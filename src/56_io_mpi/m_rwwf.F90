@@ -6,7 +6,7 @@
 !!   Read/Write wavefunctions.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2022 ABINIT group (DCA,XG,GMR,MVer,MB,MT)
+!!  Copyright (C) 1998-2024 ABINIT group (DCA,XG,GMR,MVer,MB,MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -785,6 +785,9 @@ subroutine writewf(cg,eigen,formeig,icg,ikpt,isppol,kg_k,mband,mcg,mpi_enreg,&
  integer :: kg_varid,eig_varid,occ_varid,cg_varid,ncerr
  character(len=nctk_slen) :: kdep
 #endif
+#ifdef HAVE_MPI
+ integer(kind=MPI_OFFSET_KIND) :: off(1)
+#endif
 
 ! *********************************************************************
 
@@ -916,7 +919,9 @@ subroutine writewf(cg,eigen,formeig,icg,ikpt,isppol,kg_k,mband,mcg,mpi_enreg,&
        call xderiveWRecEnd(wff,ios)
      end if
 #ifdef HAVE_MPI
-     call MPI_BCAST(wff%offwff,1,wff%offset_mpi_type,0,wff%spaceComm_mpiio,ios)
+     off(1)=wff%offwff
+     call MPI_BCAST(off,1,wff%offset_mpi_type,0,wff%spaceComm_mpiio,ios)
+     wff%offwff=off(1)
 #endif
 #ifdef HAVE_NETCDF
    else if (wff%iomode == IO_MODE_ETSF) then

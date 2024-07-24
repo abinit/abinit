@@ -6,7 +6,7 @@
 !!  This module contains utilities to analyze and retrieve information from the ebands_t.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2022 ABINIT group (MG, MJV, BXu)
+!! Copyright (C) 2008-2024 ABINIT group (MG, MJV, BXu)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -81,8 +81,8 @@ MODULE m_ebands
  public :: ebands_get_bands_from_erange   ! Return the indices of the mix and max band within an energy window.
  public :: ebands_vcbm_range_from_gaps ! Find band and energy range for states close to the CBM/VBM given input energies.
  public :: ebands_apply_scissors   ! Apply scissors operator (no k-dependency)
- public :: ebands_get_occupied     ! Returns band indeces after wich occupations are less than an input value.
- public :: ebands_enclose_degbands ! Adjust band indeces such that all degenerate states are treated.
+ public :: ebands_get_occupied     ! Returns band indices after wich occupations are less than an input value.
+ public :: ebands_enclose_degbands ! Adjust band indices such that all degenerate states are treated.
  public :: ebands_get_bands_e0     ! Find min/max band indices crossing energy e0
  public :: ebands_get_erange       ! Compute the minimum and maximum energy enclosing a list of states.
  public :: ebands_nelect_per_spin  ! Returns number of electrons per spin channel
@@ -145,11 +145,15 @@ MODULE m_ebands
    ! Number of points in the frequency mesh.
 
    integer :: ief = 0
-   integer :: ihf = 0 ! CP added for occopt 9 purposes (fermi level of thermalized holes in valence bands)
    ! Rightmost Index of the energy mesh such as IDOS[mesh[ief]] < nelect.
    ! 0 if Fermi level could not be computed
    ! Note the value of gef stored in edos_t is computed by performing
    ! a linear interpolation between ief and ief + 1
+
+   integer :: ihf = 0
+   ! Like ief (see above)
+   ! But for fermi level of thermalized holes in valence bands
+   ! For occopt 9 purposes
 
    integer :: intmeth = 0
    ! 1 for gaussian, 2 tetra
@@ -175,9 +179,12 @@ MODULE m_ebands
    ! Integrated DOS: (total, spin up, spin down) component.
 
    real(dp),allocatable :: gef(:)
-   real(dp),allocatable :: ghf(:) ! CP added for occopt 9
    ! gef(0:nsppol)
    ! DOS at the Fermi level. Total, spin up, spin down
+
+   real(dp),allocatable :: ghf(:)
+   ! ghf(0:nsppol)
+   ! DOS at the Fermi level of thermalized holes. Total, spin up, spin down
 
  contains
 
@@ -273,6 +280,7 @@ MODULE m_ebands
     ! fo_kpos(3,nsppol)
     ! fo_kpos(1:2,spin) ==> Indices of the k-points where the homo, lumo states are located (for each spin).
     ! fo_kpos(3,spin)   ==> the index of k-point where the direct gap is located (for each spin).
+    ! NB: f stands for fundamental, o for "optical" gap.
 
    real(dp) :: fermie
     ! Fermi energy taken from ebands.
@@ -759,13 +767,13 @@ end subroutine gaps_print
 !! doccde(bantot)=derivative of the occupation numbers with respect to the energy (Ha)
 !! eig(bantot)=eigenvalues (hartree)
 !! istwfk(nkpt)=parameter that describes the storage of wfs.
-!! ivalence = index of the valence band separating thermalized excited holes from excited thermalized
-!!            excited electrons ! CP added
+!! ivalence = index of the valence band separating thermalized excited holes
+!!            from excited thermalized excited electrons
 !! kptns(3,nkpt)=k points in terms of recip primitive translations
 !! nband(nkpt*nsppol)=number of bands
 !! nelect=Number of electrons.
 !! ne_qFD, nh_qFD= number of electrons (holes resp.) excited in the bands above band
-!!                 index ivalence + 1 (below ivalence resp.) ! CP added
+!!                 index ivalence + 1 (below ivalence resp.)
 !! nkpt=number of k points
 !! npwarr(nkpt)=number of planewaves at each k point
 !! nsppol=1 for unpolarized, 2 for spin-polarized
@@ -795,8 +803,8 @@ subroutine ebands_init(bantot, ebands, nelect, ne_qFD, nh_qFD, ivalence, doccde,
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: bantot,nkpt,nsppol,nspinor,occopt,ivalence ! CP added ivalence
- real(dp),intent(in) :: nelect,ne_qFD,nh_qFD,tphysel,tsmear ! CP added ne_qFD,nh_qFD,
+ integer,intent(in) :: bantot,nkpt,nsppol,nspinor,occopt,ivalence
+ real(dp),intent(in) :: nelect,ne_qFD,nh_qFD,tphysel,tsmear
  type(ebands_t),intent(out) :: ebands
 !arrays
  integer,intent(in) :: istwfk(nkpt),nband(nkpt*nsppol),npwarr(nkpt)
@@ -824,11 +832,11 @@ subroutine ebands_init(bantot, ebands, nelect, ne_qFD, nh_qFD, ivalence, doccde,
 
  ebands%entropy= zero
  ebands%fermie = zero
- ebands%fermih = zero ! CP added
- ebands%ivalence =ivalence ! CP added
+ ebands%fermih = zero
+ ebands%ivalence =ivalence
  ebands%nelect = nelect
- ebands%ne_qFD   =ne_qFD   ! CP added
- ebands%nh_qFD   =nh_qFD   ! CP added
+ ebands%ne_qFD   =ne_qFD
+ ebands%nh_qFD   =nh_qFD
  ebands%tphysel= tphysel
  ebands%tsmear = tsmear
 
@@ -927,7 +935,7 @@ type(ebands_t) function ebands_from_hdr(hdr, mband, ene3d, nelect) result(ebands
 
  ! Copy the fermi level reported in the header
  ebands%fermie = hdr%fermie
- ebands%fermih = hdr%fermih ! CP added
+ ebands%fermih = hdr%fermih
 
  ABI_FREE(ugly_doccde)
  ABI_FREE(ugly_ene)
@@ -1065,7 +1073,7 @@ subroutine ebands_copy(ibands, obands)
 
  ! Copy scalars
  obands%bantot       = ibands%bantot
- obands%ivalence     = ibands%ivalence ! CP added for occopt 9
+ obands%ivalence     = ibands%ivalence
  obands%mband        = ibands%mband
  obands%nkpt         = ibands%nkpt
  obands%nspinor      = ibands%nspinor
@@ -1079,10 +1087,10 @@ subroutine ebands_copy(ibands, obands)
  obands%extrael = ibands%extrael
  obands%entropy = ibands%entropy
  obands%fermie  = ibands%fermie
- obands%fermih  = ibands%fermih ! CP added for occopt 9
+ obands%fermih  = ibands%fermih
  obands%nelect  = ibands%nelect
- obands%ne_qFD  = ibands%ne_qFD ! CP added for occopt 9
- obands%nh_qFD  = ibands%nh_qFD ! CP added for occopt 9
+ obands%ne_qFD  = ibands%ne_qFD
+ obands%nh_qFD  = ibands%nh_qFD
  obands%tphysel = ibands%tphysel
  obands%tsmear  = ibands%tsmear
 
@@ -1426,10 +1434,11 @@ subroutine put_eneocc_vect(ebands,arr_name,vect)
 !scalars
  character(len=*),intent(in) :: arr_name
  class(ebands_t),intent(inout) :: ebands
- real(dp),intent(in) :: vect(ebands%bantot)
+ real(dp),intent(in) :: vect(:)
 
 !Local variables-------------------------------
  integer :: nkpt,nsppol,mband,bantot
+ real(dp) :: val
 ! *************************************************************************
 
  mband =ebands%mband; bantot=ebands%bantot; nkpt  =ebands%nkpt; nsppol=ebands%nsppol
@@ -1438,10 +1447,11 @@ subroutine put_eneocc_vect(ebands,arr_name,vect)
  case ('occ')
    call unpack_eneocc(nkpt,nsppol,mband,ebands%nband,vect,ebands%occ, val=zero)
  case ('eig')
-   ! DFPT routines call ebands_init with the wrong bantot. Using maxval(vect) causes SIGFAULT
+   ! DFPT routines call ebands_init with the wrong bantot. Using maxval(vect) causes SEGFAULT
    ! so I have to recompute the correct bantot here
    !ABI_CHECK(sum(ebands%nband) == ebands%bantot, "bantot and nband are incosistent")
-   call unpack_eneocc(nkpt,nsppol,mband,ebands%nband,vect,ebands%eig, val=maxval(vect(1:sum(ebands%nband))))
+   val = maxval(vect(1:sum(ebands%nband)))
+   call unpack_eneocc(nkpt,nsppol,mband,ebands%nband,vect,ebands%eig, val=val)
  case ('doccde')
    call unpack_eneocc(nkpt,nsppol,mband,ebands%nband,vect,ebands%doccde, val=zero)
  case default
@@ -1849,7 +1859,7 @@ end function ebands_get_occupied
 !!
 !! SIDE EFFECTS
 !!  ibmin,ibmax=
-!!    Input: initial guess for the indeces
+!!    Input: initial guess for the indices
 !!    Output: All the denerate states are between ibmin and ibmax
 !!
 !! SOURCE
@@ -2569,8 +2579,8 @@ end subroutine ebands_set_fermie
 !! entropy and derivative of occupancies wrt the energy for each band and k point.
 !!
 !! INPUTS
-!!  nelect=New number of electrons ! CP added
-!!  nholes=New number of excited holes ! CP added
+!!  nelect=New number of electrons
+!!  nholes=New number of excited holes
 !!  extrael=Number of electrons be added in units. Negative to add holes
 !!  spinmagntarget=if differ from -99.99d0, fix the spin polarization (in Bohr magneton)
 !!  [prtvol]=Verbosity level
@@ -2589,13 +2599,13 @@ subroutine ebands_set_extrael(ebands, nelect, nholes, spinmagntarget, msg, prtvo
 !scalars
  class(ebands_t),intent(inout) :: ebands
  integer,optional,intent(in) :: prtvol
- real(dp),intent(in) :: nelect,nholes, spinmagntarget ! CP modified
+ real(dp),intent(in) :: nelect,nholes,spinmagntarget
  character(len=*),intent(out) :: msg
 
 !Local variables-------------------------------
 !scalars
  integer :: my_prtvol
- real(dp) :: prev_fermie,prev_fermih,prev_nelect,prev_nholes ! CP modified for occopt 9 case
+ real(dp) :: prev_fermie,prev_fermih,prev_nelect,prev_nholes
 
 ! *************************************************************************
 
@@ -2606,27 +2616,22 @@ subroutine ebands_set_extrael(ebands, nelect, nholes, spinmagntarget, msg, prtvo
  end if
 
  prev_fermie = ebands%fermie; prev_nelect = ebands%nelect
- prev_fermih = ebands%fermie; prev_nholes = zero          ! CP added
+ prev_fermih = ebands%fermie; prev_nholes = zero
  ! Here we set the value of extrael
- ! CP modified
- !ebands%extrael = extrael
- !ebands%nelect = ebands%nelect + extrael
  ebands%extrael = nelect-nholes
  ebands%nelect = ebands%nelect + ebands%extrael
-! CP modified and added
  if (ebands%occopt /= 9) then
     ebands%ne_qFD = zero
     ebands%nh_qFD = zero
  else
     prev_fermie = ebands%fermie; prev_nelect = ebands%ne_qFD
-    prev_fermih = ebands%fermih; prev_nholes = ebands%nh_qFD ! CP added
+    prev_fermih = ebands%fermih; prev_nholes = ebands%nh_qFD
     ebands%ne_qFD = nelect
     ebands%nh_qFD = nholes
  end if
- ! End CP modified
+
  call ebands_update_occ(ebands, spinmagntarget, prtvol=my_prtvol)
 
- !CP modified
  if (ebands%occopt/=9) then
     write(msg,"(2(a,es16.6),a,2(a,es16.6))")&
       " Old fermi level: ",prev_fermie,", with nelect: ",prev_nelect,ch10,&
@@ -2642,7 +2647,6 @@ subroutine ebands_set_extrael(ebands, nelect, nholes, spinmagntarget, msg, prtvo
       " New holes    fermi level: ",ebands%fermih,", with nholes: ",ebands%nelect-ebands%nh_qFD
     call wrtout(std_out, msg)
  end if
- ! End CP modified
 
 end subroutine ebands_set_extrael
 !!***
@@ -2836,12 +2840,9 @@ subroutine ebands_report_gap(ebands, header, unit, mode_paral, gaps)
 
    ! No output if system i metallic
    ismetal=ANY(val_idx(:,spin)/=val_idx(1,spin))
-   ! CP modified
-   !if (ismetal) then
    if (ismetal .or. (ebands%occopt==9)) then
-   ! End CP modified
      if (PRESENT(gaps)) gaps(3,nsppol)=-one
-     CYCLE
+     cycle
    endif
 
    first=first+1
@@ -3019,7 +3020,7 @@ integer function ebands_ncwrite(ebands, ncid) result(ncerr)
  NCF_CHECK(ncerr)
 
  ! Abinit variables defining the K-point sampling.
- ncerr = nctk_def_arrays(ncid, [&
+ ncerr = nctk_def_arrays(ncid, [ &
    nctkarr_t('kptrlatt_orig', "i", 'number_of_reduced_dimensions, number_of_reduced_dimensions'), &
    nctkarr_t('shiftk_orig',  "dp", 'number_of_reduced_dimensions, nshiftk_orig'), &
    nctkarr_t('kptrlatt', "i", 'number_of_reduced_dimensions, number_of_reduced_dimensions'), &
@@ -3050,19 +3051,18 @@ integer function ebands_ncwrite(ebands, ncid) result(ncerr)
    NCF_CHECK(nf90_put_var(ncid, vid('ngkpt_shiftk'), ebands%shiftk_orig))
  end if
 
- ! CP added for case occopt 9
+!In the case occopt 9
  if (ebands%occopt == 9) then
     ncerr = nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: &
          "number_of_conduction_electrons", "number_of_valence_holes"])
     NCF_CHECK(ncerr)
     ncerr = nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: "holes_fermi_energy"])
     NCF_CHECK(ncerr)
-    NCF_CHECK(nctk_set_atomic_units(ncid, "holes_fermi_energy")) ! CP modified for occopt == 9
+    NCF_CHECK(nctk_set_atomic_units(ncid,"holes_fermi_energy"))
     NCF_CHECK(nf90_put_var(ncid, vid("holes_fermi_energy"), ebands%fermih))
     NCF_CHECK(nf90_put_var(ncid, vid("number_of_conduction_electrons"), ebands%ne_qFD))
     NCF_CHECK(nf90_put_var(ncid, vid("number_of_valence_holes"), ebands%nh_qFD))
  endif
- ! End CP added
 
 contains
  integer function vid(vname)
@@ -3155,7 +3155,7 @@ type(edos_t) function ebands_get_edos(ebands, cryst, intmeth, step, broad, comm)
 
 !Local variables-------------------------------
 !scalars
- integer :: nw,spin,band,ikpt,ief,ihf,nproc,my_rank,ierr,cnt,bcorr ! CP added ihf for the case occopt 9
+ integer :: nw,spin,band,ikpt,ief,ihf,nproc,my_rank,ierr,cnt,bcorr
  real(dp) :: max_ene,min_ene,wtk,max_occ
  character(len=500) :: msg
  type(htetra_t) :: tetra
@@ -3279,8 +3279,6 @@ type(edos_t) function ebands_get_edos(ebands, cryst, intmeth, step, broad, comm)
  ! Use bisection to find the Fermi level at T = 0
  ! Warning: this code assumes idos[i+1] >= idos[i]. This condition may not be
  ! fullfilled if we use tetra and this is the reason why we have filtered the DOS.
- ! CP modified
- ! ief = bisect(edos%idos(:,0), ebands%nelect)
  if (ebands%occopt == 9) then
     ihf = bisect(edos%idos(:,0), ebands%nelect-ebands%nh_qFD)
     ief = bisect(edos%idos(:,0), ebands%nelect+ebands%ne_qFD)
@@ -3288,7 +3286,6 @@ type(edos_t) function ebands_get_edos(ebands, cryst, intmeth, step, broad, comm)
     ief = bisect(edos%idos(:,0), ebands%nelect)
     ihf = ief
  end if
- ! End CP modified
 
  ! Handle out of range condition.
  if (ief == 0 .or. ief == nw) then
@@ -3297,22 +3294,20 @@ type(edos_t) function ebands_get_edos(ebands, cryst, intmeth, step, broad, comm)
     "Possible reasons: not enough bands or wrong number of electrons"
    ABI_WARNING(msg)
    return
- ! CP added
  else if (ihf == 0 .or. ihf == nw) then
    write(msg,"(3a)")&
     "Bisection could not find an initial guess for the holes Fermi level!",ch10,&
     "Possible reasons: not enough bands or wrong number of holes"
    ABI_WARNING(msg)
    return
- ! End CP added
  end if
 
  ! TODO: Use linear interpolation to find an improved estimate of the Fermi level?
  edos%ief = ief
- edos%ihf = ihf ! CP added
+ edos%ihf = ihf
  do spin=0,edos%nsppol
    edos%gef(spin) = edos%dos(ief,spin)
-   edos%ghf(spin) = edos%dos(ihf,spin) ! CP added
+   edos%ghf(spin) = edos%dos(ihf,spin)
  end do
 
  !write(std_out,*)"fermie from ebands: ",ebands%fermie
@@ -3346,7 +3341,7 @@ subroutine edos_free(edos)
  ABI_SFREE(edos%dos)
  ABI_SFREE(edos%idos)
  ABI_SFREE(edos%gef)
- ABI_SFREE(edos%ghf) ! CP added
+ ABI_SFREE(edos%ghf)
 
 end subroutine edos_free
 !!***
@@ -3486,11 +3481,8 @@ integer function edos_ncwrite(edos, ncid, prefix) result(ncerr)
  NCF_CHECK(ncerr)
 
  ! Define variables
- ! CP modified
- ! NCF_CHECK(nctk_def_iscalars(ncid, [character(len=nctk_slen) :: "edos_intmeth", "edos_nkibz", "edos_ief"], prefix=prefix_))
  NCF_CHECK(nctk_def_iscalars(ncid, [character(len=nctk_slen) :: "edos_intmeth", "edos_nkibz"], prefix=prefix_))
  NCF_CHECK(nctk_def_iscalars(ncid, [character(len=nctk_slen) :: "edos_ief", "edos_ihf"], prefix=prefix_))
- ! End CP modified
  NCF_CHECK(nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: "edos_broad"], prefix=prefix_))
 
  ncerr = nctk_def_arrays(ncid, [ &
@@ -3498,7 +3490,7 @@ integer function edos_ncwrite(edos, ncid, prefix) result(ncerr)
    nctkarr_t("edos_dos", "dp", "edos_nw, nsppol_plus1"), &
    nctkarr_t("edos_idos", "dp", "edos_nw, nsppol_plus1"), &
    nctkarr_t("edos_gef", "dp", "nsppol_plus1"), &
-   nctkarr_t("edos_ghf", "dp", "nsppol_plus1")  & ! CP added
+   nctkarr_t("edos_ghf", "dp", "nsppol_plus1")  &
  ],  prefix=prefix_)
  NCF_CHECK(ncerr)
 
@@ -3507,13 +3499,13 @@ integer function edos_ncwrite(edos, ncid, prefix) result(ncerr)
  NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, pre("edos_intmeth")), edos%intmeth))
  NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, pre("edos_nkibz")), edos%nkibz))
  NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, pre("edos_ief")), edos%ief))
- NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, pre("edos_ihf")), edos%ihf)) ! CP added
+ NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, pre("edos_ihf")), edos%ihf))
  NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, pre("edos_broad")), edos%broad))
  NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, pre("edos_mesh")), edos%mesh))
  NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, pre("edos_dos")), edos%dos))
  NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, pre("edos_idos")), edos%idos))
  NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, pre("edos_gef")), edos%gef))
- NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, pre("edos_ghf")), edos%ghf)) ! CP added
+ NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, pre("edos_ghf")), edos%ghf))
 
 contains
   pure function pre(istr) result(ostr)
@@ -3589,12 +3581,10 @@ subroutine edos_print(edos, unit, header)
    write(unt,"(a,es16.8)")"   g(eF) for spin down:", edos%gef(2) / Ha_eV
  end if
  write(unt,"(a,f6.1)")" Total number of electrons at eF: ", edos%idos(edos%ief, 0)
- !write(unt,"(a,f6.1)")" Total number of electrons from ebands: ", edos%nelect
  if (edos%nsppol == 2) then
    write(unt,"(a,es16.8)")"   IDOS(eF) for spin up:  ", edos%idos(edos%ief, 1)
    write(unt,"(a,es16.8)")"   IDOS(eF) for spin down:", edos%idos(edos%ief, 2)
  end if
- ! CP added for occopt 9
  if (edos%ihf /= edos%ief) then
     write(unt,'(a,es16.8,a)')' Fermi level for excited holes: ',edos%mesh(edos%ihf) * Ha_eV, " (eV)"
     write(unt,"(a,es16.8)")" Total hole DOS at Fermi level in states/eV: ", edos%ghf(0) / Ha_eV
@@ -3608,7 +3598,6 @@ subroutine edos_print(edos, unit, header)
        write(unt,"(a,es16.8)")"   N(hF) for spin down:", edos%idos(edos%ihf, 2)
     end if
  end if
- ! End CP added
 
  write(unt, "(a)")""
 
@@ -4060,7 +4049,7 @@ type(ebands_t) function ebands_downsample(self, cryst, in_kptrlatt, in_nshiftk, 
    self%cellcharge, self%kptopt, in_kptrlatt, in_nshiftk, self%shiftk, new_kptrlatt, size(new_shiftk, dim=2), new_shiftk)
 
  new%fermie = self%fermie
- new%fermih = self%fermih ! CP added
+ new%fermih = self%fermih
 
  ABI_FREE(istwfk)
  ABI_FREE(nband)
@@ -4279,7 +4268,7 @@ type(ebands_t) function ebands_interp_kmesh(ebands, cryst, params, intp_kptrlatt
 
  ! Get fermi level from input ebands.
  new%fermie = ebands%fermie
- new%fermih = ebands%fermih ! CP added
+ new%fermih = ebands%fermih
 
  ABI_FREE(new_kibz)
  ABI_FREE(new_wtk)
@@ -4558,7 +4547,7 @@ type(edos_t) function ebands_get_edos_matrix_elements(ebands, cryst, bsize, &
 !Local variables-------------------------------
 !scalars
  integer :: nproc, my_rank, nw, spin, band, ib, ik_ibz, cnt, idat, ierr, bcorr, time_opt
- integer :: ii, jj, ief, ihf, bmin_, bmax_ ! CP added ihf
+ integer :: ii, jj, ief, ihf, bmin_, bmax_
  real(dp),parameter :: max_occ1 = one
  real(dp) :: emax, emin, wtk, max_occ
  real(dp) :: cpu, wall, gflops
@@ -4615,7 +4604,7 @@ type(edos_t) function ebands_get_edos_matrix_elements(ebands, cryst, bsize, &
  edos%mesh = arth(emin, edos%step, nw)
 
  ABI_CALLOC(edos%gef, (0:edos%nsppol))
- ABI_CALLOC(edos%ghf, (0:edos%nsppol)) ! CP added
+ ABI_CALLOC(edos%ghf, (0:edos%nsppol))
  ABI_CALLOC(edos%dos,  (nw, 0:edos%nsppol))
  ABI_CALLOC(edos%idos, (nw, 0:edos%nsppol))
 
@@ -4821,10 +4810,10 @@ type(edos_t) function ebands_get_edos_matrix_elements(ebands, cryst, bsize, &
 
  ! TODO: Use linear interpolation to find an improved estimate of the Fermi level?
  edos%ief = ief
- edos%ihf = ihf ! CP modified for occopt==9 case
+ edos%ihf = ihf
  do spin=0,edos%nsppol
    edos%gef(spin) = edos%dos(ief,spin)
-   edos%ghf(spin) = edos%dos(ihf,spin) ! CP modified in case occopt == 9
+   edos%ghf(spin) = edos%dos(ihf,spin)
  end do
 
  call cwtime_report(" ebands_get_edos_matrix_elements", cpu, wall, gflops)

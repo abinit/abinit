@@ -7,7 +7,7 @@
 !!  of dynamical matrices obtained with different unit cell volumes.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2011-2022 ABINIT group (MG)
+!! Copyright (C) 2011-2024 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -150,8 +150,8 @@ type(gruns_t) function gruns_new(ddb_filepaths, inp, comm) result(new)
  do ivol=1,new%nvols
    call wrtout(ab_out, sjoin(" Reading DDB file:", ddb_filepaths(ivol)))
 
-   call new%ddb_vol(ivol)%from_file(ddb_filepaths(ivol), inp%brav, &
-                      ddb_hdr, new%cryst_vol(ivol), comm)
+   call new%ddb_vol(ivol)%from_file(ddb_filepaths(ivol), ddb_hdr, new%cryst_vol(ivol), comm)
+   call new%ddb_vol(ivol)%set_brav(inp%brav)
    natom = ddb_hdr%natom
    call ddb_hdr%free()
 

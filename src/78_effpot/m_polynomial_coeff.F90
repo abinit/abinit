@@ -7,7 +7,7 @@
 !! Module with the datatype polynomial coefficients
 !!
 !! COPYRIGHT
-!! Copyright (C) 2010-2022 ABINIT group (AM)
+!! Copyright (C) 2010-2024 ABINIT group (AM)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -824,7 +824,7 @@ end subroutine polynomial_coeff_MPIrecv
 !! This routine print the coefficents into XML format
 !!
 !! COPYRIGHT
-!! Copyright (C) 2000-2022 ABINIT group (AM)
+!! Copyright (C) 2000-2024 ABINIT group (AM)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -4035,7 +4035,7 @@ function coeffs_compare(c1,c2) result (res)
   integer :: iterm1,iterm2
 !array
   !integer,allocatable :: blkval(:,:)
-  integer :: blkval(2, maxval([c1%nterm, c2%nterm]))
+  integer :: blkval(2, max(c1%nterm,c2%nterm))
 ! *************************************************************************
   res = .false.
   blkval = 0

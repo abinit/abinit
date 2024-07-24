@@ -4,6 +4,7 @@ This page provides an introduction to the installation of the
 ABINIT package and the compilation of the executables.
 It also discusses how to test whether the compilation was successful by running the internal test suite.
 Finally, it gives related complements for the developers.
+The installation using CMake is still to be included in the present installation information. See the v10.0 release notes.
 
 Any comment or suggestion to improve the procedure or this page is welcome!
 Simply contact the ABINIT group on the [discourse forum](https://discourse.abinit.org).
@@ -37,8 +38,8 @@ working in the terminal), the installation/compilation steps are:
      is not specified via `--prefix`).
 
 Note that the details of step 1 and 3 might vary significantly depending on the operating system.
-Further details are provided by 
-[the ABINIT_build tutorial](/tutorial/abinit_build) that cover the scenario in which you want to build everything from source
+Further details are provided by
+[the ABINIT_build tutorial](/tutorial/abinit_build) that covers the scenario in which you want to build everything from source
 and install libraries in your $HOME directory.
 There are also other pages focusing on
 [macOS](/INSTALL_MacOS), [CentOS](/INSTALL_CentOS) and [Ubuntu](/INSTALL_Ubuntu)
@@ -61,6 +62,8 @@ and [Automatic tests](#how-to-make-the-automatic-tests).
 
 If you want to have a much better handling on the ABINIT source code than normal users, or if
 you downloaded ABINIT from Gitlab or GitHub anyhow, then consult the section [For developers](#for-developers).
+
+From abinit version 10, there is an experimental support for the [cmake](https://cmake.org/) build system; see [below](#how-to-build-abinit-with-cmake).
 
 ## How to get a version of ABINIT?
 
@@ -183,30 +186,30 @@ where "hostname" is the result of executing the command `hostname -s`.
     while only the first word of the returned chain of character is needed, e.g. abiref.
     This is the reasone why we had to use `hostname -s`.
 
-There is a template for such "hostname".ac9 file, located in ~abinit/doc/config. 
-Its name is *config-template.ac9*. 
-Examples of such files, that are used for testing the package on our testfarm, 
+There is a template for such "hostname".ac9 file, located in ~abinit/doc/config.
+Its name is *config-template.ac9*.
+Examples of such files, that are used for testing the package on our testfarm,
 can be found in ~abinit/doc/build/config-examples,
 or equivalently in the [autoconf_examples section](/developers/autoconf_examples/).
-Additional examples of configuration files for clusters are provided by the *abiconfig* project 
+Additional examples of configuration files for clusters are provided by the *abiconfig* project
 and are available [here](https://github.com/abinit/abiconfig/tree/master/abiconfig/clusters).
 
 Most of the examples provided in the ~abinit/doc/build/config-examples
-directory contain five important variables: location of the F90/C compilers, 
+directory contain five important variables: location of the F90/C compilers,
 F90 and C compilation options, location of MPI library (if enabled).
 On the other hand, there are many other additional control flags ("with_XYZ"),
 needed for advanced use.
 
 Your hostname.ac9 file might be placed in your home directory inside a new
-directory named ~/.abinit/build. 
+directory named ~/.abinit/build.
 If you opt for this solution, every time you
 install a new version of ABINIT, the configuration file will be automatically used by
 the configure script so you do not have to care anymore about this file after the first installation.
 
-On the other hand, if you want to play with several configurations, 
+On the other hand, if you want to play with several configurations,
 you can place the hostname.ac9 file in the ~abinit directory, where such a
 hostname.ac9 file will be also seen by the build system (and preferred over the
-one located in ~/.abinit/build) or inside your build directory (like ~abinit/tmp). 
+one located in ~/.abinit/build) or inside your build directory (like ~abinit/tmp).
 As mentioned above, you might even input the options contained in the hostname.ac9 file
 directly on the command line.
 
@@ -222,11 +225,50 @@ command-line interface), in case more than one possibility is used
 
 When the hostname.ac9 file is ready, you can come back to the configure/make sequence.
 
+## How to build abinit with cmake ?
+
+As an alternative to the autotools, you can use [cmake](https://cmake.org/) to build abinit. You just need to follow step 1 and 2 from the [overview](#Overview) above. No need to write an ac9 file, cmake should be able to figure out where all required software dependencies are installed on your build host.
+
+Here are the steps for building abinit, where all options take default values:
+
+```bash
+cd $(ABINIT_TOPLEVEL_SOURCE)
+# step 1: cmake configure
+cmake -S . -B _build/cmake
+# step 2: cmake build using 6 threads
+cmake --build _build/cmake -j 6
+```
+
+Then abinit executable will be available in folder `_build/cmake/src/98_main/`. You can use it as if you had built abinit with the autotools build system.
+
+!!! note "How cmake detects external dependencies?"
+    Most of the external dependencies are detected by cmake using either macro [find_package](https://cmake.org/cmake/help/latest/command/find_package.html) or macro [pkg_check_modules](https://cmake.org/cmake/help/latest/module/FindPkgConfig.html#command:pkg_check_modules).
+    In case cmake isn't able to detect the location of some required dependencies, e.g. when you installed a library in a non standard directory, most of the time you just need to export an environment variable to tell cmake where to look for. As an example, if you installed library fftw in a custom location, as fftw is detected by `pkg_check_modules` you just need to prepend variable `PKG_CONFIG_PATH` with the name of the folder containing file `fftw3.pc`. Alternatively, if the library is detected using `find_package`, you may need to adjust environment variable `CMAKE_PREFIX_PATH` with the full path location where the library is installed (usually a subfolder named "cmake").
+
+If you want to change cmake build parameters, you can either add optional flags on the cmake configure command line, i.e. modify step 1. For example, let's assume you want abinit to use MKL instead of FFTW library for computing Fast Fourier transforms, use the following modified step 1:
+
+```bash
+cmake -S . -B _build/cmake -DABINIT_FFT_FLAVOR=MKL_DFTI
+```
+
+If you want to browse all available cmake configuration parameters and build flavors, just use `ccmake` for the configuration step:
+
+```bash
+ccmake -S . -B _build/cmake
+```
+
+you will enter a terminal user interface, and using keyboard up and down arrows you will be able to select a cmake parameter, see the available possibilities, and select a new value. If you change a parameter from inside `ccmake` user interface, you will need to press 'c' to tell cmake to take into account the changed parameter, and then 'g' to re-generate all Makefiles. Usually, you just need to follow instructions from the bottom of the ccmake user interface.
+
+Most of the configuration parameters available in the autotools are also available in the cmake build.
+
+Additionnally, you can also build abinit for using GPU hardware (if available on your host).
+Documentation for this feature will be made available soon.
+
 ## How to run the internal tests
 
 The abinit code has several small internal tests (three basic ones, called *fast*, *v1* and
 *v5*, and then one for each of the libraries *bigdft*, *etsf_io*, *libxc*,
-*wannier90*), that can be issued automatically, and that check automatically whether the results are correct. 
+*wannier90*), that can be issued automatically, and that check automatically whether the results are correct.
 These tests are available whether you have got the package from the Web or from the ABINIT
 archive. Of course, you need to have compiled abinit in order to run the
 internal tests. Moreover, the simple implementation procedure assumes that the
@@ -325,12 +367,12 @@ This subdirectory contains a basic set of tests of the code, aimed at testing
 whether the code is coherent in time (successive versions), and exercising
 several parts of the code. However, they do not examine its accuracy on
 physical problems, mainly because the number of plane waves is too small,
-and some tests are not run to self-consistent convergence. 
+and some tests are not run to self-consistent convergence.
 32 MB of memory should be enough for these tests.
 
 The input files for each of the tests can be found in the
-~abinit/tests/fast/Input directory. At the bottom of each input file, 
-there is a section with metadata and parameters defining the test. 
+~abinit/tests/fast/Input directory. At the bottom of each input file,
+there is a section with metadata and parameters defining the test.
 Such metadata mentions the executable to be
 used, the output files to be analyzed, the admitted tolerances with respect to
 reference output files, the author of the test and a brief description of the test.
@@ -467,7 +509,7 @@ fldiff.report and report files are produced automatically.
 ## For developers
 
 Note the documentation available in the pages labelled [Developers](/developers/git_and_gitlab/),
-as well as the [developer's corner of the Wiki](https://wiki.abinit.org)
+as well as the [developer's corner of the Wiki](https://wiki.abinit.org).
 The following sections are complements for the installation from gitlab, and the generation of the
 ABINIT distribution.
 
@@ -497,7 +539,7 @@ If it is only very occasional, you might as well rely on the [ABINIT Github Web 
 It is strongly advised to subscribe to the [ABINIT discourse forum](https://discourse.abinit.org/)
 to receive the latest information concerning new developments.
 
-After having installed git, and obtained a gitlab branch on the ABINIT internal server, 
+After having installed git, and obtained a gitlab branch on the ABINIT internal server,
 create an autonomous copy of the source code, on top of which you have to make your development.
 This is explained in the ABINIT wiki
 [gitlab: ABINIT specificities](https://wiki.abinit.org/doku.php?id=developers:git:specificities_git_abinit)
@@ -525,7 +567,7 @@ At this stage, before being able to compile, cd to the newly created abinit dire
 ```
 
 This command initializes a whole set of files and scripts, needed for the
-autotools, as well as for the global work on ABINIT sources. 
+autotools, as well as for the global work on ABINIT sources.
 This initialization might take up to two minutes.
 After this initialisation, you can proceed with the configure/make procedure
 as described in section 2.

@@ -72,7 +72,6 @@ autoparal 1
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% exclude_builders = .*_nag_7.0_.*
 #%% [files]
 #%% [paral_info]
 #%% nprocs_to_test = 1, 2, 4, 10

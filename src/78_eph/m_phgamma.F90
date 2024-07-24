@@ -6,7 +6,7 @@
 !!  and transport properties in metals within the LOVA approximation to the linearized Boltzmann equation.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2022 ABINIT group (MG)
+!!  Copyright (C) 2008-2024 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -17,7 +17,7 @@
 !!  3) Gaussian adaptive smearing for double delta (tetra version from libtetrabz really slow!)
 !!  4) Automatic detections of energy window, improve filtering techniques.
 !!  5) Interface with KERANGE trick
-!!  6) More examples and tutorials (using precomputed Netcd files)
+!!  6) More examples and tutorials (using precomputed Netcdf files)
 !!  7) SKW interpolation for ph linewidths and/or linear interpolation (I don't trust plain Fourier interpolation).
 !!  8) Perform more benchmarks with dense meshes to detect hotspots and memory bottlenecks
 !!  9) Test spin and SOC
@@ -532,7 +532,7 @@ end subroutine phgamma_free
 !!
 !! SOURCE
 
-subroutine phgamma_init(gams, cryst, ifc, fstab, dtset, eph_scalprod, ngqpt, n0, comm)
+subroutine phgamma_init(gams, cryst, ifc, ebands, fstab, dtset, eph_scalprod, ngqpt, n0, comm)
 
 !Arguments ------------------------------------
 !scalars
@@ -541,6 +541,7 @@ subroutine phgamma_init(gams, cryst, ifc, fstab, dtset, eph_scalprod, ngqpt, n0,
  type(crystal_t),intent(in) :: cryst
  type(ifc_type),intent(in) :: ifc
  type(phgamma_t),intent(out) :: gams
+ type(ebands_t),intent(in) :: ebands
  type(fstab_t), intent(in) :: fstab
  type(dataset_type),intent(in) :: dtset
 !arrays
@@ -549,8 +550,7 @@ subroutine phgamma_init(gams, cryst, ifc, fstab, dtset, eph_scalprod, ngqpt, n0,
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: qptopt1 = 1
- integer :: my_rank, nproc, ierr, nsppol, natom3
+ integer :: my_rank, nproc, ierr, nsppol, natom3, qptopt, qtimrev
 !arrays
  integer :: qptrlatt(3,3)
 
@@ -581,8 +581,11 @@ subroutine phgamma_init(gams, cryst, ifc, fstab, dtset, eph_scalprod, ngqpt, n0,
  ! Setup IBZ, weights and BZ. Always use q --> -q symmetry for phonons even in systems wo inversion
  gams%ngqpt = ngqpt
  qptrlatt = 0; qptrlatt(1,1) = ngqpt(1); qptrlatt(2,2) = ngqpt(2); qptrlatt(3,3) = ngqpt(3)
- call kpts_ibz_from_kptrlatt(cryst, qptrlatt, qptopt1, 1, [zero, zero, zero], &
-   gams%nqibz, gams%qibz, gams%wtq, gams%nqbz, gams%qbz)
+ qptopt = ebands%kptopt; if (dtset%qptopt /= 0) qptopt = dtset%qptopt
+ qtimrev = kpts_timrev_from_kptopt(qptopt)
+
+ call kpts_ibz_from_kptrlatt(cryst, qptrlatt, qptopt, 1, [zero, zero, zero], &
+                             gams%nqibz, gams%qibz, gams%wtq, gams%nqbz, gams%qbz)
 
  ! Allocate matrices in the IBZ.
  ABI_MALLOC_OR_DIE(gams%vals_qibz, (2, natom3, natom3, gams%nqibz, nsppol), ierr)
@@ -1825,15 +1828,15 @@ subroutine a2fw_init(a2f, gams, cryst, ifc, ph_intmeth, wstep, wminmax, smear, n
      ! Interpolate or evaluate gamma directly.
      if (do_qintp) then
        if (gams%prteliash == 3) then
-         call gams%interp(cryst, ifc, spin, qibz(:,iq_ibz), phfrq, gamma_ph, lambda_ph, displ_cart, gamma_ph_ee=gamma_ph_ee)
+         call gams%interp(cryst,ifc,spin,qibz(:,iq_ibz),phfrq,gamma_ph,lambda_ph,displ_cart,gamma_ph_ee=gamma_ph_ee(:,:,:,spin))
        else
-         call gams%interp(cryst, ifc, spin, qibz(:,iq_ibz), phfrq, gamma_ph, lambda_ph, displ_cart)
+         call gams%interp(cryst,ifc,spin,qibz(:,iq_ibz),phfrq,gamma_ph,lambda_ph,displ_cart)
        end if
      else
        if (gams%prteliash == 3) then
-         call gams%eval_qibz(cryst, ifc, iq_ibz, spin, phfrq, gamma_ph, lambda_ph, displ_cart, gamma_ph_ee=gamma_ph_ee)
+         call gams%eval_qibz(cryst,ifc,iq_ibz,spin,phfrq,gamma_ph,lambda_ph,displ_cart,gamma_ph_ee=gamma_ph_ee(:,:,:,spin))
        else
-         call gams%eval_qibz(cryst, ifc, iq_ibz, spin, phfrq, gamma_ph, lambda_ph, displ_cart)
+         call gams%eval_qibz(cryst,ifc,iq_ibz,spin,phfrq,gamma_ph,lambda_ph, displ_cart)
        end if
      end if
 
@@ -2089,7 +2092,7 @@ subroutine a2fw_init(a2f, gams, cryst, ifc, ph_intmeth, wstep, wminmax, smear, n
        call simpson_int(nomega, wstep, a2feew_w, a2feew_w_int)
        G0 = a2feew_w_int(nomega) * two_pi * a2f%n0(spin) / cryst%ucvol
        ! conversion factor for G0 to SI units =  Ha_J / Time_Sec / (Bohr_meter)**3 ~ 1.2163049915755545e+30
-       write(ount, "(2(e20.10,2x))") temp_el, G0  * kb_HaK / Time_Sec / (Bohr_meter)**3, spin !* Ha_J???
+       write(ount, "(2(e20.10,2x),i5)") temp_el, G0  * kb_HaK / Time_Sec / (Bohr_meter)**3, spin !* Ha_J???
      end do
    end do
    close(ount)
@@ -3104,7 +3107,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
 
 !Local variables ------------------------------
 !scalars
- integer,parameter :: tim_getgh1c = 1, berryopt0 = 0, ider0 = 0, idir0 = 0
+ integer,parameter :: tim_getgh1c = 1, berryopt0 = 0, ider0 = 0, idir0 = 0, qptopt1 = 1
  integer,parameter :: useylmgr = 0, useylmgr1 = 0, master = 0, ndat1 = 1, eph_scalprod0 = 0
  integer :: my_rank,nproc,mband,nsppol,nkibz,idir,ipert,iq_ibz, ebands_timrev
  integer :: cplex,db_iqpt,natom,natom3,ipc,ipc1,ipc2,nspinor,onpw
@@ -3159,6 +3162,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
  logical,allocatable :: bks_mask(:,:,:),keep_ur(:,:,:)
  type(fstab_t),target,allocatable :: fstab(:)
  type(pawcprj_type),allocatable  :: cwaveprj0(:,:)
+ real(dp) :: abc(3)
 #ifdef HAVE_MPI
  integer :: ndims, comm_cart, me_cart
  logical :: reorder
@@ -3215,7 +3219,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
  ! Define q-mesh. eph_ngqpt_fine activates the Fourier interpolation of the DFPT potentials.
  gamma_ngqpt = ifc%ngqpt; if (all(dtset%eph_ngqpt_fine /= 0)) gamma_ngqpt = dtset%eph_ngqpt_fine
 
- call phgamma_init(gams, cryst, ifc, fstab(1), dtset, eph_scalprod0, gamma_ngqpt, n0, comm)
+ call phgamma_init(gams, cryst, ifc, ebands, fstab(1), dtset, eph_scalprod0, gamma_ngqpt, n0, comm)
 
  call wrtout(std_out, sjoin("q-mesh for the phonon linewidths:", ltoa(gamma_ngqpt)))
  call wrtout(std_out, sjoin("Will compute", itoa(gams%nqibz), "q-points in the IBZ"))
@@ -3485,7 +3489,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
    ! Prepare Fourier interpolation of DFPT potentials.
    comm_rpt = xmpi_comm_self
    !comm_rpt = bqs_comm%value
-   call dvdb%ftinterp_setup(dtset%ddb_ngqpt, 1, dtset%ddb_shiftq, nfftf, ngfftf, comm_rpt)
+   call dvdb%ftinterp_setup(dtset%ddb_ngqpt, qptopt1, 1, dtset%ddb_shiftq, nfftf, ngfftf, comm_rpt)
  end if
 
  ! Initialize the wave function descriptor.
@@ -3619,7 +3623,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
  call init_hamiltonian(gs_hamkq, psps, pawtab, nspinor, nsppol, nspden, natom, &
    dtset%typat, cryst%xred, nfft, mgfft, ngfft, cryst%rprimd, dtset%nloalg, &
    comm_atom=mpi_enreg%comm_atom, mpi_atmtab=mpi_enreg%my_atmtab, mpi_spintab=mpi_enreg%my_isppoltab, &
-   usecprj=usecprj, ph1d=ph1d, nucdipmom=dtset%nucdipmom, use_gpu_cuda=dtset%use_gpu_cuda)
+   usecprj=usecprj, ph1d=ph1d, nucdipmom=dtset%nucdipmom, gpu_option=dtset%gpu_option)
 
  ! Allocate vlocal. Note nvloc
  ! I set vlocal to huge to trigger possible bugs (DFPT routines should not access the data)
@@ -4083,7 +4087,13 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
            band_k = ib_k + bstart_k - 1
            sigma = fs%eph_fsmear
            if (fs%eph_fsmear < zero) then
-             sigma = max(maxval([(abs(dot_product(fs%vk(:, ib_k), fs%kmesh_cartvec(:,ii))), ii=1,3)]), fs%min_smear)
+             !ori sigma = max(maxval([(abs(dot_product(fs%vk(:, ib_k), fs%kmesh_cartvec(:,ii))), ii=1,3)]), fs%min_smear)
+             !replace the implicit loop by an explicit one
+             !workaround works with both ifort and ifx on oneapi 2024
+             do ii=1,3
+               abc(ii) = abs(dot_product(fs%vk(:, ib_k), fs%kmesh_cartvec(:,ii)))
+             end do
+             sigma = max(maxval(abc), fs%min_smear)
            end if
            wt_ek(:, ib_k) = gaussian(emesh - ebands%eig(band_k, ik_ibz, spin), sigma) / sqrt(one * fs%nktot)
          end do
@@ -4092,7 +4102,13 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
            band_kq = ib_kq + bstart_kq - 1
            sigma = fs%eph_fsmear
            if (fs%eph_fsmear < zero) then
-             sigma = max(maxval([(abs(dot_product(fs%vkq(:, ib_kq), fs%kmesh_cartvec(:,ii))), ii=1,3)]), fs%min_smear)
+             !ori sigma = max(maxval([(abs(dot_product(fs%vkq(:, ib_kq), fs%kmesh_cartvec(:,ii))), ii=1,3)]), fs%min_smear)
+             !replace the implicit loop by an explicit one
+             !workaround works with both ifort and ifx on oneapi 2024
+             do ii=1,3
+               abc(ii) = abs(dot_product(fs%vkq(:, ib_kq), fs%kmesh_cartvec(:,ii)))
+             end do
+             sigma = max(maxval(abc), fs%min_smear)
            end if
            wt_ekq(:, ib_kq) = gaussian(emesh - ebands%eig(band_kq, ikq_ibz, spin), sigma) / sqrt(one * fs%nktot)
          end do

@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2018-2022 ABINIT group (LB)
+!!  Copyright (C) 2018-2024 ABINIT group (LB)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -39,7 +39,7 @@ contains
 !! Loop over the perturbations j1, j2 and j3
 !!
 !! COPYRIGHT
-!! Copyright (C) 2018-2022 ABINIT group (LB)
+!! Copyright (C) 2018-2024 ABINIT group (LB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -295,7 +295,8 @@ subroutine dfptnl_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gs
 !* PAW: Initialize the overlap coefficients and allocate the Dij coefficients.
  call init_hamiltonian(gs_hamkq,psps,pawtab,dtset%nspinor,dtset%nsppol,dtset%nspden,natom,&
 & dtset%typat,xred,dtset%nfft,dtset%mgfft,dtset%ngfft,rprimd,dtset%nloalg,&
-& usecprj=usecprj,ph1d=ph1d,nucdipmom=dtset%nucdipmom,use_gpu_cuda=dtset%use_gpu_cuda,paw_ij=paw_ij0)
+& usecprj=usecprj,ph1d=ph1d,nucdipmom=dtset%nucdipmom,paw_ij=paw_ij0,&
+& gpu_option=dtset%gpu_option)
 
  ABI_MALLOC(vpsp1,(cplex*nfftf))
  ABI_MALLOC(xccc3d1,(cplex*nfftf))
@@ -631,7 +632,7 @@ subroutine dfptnl_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gs
 &                     nspden,psps%ntypat,dtset%nucdipmom,&
 &                     0,option,paw_an1_i2pert,paw_an0,paw_ij1_i2pert,pawang,&
 &                     dtset%pawprtvol,pawrad,pawrhoij1_i2pert,dtset%pawspnorb,pawtab,dtset%pawxcdev,&
-&                     dtset%spnorbscl,dtset%xclevel,dtset%xc_denpos,ucvol,psps%znuclpsp, &
+&                     dtset%spnorbscl,dtset%xclevel,dtset%xc_denpos,dtset%xc_taupos,ucvol,psps%znuclpsp, &
 &                     comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
                 !    First-order Dij computation
 !                     call timab(561,1,tsec)

@@ -1,6 +1,6 @@
   
 .Version    3.0 of PHONONS (Debug)
-.Copyright (C) 1998-2022 ABINIT group (FB,JB).
+.Copyright (C) 1998-2024 ABINIT group (FB,JB).
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -994,10 +994,10 @@ For:    2   96  direct transformation with isym=   3
  ============================================================================
  Shell number:           2
   For atom    2:
-   Number of independant coefficients in this shell=           2
-   Number of interactions in this shell=          48
+   Number of independant coefficients in this shell=           0
+   Number of interactions in this shell=           0
  ============================================================================
-   >>>>>> Total number of coefficients at the first order=           2
+   >>>>>> Total number of coefficients at the first order=           0
   
  #############################################################################
  ###### SECOND ORDER : find the number of coefficients #######################

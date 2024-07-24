@@ -1,5 +1,5 @@
 This directory, v9, contains tests which
-are related to the development of the various development in
+are related to various developments in
 version 9.x.x of Abinit
 
 Please, see the README file in the tests directory (above this one) to get help.
@@ -32,5 +32,7 @@ Please, see the README file in the tests directory (above this one) to get help.
 * Tests 140-149 concern response functions except electron-phonon 
 
 * Test  150 concerning write_files supravariable
+
+* Test  180-199 concern ground state geometry recognition
 
 ------------------------------------------------------------------

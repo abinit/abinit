@@ -7,7 +7,7 @@
 !! See http://elpa.mpcdf.mpg.de
 !!
 !! COPYRIGHT
-!! Copyright (C) 2016-2022 ABINIT group (MT)
+!! Copyright (C) 2016-2024 ABINIT group (MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -55,6 +55,7 @@ module m_elpa
  public :: elpa_func_get_communicators   ! Get rows and cols communicators (not supposed to be called directly)
  public :: elpa_func_set_matrix          ! Set matrix specifications in a ELPA handle
  public :: elpa_func_solve_evp_1stage    ! Solve the diagonalization problem (use a ELPA handle)
+ public :: elpa_func_solve_gevp_2stage   ! Solve the generalized diagonalization problem (use a ELPA handle)
  public :: elpa_func_cholesky            ! Apply Cholesky transformation (use a ELPA handle)
  public :: elpa_func_invert_triangular   ! Invert triangular matrix (use a ELPA handle)
  public :: elpa_func_hermitian_multiply  ! Perform C := A**H * B (use a ELPA handle)
@@ -63,6 +64,11 @@ module m_elpa
    module procedure elpa_func_solve_evp_1stage_real
    module procedure elpa_func_solve_evp_1stage_complex
  end interface elpa_func_solve_evp_1stage
+
+ interface elpa_func_solve_gevp_2stage
+   module procedure elpa_func_solve_gevp_2stage_real
+   module procedure elpa_func_solve_gevp_2stage_complex
+ end interface elpa_func_solve_gevp_2stage
 
  interface elpa_func_cholesky
    module procedure elpa_func_cholesky_real
@@ -90,7 +96,7 @@ module m_elpa
    integer :: elpa_comm_rows,elpa_comm_cols
    integer :: process_row,process_col
    integer :: local_nrows,local_ncols
-   integer :: na,nblk
+   integer :: na,nblk,nev
    integer :: gpu=0
 #endif
  end type elpa_hdl_t
@@ -192,42 +198,78 @@ end subroutine elpa_func_uninit
 !!  Allocate a ELPA handle and set it up with communicators specification
 !!
 !! INPUTS
-!!  mpi_comm_parent=Global communicator for the calculations
-!!  process_row=Row coordinate of the calling process in the process grid
-!!  process_col=Column coordinate of the calling process in the process grid
-!!  [gpu]= -- optional -- Flag (0 or 1): use GPU version
+!!  [blacs_ctx]= -- optional -- Blacs context
+!!  [gpu]= -- optional -- Flag (0 or 1): use GPU version (currently only NVidia)
 !!
 !! SIDE EFFECTS
 !!  elpa_hdl(type<elpa_hdl_t>)= ELPA handle
 !!
 !! SOURCE
 
-subroutine elpa_func_allocate(elpa_hdl,mpi_comm_parent,process_row,process_col,gpu)
+subroutine elpa_func_allocate(elpa_hdl,gpu,blacs_ctx)
 
 !Arguments ------------------------------------
- integer,intent(in) :: mpi_comm_parent,process_row,process_col
- integer,intent(in),optional :: gpu
+ integer,intent(in),optional :: gpu,blacs_ctx
  type(elpa_hdl_t),intent(inout) :: elpa_hdl
 
 !Local variables-------------------------------
- integer :: err
+ integer :: err,l_gpu,l_blacs_ctx
+ logical :: gpu_debug_mode=.false.
+ character(len=10) :: varname
 
 ! *********************************************************************
 
  err=0
+ ! if optional parameter is present, use it
+ ! else use default value, i.e. don't use GPU
+ l_gpu = 0
+ if (present(gpu)) then
+   if(gpu/=0) l_gpu = 1
+ end if
 
 #ifdef HAVE_LINALG_ELPA_FORTRAN2008
- elpa_hdl%elpa => elpa_allocate()
- if (err==ELPA_OK.and.present(gpu)) call elpa_hdl%elpa%set("gpu",gpu,err)
+ elpa_hdl%elpa => elpa_allocate(err)
+ call elpa_func_error_handler(err_code=err,err_msg='Error in initialization')
+
+ if(l_gpu==1) then
+#if defined HAVE_GPU_CUDA
+   varname="nvidia-gpu"
 #else
- if (err==0.and.present(gpu)) elpa_hdl%gpu=gpu
+   ABI_BUG("Requested unsupported GPU model with ELPA!")
+#endif
+   if (err==ELPA_OK) call elpa_hdl%elpa%set(varname,l_gpu,err)
+
+   ! Handling GPU-support on older ELPA versions (2020.11 and previous)
+   ! Only NVIDIA CUDA GPUs were supported with 'gpu' setting
+   if (err==ELPA_ERROR_ENTRY_NOT_FOUND) then
+#if defined HAVE_GPU_CUDA
+     varname="gpu"
+     call elpa_hdl%elpa%set(varname,l_gpu,err)
+#else
+     ABI_ERROR("You seem to use an old version of ELPA ( < 2021.x ) which only supports NVIDIA GPUs.")
+#endif
+   end if
+   call elpa_func_error_handler(err_code=err,err_msg='Error when enabling GPU on ELPA')
+
+   if (gpu_debug_mode) then
+     if (err==ELPA_OK) call elpa_hdl%elpa%set("debug",1,err) 
+     call elpa_func_error_handler(err_code=err,err_msg='Error when enabling debug on ELPA')
+   end if
+
+ end if
+#else
+ if (err==0.and.l_gpu==1) then
+   elpa_hdl%gpu=l_gpu
+   if (gpu_debug_mode) elpa_hdl%debug=1
+ end if
 #endif
 
- call elpa_func_error_handler(err_code=err,err_varname="gpu")
+ if (present(blacs_ctx)) then
+   if (err==ELPA_OK) call elpa_hdl%elpa%set("blacs_context",int(blacs_ctx,kind=c_int),err)
+   call elpa_func_error_handler(err_code=err,err_varname=varname)
+ end if
 
  elpa_hdl%is_allocated=.true.
-
- call elpa_func_get_communicators(elpa_hdl,mpi_comm_parent,process_row,process_col)
 
 end subroutine elpa_func_allocate
 !!***
@@ -380,8 +422,10 @@ subroutine elpa_func_get_communicators(elpa_hdl,mpi_comm_parent,process_row,proc
  end if
  if (err==ELPA_OK) then
    varname=''
-   if (elpa_hdl%elpa%setup()/=ELPA_OK) err=ELPA_ERROR
+   err = elpa_hdl%elpa%setup()
+   call elpa_func_error_handler(err_code=err,err_msg='Error during ELPA setup')
  endif
+
 #else
  elpa_hdl%mpi_comm_parent=mpi_comm_parent
  elpa_hdl%process_row=process_row
@@ -396,6 +440,7 @@ subroutine elpa_func_get_communicators(elpa_hdl,mpi_comm_parent,process_row,proc
 !ELPA-LEGACY-2017
  err=elpa_get_communicators(mpi_comm_parent,process_row,process_col,elpa_hdl%elpa_comm_rows,elpa_hdl%elpa_comm_cols)
 #endif
+
 #endif
 
  call elpa_func_error_handler(err_code=err,err_msg='Error in elpa_get_communicators',err_varname=varname)
@@ -416,19 +461,21 @@ end subroutine elpa_func_get_communicators
 !! INPUTS
 !!  na=Order of matrix A
 !!  nblk=Blocksize of cyclic distribution, must be the same in both directions!
+!!  nev=Number of eigenvalues needed.
 !!  local_nrows=Leading dimension of A
 !!  local_ncols=Local columns of matrixes A and Q (eigenvectors)
+!!  nev=Number of eigenvalues needed.
 !!
 !! SIDE EFFECTS
 !!  elpa_hdl(type<elpa_hdl_t>)=handler for ELPA object
 !!
 !! SOURCE
 
-subroutine elpa_func_set_matrix(elpa_hdl,na,nblk,local_nrows,local_ncols)
+subroutine elpa_func_set_matrix(elpa_hdl,na,nblk,nev,local_nrows,local_ncols)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: na,nblk,local_nrows,local_ncols
+ integer,intent(in) :: na,nblk,nev,local_nrows,local_ncols
  type(elpa_hdl_t),intent(inout) :: elpa_hdl
 !arrays
 
@@ -454,6 +501,10 @@ subroutine elpa_func_set_matrix(elpa_hdl,na,nblk,local_nrows,local_ncols)
    call elpa_hdl%elpa%set(trim(varname),nblk,err)
  end if
  if (err==ELPA_OK) then
+   varname="nev"
+   call elpa_hdl%elpa%set(trim(varname),nev,err)
+ end if
+ if (err==ELPA_OK) then
    varname="local_nrows"
    call elpa_hdl%elpa%set(trim(varname),local_nrows,err)
  end if
@@ -464,6 +515,7 @@ subroutine elpa_func_set_matrix(elpa_hdl,na,nblk,local_nrows,local_ncols)
 #else
  elpa_hdl%na=na
  elpa_hdl%nblk=nblk
+ elpa_hdl%nev=nev
  elpa_hdl%local_nrows=local_nrows
  elpa_hdl%local_ncols=local_ncols
 #endif
@@ -473,6 +525,145 @@ subroutine elpa_func_set_matrix(elpa_hdl,na,nblk,local_nrows,local_ncols)
  elpa_hdl%matrix_is_set=.true.
 
 end subroutine elpa_func_set_matrix
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_elpa/elpa_func_solve_evp_2stage_real
+!! NAME
+!!  elpa_func_solve_evp_2stage_real
+!!
+!! FUNCTION
+!!  Wrapper to elpa_solve_evp_real_2stage ELPA function
+!!
+!! INPUTS
+!!  nev=Number of eigenvalues needed.
+!!
+!! OUTPUT
+!!  ev(na)=Eigenvalues of a, every processor gets the complete set
+!!  qq(local_nrows,local_ncols)=Eigenvectors of aa
+!!                     Distribution is like in Scalapack.
+!!                     Must be always dimensioned to the full size (corresponding to (na,na))
+!!                     even if only a part of the eigenvalues is needed.
+!!
+!! SIDE EFFECTS
+!!  aa(local_nrows,local_ncols)=Distributed matrix for which eigenvalues are to be computed.
+!!                    Distribution is like in Scalapack.
+!!                    The full matrix must be set (not only one half like in scalapack).
+!!                    Destroyed on exit (upper and lower half).
+!!  elpa_hdl(type<elpa_hdl_t>)=handler for ELPA object
+!!
+!! SOURCE
+
+subroutine elpa_func_solve_gevp_2stage_real(elpa_hdl,aa,bb,qq,ev,nev)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in)  :: nev
+ type(elpa_hdl_t),intent(inout) :: elpa_hdl
+!arrays
+ real(dp),intent(inout) :: aa(:,:),bb(:,:)
+ real(dp),intent(out) :: ev(:),qq(:,:)
+
+!Local variables-------------------------------
+ integer :: err
+ logical  :: success
+
+! *********************************************************************
+
+ success=.true. ; err=0
+
+ if (.not.elpa_hdl%is_allocated) then
+   ABI_BUG('ELPA handle not allocated!')
+ end if
+ if (.not.elpa_hdl%matrix_is_set) then
+   ABI_BUG('Matrix not set in ELPA handle!')
+ end if
+#ifdef HAVE_LINALG_ELPA_FORTRAN2008
+ ABI_CHECK(size(aa)==elpa_hdl%elpa%local_nrows*elpa_hdl%elpa%local_ncols,'BUG: matrix A has wrong sizes!')
+ ABI_CHECK(size(qq)==elpa_hdl%elpa%local_nrows*elpa_hdl%elpa%local_ncols,'BUG: matrix Q has wrong sizes!')
+ ABI_CHECK(size(ev)==elpa_hdl%elpa%na,'BUG: matrix EV has wrong sizes!')
+#endif
+
+#ifdef HAVE_LINALG_ELPA_FORTRAN2008
+ if (err==ELPA_OK) call elpa_hdl%elpa%set("solver",ELPA_SOLVER_2STAGE,err)
+ if (err==ELPA_OK) call elpa_hdl%elpa%generalized_eigenvectors(aa,bb,ev,qq,.false.,err)
+ success=(err==ELPA_OK)
+#endif
+
+ if (.not.success) call elpa_func_error_handler(err_msg='Error in solve_evp_2stage_real!')
+
+end subroutine elpa_func_solve_gevp_2stage_real
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_elpa/elpa_func_solve_evp_2stage_complex
+!! NAME
+!!  elpa_func_solve_evp_2stage_complex
+!!
+!! FUNCTION
+!!  Wrapper to elpa_solve_evp_complex_2stage ELPA function
+!!
+!! INPUTS
+!!  nev=Number of eigenvalues needed.
+!!
+!! OUTPUT
+!!  ev(na)=Eigenvalues of a, every processor gets the complete set
+!!  qq(local_nrows,local_ncols)=Eigenvectors of aa
+!!                     Distribution is like in Scalapack.
+!!                     Must be always dimensioned to the full size (corresponding to (na,na))
+!!                      even if only a part of the eigenvalues is needed.
+!!
+!! SIDE EFFECTS
+!!  aa(local_nrows,local_ncols)=Distributed matrix for which eigenvalues are to be computed.
+!!                    Distribution is like in Scalapack.
+!!                    The full matrix must be set (not only one half like in scalapack).
+!!                    Destroyed on exit (upper and lower half).
+!!  elpa_hdl(type<elpa_hdl_t>)=handler for ELPA object
+!!
+!! SOURCE
+
+subroutine elpa_func_solve_gevp_2stage_complex(elpa_hdl,aa,bb,qq,ev,nev)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in)  :: nev
+ type(elpa_hdl_t),intent(inout) :: elpa_hdl
+!arrays
+ complex(dpc),intent(inout) :: aa(:,:),bb(:,:)
+ real(dp),intent(out) :: ev(:)
+ complex(dpc),intent(out) :: qq(:,:)
+
+!Local variables-------------------------------
+ integer :: err
+ logical  :: success
+
+! *********************************************************************
+
+ success=.true. ; err=0
+
+ if (.not.elpa_hdl%is_allocated) then
+   ABI_BUG('ELPA handle not allocated!')
+ end if
+ if (.not.elpa_hdl%matrix_is_set) then
+   ABI_BUG('Matrix not set in ELPA handle!')
+ end if
+#ifdef HAVE_LINALG_ELPA_FORTRAN2008
+ ABI_CHECK(size(aa)==elpa_hdl%elpa%local_nrows*elpa_hdl%elpa%local_ncols,'BUG: matrix A has wrong sizes!')
+ ABI_CHECK(size(qq)==elpa_hdl%elpa%local_nrows*elpa_hdl%elpa%local_ncols,'BUG: matrix Q has wrong sizes!')
+ ABI_CHECK(size(ev)==elpa_hdl%elpa%na,'BUG: matrix EV has wrong sizes!')
+#endif
+
+#ifdef HAVE_LINALG_ELPA_FORTRAN2008
+ if (err==ELPA_OK) call elpa_hdl%elpa%set("solver",ELPA_SOLVER_2STAGE,err)
+ if (err==ELPA_OK) call elpa_hdl%elpa%generalized_eigenvectors(aa,bb,ev,qq,.false.,err)
+ success=(err==ELPA_OK)
+#endif
+
+ if (.not.success) call elpa_func_error_handler(err_code=err,err_msg='Error in solve_evp_2stage_complex!')
+
+end subroutine elpa_func_solve_gevp_2stage_complex
 !!***
 
 !----------------------------------------------------------------------
@@ -538,7 +729,6 @@ subroutine elpa_func_solve_evp_1stage_real(elpa_hdl,aa,qq,ev,nev)
 #endif
 
 #ifdef HAVE_LINALG_ELPA_FORTRAN2008
- if (err==ELPA_OK) call elpa_hdl%elpa%set('nev',nev,err)
  if (err==ELPA_OK) call elpa_hdl%elpa%set("solver",ELPA_SOLVER_1STAGE,err)
  if (err==ELPA_OK) call elpa_hdl%elpa%eigenvectors(aa,ev,qq,err)
  success=(err==ELPA_OK)
@@ -629,7 +819,6 @@ subroutine elpa_func_solve_evp_1stage_complex(elpa_hdl,aa,qq,ev,nev)
 #endif
 
 #ifdef HAVE_LINALG_ELPA_FORTRAN2008
- if (err==ELPA_OK) call elpa_hdl%elpa%set('nev',nev,err)
  if (err==ELPA_OK) call elpa_hdl%elpa%set("solver",ELPA_SOLVER_1STAGE,err)
  if (err==ELPA_OK) call elpa_hdl%elpa%eigenvectors(aa,ev,qq,err)
  success=(err==ELPA_OK)

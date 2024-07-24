@@ -1,4 +1,3 @@
-! CP modified
 !!****m* ABINIT/defs_datatypes
 !! NAME
 !! defs_datatypes
@@ -26,7 +25,7 @@
 !! * pspheader_type: for norm-conserving pseudopotentials, the header of the file
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2022 ABINIT group (XG)
+!! Copyright (C) 2001-2024 ABINIT group (XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -64,22 +63,22 @@ module defs_datatypes
 
  type ebands_t
 
-  integer :: bantot                ! total number of bands (sum(nband(:))
-  integer :: ivalence              ! CP added: highest valence band index (useful when occopt=9 only)
+  integer :: bantot                ! Total number of bands (sum(nband(:))
+  integer :: ivalence              ! Highest valence band index (useful when occopt=9 only)
   integer :: mband                 ! Max number of bands i.e MAXVAL(nband) (to dimension arrays)
-  integer :: nkpt                  ! number of k points
+  integer :: nkpt                  ! Number of k points
   integer :: nspinor               ! 1 for collinear, 2 for noncollinear.
-  integer :: nsppol                ! number of spin-polarizations
+  integer :: nsppol                ! Number of spin-polarizations
   integer :: ntemp                 ! Number of temperatures
   integer :: occopt                ! Occupation option, see input variable.
 
   real(dp) :: entropy              ! Entropy associated with the smearing (adimensional)
   real(dp) :: fermie               ! Fermi energy ! CP: when occopt = 9, fermi energy of the quasi-FD distribution of excited
 ! electrons in the conduction bands above ivalence
-  real(dp) :: fermih               ! CP added: Fermi energy of the excited holes in the valence bands <= ivalence (occopt = 9 only)
+  real(dp) :: fermih               ! Fermi energy of the excited holes in the valence bands <= ivalence (occopt = 9 only)
   real(dp) :: nelect               ! Number of electrons.
-  real(dp) :: ne_qFD               ! CP added: Number of electrons excited in the bands > ivalence (occopt = 9 only)
-  real(dp) :: nh_qFD               ! CP added: Number of holes     excited in the bands <=ivalence (occopt = 9 only)
+  real(dp) :: ne_qFD               ! Number of electrons excited in the bands > ivalence (occopt = 9 only)
+  real(dp) :: nh_qFD               ! Number of holes     excited in the bands <=ivalence (occopt = 9 only)
   real(dp) :: tphysel              ! Physical temperature of electrons.
   real(dp) :: tsmear               ! Temperature of smearing.
   !real(dp) :: max_occ             ! Spin degeneracy factor: max_occ = two / (self%nspinor * self%nsppol)
@@ -248,6 +247,15 @@ module defs_datatypes
     ! \int{(16/15)*pi^5*n(r)*r^6* dr}
     ! (tNcore(q) = FT of pseudo core density)
 
+   real(dp) :: dtaucdq0 = zero
+    ! Gives 1/q d(tau_core(q))/dq for q=0
+    ! (tau_core(q) = FT of pseudo core kinetic energy density)
+
+   real(dp) :: d2taucdq0 = zero
+    ! Gives contribution of d2(tau_core(q))/d2q for q=0
+    ! \int{(16/15)*pi^5*n(r)*r^6* dr}
+    ! (tau_core(q) = FT of pseudo core kinetic energy density)
+
    real(dp) :: dnvdq0 = zero
     ! Gives 1/q d(tNvale(q))/dq for q=0
     ! (tNvale(q) = FT of pseudo valence density)
@@ -263,6 +271,11 @@ module defs_datatypes
     ! tcorespl is **always** allocated and initialized with zeros if not has_tcore
     ! A similar approach is used in PAW.
 
+   real(dp), allocatable :: ttaucorespl(:,:)
+    ! ttaucorespl(mqgrid_vl,2)
+    ! Gives the pseudo core kinetic energy density in reciprocal space on a regular grid.
+    ! ttaucorespl is **always** allocated and initialized with zeros if not has_tcore
+
    integer :: num_tphi = 0
    ! Number of pseudo atomic orbitals. 0 if pseudo does not provide them
 
@@ -271,7 +284,7 @@ module defs_datatypes
 
    real(dp), allocatable :: tphi_qspl(:,:,:)
     ! (mqgrid_ff, 2, num_tphi)
-    ! Form factors for thepseudo wavefunctions.
+    ! Form factors for the pseudo wavefunctions.
 
    integer,allocatable :: tphi_n(:), tphi_l(:)
     ! (num_tphi) arrays giving n, l
@@ -479,6 +492,14 @@ module defs_datatypes
    ! for each type of atom, on the radial grid. The components
    ! xccc1d(n1xccc,ideriv,ntypat) give the ideriv-th derivative of the
    ! pseudo-core charge with respect to the radial distance.
+
+  real(dp), allocatable :: xcctau1d(:,:,:)
+   ! xcctau1d(n1xccc*(1-usepaw),6,ntypat)
+   ! Norm-conserving psps only
+   ! The component xcctau1d(n1xccc,1,ntypat) is the pseudo-core charge kinetic energy density
+   ! for each type of atom, on the radial grid. The components
+   ! xcctau1d(n1xccc,ideriv,ntypat) give the ideriv-th derivative of the
+   ! pseudo-core charge kinetic energy density with respect to the radial distance.
 
   real(dp), allocatable :: zionpsp(:)
    ! zionpsp(npsp)

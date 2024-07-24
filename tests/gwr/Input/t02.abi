@@ -9,9 +9,11 @@
 ndtset      4
 timopt 1
 nsppol      2 spinmagntarget 0.0
+iomode 1
+istwfk *1
 
 # This to compute QP without symmetries for debugging purposes
-#nsym 1 
+#nsym 1
 #kptopt 3
 #kptopt 2
 
@@ -75,16 +77,16 @@ nfreqsp3 50
 freqspmax3 5 eV
 
 ################################
-# Dataset 4: RPA energy 
+# Dataset 4: RPA energy
 ################################
 optdriver4  6        # Activate GWR code
 gwr_task4 "RPA_ENERGY"     # Compute RPA energy
 getden4 1
 getwfk4 2 # WFK file with empty states
-gwr_ntau4   6        
-gwr_boxcutmin4  1.1  
-nband4      30       
-ecuteps4    4        
+gwr_ntau4   6
+gwr_boxcutmin4  1.1
+nband4      30
+ecuteps4    4
 
 
 # Definition of the k-point grid
@@ -127,6 +129,7 @@ pseudos "Pseudodojo_nc_sr_04_pbe_standard_psp8/Si.psp8"
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
+#%% exclude_builders = eos_nvhpc_23.1_elpa, eos_nvhpc_23.9_elpa, eos_nvhpc_23.11_elpa
 #%% [files]
 #%% files_to_test =
 #%%   t02.abo, tolnlines = 25, tolabs = 1.1e-3, tolrel = 3.0e-3, fld_options = -medium;
@@ -137,7 +140,7 @@ pseudos "Pseudodojo_nc_sr_04_pbe_standard_psp8/Si.psp8"
 #%% max_nprocs = 12
 #%% [extra_info]
 #%% authors = M. Giantomassi
-#%% keywords = NC, GWR
+#%% keywords = NC, GWR, MINIMAL
 #%% description =
 #%%  Crystalline silicon
 #%%  Calculation of the GW corrections with GWR code.

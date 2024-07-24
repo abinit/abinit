@@ -7,7 +7,7 @@
 !!  the time-dependent Kohn-Sham equations in RT-TDDFT
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2021-2022 ABINIT group (FB)
+!!  Copyright (C) 2021-2024 ABINIT group (FB)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -368,7 +368,7 @@ subroutine tdks_free(tdks,dtset,mpi_enreg,psps)
    !Destroy hidden save variables
    call bandfft_kpt_destroy_array(bandfft_kpt,mpi_enreg)
    if (psps%usepaw ==1) then
-      call destroy_invovl(dtset%nkpt,dtset%use_gpu_cuda)
+      call destroy_invovl(dtset%nkpt,dtset%gpu_option)
    end if
    if(tdks%gemm_nonlop_use_gemm) then
       call destroy_gemm_nonlop(dtset%nkpt)
@@ -548,13 +548,22 @@ subroutine first_setup(codvsn,dtfil,dtset,ecut_eff,mpi_enreg,pawrad,pawtab,psps,
                       & dtset%nsppol)
 
  !** Use efficient BLAS calls for computing the non local potential
- if(dtset%use_gemm_nonlop == 1 .and. dtset%use_gpu_cuda/=1) then
+ if(dtset%use_gemm_nonlop == 1 .and. dtset%gpu_option/=ABI_GPU_DISABLED) then
    ! set global variable
    tdks%gemm_nonlop_use_gemm = .true.
    call init_gemm_nonlop(dtset%nkpt)
  else
    tdks%gemm_nonlop_use_gemm = .false.
  end if
+
+ !** TODO: uncomment when gemm_nonlop can be used on GPU
+ ! if(dtset%use_gemm_nonlop == 1 .and. dtset%gpu_option/=ABI_GPU_DISABLED) then
+ !   ! set global variable
+ !   tdks%gemm_nonlop_use_gemm_gpu = .true.
+ !   !call init_gemm_nonlop_gpu(dtset%nkpt)
+ ! else
+ !   tdks%gemm_nonlop_use_gemm_gpu = .false.
+ ! end if
 
  !** Setup the Ylm for each k point
  if (psps%useylm==1) then
