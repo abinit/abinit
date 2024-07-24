@@ -2011,7 +2011,6 @@ subroutine bare_vqg(qpoint,fockcommon,gmet,nfft,nkpt_bz,ngfft,ucvol,vqg)
  real(dp),parameter :: tolfix=1.000000001e0_dp ! Same value as the one used in hartre
  real(dp) :: cutoff,gs,rcut,divgq0,gqg2p3,gqgm12,gqgm13,gqgm23,gs2,gs3
  !character(len=500) :: msg
- logical  :: shortrange
 !arrays
  integer :: id(3)
  real(dp),allocatable :: gq(:,:)
@@ -2031,23 +2030,20 @@ subroutine bare_vqg(qpoint,fockcommon,gmet,nfft,nkpt_bz,ngfft,ucvol,vqg)
  divgq0= two_pi*rcut**two
 
 
- vqg=zero
+ vqg = zero
 
  if (abs(fockcommon%hyb_mixing)>tol8) then
-    shortrange=.false.
     rcut= (three*nkpt_bz*ucvol/four_pi)**(one/three)
-    call barevcoul(rcut,fockcommon%fock_icutcoul,qpoint,fockcommon%gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,vqg,shortrange=.false.)
+    call barevcoul(rcut,fockcommon%fock_icutcoul,qpoint,fockcommon%gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,vqg)
+    ! Rescale the interaction with the factor hyb_mixing
     vqg = vqg * fockcommon%hyb_mixing
  end if
 
  if (abs(fockcommon%hyb_mixing_sr)>tol8) then
-    shortrange=.true.
-    rcut=fockcommon%hyb_range_fock
-    call barevcoul(rcut,fockcommon%fock_icutcoul,qpoint,fockcommon%gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,vqg,shortrange)
-    vqg=vqg*fockcommon%hyb_mixing_sr
-!    if (fockcommon%hyb_range_fock>tol8)then
-!       vqg(1)=fockcommon%hyb_mixing*divgq0+fockcommon%hyb_mixing_sr*pi/fockcommon%hyb_range_fock**2
-!    endif
+    rcut= one / fockcommon%hyb_range_fock
+    call barevcoul(rcut,fockcommon%fock_icutcoul,qpoint,fockcommon%gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,vqg,shortrange=.true.)
+    ! Rescale the interaction with the factor hyb_mixing_sr
+    vqg = vqg * fockcommon%hyb_mixing_sr
  end if
 
 
@@ -2094,17 +2090,6 @@ subroutine bare_vqg(qpoint,fockcommon,gmet,nfft,nkpt_bz,ngfft,ucvol,vqg)
      ii1=1
      if (i23==0 .and. qeq0==1  .and. ig2==0 .and. ig3==0) then
        ii1=2
-       if (abs(fockcommon%hyb_range_fock)>tol8)then
-         write(*,*) "FBFB dont skip this SR part yet"
-         !vqg(1+i23)=vqg(1+i23)+fockcommon%hyb_mixing_sr*(pi/fockcommon%hyb_range_fock**2)
-!      Note the combination of Spencer-Alavi and Erfc screening
-         vqg(1+i23)=fockcommon%hyb_mixing*divgq0 + fockcommon%hyb_mixing_sr*(pi/fockcommon%hyb_range_fock**2)
-
-!        This would give a combination of Spencer-Alavi and Erfc screening,
-!        unfortunately, it modifies also the tests for pure HSE06, so was not retained.
-!        vqg(1+i23)=vqg(1+i23)+fockcommon%hyb_mixing_sr*min(divgq0,pi/(fockcommon%hyb_range_fock**2))
-       endif
-
      end if
 
      ! Final inner loop on the first dimension (note the lower limit)
