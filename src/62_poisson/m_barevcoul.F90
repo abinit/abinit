@@ -23,7 +23,6 @@ module m_barevcoul
 
  use defs_basis
  use m_abicore
- use m_dtset
  use m_errors
  use m_xmpi
 
@@ -140,11 +139,11 @@ contains
 !!
 !! SOURCE
 
-subroutine barevcoul(rcut,qpoint,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,barev,shortrange)
+subroutine barevcoul(rcut,icutcoul,qpoint,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,barev,shortrange)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in)         :: nfft,nkpt_bz
+ integer,intent(in)         :: icutcoul,nfft,nkpt_bz
  real(dp),intent(in)        :: rcut,gsqcut,ucvol
  logical,intent(in),optional:: shortrange
 !arrays
@@ -155,7 +154,6 @@ subroutine barevcoul(rcut,qpoint,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,barev,shor
  real(dp),intent(inout)     :: barev(nfft)
  !real(dp)                   :: a1(3),a2(3),a3(3)
  real(dp)                   :: b1(3),b2(3),b3(3),rmet(3,3) !,gprimd(3,3),
- type(dataset_type)         :: dtset
  type(MPI_type)             :: mpi_enreg   !!!!
  type(crystal_t)            :: Cryst       !!!!
  !type(gsphere_t)            :: Gsph
@@ -197,13 +195,13 @@ subroutine barevcoul(rcut,qpoint,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,barev,shor
 !
 ! === Define geometry and cutoff radius (if used) ===
  vcut%mode='NONE'
- !icutcoul_local=dtset%icutcoul
+ icutcoul_local=icutcoul
 
-! BG: Temporary to circumvent the tests
- if(shortrange) then
-    icutcoul_local=5
- else
-    icutcoul_local=0
+ ! for short-range exchange, enforce ERFC
+ if( PRESENT(shortrange) ) then
+   if(shortrange) then
+      icutcoul_local=5
+   end if
  end if
 ! -------------------------------------
 
@@ -293,6 +291,8 @@ subroutine barevcoul(rcut,qpoint,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,barev,shor
    end do
 
  CASE('CYLINDER')
+   !FBruneval: not working. For instance, Cryst is never initialized
+   ABI_BUG("Cylinder cutoff coding is not finalized")
 
    test=COUNT(ABS(vcut%vcutgeo)>tol6)
    ABI_CHECK(test==1,'Wrong cutgeo for cylinder')
@@ -378,6 +378,8 @@ subroutine barevcoul(rcut,qpoint,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,barev,shor
    end if
 
  CASE('SLAB')
+   !FBruneval: not working. For instance, Cryst is never initialized
+   ABI_BUG("Slab cutoff coding is not finalized")
 
    test=COUNT(vcut%vcutgeo/=zero)
    ABI_CHECK(test==2,"Wrong vcutgeo")
@@ -480,6 +482,7 @@ subroutine barevcoul(rcut,qpoint,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,barev,shor
      if(abs(gpq(ig))<tol4) then
         barev(ig)=barev(ig)+divgq0
      else if(gpq(ig)<=cutoff) then
+       !FIXME FBruneval shortrange does not make sense here (it is an optional argument)
        if(shortrange) then
          barev(ig)=barev(ig)+gpq2(ig)*exp(-pi/(gpq2(ig)*rcut**2))
        end if
@@ -492,6 +495,7 @@ subroutine barevcoul(rcut,qpoint,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,barev,shor
      if(abs(gpq(ig))<tol4) then
         barev(ig)=barev(ig)+divgq0
      else if(gpq(ig)<=cutoff) then
+       !FIXME FBruneval shortrange does not make sense here (it is an optional argument)
        if(shortrange) then
          barev(ig)=barev(ig)+gpq2(ig)*(one-exp(-pi/(gpq2(ig)*rcut**2)))
        end if
