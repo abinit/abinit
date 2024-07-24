@@ -2030,18 +2030,31 @@ subroutine bare_vqg(qpoint,fockcommon,gmet,nfft,nkpt_bz,ngfft,ucvol,vqg)
  rcut= (three*nkpt_bz*ucvol/four_pi)**(one/three)
  divgq0= two_pi*rcut**two
 
- write(*,*) 'FBFB ============================'
- write(*,*) fockcommon%fock_icutcoul
- write(*,*) fockcommon%rcut
- write(*,*) rcut
- write(*,*) '================================='
+
+ vqg=zero
+
+ if (abs(fockcommon%hyb_mixing)>tol8) then
+    shortrange=.false.
+    rcut= (three*nkpt_bz*ucvol/four_pi)**(one/three)
+    call barevcoul(rcut,fockcommon%fock_icutcoul,qpoint,fockcommon%gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,vqg,shortrange=.false.)
+    vqg = vqg * fockcommon%hyb_mixing
+ end if
+
+ if (abs(fockcommon%hyb_mixing_sr)>tol8) then
+    shortrange=.true.
+    rcut=fockcommon%hyb_range_fock
+    call barevcoul(rcut,fockcommon%fock_icutcoul,qpoint,fockcommon%gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,vqg,shortrange)
+    vqg=vqg*fockcommon%hyb_mixing_sr
+!    if (fockcommon%hyb_range_fock>tol8)then
+!       vqg(1)=fockcommon%hyb_mixing*divgq0+fockcommon%hyb_mixing_sr*pi/fockcommon%hyb_range_fock**2
+!    endif
+ end if
+
 
 
 !Initialize a few quantities
  n1=ngfft(1); n2=ngfft(2); n3=ngfft(3)
  cutoff=fockcommon%gsqcut * tolfix
- vqg=zero
-
 !Some peculiar values of q
  qeq0=0; if(qpoint(1)**2+qpoint(2)**2+qpoint(3)**2<1.d-15) qeq0=1
  qeq05=0
@@ -2049,7 +2062,6 @@ subroutine bare_vqg(qpoint,fockcommon,gmet,nfft,nkpt_bz,ngfft,ucvol,vqg)
    if (abs(abs(qpoint(1))-half)<tol12.or.abs(abs(qpoint(2))-half)<tol12.or. &
 &   abs(abs(qpoint(3))-half)<tol12) qeq05=1
  end if
-
 !In order to speed the routine, precompute the components of g+q
 !Also check if the booked space was large enough...
  ABI_MALLOC(gq,(3,max(n1,n2,n3)))
@@ -2062,29 +2074,7 @@ subroutine bare_vqg(qpoint,fockcommon,gmet,nfft,nkpt_bz,ngfft,ucvol,vqg)
  end do
  ig1max=-1;ig2max=-1;ig3max=-1
  ig1min=n1;ig2min=n2;ig3min=n3
-
  id1=n1/2+2;id2=n2/2+2;id3=n3/2+2
-
- if (abs(fockcommon%hyb_mixing)>tol8) then
-    shortrange=.false.
-    rcut= (three*nkpt_bz*ucvol/four_pi)**(one/three)
-    call barevcoul(rcut,qpoint,fockcommon%gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,vqg,shortrange)
-    vqg=vqg*fockcommon%hyb_mixing
-    if (fockcommon%hyb_range_fock>tol8)then
-       vqg(1)=fockcommon%hyb_mixing*divgq0+fockcommon%hyb_mixing*(pi/fockcommon%hyb_range_fock**2)
-    endif
- end if
-
- if (abs(fockcommon%hyb_mixing_sr)>tol8) then
-    shortrange=.true.
-    rcut=fockcommon%hyb_range_fock
-    call barevcoul(rcut,qpoint,fockcommon%gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,vqg,shortrange)
-    vqg=vqg*fockcommon%hyb_mixing_sr
-!    if (fockcommon%hyb_range_fock>tol8)then
-!       vqg(1)=fockcommon%hyb_mixing*divgq0+fockcommon%hyb_mixing_sr*pi/fockcommon%hyb_range_fock**2
-!    endif
- end if
-
  ! Triple loop on each dimension
  do i3=1,n3
    ig3=i3-(i3/id3)*n3-1
@@ -2104,12 +2094,12 @@ subroutine bare_vqg(qpoint,fockcommon,gmet,nfft,nkpt_bz,ngfft,ucvol,vqg)
      ii1=1
      if (i23==0 .and. qeq0==1  .and. ig2==0 .and. ig3==0) then
        ii1=2
-       ! value of the integration of the Coulomb singularity 4pi\int_BZ 1/q^2 dq
-       vqg(1+i23)=fockcommon%hyb_mixing*divgq0
-
-!      Note the combination of Spencer-Alavi and Erfc screening
        if (abs(fockcommon%hyb_range_fock)>tol8)then
-         vqg(1+i23)=vqg(1+i23)+fockcommon%hyb_mixing_sr*(pi/fockcommon%hyb_range_fock**2)
+         write(*,*) "FBFB dont skip this SR part yet"
+         !vqg(1+i23)=vqg(1+i23)+fockcommon%hyb_mixing_sr*(pi/fockcommon%hyb_range_fock**2)
+!      Note the combination of Spencer-Alavi and Erfc screening
+         vqg(1+i23)=fockcommon%hyb_mixing*divgq0 + fockcommon%hyb_mixing_sr*(pi/fockcommon%hyb_range_fock**2)
+
 !        This would give a combination of Spencer-Alavi and Erfc screening,
 !        unfortunately, it modifies also the tests for pure HSE06, so was not retained.
 !        vqg(1+i23)=vqg(1+i23)+fockcommon%hyb_mixing_sr*min(divgq0,pi/(fockcommon%hyb_range_fock**2))
@@ -2137,6 +2127,7 @@ subroutine bare_vqg(qpoint,fockcommon,gmet,nfft,nkpt_bz,ngfft,ucvol,vqg)
      end do ! End loop on i1
    end do ! End loop on i2
  end do ! End loop on i3
+
 
 
  if (izero==1) then
