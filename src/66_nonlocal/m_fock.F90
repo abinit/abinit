@@ -114,9 +114,6 @@ module m_fock
     ! contains input variable fock_icutcoul that specifies the treatment of the Coulomb interaction (cutoff in real-space,
     ! divergence treatment etc.)
 
-  integer :: rcut
-    ! contains input variable rcut that specifies the cutoff radius for spherical cutoff
-
   integer ABI_PRIVATE :: getghc_call_ = 1
   ! 1 if fock_getghc should be called in getghc, 0 otherwise
 
@@ -153,6 +150,9 @@ module m_fock
 
   real(dp) :: hyb_range_fock
     ! hybrid range for separation, used in the fock contribution
+
+  real(dp) :: rcut
+    ! contains input variable rcut that specifies the cutoff radius for spherical cutoff
 
   real(dp) :: e_fock0
     ! contribution of the Fock term to energy (computed and stored here in case of ACE)
@@ -2029,6 +2029,13 @@ subroutine bare_vqg(qpoint,fockcommon,gmet,nfft,nkpt_bz,ngfft,ucvol,vqg)
 !For the time being, only Spencer-Alavi scheme...
  rcut= (three*nkpt_bz*ucvol/four_pi)**(one/three)
  divgq0= two_pi*rcut**two
+
+ write(*,*) 'FBFB ============================'
+ write(*,*) fockcommon%fock_icutcoul
+ write(*,*) fockcommon%rcut
+ write(*,*) rcut
+ write(*,*) '================================='
+
 
 !Initialize a few quantities
  n1=ngfft(1); n2=ngfft(2); n3=ngfft(3)
