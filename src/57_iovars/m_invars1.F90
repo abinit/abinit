@@ -2404,7 +2404,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%focktoldfe=zero
    dtsets(idtset)%fockoptmix=0
    dtsets(idtset)%fockdownsampling(:)=1
-   dtsets(idtset)%fock_icutcoul=3
+   dtsets(idtset)%fock_icutcoul=0  ! Spherical-cutoff for legacy reasons
    dtsets(idtset)%freqim_alpha=five
    dtsets(idtset)%friction=0.001_dp
    dtsets(idtset)%frzfermi=0

@@ -190,9 +190,10 @@ subroutine barevcoul(rcut,qpoint,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,barev,shor
  vcut%hcyl      = zero                 ! Length of finite cylinder (Rozzi"s method, default is Beigi).
  vcut%ucvol     = ucvol                ! Unit cell volume.
 
- vcut%rprimd    = Cryst%rprimd(:,:)    ! Dimensional direct lattice.
- vcut%boxcenter = dtset%boxcenter      ! boxcenter at the moment is supposed to be at the origin.
- vcut%vcutgeo   = dtset%vcutgeo(:)     ! Info on the orientation and extension of the cutoff region.
+ !FBruneval: comment the definitions below since Cryst and dtset are not set here!
+ !vcut%rprimd    = Cryst%rprimd(:,:)    ! Dimensional direct lattice.
+ !vcut%boxcenter = dtset%boxcenter      ! boxcenter at the moment is supposed to be at the origin.
+ !vcut%vcutgeo   = dtset%vcutgeo(:)     ! Info on the orientation and extension of the cutoff region.
 !
 ! === Define geometry and cutoff radius (if used) ===
  vcut%mode='NONE'
