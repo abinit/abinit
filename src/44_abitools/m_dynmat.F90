@@ -6,7 +6,7 @@
 !!  This module provides low-level tools to operate on the dynamical matrix
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2022 ABINIT group (XG, JCC, MJV, NH, RC, MVeithen, MM, MG, MT, DCA)
+!!  Copyright (C) 2014-2024 ABINIT group (XG, JCC, MJV, NH, RC, MVeithen, MM, MG, MT, DCA)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -56,7 +56,7 @@ module m_dynmat
  public :: d2cart_to_red        ! Transform a second-derivative matrix
                                 ! from cartesian to reduced coordinate.
  public :: chkph3               ! Check the completeness of the dynamical matrix
- public :: chneu9               ! Imposition of the Acoustic sum rule on the Effective charges
+ public :: chneu9               ! Imposition of the charge neutrality sum rule on the Effective charges
  public :: d2sym3               ! Build (nearly) all the other matrix elements that can be build using symmetries.
  public :: q0dy3_apply          ! Takes care of the inclusion of the ewald q=0 term in the dynamical matrix
  public :: q0dy3_calc           ! Calculate the q=0 correction term to the dynamical matrix
@@ -1131,9 +1131,24 @@ subroutine chkph3(carflg,idir,mpert,natom)
  ! If needed, send the message
  if(send==1)then
    write(msg, '(a,a,a,a)' )&
-   ' chkph3 : WARNING -',ch10,&
-   '  Dynamical matrix incomplete, phonon frequencies may be wrong, check input variables rfatpol and rfdir.'
-   call wrtout([std_out, ab_out],msg)
+&    ' chkph3 : WARNING -',ch10,&
+&    '  Dynamical matrix incomplete, phonon frequencies may be wrong, see the log file for more explanations.'
+   call wrtout(ab_out,msg)
+   write(msg, '(11a)' )&
+&   ' chkph3 : WARNING -',ch10,&
+&   '  Dynamical matrix incomplete, phonon frequencies may be wrong.',ch10,&
+&   '  Likely due to a list of perturbations, as defined by rfatpol and rfdir, that does not include',ch10,&
+&   '  all displacements of all atoms and (if non-metallic material) electric field type perturbation.',ch10,&
+&   '  Then, the dynamical matrix includes zeroes when the matrix element is not computed.',ch10,&
+&   '  This is allowed for testing purposes. But the phonon frequencies may be wrong.'
+   call wrtout(std_out,msg)
+   write(msg, '(9a)' )&
+&  '  If there are symmetries, perhaps these matrix elements are zero by symmetry anyhow, and phonon frequencies might be right.',ch10,&
+&  '  Please check the input variables rfatpol and rfdir, to determine whether abinit is doing what you intend it to do.',ch10,&
+&  '  Note that ANADDB is able to detect whether the symmetries allow one to reconstruct the full dynamical matrix from',ch10,&
+&  '  an incomplete one. In this case, passing to ANADDB the delivered _DDB file might confirm (or not) that',ch10,&
+&  '  phonon frequencies are right.'
+   call wrtout(std_out,msg)
  end if
 
 end subroutine chkph3
@@ -1146,11 +1161,11 @@ end subroutine chkph3
 !! chneu9
 !!
 !! FUNCTION
-!! Imposition of the Acoustic sum rule on the Effective charges
+!! Imposition of the charge neutrality sum rule on the Effective charges
 !! and suppress the imaginary part of the dynamical matrix
 !!
 !! INPUTS
-!!  chneut=(0 => no ASR, 1 => equal repartition,2 => weighted repartition )
+!!  chneut=(0 => no ASR, 1 => equal repartition, 2 => weighted repartition )
 !!  mpert =maximum number of ipert
 !!  natom=number of atom
 !!  ntypat=number of types of atoms in unit cell
@@ -1330,7 +1345,7 @@ subroutine chneu9(chneut,d2cart,mpert,natom,ntypat,selectz,typat,zion)
 !Write the effective charge tensor
  write(msg, '(a,a,a,a,a,a,a)' )&
    ' Effective charge tensors after ',ch10,&
-   ' imposition of the charge neutrality,',ch10,&
+   ' imposition of the charge neutrality (if requested by user),',ch10,&
    ' and eventual restriction to some part :',ch10,&
   '   atom    displacement  '
  call wrtout(ab_out,msg)
@@ -1486,6 +1501,7 @@ subroutine d2sym3(blkflg,d2,indsym,mpert,natom,nsym,qpt,symq,symrec,symrel,timre
        do ipert2=1,min(natom+2,mpert)
          do idir2=1,3
 
+           ! FIXME use is_type functions
 !          If an element exists
            if(blkflg(idir1,ipert1,idir2,ipert2)==1)then
 
@@ -2246,16 +2262,6 @@ subroutine dfpt_sygra(natom,desym,deunsy,indsym,ipert,nsym,qpt,symrec)
  real(dp) :: arg,im,re,sumi,sumr
 
 ! *********************************************************************
-
-!DEBUG
-!write(std_out,*)' dfpt_sygra : enter '
-!write(std_out,*)' dfpt_sygra : qpt(:)',qpt(:)
-!do ia=1,natom
-!do mu=1,3
-!write(std_out,*)' dfpt_sygra : deunsy(:2,mu,ia)',deunsy(:2,mu,ia)
-!enddo
-!enddo
-!ENDDEBUG
 
  if (nsym==1) then
 
@@ -6262,7 +6268,7 @@ end subroutine dfpt_prtph
 !!  ntypat=number of atom types
 !!  typat(natom)=integer label of each type of atom (1,2,...)
 !!  [herm_opt]= 1 to hermitianize mat (default)
-!!          0 if no symmetrization should be performed
+!!              0 if no symmetrization should be performed
 !!
 !! SIDE EFFECTS
 !!  mat(2*3*natom*3*natom)=Multiplies by atomic masses in output.

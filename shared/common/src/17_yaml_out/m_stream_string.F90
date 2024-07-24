@@ -8,7 +8,7 @@
 !!  Memory is automatically allocated on writing and freed on reading.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2022 ABINIT group (TC, MG)
+!! Copyright (C) 2009-2024 ABINIT group (TC, MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -89,7 +89,11 @@ subroutine stream_flush_unit(stream, unit, newline, firstchar)
     new_s = prep_char(s, firstchar)
     write(unit, "(a)")trim(new_s)
   else
-    write(unit, "(a)")trim(s)
+#if defined FC_NVHPC || defined FC_LLVM
+    write(unit, "(a)") s
+#else
+    write(unit, "(a)") trim(s)
+#endif
   end if
 
   if (present(newline)) then

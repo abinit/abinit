@@ -7,7 +7,7 @@
 !!  used to handle interatomic force constant sets
 !!
 !! COPYRIGHT
-!! Copyright (C) 2011-2022 ABINIT group (XG,MJV,EB,MG)
+!! Copyright (C) 2011-2024 ABINIT group (XG,MJV,EB,MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -376,7 +376,7 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
 !arrays
  integer :: ngqpt(9),qptrlatt(3,3)
  integer,allocatable :: qmissing(:),ibz2bz(:),bz2ibz_smap(:,:)
- real(dp) :: gprim(3,3),rprim(3,3),qpt(3),rprimd(3,3)
+ real(dp) :: gprim(3,3),rprim(3,3),qpt(3),rprimd(3,3), gprim_tmp(3,3), rprim_tmp(3,3)
  real(dp):: rcan(3,Crystal%natom),trans(3,Crystal%natom),dyewq0(3,3,Crystal%natom)
  real(dp) :: displ_cart(2*3*Crystal%natom*3*Crystal%natom)
  real(dp) :: phfrq(3*Crystal%natom)
@@ -458,6 +458,7 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
  wtq = one / nqbz ! Weights sum up to one
  ABI_MALLOC(bz2ibz_smap, (6, nqbz))
 
+ ! FIXME: timrev1 should be set to 0 if TR cannot be used
  call symkpt(chksymbreak0,crystal%gmet,ibz2bz,iout0,qbz,nqbz,ifc%nqibz,crystal%nsym,&
    crystal%symrec,timrev1,wtq,wtq_folded, bz2ibz_smap, xmpi_comm_self)
 
@@ -475,12 +476,22 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
 
  ABI_MALLOC(Ifc%dynmat,(2,3,natom,3,natom,nqbz))
 
+ ! This is needed to preserve the behavior of the old implementation with canonical coordinate.
+ if (Ifc%brav == 1) then
+   gprim_tmp = Crystal%gprimd
+   rprim_tmp = rprimd
+ else
+   gprim_tmp = gprim
+   rprim_tmp = rprim
+ endif
+
 ! Find symmetrical dynamical matrices
  if (.not.present(Ifc_coarse)) then
 
    ! Each q-point in the BZ mush be the symmetrical of one of the qpts in the ddb file.
+   ! SP - gprimd and rprimd is required instead of gprim and rprim for non-diagonal supercells.
    call symdm9(ddb, &
-     Ifc%dynmat,gprim,Crystal%indsym,mpert,natom,nqbz,nsym,rfmeth,rprim,qbz,&
+     Ifc%dynmat,gprim_tmp,Crystal%indsym,mpert,natom,nqbz,nsym,rfmeth,rprim_tmp,qbz,&
      Crystal%symrec, Crystal%symrel, comm)
 
  else
@@ -496,7 +507,7 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
    call wrtout(std_out,"Will fill missing qpoints in the full BZ using the coarse q-mesh","COLL")
 
    call symdm9(ddb, &
-     Ifc%dynmat,gprim,Crystal%indsym,mpert,natom,nqbz,nsym,rfmeth,rprim,qbz,&
+     Ifc%dynmat,gprim_tmp,Crystal%indsym,mpert,natom,nqbz,nsym,rfmeth,rprim_tmp,qbz,&
      Crystal%symrec,Crystal%symrel,comm, qmissing=qmissing)
 
    ! Compute dynamical matrix with Fourier interpolation on the coarse q-mesh.
@@ -758,13 +769,12 @@ subroutine ifc_from_file(ifc, dielt,filename,natom,ngqpt,nqshift,qshift,ucell_dd
  inquire(file=filename, exist=file_exists)
 
  if (file_exists .eqv. .true.)then
-   !Reading the ddb
-   call ddb_hdr%open_read(filename,2,comm,dimonly=1)
 
-   natom = ddb_hdr%natom
+   !Reading the ddb
+   call ddb%from_file(filename, ddb_hdr, ucell_ddb, comm)
    call ddb_hdr%free()
 
-   call ddb%from_file(filename,1, ddb_hdr, ucell_ddb,comm)
+   natom = ddb%natom
 
  else
    ABI_ERROR(sjoin("File:", filename, "is not present in the directory"))
@@ -796,7 +806,6 @@ subroutine ifc_from_file(ifc, dielt,filename,natom,ngqpt,nqshift,qshift,ucell_dd
 
  ! Free them all
  call ddb%free()
- call ddb_hdr%free()
 
 end subroutine ifc_from_file
 !!***
@@ -2587,7 +2596,7 @@ subroutine ifc_outphbtrap(ifc, cryst, ngqpt, nqshft, qshft, basename)
    do iatom = 1, natom
      do idir = 1, 3
        imode = idir + 3*(iatom-1)
-!      factor two for Ry output - this may change in definitive BT and abinit formats
+       ! factor two for Ry output - this may change in definitive BT and abinit formats
        write (unit_btrap,trim(format_line_btrap))phfrq(imode)*two,d2cart(1:2,1:3,1:natom,idir,iatom)
      end do
    end do

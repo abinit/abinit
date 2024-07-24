@@ -7,7 +7,7 @@
 !! the irreducible representations associated to electronic eigenstates.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2022 ABINIT group (MG)
+!!  Copyright (C) 2008-2024 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -27,7 +27,7 @@ MODULE m_esymm
  use m_errors
 
  use m_io_tools,       only : file_exists
- use m_symtk,          only : matr3inv, chkgrp, symrelrot, littlegroup_q
+ use m_symtk,          only : matr3inv, sg_multable, symrelrot, littlegroup_q
  use m_symfind,        only : symbrav
  use m_fstrings,       only : int2char10, itoa, sjoin
  use m_numeric_tools,  only : print_arr, set2unit, get_trace
@@ -154,8 +154,8 @@ MODULE m_esymm
   type(coeffi1_type),allocatable :: irrep2b(:)
   ! irrep2b(0:nclass)%value(:)
   ! Ragged arrays with the mapping between the set of irreducible representation and the band indices.
-  ! irrep2b(irp)%value(:) gives the indeces of the states belonging to irrep irp, irp=1,nclass
-  ! irrep2b(0)%value(:) stores the indeces of the states that have not been classified due to
+  ! irrep2b(irp)%value(:) gives the indices of the states belonging to irrep irp, irp=1,nclass
+  ! irrep2b(0)%value(:) stores the indices of the states that have not been classified due to
   !   the presence of an accidental degeneracy.
 
   integer,allocatable :: degs_bounds(:,:)
@@ -421,9 +421,9 @@ subroutine esymm_init(esymm,kpt_in,Cryst,only_trace,nspinor,first_ib,nbnds,EDIFF
  ABI_MALLOC(dum_symafm,(esymm%nsym_gk))
  dum_symafm=1
 
- call chkgrp(esymm%nsym_gk,dum_symafm,sgk,grp_ierr)
-
- ABI_CHECK(grp_ierr==0,"chkgrp failed")
+!Check group closure
+ call sg_multable(esymm%nsym_gk,dum_symafm,sgk,grp_ierr)
+ ABI_CHECK(grp_ierr==0,"sg_multable failed")
  ABI_FREE(dum_symafm)
 
  ABI_MALLOC(tmp_nelements,(esymm%nsym_gk))
@@ -465,7 +465,7 @@ subroutine esymm_init(esymm,kpt_in,Cryst,only_trace,nspinor,first_ib,nbnds,EDIFF
 
    spgroup=0
    chkprim=1 ! Cell must be primitive.
-   !call symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tolsym)
+   !call symlatt(bravais,std_out,msym,nptsym,ptsymrel,rprimd,tolsym)
    !call symspgr(bravais,Cryst%nsym,spgroup,Cryst%symrel,Cryst%tnons,tolsym)
 
    !call symanal(bravais,chkprim,genafm,msym,nsym,ptgroupma,rprimd,spgroup,symafm,symrel,tnons,tolsym)
@@ -493,7 +493,7 @@ subroutine esymm_init(esymm,kpt_in,Cryst,only_trace,nspinor,first_ib,nbnds,EDIFF
 
      esymm%has_chtabs = .FALSE.
 
-     ! Reorder indeces such that symmetries are packed in classes.
+     ! Reorder indices such that symmetries are packed in classes.
      ABI_MALLOC(new_idx,(esymm%nsym_gk))
      ABI_MALLOC(new_g0,(3,esymm%nsym_gk))
      new_g0=0; iord = 0
@@ -593,7 +593,7 @@ subroutine esymm_init(esymm,kpt_in,Cryst,only_trace,nspinor,first_ib,nbnds,EDIFF
    !call symrelrot(esymm%nsym_gk,conv_gprimd,axes,conv_symrec,tolsym)
    call symrelrot(esymm%nsym_gk,Cryst%gprimd,conv_gprimd,conv_symrec,tolsym)
 
-   ! 3) Reorder indeces such that symmetries are packed in classes.
+   ! 3) Reorder indices such that symmetries are packed in classes.
    ABI_MALLOC(found,(esymm%nsym_gk))
    ABI_MALLOC(new_idx,(esymm%nsym_gk))
    ABI_MALLOC(new_g0,(3,esymm%nsym_gk))
@@ -1143,7 +1143,7 @@ subroutine esymm_finalize(esymm,prtvol)
    end do
  end if
  !
- ! %irrep2b(0)) gives the indeces of the states that have not been classified.
+ ! %irrep2b(0)) gives the indices of the states that have not been classified.
  ABI_MALLOC(esymm%irrep2b,(0:esymm%nclass))
 
  !write(std_out,*)"b2irrep",esymm%b2irrep
@@ -1338,7 +1338,7 @@ subroutine esymm_symmetrize_mels(esymm,lbnd,ubnd,in_me,out_me)
    b1_stop  = esymm%degs_bounds(2,idg1)
 
    !if (b1_stop<lbnd .or. b2_start >ubnd) then
-   !  ABI_ERROR("Wrong band indeces, check esymm initialization")
+   !  ABI_ERROR("Wrong band indices, check esymm initialization")
    !end if
 
    Irrep1 => esymm%Calc_irreps(idg1)
@@ -1357,7 +1357,7 @@ subroutine esymm_symmetrize_mels(esymm,lbnd,ubnd,in_me,out_me)
      if (esymm%can_use_tr) tr_Irrep2 => esymm%trCalc_irreps(idg2)
      !
      ! Symmetrize the off-diagonal matrix elements.
-     ! summing over kk and ll. ii and jj are the indeces of the bands that are symmetrized
+     ! summing over kk and ll. ii and jj are the indices of the bands that are symmetrized
      do ii=1,b1_stop-b1_start+1
        ib= ii+b1_start-1
        do jj=1,b2_stop-b2_start+1
@@ -1372,7 +1372,7 @@ subroutine esymm_symmetrize_mels(esymm,lbnd,ubnd,in_me,out_me)
              dsd = sum_irreps(Irrep1,Irrep2,kk,ii,ll,jj)
              ofd = ofd + dsd * in_me(1,kb,lb)
              if (esymm%can_use_tr) then
-               tr_dsd = sum_irreps(tr_Irrep1,tr_Irrep2,kk,jj,ll,ii) ! Exchange of band indeces.
+               tr_dsd = sum_irreps(tr_Irrep1,tr_Irrep2,kk,jj,ll,ii) ! Exchange of band indices.
                tr_ofd = tr_ofd + tr_dsd * in_me(2,kb,lb)            ! Contribution obtained from TR.
              end if
            end do

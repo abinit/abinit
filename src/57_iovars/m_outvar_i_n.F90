@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2022 ABINIT group (DCA, XG, GMR, MM)
+!!  Copyright (C) 1998-2024 ABINIT group (DCA, XG, GMR, MM)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -150,7 +150,8 @@ subroutine outvar_i_n (dtsets,iout,&
    nimagem(idtset)=dtsets(idtset)%nimage
  end do
 
- firstchar_gpu=' '; if (maxval(dtsets(1:ndtset_alloc)%use_gpu_cuda)>0) firstchar_gpu='-'
+ firstchar_gpu=' '
+ if (maxval(dtsets(1:ndtset_alloc)%gpu_option)/=ABI_GPU_DISABLED) firstchar_gpu='-'
 
 !if(multivals%natom==0)natom=dtsets(1)%natom
  natom=dtsets(1)%natom
@@ -358,6 +359,10 @@ subroutine outvar_i_n (dtsets,iout,&
  intarr(1,:)=dtsets(:)%intxc
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'intxc','INT',0)
 
+ intarr(1,:)=dtsets(:)%invovl_blksliced
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'invovl_blksliced',&
+&             'INT',0,firstchar=firstchar_gpu)
+
  intarr(1,:)=dtsets(:)%ionmov
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'ionmov','INT',0)
 
@@ -396,6 +401,11 @@ subroutine outvar_i_n (dtsets,iout,&
 
  intarr(1,:)=dtsets(:)%irdhaydock
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'irdhaydock','INT',0)
+
+ if (any(dtsets(:)%usekden==1)) then
+   intarr(1,:)=dtsets(:)%irdkden
+   call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'irdkden','INT',0)
+ end if
 
  intarr(1,:)=dtsets(:)%irdpawden
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'irdpawden','INT',0)
@@ -976,6 +986,9 @@ subroutine outvar_i_n (dtsets,iout,&
 
  intarr(1,:)=dtsets(:)%nline
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'nline','INT',0)
+
+ intarr(1,:)=dtsets(:)%nblock_lobpcg
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'nblock_lobpcg','INT',0)
 
  intarr(1,:)=dtsets(:)%nloalg(1)
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'nloc_alg','INT',0)

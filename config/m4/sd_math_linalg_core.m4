@@ -1,6 +1,6 @@
 # -*- Autoconf -*-
 #
-# Copyright (C) 2005-2022 ABINIT Group (Yann Pouillon, Marc Torrent)
+# Copyright (C) 2005-2024 ABINIT Group (Yann Pouillon, Marc Torrent)
 #
 # This file is part of the Steredeg software package. For license information,
 # please see the COPYING file in the top-level directory of the source
@@ -669,9 +669,9 @@ AC_DEFUN([_SD_LINALG_SET_VENDOR_FLAGS], [
           sd_linalg_vendor_cppflags="-I${MKLROOT}/include"
           sd_linalg_vendor_fcflags="-I${MKLROOT}/include"
           if test "${sd_mpi_enable}" = "yes"; then
-            sd_linalg_vendor_ldflags="-mkl=cluster"
+            sd_linalg_vendor_ldflags="-qmkl=cluster"
           else
-            sd_linalg_vendor_ldflags="-mkl"
+            sd_linalg_vendor_ldflags="-qmkl"
           fi
           ;;
         *)

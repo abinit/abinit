@@ -6,7 +6,7 @@
 !!  Conjugate-gradient eigensolver.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2022 ABINIT group (DCA, XG, GMR, MT, MVeithen, ISouza, JIniguez)
+!!  Copyright (C) 2008-2024 ABINIT group (DCA, XG, GMR, MT, MVeithen, ISouza, JIniguez)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -190,7 +190,9 @@ integer,parameter :: useoverlap=0,tim_getcsc=3
 
  cwavef_bands => cg(:,1+icg:nband*npw*nspinor+icg)
 
- if (cprj_update_lvl==-2)  call cprj_update(cg,cprj_cwavef_bands,gs_hamk,icg,nband,mpi_enreg,tim_getcprj)
+ if (cprj_update_lvl==-2)then
+   call cprj_update(cg,cprj_cwavef_bands,gs_hamk,icg,nband,mpi_enreg,tim_getcprj)
+ endif
 
  isubh=1
  isubh0=1

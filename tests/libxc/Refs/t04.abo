@@ -1,8 +1,8 @@
 
-.Version 9.3.1 of ABINIT 
+.Version 9.11.6.8 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
-.Copyright (C) 1998-2022 ABINIT group . 
+.Copyright (C) 1998-2024 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,14 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h17 )
+.Starting date : Mon 22 Jan 2024.
+- ( at 20h53 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/libxc_t04/t04.in
-- output file    -> t04.out
+- input  file    -> /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk__gonze_bob_13.2/tests/Test_suite/libxc_t04/t04.abi
+- output file    -> t04.abo
 - root for input  files -> t04i
 - root for output files -> t04o
-
 
  DATASET    1 : space group Pm -3 m (#221); Bravais cP (primitive cubic)
 ================================================================================
@@ -34,11 +33,10 @@
 -    mband =           1        mffmem =           1         mkmem =           1
        mpw =        2118          nfft =       32768          nkpt =           1
 ================================================================================
-P This job should need less than                       9.574 Mbytes of memory.
+P This job should need less than                      10.477 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 ================================================================================
-
 
  DATASET    2 : space group Pm -3 m (#221); Bravais cP (primitive cubic)
 ================================================================================
@@ -51,11 +49,10 @@ _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 -    mband =           1        mffmem =           1         mkmem =           1
        mpw =        2118          nfft =       32768          nkpt =           1
 ================================================================================
-P This job should need less than                       9.574 Mbytes of memory.
+P This job should need less than                      10.477 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 ================================================================================
-
 
  DATASET    3 : space group Pm -3 m (#221); Bravais cP (primitive cubic)
 ================================================================================
@@ -68,11 +65,10 @@ _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 -    mband =           1        mffmem =           1         mkmem =           1
        mpw =        2118          nfft =       32768          nkpt =           1
 ================================================================================
-P This job should need less than                       9.574 Mbytes of memory.
+P This job should need less than                      10.477 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 ================================================================================
-
 
  DATASET    4 : space group Pm -3 m (#221); Bravais cP (primitive cubic)
 ================================================================================
@@ -85,11 +81,10 @@ _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 -    mband =           1        mffmem =           1         mkmem =           1
        mpw =        2118          nfft =       32768          nkpt =           1
 ================================================================================
-P This job should need less than                       9.574 Mbytes of memory.
+P This job should need less than                      10.477 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 ================================================================================
-
 
  DATASET    5 : space group Pm -3 m (#221); Bravais cP (primitive cubic)
 ================================================================================
@@ -102,11 +97,10 @@ _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 -    mband =           1        mffmem =           1         mkmem =           1
        mpw =        2118          nfft =       32768          nkpt =           1
 ================================================================================
-P This job should need less than                       9.574 Mbytes of memory.
+P This job should need less than                      10.477 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 ================================================================================
-
 
  DATASET    6 : space group Pm -3 m (#221); Bravais cP (primitive cubic)
 ================================================================================
@@ -119,11 +113,10 @@ _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 -    mband =           1        mffmem =           1         mkmem =           1
        mpw =        2118          nfft =       32768          nkpt =           1
 ================================================================================
-P This job should need less than                       9.574 Mbytes of memory.
+P This job should need less than                      10.477 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 ================================================================================
-
 
  DATASET    7 : space group Pm -3 m (#221); Bravais cP (primitive cubic)
 ================================================================================
@@ -136,11 +129,10 @@ _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 -    mband =           1        mffmem =           1         mkmem =           1
        mpw =        2118          nfft =       32768          nkpt =           1
 ================================================================================
-P This job should need less than                       9.574 Mbytes of memory.
+P This job should need less than                      10.477 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 ================================================================================
-
 
  DATASET    8 : space group Pm -3 m (#221); Bravais cP (primitive cubic)
 ================================================================================
@@ -153,11 +145,10 @@ _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 -    mband =           1        mffmem =           1         mkmem =           1
        mpw =        2118          nfft =       32768          nkpt =           1
 ================================================================================
-P This job should need less than                       9.574 Mbytes of memory.
+P This job should need less than                      10.477 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 ================================================================================
-
 
  DATASET    9 : space group Pm -3 m (#221); Bravais cP (primitive cubic)
 ================================================================================
@@ -170,11 +161,10 @@ _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 -    mband =           1        mffmem =           1         mkmem =           1
        mpw =        2118          nfft =       32768          nkpt =           1
 ================================================================================
-P This job should need less than                       9.574 Mbytes of memory.
+P This job should need less than                      10.477 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 ================================================================================
-
 
  DATASET   10 : space group Pm -3 m (#221); Bravais cP (primitive cubic)
 ================================================================================
@@ -187,11 +177,10 @@ _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 -    mband =           1        mffmem =           1         mkmem =           1
        mpw =        2118          nfft =       32768          nkpt =           1
 ================================================================================
-P This job should need less than                       9.574 Mbytes of memory.
+P This job should need less than                      10.477 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 ================================================================================
-
 
  DATASET   11 : space group Pm -3 m (#221); Bravais cP (primitive cubic)
 ================================================================================
@@ -204,11 +193,10 @@ _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 -    mband =           1        mffmem =           1         mkmem =           1
        mpw =        2118          nfft =       32768          nkpt =           1
 ================================================================================
-P This job should need less than                       9.574 Mbytes of memory.
+P This job should need less than                      10.477 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 ================================================================================
-
 
  DATASET   12 : space group Pm -3 m (#221); Bravais cP (primitive cubic)
 ================================================================================
@@ -221,11 +209,10 @@ _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 -    mband =           1        mffmem =           1         mkmem =           1
        mpw =        2118          nfft =       32768          nkpt =           1
 ================================================================================
-P This job should need less than                       9.574 Mbytes of memory.
+P This job should need less than                      10.477 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 ================================================================================
-
 
  DATASET   13 : space group Pm -3 m (#221); Bravais cP (primitive cubic)
 ================================================================================
@@ -238,11 +225,10 @@ _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 -    mband =           1        mffmem =           1         mkmem =           1
        mpw =        2118          nfft =       32768          nkpt =           1
 ================================================================================
-P This job should need less than                       9.574 Mbytes of memory.
+P This job should need less than                      10.477 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 ================================================================================
-
 
  DATASET   14 : space group Pm -3 m (#221); Bravais cP (primitive cubic)
 ================================================================================
@@ -255,11 +241,10 @@ _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 -    mband =           1        mffmem =           1         mkmem =           1
        mpw =        2118          nfft =       32768          nkpt =           1
 ================================================================================
-P This job should need less than                       9.574 Mbytes of memory.
+P This job should need less than                      10.477 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 ================================================================================
-
 
  DATASET   15 : space group Pm -3 m (#221); Bravais cP (primitive cubic)
 ================================================================================
@@ -272,11 +257,10 @@ _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 -    mband =           1        mffmem =           1         mkmem =           1
        mpw =        2118          nfft =       32768          nkpt =           1
 ================================================================================
-P This job should need less than                       9.574 Mbytes of memory.
+P This job should need less than                      10.477 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 ================================================================================
-
 
  DATASET   16 : space group Pm -3 m (#221); Bravais cP (primitive cubic)
 ================================================================================
@@ -289,11 +273,10 @@ _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 -    mband =           1        mffmem =           1         mkmem =           1
        mpw =        2118          nfft =       32768          nkpt =           1
 ================================================================================
-P This job should need less than                      10.461 Mbytes of memory.
+P This job should need less than                      10.477 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 ================================================================================
-
 
  DATASET   17 : space group Pm -3 m (#221); Bravais cP (primitive cubic)
 ================================================================================
@@ -306,11 +289,10 @@ _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 -    mband =           1        mffmem =           1         mkmem =           1
        mpw =        2118          nfft =       32768          nkpt =           1
 ================================================================================
-P This job should need less than                      10.461 Mbytes of memory.
+P This job should need less than                      10.477 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 ================================================================================
-
 
  DATASET   18 : space group Pm -3 m (#221); Bravais cP (primitive cubic)
 ================================================================================
@@ -323,11 +305,10 @@ _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 -    mband =           1        mffmem =           1         mkmem =           1
        mpw =        2118          nfft =       32768          nkpt =           1
 ================================================================================
-P This job should need less than                      10.461 Mbytes of memory.
+P This job should need less than                      10.477 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 ================================================================================
-
 
  DATASET   19 : space group Pm -3 m (#221); Bravais cP (primitive cubic)
 ================================================================================
@@ -340,11 +321,10 @@ _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 -    mband =           1        mffmem =           1         mkmem =           1
        mpw =        2118          nfft =       32768          nkpt =           1
 ================================================================================
-P This job should need less than                      10.461 Mbytes of memory.
+P This job should need less than                      10.477 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 ================================================================================
-
 
  DATASET   20 : space group Pm -3 m (#221); Bravais cP (primitive cubic)
 ================================================================================
@@ -357,11 +337,10 @@ _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 -    mband =           1        mffmem =           1         mkmem =           1
        mpw =        2118          nfft =       32768          nkpt =           1
 ================================================================================
-P This job should need less than                      10.461 Mbytes of memory.
+P This job should need less than                      10.477 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 ================================================================================
-
 
  DATASET   21 : space group Pm -3 m (#221); Bravais cP (primitive cubic)
 ================================================================================
@@ -374,11 +353,10 @@ _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 -    mband =           1        mffmem =           1         mkmem =           1
        mpw =        2118          nfft =       32768          nkpt =           1
 ================================================================================
-P This job should need less than                      10.461 Mbytes of memory.
+P This job should need less than                      10.477 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 ================================================================================
-
 
  DATASET   22 : space group Pm -3 m (#221); Bravais cP (primitive cubic)
 ================================================================================
@@ -391,11 +369,10 @@ _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 -    mband =           1        mffmem =           1         mkmem =           1
        mpw =        2118          nfft =       32768          nkpt =           1
 ================================================================================
-P This job should need less than                      10.461 Mbytes of memory.
+P This job should need less than                      10.477 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 ================================================================================
-
 
  DATASET   23 : space group Pm -3 m (#221); Bravais cP (primitive cubic)
 ================================================================================
@@ -408,11 +385,10 @@ _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 -    mband =           1        mffmem =           1         mkmem =           1
        mpw =        2118          nfft =       32768          nkpt =           1
 ================================================================================
-P This job should need less than                      10.461 Mbytes of memory.
+P This job should need less than                      10.477 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 ================================================================================
-
 
  DATASET   24 : space group Pm -3 m (#221); Bravais cP (primitive cubic)
 ================================================================================
@@ -425,11 +401,10 @@ _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 -    mband =           1        mffmem =           1         mkmem =           1
        mpw =        2118          nfft =       32768          nkpt =           1
 ================================================================================
-P This job should need less than                      10.461 Mbytes of memory.
+P This job should need less than                      10.477 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 ================================================================================
-
 
  DATASET   25 : space group Pm -3 m (#221); Bravais cP (primitive cubic)
 ================================================================================
@@ -442,11 +417,10 @@ _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 -    mband =           1        mffmem =           1         mkmem =           1
        mpw =        2118          nfft =       32768          nkpt =           1
 ================================================================================
-P This job should need less than                      10.461 Mbytes of memory.
+P This job should need less than                      10.477 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 ================================================================================
-
 
  DATASET   26 : space group Pm -3 m (#221); Bravais cP (primitive cubic)
 ================================================================================
@@ -459,11 +433,10 @@ _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 -    mband =           1        mffmem =           1         mkmem =           1
        mpw =        2118          nfft =       32768          nkpt =           1
 ================================================================================
-P This job should need less than                      10.461 Mbytes of memory.
+P This job should need less than                      10.477 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 ================================================================================
-
 
  DATASET   27 : space group Pm -3 m (#221); Bravais cP (primitive cubic)
 ================================================================================
@@ -476,11 +449,10 @@ _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 -    mband =           1        mffmem =           1         mkmem =           1
        mpw =        2118          nfft =       32768          nkpt =           1
 ================================================================================
-P This job should need less than                      10.461 Mbytes of memory.
+P This job should need less than                      10.477 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 ================================================================================
-
 
  DATASET   28 : space group Pm -3 m (#221); Bravais cP (primitive cubic)
 ================================================================================
@@ -493,11 +465,10 @@ _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 -    mband =           1        mffmem =           1         mkmem =           1
        mpw =        2118          nfft =       32768          nkpt =           1
 ================================================================================
-P This job should need less than                      10.461 Mbytes of memory.
+P This job should need less than                      10.477 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 ================================================================================
-
 
  DATASET   29 : space group Pm -3 m (#221); Bravais cP (primitive cubic)
 ================================================================================
@@ -510,11 +481,10 @@ _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 -    mband =           1        mffmem =           1         mkmem =           1
        mpw =        2118          nfft =       32768          nkpt =           1
 ================================================================================
-P This job should need less than                      10.461 Mbytes of memory.
+P This job should need less than                      10.477 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 ================================================================================
-
 
  DATASET   30 : space group Pm -3 m (#221); Bravais cP (primitive cubic)
 ================================================================================
@@ -527,11 +497,10 @@ _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 -    mband =           1        mffmem =           1         mkmem =           1
        mpw =        2118          nfft =       32768          nkpt =           1
 ================================================================================
-P This job should need less than                      10.461 Mbytes of memory.
+P This job should need less than                      10.477 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 ================================================================================
-
 
  DATASET   31 : space group Pm -3 m (#221); Bravais cP (primitive cubic)
 ================================================================================
@@ -544,11 +513,10 @@ _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 -    mband =           1        mffmem =           1         mkmem =           1
        mpw =        2118          nfft =       32768          nkpt =           1
 ================================================================================
-P This job should need less than                      10.461 Mbytes of memory.
+P This job should need less than                      10.477 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 ================================================================================
-
 
  DATASET   32 : space group Pm -3 m (#221); Bravais cP (primitive cubic)
 ================================================================================
@@ -561,11 +529,10 @@ _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 -    mband =           1        mffmem =           1         mkmem =           1
        mpw =        2118          nfft =       32768          nkpt =           1
 ================================================================================
-P This job should need less than                      10.461 Mbytes of memory.
+P This job should need less than                      10.477 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 ================================================================================
-
 
  DATASET   33 : space group Pm -3 m (#221); Bravais cP (primitive cubic)
 ================================================================================
@@ -578,11 +545,10 @@ _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 -    mband =           1        mffmem =           1         mkmem =           1
        mpw =        2118          nfft =       32768          nkpt =           1
 ================================================================================
-P This job should need less than                      10.461 Mbytes of memory.
+P This job should need less than                      10.477 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 ================================================================================
-
 
  DATASET   34 : space group Pm -3 m (#221); Bravais cP (primitive cubic)
 ================================================================================
@@ -595,11 +561,10 @@ _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 -    mband =           1        mffmem =           1         mkmem =           1
        mpw =        2118          nfft =       32768          nkpt =           1
 ================================================================================
-P This job should need less than                      10.461 Mbytes of memory.
+P This job should need less than                      10.477 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 ================================================================================
-
 
  DATASET   35 : space group Pm -3 m (#221); Bravais cP (primitive cubic)
 ================================================================================
@@ -612,11 +577,10 @@ _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 -    mband =           1        mffmem =           1         mkmem =           1
        mpw =        2118          nfft =       32768          nkpt =           1
 ================================================================================
-P This job should need less than                      10.461 Mbytes of memory.
+P This job should need less than                      10.477 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 ================================================================================
-
 
  DATASET   36 : space group Pm -3 m (#221); Bravais cP (primitive cubic)
 ================================================================================
@@ -629,11 +593,10 @@ _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 -    mband =           1        mffmem =           1         mkmem =           1
        mpw =        2118          nfft =       32768          nkpt =           1
 ================================================================================
-P This job should need less than                      10.461 Mbytes of memory.
+P This job should need less than                      10.477 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 ================================================================================
-
 
  DATASET   37 : space group Pm -3 m (#221); Bravais cP (primitive cubic)
 ================================================================================
@@ -646,11 +609,10 @@ _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 -    mband =           1        mffmem =           1         mkmem =           1
        mpw =        2118          nfft =       32768          nkpt =           1
 ================================================================================
-P This job should need less than                      10.461 Mbytes of memory.
+P This job should need less than                      10.477 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 ================================================================================
-
 
  DATASET   38 : space group Pm -3 m (#221); Bravais cP (primitive cubic)
 ================================================================================
@@ -663,11 +625,10 @@ _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 -    mband =           1        mffmem =           1         mkmem =           1
        mpw =        2118          nfft =       32768          nkpt =           1
 ================================================================================
-P This job should need less than                      10.461 Mbytes of memory.
+P This job should need less than                      10.477 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 ================================================================================
-
 
  DATASET   39 : space group Pm -3 m (#221); Bravais cP (primitive cubic)
 ================================================================================
@@ -680,11 +641,10 @@ _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 -    mband =           1        mffmem =           1         mkmem =           1
        mpw =        2118          nfft =       32768          nkpt =           1
 ================================================================================
-P This job should need less than                      10.461 Mbytes of memory.
+P This job should need less than                      10.477 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 ================================================================================
-
 
  DATASET   40 : space group Pm -3 m (#221); Bravais cP (primitive cubic)
 ================================================================================
@@ -697,11 +657,10 @@ _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 -    mband =           1        mffmem =           1         mkmem =           1
        mpw =        2118          nfft =       32768          nkpt =           1
 ================================================================================
-P This job should need less than                      10.461 Mbytes of memory.
+P This job should need less than                      10.477 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 ================================================================================
-
 
  DATASET   41 : space group Pm -3 m (#221); Bravais cP (primitive cubic)
 ================================================================================
@@ -714,11 +673,10 @@ _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 -    mband =           1        mffmem =           1         mkmem =           1
        mpw =        2118          nfft =       32768          nkpt =           1
 ================================================================================
-P This job should need less than                      10.461 Mbytes of memory.
+P This job should need less than                      10.477 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 ================================================================================
-
 
  DATASET   42 : space group Pm -3 m (#221); Bravais cP (primitive cubic)
 ================================================================================
@@ -731,11 +689,10 @@ _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 -    mband =           1        mffmem =           1         mkmem =           1
        mpw =        2118          nfft =       32768          nkpt =           1
 ================================================================================
-P This job should need less than                      10.461 Mbytes of memory.
+P This job should need less than                      10.477 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 ================================================================================
-
 
  DATASET   43 : space group Pm -3 m (#221); Bravais cP (primitive cubic)
 ================================================================================
@@ -748,24 +705,7 @@ _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 -    mband =           1        mffmem =           1         mkmem =           1
        mpw =        2118          nfft =       32768          nkpt =           1
 ================================================================================
-P This job should need less than                      10.461 Mbytes of memory.
-  Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
-================================================================================
-
-
- DATASET   44 : space group Pm -3 m (#221); Bravais cP (primitive cubic)
-================================================================================
- Values of the parameters that define the memory need for DATASET 44.
-     intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
-     lnmax =       1     mgfft =      32  mpssoang =       1    mqgrid =    3001
-     natom =       1  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =      48    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       2
--    mband =           1        mffmem =           1         mkmem =           1
-       mpw =        2118          nfft =       32768          nkpt =           1
-================================================================================
-P This job should need less than                      10.461 Mbytes of memory.
+P This job should need less than                      10.477 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 ================================================================================
@@ -812,36 +752,35 @@ _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
               ixc23   -101131
               ixc24   -102131
               ixc25   -103131
-              ixc26   -104131
-              ixc27   -105131
-              ixc28   -107131
-              ixc29   -108131
-              ixc30   -109131
-              ixc31   -110131
-              ixc32   -111131
-              ixc33   -112131
-              ixc34   -113131
-              ixc35   -114131
-              ixc36   -115131
-              ixc37   -116131
-              ixc38   -117131
-              ixc39   -118131
-              ixc40   -119131
-              ixc41   -120131
-              ixc42   -121131
-              ixc43   -122131
-              ixc44   -123131
+              ixc26   -105131
+              ixc27   -107131
+              ixc28   -108131
+              ixc29   -109131
+              ixc30   -110131
+              ixc31   -111131
+              ixc32   -112131
+              ixc33   -113131
+              ixc34   -114131
+              ixc35   -115131
+              ixc36   -116131
+              ixc37   -117131
+              ixc38   -118131
+              ixc39   -119131
+              ixc40   -120131
+              ixc41   -121131
+              ixc42   -122131
+              ixc43   -123131
            jdtset        1    2    3    4    5    6    7    8    9   10
                         11   12   13   14   15   16   17   18   19   20
                         21   22   23   24   25   26   27   28   29   30
                         31   32   33   34   35   36   37   38   39   40
-                        41   42   43   44
+                        41   42   43
               kpt      2.50000000E-01  2.50000000E-01  2.50000000E-01
            kptopt           0
 P           mkmem           1
             natom           1
             nband           1
-           ndtset          44
+           ndtset          43
             ngfft          32      32      32
              nkpt           1
             nline           1
@@ -966,8 +905,6 @@ P           mkmem           1
 
  chkinp: Checking input parameters for consistency, jdtset=  43.
 
- chkinp: Checking input parameters for consistency, jdtset=  44.
-
 ================================================================================
 == DATASET  1 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
@@ -992,8 +929,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk__gonze_bob_13.2/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk__gonze_bob_13.2/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1101,7 +1038,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
 kinetic             :  2.71830172269638E+00
-hartree             :  9.93512214287304E-01
+hartree             :  9.93512214287305E-01
 xc                  : -9.77930738708883E-01
 Ewald energy        : -1.13491899179226E+00
 psp_core            :  2.01061929829747E-07
@@ -1147,8 +1084,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk__gonze_bob_13.2/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk__gonze_bob_13.2/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1301,8 +1238,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk__gonze_bob_13.2/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk__gonze_bob_13.2/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1413,11 +1350,11 @@ hartree             :  1.00261105843829E+00
 xc                  : -1.00426347043465E+00
 Ewald energy        : -1.13491899179226E+00
 psp_core            :  2.01061929829747E-07
-local_psp           : -4.35288699820228E+00
+local_psp           : -4.35288699820229E+00
 non_local_psp       :  0.00000000000000E+00
-total_energy        : -2.75174615283818E+00
-total_energy_eV     : -7.48788208501580E+01
-band_energy         : -9.90561715184424E-01
+total_energy        : -2.75174615283819E+00
+total_energy_eV     : -7.48788208501582E+01
+band_energy         : -9.90561715184423E-01
 ...
 
 
@@ -1455,8 +1392,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk__gonze_bob_13.2/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk__gonze_bob_13.2/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1609,8 +1546,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk__gonze_bob_13.2/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk__gonze_bob_13.2/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1763,8 +1700,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk__gonze_bob_13.2/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk__gonze_bob_13.2/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1875,7 +1812,7 @@ hartree             :  1.00358150086598E+00
 xc                  : -9.99691023307310E-01
 Ewald energy        : -1.13491899179226E+00
 psp_core            :  2.01061929829747E-07
-local_psp           : -4.35566445287541E+00
+local_psp           : -4.35566445287542E+00
 non_local_psp       :  0.00000000000000E+00
 total_energy        : -2.74664093681681E+00
 total_energy_eV     : -7.47399008573123E+01
@@ -1917,8 +1854,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk__gonze_bob_13.2/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk__gonze_bob_13.2/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2071,8 +2008,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk__gonze_bob_13.2/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk__gonze_bob_13.2/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2180,14 +2117,14 @@ iteration_state     : {dtset: 8, }
 comment             : Components of total free energy in Hartree
 kinetic             :  2.73872946599562E+00
 hartree             :  1.00298192448114E+00
-xc                  : -9.98803561894505E-01
+xc                  : -9.98803561894504E-01
 Ewald energy        : -1.13491899179226E+00
 psp_core            :  2.01061929829747E-07
 local_psp           : -4.35406732054350E+00
 non_local_psp       :  0.00000000000000E+00
 total_energy        : -2.74607828269158E+00
 total_energy_eV     : -7.47245902599303E+01
-band_energy         : -9.85472142786411E-01
+band_energy         : -9.85472142786410E-01
 ...
 
 
@@ -2225,8 +2162,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk__gonze_bob_13.2/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk__gonze_bob_13.2/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2339,9 +2276,9 @@ Ewald energy        : -1.13491899179226E+00
 psp_core            :  2.01061929829747E-07
 local_psp           : -4.35409909194838E+00
 non_local_psp       :  0.00000000000000E+00
-total_energy        : -2.74610272833121E+00
-total_energy_eV     : -7.47252554596138E+01
-band_energy         : -9.85497672443023E-01
+total_energy        : -2.74610272833120E+00
+total_energy_eV     : -7.47252554596136E+01
+band_energy         : -9.85497672443022E-01
 ...
 
 
@@ -2379,8 +2316,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk__gonze_bob_13.2/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk__gonze_bob_13.2/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2488,14 +2425,14 @@ iteration_state     : {dtset: 10, }
 comment             : Components of total free energy in Hartree
 kinetic             :  2.73856821240502E+00
 hartree             :  1.00265951678667E+00
-xc                  : -9.95032272121442E-01
+xc                  : -9.95032272121441E-01
 Ewald energy        : -1.13491899179226E+00
 psp_core            :  2.01061929829747E-07
 local_psp           : -4.35374594179497E+00
 non_local_psp       :  0.00000000000000E+00
 total_energy        : -2.74246927545505E+00
 total_energy_eV     : -7.46263841786636E+01
-band_energy         : -9.81567952129589E-01
+band_energy         : -9.81567952129588E-01
 ...
 
 
@@ -2533,8 +2470,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk__gonze_bob_13.2/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk__gonze_bob_13.2/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2642,7 +2579,7 @@ iteration_state     : {dtset: 11, }
 comment             : Components of total free energy in Hartree
 kinetic             :  2.73966230765766E+00
 hartree             :  1.00339855439138E+00
-xc                  : -9.99202357525124E-01
+xc                  : -9.99202357525122E-01
 Ewald energy        : -1.13491899179226E+00
 psp_core            :  2.01061929829747E-07
 local_psp           : -4.35518963062446E+00
@@ -2687,8 +2624,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk__gonze_bob_13.2/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk__gonze_bob_13.2/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2803,7 +2740,7 @@ local_psp           : -4.35518939924644E+00
 non_local_psp       :  0.00000000000000E+00
 total_energy        : -2.74624959220116E+00
 total_energy_eV     : -7.47292518287543E+01
-band_energy         : -9.86224291534119E-01
+band_energy         : -9.86224291534118E-01
 ...
 
 
@@ -2841,8 +2778,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk__gonze_bob_13.2/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk__gonze_bob_13.2/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2956,8 +2893,8 @@ psp_core            :  2.01061929829747E-07
 local_psp           : -4.35439134614882E+00
 non_local_psp       :  0.00000000000000E+00
 total_energy        : -2.74314281213882E+00
-total_energy_eV     : -7.46447120439093E+01
-band_energy         : -9.82938268229517E-01
+total_energy_eV     : -7.46447120439092E+01
+band_energy         : -9.82938268229516E-01
 ...
 
 
@@ -2995,8 +2932,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk__gonze_bob_13.2/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk__gonze_bob_13.2/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3110,7 +3047,7 @@ psp_core            :  2.01061929829747E-07
 local_psp           : -4.35924608016613E+00
 non_local_psp       :  0.00000000000000E+00
 total_energy        : -2.78250825883110E+00
-total_energy_eV     : -7.57159003246733E+01
+total_energy_eV     : -7.57159003246734E+01
 band_energy         : -1.02330596523995E+00
 ...
 
@@ -3149,8 +3086,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk__gonze_bob_13.2/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk__gonze_bob_13.2/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3303,8 +3240,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk__gonze_bob_13.2/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk__gonze_bob_13.2/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3336,12 +3273,12 @@ tolerances: {tolwfr: 1.00E-14, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -2.8135230561223    -2.814E+00 5.060E-01 1.380E+02
+ ETOT  1  -2.8135230561166    -2.814E+00 5.060E-01 1.380E+02
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)= -1.50540305E-05  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)= -1.50540305E-05  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)= -1.50540305E-05  sigma(2 1)=  0.00000000E+00
+  sigma(1 1)= -1.50540297E-05  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)= -1.50540297E-05  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)= -1.50540297E-05  sigma(2 1)=  0.00000000E+00
 
 
  scprqt:  WARNING -
@@ -3364,9 +3301,9 @@ etotal    :  -2.81352306E+00
 entropy   :   0.00000000E+00
 fermie    :  -5.17970785E-01
 cartesian_stress_tensor: # hartree/bohr^3
-- [ -1.50540305E-05,   0.00000000E+00,   0.00000000E+00, ]
-- [  0.00000000E+00,  -1.50540305E-05,   0.00000000E+00, ]
-- [  0.00000000E+00,   0.00000000E+00,  -1.50540305E-05, ]
+- [ -1.50540297E-05,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,  -1.50540297E-05,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,  -1.50540297E-05, ]
 pressure_GPa:   4.4290E-01
 xred      :
 - [  0.0000E+00,   0.0000E+00,   0.0000E+00, He]
@@ -3410,28 +3347,28 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 16, }
 comment             : Components of total free energy in Hartree
-kinetic             :  2.77941217032815E+00
-hartree             :  1.02269079256391E+00
-xc                  : -1.07744611632451E+00
+kinetic             :  2.77941217000115E+00
+hartree             :  1.02269079235069E+00
+xc                  : -1.07744611621413E+00
 Ewald energy        : -1.13491899179226E+00
 psp_core            :  2.01061929829747E-07
-local_psp           : -4.40326111195948E+00
+local_psp           : -4.40326111152395E+00
 non_local_psp       :  0.00000000000000E+00
-total_energy        : -2.81352305612226E+00
-total_energy_eV     : -7.65598558791033E+01
-band_energy         : -1.03594156983227E+00
+total_energy        : -2.81352305611657E+00
+total_energy_eV     : -7.65598558789484E+01
+band_energy         : -1.03594156983383E+00
 ...
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)= -1.50540305E-05  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)= -1.50540305E-05  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)= -1.50540305E-05  sigma(2 1)=  0.00000000E+00
+  sigma(1 1)= -1.50540297E-05  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)= -1.50540297E-05  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)= -1.50540297E-05  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure=  4.4290E-01 GPa]
-- sigma(1 1)= -4.42904795E-01  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)= -4.42904795E-01  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)= -4.42904795E-01  sigma(2 1)=  0.00000000E+00
+- sigma(1 1)= -4.42904769E-01  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)= -4.42904769E-01  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)= -4.42904769E-01  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
 == DATASET 17 ==================================================================
@@ -3457,8 +3394,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk__gonze_bob_13.2/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk__gonze_bob_13.2/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3611,8 +3548,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk__gonze_bob_13.2/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk__gonze_bob_13.2/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3726,7 +3663,7 @@ psp_core            :  2.01061929829747E-07
 local_psp           : -4.41024253266824E+00
 non_local_psp       :  0.00000000000000E+00
 total_energy        : -2.81515357906900E+00
-total_energy_eV     : -7.66042246648994E+01
+total_energy_eV     : -7.66042246648995E+01
 band_energy         : -1.03912651310357E+00
 ...
 
@@ -3765,8 +3702,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk__gonze_bob_13.2/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk__gonze_bob_13.2/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3798,12 +3735,12 @@ tolerances: {tolwfr: 1.00E-14, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -2.8238468402219    -2.824E+00 5.100E-01 1.188E+02
+ ETOT  1  -2.8238468402184    -2.824E+00 5.100E-01 1.188E+02
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)= -3.27424508E-05  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)= -3.27424508E-05  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)= -3.27424508E-05  sigma(2 1)=  0.00000000E+00
+  sigma(1 1)= -3.27424499E-05  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)= -3.27424499E-05  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)= -3.27424499E-05  sigma(2 1)=  0.00000000E+00
 
 
  scprqt:  WARNING -
@@ -3826,9 +3763,9 @@ etotal    :  -2.82384684E+00
 entropy   :   0.00000000E+00
 fermie    :  -5.24003149E-01
 cartesian_stress_tensor: # hartree/bohr^3
-- [ -3.27424508E-05,   0.00000000E+00,   0.00000000E+00, ]
-- [  0.00000000E+00,  -3.27424508E-05,   0.00000000E+00, ]
-- [  0.00000000E+00,   0.00000000E+00,  -3.27424508E-05, ]
+- [ -3.27424499E-05,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,  -3.27424499E-05,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,  -3.27424499E-05, ]
 pressure_GPa:   9.6332E-01
 xred      :
 - [  0.0000E+00,   0.0000E+00,   0.0000E+00, He]
@@ -3872,28 +3809,28 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 19, }
 comment             : Components of total free energy in Hartree
-kinetic             :  2.78931556774346E+00
-hartree             :  1.02603296179578E+00
-xc                  : -1.08946815595701E+00
+kinetic             :  2.78931556741632E+00
+hartree             :  1.02603296158230E+00
+xc                  : -1.08946815584687E+00
 Ewald energy        : -1.13491899179226E+00
 psp_core            :  2.01061929829747E-07
-local_psp           : -4.41480842307376E+00
+local_psp           : -4.41480842263983E+00
 non_local_psp       :  0.00000000000000E+00
-total_energy        : -2.82384684022186E+00
-total_energy_eV     : -7.68407803311251E+01
-band_energy         : -1.04800629876893E+00
+total_energy        : -2.82384684021841E+00
+total_energy_eV     : -7.68407803310313E+01
+band_energy         : -1.04800629877154E+00
 ...
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)= -3.27424508E-05  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)= -3.27424508E-05  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)= -3.27424508E-05  sigma(2 1)=  0.00000000E+00
+  sigma(1 1)= -3.27424499E-05  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)= -3.27424499E-05  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)= -3.27424499E-05  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure=  9.6332E-01 GPa]
-- sigma(1 1)= -9.63315999E-01  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)= -9.63315999E-01  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)= -9.63315999E-01  sigma(2 1)=  0.00000000E+00
+- sigma(1 1)= -9.63315973E-01  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)= -9.63315973E-01  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)= -9.63315973E-01  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
 == DATASET 20 ==================================================================
@@ -3919,8 +3856,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk__gonze_bob_13.2/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk__gonze_bob_13.2/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3952,12 +3889,12 @@ tolerances: {tolwfr: 1.00E-14, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -2.8171516437395    -2.817E+00 5.066E-01 1.366E+02
+ ETOT  1  -2.8171516437343    -2.817E+00 5.066E-01 1.366E+02
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)= -1.39032991E-05  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)= -1.39032991E-05  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)= -1.39032991E-05  sigma(2 1)=  0.00000000E+00
+  sigma(1 1)= -1.39032982E-05  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)= -1.39032982E-05  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)= -1.39032982E-05  sigma(2 1)=  0.00000000E+00
 
 
  scprqt:  WARNING -
@@ -3980,9 +3917,9 @@ etotal    :  -2.81715164E+00
 entropy   :   0.00000000E+00
 fermie    :  -5.19724696E-01
 cartesian_stress_tensor: # hartree/bohr^3
-- [ -1.39032991E-05,   0.00000000E+00,   0.00000000E+00, ]
-- [  0.00000000E+00,  -1.39032991E-05,   0.00000000E+00, ]
-- [  0.00000000E+00,   0.00000000E+00,  -1.39032991E-05, ]
+- [ -1.39032982E-05,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,  -1.39032982E-05,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,  -1.39032982E-05, ]
 pressure_GPa:   4.0905E-01
 xred      :
 - [  0.0000E+00,   0.0000E+00,   0.0000E+00, He]
@@ -4026,28 +3963,28 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 20, }
 comment             : Components of total free energy in Hartree
-kinetic             :  2.78253062352916E+00
-hartree             :  1.02385292130911E+00
-xc                  : -1.08171925744157E+00
+kinetic             :  2.78253062320116E+00
+hartree             :  1.02385292109537E+00
+xc                  : -1.08171925733096E+00
 Ewald energy        : -1.13491899179226E+00
 psp_core            :  2.01061929829747E-07
-local_psp           : -4.40689714040590E+00
+local_psp           : -4.40689713996957E+00
 non_local_psp       :  0.00000000000000E+00
-total_energy        : -2.81715164373953E+00
-total_energy_eV     : -7.66585947696262E+01
-band_energy         : -1.03944939197772E+00
+total_energy        : -2.81715164373433E+00
+total_energy_eV     : -7.66585947694848E+01
+band_energy         : -1.03944939197956E+00
 ...
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)= -1.39032991E-05  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)= -1.39032991E-05  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)= -1.39032991E-05  sigma(2 1)=  0.00000000E+00
+  sigma(1 1)= -1.39032982E-05  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)= -1.39032982E-05  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)= -1.39032982E-05  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure=  4.0905E-01 GPa]
-- sigma(1 1)= -4.09049113E-01  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)= -4.09049113E-01  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)= -4.09049113E-01  sigma(2 1)=  0.00000000E+00
+- sigma(1 1)= -4.09049088E-01  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)= -4.09049088E-01  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)= -4.09049088E-01  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
 == DATASET 21 ==================================================================
@@ -4073,8 +4010,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk__gonze_bob_13.2/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk__gonze_bob_13.2/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -4227,8 +4164,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk__gonze_bob_13.2/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk__gonze_bob_13.2/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -4260,12 +4197,12 @@ tolerances: {tolwfr: 1.00E-14, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -2.8134167814067    -2.813E+00 5.037E-01 1.570E+02
+ ETOT  1  -2.8134167814010    -2.813E+00 5.037E-01 1.570E+02
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  1.90449280E-06  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)=  1.90449280E-06  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)=  1.90449280E-06  sigma(2 1)=  0.00000000E+00
+  sigma(1 1)=  1.90449367E-06  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)=  1.90449367E-06  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)=  1.90449367E-06  sigma(2 1)=  0.00000000E+00
 
 
  scprqt:  WARNING -
@@ -4288,9 +4225,9 @@ etotal    :  -2.81341678E+00
 entropy   :   0.00000000E+00
 fermie    :  -5.16919344E-01
 cartesian_stress_tensor: # hartree/bohr^3
-- [  1.90449280E-06,   0.00000000E+00,   0.00000000E+00, ]
-- [  0.00000000E+00,   1.90449280E-06,   0.00000000E+00, ]
-- [  0.00000000E+00,   0.00000000E+00,   1.90449280E-06, ]
+- [  1.90449367E-06,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   1.90449367E-06,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   1.90449367E-06, ]
 pressure_GPa:  -5.6032E-02
 xred      :
 - [  0.0000E+00,   0.0000E+00,   0.0000E+00, He]
@@ -4334,28 +4271,28 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 22, }
 comment             : Components of total free energy in Hartree
-kinetic             :  2.77809055993077E+00
-hartree             :  1.02251152025410E+00
-xc                  : -1.07739874294012E+00
+kinetic             :  2.77809055960268E+00
+hartree             :  1.02251152004059E+00
+xc                  : -1.07739874282941E+00
 Ewald energy        : -1.13491899179226E+00
 psp_core            :  2.01061929829747E-07
-local_psp           : -4.40170132792111E+00
+local_psp           : -4.40170132748457E+00
 non_local_psp       :  0.00000000000000E+00
-total_energy        : -2.81341678140670E+00
-total_energy_eV     : -7.65569639970233E+01
-band_energy         : -1.03383868720074E+00
+total_energy        : -2.81341678140103E+00
+total_energy_eV     : -7.65569639968691E+01
+band_energy         : -1.03383868720207E+00
 ...
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  1.90449280E-06  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)=  1.90449280E-06  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)=  1.90449280E-06  sigma(2 1)=  0.00000000E+00
+  sigma(1 1)=  1.90449367E-06  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)=  1.90449367E-06  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)=  1.90449367E-06  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -5.6032E-02 GPa]
-- sigma(1 1)=  5.60321032E-02  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  5.60321032E-02  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)=  5.60321032E-02  sigma(2 1)=  0.00000000E+00
+- sigma(1 1)=  5.60321288E-02  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  5.60321288E-02  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  5.60321288E-02  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
 == DATASET 23 ==================================================================
@@ -4381,8 +4318,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk__gonze_bob_13.2/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk__gonze_bob_13.2/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -4535,8 +4472,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk__gonze_bob_13.2/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk__gonze_bob_13.2/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -4689,8 +4626,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk__gonze_bob_13.2/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk__gonze_bob_13.2/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -4843,8 +4780,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk__gonze_bob_13.2/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk__gonze_bob_13.2/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -4871,160 +4808,6 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
 
 --- !BeginCycle
 iteration_state: {dtset: 26, }
-solver: {iscf: 7, nstep: 1, nline: 1, wfoptalg: 0, }
-tolerances: {tolwfr: 1.00E-14, }
-...
-
-     iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1 -0.41463901581645    -4.146E-01 1.898E+03 2.383E+09
-
- Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)= -1.42897445E-02  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)= -1.42897445E-02  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)= -1.42897445E-02  sigma(2 1)=  0.00000000E+00
-
-
- scprqt:  WARNING -
-  nstep=    1 was not enough SCF cycles to converge;
-  maximum residual=  1.898E+03 exceeds tolwfr=  1.000E-14
-
-
---- !ResultsGS
-iteration_state: {dtset: 26, }
-comment   : Summary of ground state results
-lattice_vectors:
-- [  5.0000000,   0.0000000,   0.0000000, ]
-- [  0.0000000,   5.0000000,   0.0000000, ]
-- [  0.0000000,   0.0000000,   5.0000000, ]
-lattice_lengths: [   5.00000,    5.00000,    5.00000, ]
-lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
-lattice_volume:   1.2500000E+02
-convergence: {deltae: -4.146E-01, res2:  2.383E+09, residm:  1.898E+03, diffor: null, }
-etotal    :  -4.14639016E-01
-entropy   :   0.00000000E+00
-fermie    :   4.85025559E+00
-cartesian_stress_tensor: # hartree/bohr^3
-- [ -1.42897445E-02,   0.00000000E+00,   0.00000000E+00, ]
-- [  0.00000000E+00,  -1.42897445E-02,   0.00000000E+00, ]
-- [  0.00000000E+00,   0.00000000E+00,  -1.42897445E-02, ]
-pressure_GPa:   4.2042E+02
-xred      :
-- [  0.0000E+00,   0.0000E+00,   0.0000E+00, He]
-cartesian_forces: # hartree/bohr
-- [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
-force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
-...
-
- Integrated electronic density in atomic spheres:
- ------------------------------------------------
- Atom  Sphere_radius  Integrated_density
-    1        2.00000          1.67760077
-================================================================================
-
- ----iterations are completed or convergence reached----
-
- Mean square residual over all n,k,spin=   18.975E+02; max=  18.975E+02
- reduced coordinates (array xred) for    1 atoms
-       0.000000000000      0.000000000000      0.000000000000
- rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
-    1       0.000000000000      0.000000000000      0.000000000000
-
- cartesian coordinates (angstrom) at end:
-    1      0.00000000000000     0.00000000000000     0.00000000000000
-
- cartesian forces (hartree/bohr) at end:
-    1     -0.00000000000000    -0.00000000000000    -0.00000000000000
- frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 h/b
-
- cartesian forces (eV/Angstrom) at end:
-    1     -0.00000000000000    -0.00000000000000    -0.00000000000000
- frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
- length scales=  5.000000000000  5.000000000000  5.000000000000 bohr
-              =  2.645886042950  2.645886042950  2.645886042950 angstroms
- prteigrs : about to open file t04o_DS26_EIG
- Fermi (or HOMO) energy (hartree) =   4.85026   Average Vxc (hartree)=  -0.06956
- Eigenvalues (hartree) for nkpt=   1  k points:
- kpt#   1, nband=  1, wtk=  1.00000, kpt=  0.2500  0.2500  0.2500 (reduced coord)
-   4.85026
-
---- !EnergyTerms
-iteration_state     : {dtset: 26, }
-comment             : Components of total free energy in Hartree
-kinetic             :  5.74561749107601E+00
-hartree             :  1.17997141091214E+00
-xc                  : -1.27819856497352E+00
-Ewald energy        : -1.13491899179226E+00
-psp_core            :  2.01061929829747E-07
-local_psp           : -4.92711056210076E+00
-non_local_psp       :  0.00000000000000E+00
-total_energy        : -4.14639015816453E-01
-total_energy_eV     : -1.12829014227141E+01
-band_energy         :  9.70051117737448E+00
-...
-
-
- Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)= -1.42897445E-02  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)= -1.42897445E-02  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)= -1.42897445E-02  sigma(2 1)=  0.00000000E+00
-
--Cartesian components of stress tensor (GPa)         [Pressure=  4.2042E+02 GPa]
-- sigma(1 1)= -4.20418728E+02  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)= -4.20418728E+02  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)= -4.20418728E+02  sigma(2 1)=  0.00000000E+00
-
-================================================================================
-== DATASET 27 ==================================================================
--   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
-
-
---- !DatasetInfo
-iteration_state: {dtset: 27, }
-dimensions: {natom: 1, nkpt: 1, mband: 1, nsppol: 1, nspinor: 1, nspden: 1, mpw: 2118, }
-cutoff_energies: {ecut:  50.0, pawecutdg:  -1.0, }
-electrons: {nelect:   2.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
-meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
-...
-
- Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
- R(1)=  5.0000000  0.0000000  0.0000000  G(1)=  0.2000000  0.0000000  0.0000000
- R(2)=  0.0000000  5.0000000  0.0000000  G(2)=  0.0000000  0.2000000  0.0000000
- R(3)=  0.0000000  0.0000000  5.0000000  G(3)=  0.0000000  0.0000000  0.2000000
- Unit cell volume ucvol=  1.2500000E+02 bohr^3
- Angles (23,13,12)=  9.00000000E+01  9.00000000E+01  9.00000000E+01 degrees
-
- getcut: wavevector=  0.0000  0.0000  0.0000  ngfft=  32  32  32
-         ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
-
---- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
-- Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
--  2.00000   2.00000    960508                znucl, zion, pspdat
-    2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
- rloc=   0.0010000
-  cc1=   0.0000000; cc2=   0.0000000; cc3=   0.0000000; cc4=   0.0000000
-  rrs=   0.0000000; h1s=   0.0000000; h2s=   0.0000000
-  rrp=   0.0000000; h1p=   0.0000000
--  Local part computed in reciprocal space.
-
- pspatm : COMMENT -
-  the projectors are not normalized,
-  so that the KB energies are not consistent with 
-  definition in PRB44, 8503 (1991). 
-  However, this does not influence the results obtained hereafter.
-  pspatm : epsatm=    0.00001257
-         --- l  ekb(1:nproj) -->
- pspatm: atomic psp has been read  and splines computed
-
---------------------------------------------------------------------------------
-
-_setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
-
-================================================================================
-
---- !BeginCycle
-iteration_state: {dtset: 27, }
 solver: {iscf: 7, nstep: 1, nline: 1, wfoptalg: 0, }
 tolerances: {tolwfr: 1.00E-14, }
 ...
@@ -5044,7 +4827,7 @@ tolerances: {tolwfr: 1.00E-14, }
 
 
 --- !ResultsGS
-iteration_state: {dtset: 27, }
+iteration_state: {dtset: 26, }
 comment   : Summary of ground state results
 lattice_vectors:
 - [  5.0000000,   0.0000000,   0.0000000, ]
@@ -5095,16 +4878,16 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  5.000000000000  5.000000000000  5.000000000000 bohr
               =  2.645886042950  2.645886042950  2.645886042950 angstroms
- prteigrs : about to open file t04o_DS27_EIG
+ prteigrs : about to open file t04o_DS26_EIG
  Fermi (or HOMO) energy (hartree) =  -0.52389   Average Vxc (hartree)=  -0.20235
  Eigenvalues (hartree) for nkpt=   1  k points:
  kpt#   1, nband=  1, wtk=  1.00000, kpt=  0.2500  0.2500  0.2500 (reduced coord)
   -0.52389
 
 --- !EnergyTerms
-iteration_state     : {dtset: 27, }
+iteration_state     : {dtset: 26, }
 comment             : Components of total free energy in Hartree
-kinetic             :  2.77527790181962E+00
+kinetic             :  2.77527790181961E+00
 hartree             :  1.00950102679760E+00
 xc                  : -1.06912458797928E+00
 Ewald energy        : -1.13491899179226E+00
@@ -5112,7 +4895,7 @@ psp_core            :  2.01061929829747E-07
 local_psp           : -4.39230070405009E+00
 non_local_psp       :  0.00000000000000E+00
 total_energy        : -2.81156515414249E+00
-total_energy_eV     : -7.65065786567713E+01
+total_energy_eV     : -7.65065786567714E+01
 band_energy         : -1.04778945690950E+00
 ...
 
@@ -5128,12 +4911,12 @@ band_energy         : -1.04778945690950E+00
 - sigma(3 3)=  1.94255683E-01  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
-== DATASET 28 ==================================================================
+== DATASET 27 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
 
 --- !DatasetInfo
-iteration_state: {dtset: 28, }
+iteration_state: {dtset: 27, }
 dimensions: {natom: 1, nkpt: 1, mband: 1, nsppol: 1, nspinor: 1, nspden: 1, mpw: 2118, }
 cutoff_energies: {ecut:  50.0, pawecutdg:  -1.0, }
 electrons: {nelect:   2.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
@@ -5151,8 +4934,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk__gonze_bob_13.2/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk__gonze_bob_13.2/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -5178,7 +4961,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
 ================================================================================
 
 --- !BeginCycle
-iteration_state: {dtset: 28, }
+iteration_state: {dtset: 27, }
 solver: {iscf: 7, nstep: 1, nline: 1, wfoptalg: 0, }
 tolerances: {tolwfr: 1.00E-14, }
 ...
@@ -5198,7 +4981,7 @@ tolerances: {tolwfr: 1.00E-14, }
 
 
 --- !ResultsGS
-iteration_state: {dtset: 28, }
+iteration_state: {dtset: 27, }
 comment   : Summary of ground state results
 lattice_vectors:
 - [  5.0000000,   0.0000000,   0.0000000, ]
@@ -5249,25 +5032,25 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  5.000000000000  5.000000000000  5.000000000000 bohr
               =  2.645886042950  2.645886042950  2.645886042950 angstroms
- prteigrs : about to open file t04o_DS28_EIG
+ prteigrs : about to open file t04o_DS27_EIG
  Fermi (or HOMO) energy (hartree) =  -0.28710   Average Vxc (hartree)=  -0.08969
  Eigenvalues (hartree) for nkpt=   1  k points:
  kpt#   1, nband=  1, wtk=  1.00000, kpt=  0.2500  0.2500  0.2500 (reduced coord)
   -0.28710
 
 --- !EnergyTerms
-iteration_state     : {dtset: 28, }
+iteration_state     : {dtset: 27, }
 comment             : Components of total free energy in Hartree
 kinetic             :  3.84111458154604E+00
-hartree             :  1.37690839077313E+00
+hartree             :  1.37690839077314E+00
 xc                  : -1.25796136001642E+00
 Ewald energy        : -1.13491899179226E+00
 psp_core            :  2.01061929829747E-07
-local_psp           : -5.17038561706807E+00
+local_psp           : -5.17038561706808E+00
 non_local_psp       :  0.00000000000000E+00
-total_energy        : -2.34524279549565E+00
-total_energy_eV     : -6.38173019531317E+01
-band_energy         : -5.74198419627618E-01
+total_energy        : -2.34524279549566E+00
+total_energy_eV     : -6.38173019531318E+01
+band_energy         : -5.74198419627617E-01
 ...
 
 
@@ -5282,12 +5065,12 @@ band_energy         : -5.74198419627618E-01
 - sigma(3 3)= -1.20164773E+02  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
-== DATASET 29 ==================================================================
+== DATASET 28 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
 
 --- !DatasetInfo
-iteration_state: {dtset: 29, }
+iteration_state: {dtset: 28, }
 dimensions: {natom: 1, nkpt: 1, mband: 1, nsppol: 1, nspinor: 1, nspden: 1, mpw: 2118, }
 cutoff_energies: {ecut:  50.0, pawecutdg:  -1.0, }
 electrons: {nelect:   2.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
@@ -5305,8 +5088,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk__gonze_bob_13.2/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk__gonze_bob_13.2/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -5332,7 +5115,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
 ================================================================================
 
 --- !BeginCycle
-iteration_state: {dtset: 29, }
+iteration_state: {dtset: 28, }
 solver: {iscf: 7, nstep: 1, nline: 1, wfoptalg: 0, }
 tolerances: {tolwfr: 1.00E-14, }
 ...
@@ -5352,7 +5135,7 @@ tolerances: {tolwfr: 1.00E-14, }
 
 
 --- !ResultsGS
-iteration_state: {dtset: 29, }
+iteration_state: {dtset: 28, }
 comment   : Summary of ground state results
 lattice_vectors:
 - [  5.0000000,   0.0000000,   0.0000000, ]
@@ -5403,14 +5186,14 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  5.000000000000  5.000000000000  5.000000000000 bohr
               =  2.645886042950  2.645886042950  2.645886042950 angstroms
- prteigrs : about to open file t04o_DS29_EIG
+ prteigrs : about to open file t04o_DS28_EIG
  Fermi (or HOMO) energy (hartree) =  -0.52380   Average Vxc (hartree)=  -0.20020
  Eigenvalues (hartree) for nkpt=   1  k points:
  kpt#   1, nband=  1, wtk=  1.00000, kpt=  0.2500  0.2500  0.2500 (reduced coord)
   -0.52380
 
 --- !EnergyTerms
-iteration_state     : {dtset: 29, }
+iteration_state     : {dtset: 28, }
 comment             : Components of total free energy in Hartree
 kinetic             :  2.77368304143228E+00
 hartree             :  1.00998452513900E+00
@@ -5420,7 +5203,7 @@ psp_core            :  2.01061929829747E-07
 local_psp           : -4.39050978970893E+00
 non_local_psp       :  0.00000000000000E+00
 total_energy        : -2.81970228307348E+00
-total_energy_eV     : -7.67280011956310E+01
+total_energy_eV     : -7.67280011956309E+01
 band_energy         : -1.04759265611883E+00
 ...
 
@@ -5436,12 +5219,12 @@ band_energy         : -1.04759265611883E+00
 - sigma(3 3)=  9.56198955E-01  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
-== DATASET 30 ==================================================================
+== DATASET 29 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
 
 --- !DatasetInfo
-iteration_state: {dtset: 30, }
+iteration_state: {dtset: 29, }
 dimensions: {natom: 1, nkpt: 1, mband: 1, nsppol: 1, nspinor: 1, nspden: 1, mpw: 2118, }
 cutoff_energies: {ecut:  50.0, pawecutdg:  -1.0, }
 electrons: {nelect:   2.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
@@ -5459,8 +5242,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk__gonze_bob_13.2/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk__gonze_bob_13.2/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -5486,7 +5269,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
 ================================================================================
 
 --- !BeginCycle
-iteration_state: {dtset: 30, }
+iteration_state: {dtset: 29, }
 solver: {iscf: 7, nstep: 1, nline: 1, wfoptalg: 0, }
 tolerances: {tolwfr: 1.00E-14, }
 ...
@@ -5506,7 +5289,7 @@ tolerances: {tolwfr: 1.00E-14, }
 
 
 --- !ResultsGS
-iteration_state: {dtset: 30, }
+iteration_state: {dtset: 29, }
 comment   : Summary of ground state results
 lattice_vectors:
 - [  5.0000000,   0.0000000,   0.0000000, ]
@@ -5557,14 +5340,14 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  5.000000000000  5.000000000000  5.000000000000 bohr
               =  2.645886042950  2.645886042950  2.645886042950 angstroms
- prteigrs : about to open file t04o_DS30_EIG
+ prteigrs : about to open file t04o_DS29_EIG
  Fermi (or HOMO) energy (hartree) =  -0.52334   Average Vxc (hartree)=  -0.23314
  Eigenvalues (hartree) for nkpt=   1  k points:
  kpt#   1, nband=  1, wtk=  1.00000, kpt=  0.2500  0.2500  0.2500 (reduced coord)
   -0.52334
 
 --- !EnergyTerms
-iteration_state     : {dtset: 30, }
+iteration_state     : {dtset: 29, }
 comment             : Components of total free energy in Hartree
 kinetic             :  2.77475535038256E+00
 hartree             :  1.00857069095937E+00
@@ -5590,12 +5373,12 @@ band_energy         : -1.04668812678526E+00
 - sigma(3 3)= -2.53823994E-01  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
-== DATASET 31 ==================================================================
+== DATASET 30 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
 
 --- !DatasetInfo
-iteration_state: {dtset: 31, }
+iteration_state: {dtset: 30, }
 dimensions: {natom: 1, nkpt: 1, mband: 1, nsppol: 1, nspinor: 1, nspden: 1, mpw: 2118, }
 cutoff_energies: {ecut:  50.0, pawecutdg:  -1.0, }
 electrons: {nelect:   2.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
@@ -5613,8 +5396,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk__gonze_bob_13.2/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk__gonze_bob_13.2/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -5640,7 +5423,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
 ================================================================================
 
 --- !BeginCycle
-iteration_state: {dtset: 31, }
+iteration_state: {dtset: 30, }
 solver: {iscf: 7, nstep: 1, nline: 1, wfoptalg: 0, }
 tolerances: {tolwfr: 1.00E-14, }
 ...
@@ -5660,7 +5443,7 @@ tolerances: {tolwfr: 1.00E-14, }
 
 
 --- !ResultsGS
-iteration_state: {dtset: 31, }
+iteration_state: {dtset: 30, }
 comment   : Summary of ground state results
 lattice_vectors:
 - [  5.0000000,   0.0000000,   0.0000000, ]
@@ -5711,14 +5494,14 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  5.000000000000  5.000000000000  5.000000000000 bohr
               =  2.645886042950  2.645886042950  2.645886042950 angstroms
- prteigrs : about to open file t04o_DS31_EIG
+ prteigrs : about to open file t04o_DS30_EIG
  Fermi (or HOMO) energy (hartree) =  -0.52742   Average Vxc (hartree)=  -0.20660
  Eigenvalues (hartree) for nkpt=   1  k points:
  kpt#   1, nband=  1, wtk=  1.00000, kpt=  0.2500  0.2500  0.2500 (reduced coord)
   -0.52742
 
 --- !EnergyTerms
-iteration_state     : {dtset: 31, }
+iteration_state     : {dtset: 30, }
 comment             : Components of total free energy in Hartree
 kinetic             :  2.74259000376679E+00
 hartree             :  1.00015001826338E+00
@@ -5728,7 +5511,7 @@ psp_core            :  2.01061929829747E-07
 local_psp           : -4.35450000321231E+00
 non_local_psp       :  0.00000000000000E+00
 total_energy        : -2.81652853998313E+00
-total_energy_eV     : -7.66416392541264E+01
+total_energy_eV     : -7.66416392541263E+01
 band_energy         : -1.05483368143691E+00
 ...
 
@@ -5744,12 +5527,12 @@ band_energy         : -1.05483368143691E+00
 - sigma(3 3)=  3.15746433E+00  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
-== DATASET 32 ==================================================================
+== DATASET 31 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
 
 --- !DatasetInfo
-iteration_state: {dtset: 32, }
+iteration_state: {dtset: 31, }
 dimensions: {natom: 1, nkpt: 1, mband: 1, nsppol: 1, nspinor: 1, nspden: 1, mpw: 2118, }
 cutoff_energies: {ecut:  50.0, pawecutdg:  -1.0, }
 electrons: {nelect:   2.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
@@ -5767,8 +5550,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk__gonze_bob_13.2/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk__gonze_bob_13.2/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -5794,7 +5577,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
 ================================================================================
 
 --- !BeginCycle
-iteration_state: {dtset: 32, }
+iteration_state: {dtset: 31, }
 solver: {iscf: 7, nstep: 1, nline: 1, wfoptalg: 0, }
 tolerances: {tolwfr: 1.00E-14, }
 ...
@@ -5814,7 +5597,7 @@ tolerances: {tolwfr: 1.00E-14, }
 
 
 --- !ResultsGS
-iteration_state: {dtset: 32, }
+iteration_state: {dtset: 31, }
 comment   : Summary of ground state results
 lattice_vectors:
 - [  5.0000000,   0.0000000,   0.0000000, ]
@@ -5865,17 +5648,17 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  5.000000000000  5.000000000000  5.000000000000 bohr
               =  2.645886042950  2.645886042950  2.645886042950 angstroms
- prteigrs : about to open file t04o_DS32_EIG
+ prteigrs : about to open file t04o_DS31_EIG
  Fermi (or HOMO) energy (hartree) =  -0.52122   Average Vxc (hartree)=  -0.17670
  Eigenvalues (hartree) for nkpt=   1  k points:
  kpt#   1, nband=  1, wtk=  1.00000, kpt=  0.2500  0.2500  0.2500 (reduced coord)
   -0.52122
 
 --- !EnergyTerms
-iteration_state     : {dtset: 32, }
+iteration_state     : {dtset: 31, }
 comment             : Components of total free energy in Hartree
 kinetic             :  2.78573235808891E+00
-hartree             :  1.01656911564410E+00
+hartree             :  1.01656911564411E+00
 xc                  : -1.07093293872250E+00
 Ewald energy        : -1.13491899179226E+00
 psp_core            :  2.01061929829747E-07
@@ -5898,12 +5681,12 @@ band_energy         : -1.04244995037832E+00
 - sigma(3 3)= -7.47337239E-01  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
-== DATASET 33 ==================================================================
+== DATASET 32 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
 
 --- !DatasetInfo
-iteration_state: {dtset: 33, }
+iteration_state: {dtset: 32, }
 dimensions: {natom: 1, nkpt: 1, mband: 1, nsppol: 1, nspinor: 1, nspden: 1, mpw: 2118, }
 cutoff_energies: {ecut:  50.0, pawecutdg:  -1.0, }
 electrons: {nelect:   2.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
@@ -5921,8 +5704,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk__gonze_bob_13.2/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk__gonze_bob_13.2/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -5948,7 +5731,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
 ================================================================================
 
 --- !BeginCycle
-iteration_state: {dtset: 33, }
+iteration_state: {dtset: 32, }
 solver: {iscf: 7, nstep: 1, nline: 1, wfoptalg: 0, }
 tolerances: {tolwfr: 1.00E-14, }
 ...
@@ -5968,7 +5751,7 @@ tolerances: {tolwfr: 1.00E-14, }
 
 
 --- !ResultsGS
-iteration_state: {dtset: 33, }
+iteration_state: {dtset: 32, }
 comment   : Summary of ground state results
 lattice_vectors:
 - [  5.0000000,   0.0000000,   0.0000000, ]
@@ -6019,14 +5802,14 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  5.000000000000  5.000000000000  5.000000000000 bohr
               =  2.645886042950  2.645886042950  2.645886042950 angstroms
- prteigrs : about to open file t04o_DS33_EIG
+ prteigrs : about to open file t04o_DS32_EIG
  Fermi (or HOMO) energy (hartree) =  -0.52127   Average Vxc (hartree)=  -0.17847
  Eigenvalues (hartree) for nkpt=   1  k points:
  kpt#   1, nband=  1, wtk=  1.00000, kpt=  0.2500  0.2500  0.2500 (reduced coord)
   -0.52127
 
 --- !EnergyTerms
-iteration_state     : {dtset: 33, }
+iteration_state     : {dtset: 32, }
 comment             : Components of total free energy in Hartree
 kinetic             :  2.78461301978707E+00
 hartree             :  1.01585124738240E+00
@@ -6052,12 +5835,12 @@ band_energy         : -1.04254721485445E+00
 - sigma(3 3)= -6.74854393E-01  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
-== DATASET 34 ==================================================================
+== DATASET 33 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
 
 --- !DatasetInfo
-iteration_state: {dtset: 34, }
+iteration_state: {dtset: 33, }
 dimensions: {natom: 1, nkpt: 1, mband: 1, nsppol: 1, nspinor: 1, nspden: 1, mpw: 2118, }
 cutoff_energies: {ecut:  50.0, pawecutdg:  -1.0, }
 electrons: {nelect:   2.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
@@ -6075,8 +5858,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk__gonze_bob_13.2/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk__gonze_bob_13.2/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -6102,7 +5885,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
 ================================================================================
 
 --- !BeginCycle
-iteration_state: {dtset: 34, }
+iteration_state: {dtset: 33, }
 solver: {iscf: 7, nstep: 1, nline: 1, wfoptalg: 0, }
 tolerances: {tolwfr: 1.00E-14, }
 ...
@@ -6122,7 +5905,7 @@ tolerances: {tolwfr: 1.00E-14, }
 
 
 --- !ResultsGS
-iteration_state: {dtset: 34, }
+iteration_state: {dtset: 33, }
 comment   : Summary of ground state results
 lattice_vectors:
 - [  5.0000000,   0.0000000,   0.0000000, ]
@@ -6173,16 +5956,16 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  5.000000000000  5.000000000000  5.000000000000 bohr
               =  2.645886042950  2.645886042950  2.645886042950 angstroms
- prteigrs : about to open file t04o_DS34_EIG
+ prteigrs : about to open file t04o_DS33_EIG
  Fermi (or HOMO) energy (hartree) =  -0.52066   Average Vxc (hartree)=  -0.20221
  Eigenvalues (hartree) for nkpt=   1  k points:
  kpt#   1, nband=  1, wtk=  1.00000, kpt=  0.2500  0.2500  0.2500 (reduced coord)
   -0.52066
 
 --- !EnergyTerms
-iteration_state     : {dtset: 34, }
+iteration_state     : {dtset: 33, }
 comment             : Components of total free energy in Hartree
-kinetic             :  2.76526519841390E+00
+kinetic             :  2.76526519841391E+00
 hartree             :  1.00691845547839E+00
 xc                  : -1.07214445874105E+00
 Ewald energy        : -1.13491899179226E+00
@@ -6206,12 +5989,12 @@ band_energy         : -1.04132530462584E+00
 - sigma(3 3)=  1.28372725E+00  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
-== DATASET 35 ==================================================================
+== DATASET 34 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
 
 --- !DatasetInfo
-iteration_state: {dtset: 35, }
+iteration_state: {dtset: 34, }
 dimensions: {natom: 1, nkpt: 1, mband: 1, nsppol: 1, nspinor: 1, nspden: 1, mpw: 2118, }
 cutoff_energies: {ecut:  50.0, pawecutdg:  -1.0, }
 electrons: {nelect:   2.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
@@ -6229,8 +6012,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk__gonze_bob_13.2/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk__gonze_bob_13.2/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -6256,7 +6039,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
 ================================================================================
 
 --- !BeginCycle
-iteration_state: {dtset: 35, }
+iteration_state: {dtset: 34, }
 solver: {iscf: 7, nstep: 1, nline: 1, wfoptalg: 0, }
 tolerances: {tolwfr: 1.00E-14, }
 ...
@@ -6276,7 +6059,7 @@ tolerances: {tolwfr: 1.00E-14, }
 
 
 --- !ResultsGS
-iteration_state: {dtset: 35, }
+iteration_state: {dtset: 34, }
 comment   : Summary of ground state results
 lattice_vectors:
 - [  5.0000000,   0.0000000,   0.0000000, ]
@@ -6327,14 +6110,14 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  5.000000000000  5.000000000000  5.000000000000 bohr
               =  2.645886042950  2.645886042950  2.645886042950 angstroms
- prteigrs : about to open file t04o_DS35_EIG
+ prteigrs : about to open file t04o_DS34_EIG
  Fermi (or HOMO) energy (hartree) =  -0.52224   Average Vxc (hartree)=  -0.17393
  Eigenvalues (hartree) for nkpt=   1  k points:
  kpt#   1, nband=  1, wtk=  1.00000, kpt=  0.2500  0.2500  0.2500 (reduced coord)
   -0.52224
 
 --- !EnergyTerms
-iteration_state     : {dtset: 35, }
+iteration_state     : {dtset: 34, }
 comment             : Components of total free energy in Hartree
 kinetic             :  2.76950823313585E+00
 hartree             :  1.01021242207448E+00
@@ -6344,7 +6127,7 @@ psp_core            :  2.01061929829747E-07
 local_psp           : -4.38694932771218E+00
 non_local_psp       :  0.00000000000000E+00
 total_energy        : -2.82098195388800E+00
-total_energy_eV     : -7.67628228093793E+01
+total_energy_eV     : -7.67628228093792E+01
 band_energy         : -1.04448989380258E+00
 ...
 
@@ -6360,12 +6143,12 @@ band_energy         : -1.04448989380258E+00
 - sigma(3 3)=  1.38474661E+00  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
-== DATASET 36 ==================================================================
+== DATASET 35 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
 
 --- !DatasetInfo
-iteration_state: {dtset: 36, }
+iteration_state: {dtset: 35, }
 dimensions: {natom: 1, nkpt: 1, mband: 1, nsppol: 1, nspinor: 1, nspden: 1, mpw: 2118, }
 cutoff_energies: {ecut:  50.0, pawecutdg:  -1.0, }
 electrons: {nelect:   2.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
@@ -6383,8 +6166,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk__gonze_bob_13.2/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk__gonze_bob_13.2/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -6410,13 +6193,13 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
 ================================================================================
 
 --- !BeginCycle
-iteration_state: {dtset: 36, }
+iteration_state: {dtset: 35, }
 solver: {iscf: 7, nstep: 1, nline: 1, wfoptalg: 0, }
 tolerances: {tolwfr: 1.00E-14, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -2.8203584485279    -2.820E+00 5.035E-01 6.584E+02
+ ETOT  1  -2.8203584485278    -2.820E+00 5.035E-01 6.584E+02
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  4.63595906E-05  sigma(3 2)=  0.00000000E+00
@@ -6430,7 +6213,7 @@ tolerances: {tolwfr: 1.00E-14, }
 
 
 --- !ResultsGS
-iteration_state: {dtset: 36, }
+iteration_state: {dtset: 35, }
 comment   : Summary of ground state results
 lattice_vectors:
 - [  5.0000000,   0.0000000,   0.0000000, ]
@@ -6481,14 +6264,14 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  5.000000000000  5.000000000000  5.000000000000 bohr
               =  2.645886042950  2.645886042950  2.645886042950 angstroms
- prteigrs : about to open file t04o_DS36_EIG
+ prteigrs : about to open file t04o_DS35_EIG
  Fermi (or HOMO) energy (hartree) =  -0.52198   Average Vxc (hartree)=  -0.17375
  Eigenvalues (hartree) for nkpt=   1  k points:
  kpt#   1, nband=  1, wtk=  1.00000, kpt=  0.2500  0.2500  0.2500 (reduced coord)
   -0.52198
 
 --- !EnergyTerms
-iteration_state     : {dtset: 36, }
+iteration_state     : {dtset: 35, }
 comment             : Components of total free energy in Hartree
 kinetic             :  2.76915109833110E+00
 hartree             :  1.01007386738173E+00
@@ -6498,7 +6281,7 @@ psp_core            :  2.01061929829747E-07
 local_psp           : -4.38653183001828E+00
 non_local_psp       :  0.00000000000000E+00
 total_energy        : -2.82035844852785E+00
-total_energy_eV     : -7.67458563656854E+01
+total_energy_eV     : -7.67458563656853E+01
 band_energy         : -1.04395015420519E+00
 ...
 
@@ -6514,12 +6297,12 @@ band_energy         : -1.04395015420519E+00
 - sigma(3 3)=  1.36394602E+00  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
-== DATASET 37 ==================================================================
+== DATASET 36 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
 
 --- !DatasetInfo
-iteration_state: {dtset: 37, }
+iteration_state: {dtset: 36, }
 dimensions: {natom: 1, nkpt: 1, mband: 1, nsppol: 1, nspinor: 1, nspden: 1, mpw: 2118, }
 cutoff_energies: {ecut:  50.0, pawecutdg:  -1.0, }
 electrons: {nelect:   2.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
@@ -6537,8 +6320,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk__gonze_bob_13.2/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk__gonze_bob_13.2/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -6564,7 +6347,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
 ================================================================================
 
 --- !BeginCycle
-iteration_state: {dtset: 37, }
+iteration_state: {dtset: 36, }
 solver: {iscf: 7, nstep: 1, nline: 1, wfoptalg: 0, }
 tolerances: {tolwfr: 1.00E-14, }
 ...
@@ -6584,7 +6367,7 @@ tolerances: {tolwfr: 1.00E-14, }
 
 
 --- !ResultsGS
-iteration_state: {dtset: 37, }
+iteration_state: {dtset: 36, }
 comment   : Summary of ground state results
 lattice_vectors:
 - [  5.0000000,   0.0000000,   0.0000000, ]
@@ -6635,17 +6418,17 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  5.000000000000  5.000000000000  5.000000000000 bohr
               =  2.645886042950  2.645886042950  2.645886042950 angstroms
- prteigrs : about to open file t04o_DS37_EIG
+ prteigrs : about to open file t04o_DS36_EIG
  Fermi (or HOMO) energy (hartree) =  -0.49978   Average Vxc (hartree)=  -0.19760
  Eigenvalues (hartree) for nkpt=   1  k points:
  kpt#   1, nband=  1, wtk=  1.00000, kpt=  0.2500  0.2500  0.2500 (reduced coord)
   -0.49978
 
 --- !EnergyTerms
-iteration_state     : {dtset: 37, }
+iteration_state     : {dtset: 36, }
 comment             : Components of total free energy in Hartree
 kinetic             :  2.73843159757947E+00
-hartree             :  9.95186541933267E-01
+hartree             :  9.95186541933268E-01
 xc                  : -1.00806831968920E+00
 Ewald energy        : -1.13491899179226E+00
 psp_core            :  2.01061929829747E-07
@@ -6668,12 +6451,12 @@ band_energy         : -9.99553358809357E-01
 - sigma(3 3)= -1.09115371E+00  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
-== DATASET 38 ==================================================================
+== DATASET 37 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
 
 --- !DatasetInfo
-iteration_state: {dtset: 38, }
+iteration_state: {dtset: 37, }
 dimensions: {natom: 1, nkpt: 1, mband: 1, nsppol: 1, nspinor: 1, nspden: 1, mpw: 2118, }
 cutoff_energies: {ecut:  50.0, pawecutdg:  -1.0, }
 electrons: {nelect:   2.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
@@ -6691,8 +6474,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk__gonze_bob_13.2/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk__gonze_bob_13.2/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -6718,7 +6501,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
 ================================================================================
 
 --- !BeginCycle
-iteration_state: {dtset: 38, }
+iteration_state: {dtset: 37, }
 solver: {iscf: 7, nstep: 1, nline: 1, wfoptalg: 0, }
 tolerances: {tolwfr: 1.00E-14, }
 ...
@@ -6738,7 +6521,7 @@ tolerances: {tolwfr: 1.00E-14, }
 
 
 --- !ResultsGS
-iteration_state: {dtset: 38, }
+iteration_state: {dtset: 37, }
 comment   : Summary of ground state results
 lattice_vectors:
 - [  5.0000000,   0.0000000,   0.0000000, ]
@@ -6789,14 +6572,14 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  5.000000000000  5.000000000000  5.000000000000 bohr
               =  2.645886042950  2.645886042950  2.645886042950 angstroms
- prteigrs : about to open file t04o_DS38_EIG
+ prteigrs : about to open file t04o_DS37_EIG
  Fermi (or HOMO) energy (hartree) =  -0.52573   Average Vxc (hartree)=  -0.21705
  Eigenvalues (hartree) for nkpt=   1  k points:
  kpt#   1, nband=  1, wtk=  1.00000, kpt=  0.2500  0.2500  0.2500 (reduced coord)
   -0.52573
 
 --- !EnergyTerms
-iteration_state     : {dtset: 38, }
+iteration_state     : {dtset: 37, }
 comment             : Components of total free energy in Hartree
 kinetic             :  2.76963135027501E+00
 hartree             :  1.00733466294434E+00
@@ -6806,7 +6589,7 @@ psp_core            :  2.01061929829747E-07
 local_psp           : -4.38530579434946E+00
 non_local_psp       :  0.00000000000000E+00
 total_energy        : -2.81950765221672E+00
-total_energy_eV     : -7.67227050206764E+01
+total_energy_eV     : -7.67227050206765E+01
 band_energy         : -1.05146068882825E+00
 ...
 
@@ -6822,12 +6605,12 @@ band_energy         : -1.05146068882825E+00
 - sigma(3 3)=  1.26335501E+00  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
-== DATASET 39 ==================================================================
+== DATASET 38 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
 
 --- !DatasetInfo
-iteration_state: {dtset: 39, }
+iteration_state: {dtset: 38, }
 dimensions: {natom: 1, nkpt: 1, mband: 1, nsppol: 1, nspinor: 1, nspden: 1, mpw: 2118, }
 cutoff_energies: {ecut:  50.0, pawecutdg:  -1.0, }
 electrons: {nelect:   2.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
@@ -6845,8 +6628,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk__gonze_bob_13.2/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk__gonze_bob_13.2/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -6872,7 +6655,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
 ================================================================================
 
 --- !BeginCycle
-iteration_state: {dtset: 39, }
+iteration_state: {dtset: 38, }
 solver: {iscf: 7, nstep: 1, nline: 1, wfoptalg: 0, }
 tolerances: {tolwfr: 1.00E-14, }
 ...
@@ -6892,7 +6675,7 @@ tolerances: {tolwfr: 1.00E-14, }
 
 
 --- !ResultsGS
-iteration_state: {dtset: 39, }
+iteration_state: {dtset: 38, }
 comment   : Summary of ground state results
 lattice_vectors:
 - [  5.0000000,   0.0000000,   0.0000000, ]
@@ -6943,14 +6726,14 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  5.000000000000  5.000000000000  5.000000000000 bohr
               =  2.645886042950  2.645886042950  2.645886042950 angstroms
- prteigrs : about to open file t04o_DS39_EIG
+ prteigrs : about to open file t04o_DS38_EIG
  Fermi (or HOMO) energy (hartree) =  -0.51235   Average Vxc (hartree)=  -0.20255
  Eigenvalues (hartree) for nkpt=   1  k points:
  kpt#   1, nband=  1, wtk=  1.00000, kpt=  0.2500  0.2500  0.2500 (reduced coord)
   -0.51235
 
 --- !EnergyTerms
-iteration_state     : {dtset: 39, }
+iteration_state     : {dtset: 38, }
 comment             : Components of total free energy in Hartree
 kinetic             :  2.76086401879374E+00
 hartree             :  1.00337882871781E+00
@@ -6976,12 +6759,12 @@ band_energy         : -1.02469243976044E+00
 - sigma(3 3)= -1.03724303E+00  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
-== DATASET 40 ==================================================================
+== DATASET 39 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
 
 --- !DatasetInfo
-iteration_state: {dtset: 40, }
+iteration_state: {dtset: 39, }
 dimensions: {natom: 1, nkpt: 1, mband: 1, nsppol: 1, nspinor: 1, nspden: 1, mpw: 2118, }
 cutoff_energies: {ecut:  50.0, pawecutdg:  -1.0, }
 electrons: {nelect:   2.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
@@ -6999,8 +6782,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk__gonze_bob_13.2/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk__gonze_bob_13.2/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -7026,7 +6809,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
 ================================================================================
 
 --- !BeginCycle
-iteration_state: {dtset: 40, }
+iteration_state: {dtset: 39, }
 solver: {iscf: 7, nstep: 1, nline: 1, wfoptalg: 0, }
 tolerances: {tolwfr: 1.00E-14, }
 ...
@@ -7046,7 +6829,7 @@ tolerances: {tolwfr: 1.00E-14, }
 
 
 --- !ResultsGS
-iteration_state: {dtset: 40, }
+iteration_state: {dtset: 39, }
 comment   : Summary of ground state results
 lattice_vectors:
 - [  5.0000000,   0.0000000,   0.0000000, ]
@@ -7097,24 +6880,24 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  5.000000000000  5.000000000000  5.000000000000 bohr
               =  2.645886042950  2.645886042950  2.645886042950 angstroms
- prteigrs : about to open file t04o_DS40_EIG
+ prteigrs : about to open file t04o_DS39_EIG
  Fermi (or HOMO) energy (hartree) =  -0.52502   Average Vxc (hartree)=  -0.21776
  Eigenvalues (hartree) for nkpt=   1  k points:
  kpt#   1, nband=  1, wtk=  1.00000, kpt=  0.2500  0.2500  0.2500 (reduced coord)
   -0.52502
 
 --- !EnergyTerms
-iteration_state     : {dtset: 40, }
+iteration_state     : {dtset: 39, }
 comment             : Components of total free energy in Hartree
-kinetic             :  2.77370151513941E+00
+kinetic             :  2.77370151513940E+00
 hartree             :  1.00783775968471E+00
 xc                  : -1.06724858763465E+00
 Ewald energy        : -1.13491899179226E+00
 psp_core            :  2.01061929829747E-07
 local_psp           : -4.38979493186529E+00
 non_local_psp       :  0.00000000000000E+00
-total_energy        : -2.81042303540615E+00
-total_energy_eV     : -7.64755000254232E+01
+total_energy        : -2.81042303540616E+00
+total_energy_eV     : -7.64755000254233E+01
 band_energy         : -1.05003251485015E+00
 ...
 
@@ -7130,12 +6913,12 @@ band_energy         : -1.05003251485015E+00
 - sigma(3 3)=  2.32500852E-01  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
-== DATASET 41 ==================================================================
+== DATASET 40 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
 
 --- !DatasetInfo
-iteration_state: {dtset: 41, }
+iteration_state: {dtset: 40, }
 dimensions: {natom: 1, nkpt: 1, mband: 1, nsppol: 1, nspinor: 1, nspden: 1, mpw: 2118, }
 cutoff_energies: {ecut:  50.0, pawecutdg:  -1.0, }
 electrons: {nelect:   2.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
@@ -7153,8 +6936,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk__gonze_bob_13.2/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk__gonze_bob_13.2/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -7180,7 +6963,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
 ================================================================================
 
 --- !BeginCycle
-iteration_state: {dtset: 41, }
+iteration_state: {dtset: 40, }
 solver: {iscf: 7, nstep: 1, nline: 1, wfoptalg: 0, }
 tolerances: {tolwfr: 1.00E-14, }
 ...
@@ -7200,7 +6983,7 @@ tolerances: {tolwfr: 1.00E-14, }
 
 
 --- !ResultsGS
-iteration_state: {dtset: 41, }
+iteration_state: {dtset: 40, }
 comment   : Summary of ground state results
 lattice_vectors:
 - [  5.0000000,   0.0000000,   0.0000000, ]
@@ -7251,24 +7034,24 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  5.000000000000  5.000000000000  5.000000000000 bohr
               =  2.645886042950  2.645886042950  2.645886042950 angstroms
- prteigrs : about to open file t04o_DS41_EIG
+ prteigrs : about to open file t04o_DS40_EIG
  Fermi (or HOMO) energy (hartree) =  -0.47549   Average Vxc (hartree)=  -0.16544
  Eigenvalues (hartree) for nkpt=   1  k points:
  kpt#   1, nband=  1, wtk=  1.00000, kpt=  0.2500  0.2500  0.2500 (reduced coord)
   -0.47549
 
 --- !EnergyTerms
-iteration_state     : {dtset: 41, }
+iteration_state     : {dtset: 40, }
 comment             : Components of total free energy in Hartree
-kinetic             :  2.70845527663697E+00
-hartree             :  9.85625147051160E-01
-xc                  : -9.54440606984015E-01
+kinetic             :  2.70845527663696E+00
+hartree             :  9.85625147051158E-01
+xc                  : -9.54440606984014E-01
 Ewald energy        : -1.13491899179226E+00
 psp_core            :  2.01061929829747E-07
 local_psp           : -4.31456860891976E+00
 non_local_psp       :  0.00000000000000E+00
 total_energy        : -2.70984758294598E+00
-total_energy_eV     : -7.37387027816363E+01
+total_energy_eV     : -7.37387027816364E+01
 band_energy         : -9.50988354477627E-01
 ...
 
@@ -7284,12 +7067,12 @@ band_energy         : -9.50988354477627E-01
 - sigma(3 3)= -2.52902633E+00  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
-== DATASET 42 ==================================================================
+== DATASET 41 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
 
 --- !DatasetInfo
-iteration_state: {dtset: 42, }
+iteration_state: {dtset: 41, }
 dimensions: {natom: 1, nkpt: 1, mband: 1, nsppol: 1, nspinor: 1, nspden: 1, mpw: 2118, }
 cutoff_energies: {ecut:  50.0, pawecutdg:  -1.0, }
 electrons: {nelect:   2.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
@@ -7307,8 +7090,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk__gonze_bob_13.2/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk__gonze_bob_13.2/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -7334,7 +7117,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
 ================================================================================
 
 --- !BeginCycle
-iteration_state: {dtset: 42, }
+iteration_state: {dtset: 41, }
 solver: {iscf: 7, nstep: 1, nline: 1, wfoptalg: 0, }
 tolerances: {tolwfr: 1.00E-14, }
 ...
@@ -7354,7 +7137,7 @@ tolerances: {tolwfr: 1.00E-14, }
 
 
 --- !ResultsGS
-iteration_state: {dtset: 42, }
+iteration_state: {dtset: 41, }
 comment   : Summary of ground state results
 lattice_vectors:
 - [  5.0000000,   0.0000000,   0.0000000, ]
@@ -7405,16 +7188,16 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  5.000000000000  5.000000000000  5.000000000000 bohr
               =  2.645886042950  2.645886042950  2.645886042950 angstroms
- prteigrs : about to open file t04o_DS42_EIG
+ prteigrs : about to open file t04o_DS41_EIG
  Fermi (or HOMO) energy (hartree) =  -0.51594   Average Vxc (hartree)=  -0.20523
  Eigenvalues (hartree) for nkpt=   1  k points:
  kpt#   1, nband=  1, wtk=  1.00000, kpt=  0.2500  0.2500  0.2500 (reduced coord)
   -0.51594
 
 --- !EnergyTerms
-iteration_state     : {dtset: 42, }
+iteration_state     : {dtset: 41, }
 comment             : Components of total free energy in Hartree
-kinetic             :  2.76631484765143E+00
+kinetic             :  2.76631484765142E+00
 hartree             :  1.00571257263415E+00
 xc                  : -1.04631223175380E+00
 Ewald energy        : -1.13491899179226E+00
@@ -7438,12 +7221,12 @@ band_energy         : -1.03187471784906E+00
 - sigma(3 3)= -7.20536616E-01  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
-== DATASET 43 ==================================================================
+== DATASET 42 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
 
 --- !DatasetInfo
-iteration_state: {dtset: 43, }
+iteration_state: {dtset: 42, }
 dimensions: {natom: 1, nkpt: 1, mband: 1, nsppol: 1, nspinor: 1, nspden: 1, mpw: 2118, }
 cutoff_energies: {ecut:  50.0, pawecutdg:  -1.0, }
 electrons: {nelect:   2.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
@@ -7461,8 +7244,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk__gonze_bob_13.2/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk__gonze_bob_13.2/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -7488,7 +7271,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
 ================================================================================
 
 --- !BeginCycle
-iteration_state: {dtset: 43, }
+iteration_state: {dtset: 42, }
 solver: {iscf: 7, nstep: 1, nline: 1, wfoptalg: 0, }
 tolerances: {tolwfr: 1.00E-14, }
 ...
@@ -7508,7 +7291,7 @@ tolerances: {tolwfr: 1.00E-14, }
 
 
 --- !ResultsGS
-iteration_state: {dtset: 43, }
+iteration_state: {dtset: 42, }
 comment   : Summary of ground state results
 lattice_vectors:
 - [  5.0000000,   0.0000000,   0.0000000, ]
@@ -7559,14 +7342,14 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  5.000000000000  5.000000000000  5.000000000000 bohr
               =  2.645886042950  2.645886042950  2.645886042950 angstroms
- prteigrs : about to open file t04o_DS43_EIG
+ prteigrs : about to open file t04o_DS42_EIG
  Fermi (or HOMO) energy (hartree) =  -0.52149   Average Vxc (hartree)=  -0.21140
  Eigenvalues (hartree) for nkpt=   1  k points:
  kpt#   1, nband=  1, wtk=  1.00000, kpt=  0.2500  0.2500  0.2500 (reduced coord)
   -0.52149
 
 --- !EnergyTerms
-iteration_state     : {dtset: 43, }
+iteration_state     : {dtset: 42, }
 comment             : Components of total free energy in Hartree
 kinetic             :  2.76865739516181E+00
 hartree             :  1.00681154856555E+00
@@ -7576,7 +7359,7 @@ psp_core            :  2.01061929829747E-07
 local_psp           : -4.38431564637069E+00
 non_local_psp       :  0.00000000000000E+00
 total_energy        : -2.80703742016045E+00
-total_energy_eV     : -7.63833727493700E+01
+total_energy_eV     : -7.63833727493701E+01
 band_energy         : -1.04298162202869E+00
 ...
 
@@ -7592,12 +7375,12 @@ band_energy         : -1.04298162202869E+00
 - sigma(3 3)=  3.60748801E-01  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
-== DATASET 44 ==================================================================
+== DATASET 43 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
 
 --- !DatasetInfo
-iteration_state: {dtset: 44, }
+iteration_state: {dtset: 43, }
 dimensions: {natom: 1, nkpt: 1, mband: 1, nsppol: 1, nspinor: 1, nspden: 1, mpw: 2118, }
 cutoff_energies: {ecut:  50.0, pawecutdg:  -1.0, }
 electrons: {nelect:   2.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
@@ -7615,8 +7398,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk__gonze_bob_13.2/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk__gonze_bob_13.2/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -7642,7 +7425,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
 ================================================================================
 
 --- !BeginCycle
-iteration_state: {dtset: 44, }
+iteration_state: {dtset: 43, }
 solver: {iscf: 7, nstep: 1, nline: 1, wfoptalg: 0, }
 tolerances: {tolwfr: 1.00E-14, }
 ...
@@ -7662,7 +7445,7 @@ tolerances: {tolwfr: 1.00E-14, }
 
 
 --- !ResultsGS
-iteration_state: {dtset: 44, }
+iteration_state: {dtset: 43, }
 comment   : Summary of ground state results
 lattice_vectors:
 - [  5.0000000,   0.0000000,   0.0000000, ]
@@ -7713,14 +7496,14 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  5.000000000000  5.000000000000  5.000000000000 bohr
               =  2.645886042950  2.645886042950  2.645886042950 angstroms
- prteigrs : about to open file t04o_DS44_EIG
+ prteigrs : about to open file t04o_DS43_EIG
  Fermi (or HOMO) energy (hartree) =  -0.52384   Average Vxc (hartree)=  -0.21080
  Eigenvalues (hartree) for nkpt=   1  k points:
  kpt#   1, nband=  1, wtk=  1.00000, kpt=  0.2500  0.2500  0.2500 (reduced coord)
   -0.52384
 
 --- !EnergyTerms
-iteration_state     : {dtset: 44, }
+iteration_state     : {dtset: 43, }
 comment             : Components of total free energy in Hartree
 kinetic             :  2.77201214336824E+00
 hartree             :  1.00806462945258E+00
@@ -7779,25 +7562,24 @@ band_energy         : -1.04767607971145E+00
            etotal23   -2.8021246700E+00
            etotal24   -2.8167353427E+00
            etotal25   -2.8153212547E+00
-           etotal26   -4.1463901582E-01
-           etotal27   -2.8115651541E+00
-           etotal28   -2.3452427955E+00
-           etotal29   -2.8197022831E+00
-           etotal30   -2.8053099942E+00
-           etotal31   -2.8165285400E+00
-           etotal32   -2.8101482429E+00
-           etotal33   -2.8099403337E+00
-           etotal34   -2.8154316786E+00
-           etotal35   -2.8209819539E+00
-           etotal36   -2.8203584485E+00
-           etotal37   -2.7582027127E+00
-           etotal38   -2.8195076522E+00
-           etotal39   -2.7813938218E+00
-           etotal40   -2.8104230354E+00
-           etotal41   -2.7098475829E+00
-           etotal42   -2.7909166690E+00
-           etotal43   -2.8070374202E+00
-           etotal44   -2.8121984134E+00
+           etotal26   -2.8115651541E+00
+           etotal27   -2.3452427955E+00
+           etotal28   -2.8197022831E+00
+           etotal29   -2.8053099942E+00
+           etotal30   -2.8165285400E+00
+           etotal31   -2.8101482429E+00
+           etotal32   -2.8099403337E+00
+           etotal33   -2.8154316786E+00
+           etotal34   -2.8209819539E+00
+           etotal35   -2.8203584485E+00
+           etotal36   -2.7582027127E+00
+           etotal37   -2.8195076522E+00
+           etotal38   -2.7813938218E+00
+           etotal39   -2.8104230354E+00
+           etotal40   -2.7098475829E+00
+           etotal41   -2.7909166690E+00
+           etotal42   -2.8070374202E+00
+           etotal43   -2.8121984134E+00
             fcart1    -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
             fcart2    -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
             fcart3    -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
@@ -7841,7 +7623,6 @@ band_energy         : -1.04767607971145E+00
             fcart41   -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
             fcart42   -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
             fcart43   -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
-            fcart44   -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
 -          fftalg         312
               ixc1      -1002
               ixc2      -1003
@@ -7868,36 +7649,35 @@ band_energy         : -1.04767607971145E+00
               ixc23   -101131
               ixc24   -102131
               ixc25   -103131
-              ixc26   -104131
-              ixc27   -105131
-              ixc28   -107131
-              ixc29   -108131
-              ixc30   -109131
-              ixc31   -110131
-              ixc32   -111131
-              ixc33   -112131
-              ixc34   -113131
-              ixc35   -114131
-              ixc36   -115131
-              ixc37   -116131
-              ixc38   -117131
-              ixc39   -118131
-              ixc40   -119131
-              ixc41   -120131
-              ixc42   -121131
-              ixc43   -122131
-              ixc44   -123131
+              ixc26   -105131
+              ixc27   -107131
+              ixc28   -108131
+              ixc29   -109131
+              ixc30   -110131
+              ixc31   -111131
+              ixc32   -112131
+              ixc33   -113131
+              ixc34   -114131
+              ixc35   -115131
+              ixc36   -116131
+              ixc37   -117131
+              ixc38   -118131
+              ixc39   -119131
+              ixc40   -120131
+              ixc41   -121131
+              ixc42   -122131
+              ixc43   -123131
            jdtset        1    2    3    4    5    6    7    8    9   10
                         11   12   13   14   15   16   17   18   19   20
                         21   22   23   24   25   26   27   28   29   30
                         31   32   33   34   35   36   37   38   39   40
-                        41   42   43   44
+                        41   42   43
               kpt      2.50000000E-01  2.50000000E-01  2.50000000E-01
            kptopt           0
 P           mkmem           1
             natom           1
             nband           1
-           ndtset          44
+           ndtset          43
             ngfft          32      32      32
              nkpt           1
             nline           1
@@ -7936,19 +7716,19 @@ P           mkmem           1
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            strten15   -1.6497076909E-04 -1.6497076909E-04 -1.6497076909E-04
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-           strten16   -1.5054030524E-05 -1.5054030524E-05 -1.5054030524E-05
+           strten16   -1.5054029659E-05 -1.5054029659E-05 -1.5054029659E-05
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            strten17   -8.9020624017E-06 -8.9020624017E-06 -8.9020624017E-06
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            strten18   -4.4229019424E-05 -4.4229019424E-05 -4.4229019424E-05
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-           strten19   -3.2742450810E-05 -3.2742450810E-05 -3.2742450810E-05
+           strten19   -3.2742449940E-05 -3.2742449940E-05 -3.2742449940E-05
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-           strten20   -1.3903299105E-05 -1.3903299105E-05 -1.3903299105E-05
+           strten20   -1.3903298238E-05 -1.3903298238E-05 -1.3903298238E-05
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            strten21   -1.0114639030E-05 -1.0114639030E-05 -1.0114639030E-05
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-           strten22    1.9044927993E-06  1.9044927993E-06  1.9044927993E-06
+           strten22    1.9044936689E-06  1.9044936689E-06  1.9044936689E-06
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            strten23    9.9501499333E-07  9.9501499333E-07  9.9501499333E-07
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -7956,43 +7736,41 @@ P           mkmem           1
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            strten25    2.2784223307E-05  2.2784223307E-05  2.2784223307E-05
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-           strten26   -1.4289744506E-02 -1.4289744506E-02 -1.4289744506E-02
+           strten26    6.6026175635E-06  6.6026175635E-06  6.6026175635E-06
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-           strten27    6.6026175635E-06  6.6026175635E-06  6.6026175635E-06
+           strten27   -4.0843182937E-03 -4.0843182937E-03 -4.0843182937E-03
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-           strten28   -4.0843182937E-03 -4.0843182937E-03 -4.0843182937E-03
+           strten28    3.2500547353E-05  3.2500547353E-05  3.2500547353E-05
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-           strten29    3.2500547353E-05  3.2500547353E-05  3.2500547353E-05
+           strten29   -8.6273036391E-06 -8.6273036391E-06 -8.6273036391E-06
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-           strten30   -8.6273036391E-06 -8.6273036391E-06 -8.6273036391E-06
+           strten30    1.0732004926E-04  1.0732004926E-04  1.0732004926E-04
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-           strten31    1.0732004926E-04  1.0732004926E-04  1.0732004926E-04
+           strten31   -2.5401480742E-05 -2.5401480742E-05 -2.5401480742E-05
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-           strten32   -2.5401480742E-05 -2.5401480742E-05 -2.5401480742E-05
+           strten32   -2.2937838446E-05 -2.2937838446E-05 -2.2937838446E-05
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-           strten33   -2.2937838446E-05 -2.2937838446E-05 -2.2937838446E-05
+           strten33    4.3633009668E-05  4.3633009668E-05  4.3633009668E-05
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-           strten34    4.3633009668E-05  4.3633009668E-05  4.3633009668E-05
+           strten34    4.7066588688E-05  4.7066588688E-05  4.7066588688E-05
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-           strten35    4.7066588688E-05  4.7066588688E-05  4.7066588688E-05
+           strten35    4.6359590638E-05  4.6359590638E-05  4.6359590638E-05
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-           strten36    4.6359590638E-05  4.6359590638E-05  4.6359590638E-05
+           strten36   -3.7087567049E-05 -3.7087567049E-05 -3.7087567049E-05
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-           strten37   -3.7087567048E-05 -3.7087567048E-05 -3.7087567048E-05
+           strten37    4.2940571292E-05  4.2940571292E-05  4.2940571292E-05
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-           strten38    4.2940571292E-05  4.2940571292E-05  4.2940571292E-05
+           strten38   -3.5255180034E-05 -3.5255180034E-05 -3.5255180034E-05
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-           strten39   -3.5255180034E-05 -3.5255180034E-05 -3.5255180034E-05
+           strten39    7.9025446527E-06  7.9025446527E-06  7.9025446527E-06
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-           strten40    7.9025446527E-06  7.9025446527E-06  7.9025446527E-06
+           strten40   -8.5959872238E-05 -8.5959872238E-05 -8.5959872238E-05
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-           strten41   -8.5959872238E-05 -8.5959872238E-05 -8.5959872238E-05
+           strten41   -2.4490545908E-05 -2.4490545908E-05 -2.4490545908E-05
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-           strten42   -2.4490545908E-05 -2.4490545908E-05 -2.4490545908E-05
+           strten42    1.2261604603E-05  1.2261604603E-05  1.2261604603E-05
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-           strten43    1.2261604603E-05  1.2261604603E-05  1.2261604603E-05
-                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-           strten44    1.7056066173E-05  1.7056066173E-05  1.7056066173E-05
+           strten43    1.7056066173E-05  1.7056066173E-05  1.7056066173E-05
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            symrel      1  0  0   0  1  0   0  0  1      -1  0  0   0 -1  0   0  0 -1
                       -1  0  0   0  1  0   0  0 -1       1  0  0   0 -1  0   0  0  1
@@ -8117,10 +7895,10 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          9.1  wall=         12.3
+- Proc.   0 individual time (sec): cpu=         10.2  wall=         12.2
 
 ================================================================================
 
  Calculation completed.
-.Delivered 137 WARNINGs and 180 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          9.1  wall=         12.3
+.Delivered 129 WARNINGs and 177 COMMENTs to log file.
++Overall time at end (sec) : cpu=         10.2  wall=         12.2

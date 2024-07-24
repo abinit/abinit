@@ -6,7 +6,7 @@
 !!  Routines to initialize k-point and q-point sampling from input file.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2022 ABINIT group (DCA, XG, GMR)
+!!  Copyright (C) 1998-2024 ABINIT group (DCA, XG, GMR)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -212,6 +212,7 @@ subroutine inkpts(bravais,chksymbreak,fockdownsampling,iout,iscf,istwfk,jdtset,&
    ! Normalize the k-point weights when occopt/=2
    ! Check that k point weights add to 1 when occopt==2
    if  (iscf>0.or.iscf==-1.or.iscf==-3.or.(iscf==-2.and.response==1))  then
+     wtk = one
      call intagm(dprarr,intarr,jdtset,marr,nkpt,string(1:lenstr),'wtk',tread,'DPR')
      if(tread==1) wtk(1:nkpt)=dprarr(1:nkpt)
 
@@ -697,6 +698,11 @@ subroutine inqpt(chksymbreak,iout,jdtset,lenstr,msym,natom,qptn,wtqc,rprimd,spin
      end if
    end if
 
+!DEBUG
+!write(std_out,'(a)')' m_inkpts%inqpt : before symlatt '
+!call flush(std_out)
+!ENDDEBUG
+
    ! Re-generate symmetry operations from the lattice and atomic coordinates
    ! This is a fundamental difference with respect to the k point generation.
    tolsym=tol8
@@ -704,11 +710,22 @@ subroutine inqpt(chksymbreak,iout,jdtset,lenstr,msym,natom,qptn,wtqc,rprimd,spin
    ABI_MALLOC(symafm_new,(msym))
    ABI_MALLOC(symrel_new,(3,3,msym))
    ABI_MALLOC(tnons_new,(3,msym))
-   call symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tolsym)
+   call symlatt(bravais,dev_null,msym,nptsym,ptsymrel,rprimd,tolsym)
    use_inversion=1
    call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
-   call symfind(0,(/zero,zero,zero/),gprimd,0,msym,natom,0,nptsym,nsym_new,0,0,&
+
+!DEBUG
+!write(std_out,'(a)')' m_inkpts%inqpt : before symfind '
+!call flush(std_out)
+!ENDDEBUG
+
+   call symfind(gprimd,msym,natom,nptsym,1,nsym_new,0,&
     ptsymrel,spinat,symafm_new,symrel_new,tnons_new,tolsym,typat,use_inversion,xred)
+
+!DEBUG
+!write(std_out,'(a)')' m_inkpts%inqpt : after symfind '
+!call flush(std_out)
+!ENDDEBUG
 
    ! Prepare to compute the q-point grid in the ZB or IZB
    iscf_fake=0 ! Do not need the weights

@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2022 ABINIT group (MG)
+!!  Copyright (C) 2008-2024 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -326,7 +326,16 @@ subroutine migdal_eliashberg_iso(gstore, dtset, dtfil)
  call edos%free()
 
  call dtset%get_ktmesh(ntemp, ktmesh)
+ !NVHPC and LLVM don't like using this constructor because allocatable arrays aren't set.
+#if defined FC_NVHPC || defined FC_LLVM
+  iso%ntemp=ntemp
+  iso%max_niter=10
+  iso%tolerance=tol10
+  iso%ncid=ncid
+  iso%comm=gstore%comm
+#else
  iso = iso_solver_t(ntemp=ntemp, max_niter=10, tolerance=tol10, ncid=ncid, comm=gstore%comm)
+#endif
 
  do itemp=1,ntemp
    ! Generate Matsubara mesh for this T with cutoff wmax.

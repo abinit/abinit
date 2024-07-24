@@ -10,7 +10,7 @@
 !!  xmpi_recv is the generic function.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2001-2022 ABINIT group
+!!  Copyright (C) 2001-2024 ABINIT group
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~ABINIT/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -47,13 +47,15 @@
 subroutine xmpi_recv_char(xval,source,tag,comm,ier)
 
 !Arguments-------------------------
- character(len=*), intent(inout) :: xval
+ character(len=*), intent(inout),target :: xval
  integer ,intent(in) :: source,tag,comm
  integer ,intent(out) :: ier
 
 !Local variables-------------------
 #if defined HAVE_MPI
  integer :: my_tag
+ character,pointer :: arr_xval(:)
+ type(c_ptr) :: cptr
 #endif
 
 ! *************************************************************************
@@ -62,7 +64,8 @@ subroutine xmpi_recv_char(xval,source,tag,comm,ier)
 #if defined HAVE_MPI
  if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
    my_tag = MOD(tag,xmpi_tag_ub)
-   call MPI_RECV(xval,len(xval),MPI_CHARACTER,source,my_tag,comm,MPI_STATUS_IGNORE,ier)
+   cptr=c_loc(xval) ; call c_f_pointer(cptr,arr_xval,[len(xval)])
+   call MPI_RECV(arr_xval,len(xval),MPI_CHARACTER,source,my_tag,comm,MPI_STATUS_IGNORE,ier)
  end if
 #endif
 
@@ -102,7 +105,8 @@ subroutine xmpi_recv_intv(xval,source,tag,comm,ier)
 
 !Local variables-------------------
 #if defined HAVE_MPI
-  integer :: my_tag
+ integer :: my_tag
+ integer :: arr_xval(1)
 #endif
 
 ! *************************************************************************
@@ -111,7 +115,8 @@ subroutine xmpi_recv_intv(xval,source,tag,comm,ier)
 #if defined HAVE_MPI
  if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
    my_tag=MOD(tag,xmpi_tag_ub)
-   call MPI_RECV(xval,1,MPI_INTEGER,source,my_tag,comm,MPI_STATUS_IGNORE,ier)
+   call MPI_RECV(arr_xval,1,MPI_INTEGER,source,my_tag,comm,MPI_STATUS_IGNORE,ier)
+   xval=arr_xval(1)
  end if
 #endif
 
@@ -357,6 +362,7 @@ subroutine xmpi_recv_dp(xval,source,tag,comm,ier)
 !Local variables-------------------
 #if defined HAVE_MPI
  integer :: my_tag
+ real(dp) :: arr_xval(1)
 #endif
 
 ! *************************************************************************
@@ -365,7 +371,8 @@ subroutine xmpi_recv_dp(xval,source,tag,comm,ier)
 #if defined HAVE_MPI
  if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
    my_tag = MOD(tag,xmpi_tag_ub)
-   call MPI_RECV(xval,1,MPI_DOUBLE_PRECISION,source,my_tag,comm,MPI_STATUS_IGNORE,ier)
+   call MPI_RECV(arr_xval,1,MPI_DOUBLE_PRECISION,source,my_tag,comm,MPI_STATUS_IGNORE,ier)
+   xval=arr_xval(1)
  end if
 #endif
 

@@ -1,4 +1,3 @@
-! CP modified
 !!****m* ABINIT/m_common
 !! NAME
 !!  m_common
@@ -8,7 +7,7 @@
 !!  Mainly printing routines.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2022 ABINIT group (DCA, XG, AF, GMR, LBoeri, MT)
+!!  Copyright (C) 1998-2024 ABINIT group (DCA, XG, AF, GMR, LBoeri, MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -120,8 +119,8 @@ contains
 !!  etotal=total energy (hartree)
 !!  favg(3)=average of forces (ha/bohr)
 !!  fcart(3,natom)=cartesian forces (hartree/bohr)
-!!  fermie=fermi energy (Hartree) / for electrons thermalized in the conduction bands when occopt==9 ! CP modified
-!!  fermih=fermi energy (Hartree) for holes thermalized in the VB when occopt==9 ! CP added
+!!  fermie=fermi energy (Hartree) / for electrons thermalized in the conduction bands when occopt==9
+!!  fermih=fermi energy (Hartree) for holes thermalized in the VB when occopt==9
 !!  fname_eig=filename for printing of the eigenenergies
 !!  fock <type(fock_type)>=quantities for the fock operator (optional argument)
 !!  character(len=fnlen) :: filnam1=character strings giving input file name
@@ -168,7 +167,6 @@ contains
 !!
 !! SOURCE
 
-! CP modified: added fermih to the list of arguments
 subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
 &  eigen,etotal,favg,fcart,fermie,fermih,fname_eig,filnam1,initGS,&
 &  iscf,istep,istep_fock_outer,istep_mix,kpt,maxfor,moved_atm_inside,mpi_enreg,&
@@ -183,7 +181,7 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
  integer,intent(in) :: moved_atm_inside,nkpt,nstep
  integer,intent(in) :: optres,prtfor,prtxml,response,usepaw
  integer,intent(out) :: quit,conv_retcode
- real(dp),intent(in) :: cpus,deltae,diffor,etotal,fermie,fermih,maxfor,res2,residm ! CP added fermih
+ real(dp),intent(in) :: cpus,deltae,diffor,etotal,fermie,fermih,maxfor,res2,residm
  real(dp),intent(in) :: vxcavg
  character(len=fnlen),intent(in) :: fname_eig,filnam1
  type(electronpositron_type),pointer,optional :: electronpositron
@@ -277,11 +275,12 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
      ABI_ERROR('toldff only allowed when prtfor=1!')
    end if
    ! If SCF calculations, one and only one of these can differ from zero
-   if(ttolwfr+ttoldff+ttoldfe+ttolvrs+ttolrff /= 1 .and. (iscf>0 .or. iscf==-3))then
-     write(message,'(6a,es14.6,a,es14.6,a,es14.6,a,es14.6,a,a,es14.6,a,a,a)' )&
+   if( (iscf>0 .or. iscf==-3) .and.(ttolwfr==1.and.ttoldff+ttoldfe+ttolvrs+ttolrff>1) &
+    .and. (ttolwfr==0.and.ttoldff+ttoldfe+ttolvrs+ttolrff/=1) ) then
+     write(message,'(6a,es14.6,a,es14.6,a,es14.6,a,a,es14.6,a,a,a)' )&
 &     'For the SCF case, one and only one of the input tolerance criteria ',ch10,&
-&     'tolwfr, toldff, tolrff, toldfe or tolvrs ','must differ from zero, while they are',ch10,&
-&     'tolwfr=',tolwfr,', toldff=',toldff,', tolrff=',tolrff,', toldfe=',toldfe,ch10,&
+&     'toldff, tolrff, toldfe or tolvrs ','must differ from zero, while they are',ch10,&
+&     'toldff=',toldff,', tolrff=',tolrff,', toldfe=',toldfe,ch10,&
 &     'and tolvrs=',tolvrs,' .',ch10,&
 &     'Action: change your input file and resubmit the job.'
      ABI_ERROR(message)
@@ -554,7 +553,7 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
 #endif
      ! Here treat the tolwfr criterion: if maximum residual is less than
      ! input tolwfr, stop steps (exit loop here)
-     if (ttolwfr == 1 .and. .not. noquit) then
+     if (ttolwfr == 1 .and. (ttolvrs+ttoldfe+ttoldff+ttolrff==0) .and. .not. noquit) then
        if (residm < tolwfr) then
          if (dtset%usewvl == 0) then
            write(message, '(a,a,i5,a,1p,e10.2,a,e10.2,a,a)' )ch10, &
@@ -590,12 +589,20 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
          use_dpfft = diffor < tol6
        end if
 
-       if(toldff_ok==2 .and. .not.noquit)then
-         write(message, '(a,a,i5,a,a,a,es11.3,a,es11.3)' ) ch10, &
-&         ' At SCF step',istep,', forces are converged : ',ch10,&
-&         '  for the second time, max diff in force=',diffor,' < toldff=',toldff
-         call wrtout([std_out, ab_out], message)
-         quit=1
+       if(toldff_ok>=2 .and..not.noquit)then
+         if (ttolwfr==0) then
+           write(message, '(a,a,i5,a,a,a,es11.3,a,es11.3)' ) ch10, &
+&           ' At SCF step',istep,', forces are converged : ',ch10,&
+&           '  for the second time, max diff in force=',diffor,' < toldff=',toldff
+           call wrtout([std_out, ab_out], message)
+           quit=1
+         else if (ttolwfr==1 .and. residm < tolwfr )then
+           write(message, '(a,a,i5,a,1p,e10.2,a,e10.2,a,a,a,es11.3,a,es11.3)' ) ch10, &
+&           ' At SCF step',istep,', max residual=',residm,' < tolwfr=',tolwfr,' AND forces are converged : ',ch10,&
+&           '  for the second time, max diff in force=',diffor,' < toldff=',toldff
+           call wrtout([std_out, ab_out], message)
+           quit=1
+        end if
        end if
      end if
 
@@ -614,13 +621,22 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
          tolrff_ok=0
          use_dpfft = diffor < tolrff * maxfor * five
        end if
-       if(tolrff_ok==2 .and. (.not.noquit))then
-         write(message, '(a,a,i5,a,a,a,es11.3,a,es11.3,a)' ) ch10, &
-         ' At SCF step',istep,', forces are sufficiently converged : ',ch10,&
-         '  for the second time, max diff in force=',diffor,&
-         ' is less than < tolrff=',tolrff, ' times max force'
-         call wrtout([std_out, ab_out], message)
-         quit=1
+       if(tolrff_ok>=2 .and. (.not.noquit))then
+         if (ttolwfr==0) then
+           write(message, '(a,a,i5,a,a,a,es11.3,a,es11.3,a)' ) ch10, &
+           ' At SCF step',istep,', forces are sufficiently converged : ',ch10,&
+           '  for the second time, max diff in force=',diffor,&
+           ' is less than < tolrff=',tolrff, ' times max force'
+           call wrtout([std_out, ab_out], message)
+           quit=1
+         else if (ttolwfr==1 .and. residm < tolwfr) then
+           write(message, '(a,a,i5,a,1p,e10.2,a,e10.2,a,a,a,es11.3,a,es11.3,a)' ) ch10, &
+           ' At SCF step',istep,', max residual=',residm,' < tolwfr=',tolwfr,' AND forces are sufficiently converged : ',ch10,&
+           '  for the second time, max diff in force=',diffor,&
+           ' is less than < tolrff=',tolrff, ' times max force'
+           call wrtout([std_out, ab_out], message)
+           quit=1
+         end if
        end if
      end if
 
@@ -635,18 +651,30 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
          toldfe_ok=0
          use_dpfft = abs(deltae) < tol8
        end if
-       if(toldfe_ok==2 .and. (.not.noquit))then
-         if(usefock==0 .or. nnsclohf<2)then
-           write(message, '(a,a,i5,a,a,a,es11.3,a,es11.3)' ) ch10, &
-            ' At SCF step',istep,', etot is converged : ',ch10,&
-            '  for the second time, diff in etot=',abs(deltae),' < toldfe=',toldfe
-         else
+       ! Fock : tolwfr not taken into account
+       if(usefock/=0.and.nnsclohf>=2) then
+         if (toldfe_ok==2 .and. (.not.noquit))then
            write(message, '(a,i3,a,i3,a,a,a,es11.3,a,es11.3)' ) &
             ' Outer loop step',istep_fock_outer,' - inner step',istep_mix,' - frozen Fock etot converged : ',ch10,&
             '  for the second time, diff in etot=',abs(deltae),' < toldfe=',toldfe
-         endif
-         call wrtout([std_out, ab_out], message)
-         quit=1
+           call wrtout([std_out, ab_out], message)
+           quit=1
+         end if
+       ! No Fock : take into account tolwfr if ttolwfr/=0
+       else if(toldfe_ok>=2 .and. (.not.noquit))then
+         if (ttolwfr==0) then
+           write(message, '(a,a,i5,a,a,a,es11.3,a,es11.3)' ) ch10, &
+            ' At SCF step',istep,', etot is converged : ',ch10,&
+            '  for the second time, diff in etot=',abs(deltae),' < toldfe=',toldfe
+           call wrtout([std_out, ab_out], message)
+           quit=1
+         else if (ttolwfr==1 .and. residm < tolwfr) then
+           write(message, '(a,a,i5,a,1p,e10.2,a,e10.2,a,a,a,es11.3,a,es11.3)' ) ch10, &
+            ' At SCF step',istep,', max residual=',residm,' < tolwfr=',tolwfr,' AND etot is converged : ',ch10,&
+            '  for the second time, diff in etot=',abs(deltae),' < toldfe=',toldfe
+           call wrtout([std_out, ab_out], message)
+           quit=1
+         end if
        end if
        if(usefock==1 .and. nnsclohf>1)then
          if(istep_mix==1 .and. (.not.noquit))then
@@ -692,18 +720,36 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
      ! Here treat the tolvrs criterion: if density/potential residual (squared)
      ! is less than input tolvrs, stop steps (exit loop here)
      if (ttolvrs==1 .and. .not. noquit) then
-       if (res2 < tolvrs) then
-         if (optres==0) then
-           write(message, '(a,a,i5,a,1p,e10.2,a,e10.2,a)' ) ch10,&
-            ' At SCF step',istep,'       vres2   =',res2,' < tolvrs=',tolvrs,' =>converged.'
+       if (ttolwfr==0) then
+         if (res2 < tolvrs) then
+           if (optres==0) then
+             write(message, '(a,a,i5,a,1p,e10.2,a,e10.2,a)' ) ch10,&
+              ' At SCF step',istep,'       vres2   =',res2,' < tolvrs=',tolvrs,' =>converged.'
+           else
+             write(message, '(a,a,i5,a,1p,e10.2,a,e10.2,a)' ) ch10,&
+              ' At SCF step',istep,'       nres2   =',res2,' < tolvrs=',tolvrs,' =>converged.'
+           end if
+           call wrtout([std_out, ab_out], message)
+           quit=1
          else
-           write(message, '(a,a,i5,a,1p,e10.2,a,e10.2,a)' ) ch10,&
-            ' At SCF step',istep,'       nres2   =',res2,' < tolvrs=',tolvrs,' =>converged.'
+           use_dpfft = res2 < tol5
          end if
-         call wrtout([std_out, ab_out], message)
-         quit=1
-       else
-         use_dpfft = res2 < tol5
+       else if (ttolwfr==1 .and. residm < tolwfr) then
+         if (res2 < tolvrs) then
+           if (optres==0) then
+             write(message, '(a,a,i5,a,1p,e10.2,a,e10.2,a,e10.2,a,e10.2,a)' ) ch10,&
+              ' At SCF step',istep,'  max residual=',residm,' < tolwfr=',tolwfr,' AND vres2   =',res2,&
+              & ' < tolvrs=',tolvrs,' =>converged.'
+           else
+             write(message, '(a,a,i5,a,1p,e10.2,a,e10.2,a,e10.2,a,e10.2,a)' ) ch10,&
+              ' At SCF step',istep,'  max residual=',residm,' < tolwfr=',tolwfr,' AND nres2   =',res2,&
+              & ' < tolvrs=',tolvrs,' =>converged.'
+           end if
+           call wrtout([std_out, ab_out], message)
+           quit=1
+         else
+           use_dpfft = res2 < tol5
+         end if
        end if
      end if
 
@@ -752,7 +798,7 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
        end if
        call wrtout([std_out, ab_out], message)
 
-       if (ttolwfr==1) then
+       if (ttolwfr==1 .and. residm > tolwfr) then
          if (dtset%usewvl == 0) then
            write(message, '(a,es11.3,a,es11.3,a)' ) &
            '  maximum residual=',residm,' exceeds tolwfr=',tolwfr,ch10
@@ -809,13 +855,29 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
 
      if (prtxml == 1) then
        if (ttoldfe == 1) then
-         write(ab_xml_out, "(A)") ' stop-criterion="toldfe" />'
+         if (ttolwfr==0) then
+           write(ab_xml_out, "(A)") ' stop-criterion="toldfe" />'
+         else
+           write(ab_xml_out, "(A)") ' stop-criterion="toldfe+tolwfr" />'
+         end if
        else if (ttoldff == 1) then
-         write(ab_xml_out, "(A)") ' stop-criterion="toldff" />'
+         if (ttolwfr==0) then
+           write(ab_xml_out, "(A)") ' stop-criterion="toldff" />'
+         else
+           write(ab_xml_out, "(A)") ' stop-criterion="toldff+tolwfr" />'
+         end if
        else if (ttolrff == 1) then
-         write(ab_xml_out, "(A)") ' stop-criterion="tolrff" />'
+         if (ttolwfr==0) then
+             write(ab_xml_out, "(A)") ' stop-criterion="tolrff" />'
+         else
+             write(ab_xml_out, "(A)") ' stop-criterion="tolrff+tolwfr" />'
+         end if
        else if (ttolvrs == 1) then
-         write(ab_xml_out, "(A)") ' stop-criterion="tolvrs" />'
+         if (ttolwfr==0) then
+           write(ab_xml_out, "(A)") ' stop-criterion="tolvrs" />'
+         else
+           write(ab_xml_out, "(A)") ' stop-criterion="tolvrs+tolwfr" />'
+         end if
        else if (ttolwfr == 1) then
          write(ab_xml_out, "(A)") ' stop-criterion="tolwfr" />'
        else
@@ -1089,9 +1151,9 @@ end subroutine setup1
 !!   or, if option==5...7, zero-point motion correction to eigenvalues (averaged)
 !!  enunit=choice parameter: 0=>output in hartree; 1=>output in eV;
 !!   2=> output in both hartree and eV
-!!  fermie=fermi energy (Hartree)/ for electrons thermalized in the conduction bands when occopt==9 ! CP modified
-!!  fermih=fermi energy (Hartree) for holes thermalized in the VB when occopt==9 ! CP modified
-!!  fname_eig=filename for printing of the eigenenergies
+!!  fermie=fermi energy (Hartree) / for electrons thermalized in the conduction bands when occopt==9
+!!  fermih=fermi energy (Hartree) for holes thermalized in the VB when occopt==9
+!!  fname_eig=filename of printing the eigenenergies
 !!  iout=unit number for formatted output file
 !!  iscf=option for self-consistency
 !!  kptns(3,nkpt)=k points in reduced coordinates
@@ -1125,7 +1187,7 @@ subroutine prteigrs(eigen,enunit,fermie,fermih,fname_eig,iout,iscf,kptns,kptopt,
 !scalars
  integer,intent(in) :: enunit,iout,iscf,kptopt,mband,nbdbuf,nkpt,nnsclo_now,nsppol
  integer,intent(in) :: occopt,option,prteig,prtvol
- real(dp),intent(in) :: fermie,fermih,tolwfr,vxcavg ! CP added fermih
+ real(dp),intent(in) :: fermie,fermih,tolwfr,vxcavg
  character(len=*),intent(in) :: fname_eig
 !arrays
  integer,intent(in) :: nband(nkpt*nsppol)
@@ -1217,9 +1279,6 @@ subroutine prteigrs(eigen,enunit,fermie,fermih,fname_eig,iout,iscf,kptns,kptopt,
      end if
 
      if(iscf>=0 .and. (ienunit==0 .or. option==1))then
-       ! CP modified for occopt 9 case
-       !write(msg, '(3a,f10.5,3a,f10.5)' ) &
-       ! ' Fermi (or HOMO) energy (',trim(strunit2),') =',convrt*fermie,'   Average Vxc (',trim(strunit2),')=',convrt*vxcavg
        if (occopt == 9) then
           write(msg, '(3a,f10.5,a,f10.5,3a,f10.5)' ) &
           ' Fermi energy for thermalized electrons and holes (',trim(strunit2),') =',&
@@ -1228,7 +1287,6 @@ subroutine prteigrs(eigen,enunit,fermie,fermih,fname_eig,iout,iscf,kptns,kptopt,
           write(msg, '(3a,f10.5,3a,f10.5)' ) &
           ' Fermi (or HOMO) energy (',trim(strunit2),') =',convrt*fermie,'   Average Vxc (',trim(strunit2),')=',convrt*vxcavg
        end if
-       ! End CP modified
        call wrtout(iout,msg)
        if (prteig > 0) call wrtout(temp_unit,msg)
      end if
@@ -1360,7 +1418,11 @@ subroutine prteigrs(eigen,enunit,fermie,fermih,fname_eig,iout,iscf,kptns,kptopt,
        end if
 
        ! Don't include the buffer in the output.
-       residk=maxval(resid(band_index+1:band_index+nband_k-nbdbuf))
+       if (nbdbuf>0) then
+         residk=maxval(resid(band_index+1:band_index+nband_k-nbdbuf))
+       else
+         residk=maxval(resid(band_index+1:band_index+nband_k))
+       end if
        if (residk>tolwfr) then
          write(msg, '(1x,a,2i5,a,1p,e13.5)' ) &
           ' prteigrs : nnsclo,ikpt=',nnsclo_now,ikpt,' max resid (excl. the buffer)=',residk
@@ -1753,12 +1815,12 @@ subroutine get_dtsets_pspheads(input_path, path, ndtset, lenstr, string, timopt,
  dtsets(0)%timopt = 1
  if (xmpi_paral == 1) dtsets(0)%timopt = 0
 
- call timab(41,2,tsec)
  call timab(timopt,5,tsec)
 
  ! Initialize pspheads, that contains the important information
  ! from the pseudopotential headers, as well as the psp filename
- call timab(42,1,tsec)
+ call timab(102,1,tsec)
+ call timab(1021,3,tsec)
 
  usepaw = 0
  ABI_MALLOC(pspheads, (npsp))
@@ -1845,11 +1907,14 @@ subroutine get_dtsets_pspheads(input_path, path, ndtset, lenstr, string, timopt,
                msym, ndtset, ndtset_alloc, string, npsp, zionpsp, comm)
 
  ABI_FREE(zionpsp)
- call timab(42,2,tsec)
- call timab(43,3,tsec)
+ call timab(1021,2,tsec)
+ call timab(1022,3,tsec)
 
  ! Provide defaults for the variables that have not yet been initialized.
  call indefo(dtsets, ndtset_alloc, nprocs)
+
+ call timab(1022,2,tsec)
+ call timab(1023,3,tsec)
 
  ! Perform some global initialization, depending on the value of
  ! pseudopotentials, parallelism variables, or macro input variables
@@ -1870,7 +1935,8 @@ subroutine get_dtsets_pspheads(input_path, path, ndtset, lenstr, string, timopt,
     mx%mband = max(dtsets(ii)%mband, mx%mband)
  end do
 
- call timab(43,2,tsec)
+ call timab(1023,2,tsec)
+ call timab(102,2,tsec)
 
  ABI_FREE(mband_upper_)
 

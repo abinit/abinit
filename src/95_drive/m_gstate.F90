@@ -1,4 +1,3 @@
-! CP modified
 !!****m* ABINIT/m_gstate
 !! NAME
 !!  m_gstate
@@ -6,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2022 ABINIT group (DCA, XG, GMR, JYR, MKV, MT, FJ, MB, DJA)
+!!  Copyright (C) 1998-2024 ABINIT group (DCA, XG, GMR, JYR, MKV, MT, FJ, MB, DJA)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -18,6 +17,9 @@
 #endif
 
 #include "abi_common.h"
+
+! nvtx related macro definition
+#include "nvtx_macros.h"
 
 module m_gstate
 
@@ -38,6 +40,8 @@ module m_gstate
  use m_bandfft_kpt
  use m_invovl
  use m_gemm_nonlop
+ use m_gemm_nonlop_gpu
+ use m_gemm_nonlop_ompgpu
  use m_wfk
  use m_nctk
  use m_hdr
@@ -59,7 +63,7 @@ module m_gstate
  use m_fft,              only : fourdp
  use m_pawang,           only : pawang_type
  use m_pawrad,           only : pawrad_type
- use m_pawtab,           only : pawtab_type
+ use m_pawtab,           only : pawtab_type, pawtab_print
  use m_pawcprj,          only : pawcprj_type,pawcprj_free,pawcprj_alloc, pawcprj_getdim
  use m_pawfgr,           only : pawfgr_type, pawfgr_init, pawfgr_destroy
  use m_abi2big,          only : wvl_occ_abi2big, wvl_setngfft, wvl_setBoxGeometry
@@ -101,9 +105,18 @@ module m_gstate
  use m_cgprj,            only : ctocprj
  use m_nonlop_ylm,       only : nonlop_ylm_init_counters,nonlop_ylm_output_counters
  use m_fft,              only : fft_init_counters,fft_output_counters
+ use m_getghc_ompgpu,    only : free_getghc_ompgpu_buffers
 
-#if defined HAVE_GPU_CUDA
- use m_manage_cuda
+#if defined HAVE_GPU
+ use m_alloc_hamilt_gpu
+#endif
+
+#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
+ use m_nvtx_data
+#endif
+
+#if defined HAVE_YAKL
+ use gator_mod
 #endif
 
  use defs_wvltypes,      only : wvl_data,coulomb_operator,wvl_wf_type
@@ -265,17 +278,17 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 #endif
  integer :: accessfil,ask_accurate,bantot,choice,comm_psp,fform
  integer :: gnt_option,gscase,iatom,idir,ierr,ii,indx,jj,kk,ios,iorder_cprj,itypat
- integer :: ixfh,izero,mband_cprj,mcg,mcprj,me,mgfftf,mpert,msize,mu,my_natom,my_nspinor
+ integer :: ixfh,mband_cprj,mcg,mcprj,me,mgfftf,mpert,mu,my_natom,my_nspinor
  integer :: nband_k,nbandtot,nblok,ncprj,ncpgr,nfftf,nfftot,npwmin
  integer :: openexit,option,optorth,psp_gencond,conv_retcode
  integer :: pwind_alloc,rdwrpaw,comm,tim_mkrho,use_sc_dmft
  integer :: cnt,spin,band,ikpt,usecg,usecprj,ylm_option
- real(dp) :: cpus,ecore,ecut_eff,ecutdg_eff,etot,fermie,fermih ! CP added fermih
+ real(dp) :: cpus,ecore,ecut_eff,ecutdg_eff,etot,fermie,fermih
  real(dp) :: gsqcut_eff,gsqcut_shp,gsqcutc_eff,hyb_range_fock,residm,ucvol
  logical :: read_wf_or_den,has_to_init,call_pawinit,write_wfk
  logical :: is_dfpt=.false.,wvlbigdft=.false.
  character(len=500) :: msg
- character(len=fnlen) :: ddbnm,dscrpt,filnam,wfkfull_path
+ character(len=fnlen) :: dscrpt,filnam,wfkfull_path
  real(dp) :: fatvshift
  type(crystal_t) :: cryst
  type(ebands_t) :: bstruct,ebands
@@ -304,7 +317,8 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  real(dp),allocatable :: ph1d(:,:),ph1df(:,:),phnons(:,:,:),resid(:),rhowfg(:,:)
  real(dp),allocatable :: rhowfr(:,:),spinat_dum(:,:),start(:,:),work(:)
  real(dp),allocatable :: ylm(:,:),ylmgr(:,:,:)
- real(dp),pointer :: cg(:,:),eigen(:),pwnsfac(:,:),rhog(:,:),rhor(:,:)
+ real(dp),ABI_CONTIGUOUS pointer :: cg(:,:) => null()
+ real(dp),pointer :: eigen(:),pwnsfac(:,:),rhog(:,:),rhor(:,:)
  real(dp),pointer :: taug(:,:),taur(:,:),xred_old(:,:)
  type(pawrhoij_type),pointer :: pawrhoij(:)
  type(coulomb_operator) :: kernel_dummy
@@ -412,7 +426,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 &   dtset%kptns,dtset%mkmem,dtset%nband,dtset%nkpt,'PERS',mpi_enreg,&
 &   dtset%mpw,npwarr,npwtot,dtset%nsppol)
    call bandfft_kpt_init1(bandfft_kpt,dtset%istwfk,kg,dtset%mgfft,dtset%mkmem,mpi_enreg,&
-&   dtset%mpw,dtset%nband,dtset%nkpt,npwarr,dtset%nsppol)
+&   dtset%mpw,dtset%nband,dtset%nkpt,npwarr,dtset%nsppol,gpu_option=dtset%gpu_option)
  else
    ABI_MALLOC(kg,(0,0))
    npwarr(:) = 0
@@ -423,13 +437,28 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    call init_invovl(dtset%nkpt)
  end if
 
- if(dtset%use_gemm_nonlop == 1 .and. dtset%use_gpu_cuda/=1) then
-   ! set global variable
+ ! Handling GEMM nonlop use
+ ! Not enabled by default for CPU and CUDA implementations
+ ! Enabled if using OpenMP GPU offload
+ gemm_nonlop_use_gemm = .false.
+
+ ! OpenMP GPU offload case (GEMM nonlop used by default)
+ if(dtset%gpu_option == ABI_GPU_OPENMP) then
    gemm_nonlop_use_gemm = .true.
-   call init_gemm_nonlop(dtset%nkpt)
- else
-   gemm_nonlop_use_gemm = .false.
+   call init_gemm_nonlop_ompgpu(dtset%nkpt)
+ else if(dtset%use_gemm_nonlop == 1) then
+   gemm_nonlop_use_gemm = .true.
+   ! CUDA & Kokkos case (same routine used)
+   if(dtset%gpu_option == ABI_GPU_LEGACY .or. dtset%gpu_option == ABI_GPU_KOKKOS) then
+     call init_gemm_nonlop(dtset%nkpt)
+     call init_gemm_nonlop_gpu(dtset%nkpt)
+   ! CPU case
+   else if(dtset%gpu_option == ABI_GPU_DISABLED) then
+     call init_gemm_nonlop(dtset%nkpt)
+   end if
  end if
+ gemm_nonlop_is_distributed = .false.
+ if(dtset%gpu_nl_distrib == 1) gemm_nonlop_is_distributed = .true.
 
 !Set up the Ylm for each k point
  if ( dtset%tfkinfunc /= 2) then
@@ -569,15 +598,10 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 
 !Update header, with evolving variables, when available
 !Here, rprimd, xred and occ are available
- etot=hdr%etot ; fermie=hdr%fermie ; fermih=hdr%fermih ; residm=hdr%residm ! CP added fermih
- ! CP modified
- !call hdr%update(bantot,etot,fermie,&
- !  residm,rprimd,occ,pawrhoij,xred,args_gs%amu,&
- !  comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
+ etot=hdr%etot ; fermie=hdr%fermie ; fermih=hdr%fermih ; residm=hdr%residm
  call hdr%update(bantot,etot,fermie,fermih,&
    residm,rprimd,occ,pawrhoij,xred,args_gs%amu,&
    comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
- ! End CP modified
 
  ! PW basis set: test if the problem is ill-defined.
  if (dtset%usewvl == 0 .and. dtset%tfkinfunc /= 2) then
@@ -648,6 +672,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 
 !###########################################################
 !### 05. Calls inwffil
+ ABI_NVTX_START_RANGE(NVTX_INIT_INWFFIL)
 
  ! if paral_kgb == 0, it may happen that some processors are idle (no entry in proc_distrb)
  ! but mkmem == nkpt and this can cause integer overflow in mcg or allocation error.
@@ -675,17 +700,17 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  if (dtset%usewvl == 0 .and. dtset%mpw > 0 .and. cnt /= 0)then
    if (my_nspinor*dtset%mband*dtset%mkmem*dtset%nsppol > floor(real(HUGE(0))/real(dtset%mpw) )) then
      write (msg,'(9a)')&
-&     "Default integer is not wide enough to store the size of the wavefunction array (mcg).",ch10,&
-&     "This usually happens when paral_kgb == 0 and there are not enough procs to distribute kpts and spins",ch10,&
-&     "Action: if paral_kgb == 0, use nprocs = nkpt * nsppol to reduce the memory per node.",ch10,&
-&     "If this does not solve the problem, use paral_kgb 1 with nprocs > nkpt * nsppol and use npfft/npband/npspinor",ch10,&
-&     "to decrease the memory requirements. Consider also OpenMP threads."
-!     ii = 0
+      "Default integer is not wide enough to store the size of the wavefunction array (mcg).",ch10,&
+      "This usually happens when paral_kgb == 0 and there are not enough procs to distribute kpts and spins",ch10,&
+      "Action: if paral_kgb == 0, use nprocs = nkpt * nsppol to reduce the memory per node.",ch10,&
+      "If this does not solve the problem, use paral_kgb 1 with nprocs > nkpt * nsppol and use npfft/npband/npspinor",ch10,&
+      "to decrease the memory requirements. Consider also OpenMP threads."
+     ii = 0
      ABI_ERROR_NOSTOP(msg,ii)
      write (msg,'(5(a,i0), 2a)')&
-&     "my_nspinor: ",my_nspinor, ", mpw: ",dtset%mpw, ", mband: ",dtset%mband,&
-&     ", mkmem: ",dtset%mkmem, ", nsppol: ",dtset%nsppol,ch10,&
-&     'Note: Compiling with large int (int64) requires a full software stack (MPI/FFTW/BLAS...) compiled in int64 mode'
+      "my_nspinor: ",my_nspinor, ", mpw: ",dtset%mpw, ", mband: ",dtset%mband,&
+      ", mkmem: ",dtset%mkmem, ", nsppol: ",dtset%nsppol,ch10,&
+      'Note: Compiling with large int (int64) requires a full software stack (MPI/FFTW/BLAS...) compiled in int64 mode'
      ABI_ERROR(msg)
    end if
  end if
@@ -694,7 +719,13 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    cg => scf_history%cg(:,:,1)
    eigen => scf_history%eigen(:,1)
  else
-   ABI_MALLOC_OR_DIE(cg,(2,mcg), ierr)
+   if(dtset%gpu_option == ABI_GPU_KOKKOS) then
+#if defined HAVE_GPU && defined HAVE_YAKL
+     ABI_MALLOC_MANAGED(cg, (/2,mcg/))
+#endif
+   else
+     ABI_MALLOC_OR_DIE(cg,(2,mcg), ierr)
+   end if
    ABI_MALLOC(eigen,(dtset%mband*dtset%nkpt*dtset%nsppol))
  end if
 
@@ -752,6 +783,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    optorth=1   !if (psps%usepaw==1) optorth=0
    if(psps%usepaw==1 .and. dtfil%ireadwf==1)optorth=0
    hdr%rprimd=rprimd_for_kg ! We need the rprimd that was used to generate de G vectors
+   ABI_NVTX_START_RANGE(NVTX_INIT_INWFFIL2)
    call inwffil(ask_accurate,cg,dtset,dtset%ecut,ecut_eff,eigen,&
 &   dtset%exchn2n3d,formeig,hdr,dtfil%ireadwf,dtset%istwfk,kg,&
 &   dtset%kptns,dtset%localrdwf,dtset%mband,mcg,dtset%mkmem,mpi_enreg,&
@@ -759,6 +791,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 &   dtset%nsppol,dtset%nsym,occ,optorth,dtset%symafm,&
 &   dtset%symrel,dtset%tnons,dtfil%unkg,wff1,wffnow,dtfil%unwff1,&
 &   dtfil%fnamewffk,wvl)
+   ABI_NVTX_END_RANGE()
    hdr%rprimd=rprimd
  end if
 
@@ -774,6 +807,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  if (dtset%fft_count/=0.and.dtset%paral_kgb==0) then
    call fft_init_counters()
  end if
+ ABI_NVTX_END_RANGE()
 
 !###########################################################
 !### 06. Operations related to restartxf (Old version)
@@ -854,29 +888,11 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 
 !Initialize (eventually) extfpmd object
  if(dtset%useextfpmd>=1.and.dtset%occopt==3) then
-   if(dtset%useextfpmd/=1.and.dtset%extfpmd_nbcut>dtset%mband) then
-     write(msg,'(3a,i0,a,i0,3a)') "Not enough bands to activate ExtFPMD routines.",ch10,&
-&     "extfpmd_nbcut = ",dtset%extfpmd_nbcut," should be less than or equal to nband = ",dtset%mband,".",ch10,&
-&     "Action: Increase nband or decrease extfpmd_nbcut."
-     ABI_ERROR(msg)
-   else
-     if(dtset%useextfpmd/=1.and.(dtset%extfpmd_nbdbuf+dtset%extfpmd_nbcut)>dtset%mband) then
-       write(msg,'(a,i0,a,i0,a,i0,2a,i0,3a)') "(extfpmd_nbdbuf = ",dtset%extfpmd_nbdbuf," + extfpmd_nbcut = ",&
-&       dtset%extfpmd_nbcut,") = ",dtset%extfpmd_nbdbuf+dtset%extfpmd_nbcut,ch10,&
-&       "should be less than or equal to nband = ",dtset%mband,".",ch10,&
-&       "Assume experienced user. Execution will continue with extfpmd_nbdbuf = 0."
-       ABI_WARNING(msg)
-       dtset%extfpmd_nbdbuf = 0
-     else if(dtset%extfpmd_nbdbuf>dtset%mband) then
-       write(msg,'(a,i0,a,i0,3a)') "extfpmd_nbdbuf = ",dtset%extfpmd_nbdbuf,&
-&       " should be less than or equal to nband = ",dtset%mband,".",ch10,&
-&       "Assume experienced user. Execution will continue with extfpmd_nbdbuf = 0."
-       ABI_WARNING(msg)
-       dtset%extfpmd_nbdbuf = 0
-     end if
+   if(extfpmd_chkinp(dtset)) then
      ABI_MALLOC(extfpmd,)
-     call extfpmd%init(dtset%mband,dtset%extfpmd_nbcut,dtset%extfpmd_nbdbuf,&
-&     dtset%nfft,dtset%nspden,rprimd,dtset%useextfpmd)
+     call extfpmd%init(dtset%mband,hdr%extfpmd_eshift,dtset%extfpmd_nbcut,dtset%extfpmd_nbdbuf,&
+&     dtset%nfft,dtset%nspden,dtset%nsppol,dtset%nkpt,rprimd,dtset%useextfpmd,mpi_enreg,&
+&     dtset%extfpmd_nband)
    end if
  end if
 
@@ -892,10 +908,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 !were read from disk, occupation scheme is metallic (this excludes iscf=-1),
 !and occupation numbers are required by iscf
  if( dtfil%ireadwf==1 .and. &
-! CP modified
-!& (dtset%occopt>=3.and.dtset%occopt<=8) .and. &
-& (dtset%occopt>=3.and.dtset%occopt<=9) .and. & ! allowing for occopt 9
-! End CP modified
+& (dtset%occopt>=3.and.dtset%occopt<=9) .and. &
 & (dtset%iscf>0 .or. dtset%iscf==-3) .and. dtset%positron/=1 ) then
 
    ABI_MALLOC(doccde,(dtset%mband*dtset%nkpt*dtset%nsppol))
@@ -909,14 +922,14 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 &   extfpmd=extfpmd)
    if (dtset%dmftcheck>=0.and.dtset%usedmft>=1.and.(sum(args_gs%upawu(:))>=tol8.or.  &
 &   sum(args_gs%jpawu(:))>tol8).and.dtset%dmft_entropy==0) results_gs%energies%entropy=zero
-   ABI_FREE(doccde)
 
    if(associated(extfpmd)) then
+!    Get nelect to build density
      extfpmd%nelect=zero
-     call extfpmd%compute_nelect(results_gs%energies%e_fermie,extfpmd%nelect,&
-&     dtset%tsmear)
-     call extfpmd%compute_e_kinetic(results_gs%energies%e_fermie,dtset%tsmear)
+     call extfpmd%compute_nelect(results_gs%energies%e_fermie,dtset%nband,extfpmd%nelect,&
+&     dtset%nkpt,dtset%nspinor,dtset%nsppol,dtset%tsmear,dtset%wtk)
    end if
+   ABI_FREE(doccde)
 
 !  Transfer occupations to bigdft object:
    if(dtset%usewvl==1 .and. .not. wvlbigdft) then
@@ -957,9 +970,9 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  end if
 
 !Here allocation of GPU for vtorho calculations
-#if defined HAVE_GPU_CUDA
- if (dtset%use_gpu_cuda==1) then
-   call alloc_hamilt_gpu(atindx1,dtset,gprimd,mpi_enreg,nattyp,npwarr,2,psps,dtset%use_gpu_cuda)
+#if defined HAVE_GPU
+ if (dtset%gpu_option/=ABI_GPU_DISABLED) then
+   call alloc_hamilt_gpu(atindx1,dtset,gprimd,mpi_enreg,nattyp,npwarr,2,psps,dtset%gpu_option)
  end if
 #endif
 
@@ -1027,6 +1040,9 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    call pawpuxinit(dtset%dmatpuopt,dtset%exchmix,dtset%f4of2_sla,dtset%f6of2_sla,&
 &     is_dfpt,args_gs%jpawu,dtset%lexexch,dtset%lpawu,dtset%nspinor,dtset%ntypat,dtset%optdcmagpawu,pawang,dtset%pawprtvol,&
 &     pawrad,pawtab,args_gs%upawu,dtset%usedmft,dtset%useexexch,dtset%usepawu,ucrpa=dtset%ucrpa)
+
+   ! DEBUG:
+   !if (me == master) call pawtab_print(Pawtab)
  end if
 
 !###########################################################
@@ -1125,149 +1141,155 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  ABI_MALLOC(taug,(2,nfftf*dtset%usekden))
 
  if (has_to_init) then
-   if (dtset%iscf>0 .or. (dtset%iscf==0 .and. dtset%usewvl==1 )) then ! .and. dtset%usepaw==1)) then
 
-     if(dtfil%ireadden/=0.and.dtset%positron<=0)then
-       ! Read density
-       rdwrpaw=psps%usepaw; if(dtfil%ireadwf/=0) rdwrpaw=0
+!  === Self-consistent case
+   if (dtset%iscf>0 .or. (dtset%iscf==0 .and. dtset%usewvl==1 )) then
+
+!    >>> Initialize charge density
+
+     if (dtfil%ireadden/=0.and.dtset%positron<=0) then
+       ! Choice 1: read charge density from file
+       rdwrpaw=psps%usepaw ; if(dtfil%ireadwf/=0) rdwrpaw=0
        if (dtset%usewvl==0) then
-         call read_rhor(dtfil%fildensin, cplex1, dtset%nspden, nfftf, ngfftf, rdwrpaw, &
-         mpi_enreg, rhor, hdr_den, pawrhoij, comm, check_hdr=hdr, allow_interp=.True.)
-         results_gs%etotal = hdr_den%etot; call hdr_den%free()
+         call read_rhor(dtfil%fildensin,cplex1,dtset%nspden,nfftf,ngfftf,rdwrpaw, &
+              mpi_enreg,rhor,hdr_den,pawrhoij,comm,check_hdr=hdr,allow_interp=.True.)
+           results_gs%etotal = hdr_den%etot
+           call hdr_den%free()
        else
          fform=52 ; accessfil=0
          if (dtset%iomode == IO_MODE_MPI ) accessfil=4
          if (dtset%iomode == IO_MODE_ETSF) accessfil=3
          call ioarr(accessfil,rhor,dtset,results_gs%etotal,fform,dtfil%fildensin,hdr,&
-           mpi_enreg,ngfftf,cplex1,nfftf,pawrhoij,1,rdwrpaw,wvl%den)
+                    mpi_enreg,ngfftf,cplex1,nfftf,pawrhoij,1,rdwrpaw,wvl%den)
        end if
-
        if (rdwrpaw/=0) then
          call hdr%update(bantot,etot,fermie,fermih,residm,&
-           rprimd,occ,pawrhoij,xred,args_gs%amu,&
-           comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
+              rprimd,occ,pawrhoij,xred,args_gs%amu,&
+              comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
        end if
-
-       ! Read kinetic energy density
-       if(dtfil%ireadkden/=0 .and. dtset%usekden==1 )then
-         call read_rhor(dtfil%filkdensin, cplex1, dtset%nspden, nfftf, ngfftf, rdwrpaw, &
-         mpi_enreg, taur, hdr_den, pawrhoij, comm, check_hdr=hdr, allow_interp=.True.)
-         call hdr_den%free()
-       end if
-
-!      Compute up+down rho(G) by fft
+       ! Compute up+down rho(G) by fft
        call fourdp(1,rhog,rhor(:,1),-1,mpi_enreg,nfftf,1,ngfftf,0)
-       if(dtset%usekden==1)then
-         call fourdp(1,taug,taur(:,1),-1,mpi_enreg,nfftf,1,ngfftf,0)
-       end if
 
-     else if(dtfil%ireadwf/=0)then
-       izero=0
-!      Obtain the charge density from wfs that were read previously
-!      Be careful: in PAW, rho does not include the compensation
-!      density (to be added in scfcv.F90) !
-!      tim_mkrho=1 ; mpi_enreg%paralbd=0
+     else if (dtfil%ireadwf/=0) then
+       ! Choice 2: obtain charge density from wfs that were read previously
+       !   Warning: in PAW, rho does not include the compensation density (added later)
        tim_mkrho=1
        if (psps%usepaw==1) then
          ABI_MALLOC(rhowfg,(2,dtset%nfft))
          ABI_MALLOC(rhowfr,(dtset%nfft,dtset%nspden))
-!        write(std_out,*) "mkrhogstate"
-         call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,&
-&         mpi_enreg,npwarr,occ,paw_dmft,phnons,rhowfg,rhowfr,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,&
-&         extfpmd=extfpmd)
+         call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phnons,&
+&             rhowfg,rhowfr,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,extfpmd=extfpmd)
          call transgrid(1,mpi_enreg,dtset%nspden,+1,1,1,dtset%paral_kgb,pawfgr,rhowfg,rhog,rhowfr,rhor)
-         if(dtset%usekden==1)then
-           call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,&
-&           mpi_enreg,npwarr,occ,paw_dmft,phnons,rhowfg,rhowfr,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,option=1)
-           call transgrid(1,mpi_enreg,dtset%nspden,+1,1,1,dtset%paral_kgb,pawfgr,rhowfg,taug,rhowfr,taur)
-         end if
          ABI_FREE(rhowfg)
          ABI_FREE(rhowfr)
        else
-         call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,&
-&         mpi_enreg,npwarr,occ,paw_dmft,phnons,rhog,rhor,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,&
-&         extfpmd=extfpmd)
-         if(dtset%usekden==1)then
-           call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,&
-&           mpi_enreg,npwarr,occ,paw_dmft,phnons,taug,taur,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,option=1)
-         end if
-
+         call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phnons,&
+&             rhog,rhor,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,extfpmd=extfpmd)
        end if
 
-     else if(dtfil%ireadwf==0.and.dtset%positron/=1)then
-
-!      Crude, but realistic initialisation of the density
-!      There is not point to compute it from random wavefunctions.
+     else if (dtfil%ireadwf==0.and.dtset%positron/=1) then
+       ! Choice 3: crude, but realistic initialisation of the charge density
+       !   There is not point to compute it from random wavefunctions
        if (dtset%usewvl == 0) then
          call initro(atindx,dtset%densty,gmet,gsqcut_eff,psps%usepaw,&
-&         mgfftf,mpi_enreg,psps%mqgrid_vl,dtset%natom,nattyp,nfftf,&
-&         ngfftf,dtset%nspden,psps%ntypat,psps,pawtab,ph1df,&
-&         psps%qgrid_vl,rhog,rhor,dtset%spinat,ucvol,psps%usepaw,&
-&         dtset%ziontypat,dtset%znucl)
-!        Update initialized density taking into account jellium slab
-         if(dtset%jellslab/=0) then
-           option=2
-           ABI_MALLOC(work,(nfftf))
-           call jellium(gmet,gsqcut_eff,mpi_enreg,nfftf,ngfftf,dtset%nspden,&
-&           option,dtset%slabwsrad,rhog,rhor,rprimd,work,dtset%slabzbeg,dtset%slabzend)
-           ABI_FREE(work)
-         end if ! of usejell
-!        Kinetic energy density initialized to zero (used only in metaGGAs ... )
-         if(dtset%usekden==1)then
-           taur=zero ; taug=zero
-         end if
-       else if (dtset%usewvl/=0) then
-!        skip for the moment for wvl+paw, not yet coded
-         if(dtset%usepaw==0) then
+&             mgfftf,mpi_enreg,psps%mqgrid_vl,dtset%natom,nattyp,nfftf,&
+&             ngfftf,dtset%nspden,psps%ntypat,psps,pawtab,ph1df,&
+&             psps%qgrid_vl,rhog,rhor,dtset%spinat,ucvol,psps%usepaw,&
+&             dtset%ziontypat,dtset%znucl)
+       else
+         if (dtset%usepaw==0) then
            !Wavelet density corresponds exactly to the wavefunctions,
            !since wavefunctions are taken from diagonalisation of LCAO.
-           call wvl_mkrho(dtset, irrzon, mpi_enreg, phnons, rhor, wvl%wfs, wvl%den)
-         else !usepaw
+           call wvl_mkrho(dtset,irrzon,mpi_enreg,phnons,rhor,wvl%wfs,wvl%den)
+         else
 #if defined HAVE_BIGDFT
-           call wvl_initro(atindx1,wvl%descr%atoms%astruct%geocode,wvl%descr%h,mpi_enreg%me_wvl,&
-&           dtset%natom,nattyp,nfftf,dtset%nspden,psps%ntypat,&
-&           wvl%descr%Glr%d%n1,wvl%descr%Glr%d%n1i,&
-&           wvl%descr%Glr%d%n2,wvl%descr%Glr%d%n2i,&
-&           wvl%descr%Glr%d%n3,&
-&           pawrad,pawtab,psps%gth_params%psppar,rhor,rprimd,&
-&           dtset%spinat,wvl%den,dtset%xc_denpos,xred,dtset%ziontypat)
-           call wvl_mkrho(dtset, irrzon, mpi_enreg, phnons, rhor, wvl%wfs, wvl%den)
+           call wvl_initro(atindx1,wvl%descr%atoms%astruct%geocode,wvl%descr%h,&
+&               mpi_enreg%me_wvl,dtset%natom,nattyp,nfftf,dtset%nspden,psps%ntypat,&
+&               wvl%descr%Glr%d%n1,wvl%descr%Glr%d%n1i,wvl%descr%Glr%d%n2,wvl%descr%Glr%d%n2i,&
+&               wvl%descr%Glr%d%n3,pawrad,pawtab,psps%gth_params%psppar,rhor,rprimd,&
+&               dtset%spinat,wvl%den,dtset%xc_denpos,xred,dtset%ziontypat)
+           call wvl_mkrho(dtset,irrzon,mpi_enreg,phnons,rhor,wvl%wfs,wvl%den)
 #endif
+         end if ! usepaw
+       end if ! usewvl
+!      Update initialized density taking into account jellium slab
+       if (dtset%jellslab/=0) then
+         option=2
+         ABI_MALLOC(work,(nfftf))
+         call jellium(gmet,gsqcut_eff,mpi_enreg,nfftf,ngfftf,dtset%nspden,option,&
+&             dtset%slabwsrad,rhog,rhor,rprimd,work,dtset%slabzbeg,dtset%slabzend)
+         ABI_FREE(work)
+       end if ! of usejell
+
+     end if ! choice for charge density initialization
+
+!    >>> Initialize kinetic energy density
+     if (dtset%usekden==1) then
+
+       if (dtfil%ireadkden/=0.and.dtset%positron<=0) then
+         ! Choice 1: read kinetic energy density from file
+         rdwrpaw=0
+         call read_rhor(dtfil%filkdensin,cplex1,dtset%nspden,nfftf,ngfftf,rdwrpaw, &
+              mpi_enreg,taur,hdr_den,pawrhoij,comm,check_hdr=hdr,allow_interp=.True.)
+         call hdr_den%free()
+         ! Compute up+down tau(G) by fft
+         call fourdp(1,taug,taur(:,1),-1,mpi_enreg,nfftf,1,ngfftf,0)
+
+       else if (dtfil%ireadwf/=0) then
+         ! Choice 2: obtain kinetic energy density from wfs that were read previously
+         tim_mkrho=1
+         if (psps%usepaw==1) then
+           ABI_MALLOC(rhowfg,(2,dtset%nfft))
+           ABI_MALLOC(rhowfr,(dtset%nfft,dtset%nspden))
+           call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phnons,&
+&               rhowfg,rhowfr,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,option=1)
+           call transgrid(1,mpi_enreg,dtset%nspden,+1,1,1,dtset%paral_kgb,pawfgr,rhowfg,taug,rhowfr,taur)
+           ABI_FREE(rhowfg)
+           ABI_FREE(rhowfr)
+         else
+           call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phnons,&
+&               taug,taur,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,option=1)
          end if
-       end if
 
-     end if
+       else if(dtfil%ireadwf==0.and.dtset%positron/=1)then
+         ! Choice 3: kinetic energy density initialized to zero (?)
+         taur=zero ; taug=zero
 
+       end if ! choice for kinetic energy density initialization
+     end if ! usekden
+
+!  === Non self-consistent case
    else if ((dtset%iscf==-1.or.dtset%iscf==-2.or.dtset%iscf==-3).and.dtset%positron<=0) then
 
-!    Read rho(r) from a disk file
-     rdwrpaw=psps%usepaw
+!    Read density from a disk file (this is mandatory for non-self-consistent calculations)
 !    Note : results_gs%etotal is read here,
 !    and might serve in the tddft routine, but it is contrary to the intended use of results_gs ...
 !    Warning : should check the use of results_gs%e_fermie
 !    Warning : should check the use of results_gs%residm
 !    One might make them separate variables.
 
-    ! Read density and get Fermi level from hdr_den
-     call read_rhor(dtfil%fildensin, cplex1, dtset%nspden, nfftf, ngfftf, rdwrpaw, &
-     mpi_enreg, rhor, hdr_den, pawrhoij, comm, check_hdr=hdr)
+    ! Read charge density and get Fermi level from hdr_den
+     rdwrpaw=psps%usepaw
+     call read_rhor(dtfil%fildensin,cplex1,dtset%nspden,nfftf,ngfftf,rdwrpaw,&
+&                   mpi_enreg,rhor,hdr_den,pawrhoij,comm,check_hdr=hdr)
      results_gs%etotal = hdr_den%etot;
-     results_gs%energies%e_fermie = hdr_den%fermie; results_gs%energies%e_fermih = hdr_den%fermih ! CP modified, added fermih
-     call hdr_den%free()
-
-     if(dtfil%ireadkden/=0 .and. dtset%usekden==1)then
-       call read_rhor(dtfil%filkdensin, cplex1, dtset%nspden, nfftf, ngfftf, rdwrpaw, &
-       mpi_enreg, taur, hdr_den, pawrhoij, comm, check_hdr=hdr)
-       call hdr_den%free()
-     end if
-
+     results_gs%energies%e_fermie = hdr_den%fermie
+     results_gs%energies%e_fermih = hdr_den%fermih
 !    Compute up+down rho(G) by fft
      call fourdp(1,rhog,rhor(:,1),-1,mpi_enreg,nfftf,1,ngfftf,0)
+     call hdr_den%free()
+
+     ! Read kinetic energy density
      if(dtset%usekden==1)then
+       rdwrpaw=0
+       call read_rhor(dtfil%filkdensin,cplex1,dtset%nspden,nfftf,ngfftf,rdwrpaw, &
+                      mpi_enreg,taur,hdr_den,pawrhoij,comm,check_hdr=hdr)
+       call hdr_den%free()
+!      Compute up+down tau(G) by fft
        call fourdp(1,taug,taur(:,1),-1,mpi_enreg,nfftf,1,ngfftf,0)
      end if
 
-   end if
+   end if ! self-consistent/non self-consistent
  end if ! has_to_init
 
 !Timing for initialisation period
@@ -1412,7 +1434,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 !Update the header, before using it
  call hdr%update(bantot,results_gs%etotal,results_gs%energies%e_fermie,results_gs%energies%e_fermih,&
    results_gs%residm,rprimd,occ,pawrhoij,xred,args_gs%amu,&
-   comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
+   comm_atom=mpi_enreg%comm_atom,extfpmd_eshift=results_gs%extfpmd_eshift,mpi_atmtab=mpi_enreg%my_atmtab)
 
  ABI_MALLOC(doccde,(dtset%mband*dtset%nkpt*dtset%nsppol))
  doccde=zero
@@ -1424,9 +1446,8 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 & hdr%kptrlatt, hdr%nshiftk, hdr%shiftk)
 
  ebands%fermie = results_gs%energies%e_fermie
- ebands%fermih = results_gs%energies%e_fermih ! CP modified
+ ebands%fermih = results_gs%energies%e_fermih
  ABI_FREE(doccde)
- !write(std_out,*)"efermi after ebands_init",ebands%fermie
 
  ! Compute and print the gaps.
  call ebands_report_gap(ebands,header="Gap info",unit=std_out,mode_paral="COLL",gaps=results_gs%gaps)
@@ -1451,10 +1472,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  hdr%rprimd=rprimd_for_kg
 
  if (write_wfk) then
-   call outresid(dtset,dtset%kptns,dtset%mband,&
-&                dtset%nband,dtset%nkpt,&
-&                dtset%nsppol,resid)
-
+   call outresid(dtset,dtset%kptns,dtset%mband,dtset%nband,dtset%nkpt,dtset%nsppol,resid)
    call outwf(cg,dtset,psps,eigen,filnam,hdr,kg,dtset%kptns,&
     dtset%mband,mcg,dtset%mkmem,mpi_enreg,dtset%mpw,dtset%natom,&
     dtset%nband,dtset%nkpt,npwarr,dtset%nsppol,&
@@ -1549,42 +1567,37 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
      nblok = 1  ! 1st blok = gradients
    end if
    mpert = dtset%natom + 6
-   msize = 3*mpert
 
    ! Create header and ddb objects
    dscrpt=' Note : temporary (transfer) database '
    call ddb_hdr%init(dtset,psps,pawtab,dscrpt,nblok,&
 &                    xred=xred,occ=occ,ngfft=ngfft)
 
-   call ddb%init(dtset, nblok, mpert, msize)
-
-   ! Write gradients to the DDB
-   if (dtset%iscf > 0) then
-     call ddb%set_gred(results_gs%gred, 1)
-   end if
+   call ddb%init(dtset, nblok, mpert, with_d1E=.true.)
 
    ! Set the electronic polarization
    if ((abs(dtset%berryopt) == 1).or.(abs(dtset%berryopt) == 3)) then
      call ddb%set_pel(results_gs%pel, dtset%rfdir, 1)
    end if
 
-   ! Set the stress tensor
    if (dtset%iscf > 0) then
-     call ddb%set_strten(results_gs%strten, 1)
-   end if
 
-   ! Set the total energy
-   if (dtset%iscf > 0) then
+     ! Set the gradients (forces) in reduced coordinates
+     call ddb%set_gred(results_gs%gred, 1)
+
+     ! Set the stress tensor
+     call ddb%set_strten(results_gs%strten, 1)
+
+     ! Set the total energy
      call ddb%set_etotal(results_gs%etotal, 2)
    end if
 
    if (dtset%prtddb==1) then
-    ! Write the DDB
-    ddbnm=trim(dtfil%filnam_ds(4))//'_DDB'
-    call ddb%write_txt(ddb_hdr, ddbnm, fullinit=0)
-   endif  
+     ! Write the DDB
+     call ddb%write(ddb_hdr, dtfil%fnameabo_ddb, with_psps=0)
+   end if
 
-   ! Deallocate
+   ! Free memory
    call ddb_hdr%free()
    call ddb%free()
 
@@ -1630,13 +1643,19 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  call pawfgr_destroy(pawfgr)
 
  if(dtset%imgwfstor==0)then
-   ABI_FREE(cg)
+   if(dtset%gpu_option == ABI_GPU_KOKKOS) then
+#if defined HAVE_GPU && defined HAVE_YAKL
+     ABI_FREE_MANAGED(cg)
+#endif
+   else
+     ABI_FREE(cg)
+   end if
    ABI_FREE(eigen)
  else
    nullify(cg,eigen)
  endif
 
- if (dtset%usewvl == 0 .or. dtset%nsym <= 1) then
+ if (dtset%usewvl == 0) then
 !  In wavelet case, irrzon and phnons are deallocated by wavelet object.
    ABI_FREE(irrzon)
    ABI_FREE(phnons)
@@ -1750,18 +1769,29 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  end if
 
  if((dtset%wfoptalg == 1 .or. dtset%wfoptalg == 111)  .and. psps%usepaw == 1) then
-   call destroy_invovl(dtset%nkpt,dtset%use_gpu_cuda)
+   call destroy_invovl(dtset%nkpt,dtset%gpu_option)
  end if
 
+!Clean gemm_nonlop work spaces
  if(gemm_nonlop_use_gemm) then
-   call destroy_gemm_nonlop(dtset%nkpt)
+   if(dtset%gpu_option == ABI_GPU_OPENMP) then
+     call destroy_gemm_nonlop_ompgpu()
+   else if(dtset%gpu_option==ABI_GPU_LEGACY .or. dtset%gpu_option==ABI_GPU_KOKKOS) then
+     call destroy_gemm_nonlop_gpu(dtset%nkpt)
+     call destroy_gemm_nonlop(dtset%nkpt)
+   else if(dtset%gpu_option==ABI_GPU_DISABLED) then
+     call destroy_gemm_nonlop(dtset%nkpt)
+   end if
    gemm_nonlop_use_gemm = .false.
  end if
 
-!Eventually clean cuda runtime
-#if defined HAVE_GPU_CUDA
- if (dtset%use_gpu_cuda==1) then
-   call dealloc_hamilt_gpu(2,dtset%use_gpu_cuda)
+!Clean GPU work spaces
+ if(dtset%gpu_option == ABI_GPU_OPENMP) then
+   call free_getghc_ompgpu_buffers()
+ end if
+#if defined HAVE_GPU
+ if (dtset%gpu_option/=ABI_GPU_DISABLED) then
+   call dealloc_hamilt_gpu(2,dtset%gpu_option)
  end if
 #endif
 
@@ -1884,7 +1914,7 @@ subroutine setup2(dtset,npwtot,start,wfs,xred)
 !!  enunit=choice for units of output eigenvalues: 0=>hartree,
 !!   1=> eV, 2=> hartree and eV
 !!  fermie=fermi energy (Hartree)
-!!  fermih=fermi energy for holes (Hartree) ! CP added for occopt 9
+!!  fermih=fermi energy for holes (Hartree) (for occopt 9)
 !!  fnameabo_dos=filename of output DOS file
 !!  fnameabo_eig=filename of output EIG file
 !!  gred(3,natom)=d(E)/d(xred) (hartree)
@@ -1923,14 +1953,13 @@ subroutine setup2(dtset,npwtot,start,wfs,xred)
 !!  (only print and write to disk)
 !!
 !! SOURCE
-! CP added fermih to the list of arguments
 subroutine clnup1(acell,dtset,eigen,fermie,fermih, fnameabo_dos,fnameabo_eig,gred,&
                   mpi_enreg,nfft,ngfft,occ,prtfor, resid,rhor,rprimd,vxcavg,xred)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nfft, prtfor
- real(dp),intent(in) :: fermie, fermih, vxcavg !CP added fermih
+ real(dp),intent(in) :: fermie, fermih, vxcavg
  character(len=*),intent(in) :: fnameabo_dos,fnameabo_eig
  type(dataset_type),intent(in) :: dtset
  type(MPI_type),intent(in) :: mpi_enreg
@@ -2060,17 +2089,10 @@ subroutine clnup1(acell,dtset,eigen,fermie,fermih, fnameabo_dos,fnameabo_eig,gre
    maxocc=two/(dtset%nspinor*dtset%nsppol)  ! Will not work in the fixed moment case
    option=2
    ABI_MALLOC(doccde,(dtset%mband*dtset%nkpt*dtset%nsppol))
-   ! CP modified
-   !call getnel(doccde,dtset%dosdeltae,eigen,entropy,fermie,&
-!&   maxocc,dtset%mband,dtset%nband,nelect,dtset%nkpt,&
-!&   dtset%nsppol,occ,dtset%occopt,option,dtset%tphysel,&
-!&   dtset%tsmear,unitdos,dtset%wtk)
    call getnel(doccde,dtset%dosdeltae,eigen,entropy,fermie,fermih,&
 &   maxocc,dtset%mband,dtset%nband,nelect,dtset%nkpt,&
 &   dtset%nsppol,occ,dtset%occopt,option,dtset%tphysel,&
 &   dtset%tsmear,unitdos,dtset%wtk,1,dtset%nband(1))!CP: added 1, nband(1) to fit new definition of getnel; parameters only used if
-! occopt 9
-   ! End CP modified
    ABI_FREE(doccde)
  end if
 
@@ -2582,7 +2604,7 @@ end subroutine pawuj_drive
 !!  read/write xfhist
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2022 ABINIT group (MB)
+!! Copyright (C) 2003-2024 ABINIT group (MB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
