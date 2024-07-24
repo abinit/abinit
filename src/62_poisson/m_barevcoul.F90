@@ -26,7 +26,7 @@ module m_barevcoul
  use m_errors
  use m_xmpi
 
- !use m_fstrings,        only : sjoin, itoa
+ use m_fstrings,        only : sjoin
  use defs_abitypes,     only : MPI_type
  use m_numeric_tools,   only : arth, l2norm, OPERATOR(.x.)
  use m_geometry,        only : normv
@@ -123,7 +123,6 @@ contains
 !!  qpoint(3)=reduced coordinates for the phonon wavelength
 !!  gsqcut=cutoff value on G**2 for sphere inside fft box. (gsqcut=(boxcut**2)*ecut/(2.d0*(Pi**2))
 !!  icutcoul=Option for the Coulomb potential cutoff technique
-!!  divgq0= value of the integration of the Coulomb singularity 4pi\int_BZ 1/q^2 dq. Used if q = Gamma
 !!  gmet(3,3)=metrix tensor in G space in Bohr**-2.
 !!  izero=if 1, unbalanced components of V(q,g) are set to zero # Used by the PAW library
 !!  nfft=Total number of FFT grid points.
@@ -131,7 +130,7 @@ contains
 !!  comm=MPI communicator.
 !!
 !! OUTPUT
-!!  barev(nfft)=4pi/(G+q)**2, G=0 component is set to divgq0/pi if q = Gamma.
+!!  barev(nfft)=4pi/(G+q)**2, q+G=0 component is set carefully
 !!
 !! NOTES
 !!  This routine operates on the full FFT mesh. DO NOT PASS MPI_TYPE
@@ -201,22 +200,21 @@ subroutine barevcoul(rcut,icutcoul,qpoint,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,i
  icutcoul_local=icutcoul
 
  ! for short-range exchange (e.g. HSE06), enforce ERFC
- if( PRESENT(shortrange) ) then
-   if(shortrange) then
+ if (PRESENT(shortrange)) then
+   if (shortrange) then
       icutcoul_local=5
    end if
  end if
 ! -------------------------------------
 
- if (icutcoul_local==0) vcut%mode='SPHERE'
- if (icutcoul_local==1) vcut%mode='CYLINDER'
- if (icutcoul_local==2) vcut%mode='SLAB'
- if (icutcoul_local==4) vcut%mode='ERF'
- if (icutcoul_local==5) vcut%mode='ERFC'
-!
-! Treatment of the divergence at q+g=zero
- rcut0= (three*nkpt_bz*ucvol/four_pi)**(one/three)
- divgq0= two_pi*rcut0**two
+ if (icutcoul_local == 0) vcut%mode = 'SPHERE'
+ if (icutcoul_local == 1) vcut%mode = 'CYLINDER'
+ if (icutcoul_local == 2) vcut%mode = 'SLAB'
+ if (icutcoul_local == 3) vcut%mode = 'CRYSTAL'
+ if (icutcoul_local == 4) vcut%mode = 'ERF'
+ if (icutcoul_local == 5) vcut%mode = 'ERFC'
+ if (icutcoul_local == 6) vcut%mode = 'AUXILIARY_FUNCTION'
+ if (icutcoul_local == 7) vcut%mode = 'AUX_GB'
 
 !Initialize a few quantities
  n1=ngfft(1); n2=ngfft(2); n3=ngfft(3)
@@ -224,7 +222,7 @@ subroutine barevcoul(rcut,icutcoul,qpoint,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,i
  barev=zero
 
 !Some peculiar values of q: q=0 or q on the BZ edge
- qeq0=0; if(qpoint(1)**2+qpoint(2)**2+qpoint(3)**2<1.d-15) qeq0=1
+ qeq0=0; if (qpoint(1)**2+qpoint(2)**2+qpoint(3)**2<1.d-15) qeq0=1
  qeq05=0
  if (qeq0==0) then
    if (abs(abs(qpoint(1))-half)<tol12.or.abs(abs(qpoint(2))-half)<tol12.or. &
@@ -267,11 +265,14 @@ subroutine barevcoul(rcut,icutcoul,qpoint,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,i
      do i1=1,n1
         ii=i1+i23
         gpq(ii)= gs2 + gq(1,i1)*(gq(1,i1)*gmet(1,1)+gqg2p3)
-        if(gpq(ii)>=tol4) then
+        if (gpq(ii)>=tol4) then
+          ! gpq2 contains 4*pi / |q+G|**2
           gpq2(ii) = piinv/gpq(ii)
         end if
      end do
 
+     !
+     ! Next part looks for ig1min,ig1max that are needed by zerosym
      ! Do the test that eliminates the Gamma point outside of the inner loop
      ii1=1
      if (i23==0 .and. qeq0==1  .and. ig2==0 .and. ig3==0) then
@@ -284,7 +285,7 @@ subroutine barevcoul(rcut,icutcoul,qpoint,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,i
 
        !ii=i1+i23
 
-       if(gs<=cutoff)then
+       if (gs<=cutoff) then
          ! Identify min/max indexes (to cancel unbalanced contributions later)
          ! Count (q+g)-vectors with similar norm
          if ((qeq05==1).and.(izero==1)) then
@@ -300,21 +301,6 @@ subroutine barevcoul(rcut,icutcoul,qpoint,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,i
  end do
 
 
-
-
-! Old version of the code extracted from m_Fock
-! do ig=1,nfft
-!     if(abs(gpq(ig))<tol4) then
-!        barev(ig)=barev(ig)+divgq0
-!     else if(gpq(ig)<=cutoff) then
-!       if(shortrange) then
-!         barev(ig)=barev(ig)+gpq2(ig)*(one-exp(-pi/(gpq2(ig)*rcut**2)))
-!       else
-!         barev(ig)=barev(ig)+gpq2(ig)*(one-cos(rcut*sqrt(four_pi/gpq2(ig))))
-!       end if
-!    end if
-! end do
-
  barev(:)=zero
 
  ! MG: This triggers SIGFPE as cryst is not initialized
@@ -322,18 +308,60 @@ subroutine barevcoul(rcut,icutcoul,qpoint,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,i
  !a2=Cryst%rprimd(:,2); b2=two_pi*gprimd(:,2)
  !a3=Cryst%rprimd(:,3); b3=two_pi*gprimd(:,3)
 
- SELECT CASE (TRIM(vcut%mode))
- CASE('SPHERE') ! Spencer-Alavi method
+ select case(TRIM(vcut%mode))
+ case ('CRYSTAL', 'AUXILIARY_FUNCTION', "AUX_GB")
+   if (vcut%mode == "CRYSTAL") then
+     ! Analytic integration of 4pi/q^2 over the volume element:
+     ! $4pi/V \int_V d^3q 1/q^2 =4pi bz_geometric_factor V^(-2/3)$
+     ! i_sz=4*pi*bz_geometry_factor*q0_vol**(-two_thirds) where q0_vol= V_BZ/N_k
+     ! bz_geometry_factor: sphere=7.79, fcc=7.44, sc=6.188, bcc=6.946, wz=5.255 (see gwa.pdf, appendix A.4)
+     q0_vol = two_pi**3 / (nkpt_bz * ucvol)
+     vcut%i_sz = four_pi*7.44*q0_vol**(-two_thirds)
+
+   !TODO FBruneval: cryst is not available here, find a workaround!
+   !else if (vcut%mode == "AUXILIARY_FUNCTION") then
+   !  ! Numerical integration of the exact-exchange divergence through the
+   !  ! auxiliary function of Carrier et al. PRB 75, 205126 (2007) [[cite:Carrier2007]].
+   !  vcut%i_sz = carrier_isz(cryst, 1, qpoint, rcut, comm)
+
+   !else if (vcut%mode == "AUX_GB") then
+   !  ! We use the auxiliary function of a Gygi-Baldereschi variant [[cite:Gigy1986]]
+   !  vcut%i_sz = gygi_baldereschi_isz(cryst, 1, qpoint, vc_ecut, ng, gvec)
+
+   else
+     ABI_ERROR(sjoin("Need treatment of 1/q^2 singularity! for mode", vcut%mode))
+   end if
 
    do ig=1,nfft
-     if(abs(gpq(ig))<tol4) then
-        barev(ig)=barev(ig)+divgq0
-     else if(gpq(ig)<=cutoff) then
-         barev(ig)=barev(ig)+gpq2(ig)*(one-cos(rcut*sqrt(four_pi/gpq2(ig))))
-    end if
+     if (abs(gpq(ig))<tol4) then
+       barev(ig) = vcut%i_sz
+     else if (gpq(ig)<=cutoff) then
+       barev(ig) = gpq2(ig)
+     end if
+   end do
+   
+
+ case('SPHERE') ! Spencer-Alavi method
+
+   !
+   ! Treatment of the divergence at q+g=zero
+   !
+   ! rcut is not set (rcut<=0), use the default Spencer-Alavi definition: 
+   if ( rcut < tol8 ) then
+     rcut0= (three*nkpt_bz*ucvol/four_pi)**(one/three)
+   else
+     rcut0 = rcut
+   end if
+
+   do ig=1,nfft
+     if (abs(gpq(ig))<tol4) then
+       barev(ig) = two_pi*rcut0**two
+     else if (gpq(ig)<=cutoff) then
+       barev(ig) = gpq2(ig) * (one - cos( rcut*sqrt(four_pi/gpq2(ig)) ) )
+     end if
    end do
 
- CASE('CYLINDER')
+ case('CYLINDER')
    !FBruneval: not working. For instance, Cryst is never initialized
    ABI_BUG("Cylinder cutoff coding is not finalized")
 
@@ -522,14 +550,14 @@ subroutine barevcoul(rcut,icutcoul,qpoint,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,i
  CASE('ERF')
 
    do ig=1,nfft
-     if(abs(gpq(ig))<tol4) then
+     if (abs(gpq(ig))<tol4) then
         !FIXME FBruneval check this value, ERFC value was wrong, so why not this one.
-        barev(ig)=barev(ig) + divgq0
-     else if(gpq(ig)<=cutoff) then
+        barev(ig) = zero ! Stupid definition to remember something should be done here.
+     else if (gpq(ig)<=cutoff) then
        !FIXME FBruneval shortrange does not make sense here (it is an optional argument that may not be present)
        ! and ERF is long range any way
-       if(shortrange) then
-         barev(ig)=barev(ig) + gpq2(ig) * exp( -pi * rcut**2 /gpq2(ig) )
+       if (shortrange) then
+         barev(ig) = + gpq2(ig) * exp( -pi * rcut**2 /gpq2(ig) )
        end if
     end if
    end do
@@ -537,21 +565,21 @@ subroutine barevcoul(rcut,icutcoul,qpoint,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,i
  CASE('ERFC')
 
    do ig=1,nfft
-     if(abs(gpq(ig))<tol4) then
+     if (abs(gpq(ig))<tol4) then
         !FBruneval there was a wrong value here
         barev(ig) = pi * rcut**2
-     else if(gpq(ig)<=cutoff) then
+     else if (gpq(ig)<=cutoff) then
        ! gpq2 is 4 pi / (q+G)**2
        ! 4 pi / (q+G)**2 * [ 1 - exp( -1/4 * Rc**2 * (q+G)**2 ) ]
        barev(ig) = gpq2(ig) * ( one - exp( -pi * rcut**2 / gpq2(ig) ) )
     end if
    end do
 
- CASE DEFAULT
+ case default
    write(msg,'(3a)')'No cut-off applied to the Coulomb Potential.', ch10, &
                     'Either icutcoul value not allowed or not defined.'
    ABI_WARNING(msg)
- END SELECT
+ end select
 
  if (izero==1) then
    ! Set contribution of unbalanced components to zero
