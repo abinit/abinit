@@ -46,7 +46,7 @@ module m_lobpcgwf
  use m_hamiltonian, only : gs_hamiltonian_type
  use m_pawcprj,     only : pawcprj_type
  use m_nonlop,      only : nonlop
- use m_prep_kgb,    only : prep_nonlop
+ use m_prep_kgb,    only : prep_getghc,prep_nonlop
  use m_getghc,      only : multithreaded_getghc
 
 #if defined(HAVE_GPU)
