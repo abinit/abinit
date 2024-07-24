@@ -1,5 +1,5 @@
 
-.Version 9.11.2 of ABINIT 
+.Version 10.1.4.3 of ABINIT, released Jun 2024.
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2024 ABINIT group . 
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 15 Jul 2023.
-- ( at 12h03 )
+.Starting date : Wed 24 Jul 2024.
+- ( at 16h03 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v6_t50-t51-t52-t53/t50.abi
+- input  file    -> /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/antonius_fixeigr2d/tests/TestBot_MPI1/v6_t50-t51-t52-t53/t50.abi
 - output file    -> t50.abo
 - root for input  files -> t50i
 - root for output files -> t50o
@@ -364,8 +364,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      8.000   => boxcut(ratio)=   2.13006
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.fakesmooth
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.fakesmooth
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/antonius_fixeigr2d/tests/Psps_for_tests/02he.fakesmooth
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/antonius_fixeigr2d/tests/Psps_for_tests/02he.fakesmooth
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -698,7 +698,7 @@ tolerances: {tolvrs: 1.00E-08, }
     (2DErelax=   -9.3387736469E+00 Ha. 2DEnonrelax=    9.3387736482E+00 Ha)
     (  non-var. 2DEtotal :   -1.3413554889E-07 Ha)
 
- Components of second-order derivatives of the electronic energy, EIGR2D.
+ Components of second-order derivatives of the electronic energy, EIGR2D, in Ha unit.
  For automatic tests, printing the matrix for the first k-point, first band, first atom.
    1   1   1   1   -3.9942356688E+00    0.0000000000E+00
    1   1   2   1    1.3314118896E+00    0.0000000000E+00
@@ -838,8 +838,8 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=      8.000   => boxcut(ratio)=   1.91566
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.fakesmooth
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.fakesmooth
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/antonius_fixeigr2d/tests/Psps_for_tests/02he.fakesmooth
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/antonius_fixeigr2d/tests/Psps_for_tests/02he.fakesmooth
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1028,7 +1028,7 @@ tolerances: {tolvrs: 1.00E-08, }
     (2DErelax=   -8.9646363971E+00 Ha. 2DEnonrelax=    1.0243842585E+01 Ha)
     (  non-var. 2DEtotal :    1.2792063541E+00 Ha)
 
- Components of second-order derivatives of the electronic energy, EIGR2D.
+ Components of second-order derivatives of the electronic energy, EIGR2D, in Ha unit.
  For automatic tests, printing the matrix for the first k-point, first band, first atom.
    1   1   1   1   -3.6318984340E+00    0.0000000000E+00
    1   1   2   1    6.8414367685E-01    0.0000000000E+00
@@ -1335,7 +1335,7 @@ tolerances: {tolvrs: 1.00E-08, }
     (2DErelax=   -8.9646363971E+00 Ha. 2DEnonrelax=    1.0243842585E+01 Ha)
     (  non-var. 2DEtotal :    1.2792063541E+00 Ha)
 
- Components of second-order derivatives of the electronic energy, EIGR2D.
+ Components of second-order derivatives of the electronic energy, EIGR2D, in Ha unit.
  For automatic tests, printing the matrix for the first k-point, first band, first atom.
    1   1   1   1   -2.6102084539E+00    0.0000000000E+00
    1   1   2   1    6.8414367689E-01    0.0000000000E+00
@@ -1642,7 +1642,7 @@ tolerances: {tolvrs: 1.00E-08, }
     (2DErelax=   -8.9646363784E+00 Ha. 2DEnonrelax=    1.0243842585E+01 Ha)
     (  non-var. 2DEtotal :    1.2792063728E+00 Ha)
 
- Components of second-order derivatives of the electronic energy, EIGR2D.
+ Components of second-order derivatives of the electronic energy, EIGR2D, in Ha unit.
  For automatic tests, printing the matrix for the first k-point, first band, first atom.
    1   1   1   1   -3.6318984129E+00    0.0000000000E+00
    1   1   2   1    2.2636113290E+00    0.0000000000E+00
@@ -1949,7 +1949,7 @@ tolerances: {tolvrs: 1.00E-08, }
     (2DErelax=   -1.7241317497E+01 Ha. 2DEnonrelax=    2.0123351794E+01 Ha)
     (  non-var. 2DEtotal :    2.8820388867E+00 Ha)
 
- Components of second-order derivatives of the electronic energy, EIGR2D.
+ Components of second-order derivatives of the electronic energy, EIGR2D, in Ha unit.
  For automatic tests, printing the matrix for the first k-point, first band, first atom.
    1   1   1   1   -2.6102084539E+00    0.0000000000E+00
    1   1   2   1    1.2419207351E+00    0.0000000000E+00
@@ -2256,7 +2256,7 @@ tolerances: {tolvrs: 1.00E-08, }
     (2DErelax=   -1.7241317479E+01 Ha. 2DEnonrelax=    2.0123351794E+01 Ha)
     (  non-var. 2DEtotal :    2.8820389049E+00 Ha)
 
- Components of second-order derivatives of the electronic energy, EIGR2D.
+ Components of second-order derivatives of the electronic energy, EIGR2D, in Ha unit.
  For automatic tests, printing the matrix for the first k-point, first band, first atom.
    1   1   1   1   -3.6318984129E+00    0.0000000000E+00
    1   1   2   1    6.8414369403E-01    0.0000000000E+00
@@ -2563,7 +2563,7 @@ tolerances: {tolvrs: 1.00E-08, }
     (2DErelax=   -1.7241317479E+01 Ha. 2DEnonrelax=    2.0123351794E+01 Ha)
     (  non-var. 2DEtotal :    2.8820389049E+00 Ha)
 
- Components of second-order derivatives of the electronic energy, EIGR2D.
+ Components of second-order derivatives of the electronic energy, EIGR2D, in Ha unit.
  For automatic tests, printing the matrix for the first k-point, first band, first atom.
    1   1   1   1   -2.6102084365E+00    0.0000000000E+00
    1   1   2   1    6.8414369407E-01    0.0000000000E+00
@@ -2702,8 +2702,8 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=      8.000   => boxcut(ratio)=   1.89816
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.fakesmooth
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.fakesmooth
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/antonius_fixeigr2d/tests/Psps_for_tests/02he.fakesmooth
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/antonius_fixeigr2d/tests/Psps_for_tests/02he.fakesmooth
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2892,7 +2892,7 @@ tolerances: {tolvrs: 1.00E-08, }
     (2DErelax=   -1.4014230160E+01 Ha. 2DEnonrelax=    1.5183597190E+01 Ha)
     (  non-var. 2DEtotal :    1.1693663370E+00 Ha)
 
- Components of second-order derivatives of the electronic energy, EIGR2D.
+ Components of second-order derivatives of the electronic energy, EIGR2D, in Ha unit.
  For automatic tests, printing the matrix for the first k-point, first band, first atom.
    1   1   1   1   -5.3473413311E+00    0.0000000000E+00
    1   1   2   1    1.7824470935E+00    0.0000000000E+00
@@ -3272,10 +3272,10 @@ P          mk1mem           8
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          2.4  wall=          2.5
+- Proc.   0 individual time (sec): cpu=          2.9  wall=          3.0
 
 ================================================================================
 
  Calculation completed.
 .Delivered  14 WARNINGs and  49 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          2.4  wall=          2.5
++Overall time at end (sec) : cpu=          2.9  wall=          3.0
