@@ -480,11 +480,12 @@ subroutine barevcoul(rcut,icutcoul,qpoint,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,b
 
    do ig=1,nfft
      if(abs(gpq(ig))<tol4) then
-        barev(ig)=barev(ig)+divgq0
+        !FIXME FBruneval check this value, ERFC value was wrong, so why not this one.
+        barev(ig)=barev(ig) + divgq0
      else if(gpq(ig)<=cutoff) then
        !FIXME FBruneval shortrange does not make sense here (it is an optional argument)
        if(shortrange) then
-         barev(ig)=barev(ig)+gpq2(ig)*exp(-pi/(gpq2(ig)*rcut**2))
+         barev(ig)=barev(ig) + gpq2(ig) * exp( -pi * rcut**2 /gpq2(ig) )
        end if
     end if
    end do
@@ -493,12 +494,12 @@ subroutine barevcoul(rcut,icutcoul,qpoint,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,b
 
    do ig=1,nfft
      if(abs(gpq(ig))<tol4) then
-        barev(ig)=barev(ig)+divgq0
+        !FBruneval there was a wrong value here
+        barev(ig) = pi * rcut**2
      else if(gpq(ig)<=cutoff) then
-       !FIXME FBruneval shortrange does not make sense here (it is an optional argument)
-       if(shortrange) then
-         barev(ig)=barev(ig)+gpq2(ig)*(one-exp(-pi/(gpq2(ig)*rcut**2)))
-       end if
+       ! gpq2 is 4 pi / (q+G)**2
+       ! 4 pi / (q+G)**2 * [ 1 - exp( -1/4 * Rc**2 * (q+G)**2 ) ]
+       barev(ig) = gpq2(ig) * ( one - exp( -pi * rcut**2 / gpq2(ig) ) )
     end if
    end do
 
