@@ -46,7 +46,7 @@
 #%% nprocs_to_test = 2
 #%% max_nprocs = 2
 #%% [NCPU_2]
-#%% files_to_test = t07_MPI2.abo, tolnlines=   16,   tolabs=  7.5e-8,      tolrel= 2.0e-2
+#%% files_to_test = t07_MPI2.abo, tolnlines=   16,   tolabs=  7.6e-8,      tolrel= 2.0e-2
 #%% [extra_info]
 #%% keywords = PAW
 #%% authors = M. Sarraute

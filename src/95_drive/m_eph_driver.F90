@@ -793,7 +793,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
    if (dtfil%filabiwanin /= ABI_NOFILE) then
      call gstore%from_ncpath(gstore_path, with_cplex2, dtset, cryst, ebands, ifc, comm)
      !call gstore%load()
-     call gstore%wannierize(dtfil)
+     call gstore%wannierize(dvdb, dtfil)
      call gstore%free()
    end if
 
@@ -814,7 +814,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  !            - Pass gstore object to the eph_task routines (what about ebands)?
 
  !  call gstore%from_ncpath(gstore_path, with_cplex2, dtset, cryst, ebands, ifc, comm)
- !  call gstore%wannierize(dtfil)
+ !  call gstore%wannierize(dvdb, dtfil)
  !  call gstore%free()
 
  !  call gstore%init(gstore_path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc, comm)

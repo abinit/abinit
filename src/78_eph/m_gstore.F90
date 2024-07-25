@@ -88,7 +88,7 @@
 !! TODO
 !!  1) Introduce new communicator to distribute (band_1, band_2)
 !!
-!!  2) Implement possibility of reading a subset of data from a larger gstore.
+!!  2) Implement possibility of reading a subset of data from a larger gstore?
 !!
 !! COPYRIGHT
 !!  Copyright (C) 2008-2024 ABINIT group (MG)
@@ -611,13 +611,15 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
  real(dp),allocatable :: qbz(:,:), wtk(:), kibz(:,:), kbz(:,:)
  !real(dp),allocatable :: phfrq(:), displ_cart(:,:,:,:)
  type(wan_t),target :: wan_spin(ebands%nsppol)
- complex(dp),allocatable :: out_gatm(:,:,:,:)
+ complex(dp),allocatable :: intp_gatm(:,:,:,:)
 !----------------------------------------------------------------------
 
  call cwtime(cpu, wall, gflops, "start")
  all_nproc = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
  natom3 = 3 * cryst%natom; nsppol = ebands%nsppol
  units = [std_out, ab_out]
+
+ call wrtout(std_out, " gstore_init: building gstore_t object...")
 
  ! Set basic parameters.
  gstore%comm = comm; gstore%nsppol = nsppol; gstore%path = path
@@ -636,8 +638,7 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
    end do
    if (dtfil%filgwanin /= ABI_NOFILE) then
      has_gwan = .True.
-     ! TODO:
-     ! Interpolate band energies.
+     ! TODO: Use Wannier to interpolate band energies on the dense k-mesh
      !call wan_interp_ebands(wan_spin, cryst, ebands, intp_kptrlatt, intp_nshiftk, intp_shiftk, dense_ebands, comm)
      !gstore%ebands => dense_ebands; gstore%ebands_owns_memory = .True.
    end if
@@ -1024,33 +1025,37 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
  call cwtime_report(" gstore_init:", cpu, wall, gflops)
 
  if (has_gwan .and. with_cplex /= 0) then
-   call wrtout(units, " Using Wannier interpolation to compute and store e-ph matrix elements ...")
+   call wrtout(units, " Using Wannier interpolation to compute and store e-ph matrix elements ...", pre_newlines=1)
+
    do my_is=1,gstore%my_nspins
      spin = gstore%my_spins(my_is)
      associate (gqk => gstore%gqk(my_is), wan => gstore%gqk(my_is)%wan)
 
-     ! Here we build gqk%wan from file
+     ! Here we build gqk%wan for this spin from the ABIWAN.nc file
+     ! and set the communicator for perturbations from gstore.
      call wan%from_abiwan(dtfil%filabiwanin, spin, ebands%nsppol, keep_umats, "", gqk%comm%value)
      wan%my_pert_start = gqk%my_pert_start; wan%my_npert = gqk%my_npert; wan%pert_comm => gqk%pert_comm
 
-     ! Now load g(R_e, R_p) from GWAN.nc
+     ! Now load g(R_e, R_p) for this spin from GWAN.nc
      call wan%load_gwan(dtfil%filgwanin, gstore%cryst, spin, ebands%nsppol, gqk%comm) ! gqk%pert_comm,
 
+     ! Interpolate my e-ph matrix elements.
+     ! NOTE: the interpolated values are in the atomic representation and distributed over perts.
+     ! Then one should take into account the change between atom and phonon representation.
      nq = 1
-     ABI_MALLOC(out_gatm, (wan%nwan, wan%nwan, wan%my_npert, nq))
+     ABI_MALLOC(intp_gatm, (wan%nwan, wan%nwan, wan%my_npert, nq))
      do my_iq=1,gqk%my_nq
        call gqk%myqpt(my_iq, gstore, weight_qq, qpt)
        !call ifc%fourq(cryst, qq_ibz, phfrq, displ_cart_qibz, out_displ_red=displ_red_qibz, out_eigvec=pheigvec_qibz)
        do my_ik=1,gqk%my_nk
          kpt = gqk%my_kpts(:,my_ik); kq = kpt + qpt
-         call wan%interp_eph_manyq(1, qpt, kpt, out_gatm)
+         call wan%interp_eph_manyq(1, qpt, kpt, intp_gatm)
        end do ! my_ik
      end do ! my_iq
-     ABI_FREE(out_gatm)
+     ABI_FREE(intp_gatm)
 
      end associate
    end do ! my_is
-   ABI_ERROR("All done")
  end if
 
 contains
@@ -1880,9 +1885,8 @@ subroutine gstore_filter_qprange__(gstore, dtset, qbz, qbz2ibz, qibz2bz, kbz, ki
  type(ebands_t),pointer :: ebands
  type(gaps_t) :: gaps
 !arrays
- real(dp),allocatable :: kcalc(:,:)
  integer,allocatable :: bstart_ks(:,:), nbcalc_ks(:,:)
-
+ real(dp),allocatable :: kcalc(:,:)
 !----------------------------------------------------------------------
 
  my_rank = xmpi_comm_rank(gstore%comm)
@@ -1983,7 +1987,6 @@ subroutine recompute_select_qbz_spin(gstore, qbz, qbz2ibz, qibz2bz, kbz, kibz, k
  integer,allocatable :: map_kq(:,:)
  real(dp) :: qpt(3)
  real(dp),contiguous, pointer :: kpts_ptr(:,:)
-
 ! *************************************************************************
 
  ABI_UNUSED(kbz2ibz)
@@ -2012,9 +2015,23 @@ subroutine recompute_select_qbz_spin(gstore, qbz, qbz2ibz, qibz2bz, kbz, kibz, k
      end if
 
      do ii=1,len_kpts_ptr
-       ikq_ibz = map_kq(1, ii)
-       ikq_bz = kibz2bz(ikq_ibz)
-       select_qbz_spin(iq_bz, :) = select_qbz_spin(iq_bz, :) + select_kbz_spin(ikq_bz, :)
+
+       ! get the k-index in BZ
+       select case (gstore%kzone)
+       case ("bz")
+         ik_bz = ii
+       case ("ibz")
+         ik_bz = kibz2bz(ii)
+       end select
+
+       do spin=1,gstore%nsppol
+         if (select_kbz_spin(ik_bz, spin) /= 0) then
+           ! now, see if q-point connects k-points inside the filtered zone
+           ikq_ibz = map_kq(1, ii)
+           ikq_bz = kibz2bz(ikq_ibz)
+           select_qbz_spin(iq_bz, :) = select_qbz_spin(iq_bz, :) + select_kbz_spin(ikq_bz, :)
+         end if
+       end do
      end do
    end do ! iq_ibz
 
@@ -2122,7 +2139,6 @@ subroutine gstore_fill_bks_mask(gstore, mband, nkibz, nsppol, bks_mask)
 !arrays
  integer,allocatable :: map_kq(:,:)
  real(dp) :: qpt(3)
-
 !----------------------------------------------------------------------
 
  call cwtime(cpu, wall, gflops, "start")
@@ -2328,7 +2344,7 @@ subroutine gstore_get_mpw_gmax(gstore, ecut, mpw, gmax)
        mpw = max(mpw, onpw)
        do ipw=1,onpw
          do ii=1,3
-          gmax(ii) = max(gmax(ii), abs(gtmp(ii,ipw)))
+           gmax(ii) = max(gmax(ii), abs(gtmp(ii,ipw)))
          end do
        end do
        ABI_FREE(gtmp)
@@ -2628,7 +2644,7 @@ subroutine gstore_free(gstore)
  ABI_SFREE(gstore%glob_nq_spin)
  ABI_SFREE(gstore%erange_spin)
 
- if (.not. gstore%ebands_owns_memory) call ebands_free(gstore%ebands)
+ if (gstore%ebands_owns_memory) call ebands_free(gstore%ebands)
 
  call gstore%krank_ibz%free()
  call gstore%qrank_ibz%free()
@@ -3154,8 +3170,8 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
  ! Increasing the buffer size increases the memory requirements
  ! but it leads to better performance as the number of IO operations is decreased.
  ! TODO: Should compute it on the basis of my_nkpt and my_nqpt
- qbuf_size = 4
- call wrtout(std_out, sjoin(" Begin computation of e-ph matrix elements with qbuf_size:", itoa(qbuf_size)))
+ qbuf_size = 16
+ call wrtout(std_out, sjoin(" Begin computation of e-ph matrix elements with qbuf_size:", itoa(qbuf_size)), pre_newlines=1)
 
  if (psps%usepaw == 1) then
    ABI_ERROR("PAW not implemented")
@@ -3190,6 +3206,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
  use_ftinterp = .True.
  !use_ftinterp = .False.
 
+ ! TODO:
 #if 0
  cnt = 0
  spin_loop: do my_is=1,gstore%my_nspins
@@ -3357,7 +3374,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
  ! inside the loop over my_iq if filtering has been used.
  ! TODO: Write phdata only if eph_task == -11
  if (ndone == 0) then
-   call wrtout(std_out, " Computing phonon frequencies and displacements in the IBZ")
+   call wrtout(std_out, " Computing phonon frequencies and displacements in the IBZ", pre_newlines=1)
    call cwtime(cpu, wall, gflops, "start")
 
    call xmpi_split_block(gstore%nqibz, gstore%comm, my_nqibz, my_iqibz_inds)
@@ -3394,7 +3411,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
  end if
 
  if (gstore%with_vk /= 0 .and. ndone == 0) then
-   call wrtout(std_out, " computing and writing velocity operator matrix elements in the IBZ")
+   call wrtout(std_out, " Computing and writing velocity operator matrix elements in the IBZ", pre_newlines=1)
    call wrtout(std_out, " note that not all the k-points in the IBZ are computed when kfilter is activated!")
    call cwtime(cpu, wall, gflops, "start")
 
@@ -3462,6 +3479,8 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
    ABI_FREE(cgwork)
    call cwtime_report(sjoin(" Computation of v_k group velocities with with_vk:", itoa(gstore%with_vk)), cpu, wall, gflops)
  end if
+
+ call wrtout(std_out, " Begin computation of e-ph matrix elements...", pre_newlines=1)
 
  ! Loop over my spins.
  do my_is=1,gstore%my_nspins
@@ -4502,9 +4521,9 @@ subroutine gstore_print_for_abitests(gstore, dtset)
    write(ab_out,"(a)") " E-PH matrix elements:"
    write(ab_out, "(1x,5(a5,1x),a16)") "iq","ik", "mode", "im_kq", "in_k", "|g|^2 in Ha^2"
    do iq_glob=1,glob_nq
-     if (iq_glob /= 1 .and. iq_glob /= glob_nq) cycle  ! Write first and the last q-points.
+     if (iq_glob /= 1 .and. iq_glob /= glob_nq) cycle  ! Write the first and the last q-point.
      do ik_glob=1,glob_nk
-       if (ik_glob /= 1 .and. ik_glob /= glob_nk) cycle ! Write first and the last k-points.
+       if (ik_glob /= 1 .and. ik_glob /= glob_nk) cycle ! Write the first and the last k-point.
        do ipc=1,natom3
          if (ipc /= 4 .and. ipc /= natom3) cycle ! Write the 4th and the last pertubation.
          ncerr = nf90_get_var(spin_ncid, spin_vid("gvals"), gslice_mn, &
@@ -4637,10 +4656,11 @@ end subroutine gqk_gather
 !!
 !! SOURCE
 
-subroutine gstore_wannierize(gstore, dtfil)
+subroutine gstore_wannierize(gstore, dvdb, dtfil)
 
 !Arguments ------------------------------------
  class(gstore_t),target, intent(in) :: gstore
+ type(dvdb_t),intent(in) :: dvdb
  type(datafiles_type),intent(in) :: dtfil
 
 !Local variables-------------------------------
@@ -4666,6 +4686,9 @@ subroutine gstore_wannierize(gstore, dtfil)
  end if
 
  ! TODO: Handle long-range part.
+ if (dvdb%has_zeff .or. dvdb%has_quadrupoles) then
+   ABI_WARNING("Treatment of long-range part not yet coded in gstore_wannierize!")
+ end if
 
  do my_is=1,gstore%my_nspins
    spin = gstore%my_spins(my_is); gqk => gstore%gqk(my_is); my_nq = gqk%my_nq; my_nk = gqk%my_nk; my_npert = gqk%my_npert
@@ -4681,7 +4704,7 @@ subroutine gstore_wannierize(gstore, dtfil)
                             gqk%my_pert_start, my_npert, gqk%pert_comm)
 
    nr_p = wan%nr_p; nr_e = wan%nr_e; nwan = wan%nwan
-   if (gqk%comm%me == master) call wan%print(units)
+   !if (gqk%comm%me == master) call wan%print(units)
 
    ABI_MALLOC(emikr, (nr_e))
    ABI_MALLOC(emiqr, (nr_p))
@@ -4804,6 +4827,13 @@ subroutine gstore_wannierize(gstore, dtfil)
 
    !call xmpi_sum(wan%grpe_wwp, gqk%qpt_comm%value, ierr)
    call xmpi_sum(wan%grpe_wwp, gqk%qpt_kpt_comm%value, ierr)
+
+   if (gqk%comm%me == 0) then
+     write(std_out, '(a)') '#   R_e [Bohr]    max_{m,n,nu} |g(m,n,nu R_e,:)|  min_{m,n,nu} |g(m,n,nu R_e,:)|[Ha/Bohr] '
+     do ir=1,nr_e
+       write(std_out, *) wan%rmod_e(ir), maxval(abs(wan%grpe_wwp(:,ir,:,:,:))), sum(abs(wan%grpe_wwp(:,ir,:,:,:))) / size(wan%grpe_wwp(:,ir,:,:,:))
+     end do
+   end if
 
    ! Free memory for this spin
    ABI_FREE(emikr)

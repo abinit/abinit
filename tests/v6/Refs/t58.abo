@@ -1,5 +1,5 @@
 
-.Version 9.11.2 of ABINIT 
+.Version 10.1.4.3 of ABINIT, released Jun 2024.
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2024 ABINIT group . 
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 15 Jul 2023.
-- ( at 12h03 )
+.Starting date : Wed 24 Jul 2024.
+- ( at 16h03 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v6_t58-t59/t58.abi
+- input  file    -> /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/antonius_fixeigr2d/tests/TestBot_MPI1/v6_t58-t59/t58.abi
 - output file    -> t58.abo
 - root for input  files -> t58i
 - root for output files -> t58o
@@ -179,8 +179,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      8.000   => boxcut(ratio)=   2.11434
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.fakesmooth
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.fakesmooth
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/antonius_fixeigr2d/tests/Psps_for_tests/02he.fakesmooth
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/antonius_fixeigr2d/tests/Psps_for_tests/02he.fakesmooth
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1732,7 +1732,7 @@ tolerances: {tolvrs: 1.00E-08, }
     (2DErelax=   -5.0985433320E+01 Ha. 2DEnonrelax=    5.7811976988E+01 Ha)
     (  non-var. 2DEtotal :    6.8265470353E+00 Ha)
 
- Components of second-order derivatives of the electronic energy, EIGR2D.
+ Components of second-order derivatives of the electronic energy, EIGR2D, in Ha unit.
  For automatic tests, printing the matrix for the first k-point, first band, first atom.
    1   1   1   1   -7.1075701719E-02    0.0000000000E+00
    1   1   2   1   -2.1831347035E-04    0.0000000000E+00
@@ -3235,10 +3235,10 @@ P          mk1mem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          9.1  wall=          9.2
+- Proc.   0 individual time (sec): cpu=          9.9  wall=         10.0
 
 ================================================================================
 
  Calculation completed.
-.Delivered   0 WARNINGs and  16 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          9.1  wall=          9.2
+.Delivered   0 WARNINGs and  14 COMMENTs to log file.
++Overall time at end (sec) : cpu=          9.9  wall=         10.0
