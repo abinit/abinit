@@ -1,5 +1,5 @@
 
-.Version 9.11.2 of ABINIT 
+.Version 10.1.4.3 of ABINIT, released Jun 2024.
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2024 ABINIT group . 
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 15 Jul 2023.
-- ( at 12h03 )
+.Starting date : Wed 24 Jul 2024.
+- ( at 16h03 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v6_t37-t38-t39-t40/t37.abi
+- input  file    -> /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/antonius_fixeigr2d/tests/TestBot_MPI1/v6_t37-t38-t39-t40/t37.abi
 - output file    -> t37.abo
 - root for input  files -> t37i
 - root for output files -> t37o
@@ -243,8 +243,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     20.000   => boxcut(ratio)=   2.09587
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/antonius_fixeigr2d/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/antonius_fixeigr2d/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -791,7 +791,7 @@ tolerances: {tolwfr: 1.00E-16, }
     (2DErelax=   -2.5270361015E+02 Ha. 2DEnonrelax=    2.6631971505E+02 Ha)
     (  non-var. 2DEtotal :    1.3616104904E+01 Ha)
 
- Components of second-order derivatives of the electronic energy, EIGR2D.
+ Components of second-order derivatives of the electronic energy, EIGR2D, in Ha unit.
  For automatic tests, printing the matrix for the first k-point, first band, first atom.
    1   1   1   1   -1.9077337060E+00    0.0000000000E+00
    1   1   2   1   -9.5386685303E-01    0.0000000000E+00
@@ -1125,8 +1125,8 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=     20.000   => boxcut(ratio)=   1.99384
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/antonius_fixeigr2d/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/antonius_fixeigr2d/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1540,7 +1540,7 @@ tolerances: {tolwfr: 1.00E-16, }
     (2DErelax=   -2.6745461594E+02 Ha. 2DEnonrelax=    2.7597135139E+02 Ha)
     (  non-var. 2DEtotal :    8.5167354601E+00 Ha)
 
- Components of second-order derivatives of the electronic energy, EIGR2D.
+ Components of second-order derivatives of the electronic energy, EIGR2D, in Ha unit.
  For automatic tests, printing the matrix for the first k-point, first band, first atom.
    1   1   1   1   -2.9600063434E+00    0.0000000000E+00
    1   1   2   1   -1.8782546416E+00    0.0000000000E+00
@@ -1965,10 +1965,10 @@ P          mk1mem           8
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         11.4  wall=         11.6
+- Proc.   0 individual time (sec): cpu=         14.6  wall=         14.9
 
 ================================================================================
 
  Calculation completed.
 .Delivered  17 WARNINGs and  46 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         11.4  wall=         11.6
++Overall time at end (sec) : cpu=         14.6  wall=         14.9
