@@ -111,6 +111,7 @@ contains
  complex(dpc), allocatable :: zfield(:,:), zfield_tr(:,:)
  complex(dpc), allocatable :: bc_barmagsus(:,:),bc_ss(:,:),bc_sp(:,:)
  complex(dpc), allocatable :: ifcmat(:,:),ifcmat_fm(:,:),zeff(:,:),zeff_tr(:,:)
+ complex(dpc), allocatable :: fmzeff(:,:),fmzeff_tr(:,:)
  complex(dpc), allocatable :: lm_epsilon(:,:),dum_phongreen(:,:)
 
 ! *********************************************************************
@@ -139,6 +140,8 @@ contains
  ABI_MALLOC(zfield_tr,((natom+2)*3,ndim))
  ABI_MALLOC(ifcmat,(3*natom,3*natom))
  ABI_MALLOC(ifcmat_fm,(3*natom,3*natom))
+ ABI_MALLOC(fmzeff,(3,3*natom))
+ ABI_MALLOC(fmzeff_tr,(3*natom,3))
  ABI_MALLOC(zeff,(3,3*natom))
  ABI_MALLOC(zeff_tr,(3*natom,3))
  ABI_MALLOC(lm_epsilon,(3,3))
@@ -264,7 +267,7 @@ contains
    end if
    if (jblok /= 0 ) then
      call mp_zeff(barmagsus,barmmom,barmmom_tr,ddb%val,&
-   & 0,jblok,invhmat,lm_epsilon,magpen,magsus,mpert,mpopt,&
+   & 0,fmzeff,fmzeff_tr,jblok,invhmat,lm_epsilon,magpen,magsus,mpert,mpopt,&
    & natom,nblok,ndim,dum_phongreen,prtopt,prtvol,ucvol,zeff,zeff_tr,zfield,zfield_tr)
    end if
 
@@ -412,6 +415,8 @@ contains
  ABI_FREE(ifcmat_fm)
  ABI_FREE(zeff)
  ABI_FREE(zeff_tr)
+ ABI_FREE(fmzeff)
+ ABI_FREE(fmzeff_tr)
  ABI_FREE(lm_epsilon)
  ABI_FREE(dum_phongreen)
 
@@ -1555,7 +1560,7 @@ contains
 !! SOURCE
 
  subroutine mp_zeff(barmagsus,barmmom,barmmom_tr,blkval,dissip,&
-& iblok,invhmat,lm_epsilon,magpen,magsus,mpert,mpopt,&
+& fmzeff,fmzeff_tr,iblok,invhmat,lm_epsilon,magpen,magsus,mpert,mpopt,&
 & natom,nblok,ndim,phongreen,prtopt,prtvol,ucvol,zeff,zeff_tr,zfield,zfield_tr)
 
 !Arguments -------------------------------
@@ -1567,6 +1572,8 @@ contains
  complex(dpc),intent(in) :: barmagsus(ndim,ndim)
  complex(dpc),intent(in) :: barmmom(ndim,(natom+2)*3)
  complex(dpc),intent(in) :: barmmom_tr((natom+2)*3,ndim)
+ complex(dpc),intent(out) :: fmzeff(3,natom*3)
+ complex(dpc),intent(out) :: fmzeff_tr(natom*3,3)
  complex(dpc),intent(in) :: invhmat(ndim,ndim)
  complex(dpc),intent(out) :: lm_epsilon(3,3)
  complex(dpc),intent(in) :: magsus(ndim,ndim)
@@ -1583,8 +1590,6 @@ contains
 !arrays
  complex(dpc) :: barzeff(3,natom*3)
  complex(dpc) :: barzeff_tr(natom*3,3)
- complex(dpc) :: fmzeff(3,natom*3)
- complex(dpc) :: fmzeff_tr(natom*3,3)
  complex(dpc) :: srzeff(3,natom*3)
  complex(dpc) :: srzeff_tr(natom*3,3)
  complex(dpc) :: diel_zfield(ndim,3)
@@ -2259,10 +2264,12 @@ contains
  complex(dpc), allocatable :: zfield(:,:),zfield_tr(:,:)
  complex(dpc), allocatable :: bc_barmagsus(:,:),bc_ss(:,:),bc_sp(:,:)
  complex(dpc), allocatable :: barepsilon(:,:,:),epsilon(:,:,:),ifcmat(:,:),ifcmat_fm(:,:)
- complex(dpc), allocatable :: modemm(:,:,:),zeff(:,:,:),zeff_tr(:,:,:),modezeff(:,:,:)
+ complex(dpc), allocatable :: modemm(:,:,:),zeff(:,:),zeff_tr(:,:),modezeff(:,:,:)
+ complex(dpc), allocatable :: fmzeff(:,:),fmzeff_tr(:,:)
  complex(dpc), allocatable :: zeffspec(:,:),mmomspec(:,:),magphongreen(:,:),phongreen(:,:)
  complex(dpc), allocatable :: lm_epsilon(:,:,:),ri_magelsus(:,:),lm_magelsus(:,:,:)
  complex(dpc), allocatable :: macmagsus(:,:,:)
+ complex(dpc), allocatable :: genzeff_tr(:,:), ri_genelsus(:,:,:)
 
 !TMP: CrI3 varaibles:
  complex(dpc) :: magbasis(4,4),work(4,4)
@@ -2309,8 +2316,12 @@ contains
  ABI_MALLOC(mmomspec,(ndim,nomega))
  ABI_MALLOC(eigvec,(2,3,natom,3,natom))
  ABI_MALLOC(modemm,(ndim,3*natom,nomega))
- ABI_MALLOC(zeff,(3,3*natom,nomega))
- ABI_MALLOC(zeff_tr,(3*natom,3,nomega))
+ ABI_MALLOC(fmzeff,(3,3*natom))
+ ABI_MALLOC(fmzeff_tr,(3*natom,3))
+ ABI_MALLOC(zeff,(3,3*natom))
+ ABI_MALLOC(zeff_tr,(3*natom,3))
+ ABI_MALLOC(genzeff_tr,(3*natom+ndim,3))
+ ABI_MALLOC(ri_genelsus,(3*natom+ndim,3,nomega))
  ABI_MALLOC(lm_epsilon,(3,3,nomega))
  ABI_MALLOC(modezeff,(3,3*natom,nomega))
  ABI_MALLOC(barmagsus,(ndim,ndim,nomega))
@@ -2462,8 +2473,8 @@ contains
 
 !     !Calculate the Born effective charges
      call mp_zeff(barmagsus(:,:,iw),barmmom,barmmom_tr,int_barddb,&
-   & dissip,1,invhmat,lm_epsilon(:,:,iw),magpen,magsus(:,:,iw),mpert,mpopt,&
-   & natom,1,ndim,phongreen,prtopt,prtvol,ucvol,zeff(:,:,iw),zeff_tr(:,:,iw),zfield,zfield_tr)
+   & dissip,fmzeff,fmzeff_tr,1,invhmat,lm_epsilon(:,:,iw),magpen,magsus(:,:,iw),mpert,mpopt,&
+   & natom,1,ndim,phongreen,prtopt,prtvol,ucvol,zeff,zeff_tr,zfield,zfield_tr)
 
      !Calculate the mode-resolved Born effective charges
 !     call mode_zeff(amu,eigvec,mode_phonspec(:,iw),modezeff(:,:,iw),natom,ntypat,&
@@ -2478,10 +2489,15 @@ contains
 
      !Calclate here the lattice-mediated magnetic moments induced by an electric field
      if (dissip==0) then
-       lm_magelsus(:,:,iw)=-matmul(mmom(:,1:natom*3,iw),matmul(phongreen,transpose(conjg(zeff(:,:,iw)))))
+       lm_magelsus(:,:,iw)=-matmul(mmom(:,1:natom*3,iw),matmul(phongreen,transpose(conjg(zeff(:,:)))))
      else if (dissip==1) then
-       lm_magelsus(:,:,iw)=-matmul(mmom(:,1:natom*3,iw),matmul(phongreen,zeff_tr(:,:,iw)))
+       lm_magelsus(:,:,iw)=-matmul(mmom(:,1:natom*3,iw),matmul(phongreen,zeff_tr(:,:)))
      end if
+
+     !Alternative calculation
+     genzeff_tr(1:natom*3,:)= fmzeff_tr(:,:)
+     genzeff_tr(natom*3:natom*3+ndim,:)= zfield(:,(natom+2)*3-2:(natom+2)*3)
+     ri_genelsus(:,:,iw)=-matmul(magphongreen,genzeff_tr)
 
      !Convert magnetic susceptibilities to the magnon basis
 !     work(:,:)=magsus(:,:,iw)
@@ -2514,7 +2530,6 @@ contains
  write(msg,'(a,es15.7)') & 
  & ' Total norm of the spectral function: ', totnorm
    call wrtout([ab_out,std_out],msg,'COLL')
-
 
 !!!  Print results of interpolation
 !Spin susceptibilities
@@ -2659,29 +2674,29 @@ contains
  write(mmom_unit,*) '#  Magnetic moments calculated and interpolated by ANADDB'
  write(mmom_unit,*) '#'
 
- write(pfmt, '( "(es15.7, ", I2, "(es17.7))" )' )  ndim
- do imode= 1, 3*natom
-   write(mmom_unit,*) ' '
-   write(mmom_unit,'(a,i3)') '#  Real part of magnetic moments (at. units) induced by phonon mode:', imode
-   write(msg,'(a,a,a)') ch10,&
- &           ' # At  hw     m_{mat_1,1}     m_{mat_1,2}     ...     m_{mat_2,1}     m_{mat_2,2}'
-   call wrtout(mmom_unit,msg,'COLL')
-   do iw=1,nomega
-     write(msg,pfmt) &
-   & omega(iw), (real(modemm(i,imode,iw)),i=1,ndim)
-     call wrtout(mmom_unit,msg,'COLL')
-   end do
-   write(mmom_unit,*) ' '
-   write(mmom_unit,'(a,i3)') '#  Imaginary part of magnetic moments (at. units) induced by phonon mode:', imode
-   write(msg,'(a,a,a)') ch10,&
- &           ' # At  hw     m_{mat_1,1}     m_{mat_1,2}     ...     m_{mat_2,1}     m_{mat_2,2}'
-   call wrtout(mmom_unit,msg,'COLL')
-   do iw=1,nomega
-     write(msg,pfmt) &
-   & omega(iw), (aimag(modemm(i,imode,iw)),i=1,ndim)
-     call wrtout(mmom_unit,msg,'COLL')
-   end do
- end do
+! write(pfmt, '( "(es15.7, ", I2, "(es17.7))" )' )  ndim
+! do imode= 1, 3*natom
+!   write(mmom_unit,*) ' '
+!   write(mmom_unit,'(a,i3)') '#  Real part of magnetic moments (at. units) induced by phonon mode:', imode
+!   write(msg,'(a,a,a)') ch10,&
+! &           ' # At  hw     m_{mat_1,1}     m_{mat_1,2}     ...     m_{mat_2,1}     m_{mat_2,2}'
+!   call wrtout(mmom_unit,msg,'COLL')
+!   do iw=1,nomega
+!     write(msg,pfmt) &
+!   & omega(iw), (real(modemm(i,imode,iw)),i=1,ndim)
+!     call wrtout(mmom_unit,msg,'COLL')
+!   end do
+!   write(mmom_unit,*) ' '
+!   write(mmom_unit,'(a,i3)') '#  Imaginary part of magnetic moments (at. units) induced by phonon mode:', imode
+!   write(msg,'(a,a,a)') ch10,&
+! &           ' # At  hw     m_{mat_1,1}     m_{mat_1,2}     ...     m_{mat_2,1}     m_{mat_2,2}'
+!   call wrtout(mmom_unit,msg,'COLL')
+!   do iw=1,nomega
+!     write(msg,pfmt) &
+!   & omega(iw), (aimag(modemm(i,imode,iw)),i=1,ndim)
+!     call wrtout(mmom_unit,msg,'COLL')
+!   end do
+! end do
 
  write(pfmt, '( "(es15.7, ", I2, "(es17.7))" )' )  ndim*3
  write(mmom_unit,*) ' '
@@ -2759,6 +2774,29 @@ contains
     call wrtout(mmom_unit,msg,'COLL')
  end do
 
+ write(mmom_unit,*) ' '
+ write(mmom_unit,*) '# [Alternative calc] Real part of relaxed-ion local magnetoelectric tensor (at. units)'
+ write(msg,'(a,a,a)') ch10,&
+&           ' # At  hw     m_{mat_1,1}^{Ex}     m_{mat_1,1}^{Ey}',&
+&           '      ...     m_{mat_1,2}^{Ex}     ...     m_{mat_2,1}^{Ex}     ...'
+ call wrtout(mmom_unit,msg,'COLL')
+ do iw=1,nomega
+    write(msg,pfmt) &
+ &  omega(iw), ((real(ri_genelsus(3*natom+i,j,iw)),j=1,3),i=1,ndim)
+    call wrtout(mmom_unit,msg,'COLL')
+ end do
+
+ write(mmom_unit,*) ' '
+ write(mmom_unit,*) '#  [Alternative calc] Imaginary part of relaxed-ion local magnetoelectric tensor (at. units)'
+ write(msg,'(a,a,a)') ch10,&
+&           ' # At  hw     m_{mat_1,1}^{Ex}     m_{mat_1,1}^{Ey}',&
+&           '      ...     m_{mat_1,2}^{Ex}     ...     m_{mat_2,1}^{Ex}     ...'
+ call wrtout(mmom_unit,msg,'COLL')
+ do iw=1,nomega
+    write(msg,pfmt) &
+ &  omega(iw), ((aimag(ri_genelsus(3*natom+i,j,iw)),j=1,3),i=1,ndim)
+    call wrtout(mmom_unit,msg,'COLL')
+ end do
  close(mmom_unit)
 
 ! mmspec_filename=trim(outfilename_radix)//"_SPECTRAL_MAGMOM"
@@ -3061,11 +3099,15 @@ contains
  ABI_FREE(mode_phonspec)
  ABI_FREE(eigvec)
  ABI_FREE(modemm)
+ ABI_FREE(fmzeff)
+ ABI_FREE(fmzeff_tr)
  ABI_FREE(zeff)
  ABI_FREE(zeff_tr)
+ ABI_FREE(genzeff_tr)
  ABI_FREE(lm_epsilon)
  ABI_FREE(ri_magelsus)
  ABI_FREE(lm_magelsus)
+ ABI_FREE(ri_genelsus)
  ABI_FREE(modezeff)
  ABI_SFREE(w0hessian)
  ABI_SFREE(w0berry)
@@ -3327,6 +3369,7 @@ subroutine phonon_green(amu,eigvec,eta_phongreen,ifc,ifc_fm,invmagsus,&
  real(dp), allocatable :: eigval(:)
  complex(dpc), allocatable :: dynmat(:,:),w2dynmat(:,:)
  complex(dpc),allocatable :: work(:),work1(:,:)
+ complex(dpc),allocatable :: mass_magphongreen(:,:)
 !character(len=500) :: msg                   
 
 ! *************************************************************************
@@ -3502,6 +3545,7 @@ subroutine phonon_green(amu,eigvec,eta_phongreen,ifc,ifc_fm,invmagsus,&
  magphongreen=work1
 
 !Now apply the mass factors
+ ABI_MALLOC(mass_magphongreen,(mpdim,mpdim))
  do icol= 1, mpdim
    if (icol <= pdim) then
      iat2= ceiling(icol/three)
@@ -3517,20 +3561,21 @@ subroutine phonon_green(amu,eigvec,eta_phongreen,ifc,ifc_fm,invmagsus,&
        mfac1=zero
      end if
  
-     magphongreen(irow,icol)= mfac1*work1(irow,icol)*mfac2
+     mass_magphongreen(irow,icol)= mfac1*work1(irow,icol)*mfac2
  
    end do
  end do
 
 !Finally extract the generalized spectral function
  do irow= 1, mpdim
-   mode_magphonspec(irow)= -two*omega/pi * aimag(magphongreen(irow,irow))
+   mode_magphonspec(irow)= -two*omega/pi * aimag(mass_magphongreen(irow,irow))
  end do
  magphonspec= sum(mode_magphonspec(:))
 
  ABI_FREE(w2dynmat)
  ABI_FREE(ipiv)
  ABI_FREE(work1)
+ ABI_FREE(mass_magphongreen)
  ABI_FREE(invmassfac)
 
  DBG_EXIT("COLL")
