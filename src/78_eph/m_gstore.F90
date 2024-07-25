@@ -3765,6 +3765,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
  !end if
  call xmpi_barrier(gstore%comm)
  NCF_CHECK(nf90_close(root_ncid))
+ call xmpi_barrier(gstore%comm)
 
  ! TODO
  ! Output some of the results to ab_out for testing purposes
