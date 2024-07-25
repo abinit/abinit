@@ -3649,7 +3649,6 @@ subroutine wan_interp_eph_manyq(wan, nq, qpts, kpt, g_atm)
 !************************************************************************
 
  ! TODO: Handle long-range part.
-
  nr_p = wan%nr_p; nr_e = wan%nr_e; nwan = wan%nwan; my_npert = wan%my_npert
 
  ABI_MALLOC(eikr, (nr_e))
@@ -3658,9 +3657,9 @@ subroutine wan_interp_eph_manyq(wan, nq, qpts, kpt, g_atm)
  ABI_MALLOC(u_kq, (nwan, nwan))
  ABI_MALLOC(cmat_w, (nwan, nwan))
 
- ABI_CHECK(allocated(wan%r_e), "wan%r_e is not allocated!")
- ABI_CHECK(allocated(wan%ndegen_e), "wan%ndegen_e is not allocated!")
- ABI_CHECK(allocated(wan%grpe_wwp), "wan%grpe_wwp is not allocated!")
+ !ABI_CHECK(allocated(wan%r_e), "wan%r_e is not allocated!")
+ !ABI_CHECK(allocated(wan%ndegen_e), "wan%ndegen_e is not allocated!")
+ !ABI_CHECK(allocated(wan%grpe_wwp), "wan%grpe_wwp is not allocated!")
 
  do ir=1,nr_e
    eikr(ir) = exp(+j_dpc * two_pi * dot_product(kpt, wan%r_e(:, ir))) / wan%ndegen_e(ir)
@@ -3832,8 +3831,7 @@ subroutine wan_ncwrite_gwan(wan, dtfil, cryst, ebands, pert_comm)
                           start=[1,1,ir,1,1,1], count=[2, wan%nr_p, batch_size, wan%nwan, wan%nwan, natom3])
      NCF_CHECK(ncerr)
      do idat=1,ndat
-       ! TODO
-       !write(ount, *) wan%rmod_e(ir+idat-1), maxval(abs(cbuf5(:,idat,:,:,:)))
+       write(ount, *) wan%rmod_e(ir+idat-1), maxval(abs(cbuf5(:,idat,:,:,:)))
      end do
    end do
    ABI_FREE(cbuf5)
@@ -3928,7 +3926,7 @@ subroutine wan_load_gwan(wan, gwan_filepath, cryst, spin, nsppol, all_comm)
  NCF_CHECK(ncerr)
 
  NCF_CHECK(nf90_close(root_ncid))
- call wrtout(units, " Reading of GWAN file completed.")
+ call wrtout(units, " Reading of GWAN.nc file completed.")
 
 contains
  integer function vid_spin(var_name)
@@ -3978,11 +3976,11 @@ subroutine wan_interp_ebands(wan_spin, cryst, in_ebands, intp_kptrlatt, intp_nsh
  real(dp) :: params(4)
  real(dp),allocatable :: eigens_k(:)
  complex(dp),allocatable :: u_k(:,:)
-
 !************************************************************************
 
  my_rank = xmpi_comm_rank(comm); nproc = xmpi_comm_size(comm)
 
+ ! Build new ebands object with memory to be filled.
  band_block(:) = [1, wan_spin(1)%max_nwan]
  out_ebands = ebands_interp_kmesh(in_ebands, cryst, params, intp_kptrlatt, intp_nshiftk, intp_shiftk, &
                                   band_block, comm, malloc_only=.True.)

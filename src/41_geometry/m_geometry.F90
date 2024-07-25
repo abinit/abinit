@@ -1244,7 +1244,7 @@ subroutine metric(gmet, gprimd, iout, rmet, rprimd, ucvol)
  end if
 
  ! Generate gprimd
- call matr3inv(rprimd,gprimd)
+ call matr3inv(rprimd, gprimd)
 
  ! Write out rprimd, gprimd and ucvol
  if (iout>=0) then
