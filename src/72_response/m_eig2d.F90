@@ -785,6 +785,7 @@ subroutine eig2stern(dtfil,occ,bdeigrf,clflg,cg1_pert,dim_eig2nkq,dim_eig2rf,eig
  integer, allocatable :: nband_rbz(:),icg2_rbz(:,:)
  integer, allocatable :: blkflg_save(:,:,:,:)
  integer, allocatable :: flg(:,:,:,:)
+ real(dp),allocatable :: eig2nkq_tmp(:,:,:,:,:,:,:)
  integer, pointer     :: kpt_fine_sub(:)
  real(dp)             :: tsec(2)
  real(dp),allocatable :: cwavef(:,:),cwavef2(:,:),center(:),eigen0tmp(:),eigenqtmp(:)
@@ -1234,6 +1235,7 @@ subroutine eig2stern(dtfil,occ,bdeigrf,clflg,cg1_pert,dim_eig2nkq,dim_eig2rf,eig
      ! SP: these cases are used for non-adiabatic quantities. In this routine we do not have access
      !     to the phonon frequency. Therefore eig2nkq only contains the Sternheimer part.
      !
+
      mpert_ = dtset%natom
 
      ! Initialize perturbation flags
@@ -1258,7 +1260,19 @@ subroutine eig2stern(dtfil,occ,bdeigrf,clflg,cg1_pert,dim_eig2nkq,dim_eig2rf,eig
 
      ! Set d2eig data
      call ddb%set_qpt(1, dtset%qptn)
-     call ddb%set_d2eig_reshape(1, eig2nkq, flg)
+
+     ! Copy eig2nkq because it needs to be summed before writing the file,
+     ! yet there are further processing on the eig2nkq array occuring
+     ! after this function
+     ABI_MALLOC(eig2nkq_tmp,(2,mband*nsppol,nkpt_rbz,3,npert,3,npert*dim_eig2nkq))
+     eig2nkq_tmp = eig2nkq
+     if(xmpi_paral==1) then
+       call xmpi_sum(eig2nkq_tmp,spaceworld,ierr)
+     end if
+
+     call ddb%set_d2eig_reshape(1, eig2nkq_tmp, flg)
+
+     ABI_FREE(eig2nkq_tmp)
 
      ! Open the file and write header
      call ddb_hdr%set_typ(ddb%nblok, ddb%typ)
