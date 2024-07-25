@@ -47,6 +47,7 @@ AC_DEFUN([SD_LINALG_INIT], [
   sd_linalg_has_lapacke="unknown"
   sd_linalg_has_blacs="unknown"
   sd_linalg_has_scalapack="unknown"
+  sd_linalg_has_buggy_zdot="unknown"
   sd_linalg_has_elpa="unknown"
   sd_linalg_has_elpa_2013="unknown"
   sd_linalg_has_elpa_2014="unknown"
