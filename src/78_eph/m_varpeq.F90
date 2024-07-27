@@ -2330,10 +2330,10 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
 !scalars
  integer,parameter :: master = 0, ndat1 = 1
  integer :: my_rank, ib, irsp, ir, uc_idx, mpw, band, bstart ! nfft, nfftf, mgfft, mgfftf, n1, n2, n3, n4, n5, n6,
- integer :: natom, natom3, nsppol, nspinor, nspden, nkibz, mband, spin, ik, sc_nfft, ebands_timrev, cnt, nproc
+ integer :: natom, natom3, nsppol, nspinor, nspden, nkibz, mband, spin, ik, sc_nfft, ebands_timrev, cnt, nproc, num_writes, ii
  integer :: ik_ibz, isym_k, trev_k, npw_k, istwf_k, npw_kq_ibz, istwf_k_ibz, nkpg_k, ierr, nk, spinor, spad, nkbz, ncid
  integer :: nqibz, iq, qtimrev, iq_ibz, isym_q, trev_q, qptopt, uc_iat, sc_iat, nu, nqbz ! icell,
- logical :: isirr_k, isirr_q, have_scell_q
+ logical :: isirr_k, isirr_q, have_scell_q, use_displaced_scell
  real(dp) :: cpu_all, wall_all, gflops_all
  character(len=500) :: msg
  character(len=fnlen) :: path
@@ -2363,7 +2363,7 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
 
  ! Read A_nk and B_qnu and other useful tables from file
  call vpq%ncread(dtfil%filvarpeqin, comm, keep_open=.False.)
- call wrtout(std_out, "Reading done")
+ !call wrtout(std_out, " Reading done")
 
  ! Copy important dimensions
  natom = cryst%natom; natom3 = 3 * natom; nsppol = ebands%nsppol; nspinor = ebands%nspinor; nspden = dtset%nspden
@@ -2417,14 +2417,10 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
    ABI_CALLOC(sc_displ_cart_re, (3, scell_q%natom, nsppol))
    ABI_CALLOC(sc_displ_cart_im, (3, scell_q%natom, nsppol))
 
-   ! TODO: Finalize the implementation.
    cnt = 0
    do spin=1,nsppol
      do iq=1,vpq%nq_spin(spin)
        cnt = cnt + 1; if (mod(cnt, nproc) /= my_rank) cycle ! MPI parallelism inside comm.
-       !if (iq == 1) then
-       !  do nu=1,3; write(std_out, *)"hello:", vpq%b_spin(1, nu, iq, spin) + j_dpc * vpq%b_spin(2, nu, iq, spin); end do
-       !end if
 
        qq = vpq%qpts_spin(:, iq, spin)
        ! Note symrec here
@@ -2481,24 +2477,28 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
    sc_displ_cart_re = -sqrt2 * sc_displ_cart_re / nqbz
    sc_displ_cart_im = -sqrt2 * sc_displ_cart_im / nqbz
 
-   ! Here we displace the atoms in the supercell for this spin (only master has the correct values)
-   !do sc_iat=1,scell_q%natom; write(std_out, *) sc_displ_cart_re(:,sc_iat); end do
-   scell_q%xcart = scell_q%xcart_ref + sc_displ_cart_re(:,:,spin)
-
    ! Write polaron-induced displacements in XSF format.
    if (my_rank == master) then
      ! Handle spin-polarized case by writing two XSF files.
      do spin=1,nsppol
        !write(msg, "(a,i0,a,es16.6)")" For spin: ", spin, ": 1/N_q \sum_qnu |B_qnu|^2 = ", sum(vpq%b_spin(:,:,:, spin) ** 2) / nqbz
        !call wrtout(units, msg)
+       write(msg, "(a,i0,a,es16.6)") " For spin: ", spin, ": maxval(abs(sc_displ_cart_re)): ", maxval(abs(sc_displ_cart_re(:,:,spin)))
+       call wrtout(units, msg)
        write(msg, "(a,i0,a,es16.6)") " For spin: ", spin, ": maxval(abs(sc_displ_cart_im)): ", maxval(abs(sc_displ_cart_im(:,:,spin)))
        call wrtout(units, msg)
-       path = strcat(dtfil%filnam_ds(4), "_POLARON_DISPL.xsf")
-       if (nsppol == 2) path = strcat(dtfil%filnam_ds(4), "_spin_", itoa(spin), "_POLARON_DISPL.xsf")
+
+       ! Here we displace the atoms in the supercell for this spin (only master has the correct values)
+       !do sc_iat=1,scell_q%natom; write(std_out, *) sc_displ_cart_re(:,sc_iat); end do
+       scell_q%xcart = scell_q%xcart_ref + sc_displ_cart_re(:,:,spin)
+
+       path = strcat(dtfil%filnam_ds(4), "_POLARON_DISPL_VECTORS.xsf")
+       if (nsppol == 2) path = strcat(dtfil%filnam_ds(4), "_spin_", itoa(spin), "_POLARON_DISPL_VECTORS.xsf")
+       call wrtout(units, sjoin(" Writing displacement vectors to:", path))
        call scell_q%write_xsf(path)
      end do
    end if
-   ABI_FREE(sc_displ_cart_re)
+
    ABI_FREE(sc_displ_cart_im)
    call cwtime_report(" Computation of polaron-induced displacements completed:", cpu_all, wall_all, gflops_all, &
                       pre_str=ch10, end_str=ch10)
@@ -2655,13 +2655,8 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
    ABI_MALLOC(pol_rho, (sc_nfft))
 
    ! Here decide if we write the polaron wavefunction with_diplaced atoms or not.
-   if (all(kptrlatt_ == qptrlatt_) .and. have_scell_q) then
-     call wrtout(units, " Writing the polaron wavefunction with diplaced atoms")
-     xcart_ptr => scell_q%xcart
-   else
-     call wrtout(units, " Writing the polaron wavefunction with undiplaced atoms")
-     xcart_ptr => scell_k%xcart
-   end if
+   use_displaced_scell = all(kptrlatt_ == qptrlatt_) .and. have_scell_q
+   num_writes = 1; if (use_displaced_scell) num_writes = 2
 
    if (nspinor == 1) then
      ! Handle spin-polarized case by writing two XSF files.
@@ -2674,11 +2669,28 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
        call wrtout(units, msg)
        write(msg, "(a,es16.6)")" maxval(abs(aimag(pol_wf))): ", maxval(abs(aimag(pol_wf(:, spin))))
        call wrtout(units, msg)
-       path = strcat(dtfil%filnam_ds(4), "_POLARON.xsf")
-       if (nsppol == 2) path = strcat(dtfil%filnam_ds(4), "_spin_", itoa(spin), "_POLARON.xsf")
-       call write_xsf(path, &
-                      sc_ngfft(1), sc_ngfft(2), sc_ngfft(3), pol_rho, scell_k%rprimd, origin0, &
-                      scell_k%natom, scell_k%ntypat, scell_k%typat, xcart_ptr, scell_k%znucl, 0)
+
+       do ii=1,num_writes
+         if (ii == 1) then
+           call wrtout(units, " Writing the polaron wavefunction with undiplaced atoms")
+           xcart_ptr => scell_k%xcart
+           path = strcat(dtfil%filnam_ds(4), "_POLARON.xsf")
+           if (nsppol == 2) path = strcat(dtfil%filnam_ds(4), "_spin_", itoa(spin), "_POLARON.xsf")
+         else
+           call wrtout(units, " Writing the polaron wavefunction with diplaced atoms")
+
+           path = strcat(dtfil%filnam_ds(4), "_POLARON_DISPL.xsf")
+           if (nsppol == 2) path = strcat(dtfil%filnam_ds(4), "_spin_", itoa(spin), "_POLARON_DISPL.xsf")
+
+           ! Here we displace the atoms in the supercell for this spin (only master has the correct values)
+           scell_q%xcart = scell_q%xcart_ref + sc_displ_cart_re(:,:,spin)
+           xcart_ptr => scell_q%xcart
+         end if
+
+         call write_xsf(path, sc_ngfft(1), sc_ngfft(2), sc_ngfft(3), pol_rho, scell_k%rprimd, origin0, &
+                        scell_k%natom, scell_k%ntypat, scell_k%typat, xcart_ptr, scell_k%znucl, 0)
+       end do ! ii
+
      end do ! spin
 
    else
@@ -2692,14 +2704,32 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
      write(msg, "(a,es16.6)")" maxval(abs(aimag(pol_wf))): ", maxval(abs(aimag(pol_wf(:, 1))))
      call wrtout(units, msg)
 
-     call write_xsf(strcat(dtfil%filnam_ds(4), "_POLARON.xsf"), &
-                    sc_ngfft(1), sc_ngfft(2), sc_ngfft(3), pol_rho, scell_k%rprimd, origin0, &
-                    scell_k%natom, scell_k%ntypat, scell_k%typat, xcart_ptr, scell_k%znucl, 0)
+     spin = 1
+     do ii=1,num_writes
+       if (ii == 1) then
+         call wrtout(units, " Writing the polaron wavefunction with undiplaced atoms")
+         xcart_ptr => scell_k%xcart
+         path = strcat(dtfil%filnam_ds(4), "_POLARON.xsf")
+       else
+         call wrtout(units, " Writing the polaron wavefunction with diplaced atoms")
+
+         path = strcat(dtfil%filnam_ds(4), "_POLARON_DISPL.xsf")
+
+         ! Here we displace the atoms in the supercell for this spin (only master has the correct values)
+         scell_q%xcart = scell_q%xcart_ref + sc_displ_cart_re(:,:,spin)
+         xcart_ptr => scell_q%xcart
+       end if
+
+       call write_xsf(path, sc_ngfft(1), sc_ngfft(2), sc_ngfft(3), pol_rho, scell_k%rprimd, origin0, &
+                      scell_k%natom, scell_k%ntypat, scell_k%typat, xcart_ptr, scell_k%znucl, 0)
+     end do ! ii
    end if
    ABI_FREE(pol_rho)
  end if ! master
 
  call cwtime_report(" Computation of polaron wavefunction completed", cpu_all, wall_all, gflops_all, pre_str=ch10, end_str=ch10)
+
+ ABI_SFREE(sc_displ_cart_re)
 
  ABI_FREE(pol_wf)
  call wfd%free()
