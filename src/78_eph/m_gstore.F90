@@ -135,7 +135,7 @@ module m_gstore
  use defs_abitypes,    only : mpi_type
  use m_time,           only : cwtime, cwtime_report, sec2str
  use m_fstrings,       only : tolower, itoa, ftoa, sjoin, ktoa, ltoa, strcat, replace_ch0
- !use m_yaml,           only : yamldoc_t
+ !use m_yaml,          only : yamldoc_t
  use m_numeric_tools,  only : arth, get_diag, isdiagmat
  use m_krank,          only : krank_t, krank_new, krank_from_kptrlatt, get_ibz2bz, star_from_ibz_idx
  use m_io_tools,       only : iomode_from_fname, file_exists !, open_file
@@ -985,7 +985,9 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
      ])
      NCF_CHECK(ncerr)
 
-     ! IMPORTANT: Init with zeros.
+     ! Compress gvals to reduce size on disk.
+     NCF_CHECK(nf90_def_var_deflate(spin_ncid, vid_spin("gvals"), shuffle=1, deflate=1, deflate_level=5))
+     ! IMPORTANT: Init gvals with zeros.
      NCF_CHECK(nf90_def_var_fill(spin_ncid, vid_spin("gvals"), NF90_FILL, GSTORE_FILL_DP))
 
      select case(gstore%with_vk)

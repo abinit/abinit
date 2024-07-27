@@ -84,6 +84,7 @@ module m_sigmaph
  use m_pawfgr,         only : pawfgr_type
  use m_dfpt_cgwf,      only : stern_t
  use m_phonons,        only : phstore_t, phstore_new
+ use m_pstat,          only : pstat_t
 
  implicit none
 
@@ -673,6 +674,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  type(phstore_t) :: phstore
  type(u1cache_t) :: u1c
  type(stern_t),target :: stern
+ type(pstat_t) :: pstat
  character(len=5000) :: msg
  character(len=fnlen) :: sigeph_filepath
 !arrays
@@ -727,6 +729,9 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  call cwtime(cpu_all, wall_all, gflops_all, "start")
 
  units = [std_out, ab_out]
+
+ call pstat%from_pid()
+ call pstat%print([std_out], header="Memory at the beginning of sigmaph")
 
  ! Copy important dimensions
  natom = cryst%natom; natom3 = 3 * natom; nsppol = ebands%nsppol; nspinor = ebands%nspinor
@@ -1198,6 +1203,8 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
  ABI_FREE(qselect)
  zpr_frohl_sphcorr = zero; zpr_frohl_sphcorr_done = .False.
+
+ call pstat%print([std_out], header="Memory before k-point loop")
 
  ! Loop over k-points in Sigma_nk. Loop over spin is internal as we operate on nspden components at once.
  do my_ikcalc=1,sigma%my_nkcalc
@@ -2552,7 +2559,8 @@ end if
    !call wrtout(std_out, sjoin("xmpi_count_requests", itoa(xmpi_count_requests)))
 
    call cwtime_report(" One ikcalc k-point", cpu_ks, wall_ks, gflops_ks)
- end do ! ikcalc
+   call pstat%print([std_out], header="Memory at the end of my_ikcalc iteration")
+ end do ! my_ikcalc
 
  call cwtime_report(" Sigma_eph full calculation", cpu_all, wall_all, gflops_all, end_str=ch10)
 
