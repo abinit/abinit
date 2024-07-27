@@ -129,6 +129,7 @@ module m_varpeq
 
     procedure :: seed_a => polstate_seed_a
     procedure :: load_a => polstate_load_a
+    procedure :: cut_a => polstate_cut_a
 
     procedure :: get_norm => polstate_get_norm
     procedure :: gather => polstate_gather
@@ -170,6 +171,7 @@ module m_varpeq
    real(dp) :: tolgrs
 
    real(dp) :: gau_params(2)
+   real(dp), allocatable :: erange_spin(:)
 
    logical :: is_complete = .False.
    logical :: restart = .False.
@@ -289,6 +291,7 @@ subroutine varpeq_free(self)
  ABI_SFREE(self%nq_spin)
  ABI_SFREE(self%nb_spin)
  ABI_SFREE(self%brange_spin)
+ ABI_SFREE(self%erange_spin)
 
  ! Free local datatypes
  call self%cryst_trinv%free()
@@ -416,6 +419,7 @@ subroutine varpeq_ncread(self, path, comm, keep_open)
  ABI_MALLOC(self%nq_spin, (nsppol))
  ABI_MALLOC(self%nb_spin, (nsppol))
  ABI_MALLOC(self%brange_spin, (2, self%nsppol))
+ ABI_MALLOC(self%erange_spin, (self%nsppol))
 
  NCF_CHECK(nf90_get_var(ncid, vid("kpts_spin"), self%kpts_spin))
  NCF_CHECK(nf90_get_var(ncid, vid("qpts_spin"), self%qpts_spin))
@@ -426,6 +430,7 @@ subroutine varpeq_ncread(self, path, comm, keep_open)
  NCF_CHECK(nf90_get_var(ncid, vid("nq_spin"), self%nq_spin))
  NCF_CHECK(nf90_get_var(ncid, vid("nb_spin"), self%nb_spin))
  NCF_CHECK(nf90_get_var(ncid, vid("brange_spin"), self%brange_spin))
+ NCF_CHECK(nf90_get_var(ncid, vid("erange_spin"), self%erange_spin))
  NCF_CHECK(nf90_get_var(ncid, vid("ngkpt"), self%ngkpt))
 
  if (present(keep_open) .and. keep_open) then
@@ -527,6 +532,7 @@ subroutine varpeq_ncwrite(self, dtset, dtfil)
      nctkarr_t("nq_spin", "int", "nsppol"), &
      nctkarr_t("nb_spin", "int", "nsppol"), &
      nctkarr_t("brange_spin", "int", "two, nsppol"), &
+     nctkarr_t("erange_spin", "dp", "nsppol"), &
      nctkarr_t("kpts_spin", "dp", "three, max_nk, nsppol"), &
      nctkarr_t("qpts_spin", "dp", "three, max_nq, nsppol"), &
      nctkarr_t("a_spin", "dp", "two, max_nb, max_nk, nsppol"), &
@@ -559,6 +565,7 @@ subroutine varpeq_ncwrite(self, dtset, dtfil)
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "nq_spin"), self%nq_spin))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "nb_spin"), self%nb_spin))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "brange_spin"), self%brange_spin))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "erange_spin"), self%erange_spin))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "kpts_spin"), self%kpts_spin))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "qpts_spin"), self%qpts_spin))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "a_spin"), self%a_spin))
@@ -789,6 +796,7 @@ subroutine varpeq_setup(self, dtfil)
  type(bzlint_t) :: bzlint
  integer, parameter :: master = 0
  integer :: my_rank, comm, ierr, my_is, spin, nk, nb, ik, ib
+ real(dp) :: anorm
 !arrays
  integer :: units(2), ngkpt(3)
  real(dp) :: kpt(3)
@@ -876,6 +884,16 @@ subroutine varpeq_setup(self, dtfil)
    else
      call polstate%seed_a(self%aseed, gau_params=self%gau_params)
    endif
+
+   ! set all the A_nk to 0 outside the energy window
+   if (self%erange_spin(spin) > tol12) then
+     call polstate%cut_a(self%erange_spin(spin))
+   endif
+
+   ! Don't forget to normalize
+   anorm = polstate%get_norm('a')
+   polstate%my_a(:, :) = polstate%my_a(:, :)*sqrt(one*polstate%nkbz)/anorm
+   call polstate%gather('a')
 
  enddo
 end subroutine varpeq_setup
@@ -976,9 +994,11 @@ subroutine varpeq_record(self, iter, my_is)
 
  select case(self%pkind)
  case ("electron")
-   psign = 1; shift = self%gaps%cb_min(spin)
+   psign = 1; shift = zero
+   !psign = 1; shift = self%gaps%cb_min(spin)
  case ("hole")
-   psign = -1; shift = -self%gaps%vb_max(spin)
+   psign = -1; shift = zero
+   !psign = -1; shift = -self%gaps%vb_max(spin)
  end select
 
  self%iter_rec_spin(1, iter, spin) = &
@@ -1061,6 +1081,7 @@ subroutine varpeq_init(self, gstore, dtset)
  ABI_MALLOC(self%nq_spin, (gstore%nsppol))
  ABI_MALLOC(self%nb_spin, (gstore%nsppol))
  ABI_MALLOC(self%brange_spin, (2, gstore%nsppol))
+ ABI_MALLOC(self%erange_spin, (gstore%nsppol))
 
  self%nk_spin(:) = gstore%glob_nk_spin(:)
  self%nq_spin(:) = gstore%glob_nq_spin(:)
@@ -1099,12 +1120,19 @@ subroutine varpeq_init(self, gstore, dtset)
 
    bstart = self%gstore%brange_spin(1, spin)
    select case(self%pkind)
+     ! we shift bands wrt band edge
    case ("electron")
-     polstate%eig = gstore%ebands%eig(bstart:bstart+gqk%nb-1, :, spin)
+     polstate%eig = &
+       gstore%ebands%eig(bstart:bstart+gqk%nb-1, :, spin) - self%gaps%cb_min(spin)
+     !polstate%eig = gstore%ebands%eig(bstart:bstart+gqk%nb-1, :, spin)
    case ("hole")
      ! here we flip the valence bands to deal with the minimization process later on
-     polstate%eig = -gstore%ebands%eig(bstart:bstart+gqk%nb-1, :, spin)
+     polstate%eig = &
+       -(gstore%ebands%eig(bstart:bstart+gqk%nb-1, :, spin) - self%gaps%vb_max(spin))
+     !polstate%eig = -gstore%ebands%eig(bstart:bstart+gqk%nb-1, :, spin)
    end select
+   ! set erange for each spin
+   self%erange_spin(spin) = dtset%varpeq_erange(spin)
 
    ! k-space and q-space treated by this proc
    polstate%my_kpts => gqk%my_kpts(:,:)
@@ -1899,6 +1927,49 @@ end subroutine polstate_get_b_from_a
 
 !----------------------------------------------------------------------
 
+!!****f* m_varpeq/polstate_cut_a
+!! NAME
+!!  polstate_cut_a
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SOURCE
+
+subroutine polstate_cut_a(self, erange)
+
+!Arguments ------------------------------------
+!scalars
+ class(polstate_t), intent(inout) :: self
+!arrays
+ real(dp), intent(in) :: erange
+
+!Local variables-------------------------------
+!scalars
+ class(gqk_t), pointer :: gqk
+ integer :: my_ik, ik_ibz, ib
+ real(dp) :: eig
+
+!----------------------------------------------------------------------
+
+ gqk => self%gqk
+
+ do my_ik=1,gqk%my_nk
+   ik_ibz = gqk%my_k2ibz(1, my_ik)
+   do ib=1,gqk%nb
+     eig = self%eig(ib, ik_ibz)
+     if (eig > erange) self%my_a(ib, my_ik) = zero
+   enddo
+ enddo
+
+end subroutine polstate_cut_a
+!!***
+
+!----------------------------------------------------------------------
+
 !!****f* m_varpeq/polstate_load_a
 !! NAME
 !!  polstate_load_a
@@ -1923,7 +1994,6 @@ subroutine polstate_load_a(self, varpeq_a)
 !scalars
  class(gqk_t), pointer :: gqk
  integer :: my_ik, ik_glob, ib
- real(dp) :: anorm
  complex(dp) :: ank
 
 !----------------------------------------------------------------------
@@ -1938,11 +2008,6 @@ subroutine polstate_load_a(self, varpeq_a)
      self%my_a(ib, my_ik) = ank
    enddo
  enddo
-
- anorm = self%get_norm('a')
- self%my_a(:, :) = self%my_a(:, :)*sqrt(one*self%nkbz)/anorm
-
- call self%gather('a')
 
 end subroutine polstate_load_a
 !!***
@@ -1974,7 +2039,6 @@ subroutine polstate_seed_a(self, mode, gau_params)
 !scalars
  class(gqk_t), pointer :: gqk
  integer :: ierr
- real(dp) :: anorm
  real(dp), allocatable :: re_rand(:,:), im_rand(:,:)
 
 !----------------------------------------------------------------------
@@ -1985,6 +2049,8 @@ subroutine polstate_seed_a(self, mode, gau_params)
  case ("gaussian")
    ABI_CHECK(present(gau_params), "polstate_seed_a: missing gau_params argument")
    call gaussian_(gau_params(1), gau_params(2))
+ case ("even")
+   self%my_a(:,:) = one
  case ("random")
    ABI_MALLOC(re_rand, (gqk%nb, gqk%my_nk))
    ABI_MALLOC(im_rand, (gqk%nb, gqk%my_nk))
@@ -2000,11 +2066,6 @@ subroutine polstate_seed_a(self, mode, gau_params)
  case default
    ABI_ERROR(sjoin("polstate_seed_a, unsuported mode: ", mode))
  end select
-
- anorm = self%get_norm('a')
- self%my_a(:, :) = self%my_a(:, :)*sqrt(one*self%nkbz)/anorm
-
- call self%gather('a')
 
 !----------------------------------------------------------------------
 

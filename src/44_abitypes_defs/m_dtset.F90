@@ -666,6 +666,7 @@ type, public :: dataset_type
  real(dp) :: varpeq_tolgrs = tol6
  real(dp) :: varpeq_pc_factor = eighth
  real(dp) :: varpeq_gau_params(2) = [zero, one]
+ real(dp) :: varpeq_erange(2) = zero
 
  integer :: vdw_nfrag
  integer :: vdw_df_ndpts
@@ -2051,6 +2052,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%varpeq_pc_nupdate  = dtin%varpeq_pc_nupdate
  dtout%varpeq_pc_factor   = dtin%varpeq_pc_factor
  dtout%varpeq_gau_params  = dtin%varpeq_gau_params
+ dtout%varpeq_erange      = dtin%varpeq_erange
 
  dtout%vdw_df_acutmin     = dtin%vdw_df_acutmin
  dtout%vdw_df_aratio      = dtin%vdw_df_aratio
@@ -3565,7 +3567,8 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' use_oldchi'
 !V
  list_vars=trim(list_vars)//' vaclst vacnum vacuum vacwidth vcutgeo'
- list_vars=trim(list_vars)//' varpeq_aseed varpeq_gau_params varpeq_interpolate varpeq_nstep varpeq_pkind'
+ list_vars=trim(list_vars)//' varpeq_aseed varpeq_erange varpeq_gau_params'
+ list_vars=trim(list_vars)//' varpeq_interpolate varpeq_nstep varpeq_pkind'
  list_vars=trim(list_vars)//' varpeq_tolgrs varpeq_pc_nupdate varpeq_pc_factor'
  list_vars=trim(list_vars)//' vdw_nfrag vdw_supercell'
  list_vars=trim(list_vars)//' vdw_tol vdw_tol_3bt vdw_typfrag vdw_xc'
