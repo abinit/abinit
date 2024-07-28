@@ -1353,7 +1353,7 @@ subroutine polstate_update_pcond(self, factor)
  do my_ik=1,gqk%my_nk
    ik_ibz = gqk%my_k2ibz(1, my_ik)
    do ib=1,gqk%nb
-     self%my_pcond(ib, my_ik) = one/(self%eig(ib, ik_ibz) - factor*self%eps)
+     self%my_pcond(ib, my_ik) = one/(self%eig(ib, ik_ibz) + factor*abs(self%eps))
    enddo
  enddo
 
