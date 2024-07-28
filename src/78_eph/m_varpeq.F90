@@ -887,7 +887,7 @@ subroutine varpeq_setup(self, dtfil)
 
    ! set all the A_nk to 0 outside the energy window
    if (self%erange_spin(spin) > tol12) then
-     call polstate%cut_a(self%erange_spin(spin))
+     call polstate%cut_a(self%erange_spin(spin) + onehalf*eV_Ha)
    endif
 
    ! Don't forget to normalize
@@ -994,10 +994,10 @@ subroutine varpeq_record(self, iter, my_is)
 
  select case(self%pkind)
  case ("electron")
-   psign = 1; shift = zero
+   psign = 1; shift = onehalf*eV_Ha
    !psign = 1; shift = self%gaps%cb_min(spin)
  case ("hole")
-   psign = -1; shift = zero
+   psign = -1; shift = onehalf*eV_Ha
    !psign = -1; shift = -self%gaps%vb_max(spin)
  end select
 
@@ -1123,12 +1123,12 @@ subroutine varpeq_init(self, gstore, dtset)
      ! we shift bands wrt band edge
    case ("electron")
      polstate%eig = &
-       gstore%ebands%eig(bstart:bstart+gqk%nb-1, :, spin) - self%gaps%cb_min(spin)
+       gstore%ebands%eig(bstart:bstart+gqk%nb-1, :, spin) - self%gaps%cb_min(spin) + onehalf*eV_Ha
      !polstate%eig = gstore%ebands%eig(bstart:bstart+gqk%nb-1, :, spin)
    case ("hole")
      ! here we flip the valence bands to deal with the minimization process later on
      polstate%eig = &
-       -(gstore%ebands%eig(bstart:bstart+gqk%nb-1, :, spin) - self%gaps%vb_max(spin))
+       -(gstore%ebands%eig(bstart:bstart+gqk%nb-1, :, spin) - self%gaps%vb_max(spin)) + onehalf*eV_Ha
      !polstate%eig = -gstore%ebands%eig(bstart:bstart+gqk%nb-1, :, spin)
    end select
    ! set erange for each spin
@@ -1353,7 +1353,7 @@ subroutine polstate_update_pcond(self, factor)
  do my_ik=1,gqk%my_nk
    ik_ibz = gqk%my_k2ibz(1, my_ik)
    do ib=1,gqk%nb
-     self%my_pcond(ib, my_ik) = one/(self%eig(ib, ik_ibz) + factor*abs(self%eps))
+     self%my_pcond(ib, my_ik) = one/(self%eig(ib, ik_ibz))! + factor*abs(self%eps))
    enddo
  enddo
 
