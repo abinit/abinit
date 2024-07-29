@@ -244,7 +244,6 @@ subroutine varpeq_run(gstore, dtset, dtfil)
 !Local variables-------------------------------
 !scalars
  type(varpeq_t) :: vpq
-
 !----------------------------------------------------------------------
 
  call vpq%init(gstore, dtset)
@@ -2334,7 +2333,7 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
  integer :: ik_ibz, isym_k, trev_k, npw_k, istwf_k, npw_kq_ibz, istwf_k_ibz, nkpg_k, ierr, nk, spinor, spad, nkbz, ncid
  integer :: nqibz, iq, qtimrev, iq_ibz, isym_q, trev_q, qptopt, uc_iat, sc_iat, nu, nqbz ! icell,
  logical :: isirr_k, isirr_q, have_scell_q, use_displaced_scell
- real(dp) :: cpu_all, wall_all, gflops_all
+ real(dp) :: cpu_all, wall_all, gflops_all, spread
  character(len=500) :: msg
  character(len=fnlen) :: path
  type(varpeq_t) :: vpq
@@ -2347,7 +2346,7 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
  integer :: units(2), work_ngfft(18), gmax(3), g0_k(3), mapl_qq(6), g0_q(3), ngqpt(3)
  integer,allocatable :: nband(:,:), wfd_istwfk(:), kg_k(:,:), sc2uc(:), gbound_k(:,:)
  real(dp),parameter :: origin0(3) = zero
- real(dp) :: kk(3), kk_ibz(3), kk_sc(3), qq(3), qq_ibz(3)
+ real(dp) :: kk(3), kk_ibz(3), kk_sc(3), qq(3), qq_ibz(3), center(3)
  real(dp),allocatable :: scred(:,:), kpg_k(:,:), ug_k(:,:), work(:,:,:,:), pol_rho(:), qibz(:,:)
  real(dp),allocatable :: pheigvec_qibz(:,:,:,:)
  real(dp),allocatable :: displ_cart_qbz(:,:,:,:), pheigvec_qbz(:,:,:,:)  !displ_red_qbz(:,:,:,:), displ_cart_qibz(:,:,:,:),
@@ -2664,11 +2663,12 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
        write(msg, "(a,i0,a,es16.6)")&
          " For spin: ", spin, ": 1/N_k \sum_nk |A_nk|^2 = ", sum(vpq%a_spin(:,:,:,spin)**2) / nkbz
        call wrtout(units, msg)
-       pol_rho = abs(pol_wf(:, spin))**2
+       pol_rho = abs(pol_wf(:, spin)) ** 2
        write(msg, "(a,i0,a,es16.6)")" Polaron density for spin: ", spin, " integrates to: ", sum(pol_rho) * cryst%ucvol/wfd%nfft
        call wrtout(units, msg)
        write(msg, "(a,es16.6)")" maxval(abs(aimag(pol_wf))): ", maxval(abs(aimag(pol_wf(:, spin))))
        call wrtout(units, msg)
+       call center_and_spread(cryst, vpq%ngkpt, sc_ngfft, pol_rho, center, spread, units)
 
        do ii=1,num_writes
          if (ii == 1) then
@@ -2690,7 +2690,6 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
          call write_xsf(path, sc_ngfft(1), sc_ngfft(2), sc_ngfft(3), pol_rho, scell_k%rprimd, origin0, &
                         scell_k%natom, scell_k%ntypat, scell_k%typat, xcart_ptr, scell_k%znucl, 0)
        end do ! ii
-
      end do ! spin
 
    else
@@ -2703,6 +2702,7 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
      call wrtout(units, msg)
      write(msg, "(a,es16.6)")" maxval(abs(aimag(pol_wf))): ", maxval(abs(aimag(pol_wf(:, 1))))
      call wrtout(units, msg)
+     call center_and_spread(cryst, vpq%ngkpt, sc_ngfft, pol_rho, center, spread, units)
 
      spin = 1
      do ii=1,num_writes
@@ -2745,6 +2745,66 @@ end function vid
 
 end subroutine varpeq_plot
 !!***
+
+subroutine center_and_spread(prim_cryst, ncells, sc_ngfft, rhor, center, spread, units)
+
+!Arguments ------------------------------------
+ type(crystal_t),intent(in) :: prim_cryst
+ integer,intent(in) :: ncells(3), sc_ngfft(18)
+ real(dp),intent(in) :: rhor(sc_ngfft(1), sc_ngfft(2), sc_ngfft(3))
+ !real(dp),intent(in) :: rhor(sc_ngfft(4), sc_ngfft(5), sc_ngfft(6)) ! FIXME
+ real(dp),intent(out) :: center(3), spread
+ integer,intent(in) :: units(:)
+
+!Local variables-------------------------------
+ integer :: i1, i2, i3, nfft
+ real(dp) :: rr(3), rmr0(3), sc_rprimd(3,3)
+ character(len=500) :: msg
+!----------------------------------------------------------------------
+
+ nfft = product(sc_ngfft(1:3))
+ sc_rprimd(:,1) = prim_cryst%rprimd(:,1) * ncells(1)
+ sc_rprimd(:,2) = prim_cryst%rprimd(:,2) * ncells(2)
+ sc_rprimd(:,3) = prim_cryst%rprimd(:,3) * ncells(3)
+
+ ! Compute center = \int r rhor(r) dr
+ center = zero
+ do i3=1,sc_ngfft(3)
+   rr(3) = (i3 - one) / sc_ngfft(3)
+   do i2=1,sc_ngfft(2)
+     rr(2) = (i2 - one) / sc_ngfft(2)
+     do i1=1,sc_ngfft(1)
+       rr(1) = (i1 - one) / sc_ngfft(1)
+       center = center + rhor(i1, i2, i3) * rr
+     end do
+   end do
+ end do
+
+ center = center * (product(ncells) * prim_cryst%ucvol / nfft)
+ call wrtout(units, sjoin(" Polaron centered at: ", ltoa(center), " (Reduced coords in terms of the supercell)"))
+ center = matmul(sc_rprimd, center)
+ call wrtout(units, sjoin(" Polaron centered at: ", ltoa(center), " (Cartesian coords in Bohr)"))
+
+ ! Compute = \int (r - center)^2 rhor dr
+ spread = zero
+ do i3=1,sc_ngfft(3)
+   rr(3) = (i3 - one) / sc_ngfft(3)
+   do i2=1,sc_ngfft(2)
+     rr(2) = (i2 - one) / sc_ngfft(2)
+     do i1=1,sc_ngfft(1)
+       rr(1) = (i1 - one) / sc_ngfft(1)
+       rmr0 = matmul(sc_rprimd, rr) - center
+       spread = spread + rhor(i1, i2, i3) * (dot_product(rmr0, rmr0) ** 2)
+     end do
+   end do
+ end do
+
+ spread = sqrt(spread * (product(ncells) * prim_cryst%ucvol / nfft))
+ write(msg, "(a,2(es16.6,a))")   "         with spread: ", spread, " (Bohr)", spread * Bohr_Ang, " (Ang)"
+ call wrtout(units, msg)
+ stop
+
+end subroutine center_and_spread
 
 end module m_varpeq
 !!***
