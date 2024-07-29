@@ -1028,7 +1028,7 @@ end subroutine cigfft
 !!
 !! SOURCE
 
-elemental integer function ig2gfft(ig,ng) result (gc)
+elemental integer function ig2gfft(ig, ng) result (gc)
 
 !Arguments ------------------------------------
 !scalars
@@ -1150,9 +1150,7 @@ pure subroutine get_gfft(ngfft, kpt, gmet, gsq_max, gfft)
      do i1=1,ngfft(1)
        g1 = ig2gfft(i1,ngfft(1))
        ifft = ifft+1
-       gfft(1,ifft) = g1
-       gfft(2,ifft) = g2
-       gfft(3,ifft) = g3
+       gfft(:,ifft) = [g1, g2, g3]
        dsq=gmet(1,1)*(kpt(1)+dble(i1))**2 &
         +gmet(2,2)*(kpt(2)+dble(i2))**2 &
         +gmet(3,3)*(kpt(3)+dble(i3))**2 &
@@ -1733,6 +1731,7 @@ end subroutine mkgrid_fft
 !! FUNCTION
 !!
 !! INPUTS
+!!  ncells(3)= Number of cells along the three reduced directions
 !!
 !! OUTPUT
 !! sc_nfft=The total number of points in the supercell.
@@ -1741,10 +1740,10 @@ end subroutine mkgrid_fft
 !!
 !! SOURCE
 
-subroutine supercell_fft(nrcl, ngfft, sc_nfft, sc_ngfft, sc2uc, scred)
+subroutine supercell_fft(ncells, ngfft, sc_nfft, sc_ngfft, sc2uc, scred)
 
 !Arguments ------------------------------------
- integer,intent(in) :: nrcl(3), ngfft(18)
+ integer,intent(in) :: ncells(3), ngfft(18)
  integer,intent(out) :: sc_nfft, sc_ngfft(18)
  integer,allocatable,intent(out) :: sc2uc(:)
  real(dp),allocatable,intent(out) :: scred(:,:)
@@ -1754,10 +1753,11 @@ subroutine supercell_fft(nrcl, ngfft, sc_nfft, sc_ngfft, sc2uc, scred)
 ! *************************************************************************
 
  sc_ngfft = ngfft
- sc_ngfft(1:3) = nrcl(1:3) * ngfft(1:3)
- sc_ngfft(4) = 2*(sc_ngfft(1)/2)+1
- sc_ngfft(5) = 2*(sc_ngfft(2)/2)+1
- sc_ngfft(6) = sc_ngfft(3)
+ sc_ngfft(1:3) = ncells(1:3) * ngfft(1:3)
+ sc_ngfft(4:6) = sc_ngfft(1:3)
+ !sc_ngfft(4) = 2*(sc_ngfft(1)/2)+1
+ !sc_ngfft(5) = 2*(sc_ngfft(2)/2)+1
+ !sc_ngfft(6) = sc_ngfft(3)
  sc_nfft = product(sc_ngfft(1:3)) ! Total number of points in the supercell
 
  ABI_MALLOC(sc2uc, (sc_nfft))
