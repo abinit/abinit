@@ -2237,6 +2237,12 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr, intarr, jdtset, marr, 2, string(1:lenstr), 'varpeq_gau_params', tread, 'DPR')
  if (tread == 1) dtset%varpeq_gau_params = dprarr(1:2)
 
+ narr = nsppol
+ call intagm(dprarr, intarr, jdtset, marr, narr, string(1:lenstr), 'varpeq_erange', tread, 'ENE')
+ if (tread == 1) then
+   dtset%varpeq_erange(1:narr) = dprarr(1:narr)
+ end if
+
  call intagm(dprarr,intarr,jdtset,marr,ntypat,string(1:lenstr),'lambsig',tread,'DPR')
  if(tread==1) dtset%lambsig(1:ntypat)=dprarr(1:ntypat)
 
