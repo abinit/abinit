@@ -1,6 +1,6 @@
 
-.Version 10.1.4.2 of ABINIT, released Jun 2024.
-.(MPI version, prepared for a x86_64_linux_gnu8.5 computer) 
+.Version 10.1.4.7 of ABINIT, released Jun 2024.
+.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2024 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,20 +14,20 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue  2 Jul 2024.
-- ( at 20h47 )
+.Starting date : Tue 30 Jul 2024.
+- ( at 09h00 )
   
-- input  file    -> tlruj_1.abi
-- output file    -> tlruj_1.abo
+- input  file    -> /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk__lmacenul/tests/TestBot_MPI1/tutorial_tlruj_1-tlruj_2-tlruj_3/tlruj_1.abi
+- output file    -> /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk__lmacenul/tests/TestBot_MPI1/tutorial_tlruj_1-tlruj_2-tlruj_3/tlruj_1.abo
 - root for input  files -> tlruj_1i
 - root for output files -> tlruj_1.o
 
 - inpspheads : Reading pseudopotential header in XML form from 
--   /home/users/lmacenul/abinit/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ni.xml
+-   /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk__lmacenul/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ni.xml
 - inpspheads : Reading pseudopotential header in XML form from 
--   /home/users/lmacenul/abinit/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ni.xml
+-   /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk__lmacenul/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ni.xml
 - inpspheads : Reading pseudopotential header in XML form from 
--   /home/users/lmacenul/abinit/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/O.xml
+-   /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk__lmacenul/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/O.xml
  Symmetries : space group R-3 m (#166); Bravais hR (rhombohedral)
 ================================================================================
  Values of the parameters that define the memory need of the present run
@@ -51,7 +51,7 @@ _ WF disk file :      2.985 Mbytes ; DEN or POT disk file :      0.979 Mbytes.
 --------------------------------------------------------------------------------
 -
 - outvars: echo of selected default values                                      
--   iomode0 =  0 , fftalg0 =112 , wfoptalg0 = 10
+-   iomode0 =  0 , fftalg0 =312 , wfoptalg0 = 10
 -
 - outvars: echo of global parameters not present in the input file              
 -  max_nthreads =    0
@@ -63,7 +63,7 @@ _ WF disk file :      2.985 Mbytes ; DEN or POT disk file :      0.979 Mbytes.
       chksymbreak           0
         dmatpuopt           3
              ecut      1.00000000E+01 Hartree
--          fftalg         112
+-          fftalg         312
               ixc     -101130
               kpt      1.25000000E-01  1.25000000E-01  1.25000000E-01
                        3.75000000E-01  1.25000000E-01  1.25000000E-01
@@ -170,9 +170,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
          ecut(hartree)=     20.000   => boxcut(ratio)=   2.06006
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/users/lmacenul/abinit/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ni.xml
-- pspatm: opening atomic psp file    /home/users/lmacenul/abinit/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ni.xml
-- pspatm : Reading pseudopotential header in XML form from /home/users/lmacenul/abinit/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ni.xml
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk__lmacenul/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ni.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk__lmacenul/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ni.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk__lmacenul/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ni.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  6 (lmn_size= 18), orbitals=   0   0   1   1   2   2
  Spheres core radius: rc_sph= 1.81432190
@@ -190,9 +190,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/users/lmacenul/abinit/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ni.xml
-- pspatm: opening atomic psp file    /home/users/lmacenul/abinit/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ni.xml
-- pspatm : Reading pseudopotential header in XML form from /home/users/lmacenul/abinit/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ni.xml
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk__lmacenul/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ni.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk__lmacenul/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ni.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk__lmacenul/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ni.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  6 (lmn_size= 18), orbitals=   0   0   1   1   2   2
  Spheres core radius: rc_sph= 1.81432190
@@ -210,9 +210,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   3  psp file is /home/users/lmacenul/abinit/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/O.xml
-- pspatm: opening atomic psp file    /home/users/lmacenul/abinit/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/O.xml
-- pspatm : Reading pseudopotential header in XML form from /home/users/lmacenul/abinit/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/O.xml
+- pspini: atom type   3  psp file is /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk__lmacenul/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/O.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk__lmacenul/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/O.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk__lmacenul/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/O.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.41465230
@@ -250,40 +250,40 @@ tolerances: {tolvrs: 1.00E-11, }
 
      iter   Etot(hartree)      deltaE(h)  residm     nres2
  ETOT  1  -367.53061135785    -3.675E+02 6.510E+00 2.587E+03
- ETOT  2  -371.85119950380    -4.321E+00 7.862E-02 2.526E+03
- ETOT  3  -364.17664467066     7.675E+00 1.451E-01 4.504E+02
- ETOT  4  -363.98424238720     1.924E-01 6.587E-02 1.567E+02
- ETOT  5  -364.21995209181    -2.357E-01 9.004E-02 2.351E+02
- ETOT  6  -363.98698683528     2.330E-01 1.712E-02 2.430E+02
- ETOT  7  -363.73109487728     2.559E-01 2.209E-02 2.807E+01
- ETOT  8  -363.72109568171     9.999E-03 1.403E-03 9.975E+00
- ETOT  9  -363.72335971207    -2.264E-03 5.879E-05 1.030E+01
- ETOT 10  -363.70931767612     1.404E-02 7.575E-04 1.666E+00
- ETOT 11  -363.70879991642     5.178E-04 1.387E-04 1.796E-01
- ETOT 12  -363.70978358148    -9.837E-04 8.667E-06 6.622E-02
- ETOT 13  -363.71075136075    -9.678E-04 3.060E-05 5.425E-02
- ETOT 14  -363.71079686915    -4.551E-05 7.652E-06 2.069E-02
- ETOT 15  -363.71080591568    -9.047E-06 9.685E-06 8.605E-04
- ETOT 16  -363.71080811149    -2.196E-06 1.235E-06 1.415E-04
- ETOT 17  -363.71080870130    -5.898E-07 4.097E-07 3.074E-05
- ETOT 18  -363.71080883783    -1.365E-07 1.913E-07 1.892E-05
- ETOT 19  -363.71080890859    -7.076E-08 1.229E-07 8.884E-05
- ETOT 20  -363.71080886481     4.377E-08 1.789E-08 4.340E-07
- ETOT 21  -363.71080887273    -7.921E-09 1.814E-08 2.577E-07
- ETOT 22  -363.71080887426    -1.528E-09 1.470E-09 1.044E-07
- ETOT 23  -363.71080887452    -2.597E-10 1.609E-09 5.635E-09
- ETOT 24  -363.71080887458    -6.037E-11 9.589E-11 1.757E-09
- ETOT 25  -363.71080887459    -1.228E-11 8.753E-11 6.351E-10
- ETOT 26  -363.71080887459    -8.527E-13 1.435E-11 2.695E-11
- ETOT 27  -363.71080887459     1.080E-12 7.900E-12 1.411E-11
- ETOT 28  -363.71080887460    -2.160E-12 2.584E-12 1.761E-12
+ ETOT  2  -371.85119950383    -4.321E+00 7.862E-02 2.526E+03
+ ETOT  3  -364.17664473446     7.675E+00 1.451E-01 4.504E+02
+ ETOT  4  -363.98424233027     1.924E-01 6.587E-02 1.567E+02
+ ETOT  5  -364.21995217990    -2.357E-01 9.003E-02 2.351E+02
+ ETOT  6  -363.98698538921     2.330E-01 1.712E-02 2.430E+02
+ ETOT  7  -363.73109499471     2.559E-01 2.209E-02 2.807E+01
+ ETOT  8  -363.72109563686     9.999E-03 1.403E-03 9.975E+00
+ ETOT  9  -363.72335963921    -2.264E-03 5.879E-05 1.030E+01
+ ETOT 10  -363.70931763316     1.404E-02 7.575E-04 1.666E+00
+ ETOT 11  -363.70879991142     5.177E-04 1.387E-04 1.796E-01
+ ETOT 12  -363.70978356622    -9.837E-04 8.669E-06 6.621E-02
+ ETOT 13  -363.71075134518    -9.678E-04 3.060E-05 5.425E-02
+ ETOT 14  -363.71079686712    -4.552E-05 7.653E-06 2.070E-02
+ ETOT 15  -363.71080591566    -9.049E-06 9.687E-06 8.605E-04
+ ETOT 16  -363.71080811188    -2.196E-06 1.236E-06 1.417E-04
+ ETOT 17  -363.71080870124    -5.894E-07 4.096E-07 3.078E-05
+ ETOT 18  -363.71080883780    -1.366E-07 1.914E-07 1.888E-05
+ ETOT 19  -363.71080890827    -7.047E-08 1.227E-07 8.831E-05
+ ETOT 20  -363.71080886481     4.346E-08 1.792E-08 4.329E-07
+ ETOT 21  -363.71080887273    -7.918E-09 1.814E-08 2.560E-07
+ ETOT 22  -363.71080887426    -1.531E-09 1.478E-09 1.036E-07
+ ETOT 23  -363.71080887452    -2.590E-10 1.616E-09 5.686E-09
+ ETOT 24  -363.71080887458    -6.048E-11 9.688E-11 1.752E-09
+ ETOT 25  -363.71080887459    -1.188E-11 8.848E-11 6.319E-10
+ ETOT 26  -363.71080887460    -3.467E-12 1.436E-11 2.711E-11
+ ETOT 27  -363.71080887460    -8.527E-13 7.886E-12 1.443E-11
+ ETOT 28  -363.71080887459     1.592E-12 2.586E-12 1.769E-12
 
- At SCF step   28       nres2   =  1.76E-12 < tolvrs=  1.00E-11 =>converged.
+ At SCF step   28       nres2   =  1.77E-12 < tolvrs=  1.00E-11 =>converged.
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  1.42470231E-01  sigma(3 2)= -4.88159862E-04
-  sigma(2 2)=  1.42470231E-01  sigma(3 1)= -4.88159862E-04
-  sigma(3 3)=  1.42470231E-01  sigma(2 1)= -4.88159862E-04
+  sigma(1 1)=  1.42470231E-01  sigma(3 2)= -4.88159863E-04
+  sigma(2 2)=  1.42470231E-01  sigma(3 1)= -4.88159863E-04
+  sigma(3 3)=  1.42470231E-01  sigma(2 1)= -4.88159863E-04
 
 
 --- !ResultsGS
@@ -296,14 +296,14 @@ lattice_vectors:
 lattice_lengths: [   9.65099,    9.65099,    9.65099, ]
 lattice_angles: [ 33.557,  33.557,  33.557, ] # degrees, (23, 13, 12)
 lattice_volume:   2.4465194E+02
-convergence: {deltae: -2.160E-12, res2:  1.761E-12, residm:  2.584E-12, diffor: null, }
+convergence: {deltae:  1.592E-12, res2:  1.769E-12, residm:  2.586E-12, diffor: null, }
 etotal    :  -3.63710809E+02
 entropy   :   0.00000000E+00
 fermie    :   4.08065949E-01
 cartesian_stress_tensor: # hartree/bohr^3
-- [  1.42470231E-01,  -4.88159862E-04,  -4.88159862E-04, ]
-- [ -4.88159862E-04,   1.42470231E-01,  -4.88159862E-04, ]
-- [ -4.88159862E-04,  -4.88159862E-04,   1.42470231E-01, ]
+- [  1.42470231E-01,  -4.88159863E-04,  -4.88159863E-04, ]
+- [ -4.88159863E-04,   1.42470231E-01,  -4.88159863E-04, ]
+- [ -4.88159863E-04,  -4.88159863E-04,   1.42470231E-01, ]
 pressure_GPa:  -4.1916E+03
 xred      :
 - [  0.0000E+00,   0.0000E+00,   0.0000E+00, Ni]
@@ -311,11 +311,11 @@ xred      :
 - [  2.5000E-01,   2.5000E-01,   2.5000E-01,  O]
 - [  7.5000E-01,   7.5000E-01,   7.5000E-01,  O]
 cartesian_forces: # hartree/bohr
-- [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
-- [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
-- [  5.50580478E-09,   5.50580478E-09,   5.50580478E-09, ]
-- [ -5.50580478E-09,  -5.50580478E-09,  -5.50580478E-09, ]
-force_length_stats: {min:   0.00000000E+00, max:   9.53633361E-09, mean:   4.76816680E-09, }
+- [ -0.00000000E+00,  -0.00000000E+00,  -4.13590306E-25, ]
+- [ -0.00000000E+00,  -0.00000000E+00,  -4.13590306E-25, ]
+- [  4.94802162E-09,   4.94802162E-09,   4.94802162E-09, ]
+- [ -4.94802162E-09,  -4.94802162E-09,  -4.94802162E-09, ]
+force_length_stats: {min:   4.13590306E-25, max:   8.57022484E-09, mean:   4.28511242E-09, }
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
@@ -334,8 +334,8 @@ force_length_stats: {min:   0.00000000E+00, max:   9.53633361E-09, mean:   4.768
  PAW TEST:
  ==== Compensation charge inside spheres ============
  The following values must be close to each other ...
- Compensation charge over spherical meshes =     12.718818249666981
- Compensation charge over fine fft grid    =     12.719105525516131
+ Compensation charge over spherical meshes =     12.718818249644396
+ Compensation charge over fine fft grid    =     12.719105525410923
 
  ==== Results concerning PAW augmentation regions ====
 
@@ -605,17 +605,17 @@ force_length_stats: {min:   0.00000000E+00, max:   9.53633361E-09, mean:   4.768
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   95.229E-16; max=  25.843E-13
+ Mean square residual over all n,k,spin=   95.556E-16; max=  25.855E-13
  reduced coordinates (array xred) for    4 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.500000000000      0.500000000000      0.500000000000
        0.250000000000      0.250000000000      0.250000000000
        0.750000000000      0.750000000000      0.750000000000
- rms dE/dt=  6.1357E-08; max dE/dt=  8.6771E-08; dE/dt below (all hartree)
+ rms dE/dt=  5.5141E-08; max dE/dt=  7.7981E-08; dE/dt below (all hartree)
     1       0.000000000000      0.000000000000      0.000000000000
     2       0.000000000000      0.000000000000      0.000000000000
-    3      -0.000000086771     -0.000000086771     -0.000000086771
-    4       0.000000086771      0.000000086771      0.000000086771
+    3      -0.000000077981     -0.000000077981     -0.000000077981
+    4       0.000000077981      0.000000077981      0.000000077981
 
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
@@ -626,16 +626,16 @@ force_length_stats: {min:   0.00000000E+00, max:   9.53633361E-09, mean:   4.768
  cartesian forces (hartree/bohr) at end:
     1     -0.00000000000000    -0.00000000000000    -0.00000000000000
     2     -0.00000000000000    -0.00000000000000    -0.00000000000000
-    3      0.00000000550580     0.00000000550580     0.00000000550580
-    4     -0.00000000550580    -0.00000000550580    -0.00000000550580
- frms,max,avg= 3.8931919E-09 5.5058048E-09   0.000E+00  0.000E+00  0.000E+00 h/b
+    3      0.00000000494802     0.00000000494802     0.00000000494802
+    4     -0.00000000494802    -0.00000000494802    -0.00000000494802
+ frms,max,avg= 3.4987796E-09 4.9480216E-09   0.000E+00  0.000E+00  0.000E+00 h/b
 
  cartesian forces (eV/Angstrom) at end:
     1     -0.00000000000000    -0.00000000000000    -0.00000000000000
     2     -0.00000000000000    -0.00000000000000    -0.00000000000000
-    3      0.00000028311984     0.00000028311984     0.00000028311984
-    4     -0.00000028311984    -0.00000028311984    -0.00000028311984
- frms,max,avg= 2.0019596E-07 2.8311984E-07   0.000E+00  0.000E+00  0.000E+00 e/A
+    3      0.00000025443748     0.00000025443748     0.00000025443748
+    4     -0.00000025443748    -0.00000025443748    -0.00000025443748
+ frms,max,avg= 1.7991447E-07 2.5443748E-07   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  7.880000000000  7.880000000000  7.880000000000 bohr
               =  4.169916403689  4.169916403689  4.169916403689 angstroms
  prteigrs : about to open file tlruj_1.o_EIG
@@ -660,35 +660,35 @@ force_length_stats: {min:   0.00000000E+00, max:   9.53633361E-09, mean:   4.768
 --- !EnergyTerms
 iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
-kinetic             :  8.94745545935032E+01
-hartree             :  8.65432000269452E+01
-xc                  : -2.18484246402996E+01
+kinetic             :  8.94745545932276E+01
+hartree             :  8.65432000274382E+01
+xc                  : -2.18484246402911E+01
 Ewald energy        : -2.39331554544165E+02
-psp_core            :  1.04313020493123E+01
-local_psp           : -2.68580940334627E+02
-spherical_terms     : -2.03989460652798E+01
-total_energy        : -3.63710808914611E+02
-total_energy_eV     : -9.89707443540660E+03
+psp_core            :  1.04313020493122E+01
+local_psp           : -2.68580940335140E+02
+spherical_terms     : -2.03989460648269E+01
+total_energy        : -3.63710808914445E+02
+total_energy_eV     : -9.89707443540209E+03
 ...
 
 
 --- !EnergyTermsDC
 iteration_state     : {dtset: 1, }
 comment             : '"Double-counting" decomposition of free energy'
-band_energy         : -4.00307312152072E+01
+band_energy         : -4.00307312143426E+01
 Ewald energy        : -2.39331554544165E+02
-psp_core            :  1.04313020493123E+01
-xc_dc               : -7.99834131932311E+01
-spherical_terms     : -1.47964119713046E+01
-total_energy_dc     : -3.63710808874596E+02
-total_energy_dc_eV  : -9.89707443431772E+03
+psp_core            :  1.04313020493122E+01
+xc_dc               : -7.99834131937221E+01
+spherical_terms     : -1.47964119716769E+01
+total_energy_dc     : -3.63710808874595E+02
+total_energy_dc_eV  : -9.89707443431769E+03
 ...
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  1.42470231E-01  sigma(3 2)= -4.88159862E-04
-  sigma(2 2)=  1.42470231E-01  sigma(3 1)= -4.88159862E-04
-  sigma(3 3)=  1.42470231E-01  sigma(2 1)= -4.88159862E-04
+  sigma(1 1)=  1.42470231E-01  sigma(3 2)= -4.88159863E-04
+  sigma(2 2)=  1.42470231E-01  sigma(3 1)= -4.88159863E-04
+  sigma(3 3)=  1.42470231E-01  sigma(2 1)= -4.88159863E-04
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -4.1916E+03 GPa]
 - sigma(1 1)=  4.19161821E+03  sigma(3 2)= -1.43621566E+01
@@ -706,11 +706,11 @@ total_energy_dc_eV  : -9.89707443431772E+03
         dmatpuopt           3
              ecut      1.00000000E+01 Hartree
            etotal     -3.6371080887E+02
-            fcart     -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
-                       5.5058047754E-09  5.5058047754E-09  5.5058047754E-09
-                      -5.5058047754E-09 -5.5058047754E-09 -5.5058047754E-09
--          fftalg         112
+            fcart     -0.0000000000E+00 -0.0000000000E+00 -4.1359030628E-25
+                      -0.0000000000E+00 -0.0000000000E+00 -4.1359030628E-25
+                       4.9480216172E-09  4.9480216172E-09  4.9480216172E-09
+                      -4.9480216172E-09 -4.9480216172E-09 -4.9480216172E-09
+-          fftalg         312
               ixc     -101130
               kpt      1.25000000E-01  1.25000000E-01  1.25000000E-01
                        3.75000000E-01  1.25000000E-01  1.25000000E-01
@@ -756,8 +756,8 @@ P           mkmem          10
                        0.0000000000E+00  0.0000000000E+00 -3.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-           strten      1.4247023106E-01  1.4247023106E-01  1.4247023106E-01
-                      -4.8815986227E-04 -4.8815986227E-04 -4.8815986227E-04
+           strten      1.4247023105E-01  1.4247023105E-01  1.4247023105E-01
+                      -4.8815986250E-04 -4.8815986250E-04 -4.8815986250E-04
            symrel      1  0  0   0  1  0   0  0  1      -1  0  0   0 -1  0   0  0 -1
                        0  1  0   1  0  0   0  0  1       0 -1  0  -1  0  0   0  0 -1
                        0  0  1   1  0  0   0  1  0       0  0 -1  -1  0  0   0 -1  0
@@ -874,10 +874,10 @@ P           mkmem          10
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         72.8  wall=         73.4
+- Proc.   0 individual time (sec): cpu=         91.1  wall=         91.4
 
 ================================================================================
 
  Calculation completed.
-.Delivered   3 WARNINGs and   4 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         72.8  wall=         73.4
+.Delivered   3 WARNINGs and   2 COMMENTs to log file.
++Overall time at end (sec) : cpu=         91.1  wall=         91.4
