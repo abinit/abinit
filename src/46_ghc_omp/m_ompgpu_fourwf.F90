@@ -175,7 +175,7 @@ subroutine ompgpu_fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,ist
    !$OMP TARGET UPDATE TO(fofr)
  endif
 
- if(option/=3) then
+ if(option==1 .or. option==2) then
    ! We launch async transfert of denpot
    !$OMP TARGET ENTER DATA MAP(alloc:denpot)
    !FIXME This async transfer might be better handled through CUDA/HIP after all...
@@ -192,6 +192,9 @@ subroutine ompgpu_fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,ist
      !$OMP TARGET ENTER DATA MAP(to:weight_r,weight_i) NOWAIT
 #endif
    endif
+ endif
+
+ if(option/=3) then
 
 #if defined HAVE_GPU_HIP && defined FC_LLVM
    !FIXME Work-around for AOMP v15.0.3 (AMD Flang fork)
@@ -375,7 +378,7 @@ subroutine ompgpu_fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,ist
    !$OMP TARGET UPDATE FROM(fofgout)   IF(transfer_fofgout)
  end if
 
- if(option/=3) then
+ if(option==1 .or. option==2) then
    ! We launch async transfert of denpot
    !!$OMP TARGET UPDATE FROM(denpot)
    !$OMP TARGET EXIT DATA MAP(delete:denpot)
