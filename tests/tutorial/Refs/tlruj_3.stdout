@@ -1,7 +1,6 @@
-MPI startup(): FI_PSM3_UUID was not generated, please set it to avoid possible resources ownership conflicts between MPI processes
 
-.Version 10.1.4.2 of LRUJ, released Jun 2024.
-.(MPI version, prepared for a x86_64_linux_gnu8.5 computer) 
+.Version 10.1.4.7 of LRUJ, released Jun 2024.
+.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2024 ABINIT group . 
  LRUJ comes with ABSOLUTELY NO WARRANTY.
@@ -15,13 +14,13 @@ MPI startup(): FI_PSM3_UUID was not generated, please set it to avoid possible r
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue  2 Jul 2024.
-- ( at 20h59 )
+.Starting date : Tue 30 Jul 2024.
+- ( at 09h06 )
   
  Number of perturbations detected:  5
  Including unperturbed state, we have  6 data points.
  Standard determination of the Hubbard U parameter.
- Maximum degree of polynomials analyzed:  4
+ Maximum degree of polynomials analyzed:  3
  NOTE: Unlike the ujdet utility, lruj treats the 
  response functions as scalars, not matrices!
  See lruj tutorial for more information.
@@ -41,20 +40,19 @@ MPI startup(): FI_PSM3_UUID was not generated, please set it to avoid possible r
  --------------- -----------------------------
     alpha [eV]     Unscreened      Screened
  --------------- -----------------------------
-  -0.1500000676   8.6964981640   8.6520722017
-  -0.1000000451   8.6747201354   8.6474287189
-  -0.0500000225   8.6560314261   8.6427490189
-   0.0000000000   8.6380182485   8.6380182485
-   0.0500000225   8.6192514252   8.6332175138
-   0.1000000451   8.5980251733   8.6283148790
+  -0.1500000676   8.6964981902   8.6520722001
+  -0.1000000451   8.6747201560   8.6474287222
+  -0.0500000225   8.6560314450   8.6427490206
+   0.0000000000   8.6380182460   8.6380182460
+   0.0500000225   8.6192514465   8.6332174932
+   0.1000000451   8.5980251987   8.6283148748
                                                                        RMS Errors
                                                          ---------------------------------------
  Regression   Chi0 [eV^-1]   Chi [eV^-1]      U [eV]    | Chi0 [eV^-1]  Chi [eV^-1]     U [eV]
 --------------------------------------------------------|---------------------------------------
- Linear:        -0.8594082    -0.0949434     9.3690012  |    0.0023925    0.0000878    0.0102653
- Quadratic:     -0.8574666    -0.0955791     9.2963162  |    0.0023777    0.0000129    0.0035296
- Cubic:         -0.8007858    -0.0952724     9.2474444  |    0.0001546    0.0000015    0.0002902
- Degree 4 :     -0.8049064    -0.0952277     9.2587688  |    0.0000790    0.0000003    0.0001250
+ Linear:        -0.8594082    -0.0949434     9.3689956  |    0.0023925    0.0000878    0.0102652
+ Quadratic:     -0.8574665    -0.0955791     9.2963102  |    0.0023777    0.0000129    0.0035294
+ Cubic:         -0.8007858    -0.0952726     9.2474236  |    0.0001546    0.0000015    0.0002900
 *************************************************************************************************
 *************************************************************************************************
  
@@ -68,13 +66,11 @@ pawujat: 1
 macro_uj: 1
 diem_token: diemix
 diem:   4.50000000E-01
-chi0_coefficients_degree1: [  8.63742242E+00,  -3.86733689E-01, ]
-chi_coefficients_degree1: [  8.63792651E+00,  -9.49433851E-02, ]
-chi0_coefficients_degree2: [  8.63730592E+00,  -3.85859966E-01,   1.74744631E-02, ]
-chi_coefficients_degree2: [  8.63801127E+00,  -9.55790630E-02,  -1.27135520E-02, ]
-chi0_coefficients_degree3: [  8.63801773E+00,  -3.60353594E-01,  -1.60476889E-01,  -2.37268363E+00, ]
-chi_coefficients_degree3: [  8.63801983E+00,  -9.52724125E-02,  -1.48529734E-02,  -2.85256050E-02, ]
-chi0_coefficients_degree4: [  8.63806830E+00,  -3.62207891E-01,  -1.91662776E-01,  -2.13668243E+00,   2.36001094E+00, ]
-chi_coefficients_degree4: [  8.63801861E+00,  -9.52276722E-02,  -1.41005242E-02,  -3.42198126E-02,  -5.69420501E-02, ]
+chi0_coefficients_degree1: [  8.63742243E+00,  -3.86733703E-01, ]
+chi_coefficients_degree1: [  8.63792651E+00,  -9.49434361E-02, ]
+chi0_coefficients_degree2: [  8.63730593E+00,  -3.85859925E-01,   1.74755446E-02, ]
+chi_coefficients_degree2: [  8.63801126E+00,  -9.55791168E-02,  -1.27136074E-02, ]
+chi0_coefficients_degree3: [  8.63801773E+00,  -3.60353615E-01,  -1.60475376E-01,  -2.37267787E+00, ]
+chi_coefficients_degree3: [  8.63801982E+00,  -9.52726025E-02,  -1.48520783E-02,  -2.85129327E-02, ]
 ...
 
