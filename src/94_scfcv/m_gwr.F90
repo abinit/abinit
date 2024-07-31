@@ -5949,7 +5949,7 @@ end if
    NCF_CHECK(nf90_put_var(ncid, vid("ks_gaps"), ks_gaps))
    NCF_CHECK(nf90_put_var(ncid, vid("qpz_gaps"), qpz_gaps))
    !NCF_CHECK(nf90_put_var(ncid, vid("qp_pade_gaps"), qp_pade_gaps))
-   NCF_CHECK(nf90_put_var(ncid, vid("sigc_it_mat"), c2r(sigc_it_mat)))
+   !NCF_CHECK(nf90_put_var(ncid, vid("sigc_it_mat"), c2r(sigc_it_mat)))
    NCF_CHECK(nf90_put_var(ncid, vid("sigc_iw_mat"), c2r(gwr%sigc_iw_mat)))
    NCF_CHECK(nf90_put_var(ncid, vid("sigxc_rw_diag"), c2r(sigxc_rw_diag)))
    NCF_CHECK(nf90_put_var(ncid, vid("spfunc_diag"), spfunc_diag))
