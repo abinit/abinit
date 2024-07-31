@@ -94,7 +94,7 @@ module m_mlwfovlp
    ! Max number of Wannier functions over spins (used to dimension arrays)
 
    integer :: num_bands = -1
-   ! Number bands seen by wannier90 for this spin.
+   ! Number of bands seen by wannier90 for this spin.
 
    !integer :: nbndep,         ! Number of remaining bands after excluding bands in Wannierizatin step
    !integer :: nbndskip,       ! Number of bands to be skipped in Wannierization step, leading to
@@ -138,7 +138,7 @@ module m_mlwfovlp
 
    real(dp),allocatable :: rmod_h(:), rmod_p(:), rmod_e(:)
    ! (nr_h), (nr_p)
-   ! Lenght in Bohr of the lattice points.
+   ! Lenght of the lattice points in Bohr
 
    real(dp),allocatable :: all_eigens(:,:)
    ! (mband, nkbz)
@@ -185,11 +185,11 @@ module m_mlwfovlp
    complex(dp),allocatable :: grpe_wwp(:,:,:,:,:)
    ! (nr_p, nr_e, nwan, nwan, my_npert))
    ! e-ph matrix elements in the Wannier representation.
-   ! NB: These matrix elements are in the atomic basis and distributed inside pert_comm
+   ! NB: These matrix elements are in the atomic represention and distributed inside pert_comm
 
  contains
    procedure :: from_abiwan => wan_from_abiwan
-   ! Initialize a wan_t instance from an ABIWAN.nc file
+   ! Initialize a wan_t instance from a ABIWAN.nc file
 
    procedure :: load_gwan => wan_load_gwan
    ! Read g(R_p, R_e) in the Wannier representation from the GWAN.nc file.

@@ -42,6 +42,7 @@ module m_varpeq
  use m_time,            only : cwtime_report, cwtime
  use m_io_tools,        only : file_exists, iomode_from_fname, open_file
  use m_pptools,         only : write_xsf
+ use m_geometry,        only : xcart2xred
  use m_kpts,            only : kpts_map, kpts_timrev_from_kptopt, bzlint_t, kptrlatt_from_ngkpt
  use m_fft_mesh,        only : supercell_fft, calc_ceikr
  use m_pawtab,          only : pawtab_type
@@ -2494,8 +2495,7 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
        !      phfreq(q+G) = phfreq(q) and eigvec(q) = eigvec(q+G)
        !
        isirr_q = (isym_q == 1 .and. trev_q == 0)
-       qq_ibz = qibz(:, iq_ibz)
-       !if (all(abs(qq_ibz) < tol6)) cycle
+       qq_ibz = qibz(:, iq_ibz); !if (all(abs(qq_ibz) < tol6)) cycle
        pheigvec_qibz = pheigvec_cart_ibz(:,:,:,:,iq_ibz)
 
        if (isirr_q) then
@@ -2807,19 +2807,19 @@ end function vid
 end subroutine varpeq_plot
 !!***
 
-subroutine center_and_spread(prim_cryst, ncells, sc_ngfft, rhor, center, spread, units)
+subroutine center_and_spread(prim_cryst, ncells, sc_ngfft, rhor, center_cart, spread, units)
 
 !Arguments ------------------------------------
  type(crystal_t),intent(in) :: prim_cryst
  integer,intent(in) :: ncells(3), sc_ngfft(18)
  real(dp),intent(in) :: rhor(sc_ngfft(1), sc_ngfft(2), sc_ngfft(3))
  !real(dp),intent(in) :: rhor(sc_ngfft(4), sc_ngfft(5), sc_ngfft(6)) ! FIXME
- real(dp),intent(out) :: center(3), spread
+ real(dp),intent(out) :: center_cart(3), spread
  integer,intent(in) :: units(:)
 
 !Local variables-------------------------------
  integer :: i1, i2, i3, nfft
- real(dp) :: rr(3), rmr0(3), sc_rprimd(3,3)
+ real(dp) :: rr(3), rcart(3), rmr0(3), sc_rprimd(3,3), center_red(3)  ! r2_mean
  character(len=500) :: msg
 !----------------------------------------------------------------------
 
@@ -2829,24 +2829,26 @@ subroutine center_and_spread(prim_cryst, ncells, sc_ngfft, rhor, center, spread,
  sc_rprimd(:,3) = prim_cryst%rprimd(:,3) * ncells(3)
 
  ! Compute center = \int r rhor(r) dr
- center = zero
+ center_cart = zero !; r2_mean = zero
  do i3=1,sc_ngfft(3)
    rr(3) = (i3 - one) / sc_ngfft(3)
    do i2=1,sc_ngfft(2)
      rr(2) = (i2 - one) / sc_ngfft(2)
      do i1=1,sc_ngfft(1)
        rr(1) = (i1 - one) / sc_ngfft(1)
-       center = center + rhor(i1, i2, i3) * rr
+       ! Go to cart coordinates.
+       rcart = matmul(sc_rprimd, rr)
+       center_cart = center_cart + rhor(i1, i2, i3) * rcart
+       !r2_mean = r2_mean + dot_product(rcart, rcart)
      end do
    end do
  end do
 
- center = center * (product(ncells) * prim_cryst%ucvol / nfft)
- call wrtout(units, sjoin(" Polaron centered at: ", ltoa(center), " (Reduced coords in terms of the supercell)"))
- center = matmul(sc_rprimd, center)
- call wrtout(units, sjoin(" Polaron centered at: ", ltoa(center), " (Cartesian coords in Bohr)"))
+ !center_cart = matmul(sc_rprimd, center_cart)
+ !r2_mean = r2_mean * (product(ncells) * prim_cryst%ucvol / nfft)
+ !spread = sqrt(r2_mean - dot_product(center_cart, center_cart))
 
- ! Compute = \int (r - center)^2 rhor dr
+ ! Compute = \int (r - center_cart)^2 rhor dr = <r^2> - <r>^2
  spread = zero
  do i3=1,sc_ngfft(3)
    rr(3) = (i3 - one) / sc_ngfft(3)
@@ -2854,16 +2856,20 @@ subroutine center_and_spread(prim_cryst, ncells, sc_ngfft, rhor, center, spread,
      rr(2) = (i2 - one) / sc_ngfft(2)
      do i1=1,sc_ngfft(1)
        rr(1) = (i1 - one) / sc_ngfft(1)
-       rmr0 = matmul(sc_rprimd, rr) - center
-       spread = spread + rhor(i1, i2, i3) * (dot_product(rmr0, rmr0) ** 2)
+       ! Go to cart coordinates.
+       rmr0 = matmul(sc_rprimd, rr) - center_cart
+       spread = spread + rhor(i1, i2, i3) * dot_product(rmr0, rmr0)
      end do
    end do
  end do
+ spread = sqrt(spread * product(ncells) * prim_cryst%ucvol / nfft)
 
- spread = sqrt(spread * (product(ncells) * prim_cryst%ucvol / nfft))
- write(msg, "(a,2(es16.6,a))")   "         with spread: ", spread, " (Bohr)", spread * Bohr_Ang, " (Ang)"
+ center_cart = center_cart * product(ncells) * prim_cryst%ucvol / nfft
+ call xcart2xred(1, prim_cryst%rprimd, center_cart, center_red)
+ call wrtout(units, sjoin(" Polaron wf centered at: ", ltoa(center_cart), " (Cartesian coords in Bohr)"))
+ call wrtout(units, sjoin("                         ", ltoa(center_red)     , " (Reduced coords in terms of the primitive cell)"))
+ write(msg, "(a,2(es16.6,a))")"         with spread: ", spread, " (Bohr)", spread * Bohr_Ang, " (Ang)"
  call wrtout(units, msg)
- stop
 
 end subroutine center_and_spread
 
