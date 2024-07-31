@@ -98,6 +98,7 @@ module m_xg_nonlop
    integer :: space_pw
    integer :: space_Dij
    logical :: paw
+   integer :: option
    real(dp) :: weight
 
    integer, pointer :: mpi_atmtab(:)
@@ -112,8 +113,17 @@ module m_xg_nonlop
    integer, allocatable :: nlmn_natom(:)
    integer, allocatable :: nlmn_ntypat(:)
 
+   real(dp), pointer :: ffnl_k(:,:,:,:)
+   real(dp), pointer :: ph3d_k(:,:,:)
+
    type(xg_t),pointer :: projectors(:)
    type(xg_t),pointer :: projectors_k
+
+   type(xg_t),pointer :: ffnl_gather(:)
+   type(xg_t),pointer :: ffnl_gather_k
+
+   type(xg_t),pointer :: ph3d_gather(:)
+   type(xg_t),pointer :: ph3d_gather_k
 
    ! non paw only:
    type(xg_t) :: ekb_all
@@ -187,7 +197,7 @@ contains
 !!
 !! SOURCE
  subroutine xg_nonlop_init(xg_nonlop,indlmn,mpi_atmtab,my_natom,nattyp,mkmem,ntypat,nspinor,ucvol,usepaw,&
-     me_band,comm_band,comm_atom)
+     xg_nonlop_option,me_band,comm_band,comm_atom)
 
    integer ,intent(in) :: me_band,comm_band,comm_atom
    integer ,intent(in) :: my_natom
@@ -195,6 +205,7 @@ contains
    integer ,intent(in) :: ntypat
    integer ,intent(in) :: nspinor
    integer ,intent(in) :: usepaw
+   integer ,intent(in) :: xg_nonlop_option
    real(dp),intent(in) :: ucvol
    type(xg_nonlop_t),intent(inout) :: xg_nonlop
 
@@ -210,6 +221,12 @@ contains
    xg_nonlop%my_natom=my_natom
    xg_nonlop%me_band=me_band
    xg_nonlop%comm_band=comm_band
+
+   if (xg_nonlop_option==0.or.xg_nonlop_option==1) then
+     xg_nonlop%option = xg_nonlop_option
+   else
+     ABI_ERROR('Wrong value of xg_nonlop_option')
+   end if
 
    xg_nonlop%paw=usepaw==1
 
@@ -247,6 +264,8 @@ contains
    xg_nonlop%cprjdim = cprjdim
 
    ABI_MALLOC(xg_nonlop%projectors,(mkmem))
+   ABI_MALLOC(xg_nonlop%ffnl_gather,(mkmem))
+   ABI_MALLOC(xg_nonlop%ph3d_gather,(mkmem))
    if (xg_nonlop%paw) then
      ABI_MALLOC(xg_nonlop%gram_proj,(mkmem))
    end if
@@ -277,11 +296,15 @@ contains
     ABI_FREE(xg_nonlop%l_shift_npw_k)
   end if
 
-  do ikpt=1,size(xg_nonlop%projectors)
+  do ikpt=1,xg_nonlop%mkmem
     call xg_free(xg_nonlop%projectors(ikpt))
+    call xg_free(xg_nonlop%ffnl_gather(ikpt))
+    call xg_free(xg_nonlop%ph3d_gather(ikpt))
     if (xg_nonlop%paw) call xg_free(xg_nonlop%gram_proj(ikpt))
   end do
   ABI_FREE(xg_nonlop%projectors)
+  ABI_FREE(xg_nonlop%ffnl_gather)
+  ABI_FREE(xg_nonlop%ph3d_gather)
 
   if (xg_nonlop%paw) then
     ABI_FREE(xg_nonlop%gram_proj)
@@ -585,7 +608,240 @@ contains
  end subroutine xg_nonlop_destroy_Sij
 !!***
 
- subroutine xg_nonlop_make_k(xg_nonlop,ikpt,istwf_k,me_g0,npw_k,ffnl_k,ph3d_k,compute_proj,compute_invS_approx,compute_gram)
+ subroutine xg_nonlop_compute_projs(xg_nonlop)
+
+  type(xg_nonlop_t),intent(inout) :: xg_nonlop
+
+  complex(dp),pointer :: projectors_k_(:,:)
+  real(dp),pointer :: projectors_k_real(:,:)
+  real(dp),pointer :: ffnl_gather_k_(:,:)
+  complex(dp),pointer :: ph3d_gather_k_(:,:)
+  real(dp),pointer :: ph3d_gather_k_real(:,:)
+
+  integer :: shift_itypat,ntypat,shift_ipw
+  integer :: icol,ilmn,nlmn,il,ipw,ia,iatom,itypat
+  real(dp) :: ffnl_ipw
+  complex(dp) :: cil(4),ph3d_ipw,ctmp
+
+  ntypat = xg_nonlop%ntypat
+
+! 4pi/sqrt(ucvol) * (-i)^l
+  cil(1) = ( 1.0_DP, 0.0_DP) * xg_nonlop%weight
+  cil(2) = ( 0.0_DP,-1.0_DP) * xg_nonlop%weight
+  cil(3) = (-1.0_DP, 0.0_DP) * xg_nonlop%weight
+  cil(4) = ( 0.0_DP, 1.0_DP) * xg_nonlop%weight
+
+  if (xg_nonlop%option==1) then
+    call xgBlock_zero(xg_nonlop%ffnl_gather_k%self)
+    call xgBlock_zero(xg_nonlop%ph3d_gather_k%self)
+    call xgBlock_reverseMap(xg_nonlop%ffnl_gather_k%self,ffnl_gather_k_)
+  end if
+
+  shift_ipw = xg_nonlop%l_shift_npw_k(xg_nonlop%me_band+1)
+
+  select case(xg_nonlop%space_pw)
+
+    case (SPACE_C)
+
+      call xgBlock_reverseMap(xg_nonlop%projectors_k%self,projectors_k_)
+      if (xg_nonlop%option==1) then
+        call xgBlock_reverseMap(xg_nonlop%ph3d_gather_k%self,ph3d_gather_k_)
+      end if
+      !TODO use openMP
+      shift_itypat=0
+      icol=1
+      do itypat = 1, ntypat
+        nlmn = xg_nonlop%nlmn_ntypat(itypat)
+        do ia = 1, xg_nonlop%nattyp(itypat)
+          iatom = ia + shift_itypat
+          !! projectors = 4pi/sqrt(ucvol) * (-i)^l * conj(ph3d) * ffnl
+          do ilmn=1,nlmn
+            il=mod(xg_nonlop%indlmn(1,ilmn,itypat),4)+1
+            do ipw=1, xg_nonlop%npw_k
+              ph3d_ipw = cmplx( xg_nonlop%ph3d_k(1,ipw,iatom), xg_nonlop%ph3d_k(2,ipw,iatom), kind=DP)
+              ffnl_ipw = xg_nonlop%ffnl_k(ipw, 1, ilmn, itypat)
+              !
+              if (xg_nonlop%option==1) then
+                ph3d_gather_k_(ipw+shift_ipw,iatom) = ph3d_ipw
+                ffnl_gather_k_(ipw+shift_ipw,ilmn+(itypat-1)*xg_nonlop%nlmn_max) = ffnl_ipw
+              end if
+              !
+              projectors_k_(ipw,icol) = cil(il) * conjg(ph3d_ipw) * ffnl_ipw
+            end do
+            icol = icol + 1
+          end do
+        end do
+        shift_itypat = shift_itypat + xg_nonlop%nattyp(itypat)
+      end do
+
+    case (SPACE_CR)
+
+      call xgBlock_reverseMap(xg_nonlop%projectors_k%self,projectors_k_real)
+      if (xg_nonlop%option==1) then
+        call xgBlock_reverseMap(xg_nonlop%ph3d_gather_k%self,ph3d_gather_k_real)
+      end if
+      !TODO use openMP
+      shift_itypat=0
+      icol=1
+      do itypat = 1, ntypat
+        nlmn = xg_nonlop%nlmn_ntypat(itypat)
+        do ia = 1, xg_nonlop%nattyp(itypat)
+          iatom = ia + shift_itypat
+          !! projectors = 4pi/sqrt(ucvol) * (-i)^l * conj(ph3d) * ffnl
+          do ilmn=1,nlmn
+            il=mod(xg_nonlop%indlmn(1,ilmn,itypat),4)+1
+            do ipw=1, xg_nonlop%npw_k
+              ph3d_ipw = cmplx( xg_nonlop%ph3d_k(1,ipw,iatom), xg_nonlop%ph3d_k(2,ipw,iatom), kind=DP)
+              ffnl_ipw = xg_nonlop%ffnl_k(ipw, 1, ilmn, itypat)
+              !
+              if (xg_nonlop%option==1) then
+                ph3d_gather_k_real(2*(ipw+shift_ipw)-1,iatom) = dble(ph3d_ipw)
+                ph3d_gather_k_real(2*(ipw+shift_ipw)  ,iatom) = dimag(ph3d_ipw)
+                ffnl_gather_k_(ipw+shift_ipw,ilmn+(itypat-1)*xg_nonlop%nlmn_max) = ffnl_ipw
+              end if
+              !
+              ctmp = cil(il) * conjg(ph3d_ipw) * ffnl_ipw
+              projectors_k_real(2*ipw-1,icol) = dble(ctmp)
+              projectors_k_real(2*ipw  ,icol) = dimag(ctmp)
+            end do
+            icol = icol + 1
+          end do
+        end do
+        shift_itypat = shift_itypat + xg_nonlop%nattyp(itypat)
+      end do
+
+    case (SPACE_R)
+      ABI_ERROR("Wrong space")
+
+  end select
+
+  if (xg_nonlop%option==1) then
+    call xgBlock_mpi_sum(xg_nonlop%ffnl_gather_k%self,comm=xg_nonlop%comm_band)
+    call xgBlock_mpi_sum(xg_nonlop%ph3d_gather_k%self,comm=xg_nonlop%comm_band)
+  end if
+
+ end subroutine xg_nonlop_compute_projs
+!!***
+
+ subroutine xg_nonlop_compute_projs_otf(xg_nonlop,projs_otf,index_mpi)
+
+  integer,intent(in) :: index_mpi
+  type(xg_nonlop_t),intent(in) :: xg_nonlop
+  type(xgBlock_t),intent(inout) :: projs_otf
+
+  complex(dp),pointer :: projectors_k_(:,:)
+  real(dp),pointer :: projectors_k_real(:,:)
+  real(dp),pointer :: ffnl_gather_k_(:,:)
+  complex(dp),pointer :: ph3d_gather_k_(:,:)
+  real(dp),pointer :: ph3d_gather_k_real(:,:)
+
+  integer :: nmpi,npw_k
+  integer :: shift_itypat,ntypat,shift_ipw
+  integer :: icol,ilmn,nlmn,il,ipw,ia,iatom,itypat
+  real(dp) :: ffnl_ipw,ph3d_ipw_r(2)
+  complex(dp) :: cil(4),ph3d_ipw,ctmp
+
+  if (xg_nonlop%option/=1) then
+    ABI_ERROR('xg_nonlop%option/=1')
+  end if
+
+  nmpi = xmpi_comm_size(xg_nonlop%comm_band)
+  if (index_mpi<0.or.index_mpi>nmpi-1) then
+    ABI_ERROR('index_mpi should be between 0 and size(comm_band)-1')
+  end if
+
+  npw_k = xg_nonlop%l_npw_k(index_mpi+1)
+  shift_ipw = xg_nonlop%l_shift_npw_k(index_mpi+1)
+
+  if (rows(projs_otf)/=npw_k) then
+    ABI_ERROR('rows(projs_otf)/=npw_k!')
+  end if
+  if (cols(projs_otf)/=xg_nonlop%cprjdim) then
+    ABI_ERROR('cols(projs_otf)/=cprjdim!')
+  end if
+
+  ntypat = xg_nonlop%ntypat
+
+! 4pi/sqrt(ucvol) * (-i)^l
+  cil(1) = ( 1.0_DP, 0.0_DP) * xg_nonlop%weight
+  cil(2) = ( 0.0_DP,-1.0_DP) * xg_nonlop%weight
+  cil(3) = (-1.0_DP, 0.0_DP) * xg_nonlop%weight
+  cil(4) = ( 0.0_DP, 1.0_DP) * xg_nonlop%weight
+
+  call xgBlock_reverseMap(xg_nonlop%ffnl_gather_k%self,ffnl_gather_k_)
+
+  select case(xg_nonlop%space_pw)
+
+    case (SPACE_C)
+
+      call xgBlock_reverseMap(projs_otf,projectors_k_)
+      if (xg_nonlop%option==1) then
+        call xgBlock_reverseMap(xg_nonlop%ph3d_gather_k%self,ph3d_gather_k_)
+      end if
+      !TODO use openMP
+      shift_itypat=0
+      icol=1
+      do itypat = 1, ntypat
+        nlmn = xg_nonlop%nlmn_ntypat(itypat)
+        do ia = 1, xg_nonlop%nattyp(itypat)
+          iatom = ia + shift_itypat
+          !! projectors = 4pi/sqrt(ucvol)* conj(ph3d) * ffnl * (-i)^l
+          do ilmn=1,nlmn
+            il=mod(xg_nonlop%indlmn(1,ilmn,itypat),4)+1
+            do ipw=1, npw_k
+              ph3d_ipw = ph3d_gather_k_(ipw+shift_ipw,iatom)
+              ffnl_ipw = ffnl_gather_k_(ipw+shift_ipw,ilmn+(itypat-1)*xg_nonlop%nlmn_max)
+              !
+              projectors_k_(ipw,icol) = cil(il) * conjg(ph3d_ipw) * ffnl_ipw
+            end do
+            icol = icol + 1
+          end do
+        end do
+        shift_itypat = shift_itypat + xg_nonlop%nattyp(itypat)
+      end do
+
+    case(SPACE_CR)
+
+      call xgBlock_reverseMap(projs_otf,projectors_k_real)
+      if (xg_nonlop%option==1) then
+        call xgBlock_reverseMap(xg_nonlop%ph3d_gather_k%self,ph3d_gather_k_real)
+      end if
+      !TODO use openMP
+      shift_itypat=0
+      icol=1
+      do itypat = 1, ntypat
+        nlmn = xg_nonlop%nlmn_ntypat(itypat)
+        do ia = 1, xg_nonlop%nattyp(itypat)
+          iatom = ia + shift_itypat
+          !! projectors = 4pi/sqrt(ucvol)* conj(ph3d) * ffnl * (-i)^l
+          do ilmn=1,nlmn
+            il=mod(xg_nonlop%indlmn(1,ilmn,itypat),4)+1
+            do ipw=1, npw_k
+              ph3d_ipw_r(1) = ph3d_gather_k_real(2*(ipw+shift_ipw)-1,iatom)
+              ph3d_ipw_r(2) = ph3d_gather_k_real(2*(ipw+shift_ipw)  ,iatom)
+              ffnl_ipw = ffnl_gather_k_(ipw+shift_ipw,ilmn+(itypat-1)*xg_nonlop%nlmn_max)
+              !
+              ctmp = cmplx( ph3d_ipw_r(1), ph3d_ipw_r(2), kind=DP)
+              ctmp = cil(il) * conjg(ctmp) * ffnl_ipw
+              projectors_k_real(2*ipw-1,icol) = dble(ctmp)
+              projectors_k_real(2*ipw  ,icol) = dimag(ctmp)
+            end do
+            icol = icol + 1
+          end do
+        end do
+        shift_itypat = shift_itypat + xg_nonlop%nattyp(itypat)
+      end do
+
+    case(SPACE_R)
+      ABI_ERROR("Wrong space")
+
+  end select
+
+ end subroutine xg_nonlop_compute_projs_otf
+!!***
+
+ subroutine xg_nonlop_make_k(xg_nonlop,ikpt,istwf_k,me_g0,me_g0_fft,npw_k,ffnl_k,ph3d_k,compute_proj,&
+     compute_invS_approx,compute_gram)
 
   type(xg_nonlop_t),intent(inout) :: xg_nonlop
 
@@ -593,18 +849,17 @@ contains
   integer ,intent(in) :: ikpt
   integer ,intent(in) :: istwf_k
   integer, intent(in) :: me_g0
+  integer, intent(in) :: me_g0_fft
   integer, intent(in) :: npw_k
-  real(dp), intent(in) :: ffnl_k(:,:,:,:)
-  real(dp), intent(in) :: ph3d_k(:,:,:)
+  real(dp), intent(in), target :: ffnl_k(:,:,:,:)
+  real(dp), intent(in), target :: ph3d_k(:,:,:)
   logical ,optional,intent(in) :: compute_invS_approx
   logical ,optional,intent(in) :: compute_gram
 
   logical :: compute_gram_,compute_invS_approx_
-  real(dp),pointer :: projectors_k_(:,:),gram_proj_k_(:,:),Sijm1_(:,:)
-  real(dp) :: cphase(2)
-  complex(dp) :: cil(4),ctmp
-  integer :: ierr,iatom, iblock, shift, shiftc, shift_itypat, itypat, ilmn, jlmn, nlmn, ia, icol, il, ipw
-  integer :: cplex,cols,rows,nlmn_max,ntypat,nmpi,me_g0_loc,space_work
+  real(dp),pointer :: gram_proj_k_(:,:),Sijm1_(:,:)
+  integer :: ierr, iblock, shift, shiftc, shift_itypat, itypat, ilmn, jlmn, nlmn, ia
+  integer :: cplex,cols,nlmn_max,ntypat,nmpi,me_g0_loc,me_g0_fft_loc,space_work
   real(dp) :: tsec(2)
   type(xg_t) :: work
   type(xgBlock_t) :: projs
@@ -614,6 +869,7 @@ contains
   call timab(tim_make_k,1,tsec)
 
   me_g0_loc = -1
+  me_g0_fft_loc = -1
   if (istwf_k==1) then
     xg_nonlop%cplex=2
     xg_nonlop%space_pw=SPACE_C
@@ -621,7 +877,11 @@ contains
     xg_nonlop%cplex=1
     xg_nonlop%space_pw=SPACE_CR
     me_g0_loc = 0
-    if (istwf_k==2.and.me_g0==1) me_g0_loc = me_g0
+    me_g0_fft_loc = 0
+    if (istwf_k==2.and.me_g0==1) then
+      me_g0_loc = me_g0
+      me_g0_fft_loc = me_g0_fft
+    end if
   end if
 
   xg_nonlop%npw_k = npw_k
@@ -644,46 +904,31 @@ contains
     xg_nonlop%l_shift_npw_k(iblock) = xg_nonlop%l_shift_npw_k(iblock-1) + xg_nonlop%l_npw_k(iblock-1)
   end do
 
-  xg_nonlop%projectors_k => xg_nonlop%projectors(ikpt)
+  xg_nonlop%ph3d_k => ph3d_k
+  xg_nonlop%ffnl_k => ffnl_k
+
+  xg_nonlop%projectors_k  => xg_nonlop%projectors(ikpt)
+  if (xg_nonlop%option==1) then
+    xg_nonlop%ffnl_gather_k => xg_nonlop%ffnl_gather(ikpt)
+    xg_nonlop%ph3d_gather_k => xg_nonlop%ph3d_gather(ikpt)
+  end if
+
   if (xg_nonlop%paw) xg_nonlop%gram_proj_k => xg_nonlop%gram_proj(ikpt)
 
   if (compute_proj) then
 
     ntypat = xg_nonlop%ntypat
 
-!   4pi/sqrt(ucvol) * (-i)^l
-    cil(1) = ( 1.0_DP, 0.0_DP) * xg_nonlop%weight
-    cil(2) = ( 0.0_DP,-1.0_DP) * xg_nonlop%weight
-    cil(3) = (-1.0_DP, 0.0_DP) * xg_nonlop%weight
-    cil(4) = ( 0.0_DP, 1.0_DP) * xg_nonlop%weight
+    call xg_init(xg_nonlop%projectors_k,xg_nonlop%space_pw,npw_k,xg_nonlop%cprjdim,&
+      xg_nonlop%comm_band,me_g0=me_g0_loc)
 
-    rows = npw_k
-    cols = xg_nonlop%cprjdim
+    if (xg_nonlop%option==1) then
+      call xg_init(xg_nonlop%ffnl_gather_k,SPACE_R,xg_nonlop%total_npw_k,xg_nonlop%nlmn_max*ntypat,xmpi_comm_null)
+      call xg_init(xg_nonlop%ph3d_gather_k,xg_nonlop%space_pw,xg_nonlop%total_npw_k,xg_nonlop%natom,&
+        xmpi_comm_null,me_g0=me_g0_fft_loc)
+    end if
 
-    call xg_init(xg_nonlop%projectors_k,xg_nonlop%space_pw,rows,cols,xg_nonlop%comm_band,me_g0=me_g0_loc)
-    call xgBlock_reverseMap(xg_nonlop%projectors_k%self,projectors_k_)
-
-    !TODO use openMP
-    shift_itypat=0
-    icol=1
-    do itypat = 1, ntypat
-      nlmn = xg_nonlop%nlmn_ntypat(itypat)
-      do ia = 1, xg_nonlop%nattyp(itypat)
-        iatom = ia + shift_itypat
-        !! projectors = 4pi/sqrt(ucvol)* conj(ph3d) * ffnl * (-i)^l
-        do ilmn=1,nlmn
-          il=mod(xg_nonlop%indlmn(1,ilmn,itypat),4)+1
-          do ipw=1, npw_k
-            ctmp = cil(il) * cmplx( ph3d_k(1,ipw,iatom), -ph3d_k(2,ipw,iatom), kind=DP )
-            cphase(1) =  dble(ctmp)
-            cphase(2) = dimag(ctmp)
-            projectors_k_(2*(ipw-1)+1:2*ipw,icol) = cphase(:) * ffnl_k(ipw, 1, ilmn, itypat)
-          end do
-          icol = icol + 1
-        end do
-      end do
-      shift_itypat = shift_itypat + xg_nonlop%nattyp(itypat)
-    end do
+    call xg_nonlop_compute_projs(xg_nonlop)
 
     compute_invS_approx_=.false.
     if (present(compute_invS_approx)) compute_invS_approx_ = compute_invS_approx
@@ -704,7 +949,7 @@ contains
         shift_itypat=1
         do itypat = 1, ntypat
           nlmn = xg_nonlop%nlmn_ntypat(itypat)
-          call xgBlock_setBlock(xg_nonlop%projectors_k%self,projs,rows,nlmn,fcol=shift_itypat)
+          call xgBlock_setBlock(xg_nonlop%projectors_k%self,projs,npw_k,nlmn,fcol=shift_itypat)
           shift=1+(itypat-1)*nlmn_max
           call xg_setBlock(xg_nonlop%invSij_approx_all,xg_nonlop%invSij_approx(itypat),nlmn,nlmn,fcol=shift)
           if (xg_nonlop%space_pw==SPACE_CR) then
@@ -742,6 +987,7 @@ contains
         cplex=2
         space_work=SPACE_C
       end if
+      cols = xg_nonlop%cprjdim
       call xg_init(xg_nonlop%gram_proj_k,space_work,cols,cols,xmpi_comm_self)
       projs = xg_nonlop%projectors_k%self
       call xgBlock_gemm('t','n',1.0d0,projs,projs,0.0d0,xg_nonlop%gram_proj_k%self,comm=xg_nonlop%comm_band)
@@ -917,9 +1163,11 @@ subroutine xg_nonlop_getcprj(xg_nonlop,X,cprjX,work_mpi)
            dest = mod(me_band-(iblock-1),nmpi)
            if (dest<0) dest=dest+nmpi
 
-           call timab(tim_getcprj_mpi,1,tsec)
-           call xgBlock_mpi_isend(projs,dest,tag,request,comm=xg_nonlop%comm_band)
-           call timab(tim_getcprj_mpi,2,tsec)
+           if (xg_nonlop%option==0) then
+             call timab(tim_getcprj_mpi,1,tsec)
+             call xgBlock_mpi_isend(projs,dest,tag,request,comm=xg_nonlop%comm_band)
+             call timab(tim_getcprj_mpi,2,tsec)
+           end if
 
            source = mod(me_band+(iblock-1),nmpi)
            npw = xg_nonlop%l_npw_k(source+1)
@@ -939,16 +1187,24 @@ subroutine xg_nonlop_getcprj(xg_nonlop,X,cprjX,work_mpi)
            call xgBlock_free_reshape(work_mpi_npw,npw,xg_nonlop%cprjdim,new_me_g0=me_g0_loc)
 
            call timab(tim_getcprj_mpi,1,tsec)
-           call xgBlock_mpi_recv(work_mpi_npw,source,tag,comm=xg_nonlop%comm_band)
+           if (xg_nonlop%option==0) then
+             call xgBlock_mpi_recv(work_mpi_npw,source,tag,comm=xg_nonlop%comm_band)
+           else if (xg_nonlop%option==1) then
+             call xg_nonlop_compute_projs_otf(xg_nonlop,work_mpi_npw,source)
+           else
+             ABI_ERROR("Wrong xg_nonlop%option")
+           end if
            call timab(tim_getcprj_mpi,2,tsec)
 
            call timab(tim_getcprj_gemm,1,tsec)
            call xgBlock_gemm('t','n',1.0d0,work_mpi_npw,X_block,1.d0,cprjX)
            call timab(tim_getcprj_gemm,2,tsec)
 
-           call timab(tim_getcprj_mpi,1,tsec)
-           call xmpi_wait(request,ierr)
-           call timab(tim_getcprj_mpi,2,tsec)
+           if (xg_nonlop%option==0) then
+             call timab(tim_getcprj_mpi,1,tsec)
+             call xmpi_wait(request,ierr)
+             call timab(tim_getcprj_mpi,2,tsec)
+           end if
 
          end if
 
@@ -1060,9 +1316,11 @@ subroutine xg_nonlop_getcprj(xg_nonlop,X,cprjX,work_mpi)
            dest = mod(me_band-(iblock-1),nmpi)
            if (dest<0) dest=dest+nmpi
 
-           call timab(tim_apply_prj_mpi,1,tsec)
-           call xgBlock_mpi_isend(projs,dest,tag,request,comm=xg_nonlop%comm_band)
-           call timab(tim_apply_prj_mpi,2,tsec)
+           if (xg_nonlop%option==0) then
+             call timab(tim_apply_prj_mpi,1,tsec)
+             call xgBlock_mpi_isend(projs,dest,tag,request,comm=xg_nonlop%comm_band)
+             call timab(tim_apply_prj_mpi,2,tsec)
+           end if
 
            source = mod(me_band+(iblock-1),nmpi)
            npw = xg_nonlop%l_npw_k(source+1)
@@ -1077,7 +1335,13 @@ subroutine xg_nonlop_getcprj(xg_nonlop,X,cprjX,work_mpi)
            call xgBlock_free_reshape(work_mpi_npw,npw,xg_nonlop%cprjdim)
 
            call timab(tim_apply_prj_mpi,1,tsec)
-           call xgBlock_mpi_recv(work_mpi_npw,source,tag,comm=xg_nonlop%comm_band)
+           if (xg_nonlop%option==0) then
+             call xgBlock_mpi_recv(work_mpi_npw,source,tag,comm=xg_nonlop%comm_band)
+           else if (xg_nonlop%option==1) then
+             call xg_nonlop_compute_projs_otf(xg_nonlop,work_mpi_npw,source)
+           else
+             ABI_ERROR("Wrong xg_nonlop%option")
+           end if
            call timab(tim_apply_prj_mpi,2,tsec)
 
            call timab(tim_apply_prj_gemm,1,tsec)
@@ -1088,9 +1352,11 @@ subroutine xg_nonlop_getcprj(xg_nonlop,X,cprjX,work_mpi)
            call xgBlock_partialcopy(X_block,X_spinor,shift_row,0,SMALL2BIG)
            call timab(tim_apply_prj_copy,2,tsec)
 
-           call timab(tim_apply_prj_mpi,1,tsec)
-           call xmpi_wait(request,ierr)
-           call timab(tim_apply_prj_mpi,2,tsec)
+           if (xg_nonlop%option==0) then
+             call timab(tim_apply_prj_mpi,1,tsec)
+             call xmpi_wait(request,ierr)
+             call timab(tim_apply_prj_mpi,2,tsec)
+           end if
          end if
 
        end do

@@ -85,4 +85,6 @@ inp_files = [
 "t99.abi",
 "t100.abi",
 "t101.abi",
+"t105.abi", # test xg_nonlop_option=1 (PAW,istwfk=1)
+"t106.abi", # test xg_nonlop_option=1 (PAW,istwfk>1)
 ]
