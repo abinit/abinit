@@ -3597,7 +3597,7 @@ if (dtset%usekden==1) then
  nsym=dtset%nsym
  ii=0;if (mod(dtset%wfoptalg,10)==4) ii=2
  if(dtset%ngfft(7)==314)ii=1
- if(dtset%usefock==1.and.dtset%optdriver/=RUNL_SIGMA.and.mod(dtset%wfoptalg,10)/=5) ii=1
+ if(dtset%usefock==1.and.dtset%optdriver/=RUNL_SIGMA.and.mod(dtset%wfoptalg,10)/=5.and.nkpt>1) ii=1
  !Enforce istwfk = 1 for all k-points in RT-TDDFT calculations
  if(dtset%optdriver==RUNL_RTTDDFT) ii=1
 
