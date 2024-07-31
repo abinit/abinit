@@ -2408,7 +2408,7 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
  integer :: units(2), work_ngfft(18), gmax(3), g0_k(3), mapl_qq(6), g0_q(3), ngqpt(3)
  integer,allocatable :: nband(:,:), wfd_istwfk(:), kg_k(:,:), sc2uc(:), gbound_k(:,:)
  real(dp),parameter :: origin0(3) = zero
- real(dp) :: kk(3), kk_ibz(3), kk_sc(3), qq(3), qq_ibz(3), center(3)
+ real(dp) :: kk(3), kk_ibz(3), kk_sc(3), qq(3), qq_ibz(3), center_cart(3)
  real(dp),allocatable :: scred(:,:), kpg_k(:,:), ug_k(:,:), work(:,:,:,:), pol_rho(:), qibz(:,:)
  real(dp),allocatable :: pheigvec_qibz(:,:,:,:)
  real(dp),allocatable :: displ_cart_qbz(:,:,:,:), pheigvec_qbz(:,:,:,:)  !displ_red_qbz(:,:,:,:), displ_cart_qibz(:,:,:,:),
@@ -2617,14 +2617,11 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
  call wfd%read_wfk(wfk0_path, iomode_from_fname(wfk0_path))
 
  call cwtime(cpu_all, wall_all, gflops_all, "start")
-
  call wrtout(std_out, " Computing mpw and gmax needed to allocate workspace array.")
  do spin=1,nsppol
    nk = vpq%nk_spin(spin)
-   do ik=1,nk
-     call ephtk_get_mpw_gmax(nk, vpq%kpts_spin(:, 1:nk, spin), dtset%ecut, cryst%gmet, mpw, gmax, comm, &
-                             init_with_zero=spin==1)
-   end do
+   call ephtk_get_mpw_gmax(nk, vpq%kpts_spin(:, 1:nk, spin), dtset%ecut, cryst%gmet, mpw, gmax, comm, &
+                           init_with_zero=spin==1)
  end do
 
  ! Init work_ngfft
@@ -2729,7 +2726,7 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
        call wrtout(units, msg)
        write(msg, "(a,es16.6)")" maxval(abs(aimag(pol_wf))): ", maxval(abs(aimag(pol_wf(:, spin))))
        call wrtout(units, msg)
-       call center_and_spread(cryst, vpq%ngkpt, sc_ngfft, pol_rho, center, spread, units)
+       call center_and_spread(cryst, vpq%ngkpt, sc_ngfft, pol_rho, center_cart, spread, units)
 
        do ii=1,num_writes
          if (ii == 1) then
@@ -2763,7 +2760,7 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
      call wrtout(units, msg)
      write(msg, "(a,es16.6)")" maxval(abs(aimag(pol_wf))): ", maxval(abs(aimag(pol_wf(:, 1))))
      call wrtout(units, msg)
-     call center_and_spread(cryst, vpq%ngkpt, sc_ngfft, pol_rho, center, spread, units)
+     call center_and_spread(cryst, vpq%ngkpt, sc_ngfft, pol_rho, center_cart, spread, units)
 
      spin = 1
      do ii=1,num_writes
@@ -2773,7 +2770,6 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
          path = strcat(dtfil%filnam_ds(4), "_POLARON.xsf")
        else
          call wrtout(units, " Writing the polaron wavefunction with diplaced atoms")
-
          path = strcat(dtfil%filnam_ds(4), "_POLARON_DISPL.xsf")
 
          ! Here we displace the atoms in the supercell for this spin (only master has the correct values)
@@ -2818,8 +2814,8 @@ subroutine center_and_spread(prim_cryst, ncells, sc_ngfft, rhor, center_cart, sp
  integer,intent(in) :: units(:)
 
 !Local variables-------------------------------
- integer :: i1, i2, i3, nfft
- real(dp) :: rr(3), rcart(3), rmr0(3), sc_rprimd(3,3), center_red(3)  ! r2_mean
+ integer :: i1, i2, i3, nfft, num_cells
+ real(dp) :: rr(3), rcart(3), rmr0(3), sc_rprimd(3,3), center_red(3), r2_mean, fwhm
  character(len=500) :: msg
 !----------------------------------------------------------------------
 
@@ -2827,8 +2823,9 @@ subroutine center_and_spread(prim_cryst, ncells, sc_ngfft, rhor, center_cart, sp
  sc_rprimd(:,1) = prim_cryst%rprimd(:,1) * ncells(1)
  sc_rprimd(:,2) = prim_cryst%rprimd(:,2) * ncells(2)
  sc_rprimd(:,3) = prim_cryst%rprimd(:,3) * ncells(3)
+ num_cells = product(ncells)
 
- ! Compute center = \int r rhor(r) dr
+ ! Compute center_cart = \int r rhor(r) dr
  center_cart = zero !; r2_mean = zero
  do i3=1,sc_ngfft(3)
    rr(3) = (i3 - one) / sc_ngfft(3)
@@ -2839,14 +2836,17 @@ subroutine center_and_spread(prim_cryst, ncells, sc_ngfft, rhor, center_cart, sp
        ! Go to cart coordinates.
        rcart = matmul(sc_rprimd, rr)
        center_cart = center_cart + rhor(i1, i2, i3) * rcart
-       !r2_mean = r2_mean + dot_product(rcart, rcart)
+       r2_mean = r2_mean + rhor(i1, i2, i3) * dot_product(rcart, rcart)
      end do
    end do
  end do
 
  !center_cart = matmul(sc_rprimd, center_cart)
- !r2_mean = r2_mean * (product(ncells) * prim_cryst%ucvol / nfft)
- !spread = sqrt(r2_mean - dot_product(center_cart, center_cart))
+ center_cart = center_cart * num_cells * prim_cryst%ucvol / nfft
+ r2_mean = r2_mean * num_cells * prim_cryst%ucvol / nfft
+ spread = sqrt(r2_mean - dot_product(center_cart, center_cart))
+ write(msg, "(a,2(es16.6,a))")" Polaron spread: ", spread, " (Bohr)", spread * Bohr_Ang, " (Ang)"
+ call wrtout(units, msg)
 
  ! Compute = \int (r - center_cart)^2 rhor dr = <r^2> - <r>^2
  spread = zero
@@ -2862,14 +2862,18 @@ subroutine center_and_spread(prim_cryst, ncells, sc_ngfft, rhor, center_cart, sp
      end do
    end do
  end do
- spread = sqrt(spread * product(ncells) * prim_cryst%ucvol / nfft)
+ spread = sqrt(spread * num_cells * prim_cryst%ucvol / nfft)
 
- center_cart = center_cart * product(ncells) * prim_cryst%ucvol / nfft
  call xcart2xred(1, prim_cryst%rprimd, center_cart, center_red)
- call wrtout(units, sjoin(" Polaron wf centered at: ", ltoa(center_cart), " (Cartesian coords in Bohr)"))
- call wrtout(units, sjoin("                         ", ltoa(center_red)     , " (Reduced coords in terms of the primitive cell)"))
- write(msg, "(a,2(es16.6,a))")"         with spread: ", spread, " (Bohr)", spread * Bohr_Ang, " (Ang)"
+ call wrtout(units, sjoin(" Polaron center in Cartesian coordinates: ", ltoa(center_cart), " (Bohr)"))
+ call wrtout(units, sjoin(" Fractional coordinates in termso of the primitive cell:", ltoa(center_red)))
+ write(msg, "(a,2(es16.6,a))")" Polaron spread: ", spread, " (Bohr)", spread * Bohr_Ang, " (Ang)"
  call wrtout(units, msg)
+ ! full width at half-maximum
+ fwhm = (two * sqrt(two * log(two))) * spread
+ write(msg, "(a,2(es16.6,a))")" Full width at half-maximum (FWHM) ", fwhm, "(Borh)", fwhm * Bohr_Ang, "(Ang)"
+ call wrtout(units, msg)
+
 
 end subroutine center_and_spread
 
