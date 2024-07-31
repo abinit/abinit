@@ -178,6 +178,9 @@ module m_lobpcg2
 #ifdef HAVE_LINALG_OPENBLAS_THREADS
     integer :: openblas_get_num_threads
 #endif
+#ifdef HAVE_LINALG_NVPL_THREADS
+    integer :: nvpl_get_max_threads
+#endif
 
     call timab(tim_init,1,tsec)
     lobpcg%neigenpairs = neigenpairs
@@ -201,6 +204,8 @@ module m_lobpcg2
     nthread =  mkl_get_max_threads()
 #elif HAVE_LINALG_OPENBLAS_THREADS
     nthread =  openblas_get_num_threads()
+#elif HAVE_LINALG_NVPL_THREADS
+    nthread =  nvpl_get_max_threads()
 #else
 !#elif defined HAVE_FC_GETENV
     !call getenv("OMP_NUM_THREADS",linalg_threads)
