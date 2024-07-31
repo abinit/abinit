@@ -1068,8 +1068,8 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
        if (dtset%cprj_in_memory==1) then
          do_invS=xg_nonlop%paw.and.dtset%wfoptalg==111
-         call xg_nonlop_make_k(xg_nonlop,my_ikpt,istwf_k,mpi_enreg%me_g0,npw_k,ffnl,ph3d,istep<=1,&
-           & compute_invS_approx=do_invS,compute_gram=do_invS)
+         call xg_nonlop_make_k(xg_nonlop,my_ikpt,istwf_k,mpi_enreg%me_g0,mpi_enreg%me_g0_fft,npw_k,ffnl,ph3d,&
+           & istep<=1,compute_invS_approx=do_invS,compute_gram=do_invS)
        end if
 
        ! Here we initialize the wavefunctions with atomic orbitals at the first GS iteration of the first

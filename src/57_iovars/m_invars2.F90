@@ -2480,6 +2480,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'cprj_update_lvl',tread,'INT')
  if(tread==1) dtset%cprj_update_lvl=intarr(1)
 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'xg_nonlop_option',tread,'INT')
+ if(tread==1) dtset%xg_nonlop_option=intarr(1)
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'useylm',tread,'INT')
  if(tread==1) dtset%useylm=intarr(1)
 
