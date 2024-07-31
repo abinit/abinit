@@ -618,7 +618,7 @@ contains
   complex(dp),pointer :: ph3d_gather_k_(:,:)
   real(dp),pointer :: ph3d_gather_k_real(:,:)
 
-  integer :: shift_itypat,ntypat,shift_ipw
+  integer :: shift_itypat,shift_itypat_nlmn,ntypat,nattyp,shift_ipw
   integer :: icol,ilmn,nlmn,il,ipw,ia,iatom,itypat
   real(dp) :: ffnl_ipw
   complex(dp) :: cil(4),ph3d_ipw,ctmp
@@ -649,15 +649,17 @@ contains
       end if
       !TODO use openMP
       shift_itypat=0
-      icol=1
+      shift_itypat_nlmn=0
       do itypat = 1, ntypat
         nlmn = xg_nonlop%nlmn_ntypat(itypat)
-        do ia = 1, xg_nonlop%nattyp(itypat)
-          iatom = ia + shift_itypat
-          !! projectors = 4pi/sqrt(ucvol) * (-i)^l * conj(ph3d) * ffnl
+        nattyp = xg_nonlop%nattyp(itypat)
+        !! projectors = 4pi/sqrt(ucvol) * (-i)^l * conj(ph3d) * ffnl
+        !!$omp parallel do collapse(3) shared(xg_nonlop,ph3d_gather_k_,ffnl_gather_k_,projectors_k_)
+        do ia = 1, nattyp
           do ilmn=1,nlmn
-            il=mod(xg_nonlop%indlmn(1,ilmn,itypat),4)+1
-            do ipw=1, xg_nonlop%npw_k
+            do ipw=1,xg_nonlop%npw_k
+              iatom = ia + shift_itypat
+              il=mod(xg_nonlop%indlmn(1,ilmn,itypat),4)+1
               ph3d_ipw = cmplx( xg_nonlop%ph3d_k(1,ipw,iatom), xg_nonlop%ph3d_k(2,ipw,iatom), kind=DP)
               ffnl_ipw = xg_nonlop%ffnl_k(ipw, 1, ilmn, itypat)
               !
@@ -666,12 +668,13 @@ contains
                 ffnl_gather_k_(ipw+shift_ipw,ilmn+(itypat-1)*xg_nonlop%nlmn_max) = ffnl_ipw
               end if
               !
+              icol = ilmn + (ia-1)*nlmn + shift_itypat_nlmn
               projectors_k_(ipw,icol) = cil(il) * conjg(ph3d_ipw) * ffnl_ipw
             end do
-            icol = icol + 1
           end do
         end do
-        shift_itypat = shift_itypat + xg_nonlop%nattyp(itypat)
+        shift_itypat      = shift_itypat      + nattyp
+        shift_itypat_nlmn = shift_itypat_nlmn + nattyp*nlmn
       end do
 
     case (SPACE_CR)
@@ -682,15 +685,17 @@ contains
       end if
       !TODO use openMP
       shift_itypat=0
-      icol=1
+      shift_itypat_nlmn=0
       do itypat = 1, ntypat
         nlmn = xg_nonlop%nlmn_ntypat(itypat)
-        do ia = 1, xg_nonlop%nattyp(itypat)
-          iatom = ia + shift_itypat
-          !! projectors = 4pi/sqrt(ucvol) * (-i)^l * conj(ph3d) * ffnl
+        nattyp = xg_nonlop%nattyp(itypat)
+        !! projectors = 4pi/sqrt(ucvol) * (-i)^l * conj(ph3d) * ffnl
+        !!$omp parallel do collapse(3) shared(xg_nonlop,ph3d_gather_k_real,ffnl_gather_k_,projectors_k_real)
+        do ia = 1, nattyp
           do ilmn=1,nlmn
-            il=mod(xg_nonlop%indlmn(1,ilmn,itypat),4)+1
-            do ipw=1, xg_nonlop%npw_k
+            do ipw=1,xg_nonlop%npw_k
+              iatom = ia + shift_itypat
+              il=mod(xg_nonlop%indlmn(1,ilmn,itypat),4)+1
               ph3d_ipw = cmplx( xg_nonlop%ph3d_k(1,ipw,iatom), xg_nonlop%ph3d_k(2,ipw,iatom), kind=DP)
               ffnl_ipw = xg_nonlop%ffnl_k(ipw, 1, ilmn, itypat)
               !
@@ -701,13 +706,14 @@ contains
               end if
               !
               ctmp = cil(il) * conjg(ph3d_ipw) * ffnl_ipw
+              icol = ilmn + (ia-1)*nlmn + shift_itypat_nlmn
               projectors_k_real(2*ipw-1,icol) = dble(ctmp)
               projectors_k_real(2*ipw  ,icol) = dimag(ctmp)
             end do
-            icol = icol + 1
           end do
         end do
-        shift_itypat = shift_itypat + xg_nonlop%nattyp(itypat)
+        shift_itypat      = shift_itypat      + nattyp
+        shift_itypat_nlmn = shift_itypat_nlmn + nattyp*nlmn
       end do
 
     case (SPACE_R)
@@ -736,7 +742,7 @@ contains
   real(dp),pointer :: ph3d_gather_k_real(:,:)
 
   integer :: nmpi,npw_k
-  integer :: shift_itypat,ntypat,shift_ipw
+  integer :: shift_itypat,shift_itypat_nlmn,ntypat,nattyp,shift_ipw
   integer :: icol,ilmn,nlmn,il,ipw,ia,iatom,itypat
   real(dp) :: ffnl_ipw,ph3d_ipw_r(2)
   complex(dp) :: cil(4),ph3d_ipw,ctmp
@@ -780,24 +786,27 @@ contains
       end if
       !TODO use openMP
       shift_itypat=0
-      icol=1
+      shift_itypat_nlmn=0
       do itypat = 1, ntypat
         nlmn = xg_nonlop%nlmn_ntypat(itypat)
+        nattyp = xg_nonlop%nattyp(itypat)
+        !! projectors = 4pi/sqrt(ucvol)* conj(ph3d) * ffnl * (-i)^l
+        !!$omp parallel do collapse(3) shared(xg_nonlop,ph3d_gather_k_,ffnl_gather_k_,projectors_k_)
         do ia = 1, xg_nonlop%nattyp(itypat)
-          iatom = ia + shift_itypat
-          !! projectors = 4pi/sqrt(ucvol)* conj(ph3d) * ffnl * (-i)^l
           do ilmn=1,nlmn
-            il=mod(xg_nonlop%indlmn(1,ilmn,itypat),4)+1
-            do ipw=1, npw_k
+            do ipw=1,npw_k
+              iatom = ia + shift_itypat
+              il=mod(xg_nonlop%indlmn(1,ilmn,itypat),4)+1
               ph3d_ipw = ph3d_gather_k_(ipw+shift_ipw,iatom)
               ffnl_ipw = ffnl_gather_k_(ipw+shift_ipw,ilmn+(itypat-1)*xg_nonlop%nlmn_max)
               !
+              icol = ilmn + (ia-1)*nlmn + shift_itypat_nlmn
               projectors_k_(ipw,icol) = cil(il) * conjg(ph3d_ipw) * ffnl_ipw
             end do
-            icol = icol + 1
           end do
         end do
-        shift_itypat = shift_itypat + xg_nonlop%nattyp(itypat)
+        shift_itypat      = shift_itypat      + nattyp
+        shift_itypat_nlmn = shift_itypat_nlmn + nattyp*nlmn
       end do
 
     case(SPACE_CR)
@@ -808,28 +817,31 @@ contains
       end if
       !TODO use openMP
       shift_itypat=0
-      icol=1
+      shift_itypat_nlmn=0
       do itypat = 1, ntypat
         nlmn = xg_nonlop%nlmn_ntypat(itypat)
-        do ia = 1, xg_nonlop%nattyp(itypat)
-          iatom = ia + shift_itypat
-          !! projectors = 4pi/sqrt(ucvol)* conj(ph3d) * ffnl * (-i)^l
+        nattyp = xg_nonlop%nattyp(itypat)
+        !! projectors = 4pi/sqrt(ucvol)* conj(ph3d) * ffnl * (-i)^l
+        !!$omp parallel do collapse(3) shared(xg_nonlop,ph3d_gather_k_real,ffnl_gather_k_,projectors_k_real)
+        do ia = 1, nattyp
           do ilmn=1,nlmn
-            il=mod(xg_nonlop%indlmn(1,ilmn,itypat),4)+1
-            do ipw=1, npw_k
+            do ipw=1,npw_k
+              iatom = ia + shift_itypat
+              il=mod(xg_nonlop%indlmn(1,ilmn,itypat),4)+1
               ph3d_ipw_r(1) = ph3d_gather_k_real(2*(ipw+shift_ipw)-1,iatom)
               ph3d_ipw_r(2) = ph3d_gather_k_real(2*(ipw+shift_ipw)  ,iatom)
               ffnl_ipw = ffnl_gather_k_(ipw+shift_ipw,ilmn+(itypat-1)*xg_nonlop%nlmn_max)
               !
               ctmp = cmplx( ph3d_ipw_r(1), ph3d_ipw_r(2), kind=DP)
               ctmp = cil(il) * conjg(ctmp) * ffnl_ipw
+              icol = ilmn + (ia-1)*nlmn + shift_itypat_nlmn
               projectors_k_real(2*ipw-1,icol) = dble(ctmp)
               projectors_k_real(2*ipw  ,icol) = dimag(ctmp)
             end do
-            icol = icol + 1
           end do
         end do
-        shift_itypat = shift_itypat + xg_nonlop%nattyp(itypat)
+        shift_itypat      = shift_itypat      + nattyp
+        shift_itypat_nlmn = shift_itypat_nlmn + nattyp*nlmn
       end do
 
     case(SPACE_R)
