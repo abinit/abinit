@@ -2245,11 +2245,11 @@ contains
 !Local variables -------------------------
 !scalars
  integer :: diel_unit,i,iblok,ifound,ii,imode,ipert1,ipert2,iw,j,jblok,jw,kblok,lblok,mmom_unit,mmspec_unit,nblok,ndim 
- integer :: nmat,nmdir,nwcalc,phon_unit,prtopt,spin_unit,zeff_unit,zeffspec_unit
+ integer :: nmat,nmdir,nwcalc,phon_unit,prtopt,spin_unit,zeff_unit,zeffspec_unit,zfield_unit
  real(dp) :: omegastp
  character(len=5000) :: msg,pfmt
  character(len=fnlen) :: diel_filename,spin_filename,mmom_filename,mmspec_filename
- character(len=fnlen) :: phon_filename,zeff_filename,zeffspec_filename
+ character(len=fnlen) :: phon_filename,zeff_filename,zeffspec_filename,zfield_filename
  complex(dpc) :: cplxvar,cplx_weta
 !arrays
  real(dp) :: qphnrm(3),qphon(3,3)
@@ -2261,7 +2261,8 @@ contains
  complex(dpc), allocatable :: barmagsus(:,:,:),invbarmagsus(:,:,:)
  complex(dpc), allocatable :: invmagsus(:,:,:), lm_magsus(:,:,:), magsus(:,:,:), invhmat(:,:)
  complex(dpc), allocatable :: barmmom(:,:),barmmom_tr(:,:),mmom(:,:,:), mmom_tr(:,:,:)
- complex(dpc), allocatable :: zfield(:,:),zfield_tr(:,:)
+ complex(dpc), allocatable :: ri_mmom(:,:,:)
+ complex(dpc), allocatable :: lm_zfield(:,:,:),zfield(:,:,:),zfield_tr(:,:)
  complex(dpc), allocatable :: bc_barmagsus(:,:),bc_ss(:,:),bc_sp(:,:)
  complex(dpc), allocatable :: barepsilon(:,:,:),epsilon(:,:,:),ifcmat(:,:),ifcmat_fm(:,:)
  complex(dpc), allocatable :: modemm(:,:,:),zeff(:,:),zeff_tr(:,:),modezeff(:,:,:)
@@ -2336,7 +2337,8 @@ contains
  ABI_MALLOC(barmmom_tr,(ndim,(natom+2)*3))
  ABI_MALLOC(mmom,(ndim,(natom+2)*3,nomega))
  ABI_MALLOC(mmom_tr,((natom+2)*3,ndim,nomega))
- ABI_MALLOC(zfield,(ndim,(natom+2)*3))
+ ABI_MALLOC(lm_zfield,(ndim,3,nomega))
+ ABI_MALLOC(zfield,(ndim,(natom+2)*3,nomega))
  ABI_MALLOC(zfield_tr,((natom+2)*3,ndim))
  ABI_MALLOC(barepsilon,(3,3,nomega))
  ABI_MALLOC(epsilon,(3,3,nomega))
@@ -2345,6 +2347,7 @@ contains
  ABI_MALLOC(ifcmat_fm,(3*natom,3*natom))
  ABI_MALLOC(dint_barddb,(2,ddb%msize))
  ABI_MALLOC(int_barddb,(2,ddb%msize,1))
+ ABI_MALLOC(ri_mmom,(ndim,3,nomega))
  if (omegaflag == 3) then
    ABI_MALLOC(coeffs,(2,nwcalc))
  end if
@@ -2402,7 +2405,7 @@ contains
    else if (omegaflag==2) then
      call lineal_omega_interp(w0hessian,w0berry,eta,ifcmat_fm, &
    & invmagsus(:,:,iw),mpatpol,mpdir,mpert,ddb%msize, &
-   & natom,ndim,nmdir,int_barddb,omega(iw),zfield,zfield_tr)
+   & natom,ndim,nmdir,int_barddb,omega(iw),zfield(:,:,iw),zfield_tr)
    else if (omegaflag==3) then
      cplx_weta=cmplx(omega(iw),eta,16)
      do ii=1,ddb%msize
@@ -2434,17 +2437,17 @@ contains
 
      !Calculate the magnetic moments
      call magmom(barmmom,barmmom_tr,int_barddb,invbarmagsus(:,:,iw),invhmat,1,1,magpen,magsus(:,:,iw),mmom(:,:,iw),mmom_tr(:,:,iw),&
-   & mpatpol,mpdir,mpert,natom,1,ndim,nmdir,omega(iw),omegaflag,prtopt,prtvol,qphon,xred,zfield,zfield_tr)
+   & mpatpol,mpdir,mpert,natom,1,ndim,nmdir,omega(iw),omegaflag,prtopt,prtvol,qphon,xred,zfield(:,:,iw),zfield_tr)
   
      !Calculate the dielectric susceptibility
      call mp_diel(barepsilon(:,:,iw),barmagsus(:,:,iw),barmmom,barmmom_tr,&
    & int_barddb,dissip,epsilon(:,:,iw),1,invhmat,magpen,magsus(:,:,iw),mpert,mpopt,&
-   & natom,1,ndim,prtopt,prtvol,ucvol,zfield,zfield_tr)
+   & natom,1,ndim,prtopt,prtvol,ucvol,zfield(:,:,iw),zfield_tr)
   
      !Calculate the interatomic force constants
      call mp_ifc(barmagsus(:,:,iw),barmmom,barmmom_tr,int_barddb,dissip,1,ifcmat,&
    & ifcmat_fm,invhmat,magsus(:,:,iw),magpen,mpert,mpopt,&
-   & natom,1,ndim,omega(iw),omegaflag,prtopt,prtvol,qphon,xred,zfield,zfield_tr)
+   & natom,1,ndim,omega(iw),omegaflag,prtopt,prtvol,qphon,xred,zfield(:,:,iw),zfield_tr)
   
      !Calculate the macroscopic magnetic susceptibility
      call mp_macmagsus(barmagsus(:,:,iw),int_barddb,&
@@ -2465,16 +2468,16 @@ contains
    !Calculate the phonon and magnon-phonon Green's functions and spectral functions
    call phonon_green(amu,eigvec,eta_phongreen,ifcmat,ifcmat_fm,invmagsus(:,:,iw),& 
  & magphongreen,magphonspec(iw),mode_magphonspec(:,iw),mode_phonspec(:,iw),natom,ndim,ntypat,omega(iw),&
- & phfrq(:,iw),phongreen,phonspec(iw),typat,zfield,zfield_tr)
+ & phfrq(:,iw),phongreen,phonspec(iw),typat,zfield(:,:,iw),zfield_tr)
 
    if (omegaflag==1.or.omegaflag==3) then
-!     !Calculate the mode-resolved magnetic moments
-!     call mode_mmom(amu,eigvec,mmom(:,:,iw),mmomspec(:,iw),modemm(:,:,iw),mode_phonspec(:,iw),natom,ndim,ntypat,typat)
+     !Calculate the mode-resolved magnetic moments
+     call mode_mmom(amu,eigvec,mmom(:,:,iw),mmomspec(:,iw),modemm(:,:,iw),mode_phonspec(:,iw),natom,ndim,ntypat,typat)
 
 !     !Calculate the Born effective charges
      call mp_zeff(barmagsus(:,:,iw),barmmom,barmmom_tr,int_barddb,&
    & dissip,fmzeff,fmzeff_tr,1,invhmat,lm_epsilon(:,:,iw),magpen,magsus(:,:,iw),mpert,mpopt,&
-   & natom,1,ndim,phongreen,prtopt,prtvol,ucvol,zeff,zeff_tr,zfield,zfield_tr)
+   & natom,1,ndim,phongreen,prtopt,prtvol,ucvol,zeff,zeff_tr,zfield(:,:,iw),zfield_tr)
 
      !Calculate the mode-resolved Born effective charges
 !     call mode_zeff(amu,eigvec,mode_phonspec(:,iw),modezeff(:,:,iw),natom,ntypat,&
@@ -2496,8 +2499,12 @@ contains
 
      !Alternative calculation
      genzeff_tr(1:natom*3,:)= fmzeff_tr(:,:)
-     genzeff_tr(natom*3:natom*3+ndim,:)= zfield(:,(natom+2)*3-2:(natom+2)*3)
+     genzeff_tr(natom*3:natom*3+ndim,:)= zfield(:,(natom+2)*3-2:(natom+2)*3,iw)
      ri_genelsus(:,:,iw)=-matmul(magphongreen,genzeff_tr)
+
+     !Another alternative
+     call me_altcalc(amu,eigvec,lm_magsus(:,:,iw),lm_zfield(:,:,iw),phongreen,magsus(:,:,iw),natom,ndim,ntypat,&
+   & ri_mmom(:,:,iw),typat,fmzeff_tr,zfield(:,:,iw))
 
      !Convert magnetic susceptibilities to the magnon basis
 !     work(:,:)=magsus(:,:,iw)
@@ -2664,6 +2671,54 @@ contains
 
  close (spin_unit)
 
+!Zfields
+ write(pfmt, '( "(es15.7, ", I4, "(es15.7))" )' )  ndim*3
+ zfield_filename=trim(outfilename_radix)//"_ZFIELDS"
+ if (open_file(zfield_filename, msg, newunit=zfield_unit) /= 0) then
+   ABI_ERROR(msg)
+ end if
+
+ write(zfield_unit,*) '#  Real part of clamped-ion local Zeeman fields induced by electric field (at. units)'
+ write(msg,'(a,a)') ch10,&
+&           ' # At  hw     Z_11     Z_12      Z_13    ...     Z_21     Z_22     ...'
+ call wrtout(zfield_unit,msg,'COLL')
+ do iw=1,nomega
+   write(msg,pfmt) omega(iw), ((real(zfield(i,(natom+1)*3+j,iw)),j=1,3),i=1,ndim)
+   call wrtout(zfield_unit,msg,'COLL')
+ end do
+
+ write(zfield_unit,*) ' '
+ write(zfield_unit,*) '#  Imag part of clamped-ion local Zeeman fields induced by electric field (at. units)'
+ write(msg,'(a,a)') ch10,&
+&           ' # At  hw     Z_11     Z_12      Z_13    ...     Z_21     Z_22     ...'
+ call wrtout(zfield_unit,msg,'COLL')
+ do iw=1,nomega
+   write(msg,pfmt) omega(iw), ((aimag(zfield(i,(natom+1)*3+j,iw)),j=1,3),i=1,ndim)
+   call wrtout(zfield_unit,msg,'COLL')
+ end do
+
+ write(zfield_unit,*) ' '
+ write(zfield_unit,*) '#  Real part of lattice-mediated local Zeeman fields induced by electric field (at. units)'
+ write(msg,'(a,a)') ch10,&
+&           ' # At  hw     Z_11     Z_12      Z_13    ...     Z_21     Z_22     ...'
+ call wrtout(zfield_unit,msg,'COLL')
+ do iw=1,nomega
+   write(msg,pfmt) omega(iw), ((real(lm_zfield(i,j,iw)),j=1,3),i=1,ndim)
+   call wrtout(zfield_unit,msg,'COLL')
+ end do
+
+ write(zfield_unit,*) ' '
+ write(zfield_unit,*) '#  Imag part of lattice-mediated local Zeeman fields induced by electric field (at. units)'
+ write(msg,'(a,a)') ch10,&
+&           ' # At  hw     Z_11     Z_12      Z_13    ...     Z_21     Z_22     ...'
+ call wrtout(zfield_unit,msg,'COLL')
+ do iw=1,nomega
+   write(msg,pfmt) omega(iw), ((aimag(lm_zfield(i,j,iw)),j=1,3),i=1,ndim)
+   call wrtout(zfield_unit,msg,'COLL')
+ end do
+ 
+ close (zfield_unit)
+
 !Magnetic moments
  mmom_filename=trim(outfilename_radix)//"_MAGMOM"
  if (open_file(mmom_filename, msg, newunit=mmom_unit) /= 0) then
@@ -2674,29 +2729,29 @@ contains
  write(mmom_unit,*) '#  Magnetic moments calculated and interpolated by ANADDB'
  write(mmom_unit,*) '#'
 
-! write(pfmt, '( "(es15.7, ", I2, "(es17.7))" )' )  ndim
-! do imode= 1, 3*natom
-!   write(mmom_unit,*) ' '
-!   write(mmom_unit,'(a,i3)') '#  Real part of magnetic moments (at. units) induced by phonon mode:', imode
-!   write(msg,'(a,a,a)') ch10,&
-! &           ' # At  hw     m_{mat_1,1}     m_{mat_1,2}     ...     m_{mat_2,1}     m_{mat_2,2}'
-!   call wrtout(mmom_unit,msg,'COLL')
-!   do iw=1,nomega
-!     write(msg,pfmt) &
-!   & omega(iw), (real(modemm(i,imode,iw)),i=1,ndim)
-!     call wrtout(mmom_unit,msg,'COLL')
-!   end do
-!   write(mmom_unit,*) ' '
-!   write(mmom_unit,'(a,i3)') '#  Imaginary part of magnetic moments (at. units) induced by phonon mode:', imode
-!   write(msg,'(a,a,a)') ch10,&
-! &           ' # At  hw     m_{mat_1,1}     m_{mat_1,2}     ...     m_{mat_2,1}     m_{mat_2,2}'
-!   call wrtout(mmom_unit,msg,'COLL')
-!   do iw=1,nomega
-!     write(msg,pfmt) &
-!   & omega(iw), (aimag(modemm(i,imode,iw)),i=1,ndim)
-!     call wrtout(mmom_unit,msg,'COLL')
-!   end do
-! end do
+ write(pfmt, '( "(es15.7, ", I2, "(es17.7))" )' )  ndim
+ do imode= 1, 3*natom
+   write(mmom_unit,*) ' '
+   write(mmom_unit,'(a,i3)') '#  Real part of magnetic moments (at. units) induced by phonon mode:', imode
+   write(msg,'(a,a,a)') ch10,&
+ &           ' # At  hw     m_{mat_1,1}     m_{mat_1,2}     ...     m_{mat_2,1}     m_{mat_2,2}'
+   call wrtout(mmom_unit,msg,'COLL')
+   do iw=1,nomega
+     write(msg,pfmt) &
+   & omega(iw), (real(modemm(i,imode,iw)),i=1,ndim)
+     call wrtout(mmom_unit,msg,'COLL')
+   end do
+   write(mmom_unit,*) ' '
+   write(mmom_unit,'(a,i3)') '#  Imaginary part of magnetic moments (at. units) induced by phonon mode:', imode
+   write(msg,'(a,a,a)') ch10,&
+ &           ' # At  hw     m_{mat_1,1}     m_{mat_1,2}     ...     m_{mat_2,1}     m_{mat_2,2}'
+   call wrtout(mmom_unit,msg,'COLL')
+   do iw=1,nomega
+     write(msg,pfmt) &
+   & omega(iw), (aimag(modemm(i,imode,iw)),i=1,ndim)
+     call wrtout(mmom_unit,msg,'COLL')
+   end do
+ end do
 
  write(pfmt, '( "(es15.7, ", I2, "(es17.7))" )' )  ndim*3
  write(mmom_unit,*) ' '
@@ -2797,6 +2852,31 @@ contains
  &  omega(iw), ((aimag(ri_genelsus(3*natom+i,j,iw)),j=1,3),i=1,ndim)
     call wrtout(mmom_unit,msg,'COLL')
  end do
+
+ write(mmom_unit,*) ' '
+ write(mmom_unit,*) '# [Another alternative calc] Real part of relaxed-ion local magnetoelectric tensor (at. units)'
+ write(msg,'(a,a,a)') ch10,&
+&           ' # At  hw     m_{mat_1,1}^{Ex}     m_{mat_1,1}^{Ey}',&
+&           '      ...     m_{mat_1,2}^{Ex}     ...     m_{mat_2,1}^{Ex}     ...'
+ call wrtout(mmom_unit,msg,'COLL')
+ do iw=1,nomega
+    write(msg,pfmt) &
+ &  omega(iw), ((real(ri_mmom(i,j,iw)),j=1,3),i=1,ndim)
+    call wrtout(mmom_unit,msg,'COLL')
+ end do
+
+ write(mmom_unit,*) ' '
+ write(mmom_unit,*) '#  [Another alternative calc] Imaginary part of relaxed-ion local magnetoelectric tensor (at. units)'
+ write(msg,'(a,a,a)') ch10,&
+&           ' # At  hw     m_{mat_1,1}^{Ex}     m_{mat_1,1}^{Ey}',&
+&           '      ...     m_{mat_1,2}^{Ex}     ...     m_{mat_2,1}^{Ex}     ...'
+ call wrtout(mmom_unit,msg,'COLL')
+ do iw=1,nomega
+    write(msg,pfmt) &
+ &  omega(iw), ((aimag(ri_mmom(i,j,iw)),j=1,3),i=1,ndim)
+    call wrtout(mmom_unit,msg,'COLL')
+ end do
+
  close(mmom_unit)
 
 ! mmspec_filename=trim(outfilename_radix)//"_SPECTRAL_MAGMOM"
@@ -3560,9 +3640,7 @@ subroutine phonon_green(amu,eigvec,eta_phongreen,ifc,ifc_fm,invmagsus,&
      else
        mfac1=zero
      end if
- 
      mass_magphongreen(irow,icol)= mfac1*work1(irow,icol)*mfac2
- 
    end do
  end do
 
@@ -3821,6 +3899,167 @@ subroutine mode_zeff(amu,eigvec,mode_phonspec,modezeff,natom,ntypat,typat,zeff,z
  DBG_EXIT("COLL")
 
 end subroutine mode_zeff
+!!***
+
+!!****f* ABINIT/me_altcalc
+!! NAME
+!!  me_altcalc
+!!
+!! FUNCTION
+!!  Calculates the relaxed-ion magnetic moments induced 
+!!  by an electric field
+!!
+!! COPYRIGHT
+!!  Copyright (C) 2024 ABINIT group (FIXME: add author)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! INPUTS
+!!  amu(ntypat)= atomic masses
+!!  eigvec(2,3,natom,3,natom)= dynamical matrix eigenvectors
+!!  natom= number of atoms in the cell
+!!  ntypat= number of atom types in the cell
+!!  typat(natom)= array with the type of atoms in the cell
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!
+!! NOTES
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+
+subroutine me_altcalc(amu,eigvec,lm_magsus,lm_zfield,phongreen,magsus,natom,ndim,ntypat,ri_mmom,typat,&
+& fmzeff_tr,zfield)
+
+ use defs_basis
+ use m_errors
+ use m_profiling_abi
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer, intent(in)  :: natom,ndim,ntypat 
+!arrays
+ integer, intent(in) :: typat(natom)
+ real(dp), intent(in) :: amu(ntypat)
+ real(dp), intent(in) :: eigvec(2,3,natom,3,natom)
+ complex(dpc), intent(in) :: lm_magsus(ndim,ndim)
+ complex(dpc), intent(out) :: lm_zfield(ndim,3)
+ complex(dpc), intent(in) :: magsus(ndim,ndim)
+ complex(dpc), intent(in) :: phongreen(3*natom,3*natom)
+ complex(dpc), intent(out) :: ri_mmom(ndim,3)
+ complex(dpc), intent(in) :: fmzeff_tr(3*natom,3)
+ complex(dpc), intent(in) :: zfield(ndim,(natom+2)*3)
+
+!Local variables-------------------------------
+!scalars
+ integer :: i,iat1,iat2,idir1,idir2,icol,im,imode1,imode2,irow,j,k,l
+ integer :: zfield_unit
+ real(dp) :: mcell,mfac1,mfac2
+!arrays
+ real(dp), allocatable :: mass(:)
+ complex(dpc), allocatable :: me_altcalcspec(:,:)
+ complex(dpc),allocatable :: mass_phongreen(:,:)
+ complex(dpc) :: ri_zfield(ndim,3),ri_magsus(ndim,ndim)
+ complex(dpc) :: eigdisp(3*natom,3*natom)
+ complex(dpc) :: nm_zfield(ndim,3*natom)
+ complex(dpc) :: nm_fmzeff_tr(3*natom,3)
+ complex(dpc) :: nm_phongreen(3*natom,3*natom)
+
+! *************************************************************************
+
+ DBG_ENTER("COLL")
+
+!Define the mass factors
+ ABI_MALLOC(mass,(natom))
+ mcell=zero
+ do iat1= 1, natom
+   mass(iat1)= amu(typat(iat1))
+   mcell= mcell + amu(typat(iat1))
+ end do
+ mass(:)=sqrt(mcell/mass(:))
+
+ ABI_MALLOC(mass_phongreen,(3*natom,3*natom))
+ do icol= 1, 3*natom
+   iat2= ceiling(icol/three)
+   mfac2= sqrt(amu(typat(iat2))*amu_emass)
+   do irow= 1, 3*natom
+     iat1= ceiling(irow/three)
+     mfac1= sqrt(amu(typat(iat1))*amu_emass)
+     mass_phongreen(irow,icol)= mfac1*phongreen(irow,icol)*mfac2
+   end do
+ end do
+
+!Calculate lattice-mediated Zeeman fields
+! lm_zfield= -matmul(zfield,matmul(mass_phongreen,zeff_tr))
+
+!Calculate the relaxed-ion induced magnetic moments
+! ri_zfield= -zfield(:,(natom+1)*3+1:(natom+2)*3)+lm_zfield(:,:)
+! ri_magsus= magsus + lm_magsus
+! ri_mmom=matmul(ri_magsus,ri_zfield)
+! ri_mmom=-matmul(magsus,zfield(:,(natom+1)*3+1:(natom+2)*3))-matmul(lm_magsus,lm_zfield)
+
+!Different formula on the sublattice space
+ !Spin part
+ ri_magsus= magsus + lm_magsus
+ ri_mmom=-matmul(ri_magsus,zfield(:,(natom+1)*3+1:(natom+2)*3))
+ !Lattice part
+! lm_zfield= matmul(zfield(:,1:3*natom),matmul(phongreen,fmzeff_tr))
+! ri_mmom= ri_mmom + matmul(magsus,lm_zfield)
+
+!Project on the normal-modes space the lattice part
+ do iat2= 1, natom
+   do idir2= 1, 3
+     imode2= (iat2-1)*3 + idir2
+     do iat1= 1, natom
+       do idir1= 1, 3
+         imode1= (iat1-1)*3 + idir1
+         eigdisp(imode1,imode2)= &
+       & cmplx(eigvec(1,idir1,iat1,idir2,iat2),eigvec(2,idir1,iat1,idir2,iat2),16)
+       end do
+     end do
+   end do
+ end do
+ nm_zfield=matmul(zfield(:,1:3*natom),eigdisp)
+ nm_fmzeff_tr=matmul(transpose(conjg(eigdisp)),fmzeff_tr)
+ nm_phongreen=matmul(transpose(conjg(eigdisp)),matmul(phongreen,eigdisp))
+ 
+ lm_zfield= matmul(nm_zfield(:,1:3*natom),matmul(nm_phongreen,nm_fmzeff_tr))
+
+ !restrict only to a set of modes
+! lm_zfield=cmplx(zero,zero,16)
+! do i= 1, ndim
+!   do j= 1, 3
+!     do k= 20,21
+!       do l= 20,21
+!         lm_zfield(i,j)= lm_zfield(i,j) + nm_zfield(i,k)*nm_phongreen(k,l)*nm_fmzeff_tr(l,j)
+!       end do 
+!     end do 
+!   end do
+! end do
+
+ ri_mmom= ri_mmom + matmul(magsus,lm_zfield)
+
+ ABI_FREE(mass)
+ ABI_FREE(mass_phongreen)
+
+ DBG_EXIT("COLL")
+
+end subroutine me_altcalc
 !!***
 
 end module m_ddb_magpen
