@@ -72,14 +72,14 @@ pseudos "H.psp8"
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   t21.abo, tolnlines=  15, tolabs=  1.2e-09, tolrel= 1.0
+#%%   t10.abo, tolnlines=  15, tolabs=  1.2e-09, tolrel= 1.0
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]
 #%% authors = F. Bruneval, M. Giantomassi
 #%% keywords = NC
 #%% description = Hartree-Fock with time-reversal, then CC4S output
-#%% topics = HF, CC4S
+##%% topics = HF, CC4S
 #%%<END TEST_INFO>
 
 
