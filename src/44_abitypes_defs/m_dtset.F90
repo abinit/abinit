@@ -661,6 +661,7 @@ type, public :: dataset_type
  character(len=fnlen) :: varpeq_aseed = "gaussian"
  character(len=fnlen) :: varpeq_pkind = "none"
  integer :: varpeq_interpolate = 0
+ integer :: varpeq_orth = 0
  integer :: varpeq_nstep = 30
  integer :: varpeq_pc_nupdate = 20
  real(dp) :: varpeq_tolgrs = tol6
@@ -2047,6 +2048,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%varpeq_aseed       = dtin%varpeq_aseed
  dtout%varpeq_pkind       = dtin%varpeq_pkind
  dtout%varpeq_interpolate = dtin%varpeq_interpolate
+ dtout%varpeq_orth        = dtin%varpeq_orth
  dtout%varpeq_nstep       = dtin%varpeq_nstep
  dtout%varpeq_tolgrs      = dtin%varpeq_tolgrs
  dtout%varpeq_pc_nupdate  = dtin%varpeq_pc_nupdate
@@ -3568,7 +3570,7 @@ subroutine chkvars(string)
 !V
  list_vars=trim(list_vars)//' vaclst vacnum vacuum vacwidth vcutgeo'
  list_vars=trim(list_vars)//' varpeq_aseed varpeq_erange varpeq_gau_params'
- list_vars=trim(list_vars)//' varpeq_interpolate varpeq_nstep varpeq_pkind'
+ list_vars=trim(list_vars)//' varpeq_interpolate varpeq_orth varpeq_nstep varpeq_pkind'
  list_vars=trim(list_vars)//' varpeq_tolgrs varpeq_pc_nupdate varpeq_pc_factor'
  list_vars=trim(list_vars)//' vdw_nfrag vdw_supercell'
  list_vars=trim(list_vars)//' vdw_tol vdw_tol_3bt vdw_typfrag vdw_xc'
