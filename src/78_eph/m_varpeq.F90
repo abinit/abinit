@@ -91,6 +91,7 @@ module m_varpeq
 
   complex(dp), allocatable :: my_a(:,:)
   complex(dp), allocatable :: a_glob(:,:)
+  complex(dp), allocatable :: orth_a(:,:)
 
   complex(dp), allocatable :: my_b(:,:)
   complex(dp), allocatable :: b_glob(:,:)
@@ -122,6 +123,7 @@ module m_varpeq
     procedure :: get_conjgrad_a => polstate_get_conjgrad_a
     procedure :: update_pcond => polstate_update_pcond
     procedure :: update_a => polstate_update_a
+    procedure :: orthonorm => polstate_orthonorm
 
     procedure :: free => polstate_free
 
@@ -177,6 +179,7 @@ module m_varpeq
    logical :: is_complete = .False.
    logical :: restart = .False.
    logical :: interpolate = .False.
+   logical :: orth = .False.
 
    integer :: ngkpt(3)
 
@@ -796,7 +799,8 @@ subroutine varpeq_setup(self, dtfil)
  type(bzlint_t) :: bzlint
  integer, parameter :: master = 0
  integer :: my_rank, comm, ierr, my_is, spin, nk, nb, ik, ib
- real(dp) :: anorm
+ real(dp) :: anorm, orth_anorm!, orth_factor
+ complex(dp) :: orth_factor
 !arrays
  integer :: units(2), ngkpt(3)
  real(dp) :: kpt(3)
@@ -890,11 +894,38 @@ subroutine varpeq_setup(self, dtfil)
      call polstate%cut_a(self%erange_spin(spin) + onehalf*eV_Ha)
    endif
 
+   ! FIXME: rewrite all the orthongonalization/normalization in the code
+   ! TOO MANY repetitions
+
+   ! if we want a solution orthongal to a previous vector
+   if (self%orth) then
+     ! set a previous vector
+     polstate%orth_a(:, :) = polstate%my_a(:, :)
+     ! normalize it
+     orth_anorm = polstate%get_norm('orth_a')
+     polstate%orth_a(:, :) = polstate%orth_a(:, :)*sqrt(one*polstate%nkbz)/orth_anorm
+
+     ! and initalize new starting point
+     call polstate%seed_a(self%aseed, gau_params=self%gau_params)
+
+     ! orthogonalize it to the previous one
+     orth_factor = sum(conjg(polstate%orth_a(:,:))*polstate%my_a(:,:))
+     !orth_factor = real(sum(polstate%orth_a(:,:)*conjg(polstate%my_a(:,:))))
+     call xmpi_sum(orth_factor, polstate%gqk%kpt_comm%value, ierr)
+     polstate%my_a(:,:) = polstate%my_a(:,:) - (orth_factor/polstate%nkbz)*polstate%orth_a(:,:)
+
+   ! otherwise, set the previous vector to zero
+   else
+     polstate%orth_a(:, :) = zero
+   endif
+
    ! Don't forget to normalize
    anorm = polstate%get_norm('a')
    polstate%my_a(:, :) = polstate%my_a(:, :)*sqrt(one*polstate%nkbz)/anorm
    call polstate%gather('a')
 
+   orth_anorm = polstate%get_norm('orth_a')
+   anorm = polstate%get_norm('a')
  enddo
 end subroutine varpeq_setup
 !!***
@@ -947,7 +978,7 @@ subroutine varpeq_solve(self)
      if (self%pc_nupdate == 1) call polstate%update_pcond(self%pc_factor)
      if (mod(ii, self%pc_nupdate) == 1) call polstate%update_pcond(self%pc_factor)
 
-     call polstate%get_conjgrad_a()
+     call polstate%get_conjgrad_a(self%orth)
      call polstate%update_a()
    enddo
 
@@ -1069,6 +1100,7 @@ subroutine varpeq_init(self, gstore, dtset)
 
  self%restart = (dtset%eph_restart == 1)
  self%interpolate = (dtset%varpeq_interpolate == 1)
+ self%orth = (dtset%varpeq_orth == 1)
 
  ABI_MALLOC(self%polstate, (gstore%my_nspins))
  ABI_MALLOC(self%iter_rec_spin, (6, self%nstep, gstore%nsppol))
@@ -1102,6 +1134,7 @@ subroutine varpeq_init(self, gstore, dtset)
 
    ! Basic dimensions
    ABI_MALLOC(polstate%my_a, (gqk%nb, gqk%my_nk))
+   ABI_MALLOC(polstate%orth_a, (gqk%nb, gqk%my_nk))
    ABI_MALLOC(polstate%my_grad_a, (gqk%nb, gqk%my_nk))
    ABI_MALLOC(polstate%my_prevgrad_a, (gqk%nb, gqk%my_nk))
    ABI_MALLOC(polstate%my_pcond, (gqk%nb, gqk%my_nk))
@@ -1279,6 +1312,7 @@ subroutine polstate_free(self)
  ABI_SFREE(self%my_grad_a)
  ABI_SFREE(self%my_prevgrad_a)
  ABI_SFREE(self%my_pcond)
+ ABI_SFREE(self%orth_a)
 
  ABI_SFREE(self%a_glob)
  ABI_SFREE(self%b_glob)
@@ -1374,24 +1408,26 @@ end subroutine polstate_update_pcond
 !!
 !! SOURCE
 
-subroutine polstate_get_conjgrad_a(self)
+subroutine polstate_get_conjgrad_a(self, orth)
 
 !Arguments ------------------------------------
  class(polstate_t), intent(inout) :: self
+ logical, intent(in) :: orth
 
 !Local variables-------------------------------
  class(gqk_t), pointer :: gqk
  integer :: ierr
- real(dp) :: beta_den
+ real(dp) :: beta_den!, norm
  complex(dp) :: beta, beta_num
 
 !----------------------------------------------------------------------
 
  gqk => self%gqk
 
+ call self%orthonorm(orth)
  ! Apply the preconditioner and orthonormalize wrt A
  self%my_grad_a(:,:) = self%my_pcond(:,:)*self%my_grad_a(:,:)
- call orthonorm_to_a_()
+ call self%orthonorm(orth)
 
  ! If previous gradient is known, get conjugate gradient using Polak-Ribi'ere formula
  if (self%has_prev_grad) then
@@ -1403,35 +1439,68 @@ subroutine polstate_get_conjgrad_a(self)
    beta = beta_num/beta_den
 
    self%my_grad_a(:,:) = self%my_grad_a(:,:) + beta*self%my_prevgrad_a(:,:)
-   call orthonorm_to_a_()
+   call self%orthonorm(orth)
  endif
+
+ !norm = self%get_norm('grad_a')
+ !self%my_grad_a(:,:) = self%my_grad_a(:,:)*sqrt(one*self%nkbz)/norm
 
  ! Save the current gradient for each processor and globally
  call self%gather('grad_a')
  self%my_prevgrad_a(:,:) = self%my_grad_a(:,:)
  self%has_prev_grad = .true.
 
+end subroutine polstate_get_conjgrad_a
+!!***
+
 !----------------------------------------------------------------------
 
- contains
- subroutine orthonorm_to_a_()
+!!****f* m_varpeq/polstate_orthonorm
+!! NAME
+!!  polstate_orthonorm
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SOURCE
 
-  integer :: ierr
-  real(dp) :: orth_factor, norm
+subroutine polstate_orthonorm(self, orth)
 
- !----------------------------------------------------------------------
+!Arguments ------------------------------------
+ class(polstate_t), intent(inout) :: self
+ logical, optional, intent(in) :: orth
 
-  orth_factor = real(sum(self%my_a(:,:)*conjg(self%my_grad_a(:,:))))
-  call xmpi_sum(orth_factor, gqk%kpt_comm%value, ierr)
-  self%my_grad_a(:,:) = &
-    self%my_grad_a(:,:) - (orth_factor/self%nkbz)*self%my_a(:,:)
+!Local variables-------------------------------
+ class(gqk_t), pointer :: gqk
+ integer :: ierr
+ real(dp) :: norm!, orth_factor, orth_factor2
+ complex(dp) :: orth_factor, orth_factor2
 
-  norm = self%get_norm('grad_a')
-  self%my_grad_a(:,:) = self%my_grad_a(:,:)*sqrt(one*self%nkbz)/norm
+!----------------------------------------------------------------------
 
- end subroutine orthonorm_to_a_
+ gqk => self%gqk
 
-end subroutine polstate_get_conjgrad_a
+ orth_factor = sum(conjg(self%my_a(:,:))*self%my_grad_a(:,:))
+ !orth_factor = real(sum(self%my_a(:,:)*conjg(self%my_grad_a(:,:))))
+ call xmpi_sum(orth_factor, gqk%kpt_comm%value, ierr)
+
+ orth_factor2 = zero
+ if (present(orth) .and. orth) then
+   orth_factor2 = sum(conjg(self%orth_a(:,:))*self%my_grad_a(:,:))
+   !orth_factor2 = real(conjg(self%orth_a(:,:)*conjg(self%my_grad_a(:,:))))
+   call xmpi_sum(orth_factor2, gqk%kpt_comm%value, ierr)
+ endif
+
+ self%my_grad_a(:,:) = self%my_grad_a(:,:) - &
+   (one/self%nkbz)*(orth_factor*self%my_a(:,:) + orth_factor2*self%orth_a(:,:))
+
+ norm = self%get_norm('grad_a')
+ self%my_grad_a(:,:) = self%my_grad_a(:,:)*sqrt(one*self%nkbz)/norm
+
+end subroutine polstate_orthonorm
 !!***
 
 !----------------------------------------------------------------------
@@ -2127,6 +2196,8 @@ real(dp) function polstate_get_norm(self, mode) result(norm)
    norm = get_norm_(self%my_a, gqk%kpt_comm%value)
  case ("grad_a")
    norm = get_norm_(self%my_grad_a, gqk%kpt_comm%value)
+ case ("orth_a")
+   norm = get_norm_(self%orth_a, gqk%kpt_comm%value)
  case ("b")
    norm = get_norm_(self%my_b, gqk%qpt_comm%value)
  case default
