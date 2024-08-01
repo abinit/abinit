@@ -36,7 +36,7 @@ nband2   24           # Number of bands
 toldfe2  1.0e-12      # Tolerance to stop SCF cycles
 nnsclo2 12
 nstep2   1 
-getwfk_filepath2 "t21o_DS1_WFK"
+getwfk_filepath2 "t10o_DS1_WFK"
 
 ###########################################
 # Dataset 3: CC4S interface
@@ -46,7 +46,7 @@ gwr_task3 "CC4S_FROM_WFK"     # Enter Abinit -> CC4S interface
 getden3     1
 nband3     20        # Number of (occ + empty) bands used to compute the oscillator matrix elements
 ecuteps3   20.
-getwfk_filepath3 "t21o_DS2_WFK"
+getwfk_filepath3 "t10o_DS2_WFK"
 
 # Definition of the unit cell: simple cubic
 acell  3*10.00         # Experimental lattice constants in Bohr
