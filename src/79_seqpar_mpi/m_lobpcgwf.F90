@@ -131,7 +131,7 @@ subroutine lobpcgwf2(cg,dtset,eig,occ,enl_out,gs_hamk,isppol,ikpt,inonsc,istep,k
  type(pawcprj_type) :: cprj_dum(1,1)
  integer :: iband, shift
  real(dp) :: gsc_dummy(0,0)
- real(dp), allocatable :: l_gvnlxc(:,:)
+ real(dp), allocatable :: gvnlxc(:,:)
 
 ! *********************************************************************
 
@@ -288,16 +288,16 @@ subroutine lobpcgwf2(cg,dtset,eig,occ,enl_out,gs_hamk,isppol,ikpt,inonsc,istep,k
    !  ABI_FREE(l_gvnlxc)
      !ABI_MALLOC(l_gvnlxc,(2,nband*l_npw*l_nspinor))
 #ifdef FC_CRAY
-   ABI_MALLOC(l_gvnlxc,(1,1))
+   ABI_MALLOC(gvnlxc,(1,1))
 #else
-   ABI_MALLOC(l_gvnlxc,(0,0))
+   ABI_MALLOC(gvnlxc,(0,0))
 #endif
 
    !Call nonlop
    if (l_paral_kgb==0) then
 
      call nonlop(choice,l_cpopt,cprj_dum,enl_out,l_gs_hamk,0,eig,mpi_enreg,nband,1,paw_opt,&
-&                signs,gsc_dummy,l_tim_getghc,cg,l_gvnlxc)
+&                signs,gsc_dummy,l_tim_getghc,cg,gvnlxc)
 
    else
      do iband=1,nband/blockdim
@@ -308,7 +308,7 @@ subroutine lobpcgwf2(cg,dtset,eig,occ,enl_out,gs_hamk,isppol,ikpt,inonsc,istep,k
 &        gsc_dummy,l_tim_getghc, &
 &        cg(:,shift+1:shift+blockdim*l_npw*l_nspinor),&
 !&        l_gvnlxc(:,shift+1:shift+blockdim*l_npw*l_nspinor),&
-&        l_gvnlxc(:,:),&
+&        gvnlxc(:,:),&
 &        already_transposed=.false.)
      end do
    end if
@@ -318,7 +318,7 @@ subroutine lobpcgwf2(cg,dtset,eig,occ,enl_out,gs_hamk,isppol,ikpt,inonsc,istep,k
 !       call dotprod_g(enl_out(iband),dprod_i,l_gs_hamk%istwf_k,npw*nspinor,1,cg(:, shift+1:shift+npw*nspinor),&
 !  &     l_gvnlxc(:, shift+1:shift+npw*nspinor),mpi_enreg%me_g0,mpi_enreg%comm_bandspinorfft)
 !   end do
-   ABI_FREE(l_gvnlxc)
+   ABI_FREE(gvnlxc)
  end if
 
  ! Free lobpcg
@@ -367,12 +367,12 @@ subroutine getghc_gsc1(X,AX,BX,transposer)
 !Local variables-------------------------------
 !scalars
  integer :: cpuRow
- real(dp) :: eval
+ real(dp) :: eval,dum
 !arrays
  real(dp), pointer :: cg(:,:)
  real(dp), pointer :: ghc(:,:)
  real(dp), pointer :: gsc(:,:)
- real(dp)          :: l_gvnlxc(1,1)
+ real(dp), allocatable :: gvnlxc(:,:)
 
 ! *********************************************************************
 
@@ -420,8 +420,23 @@ subroutine getghc_gsc1(X,AX,BX,transposer)
  !  ABI_MALLOC(l_gvnlxc,(2,blockdim*spacedim))
  !end if
 
- call multithreaded_getghc(l_cpopt,cg,cprj_dum,ghc,gsc,&
-   l_gs_hamk,l_gvnlxc,eval,l_mpi_enreg,blockdim,l_prtvol,l_sij_opt,l_tim_getghc,0)
+#ifdef FC_CRAY
+ ABI_MALLOC(gvnlxc,(1,1))
+#else
+ ABI_MALLOC(gvnlxc,(0,0))
+#endif
+
+ if (l_mpi_enreg%nproc_fft==1.or.l_gs_hamk%istwf_k==1) then
+   call multithreaded_getghc(l_cpopt,cg,cprj_dum,ghc,gsc,&
+     l_gs_hamk,gvnlxc,eval,l_mpi_enreg,blockdim,l_prtvol,l_sij_opt,l_tim_getghc,0)
+ else if (l_gs_hamk%istwf_k==2) then ! nproc_fft>1 and istwfk==2
+    call prep_getghc(cg(:,1:blockdim*spacedim),l_gs_hamk,gvnlxc,ghc,gsc(:,1:blockdim*spacedim),dum,blockdim,&
+      l_mpi_enreg,l_prtvol,l_sij_opt,l_cpopt,cprj_dum,already_transposed=.true.)
+ else ! nproc_fft>1 and istwfk>2
+   ABI_ERROR('getghc in lobpcg not implemented for npfft>1 and istwfk>2')
+ end if
+
+ ABI_FREE(gvnlxc)
 
 
 #if defined(HAVE_GPU_CUDA) && defined(HAVE_YAKL)
