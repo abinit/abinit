@@ -830,6 +830,21 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
              ABI_ERROR(msg)
            end if
 
+           if((dtsets(idtset)%cprj_in_memory/=0)) then
+             if (mpi_enregs(idtset)%nproc_spinor/=1) then
+               write(msg,'(3a,i0)') &
+               'If cprj_in_memory/=0, the number of processors for spinors, npspinor, must be 1',ch10,&
+               'However, npspinor=',mpi_enregs(idtset)%nproc_spinor
+               ABI_ERROR(msg)
+             end if
+             if(mpi_enregs(idtset)%nproc_fft/=1)then
+               write(msg,'(3a,i0)') &
+               'If cprj_in_memory/=0, the number of FFT processors, npfft, must be 1',ch10,&
+               'However, npfft=',mpi_enregs(idtset)%nproc_fft
+               ABI_ERROR(msg)
+             end if
+           end if
+
            if(modulo(dtsets(idtset)%ngfft(2),mpi_enregs(idtset)%nproc_fft)/=0)then
              write(msg,'(3a,i0,a,i0)') &
              'The number of FFT processors, npfft, should be a multiple of ngfft(2).',ch10,&
