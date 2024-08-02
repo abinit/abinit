@@ -647,14 +647,17 @@ contains
       if (xg_nonlop%option==1) then
         call xgBlock_reverseMap(xg_nonlop%ph3d_gather_k%self,ph3d_gather_k_)
       end if
-      !TODO use openMP
       shift_itypat=0
       shift_itypat_nlmn=0
+      !$omp parallel default (none) &
+      !$omp& shared(xg_nonlop,ph3d_gather_k_,ffnl_gather_k_,projectors_k_), &
+      !$omp& firstprivate(ntypat,shift_ipw,shift_itypat,shift_itypat_nlmn,cil), &
+      !$omp& private(itypat,nattyp,nlmn,ia,ilmn,ipw,iatom,il,ph3d_ipw,ffnl_ipw,icol)
       do itypat = 1, ntypat
         nlmn = xg_nonlop%nlmn_ntypat(itypat)
         nattyp = xg_nonlop%nattyp(itypat)
         !! projectors = 4pi/sqrt(ucvol) * (-i)^l * conj(ph3d) * ffnl
-        !!$omp parallel do collapse(3) shared(xg_nonlop,ph3d_gather_k_,ffnl_gather_k_,projectors_k_)
+        !$omp do collapse(3)
         do ia = 1, nattyp
           do ilmn=1,nlmn
             do ipw=1,xg_nonlop%npw_k
@@ -676,6 +679,7 @@ contains
         shift_itypat      = shift_itypat      + nattyp
         shift_itypat_nlmn = shift_itypat_nlmn + nattyp*nlmn
       end do
+      !$omp end parallel
 
     case (SPACE_CR)
 
@@ -683,14 +687,17 @@ contains
       if (xg_nonlop%option==1) then
         call xgBlock_reverseMap(xg_nonlop%ph3d_gather_k%self,ph3d_gather_k_real)
       end if
-      !TODO use openMP
       shift_itypat=0
       shift_itypat_nlmn=0
+      !$omp parallel default (none) &
+      !$omp& shared(xg_nonlop,ph3d_gather_k_real,ffnl_gather_k_,projectors_k_real), &
+      !$omp& firstprivate(ntypat,shift_ipw,shift_itypat,shift_itypat_nlmn,cil), &
+      !$omp& private(itypat,nattyp,nlmn,ia,ilmn,ipw,iatom,il,ph3d_ipw,ffnl_ipw,icol,ctmp)
       do itypat = 1, ntypat
         nlmn = xg_nonlop%nlmn_ntypat(itypat)
         nattyp = xg_nonlop%nattyp(itypat)
         !! projectors = 4pi/sqrt(ucvol) * (-i)^l * conj(ph3d) * ffnl
-        !!$omp parallel do collapse(3) shared(xg_nonlop,ph3d_gather_k_real,ffnl_gather_k_,projectors_k_real)
+        !$omp do collapse(3)
         do ia = 1, nattyp
           do ilmn=1,nlmn
             do ipw=1,xg_nonlop%npw_k
@@ -715,6 +722,7 @@ contains
         shift_itypat      = shift_itypat      + nattyp
         shift_itypat_nlmn = shift_itypat_nlmn + nattyp*nlmn
       end do
+      !$omp end parallel
 
     case (SPACE_R)
       ABI_ERROR("Wrong space")
@@ -784,14 +792,17 @@ contains
       if (xg_nonlop%option==1) then
         call xgBlock_reverseMap(xg_nonlop%ph3d_gather_k%self,ph3d_gather_k_)
       end if
-      !TODO use openMP
       shift_itypat=0
       shift_itypat_nlmn=0
+      !$omp parallel default (none) &
+      !$omp& shared(xg_nonlop,ph3d_gather_k_,ffnl_gather_k_,projectors_k_), &
+      !$omp& firstprivate(ntypat,npw_k,shift_ipw,shift_itypat,shift_itypat_nlmn,cil), &
+      !$omp& private(itypat,nattyp,nlmn,ia,ilmn,ipw,iatom,il,ph3d_ipw,ffnl_ipw,icol)
       do itypat = 1, ntypat
         nlmn = xg_nonlop%nlmn_ntypat(itypat)
         nattyp = xg_nonlop%nattyp(itypat)
         !! projectors = 4pi/sqrt(ucvol)* conj(ph3d) * ffnl * (-i)^l
-        !!$omp parallel do collapse(3) shared(xg_nonlop,ph3d_gather_k_,ffnl_gather_k_,projectors_k_)
+        !$omp do collapse(3)
         do ia = 1, xg_nonlop%nattyp(itypat)
           do ilmn=1,nlmn
             do ipw=1,npw_k
@@ -808,6 +819,7 @@ contains
         shift_itypat      = shift_itypat      + nattyp
         shift_itypat_nlmn = shift_itypat_nlmn + nattyp*nlmn
       end do
+      !$omp end parallel
 
     case(SPACE_CR)
 
@@ -815,14 +827,17 @@ contains
       if (xg_nonlop%option==1) then
         call xgBlock_reverseMap(xg_nonlop%ph3d_gather_k%self,ph3d_gather_k_real)
       end if
-      !TODO use openMP
       shift_itypat=0
       shift_itypat_nlmn=0
+      !$omp parallel default (none) &
+      !$omp& shared(xg_nonlop,ph3d_gather_k_real,ffnl_gather_k_,projectors_k_real), &
+      !$omp& firstprivate(ntypat,npw_k,shift_ipw,shift_itypat,shift_itypat_nlmn,cil), &
+      !$omp& private(itypat,nattyp,nlmn,ia,ilmn,ipw,iatom,il,ph3d_ipw_r,ffnl_ipw,icol,ctmp)
       do itypat = 1, ntypat
         nlmn = xg_nonlop%nlmn_ntypat(itypat)
         nattyp = xg_nonlop%nattyp(itypat)
         !! projectors = 4pi/sqrt(ucvol)* conj(ph3d) * ffnl * (-i)^l
-        !!$omp parallel do collapse(3) shared(xg_nonlop,ph3d_gather_k_real,ffnl_gather_k_,projectors_k_real)
+        !$omp do collapse(3)
         do ia = 1, nattyp
           do ilmn=1,nlmn
             do ipw=1,npw_k
@@ -843,6 +858,7 @@ contains
         shift_itypat      = shift_itypat      + nattyp
         shift_itypat_nlmn = shift_itypat_nlmn + nattyp*nlmn
       end do
+      !$omp end parallel
 
     case(SPACE_R)
       ABI_ERROR("Wrong space")
