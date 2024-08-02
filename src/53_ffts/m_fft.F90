@@ -3202,7 +3202,7 @@ subroutine fourdp(cplex, fofg, fofr, isign, mpi_enreg, nfft, ndat, ngfft, tim_fo
 
  ! Here, one calls the complex-to-complex FFT subroutine
  if( (fftalgb==0 .or. cplex==2) .and. fftalga/=4 )then
-   ABI_CHECK(ndat == 1, "ndat must be 1")
+   !ABI_CHECK(ndat == 1, "ndat must be 1")
 
    ABI_MALLOC(work1, (2,n4,n5,n6,ndat))
    ABI_MALLOC(work2, (2,n4,n5,n6,ndat))
