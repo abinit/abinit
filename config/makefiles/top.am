@@ -60,8 +60,10 @@ basic_tests:
 # Let Automake know how to perform basic tests
 #check-local:
 #$(MAKE) basic_tests @SET_MAKE@
+#check-local:
+#	cat $(top_srcdir)/tests/built-in/README
 check-local:
-	cat $(top_srcdir)/tests/built-in/README
+	cd $(abspath $(top_builddir))/tests && $(abspath $(top_srcdir))/tests/runtests.py --no-logo --no-colors --keyword MINIMAL --yaml-simplified-diff --forced-tolerance=easy && rm -rf $(abspath $(top_builddir))/tests/Test_suite $(abspath $(top_builddir))/tests/.*.pickle && echo "For these quick tests, the tests/Test_suite directory has been erased!"
 
 # Set of internal tests
 test_fast:

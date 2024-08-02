@@ -2047,9 +2047,7 @@ subroutine multithreaded_getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lamb
  integer :: firstband
  integer :: lastband
  integer :: spacedim, spacedim_prj
-#ifdef HAVE_OPENMP
- logical :: is_nested,fftw3_use_lib_threads_sav
-#endif
+ logical :: fftw3_use_lib_threads_sav
  integer :: select_k_default
 
  ! *************************************************************************
@@ -2063,26 +2061,28 @@ subroutine multithreaded_getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lamb
  ! Disabling multithreading for GPU variants (getghc_ompgpu is not thread-safe for now)
  !$omp parallel default (none) &
  !$omp& private(ithread,nthreads,chunk,firstband,lastband,residuchunk,firstelt,lastelt), &
- !$omp& private(firstprj,lastprj,is_nested,usegvnlxc,fftw3_use_lib_threads_sav), &
+ !$omp& private(firstprj,lastprj,usegvnlxc,fftw3_use_lib_threads_sav), &
  !$omp& shared(cwavef,ghc,gsc, gvnlxc,spacedim,spacedim_prj,ndat,kg_fft_k,kg_fft_kp,gs_ham,cwaveprj,mpi_enreg), &
  !$omp& shared(gemm_nonlop_use_gemm), &
  !$omp& firstprivate(cpopt,lambda,prtvol,sij_opt,tim_getghc,type_calc,select_k_default) &
  !$omp& IF(gs_ham%gpu_option==ABI_GPU_DISABLED .and. .not. gemm_nonlop_use_gemm)
  ithread = 0
  nthreads = 1
+ fftw3_use_lib_threads_sav = .false.
  if(gs_ham%gpu_option==ABI_GPU_DISABLED .and. .not. gemm_nonlop_use_gemm) then
 #ifdef HAVE_OPENMP
    ithread = omp_get_thread_num()
    nthreads = omp_get_num_threads()
-!   is_nested = omp_get_nested()
-   is_nested = .false.
-!   call omp_set_nested(.false.)
 !Ensure that libs are used without threads (mkl, openblas, fftw3, ...)
 #ifdef HAVE_LINALG_MKL_THREADS
    call mkl_set_num_threads(1)
 #endif
-#ifdef HAVE_LINALG_OPENBLAS_THREADS
-   call openblas_set_num_threads(1)
+!LB-23/07/24: OpenBLAS detects parallel sections automatically. To comment this line improves performances for some cases.
+!#ifdef HAVE_LINALG_OPENBLAS_THREADS
+!   call openblas_set_num_threads(1)
+!#endif
+#ifdef HAVE_LINALG_NVPL_THREADS
+   call nvpl_set_num_threads(1)
 #endif
 #ifdef HAVE_FFTW3_THREADS
    fftw3_use_lib_threads_sav=(.not.fftw3_spawn_threads_here(nthreads,nthreads))
@@ -2140,20 +2140,23 @@ subroutine multithreaded_getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lamb
  end if
  if(gs_ham%gpu_option==ABI_GPU_DISABLED .and. .not. gemm_nonlop_use_gemm) then
 #ifdef HAVE_OPENMP
-  ! call omp_set_nested(is_nested)
   !Restore libs behavior (mkl, openblas, fftw3, ...)
 #ifdef HAVE_LINALG_MKL_THREADS
    call mkl_set_num_threads(nthreads)
 #endif
-#ifdef HAVE_LINALG_OPENBLAS_THREADS
-   call openblas_set_num_threads(nthreads)
+!LB-23/07/24: OpenBLAS detects parallel sections automatically. To comment this line improves performances for some cases.
+!#ifdef HAVE_LINALG_OPENBLAS_THREADS
+!   call openblas_set_num_threads(nthreads)
+!#endif
+#ifdef HAVE_LINALG_NVPL_THREADS
+   call nvpl_set_num_threads(nthreads)
 #endif
 #ifdef HAVE_FFTW3_THREADS
    call fftw3_use_lib_threads(fftw3_use_lib_threads_sav)
 #endif
 #endif
  end if
-    !$omp end parallel
+!$omp end parallel
 
 end subroutine multithreaded_getghc
 !!***
