@@ -524,8 +524,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 !  cprj_in_memory
    if (dt%cprj_in_memory/=0) then
      if (dt%optdriver/=RUNL_GSTATE) then
-       dt%cprj_in_memory=0
-       ABI_WARNING('cprj_in_memory/=0 is implemented only for ground state (optdriver=0). cprj_in_memory is set to 0.')
+       ABI_ERROR_NOSTOP('cprj_in_memory/=0 is implemented only for ground state (optdriver=0).',ierr)
      else
        if (dt%useylm /= 1) then
          ABI_ERROR_NOSTOP('cprj_in_memory/=0 requires the input variable "useylm" to be 1',ierr)
@@ -546,12 +545,15 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
        write(msg,'(a)') "cprj_in_memory must 0 (not used), 1 (LOBPCG or Chebfi) or 2 (Conjugate Gradient). Change cprj_in_memory."
        ABI_CHECK(test,msg)
        if (dt%cprj_in_memory==1.and.dt%wfoptalg==10) then
-         dt%cprj_in_memory=2
-         ABI_WARNING('cprj_in_memory must be 2 for Conjugate Gradient (not 1). cprj_in_memory is set to 2.')
+         ABI_ERROR_NOSTOP('cprj_in_memory must be 2 for Conjugate Gradient (not 1).',ierr)
        end if
        if (dt%cprj_in_memory==2.and.(dt%wfoptalg==114.or.dt%wfoptalg==111)) then
          dt%cprj_in_memory=1
-         ABI_WARNING('cprj_in_memory must be 1 for LOBPCG or Chebfi (not 2). cprj_in_memory is set to 1.')
+         ABI_ERROR_NOSTOP('cprj_in_memory must be 1 for LOBPCG or Chebfi (not 2).',ierr)
+       end if
+       if (dt%wfoptalg/=111.and.dt%xg_nonlop_option/=0) then
+         dt%xg_nonlop_option=0
+         ABI_ERROR_NOSTOP('xg_nonlop_option/=0 is usefull only for Chebfi (wfoptalg=111).',ierr)
        end if
      end if
    end if
