@@ -1210,6 +1210,7 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,qp_ebands,Gsph_epsG0,&
 
  call timab(331,1,tsec) ! cchi0
  call cwtime(cpu_time,wall_time,gflops,"start")
+
  nsppol = Wfd%nsppol; nspinor = Wfd%nspinor
  is_metallic = ebands_has_metal_scheme(qp_ebands)
 
@@ -1273,7 +1274,7 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,qp_ebands,Gsph_epsG0,&
    end if
  end if
 
- ! Setup weights (2 for spin unpolarized sistem, 1 for polarized).
+ ! Setup weights (2 for spin unpolarized system, 1 for polarized).
  ! spin_fact is used to normalize the occupation factors to one. Consider also the AFM case.
  select case (nsppol)
  case (1)
@@ -1321,7 +1322,6 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,qp_ebands,Gsph_epsG0,&
 
  ABI_MALLOC(bbp_mask,(mband, mband))
 
-call timab(334,1,tsec) ! first loop
  do spin=1,nsppol
    do ik_bz=1,Kmesh%nbz
      if (Ep%symchi == 1) then
@@ -1345,19 +1345,12 @@ call timab(334,1,tsec) ! first loop
      my_nbbpks = my_nbbpks + my_nbbp
    end do
  end do
- call timab(334,2,tsec) ! first loop
- !    write(std_out,'(2(a,f9.1))')" cpu_time = ",cpu_time,", wall_time = ",wall_time
+
  ABI_FREE(bbp_mask)
 
  write(msg,'(a,i0,a)')" Will sum ",my_nbbpks," (b,b',k,s) states in chi0."
-<<<<<<< HEAD
- call timab(340,1,tsec) ! call 1386
- call wrtout(std_out,msg,'PERS')
- call timab(340,2,tsec) ! call 1386
-=======
  call wrtout(std_out, msg)
 
->>>>>>> trunk/develop
  if (Psps%usepaw==1) then
    ABI_MALLOC(Pwij,(Psps%ntypat))
    call pawpwij_init(Pwij,Ep%npwepG0,qpoint,Gsph_epsG0%gvec,Cryst%rprimd,Psps,Pawtab,Paw_pwff)
@@ -1366,81 +1359,51 @@ call timab(334,1,tsec) ! first loop
 
  SELECT CASE (Ep%spmeth)
  CASE (0)
-<<<<<<< HEAD
- call timab(341,1,tsec) ! call 1397
-   call wrtout(std_out,' Calculating chi0(q,omega,G,G")','COLL')
-=======
    call wrtout(std_out,' Calculating chi0(q,omega,G,G")')
->>>>>>> trunk/develop
    ! Allocation of green_w moved inside openmp loop
- call timab(341,2,tsec) ! call 1397
+
  CASE (1, 2)
-<<<<<<< HEAD
-  call timab(342,1,tsec) ! call 1402
-   call wrtout(std_out,' Calculating Im chi0(q,omega,G,G")','COLL')
-  call timab(342,2,tsec) ! call 1402
-=======
    call wrtout(std_out,' Calculating Im chi0(q,omega,G,G")')
 
->>>>>>> trunk/develop
    ! Find Max and min resonant transitions for this q, report also treated by this proc.
-     call timab(343,1,tsec) ! call 1406
    call make_transitions(Wfd,1,Ep%nbnds,nbvw,nsppol,Ep%symchi,Cryst%timrev,GW_TOL_DOCC,&
 &    max_rest,min_rest,my_max_rest,my_min_rest,Kmesh,Ltg_q,qp_eig,qp_occ,qpoint,bbp_ks_distrb)
    !
-        call timab(343,2,tsec) ! call 1406
    ! Calculate frequency dependent weights for Hilbert transform.
-   call timab(344,1,tsec) ! ABI_MALLOC
    ABI_MALLOC(omegasf,(Ep%nomegasf))
    ABI_MALLOC(kkweight,(Ep%nomegasf,Ep%nomega))
-   call timab(344,2,tsec) ! ABI_MALLOC
    !my_wl=1; my_wr=Ep%nomegasf
-   call timab(345,1,tsec) ! call 1417
    call setup_spectral(Ep%nomega,Ep%omega,Ep%nomegasf,omegasf,max_rest,min_rest,my_max_rest,my_min_rest,&
 &    0,Ep%zcut,zero,my_wl,my_wr,kkweight)
-   call timab(345,2,tsec) ! call 1417
+
    if (.not.use_tr) then
      ABI_BUG('spectral method requires time-reversal')
    end if
-   call timab(346,1,tsec) ! memreq
+
    memreq = two*gwpc*Ep%npwe**2*(my_wr-my_wl+1)*b2Gb
-    call timab(346,2,tsec) ! memreq
-   call timab(347,1,tsec) ! call 1428
    write(msg,'(a,f10.4,a)')' memory required per spectral point: ',two*gwpc*Ep%npwe**2*b2Mb,' [Mb]'
    call wrtout(std_out,msg)
    write(msg,'(a,f10.4,a)')' memory required by sf_chi0: ',memreq,' [Gb]'
-<<<<<<< HEAD
-   call wrtout(std_out,msg,'PERS')
-   call timab(347,2,tsec) ! call 1428
-=======
    call wrtout(std_out,msg)
->>>>>>> trunk/develop
    if (memreq > two) then
      ABI_WARNING(' Memory required for sf_chi0 is larger than 2.0 Gb!')
    end if
-      call timab(348,1,tsec) ! ABI_MALLOC_OR_DIE
    ABI_MALLOC_OR_DIE(sf_chi0,(Ep%npwe,Ep%npwe,my_wl:my_wr), ierr)
    sf_chi0=czero_gw
-      call timab(348,2,tsec) ! ABI_MALLOC_OR_DIE
+
  CASE DEFAULT
    ABI_BUG("Wrong spmeth")
  END SELECT
-      call timab(349,1,tsec) ! nkpt_summed
+
  nkpt_summed=Kmesh%nbz
  if (Ep%symchi == 1) then
    nkpt_summed = Ltg_q%nibz_ltg
    call Ltg_q%print(std_out, Dtset%prtvol)
  end if
 
-<<<<<<< HEAD
- write(msg,'(a,i6,a)')' Calculation status : ',nkpt_summed,' to be completed '
- call wrtout(std_out,msg,'COLL')
-      call timab(349,2,tsec) ! nkpt_summed
-=======
  write(msg,'(a,i0,a)')' Calculation status: ',nkpt_summed,' k-points to be completed'
  call wrtout(std_out, msg)
 
->>>>>>> trunk/develop
  ! ============================================
  ! === Begin big fat loop over transitions ===
  ! ============================================
@@ -1448,7 +1411,6 @@ call timab(334,1,tsec) ! first loop
 
  ! === Loop on spin to calculate trace $\chi_{up,up}+\chi_{down,down}$ ===
  ! Only $\chi_{up,up} for AFM.
- call timab(335,1,tsec) ! second loop
  do spin=1,nsppol
    if (ALL(bbp_ks_distrb(:,:,:,spin) /= Wfd%my_rank)) CYCLE
 
@@ -1488,7 +1450,7 @@ call timab(334,1,tsec) ! first loop
    ABI_MALLOC(usr1_kmq,(nfft*nspinor))
    ABI_MALLOC(ur2_k,   (nfft*nspinor))
    ABI_MALLOC(igfftepsG0,(Ep%npwepG0))
-call timab(336,1,tsec)!cchi0(ik_bz)
+
    ! Loop over k-points in the BZ.
    do ik_bz=1,Kmesh%nbz
 
@@ -1545,7 +1507,6 @@ call timab(336,1,tsec)!cchi0(ik_bz)
      ! Tables for the FFT of the oscillators.
      !  a) FFT index of G-G0.
      !  b) gw_gbound table for the zero-padded FFT performed in rhotwg.
-
      ABI_MALLOC(gw_gbound,(2*gw_mgfft+8,2))
      call Gsph_epsG0%fft_tabs(g0,gw_mgfft,ngfft_gw,use_padfft,gw_gbound,igfftepsG0)
      if ( ANY(gw_fftalga == [2, 4]) ) use_padfft=0 ! Pad-FFT is not coded in rho_tw_g
@@ -1662,6 +1623,7 @@ call timab(336,1,tsec)!cchi0(ik_bz)
                  end if
                end if !gwcomp==1
              end do !io
+
              if (Ep%gwcomp==1.and.band1==band2) then
                ! Add the "delta part" of the extrapolar method. TODO doesnt work for spinor
                call calc_wfwfg(tabr_k,itim_k,spinrot_k,nfft,nspinor,ngfft_gw,ur2_k_ibz,ur2_k_ibz,wfwfg)
@@ -1690,13 +1652,11 @@ call timab(336,1,tsec)!cchi0(ik_bz)
            call approxdelta(Ep%nomegasf,omegasf,deltaeGW_b1kmq_b2k,Ep%spsmear,iomegal,iomegar,wl,wr,Ep%spmeth)
          END SELECT
 
-          call timab(332,1,tsec) ! rho_tw_g
          ! Form rho-twiddle(r)=u^*_{b1,kmq_bz}(r) u_{b2,kbz}(r) and its FFT transform.
          call rho_tw_g(nspinor,Ep%npwepG0,nfft,ndat1,ngfft_gw,1,use_padfft,igfftepsG0,gw_gbound,&
 &          ur1_kmq_ibz,itim_kmq,tabr_kmq,ph_mkmqt,spinrot_kmq,&
 &          ur2_k_ibz,  itim_k  ,tabr_k  ,ph_mkt  ,spinrot_k,dim_rtwg,rhotwg)
-           call timab(332,2,tsec) ! rho_tw_g
-            !write(std_out,'(2(a,f9.1))')" cpu_time = ",cpu_time,", wall_time = ",wall_time
+
          if (Psps%usepaw==1) then
            ! Add PAW on-site contribution, projectors are already in the BZ.
            call paw_rho_tw_g(cryst, Pwij, Ep%npwepG0,dim_rtwg,nspinor,Gsph_epsG0%gvec,Cprj1_kmq,Cprj2_k,rhotwg)
@@ -1796,10 +1756,9 @@ call timab(336,1,tsec)!cchi0(ik_bz)
 !             if(dtset%prtvol>=10) write(6,'(a,6i4,e15.5,a)') "*****FAC*********",ik_bz,ikmq_bz,band1,band2,m1,m2,fac," q/=0"
              green_w=green_w*fac
            endif
-           call timab(333,1,tsec) ! assemblychi0
+
            call assemblychi0_sym(is_metallic,ik_bz,nspinor,Ep,Ltg_q,green_w,Ep%npwepG0,rhotwg,Gsph_epsG0,chi0)
-           call timab(333,2,tsec) ! assemblychi0
-          !write(std_out,'(2(a,f9.1))')" cpu_time = ",cpu_time,", wall_time = ",wall_time
+
          CASE (1, 2)
            ! Spectral method (not yet adapted for nspinor=2)
            call assemblychi0sf(ik_bz,Ep%symchi,Ltg_q,Ep%npwepG0,Ep%npwe,rhotwg,Gsph_epsG0,&
@@ -1833,7 +1792,7 @@ call timab(336,1,tsec)!cchi0(ik_bz)
        ABI_FREE(gboundf)
      end if
    end do !ik_bz
-call timab(336,2,tsec)!cchi0(ik_bz)
+
    ! Deallocation of arrays private to the spin loop.
    ABI_FREE(igfftepsG0)
    ABI_FREE(ur1_kmq_ibz)
@@ -1866,8 +1825,7 @@ call timab(336,2,tsec)!cchi0(ik_bz)
      end if
    end if
  end do !spin
-call timab(335,2,tsec) ! second loop
-!write(std_out,'(2(a,f9.1))')" cpu_time = ",cpu_time,", wall_time = ",wall_time
+
  ! After big loop over transitions, now MPI
  ! Master took care of the contribution in case of metallic|spin polarized systems.
  SELECT CASE (Ep%spmeth)
@@ -1875,32 +1833,23 @@ call timab(335,2,tsec) ! second loop
    ! Adler-Wiser
    ! Collective sum of the contributions of each node.
    ! Looping on frequencies to avoid problems with the size of the MPI packet
-   
-   call timab(337,1,tsec)!cchi0(xmpi_sum_1) 
    do io=1,Ep%nomega
      call xmpi_sum(chi0(:,:,io),comm,ierr)
    end do
-   call timab(337,2,tsec)!cchi0(xmpi_sum_1) 
+
  CASE (1, 2)
    ! Spectral method.
    call hilbert_transform(Ep%npwe,Ep%nomega,Ep%nomegasf,my_wl,my_wr,kkweight,sf_chi0,chi0,Ep%spmeth)
 
    ! Deallocate here before xmpi_sum
-<<<<<<< HEAD
-   if (allocated(sf_chi0)) then
-     ABI_FREE(sf_chi0)
-   end if
-call timab(338,1,tsec)!cchi0(xmpi_sum_2)
-=======
    ABI_SFREE(sf_chi0)
 
->>>>>>> trunk/develop
    ! Collective sum of the contributions.
    ! Looping over frequencies to avoid problems with the size of the MPI packet
    do io=1,Ep%nomega
      call xmpi_sum(chi0(:,:,io),comm,ierr)
    end do
-call timab(338,2,tsec)!cchi0(xmpi_sum_2)
+
  CASE DEFAULT
    ABI_BUG("Wrong spmeth")
  END SELECT
@@ -1912,20 +1861,18 @@ call timab(338,2,tsec)!cchi0(xmpi_sum_2)
 
  ! === Collect the sum rule ===
  ! * The pi factor comes from Im[1/(x-ieta)] = pi delta(x)
- call timab(400,1,tsec)!call_xmpi
  call xmpi_sum(chi0_sumrule,comm,ierr)
  chi0_sumrule=chi0_sumrule*pi*weight/Cryst%ucvol
  !
  ! *************************************************
  ! **** Now each node has chi0(q,G,Gp,Ep%omega) ****
  ! *************************************************
- call timab(400,2,tsec)!call_xmpi
+
  ! Impose Hermiticity (valid only for zero or purely imaginary frequencies)
  ! MG what about metals, where we have poles around zero?
  ! FB because of the intraband term, chi0 is never hermitian in case of metals
  ! FIXME: as of today, hermitianity is also enforced for metallic systems
  !if (.not. is_metallic) then
-call timab(339,1,tsec)!cchi0(io)
  do io=1,Ep%nomega
    if (ABS(REAL(Ep%omega(io))) <0.00001) then
      do ig2=1,Ep%npwe
@@ -1936,7 +1883,7 @@ call timab(339,1,tsec)!cchi0(io)
    end if
  end do
  !endif
-call timab(339,2,tsec)!cchi0(io)
+
  ! === Symmetrize chi0 in case of AFM system ===
  ! Reconstruct $chi0{\down,\down}$ from $chi0{\up,\up}$.
  ! Works only in case of magnetic group Shubnikov type IV.

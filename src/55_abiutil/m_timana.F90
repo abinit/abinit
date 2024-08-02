@@ -4,6 +4,9 @@
 !!
 !! FUNCTION
 !! Analyse the timing, and print in unit ab_out. Some discussion of the
+!! number of calls to different routines is also provided, as comments,
+!! at the end of the routine, as well as, in the single dataset mode (ndtset<2),
+!! a detailed analysis of the time-consuming routines.
 !!
 !! COPYRIGHT
 !!  Copyright (C) 1998-2024 ABINIT group (XG, GMR)
@@ -220,11 +223,6 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(28)='vtowfk                          '
  names(30)='vtowfk  (afterloop)             '
  names(31)='vtowfk  (1)                     '; basic(31)=1
- names(32)='gstate                          '
- names(33)='gstate->kpgsph                  '
- names(34)='gstate  (2)                     '
- names(35)='gstate(...scfcv)                '
- names(36)='gstate  (3)                     '
  names(37)='stress                          '; basic(37)=1   ! Actually, should not be basic !
  names(38)='ewald2 (+vdw_dftd)              '; basic(38)=1
  names(39)='vtowfk (loop)                   '
@@ -414,26 +412,6 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(331)='cchi0                           '
  names(332)='cchi0(rho_tw_g)                 '
  names(333)='cchi0(assembly)                 '
-<<<<<<< HEAD
- names(334)='cchi0(first_loop)               '
- names(335)='cchi0(second_loop)              '
- names(336)='cchi0(ik_bz)                    '
- names(337)='cchi0(xmpi_sum_1)               '
- names(338)='cchi0(xmpi_sum_2)               '
- names(339)='cchi0(io)                       ' 
- names(340)='call_1386                       ' 
- names(341)='call_1397                       ' 
- names(342)='call_1402                       ' 
- names(343)='call_1406                       ' 
- names(344)='ABI_MALLOC                      ' 
- names(345)='call_1417                       ' 
- names(346)='memreq                          ' 
- names(347)='call_1428                       ' 
- names(348)='ABI_MALLOC_OR_DIE               ' 
- names(349)='nkpt_summed                     ' 
- names(400)='cchi0(call_xmpi)                ' 
- 
-=======
 
  names(350)='getghc                          '
  names(351)='getghc%cgwf                     '
@@ -448,7 +426,6 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(360)='getghc(fock_XX)                 '
 
 
->>>>>>> trunk/develop
  names(401)='sigma                           '
  names(402)='sigma(Init1)                    '
  names(403)='setup_sigma                     '
@@ -650,17 +627,6 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(697)='exc_haydock_driver(matmul)      '
 !Slots up to 699 are reserved for bethe_salpeter code.
 
- names(700)='gstateimg                       '
- names(701)='gstate(pspini)                  '
- names(702)='gstateimg(leave_test)           '
- names(703)='gstateimg(init)                 '
- names(704)='gstateimg(bef. loop img)        '
- names(705)='gstateimg(bef. gstate)          '
- names(706)='gstateimg(aft. gstate)          '
- names(707)='gstateimg(aft. loop img)        '
- names(708)='gstateimg(finalize)             '
-
-
  names(710)='inwffil                         '
  names(711)='inwffil(read header)            '
  names(712)='inwffil(init params)            '
@@ -792,27 +758,6 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(944)='rhotov(rhohxcpositron)          '
  names(945)='rhotov(other)                   '
 
- names(950)='outscfcv                        '
- names(951)='outscfcv(mlwfovlp)              '
- names(952)='outscfcv([PAW]prtden)           '
- names(953)='outscfcv(prtelf)                '
- names(954)='outscfcv(prt[g,k,l]den)         '
- names(955)='outscfcv(prtwf)                 '
- names(956)='outscfcv(prtpot)                '
- names(957)='outscfcv(prt geo misc.)         '
- names(958)='outscfcv(prt stm,vha,..)        '
- names(959)='outscfcv(prtdos)                '
- names(960)='outscfcv(calcdenmagsph)         '
- names(961)='outscfcv(pawprt)                '
- names(962)='outscfcv(optics)                '
- names(963)='outscfcv(pawmkaewf)             '
- names(964)='outscfcv(outkss)                '
- names(965)='outscfcv(poslifetime)           '
- names(966)='outscfcv(outwant)               '
- names(967)='outscfcv(cal[cs,efg,fc])        '
- names(968)='outscfcv(prt[surf,nest])        '
- names(969)='outscfcv(misc.)                 '
-
  names(980)='vtorho                          '
  names(981)='vtorho(bef. spin loop)          '
  names(982)='vtorho(bef. kpt  loop)          '
@@ -849,23 +794,6 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
 
  names(1091)='listkk                          '; basic(1091) = 1
 
-<<<<<<< HEAD
-! CMartins: TEST for HF
- names(1501)='HF_init                         '; basic(1501)=1
- names(1502)='HF_updatecgocc                  '; basic(1502)=1
- !===START===containers used for testing purposes
- names(1503)='HF_updatecgocc-MPI              ';! basic(1503)=1  ! 100 % nested inside 1502
- names(1504)='HF_getghc                       ';! basic(1504)=1  !1504 = 1505 + 1506 + 1511 + extra_loops
- names(1505)='HF_getghc-init                  ';! basic(1505)=1  ! 100 % nested inside 1504
- names(1506)='HF_getghc-kmu_loop              ';! basic(1506)=1  ! 1506 = 1508 + 1509 + 1510 + 1507 + extra_loops
- names(1507)='HF_getghc-calc_vlocpsi          ';! basic(1507)=1  ! 100 % nested inside 1506
- names(1508)='HF_getghc-mult-cwf*cwocc        ';! basic(1508)=1  ! 100 % nested inside 1506
- names(1509)='HF_getghc-calc_rhog_munu        ';! basic(1509)=1  ! 100 % nested inside 1506
- names(1510)='HF_getghc-calc_vloc             ';! basic(1510)=1  ! 100 % nested inside 1506
- names(1511)='HF_getghc-calc_ghc              ';! basic(1511)=1  ! 100 % nested inside 1504
- !===STOP===containers used for testing purposes
- names(1515)='HF_getghc_main                  ';  basic(1515)=1  ! ulterior slot for test
-=======
  names(1150)='outscfcv                        '
  names(1151)='outscfcv(preparation)           '
  names(1152)='outscfcv(mlwfovlp)              '
@@ -1037,11 +965,10 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(1565)='fock2ACE(finalize)              '; basic(1565)=1
 
  names(1580)='fock_ACE_getghc                 '; basic(1580)=1
->>>>>>> trunk/develop
 
  ! Chebfi
- names(1600) = 'chebfi                        '; basic(1601) = 1
- names(1601) = 'chebfi(alltoall)              '
+ names(1600) = 'chebfi                        '
+ names(1601) = 'chebfi(alltoall)              '; basic(1601) = 1
  names(1602) = 'chebfi(appinvovl)             '
  names(1603) = 'chebfi(rotation)              '
  names(1604) = 'chebfi(subdiago)              '
@@ -1064,13 +991,6 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(1634) = "rmm_diis:band_opt             "; basic(1634) = 1
 
  ! lobpcg2
-<<<<<<< HEAD
-<<<<<<< HEAD
- names(1650) = 'lobpcgwf2                     '; basic(1650) = 1
-=======
- names(1650) = 'lobpcgwf2                     ';
->>>>>>> trunk/develop
-=======
  names(1640) = 'lobpcgwf2                      ';
  names(1641) = 'lobpcg_Bortho(X)               '
  names(1642) = 'lobpcg_Bortho(XW)              '
@@ -1081,7 +1001,6 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(1647) = 'lobpcg_RR(XWP)                 '
  names(1648) = 'lobpcg_RR(Xall)                '
 
->>>>>>> 3ff4152275af911b312e0d44ebb52d2b8abab66b
  names(1651) = 'lobpcg_init                    '
  names(1652) = 'lobpcg_free                    '
 ! names(1653) = 'lobpcg_run                     '
@@ -1414,17 +1333,8 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
      tslots(:7)=(/-140, 122,-352,-212,-227,-228,-844/)
    case(21)
 !      Estimate different complements in vtowfk
-<<<<<<< HEAD
-!      vtowfk(ssdiag) (= vtowfk(loop)    - cgwf )
-     tslots(:5)=(/-588, 39,-22,-530, -1600/)
-=======
 !      vtowfk(ssdiag) (= vtowfk(loop)  -cgwf-lobpcgwf_old-cgwf_cprj-lobpcgwf2-chebfi - getcprj(vtowfk) - getcsc(subovl))
-<<<<<<< HEAD
-     tslots(:9)=(/-588, 39,-22,-530,-1300,-1600,-1650,-1295,-1364/)
->>>>>>> trunk/develop
-=======
      tslots(:9)=(/-588, 39,-22,-530,-1300,-1600,-1640,-1295,-1364/)
->>>>>>> 3ff4152275af911b312e0d44ebb52d2b8abab66b
    case(22)
 !      vtowfk(contrib) (= vtowfk (afterloop) - nonlop%vtowfk - fourwf%vtowfk )
      tslots(:4)=(/589, 30,-222,-842/)
@@ -1772,13 +1682,9 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
        case(1)
          list(:10)=(/1,101,102,103,104,640,105,49,50,TIMER_SIZE/)      ; msg='abinit '
        case(2)
-         list(:13)=(/640,641,642,700,132,84,301,401,501,650,643,644,TIMER_SIZE/)  ; msg='driver '
+         list(:13)=(/640,641,642,700,132,84,301,401,501,650,643,644,TIMER_SIZE/)        ; msg='driver '
        case(3)
-<<<<<<< HEAD
-         list(:13)=(/700,703,704,705,33,701,34,35,36,706,702,707,708/)       ; msg='gstateimg+gstate '
-=======
          list(:32)=(/ (ii,ii=1200,1231,1) /)                         ; msg='gstateimg+gstate '
->>>>>>> trunk/develop
        case(4)
          list(:24)=(/ (ii,ii=1440,1462,1),TIMER_SIZE/)               ; msg='scfcv_core '
        case(5)
@@ -1798,107 +1704,85 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
 !            msg='lobpcgwf (light analysis: for a deeper one, use abs(timopt)=3 or 4)'
          end if
        case(9)
-<<<<<<< HEAD
-         list(:4)=(/22,201,40,211/)                            ; msg='cgwf '
-=======
          list(:4)=(/22,351,40,211/)                                  ; msg='cgwf '
->>>>>>> trunk/develop
        case(10)
-         list(:8)=(/132,133,134,135,136,137,138,141/)          ; msg='respfn '
+         list(:8)=(/132,133,134,135,136,137,138,141/)                ; msg='respfn '
        case(11)
          list(:8)=(/141,142,143,144,120,146,147,TIMER_SIZE/)         ; msg='dfpt_looppert '
        case(12)
-         list(:9)=(/120,154,121,157,152,158,160,150,564/) ; msg='dfpt_scfcv '
+         list(:9)=(/120,154,121,157,152,158,160,150,564/)            ; msg='dfpt_scfcv '
        case(13)
-         list(:9)=(/121,118,128,126,287,166,129,127,556/)      ; msg='dfpt_vtorho '
+         list(:9)=(/121,118,128,126,287,166,129,127,556/)            ; msg='dfpt_vtorho '
        case(14)
-<<<<<<< HEAD
-         list(:9)=(/128,131,122,845,288,214,108,130,565/)      ; msg='dfpt_vtowfk '
-       case(15)
-         list(:8)=(/122,140,202,197,212,227,228,844/)          ; msg='dfpt_cgwf '
-       case(16)
-         list(:4)=(/200,841,221,98/)                           ; msg='getghc '
-=======
          list(:9)=(/128,131,122,845,288,214,113,130,565/)            ; msg='dfpt_vtowfk '
        case(15)
          list(:8)=(/122,140,352,197,212,227,228,844/)                ; msg='dfpt_cgwf '
        case(16)
          list(:8)=(/350,841,221,359,235,236,360,1580/)              ; msg='getghc '
->>>>>>> trunk/develop
        case(17)
          list(:21)=(/801,840,841,842,843,844,845,846,847,848,849,850,851,852,853,854,855,856,857,858,880/)
          msg='fourwf (upwards partitioning)'
        case(18)
-         list(:5)=(/933,934,936,937,938/)                      ; msg='outkss '
+         list(:5)=(/933,934,936,937,938/)                            ; msg='outkss '
        case(19)
          list(:14)=(/301,302,315,316,319,304,305,320,321,306,307,308,309,310/)
          msg='screening '
        case(20)
          list(:13)=(/401,402,403,404,405,406,407,408,409,421,423,424,425/); msg='sigma  '
        case(21)
-         list(:9)=(/431,432,433,434,435,445,440,441,442/)     ; msg='calc_sigc_me '
+         list(:9)=(/431,432,433,434,435,445,440,441,442/)            ; msg='calc_sigc_me '
        case(23)
          list(:11)=(/630,631,632,633,634,545,635,636,637,638,TIMER_SIZE/)         ; msg='prep_getghc '
        case(24)
-         list(:4)=(/539,856,547,548/)                          ; msg='prep_fourwf '
+         list(:4)=(/539,856,547,548/)                                ; msg='prep_fourwf '
        case(25)
          list(:5)=(/570,231,232,581,TIMER_SIZE/)                     ; msg='prep_nonlop '
        case(26)
-         list(:6)=(/790,791,792,793,794,795/)                  ; msg='mkrho (upwards partitioning)'
+         list(:6)=(/(ii,ii=790,795,1)/)                  ; msg='mkrho (upwards partitioning)'
 !          Disabled (temporarily ?) because the partitioning was not correct
 !          case(27);list(:17)=(/600,601,602,603,604,605,617,606,607,608,609,610,611,612,613,614,615/)
 !          msg='vtorhorec '
        case(28)
-         list(:10)=(/650,651,653,654,655,656,658,659,660,661/)
-         msg='bethe_salpeter '
+         list(:10)=(/650,651,653,654,655,656,658,659,660,661/)       ; msg='bethe_salpeter '
        case(29)
-         list(:8)=(/740,741,742,743,744,745,746,747/)          ; msg='suscep_stat '
+         list(:8)=(/ (ii,ii=740,747,1) /)                            ; msg='suscep_stat '
        case(30)
-         list(:9)=(/750,751,848,849,753,756,859,757,755/)      ; msg='susk '
+         list(:9)=(/750,751,848,849,753,756,859,757,755/)            ; msg='susk '
        case(31)
-         list(:8)=(/760,761,764,861,871,765,862,872/)          ; msg='suskmm '
+         list(:8)=(/760,761,764,861,871,765,862,872/)                ; msg='suskmm '
        case(32)
-         list(:8)=(/710,711,712,713,714,715,716,717/)          ; msg='inwffil '
+         list(:8)=(/ (ii,ii=710,717,1) /)                            ; msg='inwffil '
        case(33)
-         list(:10)=(/720,721,722,723,724,725,726,727,67,TIMER_SIZE/)  ; msg='wfsinp '
+         list(:10)=(/720,721,722,723,724,725,726,727,67,TIMER_SIZE/) ; msg='wfsinp '
        case(34)
-         list(:5)=(/770,771,772,272,290/)                      ; msg='initwf '
+         list(:5)=(/770,771,772,272,290/)                            ; msg='initwf '
        case(35)
-         list(:9)=(/780,781,782,783,784,785,786,291,292/)      ; msg='newkpt '
+         list(:9)=(/780,781,782,783,784,785,786,291,292/)            ; msg='newkpt '
        case(36)
          list(:8)=(/93,901,902,903,904,905,268,TIMER_SIZE/)          ; msg='newvtr '
        case(37)
-         list(:2)=(/94,269/)                                   ; msg='newrho '
+         list(:2)=(/94,269/)                                         ; msg='newrho '
        case(38)
-<<<<<<< HEAD
-         list(:11)=(/9,260,261,262,263,264,265,266,267,268,269/) ; msg=' fourdp (upwards partitioning)'
-=======
          list(:12)=(/9,1260,1261,1262,1263,1264,1265,1266,1267,1268,1269,1270/) ; msg='fourdp (upwards partitioning)'
->>>>>>> trunk/develop
        case(39)
-         list(:8)=(/250,251,252,253,254,255,256,257/)          ; msg='afterscfloop '
+         list(:8)=(/ (ii,ii=250,257,1) /)                            ; msg='afterscfloop '
        case(40)
-         list(:5)=(/910,911,912,913,914/)                      ; msg='forstr '
+         list(:5)=(/ (ii,ii=910,914,1) /)                            ; msg='forstr '
        case(41)
          list(:9)=(/920,921,922,923,924,925,926,927,928/)            ; msg='forstrnps '
        case(42)
-         list(:4)=(/670,671,672,673/)                          ; msg='exc_build_ham '
+         list(:4)=(/670,671,672,673/)                                ; msg='exc_build_ham '
        case(43)
-         list(:7)=(/680,681,682,683,684,685,686/)              ; msg='exc_build_block'
+         list(:7)=(/ (ii,ii=680,686,1) /)                            ; msg='exc_build_block'
        case(44)
-         list(:8)=(/690,691,692,693,694,695,696,697/)                  ; msg='exc_haydock_driver '
+         list(:8)=(/ (ii,ii=690,697,1) /)                            ; msg='exc_haydock_driver '
        case(45)
-         list(:20)=(/950,951,952,953,954,955,956,957,958,959,960,961,962,963,964,965,966,967,968,969/)
-         msg='outscfcv '
+         list(:50)=(/ (ii,ii=1150,1199,1) /)                         ; msg='outscfcv '
        case(46)
-         list(:8)=(/620,621,622,623,624,625,626,627/)          ; msg='dmft '
+         list(:8)=(/ (ii,ii=620,627,1) /)                            ; msg='dmft '
        case(47)
-         list(:9)=(/1001,1002,1003,1004,1005,1006,1007,1008,1009/)
-         msg='initberry '
+         list(:9)=(/ (ii,ii=1001,1009,1) /)                          ; msg='initberry '
        case(50)
-<<<<<<< HEAD
-         list(:3)=(/1501,1502,1515/)                           ; msg='hartreefock '
-=======
          list(:5)=(/1560,1561,1562,1563,1565/)                       ; msg='fock2ACE '
        case(51)
          list(:5)=(/1504,1515,850,1270,237/)                         ; msg='fock_getghc -original'
@@ -1911,50 +1795,27 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
        case(55)
          list(:15)=(/1504,1512,1513,1514,1541,1521,1542,1523,1544,1545,1546,1527,1528,1547,1548/)
              msg='fock_getghc small blocs + fourXX,  nonlop, xmpi_sum '
->>>>>>> trunk/develop
        case(60)
          list(:13)=(/1600,1607,1630,1631,1632,1601,1603,1604,1605,1606,1608,1609,1610/) ; msg = 'chebfi'
        case(61)
-<<<<<<< HEAD
-         list(:3) = (/1620,1621,1622/)
-         msg = 'mkinvovl'
-=======
          list(:3)=(/1620,1621,1622/)                                 ; msg = 'mkinvovl'
->>>>>>> trunk/develop
        case(70)
-         list(:5)=(/1701,1702,1703,1721,1722/)
-         msg='gwls GW code'
+         list(:5)=(/1701,1702,1703,1721,1722/)                       ; msg='gwls GW code'
        case(71)
-         list(:16)=(/1703,1704,1705,1706,1707,1708,1709,1710,1711,1712,1713,1714,1715,1716,1717,1718/)
-         msg='gwls: compute_correlations_shift_lanczos'
+         list(:16)=(/ (ii,ii=1703,1718,1) /)                         ; msg='gwls: compute_correlations_shift_lanczos'
        case(72)
-         list(:10)=(/1724,1725,1726,1727,1728,1729,1730,1731,1732,1733/)
-         msg='gwls: Applying the susceptibility Pk'
+         list(:10)=(/ (ii,ii=1724,1733,1) /)                         ; msg='gwls: Applying the susceptibility Pk'
        case(73)
-         list(:7)=(/1734,1735,1736,1737,1738,1739,1740/)
-         msg='gwls: Applying the model susceptibility Pk_model'
+         list(:7)=(/ (ii,ii=1734,1740,1) /)                          ; msg='gwls: Applying the model susceptibility Pk_model'
        case(74)
-         list(:7)=(/1741,1742,1743,1744,1745,1746,1747/)
-         msg='gwls: computing the matrix elements of eps_model^{-1}(w) -1 '
+         list(:7)=(/ (ii,ii=1741,1747,1) /)              ; msg='gwls: computing the matrix elements of eps_model^{-1}(w) -1 '
        case(75)
-<<<<<<< HEAD
-         list(:12)=(/1650,1651,1652,1653,1654,1655,1656,1657,1658,1659,1660,1661/)
-         msg='lobpcgwf2 core engine '
-       case(76)
-         list(:18)=(/1670,1671,1672,1673,1674,1675,1676,1677,1678,1679,1680,1681,1682,1683,1684,1685,1686,1687/)
-         msg='low-level xgBlock type '
-=======
          list(:19)=(/ (ii,ii=1640,1648,1), (ii,ii=1651,1660,1)/)     ; msg='lobpcgwf2 core engine '
        case(76)
          list(:12)=(/1750,1751,1752,1754,1755,1756,1757,1759,1760,1761,1762,1763/) ; msg='chebfiwf2 core engine '
->>>>>>> 3ff4152275af911b312e0d44ebb52d2b8abab66b
        case(77)
          list(:5)=(/1690,1691,1692,1693,1694/) ; msg='low-level xgScalapack type '
        case(78)
-<<<<<<< HEAD
-         list(:8)=(/1662,1663,1664,1665,1666,1667,1668,1669/)
-         msg='low-level xgTransposer type '
-=======
          list(:8)=(/1662,1663,1664,1665,1666,1667,1668,1669/) ; msg='low-level xgTransposer type '
        case(79)
          list(:12)=(/1300,1293,1302,1303,1304,1305,1363,1370,351,211,880,1301/) ; msg='cgwf_cprj'
@@ -1967,14 +1828,9 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
        case(83)
          list(:5)=(/1370,235,1371,1372,1375/)  ; msg='getchc'
        case(84)
-<<<<<<< HEAD
-         list(:14)=(/1750,1751,1752,1753,1754,1755,1756,1757,1758,1759,1760,1761,1762,1763/) ; msg='chebfiwf2 core engine '
->>>>>>> trunk/develop
-=======
          list(:19)=(/ (ii,ii=1670,1688,1) /)                         ; msg='low-level xgBlock type '
->>>>>>> 3ff4152275af911b312e0d44ebb52d2b8abab66b
        case default
-         cycle ! This allows to disable temporarily some partitionings
+         cycle ! This allows one to disable temporarily some partitionings
 
        end select
 
@@ -2096,13 +1952,8 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
        end if !ncount
      end if !xmpi_paral
 
-<<<<<<< HEAD
-     nlist=42
-     list(:42)=(/47,49,51,801,72,73,74,77,78,79,97,82,87,88,436,437,438,439,443,444,804,805,331,332,333,334,335,336,337,338,339,340,341,342,343,344,345,346,347,348,349,400/)
-=======
      nlist=27
      list(:nlist)=(/47,49,51,801,72,73,74,77,78,79,97,82,87,88,436,437,438,439,443,444,804,805,331,332,333,1280,1281/)
->>>>>>> trunk/develop
      flag_write=1
      do ilist=1,nlist
        isort = list(ilist)
