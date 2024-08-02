@@ -287,6 +287,8 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
 
  do jkpt=1,fockbz%mkpt
 
+   if(fockbz%nbandocc_bz(jkpt,my_jsppol)==0) cycle
+
    call timab(1521,1,tsec)
 
 !* nband_k = number of bands at point k_j
