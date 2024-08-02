@@ -622,6 +622,7 @@ contains
   integer :: icol,ilmn,nlmn,il,ipw,ia,iatom,itypat
   real(dp) :: ffnl_ipw
   complex(dp) :: cil(4),ph3d_ipw,ctmp
+  logical :: compute_gather
 
   ntypat = xg_nonlop%ntypat
 
@@ -631,7 +632,9 @@ contains
   cil(3) = (-1.0_DP, 0.0_DP) * xg_nonlop%weight
   cil(4) = ( 0.0_DP, 1.0_DP) * xg_nonlop%weight
 
-  if (xg_nonlop%option==1) then
+  compute_gather = xg_nonlop%option==1
+
+  if (compute_gather) then
     call xgBlock_zero(xg_nonlop%ffnl_gather_k%self)
     call xgBlock_zero(xg_nonlop%ph3d_gather_k%self)
     call xgBlock_reverseMap(xg_nonlop%ffnl_gather_k%self,ffnl_gather_k_)
@@ -644,14 +647,14 @@ contains
     case (SPACE_C)
 
       call xgBlock_reverseMap(xg_nonlop%projectors_k%self,projectors_k_)
-      if (xg_nonlop%option==1) then
+      if (compute_gather) then
         call xgBlock_reverseMap(xg_nonlop%ph3d_gather_k%self,ph3d_gather_k_)
       end if
       shift_itypat=0
       shift_itypat_nlmn=0
       !$omp parallel default (none) &
       !$omp& shared(xg_nonlop,ph3d_gather_k_,ffnl_gather_k_,projectors_k_), &
-      !$omp& firstprivate(ntypat,shift_ipw,shift_itypat,shift_itypat_nlmn,cil), &
+      !$omp& firstprivate(compute_gather,ntypat,shift_ipw,shift_itypat,shift_itypat_nlmn,cil), &
       !$omp& private(itypat,nattyp,nlmn,ia,ilmn,ipw,iatom,il,ph3d_ipw,ffnl_ipw,icol)
       do itypat = 1, ntypat
         nlmn = xg_nonlop%nlmn_ntypat(itypat)
@@ -666,7 +669,7 @@ contains
               ph3d_ipw = cmplx( xg_nonlop%ph3d_k(1,ipw,iatom), xg_nonlop%ph3d_k(2,ipw,iatom), kind=DP)
               ffnl_ipw = xg_nonlop%ffnl_k(ipw, 1, ilmn, itypat)
               !
-              if (xg_nonlop%option==1) then
+              if (compute_gather) then
                 ph3d_gather_k_(ipw+shift_ipw,iatom) = ph3d_ipw
                 ffnl_gather_k_(ipw+shift_ipw,ilmn+(itypat-1)*xg_nonlop%nlmn_max) = ffnl_ipw
               end if
@@ -676,6 +679,7 @@ contains
             end do
           end do
         end do
+        !$omp end do
         shift_itypat      = shift_itypat      + nattyp
         shift_itypat_nlmn = shift_itypat_nlmn + nattyp*nlmn
       end do
@@ -684,14 +688,14 @@ contains
     case (SPACE_CR)
 
       call xgBlock_reverseMap(xg_nonlop%projectors_k%self,projectors_k_real)
-      if (xg_nonlop%option==1) then
+      if (compute_gather) then
         call xgBlock_reverseMap(xg_nonlop%ph3d_gather_k%self,ph3d_gather_k_real)
       end if
       shift_itypat=0
       shift_itypat_nlmn=0
       !$omp parallel default (none) &
       !$omp& shared(xg_nonlop,ph3d_gather_k_real,ffnl_gather_k_,projectors_k_real), &
-      !$omp& firstprivate(ntypat,shift_ipw,shift_itypat,shift_itypat_nlmn,cil), &
+      !$omp& firstprivate(compute_gather,ntypat,shift_ipw,shift_itypat,shift_itypat_nlmn,cil), &
       !$omp& private(itypat,nattyp,nlmn,ia,ilmn,ipw,iatom,il,ph3d_ipw,ffnl_ipw,icol,ctmp)
       do itypat = 1, ntypat
         nlmn = xg_nonlop%nlmn_ntypat(itypat)
@@ -706,7 +710,7 @@ contains
               ph3d_ipw = cmplx( xg_nonlop%ph3d_k(1,ipw,iatom), xg_nonlop%ph3d_k(2,ipw,iatom), kind=DP)
               ffnl_ipw = xg_nonlop%ffnl_k(ipw, 1, ilmn, itypat)
               !
-              if (xg_nonlop%option==1) then
+              if (compute_gather) then
                 ph3d_gather_k_real(2*(ipw+shift_ipw)-1,iatom) = dble(ph3d_ipw)
                 ph3d_gather_k_real(2*(ipw+shift_ipw)  ,iatom) = dimag(ph3d_ipw)
                 ffnl_gather_k_(ipw+shift_ipw,ilmn+(itypat-1)*xg_nonlop%nlmn_max) = ffnl_ipw
@@ -719,6 +723,7 @@ contains
             end do
           end do
         end do
+        !$omp end do
         shift_itypat      = shift_itypat      + nattyp
         shift_itypat_nlmn = shift_itypat_nlmn + nattyp*nlmn
       end do
@@ -729,7 +734,7 @@ contains
 
   end select
 
-  if (xg_nonlop%option==1) then
+  if (compute_gather) then
     call xgBlock_mpi_sum(xg_nonlop%ffnl_gather_k%self,comm=xg_nonlop%comm_band)
     call xgBlock_mpi_sum(xg_nonlop%ph3d_gather_k%self,comm=xg_nonlop%comm_band)
   end if
@@ -816,6 +821,7 @@ contains
             end do
           end do
         end do
+        !$omp end do
         shift_itypat      = shift_itypat      + nattyp
         shift_itypat_nlmn = shift_itypat_nlmn + nattyp*nlmn
       end do
@@ -855,6 +861,7 @@ contains
             end do
           end do
         end do
+        !$omp end do
         shift_itypat      = shift_itypat      + nattyp
         shift_itypat_nlmn = shift_itypat_nlmn + nattyp*nlmn
       end do
