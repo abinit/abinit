@@ -1759,7 +1759,7 @@ subroutine iofn1(input_path, filnam, filstat, comm)
 
    do i1=3,5
      ! Create input/output/temporary directories if they don't exist yet.
-     ii = index(filnam(i1), "/")
+     ii = index(filnam(i1), "/", back=.true.)
      if (ii > 0) then
        dirpath = filnam(i1)(1:ii-1)
        call clib_mkdir_if_needed(dirpath, ierr)
