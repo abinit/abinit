@@ -755,7 +755,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  !
  !      2) Pass ABIWAN.nc to the EPH code to compute GSTORE.nc only for the bands included in the wannierization step.
  !
- !      3) Call gstore%wannierize to compute g(R_e, R_p) and save results to GWAN.nc file.
+ !      3) Call gstore%wannierize_and_write_gwan to compute g(R_e, R_p) and save results to the GWAN.nc file.
  !
  !      3) Start new job to compute properties with extra dense k/q-meshes (eph_ngkpt_fine and eph_ngqpt_fine)
  !
