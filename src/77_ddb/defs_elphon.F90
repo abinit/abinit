@@ -652,8 +652,8 @@ subroutine complete_gamma(Cryst,nbranch,nsppol,nqptirred,nqpt_full,ep_scalprod,q
 
 !Local variables-------------------------------
 !scalars
- integer :: ibranch,ieqqpt,ii,natom,nsym,iqpt,isppol,isym
- integer :: itim,jbranch,jj,kk,ll,neqqpt,iatom,ancestor_iatom,iqpt_fullbz
+ integer :: ibranch,ieqqpt,natom,nsym,iqpt,isppol,isym
+ integer :: itim,jbranch,neqqpt,iatom,ancestor_iatom,iqpt_fullbz
 !arrays
  integer :: symmetrized_qpt(nqpt_full)
  integer :: gkk_flag(nbranch,nbranch,nsppol,nqpt_full)
@@ -873,8 +873,8 @@ subroutine complete_gamma_tr(crystal,ep_scalprod,nbranch,nqptirred,nqpt_full,nsp
 
 !Local variables-------------------------------
 !scalars
- integer :: ieqqpt,ii,iqpt,isppol,isym
- integer :: itim,jj,kk,ll,neqqpt
+ integer :: ieqqpt,iqpt,isppol,isym
+ integer :: itim,neqqpt
  integer :: iatom,ancestor_iatom
  integer :: iqpt_fullbz,imode, itensor
  real(dp),parameter :: tol=2.d-8

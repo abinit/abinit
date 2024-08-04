@@ -116,7 +116,7 @@ subroutine ddb_elast(inp,crystal,blkval,compl,compl_clamped,compl_stress,d2asr,&
  real(dp) :: compl_relaxed(6,6),eigval(3*natom-3)
  real(dp) :: eigvalp(3*natom),eigvec(2,3*natom-3,3*natom-3)
  real(dp) :: eigvecp(2,3*natom,3*natom),elast_relaxed(6,6)
- real(dp) :: kmatrix(3*natom,3*natom),new1(6,3*natom)
+ real(dp) :: kmatrix(3*natom,3*natom)
  real(dp) :: new2(6,6),stress(6),zhpev1(2,2*3*natom-4),zhpev1p(2,2*3*natom-1)
  real(dp) :: zhpev2(3*3*natom-5),zhpev2p(3*3*natom-2)
  real(dp) :: d2cart(2,3*natom,3*natom)
