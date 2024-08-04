@@ -3405,10 +3405,9 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
    ABI_FREE(my_iqibz_inds)
    ABI_FREE(buf_wqnu)
    ABI_FREE(buf_eigvec_cart)
-   call cwtime_report(" phonon computation + output", cpu, wall, gflops)
+   call cwtime_report(" Phonon computation + output", cpu, wall, gflops)
  else
-   call wrtout(std_out, &
-               sjoin(" Restarting GSTORE calculation. Found: ", itoa(ndone), " (qpt, spin) entries already computed"))
+   call wrtout(std_out, sjoin(" Restarting GSTORE calculation. Found: ", itoa(ndone), " (qpt, spin) entries already computed"))
  end if
 
  if (gstore%with_vk /= 0 .and. ndone == 0) then
@@ -3541,12 +3540,6 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
        call pheigvec_rotate(cryst, qq_ibz, isym_q, trev_q, pheigvec_qibz, pheigvec_qbz, displ_cart_qbz, &
                             displ_red_qbz=displ_red_qbz)
      end if
-
-     !call ifc%fourq(cryst, qq_bz, phfrq, displ_cart_qbz, out_displ_red=displ_red_qbz, out_eigvec=pheigvec_qbz))
-     ! Use Fourier interpolation of DFPT potentials to get my_npert potentials.
-     !cplex = 2
-     !ABI_MALLOC(v1scf, (cplex, nfft, nspden, dvdb%my_npert))
-     !call dvdb%ftinterp_qpt(qq_bz, nfftf, ngfftf, v1scf, dvdb%comm_rpt)
 
      ! Version with qcache.
      if (use_ftinterp) then

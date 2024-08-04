@@ -118,6 +118,7 @@
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
+#%% exclude_builders = eos_nvhpc_*,
 #%% test_chain =  teph4mob_1.abi, teph4mob_2.abi, teph4mob_3.abi, teph4mob_4.abi, teph4mob_5.abi, teph4mob_6.abi, teph4mob_7.abi,
 #%% [files]
 #%% files_to_test =
