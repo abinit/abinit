@@ -3955,6 +3955,7 @@ end subroutine wan_load_gwan
 !!
 !! NOTES
 !!  Fermi level and occupation factors of the interpolated bands are not recomputed by this routine.
+!!  Values are compied from in_ebands.
 !!
 !! SOURCE
 

@@ -148,8 +148,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  integer,parameter :: master = 0, selectz0 = 0, nsphere0 = 0, prtsrlr0 = 0, with_cplex1 = 1, with_cplex2 = 2
  integer :: ii,comm,nprocs,my_rank,psp_gencond,mgfftf,nfftf
  integer :: iblock_dielt_zeff, iblock_dielt, iblock_quadrupoles, ddb_nqshift, ierr, npert_miss
- integer :: omp_ncpus, work_size, nks_per_proc, mtyp, mpert, lwsym, qptopt, ncid ! ,ncerr
- !integer :: iatdir, iq2dir, iq1dir, quad_unt, iatom, jj
+ integer :: omp_ncpus, work_size, nks_per_proc, mtyp, mpert, lwsym, qptopt, ncid
  real(dp):: eff, mempercpu_mb, max_wfsmem_mb, nonscal_mem
  real(dp) :: ecore,ecut_eff,ecutdg_eff,gsqcutc_eff,gsqcutf_eff
  real(dp) :: cpu,wall,gflops
@@ -451,54 +450,6 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
    end if
  end if
 
- !iblock_quadrupoles = 0
- !qdrp_cart = zero
- !if (my_rank == master) then
- !  ! MG: Temporary hack to read the quadrupole tensor from a text file
- !  ! Will be removed when the EPH code will be able to read Q* from the DDB.
-
- !  if (file_exists("quadrupoles_cart.out")) then
- !    call wrtout(std_out, " Reading quadrupoles from quadrupoles_cart.out")
- !    quad_unt = 71
- !    open(unit=quad_unt,file="quadrupoles_cart.out",action="read")
- !    do ii=1,2
- !      read(quad_unt,*) msg
- !      write(std_out, *)" msg: ", trim(msg)
- !    end do
-
- !    do ii=1,3
- !      do jj=1,3*3*ddb%natom
- !        read(quad_unt,'(4(i5,3x),2(1x,f20.10))') iq2dir,iatom,iatdir,iq1dir,qdrp_cart(iq1dir,iq2dir,iatdir,iatom)
- !        write(std_out, *) iq2dir,iatom,iatdir,iq1dir,qdrp_cart(iq1dir,iq2dir,iatdir,iatom)
- !      end do
- !      read(quad_unt,'(a)') msg
- !    end do
- !    close(quad_unt)
- !    iblock_quadrupoles = 1
- !  end if
- !end if
- !call xmpi_bcast(iblock_quadrupoles, master, comm, ierr)
- !call xmpi_bcast(qdrp_cart, master, comm, ierr)
-
- ! Here we get the quadrupoles from the DDB file (this should become the official API).
- ! Section Copied from Anaddb.
-
- !if (iblock_quadrupoles == 0) then
- !  mtyp = ddb_hdr%mblktyp
- !  mpert = ddb_hdr%mpert
- !  ! MR: a new ddb is necessary for the longwave quantities due to incompability of it with authomatic reshapes
- !  ! that ddb%val and ddb%flg experience when passed as arguments of some routines
-
- !  ! Get Quadrupole tensor
- !  qdrp_cart = zero
- !  if (mtyp == BLKTYP_d3E_lw) then
- !    lwsym = 1
- !    call ddb_lw_copy(ddb, ddb_lw, mpert, dtset%natom, dtset%ntypat)
- !    iblock_quadrupoles = ddb_lw%get_quadrupoles(ddb_hdr%ddb_version, lwsym, BLKTYP_d3E_lw, qdrp_cart)
- !    call ddb_lw%free()
- !  end if
- !endif
-
  ! The default value is 1. Here we set the flags to zero if Q* is not available.
  if (iblock_quadrupoles == 0) then
    dtset%dipquad = 0
@@ -756,11 +707,11 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
    end if
 
  case (7)
-   ! Compute phonon-limited RTA from SIGEPH file.
+   ! Compute phonon-limited RTA from SIGEPH.nc file.
    call rta_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
 
  case (8)
-   ! Solve IBTE from SIGEPH file.
+   ! Solve IBTE from SIGEPH.nc file.
    call ibte_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
 
  case (9)
@@ -774,7 +725,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
    end if
 
  case (11)
-   ! Compute and write e-ph matrix elements to GSTORE file.
+   ! Compute and write e-ph matrix elements to GSTORE.nc file.
    if (dtfil%filgstorein /= ABI_NOFILE) then
      call wrtout(units, sjoin(" Restarting GSTORE computation from:", dtfil%filgstorein))
      call gstore%from_ncpath(dtfil%filgstorein, dtset%gstore_cplex, dtset, cryst, ebands, ifc, comm)
@@ -789,11 +740,11 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
    gstore_path = gstore%path
    call gstore%free()
 
-   ! Wannierize the e-ph matrix elements if the ABIWAN.nc is provided.
+   ! Wannierize the e-ph matrix elements if the ABIWAN.nc file is provided.
    if (dtfil%filabiwanin /= ABI_NOFILE) then
+     !call gstore%load() TODO ???
      call gstore%from_ncpath(gstore_path, with_cplex2, dtset, cryst, ebands, ifc, comm)
-     !call gstore%load()
-     call gstore%wannierize(dvdb, dtfil)
+     call gstore%wannierize_and_write_gwan(dvdb, dtfil)
      call gstore%free()
    end if
 
@@ -871,8 +822,6 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
    dvdb%comm = xmpi_comm_self
    if (my_rank == master) then
      call dvdb%open_read(ngfftf, xmpi_comm_self)
-     !call ephtk_set_pertables(cryst%natom, my_npert, pert_table, my_pinfo, comm)
-     !call dvdb%set_pert_distrib(sigma%comm_pert, sigma%my_pinfo, sigma%pert_table)
      call dvdb%write_v1qavg(dtset, strcat(dtfil%filnam_ds(4), "_V1QAVG.nc"))
    end if
 
