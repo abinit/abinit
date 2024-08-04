@@ -1481,6 +1481,8 @@ subroutine polstate_orthonorm(self, orth)
 
 !----------------------------------------------------------------------
 
+ ABI_UNUSED(orth)
+
  gqk => self%gqk
 
  orth_factor = sum(conjg(self%my_a(:,:))*self%my_grad_a(:,:))
