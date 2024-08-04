@@ -351,13 +351,15 @@ subroutine varpeq_compare(self, other, allow_mesh_mismatch)
  ABI_CHECK_NOSTOP(self%max_nb == other%max_nb, "Difference found in max_nb.", ierr)
  ABI_CHECK_NOSTOP(all(self%nb_spin == other%nb_spin), "Difference found in nb_spin.", ierr)
 
- if (present(allow_mesh_mismatch) .and. (.not. allow_mesh_mismatch)) then
-   ABI_CHECK_NOSTOP(self%max_nk == other%max_nk, "Difference found in max_nk.", ierr)
-   ABI_CHECK_NOSTOP(self%max_nq == other%max_nq, "Difference found in max_nq.", ierr)
-   ABI_CHECK_NOSTOP(all(self%nk_spin == other%nk_spin), "Difference found in nk_spin.", ierr)
-   ABI_CHECK_NOSTOP(all(self%nq_spin == other%nq_spin), "Difference found in nq_spin.", ierr)
-   ABI_CHECK_NOSTOP(all(self%qpts_spin == other%qpts_spin), "Difference found in qpts_spin.", ierr)
-   ABI_CHECK_NOSTOP(all(self%kpts_spin == other%kpts_spin), "Difference found in kpts_spin.", ierr)
+ if (present(allow_mesh_mismatch)) then
+   if (.not. allow_mesh_mismatch) then
+     ABI_CHECK_NOSTOP(self%max_nk == other%max_nk, "Difference found in max_nk.", ierr)
+     ABI_CHECK_NOSTOP(self%max_nq == other%max_nq, "Difference found in max_nq.", ierr)
+     ABI_CHECK_NOSTOP(all(self%nk_spin == other%nk_spin), "Difference found in nk_spin.", ierr)
+     ABI_CHECK_NOSTOP(all(self%nq_spin == other%nq_spin), "Difference found in nq_spin.", ierr)
+     ABI_CHECK_NOSTOP(all(self%qpts_spin == other%qpts_spin), "Difference found in qpts_spin.", ierr)
+     ABI_CHECK_NOSTOP(all(self%kpts_spin == other%kpts_spin), "Difference found in kpts_spin.", ierr)
+   end if
  endif
 
  ABI_CHECK(ierr == 0, "Fatal error in varpeq_compare, see previous messages!")
@@ -436,8 +438,8 @@ subroutine varpeq_ncread(self, path, comm, keep_open)
  NCF_CHECK(nf90_get_var(ncid, vid("erange_spin"), self%erange_spin))
  NCF_CHECK(nf90_get_var(ncid, vid("ngkpt"), self%ngkpt))
 
- if (present(keep_open) .and. keep_open) then
-   self%ncid = ncid
+ if (present(keep_open)) then
+   if (keep_open) self%ncid = ncid
  else
    NCF_CHECK(nf90_close(ncid))
    self%ncid = nctk_noid
@@ -1382,6 +1384,8 @@ subroutine polstate_update_pcond(self, factor)
 
 !----------------------------------------------------------------------
 
+ ABI_UNUSED(factor)
+
  gqk => self%gqk
 
  do my_ik=1,gqk%my_nk
@@ -1481,8 +1485,6 @@ subroutine polstate_orthonorm(self, orth)
 
 !----------------------------------------------------------------------
 
- ABI_UNUSED(orth)
-
  gqk => self%gqk
 
  orth_factor = sum(conjg(self%my_a(:,:))*self%my_grad_a(:,:))
@@ -1490,10 +1492,12 @@ subroutine polstate_orthonorm(self, orth)
  call xmpi_sum(orth_factor, gqk%kpt_comm%value, ierr)
 
  orth_factor2 = zero
- if (present(orth) .and. orth) then
-   orth_factor2 = sum(conjg(self%orth_a(:,:))*self%my_grad_a(:,:))
-   !orth_factor2 = real(conjg(self%orth_a(:,:)*conjg(self%my_grad_a(:,:))))
-   call xmpi_sum(orth_factor2, gqk%kpt_comm%value, ierr)
+ if (present(orth)) then
+   if (orth) then
+     orth_factor2 = sum(conjg(self%orth_a(:,:))*self%my_grad_a(:,:))
+     !orth_factor2 = real(conjg(self%orth_a(:,:)*conjg(self%my_grad_a(:,:))))
+     call xmpi_sum(orth_factor2, gqk%kpt_comm%value, ierr)
+   end if
  endif
 
  self%my_grad_a(:,:) = self%my_grad_a(:,:) - &

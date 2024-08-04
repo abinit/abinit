@@ -347,7 +347,6 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  DBG_ENTER("COLL")
 
  call timab(141,1,tsec)
- units = [std_out, ab_out]
 
 !Structured debugging if prtvol==-level
  if(dtset%prtvol==-level)then
@@ -461,7 +460,8 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 !&         ' The perturbation idir=',idir,'  ipert=',ipert,' is',ch10,&
 !&         ' symmetric of a previously calculated perturbation.',ch10,&
 !&         ' So, its SCF calculation is not needed.',ch10
-!         call wrtout(units ,msg)
+!         call wrtout(std_out,msg,'COLL')
+!         call wrtout(ab_out,msg,'COLL')
 !       end if ! Test of existence of symmetry of perturbation
 !     end if ! Test of existence of perturbation
 !   end do
@@ -528,7 +528,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
          ' The perturbation idir=',idir,'  ipert=',ipert,' is',ch10,&
          ' symmetric of a previously calculated perturbation.',ch10,&
          ' So, its SCF calculation is not needed.',ch10
-         call wrtout(units, msg)
+         call wrtout([std_out, ab_out], msg)
        end if ! Test of existence of symmetry of perturbation
      else if (ipert==dtset%natom+11 .and. rfpert(ipert)==1 .and. rfdir(idir) == 1 ) then
        to_compute_this_pert = 1
@@ -606,7 +606,8 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 !&         ' The perturbation idir=',idir,'  ipert=',ipert,' is',ch10,&
 !&         ' symmetric of a previously calculated perturbation.',ch10,&
 !&         ' So, its SCF calculation is not needed.',ch10
-!         call wrtout(units,msg)
+!         call wrtout(std_out,msg,'COLL')
+!         call wrtout(ab_out,msg,'COLL')
 !       end if ! Test of existence of symmetry of perturbation
 !     end if ! Test of existence of perturbation
 !   end do
@@ -719,26 +720,26 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 
    write(msg, '(a,80a,a,a,3f10.6)' ) ch10,('-',ii=1,80),ch10,&
     ' Perturbation wavevector (in red.coord.) ',dtset%qptn(:)
-   call wrtout(units, msg)
+   call wrtout([std_out, ab_out],msg)
    if(ipert>=1 .and. ipert<=dtset%natom)then
      write(msg, '(a,i4,a,i4)' )' Perturbation : displacement of atom',ipert,'   along direction',idir
-     call wrtout(units, msg)
+     call wrtout([std_out, ab_out], msg)
      if(iscf_mod == -3)then
        write(msg, '(a,a,a,a,a,a,a,a)' )ch10,&
        ' dfpt_looppert : COMMENT -',ch10,&
        '  The first-order density is imposed to be zero (iscf=-3).',ch10,&
        '  Although this is strange in the case of phonons,',ch10,&
        '  you are allowed to do so.'
-       call wrtout(units, msg)
+       call wrtout([std_out, ab_out], msg)
      end if
    else if(ipert==dtset%natom+1)then
      write(msg,'(a,i4)')' Perturbation : derivative vs k along direction',idir
-     call wrtout(units, msg)
+     call wrtout([std_out, ab_out], msg)
      if( iscf_mod /= -3 )then
        write(msg, '(4a)' )ch10,&
        ' dfpt_looppert : COMMENT -',ch10,&
        '  In a d/dk calculation, iscf is set to -3 automatically.'
-       call wrtout(units, msg)
+       call wrtout([std_out, ab_out], msg)
        iscf_mod=-3
      end if
      if( abs(dtset%dfpt_sciss) > 1.0d-8 )then
@@ -746,17 +747,17 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
         ' dfpt_looppert : WARNING -',ch10,&
         '  Value of dfpt_sciss=',dtset%dfpt_sciss,ch10,&
         '  Scissor with d/dk calculation : you are using a "naive" approach !'
-       call wrtout(units, msg)
+       call wrtout([std_out, ab_out], msg)
      end if
    else if(ipert==dtset%natom+2)then
      write(msg, '(a,i4)' )' Perturbation : homogeneous electric field along direction',idir
-     call wrtout(units, msg)
+     call wrtout([std_out, ab_out], msg)
      if( iscf_mod == -3 )then
        write(msg, '(a,a,a,a,a,a)' )ch10,&
         ' dfpt_looppert : COMMENT -',ch10,&
         '  The first-order density is imposed to be zero (iscf=-3).',ch10,&
         '  This corresponds to a calculation without local fields.'
-       call wrtout(units, msg)
+       call wrtout([std_out, ab_out], msg)
      end if
    else if(ipert==dtset%natom+10.or.ipert==dtset%natom+11)then
      call rf2_getidirs(idir,idir1,idir2)
@@ -767,12 +768,12 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
        write(msg,'(2(a,i1),a)') ' Perturbation : 2nd derivative wrt k (idir1 =',idir1,&
         ') and Efield (idir2 =',idir2,')'
      end if
-     call wrtout(units, msg)
+     call wrtout([std_out, ab_out], msg)
      if( iscf_mod /= -3 )then
        write(msg, '(4a)' )ch10,&
         ' dfpt_looppert : COMMENT -',ch10,&
         '  In this case, iscf is set to -3 automatically.'
-       call wrtout(units, msg)
+       call wrtout([std_out, ab_out], msg)
        iscf_mod=-3
      end if
      if( abs(dtset%dfpt_sciss) > 1.0d-8 )then
@@ -780,7 +781,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
         ' dfpt_looppert : WARNING -',ch10,&
         '  Value of dfpt_sciss=',dtset%dfpt_sciss,ch10,&
         '  Scissor with d/dk calculation : you are using a "naive" approach !'
-       call wrtout(units, msg)
+       call wrtout([std_out, ab_out], msg)
      end if
      ABI_MALLOC(occ_pert,(dtset%mband*nkpt*dtset%nsppol))
      occ_pert(:) = occ(:) - occ(1)
@@ -1343,7 +1344,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
    if (dtset%efmas>0.and.icase==ipert_cnt) then
      eigen0_pert(:) = eigen0(:)
    end if
-   !call wrtout(std_out,ch10//' dfpt_looppert: eigenq array')
+   !call wrtout(std_out,ch10//' dfpt_looppert: eigenq array',"COLL")
    nkpt_eff=nkpt
    if( (dtset%prtvol==0.or.dtset%prtvol==1.or.dtset%prtvol==2) .and. nkpt>nkpt_max ) nkpt_eff=nkpt_max
    band_index=0
@@ -1393,7 +1394,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
      write(msg, '(a,a,a,es16.6,a,es16.6,a)')&
        ' dfpt_looppert : total number of electrons, from k and k+q',ch10,&
        '  fully or partially occupied states are',dtset%nelect,' and',nelectkq,'.'
-     call wrtout(units, msg)
+     call wrtout([std_out, ab_out], msg)
      if (.not.kramers_deg) then
        call getnel(docckde_mq,dosdeltae,eigen_mq,entropy,fermie,fermie,maxocc,dtset%mband,&
          nband_rbz,nelectkq,nkpt_rbz,dtset%nsppol,occk_mq,dtset%occopt,option,&
@@ -1402,7 +1403,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
        write(msg, '(a,a,a,es16.6,a,es16.6,a)')&
          ' dfpt_looppert : total number of electrons, from k and k-q',ch10,&
          '  fully or partially occupied states are',dtset%nelect,' and',nelectkq,'.'
-       call wrtout(units, msg)
+       call wrtout([std_out, ab_out], msg)
      end if
    end if
 
@@ -1411,7 +1412,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 
 !  Initialisation of first-order wavefunctions
    write(msg,'(3a,i4)')' Initialisation of the first-order wave-functions :',ch10,'  ireadwf=',dtfil%ireadwf
-   call wrtout(units, msg)
+   call wrtout([std_out, ab_out], msg)
    call appdig(pertcase,dtfil%fnamewff1,fiwf1i)
    call appdig(pertcase,dtfil%fnameabo_1wf,fiwf1o)
 
@@ -1584,7 +1585,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
          end if
        end if
        write(msg,'(2a)')'- dfpt_looppert: read the DDK wavefunctions from file: ',trim(fiwfddk)
-       call wrtout(units, msg)
+       call wrtout([std_out, ab_out],msg)
        ! Note that the unit number for these files is 50,51,52 or 53 (dtfil%unddk=50)
        call wfk_open_read(ddk_f(ii),fiwfddk,formeig1,dtset%iomode,dtfil%unddk+(ii-1), spacecomm) !xmpi_comm_self)
      end do
@@ -1713,7 +1714,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
        dtset_tmp%tolvrs = zero
        write (msg, '(a,i6,a)') ' NOTE: doing GKK calculation for icase ', icase, ' with non-SCF calculation'
        call wrtout(std_out,msg)
-       !call wrtout(ab_out,msg) ! decomment and update output files
+       !call wrtout(ab_out,msg,'COLL') ! decomment and update output files
 
      else ! do not use non-scf shortcut, but save rotated 1DEN for comparison
 ! saves the rotated rho, for later comparison with the full SCF rhor1: comment lines below for iscf = -2
@@ -1975,8 +1976,9 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
    call timab(146,1,tsec)
 
 !  Print out message at the end of the iterations
-   write(msg, '(80a,a,a,a,a)' ) ('=',ii=1,80),ch10,ch10,' ----iterations are completed or convergence reached----',ch10
-   call wrtout(units, msg)
+   write(msg, '(80a,a,a,a,a)' ) ('=',ii=1,80),ch10,ch10,&
+&   ' ----iterations are completed or convergence reached----',ch10
+   call wrtout([std_out, ab_out], msg)
 
 !  Print _gkk file for this perturbation
    if (dtset%prtgkk == 1) then
@@ -2145,7 +2147,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
        ' dfpt_looppert : ek2=',ek2,ch10,&
        '          f-sum rule ratio=',fsum,' (note : ecutsm/=0)'
      end if
-     call wrtout(units , msg)
+     call wrtout([std_out, ab_out] , msg)
 !    Write the diagonal elements of the dH/dk operator, after averaging over degenerate states
      ABI_MALLOC(eigen1_mean,(dtset%mband*nkpt_rbz*dtset%nsppol))
      call eigen_meandege(eigen0,eigen1,eigen1_mean,dtset%mband,nband_rbz,nkpt_rbz,dtset%nsppol,1)
