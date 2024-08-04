@@ -1387,7 +1387,7 @@ subroutine dtlattflexo(amu,blkval1d,blkvalA,blkvalB,ddb_version,intstrn,lattflex
    Amatr(ivarA,ivarA)=1.0_dp/eigval(ivarA)
  end do
 
- Cmatr(:,:) = MATMUL(eigvec(1,:,:), MATMUL(Cmatr, TRANSPOSE(eigvec(1,:,:))))
+ Cmatr(:,:) = MATMUL(eigvec(1,:,:), MATMUL(Amatr, TRANSPOSE(eigvec(1,:,:))))
 
 !DEBUG
 !write(std_out,'(/,a,/)')'the pseudo inverse of the force matrix'
