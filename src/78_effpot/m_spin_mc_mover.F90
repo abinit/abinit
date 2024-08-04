@@ -197,7 +197,7 @@
      real(dp), intent(out) :: Snew(3)
      call rng%rand_normal_array(Snew, 3)
      Snew(:)=Sold(:) + Snew(:)*angle
-     Snew(:)=Snew(:)/sqrt(Snew(1)*Snew(1)+Snew(2)*Snew(2)+Snew(3)*Snew(3))
+     Snew(:)=Snew(:)/norm2(Snew)
    end subroutine move_angle
 
    !----------------------------------------------------------------------
@@ -216,7 +216,7 @@
      type(rng_t), intent(inout) :: rng
      real(dp), intent(out) :: Snew(3)
      call rng%rand_normal_array(Snew, 3)
-     Snew(:)=Snew(:)/sqrt(Snew(1)*Snew(1)+Snew(2)*Snew(2)+Snew(3)*Snew(3))
+     Snew(:)=Snew(:)/norm2(Snew)
    end subroutine move_uniform
 
    !----------------------------------------------------------------------

@@ -1176,13 +1176,9 @@ function mep_img_dotp_red(rmet,vect1,vect2)
  end if
 
  mep_img_dotp_red=zero
- do iatom=1,size2
-   do ii=1,3
-     do jj=1,3
-       mep_img_dotp_red=mep_img_dotp_red+vect1(ii,iatom)*vect2(jj,iatom)*rmet(ii,jj)
-     end do
-   end do
- end do
+do iatom = 1, size2
+  mep_img_dotp_red = mep_img_dotp_red + dot_product(vect1(:, iatom), matmul(rmet, vect2(:, iatom)))
+end do
 
 end function mep_img_dotp_red
 !!***

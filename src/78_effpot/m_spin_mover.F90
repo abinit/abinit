@@ -487,7 +487,7 @@ contains
        Ri = cross(S_in(:,i),Htmp)
        dSdt = -self%gamma_L(i)*(Ri+self%damping(i)* cross(S_in(:,i), Ri))
        Ri=S_in(:,i)+dSdt*self%dt
-       Ri=Ri/sqrt(Ri(1)*Ri(1)+Ri(2)*Ri(2)+Ri(3)*Ri(3))
+       Ri=Ri/norm2(Ri)
        self%Stmp2(:,i)=Ri
     end do
     call self%mps%allgatherv_dp2d(self%Stmp2, 3, buffer=self%buffer)
@@ -502,7 +502,7 @@ contains
        Ri = cross(S_in(:,i),Htmp)
        dSdt = -self%gamma_L(i)*(Ri+self%damping(i)* cross(S_in(:,i), Ri))
        Ri=S_in(:,i)+dSdt*self%dt
-       Ri=Ri/sqrt(Ri(1)*Ri(1)+Ri(2)*Ri(2)+Ri(3)*Ri(3))
+       Ri=Ri/norm2(Ri)
        self%Stmp(:,i)=Ri
     end do
     call self%mps%allgatherv_dp2d(self%Stmp, 3, buffer=self%buffer)
@@ -552,7 +552,7 @@ contains
        !Ri = cross(S_in(:,i),Htmp)
        !dSdt = -self%gamma_L(i)*(Ri+self%damping(i)* cross(S_in(:,i), Ri))
        Ri=S_in(:,i)!+dSdt*self%dt
-       Ri=Ri/sqrt(Ri(1)*Ri(1)+Ri(2)*Ri(2)+Ri(3)*Ri(3))
+       Ri=Ri/norm2(Ri)
        self%Stmp(:,i)=Ri
     end do
     call self%mps%allgatherv_dp2d(self%Stmp2, 3, buffer=self%buffer)

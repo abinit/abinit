@@ -522,12 +522,8 @@ subroutine asrprs(asr,asrflag,rotinv,uinvers,vtinvers,singular,d2cart,mpert,nato
 
 !  Invert U and V**T, orthogonal matrices
 
-   do ii=1, superdim
-     do jj=1, superdim
-       uinvers(ii,jj)=umatrix(jj,ii)
-       vtinvers(ii,jj)=superm(jj,ii)
-     end do
-   end do
+   uinvers = transpose(umatrix)
+   vtinvers = transpose(superm)
 
    ABI_FREE(umatrix)
    ABI_FREE(superm)
@@ -544,14 +540,8 @@ subroutine asrprs(asr,asrflag,rotinv,uinvers,vtinvers,singular,d2cart,mpert,nato
 
 !  Calculate V**T**-1 Sigma**-1 U**-1 *rhs
 
-   do ii=1, superdim
-     d2vecrnew(ii)=0d0
-     d2veccnew(ii)=0d0
-     do jj=1, superdim
-       d2vecrnew(ii)=d2vecrnew(ii)+uinvers(ii,jj)*d2vecr(jj)
-       d2veccnew(ii)=d2veccnew(ii)+uinvers(ii,jj)*d2vecc(jj)
-     end do
-   end do
+   d2vecrnew = matmul(uinvers, d2vecr)
+   d2veccnew = matmul(uinvers, d2vecc)
 
    rcond=1d-10*singular(1)
    do ii=1, superdim
@@ -1226,9 +1216,7 @@ subroutine chneu9(chneut,d2cart,mpert,natom,ntypat,selectz,typat,zion)
    end do
 
 !  Normalize the weights to unity
-   do ipert1=1,natom
-     wghtat(ipert1)=wghtat(ipert1)/sumwght(1)
-   end do
+   wghtat(1:natom) = wghtat(1:natom) / sumwght(1)
  end if
 
 !Calculation of the violation of the charge neutrality
@@ -1362,15 +1350,7 @@ subroutine chneu9(chneut,d2cart,mpert,natom,ntypat,selectz,typat,zion)
  call wrtout(ab_out,msg)
  call wrtout(std_out,msg)
 
- do ipert1=1,natom
-   do ipert2=1,natom
-     do idir1=1,3
-       do idir2=1,3
-         d2cart(2,idir1,ipert1,idir2,ipert2)=zero
-       end do
-     end do
-   end do
- end do
+ d2cart(2, 1:3, 1:natom, 1:3, 1:natom) = zero
 
  ABI_FREE(wghtat)
 
@@ -3540,12 +3520,10 @@ subroutine ftifc_q2r(atmfrc,dynmat,gprim,natom,nqpt,nrpt,rpt,spqpt,comm)
    do iqpt=1,nqpt
 
      ! Calculation of the k coordinates in Normalized Reciprocal coordinates
-     kk(1)=spqpt(1,iqpt)*gprim(1,1)+spqpt(2,iqpt)*gprim(1,2)+spqpt(3,iqpt)*gprim(1,3)
-     kk(2)=spqpt(1,iqpt)*gprim(2,1)+spqpt(2,iqpt)*gprim(2,2)+spqpt(3,iqpt)*gprim(2,3)
-     kk(3)=spqpt(1,iqpt)*gprim(3,1)+spqpt(2,iqpt)*gprim(3,2)+spqpt(3,iqpt)*gprim(3,3)
+     kk(:) = matmul(gprim, spqpt(:, iqpt))
 
      ! Product of k and r
-     kr=kk(1)*rpt(1,irpt)+kk(2)*rpt(2,irpt)+kk(3)*rpt(3,irpt)
+     kr(:)=dot_product(kk,rpt(:,irpt))
 
      ! Get the phase factor
      re=cos(two_pi*kr)
@@ -3638,15 +3616,13 @@ subroutine ftifc_r2q(atmfrc, dynmat, gprim, natom, nqpt, nrpt, rpt, spqpt, wghat
  do iqpt=1,nqpt
 
    ! Calculation of the k coordinates in Normalized Reciprocal coordinates
-   kk(1)=spqpt(1,iqpt)*gprim(1,1)+spqpt(2,iqpt)* gprim(1,2)+spqpt(3,iqpt)*gprim(1,3)
-   kk(2)=spqpt(1,iqpt)*gprim(2,1)+spqpt(2,iqpt)* gprim(2,2)+spqpt(3,iqpt)*gprim(2,3)
-   kk(3)=spqpt(1,iqpt)*gprim(3,1)+spqpt(2,iqpt)* gprim(3,2)+spqpt(3,iqpt)*gprim(3,3)
+   kk(:) = matmul(gprim, spqpt(:, iqpt))
 
    do irpt=1,nrpt
      cnt = cnt + 1; if (mod(cnt, nprocs) /= my_rank) cycle ! MPI parallelism.
 
      ! k.R
-     kr = kk(1)*rpt(1,irpt)+kk(2)*rpt(2,irpt)+kk(3)*rpt(3,irpt)
+     kr(:) = dot_product(kk,rpt(:,irpt))
      ! Get phase factor
      re = cos(two_pi*kr); im = sin(two_pi*kr)
 
@@ -3744,12 +3720,10 @@ subroutine dynmat_dq(qpt,natom,gprim,nrpt,rpt,atmfrc,wghatm,dddq)
 
  do irpt=1,nrpt
    ! Calculation of the k coordinates in Normalized Reciprocal coordinates
-   kk(1) = qpt(1)*gprim(1,1)+ qpt(2)*gprim(1,2) + qpt(3)*gprim(1,3)
-   kk(2) = qpt(1)*gprim(2,1)+ qpt(2)*gprim(2,2) + qpt(3)*gprim(2,3)
-   kk(3) = qpt(1)*gprim(3,1)+ qpt(2)*gprim(3,2) + qpt(3)*gprim(3,3)
+   kk(:) = matmul(gprim, qpt)
 
    ! Product of k and r
-   kr=kk(1)*rpt(1,irpt)+kk(2)*rpt(2,irpt)+kk(3)*rpt(3,irpt)
+   kr(:)=dot_product(kk,rpt(:,irpt))
 
    ! Get phase factor
    re=cos(two_pi*kr); im=sin(two_pi*kr)
@@ -5264,12 +5238,7 @@ subroutine axial9(ifccar,vect1,vect2,vect3)
 
 ! *********************************************************************
 
- do jj=1,3
-   work(jj)=zero
-   do ii=1,3
-     work(jj)=work(jj)+ifccar(jj,ii)*vect1(ii)
-   end do
- end do
+ work (:) = matmul(ifccar,vect1)
 
  flag=0
  do itrial=1,4
@@ -5278,14 +5247,9 @@ subroutine axial9(ifccar,vect1,vect2,vect3)
      scprod=scprod+work(ii)*vect1(ii)
    end do
 
-   do ii=1,3
-     work(ii)=work(ii)-vect1(ii)*scprod
-   end do
+   work(:)=work(:)-vect1(:)*scprod
 
-   scprod=zero
-   do ii=1,3
-     scprod=scprod+work(ii)**2
-   end do
+   scprod=dot_product(work,work)
 
    if(scprod<1.0d-10)then
      work(1:3)=zero
@@ -5298,9 +5262,7 @@ subroutine axial9(ifccar,vect1,vect2,vect3)
  end do
 
  innorm=scprod**(-0.5_dp)
- do ii=1,3
-   vect2(ii)=work(ii)*innorm
- end do
+ vect2(:)=work(:)*innorm
 
  vect3(1)=vect1(2)*vect2(3)-vect1(3)*vect2(2)
  vect3(2)=vect1(3)*vect2(1)-vect1(1)*vect2(3)
@@ -5361,14 +5323,11 @@ subroutine dymfz9(dynmat,natom,nqpt,gprim,option,spqpt,trans)
 
  do iqpt=1,nqpt
    ! Definition of q in normalized reciprocal space
-   kk(1)=spqpt(1,iqpt)*gprim(1,1)+spqpt(2,iqpt)*gprim(1,2)+spqpt(3,iqpt)*gprim(1,3)
-   kk(2)=spqpt(1,iqpt)*gprim(2,1)+spqpt(2,iqpt)*gprim(2,2)+spqpt(3,iqpt)*gprim(2,3)
-   kk(3)=spqpt(1,iqpt)*gprim(3,1)+spqpt(2,iqpt)*gprim(3,2)+spqpt(3,iqpt)*gprim(3,3)
+   kk(:) = matmul(gprim, spqpt(:, iqpt))
+
 
    if(option==1)then
-     kk(1)=-kk(1)
-     kk(2)=-kk(2)
-     kk(3)=-kk(3)
+     kk(:)=-kk(:)
    end if
 
    do ia=1,natom
@@ -6527,12 +6486,10 @@ subroutine ftgam_init (gprim,nqpt,nrpt,qpt_full,rpt,coskr, sinkr)
 ! Prepare the phase factors
  do iqpt=1,nqpt
    ! Calculation of the k coordinates in Normalized Reciprocal coordinates
-   kk(1) = qpt_full(1,iqpt)*gprim(1,1) + qpt_full(2,iqpt)*gprim(1,2) + qpt_full(3,iqpt)*gprim(1,3)
-   kk(2) = qpt_full(1,iqpt)*gprim(2,1) + qpt_full(2,iqpt)*gprim(2,2) + qpt_full(3,iqpt)*gprim(2,3)
-   kk(3) = qpt_full(1,iqpt)*gprim(3,1) + qpt_full(2,iqpt)*gprim(3,2) + qpt_full(3,iqpt)*gprim(3,3)
+   kk(:) = matmul(gprim,qpt_full(:,iqpt))
    do irpt=1,nrpt
      ! Product of k and r
-     kr = kk(1)*rpt(1,irpt)+ kk(2)*rpt(2,irpt)+ kk(3)*rpt(3,irpt)
+     kr(:) =dot_product(kk,rpt(:,irpt))
      coskr(iqpt,irpt)=cos(two_pi*kr)
      sinkr(iqpt,irpt)=sin(two_pi*kr)
    end do
