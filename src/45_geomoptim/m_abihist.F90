@@ -790,9 +790,7 @@ real(dp) :: ekin
 !  Compute the Ionic Kinetic energy
    ekin=zero
    do ii=1,natom
-     do jj=1,3
-       ekin=ekin+half*amass(ii)*vel(jj,ii)**2
-     end do
+     ekin = ekin + half * amass(ii) * DOT_PRODUCT(vel(:, ii), vel(:, ii))
    end do
 
  else

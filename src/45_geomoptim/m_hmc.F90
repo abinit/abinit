@@ -75,11 +75,9 @@ subroutine compute_kinetic_energy(ab_mover,vel,ekin)
 ! *************************************************************************
 
  ekin=0.0
- do ii=1,ab_mover%natom
-   do jj=1,3
-     ekin=ekin+half*ab_mover%amass(ii)*vel(jj,ii)**2
-   end do
- end do
+do ii = 1, ab_mover%natom
+  ekin = ekin + half * ab_mover%amass(ii) * DOT_PRODUCT(vel(:, ii), vel(:, ii))
+end do
 
 end subroutine compute_kinetic_energy
 !!***
@@ -115,13 +113,14 @@ subroutine generate_random_velocities(ab_mover,kbtemp,seed,vel,ekin)
  real(dp),      intent(inout):: vel(3,ab_mover%natom) ! velocities
  real(dp),      intent(out)  :: ekin                  ! output kinetic energy     
 !Local variables-------------------------------
- integer :: ii,jj
+ integer :: ii,jj,natom
  real(dp):: mtot,mvtot(3),mv2tot,factor                                
 !character(len=500) :: msg                   
  
 ! *************************************************************************
 
 
+ natom = ab_mover%natom
  mtot=sum(ab_mover%amass(:))         ! total mass to eventually get rid of total center of mass (CoM) momentum
  !generate velocities from normal distribution with zero mean and correct standard deviation
  do ii=1,ab_mover%natom
@@ -132,23 +131,15 @@ subroutine generate_random_velocities(ab_mover,kbtemp,seed,vel,ekin)
  end do
  !since number of atoms is most probably not big enough to obtain overall zero CoM momentum, shift the velocities
  !and then renormalize
- mvtot=zero ! total momentum
+ ! mvtot -> total momentum
+ mvtot(:) = MATMUL(vel(1:3,1:natom), ab_mover%amass(1:natom))
  do ii=1,ab_mover%natom
-   do jj=1,3
-     mvtot(jj)=mvtot(jj)+ab_mover%amass(ii)*vel(jj,ii)
-   end do
- end do
- do ii=1,ab_mover%natom
-   do jj=1,3
-     vel(jj,ii)=vel(jj,ii)-(mvtot(jj)/mtot)
-   end do
+   vel(:,ii)=vel(1:3,ii)-(mvtot(1:3)/mtot)
  end do
  !now the total cell momentum is zero
  mv2tot=0.0
  do ii=1,ab_mover%natom
-   do jj=1,3
-     mv2tot=mv2tot+ab_mover%amass(ii)*vel(jj,ii)**2
-   end do
+   mv2tot=mv2tot+ab_mover%amass(ii)* DOT_PRODUCT(vel(:,ii), vel(:,ii))
  end do
  factor = mv2tot/(dble(3*ab_mover%natom))
  factor = sqrt(kbtemp/factor)
