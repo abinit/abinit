@@ -1035,8 +1035,6 @@ subroutine ebands_free(ebands)
  ABI_SFREE(ebands%occ)
  ABI_SFREE(ebands%doccde)
  ABI_SFREE(ebands%wtk)
- !ABI_SFREE(ebands%velocity)
- !ABI_SFREE(ebands%kTmesh)
  ABI_SFREE(ebands%shiftk_orig)
  ABI_SFREE(ebands%shiftk)
 
@@ -1428,7 +1426,7 @@ end subroutine get_eneocc_vect
 !!
 !! SOURCE
 
-subroutine put_eneocc_vect(ebands,arr_name,vect)
+subroutine put_eneocc_vect(ebands, arr_name, vect)
 
 !Arguments ------------------------------------
 !scalars
@@ -1441,7 +1439,7 @@ subroutine put_eneocc_vect(ebands,arr_name,vect)
  real(dp) :: val
 ! *************************************************************************
 
- mband =ebands%mband; bantot=ebands%bantot; nkpt  =ebands%nkpt; nsppol=ebands%nsppol
+ mband = ebands%mband; bantot = ebands%bantot; nkpt= ebands%nkpt; nsppol = ebands%nsppol
 
  select case (tolower(arr_name))
  case ('occ')
