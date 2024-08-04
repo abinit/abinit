@@ -551,7 +551,7 @@ contains
   procedure :: check_cplex_qkzone_gmode => gstore_check_cplex_qkzone_gmode
   ! Perform consistency checks.
 
-  procedure :: wannierize => gstore_wannierize
+  procedure :: wannierize_and_write_gwan => gstore_wannierize_and_write_gwan
   ! Compute g(R_e,R_ph) from g(k,q) and save results to GWAN.nc file
 
 end type gstore_t
@@ -631,7 +631,7 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
  has_abiwan = .False.; has_gwan = .False.; keep_umats = .False.
  if (dtfil%filabiwanin /= ABI_NOFILE) then
    has_abiwan = .True.
-   call wrtout(units, sjoin(" Reading set of bands to be included in gstore from ABIWAN file:", dtfil%filabiwanin))
+   call wrtout(units, sjoin(" Reading set of bands to be included in gstore computation from ABIWAN file:", dtfil%filabiwanin))
    do spin=1,ebands%nsppol
      call wan_spin(spin)%from_abiwan(dtfil%filabiwanin, spin, ebands%nsppol, keep_umats, dtfil%filnam_ds(4), comm)
      call wan_spin(spin)%print(units)
@@ -1043,7 +1043,7 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
 
      ! Interpolate my e-ph matrix elements.
      ! NOTE: the interpolated values are in the atomic representation and distributed over perts.
-     ! Then one should take into account the change between atom and phonon representation.
+     ! Then one should take into account the change from atom and phonon representation.
      nq = 1
      ABI_MALLOC(intp_gatm, (wan%nwan, wan%nwan, wan%my_npert, nq))
      do my_iq=1,gqk%my_nq
@@ -1055,7 +1055,6 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
        end do ! my_ik
      end do ! my_iq
      ABI_FREE(intp_gatm)
-
      end associate
    end do ! my_is
  end if
@@ -3414,7 +3413,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
 
  if (gstore%with_vk /= 0 .and. ndone == 0) then
    call wrtout(std_out, " Computing and writing velocity operator matrix elements in the IBZ", pre_newlines=1)
-   call wrtout(std_out, " note that not all the k-points in the IBZ are computed when kfilter is activated!")
+   call wrtout(std_out, " Note that not all the k-points in the IBZ are computed when kfilter is activated!")
    call cwtime(cpu, wall, gflops, "start")
 
    ! On disk, we have:
@@ -3778,7 +3777,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
  end do ! my_is
 
  call cwtime_report(" GSTORE computation done", cpu_all, wall_all, gflops_all, pre_str=ch10, end_str=ch10) !, comm=gstore%comm)
- call gstore%print(std_out, header="GSTORE at the end of gstore%compute")
+ !call gstore%print(std_out, header="GSTORE at the end of gstore%compute")
 
  ! Set gstore_completed to 1 so that we can easily check if restarted is needed.
  !if (my_rank == master) then
@@ -4647,9 +4646,9 @@ end subroutine gqk_gather
 
 !----------------------------------------------------------------------
 
-!!****f* m_gstore/gstore_wannierize
+!!****f* m_gstore/gstore_wannierize_and_write_gwan
 !! NAME
-!! gstore_wannierize
+!! gstore_wannierize_and_write_gwan
 !!
 !! FUNCTION
 !!  Compute g(R_e,R_ph) from g(k,q) and save results to GWAN.nc file
@@ -4658,7 +4657,7 @@ end subroutine gqk_gather
 !!
 !! SOURCE
 
-subroutine gstore_wannierize(gstore, dvdb, dtfil)
+subroutine gstore_wannierize_and_write_gwan(gstore, dvdb, dtfil)
 
 !Arguments ------------------------------------
  class(gstore_t),target, intent(in) :: gstore
@@ -4676,20 +4675,21 @@ subroutine gstore_wannierize(gstore, dvdb, dtfil)
  type(gqk_t),pointer :: gqk
 !arrays
  integer :: qptrlatt_(3,3), units(2)
- real(dp) :: weight_qq, qpt(3), kpt(3), kq(3)
+ real(dp) :: weight_qq, qpt(3), kpt(3), kq(3), cpu, wall, gflops
  complex(dp),allocatable :: emikr(:), emiqr(:), u_kc(:,:), u_kqc(:,:), gww_epq(:,:,:,:,:), gww_pk(:,:,:,:), g_bb(:,:), tmp_mat(:,:)
 ! *************************************************************************
 
  units = [std_out, ab_out]
- call wrtout(units, " Computing e-ph vertex in the Wannier representation...", pre_newlines=1)
+ call wrtout(units, " Computing e-ph matrix elements in the Wannier representation...", pre_newlines=1)
+ call cwtime(cpu, wall, gflops, "start")
 
  if (gstore%check_cplex_qkzone_gmode(2, "bz", "bz", "atom", kfilter="none") /= 0) then
-   ABI_ERROR("The gstore object is inconsistent with gstore_wannierize. See messages above.")
+   ABI_ERROR("The gstore object is inconsistent with gstore_wannierize_and_write_gwan. See messages above.")
  end if
 
  ! TODO: Handle long-range part.
  if (dvdb%has_zeff .or. dvdb%has_quadrupoles) then
-   ABI_WARNING("Treatment of long-range part not yet coded in gstore_wannierize!")
+   ABI_WARNING("Treatment of long-range part not yet coded in gstore_wannierize_and_write_gwan!")
  end if
 
  do my_is=1,gstore%my_nspins
@@ -4858,7 +4858,9 @@ subroutine gstore_wannierize(gstore, dvdb, dtfil)
    call xmpi_barrier(gstore%comm)
  end do ! spin
 
-end subroutine gstore_wannierize
+ call cwtime_report(" gstore_wannierize_and_write_gwan:", cpu, wall, gflops)
+
+end subroutine gstore_wannierize_and_write_gwan
 !!***
 
 end module m_gstore

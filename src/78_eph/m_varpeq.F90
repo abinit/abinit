@@ -2517,6 +2517,7 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
    !NCF_CHECK(nctk_get_dim(ncid, "gstore_nqbz", nqbz))
 
    ! TODO: Wrap phstore API?
+   ! Encaspulate this part as we're gonna re-use it to deal with hopping
    !call gstore_read_ph_qibz(dtfil%filgstorein, ph, comm)
    !call ph%free()
 
