@@ -300,7 +300,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  type(wfk_t) :: ddk_f(4)
  type(wvl_data) :: wvl
 !arrays
- integer :: eq_symop(3,3),ngfftf(18),file_index(4),rfdir(9),rf2dir(9),rf2_dir1(3),rf2_dir2(3), units(2)
+ integer :: eq_symop(3,3),ngfftf(18),file_index(4),rfdir(9),rf2dir(9),rf2_dir1(3),rf2_dir2(3) !, units(2)
  integer,allocatable :: blkflg_save(:,:,:,:),dimcprj_srt(:),dyn(:),indkpt1(:),indkpt1_tmp(:)
  integer,allocatable :: indsy1(:,:,:),irrzon1(:,:,:),istwfk_rbz(:),istwfk_pert(:,:,:)
  integer,allocatable :: kg(:,:),kg1(:,:),nband_rbz(:),npwar1(:),npwarr(:),npwtot(:)
