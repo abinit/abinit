@@ -49,6 +49,7 @@ program mrgscr
 
  use defs_abitypes,         only : MPI_type
  use m_build_info,          only : abinit_version
+ use m_argparse,            only : get_arg, get_arg_list
  use m_specialmsg,          only : herald
  use m_time,                only : timein
  use m_gwdefs,              only : GW_TOLQ, GW_TOLQ0, GW_Q0_DEFAULT
@@ -67,8 +68,7 @@ program mrgscr
  use m_io_screening,        only : read_screening, hscr_t, ioscr_qmerge, ioscr_qrecover, ioscr_wmerge, ioscr_wremove
  use m_ppmodel,             only : ppmodel_t, cqratio
  use m_model_screening,     only : remove_phase
- use m_screening,           only : mkdump_er, em1results_free, em1results_print, decompose_epsm1, &
-                                   init_er_from_file, Epsilonm1_results
+ use m_screening,           only : Epsilonm1_results
  use m_wfd,                 only : test_charge
 
  implicit none
@@ -76,14 +76,14 @@ program mrgscr
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master=0,paral_kgb0=0,rdwr2=2,prtvol=0,cplex1=1
- integer :: iomode,fform1,ifile,ierr,ii,ios,iqibz,iqf,nfiles
+ integer :: iomode,fform1,ifile,ierr,ii,ios,iqibz,iqf,nfiles, abimem_level
  integer :: unt_dump,idx,ig1,ig2,iomega,ppmodel,npwe_asked,mqmem,io,unt_dump2
  integer :: id_required,ikxc,approx_type,option_test,dim_kxcg,usexcnhat,usefinegrid
  integer :: mgfft,nqlwl,nfft,igmax,comm,nq_selected,kptopt
  integer :: choice,nfreq_tot,nfreqre,nfreqim,nfreqc,ifrq,imax
  integer :: ig1_start,ig1_end,ig2_start,ig2_end,gmgp_idx,orig_npwe
  real(dp) :: ucvol,boxcutmin,ecut,drude_plsmf,compch_fft,compch_sph
- real(dp) :: nelectron_exp,freqremax,eps_diff,eps_norm,eps_ppm_norm
+ real(dp) :: nelectron_exp,freqremax,eps_diff,eps_norm,eps_ppm_norm, abimem_limit_mb
  real(dp) :: value1,value2,factor,GN_drude_plsmf
  real(dp) :: tcpu,tcpui,twall,twalli
  real(gwp) :: phase
@@ -131,8 +131,10 @@ program mrgscr
  ! Initialize memory profiling if it is activated
  ! if a full abimem.mocc report is desired, set the argument of abimem_init to "2" instead of "0"
  ! note that abimem.mocc files can easily be multiple GB in size so don't use this option normally
+ ABI_CHECK(get_arg("abimem-level", abimem_level, msg, default=0) == 0, msg)
+ ABI_CHECK(get_arg("abimem-limit-mb", abimem_limit_mb, msg, default=20.0_dp) == 0, msg)
 #ifdef HAVE_MEM_PROFILING
- call abimem_init(0)
+ call abimem_init(abimem_level, limit_mb=abimem_limit_mb)
 #endif
 
  call timein(tcpui,twalli)
@@ -585,7 +587,7 @@ program mrgscr
      write(std_out,'(a)') ' 3 => Calculation of dielectric function and plasmon-pole model'
 
      npwe_asked=Hscr0%npwe; mqmem=Hscr0%nqibz
-     call init_Er_from_file(Er,fname,mqmem,npwe_asked,comm)
+     call Er%init_from_file(fname,mqmem,npwe_asked,comm)
 
      ! Initialize the G-sphere ===
      call Gsphere%init(Cryst,Hscr0%npwe,gvec=Hscr0%gvec)
@@ -668,11 +670,11 @@ program mrgscr
 
      if (is_scr) Er%mqmem=1
      if (is_sus) Er%mqmem=0
-     call mkdump_Er(Er,Vcp,Er%npwe,Gsphere%gvec,dim_kxcg,kxcg,id_required,approx_type,ikxc,option_test,&
-       fname_dump,iomode,nfft,ngfft,comm)
+     call Er%mkdump(Vcp,Er%npwe,Gsphere%gvec,dim_kxcg,kxcg,id_required,approx_type,ikxc,option_test,&
+                   fname_dump,iomode,nfft,ngfft,comm)
      Er%mqmem=1
 
-     call em1results_print(Er)
+     call Er%print()
 
      write(std_out,'(2a)',advance='no') ch10,&
      ' Would you like to calculate the eigenvalues of eps^{-1}_GG''(omega) [Y/N] ? '
@@ -689,7 +691,7 @@ program mrgscr
          if (open_file(fname_eigen,msg,newunit=unt_dump,status='replace',form='formatted') /= 0) then
            ABI_ERROR(msg)
          end if
-         call decompose_epsm1(Er,iqibz,epsm1_eigen)
+         call Er%decompose_epsm1(iqibz,epsm1_eigen)
          write(unt_dump,'(a)')       '# First (max 10) eigenvalues of eps^{-1}(omega)'
          write(unt_dump,'(a,3f12.6)')'# q = ',Hscr0%qibz(:,iqibz)
          write(unt_dump,'(a)')       '# REAL omega [eV]  REAL(eigen(esp^-1(1,w)))  AIMAG(eigen(esp^-1(1,w))  ...'
@@ -1085,7 +1087,7 @@ program mrgscr
      ABI_FREE(nhat)
 
      call Vcp%free()
-     call em1results_free(Er)
+     call Er%free()
      call Gsphere%free()
 
    case(4)
