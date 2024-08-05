@@ -1,4 +1,4 @@
-#Test chebfi
+#Test chebfi with OpenMP GPU
 
  ndtset 1
  wfoptalg 111  npband 1 npfft 1
@@ -17,7 +17,7 @@
 
  ecut 15. pawecutdg 50
  diemac 12.0d0  enunit 2
- nstep 20
+ nstep 18
  acell 3*7.0
  rprim 0.0 0.5 0.5
        0.5 0.0 0.5
@@ -46,12 +46,11 @@
 #%% nprocs_to_test = 1
 #%% max_nprocs = 1
 #%% [NCPU_1]
-#%% files_to_test = t04_MPI1.abo, tolnlines=   46,   tolabs=  5.0e-8,      tolrel= 2.0e-2
+#%% files_to_test = t04_MPI1.abo, tolnlines=   16,   tolabs=  5.0e-8,      tolrel= 2.0e-2
 #%% [extra_info]
 #%% keywords = PAW
-#%% authors = A. Levitt
+#%% authors = M. Sarraute
 #%% description = 
-#%%    Chebyshev, C-diamond, Bulk, 2 atoms, paral_kgb, with PAW.
-#%%    Also test gemm_nonlop
+#%%    Chebyshev, C-diamond, Bulk, 2 atoms, paral_kgb, mono-GPU, istwfk==2, with PAW.
 #%% topics = parallelism
 #%%<END TEST_INFO>
