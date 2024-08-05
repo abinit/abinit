@@ -462,7 +462,7 @@ subroutine wedge_basis(gprimd,rprimd,wedge,normalize)
     do irprimd = 1, 3
        do igprimd = 1, 3
           if(any(abs(wedge(1:3,irprimd,igprimd)).GT.tol8)) then
-             nfac = SQRT(DOT_PRODUCT(wedge(1:3,irprimd,igprimd),wedge(1:3,irprimd,igprimd)))
+             nfac = NORM2(wedge(1:3,irprimd,igprimd))
              wedge(1:3,irprimd,igprimd) = wedge(1:3,irprimd,igprimd)/nfac
           end if
        end do
@@ -506,9 +506,7 @@ subroutine wedge_product(produv,u,v,wedgebasis)
  produv(:) = zero
  do irprimd = 1, 3
     do igprimd = 1, 3
-       do ii = 1, 3
-          produv(ii) = produv(ii) + u(irprimd)*v(igprimd)*wedgebasis(ii,irprimd,igprimd)
-       end do
+        produv(1:3) = produv(1:3) + u(irprimd)*v(igprimd)*wedgebasis(1:3,irprimd,igprimd)
     end do
  end do
 
@@ -814,16 +812,10 @@ subroutine getspinrot(rprimd, spinrot, symrel)
 
    ! Transform symmetry matrix in the system defined by rprimd
    call matr3inv(rprimd, rprimd_invt)
-   do ii=1,3
-     coord(:,ii)=rprimd_invt(ii,:)
-   end do
+   coord(:,1:3)=rprimd_invt(1:3,:)
    call matr3inv(coord,coordinvt)
-   do ii=1,3
-     matr1(:,ii) = symrel1(:,1)*coord(1,ii) + symrel1(:,2)*coord(2,ii) + symrel1(:,3)*coord(3,ii)
-   end do
-   do ii=1,3
-     matr2(:,ii) = coordinvt(1,:)*matr1(1,ii) + coordinvt(2,:)*matr1(2,ii) + coordinvt(3,:)*matr1(3,ii)
-   end do
+   matr1(:,:) = MATMUL(symrel1,coord)
+   matr2(:,:) = MATMUL(TRANSPOSE(coordinvt),matr1)
 
    ! Find the eigenvector with unit eigenvalue of the
    ! rotation matrix in cartesian coordinate, matr2
@@ -834,12 +826,12 @@ subroutine getspinrot(rprimd, spinrot, symrel)
    matr1(3,3)=matr1(3,3)-one
 
    !  Compute the axis of rotation and the cos and sin of rotation angle
-   if(matr1(1,1)**2 + matr1(2,1)**2 + matr1(3,1)**2 < tol8 )then
+   if(DOT_PRODUCT(matr1(:,1),matr1(:,1)) < tol8 )then
      ! The first direction is the axis
      axis(1)=one ; axis(2)=zero ; axis(3)=zero
      cos_phi=matr2(2,2)
      sin_phi=matr2(3,2)
-   else if(matr1(1,2)**2 + matr1(2,2)**2 + matr1(3,2)**2 < tol8 )then
+   else if(DOT_PRODUCT(matr1(:,2),matr1(:,2)) < tol8 )then
      ! The second direction is the axis
      axis(1)=zero ; axis(2)=one ; axis(3)=zero
      cos_phi=matr2(3,3)
@@ -851,7 +843,7 @@ subroutine getspinrot(rprimd, spinrot, symrel)
      axis(2)=matr1(3,1)*matr1(1,2)-matr1(3,2)*matr1(1,1)
      axis(3)=matr1(1,1)*matr1(2,2)-matr1(1,2)*matr1(2,1)
      ! Then, try to normalize it
-     scprod=sum(axis(:)**2)
+     scprod=DOT_PRODUCT(axis(:), axis(:))
      if(scprod<tol8)then
        ! The first and second vectors were linearly dependent
        ! Thus, use the first and third vectors
@@ -859,7 +851,7 @@ subroutine getspinrot(rprimd, spinrot, symrel)
        axis(2)=matr1(3,1)*matr1(1,3)-matr1(3,3)*matr1(1,1)
        axis(3)=matr1(1,1)*matr1(2,3)-matr1(1,3)*matr1(2,1)
        ! Normalize the vector
-       scprod=sum(axis(:)**2)
+       scprod=DOT_PRODUCT(axis(:), axis(:))
        if(scprod < tol8)then
          ABI_BUG('Cannot find the rotation axis.')
        end if
@@ -873,19 +865,19 @@ subroutine getspinrot(rprimd, spinrot, symrel)
      vecta(1)=one-axis(1)**2
      vecta(2)=-axis(1)*axis(2)
      vecta(3)=-axis(1)*axis(3)
-     scprod=sum(vecta(:)**2)
+     scprod=DOT_PRODUCT(vecta(:),vecta(:))
      norminv=one/sqrt(scprod)
      vecta(:)=vecta(:)*norminv
      ! Rotate the vector A, to get vector B
      vectb(:)=matr2(:,1)*vecta(1)+matr2(:,2)*vecta(2)+matr2(:,3)*vecta(3)
      ! Get dot product of vectors A and B, giving cos of the rotation angle
-     cos_phi=sum(vecta(:)*vectb(:))
+     cos_phi=DOT_PRODUCT(vecta(:),vectb(:))
      ! Compute the cross product of the axis and vector A
      vectc(1)=axis(2)*vecta(3)-axis(3)*vecta(2)
      vectc(2)=axis(3)*vecta(1)-axis(1)*vecta(3)
      vectc(3)=axis(1)*vecta(2)-axis(2)*vecta(1)
      ! Get dot product of vectors B and C, giving sin of the rotation angle
-     sin_phi=sum(vectb(:)*vectc(:))
+     sin_phi=DOT_PRODUCT(vectb(:),vectc(:))
    end if
 
    ! Get the rotation angle, then the parameters of the spinor rotation
@@ -1027,8 +1019,8 @@ subroutine rotmat(xaxis,zaxis,inversion_flag,umat)
 
 ! *************************************************************************
 
- xmod = sqrt(xaxis(1)**2 + xaxis(2)**2 + xaxis(3)**2)
- zmod = sqrt(zaxis(1)**2 + zaxis(2)**2 + zaxis(3)**2)
+ xmod = NORM2(xaxis(:))
+ zmod = NORM2(zaxis(:))
 
  if(xmod < 1.d-8)then
    write(msg,'(a,a,a,i6)')&
@@ -1045,8 +1037,7 @@ subroutine rotmat(xaxis,zaxis,inversion_flag,umat)
  end if
 
 !verify that both axis are perpendicular
- cosine = (xaxis(1)*zaxis(1) + xaxis(2)*zaxis(2) &
-& + xaxis(3)*zaxis(3))/(xmod*zmod)
+ cosine = DOT_PRODUCT(xaxis,zaxis)/(xmod*zmod)
 
  if(abs(cosine) > 1.d-8)then
    write(msg,'(a,a,a,i6)')&
@@ -1314,7 +1305,7 @@ subroutine mkradim(acell,rprim,rprimd)
 
 !Use a representation based on normalised rprim vectors
  do ii=1,3
-   acell(ii)=sqrt(rprimd(1,ii)**2+rprimd(2,ii)**2+rprimd(3,ii)**2)
+   acell(ii)=NORM2(rprimd(:,ii))
    rprim(:,ii)=rprimd(:,ii)/acell(ii)
  end do
 
@@ -1368,9 +1359,7 @@ logical :: equal
 !###########################################################
 !### 1. Compute rprimd from rprim and acell
  do ii=1,3
-   do jj=1,3
-     rprimd_test(ii,jj)=rprim(ii,jj)*acell(jj)
-   end do
+   rprimd_test(ii,1:3)=rprim(ii,1:3)*acell(1:3)
  end do
 
 
@@ -1452,22 +1441,12 @@ subroutine chkdilatmx(chkdilatmx_,dilatmx,rprimd,rprimd_orig,dilatmx_errmsg)
  call matr3inv(rprimd_orig,gprimd_orig)
 
 !Find the matrix that transform an original xcart to xred, then to the new xcart
- do mu=1,3
-   old_to_new(mu,:)=rprimd(mu,1)*gprimd_orig(:,1)+&
-&   rprimd(mu,2)*gprimd_orig(:,2)+&
-&   rprimd(mu,3)*gprimd_orig(:,3)
- end do
+ old_to_new(:,:) = MATMUL(rprimd, TRANSPOSE(gprimd_orig))
 
 !The largest increase in length will be obtained thanks
 !to the diagonalization of the corresponding metric matrix :
 !it is the square root of its largest eigenvalue.
- do ii=1,3
-   do jj=1,3
-     met(ii,jj)=old_to_new(1,ii)*old_to_new(1,jj)+&
-&     old_to_new(2,ii)*old_to_new(2,jj)+&
-&     old_to_new(3,ii)*old_to_new(3,jj)
-   end do
- end do
+ met(:,:) = MATMUL(TRANSPOSE(old_to_new),old_to_new)
 
  call matr3eigval(eigval,met)
 

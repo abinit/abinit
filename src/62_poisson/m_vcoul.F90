@@ -616,7 +616,7 @@ subroutine cylinder_setup(cryst, vcutgeo, hcyl, pdir, opt_cylinder)
      pdir(ii) = 1
      if (check < zero) then
        ! use Rozzi's method.
-       hcyl = ABS(check) *SQRT(SUM(cryst%rprimd(:,ii)**2))
+       hcyl = ABS(check) * NORM2(cryst%rprimd(:,ii))
        opt_cylinder = 2
        ! Check to enter the infinite Rozzi treatment
        if(vcutgeo(3) <= -tol999) hcyl = tol12
@@ -962,9 +962,9 @@ subroutine vcoul_plot(Vcp, Qmesh, Gsph, ng, vc, comm)
  ntasks= nqbz * ng
  call xmpi_split_work(ntasks, comm, my_start, my_stop)
 
- l1 = SQRT(SUM(Vcp%rprimd(:,1)**2))
- l2 = SQRT(SUM(Vcp%rprimd(:,2)**2))
- l3 = SQRT(SUM(Vcp%rprimd(:,3)**2))
+ l1 = NORM2(Vcp%rprimd(:,1))
+ l2 = NORM2(Vcp%rprimd(:,2))
+ l3 = NORM2(Vcp%rprimd(:,3))
 
  nr = 50
  lmax=MAX(l1,l2,l3) ; step=lmax/(nr-1)
@@ -972,10 +972,8 @@ subroutine vcoul_plot(Vcp, Qmesh, Gsph, ng, vc, comm)
 
  ! numb coding
  ABI_CALLOC(rr, (3, nr, 3))
- do ii=1,3
-   do ir=1,nr
-     rr(ii,ir,ii)=(ir-1)*step
-   end do
+ do ir=1,nr
+   rr(1:3,ir,1:3)=(ir-1)*step
  end do
 
  ABI_CALLOC(vcr, (nr, 3))
@@ -993,7 +991,7 @@ subroutine vcoul_plot(Vcp, Qmesh, Gsph, ng, vc, comm)
      idx_Sm1G = Gsph%rottbm1(ig,itim,isym) ! IS{^-1}G
      vcft=vc(idx_Sm1G,iq_ibz)
      qpgc(:)=qbz(:)+Gsph%gvec(:,ig) ; qpgc(:)=b1(:)*qpgc(1)+b2(:)*qpgc(2)+b3(:)*qpgc(3)
-     tmp=SQRT(DOT_PRODUCT(qpgc,qpgc)) ; tmp=tmp**2
+     tmp=NORM2(qpgc) ; tmp=tmp**2
      do ii=1,3
        do ir=1,nr
          arg=DOT_PRODUCT(rr(:,ir,ii),qpgc)
@@ -1513,9 +1511,7 @@ subroutine beigi_cylinder_limit(opt_cylinder, cryst, nqibz, nkbz, rcut, hcyl, bo
  ! Here Im assuming homogeneous mesh
  dx=(xx(2)-xx(1))
  integ=yy(2)*dx*3.0/2.0
- do ii=3,npt-2
-   integ=integ+yy(ii)*dx
- end do
+ integ=integ+SUM(yy(3:npt-2))*dx
  integ=integ+yy(npt-1)*dx*3.0/2.0
  !write(std_out,*)' simple integral',integ
  q0_volsph = (two_pi)**3 / (nkbz * cryst%ucvol)
@@ -1606,9 +1602,7 @@ subroutine beigi_surface_limit(opt_slab, cryst, nqibz, nkbz, rcut, alpha, boxcen
  dx=(xx(2)-xx(1))
  ! integ = \int dr r f(r)
  integ=xx(2)*yy(2)*dx*3.0/2.0
- do ii=3,npt-2
-   integ=integ+xx(ii)*yy(ii)*dx
- end do
+ integ=integ+DOT_PRODUCT(xx(3:npt-2),yy(3:npt-2))*dx
  integ=integ+xx(npt-1)*yy(npt-1)*dx*3.0/2.0
  !write(std_out,*)' simple integral',integ
  q0_vol=bz_plane*pi*xx(npt)**2
@@ -1649,7 +1643,7 @@ real(dp) function carrier_isz(cryst, nqbz, qbz, rcut, comm) result(i_sz)
  bz_geometry_factor = zero
  do iq_bz=1,nqbz
    qbz_cart(:) = qbz(1,iq_bz)*b1(:) + qbz(2,iq_bz)*b2(:) + qbz(3,iq_bz)*b3(:)
-   qbz_norm = SQRT(SUM(qbz_cart(:)**2))
+   qbz_norm = NORM2(qbz_cart)
    if (qbz_norm > TOLQ0) bz_geometry_factor = bz_geometry_factor - faux(qbz(:,iq_bz), rcut, b1, b2, b3)
  end do
 
