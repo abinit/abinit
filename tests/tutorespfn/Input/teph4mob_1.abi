@@ -13,13 +13,13 @@
 
 # Complete set of symmetry-inequivalent qpt chosen to be commensurate
 # with the kpt mesh so that only one set of GS wave functions is needed.
-# Generated automatically by running GS calculation with 
+# Generated automatically by running GS calculation with
 #
 #   kptopt = 1
 #   nshift = 0
-#   shiftk = 0 0 0 
+#   shiftk = 0 0 0
 #
-# (to include gamma) and taking output kpt set file. 
+# (to include gamma) and taking output kpt set file.
 # Set nstep=1 so that only one iteration is performed or use `abinit ... --dry-run` command line option.
 
      nqpt   1  # One qpt for each dataset (only 0 or 1 allowed)
