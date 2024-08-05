@@ -138,8 +138,6 @@ contains
 !! OUTPUT
 !!  xcdata <type(xcdata_type)>= the data to calculate exchange-correlation are initialized
 !!
-!! SIDE EFFECTS
-!!
 !! SOURCE
 
 subroutine xcdata_init(xcdata,auxc_ixc,dtset,hyb_mixing,intxc,ixc,nelect,nspden,tphysel,&
@@ -225,7 +223,7 @@ end subroutine xcdata_init
 !!
 !! SOURCE
 
-subroutine get_xclevel(ixc,xclevel,usefock)
+subroutine get_xclevel(ixc, xclevel, usefock)
 
 !Arguments ------------------------------------
 !scalars
@@ -235,7 +233,7 @@ subroutine get_xclevel(ixc,xclevel,usefock)
 
 !Local variables-------------------------------
  integer :: ii,isiz,jj
- character(len=500) :: message
+ character(len=500) :: msg
 
 ! *************************************************************************
 
@@ -263,11 +261,11 @@ subroutine get_xclevel(ixc,xclevel,usefock)
        if (libxc_functionals_is_hybrid_from_id(ii)) usefock=1
        if (usefock==1) then
          if (.not.libxc_functionals_gga_from_hybrid(hybrid_id=ii)) then
-           write(message, '(a,i8,3a,2i8,2a)' )&
-&           'ixc=',ixc,' (libXC hybrid functional) is presently not allowed.',ch10,&
-&           'ii,jj=',ii,jj,ch10,&
-&           'Action: try another hybrid functional.'
-           ABI_ERROR(message)
+           write(msg, '(a,i8,3a,2i8,2a)' )&
+           'ixc=',ixc,' (libXC hybrid functional) is presently not allowed.',ch10,&
+           'ii,jj=',ii,jj,ch10,&
+           'Action: try another hybrid functional.'
+           ABI_ERROR(msg)
          end if
        end if
      end if

@@ -603,7 +603,7 @@ module m_gemm_nonlop_gpu
       !temp_realvec(1:npwin*nspinor*ndat) = vectin(1,1:npwin*nspinor*ndat)
       call extract_real_part(temp_realvec_gpu, vectin_ptr, npwin*nspinor*ndat)
 
-      if(istwf_k == 2 .and. mpi_enreg%me_g0 == 1) then
+      if(istwf_k == 2 .and. mpi_enreg%me_g0_fft == 1) then
         ! do idat=1, ndat*nspinor
         !   temp_realvec(1+(idat-1)*npwin) = temp_realvec(1+(idat-1)*npwin)/2
         ! end do
@@ -621,7 +621,7 @@ module m_gemm_nonlop_gpu
       !temp_realvec(1:npwin*nspinor*ndat) = vectin(2,1:npwin*nspinor*ndat)
       call extract_imag_part(temp_realvec_gpu, vectin_ptr, npwin*nspinor*ndat)
 
-      if(istwf_k == 2 .and. mpi_enreg%me_g0 == 1) then
+      if(istwf_k == 2 .and. mpi_enreg%me_g0_fft == 1) then
         ! do idat=1, ndat*nspinor
         !   temp_realvec(1+(idat-1)*npwin) = zero
         ! end do

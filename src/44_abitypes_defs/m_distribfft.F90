@@ -244,7 +244,7 @@ end subroutine init_distribfft
 !!
 !! SOURCE
 
-subroutine init_distribfft_seq(distribfft_arg,grid_type,n2,n3,type_four)
+subroutine init_distribfft_seq(distribfft_arg, grid_type, n2, n3, type_four)
 
 !Arguments ------------------------------------
 !scalars

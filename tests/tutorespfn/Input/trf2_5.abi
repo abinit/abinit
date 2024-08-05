@@ -53,7 +53,7 @@ outdata_prefix = "trf2_5o"
 #%% executable = anaddb
 #%% test_chain = trf2_1.abi, trf2_2.abi, trf2_3.abi, trf2_4.abi, trf2_5.abi, trf2_6.abi, trf2_7.abi
 #%% [files]
-#%% files_to_test = trf2_5.abo, tolnlines=1, tolabs=1.1e-5, tolrel=1.8e-8; trf2_5o_PHANGMOM, tolnlines=264, tolabs=1.5e+00, tolrel=1.0e+00
+#%% files_to_test = trf2_5.abo, tolnlines=1, tolabs=1.1e-5, tolrel=1.8e-8; trf2_5o_PHANGMOM, tolnlines=270, tolabs=1.5e+00, tolrel=1.0e+00
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]

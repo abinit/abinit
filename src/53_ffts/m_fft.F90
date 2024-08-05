@@ -50,7 +50,6 @@ MODULE m_fft
  use m_distribfft,    only : distribfft_type, init_distribfft, destroy_distribfft
 
 #if defined HAVE_GPU_CUDA
- ! MG: Had to comment this line to avoid "Ambiguous reference to c_ptr on buda2 with CUDA
  use m_manage_cuda
 #endif
  use m_ompgpu_fourwf
@@ -2361,6 +2360,11 @@ subroutine fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
  gpu_option_=ABI_GPU_DISABLED
  if (PRESENT(gpu_option)) gpu_option_=gpu_option
 
+ !If processing gamma-point, disable GPU, except OpenMP (not supported on other variants)
+ if(me_g0==1 .and. istwf_k>1 .and. gpu_option_/=ABI_GPU_OPENMP) then
+   gpu_option_=ABI_GPU_DISABLED
+ end if
+
  if(gpu_option_/=ABI_GPU_DISABLED) then
    if (present(weight_array_r)) then
      weight_ptr_r => weight_array_r
@@ -4120,7 +4124,6 @@ end subroutine fftmpi_u
 subroutine zerosym(array,cplex,n1,n2,n3, &
                    ig1,ig2,ig3,comm_fft,distribfft) ! Optional arguments
 
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: cplex,n1,n2,n3
@@ -4137,8 +4140,6 @@ subroutine zerosym(array,cplex,n1,n2,n3, &
  integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:),ffti2_local(:)
 
 ! **********************************************************************
-
- DBG_ENTER("COLL")
 
  me_fft=0;nproc_fft=1
  if (present(comm_fft)) then
@@ -4254,8 +4255,6 @@ subroutine zerosym(array,cplex,n1,n2,n3, &
    ABI_FREE(fftn2_distrib)
    ABI_FREE(ffti2_local)
  end if
-
- DBG_EXIT("COLL")
 
 end subroutine zerosym
 !!***

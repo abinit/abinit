@@ -177,8 +177,7 @@ subroutine sigtk_kcalc_from_qprange(dtset, cryst, ebands, qprange, nkcalc, kcalc
  integer,intent(out) :: nkcalc
 !arrays
  real(dp),allocatable,intent(out) :: kcalc(:,:)
- integer,allocatable,intent(out) :: bstart_ks(:,:)
- integer,allocatable,intent(out) :: nbcalc_ks(:,:)
+ integer,allocatable,intent(out) :: bstart_ks(:,:), nbcalc_ks(:,:)
 
 !Local variables ------------------------------
 !scalars
