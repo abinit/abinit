@@ -107,7 +107,6 @@
 #%% executable = abinit
 #%% exclude_builders = eos_nvhpc_*
 #%% test_chain = t62.abi, t63.abi, t64.abi, t65.abi
-#%% exclude_builders = eos_nvhpc_*
 #%% [files]
 #%% files_to_test =
 #%%   t62.abo, tolnlines = 180, tolabs = 1.1e-3, tolrel = 1.1;
