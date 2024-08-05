@@ -406,7 +406,7 @@ end subroutine ompgpu_fourwf
 ! Memory allocation routine
 subroutine alloc_ompgpu_fourwf(ngfft, ndat)
  implicit none
- integer, intent(in) :: ngfft(6), ndat
+ integer, intent(in) :: ngfft(18), ndat
 
  integer :: n1,n2,n3, ldx, ldy, ldz
  integer, target :: t_fft(3)
