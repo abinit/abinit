@@ -29,8 +29,8 @@ module m_dtfil
 
  use m_build_info,   only : abinit_version
  use defs_abitypes,  only : MPI_type
- use m_clib,         only : clib_rename
- use m_fstrings,     only : int2char4, rmquotes, sjoin, strcat, basename
+ use m_clib,         only : clib_rename, clib_mkdir_if_needed
+ use m_fstrings,     only : int2char4, rmquotes, sjoin, strcat, basename, itoa
  use m_io_tools,     only : open_file, file_exists
  use m_libpaw_tools, only : libpaw_log_flag_set
  use m_parser,       only : parsefile, intagm
@@ -151,6 +151,11 @@ module m_dtfil
    ! if no dataset mode              : abi//'DVDB'
    ! if dataset mode, and getdvdb==0 : abi//'_DS'//trim(jdtset)//'DVDB'
    ! if dataset mode, and getdvdb/=0 : abo//'_DS'//trim(jgetdvdb)//'DVDB'
+
+  character(len=fnlen) :: fildrhodbin
+  ! if no dataset mode              : abi//'DRHODB'
+  ! if dataset mode, and getdrhodb==0 : abi//'_DS'//trim(jdtset)//'DRHODB'
+  ! if dataset mode, and getdrhodb/=0 : abo//'_DS'//trim(jgetdrhodb)//'DRHODB'
 
   character(len=fnlen) :: filpotin
    ! Filename used to read POT file.
@@ -607,6 +612,12 @@ subroutine dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enreg,ndtset
  call mkfilename(filnam,dtfil%fildvdbin,dtset%getdvdb,idtset,dtset%irddvdb,jdtset_,ndtset,stringfile,stringvar,will_read, &
                   getpath=dtset%getdvdb_filepath)
  if (will_read == 0) dtfil%fildvdbin = ABI_NOFILE
+
+ ! According to getdrhodb, build _DRHODB file name
+ stringfile='_DRHODB'; stringvar='drhodb'
+ call mkfilename(filnam,dtfil%fildrhodbin,dtset%getdrhodb,idtset,dtset%irddrhodb,jdtset_,ndtset,stringfile,stringvar,will_read, &
+                  getpath=dtset%getdrhodb_filepath)
+ if (will_read == 0) dtfil%fildrhodbin = ABI_NOFILE
 
  ! According to getsigeph_filepath, build _SIGEPH file name
  stringfile='_SIGEPH.nc'; stringvar='sigeph'
@@ -1546,12 +1557,13 @@ subroutine iofn1(input_path, filnam, filstat, comm)
 !Local variables-------------------------------
  character(len=1) :: blank
  integer,parameter :: master = 0
- integer :: me, ios, nproc, ierr, ndtset, lenstr, marr, jdtset, tread, i1,i2
+ integer :: me, ios, nproc, ierr, ndtset, lenstr, marr, jdtset, tread, i1,i2, ii
  logical :: ex
  character(len=fnlen) :: fillog, tmpfil, fname
  character(len=10) :: tag
  character(len=500) :: msg, errmsg
  character(len=strlen) :: string
+ character(len=fnlen) :: dirpath
 !arrays
  integer,allocatable :: intarr(:)
  real(dp),allocatable :: dprarr(:)
@@ -1712,7 +1724,7 @@ subroutine iofn1(input_path, filnam, filstat, comm)
    call isfile(filnam(2), 'new')
 
    ! Check that root name for generic input and output differ
-   if ( trim(filnam(3)) == trim(filnam(4)) ) then
+   if (trim(filnam(3)) == trim(filnam(4)) ) then
      write(msg, '(3a)' )&
      'Root name for generic input and output files must differ ',ch10,&
      'Action: correct your "file" file.'
@@ -1720,7 +1732,7 @@ subroutine iofn1(input_path, filnam, filstat, comm)
    end if
 
    ! Check that root names are at least 20 characters less than fnlen
-   if ( len_trim(filnam(3)) >= (fnlen-20) ) then
+   if (len_trim(filnam(3)) >= (fnlen-20) ) then
      write(msg, '(a,a,a,a,a,i0,a,i0,a,a)' )&
      'Root name for generic input files is too long. ',ch10,&
      'It must be 20 characters less than the maximal allowed ',ch10,&
@@ -1728,7 +1740,7 @@ subroutine iofn1(input_path, filnam, filstat, comm)
      'Action: correct your "file" file.'
      ABI_ERROR(msg)
    end if
-   if ( len_trim(filnam(4)) >= (fnlen-20) ) then
+   if (len_trim(filnam(4)) >= (fnlen-20) ) then
      write(msg, '(a,a,a,a,a,i0,a,i0,a,a)' )&
      'Root name for generic output files is too long. ',ch10,&
      'It must be 20 characters less than the maximal allowed ',ch10,&
@@ -1736,7 +1748,7 @@ subroutine iofn1(input_path, filnam, filstat, comm)
      'Action: correct your "file" file.'
      ABI_ERROR(msg)
    end if
-   if ( len_trim(filnam(5)) >= (fnlen-20) ) then
+   if (len_trim(filnam(5)) >= (fnlen-20) ) then
      write(msg, '(a,a,a,a,a,i0,a,i0,a,a)' )&
      'Root name for generic temporary files is too long. ',ch10,&
      'It must be 20 characters less than the maximal allowed ',ch10,&
@@ -1745,10 +1757,15 @@ subroutine iofn1(input_path, filnam, filstat, comm)
      ABI_ERROR(msg)
    end if
 
-   ! TODO: Create directories if needed but I need C routines to be portable.
-   !i = index(filnam(5), "/"); if (i > 0) call mkdir(filnam(5)(1:i-1), ierr)
-   !i = index(filnam(6), "/"); if (i > 0) call mkdir(filnam(6)(1:i-1), ierr)
-
+   do i1=3,5
+     ! Create input/output/temporary directories if they don't exist yet.
+     ii = index(filnam(i1), "/", back=.true.)
+     if (ii > 0) then
+       dirpath = filnam(i1)(1:ii-1)
+       call clib_mkdir_if_needed(dirpath, ierr)
+       ABI_CHECK(ierr == 0, sjoin("Error", itoa(ierr), "while trying to create directory:", dirpath))
+     end if
+   end do
  end if ! master only
 
  ! Communicate filenames to all processors

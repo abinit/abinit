@@ -36,6 +36,7 @@ inp_files = [
 "t32.abi",
 "t41.abi",
 "t43.abi", # test chebfi2
+"t45.abi", # test chebfi2 (istwfk=1,norm conserving)
 "t51.abi",
 "t52.abi",
 "t53.abi",
@@ -59,8 +60,8 @@ inp_files = [
 "t75.abi",
 "t76.abi",
 "t77.abi",
-#"t78.abi", # GWR
-#"t79.abi", # GWR
+"t78.abi", # GWR
+"t79.abi", # GWR
 "t80.abi",
 "t81.abi",
 "t82.abi",

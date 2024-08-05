@@ -79,7 +79,6 @@ subroutine xomp_show_info(unit)
 
 !Local variables-------------------
  integer :: my_unt
-
 ! *************************************************************************
 
  my_unt = std_out; if (PRESENT(unit)) my_unt=unit
@@ -577,8 +576,6 @@ function xomp_get_mapped_ptr(ptr) result(gpu_ptr)
 
 end function xomp_get_mapped_ptr
 !!***
-
-!----------------------------------------------------------------------
 
 END MODULE m_xomp
 !!***

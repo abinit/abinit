@@ -3,7 +3,7 @@
 !! m_hamiltonian
 !!
 !! FUNCTION
-!!  This module provides the definition of the gs_hamiltonian_type and rf_hamiltonian_type
+!!  This module provides the definition of the gs_hamiltonian_type and of the rf_hamiltonian_type
 !!  datastructures used in the "getghc" and "getgh1c" routines to apply the Hamiltonian (or
 !!  its derivative) on a wavefunction.
 !!  Methods to initialize or destroy the objects are defined here.
@@ -705,7 +705,7 @@ end subroutine destroy_hamiltonian
 !!  rprimd(3,3)=Direct lattice vectors in Bohr.
 !!  typat(natom)=Type of each atom.
 !!  [usecprj]=flag use only for PAW; 1 if cprj datastructure is allocated
-!!  [gpu_option] = GPU implementation to use, i.e. cuda, openMP, ... (0=not using GPU)  
+!!  [gpu_option] = GPU implementation to use, i.e. cuda, openMP, ... (0=not using GPU)
 !!  xred(3,natom)=Reduced coordinates of the atoms.
 !!  pawtab(ntypat*psps%usepaw)<pawtab_type>=PAW TABulated data initialized at start.
 !!  [paw_ij(:) <type(paw_ij_type)>]=optional, paw arrays given on (i,j) channels

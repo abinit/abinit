@@ -12,7 +12,7 @@ To use ABINIT with GPUs, two distinct programming models are available:
 - [OpenMP offload](https://www.openmp.org/specifications/)
   Available for mostly all ground-state properties (DFPT is ongoing). `LOBPCG`and `Chebyshev filtering` iterative eigensolvers available (see [[wfoptalg]]).
 -  [cuda](https://docs.nvidia.com/cuda)+[Kokkos](https://github.com/kokkos/kokkos)+[YAKL](https://github.com/mrnorman/YAKL)
-  Available only for the calculation of the ground-state total energy, using the `LOBPCG` algorithm.
+  Available only for the calculation of the ground-state total energy, using the `Chebyshev Filtering` (ChebFi) iterative eigensolver.
 
 To utilize either of these programming models, it is essential to compile ABINIT with specific configurations by enabling the relevant options during the setup stage and selecting the correct value for the input parameter [[gpu_option]].
 

@@ -149,18 +149,37 @@ MODULE m_screening
   ! used during the GW calculation since some parameters might differ, actually they might be smaller.
   ! For example, the number of G-vectors used can be smaller than the number of G"s stored on file.
 
+ contains
+
+   procedure :: free => em1results_free
+    ! Free memory
+
+   procedure :: print => em1results_print
+     ! Print basic info
+
+   procedure :: rotate_iqbz => Epsm1_rotate_iqbz
+     ! Symmetrize two-point function at a q-point in the BZ.
+
+   procedure :: rotate_iqbz_inplace => Epsm1_rotate_iqbz_inplace
+     ! In-place version of the above
+
+   procedure :: init_from_file => init_Er_from_file
+     ! Initialize the object from file
+
+   procedure :: mkdump => mkdump_Er
+     ! Dump the object to a file.
+
+   procedure :: get_epsm1 => get_epsm1
+
+   procedure :: decompose_epsm1 => decompose_epsm1
+
  end type Epsilonm1_results
 
- public :: em1results_free                ! Free memory
- public :: em1results_print               ! Print basic info
- public :: Epsm1_symmetrizer              ! Symmetrize two-point function at a q-point in the BZ.
- public :: Epsm1_symmetrizer_inplace      ! In-place version of the above
- public :: init_Er_from_file              ! Initialize the object from file
- public :: mkdump_Er                      ! Dump the object to a file.
- public :: get_epsm1
- public :: decompose_epsm1
- public :: make_epsm1_driver              !  Calculate the inverse symmetrical dielectric matrix starting from chi0
- public :: mkem1_q0                       ! construct the microscopic dielectric matrix for q-->0
+ public :: make_epsm1_driver              ! Calculate the inverse symmetrical dielectric matrix starting from chi0
+ public :: mkem1_q0                       ! Construct the microscopic dielectric matrix for q-->0
+
+ ! Routines for the model dielectric function
+
  public :: screen_mdielf                  ! Calculates W_{G,G'}(q,w) for a given q-point in the BZ using a model dielectric function.
  public :: rpa_symepsm1
 !!***
@@ -274,18 +293,14 @@ CONTAINS  !=====================================================================
 subroutine em1results_free(Er)
 
 !Arguments ------------------------------------
-!scalars
- type(Epsilonm1_results),intent(inout) :: Er
+ class(Epsilonm1_results),intent(inout) :: Er
 ! *************************************************************************
 
- !@Epsilonm1_results
  !integer
  ABI_SFREE(Er%gvec)
-
  !real
  ABI_SFREE(Er%qibz)
  ABI_SFREE(Er%qlwl)
-
  !complex
  ABI_SFREE(Er%epsm1)
  ABI_SFREE(Er%omega)
@@ -317,12 +332,12 @@ end subroutine em1results_free
 !!
 !! SOURCE
 
-subroutine em1results_print(Er,unit,prtvol,mode_paral)
+subroutine em1results_print(Er, unit, prtvol, mode_paral)
 
 !Arguments ------------------------------------
+ class(Epsilonm1_results),intent(in) :: Er
  integer,optional,intent(in) :: unit,prtvol
  character(len=4),optional,intent(in) :: mode_paral
- type(Epsilonm1_results),intent(in) :: Er
 
 !Local variables-------------------------------
  integer :: iw,iqibz,iqlwl,unt,my_prtvol
@@ -447,9 +462,9 @@ end subroutine em1results_print
 
 !----------------------------------------------------------------------
 
-!!****f* m_screening/Epsm1_symmetrizer
+!!****f* m_screening/Epsm1_rotate_iqbz
 !! NAME
-!!  Epsm1_symmetrizer
+!!  Epsm1_rotate_iqbz
 !!
 !! FUNCTION
 !!  Symmetrize the inverse dielectric matrix, namely calculate epsilon^{-1} at a generic
@@ -497,13 +512,13 @@ end subroutine em1results_print
 !!
 !! SOURCE
 
-subroutine Epsm1_symmetrizer(iq_bz,nomega,npwc,Er,Gsph,Qmesh,remove_exchange,epsm1_qbz)
+subroutine Epsm1_rotate_iqbz(Er, iq_bz,nomega,npwc,Gsph,Qmesh,remove_exchange,epsm1_qbz)
 
 !Arguments ------------------------------------
 !scalars
+ class(Epsilonm1_results),intent(in) :: Er
  integer,intent(in) :: iq_bz,nomega,npwc
  logical,intent(in) :: remove_exchange
- type(Epsilonm1_results),intent(in) :: Er
  type(gsphere_t),target,intent(in) :: Gsph
  type(kmesh_t),intent(in) :: Qmesh
 !arrays
@@ -565,17 +580,17 @@ subroutine Epsm1_symmetrizer(iq_bz,nomega,npwc,Er,Gsph,Qmesh,remove_exchange,eps
    end do
  endif
 
-end subroutine Epsm1_symmetrizer
+end subroutine Epsm1_rotate_iqbz
 !!***
 
 !----------------------------------------------------------------------
 
-!!****f* m_screening/Epsm1_symmetrizer_inplace
+!!****f* m_screening/Epsm1_rotate_iqbz_inplace
 !! NAME
-!!  Epsm1_symmetrizer_inplace
+!!  Epsm1_rotate_iqbz_inplace
 !!
 !! FUNCTION
-!!  Same function as Epsm1_symmetrizer, ecxept now the array Ep%epsm1 is modified inplace
+!!  Same function as Epsm1_rotate_iqbz, ecxept now the array Ep%epsm1 is modified inplace
 !!  thorugh an auxiliary work array of dimension (npwc,npwc)
 !!
 !! INPUTS
@@ -617,13 +632,13 @@ end subroutine Epsm1_symmetrizer
 !!
 !! SOURCE
 
-subroutine Epsm1_symmetrizer_inplace(iq_bz,nomega,npwc,Er,Gsph,Qmesh,remove_exchange)
+subroutine Epsm1_rotate_iqbz_inplace(Er,iq_bz,nomega,npwc,Gsph,Qmesh,remove_exchange)
 
 !Arguments ------------------------------------
 !scalars
+ class(Epsilonm1_results),intent(inout) :: Er
  integer,intent(in) :: iq_bz,nomega,npwc
  logical,intent(in) :: remove_exchange
- type(Epsilonm1_results) :: Er
  type(gsphere_t),target,intent(in) :: Gsph
  type(kmesh_t),intent(in) :: Qmesh
 
@@ -684,7 +699,7 @@ subroutine Epsm1_symmetrizer_inplace(iq_bz,nomega,npwc,Er,Gsph,Qmesh,remove_exch
 
  ABI_FREE(work)
 
-end subroutine Epsm1_symmetrizer_inplace
+end subroutine Epsm1_rotate_iqbz_inplace
 !!***
 
 !----------------------------------------------------------------------
@@ -708,12 +723,12 @@ end subroutine Epsm1_symmetrizer_inplace
 !!
 !! SOURCE
 
-subroutine init_Er_from_file(Er,fname,mqmem,npwe_asked,comm)
+subroutine init_Er_from_file(Er, fname, mqmem, npwe_asked, comm)
 
 !Arguments ------------------------------------
+ class(Epsilonm1_results),intent(inout) :: Er
  integer,intent(in) :: mqmem,npwe_asked,comm
  character(len=*),intent(in) :: fname
- type(Epsilonm1_results),intent(inout) :: Er
 
 !Local variables-------------------------------
 !scalars
@@ -837,14 +852,14 @@ end subroutine init_Er_from_file
 !! SOURCE
 
 subroutine mkdump_Er(Er,Vcp,npwe,gvec,nkxc,kxcg,id_required,approx_type,&
-&                    ikxc_required,option_test,fname_dump,iomode,&
-&                    nfftot,ngfft,comm,fxc_ADA)
+                     ikxc_required,option_test,fname_dump,iomode,&
+                     nfftot,ngfft,comm,fxc_ADA)
 
 !Arguments ------------------------------------
 !scalars
+ class(Epsilonm1_results),intent(inout) :: Er
  integer,intent(in) :: id_required,approx_type,option_test,ikxc_required,nkxc
  integer,intent(in) :: iomode,nfftot,npwe,comm
- type(Epsilonm1_results),intent(inout) :: Er
  type(vcoul_t),intent(in) :: Vcp
  character(len=*),intent(in) :: fname_dump
 !arrays
@@ -1109,10 +1124,10 @@ subroutine get_epsm1(Er,Vcp,approx_type,option_test,iomode,comm,iqibzA)
 
 !Arguments ------------------------------------
 !scalars
+ class(Epsilonm1_results),intent(inout) :: Er
  integer,intent(in) :: iomode,option_test,approx_type,comm
  integer,optional,intent(in) :: iqibzA
  type(vcoul_t),intent(in) :: Vcp
- type(Epsilonm1_results),intent(inout) :: Er
 
 !Local variables-------------------------------
 !scalars
@@ -1129,9 +1144,7 @@ subroutine get_epsm1(Er,Vcp,approx_type,option_test,iomode,comm,iqibzA)
  select case (Er%mqmem)
  case (0)
    !  Out-of-core solution
-   if (allocated(Er%epsm1))  then
-     ABI_FREE(Er%epsm1)
-   end if
+   ABI_SFREE(Er%epsm1)
    ABI_MALLOC_OR_DIE(Er%epsm1,(Er%npwe,Er%npwe,Er%nomega,1), ierr)
 
    ! FIXME there's a problem with SUSC files and MPI-IO
@@ -1176,12 +1189,12 @@ end subroutine get_epsm1
 !!
 !! SOURCE
 
-subroutine decompose_epsm1(Er,iqibz,eigs)
+subroutine decompose_epsm1(Er, iqibz, eigs)
 
 !Arguments ------------------------------------
 !scalars
+ class(Epsilonm1_results),intent(in) :: Er
  integer,intent(in) :: iqibz
- type(Epsilonm1_results),intent(in) :: Er
 !arrays
  complex(dpc),intent(out) :: eigs(Er%npwe,Er%nomega)
 
@@ -2813,7 +2826,7 @@ end function ylmstar_wtq_over_qTq
 !!
 !! SOURCE
 
-elemental function mdielf_bechstedt(eps_inf,qnrm,rhor) result(mdielf)
+elemental function mdielf_bechstedt(eps_inf, qnrm, rhor) result(mdielf)
 
 !Arguments ------------------------------------
 !scalars
@@ -2823,7 +2836,7 @@ elemental function mdielf_bechstedt(eps_inf,qnrm,rhor) result(mdielf)
 ! *************************************************************************
 
  mdielf = one + &
-&  one / ( one/(eps_inf-one) + (qnrm/k_thfermi(rhor))**2 + (three*qnrm**4)/(four*k_fermi(rhor)**2 * k_thfermi(rhor)**2) )
+          one / ( one/(eps_inf-one) + (qnrm/k_thfermi(rhor))**2 + (three*qnrm**4)/(four*k_fermi(rhor)**2 * k_thfermi(rhor)**2) )
 
 end function mdielf_bechstedt
 !!***
@@ -2904,7 +2917,7 @@ subroutine screen_mdielf(iq_bz,npw,nomega,model_type,eps_inf,Cryst,Qmesh,Vcp,Gsp
 
  ABI_CHECK(nomega==1,"screen_mdielf does not support nomega>1")
 
-!Fake MPI_type for the sequential part.
+ ! Fake MPI_type for the sequential part.
  call initmpi_seq(MPI_enreg_seq)
  call init_distribfft_seq(MPI_enreg_seq%distribfft,'c',ngfft(2),ngfft(3),'all')
 
@@ -3013,9 +3026,7 @@ subroutine screen_mdielf(iq_bz,npw,nomega,model_type,eps_inf,Cryst,Qmesh,Vcp,Gsp
  call destroy_mpi_enreg(MPI_enreg_seq)
 
  ABI_FREE(vc_qbz)
- if (allocated(ctmp)) then
-   ABI_FREE(ctmp)
- end if
+ ABI_SFREE(ctmp)
 
 end subroutine screen_mdielf
 !!***
@@ -3038,7 +3049,6 @@ type(chi_t) function chi_new(npwe, nomega) result(chi)
 
 !Arguments ------------------------------------
  integer,intent(in) :: npwe,nomega
-
 ! *************************************************************************
 
  chi%nomega = nomega; chi%npwe = npwe
@@ -3070,22 +3080,14 @@ subroutine chi_free(chi)
 
 !Arguments ------------------------------------
 !scalars
- type(chi_t),intent(inout) :: chi
+ class(chi_t),intent(inout) :: chi
 
 ! *************************************************************************
 
- if (allocated(chi%mat)) then
-   ABI_FREE(chi%mat)
- end if
- if (allocated(chi%head)) then
-   ABI_FREE(chi%head)
- end if
- if (allocated(chi%lwing)) then
-   ABI_FREE(chi%lwing)
- end if
- if (allocated(chi%uwing)) then
-   ABI_FREE(chi%uwing)
- end if
+ ABI_SFREE(chi%mat)
+ ABI_SFREE(chi%head)
+ ABI_SFREE(chi%lwing)
+ ABI_SFREE(chi%uwing)
 
 end subroutine chi_free
 !!***
@@ -3338,18 +3340,10 @@ subroutine lwl_free(lwl)
 
 ! *************************************************************************
 
- if (allocated(lwl%head)) then
-   ABI_FREE(lwl%head)
- end if
- if (allocated(lwl%lwing)) then
-   ABI_FREE(lwl%lwing)
- end if
- if (allocated(lwl%uwing)) then
-   ABI_FREE(lwl%uwing)
- end if
- if (allocated(lwl%body)) then
-   ABI_FREE(lwl%body)
- end if
+ ABI_SFREE(lwl%head)
+ ABI_SFREE(lwl%lwing)
+ ABI_SFREE(lwl%uwing)
+ ABI_SFREE(lwl%body)
 
 end subroutine lwl_free
 !!***

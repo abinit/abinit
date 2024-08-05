@@ -51,6 +51,7 @@ module m_sigx
  use m_sigma,         only : sigma_t, sigma_distribute_bks
  use m_oscillators,   only : rho_tw_g
  use m_esymm,         only : esymm_t, esymm_symmetrize_mels, esymm_failed
+ use m_occ,           only : get_fact_spin_tol_empty
 
  implicit none
 
@@ -231,18 +232,9 @@ subroutine calc_sigx_me(sigmak_ibz, ikcalc, bmin, bmax, cryst, qp_ebands, Sigp, 
  end if
 
  ! MRM allow lower occ numbers
- ! Normalization of theta_mu_minus_esum. If nsppol==2, qp_occ $\in [0,1]$
- select case (nsppol)
- case (1)
-   fact_spin = half; tol_empty = tol_empty_in          ! below this value the state is assumed empty
-   if (nspinor == 2) then
-     fact_spin = one; tol_empty = half * tol_empty_in  ! below this value the state is assumed empty
-   end if
- case (2)
-   fact_spin = one; tol_empty = half * tol_empty_in  ! to be consistent and obtain similar results if a metallic
- case default                                        ! spin unpolarized system is treated using nsppol==2
-   ABI_BUG(sjoin('Wrong nsppol:', itoa(nsppol)))
- end select
+ ! Set tolerance used to decide if a band is empty
+ ! and normalization of theta_mu_minus_esum. If nsppol == 2, qp_occ $\in [0,1]$
+ call get_fact_spin_tol_empty(nsppol, nspinor, tol_empty_in, fact_spin, tol_empty)
 
  ! Table for \Sigmax_ij matrix elements.
  Sigxij_tab => Sigp%Sigxij_tab(ikcalc, 1:nsppol)
@@ -533,7 +525,7 @@ subroutine calc_sigx_me(sigmak_ibz, ikcalc, bmin, bmax, cryst, qp_ebands, Sigp, 
            !   * If nspinor == 2, we evaluate <band_sum,up|jb,up> and <band_sum,dwn|jb,dwn>,
            !     and impose orthonormalization since npwwfn might be < npwvec.
            !   * Note the use of i_sz_resid and not i_sz, to account for the possibility
-           !     to have generalized KS basis set from hybrid
+           !     to have generalized KS basis set from hybrid.
 
            if (nspinor == 1) then
              rhotwg_ki(1, jb) = czero_gw
