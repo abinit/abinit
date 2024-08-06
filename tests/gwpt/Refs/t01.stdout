@@ -14,11 +14,11 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 13 Apr 2024.
-- ( at 18h04 )
+.Starting date : Tue 14 May 2024.
+- ( at 16h49 )
   
   Give name for output derivative database : 
- teph4zpr_1_DDB
+ t01_DDB
   Give short description of the derivative database :
  MgO phonons on 4x4x4 q-mesh
   Give number of input ddbs
@@ -644,5 +644,5 @@
  merge block #    1 from file MgO_eph_zpr/flow_zpr_mgo/w1/t30/outdata/out_DDB
  Final DDB has      8 blocks.
 -
-- Proc.   0 individual time (sec): cpu=          0.0  wall=          0.0
+- Proc.   0 individual time (sec): cpu=          0.0  wall=          0.1
 +mrgddb : the run completed successfully

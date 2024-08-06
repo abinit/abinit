@@ -1394,7 +1394,11 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, psps, pawtab, p
          ! Multiply by sqrt(vc(g))
          ! This renormalization is needed to make CC4S converge (work done by AlejandroG, FabienB, MatteoG)
          ug12_batch(:,idat2) = ug12_batch(:,idat2) * sqrt_vc(:) / sqrt(cryst%ucvol)
-         !if (m_istwfk == 2) ug12_batch(1,idat2) = real(ug12_batch(1,idat2)) / sqrt(two)
+         !FBru:
+         !  CC4S convention:
+         !    When using time-reversal, include a factor sqrt(2) for the non-zero G's
+         !    Then CC4S will perform the sum only over half the grid so all the G/=0 component should be counted twice.
+         if (m_istwfk == 2) ug12_batch(2:,idat2) = ug12_batch(2:,idat2) * sqrt(two)
        end do
        !write(std_out,*)" max(abs(ug12_batch)):", maxval(abs(ug12_batch(:,1:n2dat)))
 

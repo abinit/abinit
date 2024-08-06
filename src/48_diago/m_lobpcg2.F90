@@ -178,6 +178,9 @@ module m_lobpcg2
 #ifdef HAVE_LINALG_OPENBLAS_THREADS
     integer :: openblas_get_num_threads
 #endif
+#ifdef HAVE_LINALG_NVPL_THREADS
+    integer :: nvpl_get_max_threads
+#endif
 
     call timab(tim_init,1,tsec)
     lobpcg%neigenpairs = neigenpairs
@@ -201,6 +204,8 @@ module m_lobpcg2
     nthread =  mkl_get_max_threads()
 #elif HAVE_LINALG_OPENBLAS_THREADS
     nthread =  openblas_get_num_threads()
+#elif HAVE_LINALG_NVPL_THREADS
+    nthread =  nvpl_get_max_threads()
 #else
 !#elif defined HAVE_FC_GETENV
     !call getenv("OMP_NUM_THREADS",linalg_threads)
@@ -440,7 +445,7 @@ module m_lobpcg2
 
     if ( lobpcg%paral_kgb == 1 ) then
       call xgTransposer_constructor(lobpcg%xgTransposerX,lobpcg%X,lobpcg%XColsRows,nspinor,&
-        STATE_LINALG,TRANS_ALL2ALL,lobpcg%comm_rows,lobpcg%comm_cols,0,0)
+        STATE_LINALG,TRANS_ALL2ALL,lobpcg%comm_rows,lobpcg%comm_cols,0,0,gpu_option=lobpcg%gpu_option)
       call xgTransposer_copyConstructor(lobpcg%xgTransposerAX,lobpcg%xgTransposerX,&
         lobpcg%AX,lobpcg%AXColsRows,STATE_LINALG)
       call xgTransposer_copyConstructor(lobpcg%xgTransposerBX,lobpcg%xgTransposerX,&

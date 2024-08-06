@@ -105,7 +105,7 @@ diemac 9.0
 #%% max_nprocs = 4
 #%% [extra_info]
 #%% authors = M. Royo
-#%% keywords = DFPT, LONGWAVE
+#%% keywords = DFPT, LONGWAVE, MINIMAL
 #%% description = Dynamic Quadrupoles Calculation for AlAs
 #%% topics = longwave
 #%%<END TEST_INFO>
