@@ -51,6 +51,10 @@ module m_fock_getghc
 
  use, intrinsic :: iso_c_binding, only: c_loc
 
+#if defined(HAVE_GPU)
+ use m_gpu_toolbox
+#endif
+
  implicit none
 
  private
@@ -63,6 +67,85 @@ module m_fock_getghc
 
 contains
 !!***
+
+subroutine select_ndat_occ_for_gpu(ndat_occ,nband_k,ndat,npw,cplex_fock,nfftf,n4,n5,n6,natom,nspinor,usepaw,ieigen,optfor,optstr)
+
+!Arguments ------------------------------------
+! Scalars
+ integer,intent(in)     :: nband_k,ndat,npw,cplex_fock,nfftf,n4,n5,n6,natom,nspinor,usepaw,ieigen
+ logical,intent(in)     :: optfor,optstr
+ integer,intent(out)    :: ndat_occ
+
+!Local variables-------------------------------
+ integer :: i,ider
+ integer(kind=c_size_t) :: sum_mem,free_mem
+
+! *************************************************************************
+
+ ider=0
+
+#ifdef HAVE_GPU
+ call gpu_get_free_mem(free_mem)
+ free_mem = 0.95 * free_mem ! Cutting 5% out to be safe
+#endif
+
+ do i=1,30
+   if(modulo(nband_k,i)/=0) cycle
+   ndat_occ=nband_k/i
+   sum_mem = 0
+
+   ! rhor_munu
+   sum_mem = sum_mem + INT(cplex_fock,c_size_t)*nfftf*ndat_occ*ndat
+   ! rhog_munu
+   sum_mem = sum_mem + INT(2,c_size_t)*nfftf*ndat_occ*ndat
+   ! vfock
+   sum_mem = sum_mem + INT(cplex_fock,c_size_t)*nfftf*ndat_occ*ndat
+   ! occ
+   sum_mem = sum_mem + INT(ndat_occ,c_size_t)
+
+  !*Additional arrays in case of paw
+   if (usepaw==1) then
+     if ((optfor).and.(ieigen/=0)) then
+       ider=3
+       ! forout
+       sum_mem = sum_mem + INT(2,c_size_t)*npw*nspinor*ndat_occ
+     end if
+
+     if (optstr.and.(ieigen/=0)) then
+       ider=3
+       ! strout
+       sum_mem = sum_mem + INT(2,c_size_t)*npw*nspinor*ndat_occ
+     end if
+     ! grnhat_12
+     sum_mem = sum_mem + INT(2,c_size_t)*nfftf*nspinor**2*3*natom*(ider/3)*ndat_occ*ndat
+     ! gvnlxc
+     sum_mem = sum_mem + INT(2,c_size_t)*npw*nspinor*ndat_occ
+     ! rho12
+     sum_mem = sum_mem + INT(2,c_size_t)*nfftf*nspinor**2*ndat_occ*ndat
+     ! rho12 (paw_psipsi internal work array)
+     sum_mem = sum_mem + INT(2,c_size_t)*nfftf*nspinor**2*ndat_occ*ndat
+   end if
+
+   ! cwaveocc_r
+   sum_mem = sum_mem + INT(2,c_size_t)*n4*n5*n6*ndat_occ
+
+   sum_mem = sum_mem*dp
+
+   if(sum_mem < free_mem) exit
+ end do
+
+ if(sum_mem > free_mem) then
+   ABI_WARNING("Test case doesn't fit in GPU memory. Try to lower bandpp.")
+ end if
+!#ifdef DEBUG_VERBOSE
+ write(std_out,*) "-----------DEBUG fock_getghc%select_ndat_occ_for_gpu : "
+ write(std_out,'(A,F10.3,1x,A)') "Free GPU memory                : ", real(free_mem,dp)/(1024*1024), "MiB"
+ write(std_out,'(A,I4)')         "selected ndat_occ              : ", ndat_occ
+ write(std_out,'(A,F10.3,1x,A)') "Forecasted consumed GPU memory : ", real(sum_mem,dp)/(1024*1024), "MiB"
+ write(std_out,*) "-----------END DEBUG fock_getghc%select_ndat_occ_for_gpu : "
+!#endif
+
+ end subroutine select_ndat_occ_for_gpu
 
 !!****f* ABINIT/fock_getghc
 !! NAME
@@ -294,6 +377,11 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
 !* nband_k = number of bands at point k_j
    nband_k=fockbz%nbandocc_bz(jkpt,my_jsppol)
    ndat_occ=nband_k
+   if(gpu_option/=ABI_GPU_DISABLED) then
+     call select_ndat_occ_for_gpu(ndat_occ,nband_k,ndat,npw,cplex_fock,&
+&        nfftf,n4f,n5f,n6f,natom,nspinor,&
+&        fockcommon%usepaw,fockcommon%ieigen,fockcommon%optfor,fockcommon%optstr)
+   end if
 !* wtk = weight in BZ of this k point
    wtk=fockbz%wtk_bz(jkpt) !*sqrt(gs_ham%ucvol)
 !* jstwfk= how is stored the wavefunction
