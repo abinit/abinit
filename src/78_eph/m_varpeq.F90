@@ -57,10 +57,11 @@ module m_varpeq
  implicit none
 
  private
+
+ real(dp),private,parameter :: EN_SHIFT = onehalf*eV_Ha
 !!***
 
-!----------------------------------------------------------------------
-
+!----------------------------------------------------------------------4
 !!****t* m_varpeq/polstate_t
 !! NAME
 !!  polstate_t
@@ -84,6 +85,7 @@ module m_varpeq
   logical :: has_prev_grad = .false.
 
   real(dp), allocatable :: eig(:,:)
+  real(dp), allocatable :: g0(:)
 
   real(dp), allocatable :: my_qpts(:,:)
   real(dp), pointer :: my_kpts(:,:) => null()
@@ -667,9 +669,9 @@ subroutine varpeq_print(self)
      endif
 
      ! Final results
-     write(ab_out, '(a,es13.6,a)') "polaron binding energy = ", enpol, 'a.u.'
-     write(ab_out, '(a,es13.6,a)') "polaron localized state energy = ", eps, 'a.u.'
-     write(ab_out, '(a,es13.6,a)') "long-range divergence correction = ", self%e_frohl, 'a.u.'
+     write(ab_out, '(a,es13.6,a)') "polaron binding energy = ", enpol*Ha_eV, 'eV'
+     write(ab_out, '(a,es13.6,a)') "polaron localized state energy = ", eps*Ha_eV, 'eV.'
+     write(ab_out, '(a,es13.6,a)') "long-range divergence correction = ", self%e_frohl*Ha_eV, 'eV'
 
    enddo
 
@@ -891,7 +893,7 @@ subroutine varpeq_setup(self, dtfil)
 
    ! set all the A_nk to 0 outside the energy window
    if (self%erange_spin(spin) > tol12) then
-     call polstate%cut_a(self%erange_spin(spin) + onehalf*eV_Ha)
+     call polstate%cut_a(self%erange_spin(spin) + EN_SHIFT)
    endif
 
    ! FIXME: rewrite all the orthongonalization/normalization in the code
@@ -959,6 +961,9 @@ subroutine varpeq_solve(self)
  ! Variational Polaron Equations
  self%iter_rec_spin(:,:,:) = zero
 
+ ! Correction for the infrared Fr\"ohlich divergence
+ call self%avg_frohlich()
+
  do my_is=1,self%gstore%my_nspins
    spin = self%gstore%my_spins(my_is)
    polstate => self%polstate(my_is)
@@ -983,9 +988,6 @@ subroutine varpeq_solve(self)
    enddo
 
  enddo
-
- ! Correction for the infrared Fr\"ohlich divergence
- call self%avg_frohlich()
 
  ! Collect results from each polstate
  call self%collect()
@@ -1025,10 +1027,10 @@ subroutine varpeq_record(self, iter, my_is)
 
  select case(self%pkind)
  case ("electron")
-   psign = 1; shift = onehalf*eV_Ha
+   psign = 1; shift = EN_SHIFT
    !psign = 1; shift = self%gaps%cb_min(spin)
  case ("hole")
-   psign = -1; shift = onehalf*eV_Ha
+   psign = -1; shift = EN_SHIFT
    !psign = -1; shift = -self%gaps%vb_max(spin)
  end select
 
@@ -1139,6 +1141,8 @@ subroutine varpeq_init(self, gstore, dtset)
    ABI_MALLOC(polstate%my_prevgrad_a, (gqk%nb, gqk%my_nk))
    ABI_MALLOC(polstate%my_pcond, (gqk%nb, gqk%my_nk))
    ABI_MALLOC(polstate%my_b, (gqk%my_npert, gqk%my_nq))
+   ! correction for g at Gamma
+   ABI_MALLOC(polstate%g0, (3*gstore%cryst%natom))
 
    ABI_MALLOC(polstate%a_glob, (gqk%nb, gqk%glob_nk))
    ABI_MALLOC(polstate%grad_a_glob, (gqk%nb, gqk%glob_nk))
@@ -1156,12 +1160,12 @@ subroutine varpeq_init(self, gstore, dtset)
      ! we shift bands wrt band edge
    case ("electron")
      polstate%eig = &
-       gstore%ebands%eig(bstart:bstart+gqk%nb-1, :, spin) - self%gaps%cb_min(spin) + onehalf*eV_Ha
+       gstore%ebands%eig(bstart:bstart+gqk%nb-1, :, spin) - self%gaps%cb_min(spin) + EN_SHIFT
      !polstate%eig = gstore%ebands%eig(bstart:bstart+gqk%nb-1, :, spin)
    case ("hole")
      ! here we flip the valence bands to deal with the minimization process later on
      polstate%eig = &
-       -(gstore%ebands%eig(bstart:bstart+gqk%nb-1, :, spin) - self%gaps%vb_max(spin)) + onehalf*eV_Ha
+       -(gstore%ebands%eig(bstart:bstart+gqk%nb-1, :, spin) - self%gaps%vb_max(spin)) + EN_SHIFT
      !polstate%eig = -gstore%ebands%eig(bstart:bstart+gqk%nb-1, :, spin)
    end select
    ! set erange for each spin
@@ -1206,16 +1210,17 @@ end subroutine varpeq_init
 subroutine varpeq_avg_frohlich(self)
 
 !Arguments ------------------------------------
- class(varpeq_t), intent(inout) :: self
+ class(varpeq_t), target, intent(inout) :: self
 
 !Local variables-------------------------------
 !scalars
  type(ifc_type), pointer :: ifc
  type(crystal_t), pointer :: cryst
+ class(polstate_t), pointer :: polstate
  integer :: comm, my_rank, nproc, ierr
  integer :: ntheta, nphi, angl_size
  integer :: iang, iatom
- integer :: nu, natom3
+ integer :: nu, natom3, my_is
  real(dp) :: inv_qepsq, wqnu
  complex(dpc) :: cnum
 !arrays
@@ -1223,6 +1228,7 @@ subroutine varpeq_avg_frohlich(self)
  real(dp), allocatable :: phfreq(:), displ_cart(:, :, :, :)
  real(dp), allocatable :: qvers_cart(:, :)
  real(dp), allocatable :: angweight(:)
+ real(dp), allocatable :: e_frohl_mode(:)
  complex(dpc) :: cp3(3)
 
 !----------------------------------------------------------------------
@@ -1235,13 +1241,14 @@ subroutine varpeq_avg_frohlich(self)
 
  natom3 = 3*cryst%natom
  ABI_MALLOC(phfreq, (natom3))
+ ABI_MALLOC(e_frohl_mode, (natom3))
  ABI_MALLOC(displ_cart, (2, 3, cryst%natom, natom3))
 
  ntheta = self%frohl_ntheta
  nphi = 2*ntheta
  call ylm_angular_mesh(ntheta, nphi, angl_size, qvers_cart, angweight)
 
- self%e_frohl = zero
+ e_frohl_mode(:) = zero
  do iang=1,angl_size
    if (mod(iang, nproc) /= my_rank) cycle ! MPI parallelism inside comm.
 
@@ -1260,18 +1267,33 @@ subroutine varpeq_avg_frohlich(self)
      cnum = dot_product(qpt_cart, cp3)
      if (abs(cnum) < tol12) cycle
 
-     self%e_frohl = self%e_frohl + angweight(iang)*(abs(cnum)*inv_qepsq/wqnu)**2
+     e_frohl_mode(nu) = e_frohl_mode(nu) + angweight(iang)*(abs(cnum)*inv_qepsq/wqnu)**2
    enddo
  enddo
 
- call xmpi_sum(self%e_frohl, comm, ierr)
-
- self%e_frohl = self%e_frohl * &
+ call xmpi_sum(e_frohl_mode, comm, ierr)
+ e_frohl_mode(:) = e_frohl_mode(:) * &
    eight*pi/cryst%ucvol * (three / (four_pi * cryst%ucvol * self%gstore%nqbz))**third
+
+ self%e_frohl = sum(e_frohl_mode)
  ! for an electron polaron, the correction has to be negative
  if (self%pkind == "electron") self%e_frohl = -self%e_frohl
 
+
+ do my_is=1,self%gstore%my_nspins
+   polstate => self%polstate(my_is)
+
+   polstate%g0(:) = zero
+   do nu=4,natom3
+     wqnu = phfreq(nu)
+     polstate%g0(nu) = &
+       sqrt(polstate%nqbz * wqnu * e_frohl_mode(nu))
+   enddo
+
+ enddo
+
  ABI_FREE(phfreq)
+ ABI_FREE(e_frohl_mode)
  ABI_FREE(displ_cart)
  ABI_FREE(qvers_cart)
  ABI_FREE(angweight)
@@ -1313,6 +1335,7 @@ subroutine polstate_free(self)
  ABI_SFREE(self%my_prevgrad_a)
  ABI_SFREE(self%my_pcond)
  ABI_SFREE(self%orth_a)
+ ABI_SFREE(self%g0)
 
  ABI_SFREE(self%a_glob)
  ABI_SFREE(self%b_glob)
@@ -1526,7 +1549,7 @@ real(dp) function polstate_get_linemin_param(self) result(theta)
 !scalars
  class(gqk_t), pointer :: gqk
  integer :: ierr
- integer :: my_iq, my_pert
+ integer :: my_iq, my_pert, pert_glob
  integer :: my_ik, ik_ibz, ik_forw, ib, jb
  real(dp) :: term_sin2, term_sincos
  complex(dp) :: a_from, a_forw, d_from, d_forw
@@ -1534,7 +1557,7 @@ real(dp) function polstate_get_linemin_param(self) result(theta)
  complex(dp) :: b
 !arrays
  integer, allocatable :: kpq_map(:, :)
- real(dp) :: kpt(3), kpq(3)
+ real(dp) :: kpt(3), qpt(3), kpq(3)
 
 !----------------------------------------------------------------------
 
@@ -1550,6 +1573,7 @@ real(dp) function polstate_get_linemin_param(self) result(theta)
    !call self%get_mapping('kq', kpt, kpq_map)
 
    do my_iq=1,gqk%my_nq
+     qpt(:) = self%my_qpts(:, my_iq)
 
      !ik_forw = kpq_map(1, my_iq)
 
@@ -1564,7 +1588,24 @@ real(dp) function polstate_get_linemin_param(self) result(theta)
          a_forw = self%a_glob(jb, ik_forw)
          d_forw = self%grad_a_glob(jb, ik_forw)
          do my_pert=1,gqk%my_npert
-           g_forw = gqk%my_g(my_pert, jb, my_iq, ib, my_ik)
+           pert_glob = gqk%my_pert_start + my_pert - 1
+
+           if (all(abs(qpt) < tol6)) then
+           ! Gamma
+             if (ib == jb) then
+               !g_forw = self%g0(pert_glob)
+               g_forw = gqk%my_g(my_pert, jb, my_iq, ib, my_ik) + &
+                 self%g0(pert_glob)
+             else
+               !g_forw = self%g0(pert_glob)
+               g_forw = gqk%my_g(my_pert, jb, my_iq, ib, my_ik)
+             endif
+
+           else
+             g_forw = gqk%my_g(my_pert, jb, my_iq, ib, my_ik)
+           endif
+
+           !g_forw = gqk%my_g(my_pert, jb, my_iq, ib, my_ik)
            b = self%my_b(my_pert, my_iq)
 
            term_sin2 = term_sin2 + real(d_from*conjg(b)*g_forw*conjg(d_forw))
@@ -1630,6 +1671,7 @@ subroutine polstate_get_grad_a(self)
  integer :: ierr
  integer :: my_iq, my_pert
  integer :: my_ik, ik_ibz, ik_forw, ik_back, ib, jb
+ integer :: pert_glob
  complex(dp) :: a_forw, a_back
  complex(dp) :: g_forw, g_back
  complex(dp) :: b
@@ -1674,8 +1716,25 @@ subroutine polstate_get_grad_a(self)
            a_forw = self%a_glob(jb, ik_forw)
 
            do my_pert=1,gqk%my_npert
+             pert_glob = gqk%my_pert_start + my_pert - 1
              b = self%my_b(my_pert, my_iq)
-             g_forw = gqk%my_g(my_pert, jb, my_iq, ib, my_ik)
+
+             if (all(abs(qpt) < tol6)) then
+             ! Gamma
+               if (ib == jb) then
+                 !g_forw = self%g0(pert_glob)
+                 g_forw = gqk%my_g(my_pert, jb, my_iq, ib, my_ik) + &
+                   self%g0(pert_glob)
+               else
+                 !g_forw = self%g0(pert_glob)
+                 g_forw = gqk%my_g(my_pert, jb, my_iq, ib, my_ik)
+               endif
+
+             else
+               g_forw = gqk%my_g(my_pert, jb, my_iq, ib, my_ik)
+             endif
+
+             !g_forw = gqk%my_g(my_pert, jb, my_iq, ib, my_ik)
 
              self%my_grad_a(ib, my_ik) = self%my_grad_a(ib, my_ik) + a_forw*b*conjg(g_forw)
            enddo
@@ -1690,8 +1749,25 @@ subroutine polstate_get_grad_a(self)
            a_back = self%a_glob(jb, ik_back)
 
            do my_pert=1,gqk%my_npert
+             pert_glob = gqk%my_pert_start + my_pert - 1
              b = self%my_b(my_pert, my_iq)
-             g_back= gq_gathered(my_pert, ib, jb, ik_back)
+
+             if (all(abs(qpt) < tol6)) then
+             ! Gamma
+               if (ib == jb) then
+                 !g_back = self%g0(pert_glob)
+                 g_back = gq_gathered(my_pert, ib, jb, ik_back) + &
+                   self%g0(pert_glob)
+               else
+                 !g_back = self%g0(pert_glob)
+                 g_back = gq_gathered(my_pert, ib, jb, ik_back)
+               endif
+
+             else
+               g_back = gq_gathered(my_pert, ib, jb, ik_back)
+             endif
+
+             !g_back= gq_gathered(my_pert, ib, jb, ik_back)
 
              self%my_grad_a(ib, my_ik) = self%my_grad_a(ib, my_ik) + a_back*conjg(b)*g_back
            enddo
@@ -1794,10 +1870,11 @@ real(dp) function polstate_get_enelph(self) result(enelph)
 !scalars
  class(gqk_t), pointer :: gqk
  integer :: ierr, my_iq, my_pert, my_ik, ik_forw, ib, jb
+ integer :: pert_glob
  complex(dp) :: a_from, a_forw, g_forw, b
 !arrays
  integer, allocatable :: kpq_map(:, :)
- real(dp) :: kpt(3), kpq(3)
+ real(dp) :: kpt(3), qpt(3), kpq(3)
 
 !----------------------------------------------------------------------
 
@@ -1811,6 +1888,7 @@ real(dp) function polstate_get_enelph(self) result(enelph)
    !call self%get_mapping('kq', kpt, kpq_map)
 
    do my_iq=1,gqk%my_nq
+     qpt(:) = self%my_qpts(:, my_iq)
 
      !ik_forw = kpq_map(1, my_iq)
 
@@ -1823,7 +1901,25 @@ real(dp) function polstate_get_enelph(self) result(enelph)
        do jb=1,gqk%nb
          a_forw = self%a_glob(jb, ik_forw)
          do my_pert=1,gqk%my_npert
-           g_forw = gqk%my_g(my_pert, jb, my_iq, ib, my_ik)
+           pert_glob = gqk%my_pert_start + my_pert - 1
+
+           if (all(abs(qpt) < tol6)) then
+           ! Gamma
+             if (ib == jb) then
+               !g_forw = self%g0(pert_glob)
+               g_forw = gqk%my_g(my_pert, jb, my_iq, ib, my_ik) + &
+                 self%g0(pert_glob)
+             else
+               !g_forw = self%g0(pert_glob)
+               g_forw = gqk%my_g(my_pert, jb, my_iq, ib, my_ik)
+             endif
+
+           else
+             g_forw = gqk%my_g(my_pert, jb, my_iq, ib, my_ik)
+           endif
+
+           !g_forw = gqk%my_g(my_pert, jb, my_iq, ib, my_ik)
+
            b = self%my_b(my_pert, my_iq)
 
            enelph = enelph + real(a_from*conjg(b)*g_forw*conjg(a_forw))
@@ -1942,6 +2038,7 @@ subroutine polstate_get_b_from_a(self)
 !scalars
  class(gqk_t), pointer :: gqk
  integer :: ierr, my_iq, my_pert, my_ik, ik_forw, ib, jb
+ integer :: pert_glob
  complex(dp) :: a_from, a_forw, g_forw, b_tmp
 !arrays
  integer, allocatable :: qpk_map(:, :)
@@ -1958,6 +2055,7 @@ subroutine polstate_get_b_from_a(self)
    !call self%get_mapping('qk', qpt, qpk_map)
 
    do my_pert=1,gqk%my_npert
+     pert_glob = gqk%my_pert_start + my_pert - 1
 
      if (gqk%my_wnuq(my_pert, my_iq) == zero) then
        self%my_b(my_pert, my_iq) = zero
@@ -1977,7 +2075,23 @@ subroutine polstate_get_b_from_a(self)
          a_from = self%my_a(ib, my_ik)
          do jb=1,gqk%nb
            a_forw = self%a_glob(jb, ik_forw)
-           g_forw = gqk%my_g(my_pert, jb, my_iq, ib, my_ik)
+
+           if (all(abs(qpt) < tol6)) then
+           ! Gamma
+             if (ib == jb) then
+               !g_forw = self%g0(pert_glob)
+               g_forw = gqk%my_g(my_pert, jb, my_iq, ib, my_ik) + &
+                 self%g0(pert_glob)
+             else
+               !g_forw = self%g0(pert_glob)
+               g_forw = gqk%my_g(my_pert, jb, my_iq, ib, my_ik)
+             endif
+
+           else
+             g_forw = gqk%my_g(my_pert, jb, my_iq, ib, my_ik)
+           endif
+
+           !g_forw = gqk%my_g(my_pert, jb, my_iq, ib, my_ik)
 
            b_tmp = b_tmp + a_from*g_forw*conjg(a_forw)
          enddo
