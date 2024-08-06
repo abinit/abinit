@@ -111,7 +111,7 @@ module m_parser
  !public :: chkint_prt
 
  public :: prttagm             ! Print the content of intarr or dprarr.
- public :: prttagm_images      ! Extension to prttagm to include the printing of images information.
+ public :: prttagm_images      ! Extension to prttagm to include the printing of images  information.
  public :: chkvars_in_string   ! Analyze variable names in string. Abort if name is not recognized.
  public :: get_acell_rprim     ! Get acell and rprim from string
 
@@ -175,8 +175,7 @@ module m_parser
 
  public :: geo_from_abivar_string   ! Build object form abinit variable
  public :: geo_from_poscar_path     ! Build object from POSCAR filepath.
-
- public :: intagm_img   !  Read input file variables according to images path definition (1D array)
+ public :: intagm_img               ! Read input file variables according to images path definition (1D array)
 
  interface intagm_img
    module procedure intagm_img_1D

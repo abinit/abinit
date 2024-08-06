@@ -731,15 +731,13 @@ end function abifile_from_fform
 !!  check_fform
 !!
 !! FUNCTION
-!!   This function is used ifdef DEBUG_MODE. It tests whether the value of fform
-!!   is registered in all_abifiles.
+!!   This function is used ifdef DEBUG_MODE. It tests whether the value of fform is registered in all_abifiles.
 !!
 !! SOURCE
 
 subroutine check_fform(fform)
 
 !Local variables-------------------------------
-!scalars
  integer,intent(in) :: fform
 #ifdef DEBUG_MODE
  type(abifile_t) :: abifile
@@ -2819,7 +2817,7 @@ end function read_first_record
 !!
 !! SOURCE
 
-subroutine hdr_fort_read(Hdr,unit,fform,rewind)
+subroutine hdr_fort_read(Hdr, unit, fform, rewind)
 
 !Arguments ------------------------------------
  integer,intent(out) :: fform

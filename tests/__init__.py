@@ -1004,4 +1004,5 @@ KNOWN_KEYWORDS = {
     "FOLD2BLOCH": "Fold2Bloch tests.",
     "LWF": "Lattice Wannier function tests",
     "RTTDDFT": "Real-time time-dependent DFT",
+    "MINIMAL": "Quick set of tests covering all abinit optdriver and executables",
 }

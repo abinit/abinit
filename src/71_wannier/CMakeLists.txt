@@ -3,10 +3,13 @@
 #
 add_library(71_wannier STATIC
   defs_wannier90.F90
+  m_abstract_wf.F90
   m_mlwfovlp.F90
   m_mlwfovlp_qp.F90
   m_scdm_math.F90
   m_wannier_builder.F90
+  m_wannier_io.F90
+  m_wfd_wannier.F90
   m_wann_netcdf.F90
   )
 
