@@ -1,11 +1,11 @@
-# parallel version of v10[04]
+# Inspired from v9[141]
 # AlP solid
 
-#ndtset 4
-ndtset 3
-jdtset 2 3 4
+ndtset 4
+#ndtset 3
+#jdtset 2 3 4
 
-npband 4
+#npband 4
 
 wfoptalg1   0
 wfoptalg2  14
@@ -63,19 +63,15 @@ pseudos="P.xml, Al.xml"
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% need_cpp_vars = HAVE_DFTI
+#%% need_cpp_vars = !HAVE_DFTI
 #%% [files]
 #%% files_to_test = 
-#%%   t44.abo, tolnlines=  0, tolabs=  0, tolrel= 0, fld_options = -ridiculous
+#%%   t06.abo, tolnlines=  0, tolabs=  0, tolrel= 0, fld_options = -ridiculous
 #%% [paral_info]
-#%% nprocs_to_test = 4
-#%% max_nprocs = 4
-#%% [NCPU_4]
-#%% files_to_test = 
-#%%   t44_MPI4.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -ridiculous;
+#%% max_nprocs = 1
 #%% [extra_info]
 #%% authors = L. Baguet
 #%% keywords = PAW
-#%% description = Same as v9[208] but with npband=4. Compare chebfi2 with respect to other algorithms (istwfk>1).
+#%% description = Compare chebfi2 with respect to other algorithms (istwfk>1). Should give same results than v9[206].
 #%%<END TEST_INFO>
  
