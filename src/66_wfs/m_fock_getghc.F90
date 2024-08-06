@@ -470,20 +470,19 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
        end do ! idat
      else if(gpu_option==ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
-       !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(5) &
-       !$OMP& MAP(to:rhor_munu,cwavef_r,cwaveocc_r) PRIVATE(ind,imcwf,recwf,recwocc,imcwocc)
+       !$OMP TARGET TEAMS DISTRIBUTE COLLAPSE(2) &
+       !$OMP& MAP(to:rhor_munu,cwavef_r,cwaveocc_r) PRIVATE(idat,idat_occ)
        do idat=1,ndat
        do idat_occ=1,ndat_occ
+         !$OMP PARALLEL DO COLLAPSE(3) PRIVATE(ind,i3,i2,i1)
          do i3=1,n3f
            do i2=1,n2f
              do i1=1,n1f
                ind=i1+(i2-1)*n1f+(i3-1)*n2f*n1f
-               recwf  =cwavef_r(1,i1,i2,(idat-1)*n3f+i3)
-               imcwf  =cwavef_r(2,i1,i2,(idat-1)*n3f+i3)
-               recwocc=cwaveocc_r(1,i1,i2,i3,idat_occ)
-               imcwocc=cwaveocc_r(2,i1,i2,i3,idat_occ)
-               rhor_munu(1,ind,idat_occ,idat)= recwocc*recwf+imcwocc*imcwf
-               rhor_munu(2,ind,idat_occ,idat)= recwocc*imcwf-imcwocc*recwf
+               rhor_munu(1,ind,idat_occ,idat)= cwaveocc_r(1,i1,i2,i3,idat_occ)*cwavef_r(1,i1,i2,(idat-1)*n3f+i3)&
+                                              +cwaveocc_r(2,i1,i2,i3,idat_occ)*cwavef_r(2,i1,i2,(idat-1)*n3f+i3)
+               rhor_munu(2,ind,idat_occ,idat)= cwaveocc_r(1,i1,i2,i3,idat_occ)*cwavef_r(2,i1,i2,(idat-1)*n3f+i3)&
+                                              -cwaveocc_r(2,i1,i2,i3,idat_occ)*cwavef_r(1,i1,i2,(idat-1)*n3f+i3)
              end do ! i1
            end do ! i2
          end do ! i3
@@ -523,10 +522,11 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
          end do ! idat
        else if(gpu_option==ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
-         !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(3) &
+         !$OMP TARGET TEAMS DISTRIBUTE COLLAPSE(2) &
          !$OMP& MAP(to:rhor_munu,rho12) PRIVATE(idat,idat_occ)
          do idat=1,ndat
          do idat_occ=1,ndat_occ
+         !$OMP PARALLEL DO PRIVATE(ifft)
          do ifft=1,nfftf
            rhor_munu(1,ifft,idat_occ,idat)=rhor_munu(1,ifft,idat_occ,idat)+rho12(1,ifft,nspinor,idat_occ,idat)
            rhor_munu(2,ifft,idat_occ,idat)=rhor_munu(2,ifft,idat_occ,idat)-rho12(2,ifft,nspinor,idat_occ,idat)
@@ -600,10 +600,11 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
        end do ! idat
      else if(gpu_option==ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
-       !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(3) &
-       !$OMP& MAP(to:rhog_munu,vqg)
+       !$OMP TARGET TEAMS DISTRIBUTE COLLAPSE(2) &
+       !$OMP& MAP(to:rhog_munu,vqg) PRIVATE(idat,idat_occ)
        do idat=1,ndat
        do idat_occ=1,ndat_occ
+       !$OMP PARALLEL DO PRIVATE(ifft)
        do ifft=1,nfftf
          rhog_munu(1,ifft,idat_occ,idat) = rhog_munu(1,ifft,idat_occ,idat) * vqg(ifft)
          rhog_munu(2,ifft,idat_occ,idat) = rhog_munu(2,ifft,idat_occ,idat) * vqg(ifft)
@@ -987,22 +988,23 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
      else if(gpu_option==ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
        do idat_occ=1,ndat_occ
-       !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(4) &
-       !$OMP& MAP(to:vlocpsi_r) MAP(to:cwaveocc_r,occ,vfock) PRIVATE(ind,recwocc,imcwocc,revloc,imvloc)
-       do idat=1,ndat
-       do i3=1,ngfftf(3)
-         do i2=1,ngfftf(2)
-           do i1=1,ngfftf(1)
-             ind=i1+(i2-1)*ngfftf(1)+(i3-1)*ngfftf(2)*ngfftf(1)
-             revloc=vfock(2*ind-1,idat_occ,idat) ; imvloc=vfock(2*ind,idat_occ,idat)
-             recwocc=cwaveocc_r(1,i1,i2,i3,idat_occ)
-             imcwocc=cwaveocc_r(2,i1,i2,i3,idat_occ)
-             vlocpsi_r(2*ind-1,idat)=vlocpsi_r(2*ind-1,idat)-(revloc*recwocc-imvloc*imcwocc)*occ(idat_occ)*wtk
-             vlocpsi_r(2*ind  ,idat)=vlocpsi_r(2*ind  ,idat)-(revloc*imcwocc+imvloc*recwocc)*occ(idat_occ)*wtk
+         !$OMP TARGET TEAMS DISTRIBUTE &
+         !$OMP& MAP(to:vlocpsi_r) MAP(to:cwaveocc_r,occ,vfock) PRIVATE(idat)
+         do idat=1,ndat
+           !$OMP PARALLEL DO COLLAPSE(3) PRIVATE(ind,recwocc,imcwocc,revloc,imvloc,i3,i2,i1)
+           do i3=1,ngfftf(3)
+             do i2=1,ngfftf(2)
+               do i1=1,ngfftf(1)
+                 ind=i1+(i2-1)*ngfftf(1)+(i3-1)*ngfftf(2)*ngfftf(1)
+                 revloc=vfock(2*ind-1,idat_occ,idat) ; imvloc=vfock(2*ind,idat_occ,idat)
+                 recwocc=cwaveocc_r(1,i1,i2,i3,idat_occ)
+                 imcwocc=cwaveocc_r(2,i1,i2,i3,idat_occ)
+                 vlocpsi_r(2*ind-1,idat)=vlocpsi_r(2*ind-1,idat)-(revloc*recwocc-imvloc*imcwocc)*occ(idat_occ)*wtk
+                 vlocpsi_r(2*ind  ,idat)=vlocpsi_r(2*ind  ,idat)-(revloc*imcwocc+imvloc*recwocc)*occ(idat_occ)*wtk
+               end do
+             end do
            end do
-         end do
-       end do
-       end do ! idat
+         end do ! idat
        end do ! idat_occ
        !$OMP TARGET UPDATE FROM(vlocpsi_r)
 #endif
