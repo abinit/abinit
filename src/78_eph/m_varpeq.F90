@@ -1287,7 +1287,7 @@ subroutine varpeq_avg_frohlich(self)
    do nu=4,natom3
      wqnu = phfreq(nu)
      polstate%g0(nu) = &
-       sqrt(polstate%nqbz * wqnu * e_frohl_mode(nu))
+       sqrt(polstate%nqbz * wqnu * e_frohl_mode(nu) / two)
    enddo
 
  enddo
