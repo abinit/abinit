@@ -21,6 +21,8 @@ nstep  100
 
 nline 4
 
+istwfk *1
+
 ##### CONVERGENCE PARAMETERS
 ecut 4
 pawecutdg 8
