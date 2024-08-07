@@ -1432,7 +1432,8 @@ subroutine polstate_update_pcond(self, factor, e_fr)
  gqk => self%gqk
 
  if ((self%eps) > zero) then
-   local_eps = zero
+   !local_eps = zero
+   local_eps = -factor*self%eps
  else
    local_eps = factor*self%eps
  endif
@@ -1493,13 +1494,13 @@ subroutine polstate_get_conjgrad_a(self, orth)
    !beta_den = sum(conjg(self%my_prev_pcgrad(:,:))*self%my_prevgrad_a(:,:))
 
    ! Polak-Ribiere
-   !beta_num = &
-   !  sum(conjg(self%my_pcgrad_a(:,:))*(self%my_grad_a(:,:) - self%my_prevgrad_a(:,:)))
-   !beta_den = sum(conjg(self%my_prev_pcgrad(:,:))*self%my_prevgrad_a(:,:))
+   beta_num = &
+     sum(conjg(self%my_pcgrad_a(:,:))*(self%my_grad_a(:,:) - self%my_prevgrad_a(:,:)))
+   beta_den = sum(conjg(self%my_prev_pcgrad(:,:))*self%my_prevgrad_a(:,:))
 
    ! Hestenes-Stiefel
-   beta_num = sum(conjg(self%my_pcgrad_a(:,:))*(self%my_grad_a(:,:) - self%my_prevgrad_a(:,:)))
-   beta_den = sum(conjg(-self%my_prev_cjgrad(:,:))*(self%my_grad_a(:,:) - self%my_prevgrad_a(:,:)))
+   !beta_num = sum(conjg(self%my_pcgrad_a(:,:))*(self%my_grad_a(:,:) - self%my_prevgrad_a(:,:)))
+   !beta_den = sum(conjg(-self%my_prev_cjgrad(:,:))*(self%my_grad_a(:,:) - self%my_prevgrad_a(:,:)))
 
    ! Dai Yuan
    !beta_num = sum(conjg(self%my_pcgrad_a(:,:))*self%my_grad_a(:,:))
@@ -1508,8 +1509,9 @@ subroutine polstate_get_conjgrad_a(self, orth)
    call xmpi_sum(beta_num, gqk%kpt_comm%value, ierr)
    call xmpi_sum(beta_den, gqk%kpt_comm%value, ierr)
    beta = beta_num/beta_den
+   if (abs(aimag(beta)) < tol6) beta = real(beta)
 
-   !write(ab_out, *) "debug: beta", beta
+   write(ab_out, *) "debug: beta", beta
 
    self%my_cjgrad(:,:) = self%my_pcgrad_a(:,:) + beta*self%my_prev_cjgrad(:,:)
    self%my_prev_cjgrad(:,:) = self%my_cjgrad(:,:)
