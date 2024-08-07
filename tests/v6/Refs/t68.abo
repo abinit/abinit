@@ -1,6 +1,6 @@
 
-.Version 9.11.2 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 10.1.4.3 of ABINIT, released Jun 2024.
+.(sequential version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2024 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 15 Jul 2023.
-- ( at 12h03 )
+.Starting date : Tue 23 Jul 2024.
+- ( at 22h18 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v6_t68-t69/t68.abi
+- input  file    -> /home/buildbot/ABINIT3/alps_gnu_9.3_serial/antonius_fixeigr2d/tests/TestBot_MPI1/v6_t68-t69/t68.abi
 - output file    -> t68.abo
 - root for input  files -> t68i
 - root for output files -> t68o
@@ -159,8 +159,8 @@ meta: {optdriver: 0, ionmov: 2, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     20.000   => boxcut(ratio)=   2.11938
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosHGH_pwteter/1h.1.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosHGH_pwteter/1h.1.hgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/alps_gnu_9.3_serial/antonius_fixeigr2d/tests/Psps_for_tests/PseudosHGH_pwteter/1h.1.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/alps_gnu_9.3_serial/antonius_fixeigr2d/tests/Psps_for_tests/PseudosHGH_pwteter/1h.1.hgh
 - Hartwigsen-Goedecker-Hutter psp for H,  from PRB58, 3641 (1998)
 -  1.00000   1.00000     10605                znucl, zion, pspdat
     3    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1086,7 +1086,7 @@ tolerances: {tolwfr: 1.00E-18, }
     (2DErelax=   -9.8320028693E+01 Ha. 2DEnonrelax=    9.8220030183E+01 Ha)
     (  non-var. 2DEtotal :   -9.9998507758E-02 Ha)
 
- Components of second-order derivatives of the electronic energy, EIGR2D.
+ Components of second-order derivatives of the electronic energy, EIGR2D, in Ha unit.
  For automatic tests, printing the matrix for the first k-point, first band, first atom.
    1   1   1   1   -5.2972624402E+01    0.0000000000E+00
    1   1   2   1    0.0000000000E+00    0.0000000000E+00
@@ -1348,10 +1348,68 @@ P          mk1mem           1
  and a postprocessing based on the final acell, rprim, and xred.
  More details in the log file.
 
+- Total cpu        time (s,m,h):          7.6        0.13      0.002
+- Total wall clock time (s,m,h):          7.7        0.13      0.002
+-
+- For major independent code sections, cpu and wall times (sec),
+-  as well as % of the time and number of calls for node 0
+-
+-<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = 0>
+- cpu_time =            7.6, wall_time =            7.7
+-
+- routine                                    cpu     %          wall   %        number of calls Gflops    Speedup Efficacity
+-                                                                                (-1=no count)
+- fourwf%(pot)                              2.602  34.3         2.620  34.0           1070      -1.00        0.99       0.99
+- fourdp                                    0.793  10.4         0.794  10.3            466      -1.00        1.00       1.00
+- ewald                                     0.497   6.5         0.501   6.5              5      -1.00        0.99       0.99
+- stress                                    0.382   5.0         0.383   5.0              5      -1.00        1.00       1.00
+- xc:pot/=fourdp                            0.363   4.8         0.371   4.8            174      -1.00        0.98       0.98
+- ewald2 (+vdw_dftd)                        0.325   4.3         0.327   4.2              5      -1.00        1.00       1.00
+- fourwf%(G->r)                             0.275   3.6         0.275   3.6            180      -1.00        1.00       1.00
+- dfpt_cgwf-O(npw)                          0.144   1.9         0.135   1.8             -1      -1.00        1.07       1.07
+- timing timab                              0.109   1.4         0.109   1.4             10      -1.00        1.00       1.00
+- dfpt_vtorho (1)                           0.107   1.4         0.111   1.4             60      -1.00        0.96       0.96
+- projbd                                    0.107   1.4         0.104   1.4           1692      -1.00        1.03       1.03
+- get_dtsets_pspheads                       0.101   1.3         0.102   1.3              1      -1.00        1.00       1.00
+- dfpt_vtowfk(contrib)                      0.072   0.9         0.073   0.9             -1      -1.00        0.98       0.98
+- dfpt_vtorho-kpt loop                      0.065   0.9         0.071   0.9             60      -1.00        0.92       0.92
+- getgh1c_setup                             0.063   0.8         0.065   0.8             60      -1.00        0.96       0.96
+- fourwf%(den)                              0.047   0.6         0.048   0.6             43      -1.00        0.98       0.98
+- getghc(/=fourXX,nonlop,fock_XX)           0.046   0.6         0.043   0.6             -1      -1.00        1.06       1.06
+- others (143)                              0.217   2.9         0.215   2.8             -1      -1.00        1.01       1.01
+-<END_TIMER>
+-
+- subtotal                                  6.315  83.2         6.347  82.4                                  1.00       1.00
 
-- Timing analysis has been suppressed with timopt=0
+- For major independent code sections, cpu and wall times (sec),
+- as well as % of the total time and number of calls 
 
+-<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = world>
+- cpu_time =           7.6, wall_time =           7.7
+-
+- routine                                    cpu     %          wall   %        number of calls Gflops    Speedup Efficacity
+-                                                                                (-1=no count)
+- fourwf%(pot)                              2.602  34.3         2.620  34.0           1070      -1.00        0.99       0.99
+- fourdp                                    0.793  10.4         0.794  10.3            466      -1.00        1.00       1.00
+- ewald                                     0.497   6.5         0.501   6.5              5      -1.00        0.99       0.99
+- stress                                    0.382   5.0         0.383   5.0              5      -1.00        1.00       1.00
+- xc:pot/=fourdp                            0.363   4.8         0.371   4.8            174      -1.00        0.98       0.98
+- ewald2 (+vdw_dftd)                        0.325   4.3         0.327   4.2              5      -1.00        1.00       1.00
+- fourwf%(G->r)                             0.275   3.6         0.275   3.6            180      -1.00        1.00       1.00
+- dfpt_cgwf-O(npw)                          0.144   1.9         0.135   1.8             -1      -1.00        1.07       1.07
+- timing timab                              0.109   1.4         0.109   1.4             10      -1.00        1.00       1.00
+- dfpt_vtorho (1)                           0.107   1.4         0.111   1.4             60      -1.00        0.96       0.96
+- projbd                                    0.107   1.4         0.104   1.4           1692      -1.00        1.03       1.03
+- get_dtsets_pspheads                       0.101   1.3         0.102   1.3              1      -1.00        1.00       1.00
+- dfpt_vtowfk(contrib)                      0.072   0.9         0.073   0.9             -1      -1.00        0.98       0.98
+- dfpt_vtorho-kpt loop                      0.065   0.9         0.071   0.9             60      -1.00        0.92       0.92
+- getgh1c_setup                             0.063   0.8         0.065   0.8             60      -1.00        0.96       0.96
+- fourwf%(den)                              0.047   0.6         0.048   0.6             43      -1.00        0.98       0.98
+- getghc(/=fourXX,nonlop,fock_XX)           0.046   0.6         0.043   0.6             -1      -1.00        1.06       1.06
+- others (143)                              0.217   2.9         0.215   2.8             -1      -1.00        1.01       1.01
+-<END_TIMER>
 
+- subtotal                                  6.315  83.2         6.347  82.4                                  1.00       1.00
 
 ================================================================================
 
@@ -1444,10 +1502,10 @@ P          mk1mem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          6.0  wall=          6.2
+- Proc.   0 individual time (sec): cpu=          7.6  wall=          7.7
 
 ================================================================================
 
  Calculation completed.
-.Delivered   8 WARNINGs and  12 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          6.0  wall=          6.2
+.Delivered   9 WARNINGs and  12 COMMENTs to log file.
++Overall time at end (sec) : cpu=          7.6  wall=          7.7

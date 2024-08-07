@@ -31,7 +31,7 @@
 #%% max_nprocs = 4
 #%% [extra_info]
 #%% authors = Y. Gillet 
-#%% keywords = optic
+#%% keywords = optic, MINIMAL
 #%% description = Silicon, 'optic' test with scissor
 #%% topics = Optic
 #%%<END TEST_INFO>

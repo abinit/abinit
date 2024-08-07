@@ -3379,6 +3379,9 @@ Variable(
 Compute weight of configuration computed during CTQMC calculations.
 For example, for a calculation on $d$ orbitals, the calculations
 gives the weight of 0,1,2,3,4,5,6,7,8,9 and 10 electrons configurations.
+  * 0 --> Nothing done
+  * 1 --> Calculation of weight of configurations
+  * 2 --> Calculation of local magnetic susceptibilty
 """,
 ),
 
@@ -16195,8 +16198,6 @@ Like a _DEN file, it can be analyzed by cut3d.
 The file structure of this unformatted output file is described in [[help:abinit#denfile|this section]].
 Note that the computation of the kinetic energy density must be activated,
 thanks to the input variable [[usekden]].
-Please note that kinetic energy density is **not** yet implemented in the case
-of PAW ([[usepaw]] = 1) calculations.
 """,
 ),
 
