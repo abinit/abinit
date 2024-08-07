@@ -965,22 +965,23 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
 #ifdef HAVE_OPENMP_OFFLOAD
            ABI_MALLOC(strdat, (3,3,ndat_occ,ndat))
            strdat=zero
-           !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(4) MAP(tofrom:strdat) &
+           !$OMP TARGET TEAMS DISTRIBUTE COLLAPSE(4) MAP(tofrom:strdat) &
            !$OMP& MAP(to:vfock,grnhat_12,atom_nfgd,atom_rfgd,atom_ifftsph) &
-           !$OMP& PRIVATE(ifft,ind,iatom) PRIVATE(idat,idat_occ,idir,idir1,esum)
+           !$OMP& PRIVATE(idat,idat_occ,idir,idir1,esum,iatom)
            do idat=1,ndat
              do idat_occ=1,ndat_occ
                do idir=1,3
                  do idir1=1,3
-                   esum=0
                    do iatom=1,natom
+                     esum=0
+                     !$OMP PARALLEL DO PRIVATE(ifft,ind) REDUCTION(+:esum)
                      do ifft=1,atom_nfgd(iatom)
                        ind=atom_ifftsph(ifft,iatom)
                        esum=esum+(vfock(2*ind-1,idat_occ,idat)*grnhat_12(1,ind,1,idir,iatom,idat_occ,idat)-&
       &                   vfock(2*ind,idat_occ,idat)*grnhat_12(2,ind,1,idir,iatom,idat_occ,idat))*atom_rfgd(idir1,ifft,iatom)
                      end do
+                     strdat(idir,idir1,idat_occ,idat)=strdat(idir,idir1,idat_occ,idat)+esum
                    end do
-                   strdat(idir,idir1,idat_occ,idat)=esum
                  end do
                end do
              end do ! idat_occ
