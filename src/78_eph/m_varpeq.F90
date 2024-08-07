@@ -58,7 +58,7 @@ module m_varpeq
 
  private
 
- real(dp),private,parameter :: EN_SHIFT = onehalf*eV_Ha
+ real(dp),private,parameter :: EN_SHIFT = zero*eV_Ha
 !!***
 
 !----------------------------------------------------------------------4
@@ -99,8 +99,13 @@ module m_varpeq
 
   complex(dp), allocatable :: my_grad_a(:,:)
   complex(dp), allocatable :: grad_a_glob(:,:)
+  complex(dp), allocatable :: cjgrad_a_glob(:,:)
 
   complex(dp), allocatable :: my_prevgrad_a(:,:)
+  complex(dp), allocatable :: my_pcgrad_a(:,:)
+  complex(dp), allocatable :: my_prev_pcgrad(:,:)
+  complex(dp), allocatable :: my_cjgrad(:,:)
+  complex(dp), allocatable :: my_prev_cjgrad(:,:)
   complex(dp), allocatable :: my_pcond(:,:)
 
   class(gqk_t), pointer :: gqk => null()
@@ -980,8 +985,8 @@ subroutine varpeq_solve(self)
 
      ! TODO: add more control for this feature
      ! After some iterations update the preconditioner depending on the value of eps
-     if (self%pc_nupdate == 1) call polstate%update_pcond(self%pc_factor)
-     if (mod(ii, self%pc_nupdate) == 1) call polstate%update_pcond(self%pc_factor)
+     if (self%pc_nupdate == 1) call polstate%update_pcond(self%pc_factor, self%e_frohl)
+     if (mod(ii, self%pc_nupdate) == 1) call polstate%update_pcond(self%pc_factor, self%e_frohl)
 
      call polstate%get_conjgrad_a(self%orth)
      call polstate%update_a()
@@ -1146,8 +1151,14 @@ subroutine varpeq_init(self, gstore, dtset)
 
    ABI_MALLOC(polstate%a_glob, (gqk%nb, gqk%glob_nk))
    ABI_MALLOC(polstate%grad_a_glob, (gqk%nb, gqk%glob_nk))
+   ABI_MALLOC(polstate%cjgrad_a_glob, (gqk%nb, gqk%glob_nk))
    ABI_MALLOC(polstate%b_glob, (gqk%my_npert, gqk%glob_nq))
    ABI_MALLOC(polstate%eig, (gqk%nb, gstore%ebands%nkpt))
+
+   ABI_MALLOC(polstate%my_pcgrad_a, (gqk%nb, gqk%my_nk))
+   ABI_MALLOC(polstate%my_cjgrad, (gqk%nb, gqk%my_nk))
+   ABI_MALLOC(polstate%my_prev_cjgrad, (gqk%nb, gqk%my_nk))
+   ABI_MALLOC(polstate%my_prev_pcgrad, (gqk%nb, gqk%my_nk))
 
    ! Bands taking part in the polaron formation process
    ! TODO: shift the bands wrt vbm/cbm?
@@ -1290,6 +1301,11 @@ subroutine varpeq_avg_frohlich(self)
        sqrt(polstate%nqbz * wqnu * e_frohl_mode(nu) / two)
    enddo
 
+   do nu=4,natom3
+
+     write(ab_out, *) "debug, g0 mode", nu, "=", polstate%g0(nu)
+   enddo
+
  enddo
 
  ABI_FREE(phfreq)
@@ -1340,6 +1356,12 @@ subroutine polstate_free(self)
  ABI_SFREE(self%a_glob)
  ABI_SFREE(self%b_glob)
  ABI_SFREE(self%grad_a_glob)
+ ABI_SFREE(self%cjgrad_a_glob)
+
+ ABI_SFREE(self%my_pcgrad_a)
+ ABI_SFREE(self%my_cjgrad)
+ ABI_SFREE(self%my_prev_cjgrad)
+ ABI_SFREE(self%my_prev_pcgrad)
 
  call self%krank_kpts%free()
  call self%krank_qpts%free()
@@ -1373,7 +1395,7 @@ subroutine polstate_update_a(self)
 !----------------------------------------------------------------------
 
  theta = self%get_linemin_param()
- self%my_a(:,:) = cos(theta)*self%my_a(:,:) + sin(theta)*self%my_grad_a(:,:)
+ self%my_a(:,:) = cos(theta)*self%my_a(:,:) + sin(theta)*self%my_cjgrad(:,:)
  call self%gather('a')
 
 end subroutine polstate_update_a
@@ -1393,24 +1415,34 @@ end subroutine polstate_update_a
 !!
 !! SOURCE
 
-subroutine polstate_update_pcond(self, factor)
+subroutine polstate_update_pcond(self, factor, e_fr)
 
 !Arguments ------------------------------------
  class(polstate_t), intent(inout) :: self
  real(dp),intent(in) :: factor
+ real(dp),intent(in) :: e_fr
 
 !Local variables-------------------------------
  class(gqk_t), pointer :: gqk
  integer :: my_ik, ik_ibz, ib
+ real(dp) :: local_eps
 
 !----------------------------------------------------------------------
 
  gqk => self%gqk
 
+ if ((self%eps) > zero) then
+   local_eps = zero
+ else
+   local_eps = factor*self%eps
+ endif
+ !write(ab_out, *) "debug: pcond eps", self%eps, "local eps", local_eps
+
  do my_ik=1,gqk%my_nk
    ik_ibz = gqk%my_k2ibz(1, my_ik)
    do ib=1,gqk%nb
-     self%my_pcond(ib, my_ik) = one/(self%eig(ib, ik_ibz))! + factor*abs(self%eps))
+     !self%my_pcond(ib, my_ik) = one
+     self%my_pcond(ib, my_ik) = one/abs((self%eig(ib, ik_ibz) - two*abs(e_fr) - local_eps))
    enddo
  enddo
 
@@ -1440,37 +1472,64 @@ subroutine polstate_get_conjgrad_a(self, orth)
 !Local variables-------------------------------
  class(gqk_t), pointer :: gqk
  integer :: ierr
- real(dp) :: beta_den!, norm
- complex(dp) :: beta, beta_num
+ real(dp) :: norm
+ complex(dp) :: beta, beta_num, beta_den
 
 !----------------------------------------------------------------------
 
  gqk => self%gqk
 
- call self%orthonorm(orth)
+ call self%orthonorm(self%my_grad_a, orth)
  ! Apply the preconditioner and orthonormalize wrt A
- self%my_grad_a(:,:) = self%my_pcond(:,:)*self%my_grad_a(:,:)
- call self%orthonorm(orth)
+
+ self%my_pcgrad_a(:,:) = self%my_pcond(:,:)*self%my_grad_a(:,:)
+ call self%orthonorm(self%my_pcgrad_a, orth)
 
  ! If previous gradient is known, get conjugate gradient using Polak-Ribi'ere formula
  if (self%has_prev_grad) then
-   beta_num = &
-     sum(self%my_grad_a(:,:)*conjg(self%my_grad_a(:,:) - self%my_prevgrad_a(:,:)))
-   beta_den = sum(abs(self%my_prevgrad_a(:,:))**2)
+
+   ! Fletcher-Reeves
+   !beta_num = sum(conjg(self%my_pcgrad_a(:,:))*self%my_grad_a(:,:))
+   !beta_den = sum(conjg(self%my_prev_pcgrad(:,:))*self%my_prevgrad_a(:,:))
+
+   ! Polak-Ribiere
+   !beta_num = &
+   !  sum(conjg(self%my_pcgrad_a(:,:))*(self%my_grad_a(:,:) - self%my_prevgrad_a(:,:)))
+   !beta_den = sum(conjg(self%my_prev_pcgrad(:,:))*self%my_prevgrad_a(:,:))
+
+   ! Hestenes-Stiefel
+   beta_num = sum(conjg(self%my_pcgrad_a(:,:))*(self%my_grad_a(:,:) - self%my_prevgrad_a(:,:)))
+   beta_den = sum(conjg(-self%my_prev_cjgrad(:,:))*(self%my_grad_a(:,:) - self%my_prevgrad_a(:,:)))
+
+   ! Dai Yuan
+   !beta_num = sum(conjg(self%my_pcgrad_a(:,:))*self%my_grad_a(:,:))
+   !beta_den = sum(conjg(-self%my_prev_cjgrad(:,:))*(self%my_grad_a(:,:) - self%my_prevgrad_a(:,:)))
+
    call xmpi_sum(beta_num, gqk%kpt_comm%value, ierr)
    call xmpi_sum(beta_den, gqk%kpt_comm%value, ierr)
    beta = beta_num/beta_den
 
-   self%my_grad_a(:,:) = self%my_grad_a(:,:) + beta*self%my_prevgrad_a(:,:)
-   call self%orthonorm(orth)
+   !write(ab_out, *) "debug: beta", beta
+
+   self%my_cjgrad(:,:) = self%my_pcgrad_a(:,:) + beta*self%my_prev_cjgrad(:,:)
+   self%my_prev_cjgrad(:,:) = self%my_cjgrad(:,:)
+
+   call self%orthonorm(self%my_cjgrad, orth)
+ else
+   self%my_cjgrad(:,:) = self%my_pcgrad_a(:,:)
+   self%my_prev_cjgrad(:,:) = self%my_cjgrad(:,:)
+
+   call self%orthonorm(self%my_cjgrad, orth)
  endif
 
- !norm = self%get_norm('grad_a')
- !self%my_grad_a(:,:) = self%my_grad_a(:,:)*sqrt(one*self%nkbz)/norm
+ norm = self%get_norm('cjgrad')
+ self%my_cjgrad(:,:) = self%my_cjgrad(:,:)*sqrt(one*self%nkbz)/norm
 
  ! Save the current gradient for each processor and globally
- call self%gather('grad_a')
+ call self%gather('cjgrad')
+
  self%my_prevgrad_a(:,:) = self%my_grad_a(:,:)
+ self%my_prev_pcgrad(:,:) = self%my_pcgrad_a(:,:)
  self%has_prev_grad = .true.
 
 end subroutine polstate_get_conjgrad_a
@@ -1490,10 +1549,11 @@ end subroutine polstate_get_conjgrad_a
 !!
 !! SOURCE
 
-subroutine polstate_orthonorm(self, orth)
+subroutine polstate_orthonorm(self, vec, orth)
 
 !Arguments ------------------------------------
  class(polstate_t), intent(inout) :: self
+ complex(dp) :: vec(:,:)
  logical, optional, intent(in) :: orth
 
 !Local variables-------------------------------
@@ -1506,22 +1566,22 @@ subroutine polstate_orthonorm(self, orth)
 
  gqk => self%gqk
 
- orth_factor = sum(conjg(self%my_a(:,:))*self%my_grad_a(:,:))
+ orth_factor = sum(conjg(self%my_a(:,:))*vec)
  !orth_factor = real(sum(self%my_a(:,:)*conjg(self%my_grad_a(:,:))))
  call xmpi_sum(orth_factor, gqk%kpt_comm%value, ierr)
 
  orth_factor2 = zero
  if (present(orth) .and. orth) then
-   orth_factor2 = sum(conjg(self%orth_a(:,:))*self%my_grad_a(:,:))
+   orth_factor2 = sum(conjg(self%orth_a(:,:))*vec)
    !orth_factor2 = real(conjg(self%orth_a(:,:)*conjg(self%my_grad_a(:,:))))
    call xmpi_sum(orth_factor2, gqk%kpt_comm%value, ierr)
  endif
 
- self%my_grad_a(:,:) = self%my_grad_a(:,:) - &
+ vec(:,:) = vec(:,:) - &
    (one/self%nkbz)*(orth_factor*self%my_a(:,:) + orth_factor2*self%orth_a(:,:))
 
- norm = self%get_norm('grad_a')
- self%my_grad_a(:,:) = self%my_grad_a(:,:)*sqrt(one*self%nkbz)/norm
+ !norm = self%get_norm('grad_a')
+ !self%my_grad_a(:,:) = self%my_grad_a(:,:)*sqrt(one*self%nkbz)/norm
 
 end subroutine polstate_orthonorm
 !!***
@@ -1583,19 +1643,19 @@ real(dp) function polstate_get_linemin_param(self) result(theta)
 
      do ib=1,gqk%nb
        a_from = self%my_a(ib, my_ik)
-       d_from = self%my_grad_a(ib, my_ik)
+       d_from = self%my_cjgrad(ib, my_ik)
        do jb=1,gqk%nb
          a_forw = self%a_glob(jb, ik_forw)
-         d_forw = self%grad_a_glob(jb, ik_forw)
+         d_forw = self%cjgrad_a_glob(jb, ik_forw)
          do my_pert=1,gqk%my_npert
            pert_glob = gqk%my_pert_start + my_pert - 1
 
            if (all(abs(qpt) < tol6)) then
            ! Gamma
              if (ib == jb) then
-               !g_forw = self%g0(pert_glob)
-               g_forw = gqk%my_g(my_pert, jb, my_iq, ib, my_ik) + &
-                 self%g0(pert_glob)
+               g_forw = self%g0(pert_glob)
+               !g_forw = gqk%my_g(my_pert, jb, my_iq, ib, my_ik) + &
+               !  self%g0(pert_glob)
              else
                !g_forw = self%g0(pert_glob)
                g_forw = gqk%my_g(my_pert, jb, my_iq, ib, my_ik)
@@ -1627,7 +1687,7 @@ real(dp) function polstate_get_linemin_param(self) result(theta)
    ik_ibz = gqk%my_k2ibz(1, my_ik)
    do ib=1,gqk%nb
      a_from = self%my_a(ib, my_ik)
-     d_from = self%my_grad_a(ib, my_ik)
+     d_from = self%my_cjgrad(ib, my_ik)
 
      term_sin2 = term_sin2 + self%eig(ib, ik_ibz)*abs(d_from)**2
      term_sincos = term_sincos + &
@@ -1722,9 +1782,9 @@ subroutine polstate_get_grad_a(self)
              if (all(abs(qpt) < tol6)) then
              ! Gamma
                if (ib == jb) then
-                 !g_forw = self%g0(pert_glob)
-                 g_forw = gqk%my_g(my_pert, jb, my_iq, ib, my_ik) + &
-                   self%g0(pert_glob)
+                 g_forw = self%g0(pert_glob)
+                 !g_forw = gqk%my_g(my_pert, jb, my_iq, ib, my_ik) + &
+                 !  self%g0(pert_glob)
                else
                  !g_forw = self%g0(pert_glob)
                  g_forw = gqk%my_g(my_pert, jb, my_iq, ib, my_ik)
@@ -1755,9 +1815,9 @@ subroutine polstate_get_grad_a(self)
              if (all(abs(qpt) < tol6)) then
              ! Gamma
                if (ib == jb) then
-                 !g_back = self%g0(pert_glob)
-                 g_back = gq_gathered(my_pert, ib, jb, ik_back) + &
-                   self%g0(pert_glob)
+                 g_back = self%g0(pert_glob)
+                 !g_back = gq_gathered(my_pert, ib, jb, ik_back) + &
+                 !  self%g0(pert_glob)
                else
                  !g_back = self%g0(pert_glob)
                  g_back = gq_gathered(my_pert, ib, jb, ik_back)
@@ -1906,9 +1966,9 @@ real(dp) function polstate_get_enelph(self) result(enelph)
            if (all(abs(qpt) < tol6)) then
            ! Gamma
              if (ib == jb) then
-               !g_forw = self%g0(pert_glob)
-               g_forw = gqk%my_g(my_pert, jb, my_iq, ib, my_ik) + &
-                 self%g0(pert_glob)
+               g_forw = self%g0(pert_glob)
+               !g_forw = gqk%my_g(my_pert, jb, my_iq, ib, my_ik) + &
+               !  self%g0(pert_glob)
              else
                !g_forw = self%g0(pert_glob)
                g_forw = gqk%my_g(my_pert, jb, my_iq, ib, my_ik)
@@ -2079,9 +2139,9 @@ subroutine polstate_get_b_from_a(self)
            if (all(abs(qpt) < tol6)) then
            ! Gamma
              if (ib == jb) then
-               !g_forw = self%g0(pert_glob)
-               g_forw = gqk%my_g(my_pert, jb, my_iq, ib, my_ik) + &
-                 self%g0(pert_glob)
+               g_forw = self%g0(pert_glob)
+               !g_forw = gqk%my_g(my_pert, jb, my_iq, ib, my_ik) + &
+               !  self%g0(pert_glob)
              else
                !g_forw = self%g0(pert_glob)
                g_forw = gqk%my_g(my_pert, jb, my_iq, ib, my_ik)
@@ -2310,6 +2370,8 @@ real(dp) function polstate_get_norm(self, mode) result(norm)
    norm = get_norm_(self%my_a, gqk%kpt_comm%value)
  case ("grad_a")
    norm = get_norm_(self%my_grad_a, gqk%kpt_comm%value)
+ case ("cjgrad")
+   norm = get_norm_(self%my_cjgrad, gqk%kpt_comm%value)
  case ("orth_a")
    norm = get_norm_(self%orth_a, gqk%kpt_comm%value)
  case ("b")
@@ -2371,6 +2433,8 @@ subroutine polstate_gather(self, mode)
    call gather_(self%my_a, gqk%my_nk, gqk%my_kstart, self%a_glob, gqk%kpt_comm%value)
  case ("grad_a")
    call gather_(self%my_grad_a, gqk%my_nk, gqk%my_kstart, self%grad_a_glob, gqk%kpt_comm%value)
+ case ("cjgrad")
+   call gather_(self%my_cjgrad, gqk%my_nk, gqk%my_kstart, self%cjgrad_a_glob, gqk%kpt_comm%value)
  case ("b")
    call gather_(self%my_b, gqk%my_nq, gqk%my_qstart, self%b_glob, gqk%qpt_comm%value)
  case default
