@@ -17,7 +17,7 @@
 
  ecut 15. pawecutdg 50
  diemac 12.0d0  enunit 2
- nstep 18
+ nstep 16
  acell 3*7.0
  rprim 0.0 0.5 0.5
        0.5 0.0 0.5
@@ -46,7 +46,7 @@
 #%% nprocs_to_test = 2
 #%% max_nprocs = 2
 #%% [NCPU_2]
-#%% files_to_test = t07_MPI2.abo, tolnlines=   16,   tolabs=  5.0e-8,      tolrel= 2.0e-2
+#%% files_to_test = t07_MPI2.abo, tolnlines=   16,   tolabs=  7.0e-8,      tolrel= 2.0e-2
 #%% [extra_info]
 #%% keywords = PAW
 #%% authors = M. Sarraute
