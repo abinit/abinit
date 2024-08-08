@@ -43,14 +43,17 @@ module m_mover
  use defs_abitypes,        only : MPI_type
  use m_fstrings,           only : strcat, sjoin, indent, itoa
  use m_symtk,              only : matr3inv, symmetrize_xred
- use m_geometry,           only : fcart2gred, chkdilatmx, xred2xcart
+ use m_geometry,           only : fcart2gred, chkdilatmx, xred2xcart, metric
  use m_time,               only : abi_wtime, sec2str
  use m_exit,               only : get_start_time, have_timelimit_in, get_timelimit, enable_timelimit_in
  use m_electronpositron,   only : electronpositron_type
  use m_scfcv,              only : scfcv_t, scfcv_run
  use m_effective_potential,only : effective_potential_type, effective_potential_evaluate
  use m_initylmg,           only : initylmg
+ use m_kg,                 only : getcut, getph
  use m_xfpack,             only : xfh_update
+ use m_mkrho,              only : initro
+ use m_pawfgr,             only : pawfgr_type, pawfgr_init, pawfgr_destroy
  use m_precpred_1geo,      only : precpred_1geo
  use m_pred_delocint,      only : pred_delocint
  use m_pred_bfgs,          only : pred_bfgs, pred_lbfgs
@@ -216,9 +219,10 @@ type(abimover) :: ab_mover
 type(abimover_specs) :: specs
 type(abiforstr) :: preconforstr ! Preconditioned forces and stress
 type(delocint) :: deloc
+type(pawfgr_type) :: pawfgr
 type(mttk_type) :: mttk_vars
 integer :: itime,icycle,itime_hist,iexit=0,ifirst,ihist_prev,ihist_prev2,timelimit_exit,ncycle,nhisttot,kk,jj,me
-integer :: ntime,option,comm
+integer :: ntime,option,comm,mgfftf,nfftf
 integer :: nerr_dilatmx,my_quit,ierr,quitsum_request
 integer ABI_ASYNC :: quitsum_async
 character(len=500) :: msg
@@ -227,7 +231,7 @@ character(len=8) :: stat4xml
 character(len=35) :: fmt
 character(len=fnlen) :: filename,fname_ddb,name_file
 character(len=500) :: MY_NAME = "mover"
-real(dp) :: gr_avg
+real(dp) :: gr_avg,ecut_eff,ecutdg_eff,ucvol,boxcut,gsqcut_eff
 logical :: DEBUG=.FALSE., need_verbose=.TRUE.,need_writeHIST=.TRUE.
 logical :: need_scfcv_cycle = .TRUE., need_elec_eval = .FALSE.
 logical :: changed,useprtxfase
@@ -235,11 +239,13 @@ logical :: skipcycle
 integer :: minIndex,ii,similar,conv_retcode
 integer :: iapp
 logical :: file_exists
+logical :: re_init_rho
 real(dp) :: minE,wtime_step,now,prev
 !arrays
-integer :: itimes(2)
-real(dp) :: gprimd(3,3),rprim(3,3),rprimd_prev(3,3)
-real(dp),allocatable :: gred_corrected(:,:),xred_prev(:,:)
+integer :: itimes(2),ngfft(18),ngfftf(18)
+real(dp) :: gprimd(3,3),rprim(3,3),rprimd_prev(3,3),gmet(3,3),rmet(3,3)
+real(dp),allocatable :: gred_corrected(:,:),xred_prev(:,:),ph1df(:,:)
+real(dp) :: k0(3)
 ! ***************************************************************
  need_verbose=.TRUE.
  if(present(verbose)) need_verbose = verbose
@@ -253,6 +259,8 @@ real(dp),allocatable :: gred_corrected(:,:),xred_prev(:,:)
      write(std_out,*)"Enabling timelimit check in function: ",trim(MY_NAME)," with timelimit: ",trim(sec2str(get_timelimit()))
    end if
  end if
+
+ re_init_rho = .FALSE.
 
 !Table of contents
 !(=>) Refers to an important call (scfcv,pred_*)
@@ -574,6 +582,8 @@ real(dp),allocatable :: gred_corrected(:,:),xred_prev(:,:)
        call abihist_compare_and_copy(hist_prev,hist,ab_mover%natom,similar,tol8,specs%nhist==nhisttot)
        hist_prev%ihist=hist_prev%ihist+1
 
+       if (hist_prev%ihist==hist_prev%mxhist) re_init_rho=.TRUE.
+
      else
        scfcv_args%ndtpawuj=0
        iapp=itime
@@ -600,6 +610,27 @@ real(dp),allocatable :: gred_corrected(:,:),xred_prev(:,:)
            ABI_MALLOC(rhor,(2, scfcv_args%dtset%nfft))
            call wvl_mkrho(scfcv_args%dtset, scfcv_args%irrzon, scfcv_args%mpi_enreg,&
 &           scfcv_args%phnons, rhor,scfcv_args%wvl%wfs,scfcv_args%wvl%den)
+         end if
+
+         !Do another initialization of rho using the last atomic positions
+         !to avoid potential problems during restart of MD
+         if (re_init_rho) then
+            !Recompute some local quantities required by initro
+            call pawfgr_init(pawfgr,scfcv_args%dtset,mgfftf,nfftf,ecut_eff,ecutdg_eff,ngfft,ngfftf)
+            ABI_MALLOC(ph1df,(2,3*(2*mgfftf+1)*scfcv_args%dtset%natom))
+            call getph(scfcv_args%atindx,scfcv_args%dtset%natom,ngfftf(1),ngfftf(2),ngfftf(3),ph1df,xred)
+            call metric(gmet,gprimd,ab_out,rmet,rprimd,ucvol)
+            k0(:)=0.0_dp
+            call getcut(boxcut,ecutdg_eff,gmet,gsqcut_eff,scfcv_args%dtset%iboxcut,ab_out,k0,ngfftf)
+            !Reinitialise density from current xred
+            call initro(scfcv_args%atindx,scfcv_args%dtset%densty,gmet,gsqcut_eff,&
+&             scfcv_args%psps%usepaw,mgfftf,scfcv_args%mpi_enreg,scfcv_args%psps%mqgrid_vl,&
+&             scfcv_args%dtset%natom,scfcv_args%nattyp,nfftf,ngfftf,scfcv_args%dtset%nspden,&
+&             scfcv_args%psps%ntypat,scfcv_args%psps,scfcv_args%pawtab,ph1df,&
+&             scfcv_args%psps%qgrid_vl,rhog,rhor,scfcv_args%dtset%spinat,ucvol,&
+&             scfcv_args%psps%usepaw,scfcv_args%dtset%ziontypat,scfcv_args%dtset%znucl)
+            call pawfgr_destroy(pawfgr)
+            ABI_FREE(ph1df)
          end if
 
 !        MAIN CALL TO SELF-CONSISTENT FIELD ROUTINE
