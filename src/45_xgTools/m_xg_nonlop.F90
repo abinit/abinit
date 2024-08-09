@@ -896,7 +896,7 @@ contains
   logical :: compute_gram_,compute_invS_approx_
   real(dp),pointer :: gram_proj_k_(:,:),Sijm1_(:,:)
   integer :: ierr, iblock, shift, shiftc, shift_itypat, itypat, ilmn, jlmn, nlmn, ia
-  integer :: cplex,cols,nlmn_max,ntypat,nmpi,me_g0_loc,me_g0_fft_loc,space_work
+  integer :: cplex,cols,ntypat,nmpi,me_g0_loc,me_g0_fft_loc,space_work
   real(dp) :: tsec(2)
   type(xg_t) :: work
   type(xgBlock_t) :: projs
@@ -973,8 +973,6 @@ contains
         ABI_ERROR('Not implemented with paw=False.')
       end if
 
-      nlmn_max=xg_nonlop%nlmn_max
-
       shift_itypat=1
       do itypat = 1, ntypat
         nlmn = xg_nonlop%nlmn_ntypat(itypat)
@@ -987,8 +985,6 @@ contains
         end if
 
         call xgBlock_setBlock(xg_nonlop%projectors_k%self,projs,npw_k,nlmn,fcol=shift_itypat)
-        !shift=1+(itypat-1)*nlmn_max
-        !call xg_setBlock(xg_nonlop%invSij_approx_all,xg_nonlop%invSij_approx(itypat),nlmn,nlmn,fcol=shift)
         if (xg_nonlop%space_pw==SPACE_CR) then
           call xgBlock_copy(xg_nonlop%Sijm1(itypat),xg_nonlop%invSij_approx_k(itypat)%self)
         else
@@ -1015,7 +1011,6 @@ contains
       if (.not.xg_nonlop%paw) then
         ABI_ERROR('Not implemented with paw=False.')
       end if
-      nlmn_max=xg_nonlop%nlmn_max
       if (xg_nonlop%space_pw==SPACE_CR) then
         cplex=1
         space_work=SPACE_R
