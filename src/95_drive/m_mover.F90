@@ -631,6 +631,7 @@ real(dp) :: k0(3)
 &             scfcv_args%psps%usepaw,scfcv_args%dtset%ziontypat,scfcv_args%dtset%znucl)
             call pawfgr_destroy(pawfgr)
             ABI_FREE(ph1df)
+            re_init_rho = .FALSE.
          end if
 
 !        MAIN CALL TO SELF-CONSISTENT FIELD ROUTINE
