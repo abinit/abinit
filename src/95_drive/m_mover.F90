@@ -632,6 +632,8 @@ real(dp) :: k0(3)
             call pawfgr_destroy(pawfgr)
             ABI_FREE(ph1df)
             re_init_rho = .FALSE.
+            ! Also update scf_history with the correct density for density prediction if required
+             if (scfcv_args%scf_history%history_size>0) scfcv_args%scf_history%atmrho_last(:)=rhor(:,1)
          end if
 
 !        MAIN CALL TO SELF-CONSISTENT FIELD ROUTINE
