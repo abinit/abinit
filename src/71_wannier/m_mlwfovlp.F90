@@ -168,9 +168,10 @@ module m_mlwfovlp
    complex(dp),allocatable :: u_mat_opt(:,:,:)
    complex(dp),allocatable :: u_mat(:,:,:)
 
-   complex(dp),allocatable :: u_kc(:,:,:)
+   complex(dp),allocatable :: u_k(:,:,:)
    ! (max_dimwin, nwan, nkbz)
    ! total rotation matrix: the product of the optimal subspace x the rotation among the nwan Wannier functions.
+   ! on the coarse ab-initio k-mesh
 
    complex(dp),allocatable :: hwan_r(:,:,:)
    ! (nr_h, nwan, nwan)
@@ -3345,9 +3346,9 @@ subroutine wan_from_abiwan(wan, abiwan_filepath, spin, nsppol, keep_umats, out_p
 
  ! Get total rotation matrix: the product of the optimal subspace x the rotation among the nwan Wannier functions.
  ii = maxval(wan%dimwin)
- ABI_CALLOC(wan%u_kc, (ii, nwan, nkbz))
+ ABI_CALLOC(wan%u_k, (ii, nwan, nkbz))
  do ik=1,nkbz
-   wan%u_kc(1:wan%dimwin(ik), 1:nwan, ik) = matmul(wan%u_mat_opt(1:wan%dimwin(ik), :, ik), wan%u_mat(:, 1:nwan, ik))
+   wan%u_k(1:wan%dimwin(ik), 1:nwan, ik) = matmul(wan%u_mat_opt(1:wan%dimwin(ik), :, ik), wan%u_mat(:, 1:nwan, ik))
  end do
 
  wan%keep_umats = keep_umats
@@ -3400,7 +3401,7 @@ subroutine wan_from_abiwan(wan, abiwan_filepath, spin, nsppol, keep_umats, out_p
      do ib=1,jb
        ctmp = czero
        do mb=1,wan%dimwin(ik)
-         ctmp = ctmp + conjg(wan%u_kc(mb, ib, ik)) * et_opt(mb, ik) * wan%u_kc(mb, jb, ik)
+         ctmp = ctmp + conjg(wan%u_k(mb, ib, ik)) * et_opt(mb, ik) * wan%u_k(mb, jb, ik)
        end do
        chs(ib, jb, ik) = ctmp
        chs(jb, ib, ik) = conjg(ctmp)
@@ -3561,7 +3562,7 @@ subroutine wan_free(wan)
  ! Complex
  ABI_SFREE(wan%u_mat)
  ABI_SFREE(wan%u_mat_opt)
- ABI_SFREE(wan%u_kc)
+ ABI_SFREE(wan%u_k)
  ABI_SFREE(wan%hwan_r)
  ABI_SFREE(wan%grpe_wwp)
 
@@ -3723,7 +3724,7 @@ end subroutine wan_interp_eph_manyq
 !! wan_ncwrite_gwan
 !!
 !! FUNCTION
-!!  Write the e-ph matrix elements in the Wannier representation g(R_e, R_ph) to the GWAN.nc netcdf file.
+!!  Write the e-ph matrix elements in the Wannier representation g(R_e,R_ph) to the GWAN.nc netcdf file.
 !!
 !! SOURCE
 
@@ -3749,7 +3750,7 @@ subroutine wan_ncwrite_gwan(wan, dtfil, cryst, ebands, pert_comm)
  spin = wan%spin; natom3 = 3 * cryst%natom
 
  gwan_filepath = strcat(dtfil%filnam_ds(4), "_GWAN.nc")
- call wrtout(units, sjoin("- Writing e-ph vertex in the Wannier representation to file:", gwan_filepath))
+ call wrtout(units, sjoin("- Writing e-ph matrix elements in the Wannier representation to file:", gwan_filepath))
 
  if (spin == 1) then
    NCF_CHECK(nctk_open_create(root_ncid, gwan_filepath, pert_comm%value))

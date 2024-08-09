@@ -169,11 +169,6 @@ module m_gstore
 
  ! Rank of the MPI Cartesian grid.
  integer,private,parameter :: ndims = 6
-
- ! Default value for entries in gvals, vk_cart_ibz and vkmat_cart_ibz arrays that have not been written.
- ! This can happen only if we have filtered wavevectors.
- !real(dp),private,parameter :: GSTORE_FILL_DP = -huge(one) * 0.1_dp
- real(dp),private,parameter :: GSTORE_FILL_DP = zero
 !!***
 
 !----------------------------------------------------------------------
@@ -600,7 +595,7 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
  integer :: ik_ibz, ik_bz, iq_bz, iq_ibz, ebands_timrev, max_nq, max_nk, ncid, spin_ncid, ncerr, gstore_fform
  integer :: my_is, my_ik, my_iq, nq
  logical :: keep_umats, has_abiwan, has_gwan, write_gstore
- real(dp) :: cpu, wall, gflops, weight_qq
+ real(dp) :: cpu, wall, gflops, weight_qq, gstore_fill_dp
  character(len=10) :: priority
  character(len=5000) :: msg
 !arrays
@@ -988,17 +983,22 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
      ! Compress gvals to reduce size on disk.
      !NCF_CHECK(nf90_def_var_deflate(spin_ncid, vid_spin("gvals"), shuffle=1, deflate=1, deflate_level=5))
      ! IMPORTANT: Init gvals with zeros.
-     NCF_CHECK(nf90_def_var_fill(spin_ncid, vid_spin("gvals"), NF90_FILL, GSTORE_FILL_DP))
+
+    ! Default value for entries in gvals, vk_cart_ibz and vkmat_cart_ibz arrays that have not been written.
+    ! This can happen only if we have filtered wavevectors.
+     gstore_fill_dp = zero
+     if (gstore%kfilter == "none") gstore_fill_dp = -huge(one)
+     NCF_CHECK(nf90_def_var_fill(spin_ncid, vid_spin("gvals"), NF90_FILL, gstore_fill_dp))
 
      select case(gstore%with_vk)
      case (1)
        ! Diagonal terms only
        NCF_CHECK(nctk_def_arrays(spin_ncid, nctkarr_t("vk_cart_ibz", "dp", "three, nb, gstore_nkibz")))
-       NCF_CHECK(nf90_def_var_fill(spin_ncid, vid_spin("vk_cart_ibz"), NF90_FILL, GSTORE_FILL_DP))
+       NCF_CHECK(nf90_def_var_fill(spin_ncid, vid_spin("vk_cart_ibz"), NF90_FILL, gstore_fill_dp))
      case (2)
        ! Full (nb x nb) matrix.
        NCF_CHECK(nctk_def_arrays(spin_ncid, nctkarr_t("vkmat_cart_ibz", "dp", "two, three, nb, nb, gstore_nkibz")))
-       NCF_CHECK(nf90_def_var_fill(spin_ncid, vid_spin("vkmat_cart_ibz"), NF90_FILL, GSTORE_FILL_DP))
+       NCF_CHECK(nf90_def_var_fill(spin_ncid, vid_spin("vkmat_cart_ibz"), NF90_FILL, gstore_fill_dp))
      end select
 
      ! Write (small) data
@@ -4669,7 +4669,7 @@ subroutine gstore_wannierize_and_write_gwan(gstore, dvdb, dtfil)
 !arrays
  integer :: qptrlatt_(3,3), units(2)
  real(dp) :: weight_qq, qpt(3), kpt(3), kq(3), cpu, wall, gflops
- complex(dp),allocatable :: emikr(:), emiqr(:), u_kc(:,:), u_kqc(:,:), gww_epq(:,:,:,:,:), gww_pk(:,:,:,:), g_bb(:,:), tmp_mat(:,:)
+ complex(dp),allocatable :: emikr(:), emiqr(:), u_k(:,:), u_kq(:,:), gww_epq(:,:,:,:,:), gww_pk(:,:,:,:), g_bb(:,:), tmp_mat(:,:)
 ! *************************************************************************
 
  units = [std_out, ab_out]
@@ -4711,10 +4711,12 @@ subroutine gstore_wannierize_and_write_gwan(gstore, dvdb, dtfil)
    do my_iq=1,my_nq
      call gqk%myqpt(my_iq, gstore, weight_qq, qpt)
 
+     !call get_kg(qpt, 1, ecut_lr, gstore%cryst%gmet, ng_q, gvec_q)
+     !ABI_FREE(gvec_q)
+
      ! Loop over my k-points (partial sum over k)
      do my_ik=1,my_nk
        kpt = gqk%my_kpts(:,my_ik); kq = kpt + qpt
-       !call wan%get_umats(kpt, kq, ik, ikq, nwin_k, nwin_kq, u_kc, u_kqc, msg, ierr)
        ik = wan%krank%get_index(kpt); ikq = wan%krank%get_index(kq)
        ABI_CHECK(ik  /= -1, sjoin("Cannot find kpt: ", ktoa(kpt)))
        ABI_CHECK(ikq /= -1, sjoin("Cannot find k+q: ", ktoa(kq)))
@@ -4723,12 +4725,12 @@ subroutine gstore_wannierize_and_write_gwan(gstore, dvdb, dtfil)
        nwin_k = wan%dimwin(ik); nwin_kq = wan%dimwin(ikq)
 
        ABI_MALLOC(g_bb, (nwin_kq, nwin_k))
-       ABI_MALLOC(u_kc, (1:nwin_k, 1:nwan))
-       ABI_MALLOC(u_kqc, (1:nwin_kq, 1:nwan))
+       ABI_MALLOC(u_k, (1:nwin_k, 1:nwan))
+       ABI_MALLOC(u_kq, (1:nwin_kq, 1:nwan))
        ABI_MALLOC(tmp_mat, (nwan, nwin_k))
 
-       u_kc = wan%u_kc(1:nwin_k, 1:nwan, ik)
-       u_kqc = wan%u_kc(1:nwin_kq, 1:nwan, ikq)
+       u_k = wan%u_k(1:nwin_k, 1:nwan, ik)
+       u_kq = wan%u_k(1:nwin_kq, 1:nwan, ikq)
 
        do my_ip=1,gqk%my_npert
          !----------------------------------------------------------
@@ -4754,16 +4756,19 @@ subroutine gstore_wannierize_and_write_gwan(gstore, dvdb, dtfil)
            end do
          end do
 
+         ! TODO: Remove LR part.
+         !call handle_lr_term(cryst, qpt, ng_q, gvec_q, nwin_kq, nwin_k, nwan, u_kq, u_k, dvdb%zeff, dvdb%qstar, -1, g_bb)
+
          ! the two zgemm calls perform: epmats  = [ cu(ikq)^\dagger * epmatk ] * cu(ikk)
          ! [here we have a size-reduction from nbnd*nbnd to nwan*nwan]
          ! ouput stored in gww_pk(:,:, my_ip, my_ik)
 
-         !gww_pk(:,:, my_ip, my_ik) = MATMUL(CONJG(TRANSPOSE(u_kqc)), MATMUL(g_bb, u_kc))
-         call ZGEMM('N', 'N', nwan, nwin_k, nwin_kq, cone, g_bb, nwin_kq, u_kc, nwin_k, czero, tmp_mat, nwan)
-         call ZGEMM('C', 'N', nwin_kq, nwan, nwin_k, cone, u_kqc, nwan, tmp_mat, nwan, czero, gww_pk(:,:, my_ip, my_ik), nwin_kq)
+         !gww_pk(:,:, my_ip, my_ik) = MATMUL(CONJG(TRANSPOSE(u_kq)), MATMUL(g_bb, u_k))
+         call ZGEMM('N', 'N', nwan, nwin_k, nwin_kq, cone, g_bb, nwin_kq, u_k, nwin_k, czero, tmp_mat, nwan)
+         call ZGEMM('C', 'N', nwin_kq, nwan, nwin_k, cone, u_kq, nwan, tmp_mat, nwan, czero, gww_pk(:,:, my_ip, my_ik), nwin_kq)
 
-         !call ZGEMM('C', 'N', nwan, nbnd, nbnd, cone, u_kqc, nbnd, epmatk(:, :, ik, imode), nbnd, czero, eptmp, nwan)
-         !call ZGEMM('N', 'N', nwan, nwan, nbnd, cone, eptmp, nwan, u_kc, nbnd, czero, epmats(:, :, ik, imode), nwan)
+         !call ZGEMM('C', 'N', nwan, nbnd, nbnd, cone, u_kq, nbnd, epmatk(:, :, ik, imode), nbnd, czero, eptmp, nwan)
+         !call ZGEMM('N', 'N', nwan, nwan, nbnd, cone, eptmp, nwan, u_k, nbnd, czero, epmats(:, :, ik, imode), nwan)
        end do ! my_ip
 
        ABI_FREE(g_bb)
@@ -4787,8 +4792,8 @@ subroutine gstore_wannierize_and_write_gwan(gstore, dvdb, dtfil)
          end do
        end do
 
-       ABI_FREE(u_kc)
-       ABI_FREE(u_kqc)
+       ABI_FREE(u_k)
+       ABI_FREE(u_kq)
      end do ! my_ik
    end do ! my_iq
 
@@ -4854,6 +4859,37 @@ subroutine gstore_wannierize_and_write_gwan(gstore, dvdb, dtfil)
  call cwtime_report(" gstore_wannierize_and_write_gwan:", cpu, wall, gflops)
 
 end subroutine gstore_wannierize_and_write_gwan
+!!***
+
+!!****f* m_gstore/handle_lr_term
+!! NAME
+!! handle_lr_term
+!!
+!! FUNCTION
+!!  Add/Remove the long range term to/from the e-ph matrix elements.
+!!
+!! INPUTS
+!!
+!! SOURCE
+
+subroutine handle_lr_term(cryst, qpt, ng, gvec, nwin_kq, nwin_k, nwan, u_kq, u_k, zeff, qstar, isgn, g_bb)
+
+!Arguments ------------------------------------
+ type(crystal_t),intent(in) :: cryst
+ real(dp),intent(in) :: qpt(3)
+ integer,intent(in) :: ng, nwin_kq, nwin_k, nwan, isgn, gvec(3,ng)
+ complex(dp),intent(in) :: u_kq(nwin_kq, nwan), u_k(nwin_k,nwan)
+ real(dp),intent(in) :: zeff(3,3,cryst%natom), qstar(3,3,3,cryst%natom)
+ complex(dp),intent(inout) :: g_bb(nwin_kq, nwin_k)
+
+!Local variables-------------------------------
+!scalars
+ !integer :: ig
+ !character(len=500) :: msg
+!arrays
+! *************************************************************************
+
+end subroutine handle_lr_term
 !!***
 
 end module m_gstore
