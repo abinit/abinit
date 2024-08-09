@@ -925,6 +925,7 @@ subroutine xg_RayleighRitz_cprj(xg_nonlop,X,cprjX,AX,eigenvalues,blockdim_cprj,i
 
     ! Doing free on an already free object does not do anything
     call xg_free(vec)
+    call xg_free(subA)
     call xg_free(Xwork)
     call xg_free(cprjXwork)
 

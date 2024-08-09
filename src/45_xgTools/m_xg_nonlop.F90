@@ -140,9 +140,9 @@ module m_xg_nonlop
    type(xgBlock_t),allocatable :: Sij(:)
 
    type(xg_t) :: Sijm1_all
-   type(xg_t) :: invSij_approx_all
+   type(xg_t), pointer :: invSij_approx(:,:)
+   type(xg_t), pointer :: invSij_approx_k(:)
    type(xgBlock_t),allocatable :: Sijm1(:)
-   type(xgBlock_t),allocatable :: invSij_approx(:)
    ! end paw only
 
  end type xg_nonlop_t
@@ -213,7 +213,7 @@ contains
    integer,intent(in),target :: indlmn(:,:,:)
    integer,intent(in),target :: nattyp(:)
 
-   integer :: itypat,cprjdim,nlmn,nlmn_max,natom,shift
+   integer :: itypat,cprjdim,nlmn,nlmn_max,natom,shift,nmpi
 
    xg_nonlop%mkmem=mkmem
    xg_nonlop%nspinor=nspinor
@@ -268,7 +268,12 @@ contains
    ABI_MALLOC(xg_nonlop%ph3d_gather,(mkmem))
    if (xg_nonlop%paw) then
      ABI_MALLOC(xg_nonlop%gram_proj,(mkmem))
+     ABI_MALLOC(xg_nonlop%invSij_approx,(ntypat,mkmem))
    end if
+
+  nmpi = xmpi_comm_size(xg_nonlop%comm_band)
+  ABI_MALLOC(xg_nonlop%l_npw_k,(nmpi))
+  ABI_MALLOC(xg_nonlop%l_shift_npw_k,(nmpi))
 
  end subroutine xg_nonlop_init
 !!***
@@ -277,7 +282,7 @@ contains
 
   type(xg_nonlop_t),intent(inout) :: xg_nonlop
 
-  integer :: ikpt
+  integer :: ikpt,itypat
 
   if (xg_nonlop%paw) then
     call xg_nonlop_destroy_Sij(xg_nonlop) ! Can be destroyed before
@@ -289,29 +294,26 @@ contains
   ABI_FREE(xg_nonlop%nlmn_ntypat)
   ABI_FREE(xg_nonlop%nlmn_natom)
 
-  if (allocated(xg_nonlop%l_npw_k)) then
-    ABI_FREE(xg_nonlop%l_npw_k)
-  end if
-  if (allocated(xg_nonlop%l_shift_npw_k)) then
-    ABI_FREE(xg_nonlop%l_shift_npw_k)
-  end if
+  ABI_FREE(xg_nonlop%l_npw_k)
+  ABI_FREE(xg_nonlop%l_shift_npw_k)
 
   do ikpt=1,xg_nonlop%mkmem
     call xg_free(xg_nonlop%projectors(ikpt))
     call xg_free(xg_nonlop%ffnl_gather(ikpt))
     call xg_free(xg_nonlop%ph3d_gather(ikpt))
-    if (xg_nonlop%paw) call xg_free(xg_nonlop%gram_proj(ikpt))
+    if (xg_nonlop%paw) then
+      call xg_free(xg_nonlop%gram_proj(ikpt))
+      do itypat=1,xg_nonlop%ntypat
+        call xg_free(xg_nonlop%invSij_approx(itypat,ikpt))
+      end do
+    end if
   end do
   ABI_FREE(xg_nonlop%projectors)
   ABI_FREE(xg_nonlop%ffnl_gather)
   ABI_FREE(xg_nonlop%ph3d_gather)
-
   if (xg_nonlop%paw) then
     ABI_FREE(xg_nonlop%gram_proj)
-    if (allocated(xg_nonlop%invSij_approx)) then
-      ABI_FREE(xg_nonlop%invSij_approx)
-    end if
-    call xg_free(xg_nonlop%invSij_approx_all)
+    ABI_FREE(xg_nonlop%invSij_approx)
   end if
 
  end subroutine xg_nonlop_destroy
@@ -920,24 +922,21 @@ contains
   end if
 
   xg_nonlop%npw_k = npw_k
-  if (allocated(xg_nonlop%l_npw_k)) then
-    ABI_FREE(xg_nonlop%l_npw_k)
-  end if
-  nmpi = xmpi_comm_size(xg_nonlop%comm_band)
-  ABI_MALLOC(xg_nonlop%l_npw_k,(nmpi))
+
   xg_nonlop%l_npw_k(:) = 0
   xg_nonlop%l_npw_k(xg_nonlop%me_band+1) = npw_k
   call xmpi_sum(xg_nonlop%l_npw_k,xg_nonlop%comm_band,ierr)
+
   xg_nonlop%total_npw_k = sum(xg_nonlop%l_npw_k)
   xg_nonlop%max_npw_k = maxval(xg_nonlop%l_npw_k)
-  if (allocated(xg_nonlop%l_shift_npw_k)) then
-    ABI_FREE(xg_nonlop%l_shift_npw_k)
-  end if
-  ABI_MALLOC(xg_nonlop%l_shift_npw_k,(nmpi))
+
   xg_nonlop%l_shift_npw_k(1) = 0
+  nmpi = xmpi_comm_size(xg_nonlop%comm_band)
   do iblock=2,nmpi
     xg_nonlop%l_shift_npw_k(iblock) = xg_nonlop%l_shift_npw_k(iblock-1) + xg_nonlop%l_npw_k(iblock-1)
   end do
+
+  ntypat = xg_nonlop%ntypat
 
   xg_nonlop%ph3d_k => ph3d_k
   xg_nonlop%ffnl_k => ffnl_k
@@ -948,11 +947,12 @@ contains
     xg_nonlop%ph3d_gather_k => xg_nonlop%ph3d_gather(ikpt)
   end if
 
-  if (xg_nonlop%paw) xg_nonlop%gram_proj_k => xg_nonlop%gram_proj(ikpt)
+  if (xg_nonlop%paw) then
+    xg_nonlop%gram_proj_k => xg_nonlop%gram_proj(ikpt)
+    xg_nonlop%invSij_approx_k => xg_nonlop%invSij_approx(:,ikpt)
+  end if
 
   if (compute_proj) then
-
-    ntypat = xg_nonlop%ntypat
 
     call xg_init(xg_nonlop%projectors_k,xg_nonlop%space_pw,npw_k,xg_nonlop%cprjdim,&
       xg_nonlop%comm_band,me_g0=me_g0_loc)
@@ -972,38 +972,39 @@ contains
       if (.not.xg_nonlop%paw) then
         ABI_ERROR('Not implemented with paw=False.')
       end if
-      if (.not.allocated(xg_nonlop%invSij_approx)) then
-        nlmn_max=xg_nonlop%nlmn_max
-        if (xg_nonlop%space_pw==SPACE_CR) then
-          call xg_init(xg_nonlop%invSij_approx_all,SPACE_R,nlmn_max,nlmn_max*ntypat,xmpi_comm_self)
-        else
-          call xg_init(xg_nonlop%invSij_approx_all,SPACE_C,nlmn_max,nlmn_max*ntypat,xmpi_comm_self)
-        end if
-        ABI_MALLOC(xg_nonlop%invSij_approx,(ntypat))
 
-        shift_itypat=1
-        do itypat = 1, ntypat
-          nlmn = xg_nonlop%nlmn_ntypat(itypat)
-          call xgBlock_setBlock(xg_nonlop%projectors_k%self,projs,npw_k,nlmn,fcol=shift_itypat)
-          shift=1+(itypat-1)*nlmn_max
-          call xg_setBlock(xg_nonlop%invSij_approx_all,xg_nonlop%invSij_approx(itypat),nlmn,nlmn,fcol=shift)
-          if (xg_nonlop%space_pw==SPACE_CR) then
-            call xgBlock_copy(xg_nonlop%Sijm1(itypat),xg_nonlop%invSij_approx(itypat))
-          else
-            call xgBlock_r2c(xg_nonlop%Sijm1(itypat),xg_nonlop%invSij_approx(itypat),1)
-          end if
-          space_work = xg_nonlop%space_pw
-          if (xg_nonlop%space_pw==SPACE_CR) then
-            space_work = SPACE_R
-          end if
-          call xg_init(work,space_work,nlmn,nlmn,xmpi_comm_self)
-          call xgBlock_gemm('t','n',1.0d0,projs,projs,0.0d0,work%self,comm=xg_nonlop%comm_band)
-          call xgBlock_add(xg_nonlop%invSij_approx(itypat),work%self)
-          call xgBlock_invert_sy(xg_nonlop%invSij_approx(itypat),work%self)
-          call xg_free(work)
-          shift_itypat = shift_itypat + nlmn*xg_nonlop%nattyp(itypat)
-        end do
-      end if
+      nlmn_max=xg_nonlop%nlmn_max
+
+      shift_itypat=1
+      do itypat = 1, ntypat
+        nlmn = xg_nonlop%nlmn_ntypat(itypat)
+
+        !invSij_approx_k is allocated here as space_pw depends on k-point
+        if (xg_nonlop%space_pw==SPACE_CR) then
+          call xg_init(xg_nonlop%invSij_approx_k(itypat),SPACE_R,nlmn,nlmn,xmpi_comm_self)
+        else
+          call xg_init(xg_nonlop%invSij_approx_k(itypat),SPACE_C,nlmn,nlmn,xmpi_comm_self)
+        end if
+
+        call xgBlock_setBlock(xg_nonlop%projectors_k%self,projs,npw_k,nlmn,fcol=shift_itypat)
+        !shift=1+(itypat-1)*nlmn_max
+        !call xg_setBlock(xg_nonlop%invSij_approx_all,xg_nonlop%invSij_approx(itypat),nlmn,nlmn,fcol=shift)
+        if (xg_nonlop%space_pw==SPACE_CR) then
+          call xgBlock_copy(xg_nonlop%Sijm1(itypat),xg_nonlop%invSij_approx_k(itypat)%self)
+        else
+          call xgBlock_r2c(xg_nonlop%Sijm1(itypat),xg_nonlop%invSij_approx_k(itypat)%self,1)
+        end if
+        space_work = xg_nonlop%space_pw
+        if (xg_nonlop%space_pw==SPACE_CR) then
+          space_work = SPACE_R
+        end if
+        call xg_init(work,space_work,nlmn,nlmn,xmpi_comm_self)
+        call xgBlock_gemm('t','n',1.0d0,projs,projs,0.0d0,work%self,comm=xg_nonlop%comm_band)
+        call xgBlock_add(xg_nonlop%invSij_approx_k(itypat)%self,work%self)
+        call xgBlock_invert_sy(xg_nonlop%invSij_approx_k(itypat)%self,work%self)
+        call xg_free(work)
+        shift_itypat = shift_itypat + nlmn*xg_nonlop%nattyp(itypat)
+      end do
 
     end if
 
@@ -2272,14 +2273,14 @@ subroutine xg_nonlop_getXHX(xg_nonlop,cprj_left,cprj_right,cprj_work,res,blocksi
    call xgBlock_check(cprjin,cprj_work2)
    call xgBlock_getsize(Xin,nrows,ncols)
    call xgBlock_getsize(cprjin,nrows_cprj,ncols_cprj)
-   if (.not.allocated(xg_nonlop%invSij_approx)) then
-     ABI_ERROR('invSij_approx not allocated')
+   if (.not.associated(xg_nonlop%invSij_approx_k)) then
+     ABI_ERROR('invSij_approx not associated')
    end if
    if (.not.associated(xg_nonlop%gram_proj_k)) then
      ABI_ERROR('gram_proj_k should be associated')
    end if
 
-   call xg_nonlop_precond_iterative_refinement(xg_nonlop,xg_nonlop%gram_proj_k%self,xg_nonlop%invSij_approx,&
+   call xg_nonlop_precond_iterative_refinement(xg_nonlop,xg_nonlop%gram_proj_k%self,xg_nonlop%invSij_approx_k%self,&
      & cprjin,cprj_work1,cprj_work2)
    call xgBlock_scale(cprj_work1,-1.0d0,1)
 
