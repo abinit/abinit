@@ -593,6 +593,7 @@ subroutine tdep_write_dij(Eigen2nd,iqpt,Invar,qpt)
   double precision, allocatable :: omega (:)
   double complex, allocatable   :: dij   (:,:)
   double complex, allocatable   :: eigenV(:,:)
+  double precision :: norm_eigenV
   integer :: ii,jj,iatcell,jatcell
 
   ABI_MALLOC(omega ,(3*Invar%natom_unitcell))                       ; omega(:)   = zero
@@ -601,13 +602,20 @@ subroutine tdep_write_dij(Eigen2nd,iqpt,Invar,qpt)
   omega(:)=Eigen2nd%eigenval(:,iqpt)
   do iatcell=1,Invar%natom_unitcell
     do jatcell=1,Invar%natom_unitcell
-      do ii=1,3
-        do jj=1,3
+      do jj=1,3
+        norm_eigenV = 0.0d0
+        do ii=1,3
           dij   ((iatcell-1)*3+ii,(jatcell-1)*3+jj)=dcmplx(Eigen2nd%dynmat  (1,ii,iatcell,jj,jatcell,iqpt),&
 &                                                          Eigen2nd%dynmat  (2,ii,iatcell,jj,jatcell,iqpt))
           eigenV((iatcell-1)*3+ii,(jatcell-1)*3+jj)=dcmplx(Eigen2nd%eigenvec(1,ii,iatcell,jj,jatcell,iqpt),&
 &                                                          Eigen2nd%eigenvec(2,ii,iatcell,jj,jatcell,iqpt))
+          norm_eigenV = norm_eigenV + real(eigenV((iatcell-1)*3+ii, (jatcell-1)*3+jj))**2 + &
+                                      aimag(eigenV((iatcell-1)*3+ii, (jatcell-1)*3+jj))**2
         end do !ii 
+        norm_eigenV = dsqrt(norm_eigenV)
+        do ii=1,3
+            eigenV((iatcell-1)*3+ii, (jatcell-1)*3+jj) = eigenV((iatcell-1)*3+ii, (jatcell-1)*3+jj) / norm_eigenV
+        end do !ii
       end do !jj 
     end do !jatcell 
   end do !iatcell
@@ -635,15 +643,35 @@ subroutine tdep_write_dij(Eigen2nd,iqpt,Invar,qpt)
   if (Invar%enunit.eq.3) write(53,'(i5,1x,100(f15.3,1x))') iqpt,(omega(ii)*Ha_THz    ,ii=1,3*Invar%natom_unitcell)
 
 ! Print the eigenvectors (eigenV) 
-  write(51,*) 'For iqpt=',iqpt
+!  write(51,*) 'For iqpt=',iqpt
+!  do ii=1,3*Invar%natom_unitcell
+!    write(51,*) 'Mode number',ii,' energy',omega(ii)
+!    write(51,*) '  Real:'
+!    write(51,*) real(eigenV(:,ii))
+!    write(51,*) '  Imag:'
+!    write(51,*) aimag(eigenV(:,ii))
+!  end do
+!  write(51,*) ' '
+
+  write(51,'(a,4x,i2,4(f15.6,1x))') 'q-pt=',iqpt,(qpt(ii),ii=1,3),qpt(1)*qpt(2)*qpt(3)
+
   do ii=1,3*Invar%natom_unitcell
-    write(51,*) 'Mode number',ii,' energy',omega(ii)
-    write(51,*) '  Real:'
-    write(51,*) real(eigenV(:,ii))
-    write(51,*) '  Imag:'
-    write(51,*) aimag(eigenV(:,ii))
-  end do  
-  write(51,*) ' '
+    write(51,'(i5,5x,f15.6)') ii,omega(ii)*Ha_cmm1
+  enddo
+  write(51,*) 'Phonon Eigenvectors'
+  write(51,'(a,17x,a,33x,a,34x,a)') 'Mode Ion','X','Y','Z'
+  do ii=1,3*Invar%natom_unitcell
+    do jj=1,Invar%natom_unitcell
+      write(51,'(i2,3x,i2,3x,6(f15.12,1x))') ii,jj,real(eigenV(3*(jj-1)+1,ii)),&
+&                                              aimag(eigenV(3*(jj-1)+1,ii)),&
+&                                              real(eigenV(3*(jj-1)+2,ii)),&
+&                                              aimag(eigenV(3*(jj-1)+2,ii)),&
+&                                              real(eigenV(3*(jj-1)+3,ii)),&
+&                                              aimag(eigenV(3*(jj-1)+3,ii))
+    enddo
+  enddo
+
+
   ABI_FREE(omega)
   ABI_FREE(dij)
   ABI_FREE(eigenV)
