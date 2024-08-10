@@ -13,7 +13,7 @@
  acknowledgments of the ABINIT effort.
  For more information, see http://www.abinit.org .
 
-.Starting date : 13 Dec 2020.
+.Starting date :  8 Aug 2024.
   
  #############################################################################
  ######################### ECHO OF INPUT FILE ################################
@@ -63,6 +63,7 @@
  dielec_constant         3.0000000000
  born_charge             1.7500000000   -1.7500000000
  ngqpt1                  6    6    6
+ ngqpt2                 12   12   12
  enunit                  1 (Phonon frequencies in cm-1)
  USE IDEAL POSITIONS TO COMPUTE SPECTRUM
  USE NON-ANALYTICAL CORRECTIONS (LO-TO)
@@ -1092,9 +1093,9 @@
  
  ========== For an Anisotropic Material =======================================
  Sijkl [in GPa-1]=
- | S11 S12 S13 S14 S15 S16 |      0.001   -0.000   -0.000    0.000    0.000   -0.000
- | S21 S22 S23 S24 S25 S26 |     -0.000    0.001   -0.000    0.000    0.000   -0.000
- | S31 S32 S33 S34 S35 S36 |     -0.000   -0.000    0.001    0.000    0.000   -0.000
+ | S11 S12 S13 S14 S15 S16 |      0.001   -0.000   -0.000   -0.000    0.000   -0.000
+ | S21 S22 S23 S24 S25 S26 |     -0.000    0.001   -0.000   -0.000    0.000   -0.000
+ | S31 S32 S33 S34 S35 S36 |     -0.000   -0.000    0.001   -0.000    0.000   -0.000
  | S41 S42 S43 S44 S45 S46 | =    0.000    0.000    0.000    0.007    0.000   -0.000
  | S51 S52 S53 S54 S55 S56 |      0.000    0.000    0.000    0.000    0.007   -0.000
  | S61 S62 S63 S64 S65 S66 |      0.000    0.000    0.000    0.000    0.000    0.007
@@ -1132,7 +1133,7 @@
  
  ========================= Elastic anisotropy =================================
  Elastic anisotropy index : A_U= 5*G_V/G_R + K_V/K_R - 6 =    3.537
- Bulk anisotropy ratio : A_B= (B_V-B_R)/(B_V+B_R) =   -0.000
+ Bulk anisotropy ratio : A_B= (B_V-B_R)/(B_V+B_R) =    0.000
  Shear anisotropy ratio : A_G= (G_V-G_R)/(G_V+G_R) =    0.261
   
  #############################################################################
@@ -1149,7 +1150,7 @@
   Delta_F2= (< (F_MD - F_TDEP)^2 >)**0.5 
   Sigma   = (< (F_MD - F_TDEP)^2 >/<F_MD**2>)**0.5 
      <U_MD>            U_0              U_1              U_2            Delta_U          Delta_U2          Delta_F2          Sigma
- -1082.22729      -1082.48805          0.00000          0.26076         -0.00000          0.18693          0.01795          0.35820
+ -1082.22729      -1082.48805          0.00000          0.26076          0.00000          0.18693          0.01795          0.35820
  NOTE : in the harmonic and classical limit (T>>T_Debye), U_2=3/2*kB*T=      0.25852
  
  See the etotMDvsTDEP.dat & fcartMDvsTDEP.dat files
