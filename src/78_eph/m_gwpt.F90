@@ -291,8 +291,8 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  ! with a coarser FFT mesh.
  ! Another distint advantage of such splitting is that one can handle the divergence in vc(q,g) for |q+g| --> 0
  ! using well know techniques from GW and the anysotropic behavior of e-1(q) for q --> 0 in low-dimensional systems.
- ! The disavantage is that one needs to compute the GWPT e-ph matrix in two stepts, first Sig_x and then Sigma_x,
- ! so cetain operations such as the k-point mapping, the computation of form factors are performed twice
+ ! The disavantage is that one needs to compute the GWPT e-ph matrix in two steps, first Sig_x and then Sigma_x,
+ ! so cetain operations such as the k-point mapping, and the computation of the form factors are performed twice
  ! Note however that MG believes that Sigma_x is a much better approximation than v_xc when one is interested
  ! in the e-ph matrix elements connecting low-energy states such as band edges to high-energy states.
  !
@@ -440,7 +440,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
 
  nband = dtset%mband; bks_mask = .False.; keep_ur = .False.
  !bks_mask(my_bsum_start:my_bsum_stop,:,:) = .True.
- ! Distribute wavefunctions according to the seof kk, qq and pp wavevectors treated by this MPI proc.
+ ! Distribute wavefunctions according to the set of kk, qq and pp wavevectors treated by this MPI proc.
  call gstore%fill_bks_mask_pp_mesh(dtset%mband, nkpt, nsppol, my_pp_start_spin, my_pp_stop_spin, pp_mesh, bks_mask)
 
  if (dtset%userie == 124) then
@@ -889,6 +889,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
      !print *, "iq_ibz:", iq_ibz, "qpt:", qpt, "qq_ibz:", qq_ibz
 
      ! Compute phonons for this qpt.
+     ! FIXME: Here I should compute stuff in the IBZ and then rotate in order to fix the gauge in g
      call ifc%fourq(cryst, qpt, phfr_qq, displ_cart_qq, out_displ_red=displ_red_qq)
 
      ! ==================================================

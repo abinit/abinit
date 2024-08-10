@@ -3780,9 +3780,8 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
  NCF_CHECK(nf90_close(root_ncid))
  call xmpi_barrier(gstore%comm)
 
- ! TODO
  ! Output some of the results to ab_out for testing purposes
- !call gstore%print_for_abitests(dtset)
+ call gstore%print_for_abitests(dtset)
 
  ! Free memory
  ABI_FREE(gvnlx1)
@@ -4476,34 +4475,35 @@ subroutine gstore_print_for_abitests(gstore, dtset)
    write(ab_out, "(a,i0)")" gqk%glob_nq: ", glob_nq
    write(ab_out, "(a,i0)")" gqk%glob_nk: ", glob_nk
 
+   ! FIXME
    ! Handle the output of group velocities. On disk, we have:
    !
    !    nctkarr_t("vk_cart_ibz", "dp", "three, nb, gstore_nkibz"))
    ! or
    !    nctkarr_t("vkmat_cart_ibz", "dp", "two, three, nb, nb, gstore_nkibz")))
 
-   select case (gstore%with_vk)
-   case (0)
-     continue
+   !select case (gstore%with_vk)
+   !case (0)
+   !  continue
 
-   case (1)
-     ABI_MALLOC(vk_cart_ibz, (2, 3, nb))
-     write(ab_out,"(a)") " Group velocities v_nk in Cartesian coordinates and atomic units:"
-     do ik_ibz=1,gstore%nkibz
-       ! Only the first and the last k-points are written.
-       if (ik_ibz /= 1 .and. ik_ibz /= gstore%nkibz) cycle
-       NCF_CHECK(nf90_get_var(spin_ncid, spin_vid("vk_cart_ibz"), vk_cart_ibz, start=[1,1,ik_ibz], count=[3,nb,1]))
-       write(ab_out, "(a)")sjoin(" For k-point:", ktoa(gstore%kibz(:,ik_ibz)), ", spin", itoa(spin))
-       do ib=1,nb
-         write(ab_out, "(6es16.6)") vk_cart_ibz(:,:,ib)
-       end do
-     end do
-     write(ab_out, "(a)")" "
-     ABI_FREE(vk_cart_ibz)
+   !case (1)
+   !  ABI_MALLOC(vk_cart_ibz, (2, 3, nb))
+   !  write(ab_out,"(a)") " Group velocities v_nk in Cartesian coordinates and atomic units:"
+   !  do ik_ibz=1,gstore%nkibz
+   !    ! Only the first and the last k-points are written.
+   !    if (ik_ibz /= 1 .and. ik_ibz /= gstore%nkibz) cycle
+   !    NCF_CHECK(nf90_get_var(spin_ncid, spin_vid("vk_cart_ibz"), vk_cart_ibz, start=[1,1,ik_ibz], count=[3,nb,1]))
+   !    write(ab_out, "(a)")sjoin(" For k-point:", ktoa(gstore%kibz(:,ik_ibz)), ", spin", itoa(spin))
+   !    do ib=1,nb
+   !      write(ab_out, "(6es16.6)") vk_cart_ibz(:,:,ib)
+   !    end do
+   !  end do
+   !  write(ab_out, "(a)")" "
+   !  ABI_FREE(vk_cart_ibz)
 
-   case (2)
-     write(ab_out, "(a)")" TEXT Output of vkmat is not coded yet!"
-   end select
+   !case (2)
+   !  write(ab_out, "(a)")" TEXT Output of vkmat is not coded yet!"
+   !end select
 
    ! Handle the output of the e-ph matrix elements. On disk we have the global array:
    !
