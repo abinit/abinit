@@ -2710,7 +2710,7 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
  ABI_MALLOC(work, (2, work_ngfft(4), work_ngfft(5), work_ngfft(6)))
 
  call wrtout(std_out, sjoin(" Building supercell from ngkpt:", ltoa(vpq%ngkpt)))
- ! (note xyz_order)
+ ! note xyz_order="xyz"
  call kptrlatt_from_ngkpt(vpq%ngkpt, kptrlatt_)
  call scell_k%init(cryst%natom, kptrlatt_, cryst%rprimd, cryst%typat, cryst%xcart, cryst%znucl, xyz_order="xyz")
 
@@ -2789,7 +2789,7 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
    pol_wf = pol_wf / (nkbz * sqrt(cryst%ucvol))
    ABI_MALLOC(pol_rho, (sc_nfft))
 
-   ! Here decide if we write the polaron wavefunction with_diplaced atoms or not.
+   ! Here decide if we are gonna write the polaron wavefunctions with_diplaced atoms or not.
    use_displaced_scell = all(kptrlatt_ == qptrlatt_) .and. have_scell_q
    num_writes = 1; if (use_displaced_scell) num_writes = 2
 
