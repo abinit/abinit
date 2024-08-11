@@ -90,6 +90,8 @@ module m_varpeq
   real(dp), allocatable :: my_qpts(:,:)
   real(dp), pointer :: my_kpts(:,:) => null()
 
+  complex(dp), allocatable :: my_a2(:,:,:)
+
   complex(dp), allocatable :: my_a(:,:)
   complex(dp), allocatable :: a_glob(:,:)
   complex(dp), allocatable :: orth_a(:,:)
@@ -737,6 +739,10 @@ subroutine varpeq_collect(self)
      self%a_spin(2, :, ik_glob, spin) = aimag(polstate%my_a(:, my_ik)) ! imaginary part
      self%kpts_spin(:, ik_glob, spin) = polstate%my_kpts(:, my_ik)
    enddo
+
+   ! a spin is complex
+   ! associate real pointer to complex n spin
+   ! use pointer to call nf90 put var
 
    ! phonon vector & q-points
    do my_iq=1,gqk%my_nq
@@ -1586,6 +1592,66 @@ subroutine polstate_orthonorm(self, vec, orth)
  !self%my_grad_a(:,:) = self%my_grad_a(:,:)*sqrt(one*self%nkbz)/norm
 
 end subroutine polstate_orthonorm
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_varpeq/polstate_ort_to_states
+!! NAME
+!!  polstate_ort_to_states
+!!
+!! FUNCTION
+!!  Orthognongalize a vector wrt polaronic states using the Gram-Schmidt process.
+!!  The orthogonalization is performed for a range of states, specified by arguments.
+!!
+!! INPUTS
+!!  my_v(:,:)=Vetor to be orthogonalized
+!!  istart=Index of starting polaronic state
+!!  iend=Index of final polaronic state
+!!
+!! OUTPUT
+!!
+!! SOURCE
+
+subroutine polstate_ort_to_states(self, my_v, istart, iend)
+
+!Arguments ------------------------------------
+ class(polstate_t), intent(inout) :: self
+ complex(dp), intent(inout) :: my_v(self%gqk%nb, self%gqk%my_nk)
+ integer, intent(in) :: istart, iend
+
+!Local variables-------------------------------
+ class(gqk_t), pointer :: gqk
+ integer :: ipol
+
+!----------------------------------------------------------------------
+
+ gqk => self%gqk
+ do ipol=istart,iend
+   my_v(:,:) = my_v(:,:) - get_proj_(self%my_a2(:,:,ipol))*self%my_a2(:,:,ipol)
+ enddo
+
+ !----------------------------------------------------------------------
+ contains
+
+ complex(dp) function get_proj_(my_u) result(proj)
+
+  complex(dp), intent(in) :: my_u(gqk%nb, gqk%my_nk)
+  integer :: ierr
+  real(dp) :: u_sqnorm
+ !----------------------------------------------------------------------
+  u_sqnorm = sum(abs(my_u(:,:))**2)
+  call xmpi_sum(u_sqnorm, gqk%kpt_comm%value, ierr)
+
+  proj = zero
+  if (u_sqnorm > tol12) then
+    proj = sum(conjg(my_u(:,:))*my_v(:,:))
+    call xmpi_sum(proj, gqk%kpt_comm%value, ierr)
+    proj = proj/u_sqnorm
+  endif
+ end function get_proj_
+
+end subroutine polstate_ort_to_states
 !!***
 
 !----------------------------------------------------------------------
