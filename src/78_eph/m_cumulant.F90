@@ -219,8 +219,10 @@ module m_cumulant
    ! chemical potential of electrons for the different temperatures.
 
    real(dp),allocatable :: l0(:,:,:,:,:), l1(:,:,:,:,:), l2(:,:,:,:,:)
+   real(dp),allocatable :: l0_dm(:,:,:,:,:), l1_dm(:,:,:,:,:), l2_dm(:,:,:,:,:)
    ! (3, 3, 2, nsppol, ntemp)
    ! Onsager coeficients in Cartesian coordinates
+   ! _dm is version with Dyson Migdal
 
   integer,allocatable :: kcalc2ibz(:,:)
    !kcalc2ibz(nkcalc, 6))
@@ -255,19 +257,19 @@ module m_cumulant
    ! Cumulant function (time, kT, band, ikcalc, spin).
 
      complex(dpc),allocatable :: c1(:,:,:,:,:)
-   ! ct_vals(nwr, ntemp, max_nbcalc, my_nkcalc, nsppol)
+   ! FIXME ct_vals(nwr, ntemp, max_nbcalc, my_nkcalc, nsppol)
    ! Cumulant function (time, kT, band, ikcalc, spin).
 
      complex(dpc),allocatable :: c2(:,:,:,:,:)
-   ! ct_vals(nwr, ntemp, max_nbcalc, my_nkcalc, nsppol)
+   ! FIXME ct_vals(nwr, ntemp, max_nbcalc, my_nkcalc, nsppol)
    ! Cumulant function (time, kT, band, ikcalc, spin).
 
      complex(dpc),allocatable :: c3(:,:,:,:,:)
-   ! ct_vals(nwr, ntemp, max_nbcalc, my_nkcalc, nsppol)
+   ! FIXME ct_vals(nwr, ntemp, max_nbcalc, my_nkcalc, nsppol)
    ! Cumulant function (time, kT, band, ikcalc, spin).
 
      complex(dpc),allocatable :: gt_vals(:,:,:,:,:)
-   ! vals_wr(nwr, ntemp, max_nbcalc, my_nkcalc, nsppol)
+   ! FIXME vals_wr(nwr, ntemp, max_nbcalc, my_nkcalc, nsppol)
    ! Green's function in time domain (time, kT, band, ikcalc, spin).
 
      complex(dpc),allocatable :: gw_vals(:,:,:,:,:)
@@ -278,22 +280,29 @@ module m_cumulant
    ! ce_spfunc_wr(nwr, ntemp, max_nbcalc, my_nkcalc, nsppol)
    ! Absorption spectrum (omega, kT, band, ikcalc, spin).
 
+   ! for Cumulant and for Dyson Migdal (_dm)
    real(dp),allocatable :: seebeck(:,:,:,:,:)
+   real(dp),allocatable :: seebeck_dm(:,:,:,:,:)
    real(dp),allocatable :: kappa(:,:,:,:,:)
+   real(dp),allocatable :: kappa_dm(:,:,:,:,:)
    ! (3, 3, 2, nsppol, ntemp)
-   ! Transport coefficients in Cartesian coordinates
+   ! Transport coefficients in Cartesian coordinates, for Cumulant and for Dyson Migdal (_dm)
 
    real(dp),allocatable :: conductivity_mu(:,:,:,:,:)
+   real(dp),allocatable :: conductivity_mu_dm(:,:,:,:,:)
    ! (3, 3, 2, nsppol, ntemp)
    ! Conductivity in Siemens * cm-1
    ! computed by summing over k-points rather that by performing an energy integration).
+   ! for Cumulant and for Dyson Migdal (_dm)
 
    real(dp),allocatable :: print_dfdw(:,:)
 
    real(dp),allocatable :: mobility_mu(:,:,:,:,:)
+   real(dp),allocatable :: mobility_mu_dm(:,:,:,:,:)
    ! (3, 3, 2, nsppol, ntemp)
    ! mobility for electrons and holes (third dimension) at transport_mu_e(ntemp)
    ! Third dimension is for electron/hole
+   ! for Cumulant and for Dyson Migdal (_dm)
 
    real(dp),allocatable :: transport_mu_e(:)
    ! (%ntemp)
@@ -1143,7 +1152,8 @@ end subroutine cumulant_compute
 !! cumulant_kubo_transport
 !!
 !! FUNCTION
-!!  Compute conductivity/mobility
+!!  Compute conductivity/mobility within Kubo Greenwood formula, using Cumulant self energy spectral function
+!!  NB: also modified to use Dyson Migdal for comparison
 !!
 !! INPUTS
 !!
@@ -1166,16 +1176,24 @@ subroutine cumulant_kubo_transport(self, dtset, cryst)
  real(dp) :: omega!, time_step!, time_max
  real(dp) :: cpu, wall, gflops, cpu_kloop, wall_kloop, gflops_kloop
  real(dp) :: eig_nk, sp_func, wr_step
- real(dp) :: integration, mu_e, max_occ, fact0, fact
+ real(dp) :: sp_func_dm
+ real(dp) :: integration
+ real(dp) :: integration_dm
+ real(dp) :: mu_e, max_occ, fact0, fact
  character(len=500) :: msg
 !arrays
  real(dp),allocatable :: kernel(:), dfdw_acc(:),Aw(:),Aw_l0(:),dfdw_l0(:)!test_Aw(:), test_dfdw(:)
- real(dp) :: int_Aw, int_dfdw, dfdw
+ real(dp),allocatable :: kernel_dm(:), Aw_dm(:),Aw_l0_dm(:),dfdw_l0_dm(:)
+ complex(dp),allocatable :: gdm_vals(:)
+ real(dp) :: int_Aw
+ real(dp) :: int_Aw_dm
+ real(dp) :: int_dfdw, dfdw
  real(dp) :: vr(3), vv_tens(3,3), S(3,3), wtk!, spfunc
 ! real(dp), allocatable :: onsager_coeff(:,:)
- real(dp) :: work_33(3,3),l0inv_33nw(3,3,2)
+ real(dp) :: work_33(3,3)
+ real(dp) :: l0inv_33nw(3,3,2)
+ real(dp) :: l0inv_33nw_dm(3,3,2)
  real(dp) :: Tkelv
-
 
 !************************************************************************
 
@@ -1190,9 +1208,13 @@ subroutine cumulant_kubo_transport(self, dtset, cryst)
 ! ABI_MALLOC(test_Aw, (self%ntemp))
 ! ABI_MALLOC(test_dfdw, (self%ntemp))
  ABI_MALLOC(Aw, (self%nwr))
+ ABI_MALLOC(Aw_dm, (self%nwr))
  ABI_MALLOC(dfdw_acc, (self%nwr))
  ABI_MALLOC(Aw_l0, (self%ntemp))
+ ABI_MALLOC(Aw_l0_dm, (self%ntemp))
  ABI_MALLOC(dfdw_l0, (self%ntemp))
+
+ ABI_MALLOC(gdm_vals, (self%nwr))
 
  ABI_CALLOC(self%l0, (3, 3, 2, self%nsppol, self%ntemp))
  ABI_CALLOC(self%l1, (3, 3, 2, self%nsppol, self%ntemp))
@@ -1200,15 +1222,26 @@ subroutine cumulant_kubo_transport(self, dtset, cryst)
  ABI_CALLOC(self%seebeck, (3, 3, 2, self%nsppol, self%ntemp))
  ABI_CALLOC(self%kappa, (3, 3, 2, self%nsppol, self%ntemp))
 
+ ABI_CALLOC(self%l0_dm, (3, 3, 2, self%nsppol, self%ntemp))
+ ABI_CALLOC(self%l1_dm, (3, 3, 2, self%nsppol, self%ntemp))
+ ABI_CALLOC(self%l2_dm, (3, 3, 2, self%nsppol, self%ntemp))
+ ABI_CALLOC(self%seebeck_dm, (3, 3, 2, self%nsppol, self%ntemp))
+ ABI_CALLOC(self%kappa_dm, (3, 3, 2, self%nsppol, self%ntemp))
 
 
  ABI_CALLOC(self%mobility_mu, (3, 3, 2, self%nsppol, self%ntemp))
  ABI_CALLOC(self%conductivity_mu, (3, 3, 2, self%nsppol, self%ntemp))
+
+ ABI_CALLOC(self%mobility_mu_dm, (3, 3, 2, self%nsppol, self%ntemp))
+ ABI_CALLOC(self%conductivity_mu_dm, (3, 3, 2, self%nsppol, self%ntemp))
+
  ABI_CALLOC(self%print_dfdw, (self%nwr, self%ntemp))
 
  ABI_MALLOC(self%transport_mu_e, (self%ntemp))
 
  ABI_CALLOC(self%n_ehst, (2, self%nsppol, self%ntemp))
+
+print *, "cumulant_kubo_transport: allocated stuff"
  self%transport_fermie = dtset%eph_fermie
  self%transport_extrael = dtset%eph_extrael
  self%transport_mu_e = self%mu_e
@@ -1228,6 +1261,8 @@ subroutine cumulant_kubo_transport(self, dtset, cryst)
  end if
 
  call ebands_get_carriers(self%ebands, self%ntemp, self%kTmesh, self%transport_mu_e, self%n_ehst)
+
+print *, "cumulant_kubo_transport: e bands called"
 
  time_opt =0
  cnt = 0
@@ -1249,6 +1284,7 @@ subroutine cumulant_kubo_transport(self, dtset, cryst)
      do ib=self%bmin,self%bmax
        !if (ib > self%bmin) cycle ! MG HACK To be able to run tests quickly.
        ib_eph = ib - self%bmin + 1
+print *, "cumulant_kubo_transport: spin, k, band ", spin, ikcalc, ib_eph
        eig_nk = self%ebands%eig(ib, ik_ibz, spin)
        wr_step = self%wrmesh_b(2,ib_eph,my_ik,spin) - self%wrmesh_b(1,ib_eph,my_ik,spin)
        vr(:) = self%vbks(:, ib, ik_ibz, spin)
@@ -1260,8 +1296,15 @@ subroutine cumulant_kubo_transport(self, dtset, cryst)
        end do
        ! Calculation of the velocity tensor
        vv_tens = cryst%symmetrize_cart_tens33(vv_tens, time_opt)
-         do itemp=1,self%ntemp
+
+! temperature loop in Self Energy dependency
+       do itemp=1,self%ntemp
      !if (itemp > 1) cycle
+
+! calculate Dyson Migdal Green's function as well, for comparison
+         gdm_vals(:) = one / (self%wrmesh_b(:,ib_eph,my_ik,spin) &
+&              - self%e0vals(ib,my_ik,spin) - 0.5 * wr_step &
+&              - self%vals_wr(:, itemp, ib_eph, my_ik, my_spin))
 
          Tkelv = self%kTmesh(itemp) / kb_HaK; if (Tkelv < one) Tkelv = one
            do iw=1, self%nwr
@@ -1269,13 +1312,19 @@ subroutine cumulant_kubo_transport(self, dtset, cryst)
 
                 !  Preparing all elements needed for conductivity
                 omega = self%wrmesh_b(iw,ib_eph,my_ik,my_spin)
+
+! this retrieves the Cumulant spectral function
+! TODO: add the Dyson Migdal as well, to compare properly the transport with the same KG equation
                 sp_func = -aimag (self%gw_vals(iw, itemp, ib_eph, my_ik, my_spin) ) / pi
+                sp_func_dm = -aimag (gdm_vals(iw)) / pi
 !                test_Aw(itemp) = test_Aw(itemp) + sp_func
                 dfdw = occ_dfde(omega, self%kTmesh(itemp), self%mu_e(itemp))
                 self%print_dfdw(iw,itemp) = dfdw
 !                test_dfdw(itemp) = test_dfdw(itemp) + dfdw
                 kernel(iw) = - dfdw * sp_func**2
+                kernel_dm(iw) = - dfdw * sp_func_dm**2
                 Aw(iw) = sp_func**2
+                Aw_dm(iw) = sp_func_dm**2
                 dfdw_acc(iw) = dfdw
 
            end do !iw
@@ -1283,22 +1332,39 @@ subroutine cumulant_kubo_transport(self, dtset, cryst)
          ieh = 2; if (eig_nk >= mu_e) ieh = 1
          integration = simpson( wr_step, kernel)
          int_Aw = simpson(wr_step,Aw)
+         integration_dm = simpson( wr_step, kernel_dm)
+         int_Aw_dm = simpson(wr_step,Aw_dm)
          int_dfdw = simpson(wr_step,dfdw_acc)
          ! Calculation of the conductivity
-         self%l0( :, :, ieh, spin, itemp ) = self%l0( :, :, ieh, spin, itemp ) + integration*vv_tens(:,:)*wtk
+         self%l0( :, :, ieh, spin, itemp ) = self%l0( :, :, ieh, spin, itemp ) &
+&          + integration*vv_tens(:,:)*wtk
+         self%l0_dm( :, :, ieh, spin, itemp ) = self%l0_dm( :, :, ieh, spin, itemp ) &
+&          + integration_dm*vv_tens(:,:)*wtk
          Aw_l0(itemp) = Aw_l0(itemp) + int_Aw*wtk*vv_tens(1,1)
+         Aw_l0_dm(itemp) = Aw_l0_dm(itemp) + int_Aw_dm*wtk*vv_tens(1,1)
          dfdw_l0(itemp) = dfdw_l0(itemp) + int_dfdw*wtk*vv_tens(1,1)
-         call inv33(self%l0(:, :, ieh, spin, itemp), work_33)
 
-         l0inv_33nw(:,:,ieh) = work_33
          self%l1( :, :, ieh, spin, itemp ) = self%l0( :, :, ieh, spin, itemp )*(eig_nk - self%mu_e(itemp))
          self%l2( :, :, ieh, spin, itemp ) = self%l1( :, :, ieh, spin, itemp )*(eig_nk - self%mu_e(itemp))
+         self%l1_dm( :, :, ieh, spin, itemp ) = self%l0_dm( :, :, ieh, spin, itemp )*(eig_nk - self%mu_e(itemp))
+         self%l2_dm( :, :, ieh, spin, itemp ) = self%l1_dm( :, :, ieh, spin, itemp )*(eig_nk - self%mu_e(itemp))
 
+         call inv33(self%l0(:, :, ieh, spin, itemp), work_33)
+         l0inv_33nw(:,:,ieh) = work_33
          self%seebeck(:,:,ieh,spin,itemp) = matmul(work_33, self%l1(:,:,ieh,spin,itemp)) / Tkelv
+
+         call inv33(self%l0_dm(:, :, ieh, spin, itemp), work_33)
+         l0inv_33nw_dm(:,:,ieh) = work_33
+         self%seebeck_dm(:,:,ieh,spin,itemp) = matmul(work_33, self%l1_dm(:,:,ieh,spin,itemp)) / Tkelv
 
          work_33 = self%l1(:, :, ieh, spin, itemp)
          work_33 = self%l2(:, :, ieh, spin, itemp) - matmul(work_33, matmul(l0inv_33nw(:, :, ieh), work_33))
          self%kappa(:,:,ieh,spin,itemp) = work_33 / Tkelv
+
+
+         work_33 = self%l1_dm(:, :, ieh, spin, itemp)
+         work_33 = self%l2_dm(:, :, ieh, spin, itemp) - matmul(work_33, matmul(l0inv_33nw_dm(:, :, ieh), work_33))
+         self%kappa_dm(:,:,ieh,spin,itemp) = work_33 / Tkelv
          !self%conductivity_mu( :, :, ieh, spin, itemp ) = self%conductivity_mu( :, :, ieh, spin, itemp ) + integration*vv_tens(:,:)*wtk
 !         call xmpi_sum(self%conductivity_mu(:, :, ieh, spin, itemp) , self%wt_comm%value, ierr)
          end do ! itemp
@@ -1310,11 +1376,16 @@ subroutine cumulant_kubo_transport(self, dtset, cryst)
    !call xmpi_sum(self%conductivity_mu , self%kcalc_comm%value, ierr)
  end do !my_spin
 
+print *, "cumulant_kubo_transport: loops done"
  max_occ = two / (self%nspinor * self%nsppol)
  fact0 = max_occ * (siemens_SI / Bohr_meter / cryst%ucvol) / 100
  self%conductivity_mu = fact0 * self%l0  ! siemens cm^-1
  self%seebeck = - volt_SI  * max_occ * self%seebeck
  self%kappa = + volt_SI**2 * fact0 * self%kappa
+
+ self%conductivity_mu_dm = fact0 * self%l0_dm  ! siemens cm^-1
+ self%seebeck_dm = - volt_SI  * max_occ * self%seebeck_dm
+ self%kappa_dm = + volt_SI**2 * fact0 * self%kappa_dm
 
  do itemp=1, self%ntemp
    Tkelv = self%kTmesh(itemp) / kb_HaK; if (Tkelv < one) Tkelv = one
@@ -1329,6 +1400,9 @@ subroutine cumulant_kubo_transport(self, dtset, cryst)
          call safe_div(fact * self%conductivity_mu(:,:,ieh,spin,itemp), &
                        self%n_ehst(ieh, spin, itemp) / cryst%ucvol / Bohr_meter**3, zero, &
                        self%mobility_mu(:,:,ieh,spin,itemp))
+         call safe_div(fact * self%conductivity_mu_dm(:,:,ieh,spin,itemp), &
+                       self%n_ehst(ieh, spin, itemp) / cryst%ucvol / Bohr_meter**3, zero, &
+                       self%mobility_mu_dm(:,:,ieh,spin,itemp))
        end do
      end do
    end do
@@ -1337,12 +1411,17 @@ subroutine cumulant_kubo_transport(self, dtset, cryst)
  call cwtime_report(" cumulant_kubo_transport", cpu_kloop, wall_kloop, gflops_kloop)
 
  ABI_SFREE(kernel)
+ ABI_SFREE(kernel_dm)
 ! ABI_SFREE(test_Aw)
 ! ABI_SFREE(test_dfdw)
  ABI_SFREE(Aw)
+ ABI_SFREE(Aw_dm)
  ABI_SFREE(dfdw_acc)
  ABI_SFREE(Aw_l0)
+ ABI_SFREE(Aw_l0_dm)
  ABI_SFREE(dfdw_l0)
+ ABI_SFREE(gdm_vals)
+
 
 end subroutine cumulant_kubo_transport
 
