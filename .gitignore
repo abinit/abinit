@@ -354,4 +354,6 @@ doxygen.err
 .vscode/
 
 /home/users/lmacenul/abinit/build
+# R language
+.Rhistory
 

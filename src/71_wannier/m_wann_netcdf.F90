@@ -17,9 +17,6 @@
 #include "config.h"
 #endif
 
-
-
-
 #include "abi_common.h"
 
 module m_wann_netcdf
@@ -38,7 +35,7 @@ module m_wann_netcdf
 ! This is different for the wannier90 netcdf file in abinit.
 ! It is used for the lattice Wannier function.
 ! TODO: make it more similar to the electron Wannier nc file?
-!--------------------------------------------------------------------- 
+!---------------------------------------------------------------------
   type, public:: IOWannNC
      ! id of netcdf file
      integer:: ncid

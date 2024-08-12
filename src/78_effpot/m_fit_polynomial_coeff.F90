@@ -2860,9 +2860,9 @@ subroutine fit_polynomial_printSystemFiles(eff_pot,hist)
 
 !Create new supercell corresponding to the MD
  ncell = (/2,2,2/)
- call init_supercell(eff_pot%crystal%natom, (/ncell(1),0,0,  0,ncell(2),0,  0,0,ncell(3)/),&
-&                    eff_pot%crystal%rprimd,eff_pot%crystal%typat,&
-&                    eff_pot%crystal%xcart,eff_pot%crystal%znucl, supercell)
+ call supercell%init(eff_pot%crystal%natom, (/ncell(1),0,0,  0,ncell(2),0,  0,0,ncell(3)/),&
+                     eff_pot%crystal%rprimd,eff_pot%crystal%typat,&
+                     eff_pot%crystal%xcart,eff_pot%crystal%znucl)
 
 !allocation of array
  ABI_MALLOC(xcart,(3,supercell%natom))
@@ -3039,7 +3039,7 @@ subroutine fit_polynomial_printSystemFiles(eff_pot,hist)
  ABI_FREE(typat_order_uc)
  ABI_FREE(xcart)
  ABI_FREE(fcart)
- call destroy_supercell(supercell)
+ call supercell%free()
 
 end subroutine fit_polynomial_printSystemFiles
 !!***

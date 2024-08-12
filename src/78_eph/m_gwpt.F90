@@ -329,7 +329,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
 
  if (restart == 0) then
    ! Build new gstore object from dtset input variables.
-   call gstore%init(gstore_filepath, dtset, wfk_hdr, cryst, ebands, ifc, comm)
+   call gstore%init(gstore_filepath, dtset, dtfil, wfk_hdr, cryst, ebands, ifc, comm)
    ABI_REMALLOC(done_qbz_spin, (gstore%nqbz, nsppol))
    done_qbz_spin = 0
  else
@@ -561,14 +561,14 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
        end do
      end do ! my_ik
 
-     call xmpi_sum_master(count_bk, master, gqk%grid_comm%value, ierr)
-     call xmpi_sum_master(vk_cart_ibz, master, gqk%grid_comm%value, ierr)
+     call xmpi_sum_master(count_bk, master, gqk%comm%value, ierr)
+     call xmpi_sum_master(vk_cart_ibz, master, gqk%comm%value, ierr)
      do ii=1,3
        vk_cart_ibz(ii,:,:) = vk_cart_ibz(ii,:,:) / count_bk
      end do
 
      ! Write v_nk to disk.
-     !if (gqk%grid_comm%me == master) then
+     !if (gqk%comm%me == master) then
        NCF_CHECK(nf90_inq_ncid(root_ncid, strcat("gqk", "_spin", itoa(spin)), spin_ncid))
        NCF_CHECK(nf90_put_var(spin_ncid, spin_vid("vk_cart_ibz"), vk_cart_ibz))
      !end if
