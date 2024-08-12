@@ -39,7 +39,7 @@ module m_wfd
  use defs_abitypes,    only : mpi_type
  use m_gwdefs,         only : one_gw
  use m_time,           only : cwtime, cwtime_report, timab
- use m_fstrings,       only : toupper, firstchar, int2char10, sjoin, itoa, strcat, itoa, yesno, ltoa
+ use m_fstrings,       only : toupper, firstchar, int2char10, sjoin, itoa, strcat, itoa, yesno, ltoa, ktoa
  use m_io_tools,       only : get_unit, iomode_from_fname, iomode2str, open_file
  use m_numeric_tools,  only : imin_loc, list2blocks, bool2index
  use m_hide_blas,      only : xcopy, xdotc
@@ -1507,13 +1507,13 @@ subroutine wfd_get_gvec_gbound(wfd, gmet, ecut, kq, ikq_ibz, isirr_kq, nloalg, &
  if (isirr_kq) then
    ! Copy data
    istwf_kq = wfd%istwfk(ikq_ibz); npw_kq = wfd%npwarr(ikq_ibz)
-   ABI_CHECK_IGEQ(mpw, npw_kq, "mpw should me => npw_kq")
+   ABI_CHECK_IGEQ(mpw, npw_kq, sjoin("mpw should be => npw_kq for kq:", ktoa(kq)))
    kg_kq(:,1:npw_kq) = wfd%kdata(ikq_ibz)%kg_k
  else
    ! Build new g-sphere centered on k+q without TR
    istwf_kq = 1
    call get_kg(kq, istwf_kq, ecut, gmet, npw_kq, gtmp)
-   ABI_CHECK_IGEQ(mpw, npw_kq, "mpw should me => npw_kq")
+   ABI_CHECK_IGEQ(mpw, npw_kq, sjoin("mpw should be => npw_kq for kq:", ktoa(kq)))
    kg_kq(:,1:npw_kq) = gtmp(:,:npw_kq)
    ABI_FREE(gtmp)
  end if
@@ -4252,8 +4252,7 @@ subroutine wfd_rotate_cg(wfd, band, ndat, spin, kk_ibz, npw_kbz, kg_kbz, istwf_k
    end do
 
  else
-   ! Reconstruct u_k(G) from the IBZ image.
-   ! Use cg_kirr as workspace array, results stored in cgs_kbz.
+   ! Reconstruct u_k(G) from the IBZ image. Use cg_kirr as workspace array, results stored in cgs_kbz.
    istwf_kirr = wfd%istwfk(ik_ibz); npw_kirr = wfd%npwarr(ik_ibz)
    ABI_MALLOC(cg_kirr, (2, npw_kirr*wfd%nspinor))
 

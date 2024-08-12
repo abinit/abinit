@@ -313,7 +313,7 @@ subroutine dfpt_cgwf(u1_band_,band_me,rank_band,bands_treated_now,berryopt,cgq,c
 
  if (prtvol>=10) then
    !Tell us what is going on:
-   write(msg,'(a,i0,2x,a,i0,a)')' --- dfpt_cgwf is called for band:', u1_band,' for: ',nline,' lines'
+   write(msg,'(a,i0,2x,a,i0,a)')' --- dfpt_cgwf is called for band: ', u1_band,' for: ',nline,' lines'
    call wrtout(std_out,msg)
  end if
 
@@ -1617,6 +1617,7 @@ subroutine full_active_wf1(cgq,cprjq,cwavef,cwave1,cwaveprj,cwaveprj1,cycle_band
    end if
    factr = inv_delta_E * gkkr
    facti = inv_delta_E * eig1(index_eig1+1)
+   !print *, "ibandkq, iband, factr, facti:", ibandkq, iband, factr, facti
 
    ! Apply correction to 1st-order WF
 !$OMP PARALLEL DO PRIVATE(ii) SHARED(cgq,cwave1,facti,factr,index_cgq,npw1,nspinor)
@@ -1774,7 +1775,7 @@ subroutine stern_solve(stern, u1_band, band_me, idir, ipert, qpt, gs_hamkq, rf_h
 !arrays
  real(dp),allocatable :: grad_berry(:,:)
  complex(gwpc),allocatable :: cwork_sp(:)
- logical  :: cycle_bands(stern%nband)
+ logical :: cycle_bands(stern%nband)
 #ifdef HAVE_GW_DPC
  complex(gwpc),pointer :: full_ug1_dp_ptr(:)
 #endif
@@ -1889,6 +1890,8 @@ subroutine stern_solve(stern, u1_band, band_me, idir, ipert, qpt, gs_hamkq, rf_h
    call full_active_wf1(stern%cgq, stern%cprjq, cwavef, full_cg1, cwaveprj, stern%cwaveprj1, cycle_bands, stern%eig1_k, fermie1, &
                         eig0nk, eig0_kq, stern%dtset%elph2_imagden, iband, ibgq0, icgq0, stern%mcgq, stern%mcprjq, stern%mpi_enreg, &
                         stern%dtset%natom, stern%nband, stern%npw_kq, stern%nspinor, timcount0, gs_hamkq%usepaw)
+   !print *, "cwavef:", cwavef(:,1)
+   !print *, "full_cg1:", full_cg1(:,1)
 
    if (present(full_ur1)) then
      ! Note the use use of _kp pointers in gs_hamkq as full_ug1 is given on the k+q g-sphere.

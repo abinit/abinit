@@ -7,6 +7,9 @@
  nshiftk 1
  shiftk 0 0 0
 
+ # TODO: Should have a default value
+ elph2_imagden 0.1 eV
+
 ##############################################
 ####                 SECTION: EPH
 ##############################################
