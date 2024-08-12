@@ -188,7 +188,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
 !Local variables-------------------------------
 ! Scalars
  integer,parameter :: tim_fourwf_fock_getghc=10,tim_fourdp_fock_getghc=10
- integer :: bdtot_jindex,choice,cplex_fock,cplex_dij,cpopt,i1,i2,i3,ia,iatom,idat,idat_occ
+ integer :: bdtot_jindex,choice,cplex_fock,cplex_dij,cpopt,i1,i2,i3,ia,iatom,idat,idat_occ,iatm
  integer :: iband_cprj,ider,idir,idir1,ier,ii,ind,ipw,ifft,itypat,izero,jband,jbg,jcg,jkg
  integer :: jkpt,my_jsppol,jstwfk,lmn2_size,mgfftf,mpw,n1,n2,n3,n4,n5,n6,ndat_occ
  integer :: n1f,n2f,n3f,n4f,n5f,n6f,natom,nband_k,ndij,nfft,nfftf,nfftotf,nhat12_grdim,nnlout
@@ -205,7 +205,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
  integer,pointer :: gboundf(:,:),kg_occ(:,:),gbound_kp(:,:)
  real(dp) :: fockstr(6),qphon(3),qvec_j(3),tsec(2),gsc_dum(2,0),rhodum(2,1)
  real(dp) :: rhodum0(0,1,1)
- real(dp), allocatable :: dummytab(:,:),dijhat(:,:,:,:,:,:),dijhat_tmp(:,:),ffnl_kp_dum(:,:,:,:),kpg_kp(:,:),occ(:)
+ real(dp), allocatable :: dummytab(:,:),dijhat(:,:,:,:,:,:),dijhat_tmp(:,:,:),ffnl_kp_dum(:,:,:,:),kpg_kp(:,:),occ(:)
  real(dp), allocatable, target :: gvnlxc(:,:),ghc1(:,:),ghc2(:,:),grnhat12(:,:,:,:,:,:),grnhat_12(:,:,:,:,:,:,:),forikpt(:,:,:)
  real(dp), allocatable :: rho12(:,:,:,:,:),rhog_munu(:,:,:,:),rhor_munu(:,:,:,:),vlocpsi_r(:,:),strdat(:,:,:,:)
  real(dp), allocatable :: vfock(:,:,:),psilocal(:,:,:),enlout_dum(:),vectin_dum(:,:),vqg(:),forout(:,:),strout(:,:),for1(:,:)
@@ -725,23 +725,30 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
 #ifdef HAVE_OPENMP_OFFLOAD
        !!$OMP TARGET UPDATE FROM(vfock) IF(gpu_option==ABI_GPU_OPENMP)
 #endif
-       do iatom=1,natom
-         itypat=gs_ham%typat(iatom)
+       iatm=0
+       do itypat=1,gs_ham%ntypat
          lmn2_size=fockcommon%pawtab(itypat)%lmn2_size
-         ABI_MALLOC(dijhat_tmp,(cplex_fock*cplex_dij*lmn2_size,ndij*ndat_occ*ndat))
-         call pawdijhat_ndat(dijhat_tmp,cplex_dij,cplex_fock,gs_ham%gprimd,iatom,&
-&         natom,ndij,nfftf,nfftotf,nspden_fock,nspden_fock,ndat_occ*ndat,fockbz%pawang,fockcommon%pawfgrtab(iatom),&
-&         fockcommon%pawtab(itypat),vfock,qphon,gs_ham%ucvol,gs_ham%xred,gpu_option=gpu_option)
-         do idat=1,ndat
-           do idat_occ=1,ndat_occ
-             do ii=1,cplex_fock
-               ind=(ii-1)*lmn2_size*cplex_dij
-               dijhat(1:cplex_dij*lmn2_size,iatom,:,idat_occ,ii,idat)=&
-&                   dijhat_tmp(ind+1:ind+cplex_dij*lmn2_size,1+(idat_occ-1)*ndij+(idat-1)*ndat_occ*ndij:idat_occ*ndij+(idat-1)*ndat_occ*ndij)
-             end do
-           end do ! idat_occ
-         end do ! idat
+         ABI_MALLOC(dijhat_tmp,(cplex_fock*cplex_dij*lmn2_size,ndij*ndat_occ*ndat,gs_ham%nattyp(itypat)))
+         call pawdijhat_ndat(dijhat_tmp,cplex_dij,cplex_fock,gs_ham%gprimd,iatm,&
+&           natom,ndij,nfftf,nfftotf,nspden_fock,nspden_fock,ndat_occ*ndat,&
+&           gs_ham%nattyp(itypat),fockbz%pawang,fockcommon%pawfgrtab,&
+&           fockcommon%pawtab(itypat),vfock,qphon,gs_ham%ucvol,gs_ham%xred,&
+&           gpu_option=gpu_option)
+         do ia=1,gs_ham%nattyp(itypat)
+           do idat=1,ndat
+             do idat_occ=1,ndat_occ
+               do ii=1,cplex_fock
+                 iatom=iatm+ia
+                 ind=(ii-1)*lmn2_size*cplex_dij
+                 dijhat(1:cplex_dij*lmn2_size,iatom,:,idat_occ,ii,idat)=&
+  &                dijhat_tmp(ind+1:ind+cplex_dij*lmn2_size,&
+                              1+(idat_occ-1)*ndij+(idat-1)*ndat_occ*ndij:idat_occ*ndij+(idat-1)*ndat_occ*ndij,ia)
+               end do
+             end do ! idat_occ
+           end do ! idat
+         end do ! ia
          ABI_FREE(dijhat_tmp)
+         iatm=iatm+gs_ham%nattyp(itypat)
        end do
        signs=2; cpopt=2;idir=0; paw_opt=1;nnlout=1;tim_nonlop=17
        
