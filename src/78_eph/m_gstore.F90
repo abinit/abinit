@@ -2198,26 +2198,27 @@ end subroutine gstore_fill_bks_mask
 !!
 !! SOURCE
 
-subroutine gstore_fill_bks_mask_pp_mesh(gstore, mband, nkibz, nsppol, &
-                                        my_pp_start_spin, my_pp_stop_spin, pp_mesh, bks_mask)
+subroutine gstore_fill_bks_mask_pp_mesh(gstore, ecut, mband, nkibz, nsppol, my_pp_start_spin, my_pp_stop_spin, pp_mesh, bks_mask, mpw, gmax)
 
 !Arguments ------------------------------------
  class(gstore_t),target,intent(inout) :: gstore
+ real(dp),intent(in) :: ecut
  integer,intent(in) :: mband, nkibz, nsppol
  integer :: my_pp_start_spin(nsppol), my_pp_stop_spin(nsppol)
  type(kmesh_t),intent(in) :: pp_mesh
  logical,intent(out) :: bks_mask(mband, nkibz, nsppol)
+ integer,intent(out) :: mpw, gmax(3)
 
 !Local variables-------------------------------
 !scalars
- integer :: my_is, my_ik, my_iq, spin, ik_ibz, iqk_ibz, ebands_timrev, b1, b2, ipp_bz
+ integer,parameter :: istwfk1 = 1
+ integer :: my_is, my_ik, my_iq, spin, ik_ibz, iqk_ibz, ebands_timrev, b1, b2, ipp_bz, my_mpw, my_gmax(3), ierr, onpw
  real(dp) :: weight_q, cpu, wall, gflops
  type(gqk_t),pointer :: gqk
  type(crystal_t),pointer :: cryst
 !arrays
- integer,allocatable :: map_kq(:,:)
- real(dp) :: qpt(3), pp(3)
-
+ integer,allocatable :: map_kq(:,:), gtmp(:,:)
+ real(dp) :: qpt(3), pp(3), kk(3)
 !----------------------------------------------------------------------
 
  call cwtime(cpu, wall, gflops, "start")
@@ -2227,52 +2228,64 @@ subroutine gstore_fill_bks_mask_pp_mesh(gstore, mband, nkibz, nsppol, &
  cryst => gstore%cryst
  ebands_timrev = kpts_timrev_from_kptopt(gstore%ebands%kptopt)
 
+ mpw = 0; gmax = 0
+
  do my_is=1,gstore%my_nspins
-   gqk => gstore%gqk(my_is)
-   spin = gstore%my_spins(my_is)
+   gqk => gstore%gqk(my_is); spin = gstore%my_spins(my_is)
    ! FIXME: This is not correct in the case of band parallelism.
-   b1 = gqk%bstart
-   b2 = gqk%bstop
+   b1 = gqk%bstart; b2 = gqk%bstop
 
    ! We need the image of this k in the IBZ.
    do my_ik=1,gqk%my_nk
-     ik_ibz = gqk%my_k2ibz(1, my_ik)
-     bks_mask(b1:b2, ik_ibz, spin) = .True.
+     ik_ibz = gqk%my_k2ibz(1, my_ik); bks_mask(b1:b2, ik_ibz, spin) = .True.
    end do
 
    ABI_MALLOC(map_kq, (6, gqk%my_nk))
 
-   ! We also need the image of k-p in the IBZ for the pp treated by me.
+   ! We also need the image of k-p in the IBZ for the pp wavevectors treated by this MPI rank.
    do ipp_bz=my_pp_start_spin(spin), my_pp_stop_spin(spin)
      pp = pp_mesh%bz(:,ipp_bz)
      if (kpts_map("symrel", ebands_timrev, cryst, gstore%krank_ibz, gqk%my_nk, gqk%my_kpts, map_kq, qpt=-pp) /= 0) then
        ABI_ERROR(sjoin("Cannot map k-p to IBZ with qpt:", ktoa(qpt), "and pp:", ktoa(pp)))
      end if
      do my_ik=1,gqk%my_nk
-       iqk_ibz = map_kq(1, my_ik)
-       bks_mask(b1:b2, iqk_ibz, spin) = .True.
+       iqk_ibz = map_kq(1, my_ik); bks_mask(b1:b2, iqk_ibz, spin) = .True.
+       ! Compute g-sphere, returns onpw. Note istwfk == 1.
+       kk = gqk%my_kpts(:, my_ik)
+       call get_kg(kk-pp, istwfk1, ecut, gstore%cryst%gmet, onpw, gtmp, mpw=mpw, gmax=gmax)
+       ABI_FREE(gtmp)
      end do
+
    end do ! ipp_bz
 
-   ! We also need the image of k+q-p in the IBZ for the pp treated by me.
+   ! We also need the image of k+q-p in the IBZ for the pp wavevectors treated by this MPI rank.
    do my_iq=1,gqk%my_nq
      call gqk%myqpt(my_iq, gstore, weight_q, qpt)
 
      do ipp_bz=my_pp_start_spin(spin), my_pp_stop_spin(spin)
        pp = pp_mesh%bz(:,ipp_bz)
-
        if (kpts_map("symrel", ebands_timrev, cryst, gstore%krank_ibz, gqk%my_nk, gqk%my_kpts, map_kq, qpt=qpt-pp) /= 0) then
          ABI_ERROR(sjoin("Cannot map k+q-p to IBZ with qpt:", ktoa(qpt), "and pp:", ktoa(pp)))
        end if
        do my_ik=1,gqk%my_nk
-         iqk_ibz = map_kq(1, my_ik)
-         bks_mask(b1:b2, iqk_ibz, spin) = .True.
+         iqk_ibz = map_kq(1, my_ik); bks_mask(b1:b2, iqk_ibz, spin) = .True.
+
+         ! Compute g-sphere, returns onpw. Note istwfk == 1.
+         kk = gqk%my_kpts(:, my_ik)
+         call get_kg(kk+qpt-pp, istwfk1, ecut, gstore%cryst%gmet, onpw, gtmp, mpw=mpw, gmax=gmax)
+         ABI_FREE(gtmp)
        end do
+
      end do ! ipp_bz
    end do ! my_iq
 
    ABI_FREE(map_kq)
  end do ! my_is
+
+ my_mpw = mpw; call xmpi_max(my_mpw, mpw, gstore%comm, ierr)
+ my_gmax = gmax; call xmpi_max(my_gmax, gmax, gstore%comm, ierr)
+
+ call wrtout(std_out, sjoin(' Optimal value of mpw: ', itoa(mpw)))
 
  call cwtime_report(" gstore_fill_bks_mask_pp_mesh", cpu, wall, gflops)
 
@@ -2303,14 +2316,13 @@ subroutine gstore_get_mpw_gmax(gstore, ecut, mpw, gmax)
 
 !Local variables-------------------------------
  integer,parameter :: istwfk1 = 1
- integer :: my_is, my_ik, my_iq, spin, onpw, ii, ipw, ierr, my_mpw
- real(dp) :: weight_q, cpu, wall, gflops !weight_k,
+ integer :: my_is, my_ik, my_iq, spin, onpw, ii, ipw, ierr, my_mpw, ipx, ipy, ipz, pp_max
+ real(dp) :: weight_q, cpu, wall, gflops
  type(gqk_t),pointer :: gqk
 !arrays
  integer :: my_gmax(3)
  integer,allocatable :: gtmp(:,:)
- real(dp) :: kk(3), qpt(3)
-
+ real(dp) :: kk(3), qpt(3), pp(3)
 !----------------------------------------------------------------------
 
  mpw = 0; gmax = 0
@@ -2327,29 +2339,25 @@ subroutine gstore_get_mpw_gmax(gstore, ecut, mpw, gmax)
    do my_ik=1,gqk%my_nk
      kk = gqk%my_kpts(:, my_ik)
 
-     ! Compute G sphere, returning npw. Note istwfk == 1.
-     call get_kg(kk, istwfk1, ecut, gstore%cryst%gmet, onpw, gtmp)
-     mpw = max(mpw, onpw)
-     do ipw=1,onpw
-       do ii=1,3
-         gmax(ii) = max(gmax(ii), abs(gtmp(ii,ipw)))
-       end do
-     end do
+     ! Compute g-sphere, returns onpw. Note istwfk == 1.
+     call get_kg(kk, istwfk1, ecut, gstore%cryst%gmet, onpw, gtmp, mpw=mpw, gmax=gmax)
      ABI_FREE(gtmp)
 
+     pp_max = 0
      do my_iq=1,gqk%my_nq
        call gqk%myqpt(my_iq, gstore, weight_q, qpt)
-       ! TODO: g0 umklapp here can enter into play!
-       ! gmax could not be large enough!
-       call get_kg(kk + qpt, 1, ecut, gstore%cryst%gmet, onpw, gtmp)
-       mpw = max(mpw, onpw)
-       do ipw=1,onpw
-         do ii=1,3
-           gmax(ii) = max(gmax(ii), abs(gtmp(ii,ipw)))
+       ! TODO: g0 umklapp here can enter into play! gmax could not be large enough!
+       do ipz=-pp_max,pp_max
+          do ipy=-pp_max,pp_max
+            do ipx=-pp_max,pp_max
+             pp = [ipx, ipy, ipz] * half
+             call get_kg(kk + qpt - pp, 1, ecut, gstore%cryst%gmet, onpw, gtmp, mpw=mpw, gmax=gmax)
+             ABI_FREE(gtmp)
+           end do
          end do
        end do
-       ABI_FREE(gtmp)
-     end do
+
+     end do ! my_iq
 
    end do ! my_ik
  end do ! my_is
@@ -2358,7 +2366,7 @@ subroutine gstore_get_mpw_gmax(gstore, ecut, mpw, gmax)
  my_gmax = gmax; call xmpi_max(my_gmax, gmax, gstore%comm, ierr)
 
  call wrtout(std_out, sjoin(' Optimal value of mpw: ', itoa(mpw)))
- call cwtime_report(" gmax and mpw", cpu, wall, gflops)
+ call cwtime_report(" gstore_get_mpw_gmax", cpu, wall, gflops)
 
 end subroutine gstore_get_mpw_gmax
 !!***
@@ -2392,7 +2400,6 @@ subroutine gstore_calc_my_phonons(gstore, store_phdispl)
  type(crystal_t),pointer :: cryst
  type(gqk_t),pointer :: gqk
  real(dp),allocatable :: phfrq(:), displ_cart(:,:,:,:)
-
 !----------------------------------------------------------------------
 
  call cwtime(cpu, wall, gflops, "start")
@@ -3508,7 +3515,12 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
      print_time = my_rank == 0 .and. (my_iq <= LOG_MODQ .or. mod(my_iq, LOG_MODQ) == 0)
      if (print_time) call cwtime(cpu_q, wall_q, gflops_q, "start")
      iq_bz = gqk%my_q2bz(my_iq)
-     if (done_qbz_spin(iq_bz, spin) == 1) cycle
+
+     ! Handle possibile restart.
+     if (done_qbz_spin(iq_bz, spin) == 1) then
+       call wrtout(std_out, sjoin(" iq_bz:", itoa(iq_bz), ", spin: ", itoa(spin), " already computed --> skipping iteration"))
+       cycle
+     end if
 
      call gqk%myqpt(my_iq, gstore, weight_q, qq_bz)
 
@@ -3570,7 +3582,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
      ! Loop over my k-points
      do my_ik=1,gqk%my_nk
        ! Set entry to zero. Important as there are cycle instructions inside these loops
-       ! and we don't want to write random numbers to disk.
+       ! and we don't want random numbers written to disk.
        my_gbuf(:,:,:,:, my_ik, iqbuf_cnt) = zero
 
        ! The k-point and the symmetries relating the BZ k-point to the IBZ.

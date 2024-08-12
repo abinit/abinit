@@ -4418,25 +4418,31 @@ end subroutine kpgcount
 !!  npw_k=Total number of G-vectors in the full G-sphere.
 !!  kg_k(3,npw_k) list of G-vectors allocated by the routine.
 !!
+!! SIDE EFFECTS
+!!  [mpw]: Used to to compute the maximum number of PWs when looping over multiple k-points.
+!!  [gmax(3)]: Max G-component when looping over multiple k-points.
+!!
 !! SOURCE
 
 subroutine get_kg(kpoint, istwf_k, ecut, gmet, npw_k, kg_k, &
-                  kin_sorted) ! optional
+                  kin_sorted, mpw, gmax) ! optional
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: istwf_k
  integer,intent(out) :: npw_k
  real(dp),intent(in) :: ecut
+ integer,optional,intent(inout) :: mpw
 !arrays
  integer,allocatable,intent(out) :: kg_k(:,:)
  real(dp),intent(in) :: gmet(3,3),kpoint(3)
  logical,optional,intent(in) :: kin_sorted
+ integer,optional,intent(inout) :: gmax(3)
 
 !Local variables-------------------------------
 !scalars
  integer,parameter :: mkmem_ = 1, exchn2n3d0 = 0, ikg0 = 0
- integer :: npw_k_test
+ integer :: npw_k_test, ipw, ii
  type(MPI_type) :: MPI_enreg_seq
 !arrays
  integer :: kg_dum(3, 0)
@@ -4461,6 +4467,16 @@ subroutine get_kg(kpoint, istwf_k, ecut, gmet, npw_k, kg_k, &
      kg_k = iwork
      ABI_FREE(iwork)
    end if
+ end if
+
+ if (present(mpw)) mpw = max(mpw, npw_k)
+
+ if (present(gmax)) then
+   do ipw=1,npw_k
+     do ii=1,3
+       gmax(ii) = max(gmax(ii), abs(kg_k(ii,ipw)))
+     end do
+   end do
  end if
 
 end subroutine get_kg
