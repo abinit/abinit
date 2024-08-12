@@ -1,5 +1,5 @@
 
-.Version 10.0.2.1 of ABINIT, released Apr 2024.
+.Version 10.1.4.2 of ABINIT, released Jun 2024.
 .(MPI version, prepared for a aarch64_darwin22.6.0_gnu12.2 computer) 
 
 .Copyright (C) 1998-2024 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 13 Apr 2024.
-- ( at 23h08 )
+.Starting date : Tue 13 Aug 2024.
+- ( at 00h41 )
   
 - input  file    -> t04.abi
 - output file    -> t04.abo
@@ -343,6 +343,10 @@ P Number of CPUs for parallelism over perturbations: 1
 P Number of perturbations treated by this CPU: 6
 P Number of CPUs for parallelism over q-points: 1
 P Number of CPUs for parallelism over k-points: 1
+
+ vcoul_init : cutoff-mode = AUXILIARY_FUNCTION
+ q-points for optical limit:   1
+     1)      0.000010    0.000020    0.000030
  DVDB file contains all q-points in the IBZ --> Reading DFPT potentials from file.
  
  gstore_completed: 1
@@ -813,10 +817,10 @@ P           mkmem           8
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          4.0  wall=          4.0
+- Proc.   0 individual time (sec): cpu=         57.1  wall=         57.2
 
 ================================================================================
 
  Calculation completed.
 .Delivered   0 WARNINGs and   3 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          4.0  wall=          4.0
++Overall time at end (sec) : cpu=         57.1  wall=         57.2
