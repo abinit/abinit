@@ -433,7 +433,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
      end if
      ABI_MALLOC(grnhat_12,(2,nfftf,nspinor**2,3,natom*(ider/3),ndat_occ,ndat))
 #ifdef HAVE_OPENMP_OFFLOAD
-     !$OMP TARGET ENTER DATA MAP(alloc:grnhat_12) IF(gpu_option==ABI_GPU_OPENMP)
+     !$OMP TARGET ENTER DATA MAP(alloc:grnhat_12) IF(gpu_option==ABI_GPU_OPENMP .and. ider==3)
 #endif
      ABI_MALLOC(gvnlxc,(2,npw*nspinor*ndat_occ))
 #ifdef HAVE_OPENMP_OFFLOAD
@@ -1163,7 +1163,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
        ABI_FREE(strout)
      end if
 #ifdef HAVE_OPENMP_OFFLOAD
-     !$OMP TARGET EXIT DATA MAP(delete:grnhat_12) IF(gpu_option==ABI_GPU_OPENMP)
+     !$OMP TARGET EXIT DATA MAP(delete:grnhat_12) IF(gpu_option==ABI_GPU_OPENMP .and. ider==3)
 #endif
      ABI_FREE(grnhat_12)
 #ifdef HAVE_OPENMP_OFFLOAD
