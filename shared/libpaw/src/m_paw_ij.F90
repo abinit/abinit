@@ -1258,7 +1258,7 @@ subroutine paw_ij_print(Paw_ij,unit,pawprtvol,pawspnorb,mode_paral,enunit,ipert,
        if ((idij<=nsppol.or.idij==2).and.(.not.always_img_))then
          tmp_cplex_dij=1
          do kk=1,lmn2_size
-           dij2p(kk)  = my_dij(1+(kk-1)*my_cplex_dij,my_idij))
+           dij2p(kk)  = my_dij(1+(kk-1)*my_cplex_dij,my_idij)
            dij2p_(kk) = dij2p(kk)
          enddo
        else
