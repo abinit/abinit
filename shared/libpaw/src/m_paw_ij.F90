@@ -1032,10 +1032,6 @@ subroutine paw_ij_print(Paw_ij,unit,pawprtvol,pawspnorb,mode_paral,enunit,ipert,
   do idij=1,nsploop
 
    idij_sym=idij;if (ndij==4.and.idij>2) idij_sym=7-idij
-   if (qphase==2) then
-     LIBPAW_ALLOCATE(dij,(2*lmn2_size))
-     LIBPAW_ALLOCATE(dijs,(2*lmn2_size))
-   end if
 
 !  =================== Detailed output =====================================
    if (ABS(my_prtvol)>=1.and.(iatom_tot==1.or.iatom_tot==my_natom.or.my_prtvol<0)) then
@@ -1202,13 +1198,6 @@ subroutine paw_ij_print(Paw_ij,unit,pawprtvol,pawspnorb,mode_paral,enunit,ipert,
        end if
      end if
 
-     if (allocated(dij)) then
-       LIBPAW_DEALLOCATE(dij)
-     end if
-     if (allocated(dijs)) then
-       LIBPAW_DEALLOCATE(dijs)
-     end if
-
    end if   !(ABS(my_prtvol)>=1.and.(iatom_tot==1.or.iatom_tot==my_natom.or.my_prtvol<0)
 
 !  =================== Standard output =====================================
@@ -1241,13 +1230,6 @@ subroutine paw_ij_print(Paw_ij,unit,pawprtvol,pawspnorb,mode_paral,enunit,ipert,
    end if
 
 !  =================== End main loops =====================================
-
-   if (allocated(dij)) then
-     LIBPAW_DEALLOCATE(dij)
-   end if
-   if (allocated(dijs)) then
-     LIBPAW_DEALLOCATE(dijs)
-   end if
 
   end do !idij
  end do !iat
