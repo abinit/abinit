@@ -5051,7 +5051,6 @@ subroutine xmpi_distrib_2d(nprocs, order, size1, size2, n1, n2, ierr)
 
 !Local variables-------------------------------
  integer :: ii
-
 !----------------------------------------------------------------------
 
  ierr = 1; n1 = -1; n2 = -1

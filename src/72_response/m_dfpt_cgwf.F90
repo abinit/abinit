@@ -1890,8 +1890,7 @@ subroutine stern_solve(stern, u1_band, band_me, idir, ipert, qpt, gs_hamkq, rf_h
    call full_active_wf1(stern%cgq, stern%cprjq, cwavef, full_cg1, cwaveprj, stern%cwaveprj1, cycle_bands, stern%eig1_k, fermie1, &
                         eig0nk, eig0_kq, stern%dtset%elph2_imagden, iband, ibgq0, icgq0, stern%mcgq, stern%mcprjq, stern%mpi_enreg, &
                         stern%dtset%natom, stern%nband, stern%npw_kq, stern%nspinor, timcount0, gs_hamkq%usepaw)
-   !print *, "cwavef:", cwavef(:,1)
-   !print *, "full_cg1:", full_cg1(:,1)
+   !print *, "cwavef:", cwavef(:,1); print *, "full_cg1:", full_cg1(:,1)
 
    if (present(full_ur1)) then
      ! Note the use use of _kp pointers in gs_hamkq as full_ug1 is given on the k+q g-sphere.

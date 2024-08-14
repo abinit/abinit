@@ -427,6 +427,8 @@ type, public :: gstore_t
   type(ifc_type), pointer :: ifc => null()
   ! interatomic force constants.
 
+  type(dataset_type), pointer :: dtset => null()
+
   type(krank_t) :: krank_ibz, qrank_ibz
   ! Object used to find k-points or q-points in the IBZ and map BZ to IBZ.
 
@@ -499,7 +501,7 @@ contains
   ! Print info on the object
 
   procedure, private :: distribute_spins__ => gstore_distribute_spins
-!!  Distribute spins, create indirect mapping to spin index and init %brange_spin
+  ! Distribute spins, create indirect mapping to spin index and init %brange_spin
 
   procedure, private :: set_mpi_grid__ => gstore_set_mpi_grid__
   ! Set the MPI cartesian grid
@@ -580,7 +582,7 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
 !scalars
  class(gstore_t),target,intent(out) :: gstore
  character(len=*),intent(in) :: path
- type(dataset_type),intent(in) :: dtset
+ type(dataset_type),target,intent(in) :: dtset
  type(datafiles_type),intent(in) :: dtfil
  type(hdr_type),intent(in) :: wfk0_hdr
  class(crystal_t),target,intent(in) :: cryst
@@ -620,6 +622,7 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
  gstore%comm = comm; gstore%nsppol = nsppol; gstore%path = path
 
  ! Get references to other data structures.
+ gstore%dtset => dtset
  gstore%cryst => cryst; gstore%ebands => ebands; gstore%ifc => ifc
  gstore%ebands_owns_memory = .False.
 
@@ -840,7 +843,6 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
  ! Initialize gqk basic dimensions and MPI grid
  ! =============================================
  call priority_from_eph_task(dtset%eph_task, priority)
- !priority = "qk"
  call gstore%set_mpi_grid__(dtset%gstore_cplex, dtset%eph_np_pqbks, priority, nproc_spin, comm_spin)
  call xmpi_comm_free(comm_spin)
 
@@ -1203,7 +1205,8 @@ subroutine gstore_set_mpi_grid__(gstore, gstore_cplex, eph_np_pqbks, priority, n
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master = 0
- integer :: spin, my_is, np, my_rank, ierr !, ii
+ integer :: spin, my_is, np, my_rank, ierr, npp_bz !, ii
+ !type(kmesh_t) :: kmesh, qmesh
  type(gqk_t),pointer :: gqk
  character(len=5000) :: msg
  character(len=10) :: order
@@ -1214,8 +1217,7 @@ subroutine gstore_set_mpi_grid__(gstore, gstore_cplex, eph_np_pqbks, priority, n
  my_rank = xmpi_comm_rank(gstore%comm)
 
  do my_is=1,gstore%my_nspins
-   spin = gstore%my_spins(my_is)
-   gqk => gstore%gqk(my_is)
+   spin = gstore%my_spins(my_is); gqk => gstore%gqk(my_is)
 
    gqk%spin = spin; gqk%natom3 = 3 * gstore%cryst%natom; gqk%cplex = gstore_cplex
    ABI_CHECK_IRANGE(gqk%cplex, 1, 2, "gstore_cplex")
@@ -1231,8 +1233,7 @@ subroutine gstore_set_mpi_grid__(gstore, gstore_cplex, eph_np_pqbks, priority, n
  end do
 
  do my_is=1,gstore%my_nspins
-   spin = gstore%my_spins(my_is)
-   gqk => gstore%gqk(my_is)
+   spin = gstore%my_spins(my_is); gqk => gstore%gqk(my_is)
 
    ! Init for sequential execution.
    gqk%my_npert = gqk%natom3
@@ -1253,8 +1254,7 @@ subroutine gstore_set_mpi_grid__(gstore, gstore_cplex, eph_np_pqbks, priority, n
      ABI_CHECK(mod(gqk%natom3, gqk%pert_comm%nproc) == 0, "pert_comm_nproc must divide 3 * natom.")
 
      ! FIXME: Should be taken from the input.
-     gqk%bsum_comm%nproc = 1;
-     gqk%pp_sum_comm%nproc = 1;
+     gqk%bsum_comm%nproc = 1; gqk%pp_sum_comm%nproc = 1;
 
    else
      ! Automatic grid generation (hopefully smart)
@@ -1267,23 +1267,46 @@ subroutine gstore_set_mpi_grid__(gstore, gstore_cplex, eph_np_pqbks, priority, n
      ! Here we try to optimize performance but it's clear that for large systems the user
      ! should specify eph_np_pqbks in the input file.
 
-     select case (priority)
-     case ("q")
-       order = "1"
-     case ("k")
-       order = "2"
-     case ("kq")
-       order = "21"
-     case ("qk")
-       order = "12"
-     case default
-       ABI_ERROR(sjoin("Wrong priority:", priority))
-     end select
-
      np = nproc_spin(spin)
-     call xmpi_distrib_2d(np, order, gqk%glob_nq, gqk%glob_nk, gqk%qpt_comm%nproc, gqk%kpt_comm%nproc, ierr)
-     ABI_CHECK(ierr == 0, sjoin("Cannot distribute nprocs:", itoa(np), " with priority: ", priority))
-     !if (ierr /= 0) call xmpi_distrib_2d_extra(np, gqk%qpt_comm%nproc, gqk%kpt_comm%nproc, gqk%pert_comm%nproc, ierr)
+
+     if (gqk%glob_nk == 1 .and. gqk%glob_nq == 1) then
+
+       ! This may happen in GWPT when only of e-ph matrix element is wanted.
+       ! Here we activate the parallelism over pp_sum and perturbations.
+       ! In principle we should distributed the
+       npp_bz = product(get_diag(gstore%dtset%kptrlatt))
+
+       !call kmesh%init(gstore%cryst, nkibz, kibz, kptopt)
+       !call find_qmesh(qmesh, gstore%cryst, kmesh)
+       !call kmesh%free(); call qmesh%free()
+
+       order = "12"
+       !order = "21"
+       call xmpi_distrib_2d(np, order, npp_bz, gqk%natom3, gqk%pp_sum_comm%nproc, gqk%pert_comm%nproc, ierr)
+       !call xmpi_distrib_2d(np, order, gqk%natom3, gstore%dtset%mband, gqk%pert_comm%nproc, gqk%bsum_comm%nproc, ierr)
+       ABI_CHECK(ierr == 0, sjoin("Cannot distribute nprocs:", itoa(np), " with priority: ", priority))
+
+     else
+       select case (priority)
+       case ("q")
+         order = "1"
+       case ("k")
+         order = "2"
+       case ("kq")
+         order = "21"
+       case ("qk")
+         order = "12"
+       case default
+         ABI_ERROR(sjoin("Wrong priority:", priority))
+       end select
+
+       if (gqk%glob_nk == 1) order = "21"
+       if (gqk%glob_nq == 1) order = "12"
+       call xmpi_distrib_2d(np, order, gqk%glob_nq, gqk%glob_nk, gqk%qpt_comm%nproc, gqk%kpt_comm%nproc, ierr)
+       ABI_CHECK(ierr == 0, sjoin("Cannot distribute nprocs:", itoa(np), " with priority: ", priority))
+       !if (ierr /= 0) call xmpi_distrib_2d_extra(np, gqk%qpt_comm%nproc, gqk%kpt_comm%nproc, gqk%pert_comm%nproc, ierr)
+     end if
+
    end if
 
    ! Consistency check.
@@ -1304,8 +1327,7 @@ subroutine gstore_set_mpi_grid__(gstore, gstore_cplex, eph_np_pqbks, priority, n
  periods(:) = .False.; reorder = .False.
 
  do my_is=1,gstore%my_nspins
-   spin = gstore%my_spins(my_is)
-   gqk => gstore%gqk(my_is)
+   spin = gstore%my_spins(my_is); gqk => gstore%gqk(my_is)
 
    ! TODO: Should change order for GWPT
    dims = [gqk%qpt_comm%nproc, gqk%kpt_comm%nproc, gqk%pert_comm%nproc, &
@@ -1320,21 +1342,21 @@ subroutine gstore_set_mpi_grid__(gstore, gstore_cplex, eph_np_pqbks, priority, n
    call MPI_COMM_RANK(comm_cart, me_cart, ierr)
    call MPI_CART_COORDS(comm_cart, me_cart, ndims, gqk%coords_qkpb_sumbp, ierr)
 
-   ! Communicator for q-points
+   ! Communicator for q-points in g(k,q)
    keepdim = .False.; keepdim(1) = .True.; call gqk%qpt_comm%from_cart_sub(comm_cart, keepdim)
-   ! Communicator for k-points
+   ! Communicator for k-points in g(k,q)
    keepdim = .False.; keepdim(2) = .True.; call gqk%kpt_comm%from_cart_sub(comm_cart, keepdim)
    ! Communicator for the (qpt, kpt) 2D grid
    keepdim = .False.; keepdim(1) = .True.; keepdim(2) = .True.; call gqk%qpt_kpt_comm%from_cart_sub(comm_cart, keepdim)
-   ! Communicator for perturbations.
+   ! Communicator for perturbations in g(k,q)
    keepdim = .False.; keepdim(3) = .True.; call gqk%pert_comm%from_cart_sub(comm_cart, keepdim)
    ! Communicator for the (qpt, pert) 2D grid
    keepdim = .False.; keepdim(1) = .True.; keepdim(3) = .True.; call gqk%qpt_pert_comm%from_cart_sub(comm_cart, keepdim)
-   ! Communicator for band.
+   ! Communicator for band in g(k,q)
    keepdim = .False.; keepdim(4) = .True.; call gqk%band_comm%from_cart_sub(comm_cart, keepdim)
-   ! Communicator for bsum.
+   ! Communicator for bsum (GWPT mode)
    keepdim = .False.; keepdim(5) = .True.; call gqk%bsum_comm%from_cart_sub(comm_cart, keepdim)
-   ! Communicator for pp_sum.
+   ! Communicator for pp_sum (GWPT mode) .
    keepdim = .False.; keepdim(6) = .True.; call gqk%pp_sum_comm%from_cart_sub(comm_cart, keepdim)
    call xmpi_comm_free(comm_cart)
 #endif
@@ -1494,7 +1516,7 @@ subroutine gstore_malloc__(gstore, with_cplex, max_nq, qglob2bz, max_nk, kglob2b
    ! First of all we have to consider kzone
    ! Even if kzone == "bz" we may have filtered the wavevectors e.g. Fermi surface.
    call xmpi_split_block(gqk%glob_nq, gqk%qpt_comm%value, gqk%my_nq, myq2glob)
-   ABI_CHECK(gqk%my_nq > 0, "my_nq == 0")
+   ABI_CHECK(gqk%my_nq > 0, sjoin("glob_nq:", itoa(gqk%glob_nq), ", qpt_comm%nproc:", itoa(gqk%qpt_comm%nproc), " => my_nq == 0"))
    gqk%my_qstart = myq2glob(1)
    ABI_FREE(myq2glob)
 
@@ -1510,7 +1532,7 @@ subroutine gstore_malloc__(gstore, with_cplex, max_nq, qglob2bz, max_nk, kglob2b
 
    ! Split k-points and transfer symmetry tables
    call xmpi_split_block(gqk%glob_nk, gqk%kpt_comm%value, gqk%my_nk, myk2glob)
-   ABI_CHECK(gqk%my_nk > 0, "my_nk == 0")
+   ABI_CHECK(gqk%my_nk > 0, sjoin("glob_nk:", itoa(gqk%glob_nk), ", kpt_comm%nproc:", itoa(gqk%kpt_comm%nproc), " => my_nk == 0"))
    gqk%my_kstart = myk2glob(1)
    ABI_FREE(myk2glob)
 
@@ -3954,7 +3976,7 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, if
  class(gstore_t),target,intent(out) :: gstore
  character(len=*),intent(in) :: path
  integer,intent(in) :: with_cplex
- type(dataset_type),intent(in) :: dtset
+ type(dataset_type),target,intent(in) :: dtset
  class(crystal_t),target,intent(in) :: cryst
  class(ebands_t),target,intent(in) :: ebands
  class(ifc_type),target,intent(in) :: ifc
@@ -3988,6 +4010,7 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, if
  gstore%comm = comm; gstore%nsppol = dtset%nsppol; gstore%path = path
 
  ! Get references to other data structures.
+ gstore%dtset => dtset
  gstore%cryst => cryst; gstore%ebands => ebands; gstore%ifc => ifc; gstore%kibz => ebands%kptns
 
  natom = cryst%natom; natom3 = cryst%natom * 3
