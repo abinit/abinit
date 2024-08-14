@@ -981,7 +981,7 @@ subroutine paw_ij_print(Paw_ij,unit,pawprtvol,pawspnorb,mode_paral,enunit,ipert,
  integer :: idum(0)
  integer,pointer :: my_atmtab(:)
  real(dp),allocatable,target :: dijh(:,:)
- real(dp),pointer :: dij2p(:),dij2p_(:)
+ real(dp),allocatable :: dij2p(:),dij2p_(:)
 
 ! *************************************************************************
 
@@ -1025,6 +1025,8 @@ subroutine paw_ij_print(Paw_ij,unit,pawprtvol,pawspnorb,mode_paral,enunit,ipert,
   cplex_dij = Paw_ij(iatom)%cplex_dij
   qphase    = Paw_ij(iatom)%qphase
   ndij      = Paw_ij(iatom)%ndij
+  ABI_MALLOC(dij2p,(2*lmn2_size))
+  ABI_MALLOC(dij2p_,(2*lmn2_size))
 
   ! ====================================
   ! === Loop over density components ===
@@ -1232,7 +1234,9 @@ subroutine paw_ij_print(Paw_ij,unit,pawprtvol,pawspnorb,mode_paral,enunit,ipert,
 !  =================== End main loops =====================================
 
   end do !idij
- end do !iat
+  ABI_FREE(dij2p)
+  ABI_FREE(dij2p_)
+ end do !iatom
 
  call wrtout(my_unt,' ',my_mode)
 
