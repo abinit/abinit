@@ -742,8 +742,10 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
  else
 
 #ifdef HAVE_OPENMP_OFFLOAD
-   if(xomp_target_is_present(c_loc(vectin))) then
-     !$OMP TARGET UPDATE FROM(vectin) IF(hamk%gpu_option==ABI_GPU_OPENMP)
+   if(hamk%gpu_option==ABI_GPU_OPENMP) then
+     if(xomp_target_is_present(c_loc(vectin))) then
+       !$OMP TARGET UPDATE FROM(vectin)
+     end if
    end if
 #endif
 
@@ -837,11 +839,13 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
    !$omp end parallel do
 
 #ifdef HAVE_OPENMP_OFFLOAD
-   if(signs==2 .and. (paw_opt <= 2 .or. paw_opt == 4) .and. xomp_target_is_present(c_loc(vectout))) then
-     !$OMP TARGET UPDATE TO(vectout) IF(hamk%gpu_option==ABI_GPU_OPENMP)
-   end if
-   if(signs==2 .and. paw_opt>=3 .and. xomp_target_is_present(c_loc(svectout))) then
-     !$OMP TARGET UPDATE TO(svectout) IF(hamk%gpu_option==ABI_GPU_OPENMP)
+   if(hamk%gpu_option==ABI_GPU_OPENMP) then
+     if(signs==2 .and. (paw_opt <= 2 .or. paw_opt == 4) .and. xomp_target_is_present(c_loc(vectout))) then
+       !$OMP TARGET UPDATE TO(vectout)
+     end if
+     if(signs==2 .and. paw_opt>=3 .and. xomp_target_is_present(c_loc(svectout))) then
+       !$OMP TARGET UPDATE TO(svectout)
+     end if
    end if
 #endif
 
