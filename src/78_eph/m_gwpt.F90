@@ -189,7 +189,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  integer :: ib_sum, ii, ib, u1_band !,u1c_ib_k,  jj, iw !ib_kq, band_ks, ib_k, ibsum_kq, u1_master, ip
  integer :: my_is, spin, idir,ipert, ig, max_npw_xc, npw_x, npw_c, nw_nk, nw_mkq
  integer :: my_pp_start_spin(dtset%nsppol), my_pp_stop_spin(dtset%nsppol), my_npp(dtset%nsppol)
- !integer :: isym_q, trev_q
+ integer :: isym_q, trev_q
  integer :: ik_ibz, isym_k, trev_k, npw_k, istwf_k, npw_k_ibz, istwf_k_ibz
  integer :: ikq_ibz, isym_kq, trev_kq, npw_kq, istwf_kq,  npw_kq_ibz, istwf_kq_ibz
  integer :: ikmp_ibz, isym_kmp, trev_kmp, npw_kmp, istwf_kmp, npw_kmp_ibz, istwf_kmp_ibz
@@ -207,7 +207,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  real(dp) :: fact_spin, theta_mu_minus_e0i, tol_empty, tol_empty_in !, e_mkq, e_nk ! e0i,
  real(dp),ABI_CONTIGUOUS pointer :: qp_ene(:,:,:),qp_occ(:,:,:)
  real(dp) :: ecut,weight_q,enxc, vxcavg ! ediff, eshift, rfact, q0rad, bz_vol,
- logical :: isirr_k, isirr_kq, isirr_kmp, isirr_kqmp, qq_is_gamma, pp_is_gamma ! isirr_q, gen_eigenpb,
+ logical :: isirr_k, isirr_kq, isirr_kmp, isirr_kqmp, qq_is_gamma, pp_is_gamma, isirr_q !, gen_eigenpb,
  logical :: stern_use_cache, stern_has_band_para, use_ftinterp ! intra_band, same_band,
  logical :: print_time_qq, print_time_kk, print_time_pp, non_magnetic_xc, need_x
  complex(dpc) :: ieta
@@ -874,8 +874,9 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
        cycle
      end if
 
-     iq_ibz = gqk%my_q2ibz(1, my_iq) !; isym_q = gqk%my_q2ibz(2, my_iq)
-     !trev_q = gqk%my_q2ibz(6, my_iq); g0_q = gqk%my_q2ibz(3:5, my_iq)
+     iq_ibz = gqk%my_q2ibz(1, my_iq) ; isym_q = gqk%my_q2ibz(2, my_iq)
+     trev_q = gqk%my_q2ibz(6, my_iq) !; g0_q = gqk%my_q2ibz(3:5, my_iq)
+     isirr_q = (isym_q == 1 .and. trev_q == 0)
      !isirr_q = (isym_q == 1 .and. trev_q == 0 .and. all(g0_q == 0))
      !tsign_q = 1; if (trev_q == 1) tsign_q = -1
      qq_ibz = gstore%qibz(:, iq_ibz)
@@ -895,14 +896,14 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
      ! Get phonon frequencies and eigenvectors for the corresponding q-point in the IBZ.
      call ifc%fourq(cryst, qpt, phfr_qq, displ_cart_qq, out_displ_red=displ_red_qq)
 
-     !if (isirr_q) then
-     !  displ_cart_qbz = displ_cart_qibz; displ_red_qbz = displ_red_qibz; pheigvec_qbz = pheigvec_qibz
-     !else
-     !  ! Rotate phonon eigenvectors from q_ibz to q_bz.
-     !  ! This part is needed to enforce the gauge in the ph eigenvectors, including e(-q) = e(q)^*
-     !  call pheigvec_rotate(cryst, qq_ibz, isym_q, trev_q, pheigvec_qibz, pheigvec_qbz, displ_cart_qbz, &
-     !                       displ_red_qbz=displ_red_qbz)
-     !end if
+     if (isirr_q) then
+       !displ_cart_qbz = displ_cart_qibz; displ_red_qbz = displ_red_qibz; pheigvec_qbz = pheigvec_qibz
+     else
+       !! Rotate phonon eigenvectors from q_ibz to q_bz.
+       !! This part is needed to enforce the gauge in the ph eigenvectors, including e(-q) = e(q)^*
+       !call pheigvec_rotate(cryst, qq_ibz, isym_q, trev_q, pheigvec_qibz, pheigvec_qbz, displ_cart_qbz, &
+       !                     displ_red_qbz=displ_red_qbz)
+     end if
 
      ! ==================================================
      ! Get DFPT potentials and densities for this q-point
@@ -1483,6 +1484,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
        !end do
 
        ! TODO gks_atm and gks_nu
+       ! Perhaps it's gonna be easier if we only support GMODE_ATOM
        select case (gstore%gmode)
        case (GSTORE_GMODE_PHONON)
          ! Get g^{Sigma} in the phonon representation.
@@ -1650,6 +1652,9 @@ subroutine dump_data()
 
  integer :: ii, iq_bz, iq_glob, my_iq
 
+ !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+ ! FIXME: Recheck this part as we have way more levels of parallelism in GWPT
+ !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
  if (gqk%coords_qkpb_sumbp(3) /= 0) goto 10 ! Yes, I'm very proud of this GOTO.
 
  !iq_buf(:, iqbuf_cnt) = [my_iq, iq_bz]
