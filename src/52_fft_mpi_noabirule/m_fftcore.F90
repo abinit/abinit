@@ -1563,6 +1563,12 @@ subroutine sphere(cg, ndat, npw, cfft, n1, n2, n3, n4, n5, n6, kg_k, istwf_k, if
 
  DBG_ENTER("COLL")
 
+ if (n4 < 1) ABI_BUG('Wrong n4!')
+ if (n5 < 1) ABI_BUG('Wrong n5!')
+ if (n6 < 1) ABI_BUG('Wrong n6!')
+ if (ndat < 1) ABI_BUG('Wrong ndat!')
+ if (npw < 1) ABI_BUG('Wrong npw!')
+
  ! In the case of special k-points, invariant under time-reversal,
  ! but not Gamma, initialize the inverse coordinates.
  ! Remember that:

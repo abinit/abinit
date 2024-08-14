@@ -732,6 +732,10 @@ subroutine getph(atindx, natom, n1, n2, n3, ph1d, xred)
 
  do ia=1,natom
 
+   if(atindx(ia)<1 .or. natom<atindx(ia)+1)then
+     ABI_BUG('Wrong atindx(ia)!')
+   endif
+
    ! Store the phase factor of atom number ia in place atindx(ia)
    i1=(atindx(ia)-1)*(2*n1+1)
    i2=(atindx(ia)-1)*(2*n2+1)+natom*(2*n1+1)
