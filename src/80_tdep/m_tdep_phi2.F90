@@ -613,9 +613,15 @@ subroutine tdep_write_dij(Eigen2nd,iqpt,Invar,qpt)
                                       aimag(eigenV((iatcell-1)*3+ii, (jatcell-1)*3+jj))**2
         end do !ii 
         norm_eigenV = dsqrt(norm_eigenV)
-        do ii=1,3
-            eigenV((iatcell-1)*3+ii, (jatcell-1)*3+jj) = eigenV((iatcell-1)*3+ii, (jatcell-1)*3+jj) / norm_eigenV
-        end do !ii
+!        if (norm_eigenV.lt.tol8) then
+!          write(6,*) "iqpt, norm=",iqpt,norm_eigenV
+!          ABI_ERROR(' STOP: THE NORM OF EIGENVECTOR IS ZERO')
+!        end if
+        if (norm_eigenV.gt.tol8) then
+          do ii=1,3
+            eigenV((iatcell-1)*3+ii, (jatcell-1)*3+jj) = eigenV((iatcell-1)*3+ii, (jatcell-1)*3+jj) / dcmplx(norm_eigenV,0.d0)
+          end do !ii
+        end if
       end do !jj 
     end do !jatcell 
   end do !iatcell
@@ -653,7 +659,7 @@ subroutine tdep_write_dij(Eigen2nd,iqpt,Invar,qpt)
 !  end do
 !  write(51,*) ' '
 
-  write(51,'(a,4x,i2,4(f15.6,1x))') 'q-pt=',iqpt,(qpt(ii),ii=1,3),qpt(1)*qpt(2)*qpt(3)
+  write(51,'(a,4x,i3,4(f15.6,1x))') 'q-pt=',iqpt,(qpt(ii),ii=1,3),qpt(1)*qpt(2)*qpt(3)
 
   do ii=1,3*Invar%natom_unitcell
     write(51,'(i5,5x,f15.6)') ii,omega(ii)*Ha_cmm1
@@ -663,11 +669,11 @@ subroutine tdep_write_dij(Eigen2nd,iqpt,Invar,qpt)
   do ii=1,3*Invar%natom_unitcell
     do jj=1,Invar%natom_unitcell
       write(51,'(i2,3x,i2,3x,6(f15.12,1x))') ii,jj,real(eigenV(3*(jj-1)+1,ii)),&
-&                                              aimag(eigenV(3*(jj-1)+1,ii)),&
-&                                              real(eigenV(3*(jj-1)+2,ii)),&
-&                                              aimag(eigenV(3*(jj-1)+2,ii)),&
-&                                              real(eigenV(3*(jj-1)+3,ii)),&
-&                                              aimag(eigenV(3*(jj-1)+3,ii))
+&                                                 aimag(eigenV(3*(jj-1)+1,ii)),&
+&                                                  real(eigenV(3*(jj-1)+2,ii)),&
+&                                                 aimag(eigenV(3*(jj-1)+2,ii)),&
+&                                                  real(eigenV(3*(jj-1)+3,ii)),&
+&                                                 aimag(eigenV(3*(jj-1)+3,ii))
     enddo
   enddo
 
