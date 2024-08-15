@@ -114,6 +114,12 @@ module m_gpu_toolbox
       integer(kind=C_INT32_T), intent(inout) :: deviceId
     end subroutine gpu_get_device
 
+    subroutine gpu_get_max_mem(max_mem) bind(c, name='gpu_get_max_mem_cpp')
+      use, intrinsic :: iso_c_binding
+      implicit none
+      integer(kind=C_SIZE_T), intent(inout) :: max_mem
+    end subroutine gpu_get_max_mem
+
     subroutine gpu_get_free_mem(free_mem) bind(c, name='gpu_get_free_mem_cpp')
       use, intrinsic :: iso_c_binding
       implicit none

@@ -138,7 +138,7 @@ subroutine chebfiwf2_blocksize(gs_hamk,ndat,npw,nband,nspinor,paral_kgb,gpu_opti
    free_mem=256*1e9 ! Dummy value
 #ifdef HAVE_GPU
    if(gpu_option /= ABI_GPU_DISABLED) then
-     call gpu_get_free_mem(free_mem)
+     call gpu_get_max_mem(free_mem)
      free_mem = 0.95 * free_mem ! Cutting 5% out to be safe
    end if
 #else
