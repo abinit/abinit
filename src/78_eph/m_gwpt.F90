@@ -209,7 +209,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  real(dp) :: ecut,weight_q,enxc, vxcavg ! ediff, eshift, rfact, q0rad, bz_vol,
  logical :: isirr_k, isirr_kq, isirr_kmp, isirr_kqmp, qq_is_gamma, pp_is_gamma, isirr_q !, gen_eigenpb,
  logical :: stern_use_cache, stern_has_band_para, use_ftinterp ! intra_band, same_band,
- logical :: print_time_qq, print_time_kk, print_time_pp, non_magnetic_xc, need_x
+ logical :: print_time_qq, print_time_kk, print_time_pp, non_magnetic_xc, need_x_kmp, need_x_kqmp
  complex(dpc) :: ieta
  type(wfd_t) :: wfd
  type(gs_hamiltonian_type) :: gs_ham_kqmp, gs_ham_kmp
@@ -248,7 +248,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  real(dp) :: phfr_qq(3*cryst%natom), qq_ibz(3), qpt(3)
  !real(dp) :: tsec(2) ! vk(3), vkq(3),
  real(dp) :: eig0nk !,eig0mkq !eig0mk,
- complex(gwpc) :: ctmp_gwpc
+ complex(gwpc) :: ctmp_gwpc !, xdot_tmp
 !arrays
  real(dp) :: fermie1_idir_ipert(3,cryst%natom), ylmgr_dum(1,1,1), dum_nhat(0), dum_xccc3d(0), strsxc(6)
  real(dp),allocatable :: qlwl(:,:), vk_cart_ibz(:,:,:), displ_cart_qq(:,:,:,:),displ_red_qq(:,:,:,:)
@@ -1220,16 +1220,18 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
            ! TODO
            !theta_mu_minus_esum  = fact_spin * qp_occ(band_sum, ik_ibz, spin)
            !if (abs(theta_mu_minus_esum / fact_spin) >= tol_empty) then     ! MRM: allow negative occ numbers
-           need_x = .True.
+           need_x_kmp = .True.
 
            do n_k=gqk%bstart, gqk%bstop ! do n_k=gqk%n_start, gqk%n_stop
 
              ! <bsum,k-p|e^{-i(p+G')}r|n,k> * vc_sqrt(p,G')
              cwork_ur = ur_kmp * ur_nk(:,n_k)
 
-             if (need_x) then
+             if (need_x_kmp) then
                call fft_ur(npw_x, nfft, nspinor, ndat1, mgfft, ngfft, istwfk1, kg_x, gbound_x, cwork_ur, rhotwg_x)
                call multiply_by_vc_sqrt("N", npw_x, nspinor, vc_sqrt_gx, rhotwg_x)
+
+               vec_gx_nk(:,n_k) = rhotwg_x(1:npw_c*nspinor)
                rhotwg_c(:) = rhotwg_x(1:npw_c*nspinor)
              else
                call fft_ur(npw_c, nfft, nspinor, ndat1, mgfft, ngfft, istwfk1, kg_c, gbound_c, cwork_ur, rhotwg_c)
@@ -1238,6 +1240,8 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
 
              ! FIXME: npw_x should be npw_c here
              ! Contract immediately over g' with the frequency convolution: \int de' Wc_{gg'}(pp, e') / (omega - e_{bsum, kmp) - e')
+             ! Store results in vec_gwc_nk(:,:,n_k)
+
              ! Prepare list of omegas: first e_nk then e_mkq for all m indices.
              omegas_nk(1) = qp_ene(n_k, ik_ibz, spin); cnt = 1
              do m_kq=gqk%bstart, gqk%bstop ! do m_kq=gqk%m_start, gqk%m_stop
@@ -1248,11 +1252,6 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
              call screen%calc_sigc("N", nw_nk, omegame0i_nk, theta_mu_minus_e0i, dtset%zcut, &
                                    nspinor, npw_c, npw_c, rhotwg_c, vec_gwc_nk(:,:,n_k), sigcme_nk)
 
-             ! Contract immediately over g' with vc_sqrt
-             if (need_x) then
-               !xdot_tmp = -XDOTC(npwx, rhotwg(spadx1+1:), 1, rhotwgp(spadx2+1:), 1)
-               !vec_gx_nk(:,n_k) = dot_product(
-             end if
            end do ! n_k
 
            ! Get u_{n',k+q-p}(r), stored in ur_kqmp
@@ -1263,17 +1262,19 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
            theta_mu_minus_e0i = fact_spin * qp_occ(ib_sum, ikqmp_ibz, spin)
            omegame0i_mkq = omegas_mkq - qp_ene(ib_sum, ikqmp_ibz, spin)
 
+           !theta_mu_minus_esum  = fact_spin * qp_occ(band_sum, ik_ibz, spin)
            !if (abs(theta_mu_minus_esum / fact_spin) >= tol_empty) then     ! MRM: allow negative occ numbers
-           !need_x = .True.
+           need_x_kqmp = .True.
 
            do m_kq=gqk%bstart, gqk%bstop ! do m_kq=gqk%m_start, gqk%m_stop
 
              ! <m,k+q|e^{i(p+G)}r|bsum,k+q-p> * vc_sqrt(p,G) -> Exchange bra and ket and take CC of the FFT in multiply_by_vc_sqrt
              cwork_ur = ur_kqmp * ur_mkq(:,m_kq)
 
-             if (need_x) then
+             if (need_x_kqmp) then
                call fft_ur(npw_x, nfft, nspinor, ndat1, mgfft, ngfft, istwfk1, kg_x, gbound_x, cwork_ur, rhotwg_x)
                call multiply_by_vc_sqrt("C", npw_x, nspinor, vc_sqrt_gx, rhotwg_x)
+               vec_gx_mkq(:,m_kq) = rhotwg_x(1:npw_c*nspinor)
                rhotwg_c(:) = rhotwg_x(1:npw_c*nspinor)
              else
                call fft_ur(npw_c, nfft, nspinor, ndat1, mgfft, ngfft, istwfk1, kg_c, gbound_c, cwork_ur, rhotwg_c)
@@ -1281,6 +1282,8 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
              end if
 
              ! Contract immediately over g with the frequency convolution: \int de' Wc_{gg'}(pp, e') / (omega - e_{bsum, kqmp) - e')
+             ! Store results in vec_gwc_mkq(:,:,m_kq),
+
              ! Prepare list of omegas: first e_mkq then e_nk for all n indices.
              omegas_mkq(1) = qp_ene(m_kq, ikq_ibz, spin); cnt = 1
              do n_k=gqk%bstart, gqk%bstop ! do n_k=gqk%n_start, gqk%n_stop
@@ -1289,13 +1292,6 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
 
              call screen%calc_sigc("T", nw_mkq, omegame0i_mkq, theta_mu_minus_e0i, dtset%zcut, &
                                    nspinor, npw_c, npw_c, rhotwg_c, vec_gwc_mkq(:,:,m_kq), sigcme_mkq)
-
-             ! Contract immediately over g with vc
-             if (need_x) then
-               !xdot_tmp = -XDOTC(npwx, rhotwg(spadx1+1:), 1, rhotwgp(spadx2+1:), 1)
-               !vec_gx_nk(:,m_kq) = dot_product(
-             end if
-
            end do ! m_kq
 
            ! ========================================
@@ -1356,10 +1352,11 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
              ! <m,k+q|e^{i(p+G)r}|Delta_q psi_{bsum,k-p}> --> exchange bra and ket and take the CC of the FFT.
              full_ur1_kqmp = GWPC_CONJG(full_ur1_kqmp)
              do m_kq=gqk%bstart, gqk%bstop ! do m_kq=gqk%m_start, gqk%m_stop
+
                cwork_ur = full_ur1_kqmp * ur_mkq(:,m_kq)
                !print *, "full_ur1_kqmp", full_ur1_kqmp; print *, "ur_mkq(:,m_kq)", ur_mkq(:,m_kq)
                !print *, "vec_gwc_nk:", vec_gwc_nk
-               if (need_x) then
+               if (need_x_kqmp) then
                  call fft_ur(npw_x, nfft, nspinor, ndat1, mgfft, ngfft, istwfk1, kg_x, gbound_x, cwork_ur, rhotwg_x)
                  rhotwg_x = GWPC_CONJG(rhotwg_x)
                  rhotwg_c(:) = rhotwg_x(1:npw_c*nspinor)
@@ -1376,6 +1373,14 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
                    iw_mkq = m_kq - gqk%bstart + 2
                    ctmp_gwpc = half * sum(rhotwg_c(:) * (vec_gwc_nk(:,1,n_k) + vec_gwc_nk(:,iw_mkq,n_k)))
                  end if
+
+                 !if (need_x_kqmp) then
+                 !  !vec_gx_nk(:,n_k) =
+                 !  !vec_gx_mkq(:,m_kq) =
+                 !  !xdot_tmp = -xdotc(npwx, rhotwg(spadx1+1:), 1, rhotwgp(spadx2+1:), 1)
+                 !  ctmp_gwpc = ctmp_gwpc + xdot_tmp
+                 !end if
+
                  gsig_atm(1, m_kq, n_k, ipc) = gsig_atm(1, m_kq, n_k, ipc) + real(ctmp_gwpc)
                  gsig_atm(2, m_kq, n_k, ipc) = gsig_atm(2, m_kq, n_k, ipc) + aimag(ctmp_gwpc)
                end do ! n_k
@@ -1426,7 +1431,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
 
                cwork_ur = full_ur1_kqmp * ur_nk(:,n_k)
 
-               if (need_x) then
+               if (need_x_kmp) then
                  call fft_ur(npw_x, nfft, nspinor, ndat1, mgfft, ngfft, istwfk1, kg_x, gbound_x, cwork_ur, rhotwg_x)
                  rhotwg_c(:) = rhotwg_x(1:npw_c*nspinor)
                else
@@ -1441,6 +1446,14 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
                    iw_nk = n_k - gqk%bstart + 2
                    ctmp_gwpc = half * sum(rhotwg_c(:) * (vec_gwc_mkq(:,1,m_kq) + vec_gwc_mkq(:,iw_nk,m_kq)))
                  end if
+
+                 !if (need_x_kmp) then
+                 !  !vec_gx_nk(:,n_k) =
+                 !  !vec_gx_mkq(:,m_kq) =
+                 !  !xdot_tmp = -xdotc(npwx, rhotwg(spadx1+1:), 1, rhotwgp(spadx2+1:), 1)
+                 !  ctmp_gwpc = ctmp_gwpc + xdot_tmp
+                 !end if
+
                  gsig_atm(1, m_kq, n_k, ipc) = gsig_atm(1, m_kq, n_k, ipc) + real(ctmp_gwpc)
                  gsig_atm(2, m_kq, n_k, ipc) = gsig_atm(2, m_kq, n_k, ipc) + aimag(ctmp_gwpc)
                end do ! n_k

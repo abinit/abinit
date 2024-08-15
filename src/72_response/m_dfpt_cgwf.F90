@@ -662,7 +662,7 @@ subroutine dfpt_cgwf(u1_band_,band_me,rank_band,bands_treated_now,berryopt,cgq,c
 
    ! The array eig1_k contains:
    ! <u_(jband,k+q)^(0)|H_(k+q,k)^(1)|u_(iband,k)^(0)>                              (NC psps)
-   ! or <u_(jband,k+q)^(0)|H_(k+q,k)^(1)-(eig0_k+eig0_k+q)/2.S^(1)|u_(iband,k)^(0)> (PAW)
+   ! <u_(jband,k+q)^(0)|H_(k+q,k)^(1)-(eig0_k+eig0_k+q)/2.S^(1)|u_(iband,k)^(0)>    (PAW)
    ! so in case of PAW need to add the overlap term below
    !
    ! NB: 2019 11 15: MJV: I swapped the names of jband and iband to be more consistent with other loops above
@@ -693,15 +693,15 @@ subroutine dfpt_cgwf(u1_band_,band_me,rank_band,bands_treated_now,berryopt,cgq,c
 
    ! reduce over band procs to fill in the matrix for all jband (distributed over procs)
    ! must only do this once for eig1_k_loc: now have all jband for current ibands on all procs
-   call xmpi_sum(eig1_k_loc,mpi_enreg%comm_band,ierr)
+   call xmpi_sum(eig1_k_loc, mpi_enreg%comm_band, ierr)
 
    ! TODO: I think this is just a reshape
    do iband=1,nband
      if (bands_treated_now(iband) == 0) cycle
      band_off=(iband-1)*2*nband
      do jband=1,nband
-       eig1_k(2*jband-1+band_off)=eig1_k_loc(1,jband,iband)
-       eig1_k(2*jband  +band_off)=eig1_k_loc(2,jband,iband)
+       eig1_k(2*jband-1+band_off) = eig1_k_loc(1,jband,iband)
+       eig1_k(2*jband  +band_off) = eig1_k_loc(2,jband,iband)
      end do
    end do
  end if ! ipert/=natom+10.and.ipert/=natom+11
