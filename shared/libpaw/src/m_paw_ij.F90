@@ -1025,8 +1025,8 @@ subroutine paw_ij_print(Paw_ij,unit,pawprtvol,pawspnorb,mode_paral,enunit,ipert,
   cplex_dij = Paw_ij(iatom)%cplex_dij
   qphase    = Paw_ij(iatom)%qphase
   ndij      = Paw_ij(iatom)%ndij
-  LIBPAW_MALLOC(dij2p,(2*lmn2_size))
-  LIBPAW_MALLOC(dij2p_,(2*lmn2_size))
+  LIBPAW_ALLOCATE(dij2p,(2*lmn2_size))
+  LIBPAW_ALLOCATE(dij2p_,(2*lmn2_size))
 
   ! ====================================
   ! === Loop over density components ===
@@ -1234,8 +1234,8 @@ subroutine paw_ij_print(Paw_ij,unit,pawprtvol,pawspnorb,mode_paral,enunit,ipert,
 !  =================== End main loops =====================================
 
   end do !idij
-  LIBPAW_FREE(dij2p)
-  LIBPAW_FREE(dij2p_)
+  LIBPAW_DEALLOCATE(dij2p)
+  LIBPAW_DEALLOCATE(dij2p_)
  end do !iatom
 
  call wrtout(my_unt,' ',my_mode)
