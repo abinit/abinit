@@ -388,7 +388,9 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
    cwavef_r=cwavef_r*invucvol
  else if(gpu_option==ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
-   call abi_gpu_xscal(2,n4f*n5f*n6f*ndat,cinvucvol,cwavef_r,1)
+   !$OMP TARGET DATA USE_DEVICE_PTR(cwavef_r)
+   call abi_gpu_xscal(2,n4f*n5f*n6f*ndat,cinvucvol,c_loc(cwavef_r),1)
+   !$OMP END TARGET DATA
 #endif
  end if
 
@@ -580,7 +582,9 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
          cwaveocc_r=cwaveocc_r*invucvol
        else if(gpu_option==ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
-         call abi_gpu_xscal(2,n4f*n5f*n6f*ndat_occ,cinvucvol,cwaveocc_r,1)
+         !$OMP TARGET DATA USE_DEVICE_PTR(cwaveocc_r)
+         call abi_gpu_xscal(2,n4f*n5f*n6f*ndat_occ,cinvucvol,c_loc(cwaveocc_r),1)
+         !$OMP END TARGET DATA
 #endif
        end if
      end if
@@ -1927,16 +1931,18 @@ subroutine fock_ACE_getghc(cwavef,ghc,gs_ham,mpi_enreg,ndat,gpu_option)
 #ifdef HAVE_OPENMP_OFFLOAD
    !$OMP TARGET ENTER DATA MAP(alloc:xi,ghc1,mat)
    !$OMP TARGET UPDATE TO(xi)
+   !$OMP TARGET DATA USE_DEVICE_PTR(xi,cwavef,mat,ghc1)
    call abi_gpu_xgemm(2, 'C', 'N', nband_k, ndat, npw, cone, &
-                     xi, npw, &
-                     cwavef, npw, &
+                     c_loc(xi), npw, &
+                     c_loc(cwavef), npw, &
                      czero, &
-                     mat, nband_k)
+                     c_loc(mat), nband_k)
    call abi_gpu_xgemm(2, 'N', 'N', npw, ndat, nband_k, cminusone, &
-                     xi, npw, &
-                     mat, nband_k, &
+                     c_loc(xi), npw, &
+                     c_loc(mat), nband_k, &
                      czero, &
-                     ghc1, npw)
+                     c_loc(ghc1), npw)
+   !$OMP END TARGET DATA
 
    !$OMP TARGET UPDATE FROM(ghc1)
    !* If the calculation is parallelized, perform an MPI_allreduce to sum all the contributions in the array ghc

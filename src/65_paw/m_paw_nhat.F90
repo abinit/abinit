@@ -1095,7 +1095,7 @@ subroutine pawmknhat_psipsi_ndat(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngff
                !$OMP& REDUCTION(+:sumr)  REDUCTION(+:sumi)  &
                !$OMP& REDUCTION(+:sumr2) REDUCTION(+:sumi2) &
                !$OMP& REDUCTION(+:sumr3) REDUCTION(+:sumi3) &
-               !$OMP& PRIVATE(iatom,ilslm,klmn,klmn,lmin,lmax,ils,mm,ic,jc)
+               !$OMP& PRIVATE(iatom,ilslm,klmn,lmin,lmax,ils,mm,ic,jc)
                do ic=1,atom_nfgd(ia)
                  sumr=zero; sumi=zero; sumr2=zero; sumi2=zero; sumr3=zero; sumi3=zero;
                  do klmn=1,lmn2_size  ! Loop over ij channels of this atom type.
@@ -1322,7 +1322,9 @@ subroutine pawmknhat_psipsi_ndat(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngff
      grnhat_12=-grnhat_12
    case (ABI_GPU_OPENMP)
 #ifdef HAVE_OPENMP_OFFLOAD
-     call abi_gpu_xscal(1, size(grnhat_12),cminusone,grnhat_12,1)
+     !$OMP TARGET DATA USE_DEVICE_PTR(grnhat_12)
+     call abi_gpu_xscal(1, size(grnhat_12),cminusone,c_loc(grnhat_12),1)
+     !$OMP END TARGET DATA
 #endif
    case default
      ABI_BUG("Unsupported GPU option")
@@ -2426,7 +2428,9 @@ subroutine pawdijhat_ndat(dijhat,cplex_dij,qphase,gprimd,iatm,&
          prod=prod*ucvol/dble(ngridtot)
        else if(gpu_option_==ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
-         call abi_gpu_xscal(1,qphase*lm_size*ndat*nattyp,scal,prod,1)
+         !$OMP TARGET DATA USE_DEVICE_PTR(prod)
+         call abi_gpu_xscal(1,qphase*lm_size*ndat*nattyp,scal,c_loc(prod),1)
+         !$OMP END TARGET DATA
 #endif
        end if
 
