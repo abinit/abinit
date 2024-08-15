@@ -47,19 +47,26 @@ module m_ompgpu_fourwf
 #ifdef HAVE_OPENMP_OFFLOAD
 
 ! STATIC vars to avoid too much cuda overhead
+integer :: fourdp_initialized=0
 integer :: fourwf_initialized=0
 
-! FFT plan
-integer :: fft_size=-1
-integer :: ndat_loc=-1
-integer :: npw=-1
+#define FOURDP_ID 1
+#define FOURWF_ID 0
 
-! GPU ffts buffers
+! FFT plans
+integer :: fft_size_fourdp=-1
+integer :: ndat_fourdp=-1
+integer :: fft_size_fourwf=-1
+integer :: ndat_fourwf=-1
+
+! GPU ffts buffers (fourwf)
 real(dp),allocatable,target :: work_gpu(:,:,:,:)
 
 #endif
 
  public :: ompgpu_fourdp
+ !public :: alloc_ompgpu_fourdp
+ !public :: free_ompgpu_fourdp
  public :: ompgpu_fourwf
  public :: alloc_ompgpu_fourwf
  public :: free_ompgpu_fourwf
@@ -121,14 +128,14 @@ subroutine ompgpu_fourdp(cplex,ngfft,ldx,ldy,ldz,ndat,isign,fofg,fofr)
 
  ! ***********  GPU ALLOCATIONS  ***********************
 
- if (fourwf_initialized == 0) then
-   call alloc_ompgpu_fourwf(ngfft,ndat)
+ if (fourdp_initialized == 0) then
+   call alloc_ompgpu_fourdp(ngfft,ndat)
  endif !end of initialisation
 
  ! If fft size has changed, we realloc our buffers
- if((nfft_tot/=fft_size) .or. (ndat/=ndat_loc)) then
-   call free_ompgpu_fourwf
-   call alloc_ompgpu_fourwf(ngfft,ndat)
+ if((nfft_tot/=fft_size_fourdp) .or. (ndat/=ndat_fourdp)) then
+   call free_ompgpu_fourdp
+   call alloc_ompgpu_fourdp(ngfft,ndat)
  end if !end if "fft size changed"
 
  transfer_fofg=   .not. xomp_target_is_present(c_loc(fofg))
@@ -145,14 +152,14 @@ subroutine ompgpu_fourdp(cplex,ngfft,ldx,ldy,ldz,ndat,isign,fofg,fofr)
    select case (isign)
    case (FFT_INVERSE) ! +1
      !$OMP TARGET DATA USE_DEVICE_PTR(fofg,fofr)
-     call gpu_fft_exec_z2z(c_loc(fofg), c_loc(fofr), FFT_INVERSE)
+     call gpu_fft_exec_z2z(FOURDP_ID, c_loc(fofg), c_loc(fofr), FFT_INVERSE)
      !$OMP END TARGET DATA
-     call gpu_fft_stream_synchronize()
+     call gpu_fft_stream_synchronize(FOURDP_ID)
    case (FFT_FORWARD) ! -1
      !$OMP TARGET DATA USE_DEVICE_PTR(fofg,fofr)
-     call gpu_fft_exec_z2z(c_loc(fofr), c_loc(fofg), FFT_FORWARD)
+     call gpu_fft_exec_z2z(FOURDP_ID, c_loc(fofr), c_loc(fofg), FFT_FORWARD)
      !$OMP END TARGET DATA
-     call gpu_fft_stream_synchronize()
+     call gpu_fft_stream_synchronize(FOURDP_ID)
      ! Normalize here
      call abi_gpu_xscal(2,ldx*ldy*ldz*ndat,norm,fofg,1)
    case default
@@ -240,7 +247,7 @@ subroutine ompgpu_fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,ist
  ! ***********  GPU ALLOCATIONS  ***********************
 
  ! If fft size has changed, we realloc our buffers
- if((nfft_tot/=fft_size) .or. (ndat/=ndat_loc)) then
+ if((nfft_tot/=fft_size_fourwf) .or. (ndat/=ndat_fourwf)) then
    call free_ompgpu_fourwf
    call alloc_ompgpu_fourwf(ngfft,ndat)
  end if !end if "fft size changed"
@@ -361,14 +368,14 @@ subroutine ompgpu_fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,ist
    ! call backward fourrier transform on gpu work_gpu => fofr_gpu
 #if defined HAVE_GPU_HIP && defined FC_LLVM
    !$OMP TARGET DATA USE_DEVICE_ADDR(work_gpu,fofr_amdref)
-   call gpu_fft_exec_z2z(c_loc(work_gpu), c_loc(fofr_amdref), FFT_INVERSE)
+   call gpu_fft_exec_z2z(FOURWF_ID, c_loc(work_gpu), c_loc(fofr_amdref), FFT_INVERSE)
    !$OMP END TARGET DATA
 #else
    !$OMP TARGET DATA USE_DEVICE_PTR(work_gpu,fofr)
-   call gpu_fft_exec_z2z(c_loc(work_gpu), c_loc(fofr), FFT_INVERSE)
+   call gpu_fft_exec_z2z(FOURWF_ID, c_loc(work_gpu), c_loc(fofr), FFT_INVERSE)
    !$OMP END TARGET DATA
 #endif
-   call gpu_fft_stream_synchronize()
+   call gpu_fft_stream_synchronize(FOURWF_ID)
  end if
 
  if(option==0) then
@@ -449,14 +456,14 @@ subroutine ompgpu_fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,ist
    ! call forward fourier transform on gpu: fofr_gpu ==> work_gpu
 #if defined HAVE_GPU_HIP && defined FC_LLVM
    !$OMP TARGET DATA USE_DEVICE_ADDR(work_gpu,fofr_amdref)
-   call gpu_fft_exec_z2z(c_loc(fofr_amdref), c_loc(work_gpu), FFT_FORWARD)
+   call gpu_fft_exec_z2z(FOURWF_ID, c_loc(fofr_amdref), c_loc(work_gpu), FFT_FORWARD)
    !$OMP END TARGET DATA
 #else
    !$OMP TARGET DATA USE_DEVICE_PTR(work_gpu,fofr)
-   call gpu_fft_exec_z2z(c_loc(fofr), c_loc(work_gpu), FFT_FORWARD)
+   call gpu_fft_exec_z2z(FOURWF_ID, c_loc(fofr), c_loc(work_gpu), FFT_FORWARD)
    !$OMP END TARGET DATA
 #endif
-   call gpu_fft_stream_synchronize()
+   call gpu_fft_stream_synchronize(FOURWF_ID)
 
    one=1
    xnorm=one/dble(n1*n2*n3)
@@ -503,13 +510,52 @@ end subroutine ompgpu_fourwf
 !!****************************************************************************************************************
 
 ! Memory allocation routine
-subroutine alloc_ompgpu_fourwf(ngfft, ndat)
+subroutine alloc_ompgpu_fourdp(ngfft, ndat)
  implicit none
  integer, intent(in) :: ngfft(18), ndat
 
  integer :: n1,n2,n3, ldx, ldy, ldz
  integer, target :: t_fft(3)
 
+ fourdp_initialized = 1
+
+ ! Size modification if too little memory allocation
+ n1=ngfft(1)
+ n2=ngfft(2)
+ n3=ngfft(3)
+ ldx = ngfft(4)
+ ldy = ngfft(5)
+ ldz = ngfft(6)
+ fft_size_fourdp=n1*n2*n3
+ ndat_fourdp = ndat
+
+ ! Initialisation des plans FFT
+ t_fft(1) = n3;
+ t_fft(2) = n2;
+ t_fft(3) = n1;
+
+ ! Creation du plan
+ call gpu_fft_plan_many(FOURDP_ID, 3, c_loc(t_fft), c_null_ptr, 1, ldx*ldy*ldz, c_null_ptr, 1, ldx*ldy*ldz, FFT_Z2Z, ndat);
+
+end subroutine alloc_ompgpu_fourdp
+
+subroutine free_ompgpu_fourdp()
+
+ if(fourdp_initialized==0) return
+
+ ! On detruit l'ancien plan
+ call gpu_fft_plan_destroy(FOURDP_ID)
+
+ fourdp_initialized = 0;
+
+end subroutine free_ompgpu_fourdp
+
+subroutine alloc_ompgpu_fourwf(ngfft, ndat)
+ implicit none
+ integer, intent(in) :: ngfft(18), ndat
+
+ integer :: n1,n2,n3, ldx, ldy, ldz
+ integer, target :: t_fft(3)
 
  fourwf_initialized = 1
 
@@ -520,8 +566,8 @@ subroutine alloc_ompgpu_fourwf(ngfft, ndat)
  ldx = ngfft(4)
  ldy = ngfft(5)
  ldz = ngfft(6)
- fft_size=n1*n2*n3
- ndat_loc = ndat
+ fft_size_fourwf=n1*n2*n3
+ ndat_fourwf = ndat
 
  ! Initialisation des plans FFT
  t_fft(1) = n3;
@@ -529,7 +575,7 @@ subroutine alloc_ompgpu_fourwf(ngfft, ndat)
  t_fft(3) = n1;
 
  ! Creation du plan
- call gpu_fft_plan_many(3, c_loc(t_fft), c_null_ptr, 1, ldx*ldy*ldz, c_null_ptr, 1, ldx*ldy*ldz, FFT_Z2Z, ndat);
+ call gpu_fft_plan_many(FOURWF_ID, 3, c_loc(t_fft), c_null_ptr, 1, ldx*ldy*ldz, c_null_ptr, 1, ldx*ldy*ldz, FFT_Z2Z, ndat);
 
  ABI_MALLOC(work_gpu, (2,n1,n2,n3*ndat))
  !FIXME Smarter buffer management ?
@@ -545,7 +591,7 @@ subroutine free_ompgpu_fourwf()
  if(fourwf_initialized==0) return
 
  ! On detruit l'ancien plan
- call gpu_fft_plan_destroy()
+ call gpu_fft_plan_destroy(FOURWF_ID)
 
  !FIXME Smarter buffer management ?
 #ifdef HAVE_GPU_HIP

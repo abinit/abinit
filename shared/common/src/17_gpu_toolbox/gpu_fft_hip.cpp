@@ -15,8 +15,8 @@
 #include<assert.h>
 #include<gpu_fft.h>
 
-hipfftHandle plan_fft;
-static hipStream_t stream_compute;
+hipfftHandle plan_fft[2];
+static hipStream_t stream_compute[2];
 
 //! utility function to select eigen type
 static hipfftType select_hipfft_type(const int fftType_int)
@@ -70,7 +70,7 @@ static hipfftType select_hipfft_type(const int fftType_int)
 /*=========================================================================*/
 
 extern "C"
-void gpu_fft_plan_many_cpp(int *rank, int **n, int **inembed,
+void gpu_fft_plan_many_cpp(int *fft_plan_id, int *rank, int **n, int **inembed,
                        int *istride, int *idist, int **onembed, int *ostride,
                        int *odist, int *fft_type, int *batch){
 
@@ -80,7 +80,7 @@ void gpu_fft_plan_many_cpp(int *rank, int **n, int **inembed,
 
   hipfftType type = select_hipfft_type(*fft_type);
   HIP_API_CHECK(hipfftPlanMany(
-        &plan_fft,
+        &plan_fft[*fft_plan_id],
         *rank,
         *n,
         *inembed,
@@ -91,8 +91,8 @@ void gpu_fft_plan_many_cpp(int *rank, int **n, int **inembed,
         *odist,
         type,
         *batch));
-  HIP_API_CHECK( hipStreamCreate(&stream_compute) );
-  HIP_API_CHECK( hipfftSetStream(plan_fft,stream_compute) );
+  HIP_API_CHECK( hipStreamCreate(&stream_compute[*fft_plan_id]) );
+  HIP_API_CHECK( hipfftSetStream(plan_fft[*fft_plan_id],stream_compute[*fft_plan_id]) );
 }
 
 
@@ -105,9 +105,9 @@ void gpu_fft_plan_many_cpp(int *rank, int **n, int **inembed,
  */
 /*=========================================================================*/
 
-extern "C" void gpu_fft_stream_synchronize_cpp()
+extern "C" void gpu_fft_stream_synchronize_cpp(int *fft_plan_id)
 {
-  HIP_API_CHECK( hipStreamSynchronize(stream_compute) );
+  HIP_API_CHECK( hipStreamSynchronize(stream_compute[*fft_plan_id]) );
 }
 
 
@@ -121,8 +121,9 @@ extern "C" void gpu_fft_stream_synchronize_cpp()
 /*=========================================================================*/
 
 extern "C"
-void gpu_fft_plan_destroy_cpp(void){
-  HIP_API_CHECK(hipfftDestroy(plan_fft));
+void gpu_fft_plan_destroy_cpp(int *fft_plan_id){
+  HIP_API_CHECK(hipfftDestroy(plan_fft[*fft_plan_id]));
+  HIP_API_CHECK(hipStreamDestroy(stream_compute[*fft_plan_id]) );
 }
 
 
@@ -144,9 +145,9 @@ void gpu_fft_plan_destroy_cpp(void){
 /*=========================================================================*/
 
 extern "C"
-void gpu_fft_exec_z2z_cpp(void **idata, void **odata, int *direction){
+void gpu_fft_exec_z2z_cpp(int *fft_plan_id, void **idata, void **odata, int *direction){
 
-  HIP_API_CHECK(hipfftExecZ2Z(plan_fft, (hipfftDoubleComplex*) (*idata),
+  HIP_API_CHECK(hipfftExecZ2Z(plan_fft[*fft_plan_id], (hipfftDoubleComplex*) (*idata),
                  (hipfftDoubleComplex*) (*odata), *direction));
 }
 
@@ -169,8 +170,8 @@ void gpu_fft_exec_z2z_cpp(void **idata, void **odata, int *direction){
 /*=========================================================================*/
 
 extern "C"
-void gpu_fft_exec_c2c_cpp(void **idata, void **odata, int *direction){
-  HIP_API_CHECK(hipfftExecC2C(plan_fft, (hipfftComplex*) *idata,
+void gpu_fft_exec_c2c_cpp(int *fft_plan_id, void **idata, void **odata, int *direction){
+  HIP_API_CHECK(hipfftExecC2C(plan_fft[*fft_plan_id], (hipfftComplex*) *idata,
                  (hipfftComplex*) *odata, *direction));
 }
 
