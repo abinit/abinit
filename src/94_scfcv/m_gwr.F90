@@ -6215,8 +6215,10 @@ subroutine gwr_rpa_energy(gwr)
          ! Change size block and, if possible, use 2D rectangular grid of processors for diagonalization
          call proc_4diag%init(chi_tmp%processor%comm)
          call chi_tmp%change_size_blocs(chi_4diag, processor=proc_4diag)
+         call chi_4diag%copy(dummy_vec)
          call chi_4diag%heev("N", "U", dummy_vec, eig, mat_size=mat_size)
          call chi_4diag%free()
+         call dummy_vec%free()
          call proc_4diag%free()
 
          ! TODO: ELPA
