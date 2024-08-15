@@ -7,7 +7,7 @@
 !! Uses a conjugate-gradient algorithm.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1999-2024 ABINIT group (XG,DRH,XW,FJ,MT,LB)
+!!  Copyright (C) 1999-2024 ABINIT group (XG,DRH,XW,FJ,MT,LB,MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -66,15 +66,27 @@ module m_dfpt_cgwf
    integer :: npw_k  = -1
    integer :: npw_kq = -1
    integer :: nspinor = -1
+   ! Number of plane-waves at k and k+q and number of spinors.
+
    integer :: mcgq = -1
+   ! second dimension of the cgq array.
    integer :: mgscq = -1
+   ! second dimension of gscq, with only mband_mem bands.
    integer :: mcprjq = -1
+   ! second dimension of the cprjq array.
    integer :: nband = -1
+   ! Number of bands.
    integer :: nband_me = -1
+   ! Number of bands treated by this MPI proc.
    integer :: nline_in = -1
+   ! Max number of line minimization.
    integer :: nlines_done = -1
+   ! Number of line minimization in stern_solve.
    integer :: usedcwavef
+   ! flag controlling the use of dcwavef array (PAW only):
    integer :: usepaw
+   ! 1 if PAW is used.
+
    integer :: work_ngfft(18)
    logical :: use_cache
    logical :: has_band_para
@@ -87,10 +99,14 @@ module m_dfpt_cgwf
    integer,allocatable :: rank_band(:)
 
    real(dp),allocatable :: fermie1_idir_ipert(:,:)
-   real(dp),allocatable :: eig1_k(:)
+   real(dp),allocatable :: eig1_k(:,:,:)
+   ! (2, nband, nband)
+   ! matrix of first-order eigenvalues (hartree)
+   ! eig1_k(:,ii,jj)=<C0 ii|H1|C0 jj> for norm-conserving psps
+   ! eig1_k(:,ii,jj)=<C0 ii|H1-(eig0_k+eig0_k+q)/2.S(1)|C0 jj> for PAW
+
    real(dp),allocatable :: dcwavef(:, :), gh1c_n(:, :), ghc(:,:), gsc(:,:), gvnlxc(:,:), gvnlx1(:,:)
-   real(dp),allocatable :: cgq(:,:,:), gscq(:,:,:)
-   real(dp),allocatable :: work(:,:,:,:)
+   real(dp),allocatable :: cgq(:,:,:), gscq(:,:,:), work(:,:,:,:)
 
    type(pawcprj_type),allocatable :: cprjq(:,:)
    ! (natom, mcprjq)
@@ -108,7 +124,6 @@ module m_dfpt_cgwf
 
    procedure :: free => stern_free
     ! Free dynamic memory.
-
  end type stern_t
 !!***
 
@@ -1704,7 +1719,7 @@ subroutine stern_init(stern, dtset, npw_k, npw_kq, nspinor, nband, nband_me, fer
  stern%mpi_enreg%nproc_band = xmpi_comm_size(comm_band)
  stern%has_band_para = stern%mpi_enreg%nproc_band /= 1
 
- ABI_CALLOC(stern%eig1_k, (2*nband**2))
+ ABI_CALLOC(stern%eig1_k, (2,nband, nband))
  ABI_MALLOC(stern%dcwavef, (2, npw_kq*nspinor*stern%usedcwavef))
  ABI_MALLOC(stern%gh1c_n, (2, npw_kq*nspinor))
  ABI_MALLOC(stern%ghc, (2, npw_kq*nspinor))

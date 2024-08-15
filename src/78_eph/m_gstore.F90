@@ -3781,7 +3781,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
      ABI_FREE(vlocal1)
 
      ! Dump buffer
-     if (iqbuf_cnt == qbuf_size) call dump_data()
+     if (iqbuf_cnt == qbuf_size) call dump_my_gbuf()
 
      if (print_time) then
        write(msg,'(2(a,i0),a)')" My q-point [", my_iq, "/", gqk%my_nq, "]"
@@ -3792,7 +3792,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
    end do ! my_iq
 
    ! Dump the remainder.
-   if (iqbuf_cnt /= 0) call dump_data()
+   if (iqbuf_cnt /= 0) call dump_my_gbuf()
 
    ABI_FREE(iq_buf)
    ABI_FREE(my_gbuf)
@@ -3845,7 +3845,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
 
 contains
 
-subroutine dump_data()
+subroutine dump_my_gbuf()
 
  ! This function is called inside the double loop over (my_is, my_iq) or when we exit
  ! from the my_iq loop to dump the remainder that is still in the q-buffer,
@@ -3872,7 +3872,7 @@ subroutine dump_data()
  my_iq = iq_buf(1, 1)
  iq_glob = my_iq + gqk%my_qstart - 1
 
- !print *, "in dump_data with start: ", [1, 1, 1, 1, gqk%my_kstart, iq_glob]
+ !print *, "in dump_my_gbuf with start: ", [1, 1, 1, 1, gqk%my_kstart, iq_glob]
  !print *, "                  count; ", [gqk%cplex, gqk%nb, gqk%nb, gqk%natom3, gqk%my_nk, iqbuf_cnt]
 
  ! NB: this is an individual IO operation
@@ -3895,7 +3895,7 @@ subroutine dump_data()
  NCF_CHECK(nf90_sync(spin_ncid))
  NCF_CHECK(nf90_sync(root_ncid))
 
-end subroutine dump_data
+end subroutine dump_my_gbuf
 
 integer function root_vid(var_name)
   character(len=*),intent(in) :: var_name
