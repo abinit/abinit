@@ -196,7 +196,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  integer :: ikqmp_ibz, isym_kqmp, trev_kqmp, npw_kqmp, istwf_kqmp, npw_kqmp_ibz, istwf_kqmp_ibz
  integer :: mpw,ierr,nqbz,ncerr !,spad
  integer :: n1,n2,n3,n4,n5,n6,nspden, mqmem, m_kq, n_k, restart, root_ncid, spin_ncid
- integer :: usecprj !,sij_opt,usevnl,optlocal,optnl,opt_gvnlx1
+ integer :: usecprj !,sij_opt
  integer :: nfft,nfftf,mgfft,mgfftf,nkpg_k,nkpg_kq,nkpg_kqmp,nkpg_kmp,imyp, cnt, nvloc, iw_nk, iw_mkq
  integer :: nbsum,my_bsum_start, my_bsum_stop, my_nbsum, ndone, nmiss ! num_mn_kq,
  !integer :: bstart_ks,ikcalc,bstart,bstop, sendcount !iatom,
@@ -604,12 +604,6 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  call gstore%set_perts_distrib(cryst, dvdb, my_npert)
  call gstore%set_perts_distrib(cryst, drhodb, my_npert)
 
- ! Prepare call to getgh1c
- !usevnl = 0
- !optlocal = 1   ! local part of H^(1) is computed in gh1c=<G|H^(1)|C>
- !optnl = 2      ! non-local part of H^(1) is totally computed in gh1c=<G|H^(1)|C>
- !opt_gvnlx1 = 0 ! gvnlx1 is output
-
  ! This part is taken from dfpt_vtorho
  !==== Initialize most of the Hamiltonian (and derivative) ====
  ! 1) Allocate all arrays and initialize quantities that do not depend on k and spin.
@@ -955,6 +949,8 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
        ! and we don't want random numbers written to disk.
        my_gbuf(:,:,:,:, my_ik, iqbuf_cnt) = zero
 
+       gks_atm = zero
+
 #ifdef DEV_FAST_DEBUG
        if (my_ik > 12) cycle ! DEBUG
 #endif
@@ -1062,7 +1058,6 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
        ! to store W(pp) if pp_parallelism is activated.
 
        gsig_atm = zero
-       !print *, gqk%pp_sum_comm%me, " treats ipp_bz range: ", my_pp_start_spin(spin), my_pp_stop_spin(spin), "of pp_nbz", pp_mesh%nbz
 
        do ipp_bz=my_pp_start_spin(spin), my_pp_stop_spin(spin)
          my_ipp = ipp_bz - my_pp_start_spin(spin) + 1
@@ -1135,7 +1130,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
 
          ! We need two stern_t objects to compute the first order change of the wavefunctions at k-p and k+q-p.
          ! Clearly, we should not duplicate the work when pp = 0.
-         ! When pp == 0, we also get the g_ks matrix elements after stern_solve.
+         ! When pp == 0, we also get the gks matrix elements after stern_solve.
          ! Alternatively, one can solve the Sternheimer in the IBZ(kappa, alpha), store the results on disk
          ! and then use symmetries to reconstruct delta_u in the full BZ on the fly assuming spatial inversion or TR.
          ! Also, one should handle more carefully the integration in g_sigma around pp = Gamma in the case of semiconductors.
@@ -1309,7 +1304,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
              idir = dvdb%my_pinfo(1, imyp); ipert = dvdb%my_pinfo(2, imyp); ipc = dvdb%my_pinfo(3, imyp)
              !print *, "For kk, ", kk, "pp:", pp, "idir, ipert", idir, ipert
 
-             ! Set up local potential vlocal1_qq with proper dimensioning, from vtrial1 taking into account the spin.
+             ! Set up local potential vlocal1_qq with proper dimensioning, from vtrial1 taking into account the spin
              ! and prepare application of the NL part. Each CPU prepares its own potentials.
              call rf_transgrid_and_pack(spin, nspden, psps%usepaw, cplex, nfftf, nfft, ngfft, nvloc, &
                                         pawfgr, mpi_enreg, vtrial, v1scf_qq(:,:,:,imyp), vlocal, vlocal1_qq(:,:,:,:,imyp))
@@ -1344,6 +1339,12 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
                                   full_cg1=full_cg1_kqmp, full_ur1=full_ur1_kqmp)
              ABI_CHECK(ierr == 0, msg)
 
+             ! Store KS e-ph matrix elements for this perturbation.
+             if (pp_is_gamma) then
+               ib = ib_sum - gqk%bstart + 1
+               gks_atm(:,:,ib,ipc) = stern_kmp%eig1_k(:, gqk%bstart:gqk%bstop, ib_sum)
+             end if
+
              ABI_FREE(kinpw1)
              ABI_FREE(dkinpw)
              ABI_FREE(ph3d_kmp)
@@ -1354,8 +1355,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
              do m_kq=gqk%bstart, gqk%bstop ! do m_kq=gqk%m_start, gqk%m_stop
 
                cwork_ur = full_ur1_kqmp * ur_mkq(:,m_kq)
-               !print *, "full_ur1_kqmp", full_ur1_kqmp; print *, "ur_mkq(:,m_kq)", ur_mkq(:,m_kq)
-               !print *, "vec_gwc_nk:", vec_gwc_nk
+
                if (need_x_kqmp) then
                  call fft_ur(npw_x, nfft, nspinor, ndat1, mgfft, ngfft, istwfk1, kg_x, gbound_x, cwork_ur, rhotwg_x)
                  rhotwg_x = GWPC_CONJG(rhotwg_x)
@@ -1485,21 +1485,21 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
        ABI_FREE(ug_k)
        ABI_FREE(ug_kq)
 
-       ! Reduce results inside pp_sum_comm
-       call xmpi_sum(gsig_atm, gqk%pp_sum_comm%value, ierr)
+       ! TODO: Introduce 2d MPI communicator ppsum_pert
 
-       ! Collect gsig_atm inside pert_comm so that all procs can operate on the data.
+       ! Collect gsig_atm and gks_atm inside pert_comm so that all procs can operate on the data.
+       call xmpi_sum(gsig_atm, gqk%pp_sum_comm%value, ierr)
        call xmpi_sum(gsig_atm, gqk%pert_comm%value, ierr)
 
-       !print *, "gsig_atm:", gsig_atm
-       !do ii=1,natom3
-       !  write(100+gqk%pp_sum_comm%me, *) gsig_atm(:,:,:,ii)
-       !end do
+       call xmpi_sum(gks_atm, gqk%pp_sum_comm%value, ierr)
+       call xmpi_sum(gks_atm, gqk%pert_comm%value, ierr)
 
        ! TODO gks_atm and gks_nu
-       ! Perhaps it's gonna be easier if we only support GMODE_ATOM
+       gsig_atm = gsig_atm ! + gks_atm - gxc_atm
+
        select case (gstore%gmode)
        case (GSTORE_GMODE_PHONON)
+         ! FIXME Perhaps it's gonna be easier if we only support GMODE_ATOM
          ! Get g^{Sigma} in the phonon representation.
          call ephtk_gkknu_from_atm(nb, nb, 1, natom, gsig_atm, phfr_qq, displ_red_qq, gsig_nu)
 
@@ -1508,16 +1508,16 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
          case (1)
            my_gbuf(1,:,:,:, my_ik, iqbuf_cnt) = gsig_nu(1,:,:,:) ** 2 + gsig_nu(2,:,:,:) ** 2
          case (2)
-           my_gbuf(:,:,:,:, my_ik, iqbuf_cnt) = gsig_nu ! - gxc_nu ! + gks_nu
+           my_gbuf(:,:,:,:, my_ik, iqbuf_cnt) = gsig_nu
          end select
 
        case (GSTORE_GMODE_ATOM)
          ! Save e-ph matrix elements in the buffer.
          select case (gqk%cplex)
          case (1)
-           my_gbuf(1,:,:,:, my_ik, iqbuf_cnt) = gsig_atm(1,:,:,:) ** 2 + gsig_atm(2,:,:,:) ** 2
+           my_gbuf(1,:,:,:, my_ik, iqbuf_cnt) = gsig_atm(1,:,:,:)**2 + gsig_atm(2,:,:,:)** 2
          case (2)
-           my_gbuf(:,:,:,:, my_ik, iqbuf_cnt) = gsig_atm ! - gxc_atm ! + gks_atm
+           my_gbuf(:,:,:,:, my_ik, iqbuf_cnt) = gsig_atm
          end select
 
        case default
@@ -1525,7 +1525,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
        end select
 
        ! Dump buffer
-       if (iqbuf_cnt == qbuf_size) call dump_data()
+       if (iqbuf_cnt == qbuf_size) call dump_my_gbuf()
 
        if (print_time_kk) then
          write(msg,'(4x, 2(a,i0),a)')" My k-point [", my_ik, "/", gqk%my_nk, "]"
@@ -1545,7 +1545,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
    end do ! iq_ibz
 
    ! Dump the remainder.
-   if (iqbuf_cnt /= 0) call dump_data()
+   if (iqbuf_cnt /= 0) call dump_my_gbuf()
 
    ABI_FREE(ur_nk)
    ABI_FREE(ur_mkq)
@@ -1644,7 +1644,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
 
 contains
 
-subroutine dump_data()
+subroutine dump_my_gbuf()
 
  ! This function is called inside the double loop over (my_is, my_iq) or when we exit
  ! from the my_iq loop to dump the remainder that is still in the q-buffer,
@@ -1674,7 +1674,7 @@ subroutine dump_data()
  my_iq = iq_buf(1, 1)
  iq_glob = my_iq + gqk%my_qstart - 1
 
- !print *, "in dump_data with start: ", [1, 1, 1, 1, gqk%my_kstart, iq_glob]
+ !print *, "in dump_my_gbuf with start: ", [1, 1, 1, 1, gqk%my_kstart, iq_glob]
  !print *, "                  count; ", [gqk%cplex, gqk%nb, gqk%nb, gqk%natom3, gqk%my_nk, iqbuf_cnt]
  !print *, "my_gbuf", my_gbuf(:,:,:,natom3,1,1)
 
@@ -1698,7 +1698,7 @@ subroutine dump_data()
  NCF_CHECK(nf90_sync(spin_ncid))
  NCF_CHECK(nf90_sync(root_ncid))
 
-end subroutine dump_data
+end subroutine dump_my_gbuf
 
 integer function root_vid(var_name)
   character(len=*),intent(in) :: var_name
