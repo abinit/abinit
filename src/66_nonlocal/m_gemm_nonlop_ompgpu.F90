@@ -305,7 +305,7 @@ contains
   !arrays
   integer,intent(in),target :: atindx1(natom),indlmn(6,lmnmax,ntypat),kgin(3,npwin)
   integer,intent(in),target :: kgout(3,npwout),nattyp(ntypat),ngfft(18),nloalg(3),typat(natom)
-  real(dp),intent(in),target :: enl(:,:,:,:),enl_ndat(:,:,:,:,:)
+  real(dp),intent(in),ABI_CONTIGUOUS target :: enl(:,:,:,:),enl_ndat(:,:,:,:,:)
   real(dp),intent(in),target :: ffnlin(npwin,dimffnlin,lmnmax,ntypat)
   real(dp),intent(in),target :: ffnlout(npwout,dimffnlout,lmnmax,ntypat),gmet(3,3)
   real(dp),intent(in) :: gprimd(3,3),kptin(3),kptout(3)
@@ -349,7 +349,7 @@ contains
   integer, ABI_CONTIGUOUS pointer :: atindx1_(:),indlmn_(:,:,:),nattyp_(:)
   real(dp),pointer :: ffnlin_(:,:,:,:),ffnlout_(:,:,:,:)
   real(dp),pointer :: ph3din_(:,:,:),ph3dout_(:,:,:)
-  real(dp),pointer :: enl_(:,:,:,:,:),enl_ndat_(:,:,:,:,:)
+  real(dp), ABI_CONTIGUOUS pointer :: enl_(:,:,:,:,:),enl_ndat_(:,:,:,:,:)
   real(dp), ABI_CONTIGUOUS pointer :: sij_(:,:)
   real(dp), ABI_CONTIGUOUS pointer :: kpgin_(:,:),kpgout_(:,:)
   logical :: nld_on_gpu
