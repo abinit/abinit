@@ -85,7 +85,7 @@ subroutine select_ndat_occ_for_gpu(ndat_occ,nband_k,ndat,npw,cplex_fock,nfftf,n4
  ider=0
 
 #ifdef HAVE_GPU
- call gpu_get_free_mem(free_mem)
+ call gpu_get_max_mem(free_mem)
  free_mem = 0.95 * free_mem ! Cutting 5% out to be safe
 #endif
 
