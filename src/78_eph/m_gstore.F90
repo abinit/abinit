@@ -598,7 +598,6 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
  integer :: my_is, my_ik, my_iq, nq
  logical :: keep_umats, has_abiwan, has_gwan, write_gstore
  real(dp) :: cpu, wall, gflops, weight_qq, gstore_fill_dp
- character(len=10) :: priority
  character(len=5000) :: msg
 !arrays
  integer :: ngqpt(3), qptrlatt(3,3), comm_spin(ebands%nsppol), nproc_spin(ebands%nsppol), units(2)
@@ -842,8 +841,7 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
  ! =============================================
  ! Initialize gqk basic dimensions and MPI grid
  ! =============================================
- call priority_from_eph_task(dtset%eph_task, priority)
- call gstore%set_mpi_grid__(dtset%gstore_cplex, dtset%eph_np_pqbks, priority, nproc_spin, comm_spin)
+ call gstore%set_mpi_grid__(dtset%gstore_cplex, nproc_spin, comm_spin)
  call xmpi_comm_free(comm_spin)
 
  ! At this point, we have the Cartesian grid (one per spin if any)
@@ -1076,43 +1074,6 @@ end subroutine gstore_init
 
 !----------------------------------------------------------------------
 
-!!****f* m_gstore/priority_from_eph_task
-!! NAME
-!! priority_from_eph_task
-!!
-!! FUNCTION
-!!
-!! INPUTS
-!!
-!! OUTPUT
-!!
-!! SOURCE
-
-subroutine priority_from_eph_task(eph_task, priority)
-
-!Arguments ------------------------------------
- integer,intent(in) :: eph_task
- character(len=*),intent(out) :: priority
-!----------------------------------------------------------------------
-
- select case (eph_task)
- case (11)
-   priority = "qk"
- case (12, -12)
-   priority = "q"
- case (13)
-   priority = "q"
- case (14, 17)
-   priority = "kq"
- case default
-   ABI_ERROR(sjoin("Please register default priority for eph_task:", itoa(eph_task)))
- end select
-
-end subroutine priority_from_eph_task
-!!***
-
-!----------------------------------------------------------------------
-
 !!****f* m_gstore/gstore_distribute_spins
 !! NAME
 !! gstore_distribute_spins
@@ -1193,14 +1154,13 @@ end subroutine gstore_distribute_spins
 !!
 !! SOURCE
 
-subroutine gstore_set_mpi_grid__(gstore, gstore_cplex, eph_np_pqbks, priority, nproc_spin, comm_spin)
+subroutine gstore_set_mpi_grid__(gstore, gstore_cplex, nproc_spin, comm_spin)
 
 !Arguments ------------------------------------
 !scalars
  class(gstore_t),target,intent(inout) :: gstore
  integer,intent(in) :: gstore_cplex
- integer,intent(in) :: eph_np_pqbks(5), nproc_spin(gstore%nsppol), comm_spin(gstore%nsppol)
- character(len=*),intent(in) :: priority
+ integer,intent(in) :: nproc_spin(gstore%nsppol), comm_spin(gstore%nsppol)
 
 !Local variables-------------------------------
 !scalars
@@ -1212,13 +1172,14 @@ subroutine gstore_set_mpi_grid__(gstore, gstore_cplex, eph_np_pqbks, priority, n
  character(len=10) :: order
  integer :: comm_cart, me_cart, dims(ndims)
  logical :: reorder, periods(ndims), keepdim(ndims)
+ character(len=10) :: priority
 !----------------------------------------------------------------------
 
+ associate (dtset => gstore%dtset)
  my_rank = xmpi_comm_rank(gstore%comm)
 
  do my_is=1,gstore%my_nspins
    spin = gstore%my_spins(my_is); gqk => gstore%gqk(my_is)
-
    gqk%spin = spin; gqk%natom3 = 3 * gstore%cryst%natom; gqk%cplex = gstore_cplex
    ABI_CHECK_IRANGE(gqk%cplex, 1, 2, "gstore_cplex")
 
@@ -1238,20 +1199,19 @@ subroutine gstore_set_mpi_grid__(gstore, gstore_cplex, eph_np_pqbks, priority, n
    ! Init for sequential execution.
    gqk%my_npert = gqk%natom3
    gqk%qpt_comm%nproc = 1; gqk%kpt_comm%nproc = 1; gqk%pert_comm%nproc = 1; gqk%band_comm%nproc = 1
-   ! NB: These communicators are used in GWPT
-   gqk%bsum_comm%nproc = 1; gqk%pp_sum_comm%nproc = 1;
+   gqk%bsum_comm%nproc = 1; gqk%pp_sum_comm%nproc = 1 ! NB: These communicators are only used in GWPT.
 
-   if (any(eph_np_pqbks /= 0)) then
+   if (any(dtset%eph_np_pqbks /= 0)) then
      ! Use parameters from input file. Need to perform sanity check though.
-     gqk%pert_comm%nproc = eph_np_pqbks(1)
-     gqk%qpt_comm%nproc  = eph_np_pqbks(2)
-     gqk%band_comm%nproc  = eph_np_pqbks(3)
-     ABI_CHECK(eph_np_pqbks(3) == 1, "Band parallelism not yet implemented in gstore")
-     gqk%kpt_comm%nproc = eph_np_pqbks(4)
-     !gqk%spin_comm%nproc = eph_np_pqbks(5)
+     gqk%pert_comm%nproc = dtset%eph_np_pqbks(1)
+     gqk%qpt_comm%nproc  = dtset%eph_np_pqbks(2)
+     gqk%band_comm%nproc  = dtset%eph_np_pqbks(3)
+     ABI_CHECK(dtset%eph_np_pqbks(3) == 1, "Band parallelism not yet implemented in gstore")
+     gqk%kpt_comm%nproc = dtset%eph_np_pqbks(4)
+     !gqk%spin_comm%nproc = dtset%eph_np_pqbks(5)
      gqk%my_npert = gqk%natom3 / gqk%pert_comm%nproc
-     ABI_CHECK(gqk%my_npert > 0, "pert_comm_nproc cannot be greater than 3 * natom.")
-     ABI_CHECK(mod(gqk%natom3, gqk%pert_comm%nproc) == 0, "pert_comm_nproc must divide 3 * natom.")
+     ABI_CHECK(gqk%my_npert > 0, "pert_comm_nproc cannot be greater than 3*natom.")
+     ABI_CHECK(mod(gqk%natom3, gqk%pert_comm%nproc) == 0, "pert_comm_nproc must divide 3*natom.")
 
      ! FIXME: Should be taken from the input.
      gqk%bsum_comm%nproc = 1; gqk%pp_sum_comm%nproc = 1;
@@ -1265,7 +1225,7 @@ subroutine gstore_set_mpi_grid__(gstore, gstore_cplex, eph_np_pqbks, priority, n
      ! allow one to reduce the memory requirements associated to the wavefunctions (kpt) and
      ! the scattering potentials in the supercell (perturbations).
      ! Here we try to optimize performance but it's clear that for large systems the user
-     ! should specify eph_np_pqbks in the input file.
+     ! should specify dtset%eph_np_pqbks in the input file.
 
      np = nproc_spin(spin)
 
@@ -1276,8 +1236,9 @@ subroutine gstore_set_mpi_grid__(gstore, gstore_cplex, eph_np_pqbks, priority, n
        ! In principle we should distributed the
        npp_bz = product(get_diag(gstore%dtset%kptrlatt))
 
-       !call kmesh%init(gstore%cryst, nkibz, kibz, kptopt)
+       !call kmesh%init(gstore%cryst, gstore%dtset%nkibz, gstore%dtset%kptns, dtset%kptopt)
        !call find_qmesh(qmesh, gstore%cryst, kmesh)
+       !npp_bz = qmesh%nbz
        !call kmesh%free(); call qmesh%free()
 
        order = "12"
@@ -1287,6 +1248,20 @@ subroutine gstore_set_mpi_grid__(gstore, gstore_cplex, eph_np_pqbks, priority, n
        ABI_CHECK(ierr == 0, sjoin("Cannot distribute nprocs:", itoa(np), " with priority: ", priority))
 
      else
+
+       select case (dtset%eph_task)
+       case (11)
+         priority = "qk"
+       case (12, -12)
+         priority = "q"
+       case (13)
+         priority = "q"
+       case (14, 17)
+         priority = "kq"
+       case default
+         ABI_ERROR(sjoin("Please register default priority for eph_task:", itoa(dtset%eph_task)))
+       end select
+
        select case (priority)
        case ("q")
          order = "1"
@@ -1313,7 +1288,7 @@ subroutine gstore_set_mpi_grid__(gstore, gstore_cplex, eph_np_pqbks, priority, n
    if (gqk%pert_comm%nproc * gqk%qpt_comm%nproc * gqk%kpt_comm%nproc * gqk%band_comm%nproc * &
        gqk%bsum_comm%nproc * gqk%pp_sum_comm%nproc /= nproc_spin(spin)) then
      write(msg, "(a,i0,3a, 7(a,1x,i0))") &
-       "Cannot create 5d Cartesian grid with total nproc: ", nproc_spin(spin), ch10, &
+       "Cannot create Cartesian grid with total nproc: ", nproc_spin(spin), ch10, &
        "Idle processes are not supported. The product of the `nproc_*` vars should be equal to nproc.", ch10, &
        "qpt_nproc (", gqk%qpt_comm%nproc, ") x kpt_nproc (", gqk%kpt_comm%nproc, ")  x kpt_nproc", gqk%pert_comm%nproc, &
        "x band_nproc (", gqk%band_comm%nproc, "x bsum_nproc (", gqk%bsum_comm%nproc, ") x psum_nproc (", gqk%pp_sum_comm%nproc, &
@@ -1330,8 +1305,7 @@ subroutine gstore_set_mpi_grid__(gstore, gstore_cplex, eph_np_pqbks, priority, n
    spin = gstore%my_spins(my_is); gqk => gstore%gqk(my_is)
 
    ! TODO: Should change order for GWPT
-   dims = [gqk%qpt_comm%nproc, gqk%kpt_comm%nproc, gqk%pert_comm%nproc, &
-           gqk%band_comm%nproc, gqk%bsum_comm%nproc, gqk%pp_sum_comm%nproc]
+   dims = [gqk%qpt_comm%nproc, gqk%kpt_comm%nproc, gqk%pert_comm%nproc, gqk%band_comm%nproc, gqk%bsum_comm%nproc, gqk%pp_sum_comm%nproc]
 
    ! Note comm_spin(spin)
    gqk%comm = xcomm_from_mpi_int(comm_spin(spin))
@@ -1356,7 +1330,7 @@ subroutine gstore_set_mpi_grid__(gstore, gstore_cplex, eph_np_pqbks, priority, n
    keepdim = .False.; keepdim(4) = .True.; call gqk%band_comm%from_cart_sub(comm_cart, keepdim)
    ! Communicator for bsum (GWPT mode)
    keepdim = .False.; keepdim(5) = .True.; call gqk%bsum_comm%from_cart_sub(comm_cart, keepdim)
-   ! Communicator for pp_sum (GWPT mode) .
+   ! Communicator for pp_sum (GWPT mode)
    keepdim = .False.; keepdim(6) = .True.; call gqk%pp_sum_comm%from_cart_sub(comm_cart, keepdim)
    call xmpi_comm_free(comm_cart)
 #endif
@@ -1370,6 +1344,8 @@ subroutine gstore_set_mpi_grid__(gstore, gstore_cplex, eph_np_pqbks, priority, n
    call gstore%print(std_out)
    call gstore%print(ab_out)
  end if
+
+ end associate
 
 end subroutine gstore_set_mpi_grid__
 !!***
@@ -1411,6 +1387,7 @@ subroutine gstore_print(gstore, unit, header, prtvol)
  else
    call wrtout(unit, " === Gstore parameters ===")
  end if
+
  !call ebands_print(gstore%ebands, header="Electron bands", unit=unit, prtvol=my_prtvol)
  call wrtout(unit, sjoin(" kzone:", gstore%kzone))
  call wrtout(unit, sjoin(" kfilter:", gstore%kfilter))
@@ -1426,8 +1403,7 @@ subroutine gstore_print(gstore, unit, header, prtvol)
  call wrtout(unit, sjoin(" with_vk:", itoa(gstore%with_vk)))
 
  do my_is=1,gstore%my_nspins
-   spin = gstore%my_spins(my_is)
-   gqk => gstore%gqk(my_is)
+   spin = gstore%my_spins(my_is); gqk => gstore%gqk(my_is)
    call wrtout(unit, sjoin(" gqk_cplex:", itoa(gqk%cplex)), pre_newlines=1)
    call wrtout(unit, sjoin(" gqk_bstart:", itoa(gqk%bstart)))
    call wrtout(unit, sjoin(" gqk_bstop:", itoa(gqk%bstop)))
@@ -1508,8 +1484,7 @@ subroutine gstore_malloc__(gstore, with_cplex, max_nq, qglob2bz, max_nk, kglob2b
  !gstore%max_nb = maxval(gstore%brange_spin(2, :) - gstore%brange_spin(1, :) + 1)
 
  do my_is=1,gstore%my_nspins
-   gqk => gstore%gqk(my_is)
-   spin = gstore%my_spins(my_is)
+   gqk => gstore%gqk(my_is); spin = gstore%my_spins(my_is)
 
    ! Split q-points and transfer symmetry tables.
    ! Note that glob_nq and glob_nk does not necessarily correspond to the size of the BZ
@@ -1658,10 +1633,7 @@ subroutine gstore_filter_fs_tetra__(gstore, qbz, qbz2ibz, qibz2bz, kbz, kibz, kb
  call wrtout(std_out, sjoin(" Filtering k-points using:", gstore%kfilter))
 
  ! NB: here we recompute brange_spin
- cryst => gstore%cryst
- ebands => gstore%ebands
- nsppol = gstore%nsppol
-
+ cryst => gstore%cryst; ebands => gstore%ebands; nsppol = gstore%nsppol
  ebands_timrev = kpts_timrev_from_kptopt(ebands%kptopt)
 
  call ebands_get_bands_e0(ebands, ebands%fermie, gstore%brange_spin, ierr)
@@ -2087,8 +2059,8 @@ subroutine recompute_select_qbz_spin(gstore, qbz, qbz2ibz, qibz2bz, kbz, kibz, k
            ikq_ibz = map_kq(1, ii)
            ikq_bz = kibz2bz(ikq_ibz)
            select_qbz_spin(iq_bz, spin) = select_qbz_spin(iq_bz, spin) + select_kbz_spin(ikq_bz, spin)
-         endif
-       enddo
+         end if
+       end do
 
      end do
    end do
@@ -4183,10 +4155,7 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, if
  ! Compute krank
  gstore%krank_ibz = krank_from_kptrlatt(gstore%nkibz, gstore%kibz, ebands%kptrlatt, compute_invrank=.False.)
 
- ! Set MPI grid. Also define priority according to eph_task.
- call priority_from_eph_task(dtset%eph_task, priority)
-
- call gstore%set_mpi_grid__(with_cplex, dtset%eph_np_pqbks, priority, nproc_spin, comm_spin)
+ call gstore%set_mpi_grid__(with_cplex, nproc_spin, comm_spin)
 
  ! At this point, we have the Cartesian grid (one per spin if any) and we can finally allocate and distribute other arrays.
  call gstore%malloc__(with_cplex, max_nq, qglob2bz, max_nk, kglob2bz, qbz2ibz, kbz2ibz)
