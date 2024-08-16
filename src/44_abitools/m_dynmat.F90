@@ -3523,7 +3523,7 @@ subroutine ftifc_q2r(atmfrc,dynmat,gprim,natom,nqpt,nrpt,rpt,spqpt,comm)
      kk(:) = matmul(gprim, spqpt(:, iqpt))
 
      ! Product of k and r
-     kr(:)=dot_product(kk,rpt(:,irpt))
+     kr=dot_product(kk,rpt(:,irpt))
 
      ! Get the phase factor
      re=cos(two_pi*kr)
@@ -3622,7 +3622,7 @@ subroutine ftifc_r2q(atmfrc, dynmat, gprim, natom, nqpt, nrpt, rpt, spqpt, wghat
      cnt = cnt + 1; if (mod(cnt, nprocs) /= my_rank) cycle ! MPI parallelism.
 
      ! k.R
-     kr(:) = dot_product(kk,rpt(:,irpt))
+     kr=dot_product(kk,rpt(:,irpt))
      ! Get phase factor
      re = cos(two_pi*kr); im = sin(two_pi*kr)
 
@@ -3723,7 +3723,7 @@ subroutine dynmat_dq(qpt,natom,gprim,nrpt,rpt,atmfrc,wghatm,dddq)
    kk(:) = matmul(gprim, qpt)
 
    ! Product of k and r
-   kr(:)=dot_product(kk,rpt(:,irpt))
+   kr=dot_product(kk,rpt(:,irpt))
 
    ! Get phase factor
    re=cos(two_pi*kr); im=sin(two_pi*kr)
@@ -6489,7 +6489,7 @@ subroutine ftgam_init (gprim,nqpt,nrpt,qpt_full,rpt,coskr, sinkr)
    kk(:) = matmul(gprim,qpt_full(:,iqpt))
    do irpt=1,nrpt
      ! Product of k and r
-     kr(:) =dot_product(kk,rpt(:,irpt))
+     kr =dot_product(kk,rpt(:,irpt))
      coskr(iqpt,irpt)=cos(two_pi*kr)
      sinkr(iqpt,irpt)=sin(two_pi*kr)
    end do
