@@ -424,7 +424,7 @@ type(abimover_specs),intent(out) :: specs
 
 !Local variables-------------------------------
 !scalars
- integer :: iatom,natom
+ integer :: natom
  character(len=500) :: msg
 !arrays
 
@@ -1245,7 +1245,7 @@ subroutine make_angles(deloc,natom)
 
 !Local variables-------------------------------
 !scalars
- integer :: ia1,ia2,iang,ibond,is1,is2,ishift,ja1,ja2
+ integer :: ia1,ia2,ibond,is1,is2,ishift,ja1,ja2
  integer :: jbond,js1,js2
 !arrays
  integer,allocatable :: angs_tmp(:,:,:)
@@ -1471,7 +1471,7 @@ subroutine make_bonds(deloc,natom,ntypat,rprimd,typat,xcart,znucl)
 
 !Local variables ------------------------------
 !scalars
- integer :: iatom,ibond,irshift,itypat,jatom
+ integer :: iatom,irshift,itypat,jatom
  real(dp) :: bl,bondfudge,rcov1,rcov2
  type(atomdata_t) :: atom
 !arrays

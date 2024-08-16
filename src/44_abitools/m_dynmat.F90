@@ -81,7 +81,7 @@ module m_dynmat
  public :: wght9                ! Generates a weight to each R points of the Big Box and for each pair of atoms
  public :: d3sym                ! Given a set of calculated elements of the 3DTE matrix,
                                 ! build (nearly) all the other matrix elements that can be build using symmetries.
- public :: d3lwsym                                
+ public :: d3lwsym
  public :: sylwtens             ! Determines the set of irreductible elements of the spatial-dispersion tensors
  public :: sytens               ! Determines the set of irreductible elements of the nonlinear optical susceptibility
                                 ! and Raman tensors
@@ -4518,11 +4518,11 @@ subroutine d3lwsym(blkflg,d3,indsym,mpert,natom,nsym,symrec,symrel)
 !               if (blkflg(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)==1) then
 !                 strflg(i1dir,i1pert,i2dir_a,i2dir_b,i3dir,i3pert)=1
 !                 d3str(:,i1dir,i1pert,i2dir_a,i2dir_b,i3dir,i3pert)= &
-!               & d3(:,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)          
+!               & d3(:,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)
 !                 if (i2pert==natom+4) then
 !                   strflg(i1dir,i1pert,i2dir_b,i2dir_a,i3dir,i3pert)=1
 !                   d3str(:,i1dir,i1pert,i2dir_b,i2dir_a,i3dir,i3pert)= &
-!                 & d3(:,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)          
+!                 & d3(:,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)
 !                 end if
 !               end if
 !             end do
@@ -4542,7 +4542,7 @@ subroutine d3lwsym(blkflg,d3,indsym,mpert,natom,nsym,symrec,symrel)
 !  Loop over perturbations
    do i1pert = 1, mpert
      do i2pert = 1, mpert
-       is_strain=.false.    
+       is_strain=.false.
        do i3pert = 1, mpert
 
          do i1dir = 1, 3
@@ -4626,7 +4626,7 @@ subroutine d3lwsym(blkflg,d3,indsym,mpert,natom,nsym,symrec,symrel)
                          end do
                        end do
                      end do
-                   else 
+                   else
 !                     do idisy1 = 1, 3
 !                       !do idisy2_a = 1, 3
 !                       !  do idisy2_b = 1, 3
@@ -4642,10 +4642,10 @@ subroutine d3lwsym(blkflg,d3,indsym,mpert,natom,nsym,symrec,symrel)
 !                               if (strflg(idisy1,ipesy1,idisy2_a,idisy2_b,idisy3,ipesy3) == 1) then
 !
 !                                 sumr = sumr + sym1(i1dir,idisy1)*sym2(i2dir_a,idisy2_a)* &
-!&                                sym2(i2dir_b,idisy2_b)*sym3(i3dir,idisy3)*& 
+!&                                sym2(i2dir_b,idisy2_b)*sym3(i3dir,idisy3)*&
 !&                                d3str(1,idisy1,ipesy1,idisy2_a,idisy2_b,idisy3,ipesy3)
 !                                 sumi = sumi + sym1(i1dir,idisy1)*sym2(i2dir_a,idisy2_b)*&
-!&                                sym2(i2dir_b,idisy2_b)*sym3(i3dir,idisy3)*& 
+!&                                sym2(i2dir_b,idisy2_b)*sym3(i3dir,idisy3)*&
 !&                                d3str(2,idisy1,ipesy1,idisy2_a,idisy2_b,idisy3,ipesy3)
 !
 !                               else
@@ -4660,7 +4660,7 @@ subroutine d3lwsym(blkflg,d3,indsym,mpert,natom,nsym,symrec,symrel)
 !                         !end do
 !                       end do
 !                     end do
-                   end if        
+                   end if
 
                    if (found == 1) then
                      d3(1,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert) = sumr
@@ -4992,7 +4992,7 @@ subroutine sylwtens(indsym,mpert,natom,nsym,rfpert,symrec,symrel)
 
  do i1pert_ = 1, mpert
    do i2pert_ = 1, mpert
-     is_strain=.false.    
+     is_strain=.false.
      do i3pert_ = 1, mpert
 
        do i1dir_ = 1, 3
@@ -5099,7 +5099,7 @@ subroutine sylwtens(indsym,mpert,natom,nsym,rfpert,symrec,symrel)
                        end do
                      end do
                    end do
-!                 else 
+!                 else
 !                   if ((flag_dp /= -1).and.&
 !&                   (ipesy1==i1pert).and.(ipesy2==i2pert).and.(ipesy3==i3pert)) then
 !                     flag = sym1(i1dir,i1dir)*sym2(i2dir_a,i2dir_a)* &
@@ -5231,7 +5231,7 @@ subroutine axial9(ifccar,vect1,vect2,vect3)
 
 !Local variables -------------------------
 !scalars
- integer :: flag,ii,itrial,jj
+ integer :: flag,ii,itrial
  real(dp) :: innorm,scprod
 !arrays
  real(dp) :: work(3)
