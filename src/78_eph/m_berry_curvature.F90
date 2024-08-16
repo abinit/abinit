@@ -128,7 +128,7 @@ subroutine berry_curvature(gstore, dtset, dtfil)
 
  if (my_rank == master) then
    call wrtout(std_out, " Computing berry curvature", pre_newlines=2)
-   call gstore%print(std_out, header="Gstore", prtvol=dtset%prtvol)
+   call gstore%print([std_out], header="Gstore", prtvol=dtset%prtvol)
  end if
 
  ! Consistency check

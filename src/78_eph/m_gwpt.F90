@@ -185,7 +185,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  integer,parameter :: useylmgr = 0, useylmgr1 = 0, master = 0, ndat1 = 1, with_cplex0 = 0, n3xccc0 = 0
  integer,parameter :: igscq0 = 0, icgq0 = 0, usedcwavef0 = 0, nbdbuf0 = 0, quit0 = 0, cplex1 = 1, pawread0 = 0
  integer :: band, band_me, nband_me, stern_comm, nkpt, my_rank, nsppol, iq_ibz, iq_bz, my_npert
- integer :: cplex,drho_cplex,nkxc,nk3xc,option,usexcnhat,db_iqpt,natom,natom3,ipc,nspinor,nprocs
+ integer :: cplex,drho_cplex,nkxc,nk3xc,option,usexcnhat,db_iqpt,natom,natom3,ipc,nspinor,nprocs, gsum_master
  integer :: ib_sum, ii, ib, u1_band !,u1c_ib_k,  jj, iw !ib_kq, band_ks, ib_k, ibsum_kq, u1_master, ip
  integer :: my_is, spin, idir,ipert, ig, max_npw_xc, npw_x, npw_c, nw_nk, nw_mkq
  integer :: my_pp_start_spin(dtset%nsppol), my_pp_stop_spin(dtset%nsppol), my_npp(dtset%nsppol)
@@ -780,7 +780,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
 
  stern_use_cache = merge(.True., .False., dtset%eph_stern == 1)
 
- if (my_rank == master) call gstore%print(std_out)
+ if (my_rank == master) call gstore%print([std_out])
 
  ! This parameter defines the size of the q-buffer used to store the g(k, q) e-ph matrix elements
  ! for all the k-point treated by this MPI rank.
@@ -1485,14 +1485,10 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
        ABI_FREE(ug_k)
        ABI_FREE(ug_kq)
 
-       ! TODO: Introduce 2d MPI communicator ppsum_pert
-
-       ! Collect gsig_atm and gks_atm inside pert_comm so that all procs can operate on the data.
-       call xmpi_sum(gsig_atm, gqk%pp_sum_comm%value, ierr)
-       call xmpi_sum(gsig_atm, gqk%pert_comm%value, ierr)
-
-       call xmpi_sum(gks_atm, gqk%pp_sum_comm%value, ierr)
-       call xmpi_sum(gks_atm, gqk%pert_comm%value, ierr)
+       ! Here we are outside of the loop over pp_sum, band_sum and perturbation
+       ! Collect gsig_atm and gks_atm inside pert_ppsum_comm so that all procs can operate on the data.
+       call xmpi_sum_master(gsig_atm, 0, gqk%pert_ppsum_bsum_comm%value, ierr)
+       call xmpi_sum_master(gks_atm , 0, gqk%pert_ppsum_bsum_comm%value, ierr)
 
        ! TODO gks_atm and gks_nu
        gsig_atm = gsig_atm ! + gks_atm - gxc_atm
@@ -1669,6 +1665,7 @@ subroutine dump_my_gbuf()
  ! FIXME: Recheck this part as we have way more levels of parallelism in GWPT
  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
  if (gqk%coords_qkpb_sumbp(3) /= 0) goto 10 ! Yes, I'm very proud of this GOTO.
+ if (gqk%pert_ppsum_bsum_comm%me /= 0) goto 10 ! Yes, I'm very proud of this GOTO.
 
  !iq_buf(:, iqbuf_cnt) = [my_iq, iq_bz]
  my_iq = iq_buf(1, 1)

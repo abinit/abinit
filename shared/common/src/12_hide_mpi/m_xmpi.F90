@@ -168,7 +168,7 @@ module m_xmpi
    integer :: nproc = 1
    integer :: me = 0
    integer,private :: can_use_shmem__ = -1
-     ! -1 --> unitialized, 0 if ranks do not belong to a shared memory region else 1
+    ! -1 --> unitialized, 0 if ranks do not belong to a shared memory region else 1
 
  contains
    procedure :: skip => xcomm_skip                     ! Skip iteration according to rank
