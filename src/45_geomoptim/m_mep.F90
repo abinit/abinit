@@ -1166,7 +1166,7 @@ function mep_img_dotp_red(rmet,vect1,vect2)
  real(dp),intent(in) :: vect1(:,:),vect2(:,:)
 !Local variables-------------------------------
 !scalars
- integer :: iatom,ii,jj,size1,size2
+ integer :: iatom,size1,size2
 
 !************************************************************************
 

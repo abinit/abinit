@@ -1700,7 +1700,6 @@ function pimd_diff_stress(stress_pimd,stress_target)
  real(dp) :: pimd_diff_stress(3,3)
 !Local variables-------------------------------
 !scalars
- integer :: ii,jj
 !arrays
  real(dp) :: stress_pimd2(3,3)
 

@@ -774,7 +774,7 @@ real(dp),intent(in) :: vel_cell(:,:)
 
 !Local variables-------------------------------
 !scalars
-integer :: ii,jj,natom
+integer :: ii,natom
 real(dp) :: ekin
 
 ! *************************************************************

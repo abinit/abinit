@@ -79,7 +79,7 @@ subroutine pred_simple(ab_mover,hist,iexit)
 
 !Local variables-------------------------------
 !scalars
- integer  :: ihist_next,kk,jj
+ integer  :: ihist_next,kk
 
 !***************************************************************************
 !Beginning of executable session
