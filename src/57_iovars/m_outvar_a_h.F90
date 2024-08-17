@@ -857,6 +857,12 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
  end do
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,narr,narrm,ncid,ndtset_alloc,'eph_np_pqbks','INT',0, firstchar="-")
 
+ narr = size(dtsets(0)%gwpt_np_wpqbks)
+ do idtset=0,ndtset_alloc
+   intarr(1:narr,idtset) = dtsets(idtset)%gwpt_np_wpqbks
+ end do
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,narr,narrm,ncid,ndtset_alloc,'gwpt_np_wpqbks','INT',0, firstchar="-")
+
  intarr(1,:)=dtsets(:)%eph_phrange(1)
  intarr(2,:)=dtsets(:)%eph_phrange(2)
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,2,narrm,ncid,ndtset_alloc,'eph_phrange','INT',0)

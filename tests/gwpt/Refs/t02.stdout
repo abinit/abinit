@@ -1,5 +1,5 @@
 
-.Version 10.1.2.2 of MRGDV, released Apr 2024.
+.Version 10.1.4.2 of MRGDV, released Jun 2024.
 .(MPI version, prepared for a aarch64_darwin22.6.0_gnu12.2 computer) 
 
 .Copyright (C) 1998-2024 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 14 May 2024.
-- ( at 16h49 )
+.Starting date : Sat 17 Aug 2024.
+- ( at 14h02 )
   
 ->> Enter name of output file: 
 ->> Enter total number of DFPT POT files: 

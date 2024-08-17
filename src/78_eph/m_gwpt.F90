@@ -97,7 +97,7 @@ module m_gwpt
  include 'mpif.h'
 #endif
 
- public :: gwpt_run        ! Main entry point to compute GWPT e-ph matrix elements
+ public :: gwpt_run  ! Main entry point to compute GWPT e-ph matrix elements
 
 !----------------------------------------------------------------------
 
@@ -425,11 +425,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  ! TODO: One can exploit qq, kk and pp parallelism to find the wavevectors in the IBZ
  ! that will be needed in the loops below and allocate only these wavevectors so that memory scales.
 
-!#define DEV_FAST_DEBUG
  nbsum = dtset%mband
-#ifdef DEV_FAST_DEBUG
- nbsum = 1 ! DEBUG
-#endif
  my_bsum_start = 1; my_bsum_stop = nbsum; my_nbsum = my_bsum_stop - my_bsum_start + 1
  stern_has_band_para = .False.
  fermie1_idir_ipert = zero
@@ -489,8 +485,6 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  n1 = ngfft(1); n2 = ngfft(2); n3 = ngfft(3)
  n4 = ngfft(4); n5 = ngfft(5); n6 = ngfft(6)
 
- ! if PAW, one has to solve a generalized eigenproblem
- ! Be careful here because I will need sij_opt == -1
  usecprj = 0 !; gen_eigenpb = psps%usepaw == 1; sij_opt = 0; if (gen_eigenpb) sij_opt = 1
 
  ABI_MALLOC(cwaveprj0, (natom, nspinor*usecprj))
@@ -851,11 +845,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
    ! =============================================
    ! Loop over MPI distributed q-points in Sigma_q
    ! =============================================
-   ! q-points are usually in the IBZ.
    do my_iq=1,gqk%my_nq
-#ifdef DEV_FAST_DEBUG
-     if (my_iq > 3) cycle ! DEBUG
-#endif
      call gqk%myqpt(my_iq, gstore, weight_q, qpt)
      qq_is_gamma = sum(qpt**2) < tol14
 
@@ -882,7 +872,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
      print_time_qq = my_rank == 0 .and. (my_iq <= LOG_MODQ .or. mod(my_iq, LOG_MODQ) == 0)
      if (print_time_qq) then
        call cwtime(cpu_qq, wall_qq, gflops_qq, "start")
-       call wrtout(std_out, sjoin(" Computing g^GW(k,q) for qpt:", ktoa(qpt), ", spin:", itoa(spin)))
+       call wrtout(std_out, sjoin(" Computing g^GW(k,q) for qpt:", ktoa(qpt), ", spin:", itoa(spin)), pre_newlines=1)
      end if
      !print *, "iq_ibz:", iq_ibz, "qpt:", qpt, "qq_ibz:", qq_ibz
 
@@ -951,10 +941,6 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
 
        gks_atm = zero
 
-#ifdef DEV_FAST_DEBUG
-       if (my_ik > 12) cycle ! DEBUG
-#endif
-
        ! Symmetry indices for kk.
        kk = gqk%my_kpts(:, my_ik)
        ! The k-point and the symmetries relating the BZ k-point to the IBZ.
@@ -969,10 +955,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
        !print *, "ik_ibz:", ik_ibz, "kk:", kk, "kk_ibz:", kk_ibz
 
        print_time_kk = my_rank == 0 .and. (my_ik <= LOG_MODK .or. mod(my_ik, LOG_MODK) == 0)
-       if (print_time_kk) then
-         call cwtime(cpu_kk, wall_kk, gflops_kk, "start")
-         !call wrtout(std_out, sjoin(" Computing kk:", ktoa(kk), ", spin:", itoa(spin)))
-       end if
+       if (print_time_kk) call cwtime(cpu_kk, wall_kk, gflops_kk, "start")
 
        ! Get npw_k, kg_k for kk
        call wfd%get_gvec_gbound(cryst%gmet, ecut, kk, ik_ibz, isirr_k, dtset%nloalg, & ! in
@@ -1060,15 +1043,13 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
        gsig_atm = zero
 
        do ipp_bz=my_pp_start_spin(spin), my_pp_stop_spin(spin)
+
          my_ipp = ipp_bz - my_pp_start_spin(spin) + 1
          print_time_pp = my_rank == 0 .and. (my_ipp <= LOG_MODP .or. mod(my_ipp, LOG_MODP) == 0)
          if (print_time_pp) call cwtime(cpu_pp, wall_pp, gflops_pp, "start")
 
          pp = pp_mesh%bz(:,ipp_bz) !; print *, "pp", pp
          pp_is_gamma = sum(pp**2) < tol14
-#ifdef DEV_FAST_DEBUG
-         if (ipp_bz > 12) cycle ! DEBUG
-#endif
 
          ! Symmetry tables and g-sphere centered on k-p.
          kmp = kk - pp

@@ -1206,55 +1206,38 @@ subroutine gstore_set_mpi_grid__(gstore, gstore_cplex, nproc_spin, comm_spin)
    ! Init for sequential execution.
    gqk%my_npert = gqk%natom3
    gqk%qpt_comm%nproc = 1; gqk%kpt_comm%nproc = 1; gqk%pert_comm%nproc = 1; gqk%band_comm%nproc = 1
-   gqk%bsum_comm%nproc = 1; gqk%pp_sum_comm%nproc = 1 ! NB: These communicators are only used in GWPT.
+   ! NB: The communicators below are only used in GWPT.
+   gqk%bsum_comm%nproc = 1; gqk%pp_sum_comm%nproc = 1
 
-   if (any(dtset%eph_np_pqbks /= 0)) then
-     ! Use parameters from input file. Need to perform sanity check though.
-     gqk%pert_comm%nproc = dtset%eph_np_pqbks(1)
-     gqk%qpt_comm%nproc  = dtset%eph_np_pqbks(2)
-     gqk%band_comm%nproc  = dtset%eph_np_pqbks(3)
-     ABI_CHECK(dtset%eph_np_pqbks(3) == 1, "Band parallelism not yet implemented in gstore")
-     gqk%kpt_comm%nproc = dtset%eph_np_pqbks(4)
-     !gqk%spin_comm%nproc = dtset%eph_np_pqbks(5)
-     gqk%my_npert = gqk%natom3 / gqk%pert_comm%nproc
-     ABI_CHECK(gqk%my_npert > 0, "pert_comm_nproc cannot be greater than 3*natom.")
-     ABI_CHECK(mod(gqk%natom3, gqk%pert_comm%nproc) == 0, "pert_comm_nproc must divide 3*natom.")
+   np = nproc_spin(spin)
 
-     ! FIXME: Should be taken from the input.
-     gqk%bsum_comm%nproc = 1; gqk%pp_sum_comm%nproc = 1
+   if (dtset%eph_task /= 17) then
+     ! =============================
+     ! For all eph_tasks except GWPT
+     ! =============================
 
-   else
-     ! Automatic grid generation (hopefully smart)
-     ! Keep in mind that in gstore_compute, the first loop is over q-points
-     ! in order to reduce the number of interpolations of the DFPT potentials in q-space
-     ! hence the q-point parallelism is expected to be more efficient.
-     ! On the other hand, the k-point parallelism and the perturbation parallelism
-     ! allow one to reduce the memory requirements associated to the wavefunctions (kpt) and
-     ! the scattering potentials in the supercell (perturbations).
-     ! Here we try to optimize performance but it's clear that for large systems the user
-     ! should specify dtset%eph_np_pqbks in the input file.
-
-     np = nproc_spin(spin)
-
-     if (gqk%glob_nk == 1 .and. gqk%glob_nq == 1) then
-
-       ! This may happen in GWPT when only of e-ph matrix element is wanted.
-       ! Here we activate the parallelism over pp_sum and perturbations.
-       ! In principle we should distributed the
-       npp_bz = product(get_diag(gstore%dtset%kptrlatt))
-
-       !call kmesh%init(gstore%cryst, gstore%dtset%nkibz, gstore%dtset%kptns, dtset%kptopt)
-       !call find_qmesh(qmesh, gstore%cryst, kmesh)
-       !npp_bz = qmesh%nbz
-       !call kmesh%free(); call qmesh%free()
-
-       order = "12"
-       !order = "21"
-       call xmpi_distrib_2d(np, order, npp_bz, gqk%natom3, gqk%pp_sum_comm%nproc, gqk%pert_comm%nproc, ierr)
-       !call xmpi_distrib_2d(np, order, gqk%natom3, gstore%dtset%mband, gqk%pert_comm%nproc, gqk%bsum_comm%nproc, ierr)
-       ABI_CHECK(ierr == 0, sjoin("Cannot distribute nprocs:", itoa(np), " with priority: ", priority))
+     if (any(dtset%eph_np_pqbks /= 0)) then
+       ! Use parameters from input file. Need to perform sanity check though.
+       gqk%pert_comm%nproc = dtset%eph_np_pqbks(1)
+       gqk%qpt_comm%nproc  = dtset%eph_np_pqbks(2)
+       gqk%band_comm%nproc  = dtset%eph_np_pqbks(3)
+       ABI_CHECK(dtset%eph_np_pqbks(3) == 1, "Band parallelism not yet implemented in gstore")
+       gqk%kpt_comm%nproc = dtset%eph_np_pqbks(4)
+       !gqk%spin_comm%nproc = dtset%eph_np_pqbks(5)
+       gqk%my_npert = gqk%natom3 / gqk%pert_comm%nproc
+       ABI_CHECK(gqk%my_npert > 0, "pert_comm_nproc cannot be greater than 3*natom.")
+       ABI_CHECK(mod(gqk%natom3, gqk%pert_comm%nproc) == 0, "pert_comm_nproc must divide 3*natom.")
 
      else
+       ! Automatic grid generation (hopefully smart)
+       ! Keep in mind that in gstore_compute, the first loop is over q-points
+       ! in order to reduce the number of interpolations of the DFPT potentials in q-space
+       ! hence the q-point parallelism is expected to be more efficient.
+       ! On the other hand, the k-point parallelism and the perturbation parallelism
+       ! allow one to reduce the memory requirements associated to the wavefunctions (kpt) and
+       ! the scattering potentials in the supercell (perturbations).
+       ! Here we try to optimize performance but it's clear that for large systems the user
+       ! should specify dtset%eph_np_pqbks in the input file.
 
        select case (dtset%eph_task)
        case (11)
@@ -1286,9 +1269,49 @@ subroutine gstore_set_mpi_grid__(gstore, gstore_cplex, nproc_spin, comm_spin)
        if (gqk%glob_nq == 1) order = "12"
        call xmpi_distrib_2d(np, order, gqk%glob_nq, gqk%glob_nk, gqk%qpt_comm%nproc, gqk%kpt_comm%nproc, ierr)
        ABI_CHECK(ierr == 0, sjoin("Cannot distribute nprocs:", itoa(np), " with priority: ", priority))
-       !if (ierr /= 0) call xmpi_distrib_2d_extra(np, gqk%qpt_comm%nproc, gqk%kpt_comm%nproc, gqk%pert_comm%nproc, ierr)
      end if
 
+   else if (dtset%eph_task == 17) then
+     ! =========================
+     ! MPI distribution for GWPT
+     ! =========================
+
+     if (any(dtset%gwpt_np_wpqbks /= 0)) then
+       ! Use parameters from input file. Need to perform sanity check though.
+       gqk%pp_sum_comm%nproc  = dtset%gwpt_np_wpqbks(1)
+       gqk%pert_comm%nproc = dtset%gwpt_np_wpqbks(2)
+       gqk%qpt_comm%nproc  = dtset%gwpt_np_wpqbks(3)
+       gqk%bsum_comm%nproc  = dtset%gwpt_np_wpqbks(4)
+       gqk%kpt_comm%nproc = dtset%gwpt_np_wpqbks(5)
+       !gqk%spin_comm%nproc = dtset%gwpt_np_wpqbks(6)
+       gqk%my_npert = gqk%natom3 / gqk%pert_comm%nproc
+       ABI_CHECK(gqk%my_npert > 0, "pert_comm_nproc cannot be greater than 3*natom.")
+       ABI_CHECK(mod(gqk%natom3, gqk%pert_comm%nproc) == 0, "pert_comm_nproc must divide 3*natom.")
+
+     else
+       ! Automatic grid generation for GWPT (hopefully smart)
+
+       !if (gqk%glob_nk == 1 .and. gqk%glob_nq == 1) then
+         ! This may happen in GWPT when only of e-ph matrix element is wanted.
+         ! Here we activate the parallelism over pp_sum and perturbations.
+         ! In principle we should distributed the
+         npp_bz = product(get_diag(gstore%dtset%kptrlatt))
+
+         !call kmesh%init(gstore%cryst, gstore%dtset%nkibz, gstore%dtset%kptns, dtset%kptopt)
+         !call find_qmesh(qmesh, gstore%cryst, kmesh)
+         !npp_bz = qmesh%nbz
+         !call kmesh%free(); call qmesh%free()
+
+         order = "12"
+         !order = "21"
+         call xmpi_distrib_2d(np, order, npp_bz, gqk%natom3, gqk%pp_sum_comm%nproc, gqk%pert_comm%nproc, ierr)
+         !call xmpi_distrib_2d(np, order, gqk%natom3, gstore%dtset%mband, gqk%pert_comm%nproc, gqk%bsum_comm%nproc, ierr)
+         ABI_CHECK(ierr == 0, sjoin("Cannot distribute nprocs:", itoa(np), " with priority: ", priority))
+       !end if
+     end if
+
+   else
+     ABI_ERROR(sjoin("Invalid eph_task", itoa(dtset%eph_task)))
    end if
 
    ! Consistency check.
@@ -1312,7 +1335,8 @@ subroutine gstore_set_mpi_grid__(gstore, gstore_cplex, nproc_spin, comm_spin)
    spin = gstore%my_spins(my_is); gqk => gstore%gqk(my_is)
 
    ! TODO: Should change order for GWPT
-   dims = [gqk%qpt_comm%nproc, gqk%kpt_comm%nproc, gqk%pert_comm%nproc, gqk%band_comm%nproc, gqk%bsum_comm%nproc, gqk%pp_sum_comm%nproc]
+   dims = [gqk%qpt_comm%nproc, gqk%kpt_comm%nproc, gqk%pert_comm%nproc, gqk%band_comm%nproc, &
+           gqk%bsum_comm%nproc, gqk%pp_sum_comm%nproc]
 
    ! Note comm_spin(spin)
    gqk%comm = xcomm_from_mpi_int(comm_spin(spin))
@@ -1937,14 +1961,13 @@ subroutine gstore_filter_qprange__(gstore, dtset, qbz, qbz2ibz, qibz2bz, kbz, ki
      ik_ibz = mapl_kk(1)
      ik_bz = kibz2bz(ik_ibz); select_kbz_spin(ik_bz, spin) = 1
    end do
-   ! FIXME: This requires a more careful treatment of (gqk%nb, gqk%nb) matrix that
-   ! should become (nb1, nb2)
-   ! Set brange_spin from bstart_ks and nbcalc_ks
+   ! FIXME: This requires a more careful treatment of (gqk%nb, gqk%nb) matrix that should become (nb1, nb2)
+   ! Set brange_spin from bstart_ks and nbcalc_ks. Arrays have shape (nkcalc, nsppol)
    !gstore%brange_spin(:, spin) = [minval(bstart_ks(:,spin)), maxval(bstart_ks(:,spin) + nbcalc_ks(:,spin) - 1)]
  end do
 
- call recompute_select_qbz_spin(gstore, qbz, qbz2ibz, qibz2bz, kbz, kibz, kbz2ibz, kibz2bz, &
-                                select_kbz_spin, select_qbz_spin)
+ !call recompute_select_qbz_spin(gstore, qbz, qbz2ibz, qibz2bz, kbz, kibz, kbz2ibz, kibz2bz, &
+ !                               select_kbz_spin, select_qbz_spin)
 
  ABI_FREE(kcalc)
  ABI_FREE(bstart_ks)
@@ -2153,13 +2176,13 @@ subroutine gstore_fill_bks_mask(gstore, mband, nkibz, nsppol, bks_mask)
  do my_is=1,gstore%my_nspins
    gqk => gstore%gqk(my_is); spin = gstore%my_spins(my_is)
 
-   ! We need the image of this k in the IBZ.
+   ! We need the image of this k-point in the IBZ.
    do my_ik=1,gqk%my_nk
      ik_ibz = gqk%my_k2ibz(1, my_ik)
      bks_mask(gqk%bstart:gqk%bstop, ik_ibz, spin) = .True.
    end do
 
-   ! as well as the image of k+q in the IBZ.
+   ! As well as the image of k+q in the IBZ.
    ABI_MALLOC(map_kq, (6, gqk%my_nk))
 
    do my_iq=1,gqk%my_nq
@@ -2331,7 +2354,7 @@ subroutine gstore_get_mpw_gmax(gstore, ecut, mpw, gmax)
  ! TODO: This is an hotspot due to the double loop over k and q.
  ! Should use a geometrical approach to compute mpw and gmax.
 
- call wrtout(std_out, " Computing mpw. This may take some time for dense k/q meshes...")
+ call wrtout(std_out, " Computing mpw. This may take some time for dense k/q meshes...", pre_newlines=1)
  call cwtime(cpu, wall, gflops, "start")
 
  do my_is=1,gstore%my_nspins
@@ -2562,7 +2585,7 @@ subroutine gstore_get_a2fw(gstore, dtset, nw, wmesh, a2fw)
 
 !----------------------------------------------------------------------
 
- call wrtout(std_out, sjoin(" Computing a^2F(w) with ph_smear:", ftoa(dtset%ph_smear * Ha_meV), "(meV)"))
+ call wrtout(std_out, sjoin(" Computing a^2F(w) with ph_smear:", ftoa(dtset%ph_smear * Ha_meV), "(meV)"), pre_newlines=1)
  ABI_CHECK(gstore%qzone == "bz", "gstore_get_lambda_iso_iw assumes qzone == `bz`")
  call cwtime(cpu, wall, gflops, "start")
 
