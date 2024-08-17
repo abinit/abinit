@@ -1496,6 +1496,10 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,narr,string(1:lenstr),'eph_np_pqbks',tread,'INT')
  if (tread==1) dtset%eph_np_pqbks = intarr(1:narr)
 
+ narr = size(dtset%gwpt_np_wpqbks)
+ call intagm(dprarr,intarr,jdtset,marr,narr,string(1:lenstr),'gwpt_np_wpqbks',tread,'INT')
+ if (tread==1) dtset%gwpt_np_wpqbks = intarr(1:narr)
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'eph_stern',tread,'INT')
  if(tread==1) dtset%eph_stern = intarr(1)
 

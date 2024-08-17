@@ -24251,4 +24251,32 @@ while [[optdcmagpawu]]=3 takes into account magnetism in the DC term, that is cu
 """,
 ),
 
+
+Variable(
+    abivarname="gwpt_np_wpqbks",
+    varset="eph",
+    vartype="integer",
+    topics=['ElPhonInt_expert'],
+    dimensions=[6],
+    defaultval=0,
+    mnemonics="GWPT Number of Processors for Wavevector sum, Perturbations, Q-points, Bands, K-points, Spin.",
+    added_in_version="10.1.4",
+    text=r"""
+This variable defines the Cartesian grid of MPI processors used for GWPT calculations.
+If not specified in the input, the code will generate this grid automatically using the total number of processors
+and the basic dimensions of the job computed at runtime.
+
+Preliminary considerations:
+
+!!! important
+
+    The total number of MPI processes must be equal to the product of the different entries.
+
+    Note also that the GWPT code implements its own MPI-algorithm and [[gwpt_np_wpqbks]] is
+    the **only variable** that should be used to change the default behaviour.
+    Other variables such as [[nppert]], [[npband]], [[npfft]], [[np_spkpt]] and [[paral_kgb]]
+    are **not used** in the EPH subdriver.
+""",
+),
+
 ]
