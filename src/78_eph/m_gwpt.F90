@@ -274,7 +274,6 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  logical,allocatable :: bks_mask(:,:,:), keep_ur(:,:,:)
  type(pawcprj_type),allocatable :: cwaveprj0(:,:), cwaveprj(:,:)
  type(pawrhoij_type),allocatable :: pot_pawrhoij(:), den_pawrhoij(:)
-
 !************************************************************************
 
  ! Problems to be addressed:
@@ -873,7 +872,8 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
      print_time_qq = my_rank == 0 .and. (my_iq <= LOG_MODQ .or. mod(my_iq, LOG_MODQ) == 0)
      if (print_time_qq) then
        call cwtime(cpu_qq, wall_qq, gflops_qq, "start")
-       call wrtout(std_out, sjoin(" Computing g^GW(k,q) for qpt:", ktoa(qpt), ", spin:", itoa(spin)), pre_newlines=1)
+       !call para_inds(my_iq, gqk%my_nq, gqk%glob_nq, msg)
+       call wrtout(std_out, sjoin(" Computing g^Sigma(k,q) for qpt:", ktoa(qpt), ", spin:", itoa(spin)), pre_newlines=1)
      end if
      !print *, "iq_ibz:", iq_ibz, "qpt:", qpt, "qq_ibz:", qq_ibz
 
@@ -956,7 +956,11 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
        !print *, "ik_ibz:", ik_ibz, "kk:", kk, "kk_ibz:", kk_ibz
 
        print_time_kk = my_rank == 0 .and. (my_ik <= LOG_MODK .or. mod(my_ik, LOG_MODK) == 0)
-       if (print_time_kk) call cwtime(cpu_kk, wall_kk, gflops_kk, "start")
+       if (print_time_kk) then
+         call cwtime(cpu_kk, wall_kk, gflops_kk, "start")
+         !call para_inds(my_iq, gqk%my_nq, gqk%glob_nq, msg)
+         ! call wrtout(std_out, sjoin(" Computing g^Sigma(k,q) for qpt:", ktoa(qpt), ", spin:", itoa(spin)), pre_newlines=1)
+       end if
 
        ! Get npw_k, kg_k for kk
        call wfd%get_gvec_gbound(cryst%gmet, ecut, kk, ik_ibz, isirr_k, dtset%nloalg, & ! in
@@ -1446,6 +1450,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
          end do ! ibsum
 
          if (print_time_pp) then
+           !call para_inds(my_ipp, gqk%my_npp(spin), pp_mesh%nbz, msg)
            write(msg,'(4x,2(a,i0),a)')" My pp-point [", my_ipp, "/", my_npp(spin), "]"
            call cwtime_report(msg, cpu_pp, wall_pp, gflops_pp); if (my_ipp == LOG_MODP) call wrtout(std_out, "...", do_flush=.True.)
          end if
@@ -1506,6 +1511,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
        if (iqbuf_cnt == qbuf_size) call dump_my_gbuf()
 
        if (print_time_kk) then
+         !call para_inds(my_ik, gqk%my_nk, gqk%glob_nk, msg)
          write(msg,'(4x, 2(a,i0),a)')" My k-point [", my_ik, "/", gqk%my_nk, "]"
          call cwtime_report(msg, cpu_kk, wall_kk, gflops_kk); if (my_ik == LOG_MODK) call wrtout(std_out, "...", do_flush=.True.)
        end if
@@ -1621,6 +1627,12 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  call cwtime_report(" gwpt_run: MPI barrier before returning.", cpu_all, wall_all, gflops_all, end_str=ch10, comm=comm)
 
 contains
+
+subroutine para_inds(my_ik, my_nk, nk_tot, out_str)
+ integer,intent(in) :: my_ik, my_nk, nk_tot
+ character(len=*),intent(out) :: out_str
+ out_str = sjoin(itoa(my_ik), "/", itoa(my_nk), "[", itoa(nk_tot), "]")
+end subroutine  para_inds
 
 subroutine dump_my_gbuf()
 
