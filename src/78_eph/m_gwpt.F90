@@ -201,7 +201,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  integer :: ndone, nmiss ! num_mn_kq,
  !integer :: bstart_ks,ikcalc,bstart,bstop, sendcount !iatom,
  integer :: my_ipp, ipp_bz, ipp_ibz, isym_pp, itim_pp, comm_rpt, nqlwl, ebands_timrev ! osc_npw,
- integer :: ffnl_k_request, ffnl_kq_request, ffnl_kmp_request, ffnl_kqmp_request
+ !integer :: ffnl_kmp_request, ffnl_kqmp_request  ! ffnl_k_request, ffnl_kq_request,
  integer :: qptopt, my_iq, my_ik, qbuf_size, iqbuf_cnt, nb ! nelem,
  real(dp) :: cpu_all, wall_all, gflops_all, cpu_qq, wall_qq, gflops_qq, cpu_kk, wall_kk, gflops_kk, cpu_pp, wall_pp, gflops_pp
  real(dp) :: fact_spin, theta_mu_minus_e0i, tol_empty, tol_empty_in !, e_mkq, e_nk ! e0i,
@@ -254,7 +254,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  real(dp) :: fermie1_idir_ipert(3,cryst%natom), ylmgr_dum(1,1,1), dum_nhat(0), dum_xccc3d(0), strsxc(6)
  real(dp),allocatable :: qlwl(:,:), vk_cart_ibz(:,:,:), displ_cart_qq(:,:,:,:),displ_red_qq(:,:,:,:)
  real(dp),allocatable :: kinpw1(:),kpg_k(:,:),kpg_kq(:,:),kpg_kmp(:,:),kpg_kqmp(:,:), dkinpw(:)
- real(dp),allocatable :: ffnl_k(:,:,:,:),ffnl_kq(:,:,:,:), ffnl_kmp(:,:,:,:),ffnl_kqmp(:,:,:,:)
+ real(dp),allocatable :: ffnl_kmp(:,:,:,:),ffnl_kqmp(:,:,:,:) ! ffnl_k(:,:,:,:),ffnl_kq(:,:,:,:),
  real(dp),allocatable :: ph3d_kmp(:,:,:), ph3d1_kqmp(:,:,:), ph3d_kqmp(:,:,:), ph3d1_kmp(:,:,:)
  real(dp),allocatable, target :: vxc1_qq(:,:,:,:)
  real(dp),allocatable :: gsig_atm(:,:,:,:),gsig_nu(:,:,:,:), gxc_atm(:,:,:,:), gxc_nu(:,:,:,:), gks_atm(:,:,:,:), gks_nu(:,:,:,:)
@@ -597,6 +597,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  ! Activate parallelism over perturbations at the level of the DVDB, my_npert is output
  call gstore%set_perts_distrib(cryst, dvdb, my_npert)
  call gstore%set_perts_distrib(cryst, drhodb, my_npert)
+ !print *, "Treating my_npert", my_npert
 
  ! This part is taken from dfpt_vtorho
  !==== Initialize most of the Hamiltonian (and derivative) ====
@@ -805,6 +806,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  ! ========================================
 
  do my_is=1,gstore%my_nspins
+   !ABI_CHECK_IEQ(my_npert, gqk%my_npert, "my_npert")
    spin = gstore%my_spins(my_is); gqk => gstore%gqk(my_is); my_npert = gqk%my_npert
    NCF_CHECK(nf90_inq_ncid(root_ncid, strcat("gqk", "_spin", itoa(spin)), spin_ncid))
 
@@ -872,8 +874,8 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
      print_time_qq = my_rank == 0 .and. (my_iq <= LOG_MODQ .or. mod(my_iq, LOG_MODQ) == 0)
      if (print_time_qq) then
        call cwtime(cpu_qq, wall_qq, gflops_qq, "start")
-       !call para_inds(my_iq, gqk%my_nq, gqk%glob_nq, msg)
-       call wrtout(std_out, sjoin(" Computing g^Sigma(k,q) for qpt:", ktoa(qpt), ", spin:", itoa(spin)), pre_newlines=1)
+       call inds2str(0, sjoin(" Computing g^Sigma(k,q) for qpt:", ktoa(qpt)), my_iq, gqk%my_nq, gqk%glob_nq, msg)
+       call wrtout(std_out, sjoin(msg, ", for spin:", itoa(spin)), pre_newlines=1)
      end if
      !print *, "iq_ibz:", iq_ibz, "qpt:", qpt, "qq_ibz:", qq_ibz
 
@@ -956,20 +958,16 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
        !print *, "ik_ibz:", ik_ibz, "kk:", kk, "kk_ibz:", kk_ibz
 
        print_time_kk = my_rank == 0 .and. (my_ik <= LOG_MODK .or. mod(my_ik, LOG_MODK) == 0)
-       if (print_time_kk) then
-         call cwtime(cpu_kk, wall_kk, gflops_kk, "start")
-         !call para_inds(my_iq, gqk%my_nq, gqk%glob_nq, msg)
-         ! call wrtout(std_out, sjoin(" Computing g^Sigma(k,q) for qpt:", ktoa(qpt), ", spin:", itoa(spin)), pre_newlines=1)
-       end if
+       if (print_time_kk) call cwtime(cpu_kk, wall_kk, gflops_kk, "start")
 
        ! Get npw_k, kg_k for kk
        call wfd%get_gvec_gbound(cryst%gmet, ecut, kk, ik_ibz, isirr_k, dtset%nloalg, & ! in
                                 istwf_k, npw_k, kg_k, nkpg_k, kpg_k, gbound_k)         ! out
 
        ! Compute nonlocal form factors ffnl_k at (k+G)
-       ABI_MALLOC(ffnl_k, (npw_k, 1, psps%lmnmax, psps%ntypat))
-       call mkffnl_objs(cryst, psps, 1, ffnl_k, ider0, idir0, kg_k, kpg_k, kk, nkpg_k, npw_k, ylm_k, ylmgr_dum, &
-                        comm=gqk%pert_comm%value, request=ffnl_k_request)
+       !ABI_MALLOC(ffnl_k, (npw_k, 1, psps%lmnmax, psps%ntypat))
+       !call mkffnl_objs(cryst, psps, 1, ffnl_k, ider0, idir0, kg_k, kpg_k, kk, nkpg_k, npw_k, ylm_k, ylmgr_dum, &
+       !                 comm=gqk%pert_comm%value, request=ffnl_k_request)
 
        ! Find k + q in the extended zone and extract symmetry info.
        ! Be careful here because there are two umklapp vectors to be considered as:
@@ -992,9 +990,9 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
                                 istwf_kq, npw_kq, kg_kq, nkpg_kq, kpg_kq, gbound_kq)      ! out
 
        ! Compute nonlocal form factors ffnl_kq at (k+q+G)
-       ABI_MALLOC(ffnl_kq, (npw_kq, 1, psps%lmnmax, psps%ntypat))
-       call mkffnl_objs(cryst, psps, 1, ffnl_kq, ider0, idir0, kg_kq, kpg_kq, kq, nkpg_kq, npw_kq, ylm_kq, ylmgr_kq, &
-                        comm=gqk%pert_comm%value, request=ffnl_kq_request)
+       !ABI_MALLOC(ffnl_kq, (npw_kq, 1, psps%lmnmax, psps%ntypat))
+       !call mkffnl_objs(cryst, psps, 1, ffnl_kq, ider0, idir0, kg_kq, kpg_kq, kq, nkpg_kq, npw_kq, ylm_kq, ylmgr_kq, &
+       !                 comm=gqk%pert_comm%value, request=ffnl_kq_request)
 
        ABI_MALLOC(ug_k, (2, npw_k*nspinor))
        ABI_MALLOC(ug_kq, (2, npw_kq*nspinor))
@@ -1075,7 +1073,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
          ABI_MALLOC(ffnl_kmp, (npw_kmp, 1, psps%lmnmax, psps%ntypat))
 
          call mkffnl_objs(cryst, psps, 1, ffnl_kmp, ider0, idir0, kg_kmp, kpg_kmp, kmp, nkpg_kmp, &
-                          npw_kmp, ylm_kmp, ylmgr_dum, comm=gqk%pert_comm%value, request=ffnl_kmp_request)
+                          npw_kmp, ylm_kmp, ylmgr_dum) !, comm=gqk%pert_comm%value, request=ffnl_kmp_request)
 
          ! Symmetry tables and g-sphere centered on k+q-p.
          kqmp = kq - pp
@@ -1097,7 +1095,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
          ABI_MALLOC(full_cg1_kmp, (2, npw_kmp*nspinor))
 
          call mkffnl_objs(cryst, psps, 1, ffnl_kqmp, ider0, idir0, kg_kqmp, kpg_kqmp, kqmp, nkpg_kqmp, &
-                          npw_kqmp, ylm_kqmp, ylmgr_dum, comm=gqk%pert_comm%value, request=ffnl_kqmp_request)
+                          npw_kqmp, ylm_kqmp, ylmgr_dum) ! , comm=gqk%pert_comm%value, request=ffnl_kqmp_request)
 
          ! ====================================
          ! This is the g-sphere for W_{gg'}(pp)
@@ -1173,10 +1171,10 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
            vc_sqrt_gx(gsph_x%rottb(ig, itim_pp, isym_pp)) = vcp%vc_sqrt(ig, ipp_ibz)
          end do
 
-         if (ffnl_k_request /= xmpi_request_null) call xmpi_wait(ffnl_k_request, ierr)
-         if (ffnl_kq_request /= xmpi_request_null) call xmpi_wait(ffnl_kq_request, ierr)
-         if (ffnl_kmp_request /= xmpi_request_null) call xmpi_wait(ffnl_kmp_request, ierr)
-         if (ffnl_kqmp_request /= xmpi_request_null) call xmpi_wait(ffnl_kqmp_request, ierr)
+         !if (ffnl_k_request /= xmpi_request_null) call xmpi_wait(ffnl_k_request, ierr)
+         !if (ffnl_kq_request /= xmpi_request_null) call xmpi_wait(ffnl_kq_request, ierr)
+         !if (ffnl_kmp_request /= xmpi_request_null) call xmpi_wait(ffnl_kmp_request, ierr)
+         !if (ffnl_kqmp_request /= xmpi_request_null) call xmpi_wait(ffnl_kqmp_request, ierr)
 
          !e_nk = qp_ene(n_k, ik_ibz, spin)
          !e_mkq = qp_ene(m_kq, ikq_ibz, spin)
@@ -1185,15 +1183,17 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
          ! Sum over bands
          ! ==============
          do ib_sum=my_bsum_start(spin), my_bsum_stop(spin)
+
+           ! Get u_{n',k-p}(r), stored in ur_kmp
+           call wfd%rotate_cg(ib_sum, ndat1, spin, kmp_ibz, npw_kmp, kg_kmp, istwf_kmp, &
+                              cryst, mapl_kmp, gbound_kmp, work_ngfft, work, cg_kmp, urs_kbz=ur_kmp)
+
+
            ! =====================================
            ! Precompute oscillator matrix elements
            ! =====================================
            ! These terms do not depend on (idir, ipert) and can be reused in the loop over pertubations below.
            ! If the bands in the sum are distributed, one has to transmit the (m, n) indices.
-
-           ! Get u_{n',k-p}(r), stored in ur_kmp
-           call wfd%rotate_cg(ib_sum, ndat1, spin, kmp_ibz, npw_kmp, kg_kmp, istwf_kmp, &
-                              cryst, mapl_kmp, gbound_kmp, work_ngfft, work, cg_kmp, urs_kbz=ur_kmp)
 
            ur_kmp = GWPC_CONJG(ur_kmp)
            theta_mu_minus_e0i = fact_spin * qp_occ(ib_sum, ikmp_ibz, spin)
@@ -1450,8 +1450,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
          end do ! ibsum
 
          if (print_time_pp) then
-           !call para_inds(my_ipp, gqk%my_npp(spin), pp_mesh%nbz, msg)
-           write(msg,'(4x,2(a,i0),a)')" My pp-point [", my_ipp, "/", my_npp(spin), "]"
+           call inds2str(1, " My pp-point:", my_ipp, my_npp(spin), pp_mesh%nbz, msg)
            call cwtime_report(msg, cpu_pp, wall_pp, gflops_pp); if (my_ipp == LOG_MODP) call wrtout(std_out, "...", do_flush=.True.)
          end if
 
@@ -1466,9 +1465,9 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
        end do ! ipp_bz
 
        ABI_FREE(kpg_k)
-       ABI_FREE(ffnl_k)
        ABI_FREE(kpg_kq)
-       ABI_FREE(ffnl_kq)
+       !ABI_FREE(ffnl_k)
+       !ABI_FREE(ffnl_kq)
        ABI_FREE(ug_k)
        ABI_FREE(ug_kq)
 
@@ -1511,8 +1510,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
        if (iqbuf_cnt == qbuf_size) call dump_my_gbuf()
 
        if (print_time_kk) then
-         !call para_inds(my_ik, gqk%my_nk, gqk%glob_nk, msg)
-         write(msg,'(4x, 2(a,i0),a)')" My k-point [", my_ik, "/", gqk%my_nk, "]"
+         call inds2str(2, "My k-point", my_ik, gqk%my_nk, gqk%glob_nk, msg)
          call cwtime_report(msg, cpu_kk, wall_kk, gflops_kk); if (my_ik == LOG_MODK) call wrtout(std_out, "...", do_flush=.True.)
        end if
      end do ! my_ik
@@ -1628,11 +1626,14 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
 
 contains
 
-subroutine para_inds(my_ik, my_nk, nk_tot, out_str)
- integer,intent(in) :: my_ik, my_nk, nk_tot
+subroutine inds2str(level, prefix, my_ik, my_nk, nk_tot, out_str)
+ character(len=*),intent(in) :: prefix
+ integer,intent(in) :: level, my_ik, my_nk, nk_tot
  character(len=*),intent(out) :: out_str
- out_str = sjoin(itoa(my_ik), "/", itoa(my_nk), "[", itoa(nk_tot), "]")
-end subroutine  para_inds
+
+ out_str = sjoin(prefix, itoa(my_ik), "/", itoa(my_nk), "[", itoa(nk_tot), "]")
+ out_str = repeat(' ', 4 * level) // trim(out_str)
+end subroutine  inds2str
 
 subroutine dump_my_gbuf()
 

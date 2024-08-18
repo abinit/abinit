@@ -3103,13 +3103,11 @@ subroutine gstore_set_perts_distrib(gstore, cryst, dvdb, my_npert)
  type(gqk_t),pointer :: gqk
 !arrays
  integer,allocatable :: my_pinfo(:,:), pert_table(:,:)
-
 !----------------------------------------------------------------------
 
  my_npert = cryst%natom * 3
  do my_is=1,gstore%my_nspins
-   spin = gstore%my_spins(my_is)
-   gqk => gstore%gqk(my_is)
+   spin = gstore%my_spins(my_is); gqk => gstore%gqk(my_is)
    if (gqk%pert_comm%nproc > 1) then
      ! Activate parallelism over perturbations
      ! Build table with list of perturbations treated by this MPI rank inside pert_comm.
@@ -3118,6 +3116,7 @@ subroutine gstore_set_perts_distrib(gstore, cryst, dvdb, my_npert)
      call ephtk_set_pertables(cryst%natom, my_npert, pert_table, my_pinfo, gqk%pert_comm%value)
      call dvdb%set_pert_distrib(my_npert, cryst%natom * 3, my_pinfo, pert_table, gqk%pert_comm%value)
      ABI_CHECK(all(my_pinfo(3, :) == gqk%my_iperts), "my_pinfo(3, :) != gqk%my_iperts")
+
      ABI_FREE(my_pinfo)
      ABI_FREE(pert_table)
    end if
