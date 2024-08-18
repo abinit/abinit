@@ -198,7 +198,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  integer :: n1,n2,n3,n4,n5,n6,nspden, mqmem, m_kq, n_k, restart, root_ncid, spin_ncid
  integer :: usecprj !,sij_opt
  integer :: nfft,nfftf,mgfft,mgfftf,nkpg_k,nkpg_kq,nkpg_kqmp,nkpg_kmp,imyp, cnt, nvloc, iw_nk, iw_mkq
- integer :: nbsum,my_bsum_start, my_bsum_stop, my_nbsum, ndone, nmiss ! num_mn_kq,
+ integer :: ndone, nmiss ! num_mn_kq,
  !integer :: bstart_ks,ikcalc,bstart,bstop, sendcount !iatom,
  integer :: my_ipp, ipp_bz, ipp_ibz, isym_pp, itim_pp, comm_rpt, nqlwl, ebands_timrev ! osc_npw,
  integer :: ffnl_k_request, ffnl_kq_request, ffnl_kmp_request, ffnl_kqmp_request
@@ -231,6 +231,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  character(len=fnlen) :: screen_filepath, gstore_filepath
  character(len=5000) :: msg
 !arrays
+ integer :: nbsum, my_bsum_start(dtset%nsppol), my_bsum_stop(dtset%nsppol), my_nbsum(dtset%nsppol)
  integer :: g0_k(3), g0_kq(3), g0_kmp(3), g0_kqmp(3)
  integer :: mapl_k(6), mapl_kq(6), mapl_kqmp(6), mapl_kmp(6), mapc_qq(6), mapc_qq2dvdb(6)
  integer :: units(2), work_ngfft(18), gmax(3)
@@ -442,7 +443,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  ! Also, compute mpw and gmax including the additional pp
  ! This is the maximum number of PWs for all possible k+q treated.
  call gstore%fill_bks_mask_pp_mesh(ecut, dtset%mband, nkpt, nsppol, my_pp_start_spin, my_pp_stop_spin, pp_mesh, &
-                                   bks_mask, mpw, gmax)
+                                   my_bsum_start, my_bsum_stop, bks_mask, mpw, gmax)
 
  ! Init work_ngfft
  gmax = gmax + 4 ! FIXME: this is to account for umklapp, shouls also consider Gamma-only and istwfk
@@ -1062,7 +1063,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
          kmp_ibz = ebands%kptns(:, ikmp_ibz)
          istwf_kmp_ibz = wfd%istwfk(ikmp_ibz); npw_kmp_ibz = wfd%npwarr(ikmp_ibz)
 
-         ! Get npw_kmp, kg_kmp for k-p
+         ! Get npw_kmp, kg_kmp for k-p.
          call wfd%get_gvec_gbound(cryst%gmet, ecut, kmp, ikmp_ibz, isirr_kmp, dtset%nloalg, &  ! in
                                   istwf_kmp, npw_kmp, kg_kmp, nkpg_kmp, kpg_kmp, gbound_kmp)   ! out
 
@@ -1128,12 +1129,12 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
          call stern_kmp%init(dtset, npw_kmp, npw_kqmp, nspinor, nbsum, nband_me, fermie1_idir_ipert, &
                              stern_use_cache, work_ngfft, mpi_enreg, stern_comm)
 
-         do ib_sum=my_bsum_start, my_bsum_stop
+         do ib_sum=my_bsum_start(spin), my_bsum_stop(spin)
            call wfd%rotate_cg(ib_sum, ndat1, spin, kqmp_ibz, npw_kqmp, kg_kqmp, istwf_kqmp, &
                               cryst, mapl_kqmp, gbound_kqmp, work_ngfft, work, cg_kqmp)
 
            ! NB: cg_kqmp is dimensioned with mpw --> have to slice cg_kqmp
-           ii = ib_sum; if (stern_kmp%has_band_para) ii = ib_sum - my_bsum_start + 1
+           ii = ib_sum; if (stern_kmp%has_band_para) ii = ib_sum - my_bsum_start(spin) + 1
            stern_kmp%cgq(:,:,ii) = cg_kqmp(:,1:npw_kqmp*nspinor)
          end do ! ib_sum
 
@@ -1143,12 +1144,12 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
          call stern_kqmp%init(dtset, npw_kqmp, npw_kmp, nspinor, nbsum, nband_me, fermie1_idir_ipert, &
                               stern_use_cache, work_ngfft, mpi_enreg, stern_comm)
 
-         do ib_sum=my_bsum_start, my_bsum_stop
+         do ib_sum=my_bsum_start(spin), my_bsum_stop(spin)
            call wfd%rotate_cg(ib_sum, ndat1, spin, kmp_ibz, npw_kmp, kg_kmp, istwf_kmp, &
                               cryst, mapl_kmp, gbound_kmp, work_ngfft, work, cg_kmp)
 
            ! NB: cg_kmp is dimensioned with mpw --> have to slice cg_kmp
-           ii = ib_sum; if (stern_kqmp%has_band_para) ii = ib_sum - my_bsum_start + 1
+           ii = ib_sum; if (stern_kqmp%has_band_para) ii = ib_sum - my_bsum_start(spin) + 1
            stern_kqmp%cgq(:,:,ii) = cg_kmp(:,1:npw_kmp*nspinor)
          end do ! ib_sum
 
@@ -1179,7 +1180,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
          ! ==============
          ! Sum over bands
          ! ==============
-         do ib_sum=my_bsum_start, my_bsum_stop
+         do ib_sum=my_bsum_start(spin), my_bsum_stop(spin)
            ! =====================================
            ! Precompute oscillator matrix elements
            ! =====================================
