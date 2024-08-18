@@ -492,7 +492,7 @@ contains
   procedure :: fill_bks_mask_pp_mesh => gstore_fill_bks_mask_pp_mesh
   ! Fill the table used to read (b, k, s) wavefunctions from the WFK file
   ! keeping into account the distribution of the e-ph matrix elements in the GWPT code
-  ! and the parallel distribution of pp momenta.
+  ! and the parallel distribution of the pp momenta.
 
   procedure :: get_mpw_gmax => gstore_get_mpw_gmax
   ! Compute the maximum number of PWs for all possible k+q treated.
@@ -2213,7 +2213,7 @@ end subroutine gstore_fill_bks_mask
 !! gstore_fill_bks_mask_with_pp
 !!
 !! FUNCTION
-!!  Fills the bks_mask array defining the set of states that should be read from file
+!!  Fill the bks_mask array defining the set of states that should be read from file
 !!  by this MPI rank when computing the GWPT e-ph matrix elements.
 !!
 !! INPUTS
@@ -2222,7 +2222,8 @@ end subroutine gstore_fill_bks_mask
 !!
 !! SOURCE
 
-subroutine gstore_fill_bks_mask_pp_mesh(gstore, ecut, mband, nkibz, nsppol, my_pp_start_spin, my_pp_stop_spin, pp_mesh, bks_mask, mpw, gmax)
+subroutine gstore_fill_bks_mask_pp_mesh(gstore, ecut, mband, nkibz, nsppol, my_pp_start_spin, my_pp_stop_spin, pp_mesh, &
+                                        my_bsum_start, my_bsum_stop, bks_mask, mpw, gmax)
 
 !Arguments ------------------------------------
  class(gstore_t),target,intent(inout) :: gstore
@@ -2230,6 +2231,7 @@ subroutine gstore_fill_bks_mask_pp_mesh(gstore, ecut, mband, nkibz, nsppol, my_p
  integer,intent(in) :: mband, nkibz, nsppol
  integer :: my_pp_start_spin(nsppol), my_pp_stop_spin(nsppol)
  type(kmesh_t),intent(in) :: pp_mesh
+ integer,intent(in) :: my_bsum_start(nsppol), my_bsum_stop(nsppol)
  logical,intent(out) :: bks_mask(mband, nkibz, nsppol)
  integer,intent(out) :: mpw, gmax(3)
 
@@ -2257,23 +2259,43 @@ subroutine gstore_fill_bks_mask_pp_mesh(gstore, ecut, mband, nkibz, nsppol, my_p
  do my_is=1,gstore%my_nspins
    gqk => gstore%gqk(my_is); spin = gstore%my_spins(my_is)
    ! FIXME: This is not correct in the case of band parallelism.
-   b1 = gqk%bstart; b2 = gqk%bstop
-
-   ! We need the image of this k in the IBZ.
-   do my_ik=1,gqk%my_nk
-     ik_ibz = gqk%my_k2ibz(1, my_ik); bks_mask(b1:b2, ik_ibz, spin) = .True.
-   end do
+   !b1 = gqk%bstart; b2 = gqk%bstop
+   b1 = my_bsum_start(spin); b2 = my_bsum_stop(spin)
 
    ABI_MALLOC(map_kq, (6, gqk%my_nk))
 
+   do my_ik=1,gqk%my_nk
+     kk = gqk%my_kpts(:, my_ik)
+     ik_ibz = gqk%my_k2ibz(1, my_ik)
+
+     ! We need the image of this k-point in the IBZ for the incoming state (ket)
+     bks_mask(gqk%bstart:gqk%bstop, ik_ibz, spin) = .True.
+     !bks_mask(b1:b2, ik_ibz, spin) = .True.
+
+     ! We also need the image of k+q in the IBZ for the outgoing state (bra)
+     do my_iq=1,gqk%my_nq
+       call gqk%myqpt(my_iq, gstore, weight_q, qpt)
+       if (kpts_map("symrel", ebands_timrev, cryst, gstore%krank_ibz, 1, kk, map_kq, qpt=qpt) /= 0) then
+         ABI_ERROR(sjoin("Cannot map k+q to IBZ with qpt:", ktoa(qpt)))
+       end if
+       iqk_ibz = map_kq(1, 1)
+       bks_mask(gqk%bstart:gqk%bstop, iqk_ibz, spin) = .True.
+     end do ! my_iq
+
+   end do ! my_ok
+
    ! We also need the image of k-p in the IBZ for the pp wavevectors treated by this MPI rank.
+   ! These states are summed over so use my_bsum_start(spin); b2 = my_bsum_stop(spin)
    do ipp_bz=my_pp_start_spin(spin), my_pp_stop_spin(spin)
      pp = pp_mesh%bz(:,ipp_bz)
      if (kpts_map("symrel", ebands_timrev, cryst, gstore%krank_ibz, gqk%my_nk, gqk%my_kpts, map_kq, qpt=-pp) /= 0) then
        ABI_ERROR(sjoin("Cannot map k-p to IBZ with qpt:", ktoa(qpt), "and pp:", ktoa(pp)))
      end if
+
      do my_ik=1,gqk%my_nk
-       iqk_ibz = map_kq(1, my_ik); bks_mask(b1:b2, iqk_ibz, spin) = .True.
+       iqk_ibz = map_kq(1, my_ik)
+       bks_mask(b1:b2, iqk_ibz, spin) = .True.
+       !bks_mask(gqk%bstart:gqk%bstop, iqk_ibz, spin) = .True.
        ! Compute g-sphere, returns onpw. Note istwfk == 1.
        kk = gqk%my_kpts(:, my_ik)
        call get_kg(kk-pp, istwfk1, ecut, gstore%cryst%gmet, onpw, gtmp, mpw=mpw, gmax=gmax)
@@ -2283,6 +2305,7 @@ subroutine gstore_fill_bks_mask_pp_mesh(gstore, ecut, mband, nkibz, nsppol, my_p
    end do ! ipp_bz
 
    ! We also need the image of k+q-p in the IBZ for the pp wavevectors treated by this MPI rank.
+   ! These states are summed over so use my_bsum_start(spin); b2 = my_bsum_stop(spin)
    do my_iq=1,gqk%my_nq
      call gqk%myqpt(my_iq, gstore, weight_q, qpt)
 
@@ -2291,8 +2314,11 @@ subroutine gstore_fill_bks_mask_pp_mesh(gstore, ecut, mband, nkibz, nsppol, my_p
        if (kpts_map("symrel", ebands_timrev, cryst, gstore%krank_ibz, gqk%my_nk, gqk%my_kpts, map_kq, qpt=qpt-pp) /= 0) then
          ABI_ERROR(sjoin("Cannot map k+q-p to IBZ with qpt:", ktoa(qpt), "and pp:", ktoa(pp)))
        end if
+
        do my_ik=1,gqk%my_nk
-         iqk_ibz = map_kq(1, my_ik); bks_mask(b1:b2, iqk_ibz, spin) = .True.
+         iqk_ibz = map_kq(1, my_ik)
+         bks_mask(b1:b2, iqk_ibz, spin) = .True.
+         !bks_mask(gqk%bstart:gqk%bstop, iqk_ibz, spin) = .True.
 
          ! Compute g-sphere, returns onpw. Note istwfk == 1.
          kk = gqk%my_kpts(:, my_ik)
