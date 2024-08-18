@@ -732,7 +732,7 @@ subroutine getph(atindx, natom, n1, n2, n3, ph1d, xred)
 
  do ia=1,natom
 
-   if(atindx(ia)<1 .or. natom<atindx(ia)+1)then
+   if(atindx(ia)<1 .or. natom<atindx(ia))then
      ABI_BUG('Wrong atindx(ia)!')
    endif
 
