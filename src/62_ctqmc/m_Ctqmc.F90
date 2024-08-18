@@ -123,6 +123,8 @@ TYPE, PUBLIC :: Ctqmc
 
   INTEGER _PRIVATE :: flavors
 !
+  INTEGER _PRIVATE :: endDensity
+!
   INTEGER _PRIVATE :: nspinor
 !
   INTEGER _PRIVATE :: measurements
@@ -774,9 +776,11 @@ SUBROUTINE Ctqmc_allocateOpt(this)
 
   IF (this%opt_spectra .GE. 1 ) THEN
     FREEIF(this%density)
+    this%endDensity=-1
     !MALLOC(this%density,(1:this%thermalization,1:this%flavors))
     i = CEILING(DBLE(this%thermalization+this%sweeps)/DBLE(this%measurements*this%opt_spectra))
     MALLOC(this%density,(1:this%flavors+1,1:i))
+    this%endDensity=i
     this%density = 0.d0
   END IF
 !#endif
@@ -1572,7 +1576,10 @@ SUBROUTINE Ctqmc_loop(this,itotal,ilatex)
   MALLOC(gtmp_old2,(1,1))
   gtmp_old2 = 0.d0
 
-  endDensity = SIZE(this%density,2)
+!PROBLEM eos_gnu_13.2_openmpi . %endDensity was introduced throughout
+!  endDensity = SIZE(this%density,2)
+   endDensity=this%endDensity
+!ENDPROBLEM
 
   IF ( this%opt_noise .GT. 0 ) THEN
     FREEIF(gtmp_new)
@@ -2601,7 +2608,10 @@ include 'mpif.h'
   FREE(buffer)
 
   IF ( this%opt_spectra .GE. 1 ) THEN
-    endDensity = SIZE(this%density,2)
+!PROBLEM eos_gnu_13.2_openmpi . %endDensity was introduced throughout
+!   endDensity = SIZE(this%density,2)
+    endDensity=this%endDensity
+!ENDPROBLEM
     IF ( this%density(1,endDensity) .EQ. -1.d0 ) &
       endDensity = endDensity - 1
     CALL FFTHyb_init(FFTmrka,endDensity,DBLE(this%thermalization)/DBLE(this%measurements*this%opt_spectra))
@@ -3547,6 +3557,10 @@ SUBROUTINE Ctqmc_printSpectra(this, oFileIn)
   WRITE(oFile,*) "# freq[/hermalization] FFT"
 
   endDensity = SIZE(this%density,2)
+!PROBLEM eos_gnu_13.2_openmpi . %endDensity was introduced throughout
+!  endDensity = SIZE(this%density,2)
+   endDensity=this%endDensity
+!ENDPROBLEM
   DO WHILE ( this%density(flavors+1,endDensity) .EQ. -1 )
     endDensity = endDensity -1
   END DO
@@ -3636,6 +3650,7 @@ SUBROUTINE Ctqmc_destroy(this)
     DT_FREE(this%measNoiseG)
   END IF
   FREEIF(this%density)
+  this%endDensity=-1
 !#endif
   this%ostream        = 0
   this%istream        = 0
