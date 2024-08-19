@@ -1481,12 +1481,9 @@ subroutine dfpt_cgwf(u1_band_,band_me,rank_band,bands_treated_now,berryopt,cgq,c
 !            END DEBUG
 !--------------------------------------------------------------------------
 
- if (allocated(gh_direc))  then
-   ABI_FREE(gh_direc)
- end if
- if (allocated(gvnlx_direc))  then
-   ABI_FREE(gvnlx_direc)
- end if
+ ABI_SFREE(gh_direc)
+ ABI_SFREE(gvnlx_direc)
+
  ABI_FREE(conjgr)
  ABI_FREE(cwaveq)
  ABI_FREE(direc)
@@ -1864,6 +1861,14 @@ subroutine stern_solve(stern, u1_band, band_me, idir, ipert, qpt, gs_hamkq, rf_h
      ierr = 1
    else if (out_resid < zero) then
      err_msg = sjoin(" resid: ", ftoa(out_resid), ", nlines_done:", itoa(stern%nlines_done))
+     write(err_msg, "(a,i0,a, (a,es13.5), a,i0,a)") &
+       " Sternheimer didn't convergence for band: ", u1_band, ch10, &
+       " resid:", out_resid, ", after nline: ", stern%nlines_done, " iterations. Increase nline and/or tolwfr."
+     ! This may happen when the eigenvalue eig_mk(0) is higher than
+     ! the lowest non-treated eig_mk+q(0). The solution adopted here
+     ! is very crude, and rely upon the fact that occupancies of such
+     ! levels should be smaller and smaller with increasing nband, so that
+     ! a convergence study will give the right result.
      ierr = -1
    end if
 
