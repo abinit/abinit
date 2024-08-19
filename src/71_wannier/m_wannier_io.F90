@@ -23,9 +23,8 @@
 
 #include "abi_common.h"
 
-
-
 module m_wannier_io
+
   use defs_basis
   use defs_wannier90
   use m_abicore
@@ -33,28 +32,24 @@ module m_wannier_io
   use m_atomdata
   use m_xmpi
   use m_sort
+  use m_dtfil
 #ifdef FC_NAG
   use f90_unix_dir
 #endif
-#ifdef HAVE_NETCDF
-  use netcdf
-#endif
-  use m_dtset, only : dataset_type
 
+  use m_dtset, only : dataset_type
   use defs_datatypes, only : pseudopotential_type, ebands_t
   use defs_abitypes, only : MPI_type
   use m_fft, only: fourwf
   use m_io_tools,        only : open_file, get_unit
-
   use m_fftcore,  only : sphereboundary
-  use m_dtfil
   use m_pawtab,   only : pawtab_type
   use m_pawcprj,  only : pawcprj_type
   use m_abstract_wf, only: abstract_wf, cg_cprj, wfd_wf
 
-
   implicit none
   private
+
   public :: write_Amn
   public :: compute_and_write_unk
   public :: write_eigenvalues
@@ -64,7 +59,6 @@ module m_wannier_io
 
 contains
 
-
   ! Write amn file
   subroutine write_Amn(A_matrix, fname, nsppol, mband, nkpt, num_bands, nwan, band_in)
     ! TODO use the A_matrix sizes instead of the nsppol, mband, nkpt, nwan
@@ -73,16 +67,20 @@ contains
     logical, intent(in) :: band_in(:, :)
     integer, intent(in) :: nsppol, num_bands(nsppol), nwan(nsppol), mband, nkpt
     character(len=fnlen), intent(in) :: fname(nsppol)
-    character(len=1000) :: message
-    integer :: iun(nsppol)
+
+!Local variables-------------------------------
+!scalars
+    character(len=1000) :: msg
+    integer :: iun(nsppol), units(2)
     integer :: isppol, ikpt, iband, iwan, jband,  ii, jj
+
+    units = [std_out, ab_out]
 
     ! below is copied/modified from m_mlwfovlp.F90
     do isppol=1,nsppol
        ! TODO : relpace this.
-       if (open_file(trim(fname(isppol)), message, newunit=iun(isppol), &
-            & form="formatted", status="unknown", action="write") /= 0) then
-          ABI_ERROR(message)
+       if (open_file(trim(fname(isppol)), msg, newunit=iun(isppol), form="formatted", status="unknown", action="write") /= 0) then
+          ABI_ERROR(msg)
        end if
        write(iun(isppol),*) 'Projections from Abinit : mband,nkpt,nwan. indices: iband1,iwan,ikpt'
        write(iun(isppol),*) num_bands(isppol),nkpt,nwan(isppol)
@@ -104,68 +102,63 @@ contains
     !
     do isppol=1,nsppol
        close(iun(isppol))
-       write(message, '(3a)' ) &
-            &         '   ',trim(fname(isppol)),' written'
-       call wrtout(std_out,  message,'COLL')
+       write(msg, '(3a)' )'   ',trim(fname(isppol)),' written'
+       call wrtout(std_out,msg)
     end do
     !
     !  Write down part of the matrix to the output file
     !  This is for the automatic tests
     !
-    write(message, '(4a)' ) ch10,&
-         &     '   Writing top of the initial projections matrix: A_mn(ik)',ch10,&
-         &     '   m=1:3, n=1:3, ik=1'
-    call wrtout(ab_out,message,'COLL')
-    call wrtout(std_out,  message,'COLL')
+    write(msg, '(4a)' ) ch10,&
+              '   Writing top of the initial projections matrix: A_mn(ik)',ch10,&
+              '   m=1:3, n=1:3, ik=1'
+    call wrtout(units, msg)
     !
     !    just write down the first 3 elements
     !
     do isppol=1,nsppol
-       write(message, '( " " )')
+       write(msg, '( " " )')
        if (nsppol>1 ) then
-          if (isppol==1) write(message,'(2a)')trim(message),'   spin up:'
-          if (isppol==2) write(message,'(2a)')trim(message),'   spin down:'
+          if (isppol==1) write(msg,'(2a)')trim(msg),'   spin up:'
+          if (isppol==2) write(msg,'(2a)')trim(msg),'   spin down:'
        end if
        do ii=1,3
           if(ii>num_bands(isppol)) cycle
-          write(message,'(3a)') trim(message),ch10,';   ( '
+          write(msg,'(3a)') trim(msg),ch10,';   ( '
           do jj=1,3
              if(jj>nwan(isppol))cycle
-             write(message, '(a,2f11.6,a)') trim(message),&
+             write(msg, '(a,2f11.6,a)') trim(msg),&
                   &           A_matrix(ii,jj,1,isppol),' , '
           end do
-          write(message,'(2a)') trim(message),'    ) '
+          write(msg,'(2a)') trim(msg),'    ) '
        end do
-       call wrtout(ab_out,message,'COLL')
-       call wrtout(std_out,  message,'COLL')
+       call wrtout(units, msg)
     end do
     !
     !    Now write down bottom of the matrix
     !
-    write(message, '(4a)' ) ch10,&
+    write(msg, '(4a)' ) ch10,&
          &     '   Writing bottom of the initial projections matrix: A_mn(ik)',ch10,&
          &     '   m=num_bands-2:num_bands, n=nwan-2:nwan, ik=nkpt'
-    call wrtout(ab_out,message,'COLL')
-    call wrtout(std_out,  message,'COLL')
-    !
+    call wrtout(units, msg)
+
     do isppol=1,nsppol
-       write(message, '( " " )')
+       write(msg, '( " " )')
        if (nsppol>1 ) then
-          if (isppol==1) write(message,'(2a)')trim(message),'   spin up:'
-          if (isppol==2) write(message,'(2a)')trim(message),'   spin down:'
+          if (isppol==1) write(msg,'(2a)')trim(msg),'   spin up:'
+          if (isppol==2) write(msg,'(2a)')trim(msg),'   spin down:'
        end if
        do ii=num_bands(isppol)-2,num_bands(isppol)
           if(ii<1) cycle
-          write(message,'(3a)') trim(message),ch10,';   ( '
+          write(msg,'(3a)') trim(msg),ch10,';   ( '
           do jj=nwan(isppol)-2,nwan(isppol)
              if(jj<1)cycle
-             write(message, '(a,2f11.6,a)') trim(message),&
+             write(msg, '(a,2f11.6,a)') trim(msg),&
                   &           A_matrix(ii,jj,nkpt,isppol),' , '
           end do
-          write(message,'(2a)') trim(message),'    ) '
+          write(msg,'(2a)') trim(msg),'    ) '
        end do
-       call wrtout(ab_out,message,'COLL')
-       call wrtout(std_out,  message,'COLL')
+       call wrtout(units, msg)
     end do !isppol
 
   end subroutine write_Amn
@@ -193,6 +186,8 @@ contains
     !real(dp),intent(in) :: cg(2,mpw*nspinor*mband*mkmem*nsppol)
     class(abstract_wf), intent(inout) ::  mywfc
 
+!Local variables-------------------------------
+!scalars
     integer :: iun_plot
     integer :: isppol, ikpt, ikg, iband, ig
     integer :: n1, n2, n3, n4, n5, n6, cplex, mgfft, npw_k
@@ -203,25 +198,25 @@ contains
     real(dp),allocatable :: denpot(:,:,:), cwavef(:,:), fofgout(:,:),fofr(:,:,:,:)
     integer,allocatable :: gbound(:,:)
     integer :: n1tmp, n2tmp, n3tmp, jj1, jj2, jj3, ipw, ispinor
-    character(len=1000) :: message
+    character(len=1000) :: msg
 
     ABI_UNUSED(nspinor)
     if(usepaw==1) then
-       write(message, '( a,a,a,a,a,a,a,a,a)')ch10,&
+       write(msg, '( a,a,a,a,a,a,a,a,a)')ch10,&
             &     "   WARNING: The UNK matrices will not contain the correct wavefunctions ",ch10,&
             &     "   since we are just writing the plane wave contribution.",ch10,&
             &     "   The contribution from inside the spheres is missing. ",ch10,&
             &     "   However, these files can be used for plotting purposes",ch10
-       call wrtout(std_out,  message,'COLL')
+       call wrtout(std_out, msg)
     end if
     !
     spacing = w90prtunk
-    write(message, '( 8a,i3,2a)')ch10,&
+    write(msg, '( 8a,i3,2a)')ch10,&
          &   "   UNK files will be written.",ch10,&
          &   "   According to the chosen value of w90prtunk",ch10,&
          &   "   the wavefunctions are to be written ",ch10, &
          &   "   at every ", spacing," records.",ch10
-    call wrtout(std_out,  message,'COLL')
+    call wrtout(std_out, msg)
     !
     ABI_MALLOC(kg_k,(3,mpw))
     n1=ngfft(1)
@@ -250,18 +245,16 @@ contains
           ABI_MALLOC(gbound,(2*mgfft+8,2))
           ABI_MALLOC(fofgout,(2,npw_k))
 
-
           !iun_plot=1000+ikpt+ikpt*(isppol-1)
           write(wfnname,'("UNK",I5.5,".",I1)') ikpt, isppol
-          if (open_file(trim(wfnname), message, newunit=iun_plot, &
-               & form="unformatted", status="unknown", action="write") /= 0) then
-             ABI_ERROR(message)
+          if (open_file(trim(wfnname), msg, newunit=iun_plot, &
+                       form="unformatted", status="unknown", action="write") /= 0) then
+             ABI_ERROR(msg)
           endif
 
-
-          !      open (unit=iun_plot, file=wfnname,form='formatted')
-          !       open(unit=iun_plot, file=wfnname,form='unformatted')
-          !      optimizing grid for UNK files
+          ! open (unit=iun_plot, file=wfnname,form='formatted')
+          ! open(unit=iun_plot, file=wfnname,form='unformatted')
+          ! optimizing grid for UNK files
           n1tmp = n1/spacing
           n2tmp = n2/spacing
           n3tmp = n3/spacing
@@ -302,14 +295,13 @@ contains
                 !          do jj3=1,n3,spacing
                 !          do jj2=1,n2,spacing
                 !          do jj1=1,n1,spacing
-                !          write(iun_plot,*) fofr(1,jj1,jj2,jj3),&
-                !          & fofr(2,jj1,jj2,jj3)
+                !          write(iun_plot,*) fofr(1,jj1,jj2,jj3), fofr(2,jj1,jj2,jj3)
                 !          end do !jj1
                 !          end do !jj2
                 !          end do !jj3
                 !          unformatted (must be one record)
                 write(iun_plot) (((fofr(1,jj1,jj2,jj3),fofr(2,jj1,jj2,jj3),&
-                     &           jj1=1,n1,spacing),jj2=1,n2,spacing),jj3=1,n3,spacing)
+                                   jj1=1,n1,spacing),jj2=1,n2,spacing),jj3=1,n3,spacing)
              end if !iband
           end do ! iband
           ABI_FREE(cwavef)
@@ -323,11 +315,9 @@ contains
     end do  ! nsppol
     ABI_FREE(kg_k)
     !
-    write(message, '(4a)' )ch10, &
-         &   '   ','UNK files written',ch10
-    call wrtout(std_out,  message,'COLL')
+    write(msg, '(4a)' )ch10, '   ','UNK files written',ch10
+    call wrtout(std_out, msg)
   end subroutine compute_and_write_unk
-
 
 !-----------------------------------------------------------------------
 !     This subroutine writes the eigenvalues in the w90 format
@@ -335,21 +325,24 @@ contains
 !-----------------------------------------------------------------------
   subroutine write_eigenvalues(filew90_eig,eigen, band_in,  eigenvalues_w, &
        & nsppol, nkpt, mband,  dtset, rank, master )
+
     integer, intent(in) ::  nsppol, nkpt, mband, rank, master
+    character(len=fnlen),intent(in) :: filew90_eig(nsppol)
     logical, intent(in) :: band_in(:, :)
     real(dp), intent(in) :: eigen(mband,nkpt,nsppol)
-    !real(dp), intent(in) :: eigen(:, :, :)
     real(dp), intent(inout) :: eigenvalues_w(:, :, :)
     type(dataset_type),intent(in) :: dtset
-    character(len=fnlen) :: filew90_eig(nsppol)
+
+!Local variables-------------------------------
+!scalars
     integer :: iun(nsppol), isppol, band_index, iband, jband, nband_k, ikpt
-    character(len=1000) :: message
+    character(len=1000) :: msg
     !  Assign file unit numbers
     if(rank==master) then
        do isppol=1,nsppol
-          if (open_file(trim(filew90_eig(isppol)), message, newunit=iun(isppol), &
-               & form="formatted", status="unknown", action="write") /= 0) then
-             ABI_ERROR(message)
+          if (open_file(trim(filew90_eig(isppol)), msg, newunit=iun(isppol), &
+                        form="formatted", status="unknown", action="write") /= 0) then
+             ABI_ERROR(msg)
           endif
        end do
     end if !rank==master
@@ -362,13 +355,12 @@ contains
           do iband=1,mband
              if(band_in(iband,isppol)) then
                 jband=jband+1
-                !          Writing data
-                if(rank==master) then
-                   write(iun(isppol), '(2i6,4x,f10.5)' ) &
-                        & jband,ikpt,Ha_eV*eigen(iband, ikpt, isppol)
+                ! Writing data
+                if (rank==master) then
+                  write(iun(isppol), '(2i6,4x,f10.5)' ) jband,ikpt,Ha_eV*eigen(iband, ikpt, isppol)
                 end if
                 !eigen(iband+band_index)
-                !          Finish writing, now save eigenvalues
+                ! save eigenvalues
                 eigenvalues_w(jband,ikpt,isppol)=Ha_eV*eigen(iband, ikpt, isppol)
                 !eigen(iband+band_index)
              end if
@@ -380,9 +372,8 @@ contains
        do isppol=1,nsppol
           close(iun(isppol))
        end do
-       write(message, '(a,a)' ) ch10,&
-            &     '   mlwfovlp :  eigenvalues written'
-       call wrtout(std_out,  message,'COLL')
+       write(msg, '(a,a)' ) ch10,'   mlwfovlp :  eigenvalues written'
+       call wrtout(std_out, msg)
     end if !master
 
   end subroutine write_eigenvalues
@@ -394,8 +385,8 @@ contains
 !-----------------------------------------------------------------------
 ! TODO: this routine is doing much more than writing Mmn!! It also calculates etc. The io module should be segregated and cleaned
   subroutine write_Mmn(filew90_mmn, band_in, cm1, ovikp, g1, M_matrix, &
-       &  nkpt, nsppol,  nntot, mband, num_bands,  message, iam_master)
-    ! input and output vars
+       &  nkpt, nsppol,  nntot, mband, num_bands,  msg, iam_master)
+
     integer, intent(in) :: nsppol,  nntot, nkpt
     integer, intent(in) :: mband, num_bands(:)
     character(len=fnlen), intent(in) :: filew90_mmn(nsppol)
@@ -406,15 +397,17 @@ contains
     logical, intent(in) :: iam_master
     complex(dpc),intent(inout) :: M_matrix(:,:,:,:,:)
 
-
-    ! temporary vars
+!Local variables-------------------------------
+!scalars
     integer :: isppol, ikpt1, intot,ii, jj,jband1, iband1, jband2, iband2
-    integer :: iun(nsppol)
-    character(len=1000) :: message
+    integer :: iun(nsppol), units(2)
+    character(len=1000) :: msg
+
+    units = [std_out, ab_out]
 
      do isppol=1,nsppol !we write separate output files for each isppol
        iun(isppol)=220+isppol
-       if( iam_master) then
+       if (iam_master) then
           open(unit=iun(isppol),file=filew90_mmn(isppol),form='formatted',status='unknown')
           write(iun(isppol),*) "nnkp version 90"
           write(iun(isppol),*) num_bands(isppol),nkpt,nntot
@@ -435,8 +428,7 @@ contains
              do iband1=1,mband
                if(band_in(iband1,isppol)) then
                  jband1=jband1+1
-                 if(iam_master) write(iun(isppol),*) &
-&                 cm1(1,iband1,iband2,intot,ikpt1,isppol),cm1(2,iband1,iband2,intot,ikpt1,isppol)
+                 if(iam_master) write(iun(isppol),*) cm1(1,iband1,iband2,intot,ikpt1,isppol),cm1(2,iband1,iband2,intot,ikpt1,isppol)
                  M_matrix(jband1,jband2,intot,ikpt1,isppol)=&
 &                 cmplx(cm1(1,iband1,iband2,intot,ikpt1,isppol),cm1(2,iband1,iband2,intot,ikpt1,isppol), kind=dpc )
 !                write(2211,*) ikpt1,intot,iband1,iband2
@@ -449,70 +441,62 @@ contains
      end do !ikpt
      if( iam_master ) then
        close(iun(isppol))
-       write(message, '(3a)' )  '   ',trim(filew90_mmn(isppol)),' written'
-       call wrtout(std_out,  message,'COLL')
+       write(msg, '(3a)' )  '   ',trim(filew90_mmn(isppol)),' written'
+       call wrtout(std_out, msg)
      end if !rank==master
    end do !isppol
 
 
    if(iam_master) then
-     write(message, '(4a)' ) ch10,&
-&     '   Writing top of the overlap matrix: M_mn(ikb,ik)',ch10,&
-&     '   m=n=1:3, ikb=1, ik=1'
-     call wrtout(ab_out,message,'COLL')
-     call wrtout(std_out,  message,'COLL')
-!
-!    just write down the first 3 elements
-!
+     write(msg, '(4a)' ) ch10,&
+      '   Writing top of the overlap matrix: M_mn(ikb,ik)',ch10,&
+      '   m=n=1:3, ikb=1, ik=1'
+     call wrtout(units, msg)
+
+     ! just write down the first 3 elements
      do isppol=1,nsppol
-       write(message, '( " " )')
+       write(msg, '( " " )')
        if (nsppol>1 ) then
-         if (isppol==1) write(message,'(2a)')trim(message),'   spin up:'
-         if (isppol==2) write(message,'(2a)')trim(message),'   spin down:'
+         if (isppol==1) write(msg,'(2a)')trim(msg),'   spin up:'
+         if (isppol==2) write(msg,'(2a)')trim(msg),'   spin down:'
        end if
        do ii=1,3
          if(ii>num_bands(isppol)) cycle
-         write(message,'(3a)') trim(message),ch10,';   ( '
+         write(msg,'(3a)') trim(msg),ch10,';   ( '
          do jj=1,3
            if(jj>num_bands(isppol))cycle
-           write(message, '(a,2f11.6,a)') trim(message),&
-&           M_matrix(ii,jj,1,1,isppol),' , '
+           write(msg, '(a,2f11.6,a)') trim(msg),M_matrix(ii,jj,1,1,isppol),' , '
          end do
-         write(message,'(2a)') trim(message),'    ) '
+         write(msg,'(2a)') trim(msg),'    ) '
        end do
-       call wrtout(ab_out,message,'COLL')
-       call wrtout(std_out,  message,'COLL')
+       call wrtout(units, msg)
      end do
-!
-!    Now write down bottom of the matrix
-!
-     write(message, '(4a)' ) ch10,&
-&     '   Writing bottom of the overlap matrix: M_mn(ikb,ik)',ch10,&
-&     '   m=n=num_bands-2:num_bands, ikb=nntot, ik=nkpt'
-     call wrtout(ab_out,message,'COLL')
-     call wrtout(std_out,  message,'COLL')
-!
+
+     ! Now write down bottom of the matrix
+     write(msg, '(4a)' ) ch10,&
+      '   Writing bottom of the overlap matrix: M_mn(ikb,ik)',ch10,&
+      '   m=n=num_bands-2:num_bands, ikb=nntot, ik=nkpt'
+     call wrtout(units, msg)
+
      do isppol=1,nsppol
-       write(message, '( " " )')
+       write(msg, '( " " )')
        if (nsppol>1 ) then
-         if (isppol==1) write(message,'(2a)')trim(message),'   spin up:'
-         if (isppol==2) write(message,'(2a)')trim(message),'   spin down:'
+         if (isppol==1) write(msg,'(2a)')trim(msg),'   spin up:'
+         if (isppol==2) write(msg,'(2a)')trim(msg),'   spin down:'
        end if
        do ii=num_bands(isppol)-2,num_bands(isppol)
          if(ii<1) cycle
-         write(message,'(3a)') trim(message),ch10,';   ( '
+         write(msg,'(3a)') trim(msg),ch10,';   ( '
          do jj=num_bands(isppol)-2,num_bands(isppol)
            if(jj<1)cycle
-           write(message, '(a,2f11.6,a)') trim(message),&
-&           M_matrix(ii,jj,nntot,nkpt,isppol),' , '
+           write(msg, '(a,2f11.6,a)') trim(msg),M_matrix(ii,jj,nntot,nkpt,isppol),' , '
          end do !j
-         write(message,'(2a)') trim(message),'    ) '
+         write(msg,'(2a)') trim(msg),'    ) '
        end do !ii
-       call wrtout(ab_out,message,'COLL')
-       call wrtout(std_out,  message,'COLL')
+       call wrtout(units, msg)
      end do !isppol
    end if !rank==master
-!
+
  end subroutine write_Mmn
 
 !!****f* mlwfovlp/read_chkunit
@@ -527,6 +511,7 @@ contains
 !! OUTPUT
 !!
 !! SOURCE
+
  subroutine read_chkunit(seed_name,nkpt,ndimwin,ierr)
 
 !Arguments ------------------------------------
@@ -561,21 +546,20 @@ contains
    read(chk_unit) ! chkpt1                 ! Position of checkpoint
    read(chk_unit) have_disentangled        ! Whether a disentanglement has been performed
    if (have_disentangled) then
-!    read(chk_unit) ! omega_invariant     ! Omega invariant
-!    read(chk_unit) ((lwindow(i,nkp),i=1,num_bands),nkp=1,num_kpts)
+     !read(chk_unit) ! omega_invariant     ! Omega invariant
+     !read(chk_unit) ((lwindow(i,nkp),i=1,num_bands),nkp=1,num_kpts)
      read(chk_unit) (ndimwin(ikpt),ikpt=1,nkpt)
-!    read(chk_unit) (((u_matrix_opt(i,j,nkp),i=1,num_bands),j=1,num_wann),nkp=1,num_kpts)
+     !read(chk_unit) (((u_matrix_opt(i,j,nkp),i=1,num_bands),j=1,num_wann),nkp=1,num_kpts)
    else
-!    this is not expected. we should have disentanglement. Report the error.
+     ! this is not expected. we should have disentanglement. Report the error.
      ierr=-1
    end if
-!  read(chk_unit)  (((u_matrix(i,j,k),i=1,num_wann),j=1,num_wann),k=1,num_kpts)               ! U_matrix
-!  read(chk_unit)  ((((m_matrix(i,j,k,l,1),i=1,num_wann),j=1,num_wann),k=1,nntot),l=1,num_kpts) ! M_matrix
-!  read(chk_unit)  ((wannier_centres(i,j),i=1,3),j=1,num_wann)
+   !read(chk_unit)  (((u_matrix(i,j,k),i=1,num_wann),j=1,num_wann),k=1,num_kpts)               ! U_matrix
+   !read(chk_unit)  ((((m_matrix(i,j,k,l,1),i=1,num_wann),j=1,num_wann),k=1,nntot),l=1,num_kpts) ! M_matrix
+   !read(chk_unit)  ((wannier_centres(i,j),i=1,3),j=1,num_wann)
    close(chk_unit)
 
 end subroutine read_chkunit
 !!***
-
 
 end module m_wannier_io
