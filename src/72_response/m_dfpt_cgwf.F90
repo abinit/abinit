@@ -1091,7 +1091,7 @@ subroutine dfpt_cgwf(u1_band_,band_me,rank_band,bands_treated_now,berryopt,cgq,c
    dedt=-two*two*dedt
 
    if((prtvol==-level.or.prtvol==-19.or.prtvol==-20).and.dedt-tol14>0) then
-     call wrtout(std_out,' DFPT_CG_WARNING : dedt>0')
+     call wrtout(std_out,' DFPT_CGWF WARNING: dedt > 0')
    end if
    ABI_MALLOC(gvnlx_direc,(2,npw1*nspinor))
    ABI_MALLOC(gh_direc,(2,npw1*nspinor))
