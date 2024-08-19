@@ -6,7 +6,7 @@
 !! Check consistency of Abinit input data against itself.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2024 ABINIT group (DCA, XG, GMR, MKV, DRH, MVer)
+!!  Copyright (C) 1998-2024 ABINIT group (DCA, XG, GMR, MKV, DRH, MVer, MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -76,7 +76,7 @@ contains
 !!
 !! SOURCE
 
-subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
+subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads, comm)
 
 !Arguments ------------------------------------
 !scalars
@@ -980,6 +980,9 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
        call chkdpr(0,0,cond_string,cond_values,ierr,'ecuteps',dt%ecuteps,1,0.0_dp,iout)
        if (dt%ecuteps <= 0) then
          ABI_ERROR_NOSTOP("ecuteps must be specified if GWPT is activated", ierr)
+       end if
+       if (dt%ecutsigx <= 0) then
+         ABI_ERROR_NOSTOP("ecutsigx must be specified if GWPT is activated", ierr)
        end if
      end if
 

@@ -2238,7 +2238,7 @@ subroutine gstore_fill_bks_mask_pp_mesh(gstore, ecut, mband, nkibz, nsppol, my_p
 !Local variables-------------------------------
 !scalars
  integer,parameter :: istwfk1 = 1
- integer :: my_is, my_ik, my_iq, spin, ik_ibz, iqk_ibz, ebands_timrev, b1, b2, ipp_bz, my_mpw, my_gmax(3), ierr, onpw
+ integer :: my_is, my_ik, my_iq, spin, ik_ibz, ikq_ibz, ebands_timrev, b1, b2, ipp_bz, my_mpw, my_gmax(3), ierr, onpw
  real(dp) :: weight_q, cpu, wall, gflops
  type(gqk_t),pointer :: gqk
  type(crystal_t),pointer :: cryst
@@ -2249,43 +2249,38 @@ subroutine gstore_fill_bks_mask_pp_mesh(gstore, ecut, mband, nkibz, nsppol, my_p
 
  call cwtime(cpu, wall, gflops, "start")
 
- ! TODO: These loops can be parallelized using bsum_comm and pert_comm
- bks_mask = .False.
- cryst => gstore%cryst
+ ! TODO: These loops can be parallelized using bsum_comm and pert_comm if needed.
+ bks_mask = .False.; cryst => gstore%cryst
  ebands_timrev = kpts_timrev_from_kptopt(gstore%ebands%kptopt)
-
  mpw = 0; gmax = 0
 
  do my_is=1,gstore%my_nspins
    gqk => gstore%gqk(my_is); spin = gstore%my_spins(my_is)
-   ! FIXME: This is not correct in the case of band parallelism.
-   !b1 = gqk%bstart; b2 = gqk%bstop
+   ! These are the first and last band indices used in the sum over states (possibly MPI-distributed)
    b1 = my_bsum_start(spin); b2 = my_bsum_stop(spin)
 
    ABI_MALLOC(map_kq, (6, gqk%my_nk))
 
    do my_ik=1,gqk%my_nk
-     kk = gqk%my_kpts(:, my_ik)
-     ik_ibz = gqk%my_k2ibz(1, my_ik)
+     kk = gqk%my_kpts(:, my_ik); ik_ibz = gqk%my_k2ibz(1, my_ik)
 
-     ! We need the image of this k-point in the IBZ for the incoming state (ket)
-     bks_mask(gqk%bstart:gqk%bstop, ik_ibz, spin) = .True.
-     !bks_mask(b1:b2, ik_ibz, spin) = .True.
+     ! We need the image of this k-point in the IBZ for the incoming state |psi_nk>.
+     bks_mask(gqk%bstart:gqk%bstop, ik_ibz, spin) = .True.  ! gqk%n_start, gqk%n_stop
 
-     ! We also need the image of k+q in the IBZ for the outgoing state (bra)
+     ! We also need the image of k+q in the IBZ for the outgoing state <psi_mkq|.
      do my_iq=1,gqk%my_nq
        call gqk%myqpt(my_iq, gstore, weight_q, qpt)
        if (kpts_map("symrel", ebands_timrev, cryst, gstore%krank_ibz, 1, kk, map_kq, qpt=qpt) /= 0) then
          ABI_ERROR(sjoin("Cannot map k+q to IBZ with qpt:", ktoa(qpt)))
        end if
-       iqk_ibz = map_kq(1, 1)
-       bks_mask(gqk%bstart:gqk%bstop, iqk_ibz, spin) = .True.
+       ikq_ibz = map_kq(1, 1)
+       bks_mask(gqk%bstart:gqk%bstop, ikq_ibz, spin) = .True. ! gqk%m_start, gqk%m_stop
      end do ! my_iq
 
    end do ! my_ok
 
    ! We also need the image of k-p in the IBZ for the pp wavevectors treated by this MPI rank.
-   ! These states are summed over so use my_bsum_start(spin); b2 = my_bsum_stop(spin)
+   ! These states are summed over so use b1 and b2.
    do ipp_bz=my_pp_start_spin(spin), my_pp_stop_spin(spin)
      pp = pp_mesh%bz(:,ipp_bz)
      if (kpts_map("symrel", ebands_timrev, cryst, gstore%krank_ibz, gqk%my_nk, gqk%my_kpts, map_kq, qpt=-pp) /= 0) then
@@ -2293,19 +2288,17 @@ subroutine gstore_fill_bks_mask_pp_mesh(gstore, ecut, mband, nkibz, nsppol, my_p
      end if
 
      do my_ik=1,gqk%my_nk
-       iqk_ibz = map_kq(1, my_ik)
-       bks_mask(b1:b2, iqk_ibz, spin) = .True.
-       !bks_mask(gqk%bstart:gqk%bstop, iqk_ibz, spin) = .True.
+       ikq_ibz = map_kq(1, my_ik)
+       bks_mask(b1:b2, ikq_ibz, spin) = .True.
        ! Compute g-sphere, returns onpw. Note istwfk == 1.
        kk = gqk%my_kpts(:, my_ik)
        call get_kg(kk-pp, istwfk1, ecut, gstore%cryst%gmet, onpw, gtmp, mpw=mpw, gmax=gmax)
        ABI_FREE(gtmp)
      end do
-
    end do ! ipp_bz
 
    ! We also need the image of k+q-p in the IBZ for the pp wavevectors treated by this MPI rank.
-   ! These states are summed over so use my_bsum_start(spin); b2 = my_bsum_stop(spin)
+   ! These states are summed over so use b1 and b2.
    do my_iq=1,gqk%my_nq
      call gqk%myqpt(my_iq, gstore, weight_q, qpt)
 
@@ -2316,17 +2309,16 @@ subroutine gstore_fill_bks_mask_pp_mesh(gstore, ecut, mband, nkibz, nsppol, my_p
        end if
 
        do my_ik=1,gqk%my_nk
-         iqk_ibz = map_kq(1, my_ik)
-         bks_mask(b1:b2, iqk_ibz, spin) = .True.
-         !bks_mask(gqk%bstart:gqk%bstop, iqk_ibz, spin) = .True.
+         ikq_ibz = map_kq(1, my_ik)
+         bks_mask(b1:b2, ikq_ibz, spin) = .True.
 
-         ! Compute g-sphere, returns onpw. Note istwfk == 1.
+         ! Compute g-sphere, returns onpw. Note istwfk = 1.
          kk = gqk%my_kpts(:, my_ik)
          call get_kg(kk+qpt-pp, istwfk1, ecut, gstore%cryst%gmet, onpw, gtmp, mpw=mpw, gmax=gmax)
          ABI_FREE(gtmp)
        end do
-
      end do ! ipp_bz
+
    end do ! my_iq
 
    ABI_FREE(map_kq)
@@ -2336,7 +2328,6 @@ subroutine gstore_fill_bks_mask_pp_mesh(gstore, ecut, mband, nkibz, nsppol, my_p
  my_gmax = gmax; call xmpi_max(my_gmax, gmax, gstore%comm, ierr)
 
  call wrtout(std_out, sjoin(' Optimal value of mpw: ', itoa(mpw)))
-
  call cwtime_report(" gstore_fill_bks_mask_pp_mesh", cpu, wall, gflops)
 
 end subroutine gstore_fill_bks_mask_pp_mesh
@@ -2377,9 +2368,7 @@ subroutine gstore_get_mpw_gmax(gstore, ecut, mpw, gmax)
 
  mpw = 0; gmax = 0
 
- ! TODO: This is an hotspot due to the double loop over k and q.
- ! Should use a geometrical approach to compute mpw and gmax.
-
+ ! TODO: This is an hotspot due to the double loop over k and q. Should use a geometrical approach to compute mpw and gmax.
  call wrtout(std_out, " Computing mpw. This may take some time for dense k/q meshes...", pre_newlines=1)
  call cwtime(cpu, wall, gflops, "start")
 
@@ -2525,7 +2514,6 @@ subroutine gstore_get_lambda_iso_iw(gstore, dtset, nw, imag_w, lambda)
 !arrays
  real(dp) :: qpt(3)
  real(dp),allocatable :: dbldelta_q(:,:,:), g2_pmnk(:,:,:,:)
-
 !----------------------------------------------------------------------
 
  ABI_CHECK(gstore%qzone == "bz", "gstore_get_lambda_iso_iw assumes qzone == `bz`")
@@ -2608,7 +2596,6 @@ subroutine gstore_get_a2fw(gstore, dtset, nw, wmesh, a2fw)
 !arrays
  real(dp) :: qpt(3)
  real(dp),allocatable :: dbldelta_q(:,:,:), g2_mnkp(:,:,:,:), deltaw_nuq(:)
-
 !----------------------------------------------------------------------
 
  call wrtout(std_out, sjoin(" Computing a^2F(w) with ph_smear:", ftoa(dtset%ph_smear * Ha_meV), "(meV)"), pre_newlines=1)
@@ -2736,7 +2723,6 @@ pure subroutine gqk_myqpt(gqk, my_iq, gstore, weight, qpt)
 !Local variables ------------------------------
  integer :: iq_ibz, isym_q, trev_q, tsign_q, g0_q(3)
  logical :: isirr_q
-
 !----------------------------------------------------------------------
 
  iq_ibz = gqk%my_q2ibz(1, my_iq); isym_q = gqk%my_q2ibz(2, my_iq)
@@ -2797,7 +2783,6 @@ subroutine gqk_dbldelta_qpt(gqk, my_iq, gstore, eph_intmeth, eph_fsmear, qpt, we
  integer,allocatable :: my_kqmap(:,:), kmesh_map(:,:)
  real(dp) :: kk(3), kmesh_cartvec(3,3), rlatt(3,3), klatt(3,3), vb_k(3, gqk%nb), vb_kq(3, gqk%nb)
  real(dp),allocatable :: eig_k(:,:), eig_kq(:,:), kmesh(:,:), wght_bz(:,:,:)
-
 !----------------------------------------------------------------------
 
  nb = gqk%nb; nkbz = gstore%nkbz; spin = gqk%spin
@@ -3021,7 +3006,7 @@ subroutine gqk_free(gqk)
 
  call gqk%wan%free()
 
- ! Free communicators
+ ! Free MPI communicators
  call gqk%kpt_comm%free()
  call gqk%qpt_comm%free()
  call gqk%qpt_kpt_comm%free()
@@ -3061,8 +3046,7 @@ subroutine gstore_get_missing_qbz_spin(gstore, done_qbz_spin, ndone, nmiss)
 
  nmiss = 0
  do my_is=1,gstore%my_nspins
-   spin = gstore%my_spins(my_is)
-   gqk => gstore%gqk(my_is)
+   spin = gstore%my_spins(my_is); gqk => gstore%gqk(my_is)
    do my_iq=1,gqk%my_nq
      iq_bz = gqk%my_q2bz(my_iq)
      if (done_qbz_spin(iq_bz, spin) == 0) nmiss = nmiss + 1
@@ -3248,8 +3232,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
  ! FFT meshes
  nfftf = product(ngfftf(1:3)); mgfftf = maxval(ngfftf(1:3))
  nfft = product(ngfft(1:3)) ; mgfft = maxval(ngfft(1:3))
- n1 = ngfft(1); n2 = ngfft(2); n3 = ngfft(3)
- n4 = ngfft(4); n5 = ngfft(5); n6 = ngfft(6)
+ n1 = ngfft(1); n2 = ngfft(2); n3 = ngfft(3); n4 = ngfft(4); n5 = ngfft(5); n6 = ngfft(6)
 
  ! Open the DVDB file
  call dvdb%open_read(ngfftf, xmpi_comm_self)
@@ -3276,11 +3259,11 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
      trev_q = gqk%my_q2ibz(6, my_iq); g0_q = gqk%my_q2ibz(3:5,my_iq)
      db_iqpt = dvdb%findq(qq_ibz)
      if (db_iqpt == -1) then
-       cnt = 1
-       exit spin_loop
+       cnt = 1; exit spin_loop
      end if
    end do
  end do spin_loop
+
  call xmpi_sum(cnt, comm, ierr)
  use_ftinterp = (cnt /= 0)
 
@@ -3335,8 +3318,8 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
  ecut = dtset%ecut
 
  call wfd_init(wfd, cryst, pawtab, psps, keep_ur, mband, nband, nkibz, nsppol, bks_mask,&
-   nspden, nspinor, ecut, dtset%ecutsm, dtset%dilatmx, wfd_istwfk, ebands%kptns, ngfft,&
-   dtset%nloalg, dtset%prtvol, dtset%pawprtvol, comm)
+               nspden, nspinor, ecut, dtset%ecutsm, dtset%dilatmx, wfd_istwfk, ebands%kptns, ngfft,&
+               dtset%nloalg, dtset%prtvol, dtset%pawprtvol, comm)
 
  call wfd%print(header="Wavefunctions for GSTORE calculation")
 
@@ -3759,8 +3742,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
          ABI_FREE(ph3d)
          ABI_SFREE(ph3d1)
 
-         ! Calculate elphmat(j,i) = <psi_{k+q,j}|dvscf_q*psi_{k,i}> for this perturbation.
-         ! No need to handle istwf_kq because it's always 1.
+         ! Calculate <psi_{k+q,j}|dvscf_q*psi_{k,i}> for this perturbation. No need to handle istwf_kq because it's always 1.
          do in_k=1,nband_k
            do im_kq=1,nband_kq
              gkq_atm(:, im_kq, in_k, ipc) = cg_zdotc(npw_kq*nspinor, bras_kq(1,1,im_kq), h1kets_kq(1,1,in_k))
@@ -3866,11 +3848,11 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
  ABI_FREE(pheigvec_qibz)
  ABI_FREE(done_qbz_spin)
 
- call pawcprj_free(cwaveprj0)
- ABI_FREE(cwaveprj0)
  call ddkop%free()
  call gs_hamkq%free()
  call wfd%free()
+ call pawcprj_free(cwaveprj0)
+ ABI_FREE(cwaveprj0)
 
 contains
 
@@ -4278,8 +4260,7 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, if
      isirr_q = (isym_q == 1 .and. trev_q == 0)
      tsign_q = 1; if (trev_q == 1) tsign_q = -1
      qq_ibz = gstore%qibz(:, iq_ibz)
-     call pheigvec_rotate(cryst, qq_ibz, isym_q, trev_q, pheigvec_cart_ibz(:,:,:,:,iq_ibz), &
-                          pheigvec_cart_qbz, displ_cart_qbz)
+     call pheigvec_rotate(cryst, qq_ibz, isym_q, trev_q, pheigvec_cart_ibz(:,:,:,:,iq_ibz), pheigvec_cart_qbz, displ_cart_qbz)
 
      gqk%my_wnuq(:, my_iq) = phfreqs_ibz(gqk%my_iperts(:), iq_ibz)
      if (store_phdispl) gqk%my_displ_cart(:,:,:,:,my_iq) = displ_cart_qbz(:,:,:,gqk%my_iperts(:))
@@ -4505,7 +4486,6 @@ subroutine gstore_print_for_abitests(gstore, dtset)
 !arrays
  integer,allocatable :: done_qbz_spin(:,:)
  real(dp),allocatable :: vk_cart_ibz(:,:,:), gslice_mn(:,:,:) !, vkmat_cart_ibz(:,:,:,:)
-
 ! *************************************************************************
 
  ! Only master prints to ab_out
@@ -4577,7 +4557,7 @@ subroutine gstore_print_for_abitests(gstore, dtset)
      do ik_glob=1,glob_nk
        if (ik_glob /= 1 .and. ik_glob /= glob_nk) cycle ! Write the first and the last k-point.
        do ipc=1,natom3
-         if (ipc /= 4 .and. ipc /= natom3) cycle ! Write the 4th and the last pertubation.
+         if (ipc /= 4 .and. ipc /= natom3) cycle ! Write the 4th and the last perturbation.
          ncerr = nf90_get_var(spin_ncid, spin_vid("gvals"), gslice_mn, &
                               start=[1,1,1,ipc,ik_glob,iq_glob], count=[cplex,nb,nb,1,1,1])
          NCF_CHECK(ncerr)

@@ -557,7 +557,6 @@ subroutine cwtime_report(tag, cpu, wall, gflops, pre_str, end_str, out_wall, com
 !Local variables-------------------------------
 !scalars
  character(len=500) :: avg_type
-
 ! *************************************************************************
 
  if (present(comm)) then

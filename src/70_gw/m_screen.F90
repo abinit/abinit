@@ -1077,7 +1077,7 @@ subroutine screen_init(screen, W_Info, Cryst, Qmesh, Gsph, Vcp, ifname, mqmem, n
 
    do iq_ibz=1,nqibz
      if (screen%ihave_fgg(iq_ibz, how="Stored")) then
-       call wrtout(std_out, sjoin(" Calling ppm%new_setup for iq_ibz:", itoa(iq_ibz)))
+       !call wrtout(std_out, sjoin(" Calling ppm%new_setup for iq_ibz:", itoa(iq_ibz)))
        call screen%ppm%new_setup(iq_ibz, Cryst, Qmesh, npw, nomega, screen%omega, &
                                  screen%Fgg(iq_ibz)%mat, nfftf_tot, Gsph%gvec, ngfftf, screen%ae_rhor(:,1))
      end if
@@ -1514,7 +1514,7 @@ subroutine em1_symmetrize_ip(iq_bz, npw_c, nomega, Gsph, Qmesh, epsm1)
  if (itim_q==2) then
 !$OMP PARALLEL DO IF (nomega > 1)
    do iw=1,nomega
-     call sqmat_itranspose(npw_c,epsm1(:,:,iw))
+     call sqmat_itranspose(npw_c, epsm1(:,:,iw))
    end do
  end if
 
