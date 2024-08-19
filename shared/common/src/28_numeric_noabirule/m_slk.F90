@@ -5322,7 +5322,7 @@ complex(dp) function slk_get_trace(mat) result(ctrace)
      do jloc=1,mat%sizeb_local(2)
        do iloc=1,mat%sizeb_local(1)
          call mat%loc2glob(iloc, jloc, iglob, jglob)
-         if (iglob == jglob) ctrace = ctrace + mat%buffer_cplx(iloc, jglob)
+         if (iglob == jglob) ctrace = ctrace + mat%buffer_cplx(iloc, jloc)
        end do
      end do
 
@@ -5332,7 +5332,7 @@ complex(dp) function slk_get_trace(mat) result(ctrace)
      do jloc=1,mat%sizeb_local(2)
        do iloc=1,mat%sizeb_local(1)
          call mat%loc2glob(iloc, jloc, iglob, jglob)
-         if (iglob == jglob) rtrace = rtrace + mat%buffer_real(iloc, jglob)
+         if (iglob == jglob) rtrace = rtrace + mat%buffer_real(iloc, jloc)
        end do
      end do
      ctrace = rtrace
@@ -5348,7 +5348,7 @@ complex(dp) function slk_get_trace(mat) result(ctrace)
      do jloc=1,mat%sizeb_local(2)
        do iloc=1,mat%sizeb_local(1)
          call mat%loc2glob(iloc, jloc, iglob, jglob)
-         if (iglob == jglob) ctrace_sp = ctrace_sp + mat%buffer_cplx(iloc, jglob)
+         if (iglob == jglob) ctrace_sp = ctrace_sp + mat%buffer_cplx(iloc, jloc)
        end do
      end do
      ctrace = ctrace_sp
@@ -5359,7 +5359,7 @@ complex(dp) function slk_get_trace(mat) result(ctrace)
       do jloc=1,mat%sizeb_local(2)
         do iloc=1,mat%sizeb_local(1)
           call mat%loc2glob(iloc, jloc, iglob, jglob)
-          if (iglob == jglob) rtrace_sp = rtrace_sp + mat%buffer_real(iloc, jglob)
+          if (iglob == jglob) rtrace_sp = rtrace_sp + mat%buffer_real(iloc, jloc)
         end do
       end do
       ctrace = rtrace_sp
