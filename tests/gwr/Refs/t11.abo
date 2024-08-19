@@ -1,6 +1,6 @@
 
-.Version 10.1.2.3 of ABINIT, released Apr 2024.
-.(MPI version, prepared for a x86_64_linux_gnu14.1 computer) 
+.Version 10.1.4.1 of ABINIT, released Jun 2024.
+.(MPI version, prepared for a x86_64_linux_gnu14.2 computer) 
 
 .Copyright (C) 1998-2024 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,13 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 22 Jul 2024.
-- ( at 10h21 )
+.Starting date : Mon 19 Aug 2024.
+- ( at 10h26 )
   
-- input  file    -> t22.abi
-- output file    -> t22.abo
-- root for input  files -> t22i
-- root for output files -> t22o
+- input  file    -> /home/bruneval/devel/abinit-cc4s/tests/Test_suite/gwr_t11/t11.abi
+- output file    -> t11.abo
+- root for input  files -> t11i
+- root for output files -> t11o
 
  DATASET    1 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
@@ -179,8 +179,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     20.000   => boxcut(ratio)=   2.18561
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/bruneval/devel/abinit/tests/Psps_for_tests//Pseudodojo_nc_sr_04_pbe_standard_psp8/H.psp8
-- pspatm: opening atomic psp file    /home/bruneval/devel/abinit/tests/Psps_for_tests//Pseudodojo_nc_sr_04_pbe_standard_psp8/H.psp8
+- pspini: atom type   1  psp file is /home/bruneval/devel/abinit-cc4s/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pbe_standard_psp8/H.psp8
+- pspatm: opening atomic psp file    /home/bruneval/devel/abinit-cc4s/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pbe_standard_psp8/H.psp8
 - H     ONCVPSP-3.2.3.1  r_core=   1.00957   0.70586
 -  1.00000   1.00000    170501                znucl, zion, pspdat
     8   11    1    4       300   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -207,7 +207,7 @@ tolerances: {toldfe: 1.00E-06, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1 -0.53924609436862    -5.392E-01 1.119E-03 4.744E+02
+ ETOT  1 -0.53924609436863    -5.392E-01 1.119E-03 4.744E+02
  ETOT  2  -1.0366298563351    -4.974E-01 3.568E-07 5.016E+01
  ETOT  3  -1.1234223683547    -8.679E-02 3.956E-04 4.758E+01
  ETOT  4  -1.1381941826025    -1.477E-02 5.314E-05 2.692E+01
@@ -283,12 +283,12 @@ force_length_stats: {min:   4.22944707E-02, max:   4.22944707E-02, mean:   4.229
  frms,max,avg= 2.4418724E-02 4.2294471E-02  -4.442E-05 -4.694E-05 -4.473E-05 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1      0.00012998391943     0.00012994289022    -2.17486893573248
-    2     -0.00012998391943    -0.00012994289022     2.17486893573248
+    1      0.00012998391943     0.00012994289022    -2.17486893573250
+    2     -0.00012998391943    -0.00012994289022     2.17486893573250
  frms,max,avg= 1.2556612E+00 2.1748689E+00  -2.284E-03 -2.414E-03 -2.300E-03 e/A
  length scales= 10.000000000000 10.000000000000 10.000000000000 bohr
               =  5.291772085900  5.291772085900  5.291772085900 angstroms
- prteigrs : about to open file t22o_DS1_EIG
+ prteigrs : about to open file t11o_DS1_EIG
  Fermi (or HOMO) energy (hartree) =  -0.61841   Average Vxc (hartree)=   0.00000
  Eigenvalues (hartree) for nkpt=   1  k points:
  kpt#   1, nband=  2, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
@@ -318,7 +318,7 @@ comment             : '"Double-counting" decomposition of free energy'
 band_energy         : -1.23681610074635E+00
 Ewald energy        :  4.37758075208796E-01
 psp_core            :  0.00000000000000E+00
-xc_dc               : -3.41347717384577E-01
+xc_dc               : -3.41347717384576E-01
 total_energy_dc     : -1.14040574292213E+00
 ...
 
@@ -346,7 +346,7 @@ electrons: {nelect:   2.00000000E+00, charge:   0.00000000E+00, occopt:   1.0000
 meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 ...
 
- mkfilename: getwfk from: t22o_DS1_WFK
+ mkfilename: getwfk from: t11o_DS1_WFK
 
  Exchange-correlation functional for the present dataset will be:
   Hartree-Fock with mixing coefficient alpha=1
@@ -362,7 +362,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     20.000   => boxcut(ratio)=   2.18561
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t22o_DS1_WFK
+-inwffil : will read wavefunctions from disk file t11o_DS1_WFK
 _setup2: Arith. and geom. avg. npw (full set) are    4337.000    4337.000
 
 ================================================================================
@@ -442,12 +442,12 @@ force_length_stats: {min:   4.22973182E-02, max:   4.22973182E-02, mean:   4.229
  frms,max,avg= 2.4420368E-02 4.2297318E-02  -2.552E-05 -2.694E-05 -3.811E-05 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1      0.00003613612437     0.00003827657597    -2.17501536928818
-    2     -0.00003613612437    -0.00003827657597     2.17501536928818
+    1      0.00003613612437     0.00003827657598    -2.17501536928818
+    2     -0.00003613612437    -0.00003827657598     2.17501536928818
  frms,max,avg= 1.2557457E+00 2.1750154E+00  -1.312E-03 -1.385E-03 -1.960E-03 e/A
  length scales= 10.000000000000 10.000000000000 10.000000000000 bohr
               =  5.291772085900  5.291772085900  5.291772085900 angstroms
- prteigrs : about to open file t22o_DS2_EIG
+ prteigrs : about to open file t11o_DS2_EIG
  Fermi (or HOMO) energy (hartree) =  -0.61833   Average Vxc (hartree)=   0.00000
  Eigenvalues (hartree) for nkpt=   1  k points:
  kpt#   1, nband= 24, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
@@ -470,7 +470,7 @@ xc                  :  0.00000000000000E+00
 Ewald energy        :  4.37758075208796E-01
 psp_core            :  0.00000000000000E+00
 local_psp           : -2.83075985755661E+00
-non_local_psp+x     : -8.65702771533995E-01
+non_local_psp+x     : -8.65702771533996E-01
 total_energy        : -1.14025674714207E+00
 ...
 
@@ -478,7 +478,7 @@ total_energy        : -1.14025674714207E+00
 --- !EnergyTermsDC
 iteration_state     : {dtset: 2, }
 comment             : '"Double-counting" decomposition of free energy'
-band_energy         : -1.23666454262635E+00
+band_energy         : -1.23666454262636E+00
 Ewald energy        :  4.37758075208796E-01
 psp_core            :  0.00000000000000E+00
 xc_dc               : -3.41293650906202E-01
@@ -509,7 +509,7 @@ electrons: {nelect:   2.00000000E+00, charge:   0.00000000E+00, occopt:   1.0000
 meta: {optdriver: 6, }
 ...
 
- mkfilename: getwfk from: t22o_DS2_WFK
+ mkfilename: getwfk from: t11o_DS2_WFK
 
  mkfilename : getden/=0, take file _DEN from output of DATASET   1.
 
@@ -518,7 +518,7 @@ meta: {optdriver: 6, }
 
 .Using double precision arithmetic; gwpc =  8
 
-- Reading GS density from: t22o_DS1_DEN
+- Reading GS density from: t11o_DS1_DEN
 
 
 
@@ -529,12 +529,12 @@ meta: {optdriver: 6, }
 )     Minimum=    0.0000E+00  at reduced coord.    0.4444    0.4444    0.3556
    Integrated=    2.0000E+00
 
- Writing Eigenenergies metadata to file: t22o_DS3_EigenEnergies.yaml
+ Writing Eigenenergies metadata to file: t11o_DS3_EigenEnergies.yaml
 
- Writing Eigenenergies to file: t22o_DS3_EigenEnergies.elements
+ Writing Eigenenergies to file: t11o_DS3_EigenEnergies.elements
 
 
-- Reading HYBRID orbitals from WFK file: t22o_DS2_WFK
+- Reading HYBRID orbitals from WFK file: t11o_DS2_WFK
  ==== Info on the ugb_t object ====
 
 --- !ugb_t
@@ -553,15 +553,15 @@ my_nband: 20
 
  Computing oscilator matrix elements for CC4S.
 
- Writing Gridvectors metadata to file: t22o_DS3_GridVectors.yaml
+ Writing Gridvectors metadata to file: t11o_DS3_GridVectors.yaml
 
- Writing CoulombVertex metadata to file: t22o_DS3_CoulombVertex.yaml
+ Writing CoulombVertex metadata to file: t11o_DS3_CoulombVertex.yaml
 
- Writing CoulombPotential metadata to file: t22o_DS3_CoulombPotential.yaml
+ Writing CoulombPotential metadata to file: t11o_DS3_CoulombPotential.yaml
 
- Writing CoulombPotential data to file: t22o_DS3_CoulombPotential.elements
+ Writing CoulombPotential data to file: t11o_DS3_CoulombPotential.elements
 
- Writing CoulombVertex data to file: t22o_DS3_CoulombVertex.elements
+ Writing CoulombVertex data to file: t11o_DS3_CoulombVertex.elements
 
  Reading norm of Coulomb vertex for testing purposes with ng: 4
 
@@ -597,8 +597,8 @@ my_nband: 20
            etotal3     0.0000000000E+00
             fcart1     2.5277849887E-06  2.5269870977E-06 -4.2294470519E-02
                       -2.5277849887E-06 -2.5269870977E-06  4.2294470519E-02
-            fcart2     7.0273579319E-07  7.4436095321E-07 -4.2297318199E-02
-                      -7.0273579319E-07 -7.4436095321E-07  4.2297318199E-02
+            fcart2     7.0273579322E-07  7.4436095325E-07 -4.2297318199E-02
+                      -7.0273579322E-07 -7.4436095325E-07  4.2297318199E-02
             fcart3     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
 -          fftalg         512
@@ -645,9 +645,9 @@ P           mkmem           1
              rcut      5.00000000E+00 Bohr
           spgroup           1
            strten1     2.6931851167E-04  2.6931780499E-04  2.2976512425E-04
-                      -6.5931395809E-09 -6.5174088898E-09 -6.0134972123E-09
+                      -6.5931395811E-09 -6.5174088898E-09 -6.0134972123E-09
            strten2     2.6934960509E-04  2.6934944350E-04  2.2975518912E-04
-                      -1.5238815372E-09 -1.4090880297E-09 -1.2946548436E-09
+                      -1.5238815374E-09 -1.4090880296E-09 -1.2946548437E-09
            strten3     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            toldfe1     1.00000000E-06 Hartree
@@ -762,10 +762,10 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          2.3  wall=          2.4
+- Proc.   0 individual time (sec): cpu=          2.2  wall=          2.2
 
 ================================================================================
 
  Calculation completed.
-.Delivered  19 WARNINGs and  15 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          2.3  wall=          2.4
+.Delivered  19 WARNINGs and  13 COMMENTs to log file.
++Overall time at end (sec) : cpu=          2.2  wall=          2.2
