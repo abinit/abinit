@@ -230,7 +230,7 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
  integer :: option,opt_gvnlx1,quit,test_ddk
  integer :: tocceig,usedcwavef,ptr,shift_band
  real(dp) :: aa,ai,ar,eig0nk,resid,residk,scprod,energy_factor
- character(len=500) :: message
+ character(len=500) :: msg
  type(rf2_t) :: rf2
 !arrays
  logical,allocatable :: cycle_bands(:)
@@ -253,8 +253,8 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
  nkpt_max=50; if (xmpi_paral==1) nkpt_max=-1
 
  if(prtvol>2 .or. ikpt<=nkpt_max)then
-   write(message,'(2a,i5,2x,a,3f9.5,2x,a)')ch10,' Non-SCF iterations; k pt #',ikpt,'k=',gs_hamkq%kpt_k(:),'band residuals:'
-   call wrtout(std_out,message)
+   write(msg,'(2a,i5,2x,a,3f9.5,2x,a)')ch10,' Non-SCF iterations; k pt #',ikpt,'k=',gs_hamkq%kpt_k(:),'band residuals:'
+   call wrtout(std_out,msg)
  end if
 
 !Initializations and allocations
@@ -663,8 +663,8 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
  residk=maxval(resid_k(:))
  if (prtvol>2 .or. ikpt<=nkpt_max) then
    do ii=0,(nband_k-1)/8
-     write(message,'(1p,8e10.2)')(resid_k(iband),iband=1+ii*8,min(nband_k,8+ii*8))
-     call wrtout(std_out,message)
+     write(msg,'(1p,8e10.2)')(resid_k(iband),iband=1+ii*8,min(nband_k,8+ii*8))
+     call wrtout(std_out,msg)
    end do
  end if
 
@@ -699,18 +699,18 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
  ! Write the number of one-way 3D ffts skipped until now (in case of fixed occupation numbers)
  call xmpi_sum(nskip,mpi_enreg%comm_band,ierr)
  if (iscf_mod>0 .and. (prtvol>2 .or. ikpt<=nkpt_max)) then
-   write(message,'(a,i0)')' dfpt_vtowfk : number of one-way 3D ffts skipped in vtowfk3 until now =',nskip
-   call wrtout(std_out,message)
+   write(msg,'(a,i0)')' dfpt_vtowfk : number of one-way 3D ffts skipped in vtowfk3 until now =',nskip
+   call wrtout(std_out,msg)
  end if
 
  if (prtvol<=2 .and. ikpt==nkpt_max+1) then
-   write(message,'(3a)') ch10,' dfpt_vtowfk : prtvol=0, 1 or 2, do not print more k-points.',ch10
-   call wrtout(std_out,message)
+   write(msg,'(3a)') ch10,' dfpt_vtowfk : prtvol=0, 1 or 2, do not print more k-points.',ch10
+   call wrtout(std_out,msg)
  end if
 
  if (residk>dtset%tolwfr .and. iscf_mod<=0 .and. iscf_mod/=-3) then
-   write(message,'(a,2i0,a,es13.5)')'Wavefunctions not converged for nnsclo,ikpt=',nnsclo_now,ikpt,' max resid=',residk
-   ABI_WARNING(message)
+   write(msg,'(a,2i0,a,es13.5)')'Wavefunctions not converged for nnsclo,ikpt=',nnsclo_now,ikpt,' max resid=',residk
+   ABI_WARNING(msg)
  end if
 
  call timab(130,2,tsec)

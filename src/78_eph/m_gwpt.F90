@@ -229,7 +229,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  type(gqk_t),pointer :: gqk
  type(xcdata_type) :: xcdata
  character(len=fnlen) :: screen_filepath, gstore_filepath
- character(len=5000) :: msg
+ character(len=5000) :: msg, qkp_string
 !arrays
  integer :: nbsum, my_bsum_start(dtset%nsppol), my_bsum_stop(dtset%nsppol), my_nbsum(dtset%nsppol)
  integer :: g0_k(3), g0_kq(3), g0_kmp(3), g0_kqmp(3)
@@ -844,6 +844,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
    ! Loop over MPI distributed q-points in Sigma_q (gqk%qpt_comm)
    ! ============================================================
    do my_iq=1,gqk%my_nq
+     !if (my_iq <= 4) cycle
      call gqk%myqpt(my_iq, gstore, weight_q, qpt)
      qq_is_gamma = sum(qpt**2) < tol14
 
@@ -1048,6 +1049,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
 
          pp = pp_mesh%bz(:,ipp_bz) !; print *, "pp", pp
          pp_is_gamma = sum(pp**2) < tol14
+         qkp_string = sjoin("While treating qpt: ", ktoa(qpt), "kpt:", ktoa(kk), "pp:", ktoa(pp), ch10)
 
          ! Symmetry tables and g-sphere centered on k-p.
          kmp = kk - pp
@@ -1178,6 +1180,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
          ! Sum over bands
          ! ==============
          do ib_sum=my_bsum_start(spin), my_bsum_stop(spin)
+           !if (ib_sum > 8) cycle
            ! NB: All procs in gqk%pert_comm enter this part.
 
            ! Get u_{n',k-p}(r), stored in ur_kmp
@@ -1326,7 +1329,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
                                   ebands%eig(:,ikmp_ibz,spin), ebands%eig(:,ikqmp_ibz,spin), &
                                   cg_kmp, cwaveprj0, cg1_kqmp, cwaveprj, msg, ierr, &
                                   full_cg1=full_cg1_kqmp, full_ur1=full_ur1_kqmp)
-             ABI_CHECK(ierr == 0, msg)
+             ABI_WARNING_IF(ierr /= 0, sjoin("Stern at +q", qkp_string, msg))
 
              ! Store KS e-ph matrix elements for this perturbation.
              if (pp_is_gamma) then
@@ -1407,7 +1410,7 @@ if (.not. qq_is_gamma) then
                                    ebands%eig(:,ikqmp_ibz,spin), ebands%eig(:,ikmp_ibz,spin), &
                                    cg_kqmp, cwaveprj0, cg1_kmp, cwaveprj, msg, ierr, &
                                    full_cg1=full_cg1_kmp, full_ur1=full_ur1_kmp)
-             ABI_CHECK(ierr == 0, msg)
+             ABI_WARNING_IF(ierr /= 0, sjoin("Stern at -q:", qkp_string, msg))
 
              ABI_FREE(kinpw1)
              ABI_FREE(dkinpw)

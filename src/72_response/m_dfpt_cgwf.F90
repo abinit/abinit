@@ -1126,8 +1126,7 @@ subroutine dfpt_cgwf(u1_band_,band_me,rank_band,bands_treated_now,berryopt,cgq,c
    d2edt2=two*two*d2edt2
 
    if(prtvol==-level.or.prtvol==-19)then
-     write(msg,'(a,2es14.6)') 'dfpt_cgwf: dedt,d2edt2=',dedt,d2edt2
-     call wrtout(std_out,msg)
+     write(msg,'(a,3es14.6)') 'dfpt_cgwf: dedt,d2edt2,resid=',dedt,d2edt2,resid; call wrtout(std_out,msg)
    end if
 
    ! ======================================================================
@@ -1149,18 +1148,21 @@ subroutine dfpt_cgwf(u1_band_,band_me,rank_band,bands_treated_now,berryopt,cgq,c
      ghc   =zero
      gvnlxc =zero
      if (gen_eigenpb) gsc=zero
-     if (usepaw==1) then
-       call pawcprj_set_zero(cwaveprj)
-     end if
+     if (usepaw==1) call pawcprj_set_zero(cwaveprj)
+
      ! A negative residual will be the signal of this problem ...
+     !write(msg,'(a,3es14.6)') 'dfpt_cgwf: dedt,d2edt2,resid=',dedt,d2edt2,resid; call wrtout(std_out,msg)
+
      resid=-two
      if (prtvol > 0 .and. u1_band_ > 0) then
        call wrtout(std_out,' dfpt_cgwf: problem of minimisation (likely metallic), set resid to -2')
      end if
+
    else if (d2edt2 > 1.d-40) then
      ! Here, the value of theta that gives the minimum
      theta=-dedt/d2edt2
      !write(std_out,*)' dfpt_cgwf: dedt,d2edt2=',dedt,d2edt2
+
    else
      if (u1_band_ > 0) call wrtout(std_out, "DFPT_CGWF WARNING: d2edt2 is zero, skipping update")
      theta=zero
@@ -1859,16 +1861,20 @@ subroutine stern_solve(stern, u1_band, band_me, idir, ipert, qpt, gs_hamkq, rf_h
        " resid:", out_resid, " >= tolwfr: ", stern%dtset%tolwfr, ch10, &
        " after nline: ", stern%nlines_done, " iterations. Increase nline and/or tolwfr."
      ierr = 1
+
    else if (out_resid < zero) then
-     err_msg = sjoin(" resid: ", ftoa(out_resid), ", nlines_done:", itoa(stern%nlines_done))
-     write(err_msg, "(a,i0,a, (a,es13.5), a,i0,a)") &
-       " Sternheimer didn't convergence for band: ", u1_band, ch10, &
-       " resid:", out_resid, ", after nline: ", stern%nlines_done, " iterations. Increase nline and/or tolwfr."
+     write(err_msg, "(a,i0,a, (a,es13.5), a,i0)") &
+       " Sternheimer solver didn't convergence for band: ", u1_band, ch10, &
+       " resid:", out_resid, ", after nline: ", stern%nlines_done
      ! This may happen when the eigenvalue eig_mk(0) is higher than
      ! the lowest non-treated eig_mk+q(0). The solution adopted here
      ! is very crude, and rely upon the fact that occupancies of such
      ! levels should be smaller and smaller with increasing nband, so that
      ! a convergence study will give the right result.
+     !write(std_out, *)" eig0_k, eig0_kq, eig0_k - eig0_kq"
+     !do iband=1,stern%nband
+     !  write(std_out, *)iband, eig0_k(iband), eig0_kq(iband), eig0_k(iband) - eig0_kq(iband)
+     !end do
      ierr = -1
    end if
 
