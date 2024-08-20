@@ -719,10 +719,9 @@ integer function nctk_open_read(ncid, path, comm) result(ncerr)
    NCF_CHECK_MSG(ncerr, sjoin("opening file:", path))
  else
    ncerr = nf90_open(path, mode=nf90_nowrite, ncid=ncid)
-   NCF_CHECK_MSG(ncerr, sjoin("opening file:", path))
+   NCF_CHECK_MSG(ncerr, sjoin("Opening file:", path))
    !if (ncerr /= NC_EHDFERR) then
-   !  ncerr = nf90_open(path, mode=ior(ior(nf90_netcdf4), nf90_nowrite),&
-   !                    comm=comm, info=xmpio_info, ncid=ncid)
+   !  ncerr = nf90_open(path, mode=ior(ior(nf90_netcdf4), nf90_nowrite), comm=comm, info=xmpio_info, ncid=ncid)
    !end if
    if (nprocs > 1) then
      ncerr = nf90_einval
@@ -1936,7 +1935,6 @@ integer function nctk_get_dim(ncid, dimname, dimlen, datamode) result(ncerr)
  logical,optional,intent(in) :: datamode
 
 !Local variables-------------------------------
-!scalars
  integer :: dimid
 
 ! *********************************************************************
