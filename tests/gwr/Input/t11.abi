@@ -1,6 +1,7 @@
 # H2. Interface with CC4S code (NC pseudos)
 # Test in particular NO time-reversal symmetry with Hartree-Fock
 
+iomode 1
 enunit 2
 ixc 40   # HF
 
@@ -77,9 +78,8 @@ pseudos "H.psp8"
 #%% max_nprocs = 4
 #%% [extra_info]
 #%% authors = F. Bruneval, M. Giantomassi
-#%% keywords = NC
+#%% keywords = NC, CC4S
 #%% description = Hartree-Fock without time-reversal, then CC4S output
-##%% topics = HF, CC4S
 #%%<END TEST_INFO>
 
 
