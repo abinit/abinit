@@ -734,7 +734,7 @@ subroutine fftdatar_write(varname,path,iomode,hdr,crystal,ngfft,cplex,nfft,nspde
      ABI_ERROR(msg)
    end if
    call hdr%fort_write(unt, fform, ierr)
-   ABI_CHECK(ierr==0,"ierr !=0")
+   ABI_CHECK(ierr==0, "ierr !=0")
    do ii=1,nspden
      write(unt, err=10, iomsg=errmsg) (datar(iarr,ii), iarr=1,cplex * nfft)
    end do
