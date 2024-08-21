@@ -2219,32 +2219,26 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'varpeq_pkind', tread, 'KEY', key_value=key_value)
  if (tread == 1) dtset%varpeq_pkind = tolower(trim(key_value))
 
- call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'varpeq_interpolate', tread, 'INT')
- if (tread == 1) dtset%varpeq_interpolate = intarr(1)
+ call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'varpeq_avg_g', tread, 'INT')
+ if (tread == 1) dtset%varpeq_avg_g = intarr(1)
 
- call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'varpeq_orth', tread, 'INT')
- if (tread == 1) dtset%varpeq_orth = intarr(1)
+ call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'varpeq_interp', tread, 'INT')
+ if (tread == 1) dtset%varpeq_interp = intarr(1)
+
+ call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'varpeq_nstates', tread, 'INT')
+ if (tread == 1) dtset%varpeq_nstates = intarr(1)
 
  call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'varpeq_nstep', tread, 'INT')
  if (tread == 1) dtset%varpeq_nstep = intarr(1)
 
- call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'varpeq_pc_nupdate', tread, 'INT')
- if (tread == 1) dtset%varpeq_pc_nupdate = intarr(1)
-
  call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'varpeq_tolgrs', tread, 'DPR')
  if(tread==1) dtset%varpeq_tolgrs = dprarr(1)
 
- call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'varpeq_pc_factor', tread, 'DPR')
- if(tread==1) dtset%varpeq_pc_factor = dprarr(1)
+ call intagm(dprarr, intarr, jdtset, marr, 2, string(1:lenstr), 'varpeq_gpr_energy', tread, 'DPR')
+ if (tread == 1) dtset%varpeq_gpr_energy = dprarr(1:2)
 
- call intagm(dprarr, intarr, jdtset, marr, 2, string(1:lenstr), 'varpeq_gau_params', tread, 'DPR')
- if (tread == 1) dtset%varpeq_gau_params = dprarr(1:2)
-
- narr = nsppol
- call intagm(dprarr, intarr, jdtset, marr, narr, string(1:lenstr), 'varpeq_erange', tread, 'ENE')
- if (tread == 1) then
-   dtset%varpeq_erange(1:narr) = dprarr(1:narr)
- end if
+ call intagm(dprarr, intarr, jdtset, marr, 3, string(1:lenstr), 'varpeq_gpr_length', tread, 'DPR')
+ if (tread == 1) dtset%varpeq_gpr_length = dprarr(1:3)
 
  call intagm(dprarr,intarr,jdtset,marr,ntypat,string(1:lenstr),'lambsig',tread,'DPR')
  if(tread==1) dtset%lambsig(1:ntypat)=dprarr(1:ntypat)
