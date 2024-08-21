@@ -658,16 +658,15 @@ type, public :: dataset_type
 !V
  integer :: vacnum
 
- character(len=fnlen) :: varpeq_aseed = "gaussian"
+ character(len=fnlen) :: varpeq_aseed = "gau_energy"
  character(len=fnlen) :: varpeq_pkind = "none"
- integer :: varpeq_interpolate = 0
- integer :: varpeq_orth = 0
- integer :: varpeq_nstep = 30
- integer :: varpeq_pc_nupdate = 20
+ integer :: varpeq_avg_g = 0
+ integer :: varpeq_interp = 0
+ integer :: varpeq_nstates = 1
+ integer :: varpeq_nstep = 50
  real(dp) :: varpeq_tolgrs = tol6
- real(dp) :: varpeq_pc_factor = eighth
- real(dp) :: varpeq_gau_params(2) = [zero, one]
- real(dp) :: varpeq_erange(2) = zero
+ real(dp) :: varpeq_gpr_energy(2) = [zero, one]
+ real(dp) :: varpeq_gpr_length(3) = [one, one, one]
 
  integer :: vdw_nfrag
  integer :: vdw_df_ndpts
@@ -2047,14 +2046,13 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
 
  dtout%varpeq_aseed       = dtin%varpeq_aseed
  dtout%varpeq_pkind       = dtin%varpeq_pkind
- dtout%varpeq_interpolate = dtin%varpeq_interpolate
- dtout%varpeq_orth        = dtin%varpeq_orth
+ dtout%varpeq_avg_g       = dtin%varpeq_avg_g
+ dtout%varpeq_interp      = dtin%varpeq_interp
+ dtout%varpeq_nstates     = dtin%varpeq_nstates
  dtout%varpeq_nstep       = dtin%varpeq_nstep
  dtout%varpeq_tolgrs      = dtin%varpeq_tolgrs
- dtout%varpeq_pc_nupdate  = dtin%varpeq_pc_nupdate
- dtout%varpeq_pc_factor   = dtin%varpeq_pc_factor
- dtout%varpeq_gau_params  = dtin%varpeq_gau_params
- dtout%varpeq_erange      = dtin%varpeq_erange
+ dtout%varpeq_gpr_energy  = dtin%varpeq_gpr_energy
+ dtout%varpeq_gpr_length  = dtin%varpeq_gpr_length
 
  dtout%vdw_df_acutmin     = dtin%vdw_df_acutmin
  dtout%vdw_df_aratio      = dtin%vdw_df_aratio
@@ -3569,9 +3567,9 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' use_oldchi'
 !V
  list_vars=trim(list_vars)//' vaclst vacnum vacuum vacwidth vcutgeo'
- list_vars=trim(list_vars)//' varpeq_aseed varpeq_erange varpeq_gau_params'
- list_vars=trim(list_vars)//' varpeq_interpolate varpeq_orth varpeq_nstep varpeq_pkind'
- list_vars=trim(list_vars)//' varpeq_tolgrs varpeq_pc_nupdate varpeq_pc_factor'
+ list_vars=trim(list_vars)//' varpeq_avg_g varpeq_aseed varpeq_gpr_energy'
+ list_vars=trim(list_vars)//' varpeq_gpr_length varpeq_interp varpeq_nstates'
+ list_vars=trim(list_vars)//' varpeq_nstep varpeq_pkind varpeq_tolgrs'
  list_vars=trim(list_vars)//' vdw_nfrag vdw_supercell'
  list_vars=trim(list_vars)//' vdw_tol vdw_tol_3bt vdw_typfrag vdw_xc'
  list_vars=trim(list_vars)//' vdw_df_acutmin vdw_df_aratio vdw_df_damax'
