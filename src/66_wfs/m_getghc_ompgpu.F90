@@ -122,11 +122,13 @@ end subroutine alloc_getghc_ompgpu_buffers
 subroutine free_getghc_ompgpu_buffers
 
 #ifdef HAVE_OPENMP_OFFLOAD
- !FIXME Smater buffer management ?
+ if(allocated(work)) then
+   !FIXME Smater buffer management ?
 #ifdef HAVE_GPU_HIP
- !$OMP TARGET EXIT DATA MAP(delete:work)
+   !$OMP TARGET EXIT DATA MAP(delete:work)
 #endif
- ABI_FREE(work)
+   ABI_FREE(work)
+ end if
 
  buf_initialized = 0
 
