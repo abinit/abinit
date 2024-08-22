@@ -774,7 +774,9 @@ subroutine pawmknhat_psipsi_ndat(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngff
      grnhat_12=zero
    case (ABI_GPU_OPENMP)
      !FIXME grnhat_12 assumed to be mapped on GPU
-     call gpu_set_to_zero(grnhat_12,int(2,c_size_t)*nfft*nspinor**2*3*natom*ndat2*ndat1)
+     do idat1=1,ndat1
+       call gpu_set_to_zero(grnhat_12(:,:,:,:,:,:,idat1),int(2,c_size_t)*nfft*nspinor**2*3*natom*ndat2)
+     end do
    case default
      ABI_BUG("Unsupported GPU option")
    end select
@@ -843,7 +845,9 @@ subroutine pawmknhat_psipsi_ndat(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngff
      if(gpu_option_==ABI_GPU_DISABLED) then
        nhat12_atm=zero
      else if(gpu_option_==ABI_GPU_OPENMP) then
-       call gpu_set_to_zero(nhat12_atm,int(2,c_size_t)*nfft*(nspinor**2)*ndat2*ndat1*nattyp(itypat))
+       do ia=1,nattyp(itypat)
+         call gpu_set_to_zero(nhat12_atm(:,:,:,:,:,ia),int(2,c_size_t)*nfft*(nspinor**2)*ndat2*ndat1)
+       end do
      end if
    end if
 
