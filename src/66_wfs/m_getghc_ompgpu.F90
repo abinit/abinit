@@ -166,8 +166,7 @@ function getghc_ompgpu_work_mem(gs_ham, ndat) result(req_mem)
  !   - the sum of getghc and fourwf work buffers memory requirements
  !   - the amount of memory required by gemm_nonlop_ompgpu work buffers
  ghc_mem = 0
- ghc_mem = 2 * dp * int(gs_ham%n4, c_size_t) * int(gs_ham%n5, c_size_t) &
- &        * int(gs_ham%n6, c_size_t) * int(ndat, c_size_t)
+ ghc_mem = int(2, c_size_t) * dp * gs_ham%n4 * gs_ham%n5 * gs_ham%n6 * ndat
  ghc_mem = ghc_mem + ompgpu_fourwf_work_mem(gs_ham%ngfft, ndat)
 
  nonlop_mem = gemm_nonlop_ompgpu_work_mem(gs_ham%istwf_k, ndat, gs_ham%npw_fft_k,&
