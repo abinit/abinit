@@ -924,6 +924,8 @@ subroutine pawmknhat_psipsi_ndat(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngff
 
 #ifdef HAVE_OPENMP_OFFLOAD
    !$OMP TARGET ENTER DATA MAP(to:atom_gylm,atom_ifftsph,atom_dltij,qijl,gnt_scal) IF(gpu_option_==ABI_GPU_OPENMP)
+   !$OMP TARGET ENTER DATA MAP(to:atom_expiqr) IF(gpu_option_==ABI_GPU_OPENMP .and. compute_phonon)
+   !$OMP TARGET ENTER DATA MAP(to:atom_gylmgr) IF(gpu_option_==ABI_GPU_OPENMP .and. compute_grad1)
 #endif
 
    do isploop=1,nspinor**2    ! Loop over density components of the compensation charge.
@@ -1291,6 +1293,8 @@ subroutine pawmknhat_psipsi_ndat(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngff
  iatm=iatm+nattyp(itypat)
 #ifdef HAVE_OPENMP_OFFLOAD
  !$OMP TARGET EXIT  DATA MAP(delete:atom_nfgd,atom_gylm,atom_ifftsph,atom_dltij,qijl,gnt_scal) IF(gpu_option_==ABI_GPU_OPENMP)
+ !$OMP TARGET EXIT DATA MAP(delete:atom_expiqr) IF(gpu_option_==ABI_GPU_OPENMP .and. compute_phonon)
+ !$OMP TARGET EXIT DATA MAP(delete:atom_gylmgr) IF(gpu_option_==ABI_GPU_OPENMP .and. compute_grad1)
 #endif
  ABI_FREE(atom_nfgd)
  ABI_FREE(atom_gylm)
@@ -2285,7 +2289,8 @@ subroutine pawdijhat_ndat(dijhat,cplex_dij,qphase,gprimd,iatm,&
 
 #ifdef HAVE_OPENMP_OFFLOAD
  !$OMP TARGET ENTER DATA MAP(alloc:prod,dijhat_idij) IF(gpu_option_==ABI_GPU_OPENMP)
- !$OMP TARGET ENTER DATA MAP(to:atom_gylm,atom_expiqr,atom_ifftsph,gnt_scal,atom_qijl,atom_indklmn) IF(gpu_option_==ABI_GPU_OPENMP)
+ !$OMP TARGET ENTER DATA MAP(to:atom_gylm,atom_ifftsph,gnt_scal,atom_qijl,atom_indklmn) IF(gpu_option_==ABI_GPU_OPENMP)
+ !$OMP TARGET ENTER DATA MAP(to:atom_expiqr) IF(gpu_option_==ABI_GPU_OPENMP .and. has_qphase)
 #endif
 !----------------------------------------------------------
 !Loop over spin components
@@ -2629,12 +2634,16 @@ subroutine pawdijhat_ndat(dijhat,cplex_dij,qphase,gprimd,iatm,&
 
 #ifdef HAVE_OPENMP_OFFLOAD
  !$OMP TARGET EXIT DATA MAP(delete:prod,dijhat_idij) IF(gpu_option_==ABI_GPU_OPENMP)
- !$OMP TARGET EXIT DATA MAP(delete:atom_gylm,atom_expiqr,atom_ifftsph,gnt_scal,atom_qijl,atom_indklmn) IF(gpu_option_==ABI_GPU_OPENMP)
+ !$OMP TARGET EXIT DATA MAP(delete:atom_gylm,atom_ifftsph,gnt_scal,atom_qijl,atom_indklmn) IF(gpu_option_==ABI_GPU_OPENMP)
+ !$OMP TARGET EXIT DATA MAP(delete:atom_expiqr) IF(gpu_option_==ABI_GPU_OPENMP .and. has_qphase)
  !$OMP TARGET EXIT DATA MAP(from:dijhat) IF(gpu_option_==ABI_GPU_OPENMP)
 #endif
  ABI_FREE(atom_nfgd)
  ABI_FREE(atom_gylm)
  ABI_FREE(atom_ifftsph)
+ if(has_qphase) then
+   ABI_FREE(atom_expiqr)
+ end if
 !Free temporary memory spaces
  ABI_FREE(gnt_scal)
  ABI_FREE(prod)
