@@ -1167,7 +1167,6 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
            end do
          end do ! idat
        end do ! idat_occ
-       !$OMP TARGET UPDATE FROM(vlocpsi_r)
 #endif
      end if
      if (allocated(fockbz%cgocc)) then
@@ -1320,6 +1319,9 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
 &   npw_kp=gs_ham%npw_k,kg_kp=gs_ham%kg_k,ffnl_kp=gs_ham%ffnl_k,ph3d_kp=gs_ham%ph3d_k)
 
 !  * Perform an FFT using fourwf to get ghc1 = FFT^-1(vlocpsi_r)
+#ifdef HAVE_OPENMP_OFFLOAD
+   !$OMP TARGET UPDATE FROM(vlocpsi_r) IF(gpu_option==ABI_GPU_OPENMP)
+#endif
    ABI_MALLOC(psilocal,(cplex_fock*n4f,n5f,n6f*ndat))
    do idat=1,ndat
      call fftpac(1,mpi_enreg,nspden_fock,cplex_fock*n1f,n2f,n3f,&
