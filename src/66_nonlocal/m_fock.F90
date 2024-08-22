@@ -2204,6 +2204,10 @@ subroutine strfock(gprimd,gsqcut,fockstr,hyb_mixing,hyb_mixing_sr,hyb_range_fock
  integer,parameter :: im=2,re=1
  integer :: i1,i2,i3,id1,id2,id3,ierr,ig1,ig2,ig3,ii,irho2,idat,me_fft,n1,n2,n3,nproc_fft
  real(dp) :: arg,cutoff,gsquar,rcut,rhogsq,tolfix=1.000000001_dp,tot,tot1,divgq0
+#ifdef HAVE_OPENMP_OFFLOAD
+ ! Cray has trouble with reduction on array, so we use 6 scalars instead
+ real(dp) :: fockstr1,fockstr2,fockstr3,fockstr4,fockstr5,fockstr6
+#endif
  !character(len=500) :: msg
 !arrays
  real(dp) :: gcart(3),tsec(2)
@@ -2307,10 +2311,10 @@ subroutine strfock(gprimd,gsqcut,fockstr,hyb_mixing,hyb_mixing_sr,hyb_range_fock
    ABI_MALLOC(v_gcart, (3,n1,n2,n3))
 #ifdef HAVE_OPENMP_OFFLOAD
    !$OMP TARGET ENTER DATA MAP(alloc:v_gcart)
+
    !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO &
    !$OMP& PRIVATE(idat,i3,i2,i1,ig3,ig2,ig1,tot,tot1,ii,gcart,gsquar,rhogsq,arg) &
    !$OMP& MAP(to:v_gcart)
-#endif
    do i3=1,n3
      do i2=1,n2
        do i1=1,n1
@@ -2325,17 +2329,19 @@ subroutine strfock(gprimd,gsqcut,fockstr,hyb_mixing,hyb_mixing_sr,hyb_range_fock
        end do
      end do
    end do
-#ifdef HAVE_OPENMP_OFFLOAD
+
    !$OMP TARGET TEAMS DISTRIBUTE &
-   !$OMP& PRIVATE(idat) &
+   !$OMP& PRIVATE(idat,fockstr1,fockstr2,fockstr3,fockstr4,fockstr5,fockstr6) &
    !$OMP& MAP(to:rhog,v_gcart) MAP(tofrom:fockstr)
-#endif
    do idat=1,ndat
-#ifdef HAVE_OPENMP_OFFLOAD
+     fockstr1=zero
+     fockstr2=zero
+     fockstr3=zero
+     fockstr4=zero
+     fockstr5=zero
+     fockstr6=zero
    !$OMP PARALLEL DO COLLAPSE(3) PRIVATE(i3,i2,i1,tot,tot1,ii,gsquar,rhogsq,arg) &
-   !$OMP& REDUCTION(+:fockstr(1,idat)) REDUCTION(+:fockstr(2,idat)) REDUCTION(+:fockstr(3,idat)) &
-   !$OMP& REDUCTION(+:fockstr(4,idat)) REDUCTION(+:fockstr(5,idat)) REDUCTION(+:fockstr(6,idat))
-#endif
+   !$OMP& REDUCTION(+:fockstr1,fockstr2,fockstr3,fockstr4,fockstr5,fockstr6)
    do i3=1,n3
      do i2=1,n2
        do i1=1,n1
@@ -2349,9 +2355,9 @@ subroutine strfock(gprimd,gsqcut,fockstr,hyb_mixing,hyb_mixing_sr,hyb_range_fock
   !        Case G=0:
            if(gsquar<tol10) then
              if (abs(hyb_mixing)>tol8 .and. abs(hyb_mixing_sr)<tol8) then
-               fockstr(1,idat)=fockstr(1,idat)+hyb_mixing*divgq0*rhogsq
-               fockstr(2,idat)=fockstr(2,idat)+hyb_mixing*divgq0*rhogsq
-               fockstr(3,idat)=fockstr(3,idat)+hyb_mixing*divgq0*rhogsq
+               fockstr1=fockstr1+hyb_mixing*divgq0*rhogsq
+               fockstr2=fockstr2+hyb_mixing*divgq0*rhogsq
+               fockstr3=fockstr3+hyb_mixing*divgq0*rhogsq
              end if
 
            else
@@ -2368,20 +2374,25 @@ subroutine strfock(gprimd,gsqcut,fockstr,hyb_mixing,hyb_mixing_sr,hyb_range_fock
                arg=-gsquar*pi**2/(hyb_range_fock**2)
                tot=tot+hyb_mixing_sr*rhogsq*piinv/(gsquar**2)*(1.d0-exp(arg)*(1-arg))
              end if
-             fockstr(1,idat)=fockstr(1,idat)+tot*v_gcart(1,i1,i2,i3)*v_gcart(1,i1,i2,i3)+tot1
-             fockstr(2,idat)=fockstr(2,idat)+tot*v_gcart(2,i1,i2,i3)*v_gcart(2,i1,i2,i3)+tot1
-             fockstr(3,idat)=fockstr(3,idat)+tot*v_gcart(3,i1,i2,i3)*v_gcart(3,i1,i2,i3)+tot1
-             fockstr(4,idat)=fockstr(4,idat)+tot*v_gcart(3,i1,i2,i3)*v_gcart(2,i1,i2,i3)
-             fockstr(5,idat)=fockstr(5,idat)+tot*v_gcart(3,i1,i2,i3)*v_gcart(1,i1,i2,i3)
-             fockstr(6,idat)=fockstr(6,idat)+tot*v_gcart(2,i1,i2,i3)*v_gcart(1,i1,i2,i3)
+             fockstr1=fockstr1+tot*v_gcart(1,i1,i2,i3)*v_gcart(1,i1,i2,i3)+tot1
+             fockstr2=fockstr2+tot*v_gcart(2,i1,i2,i3)*v_gcart(2,i1,i2,i3)+tot1
+             fockstr3=fockstr3+tot*v_gcart(3,i1,i2,i3)*v_gcart(3,i1,i2,i3)+tot1
+             fockstr4=fockstr4+tot*v_gcart(3,i1,i2,i3)*v_gcart(2,i1,i2,i3)
+             fockstr5=fockstr5+tot*v_gcart(3,i1,i2,i3)*v_gcart(1,i1,i2,i3)
+             fockstr6=fockstr6+tot*v_gcart(2,i1,i2,i3)*v_gcart(1,i1,i2,i3)
            end if
          end if
        end do
      end do
    end do
+   fockstr(1,idat)=fockstr1
+   fockstr(2,idat)=fockstr2
+   fockstr(3,idat)=fockstr3
+   fockstr(4,idat)=fockstr4
+   fockstr(5,idat)=fockstr5
+   fockstr(6,idat)=fockstr6
    end do !ndat
 
-#ifdef HAVE_OPENMP_OFFLOAD
    !$OMP TARGET EXIT DATA MAP(delete:v_gcart)
 #endif
    ABI_FREE(v_gcart)
