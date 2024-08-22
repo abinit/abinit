@@ -82,8 +82,7 @@ function ompgpu_fourwf_work_mem(ngfft, ndat) result(req_mem)
  integer, intent(in) :: ngfft(:), ndat
  integer(kind=c_size_t) :: req_mem
 
- req_mem = 2 * dp * int(ngfft(1), c_size_t) * int(ngfft(2), c_size_t) * &
- &         int(ngfft(3), c_size_t) * int(ndat, c_size_t)
+ req_mem = int(2, c_size_t) * dp * ngfft(1) * ngfft(2) * ngfft(3) * ndat
 
 end function ompgpu_fourwf_work_mem
 
