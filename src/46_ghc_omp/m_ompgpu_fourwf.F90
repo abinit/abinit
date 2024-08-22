@@ -121,7 +121,7 @@ subroutine ompgpu_fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,ist
  integer :: shift_inv1,shift_inv2,shift_inv3
  integer :: i1,i2,i3,ipw,idat;
  integer :: i1inv,i2inv,i3inv
- logical :: transfer_fofgin, transfer_fofgout, transfer_fofr
+ logical :: transfer_fofgin, transfer_fofgout, transfer_denpot, transfer_fofr
  integer(C_SIZE_T) :: byte_count
 
 #if defined HAVE_GPU_HIP && defined FC_LLVM
@@ -160,10 +160,12 @@ subroutine ompgpu_fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,ist
 
  transfer_fofgin= .not. xomp_target_is_present(c_loc(fofgin))  .and. (option/=3)
  transfer_fofgout=.not. xomp_target_is_present(c_loc(fofgout)) .and. (option==2 .or. option==3)
+ transfer_denpot =.not. xomp_target_is_present(c_loc(denpot))  .and. (option==2 .or. option==1)
  transfer_fofr=   .not. xomp_target_is_present(c_loc(fofr))
 
  !$OMP TARGET ENTER DATA MAP(to:fofgin)     IF(transfer_fofgin)
  !$OMP TARGET ENTER DATA MAP(alloc:fofgout) IF(transfer_fofgout)
+ !$OMP TARGET ENTER DATA MAP(alloc:denpot)  IF(transfer_denpot)
  !$OMP TARGET ENTER DATA MAP(alloc:fofr)    IF(transfer_fofr)
 
 #ifdef HAVE_GPU_CUDA
@@ -177,13 +179,12 @@ subroutine ompgpu_fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,ist
 
  if(option==1 .or. option==2) then
    ! We launch async transfert of denpot
-   !$OMP TARGET ENTER DATA MAP(alloc:denpot)
    !FIXME This async transfer might be better handled through CUDA/HIP after all...
    ! Issues randomly occurs when using Cray compiler, seems fine with NVHPC.
 #ifdef FC_CRAY
-   !$OMP TARGET UPDATE TO(denpot)
+   !$OMP TARGET UPDATE TO(denpot) IF(transfer_denpot)
 #else
-   !$OMP TARGET UPDATE TO(denpot) NOWAIT
+   !$OMP TARGET UPDATE TO(denpot) NOWAIT IF(transfer_denpot)
 #endif
    if(option == 1) then
 #ifdef FC_CRAY
@@ -319,7 +320,7 @@ subroutine ompgpu_fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,ist
        end do
      end do
    end do
-   !$OMP TARGET UPDATE from(denpot)
+   !$OMP TARGET UPDATE from(denpot) IF(transfer_denpot)
 
  end if
 
@@ -379,9 +380,7 @@ subroutine ompgpu_fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,ist
  end if
 
  if(option==1 .or. option==2) then
-   ! We launch async transfert of denpot
-   !!$OMP TARGET UPDATE FROM(denpot)
-   !$OMP TARGET EXIT DATA MAP(delete:denpot)
+   !$OMP TARGET EXIT DATA MAP(delete:denpot)  IF(transfer_denpot)
    if(option == 1) then
      !$OMP TARGET EXIT DATA MAP(delete:weight_r,weight_i)
    endif
