@@ -333,7 +333,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
  ABI_MALLOC(ghc1,(2,npw*ndat))
  ABI_MALLOC(ghc2,(2,npw*ndat))
 #ifdef HAVE_OPENMP_OFFLOAD
- !$OMP TARGET ENTER DATA MAP(alloc:ghc1,ghc2) IF(gpu_option==ABI_GPU_OPENMP)
+ !$OMP TARGET ENTER DATA MAP(alloc:ghc1,ghc2,vqg) IF(gpu_option==ABI_GPU_OPENMP)
 #endif
  if(gpu_option==ABI_GPU_DISABLED) then
    ghc1=zero
@@ -540,6 +540,9 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
    qeq0=(qvec_j(1)**2+qvec_j(2)**2+qvec_j(3)**2<1.d-15)
    call bare_vqg(qvec_j,fockcommon%gsqcut,gs_ham%gmet,fockcommon%usepaw,fockcommon%hyb_mixing,&
 &   fockcommon%hyb_mixing_sr,fockcommon%hyb_range_fock,nfftf,fockbz%nkpt_bz,ngfftf,gs_ham%ucvol,vqg)
+#ifdef HAVE_OPENMP_OFFLOAD
+   !$OMP TARGET UPDATE TO(vqg) IF(gpu_option==ABI_GPU_OPENMP)
+#endif
 
    call timab(1521,2,tsec)
 
@@ -1278,7 +1281,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
 #endif
    ABI_FREE(cwavef_r)
 #ifdef HAVE_OPENMP_OFFLOAD
-   !$OMP TARGET EXIT DATA MAP(delete:ghc1,ghc2) IF(gpu_option==ABI_GPU_OPENMP)
+   !$OMP TARGET EXIT DATA MAP(delete:ghc1,ghc2,vqg) IF(gpu_option==ABI_GPU_OPENMP)
 #endif
    ABI_FREE(ghc1)
    ABI_FREE(ghc2)
@@ -1395,7 +1398,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
 #endif
    ABI_FREE(cwavef_r)
 #ifdef HAVE_OPENMP_OFFLOAD
-   !$OMP TARGET EXIT DATA MAP(delete:ghc1,ghc2) IF(gpu_option==ABI_GPU_OPENMP)
+   !$OMP TARGET EXIT DATA MAP(delete:ghc1,ghc2,vqg) IF(gpu_option==ABI_GPU_OPENMP)
 #endif
    ABI_FREE(ghc1)
    ABI_FREE(ghc2)
