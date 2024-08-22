@@ -287,6 +287,10 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
 !WVL - Following is done in plane waves.
 
  gpu_option=dtset%gpu_option
+ !FIXME Disable for now when running with HIP (bug sometimes occurs)
+#ifdef HAVE_GPU_HIP
+ gpu_option=ABI_GPU_DISABLED
+#endif
 
 !start loop over alpha and beta
 
