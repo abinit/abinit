@@ -1636,7 +1636,7 @@ real(dp) function carrier_isz(cryst, nqbz, qbz, rcut, comm) result(i_sz)
  bz_geometry_factor = zero
  do iq_bz=1,nqbz
    qbz_cart(:) = qbz(1,iq_bz)*b1(:) + qbz(2,iq_bz)*b2(:) + qbz(3,iq_bz)*b3(:)
-   qbz_norm = NORM2(qbz_cart)
+   qbz_norm = NORM2(qbz_cart(:))
    if (qbz_norm > TOLQ0) bz_geometry_factor = bz_geometry_factor - faux(qbz(:,iq_bz), rcut, b1, b2, b3)
  end do
 
