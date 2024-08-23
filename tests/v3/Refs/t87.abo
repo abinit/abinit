@@ -483,6 +483,10 @@ meta: {optdriver: 3, gwcalctyp: 0, }
           total number of points  =         1728
 
 
+ vcoul_init : cutoff-mode = AUXILIARY_FUNCTION
+ q-points for optical limit:   1
+     1)      0.000010    0.000020    0.000030
+
  Dielectric matrix will be calculated only for some 
  selected q points provided by the user through the input variables 
  nqptdm and qptdm
@@ -612,6 +616,10 @@ meta: {optdriver: 3, gwcalctyp: 0, }
           total number of points  =         1728
 
 
+ vcoul_init : cutoff-mode = AUXILIARY_FUNCTION
+ q-points for optical limit:   1
+     1)      0.000010    0.000020    0.000030
+
  Dielectric matrix will be calculated only for some 
  selected q points provided by the user through the input variables 
  nqptdm and qptdm
@@ -738,6 +746,10 @@ meta: {optdriver: 3, gwcalctyp: 0, }
  setmesh: FFT mesh size selected  =    12x   12x   12
           total number of points  =         1728
 
+
+ vcoul_init : cutoff-mode = AUXILIARY_FUNCTION
+ q-points for optical limit:   1
+     1)      0.000010    0.000020    0.000030
 
  Dielectric matrix will be calculated only for some 
  selected q points provided by the user through the input variables 

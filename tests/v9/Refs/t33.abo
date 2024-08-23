@@ -465,6 +465,10 @@ meta: {optdriver: 3, gwcalctyp: 21, }
           total number of points  =          512
 
 
+ vcoul_init : cutoff-mode = AUXILIARY_FUNCTION
+ q-points for optical limit:   1
+     1)      0.000010    0.000020    0.000030
+
 - screening: taking advantage of time-reversal symmetry 
 - Maximum band index for partially occupied states nbvw = 1
 - Remaining bands to be divided among processors   nbcw = 7
@@ -2532,6 +2536,10 @@ meta: {optdriver: 4, gwcalctyp: 21, }
  yields    32 points in the full Brillouin Zone.
 
 
+
+ vcoul_init : cutoff-mode = AUXILIARY_FUNCTION
+ q-points for optical limit:   1
+     1)      0.000010    0.000020    0.000030
  setmesh: FFT mesh size selected  =     9x    9x    9
           total number of points  =          729
 
@@ -2681,6 +2689,14 @@ meta: {optdriver: 4, gwcalctyp: 21, }
 
  Total averaged occ. from all k-points:   2.00001
 
+
+ vcoul_init : cutoff-mode = AUXILIARY_FUNCTION
+ q-points for optical limit:   1
+     1)      0.000010    0.000020    0.000030
+
+ vcoul_init : cutoff-mode = AUXILIARY_FUNCTION
+ q-points for optical limit:   1
+     1)      0.000010    0.000020    0.000030
 
  Computing band corrections Delta eik (eV)
  -----------------------------------------

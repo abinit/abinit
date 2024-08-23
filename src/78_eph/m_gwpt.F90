@@ -1715,7 +1715,7 @@ end subroutine gwpt_run
 !!  multiply_by_vc_sqrt
 !!
 !! FUNCTION
-!! Multiply by the square root of the Coulomb term
+!! Multiply rhotwg by the square root of the Coulomb term taking into account nspinor.
 !!
 !! INPUTS
 !!
@@ -1730,7 +1730,6 @@ subroutine multiply_by_vc_sqrt(trans, npw, nspinor, vc_sqrt_gx, rhotwg)
 
 !Local variables ------------------------------
  integer :: ii, spad
-
 !************************************************************************
 
  select case (trans)

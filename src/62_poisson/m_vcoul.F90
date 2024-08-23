@@ -321,8 +321,7 @@ subroutine vcoul_init(vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master=0
- integer :: nqibz, nqbz, nkbz, iqlwl, iq_ibz
- integer :: opt_cylinder,my_rank,nprocs, opt_slab
+ integer :: nqibz, nqbz, nkbz, iqlwl, iq_ibz, opt_cylinder,my_rank,nprocs, opt_slab
  real(dp) :: bz_geometry_factor,q0_vol, rcut2
  character(len=500) :: msg
  type(mc_t) :: mc
@@ -411,7 +410,6 @@ subroutine vcoul_init(vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo
    ! The small cube is approximated by a sphere, while vc(q=0) = 2piR**2.
    ! if a single q-point is used, the expression for the volume is exact.
    vcp%i_sz = two_pi * vcp%rcut**2
-   call vcp%print(units)
 
  case ('CYLINDER')
    call cylinder_setup(cryst, vcp%vcutgeo, vcp%hcyl, vcp%pdir, opt_cylinder)
@@ -434,8 +432,6 @@ subroutine vcoul_init(vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo
      ! In Rozzi's method the lim q+G --> 0 is finite.
      vcp%i_sz = vcoul(1,1)
    end if
-
-   call vcp%print(units)
 
  case ('SLAB')
    call surface_setup(cryst, vcp%vcutgeo, vcp%alpha, vcp%rcut, vcp%pdir, opt_slab)

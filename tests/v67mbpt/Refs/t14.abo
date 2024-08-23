@@ -784,6 +784,10 @@ meta: {optdriver: 3, gwcalctyp: 0, }
           total number of points  =         3375
 
 
+ vcoul_init : cutoff-mode = CRYSTAL
+ q-points for optical limit:   1
+     1)      0.000010    0.000020    0.000030
+
  The inverse dielectric matrix will be calculated on zero frequency only
  please note that the calculated epsilon^-1 cannot be used 
  to calculate QP corrections using plasmonpole model 1
@@ -1066,6 +1070,10 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 2, }
  yields     8 points in the full Brillouin Zone.
 
 
+
+ vcoul_init : cutoff-mode = CRYSTAL
+ q-points for optical limit:   1
+     1)      0.000010    0.000020    0.000030
  setmesh: FFT mesh size selected  =    15x   15x   15
           total number of points  =         3375
 
