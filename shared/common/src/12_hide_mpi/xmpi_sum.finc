@@ -2484,7 +2484,7 @@ subroutine xmpi_sum_c0dc(xval,comm,ier)
 !Arguments-------------------------
  complex(dpc),intent(inout) :: xval
  integer,intent(in) :: comm
- integer,intent(out)   :: ier
+ integer,intent(out) :: ier
 
 !Local variables-------------------
 #if defined HAVE_MPI
@@ -2535,7 +2535,7 @@ subroutine xmpi_sum_c0sc(xval,comm,ier)
 !Arguments-------------------------
  complex(sp),intent(inout) :: xval
  integer,intent(in) :: comm
- integer,intent(out)   :: ier
+ integer,intent(out) :: ier
 
 !Local variables-------------------
 #if defined HAVE_MPI

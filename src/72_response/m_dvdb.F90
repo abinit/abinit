@@ -19,7 +19,7 @@
 !! TODO
 !!  - Do we still need to support the case in which the potentials are read from file
 !!    without interpolation? We know that IO is gonna be terrible.
-!!  - Check spin and MPI-parallelism. Can we distributed nsppol?
+!!  - Check spin and MPI-parallelism. Can we distribute nsppol?
 !!  - Rewrite qcache from scratch, keep only the IBZ of the present iteration
 !!
 !! SOURCE
@@ -495,7 +495,7 @@ module m_dvdb
    ! Prepare the internal tables for Fourier interpolation.
 
    procedure :: get_maxw => dvdb_get_maxw
-   !  Compute max_r |W(R,r)|
+   ! Compute max_r |W(R,r)|
 
    procedure :: ftinterp_qpt => dvdb_ftinterp_qpt
    ! Fourier interpolation of potentials for given q-point
@@ -548,11 +548,11 @@ module m_dvdb
  ! Utilities
  public :: dvdb_merge_files        ! Merge a list of POT1 files.
 
- ! debugging tools.
- public :: dvdb_test_v1rsym        ! Check symmetries of the DFPT potentials.
- public :: dvdb_test_v1complete    ! Debugging tool used to test the symmetrization of the DFPT potentials.
+ ! Debugging tools. These functions are interfaced with mrgdv. Use mrgdv --help to access the documentation
 
- public :: dvdb_test_ftinterp      ! Test Fourier interpolation of DFPT potentials.
+ public :: dvdb_test_v1rsym        ! Check symmetries in real-space of the DFPT potentials.
+ public :: dvdb_test_v1complete    ! Test the symmetrization of the DFPT potentials.
+ public :: dvdb_test_ftinterp      ! Test the Fourier interpolation of DFPT potentials.
 
 !----------------------------------------------------------------------
 
@@ -2417,7 +2417,7 @@ end subroutine v1phq_complete
 !!  cryst<crystal_t>=crystal structure parameters
 !!  idir=Direction of the perturbation
 !!  ipert=Perturbation type.
-!!  symq(4,2,nsym)=Table produced by littlegroup_q
+!!  symq(4,2,nsym)=Table produced by littlegroup_q for this q-point.
 !!  pflag(3,natom)= For each atomic perturbation:
 !!     0 if pert is not available. 1 if pert is available. 2 if pert can been reconstructed by symmetry.
 !!
@@ -2457,11 +2457,19 @@ symloop: &
    do isym=1,cryst%nsym
 
      ! Check that isym preserves the q-point
+     ! The condition is
+     !
+     !    $q =  O S(q) - G$
+     !
+     ! with O being either the identity or the time reversal symmetry (= inversion in reciprocal space)
+     ! and G being a primitive vector of the reciprocal lattice.
+
      !if (symq(4,itirev,isym) /= 1 .or. any(symq(1:3,itirev,isym) /= 0)) cycle
      if (symq(4,itirev,isym) /= 1) cycle ! .or. any(symq(1:3,itirev,isym) /= 0)) cycle
-     if (any(symq(1:3,itirev,isym) /= 0) .and. .not.do_allow_g0) cycle
+     if (any(symq(1:3,itirev,isym) /= 0) .and. .not. do_allow_g0) cycle
      g0_qpt = symq(1:3,itirev,isym)
 
+     ! indsym map is computed in symatm.
      do ip=1,cryst%natom
        !if (.not. cryst%indsym(4,isym,ip) == ipert) cycle
        if (.not. cryst%indsym(4,isym,ipert) == ip) cycle
@@ -2493,14 +2501,17 @@ end subroutine find_symeq
 !! v1phq_rotate
 !!
 !! FUNCTION
-!!  Reconstruct all the DFPT potential for a q-point in the BZ starting from its symmetrical image in the IBZ.
+!!  Reconstruct all the DFPT potential for a q-point in the BZ (qpt_bz) starting from its symmetrical image in the IBZ (q_ibz)
 !!
 !! INPUTS
-!!  cryst<crystal_t>=crystal structure parameters
 !!  qpt_ibz(3)=q-point in the IBZ in reduced coordinates.
+!!  cryst<crystal_t>=crystal structure parameters
+!!  isym, itimrev, g0q: Symmetry indices and umklapp. The q-point in the BZ is given by:
+!!
+!!      qpt_bz = I(itimrev) S(isym) q_ibz + g0q
+!!
+!!  where S is symrec(:,:,isym)
 !!  ngfft=array of dimensions for different FFT grids
-!!  isym, itimrev, g0q:
-!!    qpt_bz = I(itimrev) S(isym) q_ibz + g0q
 !!  ngfft(18)=contain all needed information about 3D FFT.
 !!  cplex: if 1, real space 1-order functions on FFT grid are REAL, if 2, COMPLEX
 !!  nfft=(effective) number of FFT grid points (for this proc) for the "fine" grid (see NOTES in respfn.F90)
@@ -2569,16 +2580,21 @@ subroutine v1phq_rotate(cryst, qpt_ibz, isym, itimrev, g0q, ngfft, cplex, nfft, 
  ABI_MALLOC(v1g_mu, (2*nfft, nspden))
 
  symrec_eq = cryst%symrec(:,:,isym)
+ ! Compute sm1 = symrec_eq^{-1}
  call mati3inv(symrec_eq, sm1); sm1 = transpose(sm1)
 
- ! For each perturbation.
+ ! For each perturbation (idir, ipert, qpt_bz), rotate the symmetrical potentials at (idir_eq, ipert_eq, q_ibz)
+ ! computed in g-space and take linear combinations using symrec_eq(idir, idir_eq).
+ ! Finally, perform g -- >r FFTs of the potentials at qpt_bz and multiply by e^{-ig0.r} to account for umklapp.
+
+ ! See Eq C2 in [[cite:Brunin2020b]] 10.1103/PhysRevB.102.094308
  do mu=1,natom3
    root = mod(mu, nproc)
    ! MPI parallelism.
    if (root == my_rank) then
      idir = mod(mu-1, 3) + 1; ipert = (mu - idir) / 3 + 1
 
-     ! Phase due to L0 + R^{-1}tau
+     ! Phase due to L0 + R^{-1} tau where R is a symrel operation hence R^{-1} = symrec_eq^T
      l0 = cryst%indsym(1:3,isym,ipert)
      tnon = l0 + matmul(transpose(symrec_eq), cryst%tnons(:,isym))
      !if (.not. all(abs(tnon) < tol12)) then
@@ -2602,8 +2618,9 @@ subroutine v1phq_rotate(cryst, qpt_ibz, isym, itimrev, g0q, ngfft, cplex, nfft, 
          end do
        end if
 
-       ! Rotate in G-space and accumulate in workg
+       ! Rotate in G-space: output in workg
        call rotate_fqg(itimrev, sm1, qpt_ibz, tnon, ngfft, nfft, nspden, v1g_qibz(:,:,mu_eq), workg)
+       ! And accumulate in v1g_mu
        v1g_mu = v1g_mu + workg * symrec_eq(idir, idir_eq)
      end do ! idir_eq
 
@@ -2857,8 +2874,23 @@ end subroutine v1phq_symmetrize
 !!  rotate_fqg
 !!
 !! FUNCTION
+!!  Rotate density/pontential infg_q(g) in g-space to obtain outfg_{ISq}(g)
 !!
 !! INPUTS
+!!  itirev=2 if time-reversal symmetry should be used, 1 otherwise.
+!!  symm(3,3)=Symmetry operation S in reciprocal space.
+!!    NB: symm usually corresponds to the inverso of one of the symrec operations.
+!!  qpt(3)=q-point in the IBZ (this is the q-point associated to infg)
+!!  tnon(3)=Fractional translation associate the the symmetry operation.
+!!  ngfft(18)=contain all needed information about 3D FFT.
+!!  nfft=Number of fft-points treated by this processors
+!!  nspden=number of spin-density components
+!!  infg(2,nfft,nspden)=Input array in g-space on the FFT box.
+!!
+!! OUTPUTS
+!!   outfg(2,nfft,nspden)= Input array in g-space on the FFT box. In pseudo-equation:
+!!
+!!     outfg(g) = infg(IS G) e^{-i(IS^{-1} G)} exp(2*pi*I*(G) dot tau_S) rho(IS^{-1} G)
 !!
 !! SOURCE
 
@@ -2910,7 +2942,7 @@ subroutine rotate_fqg(itirev, symm, qpt, tnon, ngfft, nfft, nspden, infg, outfg)
 
          l1 = i1-(i1/id1)*n1-1
 
-         ! Get rotated G vector. IS(G)
+         ! Get rotated G vector: IS(G)
          j1 = tsign * (symm(1,1)*l1+symm(1,2)*l2+symm(1,3)*l3)
          j2 = tsign * (symm(2,1)*l1+symm(2,2)*l2+symm(2,3)*l3)
          j3 = tsign * (symm(3,1)*l1+symm(3,2)*l2+symm(3,3)*l3)
@@ -2926,7 +2958,7 @@ subroutine rotate_fqg(itirev, symm, qpt, tnon, ngfft, nfft, nspden, infg, outfg)
            cycle
          end if
 
-         tsg = [j1,j2,j3] ! +- S^{-1} G
+         tsg = [j1,j2,j3] ! IS^{-1} G
 
          ! Map into [0,n-1] and then add 1 for array index in [1, n]
          k1=1+mod(n1+mod(j1,n1),n1)
@@ -2939,11 +2971,11 @@ subroutine rotate_fqg(itirev, symm, qpt, tnon, ngfft, nfft, nspden, infg, outfg)
          ! TODO: Here I believe there are lots of cache misses, should perform low-level profiling
          ! OMP perhaps can accelerate this part but mind false sharing...
          if (has_phase) then
-           ! compute exp(-2*Pi*I*G dot tau) using original G
+           ! compute exp(-2*pi*I*G dot tau_S) using original G
            arg = two_pi * dot_product(qpt + tsg, tnon)
            phnon1(1) = cos(arg); phnon1(2) =-sin(arg)
 
-           ! rho(Strans*G)=exp(2*Pi*I*(G) dot tau_S) rho(G)
+           ! rho(Strans*G)=exp(2*pi*IG dot tau_S) rho(G)
            outfg(1, ind1, isp) = phnon1(1) * infg(1, ind2, isp) - phnon1(2) * infg(2, ind2, isp)
            outfg(2, ind1, isp) = phnon1(1) * infg(2, ind2, isp) + phnon1(2) * infg(1, ind2, isp)
          else
@@ -5630,8 +5662,8 @@ end subroutine dvdb_test_v1rsym
 !!
 !! FUNCTION
 !!  Debugging tool used to test the symmetrization of the DFPT potentials.
-!!  Assumes DVDB file containing all 3*natom perturbations (generated with nsym == 1 or
-!!  other specialized variables e.g. prepgkk)
+!!  Assumes DVDB file containing all 3*natom perturbations (either generated with nsym == 1 or
+!!  via other specialized variables e.g. prepgkk)
 !!
 !! INPUTS
 !!  db_path=Filename of the DVDB file.
@@ -5681,8 +5713,6 @@ subroutine dvdb_test_v1complete(dvdb_filepath, symv1scf, dump_path, comm)
  call dvdb%open_read(ngfft, comm)
 
  cryst => dvdb%cryst
- call ngfft_seq(ngfft, dvdb%ngfft3_v1(:,1))
- nfft = product(ngfft(:3))
 
  n1 = ngfft(1); n2 = ngfft(2); n3 = ngfft(3)
  id1 = n1/2+2; id2 = n2/2+2; id3 = n3/2+2
@@ -5728,8 +5758,13 @@ subroutine dvdb_test_v1complete(dvdb_filepath, symv1scf, dump_path, comm)
 
  ABI_CALLOC(work2, (2, nfft, dvdb%nspden, dvdb%natom3))
 
+ ! loop over the q-points available in the dvdb (likely qpts in the IBZ)
+ ! For each q-point, use symmetries to reconstruct all 3*natom perts for the independent ones
+ ! and compare with the corresponding results available in the DVDB file
+
  do iqpt=1,dvdb%nqpt
    qpt = dvdb%qpts(:,iqpt)
+
    ! Examine the symmetries of the q wavevector
    call littlegroup_q(cryst%nsym,qpt,symq,cryst%symrec,cryst%symafm,timerev_q,prtvol=dvdb%prtvol)
 
@@ -5740,7 +5775,7 @@ subroutine dvdb_test_v1complete(dvdb_filepath, symv1scf, dump_path, comm)
    call irreducible_set_pert(cryst%indsym,dvdb%mpert,cryst%natom,cryst%nsym,&
      pertsy,rfdir,rfpert,symq,cryst%symrec,cryst%symrel)
 
-   ! Read all potentials (here I assume that all perturbations are available)
+   ! Read all potentials (here we assume that all perturbations are available in the DVDB)
    call dvdb%readsym_allv1(iqpt, cplex, nfft, ngfft, file_v1scf, dvdb%comm)
 
    ! Copy basis perturbations in symm_v1scf and set pflag
@@ -5754,7 +5789,7 @@ subroutine dvdb_test_v1complete(dvdb_filepath, symv1scf, dump_path, comm)
      end if
    end do
 
-   ! Complete potentials
+   ! Complete potentials by symmetry.
    call v1phq_complete(cryst,qpt,ngfft,cplex,nfft,dvdb%nspden,dvdb%nsppol,dvdb%mpi_enreg,dvdb%symv1,pflag,symm_v1scf)
 
    if (ncid /= nctk_noid) then
@@ -5770,7 +5805,7 @@ subroutine dvdb_test_v1complete(dvdb_filepath, symv1scf, dump_path, comm)
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "pertsy_qpt"), pertsy, start=[1,1,iqpt]))
    end if
 
-   ! Compare values.
+   ! Compare potentials.
    do pcase=1,3*cryst%natom
      idir = mod(pcase-1, 3) + 1; ipert = (pcase - idir) / 3 + 1
      if (pflag(idir,ipert) /= 2) cycle

@@ -94,7 +94,7 @@ module m_mlwfovlp
    ! Max number of Wannier functions over spins (used to dimension arrays)
 
    integer :: num_bands = -1
-   ! Number bands seen by wannier90 for this spin.
+   ! Number of bands seen by wannier90 for this spin.
 
    !integer :: nbndep,         ! Number of remaining bands after excluding bands in Wannierizatin step
    !integer :: nbndskip,       ! Number of bands to be skipped in Wannierization step, leading to
@@ -138,7 +138,7 @@ module m_mlwfovlp
 
    real(dp),allocatable :: rmod_h(:), rmod_p(:), rmod_e(:)
    ! (nr_h), (nr_p)
-   ! Lenght in Bohr of the lattice points.
+   ! Lenght of the lattice points in Bohr
 
    real(dp),allocatable :: all_eigens(:,:)
    ! (mband, nkbz)
@@ -168,9 +168,10 @@ module m_mlwfovlp
    complex(dp),allocatable :: u_mat_opt(:,:,:)
    complex(dp),allocatable :: u_mat(:,:,:)
 
-   complex(dp),allocatable :: u_kc(:,:,:)
+   complex(dp),allocatable :: u_k(:,:,:)
    ! (max_dimwin, nwan, nkbz)
    ! total rotation matrix: the product of the optimal subspace x the rotation among the nwan Wannier functions.
+   ! on the coarse ab-initio k-mesh
 
    complex(dp),allocatable :: hwan_r(:,:,:)
    ! (nr_h, nwan, nwan)
@@ -185,11 +186,11 @@ module m_mlwfovlp
    complex(dp),allocatable :: grpe_wwp(:,:,:,:,:)
    ! (nr_p, nr_e, nwan, nwan, my_npert))
    ! e-ph matrix elements in the Wannier representation.
-   ! NB: These matrix elements are in the atomic basis and distributed inside pert_comm
+   ! NB: These matrix elements are in the atomic represention and distributed inside pert_comm
 
  contains
    procedure :: from_abiwan => wan_from_abiwan
-   ! Initialize a wan_t instance from an ABIWAN.nc file
+   ! Initialize a wan_t instance from a ABIWAN.nc file
 
    procedure :: load_gwan => wan_load_gwan
    ! Read g(R_p, R_e) in the Wannier representation from the GWAN.nc file.
@@ -3345,9 +3346,9 @@ subroutine wan_from_abiwan(wan, abiwan_filepath, spin, nsppol, keep_umats, out_p
 
  ! Get total rotation matrix: the product of the optimal subspace x the rotation among the nwan Wannier functions.
  ii = maxval(wan%dimwin)
- ABI_CALLOC(wan%u_kc, (ii, nwan, nkbz))
+ ABI_CALLOC(wan%u_k, (ii, nwan, nkbz))
  do ik=1,nkbz
-   wan%u_kc(1:wan%dimwin(ik), 1:nwan, ik) = matmul(wan%u_mat_opt(1:wan%dimwin(ik), :, ik), wan%u_mat(:, 1:nwan, ik))
+   wan%u_k(1:wan%dimwin(ik), 1:nwan, ik) = matmul(wan%u_mat_opt(1:wan%dimwin(ik), :, ik), wan%u_mat(:, 1:nwan, ik))
  end do
 
  wan%keep_umats = keep_umats
@@ -3400,7 +3401,7 @@ subroutine wan_from_abiwan(wan, abiwan_filepath, spin, nsppol, keep_umats, out_p
      do ib=1,jb
        ctmp = czero
        do mb=1,wan%dimwin(ik)
-         ctmp = ctmp + conjg(wan%u_kc(mb, ib, ik)) * et_opt(mb, ik) * wan%u_kc(mb, jb, ik)
+         ctmp = ctmp + conjg(wan%u_k(mb, ib, ik)) * et_opt(mb, ik) * wan%u_k(mb, jb, ik)
        end do
        chs(ib, jb, ik) = ctmp
        chs(jb, ib, ik) = conjg(ctmp)
@@ -3561,7 +3562,7 @@ subroutine wan_free(wan)
  ! Complex
  ABI_SFREE(wan%u_mat)
  ABI_SFREE(wan%u_mat_opt)
- ABI_SFREE(wan%u_kc)
+ ABI_SFREE(wan%u_k)
  ABI_SFREE(wan%hwan_r)
  ABI_SFREE(wan%grpe_wwp)
 
@@ -3723,7 +3724,7 @@ end subroutine wan_interp_eph_manyq
 !! wan_ncwrite_gwan
 !!
 !! FUNCTION
-!!  Write the e-ph matrix elements in the Wannier representation g(R_e, R_ph) to the GWAN.nc netcdf file.
+!!  Write the e-ph matrix elements in the Wannier representation g(R_e,R_ph) to the GWAN.nc netcdf file.
 !!
 !! SOURCE
 
@@ -3749,7 +3750,7 @@ subroutine wan_ncwrite_gwan(wan, dtfil, cryst, ebands, pert_comm)
  spin = wan%spin; natom3 = 3 * cryst%natom
 
  gwan_filepath = strcat(dtfil%filnam_ds(4), "_GWAN.nc")
- call wrtout(units, sjoin("- Writing e-ph vertex in the Wannier representation to file:", gwan_filepath))
+ call wrtout(units, sjoin("- Writing e-ph matrix elements in the Wannier representation to file:", gwan_filepath))
 
  if (spin == 1) then
    NCF_CHECK(nctk_open_create(root_ncid, gwan_filepath, pert_comm%value))
@@ -3955,6 +3956,7 @@ end subroutine wan_load_gwan
 !!
 !! NOTES
 !!  Fermi level and occupation factors of the interpolated bands are not recomputed by this routine.
+!!  Values are compied from in_ebands.
 !!
 !! SOURCE
 

@@ -1563,6 +1563,12 @@ subroutine sphere(cg, ndat, npw, cfft, n1, n2, n3, n4, n5, n6, kg_k, istwf_k, if
 
  DBG_ENTER("COLL")
 
+ if (n4 < 1) ABI_BUG('Wrong n4!')
+ if (n5 < 1) ABI_BUG('Wrong n5!')
+ if (n6 < 1) ABI_BUG('Wrong n6!')
+ if (ndat < 1) ABI_BUG('Wrong ndat!')
+ if (npw < 1) ABI_BUG('Wrong npw!')
+
  ! In the case of special k-points, invariant under time-reversal,
  ! but not Gamma, initialize the inverse coordinates.
  ! Remember that:
@@ -3942,8 +3948,7 @@ end subroutine indfftrisc
 !!
 !! SOURCE
 
-
-subroutine kpgsph(ecut,exchn2n3d,gmet,ikg,ikpt,istwf_k,kg,kpt,mkmem,mpi_enreg,mpw,npw)
+subroutine kpgsph(ecut, exchn2n3d, gmet, ikg, ikpt, istwf_k, kg, kpt, mkmem, mpi_enreg, mpw, npw)
 
 !Arguments ------------------------------------
 !scalars
@@ -4328,7 +4333,6 @@ end subroutine kpgsph
 
 subroutine kpgcount(ecut,exchn2n3d,gmet,istwfk,kpt,ngmax,ngmin,nkpt)
 
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: exchn2n3d,nkpt
@@ -4420,24 +4424,31 @@ end subroutine kpgcount
 !!  npw_k=Total number of G-vectors in the full G-sphere.
 !!  kg_k(3,npw_k) list of G-vectors allocated by the routine.
 !!
+!! SIDE EFFECTS
+!!  [mpw]: Used to to compute the maximum number of PWs when looping over multiple k-points.
+!!  [gmax(3)]: Max G-component when looping over multiple k-points.
+!!
 !! SOURCE
 
-subroutine get_kg(kpoint, istwf_k, ecut, gmet, npw_k, kg_k, kin_sorted)
+subroutine get_kg(kpoint, istwf_k, ecut, gmet, npw_k, kg_k, &
+                  kin_sorted, mpw, gmax) ! optional
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: istwf_k
  integer,intent(out) :: npw_k
  real(dp),intent(in) :: ecut
+ integer,optional,intent(inout) :: mpw
 !arrays
  integer,allocatable,intent(out) :: kg_k(:,:)
  real(dp),intent(in) :: gmet(3,3),kpoint(3)
  logical,optional,intent(in) :: kin_sorted
+ integer,optional,intent(inout) :: gmax(3)
 
 !Local variables-------------------------------
 !scalars
  integer,parameter :: mkmem_ = 1, exchn2n3d0 = 0, ikg0 = 0
- integer :: npw_k_test
+ integer :: npw_k_test, ipw, ii
  type(MPI_type) :: MPI_enreg_seq
 !arrays
  integer :: kg_dum(3, 0)
@@ -4448,7 +4459,7 @@ subroutine get_kg(kpoint, istwf_k, ecut, gmet, npw_k, kg_k, kin_sorted)
  call initmpi_seq(MPI_enreg_seq)
 
  ! Calculate the number of G-vectors for this k-point.
- call kpgsph(ecut,exchn2n3d0, gmet, ikg0, 0, istwf_k, kg_dum, kpoint, 0, MPI_enreg_seq, 0, npw_k)
+ call kpgsph(ecut, exchn2n3d0, gmet, ikg0, 0, istwf_k, kg_dum, kpoint, 0, MPI_enreg_seq, 0, npw_k)
 
  ! Allocate and calculate the set of G-vectors.
  ABI_MALLOC(kg_k,(3,npw_k))
@@ -4462,6 +4473,16 @@ subroutine get_kg(kpoint, istwf_k, ecut, gmet, npw_k, kg_k, kin_sorted)
      kg_k = iwork
      ABI_FREE(iwork)
    end if
+ end if
+
+ if (present(mpw)) mpw = max(mpw, npw_k)
+
+ if (present(gmax)) then
+   do ipw=1,npw_k
+     do ii=1,3
+       gmax(ii) = max(gmax(ii), abs(kg_k(ii,ipw)))
+     end do
+   end do
  end if
 
 end subroutine get_kg

@@ -702,6 +702,7 @@ type, public :: dataset_type
  integer :: d3e_pert3_dir(3)
  integer :: eph_ngqpt_fine(3) = 0
  integer :: eph_np_pqbks(5) = 0
+ integer :: gwpt_np_wpqbks(6) = 0
  integer :: fockdownsampling(3)
  integer :: gwr_np_kgts(4) = 0
  integer :: gwr_ucsc_batch(2) = -1
@@ -1531,6 +1532,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%eph_phwinfact      = dtin%eph_phwinfact
  dtout%eph_ngqpt_fine     = dtin%eph_ngqpt_fine
  dtout%eph_np_pqbks       = dtin%eph_np_pqbks
+ dtout%gwpt_np_wpqbks     = dtin%gwpt_np_wpqbks
 
  dtout%eph_prtscratew     = dtin%eph_prtscratew
  dtout%eph_restart        = dtin%eph_restart
@@ -3368,10 +3370,10 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' eph_doping eph_ecutosc eph_extrael eph_fermie eph_frohlich eph_frohlichm eph_fsewin eph_fsmear '
  list_vars=trim(list_vars)//' eph_intmeth eph_mustar eph_ngqpt_fine eph_ahc_type'
  ! XG20200321, please provide testing for eph_np_pqbks
- ! MG: Well, eph_np_pqbks cannot be tested with the present infrastructure because it's a MPI-related variable
+ ! MG: Well, eph_np_pqbks and gwpt_np_wpqbks cannot be tested with the present infrastructure because it's a MPI-related variable
  ! and all the tests in the paral and mpiio directory are done with a single input file
  ! whereas EPH requires GS + DFPT + MRGDV + MRGDDB + TESTS_MULTIPLES_PROCS
- list_vars=trim(list_vars)//' eph_np_pqbks'
+ list_vars=trim(list_vars)//' eph_np_pqbks gwpt_np_wpqbks'
  list_vars=trim(list_vars)//' eph_phrange eph_phrange_w eph_phwinfact'
  list_vars=trim(list_vars)//' eph_prtscratew eph_restart eph_stern eph_task eph_tols_idelta eph_transport eph_use_ftinterp'
  list_vars=trim(list_vars)//' eshift esmear exchmix exchn2n3d expert_user'

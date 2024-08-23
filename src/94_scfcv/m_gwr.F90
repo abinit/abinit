@@ -5949,7 +5949,7 @@ end if
    NCF_CHECK(nf90_put_var(ncid, vid("ks_gaps"), ks_gaps))
    NCF_CHECK(nf90_put_var(ncid, vid("qpz_gaps"), qpz_gaps))
    !NCF_CHECK(nf90_put_var(ncid, vid("qp_pade_gaps"), qp_pade_gaps))
-   NCF_CHECK(nf90_put_var(ncid, vid("sigc_it_mat"), c2r(sigc_it_mat)))
+   !NCF_CHECK(nf90_put_var(ncid, vid("sigc_it_mat"), c2r(sigc_it_mat)))
    NCF_CHECK(nf90_put_var(ncid, vid("sigc_iw_mat"), c2r(gwr%sigc_iw_mat)))
    NCF_CHECK(nf90_put_var(ncid, vid("sigxc_rw_diag"), c2r(sigxc_rw_diag)))
    NCF_CHECK(nf90_put_var(ncid, vid("spfunc_diag"), spfunc_diag))
@@ -6215,8 +6215,10 @@ subroutine gwr_rpa_energy(gwr)
          ! Change size block and, if possible, use 2D rectangular grid of processors for diagonalization
          call proc_4diag%init(chi_tmp%processor%comm)
          call chi_tmp%change_size_blocs(chi_4diag, processor=proc_4diag)
+         call chi_4diag%copy(dummy_vec)
          call chi_4diag%heev("N", "U", dummy_vec, eig, mat_size=mat_size)
          call chi_4diag%free()
+         call dummy_vec%free()
          call proc_4diag%free()
 
          ! TODO: ELPA

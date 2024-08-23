@@ -168,7 +168,7 @@ module m_xmpi
    integer :: nproc = 1
    integer :: me = 0
    integer,private :: can_use_shmem__ = -1
-     ! -1 --> unitialized, 0 if ranks do not belong to a shared memory region else 1
+    ! -1 --> unitialized, 0 if ranks do not belong to a shared memory region else 1
 
  contains
    procedure :: skip => xcomm_skip                     ! Skip iteration according to rank
@@ -998,7 +998,6 @@ subroutine xmpi_abort(comm, mpierr, msg, exit_status)
  integer :: ierr,my_comm,my_errorcode,ilen,ierr2
  logical :: testopen
  character(len=xmpi_msg_len) :: mpi_msg_error
-
 ! *************************************************************************
 
  ierr=0
@@ -1011,7 +1010,7 @@ subroutine xmpi_abort(comm, mpierr, msg, exit_status)
  ! Close std_out and ab_out and flush units.
  ! Note that flush does not guarantee that the data is committed to disk.
  ! This is rather annoying because we may end up with incomplete log files
- ! that cannot be parsed by Abinit.
+ ! that cannot be parsed by Abipy
  ! For a possible approach based on fsync, see
  ! https://gcc.gnu.org/onlinedocs/gcc-4.7.4/gfortran/FLUSH.html
 
@@ -1043,7 +1042,7 @@ subroutine xmpi_abort(comm, mpierr, msg, exit_status)
  !  write(std_out,'(2a)')" MPI_ERROR_STRING: ",TRIM(mpi_msg_error)
  !end if
 
- !ierr = clib_usleep(300000_c_int32_t)
+ !call clib_sleep(3)
  call MPI_ABORT(my_comm, my_errorcode, ierr)
 #endif
 
@@ -5051,7 +5050,6 @@ subroutine xmpi_distrib_2d(nprocs, order, size1, size2, n1, n2, ierr)
 
 !Local variables-------------------------------
  integer :: ii
-
 !----------------------------------------------------------------------
 
  ierr = 1; n1 = -1; n2 = -1
