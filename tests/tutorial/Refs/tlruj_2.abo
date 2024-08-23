@@ -1,5 +1,5 @@
 
-.Version 9.10.4 of ABINIT 
+.Version 10.1.4.7 of ABINIT, released Jun 2024.
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2024 ABINIT group . 
@@ -14,21 +14,20 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 17 Feb 2024.
-- ( at 14h28 )
+.Starting date : Tue 30 Jul 2024.
+- ( at 09h01 )
   
-- input  file    -> /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk__lmacenul-9.10/tests/TestBot_MPI1/tutorial_tlruj_1-tlruj_2-tlruj_3/tlruj_2.abi
-- output file    -> /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk__lmacenul-9.10/tests/TestBot_MPI1/tutorial_tlruj_1-tlruj_2-tlruj_3/tlruj_2.abo
+- input  file    -> /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk__lmacenul/tests/TestBot_MPI1/tutorial_tlruj_1-tlruj_2-tlruj_3/tlruj_2.abi
+- output file    -> /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk__lmacenul/tests/TestBot_MPI1/tutorial_tlruj_1-tlruj_2-tlruj_3/tlruj_2.abo
 - root for input  files -> tlruj_2i
 - root for output files -> tlruj_2.o
 
 - inpspheads : Reading pseudopotential header in XML form from 
--   /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk__lmacenul-9.10/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ni.xml
+-   /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk__lmacenul/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ni.xml
 - inpspheads : Reading pseudopotential header in XML form from 
--   /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk__lmacenul-9.10/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ni.xml
+-   /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk__lmacenul/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ni.xml
 - inpspheads : Reading pseudopotential header in XML form from 
--   /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk__lmacenul-9.10/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/O.xml
-
+-   /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk__lmacenul/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/O.xml
  DATASET    1 : space group R-3 m (#166); Bravais hR (rhombohedral)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  1.
@@ -46,7 +45,6 @@ P This job should need less than                      41.508 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      2.985 Mbytes ; DEN or POT disk file :      0.979 Mbytes.
 ================================================================================
-
 
  DATASET    2 : space group R-3 m (#166); Bravais hR (rhombohedral)
 ================================================================================
@@ -66,7 +64,6 @@ P This job should need less than                      41.508 Mbytes of memory.
 _ WF disk file :      2.985 Mbytes ; DEN or POT disk file :      0.979 Mbytes.
 ================================================================================
 
-
  DATASET    3 : space group R-3 m (#166); Bravais hR (rhombohedral)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  3.
@@ -85,7 +82,6 @@ P This job should need less than                      41.508 Mbytes of memory.
 _ WF disk file :      2.985 Mbytes ; DEN or POT disk file :      0.979 Mbytes.
 ================================================================================
 
-
  DATASET    4 : space group R-3 m (#166); Bravais hR (rhombohedral)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  4.
@@ -103,7 +99,6 @@ P This job should need less than                      41.508 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      2.985 Mbytes ; DEN or POT disk file :      0.979 Mbytes.
 ================================================================================
-
 
  DATASET    5 : space group R-3 m (#166); Bravais hR (rhombohedral)
 ================================================================================
@@ -312,9 +307,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
          ecut(hartree)=     20.000   => boxcut(ratio)=   2.06006
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk__lmacenul-9.10/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ni.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk__lmacenul-9.10/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ni.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk__lmacenul-9.10/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ni.xml
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk__lmacenul/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ni.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk__lmacenul/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ni.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk__lmacenul/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ni.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  6 (lmn_size= 18), orbitals=   0   0   1   1   2   2
  Spheres core radius: rc_sph= 1.81432190
@@ -332,9 +327,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk__lmacenul-9.10/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ni.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk__lmacenul-9.10/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ni.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk__lmacenul-9.10/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ni.xml
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk__lmacenul/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ni.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk__lmacenul/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ni.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk__lmacenul/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ni.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  6 (lmn_size= 18), orbitals=   0   0   1   1   2   2
  Spheres core radius: rc_sph= 1.81432190
@@ -352,9 +347,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   3  psp file is /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk__lmacenul-9.10/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/O.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk__lmacenul-9.10/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/O.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk__lmacenul-9.10/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/O.xml
+- pspini: atom type   3  psp file is /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk__lmacenul/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/O.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk__lmacenul/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/O.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk__lmacenul/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/O.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.41465230
@@ -3160,23 +3155,29 @@ P           mkmem          10
  of the ABINIT implementation.
  For information on why they are suggested, see also https://docs.abinit.org/theory/acknowledgments.
 -
-- [1] Gamma and beta cerium: DFT+U calculations of ground-state parameters.
+- [1] Facilities and practices for linear response Hubbard parameters U and J in Abinit.
+- L. MacEnulty, M. Giantomassi, B. Amadon, G.-M. Rignanese and D.D. O'Regan Electron. Struct. 6 037003 (2024).
+- Comment: to be cited in case the Hubbard U or Hund's J are calculated using the lrUJ utility
+- or the renovated functionalities of UJdet, i.e., macro_uj>0.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#MacEnulty2024
+-
+- [2] Gamma and beta cerium: DFT+U calculations of ground-state parameters.
 - B. Amadon, F. Jollet and M. Torrent, Phys. Rev. B 77, 155104 (2008).
 - Comment: DFT+U calculations, usepawu/=0. Strong suggestion to cite this paper.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#amadon2008a
 -
-- [2] Implementation of the Projector Augmented-Wave Method in the ABINIT code.
+- [3] Implementation of the Projector Augmented-Wave Method in the ABINIT code.
 - M. Torrent, F. Jollet, F. Bottin, G. Zerah, and X. Gonze Comput. Mat. Science 42, 337, (2008).
 - Comment: PAW calculations. Strong suggestion to cite this paper.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#torrent2008
 -
-- [3] Libxc: A library of exchange and correlation functionals for density functional theory.
+- [4] Libxc: A library of exchange and correlation functionals for density functional theory.
 - M.A.L. Marques, M.J.T. Oliveira, T. Burnus, Computer Physics Communications 183, 2227 (2012).
 - Comment: to be cited when LibXC is used (negative value of ixc)
 - Strong suggestion to cite this paper.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#marques2012
 -
-- [4] The Abinit project: Impact, environment and recent developments.
+- [5] The Abinit project: Impact, environment and recent developments.
 - Computer Phys. Comm. 248, 107042 (2020).
 - X.Gonze, B. Amadon, G. Antonius, F.Arnardi, L.Baguet, J.-M.Beuken,
 - J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, N.Brouwer, F.Bruneval,
@@ -3193,7 +3194,7 @@ P           mkmem          10
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
 -
-- [5] ABINIT: Overview, and focus on selected capabilities
+- [6] ABINIT: Overview, and focus on selected capabilities
 - J. Chem. Phys. 152, 124102 (2020).
 - A. Romero, D.C. Allan, B. Amadon, G. Antonius, T. Applencourt, L.Baguet,
 - J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, F.Bruneval,
@@ -3210,7 +3211,7 @@ P           mkmem          10
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
 -
-- [6] Recent developments in the ABINIT software package.
+- [7] Recent developments in the ABINIT software package.
 - Computer Phys. Comm. 205, 106 (2016).
 - X.Gonze, F.Jollet, F.Abreu Araujo, D.Adams, B.Amadon, T.Applencourt,
 - C.Audouze, J.-M.Beuken, J.Bieder, A.Bokhanchuk, E.Bousquet, F.Bruneval
@@ -3228,10 +3229,10 @@ P           mkmem          10
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=        218.0  wall=        218.7
+- Proc.   0 individual time (sec): cpu=        296.1  wall=        297.4
 
 ================================================================================
 
  Calculation completed.
 .Delivered  20 WARNINGs and   6 COMMENTs to log file.
-+Overall time at end (sec) : cpu=        218.0  wall=        218.7
++Overall time at end (sec) : cpu=        296.1  wall=        297.4

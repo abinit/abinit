@@ -965,10 +965,10 @@ subroutine getng(boxcutmin, chksymtnons, ecut, gmet, kpt, me_fft, mgfft, nfft, n
        nn=nn/valpow
        npower(3,ipower)=npower(3,ipower)+1
      end do
-     if(nn/=1)then
-       ABI_ERROR(sjoin("nproc_fft: ", itoa(nn), "is not a multiple of 2, 3, 5, 7 or 11"))
-     endif
    enddo
+   if(nn/=1)then
+     ABI_ERROR(sjoin("nproc_fft: ", itoa(nproc_fft), "is not a multiple of 2, 3, 5, 7 or 11"))
+   endif
    npower(2,:)=npower(3,:)
 
 !  Then examine tnons
@@ -1562,6 +1562,12 @@ subroutine sphere(cg, ndat, npw, cfft, n1, n2, n3, n4, n5, n6, kg_k, istwf_k, if
 ! *************************************************************************
 
  DBG_ENTER("COLL")
+
+ if (n4 < 1) ABI_BUG('Wrong n4!')
+ if (n5 < 1) ABI_BUG('Wrong n5!')
+ if (n6 < 1) ABI_BUG('Wrong n6!')
+ if (ndat < 1) ABI_BUG('Wrong ndat!')
+ if (npw < 1) ABI_BUG('Wrong npw!')
 
  ! In the case of special k-points, invariant under time-reversal,
  ! but not Gamma, initialize the inverse coordinates.

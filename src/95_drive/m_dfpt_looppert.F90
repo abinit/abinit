@@ -177,7 +177,7 @@ contains
 !!  vtrial(nfftf,nspden)=GS potential (Hartree)
 !!  vxc(nfftf,nspden)=Exchange-Correlation GS potential (Hartree)
 !!  vxcavg=average of vxc potential
-!!  vxctau(nfftf,nspden,4*usekden)=derivative of e_xc with respect to kinetic energy density, for mGGA  
+!!  vxctau(nfftf,nspden,4*usekden)=derivative of e_xc with respect to kinetic energy density, for mGGA
 !!  xred(3,natom)=reduced dimensionless atomic coordinates
 !!
 !! OUTPUT
@@ -267,7 +267,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  integer :: gscase,g0term,iband,iblok,icase,icase_eq,idir,idir0,idir1,idir2,idir_eq,idir_dkdk,ierr
  integer :: ii,ikpt,ikpt1,jband,initialized,iorder_cprj,ipert,ipert_cnt,ipert_eq,ipert_me,ireadwf0
  integer :: iscf_mod,iscf_mod_save,isppol,istr,isym,mcg,mcgq,mcg1,mcprj,mcprjq,mband
- integer :: mband_mem_rbz, mpert_
+ integer :: mband_mem_rbz
  integer :: mcgmq,mcg1mq,mpw1_mq !+/-q duplicates
  integer :: maxidir,me,mgfftf,mkmem_rbz,mk1mem_rbz,mkqmem_rbz,mpw,mpw1,my_nkpt_rbz
  integer :: n3xccc,nband_k,ncpgr,ndir,nkpt_eff,nkpt_max,nline_save,nmatel,npert_io,npert_me,nspden_rhoij
@@ -287,7 +287,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  logical,parameter :: paral_pert_inplace=.true.,remove_inv=.false.
  logical :: first_entry,found_eq_gkk,has_nd,has_vxctau,t_exist,paral_atom,write_1wfk,init_rhor1
  logical :: kramers_deg
- character(len=fnlen) :: dscrpt,fiden1i,fiwf1i,fiwf1o,fiwfddk,fnamewff(4),gkkfilnam,fname,filnam
+ character(len=fnlen) :: fiden1i,fiwf1i,fiwf1o,fiwfddk,fnamewff(4),gkkfilnam,fname,filnam
  character(len=500) :: msg
  type(crystal_t) :: crystal,ddb_crystal
  type(dataset_type), pointer :: dtset_tmp
@@ -295,12 +295,12 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  type(ebands_t) :: ebands_kmq !+/-q duplicates
  type(gkk_t)     :: gkk2d
  type(hdr_type) :: hdr,hdr_den,hdr_tmp
- type(ddb_hdr_type) :: ddb_hdr, tmp_ddb_hdr
+ type(ddb_hdr_type) :: ddb_hdr
  type(pawang_type) :: pawang1
  type(wfk_t) :: ddk_f(4)
  type(wvl_data) :: wvl
 !arrays
- integer :: eq_symop(3,3),ngfftf(18),file_index(4),rfdir(9),rf2dir(9),rf2_dir1(3),rf2_dir2(3)
+ integer :: eq_symop(3,3),ngfftf(18),file_index(4),rfdir(9),rf2dir(9),rf2_dir1(3),rf2_dir2(3) !, units(2)
  integer,allocatable :: blkflg_save(:,:,:,:),dimcprj_srt(:),dyn(:),indkpt1(:),indkpt1_tmp(:)
  integer,allocatable :: indsy1(:,:,:),irrzon1(:,:,:),istwfk_rbz(:),istwfk_pert(:,:,:)
  integer,allocatable :: kg(:,:),kg1(:,:),nband_rbz(:),npwar1(:),npwarr(:),npwtot(:)
@@ -633,8 +633,8 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  ABI_MALLOC(zeff,(3,3,dtset%natom))
  if (dtset%getddb .ne. 0 .or. dtset%irdddb .ne. 0 ) then
    filnam = dtfil%filddbsin
-   call ddb%from_file(filnam, tmp_ddb_hdr, ddb_crystal, mpi_enreg%comm_world)
-   call tmp_ddb_hdr%free()
+   call ddb%from_file(filnam, ddb_hdr, ddb_crystal, mpi_enreg%comm_world)
+   call ddb_hdr%free()
    ! Get Dielectric Tensor and Effective Charges
    ! (initialized to one_3D and zero if the derivatives are not available in the DDB file)
    iblok = ddb%get_dielt_zeff(ddb_crystal,1,0,0,dielt,zeff)
@@ -2349,117 +2349,32 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
      if(smdelta>0)then
        if ((dtset%getwfkfine /= 0 .and. dtset%irdwfkfine ==0) .or.&
 &       (dtset%getwfkfine == 0 .and. dtset%irdwfkfine /=0) )  then
-         call eig2stern(occ_pert,bdeigrf,clflg,cg1_pert,dim_eig2nkq,dim_eig2rf,eigen0_pert,eigenq_pert,&
+         call eig2stern(dtfil,occ_pert,bdeigrf,clflg,cg1_pert,dim_eig2nkq,dim_eig2rf,eigen0_pert,eigenq_pert,&
 &         eigen1_pert,eig2nkq,dtset%elph2_imagden,dtset%esmear,gh0c1_pert,gh1c_pert,&
 &         dtset%ieig2rf,istwfk_pert,dtset%mband,mk1mem_rbz,mpert,dtset%natom,mpi_enreg,mpw1,nkpt_rbz,&
-&         npwar1_pert,dtset%nspinor,dtset%nsppol,smdelta,dtset,eigbrd,eigenq_fine,hdr_fine,hdr0)
+&         npwar1_pert,dtset%nspinor,dtset%nsppol,smdelta,dtset,xred,pawtab,psps,eigbrd,eigenq_fine,hdr_fine,hdr0)
        else
-         call eig2stern(occ_pert,bdeigrf,clflg,cg1_pert,dim_eig2nkq,dim_eig2rf,eigen0_pert,eigenq_pert,&
+         call eig2stern(dtfil,occ_pert,bdeigrf,clflg,cg1_pert,dim_eig2nkq,dim_eig2rf,eigen0_pert,eigenq_pert,&
 &         eigen1_pert,eig2nkq,dtset%elph2_imagden,dtset%esmear,gh0c1_pert,gh1c_pert,&
 &         dtset%ieig2rf,istwfk_pert,dtset%mband,mk1mem_rbz,mpert,dtset%natom,mpi_enreg,mpw1,nkpt_rbz,&
-&         npwar1_pert,dtset%nspinor,dtset%nsppol,smdelta,dtset,eigbrd)
+&         npwar1_pert,dtset%nspinor,dtset%nsppol,smdelta,dtset,xred,pawtab,psps,eigbrd)
        end if
      else
        if ((dtset%getwfkfine /= 0 .and. dtset%irdwfkfine ==0) .or.&
 &       (dtset%getwfkfine == 0 .and. dtset%irdwfkfine /=0) )  then
-         call eig2stern(occ_pert,bdeigrf,clflg,cg1_pert,dim_eig2nkq,dim_eig2rf,eigen0_pert,eigenq_pert,&
+         call eig2stern(dtfil,occ_pert,bdeigrf,clflg,cg1_pert,dim_eig2nkq,dim_eig2rf,eigen0_pert,eigenq_pert,&
 &         eigen1_pert,eig2nkq,dtset%elph2_imagden,dtset%esmear,gh0c1_pert,gh1c_pert,&
 &         dtset%ieig2rf,istwfk_pert,dtset%mband,mk1mem_rbz,mpert,dtset%natom,mpi_enreg,mpw1,nkpt_rbz,&
-&         npwar1_pert,dtset%nspinor,dtset%nsppol,smdelta,dtset,eigbrd,eigenq_fine,hdr_fine,hdr0)
+&         npwar1_pert,dtset%nspinor,dtset%nsppol,smdelta,dtset,xred,pawtab,psps,eigbrd,eigenq_fine,hdr_fine,hdr0)
        else
-         call eig2stern(occ_pert,bdeigrf,clflg,cg1_pert,dim_eig2nkq,dim_eig2rf,eigen0_pert,eigenq_pert,&
+         call eig2stern(dtfil,occ_pert,bdeigrf,clflg,cg1_pert,dim_eig2nkq,dim_eig2rf,eigen0_pert,eigenq_pert,&
 &         eigen1_pert,eig2nkq,dtset%elph2_imagden,dtset%esmear,gh0c1_pert,gh1c_pert,&
 &         dtset%ieig2rf,istwfk_pert,dtset%mband,mk1mem_rbz,mpert,dtset%natom,mpi_enreg,mpw1,nkpt_rbz,&
-&         npwar1_pert,dtset%nspinor,dtset%nsppol,smdelta,dtset)
+&         npwar1_pert,dtset%nspinor,dtset%nsppol,smdelta,dtset,xred,pawtab,psps)
        end if
      end if
      call wrtout(std_out, 'Leaving: eig2stern')
-
-
-     ! -------------------------
-     ! Output d2eig data to file
-     ! -------------------------
-     if (dtset%ieig2rf==1.or.dtset%ieig2rf==2) then
-
-       ! GA: Here, mpert needs to be replaced by natom
-       !     but why is mpert larger than natom in the first place?
-       mpert_ = dtset%natom
-
-       ! Initialize perturbation flags
-       ! GA: At the moment, they are all set to one
-       ! Instead, they should be used to save individual perturbations
-       ! to separate files and merge them after the loop.
-       ABI_MALLOC(blkflg_save,(3,mpert_,3,mpert_))
-       blkflg_save = one
-
-       ! Initialize ddb object
-       call ddb%init(dtset, 1, mpert_, &
-                    mband=bdeigrf,&
-                    nkpt=nkpt_rbz,&
-                    kpt=dtset%kptns(1:3,1:nkpt_rbz),&
-                    with_d2eig=.true.)
-
-       ! Create the ddb header
-       dscrpt=' Note : temporary (transfer) database '
-       call ddb_hdr%init(dtset,psps,pawtab,dscrpt,1,&
-                         mpert=mpert_,&
-                         xred=xred,occ=occ_pert,&
-                         mband=bdeigrf / dtset%nsppol,&
-                         nkpt=nkpt_rbz,&
-                         kpt=dtset%kptns(:,1:nkpt_rbz))
-
-       ! Set d2eig data
-       call ddb%set_qpt(1, dtset%qptn)
-       call ddb%set_d2eig_reshape(1, eig2nkq, blkflg_save)
-
-       call ddb_hdr%set_typ(ddb%nblok, ddb%typ)
-
-       ! Open the file and write header
-       call ddb_hdr%open_write(dtfil%fnameabo_eigr2d, with_psps=1, comm=mpi_enreg%comm_world)
-
-       ! Write d2eig data block
-       call ddb%write_d2eig(ddb_hdr, 1, comm=mpi_enreg%comm_world)
-
-       ! close and free memory
-       call ddb_hdr%close()
-       call ddb_hdr%free()
-       call ddb%free()
-
-       if(smdelta>0) then
-         ! write out _EIGI2D file
-
-         call ddb%init(dtset, 1, mpert_, &
-                      mband=bdeigrf,&
-                      nkpt=nkpt_rbz,&
-                      kpt=dtset%kptns(:,1:nkpt_rbz),&
-                      with_d2eig=.true.)
-
-         ! Create the ddb header
-         dscrpt=' Note : temporary (transfer) database '
-         call ddb_hdr%init(dtset,psps,pawtab,dscrpt,1,&
-                           mpert=mpert_,&
-                           xred=xred,occ=occ_pert,&
-                           mband=bdeigrf / dtset%nsppol,&
-                           nkpt=nkpt_rbz,&
-                           kpt=dtset%kptns(:,1:nkpt_rbz))
-
-         call ddb%set_qpt(1, dtset%qptn)
-         call ddb%set_d2eig_reshape(1, eigbrd, blkflg_save, blktyp=BLKTYP_d2eig_im)
-
-         call ddb_hdr%set_typ(ddb%nblok, ddb%typ)
-
-         call ddb_hdr%open_write(dtfil%fnameabo_eigi2d, with_psps=1,comm=mpi_enreg%comm_world)
-         call ddb%write_d2eig(ddb_hdr, 1, comm=mpi_enreg%comm_world)
-
-         call ddb_hdr%close()
-         call ddb_hdr%free()
-         call ddb%free()
-
-       end if !smdelta
-
-       ABI_FREE(blkflg_save)
-
-     end if !ieig2rf==1.or.ieig2rf==2
+     !
    else
      write(msg,'(3a)')&
      'K point grids must be the same for every perturbation: eig2stern not called',ch10,&

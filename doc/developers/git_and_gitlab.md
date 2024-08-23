@@ -10,7 +10,7 @@ If you are not familiar with *git*, we would strongly advise to watch this tutor
 
 <iframe width="1384" height="629" src="https://www.youtube.com/embed/HVsySz-h9r4" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 
-For further information about *git*, please consult 
+For further information about *git*, please consult
 the [official documentation](https://git-scm.com/).
 
 !!! tip
@@ -24,9 +24,9 @@ the [official documentation](https://git-scm.com/).
 In the next sections, we explain how to configure *git* to interoperate with
 our [ABINIT gitlab server](https://gitlab.abinit.org/).
 It is assumed you already have an account on our **internal gitlab server**.
-Note that having an account on gitlab.com or github.com is not enough since we run our own server 
+Note that having an account on gitlab.com or github.com is not enough since we run our own server
 (you need to contact Jean-Michel Beuken to have an account created for you).
-    
+
 
 ## Initial configuration
 
@@ -265,7 +265,7 @@ of the trunk, you should first register *git@gitlab.abinit.org:trunk/abinit.git*
 
 At this point, one can fetch the branches in trunk with:
 
-    git fetch trunk
+    git fetch --tags trunk develop
 
 then, if the develop branch is to be updated, supposing it is checked out,
 To merge *trunk/develop* in your develop branch:
