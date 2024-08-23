@@ -169,8 +169,6 @@ MODULE m_numeric_tools
    module procedure cdp2rdp_3D
    module procedure cdp2rdp_4D
    module procedure cdp2rdp_5D
-   module procedure cdp2rdp_6D
-   !module procedure cdp2rdp_7D
  end interface c2r
 
  interface isinteger
@@ -733,6 +731,12 @@ end function get_trace_cdp
 !! FUNCTION
 !!  Return the diagonal of a square matrix as a vector
 !!
+!! INPUTS
+!!  matrix(:,:)
+!!
+!! OUTPUT
+!!  diag(:)=the diagonal
+!!
 !! SOURCE
 
 function get_diag_int(mat) result(diag)
@@ -764,6 +768,12 @@ end function get_diag_int
 !! FUNCTION
 !!  Return the diagonal of a square matrix as a vector
 !!
+!! INPUTS
+!!  matrix(:,:)
+!!
+!! OUTPUT
+!!  diag(:)=the diagonal
+!!
 !! SOURCE
 
 function get_diag_rdp(mat) result(diag)
@@ -793,7 +803,10 @@ end function get_diag_rdp
 !!  get_diag_cdp
 !!
 !! FUNCTION
-!!  Return the diagonal of a square matrix as a vector
+!!
+!! INPUTS
+!!
+!! OUTPUT
 !!
 !! SOURCE
 
@@ -1198,6 +1211,12 @@ end function cdp2rdp_0D
 !! FUNCTION
 !!  Create a real array containing real and imaginary part starting from a complex array
 !!
+!! INPUTS
+!!  cc(:)=the input complex array
+!!
+!! OUTPUT
+!!  rr(2,:)=the real array
+!!
 !! SOURCE
 
 pure function cdp2rdp_1D(cc) result(rr)
@@ -1222,7 +1241,10 @@ end function cdp2rdp_1D
 !!  cdp2rdp_2D
 !!
 !! FUNCTION
-!!  Create a real array containing real and imaginary part starting from a complex array!!
+!!
+!! INPUTS
+!!
+!! OUTPUT
 !!
 !! SOURCE
 
@@ -1247,7 +1269,10 @@ end function cdp2rdp_2D
 !!  cdp2rdp_3D
 !!
 !! FUNCTION
-!!  Create a real array containing real and imaginary part starting from a complex array!!
+!!
+!! INPUTS
+!!
+!! OUTPUT
 !!
 !! SOURCE
 
@@ -1273,7 +1298,10 @@ end function cdp2rdp_3D
 !!  cdp2rdp_4D
 !!
 !! FUNCTION
-!!  Create a real array containing real and imaginary part starting from a complex array!!
+!!
+!! INPUTS
+!!
+!! OUTPUT
 !!
 !! SOURCE
 
@@ -1298,7 +1326,10 @@ end function cdp2rdp_4D
 !!  cdp2rdp_5D
 !!
 !! FUNCTION
-!!  Create a real array containing real and imaginary part starting from a complex array!!
+!!
+!! INPUTS
+!!
+!! OUTPUT
 !!
 !! SOURCE
 
@@ -1316,57 +1347,6 @@ pure function cdp2rdp_5D(cc) result(rr)
 
 end function cdp2rdp_5D
 !!***
-
-!----------------------------------------------------------------------
-
-!!****f* m_numeric_tools/cdp2rdp_6D
-!! NAME
-!!  cdp2rdp_6D
-!!
-!! FUNCTION
-!!  Create a real array containing real and imaginary part starting from a complex array!!
-!!
-!! SOURCE
-
-pure function cdp2rdp_6D(cc) result(rr)
-
-!Arguments ------------------------------------
-!scalars
- complex(dpc),intent(in) :: cc(:,:,:,:,:,:)
- real(dp) :: rr(2,SIZE(cc,1),SIZE(cc,2),SIZE(cc,3),SIZE(cc,4),SIZE(cc,5),SIZE(cc,6))
-
-! *********************************************************************
-
- rr(1,:,:,:,:,:,:)=REAL (cc(:,:,:,:,:,:))
- rr(2,:,:,:,:,:,:)=AIMAG(cc(:,:,:,:,:,:))
-
-end function cdp2rdp_6D
-!!***
-
-!!!!8D arrays are not allowed in Fortran standard!
-!!!****f* m_numeric_tools/cdp2rdp_7D
-!!! NAME
-!!!  cdp2rdp_7D
-!!!
-!!! FUNCTION
-!!!  Create a real array containing real and imaginary part starting from a complex array!!
-!!!
-!!! SOURCE
-!
-!pure function cdp2rdp_7D(cc) result(rr)
-!
-!!Arguments ------------------------------------
-!!scalars
-! complex(dpc),intent(in) :: cc(:,:,:,:,:,:,:)
-! real(dp) :: rr(2,SIZE(cc,1),SIZE(cc,2),SIZE(cc,3),SIZE(cc,4),SIZE(cc,5),SIZE(cc,6),SIZE(cc,7))
-!
-!! *********************************************************************
-!
-! rr(1,:,:,:,:,:,:,:)=REAL (cc(:,:,:,:,:,:,:))
-! rr(2,:,:,:,:,:,:,:)=AIMAG(cc(:,:,:,:,:,:,:))
-!
-!end function cdp2rdp_7D
-!!!***
 
 !----------------------------------------------------------------------
 
@@ -3238,7 +3218,9 @@ subroutine hermitianize_spc(mat,uplo)
  complex(spc),intent(inout) :: mat(:,:)
 
 !Local variables-------------------------------
+!scalars
  integer :: nn,ii,jj
+!arrays
  complex(spc),allocatable :: tmp(:)
 ! *************************************************************************
 
@@ -3246,8 +3228,7 @@ subroutine hermitianize_spc(mat,uplo)
 
  select case (uplo(1:1))
 
- case ("A","a")
-   ! Full matrix has been calculated.
+ case ("A","a") ! Full matrix has been calculated.
    ABI_MALLOC(tmp,(nn))
    do ii=1,nn
      do jj=ii,nn
@@ -3259,8 +3240,7 @@ subroutine hermitianize_spc(mat,uplo)
    end do
    ABI_FREE(tmp)
 
- case ("U","u")
-   ! Only the upper triangle is used.
+ case ("U","u") ! Only the upper triangle is used.
    do jj=1,nn
      do ii=1,jj
        if (ii/=jj) then
@@ -3271,8 +3251,7 @@ subroutine hermitianize_spc(mat,uplo)
      end do
    end do
 
- case ("L","l")
-  ! Only the lower triangle is used.
+ case ("L","l") ! Only the lower triangle is used.
   do jj=1,nn
     do ii=1,jj
       if (ii/=jj) then
@@ -3314,7 +3293,7 @@ end subroutine hermitianize_spc
 !!
 !! SOURCE
 
-subroutine hermitianize_dpc(mat, uplo)
+subroutine hermitianize_dpc(mat,uplo)
 
 !Arguments ------------------------------------
 !scalars
@@ -3323,7 +3302,9 @@ subroutine hermitianize_dpc(mat, uplo)
  complex(dpc),intent(inout) :: mat(:,:)
 
 !Local variables-------------------------------
+!scalars
  integer :: nn,ii,jj
+!arrays
  complex(dpc),allocatable :: tmp(:)
 ! *************************************************************************
 
@@ -3331,8 +3312,7 @@ subroutine hermitianize_dpc(mat, uplo)
 
  select case (uplo(1:1))
 
- case ("A","a")
-   ! Full matrix has been calculated.
+ case ("A","a") ! Full matrix has been calculated.
    ABI_MALLOC(tmp,(nn))
    do ii=1,nn
      do jj=ii,nn
@@ -3343,8 +3323,7 @@ subroutine hermitianize_dpc(mat, uplo)
    end do
    ABI_FREE(tmp)
 
- case ("U","u")
-  ! Only the upper triangle is used.
+ case ("U","u") ! Only the upper triangle is used.
    do jj=1,nn
      do ii=1,jj
        if (ii/=jj) then
@@ -3355,8 +3334,7 @@ subroutine hermitianize_dpc(mat, uplo)
      end do
    end do
 
- case ("L","l")
-  ! Only the lower triangle is used.
+ case ("L","l") ! Only the lower triangle is used.
   do jj=1,nn
     do ii=1,jj
       if (ii/=jj) then
@@ -5500,7 +5478,7 @@ end subroutine smooth
 !!
 !! SOURCE
 
-subroutine nderiv(hh, yy, zz, ndim, norder)
+subroutine nderiv(hh,yy,zz,ndim,norder)
 
 !Arguments ---------------------------------------------
 !scalars

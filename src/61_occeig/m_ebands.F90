@@ -451,7 +451,7 @@ type(gaps_t) function ebands_get_gaps(ebands, ierr) result(gaps)
 
 ! *********************************************************************
 
- gaps = get_gaps_(ebands, ierr)
+ call get_gaps_(ebands, gaps, ierr)
 
  if (ierr /= 0) then
    ! get_gaps_ will fail if we have a real metal/semimetal
@@ -473,7 +473,7 @@ type(gaps_t) function ebands_get_gaps(ebands, ierr) result(gaps)
 
    ! Try to compute gaps the again with new Fermi level at FD T = tsmear computed from update_occ.
    ! Return ierr
-   gaps = get_gaps_(tmp_ebands, ierr)
+   call get_gaps_(tmp_ebands, gaps, ierr)
    call ebands_free(tmp_ebands)
  end if
 
@@ -498,11 +498,12 @@ end function ebands_get_gaps
 !!
 !! SOURCE
 
-type(gaps_t) function get_gaps_(ebands, ierr) result(gaps)
+subroutine get_gaps_(ebands, gaps, ierr)
 
 !Arguments ------------------------------------
 !scalars
  class(ebands_t),target,intent(in)  :: ebands
+ type(gaps_t),intent(out) :: gaps
  integer,intent(out) :: ierr
 
 !Local variables-------------------------------
@@ -511,13 +512,13 @@ type(gaps_t) function get_gaps_(ebands, ierr) result(gaps)
  real(dp),parameter :: tol_fermi = tol6
  real(dp) :: fun_gap, opt_gap
  logical :: ismetal
- !type(ebands_t)  :: tmp_ebands
 !arrays
  integer :: val_idx(ebands%nkpt, ebands%nsppol)
  real(dp) :: top_valence(ebands%nkpt), bot_conduct(ebands%nkpt)
 
 ! *********************************************************************
 
+ call gaps%free()
  nsppol = ebands%nsppol
 
  ! Initialize gaps_t
@@ -546,7 +547,7 @@ type(gaps_t) function get_gaps_(ebands, ierr) result(gaps)
  val_idx(:,:) = ebands_get_valence_idx(ebands, tol_fermi=tol_fermi)
 
  spin_loop: &
-&  do spin=1,nsppol
+   do spin=1,nsppol
 
    ! No output if system is metallic
    ismetal = ANY(val_idx(:,spin) /= val_idx(1,spin))
@@ -601,7 +602,7 @@ type(gaps_t) function get_gaps_(ebands, ierr) result(gaps)
    end do
  end if
 
-end function get_gaps_
+end subroutine get_gaps_
 !!***
 
 !----------------------------------------------------------------------
@@ -1035,8 +1036,6 @@ subroutine ebands_free(ebands)
  ABI_SFREE(ebands%occ)
  ABI_SFREE(ebands%doccde)
  ABI_SFREE(ebands%wtk)
- !ABI_SFREE(ebands%velocity)
- !ABI_SFREE(ebands%kTmesh)
  ABI_SFREE(ebands%shiftk_orig)
  ABI_SFREE(ebands%shiftk)
 
@@ -1428,7 +1427,7 @@ end subroutine get_eneocc_vect
 !!
 !! SOURCE
 
-subroutine put_eneocc_vect(ebands,arr_name,vect)
+subroutine put_eneocc_vect(ebands, arr_name, vect)
 
 !Arguments ------------------------------------
 !scalars
@@ -1441,7 +1440,7 @@ subroutine put_eneocc_vect(ebands,arr_name,vect)
  real(dp) :: val
 ! *************************************************************************
 
- mband =ebands%mband; bantot=ebands%bantot; nkpt  =ebands%nkpt; nsppol=ebands%nsppol
+ mband = ebands%mband; bantot = ebands%bantot; nkpt= ebands%nkpt; nsppol = ebands%nsppol
 
  select case (tolower(arr_name))
  case ('occ')

@@ -554,7 +554,7 @@ subroutine calc_sigx_me(sigmak_ibz, ikcalc, bmin, bmax, cryst, qp_ebands, Sigp, 
        theta_mu_minus_esum  = fact_spin * qp_occ(band_sum, ik_ibz, spin)
        theta_mu_minus_esum2 = sqrt(abs(fact_spin * qp_occ(band_sum, ik_ibz, spin))) ! MBB Nat. orb. funct. approx. sqrt(occ)
 
-       if (abs(theta_mu_minus_esum / fact_spin) >= tol_empty) then     ! MRM: allow negative occ numbers
+       if (abs(theta_mu_minus_esum / fact_spin) >= tol_empty) then  ! MRM: allow negative occ numbers
          do kb=bmin,bmax
            ! Copy the ket Sigma_x |phi_{k,kb}>.
            rhotwgp(:) = rhotwg_ki(:, kb)

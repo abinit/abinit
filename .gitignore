@@ -23,6 +23,7 @@ build_g95
 build_gfortran
 build_ifort
 build.*
+build*
 debian.ac
 debian.ac9
 config.optim
@@ -81,7 +82,6 @@ tests/TestBot_MPI*/*
 /abilint.out
 /aclocal.m4
 /autom4te.cache
-/build
 /_build*
 /configure
 /config.dump
@@ -354,3 +354,8 @@ venv
 
 # VSC
 .vscode/
+
+/home/users/lmacenul/abinit/build
+# R language
+.Rhistory
+

@@ -394,13 +394,13 @@ CONTAINS  !=====================================================================
 !!
 !! SOURCE
 
-subroutine kmesh_init(Kmesh, Cryst, nkibz, kibz, kptopt, &
+subroutine kmesh_init(Kmesh, cryst, nkibz, kibz, kptopt, &
                       wrap_1zone, ref_bz, break_symmetry) ! Optional
 
 !Arguments ------------------------------------
 !scalars
  class(kmesh_t),intent(inout) :: Kmesh
- integer,intent(in) :: nkibz,kptopt
+ integer,intent(in) :: nkibz, kptopt
  logical,optional,intent(in) :: wrap_1zone,break_symmetry
  type(crystal_t),intent(in) :: Cryst
 !arrays
