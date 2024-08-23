@@ -590,7 +590,7 @@ subroutine varpeq_compare(self, other, bz_mismatch)
    "Difference found in brange_spin.")
 
  ! If bz_mismatch is not allowed, also compare k/q-grids
- if (pre if (present(bz_mismatch)) then
+ if (present(bz_mismatch)) then
    if (.not. bz_mismatch) then
      call check_(all(abs(self%kpts_spin - other%kpts_spin) < tol6), &
        "Difference found in kpts_spin.")
@@ -1763,8 +1763,6 @@ subroutine polstate_update_pc(self, ip)
  real(dp) :: eps
 
 !----------------------------------------------------------------------
-
- ABI_UNUSED(factor)
 
  gqk => self%gqk
 
@@ -3234,7 +3232,7 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
              if (nsppol == 2) path = strcat(dtfil%filnam_ds(4), strcat("_spin_", itoa(spin)), "_pstate_", itoa(ip), "_POLARON_DISPL.xsf")
 
              ! Here we displace the atoms in the supercell for this spin (only master has the correct values)
-             scell_q%xcart = scell_q%xcart_ref + sc_displ_cart_re(:,ip,spin)
+             scell_q%xcart = scell_q%xcart_ref + sc_displ_cart_re(:,:,ip,spin)
              xcart_ptr => scell_q%xcart
            end if
 
@@ -3270,7 +3268,7 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
            path = strcat(dtfil%filnam_ds(4), "_pstate_", itoa(ip), "_POLARON_DISPL.xsf")
 
            ! Here we displace the atoms in the supercell for this spin (only master has the correct values)
-           scell_q%xcart = scell_q%xcart_ref + sc_displ_cart_re(:,ip,spin)
+           scell_q%xcart = scell_q%xcart_ref + sc_displ_cart_re(:,:,ip,spin)
            xcart_ptr => scell_q%xcart
          end if
 
