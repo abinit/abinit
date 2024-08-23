@@ -347,6 +347,7 @@ mac-1P0-225.ac
 doc/topics/ConstrainedDFT.md
 doxygen_docs
 doxygen.err
+venv
 
 # Pycharm
 .idea/
