@@ -141,4 +141,6 @@ on the electronic structure are computed, cite [[cite:Ponce2014]] and [[cite:Pon
 <a id="s15"></a>
 - **Spe.15.** If the new procedure for electron-phonon calculations [[optdriver]]=7 is used, cite [[cite:Brunin2020]] and/or [[cite:Brunin2020b]].
 
+<a id="s16"></a>
+- **Spe.16.** If the Linear Response UJ (lrUJ) utility or the renovated aspects of the UJ Determination (UJdet) implementation are used, cite [[cite:MacEnulty2024]] and, if relevant, [[cite:MacEnulty2023]].
 

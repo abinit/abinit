@@ -42,6 +42,7 @@ program lruj
  use defs_basis
  use m_xmpi
  use m_abicore
+ use m_build_info
  use m_errors
  use m_argparse
  use m_crystal
@@ -49,7 +50,6 @@ program lruj
  use m_nctk
  use m_yaml
 
- use m_build_info,    only : abinit_version
  use m_fstrings,      only : itoa, sjoin, ltoa
  use m_specialmsg,    only : specialmsg_getcount, herald
  use m_numeric_tools, only : polynomial_regression
@@ -402,7 +402,7 @@ call ydoc%add_real("diem",diem)
    chi(degree)=chicoeffs(2)                !at pert=0.0 is just the second coefficient.
    chi0err(degree)=chi0err(degree)/diem    !Chi0 error divided by diem also.
    hubpar(degree)=signum*(1.0d0/chi0(degree)-1.0d0/chi(degree))
-   hubparerr(degree)=sqrt((chi0err(degree)/chi0(degree))**2+(chierr(degree)/chi(degree))**2)
+   hubparerr(degree)=sqrt((chi0err(degree)/chi0(degree)**2)**2+(chierr(degree)/chi(degree)**2)**2)
    ABI_FREE(chi0coeffs)
    ABI_FREE(chicoeffs)
  end do

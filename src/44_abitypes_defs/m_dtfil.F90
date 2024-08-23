@@ -176,8 +176,20 @@ module m_dtfil
    ! Initialize via getsigeph_filepath
 
   character(len=fnlen) :: filgstorein
-   ! Filename used to read GSTOR.ncE file.
+   ! Filename used to read GSTORE.nc file.
    ! Initialize via getgstore_filepath
+
+  character(len=fnlen) :: filabiwanin
+   ! Filename used to read ABIWAN.nc file.
+   ! Initialize via getabiwan_filepath
+
+  character(len=fnlen) :: filgwanin
+   ! Filename used to read GWAN.nc file.
+   ! Initialize via getgwan_filepath
+
+  character(len=fnlen) :: filvarpeqin
+   ! Filename used to read VARPEQ.nc file.
+   ! Initialize via getvarpeq_filepath
 
   character(len=fnlen) :: filstat
    ! tmp//'_STATUS'
@@ -600,17 +612,17 @@ subroutine dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enreg,ndtset
  ! According to getddb, build _DDB file name, referred as filddbsin
  stringfile='_DDB'; stringvar='ddb'
  call mkfilename(filnam,filddbsin,dtset%getddb,idtset,dtset%irdddb,jdtset_,ndtset,stringfile,stringvar,will_read, &
-                  getpath=dtset%getddb_filepath)
+                 getpath=dtset%getddb_filepath)
 
  ! According to getpot, build _POT file name
  stringfile='_POT'; stringvar='pot'
  call mkfilename(filnam, dtfil%filpotin, 0, idtset, 0, jdtset_, ndtset, stringfile, stringvar, will_read, &
-                  getpath=dtset%getpot_filepath)
+                 getpath=dtset%getpot_filepath)
 
  ! According to getdvdb, build _DVDB file name
  stringfile='_DVDB'; stringvar='dvdb'
  call mkfilename(filnam,dtfil%fildvdbin,dtset%getdvdb,idtset,dtset%irddvdb,jdtset_,ndtset,stringfile,stringvar,will_read, &
-                  getpath=dtset%getdvdb_filepath)
+                 getpath=dtset%getdvdb_filepath)
  if (will_read == 0) dtfil%fildvdbin = ABI_NOFILE
 
  ! According to getdrhodb, build _DRHODB file name
@@ -631,6 +643,24 @@ subroutine dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enreg,ndtset
  call mkfilename(filnam, dtfil%filgstorein, 0, idtset, 0, jdtset_, ndtset, stringfile, stringvar, will_read, &
                  getpath=dtset%getgstore_filepath)
  if (will_read == 0) dtfil%filgstorein = ABI_NOFILE
+
+ ! According to getabiwan_filepath, build _ABIWAN file name
+ stringfile='_ABIWAN.nc'; stringvar='abiwan'
+ call mkfilename(filnam, dtfil%filabiwanin, dtset%getabiwan, idtset, 0, jdtset_, ndtset, stringfile, stringvar, will_read, &
+                 getpath=dtset%getabiwan_filepath)
+ if (will_read == 0) dtfil%filabiwanin = ABI_NOFILE
+
+ ! According to getgwan_filepath, build _GWAN file name
+ stringfile='_GWAN.nc'; stringvar='gwan'
+ call mkfilename(filnam, dtfil%filgwanin, dtset%getgwan, idtset, 0, jdtset_, ndtset, stringfile, stringvar, will_read, &
+                 getpath=dtset%getgwan_filepath)
+ if (will_read == 0) dtfil%filgwanin = ABI_NOFILE
+
+ ! According to getvarpeq_filepath, build _VARPEQ file name
+ stringfile='_VARPEQ.nc'; stringvar='varpeq'
+ call mkfilename(filnam, dtfil%filvarpeqin, dtset%getvarpeq, idtset, 0, jdtset_, ndtset, stringfile, stringvar, will_read, &
+                 getpath=dtset%getvarpeq_filepath)
+ if (will_read == 0) dtfil%filvarpeqin = ABI_NOFILE
 
  ! According to getden, build _DEN file name, referred as fildensin
  ! A default is available if getden is 0
@@ -1759,7 +1789,7 @@ subroutine iofn1(input_path, filnam, filstat, comm)
 
    do i1=3,5
      ! Create input/output/temporary directories if they don't exist yet.
-     ii = index(filnam(i1), "/")
+     ii = index(filnam(i1), "/", back=.True.)
      if (ii > 0) then
        dirpath = filnam(i1)(1:ii-1)
        call clib_mkdir_if_needed(dirpath, ierr)

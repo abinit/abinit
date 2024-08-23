@@ -56,7 +56,7 @@ The k points are restricted to the Irreducible Brillouin Zone.
 
 The third dataset uses the result of the second one to produce the
 wavefunctions for all the bands, for the full Brillouin Zone
-(this step could be skipped, but is included for later CPU time saving).
+(this step could be skipped for linear optic, but is included for later CPU time saving - for nonlinear optic, checks of symmetry behaviour are ongoing currently as of 23 June 2024, better to perform set three).
 If only the linear optical response is computed, then time-reversal symmetry can be used, and the computation
 might be restricted to the half Brillouin zone ([[kptopt]]=2).
 
