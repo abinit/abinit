@@ -1050,6 +1050,13 @@ meta: {optdriver: 4, gwcalctyp: 25, }
  yields    32 points in the full Brillouin Zone.
 
 
+
+ === Complement Error function cutoff === 
+
+  Cutoff radius .........     9.0909 [Bohr] 
+
+ q-points for optical limit:   1
+     1)      0.000010    0.000020    0.000030
  setmesh: FFT mesh size selected  =    12x   12x   12
           total number of points  =         1728
 
@@ -1350,6 +1357,13 @@ meta: {optdriver: 4, gwcalctyp: 25, }
  yields    32 points in the full Brillouin Zone.
 
 
+
+ === Complement Error function cutoff === 
+
+  Cutoff radius .........     9.0909 [Bohr] 
+
+ q-points for optical limit:   1
+     1)      0.000010    0.000020    0.000030
  setmesh: FFT mesh size selected  =    12x   12x   12
           total number of points  =         1728
 
@@ -1650,6 +1664,13 @@ meta: {optdriver: 4, gwcalctyp: 25, }
  yields    32 points in the full Brillouin Zone.
 
 
+
+ === Complement Error function cutoff === 
+
+  Cutoff radius .........     9.0909 [Bohr] 
+
+ q-points for optical limit:   1
+     1)      0.000010    0.000020    0.000030
  setmesh: FFT mesh size selected  =    12x   12x   12
           total number of points  =         1728
 
@@ -1950,6 +1971,13 @@ meta: {optdriver: 4, gwcalctyp: 25, }
  yields    32 points in the full Brillouin Zone.
 
 
+
+ === Complement Error function cutoff === 
+
+  Cutoff radius .........     9.0909 [Bohr] 
+
+ q-points for optical limit:   1
+     1)      0.000010    0.000020    0.000030
  setmesh: FFT mesh size selected  =    12x   12x   12
           total number of points  =         1728
 
@@ -2250,6 +2278,13 @@ meta: {optdriver: 4, gwcalctyp: 25, }
  yields    32 points in the full Brillouin Zone.
 
 
+
+ === Complement Error function cutoff === 
+
+  Cutoff radius .........     9.0909 [Bohr] 
+
+ q-points for optical limit:   1
+     1)      0.000010    0.000020    0.000030
  setmesh: FFT mesh size selected  =    12x   12x   12
           total number of points  =         1728
 
@@ -2798,6 +2833,10 @@ meta: {optdriver: 3, gwcalctyp: 0, }
           total number of points  =         1728
 
 
+ vcoul_init : cutoff-mode = AUXILIARY_FUNCTION
+ q-points for optical limit:   1
+     1)      0.000010    0.000020    0.000030
+
 - screening: taking advantage of time-reversal symmetry 
 - Maximum band index for partially occupied states nbvw = 4
 - Remaining bands to be divided among processors   nbcw = 10
@@ -3037,6 +3076,10 @@ meta: {optdriver: 4, gwcalctyp: 0, }
  yields    32 points in the full Brillouin Zone.
 
 
+
+ vcoul_init : cutoff-mode = AUXILIARY_FUNCTION
+ q-points for optical limit:   1
+     1)      0.000010    0.000020    0.000030
  setmesh: FFT mesh size selected  =    12x   12x   12
           total number of points  =         1728
 
@@ -3181,6 +3224,10 @@ meta: {optdriver: 3, gwcalctyp: 20, }
  setmesh: FFT mesh size selected  =    12x   12x   12
           total number of points  =         1728
 
+
+ vcoul_init : cutoff-mode = AUXILIARY_FUNCTION
+ q-points for optical limit:   1
+     1)      0.000010    0.000020    0.000030
 
 - screening: taking advantage of time-reversal symmetry 
 - Maximum band index for partially occupied states nbvw = 4
@@ -3426,6 +3473,10 @@ meta: {optdriver: 4, gwcalctyp: 20, }
  yields    32 points in the full Brillouin Zone.
 
 
+
+ vcoul_init : cutoff-mode = AUXILIARY_FUNCTION
+ q-points for optical limit:   1
+     1)      0.000010    0.000020    0.000030
  setmesh: FFT mesh size selected  =    12x   12x   12
           total number of points  =         1728
 
@@ -3738,6 +3789,10 @@ meta: {optdriver: 3, gwcalctyp: 20, }
           total number of points  =         1728
 
 
+ vcoul_init : cutoff-mode = AUXILIARY_FUNCTION
+ q-points for optical limit:   1
+     1)      0.000010    0.000020    0.000030
+
 - screening: taking advantage of time-reversal symmetry 
 - Maximum band index for partially occupied states nbvw = 4
 - Remaining bands to be divided among processors   nbcw = 10
@@ -3991,6 +4046,17 @@ meta: {optdriver: 4, gwcalctyp: 0, }
  yields    32 points in the full Brillouin Zone.
 
 
+
+ vcoul_init : cutoff-mode = AUXILIARY_FUNCTION
+ q-points for optical limit:   1
+     1)      0.000010    0.000020    0.000030
+
+ === Complement Error function cutoff === 
+
+  Cutoff radius .........     9.0909 [Bohr] 
+
+ q-points for optical limit:   1
+     1)      0.000010    0.000020    0.000030
  setmesh: FFT mesh size selected  =    12x   12x   12
           total number of points  =         1728
 

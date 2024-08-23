@@ -1875,7 +1875,7 @@ subroutine stern_solve(stern, u1_band, band_me, idir, ipert, qpt, gs_hamkq, rf_h
      !do iband=1,stern%nband
      !  write(std_out, *)iband, eig0_k(iband), eig0_kq(iband), eig0_k(iband) - eig0_kq(iband)
      !end do
-     ierr = -1
+     ierr = -2
    end if
 
    !if (my_rank == master .and. (enough_stern <= 5 .or. stern%dtset%prtvol > 10)) then
@@ -1903,7 +1903,9 @@ subroutine stern_solve(stern, u1_band, band_me, idir, ipert, qpt, gs_hamkq, rf_h
  ! See need_fermie1 in m_dfpt_scfcv
 
  if (present(full_cg1)) then
-   ! Compute full first order wavefunction.
+   ! =====================================
+   ! Compute full first order wavefunction
+   ! =====================================
 
    ! WARNING: Assuming all bands are on this cpu.
    cycle_bands(:) = .False.
