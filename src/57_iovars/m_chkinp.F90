@@ -2334,7 +2334,6 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      end if
 
 !    nucdipmom requires kptopt 0, 3, or 4 (no time reversal symmetry allowed)
-     ! if( (dt%kptopt .EQ. 1) .OR. (dt%kptopt .EQ. 2) .OR. (dt%kptopt .EQ. 4) ) then
      if( (dt%kptopt .EQ. 1) .OR. (dt%kptopt .EQ. 2) ) then
        write(msg, '(a,i4,a,a,a)' )&
        ' Nuclear dipole moments (variable nucdipmom) break time reveral symmetry but kptopt = ',dt%kptopt,&
@@ -2694,6 +2693,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      cond_string(1)='orbmag';cond_values(1)=dt%orbmag
   !  only kptopt 3 or 0 are allowed, because ddk cannot use spatial symmetries and
   !  nucdipmom breaks time reversal symmetry
+  ! TODO: generalize in the berryopt -2 case to kptopt 4 allowed
      call chkint_eq(1,1,cond_string,cond_values,ierr,'kptopt',dt%kptopt,2,(/0,3/),iout)
   !  only kpt parallelism is allowed at present
      call chkint_eq(1,1,cond_string,cond_values,ierr,'paral_atom',dt%paral_atom,1,(/0/),iout)
@@ -2701,7 +2701,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
   !  require usexcnhat 0
      call chkint_eq(1,1,cond_string,cond_values,ierr,'usexcnhat',dt%usexcnhat_orig,1,(/0/),iout)
   !  require pawxcdev 0
-     call chkint_eq(1,1,cond_string,cond_values,ierr,'pawxcdev',dt%pawxcdev,1,(/0/),iout)
+  !   call chkint_eq(1,1,cond_string,cond_values,ierr,'pawxcdev',dt%pawxcdev,1,(/0/),iout)
   !  require PAW
      call chkint_eq(1,1,cond_string,cond_values,ierr,'usepaw',dt%usepaw,1,(/1/),iout)
   end if
