@@ -1008,7 +1008,7 @@ contains
     end if
   end if
 
-  if(signs == 1) then
+  if(signs == 1 .and. choice > 0) then
     enlout=zero
     !$OMP TARGET ENTER DATA MAP(to:enlout)
   end if
@@ -1494,7 +1494,7 @@ contains
 #endif
 
 ! Release memory
-  if(signs == 1) then
+  if(signs == 1 .and. choice > 0) then
     !$OMP TARGET EXIT DATA MAP(delete:enlout)
   end if
   if(gemm_nonlop_is_distributed) then
