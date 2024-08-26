@@ -151,7 +151,7 @@ subroutine lobpcgwf2(cg,dtset,eig,occ,enl_out,gs_hamk,isppol,ikpt,inonsc,istep,k
 
 #ifdef HAVE_OPENMP_OFFLOAD
  if(gs_hamk%gpu_option==ABI_GPU_OPENMP) then
-   !$OMP TARGET ENTER DATA MAP(to:cg,eig,resid)
+   !$OMP TARGET ENTER DATA MAP(to:cg,eig,resid,occ)
  end if
 #endif
 
@@ -230,7 +230,7 @@ subroutine lobpcgwf2(cg,dtset,eig,occ,enl_out,gs_hamk,isppol,ikpt,inonsc,istep,k
 
 #ifdef HAVE_OPENMP_OFFLOAD
  if(gs_hamk%gpu_option==ABI_GPU_OPENMP) then
-   !$OMP TARGET EXIT DATA MAP(from:cg,eig,resid)
+   !$OMP TARGET EXIT DATA MAP(from:cg,eig,resid,occ)
  end if
 #endif
 
