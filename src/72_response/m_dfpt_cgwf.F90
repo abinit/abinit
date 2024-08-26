@@ -1954,7 +1954,6 @@ subroutine stern_free(stern)
 
 !Arguments ------------------------------------
  class(stern_t),intent(inout) :: stern
-
 !************************************************************************
 
  ! integer
