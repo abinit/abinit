@@ -170,7 +170,7 @@ void invoke_python_triqs(int rank, char* filapp_in, MPI_Fint *MPI_world_ptr) {
 	int final;
 	MPI_Finalized(&final);
 	if (final) {
-		fprintf(stderr, "MPI is finalized on node %i\n", rank);
+		fprintf(stdout, "MPI is finalized on node %i\n", rank);
 	}
 
 	// Close python
