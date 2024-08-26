@@ -29,6 +29,7 @@ module m_getghc_ompgpu
  use m_abicore
  use m_xmpi
  use m_xomp
+ use m_abi_linalg
  use, intrinsic :: iso_c_binding
 
  use defs_abitypes, only : mpi_type
@@ -833,7 +834,7 @@ has_fock=.false.
 
    else if (type_calc == 3) then
      ! for kinetic and local only, nonlocal and vfock should be zero
-     gvnlxc_(:,:) = zero
+     call gpu_set_to_zero(gvnlxc_, int(2,c_size_t)*npw_k2*my_nspinor*ndat)
    end if ! if(type_calc...
 
    ABI_NVTX_END_RANGE()
