@@ -452,6 +452,9 @@ subroutine chebfiwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
 &                signs,gsc_dummy,l_tim_getghc,cg,l_gvnlxc)
 
    else
+#ifdef HAVE_OPENMP_OFFLOAD
+     !$OMP TARGET UPDATE FROM(cg) IF(gs_hamk%gpu_option==ABI_GPU_OPENMP)
+#endif
      do iband=1,nband/blockdim
        shift = (iband-1)*blockdim*l_npw*l_nspinor
        call prep_nonlop(choice,l_cpopt,cprj_dum, &
