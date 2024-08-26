@@ -1587,7 +1587,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
         call flush_unit(std_out)
 
         ! Invoking python to execute the script
-        call Invoke_python_triqs (paw_dmft%myproc, trim(dtfil%filnam_ds(3))//c_null_char)
+        call Invoke_python_triqs (paw_dmft%myproc, trim(dtfil%filnam_ds(3))//c_null_char, paw_dmft%spacecomm)
         call xmpi_barrier(paw_dmft%spacecomm)
         call flush_unit(std_out)
 
