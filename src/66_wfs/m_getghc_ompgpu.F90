@@ -305,7 +305,7 @@ subroutine getghc_ompgpu(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_
  real(dp),pointer :: gsc_ptr(:,:)
  type(fock_common_type),pointer :: fock
  type(pawcprj_type),pointer :: cwaveprj_fock(:,:),cwaveprj_idat(:,:),cwaveprj_nonlop(:,:)
- logical :: transfer_omp_args,fourwf_on_cpu
+ logical :: transfer_ghc,transfer_gsc,transfer_cwavef,transfer_gvnlxc,fourwf_on_cpu
  integer :: tmp2i(2)
 
 ! *********************************************************************
@@ -445,20 +445,20 @@ has_fock=.false.
  if (gs_ham%usepaw==0) gsc_ptr => nonlop_dum
  if (gs_ham%usepaw==1) gsc_ptr => gsc
 
- !$OMP TARGET ENTER DATA MAP(alloc:gvnlxc_)
 
- transfer_omp_args =  .not. ( xomp_target_is_present(c_loc(ghc)) &
-   .and. xomp_target_is_present(c_loc(gsc_ptr)) &
-   .and. xomp_target_is_present(c_loc(cwavef)) )
+ transfer_ghc =  .not. xomp_target_is_present(c_loc(ghc))
+ transfer_gsc =  .not. xomp_target_is_present(c_loc(gsc))
+ transfer_gvnlxc =  .not. xomp_target_is_present(c_loc(gvnlxc_))
+ transfer_cwavef =  .not. xomp_target_is_present(c_loc(cwavef))
 
+ !$OMP TARGET ENTER DATA MAP(alloc:ghc)     IF(transfer_ghc)
+ !$OMP TARGET ENTER DATA MAP(alloc:gsc)     IF(transfer_gsc)
+ !$OMP TARGET ENTER DATA MAP(alloc:gvnlxc_) IF(transfer_gvnlxc)
+ !$OMP TARGET ENTER DATA MAP(to:cwavef)     IF(transfer_cwavef)
  if (type_calc == 2) then
-   !$OMP TARGET ENTER DATA MAP(to:ghc) IF(transfer_omp_args)
-   !$OMP TARGET ENTER DATA MAP(to:gsc_ptr) IF(transfer_omp_args)
- else
-   !$OMP TARGET ENTER DATA MAP(alloc:ghc) IF(transfer_omp_args)
-   !$OMP TARGET ENTER DATA MAP(alloc:gsc_ptr) IF(transfer_omp_args)
+   !$OMP TARGET UPDATE TO(ghc)     IF(transfer_ghc)
+   !$OMP TARGET UPDATE TO(gsc)     IF(transfer_gsc .and. gs_ham%usepaw==1)
  end if
- !$OMP TARGET ENTER DATA MAP(to:cwavef) IF(transfer_omp_args)
 
 !============================================================
 ! Application of the local potential
@@ -757,10 +757,8 @@ has_fock=.false.
      ABI_FREE(cwavef2)
    end if
 
-   if (type_calc==1) then
-     if(transfer_omp_args) then
-       !$OMP TARGET UPDATE FROM(ghc) nowait
-     end if
+   if (type_calc==1 .and. .not. fourwf_on_cpu) then
+     !$OMP TARGET UPDATE FROM(ghc) nowait IF(transfer_ghc)
    end if
 
 #ifndef HAVE_GPU_HIP
@@ -908,13 +906,11 @@ has_fock=.false.
      ABI_FREE(gvnlc)
    endif
 
-   if(transfer_omp_args) then
-     !$OMP TARGET UPDATE FROM(ghc) nowait
-     !$OMP TARGET UPDATE FROM(gsc_ptr) nowait
-     !$OMP TARGET UPDATE FROM(cwavef) nowait
-   end if
+   !$OMP TARGET UPDATE FROM(ghc)     nowait IF(transfer_ghc)
+   !$OMP TARGET UPDATE FROM(gsc)     nowait IF(transfer_gsc)
+   !$OMP TARGET UPDATE FROM(cwavef)  nowait IF(transfer_cwavef)
    if (.not. local_gvnlxc) then
-     !$OMP TARGET UPDATE FROM(gvnlxc_) nowait
+     !$OMP TARGET UPDATE FROM(gvnlxc_) nowait IF(transfer_gvnlxc)
    end if
    !$OMP TASKWAIT
 
@@ -926,8 +922,10 @@ has_fock=.false.
 
  end if ! type_calc
 
- !$OMP TARGET EXIT DATA MAP(delete:cwavef,gsc_ptr,ghc) IF(transfer_omp_args)
- !$OMP TARGET EXIT DATA MAP(delete:gvnlxc_)
+ !$OMP TARGET EXIT DATA MAP(delete:ghc)     IF(transfer_ghc)
+ !$OMP TARGET EXIT DATA MAP(delete:gsc)     IF(transfer_gsc)
+ !$OMP TARGET EXIT DATA MAP(delete:cwavef)  IF(transfer_cwavef)
+ !$OMP TARGET EXIT DATA MAP(delete:gvnlxc_) IF(transfer_gvnlxc)
  if (local_gvnlxc .and. any(type_calc == [0, 2, 3])) then
    ABI_FREE(gvnlxc_)
  end if
