@@ -226,6 +226,15 @@ subroutine lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
    call alloc_on_gpu(coordx3_gpu,       INT(cplx, c_size_t)*dp*blocksize*blocksize)
  end if
 
+ ! Work arrays eventually mapped on GPU via OpenMP
+ ABI_MALLOC(cwavef,(2,npw_k*my_nspinor*blocksize))
+ ABI_MALLOC(gwavef,(2,npw_k*my_nspinor*blocksize))
+ ABI_MALLOC(gvnlxc,(2,npw_k*my_nspinor*blocksize))
+ ABI_MALLOC(swavef,(2,npw_k*my_nspinor*blocksize))
+#ifdef HAVE_OPENMP_OFFLOAD
+ !$OMP TARGET ENTER DATA MAP(alloc:cwavef,gwavef,gvnlxc,swavef) IF(dtset%gpu_option==ABI_GPU_OPENMP)
+#endif
+
  if(abs(dtset%timopt)==4) then
    call timab(520,2,tsec)
  end if
@@ -332,11 +341,6 @@ subroutine lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
    end if
 !  !!!!!!!!!!!!!!!!!!!!!!!! End if iblock /=1 !!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-   ABI_MALLOC(cwavef,(2,npw_k*my_nspinor*blocksize))
-   ABI_MALLOC(gwavef,(2,npw_k*my_nspinor*blocksize))
-   ABI_MALLOC(gvnlxc,(2,npw_k*my_nspinor*blocksize))
-   ABI_MALLOC(swavef,(2,npw_k*my_nspinor*blocksize))
-
    call wfcopy('I',vectsize*blocksize,blockvectorx,1,cwavef,1,blocksize,iblock,'W',withbbloc=.false.,&
 &   timopt=timopt,tim_wfcopy=tim_wfcopy)
 
@@ -349,6 +353,9 @@ subroutine lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
 
    cpopt=-1;sij_opt=0;if (gen_eigenpb) sij_opt=1
 
+#ifdef HAVE_OPENMP_OFFLOAD
+   !$OMP TARGET UPDATE TO(cwavef) IF(dtset%gpu_option==ABI_GPU_OPENMP)
+#endif
    if (mpi_enreg%paral_kgb==0) then
      call getghc(cpopt,cwavef,cprj_dum,gwavef,swavef,gs_hamk,gvnlxc,dum,&
 &     mpi_enreg,blocksize,prtvol,sij_opt,tim_getghc,0)
@@ -356,6 +363,9 @@ subroutine lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
      call prep_getghc(cwavef,gs_hamk,gvnlxc,gwavef,swavef,dum,blocksize,mpi_enreg,&
 &     prtvol,sij_opt,cpopt,cprj_dum,already_transposed=.false.)
    end if
+#ifdef HAVE_OPENMP_OFFLOAD
+   !$OMP TARGET UPDATE FROM(gwavef,gvnlxc,swavef) IF(dtset%gpu_option==ABI_GPU_OPENMP)
+#endif
    if(abs(dtset%timopt)==4) then
      call timab(526,2,tsec)
    end if
@@ -374,11 +384,6 @@ subroutine lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
 
    call wfcopy('D',vectsize*blocksize,gwavef,1,blockvectorax,1,blocksize,iblock,'W',withbbloc=.false.,&
 &   timopt=timopt,tim_wfcopy=tim_wfcopy)
-
-   ABI_FREE(cwavef)
-   ABI_FREE(gwavef)
-   ABI_FREE(gvnlxc)
-   ABI_FREE(swavef)
 
    call abi_xorthonormalize(blockvectorx,blockvectorbx,blocksize,mpi_enreg%comm_bandspinorfft,gramxbx,vectsize,&
 &   x_cplx,timopt=timopt,tim_xortho=tim_xortho)
@@ -548,11 +553,6 @@ subroutine lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
 &       vectsize,gramxax,blocksize,cone,blockvectorr,vectsize,x_cplx=x_cplx)
      end if
 
-     ABI_MALLOC(cwavef,(2,npw_k*my_nspinor*blocksize))
-     ABI_MALLOC(gwavef,(2,npw_k*my_nspinor*blocksize))
-     ABI_MALLOC(gvnlxc,(2,npw_k*my_nspinor*blocksize))
-     ABI_MALLOC(swavef,(2,npw_k*my_nspinor*blocksize))
-
      call wfcopy('I',vectsize*blocksize,blockvectorr,1,cwavef,1,blocksize,iblock,'W',withbbloc=.false.,&
 &     timopt=timopt,tim_wfcopy=tim_wfcopy)
 
@@ -565,6 +565,9 @@ subroutine lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
        call timab(526,1,tsec)
      end if
 
+#ifdef HAVE_OPENMP_OFFLOAD
+     !$OMP TARGET UPDATE TO(cwavef) IF(dtset%gpu_option==ABI_GPU_OPENMP)
+#endif
      if (mpi_enreg%paral_kgb==0) then
        call getghc(cpopt,cwavef,cprj_dum,gwavef,swavef,gs_hamk,gvnlxc,dum,&
 &       mpi_enreg,blocksize,prtvol,sij_opt,tim_getghc,0)
@@ -572,6 +575,9 @@ subroutine lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
        call prep_getghc(cwavef,gs_hamk,gvnlxc,gwavef,swavef,dum,blocksize,mpi_enreg,&
 &       prtvol,sij_opt,cpopt,cprj_dum,already_transposed=.false.)
      end if
+#ifdef HAVE_OPENMP_OFFLOAD
+     !$OMP TARGET UPDATE FROM(gwavef,gvnlxc,swavef) IF(dtset%gpu_option==ABI_GPU_OPENMP)
+#endif
 
      if(abs(dtset%timopt)==4) then
        call timab(526,2,tsec)
@@ -591,11 +597,6 @@ subroutine lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
 
      call wfcopy('D',vectsize*blocksize,gwavef,1,blockvectorar,1,blocksize,iblock,'W',withbbloc=.false.,&
 &     timopt=timopt,tim_wfcopy=tim_wfcopy)
-
-     ABI_FREE(cwavef)
-     ABI_FREE(gwavef)
-     ABI_FREE(gvnlxc)
-     ABI_FREE(swavef)
 
      if(use_linalg_gpu==1) then
        call copy_on_gpu(blockvectorbr, blockvectorbr_gpu, INT(cplx, c_size_t)*dp*vectsize*blocksize)
@@ -1237,6 +1238,14 @@ subroutine lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
    end if
 
  end do  ! End big loop over bands inside blocks
+
+#ifdef HAVE_OPENMP_OFFLOAD
+ !$OMP TARGET EXIT DATA MAP(delete:cwavef,gwavef,gvnlxc,swavef) IF(dtset%gpu_option==ABI_GPU_OPENMP)
+#endif
+ ABI_FREE(cwavef)
+ ABI_FREE(gwavef)
+ ABI_FREE(gvnlxc)
+ ABI_FREE(swavef)
 
  if(use_linalg_gpu==1) then
    call dealloc_on_gpu(blockvectorr_gpu)
