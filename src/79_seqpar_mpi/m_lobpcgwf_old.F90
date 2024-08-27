@@ -213,6 +213,7 @@ subroutine lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
  use_linalg_gpu=0;use_lapack_gpu=0
  if ((dtset%gpu_option==ABI_GPU_LEGACY).and. &
 & (vectsize*blocksize*blocksize>dtset%gpu_linalg_limit)) use_linalg_gpu=1
+ if (dtset%gpu_option==ABI_GPU_OPENMP) use_linalg_gpu=1
 #if defined HAVE_LINALG_MAGMA
  use_lapack_gpu=use_linalg_gpu
 #endif
