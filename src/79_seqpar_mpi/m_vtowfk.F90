@@ -36,6 +36,7 @@ module m_vtowfk
  use m_dtset
  use m_dtfil
  use m_xomp
+ use m_xg
  use m_xg_nonlop
 
  use defs_abitypes, only : MPI_type
@@ -221,9 +222,9 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  integer :: use_totvnlx=0
  integer :: bandpp_cprj,blocksize,choice,cpopt,iband,iband1
  integer :: iblock,iblocksize,ibs,idir,ierr,igs,igsc,ii,inonsc
- integer :: iorder_cprj,ipw,ispinor,ispinor_index,istwf_k,iwavef,mgsc,my_nspinor,n1,n2,n3 !kk
+ integer :: iorder_cprj,ipw,ispinor,ispinor_index,istwf_k,iwavef,me_g0,mgsc,my_nspinor,n1,n2,n3 !kk
  integer :: nband_k_cprj,nblockbd,ncpgr,ndat,nkpt_max,nnlout,ortalgo
- integer :: paw_opt,quit,signs,spaceComm,tim_nonlop,wfoptalg,wfopta10
+ integer :: paw_opt,quit,signs,space,spaceComm,tim_nonlop,wfoptalg,wfopta10
  logical :: nspinor1TreatedByThisProc,nspinor2TreatedByThisProc
  real(dp) :: ar,ar_im,eshift,occblock,norm
  real(dp) :: residk,weight,cpu,wall,gflops
@@ -247,11 +248,13 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  real(dp),allocatable :: wfraug(:,:,:,:)
 #endif
 
+ real(dp),pointer :: cg_k(:,:)
  real(dp),pointer :: cwavef_iband(:,:)
  type(pawcprj_type),pointer :: cwaveprj(:,:)
  type(pawcprj_type),pointer :: cprj_cwavef_bands(:,:),cprj_cwavef(:,:)
 
  real(dp), allocatable :: weight_t(:) ! only allocated and used with GPU fourwf
+ type(xgBlock_t) :: xgx0,xgeigen,xgforces
 
 
 ! **********************************************************************
@@ -387,6 +390,8 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 !(often 1 for SCF calculation, =nstep for non-SCF calculations)
  call timab(39,1,tsec) ! "vtowfk (loop)"
 
+ cg_k => cg(:,1+icg:npw_k*my_nspinor*nband_k+icg)
+
  do inonsc=1,nnsclo_now
    ABI_NVTX_START_RANGE(NVTX_VTOWFK_EXTRA1)
    if (iscf < 0 .and. (inonsc <= enough .or. mod(inonsc, 10) == 0)) call cwtime(cpu, wall, gflops, "start")
@@ -455,7 +460,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
        if (wfopta10==4) then
 
          if (use_rmm_diis) then
-           call rmm_diis(istep, ikpt, isppol, cg(:,icg+1:), dtset, eig_k, occ_k, enlx_k, gs_hamk, kinpw, gsc, &
+           call rmm_diis(istep, ikpt, isppol, cg_k, dtset, eig_k, occ_k, enlx_k, gs_hamk, kinpw, gsc, &
                          mpi_enreg, nband_k, npw_k, my_nspinor, resid_k, rmm_diis_status)
          else
 
@@ -481,10 +486,10 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 
              ABI_NVTX_START_RANGE(NVTX_LOBPCG2)
              if (dtset%cprj_in_memory==1) then
-               call lobpcgwf2_cprj(cg(:,icg+1:),dtset,eig_k,occ_k,enlx_k,gs_hamk,isppol,ikpt,inonsc,istep,&
+               call lobpcgwf2_cprj(cg_k,dtset,eig_k,occ_k,enlx_k,gs_hamk,isppol,ikpt,inonsc,istep,&
                  kinpw,mpi_enreg,nband_k,npw_k,my_nspinor,prtvol,resid_k,nbdbuf,xg_nonlop)
              else
-               call lobpcgwf2(cg(:,icg+1:),dtset,eig_k,occ_k,enlx_k,gs_hamk,isppol,ikpt,inonsc,istep,kinpw,mpi_enreg,&
+               call lobpcgwf2(cg_k,dtset,eig_k,occ_k,enlx_k,gs_hamk,isppol,ikpt,inonsc,istep,kinpw,mpi_enreg,&
 &               nband_k,npw_k,my_nspinor,prtvol,resid_k,nbdbuf)
              end if
              ABI_NVTX_END_RANGE()
@@ -499,15 +504,15 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
        else if (wfopta10 == 1) then
          if ( .not. xg_diago) then
            ABI_NVTX_START_RANGE(NVTX_CHEBFI1)
-           call chebfi(cg(:, icg+1:),dtset,eig_k,enlx_k,gs_hamk,gsc,kinpw,&
+           call chebfi(cg_k,dtset,eig_k,enlx_k,gs_hamk,gsc,kinpw,&
 &           mpi_enreg,nband_k,npw_k,my_nspinor,prtvol,resid_k)
            ABI_NVTX_END_RANGE()
          else if (dtset%cprj_in_memory==1) then
-           call chebfiwf2_cprj(cg(:,icg+1:),dtset,eig_k,enlx_k,gs_hamk,kinpw,&
+           call chebfiwf2_cprj(cg_k,dtset,eig_k,enlx_k,gs_hamk,kinpw,&
              mpi_enreg,nband_k,npw_k,my_nspinor,prtvol,resid_k,xg_nonlop)
          else
            ABI_NVTX_START_RANGE(NVTX_CHEBFI2)
-           call chebfiwf2(cg(:, icg+1:),dtset,eig_k,enlx_k,gs_hamk,kinpw,&
+           call chebfiwf2(cg_k,dtset,eig_k,enlx_k,gs_hamk,kinpw,&
 &           mpi_enreg,nband_k,npw_k,my_nspinor,prtvol,resid_k)
            ABI_NVTX_END_RANGE()
          end if
@@ -783,6 +788,20 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 !the MPI call is done only once outside the OMP parallel region.
 
  !call cwtime(cpu, wall, gflops, "start")
+
+ !LTEST
+ !write(900,*) 'npband :',mpi_enreg%nproc_band
+ !write(900,*) 'bandpp :',mpi_enreg%bandpp
+ !write(900,*) 'nband_k :',nband_k
+ !write(900,*) 'nblockbd :',nblockbd
+ !write(900,*) 'blocksize :',blocksize
+ !write(901,*) 'npband :',mpi_enreg%nproc_band
+ !write(901,*) 'bandpp :',mpi_enreg%bandpp
+ !write(901,*) 'nband_k :',nband_k
+ !write(901,*) 'nblockbd :',nblockbd
+ !write(901,*) 'blocksize :',blocksize
+ !write(900,*) 'grnl_k :'
+ !LTEST
 
 !Loop over bands or blocks of bands. Note that in sequential mode iblock=iband, nblockbd=nband_k and blocksize=1
  do iblock=1,nblockbd
@@ -1142,6 +1161,55 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    end if
    ABI_NVTX_END_RANGE()
  end do !  End of loop on blocks
+ !LTEST
+ !do iband=1,nband_k
+ !  write(900,*) grnl_k(:,iband)
+ !end do
+ !LTEST
+ !LTEST
+ !flush(900)
+ !LTEST
+
+ if (dtset%cprj_in_memory==1) then
+ !LTEST
+ !write(901,*) 'grnl_k :'
+ !LTEST
+   !Depends on istwfk
+   if ( gs_hamk%istwf_k > 1 ) then ! Real only
+     ! SPACE_CR mean that we have complex numbers but no re*im terms only re*re
+     ! and im*im so that a vector of complex is consider as a long vector of real
+     ! therefore the number of data is (2*npw*nspinor)*nband
+     ! This space is completely equivalent to SPACE_R but will correctly set and
+     ! get the array data into the xgBlock
+     space = SPACE_CR
+   else ! complex
+     space = SPACE_C
+   end if
+   ! Local variables for lobpcg
+   me_g0 = -1
+   !me_g0_fft = -1
+   !if (space==SPACE_CR) then
+   !  me_g0 = 0
+   !  me_g0_fft = 0
+   !  if (gs_hamk%istwf_k == 2) then
+   !    if (l_mpi_enreg%me_g0 == 1) me_g0 = 1
+   !    if (l_mpi_enreg%me_g0_fft == 1) me_g0_fft = 1
+   !  end if
+   !end if
+   call xgBlock_map(xgx0,cg_k,space,npw_k*my_nspinor,nband_k,comm=mpi_enreg%comm_band,me_g0=me_g0,&
+ & gpu_option=dtset%gpu_option)
+   call xgBlock_map_1d(xgeigen,eig_k,SPACE_R,nband_k)
+   call xgBlock_map(xgforces,grnl_k,SPACE_R,3*natom,nband_k)
+   call xg_nonlop_forces(xg_nonlop,xgx0,xgeigen,xgforces)
+   !LTEST
+   !do iband=1,nband_k
+   !  write(901,*) grnl_k(:,iband)
+   !end do
+   !LTEST
+ end if
+ !LTEST
+ !flush(901)
+ !LTEST
  !call cwtime_report(" Block loop", cpu, wall, gflops)
 
  if(dtset%gpu_option==ABI_GPU_KOKKOS) then

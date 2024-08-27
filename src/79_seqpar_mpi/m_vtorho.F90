@@ -931,9 +931,15 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass_free,gmet,kg_k,kinpw,kpoint,npw_k,0,0)
 
 !      Compute (k+G) vectors (only if useylm=1)
-       nkpg=3*optforces*dtset%nloalg(3)
-       ABI_MALLOC(kpg_k,(npw_k,nkpg))
-       if ((mpi_enreg%paral_kgb/=1.or.istep<=1).and.nkpg>0) call mkkpg(kg_k,kpg_k,kpoint,nkpg,npw_k)
+       if (dtset%cprj_in_memory/=1) then
+         nkpg=3*optforces*dtset%nloalg(3)
+         ABI_MALLOC(kpg_k,(npw_k,nkpg))
+         if ((mpi_enreg%paral_kgb/=1.or.istep<=1).and.nkpg>0) call mkkpg(kg_k,kpg_k,kpoint,nkpg,npw_k)
+       else ! cprj_in_memory = 1
+         nkpg=3*optforces
+         ABI_MALLOC(kpg_k,(npw_k,nkpg))
+         if (optforces/=0) call mkkpg(kg_k,kpg_k,kpoint,nkpg,npw_k)
+       end if
 
 !      Compute nonlocal form factors ffnl at all (k+G):
        ider=0;idir=0;dimffnl=1
@@ -1068,7 +1074,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
        if (dtset%cprj_in_memory==1) then
          do_invS=xg_nonlop%paw.and.dtset%wfoptalg==111
-         call xg_nonlop_make_k(xg_nonlop,my_ikpt,istwf_k,mpi_enreg%me_g0,mpi_enreg%me_g0_fft,npw_k,ffnl,ph3d,&
+         call xg_nonlop_make_k(xg_nonlop,my_ikpt,istwf_k,mpi_enreg%me_g0,mpi_enreg%me_g0_fft,npw_k,ffnl,ph3d,kpg_k,&
            & istep<=1,compute_invS_approx=do_invS,compute_gram=do_invS)
        end if
 
