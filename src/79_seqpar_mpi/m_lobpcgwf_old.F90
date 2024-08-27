@@ -142,7 +142,7 @@ subroutine lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
  real(dp), allocatable, target :: coordx1(:,:),coordx2(:,:),coordx3(:,:),lambda(:,:),grama(:,:),gramb(:,:),gramyx(:,:)
  real(dp), allocatable :: tmpgramb(:,:),transf3(:,:,:),transf5(:,:,:)
  real(dp), allocatable :: tsubham(:,:)
- type(pawcprj_type) :: cprj_dum(gs_hamk%natom,0)
+ type(pawcprj_type) :: cprj_dum(gs_hamk%natom,1)
  character(len=500) :: message
  character, dimension(2) :: cparam
  type(c_ptr) :: A_gpu,C_gpu,coordx2_gpu,coordx3_gpu,bblockvector_gpu,gram_gpu
