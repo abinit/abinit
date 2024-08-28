@@ -133,11 +133,10 @@ subroutine lobpcgwf2_cprj(cg,dtset,eig,occ,enl_out,gs_hamk,isppol,ikpt,inonsc,is
    ! This space is completely equivalent to SPACE_R but will correctly set and
    ! get the array data into the xgBlock
    space      = SPACE_CR
-   space_cprj = SPACE_R
  else ! complex
    space      = SPACE_C
-   space_cprj = SPACE_C
  end if
+ space_cprj = xg_nonlop%space_cprj
 
  !For kinetic part of the Hamiltonian
  ABI_MALLOC(kin,(npw))
