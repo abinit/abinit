@@ -90,7 +90,8 @@ module m_vtorho
  use m_wvl_psi,            only : wvl_hpsitopsi, wvl_psitohpsi, wvl_nl_gradient
  use m_inwffil,            only : cg_from_atoms
  use m_gemm_nonlop_projectors, only : set_gemm_nonlop_ikpt, reset_gemm_nonlop, gemm_nonlop_use_gemm, &
-                                      gemm_nonlop_block_size, gemm_nonlop_is_distributed
+                                      gemm_nonlop_nblocks, gemm_nonlop_is_distributed
+ use m_abstract_wf,        only : abstract_wf, init_mywfc
  use m_mlwfovlp,           only : mlwfovlp
 #if defined HAVE_PYTHON_INVOCATION
  use INVOKE_PYTHON
@@ -415,6 +416,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  real(dp),allocatable :: dphasek(:,:),ek_k(:),ek_k_nd(:,:,:),eknk(:),eknk_nd(:,:,:,:,:),end_k(:)
  real(dp),allocatable :: enlx_k(:),enlxnk(:),focknk(:),fockfornk(:,:,:),ffnl(:,:,:,:),grnl_k(:,:), xcart(:,:)
  real(dp),allocatable :: grnlnk(:,:)
+ class(abstract_wf), pointer :: mywfc
 
 #if defined HAVE_GPU && defined HAVE_YAKL
  real(c_double), ABI_CONTIGUOUS pointer :: kinpw(:) => null()
@@ -1570,11 +1572,21 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
         & ,ch10,' =====  Calling Wannier90                      ========'&
         & ,ch10,' ======================================================'
         call wrtout(std_out,msg,'COLL')
-        call mlwfovlp(cryst_struc, ebands, hdr, atindx1, cg, cprj, dtset, dtfil, &
-         eigen, gprimd, kg, dtset%mband, mcg, mcprj, dtset%mgfft, dtset%mkmem, mpi_enreg, &
-         dtset%mpw, dtset%natom, nattyp, dtset%nfft, dtset%ngfft, dtset%nkpt, &
-         npwarr, dtset%nsppol, dtset%ntypat, occ, pawang, pawrad, pawtab, dtset%prtvol, &
-         psps, rprimd, ucvol, xred)
+
+        call init_mywfc(mywfc=mywfc, ebands=ebands, cg=cg, cprj=cprj, &
+         cryst=cryst_struc, dtset=dtset, dtfil=dtfil, hdr=hdr, &
+         MPI_enreg=mpi_enreg, nprocs=mpi_enreg%nproc, psps=psps, pawtab=pawtab, &
+         rank=mpi_enreg%me, comm=mpi_enreg%comm_world)
+
+        call mlwfovlp(mywfc=mywfc, crystal=cryst_struc, ebands=mywfc%ebands, hdr=mywfc%hdr, &
+         atindx1=cryst_struc%atindx1, dtset=mywfc%dtset, dtfil=dtfil, &
+         gprimd=cryst_struc%gprimd, kg=kg, mband=dtset%mband, mcg=mcg, mcprj=mcprj, &
+         mgfftc=dtset%mgfft, mkmem=dtset%mkmem, mpi_enreg=mpi_enreg, &
+         mpw=dtset%mpw, natom=dtset%natom, nattyp=nattyp, nfft=dtset%nfft, ngfft=dtset%ngfft, &
+         nkpt=dtset%nkpt, &
+         npwarr=npwarr, nsppol=dtset%nsppol, ntypat=dtset%ntypat, occ=occ, pawang=pawang, &
+         pawrad=pawrad, pawtab=pawtab, prtvol=dtset%prtvol, &
+         psps=psps, rprimd=rprimd, ucvol=ucvol, xred=xred)
         call xmpi_barrier(spaceComm_distrb)
 
         ! Perform DMFT. No need for most of the pipeline in dmft_solve.
