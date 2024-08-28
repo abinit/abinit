@@ -374,7 +374,7 @@ subroutine getghc_ompgpu(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_
    end if
  end if
  if (any(type_calc == [0, 2, 3])) then
-   local_gvnlxc = size(gvnlxc)==0
+   local_gvnlxc = size(gvnlxc)<=1
    if (local_gvnlxc) then
      ABI_MALLOC(gvnlxc_,(2,npw_k2*my_nspinor*ndat))
    else
