@@ -698,10 +698,7 @@ subroutine inqpt(chksymbreak,iout,jdtset,lenstr,msym,natom,qptn,wtqc,rprimd,spin
      end if
    end if
 
-!DEBUG
-!write(std_out,'(a)')' m_inkpts%inqpt : before symlatt '
-!call flush(std_out)
-!ENDDEBUG
+   !write(std_out,'(a)')' m_inkpts%inqpt : before symlatt '
 
    ! Re-generate symmetry operations from the lattice and atomic coordinates
    ! This is a fundamental difference with respect to the k point generation.
@@ -714,18 +711,12 @@ subroutine inqpt(chksymbreak,iout,jdtset,lenstr,msym,natom,qptn,wtqc,rprimd,spin
    use_inversion=1
    call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
 
-!DEBUG
-!write(std_out,'(a)')' m_inkpts%inqpt : before symfind '
-!call flush(std_out)
-!ENDDEBUG
+   !write(std_out,'(a)')' m_inkpts%inqpt : before symfind '
 
    call symfind(gprimd,msym,natom,nptsym,1,nsym_new,0,&
     ptsymrel,spinat,symafm_new,symrel_new,tnons_new,tolsym,typat,use_inversion,xred)
 
-!DEBUG
-!write(std_out,'(a)')' m_inkpts%inqpt : after symfind '
-!call flush(std_out)
-!ENDDEBUG
+   !write(std_out,'(a)')' m_inkpts%inqpt : after symfind '
 
    ! Prepare to compute the q-point grid in the ZB or IZB
    iscf_fake=0 ! Do not need the weights
@@ -757,9 +748,8 @@ subroutine inqpt(chksymbreak,iout,jdtset,lenstr,msym,natom,qptn,wtqc,rprimd,spin
    end if
 
    if (iqpt > nqpt_computed) then
-     write(msg, '(a,i0,3a,i0,7a)' )&
-      'The input variable iqpt,',iqpt,' is bigger than the computed number of q-points in the grid,',ch10,&
-      'which is ',nqpt_max,'.',ch10,&
+     write(msg, '(a,i0,a,i0,7a)' )&
+      'The input variable iqpt:',iqpt,' is bigger than the computed number of q-points in the grid which is ',nqpt_max,'.',ch10,&
       'The latter has been computed from the input variables qptrlatt, ngqpt, nshiftq,',ch10,&
       'shiftq, as well as qptopt, the symmetries of the lattice, and spinat.',ch10,&
       'Action: correct iqpt in the input file, or correct the computed q-point grid.'
