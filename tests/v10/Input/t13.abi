@@ -37,6 +37,8 @@ ngkpt 3*2
 nshiftk 1
 shiftk 3*0
 
+optforces 1
+
 prtwf 0
 prteig 0
 prtden 0

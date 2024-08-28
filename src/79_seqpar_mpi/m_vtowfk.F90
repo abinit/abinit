@@ -1170,7 +1170,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  !flush(900)
  !LTEST
 
- if (dtset%cprj_in_memory==1) then
+ if (dtset%cprj_in_memory==1.and.optforces>0) then
  !LTEST
  !write(901,*) 'grnl_k :'
  !LTEST
