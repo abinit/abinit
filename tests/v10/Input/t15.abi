@@ -43,6 +43,8 @@ shiftk 3*0
 
 istwfk *1
 
+optforces 1
+
 prtwf 0
 prteig 0
 prtden 0

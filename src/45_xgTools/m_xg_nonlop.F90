@@ -1413,7 +1413,7 @@ subroutine xg_nonlop_getcprj_deriv_atom(xg_nonlop,X,cprjX,work_mpi)
    type(xgBlock_t)  , intent(in   ) :: X
    type(xgBlock_t)  , intent(inout) :: cprjX,work_mpi
 
-   real(dp) :: tsec(2)
+!   real(dp) :: tsec(2)
    integer :: iblock,nmpi,npw,blocksize,nspinor,shift
    integer :: me_band
    type(xgBlock_t) :: X_block,X_spinor
@@ -2605,10 +2605,10 @@ subroutine xg_nonlop_forces(xg_nonlop,Xin,eigen,forces)
    type(xgBlock_t), intent(inout) :: forces
 
    !real(dp) :: tsec(2)
-   integer :: ia,idir,ilmn,iband,my_iband,itypat,nlmn,nattyp
-   integer :: iforces,icprj,icprj_deriv
+   integer :: ia,idir,ilmn,iband,iband_spinor,my_iband,itypat,nlmn,nattyp
+   integer :: ispinor,iforces,icprj,icprj_deriv
    integer :: nmpi,shift
-   integer :: nrows,ncols,ncols_cprj
+   integer :: nrows,ncols,ncols_cprj,ncols_cprj_nospin
    integer :: nrows_diag,ncols_diag
    integer :: nspinor
    integer :: shift_itypat,shift_itypat_nlmn,shift_itypat_3nlmn
@@ -2644,9 +2644,10 @@ subroutine xg_nonlop_forces(xg_nonlop,Xin,eigen,forces)
      ABI_ERROR('ncols_diag should be one')
    end if
 
-!   call timab(tim_getcprj,1,tsec)
-
    ncols_cprj = ncols*nspinor/nmpi
+   ncols_cprj_nospin = ncols/nmpi
+
+!   call timab(tim_getcprj,1,tsec)
 
    call xg_init(cprjin,SPACE_C,xg_nonlop%cprjdim,ncols_cprj,comm=xg_nonlop%comm_band)
    call xg_init(cprj_work,SPACE_C,xg_nonlop%cprjdim,ncols_cprj,comm=xg_nonlop%comm_band)
@@ -2667,7 +2668,7 @@ subroutine xg_nonlop_forces(xg_nonlop,Xin,eigen,forces)
    end if
 
    ! cprj_work = - e cprj_work = -e sum_j Saij cprjin
-   shift = xg_nonlop%me_band*ncols_cprj/xg_nonlop%nspinor
+   shift = xg_nonlop%me_band*ncols_cprj_nospin
    call xgBlock_ymax(cprj_work%self,eigen,shift,nmpi,xg_nonlop%nspinor)
 
    !LTEST
@@ -2738,16 +2739,19 @@ subroutine xg_nonlop_forces(xg_nonlop,Xin,eigen,forces)
      !end do
      !write(901,*) 'gxfac:',cprj_tmp
      !LTEST
-     do iband=1,ncols_cprj
-       do ia = 1, nattyp
-         do idir=1,3
-           do ilmn=1,nlmn
-             my_iband = iband + xg_nonlop%me_band*ncols_cprj
-             iforces     = idir + 3*(ia-1) + shift_itypat
-             icprj       = ilmn + nlmn*(ia-1) + shift_itypat_nlmn
-             icprj_deriv = ilmn + nlmn*(idir-1) + 3*nlmn*(ia-1) + shift_itypat_3nlmn
-             forces_(iforces,my_iband) = forces_(iforces,my_iband) + &
-               & 2 * dble(conjg(cprj_deriv_(icprj_deriv,iband))*cprj_(icprj,iband))
+     do iband=1,ncols_cprj_nospin
+       do ispinor=1,nspinor
+         do ia = 1, nattyp
+           do idir=1,3
+             do ilmn=1,nlmn
+               my_iband = iband + xg_nonlop%me_band*ncols_cprj_nospin
+               iband_spinor = ispinor + nspinor*(iband-1)
+               iforces     = idir + 3*(ia-1) + shift_itypat
+               icprj       = ilmn + nlmn*(ia-1) + shift_itypat_nlmn
+               icprj_deriv = ilmn + nlmn*(idir-1) + 3*nlmn*(ia-1) + shift_itypat_3nlmn
+               forces_(iforces,my_iband) = forces_(iforces,my_iband) &
+                 & + 2 * dble(conjg(cprj_deriv_(icprj_deriv,iband_spinor))*cprj_(icprj,iband_spinor))
+             end do
            end do
          end do
        end do
