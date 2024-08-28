@@ -554,7 +554,7 @@ subroutine alloc_ompgpu_fourwf(ngfft, ndat)
  integer, intent(in) :: ngfft(18), ndat
 
  integer :: n1,n2,n3, ldx, ldy, ldz
- integer, target :: t_fft(3)
+ integer, target :: t_fft(3),embed(3)
 
  fourwf_initialized = 1
 
@@ -573,8 +573,12 @@ subroutine alloc_ompgpu_fourwf(ngfft, ndat)
  t_fft(2) = n2;
  t_fft(3) = n1;
 
+ embed(1) = ldz
+ embed(2) = ldy
+ embed(3) = ldx
+
  ! Creation du plan
- call gpu_fft_plan_many(FOURWF_ID, 3, c_loc(t_fft), c_null_ptr, 1, ldx*ldy*ldz, c_null_ptr, 1, ldx*ldy*ldz, FFT_Z2Z, ndat);
+ call gpu_fft_plan_many(FOURWF_ID, 3, c_loc(t_fft), c_loc(embed), 1, ldx*ldy*ldz, c_loc(embed), 1, ldx*ldy*ldz, FFT_Z2Z, ndat);
 
  ABI_MALLOC(work_gpu, (2,n1,n2,n3*ndat))
  !FIXME Smarter buffer management ?
