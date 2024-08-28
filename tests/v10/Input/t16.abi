@@ -24,7 +24,6 @@ pawecutdg 10
 nstep 15
 nline  8
 
-optforces 0
 optstress 0
 
 # bands and spinors

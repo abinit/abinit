@@ -790,17 +790,17 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  !call cwtime(cpu, wall, gflops, "start")
 
  !LTEST
- !write(900,*) 'npband :',mpi_enreg%nproc_band
- !write(900,*) 'bandpp :',mpi_enreg%bandpp
- !write(900,*) 'nband_k :',nband_k
- !write(900,*) 'nblockbd :',nblockbd
- !write(900,*) 'blocksize :',blocksize
- !write(901,*) 'npband :',mpi_enreg%nproc_band
- !write(901,*) 'bandpp :',mpi_enreg%bandpp
- !write(901,*) 'nband_k :',nband_k
- !write(901,*) 'nblockbd :',nblockbd
- !write(901,*) 'blocksize :',blocksize
- !write(900,*) 'grnl_k :'
+ write(900,*) 'npband :',mpi_enreg%nproc_band
+ write(900,*) 'bandpp :',mpi_enreg%bandpp
+ write(900,*) 'nband_k :',nband_k
+ write(900,*) 'nblockbd :',nblockbd
+ write(900,*) 'blocksize :',blocksize
+ write(901,*) 'npband :',mpi_enreg%nproc_band
+ write(901,*) 'bandpp :',mpi_enreg%bandpp
+ write(901,*) 'nband_k :',nband_k
+ write(901,*) 'nblockbd :',nblockbd
+ write(901,*) 'blocksize :',blocksize
+ write(900,*) 'grnl_k :'
  !LTEST
 
 !Loop over bands or blocks of bands. Note that in sequential mode iblock=iband, nblockbd=nband_k and blocksize=1
@@ -1162,17 +1162,19 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    ABI_NVTX_END_RANGE()
  end do !  End of loop on blocks
  !LTEST
- !do iband=1,nband_k
- !  write(900,*) grnl_k(:,iband)
- !end do
+ write(900,*) ''
+ do iband=1,nband_k
+   write(900,*) grnl_k(:,iband)
+ end do
  !LTEST
  !LTEST
- !flush(900)
+ write(900,*) ''
+ flush(900)
  !LTEST
 
  if (dtset%cprj_in_memory==1.and.optforces>0) then
  !LTEST
- !write(901,*) 'grnl_k :'
+ write(901,*) 'grnl_k :'
  !LTEST
    !Depends on istwfk
    if ( gs_hamk%istwf_k > 1 ) then ! Real only
@@ -1185,30 +1187,28 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    else ! complex
      space = SPACE_C
    end if
-   ! Local variables for lobpcg
    me_g0 = -1
-   !me_g0_fft = -1
-   !if (space==SPACE_CR) then
-   !  me_g0 = 0
-   !  me_g0_fft = 0
-   !  if (gs_hamk%istwf_k == 2) then
-   !    if (l_mpi_enreg%me_g0 == 1) me_g0 = 1
-   !    if (l_mpi_enreg%me_g0_fft == 1) me_g0_fft = 1
-   !  end if
-   !end if
+   if (space==SPACE_CR) then
+     me_g0 = 0
+     if (gs_hamk%istwf_k == 2) then
+       if (mpi_enreg%me_g0 == 1) me_g0 = 1
+     end if
+   end if
    call xgBlock_map(xgx0,cg_k,space,npw_k*my_nspinor,nband_k,comm=mpi_enreg%comm_band,me_g0=me_g0,&
  & gpu_option=dtset%gpu_option)
    call xgBlock_map_1d(xgeigen,eig_k,SPACE_R,nband_k)
    call xgBlock_map(xgforces,grnl_k,SPACE_R,3*natom,nband_k)
    call xg_nonlop_forces(xg_nonlop,xgx0,xgeigen,xgforces)
    !LTEST
-   !do iband=1,nband_k
-   !  write(901,*) grnl_k(:,iband)
-   !end do
+   write(901,*) ''
+   do iband=1,nband_k
+     write(901,*) grnl_k(:,iband)
+   end do
    !LTEST
  end if
  !LTEST
- !flush(901)
+ write(901,*) ''
+ flush(901)
  !LTEST
  !call cwtime_report(" Block loop", cpu, wall, gflops)
 
