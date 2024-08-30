@@ -759,8 +759,8 @@ contains
   real(dp),pointer :: projectors_k_real(:,:)
   real(dp),pointer :: projectors_deriv_atom_k_real(:,:)
 
-  integer :: shift_itypat,shift_itypat_nlmn,shift_itypat_3nlmn,ntypat,nattyp
-  integer :: icol,icol_deriv,ilmn,nlmn,ipw,ia,iatom,itypat,idir
+  integer :: shift_itypat_nlmn,shift_itypat_3nlmn,ntypat,nattyp
+  integer :: icol,icol_deriv,ilmn,nlmn,ipw,ia,itypat,idir
   complex(dp) :: ctmp(3)
   real(dp) :: tmp(3),proj_deriv_ipw_re,proj_deriv_ipw_im
   !LTEST
@@ -793,13 +793,12 @@ contains
 
       call xgBlock_reverseMap(xg_nonlop%projectors_k%self,projectors_k_)
       call xgBlock_reverseMap(projs_deriv_atom,projectors_deriv_atom_k_)
-      shift_itypat=0
       shift_itypat_nlmn=0
       shift_itypat_3nlmn=0
       !$omp parallel default (none) &
       !$omp& shared(xg_nonlop,projectors_k_,projectors_deriv_atom_k_), &
-      !$omp& firstprivate(ntypat,shift_itypat,shift_itypat_nlmn,shift_itypat_3nlmn), &
-      !$omp& private(itypat,nattyp,nlmn,ia,ilmn,ipw,iatom,idir,icol,icol_deriv,ctmp)
+      !$omp& firstprivate(ntypat,shift_itypat_nlmn,shift_itypat_3nlmn), &
+      !$omp& private(itypat,nattyp,nlmn,ia,ilmn,ipw,idir,icol,icol_deriv,ctmp)
       do itypat = 1, ntypat
         nlmn = xg_nonlop%nlmn_ntypat(itypat)
         nattyp = xg_nonlop%nattyp(itypat)
@@ -808,7 +807,6 @@ contains
         do ia = 1, nattyp
           do ilmn=1,nlmn
             do ipw=1,xg_nonlop%npw_k
-              iatom = ia + shift_itypat
               icol = ilmn + (ia-1)*nlmn + shift_itypat_nlmn
               ctmp(:) = ( 0.0_DP, -1.0_DP) * two_pi * xg_nonlop%kpg_k(ipw,:)
               do idir=1,3
@@ -819,7 +817,6 @@ contains
           end do
         end do
         !$omp end do
-        shift_itypat       = shift_itypat       + nattyp
         shift_itypat_nlmn  = shift_itypat_nlmn  + nattyp*nlmn
         shift_itypat_3nlmn = shift_itypat_3nlmn + nattyp*3*nlmn
       end do
@@ -829,13 +826,12 @@ contains
 
       call xgBlock_reverseMap(xg_nonlop%projectors_k%self,projectors_k_real)
       call xgBlock_reverseMap(projs_deriv_atom,projectors_deriv_atom_k_real)
-      shift_itypat=0
       shift_itypat_nlmn=0
       shift_itypat_3nlmn=0
       !$omp parallel default (none) &
       !$omp& shared(xg_nonlop,projectors_k_real,projectors_deriv_atom_k_real), &
-      !$omp& firstprivate(ntypat,shift_itypat,shift_itypat_nlmn,shift_itypat_3nlmn), &
-      !$omp& private(itypat,nattyp,nlmn,ia,ilmn,ipw,iatom,idir,icol,icol_deriv,tmp), &
+      !$omp& firstprivate(ntypat,shift_itypat_nlmn,shift_itypat_3nlmn), &
+      !$omp& private(itypat,nattyp,nlmn,ia,ilmn,ipw,idir,icol,icol_deriv,tmp), &
       !$omp& private(proj_deriv_ipw_re,proj_deriv_ipw_im)
       do itypat = 1, ntypat
         nlmn = xg_nonlop%nlmn_ntypat(itypat)
@@ -845,7 +841,6 @@ contains
         do ia = 1, nattyp
           do ilmn=1,nlmn
             do ipw=1,xg_nonlop%npw_k
-              iatom = ia + shift_itypat
               icol = ilmn + (ia-1)*nlmn + shift_itypat_nlmn
               tmp(:) = - two_pi * xg_nonlop%kpg_k(ipw,:)
               do idir=1,3
@@ -869,7 +864,6 @@ contains
           end do
         end do
         !$omp end do
-        shift_itypat       = shift_itypat       + nattyp
         shift_itypat_nlmn  = shift_itypat_nlmn  + nattyp*nlmn
         shift_itypat_3nlmn = shift_itypat_3nlmn + nattyp*3*nlmn
       end do
@@ -2607,10 +2601,12 @@ subroutine xg_nonlop_getXHX(xg_nonlop,cprj_left,cprj_right,cprj_work,res,blocksi
 !!
 !! INPUTS
 !!
-subroutine xg_nonlop_forces(xg_nonlop,Xin,eigen,forces)
+subroutine xg_nonlop_forces(xg_nonlop,Xin,cprjin,cprj_work,eigen,forces)
 
    type(xg_nonlop_t), intent(in) :: xg_nonlop
    type(xgBlock_t), intent(in) :: Xin,eigen
+   type(xgBlock_t), intent(in) :: cprjin
+   type(xgBlock_t), intent(inout) :: cprj_work
    type(xgBlock_t), intent(inout) :: forces
 
    !real(dp) :: tsec(2)
@@ -2622,7 +2618,6 @@ subroutine xg_nonlop_forces(xg_nonlop,Xin,eigen,forces)
    integer :: nspinor,space_cprj
    integer :: shift_itypat,shift_itypat_nlmn,shift_itypat_3nlmn
 
-   type(xg_t) :: cprjin,cprj_work
    type(xg_t) :: cprj_deriv_atom,work_mpi_deriv_atom
    real(dp), pointer :: forces_(:,:)
    complex(dp), pointer :: cprj_(:,:),cprj_deriv_(:,:)
@@ -2632,10 +2627,6 @@ subroutine xg_nonlop_forces(xg_nonlop,Xin,eigen,forces)
    !LTEST
 
 !   call timab(tim_getHmeSX,1,tsec)
-
-   if (.not.xg_nonlop%paw) then
-     ABI_ERROR('Not implemented with paw=False.')
-   end if
 
    if (comm(Xin)/=xg_nonlop%comm_band) then
      ABI_ERROR('wrong communicator')
@@ -2661,11 +2652,6 @@ subroutine xg_nonlop_forces(xg_nonlop,Xin,eigen,forces)
 
    space_cprj = xg_nonlop%space_cprj
 
-   call xg_init(cprjin,space_cprj,xg_nonlop%cprjdim,ncols_cprj,comm=xg_nonlop%comm_band)
-   call xg_init(cprj_work,space_cprj,xg_nonlop%cprjdim,ncols_cprj,comm=xg_nonlop%comm_band)
-
-   call xg_nonlop_getcprj(xg_nonlop,Xin,cprjin%self,cprj_work%self)
-
    !LTEST
    !write(901,*) 'Xin:',xgBlock_getId(Xin)
    !write(901,*) 'cprjin:',xgBlock_getId(cprjin%self)
@@ -2673,15 +2659,15 @@ subroutine xg_nonlop_forces(xg_nonlop,Xin,eigen,forces)
 
    ! cprj_work = sum_j Saij cprjin
    if (xg_nonlop%paw) then
-     call xgBlock_zero(cprj_work%self)
-     call xg_nonlop_apply_Aij(xg_nonlop,xg_nonlop%Sij,cprjin%self,cprj_work%self)
+     call xgBlock_zero(cprj_work)
+     call xg_nonlop_apply_Aij(xg_nonlop,xg_nonlop%Sij,cprjin,cprj_work)
    else
-     call xgBlock_copy(cprjin%self,cprj_work%self)
+     call xgBlock_copy(cprjin,cprj_work)
    end if
 
    ! cprj_work = - e cprj_work = -e sum_j Saij cprjin
    shift = xg_nonlop%me_band*ncols_cprj_nospin
-   call xgBlock_ymax(cprj_work%self,eigen,shift,nmpi,xg_nonlop%nspinor)
+   call xgBlock_ymax(cprj_work,eigen,shift,nmpi,xg_nonlop%nspinor)
 
    !LTEST
    !call xgBlock_reverseMap(cprjin%self,cprj_)
@@ -2711,9 +2697,11 @@ subroutine xg_nonlop_forces(xg_nonlop,Xin,eigen,forces)
 
    ! TO DO : implement paw=False
    ! cprj_work = sum_j Daij cprjin + cprj_work
-   call xg_nonlop_apply_Aij(xg_nonlop,xg_nonlop%Dij,cprjin%self,cprj_work%self)
-
-   call xg_free(cprjin)
+   if (xg_nonlop%paw) then
+     call xg_nonlop_apply_Aij(xg_nonlop,xg_nonlop%Dij,cprjin,cprj_work)
+   else
+     call xg_nonlop_apply_diag(xg_nonlop,xg_nonlop%ekb,cprjin,cprj_work)
+   end if
 
    !LTEST
    !write(901,*) 'cprj_work:',xgBlock_getId(cprj_work%self)
@@ -2763,7 +2751,7 @@ subroutine xg_nonlop_forces(xg_nonlop,Xin,eigen,forces)
 
      case (SPACE_C)
 
-       call xgBlock_reverseMap(cprj_work%self,cprj_)
+       call xgBlock_reverseMap(cprj_work,cprj_)
        call xgBlock_reverseMap(cprj_deriv_atom%self,cprj_deriv_)
 
            !LTEST
@@ -2792,8 +2780,8 @@ subroutine xg_nonlop_forces(xg_nonlop,Xin,eigen,forces)
              do ilmn=1,nlmn
                do idir=1,3
                  icprj_deriv = ilmn + nlmn*(idir-1) + 3*nlmn*(ia-1) + shift_itypat_3nlmn
-                 cprj_tmp(1,idir+3*(ilmn-1+(ia-1)*nlmn)) = dble (cprj_deriv_(icprj_deriv,iband))
-                 cprj_tmp(2,idir+3*(ilmn-1+(ia-1)*nlmn)) = dimag(cprj_deriv_(icprj_deriv,iband))
+                 cprj_tmp(1,idir+3*(ilmn-1)+(ia-1)*3*nlmn) = dble (cprj_deriv_(icprj_deriv,iband))
+                 cprj_tmp(2,idir+3*(ilmn-1)+(ia-1)*3*nlmn) = dimag(cprj_deriv_(icprj_deriv,iband))
                end do
              end do
            end do
@@ -2827,7 +2815,7 @@ subroutine xg_nonlop_forces(xg_nonlop,Xin,eigen,forces)
 
      case (SPACE_R)
 
-       call xgBlock_reverseMap(cprj_work%self,cprj_real)
+       call xgBlock_reverseMap(cprj_work,cprj_real)
        call xgBlock_reverseMap(cprj_deriv_atom%self,cprj_deriv_real)
 
        !LTEST
@@ -2855,7 +2843,7 @@ subroutine xg_nonlop_forces(xg_nonlop,Xin,eigen,forces)
              do ilmn=1,nlmn
                do idir=1,3
                  icprj_deriv = ilmn + nlmn*(idir-1) + 3*nlmn*(ia-1) + shift_itypat_3nlmn
-                 cprj_tmp(1,idir+3*(ilmn-1+(ia-1)*nlmn)) = cprj_deriv_real(icprj_deriv,iband)
+                 cprj_tmp(1,idir+3*(ilmn-1)+(ia-1)*3*nlmn) = cprj_deriv_real(icprj_deriv,iband)
                end do
              end do
            end do
@@ -2897,7 +2885,6 @@ subroutine xg_nonlop_forces(xg_nonlop,Xin,eigen,forces)
 
    call xgBlock_mpi_sum(forces,comm=xg_nonlop%comm_band)
 
-   call xg_free(cprj_work)
    call xg_free(cprj_deriv_atom)
 
 !   call timab(tim_getHmeSX,2,tsec)

@@ -55,7 +55,7 @@ module m_vtowfk
  use m_lobpcgwf,    only : lobpcgwf2
  use m_chebfiwf,    only : chebfiwf2
  use m_chebfiwf_cprj,only : chebfiwf2_cprj
- use m_lobpcgwf_cprj,only : lobpcgwf2_cprj
+ use m_lobpcgwf_cprj,only : lobpcgwf2_cprj,xg_cprj_copy,XG_TO_CPRJ
  use m_spacepar,    only : meanvalue_g
  use m_chebfi,      only : chebfi
  use m_rmm_diis,    only : rmm_diis
@@ -223,7 +223,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  integer :: bandpp_cprj,blocksize,choice,cpopt,iband,iband1
  integer :: iblock,iblocksize,ibs,idir,ierr,igs,igsc,ii,inonsc
  integer :: iorder_cprj,ipw,ispinor,ispinor_index,istwf_k,iwavef,me_g0,mgsc,my_nspinor,n1,n2,n3 !kk
- integer :: nband_k_cprj,nblockbd,ncpgr,ndat,nkpt_max,nnlout,ortalgo
+ integer :: nband_k_cprj,ncols_cprj,nblockbd,ncpgr,ndat,nkpt_max,nnlout,ortalgo
  integer :: paw_opt,quit,signs,space,spaceComm,tim_nonlop,wfoptalg,wfopta10
  logical :: nspinor1TreatedByThisProc,nspinor2TreatedByThisProc
  real(dp) :: ar,ar_im,eshift,occblock,norm
@@ -255,6 +255,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 
  real(dp), allocatable :: weight_t(:) ! only allocated and used with GPU fourwf
  type(xgBlock_t) :: xgx0,xgeigen,xgforces
+ type(xg_t) :: cprj_xgx0,cprj_work
 
 
 ! **********************************************************************
@@ -1109,7 +1110,10 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
          grnl_k(1:nnlout,iband)=enlout(ibs+1:ibs+nnlout)
        end do
      end if ! PAW or forces
-   else
+     !LTEST
+   !else if (dtset%cprj_in_memory/=1) then
+   else if (dtset%cprj_in_memory/=1.or.gs_hamk%usepaw==1) then
+     !LTEST
      if(iscf>0.or.gs_hamk%usecprj==1)then
        if (gs_hamk%usepaw==1.or.optforces/=0) then
 !        Treat all wavefunctions in case of varying occupation numbers or PAW
@@ -1172,43 +1176,65 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  flush(900)
  !LTEST
 
- if (dtset%cprj_in_memory==1.and.optforces>0) then
- !LTEST
- write(901,*) 'grnl_k :'
- !LTEST
-   !Depends on istwfk
-   if ( gs_hamk%istwf_k > 1 ) then ! Real only
-     ! SPACE_CR mean that we have complex numbers but no re*im terms only re*re
-     ! and im*im so that a vector of complex is consider as a long vector of real
-     ! therefore the number of data is (2*npw*nspinor)*nband
-     ! This space is completely equivalent to SPACE_R but will correctly set and
-     ! get the array data into the xgBlock
-     space = SPACE_CR
-   else ! complex
-     space = SPACE_C
-   end if
-   me_g0 = -1
-   if (space==SPACE_CR) then
-     me_g0 = 0
-     if (gs_hamk%istwf_k == 2) then
-       if (mpi_enreg%me_g0 == 1) me_g0 = 1
+ if (dtset%cprj_in_memory==1) then
+
+   if(iscf>0.or.gs_hamk%usepaw==1)then
+
+     if ( gs_hamk%istwf_k > 1 ) then ! Real only
+       space = SPACE_CR
+     else ! complex
+       space = SPACE_C
      end if
+     me_g0 = -1
+     if (space==SPACE_CR) then
+       me_g0 = 0
+       if (gs_hamk%istwf_k == 2) then
+         if (mpi_enreg%me_g0 == 1) me_g0 = 1
+       end if
+     end if
+     call xgBlock_map(xgx0,cg_k,space,npw_k*my_nspinor,nband_k,comm=mpi_enreg%comm_band,me_g0=me_g0,&
+ &   gpu_option=dtset%gpu_option)
+     call xgBlock_map_1d(xgeigen,eig_k,SPACE_R,nband_k)
+     call xgBlock_map(xgforces,grnl_k,SPACE_R,3*natom,nband_k)
+
+     ncols_cprj = nband_k*my_nspinor/mpi_enreg%nproc_band
+
+     call xg_init(cprj_xgx0,xg_nonlop%space_cprj,xg_nonlop%cprjdim,ncols_cprj,comm=xg_nonlop%comm_band)
+     call xg_init(cprj_work,xg_nonlop%space_cprj,xg_nonlop%cprjdim,ncols_cprj,comm=xg_nonlop%comm_band)
+
+     if (optforces/=0.or.gs_hamk%usepaw==1) then
+       call xg_nonlop_getcprj(xg_nonlop,xgx0,cprj_xgx0%self,cprj_work%self)
+     end if
+
+     if (optforces/=0) then
+       !LTEST
+       write(901,*) 'grnl_k :'
+       !LTEST
+       call xg_nonlop_forces(xg_nonlop,xgx0,cprj_xgx0%self,cprj_work%self,xgeigen,xgforces)
+       !LTEST
+       write(901,*) ''
+       do iband=1,nband_k
+         write(901,*) grnl_k(:,iband)
+       end do
+       write(901,*) ''
+       !LTEST
+     end if
+
+     if (gs_hamk%usepaw==1) then
+       cprj_cwavef_bands => cprj(:,1+ibg:ncols_cprj+ibg)
+       call xg_cprj_copy(cprj_cwavef_bands,cprj_xgx0%self,xg_nonlop,XG_TO_CPRJ)
+     end if
+
+     call xg_free(cprj_xgx0)
+     call xg_free(cprj_work)
+
    end if
-   call xgBlock_map(xgx0,cg_k,space,npw_k*my_nspinor,nband_k,comm=mpi_enreg%comm_band,me_g0=me_g0,&
- & gpu_option=dtset%gpu_option)
-   call xgBlock_map_1d(xgeigen,eig_k,SPACE_R,nband_k)
-   call xgBlock_map(xgforces,grnl_k,SPACE_R,3*natom,nband_k)
-   call xg_nonlop_forces(xg_nonlop,xgx0,xgeigen,xgforces)
-   !LTEST
-   write(901,*) ''
-   do iband=1,nband_k
-     write(901,*) grnl_k(:,iband)
-   end do
-   !LTEST
+
  end if
+
  !LTEST
- write(901,*) ''
  flush(901)
+ flush(900)
  !LTEST
  !call cwtime_report(" Block loop", cpu, wall, gflops)
 
