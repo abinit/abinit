@@ -1212,20 +1212,11 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
      ABI_FREE(gs_ham%ph3d_kp)
    end if
 #ifdef HAVE_OPENMP_OFFLOAD
-   !$OMP TARGET EXIT DATA MAP(delete:rhor_munu) IF(gpu_option==ABI_GPU_OPENMP)
+   !$OMP TARGET EXIT DATA MAP(delete:rhor_munu,rhog_munu,vfock,occ,rho12,gvnlxc) IF(gpu_option==ABI_GPU_OPENMP)
 #endif
    ABI_FREE(rhor_munu)
-#ifdef HAVE_OPENMP_OFFLOAD
-   !$OMP TARGET EXIT DATA MAP(delete:rhog_munu) IF(gpu_option==ABI_GPU_OPENMP)
-#endif
    ABI_FREE(rhog_munu)
-#ifdef HAVE_OPENMP_OFFLOAD
-   !$OMP TARGET EXIT DATA MAP(delete:vfock) IF(gpu_option==ABI_GPU_OPENMP)
-#endif
    ABI_FREE(vfock)
-#ifdef HAVE_OPENMP_OFFLOAD
-   !$OMP TARGET EXIT DATA MAP(delete:occ) IF(gpu_option==ABI_GPU_OPENMP)
-#endif
    ABI_FREE(occ)
   !*Additional arrays in case of paw
    if (fockcommon%usepaw==1) then
@@ -1245,14 +1236,8 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
      !$OMP TARGET EXIT DATA MAP(delete:grnhat_12) IF(gpu_option==ABI_GPU_OPENMP .and. ider==3)
 #endif
      ABI_FREE(grnhat_12)
-#ifdef HAVE_OPENMP_OFFLOAD
-     !$OMP TARGET EXIT DATA MAP(delete:gvnlxc) IF(gpu_option==ABI_GPU_OPENMP)
-#endif
      ABI_FREE(gvnlxc)
      ABI_FREE(grnhat12)
-#ifdef HAVE_OPENMP_OFFLOAD
-     !$OMP TARGET EXIT DATA MAP(delete:rho12) IF(gpu_option==ABI_GPU_OPENMP)
-#endif
      ABI_FREE(rho12)
    end if
 
@@ -1291,17 +1276,14 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
 ! === Deallocate local arrays ===
 ! ===============================
 #ifdef HAVE_OPENMP_OFFLOAD
-   !$OMP TARGET EXIT DATA MAP(delete:cwavef_r) IF(gpu_option==ABI_GPU_OPENMP)
+   !$OMP TARGET EXIT DATA MAP(delete:cwavef_r,vqg,vlocpsi_r) IF(gpu_option==ABI_GPU_OPENMP)
 #endif
    ABI_FREE(cwavef_r)
 #ifdef HAVE_OPENMP_OFFLOAD
-   !$OMP TARGET EXIT DATA MAP(delete:ghc1,ghc2,vqg) IF(gpu_option==ABI_GPU_OPENMP)
+   !$OMP TARGET EXIT DATA MAP(delete:ghc1,ghc2) IF(gpu_option==ABI_GPU_OPENMP)
 #endif
    ABI_FREE(ghc1)
    ABI_FREE(ghc2)
-#ifdef HAVE_OPENMP_OFFLOAD
-   !$OMP TARGET EXIT DATA MAP(delete:vlocpsi_r) IF(gpu_option==ABI_GPU_OPENMP)
-#endif
    ABI_FREE(vlocpsi_r)
    ABI_FREE(dummytab)
    ABI_FREE(vqg)
@@ -1411,17 +1393,11 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
 !   === Deallocate local arrays ===
 !   ===============================
 #ifdef HAVE_OPENMP_OFFLOAD
-   !$OMP TARGET EXIT DATA MAP(delete:cwavef_r) IF(gpu_option==ABI_GPU_OPENMP)
+   !$OMP TARGET EXIT DATA MAP(delete:cwavef_r,ghc1,ghc2,vqg,vlocpsi_r) IF(gpu_option==ABI_GPU_OPENMP)
 #endif
    ABI_FREE(cwavef_r)
-#ifdef HAVE_OPENMP_OFFLOAD
-   !$OMP TARGET EXIT DATA MAP(delete:ghc1,ghc2,vqg) IF(gpu_option==ABI_GPU_OPENMP)
-#endif
    ABI_FREE(ghc1)
    ABI_FREE(ghc2)
-#ifdef HAVE_OPENMP_OFFLOAD
-   !$OMP TARGET EXIT DATA MAP(delete:vlocpsi_r) IF(gpu_option==ABI_GPU_OPENMP)
-#endif
    ABI_FREE(vlocpsi_r)
    ABI_FREE(dummytab)
    ABI_FREE(vqg)
