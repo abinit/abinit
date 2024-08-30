@@ -53,15 +53,16 @@ module m_lobpcgwf_cprj
 
  integer, parameter :: l_tim_getghc=5
 
- integer, parameter :: CPRJ_ALLOC=1
- integer, parameter :: CPRJ_FREE=2
-
 ! For use in getghc_gsc1
  integer, save :: l_prtvol
  type(mpi_type),pointer,save :: l_mpi_enreg
  type(gs_hamiltonian_type),pointer,save :: l_gs_hamk
 
  public :: lobpcgwf2_cprj
+ public :: xg_cprj_copy
+
+ integer,parameter,public :: XG_TO_CPRJ=1
+ integer,parameter,public :: CPRJ_TO_XG=2
 
  contains
 !!***
@@ -168,8 +169,6 @@ subroutine lobpcgwf2_cprj(cg,dtset,eig,occ,enl_out,gs_hamk,isppol,ikpt,inonsc,is
 
  call xgBlock_map_1d(xgenl,enl_out,SPACE_R,nband)
 
- !call xg_cprj_copy(cprj_cwavef_bands,cprj_contiguous,space_cprj,nband_cprj,cprj_xgx0,&
- !  & xg_nonlop,l_mpi_enreg%comm_band,CPRJ_ALLOC)
  call xg_init(cprj_xgx0,space_cprj,xg_nonlop%cprjdim,nband_cprj*nspinor,comm=l_mpi_enreg%comm_band)
 
  call xgBlock_map_1d(xgocc,occ,SPACE_R,nband,gpu_option=dtset%gpu_option)
@@ -186,8 +185,6 @@ subroutine lobpcgwf2_cprj(cg,dtset,eig,occ,enl_out,gs_hamk,isppol,ikpt,inonsc,is
  ABI_FREE(pcon)
  ABI_FREE(kin)
 
- !call xg_cprj_copy(cprj_cwavef_bands,cprj_contiguous,space_cprj,nband_cprj,cprj_xgx0,&
- !  & xg_nonlop,l_mpi_enreg%comm_band,CPRJ_FREE)
  call xg_free(cprj_xgx0)
 
  ! Free lobpcg
@@ -300,51 +297,79 @@ subroutine build_kin(kin,kinpw,npw)
 
 end subroutine build_kin
 
-subroutine xg_cprj_copy(cprj_cwavef_bands,cprj_contiguous,space_cprj,ncprj,xg_cprj,xg_nonlop,comm,option)
+subroutine xg_cprj_copy(cprj,xg_cprj,xg_nonlop,option)
 
   implicit none
 
-  integer, intent(in) :: comm,space_cprj,ncprj,option
-  type(pawcprj_type),intent(inout)   :: cprj_cwavef_bands(:,:)
-  real(dp),allocatable,intent(inout) :: cprj_contiguous(:,:)
+  integer, intent(in) :: option
+  type(pawcprj_type),intent(inout)   :: cprj(:,:)
   type(xgBlock_t), intent(inout) :: xg_cprj
   type(xg_nonlop_t), intent(in)  :: xg_nonlop
 
-  integer :: cplex,cprj_index,iatom,iband,ispinor,nlmn,nspinor
+  real(dp),pointer :: cprj_contiguous(:,:)
+  integer :: cplex,cprj_shift,iatom,iband,iband_spin,ilmn,ispinor
+  integer :: natom,nband_cprj,nlmn,nspinor
+  integer :: start,end,space_cprj
 
-  if (option/=CPRJ_ALLOC.and.option/=CPRJ_FREE) then
+  if (option/=XG_TO_CPRJ.and.option/=CPRJ_TO_XG) then
     ABI_ERROR('Bad option')
   end if
 
-  cplex=2;if (space_cprj==SPACE_R) cplex=1
-
+  natom   = xg_nonlop%natom
   nspinor = xg_nonlop%nspinor
 
-  if (option==CPRJ_ALLOC) then
-    ABI_MALLOC(cprj_contiguous,(cplex,xg_nonlop%cprjdim*ncprj*nspinor))
-    call xgBlock_map(xg_cprj,cprj_contiguous,space_cprj,xg_nonlop%cprjdim,ncprj*nspinor,comm)
+  nband_cprj   = cols(xg_cprj)/nspinor
+
+  if (size(cprj,1)/=natom) then
+    ABI_ERROR('Bad size for cprj_cwavef_bands (for dim=1)')
+  end if
+  if (size(cprj,2)/=nband_cprj*nspinor) then
+    ABI_ERROR('Bad size for cprj_cwavef_bands (for dim=2)')
   end if
 
-  cprj_index=1
-  do iband=1,ncprj
-    do iatom=1,xg_nonlop%natom
-      nlmn=xg_nonlop%nlmn_natom(iatom)
-      do ispinor=1,nspinor
-        if (option==CPRJ_ALLOC) then
-          cprj_contiguous(:,cprj_index:cprj_index+nlmn-1) = &
-            cprj_cwavef_bands(iatom,(iband-1)*nspinor+ispinor)%cp(1:cplex,1:nlmn)
-        else
-          cprj_cwavef_bands(iatom,(iband-1)*nspinor+ispinor)%cp(1:cplex,1:nlmn) = &
-            & cprj_contiguous(:,cprj_index:cprj_index+nlmn-1)
+  space_cprj = space(xg_cprj)
+  cplex=2;if (space_cprj==SPACE_R) cplex=1
+
+  call xgBlock_reverseMap(xg_cprj,cprj_contiguous)
+
+  if (size(cprj_contiguous,1)/=cplex*xg_nonlop%cprjdim) then
+    ABI_ERROR('Bad size for cprj_contiguous (for dim=1)')
+  end if
+
+  do iband=1,nband_cprj
+    do ispinor=1,nspinor
+      iband_spin = (iband-1)*nspinor+ispinor
+      cprj_shift=0
+      do iatom=1,natom
+        nlmn=xg_nonlop%nlmn_natom(iatom)
+        if (size(cprj(iatom,iband_spin)%cp)/=2*nlmn) then ! NOTE: cprj%cp size is always (2,nlmn) even in the real case
+          ABI_ERROR('Bad size for cprj_cwavef_bands%cp')
         end if
-        cprj_index=cprj_index+nlmn
+        !LTEST
+        write(900,*) cprj(iatom,iband_spin)%cp(1:cplex,:)
+        !LTEST
+        if (option==CPRJ_TO_XG) then
+          do ilmn=1,nlmn
+            start = 1+cplex*(ilmn-1)+cprj_shift
+            end   = cplex*ilmn      +cprj_shift
+            cprj_contiguous(start:end,iband_spin) = &
+              cprj(iatom,iband_spin)%cp(1:cplex,ilmn)
+          end do
+        else if (option==XG_TO_CPRJ) then
+          do ilmn=1,nlmn
+            start = 1+cplex*(ilmn-1)+cprj_shift
+            end   = cplex*ilmn      +cprj_shift
+            cprj(iatom,iband_spin)%cp(1:cplex,ilmn) = &
+              cprj_contiguous(start:end,iband_spin)
+          end do
+        end if
+        !LTEST
+        write(901,*) cprj(iatom,iband_spin)%cp(1:cplex,:)
+        !LTEST
+        cprj_shift=cprj_shift+cplex*nlmn
       end do
     end do
   end do
-
-  if (option==CPRJ_FREE) then
-    ABI_FREE(cprj_contiguous)
-  end if
 
 end subroutine xg_cprj_copy
 
