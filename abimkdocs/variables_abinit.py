@@ -10002,8 +10002,8 @@ Variable(
     requires="[[useexexch]] == 1",
     added_in_version="before_v9",
     text=r"""
-Give for each species the value of the angular momentum (only values 2 or 3
-are allowed) on which to apply the exact exchange correction.
+Give for each species the value of the angular momentum 
+on which to apply the exact exchange correction.
 """,
 ),
 
@@ -13814,7 +13814,6 @@ Variable(
     characteristics=['[[DEVELOP]]'],
     requires="""[[usepaw]] == 1;
 [[usexcnhat]] == 0;
-[[pawxcdev]] == 0;
 [[paral_atom]] == 0;
 [[paral_kgb]] == 0;
 ([[kptopt]] == 3 or [[kptopt]] == 0) """,
@@ -13829,7 +13828,10 @@ standard output file, search for "Orbital magnetic moment". This calculation req
 both the ground state and DDK wavefunctions (see [[rfddk]] or [[berryopt]]). The
 preferred way to use [[orbmag]] is at the end of a DFPT DDK calculation. Alternatively, it
 can be called in a ground state calculation if [[berryopt]] -2 has also been called,
-to generate discretized DDK wavefunctions. Note that convergence with kpt mesh is
+to generate discretized DDK wavefunctions. This latter method works only on a mesh of 
+kpoints, while the DFPT version works for both a mesh and for a single k point (as 
+encountered in studying an atom or molecule in a box, or a pariticularly large unit cell).
+Note that convergence with kpt mesh is
 *much* faster using the DFPT approach, and the [[berryopt]] approach is not recommended
 unless a very specific ground state feature is also needed.
 
