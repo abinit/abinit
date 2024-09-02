@@ -2657,20 +2657,18 @@ subroutine xg_nonlop_forces(xg_nonlop,Xin,cprjin,cprj_work,eigen,forces)
    !write(901,*) 'cprjin:',xgBlock_getId(cprjin%self)
    !LTEST
 
-   ! cprj_work = sum_j Saij cprjin
+   call xgBlock_zero(cprj_work)
    if (xg_nonlop%paw) then
-     call xgBlock_zero(cprj_work)
+     ! cprj_work = sum_j Saij cprjin
      call xg_nonlop_apply_Aij(xg_nonlop,xg_nonlop%Sij,cprjin,cprj_work)
-   else
-     call xgBlock_copy(cprjin,cprj_work)
+     ! cprj_work = - e cprj_work = -e sum_j Saij cprjin
+     shift = xg_nonlop%me_band*ncols_cprj_nospin
+     call xgBlock_ymax(cprj_work,eigen,shift,nmpi,xg_nonlop%nspinor)
    end if
 
-   ! cprj_work = - e cprj_work = -e sum_j Saij cprjin
-   shift = xg_nonlop%me_band*ncols_cprj_nospin
-   call xgBlock_ymax(cprj_work,eigen,shift,nmpi,xg_nonlop%nspinor)
 
    !LTEST
-   !call xgBlock_reverseMap(cprjin%self,cprj_)
+   !call xgBlock_reverseMap(cprjin,cprj_)
    !do iband=1,ncols_cprj
    !  my_iband = iband + xg_nonlop%me_band*ncols_cprj
    !  shift_itypat=0
@@ -2775,17 +2773,17 @@ subroutine xg_nonlop_forces(xg_nonlop,Xin,cprjin,cprj_work,eigen,forces)
            !  end do
            !end do
            !write(901,*) 'gxfac:',cprj_tmp
-           ABI_MALLOC(cprj_tmp,(2,3*nlmn*nattyp))
-           do ia = 1, nattyp
-             do ilmn=1,nlmn
-               do idir=1,3
-                 icprj_deriv = ilmn + nlmn*(idir-1) + 3*nlmn*(ia-1) + shift_itypat_3nlmn
-                 cprj_tmp(1,idir+3*(ilmn-1)+(ia-1)*3*nlmn) = dble (cprj_deriv_(icprj_deriv,iband))
-                 cprj_tmp(2,idir+3*(ilmn-1)+(ia-1)*3*nlmn) = dimag(cprj_deriv_(icprj_deriv,iband))
-               end do
-             end do
-           end do
-           write(901,*) 'dgxdt:',cprj_tmp
+           !ABI_MALLOC(cprj_tmp,(2,3*nlmn*nattyp))
+           !do ia = 1, nattyp
+           !  do ilmn=1,nlmn
+           !    do idir=1,3
+           !      icprj_deriv = ilmn + nlmn*(idir-1) + 3*nlmn*(ia-1) + shift_itypat_3nlmn
+           !      cprj_tmp(1,idir+3*(ilmn-1)+(ia-1)*3*nlmn) = dble (cprj_deriv_(icprj_deriv,iband))
+           !      cprj_tmp(2,idir+3*(ilmn-1)+(ia-1)*3*nlmn) = dimag(cprj_deriv_(icprj_deriv,iband))
+           !    end do
+           !  end do
+           !end do
+           !write(901,*) 'dgxdt:',cprj_tmp
            !LTEST
            do ispinor=1,nspinor
              do ia = 1, nattyp
@@ -2803,7 +2801,7 @@ subroutine xg_nonlop_forces(xg_nonlop,Xin,cprjin,cprj_work,eigen,forces)
              end do
            end do
            !LTEST
-           ABI_FREE(cprj_tmp)
+           !ABI_FREE(cprj_tmp)
            !LTEST
            !LTEST
          shift_itypat       = shift_itypat       + 3*nattyp
@@ -2838,17 +2836,17 @@ subroutine xg_nonlop_forces(xg_nonlop,Xin,cprjin,cprj_work,eigen,forces)
            !  end do
            !end do
            !write(901,*) 'gxfac:',cprj_tmp
-           ABI_MALLOC(cprj_tmp,(1,3*nlmn*nattyp))
-           do ia = 1, nattyp
-             do ilmn=1,nlmn
-               do idir=1,3
-                 icprj_deriv = ilmn + nlmn*(idir-1) + 3*nlmn*(ia-1) + shift_itypat_3nlmn
-                 cprj_tmp(1,idir+3*(ilmn-1)+(ia-1)*3*nlmn) = cprj_deriv_real(icprj_deriv,iband)
-               end do
-             end do
-           end do
-           write(901,*) 'dgxdt:',cprj_tmp
-           !LTEST
+           !ABI_MALLOC(cprj_tmp,(1,3*nlmn*nattyp))
+           !do ia = 1, nattyp
+           !  do ilmn=1,nlmn
+           !    do idir=1,3
+           !      icprj_deriv = ilmn + nlmn*(idir-1) + 3*nlmn*(ia-1) + shift_itypat_3nlmn
+           !      cprj_tmp(1,idir+3*(ilmn-1)+(ia-1)*3*nlmn) = cprj_deriv_real(icprj_deriv,iband)
+           !    end do
+           !  end do
+           !end do
+           !write(901,*) 'dgxdt:',cprj_tmp
+           !!LTEST
            do ispinor=1,nspinor
              do ia = 1, nattyp
                do idir=1,3
@@ -2865,7 +2863,7 @@ subroutine xg_nonlop_forces(xg_nonlop,Xin,cprjin,cprj_work,eigen,forces)
              end do
            end do
            !LTEST
-           ABI_FREE(cprj_tmp)
+           !ABI_FREE(cprj_tmp)
            !LTEST
            !LTEST
          !end do
