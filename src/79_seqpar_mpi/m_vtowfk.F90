@@ -1111,8 +1111,8 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
        end do
      end if ! PAW or forces
      !LTEST
-   !else if (dtset%cprj_in_memory/=1) then
-   else if (dtset%cprj_in_memory/=1.or.gs_hamk%usepaw==1) then
+   else if (dtset%cprj_in_memory/=1) then
+   !else
      !LTEST
      if(iscf>0.or.gs_hamk%usecprj==1)then
        if (gs_hamk%usepaw==1.or.optforces/=0) then
