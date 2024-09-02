@@ -55,13 +55,13 @@ module m_vtowfk
  use m_lobpcgwf,    only : lobpcgwf2
  use m_chebfiwf,    only : chebfiwf2
  use m_chebfiwf_cprj,only : chebfiwf2_cprj
- use m_lobpcgwf_cprj,only : lobpcgwf2_cprj,xg_cprj_copy,XG_TO_CPRJ
+ use m_lobpcgwf_cprj,only : lobpcgwf2_cprj
  use m_spacepar,    only : meanvalue_g
  use m_chebfi,      only : chebfi
  use m_rmm_diis,    only : rmm_diis
  use m_nonlop,      only : nonlop !, nonlop_counter
  use m_prep_kgb,    only : prep_nonlop, prep_fourwf
- use m_cgprj,       only : cprj_rotate
+ use m_cgprj,       only : cprj_rotate,xg_cprj_copy,XG_TO_CPRJ
  use m_fft,         only : fourwf
  use m_cgtk,        only : cgtk_fixphase
 
@@ -1195,7 +1195,6 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
      call xgBlock_map(xgx0,cg_k,space,npw_k*my_nspinor,nband_k,comm=mpi_enreg%comm_band,me_g0=me_g0,&
  &   gpu_option=dtset%gpu_option)
      call xgBlock_map_1d(xgeigen,eig_k,SPACE_R,nband_k)
-     call xgBlock_map(xgforces,grnl_k,SPACE_R,3*natom,nband_k)
 
      ncols_cprj = nband_k*my_nspinor/mpi_enreg%nproc_band
 
@@ -1210,6 +1209,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
        !LTEST
        write(901,*) 'grnl_k :'
        !LTEST
+       call xgBlock_map(xgforces,grnl_k,SPACE_R,3*natom,nband_k)
        call xg_nonlop_forces(xg_nonlop,xgx0,cprj_xgx0%self,cprj_work%self,xgeigen,xgforces)
        !LTEST
        write(901,*) ''

@@ -59,10 +59,6 @@ module m_lobpcgwf_cprj
  type(gs_hamiltonian_type),pointer,save :: l_gs_hamk
 
  public :: lobpcgwf2_cprj
- public :: xg_cprj_copy
-
- integer,parameter,public :: XG_TO_CPRJ=1
- integer,parameter,public :: CPRJ_TO_XG=2
 
  contains
 !!***
@@ -296,82 +292,6 @@ subroutine build_kin(kin,kinpw,npw)
   end do
 
 end subroutine build_kin
-
-subroutine xg_cprj_copy(cprj,xg_cprj,xg_nonlop,option)
-
-  implicit none
-
-  integer, intent(in) :: option
-  type(pawcprj_type),intent(inout)   :: cprj(:,:)
-  type(xgBlock_t), intent(inout) :: xg_cprj
-  type(xg_nonlop_t), intent(in)  :: xg_nonlop
-
-  real(dp),pointer :: cprj_contiguous(:,:)
-  integer :: cplex,cprj_shift,iatom,iband,iband_spin,ilmn,ispinor
-  integer :: natom,nband_cprj,nlmn,nspinor
-  integer :: start,end,space_cprj
-
-  if (option/=XG_TO_CPRJ.and.option/=CPRJ_TO_XG) then
-    ABI_ERROR('Bad option')
-  end if
-
-  natom   = xg_nonlop%natom
-  nspinor = xg_nonlop%nspinor
-
-  nband_cprj   = cols(xg_cprj)/nspinor
-
-  if (size(cprj,1)/=natom) then
-    ABI_ERROR('Bad size for cprj_cwavef_bands (for dim=1)')
-  end if
-  if (size(cprj,2)/=nband_cprj*nspinor) then
-    ABI_ERROR('Bad size for cprj_cwavef_bands (for dim=2)')
-  end if
-
-  space_cprj = space(xg_cprj)
-  cplex=2;if (space_cprj==SPACE_R) cplex=1
-
-  call xgBlock_reverseMap(xg_cprj,cprj_contiguous)
-
-  if (size(cprj_contiguous,1)/=cplex*xg_nonlop%cprjdim) then
-    ABI_ERROR('Bad size for cprj_contiguous (for dim=1)')
-  end if
-
-  do iband=1,nband_cprj
-    do ispinor=1,nspinor
-      iband_spin = (iband-1)*nspinor+ispinor
-      cprj_shift=0
-      do iatom=1,natom
-        nlmn=xg_nonlop%nlmn_natom(iatom)
-        if (size(cprj(iatom,iband_spin)%cp)/=2*nlmn) then ! NOTE: cprj%cp size is always (2,nlmn) even in the real case
-          ABI_ERROR('Bad size for cprj_cwavef_bands%cp')
-        end if
-        !LTEST
-        write(900,*) cprj(iatom,iband_spin)%cp(1:cplex,:)
-        !LTEST
-        if (option==CPRJ_TO_XG) then
-          do ilmn=1,nlmn
-            start = 1+cplex*(ilmn-1)+cprj_shift
-            end   = cplex*ilmn      +cprj_shift
-            cprj_contiguous(start:end,iband_spin) = &
-              cprj(iatom,iband_spin)%cp(1:cplex,ilmn)
-          end do
-        else if (option==XG_TO_CPRJ) then
-          do ilmn=1,nlmn
-            start = 1+cplex*(ilmn-1)+cprj_shift
-            end   = cplex*ilmn      +cprj_shift
-            cprj(iatom,iband_spin)%cp(1:cplex,ilmn) = &
-              cprj_contiguous(start:end,iband_spin)
-          end do
-        end if
-        !LTEST
-        write(901,*) cprj(iatom,iband_spin)%cp(1:cplex,:)
-        !LTEST
-        cprj_shift=cprj_shift+cplex*nlmn
-      end do
-    end do
-  end do
-
-end subroutine xg_cprj_copy
 
 end module m_lobpcgwf_cprj
 !!***
