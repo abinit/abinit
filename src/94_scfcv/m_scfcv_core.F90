@@ -1321,7 +1321,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
 &     nkxc,npwarr,nvresid,occ,optres,paw_ij,pawang,pawfgr,pawfgrtab,&
 &     pawrad,pawrhoij,pawtab,ph1df,ph1d,psps,rhog,rhor,rmet,rprimd,&
 &     stress_needed,strscondft,strsxc,symrec,ucvol,usecprj,vhartr,vpsp,vxc,vxctau,&
-&     xccc3d,xcctau3d,xred,ylm,ylmgr)
+&     xccc3d,xcctau3d,xred,ylm,ylmgr,xg_nonlop)
      ipositron=electronpositron_calctype(electronpositron)
    end if
 
@@ -2233,7 +2233,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
 & prtxml,psps,pwind,pwind_alloc,pwnsfac,res2,resid,residm,results_gs,&
 & rhog,rhor,rprimd,stress_needed,strscondft,strsxc,strten,symrec,synlgr,taug,&
 & taur,tollist,usecprj,vhartr,vpsp,vtrial,vxc,vxctau,vxcavg,wvl,&
-& xccc3d,xcctau3d,xred,ylm,ylmgr,dtset%cellcharge(1)*SUM(vpotzero(:)),conv_retcode)
+& xccc3d,xcctau3d,xred,ylm,ylmgr,dtset%cellcharge(1)*SUM(vpotzero(:)),conv_retcode,xg_nonlop)
 
 !Before leaving the present routine, save the current value of xred.
  xred_old(:,:)=xred(:,:)

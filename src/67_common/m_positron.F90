@@ -72,6 +72,7 @@ module m_positron
  use m_prep_kgb,    only : prep_fourwf
  use m_fft,         only : fourwf, fourdp
  use m_cgprj,       only : ctocprj
+ use m_xg_nonlop,   only : xg_nonlop_t
 
  implicit none
 
@@ -184,7 +185,7 @@ subroutine setup_positron(atindx,atindx1,cg,cprj,dtefield,dtfil,dtset,ecore,eige
 &          kxc,maxfor,mcg,mcprj,mgfft,mpi_enreg,my_natom,n3xccc,nattyp,nfft,ngfft,ngrvdw,nhat,nkxc,npwarr,nvresid,occ,optres,&
 &          paw_ij,pawang,pawfgr,pawfgrtab,pawrad,pawrhoij,pawtab,ph1d,ph1dc,psps,rhog,rhor,&
 &          rmet,rprimd,stress_needed,strscondft,strsxc,symrec,ucvol,usecprj,vhartr,vpsp,vxc,vxctau,&
-&          xccc3d,xcctau3d,xred,ylm,ylmgr)
+&          xccc3d,xcctau3d,xred,ylm,ylmgr,xg_nonlop)
 
 !Arguments ------------------------------------
 !scalars
@@ -204,6 +205,7 @@ subroutine setup_positron(atindx,atindx1,cg,cprj,dtefield,dtfil,dtset,ecore,eige
  type(pawfgr_type),intent(in) :: pawfgr
  type(pseudopotential_type), intent(in) :: psps
  type(fock_type),pointer, intent(inout) :: fock
+ type(xg_nonlop_t), intent(inout) :: xg_nonlop
 !arrays
  integer,intent(in) :: atindx(dtset%natom),atindx1(dtset%natom),indsym(4,dtset%nsym,dtset%natom)
  integer,intent(in) :: kg(3,dtset%mpw*dtset%mkmem),nattyp(dtset%natom),ngfft(18)
@@ -384,7 +386,7 @@ subroutine setup_positron(atindx,atindx1,cg,cprj,dtefield,dtfil,dtset,ecore,eige
 &       extfpmd,indsym,kg,kxc,maxfor_dum,mcg,mcprj,mgfft,mpi_enreg,my_natom,n3xccc0,nattyp,nfft,ngfft,&
 &       ngrvdw,nhat,nkxc,npwarr,dtset%ntypat,nvresid,occ,optfor,optres,paw_ij,pawang,pawfgr,&
 &       pawfgrtab,pawrad,pawrhoij,pawtab,ph1dc,ph1d,psps,rhog,rhor,rprimd,optstr,strscondft,strsxc,str_tmp,symrec,&
-&       synlgr_dum,ucvol,usecprj,vhartr,vpsp,vxc,vxctau,wvl,xccc3d,xcctau3d,xred,ylm,ylmgr,0.0_dp)
+&       synlgr_dum,ucvol,usecprj,vhartr,vpsp,vxc,vxctau,wvl,xccc3d,xcctau3d,xred,ylm,ylmgr,0.0_dp,xg_nonlop)
        electronpositron%calctype=icalctype
        if (optfor>0) electronpositron%gred_ep(:,:)=gred_tmp(:,:)
        if (optstr>0) electronpositron%stress_ep(:)=str_tmp(:)
