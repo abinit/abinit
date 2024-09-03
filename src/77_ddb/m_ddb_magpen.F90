@@ -2255,7 +2255,7 @@ contains
  real(dp) :: qphnrm(3),qphon(3,3)
  real(dp), allocatable :: dint_barddb(:,:),int_barddb(:,:,:),omega(:),omegacalc(:)
  real(dp), allocatable :: w0hessian(:,:),w0berry(:,:)
- real(dp), allocatable :: eigvec(:,:,:,:,:),phfrq(:,:)
+ real(dp), allocatable :: eigvec(:,:,:,:,:),eigvec_fm(:,:,:,:,:),phfrq(:,:)
  real(dp), allocatable :: magphonspec(:),mode_magphonspec(:,:),mode_phonspec(:,:),phonspec(:)
  real(dp), allocatable :: coeffs(:,:)
  complex(dpc), allocatable :: barmagsus(:,:,:),invbarmagsus(:,:,:)
@@ -2267,7 +2267,7 @@ contains
  complex(dpc), allocatable :: barepsilon(:,:,:),epsilon(:,:,:),ifcmat(:,:),ifcmat_fm(:,:)
  complex(dpc), allocatable :: modemm(:,:,:),zeff(:,:),zeff_tr(:,:),modezeff(:,:,:)
  complex(dpc), allocatable :: fmzeff(:,:),fmzeff_tr(:,:)
- complex(dpc), allocatable :: zeffspec(:,:),mmomspec(:,:),magphongreen(:,:),phongreen(:,:)
+ complex(dpc), allocatable :: zeffspec(:,:),mmomspec(:,:),magphongreen(:,:),phongreen(:,:),phongreen_fm(:,:)
  complex(dpc), allocatable :: lm_epsilon(:,:,:),ri_magelsus(:,:),lm_magelsus(:,:,:)
  complex(dpc), allocatable :: macmagsus(:,:,:)
  complex(dpc), allocatable :: genzeff_tr(:,:), ri_genelsus(:,:,:)
@@ -2311,11 +2311,13 @@ contains
  ABI_MALLOC(magphonspec,(nomega))
  ABI_MALLOC(magphongreen,(3*natom+ndim,3*natom+ndim))
  ABI_MALLOC(phongreen,(3*natom,3*natom))
+ ABI_MALLOC(phongreen_fm,(3*natom,3*natom))
  ABI_MALLOC(mode_phonspec,(3*natom,nomega))
  ABI_MALLOC(mode_magphonspec,(3*natom+ndim,nomega))
  ABI_MALLOC(zeffspec,(3,nomega))
  ABI_MALLOC(mmomspec,(ndim,nomega))
  ABI_MALLOC(eigvec,(2,3,natom,3,natom))
+ ABI_MALLOC(eigvec_fm,(2,3,natom,3,natom))
  ABI_MALLOC(modemm,(ndim,3*natom,nomega))
  ABI_MALLOC(fmzeff,(3,3*natom))
  ABI_MALLOC(fmzeff_tr,(3*natom,3))
@@ -2466,9 +2468,9 @@ contains
    end if
 
    !Calculate the phonon and magnon-phonon Green's functions and spectral functions
-   call phonon_green(amu,eigvec,eta_phongreen,ifcmat,ifcmat_fm,invmagsus(:,:,iw),& 
+   call phonon_green(amu,eigvec,eigvec_fm,eta_phongreen,ifcmat,ifcmat_fm,invmagsus(:,:,iw),& 
  & magphongreen,magphonspec(iw),mode_magphonspec(:,iw),mode_phonspec(:,iw),natom,ndim,ntypat,omega(iw),&
- & phfrq(:,iw),phongreen,phonspec(iw),typat,zfield(:,:,iw),zfield_tr)
+ & phfrq(:,iw),phongreen,phongreen_fm,phonspec(iw),typat,zfield(:,:,iw),zfield_tr)
 
    if (omegaflag==1.or.omegaflag==3) then
      !Calculate the mode-resolved magnetic moments
@@ -2503,8 +2505,14 @@ contains
      ri_genelsus(:,:,iw)=-matmul(magphongreen,genzeff_tr)
 
      !Another alternative
-     call me_altcalc(amu,eigvec,lm_magsus(:,:,iw),lm_zfield(:,:,iw),phongreen,magsus(:,:,iw),natom,ndim,ntypat,&
-   & ri_mmom(:,:,iw),typat,fmzeff_tr,zfield(:,:,iw))
+
+!TMP: FM eigvecs
+!     call me_altcalc(amu,eigvec_fm,lm_magsus(:,:,iw),lm_zfield(:,:,iw),phongreen_fm,magsus(:,:,iw),natom,ndim,ntypat,&
+!   & omega(iw),ri_mmom(:,:,iw),typat,fmzeff_tr,zfield(:,:,iw))
+
+!TMP: SR eigvecs
+     call me_altcalc(amu,eigvec,lm_magsus(:,:,iw),lm_zfield(:,:,iw),phongreen_fm,magsus(:,:,iw),natom,ndim,ntypat,&
+   & omega(iw),ri_mmom(:,:,iw),typat,fmzeff_tr,zfield(:,:,iw))
 
      !Convert magnetic susceptibilities to the magnon basis
 !     work(:,:)=magsus(:,:,iw)
@@ -3171,6 +3179,7 @@ contains
  ABI_FREE(phfrq)
  ABI_FREE(magphongreen)
  ABI_FREE(phongreen)
+ ABI_FREE(phongreen_fm)
  ABI_FREE(magphonspec)
  ABI_FREE(phonspec)
  ABI_FREE(zeffspec)
@@ -3178,6 +3187,7 @@ contains
  ABI_FREE(mode_magphonspec)
  ABI_FREE(mode_phonspec)
  ABI_FREE(eigvec)
+ ABI_FREE(eigvec_fm)
  ABI_FREE(modemm)
  ABI_FREE(fmzeff)
  ABI_FREE(fmzeff_tr)
@@ -3406,9 +3416,9 @@ end subroutine lineal_omega_interp
 #include "abi_common.h"
 
 
-subroutine phonon_green(amu,eigvec,eta_phongreen,ifc,ifc_fm,invmagsus,& 
+subroutine phonon_green(amu,eigvec,eigvec_fm,eta_phongreen,ifc,ifc_fm,invmagsus,& 
 & magphongreen,magphonspec,mode_magphonspec,mode_phonspec,natom,ndim,ntypat,omega,&
-& phfrq,phongreen,phonspec,typat,zfield,zfield_tr)
+& phfrq,phongreen,phongreen_fm,phonspec,typat,zfield,zfield_tr)
 
  use defs_basis
  use m_errors
@@ -3425,6 +3435,7 @@ subroutine phonon_green(amu,eigvec,eta_phongreen,ifc,ifc_fm,invmagsus,&
  integer, intent(in) :: typat(natom)
  real(dp), intent(in) :: amu(ntypat)
  real(dp),intent(out) :: eigvec(2*3*natom*3*natom)
+ real(dp),intent(out) :: eigvec_fm(2*3*natom*3*natom)
  real(dp),intent(out) :: phfrq(3*natom)
  real(dp), intent(out) :: mode_phonspec(3*natom)
  real(dp), intent(out) :: mode_magphonspec(3*natom+ndim)
@@ -3433,6 +3444,7 @@ subroutine phonon_green(amu,eigvec,eta_phongreen,ifc,ifc_fm,invmagsus,&
  complex(dpc), intent(in) :: invmagsus(ndim,ndim)
  complex(dpc), intent(out) :: magphongreen(3*natom+ndim,3*natom+ndim)
  complex(dpc), intent(out) :: phongreen(3*natom,3*natom)
+ complex(dpc), intent(out) :: phongreen_fm(3*natom,3*natom)
  complex(dpc), intent(in) :: zfield(ndim,(natom+2)*3)
  complex(dpc), intent(in) :: zfield_tr((natom+2)*3,ndim)
 
@@ -3562,7 +3574,81 @@ subroutine phonon_green(amu,eigvec,eta_phongreen,ifc,ifc_fm,invmagsus,&
      end do
    end do
  end do
+
+!Calcuate also the frozen-spin phonon Greens function
+ do iat2= 1, natom
+   do idir2= 1, 3
+     icol= (iat2-1)*3 + idir2
+     do iat1= 1, natom
+       do idir1= 1, 3
+         irow= (iat1-1)*3 + idir1
+         dynmat(irow,icol)= invmassfac(iat1,iat2)*ifc_fm(irow,icol)
+         w2dynmat(irow,icol)= -one*dynmat(irow,icol)
+         if (irow==icol) then
+           w2dynmat(irow,icol)= (omega+cplx_eta)**2 + w2dynmat(irow,icol)
+         end if
+       end do
+     end do
+   end do
+ end do
+
+!Invert to obtain the phonon Green's function
+ work1=w2dynmat
+
+ call zgetrf( pdim, pdim, work1, pdim, ipiv, info )
+ ABI_CHECK(info == 0, sjoin('zgetrf returned:', itoa(info)))
+
+ ABI_REMALLOC(work,(2))
+ call zgetri( pdim, work1, pdim, ipiv, work, -1, info )
+ ABI_CHECK(info == 0, sjoin('zgetri returned:', itoa(info)))
+ lwork=int(work(1))
+
+ ABI_REMALLOC(work,(lwork))
+ call zgetri( pdim, work1, pdim, ipiv, work, lwork, info )
+ ABI_CHECK(info == 0, sjoin('zgetri returned:', itoa(info)))
+
+ phongreen_fm=work1
+
+!Diagonalize the Dynamical matrix
+ ABI_MALLOC(matrx,(2,(3*natom*(3*natom+1))/2))
+ do icol= 1, pdim
+   do irow= 1, icol
+     matrx(1,irow + (icol-1)*icol/2)=real(dynmat(irow,icol))
+     matrx(2,irow + (icol-1)*icol/2)=aimag(dynmat(irow,icol))
+   end do
+ end do 
  ABI_FREE(dynmat)
+
+ ABI_MALLOC(zhpev1,(2,2*3*natom-1))
+ ABI_MALLOC(zhpev2,(3*3*natom-2))
+
+ call ZHPEV ('V','U',3*natom,matrx,eigval,eigvec_fm,3*natom,zhpev1,zhpev2,ier)
+ ABI_CHECK(ier == 0, sjoin('zhpev returned:', itoa(ier)))
+
+ ABI_FREE(matrx)
+ ABI_FREE(zhpev1)
+ ABI_FREE(zhpev2)
+
+ ! Fix the phase of the eigenvectors
+ call fxphas_seq(eigvec_fm,dum, 0, 0, 1, 3*natom*3*natom, 0, 3*natom, 3*natom, 0)
+
+ ! Normalise the eigenvectors
+ call pheigvec_normalize(natom, eigvec_fm)
+
+
+ ! Apply mass factos to Green's function to use it later in the calculation of the 
+ ! phonon contributions to the susceptibilities.
+ do iat2= 1, natom
+   do idir2= 1, 3
+     icol= (iat2-1)*3 + idir2
+     do iat1= 1, natom
+       do idir1= 1, 3
+         irow= (iat1-1)*3 + idir1
+         phongreen_fm(irow,icol)= invmassfac(iat1,iat2)*phongreen_fm(irow,icol)
+       end do
+     end do
+   end do
+ end do
 
 !Now calculate the generalized magnon-phonon Green's function
 !Build the (M(w+eta)**2 - C(w)) matrix 
@@ -3941,7 +4027,7 @@ end subroutine mode_zeff
 #include "abi_common.h"
 
 
-subroutine me_altcalc(amu,eigvec,lm_magsus,lm_zfield,phongreen,magsus,natom,ndim,ntypat,ri_mmom,typat,&
+subroutine me_altcalc(amu,eigvec,lm_magsus,lm_zfield,phongreen_fm,magsus,natom,ndim,ntypat,omega,ri_mmom,typat,&
 & fmzeff_tr,zfield)
 
  use defs_basis
@@ -3953,6 +4039,7 @@ subroutine me_altcalc(amu,eigvec,lm_magsus,lm_zfield,phongreen,magsus,natom,ndim
 !Arguments ------------------------------------
 !scalars
  integer, intent(in)  :: natom,ndim,ntypat 
+ real(dp), intent(in) :: omega
 !arrays
  integer, intent(in) :: typat(natom)
  real(dp), intent(in) :: amu(ntypat)
@@ -3960,7 +4047,7 @@ subroutine me_altcalc(amu,eigvec,lm_magsus,lm_zfield,phongreen,magsus,natom,ndim
  complex(dpc), intent(in) :: lm_magsus(ndim,ndim)
  complex(dpc), intent(out) :: lm_zfield(ndim,3)
  complex(dpc), intent(in) :: magsus(ndim,ndim)
- complex(dpc), intent(in) :: phongreen(3*natom,3*natom)
+ complex(dpc), intent(in) :: phongreen_fm(3*natom,3*natom)
  complex(dpc), intent(out) :: ri_mmom(ndim,3)
  complex(dpc), intent(in) :: fmzeff_tr(3*natom,3)
  complex(dpc), intent(in) :: zfield(ndim,(natom+2)*3)
@@ -4000,26 +4087,17 @@ subroutine me_altcalc(amu,eigvec,lm_magsus,lm_zfield,phongreen,magsus,natom,ndim
    do irow= 1, 3*natom
      iat1= ceiling(irow/three)
      mfac1= sqrt(amu(typat(iat1))*amu_emass)
-     mass_phongreen(irow,icol)= mfac1*phongreen(irow,icol)*mfac2
+     mass_phongreen(irow,icol)= mfac1*phongreen_fm(irow,icol)*mfac2
    end do
  end do
-
-!Calculate lattice-mediated Zeeman fields
-! lm_zfield= -matmul(zfield,matmul(mass_phongreen,zeff_tr))
-
-!Calculate the relaxed-ion induced magnetic moments
-! ri_zfield= -zfield(:,(natom+1)*3+1:(natom+2)*3)+lm_zfield(:,:)
-! ri_magsus= magsus + lm_magsus
-! ri_mmom=matmul(ri_magsus,ri_zfield)
-! ri_mmom=-matmul(magsus,zfield(:,(natom+1)*3+1:(natom+2)*3))-matmul(lm_magsus,lm_zfield)
 
 !Different formula on the sublattice space
  !Spin part
  ri_magsus= magsus + lm_magsus
  ri_mmom=-matmul(ri_magsus,zfield(:,(natom+1)*3+1:(natom+2)*3))
  !Lattice part
-! lm_zfield= matmul(zfield(:,1:3*natom),matmul(phongreen,fmzeff_tr))
-! ri_mmom= ri_mmom + matmul(magsus,lm_zfield)
+ lm_zfield= matmul(zfield(:,1:3*natom),matmul(phongreen_fm,fmzeff_tr))
+! ri_mmom= ri_mmom + matmul(ri_magsus,lm_zfield)
 
 !Project on the normal-modes space the lattice part
  do iat2= 1, natom
@@ -4036,23 +4114,38 @@ subroutine me_altcalc(amu,eigvec,lm_magsus,lm_zfield,phongreen,magsus,natom,ndim
  end do
  nm_zfield=matmul(zfield(:,1:3*natom),eigdisp)
  nm_fmzeff_tr=matmul(transpose(conjg(eigdisp)),fmzeff_tr)
- nm_phongreen=matmul(transpose(conjg(eigdisp)),matmul(phongreen,eigdisp))
+ nm_phongreen=matmul(transpose(conjg(eigdisp)),matmul(phongreen_fm,eigdisp))
  
  lm_zfield= matmul(nm_zfield(:,1:3*natom),matmul(nm_phongreen,nm_fmzeff_tr))
 
  !restrict only to a set of modes
-! lm_zfield=cmplx(zero,zero,16)
-! do i= 1, ndim
-!   do j= 1, 3
-!     do k= 20,21
-!       do l= 20,21
-!         lm_zfield(i,j)= lm_zfield(i,j) + nm_zfield(i,k)*nm_phongreen(k,l)*nm_fmzeff_tr(l,j)
-!       end do 
-!     end do 
-!   end do
-! end do
+ lm_zfield=cmplx(zero,zero,16)
+ do i= 1, ndim
+   do j= 1, 3
+     do k= 21,21
+       do l= 21,21
+         lm_zfield(i,j)= lm_zfield(i,j) + nm_zfield(i,k)*nm_phongreen(k,l)*nm_fmzeff_tr(l,j)
+       end do 
+     end do 
+   end do
+ end do
 
- ri_mmom= ri_mmom + matmul(magsus,lm_zfield)
+ write(120,*) omega,real(nm_zfield(1:4,20))
+ write(220,*) omega,aimag(nm_zfield(1:4,20))
+ write(121,*) omega,real(nm_zfield(1:4,21))
+ write(221,*) omega,aimag(nm_zfield(1:4,21))
+
+ write(420,*) omega,real(nm_fmzeff_tr(20,:))
+ write(421,*) omega,real(nm_fmzeff_tr(21,:))
+ write(520,*) omega,aimag(nm_fmzeff_tr(20,:))
+ write(521,*) omega,aimag(nm_fmzeff_tr(21,:))
+
+ do i=1, 3*natom
+   write(320,*) real(eigdisp(i,20)),aimag(eigdisp(i,20))
+   write(321,*) real(eigdisp(i,21)),aimag(eigdisp(i,21))
+ end do 
+
+ ri_mmom= ri_mmom + matmul(ri_magsus,lm_zfield)
 
  ABI_FREE(mass)
  ABI_FREE(mass_phongreen)
