@@ -4112,8 +4112,9 @@ subroutine me_altcalc(amu,eigvec,lm_magsus,lm_zfield,phongreen_fm,magsus,natom,n
      end do
    end do
  end do
- nm_zfield=matmul(zfield(:,1:3*natom),eigdisp)
- nm_fmzeff_tr=matmul(transpose(conjg(eigdisp)),fmzeff_tr)
+ nm_zfield=matmul(zfield(:,1:3*natom),conjg(eigdisp))
+! nm_fmzeff_tr=matmul(transpose(conjg(eigdisp)),fmzeff_tr)
+ nm_fmzeff_tr=matmul(transpose(eigdisp),fmzeff_tr)
  nm_phongreen=matmul(transpose(conjg(eigdisp)),matmul(phongreen_fm,eigdisp))
  
  lm_zfield= matmul(nm_zfield(:,1:3*natom),matmul(nm_phongreen,nm_fmzeff_tr))
