@@ -867,12 +867,17 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
          exc_str=exc_b(indx);if(usefxc==1) exc_str=fxc_b(indx)
          if(nspden_updn==1)then
            strdiag=rho_b(indx)*(exc_str-vxcrho_b_updn(indx,1))
+           if (usekden==1) strdiag=strdiag-two*tau_b_updn(indx,1)*vxctau_b_updn(indx,1)
          else if(nspden_updn==2)then
            depsxc(ipts,2)=vxcrho_b_updn(indx,2)
 !          Note : this is not the complete Vxc in the GGA case
            strdiag=rho_b(indx)*exc_str &
 &           -rho_b_updn(indx,1)*vxcrho_b_updn(indx,1)&
 &           -(rho_b(indx)-rho_b_updn(indx,1))*vxcrho_b_updn(indx,2)
+           if (usekden==1) then
+             strdiag=strdiag - tau_b_updn(indx,1)*vxctau_b_updn(indx, 1) &
+&                            - tau_b_updn(indx,2)*vxctau_b_updn(indx,2)
+           end if
          end if
          dstrsxc=dstrsxc+strdiag
 

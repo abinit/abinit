@@ -759,7 +759,7 @@ end subroutine hartre
 !!  npw=number of planewaves of the vector
 !!  nspinor=number of spinor components
 !!  vect(2,npw*nspinor)=vector
-!!  vect1(2,npw*nspinor*use_ndo)=vector1 (=vector in most of the cases)
+!!  vect1(2,npw*nspinor)=vector1 (=vector in most of the cases)
 !!  use_ndo = says if vect=/vect1
 !!
 !! OUTPUT
