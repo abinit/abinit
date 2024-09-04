@@ -215,7 +215,7 @@ program abitk
 
  case ("ebands_gaps")
    call get_path_ebands_cryst(path, ebands, cryst, comm)
-   call ebands_print_gaps(ebands, std_out)
+   call ebands_print_gaps(ebands, [std_out])
 
  case ("ebands_edos", "ebands_jdos")
    call get_path_ebands_cryst(path, ebands, cryst, comm)
@@ -295,8 +295,8 @@ program abitk
    ABI_CHECK(get_arg("is-metal", is_metal, msg, default=.False.) == 0, msg)
    if (.not. is_metal) then
      write(std_out, "(2a)")" Will try to compare gaps. Use --is-metal option to skip this check.",ch10
-     call ebands_print_gaps(other_ebands, std_out, header="Ab-initio gaps")
-     call ebands_print_gaps(ebands_kpath, std_out, header="SKW interpolated gaps")
+     call ebands_print_gaps(other_ebands, [std_out], header="Ab-initio gaps")
+     call ebands_print_gaps(ebands_kpath, [std_out], header="SKW interpolated gaps")
    end if
 
    !ABI_CHECK(get_arg("prtebands", prtebands, msg, default=2) == 0, msg)
@@ -339,7 +339,7 @@ program abitk
    call ebands_get_muT_with_fd(ebands, ntemp, kTmesh, spinmagntarget, prtvol, mu_e, comm)
    !mu_e = 6.715 * eV_Ha
 
-   call gaps%print(unit=std_out, header="KS gaps", kTmesh=kTmesh, mu_e=mu_e)
+   call gaps%print([std_out], header="KS gaps", kTmesh=kTmesh, mu_e=mu_e)
    !stop
 
    ABI_MALLOC(n_ehst, (2, ebands%nsppol, ntemp))

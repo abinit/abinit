@@ -3387,9 +3387,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
  call ebands_free(ebands_dense)
 
  if (my_rank == master) then
-   msg = "Gaps, band edges and relative position wrt Fermi level"
-   call gaps%print(unit=std_out, kTmesh=new%ktmesh, mu_e=new%mu_e, header=msg)
-   call gaps%print(unit=ab_out, kTmesh=new%ktmesh, mu_e=new%mu_e, header=msg)
+   call gaps%print(units, kTmesh=new%ktmesh, mu_e=new%mu_e, header="Gaps, band edges and relative position wrt Fermi level")
  end if
  call gaps%free()
 

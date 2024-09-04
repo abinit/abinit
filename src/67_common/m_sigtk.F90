@@ -374,7 +374,7 @@ subroutine sigtk_kcalc_from_erange(dtset, cryst, ebands, gaps, nkcalc, kcalc, bs
  character(len=500) :: msg
  type(krank_t) :: krank
 !arrays
- integer :: kptrlatt(3,3), unts(1)
+ integer :: kptrlatt(3,3), units(1)
  integer,allocatable :: ib_work(:,:,:), sigmak2ebands(:), indkk(:,:)
  integer :: kpos(ebands%nkpt)
  real(dp),allocatable :: sigma_wtk(:),sigma_kbz(:,:),tmp_kcalc(:,:)
@@ -382,14 +382,14 @@ subroutine sigtk_kcalc_from_erange(dtset, cryst, ebands, gaps, nkcalc, kcalc, bs
 ! *************************************************************************
 
  my_rank = xmpi_comm_rank(comm) !; nprocs = xmpi_comm_size(comm)
- unts = [std_out]
+ units = [std_out]
  assume_gap = .not. all(dtset%sigma_erange < zero)
 
  if (my_rank == master) then
    write(std_out, "(a)")" Selecting k-points and bands according to their position wrt the band edges (sigma_erange)."
    write(std_out, "(a, 2(f6.3, 1x), a)")" sigma_erange: ", dtset%sigma_erange(:) * Ha_eV, " (eV)"
    if (assume_gap) then
-     call gaps%print(unit=std_out)
+     call gaps%print([std_out])
      ABI_CHECK(maxval(gaps%ierr) == 0, "sigma_erange 0 cannot be used because I cannot find the gap (gap_err !=0)")
    end if
  end if
@@ -519,12 +519,12 @@ subroutine sigtk_kcalc_from_erange(dtset, cryst, ebands, gaps, nkcalc, kcalc, bs
    ! Write info about k-points used in the calculation.
    write(msg, "(a, i0, a, 2(f6.3, 1x), a)") &
      " Found ", nkcalc, " k-points within sigma_erange: ", dtset%sigma_erange(:) * Ha_eV, " (eV)"
-   call wrtout(unts, msg)
+   call wrtout(units, msg)
    if (any(dtset%sigma_ngkpt /= 0)) then
-     call wrtout(unts, sjoin(" These k-points belong to the sigma_ngkpt k-mesh:", ltoa(dtset%sigma_ngkpt)))
+     call wrtout(units, sjoin(" These k-points belong to the sigma_ngkpt k-mesh:", ltoa(dtset%sigma_ngkpt)))
    end if
    write(msg, "(2(a, i0))")" min(nbcalc_ks): ", minval(nbcalc_ks), " Max(nbcalc_ks): ", maxval(nbcalc_ks)
-   call wrtout(unts, msg)
+   call wrtout(units, msg)
  end if
 
  ABI_FREE(ib_work)
@@ -581,7 +581,7 @@ subroutine sigtk_kpts_in_erange(dtset, cryst, ebands, psps, pawtab, prefix, comm
  type(wvl_internal_type) :: dummy_wvl
  type(hdr_type) :: fine_hdr
 !arrays
- integer :: fine_kptrlatt(3,3), band_block(2), unts(2)
+ integer :: fine_kptrlatt(3,3), band_block(2), units(2)
  integer,allocatable :: kshe_mask(:,:,:), krange2ibz(:)
  real(dp) :: params(4)
 
@@ -591,27 +591,27 @@ subroutine sigtk_kpts_in_erange(dtset, cryst, ebands, psps, pawtab, prefix, comm
 
  ! (-num, -num) activate treatment of metals with energy window around Efermi.
  assume_gap = .not. all(dtset%sigma_erange < zero)
- unts = [std_out, ab_out]
+ units = [std_out, ab_out]
 
  if (my_rank == master) then
-   call wrtout(unts, sjoin(ch10, repeat("=", 92)))
-   call wrtout(unts, " Using SKW interpolation to interpolate KS energies onto dense k-mesh.")
-   call wrtout(unts, sjoin(" defined by sigma_ngkpt:", trim(ltoa(dtset%sigma_ngkpt))))
+   call wrtout(units, sjoin(ch10, repeat("=", 92)))
+   call wrtout(units, " Using SKW interpolation to interpolate KS energies onto dense k-mesh.")
+   call wrtout(units, sjoin(" defined by sigma_ngkpt:", trim(ltoa(dtset%sigma_ngkpt))))
    ABI_CHECK(allocated(dtset%sigma_shiftk), "sigma_nshiftk must be specified in input.")
    write(std_out, "(2a)") " and sigma_shiftk shifts:"
    do ii=1,dtset%nshiftk
-     call wrtout(unts, sjoin(itoa(ii), ltoa(dtset%sigma_shiftk(:, ii))))
+     call wrtout(units, sjoin(itoa(ii), ltoa(dtset%sigma_shiftk(:, ii))))
    end do
 
    if (assume_gap) then
-     call wrtout(unts, " Finding k-points inside (electron/hole) pockets (assuming semiconductor).")
+     call wrtout(units, " Finding k-points inside (electron/hole) pockets (assuming semiconductor).")
    else
-     call wrtout(unts, " Finding k-points inside energy window around Fermi level (assuming metal).")
+     call wrtout(units, " Finding k-points inside energy window around Fermi level (assuming metal).")
    end if
    write(msg, "(a, 2(f6.3, 1x), a)")" Using sigma_erange: ", dtset%sigma_erange(:) * Ha_eV, " (eV)"
-   call wrtout(unts, msg)
-   call wrtout(unts, sjoin(" SKW parameters (einterp): ", ltoa(dtset%einterp)))
-   call wrtout(unts, sjoin(repeat("=", 92), ch10))
+   call wrtout(units, msg)
+   call wrtout(units, sjoin(" SKW parameters (einterp): ", ltoa(dtset%einterp)))
+   call wrtout(units, sjoin(repeat("=", 92), ch10))
    !call ebands_print(ebands, [std_out], header, prtvol=dtset%prtvol)
 
    ! Consistency check.
@@ -630,13 +630,10 @@ subroutine sigtk_kpts_in_erange(dtset, cryst, ebands, psps, pawtab, prefix, comm
      ABI_ERROR("Cannot compute fundamental and direct gap (likely metal).")
    end if
 
-   if (my_rank == master) then
-     call gaps%print(header="Gaps from input WFK", unit=std_out)
-     call gaps%print(header="Gaps from input WFK", unit=ab_out)
-   end if
+   if (my_rank == master) call gaps%print(units, header="Gaps from input WFK")
    call gaps%free()
  else
-   call wrtout(unts, sjoin("Using Fermi level:", ftoa(ebands%fermie * Ha_eV, fmt="f6.2"), " (eV)"))
+   call wrtout(units, sjoin("Using Fermi level:", ftoa(ebands%fermie * Ha_eV, fmt="f6.2"), " (eV)"))
  end if
 
  ! Interpolate band energies with star functions.
@@ -662,10 +659,7 @@ subroutine sigtk_kpts_in_erange(dtset, cryst, ebands, psps, pawtab, prefix, comm
      ABI_ERROR("Cannot compute fundamental and direct gap (likely metal).")
    end if
 
-   if (my_rank == master) then
-     call fine_gaps%print(header="Gaps from SKW interpolated eigenvalues", unit=std_out)
-     call fine_gaps%print(header="Gaps from SKW interpolated eigenvalues", unit=ab_out)
-   end if
+   if (my_rank == master) call fine_gaps%print(units, header="Gaps from SKW interpolated eigenvalues")
  end if
 
  ! Build new header with fine k-mesh (note kptrlatt_orig == kptrlatt)

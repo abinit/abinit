@@ -1006,10 +1006,8 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  gwr%ks_gaps = ebands_get_gaps(ks_ebands, gap_err)
  if (my_rank == master) then
    !call ebands_print(ks_ebands, [std_out], header="KS band structure", prtvol=gwr%dtset%prtvol)
-   !call ebands_print_gaps(ks_ebands, ab_out, header="KS gaps (Fermi energy set to zero)")
-   msg = "Kohn-Sham gaps and band edges from IBZ mesh"
-   call gwr%ks_gaps%print(unit=std_out, header=msg)
-   call gwr%ks_gaps%print(unit=ab_out, header=msg)
+   !call ebands_print_gaps(ks_ebands, [ab_out], header="KS gaps (Fermi energy set to zero)")
+   call gwr%ks_gaps%print(units, header="Kohn-Sham gaps and band edges from IBZ mesh")
  end if
 
  ! TODO: nkcalc should be spin dependent.
@@ -5839,13 +5837,11 @@ end if
 
    ! Print KS and QP gaps
    msg = "Kohn-Sham gaps and band edges from IBZ mesh"
-   call gwr%ks_gaps%print(unit=std_out, header=msg)
-   call gwr%ks_gaps%print(unit=ab_out, header=msg)
+   call gwr%ks_gaps%print(units, header=msg)
 
    new_gaps = ebands_get_gaps(gwr%qp_ebands, ierr)
    write(msg,"(a,i0,a)")" QP gaps and band edges taking into account Sigma_nk corrections for ",gwr%nkcalc," k-points"
-   call new_gaps%print(unit=std_out, header=msg)
-   call new_gaps%print(unit=ab_out, header=msg)
+   call new_gaps%print(units, header=msg)
    if (ierr /= 0) then
      ABI_WARNING("Cannot compute QP fundamental and direct gap (likely metal)")
    end if
@@ -6548,8 +6544,7 @@ subroutine gwr_check_scf_cycle(gwr, converged)
 
  if (gwr%comm%me == master) then
    write(msg, "(a,i0,a)") "QP gaps at iteration: ",gwr%scf_iteration," (Fermi energy set to zero)"
-   call ebands_print_gaps(gwr%qp_ebands, std_out, header=msg)
-   call ebands_print_gaps(gwr%qp_ebands, ab_out, header=msg)
+   call ebands_print_gaps(gwr%qp_ebands, units, header=msg)
    if (.not. converged) then
      call wrtout(units," Not converged --> start new iteration ...")
    !else
