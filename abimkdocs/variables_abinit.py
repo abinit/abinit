@@ -22596,12 +22596,19 @@ Variable(
     added_in_version="9.0.0",
     text=r"""
 This variable can be used to restart an EPH calculation.
-At present, this feature is supported only when computing the electron-phonon self-energy ([[eph_task]] = 4, -4).
-In this case, the code will look for a **pre-existing** SIGEPH.nc file and will compute the remaining k-points
-provided that the metadata found in the netcdf file is compatible with the input variables specified in the input file.
-The code aborts if the metadata reported in the SIGEPH.nc file is not compatible with the input file.
+At present, this feature is supported only when computing the electron-phonon self-energy ([[eph_task]] = 4, -4)
+and solving the variational polaron equations ([[eph_task]] = 13).
+
+In the first case, the code will look for a **pre-existing** SIGEPH.nc file and will compute the remaining k-points.
 Note that the restart in done **in-place** that is the output SIGEPH.nc is used as input of the calculation so there is no
 need to specify getsigeph or irdsigeph input variables.
+
+In the second case, the code will look for a **pre-existing** VARPEQ.nc file and continue the optimization
+process from the last iteration available in the netcdf file.
+
+!!! note
+
+    The code aborts if the metadata reported in the file netcdf is not compatible with the input file.
 """,
 ),
 
@@ -22982,9 +22989,9 @@ to integrate the Frohlich divergence.
 
 Possible values:
 
-- = 0 --> Approximate oscillators with $ \delta_{b_1 b_2} $
-- > 0 --> Use full expression with G-dependence
-- < 0 --> Deactivate computation of oscillators.
+- $= 0$ --> Approximate oscillators with $ \delta_{b_1 b_2} $
+- $> 0$ --> Use full expression with G-dependence
+- $< 0$ --> Deactivate computation of oscillators.
 
 !!! important
 
@@ -24281,4 +24288,319 @@ Preliminary considerations:
 """,
 ),
 
+
+Variable(
+    abivarname="getvarpeq_filepath",
+    varset="eph",
+    vartype="string",
+    topics=['Polaron_basic'],
+    dimensions="scalar",
+    defaultval="None",
+    mnemonics="GET the VARPEQ.nc from FILEPATH",
+    requires="[[eph_task]] in [13, -13]",
+    added_in_version="tbd",
+    text=r"""
+This variable defines the path of the VARPEQ.nc file with the variational polaron
+equations optimization results.
+
+This variable can be used when [[eph_task]] == 13 i.e. when we solve the variational
+polaron equations.
+In this case, if [[eph_restart]]/[[varpeq_interp]] == 1 the code assumes we want to
+initialize the solution by restarting/interpolating from the solution available in
+the VARPEQ.nc file.
+
+If [[eph_task]] == -13, the variable is required to produce *.xsf files containing
+polaronic wavefunction and induced displacements.
+""",
+),
+
+
+Variable(
+    abivarname="getvarpeq",
+    varset="eph",
+    vartype="int",
+    topics=['Polaron_basic'],
+    dimensions="scalar",
+    defaultval="None",
+    mnemonics="GET the VARPEQ.nc from dataset",
+    requires="[[eph_task]] in [13, -13]",
+    added_in_version="tbd",
+    text=r"""
+This variable is similar in spirit to [[getvarpeq_filepath]] but uses the dataset index
+instead of the filepath.
+""",
+),
+
+
+Variable(
+    abivarname="varpeq_aseed",
+    varset="eph",
+    vartype="string",
+    topics=['Polaron_basic'],
+    dimensions="scalar",
+    defaultval="gau_energy",
+    mnemonics="VARiational Polaron EQuations: A_nk-coefficients SEED",
+    requires="[[eph_task]] == 13",
+    added_in_version="tbd",
+    text=r"""
+This variable specifies the type of initial seed for electronic coefficients
+$A_{n\mathbf{k}}$, defining the charge localization in the variational polaron
+equations.
+
+Possible values:
+
+- "gau_energy" --> Gaussian bassed on the electronic eigenergies
+  $\varepsilon_{n\mathbf{k}}$:
+
+    $$A_{n\mathbf{k}} \sim e^{-\frac{(\varepsilon_{n\mathbf{k}} - \mu)^2}{2\sigma^2}}.$$
+
+  The mean value $\mu$ and the standard deviation $\sigma$ are defined by the
+  [[varpeq_gpr_energy]] variable.
+
+- "gau_length" --> Gaussian based on the user-defined polaron localization lengths
+  $a_x$, $a_y$, $a_z$:
+
+    $$A_{n\mathbf{k}} \sim e^{-\frac{1}{2}(a^2_x k^2_x + a^2_y k^2_y + a^2_z k^2_z)}.$$
+
+  The value of the localization lenghts are defined by the [[varpeq_gpr_length]] variable.
+  This option is still under development.
+
+- "random" --> Random initialization.
+
+- "even" --> Even contribution from each electronic state $\psi_n{\mathbf{k}}$.
+
+""",
+),
+
+
+Variable(
+    abivarname="varpeq_pkind",
+    varset="eph",
+    vartype="string",
+    topics=['Polaron_basic'],
+    dimensions="scalar",
+    defaultval="none",
+    mnemonics="VARiational Polaron EQuations: Polaron KIND",
+    requires="[[eph_task]] == 13",
+    added_in_version="tbd",
+    text=r"""
+This variable specifies the kind of polaron to be obtained within the variational
+polaron equations framework.
+
+Possible values:
+
+- "electron" --> electron polaron.
+
+- "hole" --> hole polaron.
+
+!!! important
+
+    The "electron"/"hole" option requires exclusively conduction/valence manifold
+    provided in the GSTORE.nc file required to setup the variational polaron
+    equations calculation.
+    Intermixing conduction and valence states will lead to erroneous results.
+
+!!! note
+
+    If the "hole" option is chosen, valence states are flipped, so one always
+    deals with the minimization problem, regardless of the polaron kind.
+
+    Also, the polaron binding and localized state energy $E_p$ and $\varepsilon$
+    are positive in case of a hole polaron, and negatie in case of an electron
+    polaron.
+""",
+),
+
+
+Variable(
+    abivarname="varpeq_avg_g",
+    varset="eph",
+    vartype="integer",
+    topics=['Polaron_basic'],
+    dimensions="scalar",
+    defaultval="0",
+    mnemonics="VARiational Polaron EQuations: AVeraGe matrix-elements at Gamma",
+    requires="[[eph_task]] == 13",
+    added_in_version="tbd",
+    text=r"""
+If non-zero, this variable activates the correction to the the electron-phonon
+matrix elements' Fröhlich divergence.
+In this sense correction terms $g^\mathrm{avg}_\nu(0)$ are added to the matrix
+elements at $\mathbf{q} = \Gamma$:
+
+$$ g^\mathrm{corr}_{nn\nu}(\mathbf{k}, 0) = g_{nn\nu}(\mathbf{k}, 0) + g^\mathrm{avg}_\nu(0). $$
+
+These correction terms are computed from spherical integration of the long-range
+electron-phonon contribution to the polaron enregy around $\Gamma$-point.
+The spherical mesh for the integration is controlled by the [[eph_frohl_ntheta]] variable.
+
+Three scenarios are possible:
+
+- [[eph_frohl_ntheta]] == 0, [[varpeq_avg_g]] == 0
+
+No integration of the electron-phonon energy, and variational polaron equations
+are solved without $g^\mathrm{avg}_\nu(0)$ corrections.
+
+- [[eph_frohl_ntheta]] > 0, [[varpeq_avg_g]] == 0
+
+Integration of the electron-phonon energy is performed, and variational polaron
+equations are solved without $g^\mathrm{avg}_\nu(0)$ corrections.
+In this scenario, the integrated energy can be added a posteriori to the optimized
+polaron binding energy to account for the long-range effects.
+
+- [[eph_frohl_ntheta]] > 0, [[varpeq_avg_g]] != 0
+
+Integration of the electron-phonon energy is performed, and variational polaron
+equations are solved with $g^\mathrm{avg}_\nu(0)$ corrections.
+This option is expected to accelerate the convergence of the optimization process.
+
+""",
+),
+
+
+Variable(
+    abivarname="varpeq_interp",
+    varset="eph",
+    vartype="integer",
+    topics=['Polaron_basic'],
+    dimensions="scalar",
+    defaultval="0",
+    mnemonics="VARiational Polaron EQuations: INTERPolation",
+    requires="[[eph_task]] == 13",
+    added_in_version="tbd",
+    text=r"""
+If non-zero, this variable activates the interpolation of the initial guess for
+the electronic vector in the variational polaron equations.
+In this case, the code reads a pre-existing VARPEQ.nc file and performs a linear
+interpolation of $A_{n\mathbf{k}}$ provided the metadata found in the netcdf file
+is compatible with the input file.
+
+With this feature, if a polaronic solution is obtained for a certain $\mathbf{k}$-grid,
+it can then be read and interpolated to be used as a starting point for different grid.
+This option is expected to lead the optimization proccess to the same polaronic configuration
+and accelearate the convergence.
+""",
+),
+
+
+Variable(
+    abivarname="varpeq_nstates",
+    varset="eph",
+    vartype="integer",
+    topics=['Polaron_basic'],
+    dimensions="scalar",
+    defaultval="1",
+    mnemonics="VARiational Polaron EQuations: Number of polaronic STATES",
+    requires="[[optdriver]] == 7 and [[eph_task]] == 13",
+    added_in_version="tbd",
+    text=r"""
+This variables specifies the number of polaronic states to be found by solving the
+variational polaron equations.
+Each new state if found by imposing the orthogonalisation constraint to the all
+previously found states during the optimization process.
+
+!!! important
+
+    Since polaronic solutions are not necessary orthogonal to each other, only the
+    first solution is expected to reach required tolerance during optimization.
+    Impsoing the orthogonalisation constraint, however, helps to find "metastable"
+    polarons that are far away from the obtained polaronic configurations.
+    One then can use other features, e.g. [[varpeq_select]] to fully converge a "metastable"
+    state without any constraints.
+""",
+),
+
+
+Variable(
+    abivarname="varpeq_nstep",
+    varset="eph",
+    vartype="integer",
+    topics=['Polaron_basic'],
+    dimensions="scalar",
+    defaultval="50",
+    mnemonics="VARiational Polaron EQuations: Number of iteration STEPs",
+    requires="[[optdriver]] == 7 and [[eph_task]] == 13",
+    added_in_version="tbd",
+    text=r"""
+This variables sets the maximum number of iterations in the optimization of
+variational polaron equations.
+""",
+),
+
+
+Variable(
+    abivarname="varpeq_select",
+    varset="eph",
+    vartype="integer",
+    topics=['Polaron_basic'],
+    dimensions="scalar",
+    defaultval="-1",
+    mnemonics="VARiational Polaron EQuations: SELECT polaronic state",
+    requires="[[eph_task]] == 13",
+    added_in_version="tbd",
+    text=r"""
+If non-zero, this variable selects a single polaronic state to be optimized from
+a **pre-existing** VARPEQ.nc file.
+Reqiures [[eph_restart]] == 1 or [[varpeq_interp]] == 1.
+Also, since a single polaronic state is selected, [[varpeq_nstates]] must be 1 in the
+input file.
+""",
+),
+
+
+Variable(
+    abivarname="varpeq_tolgrs",
+    varset="eph",
+    vartype="real",
+    topics=['Polaron_basic'],
+    dimensions="scalar",
+    defaultval="1e-6",
+    mnemonics="VARiational Polaron EQuations: TOLerance on the Gradient ReSidual",
+    requires="[[eph_task]] == 13",
+    added_in_version="tbd",
+    text=r"""
+This variable sets a tolerance for the electronic gradient residual in the optimization
+of the varitional polaron equations.
+When reached, the iterative process will finish for a current polaronic state and move
+to the next one, up to [[varpeq_nstates]].
+""",
+),
+
+
+Variable(
+    abivarname="varpeq_gpr_energy",
+    varset="eph",
+    vartype="real",
+    topics=['Polaron_basic'],
+    dimensions="(2)",
+    defaultval="(0, 1)",
+    mnemonics="VARiational Polaron EQuations: Gaussian PaRameters -- electronic ENERGY",
+    requires="[[eph_task]] == 13 and [[varpeq_aseed]] == \"gau_energy\"",
+    added_in_version="tbd",
+    text=r"""
+If [[varpeq_aseed]]=="gau_energy", this variable defines the mean value and the
+standard deviation [[varpeq_gpr_energy]](:) = $\mu$, $\sigma$ for the Gaussian function to
+be used as initial seed for the vector electronic coefficients.
+See [[varpeq_aseed]] for details.
+""",
+),
+
+
+Variable(
+    abivarname="varpeq_gpr_length",
+    varset="eph",
+    vartype="real",
+    topics=['Polaron_basic'],
+    dimensions="(3)",
+    defaultval="(1, 1, 1)",
+    mnemonics="VARiational Polaron EQuations: Gaussian PaRameters -- localization LENGTH",
+    requires="[[eph_task]] == 13 and [[varpeq_aseed]] == \"gau_length\"",
+    added_in_version="tbd",
+    text=r"""
+If [[varpeq_aseed]]=="gau_length", this variable defines defines the estimated polaron
+localization lengths $a_x$, $a_y$, $a_z$ for the spread of Gaussian function to be used
+as initial seed for the vector electronic coefficients.
+See [[varpeq_aseed]] for details.
+""",
+),
 ]
