@@ -324,8 +324,9 @@ subroutine wrtout_unit(unit, msg, mode_paral, do_flush, newlines, pre_newlines)
  integer,optional,intent(in) :: newlines, pre_newlines
 
 !Local variables-------------------------------
- integer,save :: master=0
+ integer,save :: master = 0
  integer :: comm, me, nproc, my_newlines, ii,  my_pre_newlines
+ integer,save :: cached_comm = -666777, cached_me=-1, cached_nproc=01
  logical :: my_flush
  character(len=len(msg)+50) :: string
  character(len=500) :: my_mode_paral
@@ -348,8 +349,13 @@ subroutine wrtout_unit(unit, msg, mode_paral, do_flush, newlines, pre_newlines)
    comm = xmpi_world
  end if
 
- ! Determine who I am in COMM_WORLD
- me = xmpi_comm_rank(comm); nproc = xmpi_comm_size(comm)
+ if (comm /= cached_comm) then
+   ! Determine who I am in comm and cache results
+   me = xmpi_comm_rank(comm); nproc = xmpi_comm_size(comm)
+   cached_comm = comm; cached_me = me ; cached_nproc = nproc
+ else
+   me = cached_me; nproc = cached_nproc
+ end if
 
  if (my_mode_paral == 'COLL' .or. nproc == 1) then
    if (me == master) then
