@@ -76,7 +76,7 @@ module m_forstr
  use m_cgprj,            only : ctocprj
  use m_psolver,          only : psolver_hartree
  use m_wvl_psi,          only : wvl_nl_gradient
- use m_fft,              only : fourdp
+ use m_fft,              only : fourdp,fourwf
  use, intrinsic :: iso_c_binding,      only : c_loc,c_f_pointer,c_double,c_size_t
 
 #if defined(HAVE_GPU_CUDA) && defined(HAVE_YAKL)
@@ -99,6 +99,8 @@ module m_forstr
 
 contains
 !!***
+
+!----------------------------------------------------------------------
 
 !!****f* ABINIT/forstr
 !! NAME
@@ -539,6 +541,8 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
 
 end subroutine forstr
 !!***
+
+!----------------------------------------------------------------------
 
 !!****f* ABINIT/forstrnps
 !! NAME
@@ -1275,6 +1279,8 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
 end subroutine forstrnps
 !!***
 
+!----------------------------------------------------------------------
+
 !!****f* ABINIT/nres2vres
 !!
 !! NAME
@@ -1537,6 +1543,191 @@ subroutine nres2vres(dtset,gsqcut,izero,kxc,mpi_enreg,my_natom,nfft,ngfft,nhat,&
  ABI_FREE(dummy)
 
 end subroutine nres2vres
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* ABINIT/stress_mGGA
+!!
+!! NAME
+!! stress_mGGA
+!!
+!! FUNCTION
+!! Compute non-local metaGGA contribution to stress tensor (i.e. contribution from Div.(Vtau.Grad))
+!!   of (one block of) band Psi_n
+!! This contribution writes: -1/m_e * Sum_n[ f_n . Re{<Grad_alpha(Psi_n)|V_tau|Grad_beta(Psi_n)>} ]
+!!
+!! INPUTS
+!! cwavef(2,npw_k*my_nspinor*ndat)=planewave coefficients of wavefunction.
+!! effmass_free=effective mass for electrons (1. in common case)
+!! gbound_k(2*mgfft+4)=sphere boundary info
+!! gprimd(3,3)=dimensional reciprocal space primitive translations (b^-1)
+!! istwf_k=input parameter that describes the storage of wfs
+!! kg_k(3,npw_k)=G vec coordinates wrt recip lattice transl.
+!! kpt(3)=current k point
+!! mgfft=maximum single fft dimension
+!! mpi_enreg=information about MPI parallelization
+!! my_nspinor=number of spinorial components of the wavefunctions (on current proc)
+!! ndat=number of wave functions used to accumulate stress tensor (block of bands)
+!! ngfft(18)=contain all needed information about 3D FFT
+!! npw_k=number of planewaves in basis for given k point.
+!! nvtau=number of spin components of vxctaulocal
+!! n4,n5,n6=for dimensionning of vxctaulocal
+!! occ(ndat)=occupancies of bands at various k points
+!! ucvol=unit cell volume in bohr**3
+!! vxctaulocal(n4,n5,n6,nvloc,4)= local potential corresponding to the derivative of XC energy
+!!  with respect to kinetic energy density, in real space, on the augmented fft grid.
+!!  This array contains also the gradient of vxctaulocal (gvxctaulocal) in vxctaulocal(:,:,:,:,2:4).
+!! wtk=weights associated with current k-point
+!! [gpu_option]=GPU implementation to use, i.e. cuda, openMP, ... (0=not using GPU) [default=0]
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!  mggastr(6)=metaGGA contribution to stress tensor updated
+!!
+!! SOURCE
+
+subroutine stress_mGGA(mggastr,cwavef,effmass_free,gbound_k,gprimd,istwf_k,kg_k,kpt,mgfft, &
+&          mpi_enreg,my_nspinor,ndat,ngfft,npw_k,nvtau,n4,n5,n6,occ,ucvol,vxctaulocal,wtk, &
+&          gpu_option) ! optional
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: istwf_k,mgfft,my_nspinor,ndat,npw_k,nvtau,n4,n5,n6
+ integer,intent(in),optional :: gpu_option
+ real(dp),intent(in) :: effmass_free,ucvol,wtk
+ type(MPI_type),intent(in) :: mpi_enreg
+!arrays
+ integer,intent(in) :: gbound_k(2*mgfft+4),kg_k(3,npw_k),ngfft(18)
+ real(dp),intent(inout),target :: cwavef(2,npw_k*my_nspinor*ndat)
+ real(dp),intent(in) :: gprimd(3,3),kpt(3),occ(ndat)
+ real(dp),intent(inout) :: vxctaulocal(n4,n5,n6,nvtau,4)
+ real(dp),intent(inout) :: mggastr(6)
+
+!Local variables-------------------------------
+!scalars
+ integer,parameter :: opt_fourwf=2,tim_fourwf=1
+ integer :: gpu_option_,ia,ib,idat,idir,ierr,ipw,ispinor,mu,nspinortot
+ logical :: nspinor1TreatedByThisProc,nspinor2TreatedByThisProc
+ real(dp) :: gp2pi1,gp2pi2,gp2pi3,kg_k_cart,kpt_cart,renorm_factor,weight_dum=1
+ !arrays
+ integer,parameter :: voigt1(6)=[1,2,3,2,1,1],voigt2(6)=[1,2,3,3,3,2]
+ real(dp) :: dotr(ndat),doti(ndat),my_mggastr(6)
+ real(dp),allocatable,target :: gcwavef(:,:,:),vtau_gcwavef(:,:,:)
+ real(dp),allocatable :: weight_array(:),work(:,:,:,:)
+ real(dp),pointer :: gcwavef_ndat(:,:,:,:),vtau_gcwavef_ndat(:,:,:,:)
+ real(dp),pointer :: my_cwavef(:,:)
+ 
+! *********************************************************************
+
+ if (nvtau/=1) then
+   ABI_BUG("mGGA potential Vtau should not depend on spin!")
+ end if
+
+!Some inits
+ gpu_option_=0;if (present(gpu_option)) gpu_option_=gpu_option
+ renorm_factor=-one/effmass_free/ucvol
+ my_mggastr(:)=zero
+ ABI_MALLOC(weight_array,(ndat))
+ weight_array(1:ndat)=wtk*occ(1:ndat)
+
+!Parallelization over spinors
+ nspinortot=min(2,(1+mpi_enreg%paral_spinor)*my_nspinor)
+ if (mpi_enreg%paral_spinor==0) then
+   nspinor1TreatedByThisProc=.true.
+   nspinor2TreatedByThisProc=(nspinortot==2)
+ else
+   nspinor1TreatedByThisProc=(mpi_enreg%me_spinor==0)
+   nspinor2TreatedByThisProc=(mpi_enreg%me_spinor==1)
+ end if
+
+!Manage memory
+ if (nspinortot==1) then
+   my_cwavef => cwavef
+ else ! nspinortot==2
+   ABI_MALLOC(my_cwavef,(2,npw_k*ndat))
+ end if
+ ABI_MALLOC(work,(2,n4,n5,n6*ndat))
+ ABI_MALLOC(gcwavef,(2,npw_k*ndat,3))
+ ABI_MALLOC(vtau_gcwavef,(2,npw_k*ndat,3))
+ call c_f_pointer(c_loc(gcwavef(1,1,1)),gcwavef_ndat,[2,npw_k,ndat,3])
+ call c_f_pointer(c_loc(vtau_gcwavef(1,1,1)),vtau_gcwavef_ndat,[2,npw_k,ndat,3])
+
+!Loop over spinors (if any)
+ do ispinor=1,my_nspinor
+
+!  Select spinor component of WF
+   if (nspinortot==2) then
+     if (ispinor==1.and.nspinor1TreatedByThisProc) then
+       do idat=1,ndat
+         do ipw=1,npw_k
+           my_cwavef(1:2,ipw+(idat-1)*npw_k)=cwavef(1:2,ipw+(idat-1)*my_nspinor*npw_k)
+         end do
+       end do
+     else if (ispinor==2.and.nspinor2TreatedByThisProc) then
+       do idat=1,ndat
+         do ipw=1,npw_k
+           my_cwavef(1:2,ipw+(idat-1)*npw_k)=cwavef(1:2,ipw+(idat-1)*my_nspinor*npw_k+npw_k)
+         end do
+       end do
+     else
+       cycle
+     end if
+   end if
+
+!  Loop over cartesian directions
+   do idir=1,3
+     gp2pi1=gprimd(idir,1)*two_pi
+     gp2pi2=gprimd(idir,2)*two_pi
+     gp2pi3=gprimd(idir,3)*two_pi
+     kpt_cart=gp2pi1*kpt(1)+gp2pi2*kpt(2)+gp2pi3*kpt(3)
+
+!    Compute grad of WF (multiplication by 2pi i (G+k)_idir in reciprocal space)
+!$OMP PARALLEL DO COLLAPSE(2) PRIVATE(idat,ipw,kg_k_cart)
+     do idat=1,ndat
+       do ipw=1,npw_k
+         kg_k_cart=gp2pi1*kg_k(1,ipw)+gp2pi2*kg_k(2,ipw)+gp2pi3*kg_k(3,ipw)+kpt_cart
+         gcwavef(1,ipw+(idat-1)*npw_k,idir)= my_cwavef(2,ipw+(idat-1)*npw_k)*kg_k_cart
+         gcwavef(2,ipw+(idat-1)*npw_k,idir)=-my_cwavef(1,ipw+(idat-1)*npw_k)*kg_k_cart
+       end do
+     end do
+
+!    Compute vxctaulocal*(grad of WF) in reciprocal space
+     call fourwf(1,vxctaulocal(:,:,:,:,1),gcwavef(:,:,idir),vtau_gcwavef(:,:,idir), &
+&                work,gbound_k,gbound_k,istwf_k,kg_k,kg_k,mgfft,mpi_enreg,ndat,ngfft, &
+&                npw_k,npw_k,n4,n5,n6,opt_fourwf,tim_fourwf,weight_dum,weight_dum, &
+&                weight_array_r=weight_array,gpu_option=gpu_option_)
+
+   end do ! idir
+
+!  Accumulate stress tensor components (Re{<Grad_alpha(Psi_n)|V_tau.Grad_beta(Psi_n)>})
+   do mu=1,6
+     ia=voigt1(mu) ; ib=voigt2(mu)
+     call dotprod_g_batch_full(dotr,doti,istwf_k,npw_k,ndat,1, &
+&                 gcwavef_ndat(:,:,:,ia),vtau_gcwavef_ndat(:,:,:,ib), &
+&                 mpi_enreg%me_g0,mpi_enreg%comm_fft,gpu_option=gpu_option_)
+     my_mggastr(mu)=my_mggastr(mu) + renorm_factor*sum(dotr(1:ndat))
+   end do
+ 
+ end do ! ispinor
+ 
+!Release memory
+ if (nspinortot==2) then
+   ABI_FREE(my_cwavef)
+ end if
+ ABI_FREE(gcwavef)
+ ABI_FREE(vtau_gcwavef)
+ ABI_FREE(weight_array)
+ ABI_FREE(work)
+
+!Take into account MPI parallelism (bands, spinors)
+ call xmpi_sum(my_mggastr,mpi_enreg%comm_bandspinor ,ierr)
+ 
+!Final accumulation of stresses
+ mggastr(1:6) = mggastr(1:6) + my_mggastr(1:6)
+
+end subroutine stress_mGGA
 !!***
 
 end module m_forstr
