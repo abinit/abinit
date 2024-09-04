@@ -5537,7 +5537,7 @@ subroutine wfk_klist2mesh(in_wfkpath, kerange_path, dtset, comm)
  NCF_CHECK(nf90_close(ncid))
  ! Build fine_ebands
  fine_ebands = ebands_from_hdr(fine_hdr, fine_mband, fine_eigen)
- !call ebands_print(fine_ebands, header="SKW interpolated energies", prtvol=dtset%prtvol)
+ !call ebands_print(fine_ebands, [std_out], header="SKW interpolated energies", prtvol=dtset%prtvol)
  ABI_FREE(fine_eigen)
 
  if (my_rank == master) then
@@ -5560,7 +5560,7 @@ subroutine wfk_klist2mesh(in_wfkpath, kerange_path, dtset, comm)
    ABI_ERROR(msg)
  end if
  iwfk_ebands = wfk_read_ebands(my_inpath, xmpi_comm_self)
- !call ebands_print(iwfk_ebands, header="iwfk_ebands", unit=std_out, prtvol=dtset%prtvol)
+ !call ebands_print(iwfk_ebands, [std_out], header="iwfk_ebands", prtvol=dtset%prtvol)
 
  iomode = iomode_from_fname(my_inpath)
  call wfk_open_read(iwfk, my_inpath, formeig0, iomode, get_unit(), xmpi_comm_self)
@@ -5661,7 +5661,7 @@ subroutine wfk_klist2mesh(in_wfkpath, kerange_path, dtset, comm)
  call ebands_update_occ(fine_ebands, dtset%spinmagntarget, prtvol=dtset%prtvol)
  !call pack_eneocc(nkpt, nsppol, mband, nband, bantot, array3d, vect)
  !fine_hdr%occ = reshape(fine_ebands%occ, fine_ebands%mband (1:nband_k, ikin, spin)
- call ebands_print(fine_ebands, header="fine_ebands", unit=std_out, prtvol=dtset%prtvol)
+ call ebands_print(fine_ebands, [std_out], header="fine_ebands", prtvol=dtset%prtvol)
 
  out_wfkpath = strcat(in_wfkpath, ".tmp")
  if (iomode == IO_MODE_ETSF) out_wfkpath = strcat(out_wfkpath, ".nc")

@@ -207,7 +207,7 @@ program abitk
  case ("ebands_print", "ebands_xmgrace", "ebands_gnuplot")
    call get_path_ebands(path, ebands, comm)
    if (command == "ebands_print") then
-     call ebands_print(ebands, unit=std_out, prtvol=prtvol)
+     call ebands_print(ebands, [std_out], prtvol=prtvol)
    else
      prtebands = 1; if (command == "ebands_gnuplot") prtebands = 2
      call ebands_write(ebands, prtebands, basename(path))

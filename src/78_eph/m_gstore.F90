@@ -1421,7 +1421,7 @@ subroutine gstore_print(gstore, units, header, prtvol)
    call wrtout(units, " === Gstore parameters ===")
  end if
 
- !call ebands_print(gstore%ebands, header="Electron bands", unit=unit, prtvol=my_prtvol)
+ !call ebands_print(gstore%ebands, [std_out], header="Electron bands", prtvol=my_prtvol)
  call wrtout(units, sjoin(" kzone:", gstore%kzone))
  call wrtout(units, sjoin(" kfilter:", gstore%kfilter))
  call wrtout(units, sjoin(" nkibz:", itoa(gstore%nkibz)))

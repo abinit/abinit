@@ -1005,7 +1005,7 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  ! ==========================
  gwr%ks_gaps = ebands_get_gaps(ks_ebands, gap_err)
  if (my_rank == master) then
-   !call ebands_print(ks_ebands, header="KS band structure", unit=std_out, prtvol=gwr%dtset%prtvol)
+   !call ebands_print(ks_ebands, [std_out], header="KS band structure", prtvol=gwr%dtset%prtvol)
    !call ebands_print_gaps(ks_ebands, ab_out, header="KS gaps (Fermi energy set to zero)")
    msg = "Kohn-Sham gaps and band edges from IBZ mesh"
    call gwr%ks_gaps%print(unit=std_out, header=msg)
