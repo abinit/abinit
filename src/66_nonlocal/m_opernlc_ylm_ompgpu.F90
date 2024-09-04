@@ -171,7 +171,7 @@ subroutine opernlc_ylm_ompgpu(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,c
 !Arrays
 !scalars
  integer :: cplex_,ia,ierr,ijlmn,ijspin,ilm,ilmn,i0lmn,iln,index_enl,iphase,ispinor,ispinor_index,idat
- integer :: j0lmn,jilmn,jispin,jjlmn,jlm,jlmn,jspinor,jspinor_index,mu,shift
+ integer :: j0lmn,jilmn,jispin,jjlmn,jlm,jlmn,jspinor,jspinor_index,mu,shift,ii
  real(dp) :: sijr
 !arrays
  real(dp) :: enl_(2),gxfi(2),gxi(cplex),gxj(cplex)
@@ -203,22 +203,22 @@ subroutine opernlc_ylm_ompgpu(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,c
    ABI_CHECK(cplex_enl/=2,"BUG: invalid cplex_enl=2!")
    ABI_CHECK(cplex_fac==cplex,"BUG: invalid cplex_fac/=cplex!")
    !$OMP TARGET TEAMS DISTRIBUTE &
-   !$OMP& PARALLEL DO COLLAPSE(3) &
-   !$OMP& MAP(to:gxfac_,gx,enl_ptr) &
-   !$OMP& IS_DEVICE_PTR(indlmn) &
-   !$OMP& PRIVATE(ispinor,ispinor_index,ia,ilmn,iln,enl_)
+   !$OMP& PARALLEL DO COLLAPSE(4) &
+   !$OMP& MAP(to:gxfac_,gx,enl,indlmn) &
+   !$OMP& PRIVATE(idat,ispinor,ia,ilmn,iln,ii)
+   do idat=1,ndat
    do ispinor=1,nspinor
      do ia=1,nincat
        do ilmn=1,nlmn
-         ispinor_index=ispinor+shift
          iln=indlmn(5,ilmn,itypat)
-         enl_(1)=enl_ptr(iln,itypat,ispinor_index)
-         !TODO gxfac_(1:cplex,ilmn+(ia-1)*nlmn+ibeg,ispinor+(idat-1)*nspinor)=&
-         !& enl_(1)*gx(1:cplex,ilmn+(ia-1)*nlmn+ibeg,ispinor+(idat-1)*nspinor)
+         do ii=1,cplex
+           gxfac_(ii,ilmn+(ia-1)*nlmn+ibeg,ispinor+(idat-1)*nspinor)=&
+           & enl(iln,itypat,ispinor+shift,iphase)*gx(ii,ilmn+(ia-1)*nlmn+ibeg,ispinor+(idat-1)*nspinor)
+         end do
        end do
      end do
    end do
-   !$OMP END TARGET TEAMS DISTRIBUTE PARALLEL DO
+   end do
   end if
 
 !Accumulate gxfac related to nonlocal operator (PAW)
