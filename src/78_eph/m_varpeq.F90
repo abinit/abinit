@@ -275,7 +275,7 @@ module m_varpeq
  type, public :: varpeq_t
 
    character(len=fnlen) :: pkind = " "
-   ! Specified the kind of polaron
+   ! Specifies the kind of polaron
    ! Possible values: "hole", "electron"
 
    character(len=fnlen) :: aseed = " "
@@ -475,7 +475,7 @@ subroutine varpeq_run(gstore, dtset, dtfil)
 
  call vpq%init(gstore, dtset)
  if (vpq%frohl_ntheta > 0) call vpq%calc_fravg(avg_g0=vpq%g0_flag)
- if (vpq%interp .or. vpq%restart) call vpq%load(dtfil)
+ if (vpq%interp .or. vpq%restart) call vpq%load(dtfil, dtset%varpeq_select)
  call vpq%solve()
  call vpq%print()
  call vpq%ncwrite(dtset, dtfil)
@@ -583,7 +583,7 @@ subroutine varpeq_compare(self, other, bz_mismatch)
  ! Compare basic dimensions
  call check_(self%pkind == other%pkind, "Difference found in pkind.")
  call check_(self%nsppol == other%nsppol, "Difference found in nsppol.")
- call check_(self%nstates == other%nstates, "Difference found in nstates.")
+ !call check_(self%nstates == other%nstates, "Difference found in nstates.")
  call check_(self%cryst%compare(other%cryst) == 0, &
    "Difference found in cryst.")
  call check_(all(self%brange_spin == other%brange_spin), &
@@ -1059,21 +1059,26 @@ end subroutine varpeq_collect
 !!  a *VARPEQ.nc netcdf file. Store result in the self%a_spin variable.
 !!
 !! INPUTS
+!!  dtfil<datafiles_types>=Variables related to files.
+!!  pselect=Which state to select for reload/interpolation. Non-positive value
+!!    selects all states.
 !!
 !! OUTPUT
 !!
 !! SOURCE
 
-subroutine varpeq_load(self, dtfil)
+subroutine varpeq_load(self, dtfil, pselect)
 
 !Arguments ------------------------------------
  class(varpeq_t), target, intent(inout) :: self
  type(datafiles_type), intent(in) :: dtfil
+ integer :: pselect
 
 !Local variables-------------------------------
 !scalars
  type(varpeq_t) :: vpq_ld
  type(bzlint_t) :: bzlint
+ logical :: single_state
  integer, parameter :: master = 0
  integer :: my_rank, comm, ierr
  integer :: spin, ip, nk, nb, ik, ib
@@ -1095,7 +1100,17 @@ subroutine varpeq_load(self, dtfil)
  ! Read A_nk from file. Only the master processor reads, then broadcasts the data
  if (my_rank == master) then
    call vpq_ld%ncread(dtfil%filvarpeqin, xmpi_comm_self, keep_open=.False.)
+
+   ! Consitency check
    call self%compare(vpq_ld, bz_mismatch=self%interp)
+   if (pselect > 0) then
+     ABI_CHECK(self%nstates == 1, "varpeq_pstates must be 1 if varpeq_select > 0.")
+     ABI_CHECK(pselect <= vpq_ld%nstates, "varpeq_select must be <= loaded nstates.")
+     single_state = .true.
+   else
+     ABI_CHECK(self%nstates == vpq_ld%nstates, "Diefference found in nstates.")
+     single_state = .false.
+   endif
 
    self%a_spin(:,:,:,:) = zero
 
@@ -1111,7 +1126,13 @@ subroutine varpeq_load(self, dtfil)
 
        ! Here, interpolation is performed
        do ip=1,self%nstates
-         a_ld(:,:) = vpq_ld%a_spin(:, 1:nk, ip, spin)
+
+         if (single_state) then
+           a_ld(:,:) = vpq_ld%a_spin(:, 1:nk, pselect, spin)
+         else
+           a_ld(:,:) = vpq_ld%a_spin(:, 1:nk, ip, spin)
+         endif
+
          call c_f_pointer(c_loc(a_ld), rpt_d2, [2*nb, nk])
 
          call bzlint%init(vpq_ld%ngkpt, 2*nb, nk, kpts_ld, rpt_d2)
@@ -1335,7 +1356,7 @@ subroutine varpeq_init(self, gstore, dtset)
  ! logical
  self%restart = (dtset%eph_restart == 1)
  self%interp = (dtset%varpeq_interp == 1)
- self%g0_flag = (dtset%varpeq_avg_g == 1)
+ self%g0_flag = (dtset%varpeq_avg_g /= 0)
  ! integer
  self%nstep = dtset%varpeq_nstep
  self%nsppol = gstore%nsppol
@@ -3027,10 +3048,10 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
 
          !write(msg, "(a,i0,a,es16.6)")" For spin: ", spin, ": 1/N_q \sum_qnu |B_qnu|^2 = ", sum(abs(vpq%b_spin(:,:,ip,spin)) ** 2) / nqbz
          !call wrtout(units, msg)
-         write(msg, "(a,i0,a,es16.6)") &
+         write(msg, "(a,i0,a,i2,a,es16.6)") &
            " For spin: ", spin, ": pstate: ", ip, ": maxval(abs(sc_displ_cart_re)): ", maxval(abs(sc_displ_cart_re(:,:,ip,spin)))
          call wrtout(units, msg)
-         write(msg, "(a,i0,a,es16.6)") &
+         write(msg, "(a,i0,a,i2,a,es16.6)") &
            " For spin: ", spin, ": pstate: ", ip, ": maxval(abs(sc_displ_cart_im)): ", maxval(abs(sc_displ_cart_im(:,:,ip,spin)))
          call wrtout(units, msg)
 
@@ -3209,11 +3230,11 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
      do spin=1,nsppol
        ! Handle mutliple polaronic states for each spin.
        do ip=1,vpq%nstates
-         write(msg, "(a,i0,a,es16.6)")&
+         write(msg, "(a,i0,a,i2,a,es16.6)")&
            " For spin: ", spin, ": pstate: ", ip, ": 1/N_k \sum_nk |A_nk|^2 = ", sum(abs(vpq%a_spin(:,:,ip,spin))**2) / nkbz
          call wrtout(units, msg)
          pol_rho = abs(pol_wf(:, ip, spin))**2
-         write(msg, "(a,i0,a,es16.6)")" Polaron density for spin: ", spin, ": pstate: ", ip, " integrates to: ", sum(pol_rho) * cryst%ucvol/wfd%nfft
+         write(msg, "(a,i0,a,a,es16.6)")" Polaron density for spin: ", spin, ": pstate: ", ip, " integrates to: ", sum(pol_rho) * cryst%ucvol/wfd%nfft
          call wrtout(units, msg)
          write(msg, "(a,es16.6)")" maxval(abs(aimag(pol_wf))): ", maxval(abs(aimag(pol_wf(:, ip, spin))))
          call wrtout(units, msg)
