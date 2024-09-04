@@ -87,6 +87,8 @@ contains
 !!                       gsqcut=(boxcut**2)*ecut/(2._dp*(Pi**2)
 !!  ixc = choice of exchange-correlation functional
 !!  kinstr(6)=kinetic energy part of stress tensor
+!!  mggastr(6)=meta-GGA part of stress tensor (hartree/bohr^3)
+!!             Only non-local contribution from Div(V_tau.Grad(Psi))
 !!  mgfft=maximum size of 1D FFTs
 !!  mpi_enreg=information about MPI parallelization
 !!  mqgrid=dimensioned number of q grid points for local psp spline
@@ -166,7 +168,7 @@ contains
 !! SOURCE
 
  subroutine stress(atindx1,berryopt,dtefield,eei,efield,ehart,eii,fock,gsqcut,extfpmd,&
-&                  ixc,kinstr,mgfft,mpi_enreg,mqgrid,n1xccc,n3xccc,natom,nattyp,&
+&                  ixc,kinstr,mggastr,mgfft,mpi_enreg,mqgrid,n1xccc,n3xccc,natom,nattyp,&
 &                  nfft,ngfft,nlstr,nspden,nsym,ntypat,psps,pawrad,pawtab,ph1d,&
 &                  prtvol,qgrid,red_efieldbar,rhog,rprimd,strten,strscondft,strsxc,symrec,&
 &                  typat,usefock,usekden,usepaw,vdw_tol,vdw_tol_3bt,vdw_xc,&
@@ -187,7 +189,7 @@ contains
 !arrays
  integer,intent(in) :: atindx1(natom),nattyp(ntypat),ngfft(18),symrec(3,3,nsym)
  integer,intent(in) :: typat(natom)
- real(dp),intent(in) :: efield(3),kinstr(6),nlstr(6)
+ real(dp),intent(in) :: efield(3),kinstr(6),mggastr(6),nlstr(6)
  real(dp),intent(in) :: ph1d(2,3*(2*mgfft+1)*natom),qgrid(mqgrid)
  real(dp),intent(in) :: red_efieldbar(3),rhog(2,nfft),strscondft(6),strsxc(6)
  real(dp),intent(in) :: vlspl(mqgrid,2,ntypat),vxc(nfft,nspden),vxctau(nfft,nspden,4*usekden)
@@ -526,7 +528,7 @@ contains
 !=======================================================================
 !In cartesian coordinates (symmetric storage)
 
- strten(:)=kinstr(:)+ewestr(:)+corstr(:)+strscondft(:)+strsxc(:)+harstr(:)+lpsstr(:)+nlstr(:)
+ strten(:)=kinstr(:)+ewestr(:)+corstr(:)+strscondft(:)+strsxc(:)+harstr(:)+lpsstr(:)+nlstr(:)+mggastr(:)
 
  if (usefock==1 .and. associated(fock)) then
    if (fock%fock_common%optstr) then
@@ -613,6 +615,12 @@ contains
      write(message, '(a,i5,a,1p,e22.12)' )&
 &     ' stress: component',mu,&
 &     ' of kinetic stress is',kinstr(mu)
+     call wrtout(std_out,message,'COLL')
+   end do
+   do mu=1,6
+     write(message, '(a,i5,a,1p,e22.12)' )&
+&     ' stress: component',mu,&
+&     ' of meta-GGA stress is',mggastr(mu)
      call wrtout(std_out,message,'COLL')
    end do
    write(message, '(a)' ) ' '

@@ -57,7 +57,7 @@ module m_forstr
  use m_initylmg,         only : initylmg
  use m_xchybrid,         only : xchybrid_ncpp_cc
  use m_kg,               only : mkkpg
- use m_hamiltonian,      only : init_hamiltonian, gs_hamiltonian_type !,K_H_KPRIME
+ use m_hamiltonian,      only : init_hamiltonian, gs_hamiltonian_type, gspot_transgrid_and_pack
  use m_electronpositron, only : electronpositron_type, electronpositron_calctype
  use m_bandfft_kpt,      only : bandfft_kpt, bandfft_kpt_type, prep_bandfft_tabs, &
 &                               bandfft_kpt_savetabs, bandfft_kpt_restoretabs
@@ -323,7 +323,7 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
  logical :: apply_residual
 !arrays
  real(dp),parameter :: k0(3)=(/zero,zero,zero/)
- real(dp) :: kinstr(6),nlstr(6),tsec(2),strdum(6),gmet(3,3),gprimd(3,3),rmet(3,3)
+ real(dp) :: kinstr(6),mggastr(6),nlstr(6),tsec(2),strdum(6),gmet(3,3),gprimd(3,3),rmet(3,3)
  real(dp) :: dummy(0)
  real(dp),allocatable :: grnl(:),vlocal(:,:),vxc_hf(:,:),xcart(:,:),ylmbz(:,:),ylmgrbz(:,:,:)
  real(dp), ABI_CONTIGUOUS pointer :: resid(:,:)
@@ -358,7 +358,7 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
 !-involves summations over wavefunctions at all k points
  if (dtset%tfkinfunc>0.and.stress_needed==1) then
    kinstr(1:3)=-two/three*energies%e_kinetic/ucvol ; kinstr(4:6)=zero
-   nlstr(1:6)=zero
+   mggastr(1:6)=zero  ;nlstr(1:6)=zero
  else if (dtset%usewvl==0) then
    occopt_=0 ! This means that occ are now fixed
    if(dtset%usefock==1 .and. associated(fock)) then
@@ -411,11 +411,11 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
      end if
    end if
    call forstrnps(cg,cprj,dtset%ecut,dtset%ecutsm,dtset%effmass_free,eigen,electronpositron,fock,grnl,&
-&   dtset%istwfk,kg,kinstr,nlstr,dtset%kptns,dtset%mband,mcg,mcprj,dtset%mgfft,dtset%mkmem,&
-&   mpi_enreg,psps%mpsang,dtset%mpw,my_natom,dtset%natom,dtset%nband,dtset%nfft,dtset%ngfft,&
+&   dtset%istwfk,kg,kinstr,nlstr,dtset%kptns,dtset%mband,mcg,mcprj,dtset%mgfft,mggastr,dtset%mkmem,&
+&   mpi_enreg,psps%mpsang,dtset%mpw,my_natom,dtset%natom,dtset%nband,dtset%nfft,nfftf,dtset%ngfft,&
 &   dtset%nkpt,dtset%nloalg,npwarr,dtset%nspden,dtset%nspinor,dtset%nsppol,dtset%nsym,ntypat,&
-&   dtset%nucdipmom,occ,optfor,paw_ij,pawtab,ph1d,psps,rprimd,stress_needed,symrec,dtset%typat,&
-&   usecprj,dtset%usefock,dtset%gpu_option,dtset%wtk,xred,ylm,ylmgr)
+&   dtset%nucdipmom,occ,optfor,paw_ij,pawfgr,pawtab,ph1d,psps,rprimd,stress_needed,symrec,dtset%typat,&
+&   usecprj,dtset%usefock,dtset%usekden,vxctau,dtset%gpu_option,dtset%wtk,xred,ylm,ylmgr)
 !DEBUG
 !   write(6,*)' after forstrnps, nlstr=',nlstr(1:6)
 !ENDDEBUG
@@ -519,7 +519,7 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
      end if
    end if
    call stress(atindx1,dtset%berryopt,dtefield,energies%e_localpsp,dtset%efield,&
-&   energies%e_hartree,energies%e_corepsp,fock,gsqcut,extfpmd,dtset%ixc,kinstr,mgfftf,&
+&   energies%e_hartree,energies%e_corepsp,fock,gsqcut,extfpmd,dtset%ixc,kinstr,mggastr,mgfftf,&
 &   mpi_enreg,psps%mqgrid_vl,psps%n1xccc,n3xccc,dtset%natom,nattyp,&
 &   nfftf,ngfftf,nlstr,dtset%nspden,dtset%nsym,ntypat,psps,pawrad,pawtab,ph1df,&
 &   dtset%prtvol,psps%qgrid_vl,dtset%red_efieldbar,rhog,rprimd,strten,strscondft,strsxc,symrec,&
@@ -576,6 +576,7 @@ end subroutine forstr
 !!  natom=number of atoms in cell.
 !!  nband(nkpt)=number of bands at each k point
 !!  nfft=number of FFT grid points
+!!  nfftf= -PAW ONLY- number of FFT grid points for the fine grid (nfftf=nfft for NCPP)
 !!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !!  nkpt=number of k points in Brillouin zone
 !!  nloalg(3)=governs the choice of the algorithm for non-local operator.
@@ -589,6 +590,7 @@ end subroutine forstr
 !!  occ(mband*nkpt*nsppol)=occupation numbers for each band over all k points
 !!  optfor=1 if computation of forces is required
 !!  paw_ij(my_natom*usepaw) <type(paw_ij_type)>=paw arrays given on (i,j) channels
+!!  pawfgr <type(pawfgr_type)>=fine grid parameters and related data
 !!  pawtab(ntypat*usepaw) <type(pawtab_type)>=paw tabulated starting data
 !!  ph1d(2,3*(2*mgfft+1)*natom)=one-dimensional structure factor information
 !!  psps <type(pseudopotential_type)>=variables related to pseudopotentials
@@ -597,6 +599,10 @@ end subroutine forstr
 !!  symrec(3,3,nsym)=symmetries in reciprocal space (dimensionless)
 !!  typat(natom)=type of each atom
 !!  usecprj=1 if cprj datastructure has been allocated
+!!  usefock=1, if Fock contribution has to be included
+!!  usekden=1 if kinetic energy density contribution has to be included (mGGA)
+!!  vxctau(nfftf,nspden,4*usekden)=(only for meta-GGA): derivative of XC energy density
+!!                                wrt kinetic energy density (depsxcdtau)
 !!  gpu_option= GPU implementation to use, i.e. cuda, openMP, ... (0=not using GPU)
 !!  wtk(nkpt)=weight associated with each k point
 !!  xred(3,natom)=reduced dimensionless atomic coordinates
@@ -610,25 +616,28 @@ end subroutine forstr
 !!   kinstr(6)=kinetic energy part of stress tensor (hartree/bohr^3)
 !!   Store 6 unique components of symmetric 3x3 tensor in the order
 !!   11, 22, 33, 32, 31, 21
+!!   mggastr(6)=meta-GGA part of stress tensor (hartree/bohr^3)
+!!              Only non-local contribution from Div(V_tau.Grad(Psi))
 !!   npsstr(6)=nonlocal pseudopotential energy part of stress tensor
 !!    (hartree/bohr^3)
 !!
 !! SOURCE
 
 subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,fock,&
-&  grnl,istwfk,kg,kinstr,npsstr,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_enreg,mpsang,&
-&  mpw,my_natom,natom,nband,nfft,ngfft,nkpt,nloalg,npwarr,nspden,nspinor,nsppol,nsym,&
-&  ntypat,nucdipmom,occ,optfor,paw_ij,pawtab,ph1d,psps,rprimd,&
-&  stress_needed,symrec,typat,usecprj,usefock,gpu_option,wtk,xred,ylm,ylmgr)
+&  grnl,istwfk,kg,kinstr,npsstr,kpt,mband,mcg,mcprj,mgfft,mggastr,mkmem,mpi_enreg,mpsang,&
+&  mpw,my_natom,natom,nband,nfft,nfftf,ngfft,nkpt,nloalg,npwarr,nspden,nspinor,nsppol,nsym,&
+&  ntypat,nucdipmom,occ,optfor,paw_ij,pawfgr,pawtab,ph1d,psps,rprimd,&
+&  stress_needed,symrec,typat,usecprj,usefock,usekden,vxctau,gpu_option,wtk,xred,ylm,ylmgr)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: mband,mcg,mcprj,mgfft,mkmem,mpsang,mpw,my_natom,natom,nfft,nkpt
+ integer,intent(in) :: mband,mcg,mcprj,mgfft,mkmem,mpsang,mpw,my_natom,natom,nfft,nfftf,nkpt
  integer,intent(in) :: nspden,nsppol,nspinor,nsym,ntypat,optfor,stress_needed
- integer,intent(in) :: usecprj,usefock,gpu_option
+ integer,intent(in) :: usecprj,usefock,usekden,gpu_option
  real(dp),intent(in) :: ecut,ecutsm,effmass_free
  type(electronpositron_type),pointer :: electronpositron
  type(MPI_type),intent(inout) :: mpi_enreg
+ type(pawfgr_type), intent(in) :: pawfgr
  type(pseudopotential_type),intent(in) :: psps
 !arrays
  integer,intent(in) :: istwfk(nkpt),kg(3,mpw*mkmem),nband(nkpt*nsppol)
@@ -638,9 +647,10 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
  real(dp),intent(in) :: eigen(mband*nkpt*nsppol),kpt(3,nkpt),nucdipmom(3,my_natom)
  real(dp),intent(in) :: occ(mband*nkpt*nsppol),ph1d(2,3*(2*mgfft+1)*natom)
  real(dp),intent(in) :: rprimd(3,3),wtk(nkpt),xred(3,natom)
+ real(dp),intent(in),target :: vxctau(nfftf,nspden,4*usekden)
  real(dp),intent(in) :: ylm(mpw*mkmem,mpsang*mpsang*psps%useylm)
  real(dp),intent(in) :: ylmgr(mpw*mkmem,3,mpsang*mpsang*psps%useylm)
- real(dp),intent(out) :: grnl(3*natom*optfor),kinstr(6),npsstr(6)
+ real(dp),intent(out) :: grnl(3*natom*optfor),kinstr(6),mggastr(6),npsstr(6)
  type(pawcprj_type),intent(inout) :: cprj(natom,mcprj*usecprj)
  type(paw_ij_type),intent(in) :: paw_ij(my_natom*psps%usepaw)
  type(pawtab_type),intent(in) :: pawtab(ntypat*psps%usepaw)
@@ -666,14 +676,16 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
 #if defined HAVE_GPU && defined HAVE_YAKL
  real(c_double), ABI_CONTIGUOUS pointer :: cwavef(:,:) => null()
 #else
- real(dp),allocatable :: cwavef(:,:)
+ real(dp),allocatable,target :: cwavef(:,:)
 #endif
  real(dp),allocatable :: enlout(:),ffnl_sav(:,:,:,:),ffnl_str(:,:,:,:)
  real(dp),allocatable :: ghc_dum(:,:),gprimd(:,:),kpg_k(:,:),kpg_k_sav(:,:)
  real(dp),allocatable :: kstr1(:),kstr2(:),kstr3(:),kstr4(:),kstr5(:),kstr6(:)
  real(dp),allocatable :: lambda(:),occblock(:),ph3d(:,:,:),ph3d_sav(:,:,:)
+ real(dp),allocatable :: vxctaulocal(:,:,:,:,:)
  real(dp),allocatable :: weight(:),ylm_k(:,:),ylmgr_k(:,:,:)
  real(dp),allocatable,target :: ffnl(:,:,:,:)
+ real(dp),pointer :: vxctau_ptr(:,:,:)
  type(bandfft_kpt_type),pointer :: my_bandfft_kpt => null()
  type(pawcprj_type),target,allocatable :: cwaveprj(:,:)
  type(pawcprj_type),pointer :: cwaveprj_idat(:,:)
@@ -721,7 +733,7 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
    if (fockcommon%optfor) compute_gbound=.true.
  end if
  if (stress_needed==1) then
-   kinstr(:)=zero;npsstr(:)=zero
+   kinstr(:)=zero;mggastr(:)=0;npsstr(:)=zero
    if (usefock_loc) then
      fockcommon%optstr=.TRUE.
      fockcommon%stress=zero
@@ -747,13 +759,16 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
  end if
 
 !Initialize Hamiltonian (k-independent terms)
-
  call init_hamiltonian(gs_hamk,psps,pawtab,nspinor,nsppol,nspden,natom,&
 & typat,xred,nfft,mgfft,ngfft,rprimd,nloalg,usecprj=usecprj_local,&
 & comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,mpi_spintab=mpi_enreg%my_isppoltab,&
 & paw_ij=paw_ij,ph1d=ph1d,electronpositron=electronpositron,fock=fock,&
 & nucdipmom=nucdipmom,gpu_option=gpu_option)
  rmet = MATMUL(TRANSPOSE(rprimd),rprimd)
+
+ if (usekden>0) then
+   ABI_MALLOC(vxctaulocal,(gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,gs_hamk%nvloc,4))
+ end if
 
 !need to reorder cprj=<p_lmn|Cnk> (from unsorted to atom-sorted)
  if (psps%usepaw==1.and.usecprj_local==1) then
@@ -780,6 +795,14 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
 !  Continue to initialize the Hamiltonian (PAW DIJ coefficients)
    call gs_hamk%load_spin(isppol,with_nonlocal=.true.)
    if (usefock_loc) fockcommon%isppol=isppol
+
+!  If any, set up local potential vtau on the coarse FFT mesh
+   if (usekden>0) then
+     vxctau_ptr => vxctau ! This is to bepass annoying inout attribute
+     call gspot_transgrid_and_pack(isppol,psps%usepaw,mpi_enreg%paral_kgb,nfft,ngfft,nfftf, &
+                                   nspden,gs_hamk%nvloc,4,pawfgr,mpi_enreg,vxctau_ptr,vxctaulocal)
+     call gs_hamk%load_spin(isppol,vxctaulocal=vxctaulocal)
+   end if
 
 !  Loop over k points
    ikg=0
@@ -1120,6 +1143,14 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
            call timab(925,2,tsec)
          end if
 
+!        Accumulate stress tensor in case meta-GGA using v_tau
+         if ((stress_needed==1).and.(usekden==1)) then
+           call stress_mGGA(mggastr,cwavef,effmass_free,gs_hamk%gbound_k,gprimd,istwf_k, &
+&               kg_k,kpoint,mgfft,mpi_enreg,my_nspinor,blocksize,ngfft,npw_k,gs_hamk%nvloc, &
+&               gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,occblock,gs_hamk%ucvol,vxctaulocal, &
+&               wtk(ikpt),gpu_option=gpu_option)
+         end if
+
 !        Accumulate stress tensor and forces for the Fock part
          if (usefock_loc) then
            if(fockcommon%optstr.or.fockcommon%optfor) then
@@ -1269,10 +1300,14 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
  end if
 
 !Deallocate temporary space
+ if (usekden>0) then
+   ABI_FREE(vxctaulocal)
+ end if
  call gs_hamk%free()
  if (usefock_loc) then
    fockcommon%use_ACE=use_ACE_old
  end if
+
  call timab(928,2,tsec) ; call timab(920,-2,tsec)
  ABI_NVTX_END_RANGE()
 
@@ -1575,7 +1610,7 @@ end subroutine nres2vres
 !! n4,n5,n6=for dimensionning of vxctaulocal
 !! occ(ndat)=occupancies of bands at various k points
 !! ucvol=unit cell volume in bohr**3
-!! vxctaulocal(n4,n5,n6,nvloc,4)= local potential corresponding to the derivative of XC energy
+!! vxctaulocal(n4,n5,n6,nvtau,4)= local potential corresponding to the derivative of XC energy
 !!  with respect to kinetic energy density, in real space, on the augmented fft grid.
 !!  This array contains also the gradient of vxctaulocal (gvxctaulocal) in vxctaulocal(:,:,:,:,2:4).
 !! wtk=weights associated with current k-point
@@ -1622,7 +1657,7 @@ subroutine stress_mGGA(mggastr,cwavef,effmass_free,gbound_k,gprimd,istwf_k,kg_k,
 ! *********************************************************************
 
  if (nvtau/=1) then
-   ABI_BUG("mGGA potential Vtau should not depend on spin!")
+   ABI_BUG("mGGA potential Vtau not compatible with non-collinear magnetism!")
  end if
 
 !Some inits
