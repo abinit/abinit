@@ -2428,7 +2428,7 @@ subroutine chi0q0_intraband(Wfd,Cryst,Ep,Psps,BSt,Gsph_epsG0,Pawang,Pawrad,Pawta
  do iomega=1,MIN(Ep%nomega,NOMEGA_PRINTED)
    write(msg,'(1x,a,i4,a,2f9.4,a)')' chi0_intra(G,G'') at the ',iomega,' th omega',Ep%omega(iomega)*Ha_eV,' [eV]'
    call wrtout(std_out, msg)
-   call print_arr(chi0(:,:,iomega),unit=std_out)
+   call print_arr([std_out], chi0(:,:,iomega))
  end do
 
  ! =====================

@@ -1208,11 +1208,9 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
      ii = MIN(9, Ep%npwe)
      ABI_MALLOC(arr_99,(ii, ii))
      arr_99 = chi0(1:ii,1:ii,iomega) * ucvol
-     call print_arr(arr_99, max_r=2, unit=ab_out)
-     call print_arr(arr_99, unit=std_out)
+     call print_arr([ab_out],  arr_99, max_r=2)
+     call print_arr([std_out], arr_99)
      ABI_FREE(arr_99)
-     !call print_arr(chi0(:,:,iomega),max_r=2,unit=ab_out)
-     !call print_arr(chi0(:,:,iomega),unit=std_out)
    end do
 
    if (Ep%nomega > NOMEGA_PRINTED) then
@@ -1476,8 +1474,8 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
      do iomega=1,Ep%nomega
        write(msg,'(2x,a,i4,a,2f9.4,a)')' Upper and lower wings at the ',iomega,' th omega',Ep%omega(iomega)*Ha_eV,' [eV]'
        call wrtout(ab_out, msg)
-       call print_arr(epsm1(1,:,iomega),max_r=9,unit=ab_out)
-       call print_arr(epsm1(:,1,iomega),max_r=9,unit=ab_out)
+       call print_arr([ab_out], epsm1(1,:,iomega),max_r=9)
+       call print_arr([ab_out], epsm1(:,1,iomega),max_r=9)
        call wrtout(ab_out, ch10)
      end do
    end if

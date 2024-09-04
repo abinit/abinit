@@ -144,7 +144,7 @@ contains  !=====================================================
 !!
 !!  3) The DFPT routines operate on double-precision wavefunctions stored in arrays with real/imag part e.g. cg(1:2,npw_k)
 !!     while the GW routines operate on complex arrays of kind=gwpc where gwpc is defined at configure-time.
-!!     The default value of gwpc is single-precision
+!!     The default value of gwpc is single-precision.
 !!     We use the following conventions:
 !!
 !!       cg_kq, cr_kq

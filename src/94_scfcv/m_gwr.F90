@@ -1877,7 +1877,7 @@ subroutine gwr_malloc_free_mats(gwr, mask_ibz, what, action)
  end do ! my_is
 
  call wrtout(std_out, "")
- call gwr%print_mem(unit=std_out)
+ call gwr%print_mem([std_out])
 
 end subroutine gwr_malloc_free_mats
 !!***
@@ -2223,7 +2223,7 @@ subroutine gwr_read_ugb_from_wfk(gwr, wfk_path)
      call gwr%ugb(ik_ibz, spin)%init(npwsp, gwr%ugb_nband, gwr%g_slkproc, istwfk1, size_blocs=[-1, 1])
    end do
  end do
- call gwr%print_mem(unit=std_out)
+ call gwr%print_mem([std_out])
 
  mpw = maxval(gwr%wfk_hdr%npwarr)
  ABI_MALLOC(kg_k, (3, mpw))
@@ -2351,7 +2351,7 @@ subroutine gwr_read_ugb_from_wfk(gwr, wfk_path)
 
  ABI_FREE(kg_k)
  ABI_FREE(bmask)
- call gwr%print_mem(unit=std_out)
+ call gwr%print_mem([std_out])
 
  call cwtime_report(" gwr_read_ugb_from_wfk:", cpu, wall, gflops)
  call timab(1921, 2, tsec)
@@ -2490,8 +2490,8 @@ subroutine gwr_build_green(gwr, free_ugb)
    end do ! my_iki
  end do ! my_is
 
- if (gwr%dtset%prtvol > 0) call gwr_print_trace(gwr, "gt_kibz")
- call gwr%print_mem(unit=std_out)
+ if (gwr%dtset%prtvol > 0) call gwr%print_trace(units, "gt_kibz")
+ call gwr%print_mem([std_out])
 
  call cwtime_report(" gwr_build_green:", cpu, wall, gflops)
  call timab(1922, 2, tsec)
@@ -3484,6 +3484,9 @@ end subroutine gwr_get_wc_rpr_qbz
 !!  Perform cosine transform.
 !!
 !! INPUTS
+!!  what: "tchi" or "wc"
+!!  mode: "iw2t" for omega to tau or "it2w" for tau to omega.
+!!  [sum_spins]: True to sum the two spin-channgels when what == "tchi". Default: False.
 !!
 !! SOURCE
 
@@ -3584,7 +3587,7 @@ subroutine gwr_cos_transform(gwr, what, mode, sum_spins)
      do ig2=1,mats(it0)%sizeb_local(2), batch_size
        ndat = blocked_loop(ig2, mats(it0)%sizeb_local(2), batch_size)
 
-       ! Extract matrix elements as a function of tau.
+       ! Extract (g1, g2) matrix elements as a function of tau/omega
        do idat=1,ndat
          do my_it=1,gwr%my_ntau
            itau = gwr%my_itaus(my_it)
@@ -3625,7 +3628,7 @@ subroutine gwr_cos_transform(gwr, what, mode, sum_spins)
  end do ! my_is
 
  if (sum_spins_ .and. gwr%nspinor /= 2) then  ! gwr%nsppol == 2 .and.
-   ! Sum over spins
+   ! Sum over spin channels.
    do my_iqi=1,gwr%my_nqibz
       iq_ibz = gwr%my_qibz_inds(my_iqi)
       do my_is=1,gwr%my_nspins
@@ -3915,7 +3918,6 @@ subroutine gwr_print(gwr, units, header)
  integer :: ii
  character(len=500) :: msg
  type(yamldoc_t) :: ydoc
-
 ! *********************************************************************
 
  msg = ' ==== Info on the gwr_t object ==== '; if (present(header)) msg=' ==== '//trim(adjustl(header))//' ==== '
@@ -3972,53 +3974,49 @@ end subroutine gwr_print
 !!
 !! SOURCE
 
-subroutine gwr_print_mem(gwr, unit)
+subroutine gwr_print_mem(gwr, units)
 
 !Arguments ------------------------------------
  class(gwr_t),intent(in) :: gwr
- integer,optional,intent(in) :: unit
+ integer,intent(in) :: units(:)
 
 !Local variables-------------------------------
 !scalars
- integer :: unt
  real(dp) :: mem_mb
  !character(len=500) :: msg
-
 ! *********************************************************************
-
- unt = std_out; if (present(unit)) unt =unit
 
  if (allocated(gwr%gt_kibz)) then
    mem_mb = sum(slk_array_locmem_mb(gwr%gt_kibz))
    if (mem_mb > zero) then
-     call wrtout(std_out, sjoin("- Local memory for G(g,g',kibz,itau): ", ftoa(mem_mb, fmt="f8.1"), ' [Mb] <<< MEM'))
+     call wrtout(units, sjoin("- Local memory for G(g,g',kibz,itau): ", ftoa(mem_mb, fmt="f8.1"), ' [Mb] <<< MEM'))
    end if
  end if
  if (allocated(gwr%tchi_qibz)) then
    mem_mb = sum(slk_array_locmem_mb(gwr%tchi_qibz))
    if (mem_mb > zero) then
-     call wrtout(std_out, sjoin("- Local memory for Chi(g,g',qibz,itau): ", ftoa(mem_mb, fmt="f8.1"), ' [Mb] <<< MEM'))
+     call wrtout(units, sjoin("- Local memory for Chi(g,g',qibz,itau): ", ftoa(mem_mb, fmt="f8.1"), ' [Mb] <<< MEM'))
    end if
  end if
  if (allocated(gwr%wc_qibz)) then
    mem_mb = sum(slk_array_locmem_mb(gwr%wc_qibz))
    if (mem_mb > zero) then
-     call wrtout(std_out, sjoin("- Local memory for Wc(g,g,qibz,itau): ", ftoa(mem_mb, fmt="f8.1"), ' [Mb] <<< MEM'))
+     call wrtout(units, sjoin("- Local memory for Wc(g,g,qibz,itau): ", ftoa(mem_mb, fmt="f8.1"), ' [Mb] <<< MEM'))
    end if
  end if
  if (allocated(gwr%sigc_kibz)) then
    mem_mb = sum(slk_array_locmem_mb(gwr%sigc_kibz))
    if (mem_mb > zero) then
-     call wrtout(std_out, sjoin("- Local memory for Sigma_c(g,g',kibz,itau): ", ftoa(mem_mb, fmt="f8.1"), ' [Mb] <<< MEM'))
+     call wrtout(units, sjoin("- Local memory for Sigma_c(g,g',kibz,itau): ", ftoa(mem_mb, fmt="f8.1"), ' [Mb] <<< MEM'))
    end if
  end if
  if (allocated(gwr%ugb)) then
    mem_mb = sum(slk_array_locmem_mb(gwr%ugb))
    if (mem_mb > zero) then
-     call wrtout(std_out, sjoin('- Local memory for u_gb wavefunctions: ', ftoa(mem_mb, fmt="f8.1"), ' [Mb] <<< MEM'))
+     call wrtout(units, sjoin('- Local memory for u_gb wavefunctions: ', ftoa(mem_mb, fmt="f8.1"), ' [Mb] <<< MEM'))
    end if
  end if
- call wrtout(std_out, " ")
+ call wrtout(units, " ")
 
 end subroutine gwr_print_mem
 !!***
@@ -4056,7 +4054,7 @@ subroutine gwr_build_tchi(gwr)
  type(__slkmat_t) :: chi_rgp
  type(c_ptr) :: void_ptr
 !arrays
- integer :: sc_ngfft(18), gg(3), g0_kq(3), mask_qibz(gwr%nqibz), need_kibz(gwr%nkibz), got_kibz(gwr%nkibz)
+ integer :: sc_ngfft(18), gg(3), g0_kq(3), mask_qibz(gwr%nqibz), need_kibz(gwr%nkibz), got_kibz(gwr%nkibz), units(2)
  integer,allocatable :: green_scgvec(:,:), chi_scgvec(:,:)
  real(dp) :: kk_bz(3), kpq_bz(3), qq_ibz(3), tsec(2)
  complex(gwpc) ABI_ASYNC, contiguous, pointer :: gt_scbox(:,:,:)
@@ -4073,12 +4071,14 @@ subroutine gwr_build_tchi(gwr)
  call cwtime(cpu_all, wall_all, gflops_all, "start")
  call timab(1923, 1, tsec)
 
+ units = [std_out, ab_out]
+
  ABI_CHECK(gwr%tchi_space == "none", sjoin("tchi_space: ", gwr%tchi_space, " != none"))
  gwr%tchi_space = "itau"
 
  ! Allocate tchi_q(g,g') matrices
  mask_qibz = 0; mask_qibz(gwr%my_qibz_inds(:)) = 1
- call gwr%print_mem(unit=std_out)
+ call gwr%print_mem([std_out])
  call gwr%malloc_free_mats(mask_qibz, "tchi", "malloc")
 
  max_abs_imag_chit = zero
@@ -4467,7 +4467,7 @@ end if
  !call wrtout(std_out, sjoin(" max_abs_imag_chit", ftoa(max_abs_imag_chit)))
 
  ! Print trace of chi_q(i tau) matrices for testing purposes.
- if (gwr%dtset%prtvol > 0) call gwr%print_trace("tchi_qibz")
+ if (gwr%dtset%prtvol > 0) call gwr%print_trace(units, "tchi_qibz")
 
  ! Transform irreducible tchi from imaginary tau to imaginary omega.
  ! Also sum over spins to get total tchi if collinear spin.
@@ -4505,7 +4505,7 @@ end if
  end if
 
  ! Print trace of chi_q(i omega) matrices for testing purposes.
- if (gwr%dtset%prtvol > 0) call gwr%print_trace("tchi_qibz")
+ if (gwr%dtset%prtvol > 0) call gwr%print_trace(units, "tchi_qibz")
 
  ! Write file with chi0(i omega) if asked by user.
  if (gwr%dtset%prtsuscep > 0) call gwr%ncwrite_tchi_wc("tchi", trim(gwr%dtfil%filnam_ds(4))//'_TCHIM.nc')
@@ -4771,17 +4771,17 @@ end subroutine gwr_redistrib_mats_qibz
 !!
 !! SOURCE
 
-subroutine gwr_print_trace(gwr, what)
+subroutine gwr_print_trace(gwr, units, what)
 
 !Arguments ------------------------------------
  class(gwr_t),target,intent(inout) :: gwr
+ integer,intent(in) :: units(:)
  character(len=*),intent(in) :: what
 
 !Local variables-------------------------------
  integer,parameter :: master = 0
  integer :: my_is, spin, my_it, itau, iq_ibz, ierr, my_iqi, my_iki, ik_ibz, ipm
  character(len=5000) :: comment
- integer :: units(2)
  complex(dp),allocatable :: ctrace3(:,:,:), ctrace4(:,:,:,:)
  type(__slkmat_t),contiguous, pointer :: mats(:,:,:)
 
@@ -4789,7 +4789,7 @@ subroutine gwr_print_trace(gwr, what)
 
  ! NB: The same q/k point in the IBZ might be available on different procs in kpt_comm
  ! hence we have to rescale the trace before summing the results in gwr%comm.
- comment = "Invalid space!"; units = [std_out, ab_out]
+ comment = "Invalid space!"
 
  select case (what)
  case ("tchi_qibz", "wc_qibz")
@@ -4823,8 +4823,7 @@ subroutine gwr_print_trace(gwr, what)
      do spin=1,gwr%nsppol
        call wrtout(units, sjoin(" Trace of:", what, "for spin:", itoa(spin), "for testing purposes:"))
        call wrtout(units, comment, pre_newlines=2)
-       call print_arr(ctrace3(:,:,spin), unit=ab_out)
-       call print_arr(ctrace3(:,:,spin), unit=std_out)
+       call print_arr(units, ctrace3(:,:,spin))
      end do
    end if
    ABI_FREE(ctrace3)
@@ -4854,8 +4853,7 @@ subroutine gwr_print_trace(gwr, what)
        do ipm=1,2
          call wrtout(units, sjoin(" Trace of:", what, "for ipm:", itoa(ipm), ", spin:", itoa(spin), "for testing purposes:"))
          call wrtout(units, comment, newlines=1)
-         call print_arr(ctrace4(:,:, ipm, spin), unit=ab_out)
-         call print_arr(ctrace4(:,:, ipm, spin), unit=std_out)
+         call print_arr(units, ctrace4(:,:, ipm, spin))
        end do
      end do
    end if
@@ -4901,14 +4899,17 @@ subroutine gwr_build_wc(gwr)
  type(__slkmat_t) :: em1
  type(yamldoc_t) :: ydoc
 !arrays
+ integer :: units(2)
  real(dp) :: qq_ibz(3), tsec(2)
  complex(dpc) :: em1_wq(gwr%ntau, gwr%nqibz), eps_wq(gwr%ntau, gwr%nqibz)
 
 ! *************************************************************************
 
+ units = [std_out, ab_out]
+
  call cwtime(cpu_all, wall_all, gflops_all, "start")
  call timab(1924, 1, tsec)
- call wrtout([std_out, ab_out], " Building correlated screening Wc ...", pre_newlines=2)
+ call wrtout(units, " Building correlated screening Wc ...", pre_newlines=2)
  ABI_CHECK(gwr%tchi_space == "iomega", sjoin("tchi_space: ", gwr%tchi_space, " != iomega"))
 
  if (allocated(gwr%wc_qibz)) then
@@ -4985,7 +4986,7 @@ subroutine gwr_build_wc(gwr)
        call wc%take_from(em1, free=.True.)  ! processor=wc%processor)
 
        !call wrtout(std_out, sjoin(" e-1 at q:", ktoa(qq_ibz), "i omega:", ftoa(gwr%iw_mesh(itau) * Ha_eV), "eV"))
-       !call print_arr(wc%buffer_cplx, unit=std_out)
+       !call print_arr(units, wc%buffer_cplx)
 
        ! Build Wc(q, iw) = e^{-1}_q(g,g',iw) - delta_{gg'} v_q(g,g') by removing bare vc
        do il_g2=1,wc%sizeb_local(2)
@@ -5046,7 +5047,7 @@ subroutine gwr_build_wc(gwr)
      write(msg, "(3(es16.8,2x))") gwr%iw_mesh(iw), real(eps_wq(iw, 1)), aimag(eps_wq(iw, 1))
      call ydoc%add_tabular_line(msg)
    end do
-   call ydoc%write_units_and_free([ab_out, std_out])
+   call ydoc%write_units_and_free(units)
 
    ydoc = yamldoc_open('EMACRO_WITH_LOCAL_FIELDS') !, width=11, real_fmt='(3f8.3)')
    call ydoc%open_tabular("epsilon_{iw, q -> Gamma}(0,0)") !, comment="(iomega, iq_ibz)")
@@ -5054,11 +5055,11 @@ subroutine gwr_build_wc(gwr)
      write(msg, "(3(es16.8,2x))") gwr%iw_mesh(iw), real(em1_wq(iw, 1)), aimag(em1_wq(iw, 1))
      call ydoc%add_tabular_line(msg)
    end do
-   call ydoc%write_units_and_free([ab_out, std_out])
+   call ydoc%write_units_and_free(units)
  end if
 
  ! Print trace of wc_q(itau) matrices for testing purposes.
- if (gwr%dtset%prtvol > 0) call gwr%print_trace("wc_qibz")
+ if (gwr%dtset%prtvol > 0) call gwr%print_trace(units, "wc_qibz")
 
  ! Write file with Wc(i omega)
  !if (gwr%dtset%prtsuscep > 0) call gwr%ncwrite_tchi_wc("wc", trim(gwr%dtfil%filnam_ds(4))//'_WCIMW.nc')
@@ -5070,7 +5071,7 @@ subroutine gwr_build_wc(gwr)
  !if (gwr%dtset%prtsuscep > 0) call gwr%ncwrite_tchi_wc("wc", trim(gwr%dtfil%filnam_ds(4))//'_WCIMT.nc')
 
  ! Print trace of wc_q(iomega) matrices for testing purposes.
- !if (gwr%dtset%prtvol > 0) call gwr%print_trace("wc_qibz")
+ !if (gwr%dtset%prtvol > 0) call gwr%print_trace(units, "wc_qibz")
 
  call cwtime_report(" gwr_build_wc:", cpu_all, wall_all, gflops_all)
  call timab(1924, 2, tsec)
@@ -5203,7 +5204,7 @@ subroutine gwr_build_sigmac(gwr)
  ABI_RECALLOC(gwr%sigc_iw_mat, (gwr%ntau, gwr%b1gw:gwr%b2gw, ii:jj, gwr%nkcalc, gwr%nsppol))
 
  max_abs_imag_wct = zero; max_abs_re_wct = zero
- call gwr%print_mem(unit=std_out)
+ call gwr%print_mem([std_out])
 
 if (gwr%use_supercell_for_sigma) then
 
@@ -6215,10 +6216,10 @@ subroutine gwr_rpa_energy(gwr)
          ! Change size block and, if possible, use 2D rectangular grid of processors for diagonalization
          call proc_4diag%init(chi_tmp%processor%comm)
          call chi_tmp%change_size_blocs(chi_4diag, processor=proc_4diag)
-         call chi_4diag%copy(dummy_vec)
+         !call chi_4diag%copy(dummy_vec)
          call chi_4diag%heev("N", "U", dummy_vec, eig, mat_size=mat_size)
          call chi_4diag%free()
-         call dummy_vec%free()
+         !call dummy_vec%free()
          call proc_4diag%free()
 
          ! TODO: ELPA

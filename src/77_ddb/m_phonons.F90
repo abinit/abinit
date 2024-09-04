@@ -3336,11 +3336,11 @@ subroutine pheigvec_rotate(cryst, qq_ibz, isym, itimrev, eigvec_ibz, eigvec_qbz,
  end do
 
  !write(std_out, "(2a)")" Gamma_matrix for qq_bz:", trim(ktoa(qq_bz))
- !call print_arr(reshape(cmplx(gamma_matrix(1,:,:,:,:), gamma_matrix(2,:,:,:,:)), [natom3, natom3]))
+ !call print_arr([std_out], reshape(cmplx(gamma_matrix(1,:,:,:,:), gamma_matrix(2,:,:,:,:)), [natom3, natom3]))
  !gamma2 = gamma_matrix
  !call cg_zgemm("C", "N", natom3, natom3, natom3, gamma_matrix, gamma2, eigvec_qbz)
  !write(std_out, "(a)")" gamma^H gamma:"
- !call print_arr(reshape(cmplx(eigvec_qbz(1,:,:), eigvec_qbz(2,:,:)), [natom3, natom3]))
+ !call print_arr([std_out], reshape(cmplx(eigvec_qbz(1,:,:), eigvec_qbz(2,:,:)), [natom3, natom3]))
  !call cg_check_unitary(natom3, gamm_matrix)
 
  call cg_zgemm("N", "N", natom3, natom3, natom3, gamma_matrix, eigvec_ibz, eigvec_qbz)
@@ -3708,7 +3708,7 @@ subroutine test_phrotation(ifc, cryst, qptopt, ngqpt, comm)
    write(std_out, *) "max eig_diff [meV]: ", maxval(work)
    write(std_out, "(a)")" e^H D e (meV**2)"
    d2cart = d2cart * Ha_meV ** 2
-   call print_arr(reshape(cmplx(d2cart(1,:,:), d2cart(2,:,:), kind=dp), [natom3, natom3]))
+   call print_arr([std_out], reshape(cmplx(d2cart(1,:,:), d2cart(2,:,:), kind=dp), [natom3, natom3]))
 
    !err_eigvec = maxval(abs(eigvec_out - eigvec_bz))
    !if (err_eigvec > tol_eigvec) then
