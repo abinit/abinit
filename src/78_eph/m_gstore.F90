@@ -1795,7 +1795,7 @@ subroutine gstore_filter_erange__(gstore, qbz, qbz2ibz, qibz2bz, kbz, kibz, kbz2
 
  assume_gap = .not. all(gstore%erange_spin < zero)
  gaps = ebands_get_gaps(ebands, gap_err)
- if (assume_gap) call gaps%print(unit=std_out) !, header=msg)
+ if (assume_gap) call gaps%print([std_out]) !, header=msg)
 
  ebands_timrev = kpts_timrev_from_kptopt(ebands%kptopt)
 
@@ -1928,7 +1928,7 @@ subroutine gstore_filter_qprange__(gstore, dtset, qbz, qbz2ibz, qibz2bz, kbz, ki
  ebands_timrev = kpts_timrev_from_kptopt(ebands%kptopt)
 
  gaps = ebands_get_gaps(ebands, gap_err)
- if (my_rank == 0) call gaps%print()
+ if (my_rank == 0) call gaps%print([std_out])
  if (gap_err /= 0) then
    ABI_ERROR("Cannot compute fundamental and direct gap (likely metal).")
  end if

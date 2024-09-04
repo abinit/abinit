@@ -3365,7 +3365,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
  call ebands_update_occ(ks_ebands, Dtset%spinmagntarget, prtvol=0)
 
  gaps = ebands_get_gaps(ks_ebands, gap_err)
- call gaps%print(unit=std_out)
+ call gaps%print([std_out])
  call ebands_report_gap(ks_ebands, unit=std_out)
 
  ABI_MALLOC(val_indices,(ks_ebands%nkpt, nsppol))

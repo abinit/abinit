@@ -362,7 +362,6 @@ MODULE m_ebands
 
  public :: klinterp_new         ! Build interpolator.
 
-
 !----------------------------------------------------------------------
 
 CONTAINS  !=====================================================================================
@@ -379,37 +378,37 @@ CONTAINS  !=====================================================================
 !!
 !! INPUTS
 !!  ebands<ebands_t>=Info on the band structure, the smearing technique and the physical temperature used.
+!!  units=Unit numbers
 !!
 !! OUTPUT
 !!
 !! SOURCE
 
-subroutine ebands_print_gaps(ebands, unit, header)
+subroutine ebands_print_gaps(ebands, units, header)
 
 !Arguments ------------------------------------
  class(ebands_t),intent(in)  :: ebands
- integer,intent(in) :: unit
+ integer,intent(in) :: units(:)
  character(len=*),optional,intent(in) :: header
 
 !Local variables-------------------------------
  integer :: ierr, spin
  type(gaps_t) :: gaps
-
+ !character(len=500) :: msg
 ! *********************************************************************
 
- if (unit == dev_null) return
-
+ !if (unit == dev_null) return
  gaps = ebands_get_gaps(ebands, ierr)
  if (ierr /= 0) then
    do spin=1, ebands%nsppol
-     write(unit, "(a)")trim(gaps%errmsg_spin(spin))
+     call wrtout(units, trim(gaps%errmsg_spin(spin)))
    end do
  end if
 
  if (present(header)) then
-   call gaps%print(unit=unit, header=header)
+   call gaps%print(units, header=header)
  else
-   call gaps%print(unit=unit)
+   call gaps%print(units)
  end if
  call gaps%free()
 
@@ -650,9 +649,8 @@ end subroutine gaps_free
 !!  Print info on the fundamental and direct gap.
 !!
 !! INPUTS
-!!  gaps<gaps_t>=Object with info on the gaps.
+!!  units=Unit numbers
 !!  [header]=Optional title.
-!!  [unit]=Optional unit for output (std_out if not specified)
 !!  [kTmesh]=List of temperatures. If present activates output of (T, mu_e, band_edges)
 !!  [mu_e]=List of Fermi levels for each T.
 !!
@@ -661,35 +659,32 @@ end subroutine gaps_free
 !!
 !! SOURCE
 
-subroutine gaps_print(gaps, unit, header, kTmesh, mu_e)
+subroutine gaps_print(gaps, units, header, kTmesh, mu_e)
 
 !Arguments ------------------------------------
 !scalars
  class(gaps_t),intent(in)  :: gaps
- integer,intent(in),optional :: unit
+ integer,intent(in) :: units(:)
  character(len=*),intent(in),optional :: header
  real(dp),optional,intent(in) :: kTmesh(:), mu_e(:)
 
 !Local variables-------------------------------
 !scalars
- integer :: spin, ikopt, ivk, ick, unt, itemp, ntemp
+ integer :: spin, ikopt, ivk, ick, itemp, ntemp
  real(dp) :: fun_gap, opt_gap, csi_c, csi_v
  character(len=500) :: msg
 
 ! *********************************************************************
 
- unt = std_out; if (present(unit)) unt = unit
- if (unt == dev_null) return
-
  do spin=1,gaps%nsppol
    if (spin == 1) then
      msg = ch10
      if (present(header)) msg = ch10//' === '//trim(adjustl(header))//' === '
-     call wrtout(unt, msg)
+     call wrtout(units, msg)
    end if
 
    if (gaps%ierr(spin) /= 0) then
-     call wrtout(unt, gaps%errmsg_spin(spin))
+     call wrtout(units, gaps%errmsg_spin(spin))
      continue
    end if
 
@@ -698,7 +693,7 @@ subroutine gaps_print(gaps, unit, header, kTmesh, mu_e)
    opt_gap = gaps%fo_values(2, spin)
 
    if (any(gaps%fo_kpos(:,spin) == 0)) then
-     call wrtout(unt, sjoin(" Cannot detect gap for spin: ", itoa(spin)))
+     call wrtout(units, sjoin(" Cannot detect gap for spin: ", itoa(spin)))
      cycle
    end if
 
@@ -713,43 +708,43 @@ subroutine gaps_print(gaps, unit, header, kTmesh, mu_e)
    !  CBM:   8.96 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
    !Optical gap:       4.48 (eV) at k:[ 0.0000E+00,  0.0000E+00,  0.0000E+00]
 
-   if (gaps%nsppol == 2) call wrtout(unt, sjoin(' >>>> For spin ', itoa(spin)))
-   if (ivk == ick) call wrtout(unt, " Direct band gap semiconductor")
-   if (ivk /= ick) call wrtout(unt, " Indirect band gap semiconductor")
+   if (gaps%nsppol == 2) call wrtout(units, sjoin(' >>>> For spin ', itoa(spin)))
+   if (ivk == ick) call wrtout(units, " Direct band gap semiconductor")
+   if (ivk /= ick) call wrtout(units, " Indirect band gap semiconductor")
    write(msg, "(a,f9.3,a )")" Fundamental gap: ", fun_gap * Ha_eV, " (eV)"
-   call wrtout(unt, msg)
+   call wrtout(units, msg)
    write(msg, "(a,f9.3,2a)")"   VBM: ", gaps%vb_max(spin) * Ha_eV, " (eV) at k: ", trim(ktoa(gaps%fund_kpoints(:,1,spin)))
-   call wrtout(unt, msg)
+   call wrtout(units, msg)
    write(msg, "(a,f9.3,2a)")"   CBM: ", gaps%cb_min(spin) * Ha_eV, " (eV) at k: ", trim(ktoa(gaps%fund_kpoints(:,2,spin)))
-   call wrtout(unt, msg)
+   call wrtout(units, msg)
    write(msg, "(a,f9.3,2a)")" Direct gap:     ", opt_gap * Ha_eV," (eV) at k: ", trim(ktoa(gaps%optical_kpoints(:,spin)))
-   call wrtout(unt, msg)
+   call wrtout(units, msg)
    !write(msg, "((2(a, f9.3)))")" Fermi level:", gaps%fermie * Ha_eV, " (eV) with nelect:", gaps%nelect
-   !call wrtout(unt, msg)
+   !call wrtout(units, msg)
 
    if (present(mu_e) .and. present(kTmesh) .and. all(gaps%ierr == 0)) then
      ntemp = size(mu_e)
-     call wrtout(unt, " Position of CBM/VBM with respect to the Fermi level:", pre_newlines=1)
-     call wrtout(unt, " Notations: mu_e = Fermi level, D_v = (mu_e - VBM), D_c = (CBM - mu_e)")
-     call wrtout(unt, "  T(K)   kT (eV)  mu_e (eV)  D_v (eV)   D_c (eV)", pre_newlines=1)
+     call wrtout(units, " Position of CBM/VBM with respect to the Fermi level:", pre_newlines=1)
+     call wrtout(units, " Notations: mu_e = Fermi level, D_v = (mu_e - VBM), D_c = (CBM - mu_e)")
+     call wrtout(units, "  T(K)   kT (eV)  mu_e (eV)  D_v (eV)   D_c (eV)", pre_newlines=1)
      do itemp=1,ntemp
        csi_c =  gaps%cb_min(spin) - mu_e(itemp)
        csi_v = -gaps%vb_max(spin) + mu_e(itemp)
        write(msg, "(f6.1, 1x, 4(f9.3, 1x))") &
          kTmesh(itemp) / kb_HaK, kTmesh(itemp) * Ha_eV, mu_e(itemp) * Ha_eV, csi_v * Ha_eV,  csi_c * Ha_eV
-       call wrtout(unt, msg)
+       call wrtout(units, msg)
      end do
-     call wrtout(unt, "")
+     call wrtout(units, "")
    end if
 
  end do ! spin
 
  if (any(gaps%fo_kpos == 0)) then
    write(msg, "((2(a, f9.3)))")  "   Fermi level:", gaps%fermie * Ha_eV, " (eV) with nelect:", gaps%nelect
-   call wrtout(unt, msg)
+   call wrtout(units, msg)
  end if
 
- call wrtout(unt, "")
+ call wrtout(units, "")
 
 end subroutine gaps_print
 !!***
@@ -2876,7 +2871,7 @@ subroutine ebands_report_gap(ebands, header, unit, mode_paral, gaps)
     '   Minimum direct gap = ',opt_gap*Ha_eV,' [eV], located at k-point      : ',ebands%kptns(:,ikopt),ch10,&
     '   Fundamental gap    = ',fun_gap*Ha_eV,' [eV], Top of valence bands at : ',ebands%kptns(:,ivk),ch10,  &
                                               '      Bottom of conduction at : ',ebands%kptns(:,ick)
-   call wrtout(unt,msg,my_mode)
+   call wrtout(unt,msg, my_mode)
 
    if (present(gaps)) gaps(:,spin) = [fun_gap, opt_gap, one]
  end do !spin

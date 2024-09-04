@@ -796,8 +796,7 @@ end if
        NCF_CHECK(ebands_ncwrite_path(owfk_ebands, cryst, out_path))
        !print *, "owfk_ebands%istwfk", owfk_ebands%istwfk; stop
      end if
-     call ebands_print_gaps(owfk_ebands, ab_out, header="KS gaps after direct diagonalization")
-     call ebands_print_gaps(owfk_ebands, std_out, header="KS gaps after direct diagonalization")
+     call ebands_print_gaps(owfk_ebands, units, header="KS gaps after direct diagonalization")
      if (cc4s_task) call cc4s_write_eigens(owfk_ebands, dtfil)
    end if
 
