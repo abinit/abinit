@@ -3108,7 +3108,7 @@ cartesian_stress_tensor: # hartree/bohr^3
 - [  1.65495174E-04,   0.00000000E+00,   0.00000000E+00, ]
 - [  0.00000000E+00,   1.65495174E-04,   0.00000000E+00, ]
 - [  0.00000000E+00,   0.00000000E+00,   1.65495174E-04, ]
-pressure_GPa:  -4.8691E+00
+pressure_GPa:  -4.8690E+00
 xred      :
 - [  0.0000E+00,   0.0000E+00,   0.0000E+00, Al]
 cartesian_forces: # hartree/bohr

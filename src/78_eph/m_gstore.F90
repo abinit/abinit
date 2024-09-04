@@ -4910,24 +4910,24 @@ end subroutine gstore_wannierize_and_write_gwan
 !!
 !! SOURCE
 
-subroutine handle_lr_term(cryst, qpt, ng, gvec, nwin_kq, nwin_k, nwan, u_kq, u_k, zeff, qstar, isgn, g_bb)
-
-!Arguments ------------------------------------
- type(crystal_t),intent(in) :: cryst
- real(dp),intent(in) :: qpt(3)
- integer,intent(in) :: ng, nwin_kq, nwin_k, nwan, isgn, gvec(3,ng)
- complex(dp),intent(in) :: u_kq(nwin_kq, nwan), u_k(nwin_k,nwan)
- real(dp),intent(in) :: zeff(3,3,cryst%natom), qstar(3,3,3,cryst%natom)
- complex(dp),intent(inout) :: g_bb(nwin_kq, nwin_k)
-
-!Local variables-------------------------------
-!scalars
- !integer :: ig
- !character(len=500) :: msg
-!arrays
-! *************************************************************************
-
-end subroutine handle_lr_term
+!subroutine handle_lr_term(cryst, qpt, ng, gvec, nwin_kq, nwin_k, nwan, u_kq, u_k, zeff, qstar, isgn, g_bb)
+!
+!!Arguments ------------------------------------
+! type(crystal_t),intent(in) :: cryst
+! real(dp),intent(in) :: qpt(3)
+! integer,intent(in) :: ng, nwin_kq, nwin_k, nwan, isgn, gvec(3,ng)
+! complex(dp),intent(in) :: u_kq(nwin_kq, nwan), u_k(nwin_k,nwan)
+! real(dp),intent(in) :: zeff(3,3,cryst%natom), qstar(3,3,3,cryst%natom)
+! complex(dp),intent(inout) :: g_bb(nwin_kq, nwin_k)
+!
+!!Local variables-------------------------------
+!!scalars
+! !integer :: ig
+! !character(len=500) :: msg
+!!arrays
+!! *************************************************************************
+!
+!end subroutine handle_lr_term
 !!***
 
 end module m_gstore

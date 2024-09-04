@@ -326,11 +326,10 @@ subroutine wrtout_unit(unit, msg, mode_paral, do_flush, newlines, pre_newlines)
 !Local variables-------------------------------
  integer,save :: master = 0
  integer :: comm, me, nproc, my_newlines, ii,  my_pre_newlines
- integer,save :: cached_comm = -666777, cached_me=-1, cached_nproc=01
+ integer,save :: cached_comm = -666777, cached_me=-1, cached_nproc=-1
  logical :: my_flush
  character(len=len(msg)+50) :: string
  character(len=500) :: my_mode_paral
-
 !******************************************************************
 
  if (unit == std_out .and. .not. do_write_log) return
