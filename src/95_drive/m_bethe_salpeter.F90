@@ -1480,7 +1480,7 @@ subroutine setup_bse(codvsn,acell,rprim,ngfft_osc,Dtset,Dtfil,BS_files,Psps,Pawt
  ! the occupation scheme for semiconductors is used.
  call ebands_update_occ(ks_ebands,Dtset%spinmagntarget,prtvol=Dtset%prtvol)
 
- call ebands_print(ks_ebands,"Band structure read from the WFK file",unit=std_out,prtvol=Dtset%prtvol)
+ call ebands_print(ks_ebands, [std_out], "Band structure read from the WFK file", prtvol=Dtset%prtvol)
 
  call ebands_report_gap(ks_ebands,header=" KS band structure",unit=std_out,mode_paral="COLL")
 
@@ -2097,7 +2097,7 @@ subroutine setup_bse_interp(Dtset,Dtfil,BSp,Cryst,Kmesh, &
  ! the occupation scheme for semiconductors is used.
  call ebands_update_occ(ks_ebands_dense,Dtset%spinmagntarget,prtvol=Dtset%prtvol)
 
- call ebands_print(ks_ebands_dense,"Interpolated band structure read from the WFK file",unit=std_out,prtvol=Dtset%prtvol)
+ call ebands_print(ks_ebands_dense, [std_out], "Interpolated band structure read from the WFK file", prtvol=Dtset%prtvol)
 
  call ebands_report_gap(ks_ebands_dense,header="Interpolated KS band structure",unit=std_out,mode_paral="COLL")
 

@@ -1153,8 +1153,7 @@ end subroutine ebands_move_alloc
 !! Print the content of the object.
 !!
 !! INPUTS
-!!  ebands<ebands_t>The type containing the data.
-!!  [unit]=Unit number (default: std_out)
+!!  units=Unit numbers
 !!  [header]=title for info
 !!  [prtvol]=Verbosity level (default: 0)
 !!
@@ -1163,24 +1162,24 @@ end subroutine ebands_move_alloc
 !!
 !! SOURCE
 
-subroutine ebands_print(ebands, header, unit, prtvol)
+subroutine ebands_print(ebands, units, header, prtvol)
 
 !Arguments ------------------------------------
  class(ebands_t),intent(in) :: ebands
- integer,optional,intent(in) :: prtvol, unit
+ integer,intent(in) :: units(:)
+ integer,optional,intent(in) :: prtvol
  character(len=*),optional,intent(in) :: header
 
 !Local variables-------------------------------
- integer :: spin, ikpt, unt, my_prtvol, ii
+ integer :: spin, ikpt, my_prtvol, ii
  character(len=500) :: msg
 ! *************************************************************************
 
- unt = std_out; if (present(unit)) unt =unit
  my_prtvol = 0; if (present(prtvol)) my_prtvol = prtvol
 
  msg = ' ==== Info on the ebands_t ==== '
  if (present(header)) msg=' ==== '//trim(adjustl(header))//' ==== '
- call wrtout(unt, msg)
+ call wrtout(units, msg)
 
  write(msg,'(6(a,i0,a))')&
    '  Number of spinorial components ...... ',ebands%nspinor,ch10,&
@@ -1189,12 +1188,12 @@ subroutine ebands_print(ebands, header, unit, prtvol)
    '  kptopt .............................. ',ebands%kptopt,ch10,&
    '  Maximum number of bands ............. ',ebands%mband,ch10,&
    '  Occupation option ................... ',ebands%occopt,ch10
- call wrtout(unt, msg)
+ call wrtout(units, msg)
 
  write(msg,"(2a)")"  kptrlatt .............. ",trim(ltoa(reshape(ebands%kptrlatt, [9])))
- call wrtout(unt, msg)
+ call wrtout(units, msg)
  write(msg,"(2a)")"  shiftk ................ ",trim(ltoa(reshape(ebands%shiftk, [3 * ebands%nshiftk])))
- call wrtout(unt, msg)
+ call wrtout(units, msg)
 
  write(msg,'(3(a,f14.2,a),4(a,f14.6,a))')&
    '  Number of valence electrons ......... ',ebands%nelect,ch10,&
@@ -1204,28 +1203,28 @@ subroutine ebands_print(ebands, header, unit, prtvol)
    '  Entropy ............................. ',ebands%entropy,ch10,&
    '  Tsmear value ........................ ',ebands%tsmear,ch10,&
    '  Tphysel value ....................... ',ebands%tphysel,ch10
- call wrtout(unt, msg)
+ call wrtout(units, msg)
 
  if (my_prtvol > 10) then
    if (ebands%nsppol == 1)then
-     call wrtout(unt, sjoin(' New occ. numbers for occopt= ', itoa(ebands%occopt),' , spin-unpolarized case.'))
+     call wrtout(units, sjoin(' New occ. numbers for occopt= ', itoa(ebands%occopt),' , spin-unpolarized case.'))
    end if
 
    do spin=1,ebands%nsppol
      if (ebands%nsppol == 2) then
        write(msg,'(a,i9,a,i0)')' New occ. numbers for occopt= ',ebands%occopt,', spin ',spin
-       call wrtout(unt, msg)
+       call wrtout(units, msg)
      end if
 
      do ikpt=1,ebands%nkpt
        write(msg,'(2a,i4,3a,f6.3,2a)')ch10,&
          ' k-point number ',ikpt,') ',trim(ktoa(ebands%kptns(:,ikpt))),'; weight: ',ebands%wtk(ikpt), ch10, &
          " eig (Ha), eig (eV), occ, doccde"
-       call wrtout(unt, msg)
+       call wrtout(units, msg)
        do ii=1,ebands%nband(ikpt+(spin-1)*ebands%nkpt)
          write(msg,'(4(f7.3,1x))')ebands%eig(ii,ikpt,spin), ebands%eig(ii,ikpt,spin) * Ha_eV, &
              ebands%occ(ii,ikpt,spin), ebands%doccde(ii,ikpt,spin)
-         call wrtout(unt, msg)
+         call wrtout(units, msg)
        end do
      end do !ikpt
 

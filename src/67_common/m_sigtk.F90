@@ -612,7 +612,7 @@ subroutine sigtk_kpts_in_erange(dtset, cryst, ebands, psps, pawtab, prefix, comm
    call wrtout(unts, msg)
    call wrtout(unts, sjoin(" SKW parameters (einterp): ", ltoa(dtset%einterp)))
    call wrtout(unts, sjoin(repeat("=", 92), ch10))
-   !call ebands_print(ebands, header, unit=std_out, prtvol=dtset%prtvol)
+   !call ebands_print(ebands, [std_out], header, prtvol=dtset%prtvol)
 
    ! Consistency check.
    if (all(dtset%sigma_erange == zero)) then
@@ -653,7 +653,7 @@ subroutine sigtk_kpts_in_erange(dtset, cryst, ebands, psps, pawtab, prefix, comm
  fine_ebands%istwfk = 1
 
  call ebands_update_occ(fine_ebands, dtset%spinmagntarget, prtvol=dtset%prtvol)
- call ebands_print(fine_ebands, header="FINE EBANDS", unit=std_out, prtvol=dtset%prtvol)
+ call ebands_print(fine_ebands, [std_out], header="FINE EBANDS", prtvol=dtset%prtvol)
 
  if (assume_gap) then
    ! Compute gaps using fine_ebands.
