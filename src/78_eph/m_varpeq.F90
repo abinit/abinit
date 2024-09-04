@@ -3236,7 +3236,7 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
      end do ! spin
 
    else
-     ! Handle mutliple polaronic states.
+     ! Spinor wavefunctions
      do ip=1,vpq%nstates
        write(msg, "(2(a,i0),a,es16.6)")&
          " For spin: ", spin, ": pstate: ", ip, ": 1/N_k \sum_nk |A_nk|^2 = ", sum(abs(vpq%a_spin(:,:,ip,spin))**2) / nkbz

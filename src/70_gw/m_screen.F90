@@ -1062,7 +1062,7 @@ subroutine screen_init(screen, W_Info, Cryst, Qmesh, Gsph, Vcp, ifname, mqmem, n
        do iw=1,nomega
          write(msg,'(a,i3,a,i4,a)')'  Model symmetrical e^{-1} (q=',iq_ibz,', omega=',iw,', G,G'')'
          call wrtout(std_out,msg)
-         call print_arr(screen%Fgg(iq_ibz)%mat(:,:,iw))
+         call print_arr([std_out], screen%Fgg(iq_ibz)%mat(:,:,iw))
        end do
      end if
    end do ! iq_ibz
