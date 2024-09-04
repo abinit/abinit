@@ -680,9 +680,9 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
  type(bandfft_kpt_type),pointer :: my_bandfft_kpt => null()
  type(pawcprj_type),target,allocatable :: cwaveprj(:,:)
  type(pawcprj_type),pointer :: cwaveprj_idat(:,:)
- type(xgBlock_t) :: xgx0,xgeigen,xgforces
+ type(xgBlock_t) :: xgx0,xgeigen,xgderiv
  type(xg_t) :: cprj_xgx0,cprj_work
- real(dp),allocatable :: enlout_2d(:,:)
+ real(dp),allocatable :: enlout_2d(:,:),enlout_2d_stress(:,:)
 
 !*************************************************************************
 
@@ -817,6 +817,7 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
        bandpp=mpi_enreg%bandpp
        nblockbd=nband_k/bandpp
      end if
+     if (usexg==1) nblockbd=1
      blocksize=nband_k/nblockbd
      mband_cprj=mband/mpi_enreg%nproc_band
      nband_cprj_k=nband_k/mpi_enreg%nproc_band
@@ -1014,8 +1015,10 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
      ABI_MALLOC(weight,(blocksize))
      ABI_MALLOC(enlout,(nnlout*blocksize))
      if (usexg==1) then
-       ABI_MALLOC(enlout_2d,(3*natom,blocksize))
-       enlout_2d=zero
+       ABI_MALLOC(enlout_2d,(3*natom,blocksize*optfor))
+       ABI_MALLOC(enlout_2d_stress,(6,blocksize*stress_needed))
+       if (optfor==1) enlout_2d=zero
+       if (stress_needed==1) enlout_2d_stress=zero
      end if
      occblock=zero;weight=zero;enlout(:)=zero
      if (usefock_loc) then
@@ -1089,7 +1092,7 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
  &         gpu_option=gpu_option)
            call xgBlock_map_1d(xgeigen,lambda,SPACE_R,blocksize)
 
-           ncols_cprj = bandpp*my_nspinor
+           ncols_cprj = nband_cprj_k*my_nspinor
 
            call xg_init(cprj_xgx0,xg_nonlop%space_cprj,xg_nonlop%cprjdim,ncols_cprj,comm=xg_nonlop%comm_band)
            call xg_init(cprj_work,xg_nonlop%space_cprj,xg_nonlop%cprjdim,ncols_cprj,comm=xg_nonlop%comm_band)
@@ -1099,8 +1102,15 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
            !  !LTEST
            !  write(901,*) 'grnl_k :'
            !  !LTEST
-           call xgBlock_map(xgforces,enlout_2d,SPACE_R,3*natom,blocksize)
-           call xg_nonlop_forces(xg_nonlop,xgx0,cprj_xgx0%self,cprj_work%self,xgeigen,xgforces)
+           if (optfor==1) then
+             call xgBlock_map(xgderiv,enlout_2d,SPACE_R,3*natom,blocksize)
+             call xg_nonlop_forces(xg_nonlop,xgx0,cprj_xgx0%self,cprj_work%self,xgeigen,xgderiv)
+           end if
+
+           if (stress_needed==1) then
+             call xgBlock_map(xgderiv,enlout_2d_stress,SPACE_R,6,blocksize)
+             call xg_nonlop_stress(xg_nonlop,xgx0,cprj_xgx0%self,cprj_work%self,xgeigen,xgderiv,gs_hamk%gprimd)
+           end if
            !  !LTEST
            !  write(901,*) ''
            !  do iband=1,nband_k
@@ -1145,7 +1155,9 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
              end do
            end if
            if (stress_needed==1) then
-             ABI_ERROR('not implemented')
+             do iblocksize=1,blocksize
+               npsstr(1:6) = npsstr(1:6) + weight(iblocksize)*enlout_2d_stress(1:6,iblocksize)
+             end do
            end if
          end if
 
@@ -1268,6 +1280,7 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
      ABI_FREE(enlout)
      if (usexg==1) then
        ABI_FREE(enlout_2d)
+       ABI_FREE(enlout_2d_stress)
      end if
      ABI_FREE(ffnl)
      ABI_FREE(kg_k)
@@ -1290,6 +1303,11 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
      call timab(927,2,tsec)
 
    end do ! End k point loop
+
+   if (usexg==1) then
+     if (xg_nonlop%paw) call xg_nonlop_destroy_Dij(xg_nonlop)
+   end if
+
  end do ! End loop over spins
 
  call timab(928,1,tsec)
