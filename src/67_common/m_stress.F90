@@ -617,12 +617,16 @@ contains
 &     ' of kinetic stress is',kinstr(mu)
      call wrtout(std_out,message,'COLL')
    end do
-   do mu=1,6
-     write(message, '(a,i5,a,1p,e22.12)' )&
-&     ' stress: component',mu,&
-&     ' of meta-GGA stress is',mggastr(mu)
+   if (usekden>0) then
+     write(message, '(a)' ) ' '
      call wrtout(std_out,message,'COLL')
-   end do
+     do mu=1,6
+       write(message, '(a,i5,a,1p,e22.12)' )&
+&       ' stress: component',mu,&
+&       ' of metaGGA stress is',mggastr(mu)
+       call wrtout(std_out,message,'COLL')
+     end do
+   end if
    write(message, '(a)' ) ' '
    call wrtout(std_out,message,'COLL')
    do mu=1,6

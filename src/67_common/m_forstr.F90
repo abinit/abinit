@@ -734,6 +734,7 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
  end if
  if (stress_needed==1) then
    kinstr(:)=zero;mggastr(:)=0;npsstr(:)=zero
+   if (usekden>0) compute_gbound=.true.
    if (usefock_loc) then
      fockcommon%optstr=.TRUE.
      fockcommon%stress=zero
@@ -973,6 +974,7 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
        call bandfft_kpt_savetabs(my_bandfft_kpt,ffnl=ffnl_sav,ph3d=ph3d_sav,kpg=kpg_k_sav)
        call prep_bandfft_tabs(gs_hamk,ikpt,mkmem,mpi_enreg)
        call gs_hamk%load_k(npw_fft_k=my_bandfft_kpt%ndatarecv, &
+&       gbound_k =my_bandfft_kpt%gbound, &
 &       kg_k     =my_bandfft_kpt%kg_k_gather, &
 &       kpg_k    =my_bandfft_kpt%kpg_k_gather, &
 &       ffnl_k   =my_bandfft_kpt%ffnl_gather, &
@@ -1145,7 +1147,7 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
 
 !        Accumulate stress tensor in case meta-GGA using v_tau
          if ((stress_needed==1).and.(usekden==1)) then
-           call stress_mGGA(mggastr,cwavef,effmass_free,gs_hamk%gbound_k,gprimd,istwf_k, &
+           call stress_mGGA(mggastr,cwavef,effmass_free,gs_hamk%gbound_k,gs_hamk%gprimd,istwf_k, &
 &               kg_k,kpoint,mgfft,mpi_enreg,my_nspinor,blocksize,ngfft,npw_k,gs_hamk%nvloc, &
 &               gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,occblock,gs_hamk%ucvol,vxctaulocal, &
 &               wtk(ikpt),gpu_option=gpu_option)
@@ -1289,6 +1291,9 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
    if (nsym>1) then
      call stresssym(gs_hamk%gprimd,nsym,kinstr,symrec)
      call stresssym(gs_hamk%gprimd,nsym,npsstr,symrec)
+     if (usekden>0) then
+       call stresssym(gs_hamk%gprimd,nsym,mggastr,symrec)
+     end if
      if (usefock_loc) then
        if (fockcommon%optstr) then
          call stresssym(gs_hamk%gprimd,nsym,fockcommon%stress,symrec)
@@ -1650,7 +1655,7 @@ subroutine stress_mGGA(mggastr,cwavef,effmass_free,gbound_k,gprimd,istwf_k,kg_k,
  logical :: nspinor1TreatedByThisProc,nspinor2TreatedByThisProc
  real(dp) :: gp2pi1,gp2pi2,gp2pi3,kg_k_cart,kpt_cart,renorm_factor,weight_dum=1
  !arrays
- integer,parameter :: voigt1(6)=[1,2,3,2,1,1],voigt2(6)=[1,2,3,3,3,2]
+ integer,parameter :: voigt1(6)=[1,2,3,3,3,2],voigt2(6)=[1,2,3,2,1,1]
  real(dp) :: dotr(ndat),doti(ndat),my_mggastr(6)
  real(dp),allocatable,target :: gcwavef(:,:,:),vtau_gcwavef(:,:,:)
  real(dp),allocatable :: weight_array(:),work(:,:,:,:)
