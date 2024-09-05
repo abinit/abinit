@@ -46,12 +46,6 @@ using namespace std;
 
 static void* libpython_handle = NULL;
 
-extern "C" {
-void test_python() {
- fprintf(stdout, "TEST PYTHON");
-}
-}
-
 //--------------------
 
 extern "C" {
