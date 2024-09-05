@@ -579,8 +579,8 @@ end subroutine kmesh_free
 !! Print the content of a kmesh_t datatype
 !!
 !! INPUTS
+!! units: unit numbers
 !! [header]=optional header
-!! [unit]=the unit number for output
 !! [prtvol]=verbosity level
 !! [mode_paral]=either "COLL" or "PERS"
 !!
@@ -589,70 +589,64 @@ end subroutine kmesh_free
 !!
 !! SOURCE
 
-subroutine kmesh_print(Kmesh, header, unit, prtvol, mode_paral)
+subroutine kmesh_print(Kmesh, units, header, prtvol)
 
 !Arguments ------------------------------------
 !scalars
  class(kmesh_t),intent(in) :: Kmesh
- integer,optional,intent(in) :: prtvol,unit
- character(len=4),optional,intent(in) :: mode_paral
+ integer,intent(in) :: units(:)
  character(len=*),optional,intent(in) :: header
+ integer,optional,intent(in) :: prtvol
 
 !Local variables-------------------------------
 !scalars
  integer,parameter :: nmaxk=50
- integer :: ii,ik,my_unt,my_prtvol
- character(len=100) :: fmt
- character(len=4) :: my_mode
- character(len=500) :: msg
-
+ integer :: ii, ik, my_prtvol
+ character(len=500) :: msg, fmt
 ! *************************************************************************
 
- my_unt =std_out; if (PRESENT(unit      )) my_unt   =unit
  my_prtvol=0    ; if (PRESENT(prtvol    )) my_prtvol=prtvol
- my_mode='COLL' ; if (PRESENT(mode_paral)) my_mode  =mode_paral
 
  msg=' ==== Info on the Kmesh% object ==== '
  if (PRESENT(header)) msg=' ==== '//TRIM(ADJUSTL(header))//' ==== '
- call wrtout(my_unt,msg,my_mode)
+ call wrtout(units, msg)
 
  write(msg,'(a,i5,3a)')&
   ' Number of points in the irreducible wedge : ',Kmesh%nibz,ch10,&
   ' Reduced coordinates and weights : ',ch10
- call wrtout(my_unt,msg,my_mode)
+ call wrtout(units, msg)
 
  write(fmt,*)'(1x,i5,a,2x,3es16.8,3x,f11.5)'
  do ik=1,Kmesh%nibz ! Add tol8 for portability reasons.
    write(msg,fmt) ik,') ',(Kmesh%ibz(ii,ik),ii=1,3),Kmesh%wt(ik)+tol8
-   call wrtout(my_unt,msg,my_mode)
+   call wrtout(units, msg)
  end do
 
- SELECT CASE (Kmesh%timrev)
- CASE (1)
+ select case (Kmesh%timrev)
+ case (1)
    write(msg,'(2a,i2,3a,i5,a)')ch10,&
     ' Together with ',Kmesh%nsym,' symmetry operations (time-reversal symmetry not used) ',ch10,&
     ' yields ',Kmesh%nbz,' points in the full Brillouin Zone.'
 
- CASE (2)
+ case (2)
    write(msg,'(2a,i2,3a,i5,a)')ch10,&
     ' Together with ',Kmesh%nsym,' symmetry operations and time-reversal symmetry ',ch10,&
     ' yields ',Kmesh%nbz,' points in the full Brillouin Zone.'
 
- CASE DEFAULT
+ case default
    ABI_BUG(sjoin('Wrong value for timrev:', itoa(Kmesh%timrev)))
- END SELECT
+ end select
 
- call wrtout(my_unt,msg,my_mode)
+ call wrtout(units, msg)
 
  if (my_prtvol > 0) then
    write(fmt,*)'(1x,i5,a,2x,3es16.8)'
    do ik=1,Kmesh%nbz
      if (my_prtvol==1 .and. ik>nmaxk) then
-       write(msg,'(a)')' prtvol=1, do not print more points.'
-       call wrtout(my_unt,msg,my_mode); EXIT
+       call wrtout(units, ' prtvol=1, do not print more points.'); EXIT
      end if
      write(msg,fmt)ik,') ',(Kmesh%bz(ii,ik),ii=1,3)
-     call wrtout(my_unt,msg,my_mode)
+     call wrtout(units, msg)
    end do
  end if
 
@@ -660,16 +654,16 @@ subroutine kmesh_print(Kmesh, header, unit, prtvol, mode_paral)
  if (my_prtvol >= 10) then
    write(msg,'(2a)')ch10,&
    '                  Full point  ------->    Irred point -->            through:  Symrec  Time-Rev (1=No,-1=Yes) G0(1:3) '
-   call wrtout(my_unt,msg,my_mode)
+   call wrtout(units, msg)
    write(fmt,*)'(2x,i5,2x,2(3(f7.4,2x)),i3,2x,i2,3(i3))'
    do ik=1,Kmesh%nbz
-     write(msg,fmt)ik,Kmesh%bz(:,ik),Kmesh%ibz(:,Kmesh%tab(ik)),Kmesh%tabo(ik),Kmesh%tabi(ik),Kmesh%umklp(:,ik)
-     call wrtout(my_unt,msg,my_mode)
+     write(msg,fmt) ik,Kmesh%bz(:,ik),Kmesh%ibz(:,Kmesh%tab(ik)),Kmesh%tabo(ik),Kmesh%tabi(ik),Kmesh%umklp(:,ik)
+     call wrtout(units, msg)
    end do
  end if
 
  write(msg,'(a)')ch10
- call wrtout(my_unt,msg,my_mode)
+ call wrtout(units, msg)
 
 end subroutine kmesh_print
 !!***

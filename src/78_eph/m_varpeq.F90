@@ -3104,7 +3104,7 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
                dtset%nspden, dtset%nspinor, dtset%ecut, dtset%ecutsm, dtset%dilatmx, wfd_istwfk, ebands%kptns, ngfft, &
                dtset%nloalg, dtset%prtvol, dtset%pawprtvol, comm)
 
- call wfd%print(header="Wavefunctions for varpeq_plot")
+ call wfd%print([std_out], header="Wavefunctions for varpeq_plot")
 
  if (dtset%boxcutmin >= two) then
    call wrtout(std_out, " To reduce the size of the FFT mesh and the size of the XSF file, reduce boxcutmin from 2 to e.g. 1.1")

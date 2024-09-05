@@ -1888,10 +1888,9 @@ if(dtset%optdriver==66) then
 
   !Set up of the k-points and tables in the whole BZ
   call Kmesh%init(Cryst,dtset%nkpt,dtset%kptns,dtset%kptopt,wrap_1zone=.false.)
-  call Kmesh%print("K-mesh for the wavefunctions",std_out)
+  call Kmesh%print([std_out], header="K-mesh for the wavefunctions")
   call find_qmesh(Qmesh,Cryst,Kmesh)
-  call Qmesh%print("Q-mesh for the screening function",std_out)
-
+  call Qmesh%print([std_out], header="Q-mesh for the screening function")
 
   !------------------------------
   !Building the vc_sqrt structure
@@ -1906,10 +1905,9 @@ if(dtset%optdriver==66) then
 
   ecut_eff = dtset%ecut*(dtset%dilatmx)**2
   call make_gvec_kss(dtset%nkpt,dtset%kptns,ecut_eff,dtset%symmorphi,dtset%nsym,dtset%symrel,dtset%tnons,Cryst%gprimd,&
-  &                      dtset%prtvol,npw_serial,gvec,ierr)
+                        dtset%prtvol,npw_serial,gvec,ierr)
 
   call Gsphere%init(Cryst,npw_serial,gvec=gvec)
-
   call Gsphere%print()
 
   call Vcp%init(Gsphere,Cryst,Qmesh,Kmesh,dtset%rcut,dtset%gw_icutcoul,dtset%vcutgeo,dtset%ecutsigx,npw_serial,&
@@ -1924,12 +1922,11 @@ if(dtset%optdriver==66) then
   vc_sqrt=zero
   k=0
   do i=1,npw_k
-  do j=1,npw_serial
-  if(all(kg_k(:,i)==gvec(:,j))) k=j
+    do j=1,npw_serial
+      if(all(kg_k(:,i)==gvec(:,j))) k=j
+     end do
+    vc_sqrt(i)=Vcp%vc_sqrt(k,1)
   end do
-  vc_sqrt(i)=Vcp%vc_sqrt(k,1)
-  end do
-
 end if
 
 !--------------------------------------------------------------------------------

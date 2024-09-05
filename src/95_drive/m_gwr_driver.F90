@@ -333,8 +333,8 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
  call pawfgr_init(pawfgr, dtset, mgfftf, nfftf, ecut_eff, ecutdg_eff, ngfftc, ngfftf, &
                   gsqcutc_eff=gsqcutc_eff, gsqcutf_eff=gsqcutf_eff, gmet=cryst%gmet, k0=k0)
 
- call print_ngfft(ngfftc, header='Coarse FFT mesh for the wavefunctions')
- call print_ngfft(ngfftf, header='Dense FFT mesh for densities and potentials')
+ call print_ngfft([std_out], ngfftc, header='Coarse FFT mesh for the wavefunctions')
+ call print_ngfft([std_out], ngfftf, header='Dense FFT mesh for densities and potentials')
 
  ! Fake MPI_type for the sequential part.
  call initmpi_seq(mpi_enreg_seq)
@@ -1161,7 +1161,7 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, psps, pawtab, p
 
  if (my_rank == master) then
    call wrtout(units, " Computing oscilator matrix elements for CC4S.")
-   call print_ngfft(u_ngfft, header='FFT mesh for wavefunctions', unit=std_out)
+   call print_ngfft([std_out], u_ngfft, header='FFT mesh for wavefunctions')
 
    ! =====================
    ! Write files for CC4S

@@ -226,7 +226,7 @@ subroutine eph_phpi(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,e
    dtset%nloalg,dtset%prtvol,dtset%pawprtvol,comm)
  ABI_FREE(wfd_istwfk)
 
- call wfd_k%print(header="Wavefunctions on the k-points grid",mode_paral='PERS')
+ call wfd_k%print([std_out], header="Wavefunctions on the k-points grid")
 
  ABI_MALLOC(wfd_istwfk, (nkpt_kq))
  wfd_istwfk = 1
@@ -237,7 +237,7 @@ subroutine eph_phpi(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,e
 
  ABI_FREE(wfd_istwfk)
 
- call wfd_kq%print(header="Wavefunctions on the q-shifted k-points grid",mode_paral='PERS')
+ call wfd_kq%print([std_out], header="Wavefunctions on the q-shifted k-points grid")
 
  ABI_FREE(nband)
  ABI_FREE(bks_mask)

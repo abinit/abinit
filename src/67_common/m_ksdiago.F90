@@ -1956,7 +1956,7 @@ subroutine hyb_from_wfk_file(hyb, cryst, dtfil, dtset, psps, pawtab, ngfftc, dia
                dtset%nspden, dtset%nspinor, dtset%ecut, dtset%ecutsm, dtset%dilatmx, wfd_istwfk, hyb%ebands%kptns, ngfftc, &
                dtset%nloalg, dtset%prtvol, dtset%pawprtvol, comm)
 
- call hyb%wfd%print(header="Wavefunctions for Hybrid WKF file")
+ call hyb%wfd%print([std_out], header="Wavefunctions for Hybrid WKF file")
 
  ABI_FREE(nband)
  ABI_FREE(keep_ur)

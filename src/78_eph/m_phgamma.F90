@@ -3523,7 +3523,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
    nspden, nspinor, ecut, dtset%ecutsm, dtset%dilatmx, wfd_istwfk, ebands%kptns, ngfft,&
    dtset%nloalg, dtset%prtvol, dtset%pawprtvol, comm)
 
- call wfd%print(header="Wavefunctions on the Fermi surface")
+ call wfd%print([std_out], header="Wavefunctions on the Fermi surface")
 
  ABI_FREE(nband)
  ABI_FREE(keep_ur)
