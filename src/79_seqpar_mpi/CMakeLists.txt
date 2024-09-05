@@ -48,6 +48,12 @@ target_link_libraries(79_seqpar_mpi
   abinit::77_suscep
   )
 
+if(DO_BUILD_67_PYTHON_INVOCATION_EXT)
+  target_link_libraries(79_seqpar_mpi
+    PUBLIC
+    abinit::67_python_invocation_ext)
+endif()
+
 if(OpenMP_FOUND)
   target_link_libraries(79_seqpar_mpi
     PUBLIC
