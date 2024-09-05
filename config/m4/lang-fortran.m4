@@ -369,7 +369,7 @@ AC_DEFUN([_ABI_FC_CHECK_NVHPC],[
   m4_if([$1], , [AC_FATAL([$0: missing argument 1])])dnl
 
   dnl AC_MSG_CHECKING([if we are using the NVIDIA HPC SDK Fortran compiler])
-  fc_info_string=`$1 -V 2>&1 | grep "^nvfortran"`
+  fc_info_string=`$1 -V 2> /dev/null | grep "^nvfortran"`
   abi_result=`echo "${fc_info_string}"`
   if test "${abi_result}" = ""; then
     abi_result="no"
