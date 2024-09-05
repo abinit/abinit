@@ -410,7 +410,7 @@ subroutine kmesh_init(Kmesh, cryst, nkibz, kibz, kptopt, &
 !Local variables-------------------------------
 !scalars
  integer :: ik_bz,ik_ibz,isym,nkbz,nkbzX,nsym,timrev,itim
- real(dp) :: shift1,shift2,shift3
+ real(dp) :: shift(3)
  logical :: ltest,do_wrap,do_hack
 !arrays
  integer,allocatable :: ktab(:),ktabi(:),ktabo(:)
@@ -451,9 +451,7 @@ subroutine kmesh_init(Kmesh, cryst, nkibz, kibz, kptopt, &
 
  if (do_wrap) then ! Wrap the BZ points in the interval ]-1/2,1/2]
    do ik_bz=1,nkbz
-     call wrap2_pmhalf(kbz(1,ik_bz),kbz_wrap(1),shift1)
-     call wrap2_pmhalf(kbz(2,ik_bz),kbz_wrap(2),shift2)
-     call wrap2_pmhalf(kbz(3,ik_bz),kbz_wrap(3),shift3)
+     call wrap2_pmhalf(kbz(:,ik_bz),kbz_wrap,shift)
      kbz(:,ik_bz) = kbz_wrap
    end do
  end if
@@ -719,9 +717,7 @@ subroutine setup_k_rotation(nsym, timrev, symrec, nbz, kbz, gmet, krottb, krottb
 
  ! Sort the k-points according to their norm to speed up the search below.
  do ik=1,nbz
-   call wrap2_pmhalf(kbz(1,ik),kwrap(1),shift(1))
-   call wrap2_pmhalf(kbz(2,ik),kwrap(2),shift(2))
-   call wrap2_pmhalf(kbz(3,ik),kwrap(3),shift(3))
+   call wrap2_pmhalf(kbz(:,ik), kwrap, shift)
    knorm(ik) = normv(kwrap,gmet,"G")
    iperm(ik)= ik
  end do
@@ -768,11 +764,8 @@ subroutine setup_k_rotation(nsym, timrev, symrec, nbz, kbz, gmet, krottb, krottb
          end if
        end do
 #else
-       !
        ! Locate the shell index with bisection.
-       call wrap2_pmhalf(krot(1),kwrap(1),shift(1))
-       call wrap2_pmhalf(krot(2),kwrap(2),shift(2))
-       call wrap2_pmhalf(krot(3),kwrap(3),shift(3))
+       call wrap2_pmhalf(krot(:),kwrap,shift)
        norm_rot = normv(kwrap,gmet,"G")
        sh_start = bisect(shlen(1:nsh+1),norm_rot)
 
