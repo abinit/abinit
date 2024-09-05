@@ -329,9 +329,10 @@ subroutine ompgpu_fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,ist
 
    ! call gpu routine to  Apply local potential
    !!$OMP TARGET TEAMS LOOP &
-   !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(4) &
-   !$OMP& PRIVATE(idat,i1,i2,i3) MAP(to:denpot,fofr)
+   !$OMP TARGET TEAMS DISTRIBUTE &
+   !$OMP& PRIVATE(idat) MAP(to:denpot,fofr)
    do idat = 1, ndat
+     !$OMP PARALLEL DO COLLAPSE(3) PRIVATE(i1,i2,i3)
      do i3=1, n3
        do i2=1, n2
          do i1=1, n1
