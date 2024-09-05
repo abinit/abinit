@@ -98,9 +98,9 @@ subroutine ompgpu_fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,ist
  integer,intent(in) :: gboundin(2*mgfft+8,2),gboundout(2*mgfft+8,2)
  integer,intent(in) :: kg_kin(3,npwin),kg_kout(3,npwout),ngfft(18)
  real(dp),target,intent(inout) :: denpot(cplex*ldx,ldy,ldz)
- real(dp),intent(in) :: fofgin(2,npwin*ndat)
- real(dp),intent(inout),target :: fofr(2,ldx,ldy,ldz*ndat)
- real(dp),intent(out) :: fofgout(2,npwout*ndat)
+ real(dp),target,intent(in)    :: fofgin(2,npwin*ndat)
+ real(dp),target,intent(inout) :: fofr(2,ldx,ldy,ldz*ndat)
+ real(dp),target,intent(out)   :: fofgout(2,npwout*ndat)
 
 !Local variables-------------------------------
 !scalars
@@ -110,8 +110,6 @@ subroutine ompgpu_fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,ist
 
  real(dp) :: xnorm,one
 
- !Cuda return code
- integer fft_state
  integer rc
 
  !Local integer
@@ -409,11 +407,7 @@ subroutine alloc_ompgpu_fourwf(ngfft, ndat)
 
  integer :: n1,n2,n3, ldx, ldy, ldz
  integer, target :: t_fft(3)
- character(len=500) :: msg
- logical :: pinnedFlag
 
- !Cuda return code
- integer fft_state
 
  fourwf_initialized = 1
 
@@ -445,10 +439,8 @@ subroutine alloc_ompgpu_fourwf(ngfft, ndat)
 end subroutine alloc_ompgpu_fourwf
 
 subroutine free_ompgpu_fourwf()
- character(len=500) :: msg
 
- !Cuda return code
- integer fft_state
+ if(fourwf_initialized==0) return
 
  ! On detruit l'ancien plan
  call gpu_fft_plan_destroy()
@@ -459,7 +451,8 @@ subroutine free_ompgpu_fourwf()
 #endif
  ABI_FREE(work_gpu)
 
- fourwf_initialized = 0;
+ fourwf_initialized = 0
+
 end subroutine free_ompgpu_fourwf
 
 #else
