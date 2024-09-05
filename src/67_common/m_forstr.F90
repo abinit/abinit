@@ -1270,6 +1270,9 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
      call timab(65,1,tsec)
      call xmpi_sum(kinstr,spaceComm,ierr)
      call xmpi_sum(npsstr,spaceComm,ierr)
+     if (usekden>0) then
+       call xmpi_sum(mggastr,spaceComm,ierr)
+     end if
      if (usefock_loc) then
        if (fockcommon%optstr) then
          call xmpi_sum(fockcommon%stress,spaceComm,ierr)
@@ -1742,7 +1745,7 @@ subroutine stress_mGGA(mggastr,cwavef,effmass_free,gbound_k,gprimd,istwf_k,kg_k,
      call dotprod_g_batch_full(dotr,doti,istwf_k,npw_k,ndat,1, &
 &                 gcwavef_ndat(:,:,:,ia),vtau_gcwavef_ndat(:,:,:,ib), &
 &                 mpi_enreg%me_g0,mpi_enreg%comm_fft,gpu_option=gpu_option_)
-     my_mggastr(mu)=my_mggastr(mu) + renorm_factor*sum(dotr(1:ndat))
+     my_mggastr(mu)=my_mggastr(mu) + renorm_factor*sum(weight_array(1:ndat)*dotr(1:ndat))
    end do
  
  end do ! ispinor
