@@ -804,11 +804,12 @@ has_fock=.false.
    !  to <G|H|C(n,k)>. Take also into account build-in debugging.
    if(prtvol/=-level)then
      if (k1_eq_k2) then
-       !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(3) &
-       !$OMP& PRIVATE(idat,ispinor,ig) &
+       !$OMP TARGET TEAMS DISTRIBUTE COLLAPSE(2) &
+       !$OMP& PRIVATE(idat,ispinor) &
        !$OMP& MAP(to:ghc,kinpw_k2,gvnlxc_,gsc,cwavef) MAP(tofrom:kinpw_k2)
        do idat=1,ndat
          do ispinor=1,my_nspinor
+           !$OMP PARALLEL DO PRIVATE(ig,igspinor)
            do ig=1,npw_k2
              igspinor=ig+npw_k2*(ispinor-1)+npw_k2*my_nspinor*(idat-1)
              if(kinpw_k2(ig)<huge(zero)*1.d-11)then
@@ -826,11 +827,12 @@ has_fock=.false.
          end do ! ispinor
        end do ! idat
      else
-       !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(3) &
-       !$OMP& PRIVATE(idat,ispinor,ig) &
+       !$OMP TARGET TEAMS DISTRIBUTE COLLAPSE(2) &
+       !$OMP& PRIVATE(idat,ispinor) &
        !$OMP& MAP(to:ghc,gvnlxc_,gsc) MAP(tofrom:kinpw_k2)
        do idat=1,ndat
          do ispinor=1,my_nspinor
+           !$OMP PARALLEL DO PRIVATE(ig,igspinor)
            do ig=1,npw_k2
              igspinor=ig+npw_k2*(ispinor-1)+npw_k2*my_nspinor*(idat-1)
              if(kinpw_k2(ig)<huge(zero)*1.d-11)then
