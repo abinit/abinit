@@ -3321,7 +3321,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
                nspden, nspinor, ecut, dtset%ecutsm, dtset%dilatmx, wfd_istwfk, ebands%kptns, ngfft,&
                dtset%nloalg, dtset%prtvol, dtset%pawprtvol, comm)
 
- call wfd%print(header="Wavefunctions for GSTORE calculation")
+ call wfd%print([std_out], header="Wavefunctions for GSTORE calculation")
 
  ABI_FREE(nband)
  ABI_FREE(keep_ur)

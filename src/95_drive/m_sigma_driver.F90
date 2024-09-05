@@ -368,7 +368,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  call init_distribfft_seq(MPI_enreg_seq%distribfft,'c',ngfftc(2),ngfftc(3),'all')
  call init_distribfft_seq(MPI_enreg_seq%distribfft,'f',ngfftf(2),ngfftf(3),'all')
 
- call print_ngfft(ngfftf,header='Dense FFT mesh used for densities and potentials')
+ call print_ngfft([std_out], ngfftf, header='Dense FFT mesh used for densities and potentials')
  nfftf_tot=PRODUCT(ngfftf(1:3))
 
  ! ===========================================
@@ -402,8 +402,8 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
    ABI_WARNING(' EXPERIMENTAL - Using a pole-fit screening!')
  end if
 
- call print_ngfft(gwc_ngfft,header='FFT mesh for oscillator strengths used for Sigma_c')
- call print_ngfft(gwx_ngfft,header='FFT mesh for oscillator strengths used for Sigma_x')
+ call print_ngfft([std_out], gwc_ngfft, header='FFT mesh for oscillator strengths used for Sigma_c')
+ call print_ngfft([std_out], gwx_ngfft, header='FFT mesh for oscillator strengths used for Sigma_x')
 
  b1gw = Sigp%minbdgw; b2gw = Sigp%maxbdgw
 
@@ -2006,9 +2006,9 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
   ! calculation by simply listing the same k-point twice in kptgw. Now this trick is not allowed anymore.
   ! Everything, indeed, should be done in a clean and transparent way inside csigme.
 
- call wfd%print(mode_paral='PERS')
+ call wfd%print([std_out])
 
- call wrtout(std_out,sigma_type_from_key(mod10))
+ call wrtout(std_out, sigma_type_from_key(mod10))
 
  if (gwcalctyp<10) then
    msg = " Perturbative Calculation"
@@ -3315,8 +3315,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
  ABI_MALLOC(Kmesh%shift,(3,Kmesh%nshift))
  Kmesh%shift(:,:)    =Dtset%shiftk(:,1:Dtset%nshiftk)
 
- call Kmesh%print("K-mesh for the wavefunctions",std_out,Dtset%prtvol,"COLL")
- call Kmesh%print("K-mesh for the wavefunctions",ab_out, 0,           "COLL")
+ call Kmesh%print(units, header="K-mesh for the wavefunctions", prtvol=Dtset%prtvol)
 
  ! === Initialize the band structure datatype ===
  ! * Copy WFK energies and occupations up to Sigp%nbnds==Dtset%nband(:)
@@ -3657,9 +3656,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
    Er%gvec(:,1) = [0, 0, 0]
  end if
 
- call Qmesh%print("Q-mesh for screening function",std_out,Dtset%prtvol,"COLL")
- call Qmesh%print("Q-mesh for screening function",ab_out ,0           ,"COLL")
-
+ call Qmesh%print(units, header="Q-mesh for screening function", prtvol=Dtset%prtvol)
 
  do iqbz=1,Qmesh%nbz
    call qmesh%get_BZ_item(iqbz, q_bz, iq_ibz, isym, itim, umklp=q_umklp)

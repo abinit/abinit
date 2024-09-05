@@ -304,9 +304,9 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 
  k0(:)=zero
  call pawfgr_init(Pawfgr,Dtset,mgfftf,nfftf,ecut_eff,ecutdg_eff,ngfftc,ngfftf,&
-& gsqcutc_eff=gsqcutc_eff,gsqcutf_eff=gsqcutf_eff,gmet=gmet,k0=k0)
+                  gsqcutc_eff=gsqcutc_eff,gsqcutf_eff=gsqcutf_eff,gmet=gmet,k0=k0)
 
- call print_ngfft(ngfftf,'Dense FFT mesh used for densities and potentials')
+ call print_ngfft([std_out], ngfftf,'Dense FFT mesh used for densities and potentials')
  nfftf_tot=PRODUCT(ngfftf(1:3))
 
  ! We can intialize MPI_enreg and fft distrib here, now ngfft are known
@@ -324,7 +324,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
    ngfft_gw,Hdr_wfk,Hdr_local,Cryst,Kmesh,Qmesh,ks_ebands,Ltg_q,Gsph_epsG0,Gsph_wfn,Vcp,Ep,comm)
 
  call timab(302,2,tsec) ! screening(init)
- call print_ngfft(ngfft_gw,'FFT mesh used for oscillator strengths')
+ call print_ngfft([std_out], ngfft_gw, header='FFT mesh used for oscillator strengths')
 
  nfftgw_tot=PRODUCT(ngfft_gw(1:3))
  mgfftgw   =MAXVAL (ngfft_gw(1:3))
@@ -624,10 +624,10 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  ABI_FREE(nband)
  ABI_FREE(keep_ur)
 
- call wfd%print(mode_paral='PERS')
-!FIXME: Rewrite the treatment of use_tr branches in cchi0 ...
-!Use a different nbvw for each spin.
-!Now use_tr means that one can use time-reversal symmetry.
+ call wfd%print([std_out])
+ !FIXME: Rewrite the treatment of use_tr branches in cchi0 ...
+ !Use a different nbvw for each spin.
+ !Now use_tr means that one can use time-reversal symmetry.
 
 !==================================================
 !==== Read KS band structure from the KSS file ====
@@ -1677,7 +1677,7 @@ subroutine setup_screening(codvsn,acell,rprim,wfk_fname,Dtset,Psps,Pawtab,&
  character(len=500) :: msg
  type(wvl_internal_type) :: wvl
 !arrays
- integer :: ng0sh_opt(3)
+ integer :: ng0sh_opt(3), units(2)
  integer,allocatable :: npwarr(:)
  integer,pointer :: gvec_kss(:,:)
  integer,pointer :: test_gvec_kss(:,:)
@@ -1689,6 +1689,8 @@ subroutine setup_screening(codvsn,acell,rprim,wfk_fname,Dtset,Psps,Pawtab,&
 ! *************************************************************************
 
  DBG_ENTER('COLL')
+
+ units = [std_out, ab_out]
 
  ! Check for calculations that are not implemented
  ltest = ALL(Dtset%nband(1:Dtset%nkpt*Dtset%nsppol) == Dtset%nband(1))
@@ -1804,16 +1806,14 @@ subroutine setup_screening(codvsn,acell,rprim,wfk_fname,Dtset,Psps,Pawtab,&
  ABI_MALLOC(Kmesh%shift,(3,Kmesh%nshift))
  Kmesh%shift(:,:)    =Dtset%shiftk(:,1:Dtset%nshiftk)
 
- call Kmesh%print("K-mesh for the wavefunctions",std_out,Dtset%prtvol,"COLL")
- call Kmesh%print("K-mesh for the wavefunctions",ab_out, 0,           "COLL")
+ call Kmesh%print(units, header="K-mesh for the wavefunctions", prtvol=Dtset%prtvol)
 
  ! === Find Q-mesh, and do setup for long wavelength limit ===
  ! * Stop if a nonzero umklapp is needed to reconstruct the BZ. In this case, indeed,
  !   epsilon^-1(Sq) should be symmetrized in csigme using a different expression (G-G_o is needed)
  call find_qmesh(Qmesh,Cryst,Kmesh)
 
- call Qmesh%print("Q-mesh for the screening function",std_out,Dtset%prtvol,"COLL")
- call Qmesh%print("Q-mesh for the screening function",ab_out ,0           ,"COLL")
+ call Qmesh%print(units, "Q-mesh for the screening function", prtvol=dtset%prtvol)
 
  do iqbz=1,Qmesh%nbz
    call qmesh%get_BZ_item(iqbz,qbz,iq_ibz,isym,itim)
@@ -1826,17 +1826,6 @@ subroutine setup_screening(codvsn,acell,rprim,wfk_fname,Dtset,Psps,Pawtab,&
      ABI_ERROR(msg)
    end if
  end do
-
- ! This section is now performed in invars2
- ! Write the list of qpoints for the screening in netcdf format and exit.
- ! This file is used by abipy to generate multiple input files.
-! if (Dtset%nqptdm == -1) then
-!   if (my_rank==master) then
-!      ncerr = nctk_write_ibz(strcat(dtfil%filnam_ds(4), "_qptdms.nc"), qmesh%ibz, qmesh%wt)
-!      NCF_CHECK(ncerr)
-!   end if
-!   ABI_ERROR_NODUMP("Aborting now")
-! end if
 
  if (Dtset%gw_nqlwl==0) then
    Ep%nqlwl=1

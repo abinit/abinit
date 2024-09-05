@@ -1430,8 +1430,7 @@ end block
  !call xmpi_min_ip(gwr%uc_batch_size, gwr%comm%value, ierr)
 
  if (my_rank == master) then
-   call print_ngfft(gwr%g_ngfft, header="FFT mesh for Green's function", unit=std_out)
-   !call print_ngfft(gwr%g_ngfft, header="FFT mesh for Green's function", unit=ab_out)
+   call print_ngfft([std_out], gwr%g_ngfft, header="FFT mesh for Green's function")
    call wrtout(units, sjoin("- FFT uc_batch_size:", itoa(gwr%uc_batch_size)))
    call wrtout(units, sjoin("- FFT sc_batch_size:", itoa(gwr%sc_batch_size)))
  end if
@@ -2089,7 +2088,7 @@ subroutine gwr_load_kcalc_wfd(gwr, wfk_path, tmp_kstab)
                dtset%nspden, dtset%nspinor, dtset%ecut, dtset%ecutsm, dtset%dilatmx, wfd_istwfk, ks_ebands%kptns, gwr%g_ngfft, &
                dtset%nloalg, dtset%prtvol, dtset%pawprtvol, gwr%comm%value)
 
- call wfd%print(header="Wavefunctions for GWR calculation")
+ call wfd%print([std_out], header="Wavefunctions for GWR calculation")
 
  ABI_FREE(nband)
  ABI_FREE(keep_ur)
@@ -3507,7 +3506,6 @@ subroutine gwr_cos_transform(gwr, what, mode, sum_spins)
  complex(dp) :: wgt_globmy(gwr%ntau, gwr%my_ntau)  ! Complex instead of real to be able to call ZGEMM.
  complex(dp),allocatable :: cwork_myit(:,:,:), glob_cwork(:,:,:)
  type(__slkmat_t), pointer :: mats(:)
-
 ! *************************************************************************
 
  call cwtime(cpu, wall, gflops, "start")
@@ -3573,8 +3571,6 @@ subroutine gwr_cos_transform(gwr, what, mode, sum_spins)
 
      ! batch_size in terms of columns
      ! TODO: Determine batch_size automatically to avoid going OOM
-     !batch_size = 1
-     !batch_size = 24
      batch_size = 48
      !batch_size = loc2_size
 
@@ -3586,6 +3582,7 @@ subroutine gwr_cos_transform(gwr, what, mode, sum_spins)
        ndat = blocked_loop(ig2, mats(it0)%sizeb_local(2), batch_size)
 
        ! Extract (g1, g2) matrix elements as a function of tau/omega
+       !!!$OMP PARALLEL DO PRIVATE(itau)
        do idat=1,ndat
          do my_it=1,gwr%my_ntau
            itau = gwr%my_itaus(my_it)
@@ -3599,10 +3596,12 @@ subroutine gwr_cos_transform(gwr, what, mode, sum_spins)
        do idat=1,ndat
          call ZGEMM("N", "N", gwr%ntau, loc1_size, gwr%my_ntau, cone, &
                     wgt_globmy, gwr%ntau, cwork_myit(1,1,idat), gwr%my_ntau, czero, glob_cwork(1,1,idat), gwr%ntau)
-         !call xmpi_isum_ip(glob_cwork(:,:,idat), gwr%tau_comm%value, requests(idat), ierr)
        end do
 
-       !call xmpi_waitall_1d(requests(1:ndat), ierr)
+       ! TODO: This is a single call to ZGEMM.
+       !call ZGEMM("N", "N", gwr%ntau, loc1_size*ndat, gwr%my_ntau, cone, &
+       !            wgt_globmy, gwr%ntau, cwork_myit, gwr%my_ntau, czero, glob_cwork, gwr%ntau)
+
        call xmpi_sum(glob_cwork, gwr%tau_comm%value, ierr)
 
        ! Update my local (g1, g2) entry to have it in imaginary-frequency.
@@ -3732,7 +3731,6 @@ subroutine desc_get_vc_sqrt(desc, qpt, q_is_gamma, gwr, comm)
  logical, intent(in) :: q_is_gamma
  class(gwr_t),intent(in) :: gwr
  integer,intent(in) :: comm
-
 ! *************************************************************************
 
  ABI_UNUSED([q_is_gamma])
@@ -4063,7 +4061,6 @@ subroutine gwr_build_tchi(gwr)
  type(littlegroup_t),allocatable :: ltg_qibz(:)
  type(fftbox_plan3_t) :: green_plan
  type(uplan_t) :: uplan_q
-
 ! *************************************************************************
 
  call cwtime(cpu_all, wall_all, gflops_all, "start")
@@ -4569,7 +4566,6 @@ subroutine gwr_redistrib_gt_kibz(gwr, itau, spin, need_kibz, got_kibz, action)
  !integer :: num_pm, ipm_list__(2)
  real(dp) :: kk_ibz(3), cpu, wall, gflops
  complex(gwpc),contiguous, pointer :: ck_ptr(:,:)
-
 ! *************************************************************************
 
  call cwtime(cpu, wall, gflops, "start")
@@ -4676,7 +4672,6 @@ subroutine gwr_redistrib_mats_qibz(gwr, what, itau, spin, need_qibz, got_qibz, a
  logical, parameter :: timeit = .False.
  real(dp) :: qq_ibz(3), cpu, wall, gflops
  complex(gwpc),contiguous, pointer :: cq_ptr(:,:)
-
 ! *************************************************************************
 
  ABI_CHECK(what == "tchi" .or. what == "wc", sjoin("Invalid what:", what))
@@ -4782,7 +4777,6 @@ subroutine gwr_print_trace(gwr, units, what)
  character(len=5000) :: comment
  complex(dp),allocatable :: ctrace3(:,:,:), ctrace4(:,:,:,:)
  type(__slkmat_t),contiguous, pointer :: mats(:,:,:)
-
 ! *************************************************************************
 
  ! NB: The same q/k point in the IBZ might be available on different procs in kpt_comm
@@ -6109,7 +6103,6 @@ subroutine gwr_rpa_energy(gwr)
  type(processor_scalapack) :: proc_4diag
  real(gwp),allocatable :: eig(:)
  real(dp),allocatable :: kin_qg(:), ec_rpa(:), ec_mp2(:), ecut_chi(:)
-
 ! *************************************************************************
 
  call gwr%build_chi0_head_and_wings()
@@ -6332,7 +6325,6 @@ subroutine gwr_run_g0w0(gwr, free_ugb)
 
 !Local variables-------------------------------
  logical :: free_ugb__
-
 ! *************************************************************************
 
  ! Use ugb wavefunctions and the Lehmann representation to compute head/wings and Sigma_x matrix elements.
@@ -6371,7 +6363,6 @@ subroutine gwr_run_chi0(gwr, free_ugb)
 
 !Local variables-------------------------------
  logical :: free_ugb__
-
 ! *************************************************************************
 
  ! Use ugb wavefunctions and the Lehmann representation to compute head/wings and Sigma_x matrix elements.
@@ -6411,7 +6402,6 @@ subroutine gwr_run_energy_scf(gwr)
  integer :: units(2)
  logical :: converged
  character(len=500) :: msg
-
 ! *************************************************************************
 
  ! TODO:
@@ -6509,7 +6499,6 @@ subroutine gwr_check_scf_cycle(gwr, converged)
  character(len=500) :: msg
  real(dp) :: max_adiff, adiff(gwr%qp_ebands%mband)
  integer :: units(2)
-
 ! *************************************************************************
 
  max_adiff = -one; converged = .True.; units = [std_out, ab_out]
@@ -6585,11 +6574,10 @@ subroutine gwr_ncwrite_tchi_wc(gwr, what, filepath)
 !arrays
  real(dp), ABI_CONTIGUOUS pointer :: fptr(:,:,:)
  type(__slkmat_t), pointer :: mats(:)
-
 ! *************************************************************************
 
  ! Cannot reuse SCR.nc/SUSC.nc fileformat as:
- !  - hscr_new requires ep%
+ !  - hscr_new requires ep% instance
  !  - old file formats assume Gamma-centered g vectors.
 
  call cwtime(cpu, wall, gflops, "start")
@@ -6806,7 +6794,6 @@ subroutine box2gsph(ngfft, npw, ndat, kg_k, cfft, cg)
  integer :: n1, n2, n3, n4, n5, n6, i1, i2, i3, idat, ipw, icg
  complex(gwpc),contiguous,pointer :: cfft_ptr(:,:,:,:)
  !character(len=500) :: msg
-
 ! *************************************************************************
 
  n1 = ngfft(1); n2 = ngfft(2); n3 = ngfft(3)
@@ -6889,7 +6876,6 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
  type(gsphere_t) :: gsph
  type(ddkop_t) :: ddkop
  !type(pawcprj_type),allocatable :: cwaveprj(:,:)
-
 ! *************************************************************************
 
  call timab(1927, 1, tsec)
@@ -6956,10 +6942,7 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
  !write(std_out,*)"work_ngfft(1:3): ",work_ngfft(1:3)
  ABI_MALLOC(work, (2, work_ngfft(4), work_ngfft(5), work_ngfft(6)))
 
- if (gwr%comm%me == 0) then
-   call print_ngfft(u_ngfft, header="FFT mesh for chi0 head/wings computation", unit=std_out)
-   !call print_ngfft(u_ngfft, header="FFT mesh for chi0 head/wings computation", unit=ab_out)
- endif
+ if (gwr%comm%me == 0) call print_ngfft([std_out], u_ngfft, header="FFT mesh for chi0 head/wings computation")
 
  ! Need to broadcast G-vectors at q = 0 if k/q-point parallelism is activated.
  if (gwr%kpt_comm%me == 0) then
@@ -7344,9 +7327,7 @@ subroutine gwr_build_sigxme(gwr, compute_qp)
 !scalars
  integer :: nsppol, nspinor, ierr, my_ikf, band_sum, ii, jj, kb, il_b, iab !ig_start, ig,
  integer :: my_is, ikcalc, ikcalc_ibz, bmin, bmax, band, istwf_k, npw_k
- integer :: spin, jb, is_idx, use_umklp
- integer :: spad, wtqm, wtqp, irow, spadx1, spadx2
- integer :: npwx, u_nfft, u_mgfft, u_mpw
+ integer :: spin, jb, is_idx, use_umklp, spad, wtqm, wtqp, irow, spadx1, spadx2, npwx, u_nfft, u_mgfft, u_mpw
  integer :: ik_bz, ik_ibz, isym_k, trev_k, g0_k(3)
  integer :: iq_bz, iq_ibz, isym_q, trev_q, g0_q(3)
  logical :: isirr_k, isirr_q, sigc_is_herm, compute_qp__
@@ -7373,7 +7354,6 @@ subroutine gwr_build_sigxme(gwr, compute_qp)
  complex(dp),allocatable  :: sigxcme_tmp(:,:), sigxme_tmp(:,:,:), sigx(:,:,:,:)
  complex(dp) :: gwpc_sigxme, gwpc_sigxme2, xdot_tmp
  type(sigijtab_t),allocatable :: Sigxij_tab(:,:), Sigcij_tab(:,:)
-
 ! *************************************************************************
 
  call timab(1920, 1, tsec)
@@ -7422,10 +7402,7 @@ subroutine gwr_build_sigxme(gwr, compute_qp)
  gwr_boxcutmin_x = two
  call gwr%get_u_ngfft(gwr_boxcutmin_x, u_ngfft, u_nfft, u_mgfft, u_mpw, gmax)
 
- if (gwr%comm%me == 0) then
-   call print_ngfft(u_ngfft, header="FFT mesh for Sigma_x", unit=std_out)
-   !call print_ngfft(u_ngfft, header="FFT mesh for Sigma_x", unit=ab_out)
- end if
+ if (gwr%comm%me == 0) call print_ngfft([std_out], u_ngfft, header="FFT mesh for Sigma_x")
 
  ! Init work_ngfft
  gmax = gmax + 4 ! FIXME: this is to account for umklapp, should also consider Gamma-only and istwfk

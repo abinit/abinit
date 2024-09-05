@@ -1756,40 +1756,35 @@ end subroutine wfd_get_ur
 !!  Print the content of a wfd_t datatype
 !!
 !! INPUTS
-!!  Wfd<wfd_t>=The datatype.
+!!  units=Unit numbers for output
 !!  [header]=String to be printed as header for additional info.
-!!  [unit]=Unit number for output
 !!  [prtvol]=Verbosity level
-!!  [mode_paral]=Either "COLL" or "PERS". Defaults to "COLL".
 !!
 !! OUTPUT
 !!  Only printing
 !!
 !! SOURCE
 
-subroutine wfd_print(Wfd, header, unit, prtvol, mode_paral)
+subroutine wfd_print(Wfd, units, header, prtvol)
 
 !Arguments ------------------------------------
- integer,optional,intent(in) :: unit,prtvol
- character(len=4),optional,intent(in) :: mode_paral
- character(len=*),optional,intent(in) :: header
  class(wfd_t),intent(in) :: Wfd
+ integer,intent(in) :: units(:)
+ integer,optional,intent(in) :: prtvol
+ character(len=*),optional,intent(in) :: header
 
 !Local variables-------------------------------
 !scalars
- integer :: my_prtvol, my_unt, mpw, ib, ik, is, ug_cnt, ur_cnt, cprj_cnt, spin, ik_ibz, band
+ integer :: my_prtvol, mpw, ib, ik, is, ug_cnt, ur_cnt, cprj_cnt, spin, ik_ibz, band
  real(dp) :: ug_size, ur_size, cprj_size !,kdata_bsize
- character(len=4) :: my_mode
  character(len=500) :: msg
 ! *************************************************************************
 
- my_unt   =std_out; if (present(unit      )) my_unt   =unit
  my_prtvol=0      ; if (present(prtvol    )) my_prtvol=prtvol
- my_mode  ='COLL' ; if (present(mode_paral)) my_mode  =mode_paral
 
- msg=' ==== Info on the Wfd% object ==== '
+ msg = ' ==== Info on the wfd% object ==== '
  if (present(header)) msg=' ==== '//TRIM(ADJUSTL(header))//' ==== '
- call wrtout(my_unt,msg,my_mode)
+ call wrtout(units, msg)
 
  write(msg,'(3(a,i0,a),a,i0,2a,f5.1)')&
    '  Number of irreducible k-points ........ ',Wfd%nkibz,ch10,&
@@ -1797,16 +1792,16 @@ subroutine wfd_print(Wfd, header, unit, prtvol, mode_paral)
    '  Number of spin-density components ..... ',Wfd%nspden,ch10,&
    '  Number of spin polarizations .......... ',Wfd%nsppol,ch10,&
    '  Plane wave cutoff energy .............. ',Wfd%ecut
- call wrtout(my_unt, msg, my_mode)
+ call wrtout(units, msg)
 
  mpw = maxval(Wfd%npwarr)
  write(msg,'(3(a,i0,a))')&
    '  Max number of G-vectors ............... ',mpw,ch10,&
    '  Total number of FFT points ............ ',Wfd%nfftot,ch10,&
    '  Number of FFT points treated by me .... ',Wfd%nfft,ch10
- call wrtout(my_unt, msg, my_mode)
+ call wrtout(units, msg)
 
- call print_ngfft(Wfd%ngfft, 'FFT mesh for wavefunctions', my_unt, my_mode, my_prtvol)
+ call print_ngfft(units, Wfd%ngfft, 'FFT mesh for wavefunctions', prtvol=my_prtvol)
 
  ug_cnt = 0; ur_cnt = 0; cprj_cnt = 0
  do spin=1,Wfd%nsppol
@@ -1824,36 +1819,31 @@ subroutine wfd_print(Wfd, header, unit, prtvol, mode_paral)
  end do
 
  ! Info on memory needed for u(g), u(r) and PAW cprj
- write(msg, '(a,i0)')' Total number of (b,k,s) states stored by this rank: ', ug_cnt
- call wrtout(std_out, msg, pre_newlines=1)
+ write(msg, '(a,i0)')'P Total number of (b,k,s) states stored by this rank: ', ug_cnt
+ call wrtout(units, msg, pre_newlines=1)
 
  ug_size = one * Wfd%nspinor * mpw * ug_cnt
- write(msg,'(a,f8.1,a)')' Memory allocated for Fourier components u(G): ',two*gwpc*ug_size*b2Mb,' [Mb] <<< MEM'
- call wrtout(std_out, msg)
+ write(msg,'(a,f8.1,a)')'P Memory allocated for Fourier components u(G): ',two*gwpc*ug_size*b2Mb,' [Mb] <<< MEM'
+ call wrtout(units, msg)
 
  if (any(wfd%keep_ur)) then
    ur_size = one * Wfd%nspinor * Wfd%nfft * ur_cnt
-   write(msg,'(a,f8.1,a)')' Memory allocated for real-space u(r): ',two*gwpc*ur_size*b2Mb,' [Mb] <<< MEM'
-   call wrtout(std_out, msg)
+   write(msg,'(a,f8.1,a)')'P Memory allocated for real-space u(r): ',two*gwpc*ur_size*b2Mb,' [Mb] <<< MEM'
+   call wrtout(units, msg)
  end if
 
  if (wfd%usepaw==1) then
    cprj_size = one * Wfd%nspinor * sum(Wfd%nlmn_atm) * cprj_cnt
-   write(msg,'(a,f8.1,a)')' Memory allocated for PAW projections cprj: ',dp*cprj_size*b2Mb,' [Mb] <<< MEM'
-   call wrtout(std_out, msg)
+   write(msg,'(a,f8.1,a)')'P Memory allocated for PAW projections cprj: ',dp*cprj_size*b2Mb,' [Mb] <<< MEM'
+   call wrtout(units, msg)
  end if
 
- !TODO
- ! Add additionanl info
- !kdata_bsize = nkibz * (four * (3 * mpw) + dp * two * mpw * natom)
- !write(msg,'(a,f8.1,a)')' Memory allocated for Kdata = ',kdata_bsize * b2Mb,' [Mb] <<< MEM'
-
- write(msg,'(a,f8.1,a)')' Memory needed for wfd%s datastructure: ',ABI_MEM_MB(wfd%s),' [Mb] <<< MEM'
- call wrtout(std_out, msg)
- write(msg,'(a,f8.1,a)')' Memory needed for wfd%s(0)%k datastructure: ',ABI_MEM_MB(wfd%s(1)%k),' [Mb] <<< MEM'
- call wrtout(std_out, msg)
- write(msg,'(a,f8.1,a)')' Memory allocated for Kdata array: ',ABI_MEM_MB(wfd%kdata),' [Mb] <<< MEM'
- call wrtout(std_out, msg, newlines=1)
+ write(msg,'(a,f8.1,a)')'P Memory needed for wfd%s datastructure: ',ABI_MEM_MB(wfd%s),' [Mb] <<< MEM'
+ call wrtout(units, msg)
+ write(msg,'(a,f8.1,a)')'P Memory needed for wfd%s(0)%k datastructure: ',ABI_MEM_MB(wfd%s(1)%k),' [Mb] <<< MEM'
+ call wrtout(units, msg)
+ write(msg,'(a,f8.1,a)')'P Memory allocated for Kdata array: ',ABI_MEM_MB(wfd%kdata),' [Mb] <<< MEM'
+ call wrtout(units, msg, newlines=1)
 
 end subroutine wfd_print
 !!***
