@@ -1046,7 +1046,7 @@ subroutine vcoul_print(Vcp, units, prtvol)
 
 !Local variables-------------------------------
 !scalars
- integer :: ii, my_unt, my_prtvol, iqlwl
+ integer :: ii, my_prtvol, iqlwl
  character(len=500) :: msg
 ! *************************************************************************
 

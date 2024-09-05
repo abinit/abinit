@@ -2311,7 +2311,6 @@ subroutine gstore_fill_bks_mask_pp_mesh(gstore, ecut, mband, nkibz, nsppol, my_p
        do my_ik=1,gqk%my_nk
          ikq_ibz = map_kq(1, my_ik)
          bks_mask(b1:b2, ikq_ibz, spin) = .True.
-
          ! Compute g-sphere, returns onpw. Note istwfk = 1.
          kk = gqk%my_kpts(:, my_ik)
          call get_kg(kk+qpt-pp, istwfk1, ecut, gstore%cryst%gmet, onpw, gtmp, mpw=mpw, gmax=gmax)
@@ -2357,7 +2356,7 @@ subroutine gstore_get_mpw_gmax(gstore, ecut, mpw, gmax)
 
 !Local variables-------------------------------
  integer,parameter :: istwfk1 = 1
- integer :: my_is, my_ik, my_iq, spin, onpw, ii, ipw, ierr, my_mpw, ipx, ipy, ipz, pp_max
+ integer :: my_is, my_ik, my_iq, spin, onpw, ierr, my_mpw, ipx, ipy, ipz, pp_max
  real(dp) :: weight_q, cpu, wall, gflops
  type(gqk_t),pointer :: gqk
 !arrays
@@ -2498,11 +2497,10 @@ end subroutine gstore_calc_my_phonons
 !!
 !! SOURCE
 
-subroutine gstore_get_lambda_iso_iw(gstore, dtset, nw, imag_w, lambda)
+subroutine gstore_get_lambda_iso_iw(gstore, nw, imag_w, lambda)
 
 !Arguments ------------------------------------
  class(gstore_t),target,intent(inout) :: gstore
- type(dataset_type),intent(in) :: dtset
  integer,intent(in) :: nw
  real(dp),intent(in) :: imag_w(nw)
  real(dp),intent(out) :: lambda(nw)
@@ -2531,7 +2529,7 @@ subroutine gstore_get_lambda_iso_iw(gstore, dtset, nw, imag_w, lambda)
 
    do my_iq=1,gqk%my_nq
      ! Compute integration weights for the double delta.
-     call gqk%dbldelta_qpt(my_iq, gstore, dtset%eph_intmeth, dtset%eph_fsmear, qpt, weight_q, dbldelta_q)
+     call gqk%dbldelta_qpt(my_iq, gstore, gstore%dtset%eph_intmeth, gstore%dtset%eph_fsmear, qpt, weight_q, dbldelta_q)
 
      ! Copy data to improve memory access in the loops below.
      g2_pmnk = gqk%my_g2(:,:,my_iq,:,:)
@@ -2558,7 +2556,7 @@ subroutine gstore_get_lambda_iso_iw(gstore, dtset, nw, imag_w, lambda)
  end do ! my_is
 
  ! Take into account collinear spin
- lambda = lambda * (two / (gstore%nsppol * dtset%nspinor))
+ lambda = lambda * (two / (gstore%nsppol * gstore%dtset%nspinor))
 
  call xmpi_sum(lambda, gstore%comm, ierr)
 
@@ -2580,11 +2578,10 @@ end subroutine gstore_get_lambda_iso_iw
 !!
 !! SOURCE
 
-subroutine gstore_get_a2fw(gstore, dtset, nw, wmesh, a2fw)
+subroutine gstore_get_a2fw(gstore, nw, wmesh, a2fw)
 
 !Arguments ------------------------------------
  class(gstore_t),target,intent(inout) :: gstore
- type(dataset_type),intent(in) :: dtset
  integer,intent(in) :: nw
  real(dp),intent(in) :: wmesh(nw)
  real(dp),intent(out) :: a2fw(nw)
@@ -2598,7 +2595,7 @@ subroutine gstore_get_a2fw(gstore, dtset, nw, wmesh, a2fw)
  real(dp),allocatable :: dbldelta_q(:,:,:), g2_mnkp(:,:,:,:), deltaw_nuq(:)
 !----------------------------------------------------------------------
 
- call wrtout(std_out, sjoin(" Computing a^2F(w) with ph_smear:", ftoa(dtset%ph_smear * Ha_meV), "(meV)"), pre_newlines=1)
+ call wrtout(std_out, sjoin(" Computing a^2F(w) with ph_smear:", ftoa(gstore%dtset%ph_smear * Ha_meV), "(meV)"), pre_newlines=1)
  ABI_CHECK(gstore%qzone == "bz", "gstore_get_lambda_iso_iw assumes qzone == `bz`")
  call cwtime(cpu, wall, gflops, "start")
 
@@ -2617,7 +2614,7 @@ subroutine gstore_get_a2fw(gstore, dtset, nw, wmesh, a2fw)
 
    do my_iq=1,gqk%my_nq
      ! Compute integration weights for the double delta.
-     call gqk%dbldelta_qpt(my_iq, gstore, dtset%eph_intmeth, dtset%eph_fsmear, qpt, weight_q, dbldelta_q)
+     call gqk%dbldelta_qpt(my_iq, gstore, gstore%dtset%eph_intmeth, gstore%dtset%eph_fsmear, qpt, weight_q, dbldelta_q)
 
      ! Copy data to improve memory access in the loops below.
      do my_ip=1,gqk%my_npert
@@ -2626,7 +2623,7 @@ subroutine gstore_get_a2fw(gstore, dtset, nw, wmesh, a2fw)
 
      do my_ip=1,gqk%my_npert
        w_nuq = gqk%my_wnuq(my_ip, my_iq)
-       deltaw_nuq = gaussian(wmesh - w_nuq, dtset%ph_smear)
+       deltaw_nuq = gaussian(wmesh - w_nuq, gstore%dtset%ph_smear)
        do my_ik=1,gqk%my_nk
          !weight_k = gqk%my_kweight(my_ik, gstore)
          weight_k = gqk%my_wtk(my_ik)
@@ -2647,7 +2644,7 @@ subroutine gstore_get_a2fw(gstore, dtset, nw, wmesh, a2fw)
  ABI_FREE(deltaw_nuq)
 
  ! Take into account collinear spin and N(eF) TODO
- a2fw = a2fw * (two / (gstore%nsppol * dtset%nspinor))
+ a2fw = a2fw * (two / (gstore%nsppol * gstore%dtset%nspinor))
  call xmpi_sum(a2fw, gstore%comm, ierr)
 
  call cwtime_report(" gstore_get_a2fw", cpu, wall, gflops)
@@ -4000,7 +3997,6 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, if
  integer :: my_rank, ncid, spin, spin_ncid, nproc, ierr, fform, max_nb, ib, natom, natom3, varid
  integer :: max_nq, max_nk, gstore_cplex, ncerr, my_is, my_iq, iq_glob, my_ik, ik_glob, my_ip, ipert, iq_ibz, isym_q, trev_q, tsign_q
  real(dp) :: cpu, wall, gflops
- character(len=10) :: priority
  logical :: store_phdispl, isirr_q
  type(hdr_type) :: wfk0_hdr
  type(crystal_t) :: gstore_cryst
@@ -4479,13 +4475,13 @@ subroutine gstore_print_for_abitests(gstore, dtset)
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master = 0
- integer :: root_ncid, spin_ncid, gstore_completed, spin, ib, nb, ik_ibz, ik_glob, iq_glob, ipc, cplex, ncerr, natom3
- integer :: glob_nq, glob_nk, im_kq, in_k
+ integer :: root_ncid, spin_ncid, gstore_completed, spin, nb, ik_glob, iq_glob, ipc, cplex, ncerr, natom3
+ integer :: glob_nq, glob_nk, im_kq, in_k ! ib, ik_ibz,
  real(dp) :: g2
  !character(len=500) :: msg
 !arrays
  integer,allocatable :: done_qbz_spin(:,:)
- real(dp),allocatable :: vk_cart_ibz(:,:,:), gslice_mn(:,:,:) !, vkmat_cart_ibz(:,:,:,:)
+ real(dp),allocatable :: gslice_mn(:,:,:) !,vk_cart_ibz(:,:,:), vkmat_cart_ibz(:,:,:,:)
 ! *************************************************************************
 
  ! Only master prints to ab_out
