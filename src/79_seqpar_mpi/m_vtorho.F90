@@ -95,7 +95,6 @@ module m_vtorho
  use m_mlwfovlp,           only : mlwfovlp
 #if defined HAVE_PYTHON_INVOCATION
  use m_invoke_python
- use m_invocation_tools,   only : test_python
 #endif
  use ISO_C_BINDING
 
@@ -1516,7 +1515,6 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
      else if (dtset%usedmft == 10) then
 #if defined HAVE_PYTHON_INVOCATION
-        call test_python()
         ! xcryst_struct
         remove_inv=.false.
         call crystal_init(dtset%amu_orig(:,1),cryst_struc,dtset%spgroup,natom,dtset%npsp,ntypat, &

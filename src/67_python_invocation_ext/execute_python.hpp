@@ -17,8 +17,6 @@
 
 // int init_python_interpreter_from_env(const char* env_var);
 
-extern "C" void test_python();
-
 // states the interpreter
 extern "C" int init_python_interpreter(const char* python_so);
 

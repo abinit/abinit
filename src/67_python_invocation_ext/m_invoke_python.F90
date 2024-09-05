@@ -102,6 +102,7 @@ module m_invoke_python
         ABI_ERROR(msg)
      endif
 
+     call mpi_barrier(MPI_COMM_WORLD,ierr)
      write(f2c_string, '(a)') trim(triqs_filename)//c_null_char
      ierr = execute_python_file(f2c_string)
      write(msg, '(a, i3)') "   ierr from execution: ", ierr
