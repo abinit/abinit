@@ -1191,7 +1191,7 @@ subroutine varpeq_solve(self)
 
 !Local variables-------------------------------
  class(polstate_t), pointer :: polstate
- logical :: ld_flag
+ !logical :: ld_flag
  integer :: my_is, spin, ip, ii
  real(dp) :: grad_sqnorm
  real(dp) :: cpu, wall, gflops
@@ -1696,7 +1696,7 @@ subroutine polstate_setup(self, ip, a_src, load)
 
 !Local variables-------------------------------
  real(dp) :: a_sqnorm
- complex(dp) :: prod
+ !complex(dp) :: prod
 
 !----------------------------------------------------------------------
 
@@ -2021,7 +2021,7 @@ subroutine polstate_calc_pcjgrad(self, ip)
 !Local variables-------------------------------
  class(gqk_t), pointer :: gqk
  integer :: ierr
- real(dp) :: eps
+ !real(dp) :: eps
  complex(dp) :: beta, beta_num, beta_den
 
 !----------------------------------------------------------------------
@@ -2096,7 +2096,7 @@ subroutine polstate_calc_grad(self, ip)
  complex(dp) :: b, g0
 !arrays
  real(dp) :: kpt(3), qpt(3), kpq(3), kmq(3)
- complex(dp) :: ak(self%gqk%nb), akq(self%gqk%nb), akmq(self%gqk%nb)
+ complex(dp) :: akq(self%gqk%nb), akmq(self%gqk%nb) ! ak(self%gqk%nb),
  complex(dp) :: bq(self%gqk%my_npert)
  complex(dp), allocatable :: gq_gathered(:,:,:,:)
 
@@ -2532,7 +2532,7 @@ subroutine polstate_load_a(self, a_src, ip)
 !Local variables-------------------------------
  class(gqk_t), pointer :: gqk
  integer :: my_ik, ik_glob, ib
- complex(dp) :: ank
+ !complex(dp) :: ank
 
 !----------------------------------------------------------------------
 

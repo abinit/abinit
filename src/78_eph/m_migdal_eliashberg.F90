@@ -309,7 +309,7 @@ subroutine migdal_eliashberg_iso(gstore, dtset, dtfil)
 
  ! Compute Eliashberg function a2F(w)
  ABI_MALLOC(a2fw, (phmesh_size))
- call gstore%get_a2fw(dtset, phmesh_size, phmesh, a2fw)
+ call gstore%get_a2fw(phmesh_size, phmesh, a2fw)
 
  ncid = nctk_noid
  if (my_rank == master) then
@@ -348,7 +348,7 @@ subroutine migdal_eliashberg_iso(gstore, dtset, dtfil)
    ABI_MALLOC(imag_2w, (2 * niw))
 
    !call wrtout(std_out, " Computing lambda_iso_iw...")
-   !call gstore%get_lambda_iso_iw(dtset, 2 * niw, imag_2w, lambda_ij)
+   !call gstore%get_lambda_iso_iw(2 * niw, imag_2w, lambda_ij)
    ABI_FREE(imag_2w)
 
    !call iso%solve(itemp, kt, niw, imag_w, lambda_ij)

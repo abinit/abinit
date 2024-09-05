@@ -1748,6 +1748,7 @@ end function estimate
 !! est_print
 !!
 !! FUNCTION
+!! Print memory estimate.
 !!
 !! SOURCE
 
@@ -1886,7 +1887,7 @@ end subroutine gwr_malloc_free_mats
 !! gwr_free
 !!
 !! FUNCTION
-!!  Free dynamic memory
+!!  Free dynamic memory in gwr object.
 !!
 !! SOURCE
 
@@ -1894,7 +1895,6 @@ subroutine gwr_free(gwr)
 
 !Arguments ------------------------------------
  class(gwr_t), intent(inout) :: gwr
-
 ! *************************************************************************
 
  ABI_SFREE(gwr%ks_vbik)
@@ -2503,6 +2503,7 @@ end subroutine gwr_build_green
 !!  gwr_gk_to_scbox
 !!
 !! FUNCTION
+!!  Insert G_k(g',r) in the FFT box of the supercell: k+g' index.
 !!
 !! INPUTS
 !!
@@ -2610,6 +2611,7 @@ end subroutine gwr_gk_to_scbox
 !!  gwr_wcq_to_scbox
 !!
 !! FUNCTION
+!!  Insert W_q(g',r) in the FFT box of the supercell: q+g' index.
 !!
 !! INPUTS
 !!
@@ -3331,7 +3333,6 @@ subroutine gwr_get_myq_wc_gpr(gwr, itau, spin, desc_myqbz, wc_gpr)
  type(__slkmat_t) :: rgp, wc_qbz
  type(uplan_t) :: uplan_q
  complex(gwpc),allocatable :: ceiqr(:)
-
 ! *************************************************************************
 
  call cwtime(cpu, wall, gflops, "start")
@@ -4754,7 +4755,7 @@ end subroutine gwr_redistrib_mats_qibz
 !!  gwr_print_trace
 !!
 !! FUNCTION
-!!  Print traces of PBLAS matrices to std_out and ab_out.
+!!  Print traces of PBLAS matrices to units.
 !!  NB: This is a global routine that should be called by all procs inside gwr%comm.
 !!
 !! INPUTS
@@ -6021,7 +6022,7 @@ end subroutine write_notations
 !!  sig_braket_ur
 !!
 !! FUNCTION
-!!    Integrate self-energy matrix elements in the unit cell.
+!!  Integrate self-energy matrix elements in the unit cell.
 !!
 !! INPUTS
 !!
