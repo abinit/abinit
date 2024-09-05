@@ -2,9 +2,9 @@
 # 67_python_invocation_ext
 #
 add_library(67_python_invocation_ext STATIC
-  invocation_interface.F90
-  invoke_python.cpp
-  invoke_python.hpp
+  execute_python.c
+  m_invocation_tools.F90
+  m_invoke_python.F90
   )
 
 set_target_properties(67_python_invocation_ext

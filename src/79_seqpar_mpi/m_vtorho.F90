@@ -94,7 +94,8 @@ module m_vtorho
  use m_abstract_wf,        only : abstract_wf, init_mywfc
  use m_mlwfovlp,           only : mlwfovlp
 #if defined HAVE_PYTHON_INVOCATION
- use INVOKE_PYTHON
+ use m_invoke_python
+ use m_invocation_tools,   only : test_python
 #endif
  use ISO_C_BINDING
 
@@ -1514,6 +1515,8 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        call timab(991,2,tsec)
 
      else if (dtset%usedmft == 10) then
+#if defined HAVE_PYTHON_INVOCATION
+        call test_python()
         ! xcryst_struct
         remove_inv=.false.
         call crystal_init(dtset%amu_orig(:,1),cryst_struc,dtset%spgroup,natom,dtset%npsp,ntypat, &
@@ -1579,7 +1582,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
          rank=mpi_enreg%me, comm=mpi_enreg%comm_world)
 
         call mlwfovlp(mywfc=mywfc, crystal=cryst_struc, ebands=mywfc%ebands, hdr=mywfc%hdr, &
-         atindx1=cryst_struc%atindx1, dtset=mywfc%dtset, dtfil=dtfil, &
+         atindx1=cryst_struc%atindx1, dtset=mywfc%dtset, dtfil=dtfil, eigen=mywfc%ebands%eig, &
          gprimd=cryst_struc%gprimd, kg=kg, mband=dtset%mband, mcg=mcg, mcprj=mcprj, &
          mgfftc=dtset%mgfft, mkmem=dtset%mkmem, mpi_enreg=mpi_enreg, &
          mpw=dtset%mpw, natom=dtset%natom, nattyp=nattyp, nfft=dtset%nfft, ngfft=dtset%ngfft, &
@@ -1599,9 +1602,22 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
         call flush_unit(std_out)
 
         ! Invoking python to execute the script
-        call Invoke_python_triqs (paw_dmft%myproc, trim(dtfil%filnam_ds(3))//c_null_char, paw_dmft%spacecomm)
+        ! write(msg, '(a, i4)') ch10, paw_dmft%myproc
+        ! call wrtout(std_out, msg, 'COLL')
+        ! write(msg, '(a, a)') ch10, trim(dtfil%filnam_ds(3))//c_null_char
+        ! call wrtout(std_out, msg, 'COLL')
+        ! write(msg, '(a, a)') ch10, paw_dmft%spacecomm
+        ! call wrtout(std_out, msg, 'COLL')
+        ! call Invoke_python_triqs (paw_dmft%myproc, trim(dtfil%filnam_ds(3))//c_null_char, paw_dmft%spacecomm)
+        write(msg, '(a)') trim(dtfil%filnam_ds(3))
+        !call Invoke_python_triqs (paw_dmft%myproc, trim(dtfil%filnam_ds(3))//c_null_char, mpi_enreg%comm_world)
+        call invoke_python_run_script (paw_dmft%myproc, msg, mpi_enreg%comm_world)
         call xmpi_barrier(paw_dmft%spacecomm)
+        ! call xmpi_barrier(mpi_enreg%comm_world)
         call flush_unit(std_out)
+#else
+         ABI_ERROR('Cannot use use_dmft == 10 with #HAVE_PYTHON_INVOCATION set to false.')
+#endif
 
      end if ! usedmft
 
