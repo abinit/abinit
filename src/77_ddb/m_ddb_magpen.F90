@@ -2459,13 +2459,13 @@ contains
    end if
 
    !Apply ASR
-   if (omega(1) < tol12) then
-     call asrw0(delta_asrw0,ifcmat,natom,0) 
-     call asrw0(delta_asrw0_fm,ifcmat_fm,natom,0) 
-   else 
-     call asrw0(delta_asrw0,ifcmat,natom,1) 
-     call asrw0(delta_asrw0_fm,ifcmat_fm,natom,1) 
-   end if
+!   if (omega(1) < tol12) then
+!     call asrw0(delta_asrw0,ifcmat,natom,0) 
+!     call asrw0(delta_asrw0_fm,ifcmat_fm,natom,0) 
+!   else 
+!     call asrw0(delta_asrw0,ifcmat,natom,1) 
+!     call asrw0(delta_asrw0_fm,ifcmat_fm,natom,1) 
+!   end if
 
    !Calculate the phonon and magnon-phonon Green's functions and spectral functions
    call phonon_green(amu,eigvec,eigvec_fm,eta_phongreen,ifcmat,ifcmat_fm,invmagsus(:,:,iw),& 
@@ -2507,12 +2507,12 @@ contains
      !Another alternative
 
 !TMP: FM eigvecs
-!     call me_altcalc(amu,eigvec_fm,lm_magsus(:,:,iw),lm_zfield(:,:,iw),phongreen_fm,magsus(:,:,iw),natom,ndim,ntypat,&
-!   & omega(iw),ri_mmom(:,:,iw),typat,fmzeff_tr,zfield(:,:,iw))
+     call me_altcalc(amu,eigvec_fm,lm_magsus(:,:,iw),lm_zfield(:,:,iw),phongreen_fm,magsus(:,:,iw),natom,ndim,ntypat,&
+   & omega(iw),ri_mmom(:,:,iw),typat,fmzeff_tr,zfield(:,:,iw))
 
 !TMP: SR eigvecs
-     call me_altcalc(amu,eigvec,lm_magsus(:,:,iw),lm_zfield(:,:,iw),phongreen_fm,magsus(:,:,iw),natom,ndim,ntypat,&
-   & omega(iw),ri_mmom(:,:,iw),typat,fmzeff_tr,zfield(:,:,iw))
+!     call me_altcalc(amu,eigvec,lm_magsus(:,:,iw),lm_zfield(:,:,iw),phongreen_fm,magsus(:,:,iw),natom,ndim,ntypat,&
+!   & omega(iw),ri_mmom(:,:,iw),typat,fmzeff_tr,zfield(:,:,iw))
 
      !Convert magnetic susceptibilities to the magnon basis
 !     work(:,:)=magsus(:,:,iw)
@@ -4112,39 +4112,42 @@ subroutine me_altcalc(amu,eigvec,lm_magsus,lm_zfield,phongreen_fm,magsus,natom,n
      end do
    end do
  end do
- nm_zfield=matmul(zfield(:,1:3*natom),conjg(eigdisp))
-! nm_fmzeff_tr=matmul(transpose(conjg(eigdisp)),fmzeff_tr)
- nm_fmzeff_tr=matmul(transpose(eigdisp),fmzeff_tr)
+ nm_zfield=matmul(zfield(:,1:3*natom),eigdisp)
+ nm_fmzeff_tr=matmul(transpose(conjg(eigdisp)),fmzeff_tr)
+! nm_fmzeff_tr=matmul(transpose(eigdisp),fmzeff_tr)
  nm_phongreen=matmul(transpose(conjg(eigdisp)),matmul(phongreen_fm,eigdisp))
  
  lm_zfield= matmul(nm_zfield(:,1:3*natom),matmul(nm_phongreen,nm_fmzeff_tr))
 
  !restrict only to a set of modes
- lm_zfield=cmplx(zero,zero,16)
- do i= 1, ndim
-   do j= 1, 3
-     do k= 21,21
-       do l= 21,21
-         lm_zfield(i,j)= lm_zfield(i,j) + nm_zfield(i,k)*nm_phongreen(k,l)*nm_fmzeff_tr(l,j)
-       end do 
-     end do 
-   end do
- end do
+! lm_zfield=cmplx(zero,zero,16)
+! do i= 1, ndim
+!   do j= 1, 3
+!     do k= 21,21
+!       do l= 21,21
+!         lm_zfield(i,j)= lm_zfield(i,j) + nm_zfield(i,k)*nm_phongreen(k,l)*nm_fmzeff_tr(l,j)
+!       end do 
+!     end do 
+!   end do
+! end do
 
  write(120,*) omega,real(nm_zfield(1:4,20))
  write(220,*) omega,aimag(nm_zfield(1:4,20))
  write(121,*) omega,real(nm_zfield(1:4,21))
  write(221,*) omega,aimag(nm_zfield(1:4,21))
 
- write(420,*) omega,real(nm_fmzeff_tr(20,:))
- write(421,*) omega,real(nm_fmzeff_tr(21,:))
- write(520,*) omega,aimag(nm_fmzeff_tr(20,:))
- write(521,*) omega,aimag(nm_fmzeff_tr(21,:))
+ write(420,*) omega,real(nm_fmzeff_tr(20,1:3))
+ write(421,*) omega,real(nm_fmzeff_tr(21,1:3))
+ write(520,*) omega,aimag(nm_fmzeff_tr(20,1:3))
+ write(521,*) omega,aimag(nm_fmzeff_tr(21,1:3))
+
 
  do i=1, 3*natom
    write(320,*) real(eigdisp(i,20)),aimag(eigdisp(i,20))
    write(321,*) real(eigdisp(i,21)),aimag(eigdisp(i,21))
  end do 
+ write(320,*) 
+ write(321,*) 
 
  ri_mmom= ri_mmom + matmul(ri_magsus,lm_zfield)
 
