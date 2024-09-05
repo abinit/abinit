@@ -243,9 +243,10 @@ subroutine ompgpu_fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,ist
 
 
    !!$OMP TARGET TEAMS LOOP &
-   !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(2) &
-   !$OMP& PRIVATE(idat,ipw,i1,i2,i3) MAP(to:work_gpu,kg_kin,fofgin)
+   !$OMP TARGET TEAMS DISTRIBUTE &
+   !$OMP& PRIVATE(idat) MAP(to:work_gpu,kg_kin,fofgin)
    do idat = 1, ndat
+     !$OMP PARALLEL DO PRIVATE(ipw,i1,i2,i3)
      do ipw = 1, npwin
        i1=kg_kin(1,ipw); if(i1<0)i1=i1+n1; i1=i1+1
        i2=kg_kin(2,ipw); if(i2<0)i2=i2+n2; i2=i2+1
@@ -259,9 +260,10 @@ subroutine ompgpu_fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,ist
 
    if(istwf_k > 1) then
      !!$OMP TARGET TEAMS LOOP &
-     !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(2) &
-     !$OMP& PRIVATE(idat,ipw,i1,i2,i3,i1inv,i2inv,i3inv) MAP(to:work_gpu,kg_kin,fofgin)
+     !$OMP TARGET TEAMS DISTRIBUTE &
+     !$OMP& PRIVATE(idat) MAP(to:work_gpu,kg_kin,fofgin)
      do idat = 1, ndat
+       !$OMP PARALLEL DO PRIVATE(ipw,i1,i2,i3,i1inv,i2inv,i3inv)
        do ipw = 1, npwin
          i1=kg_kin(1,ipw); if(i1<0)i1=i1+n1;
          i2=kg_kin(2,ipw); if(i2<0)i2=i2+n2;
@@ -361,9 +363,10 @@ subroutine ompgpu_fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,ist
    one=1
    xnorm=one/dble(n1*n2*n3)
    !!$OMP TARGET TEAMS LOOP &
-   !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(2) &
-   !$OMP& PRIVATE(idat,ipw,i1,i2,i3) MAP(to:work_gpu,kg_kout,fofgout)
+   !$OMP TARGET TEAMS DISTRIBUTE &
+   !$OMP& PRIVATE(idat) MAP(to:work_gpu,kg_kout,fofgout)
    do idat = 1, ndat
+     !$OMP PARALLEL DO PRIVATE(ipw,i1,i2,i3)
      do ipw = 1, npwout
        i1=kg_kout(1,ipw); if(i1<0)i1=i1+n1; i1=i1+1
        i2=kg_kout(2,ipw); if(i2<0)i2=i2+n2; i2=i2+1
