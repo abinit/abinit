@@ -3582,7 +3582,7 @@ subroutine gwr_cos_transform(gwr, what, mode, sum_spins)
        ndat = blocked_loop(ig2, mats(it0)%sizeb_local(2), batch_size)
 
        ! Extract (g1, g2) matrix elements as a function of tau/omega
-       !!!$OMP PARALLEL DO PRIVATE(itau)
+       !!$OMP PARALLEL DO PRIVATE(itau) COLLAPSE(2)
        do idat=1,ndat
          do my_it=1,gwr%my_ntau
            itau = gwr%my_itaus(my_it)
@@ -3593,19 +3593,18 @@ subroutine gwr_cos_transform(gwr, what, mode, sum_spins)
        end do
 
        ! Compute contribution to itau matrix
-       do idat=1,ndat
-         call ZGEMM("N", "N", gwr%ntau, loc1_size, gwr%my_ntau, cone, &
-                    wgt_globmy, gwr%ntau, cwork_myit(1,1,idat), gwr%my_ntau, czero, glob_cwork(1,1,idat), gwr%ntau)
-       end do
+       !do idat=1,ndat
+       !  call ZGEMM("N", "N", gwr%ntau, loc1_size, gwr%my_ntau, cone, &
+       !             wgt_globmy, gwr%ntau, cwork_myit(1,1,idat), gwr%my_ntau, czero, glob_cwork(1,1,idat), gwr%ntau)
+       !end do
 
-       ! TODO: This is a single call to ZGEMM.
-       !call ZGEMM("N", "N", gwr%ntau, loc1_size*ndat, gwr%my_ntau, cone, &
-       !            wgt_globmy, gwr%ntau, cwork_myit, gwr%my_ntau, czero, glob_cwork, gwr%ntau)
+       call ZGEMM("N", "N", gwr%ntau, loc1_size*ndat, gwr%my_ntau, cone, &
+                   wgt_globmy, gwr%ntau, cwork_myit, gwr%my_ntau, czero, glob_cwork, gwr%ntau)
 
        call xmpi_sum(glob_cwork, gwr%tau_comm%value, ierr)
 
        ! Update my local (g1, g2) entry to have it in imaginary-frequency.
-       !!!$OMP PARALLEL DO PRIVATE(itau)
+       !!$OMP PARALLEL DO PRIVATE(itau) COLLAPSE(2)
        do idat=1,ndat
          do my_it=1,gwr%my_ntau
            itau = gwr%my_itaus(my_it)
