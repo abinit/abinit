@@ -361,8 +361,9 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
 !Compute xc potential (separate up and down if spin-polarized)
  optxc=1
  call rhotoxc(energies%e_xc,kxc,mpi_enreg,nfft,ngfft,&
-& nhat,usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,nmxc,n3xccc,optxc,rhor,rprimd,strsxc,&
-& usexcnhat,vxc,vxcavg,xccc3d,xcdata,taur=taur,vhartr=vhartr,vxctau=vxctau,add_tfw=add_tfw_)
+& nhat,usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,nmxc,n3xccc,optxc,rhor,rprimd,&
+& usexcnhat,vxc,vxcavg,xccc3d,xcdata,taur=taur,vhartr=vhartr,&
+& vxctau=vxctau,add_tfw=add_tfw_,strsxc=strsxc)
 
 !------Compute parts of total energy depending on potentials--------
 
@@ -612,8 +613,9 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
 !Compute xc potential (separate up and down if spin-polarized)
  optxc=1;if (nkxc>0) optxc=2
  call rhotoxc(energies%e_xc,kxc,mpi_enreg,nfft,ngfft,&
-& nhat,usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,nmxc,n3xccc,optxc,rhor,rprimd,strsxc,&
-& usexcnhat,vxc,vxcavg,xccc3d,xcdata,taur=taur,vhartr=vhartr,vxctau=vxctau,add_tfw=add_tfw_)
+& nhat,usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,nmxc,n3xccc,optxc,rhor,rprimd,&
+& usexcnhat,vxc,vxcavg,xccc3d,xcdata,taur=taur,vhartr=vhartr,&
+& vxctau=vxctau,add_tfw=add_tfw_,strsxc=strsxc)
 
  if (nhatgrdim>0)  then
    ABI_FREE(nhatgr)
