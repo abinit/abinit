@@ -28,6 +28,7 @@ module m_cgwf
  use m_cgtools
  use m_efield
  use m_dtfil
+ use m_distribfft
 
  use defs_abitypes,   only : MPI_type
  use defs_datatypes,  only : pseudopotential_type
@@ -90,11 +91,11 @@ module m_cgwf
    ! (nfftf, nspden)
    ! KS potential in real-space.
 
-   real(dp),allocatable :: cg(:,:)
-   ! (2, npw_k*nspinor*nband_k)
+   real(dp),allocatable :: cg(:,:,:)
+   ! (2, npw_k*nspinor, nband_k)
 
-   real(dp),allocatable :: gsc(:,:)
-   ! (2, npw_k*nspinor*nband_k*usepaw)
+   real(dp),allocatable :: gsc(:,:,:)
+   ! (2, npw_k*nspinor, nband_k*usepaw)
 
    real(dp),allocatable :: resid(:)
    ! (nband)
@@ -2361,13 +2362,16 @@ subroutine nscf_init(nscf, dtset, dtfil, cryst, comm)
  call wrtout(units, sjoin(" Reading KS GS potential from: ", dtfil%filpotin))
  call hdr_read_from_fname(pot_hdr, dtfil%filpotin, fform, comm)
  ABI_CHECK(fform /= 0, "hdr_read_from_fname returned fform 0")
- call pot_hdr%vs_dtset(dtset)
+ !call pot_hdr%vs_dtset(dtset)
 
  ! Init FFT mesh
  call ngfft_seq(nscf%ngfftf, pot_hdr%ngfft)
  call ngfft_seq(nscf%ngfft, pot_hdr%ngfft)
  ABI_CHECK(dtset%usepaw == 0, "PAW not implemented!")
  call pot_hdr%free()
+
+ call init_distribfft_seq(nscf%mpi_enreg%distribfft, 'c', nscf%ngfft(2), nscf%ngfft(3), 'all')
+ call init_distribfft_seq(nscf%mpi_enreg%distribfft, 'f', nscf%ngfftf(2), nscf%ngfftf(3), 'all')
 
  nfftf = product(nscf%ngfftf)
 
@@ -2426,10 +2430,10 @@ subroutine nscf_solve(nscf, isppol, kpt, istwf_k, nband, cryst, dtset, dtfil, ps
 !Local variables ------------------------------
 !scalars
  integer,parameter :: paral_kgb0 = 0, mcgq0 = 0, mkgq0 = 0, nkpt1 = 1, pwind_alloc0 = 0, use_subvnlx0 = 0, use_subovl0 = 0, ider0 = 0, idir0 = 0
- integer,parameter :: ikpt0 = 0, quit0 = 0
- integer :: mcg, mgsc, nvloc, nkpg, n1, n2, n3, n4, n5, n6, nfft, nfftf, mgfft, mgfftf, inonsc
+ integer,parameter :: icg0 = 0, igsc0 = 0, ikpt0 = 0, quit0 = 0, ortalgo_3 = 3
+ integer :: mcg, mgsc, nvloc, nkpg, n1, n2, n3, n4, n5, n6, nfft, nfftf, mgfft, mgfftf, inonsc, npwsp, me_g0
  real(dp),parameter :: cpus0 = zero
- !real(dp) ::
+ real(dp) :: dotr
  type(efield_type) :: dtefield
 !arrays
  integer :: npwarr_k(1), pwind(pwind_alloc0,2,3)
@@ -2441,10 +2445,9 @@ subroutine nscf_solve(nscf, isppol, kpt, istwf_k, nband, cryst, dtset, dtfil, ps
  real(dp),allocatable :: ylm_k(:,:)
 ! *************************************************************************
 
- nscf%nband = nband
-
- associate (mpi_enreg => nscf%mpi_enreg)
  ! See vtorho.F90 for the sequence of calls needed to initialize the GS Hamiltonian.
+ nscf%nband = nband
+ associate (mpi_enreg => nscf%mpi_enreg)
 
  !==== Initialize most of the Hamiltonian ====
  ! Allocate all arrays and initialize quantities that do not depend on k and spin.
@@ -2496,41 +2499,80 @@ subroutine nscf_solve(nscf, isppol, kpt, istwf_k, nband, cryst, dtset, dtfil, ps
 
  ! Compute nonlocal form factors ffnl_k at (k+G)
  ABI_MALLOC(ffnl_k, (nscf%npw_k, 1, psps%lmnmax, psps%ntypat))
+
  ! Spherical Harmonics for useylm == 1.
  ABI_MALLOC(ylm_k, (nscf%npw_k, psps%mpsang**2 * psps%useylm))
 
  call mkffnl_objs(cryst, psps, 1, ffnl_k, ider0, idir0, nscf%kg_k, kpg_k, kpt, nkpg, nscf%npw_k, ylm_k, ylmgr_dum)
  ABI_FREE(ylm_k)
 
-!      Load k-dependent part in the Hamiltonian datastructure
-!       - Compute 3D phase factors
-!       - Prepare various tabs in case of band-FFT parallelism
-!       - Load k-dependent quantities in the Hamiltonian
+ ! Load k-dependent part in the Hamiltonian datastructure
+ !  - Compute 3D phase factors
+ !  - Prepare various tabs in case of band-FFT parallelism
+ !  - Load k-dependent quantities in the Hamiltonian
 
- ABI_MALLOC(ph3d,(2, nscf%npw_k,gs_hamk%matblk))
+ ABI_MALLOC(ph3d, (2, nscf%npw_k, gs_hamk%matblk))
 
  call gs_hamk%load_k(kpt_k=kpt, istwf_k=istwf_k, npw_k=nscf%npw_k, &
                      kinpw_k=kinpw_k, kg_k=nscf%kg_k, kpg_k=kpg_k, ffnl_k=ffnl_k, ph3d_k=ph3d, &
                      compute_ph3d=(paral_kgb0/=1), compute_gbound=(paral_kgb0/=1))
 
+ !print *, "gs_hamk%ph3d_k:", gs_hamk%ph3d_k
+ !print *, "gs_hamk%ffnl_k:", gs_hamk%ffnl_k
+
  mcg = nscf%npw_k * dtset%nspinor * nscf%nband
  mgsc = mcg * dtset%usepaw
  npwarr_k = nscf%npw_k
+ npwsp = nscf%npw_k * dtset%nspinor; me_g0 = 1
 
- ABI_REMALLOC(nscf%cg, (2, nscf%npw_k * dtset%nspinor * nscf%nband))
- ABI_REMALLOC(nscf%gsc, (2, nscf%npw_k * dtset%nspinor * nscf%nband * dtset%usepaw))
+ ABI_REMALLOC(nscf%cg, (2, nscf%npw_k * dtset%nspinor, nscf%nband))
+ ABI_REMALLOC(nscf%gsc, (2, nscf%npw_k * dtset%nspinor, nscf%nband * dtset%usepaw))
  ABI_REMALLOC(nscf%resid, (nscf%nband))
 
  ! TODO
- ! Initialize the wavefunctions. See also wfconv.
- inonsc = 1
- call cgwf(dtset%berryopt, nscf%cg, cgq, dtset%chkexit, cpus0, dphase_k, dtefield, dtfil%filnam_ds(1), &
-           nscf%gsc, gs_hamk, 0, 0, ikpt0, inonsc, isppol, nscf%nband, mcg, mcgq0, mgsc, mkgq0, &
-           mpi_enreg, nscf%npw_k, nscf%nband, dtset%nbdblock, nkpt1, dtset%nline, nscf%npw_k, npwarr_k, dtset%nspinor, &
-           dtset%nsppol, dtset%ortalg, dtset%prtvol, pwind, pwind_alloc0, pwnsfac, pwnsfacq, quit0, nscf%resid, &
-           subham, subovl, subvnlx, dtset%tolrde, dtset%tolwfr_diago, use_subovl0, use_subvnlx0, mod(dtset%wfoptalg, 100), zshift)
+ ! Initialize the wavefunctions. See also wfconv for a more portable way.
+ call random_number(nscf%cg)
+ !nscf%cg = zero
+ !do iband=1,nscf%nband
+ !  call sqnorm_g(dotr, istwf_k, npwsp, nscf%cg(:,:,iband), me_g0, xmpi_comm_self)
+ !end do
 
- ! Check for convergence.
+ ! Multiply with envelope function to reduce kinetic energy
+ !call cg_envlop(cg2,ecut2,gmet2,icgmod,kg2,kpoint2_sph,mcg2,nbremn,npw2,nspinor2_this_proc)
+
+ call pw_orthon(icg0, igsc0, istwf_k, mcg, mgsc, npwsp, nband, ortalgo_3, nscf%gsc, dtset%usepaw, nscf%cg, me_g0, xmpi_comm_self)
+
+ !do inonsc=1,dtset%nstep
+ do inonsc=1,1
+
+   call cgwf(dtset%berryopt, nscf%cg, cgq, dtset%chkexit, cpus0, dphase_k, dtefield, dtfil%filnam_ds(1), &
+             nscf%gsc, gs_hamk, icg0, igsc0, ikpt0, inonsc, isppol, nscf%nband, mcg, mcgq0, mgsc, mkgq0, &
+             mpi_enreg, nscf%npw_k, nscf%nband, dtset%nbdblock, nkpt1, dtset%nline, nscf%npw_k, npwarr_k, dtset%nspinor, &
+             dtset%nsppol, dtset%ortalg, -113, & ! dtset%prtvol,
+             pwind, pwind_alloc0, pwnsfac, pwnsfacq, quit0, nscf%resid, &
+             subham, subovl, subvnlx, dtset%tolrde, dtset%tolwfr_diago, use_subovl0, use_subvnlx0, mod(dtset%wfoptalg, 100), zshift)
+
+   ! Check for convergence.
+   print *, "nscf%resid:", nscf%resid
+
+   !if (nbdbuf >= 0) then
+   !  residk = maxval(resid_k(1:max(1,nband_k-nbdbuf)))
+   !else if (nbdbuf==-101) then
+   !  residk = maxval(occ_k(1:nband_k)*resid_k(1:nband_k))
+   !else
+   !  ABI_ERROR('Bad value of nbdbuf')
+   !end if
+
+   ! Exit loop over inonsc if converged
+   !if (residk < dtset%tolwfr) then
+   !  if (iscf < 0 .and. (ikpt == 1 .or. mod(ikpt, 100) == 0)) then
+   !    call wrtout(std_out, sjoin("   NSCF loop completed after", itoa(inonsc), "iterations"))
+   !  end if
+   !  exit
+   !end if
+
+ end do ! inonsc
+
  ierr = 0; err_msg = ""
 
  end associate

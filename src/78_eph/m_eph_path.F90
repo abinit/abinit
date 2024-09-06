@@ -24,9 +24,6 @@ module m_eph_path
  use, intrinsic :: iso_c_binding
  use defs_basis
  use m_abicore
-!#ifdef HAVE_MPI2
-! use mpi
-!#endif
  use m_xmpi
  use m_mpinfo
  use m_errors
@@ -71,9 +68,7 @@ module m_eph_path
  private
 !!***
 
-#ifdef HAVE_MPI1
- include 'mpif.h'
-#endif
+ public :: eph_path_run
 
 
 contains  !=====================================================
@@ -81,9 +76,9 @@ contains  !=====================================================
 
 !----------------------------------------------------------------------
 
-!!****f* m_eph_path/eph_path
+!!****f* m_eph_path/eph_path_run
 !! NAME
-!!  eph_path
+!!  eph_path_run
 !!
 !! FUNCTION
 !!  Compute e-ph matrix elements along a path.
@@ -104,8 +99,8 @@ contains  !=====================================================
 !!
 !! SOURCE
 
-subroutine eph_path(dtfil, ngfft, ngfftf, dtset, cryst, dvdb, ifc, &
-                   pawfgr, pawang, pawrad, pawtab, psps, mpi_enreg, comm)
+subroutine eph_path_run(dtfil, ngfft, ngfftf, dtset, cryst, dvdb, ifc, &
+                        pawfgr, pawang, pawrad, pawtab, psps, mpi_enreg, comm)
 
 !Arguments ------------------------------------
 !scalars
@@ -179,7 +174,7 @@ subroutine eph_path(dtfil, ngfft, ngfftf, dtset, cryst, dvdb, ifc, &
 
  call cwtime_report(" eph_path: MPI barrier before returning.", cpu_all, wall_all, gflops_all, end_str=ch10, comm=comm)
 
-end subroutine eph_path
+end subroutine eph_path_run
 !!***
 
 end module m_eph_path

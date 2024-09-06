@@ -1202,9 +1202,9 @@ subroutine getgh1c_setup(gs_hamkq, rf_hamkq, dtset, psps, kpoint, kpq, idir, ipe
 
  !===== Load the k/k+q dependent parts of the Hamiltonian
  ! Load k-dependent part in the Hamiltonian datastructure
- ABI_MALLOC(ph3d,(2,npw_k,gs_hamkq%matblk))
- call gs_hamkq%load_k(kpt_k=kpoint,npw_k=npw_k,istwf_k=istwf_k,kg_k=kg_k,kpg_k=kpg_k,&
-                      ph3d_k=ph3d,compute_ph3d=.true.,compute_gbound=.true.)
+ ABI_MALLOC(ph3d, (2,npw_k,gs_hamkq%matblk))
+ call gs_hamkq%load_k(kpt_k=kpoint, npw_k=npw_k, istwf_k=istwf_k, kg_k=kg_k, kpg_k=kpg_k,&
+                      ph3d_k=ph3d, compute_ph3d=.true., compute_gbound=.true.)
 
  if (size(ffnlk)>0) then
    call gs_hamkq%load_k(ffnl_k=ffnlk)
@@ -1735,7 +1735,7 @@ subroutine getgh1dqc_setup(gs_hamkq,rf_hamkq,dtset,psps,kpoint,kpq,idir,ipert,qd
    & psps%lnmax,psps%mpsang,psps%mqgrid_ff,nkpg,npw_k,ntypat,&
    & psps%pspso,psps%qgrid_ff,rmet,psps%usepaw,psps%useylm,ylm_k,ylmgr_dum)
    end if
- else 
+ else
    ABI_CHECK(all(shape(ffnlk) == [npw_k, dimffnlk, psps%lmnmax, ntypat]), "Wrong shape in input ffnlk")
  end if
 
@@ -1766,7 +1766,7 @@ subroutine getgh1dqc_setup(gs_hamkq,rf_hamkq,dtset,psps,kpoint,kpq,idir,ipert,qd
  else
    ABI_CHECK(all(shape(ffnl1) == [npw1_k, dimffnl1, psps%lmnmax, ntypat]), "Wrong shape in input ffnl1")
  end if
- 
+
 
 !Convert nonlocal form factors to cartesian coordinates.
 !For metric (strain) perturbation only.
@@ -2020,7 +2020,7 @@ subroutine getgh1c_mGGA(cwavein,dkinpw,gbound_k,gh1c_mGGA,gprimd,idir,istwf_k,kg
  real(dp),intent(inout) :: gh1c_mGGA(2,npw_k*my_nspinor*ndat)
  real(dp),intent(inout) :: vxctaulocal(n4,n5,n6,nvloc,4)
  real(dp),pointer,intent(in) :: dkinpw(:),kinpw1(:)
- 
+
 !Local variables-------------------------------
  !scalars
  integer :: idat,ii,ipw,nspinortot,shift,gpu_option_
@@ -2036,7 +2036,7 @@ subroutine getgh1c_mGGA(cwavein,dkinpw,gbound_k,gh1c_mGGA,gprimd,idir,istwf_k,kg
  else
     gpu_option_=0
  end if
-  
+
  gh1c_mGGA(:,:)=zero
  if (nvloc/=1) return
 
@@ -2137,7 +2137,7 @@ subroutine getgh1c_mGGA(cwavein,dkinpw,gbound_k,gh1c_mGGA,gprimd,idir,istwf_k,kg
           end if
         end do
       end do
-   
+
       call fourwf(1,vxctaulocal(:,:,:,:,1),ghc1,ghc2,work,gbound_k,gbound_k,&
         & istwf_k,kg_k,kg_k,mgfft,mpi_enreg,ndat,ngfft,npw_k,npw_k,n4,n5,n6,2,&
         & tim_fourwf,weight,weight,gpu_option=gpu_option_)
@@ -2179,7 +2179,7 @@ subroutine getgh1c_mGGA(cwavein,dkinpw,gbound_k,gh1c_mGGA,gprimd,idir,istwf_k,kg
           end if
         end do
       end do
-   
+
       call fourwf(1,vxctaulocal(:,:,:,:,1),ghc1,ghc2,work,gbound_k,gbound_k,&
         & istwf_k,kg_k,kg_k,mgfft,mpi_enreg,ndat,ngfft,npw_k,npw_k,n4,n5,n6,2,&
         & tim_fourwf,weight,weight,gpu_option=gpu_option_)
