@@ -289,7 +289,7 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
  character(len=500) :: message
  real(dp) :: hyb_mixing, hyb_mixing_sr, hyb_range
 !arrays
- real(dp) :: gm_norm(3),grho(3),gmet(3,3),gprimd(3,3),qphon(3),rmet(3,3)
+ real(dp) :: d2rho(6),gm_norm(3),grho(3),gmet(3,3),gprimd(3,3),qphon(3),rmet(3,3)
  real(dp) :: tsec(2),vxcmean(4)
  real(dp),allocatable :: d2rhonow(:,:,:)
  real(dp),allocatable :: d2vxc_b(:,:),depsxc(:,:),depsxc_apn(:,:),dvxc_apn(:),dvxc_b(:,:)
@@ -868,12 +868,14 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
          epsxc=epsxc+rho_b(indx)*exc_b(indx)  !will be normalized with respect to the volume later to get enxc ("bigexc").
          depsxc(ipts,1)=vxcrho_b_updn(indx,1)
          exc_str=exc_b(indx);if(usefxc==1) exc_str=fxc_b(indx)
+         ! Note for GGA/mGGA: the diagonal stress contribution is not complete because
+         !  this is not the complete Vxc. Only Int[n.dFxc/dn] is computed here. The
+         !  other terms are computed later ( -Int[n.grad(dFxc/grad(n))] and Int[n.Lapl(dFxc/Lapl(n))])
          if(nspden_updn==1)then
            strdiag=rho_b(indx)*(exc_str-vxcrho_b_updn(indx,1))
            if (usekden==1) strdiag=strdiag-two*tau_b_updn(indx,1)*vxctau_b_updn(indx,1)
          else if(nspden_updn==2)then
            depsxc(ipts,2)=vxcrho_b_updn(indx,2)
-!          Note : this is not the complete Vxc in the GGA case
            strdiag=rho_b(indx)*exc_str &
 &           -rho_b_updn(indx,1)*vxcrho_b_updn(indx,1)&
 &           -(rho_b(indx)-rho_b_updn(indx,1))*vxcrho_b_updn(indx,2)
@@ -927,22 +929,18 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
 !            skip the stress tensor to follow a LDA scheme (see doc/theory/MGGA/report_MGGA.pdf)
              if(ixc==31) cycle
 
-!            Compute the contribution to the stress tensor
-             if(nspden_updn==1)then
-               grho(1:3)=rhonow(ipts,1,2:4)
-             else if(ispden==1 .and. nspden_updn==2)then
-               grho(1:3)=rhonow(ipts,2,2:4)
-             else if(ispden==2 .and. nspden_updn==2)then
-               grho(1:3)=rhonow(ipts,1,2:4)-rhonow(ipts,2,2:4)
-             else if(ispden==3 .and. nspden_updn==2)then
-               grho(1:3)=rhonow(ipts,1,2:4)
-             end if
+!            Compute the GGA contribution to the stress tensor, from the part of Vxc
+!            coming from the derivative wrt the gradient (Eq (24) of PRB 50, 4327 (1994))
+             if (nspden_updn==1.and.ispden==1) grho(1:3)=rhonow(ipts,1,2:4)
+             if (nspden_updn==2.and.ispden==1) grho(1:3)=rhonow(ipts,2,2:4)
+             if (nspden_updn==2.and.ispden==2) grho(1:3)=rhonow(ipts,1,2:4)-rhonow(ipts,2,2:4)
+             if (nspden_updn==2.and.ispden==3) grho(1:3)=rhonow(ipts,1,2:4)
              s1=-grho(1)*grho(1)*coeff
              s2=-grho(2)*grho(2)*coeff
              s3=-grho(3)*grho(3)*coeff
-!            The contribution of the next line comes from the part of Vxc
-!            obtained from the derivative wrt the gradient
+             !Diagonal part: -Int[n.grad(dFxc/grad(n))] = Int[grad(n).grad(dFxc/grad(n))]
              dstrsxc=dstrsxc+s1+s2+s3
+             !Non-diagonal part: -Int[dn/dr_alpha.grad(dFxc/grad_beta(n))]
              strsxc1_tot=strsxc1_tot+s1
              strsxc2_tot=strsxc2_tot+s2
              strsxc3_tot=strsxc3_tot+s3
@@ -953,7 +951,8 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
            end do
          end if
 
-!        For meta-GGAs, add the laplacian term (vxclrho) and/or kinetic energy density term (vxctau)
+!        For meta-GGAs, add the laplacian term (vxclrho)
+!        and/or kinetic energy density term (vxctau)
          if (usekden==1.and.with_vxctau) then
            if (nspden_updn==1)then
              vxctau(ipts,1,1) = vxctau_b_updn(indx,1)
@@ -970,6 +969,22 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
              depsxc(ipts,7)   = vxclrho_b_updn(indx,2)
            end if
 !          Compute the contribution to the stress tensor
+           do ispden=1,2
+             if (nspden_updn==1.and.ispden==1) d2rho(1:6)=d2rhonow(ipts,1,1:6)
+             if (nspden_updn==1.and.ispden==2) exit
+             if (nspden_updn==2.and.ispden==1) d2rho(1:6)=d2rhonow(ipts,2,1:6)
+             if (nspden_updn==2.and.ispden==2) d2rho(1:6)=d2rhonow(ipts,1,1:6)-d2rhonow(ipts,2,1:6)
+             coeff=vxclrho_b_updn(indx,ispden)
+             !Diagonal part: Int[n.Lapl(dFxc/Lapl(n))] = Int[Lapl(n).dFxc/grad(n)]
+             dstrsxc=dstrsxc+(d2rho(1)+d2rho(2)+d2rho(3))*coeff
+             !Non-diagonal part: -2*Int[d2n/dr_alpha.dr_beta.dFxc/Lapl(n)]
+             strsxc1_tot=strsxc1_tot-two*d2rho(1)*coeff
+             strsxc2_tot=strsxc2_tot-two*d2rho(2)*coeff
+             strsxc3_tot=strsxc3_tot-two*d2rho(3)*coeff
+             strsxc4_tot=strsxc4_tot-two*d2rho(4)*coeff
+             strsxc5_tot=strsxc5_tot-two*d2rho(5)*coeff
+             strsxc5_tot=strsxc6_tot-two*d2rho(6)*coeff
+           end do
          end if
 
        end do
