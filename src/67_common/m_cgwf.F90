@@ -2333,12 +2333,12 @@ end subroutine make_grad_berry
 !!
 !! SOURCE
 
-subroutine nscf_init(nscf, pot_filepath, dtset, cryst, comm)
+subroutine nscf_init(nscf, dtset, dtfil, cryst, comm)
 
 !Arguments ------------------------------------
  class(nscf_t),intent(out) :: nscf
- character(len=*),intent(in) :: pot_filepath
  type(dataset_type),intent(in) :: dtset
+ type(datafiles_type),intent(in) :: dtfil
  type(crystal_t),intent(in) :: cryst
  integer,intent(in) :: comm
 
@@ -2358,8 +2358,8 @@ subroutine nscf_init(nscf, pot_filepath, dtset, cryst, comm)
 
  call initmpi_seq(nscf%mpi_enreg)
 
- call wrtout(units, sjoin(" Reading KS GS potential from: ", pot_filepath))
- call hdr_read_from_fname(pot_hdr, pot_filepath, fform, comm)
+ call wrtout(units, sjoin(" Reading KS GS potential from: ", dtfil%filpotin))
+ call hdr_read_from_fname(pot_hdr, dtfil%filpotin, fform, comm)
  ABI_CHECK(fform /= 0, "hdr_read_from_fname returned fform 0")
  call pot_hdr%vs_dtset(dtset)
 
@@ -2373,7 +2373,7 @@ subroutine nscf_init(nscf, pot_filepath, dtset, cryst, comm)
 
  ! Read KS potential from file.
  ABI_MALLOC(nscf%vtrial, (nfftf, dtset%nspden))
- call read_rhor(pot_filepath, cplex1, dtset%nspden, nfftf, nscf%ngfftf, pawread0, nscf%mpi_enreg, nscf%vtrial, pot_hdr, pot_pawrhoij, comm, &
+ call read_rhor(dtfil%filpotin, cplex1, dtset%nspden, nfftf, nscf%ngfftf, pawread0, nscf%mpi_enreg, nscf%vtrial, pot_hdr, pot_pawrhoij, comm, &
                 allow_interp=.False.)
  pot_cryst = pot_hdr%get_crystal()
  if (cryst%compare(pot_cryst, header=" Comparing input crystal with POT crystal") /= 0) then
@@ -2427,7 +2427,7 @@ subroutine nscf_solve(nscf, isppol, kpt, istwf_k, nband, cryst, dtset, dtfil, ps
 !scalars
  integer,parameter :: paral_kgb0 = 0, mcgq0 = 0, mkgq0 = 0, nkpt1 = 1, pwind_alloc0 = 0, use_subvnlx0 = 0, use_subovl0 = 0, ider0 = 0, idir0 = 0
  integer,parameter :: ikpt0 = 0, quit0 = 0
- integer :: mcg, mgsc, nvloc, nkpg, n1, n2, n3, n4, n5, n6, nfft, nfftf, mgfft, mgfftf
+ integer :: mcg, mgsc, nvloc, nkpg, n1, n2, n3, n4, n5, n6, nfft, nfftf, mgfft, mgfftf, inonsc
  real(dp),parameter :: cpus0 = zero
  !real(dp) ::
  type(efield_type) :: dtefield
@@ -2437,7 +2437,7 @@ subroutine nscf_solve(nscf, isppol, kpt, istwf_k, nband, cryst, dtset, dtfil, ps
  real(dp) :: subham(nband*(nband+1)), subovl(nband*(nband+1)*use_subovl0), subvnlx(nband*(nband+1)*use_subvnlx0)
  real(dp) :: ylmgr_dum(1,1,1)
  real(dp),allocatable :: ph1d(:,:), vlocal(:,:,:,:), kinpw_k(:), kpg_k(:,:)
- real(dp),allocatable :: ffnl_k(:,:,:,:) !, ph3d(:,:,:)
+ real(dp),allocatable :: ffnl_k(:,:,:,:), ph3d(:,:,:)
  real(dp),allocatable :: ylm_k(:,:)
 ! *************************************************************************
 
@@ -2502,12 +2502,16 @@ subroutine nscf_solve(nscf, isppol, kpt, istwf_k, nband, cryst, dtset, dtfil, ps
  call mkffnl_objs(cryst, psps, 1, ffnl_k, ider0, idir0, nscf%kg_k, kpg_k, kpt, nkpg, nscf%npw_k, ylm_k, ylmgr_dum)
  ABI_FREE(ylm_k)
 
-#if 0
+!      Load k-dependent part in the Hamiltonian datastructure
+!       - Compute 3D phase factors
+!       - Prepare various tabs in case of band-FFT parallelism
+!       - Load k-dependent quantities in the Hamiltonian
+
+ ABI_MALLOC(ph3d,(2, nscf%npw_k,gs_hamk%matblk))
+
  call gs_hamk%load_k(kpt_k=kpt, istwf_k=istwf_k, npw_k=nscf%npw_k, &
                      kinpw_k=kinpw_k, kg_k=nscf%kg_k, kpg_k=kpg_k, ffnl_k=ffnl_k, ph3d_k=ph3d, &
                      compute_ph3d=(paral_kgb0/=1), compute_gbound=(paral_kgb0/=1))
-
-#endif
 
  mcg = nscf%npw_k * dtset%nspinor * nscf%nband
  mgsc = mcg * dtset%usepaw
@@ -2517,15 +2521,21 @@ subroutine nscf_solve(nscf, isppol, kpt, istwf_k, nband, cryst, dtset, dtfil, ps
  ABI_REMALLOC(nscf%gsc, (2, nscf%npw_k * dtset%nspinor * nscf%nband * dtset%usepaw))
  ABI_REMALLOC(nscf%resid, (nscf%nband))
 
-#if 0
+ ! TODO
+ ! Initialize the wavefunctions. See also wfconv.
+ inonsc = 1
  call cgwf(dtset%berryopt, nscf%cg, cgq, dtset%chkexit, cpus0, dphase_k, dtefield, dtfil%filnam_ds(1), &
            nscf%gsc, gs_hamk, 0, 0, ikpt0, inonsc, isppol, nscf%nband, mcg, mcgq0, mgsc, mkgq0, &
            mpi_enreg, nscf%npw_k, nscf%nband, dtset%nbdblock, nkpt1, dtset%nline, nscf%npw_k, npwarr_k, dtset%nspinor, &
            dtset%nsppol, dtset%ortalg, dtset%prtvol, pwind, pwind_alloc0, pwnsfac, pwnsfacq, quit0, nscf%resid, &
            subham, subovl, subvnlx, dtset%tolrde, dtset%tolwfr_diago, use_subovl0, use_subvnlx0, mod(dtset%wfoptalg, 100), zshift)
-#endif
+
+ ! Check for convergence.
+ ierr = 0; err_msg = ""
+
  end associate
 
+ ABI_FREE(ph3d)
  ABI_FREE(ph1d)
  ABI_FREE(kpg_k)
  ABI_FREE(kinpw_k)
