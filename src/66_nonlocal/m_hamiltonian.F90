@@ -1076,7 +1076,7 @@ subroutine load_k_hamiltonian(ham,ffnl_k,fockACE_k,gbound_k,istwf_k,kinpw_k,&
    ham%phkpxred => ham%phkxred
  end if
 
-!Compute or copy G sphere boundary at k+g
+ ! Compute or copy G sphere boundary at k+g
  compute_gbound_=.false.;if (present(compute_gbound)) compute_gbound_=compute_gbound
  if (present(gbound_k)) compute_gbound_=.true.
  if (compute_gbound_) then
@@ -1106,7 +1106,7 @@ subroutine load_k_hamiltonian(ham,ffnl_k,fockACE_k,gbound_k,istwf_k,kinpw_k,&
    ham%gbound_kp => ham%gbound_k
  end if
 
-!Compute 3D structure factors for each atom at k+g
+ ! Compute 3D structure factors for each atom at k+g
  if (present(compute_ph3d).and.present(ph3d_k)) then
    if (compute_ph3d.and.ham%nloalg(2)>0) then
      if ((.not.allocated(ham%phkxred)).or.(.not.associated(ham%kg_k)).or.&
@@ -2055,8 +2055,6 @@ end subroutine pawdij2e1kb
 !! OUTPUT
 !!  vlocal(n4,n5,n6,nvloc,ncomp): Potential on the coarse grid.
 !!
-!! SIDE EFFECTS
-!!
 !! SOURCE
 
 subroutine gspot_transgrid_and_pack(isppol, usepaw, paral_kgb,  nfft, ngfft, nfftf, &
@@ -2096,10 +2094,8 @@ subroutine gspot_transgrid_and_pack(isppol, usepaw, paral_kgb,  nfft, ngfft, nff
      ! Transfer from fine mesh to coarse and then pack data
      ABI_MALLOC(cgrvtrial,(nfft,nspden))
      do ic=1,ncomp
-       call transgrid(1,mpi_enreg,nspden,-1,0,0,paral_kgb,pawfgr,&
-                      rhodum,rhodum,cgrvtrial,vtrial(:,:,ic))
-       call fftpac(isppol,mpi_enreg,nspden,n1,n2,n3,n4,n5,n6,ngfft,&
-                   cgrvtrial,vlocal(:,:,:,:,ic),2)
+       call transgrid(1,mpi_enreg,nspden,-1,0,0,paral_kgb,pawfgr, rhodum,rhodum,cgrvtrial,vtrial(:,:,ic))
+       call fftpac(isppol,mpi_enreg,nspden,n1,n2,n3,n4,n5,n6,ngfft, cgrvtrial,vlocal(:,:,:,:,ic),2)
      end do
      ABI_FREE(cgrvtrial)
    end if

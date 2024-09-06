@@ -638,7 +638,7 @@ module m_gwr
 
    integer,allocatable :: kbz2ibz_symrel(:,:)
     ! (6, nkbz)
-    ! Mapping kBZ to IBZ (symrel conventions) TODO: To be removed
+    ! Mapping kBZ to IBZ (symrel conventions)
 
    real(dp), contiguous, pointer :: wtk(:) => null()
     ! (nkibz)

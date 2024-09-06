@@ -124,6 +124,7 @@ module m_dfpt_cgwf
 
    procedure :: free => stern_free
     ! Free dynamic memory.
+
  end type stern_t
 !!***
 
