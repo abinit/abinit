@@ -222,7 +222,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  integer :: paw_opt,quit,signs,spaceComm,tim_nonlop,wfoptalg,wfopta10
  logical :: nspinor1TreatedByThisProc,nspinor2TreatedByThisProc
  real(dp) :: ar,ar_im,eshift,occblock,norm
- real(dp) :: residk,weight,cpu,wall,gflops
+ real(dp) :: max_resid,weight,cpu,wall,gflops
  character(len=500) :: msg
  real(dp) :: dummy(2,1),nonlop_dum(1,1),tsec(2)
  real(dp),allocatable :: cwavef1(:,:),cwavef_x(:,:),cwavef_y(:,:),cwavefb(:,:,:)
@@ -558,9 +558,9 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 !  Note that this operation is done BEFORE rotation of bands:
 !  it would be time-consuming to recompute the residuals after.
    if (nbdbuf >= 0) then
-     residk = maxval(resid_k(1:max(1,nband_k-nbdbuf)))
+     max_resid = maxval(resid_k(1:max(1,nband_k-nbdbuf)))
    else if (nbdbuf==-101) then
-     residk = maxval(occ_k(1:nband_k)*resid_k(1:nband_k))
+     max_resid = maxval(occ_k(1:nband_k)*resid_k(1:nband_k))
    else
      ABI_ERROR('Bad value of nbdbuf')
    end if
@@ -674,7 +674,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    end if
 
    if (iscf < 0) then
-     if (residk > dtset%tolwfr .and. residk < tol7) then
+     if (max_resid > dtset%tolwfr .and. max_resid < tol7) then
        if (fftcore_mixprec == 1) call wrtout(std_out, " Approaching NSCF convergence. Activating FFT in double-precision")
        ii = fftcore_set_mixprec(0)
      end if
@@ -684,7 +684,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
        call cwtime(cpu, wall, gflops, "stop")
        if (ikpt == 1 .or. mod(ikpt, 100) == 0) then
          if (inonsc == 1) call wrtout(std_out, sjoin(" k-point: [", itoa(ikpt), "/", itoa(nkpt), "], spin:", itoa(isppol)))
-         call wrtout(std_out, sjoin("   Max resid =", ftoa(residk, fmt="es13.5"), &
+         call wrtout(std_out, sjoin("   Max resid =", ftoa(max_resid, fmt="es13.5"), &
            " (exclude nbdbuf bands). One NSCF iteration cpu-time:", &
            sec2str(cpu), ", wall-time:", sec2str(wall)), do_flush=.True.)
          if (inonsc == enough) call wrtout(std_out, "   Printing residuals every mod(20) iterations...")
@@ -694,7 +694,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    ABI_NVTX_END_RANGE()
 
    ! Exit loop over inonsc if converged
-   if (residk < dtset%tolwfr) then
+   if (max_resid < dtset%tolwfr) then
      if (iscf < 0 .and. (ikpt == 1 .or. mod(ikpt, 100) == 0)) then
        call wrtout(std_out, sjoin("   NSCF loop completed after", itoa(inonsc), "iterations"))
      end if
@@ -1194,9 +1194,9 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 
 !###################################################################
 
- if (iscf<=0 .and. residk > dtset%tolwfr) then
+ if (iscf<=0 .and. max_resid > dtset%tolwfr) then
    write(msg,'(2(a,i0),a,es13.5)')&
-    "Wavefunctions not converged for ikpt: ", ikpt, ", nnsclo: ",nnsclo_now,', max resid: ',residk
+    "Wavefunctions not converged for ikpt: ", ikpt, ", nnsclo: ",nnsclo_now,', max resid: ',max_resid
    ABI_WARNING(msg)
  end if
 
