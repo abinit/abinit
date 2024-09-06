@@ -2970,14 +2970,15 @@ subroutine ctqmc_calltriqs(paw_dmft,cryst_struc,hu,levels_ctqmc,gtmp_nd,gw_tmp_n
 
   !Report output datas from TRIQS to Abinit
   !Interacting G(iw)
- do ifreq=1,nfreq
-   do iflavor1=1,nflavor
-     do iflavor=1,nflavor
-    !   gw_tmp_nd(ifreq,iflavor,iflavor1) = g_iw(iflavor,iflavor1,ifreq) !* Ha_eV !because 1/ G0(eV)
-    !  WRITE(503,*) "[OUT Fortran] G(iw)[ w= ",ifreq," l= ",iflavor," l_= ",iflavor1,"] = ",gw_tmp_nd(ifreq,iflavor,iflavor1)!g_iw(iflavor,iflavor1,ifreq)
-     end do
-   end do
- end do
+ ! OG Commented these loops because they are useless
+ !do ifreq=1,nfreq
+ !  do iflavor1=1,nflavor
+ !    do iflavor=1,nflavor
+ !   !   gw_tmp_nd(ifreq,iflavor,iflavor1) = g_iw(iflavor,iflavor1,ifreq) !* Ha_eV !because 1/ G0(eV)
+ !   !  WRITE(503,*) "[OUT Fortran] G(iw)[ w= ",ifreq," l= ",iflavor," l_= ",iflavor1,"] = ",gw_tmp_nd(ifreq,iflavor,iflavor1)!g_iw(iflavor,iflavor1,ifreq)
+ !    end do
+ !  end do
+ !end do
 
 ! Convert in Ha
  gw_tmp_nd = gw_tmp_nd*Ha_eV
