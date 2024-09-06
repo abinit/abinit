@@ -1911,7 +1911,7 @@ subroutine xg_nonlop_getcprj_deriv(xg_nonlop,X,cprjX,work_mpi,option)
        do iband=1,ncols
          cprjin_nlmn_(1:cplex*nlmn,iband) = cprjin_(1+shift:cplex*nlmn+shift,iband)
        end do
-       call xgBlock_apply_diag(cprjin_nlmn,diag_,nspinor,Y=cprjout_nlmn)
+       call xgBlock_apply_diag(cprjin_nlmn,diag_,1,Y=cprjout_nlmn)
        do iband=1,ncols
          cprjout_(1+shift:cplex*nlmn+shift,iband) = cprjout_(1+shift:cplex*nlmn+shift,iband) &
          & + cprjout_nlmn_(1:cplex*nlmn,iband)
