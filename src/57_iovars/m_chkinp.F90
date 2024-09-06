@@ -2669,7 +2669,8 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      call chkint_ne(1,2,cond_string,cond_values,ierr,'optdriver',dt%optdriver,1,(/RUNL_LONGWAVE/),iout)
    end if
 
-   if (dt%useylm == 1 .and. dt%usepaw == 0 .and. dt%nspinor == 2 .and. any(pspheads(:)%pspso /= 0)) then
+   if (dt%useylm == 1 .and. dt%usepaw == 0 .and. dt%nspinor == 2 .and. &
+     any(pspheads(:)%pspso /= 0) .and. dt%cprj_in_memory/=1) then
      ABI_ERROR_NOSTOP("spin-orbit (pspso /=0 ) with NC pseudos and Yml for nonlop (useyml = 1) not yet allowed.", ierr)
    end if
 

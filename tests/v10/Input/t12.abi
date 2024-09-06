@@ -1,7 +1,7 @@
 # Inspired from v9[141]
 # AlP solid
 
-ndtset 4
+ndtset 6
 #ndtset 3
 #jdtset 2 3 4
 
@@ -12,10 +12,19 @@ cprj_in_memory2 1
 cprj_in_memory3 0
 cprj_in_memory4 1
 
+cprj_in_memory5 1
+cprj_in_memory6 1
+
 wfoptalg1 114
 wfoptalg2 114
 wfoptalg3 111
 wfoptalg4 111
+
+wfoptalg5 111
+wfoptalg6 111
+
+nblock_lobpcg1 4
+nblock_lobpcg2 4
 
 # unconverged
 ecut 5
@@ -41,6 +50,12 @@ shiftk 3*0
 istwfk *1
 
 optforces 1
+optstress 1
+
+optforces5 2
+
+optforces6 2
+optstress6 0
 
 prtwf 0
 prteig 0

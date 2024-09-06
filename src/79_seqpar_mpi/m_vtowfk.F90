@@ -791,6 +791,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  !call cwtime(cpu, wall, gflops, "start")
 
  !LTEST
+ if (optforces/=0) then
  write(900,*) 'npband :',mpi_enreg%nproc_band
  write(900,*) 'bandpp :',mpi_enreg%bandpp
  write(900,*) 'nband_k :',nband_k
@@ -802,6 +803,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  write(901,*) 'nblockbd :',nblockbd
  write(901,*) 'blocksize :',blocksize
  write(900,*) 'grnl_k :'
+ end if
  !LTEST
 
 !Loop over bands or blocks of bands. Note that in sequential mode iblock=iband, nblockbd=nband_k and blocksize=1
@@ -1166,6 +1168,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    ABI_NVTX_END_RANGE()
  end do !  End of loop on blocks
  !LTEST
+ if (optforces/=0) then
  write(900,*) ''
  do iband=1,nband_k
    write(900,*) grnl_k(:,iband)
@@ -1174,6 +1177,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  !LTEST
  write(900,*) ''
  flush(900)
+ end if
  !LTEST
 
  if (dtset%cprj_in_memory==1) then
@@ -1210,7 +1214,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
        write(901,*) 'grnl_k :'
        !LTEST
        call xgBlock_map(xgforces,grnl_k,SPACE_R,3*natom,nband_k)
-       call xg_nonlop_forces(xg_nonlop,xgx0,cprj_xgx0%self,cprj_work%self,xgeigen,xgforces)
+       call xg_nonlop_forces_stress(xg_nonlop,xgx0,cprj_xgx0%self,cprj_work%self,xgeigen,forces=xgforces)
        !LTEST
        write(901,*) ''
        do iband=1,nband_k
@@ -1233,8 +1237,10 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  end if
 
  !LTEST
+ if (optforces/=0) then
  flush(901)
  flush(900)
+ end if
  !LTEST
  !call cwtime_report(" Block loop", cpu, wall, gflops)
 

@@ -680,7 +680,7 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
  type(bandfft_kpt_type),pointer :: my_bandfft_kpt => null()
  type(pawcprj_type),target,allocatable :: cwaveprj(:,:)
  type(pawcprj_type),pointer :: cwaveprj_idat(:,:)
- type(xgBlock_t) :: xgx0,xgeigen,xgderiv
+ type(xgBlock_t) :: xgx0,xgeigen,xgforces,xgstress
  type(xg_t) :: cprj_xgx0,cprj_work
  real(dp),allocatable :: enlout_2d(:,:),enlout_2d_stress(:,:)
 
@@ -923,10 +923,14 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
        ABI_FREE(gprimd)
      end if
 
-!    Compute (k+G) vectors
-     nkpg=3*nloalg(3)
-     ABI_MALLOC(kpg_k,(npw_k,nkpg))
-     if (nkpg>0) then
+!    Compute (k+G) vectors (only if useylm=1)
+     if (usexg/=1) then
+       nkpg=3*nloalg(3)
+       ABI_MALLOC(kpg_k,(npw_k,nkpg))
+       if (nkpg>0) call mkkpg(kg_k,kpg_k,kpoint,nkpg,npw_k)
+     else ! cprj_in_memory = 1
+       nkpg=3
+       ABI_MALLOC(kpg_k,(npw_k,nkpg))
        call mkkpg(kg_k,kpg_k,kpoint,nkpg,npw_k)
      end if
 
@@ -1102,15 +1106,22 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
            !  !LTEST
            !  write(901,*) 'grnl_k :'
            !  !LTEST
-           if (optfor==1) then
-             call xgBlock_map(xgderiv,enlout_2d,SPACE_R,3*natom,blocksize)
-             call xg_nonlop_forces(xg_nonlop,xgx0,cprj_xgx0%self,cprj_work%self,xgeigen,xgderiv)
+           if (optfor==1) call xgBlock_map(xgforces,enlout_2d,SPACE_R,3*natom,blocksize)
+           if (stress_needed==1) call xgBlock_map(xgstress,enlout_2d_stress,SPACE_R,6,blocksize)
+
+           if (optfor==1.and.stress_needed==0) then
+             call xg_nonlop_forces_stress(xg_nonlop,xgx0,cprj_xgx0%self,cprj_work%self,xgeigen,&
+               forces=xgforces)
+           end if
+           if (optfor==0.and.stress_needed==1) then
+             call xg_nonlop_forces_stress(xg_nonlop,xgx0,cprj_xgx0%self,cprj_work%self,xgeigen,&
+               stress=xgstress,gprimd=gs_hamk%gprimd)
+           end if
+           if (optfor==1.and.stress_needed==1) then
+             call xg_nonlop_forces_stress(xg_nonlop,xgx0,cprj_xgx0%self,cprj_work%self,xgeigen,&
+               forces=xgforces,stress=xgstress,gprimd=gs_hamk%gprimd)
            end if
 
-           if (stress_needed==1) then
-             call xgBlock_map(xgderiv,enlout_2d_stress,SPACE_R,6,blocksize)
-             call xg_nonlop_stress(xg_nonlop,xgx0,cprj_xgx0%self,cprj_work%self,xgeigen,xgderiv,gs_hamk%gprimd)
-           end if
            !  !LTEST
            !  write(901,*) ''
            !  do iband=1,nband_k
