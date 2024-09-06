@@ -1453,10 +1453,10 @@ end subroutine hdr_init_lowlvl
 subroutine hdr_read_from_fname(Hdr, fname, fform, comm)
 
 !Arguments ------------------------------------
- integer,intent(in) :: comm
- integer,intent(out) :: fform
- character(len=*),intent(in) :: fname
  type(hdr_type),intent(inout) :: Hdr
+ character(len=*),intent(in) :: fname
+ integer,intent(out) :: fform
+ integer,intent(in) :: comm
 
 !Local variables-------------------------------
  integer,parameter :: rdwr1=1,master=0

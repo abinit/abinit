@@ -1239,10 +1239,8 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    end if
  end if
 
- !Hamiltonian constructor for gwls_sternheimer
- if(dtset%optdriver==RUNL_GWLS) then
-   call build_H(dtset,mpi_enreg,cpopt,cg,gs_hamk,kg_k,kinpw)
- end if
+ ! Hamiltonian constructor for gwls_sternheimer
+ if (dtset%optdriver==RUNL_GWLS) call build_H(dtset,mpi_enreg,cpopt,cg,gs_hamk,kg_k,kinpw)
 
  if (has_cprj_in_memory) nullify(cprj_cwavef_bands)
 

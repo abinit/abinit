@@ -616,7 +616,6 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  ABI_CALLOC(vtrial, (nfftf, nspden))
  ABI_CALLOC(vlocal, (n4, n5, n6, nvloc))
 
- !if (dtset%eph_stern /= 0) then
  ! Read the GS potential (vtrial) from input POT file
  ! In principle one may store GS vtrial in the DVDB but getpot_filepath is simpler to implement.
  call wrtout(units, sjoin(" Reading KS GS potential for Sternheimer from: ", dtfil%filpotin))
@@ -627,7 +626,6 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
    ABI_ERROR("Crystal structure from WFK and POT do not agree! Check messages above!")
  end if
  call pot_cryst%free(); call pot_hdr%free()
- !end if
 
  ! Find correspondence IBZ --> set of q-points in DVDB.
  ! use_ftinterp selects whether DFPT potentials should be read from the DVDB or Fourier-interpolated on the fly.

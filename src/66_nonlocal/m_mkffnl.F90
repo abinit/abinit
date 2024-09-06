@@ -75,14 +75,13 @@ subroutine mkffnl_objs(cryst, psps, dimffnl, ffnl, ider, idir, kg, kpg, kpt, nkp
  integer ABI_ASYNC, optional,intent(out):: request
 !arrays
  integer,intent(in) :: kg(3,npw)
- real(dp),intent(in) :: kpg(npw, nkpg), kpt(3)
- real(dp),intent(in) :: ylm(:,:), ylm_gr(:,:,:)
+ real(dp),intent(in) :: kpg(npw, nkpg), kpt(3), ylm(:,:), ylm_gr(:,:,:)
  real(dp),intent(out) :: ffnl(npw, dimffnl, psps%lmnmax, psps%ntypat)
 !
 !!Local variables-------------------------------
  integer :: my_comm
-
 ! *************************************************************************
+
  my_comm = xmpi_comm_self; if (present(comm)) my_comm = comm
 
  if (present(request)) then
