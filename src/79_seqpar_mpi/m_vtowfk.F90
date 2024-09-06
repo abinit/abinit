@@ -557,10 +557,10 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 !  Find largest resid over bands at this k point
 !  Note that this operation is done BEFORE rotation of bands:
 !  it would be time-consuming to recompute the residuals after.
-   if (nbdbuf>=0) then
-     residk=maxval(resid_k(1:max(1,nband_k-nbdbuf)))
+   if (nbdbuf >= 0) then
+     residk = maxval(resid_k(1:max(1,nband_k-nbdbuf)))
    else if (nbdbuf==-101) then
-     residk=maxval(occ_k(1:nband_k)*resid_k(1:nband_k))
+     residk = maxval(occ_k(1:nband_k)*resid_k(1:nband_k))
    else
      ABI_ERROR('Bad value of nbdbuf')
    end if

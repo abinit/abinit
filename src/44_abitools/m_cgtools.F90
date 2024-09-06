@@ -4719,8 +4719,9 @@ end subroutine subdiago_low_memory
 !! FUNCTION
 !! Normalize nvec complex vectors each of length nelem and then orthogonalize by modified Gram-Schmidt.
 !! Two orthogonality conditions are available:
-!!  Simple orthogonality: ${<Vec_{i}|Vec_{j}>=Delta_ij}$
-!!  Orthogonality with overlap S: ${<Vec_{i}|S|Vec_{j}>=Delta_ij}$
+!!
+!!      1) Simple orthogonality: ${<Vec_{i}|Vec_{j}>=Delta_ij}$
+!!      2) Orthogonality with overlap S: ${<Vec_{i}|S|Vec_{j}>=Delta_ij}$
 !!
 !! INPUTS
 !!  icg=shift to be given to the location of the data in cg(=vecnm)
