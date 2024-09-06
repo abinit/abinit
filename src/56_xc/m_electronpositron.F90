@@ -900,6 +900,10 @@ subroutine rhohxcpositron(electronpositron,gprimd,kxcapn,mpi_enreg,nfft,ngfft,nh
  ABI_FREE(fxcapn)
  ABI_FREE(rhop)
 
+!Store stress tensor
+ strsxc(1:3)=strdiag
+ strsxc(4:6)=zero
+
 !Reduction in case of parallelism
  if(mpi_enreg%paral_kgb==1)then
    if(paral_kgb/=0)then
@@ -910,10 +914,6 @@ subroutine rhohxcpositron(electronpositron,gprimd,kxcapn,mpi_enreg,nfft,ngfft,nh
      call xmpi_sum(strsxc,mpi_enreg%comm_fft,ierr)
    end if
  end if
-
-!Store stress tensor
- strsxc(1:3)=strdiag
- strsxc(4:6)=zero
 
 !Compute vxcavg
  call mean_fftr(vxcapn(:,1),vxcavg_tmp,nfft,nfftot,1)

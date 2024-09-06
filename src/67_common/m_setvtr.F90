@@ -569,12 +569,12 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
          if(.not.is_hybrid_ncpp .or. mod(dtset%fockoptmix,100)==11)then
            call rhotoxc(energies%e_xc,kxc,mpi_enreg,nfft,ngfft,&
 &           nhat,psps%usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,non_magnetic_xc,n3xccc,&
-&           option_eff,rhor,rprimd,strsxc,usexcnhat,vxc,vxcavg,xccc3d,xcdata,&
+&           option_eff,rhor,rprimd,usexcnhat,vxc,vxcavg,xccc3d,xcdata,strsxc=strsxc,&
 &           taur=taur,vhartr=vhartr,vxctau=vxctau,add_tfw=add_tfw_,xcctau3d=xcctau3d,grho1_over_rho1=rpnrm)
          else
 !          Only when is_hybrid_ncpp, and moreover, the xc functional is not the auxiliary xc functional, then call xchybrid_ncpp_cc
            call xchybrid_ncpp_cc(dtset,energies%e_xc,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,&
-&           strsxc,vxcavg,xccc3d,vxc=vxc)
+&                                strsxc,vxcavg,xccc3d,vxc=vxc)
          end if
 
 !        Possibly compute energies%e_hybcomp_E0
@@ -583,11 +583,11 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
            if(.not.is_hybrid_ncpp)then
              call rhotoxc(energies%e_hybcomp_E0,kxc,mpi_enreg,nfft,ngfft,&
 &             nhat,psps%usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,non_magnetic_xc,n3xccc,&
-&             option_eff,rhor,rprimd,strsxc,usexcnhat,vxc_hybcomp,vxcavg,xccc3d,xcdatahyb,&
-&             taur=taur,vhartr=vhartr,vxctau=vxctau,add_tfw=add_tfw_)
+&             option_eff,rhor,rprimd,usexcnhat,vxc_hybcomp,vxcavg,xccc3d,xcdatahyb,&
+&             strsxc=strsxc,taur=taur,vhartr=vhartr,vxctau=vxctau,add_tfw=add_tfw_)
            else
              call xchybrid_ncpp_cc(dtset,energies%e_hybcomp_E0,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,&
-&             strsxc,vxcavg,xccc3d,vxc=vxc_hybcomp)
+&                                  strsxc,vxcavg,xccc3d,vxc=vxc_hybcomp)
            end if
 
 !          Combine hybrid and auxiliary quantities
@@ -601,7 +601,7 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
        else if (ipositron==2) then
          call rhotoxc(energies%e_xc,kxc,mpi_enreg,nfft,ngfft,&
 &         nhat,psps%usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,non_magnetic_xc,n3xccc,&
-&         option_eff,rhor,rprimd,strsxc,usexcnhat,vxc,vxcavg,xccc3d,xcdata,&
+&         option_eff,rhor,rprimd,usexcnhat,vxc,vxcavg,xccc3d,xcdata,strsxc=strsxc,&
 &         taur=taur,vhartr=vhartr,vxctau=vxctau,add_tfw=add_tfw_,&
 &         electronpositron=electronpositron)
        end if

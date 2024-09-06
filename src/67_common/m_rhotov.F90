@@ -292,7 +292,7 @@ subroutine rhotov(constrained_dft,dtset,energies,gprimd,grcondft,gsqcut,intgres,
        if(.not.is_hybrid_ncpp .or. mod(dtset%fockoptmix,100)==11)then
          call rhotoxc(energies%e_xc,kxc,mpi_enreg,nfft,ngfft,&
 &         nhat,usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,non_magnetic_xc,n3xccc,optxc,&
-&         rhor,rprimd,strsxc,usexcnhat,vxc,vxcavg,xccc3d,xcdata,&
+&         rhor,rprimd,usexcnhat,vxc,vxcavg,xccc3d,xcdata,strsxc=strsxc,&
 &         taur=taur,vhartr=vhartr,vxctau=vxctau_,add_tfw=add_tfw_,xcctau3d=xcctau3d)
          if(mod(dtset%fockoptmix,100)==11)then
            energies%e_xc=energies%e_xc*dtset%auxc_scal
@@ -300,13 +300,13 @@ subroutine rhotov(constrained_dft,dtset,energies,gprimd,grcondft,gsqcut,intgres,
          end if
        else
          call xchybrid_ncpp_cc(dtset,energies%e_xc,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,&
-&         strsxc,vxcavg,xccc3d,vxc=vxc)
+&                              strsxc,vxcavg,xccc3d,vxc=vxc)
        end if
      else
        call rhotoxc(energies%e_xc,kxc,mpi_enreg,nfft,ngfft,&
 &       nhat,usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,non_magnetic_xc,n3xccc,optxc,&
-&       rhor,rprimd,strsxc,usexcnhat,vxc,vxcavg,xccc3d,xcdata,&
-&       taur=taur,vhartr=vhartr,vxctau=vxctau_,add_tfw=add_tfw_,&
+&       rhor,rprimd,usexcnhat,vxc,vxcavg,xccc3d,xcdata,&
+&       strsxc=strsxc,taur=taur,vhartr=vhartr,vxctau=vxctau_,add_tfw=add_tfw_,&
 &       electronpositron=electronpositron,xcctau3d=xcctau3d)
      end if
      call timab(941,2,tsec)
