@@ -291,6 +291,7 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
 !arrays
  real(dp) :: gm_norm(3),grho(3),gmet(3,3),gprimd(3,3),qphon(3),rmet(3,3)
  real(dp) :: tsec(2),vxcmean(4)
+ real(dp),allocatable :: d2rhonow(:,:,:)
  real(dp),allocatable :: d2vxc_b(:,:),depsxc(:,:),depsxc_apn(:,:),dvxc_apn(:),dvxc_b(:,:)
  real(dp),allocatable :: exc_b(:),fxc_b(:),fxc_apn(:),grho2_apn(:),grho2_b_updn(:,:),lrhonow(:,:),lrho_b_updn(:,:)
  real(dp),allocatable :: m_norm(:),nhat_up(:),rho_b_updn(:,:),rho_b(:),rhonow_apn(:,:,:)
@@ -612,10 +613,12 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
    end if
 
 !  rhonow will contain effective density (and gradients if GGA)
-!  taunow will contain effective kinetic energy density (if MetaGGA)
+!  taunow will contain effective kinetic energy density (if MGGA)
 !  lrhonow will contain the laplacian if we have a MGGA
+!  d2rhonow will contain the 2nd derivatives if we have a MGGA and need the stress tensor
    ABI_MALLOC(rhonow,(nfft,nspden_eff,ngrad*ngrad))
    ABI_MALLOC(lrhonow,(nfft,nspden_eff*uselaplacian))
+   ABI_MALLOC(d2rhonow,(nfft,nspden_eff,6*uselaplacian))
    ABI_MALLOC(taunow,(nfft,nspden_eff,usekden))
 
 !  ====================================================================
@@ -628,7 +631,7 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
 !    or shifted grid (will be in rhonow(:,:,2:4)), if needed.
      if (uselaplacian==1) then
        call xcden(cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden_eff,&
-&                 qphon,rhocorval,rhonow,lrhonow=lrhonow)
+&                 qphon,rhocorval,rhonow,lrhonow=lrhonow,d2rhonow=d2rhonow)
      else
        call xcden(cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden_eff,&
 &                 qphon,rhocorval,rhonow)
@@ -903,7 +906,7 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
 !            case take the coefficient that will be multiplied by the
 !            gradient of the total density
              if(nspden_updn==1)then
-!              !              Definition of vxcgrho_b_updn changed in v3.3
+!              ! Definition of vxcgrho_b_updn changed in v3.3
                if (nvxcgrho == 3) then
                  coeff=half*vxcgrho_b_updn(indx,1) + vxcgrho_b_updn(indx,3)
                else
@@ -920,7 +923,11 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
              end if
              depsxc(ipts,ispden+nspden_updn)=coeff
 
-!            Store the gradient of up, down or total density, depending on ispden and nspden, at point ipts
+!            In case of ixc 31 (mGGA functional fake 1),
+!            skip the stress tensor to follow a LDA scheme (see doc/theory/MGGA/report_MGGA.pdf)
+             if(ixc==31) cycle
+
+!            Compute the contribution to the stress tensor
              if(nspden_updn==1)then
                grho(1:3)=rhonow(ipts,1,2:4)
              else if(ispden==1 .and. nspden_updn==2)then
@@ -930,12 +937,6 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
              else if(ispden==3 .and. nspden_updn==2)then
                grho(1:3)=rhonow(ipts,1,2:4)
              end if
-
-!            In case of ixc 31 (mGGA functional fake 1),
-!            skip the stress tensor to follow a LDA scheme (see doc/theory/MGGA/report_MGGA.pdf)
-             if(ixc==31) cycle
-
-!            Compute the contribution to the stress tensor
              s1=-grho(1)*grho(1)*coeff
              s2=-grho(2)*grho(2)*coeff
              s3=-grho(3)*grho(3)*coeff
@@ -968,6 +969,7 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
              depsxc(ipts,6)   = vxclrho_b_updn(indx,1)
              depsxc(ipts,7)   = vxclrho_b_updn(indx,2)
            end if
+!          Compute the contribution to the stress tensor
          end if
 
        end do
@@ -1001,9 +1003,6 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
 &           electronpositron%posdensity0_limit,rho_b,&
 &           rhonow_apn(:,1,1),vxc_b_apn,vxcgr_apn,vxc_ep,dvxce=dvxc_apn)
          end if
-         ABI_FREE(vxc_ep)
-         ABI_FREE(rhonow_apn)
-         ABI_FREE(grho2_apn)
 !        Accumulate electron-positron XC energies
          s1=zero
          do ipts=1,npts
@@ -1029,6 +1028,10 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
            dstrsxc=dstrsxc+fxc_apn(indx)-rho_b(indx)*vxc_b_apn(indx)
            if (ngrad_apn==2) then
              depsxc_apn(ipts,2)=vxcgr_apn(indx)
+             if (nspden_updn==1)                 grho(1:3)=rhonow(ipts,1,2:4)
+             if (ispden==1 .and. nspden_updn==2) grho(1:3)=rhonow(ipts,2,2:4)
+             if (ispden==2 .and. nspden_updn==2) grho(1:3)=rhonow(ipts,1,2:4)-rhonow(ipts,2,2:4)
+             if (ispden==3 .and. nspden_updn==2) grho(1:3)=rhonow(ipts,1,2:4)
              s1=-grho(1)*grho(1)*vxcgr_apn(indx)
              s2=-grho(2)*grho(2)*vxcgr_apn(indx)
              s3=-grho(3)*grho(3)*vxcgr_apn(indx)
@@ -1045,6 +1048,9 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
          ABI_FREE(fxc_apn)
          ABI_FREE(vxc_b_apn)
          ABI_FREE(vxcgr_apn)
+         ABI_FREE(vxc_ep)
+         ABI_FREE(rhonow_apn)
+         ABI_FREE(grho2_apn)
          if (ndvxc>0) then
            ABI_FREE(dvxc_apn)
          end if
@@ -1279,6 +1285,7 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
    ABI_FREE(depsxc)
    ABI_FREE(rhonow)
    ABI_FREE(lrhonow)
+   ABI_FREE(d2rhonow)
    ABI_FREE(taunow)
    if (need_nhat.or.non_magnetic_xc) then
      ABI_FREE(rhor_)
