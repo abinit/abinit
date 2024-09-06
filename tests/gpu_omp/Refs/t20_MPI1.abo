@@ -98,7 +98,7 @@ P           mkmem           1
                        0.0000000  0.0000000  0.0000000     0.2200000  0.2200000  0.2200000
                        0.0000000  0.0000000  0.0000000     0.2200000  0.2200000  0.2200000
                        0.0000000  0.0000000  0.0000000     0.2200000  0.2200000  0.2200000
-           toldfe      1.00000000E-15 Hartree
+           tolvrs      1.00000000E-28
             typat      1  1
 -          useylm           1
 -        wfoptalg           4
@@ -194,7 +194,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     259.000     259.000
 --- !BeginCycle
 iteration_state: {dtset: 1, }
 solver: {iscf: 17, nstep: 16, nline: 4, wfoptalg: 4, }
-tolerances: {toldfe: 1.00E-15, }
+tolerances: {tolvrs: 1.00E-28, }
 ...
  
      iter   Etot(hartree)      deltaE(h)  residm     nres2
@@ -223,7 +223,7 @@ tolerances: {toldfe: 1.00E-15, }
  
  scprqt:  WARNING -
   nstep=   16 was not enough SCF cycles to converge;
-  maximum energy difference=  1.776E-15 exceeds toldfe=  1.000E-15
+  maximum energy difference=  1.776E-15 exceeds tolvrs=  1.000E-28
  
 
 --- !ResultsGS
@@ -529,7 +529,7 @@ P           mkmem           1
                        0.0000000  0.0000000  0.0000000     0.2200000  0.2200000  0.2200000
                        0.0000000  0.0000000  0.0000000     0.2200000  0.2200000  0.2200000
                        0.0000000  0.0000000  0.0000000     0.2200000  0.2200000  0.2200000
-           toldfe      1.00000000E-15 Hartree
+           tolvrs      1.00000000E-28
             typat      1  1
 -          useylm           1
 -        wfoptalg           4
