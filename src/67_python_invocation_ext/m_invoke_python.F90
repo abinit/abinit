@@ -104,7 +104,24 @@ module m_invoke_python
 
      call mpi_barrier(MPI_COMM_WORLD,ierr)
      write(f2c_string, '(a)') trim(triqs_filename)//c_null_char
+
+     write(msg, '(a)') "   ######################################"
+     call wrtout(std_out, msg, 'COLL')
+     write(msg, '(a)') "   ### EXECUTION OF THE PYTHON SCRIPT ###"
+     call wrtout(std_out, msg, 'COLL')
+     write(msg, '(a)') "   ######################################"
+     call wrtout(std_out, msg, 'COLL')
+     call flush_unit(std_out)
+
      ierr = execute_python_file(f2c_string)
+
+     write(msg, '(a)') "   ######################################"
+     call wrtout(std_out, msg, 'COLL')
+     write(msg, '(a)') "   ### END OF THE EXECUTION OF PYTHON ###"
+     call wrtout(std_out, msg, 'COLL')
+     write(msg, '(a)') "   ######################################"
+     call wrtout(std_out, msg, 'COLL')
+
      write(msg, '(a, i3)') "   ierr from execution: ", ierr
      call wrtout(std_out, msg, 'COLL')
      call mpi_barrier(MPI_COMM_WORLD,ierr)
