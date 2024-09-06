@@ -184,8 +184,7 @@ module m_xg_nonlop
   public :: xg_nonlop_getSX    ! paw only
   public :: xg_nonlop_getSm1X  ! paw only
   public :: xg_nonlop_getHmeSX ! paw only
-  public :: xg_nonlop_forces
-  public :: xg_nonlop_stress
+  public :: xg_nonlop_forces_stress
 
 contains
 !!***
@@ -2766,16 +2765,20 @@ subroutine xg_nonlop_getXHX(xg_nonlop,cprj_left,cprj_right,cprj_work,res,blocksi
 !!
 !! INPUTS
 !!
-subroutine xg_nonlop_forces(xg_nonlop,Xin,cprjin,cprj_work,eigen,forces)
+subroutine xg_nonlop_forces_stress(xg_nonlop,Xin,cprjin,cprj_work,eigen,forces,stress,gprimd)
+
+   use m_geometry, only : strconv
 
    type(xg_nonlop_t), intent(in) :: xg_nonlop
    type(xgBlock_t), intent(in) :: Xin,eigen
    type(xgBlock_t), intent(in) :: cprjin
    type(xgBlock_t), intent(inout) :: cprj_work
-   type(xgBlock_t), intent(inout) :: forces
+   type(xgBlock_t), optional, intent(inout) :: forces
+   type(xgBlock_t), optional, intent(inout) :: stress
+   real(dp), optional, intent(in) :: gprimd(:,:)
 
    !real(dp) :: tsec(2)
-   integer :: ia,idir,ilmn,iband,iband_spinor,my_iband,itypat,nlmn,nattyp
+   integer :: cplex,ia,idir,ilmn,iband,iband_spinor,my_iband,itypat,nlmn,nattyp
    integer :: ispinor,iforces,icprj,icprj_deriv
    integer :: nmpi,shift
    integer :: nrows,ncols,ncols_cprj,ncols_cprj_nospin
@@ -2783,10 +2786,14 @@ subroutine xg_nonlop_forces(xg_nonlop,Xin,cprjin,cprj_work,eigen,forces)
    integer :: nspinor,space_cprj
    integer :: shift_itypat,shift_itypat_nlmn,shift_itypat_3nlmn
 
-   type(xg_t) :: cprj_deriv,work_mpi_deriv
+   type(xg_t) :: cprj_deriv,work_mpi_deriv,dot
    real(dp), pointer :: forces_(:,:)
    complex(dp), pointer :: cprj_(:,:),cprj_deriv_(:,:)
-   real(dp), pointer :: cprj_real(:,:),cprj_deriv_real(:,:)
+   real(dp), pointer :: cprj_real(:,:),cprj_deriv_real(:,:),dot_(:,:)
+   logical :: do_forces,do_stress
+   real(dp) :: work(6)
+   real(dp), pointer :: stress_(:,:)
+   type(xgBlock_t) :: cprjin_spinor,cprj_work_spinor
    !LTEST
    real(dp), allocatable :: cprj_tmp(:,:)
    !LTEST
@@ -2802,26 +2809,42 @@ subroutine xg_nonlop_forces(xg_nonlop,Xin,cprjin,cprj_work,eigen,forces)
 
    call xgBlock_getsize(Xin,nrows,ncols)
    call xgBlock_getsize(eigen,nrows_diag,ncols_diag)
-   !if (ncols/=nrows_diag.or.ncols*nspinor/=nmpi*ncols_cprj.or.ncols_cprj/=ncols_cprj_work.or.ncols/=ncols_out) then
    if (ncols/=nrows_diag) then
      ABI_ERROR('wrong ncols')
    end if
    if (ncols_diag/=1) then
      ABI_ERROR('ncols_diag should be one')
    end if
-   if (rows(forces)/=3*xg_nonlop%natom) then
-     ABI_ERROR('rows(forces)/=3*natom')
-   end if
-   if (cols(forces)/=ncols) then
-     ABI_ERROR('cols(forces)/=ncols')
-   end if
 
    ncols_cprj = ncols*nspinor/nmpi
    ncols_cprj_nospin = ncols/nmpi
 
-!   call timab(tim_getcprj,1,tsec)
-
    space_cprj = xg_nonlop%space_cprj
+
+   do_forces = .false.
+   if (present(forces)) then
+     do_forces = .true.
+     if (rows(forces)/=3*xg_nonlop%natom) then
+       ABI_ERROR('rows(forces)/=3*natom')
+     end if
+     if (cols(forces)/=ncols) then
+       ABI_ERROR('cols(forces)/=ncols')
+     end if
+   end if
+
+   do_stress = .false.
+   if (present(stress)) then
+     do_stress = .true.
+     if (.not.present(gprimd)) then
+       ABI_ERROR('If stress is present, gprimd must be present too')
+     end if
+     if (rows(stress)/=6) then
+       ABI_ERROR('rows(stress)/=6')
+     end if
+     if (cols(stress)/=ncols) then
+       ABI_ERROR('cols(stress)/=ncols')
+     end if
+   end if
 
    !LTEST
    !write(901,*) 'Xin:',xgBlock_getId(Xin)
@@ -2875,43 +2898,117 @@ subroutine xg_nonlop_forces(xg_nonlop,Xin,cprjin,cprj_work,eigen,forces)
    !write(901,*) 'cprj_work:',xgBlock_getId(cprj_work%self)
    !LTEST
 
-   call xg_init(cprj_deriv    ,space_cprj,3*xg_nonlop%cprjdim,ncols_cprj,comm=xg_nonlop%comm_band)
-   call xg_init(work_mpi_deriv,space_cprj,3*xg_nonlop%cprjdim,ncols_cprj,comm=xg_nonlop%comm_band)
+   if (do_forces) then
 
-   call xg_nonlop_getcprj_deriv(xg_nonlop,Xin,cprj_deriv%self,work_mpi_deriv%self,DERIV_ATOM)
+     call xg_init(cprj_deriv    ,space_cprj,3*xg_nonlop%cprjdim,ncols_cprj,comm=xg_nonlop%comm_band)
+     call xg_init(work_mpi_deriv,space_cprj,3*xg_nonlop%cprjdim,ncols_cprj,comm=xg_nonlop%comm_band)
 
+     call xg_nonlop_getcprj_deriv(xg_nonlop,Xin,cprj_deriv%self,work_mpi_deriv%self,DERIV_ATOM)
+
+     !LTEST
+     !call xgBlock_reverseMap(cprjin%self,cprj_)
+     !do iband=1,ncols_cprj
+     !  my_iband = iband + xg_nonlop%me_band*ncols_cprj
+     !  shift_itypat=0
+     !  shift_itypat_nlmn=0
+     !  shift_itypat_3nlmn=0
+     !  do itypat = 1, xg_nonlop%ntypat
+     !    nlmn = xg_nonlop%nlmn_ntypat(itypat)
+     !    nattyp = xg_nonlop%nattyp(itypat)
+     !    ABI_MALLOC(cprj_tmp,(2,nlmn*nattyp))
+     !    do ia = 1, nattyp
+     !      do ilmn=1,nlmn
+     !        cprj_tmp(1,ilmn+(ia-1)*nlmn) = dble (cprj_(ilmn+(ia-1)*nlmn+shift_itypat_nlmn,iband))
+     !        cprj_tmp(2,ilmn+(ia-1)*nlmn) = dimag(cprj_(ilmn+(ia-1)*nlmn+shift_itypat_nlmn,iband))
+     !      end do
+     !    end do
+     !    write(901,*) 'gx:',cprj_tmp
+     !    shift_itypat       = shift_itypat       + 3*nattyp
+     !    shift_itypat_nlmn  = shift_itypat_nlmn  + nattyp*nlmn
+     !    shift_itypat_3nlmn = shift_itypat_3nlmn + nattyp*3*nlmn
+     !    ABI_FREE(cprj_tmp)
+     !  end do
+     !end do
+     !LTEST
+
+     call xg_free(work_mpi_deriv)
+     !LTEST
+     !write(901,*) 'cprj_deriv_atom:',xgBlock_getId(cprj_deriv_atom%self)
+     !LTEST
+
+     call xgBlock_zero(forces)
+
+     call xg_nonlop_mult_cprj_forces(xg_nonlop,cprj_work,cprj_deriv%self,forces)
+
+     call xg_free(cprj_deriv)
+
+   end if
+
+   if (do_stress) then
+
+     call xg_init(cprj_deriv    ,space_cprj,6*xg_nonlop%cprjdim,ncols_cprj,comm=xg_nonlop%comm_band)
+     call xg_init(work_mpi_deriv,space_cprj,6*xg_nonlop%cprjdim,ncols_cprj,comm=xg_nonlop%comm_band)
+
+     call xg_nonlop_getcprj_deriv(xg_nonlop,Xin,cprj_deriv%self,work_mpi_deriv%self,DERIV_STRESS)
+
+     call xg_free(work_mpi_deriv)
+
+     call xgBlock_zero(stress)
+
+     call xg_nonlop_mult_cprj_stress(xg_nonlop,cprj_work,cprj_deriv%self,stress)
+
+     call xg_free(cprj_deriv)
+
+     call xg_init(dot,space_cprj,ncols_cprj_nospin,1)
+
+     call xgBlock_reshape_spinor(cprjin,cprjin_spinor,nspinor,COLS2ROWS)
+     call xgBlock_reshape_spinor(cprj_work,cprj_work_spinor,nspinor,COLS2ROWS)
+     call xgBlock_colwiseDotProduct(cprjin_spinor,cprj_work_spinor,dot%self)
+
+     call xgBlock_reverseMap(dot%self,dot_)
+     cplex=1
+     if (space_cprj==SPACE_C) cplex=2
+
+     call xgBlock_reverseMap(stress,stress_)
+
+     do iband=1,ncols
+       work = stress_(:,iband)
+       call strconv(work,gprimd,work)
+       stress_(1:3,iband) = work(1:3) - dot_(1+cplex*(iband-1),1)
+       stress_(4:6,iband) = work(4:6)
+     end do
+
+     call xg_free(dot)
+
+   end if
+
+ end subroutine xg_nonlop_forces_stress
+!!***
+
+ subroutine xg_nonlop_mult_cprj_forces(xg_nonlop,cprj,cprj_deriv,forces)
+
+   type(xg_nonlop_t), intent(in) :: xg_nonlop
+   type(xgBlock_t), intent(in) :: cprj,cprj_deriv
+   type(xgBlock_t), intent(inout) :: forces
+
+   !real(dp) :: tsec(2)
+   integer :: ia,idir,ilmn,iband,iband_spinor,my_iband,itypat,nlmn,nattyp
+   integer :: ispinor,iforces,icprj,icprj_deriv
+   integer :: ncols_cprj,ncols_cprj_nospin
+   integer :: nspinor
+   integer :: shift_itypat,shift_itypat_nlmn,shift_itypat_3nlmn
+
+   real(dp), pointer :: forces_(:,:)
+   complex(dp), pointer :: cprj_(:,:),cprj_deriv_(:,:)
+   real(dp), pointer :: cprj_real(:,:),cprj_deriv_real(:,:)
    !LTEST
-   !call xgBlock_reverseMap(cprjin%self,cprj_)
-   !do iband=1,ncols_cprj
-   !  my_iband = iband + xg_nonlop%me_band*ncols_cprj
-   !  shift_itypat=0
-   !  shift_itypat_nlmn=0
-   !  shift_itypat_3nlmn=0
-   !  do itypat = 1, xg_nonlop%ntypat
-   !    nlmn = xg_nonlop%nlmn_ntypat(itypat)
-   !    nattyp = xg_nonlop%nattyp(itypat)
-   !    ABI_MALLOC(cprj_tmp,(2,nlmn*nattyp))
-   !    do ia = 1, nattyp
-   !      do ilmn=1,nlmn
-   !        cprj_tmp(1,ilmn+(ia-1)*nlmn) = dble (cprj_(ilmn+(ia-1)*nlmn+shift_itypat_nlmn,iband))
-   !        cprj_tmp(2,ilmn+(ia-1)*nlmn) = dimag(cprj_(ilmn+(ia-1)*nlmn+shift_itypat_nlmn,iband))
-   !      end do
-   !    end do
-   !    write(901,*) 'gx:',cprj_tmp
-   !    shift_itypat       = shift_itypat       + 3*nattyp
-   !    shift_itypat_nlmn  = shift_itypat_nlmn  + nattyp*nlmn
-   !    shift_itypat_3nlmn = shift_itypat_3nlmn + nattyp*3*nlmn
-   !    ABI_FREE(cprj_tmp)
-   !  end do
-   !end do
+   real(dp), allocatable :: cprj_tmp(:,:)
    !LTEST
 
-   call xg_free(work_mpi_deriv)
-   !LTEST
-   !write(901,*) 'cprj_deriv_atom:',xgBlock_getId(cprj_deriv_atom%self)
-   !LTEST
+   nspinor = xg_nonlop%nspinor
 
-   call xgBlock_zero(forces)
+   ncols_cprj = cols(cprj)
+   ncols_cprj_nospin = ncols_cprj/nspinor
 
    call xgBlock_reverseMap(forces,forces_)
 
@@ -2919,8 +3016,8 @@ subroutine xg_nonlop_forces(xg_nonlop,Xin,cprjin,cprj_work,eigen,forces)
 
      case (SPACE_C)
 
-       call xgBlock_reverseMap(cprj_work,cprj_)
-       call xgBlock_reverseMap(cprj_deriv%self,cprj_deriv_)
+       call xgBlock_reverseMap(cprj,cprj_)
+       call xgBlock_reverseMap(cprj_deriv,cprj_deriv_)
 
            !LTEST
          do iband=1,ncols_cprj_nospin
@@ -2983,8 +3080,8 @@ subroutine xg_nonlop_forces(xg_nonlop,Xin,cprjin,cprj_work,eigen,forces)
 
      case (SPACE_R)
 
-       call xgBlock_reverseMap(cprj_work,cprj_real)
-       call xgBlock_reverseMap(cprj_deriv%self,cprj_deriv_real)
+       call xgBlock_reverseMap(cprj,cprj_real)
+       call xgBlock_reverseMap(cprj_deriv,cprj_deriv_real)
 
        !LTEST
        do iband=1,ncols_cprj_nospin
@@ -3053,12 +3150,7 @@ subroutine xg_nonlop_forces(xg_nonlop,Xin,cprjin,cprj_work,eigen,forces)
 
    call xgBlock_mpi_sum(forces,comm=xg_nonlop%comm_band)
 
-   call xg_free(cprj_deriv)
-
-!   call timab(tim_getHmeSX,2,tsec)
-
- end subroutine xg_nonlop_forces
-!!***
+ end subroutine xg_nonlop_mult_cprj_forces
 
 !!****f* m_xg_nonlop/xg_nonlop_stress
 !! NAME
@@ -3067,34 +3159,22 @@ subroutine xg_nonlop_forces(xg_nonlop,Xin,cprjin,cprj_work,eigen,forces)
 !!
 !! INPUTS
 !!
-subroutine xg_nonlop_stress(xg_nonlop,Xin,cprjin,cprj_work,eigen,stress,gprimd)
-
-   use m_geometry, only : strconv
+subroutine xg_nonlop_mult_cprj_stress(xg_nonlop,cprj,cprj_deriv,stress)
 
    type(xg_nonlop_t), intent(in) :: xg_nonlop
-   type(xgBlock_t), intent(in) :: Xin,eigen
-   type(xgBlock_t), intent(in) :: cprjin
-   type(xgBlock_t), intent(inout) :: cprj_work
+   type(xgBlock_t), intent(in) :: cprj
+   type(xgBlock_t), intent(in) :: cprj_deriv
    type(xgBlock_t), intent(inout) :: stress
-   real(dp), intent(in) :: gprimd(3,3)
 
    !real(dp) :: tsec(2)
-   integer :: cplex,ia,idir,ilmn,iband,iband_spinor,my_iband,itypat,nlmn,nattyp
+   integer :: ia,idir,ilmn,iband,iband_spinor,my_iband,itypat,nlmn,nattyp
    integer :: ispinor,icprj,icprj_deriv
-   integer :: nmpi,shift
-   integer :: nrows,ncols,ncols_cprj,ncols_cprj_nospin
-   integer :: nrows_diag,ncols_diag
-   integer :: nspinor,space_cprj
+   integer :: ncols_cprj,ncols_cprj_nospin,nspinor
    integer :: shift_itypat,shift_itypat_nlmn,shift_itypat_6nlmn
 
-   type(xg_t) :: cprj_deriv,work_mpi_deriv
    complex(dp), pointer :: cprj_(:,:),cprj_deriv_(:,:)
    real(dp), pointer :: cprj_real(:,:),cprj_deriv_real(:,:)
    real(dp), pointer :: stress_(:,:)
-   type(xg_t) :: dot
-   real(dp), pointer :: dot_(:,:)
-   type(xgBlock_t) :: cprjin_spinor,cprj_work_spinor
-   real(dp) :: work(6)
    !LTEST
    integer :: icol
    real(dp), allocatable :: cprj_tmp(:,:)
@@ -3102,133 +3182,19 @@ subroutine xg_nonlop_stress(xg_nonlop,Xin,cprjin,cprj_work,eigen,stress,gprimd)
 
 !   call timab(tim_getHmeSX,1,tsec)
 
-   if (comm(Xin)/=xg_nonlop%comm_band) then
-     ABI_ERROR('wrong communicator')
-   end if
-
-   nmpi = xmpi_comm_size(comm(Xin))
    nspinor = xg_nonlop%nspinor
 
-   call xgBlock_getsize(Xin,nrows,ncols)
-   call xgBlock_getsize(eigen,nrows_diag,ncols_diag)
-   !if (ncols/=nrows_diag.or.ncols*nspinor/=nmpi*ncols_cprj.or.ncols_cprj/=ncols_cprj_work.or.ncols/=ncols_out) then
-   if (ncols/=nrows_diag) then
-     ABI_ERROR('wrong ncols')
-   end if
-   if (ncols_diag/=1) then
-     ABI_ERROR('ncols_diag should be one')
-   end if
-   if (rows(stress)/=6) then
-     ABI_ERROR('rows(stress)/=6')
-   end if
-   if (cols(stress)/=ncols) then
-     ABI_ERROR('cols(stress)/=ncols')
-   end if
-
-   ncols_cprj = ncols*nspinor/nmpi
-   ncols_cprj_nospin = ncols/nmpi
-
-!   call timab(tim_getcprj,1,tsec)
-
-   space_cprj = xg_nonlop%space_cprj
-
-   !LTEST
-   !write(901,*) 'Xin:',xgBlock_getId(Xin)
-   !write(901,*) 'cprjin:',xgBlock_getId(cprjin%self)
-   !LTEST
-
-   call xgBlock_zero(cprj_work)
-   if (xg_nonlop%paw) then
-     ! cprj_work = sum_j Saij cprjin
-     call xg_nonlop_apply_Aij(xg_nonlop,xg_nonlop%Sij,cprjin,cprj_work)
-     ! cprj_work = - e cprj_work = -e sum_j Saij cprjin
-     shift = xg_nonlop%me_band*ncols_cprj_nospin
-     call xgBlock_ymax(cprj_work,eigen,shift,nmpi,xg_nonlop%nspinor)
-   end if
-
-   !LTEST
-   !call xgBlock_reverseMap(cprjin,cprj_)
-   !do iband=1,ncols_cprj
-   !  my_iband = iband + xg_nonlop%me_band*ncols_cprj
-   !  shift_itypat=0
-   !  shift_itypat_nlmn=0
-   !  shift_itypat_3nlmn=0
-   !  do itypat = 1, xg_nonlop%ntypat
-   !    nlmn = xg_nonlop%nlmn_ntypat(itypat)
-   !    nattyp = xg_nonlop%nattyp(itypat)
-   !    ABI_MALLOC(cprj_tmp,(2,nlmn*nattyp))
-   !    do ia = 1, nattyp
-   !      do ilmn=1,nlmn
-   !        cprj_tmp(1,ilmn+(ia-1)*nlmn) = dble (cprj_(ilmn+(ia-1)*nlmn+shift_itypat_nlmn,iband))
-   !        cprj_tmp(2,ilmn+(ia-1)*nlmn) = dimag(cprj_(ilmn+(ia-1)*nlmn+shift_itypat_nlmn,iband))
-   !      end do
-   !    end do
-   !    write(901,*) 'gx:',cprj_tmp
-   !    shift_itypat       = shift_itypat       + 3*nattyp
-   !    shift_itypat_nlmn  = shift_itypat_nlmn  + nattyp*nlmn
-   !    shift_itypat_3nlmn = shift_itypat_3nlmn + nattyp*3*nlmn
-   !    ABI_FREE(cprj_tmp)
-   !  end do
-   !end do
-   !LTEST
-
-   ! cprj_work = sum_j Daij cprjin + cprj_work
-   if (xg_nonlop%paw) then
-     call xg_nonlop_apply_Aij(xg_nonlop,xg_nonlop%Dij,cprjin,cprj_work)
-   else
-     call xg_nonlop_apply_diag(xg_nonlop,xg_nonlop%ekb,cprjin,cprj_work)
-   end if
-
-   !LTEST
-   !write(901,*) 'cprj_work:',xgBlock_getId(cprj_work%self)
-   !LTEST
-
-   call xg_init(cprj_deriv    ,space_cprj,6*xg_nonlop%cprjdim,ncols_cprj,comm=xg_nonlop%comm_band)
-   call xg_init(work_mpi_deriv,space_cprj,6*xg_nonlop%cprjdim,ncols_cprj,comm=xg_nonlop%comm_band)
-
-   call xg_nonlop_getcprj_deriv(xg_nonlop,Xin,cprj_deriv%self,work_mpi_deriv%self,DERIV_STRESS)
-
-   !LTEST
-   !call xgBlock_reverseMap(cprjin%self,cprj_)
-   !do iband=1,ncols_cprj
-   !  my_iband = iband + xg_nonlop%me_band*ncols_cprj
-   !  shift_itypat=0
-   !  shift_itypat_nlmn=0
-   !  shift_itypat_3nlmn=0
-   !  do itypat = 1, xg_nonlop%ntypat
-   !    nlmn = xg_nonlop%nlmn_ntypat(itypat)
-   !    nattyp = xg_nonlop%nattyp(itypat)
-   !    ABI_MALLOC(cprj_tmp,(2,nlmn*nattyp))
-   !    do ia = 1, nattyp
-   !      do ilmn=1,nlmn
-   !        cprj_tmp(1,ilmn+(ia-1)*nlmn) = dble (cprj_(ilmn+(ia-1)*nlmn+shift_itypat_nlmn,iband))
-   !        cprj_tmp(2,ilmn+(ia-1)*nlmn) = dimag(cprj_(ilmn+(ia-1)*nlmn+shift_itypat_nlmn,iband))
-   !      end do
-   !    end do
-   !    write(901,*) 'gx:',cprj_tmp
-   !    shift_itypat       = shift_itypat       + 3*nattyp
-   !    shift_itypat_nlmn  = shift_itypat_nlmn  + nattyp*nlmn
-   !    shift_itypat_3nlmn = shift_itypat_3nlmn + nattyp*3*nlmn
-   !    ABI_FREE(cprj_tmp)
-   !  end do
-   !end do
-   !LTEST
-
-   call xg_free(work_mpi_deriv)
-   !LTEST
-   !write(901,*) 'cprj_deriv:',xgBlock_getId(cprj_deriv%self)
-   !LTEST
-
-   call xgBlock_zero(stress)
+   ncols_cprj = cols(cprj)
+   ncols_cprj_nospin = ncols_cprj/nspinor
 
    call xgBlock_reverseMap(stress,stress_)
 
-   select case(space_cprj)
+   select case(xg_nonlop%space_cprj)
 
      case (SPACE_C)
 
-       call xgBlock_reverseMap(cprj_work,cprj_)
-       call xgBlock_reverseMap(cprj_deriv%self,cprj_deriv_)
+       call xgBlock_reverseMap(cprj,cprj_)
+       call xgBlock_reverseMap(cprj_deriv,cprj_deriv_)
 
            !LTEST
          do iband=1,ncols_cprj_nospin
@@ -3297,8 +3263,8 @@ subroutine xg_nonlop_stress(xg_nonlop,Xin,cprjin,cprj_work,eigen,stress,gprimd)
 
      case (SPACE_R)
 
-       call xgBlock_reverseMap(cprj_work,cprj_real)
-       call xgBlock_reverseMap(cprj_deriv%self,cprj_deriv_real)
+       call xgBlock_reverseMap(cprj,cprj_real)
+       call xgBlock_reverseMap(cprj_deriv,cprj_deriv_real)
 
        !LTEST
        do iband=1,ncols_cprj_nospin
@@ -3367,30 +3333,10 @@ subroutine xg_nonlop_stress(xg_nonlop,Xin,cprjin,cprj_work,eigen,stress,gprimd)
 
    call xgBlock_mpi_sum(stress,comm=xg_nonlop%comm_band)
 
-   call xg_free(cprj_deriv)
-
-   call xg_init(dot,space_cprj,ncols_cprj_nospin,1)
-
-   call xgBlock_reshape_spinor(cprjin,cprjin_spinor,nspinor,COLS2ROWS)
-   call xgBlock_reshape_spinor(cprj_work,cprj_work_spinor,nspinor,COLS2ROWS)
-   call xgBlock_colwiseDotProduct(cprjin_spinor,cprj_work_spinor,dot%self)
-
-   call xgBlock_reverseMap(dot%self,dot_)
-   cplex=1
-   if (space_cprj==SPACE_C) cplex=2
-
-   do iband=1,ncols
-     work = stress_(:,iband) 
-     call strconv(work,gprimd,work)
-     stress_(1:3,iband) = work(1:3) - dot_(1+cplex*(iband-1),1)
-     stress_(4:6,iband) = work(4:6)
-   end do
-
-   call xg_free(dot)
 
 !   call timab(tim_getHmeSX,2,tsec)
 
- end subroutine xg_nonlop_stress
+ end subroutine xg_nonlop_mult_cprj_stress
 !!***
 
 end module m_xg_nonlop
