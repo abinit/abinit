@@ -1260,8 +1260,7 @@ end subroutine load_kprime_hamiltonian
 !!  copy_hamiltonian
 !!
 !! INPUTS
-!!  gs_hamk_in<gs_hamiltonian_type>=Structured datatype completely initialized,
-!!                                  to be copied.
+!!  gs_hamk_in<gs_hamiltonian_type>=Structured datatype completely initialized, to be copied.
 !!
 !! FUNCTION
 !!  Copy a gs_hamiltonian_type variable (gs_hamk_in) in another (gs_hamk_out).
@@ -1281,7 +1280,7 @@ end subroutine load_kprime_hamiltonian
 !!
 !! SOURCE
 
-subroutine copy_hamiltonian(gs_hamk_out,gs_hamk_in)
+subroutine copy_hamiltonian(gs_hamk_out, gs_hamk_in)
 
 !Arguments ------------------------------------
  type(gs_hamiltonian_type),intent(in),target :: gs_hamk_in

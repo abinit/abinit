@@ -562,7 +562,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    else if (nbdbuf==-101) then
      max_resid = maxval(occ_k(1:nband_k)*resid_k(1:nband_k))
    else
-     ABI_ERROR('Bad value of nbdbuf')
+     ABI_ERROR(sjoin('Bad value of nbdbuf:', itoa(nbdbuf)))
    end if
 
 !  Print residuals

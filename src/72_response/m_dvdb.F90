@@ -81,14 +81,11 @@ module m_dvdb
  integer,private,parameter :: DVDB_READMODE  = 1
  integer,private,parameter :: DVDB_WRITEMODE = 2
 
- ! FIXME
- !real(dp),public,parameter :: DDB_QTOL=2.0d-8
- ! Tolerance for the identification of two wavevectors
-
  ! Uncomment this line and recompile to use cache in double precision
  !integer,private,parameter :: QCACHE_KIND = dp
  integer,private,parameter :: QCACHE_KIND = sp
 
+ ! TODO: Remove
  type, private :: qcache_entry_t
 
    real(QCACHE_KIND), allocatable :: v1scf(:,:,:,:)
@@ -187,9 +184,9 @@ module m_dvdb
 !! FUNCTION
 !!  Database of DFPT results. The database contains `numv1` perturbations
 !!  and the corresponding first order local potentials in real space on the FFT mesh.
-!!  Note that one can have different FFT meshes for the different perturbations.
 !!  Provides methods to Fourier interpolate the potentials including the
 !!  treatment of long-range behaviour in the FT interpolation in polar semiconductors.
+!!  Note that one can have different FFT meshes for the different perturbations.
 !!
 !! NOTES
 !!  natom, nspden, nspinor, and usepaw are global variables in the sense that it's not possible to add
@@ -463,6 +460,9 @@ module m_dvdb
 
    procedure :: find_qpts => dvdb_find_qpts
    ! Returns the index of a list of q-points.
+
+   procedure :: need_ftinterp => dvdb_need_ftinterp
+   ! Check whether input list of q-points requires Fourier interpolation.
 
    procedure :: set_pert_distrib => dvdb_set_pert_distrib
    !  Activate parallelism over perturbations
@@ -3038,8 +3038,7 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, qptopt, nqshift, qshift, nfft, ngfft, 
 !scalars
  integer,parameter :: master=0
  integer :: iq_ibz,nqibz,iq_bz,nqbz !, timerev_q
- integer :: ii,jj,cplex_qibz,ispden,imyp,irpt,idir,ipert,ipc
- integer :: iqst, itimrev, isym
+ integer :: ii,jj,cplex_qibz,ispden,imyp,irpt,idir,ipert,ipc, iqst, itimrev, isym
  integer :: ifft, ierr,  my_rstart, my_rstop, iatom
  real(dp) :: cpu, wall, gflops, cpu_all, wall_all, gflops_all
  logical :: isirr_q
@@ -3078,7 +3077,7 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, qptopt, nqshift, qshift, nfft, ngfft, 
  call wrtout(std_out, " Use boxcutmin < 2.0 (> 1.1) to decrease nfft, reduce memory requirements and speedup the calculation.")
 
  call prepare_ftinterp(db, ngqpt, qptopt, nqshift, qshift, &
-     qibz, qbz, indqq, iperm, nqsts, iqs_dvdb, all_rpt, all_wghatm, db%comm)
+                       qibz, qbz, indqq, iperm, nqsts, iqs_dvdb, all_rpt, all_wghatm, db%comm)
 
  nqibz = size(qibz, dim=2); nqbz = size(qbz, dim=2); db%nrtot = size(all_rpt, dim=2)
 
@@ -3349,8 +3348,7 @@ end subroutine dvdb_get_maxw
 !!  prepare_ftinterp
 !!
 !! FUNCTION
-!!  Internal helper function used to prepare the Fourier interpolation of the DFPT potentials.
-!!
+!!  Helper function used to prepare the Fourier interpolation of the DFPT potentials.
 
 subroutine prepare_ftinterp(db, ngqpt, qptopt, nqshift, qshift, &
                             qibz, qbz, indqq, iperm, nqsts, iqs_dvdb, all_rpt, all_wghatm, comm)
@@ -3379,10 +3377,8 @@ subroutine prepare_ftinterp(db, ngqpt, qptopt, nqshift, qshift, &
 !arrays
  integer :: qptrlatt(3,3)
  integer,allocatable :: bz2ibz_sort(:),all_cell(:,:)
- real(dp) :: shift(3), rcan(3, db%cryst%natom), trans(3, db%cryst%natom)
- real(dp) :: acell(3), rprim(3,3), gprim(3,3)
+ real(dp) :: shift(3), rcan(3, db%cryst%natom), trans(3, db%cryst%natom), acell(3), rprim(3,3), gprim(3,3)
  real(dp),allocatable :: wtq(:),all_rcart(:,:)
-
 ! *************************************************************************
 
  cryst => db%cryst
@@ -4820,6 +4816,70 @@ integer function dvdb_find_qpts(db, nqpt, qpts, iq2dvdb, comm) result(notfound)
  notfound = count(iq2dvdb == -1)
 
 end function dvdb_find_qpts
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_dvdb/dvdb_need_ftinterp
+!! NAME
+!!  dvdb_need_ftinterp
+!!
+!! FUNCTION
+!!  Check whether input list of q-points requires Fourier interpolation.
+!!
+!! INPUTS
+!!  nqpt: Number of q-points
+!!  qpt(3,nqpt): q-point in reduced coordinates.
+!!
+!! OUTPUT
+!!  qmap_symrec(6, nqpt)
+!!  need_ftinterp
+!!
+!! SOURCE
+
+subroutine dvdb_need_ftinterp(db, nqpt, qpts, qptopt,  qmap_symrec, need_ftinterp)
+
+!Arguments ------------------------------------
+!scalars
+ class(dvdb_t),intent(in) :: db
+ integer,intent(in) :: nqpt, qptopt
+ logical,intent(out) :: need_ftinterp
+!arrays
+ real(dp),intent(in) :: qpts(3, nqpt)
+ integer,allocatable,intent(out) :: qmap_symrec(:,:)
+
+!Local variables-------------------------------
+!scalars
+ integer :: iq, iq_ibz, db_iqpt, qtimrev
+ type(krank_t) :: qrank
+!arrays
+ real(dp) :: qq_ibz(3)
+! *************************************************************************
+
+ need_ftinterp = .False.
+ qrank = krank_new(db%nqpt, db%qpts, compute_invrank=.False.)
+
+ qtimrev = kpts_timrev_from_kptopt(qptopt)
+ ABI_MALLOC(qmap_symrec, (6, nqpt))
+
+ if (kpts_map("symrec", qtimrev, db%cryst, qrank, nqpt, qpts, qmap_symrec) /= 0) then
+   need_ftinterp = .True.
+   call qrank%free()
+   return
+ end if
+
+ do iq=1,nqpt
+   iq_ibz = qmap_symrec(1, iq)
+   qq_ibz = db%qpts(:, iq_ibz)
+   db_iqpt = db%findq(qq_ibz)
+   if (db_iqpt == -1) then
+     need_ftinterp = .True.; exit
+   end if
+ end do
+
+ call qrank%free()
+
+end subroutine dvdb_need_ftinterp
 !!***
 
 !!****f* m_dvdb/dvdb_set_pert_distrib
@@ -7316,7 +7376,6 @@ subroutine dvdb_qdownsample(dvdb, new_dvdb_fname, qptopt, ngqpt, comm)
  integer,allocatable :: iq_read(:), pinfo(:,:)
  real(dp) :: rhog1_g0(2)
  real(dp),allocatable :: v1scf(:,:,:), v1(:), wtq(:), qibz(:,:), qbz(:,:)
-
 !************************************************************************
 
  my_rank = xmpi_comm_rank(comm); nproc = xmpi_comm_size(comm)

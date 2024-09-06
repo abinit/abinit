@@ -3260,10 +3260,11 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
      end if
    end do
  end do spin_loop
+ !call dvdb%need_ftinterp(qpath%npts, qpath%points, qptopt, qmap_symrec, use_ftinterp)
 
  call xmpi_sum(cnt, comm, ierr)
- use_ftinterp = (cnt /= 0)
 
+ use_ftinterp = (cnt /= 0)
  if (.not. use_ftinterp .and. dtset%eph_use_ftinterp /= 0) then
    ABI_WARNING("Enforcing FT interpolation for q-points even if it's not strictly needed.")
    use_ftinterp = .True.
