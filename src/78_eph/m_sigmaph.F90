@@ -730,8 +730,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
  units = [std_out, ab_out]
 
- call pstat%from_pid()
- call pstat%print([std_out], header="Memory at the beginning of sigmaph")
+ call pstat%from_pid(); call pstat%print([std_out], header="Memory at the beginning of sigmaph")
 
  ! Copy important dimensions
  natom = cryst%natom; natom3 = 3 * natom; nsppol = ebands%nsppol; nspinor = ebands%nspinor
