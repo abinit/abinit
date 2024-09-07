@@ -885,7 +885,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
 
      if (use_ftinterp) then
        ! Use Fourier interpolation to get DFPT potentials and DFPT densities for this qpt.
-       call dvdb%get_ftqbz(cryst, qpt, qq_ibz, mapc_qq, cplex, nfftf, ngfftf, v1scf_qq, gqk%pert_comm%value)
+       call dvdb%get_ftqbz(cryst, qpt, cplex, nfftf, ngfftf, v1scf_qq, gqk%pert_comm%value)
 
        call drhodb%get_vxc1_ftqbz(dtset, cryst, qpt, qq_ibz, mapc_qq, drho_cplex, nfftf, ngfftf, nkxc, kxc, &
                                   vxc1_qq, non_magnetic_xc, usexcnhat, gqk%pert_comm%value)

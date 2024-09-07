@@ -1524,9 +1524,6 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'ddb_shiftq',tread,'DPR')
  if(tread==1) dtset%ddb_shiftq=dprarr(1:3)
 
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dvdb_qcache_mb',tread,'DPR')
- if(tread==1) dtset%dvdb_qcache_mb = dprarr(1)
-
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dvdb_qdamp',tread,'DPR')
  if(tread==1) dtset%dvdb_qdamp = dprarr(1)
 

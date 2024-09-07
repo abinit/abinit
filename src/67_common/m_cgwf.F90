@@ -2409,7 +2409,7 @@ end subroutine nscf_init
 !! SOURCE
 
 subroutine nscf_solve(nscf, isppol, kpt, istwf_k, nband, cryst, dtset, dtfil, psps, pawtab, pawfgr, &
-                      npw_k, kg_k, cg_k, gsc_k, eig_k, gs_hamk, err_msg, ierr)
+                      npw_k, kg_k, kpg_k, ph3d_k, kinpw_k, ffnl_k, vlocal, cg_k, gsc_k, eig_k, gs_hamk, err_msg, ierr)  ! out
 
  use m_abi_linalg, only : abi_linalg_init, abi_linalg_finalize
 
@@ -2428,6 +2428,7 @@ subroutine nscf_solve(nscf, isppol, kpt, istwf_k, nband, cryst, dtset, dtfil, ps
  integer,intent(out) :: npw_k
  integer,allocatable,intent(out) :: kg_k(:,:)
  real(dp),allocatable,intent(out) :: cg_k(:,:,:), gsc_k(:,:,:), eig_k(:)
+ real(dp),allocatable,intent(out) :: kpg_k(:,:), ph3d_k(:,:,:), kinpw_k(:), ffnl_k(:,:,:,:), vlocal(:,:,:,:)
  integer,intent(out) :: ierr
  character(len=*),intent(out) :: err_msg
 
@@ -2449,11 +2450,11 @@ subroutine nscf_solve(nscf, isppol, kpt, istwf_k, nband, cryst, dtset, dtfil, ps
  real(dp) :: pwnsfac(2,pwind_alloc0), pwnsfacq(2,mkgq0), zshift(nband), cgq(2, mcgq0), dphase_k(3)
  real(dp) :: subham(nband*(nband+1)), subovl(nband*(nband+1)*use_subovl0), subvnlx(nband*(nband+1)*use_subvnlx0)
  real(dp) :: ylmgr_dum(1,1,1), ylmgr(0, 0)
- real(dp),allocatable :: ph1d(:,:), vlocal(:,:,:,:), kinpw_k(:), kpg_k(:,:), resid(:)
- real(dp),allocatable :: ffnl_k(:,:,:,:), ph3d(:,:,:), ylm_k(:,:), evec(:,:)
+ real(dp),allocatable :: ph1d(:,:), resid(:), ylm_k(:,:), evec(:,:)
 ! *************************************************************************
 
  ! See vtorho.F90 for the sequence of calls needed to initialize the GS Hamiltonian.
+ ! The Hamiltonian has references to the _k arrays!
  associate (mpi_enreg => nscf%mpi_enreg)
 
  !==== Initialize most of the Hamiltonian ====
@@ -2527,14 +2528,13 @@ subroutine nscf_solve(nscf, isppol, kpt, istwf_k, nband, cryst, dtset, dtfil, ps
  !  - Prepare various tabs in case of band-FFT parallelism
  !  - Load k-dependent quantities in the Hamiltonian
 
- ABI_MALLOC(ph3d, (2, npw_k, gs_hamk%matblk))
+ ABI_MALLOC(ph3d_k, (2, npw_k, gs_hamk%matblk))
 
  call gs_hamk%load_k(kpt_k=kpt, istwf_k=istwf_k, npw_k=npw_k, &
-                     kinpw_k=kinpw_k, kg_k=kg_k, kpg_k=kpg_k, ffnl_k=ffnl_k, ph3d_k=ph3d, &
+                     kinpw_k=kinpw_k, kg_k=kg_k, kpg_k=kpg_k, ffnl_k=ffnl_k, ph3d_k=ph3d_k, &
                      compute_ph3d=(paral_kgb0/=1), compute_gbound=(paral_kgb0/=1))
 
- npwarr_k = npw_k
- npwsp = npw_k * nspinor; me_g0 = 1
+ npwarr_k = npw_k; npwsp = npw_k * nspinor; me_g0 = 1
  mcg = npw_k * nspinor * nband; mgsc = mcg * dtset%usepaw
 
  ABI_MALLOC(resid, (nband))
@@ -2619,7 +2619,6 @@ subroutine nscf_solve(nscf, isppol, kpt, istwf_k, nband, cryst, dtset, dtfil, ps
                  ftoa(max_resid), " < tolwfr:", ftoa(dtset%tolwfr)))
      exit
    end if
-
  end do ! inonsc
 
  end associate
@@ -2637,16 +2636,8 @@ subroutine nscf_solve(nscf, isppol, kpt, istwf_k, nband, cryst, dtset, dtfil, ps
  call abi_linalg_finalize(dtset%gpu_option)
 
  ABI_FREE(ph1d)
-
  ABI_FREE(evec)
  ABI_FREE(resid)
-
- ! The Hamiltonian has references to these arrays so we should not free them at this level.
- !ABI_FREE(vlocal)
- !ABI_FREE(ph3d)
- !ABI_FREE(kpg_k)
- !ABI_FREE(kinpw_k)
- !ABI_FREE(ffnl_k)
 
 end subroutine nscf_solve
 !!***

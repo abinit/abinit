@@ -2071,35 +2071,6 @@ A zero value has no action of the job.
 ),
 
 Variable(
-    abivarname="dvdb_qcache_mb",
-    varset="eph",
-    vartype="real",
-    topics=['ElPhonInt_useful'],
-    dimensions="scalar",
-    #defaultval=1024,
-    defaultval=0.0,
-    mnemonics="DVDB Q-CACHE size in Megabytes",
-    added_in_version="before_v9",
-    text=r"""
-This variable activates a caching mechanism for the DFPT potentials used in the EPH part.
-The code will store in memory multiple q-points up to this size in Megabytes in order
-to reduce the number of IO operations required to read the potentials from the DVDB file.
-
-This option leads to a **significant speedup** of calculations requiring integrations
-in q-space ([[eph_task]] == 4) at the price of an increase of the memory requirements.
-The speedup is important especially if the QP corrections are computed for several k-points.
-
-A negative value signals to the code that all the q-points in the DVDB should be stored in memory.
-Use zero value disables the cache.
-
-!!! note
-
-    This variable is still under development as many things changed in the treatment of the interpolation
-    of the DFPT potential. For the time being, avoid using this option unless you know what you are doing.
-""",
-),
-
-Variable(
     abivarname="d3e_pert1_atpol",
     varset="dfpt",
     vartype="integer",
@@ -10002,7 +9973,7 @@ Variable(
     requires="[[useexexch]] == 1",
     added_in_version="before_v9",
     text=r"""
-Give for each species the value of the angular momentum 
+Give for each species the value of the angular momentum
 on which to apply the exact exchange correction.
 """,
 ),
@@ -13828,8 +13799,8 @@ standard output file, search for "Orbital magnetic moment". This calculation req
 both the ground state and DDK wavefunctions (see [[rfddk]] or [[berryopt]]). The
 preferred way to use [[orbmag]] is at the end of a DFPT DDK calculation. Alternatively, it
 can be called in a ground state calculation if [[berryopt]] -2 has also been called,
-to generate discretized DDK wavefunctions. This latter method works only on a mesh of 
-kpoints, while the DFPT version works for both a mesh and for a single k point (as 
+to generate discretized DDK wavefunctions. This latter method works only on a mesh of
+kpoints, while the DFPT version works for both a mesh and for a single k point (as
 encountered in studying an atom or molecule in a box, or a pariticularly large unit cell).
 Note that convergence with kpt mesh is
 *much* faster using the DFPT approach, and the [[berryopt]] approach is not recommended
