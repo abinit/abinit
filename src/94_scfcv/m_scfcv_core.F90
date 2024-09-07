@@ -368,7 +368,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
  integer,allocatable :: l_size_atm(:)
  integer,allocatable :: indsym_dum(:,:,:),symrec_dum(:,:,:), rmm_diis_status(:,:,:)
  logical,pointer :: lmselect_ep(:,:)
- real(dp) :: dielar(7),dphase(3),dummy2(6),favg(3),gmet(3,3),gprimd(3,3)
+ real(dp) :: dielar(7),dphase(3),favg(3),gmet(3,3),gprimd(3,3)
  real(dp) :: kpt_diel(3),pel(3),pel_cg(3),pelev(3),pion(3),ptot(3),qpt(3),red_ptot(3) !!REC
  real(dp) :: rhodum(1),rmet(3,3),strscondft(6),strsxc(6),strten(6),tollist(12)
  real(dp) :: tsec(2),vnew_mean(dtset%nspden),vres_mean(dtset%nspden)
@@ -1764,7 +1764,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
          non_magnetic_xc=(dtset%usepaw==1.and.mod(abs(dtset%usepawu),10)==4)
          call rhotoxc(edum,kxc,mpi_enreg,nfftf,&
 &         ngfftf,nhat,psps%usepaw,nhatgr,0,nkxc,nk3xc,non_magnetic_xc,n3xccc,&
-&         optxc,rhor,rprimd,dummy2,0,vxc,vxcavg_dum,xccc3d,xcdata,&
+&         optxc,rhor,rprimd,0,vxc,vxcavg_dum,xccc3d,xcdata,&
 &         add_tfw=tfw_activated,taur=taur,vhartr=vhartr,vxctau=vxctau,xcctau3d=xcctau3d)
        else if(.not. wvlbigdft) then
 !        WVL case:
