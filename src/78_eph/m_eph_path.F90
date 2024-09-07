@@ -157,7 +157,7 @@ subroutine eph_path_run(dtfil, dtset, cryst, dvdb, ifc, &
 
  !call pstat%from_pid(); call pstat%print([std_out], header="Memory at the beginning of eph_path")
 
- !! Copy important dimensions
+ ! Copy important dimensions
  natom = cryst%natom; natom3 = 3 * natom; nsppol = dtset%nsppol; nspinor = dtset%nspinor
  nspden = dtset%nspden
 
@@ -231,8 +231,6 @@ subroutine eph_path_run(dtfil, dtset, cryst, dvdb, ifc, &
    ! Allocate vlocal. Note nvloc
    ! I set vlocal to huge to trigger possible bugs (DFPT routines should not access the data)
    ABI_MALLOC(vlocal, (n4, n5, n6, gs_hamk%nvloc))
-   !vlocal = huge(one)
-
    ABI_MALLOC(ylm_k, (npw_k, psps%mpsang*psps%mpsang*psps%useylm))
 
    do iqpt=1,qpath%npts
@@ -244,23 +242,18 @@ subroutine eph_path_run(dtfil, dtset, cryst, dvdb, ifc, &
      call ifc%fourq(cryst, qq, phfrq, displ_cart, out_displ_red=displ_red)
 
      ! Compute psi_mkq
-     !if (.not. qq_is_gamma) then
+     if (qq_is_gamma) then
        call nscf%solve(spin, kq, istwfk_1, nband, cryst, dtset, dtfil, psps, pawtab, pawfgr, &
-                       npw_kq, kg_kq, kpg_kq, ph3d_kq, kinpw_kq, ffnl_kq, vlocal_kq, cg_kq, gsc_kq, eig_kq, gs_hamkq, msg, ierr) ! out
-       ABI_CHECK(ierr == 0, msg)
-     !else
-     !  call alloc_copy(kg_k, kg_kq)
-     !  call alloc_copy(kpg_k, kpg_kq)
-     !  call alloc_copy(ph3d_k, ph3d_kq)
-     !  call alloc_copy(kinpw_k, kinpw_kq)
-     !  call alloc_copy(ffnl_k, ffnl_kq)
-     !  call alloc_copy(vlocal_k, vlocal_kq)
-     !  call alloc_copy(eig_k, eig_kq)
-     !  call alloc_copy(cg_k, cg_kq)
-     !  call alloc_copy(gsc_k, gsc_kq)
-     !  call copy_hamiltonian(gs_hamkq, gs_hamk)
-     !  ! FIXME: OTher stuff needed?
-     !end if
+                       npw_kq, kg_kq, kpg_kq, ph3d_kq, kinpw_kq, ffnl_kq, vlocal_kq, cg_kq, gsc_kq, eig_kq, gs_hamkq, msg, ierr, & ! out
+                       init_cg_k=cg_k)
+       ! This to have the same gauge when qq = 0
+       cg_kq = cg_k
+
+     else
+       call nscf%solve(spin, kq, istwfk_1, nband, cryst, dtset, dtfil, psps, pawtab, pawfgr, &
+                       npw_kq, kg_kq, kpg_kq, ph3d_kq, kinpw_kq, ffnl_kq, vlocal_kq, cg_kq, gsc_kq, eig_kq, gs_hamkq, msg, ierr)
+     end if
+     ABI_CHECK(ierr == 0, msg)
 
      ! if PAW, one has to solve a generalized eigenproblem
      ! Be careful here because I will need sij_opt==-1
@@ -292,9 +285,6 @@ subroutine eph_path_run(dtfil, dtset, cryst, dvdb, ifc, &
 
      ! Allocate vlocal1 with correct cplex. Note nvloc and my_npert.
      ABI_MALLOC(vlocal1, (cplex*n4, n5, n6, gs_hamkq%nvloc))
-
-     ! Continue to initialize the GS Hamiltonian
-     !call gs_hamkq%load_spin(spin, vlocal=vlocal, with_nonlocal=.true.)
 
      ! Loop over atomic perturbations, apply H1_{kappa, alpha} and compute gkq_atm.
      gkq_atm = zero
