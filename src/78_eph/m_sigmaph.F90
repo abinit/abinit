@@ -1235,6 +1235,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
    ABI_MALLOC(kg_kq, (3, mpw))
 
    ! Spherical Harmonics for useylm == 1.
+   ! FIXME: These arrays should be allocated with npw_k and npw_kq. See getgh1c_setup
    ABI_MALLOC(ylm_k, (mpw, psps%mpsang**2 * psps%useylm))
    ABI_MALLOC(ylm_kq, (mpw, psps%mpsang**2 * psps%useylm))
    ABI_MALLOC(ylmgr_kq, (mpw, 3, psps%mpsang**2 * psps%useylm * useylmgr0))

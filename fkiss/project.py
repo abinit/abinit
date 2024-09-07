@@ -70,6 +70,15 @@ EXTERNAL_MODS = {
 }
 
 
+def load_mod(filepath):
+    try:
+        import imp
+        return imp.load_source(filepath, filepath)
+    except ModuleNotFoundError:
+        from importlib.machinery import SourceFileLoader
+        return SourceFileLoader(filepath, filepath).load_module()
+
+
 class FortranFile(object):
     """
     Base class for files containing Fortran source code.
@@ -424,14 +433,6 @@ class AbinitProject(NotebookWriter):
         start = time.time()
         def filter_fortran(files):
             return [f for f in files if f.endswith(".f") or f.endswith(".F90")]
-
-        def load_mod(filepath):
-            try:
-                import imp
-                return imp.load_source(filepath, filepath)
-            except ModuleNotFoundError:
-                from importlib.machinery import SourceFileLoader
-                return SourceFileLoader(filepath, filepath).load_module()
 
         name2path = OrderedDict()
         for d in self.dirpaths:
@@ -957,10 +958,13 @@ class AbinitProject(NotebookWriter):
             abinit.dep --> Dependencies inside the directory
             abinit.dir --> Dependencies outside the directory
             abinit.amf --> File with EXTRA_DIST
+
+        Args:
+            dryrun: True to operate in dryrun mode
+            verbose: Verbosity level.
         """
         # Group Fortfiles by dirname
         dir2files = self.groupby_dirname()
-
 
         template = """\
 # Dependencies ({kind}) of directory {directory}
@@ -1003,7 +1007,6 @@ class AbinitProject(NotebookWriter):
                 print("# For dirpath:", dirpath)
                 print(s, end=2 * "\n")
             else:
-                #shutil.copyfile(abinitdep_path, abinitdep_path + ".bkp")
                 with open(abinitdep_path, "wt") as fh:
                     fh.write(s)
 
@@ -1019,9 +1022,69 @@ class AbinitProject(NotebookWriter):
             if dryrun:
                 print(s, end=2 * "\n")
             else:
-                #if os.path.exists(abinitdir_path): shutil.copyfile(abinitdir_path, abinitdir_path + ".bkp")
                 with open(abinitdir_path, "wt") as fh:
                     fh.write(s)
+
+            #########################
+            # Intgegration with CMAKE
+            #########################
+            # Will update the following sections
+
+            #add_library(78_eph STATIC
+            #  m_berry_curvature.F90
+            #  m_cumulant.F90
+            #  ...
+            #  )
+
+            #target_link_libraries(78_eph
+            #  PUBLIC
+            #  abinit::10_defs
+            #  abinit::16_hideleave
+            #  ...
+            #  )
+
+
+            """
+            def enclose(lines, magic, path):
+                try:
+                    start = lines.index(magic)
+                except ValueError:
+                    #print(lines)
+                    raise ValueError(f"Cannot find {magic=} in {path}")
+
+                for i, l in enumerate(lines[start:]):
+                    if l.strip().startswith(")"):
+                        return start, i + start + 1
+
+                #print(lines)
+                raise ValueError(f"Cannot find closing `)` after {magic=} in {path}")
+
+            # Get list of source files (F, C, C++)
+            mod = load_mod(os.path.join(dirpath, "abinit.src"))
+
+            cmakelist_path = os.path.join(dirpath, "CMakeLists.txt")
+            dirname = os.path.basename(dirpath)
+            magic = f"add_library({dirname} STATIC"
+            lines = [l.strip() for l in open(cmakelist_path).readlines()]
+
+            start, stop = enclose(lines, magic, cmakelist_path)
+            del lines[start+1:stop-1]
+            lines[start+1:start+1] = mod.sources
+            #print("\n".join(lines))
+
+            # This section is optional!
+            magic = f"target_link_libraries({dirname}"
+            try:
+                start, stop = enclose(lines, magic, cmakelist_path)
+                del lines[start+1:stop-1]
+                #lines[start+1:start+1] = mod.sources
+                #print("\n".join(lines))
+
+            except ValueError:
+                pass
+                #print(f"{dirname=} does not export libraries!")
+            """
+
 
     def touch_alldeps(self, verbose=0):
         """
