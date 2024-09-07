@@ -142,6 +142,8 @@ subroutine eph_path_run(dtfil, dtset, cryst, dvdb, ifc, &
 ! real(dp) :: ylmgr_dum(1,1,1)
  real(dp) :: phfrq(3*cryst%natom)
  real(dp),allocatable :: displ_cart(:,:,:,:),displ_red(:,:,:,:)
+ real(dp),allocatable :: kpg_k(:,:), ph3d_k(:,:,:), kinpw_k(:), ffnl_k(:,:,:,:), vlocal_k(:,:,:,:)
+ real(dp),allocatable :: kpg_kq(:,:), ph3d_kq(:,:,:), kinpw_kq(:), ffnl_kq(:,:,:,:), vlocal_kq(:,:,:,:)
 !************************************************************************
 
  if (psps%usepaw == 1) then
@@ -209,9 +211,11 @@ subroutine eph_path_run(dtfil, dtset, cryst, dvdb, ifc, &
 
  do spin=1,dtset%nsppol
    ! Compute psi_nk
+   ! The Hamiltonian has pointers to the _k arrays in out so we cannot dellocate them till the end.
+   ! This is the reason why we use vlocal_k (vlocal_kq) although this term does not depend on k
    kpt = zero
    call nscf%solve(spin, kpt, istwfk_1, nband, cryst, dtset, dtfil, psps, pawtab, pawfgr, &
-                   npw_k, kg_k, cg_k, gsc_k, eig_k, gs_hamk, msg, ierr) ! out
+                   npw_k, kg_k, kpg_k, ph3d_k, kinpw_k, ffnl_k, vlocal_k, cg_k, gsc_k, eig_k, gs_hamk, msg, ierr) ! out
    ABI_CHECK(ierr == 0, msg)
 
    do iqpt=1,qpath%npts
@@ -225,14 +229,20 @@ subroutine eph_path_run(dtfil, dtset, cryst, dvdb, ifc, &
      ! Compute psi_mkq
      if (.not. qq_is_gamma) then
        call nscf%solve(spin, kq, istwfk_1, nband, cryst, dtset, dtfil, psps, pawtab, pawfgr, &
-                       npw_kq, kg_kq, cg_kq, gsc_kq, eig_kq, gs_hamkq, msg, ierr) ! out
+                       npw_kq, kg_kq, kpg_kq, ph3d_kq, kinpw_kq, ffnl_kq, vlocal_kq, cg_kq, gsc_kq, eig_kq, gs_hamkq, msg, ierr) ! out
        ABI_CHECK(ierr == 0, msg)
      else
        call alloc_copy(kg_k, kg_kq)
+       call alloc_copy(kpg_k, kpg_kq)
+       call alloc_copy(ph3d_k, ph3d_kq)
+       call alloc_copy(kinpw_k, kinpw_kq)
+       call alloc_copy(ffnl_k, ffnl_kq)
+       call alloc_copy(vlocal_k, vlocal_kq)
        call alloc_copy(eig_k, eig_kq)
        call alloc_copy(cg_k, cg_kq)
        call alloc_copy(gsc_k, gsc_kq)
        call copy_hamiltonian(gs_hamkq, gs_hamk)
+       ! FIXME: OTher stuff needed?
      end if
 
      ABI_MALLOC(h1kets_kq, (2, npw_kq*nspinor, nband))
@@ -247,8 +257,7 @@ subroutine eph_path_run(dtfil, dtset, cryst, dvdb, ifc, &
 
 #if 0
      if (use_ftinterp) then
-       call dvdb%get_ftqbz(cryst, qq_bz, qq_ibz, gqk%my_q2ibz(:, my_iq), cplex, nfftf, ngfftf, v1scf, &
-                           gqk%pert_comm%value)
+       call dvdb%get_ftqbz(cryst, qq_bz, cplex, nfftf, ngfftf, v1scf, gqk%pert_comm%value)
      else
        ! Read and reconstruct the dvscf potentials for qpt and my_npert perturbations.
        db_iqpt = dvdb%findq(qq_ibz)
@@ -327,6 +336,11 @@ subroutine eph_path_run(dtfil, dtset, cryst, dvdb, ifc, &
 
      call ephtk_gkknu_from_atm(nband, nband, 1, natom, gkq_atm, phfrq, displ_red, gkq_nu)
 
+     ABI_FREE(vlocal_kq)
+     ABI_FREE(ph3d_kq)
+     ABI_FREE(kpg_kq)
+     ABI_FREE(kinpw_kq)
+     ABI_FREE(ffnl_kq)
      ABI_FREE(kg_kq)
      ABI_FREE(eig_kq)
      ABI_FREE(cg_kq)
@@ -335,11 +349,15 @@ subroutine eph_path_run(dtfil, dtset, cryst, dvdb, ifc, &
      call gs_hamkq%free()
    end do ! iqpt
 
+   ABI_FREE(vlocal_k)
+   ABI_FREE(ph3d_k)
+   ABI_FREE(kpg_k)
+   ABI_FREE(kinpw_k)
+   ABI_FREE(ffnl_k)
    ABI_FREE(kg_k)
    ABI_FREE(eig_k)
    ABI_FREE(cg_k)
    ABI_FREE(gsc_k)
-
    call gs_hamk%free()
  end do ! spin
 

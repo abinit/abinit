@@ -3055,8 +3055,6 @@ end subroutine dvdb_ftinterp_qpt
 !! INPUTS
 !!  cryst<crystal_t>=crystal structure parameters
 !!  qbz(3)= q-point in the BZ in reduced coordinates.
-!!  qibz(3) = Image of qbz in the IBZ. Needed to apply symmetries IBZ --> qbz
-!!  indq2ibz(6)=Symmetry mapping qbz --> IBZ qpoint produced by listkk using the SYMREC convention.
 !!  nfft=Number of fft-points treated by this processors
 !!  ngfft(18)=contain all needed information about 3D FFT
 !!
@@ -3065,7 +3063,7 @@ end subroutine dvdb_ftinterp_qpt
 !!
 !! SOURCE
 
-subroutine dvdb_get_ftqbz(db, cryst, qbz, qibz, indq2ibz, cplex, nfft, ngfft, v1scf, comm)
+subroutine dvdb_get_ftqbz(db, cryst, qbz, cplex, nfft, ngfft, v1scf, comm)
 
 !Arguments ------------------------------------
 !scalars
@@ -3074,18 +3072,12 @@ subroutine dvdb_get_ftqbz(db, cryst, qbz, qibz, indq2ibz, cplex, nfft, ngfft, v1
  type(crystal_t),intent(in) :: cryst
  class(dvdb_t),intent(inout) :: db
 !arrays
- integer,intent(in) :: ngfft(18), indq2ibz(6)
- real(dp),intent(in) :: qbz(3), qibz(3)
+ integer,intent(in) :: ngfft(18)
+ real(dp),intent(in) :: qbz(3)
  real(dp),allocatable,intent(out) :: v1scf(:,:,:,:)
 
 !Local variables-------------------------------
-!scalars
- integer :: iq_ibz, itimrev, isym, ierr, imyp, mu, root
- logical :: isirr_q
-!!arrays
- integer :: g0q(3) !, requests(db%natom3)
  real(dp) :: tsec(2)
- real(dp) ABI_ASYNC, allocatable :: work(:,:,:,:), work2(:,:,:,:)
 ! *************************************************************************
 
  ABI_UNUSED(comm)
@@ -3093,17 +3085,10 @@ subroutine dvdb_get_ftqbz(db, cryst, qbz, qibz, indq2ibz, cplex, nfft, ngfft, v1
  ! Keep track of total time spent.
  call timab(1809, 1, tsec)
 
- iq_ibz = indq2ibz(1)
-
- ! IS(q_ibz) + g0q = q_bz
- isym = indq2ibz(2); itimrev = indq2ibz(6) + 1; g0q = indq2ibz(3:5)
- isirr_q = (isym == 1 .and. itimrev == 1 .and. all(g0q == 0))
-
- ! Note that cplex is always set to 2 here
- cplex = 2
-
  ! Interpolate the dvscf potentials directly in the **BZ** for my_npert perturbations.
  ! This is possible only if all procs inside comm_rpt call this routine else deadlock
+ ! Note that cplex is always set to 2 here
+ cplex = 2
  ABI_MALLOC(v1scf, (cplex, nfft, db%nspden, db%my_npert))
  call db%ftinterp_qpt(qbz, nfft, ngfft, v1scf, db%comm_rpt)
  call timab(1809, 2, tsec)
@@ -3168,10 +3153,10 @@ subroutine dvdb_get_vxc1_ftqbz(db, dtset, cryst, qbz, qq_ibz, mapc_qq, drho_cple
 ! *************************************************************************
 
  ! Get rho1(cplex, nfftf, nspden, my_npert))
- call db%get_ftqbz(cryst, qbz, qq_ibz, mapc_qq, drho_cplex, nfft, ngfft, vxc1, comm)
+ call db%get_ftqbz(cryst, qbz, drho_cplex, nfft, ngfft, vxc1, comm)
 
- option=2 ! if 2, treat only density change
- ABI_MALLOC(vxc1,(drho_cplex, nfft, dtset%nspden, db%my_npert))
+ option = 2 ! if 2, treat only density change
+ ABI_MALLOC(vxc1, (drho_cplex, nfft, dtset%nspden, db%my_npert))
 
  do imyp=1,db%my_npert
    call dfpt_mkvxc(drho_cplex,dtset%ixc,kxc,db%mpi_enreg,nfft,ngfft,dum_nhat,0,dum_nhat,0,&

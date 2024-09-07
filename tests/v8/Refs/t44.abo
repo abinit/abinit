@@ -172,14 +172,6 @@ _ WF disk file :      0.162 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
              bdgw7          1       8       1       8
              bdgw8          1       4       1       4
         ddb_ngqpt        2    2    2
-   dvdb_qcache_mb1    -1.00000000E+00
-   dvdb_qcache_mb2     1.02400000E+03
-   dvdb_qcache_mb3     0.00000000E+00
-   dvdb_qcache_mb4     0.00000000E+00
-   dvdb_qcache_mb5     0.00000000E+00
-   dvdb_qcache_mb6     0.00000000E+00
-   dvdb_qcache_mb7     0.00000000E+00
-   dvdb_qcache_mb8     0.00000000E+00
              ecut      2.00000000E+01 Hartree
            ecutsm      5.00000000E-01 Hartree
      eph_ahc_type1          1
@@ -3000,14 +2992,6 @@ K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00], T:  300.0 [K], mu_e:   16.212
              bdgw7          1       8       1       8
              bdgw8          1       4       1       4
         ddb_ngqpt        2    2    2
-   dvdb_qcache_mb1    -1.00000000E+00
-   dvdb_qcache_mb2     1.02400000E+03
-   dvdb_qcache_mb3     0.00000000E+00
-   dvdb_qcache_mb4     0.00000000E+00
-   dvdb_qcache_mb5     0.00000000E+00
-   dvdb_qcache_mb6     0.00000000E+00
-   dvdb_qcache_mb7     0.00000000E+00
-   dvdb_qcache_mb8     0.00000000E+00
              ecut      2.00000000E+01 Hartree
            ecutsm      5.00000000E-01 Hartree
      eph_ahc_type1          1
