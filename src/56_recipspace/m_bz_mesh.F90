@@ -1697,11 +1697,9 @@ subroutine getkptnorm_bycomponent(vect,factor,norm)
 !Local variables-------------------------------
 !scalars
  character(len=500) :: msg
-
 ! *************************************************************************
 
- ! Checking the factor is large enough
- !(skipping zero components, since in this case the product will be 0)
+ ! Checking the factor is large enough (skipping zero components, since in this case the product will be 0)
  if(ANY(vect(:)*factor < 1.0 .and. vect(:) > tol7)) then
     write(msg,'(a,a,a,a,a,a,a,a)') ' Not able to give unique norm to order vectors',ch10,&
        'This is likely related to a truncation error for a k-point in the input file',ch10,&
@@ -2754,7 +2752,6 @@ type(kpath_t) function kpath_new(bounds, gprimd, ndivsm) result(kpath)
  integer :: ii
 !arrays
  real(dp) :: dk(3)
-
 ! *************************************************************************
 
  ABI_CHECK(size(bounds, dim=1) == 3, "Wrong dim1 in bounds")

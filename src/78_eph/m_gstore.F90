@@ -874,7 +874,6 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
 
    ! Add crystalline structure.
    NCF_CHECK(gstore%cryst%ncwrite(ncid))
-
    ! Add eigenvalues and occupations.
    NCF_CHECK(ebands_ncwrite(gstore%ebands, ncid))
 
