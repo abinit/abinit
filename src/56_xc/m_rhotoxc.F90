@@ -314,7 +314,7 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
  call timab(81,1,tsec)
 
 !Optional arguments
- compute_stress=.false.;if (present(strsxc)) compute_stress=.true.
+ compute_stress=present(strsxc)
  my_add_tfw=.false.;if (present(add_tfw)) my_add_tfw=add_tfw
 
 !Useful scalars

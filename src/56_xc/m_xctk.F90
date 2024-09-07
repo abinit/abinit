@@ -168,7 +168,6 @@ subroutine xcden(cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden,qphon,rho
      ABI_MALLOC(workgr,(2,nfft))
      if (need_laplacian.or.need_derivative2) then
        ABI_MALLOC(workgr2,(2,nfft))
-       workgr2(:,ispden)=zero
      end if
      ABI_MALLOC(gcart1,(n1))
      ABI_MALLOC(gcart2,(n2))
@@ -250,6 +249,9 @@ subroutine xcden(cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden,qphon,rho
        ndir=3; if (need_derivative2) ndir=6
        do ivoigt=1,ndir
          idir=voigt1(ivoigt) ; jdir=voigt2(ivoigt)
+         
+         workgr=zero
+         if (need_laplacian.or.need_derivative2) workgr2=zero
 
          do i1=1,n1
            ig1=i1-(i1/id1)*n1-1
