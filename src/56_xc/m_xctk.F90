@@ -277,17 +277,17 @@ subroutine xcden(cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden,qphon,rho
              g2cart1(i1)=gprimd(jdir,1)*two_pi*(dble(ig1)+qphon(1))
            end do
   !        Note that the G <-> -G symmetry must be maintained
-           if(mod(n1,2)==0 .and. qeq0==1)gcart1(n1/2+1)=zero
+           if(mod(n1,2)==0 .and. qeq0==1)g2cart1(n1/2+1)=zero
            do i2=1,n2
              ig2=i2-(i2/id2)*n2-1
              g2cart2(i2)=gprimd(jdir,2)*two_pi*(dble(ig2)+qphon(2))
            end do
-           if(mod(n2,2)==0 .and. qeq0==1)gcart2(n2/2+1)=zero
+           if(mod(n2,2)==0 .and. qeq0==1)g2cart2(n2/2+1)=zero
            do i3=1,n3
              ig3=i3-(i3/id3)*n3-1
              g2cart3(i3)=gprimd(jdir,3)*two_pi*(dble(ig3)+qphon(3))
            end do
-           if(mod(n3,2)==0 .and. qeq0==1)gcart3(n3/2+1)=zero
+           if(mod(n3,2)==0 .and. qeq0==1)g2cart3(n3/2+1)=zero
          end if
 
 !        MG: Be careful here with OMP due to ifft. Disabled for the time being.
@@ -297,12 +297,12 @@ subroutine xcden(cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden,qphon,rho
          do i3=1,n3
            do i2=1,n2
              gc23_idir=gcart2(i2)+gcart3(i3) ; gc23_jdir=gc23_idir
-             if (need_derivative2) gc23_jdir=g2cart2(i2)+g2cart3(i3)
+             if (idir/=jdir) gc23_jdir=g2cart2(i2)+g2cart3(i3)
              if (fftn2_distrib(i2)==mpi_enreg%me_fft) then
                do i1=1,n1
                  ifft=ifft+1
                  gcart_idir=gc23_idir+gcart1(i1) ; gcart_jdir=gcart_idir
-                 if (need_derivative2) gcart_jdir=gc23_jdir+g2cart1(i1)
+                 if (idir/=jdir) gcart_jdir=gc23_jdir+g2cart1(i1)
 !                Multiply by i 2pi G(idir)
                  workgr(2,ifft)= gcart_idir*wkcmpx(1,ifft)
                  workgr(1,ifft)=-gcart_idir*wkcmpx(2,ifft)
