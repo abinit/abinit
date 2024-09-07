@@ -945,23 +945,23 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
 !            Compute the GGA contribution to the stress tensor, from the part of Vxc
 !            coming from the derivative wrt the gradient (Eq (24) of PRB 50, 4327 (1994))
              if (compute_stress) then
-			   if (nspden_updn==1.and.ispden==1) grho(1:3)=rhonow(ipts,1,2:4)
-			   if (nspden_updn==2.and.ispden==1) grho(1:3)=rhonow(ipts,2,2:4)
-			   if (nspden_updn==2.and.ispden==2) grho(1:3)=rhonow(ipts,1,2:4)-rhonow(ipts,2,2:4)
-			   if (nspden_updn==2.and.ispden==3) grho(1:3)=rhonow(ipts,1,2:4)
-			   s1=-grho(1)*grho(1)*coeff
-			   s2=-grho(2)*grho(2)*coeff
-			   s3=-grho(3)*grho(3)*coeff
-			   !Diagonal part: -Int[n.grad(dFxc/grad(n))] = Int[grad(n).grad(dFxc/grad(n))]
-			   dstrsxc=dstrsxc+s1+s2+s3
-			   !Non-diagonal part: -Int[dn/dr_alpha.grad(dFxc/grad_beta(n))]
-			   strsxc1_tot=strsxc1_tot+s1
-			   strsxc2_tot=strsxc2_tot+s2
-			   strsxc3_tot=strsxc3_tot+s3
-			   strsxc4_tot=strsxc4_tot-grho(3)*grho(2)*coeff
-			   strsxc5_tot=strsxc5_tot-grho(3)*grho(1)*coeff
-			   strsxc6_tot=strsxc6_tot-grho(2)*grho(1)*coeff
-			 end if
+               if (nspden_updn==1.and.ispden==1) grho(1:3)=rhonow(ipts,1,2:4)
+               if (nspden_updn==2.and.ispden==1) grho(1:3)=rhonow(ipts,2,2:4)
+               if (nspden_updn==2.and.ispden==2) grho(1:3)=rhonow(ipts,1,2:4)-rhonow(ipts,2,2:4)
+               if (nspden_updn==2.and.ispden==3) grho(1:3)=rhonow(ipts,1,2:4)
+               s1=-grho(1)*grho(1)*coeff
+               s2=-grho(2)*grho(2)*coeff
+               s3=-grho(3)*grho(3)*coeff
+               !Diagonal part: -Int[n.grad(dFxc/grad(n))] = Int[grad(n).grad(dFxc/grad(n))]
+               dstrsxc=dstrsxc+s1+s2+s3
+               !Non-diagonal part: -Int[dn/dr_alpha.grad(dFxc/grad_beta(n))]
+               strsxc1_tot=strsxc1_tot+s1
+               strsxc2_tot=strsxc2_tot+s2
+               strsxc3_tot=strsxc3_tot+s3
+               strsxc4_tot=strsxc4_tot-grho(3)*grho(2)*coeff
+               strsxc5_tot=strsxc5_tot-grho(3)*grho(1)*coeff
+               strsxc6_tot=strsxc6_tot-grho(2)*grho(1)*coeff
+             end if
 
            end do
          end if
@@ -1059,24 +1059,24 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
            depsxc_apn(ipts,1)=vxc_b_apn(indx)
            if (ngrad_apn==2) depsxc_apn(ipts,2)=vxcgr_apn(indx)
            if (compute_stress) then
-			 dstrsxc=dstrsxc+fxc_apn(indx)-rho_b(indx)*vxc_b_apn(indx)
-			 if (ngrad_apn==2) then
-			   if (nspden_updn==1)                 grho(1:3)=rhonow(ipts,1,2:4)
-			   if (ispden==1 .and. nspden_updn==2) grho(1:3)=rhonow(ipts,2,2:4)
-			   if (ispden==2 .and. nspden_updn==2) grho(1:3)=rhonow(ipts,1,2:4)-rhonow(ipts,2,2:4)
-			   if (ispden==3 .and. nspden_updn==2) grho(1:3)=rhonow(ipts,1,2:4)
-			   s1=-grho(1)*grho(1)*vxcgr_apn(indx)
-			   s2=-grho(2)*grho(2)*vxcgr_apn(indx)
-			   s3=-grho(3)*grho(3)*vxcgr_apn(indx)
-			   dstrsxc=dstrsxc+s1+s2+s3
-			   strsxc1_tot=strsxc1_tot+s1
-			   strsxc2_tot=strsxc2_tot+s2
-			   strsxc3_tot=strsxc3_tot+s3
-			   strsxc4_tot=strsxc4_tot-grho(3)*grho(2)*vxcgr_apn(indx)
-			   strsxc5_tot=strsxc5_tot-grho(3)*grho(1)*vxcgr_apn(indx)
-			   strsxc6_tot=strsxc6_tot-grho(2)*grho(1)*vxcgr_apn(indx)
-			 end if ! GGA
-		   end if
+             dstrsxc=dstrsxc+fxc_apn(indx)-rho_b(indx)*vxc_b_apn(indx)
+             if (ngrad_apn==2) then
+               if (nspden_updn==1)                 grho(1:3)=rhonow(ipts,1,2:4)
+               if (ispden==1 .and. nspden_updn==2) grho(1:3)=rhonow(ipts,2,2:4)
+               if (ispden==2 .and. nspden_updn==2) grho(1:3)=rhonow(ipts,1,2:4)-rhonow(ipts,2,2:4)
+               if (ispden==3 .and. nspden_updn==2) grho(1:3)=rhonow(ipts,1,2:4)
+               s1=-grho(1)*grho(1)*vxcgr_apn(indx)
+               s2=-grho(2)*grho(2)*vxcgr_apn(indx)
+               s3=-grho(3)*grho(3)*vxcgr_apn(indx)
+               dstrsxc=dstrsxc+s1+s2+s3
+               strsxc1_tot=strsxc1_tot+s1
+               strsxc2_tot=strsxc2_tot+s2
+               strsxc3_tot=strsxc3_tot+s3
+               strsxc4_tot=strsxc4_tot-grho(3)*grho(2)*vxcgr_apn(indx)
+               strsxc5_tot=strsxc5_tot-grho(3)*grho(1)*vxcgr_apn(indx)
+               strsxc6_tot=strsxc6_tot-grho(2)*grho(1)*vxcgr_apn(indx)
+             end if ! GGA
+           end if
          end do ! ipts
 !        Deallocations
          ABI_FREE(fxc_apn)
