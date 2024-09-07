@@ -2405,11 +2405,12 @@ end subroutine nscf_init
 !!  gs_hamk
 !!  err_msg
 !!  ierr
+!!  [init_cg_k]
 !!
 !! SOURCE
 
 subroutine nscf_solve(nscf, isppol, kpt, istwf_k, nband, cryst, dtset, dtfil, psps, pawtab, pawfgr, &
-                      npw_k, kg_k, kpg_k, ph3d_k, kinpw_k, ffnl_k, vlocal, cg_k, gsc_k, eig_k, gs_hamk, err_msg, ierr)  ! out
+                      npw_k, kg_k, kpg_k, ph3d_k, kinpw_k, ffnl_k, vlocal, cg_k, gsc_k, eig_k, gs_hamk, err_msg, ierr, init_cg_k)  ! out
 
  use m_abi_linalg, only : abi_linalg_init, abi_linalg_finalize
 
@@ -2429,6 +2430,7 @@ subroutine nscf_solve(nscf, isppol, kpt, istwf_k, nband, cryst, dtset, dtfil, ps
  integer,allocatable,intent(out) :: kg_k(:,:)
  real(dp),allocatable,intent(out) :: cg_k(:,:,:), gsc_k(:,:,:), eig_k(:)
  real(dp),allocatable,intent(out) :: kpg_k(:,:), ph3d_k(:,:,:), kinpw_k(:), ffnl_k(:,:,:,:), vlocal(:,:,:,:)
+ real(dp),optional,intent(in) :: init_cg_k(:,:,:)
  integer,intent(out) :: ierr
  character(len=*),intent(out) :: err_msg
 
@@ -2543,46 +2545,49 @@ subroutine nscf_solve(nscf, isppol, kpt, istwf_k, nband, cryst, dtset, dtfil, ps
  ABI_MALLOC(eig_k, (nband))
 
  ! Initialize the wavefunctions. See also wfconv for a more portable way.
- do iband=1,nband
-   index = 0
-   do ispinor=1,nspinor
-   do ipw=1,npw_k
-     index=index+1
-     seed=(iband-1)*npw_k*nspinor + (ispinor-1)*npw_k + ipw
+ if (present(init_cg_k)) then
+   cg_k = init_cg_k
+ else
+   do iband=1,nband
+     index = 0
+     do ispinor=1,nspinor
+       do ipw=1,npw_k
+         index=index+1
+         seed=(iband-1)*npw_k*nspinor + (ispinor-1)*npw_k + ipw
 
-     ! For portability, use only integer numbers
-     ! The series of couples (fold1,fold2) is periodic with a period of
-     ! 3x5x7x11x13x17x19x23x29x31, that is, larger than 2**32, the largest integer*4
-     ! fold1 is between 0 and 34, fold2 is between 0 and 114. As sums of five
-     ! uniform random variables, their distribution is close to a gaussian
-     fold1=modulo(seed,3)+modulo(seed,5)+modulo(seed,7)+modulo(seed,11)+modulo(seed,13)
-     fold2=modulo(seed,17)+modulo(seed,19)+modulo(seed,23)+modulo(seed,29)+modulo(seed,31)
+         ! For portability, use only integer numbers
+         ! The series of couples (fold1,fold2) is periodic with a period of
+         ! 3x5x7x11x13x17x19x23x29x31, that is, larger than 2**32, the largest integer*4
+         ! fold1 is between 0 and 34, fold2 is between 0 and 114. As sums of five
+         ! uniform random variables, their distribution is close to a gaussian
+         fold1=modulo(seed,3)+modulo(seed,5)+modulo(seed,7)+modulo(seed,11)+modulo(seed,13)
+         fold2=modulo(seed,17)+modulo(seed,19)+modulo(seed,23)+modulo(seed,29)+modulo(seed,31)
 
-     ! The gaussian distributions are folded, in order to be back to a uniform distribution
-     ! foldre is between 0 and 20, foldim is between 0 and 18
-     foldre=mod(fold1+fold2,21)
-     foldim=mod(3*fold1+2*fold2,19)
+         ! The gaussian distributions are folded, in order to be back to a uniform distribution
+         ! foldre is between 0 and 20, foldim is between 0 and 18
+         foldre=mod(fold1+fold2,21)
+         foldim=mod(3*fold1+2*fold2,19)
 
-     cg_k(1,index,iband) =dble(foldre)
-     cg_k(2,index,iband) =dble(foldim)
+         cg_k(1,index,iband) =dble(foldre)
+         cg_k(2,index,iband) =dble(foldim)
 
-     ! XG030513: Time-reversal symmetry for k=gamma imposes zero imaginary part at G=0
-     ! XG: I do not know what happens for spin-orbit here.
-     if (istwf_k == 2 .and. me_g0 == 1) then
-       cg_k(2,1,iband)=zero
-     end if
+         ! XG030513: Time-reversal symmetry for k=gamma imposes zero imaginary part at G=0
+         ! XG: I do not know what happens for spin-orbit here.
+         if (istwf_k == 2 .and. me_g0 == 1) then
+           cg_k(2,1,iband)=zero
+         end if
+       end do ! ipw
+     end do ! ispinor
+   end do ! iband
+   !call random_number(cg_k)
 
-   end do ! ipw
-   end do ! ispinor
- end do ! iband
+   ! Multiply with envelope function to reduce kinetic energy
+   call cg_envlop(cg_k, dtset%ecut, cryst%gmet, 0, kg_k, kpt, mcg, nband, npw_k, dtset%nspinor)
 
- !call random_number(cg_k)
+   ! Ortoghonalize input trial states.
+   call pw_orthon(icg0, igsc0, istwf_k, mcg, mgsc, npwsp, nband, ortalgo_3, gsc_k, dtset%usepaw, cg_k, me_g0, xmpi_comm_self)
 
- ! Multiply with envelope function to reduce kinetic energy
- call cg_envlop(cg_k, dtset%ecut, cryst%gmet, 0, kg_k, kpt, mcg, nband, npw_k, dtset%nspinor)
-
- ! Ortoghonalize input trial states.
- call pw_orthon(icg0, igsc0, istwf_k, mcg, mgsc, npwsp, nband, ortalgo_3, gsc_k, dtset%usepaw, cg_k, me_g0, xmpi_comm_self)
+ end if
 
  ABI_MALLOC(evec, (2*nband, nband))
 
