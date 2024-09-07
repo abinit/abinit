@@ -1411,7 +1411,7 @@ subroutine nres2vres(dtset,gsqcut,izero,kxc,mpi_enreg,my_natom,nfft,ngfft,nhat,&
  type(xcdata_type) :: xcdata
 !arrays
  integer :: nk3xc
- real(dp) :: dummy6(6),gmet(3,3),gprimd(3,3),qq(3),rmet(3,3)
+ real(dp) :: gmet(3,3),gprimd(3,3),qq(3),rmet(3,3)
  real(dp),allocatable :: dummy(:),kxc_cur(:,:),nhatgr(:,:,:)
  real(dp),allocatable :: nresg(:,:),rhor0(:,:),vhres(:)
 
@@ -1545,7 +1545,7 @@ subroutine nres2vres(dtset,gsqcut,izero,kxc,mpi_enreg,my_natom,nfft,ngfft,nhat,&
    nk3xc=1
    call rhotoxc(energy,kxc_cur,mpi_enreg,nfft,ngfft,&
 &   nhat,usepaw,nhatgr,nhatgrdim,nkxc_cur,nk3xc,non_magnetic_xc,n3xccc,option,&
-&   rhor0,rprimd,dummy6,usexcnhat,vresid,vxcavg,xccc3d,xcdata,vhartr=vhres,&
+&   rhor0,rprimd,usexcnhat,vresid,vxcavg,xccc3d,xcdata,vhartr=vhres,&
 &   xcctau3d=xcctau3d)  !vresid=work space
    if (dtset%nspden/=4)  then
      ABI_FREE(rhor0)
