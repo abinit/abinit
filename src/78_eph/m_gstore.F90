@@ -3276,28 +3276,28 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
    call dvdb%ftinterp_setup(dtset%ddb_ngqpt, gstore%qptopt, 1, dtset%ddb_shiftq, nfftf, ngfftf, comm_rpt)
 
    ! Build q-cache in the *dense* IBZ using the global mask qselect and itreat_qibz.
-   ABI_MALLOC(itreat_qibz, (gstore%nqibz))
-   ABI_MALLOC(qselect, (gstore%nqibz))
-   qselect = 0; itreat_qibz = 0
-   call dvdb%ftqcache_build(nfftf, ngfftf, gstore%nqibz, gstore%qibz, dtset%dvdb_qcache_mb, qselect, itreat_qibz, gstore%comm)
-   ABI_FREE(itreat_qibz)
-   ABI_FREE(qselect)
+   !ABI_MALLOC(itreat_qibz, (gstore%nqibz))
+   !ABI_MALLOC(qselect, (gstore%nqibz))
+   !qselect = 0; itreat_qibz = 0
+   !call dvdb%ftqcache_build(nfftf, ngfftf, gstore%nqibz, gstore%qibz, dtset%dvdb_qcache_mb, qselect, itreat_qibz, gstore%comm)
+   !ABI_FREE(itreat_qibz)
+   !ABI_FREE(qselect)
 
  else
    call wrtout(units, " DVDB file contains all q-points in the IBZ --> Reading DFPT potentials from file.")
    ! Need to translate itreat_qibz into itreatq_dvdb.
    ! FIXME: Not used
-   ABI_ICALLOC(qselect, (dvdb%nqpt))
-   ABI_ICALLOC(itreatq_dvdb, (dvdb%nqpt))
+   !ABI_ICALLOC(qselect, (dvdb%nqpt))
+   !ABI_ICALLOC(itreatq_dvdb, (dvdb%nqpt))
    !do iq_ibz=1,gstore%nqibz
    !  if (itreat_qibz(iq_ibz) == 0) cycle
    !  db_iqpt = qibz2dvdb(iq_ibz)
    !  ABI_CHECK(db_iqpt /= -1, sjoin("Could not find IBZ q-point:", ktoa(gstore%qibz(:, iq_ibz)), "in the DVDB file."))
    !  itreatq_dvdb(db_iqpt) = 1
    !end do
-   call dvdb%qcache_read(nfftf, ngfftf, dtset%dvdb_qcache_mb, qselect, itreatq_dvdb, comm)
-   ABI_FREE(qselect)
-   ABI_FREE(itreatq_dvdb)
+   !call dvdb%qcache_read(nfftf, ngfftf, dtset%dvdb_qcache_mb, qselect, itreatq_dvdb, comm)
+   !ABI_FREE(qselect)
+   !ABI_FREE(itreatq_dvdb)
  end if
 
  ! Initialize the wave function descriptor.

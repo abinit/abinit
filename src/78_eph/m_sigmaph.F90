@@ -637,7 +637,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 !Local variables ------------------------------
 !scalars
  integer,parameter :: tim_getgh1c1 = 1, berryopt0 = 0, istw1 = 1, ider0 = 0, idir0 = 0, istwfk1 = 1
- integer,parameter :: useylmgr = 0, useylmgr1 =0, master = 0, ndat1 = 1
+ integer,parameter :: useylmgr0 = 0, master = 0, ndat1 = 1
  integer,parameter :: cplex1 = 1, pawread0 = 0
  integer :: band_me, nband_me
  integer :: my_rank,nsppol,nkpt,iq_ibz,iq_ibz_k,my_npert ! iq_ibz_frohl,iq_bz_frohl,
@@ -1174,7 +1174,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
    if (sigma%imag_only .and. sigma%qint_method == 1) then
      call qpoints_oracle(sigma, dtset, cryst, ebands, sigma%qibz, sigma%nqibz, sigma%nqbz, sigma%qbz, qselect, comm)
    end if
-   call dvdb%ftqcache_build(nfftf, ngfftf, sigma%nqibz, sigma%qibz, dtset%dvdb_qcache_mb, qselect, sigma%itreat_qibz, comm)
+   !call dvdb%ftqcache_build(nfftf, ngfftf, sigma%nqibz, sigma%qibz, dtset%dvdb_qcache_mb, qselect, sigma%itreat_qibz, comm)
 
  else
    ABI_MALLOC(qselect, (dvdb%nqpt))
@@ -1196,7 +1196,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
      ABI_CHECK(db_iqpt /= -1, sjoin("Could not find IBZ q-point:", ktoa(sigma%qibz(:, iq_ibz)), "in the DVDB file."))
      itreatq_dvdb(db_iqpt) = 1
    end do
-   call dvdb%qcache_read(nfftf, ngfftf, dtset%dvdb_qcache_mb, qselect, itreatq_dvdb, comm)
+   !call dvdb%qcache_read(nfftf, ngfftf, dtset%dvdb_qcache_mb, qselect, itreatq_dvdb, comm)
    ABI_FREE(itreatq_dvdb)
  end if
 
@@ -1239,7 +1239,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
    ! Spherical Harmonics for useylm == 1.
    ABI_MALLOC(ylm_k, (mpw, psps%mpsang**2 * psps%useylm))
    ABI_MALLOC(ylm_kq, (mpw, psps%mpsang**2 * psps%useylm))
-   ABI_MALLOC(ylmgr_kq, (mpw, 3, psps%mpsang**2 * psps%useylm * useylmgr1))
+   ABI_MALLOC(ylmgr_kq, (mpw, 3, psps%mpsang**2 * psps%useylm * useylmgr0))
 
    ! Compute k+G vectors
    nkpg = 3*dtset%nloalg(3)
@@ -1560,7 +1560,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
        ! Set up the spherical harmonics (Ylm) at k and k+q. See also dfpt_looppert
        !if (psps%useylm == 1) then
-       !   optder = 0; if (useylmgr == 1) optder = 1
+       !   optder = 0; if (useylmgr0 == 1) optder = 1
        !   call initylmg(cryst%gprimd, kg_k, kk, mkmem1, mpi_enreg, psps%mpsang, mpw, nband, mkmem1, &
        !     [npw_k], dtset%nsppol, optder, cryst%rprimd, ylm_k, ylmgr)
        !   call initylmg(cryst%gprimd, kg_kq, kq, mkmem1, mpi_enreg, psps%mpsang, mpw, nband, mkmem1, &
@@ -1679,7 +1679,7 @@ end if
          ! This call is not optimal because there are quantities in out that do not depend on idir,ipert
          call getgh1c_setup(gs_hamkq, rf_hamkq, dtset, psps, kk, kq, idir, ipert, &  ! In
            cryst%natom, cryst%rmet, cryst%gprimd, cryst%gmet, istwf_k, &             ! In
-           npw_k, npw_kq, useylmgr1, kg_k, ylm_k, kg_kq, ylm_kq, ylmgr_kq, &         ! In
+           npw_k, npw_kq, useylmgr0, kg_k, ylm_k, kg_kq, ylm_kq, ylmgr_kq, &         ! In
            dkinpw, nkpg, nkpg1, kpg_k, kpg1_k, kinpw1, ffnlk, ffnl1, ph3d, ph3d1, &  ! Out
            reuse_kpg_k=1, reuse_kpg1_k=1, reuse_ffnlk=1, reuse_ffnl1=1)              ! Reuse some arrays
 
@@ -2292,12 +2292,12 @@ end if
      call cwtime_report(" Fan-Migdal q-loop", cpu_qloop, wall_qloop, gflops_qloop)
 
      ! Print cache stats.
-     if (sigma%use_ftinterp) then
-       call dvdb%ft_qcache%report_stats()
-       if (dvdb%ft_qcache%v1scf_3natom_request /= xmpi_request_null) call xmpi_wait(dvdb%ft_qcache%v1scf_3natom_request, ierr)
-     else
-       call dvdb%qcache%report_stats()
-     end if
+     !if (sigma%use_ftinterp) then
+     !  !call dvdb%ft_qcache%report_stats()
+     !  if (dvdb%ft_qcache%v1scf_3natom_request /= xmpi_request_null) call xmpi_wait(dvdb%ft_qcache%v1scf_3natom_request, ierr)
+     !else
+     !  call dvdb%qcache%report_stats()
+     !end if
 
      ABI_FREE(sigma%e0vals)
      ABI_FREE(kets_k)
@@ -4570,11 +4570,11 @@ subroutine sigmaph_setup_qloop(self, dtset, cryst, ebands, dvdb, spin, ikcalc, n
              if (ii == 2) then
                cnt = cnt + 1
                self%myq2ibz_k(cnt) = qtab(iq)
-               if (self%use_ftinterp) then
-                 if (.not. allocated(dvdb%ft_qcache%key(iq_ibz)%v1scf)) ineed_qibz(iq_ibz) = 1
-               else
-                 if (.not. allocated(dvdb%qcache%key(iq_dvdb)%v1scf)) ineed_qdvdb(iq_dvdb) = 1
-               end if
+               !if (self%use_ftinterp) then
+               !  if (.not. allocated(dvdb%ft_qcache%key(iq_ibz)%v1scf)) ineed_qibz(iq_ibz) = 1
+               !else
+               !  if (.not. allocated(dvdb%qcache%key(iq_dvdb)%v1scf)) ineed_qdvdb(iq_dvdb) = 1
+               !end if
              end if
            end if
          end do
@@ -4597,13 +4597,13 @@ subroutine sigmaph_setup_qloop(self, dtset, cryst, ebands, dvdb, spin, ikcalc, n
        ABI_WARNING_IF(self%my_nqibz_k == 0, "my_nqibz_k == 0")
 
        ! Make sure each node has the q-points we need. Try not to break qcache_size_mb contract!
-       if (self%use_ftinterp) then
-         ! Update cache by Fourier interpolating W(r,R)
-         call dvdb%ftqcache_update_from_ft(nfftf, ngfftf, self%nqibz, self%qibz, ineed_qibz, comm)
-       else
-         ! Update cache. Perform collective IO inside comm if needed.
-         call dvdb%qcache_update_from_file(nfftf, ngfftf, ineed_qdvdb, comm)
-       end if
+       !if (self%use_ftinterp) then
+       !  ! Update cache by Fourier interpolating W(r,R)
+       !  call dvdb%ftqcache_update_from_ft(nfftf, ngfftf, self%nqibz, self%qibz, ineed_qibz, comm)
+       !else
+       !  ! Update cache. Perform collective IO inside comm if needed.
+       !  call dvdb%qcache_update_from_file(nfftf, ngfftf, ineed_qdvdb, comm)
+       !end if
 
        ABI_SFREE(ineed_qibz)
        ABI_SFREE(ineed_qdvdb)

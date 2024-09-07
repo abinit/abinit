@@ -40,7 +40,7 @@ MODULE m_errors
 
  use iso_c_binding,     only : c_ptr, c_size_t, c_associated
 
- use m_io_tools,        only : flush_unit, lock_and_write, file_exists, num_opened_units, show_units, open_file
+ use m_io_tools,        only : flush_unit, lock_and_write, file_exists, num_opened_units, show_units, open_file, is_open
  use m_fstrings,        only : toupper, basename, indent, lstrip, atoi, strcat, itoa
  use m_build_info,      only : dump_config, abinit_version
  use m_cppopts_dumper,  only : dump_cpp_options
@@ -688,7 +688,6 @@ subroutine msg_hndl(message, level, mode_paral, file, line, NODUMP, NOSTOP, unit
 
 !Local variables-------------------------------
  integer :: f90line,ierr,unit_
- logical :: is_open_unit
  character(len=10) :: lnum
  character(len=500) :: f90name
  character(len=LEN(message)) :: my_msg
@@ -733,6 +732,12 @@ subroutine msg_hndl(message, level, mode_paral, file, line, NODUMP, NOSTOP, unit
      "--- !",TRIM(level),ch10,&
      "message: |",ch10,TRIM(indent(my_msg)),ch10,"..."
    call wrtout(unit_, sbuf, mode_paral, do_flush=.True.)
+
+   ! Write error message to ab_out as well, provided this proc is connected to ab_out
+   if (unit_ /= ab_out .and. is_open(ab_out)) then
+     call wrtout(ab_out, sbuf, mode_paral="PERS", do_flush=.True.)
+   end if
+
    if (.not.present(NOSTOP)) call abi_abort(mode_paral, print_config=.FALSE.)
 
  case default
@@ -751,9 +756,10 @@ subroutine msg_hndl(message, level, mode_paral, file, line, NODUMP, NOSTOP, unit
      "...",ch10
    call wrtout(unit_, sbuf, mode_paral)
 
-   ! Write error message to ab_out is unit is connected.
-   inquire(unit=ab_out, opened=is_open_unit)
-   if (is_open_unit) call wrtout(ab_out, sbuf) !, mode_paral="PERS")
+   ! Write error message to ab_out as well, provided this proc is connected to ab_out
+   if (is_open(ab_out)) then
+     call wrtout(ab_out, sbuf, mode_paral="PERS", do_flush=.True.)
+   end if
 
    if (.not.present(NOSTOP)) then
      ! The first MPI proc that gets here, writes the ABI_MPIABORTFILE with the message!
@@ -761,7 +767,7 @@ subroutine msg_hndl(message, level, mode_paral, file, line, NODUMP, NOSTOP, unit
      if (.not. file_exists(ABI_MPIABORTFILE) .and. xmpi_comm_size(xmpi_world) > 1) then
         call lock_and_write(ABI_MPIABORTFILE, sbuf, ierr)
      end if
-     ! And now we die!
+     ! And now we're gonna die!
      call abi_abort(mode_paral, print_config=.FALSE.)
    end if
 

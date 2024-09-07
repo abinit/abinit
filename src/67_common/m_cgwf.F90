@@ -55,6 +55,7 @@ module m_cgwf
  use m_pawrhoij,      only : pawrhoij_type
  use m_pawfgr,        only : pawfgr_type
  use m_mkffnl,        only : mkffnl_objs
+ use m_initylmg,      only : initylmg
 
  implicit none
 
@@ -99,7 +100,7 @@ module m_cgwf
  end type nscf_t
 !!***
 
- public :: cgwf
+ public :: cgwf  ! Conjugate-gradient solver.
 !!***
 
 contains
@@ -2371,6 +2372,10 @@ subroutine nscf_init(nscf, dtset, dtfil, cryst, comm)
  end if
  call pot_cryst%free(); call pot_hdr%free()
 
+ if (dtset%usekden /= 0) then
+   ABI_ERROR("nscf_init with mgga not yet coded")
+ end if
+
 end subroutine nscf_init
 !!***
 
@@ -2394,8 +2399,8 @@ end subroutine nscf_init
 !! OUTPUT
 !!  gs_hamk <type(gs_hamiltonian_type)>=all data for the Hamiltonian at k
 !!  kg_k=
-!!  cg
-!!  gsc
+!!  cg_g
+!!  gsc_k
 !!  eig_k
 !!  gs_hamk
 !!  err_msg
@@ -2404,7 +2409,7 @@ end subroutine nscf_init
 !! SOURCE
 
 subroutine nscf_solve(nscf, isppol, kpt, istwf_k, nband, cryst, dtset, dtfil, psps, pawtab, pawfgr, &
-                      npw_k, kg_k, cg, gsc, eig_k, gs_hamk, err_msg, ierr)
+                      npw_k, kg_k, cg_k, gsc_k, eig_k, gs_hamk, err_msg, ierr)
 
  use m_abi_linalg, only : abi_linalg_init, abi_linalg_finalize
 
@@ -2422,23 +2427,28 @@ subroutine nscf_solve(nscf, isppol, kpt, istwf_k, nband, cryst, dtset, dtfil, ps
 !arrays
  integer,intent(out) :: npw_k
  integer,allocatable,intent(out) :: kg_k(:,:)
- real(dp),allocatable,intent(out) :: cg(:,:,:), gsc(:,:,:), eig_k(:)
+ real(dp),allocatable,intent(out) :: cg_k(:,:,:), gsc_k(:,:,:), eig_k(:)
  integer,intent(out) :: ierr
  character(len=*),intent(out) :: err_msg
 
 !Local variables ------------------------------
 !scalars
  integer,parameter :: paral_kgb0 = 0, mcgq0 = 0, mkgq0 = 0, nkpt1 = 1, pwind_alloc0 = 0, use_subvnlx0 = 0, use_subovl0 = 0, ider0 = 0, idir0 = 0
- integer,parameter :: icg0 = 0, igsc0 = 0, ikpt0 = 0, quit0 = 0, ortalgo_3 = 3
- integer :: mcg, mgsc, nvloc, nkpg, n1, n2, n3, n4, n5, n6, nfft, nfftf, mgfft, mgfftf, inonsc, npwsp, me_g0, linalg_max_size, iband
+ integer,parameter :: icg0 = 0, igsc0 = 0, ikpt0 = 0, quit0 = 0, ortalgo_3 = 3, mkmem1 = 1
+ integer,parameter :: useylmgr0 = 0, master = 0, ndat1 = 1
+ integer :: mcg, mgsc, nvloc, nkpg, n1, n2, n3, n4, n5, n6, nfft, nfftf, mgfft, mgfftf, inonsc, npwsp, me_g0, linalg_max_size, optder
+ integer :: ipw, ispinor, index, nspinor
+ integer, parameter :: int64 = selected_int_kind(18)
+ integer(KIND=int64) :: seed
+ integer :: fold1,fold2,foldim,foldre,iband
  real(dp),parameter :: cpus0 = zero
- real(dp) :: dotr, max_resid
+ real(dp) :: max_resid ! dotr,
  type(efield_type) :: dtefield
 !arrays
- integer :: npwarr_k(1), pwind(pwind_alloc0,2,3)
+ integer :: npwarr_k(1), pwind(pwind_alloc0,2,3), nband_ks(dtset%nsppol)
  real(dp) :: pwnsfac(2,pwind_alloc0), pwnsfacq(2,mkgq0), zshift(nband), cgq(2, mcgq0), dphase_k(3)
  real(dp) :: subham(nband*(nband+1)), subovl(nband*(nband+1)*use_subovl0), subvnlx(nband*(nband+1)*use_subvnlx0)
- real(dp) :: ylmgr_dum(1,1,1)
+ real(dp) :: ylmgr_dum(1,1,1), ylmgr(0, 0)
  real(dp),allocatable :: ph1d(:,:), vlocal(:,:,:,:), kinpw_k(:), kpg_k(:,:), resid(:)
  real(dp),allocatable :: ffnl_k(:,:,:,:), ph3d(:,:,:), ylm_k(:,:), evec(:,:)
 ! *************************************************************************
@@ -2453,6 +2463,7 @@ subroutine nscf_solve(nscf, isppol, kpt, istwf_k, nband, cryst, dtset, dtfil, ps
  nfftf = product(nscf%ngfftf(1:3)); mgfftf = maxval(nscf%ngfftf(1:3))
  nfft = product(nscf%ngfft(1:3)) ; mgfft = maxval(nscf%ngfft(1:3))
  n1 = nscf%ngfft(1); n2 = nscf%ngfft(2); n3 = nscf%ngfft(3); n4 = nscf%ngfft(4); n5 = nscf%ngfft(5); n6 = nscf%ngfft(6)
+ nspinor = dtset%nspinor
 
  ! Compute g-sphere for this k-point from ecut
  call get_kg(kpt, istwf_k, dtset%ecut, cryst%gmet, npw_k, kg_k)
@@ -2470,7 +2481,7 @@ subroutine nscf_solve(nscf, isppol, kpt, istwf_k, nband, cryst, dtset, dtfil, ps
  ABI_MALLOC(ph1d, (2,3*(2*mgfft+1)*cryst%natom))
  call getph(cryst%atindx, cryst%natom, n1, n2, n3, ph1d, cryst%xred)
 
- call init_hamiltonian(gs_hamk, psps, pawtab, dtset%nspinor, dtset%nsppol, dtset%nspden, cryst%natom, &
+ call init_hamiltonian(gs_hamk, psps, pawtab, nspinor, dtset%nsppol, dtset%nspden, cryst%natom, &
                        dtset%typat, cryst%xred, nfft, mgfft, nscf%ngfft, cryst%rprimd, dtset%nloalg, &
                        comm_atom=mpi_enreg%comm_atom, mpi_atmtab=mpi_enreg%my_atmtab, mpi_spintab=mpi_enreg%my_isppoltab, &
                        usecprj=dtset%usepaw, ph1d=ph1d, nucdipmom=dtset%nucdipmom, gpu_option=dtset%gpu_option)
@@ -2486,7 +2497,7 @@ subroutine nscf_solve(nscf, isppol, kpt, istwf_k, nband, cryst, dtset, dtfil, ps
  !vlocal = zero
  call gs_hamk%load_spin(isppol, vlocal=vlocal, with_nonlocal=.true.)
 
- !with_vxctau = (present(vxctau).and.dtset%usekden/=0)
+ !with_vxctau = (dtset%usekden/=0)
 
  !if (with_vxctau) then
  !  call gspot_transgrid_and_pack(isppol, psps%usepaw, paral_kgb0, dtset%nfft, dtset%ngfft, nfftf, &
@@ -2501,11 +2512,12 @@ subroutine nscf_solve(nscf, isppol, kpt, istwf_k, nband, cryst, dtset, dtfil, ps
  ABI_MALLOC(ylm_k, (npw_k, psps%mpsang**2 * psps%useylm))
 
  ! Set up the spherical harmonics (Ylm) at k and k+q. See also dfpt_looppert
- !if (psps%useylm == 1) then
- !   optder = 0; if (useylmgr == 1) optder = 1
- !   call initylmg(cryst%gprimd, kg_k, kk, mkmem1, mpi_enreg, psps%mpsang, mpw, nband, mkmem1,&
- !     [npw_k], dtset%nsppol, optder, cryst%rprimd, ylm_k, ylmgr)
- !end if
+ if (psps%useylm == 1) then
+   optder = 0; if (useylmgr0 == 1) optder = 1
+   nband_ks = nband
+   call initylmg(cryst%gprimd, kg_k, kpt, mkmem1, nscf%mpi_enreg, psps%mpsang, npw_k, nband_ks, mkmem1,&
+                [npw_k], dtset%nsppol, optder, cryst%rprimd, ylm_k, ylmgr)
+ end if
 
  call mkffnl_objs(cryst, psps, 1, ffnl_k, ider0, idir0, kg_k, kpg_k, kpt, nkpg, npw_k, ylm_k, ylmgr_dum)
  ABI_FREE(ylm_k)
@@ -2521,36 +2533,61 @@ subroutine nscf_solve(nscf, isppol, kpt, istwf_k, nband, cryst, dtset, dtfil, ps
                      kinpw_k=kinpw_k, kg_k=kg_k, kpg_k=kpg_k, ffnl_k=ffnl_k, ph3d_k=ph3d, &
                      compute_ph3d=(paral_kgb0/=1), compute_gbound=(paral_kgb0/=1))
 
- !print *, "gs_hamk%ph3d_k:", gs_hamk%ph3d_k; print *, "gs_hamk%ffnl_k:", gs_hamk%ffnl_k
- !print *, "gs_hamk%vlocal:", gs_hamk%vlocal
- !print *, "nscf%vtrial:", nscf%vtrial
-
  npwarr_k = npw_k
- npwsp = npw_k * dtset%nspinor; me_g0 = 1
- mcg = npw_k * dtset%nspinor * nband; mgsc = mcg * dtset%usepaw
+ npwsp = npw_k * nspinor; me_g0 = 1
+ mcg = npw_k * nspinor * nband; mgsc = mcg * dtset%usepaw
 
  ABI_MALLOC(resid, (nband))
- ABI_MALLOC(cg, (2, npw_k * dtset%nspinor, nband))
- ABI_MALLOC(gsc, (2, npw_k * dtset%nspinor, nband * dtset%usepaw))
+ ABI_MALLOC(cg_k, (2, npw_k * nspinor, nband))
+ ABI_MALLOC(gsc_k, (2, npw_k * nspinor, nband * dtset%usepaw))
  ABI_MALLOC(eig_k, (nband))
 
  ! TODO
  ! Initialize the wavefunctions. See also wfconv for a more portable way.
- call random_number(cg)
- !nscf%cg = zero
- !do iband=1,nband
- !  call sqnorm_g(dotr, istwf_k, npwsp, nscf%cg(:,:,iband), me_g0, xmpi_comm_self)
- !end do
+ !call random_number(cg_k)
+
+ do iband=1,nband
+   index = 0
+   do ispinor=1,nspinor
+   do ipw=1,npw_k
+     index=index+1
+     seed=(iband-1)*npw_k*nspinor + (ispinor-1)*npw_k + ipw
+
+     ! For portability, use only integer numbers
+     ! The series of couples (fold1,fold2) is periodic with a period of
+     ! 3x5x7x11x13x17x19x23x29x31, that is, larger than 2**32, the largest integer*4
+     ! fold1 is between 0 and 34, fold2 is between 0 and 114. As sums of five
+     ! uniform random variables, their distribution is close to a gaussian
+     fold1=modulo(seed,3)+modulo(seed,5)+modulo(seed,7)+modulo(seed,11)+modulo(seed,13)
+     fold2=modulo(seed,17)+modulo(seed,19)+modulo(seed,23)+modulo(seed,29)+modulo(seed,31)
+
+     ! The gaussian distributions are folded, in order to be back to a uniform distribution
+     ! foldre is between 0 and 20, foldim is between 0 and 18
+     foldre=mod(fold1+fold2,21)
+     foldim=mod(3*fold1+2*fold2,19)
+
+     cg_k(1,index,iband) =dble(foldre)
+     cg_k(2,index,iband) =dble(foldim)
+
+     ! XG030513: Time-reversal symmetry for k=gamma imposes zero imaginary part at G=0
+     ! XG: I do not know what happens for spin-orbit here.
+     if (istwf_k == 2 .and. me_g0 == 1) then
+       cg_k(2,1,iband)=zero
+     end if
+
+   end do ! ipw
+   end do ! ispinor
+ end do ! iband
 
  ! Multiply with envelope function to reduce kinetic energy
- call cg_envlop(cg, dtset%ecut, cryst%gmet, 0, kg_k, kpt, mcg, nband, npw_k, dtset%nspinor)
+ call cg_envlop(cg_k, dtset%ecut, cryst%gmet, 0, kg_k, kpt, mcg, nband, npw_k, dtset%nspinor)
 
  ! Ortoghonalize input trial states.
- call pw_orthon(icg0, igsc0, istwf_k, mcg, mgsc, npwsp, nband, ortalgo_3, gsc, dtset%usepaw, cg, me_g0, xmpi_comm_self)
+ call pw_orthon(icg0, igsc0, istwf_k, mcg, mgsc, npwsp, nband, ortalgo_3, gsc_k, dtset%usepaw, cg_k, me_g0, xmpi_comm_self)
 
  ABI_MALLOC(evec, (2*nband, nband))
 
-!linalg initialisation
+ ! linalg initialisation (required by subdiago)
  linalg_max_size=maxval(dtset%nband(:))
  call abi_linalg_init(linalg_max_size,RUNL_GSTATE,dtset%wfoptalg, paral_kgb0,&
                       dtset%gpu_option,dtset%use_slk,dtset%np_slk, nscf%mpi_enreg%comm_bandspinorfft)
@@ -2558,8 +2595,8 @@ subroutine nscf_solve(nscf, isppol, kpt, istwf_k, nband, cryst, dtset, dtfil, ps
  ierr = 1; err_msg = ""
  do inonsc=1,dtset%nstep
 
-   call cgwf(dtset%berryopt, cg, cgq, dtset%chkexit, cpus0, dphase_k, dtefield, dtfil%filnam_ds(1), &
-             gsc, gs_hamk, icg0, igsc0, ikpt0, inonsc, isppol, nband, mcg, mcgq0, mgsc, mkgq0, &
+   call cgwf(dtset%berryopt, cg_k, cgq, dtset%chkexit, cpus0, dphase_k, dtefield, dtfil%filnam_ds(1), &
+             gsc_k, gs_hamk, icg0, igsc0, ikpt0, inonsc, isppol, nband, mcg, mcgq0, mgsc, mkgq0, &
              mpi_enreg, npw_k, nband, dtset%nbdblock, nkpt1, dtset%nline, npw_k, npwarr_k, dtset%nspinor, &
              dtset%nsppol, dtset%ortalg,  &
              !-113, &
@@ -2567,8 +2604,8 @@ subroutine nscf_solve(nscf, isppol, kpt, istwf_k, nband, cryst, dtset, dtfil, ps
              pwind, pwind_alloc0, pwnsfac, pwnsfacq, quit0, resid, &
              subham, subovl, subvnlx, dtset%tolrde, dtset%tolwfr_diago, use_subovl0, use_subvnlx0, mod(dtset%wfoptalg, 100), zshift)
 
-   call subdiago(cg, eig_k, evec, gsc, icg0, igsc0, istwf_k, &
-                 mcg, mgsc, nband, npw_k, dtset%nspinor, paral_kgb0, &
+   ! subspace rotation (without this, cgwf will never converge!)
+   call subdiago(cg_k, eig_k, evec, gsc_k, icg0, igsc0, istwf_k, mcg, mgsc, nband, npw_k, dtset%nspinor, paral_kgb0, &
                  subham, subovl, use_subovl0, gs_hamk%usepaw, me_g0)
 
    ! Check for convergence.
