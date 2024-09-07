@@ -193,36 +193,14 @@ subroutine eph_path_run(dtfil, dtset, cryst, dvdb, ifc, &
    ABI_WARNING("Enforcing FT interpolation for q-points even if it's not strictly needed.")
    use_ftinterp = .True.
  end if
- ABI_FREE(qmap_symrec)
 
 #if 0
  if (use_ftinterp) then
    call wrtout(units, " Cannot find all q-points in the DVDB --> Activating Fourier interpolation.")
    call dvdb%ftinterp_setup(dtset%ddb_ngqpt, qptopt, 1, dtset%ddb_shiftq, nfftf, ngfftf, xmpi_comm_self)
 
-   ! Build q-cache in the *dense* IBZ using the global mask qselect and itreat_qibz.
-   ABI_MALLOC(itreat_qibz, (gstore%nqibz))
-   ABI_MALLOC(qselect, (gstore%nqibz))
-   qselect = 0; itreat_qibz = 0
-   call dvdb%ftqcache_build(nfftf, ngfftf, gstore%nqibz, gstore%qibz, dtset%dvdb_qcache_mb, qselect, itreat_qibz, gstore%comm)
-   ABI_FREE(itreat_qibz)
-   ABI_FREE(qselect)
-
  else
    call wrtout(units, " DVDB file contains all q-points in the IBZ --> Reading DFPT potentials from file.")
-   ! Need to translate itreat_qibz into itreatq_dvdb.
-   ! FIXME: Not used
-   ABI_ICALLOC(qselect, (dvdb%nqpt))
-   ABI_ICALLOC(itreatq_dvdb, (dvdb%nqpt))
-   !do iq_ibz=1,gstore%nqibz
-   !  if (itreat_qibz(iq_ibz) == 0) cycle
-   !  db_iqpt = qibz2dvdb(iq_ibz)
-   !  ABI_CHECK(db_iqpt /= -1, sjoin("Could not find IBZ q-point:", ktoa(gstore%qibz(:, iq_ibz)), "in the DVDB file."))
-   !  itreatq_dvdb(db_iqpt) = 1
-   !end do
-   call dvdb%qcache_read(nfftf, ngfftf, dtset%dvdb_qcache_mb, qselect, itreatq_dvdb, comm)
-   ABI_FREE(qselect)
-   ABI_FREE(itreatq_dvdb)
  end if
 #endif
 
@@ -281,7 +259,6 @@ subroutine eph_path_run(dtfil, dtset, cryst, dvdb, ifc, &
        call dvdb%readsym_qbz(cryst, qq_bz, mapc_qq2dvdb, cplex, nfftf, ngfftf, v1scf, gqk%pert_comm%value)
      end if
 
-
      ! Allocate vlocal1 with correct cplex. Note nvloc and my_npert.
      ABI_MALLOC(vlocal1, (cplex*n4, n5, n6, gs_hamkq%nvloc, my_npert))
 
@@ -296,7 +273,7 @@ subroutine eph_path_run(dtfil, dtset, cryst, dvdb, ifc, &
      !call gs_hamkq%load_spin(spin, vlocal=vlocal, with_nonlocal=.true.)
 
      ABI_FREE(v1scf)
-     ABI_FREE(vlocal1)
+     !ABI_FREE(vlocal1)
 
      ! Loop over atomic perturbations, apply H1_{kappa, alpha} and compute e-ph matrix elements.
 #if 0
@@ -366,6 +343,7 @@ subroutine eph_path_run(dtfil, dtset, cryst, dvdb, ifc, &
    call gs_hamk%free()
  end do ! spin
 
+ ABI_FREE(qmap_symrec)
  ABI_FREE(gkq_atm)
  ABI_FREE(gkq_nu)
  ABI_FREE(dummy_vtrial)

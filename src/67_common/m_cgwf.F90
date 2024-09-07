@@ -2494,7 +2494,7 @@ subroutine nscf_solve(nscf, isppol, kpt, istwf_k, nband, cryst, dtset, dtfil, ps
 
  call gspot_transgrid_and_pack(isppol, psps%usepaw, paral_kgb0, nfft, nscf%ngfft, nfftf, &
                                dtset%nspden, gs_hamk%nvloc, 1, pawfgr, mpi_enreg, nscf%vtrial, vlocal)
- !vlocal = zero
+
  call gs_hamk%load_spin(isppol, vlocal=vlocal, with_nonlocal=.true.)
 
  !with_vxctau = (dtset%usekden/=0)
@@ -2542,10 +2542,7 @@ subroutine nscf_solve(nscf, isppol, kpt, istwf_k, nband, cryst, dtset, dtfil, ps
  ABI_MALLOC(gsc_k, (2, npw_k * nspinor, nband * dtset%usepaw))
  ABI_MALLOC(eig_k, (nband))
 
- ! TODO
  ! Initialize the wavefunctions. See also wfconv for a more portable way.
- !call random_number(cg_k)
-
  do iband=1,nband
    index = 0
    do ispinor=1,nspinor
@@ -2579,6 +2576,8 @@ subroutine nscf_solve(nscf, isppol, kpt, istwf_k, nband, cryst, dtset, dtfil, ps
    end do ! ispinor
  end do ! iband
 
+ !call random_number(cg_k)
+
  ! Multiply with envelope function to reduce kinetic energy
  call cg_envlop(cg_k, dtset%ecut, cryst%gmet, 0, kg_k, kpt, mcg, nband, npw_k, dtset%nspinor)
 
@@ -2598,9 +2597,7 @@ subroutine nscf_solve(nscf, isppol, kpt, istwf_k, nband, cryst, dtset, dtfil, ps
    call cgwf(dtset%berryopt, cg_k, cgq, dtset%chkexit, cpus0, dphase_k, dtefield, dtfil%filnam_ds(1), &
              gsc_k, gs_hamk, icg0, igsc0, ikpt0, inonsc, isppol, nband, mcg, mcgq0, mgsc, mkgq0, &
              mpi_enreg, npw_k, nband, dtset%nbdblock, nkpt1, dtset%nline, npw_k, npwarr_k, dtset%nspinor, &
-             dtset%nsppol, dtset%ortalg,  &
-             !-113, &
-             dtset%prtvol, &
+             dtset%nsppol, dtset%ortalg, dtset%prtvol, &
              pwind, pwind_alloc0, pwnsfac, pwnsfacq, quit0, resid, &
              subham, subovl, subvnlx, dtset%tolrde, dtset%tolwfr_diago, use_subovl0, use_subvnlx0, mod(dtset%wfoptalg, 100), zshift)
 
@@ -2639,14 +2636,17 @@ subroutine nscf_solve(nscf, isppol, kpt, istwf_k, nband, cryst, dtset, dtfil, ps
 
  call abi_linalg_finalize(dtset%gpu_option)
 
- ABI_FREE(ph3d)
  ABI_FREE(ph1d)
- ABI_FREE(kpg_k)
- ABI_FREE(kinpw_k)
- ABI_FREE(ffnl_k)
- ABI_FREE(vlocal)
+
  ABI_FREE(evec)
  ABI_FREE(resid)
+
+ ! The Hamiltonian has references to these arrays so we should not free them at this level.
+ !ABI_FREE(vlocal)
+ !ABI_FREE(ph3d)
+ !ABI_FREE(kpg_k)
+ !ABI_FREE(kinpw_k)
+ !ABI_FREE(ffnl_k)
 
 end subroutine nscf_solve
 !!***

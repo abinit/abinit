@@ -1174,7 +1174,6 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
    if (sigma%imag_only .and. sigma%qint_method == 1) then
      call qpoints_oracle(sigma, dtset, cryst, ebands, sigma%qibz, sigma%nqibz, sigma%nqbz, sigma%qbz, qselect, comm)
    end if
-   !call dvdb%ftqcache_build(nfftf, ngfftf, sigma%nqibz, sigma%qibz, dtset%dvdb_qcache_mb, qselect, sigma%itreat_qibz, comm)
 
  else
    ABI_MALLOC(qselect, (dvdb%nqpt))
@@ -1196,7 +1195,6 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
      ABI_CHECK(db_iqpt /= -1, sjoin("Could not find IBZ q-point:", ktoa(sigma%qibz(:, iq_ibz)), "in the DVDB file."))
      itreatq_dvdb(db_iqpt) = 1
    end do
-   !call dvdb%qcache_read(nfftf, ngfftf, dtset%dvdb_qcache_mb, qselect, itreatq_dvdb, comm)
    ABI_FREE(itreatq_dvdb)
  end if
 
@@ -2290,14 +2288,6 @@ end if
      end do ! iq_ibz_k (sum over q-points in IBZ_k)
 
      call cwtime_report(" Fan-Migdal q-loop", cpu_qloop, wall_qloop, gflops_qloop)
-
-     ! Print cache stats.
-     !if (sigma%use_ftinterp) then
-     !  !call dvdb%ft_qcache%report_stats()
-     !  if (dvdb%ft_qcache%v1scf_3natom_request /= xmpi_request_null) call xmpi_wait(dvdb%ft_qcache%v1scf_3natom_request, ierr)
-     !else
-     !  call dvdb%qcache%report_stats()
-     !end if
 
      ABI_FREE(sigma%e0vals)
      ABI_FREE(kets_k)
@@ -4483,7 +4473,6 @@ subroutine sigmaph_setup_qloop(self, dtset, cryst, ebands, dvdb, spin, ikcalc, n
  character(len=5000) :: msg
 !arrays
  integer,allocatable :: mask_qibz_k(:), imask(:), qtab(:), ineed_qibz(:), ineed_qdvdb(:)
-
 ! *************************************************************************
 
  my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
@@ -4546,7 +4535,6 @@ subroutine sigmaph_setup_qloop(self, dtset, cryst, ebands, dvdb, spin, ikcalc, n
        end if
 
        ! Redistribute relevant q-points inside qpt_comm taking into account itreat_qibz
-       ! I may need to update qcache after this operation -->  build ineed_* table.
        ! Must handle two cases: potentials from DVDB or Fourier-interpolated.
        if (self%use_ftinterp) then
          ABI_ICALLOC(ineed_qibz, (self%nqibz))
@@ -4570,11 +4558,6 @@ subroutine sigmaph_setup_qloop(self, dtset, cryst, ebands, dvdb, spin, ikcalc, n
              if (ii == 2) then
                cnt = cnt + 1
                self%myq2ibz_k(cnt) = qtab(iq)
-               !if (self%use_ftinterp) then
-               !  if (.not. allocated(dvdb%ft_qcache%key(iq_ibz)%v1scf)) ineed_qibz(iq_ibz) = 1
-               !else
-               !  if (.not. allocated(dvdb%qcache%key(iq_dvdb)%v1scf)) ineed_qdvdb(iq_dvdb) = 1
-               !end if
              end if
            end if
          end do
@@ -4595,15 +4578,6 @@ subroutine sigmaph_setup_qloop(self, dtset, cryst, ebands, dvdb, spin, ikcalc, n
         " Load balance inside qpt_comm ranges between: [",  efact_min, efact_max, "] (should be ~1)"
        call wrtout(std_out, msg)
        ABI_WARNING_IF(self%my_nqibz_k == 0, "my_nqibz_k == 0")
-
-       ! Make sure each node has the q-points we need. Try not to break qcache_size_mb contract!
-       !if (self%use_ftinterp) then
-       !  ! Update cache by Fourier interpolating W(r,R)
-       !  call dvdb%ftqcache_update_from_ft(nfftf, ngfftf, self%nqibz, self%qibz, ineed_qibz, comm)
-       !else
-       !  ! Update cache. Perform collective IO inside comm if needed.
-       !  call dvdb%qcache_update_from_file(nfftf, ngfftf, ineed_qdvdb, comm)
-       !end if
 
        ABI_SFREE(ineed_qibz)
        ABI_SFREE(ineed_qdvdb)
