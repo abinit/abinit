@@ -237,7 +237,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  integer,allocatable :: kg_k(:,:), kg_kq(:,:), kg_kmp(:,:), kg_kqmp(:,:)
  integer,allocatable :: gbound_k(:,:), gbound_kq(:,:), gbound_kmp(:,:), gbound_kqmp(:,:), gbound_c(:,:), gbound_x(:,:)
  !integer,allocatable :: rank_band(:), root_bcalc(:)
- integer,allocatable :: nband(:,:), qselect(:), wfd_istwfk(:), count_bk(:,:)
+ integer,allocatable :: nband(:,:), wfd_istwfk(:), count_bk(:,:)
  integer,allocatable :: qibz2dvdb(:) !, displs(:), recvcounts(:)
  integer,allocatable :: iq_buf(:,:), done_qbz_spin(:,:) !, my_iqibz_inds(:) !, iperm(:)
  integer(i1b),allocatable :: itreat_qibz(:)
@@ -684,15 +684,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
    call dvdb%ftinterp_setup(dtset%ddb_ngqpt, qptopt, 1, dtset%ddb_shiftq, nfftf, ngfftf, comm_rpt)
    call drhodb%ftinterp_setup(dtset%ddb_ngqpt, qptopt, 1, dtset%ddb_shiftq, nfftf, ngfftf, comm_rpt)
 
-   ! Build q-cache in the *dense* IBZ using the global mask qselect and itreat_qibz.
-   ABI_MALLOC(qselect, (gstore%nqibz))
-   qselect = 1
-   !call dvdb%ftqcache_build(nfftf, ngfftf, gstore%nqibz, gstore%qibz, dtset%dvdb_qcache_mb, qselect, itreat_qibz, comm)
-   !call drhodb%ftqcache_build(nfftf, ngfftf, gstore%nqibz, gstore%qibz, dtset%dvdb_qcache_mb, qselect, itreat_qibz, comm)
-
  else
-   ABI_MALLOC(qselect, (dvdb%nqpt))
-   qselect = 1
  end if
 
  call dvdb%print(prtvol=dtset%prtvol)
@@ -707,14 +699,11 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
      ABI_CHECK(db_iqpt /= -1, sjoin("Could not find IBZ q-point:", ktoa(gstore%qibz(:, iq_ibz)), "in the DVDB file."))
      itreatq_dvdb(db_iqpt) = 1
    end do
-   !call dvdb%qcache_read(nfftf, ngfftf, dtset%dvdb_qcache_mb, qselect, itreatq_dvdb, comm)
-   !call drhodb%qcache_read(nfftf, ngfftf, dtset%dvdb_qcache_mb, qselect, itreatq_dvdb, comm)
    ABI_FREE(itreatq_dvdb)
  end if
 
  ABI_FREE(itreat_qibz)
  ABI_FREE(qibz2dvdb)
- ABI_FREE(qselect)
 
  ! The GS density is needed for vxc1_qq and the model dielectric function
  ABI_CALLOC(rhor, (nfftf, nspden))

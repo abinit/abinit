@@ -3180,9 +3180,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
 !arrays
  integer :: g0_k(3), g0_kq(3), g0_q(3), work_ngfft(18),gmax(3),indkk_kq(6,1), units(2)
  integer :: mapc_qq2dvdb(6) ! mapl_k(6), mapl_kq(6), mapl_kqmp(6), mapl_kmp(6), mapc_qq(6),
- integer(i1b),allocatable :: itreat_qibz(:)
- integer(i1b),allocatable :: itreatq_dvdb(:)
- integer,allocatable :: kg_k(:,:), kg_kq(:,:), nband(:,:), wfd_istwfk(:), qselect(:)
+ integer,allocatable :: kg_k(:,:), kg_kq(:,:), nband(:,:), wfd_istwfk(:)
  integer,allocatable :: iq_buf(:,:), done_qbz_spin(:,:), my_iqibz_inds(:)
  !integer,allocatable :: qibz2dvdb(:) !, displs(:), recvcounts(:)
  real(dp) :: kk_bz(3),kq_bz(3),kk_ibz(3),kq_ibz(3), qq_bz(3), qq_ibz(3), vk(3)
@@ -3275,29 +3273,8 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
    call wrtout(units, " Cannot find all IBZ q-points in the DVDB --> Activating Fourier interpolation.")
    call dvdb%ftinterp_setup(dtset%ddb_ngqpt, gstore%qptopt, 1, dtset%ddb_shiftq, nfftf, ngfftf, comm_rpt)
 
-   ! Build q-cache in the *dense* IBZ using the global mask qselect and itreat_qibz.
-   !ABI_MALLOC(itreat_qibz, (gstore%nqibz))
-   !ABI_MALLOC(qselect, (gstore%nqibz))
-   !qselect = 0; itreat_qibz = 0
-   !call dvdb%ftqcache_build(nfftf, ngfftf, gstore%nqibz, gstore%qibz, dtset%dvdb_qcache_mb, qselect, itreat_qibz, gstore%comm)
-   !ABI_FREE(itreat_qibz)
-   !ABI_FREE(qselect)
-
  else
    call wrtout(units, " DVDB file contains all q-points in the IBZ --> Reading DFPT potentials from file.")
-   ! Need to translate itreat_qibz into itreatq_dvdb.
-   ! FIXME: Not used
-   !ABI_ICALLOC(qselect, (dvdb%nqpt))
-   !ABI_ICALLOC(itreatq_dvdb, (dvdb%nqpt))
-   !do iq_ibz=1,gstore%nqibz
-   !  if (itreat_qibz(iq_ibz) == 0) cycle
-   !  db_iqpt = qibz2dvdb(iq_ibz)
-   !  ABI_CHECK(db_iqpt /= -1, sjoin("Could not find IBZ q-point:", ktoa(gstore%qibz(:, iq_ibz)), "in the DVDB file."))
-   !  itreatq_dvdb(db_iqpt) = 1
-   !end do
-   !call dvdb%qcache_read(nfftf, ngfftf, dtset%dvdb_qcache_mb, qselect, itreatq_dvdb, comm)
-   !ABI_FREE(qselect)
-   !ABI_FREE(itreatq_dvdb)
  end if
 
  ! Initialize the wave function descriptor.
@@ -3585,8 +3562,8 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
                             displ_red_qbz=displ_red_qbz)
      end if
 
-     ! Version with qcache.
      if (use_ftinterp) then
+       ! Fourier interpolation.
        call dvdb%get_ftqbz(cryst, qq_bz, qq_ibz, gqk%my_q2ibz(:, my_iq), cplex, nfftf, ngfftf, v1scf, &
                            gqk%pert_comm%value)
      else
@@ -3796,8 +3773,6 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
        write(msg,'(2(a,i0),a)')" My q-point [", my_iq, "/", gqk%my_nq, "]"
        call cwtime_report(msg, cpu_q, wall_q, gflops_q); if (my_iq == LOG_MODQ) call wrtout(std_out, "...", do_flush=.True.)
      end if
-     ! Print cache stats.
-     !if (my_rank == master) call dvdb%ft_qcache%report_stats()
    end do ! my_iq
 
    ! Dump the remainder.
