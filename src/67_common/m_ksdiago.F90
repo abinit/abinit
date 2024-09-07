@@ -1003,7 +1003,11 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
 
  ! See sequence of calls in vtorho.
  ! Check that usekden is not 0 if want to use vxctau
- !with_vxctau = (present(vxctau).and.dtset%usekden/=0)
+ !with_vxctau = dtset%usekden/=0
+
+ if (dtset%usekden/=0) then
+   ABI_ERROR("nscf_init with mgga not yet coded")
+ end if
 
  !====================
  !=== Check input ====
