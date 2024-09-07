@@ -34,20 +34,18 @@ module m_eph_path
  use m_hamiltonian
  use m_pawcprj
  use m_ephtk
- !use netcdf
- !use m_nctk
+ use netcdf
+ use m_nctk
  use m_dtset
  use m_dtfil
-! use m_clib
-! use m_mkffnl
-!
+ !use m_clib
+ !use m_mkffnl
+
  use defs_abitypes,    only : mpi_type
  use defs_datatypes,   only : ebands_t, pseudopotential_type
  use m_time,           only : cwtime, cwtime_report, timab, sec2str
- use m_fstrings,       only : itoa, ftoa, sjoin, ktoa, ltoa
-! use m_numeric_tools,  only : arth, c2r, get_diag, linfit, iseven, simpson_cplx, simpson, print_arr, inrange
-! use m_fftcore,        only : ngfft_seq, sphereboundary, get_kg, kgindex
- use m_cgtools,        only : cg_zdotc !, cg_real_zdotc, cg_zgemm, fxphas_seq
+ use m_fstrings,       only : itoa, ftoa, sjoin, ktoa, ltoa, strcat
+ use m_cgtools,        only : cg_zdotc
  use m_crystal,        only : crystal_t
  use m_getgh1c,        only : getgh1c, rf_transgrid_and_pack, getgh1c_setup
  use m_pawang,         only : pawang_type
@@ -55,9 +53,9 @@ module m_eph_path
  use m_pawtab,         only : pawtab_type
  use m_pawfgr,         only : pawfgr_type
 ! use m_phonons,        only : phstore_t, phstore_new
- use m_pstat,          only : pstat_t
+ !use m_pstat,          only : pstat_t
  use m_cgwf,           only : nscf_t
- use m_bz_mesh,        only : kpath_t, kpath_new  !isamek, make_path,
+ use m_bz_mesh,        only : kpath_t, kpath_new
 
  implicit none
 
@@ -114,11 +112,11 @@ subroutine eph_path_run(dtfil, dtset, cryst, dvdb, ifc, &
 
 !Local variables ------------------------------
 !scalars
- integer,parameter :: istwfk_1 = 1, tim_getgh1c = 1, berryopt0 = 0, useylmgr1 = 0 !, master = 0, ndat1 = 1
+ integer,parameter :: istwfk_1 = 1, tim_getgh1c = 1, berryopt0 = 0, useylmgr1 = 0, master = 0 !, ndat1 = 1
  integer :: sij_opt,usecprj,usevnl,optlocal,optnl,opt_gvnlx1
- integer :: spin, iqpt, nband, ierr, npw_k, npw_kq, my_rank, nprocs, n1, n2, n3, n4, n5, n6, cplex
+ integer :: spin, iq, ik, nk_path, nq_path, nband, ierr, npw_k, npw_kq, my_rank, nprocs, n1, n2, n3, n4, n5, n6, cplex
  integer :: natom, natom3, nsppol, nspden, nspinor, cnt, qptopt, db_iqpt
- integer :: nfft,nfftf,mgfft,mgfftf, my_npert, my_ip, idir, ipert, ipc, nkpg, nkpg1 !, qbuf_size, iqbuf_cnt, root_ncid, spin_ncid, ncerr
+ integer :: nfft,nfftf,mgfft,mgfftf, my_npert, my_ip, idir, ipert, ipc, nkpg, nkpg1, ncerr, ncid
  integer :: in_k, im_kq
  real(dp) :: cpu_all,wall_all,gflops_all, eig0nk, eshift
  logical :: qq_is_gamma, use_ftinterp, gen_eigenpb
@@ -126,13 +124,15 @@ subroutine eph_path_run(dtfil, dtset, cryst, dvdb, ifc, &
  type(gs_hamiltonian_type) :: gs_hamk, gs_hamkq
  type(rf_hamiltonian_type) :: rf_hamkq
  type(nscf_t) :: nscf
- type(kpath_t) :: qpath
+ type(kpath_t) :: qpath, kpath
  type(xcomm_t) :: pert_comm, spin_comm, qpt_comm
+ character(len=1) :: which_fixed
+ character(len=fnlen) :: out_path
  character(len=5000) :: msg
 !!arrays
  integer :: units(2), ngfft(18),ngfftf(18)
  integer,allocatable :: kg_k(:,:), kg_kq(:,:), qmap_symrec(:,:)
- real(dp) :: kk(3), qq(3), kq(3), phfrq(3*cryst%natom)
+ real(dp) :: kk(3), qq(3), kq(3), phfrq(3*cryst%natom), fixed_point(3), fake_path(3,2)
  real(dp),allocatable :: grad_berry(:,:), kinpw1(:), dkinpw(:)
  real(dp),allocatable :: cg_k(:,:,:), cg_kq(:,:,:), gsc_k(:,:,:), gsc_kq(:,:,:),eig_k(:), eig_kq(:)
  real(dp),allocatable :: v1scf(:,:,:,:), vlocal1(:,:,:,:), vlocal(:,:,:,:), gkq_atm(:,:,:,:), gkq_nu(:,:,:,:)
@@ -155,14 +155,36 @@ subroutine eph_path_run(dtfil, dtset, cryst, dvdb, ifc, &
  my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
  units = [std_out, ab_out]
 
- !call pstat%from_pid(); call pstat%print([std_out], header="Memory at the beginning of eph_path")
-
  ! Copy important dimensions
  natom = cryst%natom; natom3 = 3 * natom; nsppol = dtset%nsppol; nspinor = dtset%nspinor
  nspden = dtset%nspden
 
+ ! TODO: Make sure input variables are defined propertly!
  ! Build q-path.
- qpath = kpath_new(dtset%ph_qpath(:,1:dtset%ph_nqpath), cryst%gprimd, dtset%ph_ndivsm)
+ which_fixed = "k"
+ fixed_point = zero
+ select case (which_fixed)
+ case ("k")
+   qpath = kpath_new(dtset%ph_qpath(:,1:dtset%ph_nqpath), cryst%gprimd, dtset%ph_ndivsm)
+   nq_path = qpath%npts
+   call qpath%print(header="q-point path for g(k,q)")
+   fake_path(:,1) = fixed_point
+   fake_path(:,2) = fixed_point + one
+   kpath = kpath_new(fake_path, cryst%gprimd, 0)
+   nk_path = 1
+
+ case ("q")
+   kpath = kpath_new(dtset%kptbounds(:,1:dtset%nkpath), cryst%gprimd, dtset%ndivsm)
+   nk_path = kpath%npts
+   call kpath%print(header="k-point path for g(k,q)")
+   fake_path(:,1) = fixed_point
+   fake_path(:,2) = fixed_point + one
+   qpath = kpath_new(fake_path, cryst%gprimd, 0)
+   nq_path = 1
+
+ case default
+   ABI_ERROR(sjoin("Invalid value of which_fixed:", which_fixed))
+ end select
 
  ! Load KS potential from file.
  call nscf%init(dtset, dtfil, cryst, comm)
@@ -180,12 +202,11 @@ subroutine eph_path_run(dtfil, dtset, cryst, dvdb, ifc, &
  my_npert = natom3
  if (pert_comm%nproc > 1) then
    ! Activate parallelism over perturbations
-   !call dvdb%set_pert_distrib(sigma%my_npert, natom3, sigma%my_pinfo, sigma%pert_table, pert_comm%value)
+   !call dvdb%set_pert_distrib(my_npert, natom3, sigma%my_pinfo, sigma%pert_table, pert_comm%value)
  end if
 
  qptopt = dtset%kptopt; if (dtset%qptopt /= 0) qptopt = dtset%qptopt
-
- call dvdb%need_ftinterp(qpath%npts, qpath%points, qptopt, qmap_symrec, use_ftinterp)
+ call dvdb%need_ftinterp(nq_path, qpath%points, qptopt, qmap_symrec, use_ftinterp)
 
  if (.not. use_ftinterp .and. dtset%eph_use_ftinterp /= 0) then
    ABI_WARNING("Enforcing FT interpolation for q-points even if it's not strictly needed.")
@@ -215,26 +236,84 @@ subroutine eph_path_run(dtfil, dtset, cryst, dvdb, ifc, &
  ABI_MALLOC(gkq_atm, (2, nband, nband, natom3))
  ABI_MALLOC(gkq_nu, (2, nband, nband, natom3))
 
- ! Spherical Harmonics for useylm == 1.
- ! FIXME: These arrays should be allocated with npw_k and npw_kq. See getgh1c_setup
+ out_path = strcat(dtfil%filnam_ds(4), "_GPATH.nc")
 
+ if (my_rank == master) then
+   NCF_CHECK(nctk_open_create(ncid, out_path, xmpi_comm_self))
+
+   ! Write the abinit header with metadata, structure and occupancies.
+   !gstore_fform = fform_from_ext("GSTORE.nc")
+   !NCF_CHECK(wfk0_hdr%ncwrite(ncid, gstore_fform, spinat=dtset%spinat, nc_define=.True.))
+
+   ! Add crystalline structure.
+   NCF_CHECK(cryst%ncwrite(ncid))
+   ! Add eigenvalues and occupations.
+   !NCF_CHECK(ebands_ncwrite(gstore%ebands, ncid))
+
+   ! Write gstore dimensions
+   ncerr = nctk_def_dims(ncid, [ &
+      nctkdim_t("nq_path", nq_path), &
+      nctkdim_t("nk_path", nk_path), &
+      !nctkdim_t("gstore_max_nb", maxval(gstore%brange_spin(2, :) - gstore%brange_spin(1, :) + 1) ), &
+      nctkdim_t("natom", cryst%natom), &
+      nctkdim_t("natom3", 3 * natom3) &
+   ], defmode=.True.)
+   NCF_CHECK(ncerr)
+
+   !ncerr = nctk_def_iscalars(ncid, [character(len=nctk_slen) :: "gstore_with_vk", "gstore_qptopt", "gstore_completed"])
+   !NCF_CHECK(ncerr)
+   !ncerr = nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: "fermi_energy", "smearing_width"])
+   !NCF_CHECK(ncerr)
+
+   ncerr = nctk_def_arrays(ncid, [ &
+     nctkarr_t("kpath", "dp", "three, nk_path"), &
+     nctkarr_t("qpath", "dp", "three, nq_path"), &
+     !nctkarr_t("gstore_gmode", "c", "fnlen"), &                    ! FIXME fnlen
+     !nctkarr_t("phfreqs_qpath", "dp", "natom3, nq_path"), &
+     !nctkarr_t("pheigvec_cart_qpath", "dp", "two, three, natom, natom3, nq_path"), &
+     nctkarr_t("which_fixed", "c", "one"), &
+     nctkarr_t("fixed_point", "dp", "three") &
+   ])
+   NCF_CHECK(ncerr)
+
+   ! Write arrays
+   NCF_CHECK(nctk_set_datamode(ncid))
+   NCF_CHECK(nf90_put_var(ncid, vid("kpath"), kpath%points(:,1:nk_path)))
+   NCF_CHECK(nf90_put_var(ncid, vid("qpath"), qpath%points(:,1:nq_path)))
+   NCF_CHECK(nf90_put_var(ncid, vid("which_fixed"), which_fixed))
+   NCF_CHECK(nf90_put_var(ncid, vid("fixed_point"), fixed_point))
+
+   NCF_CHECK(nf90_close(ncid))
+ end if
+
+ ! Make sure the nc file has been written by master before continuing.
+ call xmpi_barrier(comm)
+
+ ! TODO:
+ ! 1) Add possibility of fixing k or q and selecting bands
+ ! 2) Save g^2 in nc format without any average. This operation will be performed by Abipy (need ph freqs and eigenergies)
+ ! 3) MPI-parallelism (spin, k/q-points and perturbations)
+
+ ! Open GPATH file
+ NCF_CHECK(nctk_open_modify(ncid, out_path, comm))
 
  do spin=1,dtset%nsppol
+   do ik=1,nk_path
+
    ! Compute psi_nk
-   ! The Hamiltonian has pointers to the _k arrays in out so we cannot dellocate them till the end.
+   ! NB: The Hamiltonian has pointers to the _k arrays in out so we cannot dellocate them till the end.
    ! This is the reason why we use vlocal_k (vlocal_kq) although this term does not depend on k
-   kk = zero
+   kk = kpath%points(:, ik)
    call nscf%solve(spin, kk, istwfk_1, nband, cryst, dtset, dtfil, psps, pawtab, pawfgr, &
                    npw_k, kg_k, kpg_k, ph3d_k, kinpw_k, ffnl_k, vlocal_k, cg_k, gsc_k, eig_k, gs_hamk, msg, ierr) ! out
    ABI_CHECK(ierr == 0, msg)
 
    ! Allocate vlocal. Note nvloc
-   ! I set vlocal to huge to trigger possible bugs (DFPT routines should not access the data)
    ABI_MALLOC(vlocal, (n4, n5, n6, gs_hamk%nvloc))
    ABI_MALLOC(ylm_k, (npw_k, psps%mpsang*psps%mpsang*psps%useylm))
 
-   do iqpt=1,qpath%npts
-     qq = qpath%points(:,iqpt)
+   do iq=1,nq_path
+     qq = qpath%points(:,iq)
      qq_is_gamma = sum(qq**2) < tol14
      kq = kk + qq
 
@@ -332,7 +411,6 @@ subroutine eph_path_run(dtfil, dtset, cryst, dvdb, ifc, &
        do in_k=1,nband
          do im_kq=1,nband
            gkq_atm(:, im_kq, in_k, ipc) = cg_zdotc(npw_kq*nspinor, cg_kq(1,1,im_kq), h1kets_kq(1,1,in_k))
-           !print *, "gqk:", gkq_atm(:, im_kq, in_k, ipc)
          end do
        end do
      end do ! my_ip
@@ -341,6 +419,8 @@ subroutine eph_path_run(dtfil, dtset, cryst, dvdb, ifc, &
      if (pert_comm%nproc > 1) call xmpi_sum(gkq_atm, pert_comm%value, ierr)
 
      call ephtk_gkknu_from_atm(nband, nband, 1, natom, gkq_atm, phfrq, displ_red, gkq_nu)
+     ! TODO
+     !NCF_CHECK(nf90_put_var(ncid, vid("gkq2_nu"), gkq2_nu, start=1))
 
      ABI_FREE(gs1c)
      ABI_FREE(ylm_kq)
@@ -358,7 +438,7 @@ subroutine eph_path_run(dtfil, dtset, cryst, dvdb, ifc, &
      ABI_FREE(gsc_kq)
      ABI_FREE(h1kets_kq)
      call gs_hamkq%free()
-   end do ! iqpt
+   end do ! iq
 
    ABI_FREE(ylm_k)
    ABI_FREE(vlocal)
@@ -372,6 +452,7 @@ subroutine eph_path_run(dtfil, dtset, cryst, dvdb, ifc, &
    ABI_FREE(cg_k)
    ABI_FREE(gsc_k)
    call gs_hamk%free()
+ end do ! ik
  end do ! spin
 
  ! Free memory
@@ -386,11 +467,20 @@ subroutine eph_path_run(dtfil, dtset, cryst, dvdb, ifc, &
  ABI_FREE(cwaveprj0)
 
  call qpath%free()
+ call kpath%free()
  call nscf%free()
 
  ! Average matrix elements over degenerate states (electrons at k, k+q, and phonons
 
+ NCF_CHECK(nf90_close(ncid))
+
  call cwtime_report(" eph_path: MPI barrier before returning.", cpu_all, wall_all, gflops_all, end_str=ch10, comm=comm)
+
+contains
+ integer function vid(var_name)
+   character(len=*),intent(in) :: var_name
+   vid = nctk_idname(ncid, var_name)
+ end function vid
 
 end subroutine eph_path_run
 !!***

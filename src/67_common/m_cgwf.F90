@@ -2620,8 +2620,9 @@ subroutine nscf_solve(nscf, isppol, kpt, istwf_k, nband, cryst, dtset, dtfil, ps
    ! Exit loop over inonsc if converged
    if (max_resid < dtset%tolwfr) then
      ierr = 0
-     call wrtout(std_out, sjoin("   NSCF loop completed after", itoa(inonsc), "iterations. max_resid:", &
-                 ftoa(max_resid), " < tolwfr:", ftoa(dtset%tolwfr)))
+     err_msg = sjoin("   NSCF loop for kpt:", ktoa(kpt), " completed in", itoa(inonsc), "iterations. max_resid:")
+     err_msg = sjoin(err_msg, ftoa(max_resid)) ! , " < tolwfr:", ftoa(dtset%tolwfr))
+     call wrtout(std_out, err_msg)
      exit
    end if
  end do ! inonsc
