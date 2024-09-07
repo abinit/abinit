@@ -2278,6 +2278,8 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    dtset%pawcpxocc=2
  else if (dtset%pawspnorb>0.and.(dtset%kptopt<=0.or.dtset%kptopt>=3)) then
    if (dtset%optdriver/=RUNL_GSTATE.or.dtset%ionmov<6.or.dtset%iscf<10) dtset%pawcpxocc=2
+ else if (ANY(ABS(dtset%nucdipmom)>tol8)) then
+   dtset%pawcpxocc=2
  end if
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'pawcross',tread,'INT')
