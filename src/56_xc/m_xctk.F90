@@ -167,8 +167,8 @@ subroutine xcden(cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden,qphon,rho
    if(ngrad==2)then
      ABI_MALLOC(workgr,(2,nfft))
      if (need_laplacian.or.need_derivative2) then
-	   ABI_MALLOC(workgr2,(2,nfft))
-	   workgr2(:,ispden)=zero
+       ABI_MALLOC(workgr2,(2,nfft))
+       workgr2(:,ispden)=zero
      end if
      ABI_MALLOC(gcart1,(n1))
      ABI_MALLOC(gcart2,(n2))
@@ -270,22 +270,22 @@ subroutine xcden(cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden,qphon,rho
 
          !Need a second g-vector component for some 2nd derivatives
          if (idir/=jdir) then
-		   do i1=1,n1
-			 ig1=i1-(i1/id1)*n1-1
-			 g2cart1(i1)=gprimd(jdir,1)*two_pi*(dble(ig1)+qphon(1))
-		   end do
+           do i1=1,n1
+             ig1=i1-(i1/id1)*n1-1
+             g2cart1(i1)=gprimd(jdir,1)*two_pi*(dble(ig1)+qphon(1))
+           end do
   !        Note that the G <-> -G symmetry must be maintained
-		   if(mod(n1,2)==0 .and. qeq0==1)gcart1(n1/2+1)=zero
-		   do i2=1,n2
-			 ig2=i2-(i2/id2)*n2-1
-			 g2cart2(i2)=gprimd(jdir,2)*two_pi*(dble(ig2)+qphon(2))
-		   end do
-		   if(mod(n2,2)==0 .and. qeq0==1)gcart2(n2/2+1)=zero
-		   do i3=1,n3
-			 ig3=i3-(i3/id3)*n3-1
-			 g2cart3(i3)=gprimd(jdir,3)*two_pi*(dble(ig3)+qphon(3))
-		   end do
-		   if(mod(n3,2)==0 .and. qeq0==1)gcart3(n3/2+1)=zero
+           if(mod(n1,2)==0 .and. qeq0==1)gcart1(n1/2+1)=zero
+           do i2=1,n2
+             ig2=i2-(i2/id2)*n2-1
+             g2cart2(i2)=gprimd(jdir,2)*two_pi*(dble(ig2)+qphon(2))
+           end do
+           if(mod(n2,2)==0 .and. qeq0==1)gcart2(n2/2+1)=zero
+           do i3=1,n3
+             ig3=i3-(i3/id3)*n3-1
+             g2cart3(i3)=gprimd(jdir,3)*two_pi*(dble(ig3)+qphon(3))
+           end do
+           if(mod(n3,2)==0 .and. qeq0==1)gcart3(n3/2+1)=zero
          end if
 
 !        MG: Be careful here with OMP due to ifft. Disabled for the time being.
