@@ -24546,7 +24546,7 @@ Variable(
     dimensions="(2)",
     defaultval=[0, 1],
     mnemonics="VARiational Polaron EQuations: Gaussian PaRameters -- electronic ENERGY",
-    requires="[[eph_task]] == 13 and [[varpeq_aseed]] == \"gau_energy\"",
+    requires='[[eph_task]] == 13 and [[varpeq_aseed]] == "gau_energy"',
     added_in_version="10.1.4",
     text=r"""
 If [[varpeq_aseed]] == "gau_energy", this variable defines the mean value and the
@@ -24557,7 +24557,7 @@ See [[varpeq_aseed]] for details.
 ),
 
 
-variable(
+Variable(
     abivarname="varpeq_gpr_length",
     varset="eph",
     vartype="real",
@@ -24565,7 +24565,7 @@ variable(
     dimensions="(3)",
     defaultval=(1, 1, 1),
     mnemonics="variational polaron equations: gaussian parameters -- localization length",
-    requires="[[eph_task]] == 13 and [[varpeq_aseed]] == \"gau_length\"",
+    requires='[[eph_task]] == 13 and [[varpeq_aseed]] == "gau_length"',
     added_in_version="10.1.4",
     text=r"""
 if [[varpeq_aseed]] == "gau_length", this variable defines defines the estimated polaron
@@ -24575,8 +24575,7 @@ see [[varpeq_aseed]] for details.
 """,
 ),
 
-
-variable(
+Variable(
     abivarname="eph_fix_korq",
     varset="eph",
     vartype="string",
@@ -24590,7 +24589,7 @@ variable(
 """,
 ),
 
-variable(
+Variable(
     abivarname="eph_fix_wavevec",
     varset="eph",
     vartype="real",
@@ -24641,11 +24640,11 @@ To compute e-ph matrix as a function of q
 ),
 
 
-variable(
+Variable(
     abivarname="eph_bstart",
     varset="eph",
     vartype="int",
-    topics=['ElPhonInt_basic'],
+    topics=['ElPhonInt_useful'],
     dimensions="scalar",
     defaultval=1,
     mnemonics="Electron-PHonon: Band START",
@@ -24654,6 +24653,5 @@ variable(
     text=r"""
 """,
 ),
-
 
 ]

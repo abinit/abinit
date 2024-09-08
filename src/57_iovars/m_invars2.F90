@@ -2913,7 +2913,7 @@ if (dtset%usekden==1) then
  if(tread==1) dtset%tl_radius=dprarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'eph_fix_korq',tread,'KEY', key_value=key_value)
- if(tread==1) dtset%eph_fix_korq = key_value
+ if(tread==1) dtset%eph_fix_korq = key_value(1:1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'write_files',tread,'KEY', key_value=key_value)
  if(tread==1) dtset%write_files = key_value

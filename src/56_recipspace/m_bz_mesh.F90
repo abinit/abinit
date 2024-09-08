@@ -2853,7 +2853,7 @@ subroutine kpath_print(kpath, units, header,prtvol, pre)
 
 !Local variables-------------------------------
  integer :: my_prtvol,ii
- character(len=500) :: my_pre, msg
+ character(len=500) :: my_pre !, msg
 
 ! *************************************************************************
 
