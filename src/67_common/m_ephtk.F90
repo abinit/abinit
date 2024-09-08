@@ -145,7 +145,7 @@ subroutine ephtk_set_pertables(natom, my_npert, pert_table, my_pinfo, comm)
 !Arguments ------------------------------------
  integer,intent(in) :: natom, my_npert, comm
 !arrays
- integer,allocatable :: pert_table(:,:), my_pinfo(:,:)
+ integer,allocatable,intent(out) :: pert_table(:,:), my_pinfo(:,:)
 
 !Local variables ------------------------------
 !scalars
