@@ -319,7 +319,7 @@ subroutine eph_path_run(dtfil, dtset, cryst, dvdb, ifc, &
       nctkdim_t("nband", nband), &
       nctkdim_t("nb_in_g", nb_in_g), &
       nctkdim_t("natom", cryst%natom), &
-      nctkdim_t("natom3", 3 * natom3) &
+      nctkdim_t("natom3", natom3) &
    ], defmode=.True.)
    NCF_CHECK(ncerr)
 
@@ -369,8 +369,11 @@ subroutine eph_path_run(dtfil, dtset, cryst, dvdb, ifc, &
  ! Open GPATH file
  NCF_CHECK(nctk_open_modify(ncid, gpath_path, comm))
 
+ ! Loop over spins (MPI parallelized)
  do my_is=1,my_nspins
    spin = my_spins(my_is)
+
+   ! Loop over k-points in k-path (MPI parallelized)
    do my_ik=1,my_nkpath
      ik = my_ik_inds(my_ik)
      ! Compute psi_nk
@@ -389,6 +392,8 @@ subroutine eph_path_run(dtfil, dtset, cryst, dvdb, ifc, &
      ABI_MALLOC(vlocal, (n4, n5, n6, gs_hamk%nvloc))
      ABI_MALLOC(ylm_k, (npw_k, psps%mpsang*psps%mpsang*psps%useylm))
 
+     ! Loop over q-points in k-path (MPI parallelized)
+     ! All procs in pert_comm enter this loop with the same ik/iq indices.
      do my_iq=1,my_nqpath
        iq = my_iq_inds(my_iq)
        qq = qpath%points(:,iq); qq_is_gamma = sum(qq**2) < tol14
@@ -446,7 +451,7 @@ subroutine eph_path_run(dtfil, dtset, cryst, dvdb, ifc, &
        ! Allocate vlocal1 with correct cplex. Note nvloc and my_npert.
        ABI_MALLOC(vlocal1, (cplex*n4, n5, n6, gs_hamkq%nvloc))
 
-       ! Loop over atomic perturbations, apply H1_{kappa, alpha} and compute gkq_atm.
+       ! Loop over my atomic perturbations: apply H1_{kappa, alpha} and compute gkq_atm.
        gkq_atm = zero
        do my_ip=1,my_npert
          idir = dvdb%my_pinfo(1, my_ip); ipert = dvdb%my_pinfo(2, my_ip); ipc = dvdb%my_pinfo(3, my_ip)
@@ -503,11 +508,12 @@ subroutine eph_path_run(dtfil, dtset, cryst, dvdb, ifc, &
        call ephtk_gkknu_from_atm(nb_in_g, nb_in_g, 1, natom, gkq_atm, phfreqs, displ_red, gkq_nu)
 
        if (pert_comm%me == master) then
-         ! Write g^2 for this q.
+         ! Write |g|^2 for this q.
          gkq2_nu = gkq_nu(1,:,:,:)**2 + gkq_nu(2,:,:,:)** 2
          NCF_CHECK(nf90_put_var(ncid, vid("gkq2_nu"), gkq2_nu, start=[1,1,1,iq,ik,spin]))
          ! Write phonons for this q.
          if (spin == 1) then
+           !print *, "Writing phonons at iq:", iq
            NCF_CHECK(nf90_put_var(ncid, vid("phfreqs"), phfreqs_ev, start=[1,iq]))
            NCF_CHECK(nf90_put_var(ncid, vid("phdispl_cart"), displ_cart, start=[1,1,1,1,iq]))
          end if
