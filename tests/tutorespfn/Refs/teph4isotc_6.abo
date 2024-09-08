@@ -433,12 +433,6 @@ meta: {optdriver: 7, eph_task: 11, }
  kptopt: 1
  qptopt: 1
  with_vk: 1
- 
-  === MPI distribution ===
-P Number of CPUs for parallelism over perturbations: 1
-P Number of perturbations treated by this CPU: 9
-P Number of CPUs for parallelism over q-points: 1
-P Number of CPUs for parallelism over k-points: 1
 
  gqk_cplex: 2
  gqk_bstart: 3
@@ -447,6 +441,13 @@ P Number of CPUs for parallelism over k-points: 1
  gqk_my_npert: 9
  gqk_my_nk: -1
  gqk_my_nq: -1
+
+  === MPI distribution ===
+P Number of CPUs for parallelism over perturbations: 1
+P Number of perturbations treated by this CPU: 9
+P Number of CPUs for parallelism over q-points: 1
+P Number of CPUs for parallelism over k-points: 1
+ Cannot find all IBZ q-points in the DVDB --> Activating Fourier interpolation.
 
 == END DATASET(S) ==============================================================
 ================================================================================

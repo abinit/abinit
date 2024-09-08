@@ -1325,14 +1325,14 @@ subroutine getghc_nucdip(cwavef,ghc_vectornd,gbound_k,istwf_k,kg_k,kpt,mgfft,mpi
 !Local variables-------------------------------
 !scalars
  integer,parameter :: tim_fourwf=1
- integer :: idat,idir,ipw,nspinortot,shift
+ integer :: icmplx,idat,idir,ipw,iv1,iv2,nspinortot,shift
  logical :: nspinor1TreatedByThisProc,nspinor2TreatedByThisProc
  real(dp) :: scale_conversion,weight=one
  !arrays
  real(dp),allocatable :: cwavef1(:,:),cwavef2(:,:)
  real(dp),allocatable :: gcwavef(:,:,:),gcwavef1(:,:,:),gcwavef2(:,:,:)
  real(dp),allocatable :: ghc1(:,:),ghc2(:,:),kgkpk(:,:)
- real(dp),allocatable :: work(:,:,:,:)
+ real(dp),allocatable :: dx(:),dy(:),work(:,:,:,:)
 
 ! *********************************************************************
 
@@ -1375,16 +1375,17 @@ subroutine getghc_nucdip(cwavef,ghc_vectornd,gbound_k,istwf_k,kg_k,kpt,mgfft,mpi
     ! make 2\pi(k+G)c(G)|G> by element-wise multiplication
     do idir = 1, 3
        do idat = 1, ndat
-          gcwavef(1,1+(idat-1)*npw_k:npw_k+(idat-1)*npw_k,idir) = &
-               & cwavef(1,1+(idat-1)*npw_k:npw_k+(idat-1)*npw_k)*kgkpk(1:npw_k,idir)
-          gcwavef(2,1+(idat-1)*npw_k:npw_k+(idat-1)*npw_k,idir) = &
-               & cwavef(2,1+(idat-1)*npw_k:npw_k+(idat-1)*npw_k)*kgkpk(1:npw_k,idir)
+          iv1=1+(idat-1)*npw_k; iv2=-1+iv1+npw_k
+          gcwavef(1,iv1:iv2,idir) = cwavef(1,iv1:iv2)*kgkpk(1:npw_k,idir)
+          gcwavef(2,iv1:iv2,idir) = cwavef(2,iv1:iv2)*kgkpk(1:npw_k,idir)
        end do
     end do
     ABI_FREE(kgkpk)
     gcwavef = gcwavef*two_pi
 
     !  STEP2: Compute sum of (grad components of vectornd)*(grad components of cwavef)
+    ABI_MALLOC(dx,(npw_k))
+    ABI_MALLOC(dy,(npw_k))
     do idir=1,3
       call fourwf(1,vectornd(:,:,:,:,idir),gcwavef(:,:,idir),ghc1,work,gbound_k,gbound_k,&
            istwf_k,kg_k,kg_k,mgfft,mpi_enreg,ndat,ngfft,npw_k,npw_k,n4,n5,n6,2,&
@@ -1393,12 +1394,17 @@ subroutine getghc_nucdip(cwavef,ghc_vectornd,gbound_k,istwf_k,kg_k,kpt,mgfft,mpi
        ! DAXPY is a BLAS routine for y -> A*x + y, here x = ghc1, A = scale_conversion, and y = ghc_vectornd
        ! should be faster than explicit loop over ipw as npw_k gets large
       do idat=1,ndat
-        call DAXPY(npw_k,scale_conversion,ghc1(1,1+(idat-1)*npw_k:npw_k+(idat-1)*npw_k),1,&
-             & ghc_vectornd(1,1+(idat-1)*npw_k:npw_k+(idat-1)*npw_k),1)
-        call DAXPY(npw_k,scale_conversion,ghc1(2,1+(idat-1)*npw_k:npw_k+(idat-1)*npw_k),1,&
-             & ghc_vectornd(2,1+(idat-1)*npw_k:npw_k+(idat-1)*npw_k),1)
+        iv1=1+(idat-1)*npw_k; iv2=-1+iv1+npw_k
+        do icmplx=1,2
+          dx=ghc1(icmplx,iv1:iv2)
+          dy=ghc_vectornd(icmplx,iv1:iv2)
+          call DAXPY(npw_k,scale_conversion,dx,1,dy,1)
+          ghc_vectornd(icmplx,iv1:iv2)=dy
+        end do
       end do
     end do ! idir
+    ABI_FREE(dx)
+    ABI_FREE(dy)
     ABI_FREE(gcwavef)
     ABI_FREE(ghc1)
 
@@ -1407,10 +1413,10 @@ subroutine getghc_nucdip(cwavef,ghc_vectornd,gbound_k,istwf_k,kg_k,kpt,mgfft,mpi
     ABI_MALLOC(cwavef1,(2,npw_k*ndat))
     ABI_MALLOC(cwavef2,(2,npw_k*ndat))
     do idat=1,ndat
-       do ipw=1,npw_k
-          cwavef1(1:2,ipw+(idat-1)*npw_k)=cwavef(1:2,ipw+(idat-1)*my_nspinor*npw_k)
-          cwavef2(1:2,ipw+(idat-1)*npw_k)=cwavef(1:2,ipw+(idat-1)*my_nspinor*npw_k+shift)
-       end do
+       iv1=1+(idat-1)*npw_k; iv2=-1+iv1+npw_k
+       cwavef1(1:2,iv1:iv2) = cwavef(1:2,1+(idat-1)*my_nspinor*npw_k:npw_k+(idat-1)*my_nspinor*npw_k)
+       cwavef2(1:2,iv1:iv2) = &
+         & cwavef(1:2,1+(idat-1)*my_nspinor*npw_k+shift:npw_k+(idat-1)*my_nspinor*npw_k+shift)
     end do
 
     ! compute k + G. Note these are in reduced coords
@@ -1430,16 +1436,17 @@ subroutine getghc_nucdip(cwavef,ghc_vectornd,gbound_k,istwf_k,kg_k,kpt,mgfft,mpi
        gcwavef1 = zero
        ! make 2\pi(k+G)c(G)|G> by element-wise multiplication
        do idir = 1, 3
-          do idat = 1, ndat
-             gcwavef1(1,1+(idat-1)*npw_k:npw_k+(idat-1)*npw_k,idir) = &
-                  & cwavef1(1,1+(idat-1)*npw_k:npw_k+(idat-1)*npw_k)*kgkpk(1:npw_k,idir)
-             gcwavef1(2,1+(idat-1)*npw_k:npw_k+(idat-1)*npw_k,idir) = &
-                  & cwavef1(2,1+(idat-1)*npw_k:npw_k+(idat-1)*npw_k)*kgkpk(1:npw_k,idir)
-          end do
+         do idat = 1, ndat
+           iv1=1+(idat-1)*npw_k; iv2=-1+iv1+npw_k
+           gcwavef1(1,iv1:iv2,idir) = cwavef1(1,iv1:iv2)*kgkpk(1:npw_k,idir)
+           gcwavef1(2,iv1:iv2,idir) = cwavef1(2,iv1:iv2)*kgkpk(1:npw_k,idir)
+         end do
        end do
        gcwavef1 = gcwavef1*two_pi
 
        !  STEP2: Compute sum of (grad components of vectornd)*(grad components of cwavef)
+       ABI_MALLOC(dx,(npw_k))
+       ABI_MALLOC(dy,(npw_k))
        do idir=1,3
           call fourwf(1,vectornd(:,:,:,:,idir),gcwavef1(:,:,idir),ghc1,work,gbound_k,gbound_k,&
                istwf_k,kg_k,kg_k,mgfft,mpi_enreg,ndat,ngfft,npw_k,npw_k,n4,n5,n6,2,&
@@ -1448,12 +1455,17 @@ subroutine getghc_nucdip(cwavef,ghc_vectornd,gbound_k,istwf_k,kg_k,kpt,mgfft,mpi
           ! DAXPY is a BLAS routine for y -> A*x + y, here x = ghc1, A = scale_conversion, and y = ghc_vectornd
           ! should be faster than explicit loop over ipw as npw_k gets large
           do idat=1,ndat
-             call DAXPY(npw_k,scale_conversion,ghc1(1,1+(idat-1)*npw_k:npw_k+(idat-1)*npw_k),1,&
-                  & ghc_vectornd(1,1+(idat-1)*npw_k:npw_k+(idat-1)*npw_k),1)
-             call DAXPY(npw_k,scale_conversion,ghc1(2,1+(idat-1)*npw_k:npw_k+(idat-1)*npw_k),1,&
-                  & ghc_vectornd(2,1+(idat-1)*npw_k:npw_k+(idat-1)*npw_k),1)
+            iv1=1+(idat-1)*npw_k; iv2=-1+iv1+npw_k
+            do icmplx=1,2
+              dx=ghc1(icmplx,iv1:iv2)
+              dy=ghc_vectornd(icmplx,iv1:iv2)
+              call DAXPY(npw_k,scale_conversion,dx,1,dy,1)
+              ghc_vectornd(icmplx,iv1:iv2)=dy
+            end do
           end do
        end do ! idir
+       ABI_FREE(dx)
+       ABI_FREE(dy)
        ABI_FREE(gcwavef1)
        ABI_FREE(ghc1)
 
@@ -1466,20 +1478,20 @@ subroutine getghc_nucdip(cwavef,ghc_vectornd,gbound_k,istwf_k,kg_k,kpt,mgfft,mpi
        !  Do it in 2 STEPs:
        !  STEP1: Compute grad of cwavef
        ABI_MALLOC(gcwavef2,(2,npw_k*ndat,3))
-
        gcwavef2 = zero
        ! make 2\pi(k+G)c(G)|G> by element-wise multiplication
        do idir = 1, 3
-          do idat = 1, ndat
-             gcwavef2(1,1+(idat-1)*npw_k:npw_k+(idat-1)*npw_k,idir) = &
-                  & cwavef2(1,1+(idat-1)*npw_k:npw_k+(idat-1)*npw_k)*kgkpk(1:npw_k,idir)
-             gcwavef2(2,1+(idat-1)*npw_k:npw_k+(idat-1)*npw_k,idir) = &
-                  & cwavef2(2,1+(idat-1)*npw_k:npw_k+(idat-1)*npw_k)*kgkpk(1:npw_k,idir)
+         do idat = 1, ndat
+           iv1=1+(idat-1)*npw_k; iv2=-1+iv1+npw_k
+           gcwavef2(1,iv1:iv2,idir) = cwavef2(1,iv1:iv2)*kgkpk(1:npw_k,idir)
+           gcwavef2(2,iv1:iv2,idir) = cwavef2(2,iv1:iv2)*kgkpk(1:npw_k,idir)
           end do
        end do
        gcwavef2 = gcwavef2*two_pi
 
        !  STEP2: Compute sum of (grad components of vectornd)*(grad components of cwavef)
+       ABI_MALLOC(dx,(npw_k))
+       ABI_MALLOC(dy,(npw_k))
        do idir=1,3
           call fourwf(1,vectornd(:,:,:,:,idir),gcwavef2(:,:,idir),ghc2,work,gbound_k,gbound_k,&
                istwf_k,kg_k,kg_k,mgfft,mpi_enreg,ndat,ngfft,npw_k,npw_k,n4,n5,n6,2,&
@@ -1488,12 +1500,17 @@ subroutine getghc_nucdip(cwavef,ghc_vectornd,gbound_k,istwf_k,kg_k,kpt,mgfft,mpi
           ! DAXPY is a BLAS routine for y -> A*x + y, here x = ghc1, A = scale_conversion, and y = ghc_vectornd
           ! should be faster than explicit loop over ipw as npw_k gets large
           do idat=1,ndat
-             call DAXPY(npw_k,scale_conversion,ghc2(1,1+(idat-1)*npw_k:npw_k+(idat-1)*npw_k),1,&
-                  & ghc_vectornd(1,1+(idat-1)*npw_k+shift:npw_k+(idat-1)*npw_k+shift),1)
-             call DAXPY(npw_k,scale_conversion,ghc2(2,1+(idat-1)*npw_k:npw_k+(idat-1)*npw_k),1,&
-                  & ghc_vectornd(2,1+(idat-1)*npw_k+shift:npw_k+(idat-1)*npw_k+shift),1)
+            iv1=1+(idat-1)*npw_k; iv2=-1+iv1+npw_k
+            do icmplx=1,2
+              dx=ghc2(icmplx,iv1:iv2)
+              dy=ghc_vectornd(icmplx,iv1+shift:iv2+shift)
+              call DAXPY(npw_k,scale_conversion,dx,1,dy,1)
+              ghc_vectornd(icmplx,iv1+shift:iv2+shift)=dy
+            end do
           end do
        end do ! idir
+       ABI_FREE(dx)
+       ABI_FREE(dy)
        ABI_FREE(gcwavef2)
        ABI_FREE(ghc2)
 

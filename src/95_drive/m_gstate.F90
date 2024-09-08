@@ -291,10 +291,10 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  character(len=fnlen) :: dscrpt,filnam,wfkfull_path
  real(dp) :: fatvshift
  type(crystal_t) :: cryst
- type(ebands_t) :: bstruct,ebands
+ type(ebands_t) :: bstruct, ebands, ebands_bz
  type(efield_type) :: dtefield
  type(electronpositron_type),pointer :: electronpositron
- type(hdr_type) :: hdr, hdr_den, hdr_kfull
+ type(hdr_type) :: hdr, hdr_den, hdr_bz
  type(extfpmd_type),pointer :: extfpmd => null()
  type(macro_uj_type) :: dtpawuj(1)
  type(paw_dmft_type) :: paw_dmft
@@ -1496,9 +1496,8 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  if (me == master .and. dtset%prtwf == 1 .and. dtset%prtwf_full == 1 .and. dtset%nqpt == 0) then
    wfkfull_path = strcat(dtfil%filnam_ds(4), "_FULL_WFK")
    if (dtset%iomode == IO_MODE_ETSF) wfkfull_path = nctk_ncify(wfkfull_path)
-   call wfk_tofullbz(filnam, dtset, psps, pawtab, wfkfull_path, hdr_kfull)
-   call hdr_kfull%free()
-   call cryst%free()
+   call wfk_to_bz(filnam, dtset, psps, pawtab, wfkfull_path, hdr_bz, ebands_bz)
+   call hdr_bz%free(); call ebands_free(ebands_bz); call cryst%free()
  end if
 
  call timab(1227,2,tsec)

@@ -257,7 +257,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     515.000     515.000
 
 ================================================================================
 
-=== [ionmov= 2] Broyden-Fletcher-Goldfard-Shanno method (forces)            
+=== [ionmov= 2] Broyden-Fletcher-Goldfarb-Shanno method (forces)            
 ================================================================================
 
 --- Iteration: (1/3) Internal Cycle: (1/1)
@@ -689,7 +689,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     515.000     515.000
 
 ================================================================================
 
-=== [ionmov= 2] Broyden-Fletcher-Goldfard-Shanno method (forces)            
+=== [ionmov= 2] Broyden-Fletcher-Goldfarb-Shanno method (forces)            
 ================================================================================
 
 --- Iteration: (1/3) Internal Cycle: (1/1)
@@ -1121,7 +1121,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     515.000     515.000
 
 ================================================================================
 
-=== [ionmov= 2] Broyden-Fletcher-Goldfard-Shanno method (forces)            
+=== [ionmov= 2] Broyden-Fletcher-Goldfarb-Shanno method (forces)            
 ================================================================================
 
 --- Iteration: (1/3) Internal Cycle: (1/1)
