@@ -74,6 +74,8 @@ module m_dfpt_nstwf
  use m_mklocl,     only : dfpt_vlocal, vlocalstr
  use m_cgprj,      only : getcprj
 
+ use, intrinsic :: iso_c_binding, only: c_size_t, c_loc
+
 #if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
  use m_nvtx_data
 #endif
@@ -324,7 +326,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
  integer,allocatable :: jpert1(:),jdir1(:),kg1_k(:,:),kg_k(:,:)
  integer,pointer :: my_atmtab(:)
  real(dp) :: dum1(1,1),dum2(1,1),dum3(1,1),epawnst(2),kpoint(3),kpq(3)
- real(dp),allocatable :: vdot1r(:),vdot1i(:)
+ real(dp),allocatable :: vdotr(:),vdoti(:),vdot1r(:),vdot1i(:),vdot2r(:),vdot2i(:)
  real(dp) :: sumelfd(2),symfact(3),tsec(2),ylmgr_dum(1,3,1)
  real(dp),allocatable :: buffer(:),ch1c(:,:,:,:),cs1c(:,:,:,:)
  real(dp),allocatable,target :: ch1c_tmp(:,:)
@@ -892,8 +894,15 @@ has_vectornd = (with_vectornd .EQ. 1)
        ABI_MALLOC(eig_kq,(nband_k))
        ABI_MALLOC(eig1_k,(2*nband_k**2))
        ABI_MALLOC(occ_k,(nband_k))
+       ABI_MALLOC(vdotr,(nband_k))
+       ABI_MALLOC(vdoti,(nband_k))
        ABI_MALLOC(vdot1r,(nband_k))
        ABI_MALLOC(vdot1i,(nband_k))
+       ABI_MALLOC(vdot2r,(nband_k))
+       ABI_MALLOC(vdot2i,(nband_k))
+#ifdef HAVE_OPENMP_OFFLOAD
+       !$OMP TARGET ENTER DATA MAP(alloc:vdotr,vdoti,vdot1r,vdot1i,vdot2r,vdot2i) IF(dtset%gpu_option==ABI_GPU_OPENMP)
+#endif
        d2nl_k(:,:)=zero
        d2ovl_k(:,:)=zero
        eig_k (:)=eigen0(1+bdtot_index:nband_k+bdtot_index)
@@ -1629,7 +1638,7 @@ has_vectornd = (with_vectornd .EQ. 1)
 !              Computation of cs1c=<u0_k_i|S^(j1)|u0_k+q_j>
 !                do _I_ need to calculate the dot1X?
                if (do_scprod > 0) then
-                 call dotprod_g_batch(vdot1r,vdot1i,istwf_k,npw1_k*nspinor,nband_k,2,&
+                 call dotprod_g_batch_half(vdot1r,vdot1i,istwf_k,npw1_k*nspinor,nband_k,2,&
 &                     gs1(:,1+(idat-1)*npw1_k*nspinor:idat*npw1_k*nspinor),&
 &                     gvnlx2,mpi_enreg%me_g0,mpi_enreg%comm_spinorfft,gpu_option=dtset%gpu_option)
 #ifdef HAVE_OPENMP_OFFLOAD
@@ -1714,39 +1723,63 @@ has_vectornd = (with_vectornd .EQ. 1)
 !            MT jan-2010: this is probably not correctly implemented for PAW !!!
 !            missing terms due to S^(1) and S^(2)
            else
-             do idat=1,ndat
-  !            note: gh1 used as temporary space (to store idir ddk WF)
-               if (idir==idir1) then
-                 gvnlx1_tmp=cwavef(:,1+(idat-1)*npw1_k*nspinor:idat*npw1_k*nspinor)
+!            note: gh1 used as temporary space (to store idir ddk WF)
+             if (idir==idir1) then
+               if(dtset%gpu_option==ABI_GPU_DISABLED) then
+                 gvnlx1(:,1:ndat*npw1_k*nspinor)=cwavef(:,1:ndat*npw1_k*nspinor)
+               else if(dtset%gpu_option==ABI_GPU_OPENMP) then
+#ifdef HAVE_OPENMP_OFFLOAD
+                 !$OMP TARGET DATA USE_DEVICE_PTR(gvnlx1,cwavef)
+                 call copy_gpu_to_gpu(c_loc(gvnlx1), c_loc(cwavef), int(2,c_size_t)*npw1_k*nspinor*ndat*dp)
+                 !$OMP END TARGET DATA
+#endif
+               end if
+             else
+               if (need_ddk_file.and.ddkfil(idir1)/=0) then
+                 !ik_ddk = wfk_findk(ddks(idir1), kpt_rbz(:,ikpt)
+                 !ik_ddk = indkpt1(ikpt)
+                 !call ddks(idir1)%read_bks(iband, ik_ddk, isppol, xmpio_single, cg_bks=gvnlx1_tmp)
+                 gvnlx1(:,1:ndat*npw1_k*nspinor) = cg_ddk(:,1+(iband)*npw1_k*nspinor:(iband+ndat)*npw1_k*nspinor,idir1)
+                 !$OMP TARGET UPDATE TO(gvnlx1) IF(dtset%gpu_option==ABI_GPU_OPENMP)
                else
-                 if (need_ddk_file.and.ddkfil(idir1)/=0) then
-                   !ik_ddk = wfk_findk(ddks(idir1), kpt_rbz(:,ikpt)
-                   !ik_ddk = indkpt1(ikpt)
-                   !call ddks(idir1)%read_bks(iband, ik_ddk, isppol, xmpio_single, cg_bks=gvnlx1_tmp)
-                   gvnlx1_tmp = cg_ddk(:,1+(iband+idat-1)*npw1_k*nspinor:(iband+idat)*npw1_k*nspinor,idir1)
-                 else
-                   gvnlx1_tmp=zero
+                 if(dtset%gpu_option==ABI_GPU_DISABLED) then
+                   gvnlx1=zero
+                 else if(dtset%gpu_option==ABI_GPU_OPENMP) then
+                   call gpu_set_to_zero(gvnlx1,int(2,c_size_t)*npw1_k*nspinor*ndat)
                  end if
                end if
+             end if
+             do_scprod=0
+             do idat=1,ndat
                if (abs(occ_k(iband+idat-1))>tol8) then
-                 call dotprod_g(dotr,doti,istwf_k,npw1_k*nspinor,2,&
-  &                  gvnlx1_tmp,&
-  &                  cwavef(:,1+(idat-1)*npw1_k*nspinor:idat*npw1_k*nspinor),&
-  &                  mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
-                 call dotprod_g(dot1r,dot1i,istwf_k,npw1_k*nspinor,2,&
-  &                  cwave0(:,1+(idat-1)*npw_k*nspinor:idat*npw_k*nspinor),&
-  &                  gvnlx1_tmp,&
-  &                  mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
-                 call dotprod_g(dot2r,dot2i,istwf_k,npw1_k*nspinor,2,&
-  &                  cwavef(:,1+(idat-1)*npw1_k*nspinor:idat*npw1_k*nspinor),&
-  &                  cwave0(:,1+(idat-1)*npw_k*nspinor:idat*npw_k*nspinor),&
-  &                  mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
-                 dotr=dotr-(dot1r*dot2r-dot1i*dot2i)
-                 doti=doti-(dot1r*dot2i+dot1i*dot2r)
-                 d2nl_k(1,idir1)=d2nl_k(1,idir1)+wtk_k*occ_k(iband+idat-1)*dotr/(nband_kocc*two)
-                 d2nl_k(2,idir1)=d2nl_k(2,idir1)+wtk_k*occ_k(iband+idat-1)*doti/(nband_kocc*two)
+                 do_scprod=1
                end if
-             end do !idat
+             end do
+             if (do_scprod==1) then
+               call dotprod_g_batch_full(vdotr,vdoti,istwf_k,npw1_k*nspinor,ndat,2,&
+&                  gvnlx1,&
+&                  cwavef,&
+&                  mpi_enreg%me_g0,mpi_enreg%comm_spinorfft,gpu_option=dtset%gpu_option)
+               call dotprod_g_batch_full(vdot1r,vdot1i,istwf_k,npw1_k*nspinor,ndat,2,&
+&                  cwave0,&
+&                  gvnlx1,&
+&                  mpi_enreg%me_g0,mpi_enreg%comm_spinorfft,gpu_option=dtset%gpu_option)
+               call dotprod_g_batch_full(vdot2r,vdot2i,istwf_k,npw1_k*nspinor,ndat,2,&
+&                  cwavef,&
+&                  cwave0,&
+&                  mpi_enreg%me_g0,mpi_enreg%comm_spinorfft,gpu_option=dtset%gpu_option)
+#ifdef HAVE_OPENMP_OFFLOAD
+               !$OMP TARGET UPDATE FROM(vdotr,vdoti,vdot1r,vdot1i,vdot2r,vdot2i) IF(dtset%gpu_option==ABI_GPU_OPENMP)
+#endif
+               do idat=1,ndat
+                 if (abs(occ_k(iband+idat-1))>tol8) then
+                   vdotr(idat)=vdotr(idat)-(vdot1r(idat)*vdot2r(idat)-vdot1i(idat)*vdot2i(idat))
+                   vdoti(idat)=vdoti(idat)-(vdot1r(idat)*vdot2i(idat)+vdot1i(idat)*vdot2r(idat))
+                   d2nl_k(1,idir1)=d2nl_k(1,idir1)+wtk_k*occ_k(iband+idat-1)*vdotr(idat)/(nband_kocc*two)
+                   d2nl_k(2,idir1)=d2nl_k(2,idir1)+wtk_k*occ_k(iband+idat-1)*vdoti(idat)/(nband_kocc*two)
+                 end if
+               end do !idat
+             end if
            end if
 
 
@@ -1854,8 +1887,15 @@ has_vectornd = (with_vectornd .EQ. 1)
        ABI_FREE(eig_kq)
        ABI_FREE(eig1_k)
        ABI_FREE(occ_k)
+#ifdef HAVE_OPENMP_OFFLOAD
+       !$OMP TARGET EXIT DATA MAP(delete:vdotr,vdoti,vdot1r,vdot1i,vdot2r,vdot2i) IF(dtset%gpu_option==ABI_GPU_OPENMP)
+#endif
+       ABI_FREE(vdotr)
+       ABI_FREE(vdoti)
        ABI_FREE(vdot1r)
        ABI_FREE(vdot1i)
+       ABI_FREE(vdot2r)
+       ABI_FREE(vdot2i)
        if (is_metal)  then
          ABI_FREE(doccde_k)
          ABI_FREE(doccde_kq)
