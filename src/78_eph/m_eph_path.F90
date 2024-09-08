@@ -131,7 +131,9 @@ subroutine eph_path_run(dtfil, dtset, cryst, dvdb, ifc, &
  character(len=10) :: priority
 !!arrays
  integer :: units(2), ngfft(18),ngfftf(18), band_range(2)
- integer,allocatable :: kg_k(:,:), kg_kq(:,:), qmap_symrec(:,:), my_ik_inds(:), my_iq_inds(:), my_spins(:)
+ integer :: coords_spin(ndims), dims(ndims)
+ integer,allocatable :: kg_k(:,:), kg_kq(:,:), qmap_symrec(:,:), my_ik_inds(:), my_iq_inds(:), my_spins(:), my_iperts(:)
+ integer,allocatable :: pert_table(:,:), my_pinfo(:,:)
  real(dp) :: kk(3), qq(3), kq(3), phfreqs(3*cryst%natom), phfreqs_ev(3*cryst%natom), fake_path(3,2)
  real(dp),allocatable :: grad_berry(:,:), kinpw1(:), dkinpw(:)
  real(dp),allocatable :: cg_k(:,:,:), cg_kq(:,:,:), gsc_k(:,:,:), gsc_kq(:,:,:),eig_k(:), eig_kq(:)
@@ -142,7 +144,6 @@ subroutine eph_path_run(dtfil, dtset, cryst, dvdb, ifc, &
  real(dp),allocatable :: kpg_kq(:,:), ph3d_kq(:,:,:), kinpw_kq(:), ffnl_kq(:,:,:,:), vlocal_kq(:,:,:,:)
  real(dp),allocatable :: ylm_kq(:,:), ylm_k(:,:), ylmgr_kq(:,:,:), rvec(:)
  real(dp),allocatable :: ph3d(:,:,:), ph3d1(:,:,:)  ! ffnlk(:,:,:,:), ffnl1(:,:,:,:),
- integer :: coords_spin(ndims), dims(ndims)
  logical :: reorder, periods(ndims), keepdim(ndims)
  type(pawcprj_type),allocatable  :: cwaveprj0(:,:)
 !************************************************************************
@@ -195,6 +196,7 @@ subroutine eph_path_run(dtfil, dtset, cryst, dvdb, ifc, &
  call xmpi_split_nsppol(comm, nsppol, my_nspins, my_spins, comm_my_is)
 
  ! And now the MPI cartesian grid.
+ my_npert = natom3
  do my_is=1,my_nspins
    spin = my_spins(my_is)
    np = comm_my_is(my_is)%nproc; priority = "12"
@@ -238,7 +240,8 @@ subroutine eph_path_run(dtfil, dtset, cryst, dvdb, ifc, &
 #endif
 
    ! Distribute perturbations inside pert_comm using block distribution.
-   !call xmpi_split_block(natom3, pert_comm%value, my_npert, my_iperts)
+   call xmpi_split_block(natom3, pert_comm%value, my_npert, my_iperts)
+   ABI_FREE(my_iperts)
  end do ! my_is
 
  ! Distribute k-points (q-points) inside kpt_comm (qpt_comm) using block distribution.
@@ -259,13 +262,13 @@ subroutine eph_path_run(dtfil, dtset, cryst, dvdb, ifc, &
  ! Open the DVDB file
  call dvdb%open_read(ngfftf, xmpi_comm_self)
 
- my_npert = natom3
  if (pert_comm%nproc > 1) then
-   NOT_IMPLEMENTED_ERROR()
    ! Build table with list of perturbations treated by this CPU inside pert_comm
-   !call ephtk_set_pertables(cryst%natom, new%my_npert, new%pert_table, new%my_pinfo, pert_comm%value)
+   call ephtk_set_pertables(cryst%natom, my_npert, pert_table, my_pinfo, pert_comm%value)
    ! Activate parallelism over perturbations
-   !call dvdb%set_pert_distrib(my_npert, natom3, sigma%my_pinfo, sigma%pert_table, pert_comm%value)
+   call dvdb%set_pert_distrib(my_npert, natom3, my_pinfo, pert_table, pert_comm%value)
+   ABI_FREE(my_pinfo)
+   ABI_FREE(pert_table)
  end if
 
  qptopt = dtset%kptopt; if (dtset%qptopt /= 0) qptopt = dtset%qptopt
@@ -328,10 +331,27 @@ subroutine eph_path_run(dtfil, dtset, cryst, dvdb, ifc, &
    !ncerr = nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: "fermi_energy", "smearing_width"])
    !NCF_CHECK(ncerr)
 
+   !ncerr = nctk_def_iscalars(ncid, [character(len=nctk_slen) :: &
+   !  "eph_task", "symsigma", "nbsum", "bsum_start", "bsum_stop", "symdynmat", &
+   !  "ph_intmeth", "eph_intmeth", "qint_method", "eph_transport", &
+   !  "imag_only", "symv1scf", "dvdb_add_lr", "mrta", "ibte_prep", "eph_prtscratew", "eph_ahc_type"])
+   !NCF_CHECK(ncerr)
+
+   !ncerr = nctk_write_iscalars(ncid, [character(len=nctk_slen) :: &
+   !  "eph_task", "symsigma", "nbsum", "bsum_start", "bsum_stop", &
+   !  "symdynmat", "ph_intmeth", "eph_intmeth", "qint_method", &
+   !  "eph_transport", "imag_only", "symv1scf", "dvdb_add_lr", "mrta", "ibte_prep", "eph_prtscratew", "eph_ahc_type"], &
+   !  [dtset%eph_task, self%symsigma, self%nbsum, self%bsum_start, self%bsum_stop, &
+   !  dtset%symdynmat, dtset%ph_intmeth, dtset%eph_intmeth, self%qint_method, dtset%eph_transport, ii, &
+   !  dtset%symv1scf, dtset%dvdb_add_lr, self%mrta, dtset%ibte_prep, dtset%eph_prtscratew, dtset%eph_ahc_type])
+   !NCF_CHECK(ncerr)
+
    ncerr = nctk_def_arrays(ncid, [ &
      nctkarr_t("kpoints", "dp", "three, nk_path"), &
      nctkarr_t("qpoints", "dp", "three, nq_path"), &
      nctkarr_t("qweights", "dp", "nq_path"), &
+     nctkarr_t("all_eigens_k", "dp", "nband, nk_path, nsppol"), &
+     nctkarr_t("all_eigens_kq", "dp", "nband, nq_path, nsppol"), &
      nctkarr_t("gkq2_nu", "dp", "nb_in_g, nb_in_g, natom3, nq_path, nk_path, nsppol"), &
      nctkarr_t("phfreqs", "dp", "natom3, nq_path"), &
      nctkarr_t("phdispl_cart", "dp", "two, three, natom, natom3, nq_path"), &
@@ -385,6 +405,10 @@ subroutine eph_path_run(dtfil, dtset, cryst, dvdb, ifc, &
      ABI_CHECK(ierr == 0, msg)
      !ebands_kpath%eigens(:, ik, spin) = eig_k
 
+     if (pert_comm%me == master) then
+       NCF_CHECK(nf90_put_var(ncid, vid("all_eigens_k"), eig_k, start=[1,ik,spin]))
+     end if
+
      ! Make sure all procs in pert_comm have the same wavefunctions at k
      call xmpi_bcast(cg_k, master, pert_comm%value, ierr); if (psps%usepaw == 1) call xmpi_bcast(gsc_k, master, pert_comm%value, ierr)
 
@@ -419,6 +443,15 @@ subroutine eph_path_run(dtfil, dtset, cryst, dvdb, ifc, &
 
        ! Make sure all procs in pert_comm have the same wavefunctions at k
        call xmpi_bcast(cg_kq, master, pert_comm%value, ierr); if (psps%usepaw == 1) call xmpi_bcast(gsc_kq, master, pert_comm%value, ierr)
+
+       if (pert_comm%me == master) then
+         NCF_CHECK(nf90_put_var(ncid, vid("all_eigens_kq"), eig_kq, start=[1,iq,spin]))
+         ! Write phonons for this q.
+         if (spin == 1) then
+           NCF_CHECK(nf90_put_var(ncid, vid("phfreqs"), phfreqs_ev, start=[1,iq]))
+           NCF_CHECK(nf90_put_var(ncid, vid("phdispl_cart"), displ_cart, start=[1,1,1,1,iq]))
+         end if
+       end if
 
        ! if PAW, one has to solve a generalized eigenproblem
        ! Be careful here because I will need sij_opt==-1
@@ -507,16 +540,10 @@ subroutine eph_path_run(dtfil, dtset, cryst, dvdb, ifc, &
 
        call ephtk_gkknu_from_atm(nb_in_g, nb_in_g, 1, natom, gkq_atm, phfreqs, displ_red, gkq_nu)
 
+       ! Write |g|^2 for this q.
        if (pert_comm%me == master) then
-         ! Write |g|^2 for this q.
          gkq2_nu = gkq_nu(1,:,:,:)**2 + gkq_nu(2,:,:,:)** 2
          NCF_CHECK(nf90_put_var(ncid, vid("gkq2_nu"), gkq2_nu, start=[1,1,1,iq,ik,spin]))
-         ! Write phonons for this q.
-         if (spin == 1) then
-           !print *, "Writing phonons at iq:", iq
-           NCF_CHECK(nf90_put_var(ncid, vid("phfreqs"), phfreqs_ev, start=[1,iq]))
-           NCF_CHECK(nf90_put_var(ncid, vid("phdispl_cart"), displ_cart, start=[1,1,1,1,iq]))
-         end if
        end if
 
        ABI_FREE(gs1c)
