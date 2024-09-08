@@ -1085,7 +1085,7 @@ end subroutine gstore_init
 !! gstore_distribute_spins
 !!
 !! FUNCTION
-!!  Distribute spins, create indirect mapping to spin index and init %brange_spin
+!!  Distribute spins. Also create and return indirect mapping to spin index and init %brange_spin
 !!
 !! INPUTS
 !!
@@ -1103,25 +1103,24 @@ subroutine gstore_distribute_spins(gstore, mband, gstore_brange, nproc_spin, com
 
 !Local variables-------------------------------
 !scalars
- integer :: spin, my_rank, ierr, color, nsppol, all_nproc
+ integer :: spin, my_rank, ierr, color, nsppol, nprocs
 !arrays
  integer :: buff_spin(2)
 !----------------------------------------------------------------------
 
- all_nproc = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
-
+ nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
  nsppol = gstore%nsppol
+
  gstore%my_nspins = 0
  ABI_MALLOC(gstore%brange_spin, (2, nsppol))
 
  do spin=1,nsppol
-   ! NB: If MPI_UNDEFINED is passed as the colour value, the subgroup in which the calling
-   ! MPI process will be placed is MPI_COMM_NULL
+   ! NB: If MPI_UNDEFINED is passed as the colour value, the subgroup in which the calling MPI process will be placed is MPI_COMM_NULL
    color = 1
-   if (nsppol == 2 .and. all_nproc > 1) then
+   if (nsppol == 2 .and. nprocs > 1) then
      color = xmpi_undefined
-     if (spin == 1 .and. my_rank <= (all_nproc - 1) / 2) color = 1
-     if (spin == 2 .and. my_rank > (all_nproc - 1) / 2) color = 1
+     if (spin == 1 .and. my_rank <= (nprocs - 1) / 2) color = 1
+     if (spin == 2 .and. my_rank > (nprocs - 1) / 2) color = 1
    end if
 
    call xmpi_comm_split(comm, color, my_rank, comm_spin(spin), ierr)
@@ -1146,6 +1145,7 @@ subroutine gstore_distribute_spins(gstore, mband, gstore_brange, nproc_spin, com
 
 end subroutine gstore_distribute_spins
 !!***
+
 !----------------------------------------------------------------------
 
 !!****f* m_gstore/gstore_set_mpi_grid__
@@ -1166,7 +1166,8 @@ subroutine gstore_set_mpi_grid__(gstore, gstore_cplex, nproc_spin, comm_spin)
 !scalars
  class(gstore_t),target,intent(inout) :: gstore
  integer,intent(in) :: gstore_cplex
- integer,intent(in) :: nproc_spin(gstore%nsppol), comm_spin(gstore%nsppol)
+ integer,intent(in) :: nproc_spin(gstore%nsppol)
+ integer,intent(inout) :: comm_spin(gstore%nsppol)
 
 !Local variables-------------------------------
 !scalars
@@ -1319,7 +1320,7 @@ subroutine gstore_set_mpi_grid__(gstore, gstore_cplex, nproc_spin, comm_spin)
      write(msg, "(a,i0,3a, 7(a,1x,i0))") &
        "Cannot create Cartesian grid with total nproc: ", nproc_spin(spin), ch10, &
        "Idle processes are not supported. The product of the `nproc_*` vars should be equal to nproc.", ch10, &
-       "qpt_nproc (", gqk%qpt_comm%nproc, ") x kpt_nproc (", gqk%kpt_comm%nproc, ")  x kpt_nproc", gqk%pert_comm%nproc, &
+       "qpt_nproc (", gqk%qpt_comm%nproc, ") x kpt_nproc (", gqk%kpt_comm%nproc, ") x pert_nproc", gqk%pert_comm%nproc, &
        "x band_nproc (", gqk%band_comm%nproc, "x bsum_nproc (", gqk%bsum_comm%nproc, ") x psum_nproc (", gqk%pp_sum_comm%nproc, &
        ") != ", nproc_spin(spin)
      ABI_ERROR(msg)

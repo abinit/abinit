@@ -2832,7 +2832,7 @@ end subroutine kpath_free
 !!  Print info on the path.
 !!
 !! INPUTS
-!!  [unit]=Unit number for output. Defaults to std_out
+!!  units=Unit numbers
 !!  [prtvol]=Verbosity level.
 !!  [header]=String to be printed as header for additional info.
 !!  [pre]=Optional string prepended to output e.g. #. Default: " "
@@ -2842,36 +2842,36 @@ end subroutine kpath_free
 !!
 !! SOURCE
 
-subroutine kpath_print(kpath, header, unit, prtvol, pre)
+subroutine kpath_print(kpath, units, header,prtvol, pre)
 
 !Arguments ------------------------------------
 !scalars
- integer,optional,intent(in) :: unit,prtvol
- character(len=*),optional,intent(in) :: header,pre
  class(kpath_t),intent(in) :: kpath
+ integer,intent(in) :: units(:)
+ integer,optional,intent(in) :: prtvol
+ character(len=*),optional,intent(in) :: header,pre
 
 !Local variables-------------------------------
- integer :: unt,my_prtvol,ii
- character(len=500) :: my_pre
+ integer :: my_prtvol,ii
+ character(len=500) :: my_pre, msg
 
 ! *************************************************************************
 
- unt = std_out; if (present(unit)) unt = unit
  my_prtvol = 0; if (present(prtvol)) my_prtvol = prtvol
  my_pre = " "; if (present(pre)) my_pre = pre
- if (unt <= 0) return
 
- if (present(header)) write(unt,"(a)") sjoin(my_pre, '==== '//trim(adjustl(header))//' ==== ')
- write(unt, "(a)") sjoin(my_pre, " Number of points:", itoa(kpath%npts), ", ndivsmall:", itoa(kpath%ndivsm))
- write(unt, "(a)") sjoin(my_pre, " Boundaries and corresponding index in the k-points array:")
+ if (present(header)) call wrtout(units, sjoin(my_pre, '==== '//trim(adjustl(header))//' ==== '))
+
+ call wrtout(units, sjoin(my_pre, " Number of points:", itoa(kpath%npts), ", ndivsmall:", itoa(kpath%ndivsm)))
+ call wrtout(units, sjoin(my_pre, " Boundaries and corresponding index in the k-points array:"))
  do ii=1,kpath%nbounds
-   write(unt, "(a)") sjoin(my_pre, itoa(kpath%bounds2kpt(ii)), ktoa(kpath%bounds(:,ii)))
+   call wrtout(units, sjoin(my_pre, itoa(kpath%bounds2kpt(ii)), ktoa(kpath%bounds(:,ii))))
  end do
- write(unt, "(a)") sjoin(my_pre, " ")
+ call wrtout(units, " ")
 
  if (my_prtvol > 10) then
    do ii=1,kpath%npts
-     write(unt, "(a)") sjoin(my_pre, ktoa(kpath%points(:,ii)))
+     call wrtout(units, sjoin(my_pre, ktoa(kpath%points(:,ii))))
    end do
  end if
 

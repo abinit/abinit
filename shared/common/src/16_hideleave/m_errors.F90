@@ -734,9 +734,7 @@ subroutine msg_hndl(message, level, mode_paral, file, line, NODUMP, NOSTOP, unit
    call wrtout(unit_, sbuf, mode_paral, do_flush=.True.)
 
    ! Write error message to ab_out as well, provided this proc is connected to ab_out
-   if (unit_ /= ab_out .and. is_open(ab_out)) then
-     call wrtout(ab_out, sbuf, mode_paral="PERS", do_flush=.True.)
-   end if
+   !if (unit_ /= ab_out .and. is_open(ab_out)) call wrtout(ab_out, sbuf, mode_paral="PERS", do_flush=.True.)
 
    if (.not.present(NOSTOP)) call abi_abort(mode_paral, print_config=.FALSE.)
 

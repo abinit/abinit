@@ -794,8 +794,8 @@ end subroutine gaps_print
 !! SOURCE
 
 subroutine ebands_init(bantot, ebands, nelect, ne_qFD, nh_qFD, ivalence, doccde, eig, istwfk, kptns, &
-  nband, nkpt, npwarr, nsppol, nspinor, tphysel, tsmear, occopt, occ, wtk, &
-  cellcharge, kptopt, kptrlatt_orig, nshiftk_orig, shiftk_orig, kptrlatt, nshiftk, shiftk)
+                        nband, nkpt, npwarr, nsppol, nspinor, tphysel, tsmear, occopt, occ, wtk, &
+                        cellcharge, kptopt, kptrlatt_orig, nshiftk_orig, shiftk_orig, kptrlatt, nshiftk, shiftk)
 
 !Arguments ------------------------------------
 !scalars
@@ -1989,14 +1989,14 @@ end subroutine ebands_get_bands_e0
 !!  ebands<ebands_t>=The object describing the band structure.
 !!  nkpts=Number of k-points
 !!  kpoints(3,nkpts)=K-points
-!!  band_block(2,nkpts)=Gives for each k-points, the initial and the final band index to include.
+!!  band_range(2,nkpts)=Gives for each k-points, the initial and the final band index to include.
 !!
 !! OUTPUT
 !!  emin,emax=min and max energy
 !!
 !! SOURCE
 
-subroutine ebands_get_erange(ebands, nkpts, kpoints, band_block, emin, emax)
+subroutine ebands_get_erange(ebands, nkpts, kpoints, band_range, emin, emax)
 
 !Arguments ------------------------------------
 !scalars
@@ -2004,7 +2004,7 @@ subroutine ebands_get_erange(ebands, nkpts, kpoints, band_block, emin, emax)
  real(dp),intent(out) :: emin,emax
  class(ebands_t),intent(in) :: ebands
 !arrays
- integer,intent(in) :: band_block(2,nkpts)
+ integer,intent(in) :: band_range(2,nkpts)
  real(dp),intent(in) :: kpoints(3,nkpts)
 
 !Local variables-------------------------------
@@ -2024,10 +2024,10 @@ subroutine ebands_get_erange(ebands, nkpts, kpoints, band_block, emin, emax)
        ABI_WARNING(sjoin("Cannot find k-point:", ktoa(kpoints(:,ik))))
        cycle
      end if
-     if (.not. (band_block(1,ik) >= 1 .and. band_block(2,ik) <= ebands%mband)) cycle
+     if (.not. (band_range(1,ik) >= 1 .and. band_range(2,ik) <= ebands%mband)) cycle
      cnt = cnt + 1
-     emin = min(emin, minval(ebands%eig(band_block(1,ik):band_block(2,ik), ikpt, spin)))
-     emax = max(emax, maxval(ebands%eig(band_block(1,ik):band_block(2,ik), ikpt, spin)))
+     emin = min(emin, minval(ebands%eig(band_range(1,ik):band_range(2,ik), ikpt, spin)))
+     emax = max(emax, maxval(ebands%eig(band_range(1,ik):band_range(2,ik), ikpt, spin)))
    end do
  end do
 
@@ -4185,7 +4185,7 @@ end subroutine ebands_sort
 !!  intp_kptrlatt(3,3) = New k-mesh
 !!  intp_nshiftk= Number of shifts in new k-mesh.
 !!  intp_shiftk(3,intp_nshiftk) = Shifts in new k-mesh.
-!!  band_block(2)=Initial and final band index. If [0,0], all bands are used
+!!  band_range(2)=Initial and final band index. If [0,0], all bands are used
 !!    This is a global variable i.e. all MPI procs must call the routine with the same value.
 !!  comm=MPI communicator
 !!  [out_prefix]: optional string prefix used to write netcdf file.
@@ -4200,7 +4200,7 @@ end subroutine ebands_sort
 !!
 !! SOURCE
 
-type(ebands_t) function ebands_interp_kmesh(ebands, cryst, params, intp_kptrlatt, intp_nshiftk, intp_shiftk, band_block, comm, &
+type(ebands_t) function ebands_interp_kmesh(ebands, cryst, params, intp_kptrlatt, intp_nshiftk, intp_shiftk, band_range, comm, &
                                              out_prefix, malloc_only) result(new)
 
 !Arguments ------------------------------------
@@ -4211,7 +4211,7 @@ type(ebands_t) function ebands_interp_kmesh(ebands, cryst, params, intp_kptrlatt
  character(len=*),optional,intent(in) :: out_prefix
  logical,optional,intent(in) :: malloc_only
 !arrays
- integer,intent(in) :: intp_kptrlatt(3,3),band_block(2)
+ integer,intent(in) :: intp_kptrlatt(3,3),band_range(2)
  real(dp),intent(in) :: params(:)
  real(dp),intent(in) :: intp_shiftk(3,intp_nshiftk)
 
@@ -4231,7 +4231,7 @@ type(ebands_t) function ebands_interp_kmesh(ebands, cryst, params, intp_kptrlatt
 
  nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
 
- my_bblock = band_block; if (all(band_block == 0)) my_bblock = [1, ebands%mband]
+ my_bblock = band_range; if (all(band_range == 0)) my_bblock = [1, ebands%mband]
  nb = my_bblock(2) - my_bblock(1) + 1
 
  ! Get ibz, new shifts and new kptrlatt.
@@ -4297,7 +4297,7 @@ type(ebands_t) function ebands_interp_kmesh(ebands, cryst, params, intp_kptrlatt
    do ik_ibz=1,new%nkpt
      do ib=1,nb
        cnt = cnt + 1; if (mod(cnt, nprocs) /= my_rank) cycle  ! Mpi parallelism.
-       ! Note the difference between band and ib index if band_block.
+       ! Note the difference between band and ib index if band_range.
        band = my_bblock(1) + ib - 1
        select case (itype)
        case (1)
@@ -4346,7 +4346,7 @@ end function ebands_interp_kmesh
 !!  kpath<kpath_t> = Object describing the k-path
 !!  params(:):
 !!    params(1): 1 for SKW.
-!!  band_block(2)=Initial and final band index to be interpolated. [0,0] if all bands are used.
+!!  band_range(2)=Initial and final band index to be interpolated. [0,0] if all bands are used.
 !!    This is a global variable i.e. all MPI procs must call the routine with the same value.
 !!  comm=MPI communicator
 !!  [malloc_only]: if true, create new bands object but don't interpolate eigenvalues.
@@ -4356,7 +4356,7 @@ end function ebands_interp_kmesh
 !!
 !! SOURCE
 
-type(ebands_t) function ebands_interp_kpath(ebands, cryst, kpath, params, band_block, comm, malloc_only) result(new)
+type(ebands_t) function ebands_interp_kpath(ebands, cryst, kpath, params, band_range, comm, malloc_only) result(new)
 
 !Arguments ------------------------------------
 !scalars
@@ -4366,7 +4366,7 @@ type(ebands_t) function ebands_interp_kpath(ebands, cryst, kpath, params, band_b
  type(kpath_t),intent(in) :: kpath
  logical,optional,intent(in) :: malloc_only
 !arrays
- integer,intent(in) :: band_block(2)
+ integer,intent(in) :: band_range(2)
  real(dp),intent(in) :: params(:)
 
 !Local variables-------------------------------
@@ -4386,7 +4386,7 @@ type(ebands_t) function ebands_interp_kpath(ebands, cryst, kpath, params, band_b
 
  nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
 
- my_bblock = band_block; if (all(band_block == 0)) my_bblock = [1, ebands%mband]
+ my_bblock = band_range; if (all(band_range == 0)) my_bblock = [1, ebands%mband]
  nb = my_bblock(2) - my_bblock(1) + 1
 
  if (ebands%nkpt == 1) then
@@ -4450,7 +4450,7 @@ type(ebands_t) function ebands_interp_kpath(ebands, cryst, kpath, params, band_b
    do ik_ibz=1,new%nkpt
      do ib=1,nb
        cnt = cnt + 1; if (mod(cnt, nprocs) /= my_rank) cycle  ! Mpi parallelism.
-       ! Note the difference between band and ib index if band_block.
+       ! Note the difference between band and ib index if band_range.
        band = my_bblock(1) + ib - 1
        select case (itype)
        case (1)
@@ -5806,14 +5806,14 @@ end subroutine ebands_write_gnuplot
 !!
 !! INPUTS
 !!  dtset<dataset_type>=Abinit dataset
-!!  band_block(2)=Initial and final band index to be interpolated. [0,0] if all bands are used.
+!!  band_range(2)=Initial and final band index to be interpolated. [0,0] if all bands are used.
 !!    This is a global variable i.e. all MPI procs must call the routine with the same value.
 !!
 !! OUTPUT
 !!
 !! SOURCE
 
-subroutine ebands_interpolate_kpath(ebands, dtset, cryst, band_block, prefix, comm)
+subroutine ebands_interpolate_kpath(ebands, dtset, cryst, band_range, prefix, comm)
 
 !Arguments ------------------------------------
 !scalars
@@ -5823,7 +5823,7 @@ subroutine ebands_interpolate_kpath(ebands, dtset, cryst, band_block, prefix, co
  integer,intent(in) :: comm
  character(len=*),intent(in) :: prefix
 !arrays
- integer,intent(in) :: band_block(2)
+ integer,intent(in) :: band_range(2)
 
 !Local variables-------------------------------
 !scalars
@@ -5859,11 +5859,11 @@ subroutine ebands_interpolate_kpath(ebands, dtset, cryst, band_block, prefix, co
  end if
 
  kpath = kpath_new(bounds, cryst%gprimd, ndivsm)
- call kpath%print(header="Interpolating energies on k-path", unit=std_out)
+ call kpath%print([std_out], header="Interpolating energies on k-path")
  ABI_FREE(bounds)
 
  ! Interpolate bands on k-path.
- ebands_kpath = ebands_interp_kpath(ebands, cryst, kpath, dtset%einterp, band_block, comm)
+ ebands_kpath = ebands_interp_kpath(ebands, cryst, kpath, dtset%einterp, band_range, comm)
 
  if (my_rank == master) then
    call wrtout(ab_out, sjoin("- Writing interpolated bands to file:", strcat(prefix, tag)))

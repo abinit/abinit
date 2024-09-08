@@ -1337,10 +1337,10 @@ subroutine dvdb_readsym_qbz(db, cryst, qbz, indq2db, cplex, nfft, ngfft, v1scf, 
 
 !Local variables-------------------------------
 !scalars
- integer :: db_iqpt, itimrev, isym, npc, ierr, imyp, mu, root
+ integer :: db_iqpt, itimrev, isym, imyp
  logical :: isirr_q
 !arrays
- integer :: pinfo(3,3*db%mpert), g0q(3), requests(db%natom3)
+ integer :: g0q(3)
  real(dp) :: tsec(2)
  real(dp) ABI_ASYNC, allocatable :: work(:,:,:,:), work2(:,:,:,:)
 ! *************************************************************************

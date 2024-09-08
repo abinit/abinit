@@ -2403,14 +2403,14 @@ end subroutine nscf_init
 !!  gsc_k
 !!  eig_k
 !!  gs_hamk
-!!  err_msg
+!!  msg
 !!  ierr
 !!  [init_cg_k]
 !!
 !! SOURCE
 
 subroutine nscf_solve(nscf, isppol, kpt, istwf_k, nband, cryst, dtset, dtfil, psps, pawtab, pawfgr, &
-                      npw_k, kg_k, kpg_k, ph3d_k, kinpw_k, ffnl_k, vlocal, cg_k, gsc_k, eig_k, gs_hamk, err_msg, ierr, init_cg_k)  ! out
+                      npw_k, kg_k, kpg_k, ph3d_k, kinpw_k, ffnl_k, vlocal, cg_k, gsc_k, eig_k, gs_hamk, msg, ierr, init_cg_k)  ! out
 
  use m_abi_linalg, only : abi_linalg_init, abi_linalg_finalize
 
@@ -2432,7 +2432,7 @@ subroutine nscf_solve(nscf, isppol, kpt, istwf_k, nband, cryst, dtset, dtfil, ps
  real(dp),allocatable,intent(out) :: kpg_k(:,:), ph3d_k(:,:,:), kinpw_k(:), ffnl_k(:,:,:,:), vlocal(:,:,:,:)
  real(dp),optional,intent(in) :: init_cg_k(:,:,:)
  integer,intent(out) :: ierr
- character(len=*),intent(out) :: err_msg
+ character(len=*),intent(out) :: msg
 
 !Local variables ------------------------------
 !scalars
@@ -2500,13 +2500,12 @@ subroutine nscf_solve(nscf, isppol, kpt, istwf_k, nband, cryst, dtset, dtfil, ps
 
  call gs_hamk%load_spin(isppol, vlocal=vlocal, with_nonlocal=.true.)
 
- !with_vxctau = (dtset%usekden/=0)
-
- !if (with_vxctau) then
- !  call gspot_transgrid_and_pack(isppol, psps%usepaw, paral_kgb0, dtset%nfft, dtset%ngfft, nfftf, &
- !                                dtset%nspden, gs_hamk%nvloc, 4, pawfgr, mpi_enreg, vxctau, vxctaulocal)
- !  call gs_hamk%load_spin(isppol, vxctaulocal=vxctaulocal)
- !end if
+ if (dtset%usekden /= 0) then
+   ABI_ERROR("nscf_init with mgga not yet coded")
+   !call gspot_transgrid_and_pack(isppol, psps%usepaw, paral_kgb0, dtset%nfft, dtset%ngfft, nfftf, &
+   !                              dtset%nspden, gs_hamk%nvloc, 4, pawfgr, mpi_enreg, vxctau, vxctaulocal)
+   !call gs_hamk%load_spin(isppol, vxctaulocal=vxctaulocal)
+ end if
 
  ! Compute nonlocal form factors ffnl_k at (k+G)
  ABI_MALLOC(ffnl_k, (npw_k, 1, psps%lmnmax, psps%ntypat))
@@ -2544,10 +2543,12 @@ subroutine nscf_solve(nscf, isppol, kpt, istwf_k, nband, cryst, dtset, dtfil, ps
  ABI_MALLOC(gsc_k, (2, npw_k * nspinor, nband * dtset%usepaw))
  ABI_MALLOC(eig_k, (nband))
 
- ! Initialize the wavefunctions. See also wfconv for a more portable way.
+
  if (present(init_cg_k)) then
+   ! Initialize wavefunctions from init_cg_k
    cg_k = init_cg_k
  else
+   ! Initialize the wavefunctions with random numbers. See wfconv
    do iband=1,nband
      index = 0
      do ispinor=1,nspinor
@@ -2586,7 +2587,6 @@ subroutine nscf_solve(nscf, isppol, kpt, istwf_k, nband, cryst, dtset, dtfil, ps
 
    ! Ortoghonalize input trial states.
    call pw_orthon(icg0, igsc0, istwf_k, mcg, mgsc, npwsp, nband, ortalgo_3, gsc_k, dtset%usepaw, cg_k, me_g0, xmpi_comm_self)
-
  end if
 
  ABI_MALLOC(evec, (2*nband, nband))
@@ -2596,7 +2596,7 @@ subroutine nscf_solve(nscf, isppol, kpt, istwf_k, nband, cryst, dtset, dtfil, ps
  call abi_linalg_init(linalg_max_size,RUNL_GSTATE,dtset%wfoptalg, paral_kgb0,&
                       dtset%gpu_option,dtset%use_slk,dtset%np_slk, nscf%mpi_enreg%comm_bandspinorfft)
 
- ierr = 1; err_msg = ""
+ ierr = 1; msg = ""
  do inonsc=1,dtset%nstep
 
    call cgwf(dtset%berryopt, cg_k, cgq, dtset%chkexit, cpus0, dphase_k, dtefield, dtfil%filnam_ds(1), &
@@ -2620,23 +2620,26 @@ subroutine nscf_solve(nscf, isppol, kpt, istwf_k, nband, cryst, dtset, dtfil, ps
    ! Exit loop over inonsc if converged
    if (max_resid < dtset%tolwfr) then
      ierr = 0
-     err_msg = sjoin("   NSCF loop for kpt:", ktoa(kpt), " completed in", itoa(inonsc), "iterations. max_resid:")
-     err_msg = sjoin(err_msg, ftoa(max_resid)) ! , " < tolwfr:", ftoa(dtset%tolwfr))
-     call wrtout(std_out, err_msg)
+     msg = sjoin(" NSCF for kpt:", ktoa(kpt), " completed in", itoa(inonsc), "steps. max_resid:", ftoa(max_resid))
+     call wrtout(std_out, msg)
+     ! Fix the phase of the wavefunctions.
+     !call fxphas_seq(cg_k, gsc_k, icg0, igsc0, istwf_k, mcg, mgsc, nband, npw_k, dtset%usepaw)
      exit
    end if
  end do ! inonsc
 
  end associate
 
- !write(std_out, *)" Eigenvalues in Ha and eV"
- !do iband=1,nband
- !  write(std_out, *)eig_k(iband), eig_k(iband) * Ha_eV
- !end do
+ !if (prtvol > 10) then
+   !write(std_out, *)" Eigenvalues in Ha and eV"
+   !do iband=1,nband
+   !  write(std_out, *)iband, eig_k(iband), eig_k(iband) * Ha_eV
+   !end do
+ !end if
 
  if (ierr /= 0) then
-   err_msg = sjoin("NSCF run for kpt:", ktoa(kpt), "didn't converge after", itoa(dtset%nstep), " iterations", ch10)
-   err_msg = sjoin(err_msg, "max_resid:", ftoa(max_resid), " >= tolwfr:", ftoa(dtset%tolwfr))
+   msg = sjoin(" NSCF run for kpt:", ktoa(kpt), "didn't converge after", itoa(dtset%nstep), " steps", ch10)
+   msg = sjoin(msg, "max_resid:", ftoa(max_resid), " >= tolwfr:", ftoa(dtset%tolwfr))
  end if
 
  call abi_linalg_finalize(dtset%gpu_option)
