@@ -842,7 +842,7 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  type(pawtab_type),target,intent(in) :: pawtab(psps%ntypat*psps%usepaw)
  type(ebands_t),target,intent(in) :: ks_ebands
  type(mpi_type),target,intent(in) :: mpi_enreg
- integer,intent(in) :: input_comm
+ integer,intent(inout) :: input_comm
 
 !Local variables-------------------------------
 !scalars

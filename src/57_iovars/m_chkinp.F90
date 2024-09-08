@@ -35,7 +35,7 @@ module m_chkinp
  use m_io_tools,       only : flush_unit
  use m_numeric_tools,  only : iseven, isdiagmat
  use m_symtk,          only : sg_multable, chkorthsy, symmetrize_xred
- use m_fstrings,       only : string_in, sjoin
+ use m_fstrings,       only : string_in, sjoin, itoa
  use m_geometry,       only : metric
  use m_fftcore,        only : fftalg_has_mpi
  use m_exit,           only : get_timelimit
@@ -913,7 +913,9 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      call chkint_eq(1,1,cond_string,cond_values,ierr,'enable_mpi_io',xmpi_mpiio,1,(/1/),iout)
    end if
 
-   ! eph variables
+   ! ========
+   ! eph code
+   ! ========
    if (optdriver == RUNL_EPH) then
      cond_string(1)='optdriver'; cond_values(1)=optdriver
      call chkint_eq(1,1,cond_string,cond_values,ierr,'eph_task',dt%eph_task, &
@@ -935,9 +937,22 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      if (dt%eph_task == 2 .and. dt%irdwfq == 0 .and. dt%getwfq == 0) then
        ABI_ERROR_NOSTOP('Either getwfq or irdwfq must be non-zero in order to compute the gkk', ierr)
      end if
-     if (any(dt%eph_task == [-5, 18])) then
-       ABI_CHECK(dt%ph_nqpath > 0, "ph_nqpath must be specified when eph_task in [-5, 18]")
+     if (any(dt%eph_task == [-5])) then
+       ABI_CHECK(dt%ph_nqpath > 0, "ph_nqpath must be specified when eph_task == -5")
      end if
+     if (any(dt%eph_task == [18])) then
+
+       ABI_CHECK_IRANGE(dt%eph_bstart, 1, dt%mband, "Wrong eph_bstart")
+
+       if (dt%eph_fix_korq == "k") then
+         ABI_CHECK(dt%ph_nqpath > 0, "ph_nqpath must be specified when elh_fix_kord = 'k' with eph_task == -5")
+       end if
+       if (dt%eph_fix_korq == "q") then
+         ABI_CHECK(dt%nkpath > 0, "nkpath and kptbounds must be specified when eph_fix_kord = 'q' with eph_task == -5")
+         ABI_CHECK(allocated(dt%kptbounds), "kptbounds must be specified when eph_fix_kord = 'q' with eph_task == -5")
+       end if
+     end if
+
      if (dt%eph_task == 13) then
        msg = "electron, hole"
        if (.not. string_in(dt%varpeq_pkind, msg)) then
@@ -4078,9 +4093,9 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      enddo
      if (npsp /= dt%ntypat) then
        write(msg, '(a,a,a,a,I0,a,I0,a,a,a)' ) ch10,&
-&       'wvl_wfs_set:  consistency checks failed,', ch10, &
-&       'dtset%npsp (', npsp, ') /= dtset%ntypat (', dt%ntypat, ').', ch10, &
-&       'No alchemy pseudo are allowed with wavelets.'
+       'wvl_wfs_set:  consistency checks failed,', ch10, &
+       'dtset%npsp (', npsp, ') /= dtset%ntypat (', dt%ntypat, ').', ch10, &
+       'No alchemy pseudo are allowed with wavelets.'
        ABI_ERROR_NOSTOP(msg,ierr)
      end if
    end if

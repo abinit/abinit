@@ -1549,7 +1549,7 @@ subroutine phgamma_linwid(gams, cryst, ifc, ndivsm, nvert, qverts, basename, nci
    write(unt,'(a)')     '# ABINIT package: E-PH band structure file. Hartree units'
    write(unt,'(a)')     '#'
    write(unt,'(a,i0,a)')'# Phonon frequencies, ph linewidths and lambda calculated on ',nqpt,' q-points'
-   call qpath%print(header="Description of the q-path:", unit=unt, pre="#")
+   call qpath%print([unt], header="Description of the q-path:", pre="#")
    do ii=1,2; write(unt,'(a)')     "# "; end do
 
    write(unt,'(a,e16.6)')"# Total DOS at Fermi level ",sum(gams%n0)
@@ -1622,11 +1622,6 @@ end subroutine phgamma_linwid
 !!
 !! FUNCTION
 !!  Free the memory allocated in a2f
-!!
-!! SIDE EFFECTS
-!!  a2f<a2fw_t>=Structure storing the Eliashberg function a2F.
-!!
-!! OUTPUT
 !!
 !! SOURCE
 

@@ -262,7 +262,7 @@ program abitk
    kpath = kpath_new(bounds, cryst%gprimd, ndivsm)
    ABI_FREE(bounds)
 
-   call kpath%print(header="Interpolating energies on k-path", unit=std_out)
+   call kpath%print([std_out], header="Interpolating energies on k-path")
 
    ! Interpolate band energies with star-functions
    call parse_skw_params(skw_params)
