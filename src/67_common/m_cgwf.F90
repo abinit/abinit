@@ -2631,10 +2631,10 @@ subroutine nscf_solve(nscf, isppol, kpt, istwf_k, nband, cryst, dtset, dtfil, ps
  end associate
 
  !if (prtvol > 10) then
-   !write(std_out, *)" Eigenvalues in Ha and eV"
-   !do iband=1,nband
-   !  write(std_out, *)iband, eig_k(iband), eig_k(iband) * Ha_eV
-   !end do
+ !  write(std_out, *)" Eigenvalues in Ha and eV"
+ !  do iband=1,nband
+ !    write(std_out, *)iband, eig_k(iband), eig_k(iband) * Ha_eV
+ !  end do
  !end if
 
  if (ierr /= 0) then

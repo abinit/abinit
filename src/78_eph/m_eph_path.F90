@@ -130,7 +130,7 @@ subroutine eph_path_run(dtfil, dtset, cryst, dvdb, ifc, &
  character(len=5000) :: msg
  character(len=10) :: priority
 !!arrays
- integer :: units(2), ngfft(18),ngfftf(18), band_range(2)
+ integer :: units(2), ngfft(18),ngfftf(18)
  integer :: coords_spin(ndims), dims(ndims)
  integer,allocatable :: kg_k(:,:), kg_kq(:,:), qmap_symrec(:,:), my_ik_inds(:), my_iq_inds(:), my_spins(:), my_iperts(:)
  integer,allocatable :: pert_table(:,:), my_pinfo(:,:)
@@ -170,7 +170,7 @@ subroutine eph_path_run(dtfil, dtset, cryst, dvdb, ifc, &
  case ("k")
    qpath = kpath_new(dtset%ph_qpath(:,1:dtset%ph_nqpath), cryst%gprimd, dtset%ph_ndivsm)
    nq_path = qpath%npts
-   call qpath%print(units, header=sjoin("q-point path for g(k,q) with k:", ktoa(dtset%eph_fix_wavevec)))
+   call qpath%print(units, header=sjoin("q-point path for g(k,q) with k:", ktoa(dtset%eph_fix_wavevec)), prtvol=11)
    fake_path(:,1) = dtset%eph_fix_wavevec; fake_path(:,2) = dtset%eph_fix_wavevec + one
    kpath = kpath_new(fake_path, cryst%gprimd, 0)
    nk_path = 1
@@ -178,7 +178,7 @@ subroutine eph_path_run(dtfil, dtset, cryst, dvdb, ifc, &
  case ("q")
    kpath = kpath_new(dtset%kptbounds(:,1:dtset%nkpath), cryst%gprimd, dtset%ndivsm)
    nk_path = kpath%npts
-   call qpath%print(units, header=sjoin("k-point path for g(k,q) with q:", ktoa(dtset%eph_fix_wavevec)))
+   call qpath%print(units, header=sjoin("k-point path for g(k,q) with q:", ktoa(dtset%eph_fix_wavevec)), prtvol=11)
    fake_path(:,1) = dtset%eph_fix_wavevec; fake_path(:,2) = dtset%eph_fix_wavevec + one
    qpath = kpath_new(fake_path, cryst%gprimd, 0)
    nq_path = 1
