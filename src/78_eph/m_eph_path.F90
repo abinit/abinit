@@ -238,17 +238,16 @@ subroutine eph_path_run(dtfil, dtset, cryst, dvdb, ifc, &
    keepdim = .False.; keepdim(3) = .True.; call kpt_comm%from_cart_sub(comm_cart, keepdim)
    call xmpi_comm_free(comm_cart)
 #endif
-
-   ! Distribute perturbations inside pert_comm using block distribution.
-   call xmpi_split_block(natom3, pert_comm%value, my_npert, my_iperts)
-   ABI_FREE(my_iperts)
  end do ! my_is
 
  ! Distribute k-points (q-points) inside kpt_comm (qpt_comm) using block distribution.
  call xmpi_split_block(nk_path, kpt_comm%value, my_nkpath, my_ik_inds)
  call xmpi_split_block(nq_path, qpt_comm%value, my_nqpath, my_iq_inds)
+ call xmpi_split_block(natom3, pert_comm%value, my_npert, my_iperts)
+ ABI_FREE(my_iperts)
  ABI_CHECK_IGEQ(my_nkpath, 1, "Too many procs for k-points")
  ABI_CHECK_IGEQ(my_nqpath, 1, "Too many procs for q-points")
+ ABI_CHECK_IGEQ(my_npert, 1, "Too many procs for perturbationss")
 
  ! Load KS potential from file.
  call nscf%init(dtset, dtfil, cryst, comm)
@@ -269,6 +268,7 @@ subroutine eph_path_run(dtfil, dtset, cryst, dvdb, ifc, &
    call dvdb%set_pert_distrib(my_npert, natom3, my_pinfo, pert_table, pert_comm%value)
    ABI_FREE(my_pinfo)
    ABI_FREE(pert_table)
+   ABI_WARNING("Parallelism over pertubations should be tested.")
  end if
 
  qptopt = dtset%kptopt; if (dtset%qptopt /= 0) qptopt = dtset%qptopt
@@ -405,9 +405,9 @@ subroutine eph_path_run(dtfil, dtset, cryst, dvdb, ifc, &
      ABI_CHECK(ierr == 0, msg)
      !ebands_kpath%eigens(:, ik, spin) = eig_k
 
-     if (pert_comm%me == master) then
+     !if (pert_comm%me == master) then
        NCF_CHECK(nf90_put_var(ncid, vid("all_eigens_k"), eig_k, start=[1,ik,spin]))
-     end if
+     !end if
 
      ! Make sure all procs in pert_comm have the same wavefunctions at k
      call xmpi_bcast(cg_k, master, pert_comm%value, ierr); if (psps%usepaw == 1) call xmpi_bcast(gsc_k, master, pert_comm%value, ierr)
@@ -444,14 +444,14 @@ subroutine eph_path_run(dtfil, dtset, cryst, dvdb, ifc, &
        ! Make sure all procs in pert_comm have the same wavefunctions at k
        call xmpi_bcast(cg_kq, master, pert_comm%value, ierr); if (psps%usepaw == 1) call xmpi_bcast(gsc_kq, master, pert_comm%value, ierr)
 
-       if (pert_comm%me == master) then
+       !if (pert_comm%me == master) then
          NCF_CHECK(nf90_put_var(ncid, vid("all_eigens_kq"), eig_kq, start=[1,iq,spin]))
          ! Write phonons for this q.
          if (spin == 1) then
            NCF_CHECK(nf90_put_var(ncid, vid("phfreqs"), phfreqs_ev, start=[1,iq]))
            NCF_CHECK(nf90_put_var(ncid, vid("phdispl_cart"), displ_cart, start=[1,1,1,1,iq]))
          end if
-       end if
+       !end if
 
        ! if PAW, one has to solve a generalized eigenproblem
        ! Be careful here because I will need sij_opt==-1
@@ -477,7 +477,7 @@ subroutine eph_path_run(dtfil, dtset, cryst, dvdb, ifc, &
          ! The first entry in mapc_qq2dvdb gives the index in dvdb%qpts.
          ! The other entries in mapc_qq are OK as they refer to symmetries.
          mapc_qq2dvdb = gqk%my_q2ibz(:, my_iq); mapc_qq2dvdb(1) = db_iqpt
-         call dvdb%readsym_qbz(cryst, qq_bz, mapc_qq2dvdb, cplex, nfftf, ngfftf, v1scf, pert_comm%value)
+         call dvdb%readsym_qbz(cryst, qq, mapc_qq2dvdb, cplex, nfftf, ngfftf, v1scf, pert_comm%value)
 #endif
        end if
 
@@ -541,10 +541,10 @@ subroutine eph_path_run(dtfil, dtset, cryst, dvdb, ifc, &
        call ephtk_gkknu_from_atm(nb_in_g, nb_in_g, 1, natom, gkq_atm, phfreqs, displ_red, gkq_nu)
 
        ! Write |g|^2 for this q.
-       if (pert_comm%me == master) then
+       !if (pert_comm%me == master) then
          gkq2_nu = gkq_nu(1,:,:,:)**2 + gkq_nu(2,:,:,:)** 2
          NCF_CHECK(nf90_put_var(ncid, vid("gkq2_nu"), gkq2_nu, start=[1,1,1,iq,ik,spin]))
-       end if
+       !end if
 
        ABI_FREE(gs1c)
        ABI_FREE(ylm_kq)
