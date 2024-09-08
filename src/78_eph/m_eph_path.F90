@@ -117,7 +117,7 @@ subroutine eph_path_run(dtfil, dtset, cryst, dvdb, ifc, &
  integer :: spin, iq, ik, nk_path, nq_path, ierr, npw_k, npw_kq, my_rank, nprocs, n1, n2, n3, n4, n5, n6, cplex
  integer :: natom, natom3, nsppol, nspden, nspinor, qptopt, db_iqpt, comm_cart, me_cart
  integer :: nfft,nfftf,mgfft,mgfftf, my_npert, my_ip, idir, ipert, ipc, nkpg, nkpg1, ncerr, ncid, my_nkpath, my_nqpath
- integer :: in_k, im_kq, my_is, my_ik, my_iq, nband, nb, band_n, band_m, bstart, my_nspins, np
+ integer :: in_k, im_kq, my_is, my_ik, my_iq, nband, nb_in_g, band_n, band_m, bstart, my_nspins, np
  real(dp) :: cpu_all,wall_all,gflops_all, eig0nk, eshift
  logical :: qq_is_gamma, use_ftinterp, gen_eigenpb
  type(gs_hamiltonian_type) :: gs_hamk, gs_hamkq
@@ -186,8 +186,8 @@ subroutine eph_path_run(dtfil, dtset, cryst, dvdb, ifc, &
    ABI_ERROR(sjoin("Invalid value of eph_fix_korq:", dtset%eph_fix_korq))
  end select
 
- ! Define band range and nb
- bstart = dtset%eph_bstart; nband = dtset%mband; nb = nband - bstart + 1
+ ! Define band range and nb_in_g
+ bstart = dtset%eph_bstart; nband = dtset%mband; nb_in_g = nband - bstart + 1
 
  !ebands_kpath = ebands_interp_kpath(gs_ebands, cryst, kpath, params, [bstart, nband], comm, malloc_only=.True.)
 
@@ -295,9 +295,9 @@ subroutine eph_path_run(dtfil, dtset, cryst, dvdb, ifc, &
 
  ABI_MALLOC(displ_cart, (2, 3, cryst%natom, natom3))
  ABI_MALLOC(displ_red, (2, 3, cryst%natom, natom3))
- ABI_MALLOC(gkq_atm, (2, nb, nb, natom3))
- ABI_MALLOC(gkq_nu, (2, nb, nb, natom3))
- ABI_MALLOC(gkq2_nu, (nb, nb, natom3))
+ ABI_MALLOC(gkq_atm, (2, nb_in_g, nb_in_g, natom3))
+ ABI_MALLOC(gkq_nu, (2, nb_in_g, nb_in_g, natom3))
+ ABI_MALLOC(gkq2_nu, (nb_in_g, nb_in_g, natom3))
 
  gpath_path = strcat(dtfil%filnam_ds(4), "_GPATH.nc")
 
@@ -316,7 +316,8 @@ subroutine eph_path_run(dtfil, dtset, cryst, dvdb, ifc, &
       nctkdim_t("nq_path", nq_path), &
       nctkdim_t("nk_path", nk_path), &
       nctkdim_t("nsppol", nsppol), &
-      nctkdim_t("nb", nb), &
+      nctkdim_t("nband", nband), &
+      nctkdim_t("nb_in_g", nb_in_g), &
       nctkdim_t("natom", cryst%natom), &
       nctkdim_t("natom3", 3 * natom3) &
    ], defmode=.True.)
@@ -331,7 +332,7 @@ subroutine eph_path_run(dtfil, dtset, cryst, dvdb, ifc, &
      nctkarr_t("kpoints", "dp", "three, nk_path"), &
      nctkarr_t("qpoints", "dp", "three, nq_path"), &
      nctkarr_t("qweights", "dp", "nq_path"), &
-     nctkarr_t("gkq2_nu", "dp", "nb, nb, natom3, nk_path, nq_path, nsppol"), &
+     nctkarr_t("gkq2_nu", "dp", "nb_in_g, nb_in_g, natom3, nq_path, nk_path, nsppol"), &
      nctkarr_t("phfreqs", "dp", "natom3, nq_path"), &
      nctkarr_t("phdispl_cart", "dp", "two, three, natom, natom3, nq_path"), &
      nctkarr_t("eph_fix_korq", "c", "one"), &
@@ -421,7 +422,7 @@ subroutine eph_path_run(dtfil, dtset, cryst, dvdb, ifc, &
        ABI_MALLOC(ylm_kq, (npw_kq, psps%mpsang*psps%mpsang*psps%useylm))
        ABI_MALLOC(ylmgr_kq, (npw_kq, 3, psps%mpsang*psps%mpsang*psps%useylm*useylmgr1))
 
-       ABI_MALLOC(h1kets_kq, (2, npw_kq*nspinor, nb))
+       ABI_MALLOC(h1kets_kq, (2, npw_kq*nspinor, nb_in_g))
 
        ! ====================================
        ! Get DFPT potentials for this q-point
@@ -468,7 +469,7 @@ subroutine eph_path_run(dtfil, dtset, cryst, dvdb, ifc, &
 
          ! Calculate dvscf * psi_k, results stored in h1kets_kq on the k+q sphere.
          ! Compute H(1) applied to GS wavefunction Psi(0)
-         do in_k=1,nb
+         do in_k=1,nb_in_g
            band_n = in_k + bstart - 1
            eig0nk = eig_k(band_n)
            ! Use scissor shift on 0-order eigenvalue
@@ -487,9 +488,9 @@ subroutine eph_path_run(dtfil, dtset, cryst, dvdb, ifc, &
          call rf_hamkq%free()
 
          ! Calculate <psi_{k+q,j}|dvscf_q*psi_{k,i}> for this perturbation. No need to handle istwf_kq because it's always 1.
-         do in_k=1,nb
+         do in_k=1,nb_in_g
            band_n = in_k + bstart - 1
-           do im_kq=1,nb
+           do im_kq=1,nb_in_g
              band_m = im_kq + bstart - 1
              gkq_atm(:, im_kq, in_k, ipc) = cg_zdotc(npw_kq*nspinor, cg_kq(1,1,band_m), h1kets_kq(1,1,in_k))
            end do
@@ -499,12 +500,12 @@ subroutine eph_path_run(dtfil, dtset, cryst, dvdb, ifc, &
        ! Collect gkq_atm inside pert_comm so that all procs can operate on the data.
        if (pert_comm%nproc > 1) call xmpi_sum(gkq_atm, pert_comm%value, ierr)
 
-       call ephtk_gkknu_from_atm(nb, nb, 1, natom, gkq_atm, phfreqs, displ_red, gkq_nu)
+       call ephtk_gkknu_from_atm(nb_in_g, nb_in_g, 1, natom, gkq_atm, phfreqs, displ_red, gkq_nu)
 
        if (pert_comm%me == master) then
          ! Write g^2 for this q.
-         gkq2_nu = gkq_nu(1,:,:,:) **2 + gkq_nu(2,:,:,:) ** 2
-         NCF_CHECK(nf90_put_var(ncid, vid("gkq2_nu"), gkq2_nu, start=[1,1,1,ik,iq,spin]))
+         gkq2_nu = gkq_nu(1,:,:,:)**2 + gkq_nu(2,:,:,:)** 2
+         NCF_CHECK(nf90_put_var(ncid, vid("gkq2_nu"), gkq2_nu, start=[1,1,1,iq,ik,spin]))
          ! Write phonons for this q.
          if (spin == 1) then
            NCF_CHECK(nf90_put_var(ncid, vid("phfreqs"), phfreqs_ev, start=[1,iq]))
