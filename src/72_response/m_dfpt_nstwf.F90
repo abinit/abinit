@@ -317,10 +317,12 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
  type(MPI_type) :: mpi_enreg_seq
 !arrays
  integer :: ddkfil(3),my_spintab(2),nband_tmp(1),npwar1_tmp(1)
- integer,allocatable :: bands_treated_now(:),band_procs(:)
+ integer,allocatable,target :: bands_treated_now_ndat(:,:),band_procs(:)
+ integer,pointer     :: bands_treated_now(:)
  integer,allocatable :: jpert1(:),jdir1(:),kg1_k(:,:),kg_k(:,:)
  integer,pointer :: my_atmtab(:)
  real(dp) :: dum1(1,1),dum2(1,1),dum3(1,1),epawnst(2),kpoint(3),kpq(3)
+ real(dp),allocatable :: vdot1r(:),vdot1i(:)
  real(dp) :: sumelfd(2),symfact(3),tsec(2),ylmgr_dum(1,3,1)
  real(dp),allocatable :: buffer(:),ch1c(:,:,:,:),cs1c(:,:,:,:)
  real(dp),allocatable :: ch1c_tmp(:,:)
@@ -334,7 +336,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
  real(dp),allocatable :: d2nl_k(:,:),d2ovl_drho(:,:,:,:,:),d2ovl_k(:,:)
  real(dp),allocatable :: eig_k(:),eig_kq(:),eig1_k(:)
  real(dp),allocatable,target :: e1kbfr_spin(:,:,:,:,:,:),ffnlk(:,:,:,:),ffnl1(:,:,:,:)
- real(dp),allocatable :: gh1(:,:),gs1(:,:),gvnlx1(:,:),kinpw1(:),kpg_k(:,:),kpg1_k(:,:)
+ real(dp),allocatable :: gh1(:,:),gs1(:,:),gvnlx1(:,:),gvnlx2(:,:),kinpw1(:),kpg_k(:,:),kpg1_k(:,:)
  real(dp),allocatable :: gvnlx1_tmp(:,:)
  real(dp),allocatable :: occ_k(:),occ_kq(:),ph3d(:,:,:),ph3d1(:,:,:),rhotmp(:,:),rocceig(:,:)
  real(dp),allocatable :: vectornd_pac(:,:,:,:,:),vectornd_pac_idir(:,:,:,:)
@@ -434,7 +436,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
  mcgq=mpw1*nspinor*mband_mem_rbz*mkqmem*nsppol
  mcprjq=nspinor*mband_mem_rbz*mkqmem*nsppol*usecprj
 
- ABI_MALLOC(bands_treated_now, (maxval(nband_rbz)))
+ ABI_MALLOC(bands_treated_now_ndat, (maxval(nband_rbz),ndat))
 
 !Check ddk files (needed to compute electric field perturbations)
  ddkfil(:)=0
@@ -879,6 +881,8 @@ has_vectornd = (with_vectornd .EQ. 1)
        ABI_MALLOC(eig_kq,(nband_k))
        ABI_MALLOC(eig1_k,(2*nband_k**2))
        ABI_MALLOC(occ_k,(nband_k))
+       ABI_MALLOC(vdot1r,(nband_k))
+       ABI_MALLOC(vdot1i,(nband_k))
        d2nl_k(:,:)=zero
        d2ovl_k(:,:)=zero
        eig_k (:)=eigen0(1+bdtot_index:nband_k+bdtot_index)
@@ -1100,7 +1104,6 @@ has_vectornd = (with_vectornd .EQ. 1)
 
 
 !      LOOP OVER BANDS
-       iband_me = 0
        do iband=1,nband_k,ndat
 
 
@@ -1146,7 +1149,6 @@ has_vectornd = (with_vectornd .EQ. 1)
            idir1=jdir1(kdir1)
            istr1=idir1;if(ipert1==dtset%natom+4) istr1=idir1+3
            iband_me = iband - 1
-           !bands_treated_now(1:iband) = 1
 
 !          Not able to compute if ipert1=(Elect. field) and no ddk WF file
            if (ipert1==dtset%natom+2.and.ddkfil(idir1)==0) cycle
@@ -1304,7 +1306,7 @@ has_vectornd = (with_vectornd .EQ. 1)
 !          Read DDK wave function (if ipert1=electric field)
            if (ipert1==dtset%natom+2) then
              usevnl=1
-             ABI_MALLOC(gvnlx1,(2,npw1_k*nspinor*ndat))
+             ABI_MALLOC(gvnlx1,(2,npw1_k*nspinor*nband_k))
              if (need_ddk_file) then
                if (ddkfil(idir1)/=0) then
                  !ik_ddk = wfk_findk(ddks(idir1), kpt_rbz(:,ikpt)
@@ -1376,13 +1378,14 @@ has_vectornd = (with_vectornd .EQ. 1)
 
 
 
-
            ABI_MALLOC(gvnlx1,    (2,npw1_k*nspinor*ndat))
+           ABI_MALLOC(gvnlx2,    (2,npw1_k*nspinor*nband_k))
            ABI_MALLOC(gvnlx1_tmp,(2,npw1_k*nspinor))
 
            do idat=1,ndat
 
-             iband_me = iband_me + 1
+             iband_me = iband + idat - 1
+             bands_treated_now => bands_treated_now_ndat(:,idat)
              bands_treated_now = 0
              bands_treated_now(iband+idat-1) = 1
              call xmpi_sum(bands_treated_now,mpi_enreg%comm_band,ierr)
@@ -1456,7 +1459,7 @@ has_vectornd = (with_vectornd .EQ. 1)
 
 !!!!!!!!!!!!!!!!! 8) End of that scary looking loop...
              if (has_dcwf) then
-               if (ipert==ipert1.and.idir==idir1) gvnlx1=gvnlx1-gh1
+               if (ipert==ipert1.and.idir==idir1) gvnlx1 = gvnlx1-gh1
                dotr=zero;doti=zero
                if (abs(occ_k(iband+idat-1))>tol8) then
 !                Compute: -<u0_k_i|S^(j1)| Sum_{j}[<u0_k+q_j|H^(j2)-Eps_k_i.S^(j2)|u0_k_i>.|u0_k+q_j>
@@ -1473,12 +1476,17 @@ has_vectornd = (with_vectornd .EQ. 1)
              end if
              !ABI_FREE(gvnlx1)
            end if
+         end do !idat
 
 
 
 
 
 
+         do idat=1,ndat
+
+           iband_me = iband + idat - 1
+           bands_treated_now => bands_treated_now_ndat(:,idat)
 
 
 !          If needed, compute here <delta_u^(j1)_k_i|H-Eps_k_i.S|u^(j2)_k_i>
@@ -1519,38 +1527,40 @@ has_vectornd = (with_vectornd .EQ. 1)
 
 
              jband_me = 0
-             do jband=1,nband_k
-               if (do_bcast > 0) then
-                 gvnlx1 = zero
+             if (do_bcast > 0) then
+               gvnlx2 = zero
+               do jband=1,nband_k
                  if (mpi_enreg%proc_distrb(ikpt,jband,isppol)==me) then
                    jband_me = jband_me + 1
 ! gvnlx1 depends on j only, I have it, and everyone needs it
-                   gvnlx1(:,1:npw1_k*nspinor)=cgq(:,1+npw1_k*nspinor*(jband_me-1)+icgq:npw1_k*nspinor*jband_me+icgq)
+                   gvnlx2(:,1+(jband-1)*npw1_k*nspinor:jband*npw1_k*nspinor)=cgq(:,1+npw1_k*nspinor*(jband_me-1)+icgq:npw1_k*nspinor*jband_me+icgq)
                  end if
 ! xmpi bcast the current jband to other procs in band pool
                  !call xmpi_bcast(gvnlx1, band_procs(jband), mpi_enreg%comm_band, ierr)
-                 call xmpi_sum(gvnlx1, mpi_enreg%comm_band, ierr)
+               end do
+               call xmpi_sum(gvnlx2, mpi_enreg%comm_band, ierr)
 !              Computation of cs1c=<u0_k_i|S^(j1)|u0_k+q_j>
-!                  do _I_ need to calculate the dot1X?
-                 if (do_scprod > 0) then
-                   call dotprod_g(dot1r,dot1i,istwf_k,npw1_k*nspinor,2,&
+!                do _I_ need to calculate the dot1X?
+               if (do_scprod > 0) then
+                 call dotprod_g_batch(vdot1r,vdot1i,istwf_k,npw1_k*nspinor,nband_k,2,&
 &                     gs1(:,1+(idat-1)*npw1_k*nspinor:idat*npw1_k*nspinor),&
-&                     gvnlx1,mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
-                   if (ipert==ipert1.and.idir==idir1.and.has_dcwf2) then
-                     cs1c(1,jband,iband_me,ikpt_me)=dot1r
-                     cs1c(2,jband,iband_me,ikpt_me)=dot1i
-                   end if
+&                     gvnlx2,mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
+                 if (ipert==ipert1.and.idir==idir1.and.has_dcwf2) then
+                   cs1c(1,:,iband_me,ikpt_me)=vdot1r(:)
+                   cs1c(2,:,iband_me,ikpt_me)=vdot1i(:)
                  end if
-               end if ! ipert==ipert1.and.idir==idir1 or some iband for some proc in pool is filled
+               end if
+             end if ! ipert==ipert1.and.idir==idir1 or some iband for some proc in pool is filled
 
-               if (abs(occ_k(iband+idat-1))>tol8) then
+             if (do_scprod > 0) then
+               do jband=1,nband_k
 !                Computation of term (I)
                  if (has_dcwf2) then
                    arg=eig_kq(jband)-eig_k(iband+idat-1)
                    dot2r=cs1c(1,jband,iband_me,ikpt_me)
                    dot2i=cs1c(2,jband,iband_me,ikpt_me)
-                   dotr=dotr+(dot1r*dot2r+dot1i*dot2i)*arg
-                   doti=doti+(dot1i*dot2r-dot1r*dot2i)*arg
+                   dotr=dotr+(vdot1r(jband)*dot2r+vdot1i(jband)*dot2i)*arg
+                   doti=doti+(vdot1i(jband)*dot2r-vdot1r(jband)*dot2i)*arg
                  end if
 !                Computation of term (II) TODO: the next two ifs could be combined
                  if (is_metal) then
@@ -1559,12 +1569,12 @@ has_vectornd = (with_vectornd .EQ. 1)
                      arg=invocc*rocceig(jband,iband+idat-1)*(eig_k(iband+idat-1)-eig_kq(jband))
                      dot2r=eig1_k(ii)
                      dot2i=eig1_k(ii+1)
-                     dotr=dotr+arg*(dot1r*dot2r-dot1i*dot2i)
-                     doti=doti+arg*(dot1r*dot2i+dot2r*dot1i)
+                     dotr=dotr+arg*(vdot1r(jband)*dot2r-vdot1i(jband)*dot2i)
+                     doti=doti+arg*(vdot1r(jband)*dot2i+dot2r*vdot1i(jband))
                    end if
                  end if
-               end if ! occ bands
-             end do ! jband
+               end do
+             end if ! occ bands
 
              dotr=quarter*dotr
              doti=quarter*doti
@@ -1575,6 +1585,7 @@ has_vectornd = (with_vectornd .EQ. 1)
              d2ovl_k(2,idir1)=d2ovl_k(2,idir1)+wtk_k*occ_k(iband+idat-1)*two*elfd_fact*doti
              !ABI_FREE(gvnlx1)
            end if
+         end do !idat
 
 
 
@@ -1586,19 +1597,21 @@ has_vectornd = (with_vectornd .EQ. 1)
 !          Build the matrix element <u0_k_i|H^(j1)-Eps_k_i.S^(j1)|u^(j2)_k,q_i>
 !          and add contribution to DDB
            if (ipert1/=dtset%natom+1) then
-             if (abs(occ_k(iband+idat-1))>tol8) then
-               call dotprod_g(dotr,doti,istwf_k,npw1_k*nspinor,2,&
-&                   gh1(:,1+(idat-1)*npw1_k*nspinor:idat*npw1_k*nspinor),&
-&                   cwavef(:,1+(idat-1)*npw1_k*nspinor:idat*npw1_k*nspinor),&
-&                   mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
-!              Case ipert1=natom+2 (electric field):
-!              gh1 contains H^(j1)|u0_k_i> (VHxc constant) which corresponds
-!              to i.d/dk in Eq. (38) of Gonze, PRB 55, 10355 (1997) [[cite:Gonze1997a]].
-!              * if ipert==natom+2, we apply directly Eq. (38)
-!              * if ipert/=natom+2, Born effective charges are minus D2E
-               d2nl_k(1,idir1)=d2nl_k(1,idir1)+wtk_k*occ_k(iband+idat-1)*two*elfd_fact*dotr
-               d2nl_k(2,idir1)=d2nl_k(2,idir1)+wtk_k*occ_k(iband+idat-1)*two*elfd_fact*doti
-             end if
+             do idat=1,ndat
+               if (abs(occ_k(iband+idat-1))>tol8) then
+                 call dotprod_g(dotr,doti,istwf_k,npw1_k*nspinor,2,&
+  &                   gh1(:,1+(idat-1)*npw1_k*nspinor:idat*npw1_k*nspinor),&
+  &                   cwavef(:,1+(idat-1)*npw1_k*nspinor:idat*npw1_k*nspinor),&
+  &                   mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
+  !              Case ipert1=natom+2 (electric field):
+  !              gh1 contains H^(j1)|u0_k_i> (VHxc constant) which corresponds
+  !              to i.d/dk in Eq. (38) of Gonze, PRB 55, 10355 (1997) [[cite:Gonze1997a]].
+  !              * if ipert==natom+2, we apply directly Eq. (38)
+  !              * if ipert/=natom+2, Born effective charges are minus D2E
+                 d2nl_k(1,idir1)=d2nl_k(1,idir1)+wtk_k*occ_k(iband+idat-1)*two*elfd_fact*dotr
+                 d2nl_k(2,idir1)=d2nl_k(2,idir1)+wtk_k*occ_k(iband+idat-1)*two*elfd_fact*doti
+               end if
+             end do !idat
 
 
 
@@ -1611,37 +1624,39 @@ has_vectornd = (with_vectornd .EQ. 1)
 !            MT jan-2010: this is probably not correctly implemented for PAW !!!
 !            missing terms due to S^(1) and S^(2)
            else
-!            note: gh1 used as temporary space (to store idir ddk WF)
-             if (idir==idir1) then
-               gvnlx1_tmp=cwavef
-             else
-               if (need_ddk_file.and.ddkfil(idir1)/=0) then
-                 !ik_ddk = wfk_findk(ddks(idir1), kpt_rbz(:,ikpt)
-                 !ik_ddk = indkpt1(ikpt)
-                 !call ddks(idir1)%read_bks(iband, ik_ddk, isppol, xmpio_single, cg_bks=gvnlx1_tmp)
-                 gvnlx1_tmp = cg_ddk(:,1+(iband+idat-1)*npw1_k*nspinor:(iband+idat)*npw1_k*nspinor,idir1)
+             do idat=1,ndat
+  !            note: gh1 used as temporary space (to store idir ddk WF)
+               if (idir==idir1) then
+                 gvnlx1_tmp=cwavef
                else
-                 gvnlx1_tmp=zero
+                 if (need_ddk_file.and.ddkfil(idir1)/=0) then
+                   !ik_ddk = wfk_findk(ddks(idir1), kpt_rbz(:,ikpt)
+                   !ik_ddk = indkpt1(ikpt)
+                   !call ddks(idir1)%read_bks(iband, ik_ddk, isppol, xmpio_single, cg_bks=gvnlx1_tmp)
+                   gvnlx1_tmp = cg_ddk(:,1+(iband+idat-1)*npw1_k*nspinor:(iband+idat)*npw1_k*nspinor,idir1)
+                 else
+                   gvnlx1_tmp=zero
+                 end if
                end if
-             end if
-             if (abs(occ_k(iband+idat-1))>tol8) then
-               call dotprod_g(dotr,doti,istwf_k,npw1_k*nspinor,2,&
-&                  gvnlx1_tmp,&
-&                  cwavef(:,1+(idat-1)*npw1_k*nspinor:idat*npw1_k*nspinor),&
-&                  mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
-               call dotprod_g(dot1r,dot1i,istwf_k,npw1_k*nspinor,2,&
-&                  cwave0(:,1+(idat-1)*npw_k*nspinor:idat*npw_k*nspinor),&
-&                  gvnlx1_tmp,&
-&                  mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
-               call dotprod_g(dot2r,dot2i,istwf_k,npw1_k*nspinor,2,&
-&                  cwavef(:,1+(idat-1)*npw1_k*nspinor:idat*npw1_k*nspinor),&
-&                  cwave0(:,1+(idat-1)*npw_k*nspinor:idat*npw_k*nspinor),&
-&                  mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
-               dotr=dotr-(dot1r*dot2r-dot1i*dot2i)
-               doti=doti-(dot1r*dot2i+dot1i*dot2r)
-               d2nl_k(1,idir1)=d2nl_k(1,idir1)+wtk_k*occ_k(iband+idat-1)*dotr/(nband_kocc*two)
-               d2nl_k(2,idir1)=d2nl_k(2,idir1)+wtk_k*occ_k(iband+idat-1)*doti/(nband_kocc*two)
-             end if
+               if (abs(occ_k(iband+idat-1))>tol8) then
+                 call dotprod_g(dotr,doti,istwf_k,npw1_k*nspinor,2,&
+  &                  gvnlx1_tmp,&
+  &                  cwavef(:,1+(idat-1)*npw1_k*nspinor:idat*npw1_k*nspinor),&
+  &                  mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
+                 call dotprod_g(dot1r,dot1i,istwf_k,npw1_k*nspinor,2,&
+  &                  cwave0(:,1+(idat-1)*npw_k*nspinor:idat*npw_k*nspinor),&
+  &                  gvnlx1_tmp,&
+  &                  mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
+                 call dotprod_g(dot2r,dot2i,istwf_k,npw1_k*nspinor,2,&
+  &                  cwavef(:,1+(idat-1)*npw1_k*nspinor:idat*npw1_k*nspinor),&
+  &                  cwave0(:,1+(idat-1)*npw_k*nspinor:idat*npw_k*nspinor),&
+  &                  mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
+                 dotr=dotr-(dot1r*dot2r-dot1i*dot2i)
+                 doti=doti-(dot1r*dot2i+dot1i*dot2r)
+                 d2nl_k(1,idir1)=d2nl_k(1,idir1)+wtk_k*occ_k(iband+idat-1)*dotr/(nband_kocc*two)
+                 d2nl_k(2,idir1)=d2nl_k(2,idir1)+wtk_k*occ_k(iband+idat-1)*doti/(nband_kocc*two)
+               end if
+             end do !idat
            end if
 
 
@@ -1656,12 +1671,13 @@ has_vectornd = (with_vectornd .EQ. 1)
 !            (see PRB 78, 035105 (2008) [[cite:Audouze2008]], Eq. (42))
              ABI_MALLOC(dcwavef,(2,npw1_k*nspinor))
              ABI_MALLOC(dcwaveprj,(dtset%natom,nspinor))
-             call pawcprj_alloc(dcwaveprj,0,gs_hamkq%dimcprj)
+               do idat=1,ndat
+               call pawcprj_alloc(dcwaveprj,0,gs_hamkq%dimcprj)
   ! NB: have to call getdc with all band processors to distribute cgq cprjq correctly
-               call getdc1(iband+idat-1,band_procs,bands_treated_now,cgq,cprjq,dcwavef,dcwaveprj,&
+               call getdc1(iband+idat-1,band_procs,bands_treated_now_ndat(:,idat),cgq,cprjq,dcwavef,dcwaveprj,&
 &                 ibgq,icgq,istwf_k,mcgq,&
 &                 mcprjq,mpi_enreg,dtset%natom,nband_k,nband_me,npw1_k,nspinor,1,&
-&                 gs1(:,1+(idat-1)*npw1_k*nspinor:idat*npw1_k*nspinor),gpu_option=ABI_GPU_DISABLED)
+&                 gs1(:,1+(idat-1)*npw1_k*nspinor:idat*npw1_k*nspinor),gpu_option=dtset%gpu_option)
 
                if (abs(occ_k(iband+idat-1))>tol8) then
   !              Accumulate 1st-order density due to delta_u^(j1)
@@ -1673,16 +1689,17 @@ has_vectornd = (with_vectornd .EQ. 1)
 &                 pawdrhoij1_unsym(:,idir1),drhoaug1(:,:,:,idir1),tim_fourwf,wfcorr,wtk_k)
                end if
 
-             call pawcprj_free(dcwaveprj)
+               call pawcprj_free(dcwaveprj)
+             end do !idat
              ABI_FREE(dcwaveprj)
              ABI_FREE(dcwavef)
            end if ! has_drho
-         end do !idat
          !do idat=1,ndat
          !  !call pawcprj_output(cwaveprj0_idir1(:,1+(idat-1)*nspinor:idat*nspinor),prtgrads=1)
          !end do
 
              ABI_FREE(gvnlx1)
+             ABI_FREE(gvnlx2)
              ABI_FREE(gvnlx1_tmp)
 
            if((usecprj==1).and..not.(associated(cwaveprj0_idir1,cwaveprj0)))then
@@ -1733,6 +1750,8 @@ has_vectornd = (with_vectornd .EQ. 1)
        ABI_FREE(eig_kq)
        ABI_FREE(eig1_k)
        ABI_FREE(occ_k)
+       ABI_FREE(vdot1r)
+       ABI_FREE(vdot1i)
        if (is_metal)  then
          ABI_FREE(doccde_k)
          ABI_FREE(doccde_kq)
@@ -2073,7 +2092,7 @@ has_vectornd = (with_vectornd .EQ. 1)
 !         2nd-order energy non-stationnary expression
  eovl1=zero;if (usepaw==1) eovl1=d2ovl(1,idir,ipert,idir,ipert)
 
- ABI_FREE(bands_treated_now)
+ ABI_FREE(bands_treated_now_ndat)
 
  call destroy_mpi_enreg(mpi_enreg_seq)
  call timab(566,2,tsec)
