@@ -1294,6 +1294,7 @@ subroutine getdc1(band,band_procs,bands_treated_now,cgq,cprjq,dcwavef,dcwaveprj,
  integer :: band_, ierr
  real(dp),parameter :: scal=-half
 !arrays
+ integer, allocatable :: nlmn(:)
  real(dp), allocatable :: dummy(:,:),scprod(:,:)
  real(dp), allocatable :: dcwavef_tmp(:,:)
  type(pawcprj_type),allocatable :: dcwaveprj_tmp(:,:)
@@ -1306,8 +1307,11 @@ subroutine getdc1(band,band_procs,bands_treated_now,cgq,cprjq,dcwavef,dcwaveprj,
  ABI_MALLOC(scprod,(2,nband_me))
  ABI_MALLOC(dcwavef_tmp,(2,npw1*nspinor))
  if (optcprj == 1) then
+   ABI_MALLOC(nlmn,(natom))
    ABI_MALLOC(dcwaveprj_tmp,(natom,nspinor*optcprj))
-   call pawcprj_alloc(dcwaveprj_tmp, 0, dcwaveprj(:,1)%nlmn)
+   nlmn(:)=dcwaveprj(:,1)%nlmn
+   call pawcprj_alloc(dcwaveprj_tmp, 0, nlmn)
+   ABI_FREE(nlmn)
  end if
 
 !=== 1- COMPUTE: <G|S^(1)|C_k> - Sum_j [<C_k+q,j|S^(1)|C_k>.<G|C_k+q,j>]

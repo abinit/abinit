@@ -799,6 +799,7 @@ subroutine corrmetalwf1(cgq,cprjq,cwavef,cwave1,cwaveprj,cwaveprj1,cycle_bands,e
  real(dp) :: edocc_tmp
 !arrays
  integer :: bands_treated_now(nband)
+ integer, allocatable :: nlmn(:)
  real(dp) :: tsec(2)
  real(dp),allocatable :: cwcorr(:,:)
  type(pawcprj_type) :: cwaveprj1_corr(natom,nspinor*usepaw)
@@ -821,7 +822,10 @@ subroutine corrmetalwf1(cgq,cprjq,cwavef,cwave1,cwaveprj,cwaveprj1,cycle_bands,e
  wf_corrected=0
 
  if(usepaw==1) then
-   call pawcprj_alloc(cwaveprj1_corr, cwaveprj1(1,1)%ncpgr, cwaveprj1(:,1)%nlmn)
+   ABI_MALLOC(nlmn,(natom))
+   nlmn(:)=cwaveprj1(:,1)%nlmn
+   call pawcprj_alloc(cwaveprj1_corr, cwaveprj1(1,1)%ncpgr, nlmn)
+   ABI_FREE(nlmn)
  end if
 
 ! loop iband_ over all bands being treated for the moment
