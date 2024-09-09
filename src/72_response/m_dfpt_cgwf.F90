@@ -93,7 +93,7 @@ module m_dfpt_cgwf
 
    type(dataset_type),pointer :: dtset => null()
    type(mpi_type) :: mpi_enreg
-   !type(u1cache_t) :: u1c
+   !type(u1_cache_t) :: u1c
 
    integer,allocatable :: bands_treated_now(:)
    integer,allocatable :: rank_band(:)

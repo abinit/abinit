@@ -476,9 +476,9 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, &
          cg_kq = cg_k
        end if
 
-       !call cgtk_change_gsphere(nspinor*nband, prev_npw_kq, prev_istwf, prev_kg_kq, prev_cg_kq, npw2, istwf2, kg2, cg2, work_ngfft, work)
-       !ABI_REMALLOC(prev_cg_kq, (2, npw_kq * nspinor, nband))
-       !prev_cg_kq = cg_kq
+       !call u0_cache_kq%get_new_kpt(kq, new_npw_kq, nspinor, new_nband_kq, new_kg_kq, new_cg_kq)
+       !call u0_cache_kq%store(kq, npw_kq, nspinor, nband, kg_kq, cg_kq)
+       !call u0_cache_kq%free()
 
        ABI_WARNING_IF(ierr /= 0, msg)
        tot_nscf_ierr = tot_nscf_ierr + ierr
