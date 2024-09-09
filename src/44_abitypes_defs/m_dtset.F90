@@ -176,7 +176,7 @@ type, public :: dataset_type
  integer :: efmas_ntheta
  integer :: enunit
  integer :: eph_ahc_type = 1
- integer :: eph_bstart = 1
+ integer :: eph_path_brange(2) = 0
  integer :: eph_intmeth = 2
  integer :: eph_frohlichm = 0
  integer :: eph_frohl_ntheta = 0
@@ -1518,7 +1518,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%chneut             = dtin%chneut
 
  dtout%eph_ahc_type       = dtin%eph_ahc_type
- dtout%eph_bstart         = dtin%eph_bstart
+ dtout%eph_path_brange    = dtin%eph_path_brange
  dtout%eph_mustar         = dtin%eph_mustar
  dtout%eph_intmeth        = dtin%eph_intmeth
  dtout%eph_tols_idelta    = dtin%eph_tols_idelta
@@ -3372,7 +3372,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' efield einterp elph2_imagden energy_reference enunit'
  list_vars=trim(list_vars)//' eph_frohl_ntheta'
  list_vars=trim(list_vars)//' eph_doping eph_ecutosc eph_extrael eph_fermie eph_frohlich eph_frohlichm eph_fsewin eph_fsmear '
- list_vars=trim(list_vars)//' eph_intmeth eph_mustar eph_ngqpt_fine eph_ahc_type eph_bstart'
+ list_vars=trim(list_vars)//' eph_intmeth eph_mustar eph_ngqpt_fine eph_ahc_type eph_path_brange'
  ! XG20200321, please provide testing for eph_np_pqbks
  ! MG: Well, eph_np_pqbks and gwpt_np_wpqbks cannot be tested with the present infrastructure because it's a MPI-related variable
  ! and all the tests in the paral and mpiio directory are done with a single input file

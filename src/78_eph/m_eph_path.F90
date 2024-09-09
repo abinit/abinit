@@ -120,7 +120,7 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, &
  integer :: spin, iq, ik, nk_path, nq_path, ierr, npw_k, npw_kq, my_rank, nprocs, n1, n2, n3, n4, n5, n6, cplex
  integer :: natom, natom3, nsppol, nspden, nspinor, qptopt, db_iqpt, comm_cart, me_cart, nq_vers
  integer :: nfft,nfftf,mgfft,mgfftf, my_npert, my_ip, idir, ipert, ipc, nkpg, nkpg1, ncerr, ncid, my_nkpath, my_nqpath
- integer :: in_k, im_kq, my_is, my_ik, my_iq, nband, nb_in_g, band_n, band_m, bstart, my_nspins, np, tot_nscf_ierr
+ integer :: in_k, im_kq, my_is, my_ik, my_iq, nband, nb_in_g, band_n, band_m, bstart, bstop, my_nspins, np, tot_nscf_ierr
  real(dp) :: cpu_all,wall_all,gflops_all, eig0nk, eshift
  logical :: qq_is_gamma, use_ftinterp, gen_eigenpb
  type(gs_hamiltonian_type) :: gs_hamk, gs_hamkq
@@ -192,9 +192,10 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, &
  end select
 
  ! Define band range and nb_in_g
- bstart = dtset%eph_bstart; nband = dtset%mband; nb_in_g = nband - bstart + 1
-
- !ebands_kpath = ebands_interp_kpath(gs_ebands, cryst, kpath, params, [bstart, nband], comm, malloc_only=.True.)
+ nband = dtset%mband
+ bstart = dtset%eph_path_brange(1); bstop = dtset%eph_path_brange(2)
+ nb_in_g = bstop - bstart + 1
+ call wrtout(units, sjoin("Computing g with eph_path_brange:", ltoa(dtset%eph_path_brange)))
 
  ! Distribute spins iside input comm.
  call xmpi_split_nsppol(comm, nsppol, my_nspins, my_spins, comm_my_is)
@@ -353,7 +354,7 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, &
 
    ! integer scalars
    ncerr = nctk_def_iscalars(ncid, [character(len=nctk_slen) :: &
-     "bstart", "dvdb_add_lr" &
+     "bstart", "bstop", "dvdb_add_lr" &
    ])
    NCF_CHECK(ncerr)
 
@@ -385,8 +386,8 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, &
    NCF_CHECK(nctk_set_datamode(ncid))
 
   ncerr = nctk_write_iscalars(ncid, [character(len=nctk_slen) :: &
-    "bstart", "dvdb_add_lr"], &
-    [bstart, dtset%dvdb_add_lr &
+    "bstart", "bstop", "dvdb_add_lr"], &
+    [bstart, bstop, dtset%dvdb_add_lr &
   ])
   NCF_CHECK(ncerr)
 
@@ -485,14 +486,15 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, &
        ! Make sure all procs in pert_comm have the same wavefunctions at k
        call xmpi_bcast(cg_kq, master, pert_comm%value, ierr); if (psps%usepaw == 1) call xmpi_bcast(gsc_kq, master, pert_comm%value, ierr)
 
-       !if (pert_comm%me == master) then
+       !if (my_ik == 1 .and. pert_comm%me == master) then
+       if (my_ik == 1) then
          NCF_CHECK(nf90_put_var(ncid, vid("all_eigens_kq"), eig_kq, start=[1,iq,spin]))
          ! Write phonons for this q.
          if (spin == 1) then
            NCF_CHECK(nf90_put_var(ncid, vid("phfreqs"), phfreqs_ev, start=[1,iq]))
            NCF_CHECK(nf90_put_var(ncid, vid("phdispl_cart"), displ_cart, start=[1,1,1,1,iq]))
          end if
-       !end if
+       end if
 
        ! if PAW, one has to solve a generalized eigenproblem
        ! Be careful here because I will need sij_opt==-1
@@ -655,7 +657,7 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, &
        do iq=1, nq_path
          NCF_CHECK(nf90_get_var(ncid, vid("gkq2_nu"), gkq2_nu, start=[1,1,1,iq,ik,spin]))
          do nu=1,natom3
-           write(msg, "(1x,4(i5,1x),es16.6)"), nu, iq, ik, spin, sqrt(sum(gkq2_nu(:,:, nu)) / nb_in_g**2) * Ha_meV
+           write(msg, "(1x,4(i5,1x),es16.6)") nu, iq, ik, spin, sqrt(sum(gkq2_nu(:,:, nu)) / nb_in_g**2) * Ha_meV
            call wrtout(units, msg)
          end do
        end do ! iq
@@ -691,7 +693,7 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, &
  call qpt_comm%free(); call kpt_comm%free(); call pert_comm%free()
 
  call cwtime_report(" eph_path: MPI barrier before returning.", cpu_all, wall_all, gflops_all, end_str=ch10, comm=comm)
- stop
+ !stop
 
 contains
  integer function vid(var_name)

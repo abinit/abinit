@@ -24626,7 +24626,7 @@ To compute e-ph matrix as a function of the q-point:
    eph_fix_korq "k"          # k is fixed in g(k,q)
    eph_fix_wavevec 0.0 0 0   # k-point
 
-   eph_bstart 4              # Compute g(k,q) with m and n ranging from 4 up to 10
+   eph_path_brange 1 4              # Compute g(k,q) with m and n ranging from 4 up to 10
    nband 40
 
    ph_ndivsm 10              # the q-path in g(k,q)
@@ -24646,7 +24646,7 @@ To compute e-ph matrix as a function of the k-point:
    eph_fix_korq "q"
    eph_fix_wavevec 0.5 0 0
    nband 10
-   eph_bstart 4
+   eph_path_brange 4
 
    ndivsm 10
    nkpath 3
@@ -24660,21 +24660,22 @@ To compute e-ph matrix as a function of the k-point:
 
 
 Variable(
-    abivarname="eph_bstart",
+    abivarname="eph_path_brange",
     varset="eph",
     vartype="int",
     topics=['ElPhonInt_useful'],
-    dimensions="scalar",
-    defaultval=1,
-    mnemonics="Electron-PHonon: Band START",
+    dimensions=[2],
+    defaultval=[0, 0],
+    mnemonics="Electron-PHonon: Band RANGE",
     requires="[[eph_task]] == 18",
     added_in_version="10.1.4",
     text=r"""
 
-This variable defines the first band that should be included when computing the e-ph matrix elements
+This variable defines the first and the last band that should be included when computing the e-ph matrix elements
 g(k,q) along either a q-path or k-path ([[eph_task]] == 18].
-All bands from 1 up to [[nband]] are included, hence one can use these two variables to select the band range of interest
-and skip, for instance, low-energy states.
+One can use these two variables to select the band range of interest and skip, for instance, low-energy states.
+If not specied all bands from 1 up to [[nband]] are included,
+If specified in input, eph_path_brange(2) must be <= [[nband]].
 """,
 ),
 
