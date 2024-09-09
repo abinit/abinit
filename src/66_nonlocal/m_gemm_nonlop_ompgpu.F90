@@ -817,37 +817,13 @@ contains
     if(choice /= 7) then
       ! opernlc
       iatm = 0
-      shift = 0; dshift = 0; d2shift = 0
-      !$OMP TARGET UPDATE FROM(projections) IF(dimekbq==2)
-      !$OMP TARGET UPDATE FROM(dprojections) IF(dimekbq==2 .and. ndgxdt>0)
+      shift = 0
       do itypat=1, ntypat
         nlmn=count(indlmn(3,:,itypat)>0)
 
         ibeg = shift+1
         iend = shift+nattyp(itypat)*nlmn
 
-        idbeg = dshift+1
-        idend = dshift+nattyp(itypat)*nlmn*ngrads
-
-        id2beg = d2shift+1
-        id2end = d2shift+nattyp(itypat)*nlmn*ngrads2
-
-        if(dimekbq==2) then
-        do idat = 1,ndat
-          call opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fac,&
-&         dprojections(:, idbeg:idend, 1+nspinor*(idat-1):nspinor*idat),&
-&         vnl_dprojections(:, idbeg:idend, 1+nspinor*(idat-1):nspinor*idat),&
-&         s_dprojections(:, idbeg:idend, 1+nspinor*(idat-1):nspinor*idat),&
-&         d2projections(:, id2beg:id2end, 1+nspinor*(idat-1):nspinor*idat),&
-&         d2gxdt_dum_out,d2gxdt_dum_out2,&
-&         dimenl1,dimenl2,dimekbq,enl,&
-&         projections(:, ibeg:iend, 1+nspinor*(idat-1):nspinor*idat),&
-&         vnl_projections(:, ibeg:iend,1+nspinor*(idat-1):nspinor*idat),&
-&         s_projections(:, ibeg:iend,1+nspinor*(idat-1):nspinor*idat),&
-&         iatm,indlmn(:,:,itypat),itypat,lambda(idat),mpi_enreg,natom,ndgxdt,ndgxdtfac,nd2gxdt,nd2gxdtfac,&
-&         nattyp(itypat),nlmn,nspinor,nspinortot,optder,paw_opt,sij_typ(:,itypat))
-        end do
-        else
         call opernlc_ylm_ompgpu(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fac,&
   &         dprojections,&
   &         vnl_dprojections,&
@@ -858,15 +834,10 @@ contains
   &         s_projections,&
   &         iatm,indlmn,itypat,lambda,mpi_enreg,natom,ndgxdt,ndgxdtfac,nd2gxdt,nd2gxdtfac,&
   &         nattyp(itypat),nlmn,nspinor,nspinortot,optder,paw_opt,sij_typ,ndat,ibeg-1,iend,nprojs,ntypat)
-        end if
 
         shift = shift + nattyp(itypat)*nlmn
-        dshift = dshift + nattyp(itypat)*nlmn*ngrads
-        d2shift = d2shift + nattyp(itypat)*nlmn*ngrads2
         iatm = iatm+nattyp(itypat)
       end do
-      !$OMP TARGET UPDATE TO(vnl_projections,s_projections) IF(dimekbq==2)
-      !$OMP TARGET UPDATE TO(vnl_dprojections,s_dprojections) IF(dimekbq==2 .and. ndgxdtfac>0)
     else
       !$OMP TARGET DATA USE_DEVICE_PTR(s_projections,projections)
       call copy_gpu_to_gpu(c_loc(s_projections), &
