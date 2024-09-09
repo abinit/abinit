@@ -672,7 +672,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  type(crystal_t) :: pot_cryst
  type(hdr_type) :: pot_hdr
  type(phstore_t) :: phstore
- type(u1cache_t) :: u1c
+ type(u1_cache_t) :: u1c
  type(stern_t),target :: stern
  type(pstat_t) :: pstat
  character(len=5000) :: msg

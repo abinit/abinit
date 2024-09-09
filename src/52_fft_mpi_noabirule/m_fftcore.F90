@@ -397,7 +397,6 @@ pure subroutine ngfft_seq(ngfft, n123)
 
 !Local variables-------------------------------
  integer :: fftalg
-
 ! *************************************************************************
 
  ! Default for sequential case.

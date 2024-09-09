@@ -548,21 +548,32 @@ module m_wfd
  public :: wfdgw_copy
 !!***
 
- type, public :: u1cache_t
+ type, public :: u0_cache_t
+   integer :: prev_npw_k = -1, prev_nband_k = - 1, prev_istwf_k = -1
+   real(dp) :: prev_kpt(3) = -1
+   integer, allocatable :: prev_kg_k(:,:)
+   real(dp),allocatable :: prev_cg_k(:,:,:)
+    ! (2, prev_npw_k*nspinor, prev_nband_k))
+ contains
+   procedure :: store => u0_cache_store
+   procedure :: get => u0_cache_get_new_kpt
+   procedure :: free => u0_cache_free
+ end type u0_cache_t
+
+ type, public :: u1_cache_t
    integer :: prev_npw_kq = -1, prev_bstart_ks = -1, prev_nbcalc_ks = - 1
-   !integer :: tot_nlines_done = 0
    integer :: hits = 0, miss = 0
    real(dp) :: prev_qpt(3)
    integer, allocatable :: prev_kg_kq(:,:)
    real(dp),allocatable :: prev_cg1s_kq(:,:,:,:)
     ! (2, npw_kq*nspinor, natom3, nbcalc_ks))
  contains
-   procedure :: store => u1cache_store
-   procedure :: find_band => u1cache_find_band
-   procedure :: free => u1cache_free
- end type u1cache_t
+   procedure :: store => u1_cache_store
+   procedure :: find_band => u1_cache_find_band
+   procedure :: free => u1_cache_free
+ end type u1_cache_t
 
-CONTAINS  !==============================================================================
+contains
 
 !!****f* m_wfd/kdata_init
 !! NAME
@@ -596,7 +607,6 @@ subroutine kdata_init(Kdata, Cryst, Psps, kpoint, istwfk, ngfft, MPI_enreg, ecut
 !arrays
  integer :: nband_(1), npwarr_(1)
  real(dp),allocatable :: ylmgr_k(:,:,:),kpg_k(:,:),ph1d(:,:)
-
 !************************************************************************
 
  !@kdata_t
@@ -6096,8 +6106,58 @@ subroutine wfdgw_pawrhoij(Wfd,Cryst,Bst,kptopt,pawrhoij,pawprtvol)
 end subroutine wfdgw_pawrhoij
 !!***
 
-subroutine u1cache_store(u1c, qpt, npw_kq, nspinor, natom3, bstart_ks, nbcalc_ks, kg_kq, cg1s_kq)
- class(u1cache_t),intent(inout) :: u1c
+subroutine u0_cache_store(u0c, kpt, istwf_k, npw_k, nspinor, nband_k, kg_k, cg_k)
+ class(u0_cache_t),intent(inout) :: u0c
+ real(dp),intent(in) :: kpt(3)
+ integer,intent(in) :: istwf_k, npw_k, nspinor, nband_k, kg_k(3,npw_k)
+ real(dp),intent(in) :: cg_k(2, npw_k*nspinor, nband_k)
+
+ call u0c%free()
+ u0c%prev_kpt = kpt
+ u0c%prev_istwf_k = istwf_k
+ u0c%prev_npw_k = npw_k
+ u0c%prev_nband_k = nband_k
+ call alloc_copy(kg_k, u0c%prev_kg_k)
+ call alloc_copy(cg_k, u0c%prev_cg_k)
+end subroutine u0_cache_store
+
+subroutine u0_cache_get_new_kpt(u0c, new_kpt, new_istwf_k, new_npw_k, nspinor, new_nband_k, new_kg_k, new_cg_k)
+ class(u0_cache_t),intent(inout) :: u0c
+ real(dp),intent(in) :: new_kpt(3)
+ integer,intent(in) :: new_istwf_k, new_npw_k, nspinor, new_nband_k, new_kg_k(3,new_npw_k)
+ real(dp),intent(out) :: new_cg_k(2, new_npw_k*nspinor, new_nband_k)
+
+!Local variables ------------------------------
+ integer :: mg1, mg2, mg3, work_ngfft(18)
+ real(dp),allocatable :: work(:,:,:,:)
+!************************************************************************
+
+ ABI_CHECK_IEQ(new_nband_k,  u0c%prev_nband_k, "This case is not yet implemented")
+
+
+ !real(dp),intent(out) :: work(2,work_ngfft(4),work_ngfft(5),work_ngfft(6))
+ mg1 = max(maxval(abs(u0c%prev_kg_k(1,:))), maxval(abs(new_kg_k(1,:))))
+ mg2 = max(maxval(abs(u0c%prev_kg_k(2,:))), maxval(abs(new_kg_k(2,:))))
+ mg3 = max(maxval(abs(u0c%prev_kg_k(3,:))), maxval(abs(new_kg_k(3,:))))
+
+ call ngfft_seq(work_ngfft, [mg1, mg2, mg3])
+ ABI_MALLOC(work, (2,work_ngfft(4),work_ngfft(5),work_ngfft(6)))
+
+ call cgtk_change_gsphere(nspinor*new_nband_k, u0c%prev_npw_k, u0c%prev_istwf_k, u0c%prev_kg_k, u0c%prev_cg_k, &
+                          new_npw_k, new_istwf_k, new_kg_k, new_cg_k, work_ngfft, work)
+
+ ABI_FREE(work)
+
+end subroutine u0_cache_get_new_kpt
+
+subroutine u0_cache_free(u0c)
+ class(u0_cache_t),intent(inout) :: u0c
+ ABI_SFREE(u0c%prev_kg_k)
+ ABI_SFREE(u0c%prev_cg_k)
+end subroutine u0_cache_free
+
+subroutine u1_cache_store(u1c, qpt, npw_kq, nspinor, natom3, bstart_ks, nbcalc_ks, kg_kq, cg1s_kq)
+ class(u1_cache_t),intent(inout) :: u1c
  real(dp),intent(in) :: qpt(3)
  integer,intent(in) :: npw_kq, nspinor, natom3, bstart_ks, nbcalc_ks, kg_kq(3,npw_kq)
  real(dp),intent(in) :: cg1s_kq(2, npw_kq*nspinor, natom3, nbcalc_ks)
@@ -6109,10 +6169,10 @@ subroutine u1cache_store(u1c, qpt, npw_kq, nspinor, natom3, bstart_ks, nbcalc_ks
  u1c%prev_nbcalc_ks = nbcalc_ks
  call alloc_copy(kg_kq, u1c%prev_kg_kq)
  call alloc_copy(cg1s_kq, u1c%prev_cg1s_kq)
-end subroutine u1cache_store
+end subroutine u1_cache_store
 
-integer function u1cache_find_band(u1c, band) result(u1c_band)
- class(u1cache_t),intent(inout) :: u1c
+integer function u1_cache_find_band(u1c, band) result(u1c_band)
+ class(u1_cache_t),intent(inout) :: u1c
  integer,intent(in) :: band
  ! Make sure we have the proper global band index in the cache as bstart_ks depends on the
  ! k-point in Sigma_{nk}. If not, fill cg1s_kq with zeros and return.
@@ -6125,15 +6185,13 @@ integer function u1cache_find_band(u1c, band) result(u1c_band)
  else
    u1c%hits = u1c%hits + 1
  end if
-end function u1cache_find_band
+end function u1_cache_find_band
 
-subroutine u1cache_free(u1c)
- class(u1cache_t),intent(inout) :: u1c
- !u1c%miss = 0
- !u1c%hits = 0
+subroutine u1_cache_free(u1c)
+ class(u1_cache_t),intent(inout) :: u1c
  ABI_SFREE(u1c%prev_kg_kq)
  ABI_SFREE(u1c%prev_cg1s_kq)
-end subroutine u1cache_free
+end subroutine u1_cache_free
 
 end module m_wfd
 !!***
