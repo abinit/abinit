@@ -5426,7 +5426,7 @@ else
  use_umklp = 1
  do ikcalc=1,gwr%nkcalc
    call ltg_kcalc(ikcalc)%init(gwr%kcalc(:,ikcalc), gwr%nkbz, gwr%kbz, gwr%cryst, use_umklp, npwe=0, timrev=1)
-   call ltg_kcalc(ikcalc)%print(unit=std_out, prtvol=gwr%dtset%prtvol)
+   call ltg_kcalc(ikcalc)%print([std_out], prtvol=gwr%dtset%prtvol)
  end do
 
  ! Allocate PBLAS matrices to store Wc_q(r',r,tau), and Sigma_kcalc(r',r,+/-tau) in the unit cell.
@@ -6967,7 +6967,7 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
  nkpt_summed = gwr%nkbz
  if (dtset%symchi /= 0) then
    nkpt_summed = ltg_q%nibz_ltg
-   call ltg_q%print(std_out, dtset%prtvol)
+   call ltg_q%print([std_out], prtvol=dtset%prtvol)
  end if
  !call wrtout(std_out, sjoin(' Calculation status: ', itoa(nkpt_summed), ' k-points to be completed'))
 

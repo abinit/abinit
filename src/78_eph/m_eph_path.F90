@@ -79,7 +79,9 @@ contains  !=====================================================
 !!
 !! INPUTS
 !! dtset<dataset_type>=All input variables for this dataset.
+!! cryst<crystal_t>=crystal structure parameters
 !! dvdb<dbdb_type>=Database with the DFPT SCF potentials.
+!! wfk_ebands: electron bands from the input WFK file (used to propagate nelect and fermie to GPATH.nc)
 !! ifc<ifc_type>=interatomic force constants and corresponding real space grid info.
 !! pawfgr <type(pawfgr_type)>=fine grid parameters and related data
 !! pawang<pawang_type)>=PAW angular mesh and related data.
@@ -92,7 +94,7 @@ contains  !=====================================================
 !!
 !! SOURCE
 
-subroutine eph_path_run(dtfil, dtset, cryst, dvdb, ifc, &
+subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, &
                         pawfgr, pawang, pawrad, pawtab, psps, comm)
 
 !Arguments ------------------------------------
@@ -101,6 +103,7 @@ subroutine eph_path_run(dtfil, dtset, cryst, dvdb, ifc, &
  type(datafiles_type),intent(in) :: dtfil
  type(dataset_type),intent(in) :: dtset
  type(crystal_t),intent(in) :: cryst
+ type(ebands_t),intent(in) :: wfk_ebands
  type(dvdb_t),intent(inout) :: dvdb
  type(pawang_type),intent(in) :: pawang
  type(pseudopotential_type),intent(in) :: psps
@@ -115,9 +118,9 @@ subroutine eph_path_run(dtfil, dtset, cryst, dvdb, ifc, &
  integer,parameter :: istwfk_1 = 1, tim_getgh1c = 1, berryopt0 = 0, useylmgr1 = 0, master = 0, ndims=3
  integer :: sij_opt,usecprj,usevnl,optlocal,optnl,opt_gvnlx1
  integer :: spin, iq, ik, nk_path, nq_path, ierr, npw_k, npw_kq, my_rank, nprocs, n1, n2, n3, n4, n5, n6, cplex
- integer :: natom, natom3, nsppol, nspden, nspinor, qptopt, db_iqpt, comm_cart, me_cart
+ integer :: natom, natom3, nsppol, nspden, nspinor, qptopt, db_iqpt, comm_cart, me_cart, nq_vers
  integer :: nfft,nfftf,mgfft,mgfftf, my_npert, my_ip, idir, ipert, ipc, nkpg, nkpg1, ncerr, ncid, my_nkpath, my_nqpath
- integer :: in_k, im_kq, my_is, my_ik, my_iq, nband, nb_in_g, band_n, band_m, bstart, my_nspins, np
+ integer :: in_k, im_kq, my_is, my_ik, my_iq, nband, nb_in_g, band_n, band_m, bstart, my_nspins, np, tot_nscf_ierr
  real(dp) :: cpu_all,wall_all,gflops_all, eig0nk, eshift
  logical :: qq_is_gamma, use_ftinterp, gen_eigenpb
  type(gs_hamiltonian_type) :: gs_hamk, gs_hamkq
@@ -135,7 +138,7 @@ subroutine eph_path_run(dtfil, dtset, cryst, dvdb, ifc, &
  integer,allocatable :: kg_k(:,:), kg_kq(:,:), qmap_symrec(:,:), my_ik_inds(:), my_iq_inds(:), my_spins(:), my_iperts(:)
  integer,allocatable :: pert_table(:,:), my_pinfo(:,:)
  real(dp) :: kk(3), qq(3), kq(3), phfreqs(3*cryst%natom), phfreqs_ev(3*cryst%natom), fake_path(3,2)
- real(dp),allocatable :: grad_berry(:,:), kinpw1(:), dkinpw(:)
+ real(dp),allocatable :: grad_berry(:,:), kinpw1(:), dkinpw(:), qvers_red(:,:)
  real(dp),allocatable :: cg_k(:,:,:), cg_kq(:,:,:), gsc_k(:,:,:), gsc_kq(:,:,:),eig_k(:), eig_kq(:)
  real(dp),allocatable :: v1scf(:,:,:,:), vlocal1(:,:,:,:), vlocal(:,:,:,:), gkq_atm(:,:,:,:), gkq_nu(:,:,:,:), gkq2_nu(:,:,:)
  real(dp),allocatable :: gvnlx1(:,:), gs1c(:,:), h1kets_kq(:,:,:)
@@ -144,6 +147,7 @@ subroutine eph_path_run(dtfil, dtset, cryst, dvdb, ifc, &
  real(dp),allocatable :: kpg_kq(:,:), ph3d_kq(:,:,:), kinpw_kq(:), ffnl_kq(:,:,:,:), vlocal_kq(:,:,:,:)
  real(dp),allocatable :: ylm_kq(:,:), ylm_k(:,:), ylmgr_kq(:,:,:), rvec(:)
  real(dp),allocatable :: ph3d(:,:,:), ph3d1(:,:,:)  ! ffnlk(:,:,:,:), ffnl1(:,:,:,:),
+ real(dp),allocatable :: phfreqs_nanal(:,:), displ_cart_nanal(:,:,:,:,:)
  logical :: reorder, periods(ndims), keepdim(ndims)
  type(pawcprj_type),allocatable  :: cwaveprj0(:,:)
 !************************************************************************
@@ -304,21 +308,39 @@ subroutine eph_path_run(dtfil, dtset, cryst, dvdb, ifc, &
 
  gpath_path = strcat(dtfil%filnam_ds(4), "_GPATH.nc")
 
+ ! Compute non-analytic phonons for q--> 0 in polar materials.
+#if 0
+ !if (nq_path > 1) then
+ !call ifc%ncwrite_nanal_terms_qpath(ncid, units, qpath)
+ call qpath%get_versors(nq_vers, qvers_red)
+ ABI_MALLOC(phfreqs_nanal, (natom3, nq_vers))
+ ABI_MALLOC(displ_cart_nanal, (2, 3, cryst%natom, natom3, nq_vers))
+ do iq=1,nq_vers
+   call ifc%fourq(cryst, qvers_red(:,iq), phfreqs_nanal(:,iq), displ_cart_nanal(:,:,:,:,iq), nanaqdir="reduced")
+   call wrtout(units, sjoin("Phonon frequencies in meV along reduced direction:", ktoa(qvers_red(:,iq)), "(reciprocal space"))
+   do nu=1,natom3
+     write(msg, "(1x,i0, es16.6)") nu, phfreqs_nanal(nu, iq) * Ha_meV
+     call wrtout(units, msg)
+   end do
+ end do
+ ABI_FREE(phfreqs_nanal)
+ ABI_FREE(displ_cart_nanal)
+ ABI_FREE(qvers_red)
+#endif
+
  if (my_rank == master) then
    NCF_CHECK(nctk_open_create(ncid, gpath_path, xmpi_comm_self))
-
-   ! Write the abinit header with metadata, structure and occupancies.
-   !gpath_fform = fform_from_ext("GPATH.nc")
-   !NCF_CHECK(wfk0_hdr%ncwrite(ncid, gpath_fform, spinat=dtset%spinat, nc_define=.True.))
 
    ! Add crystalline structure.
    NCF_CHECK(cryst%ncwrite(ncid))
 
    ! Write gstore dimensions
    ncerr = nctk_def_dims(ncid, [ &
+      nctkdim_t("nspinor", nspinor), &
+      nctkdim_t("nspden", nspden), &
+      nctkdim_t("nsppol", nsppol), &
       nctkdim_t("nq_path", nq_path), &
       nctkdim_t("nk_path", nk_path), &
-      nctkdim_t("nsppol", nsppol), &
       nctkdim_t("nband", nband), &
       nctkdim_t("nb_in_g", nb_in_g), &
       nctkdim_t("natom", cryst%natom), &
@@ -326,25 +348,17 @@ subroutine eph_path_run(dtfil, dtset, cryst, dvdb, ifc, &
    ], defmode=.True.)
    NCF_CHECK(ncerr)
 
-   ncerr = nctk_def_iscalars(ncid, [character(len=nctk_slen) :: "bstart"])
+   ! integer scalars
+   ncerr = nctk_def_iscalars(ncid, [character(len=nctk_slen) :: &
+     "bstart", "dvdb_add_lr" &
+   ])
    NCF_CHECK(ncerr)
-   !ncerr = nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: "fermi_energy", "smearing_width"])
-   !NCF_CHECK(ncerr)
 
-   !ncerr = nctk_def_iscalars(ncid, [character(len=nctk_slen) :: &
-   !  "eph_task", "symsigma", "nbsum", "bsum_start", "bsum_stop", "symdynmat", &
-   !  "ph_intmeth", "eph_intmeth", "qint_method", "eph_transport", &
-   !  "imag_only", "symv1scf", "dvdb_add_lr", "mrta", "ibte_prep", "eph_prtscratew", "eph_ahc_type"])
-   !NCF_CHECK(ncerr)
-
-   !ncerr = nctk_write_iscalars(ncid, [character(len=nctk_slen) :: &
-   !  "eph_task", "symsigma", "nbsum", "bsum_start", "bsum_stop", &
-   !  "symdynmat", "ph_intmeth", "eph_intmeth", "qint_method", &
-   !  "eph_transport", "imag_only", "symv1scf", "dvdb_add_lr", "mrta", "ibte_prep", "eph_prtscratew", "eph_ahc_type"], &
-   !  [dtset%eph_task, self%symsigma, self%nbsum, self%bsum_start, self%bsum_stop, &
-   !  dtset%symdynmat, dtset%ph_intmeth, dtset%eph_intmeth, self%qint_method, dtset%eph_transport, ii, &
-   !  dtset%symv1scf, dtset%dvdb_add_lr, self%mrta, dtset%ibte_prep, dtset%eph_prtscratew, dtset%eph_ahc_type])
-   !NCF_CHECK(ncerr)
+   ! double precision scalars
+   ncerr = nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: &
+     "nelect", "fermie"  &
+   ])
+   NCF_CHECK(ncerr)
 
    ncerr = nctk_def_arrays(ncid, [ &
      nctkarr_t("kpoints", "dp", "three, nk_path"), &
@@ -367,8 +381,17 @@ subroutine eph_path_run(dtfil, dtset, cryst, dvdb, ifc, &
    ! Write data
    NCF_CHECK(nctk_set_datamode(ncid))
 
-   ! scalars
-   NCF_CHECK(nf90_put_var(ncid, vid("bstart"), bstart))
+  ncerr = nctk_write_iscalars(ncid, [character(len=nctk_slen) :: &
+    "bstart", "dvdb_add_lr"], &
+    [bstart, dtset%dvdb_add_lr &
+  ])
+  NCF_CHECK(ncerr)
+
+  ncerr = nctk_write_dpscalars(ncid, [character(len=nctk_slen) :: &
+    "nelect", "fermie"], &
+    [wfk_ebands%nelect, wfk_ebands%fermie &
+  ])
+  NCF_CHECK(ncerr)
 
    ! arrays
    NCF_CHECK(nf90_put_var(ncid, vid("kpoints"), kpath%points(:,1:nk_path)))
@@ -390,6 +413,8 @@ subroutine eph_path_run(dtfil, dtset, cryst, dvdb, ifc, &
  NCF_CHECK(nctk_open_modify(ncid, gpath_path, comm))
 
  ! Loop over spins (MPI parallelized)
+ tot_nscf_ierr = 0
+
  do my_is=1,my_nspins
    spin = my_spins(my_is)
 
@@ -402,7 +427,9 @@ subroutine eph_path_run(dtfil, dtset, cryst, dvdb, ifc, &
      kk = kpath%points(:, ik)
      call nscf%solve(spin, kk, istwfk_1, nband, cryst, dtset, dtfil, psps, pawtab, pawfgr, &
                      npw_k, kg_k, kpg_k, ph3d_k, kinpw_k, ffnl_k, vlocal_k, cg_k, gsc_k, eig_k, gs_hamk, msg, ierr) ! out
-     ABI_CHECK(ierr == 0, msg)
+
+     ABI_WARNING_IF(ierr /= 0, msg)
+     tot_nscf_ierr = tot_nscf_ierr + ierr
      !ebands_kpath%eigens(:, ik, spin) = eig_k
 
      !if (pert_comm%me == master) then
@@ -439,7 +466,9 @@ subroutine eph_path_run(dtfil, dtset, cryst, dvdb, ifc, &
          call nscf%solve(spin, kq, istwfk_1, nband, cryst, dtset, dtfil, psps, pawtab, pawfgr, &
                          npw_kq, kg_kq, kpg_kq, ph3d_kq, kinpw_kq, ffnl_kq, vlocal_kq, cg_kq, gsc_kq, eig_kq, gs_hamkq, msg, ierr)
        end if
-       ABI_CHECK(ierr == 0, msg)
+
+       ABI_WARNING_IF(ierr /= 0, msg)
+       tot_nscf_ierr = tot_nscf_ierr + ierr
 
        ! Make sure all procs in pert_comm have the same wavefunctions at k
        call xmpi_bcast(cg_kq, master, pert_comm%value, ierr); if (psps%usepaw == 1) call xmpi_bcast(gsc_kq, master, pert_comm%value, ierr)
@@ -522,7 +551,6 @@ subroutine eph_path_run(dtfil, dtset, cryst, dvdb, ifc, &
          ABI_FREE(dkinpw)
          ABI_FREE(ph3d)
          ABI_SFREE(ph3d1)
-
          call rf_hamkq%free()
 
          ! Calculate <psi_{k+q,j}|dvscf_q*psi_{k,i}> for this perturbation. No need to handle istwf_kq because it's always 1.
@@ -579,6 +607,16 @@ subroutine eph_path_run(dtfil, dtset, cryst, dvdb, ifc, &
    end do ! my_ik
  end do ! my_is
 
+ call xmpi_sum(tot_nscf_ierr, comm, ierr)
+ tot_nscf_ierr = int(tot_nscf_ierr / dble(pert_comm%nproc))
+ if (my_rank == master) then
+   if (tot_nscf_ierr == 0) then
+     call wrtout(units, sjoin("Computation of g(k,q) completed succesfully. All NSCF runs converged within tolwfr", ftoa(dtset%tolwfr)))
+   else
+     call wrtout(units, sjoin("WARNING:", itoa(tot_nscf_ierr), "NSCF runs did not converge within tolwfr", ftoa(dtset%tolwfr), ". Increase nstep!"))
+   end if
+ end if
+
  ! Free memory
  ABI_FREE(my_ik_inds)
  ABI_FREE(my_iq_inds)
@@ -614,7 +652,6 @@ subroutine eph_path_run(dtfil, dtset, cryst, dvdb, ifc, &
  !NCF_CHECK(ebands_ncwrite(ebands_kpath, ncid))
  !NCF_CHECK(ebands_ncwrite_path(ebands, cryst, gpath_path))
  !call ebands_kpath%free()
-
 
  ! TODO: Write results to ab_out for automatic testing.
 

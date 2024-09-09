@@ -940,10 +940,12 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      if (any(dt%eph_task == [-5])) then
        ABI_CHECK(dt%ph_nqpath > 0, "ph_nqpath must be specified when eph_task == -5")
      end if
+
      if (any(dt%eph_task == [18])) then
-
        ABI_CHECK_IRANGE(dt%eph_bstart, 1, dt%mband, "Wrong eph_bstart")
-
+       if (dt%tolwfr == zero) then
+         ABI_ERROR_NOSTOP("tolwfr must be specified when eph_stern /= 0", ierr)
+       end if
        if (dt%eph_fix_korq == "k") then
          ABI_CHECK(dt%ph_nqpath > 0, "ph_nqpath must be specified when elh_fix_kord = 'k' with eph_task == -5")
        end if
