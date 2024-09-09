@@ -24586,6 +24586,11 @@ Variable(
     requires="[[eph_task]] == 18",
     added_in_version="10.1.4",
     text=r"""
+This variable defines whether one should fix the k-point or the q-point when computing the e-ph matrix elements
+g(k,q) along either a q-path or k-path ([[eph_task]] == 18].
+Use "k" to fix the k-point or "q" to fix the q-point.
+
+The other piece of information is given by [[eph_fix_wavevec]] that specifies the reduced coordinates of the wavevector.
 """,
 ),
 
@@ -24600,25 +24605,39 @@ Variable(
     requires="[[eph_task]] == 18",
     added_in_version="10.1.4",
     text=r"""
+This variable defines the wavevector in reduced coordinates of the reciprocal lattice
+that should be fixed when computing the e-ph matrix elements g(k,q) along either a q-path or k-path ([[eph_task]] == 18].
+The other piece of information is given by [[eph_fix_korq]] that specifies whether one should fix the k-point or the q-point.
 
-To compute e-ph matrix as a function of q
+To compute e-ph matrix as a function of the q-point:
 
 ```
    optdriver 7
    eph_task 18
 
-   eph_fix_korq "k"
-   eph_fix_wavevec 0.0 0 0
-   nband 10
-   eph_bstart 4
+   nstep 100      # NSCF cycle for electronic wavefunctions.
+   tolwfr 1e-18
+   nbdbuf 4
+   getpot_filepath  "gs_POT"   # Need to read the GS potential from file produced in a previous run.
 
-   ph_ndivsm 10
+
+   # OTHER VARIABLES required by the EPH code such as getdvdb_filepath ...
+
+   eph_fix_korq "k"          # k is fixed in g(k,q)
+   eph_fix_wavevec 0.0 0 0   # k-point
+
+   eph_bstart 4              # Compute g(k,q) with m and n ranging from 4 up to 10
+   nband 40
+
+   ph_ndivsm 10              # the q-path in g(k,q)
    ph_nqpath 3
    ph_qpath
       0.0    0.0    0.0
       0.5    0.0    0.5
       0.5    0.25   0.75
 ```
+
+To compute e-ph matrix as a function of the k-point:
 
 ```
    optdriver 7
@@ -24651,6 +24670,11 @@ Variable(
     requires="[[eph_task]] == 18",
     added_in_version="10.1.4",
     text=r"""
+
+This variable defines the first band that should be included when computing the e-ph matrix elements
+g(k,q) along either a q-path or k-path ([[eph_task]] == 18].
+All bands from 1 up to [[nband]] are included, hence one can use these two variables to select the band range of interest
+and skip, for instance, low-energy states.
 """,
 ),
 

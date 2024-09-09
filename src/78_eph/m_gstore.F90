@@ -3710,13 +3710,14 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
                         optnl, opt_gvnlx1, rf_hamkq, sij_opt, tim_getgh1c, usevnl)
          end do
 
-         call rf_hamkq%free()
          ABI_FREE(kinpw1)
          ABI_FREE(dkinpw)
          ABI_FREE(ph3d)
          ABI_SFREE(ph3d1)
+         call rf_hamkq%free()
 
          ! Calculate <psi_{k+q,j}|dvscf_q*psi_{k,i}> for this perturbation. No need to handle istwf_kq because it's always 1.
+!$OMP PARALLEL DO COLLAPSE(2)
          do in_k=1,nband_k
            do im_kq=1,nband_kq
              gkq_atm(:, im_kq, in_k, ipc) = cg_zdotc(npw_kq*nspinor, bras_kq(1,1,im_kq), h1kets_kq(1,1,in_k))
