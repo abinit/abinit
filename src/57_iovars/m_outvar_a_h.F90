@@ -813,8 +813,9 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
  intarr(1,:)=dtsets(:)%eph_ahc_type
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'eph_ahc_type','INT',0)
 
- intarr(1,:)=dtsets(:)%eph_bstart
- call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'eph_bstart','INT',0)
+ intarr(1,:)=dtsets(:)%eph_path_brange(1)
+ intarr(2,:)=dtsets(:)%eph_path_brange(2)
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,2,narrm,ncid,ndtset_alloc,'eph_path_brange','INT',0)
 
  dprarr(1,:)=dtsets(:)%eph_ecutosc
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'eph_ecutosc','ENE',0)
