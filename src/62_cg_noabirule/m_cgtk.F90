@@ -420,7 +420,6 @@ subroutine cgtk_change_gsphere(ndat, npw1, istwf1, kg1, cg1, npw2, istwf2, kg2, 
 !Local variables ------------------------------
 !scalars
  integer :: n1,n2,n3,n4,n5,n6,idat
-
 !************************************************************************
 
  n1 = work_ngfft(1); n2 = work_ngfft(2); n3 = work_ngfft(3)

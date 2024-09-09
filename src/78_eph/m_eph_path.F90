@@ -116,7 +116,7 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, &
 !Local variables ------------------------------
 !scalars
  integer,parameter :: istwfk_1 = 1, tim_getgh1c = 1, berryopt0 = 0, useylmgr1 = 0, master = 0, ndims=3
- integer :: sij_opt,usecprj,usevnl,optlocal,optnl,opt_gvnlx1
+ integer :: sij_opt,usecprj,usevnl,optlocal,optnl,opt_gvnlx1, nu
  integer :: spin, iq, ik, nk_path, nq_path, ierr, npw_k, npw_kq, my_rank, nprocs, n1, n2, n3, n4, n5, n6, cplex
  integer :: natom, natom3, nsppol, nspden, nspinor, qptopt, db_iqpt, comm_cart, me_cart, nq_vers
  integer :: nfft,nfftf,mgfft,mgfftf, my_npert, my_ip, idir, ipert, ipc, nkpg, nkpg1, ncerr, ncid, my_nkpath, my_nqpath
@@ -139,13 +139,13 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, &
  integer,allocatable :: pert_table(:,:), my_pinfo(:,:)
  real(dp) :: kk(3), qq(3), kq(3), phfreqs(3*cryst%natom), phfreqs_ev(3*cryst%natom), fake_path(3,2)
  real(dp),allocatable :: grad_berry(:,:), kinpw1(:), dkinpw(:), qvers_red(:,:)
- real(dp),allocatable :: cg_k(:,:,:), cg_kq(:,:,:), gsc_k(:,:,:), gsc_kq(:,:,:),eig_k(:), eig_kq(:)
+ real(dp),allocatable :: cg_k(:,:,:), cg_kq(:,:,:), prev_cg_kq(:,:,:), gsc_k(:,:,:), gsc_kq(:,:,:),eig_k(:), eig_kq(:)
  real(dp),allocatable :: v1scf(:,:,:,:), vlocal1(:,:,:,:), vlocal(:,:,:,:), gkq_atm(:,:,:,:), gkq_nu(:,:,:,:), gkq2_nu(:,:,:)
  real(dp),allocatable :: gvnlx1(:,:), gs1c(:,:), h1kets_kq(:,:,:)
  real(dp),allocatable :: displ_cart(:,:,:,:),displ_red(:,:,:,:)
  real(dp),allocatable :: kpg_k(:,:), ph3d_k(:,:,:), kinpw_k(:), ffnl_k(:,:,:,:), vlocal_k(:,:,:,:)
  real(dp),allocatable :: kpg_kq(:,:), ph3d_kq(:,:,:), kinpw_kq(:), ffnl_kq(:,:,:,:), vlocal_kq(:,:,:,:)
- real(dp),allocatable :: ylm_kq(:,:), ylm_k(:,:), ylmgr_kq(:,:,:), rvec(:)
+ real(dp),allocatable :: ylm_kq(:,:), ylm_k(:,:), ylmgr_kq(:,:,:), rvec(:) !, work(:,:,:,:)
  real(dp),allocatable :: ph3d(:,:,:), ph3d1(:,:,:)  ! ffnlk(:,:,:,:), ffnl1(:,:,:,:),
  real(dp),allocatable :: phfreqs_nanal(:,:), displ_cart_nanal(:,:,:,:,:)
  logical :: reorder, periods(ndims), keepdim(ndims)
@@ -261,6 +261,9 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, &
  nfftf = product(ngfftf(1:3)); mgfftf = maxval(ngfftf(1:3))
  nfft = product(ngfft(1:3)) ; mgfft = maxval(ngfft(1:3))
  n1 = ngfft(1); n2 = ngfft(2); n3 = ngfft(3); n4 = ngfft(4); n5 = ngfft(5); n6 = ngfft(6)
+
+ !ABI_MALLOC(work, (2, ngfft(4), ngfft(5), ngfft(6)))
+ !ABI_FREE(work)
 
  ! Open the DVDB file
  call dvdb%open_read(ngfftf, xmpi_comm_self)
@@ -455,17 +458,26 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, &
        phfreqs_eV = phfreqs * Ha_eV
 
        ! Compute psi_mkq
-       if (qq_is_gamma) then
-         call nscf%solve(spin, kq, istwfk_1, nband, cryst, dtset, dtfil, psps, pawtab, pawfgr, &
-                         npw_kq, kg_kq, kpg_kq, ph3d_kq, kinpw_kq, ffnl_kq, vlocal_kq, cg_kq, gsc_kq, eig_kq, gs_hamkq, msg, ierr, & ! out
-                         init_cg_k=cg_k)
-         ! This to have the same gauge when qq = 0
-         cg_kq = cg_k
+       !if (qq_is_gamma) then
+       !  call nscf%solve(spin, kq, istwfk_1, nband, cryst, dtset, dtfil, psps, pawtab, pawfgr, &
+       !                  npw_kq, kg_kq, kpg_kq, ph3d_kq, kinpw_kq, ffnl_kq, vlocal_kq, cg_kq, gsc_kq, eig_kq, gs_hamkq, msg, ierr, & ! out
+       !                  init_cg_k=cg_k)
+       !  ! This to have the same gauge when qq = 0
+       !  cg_kq = cg_k
 
-       else
+       !else
          call nscf%solve(spin, kq, istwfk_1, nband, cryst, dtset, dtfil, psps, pawtab, pawfgr, &
                          npw_kq, kg_kq, kpg_kq, ph3d_kq, kinpw_kq, ffnl_kq, vlocal_kq, cg_kq, gsc_kq, eig_kq, gs_hamkq, msg, ierr)
+       !end if
+
+       if (qq_is_gamma) then
+         ! This to have the same gauge when qq = 0
+         cg_kq = cg_k
        end if
+
+       !call cgtk_change_gsphere(nspinor*nband, prev_npw_kq, prev_istwf, prev_kg_kq, prev_cg_kq, npw2, istwf2, kg2, cg2, work_ngfft, work)
+       !ABI_REMALLOC(prev_cg_kq, (2, npw_kq * nspinor, nband))
+       !prev_cg_kq = cg_kq
 
        ABI_WARNING_IF(ierr /= 0, msg)
        tot_nscf_ierr = tot_nscf_ierr + ierr
@@ -531,8 +543,9 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, &
          call getgh1c_setup(gs_hamkq, rf_hamkq, dtset, psps, kk, kq, idir, ipert, &                   ! In
                             cryst%natom, cryst%rmet, cryst%gprimd, cryst%gmet, istwfk_1, &            ! In
                             npw_k, npw_kq, useylmgr1, kg_k, ylm_k, kg_kq, ylm_kq, ylmgr_kq, &         ! In
-                            dkinpw, nkpg, nkpg1, kpg_k, kpg_kq, kinpw1, ffnl_k, ffnl_kq, ph3d, ph3d1, &  ! Out
-                            reuse_kpg_k=1, reuse_kpg1_k=1, reuse_ffnlk=1, reuse_ffnl1=1)              ! Reuse some arrays
+                            dkinpw, nkpg, nkpg1, kpg_k, kpg_kq, kinpw1, ffnl_k, ffnl_kq, ph3d, ph3d1 & ! Out
+                            , reuse_kpg_k=1, reuse_kpg1_k=1, reuse_ffnlk=1, reuse_ffnl1=1)              ! Reuse some arrays
+                            !)
 
          ! Calculate dvscf * psi_k, results stored in h1kets_kq on the k+q sphere.
          ! Compute H(1) applied to GS wavefunction Psi(0)
@@ -554,8 +567,8 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, &
          call rf_hamkq%free()
 
          ! Calculate <psi_{k+q,j}|dvscf_q*psi_{k,i}> for this perturbation. No need to handle istwf_kq because it's always 1.
+!$OMP PARALLEL DO COLLAPSE(2) PRIVATE(band_m)
          do in_k=1,nb_in_g
-           band_n = in_k + bstart - 1
            do im_kq=1,nb_in_g
              band_m = im_kq + bstart - 1
              gkq_atm(:, im_kq, in_k, ipc) = cg_zdotc(npw_kq*nspinor, cg_kq(1,1,band_m), h1kets_kq(1,1,in_k))
@@ -617,7 +630,43 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, &
    end if
  end if
 
+ NCF_CHECK(nf90_close(ncid))
+ call xmpi_barrier(comm)
+
+ ! Write results to ab_out for automatic testing.
+ if (my_rank == master) then
+   NCF_CHECK(nctk_open_read(ncid, gpath_path, xmpi_comm_self))
+   ! Average matrix elements over degenerate states (electrons at k, k+q, and phonons)?
+   call wrtout(units, "kpoints:")
+   do ik=1, nk_path
+     call wrtout(units, sjoin(char(9), itoa(ik), ktoa(kpath%points(:,ik))))
+   end do
+   call wrtout(units, "qpoints:")
+   do iq=1, nq_path
+     call wrtout(units, sjoin(char(9), itoa(iq), ktoa(qpath%points(:,iq))))
+   end do
+
+   call wrtout(units, " Writing sqrt(1/N_b^2 \sum_{mn} |g_{mn,nu}(k, q)|^2) in meV for testing purpose.", pre_newlines=2)
+   write(msg, "(1x,4(a5,1x),a16)") "nu","iq", "ik", "spin", "|g| in meV"
+   call wrtout(units, msg)
+
+   do spin=1,nsppol
+     do ik=1, nk_path
+       do iq=1, nq_path
+         NCF_CHECK(nf90_get_var(ncid, vid("gkq2_nu"), gkq2_nu, start=[1,1,1,iq,ik,spin]))
+         do nu=1,natom3
+           write(msg, "(1x,4(i5,1x),es16.6)"), nu, iq, ik, spin, sqrt(sum(gkq2_nu(:,:, nu)) / nb_in_g**2) * Ha_meV
+           call wrtout(units, msg)
+         end do
+       end do ! iq
+     end do ! ik
+   end do ! spin
+
+   NCF_CHECK(nf90_close(ncid))
+ end if
+
  ! Free memory
+ !ABI_SFREE(prev_cg_kq)
  ABI_FREE(my_ik_inds)
  ABI_FREE(my_iq_inds)
  ABI_FREE(gvnlx1)
@@ -641,21 +690,8 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, &
  call nscf%free()
  call qpt_comm%free(); call kpt_comm%free(); call pert_comm%free()
 
- ! Average matrix elements over degenerate states (electrons at k, k+q, and phonons)?
-
- NCF_CHECK(nf90_close(ncid))
- call xmpi_barrier(comm)
-
- ! TODO: Add eigenvalues and occupations.
- !call xmpi_sum_master(ebands%eig, master, comm, ierr)
- !NCF_CHECK(nctk_open_modify(ncid, gpath_path, comm))
- !NCF_CHECK(ebands_ncwrite(ebands_kpath, ncid))
- !NCF_CHECK(ebands_ncwrite_path(ebands, cryst, gpath_path))
- !call ebands_kpath%free()
-
- ! TODO: Write results to ab_out for automatic testing.
-
  call cwtime_report(" eph_path: MPI barrier before returning.", cpu_all, wall_all, gflops_all, end_str=ch10, comm=comm)
+ stop
 
 contains
  integer function vid(var_name)
