@@ -536,7 +536,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  ! spurious results in case of accidental degeneracies.
  nq_summed=Kmesh%nbz
  if (Sigp%symsigma > 0) then
-   call Ltg_k%print(std_out, Dtset%prtvol, mode_paral='COLL')
+   call Ltg_k%print([std_out], prtvol=Dtset%prtvol)
    nq_summed=SUM(Ltg_k%ibzq(:))
    !
    ! Find number of degenerate subspaces and number of bands in each subspace

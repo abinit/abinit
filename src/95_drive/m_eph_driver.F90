@@ -848,7 +848,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
 
  case (18)
    ! Compute e-ph matrix elements along a q-path
-    call eph_path_run(dtfil, dtset, cryst, dvdb, ifc, pawfgr, pawang, pawrad, pawtab, psps, comm)
+    call eph_path_run(dtfil, dtset, cryst, ebands, dvdb, ifc, pawfgr, pawang, pawrad, pawtab, psps, comm)
 
  case default
    ABI_ERROR(sjoin("Unsupported value of eph_task:", itoa(dtset%eph_task)))

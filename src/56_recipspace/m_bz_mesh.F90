@@ -250,6 +250,9 @@ module m_bz_mesh
   procedure :: free => kpath_free
    ! Free memory
 
+  procedure :: get_versors => kpath_get_versors
+   ! Return all the versors emanating from the Gamma point.
+
   procedure :: print => kpath_print
    ! Print the path.
 
@@ -1143,7 +1146,7 @@ end function has_BZ_item
 !!
 !! SOURCE
 
-logical function has_IBZ_item(Kmesh,item,ikibz,g0)
+logical function has_IBZ_item(Kmesh, item, ikibz, g0)
 
 !Arguments ------------------------------------
 !scalars
@@ -1159,7 +1162,6 @@ logical function has_IBZ_item(Kmesh,item,ikibz,g0)
  !character(len=500) :: msg
 !arrays
  integer :: g0_tmp(3)
-
 ! *************************************************************************
 
  has_IBZ_item=.FALSE.; ikibz=0; g0=0; yetfound=0
@@ -2522,10 +2524,8 @@ subroutine littlegroup_free_0D(Ltg)
 
 !Arguments ------------------------------------
  class(littlegroup_t),intent(inout) :: Ltg
-
 ! *********************************************************************
 
- !@littlegroup_t
  ABI_SFREE(Ltg%g0)
  ABI_SFREE(Ltg%ibzq)
  ABI_SFREE(Ltg%bz2ibz)
@@ -2580,42 +2580,38 @@ end subroutine littlegroup_free_1D
 !!
 !! INPUTS
 !!  Ltg=the datatype to be printed
-!!  [unit]=the unit number for output
+!!  units=unit numbers for output
 !!  [prtvol]=verbosity level
-!!  [mode_paral]=either "COLL" or "PERS"
 !!
 !! OUTPUT
 !!  Only printing
 !!
 !! SOURCE
 
-subroutine littlegroup_print(Ltg, unit, prtvol, mode_paral)
+subroutine littlegroup_print(Ltg, units, prtvol)
 
 !Arguments ------------------------------------
  class(littlegroup_t),intent(in) :: Ltg
- integer,optional,intent(in) :: prtvol,unit
- character(len=4),optional,intent(in) :: mode_paral
+ integer,intent(in) :: units(:)
+ integer,optional,intent(in) :: prtvol
 
 !Local variables-------------------------------
 !scalars
- integer :: itim,my_unt,my_prtvol
+ integer :: itim, my_prtvol
  character(len=4) :: my_mode
  character(len=500) :: msg
 !arrays
  integer :: nop(Ltg%timrev),nopg0(Ltg%timrev)
-
 ! *********************************************************************
 
- my_unt   =std_out; if (PRESENT(unit      )) my_unt   =unit
- my_prtvol=0      ; if (PRESENT(prtvol    )) my_prtvol=prtvol
- my_mode  ='COLL' ; if (PRESENT(mode_paral)) my_mode  =mode_paral
+ my_prtvol=0; if (PRESENT(prtvol)) my_prtvol=prtvol
 
  write(msg,'(7a,i0,a,i0,2a,i0,a,i0)')ch10, &
   ' ==== Little Group Info ==== ', ch10, &
   '  External point: ',trim(ktoa(Ltg%ext_pt)), ch10, &
   '  Number of points in the IBZ defined by little group:  ', Ltg%nibz_Ltg, '/', Ltg%nbz,ch10, &
   '  Number of operations in the little group: ',Ltg%nsym_Ltg,'/',Ltg%nsym_sg
- call wrtout(my_unt,msg,my_mode)
+ call wrtout(units, msg)
 
  nop=0 ; nopg0=0
  do itim=1,Ltg%timrev
@@ -2628,12 +2624,12 @@ subroutine littlegroup_print(Ltg, unit, prtvol, mode_paral)
      write(msg,'(2(a,i2,a))') &
        '  No time-reversal symmetry with zero umklapp: ',nop(1)-nopg0(1),ch10,&
        '  No time-reversal symmetry with non-zero umklapp: ',nopg0(1),ch10
-     call wrtout(my_unt,msg,my_mode)
+     call wrtout(units, msg)
    else if (itim==2) then
      write(msg,'(2(a,i2,a))') &
        '  time-reversal symmetry with zero umklapp: ',nop(2)-nopg0(2),ch10,&
        '  time-reversal symmetry with non-zero umklapp: ',nopg0(2),ch10
-     call wrtout(my_unt,msg,my_mode)
+     call wrtout(units, msg)
    end if
  end do
 
@@ -2796,6 +2792,93 @@ end function kpath_new
 
 !----------------------------------------------------------------------
 
+!!****f* m_bz_mesh/kpath_get_versors
+!! NAME
+!! kpath_get_versors
+!!
+!! FUNCTION
+!!  Return all the versors emanating from the Gamma point.
+
+!! OUTPUT
+!!  nvers=number of versors
+!!  versors(3,nvers)=versors in reduced coords unless cart_coords is True
+!!
+!! SOURCE
+
+subroutine kpath_get_versors(kpath, nvers, versors, cart_coords)
+
+!Arguments ------------------------------------
+!scalars
+ class(kpath_t),intent(inout) :: kpath
+ integer,intent(out) :: nvers
+ real(dp),allocatable,intent(out) :: versors(:,:)
+ logical,optional,intent(in) :: cart_coords
+
+! local variables
+ integer :: ii, ipt, ipt_list(kpath%npts), cnt
+ real(dp) :: norm
+ real(dp),allocatable :: tmp_versors(:,:)
+! *************************************************************************
+
+ ! Quick return if just one point.
+ if (kpath%npts == 1) then
+   nvers = 0
+   ABI_MALLOC(versors, (0, 0))
+   return
+ end if
+
+ cnt = 0
+ do ipt=1,kpath%npts
+   if (all(abs(kpath%points(:, ipt)) < tol16)) then
+     cnt = cnt + 1
+     ipt_list(cnt) = ipt
+   end if
+ end do
+
+ ABI_MALLOC(tmp_versors, (3, 2*cnt))
+ nvers = 0
+ do ii=1,cnt
+   ipt = ipt_list(cnt)
+   ! Different logic depending whether Gamma is at the beggining/end of the path or in the middle.
+   if (ipt == 1) then
+     nvers = nvers + 1
+     tmp_versors(:, nvers) = kpath%points(:, ipt+1) - kpath%points(:, ipt)
+   else if (ipt == kpath%npts) then
+     nvers = nvers + 1
+     tmp_versors(:, nvers) = kpath%points(:, ipt-1) - kpath%points(:, ipt)
+   else
+     nvers = nvers + 1
+     tmp_versors(:, nvers) = kpath%points(:, ipt-1) - kpath%points(:, ipt)
+     nvers = nvers + 1
+     tmp_versors(:, nvers) = kpath%points(:, ipt+1) - kpath%points(:, ipt)
+   end if
+ end do
+
+ ! Allocate output results
+ ABI_MALLOC(versors, (3, nvers))
+ versors = tmp_versors(:,1:nvers)
+ ABI_FREE(tmp_versors)
+
+ ! Normalize
+ do ii=1,nvers
+   norm = dot_product(versors(:,ii), matmul(kpath%gmet, versors(:,ii)))
+   versors(:,ii) = versors(:,ii) / (two_pi * sqrt(norm))
+ end do
+
+ if (present(cart_coords)) then
+   if (cart_coords) then
+     ABI_MALLOC(tmp_versors, (3, nvers))
+     tmp_versors = versors
+     versors = matmul(kpath%gprimd, tmp_versors)
+     ABI_FREE(tmp_versors)
+   end if
+ end if
+
+end subroutine kpath_get_versors
+!!***
+
+!----------------------------------------------------------------------
+
 !!****f* m_bz_mesh/kpath_free
 !! NAME
 !! kpath_free
@@ -2810,7 +2893,6 @@ subroutine kpath_free(Kpath)
 !Arguments ------------------------------------
 !scalars
  class(kpath_t),intent(inout) :: Kpath
-
 ! *************************************************************************
 
  ABI_SFREE(Kpath%ndivs)
@@ -2854,7 +2936,6 @@ subroutine kpath_print(kpath, units, header,prtvol, pre)
 !Local variables-------------------------------
  integer :: my_prtvol,ii
  character(len=500) :: my_pre !, msg
-
 ! *************************************************************************
 
  my_prtvol = 0; if (present(prtvol)) my_prtvol = prtvol

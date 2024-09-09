@@ -24351,7 +24351,7 @@ Variable(
     vartype="string",
     topics=['Polaron_basic'],
     dimensions="scalar",
-    defaultval=None,
+    defaultval="None",
     mnemonics="VARiational Polaron EQuations: Polaron KIND",
     requires="[[eph_task]] == 13",
     added_in_version="10.1.4",
