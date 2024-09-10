@@ -145,6 +145,8 @@ module m_gemm_nonlop_projectors
 
  integer, save, public :: gemm_nonlop_choice = -1
 
+ integer, save, public :: gemm_nonlop_gpu_option = ABI_GPU_DISABLED
+
  real(dp),save, allocatable, target :: atom_projs(:,:,:)
  real(dp),save, allocatable, target :: atom_dprojs(:,:,:,:)
  real(dp),save, allocatable, target :: atom_d2projs(:,:,:,:)
@@ -219,6 +221,7 @@ contains
 #endif
   end if
 
+  gemm_nonlop_gpu_option=gpu_option
   rank = xmpi_comm_rank(xmpi_world); nprocs = xmpi_comm_size(xmpi_world)
   if(gemm_nonlop_block_comm/=xmpi_comm_null) call xmpi_comm_free(gemm_nonlop_block_comm)
   if(gemm_nonlop_nblocks==0) gemm_nonlop_nblocks=nprocs
