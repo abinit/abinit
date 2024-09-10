@@ -30,6 +30,7 @@ module m_getgh1c
  use defs_abitypes, only : MPI_type
  use defs_datatypes, only : pseudopotential_type
  use m_time,        only : timab
+ use m_fstrings,    only : sjoin, ltoa
  use m_pawcprj,     only : pawcprj_type, pawcprj_alloc, pawcprj_free, &
       & pawcprj_copy, pawcprj_lincom, pawcprj_axpby, pawcprj_mpi_sum
  use m_kg,          only : kpgstr, mkkin, mkkpg, mkkin_metdqdq
@@ -1035,7 +1036,7 @@ subroutine getgh1c_setup(gs_hamkq, rf_hamkq, dtset, psps, kpoint, kpq, idir, ipe
    ABI_MALLOC(kpg_k, (npw_k,  nkpg))
    if (nkpg > 0) call mkkpg(kg_k, kpg_k, kpoint, nkpg, npw_k)
  else
-   ABI_CHECK(all(shape(kpg_k) == [npw_k,  nkpg]), "Wrong shape in input kpg_k")
+   ABI_CHECK(all(shape(kpg_k) == [npw_k,  nkpg]), sjoin("Wrong shape in input kpg_k", ltoa(shape(kpg_k))))
  endif
 
  ! Compute k+q+G vectors
@@ -1044,7 +1045,7 @@ subroutine getgh1c_setup(gs_hamkq, rf_hamkq, dtset, psps, kpoint, kpq, idir, ipe
    ABI_MALLOC(kpg1_k, (npw1_k, nkpg1))
    if (nkpg1 > 0) call mkkpg(kg1_k, kpg1_k, kpq(:), nkpg1, npw1_k)
  else
-   ABI_CHECK(all(shape(kpg1_k) == [npw1_k,  nkpg1]), "Wrong shape in input kpg1_k")
+   ABI_CHECK(all(shape(kpg1_k) == [npw1_k,  nkpg1]), sjoin("Wrong shape in input kpg1_k:", ltoa(shape(kpg1_k))))
  endif
 
  ! ===== Preparation of the non-local contributions
@@ -1062,7 +1063,7 @@ subroutine getgh1c_setup(gs_hamkq, rf_hamkq, dtset, psps, kpoint, kpq, idir, ipe
        psps%pspso,psps%qgrid_ff,rmet,psps%usepaw,psps%useylm,ylm_k,ylmgr_dum)
    end if
  else
-   ABI_CHECK(all(shape(ffnlk) == [npw_k, dimffnlk, psps%lmnmax, ntypat]), "Wrong shape in input ffnlk")
+   ABI_CHECK(all(shape(ffnlk) == [npw_k, dimffnlk, psps%lmnmax, ntypat]), sjoin("Wrong shape in input ffnlk:", ltoa(shape(ffnlk))))
  end if
 
  ! Compute nonlocal form factors ffnl1 at (k+q+G)
@@ -1104,7 +1105,7 @@ subroutine getgh1c_setup(gs_hamkq, rf_hamkq, dtset, psps, kpoint, kpq, idir, ipe
      psps%indlmn,kg1_k,kpg1_k,kpq,psps%lmnmax,psps%lnmax,psps%mpsang,psps%mqgrid_ff,nkpg1,&
      npw1_k,ntypat,psps%pspso,psps%qgrid_ff,rmet,psps%usepaw,psps%useylm,ylm1_k,ylmgr1_k)
  else
-   ABI_CHECK(all(shape(ffnl1) == [npw1_k, dimffnl1, psps%lmnmax, ntypat]), "Wrong shape in input ffnl1")
+   ABI_CHECK(all(shape(ffnl1) == [npw1_k, dimffnl1, psps%lmnmax, ntypat]), sjoin("Wrong shape in input ffnl1", ltoa(shape(ffnl1))))
  end if
 
  ! Compute ffnl for nonlop with signs = 1
@@ -1202,9 +1203,9 @@ subroutine getgh1c_setup(gs_hamkq, rf_hamkq, dtset, psps, kpoint, kpq, idir, ipe
 
  !===== Load the k/k+q dependent parts of the Hamiltonian
  ! Load k-dependent part in the Hamiltonian datastructure
- ABI_MALLOC(ph3d,(2,npw_k,gs_hamkq%matblk))
- call gs_hamkq%load_k(kpt_k=kpoint,npw_k=npw_k,istwf_k=istwf_k,kg_k=kg_k,kpg_k=kpg_k,&
-                      ph3d_k=ph3d,compute_ph3d=.true.,compute_gbound=.true.)
+ ABI_MALLOC(ph3d, (2,npw_k,gs_hamkq%matblk))
+ call gs_hamkq%load_k(kpt_k=kpoint, npw_k=npw_k, istwf_k=istwf_k, kg_k=kg_k, kpg_k=kpg_k,&
+                      ph3d_k=ph3d, compute_ph3d=.true., compute_gbound=.true.)
 
  if (size(ffnlk)>0) then
    call gs_hamkq%load_k(ffnl_k=ffnlk)
@@ -1294,6 +1295,7 @@ subroutine getdc1(band,band_procs,bands_treated_now,cgq,cprjq,dcwavef,dcwaveprj,
  integer :: band_, ierr
  real(dp),parameter :: scal=-half
 !arrays
+ integer, allocatable :: nlmn(:)
  real(dp), allocatable :: dummy(:,:),scprod(:,:)
  real(dp), allocatable :: dcwavef_tmp(:,:)
  type(pawcprj_type),allocatable :: dcwaveprj_tmp(:,:)
@@ -1306,8 +1308,11 @@ subroutine getdc1(band,band_procs,bands_treated_now,cgq,cprjq,dcwavef,dcwaveprj,
  ABI_MALLOC(scprod,(2,nband_me))
  ABI_MALLOC(dcwavef_tmp,(2,npw1*nspinor))
  if (optcprj == 1) then
+   ABI_MALLOC(nlmn,(natom))
    ABI_MALLOC(dcwaveprj_tmp,(natom,nspinor*optcprj))
-   call pawcprj_alloc(dcwaveprj_tmp, 0, dcwaveprj(:,1)%nlmn)
+   nlmn(:)=dcwaveprj(:,1)%nlmn
+   call pawcprj_alloc(dcwaveprj_tmp, 0, nlmn)
+   ABI_FREE(nlmn)
  end if
 
 !=== 1- COMPUTE: <G|S^(1)|C_k> - Sum_j [<C_k+q,j|S^(1)|C_k>.<G|C_k+q,j>]
@@ -1735,7 +1740,7 @@ subroutine getgh1dqc_setup(gs_hamkq,rf_hamkq,dtset,psps,kpoint,kpq,idir,ipert,qd
    & psps%lnmax,psps%mpsang,psps%mqgrid_ff,nkpg,npw_k,ntypat,&
    & psps%pspso,psps%qgrid_ff,rmet,psps%usepaw,psps%useylm,ylm_k,ylmgr_dum)
    end if
- else 
+ else
    ABI_CHECK(all(shape(ffnlk) == [npw_k, dimffnlk, psps%lmnmax, ntypat]), "Wrong shape in input ffnlk")
  end if
 
@@ -1766,7 +1771,7 @@ subroutine getgh1dqc_setup(gs_hamkq,rf_hamkq,dtset,psps,kpoint,kpq,idir,ipert,qd
  else
    ABI_CHECK(all(shape(ffnl1) == [npw1_k, dimffnl1, psps%lmnmax, ntypat]), "Wrong shape in input ffnl1")
  end if
- 
+
 
 !Convert nonlocal form factors to cartesian coordinates.
 !For metric (strain) perturbation only.
@@ -2020,7 +2025,7 @@ subroutine getgh1c_mGGA(cwavein,dkinpw,gbound_k,gh1c_mGGA,gprimd,idir,istwf_k,kg
  real(dp),intent(inout) :: gh1c_mGGA(2,npw_k*my_nspinor*ndat)
  real(dp),intent(inout) :: vxctaulocal(n4,n5,n6,nvloc,4)
  real(dp),pointer,intent(in) :: dkinpw(:),kinpw1(:)
- 
+
 !Local variables-------------------------------
  !scalars
  integer :: idat,ii,ipw,nspinortot,shift,gpu_option_
@@ -2036,7 +2041,7 @@ subroutine getgh1c_mGGA(cwavein,dkinpw,gbound_k,gh1c_mGGA,gprimd,idir,istwf_k,kg
  else
     gpu_option_=0
  end if
-  
+
  gh1c_mGGA(:,:)=zero
  if (nvloc/=1) return
 
@@ -2137,7 +2142,7 @@ subroutine getgh1c_mGGA(cwavein,dkinpw,gbound_k,gh1c_mGGA,gprimd,idir,istwf_k,kg
           end if
         end do
       end do
-   
+
       call fourwf(1,vxctaulocal(:,:,:,:,1),ghc1,ghc2,work,gbound_k,gbound_k,&
         & istwf_k,kg_k,kg_k,mgfft,mpi_enreg,ndat,ngfft,npw_k,npw_k,n4,n5,n6,2,&
         & tim_fourwf,weight,weight,gpu_option=gpu_option_)
@@ -2179,7 +2184,7 @@ subroutine getgh1c_mGGA(cwavein,dkinpw,gbound_k,gh1c_mGGA,gprimd,idir,istwf_k,kg
           end if
         end do
       end do
-   
+
       call fourwf(1,vxctaulocal(:,:,:,:,1),ghc1,ghc2,work,gbound_k,gbound_k,&
         & istwf_k,kg_k,kg_k,mgfft,mpi_enreg,ndat,ngfft,npw_k,npw_k,n4,n5,n6,2,&
         & tim_fourwf,weight,weight,gpu_option=gpu_option_)

@@ -176,11 +176,11 @@ type, public :: dataset_type
  integer :: efmas_ntheta
  integer :: enunit
  integer :: eph_ahc_type = 1
+ integer :: eph_path_brange(2) = 0
  integer :: eph_intmeth = 2
  integer :: eph_frohlichm = 0
  integer :: eph_frohl_ntheta = 0
  integer :: eph_phrange(2) = 0
-
  integer :: eph_prtscratew = 0
  integer :: eph_restart = 0
  integer :: eph_stern = 0
@@ -788,8 +788,6 @@ type, public :: dataset_type
  real(dp) :: dosdeltae
  real(dp) :: dtion
  real(dp) :: dtele
- !real(dp) :: dvdb_qcache_mb = 1024.0_dp
- real(dp) :: dvdb_qcache_mb = zero
  real(dp) :: dvdb_qdamp = 0.1_dp
  real(dp) :: ecut
  real(dp) :: ecuteps
@@ -937,6 +935,7 @@ type, public :: dataset_type
  real(dp) :: efield(3)
  real(dp) :: einterp(4) = zero
  real(dp) :: eph_tols_idelta(2) = [tol12, tol12]
+ real(dp) :: eph_fix_wavevec(3) = zero
  real(dp) :: field_red(3)
  real(dp) :: genafm(3)
  real(dp) :: goprecprm(3)
@@ -1032,6 +1031,7 @@ type, public :: dataset_type
  character(len=fnlen) :: getabiwan_filepath = ABI_NOFILE
  character(len=fnlen) :: getgwan_filepath = ABI_NOFILE
  character(len=fnlen) :: write_files = ABI_NOFILE
+ character(len=1) :: eph_fix_korq = "k"
 
  contains
 
@@ -1520,9 +1520,11 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%chneut             = dtin%chneut
 
  dtout%eph_ahc_type       = dtin%eph_ahc_type
+ dtout%eph_path_brange    = dtin%eph_path_brange
  dtout%eph_mustar         = dtin%eph_mustar
  dtout%eph_intmeth        = dtin%eph_intmeth
  dtout%eph_tols_idelta    = dtin%eph_tols_idelta
+ dtout%eph_fix_wavevec    = dtin%eph_fix_wavevec
  dtout%eph_phrange        = dtin%eph_phrange
  dtout%eph_phrange_w      = dtin%eph_phrange_w
  dtout%eph_extrael        = dtin%eph_extrael
@@ -1553,7 +1555,6 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%ph_smear          = dtin%ph_smear
  dtout%ddb_ngqpt         = dtin%ddb_ngqpt
  dtout%ddb_shiftq        = dtin%ddb_shiftq
- dtout%dvdb_qcache_mb    = dtin%dvdb_qcache_mb
  dtout%dvdb_qdamp        = dtin%dvdb_qdamp
  dtout%dvdb_add_lr       = dtin%dvdb_add_lr
  dtout%dvdb_rspace_cell  = dtin%dvdb_rspace_cell
@@ -2090,6 +2091,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%wfoptalg           = dtin%wfoptalg
  dtout%wfoptalg           = dtin%wfoptalg
  dtout%write_files        = dtin%write_files
+ dtout%eph_fix_korq       = dtin%eph_fix_korq
  dtout%wvl_bigdft_comp    = dtin%wvl_bigdft_comp
  dtout%w90iniprj          = dtin%w90iniprj
  dtout%w90prtunk          = dtin%w90prtunk
@@ -3361,7 +3363,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' dmft_occnd_imag dmft_read_occnd dmft_rslf dmft_solv'
  list_vars=trim(list_vars)//' dmft_tolfreq dmft_tollc dmft_t2g dmft_wanorthnorm' ! dmft_wanorthnorm is not documented
  list_vars=trim(list_vars)//' dosdeltae dtion dtele dynamics dynimage' !FB: dynamics?
- list_vars=trim(list_vars)//' dvdb_add_lr dvdb_ngqpt dvdb_qcache_mb dvdb_qdamp dvdb_rspace_cell'
+ list_vars=trim(list_vars)//' dvdb_add_lr dvdb_ngqpt dvdb_qdamp dvdb_rspace_cell'
  list_vars=trim(list_vars)//' dyn_chksym dyn_tolsym'
  list_vars=trim(list_vars)//' d3e_pert1_atpol d3e_pert1_dir d3e_pert1_elfd d3e_pert1_phon'
  list_vars=trim(list_vars)//' d3e_pert2_atpol d3e_pert2_dir d3e_pert2_elfd d3e_pert2_phon'
@@ -3374,14 +3376,14 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' efield einterp elph2_imagden energy_reference enunit'
  list_vars=trim(list_vars)//' eph_frohl_ntheta'
  list_vars=trim(list_vars)//' eph_doping eph_ecutosc eph_extrael eph_fermie eph_frohlich eph_frohlichm eph_fsewin eph_fsmear '
- list_vars=trim(list_vars)//' eph_intmeth eph_mustar eph_ngqpt_fine eph_ahc_type'
+ list_vars=trim(list_vars)//' eph_intmeth eph_mustar eph_ngqpt_fine eph_ahc_type eph_path_brange'
  ! XG20200321, please provide testing for eph_np_pqbks
  ! MG: Well, eph_np_pqbks and gwpt_np_wpqbks cannot be tested with the present infrastructure because it's a MPI-related variable
  ! and all the tests in the paral and mpiio directory are done with a single input file
  ! whereas EPH requires GS + DFPT + MRGDV + MRGDDB + TESTS_MULTIPLES_PROCS
  list_vars=trim(list_vars)//' eph_np_pqbks gwpt_np_wpqbks'
- list_vars=trim(list_vars)//' eph_phrange eph_phrange_w eph_phwinfact'
- list_vars=trim(list_vars)//' eph_prtscratew eph_restart eph_stern eph_task eph_tols_idelta eph_transport eph_use_ftinterp'
+ list_vars=trim(list_vars)//' eph_phrange eph_phrange_w eph_phwinfact eph_fix_korq'
+ list_vars=trim(list_vars)//' eph_prtscratew eph_restart eph_stern eph_task eph_tols_idelta eph_fix_wavevec eph_transport eph_use_ftinterp'
  list_vars=trim(list_vars)//' eshift esmear exchmix exchn2n3d expert_user'
  list_vars=trim(list_vars)//' extfpmd_nbcut extfpmd_nbdbuf extfpmd_nband extrapwf'
 !F

@@ -5731,6 +5731,7 @@ function vnorm(vv,dir)
    ABI_ERROR('vnorm calcul')
  end if
  vnorm=sqrt(vnorm)
+
 end function vnorm
 !!***
 

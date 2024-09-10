@@ -503,7 +503,7 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,qp_ebands,ks_ebands,Gsph_eps
  nkpt_summed = Kmesh%nbz
  if (Ep%symchi /= 0) then
    nkpt_summed = Ltg_q%nibz_ltg
-   call Ltg_q%print(std_out, Dtset%prtvol)
+   call Ltg_q%print([std_out], prtvol=Dtset%prtvol)
  end if
  call wrtout(std_out, sjoin(' Calculation status: ', itoa(nkpt_summed), ' k-points to be completed'))
 
@@ -1398,7 +1398,7 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,qp_ebands,Gsph_epsG0,&
  nkpt_summed=Kmesh%nbz
  if (Ep%symchi == 1) then
    nkpt_summed = Ltg_q%nibz_ltg
-   call Ltg_q%print(std_out, Dtset%prtvol)
+   call Ltg_q%print([std_out], prtvol=Dtset%prtvol)
  end if
 
  write(msg,'(a,i0,a)')' Calculation status: ',nkpt_summed,' k-points to be completed'
@@ -2290,7 +2290,7 @@ subroutine chi0q0_intraband(Wfd,Cryst,Ep,Psps,BSt,Gsph_epsG0,Pawang,Pawrad,Pawta
  nkpt_summed=Kmesh%nbz
  if (Ep%symchi/=0) then
    nkpt_summed=Ltg_q%nibz_ltg
-   call Ltg_q%print(std_out, Wfd%prtvol)
+   call Ltg_q%print([std_out], prtvol=Wfd%prtvol)
  end if
  !
  ! ============================================
@@ -2428,7 +2428,7 @@ subroutine chi0q0_intraband(Wfd,Cryst,Ep,Psps,BSt,Gsph_epsG0,Pawang,Pawrad,Pawta
  do iomega=1,MIN(Ep%nomega,NOMEGA_PRINTED)
    write(msg,'(1x,a,i4,a,2f9.4,a)')' chi0_intra(G,G'') at the ',iomega,' th omega',Ep%omega(iomega)*Ha_eV,' [eV]'
    call wrtout(std_out, msg)
-   call print_arr(chi0(:,:,iomega),unit=std_out)
+   call print_arr([std_out], chi0(:,:,iomega))
  end do
 
  ! =====================

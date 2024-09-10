@@ -816,6 +816,9 @@ meta: {optdriver: 3, gwcalctyp: 0, }
  setmesh: FFT mesh size selected  =    20x   20x   20
           total number of points  =         8000
 
+ vcoul_init : cutoff-mode = AUXILIARY_FUNCTION
+ q-points for optical limit:   1
+     1)      0.000010    0.000020    0.000030
 
  The inverse dielectric matrix will be calculated on zero frequency only
  please note that the calculated epsilon^-1 cannot be used 

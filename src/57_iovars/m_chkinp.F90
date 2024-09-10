@@ -35,7 +35,7 @@ module m_chkinp
  use m_io_tools,       only : flush_unit
  use m_numeric_tools,  only : iseven, isdiagmat
  use m_symtk,          only : sg_multable, chkorthsy, symmetrize_xred
- use m_fstrings,       only : string_in, sjoin
+ use m_fstrings,       only : string_in, sjoin, itoa
  use m_geometry,       only : metric
  use m_fftcore,        only : fftalg_has_mpi
  use m_exit,           only : get_timelimit
@@ -913,11 +913,13 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      call chkint_eq(1,1,cond_string,cond_values,ierr,'enable_mpi_io',xmpi_mpiio,1,(/1/),iout)
    end if
 
-   ! eph variables
+   ! ========
+   ! eph code
+   ! ========
    if (optdriver == RUNL_EPH) then
      cond_string(1)='optdriver'; cond_values(1)=optdriver
      call chkint_eq(1,1,cond_string,cond_values,ierr,'eph_task',dt%eph_task, &
-       24, [0, 1, 2, -2, 3, 4, -4, 5, -5, 6, 7, -7, 8, 9, 10, 11, -12, 13, -13, 14, 15, -15, 16, 17], iout)
+       25, [0, 1, 2, -2, 3, 4, -4, 5, -5, 6, 7, -7, 8, 9, 10, 11, -12, 13, -13, 14, 15, -15, 16, 17, 18], iout)
 
      if (any(dt%ddb_ngqpt <= 0)) then
        ABI_ERROR_NOSTOP("ddb_ngqpt must be specified when performing EPH calculations.", ierr)
@@ -936,8 +938,25 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
        ABI_ERROR_NOSTOP('Either getwfq or irdwfq must be non-zero in order to compute the gkk', ierr)
      end if
      if (any(dt%eph_task == [-5])) then
-       ABI_CHECK(dt%ph_nqpath > 0, "ph_nqpath must be specified when eph_task in [-5]")
+       ABI_CHECK(dt%ph_nqpath > 0, "ph_nqpath must be specified when eph_task == -5")
      end if
+
+     if (any(dt%eph_task == [18])) then
+       ABI_CHECK_IRANGE(dt%eph_path_brange(1), 1, dt%mband, "Wrong eph_path_brange(1)")
+       ABI_CHECK_IRANGE(dt%eph_path_brange(2), 1, dt%mband, "Wrong eph_path_brange(2)t")
+       ABI_CHECK_IGEQ(dt%eph_path_brange(2), dt%eph_path_brange(1), "eph_path_brange(2) < eph_path_brange(1)")
+       if (dt%tolwfr == zero) then
+         ABI_ERROR_NOSTOP("tolwfr must be specified when eph_stern /= 0", ierr)
+       end if
+       if (dt%eph_fix_korq == "k") then
+         ABI_CHECK(dt%ph_nqpath > 0, "ph_nqpath must be specified when elh_fix_kord = 'k' with eph_task == -5")
+       end if
+       if (dt%eph_fix_korq == "q") then
+         ABI_CHECK(dt%nkpath > 0, "nkpath and kptbounds must be specified when eph_fix_kord = 'q' with eph_task == -5")
+         ABI_CHECK(allocated(dt%kptbounds), "kptbounds must be specified when eph_fix_kord = 'q' with eph_task == -5")
+       end if
+     end if
+
      if (dt%eph_task == 13) then
        msg = "electron, hole"
        if (.not. string_in(dt%varpeq_pkind, msg)) then
@@ -2334,7 +2353,6 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      end if
 
 !    nucdipmom requires kptopt 0, 3, or 4 (no time reversal symmetry allowed)
-     ! if( (dt%kptopt .EQ. 1) .OR. (dt%kptopt .EQ. 2) .OR. (dt%kptopt .EQ. 4) ) then
      if( (dt%kptopt .EQ. 1) .OR. (dt%kptopt .EQ. 2) ) then
        write(msg, '(a,i4,a,a,a)' )&
        ' Nuclear dipole moments (variable nucdipmom) break time reveral symmetry but kptopt = ',dt%kptopt,&
@@ -2694,6 +2712,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      cond_string(1)='orbmag';cond_values(1)=dt%orbmag
   !  only kptopt 3 or 0 are allowed, because ddk cannot use spatial symmetries and
   !  nucdipmom breaks time reversal symmetry
+  ! TODO: generalize in the berryopt -2 case to kptopt 4 allowed
      call chkint_eq(1,1,cond_string,cond_values,ierr,'kptopt',dt%kptopt,2,(/0,3/),iout)
   !  only kpt parallelism is allowed at present
      call chkint_eq(1,1,cond_string,cond_values,ierr,'paral_atom',dt%paral_atom,1,(/0/),iout)
@@ -2701,7 +2720,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
   !  require usexcnhat 0
      call chkint_eq(1,1,cond_string,cond_values,ierr,'usexcnhat',dt%usexcnhat_orig,1,(/0/),iout)
   !  require pawxcdev 0
-     call chkint_eq(1,1,cond_string,cond_values,ierr,'pawxcdev',dt%pawxcdev,1,(/0/),iout)
+  !   call chkint_eq(1,1,cond_string,cond_values,ierr,'pawxcdev',dt%pawxcdev,1,(/0/),iout)
   !  require PAW
      call chkint_eq(1,1,cond_string,cond_values,ierr,'usepaw',dt%usepaw,1,(/1/),iout)
   end if
@@ -4078,9 +4097,9 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      enddo
      if (npsp /= dt%ntypat) then
        write(msg, '(a,a,a,a,I0,a,I0,a,a,a)' ) ch10,&
-&       'wvl_wfs_set:  consistency checks failed,', ch10, &
-&       'dtset%npsp (', npsp, ') /= dtset%ntypat (', dt%ntypat, ').', ch10, &
-&       'No alchemy pseudo are allowed with wavelets.'
+       'wvl_wfs_set:  consistency checks failed,', ch10, &
+       'dtset%npsp (', npsp, ') /= dtset%ntypat (', dt%ntypat, ').', ch10, &
+       'No alchemy pseudo are allowed with wavelets.'
        ABI_ERROR_NOSTOP(msg,ierr)
      end if
    end if

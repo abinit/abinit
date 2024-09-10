@@ -173,7 +173,8 @@ end function krank_from_kptrlatt
 !!
 !! SOURCE
 
-type(krank_t) function krank_new(nkpt, kpts, nsym, symrec, time_reversal, max_linear_density, compute_invrank) result(new)
+type(krank_t) function krank_new(nkpt, kpts, &
+                                 nsym, symrec, time_reversal, max_linear_density, compute_invrank) result(new)
 
 !Arguments ------------------------------------
 !scalars
@@ -240,7 +241,6 @@ type(krank_t) function krank_new(nkpt, kpts, nsym, symrec, time_reversal, max_li
 
    do ikpt=1,nkpt
      irank = new%get_rank(kpts(:,ikpt))
-
      if (irank > new%max_rank .or. irank < new%min_rank) then
        write(msg,'(a,2i0)')" rank above max_rank or below min_rank, ikpt, rank ", ikpt, irank
        ABI_ERROR(msg)
@@ -303,7 +303,6 @@ integer function get_rank(krank, kpt) result(rank)
  character(len=500) :: msg
 !arrays
  real(dp) :: redkpt(3)
-
 ! *************************************************************************
 
  ! wrap to [0, 1[ -> replaced call to wrap2_zero2one inline, to encapsulate this module

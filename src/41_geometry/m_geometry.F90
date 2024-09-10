@@ -1620,7 +1620,7 @@ end subroutine xcart2xred
 !!
 !! SOURCE
 
-subroutine xred2xcart(natom,rprimd,xcart,xred)
+subroutine xred2xcart(natom, rprimd, xcart, xred)
 
 !Arguments ------------------------------------
 !scalars
@@ -1632,7 +1632,6 @@ subroutine xred2xcart(natom,rprimd,xcart,xred)
 !Local variables-------------------------------
 !scalars
  integer :: iatom,mu
-
 ! *************************************************************************
 
  do iatom=1,natom

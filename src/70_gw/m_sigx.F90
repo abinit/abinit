@@ -312,7 +312,7 @@ subroutine calc_sigx_me(sigmak_ibz, ikcalc, bmin, bmax, cryst, qp_ebands, Sigp, 
 
  nq_summed = Kmesh%nbz
  if (Sigp%symsigma > 0) then
-   call ltg_k%print(std_out, prtvol, mode_paral='COLL')
+   call ltg_k%print([std_out], prtvol=prtvol)
    nq_summed = sum(ltg_k%ibzq(:))
  end if ! symsigma
 

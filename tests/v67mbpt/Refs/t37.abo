@@ -626,6 +626,10 @@ meta: {optdriver: 3, gwcalctyp: 2, }
           total number of points  =         3375
 
 
+ vcoul_init : cutoff-mode = AUXILIARY_FUNCTION
+ q-points for optical limit:   1
+     1)      0.000010    0.000020    0.000030
+
 - screening: taking advantage of time-reversal symmetry 
 - Maximum band index for partially occupied states nbvw = 4
 - Remaining bands to be divided among processors   nbcw = 46
@@ -1992,6 +1996,10 @@ meta: {optdriver: 3, gwcalctyp: 2, }
  setmesh: FFT mesh size selected  =    15x   15x   15
           total number of points  =         3375
 
+
+ vcoul_init : cutoff-mode = AUXILIARY_FUNCTION
+ q-points for optical limit:   1
+     1)      0.000010    0.000020    0.000030
 
 - screening: taking advantage of time-reversal symmetry 
 - Maximum band index for partially occupied states nbvw = 4

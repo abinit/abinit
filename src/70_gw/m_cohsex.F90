@@ -411,7 +411,7 @@ subroutine cohsex_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,Cryst,QP_BSt,Si
  ! based on group theory, and it might lead to spurious results in case of accidental degeneracies.
  nq_summed=Kmesh%nbz
  if (Sigp%symsigma > 0) then
-   call Ltg_k%print(std_out, prtvol, mode_paral='COLL')
+   call Ltg_k%print([std_out], prtvol=prtvol)
    nq_summed=SUM(Ltg_k%ibzq(:))
    !
    ! Find number of degenerate states and number of bands in each subspace

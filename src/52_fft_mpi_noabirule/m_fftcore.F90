@@ -397,7 +397,6 @@ pure subroutine ngfft_seq(ngfft, n123)
 
 !Local variables-------------------------------
  integer :: fftalg
-
 ! *************************************************************************
 
  ! Default for sequential case.
@@ -434,46 +433,43 @@ end subroutine ngfft_seq
 !!  Print the content of ngfft(18) in explicative format.
 !!
 !! INPUTS
+!!  units: Unit numbers
 !!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft.
 !!  [unit]=unit number for output (defaults to std_out).
 !!  [prtvol]=verbosity level (defaults to 0).
-!!  [mode_paral]=either "COLL" or "PERS" ("COLL" is default).
 !!
 !! OUTPUT
 !!  Only writing
 !!
 !! SOURCE
 
-subroutine print_ngfft(ngfft, header, unit, mode_paral, prtvol)
+subroutine print_ngfft(units, ngfft, header, prtvol)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in),optional :: prtvol,unit
+ integer,intent(in) :: units(:)
+ integer,intent(in),optional :: prtvol
  character(len=*),intent(in),optional :: header
- character(len=4),intent(in),optional :: mode_paral
 !arrays
  integer,intent(in) :: ngfft(18)
 
 !Local variables-------------------------------
- integer :: my_unt,my_prtvol
- character(len=4) :: my_mode
+ integer :: my_prtvol
  character(len=500) :: msg
-
 ! *************************************************************************
 
- my_prtvol=0;       if (PRESENT(prtvol    )) my_prtvol=prtvol
- my_unt   =std_out; if (PRESENT(unit      )) my_unt   =unit
- my_mode  ='COLL';  if (PRESENT(mode_paral)) my_mode  =mode_paral
+ my_prtvol=0; if (PRESENT(prtvol)) my_prtvol=prtvol
 
- msg=ch10//' ==== FFT mesh description (ngfft) ==== '
+ msg = ch10//' ==== FFT mesh description (ngfft) ==== '
  if (PRESENT(header)) msg=ch10//' ==== '//TRIM(ADJUSTL(header))//' ==== '
- call wrtout(my_unt,msg,my_mode)
+ call wrtout(units, msg)
+
  write(msg,'(2(a,3i5,a),a,i5,2a,i5)')&
   '  FFT mesh divisions ........................ ',ngfft(1),ngfft(2),ngfft(3),ch10,&
   '  Augmented FFT divisions ................... ',ngfft(4),ngfft(5),ngfft(6),ch10,&
   '  FFT algorithm ............................. ',ngfft(7),ch10,&
   '  FFT cache size ............................ ',ngfft(8)
- call wrtout(my_unt,msg,my_mode)
+ call wrtout(units, msg)
 
  if (my_prtvol > 0) then
    write(msg,'(6(a,i5,a),a,4i5)')&
@@ -484,7 +480,7 @@ subroutine print_ngfft(ngfft, header, unit, mode_paral, prtvol)
     '  No of xy planes in G space treated by me .. ',ngfft(13),ch10,&
     '  MPI communicator for FFT .................. ',ngfft(14),ch10,&
     '  Value of ngfft(15:18) ..................... ',ngfft(15:18)
-   call wrtout(my_unt,msg,my_mode)
+   call wrtout(units, msg)
  end if
 
 end subroutine print_ngfft
@@ -1219,7 +1215,7 @@ subroutine getng(boxcutmin, chksymtnons, ecut, gmet, kpt, me_fft, mgfft, nfft, n
    ngfft(13)=ngfft(3)/nproc_fft
  end if
 
- call print_ngfft(ngfft,header="FFT mesh",unit=ount,mode_paral="COLL")
+ call print_ngfft([ount], ngfft, header="FFT mesh")
 
 end subroutine getng
 !!***
@@ -1558,7 +1554,6 @@ subroutine sphere(cg, ndat, npw, cfft, n1, n2, n3, n4, n5, n6, kg_k, istwf_k, if
 !arrays
  integer :: identity(3,3)
  integer :: i1inver(n1),i2inver(n2),i3inver(n3)
-
 ! *************************************************************************
 
  DBG_ENTER("COLL")

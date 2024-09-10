@@ -1434,6 +1434,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,2,string(1:lenstr),'eph_tols_idelta',tread,'DPR')
  if (tread == 1) dtset%eph_tols_idelta = dprarr(1:2)
 
+ call intagm(dprarr,intarr,jdtset,marr,2,string(1:lenstr),'eph_fix_wavevec',tread,'DPR')
+ if (tread == 1) dtset%eph_fix_wavevec = dprarr(1:3)
+
  call intagm(dprarr,intarr,jdtset,marr,2,string(1:lenstr),'eph_phrange',tread,'INT')
  if (tread == 1) dtset%eph_phrange = intarr(1:2)
 
@@ -1467,6 +1470,10 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'eph_ahc_type',tread,'INT')
  if(tread==1) dtset%eph_ahc_type=intarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,2,string(1:lenstr),'eph_path_brange',tread,'INT')
+ if(tread==1) dtset%eph_path_brange=intarr(1:2)
+ if (any(dtset%eph_path_brange <= 0)) dtset%eph_path_brange = [1, mband]
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'eph_fermie',tread,'ENE')
  if(tread==1) dtset%eph_fermie=dprarr(1)
@@ -1523,9 +1530,6 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
  call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'ddb_shiftq',tread,'DPR')
  if(tread==1) dtset%ddb_shiftq=dprarr(1:3)
-
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dvdb_qcache_mb',tread,'DPR')
- if(tread==1) dtset%dvdb_qcache_mb = dprarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dvdb_qdamp',tread,'DPR')
  if(tread==1) dtset%dvdb_qdamp = dprarr(1)
@@ -2287,6 +2291,8 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    dtset%pawcpxocc=2
  else if (dtset%pawspnorb>0.and.(dtset%kptopt<=0.or.dtset%kptopt>=3)) then
    if (dtset%optdriver/=RUNL_GSTATE.or.dtset%ionmov<6.or.dtset%iscf<10) dtset%pawcpxocc=2
+ else if (ANY(ABS(dtset%nucdipmom)>tol8)) then
+   dtset%pawcpxocc=2
  end if
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'pawcross',tread,'INT')
@@ -2913,8 +2919,12 @@ if (dtset%usekden==1) then
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'tl_radius',tread,'DPR')
  if(tread==1) dtset%tl_radius=dprarr(1)
 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'eph_fix_korq',tread,'KEY', key_value=key_value)
+ if(tread==1) dtset%eph_fix_korq = key_value(1:1)
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'write_files',tread,'KEY', key_value=key_value)
  if(tread==1) dtset%write_files = key_value
+
 ! Print variables
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'write_files',tread,'KEY', key_value=key_value)
  if(tread==1) dtset%write_files = key_value
