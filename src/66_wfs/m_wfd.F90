@@ -551,10 +551,13 @@ module m_wfd
  type, public :: u0_cache_t
    integer :: prev_npw_k = -1, prev_nband_k = - 1, prev_istwf_k = -1
    real(dp) :: prev_kpt(3) = -1
+   logical :: use_cache = .False.
+   integer :: ngfft(18)
    integer, allocatable :: prev_kg_k(:,:)
    real(dp),allocatable :: prev_cg_k(:,:,:)
     ! (2, prev_npw_k*nspinor, prev_nband_k))
  contains
+   procedure :: init => u0_cache_init
    procedure :: store_kpt => u0_cache_store_kpt
    procedure :: get_kpt => u0_cache_get_kpt
    procedure :: free => u0_cache_free
@@ -6106,6 +6109,20 @@ subroutine wfdgw_pawrhoij(Wfd,Cryst,Bst,kptopt,pawrhoij,pawprtvol)
 end subroutine wfdgw_pawrhoij
 !!***
 
+
+subroutine u0_cache_init(u0c, use_cache, ngfft)
+
+!Arguments ------------------------------------
+ class(u0_cache_t),intent(out) :: u0c
+ logical,intent(in) :: use_cache
+ integer,intent(in) :: ngfft(18)
+!************************************************************************
+
+ u0c%use_cache = use_cache
+ u0c%ngfft = ngfft
+
+end subroutine u0_cache_init
+
 subroutine u0_cache_store_kpt(u0c, kpt, istwf_k, npw_k, nspinor, nband_k, kg_k, cg_k)
 
 !Arguments ------------------------------------
@@ -6115,6 +6132,8 @@ subroutine u0_cache_store_kpt(u0c, kpt, istwf_k, npw_k, nspinor, nband_k, kg_k, 
  real(dp),intent(in) :: cg_k(2, npw_k*nspinor, nband_k)
 !************************************************************************
 
+ if (.not. u0c%use_cache) return
+
  call u0c%free()
  u0c%prev_npw_k = npw_k
  u0c%prev_nband_k = nband_k
@@ -6123,8 +6142,6 @@ subroutine u0_cache_store_kpt(u0c, kpt, istwf_k, npw_k, nspinor, nband_k, kg_k, 
 
  call alloc_copy(kg_k, u0c%prev_kg_k)
  call alloc_copy(cg_k, u0c%prev_cg_k)
- !print *, "npw_k, nspinor, nband_k", npw_k, nspinor, nband_k
- !print *, "u0c%prev_cg_k:", u0c%prev_cg_k
 
 end subroutine u0_cache_store_kpt
 
@@ -6141,6 +6158,8 @@ subroutine u0_cache_get_kpt(u0c, new_kpt, new_istwf_k, new_npw_k, nspinor, new_n
  real(dp),allocatable :: work(:,:,:,:)
 !************************************************************************
 
+ if (.not. u0c%use_cache) return
+
  ABI_CHECK_IEQ(new_nband_k,  u0c%prev_nband_k, "This case is not yet implemented")
 
  mg1 = max(maxval(abs(u0c%prev_kg_k(1,:))), maxval(abs(new_kg_k(1,:))))
@@ -6151,14 +6170,9 @@ subroutine u0_cache_get_kpt(u0c, new_kpt, new_istwf_k, new_npw_k, nspinor, new_n
  mg2 = 2*mg2 + 1
  mg3 = 2*mg3 + 1
 
- mg1 = 2*mg1
- mg2 = 2*mg2
- mg3 = 2*mg3
-
  call ngfft_seq(work_ngfft, [mg1, mg2, mg3])
  ABI_MALLOC(work, (2, work_ngfft(4),work_ngfft(5),work_ngfft(6)))
 
- !new_cg_k = zero
  call cgtk_change_gsphere(nspinor*new_nband_k, u0c%prev_npw_k, u0c%prev_istwf_k, u0c%prev_kg_k, u0c%prev_cg_k, &
                           new_npw_k, new_istwf_k, new_kg_k, new_cg_k, work_ngfft, work)
 
