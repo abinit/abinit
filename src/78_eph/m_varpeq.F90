@@ -944,9 +944,15 @@ subroutine varpeq_print(self)
            enph, enelph, eps, grs
          call wrtout(units, msg)
        enddo
+       call wrtout(units, repeat('-', 80))
+       write(msg, '(a13,es17.8)') "  E_pol (eV):", enpol*Ha_eV
+       call wrtout(units, msg)
+       write(msg, '(a13,es17.8)') "  eps (eV):", eps*Ha_eV
+       call wrtout(units, msg)
+       call wrtout(units, repeat('-', 80))
      enddo
-     write(msg, '(a)') repeat('-', 80)
-     call wrtout(units, msg)
+     !write(msg, '(a)') repeat('-', 80)
+     !call wrtout(units, msg)
 
    enddo
  endif
@@ -1873,7 +1879,7 @@ subroutine polstate_ort_to_states(self, my_v, istart, iend, tr_flag)
 
          do my_ik=1,gqk%my_nk
            kpt(:) = self%my_kpts(:, my_ik)
-           phase = exp(j_dpc*sum(kpt(:)*tr_vec(:))*pi)
+           phase = exp(j_dpc*sum(kpt(:)*tr_vec(:))*two_pi)
            a_tr(:, my_ik) = phase*self%my_a(:, my_ik, ip)
          enddo
 
