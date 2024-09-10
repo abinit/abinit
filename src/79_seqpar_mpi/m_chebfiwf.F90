@@ -366,11 +366,11 @@ subroutine chebfiwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
  end if
 #endif
 
- call xgBlock_map(xgx0,cg,space,l_icplx*l_npw*l_nspinor,nband,l_mpi_enreg%comm_bandspinorfft,gpu_option=dtset%gpu_option)
-
 #ifdef HAVE_OPENMP_OFFLOAD
  !$OMP TARGET ENTER DATA MAP(to:cg,eig,resid) IF(gs_hamk%gpu_option==ABI_GPU_OPENMP)
 #endif
+
+ call xgBlock_map(xgx0,cg,space,l_icplx*l_npw*l_nspinor,nband,l_mpi_enreg%comm_bandspinorfft,gpu_option=dtset%gpu_option)
 
  ABI_NVTX_START_RANGE(NVTX_CHEBFI2_SQRT2)
  if ( l_istwf == 2 ) then ! Real only
@@ -452,6 +452,9 @@ subroutine chebfiwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
 &                signs,gsc_dummy,l_tim_getghc,cg,l_gvnlxc)
 
    else
+#ifdef HAVE_OPENMP_OFFLOAD
+     !$OMP TARGET UPDATE FROM(cg) IF(gs_hamk%gpu_option==ABI_GPU_OPENMP)
+#endif
      do iband=1,nband/blockdim
        shift = (iband-1)*blockdim*l_npw*l_nspinor
        call prep_nonlop(choice,l_cpopt,cprj_dum, &
