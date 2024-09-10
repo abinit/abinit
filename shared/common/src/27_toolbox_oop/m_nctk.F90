@@ -221,8 +221,7 @@ MODULE m_nctk
  public :: nctk_write_datar
  public :: nctk_read_datar
 
- ! FIXME These routines are specific to anaddb
- !       and should be moved at the level of 77_ddb
+ ! FIXME These routines are specific to anaddb and should be moved at the level of 77_ddb
  public :: nctk_defwrite_nonana_terms  ! Write phonon frequencies and displacements for q-->0
                                        ! in the presence of non-analytical behaviour.
  public :: nctk_defwrite_nonana_raman_terms   ! Write raman susceptiblities for q-->0
@@ -2529,11 +2528,10 @@ end subroutine var_from_name
 !!
 !! INPUTS
 !!  ncid=netcdf file id.
-!!  iphl2=Index of the q-point to be written to file
-!!  nph2l=Number of qpoints.
-!!  qph2l(3,nph2l)=List of phonon wavevector directions along which the non-analytical correction
-!!    to the Gamma-point phonon frequencies will be calculated
-!!    The direction is in CARTESIAN COORDINATES
+!!  iq_dir=Index of the q-point to be written to file
+!!  ndirs=Number of qpoints.
+!!  qdirs_cart(3,ndirs)=List of phonon wavevector directions along which the non-analytical correction
+!!    to the Gamma-point phonon frequencies will be calculated. The direction is in CARTESIAN COORDINATES
 !!  natom=Number of atoms
 !!  phfrq(3*natom)=Phonon frequencies in Ha
 !!  cart_displ(2,3*natom,3*natom)=displacements in CARTESIAN coordinates.
@@ -2543,27 +2541,23 @@ end subroutine var_from_name
 !!
 !! SOURCE
 
-subroutine nctk_defwrite_nonana_terms(ncid, iphl2, nph2l, qph2l, natom, phfrq, cart_displ, mode)
+subroutine nctk_defwrite_nonana_terms(ncid, iq_dir, ndirs, qdirs_cart, natom, phfrq, cart_displ, mode)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: ncid,iphl2,nph2l,natom
+ integer,intent(in) :: ncid,iq_dir,ndirs,natom
  character(len=*),intent(in) :: mode
 !arrays
- real(dp),intent(in) :: qph2l(3, nph2l)
- real(dp),intent(in) :: phfrq(3*natom)
- real(dp),intent(in) :: cart_displ(2,3*natom,3*natom)
+ real(dp),intent(in) :: qdirs_cart(3, ndirs), phfrq(3*natom), cart_displ(2,3*natom,3*natom)
 
 !Local variables-------------------------------
-!scalars
  integer :: ncerr, na_phmodes_varid, na_phdispl_varid
-
 ! *************************************************************************
 
  select case (mode)
  case ("define")
    !NCF_CHECK(nctk_def_basedims(ncid, defmode=.True.))
-   ncerr = nctk_def_dims(ncid, [nctkdim_t("number_of_non_analytical_directions", nph2l)], defmode=.True.)
+   ncerr = nctk_def_dims(ncid, [nctkdim_t("number_of_non_analytical_directions", ndirs)], defmode=.True.)
    NCF_CHECK(ncerr)
 
    ncerr = nctk_def_arrays(ncid, [&
@@ -2574,15 +2568,15 @@ subroutine nctk_defwrite_nonana_terms(ncid, iphl2, nph2l, qph2l, natom, phfrq, c
    NCF_CHECK(ncerr)
 
    NCF_CHECK(nctk_set_datamode(ncid))
-   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "non_analytical_directions"), qph2l))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "non_analytical_directions"), qdirs_cart))
 
  case ("write")
 
    NCF_CHECK(nf90_inq_varid(ncid, "non_analytical_phonon_modes", na_phmodes_varid))
-   NCF_CHECK(nf90_put_var(ncid,na_phmodes_varid,phfrq*Ha_eV,start=[1, iphl2], count=[3*natom, 1]))
+   NCF_CHECK(nf90_put_var(ncid,na_phmodes_varid,phfrq*Ha_eV,start=[1, iq_dir], count=[3*natom, 1]))
    NCF_CHECK(nf90_inq_varid(ncid, "non_analytical_phdispl_cart", na_phdispl_varid))
    ncerr = nf90_put_var(ncid,na_phdispl_varid,cart_displ*Bohr_Ang,&
-   start=[1,1,1,iphl2], count=[2,3*natom,3*natom, 1])
+   start=[1,1,1,iq_dir], count=[2,3*natom,3*natom, 1])
    NCF_CHECK(ncerr)
 
  case default
@@ -2601,9 +2595,9 @@ end subroutine nctk_defwrite_nonana_terms
 !!
 !! INPUTS
 !!  ncid=netcdf file id.
-!!  iphl2=Index of the q-point to be written to file.
-!!  nph2l=Number of qpoints.
-!!  rsus(3*natom,3,3)=List of Raman susceptibilities along the direction corresponding to iphl2.
+!!  iq_dir=Index of the q-point to be written to file.
+!!  ndirs=Number of qpoints.
+!!  rsus(3*natom,3,3)=List of Raman susceptibilities along the direction corresponding to iq_dir.
 !!  natom=Number of atoms
 !!
 !! OUTPUT
@@ -2611,11 +2605,11 @@ end subroutine nctk_defwrite_nonana_terms
 !!
 !! SOURCE
 
-subroutine nctk_defwrite_nonana_raman_terms(ncid, iphl2, nph2l, natom, rsus, mode)
+subroutine nctk_defwrite_nonana_raman_terms(ncid, iq_dir, ndirs, natom, rsus, mode)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: ncid,natom,iphl2,nph2l
+ integer,intent(in) :: ncid,natom,iq_dir,ndirs
  character(len=*),intent(in) :: mode
 !arrays
  real(dp),intent(in) :: rsus(3*natom,3,3)
@@ -2626,10 +2620,8 @@ subroutine nctk_defwrite_nonana_raman_terms(ncid, iphl2, nph2l, natom, rsus, mod
 
 ! *************************************************************************
 
-!Fake use of nph2l, to keep it as argument. This should be removed when nph2l will be used.
- if(.false.)then
-  ncerr=nph2l
- end if
+ ! Fake use of ndirs, to keep it as argument. This should be removed when ndirs will be used.
+ if(.false.) ncerr=ndirs
 
  select case (mode)
  case ("define")
@@ -2642,8 +2634,7 @@ subroutine nctk_defwrite_nonana_raman_terms(ncid, iphl2, nph2l, natom, rsus, mod
 
  case ("write")
    NCF_CHECK(nf90_inq_varid(ncid, "non_analytical_raman_sus", raman_sus_varid))
-   ncerr = nf90_put_var(ncid,raman_sus_varid,rsus,&
-     start=[iphl2,1,1,1], count=[1,3*natom,3,3])
+   ncerr = nf90_put_var(ncid,raman_sus_varid,rsus, start=[iq_dir,1,1,1], count=[1,3*natom,3,3])
    NCF_CHECK(ncerr)
 
  case default
@@ -2717,7 +2708,7 @@ end subroutine nctk_defwrite_raman_terms
 !!
 !! SOURCE
 
-subroutine create_nc_file (filename,ncid)
+subroutine create_nc_file(filename, ncid)
 
 !Arguments ------------------------------------
 !scalars

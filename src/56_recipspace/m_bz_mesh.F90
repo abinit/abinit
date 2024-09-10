@@ -2667,7 +2667,6 @@ function box_len(qpt, gprimd)
  real(dp) :: x1,x2,x3
 !arrays
  real(dp) :: my_qpt(3),gmet(3,3),q0box(3)
-
 ! *************************************************************************
 
  ! Compute reciprocal space metric
@@ -2801,18 +2800,18 @@ end function kpath_new
 
 !! OUTPUT
 !!  nvers=number of versors
-!!  versors(3,nvers)=versors in reduced coords unless cart_coords is True
+!!  red_versors(3,nvers)=versors in reduced coords
+!!  cart_versors(3,nvers)=versors in reduced coords
 !!
 !! SOURCE
 
-subroutine kpath_get_versors(kpath, nvers, versors, cart_coords)
+subroutine kpath_get_versors(kpath, nvers, red_versors, cart_versors)
 
 !Arguments ------------------------------------
 !scalars
- class(kpath_t),intent(inout) :: kpath
+ class(kpath_t),intent(in) :: kpath
  integer,intent(out) :: nvers
- real(dp),allocatable,intent(out) :: versors(:,:)
- logical,optional,intent(in) :: cart_coords
+ real(dp),allocatable,intent(out) :: red_versors(:,:), cart_versors(:,:)
 
 ! local variables
  integer :: ii, ipt, ipt_list(kpath%npts), cnt
@@ -2823,13 +2822,14 @@ subroutine kpath_get_versors(kpath, nvers, versors, cart_coords)
  ! Quick return if just one point.
  if (kpath%npts == 1) then
    nvers = 0
-   ABI_MALLOC(versors, (0, 0))
+   ABI_MALLOC(red_versors, (0, 0))
+   ABI_MALLOC(cart_versors, (0, 0))
    return
  end if
 
  cnt = 0
  do ipt=1,kpath%npts
-   if (all(abs(kpath%points(:, ipt)) < tol16)) then
+   if (sum(kpath%points(:,ipt)**2) < tol14) then
      cnt = cnt + 1
      ipt_list(cnt) = ipt
    end if
@@ -2838,16 +2838,14 @@ subroutine kpath_get_versors(kpath, nvers, versors, cart_coords)
  ABI_MALLOC(tmp_versors, (3, 2*cnt))
  nvers = 0
  do ii=1,cnt
-   ipt = ipt_list(cnt)
+   ipt = ipt_list(ii)
+   nvers = nvers + 1
    ! Different logic depending whether Gamma is at the beggining/end of the path or in the middle.
    if (ipt == 1) then
-     nvers = nvers + 1
      tmp_versors(:, nvers) = kpath%points(:, ipt+1) - kpath%points(:, ipt)
    else if (ipt == kpath%npts) then
-     nvers = nvers + 1
      tmp_versors(:, nvers) = kpath%points(:, ipt-1) - kpath%points(:, ipt)
    else
-     nvers = nvers + 1
      tmp_versors(:, nvers) = kpath%points(:, ipt-1) - kpath%points(:, ipt)
      nvers = nvers + 1
      tmp_versors(:, nvers) = kpath%points(:, ipt+1) - kpath%points(:, ipt)
@@ -2855,24 +2853,21 @@ subroutine kpath_get_versors(kpath, nvers, versors, cart_coords)
  end do
 
  ! Allocate output results
- ABI_MALLOC(versors, (3, nvers))
- versors = tmp_versors(:,1:nvers)
+ ABI_MALLOC(red_versors, (3, nvers))
+ red_versors = tmp_versors(:,1:nvers)
  ABI_FREE(tmp_versors)
 
  ! Normalize
- do ii=1,nvers
-   norm = dot_product(versors(:,ii), matmul(kpath%gmet, versors(:,ii)))
-   versors(:,ii) = versors(:,ii) / (two_pi * sqrt(norm))
- end do
+ !do ii=1,nvers
+ !  norm = dot_product(red_versors(:,ii), matmul(kpath%gmet, red_versors(:,ii)))
+ !  red_versors(:,ii) = red_versors(:,ii) / sqrt(norm)
+ !end do
 
- if (present(cart_coords)) then
-   if (cart_coords) then
-     ABI_MALLOC(tmp_versors, (3, nvers))
-     tmp_versors = versors
-     versors = matmul(kpath%gprimd, tmp_versors)
-     ABI_FREE(tmp_versors)
-   end if
- end if
+ ! Convert to Cartesian coordinates.
+ ABI_MALLOC(cart_versors, (3, nvers))
+ do ii=1, nvers
+   cart_versors(:,ii) = matmul(kpath%gprimd, red_versors(:,ii))
+ end do
 
 end subroutine kpath_get_versors
 !!***

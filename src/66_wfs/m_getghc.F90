@@ -284,6 +284,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
 !Check sizes
  my_nspinor=max(1,gs_ham%nspinor/mpi_enreg%nproc_spinor)
  if (size(cwavef)<2*npw_k1*my_nspinor*ndat) then
+   !print *, size(cwavef)<2*npw_k1*my_nspinor*ndat
    ABI_BUG('wrong size for cwavef!')
  end if
  if (size(ghc)<2*npw_k2*my_nspinor*ndat) then
