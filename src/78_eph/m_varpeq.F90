@@ -79,8 +79,14 @@ module m_varpeq
  type, public :: polstate_t
 
   character(len=fnlen) :: aseed = " "
-  ! Specifies the type of initial seed for charge localization A_nk
-  ! Possible values: "gau_energy", "gau_length", "random", "even"
+   ! Specifies the type of initial seed for charge localization A_nk
+   ! Possible values: "gau_energy", "gau_length", "random", "even"
+
+  logical :: translate = .false.
+   ! Flag controlling treatment of polaronic solution invariant by primitive
+   ! translations inside supercell
+   ! if .true. and np > 1, the next solution is found to be orthogonal to all
+   ! previous states + their translated replicas
 
   integer :: spin = -1
    ! Spin index
@@ -99,6 +105,9 @@ module m_varpeq
 
   real(dp) :: e_frohl
    ! Long-range divergence correction of polaron binding energy due to g(0) avg
+
+  integer :: ngkpt(3)
+   ! Number of points in the uniform k-grid defining the electronic subspace
 
   real(dp) :: gpr_energy(2)
   ! Gaussian parameters for energy-based initialization
@@ -303,6 +312,10 @@ module m_varpeq
 
    integer :: nstep = -1
    ! Maximum number of iterations for optimization of a single polaronic state
+
+   integer :: nstep_ort = -1
+   ! Maximum number of iterations for which orthogonalization to all previous
+   ! states is performed
 
    integer :: nsppol = -1
    ! Number of independent spin polarizations
@@ -1236,7 +1249,7 @@ subroutine varpeq_solve(self)
        call polstate%update_pc(ip)
 
        ! get preconditioned conjugate gradient direction
-       call polstate%calc_pcjgrad(ip)
+       call polstate%calc_pcjgrad(ip, ii, self%nstep_ort)
 
        ! update a based on line minimization and pcj direction
        call polstate%update_a(ip)
@@ -1354,11 +1367,12 @@ subroutine varpeq_init(self, gstore, dtset)
  self%pkind = dtset%varpeq_pkind
  self%aseed = dtset%varpeq_aseed
  ! logical
- self%restart = (dtset%eph_restart == 1)
- self%interp = (dtset%varpeq_interp == 1)
+ self%restart = (dtset%eph_restart /= 0)
+ self%interp = (dtset%varpeq_interp /= 0)
  self%g0_flag = (dtset%varpeq_avg_g /= 0)
  ! integer
  self%nstep = dtset%varpeq_nstep
+ self%nstep_ort = dtset%varpeq_nstep_ort
  self%nsppol = gstore%nsppol
  self%nstates = dtset%varpeq_nstates
  self%natom3 = gstore%cryst%natom*3
@@ -1409,6 +1423,8 @@ subroutine varpeq_init(self, gstore, dtset)
    ! Scalars
    ! character
    polstate%aseed = dtset%varpeq_aseed
+   ! logical
+   polstate%translate = (dtset%varpeq_translate /= 0)
    ! integers
    polstate%np = dtset%varpeq_nstates
    polstate%nkbz = gstore%nkbz
@@ -1417,6 +1433,8 @@ subroutine varpeq_init(self, gstore, dtset)
    polstate%e_frohl = zero
 
    ! Static arrays
+   ! integer
+   polstate%ngkpt(:) = dtset%ngkpt(:)
    ! real
    polstate%gpr_energy(:) = dtset%varpeq_gpr_energy(:)
    polstate%gpr_length(:) = dtset%varpeq_gpr_length(:)
@@ -1709,7 +1727,7 @@ subroutine polstate_setup(self, ip, a_src, load)
  endif
 
  ! Orthogonalize current states to the previous ones
- call self%ort_to_states(self%my_a(:,:,ip), 1, ip-1)
+ call self%ort_to_states(self%my_a(:,:,ip), 1, ip-1, tr_flag=self%translate)
 
  ! Normalize A_nk at current polaronic state
  a_sqnorm = self%get_sqnorm("a", ip)
@@ -1813,28 +1831,59 @@ end subroutine polstate_update_pc
 !!  my_v(:,:)=Vetor to be orthogonalized
 !!  istart=Index of starting polaronic state
 !!  iend=Index of final polaronic state
+!!  tr_flag=.True. if orthognoalization must include all states invariant by
+!!    translations inside a supercell
 !!
 !! OUTPUT
 !!
 !! SOURCE
 
-subroutine polstate_ort_to_states(self, my_v, istart, iend)
+subroutine polstate_ort_to_states(self, my_v, istart, iend, tr_flag)
 
 !Arguments ------------------------------------
  class(polstate_t), intent(inout) :: self
- complex(dp), intent(inout) :: my_v(self%gqk%nb, self%gqk%my_nk)
+ logical, intent(in) :: tr_flag
  integer, intent(in) :: istart, iend
+ complex(dp), intent(inout) :: my_v(self%gqk%nb, self%gqk%my_nk)
 
 !Local variables-------------------------------
  class(gqk_t), pointer :: gqk
- integer :: ip
+ integer :: ip, my_ik, vx, vy, vz
+ complex(dp) :: phase, proj
+ integer :: tr_vec(3), ngkpt_tr(3)
+ real(dp) :: kpt(3)
+ complex(dp) :: a_tr(self%gqk%nb, self%gqk%my_nk)
 
 !----------------------------------------------------------------------
 
  gqk => self%gqk
+
+ ! TODO: optimize
+ ngkpt_tr(:) = 1
+ if (tr_flag) ngkpt_tr(:) = self%ngkpt(:)
+
  do ip=istart,iend
-   my_v(:,:) = my_v(:,:) - &
-     get_proj_(self%my_a(:,:,ip)) * self%my_a(:,:,ip)
+
+   do vx=1,ngkpt_tr(1)
+     tr_vec(1) = vx - 1
+     do vy=1,ngkpt_tr(2)
+       tr_vec(2) = vy - 1
+       do vz=1,ngkpt_tr(3)
+         tr_vec(3) = vz - 1
+
+         do my_ik=1,gqk%my_nk
+           kpt(:) = self%my_kpts(:, my_ik)
+           phase = exp(j_dpc*sum(kpt(:)*tr_vec(:))*pi)
+           a_tr(:, my_ik) = phase*self%my_a(:, my_ik, ip)
+         enddo
+
+         proj = get_proj_(a_tr)
+         my_v(:,:) = my_v(:,:) - proj * a_tr(:,:)
+
+       enddo
+     enddo
+   enddo
+
  enddo
 
  !----------------------------------------------------------------------
@@ -1908,7 +1957,8 @@ real(dp) function polstate_get_lm_theta(self, ip) result(theta)
  gqk => self%gqk
 
  ! Orthogonalize pcj direction to the current state and normalize
- call self%ort_to_states(self%my_pcjgrad, ip, ip)
+ call self%ort_to_states(self%my_pcjgrad, ip, ip, tr_flag=.false.)
+
  sqnorm = self%get_sqnorm('pcjgrad', ip)
  self%my_pcjgrad(:,:) = sqrt(self%nkbz/sqnorm)*self%my_pcjgrad(:,:)
 
@@ -2008,16 +2058,21 @@ end function polstate_get_lm_theta
 !!
 !! INPUTS
 !!   ip=Index of a polaronic state.
+!!   ii=Iteration number.
+!!   nstep_ort=Iteration number, after which the orthogonality constraint
+!!     on all PREVIOUS states is lifted.
 !!
 !! OUTPUT
 !!
 !! SOURCE
 
-subroutine polstate_calc_pcjgrad(self, ip)
+subroutine polstate_calc_pcjgrad(self, ip, ii, nstep_ort)
 
 !Arguments ------------------------------------
  class(polstate_t), intent(inout) :: self
  integer, intent(in) :: ip
+ integer, intent(in) :: ii
+ integer, intent(in) :: nstep_ort
 
 !Local variables-------------------------------
  class(gqk_t), pointer :: gqk
@@ -2030,12 +2085,17 @@ subroutine polstate_calc_pcjgrad(self, ip)
  gqk => self%gqk
 
  ! Orthogonalize current gradient to all previous bands
- call self%ort_to_states(self%my_grad, 1, ip-1)
+ if (ii <= nstep_ort) then
+   call self%ort_to_states(self%my_grad, 1, ip-1, tr_flag=self%translate)
+ endif
 
  ! Precondtion vector
  self%my_pcgrad(:,:) = self%my_pc(:,:)*self%my_grad(:,:)
  ! Orthogonalize to all bands
- call self%ort_to_states(self%my_pcgrad, 1, ip)
+ if (ii <= nstep_ort) then
+   call self%ort_to_states(self%my_pcgrad, 1, ip-1, tr_flag=self%translate)
+ endif
+ call self%ort_to_states(self%my_pcgrad, ip, ip, tr_flag=.false.)
 
  ! Conjugate gradient direction
  if (self%has_prev_grad(ip)) then
@@ -3234,7 +3294,7 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
            " For spin: ", spin, ": pstate: ", ip, ": 1/N_k \sum_nk |A_nk|^2 = ", sum(abs(vpq%a_spin(:,:,ip,spin))**2) / nkbz
          call wrtout(units, msg)
          pol_rho = abs(pol_wf(:, ip, spin))**2
-         write(msg, "(a,i0,a,a,es16.6)")" Polaron density for spin: ", spin, ": pstate: ", ip, " integrates to: ", sum(pol_rho) * cryst%ucvol/wfd%nfft
+         write(msg, "(a,i0,a,i2,a,es16.6)")" Polaron density for spin: ", spin, ": pstate: ", ip, " integrates to: ", sum(pol_rho) * cryst%ucvol/wfd%nfft
          call wrtout(units, msg)
          write(msg, "(a,es16.6)")" maxval(abs(aimag(pol_wf))): ", maxval(abs(aimag(pol_wf(:, ip, spin))))
          call wrtout(units, msg)
@@ -3272,7 +3332,7 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
 
        pol_rho(:) = abs(pol_wf(1:sc_nfft, ip, 1)) ** 2
        pol_rho(:) = abs(pol_wf(sc_nfft+1:, ip, 1)) ** 2 + pol_rho(:)
-       write(msg, "(a,i0,a,es16.6)")" Polaron density integrates to: ", sum(pol_rho) * cryst%ucvol/wfd%nfft
+       write(msg, "(a,es16.6)")" Polaron density integrates to: ", sum(pol_rho) * cryst%ucvol/wfd%nfft
        call wrtout(units, msg)
        write(msg, "(a,es16.6)")" maxval(abs(aimag(pol_wf))): ", maxval(abs(aimag(pol_wf(:, ip, 1))))
        call wrtout(units, msg)
