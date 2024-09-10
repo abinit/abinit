@@ -555,8 +555,8 @@ module m_wfd
    real(dp),allocatable :: prev_cg_k(:,:,:)
     ! (2, prev_npw_k*nspinor, prev_nband_k))
  contains
-   procedure :: store => u0_cache_store
-   procedure :: get => u0_cache_get_new_kpt
+   procedure :: store_kpt => u0_cache_store_kpt
+   procedure :: get_kpt => u0_cache_get_kpt
    procedure :: free => u0_cache_free
  end type u0_cache_t
 
@@ -6106,7 +6106,8 @@ subroutine wfdgw_pawrhoij(Wfd,Cryst,Bst,kptopt,pawrhoij,pawprtvol)
 end subroutine wfdgw_pawrhoij
 !!***
 
-subroutine u0_cache_store(u0c, kpt, istwf_k, npw_k, nspinor, nband_k, kg_k, cg_k)
+subroutine u0_cache_store_kpt(u0c, kpt, istwf_k, npw_k, nspinor, nband_k, kg_k, cg_k)
+
  class(u0_cache_t),intent(inout) :: u0c
  real(dp),intent(in) :: kpt(3)
  integer,intent(in) :: istwf_k, npw_k, nspinor, nband_k, kg_k(3,npw_k)
@@ -6117,11 +6118,13 @@ subroutine u0_cache_store(u0c, kpt, istwf_k, npw_k, nspinor, nband_k, kg_k, cg_k
  u0c%prev_istwf_k = istwf_k
  u0c%prev_npw_k = npw_k
  u0c%prev_nband_k = nband_k
+
  call alloc_copy(kg_k, u0c%prev_kg_k)
  call alloc_copy(cg_k, u0c%prev_cg_k)
-end subroutine u0_cache_store
 
-subroutine u0_cache_get_new_kpt(u0c, new_kpt, new_istwf_k, new_npw_k, nspinor, new_nband_k, new_kg_k, new_cg_k)
+end subroutine u0_cache_store_kpt
+
+subroutine u0_cache_get_kpt(u0c, new_kpt, new_istwf_k, new_npw_k, nspinor, new_nband_k, new_kg_k, new_cg_k)
  class(u0_cache_t),intent(inout) :: u0c
  real(dp),intent(in) :: new_kpt(3)
  integer,intent(in) :: new_istwf_k, new_npw_k, nspinor, new_nband_k, new_kg_k(3,new_npw_k)
@@ -6134,21 +6137,28 @@ subroutine u0_cache_get_new_kpt(u0c, new_kpt, new_istwf_k, new_npw_k, nspinor, n
 
  ABI_CHECK_IEQ(new_nband_k,  u0c%prev_nband_k, "This case is not yet implemented")
 
-
- !real(dp),intent(out) :: work(2,work_ngfft(4),work_ngfft(5),work_ngfft(6))
  mg1 = max(maxval(abs(u0c%prev_kg_k(1,:))), maxval(abs(new_kg_k(1,:))))
  mg2 = max(maxval(abs(u0c%prev_kg_k(2,:))), maxval(abs(new_kg_k(2,:))))
  mg3 = max(maxval(abs(u0c%prev_kg_k(3,:))), maxval(abs(new_kg_k(3,:))))
 
- call ngfft_seq(work_ngfft, [mg1, mg2, mg3])
- ABI_MALLOC(work, (2,work_ngfft(4),work_ngfft(5),work_ngfft(6)))
+ mg1 = 2*mg1 + 1
+ mg2 = 2*mg2 + 1
+ mg3 = 2*mg3 + 1
 
+ !mg1 = 2*mg1
+ !mg2 = 2*mg2
+ !mg3 = 2*mg3
+
+ call ngfft_seq(work_ngfft, [mg1, mg2, mg3])
+ ABI_MALLOC(work, (2, work_ngfft(4),work_ngfft(5),work_ngfft(6)))
+
+ !new_cg_k = zero
  call cgtk_change_gsphere(nspinor*new_nband_k, u0c%prev_npw_k, u0c%prev_istwf_k, u0c%prev_kg_k, u0c%prev_cg_k, &
                           new_npw_k, new_istwf_k, new_kg_k, new_cg_k, work_ngfft, work)
 
  ABI_FREE(work)
 
-end subroutine u0_cache_get_new_kpt
+end subroutine u0_cache_get_kpt
 
 subroutine u0_cache_free(u0c)
  class(u0_cache_t),intent(inout) :: u0c
