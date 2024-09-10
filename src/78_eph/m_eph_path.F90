@@ -457,11 +457,12 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, &
 
          use_cg_kq = (my_iq > 1)
          if (use_cg_kq) call ukq_cache%get_kpt(kq, istwfk_1, npw_kq, nspinor, nband, kg_kq, cg_kq)
+         !use_cg_kq = .False.
 
          call nscf%solve_kpt(spin, kq, istwfk_1, nband, cryst, dtset, dtfil, psps, pawtab, pawfgr, gs_hamkq, &
                              use_cg_kq, npw_kq, cg_kq, gsc_kq, eig_kq, msg, ierr)
 
-         call ukq_cache%store_kpt(kq, npw_kq, istwfk_1, nspinor, nband, kg_kq, cg_kq)
+         call ukq_cache%store_kpt(kq, istwfk_1, npw_kq, nspinor, nband, kg_kq, cg_kq)
 
 #else
          call nscf%solve(spin, kq, istwfk_1, nband, cryst, dtset, dtfil, psps, pawtab, pawfgr, &
