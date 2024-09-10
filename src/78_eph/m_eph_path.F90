@@ -196,8 +196,14 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, &
  ! Define band range and nb_in_g
  nband = dtset%mband
  bstart = dtset%eph_path_brange(1); bstop = dtset%eph_path_brange(2)
+ if (bstart <= 0) bstart = 1
+ if (bstop <= 0) bstop = nband
  nb_in_g = bstop - bstart + 1
- call wrtout(units, sjoin("Computing g with eph_path_brange:", ltoa(dtset%eph_path_brange)))
+
+ ABI_CHECK_IRANGE(bstart, 1, nband, "Wrong eph_path_brange(1)")
+ ABI_CHECK_IRANGE(bstop, 1, nband, "Wrong eph_path_brange(2)t")
+ ABI_CHECK_IGEQ(bstop, bstart, "eph_path_brange(2) < eph_path_brange(1)")
+ call wrtout(units, sjoin("Computing g with eph_path_brange:", ltoa([bstart, bstop])))
 
  ! Distribute spins iside input comm.
  call xmpi_split_nsppol(comm, nsppol, my_nspins, my_spins, comm_my_is)
@@ -420,7 +426,6 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, &
      ! This is the reason why we use vlocal_k (vlocal_kq) although this term does not depend on k
      kk = kpath%points(:, ik)
 
-#if 1
      call nscf%setup_kpt(spin, kk, istwfk_1, nband, cryst, dtset, dtfil, psps, pawtab, pawfgr, &
                          npw_k, kg_k, kpg_k, ph3d_k, kinpw_k, ffnl_k, vlocal_k, cg_k, gsc_k, gs_hamk)
 
@@ -432,11 +437,6 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, &
                          use_cg_k, npw_k, cg_k, gsc_k, eig_k, msg, ierr)
 
      call ucache_k%store_kpt(kk, istwfk_1, npw_k, nspinor, nband, kg_k, cg_k)
-#else
-
-     call nscf%solve(spin, kk, istwfk_1, nband, cryst, dtset, dtfil, psps, pawtab, pawfgr, &
-                     npw_k, kg_k, kpg_k, ph3d_k, kinpw_k, ffnl_k, vlocal_k, cg_k, gsc_k, eig_k, gs_hamk, msg, ierr) ! out
-#endif
 
      ABI_WARNING_IF(ierr /= 0, msg)
      tot_nscf_ierr = tot_nscf_ierr + ierr
@@ -464,37 +464,26 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, &
        phfreqs_eV = phfreqs * Ha_eV
 
        ! Compute psi_mkq
-       !if (qq_is_gamma) then
-       !  call nscf%solve(spin, kq, istwfk_1, nband, cryst, dtset, dtfil, psps, pawtab, pawfgr, &
-       !                  npw_kq, kg_kq, kpg_kq, ph3d_kq, kinpw_kq, ffnl_kq, vlocal_kq, cg_kq, gsc_kq, eig_kq, gs_hamkq, msg, ierr, & ! out
-       !                  init_cg_k=cg_k)
-       !  ! This to have the same gauge when qq = 0
-       !  cg_kq = cg_k
+       call nscf%setup_kpt(spin, kq, istwfk_1, nband, cryst, dtset, dtfil, psps, pawtab, pawfgr, &
+                           npw_kq, kg_kq, kpg_kq, ph3d_kq, kinpw_kq, ffnl_kq, vlocal_kq, cg_kq, gsc_kq, gs_hamkq)
 
-       !else
-#if 1
-         call nscf%setup_kpt(spin, kq, istwfk_1, nband, cryst, dtset, dtfil, psps, pawtab, pawfgr, &
-                             npw_kq, kg_kq, kpg_kq, ph3d_kq, kinpw_kq, ffnl_kq, vlocal_kq, cg_kq, gsc_kq, gs_hamkq)
-
-         ! cache.
-         use_cg_kq = (my_iq > 1 .and. ucache_kq%use_cache)
-         if (use_cg_kq) call ucache_kq%get_kpt(kq, istwfk_1, npw_kq, nspinor, nband, kg_kq, cg_kq)
-
-         call nscf%solve_kpt(spin, kq, istwfk_1, nband, cryst, dtset, dtfil, psps, pawtab, pawfgr, gs_hamkq, &
-                             use_cg_kq, npw_kq, cg_kq, gsc_kq, eig_kq, msg, ierr)
-
-         call ucache_kq%store_kpt(kq, istwfk_1, npw_kq, nspinor, nband, kg_kq, cg_kq)
-
-#else
-         call nscf%solve(spin, kq, istwfk_1, nband, cryst, dtset, dtfil, psps, pawtab, pawfgr, &
-                         npw_kq, kg_kq, kpg_kq, ph3d_kq, kinpw_kq, ffnl_kq, vlocal_kq, cg_kq, gsc_kq, eig_kq, gs_hamkq, msg, ierr)
-#endif
-       !end if
+       ! cache.
+       use_cg_kq = (my_iq > 1 .and. ucache_kq%use_cache)
+       if (use_cg_kq) call ucache_kq%get_kpt(kq, istwfk_1, npw_kq, nspinor, nband, kg_kq, cg_kq)
 
        if (qq_is_gamma) then
-         ! This to have the same gauge when qq = 0
+         ! We can use cg_k as input for the NSCF for a very quick NSCF
+         use_cg_kq = .True.
          cg_kq = cg_k
        end if
+
+       call nscf%solve_kpt(spin, kq, istwfk_1, nband, cryst, dtset, dtfil, psps, pawtab, pawfgr, gs_hamkq, &
+                           use_cg_kq, npw_kq, cg_kq, gsc_kq, eig_kq, msg, ierr)
+
+       call ucache_kq%store_kpt(kq, istwfk_1, npw_kq, nspinor, nband, kg_kq, cg_kq)
+
+       ! This to have the same gauge when qq = 0
+       if (qq_is_gamma) cg_kq = cg_k
 
        ABI_WARNING_IF(ierr /= 0, msg)
        tot_nscf_ierr = tot_nscf_ierr + ierr
