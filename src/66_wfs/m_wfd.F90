@@ -6108,23 +6108,29 @@ end subroutine wfdgw_pawrhoij
 
 subroutine u0_cache_store_kpt(u0c, kpt, istwf_k, npw_k, nspinor, nband_k, kg_k, cg_k)
 
+!Arguments ------------------------------------
  class(u0_cache_t),intent(inout) :: u0c
  real(dp),intent(in) :: kpt(3)
  integer,intent(in) :: istwf_k, npw_k, nspinor, nband_k, kg_k(3,npw_k)
  real(dp),intent(in) :: cg_k(2, npw_k*nspinor, nband_k)
+!************************************************************************
 
  call u0c%free()
- u0c%prev_kpt = kpt
- u0c%prev_istwf_k = istwf_k
  u0c%prev_npw_k = npw_k
  u0c%prev_nband_k = nband_k
+ u0c%prev_istwf_k = istwf_k
+ u0c%prev_kpt = kpt
 
  call alloc_copy(kg_k, u0c%prev_kg_k)
  call alloc_copy(cg_k, u0c%prev_cg_k)
+ !print *, "npw_k, nspinor, nband_k", npw_k, nspinor, nband_k
+ !print *, "u0c%prev_cg_k:", u0c%prev_cg_k
 
 end subroutine u0_cache_store_kpt
 
 subroutine u0_cache_get_kpt(u0c, new_kpt, new_istwf_k, new_npw_k, nspinor, new_nband_k, new_kg_k, new_cg_k)
+
+!Arguments ------------------------------------
  class(u0_cache_t),intent(inout) :: u0c
  real(dp),intent(in) :: new_kpt(3)
  integer,intent(in) :: new_istwf_k, new_npw_k, nspinor, new_nband_k, new_kg_k(3,new_npw_k)
@@ -6145,9 +6151,9 @@ subroutine u0_cache_get_kpt(u0c, new_kpt, new_istwf_k, new_npw_k, nspinor, new_n
  mg2 = 2*mg2 + 1
  mg3 = 2*mg3 + 1
 
- !mg1 = 2*mg1
- !mg2 = 2*mg2
- !mg3 = 2*mg3
+ mg1 = 2*mg1
+ mg2 = 2*mg2
+ mg3 = 2*mg3
 
  call ngfft_seq(work_ngfft, [mg1, mg2, mg3])
  ABI_MALLOC(work, (2, work_ngfft(4),work_ngfft(5),work_ngfft(6)))
@@ -6161,16 +6167,22 @@ subroutine u0_cache_get_kpt(u0c, new_kpt, new_istwf_k, new_npw_k, nspinor, new_n
 end subroutine u0_cache_get_kpt
 
 subroutine u0_cache_free(u0c)
+
+!Arguments ------------------------------------
  class(u0_cache_t),intent(inout) :: u0c
+!************************************************************************
  ABI_SFREE(u0c%prev_kg_k)
  ABI_SFREE(u0c%prev_cg_k)
 end subroutine u0_cache_free
 
 subroutine u1_cache_store(u1c, qpt, npw_kq, nspinor, natom3, bstart_ks, nbcalc_ks, kg_kq, cg1s_kq)
+
+!Arguments ------------------------------------
  class(u1_cache_t),intent(inout) :: u1c
  real(dp),intent(in) :: qpt(3)
  integer,intent(in) :: npw_kq, nspinor, natom3, bstart_ks, nbcalc_ks, kg_kq(3,npw_kq)
  real(dp),intent(in) :: cg1s_kq(2, npw_kq*nspinor, natom3, nbcalc_ks)
+!************************************************************************
 
  call u1c%free()
  u1c%prev_qpt = qpt
@@ -6182,8 +6194,12 @@ subroutine u1_cache_store(u1c, qpt, npw_kq, nspinor, natom3, bstart_ks, nbcalc_k
 end subroutine u1_cache_store
 
 integer function u1_cache_find_band(u1c, band) result(u1c_band)
+
+!Arguments ------------------------------------
  class(u1_cache_t),intent(inout) :: u1c
  integer,intent(in) :: band
+!************************************************************************
+
  ! Make sure we have the proper global band index in the cache as bstart_ks depends on the
  ! k-point in Sigma_{nk}. If not, fill cg1s_kq with zeros and return.
  u1c_band = -1
@@ -6198,7 +6214,10 @@ integer function u1_cache_find_band(u1c, band) result(u1c_band)
 end function u1_cache_find_band
 
 subroutine u1_cache_free(u1c)
+
+!Arguments ------------------------------------
  class(u1_cache_t),intent(inout) :: u1c
+!************************************************************************
  ABI_SFREE(u1c%prev_kg_kq)
  ABI_SFREE(u1c%prev_cg1s_kq)
 end subroutine u1_cache_free

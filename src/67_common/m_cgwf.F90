@@ -2973,10 +2973,11 @@ subroutine nscf_solve_kpt(nscf, isppol, kpt, istwf_k, nband, cryst, dtset, dtfil
    call pw_orthon(icg0, igsc0, istwf_k, mcg, mgsc, npwsp, nband, ortalgo_3, gsc_k, dtset%usepaw, cg_k, me_g0, xmpi_comm_self)
 
  else
-   call wrtout(std_out, "Using input cg")
-   call cg_envlop(cg_k, dtset%ecut, cryst%gmet, 0, kg_k, kpt, mcg, nband, npw_k, dtset%nspinor)
+   !call wrtout(std_out, " Using input cg")
+   !print *, cg_k
+   !call cg_envlop(cg_k, dtset%ecut, cryst%gmet, 0, kg_k, kpt, mcg, nband, npw_k, dtset%nspinor)
    call pw_orthon(icg0, igsc0, istwf_k, mcg, mgsc, npwsp, nband, ortalgo_3, gsc_k, dtset%usepaw, cg_k, me_g0, xmpi_comm_self)
-   call wrtout(std_out, "done pw_orthon")
+   !call wrtout(std_out, "done pw_orthon")
  end if
 
  ABI_MALLOC(evec, (2*nband, nband))

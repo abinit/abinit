@@ -2840,7 +2840,7 @@ subroutine kpath_get_versors(kpath, nvers, red_versors, cart_versors)
  do ii=1,cnt
    ipt = ipt_list(ii)
    nvers = nvers + 1
-   ! Different logic depending whether Gamma is at the beggining/end of the path or in the middle.
+   ! Different logic depending whether Gamma is at the beginning/end of the path or in the middle.
    if (ipt == 1) then
      tmp_versors(:, nvers) = kpath%points(:, ipt+1) - kpath%points(:, ipt)
    else if (ipt == kpath%npts) then
