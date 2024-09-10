@@ -346,12 +346,12 @@ subroutine chebfiwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
    write(std_out,'(4x,A,F10.6,1x,A)') "Temporary memory in m_chebfi : ",(chebfiMem(2))/1e9,"GB"
  end if
 
- call xgBlock_map(xgx0,cg,space,l_npw*l_nspinor,nband,comm=l_mpi_enreg%comm_bandspinorfft,me_g0=me_g0,&
-   & gpu_option=dtset%gpu_option)
-
 #ifdef HAVE_OPENMP_OFFLOAD
  !$OMP TARGET ENTER DATA MAP(to:cg,eig,resid) IF(gs_hamk%gpu_option==ABI_GPU_OPENMP)
 #endif
+
+ call xgBlock_map(xgx0,cg,space,l_npw*l_nspinor,nband,comm=l_mpi_enreg%comm_bandspinorfft,me_g0=me_g0,&
+   & gpu_option=dtset%gpu_option)
 
  !For preconditionning
  if(dtset%gpu_option==ABI_GPU_KOKKOS) then
@@ -424,6 +424,9 @@ subroutine chebfiwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
 &                signs,gsc_dummy,l_tim_getghc,cg,l_gvnlxc)
 
    else
+#ifdef HAVE_OPENMP_OFFLOAD
+     !$OMP TARGET UPDATE FROM(cg) IF(gs_hamk%gpu_option==ABI_GPU_OPENMP)
+#endif
      do iband=1,nband/blockdim
        shift = (iband-1)*blockdim*l_npw*l_nspinor
        call prep_nonlop(choice,l_cpopt,cprj_dum, &

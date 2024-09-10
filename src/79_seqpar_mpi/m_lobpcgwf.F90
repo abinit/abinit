@@ -219,6 +219,9 @@ subroutine lobpcgwf2(cg,dtset,eig,occ,enl_out,gs_hamk,isppol,ikpt,inonsc,istep,k
 &                signs,gsc_dummy,l_tim_getghc,cg,gvnlxc)
 
    else
+#ifdef HAVE_OPENMP_OFFLOAD
+     !$OMP TARGET UPDATE FROM(cg) IF(gs_hamk%gpu_option==ABI_GPU_OPENMP)
+#endif
      do iband=1,nband/blockdim
        shift = (iband-1)*blockdim*l_npw*l_nspinor
        call prep_nonlop(choice,l_cpopt,cprj_dum, &
