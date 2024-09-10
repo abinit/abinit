@@ -93,7 +93,7 @@ module m_dfpt_cgwf
 
    type(dataset_type),pointer :: dtset => null()
    type(mpi_type) :: mpi_enreg
-   !type(u1cache_t) :: u1c
+   !type(u1_cache_t) :: u1c
 
    integer,allocatable :: bands_treated_now(:)
    integer,allocatable :: rank_band(:)
@@ -124,6 +124,7 @@ module m_dfpt_cgwf
 
    procedure :: free => stern_free
     ! Free dynamic memory.
+
  end type stern_t
 !!***
 
@@ -1875,7 +1876,7 @@ subroutine stern_solve(stern, u1_band, band_me, idir, ipert, qpt, gs_hamkq, rf_h
      !do iband=1,stern%nband
      !  write(std_out, *)iband, eig0_k(iband), eig0_kq(iband), eig0_k(iband) - eig0_kq(iband)
      !end do
-     ierr = -1
+     ierr = -2
    end if
 
    !if (my_rank == master .and. (enough_stern <= 5 .or. stern%dtset%prtvol > 10)) then
@@ -1903,7 +1904,9 @@ subroutine stern_solve(stern, u1_band, band_me, idir, ipert, qpt, gs_hamkq, rf_h
  ! See need_fermie1 in m_dfpt_scfcv
 
  if (present(full_cg1)) then
-   ! Compute full first order wavefunction.
+   ! =====================================
+   ! Compute full first order wavefunction
+   ! =====================================
 
    ! WARNING: Assuming all bands are on this cpu.
    cycle_bands(:) = .False.
@@ -1952,7 +1955,6 @@ subroutine stern_free(stern)
 
 !Arguments ------------------------------------
  class(stern_t),intent(inout) :: stern
-
 !************************************************************************
 
  ! integer

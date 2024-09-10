@@ -817,6 +817,10 @@ meta: {optdriver: 3, gwcalctyp: 29, }
           total number of points  =         8000
 
 
+ vcoul_init : cutoff-mode = AUX_GB
+ q-points for optical limit:   1
+     1)      0.000010    0.000020    0.000030
+
 - screening: taking advantage of time-reversal symmetry 
 - Maximum band index for partially occupied states nbvw = 4
 - Remaining bands to be divided among processors   nbcw = 12
@@ -1347,6 +1351,9 @@ meta: {optdriver: 4, gwcalctyp: 29, }
  yields    27 points in the full Brillouin Zone.
 
 
+ vcoul_init : cutoff-mode = AUX_GB
+ q-points for optical limit:   1
+     1)      0.000010    0.000020    0.000030
  setmesh: FFT mesh size selected  =    24x   24x   24
           total number of points  =        13824
 
@@ -1578,6 +1585,10 @@ meta: {optdriver: 3, gwcalctyp: 29, }
  setmesh: FFT mesh size selected  =    20x   20x   20
           total number of points  =         8000
 
+
+ vcoul_init : cutoff-mode = AUX_GB
+ q-points for optical limit:   1
+     1)      0.000010    0.000020    0.000030
 
 - screening: taking advantage of time-reversal symmetry 
 - Maximum band index for partially occupied states nbvw = 4
@@ -2111,6 +2122,10 @@ meta: {optdriver: 4, gwcalctyp: 29, }
  yields    27 points in the full Brillouin Zone.
 
 
+
+ vcoul_init : cutoff-mode = AUX_GB
+ q-points for optical limit:   1
+     1)      0.000010    0.000020    0.000030
  setmesh: FFT mesh size selected  =    24x   24x   24
           total number of points  =        13824
 
@@ -2342,6 +2357,10 @@ meta: {optdriver: 3, gwcalctyp: 29, }
  setmesh: FFT mesh size selected  =    20x   20x   20
           total number of points  =         8000
 
+
+ vcoul_init : cutoff-mode = AUX_GB
+ q-points for optical limit:   1
+     1)      0.000010    0.000020    0.000030
 
 - screening: taking advantage of time-reversal symmetry 
 - Maximum band index for partially occupied states nbvw = 4
@@ -2875,6 +2894,10 @@ meta: {optdriver: 4, gwcalctyp: 29, }
  yields    27 points in the full Brillouin Zone.
 
 
+
+ vcoul_init : cutoff-mode = AUX_GB
+ q-points for optical limit:   1
+     1)      0.000010    0.000020    0.000030
  setmesh: FFT mesh size selected  =    24x   24x   24
           total number of points  =        13824
 
@@ -3106,6 +3129,10 @@ meta: {optdriver: 3, gwcalctyp: 29, }
  setmesh: FFT mesh size selected  =    20x   20x   20
           total number of points  =         8000
 
+
+ vcoul_init : cutoff-mode = AUX_GB
+ q-points for optical limit:   1
+     1)      0.000010    0.000020    0.000030
 
 - screening: taking advantage of time-reversal symmetry 
 - Maximum band index for partially occupied states nbvw = 4
@@ -3639,6 +3666,9 @@ meta: {optdriver: 4, gwcalctyp: 29, }
  yields    27 points in the full Brillouin Zone.
 
 
+ vcoul_init : cutoff-mode = AUX_GB
+ q-points for optical limit:   1
+     1)      0.000010    0.000020    0.000030
  setmesh: FFT mesh size selected  =    24x   24x   24
           total number of points  =        13824
 

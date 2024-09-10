@@ -658,6 +658,10 @@ meta: {optdriver: 3, gwcalctyp: 2, }
  setmesh: FFT mesh size selected  =     9x    9x    9
           total number of points  =          729
 
+
+ vcoul_init : cutoff-mode = AUXILIARY_FUNCTION
+ q-points for optical limit:   1
+     1)      0.000010    0.000020    0.000030
  Number of electrons calculated from density =    3.0000; Expected =    3.0000
  average of density, n =  0.026783
  r_s =    2.0734
@@ -1456,6 +1460,10 @@ meta: {optdriver: 4, gwcalctyp: 0, }
  yields    64 points in the full Brillouin Zone.
 
 
+
+ vcoul_init : cutoff-mode = CRYSTAL
+ q-points for optical limit:   1
+     1)      0.000010    0.000020    0.000030
  setmesh: FFT mesh size selected  =    12x   12x   12
           total number of points  =         1728
 
@@ -1594,6 +1602,10 @@ meta: {optdriver: 4, gwcalctyp: 2, }
  yields    64 points in the full Brillouin Zone.
 
 
+
+ vcoul_init : cutoff-mode = CRYSTAL
+ q-points for optical limit:   1
+     1)      0.000010    0.000020    0.000030
  setmesh: FFT mesh size selected  =    12x   12x   12
           total number of points  =         1728
 

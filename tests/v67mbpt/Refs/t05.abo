@@ -297,6 +297,9 @@ meta: {optdriver: 4, gwcalctyp: 0, }
  yields    32 points in the full Brillouin Zone.
 
 
+ vcoul_init : cutoff-mode = CRYSTAL
+ q-points for optical limit:   1
+     1)      0.000010    0.000020    0.000030
  setmesh: FFT mesh size selected  =    12x   12x   12
           total number of points  =         1728
 
@@ -535,6 +538,10 @@ meta: {optdriver: 4, gwcalctyp: 0, }
  yields    32 points in the full Brillouin Zone.
 
 
+
+ vcoul_init : cutoff-mode = CRYSTAL
+ q-points for optical limit:   1
+     1)      0.000010    0.000020    0.000030
  setmesh: FFT mesh size selected  =    12x   12x   12
           total number of points  =         1728
 
@@ -777,6 +784,10 @@ meta: {optdriver: 4, gwcalctyp: 28, }
  yields    32 points in the full Brillouin Zone.
 
 
+
+ vcoul_init : cutoff-mode = CRYSTAL
+ q-points for optical limit:   1
+     1)      0.000010    0.000020    0.000030
  setmesh: FFT mesh size selected  =    12x   12x   12
           total number of points  =         1728
 

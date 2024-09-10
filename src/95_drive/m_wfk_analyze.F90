@@ -219,14 +219,14 @@ subroutine wfk_analyze(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps
  ebands = ebands_from_hdr(wfk0_hdr, maxval(wfk0_hdr%nband), gs_eigen)
 
  !call ebands_update_occ(ebands, spinmagntarget)
- call ebands_print(ebands,header="Ground state energies", prtvol=dtset%prtvol)
+ call ebands_print(ebands, [std_out], header="Ground state energies", prtvol=dtset%prtvol)
  ABI_FREE(gs_eigen)
 
  call pawfgr_init(pawfgr,dtset,mgfftf,nfftf,ecut_eff,ecutdg_eff,ngfftc,ngfftf,&
                   gsqcutc_eff=gsqcutc_eff,gsqcutf_eff=gsqcutf_eff,gmet=cryst%gmet,k0=k0)
 
- call print_ngfft(ngfftc, header='Coarse FFT mesh used for the wavefunctions')
- call print_ngfft(ngfftf, header='Dense FFT mesh used for densities and potentials')
+ call print_ngfft([std_out], ngfftc, header='Coarse FFT mesh used for the wavefunctions')
+ call print_ngfft([std_out], ngfftf, header='Dense FFT mesh used for densities and potentials')
 
  ! Fake MPI_type for the sequential part.
  call initmpi_seq(mpi_enreg)

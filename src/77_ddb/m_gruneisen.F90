@@ -371,7 +371,7 @@ subroutine gruns_qpath(gruns, prefix, qpath, ncid, comm)
    end if
    write(unt,'(a)')'# Phonon band structure, Gruneisen parameters and group velocity'
    write(unt,'(a)')"# Energy in Hartree, DOS in states/Hartree"
-   call qpath%print(unit=unt, pre="#")
+   call qpath%print([unt], pre="#")
    write(unt,'(5a)')&
      "# phfreq(mode=1) gruneisen(mode=1) velocity(mode=1)    phfreq(mode=2) gruneisen(mode=2) velocity(mode=2)   ..."
    do iqpt=1,qpath%npts

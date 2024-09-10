@@ -2152,8 +2152,7 @@ subroutine phdos_calc_vsound(eigvec, gmet, natom, phfrq, qphon, speedofsound)
 !scalars
  integer, intent(in) :: natom
 !arrays
- real(dp), intent(in) :: gmet(3,3),qphon(3)
- real(dp), intent(in) :: phfrq(3*natom),eigvec(2,3*natom,3*natom)
+ real(dp), intent(in) :: gmet(3,3),qphon(3),phfrq(3*natom),eigvec(2,3*natom,3*natom)
  real(dp), intent(out) :: speedofsound(3)
 
 !Local variables -------------------------
@@ -2204,6 +2203,7 @@ end subroutine phdos_calc_vsound
 !! speedofsound(3)
 !!
 !! OUTPUT
+!!  Only writing
 !!
 !! SOURCE
 
@@ -2220,7 +2220,6 @@ subroutine phdos_print_vsound(iunit, ucvol, speedofsound)
  integer :: imode_acoustic, units(2)
  character(len=500) :: msg
  real(dp) :: tdebye
-
 ! *********************************************************************
 
  units = [std_out, iunit]
@@ -2283,7 +2282,6 @@ subroutine phdos_print_msqd(PHdos, fname, ntemper, tempermin, temperinc)
 !arrays
  real(dp), allocatable :: bose_msqd(:,:), tmp_msqd(:,:), integ_msqd(:,:)
  real(dp), allocatable :: bose_msqv(:,:), tmp_msqv(:,:), integ_msqv(:,:)
-
 ! *********************************************************************
 
  fname_msqd = trim(fname) //"_MSQD_T"
@@ -2435,7 +2433,6 @@ subroutine phonons_ncwrite(ncid, natom, nqpts, qpoints, weights, phfreq, phdispl
 !Local variables-------------------------------
 !scalars
  integer :: nphmodes,ncerr
-
 ! *************************************************************************
 
  nphmodes = 3*natom
@@ -2515,7 +2512,6 @@ end subroutine phonons_ncwrite
  real(dp) :: dummy
  character(len=300) :: formt
  character(len=500) :: msg
-
 ! *************************************************************************
 
  nphmodes = 3*natom
@@ -2636,7 +2632,6 @@ subroutine phonons_write_xmgrace(filename, natom, nqpts, qpts, phfreqs, qptbound
 !arrays
  integer :: g0(3)
  integer,allocatable :: bounds2qpt(:)
-
 ! *********************************************************************
 
  nqbounds = 0
@@ -2757,7 +2752,6 @@ subroutine phonons_write_gnuplot(prefix, natom, nqpts, qpts, phfreqs, qptbounds)
 !arrays
  integer :: g0(3)
  integer,allocatable :: bounds2qpt(:)
-
 ! *********************************************************************
 
  nqbounds = 0
@@ -2873,7 +2867,7 @@ subroutine ifc_mkphbs(ifc, cryst, dtset, prefix, comm)
 !Local variables -------------------------
 !scalars
  integer,parameter :: master = 0
- integer :: iqpt, nqpts, natom, ncid, nprocs, my_rank, ierr, nph2l, ncerr
+ integer :: iqpt, nqpts, natom, ncid, nprocs, my_rank, ierr, ndirs, ncerr
  type(kpath_t) :: qpath
 !arrays
  real(dp),allocatable :: qph2l(:,:), qnrml2(:), eigvec(:,:,:,:,:),phfrqs(:,:),phdispl_cart(:,:,:,:),phangmom(:,:,:),weights(:)
@@ -2889,8 +2883,8 @@ subroutine ifc_mkphbs(ifc, cryst, dtset, prefix, comm)
  call wrtout(std_out, " Writing phonon bands, use prtphbands 0 to disable this part")
 
  nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
- natom = cryst%natom
 
+ natom = cryst%natom
  qpath = kpath_new(dtset%ph_qpath(:,1:dtset%ph_nqpath), cryst%gprimd, dtset%ph_ndivsm)
  nqpts = qpath%npts
 
@@ -2919,25 +2913,25 @@ subroutine ifc_mkphbs(ifc, cryst, dtset, prefix, comm)
    ABI_MALLOC(qph2l, (3, 2*dtset%ph_nqpath))
    ABI_MALLOC(qnrml2, (2*dtset%ph_nqpath))
 
-   nph2l = 0
+   ndirs = 0
    if (any(ifc%zeff /= zero)) then
      do iqpt=1,dtset%ph_nqpath
        if (sum(dtset%ph_qpath(:, iqpt)**2) < tol14) then
-         nph2l = nph2l + 1
+         ndirs = ndirs + 1
          if (iqpt == 1) then
-           qph2l(:, nph2l) = dtset%ph_qpath(:, 2) - dtset%ph_qpath(:, 1)
+           qph2l(:, ndirs) = dtset%ph_qpath(:, 2) - dtset%ph_qpath(:, 1)
          else if (iqpt == dtset%ph_nqpath) then
-           qph2l(:, nph2l) = dtset%ph_qpath(:, dtset%ph_nqpath - 1) - dtset%ph_qpath(:, dtset%ph_nqpath)
+           qph2l(:, ndirs) = dtset%ph_qpath(:, dtset%ph_nqpath - 1) - dtset%ph_qpath(:, dtset%ph_nqpath)
          else
-           qph2l(:, nph2l) = dtset%ph_qpath(:, iqpt - 1) - dtset%ph_qpath(:, iqpt)
-           nph2l = nph2l + 1
-           qph2l(:, nph2l) = dtset%ph_qpath(:, iqpt + 1) - dtset%ph_qpath(:, iqpt)
+           qph2l(:, ndirs) = dtset%ph_qpath(:, iqpt - 1) - dtset%ph_qpath(:, iqpt)
+           ndirs = ndirs + 1
+           qph2l(:, ndirs) = dtset%ph_qpath(:, iqpt + 1) - dtset%ph_qpath(:, iqpt)
          end if
        end if
      end do
 
      ! Convert to Cartesian coordinates.
-     do iqpt=1,nph2l
+     do iqpt=1,ndirs
        qph2l(:, iqpt) = matmul(cryst%gprimd, qph2l(:, iqpt))
      end do
      qnrml2 = zero
@@ -2954,7 +2948,7 @@ subroutine ifc_mkphbs(ifc, cryst, dtset, prefix, comm)
    NCF_CHECK(ncerr)
    NCF_CHECK(nctk_set_datamode(ncid))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "atomic_mass_units"), ifc%amu))
-   if (nph2l /= 0) call ifc%calcnwrite_nana_terms(cryst, nph2l, qph2l, qnrml2, ncid=ncid)
+   if (ndirs /= 0) call ifc%calcnwrite_nana_terms(cryst, ndirs, qph2l, qnrml2, ncid=ncid)
    NCF_CHECK(nf90_close(ncid))
 
    ABI_FREE(qph2l)
@@ -3336,11 +3330,11 @@ subroutine pheigvec_rotate(cryst, qq_ibz, isym, itimrev, eigvec_ibz, eigvec_qbz,
  end do
 
  !write(std_out, "(2a)")" Gamma_matrix for qq_bz:", trim(ktoa(qq_bz))
- !call print_arr(reshape(cmplx(gamma_matrix(1,:,:,:,:), gamma_matrix(2,:,:,:,:)), [natom3, natom3]))
+ !call print_arr([std_out], reshape(cmplx(gamma_matrix(1,:,:,:,:), gamma_matrix(2,:,:,:,:)), [natom3, natom3]))
  !gamma2 = gamma_matrix
  !call cg_zgemm("C", "N", natom3, natom3, natom3, gamma_matrix, gamma2, eigvec_qbz)
  !write(std_out, "(a)")" gamma^H gamma:"
- !call print_arr(reshape(cmplx(eigvec_qbz(1,:,:), eigvec_qbz(2,:,:)), [natom3, natom3]))
+ !call print_arr([std_out], reshape(cmplx(eigvec_qbz(1,:,:), eigvec_qbz(2,:,:)), [natom3, natom3]))
  !call cg_check_unitary(natom3, gamm_matrix)
 
  call cg_zgemm("N", "N", natom3, natom3, natom3, gamma_matrix, eigvec_ibz, eigvec_qbz)
@@ -3390,7 +3384,6 @@ type(phstore_t) function phstore_new(cryst, ifc, nqibz, qibz, use_ifc_fourq, com
 !scalars
  integer :: natom3, my_q1, my_q2, iq_ibz
  character(len=500) :: msg
-
 ! *************************************************************************
 
  new%qibz => qibz
@@ -3445,7 +3438,6 @@ subroutine phstore_free(self)
 
 !Arguments ------------------------------------
  class(phstore_t),intent(inout) :: self
-
 ! *************************************************************************
 
  ABI_SFREE(self%qibz_start)
@@ -3486,7 +3478,6 @@ subroutine phstore_async_rotate(self, cryst, ifc, iq_ibz, qpt_ibz, qpt_bz, isym_
  integer :: rank, master, ierr
  logical :: isirr_q
  real(dp) :: eigvec_qpt(2, self%natom3, self%natom3)
-
 ! *************************************************************************
 
  ABI_UNUSED(qpt_ibz(1))
@@ -3496,7 +3487,7 @@ subroutine phstore_async_rotate(self, cryst, ifc, iq_ibz, qpt_ibz, qpt_bz, isym_
    call ifc%fourq(cryst, qpt_bz, self%phfrq, self%displ_cart); return
  end if
 
- ! Find the rank MPI storing the q-point in the IBZ.
+ ! Find the MPI rank storing the q-point in the IBZ.
  do rank=0,self%nprocs-1
    if (iq_ibz >= self%qibz_start(rank) .and. iq_ibz <= self%qibz_stop(rank)) then
      master = rank; exit
@@ -3612,7 +3603,6 @@ subroutine test_phrotation(ifc, cryst, qptopt, ngqpt, comm)
  real(dp),allocatable :: wtq_ibz(:), qbz(:,:), qibz(:,:)
  real(dp),allocatable :: displ_cart(:,:,:,:),displ_red(:,:,:,:)
  real(dp),allocatable :: phfreqs_qibz(:,:), displ_cart_ibz(:,:,:,:),eigvec_ibz(:,:,:,:)
-
 !************************************************************************
 
  if (xmpi_comm_rank(comm) /= 0) return
@@ -3708,7 +3698,7 @@ subroutine test_phrotation(ifc, cryst, qptopt, ngqpt, comm)
    write(std_out, *) "max eig_diff [meV]: ", maxval(work)
    write(std_out, "(a)")" e^H D e (meV**2)"
    d2cart = d2cart * Ha_meV ** 2
-   call print_arr(reshape(cmplx(d2cart(1,:,:), d2cart(2,:,:), kind=dp), [natom3, natom3]))
+   call print_arr([std_out], reshape(cmplx(d2cart(1,:,:), d2cart(2,:,:), kind=dp), [natom3, natom3]))
 
    !err_eigvec = maxval(abs(eigvec_out - eigvec_bz))
    !if (err_eigvec > tol_eigvec) then

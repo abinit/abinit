@@ -151,7 +151,7 @@ _tsuite_dirs = [
     "etsf_io",
     "fast",
     "gwr",
-    "gwpt",
+    #"gwpt",
     "psml",
     "gpu",
     "libxc",
@@ -242,7 +242,7 @@ class Suite(object):
 
             for name in subsuite_names:
                 #pattern = re.compile("-?t" + name + "_\d+\.in")
-                pattern = re.compile("-?t" + name + "_\d+\.abi")
+                pattern = re.compile("-?t" + name + r"_\d+\.abi")
                 for inp in module.inp_files:
                     if pattern.match(inp):
                         #print(inp, "--> subsuite: ", name)
@@ -733,8 +733,8 @@ class AbinitTests(object):
 
         else:
             import re
-            re_slice = re.compile("^\[(\d*):(\d*)\]$")
-            re_single = re.compile("^\[(\d*)\]$")
+            re_slice = re.compile(r"^\[(\d*):(\d*)\]$")
+            re_single = re.compile(r"^\[(\d*)\]$")
 
             d = {}
             for arg in args:

@@ -874,7 +874,6 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
 
    ! Add crystalline structure.
    NCF_CHECK(gstore%cryst%ncwrite(ncid))
-
    ! Add eigenvalues and occupations.
    NCF_CHECK(ebands_ncwrite(gstore%ebands, ncid))
 
@@ -1086,7 +1085,7 @@ end subroutine gstore_init
 !! gstore_distribute_spins
 !!
 !! FUNCTION
-!!  Distribute spins, create indirect mapping to spin index and init %brange_spin
+!!  Distribute spins. Also create and return indirect mapping to spin index and init %brange_spin
 !!
 !! INPUTS
 !!
@@ -1104,25 +1103,24 @@ subroutine gstore_distribute_spins(gstore, mband, gstore_brange, nproc_spin, com
 
 !Local variables-------------------------------
 !scalars
- integer :: spin, my_rank, ierr, color, nsppol, all_nproc
+ integer :: spin, my_rank, ierr, color, nsppol, nprocs
 !arrays
  integer :: buff_spin(2)
 !----------------------------------------------------------------------
 
- all_nproc = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
-
+ nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
  nsppol = gstore%nsppol
+
  gstore%my_nspins = 0
  ABI_MALLOC(gstore%brange_spin, (2, nsppol))
 
  do spin=1,nsppol
-   ! NB: If MPI_UNDEFINED is passed as the colour value, the subgroup in which the calling
-   ! MPI process will be placed is MPI_COMM_NULL
+   ! NB: If MPI_UNDEFINED is passed as the colour value, the subgroup in which the calling MPI process will be placed is MPI_COMM_NULL
    color = 1
-   if (nsppol == 2 .and. all_nproc > 1) then
+   if (nsppol == 2 .and. nprocs > 1) then
      color = xmpi_undefined
-     if (spin == 1 .and. my_rank <= (all_nproc - 1) / 2) color = 1
-     if (spin == 2 .and. my_rank > (all_nproc - 1) / 2) color = 1
+     if (spin == 1 .and. my_rank <= (nprocs - 1) / 2) color = 1
+     if (spin == 2 .and. my_rank > (nprocs - 1) / 2) color = 1
    end if
 
    call xmpi_comm_split(comm, color, my_rank, comm_spin(spin), ierr)
@@ -1147,6 +1145,7 @@ subroutine gstore_distribute_spins(gstore, mband, gstore_brange, nproc_spin, com
 
 end subroutine gstore_distribute_spins
 !!***
+
 !----------------------------------------------------------------------
 
 !!****f* m_gstore/gstore_set_mpi_grid__
@@ -1167,7 +1166,8 @@ subroutine gstore_set_mpi_grid__(gstore, gstore_cplex, nproc_spin, comm_spin)
 !scalars
  class(gstore_t),target,intent(inout) :: gstore
  integer,intent(in) :: gstore_cplex
- integer,intent(in) :: nproc_spin(gstore%nsppol), comm_spin(gstore%nsppol)
+ integer,intent(in) :: nproc_spin(gstore%nsppol)
+ integer,intent(inout) :: comm_spin(gstore%nsppol)
 
 !Local variables-------------------------------
 !scalars
@@ -1320,7 +1320,7 @@ subroutine gstore_set_mpi_grid__(gstore, gstore_cplex, nproc_spin, comm_spin)
      write(msg, "(a,i0,3a, 7(a,1x,i0))") &
        "Cannot create Cartesian grid with total nproc: ", nproc_spin(spin), ch10, &
        "Idle processes are not supported. The product of the `nproc_*` vars should be equal to nproc.", ch10, &
-       "qpt_nproc (", gqk%qpt_comm%nproc, ") x kpt_nproc (", gqk%kpt_comm%nproc, ")  x kpt_nproc", gqk%pert_comm%nproc, &
+       "qpt_nproc (", gqk%qpt_comm%nproc, ") x kpt_nproc (", gqk%kpt_comm%nproc, ") x pert_nproc", gqk%pert_comm%nproc, &
        "x band_nproc (", gqk%band_comm%nproc, "x bsum_nproc (", gqk%bsum_comm%nproc, ") x psum_nproc (", gqk%pp_sum_comm%nproc, &
        ") != ", nproc_spin(spin)
      ABI_ERROR(msg)
@@ -1421,7 +1421,7 @@ subroutine gstore_print(gstore, units, header, prtvol)
    call wrtout(units, " === Gstore parameters ===")
  end if
 
- !call ebands_print(gstore%ebands, header="Electron bands", unit=unit, prtvol=my_prtvol)
+ !call ebands_print(gstore%ebands, [std_out], header="Electron bands", prtvol=my_prtvol)
  call wrtout(units, sjoin(" kzone:", gstore%kzone))
  call wrtout(units, sjoin(" kfilter:", gstore%kfilter))
  call wrtout(units, sjoin(" nkibz:", itoa(gstore%nkibz)))
@@ -1795,7 +1795,7 @@ subroutine gstore_filter_erange__(gstore, qbz, qbz2ibz, qibz2bz, kbz, kibz, kbz2
 
  assume_gap = .not. all(gstore%erange_spin < zero)
  gaps = ebands_get_gaps(ebands, gap_err)
- if (assume_gap) call gaps%print(unit=std_out) !, header=msg)
+ if (assume_gap) call gaps%print([std_out]) !, header=msg)
 
  ebands_timrev = kpts_timrev_from_kptopt(ebands%kptopt)
 
@@ -1928,7 +1928,7 @@ subroutine gstore_filter_qprange__(gstore, dtset, qbz, qbz2ibz, qibz2bz, kbz, ki
  ebands_timrev = kpts_timrev_from_kptopt(ebands%kptopt)
 
  gaps = ebands_get_gaps(ebands, gap_err)
- if (my_rank == 0) call gaps%print()
+ if (my_rank == 0) call gaps%print([std_out])
  if (gap_err /= 0) then
    ABI_ERROR("Cannot compute fundamental and direct gap (likely metal).")
  end if
@@ -2311,7 +2311,6 @@ subroutine gstore_fill_bks_mask_pp_mesh(gstore, ecut, mband, nkibz, nsppol, my_p
        do my_ik=1,gqk%my_nk
          ikq_ibz = map_kq(1, my_ik)
          bks_mask(b1:b2, ikq_ibz, spin) = .True.
-
          ! Compute g-sphere, returns onpw. Note istwfk = 1.
          kk = gqk%my_kpts(:, my_ik)
          call get_kg(kk+qpt-pp, istwfk1, ecut, gstore%cryst%gmet, onpw, gtmp, mpw=mpw, gmax=gmax)
@@ -2357,7 +2356,7 @@ subroutine gstore_get_mpw_gmax(gstore, ecut, mpw, gmax)
 
 !Local variables-------------------------------
  integer,parameter :: istwfk1 = 1
- integer :: my_is, my_ik, my_iq, spin, onpw, ii, ipw, ierr, my_mpw, ipx, ipy, ipz, pp_max
+ integer :: my_is, my_ik, my_iq, spin, onpw, ierr, my_mpw, ipx, ipy, ipz, pp_max
  real(dp) :: weight_q, cpu, wall, gflops
  type(gqk_t),pointer :: gqk
 !arrays
@@ -2498,11 +2497,10 @@ end subroutine gstore_calc_my_phonons
 !!
 !! SOURCE
 
-subroutine gstore_get_lambda_iso_iw(gstore, dtset, nw, imag_w, lambda)
+subroutine gstore_get_lambda_iso_iw(gstore, nw, imag_w, lambda)
 
 !Arguments ------------------------------------
  class(gstore_t),target,intent(inout) :: gstore
- type(dataset_type),intent(in) :: dtset
  integer,intent(in) :: nw
  real(dp),intent(in) :: imag_w(nw)
  real(dp),intent(out) :: lambda(nw)
@@ -2531,7 +2529,7 @@ subroutine gstore_get_lambda_iso_iw(gstore, dtset, nw, imag_w, lambda)
 
    do my_iq=1,gqk%my_nq
      ! Compute integration weights for the double delta.
-     call gqk%dbldelta_qpt(my_iq, gstore, dtset%eph_intmeth, dtset%eph_fsmear, qpt, weight_q, dbldelta_q)
+     call gqk%dbldelta_qpt(my_iq, gstore, gstore%dtset%eph_intmeth, gstore%dtset%eph_fsmear, qpt, weight_q, dbldelta_q)
 
      ! Copy data to improve memory access in the loops below.
      g2_pmnk = gqk%my_g2(:,:,my_iq,:,:)
@@ -2558,7 +2556,7 @@ subroutine gstore_get_lambda_iso_iw(gstore, dtset, nw, imag_w, lambda)
  end do ! my_is
 
  ! Take into account collinear spin
- lambda = lambda * (two / (gstore%nsppol * dtset%nspinor))
+ lambda = lambda * (two / (gstore%nsppol * gstore%dtset%nspinor))
 
  call xmpi_sum(lambda, gstore%comm, ierr)
 
@@ -2580,11 +2578,10 @@ end subroutine gstore_get_lambda_iso_iw
 !!
 !! SOURCE
 
-subroutine gstore_get_a2fw(gstore, dtset, nw, wmesh, a2fw)
+subroutine gstore_get_a2fw(gstore, nw, wmesh, a2fw)
 
 !Arguments ------------------------------------
  class(gstore_t),target,intent(inout) :: gstore
- type(dataset_type),intent(in) :: dtset
  integer,intent(in) :: nw
  real(dp),intent(in) :: wmesh(nw)
  real(dp),intent(out) :: a2fw(nw)
@@ -2598,7 +2595,7 @@ subroutine gstore_get_a2fw(gstore, dtset, nw, wmesh, a2fw)
  real(dp),allocatable :: dbldelta_q(:,:,:), g2_mnkp(:,:,:,:), deltaw_nuq(:)
 !----------------------------------------------------------------------
 
- call wrtout(std_out, sjoin(" Computing a^2F(w) with ph_smear:", ftoa(dtset%ph_smear * Ha_meV), "(meV)"), pre_newlines=1)
+ call wrtout(std_out, sjoin(" Computing a^2F(w) with ph_smear:", ftoa(gstore%dtset%ph_smear * Ha_meV), "(meV)"), pre_newlines=1)
  ABI_CHECK(gstore%qzone == "bz", "gstore_get_lambda_iso_iw assumes qzone == `bz`")
  call cwtime(cpu, wall, gflops, "start")
 
@@ -2617,7 +2614,7 @@ subroutine gstore_get_a2fw(gstore, dtset, nw, wmesh, a2fw)
 
    do my_iq=1,gqk%my_nq
      ! Compute integration weights for the double delta.
-     call gqk%dbldelta_qpt(my_iq, gstore, dtset%eph_intmeth, dtset%eph_fsmear, qpt, weight_q, dbldelta_q)
+     call gqk%dbldelta_qpt(my_iq, gstore, gstore%dtset%eph_intmeth, gstore%dtset%eph_fsmear, qpt, weight_q, dbldelta_q)
 
      ! Copy data to improve memory access in the loops below.
      do my_ip=1,gqk%my_npert
@@ -2626,7 +2623,7 @@ subroutine gstore_get_a2fw(gstore, dtset, nw, wmesh, a2fw)
 
      do my_ip=1,gqk%my_npert
        w_nuq = gqk%my_wnuq(my_ip, my_iq)
-       deltaw_nuq = gaussian(wmesh - w_nuq, dtset%ph_smear)
+       deltaw_nuq = gaussian(wmesh - w_nuq, gstore%dtset%ph_smear)
        do my_ik=1,gqk%my_nk
          !weight_k = gqk%my_kweight(my_ik, gstore)
          weight_k = gqk%my_wtk(my_ik)
@@ -2647,7 +2644,7 @@ subroutine gstore_get_a2fw(gstore, dtset, nw, wmesh, a2fw)
  ABI_FREE(deltaw_nuq)
 
  ! Take into account collinear spin and N(eF) TODO
- a2fw = a2fw * (two / (gstore%nsppol * dtset%nspinor))
+ a2fw = a2fw * (two / (gstore%nsppol * gstore%dtset%nspinor))
  call xmpi_sum(a2fw, gstore%comm, ierr)
 
  call cwtime_report(" gstore_get_a2fw", cpu, wall, gflops)
@@ -3183,9 +3180,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
 !arrays
  integer :: g0_k(3), g0_kq(3), g0_q(3), work_ngfft(18),gmax(3),indkk_kq(6,1), units(2)
  integer :: mapc_qq2dvdb(6) ! mapl_k(6), mapl_kq(6), mapl_kqmp(6), mapl_kmp(6), mapc_qq(6),
- integer(i1b),allocatable :: itreat_qibz(:)
- integer(i1b),allocatable :: itreatq_dvdb(:)
- integer,allocatable :: kg_k(:,:), kg_kq(:,:), nband(:,:), wfd_istwfk(:), qselect(:)
+ integer,allocatable :: kg_k(:,:), kg_kq(:,:), nband(:,:), wfd_istwfk(:)
  integer,allocatable :: iq_buf(:,:), done_qbz_spin(:,:), my_iqibz_inds(:)
  !integer,allocatable :: qibz2dvdb(:) !, displs(:), recvcounts(:)
  real(dp) :: kk_bz(3),kq_bz(3),kk_ibz(3),kq_ibz(3), qq_bz(3), qq_ibz(3), vk(3)
@@ -3203,7 +3198,6 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
  real(dp),allocatable :: my_gbuf(:,:,:,:,:,:), buf_wqnu(:,:), buf_eigvec_cart(:,:,:,:,:)
  logical,allocatable :: bks_mask(:,:,:),keep_ur(:,:,:)
  type(pawcprj_type),allocatable  :: cwaveprj0(:,:)
-
 !************************************************************************
 
  units = [std_out, ab_out]
@@ -3263,10 +3257,11 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
      end if
    end do
  end do spin_loop
+ !call dvdb%need_ftinterp(qpath%npts, qpath%points, qptopt, qmap_symrec, use_ftinterp)
 
  call xmpi_sum(cnt, comm, ierr)
- use_ftinterp = (cnt /= 0)
 
+ use_ftinterp = (cnt /= 0)
  if (.not. use_ftinterp .and. dtset%eph_use_ftinterp /= 0) then
    ABI_WARNING("Enforcing FT interpolation for q-points even if it's not strictly needed.")
    use_ftinterp = .True.
@@ -3277,29 +3272,8 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
    call wrtout(units, " Cannot find all IBZ q-points in the DVDB --> Activating Fourier interpolation.")
    call dvdb%ftinterp_setup(dtset%ddb_ngqpt, gstore%qptopt, 1, dtset%ddb_shiftq, nfftf, ngfftf, comm_rpt)
 
-   ! Build q-cache in the *dense* IBZ using the global mask qselect and itreat_qibz.
-   ABI_MALLOC(itreat_qibz, (gstore%nqibz))
-   ABI_MALLOC(qselect, (gstore%nqibz))
-   qselect = 0; itreat_qibz = 0
-   call dvdb%ftqcache_build(nfftf, ngfftf, gstore%nqibz, gstore%qibz, dtset%dvdb_qcache_mb, qselect, itreat_qibz, gstore%comm)
-   ABI_FREE(itreat_qibz)
-   ABI_FREE(qselect)
-
  else
    call wrtout(units, " DVDB file contains all q-points in the IBZ --> Reading DFPT potentials from file.")
-   ! Need to translate itreat_qibz into itreatq_dvdb.
-   ! FIXME: Not used
-   ABI_ICALLOC(qselect, (dvdb%nqpt))
-   ABI_ICALLOC(itreatq_dvdb, (dvdb%nqpt))
-   !do iq_ibz=1,gstore%nqibz
-   !  if (itreat_qibz(iq_ibz) == 0) cycle
-   !  db_iqpt = qibz2dvdb(iq_ibz)
-   !  ABI_CHECK(db_iqpt /= -1, sjoin("Could not find IBZ q-point:", ktoa(gstore%qibz(:, iq_ibz)), "in the DVDB file."))
-   !  itreatq_dvdb(db_iqpt) = 1
-   !end do
-   call dvdb%qcache_read(nfftf, ngfftf, dtset%dvdb_qcache_mb, qselect, itreatq_dvdb, comm)
-   ABI_FREE(qselect)
-   ABI_FREE(itreatq_dvdb)
  end if
 
  ! Initialize the wave function descriptor.
@@ -3321,7 +3295,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
                nspden, nspinor, ecut, dtset%ecutsm, dtset%dilatmx, wfd_istwfk, ebands%kptns, ngfft,&
                dtset%nloalg, dtset%prtvol, dtset%pawprtvol, comm)
 
- call wfd%print(header="Wavefunctions for GSTORE calculation")
+ call wfd%print([std_out], header="Wavefunctions for GSTORE calculation")
 
  ABI_FREE(nband)
  ABI_FREE(keep_ur)
@@ -3352,6 +3326,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
  ABI_MALLOC(kg_kq, (3, mpw))
 
  ! Spherical Harmonics for useylm == 1.
+ ! FIXME: These arrays should be allocated with npw_k and npw_kq. See getgh1c_setup
  ABI_MALLOC(ylm_k, (mpw, psps%mpsang*psps%mpsang*psps%useylm))
  ABI_MALLOC(ylm_kq, (mpw, psps%mpsang*psps%mpsang*psps%useylm))
  ABI_MALLOC(ylmgr_kq, (mpw, 3, psps%mpsang*psps%mpsang*psps%useylm*useylmgr1))
@@ -3587,10 +3562,9 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
                             displ_red_qbz=displ_red_qbz)
      end if
 
-     ! Version with qcache.
      if (use_ftinterp) then
-       call dvdb%get_ftqbz(cryst, qq_bz, qq_ibz, gqk%my_q2ibz(:, my_iq), cplex, nfftf, ngfftf, v1scf, &
-                           gqk%pert_comm%value)
+       ! Fourier interpolation.
+       call dvdb%get_ftqbz(cryst, qq_bz, cplex, nfftf, ngfftf, v1scf, gqk%pert_comm%value)
      else
        ! Read and reconstruct the dvscf potentials for qpt and my_npert perturbations.
        db_iqpt = dvdb%findq(qq_ibz)
@@ -3736,13 +3710,14 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
                         optnl, opt_gvnlx1, rf_hamkq, sij_opt, tim_getgh1c, usevnl)
          end do
 
-         call rf_hamkq%free()
          ABI_FREE(kinpw1)
          ABI_FREE(dkinpw)
          ABI_FREE(ph3d)
          ABI_SFREE(ph3d1)
+         call rf_hamkq%free()
 
          ! Calculate <psi_{k+q,j}|dvscf_q*psi_{k,i}> for this perturbation. No need to handle istwf_kq because it's always 1.
+!$OMP PARALLEL DO COLLAPSE(2)
          do in_k=1,nband_k
            do im_kq=1,nband_kq
              gkq_atm(:, im_kq, in_k, ipc) = cg_zdotc(npw_kq*nspinor, bras_kq(1,1,im_kq), h1kets_kq(1,1,in_k))
@@ -3798,8 +3773,6 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
        write(msg,'(2(a,i0),a)')" My q-point [", my_iq, "/", gqk%my_nq, "]"
        call cwtime_report(msg, cpu_q, wall_q, gflops_q); if (my_iq == LOG_MODQ) call wrtout(std_out, "...", do_flush=.True.)
      end if
-     ! Print cache stats.
-     !if (my_rank == master) call dvdb%ft_qcache%report_stats()
    end do ! my_iq
 
    ! Dump the remainder.
@@ -4000,7 +3973,6 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, if
  integer :: my_rank, ncid, spin, spin_ncid, nproc, ierr, fform, max_nb, ib, natom, natom3, varid
  integer :: max_nq, max_nk, gstore_cplex, ncerr, my_is, my_iq, iq_glob, my_ik, ik_glob, my_ip, ipert, iq_ibz, isym_q, trev_q, tsign_q
  real(dp) :: cpu, wall, gflops
- character(len=10) :: priority
  logical :: store_phdispl, isirr_q
  type(hdr_type) :: wfk0_hdr
  type(crystal_t) :: gstore_cryst
@@ -4479,13 +4451,13 @@ subroutine gstore_print_for_abitests(gstore, dtset)
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master = 0
- integer :: root_ncid, spin_ncid, gstore_completed, spin, ib, nb, ik_ibz, ik_glob, iq_glob, ipc, cplex, ncerr, natom3
- integer :: glob_nq, glob_nk, im_kq, in_k
+ integer :: root_ncid, spin_ncid, gstore_completed, spin, nb, ik_glob, iq_glob, ipc, cplex, ncerr, natom3
+ integer :: glob_nq, glob_nk, im_kq, in_k ! ib, ik_ibz,
  real(dp) :: g2
  !character(len=500) :: msg
 !arrays
  integer,allocatable :: done_qbz_spin(:,:)
- real(dp),allocatable :: vk_cart_ibz(:,:,:), gslice_mn(:,:,:) !, vkmat_cart_ibz(:,:,:,:)
+ real(dp),allocatable :: gslice_mn(:,:,:) !,vk_cart_ibz(:,:,:), vkmat_cart_ibz(:,:,:,:)
 ! *************************************************************************
 
  ! Only master prints to ab_out
@@ -4910,24 +4882,24 @@ end subroutine gstore_wannierize_and_write_gwan
 !!
 !! SOURCE
 
-subroutine handle_lr_term(cryst, qpt, ng, gvec, nwin_kq, nwin_k, nwan, u_kq, u_k, zeff, qstar, isgn, g_bb)
-
-!Arguments ------------------------------------
- type(crystal_t),intent(in) :: cryst
- real(dp),intent(in) :: qpt(3)
- integer,intent(in) :: ng, nwin_kq, nwin_k, nwan, isgn, gvec(3,ng)
- complex(dp),intent(in) :: u_kq(nwin_kq, nwan), u_k(nwin_k,nwan)
- real(dp),intent(in) :: zeff(3,3,cryst%natom), qstar(3,3,3,cryst%natom)
- complex(dp),intent(inout) :: g_bb(nwin_kq, nwin_k)
-
-!Local variables-------------------------------
-!scalars
- !integer :: ig
- !character(len=500) :: msg
-!arrays
-! *************************************************************************
-
-end subroutine handle_lr_term
+!subroutine handle_lr_term(cryst, qpt, ng, gvec, nwin_kq, nwin_k, nwan, u_kq, u_k, zeff, qstar, isgn, g_bb)
+!
+!!Arguments ------------------------------------
+! type(crystal_t),intent(in) :: cryst
+! real(dp),intent(in) :: qpt(3)
+! integer,intent(in) :: ng, nwin_kq, nwin_k, nwan, isgn, gvec(3,ng)
+! complex(dp),intent(in) :: u_kq(nwin_kq, nwan), u_k(nwin_k,nwan)
+! real(dp),intent(in) :: zeff(3,3,cryst%natom), qstar(3,3,3,cryst%natom)
+! complex(dp),intent(inout) :: g_bb(nwin_kq, nwin_k)
+!
+!!Local variables-------------------------------
+!!scalars
+! !integer :: ig
+! !character(len=500) :: msg
+!!arrays
+!! *************************************************************************
+!
+!end subroutine handle_lr_term
 !!***
 
 end module m_gstore

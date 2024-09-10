@@ -91,8 +91,6 @@ contains
 subroutine predict_neb(itimimage,itimimage_eff,list_dynimage,mep_param,mpi_enreg,natom,&
 &                      ndynimage,nimage,nimage_tot,ntimimage_stored,results_img)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: itimimage,itimimage_eff,natom,ndynimage

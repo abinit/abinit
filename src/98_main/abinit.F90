@@ -187,7 +187,6 @@ program abinit
 
 !0) Change communicator for I/O (mandatory!)
  call abi_io_redirect(new_io_comm=xmpi_world)
- !call xlf_set_sighandler()
 
 !------------------------------------------------------------------------------
 
@@ -204,7 +203,6 @@ program abinit
 #ifdef HAVE_MEM_PROFILING
  call abimem_init(args%abimem_level, limit_mb=args%abimem_limit_mb)
 #endif
-
 
 !------------------------------------------------------------------------------
 
@@ -599,8 +597,7 @@ program abinit
  print_mem_report = 1
  do ii=1,ndtset_alloc
    if ((dtsets(ii)%usewvl == 1) .or. (dtsets(ii)%icoulomb > 0)) then
-     print_mem_report = 0
-     exit
+     print_mem_report = 0; exit
    end if
  end do
 

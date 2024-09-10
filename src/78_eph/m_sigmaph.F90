@@ -637,7 +637,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 !Local variables ------------------------------
 !scalars
  integer,parameter :: tim_getgh1c1 = 1, berryopt0 = 0, istw1 = 1, ider0 = 0, idir0 = 0, istwfk1 = 1
- integer,parameter :: useylmgr = 0, useylmgr1 =0, master = 0, ndat1 = 1
+ integer,parameter :: useylmgr0 = 0, master = 0, ndat1 = 1
  integer,parameter :: cplex1 = 1, pawread0 = 0
  integer :: band_me, nband_me
  integer :: my_rank,nsppol,nkpt,iq_ibz,iq_ibz_k,my_npert ! iq_ibz_frohl,iq_bz_frohl,
@@ -672,7 +672,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  type(crystal_t) :: pot_cryst
  type(hdr_type) :: pot_hdr
  type(phstore_t) :: phstore
- type(u1cache_t) :: u1c
+ type(u1_cache_t) :: u1c
  type(stern_t),target :: stern
  type(pstat_t) :: pstat
  character(len=5000) :: msg
@@ -730,8 +730,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
  units = [std_out, ab_out]
 
- call pstat%from_pid()
- call pstat%print([std_out], header="Memory at the beginning of sigmaph")
+ call pstat%from_pid(); call pstat%print([std_out], header="Memory at the beginning of sigmaph")
 
  ! Copy important dimensions
  natom = cryst%natom; natom3 = 3 * natom; nsppol = ebands%nsppol; nspinor = ebands%nspinor
@@ -890,7 +889,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
                nspden, nspinor, ecut, dtset%ecutsm, dtset%dilatmx, wfd_istwfk, ebands%kptns, ngfft,&
                dtset%nloalg, dtset%prtvol, dtset%pawprtvol, comm)
 
- call wfd%print(header="Wavefunctions for self-energy calculation.", mode_paral='PERS')
+ call wfd%print([std_out], header="Wavefunctions for self-energy calculation.")
 
  ABI_FREE(nband)
  ABI_FREE(bks_mask)
@@ -1175,7 +1174,6 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
    if (sigma%imag_only .and. sigma%qint_method == 1) then
      call qpoints_oracle(sigma, dtset, cryst, ebands, sigma%qibz, sigma%nqibz, sigma%nqbz, sigma%qbz, qselect, comm)
    end if
-   call dvdb%ftqcache_build(nfftf, ngfftf, sigma%nqibz, sigma%qibz, dtset%dvdb_qcache_mb, qselect, sigma%itreat_qibz, comm)
 
  else
    ABI_MALLOC(qselect, (dvdb%nqpt))
@@ -1197,7 +1195,6 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
      ABI_CHECK(db_iqpt /= -1, sjoin("Could not find IBZ q-point:", ktoa(sigma%qibz(:, iq_ibz)), "in the DVDB file."))
      itreatq_dvdb(db_iqpt) = 1
    end do
-   call dvdb%qcache_read(nfftf, ngfftf, dtset%dvdb_qcache_mb, qselect, itreatq_dvdb, comm)
    ABI_FREE(itreatq_dvdb)
  end if
 
@@ -1238,9 +1235,10 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
    ABI_MALLOC(kg_kq, (3, mpw))
 
    ! Spherical Harmonics for useylm == 1.
+   ! FIXME: These arrays should be allocated with npw_k and npw_kq. See getgh1c_setup
    ABI_MALLOC(ylm_k, (mpw, psps%mpsang**2 * psps%useylm))
    ABI_MALLOC(ylm_kq, (mpw, psps%mpsang**2 * psps%useylm))
-   ABI_MALLOC(ylmgr_kq, (mpw, 3, psps%mpsang**2 * psps%useylm * useylmgr1))
+   ABI_MALLOC(ylmgr_kq, (mpw, 3, psps%mpsang**2 * psps%useylm * useylmgr0))
 
    ! Compute k+G vectors
    nkpg = 3*dtset%nloalg(3)
@@ -1489,8 +1487,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
          ! Use Fourier interpolation to get DFPT potentials for this qpt (hopefully in cache).
          db_iqpt = sigma%ind_ibzk2ibz(1, iq_ibz_k)
          qq_ibz = sigma%qibz(:, db_iqpt)
-         call dvdb%get_ftqbz(cryst, qpt, qq_ibz, sigma%ind_ibzk2ibz(:, iq_ibz_k), cplex, nfftf, ngfftf, v1scf, &
-                             sigma%pert_comm%value)
+         call dvdb%get_ftqbz(cryst, qpt, cplex, nfftf, ngfftf, v1scf, sigma%pert_comm%value)
        else
          ! Read and reconstruct the dvscf potentials for qpt and my_npert perturbations.
          db_iqpt = sigma%ind_q2dvdb_k(1, iq_ibz_k)
@@ -1561,7 +1558,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
        ! Set up the spherical harmonics (Ylm) at k and k+q. See also dfpt_looppert
        !if (psps%useylm == 1) then
-       !   optder = 0; if (useylmgr == 1) optder = 1
+       !   optder = 0; if (useylmgr0 == 1) optder = 1
        !   call initylmg(cryst%gprimd, kg_k, kk, mkmem1, mpi_enreg, psps%mpsang, mpw, nband, mkmem1, &
        !     [npw_k], dtset%nsppol, optder, cryst%rprimd, ylm_k, ylmgr)
        !   call initylmg(cryst%gprimd, kg_kq, kq, mkmem1, mpi_enreg, psps%mpsang, mpw, nband, mkmem1, &
@@ -1680,7 +1677,7 @@ end if
          ! This call is not optimal because there are quantities in out that do not depend on idir,ipert
          call getgh1c_setup(gs_hamkq, rf_hamkq, dtset, psps, kk, kq, idir, ipert, &  ! In
            cryst%natom, cryst%rmet, cryst%gprimd, cryst%gmet, istwf_k, &             ! In
-           npw_k, npw_kq, useylmgr1, kg_k, ylm_k, kg_kq, ylm_kq, ylmgr_kq, &         ! In
+           npw_k, npw_kq, useylmgr0, kg_k, ylm_k, kg_kq, ylm_kq, ylmgr_kq, &         ! In
            dkinpw, nkpg, nkpg1, kpg_k, kpg1_k, kinpw1, ffnlk, ffnl1, ph3d, ph3d1, &  ! Out
            reuse_kpg_k=1, reuse_kpg1_k=1, reuse_ffnlk=1, reuse_ffnl1=1)              ! Reuse some arrays
 
@@ -2291,14 +2288,6 @@ end if
      end do ! iq_ibz_k (sum over q-points in IBZ_k)
 
      call cwtime_report(" Fan-Migdal q-loop", cpu_qloop, wall_qloop, gflops_qloop)
-
-     ! Print cache stats.
-     if (sigma%use_ftinterp) then
-       call dvdb%ft_qcache%report_stats()
-       if (dvdb%ft_qcache%v1scf_3natom_request /= xmpi_request_null) call xmpi_wait(dvdb%ft_qcache%v1scf_3natom_request, ierr)
-     else
-       call dvdb%qcache%report_stats()
-     end if
 
      ABI_FREE(sigma%e0vals)
      ABI_FREE(kets_k)
@@ -3387,9 +3376,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
  call ebands_free(ebands_dense)
 
  if (my_rank == master) then
-   msg = "Gaps, band edges and relative position wrt Fermi level"
-   call gaps%print(unit=std_out, kTmesh=new%ktmesh, mu_e=new%mu_e, header=msg)
-   call gaps%print(unit=ab_out, kTmesh=new%ktmesh, mu_e=new%mu_e, header=msg)
+   call gaps%print(units, kTmesh=new%ktmesh, mu_e=new%mu_e, header="Gaps, band edges and relative position wrt Fermi level")
  end if
  call gaps%free()
 
@@ -4486,7 +4473,6 @@ subroutine sigmaph_setup_qloop(self, dtset, cryst, ebands, dvdb, spin, ikcalc, n
  character(len=5000) :: msg
 !arrays
  integer,allocatable :: mask_qibz_k(:), imask(:), qtab(:), ineed_qibz(:), ineed_qdvdb(:)
-
 ! *************************************************************************
 
  my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
@@ -4549,7 +4535,6 @@ subroutine sigmaph_setup_qloop(self, dtset, cryst, ebands, dvdb, spin, ikcalc, n
        end if
 
        ! Redistribute relevant q-points inside qpt_comm taking into account itreat_qibz
-       ! I may need to update qcache after this operation -->  build ineed_* table.
        ! Must handle two cases: potentials from DVDB or Fourier-interpolated.
        if (self%use_ftinterp) then
          ABI_ICALLOC(ineed_qibz, (self%nqibz))
@@ -4573,11 +4558,6 @@ subroutine sigmaph_setup_qloop(self, dtset, cryst, ebands, dvdb, spin, ikcalc, n
              if (ii == 2) then
                cnt = cnt + 1
                self%myq2ibz_k(cnt) = qtab(iq)
-               if (self%use_ftinterp) then
-                 if (.not. allocated(dvdb%ft_qcache%key(iq_ibz)%v1scf)) ineed_qibz(iq_ibz) = 1
-               else
-                 if (.not. allocated(dvdb%qcache%key(iq_dvdb)%v1scf)) ineed_qdvdb(iq_dvdb) = 1
-               end if
              end if
            end if
          end do
@@ -4598,15 +4578,6 @@ subroutine sigmaph_setup_qloop(self, dtset, cryst, ebands, dvdb, spin, ikcalc, n
         " Load balance inside qpt_comm ranges between: [",  efact_min, efact_max, "] (should be ~1)"
        call wrtout(std_out, msg)
        ABI_WARNING_IF(self%my_nqibz_k == 0, "my_nqibz_k == 0")
-
-       ! Make sure each node has the q-points we need. Try not to break qcache_size_mb contract!
-       if (self%use_ftinterp) then
-         ! Update cache by Fourier interpolating W(r,R)
-         call dvdb%ftqcache_update_from_ft(nfftf, ngfftf, self%nqibz, self%qibz, ineed_qibz, comm)
-       else
-         ! Update cache. Perform collective IO inside comm if needed.
-         call dvdb%qcache_update_from_file(nfftf, ngfftf, ineed_qdvdb, comm)
-       end if
 
        ABI_SFREE(ineed_qibz)
        ABI_SFREE(ineed_qdvdb)

@@ -144,7 +144,7 @@ contains  !=====================================================
 !!
 !!  3) The DFPT routines operate on double-precision wavefunctions stored in arrays with real/imag part e.g. cg(1:2,npw_k)
 !!     while the GW routines operate on complex arrays of kind=gwpc where gwpc is defined at configure-time.
-!!     The default value of gwpc is single-precision
+!!     The default value of gwpc is single-precision.
 !!     We use the following conventions:
 !!
 !!       cg_kq, cr_kq
@@ -185,7 +185,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  integer,parameter :: useylmgr = 0, useylmgr1 = 0, master = 0, ndat1 = 1, with_cplex0 = 0, n3xccc0 = 0
  integer,parameter :: igscq0 = 0, icgq0 = 0, usedcwavef0 = 0, nbdbuf0 = 0, quit0 = 0, cplex1 = 1, pawread0 = 0
  integer :: band, band_me, nband_me, stern_comm, nkpt, my_rank, nsppol, iq_ibz, iq_bz, my_npert
- integer :: cplex,drho_cplex,nkxc,nk3xc,option,usexcnhat,db_iqpt,natom,natom3,ipc,nspinor,nprocs, gsum_master
+ integer :: cplex,drho_cplex,nkxc,nk3xc,option,usexcnhat,db_iqpt,natom,natom3,ipc,nspinor,nprocs !, gsum_master
  integer :: ib_sum, ii, ib, u1_band !,u1c_ib_k,  jj, iw !ib_kq, band_ks, ib_k, ibsum_kq, u1_master, ip
  integer :: my_is, spin, idir,ipert, ig, max_npw_xc, npw_x, npw_c, nw_nk, nw_mkq
  integer :: my_pp_start_spin(dtset%nsppol), my_pp_stop_spin(dtset%nsppol), my_npp(dtset%nsppol)
@@ -193,22 +193,19 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  integer :: ik_ibz, isym_k, trev_k, npw_k, istwf_k, npw_k_ibz, istwf_k_ibz
  integer :: ikq_ibz, isym_kq, trev_kq, npw_kq, istwf_kq,  npw_kq_ibz, istwf_kq_ibz
  integer :: ikmp_ibz, isym_kmp, trev_kmp, npw_kmp, istwf_kmp, npw_kmp_ibz, istwf_kmp_ibz
- integer :: ikqmp_ibz, isym_kqmp, trev_kqmp, npw_kqmp, istwf_kqmp, npw_kqmp_ibz, istwf_kqmp_ibz
- integer :: mpw,ierr,nqbz,ncerr !,spad
- integer :: n1,n2,n3,n4,n5,n6,nspden, mqmem, m_kq, n_k, restart, root_ncid, spin_ncid
- integer :: usecprj !,sij_opt
- integer :: nfft,nfftf,mgfft,mgfftf,nkpg_k,nkpg_kq,nkpg_kqmp,nkpg_kmp,imyp, cnt, nvloc, iw_nk, iw_mkq
- integer :: ndone, nmiss ! num_mn_kq,
+ integer :: ikqmp_ibz, isym_kqmp, trev_kqmp, npw_kqmp, istwf_kqmp, npw_kqmp_ibz, istwf_kqmp_ibz, mpw,ierr,nqbz,ncerr !,spad
+ integer :: n1,n2,n3,n4,n5,n6,nspden, mqmem, m_kq, n_k, restart, root_ncid, spin_ncid, usecprj !,sij_opt
+ integer :: nfft,nfftf,mgfft,mgfftf,nkpg_k,nkpg_kq,nkpg_kqmp,nkpg_kmp,imyp, cnt, nvloc, iw_nk, iw_mkq, ndone, nmiss
  !integer :: bstart_ks,ikcalc,bstart,bstop, sendcount !iatom,
  integer :: my_ipp, ipp_bz, ipp_ibz, isym_pp, itim_pp, comm_rpt, nqlwl, ebands_timrev ! osc_npw,
  !integer :: ffnl_kmp_request, ffnl_kqmp_request  ! ffnl_k_request, ffnl_kq_request,
- integer :: qptopt, my_iq, my_ik, qbuf_size, iqbuf_cnt, nb ! nelem,
+ integer :: qptopt, my_iq, my_ik, qbuf_size, iqbuf_cnt, nb
  real(dp) :: cpu_all, wall_all, gflops_all, cpu_qq, wall_qq, gflops_qq, cpu_kk, wall_kk, gflops_kk, cpu_pp, wall_pp, gflops_pp
  real(dp) :: fact_spin, theta_mu_minus_e0i, tol_empty, tol_empty_in !, e_mkq, e_nk ! e0i,
  real(dp),ABI_CONTIGUOUS pointer :: qp_ene(:,:,:), qp_occ(:,:,:)
- real(dp) :: ecut,weight_q,enxc, vxcavg ! ediff, eshift, rfact, q0rad, bz_vol,
+ real(dp) :: ecut,weight_q,enxc, vxcavg ! ediff, eshift, q0rad, bz_vol,
  logical :: isirr_k, isirr_kq, isirr_kmp, isirr_kqmp, qq_is_gamma, pp_is_gamma, isirr_q
- logical :: stern_use_cache, stern_has_band_para, use_ftinterp ! same_band,
+ logical :: stern_use_cache, stern_has_band_para, use_ftinterp
  logical :: print_time_qq, print_time_kk, print_time_pp, non_magnetic_xc, need_x_kmp, need_x_kqmp
  complex(dpc) :: ieta
  type(wfd_t) :: wfd
@@ -240,7 +237,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  integer,allocatable :: kg_k(:,:), kg_kq(:,:), kg_kmp(:,:), kg_kqmp(:,:)
  integer,allocatable :: gbound_k(:,:), gbound_kq(:,:), gbound_kmp(:,:), gbound_kqmp(:,:), gbound_c(:,:), gbound_x(:,:)
  !integer,allocatable :: rank_band(:), root_bcalc(:)
- integer,allocatable :: nband(:,:), qselect(:), wfd_istwfk(:), count_bk(:,:)
+ integer,allocatable :: nband(:,:), wfd_istwfk(:), count_bk(:,:)
  integer,allocatable :: qibz2dvdb(:) !, displs(:), recvcounts(:)
  integer,allocatable :: iq_buf(:,:), done_qbz_spin(:,:) !, my_iqibz_inds(:) !, iperm(:)
  integer(i1b),allocatable :: itreat_qibz(:)
@@ -423,7 +420,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  nbsum = dtset%mband
  my_bsum_start = 1; my_bsum_stop = nbsum; my_nbsum = my_bsum_stop - my_bsum_start + 1
  stern_has_band_para = .False.
- ! TODO: This term is needed in metals.
+ ! FIXME: This term is needed in metals.
  fermie1_idir_ipert = zero
 
  nkpt = wfk_hdr%nkpt
@@ -458,7 +455,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
                nspden, nspinor, ecut, dtset%ecutsm, dtset%dilatmx, wfd_istwfk, ebands%kptns, ngfft,&
                dtset%nloalg, dtset%prtvol, dtset%pawprtvol, comm)
 
- call wfd%print(header="Wavefunctions for GWPT calculation.", mode_paral='PERS')
+ call wfd%print([std_out], header="Wavefunctions for GWPT calculation.")
 
  ABI_FREE(nband)
  ABI_FREE(bks_mask)
@@ -619,7 +616,6 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  ABI_CALLOC(vtrial, (nfftf, nspden))
  ABI_CALLOC(vlocal, (n4, n5, n6, nvloc))
 
- !if (dtset%eph_stern /= 0) then
  ! Read the GS potential (vtrial) from input POT file
  ! In principle one may store GS vtrial in the DVDB but getpot_filepath is simpler to implement.
  call wrtout(units, sjoin(" Reading KS GS potential for Sternheimer from: ", dtfil%filpotin))
@@ -630,7 +626,6 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
    ABI_ERROR("Crystal structure from WFK and POT do not agree! Check messages above!")
  end if
  call pot_cryst%free(); call pot_hdr%free()
- !end if
 
  ! Find correspondence IBZ --> set of q-points in DVDB.
  ! use_ftinterp selects whether DFPT potentials should be read from the DVDB or Fourier-interpolated on the fly.
@@ -689,15 +684,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
    call dvdb%ftinterp_setup(dtset%ddb_ngqpt, qptopt, 1, dtset%ddb_shiftq, nfftf, ngfftf, comm_rpt)
    call drhodb%ftinterp_setup(dtset%ddb_ngqpt, qptopt, 1, dtset%ddb_shiftq, nfftf, ngfftf, comm_rpt)
 
-   ! Build q-cache in the *dense* IBZ using the global mask qselect and itreat_qibz.
-   ABI_MALLOC(qselect, (gstore%nqibz))
-   qselect = 1
-   call dvdb%ftqcache_build(nfftf, ngfftf, gstore%nqibz, gstore%qibz, dtset%dvdb_qcache_mb, qselect, itreat_qibz, comm)
-   call drhodb%ftqcache_build(nfftf, ngfftf, gstore%nqibz, gstore%qibz, dtset%dvdb_qcache_mb, qselect, itreat_qibz, comm)
-
  else
-   ABI_MALLOC(qselect, (dvdb%nqpt))
-   qselect = 1
  end if
 
  call dvdb%print(prtvol=dtset%prtvol)
@@ -712,14 +699,11 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
      ABI_CHECK(db_iqpt /= -1, sjoin("Could not find IBZ q-point:", ktoa(gstore%qibz(:, iq_ibz)), "in the DVDB file."))
      itreatq_dvdb(db_iqpt) = 1
    end do
-   call dvdb%qcache_read(nfftf, ngfftf, dtset%dvdb_qcache_mb, qselect, itreatq_dvdb, comm)
-   call drhodb%qcache_read(nfftf, ngfftf, dtset%dvdb_qcache_mb, qselect, itreatq_dvdb, comm)
    ABI_FREE(itreatq_dvdb)
  end if
 
  ABI_FREE(itreat_qibz)
  ABI_FREE(qibz2dvdb)
- ABI_FREE(qselect)
 
  ! The GS density is needed for vxc1_qq and the model dielectric function
  ABI_CALLOC(rhor, (nfftf, nspden))
@@ -901,7 +885,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
 
      if (use_ftinterp) then
        ! Use Fourier interpolation to get DFPT potentials and DFPT densities for this qpt.
-       call dvdb%get_ftqbz(cryst, qpt, qq_ibz, mapc_qq, cplex, nfftf, ngfftf, v1scf_qq, gqk%pert_comm%value)
+       call dvdb%get_ftqbz(cryst, qpt, cplex, nfftf, ngfftf, v1scf_qq, gqk%pert_comm%value)
 
        call drhodb%get_vxc1_ftqbz(dtset, cryst, qpt, qq_ibz, mapc_qq, drho_cplex, nfftf, ngfftf, nkxc, kxc, &
                                   vxc1_qq, non_magnetic_xc, usexcnhat, gqk%pert_comm%value)
@@ -1047,7 +1031,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
          print_time_pp = my_rank == 0 .and. (my_ipp <= LOG_MODP .or. mod(my_ipp, LOG_MODP) == 0)
          if (print_time_pp) call cwtime(cpu_pp, wall_pp, gflops_pp, "start")
 
-         pp = pp_mesh%bz(:,ipp_bz) !; print *, "pp", pp
+         pp = pp_mesh%bz(:,ipp_bz)
          pp_is_gamma = sum(pp**2) < tol14
          qkp_string = sjoin("While treating qpt: ", ktoa(qpt), "kpt:", ktoa(kk), "pp:", ktoa(pp), ch10)
 
@@ -1329,6 +1313,8 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
                                   ebands%eig(:,ikmp_ibz,spin), ebands%eig(:,ikqmp_ibz,spin), &
                                   cg_kmp, cwaveprj0, cg1_kqmp, cwaveprj, msg, ierr, &
                                   full_cg1=full_cg1_kqmp, full_ur1=full_ur1_kqmp)
+
+             ! TODO: Last states may fail to converge
              ABI_WARNING_IF(ierr /= 0, sjoin("Stern at +q", qkp_string, msg))
 
              ! Store KS e-ph matrix elements for this perturbation.
@@ -1410,6 +1396,8 @@ if (.not. qq_is_gamma) then
                                    ebands%eig(:,ikqmp_ibz,spin), ebands%eig(:,ikmp_ibz,spin), &
                                    cg_kqmp, cwaveprj0, cg1_kmp, cwaveprj, msg, ierr, &
                                    full_cg1=full_cg1_kmp, full_ur1=full_ur1_kmp)
+
+             ! TODO: Last states may fail to converge
              ABI_WARNING_IF(ierr /= 0, sjoin("Stern at -q:", qkp_string, msg))
 
              ABI_FREE(kinpw1)
@@ -1715,7 +1703,7 @@ end subroutine gwpt_run
 !!  multiply_by_vc_sqrt
 !!
 !! FUNCTION
-!! Multiply by the square root of the Coulomb term
+!! Multiply rhotwg by the square root of the Coulomb term taking into account nspinor.
 !!
 !! INPUTS
 !!
@@ -1730,7 +1718,6 @@ subroutine multiply_by_vc_sqrt(trans, npw, nspinor, vc_sqrt_gx, rhotwg)
 
 !Local variables ------------------------------
  integer :: ii, spad
-
 !************************************************************************
 
  select case (trans)

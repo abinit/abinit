@@ -1137,6 +1137,7 @@ subroutine littlegroup_q(nsym,qpt,symq,symrec,symafm,timrev,prtvol,use_sym)
 !scalars
  integer :: ii,isign,isym,itirev,my_prtvol
  real(dp),parameter :: tol=2.d-8
+ !real(dp),parameter :: tol=tol4
  real(dp) :: reduce
  character(len=500) :: msg
 !arrays

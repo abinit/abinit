@@ -1003,7 +1003,11 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
 
  ! See sequence of calls in vtorho.
  ! Check that usekden is not 0 if want to use vxctau
- !with_vxctau = (present(vxctau).and.dtset%usekden/=0)
+ !with_vxctau = dtset%usekden/=0
+
+ if (dtset%usekden/=0) then
+   ABI_ERROR("nscf_init with mgga not yet coded")
+ end if
 
  !====================
  !=== Check input ====
@@ -1956,7 +1960,7 @@ subroutine hyb_from_wfk_file(hyb, cryst, dtfil, dtset, psps, pawtab, ngfftc, dia
                dtset%nspden, dtset%nspinor, dtset%ecut, dtset%ecutsm, dtset%dilatmx, wfd_istwfk, hyb%ebands%kptns, ngfftc, &
                dtset%nloalg, dtset%prtvol, dtset%pawprtvol, comm)
 
- call hyb%wfd%print(header="Wavefunctions for Hybrid WKF file")
+ call hyb%wfd%print([std_out], header="Wavefunctions for Hybrid WKF file")
 
  ABI_FREE(nband)
  ABI_FREE(keep_ur)

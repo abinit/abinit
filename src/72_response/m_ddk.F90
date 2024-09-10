@@ -358,7 +358,7 @@ subroutine ddkstore_compute_ddk(ds, wfk_path, prefix, dtset, psps, pawtab, ngfft
  ABI_FREE(keep_ur)
  ABI_FREE(nband)
 
- call wfd%print(header="Wavefunctions on the k-points grid")
+ call wfd%print([std_out], header="Wavefunctions on the k-points grid")
 
  ! Read wavefunctions from WFK file.
  call wfd%read_wfk(wfk_path, iomode_from_fname(wfk_path))

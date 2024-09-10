@@ -694,7 +694,7 @@ integer function kpts_map(mode, timrev, cryst, krank, nkpt2, kpt2, map, qpt, dks
  my_tol = tol12; if (present(dksqmax_tol)) my_tol = dksqmax_tol
 
  ierr = merge(1, 0, dksqmax > my_tol)
- if (ierr /= 0) call wrtout(std_out, sjoin(" CRITICAL WARNING: dksqmax ", ftoa(dksqmax), " > ", ftoa(my_tol)))
+ !if (ierr /= 0) call wrtout(std_out, sjoin(" CRITICAL WARNING: dksqmax ", ftoa(dksqmax), " > ", ftoa(my_tol)))
 
 end function kpts_map
 !!***

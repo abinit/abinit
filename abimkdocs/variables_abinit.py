@@ -2071,35 +2071,6 @@ A zero value has no action of the job.
 ),
 
 Variable(
-    abivarname="dvdb_qcache_mb",
-    varset="eph",
-    vartype="real",
-    topics=['ElPhonInt_useful'],
-    dimensions="scalar",
-    #defaultval=1024,
-    defaultval=0.0,
-    mnemonics="DVDB Q-CACHE size in Megabytes",
-    added_in_version="before_v9",
-    text=r"""
-This variable activates a caching mechanism for the DFPT potentials used in the EPH part.
-The code will store in memory multiple q-points up to this size in Megabytes in order
-to reduce the number of IO operations required to read the potentials from the DVDB file.
-
-This option leads to a **significant speedup** of calculations requiring integrations
-in q-space ([[eph_task]] == 4) at the price of an increase of the memory requirements.
-The speedup is important especially if the QP corrections are computed for several k-points.
-
-A negative value signals to the code that all the q-points in the DVDB should be stored in memory.
-Use zero value disables the cache.
-
-!!! note
-
-    This variable is still under development as many things changed in the treatment of the interpolation
-    of the DFPT potential. For the time being, avoid using this option unless you know what you are doing.
-""",
-),
-
-Variable(
     abivarname="d3e_pert1_atpol",
     varset="dfpt",
     vartype="integer",
@@ -4384,12 +4355,14 @@ The choice is among:
         Requires [[ibte_prep]] = 1 when computing the imaginary part of the e-ph self-energy with [[eph_task]] == -4.
 * 9 --> Compute cumulant from SIGEPH.nc file specifcy via [[getsigeph_filepath]].
 * 10 --> Compute polaron effective mass, using the generalized Frohlich model, in the triply-degenerate VB or CB cubic case.
-         Polaron effective masses are computed along the 3 crystallographic directions: (100), (110) and (111). Same requirements as for [[eph_task]] = 6. Reference: [[cite:Guster2021]]
+         Polaron effective masses are computed along the 3 crystallographic directions: (100), (110) and (111).
+         Same requirements as for [[eph_task]] = 6. Reference: [[cite:Guster2021]]
 * 11 --> Compute e-ph matrix elements on homogeneous k- and q-meshes.
          Save results in GSTORE.nc file (requires netcdf library with MPI-IO support).
          The k-mesh must be equal to the one associated to the input WFK file, the q-mesh is specified
          by [[eph_ngqpt_fine]] (NB: the q-mesh must be a sub-mesh of the k-mesh or equal).
-* 14 --> Compute the molecular Berry curvature from GSTORE.nc. No support for metals or non-collinear magnetism yet. Reference: [[cite:Saparov2022]], [[cite:Coh2023]].
+* 14 --> Compute the molecular Berry curvature from GSTORE.nc. No support for metals or non-collinear magnetism yet.
+         Reference: [[cite:Saparov2022]], [[cite:Coh2023]].
 * 15, -15 --> Write the average in r-space of the DFPT potentials to the V1QAVG.nc file.
               In the first case (+15) the q-points are specified via [[ph_nqpath]] and [[ph_qpath]]. The code assumes the
               input DVDB contains q-points in the IBZ and the potentials along the path
@@ -4400,7 +4373,7 @@ The choice is among:
 
 !!! important
 
-    At the time of writing ( |today| ), PAW or norm-conserving pseudos with SOC are not supported by the EPH code.
+    At the time of writing ( |today| ), PAW is not supported by the EPH code.
     Also [[useylm]] must be set to 0 (default for NC pseudos).
 """,
 ),
@@ -10002,8 +9975,8 @@ Variable(
     requires="[[useexexch]] == 1",
     added_in_version="before_v9",
     text=r"""
-Give for each species the value of the angular momentum (only values 2 or 3
-are allowed) on which to apply the exact exchange correction.
+Give for each species the value of the angular momentum
+on which to apply the exact exchange correction.
 """,
 ),
 
@@ -13814,7 +13787,6 @@ Variable(
     characteristics=['[[DEVELOP]]'],
     requires="""[[usepaw]] == 1;
 [[usexcnhat]] == 0;
-[[pawxcdev]] == 0;
 [[paral_atom]] == 0;
 [[paral_kgb]] == 0;
 ([[kptopt]] == 3 or [[kptopt]] == 0) """,
@@ -13829,7 +13801,10 @@ standard output file, search for "Orbital magnetic moment". This calculation req
 both the ground state and DDK wavefunctions (see [[rfddk]] or [[berryopt]]). The
 preferred way to use [[orbmag]] is at the end of a DFPT DDK calculation. Alternatively, it
 can be called in a ground state calculation if [[berryopt]] -2 has also been called,
-to generate discretized DDK wavefunctions. Note that convergence with kpt mesh is
+to generate discretized DDK wavefunctions. This latter method works only on a mesh of
+kpoints, while the DFPT version works for both a mesh and for a single k point (as
+encountered in studying an atom or molecule in a box, or a pariticularly large unit cell).
+Note that convergence with kpt mesh is
 *much* faster using the DFPT approach, and the [[berryopt]] approach is not recommended
 unless a very specific ground state feature is also needed.
 
@@ -24293,25 +24268,24 @@ Variable(
     vartype="string",
     topics=['Polaron_basic'],
     dimensions="scalar",
-    defaultval="None",
+    defaultval=None,
     mnemonics="GET the VARPEQ.nc from FILEPATH",
     requires="[[eph_task]] in [13, -13]",
-    added_in_version="tbd",
+    added_in_version="10.1.4",
     text=r"""
 This variable defines the path of the VARPEQ.nc file with the variational polaron
 equations optimization results.
 
 This variable can be used when [[eph_task]] == 13 i.e. when we solve the variational
 polaron equations.
-In this case, if [[eph_restart]]/[[varpeq_interp]] == 1 the code assumes we want to
+In this case, if [[eph_restart]] / [[varpeq_interp]] == 1, the code assumes we want to
 initialize the solution by restarting/interpolating from the solution available in
 the VARPEQ.nc file.
 
 If [[eph_task]] == -13, the variable is required to produce *.xsf files containing
-polaronic wavefunction and induced displacements.
+polaronic wavefunction and induced displacements that can be visualized with VESTA or Xcrysden.
 """,
 ),
-
 
 Variable(
     abivarname="getvarpeq",
@@ -24319,10 +24293,10 @@ Variable(
     vartype="int",
     topics=['Polaron_basic'],
     dimensions="scalar",
-    defaultval="None",
+    defaultval=None,
     mnemonics="GET the VARPEQ.nc from dataset",
     requires="[[eph_task]] in [13, -13]",
-    added_in_version="tbd",
+    added_in_version="10.1.4",
     text=r"""
 This variable is similar in spirit to [[getvarpeq_filepath]] but uses the dataset index
 instead of the filepath.
@@ -24339,9 +24313,9 @@ Variable(
     defaultval="gau_energy",
     mnemonics="VARiational Polaron EQuations: A_nk-coefficients SEED",
     requires="[[eph_task]] == 13",
-    added_in_version="tbd",
+    added_in_version="10.1.4",
     text=r"""
-This variable specifies the type of initial seed for electronic coefficients
+This variable specifies the type of initial seed for the electronic coefficients
 $A_{n\mathbf{k}}$, defining the charge localization in the variational polaron
 equations.
 
@@ -24377,10 +24351,10 @@ Variable(
     vartype="string",
     topics=['Polaron_basic'],
     dimensions="scalar",
-    defaultval="none",
+    defaultval="None",
     mnemonics="VARiational Polaron EQuations: Polaron KIND",
     requires="[[eph_task]] == 13",
-    added_in_version="tbd",
+    added_in_version="10.1.4",
     text=r"""
 This variable specifies the kind of polaron to be obtained within the variational
 polaron equations framework.
@@ -24416,10 +24390,10 @@ Variable(
     vartype="integer",
     topics=['Polaron_basic'],
     dimensions="scalar",
-    defaultval="0",
+    defaultval=0,
     mnemonics="VARiational Polaron EQuations: AVeraGe matrix-elements at Gamma",
     requires="[[eph_task]] == 13",
-    added_in_version="tbd",
+    added_in_version="10.1.4",
     text=r"""
 If non-zero, this variable activates the correction to the the electron-phonon
 matrix elements' Fröhlich divergence.
@@ -24462,10 +24436,10 @@ Variable(
     vartype="integer",
     topics=['Polaron_basic'],
     dimensions="scalar",
-    defaultval="0",
+    defaultval=0,
     mnemonics="VARiational Polaron EQuations: INTERPolation",
     requires="[[eph_task]] == 13",
-    added_in_version="tbd",
+    added_in_version="10.1.4",
     text=r"""
 If non-zero, this variable activates the interpolation of the initial guess for
 the electronic vector in the variational polaron equations.
@@ -24474,9 +24448,9 @@ interpolation of $A_{n\mathbf{k}}$ provided the metadata found in the netcdf fil
 is compatible with the input file.
 
 With this feature, if a polaronic solution is obtained for a certain $\mathbf{k}$-grid,
-it can then be read and interpolated to be used as a starting point for different grid.
+it can then be read and interpolated to be used as a starting point for different grids.
 This option is expected to lead the optimization proccess to the same polaronic configuration
-and accelearate the convergence.
+and accelarate the convergence.
 """,
 ),
 
@@ -24487,10 +24461,10 @@ Variable(
     vartype="integer",
     topics=['Polaron_basic'],
     dimensions="scalar",
-    defaultval="1",
+    defaultval=1,
     mnemonics="VARiational Polaron EQuations: Number of polaronic STATES",
     requires="[[optdriver]] == 7 and [[eph_task]] == 13",
-    added_in_version="tbd",
+    added_in_version="10.1.4",
     text=r"""
 This variables specifies the number of polaronic states to be found by solving the
 variational polaron equations.
@@ -24499,15 +24473,14 @@ previously found states during the optimization process.
 
 !!! important
 
-    Since polaronic solutions are not necessary orthogonal to each other, only the
-    first solution is expected to reach required tolerance during optimization.
-    Impsoing the orthogonalisation constraint, however, helps to find "metastable"
+    Since polaronic solutions are not necessarly orthogonal to each other, only the
+    first solution is expected to reach the required tolerance during optimization.
+    Imposing the orthogonalisation constraint, however, helps to find "metastable"
     polarons that are far away from the obtained polaronic configurations.
     One then can use other features, e.g. [[varpeq_select]] to fully converge a "metastable"
     state without any constraints.
 """,
 ),
-
 
 Variable(
     abivarname="varpeq_nstep",
@@ -24515,10 +24488,10 @@ Variable(
     vartype="integer",
     topics=['Polaron_basic'],
     dimensions="scalar",
-    defaultval="50",
+    defaultval=50,
     mnemonics="VARiational Polaron EQuations: Number of iteration STEPs",
     requires="[[optdriver]] == 7 and [[eph_task]] == 13",
-    added_in_version="tbd",
+    added_in_version="10.1.4",
     text=r"""
 This variables sets the maximum number of iterations in the optimization of
 variational polaron equations.
@@ -24532,14 +24505,14 @@ Variable(
     vartype="integer",
     topics=['Polaron_basic'],
     dimensions="scalar",
-    defaultval="-1",
+    defaultval=-1,
     mnemonics="VARiational Polaron EQuations: SELECT polaronic state",
     requires="[[eph_task]] == 13",
-    added_in_version="tbd",
+    added_in_version="10.1.4",
     text=r"""
 If non-zero, this variable selects a single polaronic state to be optimized from
 a **pre-existing** VARPEQ.nc file.
-Reqiures [[eph_restart]] == 1 or [[varpeq_interp]] == 1.
+Requires [[eph_restart]] == 1 or [[varpeq_interp]] == 1.
 Also, since a single polaronic state is selected, [[varpeq_nstates]] must be 1 in the
 input file.
 """,
@@ -24552,10 +24525,10 @@ Variable(
     vartype="real",
     topics=['Polaron_basic'],
     dimensions="scalar",
-    defaultval="1e-6",
+    defaultval=1e-6,
     mnemonics="VARiational Polaron EQuations: TOLerance on the Gradient ReSidual",
     requires="[[eph_task]] == 13",
-    added_in_version="tbd",
+    added_in_version="10.1.4",
     text=r"""
 This variable sets a tolerance for the electronic gradient residual in the optimization
 of the varitional polaron equations.
@@ -24571,12 +24544,12 @@ Variable(
     vartype="real",
     topics=['Polaron_basic'],
     dimensions="(2)",
-    defaultval="(0, 1)",
+    defaultval=[0, 1],
     mnemonics="VARiational Polaron EQuations: Gaussian PaRameters -- electronic ENERGY",
-    requires="[[eph_task]] == 13 and [[varpeq_aseed]] == \"gau_energy\"",
-    added_in_version="tbd",
+    requires='[[eph_task]] == 13 and [[varpeq_aseed]] == "gau_energy"',
+    added_in_version="10.1.4",
     text=r"""
-If [[varpeq_aseed]]=="gau_energy", this variable defines the mean value and the
+If [[varpeq_aseed]] == "gau_energy", this variable defines the mean value and the
 standard deviation [[varpeq_gpr_energy]](:) = $\mu$, $\sigma$ for the Gaussian function to
 be used as initial seed for the vector electronic coefficients.
 See [[varpeq_aseed]] for details.
@@ -24588,17 +24561,122 @@ Variable(
     abivarname="varpeq_gpr_length",
     varset="eph",
     vartype="real",
-    topics=['Polaron_basic'],
+    topics=['polaron_basic'],
     dimensions="(3)",
-    defaultval="(1, 1, 1)",
-    mnemonics="VARiational Polaron EQuations: Gaussian PaRameters -- localization LENGTH",
-    requires="[[eph_task]] == 13 and [[varpeq_aseed]] == \"gau_length\"",
-    added_in_version="tbd",
+    defaultval=(1, 1, 1),
+    mnemonics="variational polaron equations: gaussian parameters -- localization length",
+    requires='[[eph_task]] == 13 and [[varpeq_aseed]] == "gau_length"',
+    added_in_version="10.1.4",
     text=r"""
-If [[varpeq_aseed]]=="gau_length", this variable defines defines the estimated polaron
-localization lengths $a_x$, $a_y$, $a_z$ for the spread of Gaussian function to be used
+if [[varpeq_aseed]] == "gau_length", this variable defines defines the estimated polaron
+localization lengths $a_x$, $a_y$, $a_z$ for the spread of gaussian function to be used
 as initial seed for the vector electronic coefficients.
-See [[varpeq_aseed]] for details.
+see [[varpeq_aseed]] for details.
 """,
 ),
+
+Variable(
+    abivarname="eph_fix_korq",
+    varset="eph",
+    vartype="string",
+    topics=['ElPhonInt_basic'],
+    dimensions="scalar",
+    defaultval="k",
+    mnemonics="Electron-PHonon: FIX K-point OR Q-point",
+    requires="[[eph_task]] == 18",
+    added_in_version="10.1.4",
+    text=r"""
+This variable defines whether one should fix the k-point or the q-point when computing the e-ph matrix elements
+g(k,q) along either a q-path or k-path ([[eph_task]] == 18].
+Use "k" to fix the k-point or "q" to fix the q-point.
+
+The other piece of information is given by [[eph_fix_wavevec]] that specifies the reduced coordinates of the wavevector.
+""",
+),
+
+Variable(
+    abivarname="eph_fix_wavevec",
+    varset="eph",
+    vartype="real",
+    topics=['ElPhonInt_basic'],
+    dimensions=[3],
+    defaultval=[0, 0, 0],
+    mnemonics="Electron-PHonon: FIX WAVE-VECtor",
+    requires="[[eph_task]] == 18",
+    added_in_version="10.1.4",
+    text=r"""
+This variable defines the wavevector in reduced coordinates of the reciprocal lattice
+that should be fixed when computing the e-ph matrix elements g(k,q) along either a q-path or k-path ([[eph_task]] == 18].
+The other piece of information is given by [[eph_fix_korq]] that specifies whether one should fix the k-point or the q-point.
+
+To compute e-ph matrix as a function of the q-point:
+
+```
+   optdriver 7
+   eph_task 18
+
+   nstep 100      # NSCF cycle for electronic wavefunctions.
+   tolwfr 1e-18
+   nbdbuf 4
+   getpot_filepath  "gs_POT"   # Need to read the GS potential from file produced in a previous run.
+
+
+   # OTHER VARIABLES required by the EPH code such as getdvdb_filepath ...
+
+   eph_fix_korq "k"          # k is fixed in g(k,q)
+   eph_fix_wavevec 0.0 0 0   # k-point
+
+   eph_path_brange 1 4              # Compute g(k,q) with m and n ranging from 4 up to 10
+   nband 40
+
+   ph_ndivsm 10              # the q-path in g(k,q)
+   ph_nqpath 3
+   ph_qpath
+      0.0    0.0    0.0
+      0.5    0.0    0.5
+      0.5    0.25   0.75
+```
+
+To compute e-ph matrix as a function of the k-point:
+
+```
+   optdriver 7
+   eph_task 18
+
+   eph_fix_korq "q"
+   eph_fix_wavevec 0.5 0 0
+   nband 10
+   eph_path_brange 4
+
+   ndivsm 10
+   nkpath 3
+   kptbounds
+      0.0    0.0    0.0
+      0.5    0.0    0.5
+      0.5    0.25   0.75
+```
+""",
+),
+
+
+Variable(
+    abivarname="eph_path_brange",
+    varset="eph",
+    vartype="int",
+    topics=['ElPhonInt_useful'],
+    dimensions=[2],
+    defaultval=[0, 0],
+    mnemonics="Electron-PHonon: Band RANGE",
+    requires="[[eph_task]] == 18",
+    added_in_version="10.1.4",
+    text=r"""
+
+This variable defines the first and the last band that should be included when computing the e-ph matrix elements
+g(k,q) along either a q-path or k-path ([[eph_task]] == 18].
+One can use these two variables to select the band range of interest and skip, for instance, low-energy states.
+If not specied all bands from 1 up to [[nband]] are included,
+If specified in input, eph_path_brange(2) must be <= [[nband]].
+""",
+),
+
 ]

@@ -925,6 +925,10 @@ meta: {optdriver: 3, gwcalctyp: 28, }
           total number of points  =         1728
 
 
+ vcoul_init : cutoff-mode = AUXILIARY_FUNCTION
+ q-points for optical limit:   1
+     1)      0.000010    0.000020    0.000030
+
  rdqps: reading QP wavefunctions of the previous step 
         looking for file t03i_DS3_QPS
  file not found, 1st iteration initialized with KS eigenelements 
@@ -1209,6 +1213,10 @@ meta: {optdriver: 4, gwcalctyp: 28, }
  yields    64 points in the full Brillouin Zone.
 
 
+
+ vcoul_init : cutoff-mode = CRYSTAL
+ q-points for optical limit:   1
+     1)      0.000010    0.000020    0.000030
  setmesh: FFT mesh size selected  =    15x   15x   15
           total number of points  =         3375
 
@@ -1533,6 +1541,10 @@ meta: {optdriver: 3, gwcalctyp: 28, }
           total number of points  =         1728
 
 
+ vcoul_init : cutoff-mode = AUXILIARY_FUNCTION
+ q-points for optical limit:   1
+     1)      0.000010    0.000020    0.000030
+
  rdqps: reading QP wavefunctions of the previous step 
         looking for file t03o_DS4_QPS
  Number of iteration(s) already performed:    1
@@ -1819,6 +1831,9 @@ meta: {optdriver: 4, gwcalctyp: 28, }
  yields    64 points in the full Brillouin Zone.
 
 
+ vcoul_init : cutoff-mode = CRYSTAL
+ q-points for optical limit:   1
+     1)      0.000010    0.000020    0.000030
  setmesh: FFT mesh size selected  =    15x   15x   15
           total number of points  =         3375
 

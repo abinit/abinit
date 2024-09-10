@@ -5,9 +5,10 @@ import os
 import re
 import sys
 
-fortran = re.compile("\.([Ff]|[Ff]90)$")
+fortran = re.compile(r"\.([Ff]|[Ff]90)$")
 cppline = re.compile("^#")
-cppkeys = ("define .*","include.*","ifdef","ifndef","elif","^if ","else","endif","defined","undef","!","&&","\|\|","\(","\)")
+cppkeys = ("define .*", "include.*", "ifdef", "ifndef", "elif", "^if ", "else", "endif", "defined", "undef",
+           "!", "&&", r"\|\|", r"\(", r"\)")
 
 def list_cpp_options(top):
   cppopts = dict()
