@@ -115,12 +115,6 @@ subroutine rttddft(codvsn,dtfil,dtset,mpi_enreg,pawang,pawrad,pawtab,psps)
  call wrtout(ab_out,msg)
  if (do_write_log) call wrtout(std_out,msg)
 
- !FB: Do not allow RT-TDDFT for now. Still under development
- ! write(msg,'(3a)') ch10,'Real-time time dependent DFT is not yet available. Still under development..',ch10
- ! call wrtout(ab_out,msg)
- ! if (do_write_log) call wrtout(std_out,msg)
- ! ABI_ERROR(msg)
-
  !** 1) Initialization: create main tdks (Time-Dependent Kohn-Sham) object
  write(msg,'(3a)') ch10,'---------------------------   Initialization   ----------------------------',ch10
  call wrtout(ab_out,msg)
@@ -170,13 +164,13 @@ subroutine rttddft(codvsn,dtfil,dtset,mpi_enreg,pawang,pawrad,pawtab,psps)
    !Test of stability
    integrated_density = sum(tdks%rhor(:,1))*tdks%ucvol/tdks%nfftf
    stability = abs(integrated_density-dtset%nelect)/dtset%nelect
-   if (stability > 0.1_dp) then 
+   if (stability > 0.1_dp) then
       write(msg,"(3a)") "The integrated density has changed by more than 10%!", ch10, &
                      &  "The integration is unstable, you should probably decrease the timestep dtele."
       ABI_ERROR(msg)
    else if (stability > 0.05_dp) then
       write(msg,"(3a)") "The integrated density has changed by more than 5%!", ch10, &
-                     &  "You should be careful, the integration might become unstable"
+                     &  "You should be careful, the integration might be unstable"
       ABI_WARNING(msg)
    end if
 
