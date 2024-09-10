@@ -404,6 +404,7 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, &
  tot_nscf_ierr = 0
 
  use_cache = .True.
+ use_cache = .False.
  call ucache_k%init(use_cache .and. my_nkpath > 1, ngfft)
  call ucache_kq%init(use_cache .and. my_nqpath > 1, ngfft)
 
