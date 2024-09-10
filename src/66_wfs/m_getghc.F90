@@ -301,7 +301,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
    end if
  end if
  if (any(type_calc == [0, 2, 3])) then
-   local_gvnlxc = size(gvnlxc)==0
+   local_gvnlxc = size(gvnlxc)<=1
    if (local_gvnlxc) then
      if(gs_ham%gpu_option==ABI_GPU_KOKKOS) then
 #if defined HAVE_GPU && defined HAVE_YAKL

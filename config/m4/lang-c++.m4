@@ -244,7 +244,7 @@ AC_DEFUN([_ABI_CXX_CHECK_NVHPC],[
   m4_if([$1], , [AC_FATAL([$0: missing argument 1])])dnl
 
   dnl AC_MSG_CHECKING([if we are using the NVIDIA HPC SDK C++ compiler])
-  cxx_info_string=`$1 -V 2>&1 | grep "^nvc++"`
+  cxx_info_string=`$1 -V 2> /dev/null | grep "^nvc++"`
   abi_result=`echo "${cxx_info_string}"`
   if test "${abi_result}" = ""; then
     abi_result="no"
