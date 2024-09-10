@@ -254,6 +254,9 @@ program abinit
    call wrtout([std_out, ab_out], msg)
  end if
 
+ msg=' abinit : after writing the name of files '
+ call wrtout(std_out,msg,'PERS')
+
  ! Test if the netcdf library supports MPI-IO
  call nctk_test_mpiio()
 
