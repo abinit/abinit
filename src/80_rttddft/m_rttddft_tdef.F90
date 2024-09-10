@@ -172,8 +172,12 @@ subroutine tdef_update(tdef, dtset, mpi_enreg, time, rprimd, gprimd, kg, mpsang,
    case (0)
    !Dirac pulse: vector potential is just an Heaviside function
    case (1)
-      if (time >= tdef%ef_tzero) then
+      if (abs(time-tdef%ef_tzero)<tol16) then
          tdef%efield(:) = tdef%ef_ezero(:)
+      else
+         tdef%efield(:) = zero
+      end if
+      if (time >= tdef%ef_tzero) then
          tdef%vecpot(:) = -tdef%ef_ezero(:)
       end if
       tdef%vecpot_red = matmul(transpose(rprimd),tdef%vecpot)/(2.0_dp*pi)

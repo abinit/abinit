@@ -164,7 +164,7 @@ subroutine rttddft_calc_density(dtset, mpi_enreg, psps, tdks)
                & dtset%typat,tdks%ucvol,dtset%usewvl,tdks%xred,pawnhat=tdks%nhat, &
                & rhog=tdks%rhog)
 
-   ! 6-Take care of kinetic energy density
+   ! 5-Take care of kinetic energy density
    if(dtset%usekden==1)then
      call mkrho(tdks%cg,dtset,tdks%gprimd,tdks%irrzon,tdks%kg,tdks%mcg,mpi_enreg,  &
               & tdks%npwarr,tdks%occ0,tdks%paw_dmft,tdks%phnons,rhowfg,rhowfr,     &
@@ -262,11 +262,11 @@ subroutine rttddft_calc_etot(dtset, energies, etotal, occ)
       & + energies%e_xc          &
       & + energies%e_localpsp    &   
       & + energies%e_corepsp     &
-      & + energies%e_entropy     &
       & + energies%e_ewald       &
       & + energies%e_vdw_dftd    &
       & + energies%e_nlpsp_vfock &
       & + energies%e_paw         
+!     & + energies%e_entropy
 !FB: @MT Should one add the last e_paw contribution or not?
 !FB: Seeems like all the other contributions are not relevant here @MT?
 !     & + energies%e_chempot     &
@@ -793,12 +793,11 @@ subroutine rttddft_calc_current(tdks, dtset, dtfil, psps, mpi_enreg)
 ! ***********************************************************************
 
  if (psps%usepaw==1) then
-   ! 1 - Computes <\psi_{kn}|v|\psi_{kn}> = <\psi_{kn}|-i\nabla|\psi_{kn}> = Im[<\tilde{psi}_{nk}|\nabla|\tilde{psi}_{nk}>]
+   ! 1 - Computes <\psi_{nk}|v|\psi_{nk}> = <\psi_{nk}|-i\nabla|\psi_{nk}> = Im[<\tilde{psi}_{nk}|\nabla|\tilde{psi}_{nk}>]
    call optics_paw(tdks%atindx1,tdks%cg,tdks%cprj,tdks%dimcprj,dtfil,dtset,tdks%eigen,tdks%gprimd,tdks%hdr, &
                  & tdks%kg,dtset%mband,tdks%mcg,tdks%mcprj,dtset%mkmem,mpi_enreg,psps%mpsang,dtset%mpw,     &
                  & dtset%natom,dtset%nkpt,tdks%npwarr,dtset%nsppol,tdks%pawang,tdks%pawrad,tdks%pawrhoij,   &
                  & tdks%pawtab,dtset%znucl,psinablapsi)
- 
  
    ! 2 - Sum over bands and k-points
    tdks%current = 0.0_dp
