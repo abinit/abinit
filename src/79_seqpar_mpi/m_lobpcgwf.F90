@@ -190,7 +190,7 @@ subroutine lobpcgwf2(cg,dtset,eig,occ,enl_out,gs_hamk,isppol,ikpt,inonsc,istep,k
 
  call xgBlock_map_1d(xgocc,occ,SPACE_R,nband,gpu_option=dtset%gpu_option)
 
- call lobpcg_init(lobpcg,nband,l_npw*l_nspinor,blockdim,dtset%tolwfr,dtset%nline,&
+ call lobpcg_init(lobpcg,nband,l_npw*l_nspinor,blockdim,dtset%tolwfr_diago,dtset%nline,&
    space,l_mpi_enreg%comm_bandspinorfft,l_paral_kgb,l_mpi_enreg%comm_spinorfft,l_mpi_enreg%comm_band,&
    me_g0,me_g0_fft,gs_hamk%gpu_option)
 
