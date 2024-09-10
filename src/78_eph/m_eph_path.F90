@@ -123,14 +123,14 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, &
  integer :: nfft,nfftf,mgfft,mgfftf, my_npert, my_ip, idir, ipert, ipc, nkpg, nkpg1, ncerr, ncid, my_nkpath, my_nqpath
  integer :: in_k, im_kq, my_is, my_ik, my_iq, nband, nb_in_g, band_n, band_m, bstart, bstop, my_nspins, np, tot_nscf_ierr
  real(dp) :: cpu_all,wall_all,gflops_all, eig0nk, eshift
- logical :: qq_is_gamma, use_ftinterp, gen_eigenpb, use_cg_k, use_cg_kq
+ logical :: qq_is_gamma, use_ftinterp, gen_eigenpb, use_cg_k, use_cg_kq, use_cache
  type(gs_hamiltonian_type) :: gs_hamk, gs_hamkq
  type(rf_hamiltonian_type) :: rf_hamkq
  type(nscf_t) :: nscf
  type(kpath_t) :: qpath, kpath
  type(xcomm_t) :: kpt_comm, qpt_comm, pert_comm
  type(xcomm_t),allocatable :: comm_my_is(:)
- type(u0_cache_t) :: ukq_cache, uk_cache
+ type(u0_cache_t) :: ucache_kq, ucache_k
  character(len=fnlen) :: gpath_path
  character(len=5000) :: msg
  character(len=10) :: priority
@@ -403,18 +403,39 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, &
  ! Loop over spins (MPI parallelized)
  tot_nscf_ierr = 0
 
+ use_cache = .True.
+ call ucache_k%init(use_cache .and. my_nkpath > 1, ngfft)
+ call ucache_kq%init(use_cache .and. my_nqpath > 1, ngfft)
+
  do my_is=1,my_nspins
    spin = my_spins(my_is)
 
    ! Loop over k-points in k-path (MPI parallelized)
    do my_ik=1,my_nkpath
      ik = my_ik_inds(my_ik)
+
      ! Compute psi_nk
      ! NB: The Hamiltonian has pointers to the _k arrays in out so we cannot dellocate them till the end.
      ! This is the reason why we use vlocal_k (vlocal_kq) although this term does not depend on k
      kk = kpath%points(:, ik)
+
+#if 1
+     call nscf%setup_kpt(spin, kk, istwfk_1, nband, cryst, dtset, dtfil, psps, pawtab, pawfgr, &
+                         npw_k, kg_k, kpg_k, ph3d_k, kinpw_k, ffnl_k, vlocal_k, cg_k, gsc_k, gs_hamk)
+
+     ! cache.
+     use_cg_k = (my_ik > 1 .and. ucache_k%use_cache)
+     if (use_cg_k) call ucache_k%get_kpt(kk, istwfk_1, npw_k, nspinor, nband, kg_k, cg_k)
+
+     call nscf%solve_kpt(spin, kk, istwfk_1, nband, cryst, dtset, dtfil, psps, pawtab, pawfgr, gs_hamk, &
+                         use_cg_k, npw_k, cg_k, gsc_k, eig_k, msg, ierr)
+
+     call ucache_k%store_kpt(kk, istwfk_1, npw_k, nspinor, nband, kg_k, cg_k)
+#else
+
      call nscf%solve(spin, kk, istwfk_1, nband, cryst, dtset, dtfil, psps, pawtab, pawfgr, &
                      npw_k, kg_k, kpg_k, ph3d_k, kinpw_k, ffnl_k, vlocal_k, cg_k, gsc_k, eig_k, gs_hamk, msg, ierr) ! out
+#endif
 
      ABI_WARNING_IF(ierr /= 0, msg)
      tot_nscf_ierr = tot_nscf_ierr + ierr
@@ -450,19 +471,18 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, &
        !  cg_kq = cg_k
 
        !else
-#if 0
-         ! Version with cache. Does not work yet!
+#if 1
          call nscf%setup_kpt(spin, kq, istwfk_1, nband, cryst, dtset, dtfil, psps, pawtab, pawfgr, &
                              npw_kq, kg_kq, kpg_kq, ph3d_kq, kinpw_kq, ffnl_kq, vlocal_kq, cg_kq, gsc_kq, gs_hamkq)
 
-         use_cg_kq = (my_iq > 1)
-         if (use_cg_kq) call ukq_cache%get_kpt(kq, istwfk_1, npw_kq, nspinor, nband, kg_kq, cg_kq)
-         !use_cg_kq = .False.
+         ! cache.
+         use_cg_kq = (my_iq > 1 .and. ucache_kq%use_cache)
+         if (use_cg_kq) call ucache_kq%get_kpt(kq, istwfk_1, npw_kq, nspinor, nband, kg_kq, cg_kq)
 
          call nscf%solve_kpt(spin, kq, istwfk_1, nband, cryst, dtset, dtfil, psps, pawtab, pawfgr, gs_hamkq, &
                              use_cg_kq, npw_kq, cg_kq, gsc_kq, eig_kq, msg, ierr)
 
-         call ukq_cache%store_kpt(kq, istwfk_1, npw_kq, nspinor, nband, kg_kq, cg_kq)
+         call ucache_kq%store_kpt(kq, istwfk_1, npw_kq, nspinor, nband, kg_kq, cg_kq)
 
 #else
          call nscf%solve(spin, kq, istwfk_1, nband, cryst, dtset, dtfil, psps, pawtab, pawfgr, &
@@ -684,9 +704,9 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, &
  call qpath%free()
  call kpath%free()
  call nscf%free()
+ call ucache_k%free()
+ call ucache_kq%free()
  call qpt_comm%free(); call kpt_comm%free(); call pert_comm%free()
- call uk_cache%free()
- call ukq_cache%free()
 
  call cwtime_report(" eph_path: MPI barrier before returning.", cpu_all, wall_all, gflops_all, end_str=ch10, comm=comm)
  !stop
