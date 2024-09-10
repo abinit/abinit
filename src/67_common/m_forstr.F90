@@ -817,8 +817,22 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
        bandpp=mpi_enreg%bandpp
        nblockbd=nband_k/bandpp
      end if
-     if (usexg==1) nblockbd=1
      blocksize=nband_k/nblockbd
+     !LTEST
+     if (usexg==1) then
+       write(901,*) '   nband_k',nband_k
+       write(901,*) 'nproc_band',mpi_enreg%nproc_band
+       write(901,*) '    bandpp',mpi_enreg%bandpp
+       write(901,*) ' blocksize',blocksize
+       write(901,*) '  nblockbd',nblockbd
+     else
+       write(900,*) '   nband_k',nband_k
+       write(900,*) 'nproc_band',mpi_enreg%nproc_band
+       write(900,*) '    bandpp',mpi_enreg%bandpp
+       write(900,*) ' blocksize',blocksize
+       write(900,*) '  nblockbd',nblockbd
+     end if
+     !LTEST
      mband_cprj=mband/mpi_enreg%nproc_band
      nband_cprj_k=nband_k/mpi_enreg%nproc_band
 
@@ -1039,6 +1053,12 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
 
      call timab(922,2,tsec)
 
+     if (usexg==1) then
+       ncols_cprj = bandpp*my_nspinor
+       call xg_init(cprj_xgx0,xg_nonlop%space_cprj,xg_nonlop%cprjdim,ncols_cprj,comm=xg_nonlop%comm_band)
+       call xg_init(cprj_work,xg_nonlop%space_cprj,xg_nonlop%cprjdim,ncols_cprj,comm=xg_nonlop%comm_band)
+     end if
+
      do iblock=1,nblockbd
 
        iband=(iblock-1)*blocksize+1;iband_last=min(iband+blocksize-1,nband_k)
@@ -1096,11 +1116,6 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
  &         gpu_option=gpu_option)
            call xgBlock_map_1d(xgeigen,lambda,SPACE_R,blocksize)
 
-           ncols_cprj = nband_cprj_k*my_nspinor
-
-           call xg_init(cprj_xgx0,xg_nonlop%space_cprj,xg_nonlop%cprjdim,ncols_cprj,comm=xg_nonlop%comm_band)
-           call xg_init(cprj_work,xg_nonlop%space_cprj,xg_nonlop%cprjdim,ncols_cprj,comm=xg_nonlop%comm_band)
-
            call xg_nonlop_getcprj(xg_nonlop,xgx0,cprj_xgx0%self,cprj_work%self)
 
            !  !LTEST
@@ -1135,9 +1150,6 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
            !  call xg_cprj_copy(cprj_cwavef_bands,cprj_xgx0%self,xg_nonlop,XG_TO_CPRJ)
            !end if
 
-           call xg_free(cprj_xgx0)
-           call xg_free(cprj_work)
-
          end if
 
          ABI_NVTX_END_RANGE()
@@ -1158,6 +1170,9 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
                ibs=nnlout*(iblocksize-1)
                npsstr(1:6)=npsstr(1:6) + weight(iblocksize)*enlout(ibs+1:ibs+6)
              end do
+             !LTEST
+             write(900,*) 'npsstr:', npsstr
+             !LTEST
            end if
          else
            if (optfor==1) then
@@ -1169,6 +1184,9 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
              do iblocksize=1,blocksize
                npsstr(1:6) = npsstr(1:6) + weight(iblocksize)*enlout_2d_stress(1:6,iblocksize)
              end do
+             !LTEST
+             write(901,*) 'npsstr:', npsstr
+             !LTEST
            end if
          end if
 
@@ -1251,6 +1269,11 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
 
      end do ! End of loop on block of bands
 
+     if (usexg==1) then
+       call xg_free(cprj_xgx0)
+       call xg_free(cprj_work)
+     end if
+
      call timab(927,1,tsec)
 
 !    Restore the bandfft tabs
@@ -1321,6 +1344,15 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
 
  end do ! End loop over spins
 
+ !LTEST
+ if (stress_needed==1) then
+   if (usexg==0) then
+     flush(900)
+   else
+     flush(901)
+   end if
+ end if
+ !LTEST
  call timab(928,1,tsec)
 
 !Stress is equal to dE/d_strain * (1/ucvol)
