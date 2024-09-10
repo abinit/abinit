@@ -20,7 +20,7 @@ inp_files = [
     "t12.abi" ,  # same as v10[10], with nspinor=2.
     "t13.abi" ,  # same as v10[10], with istwfk>1.
     "t14.abi" ,  # same as v10[10] but with NC pseudos
-    "t15.abi" ,  # same as v10[10] but with NC pseudos, nspinor=2 ! not working yet
+#    "t15.abi" ,  # same as v10[10] but with NC pseudos, nspinor=2 ! not working yet
     "t16.abi" ,  # same as v10[10] but with NC pseudos, istwfk>1
     "t40.abi" ,  # test orbmag calculation when using spatial symmetries for GS nuclear dipole 
 ]

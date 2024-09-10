@@ -2424,8 +2424,8 @@ subroutine xg_nonlop_colwiseXHX(xg_nonlop,cprj,cprj_work,res)
    nmpi = xmpi_comm_size(comm(cprj))
    ncols = cols(cprj)
    nres = rows(res)
-   if (nres/=nmpi*ncols) then
-     ABI_ERROR('rows(res)/=nmpi*cols(cprj))')
+   if (nres*xg_nonlop%nspinor/=nmpi*ncols) then
+     ABI_ERROR('rows(res)*nspinor/=nmpi*cols(cprj))')
    end if
 
    call xgBlock_zero(res)
@@ -2443,7 +2443,7 @@ subroutine xg_nonlop_colwiseXHX(xg_nonlop,cprj,cprj_work,res)
    if (xg_nonlop%paw) then
      call xg_nonlop_colwiseXAX(xg_nonlop,xg_nonlop%Dij,cprj,cprj_work,res_mpi)
    else
-    call xg_nonlop_colwiseXDX(xg_nonlop,xg_nonlop%ekb,cprj,cprj_work,res_mpi)
+     call xg_nonlop_colwiseXDX(xg_nonlop,xg_nonlop%ekb,cprj,cprj_work,res_mpi)
    end if
 
    call xgBlock_mpi_sum(res,comm=xg_nonlop%comm_band)
@@ -2778,18 +2778,14 @@ subroutine xg_nonlop_forces_stress(xg_nonlop,Xin,cprjin,cprj_work,eigen,forces,s
    real(dp), optional, intent(in) :: gprimd(:,:)
 
    !real(dp) :: tsec(2)
-   integer :: cplex,ia,idir,ilmn,iband,iband_spinor,my_iband,itypat,nlmn,nattyp
-   integer :: ispinor,iforces,icprj,icprj_deriv
+   integer :: cplex,iband
    integer :: nmpi,shift
    integer :: nrows,ncols,ncols_cprj,ncols_cprj_nospin
    integer :: nrows_diag,ncols_diag
    integer :: nspinor,space_cprj
-   integer :: shift_itypat,shift_itypat_nlmn,shift_itypat_3nlmn
 
-   type(xg_t) :: cprj_deriv,work_mpi_deriv,dot
-   real(dp), pointer :: forces_(:,:)
-   complex(dp), pointer :: cprj_(:,:),cprj_deriv_(:,:)
-   real(dp), pointer :: cprj_real(:,:),cprj_deriv_real(:,:),dot_(:,:)
+   type(xg_t) :: cprj_deriv,work_mpi_deriv,dot,dot_all
+   real(dp), pointer :: dot_(:,:),dot_all_(:,:)
    logical :: do_forces,do_stress
    real(dp) :: work(6)
    real(dp), pointer :: stress_(:,:)
@@ -2963,22 +2959,55 @@ subroutine xg_nonlop_forces_stress(xg_nonlop,Xin,cprjin,cprj_work,eigen,forces,s
 
      call xgBlock_reshape_spinor(cprjin,cprjin_spinor,nspinor,COLS2ROWS)
      call xgBlock_reshape_spinor(cprj_work,cprj_work_spinor,nspinor,COLS2ROWS)
-     call xgBlock_colwiseDotProduct(cprjin_spinor,cprj_work_spinor,dot%self)
+     call xgBlock_colwiseDotProduct(cprjin_spinor,cprj_work_spinor,dot%self,comm_loc=xmpi_comm_null)
 
-     call xgBlock_reverseMap(dot%self,dot_)
      cplex=1
      if (space_cprj==SPACE_C) cplex=2
 
+     call xg_init(dot_all,space_cprj,ncols,1)
+     if (xmpi_comm_size(xg_nonlop%comm_band)>1) then
+       call xgBlock_zero(dot_all%self)
+       call xgBlock_reverseMap(dot%self,dot_)
+       call xgBlock_reverseMap(dot_all%self,dot_all_)
+       shift = cplex*xg_nonlop%me_band*ncols_cprj_nospin
+       do iband=1,ncols_cprj_nospin
+         dot_all_(1+cplex*(iband-1)+shift,1) = dot_(1+cplex*(iband-1),1)
+       end do
+     !LTEST
+     !write(901,*) 'me_band:',xg_nonlop%me_band
+     !write(901,*) 'shift:',shift
+     !write(901,*) 'dot:',dot_
+     !write(901,*) 'dot_all0:',dot_all_
+     !LTEST
+       call xgBlock_mpi_sum(dot_all%self,comm=xg_nonlop%comm_band)
+     !LTEST
+     !write(901,*) 'dot_all1:',dot_all_
+     !LTEST
+     else
+       call xgBlock_reverseMap(dot%self,dot_all_)
+     end if
+     !LTEST
+     write(901,*) 'ncols:',ncols
+     write(901,*) 'dot_all:',dot_all_
+     !LTEST
+
      call xgBlock_reverseMap(stress,stress_)
 
+     !LTEST
+     !write(901,*) 'stress1:',stress_
+     !LTEST
      do iband=1,ncols
        work = stress_(:,iband)
        call strconv(work,gprimd,work)
-       stress_(1:3,iband) = work(1:3) - dot_(1+cplex*(iband-1),1)
+       stress_(1:3,iband) = work(1:3) - dot_all_(1+cplex*(iband-1),1)
        stress_(4:6,iband) = work(4:6)
      end do
+     !LTEST
+     !write(901,*) 'stress2:',stress_
+     !LTEST
 
      call xg_free(dot)
+     call xg_free(dot_all)
 
    end if
 
@@ -3225,10 +3254,10 @@ subroutine xg_nonlop_mult_cprj_stress(xg_nonlop,cprj,cprj_deriv,stress)
                  icol = idir+6*(ilmn-1)+(ia-1)*6*nlmn
                  cprj_tmp(1,icol)= dble (cprj_deriv_(icprj_deriv,iband))
                  cprj_tmp(2,icol)= dimag(cprj_deriv_(icprj_deriv,iband))
-                 if (abs(cprj_tmp(1,icol)) < tol12) then
+                 if (abs(cprj_tmp(1,icol)) < tol8) then
                    cprj_tmp(1,icol) = zero
                  end if
-                 if (abs(cprj_tmp(2,icol)) < tol12) then
+                 if (abs(cprj_tmp(2,icol)) < tol8) then
                    cprj_tmp(2,icol) = zero
                  end if
                end do

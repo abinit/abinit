@@ -42,6 +42,7 @@ inp_files = [
 "t47.abi", # test cprj_in_memory=1 (PAW,nspinor=2)
 "t48.abi", # test cprj_in_memory=1 (PAW,istwfk>1)
 "t49.abi", # test cprj_in_memory=1 (NC,istwfk>1)
+#"t50.abi", # test cprj_in_memory=1 (NC,nspinor=2) ! not working yet
 "t51.abi",
 "t52.abi",
 "t53.abi",
