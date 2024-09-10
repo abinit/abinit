@@ -6109,7 +6109,6 @@ subroutine wfdgw_pawrhoij(Wfd,Cryst,Bst,kptopt,pawrhoij,pawprtvol)
 end subroutine wfdgw_pawrhoij
 !!***
 
-
 subroutine u0_cache_init(u0c, use_cache, ngfft)
 
 !Arguments ------------------------------------
