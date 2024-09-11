@@ -2735,12 +2735,11 @@ subroutine ifc_calcnwrite_nana_terms(ifc, crystal, nph2l, qph2l, &
 !arrays
  real(dp) :: qphnrm(3),qphon(3,3)
  real(dp),allocatable :: displ_cart(:,:,:),phfrq(:),d2cart(:,:,:),eigvec(:,:,:),eigval(:)
-
 ! ************************************************************************
 
  if (nph2l == 0) return
 
- !Now treat the second list of vectors (only at the Gamma point, but can include non-analyticities)
+ ! Now treat the second list of vectors (only at the Gamma point, but can include non-analyticities)
  ABI_MALLOC(phfrq, (3*crystal%natom))
  ABI_MALLOC(displ_cart, (2, 3*crystal%natom, 3*crystal%natom))
  ABI_MALLOC(d2cart, (2, 3*ifc%mpert, 3*ifc%mpert))
@@ -2751,8 +2750,7 @@ subroutine ifc_calcnwrite_nana_terms(ifc, crystal, nph2l, qph2l, &
  qphon(:,1)=zero; qphnrm(1)=zero
 
  ! Generation of the dynamical matrix in cartesian coordinates
- ! Get d2cart using the interatomic forces and the
- ! long-range coulomb interaction through Ewald summation
+ ! Get d2cart using the interatomic forces and the long-range coulomb interaction through Ewald summation
  call gtdyn9(ifc%acell,ifc%atmfrc,ifc%dielt,ifc%dipdip, &
    ifc%dyewq0,d2cart,crystal%gmet,ifc%gprim,ifc%mpert,crystal%natom, &
    ifc%nrpt,qphnrm(1),qphon,crystal%rmet,ifc%rprim,ifc%rpt, &

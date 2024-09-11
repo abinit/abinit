@@ -1473,7 +1473,6 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
  call intagm(dprarr,intarr,jdtset,marr,2,string(1:lenstr),'eph_path_brange',tread,'INT')
  if(tread==1) dtset%eph_path_brange=intarr(1:2)
- if (any(dtset%eph_path_brange <= 0)) dtset%eph_path_brange = [1, mband]
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'eph_fermie',tread,'ENE')
  if(tread==1) dtset%eph_fermie=dprarr(1)
