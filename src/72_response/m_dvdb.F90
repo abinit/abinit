@@ -1307,7 +1307,7 @@ end subroutine dvdb_readsym_allv1
 !! INPUTS
 !!  cryst<crystal_t>=crystal structure parameters
 !!  qbz(3)=Q-point in BZ.
-!!  indq2db(6)=Symmetry mapping qbz --> DVDB qpoints produced by listkk using the SYMREC convention.
+!!  indq2db(6)=Symmetry mapping qbz --> DVDB qpoints produced using the SYMREC convention.
 !!    Note that indq2db(1) should give the index in the set of q-points in the DVDB
 !!    that is not necessarly ORDERED as the IBZ computed by the Abinit routines.
 !!  nfft=Number of fft-points treated by this processors
@@ -3300,7 +3300,7 @@ subroutine dvdb_get_v1scf_rpt(db, cryst, ngqpt, nqshift, qshift, nfft, ngfft, &
  ! we use symrec instead of symrel
  ABI_MALLOC(indqq, (nqbz*sppoldbl1,6))
  call listkk(dksqmax,cryst%gmet,indqq,qibz,qbz,nqibz,nqbz,cryst%nsym,&
-   sppoldbl1,cryst%symafm,cryst%symrec,timrev1,comm,use_symrec=.True.)
+             sppoldbl1,cryst%symafm,cryst%symrec,timrev1,comm,use_symrec=.True.)
 
  !qrank = krank_from_kptrlatt(new%nqibz, new%qibz, qptrlatt, compute_invrank=.False.)
  !call qrank%get_mapping(new%nqbz, new%qbz, dksqmax, cryst%gmet, temp, &
@@ -3362,7 +3362,7 @@ subroutine dvdb_get_v1scf_rpt(db, cryst, ngqpt, nqshift, qshift, nfft, ngfft, &
 
  ! Redo the mapping with the new IBZ
  call listkk(dksqmax,cryst%gmet,indqq,qibz,qbz,nqibz,nqbz,cryst%nsym,&
-   sppoldbl1,cryst%symafm,cryst%symrec,timrev1,comm,use_symrec=.True.)
+             sppoldbl1,cryst%symafm,cryst%symrec,timrev1,comm,use_symrec=.True.)
 
  !qrank = krank_from_kptrlatt(new%nqibz, new%qibz, qptrlatt, compute_invrank=.False.)
  !call qrank%get_mapping(new%nqbz, new%qbz, dksqmax, cryst%gmet, temp, &
