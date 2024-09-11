@@ -2395,7 +2395,6 @@ end subroutine nscf_init
 !! isppol=Spin index
 !! kpt(3)=K-point
 !! dtset<dataset_type>=All input variables for this dataset.
-!! dtfil <type(datafiles_type)>=variables related to files
 !! cryst=Crystalline structure
 !! psps<pseudopotential_type>=Variables related to pseudopotentials.
 !! pawtab(ntypat*usepaw)<pawtab_type>=Paw tabulated starting data.
@@ -2414,7 +2413,7 @@ end subroutine nscf_init
 !!
 !! SOURCE
 
-subroutine nscf_setup_kpt(nscf, isppol, kpt, istwf_k, nband, cryst, dtset, dtfil, psps, pawtab, pawfgr, &
+subroutine nscf_setup_kpt(nscf, isppol, kpt, istwf_k, nband, cryst, dtset, psps, pawtab, pawfgr, &
                           npw_k, kg_k, kpg_k, ph3d_k, kinpw_k, ffnl_k, vlocal, cg_k, gsc_k, gs_hamk)
 
 !Arguments ------------------------------------
@@ -2422,7 +2421,6 @@ subroutine nscf_setup_kpt(nscf, isppol, kpt, istwf_k, nband, cryst, dtset, dtfil
  integer,intent(in) :: isppol, istwf_k, nband
  real(dp),intent(in) :: kpt(3)
  type(dataset_type),intent(in) :: dtset
- type(datafiles_type), intent(in) :: dtfil
  type(crystal_t),intent(in) :: cryst
  type(pseudopotential_type),intent(in) :: psps
  type(pawtab_type),intent(in) :: pawtab(cryst%ntypat*psps%usepaw)
@@ -2438,12 +2436,13 @@ subroutine nscf_setup_kpt(nscf, isppol, kpt, istwf_k, nband, cryst, dtset, dtfil
 !scalars
  integer,parameter :: paral_kgb0 = 0, nkpt1 = 1, use_subovl0 = 0, ider0 = 0, idir0 = 0, mkmem1 = 1, useylmgr0 = 0
  integer :: mcg, mgsc, nvloc, nkpg, n1, n2, n3, n4, n5, n6, nfft, nfftf, mgfft, mgfftf, inonsc, npwsp, me_g0, linalg_max_size, optder
- integer :: ipw, ispinor, index, nspinor
+ integer :: ipw, index, nspinor
  !character(len=500) :: msg
 !arrays
  integer :: npwarr_k(1), nband_ks(dtset%nsppol)
  real(dp) :: ylmgr_dum(1,1,1), ylmgr(0, 0)
- real(dp),allocatable :: ph1d(:,:), ylm_k(:,:), evec(:,:)
+ real(dp),allocatable :: ph1d(:,:), ylm_k(:,:)
+
 ! *************************************************************************
 
  ! See vtorho.F90 for the sequence of calls needed to initialize the GS Hamiltonian.
@@ -2552,8 +2551,6 @@ end subroutine nscf_setup_kpt
 !! dtfil <type(datafiles_type)>=variables related to files
 !! cryst=Crystalline structure
 !! psps<pseudopotential_type>=Variables related to pseudopotentials.
-!! pawtab(ntypat*usepaw)<pawtab_type>=Paw tabulated starting data.
-!! pawfgr <type(pawfgr_type)>=fine grid parameters and related data
 !!
 !! OUTPUT
 !!  gs_hamk <type(gs_hamiltonian_type)>=all data for the Hamiltonian at k
@@ -2567,7 +2564,7 @@ end subroutine nscf_setup_kpt
 !!
 !! SOURCE
 
-subroutine nscf_solve_kpt(nscf, isppol, kpt, istwf_k, nband, cryst, dtset, dtfil, psps, pawtab, pawfgr, gs_hamk, use_cg_k, & ! in
+subroutine nscf_solve_kpt(nscf, isppol, kpt, istwf_k, nband, cryst, dtset, dtfil, psps, gs_hamk, use_cg_k, & ! in
                           npw_k, cg_k, gsc_k, eig_k, msg, ierr)  ! out
 
 !Arguments ------------------------------------
@@ -2579,8 +2576,6 @@ subroutine nscf_solve_kpt(nscf, isppol, kpt, istwf_k, nband, cryst, dtset, dtfil
  type(datafiles_type), intent(in) :: dtfil
  type(crystal_t),intent(in) :: cryst
  type(pseudopotential_type),intent(in) :: psps
- type(pawtab_type),intent(in) :: pawtab(cryst%ntypat*psps%usepaw)
- type(pawfgr_type),intent(in) :: pawfgr
  type(gs_hamiltonian_type),intent(inout) :: gs_hamk
 !arrays
  real(dp),intent(inout) :: cg_k(:,:,:), gsc_k(:,:,:)
@@ -2595,7 +2590,7 @@ subroutine nscf_solve_kpt(nscf, isppol, kpt, istwf_k, nband, cryst, dtset, dtfil
  integer,parameter :: paral_kgb0 = 0, mcgq0 = 0, mkgq0 = 0, nkpt1 = 1, pwind_alloc0 = 0, use_subvnlx0 = 0, use_subovl0 = 0, ider0 = 0, idir0 = 0
  integer,parameter :: icg0 = 0, igsc0 = 0, ikpt0 = 0, quit0 = 0, ortalgo_3 = 3, mkmem1 = 1
  integer,parameter :: useylmgr0 = 0
- integer :: mcg, mgsc, n1, n2, n3, n4, n5, n6, nfft, nfftf, mgfft, mgfftf, inonsc, npwsp, me_g0, linalg_max_size, optder
+ integer :: mcg, mgsc, n1, n2, n3, n4, n5, n6, nfft, nfftf, mgfft, mgfftf, inonsc, npwsp, me_g0, linalg_max_size
  integer :: ipw, ispinor, index, nspinor
  integer, parameter :: int64 = selected_int_kind(18)
  integer(KIND=int64) :: seed
@@ -2604,11 +2599,11 @@ subroutine nscf_solve_kpt(nscf, isppol, kpt, istwf_k, nband, cryst, dtset, dtfil
  real(dp) :: max_resid ! dotr,
  type(efield_type) :: dtefield
 !arrays
- integer :: npwarr_k(1), pwind(pwind_alloc0,2,3), nband_ks(dtset%nsppol)
+ integer :: npwarr_k(1), pwind(pwind_alloc0,2,3)
  real(dp) :: pwnsfac(2,pwind_alloc0), pwnsfacq(2,mkgq0), zshift(nband), cgq(2, mcgq0), dphase_k(3)
  real(dp) :: subham(nband*(nband+1)), subovl(nband*(nband+1)*use_subovl0), subvnlx(nband*(nband+1)*use_subvnlx0)
- real(dp) :: ylmgr_dum(1,1,1), ylmgr(0, 0)
- real(dp),allocatable :: resid(:), ylm_k(:,:), evec(:,:)
+ real(dp) :: ylmgr(0, 0)
+ real(dp),allocatable :: resid(:), evec(:,:)
 ! *************************************************************************
 
  ! See vtorho.F90 for the sequence of calls needed to initialize the GS Hamiltonian.

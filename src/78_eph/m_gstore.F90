@@ -3646,7 +3646,6 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
                           work_ngfft, work, istwf_kq, npw_kq, kg_kq, bras_kq)
 
        ! if PAW, one has to solve a generalized eigenproblem
-       ! Be careful here because I will need sij_opt==-1
        gen_eigenpb = psps%usepaw == 1; sij_opt = 0; if (gen_eigenpb) sij_opt = 1
        ABI_MALLOC(gs1c, (2, npw_kq*nspinor*((sij_opt+1)/2)))
 
@@ -4471,7 +4470,7 @@ subroutine gstore_print_for_abitests(gstore, dtset)
 
  ABI_MALLOC(done_qbz_spin, (gstore%nqbz, dtset%nsppol))
  NCF_CHECK(nf90_get_var(root_ncid, root_vid("gstore_done_qbz_spin"), done_qbz_spin))
- write(ab_out, "(a,*(i0,1x))")" gstore_done_qbz_spin: ", done_qbz_spin
+ write(ab_out, "(a,*(i0,1x))")" ndone_done_qbz_spin: ", count(done_qbz_spin == 1)
  ABI_FREE(done_qbz_spin)
 
  do spin=1,gstore%nsppol

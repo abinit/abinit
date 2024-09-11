@@ -6161,6 +6161,11 @@ subroutine u0_cache_get_kpt(u0c, new_kpt, new_istwf_k, new_npw_k, nspinor, new_n
 
  ABI_CHECK_IEQ(new_nband_k,  u0c%prev_nband_k, "This case is not yet implemented")
 
+ if (all(abs(new_kpt - u0c%prev_kpt) < tol16) .and. new_npw_k == u0c%prev_npw_k) then
+   new_cg_k = u0c%prev_cg_k
+   return
+ end if
+
  mg1 = max(maxval(abs(u0c%prev_kg_k(1,:))), maxval(abs(new_kg_k(1,:))))
  mg2 = max(maxval(abs(u0c%prev_kg_k(2,:))), maxval(abs(new_kg_k(2,:))))
  mg3 = max(maxval(abs(u0c%prev_kg_k(3,:))), maxval(abs(new_kg_k(3,:))))
