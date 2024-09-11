@@ -10,6 +10,8 @@ Can be executed everywhere inside the Abinit directory, including build director
 
 Use: `pip install invoke --user` to install invoke package.
 """
+from __future__ import annotations
+
 import os
 import sys
 import webbrowser
@@ -59,6 +61,50 @@ ALL_BINARIES = [
 import platform
 SYSTEM = platform.system()
 
+
+def which_vim():
+    """
+    Find vim in $PATH
+    """
+    if which("mvim") is not None: return "mvim"
+    if which("nvim") is not None: return "nvim"
+    if which("vim") is not None: return "vim"
+    raise RuntimeError("Cannot find vim in $PATH!")
+
+
+def which_differ():
+    """
+    Find differ in $PATH
+    """
+    differ = "vimdiff"
+    if which("mvimdiff") is not None: differ = "mvimdiff"
+
+    if which(differ) is None:
+        raise RuntimeError(f"Cannot find {differ=} in $PATH!")
+
+    return differ
+
+
+def change_output_file(input_file, output_file):
+    """
+    Change the name of the main output file in the `input_file` using `output_file`
+    """
+    with open(input_file, "rt") as fh:
+        remove_iline = None
+        lines = [l.lstrip() for l in fh.readlines()]
+        for i, l in enumerate(lines):
+            if l.lstrip().startswith("output_file"):
+                remove_iline = i
+                break
+
+    if remove_iline is not None:
+        lines.pop(remove_iline)
+
+    lines.insert(0, f'output_file = "{output_file}"')
+    with open(input_file, "wt") as fh:
+        fh.write("\n".join(lines))
+
+
 @contextmanager
 def cd(path):
     """
@@ -81,6 +127,12 @@ def cd(path):
         os.chdir(cwd)
 
 
+def list_from_string(string, type=int):
+    if "," in string:
+        return [type(s) for s in string.split(",")]
+    return [type(s) for s in string.split(" ")]
+
+
 @task
 def make(ctx, jobs="auto", touch=False, clean=False, binary=""):
     """
@@ -95,10 +147,10 @@ def make(ctx, jobs="auto", touch=False, clean=False, binary=""):
     if touch:
         with cd(ABINIT_ROOTDIR):
             cmd = "./abisrc.py touch"
-            cprint("Executing: %s" % cmd, "yellow")
+            cprint(f"Executing: {cmd}", color="yellow")
             result = ctx.run(cmd, pty=True)
             if not result.ok:
-                cprint("`%s` failed. Aborting now!" % cmd, "red")
+                cprint(f"{cmd=} failed. Aborting now!", color="red")
                 return 1
 
     top = find_top_build_tree(".", with_abinit=False)
@@ -108,8 +160,9 @@ def make(ctx, jobs="auto", touch=False, clean=False, binary=""):
         if clean:
             ctx.run("cd src && make clean && cd ..", pty=True)
             ctx.run("cd shared && make clean && cd ..", pty=True)
-        cmd = "make -j%d %s > >(tee -a make.log) 2> >(tee -a make.stderr >&2)" % (jobs, binary)
-        cprint("Executing: %s" % cmd, "yellow")
+
+        cmd = f"make -j{jobs} {binary} | tee make.log 2> make.stderr"
+        cprint(f"Executing: {cmd}", color="yellow")
         results = ctx.run(cmd, pty=True)
         # TODO Check for errors in make.stderr
         #cprint("Exit code: %s" % retcode, "green" if retcode == 0 else "red")
@@ -140,14 +193,14 @@ def runemall(ctx, make=True, jobs="auto", touch=False, clean=False, keywords=Non
 
     with cd(os.path.join(top, "tests")):
         cmd = "./runtests.py -j%d %s" % (jobs, kws)
-        cprint("Executing: %s" % cmd, "yellow")
+        cprint(f"Executing: {cmd}", color="yellow")
         ctx.run(cmd, pty=True)
         # Now run the parallel tests.
         for n in [2, 4, 10]:
             j = jobs // n
             if j == 0: continue
             cmd = "./runtests.py paral mpiio -j%d -n%d %s" % (j, n, kws)
-            cprint("Executing: %s" % cmd, "yellow")
+            cprint(f"Executing: {cmd}", color="yellow")
             ctx.run(cmd, pty=True)
 
 
@@ -185,9 +238,9 @@ def abichecks(ctx):
             if not result.ok: retcode += 1
 
     if retcode != 0:
-        cprint("%d FAILED TESTS" % retcode, "red")
+        cprint("%d FAILED TESTS" % retcode, color="red")
     else:
-        cprint("ALL TESTS OK", "green")
+        cprint("ALL TESTS OK", color="green")
 
     return retcode
 
@@ -198,13 +251,13 @@ def robodoc(ctx):
         result = ctx.run("./mkrobodoc.sh", pty=True)
 
         if result.ok:
-            cprint("ROBODOC BUILD OK", "green")
+            cprint("ROBODOC BUILD OK", color="green")
             # https://stackoverflow.com/questions/44447469/cannot-open-an-html-file-from-python-in-a-web-browser-notepad-opens-instead
             html_path = os.path.join(ABINIT_ROOTDIR, "./tmp-robodoc/www/robodoc/masterindex.html")
             print("Trying to open %s in browser ..." % html_path)
             return webbrowser.open_new_tab(html_path)
         else:
-            cprint("ROBODOC BUILD FAILED", "red")
+            cprint("ROBODOC BUILD FAILED", color="red")
 
         return result.ok
 
@@ -232,7 +285,7 @@ def links(ctx):
         if os.path.isfile(source):
             os.symlink(source, dest)
         else:
-            cprint("Cannot find `%s` in dir `%s" % (source, main98), "yellow")
+            cprint("Cannot find `%s` in dir `%s" % (source, main98), color="yellow")
 
 
 @task
@@ -288,13 +341,11 @@ def tgrep(ctx, pattern):
 @task
 def vimt(ctx, tagname):
     """
-    Execute `vim -t tagname` with tagname a ctags tag.
+    Execute `vim -t tagname` with tagname as ctags tag.
     """
+    vim = which_vim()
     with cd(ABINIT_ROOTDIR):
-        if which("mvim") is not None:
-            cmd  = "mvim -t %s" % tagname
-        else:
-            cmd  = "vim -t %s" % tagname
+        cmd = f"{vim} -f {tagname}"
         print("Executing:", cmd)
         ctx.run(cmd, pty=True)
 
@@ -302,7 +353,7 @@ def vimt(ctx, tagname):
 @task
 def env(ctx):
     """Print sh code to set $PATH and $ABI_PSPDIR in order to work with build directory."""
-    print("\nExecute the following lines in the shell to set the env:\n")
+    cprint("\nExecute the following lines in the shell to set the env:\n", color="green")
     top = find_top_build_tree(".", with_abinit=True)
     binpath = os.path.join(top, "src", "98_main")
     print(f"export ABI_PSPDIR={ABINIT_ROOTDIR}/tests/Psps_for_tests")
@@ -314,12 +365,11 @@ def diff2(ctx, filename="run.abo"):
     """
     Execute `vimdiff` to compare run.abo with the last run.abo0001 found in the cwd.
     """
-    vimdiff = "vimdiff"
-    if which("mvimdiff") is not None: vimdiff = "mvimdiff"
+    vimdiff = which_differ()
     files = sorted([f for f in os.listdir(".") if f.startswith(filename)])
     if not files: return
-    cmd = "%s %s %s" % (vimdiff, filename, files[-1])
-    print("Executing:", cmd)
+    cmd = f"{vimdiff} {filename} {files[-1]}"
+    cprint(f"Executing {cmd}", color="green")
     ctx.run(cmd, pty=True)
 
 
@@ -328,14 +378,15 @@ def diff3(ctx, filename="run.abo"):
     """
     Execute `vimdiff` to compare run.abo with the last run.abo0001 found in the cwd.
     """
-    vimdiff = "vimdiff"
-    if which("mvimdiff") is not None: vimdiff = "vimdiff"
+    differ = which_differ()
+
     files = sorted([f for f in os.listdir(".") if f.startswith(filename)])
     if not files: return
+
     if len(files) > 2:
-        cmd = "%s %s %s %s" % (vimdiff, filename, files[-2], files[-1])
+        cmd = "%s %s %s %s" % (differ, filename, files[-2], files[-1])
     else:
-        cmd = "%s %s %s" % (vimdiff, filename, files[-1])
+        cmd = "%s %s %s" % (differ, filename, files[-1])
     print("Executing:", cmd)
     ctx.run(cmd, pty=True)
 
@@ -359,22 +410,22 @@ def remote_add(ctx, remote):
     ctx.run(cmd, pty=True)
 
 
-#@task
-#def gdb(ctx, input_name, exec_name="abinit", run_make=False):
-#    """
-#    Execute `lldb` debugger with the given `input_name`.
-#    """
-#    if run_make: make(ctx)
-#
-#    top = find_top_build_tree(".", with_abinit=True)
-#    binpath = os.path.join(top, "src", "98_main", exec_name)
-#    cprint(f"Using binpath: {binpath}", "green")
-#    cmd = f"gdb {binpath} --one-line 'settings set target.run-args {input_name}'"
-#    cprint(f"Executing gdb command: {cmd}", color="green")
-#    # mpirun -np 2 xterm -e gdb fftprof --command=dbg_file
-#    #cprint("Type run to start lldb debugger", color="green")
-#    #cprint("Then use `bt` to get the backtrace\n\n", color="green")
-#    ctx.run(cmd, pty=True)
+@task
+def gdb(ctx, input_name, exec_name="abinit", run_make=False):
+    """
+    Execute `gdb` debugger with the given `input_name`.
+    """
+    if run_make: make(ctx)
+
+    top = find_top_build_tree(".", with_abinit=True)
+    binpath = os.path.join(top, "src", "98_main", exec_name)
+    cprint(f"Using binpath: {binpath}", "green")
+    cmd = f"gdb {binpath} --one-line 'settings set target.run-args {input_name}'"
+    cprint(f"Executing gdb command: {cmd}", color="green")
+    # mpirun -np 2 xterm -e gdb fftprof --command=dbg_file
+    #cprint("Type run to start lldb debugger", color="green")
+    #cprint("Then use `bt` to get the backtrace\n\n", color="green")
+    ctx.run(cmd, pty=True)
 
 
 @task
@@ -386,13 +437,79 @@ def lldb(ctx, input_name, exec_name="abinit", run_make=False):
 
     top = find_top_build_tree(".", with_abinit=True)
     binpath = os.path.join(top, "src", "98_main", exec_name)
-    cprint(f"Using binpath: {binpath}", "green")
+    cprint(f"Using binpath: {binpath}", color="green")
     cmd = f"lldb {binpath} --one-line 'settings set target.run-args {input_name}'"
     cprint(f"Executing lldb command: {cmd}", color="green")
     cprint("Type run to start lldb debugger", color="green")
     cprint("Then use `bt` to get the backtrace\n\n", color="green")
     ctx.run(cmd, pty=True)
 
+
+@task
+def mpi_check(ctx, np_list="1, 2", abinit_input_file="run.abi", mpi_runner="mpiexec", run_make=False):
+    """
+    Args:
+        np_list: List of MPI procs
+    """
+    if run_make: make(ctx)
+
+    cprint(f"Will run {abinit_input_file=} with MPI nprocs in {np_list=}", color="yellow")
+
+    differ = which_differ()
+    np_list = list_from_string(np_list)
+
+    for np in np_list:
+        change_output_file(abinit_input_file, f"run_mpi{np}.abo")
+        cmd = f"{mpi_runner} -n {np} abinit {abinit_input_file} | tee run_mpi{np}.log"
+        cprint(f"About to execute {cmd=}", color="yellow" )
+        ctx.run(cmd)
+
+    np_ref = np_list[0]
+    for np in np_list[1:]:
+        cmd = f"{differ} run_mpi{np_ref}.abo run_mpi{np}.abo"
+        cprint(f"About to execute {cmd=}", color="yellow")
+        ctx.run(cmd, pty=True)
+        cmd = f"{differ} run_mpi{np_ref}.log run_mpi{np}.log"
+        cprint(f"About to execute {cmd=}", color="yellow")
+        ctx.run(cmd, pty=True)
+
+
+@task
+def omp_check(ctx, omp_threads="1, 2", np=1, abinit_input_file="run.abi", mpi_runner="mpiexec", run_make=False):
+    """
+    """
+    if run_make: make(ctx)
+
+    differ = which_differ()
+
+    omp_threads = list_from_string(omp_threads)
+
+    cprint("Will run {abinit_input_file=} with OMP threads={omp_threads=} and MPI nprocs={np}", color="yellow")
+    for nth in omp_threads:
+        change_output_file(abinit_input_file, f"run_omp{nth}_mpi{np}.abo")
+        cmd = f"{mpi_runner} -n {np} abinit -o {nth} {abinit_input_file} | tee run_omp{nth}_mpi{np}.log"
+        cprint(f"About to execute {cmd=}", color="yellow" )
+        ctx.run(cmd)
+
+    omp_ref = omp_threads[0]
+    for nth in omp_threads[1:]:
+        cmd = f"{differ} run_omp{omp_ref}.abo run_omp{nth}_mpi{np}.abo"
+        cprint(f"About to execute {cmd=}", color="yellow" )
+        ctx.run(cmd, pty=True)
+        cmd = f"{differ} run_omp{omp_ref}.log run_omp{nth}_mpi{np}.log"
+        cprint(f"About to execute {cmd=}", color="yellow" )
+        ctx.run(cmd, pty=True)
+
+@task
+def pyenv_clean(ctx):
+    if which("conda") is not None:
+        cmd = f"conda clean --all --yes"
+        cprint(f"About to execute {cmd=}")
+        ctx.run(cmd)
+
+    cmd = f"pip cache purge"
+    cprint("About to execute {cmd=}")
+    ctx.run(cmd)
 
 @task
 def abinit(ctx, input_name, run_make=False):
@@ -413,7 +530,7 @@ def _run(ctx, input_name, exec_name, run_make):
     if run_make: make(ctx)
     top = find_top_build_tree(".", with_abinit=True)
     binpath = os.path.join(top, "src", "98_main", exec_name)
-    cprint(f"Using binpath: {binpath}", "green")
+    cprint(f"Using binpath: {binpath}", color="green")
     cmd = f"{binpath} {input_name}"
     cprint(f"Executing {cmd}", color="green")
     ctx.run(cmd, pty=True)
@@ -424,14 +541,27 @@ def pull_trunk(ctx):
     """"Execute `git stash && git pull trunk develop && git stash apply`"""
     ctx.run("git stash")
     ctx.run("git pull trunk develop")
+    ctx.run("git pull trunk develop --tags")
+    ctx.run("git commit")
+    ctx.run("git push")
+    ctx.run("git push --tags")
     ctx.run("git stash apply")
 
 @task
 def pull(ctx):
-    """"Execute `git stash && git pull --recurse-submodules && git stash apply`"""
+    """"Execute `git stash && git pull --recurse-submodules && git stash apply && makemake`"""
     ctx.run("git stash")
     ctx.run("git pull --recurse-submodules")
     ctx.run("git stash apply")
+    makemake(ctx)
+
+
+@task
+def push(ctx):
+    """"Execute `git commit && git push && git push --tags`"""
+    ctx.run("git commit")
+    ctx.run("git push")
+    ctx.run("git push --tags")
 
 
 @task

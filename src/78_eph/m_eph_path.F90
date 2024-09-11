@@ -39,7 +39,6 @@ module m_eph_path
  use m_dtset
  use m_dtfil
  !use m_clib
- !use m_mkffnl
 
  use defs_abitypes,    only : mpi_type
  use defs_datatypes,   only : ebands_t, pseudopotential_type
@@ -135,21 +134,18 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, &
  character(len=5000) :: msg
  character(len=10) :: priority
 !!arrays
- integer :: units(2), ngfft(18),ngfftf(18)
- integer :: coords_spin(ndims), dims(ndims)
+ integer :: units(2), ngfft(18),ngfftf(18), coords_spin(ndims), dims(ndims)
  integer,allocatable :: kg_k(:,:), kg_kq(:,:), qmap_symrec(:,:), my_ik_inds(:), my_iq_inds(:), my_spins(:), my_iperts(:)
  integer,allocatable :: pert_table(:,:), my_pinfo(:,:)
  real(dp) :: kk(3), qq(3), kq(3), phfreqs(3*cryst%natom), phfreqs_ev(3*cryst%natom), fake_path(3,2)
  real(dp),allocatable :: grad_berry(:,:), kinpw1(:), dkinpw(:), qvers_red(:,:)
  real(dp),allocatable :: cg_k(:,:,:), cg_kq(:,:,:), prev_cg_kq(:,:,:), gsc_k(:,:,:), gsc_kq(:,:,:),eig_k(:), eig_kq(:)
  real(dp),allocatable :: v1scf(:,:,:,:), vlocal1(:,:,:,:), vlocal(:,:,:,:), gkq_atm(:,:,:,:), gkq_nu(:,:,:,:), gkq2_nu(:,:,:)
- real(dp),allocatable :: gvnlx1(:,:), gs1c(:,:), h1kets_kq(:,:,:)
- real(dp),allocatable :: displ_cart(:,:,:,:),displ_red(:,:,:,:)
+ real(dp),allocatable :: gvnlx1(:,:), gs1c(:,:), h1kets_kq(:,:,:), displ_cart(:,:,:,:),displ_red(:,:,:,:)
  real(dp),allocatable :: kpg_k(:,:), ph3d_k(:,:,:), kinpw_k(:), ffnl_k(:,:,:,:), vlocal_k(:,:,:,:)
  real(dp),allocatable :: kpg_kq(:,:), ph3d_kq(:,:,:), kinpw_kq(:), ffnl_kq(:,:,:,:), vlocal_kq(:,:,:,:)
  real(dp),allocatable :: ylm_kq(:,:), ylm_k(:,:), ylmgr_kq(:,:,:), rvec(:) !, work(:,:,:,:)
- real(dp),allocatable :: ph3d(:,:,:), ph3d1(:,:,:)  ! ffnlk(:,:,:,:), ffnl1(:,:,:,:),
- real(dp),allocatable :: phfreqs_nanal(:,:), displ_cart_nanal(:,:,:,:,:)
+ real(dp),allocatable :: ph3d(:,:,:), ph3d1(:,:,:), phfreqs_nanal(:,:), displ_cart_nanal(:,:,:,:,:)
  logical :: reorder, periods(ndims), keepdim(ndims)
  type(pawcprj_type),allocatable  :: cwaveprj0(:,:)
 !************************************************************************
@@ -157,7 +153,6 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, &
  ! TODO:
  ! 1) Add possibility of selecting bands
  ! 2) Save g^2 in nc format without any average. This operation will be performed by Abipy (need ph freqs and eigenergies)
- ! 3) MPI-parallelism (spin, k/q-points and perturbations)
 
  if (psps%usepaw == 1) then
    ABI_ERROR("PAW not implemented")
@@ -208,20 +203,31 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, &
  ! Distribute spins iside input comm.
  call xmpi_split_nsppol(comm, nsppol, my_nspins, my_spins, comm_my_is)
 
- ! And now the MPI cartesian grid.
+ ! ==================
+ ! MPI cartesian grid
+ ! ==================
  my_npert = natom3
  do my_is=1,my_nspins
    spin = my_spins(my_is)
    np = comm_my_is(my_is)%nproc; priority = "12"
 
-   if (nk_path == 1) then
-     call xmpi_distrib_2d(np, priority, nq_path, natom3, qpt_comm%nproc, pert_comm%nproc, ierr)
-   else
-     call xmpi_distrib_2d(np, priority, nk_path, natom3, kpt_comm%nproc, pert_comm%nproc, ierr)
-   end if
-   ABI_CHECK(ierr == 0, sjoin("Cannot distribute nprocs:", itoa(np), " with priority: ", priority))
+   if (any(dtset%eph_np_pqbks /= 0)) then
+     pert_comm%nproc = dtset%eph_np_pqbks(1)
+     qpt_comm%nproc  = dtset%eph_np_pqbks(2)
+     ABI_CHECK(dtset%eph_np_pqbks(3) == 1, "Band parallelism not implemented in eph_path")
+     kpt_comm%nproc = dtset%eph_np_pqbks(4)
 
-   ! Consistency check.
+   else
+     ! Automatic generation
+     if (nk_path == 1) then
+       call xmpi_distrib_2d(np, priority, nq_path, natom3, qpt_comm%nproc, pert_comm%nproc, ierr)
+     else
+       call xmpi_distrib_2d(np, priority, nk_path, natom3, kpt_comm%nproc, pert_comm%nproc, ierr)
+     end if
+     ABI_CHECK(ierr == 0, sjoin("Cannot distribute nprocs:", itoa(np), " with priority: ", priority))
+   end if
+
+   ! Consistency check
    write(msg, "(a,i2,a,3(i0,1x))")"P Cartesian grid for spin", spin, ": (pert_comm%nproc, qpt_comm%nproc, kpt_comm%nproc) = ", &
                                   pert_comm%nproc, qpt_comm%nproc, kpt_comm%nproc
    call wrtout(units, msg)
@@ -410,7 +416,7 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, &
  tot_nscf_ierr = 0
 
  use_cache = .True.
- use_cache = .False.
+ !use_cache = .False.
  call ucache_k%init(use_cache .and. my_nkpath > 1, ngfft)
  call ucache_kq%init(use_cache .and. my_nqpath > 1, ngfft)
 
