@@ -37,6 +37,7 @@ wfoptalg 114
 kptopt 1
 kptrlatt 3 0 0 0 3 0 0 0 3
 chksymbreak 0
+istwfk *1
 
 # === DFT+U options
 usepawu 1
