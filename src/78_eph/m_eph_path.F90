@@ -137,12 +137,12 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
  integer,allocatable :: kg_k(:,:), kg_kq(:,:), qmap_symrec(:,:), my_ik_inds(:), my_iq_inds(:), my_spins(:), my_iperts(:)
  integer,allocatable :: pert_table(:,:), my_pinfo(:,:)
  real(dp) :: kk(3), qq(3), kq(3), phfreqs(3*cryst%natom), phfreqs_ev(3*cryst%natom), fake_path(3,2)
- real(dp),allocatable :: grad_berry(:,:), kinpw1(:), dkinpw(:)
+ real(dp),allocatable :: grad_berry(:,:), kinpw_k(:), kinpw_kq(:), dkinpw(:)
  real(dp),allocatable :: cg_k(:,:,:), cg_kq(:,:,:), gsc_k(:,:,:), gsc_kq(:,:,:),eig_k(:), eig_kq(:)
  real(dp),allocatable :: v1scf(:,:,:,:), vlocal1(:,:,:,:), vlocal(:,:,:,:), gkq_atm(:,:,:,:), gkq_nu(:,:,:,:), gkq2_nu(:,:,:)
  real(dp),allocatable :: gvnlx1(:,:), gs1c(:,:), h1kets_kq(:,:,:), displ_cart(:,:,:,:),displ_red(:,:,:,:)
- real(dp),allocatable :: kpg_k(:,:), ph3d_k(:,:,:), kinpw_k(:), ffnl_k(:,:,:,:), vlocal_k(:,:,:,:)
- real(dp),allocatable :: kpg_kq(:,:), ph3d_kq(:,:,:), kinpw_kq(:), ffnl_kq(:,:,:,:), vlocal_kq(:,:,:,:)
+ real(dp),allocatable :: kpg_k(:,:), ph3d_k(:,:,:), ffnl_k(:,:,:,:), vlocal_k(:,:,:,:)
+ real(dp),allocatable :: kpg_kq(:,:), ph3d_kq(:,:,:), ffnl_kq(:,:,:,:), vlocal_kq(:,:,:,:)
  real(dp),allocatable :: ylm_kq(:,:), ylm_k(:,:), ylmgr_kq(:,:,:), rvec(:), ph3d(:,:,:), ph3d1(:,:,:)
  logical :: reorder, periods(ndims), keepdim(ndims)
  type(pawcprj_type),allocatable  :: cwaveprj0(:,:)
@@ -537,6 +537,30 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
        ! Allocate vlocal1 with correct cplex. Note nvloc and my_npert.
        ABI_MALLOC(vlocal1, (cplex*n4, n5, n6, gs_hamkq%nvloc))
 
+#define USE_SETUP 0
+
+#if USE_SETUP == 0
+       !print *, "bypassing getgh1c_setup"
+       !===== Load the k/k+q dependent parts of the Hamiltonian
+       ! Load k-dependent part in the Hamiltonian datastructure
+       !ABI_MALLOC(ph3d, (2, npw_k, gs_hamkq%matblk))
+       call gs_hamkq%load_k(kpt_k=kk, npw_k=npw_k, istwf_k=istwfk_1, kg_k=kg_k, kpg_k=kpg_k,&
+                            ph3d_k=ph3d_k, compute_ph3d=.false., compute_gbound=.true.)
+
+       call gs_hamkq%load_k(ffnl_k=ffnl_k)
+
+       ! Load k+q-dependent part in the Hamiltonian datastructure
+       ! Note: istwf_k is imposed to 1 for RF calculations (should use istwf_kq instead)
+       call gs_hamkq%load_kprime(kpt_kp=kq, npw_kp=npw_kq, istwf_kp=istwfk_1,&
+        ! kinpw_kp=kinpw_kq,
+        kg_kp=kg_kq, kpg_kp=kpg_kq, ffnl_kp=ffnl_kq, compute_gbound=.true.)
+
+       if (.not. qq_is_gamma) then
+         !ABI_MALLOC(ph3d1,(2, npw_kq, gs_hamkq%matblk))
+         call gs_hamkq%load_kprime(ph3d_kp=ph3d_kq, compute_ph3d=.false.)
+       end if
+#endif
+
        ! Loop over my atomic perturbations: apply H1_{kappa, alpha} and compute gkq_atm.
        gkq_atm = zero
        do my_ip=1,my_npert
@@ -551,36 +575,13 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
 
          call rf_hamkq%load_spin(spin, vlocal1=vlocal1, with_nonlocal=.true.)
 
-#if 0
+#if USE_SETUP == 1
          ! This call is not optimal because there are quantities in out that do not depend on idir,ipert
          call getgh1c_setup(gs_hamkq, rf_hamkq, dtset, psps, kk, kq, idir, ipert, &                     ! In
                             cryst%natom, cryst%rmet, cryst%gprimd, cryst%gmet, istwfk_1, &              ! In
                             npw_k, npw_kq, useylmgr1, kg_k, ylm_k, kg_kq, ylm_kq, ylmgr_kq, &           ! In
-                            dkinpw, nkpg_k, nkpg_kq, kpg_k, kpg_kq, kinpw1, ffnl_k, ffnl_kq, ph3d, ph3d1, & ! Out
+                            dkinpw, nkpg_k, nkpg_kq, kpg_k, kpg_kq, kinpw_kq, ffnl_k, ffnl_kq, ph3d, ph3d1, & ! Out
                             reuse_kpg_k=1, reuse_kpg1_k=1, reuse_ffnlk=1, reuse_ffnl1=1)                ! Reuse some arrays
-#else
-
-         !===== Load the k/k+q dependent parts of the Hamiltonian
-         ! Load k-dependent part in the Hamiltonian datastructure
-         !ABI_MALLOC(ph3d, (2, npw_k, gs_hamkq%matblk))
-         call gs_hamkq%load_k(kpt_k=kk, npw_k=npw_k, istwf_k=istwfk_1, kg_k=kg_k, kpg_k=kpg_k,&
-                              ph3d_k=ph3d_k, compute_ph3d=.false., compute_gbound=.true.)
-
-         call gs_hamkq%load_k(ffnl_k=ffnl_k)
-
-         ! Load k+q-dependent part in the Hamiltonian datastructure
-         ! Note: istwf_k is imposed to 1 for RF calculations (should use istwf_kq instead)
-         call gs_hamkq%load_kprime(kpt_kp=kq, npw_kp=npw_kq, istwf_kp=istwfk_1,&
-          ! kinpw_kp=kinpw1,
-          kg_kp=kg_kq, kpg_kp=kpg_kq, ffnl_kp=ffnl_kq, compute_gbound=.true.)
-
-         if (.not. qq_is_gamma) then
-           !ABI_MALLOC(ph3d1,(2, npw_kq, gs_hamkq%matblk))
-           call gs_hamkq%load_kprime(ph3d_kp=ph3d_kq, compute_ph3d=.false.)
-         end if
-
-         ! Load k-dependent part in the 1st-order Hamiltonian datastructure
-         !call rf_hamkq%load_k(npw_k=npw_k,dkinpw_k=dkinpw)
 #endif
 
          ! Calculate dvscf * psi_k, results stored in h1kets_kq on the k+q sphere.
@@ -596,7 +597,7 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
                         optnl, opt_gvnlx1, rf_hamkq, sij_opt, tim_getgh1c, usevnl)
          end do
 
-         ABI_SFREE(kinpw1)
+         ABI_SFREE(kinpw_kq)
          ABI_SFREE(dkinpw)
          ABI_SFREE(ph3d)
          ABI_SFREE(ph3d1)
