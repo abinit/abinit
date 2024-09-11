@@ -464,7 +464,7 @@ CONTAINS  !=====================================================================
 &                    +(kpoint(2)+kg_k(2,ipw))*gprimd(3,2) &
 &                    +(kpoint(3)+kg_k(3,ipw))*gprimd(3,3)
        end do
-       kpg_k=two_pi*kpg_k
+       kpg_k(:,1:npw_k)=two_pi*kpg_k(:,1:npw_k)
        if (dtset%nspinor==2) kpg_k(1:3,npw_k+1:2*npw_k)=kpg_k(1:3,1:npw_k)
 
 !      Loops over bands
