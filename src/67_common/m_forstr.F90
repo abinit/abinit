@@ -818,21 +818,6 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
        nblockbd=nband_k/bandpp
      end if
      blocksize=nband_k/nblockbd
-     !LTEST
-     if (usexg==1) then
-       write(901,*) '   nband_k',nband_k
-       write(901,*) 'nproc_band',mpi_enreg%nproc_band
-       write(901,*) '    bandpp',mpi_enreg%bandpp
-       write(901,*) ' blocksize',blocksize
-       write(901,*) '  nblockbd',nblockbd
-     else
-       write(900,*) '   nband_k',nband_k
-       write(900,*) 'nproc_band',mpi_enreg%nproc_band
-       write(900,*) '    bandpp',mpi_enreg%bandpp
-       write(900,*) ' blocksize',blocksize
-       write(900,*) '  nblockbd',nblockbd
-     end if
-     !LTEST
      mband_cprj=mband/mpi_enreg%nproc_band
      nband_cprj_k=nband_k/mpi_enreg%nproc_band
 
@@ -1122,9 +1107,6 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
              call xg_nonlop_getcprj(xg_nonlop,xgx0,cprj_xgx0%self,cprj_work%self)
            end if
 
-           !  !LTEST
-           !  write(901,*) 'grnl_k :'
-           !  !LTEST
            if (optfor==1) call xgBlock_map(xgforces,enlout_2d,SPACE_R,3*natom,blocksize)
            if (stress_needed==1) call xgBlock_map(xgstress,enlout_2d_stress,SPACE_R,6,blocksize)
 
@@ -1140,19 +1122,6 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
              call xg_nonlop_forces_stress(xg_nonlop,xgx0,cprj_xgx0%self,cprj_work%self,xgeigen,&
                forces=xgforces,stress=xgstress,gprimd=gs_hamk%gprimd)
            end if
-
-           !  !LTEST
-           !  write(901,*) ''
-           !  do iband=1,nband_k
-           !    write(901,*) grnl_k(:,iband)
-           !  end do
-           !  write(901,*) ''
-           !  !LTEST
-
-           !if (gs_hamk%usepaw==1) then
-           !  cprj_cwavef_bands => cprj(:,1+ibg:ncols_cprj+ibg)
-           !  call xg_cprj_copy(cprj_cwavef_bands,cprj_xgx0%self,xg_nonlop,XG_TO_CPRJ)
-           !end if
 
          end if
 
@@ -1174,9 +1143,6 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
                ibs=nnlout*(iblocksize-1)
                npsstr(1:6)=npsstr(1:6) + weight(iblocksize)*enlout(ibs+1:ibs+6)
              end do
-             !LTEST
-             write(900,*) 'npsstr:', npsstr
-             !LTEST
            end if
          else
            if (optfor==1) then
@@ -1188,9 +1154,6 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
              do iblocksize=1,blocksize
                npsstr(1:6) = npsstr(1:6) + weight(iblocksize)*enlout_2d_stress(1:6,iblocksize)
              end do
-             !LTEST
-             write(901,*) 'npsstr:', npsstr
-             !LTEST
            end if
          end if
 
@@ -1348,15 +1311,6 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
 
  end do ! End loop over spins
 
- !LTEST
- if (stress_needed==1) then
-   if (usexg==0) then
-     flush(900)
-   else
-     flush(901)
-   end if
- end if
- !LTEST
  call timab(928,1,tsec)
 
 !Stress is equal to dE/d_strain * (1/ucvol)
