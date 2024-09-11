@@ -24477,8 +24477,13 @@ previously found states during the optimization process.
     first solution is expected to reach the required tolerance during optimization.
     Imposing the orthogonalisation constraint, however, helps to find "metastable"
     polarons that are far away from the obtained polaronic configurations.
-    One then can use other features, e.g. [[varpeq_select]] to fully converge a "metastable"
-    state without any constraints.
+    One then can use other features, e.g. [[varpeq_select]] or [[varpeq_nstep_ort]]
+    to fully converge a "metastable" state without any constraints.
+
+    Also, a single polaronic solution is invariant by primitive translations in a
+    supercell.
+    In order to eliminiate such trivial solutions, [[varpeq_translate]] variable
+    can be used.
 """,
 ),
 
@@ -24561,19 +24566,57 @@ Variable(
     abivarname="varpeq_gpr_length",
     varset="eph",
     vartype="real",
-    topics=['polaron_basic'],
+    topics=['Polaron_basic'],
     dimensions="(3)",
     defaultval=(1, 1, 1),
-    mnemonics="variational polaron equations: gaussian parameters -- localization length",
+    mnemonics="VARiational Polaron EQuations: Gaussian PaRameters -- localization LENGTH",
     requires='[[eph_task]] == 13 and [[varpeq_aseed]] == "gau_length"',
     added_in_version="10.1.4",
     text=r"""
-if [[varpeq_aseed]] == "gau_length", this variable defines defines the estimated polaron
+If [[varpeq_aseed]] == "gau_length", this variable defines the estimated polaron
 localization lengths $a_x$, $a_y$, $a_z$ for the spread of gaussian function to be used
 as initial seed for the vector electronic coefficients.
-see [[varpeq_aseed]] for details.
+See [[varpeq_aseed]] for details.
 """,
 ),
+
+#Variable(
+#    abivarname="varpeq_translate",
+#    varset="eph",
+#    vartype="integer",
+#    topics=['Polaron_basic'],
+#    dimensions="scalar",
+#    defaultval=0,
+#    mnemonics="VARiational Polaron EQuations: TRANSLATE solutions",
+#    requires='[[eph_task]] == 13 and [[varpeq_nstates]] > 1',
+#    added_in_version="10.1.4",
+#    text=r"""
+#If non-zero and [[varpeq_nstates]] > 1, this variable activates the translation
+#of previously obtained polaronic solutions prior to solving variational polaron
+#equations for a new one.
+#This helps to eliminate trivial states that are invariant by primitie translations.
+#See also [[varpeq_nstates]].
+#""",
+#),
+
+#Variable(
+#    abivarname="varpeq_nstep_ort",
+#    varset="eph",
+#    vartype="integer",
+#    topics=['Polaron_basic'],
+#    dimensions="scalar",
+#    defaultval=50,
+#    mnemonics="VARiational Polaron EQuations: Number of STEPs with ORThogonalisation",
+#    requires='[[eph_task]] == 13 and [[varpeq_nstates]] > 1',
+#    added_in_version="10.1.4",
+#    text=r"""
+#This variable defines the number of optimization steps, up to which the orthogonalization
+#to previous polaronic solutions is performed.
+#After [[varpeq_nstep_ort]] the orthogonalization constraint is lifted, which helps to
+#fully relax the polaron, while keeping it far from the previously obtained states.
+#See also [[varpeq_nstates]].
+#""",
+#),
 
 Variable(
     abivarname="eph_fix_korq",
