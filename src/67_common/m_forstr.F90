@@ -75,7 +75,7 @@ module m_forstr
  use m_paw_nhat,         only : pawmknhat
  use m_rhotoxc,          only : rhotoxc
  use m_dfpt_mkvxc,       only : dfpt_mkvxc, dfpt_mkvxc_noncoll
- use m_cgprj,            only : ctocprj
+ use m_cgprj,            only : ctocprj,xg_cprj_copy,CPRJ_TO_XG
  use m_psolver,          only : psolver_hartree
  use m_wvl_psi,          only : wvl_nl_gradient
  use m_fft,              only : fourdp
@@ -844,7 +844,7 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
        ABI_MALLOC(cwavef,(2,npw_k*my_nspinor*blocksize))
      end if
 
-     if (psps%usepaw==1.and.usecprj_local==1.and.usexg/=1) then
+     if (psps%usepaw==1.and.usecprj_local==1) then
        ABI_MALLOC(cwaveprj,(natom,my_nspinor*bandpp))
        call pawcprj_alloc(cwaveprj,0,gs_hamk%dimcprj)
      else
@@ -1079,7 +1079,7 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
 !        Load contribution from n,k
          cwavef(:,1:npw_k*my_nspinor*blocksize)=&
 &         cg(:,1+(iblock-1)*npw_k*my_nspinor*blocksize+icg:iblock*npw_k*my_nspinor*blocksize+icg)
-         if (psps%usepaw==1.and.usecprj_local==1.and.usexg/=1) then
+         if (psps%usepaw==1.and.usecprj_local==1) then
            call pawcprj_get(gs_hamk%atindx1,cwaveprj,cprj,natom,iband_cprj,ibg,ikpt,0,isppol,&
 &           mband_cprj,mkmem,natom,bandpp,nband_cprj_k,my_nspinor,nsppol,0,&
 &           mpicomm=mpi_enreg%comm_kpt,proc_distrb=mpi_enreg%proc_distrb)
@@ -1116,7 +1116,11 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
  &         gpu_option=gpu_option)
            call xgBlock_map_1d(xgeigen,lambda,SPACE_R,blocksize)
 
-           call xg_nonlop_getcprj(xg_nonlop,xgx0,cprj_xgx0%self,cprj_work%self)
+           if (psps%usepaw==1.and.usecprj_local==1) then
+             call xg_cprj_copy(cwaveprj,cprj_xgx0%self,xg_nonlop,CPRJ_TO_XG)
+           else
+             call xg_nonlop_getcprj(xg_nonlop,xgx0,cprj_xgx0%self,cprj_work%self)
+           end if
 
            !  !LTEST
            !  write(901,*) 'grnl_k :'
@@ -1295,7 +1299,7 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
        end if
      end if
 
-     if (psps%usepaw==1.and.usexg/=1) then
+     if (psps%usepaw==1) then
        call pawcprj_free(cwaveprj)
      end if
      ABI_FREE(cwaveprj)
