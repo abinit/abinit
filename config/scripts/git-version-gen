@@ -183,7 +183,8 @@ then
                      echo "$0: WARNING: git rev-list failed" 1>&2; }
             numcommits=`echo "$commit_list" | wc -l`
             v=`echo "$v" | sed "s/\(.*\)-\(.*\)/\1-$numcommits-\2/"`;
-            test "$commit_list" = failed && v=UNKNOWN
+            # In the next line, the last value is the current default
+            test "$commit_list" = failed && v=10.0.8
             ;;
     esac
 
@@ -192,7 +193,8 @@ then
     v=`echo "$v" | sed 's/-\([^-]*\)-g\([^-]*\)$/.\1-\2/'`;
     v_from_git=1
 elif test "x$fallback" = x || git --version >/dev/null 2>&1; then
-    v=UNKNOWN
+    # In the next line, the value is the current default
+    v=10.0.8 
 else
     v=$fallback
 fi
@@ -200,7 +202,7 @@ fi
 v=`echo "$v" |sed "s/^$prefix//"`
 
 # Test whether to append the "-dirty" suffix only if the version
-# string we're using came from git.  I.e., skip the test if it's "UNKNOWN"
+# string we are using came from git.  I.e., skip the test if it is the default value
 # or if it came from .tarball-version.
 if test "x$v_from_git" != x; then
   # Don't declare a version "dirty" merely because a timestamp has changed.
