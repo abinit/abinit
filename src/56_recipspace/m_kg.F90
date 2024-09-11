@@ -320,7 +320,7 @@ end subroutine getmpw
 !!
 !! SOURCE
 
-subroutine mkkin (ecut, ecutsm, effmass_free, gmet, kg, kinpw, kpt, npw, idir1, idir2)
+subroutine mkkin(ecut, ecutsm, effmass_free, gmet, kg, kinpw, kpt, npw, idir1, idir2)
 
 !Arguments ------------------------------------
 !scalars

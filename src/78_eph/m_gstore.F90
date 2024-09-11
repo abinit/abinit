@@ -144,7 +144,7 @@ module m_gstore
  use m_fftcore,        only : ngfft_seq, get_kg
  use m_cgtools,        only : cg_zdotc
  use m_geometry,       only : wigner_seitz
- use m_kg,             only : getph, mkkpg
+ use m_kg,             only : getph, mkkpg, mkkin
  use defs_datatypes,   only : ebands_t, pseudopotential_type
  use m_hdr,            only : hdr_type, fform_from_ext, hdr_ncread
  use m_symtk,          only : matr3inv
@@ -3187,8 +3187,8 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
  real(dp) :: phfrq(3*cryst%natom), ylmgr_dum(1,1,1)
  real(dp),allocatable :: displ_cart_qibz(:,:,:,:), displ_red_qibz(:,:,:,:), pheigvec_qibz(:,:,:,:)
  real(dp),allocatable :: displ_cart_qbz(:,:,:,:), displ_red_qbz(:,:,:,:), pheigvec_qbz(:,:,:,:)
- real(dp),allocatable :: grad_berry(:,:), kinpw1(:), kpg_kq(:,:), kpg_k(:,:), dkinpw(:)
- real(dp),allocatable :: ffnl_k(:,:,:,:), ffnl_kq(:,:,:,:), ph3d(:,:,:), ph3d1(:,:,:)
+ real(dp),allocatable :: grad_berry(:,:), kinpw_k(:), kinpw_kq(:), kpg_kq(:,:), kpg_k(:,:), dkinpw(:)
+ real(dp),allocatable :: ffnl_k(:,:,:,:), ffnl_kq(:,:,:,:), ph3d_k(:,:,:), ph3d_kq(:,:,:)
  real(dp),allocatable :: v1scf(:,:,:,:), gkq_atm(:,:,:,:),gkq_nu(:,:,:,:)
  real(dp),allocatable :: bras_kq(:,:,:), kets_k(:,:,:), h1kets_kq(:,:,:), cgwork(:,:)
  real(dp),allocatable :: ph1d(:,:), vlocal(:,:,:,:), vlocal1(:,:,:,:,:)
@@ -3679,6 +3679,43 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
        call mkffnl_objs(cryst, psps, 1, ffnl_kq, ider0, idir0, kg_kq, kpg_kq, kq_bz, nkpg_kq, npw_kq, ylm_kq, ylmgr_kq, &
                         comm=gqk%pert_comm%value) ! request=ffnl1_request)
 
+#define USE_SETUP 0
+
+#if USE_SETUP == 0
+        !print *, "bypassing getgh1c_setup"
+
+        ABI_MALLOC(kinpw_k, (npw_k))
+        kinpw_k(:)=zero
+        call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass_free, cryst%gmet, kg_k, kinpw_k, kk_bz, npw_k, 0, 0)
+
+        ! Compute (1/2) (2 Pi)**2 (k+q+G)**2:
+        ABI_MALLOC(kinpw_kq, (npw_kq))
+        kinpw_kq(:)=zero
+        call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass_free, cryst%gmet, kg_kq, kinpw_kq, kq_bz, npw_kq, 0, 0)
+
+        ABI_MALLOC(ph3d_k, (2, npw_k, gs_hamkq%matblk))
+        ABI_MALLOC(ph3d_kq, (2, npw_kq, gs_hamkq%matblk))
+
+        !===== Load the k/k+q dependent parts of the Hamiltonian
+        ! Load k-dependent part in the Hamiltonian datastructure
+        !ABI_MALLOC(ph3d_k, (2, npw_k, gs_hamkq%matblk))
+        call gs_hamkq%load_k(kpt_k=kk_bz, npw_k=npw_k, istwf_k=istwf_k, kg_k=kg_k, kpg_k=kpg_k,&
+                             ph3d_k=ph3d_k, compute_ph3d=.true., compute_gbound=.true.)
+
+        call gs_hamkq%load_k(ffnl_k=ffnl_k)
+
+        ! Load k+q-dependent part in the Hamiltonian datastructure
+        ! Note: istwf_k is imposed to 1 for RF calculations (should use istwf_kq instead)
+        call gs_hamkq%load_kprime(kpt_kp=kq_bz, npw_kp=npw_kq, istwf_kp=istwf_k,&
+         kinpw_kp=kinpw_kq, &
+         kg_kp=kg_kq, kpg_kp=kpg_kq, ffnl_kp=ffnl_kq, compute_gbound=.true.)
+
+        if (.not. qq_is_gamma) then
+          !ABI_MALLOC(ph3d_kq,(2, npw_kq, gs_hamkq%matblk))
+          call gs_hamkq%load_kprime(ph3d_kp=ph3d_kq, compute_ph3d=.true.)
+        end if
+#endif
+
        ! Loop over my atomic perturbations and compute gkq_atm.
        gkq_atm = zero
        do my_ip=1,my_npert
@@ -3689,12 +3726,19 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
 
          call rf_hamkq%load_spin(spin, vlocal1=vlocal1(:,:,:,:,my_ip), with_nonlocal=.true.)
 
+#if USE_SETUP == 1
          ! This call is not optimal because there are quantities in out that do not depend on idir,ipert
          call getgh1c_setup(gs_hamkq, rf_hamkq, dtset, psps, kk_bz, kq_bz, idir, ipert, &             ! In
                             cryst%natom, cryst%rmet, cryst%gprimd, cryst%gmet, istwf_k, &             ! In
                             npw_k, npw_kq, useylmgr1, kg_k, ylm_k, kg_kq, ylm_kq, ylmgr_kq, &         ! In
-                            dkinpw, nkpg_k, nkpg_kq, kpg_k, kpg_kq, kinpw1, ffnl_k, ffnl_kq, ph3d, ph3d1, &  ! Out
+                            dkinpw, nkpg_k, nkpg_kq, kpg_k, kpg_kq, kinpw_kq, ffnl_k, ffnl_kq, ph3d_k, ph3d_kq, &  ! Out
                             reuse_kpg_k=1, reuse_kpg1_k=1, reuse_ffnlk=1, reuse_ffnl1=1)              ! Reuse some arrays
+
+         ABI_SFREE(kinpw_kq)
+         ABI_SFREE(dkinpw)
+         ABI_SFREE(ph3d_k)
+         ABI_SFREE(ph3d_kq)
+#endif
 
          ! Calculate dvscf * psi_k, results stored in h1kets_kq on the k+q sphere.
          ! Compute H(1) applied to GS wavefunction Psi(0)
@@ -3709,10 +3753,6 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
                         optnl, opt_gvnlx1, rf_hamkq, sij_opt, tim_getgh1c, usevnl)
          end do
 
-         ABI_SFREE(kinpw1)
-         ABI_SFREE(dkinpw)
-         ABI_SFREE(ph3d)
-         ABI_SFREE(ph3d1)
          call rf_hamkq%free()
 
          ! Calculate <psi_{k+q,j}|dvscf_q*psi_{k,i}> for this perturbation. No need to handle istwf_kq because it's always 1.
@@ -3730,6 +3770,11 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
        ABI_FREE(ffnl_kq)
        ABI_FREE(kpg_k)
        ABI_FREE(kpg_kq)
+
+       ABI_SFREE(ph3d_k)
+       ABI_SFREE(ph3d_kq)
+       ABI_SFREE(kinpw_k)
+       ABI_SFREE(kinpw_kq)
 
        ! Collect gkq_atm inside pert_comm so that all procs can operate on the data.
        if (gqk%pert_comm%nproc > 1) call xmpi_sum(gkq_atm, gqk%pert_comm%value, ierr)
