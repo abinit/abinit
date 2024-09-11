@@ -946,13 +946,6 @@ contains
          else
             gxfac_sij=gx
          end if
-         !LTEST
-         !write(900,*) 'gx:',gx
-         !write(900,*) 'gxfac:',gxfac
-         if (choice==2) then
-           write(900,*) 'dgxdt:',dgxdt
-         end if
-         !LTEST
 
 !        Operate with the non-local potential on the projected scalars,
 !        in order to get contributions to energy/forces/stress/dyn.mat

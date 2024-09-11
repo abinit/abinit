@@ -791,29 +791,6 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 
  !call cwtime(cpu, wall, gflops, "start")
 
- !LTEST
- if (dtset%cprj_in_memory==0) then
-   write(900,*) 'start'
- else
-   write(901,*) 'start'
- end if
- if (optforces/=0) then
-   if (dtset%cprj_in_memory==0) then
-     write(900,*) 'npband :',mpi_enreg%nproc_band
-     write(900,*) 'bandpp :',mpi_enreg%bandpp
-     write(900,*) 'nband_k :',nband_k
-     write(900,*) 'nblockbd :',nblockbd
-     write(900,*) 'blocksize :',blocksize
-   else
-     write(901,*) 'npband :',mpi_enreg%nproc_band
-     write(901,*) 'bandpp :',mpi_enreg%bandpp
-     write(901,*) 'nband_k :',nband_k
-     write(901,*) 'nblockbd :',nblockbd
-     write(901,*) 'blocksize :',blocksize
-   end if
- end if
- !LTEST
-
  if (dtset%cprj_in_memory==1) then
    ncols_cprj = blocksize*my_nspinor/mpi_enreg%nproc_band
    call xg_init(cprj_xgx0,xg_nonlop%space_cprj,xg_nonlop%cprjdim,ncols_cprj,comm=xg_nonlop%comm_band)
@@ -1167,13 +1144,6 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
                  iband=iband+1;ibs=ii+nnlout*(iblocksize-1)
                  grnl_k(1:nnlout,iband)=enlout(ibs+1:ibs+nnlout)
                end do
-       !LTEST
-       write(900,*) 'grnl_k :'
-       do iband=1,blocksize
-       write(900,*) grnl_k(:,iband+(iblock-1)*blocksize)
-       end do
-       write(900,*) ''
-       !LTEST
              end if
   !          Store cprj (<Pnl|Psi>)
              if (gs_hamk%usepaw==1.and.gs_hamk%usecprj==1) then
@@ -1209,13 +1179,6 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
                grnl_k_block => grnl_k(:,1+(iblock-1)*blocksize:iblock*blocksize)
                call xgBlock_map(xgforces,grnl_k_block,SPACE_R,3*natom,blocksize)
                call xg_nonlop_forces_stress(xg_nonlop,xgx0,cprj_xgx0%self,cprj_work%self,xgeigen,forces=xgforces)
-               !LTEST
-               write(901,*) 'grnl_k :'
-               do iband=1,blocksize
-                 write(901,*) grnl_k_block(:,iband)
-               end do
-               write(901,*) ''
-               !LTEST
              end if
 
              if (gs_hamk%usepaw==1) then
@@ -1230,13 +1193,6 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    end if
    ABI_NVTX_END_RANGE()
  end do !  End of loop on blocks
- !LTEST
- if (dtset%cprj_in_memory==0) then
- flush(900)
- else
- flush(901)
-end if
- !LTEST
 
  if (dtset%cprj_in_memory==1) then
 

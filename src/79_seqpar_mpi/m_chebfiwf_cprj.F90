@@ -68,9 +68,6 @@ module m_chebfiwf_cprj
 
  integer, parameter :: l_tim_getghc=5
 
- integer, parameter :: CPRJ_ALLOC=1
- integer, parameter :: CPRJ_FREE=2
-
 ! For use in getghc_gsc1
  integer, save :: l_prtvol
  type(mpi_type),pointer,save :: l_mpi_enreg
@@ -338,54 +335,6 @@ subroutine build_kin(kin,kinpw,npw)
   end do
 
 end subroutine build_kin
-
-!subroutine xg_cprj_copy(cprj_cwavef_bands,cprj_contiguous,space_cprj,ncprj,xg_cprj,xg_nonlop,comm,option)
-!
-!  implicit none
-!
-!  integer, intent(in) :: comm,space_cprj,ncprj,option
-!  type(pawcprj_type),intent(inout)   :: cprj_cwavef_bands(:,:)
-!  real(dp),allocatable,intent(inout) :: cprj_contiguous(:,:)
-!  type(xgBlock_t), intent(inout) :: xg_cprj
-!  type(xg_nonlop_t), intent(in)  :: xg_nonlop
-!
-!  integer :: cplex,cprj_index,iatom,iband,ispinor,nlmn,nspinor
-!
-!  if (option/=CPRJ_ALLOC.and.option/=CPRJ_FREE) then
-!    ABI_ERROR('Bad option')
-!  end if
-!
-!  cplex=2;if (space_cprj==SPACE_R) cplex=1
-!
-!  nspinor = xg_nonlop%nspinor
-!
-!  if (option==CPRJ_ALLOC) then
-!    ABI_MALLOC(cprj_contiguous,(cplex,xg_nonlop%cprjdim*ncprj*nspinor))
-!    call xgBlock_map(xg_cprj,cprj_contiguous,space_cprj,xg_nonlop%cprjdim,ncprj*nspinor,comm)
-!  end if
-!
-!  cprj_index=1
-!  do iband=1,ncprj
-!    do iatom=1,xg_nonlop%natom
-!      nlmn=xg_nonlop%nlmn_natom(iatom)
-!      do ispinor=1,nspinor
-!        if (option==CPRJ_ALLOC) then
-!          cprj_contiguous(:,cprj_index:cprj_index+nlmn-1) = &
-!            cprj_cwavef_bands(iatom,(iband-1)*nspinor+ispinor)%cp(1:cplex,1:nlmn)
-!        else
-!          cprj_cwavef_bands(iatom,(iband-1)*nspinor+ispinor)%cp(1:cplex,1:nlmn) = &
-!            & cprj_contiguous(:,cprj_index:cprj_index+nlmn-1)
-!        end if
-!        cprj_index=cprj_index+nlmn
-!      end do
-!    end do
-!  end do
-!
-!  if (option==CPRJ_FREE) then
-!    ABI_FREE(cprj_contiguous)
-!  end if
-!
-!end subroutine xg_cprj_copy
 
 end module m_chebfiwf_cprj
 !!***

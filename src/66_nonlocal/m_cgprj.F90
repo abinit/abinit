@@ -1102,9 +1102,6 @@ contains
          if (size(cprj(iatom,iband_spin)%cp)/=2*nlmn) then ! NOTE: cprj%cp size is always (2,nlmn) even in the real case
            ABI_ERROR('Bad size for cprj_cwavef_bands%cp')
          end if
-         !LTEST
-         write(900,*) cprj(iatom,iband_spin)%cp(1:cplex,:)
-         !LTEST
          if (option==CPRJ_TO_XG) then
            do ilmn=1,nlmn
              start = 1+cplex*(ilmn-1)+cprj_shift
@@ -1120,9 +1117,6 @@ contains
                cprj_contiguous(start:end,iband_spin)
            end do
          end if
-         !LTEST
-         write(901,*) cprj(iatom,iband_spin)%cp(1:cplex,:)
-         !LTEST
          cprj_shift=cprj_shift+cplex*nlmn
        end do
      end do
