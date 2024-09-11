@@ -32,7 +32,7 @@ module m_getgh1c
  use m_time,        only : timab
  use m_fstrings,    only : sjoin, ltoa
  use m_pawcprj,     only : pawcprj_type, pawcprj_alloc, pawcprj_free, &
-      & pawcprj_copy, pawcprj_lincom, pawcprj_axpby, pawcprj_mpi_sum
+                           pawcprj_copy, pawcprj_lincom, pawcprj_axpby, pawcprj_mpi_sum
  use m_kg,          only : kpgstr, mkkin, mkkpg, mkkin_metdqdq
  use m_mkffnl,      only : mkffnl
  use m_pawfgr,      only : pawfgr_type

@@ -3277,7 +3277,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
  end if
 
  ! Initialize the wave function descriptor.
- ! Only wavefunctions for the symmetrical imagine of the k/k+q wavevectors treated by this MPI rank are stored.
+ ! Only wavefunctions for the symmetrical image of the k/k+q wavevectors treated by this MPI rank are stored.
  ABI_MALLOC(nband, (nkibz, nsppol))
  ABI_MALLOC(bks_mask, (mband, nkibz, nsppol))
  ABI_MALLOC(keep_ur, (mband, nkibz, nsppol))
@@ -3634,7 +3634,6 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
        end if
 
        ! Number of bands crossing the Fermi level at k+q
-       !bstart_kq = fs%bstart_cnt_ibz(1, ikq_ibz); nband_kq = fs%bstart_cnt_ibz(2, ikq_ibz)
        bstart_kq = gqk%bstart; nband_kq = gqk%nb
        ABI_CHECK(nband_k <= nb .and. nband_kq <= nb, "wrong nband")
 

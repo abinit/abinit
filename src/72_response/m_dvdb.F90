@@ -2971,10 +2971,18 @@ subroutine dvdb_ftinterp_qpt(db, qpt, nfft, ngfft, ov1r, comm_rpt, add_lr)
      ! unfortunately the API does not support transa so one has to transport db%wsr.
      ! Alternatively, compute all my_npert with ZGEMM (more memory but it should be more efficient).
 
+#if 1
      call SGEMV("T", db%my_nrpt, nfft, one_sp, db%wsr(1,1,1,ispden,imyp), db%my_nrpt, weiqr_sp(1,1), 1, &
                 zero_sp, ov1r_sp(1,1), 2)
      call SGEMV("T", db%my_nrpt, nfft, one_sp, db%wsr(1,1,1,ispden,imyp), db%my_nrpt, weiqr_sp(1,2), 1, &
                 zero_sp, ov1r_sp(2,1), 2)
+
+#else
+     ! Use BLAS ZGEMM for 2 matrix-vector operations
+     ! One matrix multiplication call replaces two SGEMV calls
+     call SGEMM("T", "N", db%my_nrpt, 2, nfft, one_sp, db%wsr(1,1,1,ispden,imyp), db%my_nrpt, &
+                weiqr_sp, nfft, zero_sp, ov1r_sp, db%my_nrpt)
+#endif
 
      ov1r(:, :, ispden, imyp) = ov1r_sp(:, :)
 
@@ -4461,7 +4469,7 @@ end subroutine dvdb_merge_files
 !!
 !! SOURCE
 
-pure subroutine calc_eiqr(qpt, nrpt, rpt, eiqr)
+subroutine calc_eiqr(qpt, nrpt, rpt, eiqr)
 
 !Arguments -------------------------------
 !scalars
@@ -4477,6 +4485,7 @@ pure subroutine calc_eiqr(qpt, nrpt, rpt, eiqr)
 
 ! *********************************************************************
 
+!$OMP PARALLEL DO PRIVATE(qr)
  do ir=1,nrpt
    qr = two_pi * dot_product(qpt, rpt(:,ir))
    eiqr(1, ir) = cos(qr); eiqr(2, ir) = sin(qr)

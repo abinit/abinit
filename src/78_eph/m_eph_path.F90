@@ -39,7 +39,6 @@ module m_eph_path
  use m_dtset
  use m_dtfil
  !use m_clib
- !use m_mkffnl
 
  use defs_abitypes,    only : mpi_type
  use defs_datatypes,   only : ebands_t, pseudopotential_type
@@ -95,8 +94,7 @@ contains  !=====================================================
 !!
 !! SOURCE
 
-subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, &
-                        pawfgr, pawang, pawrad, pawtab, psps, comm)
+subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawang, pawrad, pawtab, psps, comm)
 
 !Arguments ------------------------------------
 !scalars
@@ -135,21 +133,18 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, &
  character(len=5000) :: msg
  character(len=10) :: priority
 !!arrays
- integer :: units(2), ngfft(18),ngfftf(18)
- integer :: coords_spin(ndims), dims(ndims)
+ integer :: units(2), ngfft(18),ngfftf(18), coords_spin(ndims), dims(ndims)
  integer,allocatable :: kg_k(:,:), kg_kq(:,:), qmap_symrec(:,:), my_ik_inds(:), my_iq_inds(:), my_spins(:), my_iperts(:)
  integer,allocatable :: pert_table(:,:), my_pinfo(:,:)
  real(dp) :: kk(3), qq(3), kq(3), phfreqs(3*cryst%natom), phfreqs_ev(3*cryst%natom), fake_path(3,2)
  real(dp),allocatable :: grad_berry(:,:), kinpw1(:), dkinpw(:), qvers_red(:,:)
- real(dp),allocatable :: cg_k(:,:,:), cg_kq(:,:,:), prev_cg_kq(:,:,:), gsc_k(:,:,:), gsc_kq(:,:,:),eig_k(:), eig_kq(:)
+ real(dp),allocatable :: cg_k(:,:,:), cg_kq(:,:,:), gsc_k(:,:,:), gsc_kq(:,:,:),eig_k(:), eig_kq(:)
  real(dp),allocatable :: v1scf(:,:,:,:), vlocal1(:,:,:,:), vlocal(:,:,:,:), gkq_atm(:,:,:,:), gkq_nu(:,:,:,:), gkq2_nu(:,:,:)
- real(dp),allocatable :: gvnlx1(:,:), gs1c(:,:), h1kets_kq(:,:,:)
- real(dp),allocatable :: displ_cart(:,:,:,:),displ_red(:,:,:,:)
+ real(dp),allocatable :: gvnlx1(:,:), gs1c(:,:), h1kets_kq(:,:,:), displ_cart(:,:,:,:),displ_red(:,:,:,:)
  real(dp),allocatable :: kpg_k(:,:), ph3d_k(:,:,:), kinpw_k(:), ffnl_k(:,:,:,:), vlocal_k(:,:,:,:)
  real(dp),allocatable :: kpg_kq(:,:), ph3d_kq(:,:,:), kinpw_kq(:), ffnl_kq(:,:,:,:), vlocal_kq(:,:,:,:)
  real(dp),allocatable :: ylm_kq(:,:), ylm_k(:,:), ylmgr_kq(:,:,:), rvec(:) !, work(:,:,:,:)
- real(dp),allocatable :: ph3d(:,:,:), ph3d1(:,:,:)  ! ffnlk(:,:,:,:), ffnl1(:,:,:,:),
- real(dp),allocatable :: phfreqs_nanal(:,:), displ_cart_nanal(:,:,:,:,:)
+ real(dp),allocatable :: ph3d(:,:,:), ph3d1(:,:,:), phfreqs_nanal(:,:), displ_cart_nanal(:,:,:,:,:)
  logical :: reorder, periods(ndims), keepdim(ndims)
  type(pawcprj_type),allocatable  :: cwaveprj0(:,:)
 !************************************************************************
@@ -157,7 +152,6 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, &
  ! TODO:
  ! 1) Add possibility of selecting bands
  ! 2) Save g^2 in nc format without any average. This operation will be performed by Abipy (need ph freqs and eigenergies)
- ! 3) MPI-parallelism (spin, k/q-points and perturbations)
 
  if (psps%usepaw == 1) then
    ABI_ERROR("PAW not implemented")
@@ -171,12 +165,12 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, &
  ! Copy important dimensions
  natom = cryst%natom; natom3 = 3 * natom; nsppol = dtset%nsppol; nspinor = dtset%nspinor; nspden = dtset%nspden
 
- ! Build path. NB: Input variables have been already checked for consistency in chkinp.
+ ! Build (k/q)-path. NB: Input variables have been already checked for consistency in chkinp.
  select case (dtset%eph_fix_korq)
  case ("k")
    qpath = kpath_new(dtset%ph_qpath(:,1:dtset%ph_nqpath), cryst%gprimd, dtset%ph_ndivsm)
    nq_path = qpath%npts
-   call qpath%print(units, header=sjoin("q-point path for g(k,q) with k:", ktoa(dtset%eph_fix_wavevec)), prtvol=11)
+   call qpath%print(units, header=sjoin("q-point path for g(k,q) with k:", ktoa(dtset%eph_fix_wavevec)), prtvol=dtset%prtvol)
    fake_path(:,1) = dtset%eph_fix_wavevec; fake_path(:,2) = dtset%eph_fix_wavevec + one
    kpath = kpath_new(fake_path, cryst%gprimd, 0)
    nk_path = 1
@@ -184,7 +178,7 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, &
  case ("q")
    kpath = kpath_new(dtset%kptbounds(:,1:dtset%nkpath), cryst%gprimd, dtset%ndivsm)
    nk_path = kpath%npts
-   call qpath%print(units, header=sjoin("k-point path for g(k,q) with q:", ktoa(dtset%eph_fix_wavevec)), prtvol=11)
+   call qpath%print(units, header=sjoin("k-point path for g(k,q) with q:", ktoa(dtset%eph_fix_wavevec)), prtvol=dtset%prtvol)
    fake_path(:,1) = dtset%eph_fix_wavevec; fake_path(:,2) = dtset%eph_fix_wavevec + one
    qpath = kpath_new(fake_path, cryst%gprimd, 0)
    nq_path = 1
@@ -193,29 +187,46 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, &
    ABI_ERROR(sjoin("Invalid value of eph_fix_korq:", dtset%eph_fix_korq))
  end select
 
- ! Define band range and nb_in_g
- nband = dtset%mband
- bstart = dtset%eph_path_brange(1); bstop = dtset%eph_path_brange(2)
+ ! Define band range and nb_in_g from eph_path_brange
+ nband = dtset%mband; bstart = dtset%eph_path_brange(1); bstop = dtset%eph_path_brange(2)
+ if (bstart <= 0) bstart = 1
+ if (bstop <= 0) bstop = nband
  nb_in_g = bstop - bstart + 1
- call wrtout(units, sjoin("Computing g with eph_path_brange:", ltoa(dtset%eph_path_brange)))
+
+ ! Values of eph_path_brange should be validated at this level!
+ ABI_CHECK_IRANGE(bstart, 1, nband, "Wrong eph_path_brange(1)")
+ ABI_CHECK_IRANGE(bstop, 1, nband, "Wrong eph_path_brange(2)t")
+ ABI_CHECK_IGEQ(bstop, bstart, "eph_path_brange(2) < eph_path_brange(1)")
+ call wrtout(units, sjoin("Computing g with eph_path_brange:", ltoa([bstart, bstop])))
 
  ! Distribute spins iside input comm.
  call xmpi_split_nsppol(comm, nsppol, my_nspins, my_spins, comm_my_is)
 
- ! And now the MPI cartesian grid.
+ ! ==================
+ ! MPI cartesian grid
+ ! ==================
  my_npert = natom3
  do my_is=1,my_nspins
    spin = my_spins(my_is)
    np = comm_my_is(my_is)%nproc; priority = "12"
 
-   if (nk_path == 1) then
-     call xmpi_distrib_2d(np, priority, nq_path, natom3, qpt_comm%nproc, pert_comm%nproc, ierr)
-   else
-     call xmpi_distrib_2d(np, priority, nk_path, natom3, kpt_comm%nproc, pert_comm%nproc, ierr)
-   end if
-   ABI_CHECK(ierr == 0, sjoin("Cannot distribute nprocs:", itoa(np), " with priority: ", priority))
+   if (any(dtset%eph_np_pqbks /= 0)) then
+     pert_comm%nproc = dtset%eph_np_pqbks(1)
+     qpt_comm%nproc  = dtset%eph_np_pqbks(2)
+     ABI_CHECK(dtset%eph_np_pqbks(3) == 1, "Band parallelism not implemented in eph_path")
+     kpt_comm%nproc = dtset%eph_np_pqbks(4)
 
-   ! Consistency check.
+   else
+     ! Automatic generation
+     if (nk_path == 1) then
+       call xmpi_distrib_2d(np, priority, nq_path, natom3, qpt_comm%nproc, pert_comm%nproc, ierr)
+     else
+       call xmpi_distrib_2d(np, priority, nk_path, natom3, kpt_comm%nproc, pert_comm%nproc, ierr)
+     end if
+     ABI_CHECK(ierr == 0, sjoin("Cannot distribute nprocs:", itoa(np), " with priority: ", priority))
+   end if
+
+   ! Consistency check
    write(msg, "(a,i2,a,3(i0,1x))")"P Cartesian grid for spin", spin, ": (pert_comm%nproc, qpt_comm%nproc, kpt_comm%nproc) = ", &
                                   pert_comm%nproc, qpt_comm%nproc, kpt_comm%nproc
    call wrtout(units, msg)
@@ -256,6 +267,16 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, &
  ABI_CHECK_IGEQ(my_nqpath, 1, "Too many procs for q-points")
  ABI_CHECK_IGEQ(my_npert, 1, "Too many procs for perturbationss")
 
+ if (pert_comm%nproc > 1) then
+   ! Build table with list of perturbations treated by this CPU inside pert_comm
+   call ephtk_set_pertables(cryst%natom, my_npert, pert_table, my_pinfo, pert_comm%value)
+   ! Activate parallelism over perturbations
+   call dvdb%set_pert_distrib(my_npert, natom3, my_pinfo, pert_table, pert_comm%value)
+   ABI_FREE(my_pinfo)
+   ABI_FREE(pert_table)
+   ABI_WARNING("Parallelism over pertubations should be tested.")
+ end if
+
  ! Load KS potential from file.
  call nscf%init(dtset, dtfil, cryst, comm)
 
@@ -268,16 +289,7 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, &
  ! Open the DVDB file
  call dvdb%open_read(ngfftf, xmpi_comm_self)
 
- if (pert_comm%nproc > 1) then
-   ! Build table with list of perturbations treated by this CPU inside pert_comm
-   call ephtk_set_pertables(cryst%natom, my_npert, pert_table, my_pinfo, pert_comm%value)
-   ! Activate parallelism over perturbations
-   call dvdb%set_pert_distrib(my_npert, natom3, my_pinfo, pert_table, pert_comm%value)
-   ABI_FREE(my_pinfo)
-   ABI_FREE(pert_table)
-   ABI_WARNING("Parallelism over pertubations should be tested.")
- end if
-
+ ! Check if the q-points are present in the DVDB
  qptopt = dtset%kptopt; if (dtset%qptopt /= 0) qptopt = dtset%qptopt
  call dvdb%need_ftinterp(nq_path, qpath%points, qptopt, qmap_symrec, use_ftinterp)
 
@@ -309,6 +321,7 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, &
  ABI_MALLOC(gkq_nu, (2, nb_in_g, nb_in_g, natom3))
  ABI_MALLOC(gkq2_nu, (nb_in_g, nb_in_g, natom3))
 
+ ! Master writes metada to GPATH file.
  gpath_path = strcat(dtfil%filnam_ds(4), "_GPATH.nc")
 
  if (my_rank == master) then
@@ -317,7 +330,7 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, &
    ! Add crystalline structure.
    NCF_CHECK(cryst%ncwrite(ncid))
 
-   ! Write gstore dimensions
+   ! Write dimensions
    ncerr = nctk_def_dims(ncid, [ &
       nctkdim_t("nspinor", nspinor), &
       nctkdim_t("nspden", nspden), &
@@ -394,20 +407,20 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, &
    NCF_CHECK(nf90_close(ncid))
  end if
 
- ! Make sure the nc file has been written by master before continuing.
- call xmpi_barrier(comm)
+ call xmpi_barrier(comm) ! Make sure the nc file has been written by master before continuing.
 
- ! Open GPATH file
+ ! All procs open GPATH here
  NCF_CHECK(nctk_open_modify(ncid, gpath_path, comm))
 
- ! Loop over spins (MPI parallelized)
+ ! The cache allows one the reuse the wavefunctions of the previous k/q to init the NSCF cycle
+ ! It usually reduces the number of iterations by 3-4 but it requires more memory.
  tot_nscf_ierr = 0
-
  use_cache = .True.
- use_cache = .False.
+ !use_cache = .False.
  call ucache_k%init(use_cache .and. my_nkpath > 1, ngfft)
  call ucache_kq%init(use_cache .and. my_nqpath > 1, ngfft)
 
+ ! Loop over spins (MPI parallelized)
  do my_is=1,my_nspins
    spin = my_spins(my_is)
 
@@ -420,7 +433,6 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, &
      ! This is the reason why we use vlocal_k (vlocal_kq) although this term does not depend on k
      kk = kpath%points(:, ik)
 
-#if 1
      call nscf%setup_kpt(spin, kk, istwfk_1, nband, cryst, dtset, dtfil, psps, pawtab, pawfgr, &
                          npw_k, kg_k, kpg_k, ph3d_k, kinpw_k, ffnl_k, vlocal_k, cg_k, gsc_k, gs_hamk)
 
@@ -432,11 +444,6 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, &
                          use_cg_k, npw_k, cg_k, gsc_k, eig_k, msg, ierr)
 
      call ucache_k%store_kpt(kk, istwfk_1, npw_k, nspinor, nband, kg_k, cg_k)
-#else
-
-     call nscf%solve(spin, kk, istwfk_1, nband, cryst, dtset, dtfil, psps, pawtab, pawfgr, &
-                     npw_k, kg_k, kpg_k, ph3d_k, kinpw_k, ffnl_k, vlocal_k, cg_k, gsc_k, eig_k, gs_hamk, msg, ierr) ! out
-#endif
 
      ABI_WARNING_IF(ierr /= 0, msg)
      tot_nscf_ierr = tot_nscf_ierr + ierr
@@ -464,43 +471,33 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, &
        phfreqs_eV = phfreqs * Ha_eV
 
        ! Compute psi_mkq
-       !if (qq_is_gamma) then
-       !  call nscf%solve(spin, kq, istwfk_1, nband, cryst, dtset, dtfil, psps, pawtab, pawfgr, &
-       !                  npw_kq, kg_kq, kpg_kq, ph3d_kq, kinpw_kq, ffnl_kq, vlocal_kq, cg_kq, gsc_kq, eig_kq, gs_hamkq, msg, ierr, & ! out
-       !                  init_cg_k=cg_k)
-       !  ! This to have the same gauge when qq = 0
-       !  cg_kq = cg_k
+       call nscf%setup_kpt(spin, kq, istwfk_1, nband, cryst, dtset, dtfil, psps, pawtab, pawfgr, &
+                           npw_kq, kg_kq, kpg_kq, ph3d_kq, kinpw_kq, ffnl_kq, vlocal_kq, cg_kq, gsc_kq, gs_hamkq)
 
-       !else
-#if 1
-         call nscf%setup_kpt(spin, kq, istwfk_1, nband, cryst, dtset, dtfil, psps, pawtab, pawfgr, &
-                             npw_kq, kg_kq, kpg_kq, ph3d_kq, kinpw_kq, ffnl_kq, vlocal_kq, cg_kq, gsc_kq, gs_hamkq)
-
-         ! cache.
-         use_cg_kq = (my_iq > 1 .and. ucache_kq%use_cache)
-         if (use_cg_kq) call ucache_kq%get_kpt(kq, istwfk_1, npw_kq, nspinor, nband, kg_kq, cg_kq)
-
-         call nscf%solve_kpt(spin, kq, istwfk_1, nband, cryst, dtset, dtfil, psps, pawtab, pawfgr, gs_hamkq, &
-                             use_cg_kq, npw_kq, cg_kq, gsc_kq, eig_kq, msg, ierr)
-
-         call ucache_kq%store_kpt(kq, istwfk_1, npw_kq, nspinor, nband, kg_kq, cg_kq)
-
-#else
-         call nscf%solve(spin, kq, istwfk_1, nband, cryst, dtset, dtfil, psps, pawtab, pawfgr, &
-                         npw_kq, kg_kq, kpg_kq, ph3d_kq, kinpw_kq, ffnl_kq, vlocal_kq, cg_kq, gsc_kq, eig_kq, gs_hamkq, msg, ierr)
-#endif
-       !end if
+       ! cache.
+       use_cg_kq = (my_iq > 1 .and. ucache_kq%use_cache)
+       if (use_cg_kq) call ucache_kq%get_kpt(kq, istwfk_1, npw_kq, nspinor, nband, kg_kq, cg_kq)
 
        if (qq_is_gamma) then
-         ! This to have the same gauge when qq = 0
+         ! We can use cg_k as input for the NSCF for a very quick NSCF
+         use_cg_kq = .True.
          cg_kq = cg_k
        end if
+
+       call nscf%solve_kpt(spin, kq, istwfk_1, nband, cryst, dtset, dtfil, psps, pawtab, pawfgr, gs_hamkq, &
+                           use_cg_kq, npw_kq, cg_kq, gsc_kq, eig_kq, msg, ierr)
+
+       call ucache_kq%store_kpt(kq, istwfk_1, npw_kq, nspinor, nband, kg_kq, cg_kq)
+
+       ! This to have the same gauge when qq = 0
+       if (qq_is_gamma) cg_kq = cg_k
 
        ABI_WARNING_IF(ierr /= 0, msg)
        tot_nscf_ierr = tot_nscf_ierr + ierr
 
        ! Make sure all procs in pert_comm have the same wavefunctions at k
-       call xmpi_bcast(cg_kq, master, pert_comm%value, ierr); if (psps%usepaw == 1) call xmpi_bcast(gsc_kq, master, pert_comm%value, ierr)
+       call xmpi_bcast(cg_kq, master, pert_comm%value, ierr)
+       if (psps%usepaw == 1) call xmpi_bcast(gsc_kq, master, pert_comm%value, ierr)
 
        !if (my_ik == 1 .and. pert_comm%me == master) then
        if (my_ik == 1) then
@@ -557,12 +554,11 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, &
          call rf_hamkq%load_spin(spin, vlocal1=vlocal1, with_nonlocal=.true.)
 
          ! This call is not optimal because there are quantities in out that do not depend on idir,ipert
-         call getgh1c_setup(gs_hamkq, rf_hamkq, dtset, psps, kk, kq, idir, ipert, &                   ! In
-                            cryst%natom, cryst%rmet, cryst%gprimd, cryst%gmet, istwfk_1, &            ! In
-                            npw_k, npw_kq, useylmgr1, kg_k, ylm_k, kg_kq, ylm_kq, ylmgr_kq, &         ! In
-                            dkinpw, nkpg, nkpg1, kpg_k, kpg_kq, kinpw1, ffnl_k, ffnl_kq, ph3d, ph3d1 &! Out
-                            , reuse_kpg_k=1, reuse_kpg1_k=1, reuse_ffnlk=1, reuse_ffnl1=1)            ! Reuse some arrays
-                            !)
+         call getgh1c_setup(gs_hamkq, rf_hamkq, dtset, psps, kk, kq, idir, ipert, &                     ! In
+                            cryst%natom, cryst%rmet, cryst%gprimd, cryst%gmet, istwfk_1, &              ! In
+                            npw_k, npw_kq, useylmgr1, kg_k, ylm_k, kg_kq, ylm_kq, ylmgr_kq, &           ! In
+                            dkinpw, nkpg, nkpg1, kpg_k, kpg_kq, kinpw1, ffnl_k, ffnl_kq, ph3d, ph3d1, & ! Out
+                            reuse_kpg_k=1, reuse_kpg1_k=1, reuse_ffnlk=1, reuse_ffnl1=1)                ! Reuse some arrays
 
          ! Calculate dvscf * psi_k, results stored in h1kets_kq on the k+q sphere.
          ! Compute H(1) applied to GS wavefunction Psi(0)
@@ -683,7 +679,6 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, &
  end if
 
  ! Free memory
- !ABI_SFREE(prev_cg_kq)
  ABI_FREE(my_ik_inds)
  ABI_FREE(my_iq_inds)
  ABI_FREE(gvnlx1)

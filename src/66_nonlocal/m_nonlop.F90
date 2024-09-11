@@ -741,11 +741,13 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
 
  else
 
-   if(xomp_target_is_present(c_loc(vectin))) then
 #ifdef HAVE_OPENMP_OFFLOAD
-     !$OMP TARGET UPDATE FROM(vectin,vectout,svectout) IF(hamk%gpu_option==ABI_GPU_OPENMP)
-#endif
+   if(hamk%gpu_option==ABI_GPU_OPENMP) then
+     if(xomp_target_is_present(c_loc(vectin))) then
+       !$OMP TARGET UPDATE FROM(vectin)
+     end if
    end if
+#endif
 
    !$omp parallel do default(shared), &
    !$omp& firstprivate(ndat,npwin,my_nspinor,choice,signs,paw_opt,npwout,cpopt,nnlout), &
@@ -836,11 +838,16 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
    end do
    !$omp end parallel do
 
-   if(xomp_target_is_present(c_loc(vectin))) then
 #ifdef HAVE_OPENMP_OFFLOAD
-     !$OMP TARGET UPDATE TO(vectin,vectout,svectout) IF(hamk%gpu_option==ABI_GPU_OPENMP)
-#endif
+   if(hamk%gpu_option==ABI_GPU_OPENMP) then
+     if(signs==2 .and. (paw_opt <= 2 .or. paw_opt == 4) .and. xomp_target_is_present(c_loc(vectout))) then
+       !$OMP TARGET UPDATE TO(vectout)
+     end if
+     if(signs==2 .and. paw_opt>=3 .and. xomp_target_is_present(c_loc(svectout))) then
+       !$OMP TARGET UPDATE TO(svectout)
+     end if
    end if
+#endif
 
  end if
 
