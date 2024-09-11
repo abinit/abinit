@@ -109,7 +109,6 @@ contains
 !!  indsy1(4,nsym1,natom)=indirect indexing array for atom labels
 !!  ipert=type of the perturbation
 !!  irrzon1(nfft**(1-1/nsym1),2,(nspden/nsppol)-3*(nspden/4))=irreducible zone data
-!!  istep=index of the number of steps in the routine dfpt_scfcv
 !!  istwfk_rbz(nkpt_rbz)=input option parameter that describes the storage of wfs
 !!  kg(3,mpw*mkmem)=reduced planewave coordinates.
 !!  kg1(3,mpw1*mk1mem)=reduced planewave coordinates at k+q, with RF k points
@@ -224,7 +223,7 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
 & dim_eig2rf,doccde_rbz,docckqde,dtefield,dtfil,dtset,qphon,&
 & edocc,eeig0,eigenq,eigen0,eigen1,ek0,ek1,eloc0,end0,end1,enl0,enl1,&
 & evxctau0,evxctau1,fermie1,gh0c1_set,gh1c_set,gmet,gprimd,idir,indsy1,&
-& ipert,irrzon1,istep,istwfk_rbz,kg,kg1,kpt_rbz,mband,mband_mem,&
+& ipert,irrzon1,istwfk_rbz,kg,kg1,kpt_rbz,mband,mband_mem,&
 & mkmem,mkqmem,mk1mem,mpi_enreg,mpw,mpw1,my_natom,&
 & natom,nband_rbz,ncpgr,nfftf,nhat1,nkpt_rbz,npwarr,npwar1,nres2,nspden,&
 & nsppol,nsym1,ntypat,nvresid1,occkq,occ_rbz,optres,&
@@ -234,7 +233,7 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
 
 !Arguments -------------------------------
 !scalars
- integer,intent(in) :: cplex,dbl_nnsclo,dim_eig2rf,idir,ipert,istep,mband,mk1mem,mkmem
+ integer,intent(in) :: cplex,dbl_nnsclo,dim_eig2rf,idir,ipert,mband,mk1mem,mkmem
  integer,intent(in) :: mband_mem
  integer,intent(in) :: mkqmem,mpw,mpw1,my_natom,natom,ncpgr,nfftf,nkpt_rbz,nspden
  integer,intent(in) :: nsppol,nsym1,ntypat,optres,prtvol,usecprj,useylmgr1,with_vectornd
@@ -309,7 +308,6 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
  integer :: nnsclo_now,npw1_k,npw_k,nspden_rhoij,qphase_rhoij,spaceworld,test_dot
  integer :: nband_me
  logical :: has_vectornd,has_vxctau,paral_atom,qne0
- integer :: signs,choice
  real(dp) :: arg,wtk_k
  type(gs_hamiltonian_type) :: gs_hamkq
  type(rf_hamiltonian_type) :: rf_hamkq,rf_hamk_dir2
