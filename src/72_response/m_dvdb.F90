@@ -4469,7 +4469,7 @@ end subroutine dvdb_merge_files
 !!
 !! SOURCE
 
-pure subroutine calc_eiqr(qpt, nrpt, rpt, eiqr)
+subroutine calc_eiqr(qpt, nrpt, rpt, eiqr)
 
 !Arguments -------------------------------
 !scalars
