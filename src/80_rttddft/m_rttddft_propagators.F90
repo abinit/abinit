@@ -120,7 +120,6 @@ subroutine rttddft_propagator_er(dtset, ham_k, istep, mpi_enreg, psps, tdks, cal
  integer                        :: shift
  integer                        :: spaceComm_distrb
  integer                        :: n4, n5, n6
- integer                        :: signs, choice
  logical                        :: with_vxctau
  logical                        :: lcalc_properties
  type(energies_type)            :: energies
