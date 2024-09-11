@@ -56,7 +56,8 @@ module m_cgwf
  use m_pawfgr,        only : pawfgr_type
  use m_mkffnl,        only : mkffnl_objs
  use m_initylmg,      only : initylmg
- use m_abi_linalg, only : abi_linalg_init, abi_linalg_finalize
+ use m_abi_linalg,    only : abi_linalg_init, abi_linalg_finalize
+ use m_cgtk,          only : cgtk_fixphase
 
  implicit none
 
@@ -2689,6 +2690,9 @@ subroutine nscf_solve_kpt(nscf, isppol, kpt, istwf_k, nband, cryst, dtset, dtfil
              pwind, pwind_alloc0, pwnsfac, pwnsfacq, quit0, resid, &
              subham, subovl, subvnlx, dtset%tolrde, dtset%tolwfr_diago, use_subovl0, use_subvnlx0, mod(dtset%wfoptalg, 100), zshift)
 
+   !call rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kinpw, gsc, &
+   !                 mpi_enreg, nband, npw, my_nspinor, resid, rmm_diis_status)
+
    ! subspace rotation (without this, cgwf will never converge!)
    call subdiago(cg_k, eig_k, evec, gsc_k, icg0, igsc0, istwf_k, mcg, mgsc, nband, npw_k, dtset%nspinor, paral_kgb0, &
                  subham, subovl, use_subovl0, gs_hamk%usepaw, me_g0)
@@ -2706,8 +2710,7 @@ subroutine nscf_solve_kpt(nscf, isppol, kpt, istwf_k, nband, cryst, dtset, dtfil
      msg = sjoin(" NSCF for kpt:", ktoa(kpt), " completed in", itoa(inonsc), "steps. max_resid:", ftoa(max_resid))
      call wrtout(std_out, msg)
      ! Fix the phase of the wavefunctions.
-     !call fxphas_seq(cg_k, gsc_k, icg0, igsc0, istwf_k, mcg, mgsc, nband, npw_k, dtset%usepaw)
-     !cgtk_fixphase(cg, gsc, icg, igsc, istwfk, mcg, mgsc, mpi_enreg, nband_k, npw_k, useoverlap, cprj, nspinor)
+     call cgtk_fixphase(cg_k, gsc_k, icg0, igsc0, istwf_k, mcg, mgsc, mpi_enreg, nband, npw_k, dtset%usepaw)
      exit
    end if
  end do ! inonsc
