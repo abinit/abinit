@@ -15,4 +15,6 @@ inp_files = [
     "t02.abi" ,  # check Wyckoff positions of trigonal groups 143-167
     "t03.abi" ,  # same as v9[206] but with norm-conserving pseudos
     "t40.abi" ,  # test orbmag calculation when using spatial symmetries for GS nuclear dipole 
+    "t81.abi" ,  # Short MD to test restart on next test
+    "t82.abi" ,  # Test restart of MD from the HIST of previous test using restartxf -1
 ]
