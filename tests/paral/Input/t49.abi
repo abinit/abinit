@@ -46,7 +46,7 @@ ngkpt 3*2
 nshiftk 1
 shiftk 3*0
 
-istwfk *1
+#istwfk *1
 
 optforces 1
 optstress 1
