@@ -1212,10 +1212,11 @@ contains
         if(gpu_option==ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
           !$OMP TARGET UPDATE TO(scal,parity)
-          !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(3) &
-          !$OMP& PRIVATE(idir,ipw,ilmn) MAP(to:atom_dprojs,scal) &
+          !$OMP TARGET TEAMS DISTRIBUTE &
+          !$OMP& PRIVATE(ilmn) MAP(to:atom_dprojs,scal) &
           !$OMP& IF(gpu_option==ABI_GPU_OPENMP)
           do ilmn=1,nlmn_o
+            !$OMP PARALLEL DO COLLAPSE(2) PRIVATE(idir,ipw)
             do idir=1,ndprojs
               do ipw=1,npw
                 atom_dprojs(1,ipw,idir,ilmn) = atom_dprojs(1,ipw,idir,ilmn) * scal(ilmn)
@@ -1224,10 +1225,11 @@ contains
             end do
           end do
           if(nd2projs>0) then
-            !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(3) &
-            !$OMP& PRIVATE(idir,ipw,ilmn) MAP(to:atom_d2projs,scal) &
+            !$OMP TARGET TEAMS DISTRIBUTE &
+            !$OMP& PRIVATE(ilmn) MAP(to:atom_d2projs,scal) &
             !$OMP& IF(gpu_option==ABI_GPU_OPENMP)
             do ilmn=1,nlmn_o
+              !$OMP PARALLEL DO COLLAPSE(2) PRIVATE(idir,ipw)
               do idir=1,nd2projs
                 do ipw=1,npw
                   atom_d2projs(1,ipw,idir,ilmn) = atom_d2projs(1,ipw,idir,ilmn) * scal(ilmn)
@@ -1295,11 +1297,12 @@ contains
       ! multiply by conj(ph3d)
       if (ndprojs>0) then
 #ifdef HAVE_OPENMP_OFFLOAD
-        !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(3) &
-        !$OMP& PRIVATE(ilmn,idir,ipw,tmp) MAP(to:atom_dprojs,ph3d) &
+        !$OMP TARGET TEAMS DISTRIBUTE &
+        !$OMP& PRIVATE(ilmn) MAP(to:atom_dprojs,ph3d) &
         !$OMP& IF(gpu_option==ABI_GPU_OPENMP)
 #endif
         do ilmn=1,nlmn_o
+          !$OMP PARALLEL DO COLLAPSE(2) PRIVATE(tmp,ipw,idir)
           do idir=1,ndprojs
             do ipw=1,npw
               tmp = atom_dprojs(1, ipw, idir,ilmn)
@@ -1313,11 +1316,12 @@ contains
       end if
       if (nd2projs>0) then
 #ifdef HAVE_OPENMP_OFFLOAD
-        !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(3) &
+        !$OMP TARGET TEAMS DISTRIBUTE &
         !$OMP& PRIVATE(ilmn,idir,ipw,tmp) MAP(to:atom_d2projs,ph3d) &
         !$OMP& IF(gpu_option==ABI_GPU_OPENMP)
 #endif
         do ilmn=1,nlmn_o
+          !$OMP PARALLEL DO COLLAPSE(2) PRIVATE(ipw,idir,tmp)
           do idir=1,nd2projs
             do ipw=1,npw
               tmp = atom_d2projs(1, ipw, idir,ilmn)
@@ -1335,11 +1339,12 @@ contains
       if(signs==1 .and. (choice==3 .or. choice==23 .or. choice==55)) then
         if(istwf_k <= 1) then
 #ifdef HAVE_OPENMP_OFFLOAD
-          !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(3) &
+          !$OMP TARGET TEAMS DISTRIBUTE &
           !$OMP& PRIVATE(ilmn,ipw,idir,idir1,idir2) MAP(to:atom_dprojs,dprojs_,kpg) &
           !$OMP& IF(gpu_option==ABI_GPU_OPENMP)
 #endif
           do ilmn=lmn_beg,nlmn
+            !$OMP PARALLEL DO COLLAPSE(2) PRIVATE(ipw,idir,idir1,idir2)
             do idir=1,6
               do ipw=1,npw
                 idir1=alpha(idir);idir2=beta(idir)
@@ -1354,12 +1359,13 @@ contains
           end do
         else ! istwf_k>1
 #ifdef HAVE_OPENMP_OFFLOAD
-          !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(3) &
+          !$OMP TARGET TEAMS DISTRIBUTE &
           !$OMP& PRIVATE(ilmn,ipw,idir,idir1,idir2) MAP(to:atom_dprojs,dprojs_r_,dprojs_i_,kpg) &
           !$OMP& IF(gpu_option==ABI_GPU_OPENMP)
 #endif
-          do idir=1,6
-            do ilmn=lmn_beg,nlmn
+          do ilmn=lmn_beg,nlmn
+            !$OMP PARALLEL DO COLLAPSE(2) PRIVATE(ipw,idir,idir1,idir2)
+            do idir=1,6
               do ipw=1,npw
                 idir1=alpha(idir);idir2=beta(idir)
                 dprojs_r_(1, ipw, shift_grad+(ilmn-1)*ngrads+idir) = &
@@ -1380,11 +1386,12 @@ contains
         igrad=0; if(choice==23) igrad=6
         if(istwf_k <= 1) then
 #ifdef HAVE_OPENMP_OFFLOAD
-          !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(3) &
+          !$OMP TARGET TEAMS DISTRIBUTE &
           !$OMP& PRIVATE(ilmn,ipw,idir) MAP(to:projs,dprojs_,kpg) &
           !$OMP& IF(gpu_option==ABI_GPU_OPENMP)
 #endif
           do ilmn=lmn_beg,nlmn
+            !$OMP PARALLEL DO COLLAPSE(2) PRIVATE(ipw,idir)
             do idir=1,3
               do ipw=1,npw
                 dprojs_(1, ipw, shift_grad+(ilmn-1)*ngrads+igrad+idir) = &
@@ -1396,12 +1403,13 @@ contains
           end do
         else ! istwf_k>1
 #ifdef HAVE_OPENMP_OFFLOAD
-          !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(3) &
+          !$OMP TARGET TEAMS DISTRIBUTE &
           !$OMP& PRIVATE(ilmn,ipw,idir) MAP(to:projs_r,projs_i,dprojs_r_,dprojs_i_,kpg) &
           !$OMP& IF(gpu_option==ABI_GPU_OPENMP)
 #endif
-          do idir=1,3
-            do ilmn=lmn_beg,nlmn
+          do ilmn=lmn_beg,nlmn
+            !$OMP PARALLEL DO COLLAPSE(2) PRIVATE(ipw,idir)
+            do idir=1,3
               do ipw=1,npw
                 dprojs_r_(1, ipw, shift_grad+(ilmn-1)*ngrads+igrad+idir) = &
                 &     +projs_i(1, ipw, shift+ilmn)*kpg(ipw,idir)*two_pi
@@ -1416,11 +1424,12 @@ contains
       if(signs==1 .and. (choice==5 .or. choice==51 .or. choice==54 .or. choice==55)) then
         igrad=0; if(choice==54) igrad=3; if(choice==55) igrad=6
 #ifdef HAVE_OPENMP_OFFLOAD
-        !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(3) &
+        !$OMP TARGET TEAMS DISTRIBUTE &
         !$OMP& PRIVATE(ilmn,ipw) MAP(to:atom_dprojs,dprojs_) &
         !$OMP& IF(gpu_option==ABI_GPU_OPENMP)
 #endif
         do ilmn=lmn_beg,nlmn
+          !$OMP PARALLEL DO COLLAPSE(2) PRIVATE(ipw,idir)
           do idir=1,3
             do ipw=1,npw
               dprojs_(1, ipw, shift_grad+(ilmn-1)*ngrads+igrad+idir) = &
@@ -1434,11 +1443,12 @@ contains
 
       if(signs==2 .and. (choice==2)) then
 #ifdef HAVE_OPENMP_OFFLOAD
-        !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(2) &
+        !$OMP TARGET TEAMS DISTRIBUTE &
         !$OMP& PRIVATE(ilmn,ipw) MAP(to:projs,dprojs_,kpg) &
         !$OMP& IF(gpu_option==ABI_GPU_OPENMP)
 #endif
         do ilmn=lmn_beg,nlmn
+          !$OMP PARALLEL DO PRIVATE(ipw)
           do ipw=1,npw
             dprojs_(1, ipw, shift_grad+ilmn) = &
             &      projs(2, ipw, shift+ilmn)*kpg(ipw,idir_pert)*two_pi
@@ -1451,11 +1461,12 @@ contains
 
       if(signs==2 .and. (choice==3)) then
 #ifdef HAVE_OPENMP_OFFLOAD
-        !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(2) &
+        !$OMP TARGET TEAMS DISTRIBUTE &
         !$OMP& PRIVATE(ilmn,ipw) MAP(to:atom_dprojs,dprojs_) &
         !$OMP& IF(gpu_option==ABI_GPU_OPENMP)
 #endif
         do ilmn=lmn_beg,nlmn
+          !$OMP PARALLEL DO PRIVATE(ipw)
           do ipw=1,npw
             dprojs_(1, ipw, shift_grad+ilmn) = &
             &     -atom_dprojs(1, ipw, 1, ilmn)
@@ -1468,11 +1479,12 @@ contains
 
       if(signs==2 .and. (choice==5 .or. choice==51)) then
 #ifdef HAVE_OPENMP_OFFLOAD
-        !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(2) &
+        !$OMP TARGET TEAMS DISTRIBUTE &
         !$OMP& PRIVATE(ilmn,ipw) MAP(to:atom_dprojs,dprojs_) &
         !$OMP& IF(gpu_option==ABI_GPU_OPENMP)
 #endif
         do ilmn=lmn_beg,nlmn
+          !$OMP PARALLEL DO PRIVATE(ipw)
           do ipw=1,npw
             dprojs_(1, ipw, shift_grad+ilmn) = &
             &     +atom_dprojs(1, ipw, 1, ilmn)
