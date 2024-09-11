@@ -118,7 +118,7 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
  integer :: sij_opt,usecprj,usevnl,optlocal,optnl,opt_gvnlx1, nu
  integer :: spin, iq, ik, nk_path, nq_path, ierr, npw_k, npw_kq, my_rank, nprocs, n1, n2, n3, n4, n5, n6, cplex
  integer :: natom, natom3, nsppol, nspden, nspinor, qptopt, db_iqpt, comm_cart, me_cart
- integer :: nfft,nfftf,mgfft,mgfftf, my_npert, my_ip, idir, ipert, ipc, nkpg, nkpg1, ncerr, ncid, my_nkpath, my_nqpath
+ integer :: nfft,nfftf,mgfft,mgfftf, my_npert, my_ip, idir, ipert, ipc, nkpg_k, nkpg_kq, ncerr, ncid, my_nkpath, my_nqpath
  integer :: in_k, im_kq, my_is, my_ik, my_iq, nband, nb_in_g, band_n, band_m, bstart, bstop, my_nspins, np, tot_nscf_ierr
  real(dp) :: cpu_all,wall_all,gflops_all, eig0nk, eshift
  logical :: qq_is_gamma, use_ftinterp, gen_eigenpb, use_cg_k, use_cg_kq, use_cache
@@ -551,12 +551,37 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
 
          call rf_hamkq%load_spin(spin, vlocal1=vlocal1, with_nonlocal=.true.)
 
+#if 0
          ! This call is not optimal because there are quantities in out that do not depend on idir,ipert
          call getgh1c_setup(gs_hamkq, rf_hamkq, dtset, psps, kk, kq, idir, ipert, &                     ! In
                             cryst%natom, cryst%rmet, cryst%gprimd, cryst%gmet, istwfk_1, &              ! In
                             npw_k, npw_kq, useylmgr1, kg_k, ylm_k, kg_kq, ylm_kq, ylmgr_kq, &           ! In
-                            dkinpw, nkpg, nkpg1, kpg_k, kpg_kq, kinpw1, ffnl_k, ffnl_kq, ph3d, ph3d1, & ! Out
+                            dkinpw, nkpg_k, nkpg_kq, kpg_k, kpg_kq, kinpw1, ffnl_k, ffnl_kq, ph3d, ph3d1, & ! Out
                             reuse_kpg_k=1, reuse_kpg1_k=1, reuse_ffnlk=1, reuse_ffnl1=1)                ! Reuse some arrays
+#else
+
+         !===== Load the k/k+q dependent parts of the Hamiltonian
+         ! Load k-dependent part in the Hamiltonian datastructure
+         !ABI_MALLOC(ph3d, (2, npw_k, gs_hamkq%matblk))
+         call gs_hamkq%load_k(kpt_k=kk, npw_k=npw_k, istwf_k=istwfk_1, kg_k=kg_k, kpg_k=kpg_k,&
+                              ph3d_k=ph3d_k, compute_ph3d=.false., compute_gbound=.true.)
+
+         call gs_hamkq%load_k(ffnl_k=ffnl_k)
+
+         ! Load k+q-dependent part in the Hamiltonian datastructure
+         ! Note: istwf_k is imposed to 1 for RF calculations (should use istwf_kq instead)
+         call gs_hamkq%load_kprime(kpt_kp=kq, npw_kp=npw_kq, istwf_kp=istwfk_1,&
+          ! kinpw_kp=kinpw1,
+          kg_kp=kg_kq, kpg_kp=kpg_kq, ffnl_kp=ffnl_kq, compute_gbound=.true.)
+
+         if (.not. qq_is_gamma) then
+           !ABI_MALLOC(ph3d1,(2, npw_kq, gs_hamkq%matblk))
+           call gs_hamkq%load_kprime(ph3d_kp=ph3d_kq, compute_ph3d=.false.)
+         end if
+
+         ! Load k-dependent part in the 1st-order Hamiltonian datastructure
+         !call rf_hamkq%load_k(npw_k=npw_k,dkinpw_k=dkinpw)
+#endif
 
          ! Calculate dvscf * psi_k, results stored in h1kets_kq on the k+q sphere.
          ! Compute H(1) applied to GS wavefunction Psi(0)
@@ -571,9 +596,9 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
                         optnl, opt_gvnlx1, rf_hamkq, sij_opt, tim_getgh1c, usevnl)
          end do
 
-         ABI_FREE(kinpw1)
-         ABI_FREE(dkinpw)
-         ABI_FREE(ph3d)
+         ABI_SFREE(kinpw1)
+         ABI_SFREE(dkinpw)
+         ABI_SFREE(ph3d)
          ABI_SFREE(ph3d1)
          call rf_hamkq%free()
 
