@@ -1493,9 +1493,9 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    end if
 
 !  istwfk
-   if(dt%usefock==1 .and. dt%optdriver/=RUNL_SIGMA .and. mod(dt%wfoptalg,10)/=5 .and. maxval( abs(dt%istwfk(1:nkpt)-1) ) >0)then
+   if(dt%usefock==1 .and. dt%optdriver/=RUNL_SIGMA .and. mod(dt%wfoptalg,10)/=5 .and. maxval(abs(dt%istwfk(1:nkpt)-1)) > 0 .and. nkpt > 1 ) then
      write(msg,'(3a)' )&
-      'When usefock==1, unless sigma calculation, all the components of istwfk must be 1.',ch10,&
+      'When usefock==1 and several k-points, unless sigma calculation, all the components of istwfk must be 1.',ch10,&
       'Action: set istwfk to 1 for all k-points'
      ABI_ERROR_NOSTOP(msg, ierr)
    end if
@@ -1530,21 +1530,23 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      'Action: set istwfk to 1 for all k-points'
      ABI_ERROR_NOSTOP(msg, ierr)
    end if
-   if (dt%optdriver==RUNL_GSTATE) then
-     if ((dt%wfoptalg==4.or.dt%wfoptalg==14.or.dt%wfoptalg==114).and.maxval(dt%istwfk(:)-2)>0) then
-       write(msg, '(a,a,a,a,a)' )&
-       'Only the gamma point can use time-reversal and wfoptalg=4 or 14',ch10,&
-       'Action: put istwfk to 1 or remove k points with half integer coordinates ',ch10,&
-       'Also contact ABINIT group to say that you need that option.'
-       ABI_ERROR_NOSTOP(msg, ierr)
-     end if
-!     if ((dt%wfoptalg==4.or.dt%wfoptalg==14).and.any(dt%istwfk(:)==2) .and.dt%paral_kgb==1.and.fftalg/=401.and.fftalg/=312) then
-!       write(msg, '(a,i3,a,a,a)' )&
-!&       ' For istwfk=2, the value fftalg= ',fftalg, &
-!&       ' is not allowed in case of wfoptalg=4 or 14 !', ch10,&
-!&       ' Change if to fftalg=401.'
-!       ABI_ERROR_NOSTOP(msg, ierr)
-!     end if
+   if ( dt%gpu_option/=0 .and. dt%gpu_option/=2 .and. maxval( abs(dt%istwfk(1:nkpt)-1) ) > 0 ) then
+     write(msg,'(3a)' )&
+      'When gpu_option is neither 0 nor 2, all the components of istwfk must be 1.',ch10,&
+      'Action: set istwfk to 1 for all k-points or change gpu_option.'
+     ABI_ERROR_NOSTOP(msg, ierr)
+   end if
+   if ( dt%gpu_option==2 .and. any( dt%istwfk(1:nkpt) > 2 ) ) then
+     write(msg,'(3a)' )&
+      'When gpu_option is 2, all the components of istwfk must be 1 or 2.',ch10,&
+      'Action: change gpu_option or set "istwfk *1" in the input file. If there is one k-point which is "0 0 0" then set "istwfk 2".'
+     ABI_ERROR_NOSTOP(msg, ierr)
+   end if
+   if ( dt%npfft>1 .and. any( dt%istwfk(1:nkpt) > 2 ) ) then
+     write(msg,'(3a)' )&
+      'When npfft>1, all the components of istwfk must be 1 or 2.',ch10,&
+      'Action: set "npfft 1" or set "istwfk *1" in the input file. If only one k-point which is "0 0 0" then set "istwfk 2".'
+     ABI_ERROR_NOSTOP(msg, ierr)
    end if
 
 !  ixc
@@ -3892,8 +3894,8 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      if(dt%usefock > 0) then
        ABI_ERROR_NOSTOP('Fock not yet compatible with wfoptalg 1 (use Fock-level parallelism)', ierr)
      end if
-     if(maxval(abs(dt%istwfk(1:nkpt))) > 2) then
-       ABI_ERROR_NOSTOP('Istwfk > 2 not compatible with wfoptalg 1', ierr)
+     if(dt%wfoptalg==1.and.maxval(abs(dt%istwfk(1:nkpt))) > 2) then
+       ABI_ERROR_NOSTOP('Istwfk > 2 not compatible with wfoptalg 1. Use chebfi V2 instead (wfoptalg=111).', ierr)
      end if
      if(dt%ecutsm > 0) then
        ABI_ERROR_NOSTOP('Ecutsm > 0 not yet compatible with wfoptalg 1', ierr)
@@ -3999,13 +4001,6 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
        write(msg,'(a,a,a)')&
 &       'The number of bands have to remain constant in the case of band-FFT parallelization.',ch10,&
 &       'Action: set all the nbands to the same value in your input file'
-       ABI_ERROR_NOSTOP(msg,ierr)
-     end if
-     if(maxval(abs(dt%istwfk(1:nkpt)-1)) > 1)then
-       write(msg,'(5a)' )&
-&       'One of the components of istwfk is not equal to 1 or 2.',ch10,&
-&       'Time-reversal symmetry is not yet programmed in the case of band-FFT parallelization.',ch10,&
-&       'Action: set istwfk to 1 or 2 for all k-points'
        ABI_ERROR_NOSTOP(msg,ierr)
      end if
      if (dt%mkmem == 0) then
