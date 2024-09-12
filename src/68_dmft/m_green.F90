@@ -30,6 +30,10 @@
  use m_paw_dmft, only : mpi_distrib_dmft_type,paw_dmft_type
  use m_self, only : self_type
 
+#ifdef HAVE_GPU_MARKERS
+ use m_nvtx
+#endif
+
  implicit none
 
  private
@@ -1010,6 +1014,9 @@ subroutine compute_green(green,paw_dmft,prtopt,self,opt_self,opt_nonxsum,opt_non
 ! integer, allocatable :: procb(:,:),proct(:,:)
 ! *********************************************************************
 
+#ifdef HAVE_GPU_MARKERS
+ call nvtxStartRange("compute_green",7)
+#endif
  !lintegrate=.true.
  !if(lintegrate.and.green%w_type=="real") then
  !if(green%w_type=="real") then
@@ -1135,6 +1142,9 @@ subroutine compute_green(green,paw_dmft,prtopt,self,opt_self,opt_nonxsum,opt_non
  if (green%oper(1)%has_operks == 0) shift_green = 0
 
  do ifreq=1,green%nw
+#ifdef HAVE_GPU_MARKERS
+   call nvtxStartRange("iter_ifreq",9)
+#endif
    !if(present(iii)) write(6,*) ch10,'ifreq  self', ifreq,self%oper(ifreq)%matlu(1)%mat(1,1,1,1,1)
 !   ====================================================
 !   First Upfold self-energy and double counting  Self_imp -> self(k)
@@ -1277,6 +1287,9 @@ subroutine compute_green(green,paw_dmft,prtopt,self,opt_self,opt_nonxsum,opt_non
 !    accumulate integration
    if (green%w_type /= "real") then
 
+#ifdef HAVE_GPU_MARKERS
+     call nvtxStartRange("add_int_fct",13)
+#endif
      !do isppol=1,nsppol
      !  do ikpt=1,nkpt
      !    if (green%distrib%procb(ikpt+(isppol-1)*nkpt) /= me_spkpt) cycle
@@ -1306,6 +1319,9 @@ subroutine compute_green(green,paw_dmft,prtopt,self,opt_self,opt_nonxsum,opt_non
           & fac*green%oper(ifreq)%ks(:,:,1+shift_green:mkmem+shift_green,:)
      end if ! diag
 
+#ifdef HAVE_GPU_MARKERS
+     call nvtxEndRange()
+#endif
    end if ! green%wtype
 
 !        write(std_out,*) 'after inverse_oper'
@@ -1350,6 +1366,9 @@ subroutine compute_green(green,paw_dmft,prtopt,self,opt_self,opt_nonxsum,opt_non
      ABI_FREE(green%oper(ifreq)%ks)
    end if
 ! call flush(std_out)
+#ifdef HAVE_GPU_MARKERS
+   call nvtxEndRange()
+#endif
  end do ! ifreq
 
  if (optlog == 1) then
@@ -1483,6 +1502,9 @@ subroutine compute_green(green,paw_dmft,prtopt,self,opt_self,opt_nonxsum,opt_non
  end if
 ! call flush(std_out)
 
+#ifdef HAVE_GPU_MARKERS
+ call nvtxEndRange()
+#endif
  call timab(624,2,tsec(:))
 
 end subroutine compute_green
@@ -1546,6 +1568,9 @@ subroutine integrate_green(green,paw_dmft,prtopt,opt_ksloc,opt_after_solver,opt_
 
  DBG_ENTER("COLL")
  call timab(625,1,tsec(:))
+#ifdef HAVE_GPU_MARKERS
+ call nvtxStartRange("integrate_green",8)
+#endif
 
  if (prtopt > 0) then
    write(message,'(2a,i3,13x,a)') ch10," ===  Integrate Green's function"
@@ -1986,6 +2011,9 @@ subroutine integrate_green(green,paw_dmft,prtopt,opt_ksloc,opt_after_solver,opt_
  call destroy_matlu(matlu_temp(:),natom)
  ABI_FREE(matlu_temp)
 ! deallocate(charge_loc_old)
+#ifdef HAVE_GPU_MARKERS
+ call nvtxEndRange()
+#endif
  call timab(625,2,tsec(:))
  DBG_EXIT("COLL")
 
@@ -3246,6 +3274,9 @@ subroutine fermi_green(green,paw_dmft,self)
  character(len=500) :: message
 !************************************************************************
 !
+#ifdef HAVE_GPU_MARKERS
+ call nvtxStartRange("fermi_green",24)
+#endif
  write(message,'(a,8x,a)') ch10,"  == Compute Fermi level"
  call wrtout(std_out,message,'COLL')
 
@@ -3349,6 +3380,9 @@ subroutine fermi_green(green,paw_dmft,self)
  !call compute_green(green,paw_dmft,0,self,opt_self=1,opt_nonxsum=1)
  !call integrate_green(green,paw_dmft,prtopt=0,opt_ksloc=3) !,opt_nonxsum=1)
 
+#ifdef HAVE_GPU_MARKERS
+ call nvtxEndRange()
+#endif
  !return
 end subroutine fermi_green
 !!***
@@ -3729,6 +3763,9 @@ subroutine compute_nb_elec(green,self,paw_dmft,Fx,nb_elec_x,fermie,Fxprime)
  complex(dpc), allocatable :: omega_fac(:),trace_moments(:),trace_moments_prime(:)
 ! *********************************************************************
 
+#ifdef HAVE_GPU_MARKERS
+   call nvtxStartRange("compute_nb_elec",29)
+#endif
    dmft_test = paw_dmft%dmft_test
 
    if (dmft_test == 0) then
@@ -3853,6 +3890,9 @@ subroutine compute_nb_elec(green,self,paw_dmft,Fx,nb_elec_x,fermie,Fxprime)
    nb_elec_x = green%charge_ks
    Fx = green%charge_ks - paw_dmft%nelectval
 
+#ifdef HAVE_GPU_MARKERS
+   call nvtxEndRange()
+#endif
  end subroutine compute_nb_elec
 !!***
 

@@ -31,6 +31,10 @@ MODULE m_oper
 
  use m_matlu, only : matlu_type
 
+#ifdef HAVE_GPU_MARKERS
+ use m_nvtx
+#endif
+
  implicit none
 
  private
@@ -672,6 +676,9 @@ subroutine inverse_oper(oper,option,procb,iproc)
 !todo_ba: prb with gwpc here: necessary for matcginv but should be dpc
 ! *********************************************************************
 
+#ifdef HAVE_GPU_MARKERS
+ call nvtxStartRange("inverse_oper",14)
+#endif
  DBG_ENTER("COLL")
 
  paral = 0
@@ -701,6 +708,9 @@ subroutine inverse_oper(oper,option,procb,iproc)
    end do ! isppol
  end if ! option
 
+#ifdef HAVE_GPU_MARKERS
+  call nvtxEndRange()
+#endif
  DBG_EXIT("COLL")
 
 end subroutine inverse_oper
@@ -749,6 +759,9 @@ subroutine downfold_oper(oper,paw_dmft,procb,iproc,option,op_ks_diag)
  complex(dpc), allocatable :: mat_temp(:,:),mat_temp2(:,:),mat_temp3(:,:)
 ! *********************************************************************
 
+#ifdef HAVE_GPU_MARKERS
+call nvtxStartRange("downfold_oper",20)
+#endif
  DBG_ENTER("COLL")
 
  if (oper%has_opermatlu == 0) then
@@ -874,6 +887,9 @@ subroutine downfold_oper(oper,paw_dmft,procb,iproc,option,op_ks_diag)
 
  DBG_EXIT("COLL")
 
+#ifdef HAVE_GPU_MARKERS
+ call nvtxEndRange()
+#endif
 end subroutine downfold_oper
 !!***
 
@@ -910,6 +926,9 @@ subroutine upfold_oper(oper,paw_dmft,procb,iproc)
  complex(dpc), allocatable :: mat_temp(:,:),mat_temp2(:,:)
 ! *********************************************************************
 
+#ifdef HAVE_GPU_MARKERS
+ call nvtxStartRange("upfold_oper",15)
+#endif
 !   write(6,*) "upfold_oper procb",procb
 !   write(6,*) "iproc",iproc
 !   write(6,*) size(procb)
@@ -1014,6 +1033,9 @@ subroutine upfold_oper(oper,paw_dmft,procb,iproc)
 
  DBG_EXIT("COLL")
 
+#ifdef HAVE_GPU_MARKERS
+ call nvtxEndRange()
+#endif
 end subroutine upfold_oper
 !!***
 

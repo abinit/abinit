@@ -52,6 +52,10 @@ MODULE m_dmft
  use m_self, only : dc_self,destroy_self,initialize_self,new_self,print_self,rw_self,self_type
  use m_time, only : timab
 
+#ifdef HAVE_GPU_MARKERS
+ use m_nvtx
+#endif
+
  implicit none
 
  private
@@ -117,6 +121,9 @@ subroutine dmft_solve(cryst_struc,istep,dft_occup,mpi_enreg,paw_dmft,pawang,pawt
 !************************************************************************
 
  DBG_ENTER('COLL')
+#ifdef HAVE_GPU_MARKERS
+ call nvtxStartRange("dmft_solve",1)
+#endif
  myproc = paw_dmft%myproc
  check  = paw_dmft%dmftcheck ! checks enabled
  t2g    = (paw_dmft%dmft_t2g == 1)
@@ -365,6 +372,9 @@ subroutine dmft_solve(cryst_struc,istep,dft_occup,mpi_enreg,paw_dmft,pawang,pawt
    & ch10,' ======================================================'
  call wrtout(std_out,message,'COLL')
 
+#ifdef HAVE_GPU_MARKERS
+ call nvtxStartRange("dmft_loop")
+#endif
 !=======================================================================
 !===  dmft loop  =======================================================
  do idmftloop=1,dmft_iter
@@ -521,6 +531,9 @@ subroutine dmft_solve(cryst_struc,istep,dft_occup,mpi_enreg,paw_dmft,pawang,pawt
 !  =======================================================================
 !  === end dmft loop  ====================================================
  end do ! idmftloop
+#ifdef HAVE_GPU_MARKERS
+ call nvtxEndRange()
+#endif
 !=========================================================================
 
 !== Save self on disk
@@ -598,6 +611,9 @@ subroutine dmft_solve(cryst_struc,istep,dft_occup,mpi_enreg,paw_dmft,pawang,pawt
 
  ABI_FREE(hu)
 
+#ifdef HAVE_GPU_MARKERS
+ call nvtxEndRange()
+#endif
  DBG_EXIT("COLL")
 
 end subroutine dmft_solve
@@ -654,6 +670,9 @@ subroutine impurity_solve(cryst_struc,green,hu,paw_dmft,pawang,pawtab,&
 !character(len=500) :: message
 
  call timab(622,1,tsec(:))
+#ifdef HAVE_GPU_MARKERS
+ call nvtxStartRange("impurity_solve",2)
+#endif
 !=======================================================================
 !== Prepare data for Hirsch Fye QMC
 !== NB: for CTQMC, Fourier Transformation are done inside the CTQMC code
@@ -851,6 +870,10 @@ subroutine impurity_solve(cryst_struc,green,hu,paw_dmft,pawang,pawtab,&
  !if(abs(pawprtvol)>0) then
  !end if
 
+
+#ifdef HAVE_GPU_MARKERS
+ call nvtxEndRange()
+#endif
  call timab(622,2,tsec(:))
 
 end subroutine impurity_solve
