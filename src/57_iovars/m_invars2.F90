@@ -3656,7 +3656,7 @@ if (dtset%usekden==1) then
  if (dtset%wfoptalg==114.or.dtset%wfoptalg==111) ii=2 ! allow only istwfk=1 or 2 for LOBPCG or Chebfi with xg_tools
 #endif
  if(dtset%ngfft(7)==314)ii=1
- if(dtset%usefock==1.and.dtset%optdriver/=RUNL_SIGMA.and.mod(dtset%wfoptalg,10)/=5) ii=1
+ if(dtset%usefock==1.and.dtset%optdriver/=RUNL_SIGMA.and.mod(dtset%wfoptalg,10)/=5.and.nkpt>1) ii=1
  !Enforce istwfk = 1 for all k-points in RT-TDDFT calculations
  if(dtset%optdriver==RUNL_RTTDDFT) ii=1
 
