@@ -2598,7 +2598,6 @@ subroutine littlegroup_print(Ltg, units, prtvol)
 !Local variables-------------------------------
 !scalars
  integer :: itim, my_prtvol
- character(len=4) :: my_mode
  character(len=500) :: msg
 !arrays
  integer :: nop(Ltg%timrev),nopg0(Ltg%timrev)
@@ -2815,7 +2814,7 @@ subroutine kpath_get_versors(kpath, nvers, red_versors, cart_versors)
 
 ! local variables
  integer :: ii, ipt, ipt_list(kpath%npts), cnt
- real(dp) :: norm
+ !real(dp) :: norm
  real(dp),allocatable :: tmp_versors(:,:)
 ! *************************************************************************
 

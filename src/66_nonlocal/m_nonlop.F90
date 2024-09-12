@@ -420,7 +420,7 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
 !end if
 
 !Select k-dependent objects according to select_k input parameter
- select_k_=1;if (present(select_k)) select_k_=select_k
+ select_k_=KPRIME_H_K;if (present(select_k)) select_k_=select_k
  nkpgin=0;nkpgout=0;nullify(kpgin);nullify(kpgout)
  nullify(ph3din);nullify(ph3dout)
  if (select_k_==KPRIME_H_K) then

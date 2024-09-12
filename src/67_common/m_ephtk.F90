@@ -83,7 +83,6 @@ subroutine ephtk_set_phmodes_skip(natom, eph_phrange, phmodes_skip)
 
 !Local variables ------------------------------
  integer :: natom3
-
 ! *************************************************************************
 
  ! Setup a mask to skip accumulating the contribution of certain phonon modes.
@@ -152,7 +151,6 @@ subroutine ephtk_set_pertables(natom, my_npert, pert_table, my_pinfo, comm)
  integer :: iatom, idir, pertcase, bstart, bstop, ii, ip, natom3, my_rank, nproc
 !arrays
  integer :: all_pinfo(3, natom*3)
-
 ! *************************************************************************
 
  my_rank = xmpi_comm_rank(comm); nproc = xmpi_comm_size(comm)
@@ -217,7 +215,6 @@ subroutine ephtk_mkqtabs(cryst, nqibz, qibz, nqbz, qbz, qirredtofull, qpttoqpt)
 !arrays
  integer :: g0(3)
  real(dp) :: qirr(3), tmp_qpt(3)
-
 ! *************************************************************************
 
  qrank = krank_new(nqbz, qbz)
@@ -297,7 +294,6 @@ subroutine ephtk_gam_atm2qnu(natom3, displ_red, gam_atm, gam_qnu)
  integer :: nu
  character(len=500) :: msg
  real(dp) :: zgemm_tmp_mat(2,natom3,natom3), gam_now(2,natom3,natom3)
-
 ! *********************************************************************
 
  call zgemm('c','n',natom3, natom3, natom3, cone, displ_red, natom3, gam_atm, natom3, czero, zgemm_tmp_mat, natom3)
@@ -353,9 +349,7 @@ subroutine ephtk_gkknu_from_atm(nb1, nb2, nk, natom, gkq_atm, phfrq, displ_red, 
  real(dp),intent(out) :: gkq_nu(2,nb1,nb2,nk,3*natom)
 
 !Local variables-------------------------
-!scalars
  integer :: nu,ipc
-
 ! *************************************************************************
 
  gkq_nu = zero
@@ -415,7 +409,6 @@ subroutine ephtk_update_ebands(dtset, ebands, header)
  real(dp),parameter :: nholes = zero
  character(len=500) :: msg
  integer :: unts(2)
-
 ! *************************************************************************
 
  unts = [std_out, ab_out]
@@ -493,7 +486,6 @@ subroutine ephtk_get_mpw_gmax(nkpt, kpts, ecut, gmet, mpw, gmax, comm, init_with
  real(dp) :: kk(3), kq(3)
  integer,allocatable :: gtmp(:,:)
  logical :: init_with_zero__
-
 ! *************************************************************************
 
  my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
@@ -532,7 +524,6 @@ subroutine ephtk_get_mpw_gmax(nkpt, kpts, ecut, gmet, mpw, gmax, comm, init_with
 end subroutine ephtk_get_mpw_gmax
 !!***
 
-
 !!****f* m_epthk/ephtk_v1atm_to_vqnu
 !! NAME
 !!  ephtk_v1atm_to_vqnu
@@ -559,7 +550,6 @@ pure subroutine ephtk_v1atm_to_vqnu(cplex, nfft, nspden, natom3, v1_atm, displ_r
 !Local variables-------------------------------
 !scalars
  integer :: nu, ip, ispden
-
 !************************************************************************
 
  do nu=1,natom3

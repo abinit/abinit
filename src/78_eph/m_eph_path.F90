@@ -439,7 +439,7 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
      use_cg_k = (my_ik > 1 .and. ucache_k%use_cache)
      if (use_cg_k) call ucache_k%get_kpt(kk, istwfk_1, npw_k, nspinor, nband, kg_k, cg_k)
 
-     call nscf%solve_kpt(spin, kk, istwfk_1, nband, cryst, dtset, dtfil, psps, gs_hamk, &
+     call nscf%solve_kpt(spin, kk, istwfk_1, nband, cryst, dtset, dtfil, gs_hamk, &
                          use_cg_k, npw_k, cg_k, gsc_k, eig_k, msg, ierr)
 
      call ucache_k%store_kpt(kk, istwfk_1, npw_k, nspinor, nband, kg_k, cg_k)
@@ -483,7 +483,7 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
          cg_kq = cg_k
        end if
 
-       call nscf%solve_kpt(spin, kq, istwfk_1, nband, cryst, dtset, dtfil, psps, gs_hamkq, &
+       call nscf%solve_kpt(spin, kq, istwfk_1, nband, cryst, dtset, dtfil, gs_hamkq, &
                            use_cg_kq, npw_kq, cg_kq, gsc_kq, eig_kq, msg, ierr)
 
        call ucache_kq%store_kpt(kq, istwfk_1, npw_kq, nspinor, nband, kg_kq, cg_kq)
@@ -538,27 +538,24 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
        ABI_MALLOC(vlocal1, (cplex*n4, n5, n6, gs_hamkq%nvloc))
 
 #define USE_SETUP 0
+!#define USE_SETUP 1
 
 #if USE_SETUP == 0
        !print *, "bypassing getgh1c_setup"
        !===== Load the k/k+q dependent parts of the Hamiltonian
        ! Load k-dependent part in the Hamiltonian datastructure
-       !ABI_MALLOC(ph3d, (2, npw_k, gs_hamkq%matblk))
        call gs_hamkq%load_k(kpt_k=kk, npw_k=npw_k, istwf_k=istwfk_1, kg_k=kg_k, kpg_k=kpg_k,&
-                            ph3d_k=ph3d_k, compute_ph3d=.false., compute_gbound=.true.)
+                            ph3d_k=ph3d_k, compute_ph3d=.true., compute_gbound=.true.)
 
        call gs_hamkq%load_k(ffnl_k=ffnl_k)
 
        ! Load k+q-dependent part in the Hamiltonian datastructure
        ! Note: istwf_k is imposed to 1 for RF calculations (should use istwf_kq instead)
        call gs_hamkq%load_kprime(kpt_kp=kq, npw_kp=npw_kq, istwf_kp=istwfk_1,&
-        ! kinpw_kp=kinpw_kq,
-        kg_kp=kg_kq, kpg_kp=kpg_kq, ffnl_kp=ffnl_kq, compute_gbound=.true.)
+                                 !kinpw_kp=kinpw_kq,
+                                 kg_kp=kg_kq, kpg_kp=kpg_kq, ffnl_kp=ffnl_kq, compute_gbound=.true.) ! compute_ph3d=.true.,
 
-       if (.not. qq_is_gamma) then
-         !ABI_MALLOC(ph3d1,(2, npw_kq, gs_hamkq%matblk))
-         call gs_hamkq%load_kprime(ph3d_kp=ph3d_kq, compute_ph3d=.false.)
-       end if
+       if (.not. qq_is_gamma) call gs_hamkq%load_kprime(ph3d_kp=ph3d_kq, compute_ph3d=.true.)
 #endif
 
        ! Loop over my atomic perturbations: apply H1_{kappa, alpha} and compute gkq_atm.
@@ -597,11 +594,13 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
                         optnl, opt_gvnlx1, rf_hamkq, sij_opt, tim_getgh1c, usevnl)
          end do
 
-         ABI_SFREE(kinpw_kq)
-         ABI_SFREE(dkinpw)
-         ABI_SFREE(ph3d)
-         ABI_SFREE(ph3d1)
          call rf_hamkq%free()
+#if USE_SETUP == 1
+         ABI_FREE(kinpw_kq)
+         ABI_FREE(dkinpw)
+         ABI_FREE(ph3d)
+         ABI_FREE(ph3d1)
+#endif
 
          ! Calculate <psi_{k+q,j}|dvscf_q*psi_{k,i}> for this perturbation. No need to handle istwf_kq because it's always 1.
 !$OMP PARALLEL DO COLLAPSE(2) PRIVATE(band_m)
@@ -611,6 +610,7 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
              gkq_atm(:, im_kq, in_k, ipc) = cg_zdotc(npw_kq*nspinor, cg_kq(1,1,band_m), h1kets_kq(1,1,in_k))
            end do
          end do
+
        end do ! my_ip
 
        ! Collect gkq_atm inside pert_comm so that all procs can operate on the data.
@@ -632,7 +632,7 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
        ABI_FREE(vlocal_kq)
        ABI_FREE(ph3d_kq)
        ABI_FREE(kpg_kq)
-       ABI_FREE(kinpw_kq)
+       ABI_SFREE(kinpw_kq)
        ABI_FREE(ffnl_kq)
        ABI_FREE(kg_kq)
        ABI_FREE(eig_kq)
@@ -691,6 +691,7 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
      do ik=1, nk_path
        do iq=1, nq_path
          NCF_CHECK(nf90_get_var(ncid, vid("gkq2_nu"), gkq2_nu, start=[1,1,1,iq,ik,spin]))
+         !call epth_gkq2_nu_average(natom3, bstart, nb, phfreqs, eig_k, eig_kq, gkq2_nu)
          do nu=1,natom3
            write(msg, "(1x,4(i5,1x),es16.6)") nu, iq, ik, spin, sqrt(sum(gkq2_nu(:,:, nu)) / nb_in_g**2) * Ha_meV
            call wrtout(units, msg)

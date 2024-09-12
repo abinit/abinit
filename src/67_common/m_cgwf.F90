@@ -2436,8 +2436,7 @@ subroutine nscf_setup_kpt(nscf, isppol, kpt, istwf_k, nband, cryst, dtset, psps,
 !Local variables ------------------------------
 !scalars
  integer,parameter :: paral_kgb0 = 0, nkpt1 = 1, use_subovl0 = 0, ider0 = 0, idir0 = 0, mkmem1 = 1, useylmgr0 = 0
- integer :: mcg, mgsc, nvloc, nkpg, n1, n2, n3, n4, n5, n6, nfft, nfftf, mgfft, mgfftf, inonsc, npwsp, me_g0, linalg_max_size, optder
- integer :: ipw, index, nspinor
+ integer :: mcg, mgsc, nvloc, nkpg, n1, n2, n3, n4, n5, n6, nfft, nfftf, mgfft, mgfftf, npwsp, me_g0, optder, nspinor
  !character(len=500) :: msg
 !arrays
  integer :: npwarr_k(1), nband_ks(dtset%nsppol)
@@ -2551,7 +2550,6 @@ end subroutine nscf_setup_kpt
 !! dtset<dataset_type>=All input variables for this dataset.
 !! dtfil <type(datafiles_type)>=variables related to files
 !! cryst=Crystalline structure
-!! psps<pseudopotential_type>=Variables related to pseudopotentials.
 !!
 !! OUTPUT
 !!  gs_hamk <type(gs_hamiltonian_type)>=all data for the Hamiltonian at k
@@ -2565,7 +2563,7 @@ end subroutine nscf_setup_kpt
 !!
 !! SOURCE
 
-subroutine nscf_solve_kpt(nscf, isppol, kpt, istwf_k, nband, cryst, dtset, dtfil, psps, gs_hamk, use_cg_k, & ! in
+subroutine nscf_solve_kpt(nscf, isppol, kpt, istwf_k, nband, cryst, dtset, dtfil, gs_hamk, use_cg_k, & ! in
                           npw_k, cg_k, gsc_k, eig_k, msg, ierr)  ! out
 
 !Arguments ------------------------------------
@@ -2576,7 +2574,6 @@ subroutine nscf_solve_kpt(nscf, isppol, kpt, istwf_k, nband, cryst, dtset, dtfil
  type(dataset_type),intent(in) :: dtset
  type(datafiles_type), intent(in) :: dtfil
  type(crystal_t),intent(in) :: cryst
- type(pseudopotential_type),intent(in) :: psps
  type(gs_hamiltonian_type),intent(inout) :: gs_hamk
 !arrays
  real(dp),intent(inout) :: cg_k(:,:,:), gsc_k(:,:,:)
@@ -2603,7 +2600,6 @@ subroutine nscf_solve_kpt(nscf, isppol, kpt, istwf_k, nband, cryst, dtset, dtfil
  integer :: npwarr_k(1), pwind(pwind_alloc0,2,3)
  real(dp) :: pwnsfac(2,pwind_alloc0), pwnsfacq(2,mkgq0), zshift(nband), cgq(2, mcgq0), dphase_k(3)
  real(dp) :: subham(nband*(nband+1)), subovl(nband*(nband+1)*use_subovl0), subvnlx(nband*(nband+1)*use_subvnlx0)
- real(dp) :: ylmgr(0, 0)
  real(dp),allocatable :: resid(:), evec(:,:)
 ! *************************************************************************
 
@@ -2710,7 +2706,7 @@ subroutine nscf_solve_kpt(nscf, isppol, kpt, istwf_k, nband, cryst, dtset, dtfil
      msg = sjoin(" NSCF for kpt:", ktoa(kpt), " completed in", itoa(inonsc), "steps. max_resid:", ftoa(max_resid))
      call wrtout(std_out, msg)
      ! Fix the phase of the wavefunctions.
-     call cgtk_fixphase(cg_k, gsc_k, icg0, igsc0, istwf_k, mcg, mgsc, mpi_enreg, nband, npw_k, dtset%usepaw)
+     !call cgtk_fixphase(cg_k, gsc_k, icg0, igsc0, istwf_k, mcg, mgsc, mpi_enreg, nband, npw_k, dtset%usepaw)
      exit
    end if
  end do ! inonsc
