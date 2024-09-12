@@ -40,13 +40,12 @@ module m_cgtools
  use m_abicore
  use m_errors
  use m_xmpi
+ use m_abi_linalg
 
  use m_fstrings,      only : toupper, itoa, sjoin
  use m_time,          only : timab, cwtime, cwtime_report
  use m_numeric_tools, only : hermit, rhophi
- use m_abi_linalg,    only : abi_zgemm_2r, abi_xgemm
  use m_pawcprj,       only : pawcprj_type,pawcprj_axpby,pawcprj_zaxpby
- use m_abi_linalg
 
  implicit none
 
@@ -3075,19 +3074,27 @@ subroutine projbd(cg,direc,iband0,icg,iscg,istwf_k,mcg,mscg,nband,&
    end if
 
    if (iband0>0.and.iband0<=nbandm) then
+#ifdef HAVE_OPENMP_OFFLOAD
      !$OMP TARGET MAP(to:bkp_scprod,scprod) IF(my_gpu_option==ABI_GPU_OPENMP)
+#endif
      bkp_scprod(:) = scprod(:,iband0)
      scprod(:,iband0) = zero
+#ifdef HAVE_OPENMP_OFFLOAD
      !$OMP END TARGET
+#endif
    end if
 
    call cg_zgemv("N",npw_sp,nbandm,cg(1,icg+1),scprod,direc,alpha=-cg_cone,beta=cg_cone,gpu_option=my_gpu_option)
 
    if (iband0>0.and.iband0<=nbandm) then
      ! Restore previous value as scprod is output.
+#ifdef HAVE_OPENMP_OFFLOAD
      !$OMP TARGET MAP(to:bkp_scprod,scprod) IF(my_gpu_option==ABI_GPU_OPENMP)
+#endif
      scprod(:,iband0) = bkp_scprod(:)
+#ifdef HAVE_OPENMP_OFFLOAD
      !$OMP END TARGET
+#endif
    end if
 
  else if (istwf_k>=2) then

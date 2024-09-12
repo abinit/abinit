@@ -490,7 +490,9 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
 !    All atoms contribute
      if (optnl>=1) then
        ABI_MALLOC(nonlop_out,(2,npw1*my_nspinor))
+#ifdef HAVE_OPENMP_OFFLOAD
        !$OMP TARGET ENTER DATA MAP(alloc:nonlop_out) IF(use_gpu_==ABI_GPU_OPENMP)
+#endif
        cpopt=1+3*usecprj ; choice=1 ; signs=2 ; paw_opt=1
        call nonlop(choice,cpopt,cwaveprj_ptr,enlout,gs_hamkq,idir,(/lambda/),mpi_enreg,1,nnlout,&
 &       paw_opt,signs,svectout_dum,tim_nonlop,cwave,nonlop_out,enl=rf_hamkq%e1kbfr)
@@ -507,7 +509,9 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
          end do
 #endif
        end if
+#ifdef HAVE_OPENMP_OFFLOAD
        !$OMP TARGET EXIT DATA MAP(release:nonlop_out) IF(use_gpu_==ABI_GPU_OPENMP)
+#endif
        ABI_FREE(nonlop_out)
      end if
 
@@ -515,7 +519,9 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
 !    All atoms contribute
      if (optnl==2) then
        ABI_MALLOC(gvnl2,(2,npw1*my_nspinor))
+#ifdef HAVE_OPENMP_OFFLOAD
        !$OMP TARGET ENTER DATA MAP(alloc:gvnl2) IF(use_gpu_==ABI_GPU_OPENMP)
+#endif
        cpopt=4 ; choice=1 ; signs=2 ; paw_opt=1
        call nonlop(choice,cpopt,cwaveprj_ptr,enlout,gs_hamkq,idir,(/lambda/),mpi_enreg,1,nnlout,&
 &       paw_opt,signs,svectout_dum,tim_nonlop,cwave,gvnl2,enl=rf_hamkq%e1kbsc)
@@ -596,7 +602,9 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
 !      PAW: Compute application of S^(0) to ddk WF
        cpopt=-1 ; choice=1 ; paw_opt=3 ; signs=2
        ABI_MALLOC(nonlop_out,(2,npw1*my_nspinor))
+#ifdef HAVE_OPENMP_OFFLOAD
        !$OMP TARGET ENTER DATA MAP(alloc:nonlop_out) IF(use_gpu_==ABI_GPU_OPENMP)
+#endif
        call nonlop(choice,cpopt,cwaveprj_ptr,enlout,gs_hamkq,0,(/lambda/),mpi_enreg,1,nnlout,&
 &       paw_opt,signs,nonlop_out,tim_nonlop,gvnlx1_,vectout_dum)
        if(use_gpu_/=ABI_GPU_OPENMP) then
@@ -605,10 +613,12 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
            gvnlx1_(:,ipw)=nonlop_out(:,ipw)
          end do
        else
+#ifdef HAVE_OPENMP_OFFLOAD
          !$OMP TARGET PARALLEL DO MAP(to:gvnlx1_,nonlop_out)
          do ipw=1,npw1*my_nspinor
            gvnlx1_(:,ipw)=nonlop_out(:,ipw)
          end do
+#endif
        end if
 
 !      PAW: Compute part of H^(1) due to derivative of S
@@ -630,6 +640,7 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
            end do
          end if
        else
+#ifdef HAVE_OPENMP_OFFLOAD
          if(compute_conjugate) then
            !$OMP TARGET PARALLEL DO MAP(to:gvnlx1_,nonlop_out)
            do ipw=1,npw1*my_nspinor ! Note the multiplication by -i
@@ -643,6 +654,7 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
              gvnlx1_(2,ipw)=gvnlx1_(2,ipw)+nonlop_out(1,ipw)
            end do
          end if
+#endif
        end if
 
 !      PAW: Compute part of H^(1) due to derivative of electric field part of Dij
@@ -655,12 +667,16 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
            gvnlx1_(:,ipw)=gvnlx1_(:,ipw)+nonlop_out(:,ipw)
          end do
        else
+#ifdef HAVE_OPENMP_OFFLOAD
          !$OMP TARGET PARALLEL DO MAP(to:gvnlx1_,nonlop_out)
          do ipw=1,npw1*my_nspinor
            gvnlx1_(:,ipw)=gvnlx1_(:,ipw)+nonlop_out(:,ipw)
          end do
+#endif
        end if
+#ifdef HAVE_OPENMP_OFFLOAD
        !$OMP TARGET EXIT DATA MAP(release:nonlop_out) IF(use_gpu_==ABI_GPU_OPENMP)
+#endif
        ABI_FREE(nonlop_out)
 
      end if ! opt_gvnlx1==2
@@ -668,7 +684,9 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
 !    PAW: Compute derivatives due to part of D_ij^(1) depending on VHxc^(1)
      if (optnl>=2) then
        ABI_MALLOC(gvnl2,(2,npw1*my_nspinor))
+#ifdef HAVE_OPENMP_OFFLOAD
        !$OMP TARGET ENTER DATA MAP(alloc:gvnl2) IF(use_gpu_==ABI_GPU_OPENMP)
+#endif
        cpopt=-1+3*usecprj;if (opt_gvnlx1==2) cpopt=2
        choice=1 ; paw_opt=1 ; signs=2
        call nonlop(choice,cpopt,cwaveprj_ptr,enlout,gs_hamkq,0,(/lambda/),mpi_enreg,1,nnlout,&
@@ -682,10 +700,12 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
            gs1c(:,ipw)=zero
          end do
        else
+#ifdef HAVE_OPENMP_OFFLOAD
          !$OMP TARGET PARALLEL DO MAP(to:gs1c)
          do ipw=1,npw1*my_nspinor
            gs1c(:,ipw)=zero
          end do
+#endif
        end if
      end if
      if (usecprj==0) then
@@ -989,6 +1009,7 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
          end if
        end do
      else
+#ifdef HAVE_OPENMP_OFFLOAD
        !$OMP TARGET PARALLEL DO PRIVATE(ipw) MAP(to:gh1c,gvnl2,kinpw1)
        do ipw=1+ipws,npw1+ipws
          if(kinpw1(ipw-ipws)<huge(zero)*1.d-11)then
@@ -996,6 +1017,7 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
            gh1c(2,ipw)=gh1c(2,ipw)+gvnl2(2,ipw)
          end if
        end do
+#endif
      end if
    end do
 #ifdef HAVE_OPENMP_OFFLOAD
