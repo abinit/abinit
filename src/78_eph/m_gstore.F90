@@ -87,8 +87,12 @@
 !!
 !! TODO
 !!  1) Introduce new communicator to distribute (band_1, band_2)
-!!
-!!  2) Implement possibility of reading a subset of data from a larger gstore?
+!!  2) Implement possibility of reading a subset of data from a larger gstore ?
+!!  2) Optimize v^1_loc|psi_nk> by precomputing <r|psi_nk> before the looop over my_npert
+!!     Big speedup is expected, especially if one loops first over k and then q, provided
+!!     the interpolation of v^1_q does not start to dominate
+!!  3) Use similar trick in dfpt_cgw for H^0 |psi_nk>
+!!  4) Operate on multiple n states in getgh1c (need big refactoring of getgh1c thoug)
 !!
 !! COPYRIGHT
 !!  Copyright (C) 2008-2024 ABINIT group (MG)
@@ -3604,7 +3608,6 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
        kk_ibz = ebands%kptns(:,ik_ibz)
 
        ! Number of bands crossing the Fermi level at k
-       !bstart_k = fs%bstart_cnt_ibz(1, ik_ibz); nband_k = fs%bstart_cnt_ibz(2, ik_ibz)
        bstart_k = gqk%bstart; nband_k = gqk%nb
 
        ! ============================================
@@ -3680,25 +3683,21 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
                         comm=gqk%pert_comm%value) ! request=ffnl1_request)
 
 #define USE_SETUP 0
+!#define USE_SETUP 1
 
 #if USE_SETUP == 0
         !print *, "bypassing getgh1c_setup"
-
-        ABI_MALLOC(kinpw_k, (npw_k))
-        kinpw_k(:)=zero
-        call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass_free, cryst%gmet, kg_k, kinpw_k, kk_bz, npw_k, 0, 0)
-
         ! Compute (1/2) (2 Pi)**2 (k+q+G)**2:
-        ABI_MALLOC(kinpw_kq, (npw_kq))
-        kinpw_kq(:)=zero
-        call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass_free, cryst%gmet, kg_kq, kinpw_kq, kq_bz, npw_kq, 0, 0)
+        ABI_CALLOC(kinpw_k, (npw_k))
+        ABI_CALLOC(kinpw_kq, (npw_kq))
+        call mkkin(dtset%ecut, dtset%ecutsm, dtset%effmass_free, cryst%gmet, kg_k, kinpw_k, kk_bz, npw_k, 0, 0)
+        call mkkin(dtset%ecut, dtset%ecutsm, dtset%effmass_free, cryst%gmet, kg_kq, kinpw_kq, kq_bz, npw_kq, 0, 0)
 
         ABI_MALLOC(ph3d_k, (2, npw_k, gs_hamkq%matblk))
         ABI_MALLOC(ph3d_kq, (2, npw_kq, gs_hamkq%matblk))
 
         !===== Load the k/k+q dependent parts of the Hamiltonian
         ! Load k-dependent part in the Hamiltonian datastructure
-        !ABI_MALLOC(ph3d_k, (2, npw_k, gs_hamkq%matblk))
         call gs_hamkq%load_k(kpt_k=kk_bz, npw_k=npw_k, istwf_k=istwf_k, kg_k=kg_k, kpg_k=kpg_k,&
                              ph3d_k=ph3d_k, compute_ph3d=.true., compute_gbound=.true.)
 
@@ -3706,14 +3705,11 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
 
         ! Load k+q-dependent part in the Hamiltonian datastructure
         ! Note: istwf_k is imposed to 1 for RF calculations (should use istwf_kq instead)
-        call gs_hamkq%load_kprime(kpt_kp=kq_bz, npw_kp=npw_kq, istwf_kp=istwf_k,&
-         kinpw_kp=kinpw_kq, &
-         kg_kp=kg_kq, kpg_kp=kpg_kq, ffnl_kp=ffnl_kq, compute_gbound=.true.)
+        call gs_hamkq%load_kprime(kpt_kp=kq_bz, npw_kp=npw_kq, istwf_kp=istwf_kq,&
+                                  kinpw_kp=kinpw_kq, &
+                                  kg_kp=kg_kq, kpg_kp=kpg_kq, ffnl_kp=ffnl_kq, compute_gbound=.true.)
 
-        if (.not. qq_is_gamma) then
-          !ABI_MALLOC(ph3d_kq,(2, npw_kq, gs_hamkq%matblk))
-          call gs_hamkq%load_kprime(ph3d_kp=ph3d_kq, compute_ph3d=.true.)
-        end if
+        if (.not. qq_is_gamma) call gs_hamkq%load_kprime(ph3d_kp=ph3d_kq, compute_ph3d=.true.)
 #endif
 
        ! Loop over my atomic perturbations and compute gkq_atm.
@@ -3733,11 +3729,6 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
                             npw_k, npw_kq, useylmgr1, kg_k, ylm_k, kg_kq, ylm_kq, ylmgr_kq, &         ! In
                             dkinpw, nkpg_k, nkpg_kq, kpg_k, kpg_kq, kinpw_kq, ffnl_k, ffnl_kq, ph3d_k, ph3d_kq, &  ! Out
                             reuse_kpg_k=1, reuse_kpg1_k=1, reuse_ffnlk=1, reuse_ffnl1=1)              ! Reuse some arrays
-
-         ABI_SFREE(kinpw_kq)
-         ABI_SFREE(dkinpw)
-         ABI_SFREE(ph3d_k)
-         ABI_SFREE(ph3d_kq)
 #endif
 
          ! Calculate dvscf * psi_k, results stored in h1kets_kq on the k+q sphere.
@@ -3754,6 +3745,12 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
          end do
 
          call rf_hamkq%free()
+#if USE_SETUP == 1
+         ABI_SFREE(kinpw_kq)
+         ABI_SFREE(dkinpw)
+         ABI_SFREE(ph3d_k)
+         ABI_SFREE(ph3d_kq)
+#endif
 
          ! Calculate <psi_{k+q,j}|dvscf_q*psi_{k,i}> for this perturbation. No need to handle istwf_kq because it's always 1.
 !$OMP PARALLEL DO COLLAPSE(2)
