@@ -83,6 +83,7 @@ tests/TestBot_MPI*/*
 /aclocal.m4
 /autom4te.cache
 /_build*
+/build
 /configure
 /config.dump
 /config.dump.in
