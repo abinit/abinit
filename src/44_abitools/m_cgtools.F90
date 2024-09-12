@@ -3075,19 +3075,27 @@ subroutine projbd(cg,direc,iband0,icg,iscg,istwf_k,mcg,mscg,nband,&
    end if
 
    if (iband0>0.and.iband0<=nbandm) then
+#ifdef HAVE_OPENMP_OFFLOAD
      !$OMP TARGET MAP(to:bkp_scprod,scprod) IF(my_gpu_option==ABI_GPU_OPENMP)
+#endif
      bkp_scprod(:) = scprod(:,iband0)
      scprod(:,iband0) = zero
+#ifdef HAVE_OPENMP_OFFLOAD
      !$OMP END TARGET
+#endif
    end if
 
    call cg_zgemv("N",npw_sp,nbandm,cg(1,icg+1),scprod,direc,alpha=-cg_cone,beta=cg_cone,gpu_option=my_gpu_option)
 
    if (iband0>0.and.iband0<=nbandm) then
      ! Restore previous value as scprod is output.
+#ifdef HAVE_OPENMP_OFFLOAD
      !$OMP TARGET MAP(to:bkp_scprod,scprod) IF(my_gpu_option==ABI_GPU_OPENMP)
+#endif
      scprod(:,iband0) = bkp_scprod(:)
+#ifdef HAVE_OPENMP_OFFLOAD
      !$OMP END TARGET
+#endif
    end if
 
  else if (istwf_k>=2) then
