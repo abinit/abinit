@@ -3174,7 +3174,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
  integer :: ii, my_nqibz, iq_start, iq_ibz, isym_q, trev_q, prev_iqbz
  real(dp) :: cpu, wall, gflops, cpu_q, wall_q, gflops_q, cpu_all, wall_all, gflops_all
  real(dp) :: ecut, eshift, eig0nk, weight_q, weight_k
- logical :: gen_eigenpb, isirr_k, isirr_kq, isirr_q, print_time, use_ftinterp, qq_is_gamma
+ logical :: gen_eigenpb, isirr_k, isirr_kq, isirr_q, print_time, need_ftinterp, qq_is_gamma
  type(wfd_t) :: wfd
  type(gs_hamiltonian_type) :: gs_hamkq
  type(rf_hamiltonian_type) :: rf_hamkq
@@ -3243,8 +3243,8 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
  !comm_rpt = bqs_comm%value
 
  ! qibz2dvdb gives the mapping gstore%ibz --> dvdb%ibz
- use_ftinterp = .True.
- !use_ftinterp = .False.
+ need_ftinterp = .True.
+ !need_ftinterp = .False.
 
  ! TODO:
 #if 0
@@ -3261,18 +3261,19 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
      end if
    end do
  end do spin_loop
- !call dvdb%need_ftinterp(qpath%npts, qpath%points, qptopt, qmap_symrec, use_ftinterp)
+
+ !call dvdb%need_ftinterp(qpath%npts, qpath%points, qptopt, qmap_symrec, need_ftinterp)
 
  call xmpi_sum(cnt, comm, ierr)
 
- use_ftinterp = (cnt /= 0)
- if (.not. use_ftinterp .and. dtset%eph_use_ftinterp /= 0) then
+ need_ftinterp = (cnt /= 0)
+ if (.not. need_ftinterp .and. dtset%eph_need_ftinterp /= 0) then
    ABI_WARNING("Enforcing FT interpolation for q-points even if it's not strictly needed.")
-   use_ftinterp = .True.
+   need_ftinterp = .True.
  end if
 #endif
 
- if (use_ftinterp) then
+ if (need_ftinterp) then
    call wrtout(units, " Cannot find all IBZ q-points in the DVDB --> Activating Fourier interpolation.")
    call dvdb%ftinterp_setup(dtset%ddb_ngqpt, gstore%qptopt, 1, dtset%ddb_shiftq, nfftf, ngfftf, comm_rpt)
 
@@ -3502,6 +3503,11 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
 
  call wrtout(std_out, " Begin computation of e-ph matrix elements...", pre_newlines=1)
 
+ ! TODO: Exchange the q/k loops so that one can reduce the number of calls to _k dependente routines
+ ! and precompute u_nk(r) so that we can save one FFT every time we compute <g|v^1_{kappa,a}(r)|u_nk(r)>
+ ! The price to pay is an increase in the number of calls to get_ftqbz but for small systems this part does not dominate
+ ! Alternatively, one cah have two versions that will be invoked depending on my_nk, my_nq
+
  ! Loop over my spins.
  do my_is=1,gstore%my_nspins
    spin = gstore%my_spins(my_is)
@@ -3567,7 +3573,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
                             displ_red_qbz=displ_red_qbz)
      end if
 
-     if (use_ftinterp) then
+     if (need_ftinterp) then
        ! Fourier interpolation.
        call dvdb%get_ftqbz(cryst, qq_bz, cplex, nfftf, ngfftf, v1scf, gqk%pert_comm%value)
      else
@@ -3682,11 +3688,6 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
        call mkffnl_objs(cryst, psps, 1, ffnl_kq, ider0, idir0, kg_kq, kpg_kq, kq_bz, nkpg_kq, npw_kq, ylm_kq, ylmgr_kq, &
                         comm=gqk%pert_comm%value) ! request=ffnl1_request)
 
-#define USE_SETUP 0
-!#define USE_SETUP 1
-
-#if USE_SETUP == 0
-        !print *, "bypassing getgh1c_setup"
         ! Compute (1/2) (2 Pi)**2 (k+q+G)**2:
         ABI_CALLOC(kinpw_k, (npw_k))
         ABI_CALLOC(kinpw_kq, (npw_kq))
@@ -3698,19 +3699,14 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
 
         !===== Load the k/k+q dependent parts of the Hamiltonian
         ! Load k-dependent part in the Hamiltonian datastructure
-        call gs_hamkq%load_k(kpt_k=kk_bz, npw_k=npw_k, istwf_k=istwf_k, kg_k=kg_k, kpg_k=kpg_k,&
-                             ph3d_k=ph3d_k, compute_ph3d=.true., compute_gbound=.true.)
-
-        call gs_hamkq%load_k(ffnl_k=ffnl_k)
+        call gs_hamkq%load_k(kpt_k=kk_bz, npw_k=npw_k, istwf_k=istwf_k, kg_k=kg_k, kpg_k=kpg_k, &
+                             ph3d_k=ph3d_k, ffnl_k=ffnl_k, compute_ph3d=.true., compute_gbound=.true.)
 
         ! Load k+q-dependent part in the Hamiltonian datastructure
-        ! Note: istwf_k is imposed to 1 for RF calculations (should use istwf_kq instead)
-        call gs_hamkq%load_kprime(kpt_kp=kq_bz, npw_kp=npw_kq, istwf_kp=istwf_kq,&
-                                  kinpw_kp=kinpw_kq, &
-                                  kg_kp=kg_kq, kpg_kp=kpg_kq, ffnl_kp=ffnl_kq, compute_gbound=.true.)
+        call gs_hamkq%load_kprime(kpt_kp=kq_bz, npw_kp=npw_kq, istwf_kp=istwf_kq, kg_kp=kg_kq, kpg_kp=kpg_kq, &
+                                  kinpw_kp=kinpw_kq, ffnl_kp=ffnl_kq, compute_gbound=.true.)
 
         if (.not. qq_is_gamma) call gs_hamkq%load_kprime(ph3d_kp=ph3d_kq, compute_ph3d=.true.)
-#endif
 
        ! Loop over my atomic perturbations and compute gkq_atm.
        gkq_atm = zero
@@ -3721,15 +3717,6 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
          call init_rf_hamiltonian(cplex, gs_hamkq, ipert, rf_hamkq, has_e1kbsc=.true.)
 
          call rf_hamkq%load_spin(spin, vlocal1=vlocal1(:,:,:,:,my_ip), with_nonlocal=.true.)
-
-#if USE_SETUP == 1
-         ! This call is not optimal because there are quantities in out that do not depend on idir,ipert
-         call getgh1c_setup(gs_hamkq, rf_hamkq, dtset, psps, kk_bz, kq_bz, idir, ipert, &             ! In
-                            cryst%natom, cryst%rmet, cryst%gprimd, cryst%gmet, istwf_k, &             ! In
-                            npw_k, npw_kq, useylmgr1, kg_k, ylm_k, kg_kq, ylm_kq, ylmgr_kq, &         ! In
-                            dkinpw, nkpg_k, nkpg_kq, kpg_k, kpg_kq, kinpw_kq, ffnl_k, ffnl_kq, ph3d_k, ph3d_kq, &  ! Out
-                            reuse_kpg_k=1, reuse_kpg1_k=1, reuse_ffnlk=1, reuse_ffnl1=1)              ! Reuse some arrays
-#endif
 
          ! Calculate dvscf * psi_k, results stored in h1kets_kq on the k+q sphere.
          ! Compute H(1) applied to GS wavefunction Psi(0)
@@ -3745,12 +3732,6 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
          end do
 
          call rf_hamkq%free()
-#if USE_SETUP == 1
-         ABI_SFREE(kinpw_kq)
-         ABI_SFREE(dkinpw)
-         ABI_SFREE(ph3d_k)
-         ABI_SFREE(ph3d_kq)
-#endif
 
          ! Calculate <psi_{k+q,j}|dvscf_q*psi_{k,i}> for this perturbation. No need to handle istwf_kq because it's always 1.
 !$OMP PARALLEL DO COLLAPSE(2)
@@ -3767,11 +3748,10 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
        ABI_FREE(ffnl_kq)
        ABI_FREE(kpg_k)
        ABI_FREE(kpg_kq)
-
-       ABI_SFREE(ph3d_k)
-       ABI_SFREE(ph3d_kq)
-       ABI_SFREE(kinpw_k)
-       ABI_SFREE(kinpw_kq)
+       ABI_FREE(ph3d_k)
+       ABI_FREE(ph3d_kq)
+       ABI_FREE(kinpw_k)
+       ABI_FREE(kinpw_kq)
 
        ! Collect gkq_atm inside pert_comm so that all procs can operate on the data.
        if (gqk%pert_comm%nproc > 1) call xmpi_sum(gkq_atm, gqk%pert_comm%value, ierr)

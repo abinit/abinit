@@ -3258,7 +3258,7 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
              pol_wf(irsp, ip, spin) = pol_wf(irsp, ip, spin) + a_nk * ur_k(uc_idx) * ceikr(irsp)
            end do
          end do
-       end do ! ib
+       end do ! ip
      end do ! ib
 
      ABI_FREE(ug_k)
@@ -3449,7 +3449,6 @@ subroutine center_and_spread(prim_cryst, ncells, sc_ngfft, rhor, center_cart, sp
  fwhm = (two * sqrt(two * log(two))) * spread
  write(msg, "(a,2(es16.6,a))")" Full width at half-maximum (FWHM) ", fwhm, "(Borh) ", fwhm * Bohr_Ang, " (Ang)"
  call wrtout(units, msg)
-
 
 end subroutine center_and_spread
 
