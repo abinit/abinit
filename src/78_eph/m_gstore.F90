@@ -92,7 +92,7 @@
 !!     Big speedup is expected, especially if one loops first over k and then q, provided
 !!     the interpolation of v^1_q does not start to dominate
 !!  3) Use similar trick in dfpt_cgw for H^0 |psi_nk>
-!!  4) Operate on multiple n states in getgh1c (need big refactoring of getgh1c thoug)
+!!  4) Operate on multiple n states in getgh1c (need big refactoring of getgh1c though)
 !!
 !! COPYRIGHT
 !!  Copyright (C) 2008-2024 ABINIT group (MG)
@@ -616,7 +616,6 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
  integer,allocatable :: select_qbz_spin(:,:), select_kbz_spin(:,:)
  real(dp):: my_shiftq(3,1), kpt(3), kq(3), qpt(3)
  real(dp),allocatable :: qbz(:,:), wtk(:), kibz(:,:), kbz(:,:)
- !real(dp),allocatable :: phfrq(:), displ_cart(:,:,:,:)
  type(wan_t),target :: wan_spin(ebands%nsppol)
  complex(dp),allocatable :: intp_gatm(:,:,:,:)
 !----------------------------------------------------------------------
@@ -1172,12 +1171,10 @@ subroutine gstore_set_mpi_grid__(gstore, gstore_cplex, nproc_spin, comm_spin)
  integer,intent(in) :: gstore_cplex
  integer,intent(in) :: nproc_spin(gstore%nsppol)
  integer,intent(inout) :: comm_spin(gstore%nsppol)
-
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master = 0
- integer :: spin, my_is, np, my_rank, ierr, npp_bz !, ii
- !type(kmesh_t) :: kmesh, qmesh
+ integer :: spin, my_is, np, my_rank, ierr, npp_bz
  type(gqk_t),pointer :: gqk
  character(len=5000) :: msg
  character(len=10) :: order
@@ -2011,8 +2008,7 @@ subroutine recompute_select_qbz_spin(gstore, qbz, qbz2ibz, qibz2bz, kbz, kibz, k
 
 !Local variables-------------------------------
 !scalars
- integer :: all_nproc, my_rank, ierr, ii, ik_bz, iq_bz, iq_ibz, ikq_ibz, ikq_bz, len_kpts_ptr, ebands_timrev
- integer :: spin
+ integer :: all_nproc, my_rank, ierr, ii, ik_bz, iq_bz, iq_ibz, ikq_ibz, ikq_bz, len_kpts_ptr, ebands_timrev, spin
 !arrays
  integer,allocatable :: map_kq(:,:)
  real(dp) :: qpt(3)
@@ -2629,7 +2625,6 @@ subroutine gstore_get_a2fw(gstore, nw, wmesh, a2fw)
        w_nuq = gqk%my_wnuq(my_ip, my_iq)
        deltaw_nuq = gaussian(wmesh - w_nuq, gstore%dtset%ph_smear)
        do my_ik=1,gqk%my_nk
-         !weight_k = gqk%my_kweight(my_ik, gstore)
          weight_k = gqk%my_wtk(my_ik)
          do in_k=1,gqk%nb
            do im_kq=1,gqk%nb
@@ -3922,7 +3917,7 @@ end subroutine gstore_compute
 !! gstore_check_cplex_qkzone_gmode
 !!
 !! FUNCTION
-!! Performs consistency checks
+!! Perform consistency checks
 !!
 !! INPUTS
 !!
@@ -4284,9 +4279,6 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, if
 
      NCF_CHECK(nctk_open_read(ncid, gstore%path, gqk%comm%value))
      NCF_CHECK(nf90_inq_ncid(ncid, strcat("gqk", "_spin", itoa(spin)), spin_ncid))
-
-     !NCF_CHECK(nf90_get_var(spin_ncid, spin_vid("bstart"), gqk%bstart))
-     !NCF_CHECK(nf90_get_var(spin_ncid, spin_vid("bstop"), gqk%bstop))
 
      ! gstore_cplex defines the data on disk while cplex defines what we want to store in memory
      ABI_MALLOC_OR_DIE(gwork_q, (gstore_cplex, gqk%nb, gqk%nb, gqk%natom3, gqk%glob_nk), ierr)
