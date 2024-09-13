@@ -582,6 +582,22 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  end do
  ABI_CHECK(ierr == 0, "Found different q-points in DVDB and DRHODB. See messages above!")
 
+ ! Check if the q-points are present in the DVDB
+ !qptopt = dtset%kptopt; if (dtset%qptopt /= 0) qptopt = dtset%qptopt
+ !call dvdb%need_ftinterp(nq_path, qpath%points, qptopt, qmap_symrec, use_ftinterp)
+
+ !if (.not. use_ftinterp .and. dtset%eph_use_ftinterp /= 0) then
+ !  ABI_WARNING("Enforcing FT interpolation for q-points even if it's not strictly needed.")
+ !  use_ftinterp = .True.
+ !end if
+
+ !if (use_ftinterp) then
+ !  call wrtout(units, " Cannot find all q-points in the DVDB --> Activating Fourier interpolation.")
+ !  call dvdb%ftinterp_setup(dtset%ddb_ngqpt, qptopt, 1, dtset%ddb_shiftq, nfftf, ngfftf, xmpi_comm_self)
+ !else
+ !  call wrtout(units, " DVDB file contains all q-points along the path --> Reading DFPT potentials from file.")
+ !end if
+
  ! Activate parallelism over perturbations at the level of the DVDB, my_npert is output
  call gstore%set_perts_distrib(cryst, dvdb, my_npert)
  call gstore%set_perts_distrib(cryst, drhodb, my_npert)
@@ -1015,7 +1031,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
        ! MPI sum over the pp momenta in the full BZ gqk%pp_sum_comm
        ! ===========================================================
        !
-       ! Be careful here because pp should run over the list of wavevectors in the screeningm matrix!
+       ! Be careful here because pp should run over the list of wavevectors in the screening matrix!
        ! as pp_mesh%bz is not necessarily equivalent to the k-mesh for the wavefunctions,
        ! and we have to use the ipp_bz index to symmetrize W(pp_bz) from W(pp_ibz).
        !
@@ -1466,8 +1482,8 @@ end if ! .not qq_is_gamma.
 
        ! Here we are outside of the loop over pp_sum, band_sum and perturbations.
        ! Collect gsig_atm and gks_atm inside pert_ppsum_comm so that all procs can operate on the data.
-       call xmpi_sum_master(gsig_atm, 0, gqk%pert_ppsum_bsum_comm%value, ierr)
-       call xmpi_sum_master(gks_atm , 0, gqk%pert_ppsum_bsum_comm%value, ierr)
+       call xmpi_sum_master(gsig_atm, master, gqk%pert_ppsum_bsum_comm%value, ierr)
+       call xmpi_sum_master(gks_atm , master, gqk%pert_ppsum_bsum_comm%value, ierr)
 
        ! TODO gks_atm and gks_nu
        !gsig_atm = gsig_atm / (cryst%ucvol * pp_mesh%nbz)

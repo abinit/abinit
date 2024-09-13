@@ -121,7 +121,7 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
  integer :: nfft,nfftf,mgfft,mgfftf, my_npert, my_ip, idir, ipert, ipc, nkpg_k, nkpg_kq, ncerr, ncid, my_nkpath, my_nqpath
  integer :: in_k, im_kq, my_is, my_ik, my_iq, nband, nb_in_g, band_n, band_m, bstart, bstop, my_nspins, np, tot_nscf_ierr
  real(dp) :: cpu_all,wall_all,gflops_all, eig0nk, eshift
- logical :: qq_is_gamma, use_ftinterp, gen_eigenpb, use_cg_k, use_cg_kq, use_cache
+ logical :: qq_is_gamma, need_ftinterp, gen_eigenpb, use_cg_k, use_cg_kq, use_cache
  type(gs_hamiltonian_type) :: gs_hamk, gs_hamkq
  type(rf_hamiltonian_type) :: rf_hamkq
  type(nscf_t) :: nscf
@@ -290,14 +290,14 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
 
  ! Check if the q-points are present in the DVDB
  qptopt = dtset%kptopt; if (dtset%qptopt /= 0) qptopt = dtset%qptopt
- call dvdb%need_ftinterp(nq_path, qpath%points, qptopt, qmap_symrec, use_ftinterp)
+ call dvdb%need_ftinterp(nq_path, qpath%points, qptopt, qmap_symrec, need_ftinterp)
 
- if (.not. use_ftinterp .and. dtset%eph_use_ftinterp /= 0) then
+ if (.not. need_ftinterp .and. dtset%eph_use_ftinterp /= 0) then
    ABI_WARNING("Enforcing FT interpolation for q-points even if it's not strictly needed.")
-   use_ftinterp = .True.
+   need_ftinterp = .True.
  end if
 
- if (use_ftinterp) then
+ if (need_ftinterp) then
    call wrtout(units, " Cannot find all q-points in the DVDB --> Activating Fourier interpolation.")
    call dvdb%ftinterp_setup(dtset%ddb_ngqpt, qptopt, 1, dtset%ddb_shiftq, nfftf, ngfftf, xmpi_comm_self)
  else
@@ -519,7 +519,7 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
        ! Get DFPT potentials for this q-point
        ! ====================================
        ! After this branch we have allocated v1scf(cplex, nfftf, nspden, my_npert))
-       if (use_ftinterp) then
+       if (need_ftinterp) then
          call dvdb%get_ftqbz(cryst, qq, cplex, nfftf, ngfftf, v1scf, pert_comm%value)
        else
          ! Read and reconstruct the dvscf potentials for qq and my_npert perturbations.
@@ -534,29 +534,18 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
 #endif
        end if
 
-       ! Allocate vlocal1 with correct cplex. Note nvloc and my_npert.
+       ! Allocate vlocal1 with correct cplex. Note nvloc.
        ABI_MALLOC(vlocal1, (cplex*n4, n5, n6, gs_hamkq%nvloc))
 
-#define USE_SETUP 0
-!#define USE_SETUP 1
-
-#if USE_SETUP == 0
-       !print *, "bypassing getgh1c_setup"
        !===== Load the k/k+q dependent parts of the Hamiltonian
        ! Load k-dependent part in the Hamiltonian datastructure
-       call gs_hamkq%load_k(kpt_k=kk, npw_k=npw_k, istwf_k=istwfk_1, kg_k=kg_k, kpg_k=kpg_k,&
-                            ph3d_k=ph3d_k, compute_ph3d=.true., compute_gbound=.true.)
-
-       call gs_hamkq%load_k(ffnl_k=ffnl_k)
+       call gs_hamkq%load_k(kpt_k=kk, npw_k=npw_k, istwf_k=istwfk_1, kg_k=kg_k, kpg_k=kpg_k, &
+                            ph3d_k=ph3d_k, ffnl_k=ffnl_k, compute_ph3d=.false., compute_gbound=.true.)
 
        ! Load k+q-dependent part in the Hamiltonian datastructure
-       ! Note: istwf_k is imposed to 1 for RF calculations (should use istwf_kq instead)
-       call gs_hamkq%load_kprime(kpt_kp=kq, npw_kp=npw_kq, istwf_kp=istwfk_1,&
-                                 !kinpw_kp=kinpw_kq,
-                                 kg_kp=kg_kq, kpg_kp=kpg_kq, ffnl_kp=ffnl_kq, compute_gbound=.true.) ! compute_ph3d=.true.,
+       call gs_hamkq%load_kprime(kpt_kp=kq, npw_kp=npw_kq, istwf_kp=istwfk_1, kg_kp=kg_kq, kpg_kp=kpg_kq, &
+                                 ph3d_kp=ph3d_kq, ffnl_kp=ffnl_kq, compute_ph3d=.false., compute_gbound=.true.)
 
-       if (.not. qq_is_gamma) call gs_hamkq%load_kprime(ph3d_kp=ph3d_kq, compute_ph3d=.true.)
-#endif
 
        ! Loop over my atomic perturbations: apply H1_{kappa, alpha} and compute gkq_atm.
        gkq_atm = zero
@@ -572,15 +561,6 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
 
          call rf_hamkq%load_spin(spin, vlocal1=vlocal1, with_nonlocal=.true.)
 
-#if USE_SETUP == 1
-         ! This call is not optimal because there are quantities in out that do not depend on idir,ipert
-         call getgh1c_setup(gs_hamkq, rf_hamkq, dtset, psps, kk, kq, idir, ipert, &                     ! In
-                            cryst%natom, cryst%rmet, cryst%gprimd, cryst%gmet, istwfk_1, &              ! In
-                            npw_k, npw_kq, useylmgr1, kg_k, ylm_k, kg_kq, ylm_kq, ylmgr_kq, &           ! In
-                            dkinpw, nkpg_k, nkpg_kq, kpg_k, kpg_kq, kinpw_kq, ffnl_k, ffnl_kq, ph3d, ph3d1, & ! Out
-                            reuse_kpg_k=1, reuse_kpg1_k=1, reuse_ffnlk=1, reuse_ffnl1=1)                ! Reuse some arrays
-#endif
-
          ! Calculate dvscf * psi_k, results stored in h1kets_kq on the k+q sphere.
          ! Compute H(1) applied to GS wavefunction Psi(0)
          do in_k=1,nb_in_g
@@ -595,12 +575,6 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
          end do
 
          call rf_hamkq%free()
-#if USE_SETUP == 1
-         ABI_FREE(kinpw_kq)
-         ABI_FREE(dkinpw)
-         ABI_FREE(ph3d)
-         ABI_FREE(ph3d1)
-#endif
 
          ! Calculate <psi_{k+q,j}|dvscf_q*psi_{k,i}> for this perturbation. No need to handle istwf_kq because it's always 1.
 !$OMP PARALLEL DO COLLAPSE(2) PRIVATE(band_m)
@@ -661,9 +635,11 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
  tot_nscf_ierr = int(tot_nscf_ierr / dble(pert_comm%nproc))
  if (my_rank == master) then
    if (tot_nscf_ierr == 0) then
-     call wrtout(units, sjoin("Computation of g(k,q) completed succesfully. All NSCF runs converged within tolwfr", ftoa(dtset%tolwfr)))
+     call wrtout(units, &
+                 sjoin("Computation of g(k,q) completed. All NSCF runs converged within tolwfr", ftoa(dtset%tolwfr)))
    else
-     call wrtout(units, sjoin("WARNING:", itoa(tot_nscf_ierr), "NSCF runs did not converge within tolwfr", ftoa(dtset%tolwfr), ". Increase nstep!"))
+     call wrtout(units, &
+                sjoin("WARNING:", itoa(tot_nscf_ierr), "NSCF runs did not converge within tolwfr", ftoa(dtset%tolwfr), ". Increase nstep!"))
    end if
  end if
 

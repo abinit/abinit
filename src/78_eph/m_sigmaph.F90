@@ -269,7 +269,7 @@ module m_sigmaph
   logical :: use_doublegrid = .False.
    ! whether to use double grid or not
 
-  logical :: use_ftinterp = .False.
+  logical :: need_ftinterp = .False.
    ! whether DFPT potentials should be read from the DVDB or Fourier-interpolated on the fly.
 
   type(eph_double_grid_t) :: eph_doublegrid
@@ -1138,22 +1138,22 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
  ! Find correspondence IBZ --> set of q-points in DVDB.
  ! Activate FT interpolation automatically if required q-points in the IBZ are not found in the DVDB.
- sigma%use_ftinterp = .False.
+ sigma%need_ftinterp = .False.
  ABI_MALLOC(sigma%qibz2dvdb, (sigma%nqibz))
  if (dvdb%find_qpts(sigma%nqibz, sigma%qibz, sigma%qibz2dvdb, comm) /= 0) then
    call wrtout(units, " Cannot find eph_ngqpt_fine q-points in DVDB --> Activating Fourier interpolation.")
-   sigma%use_ftinterp = .True.
+   sigma%need_ftinterp = .True.
  else
    call wrtout(units, " DVDB file contains all q-points in the IBZ --> Reading DFPT potentials from file.")
-   sigma%use_ftinterp = .False.
+   sigma%need_ftinterp = .False.
  end if
 
- if (.not. sigma%use_ftinterp .and. dtset%eph_use_ftinterp /= 0) then
+ if (.not. sigma%need_ftinterp .and. dtset%eph_use_ftinterp /= 0) then
    ABI_WARNING("Enforcing FT interpolation for q-points even if it's not strictly needed.")
-   sigma%use_ftinterp = .True.
+   sigma%need_ftinterp = .True.
  end if
 
- if (sigma%use_ftinterp) then
+ if (sigma%need_ftinterp) then
    ! Use ddb_ngqpt q-mesh to compute the real-space represention of DFPT v1scf potentials to prepare Fourier interpolation.
    ! R-points are distributed inside comm_rpt
    ! Note that when R-points are distributed inside qpt_comm we cannot interpolate potentials on-the-fly
@@ -1185,7 +1185,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
  call dvdb%print(prtvol=dtset%prtvol)
 
- if (.not. sigma%use_ftinterp) then
+ if (.not. sigma%need_ftinterp) then
    ! Need to translate itreat_qibz into itreatq_dvdb.
    ABI_ICALLOC(itreatq_dvdb, (dvdb%nqpt))
    do iq_ibz=1,sigma%nqibz
@@ -1482,7 +1482,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
        ! Get DFPT potentials for this q-point
        ! ====================================
        ! After this branch we have allocated v1scf(cplex, nfftf, nspden, my_npert))
-       if (sigma%use_ftinterp) then
+       if (sigma%need_ftinterp) then
          ! Use Fourier interpolation to get DFPT potentials for this qpt (hopefully in cache).
          db_iqpt = sigma%ind_ibzk2ibz(1, iq_ibz_k)
          qq_ibz = sigma%qibz(:, db_iqpt)
@@ -4329,7 +4329,7 @@ subroutine sigmaph_setup_kcalc(self, dtset, cryst, ebands, ikcalc, prtvol, comm)
 
  call cwtime_report(" IBZ_k --> IBZ", cpu, wall, gflops)
 
- if (.not. self%use_ftinterp) then
+ if (.not. self%need_ftinterp) then
    ! Find correspondence IBZ_k --> set of q-points in DVDB.
    ! Need to handle q_bz = S q_ibz by symmetrizing the potentials already available in the DVDB.
    !
@@ -4535,7 +4535,7 @@ subroutine sigmaph_setup_qloop(self, dtset, cryst, ebands, dvdb, spin, ikcalc, n
 
        ! Redistribute relevant q-points inside qpt_comm taking into account itreat_qibz
        ! Must handle two cases: potentials from DVDB or Fourier-interpolated.
-       if (self%use_ftinterp) then
+       if (self%need_ftinterp) then
          ABI_ICALLOC(ineed_qibz, (self%nqibz))
        else
          ABI_ICALLOC(ineed_qdvdb, (dvdb%nqpt))
@@ -4551,7 +4551,7 @@ subroutine sigmaph_setup_qloop(self, dtset, cryst, ebands, dvdb, spin, ikcalc, n
            iq_ibz_k = qtab(iq)
            iq_ibz = self%ind_ibzk2ibz(1, iq_ibz_k)
            itreat = int(self%itreat_qibz(iq_ibz), kind=i4b)
-           if (.not. self%use_ftinterp) iq_dvdb = self%ind_q2dvdb_k(1, iq_ibz_k)
+           if (.not. self%need_ftinterp) iq_dvdb = self%ind_q2dvdb_k(1, iq_ibz_k)
            if (itreat /= 0) then
              if (ii == 1) self%my_nqibz_k = self%my_nqibz_k + 1
              if (ii == 2) then
