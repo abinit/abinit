@@ -2347,8 +2347,8 @@ subroutine nscf_init(nscf, dtset, dtfil, cryst, comm)
  type(pawrhoij_type),allocatable :: pot_pawrhoij(:)
 ! *************************************************************************
 
- !my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
  units = [std_out, ab_out]
+ call pot_hdr%free()
 
  call initmpi_seq(nscf%mpi_enreg)
 
@@ -2361,7 +2361,6 @@ subroutine nscf_init(nscf, dtset, dtfil, cryst, comm)
  call ngfft_seq(nscf%ngfftf, pot_hdr%ngfft)
  call ngfft_seq(nscf%ngfft, pot_hdr%ngfft)
  ABI_CHECK(dtset%usepaw == 0, "PAW not implemented!")
- call pot_hdr%free()
 
  call init_distribfft_seq(nscf%mpi_enreg%distribfft, 'c', nscf%ngfft(2), nscf%ngfft(3), 'all')
  call init_distribfft_seq(nscf%mpi_enreg%distribfft, 'f', nscf%ngfftf(2), nscf%ngfftf(3), 'all')
@@ -2442,7 +2441,6 @@ subroutine nscf_setup_kpt(nscf, isppol, kpt, istwf_k, nband, cryst, dtset, psps,
  integer :: npwarr_k(1), nband_ks(dtset%nsppol)
  real(dp) :: ylmgr_dum(1,1,1), ylmgr(0, 0)
  real(dp),allocatable :: ph1d(:,:), ylm_k(:,:)
-
 ! *************************************************************************
 
  ! See vtorho.F90 for the sequence of calls needed to initialize the GS Hamiltonian.
@@ -2461,6 +2459,16 @@ subroutine nscf_setup_kpt(nscf, isppol, kpt, istwf_k, nband, cryst, dtset, psps,
  ! Compute g-sphere for this k-point from ecut
  call get_kg(kpt, istwf_k, dtset%ecut, cryst%gmet, npw_k, kg_k)
 
+ !block
+ !integer :: mg1, mg2, mg3
+ !mg1 =maxval(abs(kg_k(1,:))); mg1 = 2*mg1 + 1
+ !mg2 =maxval(abs(kg_k(2,:))); mg2 = 2*mg2 + 1
+ !mg3 =maxval(abs(kg_k(3,:))); mg3 = 2*mg3 + 1
+ !ABI_CHECK_ILEQ(mg1, nscf%ngfft(1), "ngfft(1) too small")
+ !ABI_CHECK_ILEQ(mg2, nscf%ngfft(2), "ngfft(2) too small")
+ !ABI_CHECK_ILEQ(mg3, nscf%ngfft(3), "ngfft(3) too small")
+ !end block
+
  ! Compute kinetic energy.
  ABI_MALLOC(kinpw_k, (npw_k))
  call mkkin(dtset%ecut, dtset%ecutsm, dtset%effmass_free, cryst%gmet, kg_k, kinpw_k, kpt, npw_k, 0, 0)
@@ -2478,6 +2486,8 @@ subroutine nscf_setup_kpt(nscf, isppol, kpt, istwf_k, nband, cryst, dtset, psps,
                        dtset%typat, cryst%xred, nfft, mgfft, nscf%ngfft, cryst%rprimd, dtset%nloalg, &
                        comm_atom=mpi_enreg%comm_atom, mpi_atmtab=mpi_enreg%my_atmtab, mpi_spintab=mpi_enreg%my_isppoltab, &
                        usecprj=dtset%usepaw, ph1d=ph1d, nucdipmom=dtset%nucdipmom, gpu_option=dtset%gpu_option)
+
+ ABI_FREE(ph1d)
 
  ! Set up local potential vlocal on the coarse FFT mesh from vtrial taking into account the spin.
  ! Also, continue to initialize the Hamiltonian.
@@ -2531,7 +2541,7 @@ subroutine nscf_setup_kpt(nscf, isppol, kpt, istwf_k, nband, cryst, dtset, psps,
  ABI_MALLOC(cg_k, (2, npw_k * nspinor, nband))
  ABI_MALLOC(gsc_k, (2, npw_k * nspinor, nband * dtset%usepaw))
 
- ABI_FREE(ph1d)
+
  end associate
 
 end subroutine nscf_setup_kpt
@@ -2576,9 +2586,8 @@ subroutine nscf_solve_kpt(nscf, isppol, kpt, istwf_k, nband, cryst, dtset, dtfil
  type(crystal_t),intent(in) :: cryst
  type(gs_hamiltonian_type),intent(inout) :: gs_hamk
 !arrays
- real(dp),intent(inout) :: cg_k(:,:,:), gsc_k(:,:,:)
- !ABI_MALLOC(cg_k, (2, npw_k * nspinor, nband))
- !ABI_MALLOC(gsc_k, (2, npw_k * nspinor, nband * dtset%usepaw))
+ real(dp),intent(inout) :: cg_k(2, npw_k * dtset%nspinor, nband)
+ real(dp),intent(inout) :: gsc_k(2, npw_k * dtset%nspinor, nband * dtset%usepaw)
  real(dp),allocatable,intent(out) :: eig_k(:)
  integer,intent(out) :: ierr
  character(len=*),intent(out) :: msg
@@ -2622,10 +2631,6 @@ subroutine nscf_solve_kpt(nscf, isppol, kpt, istwf_k, nband, cryst, dtset, dtfil
  ABI_MALLOC(resid, (nband))
  ABI_MALLOC(eig_k, (nband))
 
- !if (present(init_cg_k)) then
- !  ! Initialize wavefunctions from init_cg_k
- !  cg_k = init_cg_k
- !else
  if (.not. use_cg_k) then
    ! Initialize the wavefunctions with random numbers. See wfconv
    do iband=1,nband
@@ -2663,7 +2668,7 @@ subroutine nscf_solve_kpt(nscf, isppol, kpt, istwf_k, nband, cryst, dtset, dtfil
    !call random_number(cg_k)
 
    ! Multiply with envelope function to reduce kinetic energy
-   call cg_envlop(cg_k, dtset%ecut, cryst%gmet, 0, kg_k, kpt, mcg, nband, npw_k, dtset%nspinor)
+   call cg_envlop(cg_k, dtset%ecut, cryst%gmet, icg0, kg_k, kpt, mcg, nband, npw_k, dtset%nspinor)
  end if
 
  ! Ortoghonalize input trial states (this is important, even whe cg_k is already initialized from a previous kpt
@@ -2673,11 +2678,17 @@ subroutine nscf_solve_kpt(nscf, isppol, kpt, istwf_k, nband, cryst, dtset, dtfil
 
  ! linalg initialisation (required by subdiago)
  linalg_max_size=maxval(dtset%nband(:))
- call abi_linalg_init(linalg_max_size,RUNL_GSTATE,dtset%wfoptalg, paral_kgb0,&
-                      dtset%gpu_option,dtset%use_slk,dtset%np_slk, nscf%mpi_enreg%comm_bandspinorfft)
+ call abi_linalg_init(linalg_max_size, RUNL_GSTATE, dtset%wfoptalg, paral_kgb0,&
+                      dtset%gpu_option, dtset%use_slk, dtset%np_slk, nscf%mpi_enreg%comm_bandspinorfft)
 
  ierr = 1; msg = ""
  do inonsc=1,dtset%nstep
+
+   !if (inonsc > 1) then
+   !! subspace rotation (without this, cgwf will never converge!)
+   !call subdiago(cg_k, eig_k, evec, gsc_k, icg0, igsc0, istwf_k, mcg, mgsc, nband, npw_k, dtset%nspinor, paral_kgb0, &
+   !              subham, subovl, use_subovl0, gs_hamk%usepaw, me_g0)
+   !end if
 
    call cgwf(dtset%berryopt, cg_k, cgq, dtset%chkexit, cpus0, dphase_k, dtefield, dtfil%filnam_ds(1), &
              gsc_k, gs_hamk, icg0, igsc0, ikpt0, inonsc, isppol, nband, mcg, mcgq0, mgsc, mkgq0, &
@@ -2686,18 +2697,30 @@ subroutine nscf_solve_kpt(nscf, isppol, kpt, istwf_k, nband, cryst, dtset, dtfil
              pwind, pwind_alloc0, pwnsfac, pwnsfacq, quit0, resid, &
              subham, subovl, subvnlx, dtset%tolrde, dtset%tolwfr_diago, use_subovl0, use_subvnlx0, mod(dtset%wfoptalg, 100), zshift)
 
-   !call rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kinpw, gsc, &
-   !                 mpi_enreg, nband, npw, my_nspinor, resid, rmm_diis_status)
-
    ! subspace rotation (without this, cgwf will never converge!)
    call subdiago(cg_k, eig_k, evec, gsc_k, icg0, igsc0, istwf_k, mcg, mgsc, nband, npw_k, dtset%nspinor, paral_kgb0, &
                  subham, subovl, use_subovl0, gs_hamk%usepaw, me_g0)
+
+   !  Print energies
+   !if(prtvol/=5.and.(prtvol>2 .or. ikpt<=nkpt_max))then
+   !  do ii=0,(nband_k-1)/8
+   !    write(msg, '(a,8es10.2)' )' ene:',(eig_k(iband),iband=1+ii*8,min(nband_k,8+ii*8))
+   !    call wrtout(std_out,msg,'PERS')
+   !  end do
+   !end if
+
+   !if (prtvol > 10) then
+   !  write(std_out, *)" Eigenvalues in Ha and eV"
+   !  do iband=1,nband
+   !    write(std_out, *)iband, eig_k(iband), eig_k(iband) * Ha_eV
+   !  end do
+   !end if
 
    ! Check for convergence.
    if (dtset%nbdbuf >= 0) then
      max_resid = maxval(resid(1:max(1,nband-dtset%nbdbuf)))
    else
-    ABI_ERROR(sjoin('Bad value of nbdbuf:', itoa(dtset%nbdbuf)))
+     ABI_ERROR(sjoin('Bad value of nbdbuf:', itoa(dtset%nbdbuf)))
    end if
 
    ! Exit loop over inonsc if converged
@@ -2710,13 +2733,6 @@ subroutine nscf_solve_kpt(nscf, isppol, kpt, istwf_k, nband, cryst, dtset, dtfil
      exit
    end if
  end do ! inonsc
-
- !if (prtvol > 10) then
- !  write(std_out, *)" Eigenvalues in Ha and eV"
- !  do iband=1,nband
- !    write(std_out, *)iband, eig_k(iband), eig_k(iband) * Ha_eV
- !  end do
- !end if
 
  if (ierr /= 0) then
    msg = sjoin(" NSCF run for kpt:", ktoa(kpt), "didn't converge after", itoa(dtset%nstep), " steps", ch10)
