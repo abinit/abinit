@@ -1,6 +1,6 @@
 
-.Version 9.11.0 of MRGDDB 
-.(MPI version, prepared for a x86_64_linux_intel19.1 computer) 
+.Version 10.1.4.5 of MRGDDB, released Sep 2024.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2024 ABINIT group . 
  MRGDDB comes with ABSOLUTELY NO WARRANTY.
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed 31 May 2023.
-- ( at 01h00 )
+.Starting date : Sat 14 Sep 2024.
+- ( at 06h51 )
   
   Give name for output derivative database : 
  t53o_DS20_DDB
@@ -29,17 +29,17 @@
  t50o_DS4_DDB
   Give name for derivative database number           3  : 
  t50o_DS5_DDB
- 
+
   merge_ddb: Reading all headers.
  Opening DDB file: t50o_DS3_DDB
  Opening DDB file: t50o_DS4_DDB
  Opening DDB file: t50o_DS5_DDB
  Opening DDB file: t50o_DS3_DDB
- 
+
  read the input derivative database number     1
  Opening DDB file: t50o_DS3_DDB
  compare the current and input DDB information
- 
+
   ==== Info on the Cryst% object ====
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  3.3517340  3.3517340  G(1)= -0.1491765  0.1491765  0.1491765
@@ -51,14 +51,14 @@
  Reduced atomic positions [iatom, xred, symbol]:
     1)    0.0000000  0.0000000  0.0000000   C
     2)    0.2500000  0.2500000  0.2500000   C
- 
+
  DDB file with 1 blocks has been read.
  add block #    1 from file t50o_DS3_DDB
- 
+
  read the input derivative database number     2
  Opening DDB file: t50o_DS4_DDB
  compare the current and input DDB information
- 
+
   ==== Info on the Cryst% object ====
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  3.3517340  3.3517340  G(1)= -0.1491765  0.1491765  0.1491765
@@ -70,14 +70,14 @@
  Reduced atomic positions [iatom, xred, symbol]:
     1)    0.0000000  0.0000000  0.0000000   C
     2)    0.2500000  0.2500000  0.2500000   C
- 
+
  DDB file with 1 blocks has been read.
  add block #    1 from file t50o_DS4_DDB
- 
+
  read the input derivative database number     3
  Opening DDB file: t50o_DS5_DDB
  compare the current and input DDB information
- 
+
   ==== Info on the Cryst% object ====
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  3.3517340  3.3517340  G(1)= -0.1491765  0.1491765  0.1491765
@@ -89,10 +89,10 @@
  Reduced atomic positions [iatom, xred, symbol]:
     1)    0.0000000  0.0000000  0.0000000   C
     2)    0.2500000  0.2500000  0.2500000   C
- 
+
  DDB file with 1 blocks has been read.
  add block #    1 from file t50o_DS5_DDB
  Final DDB has      3 blocks.
 -
-- Proc.   0 individual time (sec): cpu=          0.0  wall=          0.1
+- Proc.   0 individual time (sec): cpu=          0.0  wall=          0.0
 +mrgddb : the run completed successfully
