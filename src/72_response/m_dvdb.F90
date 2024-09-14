@@ -3845,11 +3845,12 @@ subroutine dvdb_need_ftinterp(db, nqpt, qpts, qptopt,  qmap_symrec, need_ftinter
  ABI_MALLOC(qmap_symrec, (6, nqpt))
 
  if (kpts_map("symrec", qtimrev, db%cryst, qrank, nqpt, qpts, qmap_symrec) /= 0) then
-   need_ftinterp = .True.
-   call qrank%free()
+   ! There's at least on-qpoint in qpts that is not the IBZ imanged of db%qpts
+   need_ftinterp = .True.; call qrank%free()
    return
  end if
 
+ ! All the IBZ images must be in the DVDB
  do iq=1,nqpt
    iq_ibz = qmap_symrec(1, iq)
    qq_ibz = db%qpts(:, iq_ibz)

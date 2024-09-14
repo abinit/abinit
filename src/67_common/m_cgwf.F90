@@ -2413,12 +2413,12 @@ end subroutine nscf_init
 !!
 !! SOURCE
 
-subroutine nscf_setup_kpt(nscf, isppol, kpt, istwf_k, nband, cryst, dtset, psps, pawtab, pawfgr, &
+subroutine nscf_setup_kpt(nscf, isppol, kpt, istwf_k, nband_k, cryst, dtset, psps, pawtab, pawfgr, &
                           npw_k, kg_k, kpg_k, ph3d_k, kinpw_k, ffnl_k, vlocal, cg_k, gsc_k, gs_hamk)
 
 !Arguments ------------------------------------
  class(nscf_t),intent(inout) :: nscf
- integer,intent(in) :: isppol, istwf_k, nband
+ integer,intent(in) :: isppol, istwf_k, nband_k
  real(dp),intent(in) :: kpt(3)
  type(dataset_type),intent(in) :: dtset
  type(crystal_t),intent(in) :: cryst
@@ -2516,7 +2516,7 @@ subroutine nscf_setup_kpt(nscf, isppol, kpt, istwf_k, nband, cryst, dtset, psps,
  ! Set up the spherical harmonics (Ylm) at k and k+q. See also dfpt_looppert
  if (psps%useylm == 1) then
    optder = 0; if (useylmgr0 == 1) optder = 1
-   nband_ks = nband
+   nband_ks = nband_k
    call initylmg(cryst%gprimd, kg_k, kpt, mkmem1, nscf%mpi_enreg, psps%mpsang, npw_k, nband_ks, mkmem1,&
                 [npw_k], dtset%nsppol, optder, cryst%rprimd, ylm_k, ylmgr)
  end if
@@ -2536,11 +2536,10 @@ subroutine nscf_setup_kpt(nscf, isppol, kpt, istwf_k, nband, cryst, dtset, psps,
                      compute_ph3d=(paral_kgb0/=1), compute_gbound=(paral_kgb0/=1))
 
  npwarr_k = npw_k; npwsp = npw_k * nspinor; me_g0 = 1
- mcg = npw_k * nspinor * nband; mgsc = mcg * dtset%usepaw
+ mcg = npw_k * nspinor * nband_k; mgsc = mcg * dtset%usepaw
 
- ABI_MALLOC(cg_k, (2, npw_k * nspinor, nband))
- ABI_MALLOC(gsc_k, (2, npw_k * nspinor, nband * dtset%usepaw))
-
+ ABI_MALLOC(cg_k, (2, npw_k * nspinor, nband_k))
+ ABI_MALLOC(gsc_k, (2, npw_k * nspinor, nband_k * dtset%usepaw))
 
  end associate
 
@@ -2573,21 +2572,21 @@ end subroutine nscf_setup_kpt
 !!
 !! SOURCE
 
-subroutine nscf_solve_kpt(nscf, isppol, kpt, istwf_k, nband, cryst, dtset, dtfil, gs_hamk, use_cg_k, & ! in
+subroutine nscf_solve_kpt(nscf, isppol, kpt, istwf_k, nband_k, cryst, dtset, dtfil, gs_hamk, use_cg_k, & ! in
                           npw_k, cg_k, gsc_k, eig_k, msg, ierr)  ! out
 
 !Arguments ------------------------------------
  class(nscf_t),intent(inout) :: nscf
  logical,intent(in) :: use_cg_k
- integer,intent(in) :: isppol, istwf_k, nband, npw_k
+ integer,intent(in) :: isppol, istwf_k, nband_k, npw_k
  real(dp),intent(in) :: kpt(3)
  type(dataset_type),intent(in) :: dtset
  type(datafiles_type), intent(in) :: dtfil
  type(crystal_t),intent(in) :: cryst
  type(gs_hamiltonian_type),intent(inout) :: gs_hamk
 !arrays
- real(dp),intent(inout) :: cg_k(2, npw_k * dtset%nspinor, nband)
- real(dp),intent(inout) :: gsc_k(2, npw_k * dtset%nspinor, nband * dtset%usepaw)
+ real(dp),intent(inout) :: cg_k(2, npw_k * dtset%nspinor, nband_k)
+ real(dp),intent(inout) :: gsc_k(2, npw_k * dtset%nspinor, nband_k * dtset%usepaw)
  real(dp),allocatable,intent(out) :: eig_k(:)
  integer,intent(out) :: ierr
  character(len=*),intent(out) :: msg
@@ -2607,8 +2606,8 @@ subroutine nscf_solve_kpt(nscf, isppol, kpt, istwf_k, nband, cryst, dtset, dtfil
  type(efield_type) :: dtefield
 !arrays
  integer :: npwarr_k(1), pwind(pwind_alloc0,2,3)
- real(dp) :: pwnsfac(2,pwind_alloc0), pwnsfacq(2,mkgq0), zshift(nband), cgq(2, mcgq0), dphase_k(3)
- real(dp) :: subham(nband*(nband+1)), subovl(nband*(nband+1)*use_subovl0), subvnlx(nband*(nband+1)*use_subvnlx0)
+ real(dp) :: pwnsfac(2,pwind_alloc0), pwnsfacq(2,mkgq0), zshift(nband_k), cgq(2, mcgq0), dphase_k(3)
+ real(dp) :: subham(nband_k*(nband_k+1)), subovl(nband_k*(nband_k+1)*use_subovl0), subvnlx(nband_k*(nband_k+1)*use_subvnlx0)
  real(dp),allocatable :: resid(:), evec(:,:)
 ! *************************************************************************
 
@@ -2626,14 +2625,14 @@ subroutine nscf_solve_kpt(nscf, isppol, kpt, istwf_k, nband, cryst, dtset, dtfil
  nspinor = dtset%nspinor
 
  npwarr_k = npw_k; npwsp = npw_k * nspinor; me_g0 = 1
- mcg = npw_k * nspinor * nband; mgsc = mcg * dtset%usepaw
+ mcg = npw_k * nspinor * nband_k; mgsc = mcg * dtset%usepaw
 
- ABI_MALLOC(resid, (nband))
- ABI_MALLOC(eig_k, (nband))
+ ABI_MALLOC(resid, (nband_k))
+ ABI_MALLOC(eig_k, (nband_k))
 
  if (.not. use_cg_k) then
    ! Initialize the wavefunctions with random numbers. See wfconv
-   do iband=1,nband
+   do iband=1,nband_k
      index = 0
      do ispinor=1,nspinor
        do ipw=1,npw_k
@@ -2668,13 +2667,13 @@ subroutine nscf_solve_kpt(nscf, isppol, kpt, istwf_k, nband, cryst, dtset, dtfil
    !call random_number(cg_k)
 
    ! Multiply with envelope function to reduce kinetic energy
-   call cg_envlop(cg_k, dtset%ecut, cryst%gmet, icg0, kg_k, kpt, mcg, nband, npw_k, dtset%nspinor)
+   call cg_envlop(cg_k, dtset%ecut, cryst%gmet, icg0, kg_k, kpt, mcg, nband_k, npw_k, dtset%nspinor)
  end if
 
  ! Ortoghonalize input trial states (this is important, even whe cg_k is already initialized from a previous kpt
- call pw_orthon(icg0, igsc0, istwf_k, mcg, mgsc, npwsp, nband, ortalgo_3, gsc_k, dtset%usepaw, cg_k, me_g0, xmpi_comm_self)
+ call pw_orthon(icg0, igsc0, istwf_k, mcg, mgsc, npwsp, nband_k, ortalgo_3, gsc_k, dtset%usepaw, cg_k, me_g0, xmpi_comm_self)
 
- ABI_MALLOC(evec, (2*nband, nband))
+ ABI_MALLOC(evec, (2*nband_k, nband_k))
 
  ! linalg initialisation (required by subdiago)
  linalg_max_size=maxval(dtset%nband(:))
@@ -2686,19 +2685,19 @@ subroutine nscf_solve_kpt(nscf, isppol, kpt, istwf_k, nband, cryst, dtset, dtfil
 
    !if (inonsc > 1) then
    !! subspace rotation (without this, cgwf will never converge!)
-   !call subdiago(cg_k, eig_k, evec, gsc_k, icg0, igsc0, istwf_k, mcg, mgsc, nband, npw_k, dtset%nspinor, paral_kgb0, &
+   !call subdiago(cg_k, eig_k, evec, gsc_k, icg0, igsc0, istwf_k, mcg, mgsc, nband_k, npw_k, dtset%nspinor, paral_kgb0, &
    !              subham, subovl, use_subovl0, gs_hamk%usepaw, me_g0)
    !end if
 
    call cgwf(dtset%berryopt, cg_k, cgq, dtset%chkexit, cpus0, dphase_k, dtefield, dtfil%filnam_ds(1), &
-             gsc_k, gs_hamk, icg0, igsc0, ikpt0, inonsc, isppol, nband, mcg, mcgq0, mgsc, mkgq0, &
-             mpi_enreg, npw_k, nband, dtset%nbdblock, nkpt1, dtset%nline, npw_k, npwarr_k, dtset%nspinor, &
+             gsc_k, gs_hamk, icg0, igsc0, ikpt0, inonsc, isppol, nband_k, mcg, mcgq0, mgsc, mkgq0, &
+             mpi_enreg, npw_k, nband_k, dtset%nbdblock, nkpt1, dtset%nline, npw_k, npwarr_k, dtset%nspinor, &
              dtset%nsppol, dtset%ortalg, dtset%prtvol, &
              pwind, pwind_alloc0, pwnsfac, pwnsfacq, quit0, resid, &
              subham, subovl, subvnlx, dtset%tolrde, dtset%tolwfr_diago, use_subovl0, use_subvnlx0, mod(dtset%wfoptalg, 100), zshift)
 
    ! subspace rotation (without this, cgwf will never converge!)
-   call subdiago(cg_k, eig_k, evec, gsc_k, icg0, igsc0, istwf_k, mcg, mgsc, nband, npw_k, dtset%nspinor, paral_kgb0, &
+   call subdiago(cg_k, eig_k, evec, gsc_k, icg0, igsc0, istwf_k, mcg, mgsc, nband_k, npw_k, dtset%nspinor, paral_kgb0, &
                  subham, subovl, use_subovl0, gs_hamk%usepaw, me_g0)
 
    !  Print energies
@@ -2711,14 +2710,14 @@ subroutine nscf_solve_kpt(nscf, isppol, kpt, istwf_k, nband, cryst, dtset, dtfil
 
    !if (prtvol > 10) then
    !  write(std_out, *)" Eigenvalues in Ha and eV"
-   !  do iband=1,nband
+   !  do iband=1,nband_k
    !    write(std_out, *)iband, eig_k(iband), eig_k(iband) * Ha_eV
    !  end do
    !end if
 
    ! Check for convergence.
    if (dtset%nbdbuf >= 0) then
-     max_resid = maxval(resid(1:max(1,nband-dtset%nbdbuf)))
+     max_resid = maxval(resid(1:max(1,nband_k-dtset%nbdbuf)))
    else
      ABI_ERROR(sjoin('Bad value of nbdbuf:', itoa(dtset%nbdbuf)))
    end if
@@ -2729,7 +2728,7 @@ subroutine nscf_solve_kpt(nscf, isppol, kpt, istwf_k, nband, cryst, dtset, dtfil
      msg = sjoin(" NSCF for kpt:", ktoa(kpt), " completed in", itoa(inonsc), "steps. max_resid:", ftoa(max_resid))
      call wrtout(std_out, msg)
      ! Fix the phase of the wavefunctions.
-     !call cgtk_fixphase(cg_k, gsc_k, icg0, igsc0, istwf_k, mcg, mgsc, mpi_enreg, nband, npw_k, dtset%usepaw)
+     !call cgtk_fixphase(cg_k, gsc_k, icg0, igsc0, istwf_k, mcg, mgsc, mpi_enreg, nband_k, npw_k, dtset%usepaw)
      exit
    end if
  end do ! inonsc
