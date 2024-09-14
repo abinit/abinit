@@ -119,7 +119,7 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
  integer :: spin, iq, ik, nk_path, nq_path, ierr, npw_k, npw_kq, my_rank, nprocs, n1, n2, n3, n4, n5, n6, cplex
  integer :: natom, natom3, nsppol, nspden, nspinor, qptopt, db_iqpt, comm_cart, me_cart
  integer :: nfft,nfftf,mgfft,mgfftf, my_npert, my_ip, idir, ipert, ipc, nkpg_k, nkpg_kq, ncerr, ncid, my_nkpath, my_nqpath
- integer :: in_k, im_kq, my_is, my_ik, my_iq, nband, nb_in_g, band_n, band_m, bstart, bstop, my_nspins, np, tot_nscf_ierr
+ integer :: in_k, im_kq, my_is, my_ik, my_iq, nband, nb_in_g, ii, band_n, band_m, bstart, bstop, my_nspins, np, tot_nscf_ierr
  real(dp) :: cpu_all,wall_all,gflops_all, eig0nk, eshift
  logical :: qq_is_gamma, need_ftinterp, gen_eigenpb, use_cg_k, use_cg_kq, use_cache
  type(gs_hamiltonian_type) :: gs_hamk, gs_hamkq
@@ -473,6 +473,8 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
        call nscf%setup_kpt(spin, kq, istwfk_1, nband, cryst, dtset, psps, pawtab, pawfgr, &
                            npw_kq, kg_kq, kpg_kq, ph3d_kq, kinpw_kq, ffnl_kq, vlocal_kq, cg_kq, gsc_kq, gs_hamkq)
 
+       !print *, "kq:", kq, "npw_kq", npw_kq
+
        ! cache.
        use_cg_kq = (my_iq > 1 .and. ucache_kq%use_cache)
        if (use_cg_kq) call ucache_kq%get_kpt(kq, istwfk_1, npw_kq, nspinor, nband, kg_kq, cg_kq)
@@ -482,7 +484,9 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
          use_cg_kq = .True.
          cg_kq = cg_k
        end if
+       !use_cg_kq = .False.
 
+       !cg_kq = zero
        call nscf%solve_kpt(spin, kq, istwfk_1, nband, cryst, dtset, dtfil, gs_hamkq, &
                            use_cg_kq, npw_kq, cg_kq, gsc_kq, eig_kq, msg, ierr)
 
@@ -494,7 +498,7 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
        ABI_WARNING_IF(ierr /= 0, msg)
        tot_nscf_ierr = tot_nscf_ierr + ierr
 
-       ! Make sure all procs in pert_comm have the same wavefunctions at k
+       ! Make sure all procs in pert_comm have the same wavefunctions at k+q
        call xmpi_bcast(cg_kq, master, pert_comm%value, ierr)
        if (psps%usepaw == 1) call xmpi_bcast(gsc_kq, master, pert_comm%value, ierr)
 
@@ -536,6 +540,8 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
 
        ! Allocate vlocal1 with correct cplex. Note nvloc.
        ABI_MALLOC(vlocal1, (cplex*n4, n5, n6, gs_hamkq%nvloc))
+
+#if 0
 
        !===== Load the k/k+q dependent parts of the Hamiltonian
        ! Load k-dependent part in the Hamiltonian datastructure
@@ -591,6 +597,7 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
        if (pert_comm%nproc > 1) call xmpi_sum(gkq_atm, pert_comm%value, ierr)
 
        call ephtk_gkknu_from_atm(nb_in_g, nb_in_g, 1, natom, gkq_atm, phfreqs, displ_red, gkq_nu)
+#endif
 
        ! Write |g|^2 for this q.
        !if (pert_comm%me == master) then
@@ -606,7 +613,7 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
        ABI_FREE(vlocal_kq)
        ABI_FREE(ph3d_kq)
        ABI_FREE(kpg_kq)
-       ABI_SFREE(kinpw_kq)
+       ABI_FREE(kinpw_kq)
        ABI_FREE(ffnl_kq)
        ABI_FREE(kg_kq)
        ABI_FREE(eig_kq)
@@ -646,10 +653,13 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
  NCF_CHECK(nf90_close(ncid))
  call xmpi_barrier(comm)
 
- ! Write results to ab_out for automatic testing.
+ ! ===========================================
+ ! Write results to ab_out for automatic tests
+ ! ===========================================
  if (my_rank == master) then
    NCF_CHECK(nctk_open_read(ncid, gpath_path, xmpi_comm_self))
-   ! Average matrix elements over degenerate states (electrons at k, k+q, and phonons)?
+   ! TODO: 1) Average matrix elements over degenerate states (electrons at k, k+q, and phonons) ?
+   !       2) Write eigenvalues
    call wrtout(units, "kpoints:")
    do ik=1, nk_path
      call wrtout(units, sjoin(char(9), itoa(ik), ktoa(kpath%points(:,ik))))
@@ -658,6 +668,38 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
    do iq=1, nq_path
      call wrtout(units, sjoin(char(9), itoa(iq), ktoa(qpath%points(:,iq))))
    end do
+
+   if (nq_path > 1) then
+     ABI_MALLOC(eig_kq, (nband))
+     do spin=1,nsppol
+       call wrtout(units, sjoin(" Energies_kq in eV for spin:", itoa(spin)))
+       do iq=1, nq_path
+         if (.not. any(iq /= [1, nq_path])) cycle
+         NCF_CHECK(nf90_get_var(ncid, vid("all_eigens_kq"), eig_kq, start=[1,iq,spin]))
+         do ii=0,(nband-1)/8
+           write(msg, '(a, 8es10.2)' )' ene:',(eig_kq(band_m) * Ha_eV, band_m=1+ii*8,min(nband,8+ii*8))
+           call wrtout(units, msg)
+         end do
+       end do
+     end do
+     ABI_FREE(eig_kq)
+
+   else
+
+     ABI_MALLOC(eig_k, (nband))
+     do spin=1,nsppol
+       call wrtout(units, sjoin(" Energies_k in eV for spin:", itoa(spin)))
+       do ik=1, nk_path
+         NCF_CHECK(nf90_get_var(ncid, vid("all_eigens_k"), eig_k, start=[1,ik,spin]))
+         if (.not. any(ik /= [1, nk_path])) cycle
+         do ii=0,(nband-1)/8
+           write(msg, '(a, 8es10.2)' )' ene:',(eig_k(band_n) * Ha_eV, band_n=1+ii*8,min(nband,8+ii*8))
+           call wrtout(units, msg)
+         end do
+       end do
+     end do
+     ABI_FREE(eig_k)
+   end if
 
    call wrtout(units, " Writing sqrt(1/N_b^2 \sum_{mn} |g_{mn,nu}(k, q)|^2) in meV for testing purpose.", pre_newlines=2)
    write(msg, "(1x,4(a5,1x),a16)") "nu","iq", "ik", "spin", "|g| in meV"

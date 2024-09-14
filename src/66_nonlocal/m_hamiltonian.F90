@@ -9,7 +9,7 @@
 !!  Methods to initialize or destroy the objects are defined here.
 !!
 !! TODO
-!!  All array pointers in H datatypes should be declared as contiguous for efficient reasons
+!!  All array pointers in H datatypes should be declared as contiguous for efficiency reasons
 !!  (well, here performance is critical)
 !!  Client code should make sure they always point contiguous targets.
 !!
