@@ -3179,7 +3179,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
 !arrays
  integer :: g0_k(3), g0_kq(3), g0_q(3), work_ngfft(18),gmax(3),indkk_kq(6,1), units(2)
  integer :: mapc_qq2dvdb(6) ! mapl_k(6), mapl_kq(6), mapl_kqmp(6), mapl_kmp(6), mapc_qq(6),
- integer,allocatable :: kg_k(:,:), kg_kq(:,:), nband(:,:), wfd_istwfk(:)
+ integer,allocatable :: kg_k(:,:), kg_kq(:,:), nband(:,:), wfd_istwfk(:), qmap_symrec(:,:)
  integer,allocatable :: iq_buf(:,:), done_qbz_spin(:,:), my_iqibz_inds(:)
  !integer,allocatable :: qibz2dvdb(:) !, displs(:), recvcounts(:)
  real(dp) :: kk_bz(3),kq_bz(3),kk_ibz(3),kq_ibz(3), qq_bz(3), qq_ibz(3), vk(3)
@@ -3237,36 +3237,18 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
  comm_rpt = xmpi_comm_self
  !comm_rpt = bqs_comm%value
 
- ! qibz2dvdb gives the mapping gstore%ibz --> dvdb%ibz
+ ! qmap_symrec gives the mapping gstore%ibz --> dvdb%ibz
  need_ftinterp = .True.
  !need_ftinterp = .False.
 
- ! TODO:
 #if 0
- cnt = 0
- spin_loop: do my_is=1,gstore%my_nspins
-   spin = gstore%my_spins(my_is)
-   gqk => gstore%gqk(my_is)
-   do my_iq=1,gqk%my_nq
-     iq_ibz = gqk%my_q2ibz(1, my_iq); isym_q = gqk%my_q2ibz(2, my_iq)
-     trev_q = gqk%my_q2ibz(6, my_iq); g0_q = gqk%my_q2ibz(3:5,my_iq)
-     db_iqpt = dvdb%findq(qq_ibz)
-     if (db_iqpt == -1) then
-       cnt = 1; exit spin_loop
-     end if
-   end do
- end do spin_loop
+ call dvdb%need_ftinterp(qstore%nqibz, gstore%qibz, gstore%qptopt, qmap_symrec, need_ftinterp)
+#endif
 
- !call dvdb%need_ftinterp(qpath%npts, qpath%points, qptopt, qmap_symrec, need_ftinterp)
-
- call xmpi_sum(cnt, comm, ierr)
-
- need_ftinterp = (cnt /= 0)
- if (.not. need_ftinterp .and. dtset%eph_need_ftinterp /= 0) then
+ if (.not. need_ftinterp .and. dtset%eph_use_ftinterp /= 0) then
    ABI_WARNING("Enforcing FT interpolation for q-points even if it's not strictly needed.")
    need_ftinterp = .True.
  end if
-#endif
 
  if (need_ftinterp) then
    call wrtout(units, " Cannot find all IBZ q-points in the DVDB --> Activating Fourier interpolation.")
@@ -3375,12 +3357,26 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
  ! Open GSTORE file, and read table used for restarting.
  NCF_CHECK(nctk_open_modify(root_ncid, gstore%path, gstore%comm))
 
+ ! integer scalars
+ ncerr = nctk_def_iscalars(root_ncid, [character(len=nctk_slen) :: &
+   "used_ftinterp" &
+ ])
+ NCF_CHECK(ncerr)
+
  ABI_MALLOC(done_qbz_spin, (gstore%nqbz, nsppol))
  NCF_CHECK(nf90_get_var(root_ncid, nctk_idname(root_ncid, "gstore_done_qbz_spin"), done_qbz_spin))
 
  gstore%wfk0_path = wfk0_path
+
  !if (my_rank == master) then
-   NCF_CHECK(nf90_put_var(root_ncid, root_vid("gstore_wfk0_path"), trim(gstore%wfk0_path)))
+ ii = merge(1, 0, need_ftinterp)
+ ncerr = nctk_write_iscalars(root_ncid, [character(len=nctk_slen) :: &
+   "used_ftinterp"], &
+   [ii &
+ ])
+ NCF_CHECK(ncerr)
+
+ NCF_CHECK(nf90_put_var(root_ncid, root_vid("gstore_wfk0_path"), trim(gstore%wfk0_path)))
  !end if
 
  if (my_rank == master) call gstore%print([std_out])
@@ -3573,10 +3569,12 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
        call dvdb%get_ftqbz(cryst, qq_bz, cplex, nfftf, ngfftf, v1scf, gqk%pert_comm%value)
      else
        ! Read and reconstruct the dvscf potentials for qpt and my_npert perturbations.
-       db_iqpt = dvdb%findq(qq_ibz)
-       ABI_CHECK(db_iqpt /= -1, sjoin("Could not find symmetric of q-point:", ktoa(qq_bz), "in DVDB file."))
+       !db_iqpt = dvdb%findq(qq_ibz)
+       !ABI_CHECK(db_iqpt /= -1, sjoin("Could not find symmetric of q-point:", ktoa(qq_bz), "in DVDB file."))
        ! The first entry in mapc_qq2dvdb gives the index in dvdb%qpts.
        ! The other entries in mapc_qq are OK as they refer to symmetries.
+       !qmap_symrec(iq_ibz, :)
+       NOT_IMPLEMENTED_ERROR()
        mapc_qq2dvdb = gqk%my_q2ibz(:, my_iq); mapc_qq2dvdb(1) = db_iqpt
        call dvdb%readsym_qbz(cryst, qq_bz, mapc_qq2dvdb, cplex, nfftf, ngfftf, v1scf, gqk%pert_comm%value)
      end if
@@ -3836,6 +3834,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
  ABI_FREE(pheigvec_qbz)
  ABI_FREE(pheigvec_qibz)
  ABI_FREE(done_qbz_spin)
+ ABI_SFREE(qmap_symrec)
 
  call ddkop%free()
  call gs_hamkq%free()

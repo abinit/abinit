@@ -346,7 +346,7 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
 
    ! integer scalars
    ncerr = nctk_def_iscalars(ncid, [character(len=nctk_slen) :: &
-     "bstart", "bstop", "dvdb_add_lr" &
+     "bstart", "bstop", "dvdb_add_lr, used_ftinterp" &
    ])
    NCF_CHECK(ncerr)
 
@@ -376,18 +376,18 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
 
    ! Write data
    NCF_CHECK(nctk_set_datamode(ncid))
+   ii = merge(1, 0, need_ftinterp)
+   ncerr = nctk_write_iscalars(ncid, [character(len=nctk_slen) :: &
+     "bstart", "bstop", "dvdb_add_lr", "used_ftinterp"], &
+     [bstart, bstop, dtset%dvdb_add_lr, ii  &
+   ])
+   NCF_CHECK(ncerr)
 
-  ncerr = nctk_write_iscalars(ncid, [character(len=nctk_slen) :: &
-    "bstart", "bstop", "dvdb_add_lr"], &
-    [bstart, bstop, dtset%dvdb_add_lr &
-  ])
-  NCF_CHECK(ncerr)
-
-  ncerr = nctk_write_dpscalars(ncid, [character(len=nctk_slen) :: &
+   ncerr = nctk_write_dpscalars(ncid, [character(len=nctk_slen) :: &
     "nelect", "fermie"], &
     [wfk_ebands%nelect, wfk_ebands%fermie &
-  ])
-  NCF_CHECK(ncerr)
+   ])
+   NCF_CHECK(ncerr)
 
    ! arrays
    NCF_CHECK(nf90_put_var(ncid, vid("kpoints"), kpath%points(:,1:nk_path)))
@@ -426,12 +426,11 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
    ! Loop over k-points in k-path (MPI parallelized)
    do my_ik=1,my_nkpath
      ik = my_ik_inds(my_ik)
+     kk = kpath%points(:, ik)
 
      ! Compute psi_nk
      ! NB: The Hamiltonian has pointers to the _k arrays in out so we cannot dellocate them till the end.
      ! This is the reason why we use vlocal_k (vlocal_kq) although this term does not depend on k
-     kk = kpath%points(:, ik)
-
      call nscf%setup_kpt(spin, kk, istwfk_1, nband, cryst, dtset, psps, pawtab, pawfgr, &
                          npw_k, kg_k, kpg_k, ph3d_k, kinpw_k, ffnl_k, vlocal_k, cg_k, gsc_k, gs_hamk)
 
@@ -452,7 +451,8 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
      !end if
 
      ! Make sure all procs in pert_comm have the same wavefunctions at k
-     call xmpi_bcast(cg_k, master, pert_comm%value, ierr); if (psps%usepaw == 1) call xmpi_bcast(gsc_k, master, pert_comm%value, ierr)
+     call xmpi_bcast(cg_k, master, pert_comm%value, ierr)
+     if (psps%usepaw == 1) call xmpi_bcast(gsc_k, master, pert_comm%value, ierr)
 
      ! Allocate vlocal. Note nvloc
      ABI_MALLOC(vlocal, (n4, n5, n6, gs_hamk%nvloc))
@@ -460,6 +460,7 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
 
      ! Loop over q-points in k-path (MPI parallelized)
      ! All procs in pert_comm enter this loop with the same ik/iq indices.
+     ! FIXME: I don't know why but all_eigens_kq are not smooth as a function of q!
      do my_iq=1,my_nqpath
        iq = my_iq_inds(my_iq)
        qq = qpath%points(:,iq); qq_is_gamma = sum(qq**2) < tol14
@@ -480,12 +481,12 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
        if (use_cg_kq) call ucache_kq%get_kpt(kq, istwfk_1, npw_kq, nspinor, nband, kg_kq, cg_kq)
 
        if (qq_is_gamma) then
-         ! We can use cg_k as input for the NSCF for a very quick NSCF
+         ! We can use cg_k as input for the NSCF for a very quick return
          use_cg_kq = .True.
          cg_kq = cg_k
        end if
-       !use_cg_kq = .False.
 
+       !use_cg_kq = .False.
        !cg_kq = zero
        call nscf%solve_kpt(spin, kq, istwfk_1, nband, cryst, dtset, dtfil, gs_hamkq, &
                            use_cg_kq, npw_kq, cg_kq, gsc_kq, eig_kq, msg, ierr)
@@ -527,22 +528,13 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
          call dvdb%get_ftqbz(cryst, qq, cplex, nfftf, ngfftf, v1scf, pert_comm%value)
        else
          ! Read and reconstruct the dvscf potentials for qq and my_npert perturbations.
-         db_iqpt = dvdb%findq(qq)
-         ABI_CHECK(db_iqpt /= -1, sjoin("Could not find q-point:", ktoa(qq), "in DVDB file."))
-         NOT_IMPLEMENTED_ERROR()
-#if 0
-         ! The first entry in mapc_qq2dvdb gives the index in dvdb%qpts.
-         ! The other entries in mapc_qq are OK as they refer to symmetries.
-         mapc_qq2dvdb = gqk%my_q2ibz(:, my_iq); mapc_qq2dvdb(1) = db_iqpt
-         call dvdb%readsym_qbz(cryst, qq, mapc_qq2dvdb, cplex, nfftf, ngfftf, v1scf, pert_comm%value)
-#endif
+         call dvdb%readsym_qbz(cryst, qq, qmap_symrec(:,iq), cplex, nfftf, ngfftf, v1scf, pert_comm%value)
        end if
 
        ! Allocate vlocal1 with correct cplex. Note nvloc.
        ABI_MALLOC(vlocal1, (cplex*n4, n5, n6, gs_hamkq%nvloc))
 
-#if 0
-
+#if 1
        !===== Load the k/k+q dependent parts of the Hamiltonian
        ! Load k-dependent part in the Hamiltonian datastructure
        call gs_hamkq%load_k(kpt_k=kk, npw_k=npw_k, istwf_k=istwfk_1, kg_k=kg_k, kpg_k=kpg_k, &
@@ -658,8 +650,9 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
  ! ===========================================
  if (my_rank == master) then
    NCF_CHECK(nctk_open_read(ncid, gpath_path, xmpi_comm_self))
-   ! TODO: 1) Average matrix elements over degenerate states (electrons at k, k+q, and phonons) ?
-   !       2) Write eigenvalues
+
+
+   ! Write wavevectors
    call wrtout(units, "kpoints:")
    do ik=1, nk_path
      call wrtout(units, sjoin(char(9), itoa(ik), ktoa(kpath%points(:,ik))))
@@ -669,6 +662,7 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
      call wrtout(units, sjoin(char(9), itoa(iq), ktoa(qpath%points(:,iq))))
    end do
 
+   ! Write eigenvalues
    if (nq_path > 1) then
      ABI_MALLOC(eig_kq, (nband))
      do spin=1,nsppol
@@ -685,7 +679,7 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
      ABI_FREE(eig_kq)
 
    else
-
+     ! (nk_path > 1)
      ABI_MALLOC(eig_k, (nband))
      do spin=1,nsppol
        call wrtout(units, sjoin(" Energies_k in eV for spin:", itoa(spin)))
@@ -701,13 +695,16 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
      ABI_FREE(eig_k)
    end if
 
+   ! TODO: Average matrix elements over degenerate states (electrons at k, k+q, and phonons ???
    call wrtout(units, " Writing sqrt(1/N_b^2 \sum_{mn} |g_{mn,nu}(k, q)|^2) in meV for testing purpose.", pre_newlines=2)
    write(msg, "(1x,4(a5,1x),a16)") "nu","iq", "ik", "spin", "|g| in meV"
    call wrtout(units, msg)
 
    do spin=1,nsppol
      do ik=1, nk_path
+       !if (.not. any(ik /= [1, nk_path])) cycle
        do iq=1, nq_path
+         !if (.not. any(iq /= [1, nq_path])) cycle
          NCF_CHECK(nf90_get_var(ncid, vid("gkq2_nu"), gkq2_nu, start=[1,1,1,iq,ik,spin]))
          !call epth_gkq2_nu_average(natom3, bstart, nb, phfreqs, eig_k, eig_kq, gkq2_nu)
          do nu=1,natom3

@@ -164,6 +164,7 @@ def make(ctx, jobs="auto", touch=False, clean=False, binary=""):
         cmd = f"make -j{jobs} {binary} | tee make.log 2> make.stderr"
         cprint(f"Executing: {cmd}", color="yellow")
         results = ctx.run(cmd, pty=True)
+
         # TODO Check for errors in make.stderr
         #cprint("Exit code: %s" % retcode, "green" if retcode == 0 else "red")
 
