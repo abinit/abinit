@@ -300,7 +300,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
    end if
  end if
  if (any(type_calc == [0, 2, 3])) then
-   local_gvnlxc = size(gvnlxc)==0
+   local_gvnlxc = size(gvnlxc)<=1
    if (local_gvnlxc) then
      if(gs_ham%gpu_option==ABI_GPU_KOKKOS) then
 #if defined HAVE_GPU && defined HAVE_YAKL
@@ -394,7 +394,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
    ndat_             = ndat
    istwf_k_          = gs_ham%istwf_k
    double_rfft_trick = istwf_k_==2.and.ndat>1.and.mpi_enreg%paral_kgb==1
-   ! double_rfft_trick could work for paral_kgb=0, but this generates an error in RMM-DIIS.
+   ! LB-08-2024 : double_rfft_trick works only for paral_kgb=1, but I don't know why...
    ! Note that the trick can be activated only if nspinortot=1 (if =2 then istwf_k=1), so gs_ham%nvloc=1 too
    if (double_rfft_trick) then
      if (mpi_enreg%nproc_fft>1) then
