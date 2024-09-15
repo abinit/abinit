@@ -2280,6 +2280,8 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    dtset%pawcpxocc=2
  else if (dtset%pawspnorb>0.and.(dtset%kptopt<=0.or.dtset%kptopt>=3)) then
    if (dtset%optdriver/=RUNL_GSTATE.or.dtset%ionmov<6.or.dtset%iscf<10) dtset%pawcpxocc=2
+ else if (ANY(ABS(dtset%nucdipmom)>tol8)) then
+   dtset%pawcpxocc=2
  end if
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'pawcross',tread,'INT')
@@ -3648,8 +3650,13 @@ if (dtset%usekden==1) then
 
  nsym=dtset%nsym
  ii=0;if (mod(dtset%wfoptalg,10)==4) ii=2
+#ifdef HAVE_DFTI
+ if (dtset%wfoptalg==114.or.dtset%wfoptalg==111) ii=0 ! allow any istwfk for LOBPCG or Chebfi with xg_tools
+#else
+ if (dtset%wfoptalg==114.or.dtset%wfoptalg==111) ii=2 ! allow only istwfk=1 or 2 for LOBPCG or Chebfi with xg_tools
+#endif
  if(dtset%ngfft(7)==314)ii=1
- if(dtset%usefock==1.and.dtset%optdriver/=RUNL_SIGMA.and.mod(dtset%wfoptalg,10)/=5) ii=1
+ if(dtset%usefock==1.and.dtset%optdriver/=RUNL_SIGMA.and.mod(dtset%wfoptalg,10)/=5.and.nkpt>1) ii=1
  !Enforce istwfk = 1 for all k-points in RT-TDDFT calculations
  if(dtset%optdriver==RUNL_RTTDDFT) ii=1
 
