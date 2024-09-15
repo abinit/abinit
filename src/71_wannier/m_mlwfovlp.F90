@@ -3596,6 +3596,7 @@ subroutine wan_setup_eph_ws_kq(wan, cryst, shiftk, kptrlatt, qptrlatt, my_pert_s
 
  ABI_UNUSED(shiftk)
 
+ ! See Appendix A of Phys. Rev. Research 3, 043022 for possible improvements.
  if (.not. allocated(wan%r_h)) then
    call wigner_seitz(center, lmax, kptrlatt, cryst%rmet, wan%nr_h, wan%r_h, wan%ndegen_h, wan%rmod_h)
  end if
