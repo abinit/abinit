@@ -179,7 +179,7 @@ contains
 !!    at input =wavefunction <G|C band,k> coefficients for ALL bands
 !!    at output same as input except that the current band, with number 'band' has been updated
 !!  dtefield <type(efield_type)> = variables related to Berry phase calculations (see initberry.f)
-
+!!
 !!  if(gs_hamk%usepaw==1)
 !!   gsc(2,mgsc)=<G|S|C band,k> coefficients for ALL bands where S is the overlap matrix (used only for paw)
 !!
@@ -2600,15 +2600,15 @@ subroutine nscf_solve_kpt(nscf, isppol, kpt, istwf_k, nband_k, cryst, dtset, dtf
  integer :: ipw, ispinor, index, nspinor
  integer, parameter :: int64 = selected_int_kind(18)
  integer(KIND=int64) :: seed
- integer :: fold1,fold2,foldim,foldre,iband
+ integer :: fold1,fold2,foldim,foldre,iband, ii
  real(dp),parameter :: cpus0 = zero
  real(dp) :: max_resid ! dotr,
  type(efield_type) :: dtefield
 !arrays
  integer :: npwarr_k(1), pwind(pwind_alloc0,2,3)
  real(dp) :: pwnsfac(2,pwind_alloc0), pwnsfacq(2,mkgq0), zshift(nband_k), cgq(2, mcgq0), dphase_k(3)
- real(dp) :: subham(nband_k*(nband_k+1)), subovl(nband_k*(nband_k+1)*use_subovl0), subvnlx(nband_k*(nband_k+1)*use_subvnlx0)
- real(dp),allocatable :: resid(:), evec(:,:)
+ real(dp) :: subovl(nband_k*(nband_k+1)*use_subovl0), subvnlx(nband_k*(nband_k+1)*use_subvnlx0)
+ real(dp),allocatable :: subham(:), resid(:), evec(:,:)
 ! *************************************************************************
 
  ! See vtorho.F90 for the sequence of calls needed to initialize the GS Hamiltonian.
@@ -2665,6 +2665,8 @@ subroutine nscf_solve_kpt(nscf, isppol, kpt, istwf_k, nband_k, cryst, dtset, dtf
      end do ! ispinor
    end do ! iband
    !call random_number(cg_k)
+   ! TODO
+   !call ncgtk_random(...)
 
    ! Multiply with envelope function to reduce kinetic energy
    call cg_envlop(cg_k, dtset%ecut, cryst%gmet, icg0, kg_k, kpt, mcg, nband_k, npw_k, dtset%nspinor)
@@ -2673,21 +2675,16 @@ subroutine nscf_solve_kpt(nscf, isppol, kpt, istwf_k, nband_k, cryst, dtset, dtf
  ! Ortoghonalize input trial states (this is important, even whe cg_k is already initialized from a previous kpt
  call pw_orthon(icg0, igsc0, istwf_k, mcg, mgsc, npwsp, nband_k, ortalgo_3, gsc_k, dtset%usepaw, cg_k, me_g0, xmpi_comm_self)
 
- ABI_MALLOC(evec, (2*nband_k, nband_k))
-
  ! linalg initialisation (required by subdiago)
  linalg_max_size=maxval(dtset%nband(:))
  call abi_linalg_init(linalg_max_size, RUNL_GSTATE, dtset%wfoptalg, paral_kgb0,&
                       dtset%gpu_option, dtset%use_slk, dtset%np_slk, nscf%mpi_enreg%comm_bandspinorfft)
 
+ ABI_MALLOC(subham, (nband_k*(nband_k+1)))
+ ABI_MALLOC(evec, (2*nband_k, nband_k))
+
  ierr = 1; msg = ""
  do inonsc=1,dtset%nstep
-
-   !if (inonsc > 1) then
-   !! subspace rotation (without this, cgwf will never converge!)
-   !call subdiago(cg_k, eig_k, evec, gsc_k, icg0, igsc0, istwf_k, mcg, mgsc, nband_k, npw_k, dtset%nspinor, paral_kgb0, &
-   !              subham, subovl, use_subovl0, gs_hamk%usepaw, me_g0)
-   !end if
 
    call cgwf(dtset%berryopt, cg_k, cgq, dtset%chkexit, cpus0, dphase_k, dtefield, dtfil%filnam_ds(1), &
              gsc_k, gs_hamk, icg0, igsc0, ikpt0, inonsc, isppol, nband_k, mcg, mcgq0, mgsc, mkgq0, &
@@ -2699,21 +2696,6 @@ subroutine nscf_solve_kpt(nscf, isppol, kpt, istwf_k, nband_k, cryst, dtset, dtf
    ! subspace rotation (without this, cgwf will never converge!)
    call subdiago(cg_k, eig_k, evec, gsc_k, icg0, igsc0, istwf_k, mcg, mgsc, nband_k, npw_k, dtset%nspinor, paral_kgb0, &
                  subham, subovl, use_subovl0, gs_hamk%usepaw, me_g0)
-
-   !  Print energies
-   !if(prtvol/=5.and.(prtvol>2 .or. ikpt<=nkpt_max))then
-   !  do ii=0,(nband_k-1)/8
-   !    write(msg, '(a,8es10.2)' )' ene:',(eig_k(iband),iband=1+ii*8,min(nband_k,8+ii*8))
-   !    call wrtout(std_out,msg,'PERS')
-   !  end do
-   !end if
-
-   !if (prtvol > 10) then
-   !  write(std_out, *)" Eigenvalues in Ha and eV"
-   !  do iband=1,nband_k
-   !    write(std_out, *)iband, eig_k(iband), eig_k(iband) * Ha_eV
-   !  end do
-   !end if
 
    ! Check for convergence.
    if (dtset%nbdbuf >= 0) then
@@ -2729,7 +2711,16 @@ subroutine nscf_solve_kpt(nscf, isppol, kpt, istwf_k, nband_k, cryst, dtset, dtf
      call wrtout(std_out, msg)
      ! Fix the phase of the wavefunctions.
      !call cgtk_fixphase(cg_k, gsc_k, icg0, igsc0, istwf_k, mcg, mgsc, mpi_enreg, nband_k, npw_k, dtset%usepaw)
-     exit
+
+     ! Print energies and residuals
+     if (prtvol > 10) then
+       do ii=0,(nband_k-1)/8
+         write(msg, '(a,8es10.2)' )' ene:',(eig_k(iband) * Ha_eV,iband=1+ii*8,min(nband_k,8+ii*8)); call wrtout(std_out, msg)
+         write(msg, '(a,8es10.2)' )' res:',(resid(iband),        iband=1+ii*8,min(nband_k,8+ii*8)); call wrtout(std_out, msg)
+       end do
+     end if
+
+     exit  ! EXIT NSCF cycle
    end if
  end do ! inonsc
 
@@ -2740,6 +2731,7 @@ subroutine nscf_solve_kpt(nscf, isppol, kpt, istwf_k, nband_k, cryst, dtset, dtf
 
  call abi_linalg_finalize(dtset%gpu_option)
 
+ ABI_FREE(subham)
  ABI_FREE(evec)
  ABI_FREE(resid)
  end associate

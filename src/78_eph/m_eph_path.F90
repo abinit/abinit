@@ -51,8 +51,8 @@ module m_eph_path
  use m_pawrad,         only : pawrad_type
  use m_pawtab,         only : pawtab_type
  use m_pawfgr,         only : pawfgr_type
-! use m_phonons,        only : phstore_t, phstore_new
- !use m_pstat,          only : pstat_t
+! use m_phonons,       only : phstore_t, phstore_new
+ !use m_pstat,         only : pstat_t
  use m_cgwf,           only : nscf_t
  use m_bz_mesh,        only : kpath_t, kpath_new
  use m_wfd,            only : u0_cache_t
@@ -63,7 +63,6 @@ module m_eph_path
 !!***
 
  public :: eph_path_run
-
 
 contains  !=====================================================
 !!***
@@ -98,7 +97,6 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: comm
  type(datafiles_type),intent(in) :: dtfil
  type(dataset_type),intent(in) :: dtset
  type(crystal_t),intent(in) :: cryst
@@ -108,6 +106,7 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
  type(pseudopotential_type),intent(in) :: psps
  type(pawfgr_type),intent(in) :: pawfgr
  type(ifc_type),intent(in) :: ifc
+ integer,intent(in) :: comm
 !arrays
  type(pawrad_type),intent(in) :: pawrad(psps%ntypat*psps%usepaw)
  type(pawtab_type),intent(in) :: pawtab(psps%ntypat*psps%usepaw)
@@ -320,7 +319,7 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
  ABI_MALLOC(gkq_nu, (2, nb_in_g, nb_in_g, natom3))
  ABI_MALLOC(gkq2_nu, (nb_in_g, nb_in_g, natom3))
 
- ! Master writes metada to GPATH file.
+ ! Master writes metadata to GPATH file.
  gpath_path = strcat(dtfil%filnam_ds(4), "_GPATH.nc")
 
  if (my_rank == master) then
@@ -346,7 +345,7 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
 
    ! integer scalars
    ncerr = nctk_def_iscalars(ncid, [character(len=nctk_slen) :: &
-     "bstart", "bstop", "dvdb_add_lr, used_ftinterp" &
+     "bstart", "bstop", "dvdb_add_lr", "used_ftinterp" &
    ])
    NCF_CHECK(ncerr)
 
@@ -428,7 +427,7 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
      ik = my_ik_inds(my_ik)
      kk = kpath%points(:, ik)
 
-     ! Compute psi_nk
+     ! Compute u_{nk}(g)
      ! NB: The Hamiltonian has pointers to the _k arrays in out so we cannot dellocate them till the end.
      ! This is the reason why we use vlocal_k (vlocal_kq) although this term does not depend on k
      call nscf%setup_kpt(spin, kk, istwfk_1, nband, cryst, dtset, psps, pawtab, pawfgr, &
@@ -441,10 +440,10 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
      call nscf%solve_kpt(spin, kk, istwfk_1, nband, cryst, dtset, dtfil, gs_hamk, &
                          use_cg_k, npw_k, cg_k, gsc_k, eig_k, msg, ierr)
 
-     call ucache_k%store_kpt(kk, istwfk_1, npw_k, nspinor, nband, kg_k, cg_k)
-
      ABI_WARNING_IF(ierr /= 0, msg)
      tot_nscf_ierr = tot_nscf_ierr + ierr
+
+     call ucache_k%store_kpt(kk, istwfk_1, npw_k, nspinor, nband, kg_k, cg_k)
 
      !if (pert_comm%me == master) then
        NCF_CHECK(nf90_put_var(ncid, vid("all_eigens_k"), eig_k, start=[1,ik,spin]))
@@ -458,7 +457,7 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
      ABI_MALLOC(vlocal, (n4, n5, n6, gs_hamk%nvloc))
      ABI_MALLOC(ylm_k, (npw_k, psps%mpsang*psps%mpsang*psps%useylm))
 
-     ! Loop over q-points in k-path (MPI parallelized)
+     ! Loop over q-points in 1-path (MPI parallelized)
      ! All procs in pert_comm enter this loop with the same ik/iq indices.
      ! FIXME: I don't know why but all_eigens_kq are not smooth as a function of q!
      do my_iq=1,my_nqpath
@@ -470,10 +469,9 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
        call ifc%fourq(cryst, qq, phfreqs, displ_cart, out_displ_red=displ_red)
        phfreqs_eV = phfreqs * Ha_eV
 
-       ! Compute psi_mkq
+       ! Compute u_{m k+q}(g)
        call nscf%setup_kpt(spin, kq, istwfk_1, nband, cryst, dtset, psps, pawtab, pawfgr, &
                            npw_kq, kg_kq, kpg_kq, ph3d_kq, kinpw_kq, ffnl_kq, vlocal_kq, cg_kq, gsc_kq, gs_hamkq)
-
        !print *, "kq:", kq, "npw_kq", npw_kq
 
        ! cache.
@@ -491,13 +489,13 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
        call nscf%solve_kpt(spin, kq, istwfk_1, nband, cryst, dtset, dtfil, gs_hamkq, &
                            use_cg_kq, npw_kq, cg_kq, gsc_kq, eig_kq, msg, ierr)
 
+       ABI_WARNING_IF(ierr /= 0, msg)
+       tot_nscf_ierr = tot_nscf_ierr + ierr
+
        call ucache_kq%store_kpt(kq, istwfk_1, npw_kq, nspinor, nband, kg_kq, cg_kq)
 
        ! This to have the same gauge when qq = 0
        if (qq_is_gamma) cg_kq = cg_k
-
-       ABI_WARNING_IF(ierr /= 0, msg)
-       tot_nscf_ierr = tot_nscf_ierr + ierr
 
        ! Make sure all procs in pert_comm have the same wavefunctions at k+q
        call xmpi_bcast(cg_kq, master, pert_comm%value, ierr)
@@ -543,7 +541,6 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
        ! Load k+q-dependent part in the Hamiltonian datastructure
        call gs_hamkq%load_kprime(kpt_kp=kq, npw_kp=npw_kq, istwf_kp=istwfk_1, kg_kp=kg_kq, kpg_kp=kpg_kq, &
                                  ph3d_kp=ph3d_kq, ffnl_kp=ffnl_kq, compute_ph3d=.false., compute_gbound=.true.)
-
 
        ! Loop over my atomic perturbations: apply H1_{kappa, alpha} and compute gkq_atm.
        gkq_atm = zero
@@ -650,7 +647,6 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
  ! ===========================================
  if (my_rank == master) then
    NCF_CHECK(nctk_open_read(ncid, gpath_path, xmpi_comm_self))
-
 
    ! Write wavevectors
    call wrtout(units, "kpoints:")
