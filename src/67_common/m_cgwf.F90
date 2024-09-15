@@ -2348,9 +2348,10 @@ subroutine nscf_init(nscf, dtset, dtfil, cryst, comm)
 ! *************************************************************************
 
  units = [std_out, ab_out]
- call pot_hdr%free()
-
- call initmpi_seq(nscf%mpi_enreg)
+ ABI_CHECK(dtset%usepaw == 0, "PAW not implemented!")
+ if (dtset%usekden /= 0) then
+   ABI_ERROR("nscf_init with mgga not yet coded")
+ end if
 
  call wrtout(units, sjoin(" Reading KS GS potential from: ", dtfil%filpotin))
  call hdr_read_from_fname(pot_hdr, dtfil%filpotin, fform, comm)
@@ -2360,8 +2361,9 @@ subroutine nscf_init(nscf, dtset, dtfil, cryst, comm)
  ! Init FFT mesh
  call ngfft_seq(nscf%ngfftf, pot_hdr%ngfft)
  call ngfft_seq(nscf%ngfft, pot_hdr%ngfft)
- ABI_CHECK(dtset%usepaw == 0, "PAW not implemented!")
+ call pot_hdr%free()
 
+ call initmpi_seq(nscf%mpi_enreg)
  call init_distribfft_seq(nscf%mpi_enreg%distribfft, 'c', nscf%ngfft(2), nscf%ngfft(3), 'all')
  call init_distribfft_seq(nscf%mpi_enreg%distribfft, 'f', nscf%ngfftf(2), nscf%ngfftf(3), 'all')
 
@@ -2371,15 +2373,12 @@ subroutine nscf_init(nscf, dtset, dtfil, cryst, comm)
 
  call read_rhor(dtfil%filpotin, cplex1, dtset%nspden, nfftf, nscf%ngfftf, pawread0, nscf%mpi_enreg, nscf%vtrial, pot_hdr, pot_pawrhoij, comm, &
                 allow_interp=.False.)
+
  pot_cryst = pot_hdr%get_crystal()
  if (cryst%compare(pot_cryst, header=" Comparing input crystal with POT crystal") /= 0) then
    ABI_ERROR("Crystal structure from WFK and POT do not agree! Check messages above!")
  end if
  call pot_cryst%free(); call pot_hdr%free()
-
- if (dtset%usekden /= 0) then
-   ABI_ERROR("nscf_init with mgga not yet coded")
- end if
 
 end subroutine nscf_init
 !!***
@@ -2407,9 +2406,6 @@ end subroutine nscf_init
 !!  gsc_k
 !!  eig_k
 !!  gs_hamk
-!!  msg
-!!  ierr
-!!  [init_cg_k]
 !!
 !! SOURCE
 
@@ -2476,6 +2472,7 @@ subroutine nscf_setup_kpt(nscf, isppol, kpt, istwf_k, nband_k, cryst, dtset, psp
  ! Compute (k+G) vectors (only if useylm=1)
  nkpg = 3 * dtset%nloalg(3)
  ABI_MALLOC(kpg_k, (npw_k, nkpg))
+ !print *, "nkpg:", nkpg
  if (paral_kgb0 /= 1 .and. nkpg > 0) call mkkpg(kg_k, kpg_k, kpt, nkpg, npw_k)
 
  ! Get one-dimensional structure factor information on the coarse grid.
@@ -2559,6 +2556,7 @@ end subroutine nscf_setup_kpt
 !! dtset<dataset_type>=All input variables for this dataset.
 !! dtfil <type(datafiles_type)>=variables related to files
 !! cryst=Crystalline structure
+!! gs_hamk
 !!
 !! OUTPUT
 !!  gs_hamk <type(gs_hamiltonian_type)>=all data for the Hamiltonian at k
@@ -2566,7 +2564,6 @@ end subroutine nscf_setup_kpt
 !!  cg_g
 !!  gsc_k
 !!  eig_k
-!!  gs_hamk
 !!  msg
 !!  ierr
 !!
@@ -2686,6 +2683,9 @@ subroutine nscf_solve_kpt(nscf, isppol, kpt, istwf_k, nband_k, cryst, dtset, dtf
  ierr = 1; msg = ""
  do inonsc=1,dtset%nstep
 
+   !call rmm_diis(inonsc, ikpt, isppol, cg_k, dtset, eig_k, occ_k, enlx_k, gs_hamk, kinpw_k, gsc, &
+   !              mpi_enreg, nband_k, npw_k, nspinor, resid_k, rmm_diis_status)
+
    call cgwf(dtset%berryopt, cg_k, cgq, dtset%chkexit, cpus0, dphase_k, dtefield, dtfil%filnam_ds(1), &
              gsc_k, gs_hamk, icg0, igsc0, ikpt0, inonsc, isppol, nband_k, mcg, mcgq0, mgsc, mkgq0, &
              mpi_enreg, npw_k, nband_k, dtset%nbdblock, nkpt1, dtset%nline, npw_k, npwarr_k, dtset%nspinor, &
@@ -2713,7 +2713,7 @@ subroutine nscf_solve_kpt(nscf, isppol, kpt, istwf_k, nband_k, cryst, dtset, dtf
      !call cgtk_fixphase(cg_k, gsc_k, icg0, igsc0, istwf_k, mcg, mgsc, mpi_enreg, nband_k, npw_k, dtset%usepaw)
 
      ! Print energies and residuals
-     if (prtvol > 10) then
+     if (dtset%prtvol > 10) then
        do ii=0,(nband_k-1)/8
          write(msg, '(a,8es10.2)' )' ene:',(eig_k(iband) * Ha_eV,iband=1+ii*8,min(nband_k,8+ii*8)); call wrtout(std_out, msg)
          write(msg, '(a,8es10.2)' )' res:',(resid(iband),        iband=1+ii*8,min(nband_k,8+ii*8)); call wrtout(std_out, msg)
@@ -2722,7 +2722,7 @@ subroutine nscf_solve_kpt(nscf, isppol, kpt, istwf_k, nband_k, cryst, dtset, dtf
 
      exit  ! EXIT NSCF cycle
    end if
- end do ! inonsc
+ end do ! inonsc (NON SELF-CONSISTENT LOOP)
 
  if (ierr /= 0) then
    msg = sjoin(" NSCF run for kpt:", ktoa(kpt), "didn't converge after", itoa(dtset%nstep), " steps", ch10)

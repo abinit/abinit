@@ -3,7 +3,7 @@
 !!  m_eph_path
 !!
 !! FUNCTION
-!!  Compute e-ph matrix elements along a path
+!!  Compute e-ph matrix elements g(k,q) along an arbitray path either in k- or q-space
 !!
 !! COPYRIGHT
 !!  Copyright (C) 2008-2024 ABINIT group (MG)
@@ -56,6 +56,7 @@ module m_eph_path
  use m_cgwf,           only : nscf_t
  use m_bz_mesh,        only : kpath_t, kpath_new
  use m_wfd,            only : u0_cache_t
+ !use m_abi_linalg,     only : abi_linalg_init, abi_linalg_finalize
 
  implicit none
 
@@ -74,7 +75,13 @@ contains  !=====================================================
 !!  eph_path_run
 !!
 !! FUNCTION
-!!  Compute e-ph matrix elements along a path.
+!!  Compute e-ph matrix elements g(k,q) along an arbitray path either in k- or q-space.
+!!  Wavefunctions at k and k+q are computed non self-consistently starting from the GS potential read
+!!  from file by invoking the CG eigesolver.
+!!  The DFPT potential at q are usually obtained via Fourier interpolation but it is also possible
+!!  to use fully ab-iniio potentials provided the DVDB file has all the q-points along the path.
+!!  This requires performing DFPT calculations for all the q-points and then merging
+!!  all the POT1 files with the mrgdv utility.
 !!
 !! INPUTS
 !! dtset<dataset_type>=All input variables for this dataset.
@@ -113,12 +120,13 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
 
 !Local variables ------------------------------
 !scalars
- integer,parameter :: istwfk_1 = 1, tim_getgh1c = 1, berryopt0 = 0, useylmgr1 = 0, master = 0, ndims=3
+ integer,parameter :: istwfk_1 = 1, tim_getgh1c = 1, berryopt0 = 0, useylmgr1 = 0, master = 0, ndims=3, paral_kgb0 = 0
  integer :: sij_opt,usecprj,usevnl,optlocal,optnl,opt_gvnlx1, nu
  integer :: spin, iq, ik, nk_path, nq_path, ierr, npw_k, npw_kq, my_rank, nprocs, n1, n2, n3, n4, n5, n6, cplex
  integer :: natom, natom3, nsppol, nspden, nspinor, qptopt, db_iqpt, comm_cart, me_cart
  integer :: nfft,nfftf,mgfft,mgfftf, my_npert, my_ip, idir, ipert, ipc, nkpg_k, nkpg_kq, ncerr, ncid, my_nkpath, my_nqpath
  integer :: in_k, im_kq, my_is, my_ik, my_iq, nband, nb_in_g, ii, band_n, band_m, bstart, bstop, my_nspins, np, tot_nscf_ierr
+ !integer :: linalg_max_size
  real(dp) :: cpu_all,wall_all,gflops_all, eig0nk, eshift
  logical :: qq_is_gamma, need_ftinterp, gen_eigenpb, use_cg_k, use_cg_kq, use_cache
  type(gs_hamiltonian_type) :: gs_hamk, gs_hamkq
@@ -309,6 +317,7 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
  optnl = 2       ! non-local part of H^(1) is totally computed in gh1c=<G|H^(1)|C>
  opt_gvnlx1 = 0  ! gvnlx1 is output
  usecprj = 0
+
  ABI_MALLOC(gvnlx1, (2, usevnl))
  ABI_MALLOC(grad_berry, (2, nspinor*(berryopt0/4)))
  ABI_MALLOC(cwaveprj0, (natom, nspinor*usecprj))
@@ -418,6 +427,10 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
  call ucache_k%init(use_cache .and. my_nkpath > 1, ngfft)
  call ucache_kq%init(use_cache .and. my_nqpath > 1, ngfft)
 
+ !linalg_max_size = maxval(dtset%nband(:))
+ !call abi_linalg_init(linalg_max_size, RUNL_GSTATE, dtset%wfoptalg, paral_kgb0,&
+ !                     dtset%gpu_option, dtset%use_slk, dtset%np_slk, nscf%mpi_enreg%comm_bandspinorfft)
+
  ! Loop over spins (MPI parallelized)
  do my_is=1,my_nspins
    spin = my_spins(my_is)
@@ -478,16 +491,17 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
        use_cg_kq = (my_iq > 1 .and. ucache_kq%use_cache)
        if (use_cg_kq) call ucache_kq%get_kpt(kq, istwfk_1, npw_kq, nspinor, nband, kg_kq, cg_kq)
 
+       ! We can use cg_k as input for the NSCF for a very quick return
        if (qq_is_gamma) then
-         ! We can use cg_k as input for the NSCF for a very quick return
-         use_cg_kq = .True.
-         cg_kq = cg_k
+         use_cg_kq = .True.; cg_kq = cg_k
        end if
 
-       !use_cg_kq = .False.
-       !cg_kq = zero
+       !use_cg_kq = .False.; cg_kq = zero
        call nscf%solve_kpt(spin, kq, istwfk_1, nband, cryst, dtset, dtfil, gs_hamkq, &
                            use_cg_kq, npw_kq, cg_kq, gsc_kq, eig_kq, msg, ierr)
+
+       !call nscf%solve_kpt(spin, kq, istwfk_1, nband, cryst, dtset, dtfil, gs_hamkq, &
+       !                    .True., npw_kq, cg_kq, gsc_kq, eig_kq, msg, ierr)
 
        ABI_WARNING_IF(ierr /= 0, msg)
        tot_nscf_ierr = tot_nscf_ierr + ierr
@@ -620,7 +634,7 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
      ABI_FREE(kinpw_k)
      ABI_FREE(ffnl_k)
      ABI_FREE(kg_k)
-     ABI_FREE(eig_k)
+     ABI_SFREE(eig_k)
      ABI_FREE(cg_k)
      ABI_FREE(gsc_k)
      call gs_hamk%free()
@@ -739,6 +753,8 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
  call ucache_k%free()
  call ucache_kq%free()
  call qpt_comm%free(); call kpt_comm%free(); call pert_comm%free()
+
+ !call abi_linalg_finalize(dtset%gpu_option)
 
  call cwtime_report(" eph_path: MPI barrier before returning.", cpu_all, wall_all, gflops_all, end_str=ch10, comm=comm)
  !stop
