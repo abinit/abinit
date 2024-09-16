@@ -1,6 +1,6 @@
 
-.Version 9.11.2 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 10.1.4.5 of ABINIT, released Sep 2024.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2024 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 15 Jul 2023.
-- ( at 12h00 )
+.Starting date : Fri 13 Sep 2024.
+- ( at 19h09 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v4_t40-t41/t40.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v4_t40-t41/t40.abi
 - output file    -> t40.abo
 - root for input  files -> t40i
 - root for output files -> t40o
@@ -42,10 +42,10 @@ _ WF disk file :      0.268 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
 -
-- outvars: echo of selected default values                                      
--   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+- outvars: echo of selected default values
+-   iomode0 =  0 , fftalg0 =512 , wfoptalg0 =  0
 -
-- outvars: echo of global parameters not present in the input file              
+- outvars: echo of global parameters not present in the input file
 -  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
@@ -54,7 +54,7 @@ _ WF disk file :      0.268 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
            diemac      1.20000000E+01
              ecut      2.99000000E+00 Hartree
            enunit           2
--          fftalg         312
+-          fftalg         512
              iscf           3
               kpt      1.00000000E+00  1.00000000E+00  1.00000000E+00
                       -1.00000000E+00  1.00000000E+00  1.00000000E+00
@@ -138,8 +138,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 3, paral_kgb: 0, }
          ecut(hartree)=      2.990   => boxcut(ratio)=   2.00281
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -178,16 +178,16 @@ tolerances: {tolwfr: 1.00E-14, }
  ETOT  6  -35.191572884808    -5.731E-08 6.560E-10 1.689E-06
  ETOT  7  -35.191572890293    -5.485E-09 8.377E-11 1.462E-07
  ETOT  8  -35.191572890801    -5.077E-10 6.329E-12 9.073E-09
- ETOT  9  -35.191572890831    -3.025E-11 2.814E-13 7.374E-10
- ETOT 10  -35.191572890833    -2.274E-12 1.807E-14 5.622E-11
+ ETOT  9  -35.191572890831    -3.026E-11 2.814E-13 7.374E-10
+ ETOT 10  -35.191572890834    -2.281E-12 1.807E-14 5.622E-11
  ETOT 11  -35.191572890834    -7.105E-15 5.713E-15 1.064E-11
 
  At SCF step   11   max residual=  5.71E-15 < tolwfr=  1.00E-14 =>converged.
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  3.74689988E-04  sigma(3 2)= -1.63105779E-06
-  sigma(2 2)=  3.74672404E-04  sigma(3 1)= -2.64360876E-12
-  sigma(3 3)=  3.74672402E-04  sigma(2 1)=  4.58757480E-11
+  sigma(2 2)=  3.74672404E-04  sigma(3 1)= -2.64360820E-12
+  sigma(3 3)=  3.74672402E-04  sigma(2 1)=  4.58757482E-11
 
 
 --- !ResultsGS
@@ -205,9 +205,9 @@ etotal    :  -3.51915729E+01
 entropy   :   0.00000000E+00
 fermie    :   1.89013757E-01
 cartesian_stress_tensor: # hartree/bohr^3
-- [  3.74689988E-04,   4.58757480E-11,  -2.64360876E-12, ]
-- [  4.58757480E-11,   3.74672404E-04,  -1.63105779E-06, ]
-- [ -2.64360876E-12,  -1.63105779E-06,   3.74672402E-04, ]
+- [  3.74689988E-04,   4.58757482E-11,  -2.64360820E-12, ]
+- [  4.58757482E-11,   3.74672404E-04,  -1.63105779E-06, ]
+- [ -2.64360820E-12,  -1.63105779E-06,   3.74672402E-04, ]
 pressure_GPa:  -1.1023E+01
 xred      :
 - [  1.0000E-03,   0.0000E+00,   0.0000E+00, Si]
@@ -219,13 +219,13 @@ xred      :
 - [  5.0000E-01,   5.0000E-01,   0.0000E+00, Si]
 - [  7.5000E-01,   7.5000E-01,   2.5000E-01, Si]
 cartesian_forces: # hartree/bohr
-- [ -1.32242684E-03,   4.60667721E-09,   1.95014608E-08, ]
+- [ -1.32242684E-03,   4.60667695E-09,   1.95014605E-08, ]
 - [  3.26475982E-04,   2.19371324E-04,   2.19375739E-04, ]
-- [ -1.73388800E-04,  -3.72896177E-09,  -1.60902967E-08, ]
+- [ -1.73388800E-04,  -3.72896159E-09,  -1.60902964E-08, ]
 - [  3.26466635E-04,  -2.19371315E-04,  -2.19375468E-04, ]
-- [  9.72403970E-05,   7.08885266E-09,  -1.52449612E-08, ]
+- [  9.72403970E-05,   7.08885256E-09,  -1.52449613E-08, ]
 - [  3.24195742E-04,  -2.15871056E-04,   2.15859772E-04, ]
-- [  9.72357582E-05,  -8.53023845E-09,   1.42324409E-08, ]
+- [  9.72357582E-05,  -8.53023873E-09,   1.42324404E-08, ]
 - [  3.24201122E-04,   2.15871611E-04,  -2.15862441E-04, ]
 force_length_stats: {min:   9.72357596E-05, max:   1.32242684E-03, mean:   4.35206443E-04, }
 ...
@@ -287,14 +287,14 @@ force_length_stats: {min:   9.72357596E-05, max:   1.32242684E-03, mean:   4.352
  frms,max,avg= 3.2914377E-04 1.3224268E-03  -3.759E-08 -6.383E-11 -5.912E-10 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1     -0.06800191634697     0.00000023688485     0.00000100280535
-    2      0.01678806859044     0.01128052606443     0.01128075311350
-    3     -0.00891600985103    -0.00000019175091    -0.00000082739625
-    4      0.01678758795987    -0.01128052561208    -0.01128073918399
-    5      0.00500030183923     0.00000036452343    -0.00000078392736
-    6      0.01667081392387    -0.01110053510849     0.01109995481774
-    7      0.00500006330044    -0.00000043864246     0.00000073186147
-    8      0.01667109058416     0.01110056364124    -0.01110009209047
+    1     -0.06800191634698     0.00000023688483     0.00000100280534
+    2      0.01678806859043     0.01128052606443     0.01128075311351
+    3     -0.00891600985103    -0.00000019175090    -0.00000082739624
+    4      0.01678758795987    -0.01128052561207    -0.01128073918399
+    5      0.00500030183923     0.00000036452342    -0.00000078392736
+    6      0.01667081392387    -0.01110053510849     0.01109995481775
+    7      0.00500006330045    -0.00000043864247     0.00000073186145
+    8      0.01667109058416     0.01110056364124    -0.01110009209045
  frms,max,avg= 1.6925252E-02 6.8001916E-02  -1.933E-06 -3.282E-09 -3.040E-08 e/A
  length scales= 10.263110000000 10.263110000000 10.263110000000 bohr
               =  5.431003901252  5.431003901252  5.431003901252 angstroms
@@ -322,7 +322,7 @@ hartree             :  2.12455664988183E+00
 xc                  : -1.41070123136155E+01
 Ewald energy        : -3.35916540166273E+01
 psp_core            :  3.39557039534767E-01
-local_psp           : -9.85491942199853E+00
+local_psp           : -9.85491942199854E+00
 non_local_psp       :  8.21593501279541E+00
 total_energy        : -3.51915728908335E+01
 total_energy_eV     : -9.57611398569641E+02
@@ -332,12 +332,12 @@ band_energy         :  1.05756665243628E+00
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  3.74689988E-04  sigma(3 2)= -1.63105779E-06
-  sigma(2 2)=  3.74672404E-04  sigma(3 1)= -2.64360876E-12
-  sigma(3 3)=  3.74672402E-04  sigma(2 1)=  4.58757480E-11
+  sigma(2 2)=  3.74672404E-04  sigma(3 1)= -2.64360820E-12
+  sigma(3 3)=  3.74672402E-04  sigma(2 1)=  4.58757482E-11
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -1.1023E+01 GPa]
 - sigma(1 1)=  1.10237582E+01  sigma(3 2)= -4.79873689E-02
-- sigma(2 2)=  1.10232408E+01  sigma(3 1)= -7.77776419E-08
+- sigma(2 2)=  1.10232408E+01  sigma(3 1)= -7.77776253E-08
 - sigma(3 3)=  1.10232408E+01  sigma(2 1)=  1.34971088E-06
 
 == END DATASET(S) ==============================================================
@@ -350,15 +350,15 @@ band_energy         :  1.05756665243628E+00
              ecut      2.99000000E+00 Hartree
            enunit           2
            etotal     -3.5191572891E+01
-            fcart     -1.3224268364E-03  4.6066772096E-09  1.9501460789E-08
+            fcart     -1.3224268364E-03  4.6066769509E-09  1.9501460530E-08
                        3.2647598226E-04  2.1937132359E-04  2.1937573900E-04
-                      -1.7338880040E-04 -3.7289617724E-09 -1.6090296708E-08
+                      -1.7338880040E-04 -3.7289615853E-09 -1.6090296417E-08
                        3.2646663548E-04 -2.1937131480E-04 -2.1937546811E-04
-                       9.7240396997E-05  7.0888526593E-09 -1.5244961169E-08
+                       9.7240396997E-05  7.0888525564E-09 -1.5244961271E-08
                        3.2419574185E-04 -2.1587105650E-04  2.1585977164E-04
-                       9.7235758156E-05 -8.5302384520E-09  1.4232440867E-08
+                       9.7235758156E-05 -8.5302387271E-09  1.4232440359E-08
                        3.2420112203E-04  2.1587161137E-04 -2.1586244117E-04
--          fftalg         312
+-          fftalg         512
              iscf           3
               kpt      1.00000000E+00  1.00000000E+00  1.00000000E+00
                       -1.00000000E+00  1.00000000E+00  1.00000000E+00
@@ -381,7 +381,7 @@ P           mkmem           4
            occopt           0
           spgroup           1
            strten      3.7468998815E-04  3.7467240411E-04  3.7467240239E-04
-                      -1.6310577929E-06 -2.6436087610E-12  4.5875747958E-11
+                      -1.6310577929E-06 -2.6436081963E-12  4.5875748158E-11
            tolwfr      1.00000000E-14
             typat      1  1  1  1  1  1  1  1
               wtk        0.25000    0.25000    0.25000    0.25000
@@ -505,10 +505,10 @@ P           mkmem           4
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          1.3  wall=          1.3
+- Proc.   0 individual time (sec): cpu=          0.9  wall=          0.9
 
 ================================================================================
 
  Calculation completed.
-.Delivered  11 WARNINGs and   6 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          1.3  wall=          1.3
+.Delivered  11 WARNINGs and   5 COMMENTs to log file.
++Overall time at end (sec) : cpu=          0.9  wall=          0.9

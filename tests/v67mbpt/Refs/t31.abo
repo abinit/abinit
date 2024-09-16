@@ -1,6 +1,6 @@
 
-.Version 9.7.2 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 10.1.4.5 of ABINIT, released Sep 2024.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2024 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,14 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Thu 10 Feb 2022.
-- ( at 14h21 )
+.Starting date : Fri 13 Sep 2024.
+- ( at 19h12 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/TestBot_MPI1/v67mbpt_t31-t32-t33-t34-t35/t31.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v67mbpt_t31-t32-t33-t34-t35/t31.abi
 - output file    -> t31.abo
 - root for input  files -> t31i
 - root for output files -> t31o
-
 
  DATASET    1 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -39,7 +38,6 @@ P This job should need less than                       1.973 Mbytes of memory.
 _ WF disk file :      0.118 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
 
-
  DATASET    2 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  2.
@@ -55,7 +53,6 @@ P This job should need less than                       2.238 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.814 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
-
 
  DATASET    3 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -73,7 +70,6 @@ P This job should need less than                       2.048 Mbytes of memory.
 _ WF disk file :      0.188 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
 
-
  DATASET    4 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  4.
@@ -89,7 +85,6 @@ P This job should need less than                       8.446 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      6.599 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
-
 
  DATASET    5 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -111,10 +106,10 @@ _ WF disk file :      1.510 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
 -
-- outvars: echo of selected default values                                      
--   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+- outvars: echo of selected default values
+-   iomode0 =  0 , fftalg0 =512 , wfoptalg0 =  0
 -
-- outvars: echo of global parameters not present in the input file              
+- outvars: echo of global parameters not present in the input file
 -  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
@@ -160,7 +155,7 @@ _ WF disk file :      1.510 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
              ecut      6.00000000E+00 Hartree
           ecuteps      2.10000000E+00 Hartree
           ecutwfn      6.00000000E+00 Hartree
--          fftalg         312
+-          fftalg         512
            getden1          0
            getden2         -1
            getden3          0
@@ -510,8 +505,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.00850
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -547,10 +542,10 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  3  -8.7862679203118    -1.166E-04 2.195E-05 2.759E-03
  ETOT  4  -8.7862694743831    -1.554E-06 2.380E-05 7.407E-06
  ETOT  5  -8.7862694793877    -5.005E-09 4.254E-05 1.059E-08
- ETOT  6  -8.7862694793961    -8.484E-12 3.187E-05 7.947E-11
+ ETOT  6  -8.7862694793961    -8.486E-12 3.187E-05 7.947E-11
 
  At SCF step    6, etot is converged : 
-  for the second time, diff in etot=  8.484E-12 < toldfe=  1.000E-06
+  for the second time, diff in etot=  8.486E-12 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -1.52074048E-04  sigma(3 2)=  0.00000000E+00
@@ -568,7 +563,7 @@ lattice_vectors:
 lattice_lengths: [   7.22451,    7.22451,    7.22451, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.6663072E+02
-convergence: {deltae: -8.484E-12, res2:  7.947E-11, residm:  3.187E-05, diffor: null, }
+convergence: {deltae: -8.486E-12, res2:  7.947E-11, residm:  3.187E-05, diffor: null, }
 etotal    :  -8.78626948E+00
 entropy   :   0.00000000E+00
 fermie    :   2.24517494E-01
@@ -638,7 +633,7 @@ local_psp           : -2.54194380616736E+00
 non_local_psp       :  1.90003800348738E+00
 total_energy        : -8.78626947939614E+00
 total_energy_eV     : -2.39086551501251E+02
-band_energy         :  3.67853467948844E-01
+band_energy         :  3.67853467948843E-01
 ...
 
 
@@ -1167,8 +1162,8 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 2, }
  >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 180 iterations.
  >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 189 iterations.
  >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 179 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 183 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 183 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 180 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 182 iterations.
  Writing EXC Macroscopic dielectric function to file: t31o_DS5_EXC_MDF
   
  Macroscopic dielectric function:
@@ -1240,7 +1235,7 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 2, }
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
             fcart5     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
--          fftalg         312
+-          fftalg         512
            getden1          0
            getden2         -1
            getden3          0
@@ -1644,10 +1639,10 @@ P           mkmem5         64
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         47.1  wall=         47.4
+- Proc.   0 individual time (sec): cpu=         22.3  wall=         22.3
 
 ================================================================================
 
  Calculation completed.
-.Delivered  16 WARNINGs and  11 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         47.1  wall=         47.4
+.Delivered   8 WARNINGs and  11 COMMENTs to log file.
++Overall time at end (sec) : cpu=         22.3  wall=         22.3

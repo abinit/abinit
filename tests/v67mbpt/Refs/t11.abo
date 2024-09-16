@@ -1,6 +1,6 @@
 
-.Version 9.11.2 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 10.1.4.5 of ABINIT, released Sep 2024.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2024 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 15 Jul 2023.
-- ( at 12h04 )
+.Starting date : Fri 13 Sep 2024.
+- ( at 19h11 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v67mbpt_t11/t11.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v67mbpt_t11/t11.abi
 - output file    -> t11.abo
 - root for input  files -> t11i
 - root for output files -> t11o
@@ -154,10 +154,10 @@ _ WF disk file :      0.048 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
 -
-- outvars: echo of selected default values                                      
--   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+- outvars: echo of selected default values
+-   iomode0 =  0 , fftalg0 =512 , wfoptalg0 =  0
 -
-- outvars: echo of global parameters not present in the input file              
+- outvars: echo of global parameters not present in the input file
 -  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
@@ -223,7 +223,7 @@ _ WF disk file :      0.048 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
              ecut      6.00000000E+00 Hartree
           ecuteps      2.10000000E+00 Hartree
           ecutwfn      6.00000000E+00 Hartree
--          fftalg         312
+-          fftalg         512
             fftgw1         21
             fftgw2         21
             fftgw3         11
@@ -472,8 +472,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.00850
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -593,14 +593,14 @@ iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
 kinetic             :  3.02772528891649E+00
 hartree             :  5.45146571847796E-01
-xc                  : -3.54237623346144E+00
+xc                  : -3.54237623346145E+00
 Ewald energy        : -8.43581958561899E+00
 psp_core            :  8.60437873155177E-02
 local_psp           : -2.46091913373859E+00
 non_local_psp       :  1.92087853012529E+00
-total_energy        : -8.85932077461392E+00
+total_energy        : -8.85932077461393E+00
 total_energy_eV     : -2.41074378336892E+02
-band_energy         :  2.51095269968234E-01
+band_energy         :  2.51095269968235E-01
 ...
 
 
@@ -814,7 +814,7 @@ meta: {optdriver: 3, gwcalctyp: 0, }
         0.000   0.000  -0.000   0.000  -0.000   0.000  -0.000   0.000  -0.000
 
     2   0.000 -14.952  -0.146  -0.146  -0.146  -0.000  -0.000  -0.000  -0.000
-       -0.000   0.000   0.000   0.000  -0.000  -4.960  -0.309  -0.309  -0.309
+       -0.000   0.000   0.000  -0.000   0.000  -4.960  -0.309  -0.309  -0.309
 
  For q-point:  0.000010 0.000020 0.000030
   dielectric constant =  26.0274
@@ -857,7 +857,7 @@ meta: {optdriver: 3, gwcalctyp: 0, }
         0.000  -1.504  -2.593  -1.504  -2.593   2.593   1.504   2.593   1.504
 
     2  -1.504 -17.203  -0.178   2.841  -0.178  -0.000  -0.000   0.000  -0.000
-        1.504   0.000   0.000  -0.000  -0.000  -2.089  -0.000  -0.085   0.000
+        1.504   0.000   0.000  -0.000  -0.000  -2.089  -0.000  -0.085  -0.000
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point    3 :     56.58  [%]
 
@@ -899,7 +899,7 @@ meta: {optdriver: 3, gwcalctyp: 0, }
         0.000  -1.438  -2.797  -2.461  -2.510   2.510   2.461   2.797   1.438
 
     2  -1.438 -18.556  -0.140   1.643  -0.367  -0.000  -0.000  -0.000   0.000
-        1.438   0.000   0.000  -0.000  -0.000  -2.376   0.000   0.092  -0.000
+        1.438   0.000   0.000  -0.000  -0.000  -2.376  -0.000   0.092  -0.000
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point    6 :     56.25  [%]
 
@@ -1047,7 +1047,7 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 1, }
   
  Macroscopic dielectric function:
  omega [eV] <KS_RPA_nlf>  <GW_RPA_nlf>  <BSE> 
-   0.0000  24.2067  -0.0000  19.6703  -0.0000  21.7046   0.0000
+   0.0000  24.2067   0.0000  19.6703   0.0000  21.7046  -0.0000
    0.1000  24.2293   0.0454  19.6816   0.0227  21.7200   0.0309
    0.2000  24.2973   0.0914  19.7156   0.0456  21.7664   0.0622
    0.3000  24.4117   0.1387  19.7726   0.0688  21.8441   0.0940
@@ -1183,7 +1183,7 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 2, }
   
  Macroscopic dielectric function:
  omega [eV] <KS_RPA_nlf>  <GW_RPA_nlf>  <BSE> 
-   0.0000  24.2067  -0.0000  19.6703  -0.0000  21.7046   0.0000
+   0.0000  24.2067   0.0000  19.6703   0.0000  21.7046   0.0000
    0.1000  24.2293   0.0454  19.6816   0.0227  21.7200   0.0309
    0.2000  24.2973   0.0914  19.7156   0.0456  21.7664   0.0622
    0.3000  24.4117   0.1387  19.7726   0.0688  21.8441   0.0940
@@ -1313,7 +1313,7 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 2, }
   
  Macroscopic dielectric function:
  omega [eV] <KS_RPA_nlf>  <GW_RPA_nlf>  <BSE> 
-   0.0000  24.2067  -0.0000  19.6703  -0.0000  22.2842   0.0000
+   0.0000  24.2067   0.0000  19.6703   0.0000  22.2842   0.0000
    0.1000  24.2293   0.0454  19.6816   0.0227  22.3010   0.0339
    0.2000  24.2973   0.0914  19.7156   0.0456  22.3518   0.0681
    0.3000  24.4117   0.1387  19.7726   0.0688  22.4370   0.1031
@@ -1443,7 +1443,7 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 2, }
   
  Macroscopic dielectric function:
  omega [eV] <KS_RPA_nlf>  <GW_RPA_nlf>  <BSE> 
-   0.0000  24.2067  -0.0000  19.6703  -0.0000  22.2842   0.0000
+   0.0000  24.2067   0.0000  19.6703   0.0000  22.2842   0.0000
    0.1000  24.2293   0.0454  19.6816   0.0227  22.3010   0.0339
    0.2000  24.2973   0.0914  19.7156   0.0456  22.3518   0.0681
    0.3000  24.4117   0.1387  19.7726   0.0688  22.4370   0.1031
@@ -1594,7 +1594,7 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 1, }
   
  Macroscopic dielectric function:
  omega [eV] <KS_RPA_nlf>  <GW_RPA_nlf>  <BSE> 
-   0.0000  24.2067  -0.0000  19.6703  -0.0000  21.0330   0.0000
+   0.0000  24.2067   0.0000  19.6703   0.0000  21.0330  -0.0000
    0.1000  24.2293   0.0454  19.6816   0.0227  21.0480   0.0301
    0.2000  24.2973   0.0914  19.7156   0.0456  21.0931   0.0605
    0.3000  24.4117   0.1387  19.7726   0.0688  21.1688   0.0916
@@ -1696,7 +1696,7 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 1, }
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
             fcart8     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
--          fftalg         312
+-          fftalg         512
             fftgw1         21
             fftgw2         21
             fftgw3         11
@@ -2006,10 +2006,10 @@ P           mkmem           2
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         35.7  wall=         35.9
+- Proc.   0 individual time (sec): cpu=         15.4  wall=         18.5
 
 ================================================================================
 
  Calculation completed.
-.Delivered  23 WARNINGs and  23 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         35.7  wall=         35.9
+.Delivered  16 WARNINGs and  23 COMMENTs to log file.
++Overall time at end (sec) : cpu=         15.4  wall=         18.5
