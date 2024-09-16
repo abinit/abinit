@@ -95,11 +95,10 @@ module m_cgwf
 
    procedure :: setup_kpt => nscf_setup_kpt
     ! Prepare call to nscf_solve_kpt.
-    ! Computes k-dependent temrms, gs_hamk and allocates wavefunction block for this k-point
+    ! Computes k-dependent terms, gs_hamk and allocates wavefunction block for this k-point
 
    procedure :: solve_kpt => nscf_solve_kpt
     ! Solves the NSCF equation for given k-point and spin.
-    ! Simplified wrapper around cgwf.
 
    procedure :: free => nscf_free
     ! Free dynamic memory.
@@ -2358,10 +2357,18 @@ subroutine nscf_init(nscf, dtset, dtfil, cryst, comm)
  ABI_CHECK(fform /= 0, "hdr_read_from_fname returned fform 0")
  !call pot_hdr%vs_dtset(dtset)
 
- ! Init FFT mesh
+ ! Init FFT mesh from file as we don't want to interpolate the potential
  call ngfft_seq(nscf%ngfftf, pot_hdr%ngfft)
  call ngfft_seq(nscf%ngfft, pot_hdr%ngfft)
  call pot_hdr%free()
+
+ if (dtset%usepaw == 0) then
+   ABI_CHECK(all(nscf%ngfft(1:6) == dtset%ngfft(1:6)), "different ngfft meshes")
+ else
+   ABI_CHECK(all(nscf%ngfftf(1:6) == dtset%ngfftdg(1:6)),  "different ngfftf meshes")
+ end if
+ ! Not augmentation.
+ !nscf%ngfft(4:6) = nscf%ngfft(1:3)
 
  call initmpi_seq(nscf%mpi_enreg)
  call init_distribfft_seq(nscf%mpi_enreg%distribfft, 'c', nscf%ngfft(2), nscf%ngfft(3), 'all')
@@ -2388,7 +2395,8 @@ end subroutine nscf_init
 !!  nscf_setup_kp
 !!
 !! FUNCTION
-!!  Prepare call to nscf_solve_kpt. Computes k-dependent temrms, gs_hamk and allocates wavefunction block for this k-point
+!!  Prepare call to nscf_solve_kpt.
+!!  Computes k-dependent temrms, gs_hamk and allocates wavefunction block for this k-point
 !!
 !! INPUT
 !! isppol=Spin index
@@ -2431,16 +2439,16 @@ subroutine nscf_setup_kpt(nscf, isppol, kpt, istwf_k, nband_k, cryst, dtset, psp
 !Local variables ------------------------------
 !scalars
  integer,parameter :: paral_kgb0 = 0, nkpt1 = 1, use_subovl0 = 0, ider0 = 0, idir0 = 0, mkmem1 = 1, useylmgr0 = 0
- integer :: mcg, mgsc, nvloc, nkpg, n1, n2, n3, n4, n5, n6, nfft, nfftf, mgfft, mgfftf, npwsp, me_g0, optder, nspinor
+ integer :: nvloc, nkpg, n1, n2, n3, n4, n5, n6, nfft, nfftf, mgfft, mgfftf, optder, nspinor
  !character(len=500) :: msg
 !arrays
- integer :: npwarr_k(1), nband_ks(dtset%nsppol)
+ integer :: nband_ks(dtset%nsppol)
  real(dp) :: ylmgr_dum(1,1,1), ylmgr(0, 0)
  real(dp),allocatable :: ph1d(:,:), ylm_k(:,:)
 ! *************************************************************************
 
  ! See vtorho.F90 for the sequence of calls needed to initialize the GS Hamiltonian.
- ! The Hamiltonian has references to the _k arrays!
+ ! The Hamiltonian has references to the _k arrays allocated here and returned
  associate (mpi_enreg => nscf%mpi_enreg)
 
  !==== Initialize most of the Hamiltonian ====
@@ -2532,9 +2540,6 @@ subroutine nscf_setup_kpt(nscf, isppol, kpt, istwf_k, nband_k, cryst, dtset, psp
                      kinpw_k=kinpw_k, kg_k=kg_k, kpg_k=kpg_k, ffnl_k=ffnl_k, ph3d_k=ph3d_k, &
                      compute_ph3d=(paral_kgb0/=1), compute_gbound=(paral_kgb0/=1))
 
- npwarr_k = npw_k; npwsp = npw_k * nspinor; me_g0 = 1
- mcg = npw_k * nspinor * nband_k; mgsc = mcg * dtset%usepaw
-
  ABI_MALLOC(cg_k, (2, npw_k * nspinor, nband_k))
  ABI_MALLOC(gsc_k, (2, npw_k * nspinor, nband_k * dtset%usepaw))
 
@@ -2599,7 +2604,7 @@ subroutine nscf_solve_kpt(nscf, isppol, kpt, istwf_k, nband_k, cryst, dtset, dtf
  integer(KIND=int64) :: seed
  integer :: fold1,fold2,foldim,foldre,iband, ii
  real(dp),parameter :: cpus0 = zero
- real(dp) :: max_resid ! dotr,
+ real(dp) :: max_resid
  type(efield_type) :: dtefield
 !arrays
  integer :: npwarr_k(1), pwind(pwind_alloc0,2,3)
@@ -2609,7 +2614,6 @@ subroutine nscf_solve_kpt(nscf, isppol, kpt, istwf_k, nband_k, cryst, dtset, dtf
 ! *************************************************************************
 
  ! See vtorho.F90 for the sequence of calls needed to initialize the GS Hamiltonian.
- ! The Hamiltonian has references to the _k arrays!
  associate (mpi_enreg => nscf%mpi_enreg, kg_k => gs_hamk%kg_k)
 
  !==== Initialize most of the Hamiltonian ====
@@ -2629,6 +2633,9 @@ subroutine nscf_solve_kpt(nscf, isppol, kpt, istwf_k, nband_k, cryst, dtset, dtf
 
  if (.not. use_cg_k) then
    ! Initialize the wavefunctions with random numbers. See wfconv
+   !TODO
+   !call ncgtk_randomize(istwf_k, npw_k, nspinor, nband, me_g0, cg_k)
+
    do iband=1,nband_k
      index = 0
      do ispinor=1,nspinor
@@ -2649,7 +2656,6 @@ subroutine nscf_solve_kpt(nscf, isppol, kpt, istwf_k, nband_k, cryst, dtset, dtf
          foldre=mod(fold1+fold2,21)
          foldim=mod(3*fold1+2*fold2,19)
 
-         !if (.not. use_cg_k) then
          cg_k(1,index,iband) =dble(foldre)
          cg_k(2,index,iband) =dble(foldim)
 
@@ -2661,9 +2667,6 @@ subroutine nscf_solve_kpt(nscf, isppol, kpt, istwf_k, nband_k, cryst, dtset, dtf
        end do ! ipw
      end do ! ispinor
    end do ! iband
-   !call random_number(cg_k)
-   ! TODO
-   !call ncgtk_random(...)
 
    ! Multiply with envelope function to reduce kinetic energy
    call cg_envlop(cg_k, dtset%ecut, cryst%gmet, icg0, kg_k, kpt, mcg, nband_k, npw_k, dtset%nspinor)
@@ -2696,6 +2699,9 @@ subroutine nscf_solve_kpt(nscf, isppol, kpt, istwf_k, nband_k, cryst, dtset, dtf
    ! subspace rotation (without this, cgwf will never converge!)
    call subdiago(cg_k, eig_k, evec, gsc_k, icg0, igsc0, istwf_k, mcg, mgsc, nband_k, npw_k, dtset%nspinor, paral_kgb0, &
                  subham, subovl, use_subovl0, gs_hamk%usepaw, me_g0)
+
+   ! Fix the phase of the wavefunctions.
+   !call cgtk_fixphase(cg_k, gsc_k, icg0, igsc0, istwf_k, mcg, mgsc, mpi_enreg, nband_k, npw_k, dtset%usepaw)
 
    ! Check for convergence.
    if (dtset%nbdbuf >= 0) then
