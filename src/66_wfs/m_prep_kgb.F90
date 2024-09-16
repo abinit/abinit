@@ -189,10 +189,10 @@ subroutine prep_getghc(cwavef, gs_hamk, gvnlxc, gwavef, swavef, lambda, blocksiz
    ABI_BUG('wrong size for gwavef!')
  end if
  local_gvnlxc = .false.
- if (size(gvnlxc)==0) then
+ if (size(gvnlxc)<=1) then
    local_gvnlxc = .true.
  end if
- if ((.not.local_gvnlxc).and.size(gvnlxc)<mcg) then
+ if ((.not.local_gvnlxc).and.(size(gvnlxc)<mcg)) then
    ABI_BUG('wrong size for gvnlxc!')
  end if
  if (sij_opt==1) then

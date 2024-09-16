@@ -407,7 +407,9 @@ In this case, using the same sampling for electrons and phonons may be enough to
   since these transitions are not compatible with energy and crystalline-momentum conservation.
   The use of the tetrahedron method is **automatically activated** when [[eph_task]] is set to -4.
   It is possible to change this behaviour by using [[eph_intmeth]] albeit not recommended
-  as the calculation will become significantly slower.
+  as the calculation will become significantly slower. If using the Gaussian method, one must 
+  converge the self-energy with respect to [[zcut]] (or [[eph_fsmear]] if [[eph_task]] is set to 1), 
+  By default, [[zcut]] is set to a very large value.
 
 * The [[sigma_erange]] variable defines the energy window, below the VBM and above the
   CBM, where the lifetimes will be computed.

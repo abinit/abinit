@@ -1459,7 +1459,7 @@ subroutine pawpsp_read_corewf(energy_cor,indlmn_core,lcor,lmncmax,ncor,nphicor,r
    if((.not.present(kappacor)).and.diracrel) then
      write(msg,'(3a)') 'Error in pawpsp_read_core:',ch10, &
 &     '  Cannot use diracrelativistic corewf file!'
-     ABI_ERROR(msg)
+     LIBPAW_ERROR(msg)
    endif
 
    read(unt,*) ! skip zatom,zcore,pspdat
