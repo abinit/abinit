@@ -166,6 +166,7 @@ subroutine xcden(cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden,qphon,rho
    ABI_MALLOC(wkcmpx,(2,nfft))
    if(ngrad==2)then
      ABI_MALLOC(workgr,(2,nfft))
+     if (need_laplacian) lrhonow(:,:)=zero
      if (need_laplacian.or.need_derivative2) then
        ABI_MALLOC(workgr2,(2,nfft))
      end if
