@@ -68,7 +68,7 @@ module m_time
  !==================
 
  ! TIMER_SIZE determines the maximum number of "timing slots" available
- integer,public,parameter :: TIMER_SIZE=1999
+ integer,public,parameter :: TIMER_SIZE=2099
 
  ! timeopt is a flag which indicates the suppression or not of the timing.
  integer,private,save :: timopt=1

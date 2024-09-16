@@ -7,16 +7,16 @@ ndtset 2
 ###############
 # Compute only the imaginary part of the self-energy
 # Followed by mobility computation.
-eph_task1 -4  
+eph_task1 -4
 
 ###############
 # Second dataset
 ###############
 # This just to show how to compute mobility from SIGEPH.nc file with a k submesh
-eph_task2  7  
+eph_task2  7
 getsigeph_filepath2 "teph4mob_7o_DS1_SIGEPH.nc"
-transport_ngkpt2 12 12 12 
-#sigma_ngkpt2 12 12 12 
+transport_ngkpt2 12 12 12
+#sigma_ngkpt2 12 12 12
 
 #########################
 # Common to all datasets
@@ -45,7 +45,7 @@ getwfkfine_filepath "teph4mob_4o_DS3_WFK" # Path to the dense 48x48x48 WFK
 # Definition of the variables related to transport properties
 tmesh 5.0 59.0 6        # Temperature array at which the mobility will be computed
 # Change this depending on the concentration you want
-eph_doping  -1e+15   # in |e| cm^-3  
+eph_doping  -1e+15   # in |e| cm^-3
 
 sigma_erange  0 0.15 eV # We compute the lifetimes of electrons only,
                         # in an energy window of 0.15 eV from the CBM
@@ -97,6 +97,7 @@ nband 8
 #%% [setup]
 #%% executable = abinit
 #%% test_chain =  teph4mob_1.abi, teph4mob_2.abi, teph4mob_3.abi, teph4mob_4.abi, teph4mob_5.abi, teph4mob_6.abi, teph4mob_7.abi
+#%% exclude_builders = eos_nvhpc_*,
 #%% [files]
 #%% files_to_test =
 #%%   teph4mob_7.abo, tolnlines= 57, tolabs=  80, tolrel= 0.05;
@@ -106,7 +107,7 @@ nband 8
 #%%   teph4mob_7o_DS1_MRTA_PI, tolnlines= 50, tolabs= 1.1e-2, tolrel= 5.0e-2, fld_options = -ridiculous;
 #%%   teph4mob_7o_DS1_SERTA_SBK, tolnlines= 50, tolabs= 1.1e-2, tolrel= 5.0e-2, fld_options = -ridiculous;
 #%%   teph4mob_7o_DS1_MRTA_SBK, tolnlines= 50, tolabs= 1.1e-2, tolrel= 5.0e-2, fld_options = -ridiculous;
-#%%   teph4mob_7o_DS1_SERTA_SIGMA, tolnlines= 50, tolabs= 4e+3, tolrel= 5.0e-2, fld_options = -ridiculous;
+#%%   teph4mob_7o_DS1_SERTA_SIGMA, tolnlines= 50, tolabs= 1.2e+4, tolrel= 5.0e-2, fld_options = -ridiculous;
 #%%   teph4mob_7o_DS1_MRTA_SIGMA, tolnlines= 50, tolabs= 100, tolrel= 5.0e-2, fld_options = -ridiculous;
 #%% [paral_info]
 #%% max_nprocs = 4

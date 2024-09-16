@@ -39,9 +39,9 @@ static void prt_dev_info()
       printf("  Clock rate:                                    %3.1f GHz\n", deviceProp.clockRate/1000000.);
       printf("  Number of processors/cores:                    %d/%d\n", NProcs,NCores);
       if (NCores<0) {
-        printf("  Max GFLOPS:                                    undefined (add new def. in version_2_cores function)\n");
+        printf("  Max FP64 GFLOPS:                                    undefined (add new def. in version_2_cores function)\n");
       } else {
-        printf("  Max GFLOPS:                                    %d GFP\n", NCores*deviceProp.multiProcessorCount * deviceProp.clockRate/1000000);
+        printf("  Max FP64 GFLOPS:                                    %d GFP\n", NCores*deviceProp.multiProcessorCount * deviceProp.clockRate/1000000);
       }
       printf("  Total amount of constant memory:               %d bytes\n",(int) deviceProp.totalConstMem);
       printf("  Total amount of shared memory per block:       %d bytes\n",(int) deviceProp.sharedMemPerBlock);
@@ -251,6 +251,8 @@ void c_get_ndevice_(int* ndev)
 // Get number of cores of device  --------------
 //This function is present in cuda SDK: see ${CUDAROOT}/common/inc/helper_cuda_drvapi.h
 //To be completed for new card versions
+//Values for FP64 cores:
+//https://docs.nvidia.com/cuda/cuda-c-programming-guide/index.html#arithmetic-instructions
 static
 int version_2_cores(int major, int minor)
 {
@@ -258,45 +260,47 @@ int version_2_cores(int major, int minor)
     typedef struct
     {
         int SM; // 0xMm (hexidecimal notation), M = SM Major version, and m = SM minor version
-        int Cores;
+        int Cores_fp32; // Number of cores~ALU running 32bits floating point operations (FP32)
+        int Cores_fp64; // Number of cores~ALU running 32bits floating point operations (FP64)
     } sSMtoCores;
     sSMtoCores nGpuArchCoresPerSM[] =
     {
-        { 0x10,  8 }, // Tesla Generation (SM 1.0) G80 class
-        { 0x11,  8 }, // Tesla Generation (SM 1.1) G8x class
-        { 0x12,  8 }, // Tesla Generation (SM 1.2) G9x class
-        { 0x13,  8 }, // Tesla Generation (SM 1.3) GT200 class
-        { 0x20, 32 }, // Fermi Generation (SM 2.0) GF100 class
-        { 0x21, 48 }, // Fermi Generation (SM 2.1) GF10x class
-        { 0x30, 192}, // Kepler Generation (SM 3.0) GK10x class
-        { 0x32, 192}, // Kepler Generation (SM 3.2) GK10x class
-        { 0x35, 192}, // Kepler Generation (SM 3.5) GK11x class
-        { 0x50, 128}, // Maxwell Generation (SM 5.0) GM10x class
-        { 0x60, 64 }, // Pascal Generation (SM 6.0) GP100 class
-        { 0x61, 128}, // Pascal Generation (SM 6.1) GP10x class
-        { 0x62, 128}, // Pascal Generation (SM 6.2) GP10x class
-        { 0x70, 64 }, // Volta Generation (SM 7.0) GV100 class
-        { 0x72, 64 }, // Volta Generation (SM 7.2) AGX class
-        { 0x75, 64 }, // Turing Generation (SM 7.5) RTX class
-        { 0x80, 64 }, // Ampere Generation (SM 8.0) A100 class
-        { 0x86, 128}, // Ampere Generation (SM 8.6) RTX class
-        { 0x87, 128}, // Ampere Generation (SM 8.7) AGX class
-        { 0x89, 128}, // Ada Lovelace Generation (SM 8.9) RTX class
-        { 0x90, 128}, // Hooper Generation (SM 9.0) H100 class
-        {   -1, -1 }
+        { 0x10,  8 , 1 }, // Tesla Generation (SM 1.0) G80 class
+        { 0x11,  8 , 1 }, // Tesla Generation (SM 1.1) G8x class
+        { 0x12,  8 , 1 }, // Tesla Generation (SM 1.2) G9x class
+        { 0x13,  8 , 1 }, // Tesla Generation (SM 1.3) GT200 class
+        { 0x20, 32 , 8 }, // Fermi Generation (SM 2.0) GF100 class
+        { 0x21, 48 , 4 }, // Fermi Generation (SM 2.1) GF10x class
+        { 0x30, 192, 8 }, // Kepler Generation (SM 3.0) GK10x class
+        { 0x32, 192, 8 }, // Kepler Generation (SM 3.2) GK10x class
+        { 0x35, 192, 8 }, // Kepler Generation (SM 3.5) GK11x class
+        { 0x35, 192, 64}, // Kepler Generation (SM 3.7) GK21x class
+        { 0x50, 128, 4 }, // Maxwell Generation (SM 5.0) GM10x class
+        { 0x60, 64 , 32}, // Pascal Generation (SM 6.0) GP100 class
+        { 0x61, 128, 4 }, // Pascal Generation (SM 6.1) GP10x class
+        { 0x62, 128, 4 }, // Pascal Generation (SM 6.2) GP10x class
+        { 0x70, 64 , 32}, // Volta Generation (SM 7.0) GV100 class
+        { 0x72, 64 , 32}, // Volta Generation (SM 7.2) AGX class
+        { 0x75, 64 , 2 }, // Turing Generation (SM 7.5) RTX class
+        { 0x80, 64 , 32}, // Ampere Generation (SM 8.0) A100 class
+        { 0x86, 128, 2 }, // Ampere Generation (SM 8.6) RTX class
+        { 0x87, 128, 2 }, // Ampere Generation (SM 8.7) AGX class
+        { 0x89, 128, 2 }, // Ada Lovelace Generation (SM 8.9) RTX class
+        { 0x90, 128, 64}, // Hooper Generation (SM 9.0) H100 class
+        {   -1, -1, -1 }
     };
     int index = 0;
     while (nGpuArchCoresPerSM[index].SM != -1)
     {
         if (nGpuArchCoresPerSM[index].SM == ((major << 4) + minor))
         {
-            return nGpuArchCoresPerSM[index].Cores;
+            return nGpuArchCoresPerSM[index].Cores_fp64;
         }
         index++;
     }
 
 //  printf("MapSMtoCores for SM %d.%d is undefined.  Default to use %d Cores/SM\n", major, minor, nGpuArchCoresPerSM[7].Cores);
-    return nGpuArchCoresPerSM[10].Cores;
+    return nGpuArchCoresPerSM[10].Cores_fp64;
 }
 
 

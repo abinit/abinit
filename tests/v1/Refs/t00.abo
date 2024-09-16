@@ -1,6 +1,6 @@
 
-.Version 9.11.2 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 10.1.4.5 of ABINIT, released Sep 2024.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2024 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 15 Jul 2023.
-- ( at 11h58 )
+.Starting date : Fri 13 Sep 2024.
+- ( at 19h07 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v1_t00/t00.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v1_t00/t00.abi
 - output file    -> t00.abo
 - root for input  files -> t00i
 - root for output files -> t00o
@@ -42,10 +42,10 @@ _ WF disk file :      0.069 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
 -
-- outvars: echo of selected default values                                      
--   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+- outvars: echo of selected default values
+-   iomode0 =  0 , fftalg0 =512 , wfoptalg0 =  0
 -
-- outvars: echo of global parameters not present in the input file              
+- outvars: echo of global parameters not present in the input file
 -  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
@@ -55,7 +55,7 @@ _ WF disk file :      0.069 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
            dielng      8.00000000E-01 Bohr
              ecut      8.00000000E+00 Hartree
            enunit           2
--          fftalg         312
+-          fftalg         512
             intxc           1
               kpt      1.00000000E+00  1.00000000E+00  1.00000000E+00
                        1.00000000E+00  2.00000000E+00  2.00000000E+00
@@ -128,8 +128,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      8.000   => boxcut(ratio)=   2.00546
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/70yb.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/70yb.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/70yb.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/70yb.pspnc
 -  Troullier-Martins psp for element  Yb        Thu Oct 27 17:54:17 EDT 1994
 - 70.00000  16.00000    940714                znucl, zion, pspdat
     1    1    3    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -259,14 +259,14 @@ iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
 kinetic             :  2.36568654363415E+01
 hartree             :  1.27017021898304E+01
-xc                  : -8.83161668269841E+00
+xc                  : -8.83161668269842E+00
 Ewald energy        : -5.86862345486569E+01
 psp_core            :  7.83540595790140E+00
 local_psp           : -2.76965080207125E+01
 non_local_psp       : -1.97915725495929E+01
 total_energy        : -7.08119582175874E+01
 total_energy_eV     : -1.92689137693705E+03
-band_energy         : -8.82726676241824E+00
+band_energy         : -8.82726676241826E+00
 ...
 
 
@@ -292,7 +292,7 @@ band_energy         : -8.82726676241824E+00
            enunit           2
            etotal     -7.0811958218E+01
             fcart     -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
--          fftalg         312
+-          fftalg         512
             intxc           1
               kpt      1.00000000E+00  1.00000000E+00  1.00000000E+00
                        1.00000000E+00  2.00000000E+00  2.00000000E+00
@@ -428,10 +428,10 @@ P           mkmem           2
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          0.8  wall=          0.8
+- Proc.   0 individual time (sec): cpu=          0.5  wall=          1.2
 
 ================================================================================
 
  Calculation completed.
 .Delivered  12 WARNINGs and   2 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          0.8  wall=          0.8
++Overall time at end (sec) : cpu=          0.5  wall=          1.2
