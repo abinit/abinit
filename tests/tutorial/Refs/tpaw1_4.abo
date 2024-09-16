@@ -1,6 +1,6 @@
 
-.Version 9.3.3 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 10.1.4.5 of ABINIT, released Sep 2024.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2024 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,17 +14,16 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun 13 Dec 2020.
-- ( at 20h50 )
+.Starting date : Fri 13 Sep 2024.
+- ( at 19h06 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_beauty/tests/TestBot_MPI1/tutorial_tpaw1_4/tpaw1_4.abi
-- output file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_beauty/tests/TestBot_MPI1/tutorial_tpaw1_4/tpaw1_4.abo
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/tutorial_tpaw1_4/tpaw1_4.abi
+- output file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/tutorial_tpaw1_4/tpaw1_4.abo
 - root for input  files -> tpaw1_4i
 - root for output files -> tpaw1_4o
 
 - inpspheads : Reading pseudopotential header in XML form from 
--   /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_beauty/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/C.xml
-
+-   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/C.xml
  Symmetries : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need of the present run
@@ -38,7 +37,7 @@
  PAW method is used; the additional fine FFT grid is defined by:
    mgfftf=        24    nfftf =     13824
 ================================================================================
-P This job should need less than                       7.162 Mbytes of memory.
+P This job should need less than                       7.244 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      1.664 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
 ================================================================================
@@ -47,10 +46,10 @@ _ WF disk file :      1.664 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
 -
-- outvars: echo of selected default values                                      
--   iomode0 =  0 , fftalg0 =312 , wfoptalg0 = 10
+- outvars: echo of selected default values
+-   iomode0 =  0 , fftalg0 =512 , wfoptalg0 = 10
 -
-- outvars: echo of global parameters not present in the input file              
+- outvars: echo of global parameters not present in the input file
 -  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
@@ -58,7 +57,7 @@ _ WF disk file :      1.664 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
               amu      1.20110000E+01
              ecut      1.20000000E+01 Hartree
            ecutsm      5.00000000E-01 Hartree
--          fftalg         312
+-          fftalg         512
               ixc       -1012
               kpt     -5.00000000E-02 -1.00000000E-01  0.00000000E+00
                       -5.00000000E-02 -2.00000000E-01  0.00000000E+00
@@ -296,9 +295,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_beauty/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/C.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_beauty/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/C.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_beauty/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/C.xml
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/C.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/C.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/C.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.50736703
@@ -371,9 +370,9 @@ xred      :
 - [  0.0000E+00,   0.0000E+00,   0.0000E+00,  C]
 - [  2.5000E-01,   2.5000E-01,   2.5000E-01,  C]
 cartesian_forces: # hartree/bohr
-- [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
-- [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
-force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
+- [ -9.98658875E-30,  -9.98658875E-30,  -4.99329438E-29, ]
+- [  9.98658875E-30,   9.98658875E-30,   4.99329438E-29, ]
+force_length_stats: {min:   5.18918373E-29, max:   5.18918373E-29, mean:   5.18918373E-29, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -385,8 +384,8 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  PAW TEST:
  ==== Compensation charge inside spheres ============
  The following values must be close to each other ...
- Compensation charge over spherical meshes =      0.252499824724914
- Compensation charge over fine fft grid    =      0.252513179501386
+ Compensation charge over spherical meshes =      0.252499824724908
+ Compensation charge over fine fft grid    =      0.252513179501384
 
  ==== Results concerning PAW augmentation regions ====
 
@@ -440,9 +439,9 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.250000000000      0.250000000000      0.250000000000
- rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
-    1       0.000000000000      0.000000000000      0.000000000000
-    2       0.000000000000      0.000000000000      0.000000000000
+ rms dE/dt=  2.5485E-28; max dE/dt=  6.7316E-29; dE/dt below (all hartree)
+    1       0.000000000000     -0.000000000000     -0.000000000000
+    2      -0.000000000000     -0.000000000000     -0.000000000000
 
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
@@ -450,13 +449,13 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 
  cartesian forces (hartree/bohr) at end:
     1     -0.00000000000000    -0.00000000000000    -0.00000000000000
-    2     -0.00000000000000    -0.00000000000000    -0.00000000000000
- frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 h/b
+    2      0.00000000000000     0.00000000000000     0.00000000000000
+ frms,max,avg= 2.9959766E-29 4.9932944E-29   0.000E+00  0.000E+00  0.000E+00 h/b
 
  cartesian forces (eV/Angstrom) at end:
     1     -0.00000000000000    -0.00000000000000    -0.00000000000000
-    2     -0.00000000000000    -0.00000000000000    -0.00000000000000
- frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
+    2      0.00000000000000     0.00000000000000     0.00000000000000
+ frms,max,avg= 1.5405930E-27 2.5676550E-27   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  6.740653116003  6.740653116003  6.740653116003 bohr
               =  3.567000000000  3.567000000000  3.567000000000 angstroms
  Fermi (or HOMO) energy (hartree) =   0.44923   Average Vxc (hartree)=  -0.50144
@@ -472,27 +471,27 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
 kinetic             :  6.91883160681574E+00
-hartree             :  9.60013175666651E-01
+hartree             :  9.60013175666647E-01
 xc                  : -4.30271448040895E+00
 Ewald energy        : -1.27864121210521E+01
 psp_core            :  9.19814512188249E-01
-local_psp           : -4.65296335096543E+00
-spherical_terms     :  1.42464715422303E+00
+local_psp           : -4.65296335096541E+00
+spherical_terms     :  1.42464715422304E+00
 internal            : -1.15187835035328E+01
 '-kT*entropy'       : -3.77630940398075E-18
 total_energy        : -1.15187835035328E+01
-total_energy_eV     : -3.13442039514866E+02
+total_energy_eV     : -3.13442039514865E+02
 ...
 
 
 --- !EnergyTermsDC
 iteration_state     : {dtset: 1, }
 comment             : '"Double-counting" decomposition of free energy'
-band_energy         :  3.11935871320717E-01
+band_energy         :  3.11935871320715E-01
 Ewald energy        : -1.27864121210521E+01
 psp_core            :  9.19814512188249E-01
-xc_dc               : -7.33142865606674E-01
-spherical_terms     :  7.69023194720945E-01
+xc_dc               : -7.33142865606669E-01
+spherical_terms     :  7.69023194720941E-01
 internal            : -1.15187814084288E+01
 '-kT*entropy'       : -3.77630940398075E-18
 total_energy_dc     : -1.15187814084288E+01
@@ -519,9 +518,9 @@ total_energy_dc_eV  : -3.13441982504189E+02
              ecut      1.20000000E+01 Hartree
            ecutsm      5.00000000E-01 Hartree
            etotal     -1.1518781408E+01
-            fcart     -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
--          fftalg         312
+            fcart     -9.9865887504E-30 -9.9865887504E-30 -4.9932943752E-29
+                       9.9865887504E-30  9.9865887504E-30  4.9932943752E-29
+-          fftalg         512
               ixc       -1012
               kpt     -5.00000000E-02 -1.00000000E-01  0.00000000E+00
                       -5.00000000E-02 -2.00000000E-01  0.00000000E+00
@@ -804,10 +803,10 @@ P           mkmem         110
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          5.6  wall=          5.6
+- Proc.   0 individual time (sec): cpu=          3.6  wall=          3.6
 
 ================================================================================
 
  Calculation completed.
-.Delivered   2 WARNINGs and   3 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          5.6  wall=          5.6
+.Delivered   1 WARNINGs and   4 COMMENTs to log file.
++Overall time at end (sec) : cpu=          3.6  wall=          3.6
