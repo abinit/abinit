@@ -176,7 +176,7 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
  case ("k")
    qpath = kpath_new(dtset%ph_qpath(:,1:dtset%ph_nqpath), cryst%gprimd, dtset%ph_ndivsm)
    nq_path = qpath%npts
-   call qpath%print(units, header=sjoin("q-point path for g(k,q) with k:", ktoa(dtset%eph_fix_wavevec)), prtvol=dtset%prtvol)
+   call qpath%print(units, header=sjoin("q-point path for g(k,q) with fixed k:", ktoa(dtset%eph_fix_wavevec)), prtvol=dtset%prtvol)
    fake_path(:,1) = dtset%eph_fix_wavevec; fake_path(:,2) = dtset%eph_fix_wavevec + one
    kpath = kpath_new(fake_path, cryst%gprimd, 0)
    nk_path = 1
@@ -184,7 +184,7 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
  case ("q")
    kpath = kpath_new(dtset%kptbounds(:,1:dtset%nkpath), cryst%gprimd, dtset%ndivsm)
    nk_path = kpath%npts
-   call qpath%print(units, header=sjoin("k-point path for g(k,q) with q:", ktoa(dtset%eph_fix_wavevec)), prtvol=dtset%prtvol)
+   call qpath%print(units, header=sjoin("k-point path for g(k,q) with fixed q:", ktoa(dtset%eph_fix_wavevec)), prtvol=dtset%prtvol)
    fake_path(:,1) = dtset%eph_fix_wavevec; fake_path(:,2) = dtset%eph_fix_wavevec + one
    qpath = kpath_new(fake_path, cryst%gprimd, 0)
    nq_path = 1
@@ -269,9 +269,9 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
  call xmpi_split_block(nq_path, qpt_comm%value, my_nqpath, my_iq_inds)
  call xmpi_split_block(natom3, pert_comm%value, my_npert, my_iperts)
  ABI_FREE(my_iperts)
- ABI_CHECK_IGEQ(my_nkpath, 1, "Too many procs for k-points")
- ABI_CHECK_IGEQ(my_nqpath, 1, "Too many procs for q-points")
- ABI_CHECK_IGEQ(my_npert, 1, "Too many procs for perturbationss")
+ ABI_CHECK_IGEQ(my_nkpath, 1, "Too many procs for k-points.")
+ ABI_CHECK_IGEQ(my_nqpath, 1, "Too many procs for q-points.")
+ ABI_CHECK_IGEQ(my_npert, 1, "Too many procs for perturbations.")
 
  if (pert_comm%nproc > 1) then
    ! Build table with list of perturbations treated by this CPU inside pert_comm
@@ -321,7 +321,6 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
  ABI_MALLOC(gvnlx1, (2, usevnl))
  ABI_MALLOC(grad_berry, (2, nspinor*(berryopt0/4)))
  ABI_MALLOC(cwaveprj0, (natom, nspinor*usecprj))
-
  ABI_MALLOC(displ_cart, (2, 3, cryst%natom, natom3))
  ABI_MALLOC(displ_red, (2, 3, cryst%natom, natom3))
  ABI_MALLOC(gkq_atm, (2, nb_in_g, nb_in_g, natom3))
@@ -423,7 +422,7 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
  ! It usually reduces the number of iterations by 3-4 but it requires more memory.
  tot_nscf_ierr = 0
  use_cache = .True.
- !use_cache = .False.
+ use_cache = .False.
  call ucache_k%init(use_cache .and. my_nkpath > 1, ngfft)
  call ucache_kq%init(use_cache .and. my_nqpath > 1, ngfft)
 
@@ -441,7 +440,7 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
      kk = kpath%points(:, ik)
 
      ! Compute u_{nk}(g)
-     ! NB: The Hamiltonian has pointers to the _k arrays in out so we cannot dellocate them till the end.
+     ! NB: The Hamiltonian has pointers to the _k arrays in output so we cannot dellocate them till the end.
      ! This is the reason why we use vlocal_k (vlocal_kq) although this term does not depend on k
      call nscf%setup_kpt(spin, kk, istwfk_1, nband, cryst, dtset, psps, pawtab, pawfgr, &
                          npw_k, kg_k, kpg_k, ph3d_k, kinpw_k, ffnl_k, vlocal_k, cg_k, gsc_k, gs_hamk)
@@ -459,7 +458,7 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
      call ucache_k%store_kpt(kk, istwfk_1, npw_k, nspinor, nband, kg_k, cg_k)
 
      !if (pert_comm%me == master) then
-       NCF_CHECK(nf90_put_var(ncid, vid("all_eigens_k"), eig_k, start=[1,ik,spin]))
+     NCF_CHECK(nf90_put_var(ncid, vid("all_eigens_k"), eig_k, start=[1,ik,spin]))
      !end if
 
      ! Make sure all procs in pert_comm have the same wavefunctions at k
@@ -508,7 +507,7 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
 
        call ucache_kq%store_kpt(kq, istwfk_1, npw_kq, nspinor, nband, kg_kq, cg_kq)
 
-       ! This to have the same gauge when qq = 0
+       ! This to have the same gauge when qq = 0.
        if (qq_is_gamma) cg_kq = cg_k
 
        ! Make sure all procs in pert_comm have the same wavefunctions at k+q
@@ -604,8 +603,8 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
 
        ! Write |g|^2 for this q.
        !if (pert_comm%me == master) then
-         gkq2_nu = gkq_nu(1,:,:,:)**2 + gkq_nu(2,:,:,:)** 2
-         NCF_CHECK(nf90_put_var(ncid, vid("gkq2_nu"), gkq2_nu, start=[1,1,1,iq,ik,spin]))
+       gkq2_nu = gkq_nu(1,:,:,:)**2 + gkq_nu(2,:,:,:)** 2
+       NCF_CHECK(nf90_put_var(ncid, vid("gkq2_nu"), gkq2_nu, start=[1,1,1,iq,ik,spin]))
        !end if
 
        ABI_FREE(gs1c)
@@ -649,7 +648,7 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
                  sjoin("Computation of g(k,q) completed. All NSCF runs converged within tolwfr", ftoa(dtset%tolwfr)))
    else
      call wrtout(units, &
-                sjoin("WARNING:", itoa(tot_nscf_ierr), "NSCF runs did not converge within tolwfr", ftoa(dtset%tolwfr), ". Increase nstep!"))
+                 sjoin("WARNING:", itoa(tot_nscf_ierr), "NSCF runs did not converge within tolwfr", ftoa(dtset%tolwfr), ". Increase nstep!"))
    end if
  end if
 
@@ -688,8 +687,7 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
      end do
      ABI_FREE(eig_kq)
 
-   else
-     ! (nk_path > 1)
+   else ! (nk_path > 1)
      ABI_MALLOC(eig_k, (nband))
      do spin=1,nsppol
        call wrtout(units, sjoin(" Energies_k in eV for spin:", itoa(spin)))
@@ -755,7 +753,6 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
  call qpt_comm%free(); call kpt_comm%free(); call pert_comm%free()
 
  !call abi_linalg_finalize(dtset%gpu_option)
-
  call cwtime_report(" eph_path: MPI barrier before returning.", cpu_all, wall_all, gflops_all, end_str=ch10, comm=comm)
  !stop
 
