@@ -129,8 +129,8 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
  !integer :: linalg_max_size
  real(dp) :: cpu_all,wall_all,gflops_all, eig0nk, eshift
  logical :: qq_is_gamma, need_ftinterp, gen_eigenpb, use_cg_k, use_cg_kq, use_cache
- type(gs_hamiltonian_type) :: gs_hamk, gs_hamkq
- type(rf_hamiltonian_type) :: rf_hamkq
+ type(gs_hamiltonian_type) :: gs_ham_k, gs_ham_kq
+ type(rf_hamiltonian_type) :: rf_ham_kq
  type(nscf_t) :: nscf
  type(kpath_t) :: qpath, kpath
  type(xcomm_t) :: kpt_comm, qpt_comm, pert_comm
@@ -443,13 +443,13 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
      ! NB: The Hamiltonian has pointers to the _k arrays in output so we cannot dellocate them till the end.
      ! This is the reason why we use vlocal_k (vlocal_kq) although this term does not depend on k
      call nscf%setup_kpt(spin, kk, istwfk_1, nband, cryst, dtset, psps, pawtab, pawfgr, &
-                         npw_k, kg_k, kpg_k, ph3d_k, kinpw_k, ffnl_k, vlocal_k, cg_k, gsc_k, gs_hamk)
+                         npw_k, kg_k, kpg_k, ph3d_k, kinpw_k, ffnl_k, vlocal_k, cg_k, gsc_k, gs_ham_k)
 
      ! cache.
      use_cg_k = (my_ik > 1 .and. ucache_k%use_cache)
      if (use_cg_k) call ucache_k%get_kpt(kk, istwfk_1, npw_k, nspinor, nband, kg_k, cg_k)
 
-     call nscf%solve_kpt(spin, kk, istwfk_1, nband, cryst, dtset, dtfil, gs_hamk, &
+     call nscf%solve_kpt(spin, kk, istwfk_1, nband, cryst, dtset, dtfil, gs_ham_k, &
                          use_cg_k, npw_k, cg_k, gsc_k, eig_k, msg, ierr)
 
      ABI_WARNING_IF(ierr /= 0, msg)
@@ -466,7 +466,7 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
      if (psps%usepaw == 1) call xmpi_bcast(gsc_k, master, pert_comm%value, ierr)
 
      ! Allocate vlocal. Note nvloc
-     ABI_MALLOC(vlocal, (n4, n5, n6, gs_hamk%nvloc))
+     ABI_MALLOC(vlocal, (n4, n5, n6, gs_ham_k%nvloc))
      ABI_MALLOC(ylm_k, (npw_k, psps%mpsang*psps%mpsang*psps%useylm))
 
      ! Loop over q-points in 1-path (MPI parallelized)
@@ -477,13 +477,9 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
        qq = qpath%points(:,iq); qq_is_gamma = sum(qq**2) < tol14
        kq = kk + qq
 
-       ! Get phonons for this q-point.
-       call ifc%fourq(cryst, qq, phfreqs, displ_cart, out_displ_red=displ_red)
-       phfreqs_eV = phfreqs * Ha_eV
-
        ! Compute u_{m k+q}(g)
        call nscf%setup_kpt(spin, kq, istwfk_1, nband, cryst, dtset, psps, pawtab, pawfgr, &
-                           npw_kq, kg_kq, kpg_kq, ph3d_kq, kinpw_kq, ffnl_kq, vlocal_kq, cg_kq, gsc_kq, gs_hamkq)
+                           npw_kq, kg_kq, kpg_kq, ph3d_kq, kinpw_kq, ffnl_kq, vlocal_kq, cg_kq, gsc_kq, gs_ham_kq)
        !print *, "kq:", kq, "npw_kq", npw_kq
 
        ! cache.
@@ -496,10 +492,10 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
        end if
 
        !use_cg_kq = .False.; cg_kq = zero
-       call nscf%solve_kpt(spin, kq, istwfk_1, nband, cryst, dtset, dtfil, gs_hamkq, &
+       call nscf%solve_kpt(spin, kq, istwfk_1, nband, cryst, dtset, dtfil, gs_ham_kq, &
                            use_cg_kq, npw_kq, cg_kq, gsc_kq, eig_kq, msg, ierr)
 
-       !call nscf%solve_kpt(spin, kq, istwfk_1, nband, cryst, dtset, dtfil, gs_hamkq, &
+       !call nscf%solve_kpt(spin, kq, istwfk_1, nband, cryst, dtset, dtfil, gs_ham_kq, &
        !                    .True., npw_kq, cg_kq, gsc_kq, eig_kq, msg, ierr)
 
        ABI_WARNING_IF(ierr /= 0, msg)
@@ -513,6 +509,10 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
        ! Make sure all procs in pert_comm have the same wavefunctions at k+q
        call xmpi_bcast(cg_kq, master, pert_comm%value, ierr)
        if (psps%usepaw == 1) call xmpi_bcast(gsc_kq, master, pert_comm%value, ierr)
+
+       ! Get phonons for this q-point.
+       call ifc%fourq(cryst, qq, phfreqs, displ_cart, out_displ_red=displ_red)
+       phfreqs_eV = phfreqs * Ha_eV
 
        !if (my_ik == 1 .and. pert_comm%me == master) then
        if (my_ik == 1) then
@@ -543,17 +543,17 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
        end if
 
        ! Allocate vlocal1 with correct cplex. Note nvloc.
-       ABI_MALLOC(vlocal1, (cplex*n4, n5, n6, gs_hamkq%nvloc))
+       ABI_MALLOC(vlocal1, (cplex*n4, n5, n6, gs_ham_kq%nvloc))
 
 #if 1
        !===== Load the k/k+q dependent parts of the Hamiltonian
        ! Load k-dependent part in the Hamiltonian datastructure
-       call gs_hamkq%load_k(kpt_k=kk, npw_k=npw_k, istwf_k=istwfk_1, kg_k=kg_k, kpg_k=kpg_k, &
+       call gs_ham_kq%load_k(kpt_k=kk, npw_k=npw_k, istwf_k=istwfk_1, kg_k=kg_k, kpg_k=kpg_k, &
                             ph3d_k=ph3d_k, ffnl_k=ffnl_k, compute_ph3d=.false., compute_gbound=.true.)
 
        ! Load k+q-dependent part in the Hamiltonian datastructure
-       call gs_hamkq%load_kprime(kpt_kp=kq, npw_kp=npw_kq, istwf_kp=istwfk_1, kg_kp=kg_kq, kpg_kp=kpg_kq, &
-                                 ph3d_kp=ph3d_kq, ffnl_kp=ffnl_kq, compute_ph3d=.false., compute_gbound=.true.)
+       call gs_ham_kq%load_kprime(kpt_kp=kq, npw_kp=npw_kq, istwf_kp=istwfk_1, kg_kp=kg_kq, kpg_kp=kpg_kq, &
+                                  ph3d_kp=ph3d_kq, ffnl_kp=ffnl_kq, compute_ph3d=.false., compute_gbound=.true.)
 
        ! Loop over my atomic perturbations: apply H1_{kappa, alpha} and compute gkq_atm.
        gkq_atm = zero
@@ -561,13 +561,13 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
          idir = dvdb%my_pinfo(1, my_ip); ipert = dvdb%my_pinfo(2, my_ip); ipc = dvdb%my_pinfo(3, my_ip)
 
          ! Set up local potential vlocal1 with proper dimensioning from vtrial1 taking into account the spin.
-         call rf_transgrid_and_pack(spin, nspden, psps%usepaw, cplex, nfftf, nfft, ngfft, gs_hamkq%nvloc,&
+         call rf_transgrid_and_pack(spin, nspden, psps%usepaw, cplex, nfftf, nfft, ngfft, gs_ham_kq%nvloc,&
                                     pawfgr, nscf%mpi_enreg, nscf%vtrial, v1scf(:,:,:,my_ip), vlocal, vlocal1)
 
          ! Prepare application of the NL part.
-         call init_rf_hamiltonian(cplex, gs_hamkq, ipert, rf_hamkq, has_e1kbsc=.true.)
+         call init_rf_hamiltonian(cplex, gs_ham_kq, ipert, rf_ham_kq, has_e1kbsc=.true.)
 
-         call rf_hamkq%load_spin(spin, vlocal1=vlocal1, with_nonlocal=.true.)
+         call rf_ham_kq%load_spin(spin, vlocal1=vlocal1, with_nonlocal=.true.)
 
          ! Calculate dvscf * psi_k, results stored in h1kets_kq on the k+q sphere.
          ! Compute H(1) applied to GS wavefunction Psi(0)
@@ -578,11 +578,11 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
            eshift = eig0nk - dtset%dfpt_sciss
 
            call getgh1c(berryopt0, cg_k(:,:,band_n), cwaveprj0, h1kets_kq(:,:,in_k), &
-                        grad_berry, gs1c, gs_hamkq, gvnlx1, idir, ipert, eshift, nscf%mpi_enreg, optlocal, &
-                        optnl, opt_gvnlx1, rf_hamkq, sij_opt, tim_getgh1c, usevnl)
+                        grad_berry, gs1c, gs_ham_kq, gvnlx1, idir, ipert, eshift, nscf%mpi_enreg, optlocal, &
+                        optnl, opt_gvnlx1, rf_ham_kq, sij_opt, tim_getgh1c, usevnl)
          end do
 
-         call rf_hamkq%free()
+         call rf_ham_kq%free()
 
          ! Calculate <psi_{k+q,j}|dvscf_q*psi_{k,i}> for this perturbation. No need to handle istwf_kq because it's always 1.
 !$OMP PARALLEL DO COLLAPSE(2) PRIVATE(band_m)
@@ -622,7 +622,7 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
        ABI_FREE(cg_kq)
        ABI_FREE(gsc_kq)
        ABI_FREE(h1kets_kq)
-       call gs_hamkq%free()
+       call gs_ham_kq%free()
      end do ! my_iq
 
      ABI_FREE(ylm_k)
@@ -636,7 +636,7 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
      ABI_SFREE(eig_k)
      ABI_FREE(cg_k)
      ABI_FREE(gsc_k)
-     call gs_hamk%free()
+     call gs_ham_k%free()
    end do ! my_ik
  end do ! my_is
 
