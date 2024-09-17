@@ -115,7 +115,7 @@ subroutine tdep_calc_phi4fcoeff(CoeffMoore,Invar,proj,Shell4at,Sym,ucart)
   integer :: icoeff,isym,iatshell,itrans,counter
   integer :: mu,nu,xi,zeta,alpha,beta,gama,delta,iindex_l,iindex_h
   integer :: ncoeff_prev_l,ncoeff_prev_h
-  double precision :: temp,SSSS_tmp(81),proj_tmp(3)
+  double precision :: temp,SSSS_tmp(81),proj_tmp(81)
   double precision, allocatable :: SSSS_proj(:,:,:,:,:)
   type(Constraints_type) :: Const
 
