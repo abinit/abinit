@@ -1019,7 +1019,7 @@ subroutine complete_gamma_tr(crystal,ep_scalprod,nbranch,nqptirred,nqpt_full,nsp
              tmp_mat(:,:) = reshape(gkk_qpt_tmp(reim,itensor,:,isppol),(/nbranch,nbranch/))
              call DGEMM ('N','N',nbranch,nbranch,nbranch,one,ss_allatoms,nbranch,tmp_mat,nbranch,zero,tmp_mat2,nbranch)
              call DGEMM ('N','T',nbranch,nbranch,nbranch,one,tmp_mat2,nbranch,ss_allatoms,nbranch,zero,tmp_mat,nbranch)
-             gkk_qpt_tmp(reim,itensor,:,isppol) = reshape (tmp_mat, (nbranch*nbranch/))
+             gkk_qpt_tmp(reim,itensor,:,isppol) = reshape (tmp_mat, (/nbranch*nbranch/))
            enddo
          end do ! itensor
 
