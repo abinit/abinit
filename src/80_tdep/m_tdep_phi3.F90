@@ -127,6 +127,7 @@ subroutine tdep_calc_phi3fcoeff(CoeffMoore,Invar,proj,Shell3at,Sym,ucart)
   double precision :: temp
   double precision :: udiff_ki(3),udiff_ji(3)
   double precision, allocatable :: SSS_proj(:,:,:,:)
+  double precision :: SSS_tmp(27), proj_tmp(3)
   type(Constraints_type) :: Const
 
   ABI_MALLOC(Const%Sprod,(Sym%nsym,6))
@@ -177,8 +178,10 @@ subroutine tdep_calc_phi3fcoeff(CoeffMoore,Invar,proj,Shell3at,Sym,ucart)
         do mu=1,3
           do nu=1,3
             do xi=1,3
+              SSS_tmp(:)=Const%Sprod(isym,itrans)%SSS(mu,:,nu,xi)
               do icoeff=1,ncoeff
-                SSS_proj(mu,nu,xi,icoeff)=DDOT(27,Const%Sprod(isym,itrans)%SSS(mu,:,nu,xi),1,proj(:,icoeff,ishell),1)
+                proj_tmp(:)=proj(:,icoeff,ishell)
+                SSS_proj(mu,nu,xi,icoeff)=DDOT(27,SSS_tmp,1,proj_tmp,1)
               end do
             end do
           end do
