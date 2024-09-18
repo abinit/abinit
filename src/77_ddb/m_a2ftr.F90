@@ -157,7 +157,8 @@ subroutine mka2f_tr(crystal,ifc,elph_ds,ntemper,tempermin,temperinc,pair2red,elp
  real(dp),allocatable :: q00(:,:,:,:), q01(:,:,:,:),q11(:,:,:,:)
  real(dp),allocatable :: seebeck(:,:,:,:)!, rho_nm(:,:,:,:)
  real(dp),allocatable :: rho_T(:)
- real(dp),allocatable :: coskr(:,:), sinkr(:,:), coskr_tmp(:,:), sinkr_tmp(:,:)
+ real(dp),allocatable :: coskr(:,:), sinkr(:,:), coskr_tmp(:), sinkr_tmp(:)
+ real(dp),allocatable :: gam_rpt(:,:,:)
 
 ! *********************************************************************
 !calculate a2f_tr for frequencies between 0 and omega_max
