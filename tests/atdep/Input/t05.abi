@@ -21,6 +21,7 @@ use_ideal_positions 1
 dielec_constant 3
 born_charge 1.75 -1.75
 ngqpt1 6 6 6
+ngqpt2 12 12 12
 enunit 1
 TheEnd
  

@@ -334,11 +334,19 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
      if (dtsets(idtset)%usepaw==0) dtsets(idtset)%wfoptalg=0
      if (dtsets(idtset)%usepaw/=0) dtsets(idtset)%wfoptalg=10
      if ((optdriver==RUNL_GSTATE.or.optdriver==RUNL_GWLS).and.dtsets(idtset)%paral_kgb/=0) dtsets(idtset)%wfoptalg=114
+#ifndef HAVE_DFTI
      if (mod(dtsets(idtset)%wfoptalg,10)==4) then
        do iikpt=1,dtsets(idtset)%nkpt
          if (any(abs(dtsets(idtset)%kpt(:,iikpt))>tol8)) dtsets(idtset)%istwfk(iikpt)=1
        end do
      end if
+#else
+     if (mod(dtsets(idtset)%wfoptalg,10)==4.and.dtsets(idtset)%wfoptalg/=114) then
+       do iikpt=1,dtsets(idtset)%nkpt
+         if (any(abs(dtsets(idtset)%kpt(:,iikpt))>tol8)) dtsets(idtset)%istwfk(iikpt)=1
+       end do
+     end if
+#endif
    end if
 
    dtsets(idtset)%densfor_pred=2

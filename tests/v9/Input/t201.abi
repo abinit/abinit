@@ -26,6 +26,7 @@ nbdbuf4 -101
 tolwfr 1e-20
 tolvrs 1e-15
 
+istwfk *1
 ##### CONVERGENCE PARAMETERS
 ecut 4
 pawecutdg 8

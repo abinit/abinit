@@ -300,7 +300,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
    end if
  end if
  if (any(type_calc == [0, 2, 3])) then
-   local_gvnlxc = size(gvnlxc)==0
+   local_gvnlxc = size(gvnlxc)<=1
    if (local_gvnlxc) then
      if(gs_ham%gpu_option==ABI_GPU_KOKKOS) then
 #if defined HAVE_GPU && defined HAVE_YAKL
@@ -394,7 +394,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
    ndat_             = ndat
    istwf_k_          = gs_ham%istwf_k
    double_rfft_trick = istwf_k_==2.and.ndat>1.and.mpi_enreg%paral_kgb==1
-   ! double_rfft_trick could work for paral_kgb=0, but this generates an error in RMM-DIIS.
+   ! LB-08-2024 : double_rfft_trick works only for paral_kgb=1, but I don't know why...
    ! Note that the trick can be activated only if nspinortot=1 (if =2 then istwf_k=1), so gs_ham%nvloc=1 too
    if (double_rfft_trick) then
      if (mpi_enreg%nproc_fft>1) then
@@ -1325,14 +1325,14 @@ subroutine getghc_nucdip(cwavef,ghc_vectornd,gbound_k,istwf_k,kg_k,kpt,mgfft,mpi
 !Local variables-------------------------------
 !scalars
  integer,parameter :: tim_fourwf=1
- integer :: idat,idir,ipw,nspinortot,shift
+ integer :: icmplx,idat,idir,ipw,iv1,iv2,nspinortot,shift
  logical :: nspinor1TreatedByThisProc,nspinor2TreatedByThisProc
  real(dp) :: scale_conversion,weight=one
  !arrays
  real(dp),allocatable :: cwavef1(:,:),cwavef2(:,:)
  real(dp),allocatable :: gcwavef(:,:,:),gcwavef1(:,:,:),gcwavef2(:,:,:)
  real(dp),allocatable :: ghc1(:,:),ghc2(:,:),kgkpk(:,:)
- real(dp),allocatable :: work(:,:,:,:)
+ real(dp),allocatable :: dx(:),dy(:),work(:,:,:,:)
 
 ! *********************************************************************
 
@@ -1375,16 +1375,17 @@ subroutine getghc_nucdip(cwavef,ghc_vectornd,gbound_k,istwf_k,kg_k,kpt,mgfft,mpi
     ! make 2\pi(k+G)c(G)|G> by element-wise multiplication
     do idir = 1, 3
        do idat = 1, ndat
-          gcwavef(1,1+(idat-1)*npw_k:npw_k+(idat-1)*npw_k,idir) = &
-               & cwavef(1,1+(idat-1)*npw_k:npw_k+(idat-1)*npw_k)*kgkpk(1:npw_k,idir)
-          gcwavef(2,1+(idat-1)*npw_k:npw_k+(idat-1)*npw_k,idir) = &
-               & cwavef(2,1+(idat-1)*npw_k:npw_k+(idat-1)*npw_k)*kgkpk(1:npw_k,idir)
+          iv1=1+(idat-1)*npw_k; iv2=-1+iv1+npw_k
+          gcwavef(1,iv1:iv2,idir) = cwavef(1,iv1:iv2)*kgkpk(1:npw_k,idir)
+          gcwavef(2,iv1:iv2,idir) = cwavef(2,iv1:iv2)*kgkpk(1:npw_k,idir)
        end do
     end do
     ABI_FREE(kgkpk)
     gcwavef = gcwavef*two_pi
 
     !  STEP2: Compute sum of (grad components of vectornd)*(grad components of cwavef)
+    ABI_MALLOC(dx,(npw_k))
+    ABI_MALLOC(dy,(npw_k))
     do idir=1,3
       call fourwf(1,vectornd(:,:,:,:,idir),gcwavef(:,:,idir),ghc1,work,gbound_k,gbound_k,&
            istwf_k,kg_k,kg_k,mgfft,mpi_enreg,ndat,ngfft,npw_k,npw_k,n4,n5,n6,2,&
@@ -1393,12 +1394,17 @@ subroutine getghc_nucdip(cwavef,ghc_vectornd,gbound_k,istwf_k,kg_k,kpt,mgfft,mpi
        ! DAXPY is a BLAS routine for y -> A*x + y, here x = ghc1, A = scale_conversion, and y = ghc_vectornd
        ! should be faster than explicit loop over ipw as npw_k gets large
       do idat=1,ndat
-        call DAXPY(npw_k,scale_conversion,ghc1(1,1+(idat-1)*npw_k:npw_k+(idat-1)*npw_k),1,&
-             & ghc_vectornd(1,1+(idat-1)*npw_k:npw_k+(idat-1)*npw_k),1)
-        call DAXPY(npw_k,scale_conversion,ghc1(2,1+(idat-1)*npw_k:npw_k+(idat-1)*npw_k),1,&
-             & ghc_vectornd(2,1+(idat-1)*npw_k:npw_k+(idat-1)*npw_k),1)
+        iv1=1+(idat-1)*npw_k; iv2=-1+iv1+npw_k
+        do icmplx=1,2
+          dx=ghc1(icmplx,iv1:iv2)
+          dy=ghc_vectornd(icmplx,iv1:iv2)
+          call DAXPY(npw_k,scale_conversion,dx,1,dy,1)
+          ghc_vectornd(icmplx,iv1:iv2)=dy
+        end do
       end do
     end do ! idir
+    ABI_FREE(dx)
+    ABI_FREE(dy)
     ABI_FREE(gcwavef)
     ABI_FREE(ghc1)
 
@@ -1407,10 +1413,10 @@ subroutine getghc_nucdip(cwavef,ghc_vectornd,gbound_k,istwf_k,kg_k,kpt,mgfft,mpi
     ABI_MALLOC(cwavef1,(2,npw_k*ndat))
     ABI_MALLOC(cwavef2,(2,npw_k*ndat))
     do idat=1,ndat
-       do ipw=1,npw_k
-          cwavef1(1:2,ipw+(idat-1)*npw_k)=cwavef(1:2,ipw+(idat-1)*my_nspinor*npw_k)
-          cwavef2(1:2,ipw+(idat-1)*npw_k)=cwavef(1:2,ipw+(idat-1)*my_nspinor*npw_k+shift)
-       end do
+       iv1=1+(idat-1)*npw_k; iv2=-1+iv1+npw_k
+       cwavef1(1:2,iv1:iv2) = cwavef(1:2,1+(idat-1)*my_nspinor*npw_k:npw_k+(idat-1)*my_nspinor*npw_k)
+       cwavef2(1:2,iv1:iv2) = &
+         & cwavef(1:2,1+(idat-1)*my_nspinor*npw_k+shift:npw_k+(idat-1)*my_nspinor*npw_k+shift)
     end do
 
     ! compute k + G. Note these are in reduced coords
@@ -1430,16 +1436,17 @@ subroutine getghc_nucdip(cwavef,ghc_vectornd,gbound_k,istwf_k,kg_k,kpt,mgfft,mpi
        gcwavef1 = zero
        ! make 2\pi(k+G)c(G)|G> by element-wise multiplication
        do idir = 1, 3
-          do idat = 1, ndat
-             gcwavef1(1,1+(idat-1)*npw_k:npw_k+(idat-1)*npw_k,idir) = &
-                  & cwavef1(1,1+(idat-1)*npw_k:npw_k+(idat-1)*npw_k)*kgkpk(1:npw_k,idir)
-             gcwavef1(2,1+(idat-1)*npw_k:npw_k+(idat-1)*npw_k,idir) = &
-                  & cwavef1(2,1+(idat-1)*npw_k:npw_k+(idat-1)*npw_k)*kgkpk(1:npw_k,idir)
-          end do
+         do idat = 1, ndat
+           iv1=1+(idat-1)*npw_k; iv2=-1+iv1+npw_k
+           gcwavef1(1,iv1:iv2,idir) = cwavef1(1,iv1:iv2)*kgkpk(1:npw_k,idir)
+           gcwavef1(2,iv1:iv2,idir) = cwavef1(2,iv1:iv2)*kgkpk(1:npw_k,idir)
+         end do
        end do
        gcwavef1 = gcwavef1*two_pi
 
        !  STEP2: Compute sum of (grad components of vectornd)*(grad components of cwavef)
+       ABI_MALLOC(dx,(npw_k))
+       ABI_MALLOC(dy,(npw_k))
        do idir=1,3
           call fourwf(1,vectornd(:,:,:,:,idir),gcwavef1(:,:,idir),ghc1,work,gbound_k,gbound_k,&
                istwf_k,kg_k,kg_k,mgfft,mpi_enreg,ndat,ngfft,npw_k,npw_k,n4,n5,n6,2,&
@@ -1448,12 +1455,17 @@ subroutine getghc_nucdip(cwavef,ghc_vectornd,gbound_k,istwf_k,kg_k,kpt,mgfft,mpi
           ! DAXPY is a BLAS routine for y -> A*x + y, here x = ghc1, A = scale_conversion, and y = ghc_vectornd
           ! should be faster than explicit loop over ipw as npw_k gets large
           do idat=1,ndat
-             call DAXPY(npw_k,scale_conversion,ghc1(1,1+(idat-1)*npw_k:npw_k+(idat-1)*npw_k),1,&
-                  & ghc_vectornd(1,1+(idat-1)*npw_k:npw_k+(idat-1)*npw_k),1)
-             call DAXPY(npw_k,scale_conversion,ghc1(2,1+(idat-1)*npw_k:npw_k+(idat-1)*npw_k),1,&
-                  & ghc_vectornd(2,1+(idat-1)*npw_k:npw_k+(idat-1)*npw_k),1)
+            iv1=1+(idat-1)*npw_k; iv2=-1+iv1+npw_k
+            do icmplx=1,2
+              dx=ghc1(icmplx,iv1:iv2)
+              dy=ghc_vectornd(icmplx,iv1:iv2)
+              call DAXPY(npw_k,scale_conversion,dx,1,dy,1)
+              ghc_vectornd(icmplx,iv1:iv2)=dy
+            end do
           end do
        end do ! idir
+       ABI_FREE(dx)
+       ABI_FREE(dy)
        ABI_FREE(gcwavef1)
        ABI_FREE(ghc1)
 
@@ -1466,20 +1478,20 @@ subroutine getghc_nucdip(cwavef,ghc_vectornd,gbound_k,istwf_k,kg_k,kpt,mgfft,mpi
        !  Do it in 2 STEPs:
        !  STEP1: Compute grad of cwavef
        ABI_MALLOC(gcwavef2,(2,npw_k*ndat,3))
-
        gcwavef2 = zero
        ! make 2\pi(k+G)c(G)|G> by element-wise multiplication
        do idir = 1, 3
-          do idat = 1, ndat
-             gcwavef2(1,1+(idat-1)*npw_k:npw_k+(idat-1)*npw_k,idir) = &
-                  & cwavef2(1,1+(idat-1)*npw_k:npw_k+(idat-1)*npw_k)*kgkpk(1:npw_k,idir)
-             gcwavef2(2,1+(idat-1)*npw_k:npw_k+(idat-1)*npw_k,idir) = &
-                  & cwavef2(2,1+(idat-1)*npw_k:npw_k+(idat-1)*npw_k)*kgkpk(1:npw_k,idir)
+         do idat = 1, ndat
+           iv1=1+(idat-1)*npw_k; iv2=-1+iv1+npw_k
+           gcwavef2(1,iv1:iv2,idir) = cwavef2(1,iv1:iv2)*kgkpk(1:npw_k,idir)
+           gcwavef2(2,iv1:iv2,idir) = cwavef2(2,iv1:iv2)*kgkpk(1:npw_k,idir)
           end do
        end do
        gcwavef2 = gcwavef2*two_pi
 
        !  STEP2: Compute sum of (grad components of vectornd)*(grad components of cwavef)
+       ABI_MALLOC(dx,(npw_k))
+       ABI_MALLOC(dy,(npw_k))
        do idir=1,3
           call fourwf(1,vectornd(:,:,:,:,idir),gcwavef2(:,:,idir),ghc2,work,gbound_k,gbound_k,&
                istwf_k,kg_k,kg_k,mgfft,mpi_enreg,ndat,ngfft,npw_k,npw_k,n4,n5,n6,2,&
@@ -1488,12 +1500,17 @@ subroutine getghc_nucdip(cwavef,ghc_vectornd,gbound_k,istwf_k,kg_k,kpt,mgfft,mpi
           ! DAXPY is a BLAS routine for y -> A*x + y, here x = ghc1, A = scale_conversion, and y = ghc_vectornd
           ! should be faster than explicit loop over ipw as npw_k gets large
           do idat=1,ndat
-             call DAXPY(npw_k,scale_conversion,ghc2(1,1+(idat-1)*npw_k:npw_k+(idat-1)*npw_k),1,&
-                  & ghc_vectornd(1,1+(idat-1)*npw_k+shift:npw_k+(idat-1)*npw_k+shift),1)
-             call DAXPY(npw_k,scale_conversion,ghc2(2,1+(idat-1)*npw_k:npw_k+(idat-1)*npw_k),1,&
-                  & ghc_vectornd(2,1+(idat-1)*npw_k+shift:npw_k+(idat-1)*npw_k+shift),1)
+            iv1=1+(idat-1)*npw_k; iv2=-1+iv1+npw_k
+            do icmplx=1,2
+              dx=ghc2(icmplx,iv1:iv2)
+              dy=ghc_vectornd(icmplx,iv1+shift:iv2+shift)
+              call DAXPY(npw_k,scale_conversion,dx,1,dy,1)
+              ghc_vectornd(icmplx,iv1+shift:iv2+shift)=dy
+            end do
           end do
        end do ! idir
+       ABI_FREE(dx)
+       ABI_FREE(dy)
        ABI_FREE(gcwavef2)
        ABI_FREE(ghc2)
 
@@ -2047,9 +2064,7 @@ subroutine multithreaded_getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lamb
  integer :: firstband
  integer :: lastband
  integer :: spacedim, spacedim_prj
-#ifdef HAVE_OPENMP
- logical :: is_nested,fftw3_use_lib_threads_sav
-#endif
+ logical :: fftw3_use_lib_threads_sav
  integer :: select_k_default
 
  ! *************************************************************************
@@ -2063,26 +2078,28 @@ subroutine multithreaded_getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lamb
  ! Disabling multithreading for GPU variants (getghc_ompgpu is not thread-safe for now)
  !$omp parallel default (none) &
  !$omp& private(ithread,nthreads,chunk,firstband,lastband,residuchunk,firstelt,lastelt), &
- !$omp& private(firstprj,lastprj,is_nested,usegvnlxc,usegsc,fftw3_use_lib_threads_sav), &
+ !$omp& private(firstprj,lastprj,usegvnlxc,usegsc,fftw3_use_lib_threads_sav), &
  !$omp& shared(cwavef,ghc,gsc, gvnlxc,spacedim,spacedim_prj,ndat,kg_fft_k,kg_fft_kp,gs_ham,cwaveprj,mpi_enreg), &
  !$omp& shared(gemm_nonlop_use_gemm), &
  !$omp& firstprivate(cpopt,lambda,prtvol,sij_opt,tim_getghc,type_calc,select_k_default) &
  !$omp& IF(gs_ham%gpu_option==ABI_GPU_DISABLED .and. .not. gemm_nonlop_use_gemm)
  ithread = 0
  nthreads = 1
+ fftw3_use_lib_threads_sav = .false.
  if(gs_ham%gpu_option==ABI_GPU_DISABLED .and. .not. gemm_nonlop_use_gemm) then
 #ifdef HAVE_OPENMP
    ithread = omp_get_thread_num()
    nthreads = omp_get_num_threads()
-!   is_nested = omp_get_nested()
-   is_nested = .false.
-!   call omp_set_nested(.false.)
 !Ensure that libs are used without threads (mkl, openblas, fftw3, ...)
 #ifdef HAVE_LINALG_MKL_THREADS
    call mkl_set_num_threads(1)
 #endif
-#ifdef HAVE_LINALG_OPENBLAS_THREADS
-   call openblas_set_num_threads(1)
+!LB-23/07/24: OpenBLAS detects parallel sections automatically. To comment this line improves performances for some cases.
+!#ifdef HAVE_LINALG_OPENBLAS_THREADS
+!   call openblas_set_num_threads(1)
+!#endif
+#ifdef HAVE_LINALG_NVPL_THREADS
+   call nvpl_set_num_threads(1)
 #endif
 #ifdef HAVE_FFTW3_THREADS
    fftw3_use_lib_threads_sav=(.not.fftw3_spawn_threads_here(nthreads,nthreads))
@@ -2142,20 +2159,23 @@ subroutine multithreaded_getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lamb
  end if
  if(gs_ham%gpu_option==ABI_GPU_DISABLED .and. .not. gemm_nonlop_use_gemm) then
 #ifdef HAVE_OPENMP
-  ! call omp_set_nested(is_nested)
   !Restore libs behavior (mkl, openblas, fftw3, ...)
 #ifdef HAVE_LINALG_MKL_THREADS
    call mkl_set_num_threads(nthreads)
 #endif
-#ifdef HAVE_LINALG_OPENBLAS_THREADS
-   call openblas_set_num_threads(nthreads)
+!LB-23/07/24: OpenBLAS detects parallel sections automatically. To comment this line improves performances for some cases.
+!#ifdef HAVE_LINALG_OPENBLAS_THREADS
+!   call openblas_set_num_threads(nthreads)
+!#endif
+#ifdef HAVE_LINALG_NVPL_THREADS
+   call nvpl_set_num_threads(nthreads)
 #endif
 #ifdef HAVE_FFTW3_THREADS
    call fftw3_use_lib_threads(fftw3_use_lib_threads_sav)
 #endif
 #endif
  end if
-    !$omp end parallel
+!$omp end parallel
 
 end subroutine multithreaded_getghc
 !!***

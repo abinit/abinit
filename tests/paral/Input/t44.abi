@@ -1,4 +1,4 @@
-# parallel version of v9[208]
+# parallel version of v10[04]
 # AlP solid
 
 #ndtset 4
@@ -26,8 +26,6 @@ nbdbuf 2
 tolvrs 1.0D-20
 
 kptopt 3
-
-#istwfk *1
 
 # severely unconverged
 ngkpt 3*2 
@@ -65,6 +63,7 @@ pseudos="P.xml, Al.xml"
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
+#%% need_cpp_vars = HAVE_DFTI
 #%% [files]
 #%% files_to_test = 
 #%%   t44.abo, tolnlines=  0, tolabs=  0, tolrel= 0, fld_options = -ridiculous

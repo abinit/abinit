@@ -28,9 +28,7 @@ module m_crystal
  use m_xmpi
  use m_nctk
  use, intrinsic :: iso_c_binding
-#ifdef HAVE_NETCDF
  use netcdf
-#endif
 
  use m_io_tools,       only : file_exists
  use m_numeric_tools,  only : set2unit
@@ -223,6 +221,9 @@ module m_crystal
    procedure :: new_without_symmetries => crystal_without_symmetries
    ! Return new object without symmetries (actually nsym = 1 and identity operation)
 
+   procedure :: new_trinv_only => crystal_trinv_only
+   ! Return new object without only identity, inversion & TR symmetries (if present)
+
    procedure :: get_point_group => crystal_point_group
    ! Return the symmetries of the point group of the crystal.
 
@@ -408,6 +409,8 @@ subroutine crystal_init(amu,Cryst,space_group,natom,npsp,ntypat,nsym,rprimd,typa
 end subroutine crystal_init
 !!***
 
+!----------------------------------------------------------------------
+
 !!****f* m_crystal/crystal_without_symmetries
 !! NAME
 !!  crystal_without_symmetries
@@ -436,6 +439,47 @@ type(crystal_t) function crystal_without_symmetries(self) result(new)
   symrel=identity_3d, tnons=new_tnons, symafm=new_symafm)
 
 end function crystal_without_symmetries
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_crystal/crystal_trinv_only
+!! NAME
+!!  crystal_trinv_only
+!!
+!! FUNCTION
+! ! Return new crystal_t without only identity, inversion & TR symmetries (if present)
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SOURCE
+
+type(crystal_t) function crystal_trinv_only(self) result(new)
+
+!Arguments ------------------------------------
+ class(crystal_t), intent(in) :: self
+
+!Local variables-------------------------------
+ integer,parameter :: timrev2 = 2
+ real(dp),parameter :: new_tnons(3,2) = zero
+ integer :: inv_idx, new_symafm(2), new_symrel(3,3,2)
+! *************************************************************************
+
+ inv_idx = self%idx_spatial_inversion()
+ if (inv_idx == 0) then ! no spatial inversion
+   new = self%new_without_symmetries(); new%timrev = timrev2
+ else ! spatial inversion is present
+   new_symrel(:,:,1) = identity_3d; new_symrel(:,:,2) = self%symrel(:,:,inv_idx)
+   new_symafm(1) = 1; new_symafm(2) = self%symafm(inv_idx)
+
+   call crystal_init(self%amu, new, 2, self%natom, self%npsp, self%ntypat, 2, self%rprimd, self%typat, &
+     self%xred, self%zion, self%znucl, timrev2, .False., .False., self%title, &
+     symrel=new_symrel, tnons=new_tnons, symafm=new_symafm)
+ endif
+
+end function crystal_trinv_only
 !!***
 
 !----------------------------------------------------------------------
@@ -1477,8 +1521,6 @@ integer function crystal_ncwrite(cryst, ncid) result(ncerr)
 
 ! *************************************************************************
 
-#ifdef HAVE_NETCDF
-
  ! TODO alchemy not treated correctly by ETSF_IO specs.
  if (cryst%isalchemical()) then
    write(msg,"(3a)")&
@@ -1575,11 +1617,6 @@ integer function crystal_ncwrite(cryst, ncid) result(ncerr)
     NCF_CHECK(nf90_put_var(ncid, vid("use_antiferromagnetic_symmetries"), 0))
  end if
 
-
-#else
- ABI_ERROR("netcdf library not available")
-#endif
-
 contains
  integer function vid(vname)
    character(len=*),intent(in) :: vname
@@ -1614,11 +1651,8 @@ integer function crystal_ncwrite_path(crystal, path) result(ncerr)
  character(len=*),intent(in) :: path
  class(crystal_t),intent(in) :: crystal
 
-#ifdef HAVE_NETCDF
 !Local variables-------------------------------
-!scalars
  integer :: ncid
-
 ! *************************************************************************
 
  ncerr = nf90_noerr
@@ -1631,7 +1665,6 @@ integer function crystal_ncwrite_path(crystal, path) result(ncerr)
 
  NCF_CHECK(crystal_ncwrite(crystal, ncid))
  NCF_CHECK(nf90_close(ncid))
-#endif
 
 end function crystal_ncwrite_path
 !!***
@@ -1665,11 +1698,9 @@ subroutine crystal_ncread(cryst, ncid)
 !scalars
  integer :: use_antiferro
 
-#ifdef HAVE_NETCDF
-
 ! *************************************************************************
 
-   !NCF_CHECK(nf90_inq_varid(ncid, varname, varid))
+ !NCF_CHECK(nf90_inq_varid(ncid, varname, varid))
 
  ! ---------------
  ! Read dimensions
@@ -1724,10 +1755,6 @@ subroutine crystal_ncread(cryst, ncid)
  call Cryst%compute_geometry()
  call Cryst%index_atoms()
  call Cryst%compute_sym()
-
-#else
- ABI_ERROR("netcdf library not available")
-#endif
 
 end subroutine crystal_ncread
 !!***
