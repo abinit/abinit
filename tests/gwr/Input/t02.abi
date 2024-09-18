@@ -140,7 +140,7 @@ pseudos "Pseudodojo_nc_sr_04_pbe_standard_psp8/Si.psp8"
 #%% max_nprocs = 12
 #%% [extra_info]
 #%% authors = M. Giantomassi
-#%% keywords = NC, GWR, MINIMAL
+#%% keywords = NC, GWR
 #%% description =
 #%%  Crystalline silicon
 #%%  Calculation of the GW corrections with GWR code.

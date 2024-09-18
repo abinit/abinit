@@ -424,6 +424,9 @@
 /* Define to 1 if your MPI library supports MPI_TYPE_CREATE_STRUCT. */
 #cmakedefine HAVE_MPI_TYPE_CREATE_STRUCT @HAVE_MPI_TYPE_CREATE_STRUCT@
 
+/* Define to 1 if your MPI library has buggy interfaces (mishandling scalars). */
+#cmakedefine HAVE_MPI_BUGGY_INTERFACES @HAVE_MPI_BUGGY_INTERFACES@
+
 /* Define to 1 if you want to activate possibility to call python scripts
    externally by invoking a python interpreter. */
 #cmakedefine HAVE_PYTHON_INVOCATION @HAVE_PYTHON_INVOCATION@

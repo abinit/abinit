@@ -1,31 +1,16 @@
-# parallel version of v10[10]
+# parallel version of v9[208]
 # AlP solid
 
-ndtset 6
-#ndtset 3
-#jdtset 2 3 4
+#ndtset 4
+ndtset 3
+jdtset 2 3 4
 
-npkpt  2
-npband 2
+npband 4
 
-cprj_in_memory1 0
-cprj_in_memory2 1
-cprj_in_memory3 0
-cprj_in_memory4 1
-
-cprj_in_memory5 1
-cprj_in_memory6 1
-
-wfoptalg1 114
-wfoptalg2 114
-wfoptalg3 111
+wfoptalg1   0
+wfoptalg2  14
+wfoptalg3 114
 wfoptalg4 111
-
-wfoptalg5 111
-wfoptalg6 111
-
-nblock_lobpcg1 4
-nblock_lobpcg2 4
 
 # unconverged
 ecut 5
@@ -42,20 +27,12 @@ tolvrs 1.0D-20
 
 kptopt 3
 
+#istwfk *1
+
 # severely unconverged
 ngkpt 3*2 
 nshiftk 1
 shiftk 3*0
-
-istwfk *1
-
-optforces 1
-optstress 1
-
-optforces5 2
-
-optforces6 2
-optstress6 0
 
 prtwf 0
 prteig 0
@@ -88,6 +65,7 @@ pseudos="P.xml, Al.xml"
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
+#%% need_cpp_vars = !HAVE_DFTI
 #%% [files]
 #%% files_to_test = 
 #%%   t46.abo, tolnlines=  0, tolabs=  0, tolrel= 0, fld_options = -ridiculous
@@ -96,10 +74,9 @@ pseudos="P.xml, Al.xml"
 #%% max_nprocs = 4
 #%% [NCPU_4]
 #%% files_to_test = 
-#%%   t46_MPI4.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -ridiculous
+#%%   t46_MPI4.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -ridiculous;
 #%% [extra_info]
 #%% authors = L. Baguet
-#%% keywords = PAW,CPRJ
-#%% description = Compare cprj_in_memory=1 with cprj_in_memory=0 (lobpcg2 and chebfi2). PAW,istwfk=1,npkpt=2,npband=2
+#%% keywords = PAW
+#%% description = Same as v9[208] but with npband=4. Compare chebfi2 with respect to other algorithms (istwfk>1).
 #%%<END TEST_INFO>
- 

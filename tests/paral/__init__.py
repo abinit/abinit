@@ -34,12 +34,14 @@ inp_files = [
 "t30.abi",
 "t31.abi",
 "t32.abi",
+"t39.abi", # test cprj_in_memory=1 (PAW,istwfk=1,npkpt>1)
+"t40.abi", # test cprj_in_memory=1 (PAW,nspinor=2)
 "t41.abi",
 "t43.abi", # test chebfi2 (paw+soc)
-"t44.abi", # test chebfi2 (istwfk>1,paw)
-"t45.abi", # test chebfi2 (istwfk>1,norm conserving)
-"t46.abi", # test cprj_in_memory=1 (PAW,istwfk=1,npkpt>1)
-"t47.abi", # test cprj_in_memory=1 (PAW,nspinor=2)
+"t44.abi", # test chebfi2 (istwfk>1,paw,DFTI)
+"t45.abi", # test chebfi2 (istwfk>1,norm conserving,DFTI)
+"t46.abi", # test chebfi2 (istwfk>1,paw,not DFTI)
+"t47.abi", # test chebfi2 (istwfk>1,norm conserving,not DFTI)
 "t48.abi", # test cprj_in_memory=1 (PAW,istwfk>1)
 "t49.abi", # test cprj_in_memory=1 (NC,istwfk>1)
 #"t50.abi", # test cprj_in_memory=1 (NC,nspinor=2) ! not working yet

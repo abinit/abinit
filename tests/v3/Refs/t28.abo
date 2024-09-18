@@ -1,6 +1,6 @@
 
-.Version 10.1.2.3 of ABINIT, released Apr 2024.
-.(MPI version, prepared for a x86_64_linux_intel2021.10 computer) 
+.Version 10.1.4.5 of ABINIT, released Sep 2024.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2024 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,14 +14,14 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 31 May 2024.
-- ( at 15h42 )
+.Starting date : Fri 13 Sep 2024.
+- ( at 19h08 )
   
-- input  file    -> /media/jzwanzig/jzwanzig/abinit/abinit-develop/tmp-build/tests/Test_suite/v3_t28/t28.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v3_t28/t28.abi
 - output file    -> t28.abo
 - root for input  files -> t28i
 - root for output files -> t28o
- 
+
  DATASET    1 : space group P3 (#143); Bravais hP (primitive hexag.)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  1.
@@ -37,7 +37,7 @@ P This job should need less than                       0.674 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
- 
+
  DATASET    2 : space group P3_1 (#144); Bravais hP (primitive hexag.)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  2.
@@ -53,7 +53,7 @@ P This job should need less than                       0.674 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
- 
+
  DATASET    3 : space group P3_2 (#145); Bravais hP (primitive hexag.)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  3.
@@ -69,7 +69,7 @@ P This job should need less than                       0.674 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
- 
+
  DATASET    4 : space group R3 (#146); Bravais hR (rhombohedral)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  4.
@@ -85,7 +85,7 @@ P This job should need less than                       0.639 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
 ================================================================================
- 
+
  DATASET    5 : space group P-3 (#147); Bravais hP (primitive hexag.)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  5.
@@ -101,7 +101,7 @@ P This job should need less than                       0.749 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
- 
+
  DATASET    6 : space group R-3 (#148); Bravais hR (rhombohedral)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  6.
@@ -117,7 +117,7 @@ P This job should need less than                       0.712 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.005 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
 ================================================================================
- 
+
  DATASET    7 : space group P3 1 2 (#149); Bravais hP (primitive hexag.)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  7.
@@ -133,7 +133,7 @@ P This job should need less than                       0.749 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
- 
+
  DATASET    8 : space group P3 2 1 (#150); Bravais hP (primitive hexag.)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  8.
@@ -149,7 +149,7 @@ P This job should need less than                       0.749 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
- 
+
  DATASET    9 : space group P3_1 1 2 (#151); Bravais hP (primitive hexag.)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  9.
@@ -165,7 +165,7 @@ P This job should need less than                       0.749 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
- 
+
  DATASET   10 : space group P3_1 2 1 (#152); Bravais hP (primitive hexag.)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 10.
@@ -181,7 +181,7 @@ P This job should need less than                       0.749 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
- 
+
  DATASET   11 : space group P3_2 1 2 (#153); Bravais hP (primitive hexag.)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 11.
@@ -197,7 +197,7 @@ P This job should need less than                       0.749 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
- 
+
  DATASET   12 : space group P3_2 2 1 (#154); Bravais hP (primitive hexag.)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 12.
@@ -213,7 +213,7 @@ P This job should need less than                       0.749 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
- 
+
  DATASET   13 : space group R3 2 (#155); Bravais hR (rhombohedral)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 13.
@@ -229,7 +229,7 @@ P This job should need less than                       0.712 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.005 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
 ================================================================================
- 
+
  DATASET   14 : space group P3 m 1 (#156); Bravais hP (primitive hexag.)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 14.
@@ -245,7 +245,7 @@ P This job should need less than                       0.749 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
- 
+
  DATASET   15 : space group P3 1 m (#157); Bravais hP (primitive hexag.)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 15.
@@ -261,7 +261,7 @@ P This job should need less than                       0.749 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
- 
+
  DATASET   16 : space group P3 c 1 (#158); Bravais hP (primitive hexag.)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 16.
@@ -277,7 +277,7 @@ P This job should need less than                       0.749 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
- 
+
  DATASET   17 : space group P3 1 c (#159); Bravais hP (primitive hexag.)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 17.
@@ -293,7 +293,7 @@ P This job should need less than                       0.749 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
- 
+
  DATASET   18 : space group R3 m (#160); Bravais hR (rhombohedral)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 18.
@@ -309,7 +309,7 @@ P This job should need less than                       0.712 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.005 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
 ================================================================================
- 
+
  DATASET   19 : space group R3 c (#161); Bravais hR (rhombohedral)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 19.
@@ -325,7 +325,7 @@ P This job should need less than                       0.712 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.005 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
 ================================================================================
- 
+
  DATASET   20 : space group P-3 1 m (#162); Bravais hP (primitive hexag.)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 20.
@@ -341,7 +341,7 @@ P This job should need less than                       0.918 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
- 
+
  DATASET   21 : space group P-3 1 c (#163); Bravais hP (primitive hexag.)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 21.
@@ -357,7 +357,7 @@ P This job should need less than                       0.918 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
- 
+
  DATASET   22 : space group P-3 m 1 (#164); Bravais hP (primitive hexag.)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 22.
@@ -373,7 +373,7 @@ P This job should need less than                       0.918 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
- 
+
  DATASET   23 : space group P-3 c 1 (#165); Bravais hP (primitive hexag.)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 23.
@@ -389,7 +389,7 @@ P This job should need less than                       0.918 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
- 
+
  DATASET   24 : space group R-3 m (#166); Bravais hR (rhombohedral)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 24.
@@ -405,7 +405,7 @@ P This job should need less than                       0.878 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.007 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
 ================================================================================
- 
+
  DATASET   25 : space group R-3 c (#167); Bravais hR (rhombohedral)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 25.
@@ -421,7 +421,7 @@ P This job should need less than                       0.878 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.007 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
 ================================================================================
- 
+
  DATASET   26 : space group P6 (#168); Bravais hP (primitive hexag.)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 26.
@@ -437,7 +437,7 @@ P This job should need less than                       0.749 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
- 
+
  DATASET   27 : space group P6_1 (#169); Bravais hP (primitive hexag.)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 27.
@@ -453,7 +453,7 @@ P This job should need less than                       0.749 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
- 
+
  DATASET   28 : space group P6_5 (#170); Bravais hP (primitive hexag.)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 28.
@@ -469,7 +469,7 @@ P This job should need less than                       0.749 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
- 
+
  DATASET   29 : space group P6_2 (#171); Bravais hP (primitive hexag.)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 29.
@@ -485,7 +485,7 @@ P This job should need less than                       0.749 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
- 
+
  DATASET   30 : space group P6_4 (#172); Bravais hP (primitive hexag.)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 30.
@@ -501,7 +501,7 @@ P This job should need less than                       0.749 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
- 
+
  DATASET   31 : space group P6_3 (#173); Bravais hP (primitive hexag.)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 31.
@@ -517,7 +517,7 @@ P This job should need less than                       0.749 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
- 
+
  DATASET   32 : space group P-6 (#174); Bravais hP (primitive hexag.)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 32.
@@ -533,7 +533,7 @@ P This job should need less than                       0.749 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
- 
+
  DATASET   33 : space group P6/m (#175); Bravais hP (primitive hexag.)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 33.
@@ -549,7 +549,7 @@ P This job should need less than                       0.918 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
- 
+
  DATASET   34 : space group P6_3/m (#176); Bravais hP (primitive hexag.)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 34.
@@ -565,7 +565,7 @@ P This job should need less than                       0.918 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
- 
+
  DATASET   35 : space group P6 2 2 (#177); Bravais hP (primitive hexag.)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 35.
@@ -581,7 +581,7 @@ P This job should need less than                       0.918 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
- 
+
  DATASET   36 : space group P6_1 2 2 (#178); Bravais hP (primitive hexag.)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 36.
@@ -597,7 +597,7 @@ P This job should need less than                       0.918 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
- 
+
  DATASET   37 : space group P6_5 2 2 (#179); Bravais hP (primitive hexag.)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 37.
@@ -613,7 +613,7 @@ P This job should need less than                       0.918 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
- 
+
  DATASET   38 : space group P6_2 2 2 (#180); Bravais hP (primitive hexag.)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 38.
@@ -629,7 +629,7 @@ P This job should need less than                       0.918 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
- 
+
  DATASET   39 : space group P6_4 2 2 (#181); Bravais hP (primitive hexag.)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 39.
@@ -645,7 +645,7 @@ P This job should need less than                       0.918 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
- 
+
  DATASET   40 : space group P6_3 2 2 (#182); Bravais hP (primitive hexag.)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 40.
@@ -661,7 +661,7 @@ P This job should need less than                       0.918 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
- 
+
  DATASET   41 : space group P6 m m (#183); Bravais hP (primitive hexag.)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 41.
@@ -677,7 +677,7 @@ P This job should need less than                       0.918 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
- 
+
  DATASET   42 : space group P6 c c (#184); Bravais hP (primitive hexag.)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 42.
@@ -693,7 +693,7 @@ P This job should need less than                       0.918 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
- 
+
  DATASET   43 : space group P6_3 c m (#185); Bravais hP (primitive hexag.)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 43.
@@ -709,7 +709,7 @@ P This job should need less than                       0.918 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
- 
+
  DATASET   44 : space group P6_3 m c (#186); Bravais hP (primitive hexag.)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 44.
@@ -725,7 +725,7 @@ P This job should need less than                       0.918 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
- 
+
  DATASET   45 : space group P-6 m 2 (#187); Bravais hP (primitive hexag.)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 45.
@@ -741,7 +741,7 @@ P This job should need less than                       0.918 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
- 
+
  DATASET   46 : space group P-6 c 2 (#188); Bravais hP (primitive hexag.)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 46.
@@ -757,7 +757,7 @@ P This job should need less than                       0.918 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
- 
+
  DATASET   47 : space group P-6 2 m (#189); Bravais hP (primitive hexag.)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 47.
@@ -773,7 +773,7 @@ P This job should need less than                       0.918 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
- 
+
  DATASET   48 : space group P-6 2 c (#190); Bravais hP (primitive hexag.)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 48.
@@ -789,7 +789,7 @@ P This job should need less than                       0.918 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
- 
+
  DATASET   49 : space group P6/m m m (#191); Bravais hP (primitive hexag.)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 49.
@@ -805,7 +805,7 @@ P This job should need less than                       1.337 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.010 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
- 
+
  DATASET   50 : space group P6/m c c (#192); Bravais hP (primitive hexag.)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 50.
@@ -821,7 +821,7 @@ P This job should need less than                       1.337 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.010 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
- 
+
  DATASET   51 : space group P6_3/m c m (#193); Bravais hP (primitive hexag.)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 51.
@@ -837,7 +837,7 @@ P This job should need less than                       1.337 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.010 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
- 
+
  DATASET   52 : space group P6_3/m m c (#194); Bravais hP (primitive hexag.)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 52.
@@ -853,15 +853,15 @@ P This job should need less than                       1.337 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.010 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
- 
+
 --------------------------------------------------------------------------------
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
 -
-- outvars: echo of selected default values                                      
--   iomode0 =  3 , fftalg0 =512 , wfoptalg0 =  0
+- outvars: echo of selected default values
+-   iomode0 =  0 , fftalg0 =512 , wfoptalg0 =  0
 -
-- outvars: echo of global parameters not present in the input file              
+- outvars: echo of global parameters not present in the input file
 -  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
@@ -1868,11 +1868,11 @@ P           mkmem           1
             tnons4     0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
                        0.0000000  0.0000000  0.0000000
             tnons5     0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
-                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
-                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000    -0.0000000 -0.0000000 -0.0000000
+                      -0.0000000 -0.0000000 -0.0000000    -0.0000000 -0.0000000 -0.0000000
             tnons6     0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
-                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
-                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000    -0.0000000 -0.0000000 -0.0000000
+                      -0.0000000 -0.0000000 -0.0000000    -0.0000000 -0.0000000 -0.0000000
             tnons7     0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
                        0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
                        0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
@@ -1915,38 +1915,38 @@ P           mkmem           1
             tnons20    0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
                        0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
                        0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
-                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
-                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
-                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+                      -0.0000000 -0.0000000 -0.0000000    -0.0000000 -0.0000000 -0.0000000
+                      -0.0000000 -0.0000000 -0.0000000    -0.0000000 -0.0000000 -0.0000000
+                      -0.0000000 -0.0000000 -0.0000000    -0.0000000 -0.0000000 -0.0000000
             tnons21    0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
                        0.0000000  0.0000000  0.5000000     0.0000000  0.0000000  0.0000000
                        0.0000000  0.0000000  0.5000000     0.0000000  0.0000000  0.5000000
-                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
-                       0.0000000  0.0000000  0.5000000     0.0000000  0.0000000  0.0000000
-                       0.0000000  0.0000000  0.5000000     0.0000000  0.0000000  0.5000000
+                      -0.0000000 -0.0000000 -0.0000000    -0.0000000 -0.0000000 -0.0000000
+                      -0.0000000 -0.0000000  0.5000000    -0.0000000 -0.0000000 -0.0000000
+                      -0.0000000 -0.0000000  0.5000000    -0.0000000 -0.0000000  0.5000000
             tnons22    0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
                        0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
                        0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
-                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
-                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
-                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+                      -0.0000000 -0.0000000 -0.0000000    -0.0000000 -0.0000000 -0.0000000
+                      -0.0000000 -0.0000000 -0.0000000    -0.0000000 -0.0000000 -0.0000000
+                      -0.0000000 -0.0000000 -0.0000000    -0.0000000 -0.0000000 -0.0000000
             tnons23    0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
                        0.0000000  0.0000000  0.5000000     0.0000000  0.0000000  0.0000000
                        0.0000000  0.0000000  0.5000000     0.0000000  0.0000000  0.5000000
-                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
-                       0.0000000  0.0000000  0.5000000     0.0000000  0.0000000  0.0000000
-                       0.0000000  0.0000000  0.5000000     0.0000000  0.0000000  0.5000000
+                      -0.0000000 -0.0000000 -0.0000000    -0.0000000 -0.0000000 -0.0000000
+                      -0.0000000 -0.0000000  0.5000000    -0.0000000 -0.0000000 -0.0000000
+                      -0.0000000 -0.0000000  0.5000000    -0.0000000 -0.0000000  0.5000000
             tnons24    0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
                        0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
                        0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
-                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
-                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
-                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+                      -0.0000000 -0.0000000 -0.0000000    -0.0000000 -0.0000000 -0.0000000
+                      -0.0000000 -0.0000000 -0.0000000    -0.0000000 -0.0000000 -0.0000000
+                      -0.0000000 -0.0000000 -0.0000000    -0.0000000 -0.0000000 -0.0000000
             tnons25    0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
                        0.0000000  0.0000000  0.0000000     0.5000000  0.5000000  0.5000000
                        0.5000000  0.5000000  0.5000000     0.5000000  0.5000000  0.5000000
-                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
-                       0.0000000  0.0000000  0.0000000     0.5000000  0.5000000  0.5000000
+                      -0.0000000 -0.0000000 -0.0000000    -0.0000000 -0.0000000 -0.0000000
+                      -0.0000000 -0.0000000 -0.0000000     0.5000000  0.5000000  0.5000000
                        0.5000000  0.5000000  0.5000000     0.5000000  0.5000000  0.5000000
             tnons26    0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
                        0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
@@ -1972,15 +1972,15 @@ P           mkmem           1
             tnons33    0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
                        0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
                        0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
-                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
-                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
-                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+                      -0.0000000 -0.0000000 -0.0000000    -0.0000000 -0.0000000 -0.0000000
+                      -0.0000000 -0.0000000 -0.0000000    -0.0000000 -0.0000000 -0.0000000
+                      -0.0000000 -0.0000000 -0.0000000    -0.0000000 -0.0000000 -0.0000000
             tnons34    0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.5000000
                        0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.5000000
                        0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.5000000
-                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.5000000
-                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.5000000
-                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.5000000
+                      -0.0000000 -0.0000000 -0.0000000    -0.0000000 -0.0000000  0.5000000
+                      -0.0000000 -0.0000000 -0.0000000    -0.0000000 -0.0000000  0.5000000
+                      -0.0000000 -0.0000000 -0.0000000    -0.0000000 -0.0000000  0.5000000
             tnons35    0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
                        0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
                        0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
@@ -2071,48 +2071,48 @@ P           mkmem           1
                        0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
                        0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
                        0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
-                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
-                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
-                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
-                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
-                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
-                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+                      -0.0000000 -0.0000000 -0.0000000    -0.0000000 -0.0000000 -0.0000000
+                      -0.0000000 -0.0000000 -0.0000000    -0.0000000 -0.0000000 -0.0000000
+                      -0.0000000 -0.0000000 -0.0000000    -0.0000000 -0.0000000 -0.0000000
+                      -0.0000000 -0.0000000 -0.0000000    -0.0000000 -0.0000000 -0.0000000
+                      -0.0000000 -0.0000000 -0.0000000    -0.0000000 -0.0000000 -0.0000000
+                      -0.0000000 -0.0000000 -0.0000000    -0.0000000 -0.0000000 -0.0000000
             tnons50    0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
                        0.0000000  0.0000000  0.5000000     0.0000000  0.0000000  0.0000000
                        0.0000000  0.0000000  0.5000000     0.0000000  0.0000000  0.5000000
                        0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.5000000
                        0.0000000  0.0000000  0.5000000     0.0000000  0.0000000  0.0000000
                        0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.5000000
-                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
-                       0.0000000  0.0000000  0.5000000     0.0000000  0.0000000  0.0000000
-                       0.0000000  0.0000000  0.5000000     0.0000000  0.0000000  0.5000000
-                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.5000000
-                       0.0000000  0.0000000  0.5000000     0.0000000  0.0000000  0.0000000
-                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.5000000
+                      -0.0000000 -0.0000000 -0.0000000    -0.0000000 -0.0000000 -0.0000000
+                      -0.0000000 -0.0000000  0.5000000    -0.0000000 -0.0000000 -0.0000000
+                      -0.0000000 -0.0000000  0.5000000    -0.0000000 -0.0000000  0.5000000
+                      -0.0000000 -0.0000000 -0.0000000    -0.0000000 -0.0000000  0.5000000
+                      -0.0000000 -0.0000000  0.5000000    -0.0000000 -0.0000000 -0.0000000
+                      -0.0000000 -0.0000000 -0.0000000    -0.0000000 -0.0000000  0.5000000
             tnons51    0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.5000000
                        0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
                        0.0000000  0.0000000  0.5000000     0.0000000  0.0000000  0.5000000
                        0.0000000  0.0000000  0.5000000     0.0000000  0.0000000  0.0000000
                        0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.5000000
                        0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.5000000
-                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.5000000
-                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
-                       0.0000000  0.0000000  0.5000000     0.0000000  0.0000000  0.5000000
-                       0.0000000  0.0000000  0.5000000     0.0000000  0.0000000  0.0000000
-                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.5000000
-                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.5000000
+                      -0.0000000 -0.0000000 -0.0000000    -0.0000000 -0.0000000  0.5000000
+                      -0.0000000 -0.0000000 -0.0000000    -0.0000000 -0.0000000 -0.0000000
+                      -0.0000000 -0.0000000  0.5000000    -0.0000000 -0.0000000  0.5000000
+                      -0.0000000 -0.0000000  0.5000000    -0.0000000 -0.0000000 -0.0000000
+                      -0.0000000 -0.0000000 -0.0000000    -0.0000000 -0.0000000  0.5000000
+                      -0.0000000 -0.0000000 -0.0000000    -0.0000000 -0.0000000  0.5000000
             tnons52    0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.5000000
                        0.0000000  0.0000000  0.5000000     0.0000000  0.0000000  0.0000000
                        0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
                        0.0000000  0.0000000  0.5000000     0.0000000  0.0000000  0.5000000
                        0.0000000  0.0000000  0.5000000     0.0000000  0.0000000  0.5000000
                        0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
-                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.5000000
-                       0.0000000  0.0000000  0.5000000     0.0000000  0.0000000  0.0000000
-                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
-                       0.0000000  0.0000000  0.5000000     0.0000000  0.0000000  0.5000000
-                       0.0000000  0.0000000  0.5000000     0.0000000  0.0000000  0.5000000
-                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+                      -0.0000000 -0.0000000 -0.0000000    -0.0000000 -0.0000000  0.5000000
+                      -0.0000000 -0.0000000  0.5000000    -0.0000000 -0.0000000 -0.0000000
+                      -0.0000000 -0.0000000 -0.0000000    -0.0000000 -0.0000000 -0.0000000
+                      -0.0000000 -0.0000000  0.5000000    -0.0000000 -0.0000000  0.5000000
+                      -0.0000000 -0.0000000  0.5000000    -0.0000000 -0.0000000  0.5000000
+                      -0.0000000 -0.0000000 -0.0000000    -0.0000000 -0.0000000 -0.0000000
            toldfe      1.00000000E-06 Hartree
             typat1     1  1  1  1  1  1  1  1  1
             typat2     1  1  1  1  1  1  1  1  1
@@ -6737,136 +6737,131 @@ P           mkmem           1
                        4.6700000000E-01  7.3400000000E-01  3.4000000000E-01
                        8.2400000000E-01  4.4000000000E-01  6.8585000000E-01
             znucl        1.00000
- 
+
 ================================================================================
- 
+
  chkinp: Checking input parameters for consistency, jdtset=   1.
- 
+
  chkinp: Checking input parameters for consistency, jdtset=   2.
- 
+
  chkinp: Checking input parameters for consistency, jdtset=   3.
- 
+
  chkinp: Checking input parameters for consistency, jdtset=   4.
- 
+
  chkinp: Checking input parameters for consistency, jdtset=   5.
- 
+
  chkinp: Checking input parameters for consistency, jdtset=   6.
- 
+
  chkinp: Checking input parameters for consistency, jdtset=   7.
- 
+
  chkinp: Checking input parameters for consistency, jdtset=   8.
- 
+
  chkinp: Checking input parameters for consistency, jdtset=   9.
- 
+
  chkinp: Checking input parameters for consistency, jdtset=  10.
- 
+
  chkinp: Checking input parameters for consistency, jdtset=  11.
- 
+
  chkinp: Checking input parameters for consistency, jdtset=  12.
- 
+
  chkinp: Checking input parameters for consistency, jdtset=  13.
- 
+
  chkinp: Checking input parameters for consistency, jdtset=  14.
- 
+
  chkinp: Checking input parameters for consistency, jdtset=  15.
- 
+
  chkinp: Checking input parameters for consistency, jdtset=  16.
- 
+
  chkinp: Checking input parameters for consistency, jdtset=  17.
- 
+
  chkinp: Checking input parameters for consistency, jdtset=  18.
- 
+
  chkinp: Checking input parameters for consistency, jdtset=  19.
- 
+
  chkinp: Checking input parameters for consistency, jdtset=  20.
- 
+
  chkinp: Checking input parameters for consistency, jdtset=  21.
- 
+
  chkinp: Checking input parameters for consistency, jdtset=  22.
- 
+
  chkinp: Checking input parameters for consistency, jdtset=  23.
- 
+
  chkinp: Checking input parameters for consistency, jdtset=  24.
- 
+
  chkinp: Checking input parameters for consistency, jdtset=  25.
- 
+
  chkinp: Checking input parameters for consistency, jdtset=  26.
- 
+
  chkinp: Checking input parameters for consistency, jdtset=  27.
- 
+
  chkinp: Checking input parameters for consistency, jdtset=  28.
- 
+
  chkinp: Checking input parameters for consistency, jdtset=  29.
- 
+
  chkinp: Checking input parameters for consistency, jdtset=  30.
- 
+
  chkinp: Checking input parameters for consistency, jdtset=  31.
- 
+
  chkinp: Checking input parameters for consistency, jdtset=  32.
- 
+
  chkinp: Checking input parameters for consistency, jdtset=  33.
- 
+
  chkinp: Checking input parameters for consistency, jdtset=  34.
- 
+
  chkinp: Checking input parameters for consistency, jdtset=  35.
- 
+
  chkinp: Checking input parameters for consistency, jdtset=  36.
- 
+
  chkinp: Checking input parameters for consistency, jdtset=  37.
- 
+
  chkinp: Checking input parameters for consistency, jdtset=  38.
- 
+
  chkinp: Checking input parameters for consistency, jdtset=  39.
- 
+
  chkinp: Checking input parameters for consistency, jdtset=  40.
- 
+
  chkinp: Checking input parameters for consistency, jdtset=  41.
- 
+
  chkinp: Checking input parameters for consistency, jdtset=  42.
- 
+
  chkinp: Checking input parameters for consistency, jdtset=  43.
- 
+
  chkinp: Checking input parameters for consistency, jdtset=  44.
- 
+
  chkinp: Checking input parameters for consistency, jdtset=  45.
- 
+
  chkinp: Checking input parameters for consistency, jdtset=  46.
- 
+
  chkinp: Checking input parameters for consistency, jdtset=  47.
- 
+
  chkinp: Checking input parameters for consistency, jdtset=  48.
- 
+
  chkinp: Checking input parameters for consistency, jdtset=  49.
- 
+
  chkinp: Checking input parameters for consistency, jdtset=  50.
- 
+
  chkinp: Checking input parameters for consistency, jdtset=  51.
- 
+
  chkinp: Checking input parameters for consistency, jdtset=  52.
- 
+
  abinit : before driver, prtvol=-1, debugging mode => will skip driver
- 
+
 == END DATASET(S) ==============================================================
 ================================================================================
- 
+
  abinit : before driver, prtvol=-1, debugging mode => will skip outvars
 
 
 - Timing analysis has been suppressed with timopt=0
 
 
- 
+
  abinit : before driver, prtvol=-1, debugging mode => will skip acknowledgments
 -
-- Proc.   0 individual time (sec): cpu=          4.8  wall=          4.8
- 
+- Proc.   0 individual time (sec): cpu=          2.6  wall=          2.6
+
 ================================================================================
- 
+
  Calculation completed.
 .Delivered   0 WARNINGs and  54 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          4.8  wall=          4.8
-- [ALL OK] MEMORY CONSUMPTION REPORT FOR C CODE:
--   There were 0 allocations and 0 deallocations in C code
-- [ALL OK] MEMORY CONSUMPTION REPORT FOR FORTRAN CODE:
--   There were 17635 allocations and 17635 deallocations in Fortran
--   Remaining memory at the end of the calculation is 0
++Overall time at end (sec) : cpu=          2.6  wall=          2.6

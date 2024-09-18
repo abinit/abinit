@@ -771,11 +771,12 @@ contains
       end if
     end if
 
-    if ( present(gpu_option) ) then
-      xgBlock%gpu_option = gpu_option
-    else if ( xomp_target_is_present(c_loc(array)) ) then
-      xgBlock%gpu_option = ABI_GPU_OPENMP
+    if ( present(gpu_option) ) xgBlock%gpu_option = gpu_option
+#if defined(DEBUG_VERBOSE) && defined(HAVE_OPENMP_OFFLOAD)
+    if ( xgBlock%gpu_option == ABI_GPU_OPENMP ) then
+      ABI_CHECK(xomp_target_is_present(c_loc(array)), "Mapped array isn't... mapped with OpenMP")
     end if
+#endif
     if ( xgBlock%gpu_option /= ABI_GPU_DISABLED .and. xgBlock%gpu_option /= ABI_GPU_LEGACY .and. &
          xgBlock%gpu_option /= ABI_GPU_OPENMP   .and. xgBlock%gpu_option /= ABI_GPU_KOKKOS ) then
        ABI_ERROR('Bad GPU option in xgBlock_map')
