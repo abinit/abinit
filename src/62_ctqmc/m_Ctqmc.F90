@@ -3556,7 +3556,6 @@ SUBROUTINE Ctqmc_printSpectra(this, oFileIn)
   formatSpectra ='(1x,'//TRIM(ADJUSTL(a))//'ES22.14)'
   WRITE(oFile,*) "# freq[/hermalization] FFT"
 
-  endDensity = SIZE(this%density,2)
 !PROBLEM eos_gnu_13.2_openmpi . %endDensity was introduced throughout
 !  endDensity = SIZE(this%density,2)
    endDensity=this%endDensity
