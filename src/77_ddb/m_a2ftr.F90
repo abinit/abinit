@@ -157,7 +157,7 @@ subroutine mka2f_tr(crystal,ifc,elph_ds,ntemper,tempermin,temperinc,pair2red,elp
  real(dp),allocatable :: q00(:,:,:,:), q01(:,:,:,:),q11(:,:,:,:)
  real(dp),allocatable :: seebeck(:,:,:,:)!, rho_nm(:,:,:,:)
  real(dp),allocatable :: rho_T(:)
- real(dp),allocatable :: coskr(:,:), sinkr(:,:)
+ real(dp),allocatable :: coskr(:,:), sinkr(:,:), coskr_tmp(:,:), sinkr_tmp(:,:)
 
 ! *********************************************************************
 !calculate a2f_tr for frequencies between 0 and omega_max
@@ -260,6 +260,9 @@ subroutine mka2f_tr(crystal,ifc,elph_ds,ntemper,tempermin,temperinc,pair2red,elp
  elph_tr_ds%a2f_1d_tr = zero
  tmp_a2f_1d_tr = zero
 
+ ABI_MALLOC(gam_rpt,(2,3*natom*3*natom,nrpt))
+ ABI_MALLOC(coskr_tmp,(nrpt))
+ ABI_MALLOC(sinkr_tmp,(nrpt))
 
  do ie = 1, elph_ds%n_pair
    do ssp = 1,4
@@ -277,8 +280,10 @@ subroutine mka2f_tr(crystal,ifc,elph_ds,ntemper,tempermin,temperinc,pair2red,elp
              gam_now(:,:) = elph_tr_ds%gamma_qpt_tr(:,itrtensor,:,isppol,iFSqpt)
            else
 !            Do FT from real-space gamma grid to 1 qpt.
-             call ftgam(ifc%wghatm,gam_now,elph_tr_ds%gamma_rpt_tr(:,itrtensor,:,isppol,:,ssp,ie),natom,1,nrpt,0,&
-&             coskr(iFSqpt,:), sinkr(iFSqpt,:))
+             gam_rpt(:,:,:)=elph_tr_ds%gamma_rpt_tr(:,itrtensor,:,isppol,:,ssp,ie)
+             coskr_tmp(:)=coskr(iFSqpt,:)
+             sinkr_tmp(:)=sinkr(iFSqpt,:)
+             call ftgam(ifc%wghatm,gam_now,gam_rpt,natom,1,nrpt,0,coskr_tmp, sinkr_tmp)
            end if
 
 !          Diagonalize gamma matrix at this qpoint (complex matrix).
@@ -380,6 +385,9 @@ subroutine mka2f_tr(crystal,ifc,elph_ds,ntemper,tempermin,temperinc,pair2red,elp
  ! Likely this routine is never executed in parallel
  call xmpi_sum (tmp_a2f_1d_tr, xmpi_world, ierr)
 
+ ABI_FREE(gam_rpt)
+ ABI_FREE(coskr_tmp)
+ ABI_FREE(sinkr_tmp)
  ABI_FREE(coskr)
  ABI_FREE(sinkr)
 
@@ -1085,6 +1093,7 @@ subroutine mka2f_tr_lova(crystal,ifc,elph_ds,ntemper,tempermin,temperinc,elph_tr
  real(dp),allocatable :: rho_T(:),tau_T(:)
  real(dp),allocatable :: coskr(:,:)
  real(dp),allocatable :: sinkr(:,:)
+ real(dp),allocatable :: gam_rpt(:,:,:)
 
 ! *********************************************************************
 
