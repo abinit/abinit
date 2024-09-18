@@ -1202,8 +1202,8 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam,comm)
    s2ofssp = (/1,-1,1,-1/)
 
 !  Get gamma
-   ABI_MALLOC(gam_qpt,(2,3*natom*3*natom,elph_ds%nqpt_full)
-   ABI_MALLOC(gam_rpt,(2,3*natom*3*natom,Ifc%nrpt)
+   ABI_MALLOC(gam_qpt,(2,3*natom*3*natom,elph_ds%nqpt_full))
+   ABI_MALLOC(gam_rpt,(2,3*natom*3*natom,Ifc%nrpt))
    do ie=1,elph_ds%n_pair
      ie1 = red2pair(1,ie)
      ie2 = red2pair(2,ie)
