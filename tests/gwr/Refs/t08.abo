@@ -1,6 +1,6 @@
 
-.Version 9.9.3 of ABINIT 
-.(MPI version, prepared for a x86_64_darwin21.5.0_gnu12.1 computer) 
+.Version 10.1.4.5 of ABINIT, released Sep 2024.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2024 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,19 +14,18 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 17 Mar 2023.
-- ( at 01h21 )
+.Starting date : Wed 18 Sep 2024.
+- ( at 17h21 )
   
-- input  file    -> /Users/gmatteo/git_repos/abinit_gwr/_build/tests/Test_suite/gwr_t08/t08.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop/tests/TestBot_MPI1/gwr_t08/t08.abi
 - output file    -> t08.abo
 - root for input  files -> t08i
 - root for output files -> t08o
 
 - inpspheads : Reading pseudopotential header in XML form from 
--   /Users/gmatteo/git_repos/abinit_gwr/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Li.xml
+-   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Li.xml
 - inpspheads : Reading pseudopotential header in XML form from 
--   /Users/gmatteo/git_repos/abinit_gwr/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/F.xml
-
+-   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/F.xml
  DATASET    1 : space group Fm -3 m (#225); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  1.
@@ -44,7 +43,6 @@ P This job should need less than                       7.432 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.053 Mbytes ; DEN or POT disk file :      0.208 Mbytes.
 ================================================================================
-
 
  DATASET    2 : space group Fm -3 m (#225); Bravais cF (face-center cubic)
 ================================================================================
@@ -68,19 +66,20 @@ _ WF disk file :      0.204 Mbytes ; DEN or POT disk file :      0.208 Mbytes.
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
 -
-- outvars: echo of selected default values                                      
--   iomode0 =  0 , fftalg0 =312 , wfoptalg0 = 10
+- outvars: echo of selected default values
+-   iomode0 =  0 , fftalg0 =512 , wfoptalg0 = 10
 -
-- outvars: echo of global parameters not present in the input file              
+- outvars: echo of global parameters not present in the input file
 -  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
+-          iomode           1
             acell      7.7034756000E+00  7.7034756000E+00  7.7034756000E+00 Bohr
               amu      6.94100000E+00  1.89984032E+01
              ecut      1.50000000E+01 Hartree
           ecuteps1     0.00000000E+00 Hartree
           ecuteps2     4.00000000E+00 Hartree
--          fftalg         312
+-          fftalg         512
            getden1          0
            getden2          1
            istwfk        1
@@ -143,9 +142,9 @@ P           mkmem           1
             typat      1  2
            useylm           1
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                      -2.0382518572E+00  0.0000000000E+00  0.0000000000E+00
+                      -2.0382518572E+00 -4.3552371229E-18  4.3552371229E-18
             xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                      -3.8517378000E+00  0.0000000000E+00  0.0000000000E+00
+                      -3.8517378000E+00 -8.2302054061E-18  8.2302054061E-18
              xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        5.0000000000E-01 -5.0000000000E-01 -5.0000000000E-01
             znucl        3.00000    9.00000
@@ -194,9 +193,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /Users/gmatteo/git_repos/abinit_gwr/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Li.xml
-- pspatm: opening atomic psp file    /Users/gmatteo/git_repos/abinit_gwr/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Li.xml
-- pspatm : Reading pseudopotential header in XML form from /Users/gmatteo/git_repos/abinit_gwr/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Li.xml
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Li.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Li.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Li.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  5 (lmn_size=  9), orbitals=   0   0   0   1   1
  Spheres core radius: rc_sph= 1.60264751
@@ -214,9 +213,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /Users/gmatteo/git_repos/abinit_gwr/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/F.xml
-- pspatm: opening atomic psp file    /Users/gmatteo/git_repos/abinit_gwr/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/F.xml
-- pspatm : Reading pseudopotential header in XML form from /Users/gmatteo/git_repos/abinit_gwr/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/F.xml
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/F.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/F.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/F.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.40288605
@@ -302,8 +301,8 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  PAW TEST:
  ==== Compensation charge inside spheres ============
  The following values must be close to each other ...
- Compensation charge over spherical meshes =      2.388815982427041
- Compensation charge over fine fft grid    =      2.388829002214681
+ Compensation charge over spherical meshes =      2.388815982425787
+ Compensation charge over fine fft grid    =      2.388829002215318
 
  ==== Results concerning PAW augmentation regions ====
 
@@ -371,7 +370,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
-    2     -2.03825185722459     0.00000000000000     0.00000000000000
+    2     -2.03825185722459    -0.00000000000000     0.00000000000000
 
  cartesian forces (hartree/bohr) at end:
     1     -0.00000000000000    -0.00000000000000    -0.00000000000000
@@ -394,26 +393,26 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
-kinetic             :  1.17988519573430E+01
-hartree             :  9.01091403028487E+00
-xc                  : -4.01101613304039E+00
+kinetic             :  1.17988519573451E+01
+hartree             :  9.01091403028306E+00
+xc                  : -4.01101613304150E+00
 Ewald energy        : -2.02305295457931E+01
 psp_core            :  1.02165789007405E+00
-local_psp           : -2.57380549664744E+01
-spherical_terms     : -3.51202393358493E+00
-total_energy        : -3.16602007011909E+01
-total_energy_eV     : -8.61517874364746E+02
+local_psp           : -2.57380549664699E+01
+spherical_terms     : -3.51202393358703E+00
+total_energy        : -3.16602007011894E+01
+total_energy_eV     : -8.61517874364706E+02
 ...
 
 
 --- !EnergyTermsDC
 iteration_state     : {dtset: 1, }
 comment             : '"Double-counting" decomposition of free energy'
-band_energy         : -4.51124898695153E+00
+band_energy         : -4.51124898695376E+00
 Ewald energy        : -2.02305295457931E+01
 psp_core            :  1.02165789007405E+00
-xc_dc               : -7.76559047700073E+00
-spherical_terms     : -1.74512908140660E-01
+xc_dc               : -7.76559047699863E+00
+spherical_terms     : -1.74512908140514E-01
 total_energy_dc     : -3.16602240278120E+01
 total_energy_dc_eV  : -8.61518509114388E+02
 ...
@@ -561,23 +560,23 @@ meta: {optdriver: 6, }
  Total pseudopotential strength Dij (hartree):
  Atom #  1
   -1.94238   0.17496   0.32546   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
-   0.17496  -0.00421   0.03428  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000
-   0.32546   0.03428   0.28920  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000
-   0.00000  -0.00000  -0.00000  -0.00640  -0.00000   0.00000  -0.02471  -0.00000   0.00000
-   0.00000  -0.00000  -0.00000  -0.00000  -0.00640  -0.00000  -0.00000  -0.02471  -0.00000
-   0.00000  -0.00000  -0.00000   0.00000  -0.00000  -0.00640   0.00000  -0.00000  -0.02471
-   0.00000  -0.00000  -0.00000  -0.02471  -0.00000   0.00000  -0.09530  -0.00000   0.00000
-   0.00000  -0.00000  -0.00000  -0.00000  -0.02471  -0.00000  -0.00000  -0.09530  -0.00000
-   0.00000  -0.00000  -0.00000   0.00000  -0.00000  -0.02471   0.00000  -0.00000  -0.09530
+   0.17496  -0.00421   0.03428   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
+   0.32546   0.03428   0.28920   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
+   0.00000   0.00000   0.00000  -0.00640   0.00000   0.00000  -0.02471   0.00000   0.00000
+   0.00000   0.00000   0.00000   0.00000  -0.00640   0.00000   0.00000  -0.02471   0.00000
+   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00640   0.00000   0.00000  -0.02471
+   0.00000   0.00000   0.00000  -0.02471   0.00000   0.00000  -0.09530   0.00000   0.00000
+   0.00000   0.00000   0.00000   0.00000  -0.02471   0.00000   0.00000  -0.09530   0.00000
+   0.00000   0.00000   0.00000   0.00000   0.00000  -0.02471   0.00000   0.00000  -0.09530
  Atom #  2
-   0.30807  -0.50008  -0.00000   0.00000  -0.00000   0.00000  -0.00000   0.00000
-  -0.50008   0.92814   0.00000  -0.00000   0.00000  -0.00000   0.00000  -0.00000
-  -0.00000   0.00000  -0.47243  -0.00000  -0.00000   0.70075   0.00000   0.00000
-   0.00000  -0.00000  -0.00000  -0.47243  -0.00000   0.00000   0.70075   0.00000
-  -0.00000   0.00000  -0.00000  -0.00000  -0.47243   0.00000   0.00000   0.70075
-   0.00000  -0.00000   0.70075   0.00000   0.00000   0.19675  -0.00000  -0.00000
-  -0.00000   0.00000   0.00000   0.70075   0.00000  -0.00000   0.19675  -0.00000
-   0.00000  -0.00000   0.00000   0.00000   0.70075  -0.00000  -0.00000   0.19675
+   0.30807  -0.50008   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
+  -0.50008   0.92814   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
+   0.00000   0.00000  -0.47243   0.00000   0.00000   0.70075   0.00000   0.00000
+   0.00000   0.00000   0.00000  -0.47243   0.00000   0.00000   0.70075   0.00000
+   0.00000   0.00000   0.00000   0.00000  -0.47243   0.00000   0.00000   0.70075
+   0.00000   0.00000   0.70075   0.00000   0.00000   0.19675   0.00000   0.00000
+   0.00000   0.00000   0.00000   0.70075   0.00000   0.00000   0.19675   0.00000
+   0.00000   0.00000   0.00000   0.00000   0.70075   0.00000   0.00000   0.19675
 
 
  Augmentation waves occupancies Rhoij:
@@ -635,11 +634,11 @@ meta: {optdriver: 6, }
  For band1: 1 , band2: 2
   0.00000E+00  2.20958E-02  2.20958E-02  2.20958E-02
  For band1: 1 , band2: 3
-  0.00000E+00  4.33192E-03  4.33192E-03  1.13474E-03
+  0.00000E+00  4.33108E-03  4.33108E-03  1.13992E-03
  For band1: 1 , band2: 4
-  0.00000E+00  5.62517E-03  5.62517E-03  1.91589E-02
+  0.00000E+00  5.63151E-03  5.63151E-03  1.91589E-02
  For band1: 1 , band2: 5
-  0.00000E+00  1.78673E-02  1.78673E-02  1.13951E-03
+  0.00000E+00  1.78655E-02  1.78655E-02  1.13402E-03
 
  === KS gaps after direct diagonalization ===
  Direct band gap semiconductor
@@ -657,6 +656,7 @@ meta: {optdriver: 6, }
 ================================================================================
   
  -outvars: echo values of variables after computation  --------
+-          iomode           1
             acell      7.7034756000E+00  7.7034756000E+00  7.7034756000E+00 Bohr
               amu      6.94100000E+00  1.89984032E+01
              ecut      1.50000000E+01 Hartree
@@ -668,7 +668,7 @@ meta: {optdriver: 6, }
                       -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
             fcart2     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
--          fftalg         312
+-          fftalg         512
            getden1          0
            getden2          1
            istwfk        1
@@ -735,9 +735,9 @@ P           mkmem           1
             typat      1  2
            useylm           1
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                      -2.0382518572E+00  0.0000000000E+00  0.0000000000E+00
+                      -2.0382518572E+00 -4.3552371229E-18  4.3552371229E-18
             xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                      -3.8517378000E+00  0.0000000000E+00  0.0000000000E+00
+                      -3.8517378000E+00 -8.2302054061E-18  8.2302054061E-18
              xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        5.0000000000E-01 -5.0000000000E-01 -5.0000000000E-01
             znucl        3.00000    9.00000
@@ -827,15 +827,10 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          7.5  wall=          7.8
+- Proc.   0 individual time (sec): cpu=          7.1  wall=          7.1
 
 ================================================================================
 
  Calculation completed.
 .Delivered   2 WARNINGs and   6 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          7.9  wall=          8.3
-- [ALL OK] MEMORY CONSUMPTION REPORT FOR C CODE:
--   There were 100 allocations and 100 deallocations in C code
-- [ALL OK] MEMORY CONSUMPTION REPORT FOR FORTRAN CODE:
--   There were 30076 allocations and 30076 deallocations in Fortran
--   Remaining memory at the end of the calculation is 0
++Overall time at end (sec) : cpu=          7.1  wall=          7.1
