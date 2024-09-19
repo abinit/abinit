@@ -1094,7 +1094,7 @@ subroutine mka2f_tr_lova(crystal,ifc,elph_ds,ntemper,tempermin,temperinc,elph_tr
  real(dp),allocatable :: rho_T(:),tau_T(:)
  real(dp),allocatable :: coskr(:,:)
  real(dp),allocatable :: sinkr(:,:)
- real(dp),allocatable :: gam_rpt(:,:,:)
+!real(dp),allocatable :: gam_rpt(:,:,:)
 
 ! *********************************************************************
 
