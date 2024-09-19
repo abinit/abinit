@@ -2250,6 +2250,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'varpeq_tolgrs', tread, 'DPR')
  if(tread==1) dtset%varpeq_tolgrs = dprarr(1)
 
+ call intagm(dprarr, intarr, jdtset, marr, 3, string(1:lenstr), 'varpeq_trvec', tread, 'INT')
+ if (tread == 1) dtset%varpeq_trvec = intarr(1:3)
+
  call intagm(dprarr, intarr, jdtset, marr, 2, string(1:lenstr), 'varpeq_gpr_energy', tread, 'DPR')
  if (tread == 1) dtset%varpeq_gpr_energy = dprarr(1:2)
 
