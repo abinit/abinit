@@ -97,7 +97,7 @@ module m_respfn_driver
  use m_dfpt_elt,   only : dfpt_eltfrxc, dfpt_eltfrloc, dfpt_eltfrkin, dfpt_eltfrhar, elt_ewald, dfpt_ewald
  use m_d2frnl,     only : d2frnl
 
-#if defined HAVE_GPU_CUDA
+#if defined HAVE_GPU
  use m_alloc_hamilt_gpu
 #endif
 
@@ -549,8 +549,8 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  end do
 
 !Here allocation of GPU for fft calculations
-#if defined HAVE_GPU_CUDA
- if (dtset%gpu_option==ABI_GPU_LEGACY .or. dtset%gpu_option==ABI_GPU_KOKKOS) then
+#if defined HAVE_GPU
+ if (dtset%gpu_option/=ABI_GPU_DISABLED) then
    call alloc_hamilt_gpu(atindx1,dtset,gprimd,mpi_enreg,nattyp,npwarr,0,psps,dtset%gpu_option)
  end if
 #endif
@@ -1903,8 +1903,8 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  call hdr%free()
 
 !Clean GPU data
-#if defined HAVE_GPU_CUDA
- if (dtset%gpu_option==ABI_GPU_LEGACY .or. dtset%gpu_option==ABI_GPU_KOKKOS) then
+#if defined HAVE_GPU
+ if (dtset%gpu_option/=ABI_GPU_DISABLED) then
    call dealloc_hamilt_gpu(0,dtset%gpu_option)
  end if
 #endif
