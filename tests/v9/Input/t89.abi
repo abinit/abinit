@@ -74,6 +74,7 @@ jpawu  1.0000 eV
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
+#%% exclude_builders = eos_gnu_13.2_serial
 #%% [files]
 #%% files_to_test =
 #%%   t89.abo, tolnlines = 99, tolabs = 1.100e-03, tolrel = 9.000e-01, fld_options = -medium

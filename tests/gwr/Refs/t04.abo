@@ -1,6 +1,6 @@
 
-.Version 10.0.2.1 of ABINIT, released Apr 2024.
-.(MPI version, prepared for a aarch64_darwin22.6.0_gnu12.2 computer) 
+.Version 10.1.4.5 of ABINIT, released Sep 2024.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2024 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,14 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 12 Apr 2024.
-- ( at 13h18 )
+.Starting date : Wed 18 Sep 2024.
+- ( at 17h21 )
   
-- input  file    -> /Users/gmatteo/git_repos/abinit_gwr/_build/tests/Test_suite/gwr_t04/t04.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop/tests/TestBot_MPI1/gwr_t04/t04.abi
 - output file    -> t04.abo
 - root for input  files -> t04i
 - root for output files -> t04o
-
 
  DATASET    1 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -39,7 +38,6 @@ P This job should need less than                       1.816 Mbytes of memory.
 _ WF disk file :      0.012 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
 
-
  DATASET    2 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  2.
@@ -55,7 +53,6 @@ P This job should need less than                       1.858 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.054 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
-
 
  DATASET    3 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -73,7 +70,6 @@ P This job should need less than                       1.858 Mbytes of memory.
 _ WF disk file :      0.054 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
 
-
  DATASET    4 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  4.
@@ -89,7 +85,6 @@ P This job should need less than                       1.858 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.054 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
-
 
  DATASET    5 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -111,10 +106,10 @@ _ WF disk file :      0.054 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
 -
-- outvars: echo of selected default values                                      
--   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+- outvars: echo of selected default values
+-   iomode0 =  0 , fftalg0 =512 , wfoptalg0 =  0
 -
-- outvars: echo of global parameters not present in the input file              
+- outvars: echo of global parameters not present in the input file
 -  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
@@ -125,7 +120,7 @@ _ WF disk file :      0.054 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
              ecut      4.00000000E+00 Hartree
           ecuteps      4.00000000E+00 Hartree
          ecutsigx      4.00000000E+00 Hartree
--          fftalg         312
+-          fftalg         512
         freqspmax      1.83746627E-01 Hartree
         freqspmin     -1.83746627E-01 Hartree
            getden1          0
@@ -300,8 +295,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      4.000   => boxcut(ratio)=   2.15429
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /Users/gmatteo/git_repos/abinit_gwr/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pbe_standard_psp8/Si.psp8
-- pspatm: opening atomic psp file    /Users/gmatteo/git_repos/abinit_gwr/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pbe_standard_psp8/Si.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pbe_standard_psp8/Si.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pbe_standard_psp8/Si.psp8
 - Si    ONCVPSP-3.2.3.1  r_core=   1.60303   1.72197   1.91712
 - 14.00000   4.00000    170510                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -332,10 +327,10 @@ tolerances: {tolvrs: 1.00E-08, }
  ETOT  1  -7.7704612422828    -7.770E+00 2.835E-03 5.483E+00
  ETOT  2  -7.7794162061919    -8.955E-03 1.020E-05 2.892E-01
  ETOT  3  -7.7797638232987    -3.476E-04 4.684E-07 1.051E-02
- ETOT  4  -7.7797726742222    -8.851E-06 3.668E-08 1.228E-04
+ ETOT  4  -7.7797726742221    -8.851E-06 3.668E-08 1.228E-04
  ETOT  5  -7.7797727468135    -7.259E-08 5.038E-10 1.296E-06
- ETOT  6  -7.7797727472125    -3.991E-10 2.211E-11 3.634E-08
- ETOT  7  -7.7797727472275    -1.501E-11 1.137E-12 1.006E-10
+ ETOT  6  -7.7797727472125    -3.990E-10 2.211E-11 3.634E-08
+ ETOT  7  -7.7797727472275    -1.500E-11 1.137E-12 1.006E-10
 
  At SCF step    7       vres2   =  1.01E-10 < tolvrs=  1.00E-08 =>converged.
 
@@ -355,7 +350,7 @@ lattice_vectors:
 lattice_lengths: [   7.25492,    7.25492,    7.25492, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.7001139E+02
-convergence: {deltae: -1.501E-11, res2:  1.006E-10, residm:  1.137E-12, diffor: null, }
+convergence: {deltae: -1.500E-11, res2:  1.006E-10, residm:  1.137E-12, diffor: null, }
 etotal    :  -7.77977275E+00
 entropy   :   0.00000000E+00
 fermie    :   1.97442132E-01
@@ -368,9 +363,9 @@ xred      :
 - [  0.0000E+00,   0.0000E+00,   0.0000E+00, Si]
 - [  2.5000E-01,   2.5000E-01,   2.5000E-01, Si]
 cartesian_forces: # hartree/bohr
-- [  1.00777365E-26,  -5.03886825E-27,  -2.51943413E-27, ]
-- [ -1.00777365E-26,   5.03886825E-27,   2.51943413E-27, ]
-force_length_stats: {min:   1.15454976E-26, max:   1.15454976E-26, mean:   1.15454976E-26, }
+- [  1.25971706E-27,  -9.65783082E-27,   1.46966991E-26, ]
+- [ -1.25971706E-27,   9.65783082E-27,  -1.46966991E-26, ]
+force_length_stats: {min:   1.76310393E-26, max:   1.76310393E-26, mean:   1.76310393E-26, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -386,23 +381,23 @@ force_length_stats: {min:   1.15454976E-26, max:   1.15454976E-26, mean:   1.154
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.250000000000      0.250000000000      0.250000000000
- rms dE/dt=  4.7456E-26; max dE/dt=  7.7548E-26; dE/dt below (all hartree)
-    1       0.000000000000     -0.000000000000     -0.000000000000
-    2       0.000000000000      0.000000000000      0.000000000000
+ rms dE/dt=  6.3024E-26; max dE/dt=  6.8932E-26; dE/dt below (all hartree)
+    1       0.000000000000     -0.000000000000      0.000000000000
+    2       0.000000000000      0.000000000000     -0.000000000000
 
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
     2      1.35733954003335     1.35733954003335     1.35733954003335
 
  cartesian forces (hartree/bohr) at end:
-    1      0.00000000000000    -0.00000000000000    -0.00000000000000
-    2     -0.00000000000000     0.00000000000000     0.00000000000000
- frms,max,avg= 6.6657961E-27 1.0077737E-26   0.000E+00  0.000E+00  0.000E+00 h/b
+    1      0.00000000000000    -0.00000000000000     0.00000000000000
+    2     -0.00000000000000     0.00000000000000    -0.00000000000000
+ frms,max,avg= 1.0179285E-26 1.4696699E-26   0.000E+00  0.000E+00  0.000E+00 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1      0.00000000000000    -0.00000000000000    -0.00000000000000
-    2     -0.00000000000000     0.00000000000000     0.00000000000000
- frms,max,avg= 3.4276899E-25 5.1821800E-25   0.000E+00  0.000E+00  0.000E+00 e/A
+    1      0.00000000000000    -0.00000000000000     0.00000000000000
+    2     -0.00000000000000     0.00000000000000    -0.00000000000000
+ frms,max,avg= 5.2343985E-25 7.5573459E-25   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales= 10.260000000000 10.260000000000 10.260000000000 bohr
               =  5.429358160133  5.429358160133  5.429358160133 angstroms
  prteigrs : about to open file t04o_DS1_EIG
@@ -414,16 +409,16 @@ force_length_stats: {min:   1.15454976E-26, max:   1.15454976E-26, mean:   1.154
 --- !EnergyTerms
 iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
-kinetic             :  4.01960011478862E+00
-hartree             :  8.17041173202744E-01
-xc                  : -3.22453777827715E+00
+kinetic             :  4.01960011478858E+00
+hartree             :  8.17041173202748E-01
+xc                  : -3.22453777827716E+00
 Ewald energy        : -8.40046478618609E+00
 psp_core            :  5.53648753925927E-01
-local_psp           : -2.61258029324723E+00
-non_local_psp       :  1.06752006856564E+00
-total_energy        : -7.77977274722754E+00
+local_psp           : -2.61258029324710E+00
+non_local_psp       :  1.06752006856556E+00
+total_energy        : -7.77977274722753E+00
 total_energy_eV     : -2.11698382568375E+02
-band_energy         :  7.10792313517764E-01
+band_energy         :  7.10792313517699E-01
 ...
 
 
@@ -620,14 +615,14 @@ Minimax imaginary tau/omega mesh: !Tabular | # tau, weight(tau), omega, weight(o
 
        1       2       3       4       5       6
     1 -23.190 -14.579  -7.384  -3.863  -2.068  -0.946
-        0.000   0.000   0.000  -0.000  -0.000  -0.000
+        0.000   0.000   0.000   0.000   0.000   0.000
 
  Trace of: gt_kibz for ipm: 2 , spin: 1 for testing purposes:
  (ik_ibz, itau) table
 
        1       2       3       4       5       6
     1   3.902   3.518   2.953   2.354   1.701   0.899
-       -0.000  -0.000   0.000  -0.000   0.000  -0.000
+        0.000   0.000   0.000   0.000   0.000   0.000
 
  Trace of: tchi_qibz for spin: 1 for testing purposes:
 
@@ -643,7 +638,7 @@ Minimax imaginary tau/omega mesh: !Tabular | # tau, weight(tau), omega, weight(o
  (iq_ibz, iomega) table
        1       2       3       4       5       6
     1  -4.016  -3.017  -2.087  -1.374  -0.726  -0.192
-        0.000  -0.000  -0.000   0.000  -0.000  -0.000
+       -0.000  -0.000  -0.000   0.000  -0.000   0.000
 
 
 
@@ -652,12 +647,12 @@ Minimax imaginary tau/omega mesh: !Tabular | # tau, weight(tau), omega, weight(o
 --- !EMACRO_WITHOUT_LOCAL_FIELDS
 iteration_state: {dtset: 3, }
 'epsilon_{iw, q -> Gamma}(0,0)': !Tabular |
-      2.63761313E-02    1.54943363E+02   -6.03346606E-20
-      9.16320406E-02    8.27530238E+01    1.62800349E-18
-      2.03417403E-01    2.97676653E+01    1.22782747E-18
-      4.31070640E-01    8.82331004E+00   -2.46350735E-19
-      9.53132482E-01    2.71109750E+00   -1.45010961E-19
-      2.50824148E+00    1.25207131E+00    2.22655129E-20
+      2.63761313E-02    1.54943363E+02    4.72117214E-19
+      9.16320406E-02    8.27530238E+01    1.79029431E-18
+      2.03417403E-01    2.97676653E+01    5.23453514E-19
+      4.31070640E-01    8.82331004E+00   -4.76858645E-19
+      9.53132482E-01    2.71109750E+00    4.04252992E-20
+      2.50824148E+00    1.25207131E+00   -1.00768610E-20
 ...
 
 
@@ -678,7 +673,7 @@ iteration_state: {dtset: 3, }
  (iq_ibz, iomega) table
        1       2       3       4       5       6
     1  -0.686  -0.659  -0.609  -0.525  -0.352  -0.108
-        0.000   0.000  -0.000   0.000  -0.000  -0.000
+        0.000   0.000   0.000   0.000   0.000   0.000
 
 ================================================================================
  QP results (energies in eV)
@@ -749,14 +744,14 @@ data: !Tabular |
 
        1       2       3       4       5       6
     1 -23.244 -14.728  -7.473  -3.814  -1.912  -0.783
-       -0.000  -0.000  -0.000   0.000   0.000  -0.000
+        0.000   0.000   0.000   0.000   0.000   0.000
 
  Trace of: gt_kibz for ipm: 2 , spin: 1 for testing purposes:
  (ik_ibz, itau) table
 
        1       2       3       4       5       6
     1   3.898   3.496   2.902   2.261   1.560   0.748
-        0.000  -0.000  -0.000  -0.000   0.000   0.000
+        0.000   0.000   0.000   0.000   0.000   0.000
 
 
  Computing diagonal matrix elements of Sigma_x
@@ -843,14 +838,14 @@ data: !Tabular |
 
        1       2       3       4       5       6
     1 -23.259 -14.775  -7.511  -3.827  -1.903  -0.769
-        0.000  -0.000   0.000  -0.000  -0.000  -0.000
+        0.000   0.000   0.000   0.000   0.000   0.000
 
  Trace of: gt_kibz for ipm: 2 , spin: 1 for testing purposes:
  (ik_ibz, itau) table
 
        1       2       3       4       5       6
     1   3.897   3.493   2.896   2.252   1.547   0.734
-       -0.000   0.000   0.000  -0.000  -0.000   0.000
+        0.000   0.000   0.000   0.000   0.000   0.000
 
 
  Computing diagonal matrix elements of Sigma_x
@@ -918,7 +913,7 @@ data: !Tabular |
 
  Checking for convergence at iteration: 3
  For k-point: 1 [ 0.0000E+00,  0.0000E+00,  0.0000E+00], spin: 1
-    max(abs(E_i - E_{i-1})):  3.63454E+01 (meV) for band: 14
+    max(abs(E_i - E_{i-1})):  3.63452E+01 (meV) for band: 14
 
  === QP gaps at iteration: 3 (Fermi energy set to zero) ===
  Direct band gap semiconductor
@@ -937,14 +932,14 @@ data: !Tabular |
 
        1       2       3       4       5       6
     1 -23.263 -14.786  -7.520  -3.830  -1.903  -0.768
-       -0.000   0.000  -0.000  -0.000  -0.000   0.000
+        0.000   0.000   0.000   0.000   0.000   0.000
 
  Trace of: gt_kibz for ipm: 2 , spin: 1 for testing purposes:
  (ik_ibz, itau) table
 
        1       2       3       4       5       6
     1   3.897   3.493   2.896   2.251   1.545   0.733
-       -0.000  -0.000  -0.000  -0.000  -0.000   0.000
+        0.000   0.000   0.000   0.000   0.000   0.000
 
 
  Computing diagonal matrix elements of Sigma_x
@@ -1012,7 +1007,7 @@ data: !Tabular |
 
  Checking for convergence at iteration: 4
  For k-point: 1 [ 0.0000E+00,  0.0000E+00,  0.0000E+00], spin: 1
-    max(abs(E_i - E_{i-1})):  8.36859E+00 (meV) for band: 14
+    max(abs(E_i - E_{i-1})):  8.36851E+00 (meV) for band: 14
 
  === QP gaps at iteration: 4 (Fermi energy set to zero) ===
  Direct band gap semiconductor
@@ -1166,14 +1161,14 @@ Minimax imaginary tau/omega mesh: !Tabular | # tau, weight(tau), omega, weight(o
 
        1       2       3       4       5       6
     1 -23.190 -14.579  -7.384  -3.863  -2.068  -0.946
-        0.000   0.000   0.000  -0.000  -0.000  -0.000
+        0.000   0.000   0.000   0.000   0.000   0.000
 
  Trace of: gt_kibz for ipm: 2 , spin: 1 for testing purposes:
  (ik_ibz, itau) table
 
        1       2       3       4       5       6
     1   3.902   3.518   2.953   2.354   1.701   0.899
-       -0.000  -0.000   0.000  -0.000   0.000  -0.000
+        0.000   0.000   0.000   0.000   0.000   0.000
 
  Trace of: tchi_qibz for spin: 1 for testing purposes:
 
@@ -1189,7 +1184,7 @@ Minimax imaginary tau/omega mesh: !Tabular | # tau, weight(tau), omega, weight(o
  (iq_ibz, iomega) table
        1       2       3       4       5       6
     1  -4.016  -3.017  -2.087  -1.374  -0.726  -0.192
-        0.000  -0.000  -0.000   0.000  -0.000  -0.000
+       -0.000  -0.000  -0.000   0.000  -0.000   0.000
 
 
 
@@ -1198,12 +1193,12 @@ Minimax imaginary tau/omega mesh: !Tabular | # tau, weight(tau), omega, weight(o
 --- !EMACRO_WITHOUT_LOCAL_FIELDS
 iteration_state: {dtset: 4, }
 'epsilon_{iw, q -> Gamma}(0,0)': !Tabular |
-      2.63761313E-02    1.54943363E+02   -6.03346606E-20
-      9.16320406E-02    8.27530238E+01    1.62800349E-18
-      2.03417403E-01    2.97676653E+01    1.22782747E-18
-      4.31070640E-01    8.82331004E+00   -2.46350735E-19
-      9.53132482E-01    2.71109750E+00   -1.45010961E-19
-      2.50824148E+00    1.25207131E+00    2.22655129E-20
+      2.63761313E-02    1.54943363E+02    4.72117214E-19
+      9.16320406E-02    8.27530238E+01    1.79029431E-18
+      2.03417403E-01    2.97676653E+01    5.23453514E-19
+      4.31070640E-01    8.82331004E+00   -4.76858645E-19
+      9.53132482E-01    2.71109750E+00    4.04252992E-20
+      2.50824148E+00    1.25207131E+00   -1.00768610E-20
 ...
 
 
@@ -1224,7 +1219,7 @@ iteration_state: {dtset: 4, }
  (iq_ibz, iomega) table
        1       2       3       4       5       6
     1  -0.686  -0.659  -0.609  -0.525  -0.352  -0.108
-        0.000   0.000  -0.000   0.000  -0.000  -0.000
+        0.000   0.000   0.000   0.000   0.000   0.000
 
 ================================================================================
  QP results (energies in eV)
@@ -1307,7 +1302,7 @@ data: !Tabular |
  q0_len: 1.000000E-03 (Bohr^-1)
    iomega (eV)         [100]         [010]         [001]             x             y             z
  7.17731E-01  -1.08805E-05  -1.08853E-05  -1.08901E-05  -1.08900E-05  -1.08870E-05  -1.08840E-05
- 2.49343E+00  -6.45652E-06  -6.45684E-06  -6.45714E-06  -6.45687E-06  -6.45693E-06  -6.45698E-06
+ 2.49343E+00  -6.45652E-06  -6.45684E-06  -6.45715E-06  -6.45687E-06  -6.45693E-06  -6.45698E-06
  5.53527E+00  -2.47331E-06  -2.47263E-06  -2.47195E-06  -2.47192E-06  -2.47239E-06  -2.47285E-06
  1.17300E+01  -6.97712E-07  -6.97433E-07  -6.97155E-07  -6.97194E-07  -6.97337E-07  -6.97480E-07
  2.59361E+01  -1.54453E-07  -1.54387E-07  -1.54321E-07  -1.54335E-07  -1.54364E-07  -1.54393E-07
@@ -1326,14 +1321,14 @@ data: !Tabular |
 
        1       2       3       4       5       6
     1 -23.244 -14.728  -7.473  -3.814  -1.912  -0.783
-       -0.000  -0.000  -0.000   0.000   0.000  -0.000
+        0.000   0.000   0.000   0.000   0.000   0.000
 
  Trace of: gt_kibz for ipm: 2 , spin: 1 for testing purposes:
  (ik_ibz, itau) table
 
        1       2       3       4       5       6
     1   3.898   3.496   2.902   2.261   1.560   0.748
-        0.000  -0.000  -0.000  -0.000   0.000   0.000
+        0.000   0.000   0.000   0.000   0.000   0.000
 
  Trace of: tchi_qibz for spin: 1 for testing purposes:
 
@@ -1349,7 +1344,7 @@ data: !Tabular |
  (iq_ibz, iomega) table
        1       2       3       4       5       6
     1  -3.793  -3.010  -2.128  -1.396  -0.730  -0.192
-        0.000  -0.000  -0.000  -0.000  -0.000  -0.000
+       -0.000  -0.000  -0.000  -0.000   0.000   0.000
 
 
 
@@ -1358,24 +1353,24 @@ data: !Tabular |
 --- !EMACRO_WITHOUT_LOCAL_FIELDS
 iteration_state: {dtset: 4, }
 'epsilon_{iw, q -> Gamma}(0,0)': !Tabular |
-      2.63761313E-02    1.37902476E+02    5.06849195E-20
-      9.16320406E-02    8.21432303E+01    6.25076025E-19
-      2.03417403E-01    3.20554051E+01    4.57144038E-19
-      4.31070640E-01    9.75801366E+00   -7.88577559E-20
-      9.53132482E-01    2.93866851E+00    7.10657612E-20
-      2.50824148E+00    1.28638180E+00    3.06521759E-22
+      2.63761313E-02    1.37902496E+02    6.34722879E-19
+      9.16320406E-02    8.21432323E+01    1.14119390E-18
+      2.03417403E-01    3.20554024E+01    2.98309562E-19
+      4.31070640E-01    9.75801241E+00    4.57669000E-19
+      9.53132482E-01    2.93866820E+00   -1.41051464E-19
+      2.50824148E+00    1.28638176E+00   -1.34846716E-20
 ...
 
 
 --- !EMACRO_WITH_LOCAL_FIELDS
 iteration_state: {dtset: 4, }
 'epsilon_{iw, q -> Gamma}(0,0)': !Tabular |
-      2.63761313E-02    9.94790143E-03    0.00000000E+00
-      9.16320406E-02    1.49230998E-02    0.00000000E+00
-      2.03417403E-01    3.42021611E-02    0.00000000E+00
-      4.31070640E-01    1.05884310E-01    0.00000000E+00
-      9.53132482E-01    3.42971458E-01    0.00000000E+00
-      2.50824148E+00    7.77794830E-01    0.00000000E+00
+      2.63761313E-02    9.94790030E-03    0.00000000E+00
+      9.16320406E-02    1.49230994E-02    0.00000000E+00
+      2.03417403E-01    3.42021638E-02    0.00000000E+00
+      4.31070640E-01    1.05884323E-01    0.00000000E+00
+      9.53132482E-01    3.42971494E-01    0.00000000E+00
+      2.50824148E+00    7.77794858E-01    0.00000000E+00
 ...
 
  Trace of: wc_qibz for spin: 1 for testing purposes:
@@ -1384,7 +1379,7 @@ iteration_state: {dtset: 4, }
  (iq_ibz, iomega) table
        1       2       3       4       5       6
     1  -0.683  -0.659  -0.612  -0.531  -0.365  -0.118
-        0.000   0.000  -0.000   0.000   0.000  -0.000
+        0.000   0.000   0.000   0.000   0.000   0.000
 
 ================================================================================
  QP results (energies in eV)
@@ -1486,14 +1481,14 @@ data: !Tabular |
 
        1       2       3       4       5       6
     1 -23.231 -14.694  -7.453  -3.820  -1.924  -0.791
-       -0.000   0.000  -0.000  -0.000   0.000   0.000
+        0.000   0.000   0.000   0.000   0.000   0.000
 
  Trace of: gt_kibz for ipm: 2 , spin: 1 for testing purposes:
  (ik_ibz, itau) table
 
        1       2       3       4       5       6
     1   3.897   3.494   2.901   2.264   1.567   0.755
-       -0.000  -0.000  -0.000   0.000  -0.000  -0.000
+        0.000   0.000   0.000   0.000   0.000   0.000
 
  Trace of: tchi_qibz for spin: 1 for testing purposes:
 
@@ -1509,7 +1504,7 @@ data: !Tabular |
  (iq_ibz, iomega) table
        1       2       3       4       5       6
     1  -3.799  -3.006  -2.120  -1.391  -0.730  -0.192
-       -0.000   0.000  -0.000   0.000   0.000  -0.000
+       -0.000  -0.000   0.000   0.000   0.000  -0.000
 
 
 
@@ -1518,24 +1513,24 @@ data: !Tabular |
 --- !EMACRO_WITHOUT_LOCAL_FIELDS
 iteration_state: {dtset: 4, }
 'epsilon_{iw, q -> Gamma}(0,0)': !Tabular |
-      2.63761313E-02    1.38658258E+02   -5.76249619E-19
-      9.16320406E-02    8.21886821E+01    1.58453269E-18
-      2.03417403E-01    3.19509783E+01    7.33492789E-19
-      4.31070640E-01    9.71488737E+00   -4.39207518E-20
-      9.53132482E-01    2.92820004E+00   -1.31102026E-19
-      2.50824148E+00    1.28481224E+00    1.60641286E-20
+      2.63761313E-02    1.38658276E+02    3.79445241E-19
+      9.16320406E-02    8.21886839E+01    1.91197688E-18
+      2.03417403E-01    3.19509760E+01   -1.52754973E-18
+      4.31070640E-01    9.71488629E+00   -3.94731327E-20
+      9.53132482E-01    2.92819977E+00   -1.54954736E-19
+      2.50824148E+00    1.28481220E+00    3.06592511E-20
 ...
 
 
 --- !EMACRO_WITH_LOCAL_FIELDS
 iteration_state: {dtset: 4, }
 'epsilon_{iw, q -> Gamma}(0,0)': !Tabular |
-      2.63761313E-02    9.91053846E-03    0.00000000E+00
-      9.16320406E-02    1.49187272E-02    0.00000000E+00
-      2.03417403E-01    3.43082347E-02    0.00000000E+00
-      4.31070640E-01    1.06342988E-01    0.00000000E+00
-      9.53132482E-01    3.44185218E-01    0.00000000E+00
-      2.50824148E+00    7.78742921E-01    0.00000000E+00
+      2.63761313E-02    9.91053749E-03    0.00000000E+00
+      9.16320406E-02    1.49187269E-02    0.00000000E+00
+      2.03417403E-01    3.43082369E-02    0.00000000E+00
+      4.31070640E-01    1.06343000E-01    0.00000000E+00
+      9.53132482E-01    3.44185250E-01    0.00000000E+00
+      2.50824148E+00    7.78742945E-01    0.00000000E+00
 ...
 
  Trace of: wc_qibz for spin: 1 for testing purposes:
@@ -1544,7 +1539,7 @@ iteration_state: {dtset: 4, }
  (iq_ibz, iomega) table
        1       2       3       4       5       6
     1  -0.683  -0.659  -0.612  -0.530  -0.364  -0.117
-       -0.000   0.000   0.000   0.000   0.000   0.000
+        0.000   0.000   0.000   0.000   0.000   0.000
 
 ================================================================================
  QP results (energies in eV)
@@ -1608,7 +1603,7 @@ data: !Tabular |
 
  Checking for convergence at iteration: 4
  For k-point: 1 [ 0.0000E+00,  0.0000E+00,  0.0000E+00], spin: 1
-    max(abs(E_i - E_{i-1})):  2.84101E+01 (meV) for band: 14
+    max(abs(E_i - E_{i-1})):  2.84100E+01 (meV) for band: 14
 
  === QP gaps at iteration: 4 (Fermi energy set to zero) ===
  Direct band gap semiconductor
@@ -1629,7 +1624,7 @@ data: !Tabular |
  7.17731E-01  -1.09477E-05  -1.09523E-05  -1.09569E-05  -1.09568E-05  -1.09540E-05  -1.09512E-05
  2.49343E+00  -6.46077E-06  -6.46105E-06  -6.46133E-06  -6.46105E-06  -6.46113E-06  -6.46122E-06
  5.53527E+00  -2.46403E-06  -2.46339E-06  -2.46274E-06  -2.46270E-06  -2.46314E-06  -2.46359E-06
- 1.17300E+01  -6.93851E-07  -6.93586E-07  -6.93323E-07  -6.93360E-07  -6.93492E-07  -6.93623E-07
+ 1.17300E+01  -6.93850E-07  -6.93587E-07  -6.93323E-07  -6.93360E-07  -6.93491E-07  -6.93623E-07
  2.59361E+01  -1.53514E-07  -1.53451E-07  -1.53389E-07  -1.53403E-07  -1.53429E-07  -1.53455E-07
  6.82527E+01  -2.26751E-08  -2.26658E-08  -2.26565E-08  -2.26589E-08  -2.26625E-08  -2.26662E-08
 
@@ -1646,14 +1641,14 @@ data: !Tabular |
 
        1       2       3       4       5       6
     1 -23.228 -14.686  -7.448  -3.819  -1.925  -0.792
-        0.000   0.000  -0.000  -0.000   0.000  -0.000
+        0.000   0.000   0.000   0.000   0.000   0.000
 
  Trace of: gt_kibz for ipm: 2 , spin: 1 for testing purposes:
  (ik_ibz, itau) table
 
        1       2       3       4       5       6
     1   3.897   3.494   2.900   2.264   1.567   0.756
-       -0.000   0.000  -0.000   0.000  -0.000  -0.000
+        0.000   0.000   0.000   0.000   0.000   0.000
 
  Trace of: tchi_qibz for spin: 1 for testing purposes:
 
@@ -1669,7 +1664,7 @@ data: !Tabular |
  (iq_ibz, iomega) table
        1       2       3       4       5       6
     1  -3.799  -3.005  -2.118  -1.390  -0.730  -0.192
-       -0.000  -0.000  -0.000  -0.000   0.000   0.000
+        0.000  -0.000  -0.000  -0.000   0.000   0.000
 
 
 
@@ -1678,24 +1673,24 @@ data: !Tabular |
 --- !EMACRO_WITHOUT_LOCAL_FIELDS
 iteration_state: {dtset: 4, }
 'epsilon_{iw, q -> Gamma}(0,0)': !Tabular |
-      2.63761313E-02    1.38741103E+02   -9.31149545E-19
-      9.16320406E-02    8.21954815E+01    4.25116404E-19
-      2.03417403E-01    3.19397939E+01   -3.25583682E-19
-      4.31070640E-01    9.70992498E+00    1.66819615E-20
-      9.53132482E-01    2.92697428E+00   -1.84712627E-20
-      2.50824148E+00    1.28462855E+00   -2.77678299E-20
+      2.63761313E-02    1.38741121E+02   -1.16938559E-19
+      9.16320406E-02    8.21954833E+01    1.43073984E-18
+      2.03417403E-01    3.19397916E+01    1.80561319E-18
+      4.31070640E-01    9.70992389E+00    2.94111860E-19
+      9.53132482E-01    2.92697401E+00   -2.16279210E-19
+      2.50824148E+00    1.28462851E+00   -7.46440681E-21
 ...
 
 
 --- !EMACRO_WITH_LOCAL_FIELDS
 iteration_state: {dtset: 4, }
 'epsilon_{iw, q -> Gamma}(0,0)': !Tabular |
-      2.63761313E-02    9.90661787E-03    0.00000000E+00
-      9.16320406E-02    1.49181486E-02    0.00000000E+00
-      2.03417403E-01    3.43197871E-02    0.00000000E+00
-      4.31070640E-01    1.06396216E-01    0.00000000E+00
-      9.53132482E-01    3.44328255E-01    0.00000000E+00
-      2.50824148E+00    7.78854145E-01    0.00000000E+00
+      2.63761313E-02    9.90661689E-03    0.00000000E+00
+      9.16320406E-02    1.49181482E-02    0.00000000E+00
+      2.03417403E-01    3.43197894E-02    0.00000000E+00
+      4.31070640E-01    1.06396227E-01    0.00000000E+00
+      9.53132482E-01    3.44328287E-01    0.00000000E+00
+      2.50824148E+00    7.78854170E-01    0.00000000E+00
 ...
 
  Trace of: wc_qibz for spin: 1 for testing purposes:
@@ -1704,7 +1699,7 @@ iteration_state: {dtset: 4, }
  (iq_ibz, iomega) table
        1       2       3       4       5       6
     1  -0.683  -0.659  -0.612  -0.530  -0.364  -0.117
-        0.000   0.000  -0.000   0.000  -0.000  -0.000
+        0.000   0.000   0.000   0.000   0.000   0.000
 
 ================================================================================
  QP results (energies in eV)
@@ -1768,7 +1763,7 @@ data: !Tabular |
 
  Checking for convergence at iteration: 5
  For k-point: 1 [ 0.0000E+00,  0.0000E+00,  0.0000E+00], spin: 1
-    max(abs(E_i - E_{i-1})):  6.81384E+00 (meV) for band: 14
+    max(abs(E_i - E_{i-1})):  6.81381E+00 (meV) for band: 14
 
  === QP gaps at iteration: 5 (Fermi energy set to zero) ===
  Direct band gap semiconductor
@@ -1902,6 +1897,7 @@ Minimax imaginary tau/omega mesh: !Tabular | # tau, weight(tau), omega, weight(o
 ================================================================================
   
  -outvars: echo values of variables after computation  --------
+-          iomode           1
             acell      1.0260000000E+01  1.0260000000E+01  1.0260000000E+01 Bohr
               amu      2.80855000E+01
            diemac      1.20000000E+01
@@ -1913,8 +1909,8 @@ Minimax imaginary tau/omega mesh: !Tabular | # tau, weight(tau), omega, weight(o
            etotal3     0.0000000000E+00
            etotal4     0.0000000000E+00
            etotal5     0.0000000000E+00
-            fcart1     1.0077736508E-26 -5.0388682539E-27 -2.5194341269E-27
-                      -1.0077736508E-26  5.0388682539E-27  2.5194341269E-27
+            fcart1     1.2597170635E-27 -9.6578308199E-27  1.4696699074E-26
+                      -1.2597170635E-27  9.6578308199E-27 -1.4696699074E-26
             fcart2     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
             fcart3     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -1923,7 +1919,7 @@ Minimax imaginary tau/omega mesh: !Tabular | # tau, weight(tau), omega, weight(o
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
             fcart5     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
--          fftalg         312
+-          fftalg         512
         freqspmax      1.83746627E-01 Hartree
         freqspmin     -1.83746627E-01 Hartree
            getden1          0
@@ -2161,15 +2157,10 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          6.4  wall=          6.8
+- Proc.   0 individual time (sec): cpu=          4.6  wall=          4.6
 
 ================================================================================
 
  Calculation completed.
-.Delivered   2 WARNINGs and  13 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          5.5  wall=          5.5
-- [ALL OK] MEMORY CONSUMPTION REPORT FOR C CODE:
--   There were 202 allocations and 202 deallocations in C code
-- [ALL OK] MEMORY CONSUMPTION REPORT FOR FORTRAN CODE:
--   There were 678508 allocations and 678508 deallocations in Fortran
--   Remaining memory at the end of the calculation is 0
+.Delivered   3 WARNINGs and   9 COMMENTs to log file.
++Overall time at end (sec) : cpu=          4.6  wall=          4.6
