@@ -668,6 +668,7 @@ type, public :: dataset_type
  integer :: varpeq_nstep_ort = 50
  integer :: varpeq_select = -1
  real(dp) :: varpeq_tolgrs = tol6
+ integer :: varpeq_trvec(3) = [0, 0, 0]
  real(dp) :: varpeq_gpr_energy(2) = [zero, one]
  real(dp) :: varpeq_gpr_length(3) = [one, one, one]
 
@@ -2060,6 +2061,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%varpeq_nstep_ort   = dtin%varpeq_nstep_ort
  dtout%varpeq_select      = dtin%varpeq_select
  dtout%varpeq_tolgrs      = dtin%varpeq_tolgrs
+ dtout%varpeq_trvec       = dtin%varpeq_trvec
  dtout%varpeq_gpr_energy  = dtin%varpeq_gpr_energy
  dtout%varpeq_gpr_length  = dtin%varpeq_gpr_length
 
@@ -3580,7 +3582,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' varpeq_avg_g varpeq_aseed varpeq_gpr_energy'
  list_vars=trim(list_vars)//' varpeq_gpr_length varpeq_interp varpeq_nstates'
  list_vars=trim(list_vars)//' varpeq_nstep varpeq_nstep_ort varpeq_select varpeq_pkind'
- list_vars=trim(list_vars)//' varpeq_tolgrs varpeq_translate'
+ list_vars=trim(list_vars)//' varpeq_tolgrs varpeq_translate varpeq_trvec'
  list_vars=trim(list_vars)//' vdw_nfrag vdw_supercell'
  list_vars=trim(list_vars)//' vdw_tol vdw_tol_3bt vdw_typfrag vdw_xc'
  list_vars=trim(list_vars)//' vdw_df_acutmin vdw_df_aratio vdw_df_damax'
