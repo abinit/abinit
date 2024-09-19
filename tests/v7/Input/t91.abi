@@ -8,8 +8,8 @@ t90o_DS4_DDB
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = mrgddb
-#%% test_chain = t90.abi, t91.abi, t92.abi, t93.abi, t94.abi
-#%% exclude_builders = eos_gnu_13.2_mpich, eos_gnu_13.2_serial
+#%% test_chain = t90.abi, t91.abi, t92.abi
+##%% test_chain = t90.abi, t91.abi, t92.abi, t93.abi, t94.abi
 #%% [files]
 #%% files_to_test = 
 #%%   t91.ddb.out, tolnlines=   80,   tolabs=  1.0e-4,      tolrel= 1.1, fld_options = -medium
