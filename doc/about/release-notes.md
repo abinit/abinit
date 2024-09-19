@@ -3253,7 +3253,7 @@ B.4 The python library [AbiPy](https://github.com/abinit/abipy), for launching A
 B.5 A new algorithm (Wigner-Seitz cell based) for computing the weights for the phonon band structure interpolation in ANADDB
     has been implemented. It has replaced the old algorithm in case [[brav@anaddb]] = 1.
     The old algorithm is still available for back-compatibility purposes, now corresponding to [[brav@anaddb]] = -1,
-    see [[test:v7_93]], although there is no real reason for using it.
+    see test:v7_93, although there is no real reason for using it.
     The new algorithm is very general, respect better the symmetries, and should even supercede
     the use of other values of [[brav@anaddb]].
     By G. Petretto following discussions with GM Rignanese and XGonze, and tests by Henrique Pereira Miranda.
