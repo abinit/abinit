@@ -1888,7 +1888,7 @@ The new syntax is:
     anaddb run.in > run.log 2> run.err &
 
 See tests [[test:v8_52]] for a standard analysis of the DDB file and
-[[test:v7_94]] for the (old implementation) of electron-phonon calculations in anaddb.
+test v7_94 for the (old implementation) of electron-phonon calculations in anaddb.
 
 !!! important
 
@@ -1920,7 +1920,7 @@ List of new input variables that rely on this feature:
 - [[pp_dirpath]]: Used in all the input files of the Test Suite
 - [[output_file@anaddb]], [[ddb_filepath@anaddb]], [[gkk_filepath@anaddb]], [[eph_prefix@anaddb]].
   See tests [[test:v8_52]] for a standard analysis of the DDB file and
-  [[test:v7_94]] for the (old implementation) of electron-phonon calculations in anaddb.
+  test v7_94 for the (old implementation) of electron-phonon calculations in anaddb.
 
 By M. Giantomassi
 
@@ -2638,7 +2638,7 @@ The new syntax is:
     anaddb run.in > run.log 2> run.err &
 
 See tests [[test:v8_52]] for a standard analysis of the DDB file and
-[[test:v7_94]] for the (old implementation) of electron-phonon calculations in anaddb.
+test v7_94 for the (old implementation) of electron-phonon calculations in anaddb.
 
 !!! important
 
@@ -2670,7 +2670,7 @@ List of new input variables that rely on this feature:
 - [[pp_dirpath]]: cannot be tested  EXPLICITLY because system dependent but used by runtests.py when generating the input file.
 - [[output_file@anaddb]], [[ddb_filepath@anaddb]], [[gkk_filepath@anaddb]], [[eph_prefix@anaddb]].
   See tests [[test:v8_52]] for a standard analysis of the DDB file and
-  [[test:v7_94]] for the (old implementation) of electron-phonon calculations in anaddb.
+  test v7_94 for the (old implementation) of electron-phonon calculations in anaddb.
 
 By M. Giantomassi
 
