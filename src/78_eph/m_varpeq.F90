@@ -2965,7 +2965,7 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
  type(wfd_t) :: wfd
  type(supercell_type), target :: scell_q, scell_k
  type(krank_t) :: krank_ibz, qrank_ibz
- complex(dp) :: a_nk, bstar_qnu, cphase, c3tmp(3)
+ complex(dp) :: a_nk, bstar_qnu, cphase, cphase_tr, c3tmp(3)
 !arrays
  integer :: sc_ngfft(18), mapl_k(6), kptrlatt_(3,3), qptrlatt_(3,3)
  integer :: units(2), work_ngfft(18), gmax(3), g0_k(3), mapl_qq(6), g0_q(3), ngqpt(3)
@@ -3072,6 +3072,9 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
          call pheigvec_rotate(cryst, qq_ibz, isym_q, trev_q, pheigvec_qibz, pheigvec_qbz, displ_cart_qbz)
        end if
 
+       ! Phase due to the primitive translation (default: 0)
+       cphase_tr = exp(+j_dpc * two_pi * dot_product(qq, dtset%varpeq_trvec))
+
        do sc_iat=1, scell_q%natom
          uc_iat = scell_q%atom_indexing(sc_iat)
          ! Compute phase e^{iq.R}
@@ -3079,7 +3082,7 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
          do ip=1,vpq%nstates
            ! Summing over ph modes.
            do nu=1,natom3
-             bstar_qnu = vpq%b_spin(nu, iq, ip, spin)
+             bstar_qnu = vpq%b_spin(nu, iq, ip, spin) * cphase_tr
              c3tmp = (displ_cart_qbz(1,:,uc_iat,nu) + j_dpc * displ_cart_qbz(2,:,uc_iat,nu)) * bstar_qnu * cphase
              sc_displ_cart_re(:,sc_iat,ip,spin) = sc_displ_cart_re(:,sc_iat,ip,spin) + real(c3tmp)
              sc_displ_cart_im(:,sc_iat,ip,spin) = sc_displ_cart_im(:,sc_iat,ip,spin) + aimag(c3tmp) ! This to check if the imag part is zero.
@@ -3242,6 +3245,9 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
      kk_sc = kk * vpq%ngkpt
      call calc_ceikr(kk_sc, sc_ngfft, sc_nfft, nspinor, ceikr)
 
+     ! Phase due to the primitive translation (default: 0)
+     cphase_tr = exp(-j_dpc * two_pi * dot_product(kk, dtset%varpeq_trvec))
+
      do ib=1,vpq%nb_spin(spin)
        band = bstart + ib - 1
        call wfd%rotate_cg(band, ndat1, spin, kk_ibz, npw_k, kg_k, istwf_k, &
@@ -3249,7 +3255,7 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
        !print *, "int_omega dr |u(r)}^2:", sum(abs(ur_k) ** 2) / wfd%nfft
 
        do ip=1,vpq%nstates
-         a_nk = vpq%a_spin(ib, ik, ip, spin)
+         a_nk = vpq%a_spin(ib, ik, ip, spin)*cphase_tr
          do spinor=1,nspinor
            spad = (spinor - 1) * sc_nfft
            do ir=1,sc_nfft
