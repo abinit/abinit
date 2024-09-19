@@ -40,11 +40,11 @@ module m_cgtools
  use m_abicore
  use m_errors
  use m_xmpi
+ use m_abi_linalg
 
  use m_fstrings,      only : toupper, itoa, sjoin
  use m_time,          only : timab, cwtime, cwtime_report
  use m_numeric_tools, only : hermit, rhophi
- use m_abi_linalg,    only : abi_zgemm_2r, abi_xgemm
  use m_pawcprj,       only : pawcprj_type,pawcprj_axpby,pawcprj_zaxpby
 
  implicit none
@@ -761,13 +761,14 @@ end subroutine cg_zaxpby
 !!
 !! SOURCE
 
-subroutine cg_zgemv(trans, nrows, ncols, cgmat, vec, matvec, alpha, beta)
+subroutine cg_zgemv(trans, nrows, ncols, cgmat, vec, matvec, alpha, beta, gpu_option)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nrows, ncols
  real(dp),optional,intent(in) :: alpha(2), beta(2)
  character(len=1),intent(in) :: trans
+ integer,optional,intent(in) :: gpu_option
 !arrays
  real(dp),intent(in) :: cgmat(2,nrows*ncols), vec(2,*)
  real(dp),intent(inout) :: matvec(2,*)
@@ -775,12 +776,15 @@ subroutine cg_zgemv(trans, nrows, ncols, cgmat, vec, matvec, alpha, beta)
 !Local variables-------------------------------
 !scalars
  integer :: mm, nn, kk, lda, ldb, ldc
+ integer :: my_gpu_option
  real(dp) :: my_alpha(2), my_beta(2)
+ complex(dpc) :: my_calpha, my_cbeta
 
 ! *************************************************************************
 
  my_alpha = cg_cone;  if (present(alpha)) my_alpha = alpha
  my_beta  = cg_czero; if (present(beta))  my_beta  = beta
+ my_gpu_option = ABI_GPU_DISABLED; if (present(gpu_option))  my_gpu_option  = gpu_option
 
  lda = nrows; mm = nrows; nn = 1; kk = ncols
  if (toupper(trans) /= 'N') then
@@ -788,7 +792,13 @@ subroutine cg_zgemv(trans, nrows, ncols, cgmat, vec, matvec, alpha, beta)
  end if
  ldb = kk; ldc = mm
 
- call ZGEMM(trans, "N", mm, nn, kk, my_alpha, cgmat, lda, vec, ldb, my_beta, matvec, ldc)
+ if(my_gpu_option==ABI_GPU_DISABLED) then
+   call ZGEMM(trans, "N", mm, nn, kk, my_alpha, cgmat, lda, vec, ldb, my_beta, matvec, ldc)
+ else if(my_gpu_option==ABI_GPU_OPENMP) then
+   my_calpha = DCMPLX(my_alpha(1), my_alpha(2))
+   my_cbeta  = DCMPLX(my_beta(1), my_beta(2))
+   call abi_gpu_xgemm(2, trans, "N", mm, nn, kk, my_calpha, cgmat, lda, vec, ldb, my_cbeta, matvec, ldc)
+ end if
  ! ZGEMM(TRANSA,TRANSB,M,N,K,ALPHA,A,LDA,B,LDB,BETA,C,LDC)
 
  !call ZGEMV(trans,mm,nn,my_alpha,cgmat,lda,vec,1,my_beta,matvec,1)
@@ -3023,12 +3033,13 @@ end subroutine cgpaw_gramschmidt
 !! SOURCE
 
 subroutine projbd(cg,direc,iband0,icg,iscg,istwf_k,mcg,mscg,nband,&
-                  npw,nspinor,scg,scprod,scprod_io,tim_projbd,useoverlap,me_g0,comm)
+                  npw,nspinor,scg,scprod,scprod_io,tim_projbd,useoverlap,me_g0,comm,gpu_option)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: iband0,icg,iscg,istwf_k,mcg,mscg,nband,npw,nspinor
  integer,intent(in) :: scprod_io,tim_projbd,useoverlap,me_g0,comm
+ integer,optional,intent(in) :: gpu_option
 !arrays
  real(dp),intent(in) :: cg(2,mcg),scg(2,mscg*useoverlap)
  real(dp),intent(inout) :: direc(2,npw*nspinor)
@@ -3037,12 +3048,15 @@ subroutine projbd(cg,direc,iband0,icg,iscg,istwf_k,mcg,mscg,nband,&
 !Local variables-------------------------------
 !scalars
  integer :: nbandm,npw_sp,ierr
+ integer :: my_gpu_option
 !arrays
  real(dp) :: tsec(2),bkp_scprod(2),bkp_dirg0(2)
 
 ! *************************************************************************
 
  call timab(210+tim_projbd,1,tsec)
+
+ my_gpu_option = ABI_GPU_DISABLED; if (present(gpu_option))  my_gpu_option  = gpu_option
 
  npw_sp=npw*nspinor
 
@@ -3052,23 +3066,39 @@ subroutine projbd(cg,direc,iband0,icg,iscg,istwf_k,mcg,mscg,nband,&
 
    if (scprod_io==0) then
      if (useoverlap==1) then
-       call cg_zgemv("C",npw_sp,nbandm,scg(1,iscg+1),direc,scprod)
+       call cg_zgemv("C",npw_sp,nbandm,scg(1,iscg+1),direc,scprod,gpu_option=my_gpu_option)
      else
-       call cg_zgemv("C",npw_sp,nbandm,cg(1,icg+1),  direc,scprod)
+       call cg_zgemv("C",npw_sp,nbandm,cg(1,icg+1),  direc,scprod,gpu_option=my_gpu_option)
      end if
      call xmpi_sum(scprod,comm,ierr)
    end if
 
    if (iband0>0.and.iband0<=nbandm) then
-     bkp_scprod = scprod(:,iband0)
+#ifdef HAVE_OPENMP_OFFLOAD
+     !$OMP TARGET MAP(to:bkp_scprod,scprod) IF(my_gpu_option==ABI_GPU_OPENMP)
+#endif
+     bkp_scprod(:) = scprod(:,iband0)
      scprod(:,iband0) = zero
+#ifdef HAVE_OPENMP_OFFLOAD
+     !$OMP END TARGET
+#endif
    end if
 
-   call cg_zgemv("N",npw_sp,nbandm,cg(1,icg+1),scprod,direc,alpha=-cg_cone,beta=cg_cone)
+   call cg_zgemv("N",npw_sp,nbandm,cg(1,icg+1),scprod,direc,alpha=-cg_cone,beta=cg_cone,gpu_option=my_gpu_option)
 
-   if (iband0>0.and.iband0<=nbandm) scprod(:,iband0) = bkp_scprod ! Restore previous value as scprod is output.
+   if (iband0>0.and.iband0<=nbandm) then
+     ! Restore previous value as scprod is output.
+#ifdef HAVE_OPENMP_OFFLOAD
+     !$OMP TARGET MAP(to:bkp_scprod,scprod) IF(my_gpu_option==ABI_GPU_OPENMP)
+#endif
+     scprod(:,iband0) = bkp_scprod(:)
+#ifdef HAVE_OPENMP_OFFLOAD
+     !$OMP END TARGET
+#endif
+   end if
 
  else if (istwf_k>=2) then
+   if(my_gpu_option/=ABI_GPU_DISABLED) ABI_BUG("Use case not handled with OpenMP GPU (use_gpu_cuda==2)")
    !
    !  u_{G0/2}(G) = u_{G0/2}(-G-G0)^*; k = G0/2
    !  hence:
@@ -3086,7 +3116,7 @@ subroutine projbd(cg,direc,iband0,icg,iscg,istwf_k,mcg,mscg,nband,&
          direc(2,1) = zero
        end if
 
-       call cg_zgemv("C",npw_sp,nbandm,scg(1,iscg+1),direc,scprod)
+       call cg_zgemv("C",npw_sp,nbandm,scg(1,iscg+1),direc,scprod,gpu_option=my_gpu_option)
        scprod = two * scprod
        scprod(2,:) = zero
 
@@ -3100,7 +3130,7 @@ subroutine projbd(cg,direc,iband0,icg,iscg,istwf_k,mcg,mscg,nband,&
          direc(2,1) = zero
        end if
 
-       call cg_zgemv("C",npw_sp,nbandm,cg(1,icg+1),direc,scprod)
+       call cg_zgemv("C",npw_sp,nbandm,cg(1,icg+1),direc,scprod,gpu_option=my_gpu_option)
        scprod = two * scprod
        scprod(2,:) = zero
 
@@ -3115,7 +3145,7 @@ subroutine projbd(cg,direc,iband0,icg,iscg,istwf_k,mcg,mscg,nband,&
      scprod(:,iband0) = zero
    end if
 
-   call cg_zgemv("N",npw_sp,nbandm,cg(1,icg+1),scprod,direc,alpha=-cg_cone,beta=cg_cone)
+   call cg_zgemv("N",npw_sp,nbandm,cg(1,icg+1),scprod,direc,alpha=-cg_cone,beta=cg_cone,gpu_option=my_gpu_option)
 
    if (iband0>0.and.iband0<=nbandm) scprod(:,iband0) = bkp_scprod ! Restore previous value as scprod is output.
 
