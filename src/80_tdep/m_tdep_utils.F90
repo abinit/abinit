@@ -298,6 +298,7 @@ contains
       distance_tmp(:)=distance(eatom,fatom,2:4)
 !     call DGEMV('T',3,3,1.d0,Lattice%rprimd_md(:,:),3,tmp,1,0.d0,distance(eatom,fatom,2:4),1)
       call DGEMV('T',3,3,1.d0,rprimd_md_tmp,3,tmp,1,0.d0,distance_tmp,1)
+      distance(eatom,fatom,2:4)=distance_tmp(:)
       do ii=1,3
 !       Remove the rounding errors before writing (for non regression testing purposes)
         if (abs(distance(eatom,fatom,ii+1)).lt.tol8) distance(eatom,fatom,ii+1)=zero
