@@ -303,12 +303,11 @@ subroutine fstab_init(fstab, ebands, cryst, dtset, comm)
 
  ! Find correspondence BZ --> IBZ
  ! Note that we use symrel so these tables can be used to symmetrize wavefunctions.
- timrev = kpts_timrev_from_kptopt(ebands%kptopt)
  ABI_MALLOC(indkk, (6, nkbz))
 
  krank = krank_from_kptrlatt(ebands%nkpt, ebands%kptns, kptrlatt, compute_invrank=.False.)
 
- if (kpts_map("symrel", timrev, cryst, krank, nkbz, kbz, indkk) /= 0) then
+ if (kpts_map("symrel", ebands%kptopt, cryst, krank, nkbz, kbz, indkk) /= 0) then
    write(msg, '(10a)' ) &
    'The WFK file cannot be used to start the present calculation ',ch10, &
    'It was asked that the wavefunctions be accurate, but',ch10, &
