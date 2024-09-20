@@ -1123,9 +1123,9 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
                forces=xgforces,stress=xgstress,gprimd=gs_hamk%gprimd)
            end if
 
-         end if
-
+         end if ! end usexg==1
          ABI_NVTX_END_RANGE()
+
          if ((stress_needed==1).and.(usefock_loc).and.(psps%usepaw==1))then
            call gs_hamk%load_k(ffnl_k=ffnl_str)
          end if

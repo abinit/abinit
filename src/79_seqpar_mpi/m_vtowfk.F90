@@ -1091,6 +1091,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    cg_k_block => cg_k(:,1+(iblock-1)*blocksize*my_nspinor*npw_k:iblock*blocksize*my_nspinor*npw_k)
    if (dtset%cprj_in_memory==2) then
      if (optforces>0) then
+       call timab(554,1,tsec)  ! "vtowfk:rhoij"
 !      Treat all wavefunctions in case of PAW
        cwaveprj => cprj(:,1+(iblock-1)*my_nspinor*blocksize+ibg:iblock*my_nspinor*blocksize+ibg)
        call nonlop(choice,cpopt,cwaveprj,enlout,gs_hamk,idir,eig_k_block,&
@@ -1104,6 +1105,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
          iband=iband+1;ibs=ii+nnlout*(iblocksize-1)
          grnl_k(1:nnlout,iband)=enlout(ibs+1:ibs+nnlout)
        end do
+       call timab(554,2,tsec)  ! "vtowfk:rhoij"
      end if ! PAW or forces
    else
      if(iscf>0.or.gs_hamk%usecprj==1)then
@@ -1155,6 +1157,8 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 
            else ! cprj_in_memory==1
 
+             call timab(222,1,tsec) ! 'nonlop%vtowfk'
+
              if ( gs_hamk%istwf_k > 1 ) then ! Real only
                space = SPACE_CR
              else ! complex
@@ -1180,6 +1184,8 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
                call xgBlock_map(xgforces,grnl_k_block,SPACE_R,3*natom,blocksize)
                call xg_nonlop_forces_stress(xg_nonlop,xgx0,cprj_xgx0%self,cprj_work%self,xgeigen,forces=xgforces)
              end if
+
+             call timab(222,2,tsec) ! 'nonlop%vtowfk'
 
              if (gs_hamk%usepaw==1) then
                cprj_cwavef_bands => cprj(:,1+ibg+(iblock-1)*ncols_cprj:iblock*ncols_cprj+ibg)
