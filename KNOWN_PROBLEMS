@@ -16,7 +16,7 @@ The present revision ABINITv10.1.4 is for development.
 ================================================================
 0. Platforms
 
-For ABINITv10.1.4, list closed on 2024 07 XX
+For ABINITv10.1.4, list closed on 2024 09 XX
 after installation and successful tests for the standard set of platforms,
 as mentioned on
 https://bbportal.abinit.org/#/status
@@ -37,6 +37,9 @@ All are mostly OK
 GNU 9.2 : v8#34 is disactivated
 GNU 9.3 : bigdft#14 is disactivated
 GNU 12.2 : tutoparal/timages#04 is disactivated
+GNU 13.2 : v7#90-94 is disactivated on the reference bots eos_gnu_13.2_mpich and serial
+GNU 13.2 : paral (MPI10) 83, 84, 101 are disactivated on the reference bot eos_gnu_13.2_mpich 
+GNU 13.2 : paral (MPI4) 78 is disactivated on the reference bot eos_gnu_13.2_mpich 
 GNU 13.2 with OpenMP : several atdep tests are disactivated (08,24,25,27,30,31,34,36)
 GNU 13.2 with OpenMP : several libxc tests are disactivated (34,35)
 GNU 13.2 with OpenMP : several tutorespfn/tlw tests are disactivated (4,5,6,7)
@@ -844,4 +847,4 @@ The value computed for
 has changed largely at the switch from 9.0.0 to 9.0.1 . Should be checked what is the correct value, (e.g. in sequential),
 and debug the situation...
 
-NOTE that problems are presently (since 2020) most often reported on the issue manager of Github .
+NOTE that problems are presently (since 2020) most often reported on the issue manager of Gitlab .

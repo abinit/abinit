@@ -898,7 +898,7 @@ subroutine complete_gamma_tr(crystal,ep_scalprod,nbranch,nqptirred,nqpt_full,nsp
  integer :: ieqqpt,ii,iqpt,isppol,isym
  integer :: itim,jj,kk,ll,neqqpt
  integer :: iatom,ancestor_iatom
- integer :: iqpt_fullbz,imode, itensor
+ integer :: iqpt_fullbz,imode, itensor,reim
  real(dp),parameter :: tol=2.d-8
 !arrays
  integer :: symrel(3,3,crystal%nsym),symrec(3,3,crystal%nsym)
@@ -906,10 +906,10 @@ subroutine complete_gamma_tr(crystal,ep_scalprod,nbranch,nqptirred,nqpt_full,nsp
  integer :: gkk_flag(nbranch,nbranch,nsppol,nqpt_full)
  real(dp) :: gprimd(3,3),rprimd(3,3)
  real(dp) :: ss(3,3), sscart(3,3)
- real(dp) :: tmp_mat(2,nbranch,nbranch)
- real(dp) :: tmp_mat2(2,nbranch,nbranch)
- real(dp) :: tmp_tensor(2,3,3)
- real(dp) :: tmp_tensor2(2,3,3)
+ real(dp) :: tmp_mat(nbranch,nbranch)
+ real(dp) :: tmp_mat2(nbranch,nbranch)
+ real(dp) :: tmp_tensor(3,3)
+ real(dp) :: tmp_tensor2(3,3)
  real(dp) :: ss_allatoms(nbranch,nbranch)
  real(dp),allocatable :: gkk_qpt_new(:,:,:,:),gkk_qpt_tmp(:,:,:,:)
 
@@ -1013,47 +1013,25 @@ subroutine complete_gamma_tr(crystal,ep_scalprod,nbranch,nqptirred,nqpt_full,nsp
 
 !        for each tensor component, rotate the cartesian directions of phonon modes
          do itensor = 1, 9
-!          multiply by the ss matrices
-           tmp_mat2(:,:,:) = zero
-           tmp_mat(:,:,:) = reshape(gkk_qpt_tmp(:,itensor,:,isppol),&
-&           (/2,nbranch,nbranch/))
-           call DGEMM ('N','N',nbranch,nbranch,nbranch,&
-&           one,ss_allatoms,nbranch,tmp_mat(1,:,:),nbranch,zero,&
-&           tmp_mat2(1,:,:),nbranch)
-           call DGEMM ('N','N',nbranch,nbranch,nbranch,&
-&           one,ss_allatoms,nbranch,tmp_mat(2,:,:),nbranch,zero,&
-&           tmp_mat2(2,:,:),nbranch)
-
-           call DGEMM ('N','T',nbranch,nbranch,nbranch,&
-&           one,tmp_mat2(1,:,:),nbranch,ss_allatoms,nbranch,zero,&
-&           tmp_mat(1,:,:),nbranch)
-           call DGEMM ('N','T',nbranch,nbranch,nbranch,&
-&           one,tmp_mat2(2,:,:),nbranch,ss_allatoms,nbranch,zero,&
-&           tmp_mat(2,:,:),nbranch)
-
-           gkk_qpt_tmp(:,itensor,:,isppol) = reshape (tmp_mat, (/2,nbranch*nbranch/))
+           do reim=1,2  ! Real/Imaginary parts 
+!            Multiply by the ss matrices
+             tmp_mat2(:,:) = zero
+             tmp_mat(:,:) = reshape(gkk_qpt_tmp(reim,itensor,:,isppol),(/nbranch,nbranch/))
+             call DGEMM ('N','N',nbranch,nbranch,nbranch,one,ss_allatoms,nbranch,tmp_mat,nbranch,zero,tmp_mat2,nbranch)
+             call DGEMM ('N','T',nbranch,nbranch,nbranch,one,tmp_mat2,nbranch,ss_allatoms,nbranch,zero,tmp_mat,nbranch)
+             gkk_qpt_tmp(reim,itensor,:,isppol) = reshape (tmp_mat, (/nbranch*nbranch/))
+           enddo
          end do ! itensor
 
 !        for each cartesian direction/phonon mode, rotate the tensor components
          do imode = 1, nbranch*nbranch
-           tmp_tensor2(:,:,:) = zero
-           tmp_tensor(:,:,:) = reshape(gkk_qpt_tmp(:,:,imode,isppol),&
-&           (/2,3,3/))
-           call DGEMM ('N','N',3,3,3,&
-&           one,sscart,3,tmp_tensor(1,:,:),3,zero,&
-&           tmp_tensor2(1,:,:),3)
-           call DGEMM ('N','T',3,3,3,&
-&           one,tmp_tensor2(1,:,:),3,sscart,3,zero,&
-&           tmp_tensor(1,:,:),3)
-
-           call DGEMM ('N','N',3,3,3,&
-&           one,sscart,3,tmp_tensor(2,:,:),3,zero,&
-&           tmp_tensor2(2,:,:),3)
-           call DGEMM ('N','T',3,3,3,&
-&           one,tmp_tensor2(2,:,:),3,sscart,3,zero,&
-&           tmp_tensor(2,:,:),3)
-
-           gkk_qpt_tmp(:,:,imode,isppol) = reshape (tmp_tensor, (/2,9/)) ! modified by BX
+           do reim=1,2  ! Real/Imaginary parts 
+             tmp_tensor2(:,:) = zero
+             tmp_tensor(:,:) = reshape(gkk_qpt_tmp(reim,:,imode,isppol),(/3,3/))
+             call DGEMM ('N','N',3,3,3,one,sscart,3,tmp_tensor,3,zero,tmp_tensor2,3)
+             call DGEMM ('N','T',3,3,3,one,tmp_tensor2,3,sscart,3,zero,tmp_tensor,3)
+             gkk_qpt_tmp(reim,:,imode,isppol) = reshape (tmp_tensor, (/9/)) ! modified by BX
+           enddo
          end do ! imode
 
 !        add to gkk_qpt_new
@@ -1124,51 +1102,26 @@ subroutine complete_gamma_tr(crystal,ep_scalprod,nbranch,nqptirred,nqpt_full,nsp
 
        do isppol=1,nsppol
          do itensor = 1, 9
-!          multiply by the ss^{-1} matrices
-           tmp_mat2(:,:,:) = zero
-           tmp_mat(:,:,:) = reshape(gkk_qpt_new(:,itensor,:,isppol),&
-&           (/2,nbranch,nbranch/))
-
-
-           call DGEMM ('N','N',nbranch,nbranch,nbranch,&
-&           one,ss_allatoms,nbranch,tmp_mat(1,:,:),nbranch,zero,&
-&           tmp_mat2(1,:,:),nbranch)
-           call DGEMM ('N','N',nbranch,nbranch,nbranch,&
-&           one,ss_allatoms,nbranch,tmp_mat(2,:,:),nbranch,zero,&
-&           tmp_mat2(2,:,:),nbranch)
-
-           call DGEMM ('N','T',nbranch,nbranch,nbranch,&
-&           one,tmp_mat2(1,:,:),nbranch,ss_allatoms,nbranch,zero,&
-&           tmp_mat(1,:,:),nbranch)
-           call DGEMM ('N','T',nbranch,nbranch,nbranch,&
-&           one,tmp_mat2(2,:,:),nbranch,ss_allatoms,nbranch,zero,&
-&           tmp_mat(2,:,:),nbranch)
-
-
-           gkk_qpt_tmp(:,itensor,:,isppol) = reshape (tmp_mat, (/2,nbranch*nbranch/))
+           do reim=1,2  ! Real/Imaginary parts
+!            Multiply by the ss^{-1} matrices
+             tmp_mat2(:,:) = zero
+             tmp_mat(:,:) = reshape(gkk_qpt_new(reim,itensor,:,isppol),(/nbranch,nbranch/))
+             call DGEMM ('N','N',nbranch,nbranch,nbranch,one,ss_allatoms,nbranch,tmp_mat,nbranch,zero,tmp_mat2,nbranch)
+             call DGEMM ('N','T',nbranch,nbranch,nbranch,one,tmp_mat2,nbranch,ss_allatoms,nbranch,zero,tmp_mat,nbranch)
+             gkk_qpt_tmp(reim,itensor,:,isppol) = reshape (tmp_mat, (/nbranch*nbranch/))
+           enddo
          end do ! itensor
 
 !        for each cartesian direction/phonon mode, rotate the tensor components
          do imode = 1, nbranch*nbranch
-           tmp_tensor2(:,:,:) = zero
-           tmp_tensor(:,:,:) = reshape(gkk_qpt_tmp(:,:,imode,isppol),&
-&           (/2,3,3/))
-           call DGEMM ('N','N',3,3,3,&
-&           one,sscart,3,tmp_tensor(1,:,:),3,zero,&
-&           tmp_tensor2(1,:,:),3)
-           call DGEMM ('N','T',3,3,3,&
-&           one,tmp_tensor2(1,:,:),3,sscart,3,zero,&
-&           tmp_tensor(1,:,:),3)
-
-           call DGEMM ('N','N',3,3,3,&
-&           one,sscart,3,tmp_tensor(2,:,:),3,zero,&
-&           tmp_tensor2(2,:,:),3)
-           call DGEMM ('N','T',3,3,3,&
-&           one,tmp_tensor2(2,:,:),3,sscart,3,zero,&
-&           tmp_tensor(2,:,:),3)
-
-!          gkk_qpt_new(:,:,imode,isppol) = reshape (tmp_tensor, (/2,9/)) ! Modified by BX
-           gkk_qpt_tmp(:,:,imode,isppol) = reshape (tmp_tensor, (/2,9/)) ! Modified by BX
+           do reim=1,2  ! Real/Imaginary parts
+             tmp_tensor2(:,:) = zero
+             tmp_tensor(:,:) = reshape(gkk_qpt_tmp(reim,:,imode,isppol),(/3,3/))
+             call DGEMM ('N','N',3,3,3,one,sscart,3,tmp_tensor,3,zero,tmp_tensor2,3)
+             call DGEMM ('N','T',3,3,3,one,tmp_tensor2,3,sscart,3,zero,tmp_tensor,3)
+!            gkk_qpt_new(:,:,imode,isppol) = reshape (tmp_tensor, (/2,9/)) ! Modified by BX
+             gkk_qpt_tmp(reim,:,imode,isppol) = reshape (tmp_tensor, (/9/)) ! Modified by BX
+           enddo
          end do ! imode
 
          if (gkk_flag (1,1,isppol,ieqqpt) == -1) then
