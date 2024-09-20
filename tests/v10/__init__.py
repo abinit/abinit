@@ -18,4 +18,6 @@ inp_files = [
     "t05.abi" ,  # same as v10[04] but with norm-conserving pseudos (without DFTI)
     "t06.abi" ,  # same as v9[206] but with istwfk>1 (without DFTI)
     "t40.abi" ,  # test orbmag calculation when using spatial symmetries for GS nuclear dipole 
+    "t81.abi" ,  # Short MD to test restart on next test
+    "t82.abi" ,  # Test restart of MD from the HIST of previous test using restartxf -1
 ]

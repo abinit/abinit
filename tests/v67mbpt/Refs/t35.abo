@@ -1,6 +1,6 @@
 
-.Version 9.3.1 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 10.1.4.5 of ABINIT, released Sep 2024.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2024 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,14 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h31 )
+.Starting date : Fri 13 Sep 2024.
+- ( at 19h12 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v67mbpt_t31-t32-t33-t34-t35/t35.in
-- output file    -> t35.out
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v67mbpt_t31-t32-t33-t34-t35/t35.abi
+- output file    -> t35.abo
 - root for input  files -> t35i
 - root for output files -> t35o
-
 
  DATASET    1 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -34,7 +33,7 @@
 -    mband =           8        mffmem =           1         mkmem =           8
        mpw =         190          nfft =        4096          nkpt =           8
 ================================================================================
-P This job should need less than                       1.932 Mbytes of memory.
+P This job should need less than                       2.048 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.188 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
@@ -43,10 +42,10 @@ _ WF disk file :      0.188 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
 -
-- outvars: echo of selected default values                                      
--   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+- outvars: echo of selected default values
+-   iomode0 =  0 , fftalg0 =512 , wfoptalg0 =  0
 -
-- outvars: echo of global parameters not present in the input file              
+- outvars: echo of global parameters not present in the input file
 -  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
@@ -65,7 +64,7 @@ _ WF disk file :      0.188 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
              ecut      6.00000000E+00 Hartree
           ecuteps      2.10000000E+00 Hartree
           ecutwfn      6.00000000E+00 Hartree
--          fftalg         312
+-          fftalg         512
        getwfkfine          99
            irdwfk           1
            jdtset        1
@@ -198,8 +197,8 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 2, }
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -368,9 +367,9 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 2, }
  Writing KS-RPA macroscopic dielectric function without local fields to file: t35o_DS1_RPA_NLF_MDF
  Writing GW-RPA macroscopic dielectric function without local fields to file: t35o_DS1_GW_NLF_MDF
  >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 182 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 173 iterations.
  >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 179 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 182 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 179 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 185 iterations.
  >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 186 iterations.
  >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 182 iterations.
  Writing EXC Macroscopic dielectric function to file: t35o_DS1_EXC_MDF
@@ -411,7 +410,7 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 2, }
            etotal1     0.0000000000E+00
             fcart1     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
--          fftalg         312
+-          fftalg         512
        getwfkfine          99
            irdwfk           1
            jdtset        1
@@ -602,10 +601,10 @@ P           mkmem           8
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          2.0  wall=          2.1
+- Proc.   0 individual time (sec): cpu=          1.4  wall=          1.5
 
 ================================================================================
 
  Calculation completed.
-.Delivered  12 WARNINGs and   4 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          2.0  wall=          2.1
+.Delivered   4 WARNINGs and   5 COMMENTs to log file.
++Overall time at end (sec) : cpu=          1.4  wall=          1.5

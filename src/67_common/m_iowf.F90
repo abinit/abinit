@@ -151,7 +151,7 @@ subroutine outresid(dtset,kptns,mband,nband,nkpt,nsppol,resid)
          call wrtout(std_out, msg)
        end do
      else if(ikpt==nkpt_eff+1)then
-       write(msg,'(2a)')' outwf : prtvol=0 or 1, do not print more k-points.',ch10
+       write(msg,'(2a)')' outresid : prtvol=0 or 1, do not print more k-points.',ch10
        if(dtset%prtvol>=2) call wrtout(ab_out, msg)
        call wrtout(std_out, msg)
      end if

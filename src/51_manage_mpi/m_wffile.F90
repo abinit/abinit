@@ -2641,7 +2641,7 @@ subroutine xderiveRead_int2d_displ(wff,xval,n1,n2,spaceComm,displace,ierr)
      depl_val(ipos)=ipos
    end do
  end do
-!To save time, the location describe by array map must be in increasing order
+!To save time, the location described by array map must be in increasing order
  nbval=0
  do i1=0,totsize-1
    if (depl_val(i1)/=-1) then
