@@ -764,8 +764,8 @@ contains
 
   integer :: shift_itypat_nlmn,shift_itypat_3nlmn,ntypat,nattyp
   integer :: icol,icol_deriv,ilmn,nlmn,ipw,ia,itypat,idir
-  complex(dp) :: ctmp(3)
-  real(dp) :: tmp(3),proj_deriv_ipw_re,proj_deriv_ipw_im
+  complex(dp) :: ctmp
+  real(dp) :: tmp,proj_deriv_ipw_re,proj_deriv_ipw_im
 
   if (.not.associated(xg_nonlop%projectors_k)) then
     ABI_ERROR('projectors_k should be associated')
@@ -796,15 +796,15 @@ contains
         nlmn = xg_nonlop%nlmn_ntypat(itypat)
         nattyp = xg_nonlop%nattyp(itypat)
         !! projectors_deriv_atom(k+G) = -i * 2pi * (k+G)_idir * projectors(k+G)
-        !$omp do collapse(3)
+        !$omp do collapse(4)
         do ia = 1, nattyp
           do ilmn=1,nlmn
             do ipw=1,xg_nonlop%npw_k
-              icol = ilmn + (ia-1)*nlmn + shift_itypat_nlmn
-              ctmp(:) = ( 0.0_DP, -1.0_DP) * two_pi * xg_nonlop%kpg_k(ipw,:)
               do idir=1,3
+                icol = ilmn + (ia-1)*nlmn + shift_itypat_nlmn
+                ctmp = ( 0.0_DP, -1.0_DP) * two_pi * xg_nonlop%kpg_k(ipw,idir)
                 icol_deriv = ilmn + (idir-1)*nlmn + (ia-1)*3*nlmn + shift_itypat_3nlmn
-                projectors_deriv_atom_k_(ipw,icol_deriv) = ctmp(idir) * projectors_k_(ipw,icol)
+                projectors_deriv_atom_k_(ipw,icol_deriv) = ctmp * projectors_k_(ipw,icol)
               end do
             end do
           end do
@@ -830,18 +830,18 @@ contains
         nlmn = xg_nonlop%nlmn_ntypat(itypat)
         nattyp = xg_nonlop%nattyp(itypat)
         !! projectors_deriv_atom(k+G) = -i * 2pi * (k+G)_idir * projectors(k+G)
-        !$omp do collapse(3)
+        !$omp do collapse(4)
         do ia = 1, nattyp
           do ilmn=1,nlmn
             do ipw=1,xg_nonlop%npw_k
-              icol = ilmn + (ia-1)*nlmn + shift_itypat_nlmn
-              tmp(:) = - two_pi * xg_nonlop%kpg_k(ipw,:)
               do idir=1,3
+                icol = ilmn + (ia-1)*nlmn + shift_itypat_nlmn
+                tmp  = - two_pi * xg_nonlop%kpg_k(ipw,idir)
                 icol_deriv = ilmn + (idir-1)*nlmn + (ia-1)*3*nlmn + shift_itypat_3nlmn
                 !! Re(projectors_deriv_atom) =  2pi * (k+G)_idir * Im(projectors)
                 !! Im(projectors_deriv_atom) = -2pi * (k+G)_idir * Re(projectors)
-                proj_deriv_ipw_re = - tmp(idir) * projectors_k_real(2*ipw  ,icol)
-                proj_deriv_ipw_im =   tmp(idir) * projectors_k_real(2*ipw-1,icol)
+                proj_deriv_ipw_re = - tmp * projectors_k_real(2*ipw  ,icol)
+                proj_deriv_ipw_im =   tmp * projectors_k_real(2*ipw-1,icol)
                 projectors_deriv_atom_k_real(2*ipw-1,icol_deriv) = proj_deriv_ipw_re
                 projectors_deriv_atom_k_real(2*ipw  ,icol_deriv) = proj_deriv_ipw_im
               end do
@@ -2940,9 +2940,15 @@ subroutine xg_nonlop_forces_stress(xg_nonlop,Xin,cprjin,cprj_work,eigen,forces,s
        shift_itypat=0
        shift_itypat_nlmn=0
        shift_itypat_3nlmn=0
+       !$omp parallel default (none) &
+       !$omp& shared(xg_nonlop,forces_,cprj_deriv_,cprj_), &
+       !$omp& firstprivate(shift_itypat,shift_itypat_nlmn,shift_itypat_3nlmn,ncols_cprj_nospin,nspinor), &
+       !$omp& private(itypat,nattyp,nlmn,ia,ilmn,idir,iforces,my_iband), &
+       !$omp& private(iband_spinor,icprj,icprj_deriv)
        do itypat = 1, xg_nonlop%ntypat
          nlmn = xg_nonlop%nlmn_ntypat(itypat)
          nattyp = xg_nonlop%nattyp(itypat)
+         !$omp do collapse(5)
          do iband=1,ncols_cprj_nospin
            do ispinor=1,nspinor
              do ia = 1, nattyp
@@ -2960,10 +2966,12 @@ subroutine xg_nonlop_forces_stress(xg_nonlop,Xin,cprjin,cprj_work,eigen,forces,s
              end do
            end do
          end do
+         !$omp end do
          shift_itypat       = shift_itypat       + 3*nattyp
          shift_itypat_nlmn  = shift_itypat_nlmn  + nattyp*nlmn
          shift_itypat_3nlmn = shift_itypat_3nlmn + nattyp*3*nlmn
        end do
+       !$omp end parallel
 
      case (SPACE_R)
 
@@ -2973,9 +2981,15 @@ subroutine xg_nonlop_forces_stress(xg_nonlop,Xin,cprjin,cprj_work,eigen,forces,s
        shift_itypat=0
        shift_itypat_nlmn=0
        shift_itypat_3nlmn=0
+       !$omp parallel default (none) &
+       !$omp& shared(xg_nonlop,forces_,cprj_deriv_real,cprj_real), &
+       !$omp& firstprivate(shift_itypat,shift_itypat_nlmn,shift_itypat_3nlmn,ncols_cprj_nospin,nspinor), &
+       !$omp& private(itypat,nattyp,nlmn,ia,ilmn,idir,iforces,my_iband), &
+       !$omp& private(iband_spinor,icprj,icprj_deriv)
        do itypat = 1, xg_nonlop%ntypat
          nlmn = xg_nonlop%nlmn_ntypat(itypat)
          nattyp = xg_nonlop%nattyp(itypat)
+         !$omp do collapse(5)
          do iband=1,ncols_cprj_nospin
            do ispinor=1,nspinor
              do ia = 1, nattyp
@@ -2993,10 +3007,12 @@ subroutine xg_nonlop_forces_stress(xg_nonlop,Xin,cprjin,cprj_work,eigen,forces,s
              end do
            end do
          end do
+         !$omp end do
          shift_itypat       = shift_itypat       + 3*nattyp
          shift_itypat_nlmn  = shift_itypat_nlmn  + nattyp*nlmn
          shift_itypat_3nlmn = shift_itypat_3nlmn + nattyp*3*nlmn
        end do
+       !$omp end parallel
 
      case default
        ABI_ERROR("Wrong space")
@@ -3050,9 +3066,15 @@ subroutine xg_nonlop_mult_cprj_stress(xg_nonlop,cprj,cprj_deriv,stress)
        shift_itypat=0
        shift_itypat_nlmn=0
        shift_itypat_6nlmn=0
+       !$omp parallel default (none) &
+       !$omp& shared(xg_nonlop,stress_,cprj_deriv_,cprj_), &
+       !$omp& firstprivate(shift_itypat,shift_itypat_nlmn,shift_itypat_6nlmn,ncols_cprj_nospin,nspinor), &
+       !$omp& private(itypat,nattyp,nlmn,ia,ilmn,idir,my_iband), &
+       !$omp& private(iband_spinor,icprj,icprj_deriv)
        do itypat = 1, xg_nonlop%ntypat
          nlmn = xg_nonlop%nlmn_ntypat(itypat)
          nattyp = xg_nonlop%nattyp(itypat)
+         !$omp do collapse(5)
          do iband=1,ncols_cprj_nospin
            do ispinor=1,nspinor
              do ia = 1, nattyp
@@ -3069,10 +3091,12 @@ subroutine xg_nonlop_mult_cprj_stress(xg_nonlop,cprj,cprj_deriv,stress)
              end do
            end do
          end do
+         !$omp end do
          shift_itypat       = shift_itypat       + 6*nattyp
          shift_itypat_nlmn  = shift_itypat_nlmn  + nattyp*nlmn
          shift_itypat_6nlmn = shift_itypat_6nlmn + nattyp*6*nlmn
        end do
+       !$omp end parallel
 
      case (SPACE_R)
 
@@ -3082,9 +3106,15 @@ subroutine xg_nonlop_mult_cprj_stress(xg_nonlop,cprj,cprj_deriv,stress)
        shift_itypat=0
        shift_itypat_nlmn=0
        shift_itypat_6nlmn=0
+       !$omp parallel default (none) &
+       !$omp& shared(xg_nonlop,stress_,cprj_deriv_real,cprj_real), &
+       !$omp& firstprivate(shift_itypat,shift_itypat_nlmn,shift_itypat_6nlmn,ncols_cprj_nospin,nspinor), &
+       !$omp& private(itypat,nattyp,nlmn,ia,ilmn,idir,my_iband), &
+       !$omp& private(iband_spinor,icprj,icprj_deriv)
        do itypat = 1, xg_nonlop%ntypat
          nlmn = xg_nonlop%nlmn_ntypat(itypat)
          nattyp = xg_nonlop%nattyp(itypat)
+         !$omp do collapse(5)
          do iband=1,ncols_cprj_nospin
            do ispinor=1,nspinor
              do ia = 1, nattyp
@@ -3101,10 +3131,12 @@ subroutine xg_nonlop_mult_cprj_stress(xg_nonlop,cprj,cprj_deriv,stress)
              end do
            end do
          end do
+         !$omp end do
          shift_itypat       = shift_itypat       + 6*nattyp
          shift_itypat_nlmn  = shift_itypat_nlmn  + nattyp*nlmn
          shift_itypat_6nlmn = shift_itypat_6nlmn + nattyp*6*nlmn
        end do
+       !$omp end parallel
 
      case default
        ABI_ERROR("Wrong space")
