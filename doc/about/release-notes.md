@@ -1888,7 +1888,7 @@ The new syntax is:
     anaddb run.in > run.log 2> run.err &
 
 See tests [[test:v8_52]] for a standard analysis of the DDB file and
-[[test:v7_94]] for the (old implementation) of electron-phonon calculations in anaddb.
+test v7_94 for the (old implementation) of electron-phonon calculations in anaddb.
 
 !!! important
 
@@ -1920,7 +1920,7 @@ List of new input variables that rely on this feature:
 - [[pp_dirpath]]: Used in all the input files of the Test Suite
 - [[output_file@anaddb]], [[ddb_filepath@anaddb]], [[gkk_filepath@anaddb]], [[eph_prefix@anaddb]].
   See tests [[test:v8_52]] for a standard analysis of the DDB file and
-  [[test:v7_94]] for the (old implementation) of electron-phonon calculations in anaddb.
+  test v7_94 for the (old implementation) of electron-phonon calculations in anaddb.
 
 By M. Giantomassi
 
@@ -2638,7 +2638,7 @@ The new syntax is:
     anaddb run.in > run.log 2> run.err &
 
 See tests [[test:v8_52]] for a standard analysis of the DDB file and
-[[test:v7_94]] for the (old implementation) of electron-phonon calculations in anaddb.
+test v7_94 for the (old implementation) of electron-phonon calculations in anaddb.
 
 !!! important
 
@@ -2670,7 +2670,7 @@ List of new input variables that rely on this feature:
 - [[pp_dirpath]]: cannot be tested  EXPLICITLY because system dependent but used by runtests.py when generating the input file.
 - [[output_file@anaddb]], [[ddb_filepath@anaddb]], [[gkk_filepath@anaddb]], [[eph_prefix@anaddb]].
   See tests [[test:v8_52]] for a standard analysis of the DDB file and
-  [[test:v7_94]] for the (old implementation) of electron-phonon calculations in anaddb.
+  test v7_94 for the (old implementation) of electron-phonon calculations in anaddb.
 
 By M. Giantomassi
 
@@ -3253,7 +3253,7 @@ B.4 The python library [AbiPy](https://github.com/abinit/abipy), for launching A
 B.5 A new algorithm (Wigner-Seitz cell based) for computing the weights for the phonon band structure interpolation in ANADDB
     has been implemented. It has replaced the old algorithm in case [[brav@anaddb]] = 1.
     The old algorithm is still available for back-compatibility purposes, now corresponding to [[brav@anaddb]] = -1,
-    see [[test:v7_93]], although there is no real reason for using it.
+    see test:v7_93, although there is no real reason for using it.
     The new algorithm is very general, respect better the symmetries, and should even supercede
     the use of other values of [[brav@anaddb]].
     By G. Petretto following discussions with GM Rignanese and XGonze, and tests by Henrique Pereira Miranda.
