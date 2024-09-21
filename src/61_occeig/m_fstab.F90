@@ -258,7 +258,7 @@ subroutine fstab_init(fstab, ebands, cryst, dtset, comm)
 !Local variables-------------------------------
 !scalars
  integer,parameter :: option0 = 0, brav1 = 1, bcorr0 = 0
- integer :: nkfs,spin,band,nband_k,i1,i2,ib,blow,ik_bz,ik_ibz,nkibz,timrev
+ integer :: nkfs,spin,band,nband_k,i1,i2,ib,blow,ik_bz,ik_ibz,nkibz
  integer :: ik,mkpt,nkbz,ierr, nene,ifermi
  real(dp),parameter :: max_occ1 = one
  real(dp) :: elow,ehigh,ebis,enemin,enemax,deltaene,cpu,wall,gflops
