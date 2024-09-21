@@ -3901,7 +3901,7 @@ type(ebands_t) function sigmaph_get_ebands(self, cryst, ebands, brange, kcalc2eb
 !Local variables -----------------------------------------
 !scalars
  integer,parameter :: master = 0
- integer :: spin, ikpt, ikcalc, iband, itemp, nsppol, nkpt, timrev, band_ks, bstart_ks, nbcalc_ks, mband
+ integer :: spin, ikpt, ikcalc, iband, itemp, nsppol, nkpt, band_ks, bstart_ks, nbcalc_ks, mband
  integer :: bmin, bmax, my_rank, ierr
  integer :: ncerr
  type(krank_t) :: krank
@@ -4190,7 +4190,7 @@ subroutine sigmaph_setup_kcalc(self, dtset, cryst, ebands, ikcalc, prtvol, comm)
 
 !Local variables-------------------------------
  integer,parameter :: master = 0
- integer :: spin, my_rank, iq_ibz, nprocs, qtimrev, qptopt, kptopt !, nbcalc_ks !, bstart_ks
+ integer :: spin, my_rank, iq_ibz, nprocs, qptopt, kptopt !, nbcalc_ks !, bstart_ks
  integer :: ikpt, ibz_k, isym_k, itim_k !isym_lgk,
  real(dp) :: cpu, wall, gflops
  character(len=5000) :: msg
@@ -5464,7 +5464,7 @@ subroutine qpoints_oracle(sigma, dtset, cryst, ebands, qpts, nqpt, nqbz, qbz, qs
 !scalars
  integer,parameter :: master = 0
  integer :: spin, ikcalc, ik_ibz, iq_bz, ierr, db_iqpt, ibsum_kq, ikq_ibz, ikq_bz
- integer :: cnt, my_rank, nprocs, ib_k, band_ks, nkibz, nkbz, kq_rank, qptopt, qtimrev
+ integer :: cnt, my_rank, nprocs, ib_k, band_ks, nkibz, nkbz, kq_rank, qptopt
  real(dp) :: eig0nk, eig0mkq, ediff, cpu, wall, gflops
  character(len=5000) :: msg
  type(krank_t) :: krank, qrank
