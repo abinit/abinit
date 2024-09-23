@@ -70,10 +70,12 @@ module m_xg_nonlop
  integer, parameter :: tim_getcprj_gemm     = 2130
  integer, parameter :: tim_getcprj_copy     = 2131
  integer, parameter :: tim_getcprj_mpi      = 2132
+ integer, parameter :: tim_getcprj_otf      = 2133
 
  integer, parameter :: tim_apply_prj_gemm   = 2135
  integer, parameter :: tim_apply_prj_copy   = 2136
  integer, parameter :: tim_apply_prj_mpi    = 2137
+ integer, parameter :: tim_apply_prj_otf    = 2138
 
  integer, parameter :: tim_mult_cprj_gemm   = 2140
  integer, parameter :: tim_mult_cprj_copy   = 2141
@@ -642,7 +644,7 @@ contains
   cil(3) = (-1.0_DP, 0.0_DP) * xg_nonlop%weight
   cil(4) = ( 0.0_DP, 1.0_DP) * xg_nonlop%weight
 
-  compute_gather = xg_nonlop%option==1
+  compute_gather = xg_nonlop%option==0
 
   if (compute_gather) then
     call xgBlock_zero(xg_nonlop%ffnl_gather_k%self)
@@ -1029,8 +1031,8 @@ contains
   real(dp) :: ffnl_ipw,ph3d_ipw_r(2)
   complex(dp) :: cil(4),ph3d_ipw,ctmp
 
-  if (xg_nonlop%option/=1) then
-    ABI_ERROR('xg_nonlop%option/=1')
+  if (xg_nonlop%option/=0) then
+    ABI_ERROR('xg_nonlop%option/=0')
   end if
 
   nmpi = xmpi_comm_size(xg_nonlop%comm_band)
@@ -1063,9 +1065,7 @@ contains
     case (SPACE_C)
 
       call xgBlock_reverseMap(projs_otf,projectors_k_)
-      if (xg_nonlop%option==1) then
-        call xgBlock_reverseMap(xg_nonlop%ph3d_gather_k%self,ph3d_gather_k_)
-      end if
+      call xgBlock_reverseMap(xg_nonlop%ph3d_gather_k%self,ph3d_gather_k_)
       shift_itypat=0
       shift_itypat_nlmn=0
       !$omp parallel default (none) &
@@ -1099,9 +1099,7 @@ contains
     case(SPACE_CR)
 
       call xgBlock_reverseMap(projs_otf,projectors_k_real)
-      if (xg_nonlop%option==1) then
-        call xgBlock_reverseMap(xg_nonlop%ph3d_gather_k%self,ph3d_gather_k_real)
-      end if
+      call xgBlock_reverseMap(xg_nonlop%ph3d_gather_k%self,ph3d_gather_k_real)
       shift_itypat=0
       shift_itypat_nlmn=0
       !$omp parallel default (none) &
@@ -1217,7 +1215,7 @@ contains
   xg_nonlop%kpg_k => kpg_k
 
   xg_nonlop%projectors_k  => xg_nonlop%projectors(ikpt)
-  if (xg_nonlop%option==1) then
+  if (xg_nonlop%option==0) then
     xg_nonlop%ffnl_gather_k => xg_nonlop%ffnl_gather(ikpt)
     xg_nonlop%ph3d_gather_k => xg_nonlop%ph3d_gather(ikpt)
   end if
@@ -1232,7 +1230,7 @@ contains
     call xg_init(xg_nonlop%projectors_k,xg_nonlop%space_pw,npw_k,xg_nonlop%cprjdim,&
       xg_nonlop%comm_band,me_g0=me_g0_loc)
 
-    if (xg_nonlop%option==1) then
+    if (xg_nonlop%option==0) then
       call xg_init(xg_nonlop%ffnl_gather_k,SPACE_R,xg_nonlop%total_npw_k,xg_nonlop%nlmn_max*ntypat,xmpi_comm_null)
       call xg_init(xg_nonlop%ph3d_gather_k,xg_nonlop%space_pw,xg_nonlop%total_npw_k,xg_nonlop%natom,&
         xmpi_comm_null,me_g0=me_g0_fft_loc)
@@ -1455,7 +1453,7 @@ subroutine xg_nonlop_getcprj(xg_nonlop,X,cprjX,work_mpi)
            dest = mod(me_band-(iblock-1),nmpi)
            if (dest<0) dest=dest+nmpi
 
-           if (xg_nonlop%option==0) then
+           if (xg_nonlop%option==1) then
              call timab(tim_getcprj_mpi,1,tsec)
              call xgBlock_mpi_isend(projs,dest,tag,request,comm=xg_nonlop%comm_band)
              call timab(tim_getcprj_mpi,2,tsec)
@@ -1478,21 +1476,23 @@ subroutine xg_nonlop_getcprj(xg_nonlop,X,cprjX,work_mpi)
            call xgBlock_setBlock(work_mpi,work_mpi_npw,npw_max,xg_nonlop%cprjdim)
            call xgBlock_free_reshape(work_mpi_npw,npw,xg_nonlop%cprjdim,new_me_g0=me_g0_loc)
 
-           call timab(tim_getcprj_mpi,1,tsec)
-           if (xg_nonlop%option==0) then
+           if (xg_nonlop%option==1) then
+             call timab(tim_getcprj_mpi,1,tsec)
              call xgBlock_mpi_recv(work_mpi_npw,source,tag,comm=xg_nonlop%comm_band)
-           else if (xg_nonlop%option==1) then
+             call timab(tim_getcprj_mpi,2,tsec)
+           else if (xg_nonlop%option==0) then
+             call timab(tim_getcprj_otf,1,tsec)
              call xg_nonlop_compute_projs_otf(xg_nonlop,work_mpi_npw,source)
+             call timab(tim_getcprj_otf,2,tsec)
            else
              ABI_ERROR("Wrong xg_nonlop%option")
            end if
-           call timab(tim_getcprj_mpi,2,tsec)
 
            call timab(tim_getcprj_gemm,1,tsec)
            call xgBlock_gemm('t','n',1.0d0,work_mpi_npw,X_block,1.d0,cprjX)
            call timab(tim_getcprj_gemm,2,tsec)
 
-           if (xg_nonlop%option==0) then
+           if (xg_nonlop%option==1) then
              call timab(tim_getcprj_mpi,1,tsec)
              call xmpi_wait(request,ierr)
              call timab(tim_getcprj_mpi,2,tsec)
@@ -1721,7 +1721,7 @@ subroutine xg_nonlop_getcprj_deriv(xg_nonlop,X,cprjX,work_mpi,option)
            dest = mod(me_band-(iblock-1),nmpi)
            if (dest<0) dest=dest+nmpi
 
-           if (xg_nonlop%option==0) then
+           if (xg_nonlop%option==1) then
              call timab(tim_apply_prj_mpi,1,tsec)
              call xgBlock_mpi_isend(projs,dest,tag,request,comm=xg_nonlop%comm_band)
              call timab(tim_apply_prj_mpi,2,tsec)
@@ -1739,15 +1739,17 @@ subroutine xg_nonlop_getcprj_deriv(xg_nonlop,X,cprjX,work_mpi,option)
            call xgBlock_setBlock(work_mpi,work_mpi_npw,npw_max,xg_nonlop%cprjdim)
            call xgBlock_free_reshape(work_mpi_npw,npw,xg_nonlop%cprjdim)
 
-           call timab(tim_apply_prj_mpi,1,tsec)
-           if (xg_nonlop%option==0) then
+           if (xg_nonlop%option==1) then
+             call timab(tim_apply_prj_mpi,1,tsec)
              call xgBlock_mpi_recv(work_mpi_npw,source,tag,comm=xg_nonlop%comm_band)
-           else if (xg_nonlop%option==1) then
+             call timab(tim_apply_prj_mpi,2,tsec)
+           else if (xg_nonlop%option==0) then
+             call timab(tim_apply_prj_otf,1,tsec)
              call xg_nonlop_compute_projs_otf(xg_nonlop,work_mpi_npw,source)
+             call timab(tim_apply_prj_otf,2,tsec)
            else
              ABI_ERROR("Wrong xg_nonlop%option")
            end if
-           call timab(tim_apply_prj_mpi,2,tsec)
 
            call timab(tim_apply_prj_gemm,1,tsec)
            call xgBlock_gemm('n','n',1.0d0,work_mpi_npw,cprjX,1.d0,X_block)
@@ -1757,7 +1759,7 @@ subroutine xg_nonlop_getcprj_deriv(xg_nonlop,X,cprjX,work_mpi,option)
            call xgBlock_partialcopy(X_block,X_spinor,shift_row,0,SMALL2BIG)
            call timab(tim_apply_prj_copy,2,tsec)
 
-           if (xg_nonlop%option==0) then
+           if (xg_nonlop%option==1) then
              call timab(tim_apply_prj_mpi,1,tsec)
              call xmpi_wait(request,ierr)
              call timab(tim_apply_prj_mpi,2,tsec)
@@ -2922,6 +2924,7 @@ subroutine xg_nonlop_forces_stress(xg_nonlop,Xin,cprjin,cprj_work,eigen,forces,s
    real(dp), pointer :: forces_(:,:)
    complex(dp), pointer :: cprj_(:,:),cprj_deriv_(:,:)
    real(dp), pointer :: cprj_real(:,:),cprj_deriv_real(:,:)
+   real(dp) :: forces_tmp
 
    nspinor = xg_nonlop%nspinor
 
@@ -2944,25 +2947,27 @@ subroutine xg_nonlop_forces_stress(xg_nonlop,Xin,cprjin,cprj_work,eigen,forces,s
        !$omp& shared(xg_nonlop,forces_,cprj_deriv_,cprj_), &
        !$omp& firstprivate(shift_itypat,shift_itypat_nlmn,shift_itypat_3nlmn,ncols_cprj_nospin,nspinor), &
        !$omp& private(itypat,nattyp,nlmn,ia,ilmn,idir,iforces,my_iband), &
-       !$omp& private(iband_spinor,icprj,icprj_deriv)
+       !$omp& private(iband_spinor,icprj,icprj_deriv,forces_tmp)
        do itypat = 1, xg_nonlop%ntypat
          nlmn = xg_nonlop%nlmn_ntypat(itypat)
          nattyp = xg_nonlop%nattyp(itypat)
-         !$omp do collapse(5)
+         !$omp do collapse(3)
          do iband=1,ncols_cprj_nospin
-           do ispinor=1,nspinor
-             do ia = 1, nattyp
-               do idir=1,3
+           do ia = 1, nattyp
+             do idir=1,3
+               forces_tmp = zero
+               do ispinor=1,nspinor
                  do ilmn=1,nlmn
-                   my_iband = iband + xg_nonlop%me_band*ncols_cprj_nospin
                    iband_spinor = ispinor + nspinor*(iband-1)
-                   iforces     = idir + 3*(ia-1) + shift_itypat
                    icprj       = ilmn + nlmn*(ia-1) + shift_itypat_nlmn
                    icprj_deriv = ilmn + nlmn*(idir-1) + 3*nlmn*(ia-1) + shift_itypat_3nlmn
-                   forces_(iforces,my_iband) = forces_(iforces,my_iband) &
+                   forces_tmp = forces_tmp &
                      & + 2 * dble(conjg(cprj_deriv_(icprj_deriv,iband_spinor))*cprj_(icprj,iband_spinor))
                  end do
                end do
+               iforces  = idir + 3*(ia-1) + shift_itypat
+               my_iband = iband + xg_nonlop%me_band*ncols_cprj_nospin
+               forces_(iforces,my_iband) = forces_(iforces,my_iband) + forces_tmp
              end do
            end do
          end do
@@ -2985,25 +2990,27 @@ subroutine xg_nonlop_forces_stress(xg_nonlop,Xin,cprjin,cprj_work,eigen,forces,s
        !$omp& shared(xg_nonlop,forces_,cprj_deriv_real,cprj_real), &
        !$omp& firstprivate(shift_itypat,shift_itypat_nlmn,shift_itypat_3nlmn,ncols_cprj_nospin,nspinor), &
        !$omp& private(itypat,nattyp,nlmn,ia,ilmn,idir,iforces,my_iband), &
-       !$omp& private(iband_spinor,icprj,icprj_deriv)
+       !$omp& private(iband_spinor,icprj,icprj_deriv,forces_tmp)
        do itypat = 1, xg_nonlop%ntypat
          nlmn = xg_nonlop%nlmn_ntypat(itypat)
          nattyp = xg_nonlop%nattyp(itypat)
-         !$omp do collapse(5)
+         !$omp do collapse(3)
          do iband=1,ncols_cprj_nospin
-           do ispinor=1,nspinor
-             do ia = 1, nattyp
-               do idir=1,3
+           do ia = 1, nattyp
+             do idir=1,3
+               forces_tmp = zero
+               do ispinor=1,nspinor
                  do ilmn=1,nlmn
-                   my_iband = iband + xg_nonlop%me_band*ncols_cprj_nospin
                    iband_spinor = ispinor + nspinor*(iband-1)
-                   iforces     = idir + 3*(ia-1) + shift_itypat
                    icprj       = ilmn + nlmn*(ia-1) + shift_itypat_nlmn
                    icprj_deriv = ilmn + nlmn*(idir-1) + 3*nlmn*(ia-1) + shift_itypat_3nlmn
-                   forces_(iforces,my_iband) = forces_(iforces,my_iband) &
+                   forces_tmp = forces_tmp &
                      & + 2 * cprj_deriv_real(icprj_deriv,iband_spinor)*cprj_real(icprj,iband_spinor)
                  end do
                end do
+               iforces  = idir + 3*(ia-1) + shift_itypat
+               my_iband = iband + xg_nonlop%me_band*ncols_cprj_nospin
+               forces_(iforces,my_iband) = forces_(iforces,my_iband) + forces_tmp
              end do
            end do
          end do
@@ -3046,6 +3053,7 @@ subroutine xg_nonlop_mult_cprj_stress(xg_nonlop,cprj,cprj_deriv,stress)
    complex(dp), pointer :: cprj_(:,:),cprj_deriv_(:,:)
    real(dp), pointer :: cprj_real(:,:),cprj_deriv_real(:,:)
    real(dp), pointer :: stress_(:,:)
+   real(dp) :: stress_tmp
 
 !   call timab(tim_getHmeSX,1,tsec)
 
@@ -3070,25 +3078,27 @@ subroutine xg_nonlop_mult_cprj_stress(xg_nonlop,cprj,cprj_deriv,stress)
        !$omp& shared(xg_nonlop,stress_,cprj_deriv_,cprj_), &
        !$omp& firstprivate(shift_itypat,shift_itypat_nlmn,shift_itypat_6nlmn,ncols_cprj_nospin,nspinor), &
        !$omp& private(itypat,nattyp,nlmn,ia,ilmn,idir,my_iband), &
-       !$omp& private(iband_spinor,icprj,icprj_deriv)
+       !$omp& private(iband_spinor,icprj,icprj_deriv,stress_tmp)
        do itypat = 1, xg_nonlop%ntypat
          nlmn = xg_nonlop%nlmn_ntypat(itypat)
          nattyp = xg_nonlop%nattyp(itypat)
-         !$omp do collapse(5)
+         !$omp do collapse(2)
          do iband=1,ncols_cprj_nospin
-           do ispinor=1,nspinor
-             do ia = 1, nattyp
-               do idir=1,6
+           do idir=1,6
+             stress_tmp = zero
+             do ispinor=1,nspinor
+               do ia = 1, nattyp
                  do ilmn=1,nlmn
-                   my_iband = iband + xg_nonlop%me_band*ncols_cprj_nospin
                    iband_spinor = ispinor + nspinor*(iband-1)
                    icprj       = ilmn + nlmn*(ia-1) + shift_itypat_nlmn
                    icprj_deriv = ilmn + nlmn*(idir-1) + 6*nlmn*(ia-1) + shift_itypat_6nlmn
-                   stress_(idir,my_iband) = stress_(idir,my_iband) &
+                   stress_tmp = stress_tmp &
                      & + 2 * dble(conjg(cprj_deriv_(icprj_deriv,iband_spinor))*cprj_(icprj,iband_spinor))
                  end do
                end do
              end do
+             my_iband = iband + xg_nonlop%me_band*ncols_cprj_nospin
+             stress_(idir,my_iband) = stress_(idir,my_iband) + stress_tmp
            end do
          end do
          !$omp end do
@@ -3110,25 +3120,27 @@ subroutine xg_nonlop_mult_cprj_stress(xg_nonlop,cprj,cprj_deriv,stress)
        !$omp& shared(xg_nonlop,stress_,cprj_deriv_real,cprj_real), &
        !$omp& firstprivate(shift_itypat,shift_itypat_nlmn,shift_itypat_6nlmn,ncols_cprj_nospin,nspinor), &
        !$omp& private(itypat,nattyp,nlmn,ia,ilmn,idir,my_iband), &
-       !$omp& private(iband_spinor,icprj,icprj_deriv)
+       !$omp& private(iband_spinor,icprj,icprj_deriv,stress_tmp)
        do itypat = 1, xg_nonlop%ntypat
          nlmn = xg_nonlop%nlmn_ntypat(itypat)
          nattyp = xg_nonlop%nattyp(itypat)
-         !$omp do collapse(5)
+         !$omp do collapse(2)
          do iband=1,ncols_cprj_nospin
-           do ispinor=1,nspinor
-             do ia = 1, nattyp
-               do idir=1,6
+           do idir=1,6
+             stress_tmp = zero
+             do ispinor=1,nspinor
+               do ia = 1, nattyp
                  do ilmn=1,nlmn
-                   my_iband = iband + xg_nonlop%me_band*ncols_cprj_nospin
                    iband_spinor = ispinor + nspinor*(iband-1)
                    icprj       = ilmn + nlmn*(ia-1) + shift_itypat_nlmn
                    icprj_deriv = ilmn + nlmn*(idir-1) + 6*nlmn*(ia-1) + shift_itypat_6nlmn
-                   stress_(idir,my_iband) = stress_(idir,my_iband) &
+                   stress_tmp = stress_tmp &
                      & + 2 * cprj_deriv_real(icprj_deriv,iband_spinor)*cprj_real(icprj,iband_spinor)
                  end do
                end do
              end do
+             my_iband = iband + xg_nonlop%me_band*ncols_cprj_nospin
+             stress_(idir,my_iband) = stress_(idir,my_iband) + stress_tmp
            end do
          end do
          !$omp end do
