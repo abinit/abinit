@@ -1,6 +1,6 @@
 
  **** DERIVATIVE DATABASE ****    
-+DDB, Version number    100401
++DDB, Version number  20230401
 
  DDB for BaTiO3-cubic, a=7.5589, 45Ha, 10SP IBZ, SCI=0. (G and X only)
 
@@ -490,7 +490,7 @@
  **** Database of total energy derivatives ****
  Number of data blocks=    4
   
- 2nd derivatives (non-stat.)  - # elements :      98
+ 2nd derivatives (non-stat.)  - # elements :          98
  qpt  0.00000000E+00  0.00000000E+00  0.00000000E+00   1.0
    1   1   1   1  0.33741133413200D+01 -0.40051968795263D-10
    2   1   1   1  0.13088538308872D-07 -0.49076478205364D-08
@@ -591,7 +591,7 @@
    3   5   1   7  0.17938975243669D-08  0.10755312929478D-08
    1   7   1   7 -0.13646657867065D+03  0.37518462177301D-11
   
- 2nd derivatives (stationary) - # elements :       5
+ 2nd derivatives (stationary) - # elements :           5
  qpt  0.00000000E+00  0.00000000E+00  0.00000000E+00   1.0
    1   1   1   1  0.33741133914622D+01  0.00000000000000D+00
    1   2   1   2 -0.17687927461836D+00  0.00000000000000D+00
@@ -599,7 +599,7 @@
    1   5   1   5  0.51570149153340D+01  0.00000000000000D+00
    1   7   1   7 -0.13646657938293D+03  0.00000000000000D+00
   
- 2nd derivatives (non-stat.)  - # elements :     279
+ 2nd derivatives (non-stat.)  - # elements :         279
  qpt  5.00000000E-01  0.00000000E+00  0.00000000E+00   1.0
    1   1   1   1  0.73317227739270D+01 -0.16348259227736D-32
    2   1   1   1 -0.77857310464921D-08 -0.99283006003619D-08
@@ -881,7 +881,7 @@
    2   5   3   7  0.00000000000000D+00  0.00000000000000D+00
    3   5   3   7  0.00000000000000D+00  0.00000000000000D+00
   
- 2nd derivatives (stationary) - # elements :      99
+ 2nd derivatives (stationary) - # elements :          99
  qpt  5.00000000E-01  0.00000000E+00  0.00000000E+00   1.0
    1   1   1   1  0.73317219847858D+01 -0.16348259227736D-32
    1   7   1   1  0.00000000000000D+00  0.00000000000000D+00

@@ -1554,7 +1554,8 @@ end subroutine isfile
 !! iofn1
 !!
 !! FUNCTION
-!! Begin by eventual redefinition of unit std_in and std_out
+!! Define values of do_write_log and do_write_status parameters
+!! Eventual redefinition of unit std_in and std_out
 !! Then, print greetings for interactive user.
 !! Next, read filenames from unit std_in, AND check that new
 !! output file does not already exist.
@@ -1603,10 +1604,10 @@ subroutine iofn1(input_path, filnam, filstat, comm)
  real(dp),allocatable :: dprarr(:)
 !*************************************************************************
 
- ! NOTE: In this routine it's very important to perform tests
+ ! NOTE: In this routine it is very important to perform tests
  ! on possible IO errors (err=10, iomsg) because we are initializing the IO stuff
- ! It there's some problem with the hardware or some misconfiguration,
- ! it's very likely that the code will crash here and we should try to give useful error messages.
+ ! If there is some problem with the hardware or some misconfiguration,
+ ! it is very likely that the code will crash here and we should try to give useful error messages.
 
  blank = ' '; tmpfil = ''
 
@@ -1819,6 +1820,10 @@ subroutine iofn1(input_path, filnam, filstat, comm)
      if (open_file(fillog,msg,unit=std_out,status='unknown',action="write") /= 0) then
        ABI_ERROR(msg)
      end if
+!    Print greetings for interactive user
+     write(std_out,*,err=10,iomsg=errmsg)' ABINIT ',trim(abinit_version)
+     write(std_out,*,err=10,iomsg=errmsg)' '
+     write(std_out,*,err=10,iomsg=errmsg)' I am not the master. Writing log in ',fillog 
    else
      close(std_out, err=10, iomsg=errmsg)
      if (open_file(NULL_FILE,msg,unit=std_out,action="write") /= 0) then

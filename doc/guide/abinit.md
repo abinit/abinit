@@ -1231,6 +1231,7 @@ information on such files:
   * [[prtgeo]] to print a file with a geometrical analysis (bond lengths and bond angles), that also contains an XMOL section
   * [[prt1dm]] to print a one-dimensional projection of potential and density, for the three axes.
 
+<a id="control-of-output-in-the-parallel-case"></a>
 ### 5.9 Control of output in the parallel case
   
 For massively parallel runs, one cannot afford to have some of the output
