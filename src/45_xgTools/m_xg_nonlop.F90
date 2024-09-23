@@ -81,6 +81,14 @@ module m_xg_nonlop
  integer, parameter :: tim_mult_cprj_copy   = 2141
  integer, parameter :: tim_mult_cprj_mpi    = 2142
 
+ integer, parameter :: tim_forces_stress      = 2150
+ integer, parameter :: tim_fst_start          = 2151
+ integer, parameter :: tim_fst_cprj_deriv_f   = 2152
+ integer, parameter :: tim_fst_cprj_deriv_str = 2153
+ integer, parameter :: tim_fst_mult_cprj_f    = 2154
+ integer, parameter :: tim_fst_mult_cprj_str  = 2155
+ integer, parameter :: tim_fst_work_str       = 2156
+
  integer, parameter, public :: DERIV_ATOM   = 1
  integer, parameter, public :: DERIV_STRESS = 2
 
@@ -2758,7 +2766,7 @@ subroutine xg_nonlop_forces_stress(xg_nonlop,Xin,cprjin,cprj_work,eigen,forces,s
    type(xgBlock_t), optional, intent(inout) :: stress
    real(dp), optional, intent(in) :: gprimd(:,:)
 
-   !real(dp) :: tsec(2)
+   real(dp) :: tsec(2)
    integer :: cplex,iband
    integer :: nmpi,shift
    integer :: nrows,ncols,ncols_cprj,ncols_cprj_nospin
@@ -2772,7 +2780,9 @@ subroutine xg_nonlop_forces_stress(xg_nonlop,Xin,cprjin,cprj_work,eigen,forces,s
    real(dp), pointer :: stress_(:,:)
    type(xgBlock_t) :: cprjin_spinor,cprj_work_spinor
 
-!   call timab(tim_getHmeSX,1,tsec)
+   call timab(tim_forces_stress,1,tsec)
+
+   call timab(tim_fst_start,1,tsec)
 
    if (comm(Xin)/=xg_nonlop%comm_band) then
      ABI_ERROR('wrong communicator')
@@ -2836,18 +2846,24 @@ subroutine xg_nonlop_forces_stress(xg_nonlop,Xin,cprjin,cprj_work,eigen,forces,s
      call xg_nonlop_apply_diag(xg_nonlop,xg_nonlop%ekb,cprjin,cprj_work)
    end if
 
+   call timab(tim_fst_start,2,tsec)
+
    if (do_forces) then
 
      call xg_init(cprj_deriv    ,space_cprj,3*xg_nonlop%cprjdim,ncols_cprj,comm=xg_nonlop%comm_band)
      call xg_init(work_mpi_deriv,space_cprj,3*xg_nonlop%cprjdim,ncols_cprj,comm=xg_nonlop%comm_band)
 
+     call timab(tim_fst_cprj_deriv_f,1,tsec)
      call xg_nonlop_getcprj_deriv(xg_nonlop,Xin,cprj_deriv%self,work_mpi_deriv%self,DERIV_ATOM)
+     call timab(tim_fst_cprj_deriv_f,2,tsec)
 
      call xg_free(work_mpi_deriv)
 
      call xgBlock_zero(forces)
 
+     call timab(tim_fst_mult_cprj_f,1,tsec)
      call xg_nonlop_mult_cprj_forces(xg_nonlop,cprj_work,cprj_deriv%self,forces)
+     call timab(tim_fst_mult_cprj_f,2,tsec)
 
      call xg_free(cprj_deriv)
 
@@ -2858,16 +2874,21 @@ subroutine xg_nonlop_forces_stress(xg_nonlop,Xin,cprjin,cprj_work,eigen,forces,s
      call xg_init(cprj_deriv    ,space_cprj,6*xg_nonlop%cprjdim,ncols_cprj,comm=xg_nonlop%comm_band)
      call xg_init(work_mpi_deriv,space_cprj,6*xg_nonlop%cprjdim,ncols_cprj,comm=xg_nonlop%comm_band)
 
+     call timab(tim_fst_cprj_deriv_str,1,tsec)
      call xg_nonlop_getcprj_deriv(xg_nonlop,Xin,cprj_deriv%self,work_mpi_deriv%self,DERIV_STRESS)
+     call timab(tim_fst_cprj_deriv_str,2,tsec)
 
      call xg_free(work_mpi_deriv)
 
      call xgBlock_zero(stress)
 
+     call timab(tim_fst_mult_cprj_str,1,tsec)
      call xg_nonlop_mult_cprj_stress(xg_nonlop,cprj_work,cprj_deriv%self,stress)
+     call timab(tim_fst_mult_cprj_str,2,tsec)
 
      call xg_free(cprj_deriv)
 
+     call timab(tim_fst_work_str,1,tsec)
      call xg_init(dot,space_cprj,ncols_cprj_nospin,1)
 
      call xgBlock_reshape_spinor(cprjin,cprjin_spinor,nspinor,COLS2ROWS)
@@ -2903,7 +2924,11 @@ subroutine xg_nonlop_forces_stress(xg_nonlop,Xin,cprjin,cprj_work,eigen,forces,s
      call xg_free(dot)
      call xg_free(dot_all)
 
+     call timab(tim_fst_work_str,2,tsec)
+
    end if
+
+   call timab(tim_forces_stress,2,tsec)
 
  end subroutine xg_nonlop_forces_stress
 !!***
