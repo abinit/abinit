@@ -1271,12 +1271,14 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(2130)='xg_nl%getcprj(gemm)             '
  names(2131)='xg_nl%getcprj(copy)             '
  names(2132)='xg_nl%getcprj(mpi)              '
- names(2133)='xg_nl%getcprj(other)            '
+ names(2133)='xg_nl%getcprj(proj-otf)         '
+ names(2134)='xg_nl%getcprj(other)            '
 
  names(2135)='xg_nl%apply_prj(gemm)           '
  names(2136)='xg_nl%apply_prj(copy)           '
  names(2137)='xg_nl%apply_prj(mpi)            '
- names(2138)='xg_nl%apply_prj(other)          '
+ names(2138)='xg_nl%apply_prj(proj-otf)       '
+ names(2139)='xg_nl%apply_prj(other)          '
 
  names(2140)='xg_nl%multcprj(gemm)            '
  names(2141)='xg_nl%multcprj(copy)            '
@@ -1540,10 +1542,10 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
      tslots(:10)=(/2100,2101,2102,2103,2104,2105,2106,2107,2108,2109/)
    case(53)
 !      Estimate the complement of xg_nonlop%getcprj
-     tslots(:5)=(/2133,2101,-2130,-2131,-2132/)
+     tslots(:6)=(/2134,2101,-2130,-2131,-2132,-2133/)
    case(54)
 !      Estimate the complement of xg_nonlop%apply_prj
-     tslots(:5)=(/2138,2102,-2135,-2136,-2137/)
+     tslots(:6)=(/2139,2102,-2135,-2136,-2137,-2138/)
    case(55)
 !      Estimate the complement of xg_nonlop%multcprj
      tslots(:5)=(/2143,2104,-2140,-2141,-2142/)
@@ -1963,9 +1965,9 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
        case(85)
          list(:14)=(/2100,2101,2102,2103,2104,2105,2106,2107,2108,2109,2120,2121,2122,2123/) ; msg='xg_nonlop'
        case(86)
-         list(:5)=(/2101,2130,2131,2132,2133/) ; msg='xg_nonlop%getcprj'
+         list(:6)=(/2101,2130,2131,2132,2133,2134/) ; msg='xg_nonlop%getcprj'
        case(87)
-         list(:5)=(/2102,2135,2136,2137,2138/) ; msg='xg_nonlop%apply_prj'
+         list(:6)=(/2102,2135,2136,2137,2138,2139/) ; msg='xg_nonlop%apply_prj'
        case(88)
          list(:5)=(/2104,2140,2141,2142,2143/) ; msg='xg_nonlop%multcprj'
        case(89)

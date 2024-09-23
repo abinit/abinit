@@ -34,6 +34,7 @@ inp_files = [
 "t30.abi",
 "t31.abi",
 "t32.abi",
+"t38.abi", # test cprj_in_memory=1 (PAW,nspinor=2,compare xg_nonlop_option=0 and 1)
 "t39.abi", # test cprj_in_memory=1 (PAW,istwfk=1,npkpt>1)
 "t40.abi", # test cprj_in_memory=1 (PAW,nspinor=2)
 "t41.abi",
