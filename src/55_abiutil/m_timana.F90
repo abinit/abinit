@@ -1012,6 +1012,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(1658) = 'lobpcg_maxResidu               '
  names(1659) = 'lobpcg_run@getAX_BX            '
  names(1660) = 'lobpcg_pcond                   '
+ names(1661) = 'lobpcg(other)                  '
 
  ! xg_t (1st part)
  names(1662) = 'xgTransposer_transpose@ColsRows'
@@ -1137,6 +1138,8 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(1769) = 'chebfi2_X_NP@init             '
  names(1770) = 'chebfi2_AX_BX@init            '
 
+ names(1779) = 'chebfi2(other)                '
+
  names(1780)='ctgk_rotate'; basic(1780) = 1
 
  names(1795) = 'RayleighRitz@diago            '; ndata(1795) = nbdmean*nbdmean
@@ -1224,6 +1227,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(2049) = 'lobpcg_AX(loc)                 '
  names(2050) = 'lobpcg_AX(nl)                  '
  names(2051) = 'lobpcg_enl                     '
+ names(2059) = 'lobpcg(other)                  '
 
  ! chebfi2_cprj
  names(2060) = 'chebfiwf2_cprj                '
@@ -1245,6 +1249,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(2077) = 'chebfi2_AX(loc)               '
  names(2078) = 'chebfi2_AX(nl)                '
  names(2079) = 'chebfi2_enl                   '
+ names(2080) = 'chebfi2(other)                '
 
  ! xg_nonlop
  names(2100)='xg_nonlop                       '
@@ -1542,6 +1547,18 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
    case(55)
 !      Estimate the complement of xg_nonlop%multcprj
      tslots(:5)=(/2143,2104,-2140,-2141,-2142/)
+   case(56)
+!      Estimate the complement of lobpcgwf2
+     tslots(:22)=(/1661,1640,(ii,ii=-1641,-1660,-1)/)
+   case(57)
+!      Estimate the complement of lobpcgwf2_cprj
+     tslots(:23)=(/2059,2030,(ii,ii=-2031,-2051,-1)/)
+   case(58)
+!      Estimate the complement of chebfi2
+     tslots(:30)=(/1779,1750,(ii,ii=-1751,-1778,-1)/)
+   case(59)
+!      Estimate the complement of chebfi2_cprj
+     tslots(:21)=(/2080,2060,(ii,ii=-2061,-2079,-1)/)
 
    case default
      cycle
@@ -1924,13 +1941,13 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
        case(74)
          list(:7)=(/ (ii,ii=1741,1747,1) /)              ; msg='gwls: computing the matrix elements of eps_model^{-1}(w) -1 '
        case(75)
-         list(:20)=(/ (ii,ii=1640,1649,1), (ii,ii=1651,1660,1)/)     ; msg='lobpcgwf2 core engine '
+         list(:21)=(/ (ii,ii=1640,1649,1), (ii,ii=1651,1660,1), 1661/)     ; msg='lobpcgwf2 core engine '
        case(76)
-         list(:22)=(/ (ii,ii=2030,2051,1)/)     ; msg='lobpcgwf2_cprj core engine '
+         list(:23)=(/ (ii,ii=2030,2051,1),2059/)     ; msg='lobpcgwf2_cprj core engine '
        case(77)
-         list(:16)=(/ (ii,ii=1750,1765,1) /) ; msg='chebfiwf2 core engine '
+         list(:30)=(/ (ii,ii=1750,1778,1),1779 /) ; msg='chebfiwf2 core engine '
        case(78)
-         list(:20)=(/ (ii,ii=2060,2079,1) /) ; msg='chebfiwf2_cprj core engine '
+         list(:21)=(/ (ii,ii=2060,2079,1),2080 /) ; msg='chebfiwf2_cprj core engine '
        case(79)
          list(:5)=(/1690,1691,1692,1693,1694/) ; msg='low-level xgScalapack type '
        case(80)
