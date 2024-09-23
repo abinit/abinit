@@ -1285,6 +1285,15 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(2142)='xg_nl%multcprj(mpi)             '
  names(2143)='xg_nl%multcprj(other)           '
 
+ names(2150)='xg_nonlop_forces_stress         '
+ names(2151)='xg_nl_fst%start                 '
+ names(2152)='xg_nl_fst%cprj_deriv_f          '
+ names(2153)='xg_nl_fst%cprj_deriv_str        '
+ names(2154)='xg_nl_fst%mult_cprj_f           '
+ names(2155)='xg_nl_fst%mult_cprj_str         '
+ names(2156)='xg_nl_fst%work_str              '
+ names(2159)='xg_nl_fst(other)                '
+
  ! TIMER_SIZE is 2199. See m_time
  names(TIMER_SIZE)='(other)                         ' ! This is a generic slot, to compute a complement
 
@@ -1561,6 +1570,9 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
    case(59)
 !      Estimate the complement of chebfi2_cprj
      tslots(:21)=(/2080,2060,(ii,ii=-2061,-2079,-1)/)
+   case(60)
+!      Estimate the complement of xg_nonlop_forces_stress
+     tslots(:8)=(/2159,2150,-2151,-2152,-2153,-2154,-2155,-2156/)
 
    case default
      cycle
@@ -1971,6 +1983,8 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
        case(88)
          list(:5)=(/2104,2140,2141,2142,2143/) ; msg='xg_nonlop%multcprj'
        case(89)
+         list(:8)=(/2150,2151,2152,2153,2154,2155,2156,2159/) ; msg='xg_nonlop%forces_stress'
+       case(90)
          list(:36)=(/ (ii,ii=1670,1689,1),(ii,ii=2000,2015,1) /) ; msg='low-level xgBlock type '
        case default
          cycle ! This allows one to disable temporarily some partitionings
