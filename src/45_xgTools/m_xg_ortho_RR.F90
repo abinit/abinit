@@ -718,6 +718,9 @@ subroutine xg_RayleighRitz_cprj(xg_nonlop,X,cprjX,AX,eigenvalues,blockdim_cprj,i
     ! |  *  |  WAW  | WAP |  |  *  |   I   | WBP |
     ! |  *  |   *   | PAP |  |  *  |   *   |  I  |
 
+    call timab(tim_RR_gemm_1,1,tsec)
+    ABI_NVTX_START_RANGE(NVTX_RR_GEMM_1)
+
     ! Compute XAX
     call xg_setBlock(subA,subsub,blockdim,blockdim)
 
@@ -779,6 +782,9 @@ subroutine xg_RayleighRitz_cprj(xg_nonlop,X,cprjX,AX,eigenvalues,blockdim_cprj,i
     end if
 
     call xg_free(cprj_work)
+
+    call timab(tim_RR_gemm_1,2,tsec)
+    ABI_NVTX_END_RANGE()
 
     if ( EIGPACK(eigenSolver) ) then
       call xgBlock_pack(subA%self,subA%self,'u')
@@ -851,6 +857,9 @@ subroutine xg_RayleighRitz_cprj(xg_nonlop,X,cprjX,AX,eigenvalues,blockdim_cprj,i
     end if
     call xg_free(subB)
 
+    call timab(tim_RR_gemm_2,1,tsec)
+    ABI_NVTX_START_RANGE(NVTX_RR_GEMM_2)
+
     if ( info == 0 ) then
       call xg_init(Xwork,space(X),spacedim,blockdim,me_g0=me_g0(X))
       ncols_cprj = cols(cprjX)
@@ -922,6 +931,9 @@ subroutine xg_RayleighRitz_cprj(xg_nonlop,X,cprjX,AX,eigenvalues,blockdim_cprj,i
       end if
 
     end if
+
+    call timab(tim_RR_gemm_2,2,tsec)
+    ABI_NVTX_END_RANGE()
 
     ! Doing free on an already free object does not do anything
     call xg_free(vec)
