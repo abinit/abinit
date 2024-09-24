@@ -209,7 +209,7 @@ contains
 !!  vpsp1(cplex*nfftf)=first-order derivative of the ionic potential
 !!  vtrial(nfftf,nspden)=GS potential (Hartree).
 !!  vxc(nfftf,nspden)=Exchange-Correlation GS potential (Hartree)
-!!  vxctau(nfftf,nspden,4*usekden)=derivative of e_xc with respect to kinetic energy density, for mGGA  
+!!  vxctau(nfftf,nspden,4*usekden)=derivative of e_xc with respect to kinetic energy density, for mGGA
 !!  wtk_rbz(nkpt_rbz)=weight for each k point in the reduced Brillouin zone
 !!  xccc3d1(cplex*n3xccc)=3D change in core charge density, see n3xccc
 !!  xred(3,natom)=reduced dimensionless atomic coordinates
@@ -246,8 +246,8 @@ contains
 !!        PAW only - Eq(79) and Eq(80) of PRB 78, 035105 (2008) [[cite:Audouze2008]]
 !!  epaw1=1st-order PAW on-site part of 2nd-order total energy.
 !!  etotal=total energy (sum of 7 contributions) (hartree)
-!!  evxctau0=0th-order energy from vxctau  
-!!  evxctau1=1st-order energy from vxctau  
+!!  evxctau0=0th-order energy from vxctau
+!!  evxctau1=1st-order energy from vxctau
 !!  exc1=1st-order exchange-correlation part of 2nd-order total energy.
 !!  gh1c_set(2,mpw1*nspinor*mband*mk1mem*nsppol*dim_eig2rf)= set of <G|H^{(1)}|nK>
 !!  gh0c1_set(2,mpw1*nspinor*mband*mk1mem*nsppol*dim_eig2rf)= set of <G|H^{(0)}|\Psi^{(1)}>
@@ -992,7 +992,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 !  call calcdenmagsph(mpi_enreg,dtset%natom,nfftf,ngfftf,nspden,&
 !&   dtset%ntypat,dtset%ratsm,dtset%ratsph,rhor1,rprimd,dtset%typat,xred,&
 !&   idir+1,cplex,intgden=intgden,rhomag=rhomag)
-!  call  prtdenmagsph(cplex,intgden,dtset%natom,nspden,dtset%ntypat,ab_out,idir+1,dtset%ratsm,dtset%ratsph,rhomag,dtset%typat)
+!  call  prtdenmagsph(cplex,intgden,dtset%natom,nspden,dtset%ntypat,[ab_out],idir+1,dtset%ratsm,dtset%ratsph,rhomag,dtset%typat)
 
 !     write(*,*) ' n ( 1,2)',intgden(1,1),' ',intgden(1,2)
 !     write(*,*) ' mx( 1,2)',intgden(2,1),' ',intgden(2,2)
@@ -1416,7 +1416,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
      call calcdenmagsph(mpi_enreg,dtset%natom,nfftf,ngfftf,nspden,&
 &     dtset%ntypat,dtset%ratsm,dtset%ratsph,rhor1,rprimd,dtset%typat,xred,&
 &     prtopt,cplex,intgden=intgden,dentot=dentot,rhomag=rhomag)
-     call  prtdenmagsph(cplex,intgden,dtset%natom,nspden,dtset%ntypat,ab_out,prtopt,dtset%ratsm,dtset%ratsph,rhomag,dtset%typat)
+     call  prtdenmagsph(cplex,intgden,dtset%natom,nspden,dtset%ntypat,[ab_out],prtopt,dtset%ratsm,dtset%ratsph,rhomag,dtset%typat)
    end if
  end if
 
