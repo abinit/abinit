@@ -1205,6 +1205,7 @@ subroutine cumulant_kubo_transport(self, dtset, cryst)
 
 
  ABI_MALLOC(kernel, (self%nwr))
+ ABI_MALLOC(kernel_dm, (self%nwr))
 ! ABI_MALLOC(test_Aw, (self%ntemp))
 ! ABI_MALLOC(test_dfdw, (self%ntemp))
  ABI_MALLOC(Aw, (self%nwr))
