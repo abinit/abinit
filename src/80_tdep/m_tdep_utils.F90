@@ -222,7 +222,7 @@ contains
 
   integer :: ii,jj,kk,max_ijk,iatcell,jatcell,iatom,jatom,eatom,fatom,istep
   integer :: foo,foo2,atom_ref,ierr
-  double precision :: tmp(3),tmp1(3),tmp2(3),Rlatt(3),xred_tmp(3),rprimd_md_tmp(3,3)
+  double precision :: tmp(3),tmp1(3),tmp2(3),Rlatt(3),xred_tmp(3),rprimd_md_tmp(3,3),distance_tmp(3)
   double precision, allocatable :: dist_unitcell(:,:,:),xcart_average(:,:)
   double precision, allocatable :: fcart_tmp(:,:,:),ucart_tmp(:,:,:)
   double precision, allocatable  :: xred_average(:,:)
@@ -294,7 +294,11 @@ contains
     do fatom=1,Invar%natom
       tmp(:)=xred_ideal(:,fatom)-xred_ideal(:,eatom)
       call tdep_make_inbox(tmp,1,1d-4)
-      call DGEMV('T',3,3,1.d0,Lattice%rprimd_md(:,:),3,tmp(:),1,0.d0,distance(eatom,fatom,2:4),1)
+      rprimd_md_tmp(:,:)=Lattice%rprimd_md(:,:)
+      distance_tmp(:)=distance(eatom,fatom,2:4)
+!     call DGEMV('T',3,3,1.d0,Lattice%rprimd_md(:,:),3,tmp,1,0.d0,distance(eatom,fatom,2:4),1)
+      call DGEMV('T',3,3,1.d0,rprimd_md_tmp,3,tmp,1,0.d0,distance_tmp,1)
+      distance(eatom,fatom,2:4)=distance_tmp(:)
       do ii=1,3
 !       Remove the rounding errors before writing (for non regression testing purposes)
         if (abs(distance(eatom,fatom,ii+1)).lt.tol8) distance(eatom,fatom,ii+1)=zero
@@ -637,7 +641,7 @@ contains
   end do
   do iatom=1,Invar%natom
     do iatcell=1,Invar%natom_unitcell
-      call DGEMV('T',3,3,1.d0,rprimd_md_tmp(:,:),3,Rlatt_red(:,iatcell,iatom),1,0.d0,Rlatt4dos(:,iatcell,iatom),1)
+      call DGEMV('T',3,3,1.d0,rprimd_md_tmp,3,Rlatt_red(:,iatcell,iatom),1,0.d0,Rlatt4dos(:,iatcell,iatom),1)
     end do
   end do
 

@@ -353,7 +353,7 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
      !call ydoc%write_and_free(std_out, newline=.False.)
      !end if
 
-     call wrtout(ab_out,message,'COLL')
+     call wrtout(ab_out,message)
    end if
 
  case (2)
@@ -457,7 +457,7 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
        end if
      end if
      !if (etot_yaml_doc%stream%length /= 0) call etot_yaml_doc%add_tabular_line('  '//message(6:))
-     call wrtout(ab_out,message,'COLL')
+     call wrtout(ab_out,message)
 
      if(mpi_enreg%paral_pert==1) then
        call wrtout(std_out,  message,'PERS')
@@ -469,7 +469,7 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
 
    ! Print positions/forces every step if dtset%prtvol>=10 and iscf>0 or -3 and GS case
    if (dtset%prtvol>=10.and.(iscf>=0.or.iscf==-3).and.response==0.and.dtset%prtstm==0) then
-     call wrtout(ab_out," ",'COLL')
+     call wrtout(ab_out," ")
 
      ! Print up and down charge and magnetization
      if(tmagnet==1) then
@@ -518,7 +518,7 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
 
    if(response==0)then
      write(message, '(a,1p,e15.7,a)'  ) ' scprqt: <Vxc>=',vxcavg,' hartree'
-     call wrtout(std_out,message,'COLL')
+     call wrtout(std_out,message)
    end if
 
    ! Check whether exiting was required by the user.
@@ -547,7 +547,7 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
      ! write(message,'(1x,a,e10.3,1x,a,e10.3,1x,l1,a)') &
      ! &      '[vdW-DF][DEBUG] deltae=',deltae,'vdw_df_threshold=',vdw_df_threshold, &
      ! &      (abs(deltae)<vdw_df_threshold),ch10
-     ! call wrtout(std_out,message,'COLL')
+     ! call wrtout(std_out,message)
 #if defined DEV_YP_VDWXC
      call xc_vdw_trigger( (abs(deltae)<vdw_df_threshold) )
 #endif
@@ -704,7 +704,7 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
 !      write(message,'(1x,a,e10.3,1x,a,e10.3,1x,l1,a)') &
 !      &      '[vdW-DF][DEBUG] deltae=',deltae,'vdw_df_threshold=',vdw_df_threshold, &
 !      &      (abs(deltae)<toldfe),ch10
-!      call wrtout(std_out,message,'COLL')
+!      call wrtout(std_out,message)
 #if defined DEV_YP_VDWXC
        ivdw = 0
        if ( toldfe > vdw_df_threshold ) then
@@ -806,11 +806,11 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
            write(message2, '(a,es11.3,2a)' ) &
            '  maximum residual each band. tolwfr= ',tolwfr,ch10,&
            '  iband, isppol, individual band residuals (max over all k-points):'
-           call wrtout(std_out, message2,'COLL')
+           call wrtout(std_out, message2)
            do isppol = 1, dtset%nsppol
              do iband = 1, dtset%mband
                write(message3, '(2i6, es11.3)') iband, isppol, residm_band(iband,isppol)
-               call wrtout(std_out,message3,'COLL')
+               call wrtout(std_out,message3)
              end do
            end do
 
@@ -1295,9 +1295,9 @@ subroutine prteigrs(eigen,enunit,fermie,fermih,fname_eig,iout,iscf,kptns,kptopt,
      if(iscf>=0 .and. ienunit==0)then ! For historical reasons
        if(tmagnet==1)then
          write(msg, '(a,es16.8,a,a,es16.8,a,es16.8)' )&
-&         ' Magnetization (Bohr magneton)=',magnet,ch10,&
-&         ' Total spin up =',rhoup,'   Total spin down =',rhodn
-         call wrtout(iout,msg,'COLL')
+         ' Magnetization (Bohr magneton)=',magnet,ch10,&
+         ' Total spin up =',rhoup,'   Total spin down =',rhodn
+         call wrtout(iout,msg)
          if (prteig > 0) call wrtout(temp_unit,msg)
        end if
      end if
@@ -1331,11 +1331,11 @@ subroutine prteigrs(eigen,enunit,fermie,fermih,fname_eig,iout,iscf,kptns,kptopt,
          if(ikpt<=nkpt_eff)then
            write(msg, '(a,'//ikpt_fmt//',a,'//ibnd_fmt//',a,f9.5,a,3f8.4,a)' ) &
 &           ' kpt#',ikpt,', nband=',nband_k,', wtk=',wtk(ikpt)+tol10,', kpt=',kptns(1:3,ikpt)+tol10,' (reduced coord)'
-           call wrtout(iout,msg,'COLL')
+           call wrtout(iout,msg)
            if (prteig > 0) call wrtout(temp_unit,msg)
            do ii=0,(nband_k-1)/8
              write(msg, '(8(f10.5,1x))' ) (convrt*eigen(iband+band_index), iband=1+ii*8,min(nband_k,8+ii*8))
-             call wrtout(iout,msg,'COLL')
+             call wrtout(iout,msg)
              if (prteig > 0) call wrtout(temp_unit,msg)
            end do
            if(ienunit==0 .and. option==1 .and. occopt>=3 .and. occopt<=8)then
@@ -1566,9 +1566,9 @@ subroutine prtene(dtset,energies,iout,usepaw)
        !!!XG20181025 Does not work (yet)...
        !!!if(abs(energies%e_nlpsp_vfock)>tol8)then
        !!!  write(msg, '(a,es21.14)' )'    Fock-type term  = ',energies%e_nlpsp_vfock
-       !!!  call wrtout(iout,msg,'COLL')
+       !!!  call wrtout(iout,msg)
        !!!  write(msg, '(a,es21.14)' ) '    -frozen Fock en.= ',-energies%e_fock0
-       !!!  call wrtout(iout,msg,'COLL')
+       !!!  call wrtout(iout,msg)
        !!!endif
      end if
      if (ANY(ABS(dtset%nucdipmom)>tol8)) then
@@ -1591,11 +1591,11 @@ subroutine prtene(dtset,energies,iout,usepaw)
        end if
        !write(msg, '(3a,es21.14,a)' ) &
        ! '    >>> ',EPName(ipositron),' E= ',etotal-energies%e0_electronpositron -energies%e_electronpositron,ch10
-       !call wrtout(iout,msg,'COLL')
+       !call wrtout(iout,msg)
        !write(msg, '(3a,es21.14,2a,es21.14)' ) &
        ! '    ',EPName(3-ipositron),' ener.= ',energies%e0_electronpositron,ch10,&
        ! '    EP interaction E= '             ,energies%e_electronpositron
-       !call wrtout(iout,msg,'COLL')
+       !call wrtout(iout,msg)
        if(ipositron == 1) then
         call edoc%add_real('positronic', etotal - energies%e0_electronpositron-energies%e_electronpositron)
         call edoc%add_real('electronic', energies%e0_electronpositron)
@@ -1619,7 +1619,7 @@ subroutine prtene(dtset,energies,iout,usepaw)
      '  PAW contribution due to spin-orbit coupling cannot be evaluated',ch10,&
      '  without the knowledge of imaginary part of Rhoij atomic occupancies',ch10,&
      '  (computed only when pawcpxocc=2).'
-     call wrtout(iout,msg,'COLL')
+     call wrtout(iout,msg)
    end if
  end if
 !============= Printing of Etotal by double-counting scheme ===========
@@ -1638,7 +1638,7 @@ subroutine prtene(dtset,energies,iout,usepaw)
      !  '    PspCore energy  = ',energies%e_corepsp-energies%e_corepspdc,ch10,&
      !  '    Dble-C XC-energy= ',-energies%e_hartree+energies%e_xc-energies%e_xcdc -energies%e_fock0 + &
      !  energies%e_hybcomp_E0-energies%e_hybcomp_v0
-     !call wrtout(iout,msg,'COLL')
+     !call wrtout(iout,msg)
      call dc_edoc%add_real(eneName, enevalue)
      call dc_edoc%add_real('psp_core', energies%e_corepsp-energies%e_corepspdc)
      call dc_edoc%add_real('xc_dc', -energies%e_hartree+energies%e_xc-energies%e_xcdc - energies%e_fock0 + &
@@ -1662,7 +1662,7 @@ subroutine prtene(dtset,energies,iout,usepaw)
        !write(msg, '(a,es21.14,a,a,a,es21.14)' ) &
        ! '    >>>>> Internal E= ',etotaldc-eent,ch10,ch10,&
        ! '    -kT*entropy     = ',eent
-       !call wrtout(iout,msg,'COLL')
+       !call wrtout(iout,msg)
        call dc_edoc%add_real('internal', etotaldc-eent)
        call dc_edoc%add_real('-kT*entropy', eent)
      else
@@ -1675,11 +1675,11 @@ subroutine prtene(dtset,energies,iout,usepaw)
      !write(msg, '(a,es21.14,4a,es21.14,a)' ) &
      !  '    - EP dble-ct En.= ',-energies%edc_electronpositron,ch10,&
      !  '    >>> ',EPName(ipositron),' E= ',etotaldc-energies%e0_electronpositron -energies%e_electronpositron,ch10
-     !call wrtout(iout,msg,'COLL')
+     !call wrtout(iout,msg)
      !write(msg, '(3a,es21.14,2a,es21.14)' ) &
      ! '    ',EPName(3-ipositron),' ener.= ',energies%e0_electronpositron,ch10,&
      ! '    EP interaction E= '            ,energies%e_electronpositron
-     !call wrtout(iout,msg,'COLL')
+     !call wrtout(iout,msg)
      call dc_edoc%add_real('electron_positron_dc', -energies%edc_electronpositron)
      if(ipositron == 1) then
        call dc_edoc%add_real('positronic', etotaldc-energies%e0_electronpositron-energies%e_electronpositron)
@@ -1693,7 +1693,7 @@ subroutine prtene(dtset,energies,iout,usepaw)
 
 
    write(msg, '(a,es21.14)' ) '    >>>> Etotal (DC)= ',etotaldc
-   !call wrtout(iout,msg,'COLL')
+   !call wrtout(iout,msg)
    call dc_edoc%add_real('total_energy_dc', etotaldc)
  end if
 
@@ -1706,7 +1706,7 @@ subroutine prtene(dtset,energies,iout,usepaw)
 
  if ((optdc==0.or.optdc==2).and.(.not.directE_avail)) then
    !write(msg, '(a,a,es18.10)' ) ch10,' Band energy (Ha)= ',energies%e_eigenvalues
-   !call wrtout(iout,msg,'COLL')
+   !call wrtout(iout,msg)
    call edoc%add_real('band_energy', energies%e_eigenvalues)
  end if
 
@@ -1717,7 +1717,7 @@ subroutine prtene(dtset,energies,iout,usepaw)
    if (optdc>=1) then
      !if (optdc==1) write(msg, '(a,a,es21.14)' ) ch10,'  >Total DC energy in eV        = ',etotaldc*Ha_eV
      !if (optdc==2) write(msg, '(a,es21.14)' ) '  >Total DC energy in eV        = ',etotaldc*Ha_eV
-     !call wrtout(iout,msg,'COLL')
+     !call wrtout(iout,msg)
      call dc_edoc%add_real('total_energy_dc_eV', etotaldc*Ha_eV)
    end if
  end if
@@ -1727,7 +1727,7 @@ subroutine prtene(dtset,energies,iout,usepaw)
      ch10,' Calculation was performed for a charged system with PBC',&
      ch10,' You may consider including the monopole correction to the total energy',&
      ch10,' The correction is to be divided by the dielectric constant'
-   call wrtout(iout,msg,'COLL')
+   call wrtout(iout,msg)
    call edoc%add_real('monopole_correction', energies%e_monopole)
    call edoc%add_real('monopole_correction_eV', energies%e_monopole*Ha_eV)
  end if

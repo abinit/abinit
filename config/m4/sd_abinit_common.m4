@@ -83,12 +83,13 @@ AC_DEFUN([SD_ABINIT_COMMON_INIT], [
   # Declare environment variables
   AC_ARG_VAR([ABINIT_COMMON_CPPFLAGS], [C preprocessing flags for ABINIT Common.])
   AC_ARG_VAR([ABINIT_COMMON_FCFLAGS], [Fortran flags for ABINIT Common.])
+  AC_ARG_VAR([ABINIT_COMMON_FFLAGS], [Fortran flags for ABINIT Common (better use ABINIT_COMMON_FCFLAGS).])
   AC_ARG_VAR([ABINIT_COMMON_LDFLAGS], [Linker flags for ABINIT Common.])
   AC_ARG_VAR([ABINIT_COMMON_LIBS], [Library flags for ABINIT Common.])
 
   # Detect use of environment variables
   if test "${sd_abinit_common_enable}" = "yes" -o "${sd_abinit_common_enable}" = "auto"; then
-    tmp_abinit_common_vars="${ABINIT_COMMON_CPPFLAGS}${ABINIT_COMMON_FCFLAGS}${ABINIT_COMMON_LDFLAGS}${ABINIT_COMMON_LIBS}"
+    tmp_abinit_common_vars="${ABINIT_COMMON_CPPFLAGS}${ABINIT_COMMON_FFLAGS}${ABINIT_COMMON_FCFLAGS}${ABINIT_COMMON_LDFLAGS}${ABINIT_COMMON_LIBS}"
     if test "${sd_abinit_common_init}" = "def" -a ! -z "${tmp_abinit_common_vars}"; then
       sd_abinit_common_enable="yes"
       sd_abinit_common_init="env"
@@ -126,6 +127,7 @@ AC_DEFUN([SD_ABINIT_COMMON_INIT], [
         sd_abinit_common_ldflags="${sd_abinit_common_ldflags_def}"
         sd_abinit_common_libs="${sd_abinit_common_libs_def}"
         test ! -z "${ABINIT_COMMON_CPPFLAGS}" && sd_abinit_common_cppflags="${ABINIT_COMMON_CPPFLAGS}"
+        test ! -z "${ABINIT_COMMON_FFLAGS}" && sd_abinit_common_fcflags="${ABINIT_COMMON_FFLAGS}"
         test ! -z "${ABINIT_COMMON_FCFLAGS}" && sd_abinit_common_fcflags="${ABINIT_COMMON_FCFLAGS}"
         test ! -z "${ABINIT_COMMON_LDFLAGS}" && sd_abinit_common_ldflags="${ABINIT_COMMON_LDFLAGS}"
         test ! -z "${ABINIT_COMMON_LIBS}" && sd_abinit_common_libs="${ABINIT_COMMON_LIBS}"
@@ -339,7 +341,7 @@ AC_DEFUN([_SD_ABINIT_COMMON_CHECK_CONFIG], [
   fi
 
   # Environment variables conflict with --with-* options
-  tmp_abinit_common_vars="${ABINIT_COMMON_CPPFLAGS}${ABINIT_COMMON_FCFLAGS}${ABINIT_COMMON_LDFLAGS}${ABINIT_COMMON_LIBS}"
+  tmp_abinit_common_vars="${ABINIT_COMMON_CPPFLAGS}${ABINIT_COMMON_FFLAGS}${ABINIT_COMMON_FCFLAGS}${ABINIT_COMMON_LDFLAGS}${ABINIT_COMMON_LIBS}"
   tmp_abinit_common_invalid="no"
   if test ! -z "${tmp_abinit_common_vars}" -a ! -z "${with_abinit_common}"; then
     case "${sd_abinit_common_policy}" in

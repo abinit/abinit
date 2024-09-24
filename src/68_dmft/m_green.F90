@@ -1345,6 +1345,7 @@ subroutine integrate_green(cryst_struc,green,paw_dmft&
  integer :: mband,mbandc,myproc,natom,ndim,nkpt,nproc,nspinor
  integer :: nsppol,option
  integer :: optksloc,spacecomm,optaftsolv,optnonxsum
+ integer, allocatable :: lpawu_natom(:)
  complex(dpc) :: integral
  character(len=500) :: message
  complex(dpc), allocatable :: ff(:)
@@ -1417,7 +1418,10 @@ subroutine integrate_green(cryst_struc,green,paw_dmft&
 
 ! Allocations
  ABI_MALLOC(matlu_temp,(natom))
- call init_matlu(natom,nspinor,nsppol,green%oper(1)%matlu(:)%lpawu,matlu_temp)
+ ABI_MALLOC(lpawu_natom,(natom))
+ lpawu_natom(:)=green%oper(1)%matlu(:)%lpawu
+ call init_matlu(natom,nspinor,nsppol,lpawu_natom,matlu_temp)
+ ABI_FREE(lpawu_natom)
 
  ABI_MALLOC(ff,(green%nw))
 

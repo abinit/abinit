@@ -13,7 +13,7 @@
  acknowledgments of the ABINIT effort.
  For more information, see http://www.abinit.org .
 
-.Starting date : 13 Dec 2020.
+.Starting date : 13 Sep 2024.
   
  #############################################################################
  ######################### ECHO OF INPUT FILE ################################
@@ -1342,7 +1342,7 @@
  
  ========================= Elastic anisotropy =================================
  Elastic anisotropy index : A_U= 5*G_V/G_R + K_V/K_R - 6 =    0.510
- Bulk anisotropy ratio : A_B= (B_V-B_R)/(B_V+B_R) =    0.000
+ Bulk anisotropy ratio : A_B= (B_V-B_R)/(B_V+B_R) =   -0.000
  Shear anisotropy ratio : A_G= (G_V-G_R)/(G_V+G_R) =    0.049
   
  #############################################################################

@@ -72,7 +72,7 @@ znucl 14.0
 #%% max_nprocs = 4
 #%% [extra_info]
 #%% authors = M. Giantomassi
-#%% keywords = PAW, LOBSTER
+#%% keywords = PAW, LOBSTER, MINIMAL
 #%% description =
 #%%   Si in diamond structure. Test ABINIT --> LOBSTER converter.
 #%%   The first dataset performs a standard SCF run with symmetries.

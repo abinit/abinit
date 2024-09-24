@@ -168,6 +168,9 @@ TYPE Ctqmcoffdiag
   INTEGER :: samples
 ! nb of L points (dmftqmc_l)
 
+! INTEGER :: endDensity
+! second dimension of density allocatable array
+
   INTEGER(8) :: seed
 !
 
@@ -813,6 +816,9 @@ SUBROUTINE Ctqmcoffdiag_allocateOpt(op)
     i = CEILING(DBLE(op%thermalization+op%sweeps)/DBLE(op%measurements*op%opt_spectra))
     MALLOC(op%density,(1:op%flavors+1,1:i))
     op%density = 0.d0
+!   op%endDensity=i
+!ENDPROBLEM
+
   END IF
 !#endif
 END SUBROUTINE Ctqmcoffdiag_allocateOpt
@@ -1994,7 +2000,11 @@ SUBROUTINE Ctqmcoffdiag_loop(op,itotal,ilatex)
   MALLOC(gtmp_old2,(1,1))
   gtmp_old2 = 0.d0
 
+!PROBLEM eos_gnu_13.2_mpich . %endDensity was introduced throughout
   endDensity = SIZE(op%density,2)
+! endDensity=op%endDensity
+!ENDPROBLEM
+
 
   IF ( op%opt_noise .GT. 0 ) THEN
     FREEIF(gtmp_new)
@@ -3519,7 +3529,11 @@ include 'mpif.h'
   FREE(fullempty)
 
   IF ( op%opt_spectra .GE. 1 ) THEN
+!PROBLEM eos_gnu_13.2_mpich . %endDensity was introduced throughout
     endDensity = SIZE(op%density,2)
+!   endDensity=op%endDensity
+!ENDPROBLEM
+
     IF ( op%density(1,endDensity) .EQ. -1.d0 ) &
       endDensity = endDensity - 1
     CALL FFTHyb_init(FFTmrka,endDensity,DBLE(op%thermalization)/DBLE(op%measurements*op%opt_spectra))
@@ -4745,7 +4759,10 @@ SUBROUTINE Ctqmcoffdiag_printSpectra(op, oFileIn)
   formatSpectra ='(1x,'//TRIM(ADJUSTL(a))//'ES22.14)'
   WRITE(oFile,*) "# freq[/hermalization] FFT"
 
+!PROBLEM eos_gnu_13.2_mpich . %endDensity was introduced throughout
   endDensity = SIZE(op%density,2)
+! endDensity=op%endDensity
+!ENDPROBLEM
   DO WHILE ( op%density(flavors+1,endDensity) .EQ. -1 )
     endDensity = endDensity -1
   END DO
@@ -4838,6 +4855,7 @@ SUBROUTINE Ctqmcoffdiag_destroy(op)
   op%sweeps         = 0
   op%thermalization = 0
   op%flavors        = 0
+! op%endDensity     = 0
   op%samples        = 0
   op%beta           = 0.d0
 !  op%seg_added      = 0.d0
