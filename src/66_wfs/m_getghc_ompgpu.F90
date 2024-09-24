@@ -263,9 +263,9 @@ subroutine getghc_ompgpu(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_
 !arrays
  integer,intent(in),optional,target :: kg_fft_k(:,:),kg_fft_kp(:,:)
  real(dp),intent(out),target :: gsc(:,:)
- real(dp),intent(inout) :: cwavef(:,:)
+ real(dp),intent(inout),target :: cwavef(:,:)
  real(dp),optional,intent(inout) :: cwavef_r(:,:,:,:,:)
- real(dp),intent(out) :: ghc(:,:)
+ real(dp),intent(out),target :: ghc(:,:)
  real(dp),intent(out),target :: gvnlxc(:,:)
  type(pawcprj_type),intent(inout),target :: cwaveprj(:,:)
  !MG: Passing these arrays assumed-shape has the drawback that client code is

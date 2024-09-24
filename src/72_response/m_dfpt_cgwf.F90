@@ -20,6 +20,9 @@
 
 #include "abi_common.h"
 
+! nvtx related macro definition
+#include "nvtx_macros.h"
+
 module m_dfpt_cgwf
 
  use, intrinsic :: iso_c_binding
@@ -41,6 +44,10 @@ module m_dfpt_cgwf
  use m_getghc,      only : getghc
  use m_getgh1c,     only : getgh1c, getdc1
  use m_fft,         only : fft_ug
+
+#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
+ use m_nvtx_data
+#endif
 
  implicit none
 
@@ -147,7 +154,7 @@ contains
 !! by contributions from the active space in the calling routine, if needed.
 !!
 !! As concerns the MPI algorithm: cgq and gscq are distributed inside comm_band and
-!! each proc has nband_me non-overlapping blocks. Each proc in comm_band call dfpt_cgwf
+!! each proc has nband_me non-overlapping blocks. Each proc in comm_band calls dfpt_cgwf
 !! with a different u^1_{band} state (the band index is therefore LOCAL) but then
 !! we need to communicate every time we call projbd to orthogonalize wrt the MPI-distributed cgq.
 !! Other arrays such as rank_band and bands_treated_now are GLOBAL i.e. all procs in comm_band
@@ -165,7 +172,7 @@ contains
 !!  rank_band(nband)=rank of processor in band_comm which have the other bands for cgq below (GLOBAL)
 !!  bands_treated_now(nband)  (GLOBAL)
 !!  eig0_k=0-order eigenvalues for the present wavefunction at k
-!!  eig0_kq(nband)=GS eigenvalues at k+Q (hartree)
+!!  eig0_kq(nband)=GS eigenvalues at k+q (hartree)
 !!  grad_berry(2,mpw1,dtefield%mband_occ) = the gradient of the Berry phase term
 !!  gscq(2,mgscq)=<g|S|Cnk+q> coefficients for MY bands (PAW) at k+Q
 !!  gs_hamkq <type(gs_hamiltonian_type)>=all data for the Hamiltonian at k+Q
@@ -187,10 +194,10 @@ contains
 !!  nspinor=number of spinorial components of the wavefunctions
 !!  opt_gvnlx1=option controlling the use of gvnlx1 array:
 !!            0: used as an output
-!!            1: used as an input:    - used only for ipert=natom+2
+!!            1: used as an input: - used only for ipert=natom+2
 !!                 NCPP: contains the ddk 1-st order WF
 !!                 PAW: contains frozen part of 1st-order hamiltonian
-!!            2: used as input/ouput:    - used only for PAW and ipert=natom+2
+!!            2: used as input/ouput: - used only for PAW and ipert=natom+2
 !!                 At input: contains the ddk 1-st order WF (times i)
 !!                 At output: contains frozen part of 1st-order hamiltonian
 !!  prtvol=control print volume and debugging output
@@ -220,7 +227,7 @@ contains
 !!
 !! SIDE EFFECTS
 !!  Input/Output:
-!!  cwavef(2,npw1*nspinor)=first-order  wavefunction at k,q, in reciprocal space (updated)
+!!  cwavef(2,npw1*nspinor)=first-order wavefunction at k,q, in reciprocal space (updated)
 !!
 !!  === if gs_hamkq%usepaw==1 ===
 !!  cwaveprj(natom,nspinor)= wave functions at k projected with nl projectors
@@ -300,6 +307,8 @@ subroutine dfpt_cgwf(u1_band_,band_me,rank_band,bands_treated_now,berryopt,cgq,c
 
  DBG_ENTER("COLL")
 
+ ABI_NVTX_START_RANGE(NVTX_DFPT_CGWF)
+
  call timab(122,1,tsec)
 
  !======================================================================
@@ -374,6 +383,9 @@ subroutine dfpt_cgwf(u1_band_,band_me,rank_band,bands_treated_now,berryopt,cgq,c
 
 ! this is used many times - no use de and re allocating
  ABI_MALLOC(work,(2,npw1*nspinor))
+#ifdef HAVE_OPENMP_OFFLOAD
+ !$OMP TARGET ENTER DATA MAP(alloc:work,scprod) IF(gs_hamkq%gpu_option==ABI_GPU_OPENMP)
+#endif
 
 !DEBUG!! Several checking statements
  if (prtvol==-level.or.prtvol==-19.or.prtvol==-20) then
@@ -555,7 +567,7 @@ subroutine dfpt_cgwf(u1_band_,band_me,rank_band,bands_treated_now,berryopt,cgq,c
      gvnlx1_saved(:,:) = gvnlx1(:,:)
    end if
    call getgh1c(berryopt,cwave0,cwaveprj0,gh1c,gberry,gs1c,gs_hamkq,gvnlx1,idir,ipert,eshift,&
-     mpi_enreg,optlocal,optnl,opt_gvnlx1,rf_hamkq,sij_opt,tim_getgh1c,usevnl)
+     mpi_enreg,optlocal,optnl,opt_gvnlx1,rf_hamkq,sij_opt,tim_getgh1c,usevnl,use_gpu=gs_hamkq%gpu_option)
 
    if (gen_eigenpb) then
      if (ipert/=natom+2) then  ! S^(1) is zero for ipert=natom+2
@@ -581,7 +593,7 @@ subroutine dfpt_cgwf(u1_band_,band_me,rank_band,bands_treated_now,berryopt,cgq,c
      if (usedcwavef==2) then
        call getdc1(u1_band,rank_band,bands_treated_now,cgq,cprj_dummy,dcwavef,cprj_dummy,&
 &           0,icgq,istwf_k,mcgq,0,&
-&           mpi_enreg,natom,nband,nband_me,npw1,nspinor,0,gs1c)
+&           mpi_enreg,natom,nband,nband_me,npw1,nspinor,0,gs1c,gpu_option=gs_hamkq%gpu_option)
      end if
    end if ! gen_eigenpb
 
@@ -645,13 +657,19 @@ subroutine dfpt_cgwf(u1_band_,band_me,rank_band,bands_treated_now,berryopt,cgq,c
    if (rank_band(iband) == me_band) work = gh1c
    call xmpi_bcast(work,rank_band(iband),mpi_enreg%comm_band,ierr)
 
+#ifdef HAVE_OPENMP_OFFLOAD
+   !$OMP TARGET UPDATE TO (work) IF(gs_hamkq%gpu_option==ABI_GPU_OPENMP)
+#endif
    if(gen_eigenpb)then
      call projbd(gscq,work,-1,igscq,icgq,istwf_k,mgscq,mcgq,nband_me,npw1,nspinor,&
-       cgq,scprod,0,tim_projbd,useoverlap,me_g0,comm_fft)
+       cgq,scprod,0,tim_projbd,useoverlap,me_g0,comm_fft,gpu_option=gs_hamkq%gpu_option)
    else
      call projbd(cgq,work,-1,icgq,0,istwf_k,mcgq,mgscq,nband_me,npw1,nspinor,&
-       dummy,scprod,0,tim_projbd,useoverlap,me_g0,comm_fft)
+       dummy,scprod,0,tim_projbd,useoverlap,me_g0,comm_fft,gpu_option=gs_hamkq%gpu_option)
    end if
+#ifdef HAVE_OPENMP_OFFLOAD
+   !$OMP TARGET UPDATE FROM (work,scprod) IF(gs_hamkq%gpu_option==ABI_GPU_OPENMP)
+#endif
 
    ! sum projections against all bands k+q
    call xmpi_sum_master(work, rank_band(iband), mpi_enreg%comm_band, ierr)
@@ -743,8 +761,14 @@ subroutine dfpt_cgwf(u1_band_,band_me,rank_band,bands_treated_now,berryopt,cgq,c
    if (rank_band(iband) == me_band) work = cwavef
    call xmpi_bcast(work,rank_band(iband),mpi_enreg%comm_band,ierr)
 
+#ifdef HAVE_OPENMP_OFFLOAD
+   !$OMP TARGET UPDATE TO (work) IF(gs_hamkq%gpu_option==ABI_GPU_OPENMP)
+#endif
    call projbd(cgq,work,-1,icgq,igscq,istwf_k,mcgq,mgscq,nband_me,npw1,nspinor,&
-     gscq,scprod,0,tim_projbd,useoverlap,me_g0,comm_fft)
+     gscq,scprod,0,tim_projbd,useoverlap,me_g0,comm_fft,gpu_option=gs_hamkq%gpu_option)
+#ifdef HAVE_OPENMP_OFFLOAD
+   !$OMP TARGET UPDATE FROM (work,scprod) IF(gs_hamkq%gpu_option==ABI_GPU_OPENMP)
+#endif
 
    call xmpi_sum_master(work, rank_band(iband), mpi_enreg%comm_band, ierr)
 
@@ -833,6 +857,7 @@ subroutine dfpt_cgwf(u1_band_,band_me,rank_band,bands_treated_now,berryopt,cgq,c
  ! ======================================================================
  ! ====== BEGIN LOOP FOR A GIVEN BAND: MINIMIZATION ITERATIONS ==========
  ! ======================================================================
+ ABI_NVTX_START_RANGE(NVTX_DFPT_CGWF_CORE)
  do iline=1,nline
 
 
@@ -881,13 +906,19 @@ subroutine dfpt_cgwf(u1_band_,band_me,rank_band,bands_treated_now,berryopt,cgq,c
      if (rank_band(iband) == me_band) work = gresid
      call xmpi_bcast(work,rank_band(iband),mpi_enreg%comm_band,ierr)
 
+#ifdef HAVE_OPENMP_OFFLOAD
+     !$OMP TARGET UPDATE TO (work) IF(gs_hamkq%gpu_option==ABI_GPU_OPENMP)
+#endif
      if(gen_eigenpb)then
        call projbd(gscq,work,-1,igscq,icgq,istwf_k,mgscq,mcgq,nband_me,npw1,nspinor,&
-         cgq,  scprod,0,tim_projbd,useoverlap,me_g0,comm_fft)
+         cgq,  scprod,0,tim_projbd,useoverlap,me_g0,comm_fft,gpu_option=gs_hamkq%gpu_option)
      else
        call projbd( cgq,work,-1, icgq,   0,istwf_k,mcgq,mgscq,nband_me,npw1,nspinor,&
-         dummy,scprod,0,tim_projbd,useoverlap,me_g0,comm_fft)
+         dummy,scprod,0,tim_projbd,useoverlap,me_g0,comm_fft,gpu_option=gs_hamkq%gpu_option)
      end if
+#ifdef HAVE_OPENMP_OFFLOAD
+     !$OMP TARGET UPDATE FROM (work,scprod) IF(gs_hamkq%gpu_option==ABI_GPU_OPENMP)
+#endif
 
      call xmpi_sum_master(work, rank_band(iband), mpi_enreg%comm_band, ierr)
 
@@ -1035,8 +1066,14 @@ subroutine dfpt_cgwf(u1_band_,band_me,rank_band,bands_treated_now,berryopt,cgq,c
      if (rank_band(iband) == me_band) work = direc
      call xmpi_bcast(work,rank_band(iband),mpi_enreg%comm_band,ierr)
 
+#ifdef HAVE_OPENMP_OFFLOAD
+     !$OMP TARGET UPDATE TO (work) IF(gs_hamkq%gpu_option==ABI_GPU_OPENMP)
+#endif
      call projbd(cgq,work,-1,icgq,igscq,istwf_k,mcgq,mgscq,nband_me,npw1,nspinor,&
-       gscq,scprod,0,tim_projbd,useoverlap,me_g0,comm_fft)
+       gscq,scprod,0,tim_projbd,useoverlap,me_g0,comm_fft,gpu_option=gs_hamkq%gpu_option)
+#ifdef HAVE_OPENMP_OFFLOAD
+     !$OMP TARGET UPDATE FROM (work,scprod) IF(gs_hamkq%gpu_option==ABI_GPU_OPENMP)
+#endif
 
      call xmpi_sum_master(work, rank_band(iband), mpi_enreg%comm_band, ierr)
 
@@ -1248,6 +1285,7 @@ subroutine dfpt_cgwf(u1_band_,band_me,rank_band,bands_treated_now,berryopt,cgq,c
 
    nlines_done = nlines_done + 1
  end do ! iline
+ ABI_NVTX_END_RANGE()
 
 !--------------------------------------------------------------------------
 !             DEBUG
@@ -1277,7 +1315,7 @@ subroutine dfpt_cgwf(u1_band_,band_me,rank_band,bands_treated_now,berryopt,cgq,c
      if (ipert/=natom+10.and.ipert/=natom+11) then
        if (gen_eigenpb) then
          call getgh1c(berryopt,cwave0,cwaveprj0,work1,gberry,work2,gs_hamkq,gvnlx1_saved,idir,ipert,eshift,&
-           mpi_enreg,optlocal,optnl,opt_gvnlx1,rf_hamkq,sij_opt,tim_getgh1c,usevnl)
+           mpi_enreg,optlocal,optnl,opt_gvnlx1,rf_hamkq,sij_opt,tim_getgh1c,usevnl,use_gpu=gs_hamkq%gpu_option)
 
          if (rank_band(iband) == me_band) then
            work(:,:)=cgq(:,1+npw1*nspinor*(iband_me-1)+icgq:npw1*nspinor*iband_me+icgq)
@@ -1508,6 +1546,9 @@ subroutine dfpt_cgwf(u1_band_,band_me,rank_band,bands_treated_now,berryopt,cgq,c
    call wrtout(std_out,msg)
  end if
 
+#ifdef HAVE_OPENMP_OFFLOAD
+ !$OMP TARGET EXIT DATA MAP(release:work,scprod) IF(gs_hamkq%gpu_option==ABI_GPU_OPENMP)
+#endif
  ABI_FREE(work)
  ABI_FREE(gh1c)
  ABI_FREE(pcon)
@@ -1515,6 +1556,8 @@ subroutine dfpt_cgwf(u1_band_,band_me,rank_band,bands_treated_now,berryopt,cgq,c
  ABI_FREE(gberry)
 
  call timab(122,2,tsec)
+
+ ABI_NVTX_END_RANGE()
 
  DBG_EXIT("COLL")
 

@@ -19,6 +19,9 @@
 
 #include "abi_common.h"
 
+! nvtx related macro definition
+#include "nvtx_macros.h"
+
 module m_getgh2c
 
  use defs_basis
@@ -29,6 +32,10 @@ module m_getgh2c
  use m_pawcprj,     only : pawcprj_type,pawcprj_alloc,pawcprj_free
  use m_hamiltonian, only : gs_hamiltonian_type,rf_hamiltonian_type
  use m_nonlop,      only : nonlop
+
+#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
+ use m_nvtx_data
+#endif
 
  implicit none
 
@@ -135,6 +142,7 @@ subroutine getgh2c(cwavef,cwaveprj,gh2c,gs2c,gs_hamkq,gvnl2,idir,ipert,lambda,&
 
  DBG_ENTER("COLL")
  ABI_UNUSED(tim_getgh2c)
+ ABI_NVTX_START_RANGE(NVTX_GETGH2C)
 
 !Keep track of total time spent in getgh2c
 !call timab(196+tim_getgh2c,1,tsec)
@@ -556,6 +564,8 @@ subroutine getgh2c(cwavef,cwaveprj,gh2c,gs2c,gs_hamkq,gvnl2,idir,ipert,lambda,&
  else
    ABI_FREE(gvnl2_)
  end if
+
+ ABI_NVTX_END_RANGE()
 
 !call timab(196+tim_getgh2c,2,tsec)
 

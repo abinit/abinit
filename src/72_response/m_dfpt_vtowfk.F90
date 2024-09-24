@@ -18,6 +18,9 @@
 
 #include "abi_common.h"
 
+! nvtx related macro definition
+#include "nvtx_macros.h"
+
 module m_dfpt_vtowfk
 
  use defs_basis
@@ -43,6 +46,10 @@ module m_dfpt_vtowfk
  use m_dfpt_cgwf,    only : dfpt_cgwf, full_active_wf1
  use m_getghc,       only : getgsc, getghc_nucdip, getghc_mGGA
  use m_getgh1c,      only : getgh1ndc, getgh1c_mGGA
+
+#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
+ use m_nvtx_data
+#endif
 
  implicit none
 
@@ -247,6 +254,8 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
 
  DBG_ENTER('COLL')
 
+ ABI_NVTX_START_RANGE(NVTX_DFPT_VTOWFK)
+
 !Keep track of total time spent in dfpt_vtowfk
  call timab(128,1,tsec)
 
@@ -338,6 +347,9 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
  call proc_distrb_band(rank_band,mpi_enreg%proc_distrb,ikpt,isppol,mband,&
 &  mpi_enreg%me_band,mpi_enreg%me_kpt,mpi_enreg%comm_band)
 
+#ifdef HAVE_OPENMP_OFFLOAD
+ !$OMP TARGET ENTER DATA MAP(to:cgq,gscq)       IF(gs_hamkq%gpu_option==ABI_GPU_OPENMP)
+#endif
  iband_me = 0
  do iband=1,nband_k
 
@@ -641,6 +653,9 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
 !==================  END LOOP OVER BANDS ==============================
 !======================================================================
 
+#ifdef HAVE_OPENMP_OFFLOAD
+ !$OMP TARGET EXIT DATA MAP(release:cgq,gscq) IF(gs_hamkq%gpu_option==ABI_GPU_OPENMP)
+#endif
 ! select eig1 matrix for only my slice of bands at present k-point
 ! this enables global xmpi_sum in dfpt_vtorho without double counting
  ii = 0
@@ -715,6 +730,8 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
 
  call timab(130,2,tsec)
  call timab(128,2,tsec)
+
+ ABI_NVTX_END_RANGE()
 
  DBG_EXIT('COLL')
 
