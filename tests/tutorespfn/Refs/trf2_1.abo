@@ -1,6 +1,6 @@
 
-.Version 9.10.4 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu11.4 computer) 
+.Version 10.1.4.5 of ABINIT, released Sep 2024.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2024 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,14 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed 21 Feb 2024.
-- ( at 13h27 )
+.Starting date : Fri 13 Sep 2024.
+- ( at 19h05 )
   
-- input  file    -> trf2_1.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/tutorespfn_trf2_1-trf2_2-trf2_3-trf2_4-trf2_5-trf2_6-trf2_7/trf2_1.abi
 - output file    -> trf2_1.abo
 - root for input  files -> trf2_1i
 - root for output files -> trf2_1o
-
 
  DATASET    1 : space group F-4 3 m (#216); Bravais cF (face-center cubic)
 ================================================================================
@@ -38,7 +37,6 @@ P This job should need less than                       1.499 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.049 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
-
 
  DATASET    2 : space group F-4 3 m (#216); Bravais cF (face-center cubic)
 ================================================================================
@@ -61,10 +59,10 @@ _ WF disk file :      0.604 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
 -
-- outvars: echo of selected default values                                      
+- outvars: echo of selected default values
 -   iomode0 =  0 , fftalg0 =512 , wfoptalg0 =  0
 -
-- outvars: echo of global parameters not present in the input file              
+- outvars: echo of global parameters not present in the input file
 -  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
@@ -245,8 +243,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      3.000   => boxcut(ratio)=   2.05142
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/jzwanzig/local/src/abinit-develop/tests/Psps_for_tests/13al.981214.fhi
-- pspatm: opening atomic psp file    /home/jzwanzig/local/src/abinit-develop/tests/Psps_for_tests/13al.981214.fhi
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/13al.981214.fhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/13al.981214.fhi
 - Aluminum, fhi98PP : Hamann-type, LDA CA PerdewWang, l=2 local
 - 13.00000   3.00000    981214                znucl, zion, pspdat
     6    7    2    2       493   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -258,8 +256,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
              1    0.900554
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/jzwanzig/local/src/abinit-develop/tests/Psps_for_tests/PseudosTM_pwteter/33as.pspnc
-- pspatm: opening atomic psp file    /home/jzwanzig/local/src/abinit-develop/tests/Psps_for_tests/PseudosTM_pwteter/33as.pspnc
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/33as.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/33as.pspnc
 -  Troullier-Martins psp for element  As        Thu Oct 27 17:37:14 EDT 1994
 - 33.00000   5.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -289,15 +287,15 @@ tolerances: {tolvrs: 1.00E-18, }
      iter   Etot(hartree)      deltaE(h)  residm     vres2
  ETOT  1  -9.7616347341688    -9.762E+00 4.240E-04 9.226E-01
  ETOT  2  -9.7656186524780    -3.984E-03 2.214E-10 5.246E-02
- ETOT  3  -9.7658599527301    -2.413E-04 3.325E-06 3.524E-03
- ETOT  4  -9.7658721734640    -1.222E-05 9.642E-08 6.968E-05
+ ETOT  3  -9.7658599527235    -2.413E-04 3.325E-06 3.524E-03
+ ETOT  4  -9.7658721734639    -1.222E-05 9.642E-08 6.968E-05
  ETOT  5  -9.7658722910037    -1.175E-07 5.757E-10 3.166E-07
  ETOT  6  -9.7658722914688    -4.651E-10 1.759E-12 7.056E-09
- ETOT  7  -9.7658722914794    -1.059E-11 4.098E-14 8.677E-11
- ETOT  8  -9.7658722914795    -1.439E-13 6.546E-16 2.829E-13
- ETOT  9  -9.7658722914795    -1.243E-14 3.038E-18 1.104E-15
- ETOT 10  -9.7658722914795     2.309E-14 1.104E-20 1.983E-18
- ETOT 11  -9.7658722914796    -6.573E-14 2.887E-23 1.156E-20
+ ETOT  7  -9.7658722914794    -1.058E-11 4.099E-14 8.671E-11
+ ETOT  8  -9.7658722914795    -1.510E-13 6.541E-16 2.829E-13
+ ETOT  9  -9.7658722914795     4.086E-14 3.040E-18 1.105E-15
+ ETOT 10  -9.7658722914795    -5.862E-14 1.106E-20 2.002E-18
+ ETOT 11  -9.7658722914796    -3.197E-14 2.992E-23 1.159E-20
 
  At SCF step   11       vres2   =  1.16E-20 < tolvrs=  1.00E-18 =>converged.
 
@@ -317,7 +315,7 @@ lattice_vectors:
 lattice_lengths: [   7.50240,    7.50240,    7.50240, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.9859750E+02
-convergence: {deltae: -6.573E-14, res2:  1.156E-20, residm:  2.887E-23, diffor: null, }
+convergence: {deltae: -3.197E-14, res2:  1.159E-20, residm:  2.992E-23, diffor: null, }
 etotal    :  -9.76587229E+00
 entropy   :   0.00000000E+00
 fermie    :   7.84748681E-02
@@ -344,7 +342,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   11.282E-24; max=  28.867E-24
+ Mean square residual over all n,k,spin=   11.609E-24; max=  29.918E-24
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.250000000000      0.250000000000      0.250000000000
@@ -378,16 +376,16 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
-kinetic             :  2.92021253013915E+00
-hartree             :  7.88950069313383E-01
+kinetic             :  2.92021253013914E+00
+hartree             :  7.88950069313378E-01
 xc                  : -3.93636576105228E+00
 Ewald energy        : -8.47989583509473E+00
 psp_core            :  7.65414498117480E-01
-local_psp           : -2.42022700737535E+00
-non_local_psp       :  5.96039214472781E-01
+local_psp           : -2.42022700737533E+00
+non_local_psp       :  5.96039214472764E-01
 total_energy        : -9.76587229147957E+00
 total_energy_eV     : -2.65742899651188E+02
-band_energy         : -7.16243168046233E-01
+band_energy         : -7.16243168046014E-01
 ...
 
 
@@ -462,14 +460,14 @@ tolerances: {tolwfr: 1.00E-20, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  -8.3112827213665     -8.311E+00 2.710E-02 0.000E+00
- ETOT  2  -8.3150932295402     -3.811E-03 1.679E-05 0.000E+00
- ETOT  3  -8.3150945861767     -1.357E-06 4.292E-09 0.000E+00
- ETOT  4  -8.3150945869935     -8.168E-10 6.723E-12 0.000E+00
- ETOT  5  -8.3150945869943     -7.798E-13 9.941E-15 0.000E+00
- ETOT  6  -8.3150945869943     -2.665E-14 1.678E-17 0.000E+00
- ETOT  7  -8.3150945869944     -7.105E-15 2.538E-20 0.000E+00
- ETOT  8  -8.3150945869944      0.000E+00 9.506E-21 0.000E+00
+-ETOT  1  -8.3112827238527     -8.311E+00 2.710E-02 0.000E+00
+ ETOT  2  -8.3150932295413     -3.811E-03 1.679E-05 0.000E+00
+ ETOT  3  -8.3150945861779     -1.357E-06 4.292E-09 0.000E+00
+ ETOT  4  -8.3150945869947     -8.168E-10 6.723E-12 0.000E+00
+ ETOT  5  -8.3150945869955     -7.887E-13 9.941E-15 0.000E+00
+ ETOT  6  -8.3150945869955      3.020E-14 1.678E-17 0.000E+00
+ ETOT  7  -8.3150945869955      0.000E+00 2.538E-20 0.000E+00
+ ETOT  8  -8.3150945869955     -1.776E-15 9.506E-21 0.000E+00
 
  At SCF step    8   max residual=  9.51E-21 < tolwfr=  1.00E-20 =>converged.
 ================================================================================
@@ -520,14 +518,14 @@ tolerances: {tolwfr: 1.00E-20, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  -8.3112827212650     -8.311E+00 2.710E-02 0.000E+00
- ETOT  2  -8.3150932294386     -3.811E-03 1.679E-05 0.000E+00
- ETOT  3  -8.3150945860752     -1.357E-06 4.292E-09 0.000E+00
- ETOT  4  -8.3150945868920     -8.168E-10 6.723E-12 0.000E+00
- ETOT  5  -8.3150945868927     -7.283E-13 9.941E-15 0.000E+00
- ETOT  6  -8.3150945868927     -2.309E-14 1.678E-17 0.000E+00
- ETOT  7  -8.3150945868927      3.553E-15 2.538E-20 0.000E+00
- ETOT  8  -8.3150945868927      0.000E+00 9.506E-21 0.000E+00
+-ETOT  1  -8.3112827237512     -8.311E+00 2.710E-02 0.000E+00
+ ETOT  2  -8.3150932294398     -3.811E-03 1.679E-05 0.000E+00
+ ETOT  3  -8.3150945860764     -1.357E-06 4.292E-09 0.000E+00
+ ETOT  4  -8.3150945868931     -8.168E-10 6.723E-12 0.000E+00
+ ETOT  5  -8.3150945868939     -7.923E-13 9.941E-15 0.000E+00
+ ETOT  6  -8.3150945868939     -1.066E-14 1.678E-17 0.000E+00
+ ETOT  7  -8.3150945868939      1.421E-14 2.538E-20 0.000E+00
+ ETOT  8  -8.3150945868939      3.553E-15 9.506E-21 0.000E+00
 
  At SCF step    8   max residual=  9.51E-21 < tolwfr=  1.00E-20 =>converged.
 ================================================================================
@@ -578,14 +576,14 @@ tolerances: {tolwfr: 1.00E-20, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  -8.3112827211635     -8.311E+00 2.710E-02 0.000E+00
- ETOT  2  -8.3150932293370     -3.811E-03 1.679E-05 0.000E+00
- ETOT  3  -8.3150945859736     -1.357E-06 4.292E-09 0.000E+00
- ETOT  4  -8.3150945867904     -8.168E-10 6.723E-12 0.000E+00
- ETOT  5  -8.3150945867911     -7.674E-13 9.941E-15 0.000E+00
- ETOT  6  -8.3150945867911     -3.553E-15 1.678E-17 0.000E+00
- ETOT  7  -8.3150945867911     -5.329E-15 2.538E-20 0.000E+00
- ETOT  8  -8.3150945867911     -3.553E-15 9.506E-21 0.000E+00
+-ETOT  1  -8.3112827236496     -8.311E+00 2.710E-02 0.000E+00
+ ETOT  2  -8.3150932293382     -3.811E-03 1.679E-05 0.000E+00
+ ETOT  3  -8.3150945859748     -1.357E-06 4.292E-09 0.000E+00
+ ETOT  4  -8.3150945867915     -8.168E-10 6.723E-12 0.000E+00
+ ETOT  5  -8.3150945867923     -7.834E-13 9.941E-15 0.000E+00
+ ETOT  6  -8.3150945867923      1.776E-14 1.678E-17 0.000E+00
+ ETOT  7  -8.3150945867923     -3.553E-15 2.538E-20 0.000E+00
+ ETOT  8  -8.3150945867923     -7.105E-15 9.506E-21 0.000E+00
 
  At SCF step    8   max residual=  9.51E-21 < tolwfr=  1.00E-20 =>converged.
 ================================================================================
@@ -879,10 +877,10 @@ P          mk1mem2        128
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          2.4  wall=          2.6
+- Proc.   0 individual time (sec): cpu=          2.5  wall=          4.9
 
 ================================================================================
 
  Calculation completed.
 .Delivered  13 WARNINGs and   3 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          2.4  wall=          2.6
++Overall time at end (sec) : cpu=          2.5  wall=          4.9

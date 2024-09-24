@@ -527,9 +527,9 @@ program cut3d
              read(std_in,*) gridshift1, gridshift2, gridshift3
              shift_tau(:) = gridshift1*rprimd(:,1)/(nr1+1) + gridshift2*rprimd(:,2)/(nr2+1) + gridshift3*rprimd(:,3)/(nr3+1)
            end if
-!
-!            Generate translated coordinates to match density shift
-!
+           !
+           ! Generate translated coordinates to match density shift
+           !
            ABI_MALLOC(tau2,(3,natom))
            do iatom = 1,natom
              tau2(:,iatom) = xcart(:,iatom) - shift_tau(:)

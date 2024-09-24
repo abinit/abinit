@@ -1,8 +1,8 @@
 
-.Version 9.11.1 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 10.1.4.5 of ABINIT, released Sep 2024.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2022 ABINIT group . 
+.Copyright (C) 1998-2024 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,14 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun 25 Jun 2023.
-- ( at 08h48 )
+.Starting date : Fri 13 Sep 2024.
+- ( at 19h17 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/xuhe_ewann/tests/TestBot_MPI1/wannier90_t14/t14.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/wannier90_t14/t14.abi
 - output file    -> t14.abo
 - root for input  files -> t14i
 - root for output files -> t14o
-
 
  DATASET    1 : space group F-4 3 m (#216); Bravais cF (face-center cubic)
 ================================================================================
@@ -38,7 +37,6 @@ P This job should need less than                      11.746 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.620 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 ================================================================================
-
 
  DATASET    2 : space group F-4 3 m (#216); Bravais cF (face-center cubic)
 ================================================================================
@@ -60,10 +58,10 @@ _ WF disk file :      0.620 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
 -
-- outvars: echo of selected default values                                      
--   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+- outvars: echo of selected default values
+-   iomode0 =  0 , fftalg0 =512 , wfoptalg0 =  0
 -
-- outvars: echo of global parameters not present in the input file              
+- outvars: echo of global parameters not present in the input file
 -  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
@@ -71,7 +69,7 @@ _ WF disk file :      0.620 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
               amu      6.97200000E+01  7.49216000E+01
            diemac      1.00000000E+01
              ecut      2.00000000E+01 Hartree
--          fftalg         312
+-          fftalg         512
            getwfk1          0
            getwfk2         -1
            istwfk        2    3    6    7    4    5    8    9
@@ -169,8 +167,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     20.000   => boxcut(ratio)=   2.12070
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/xuhe_ewann/tests/Psps_for_tests/PseudosTM_pwteter/31ga.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/xuhe_ewann/tests/Psps_for_tests/PseudosTM_pwteter/31ga.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/31ga.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/31ga.pspnc
 -  Troullier-Martins psp for element  Ga        Thu Oct 27 17:36:43 EDT 1994
 - 31.00000   3.00000    940714                znucl, zion, pspdat
     1    1    1    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -184,8 +182,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
              1    2.537532
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/xuhe_ewann/tests/Psps_for_tests/PseudosTM_pwteter/33as.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/xuhe_ewann/tests/Psps_for_tests/PseudosTM_pwteter/33as.pspnc
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/33as.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/33as.pspnc
 -  Troullier-Martins psp for element  As        Thu Oct 27 17:37:14 EDT 1994
 - 33.00000   5.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -219,12 +217,12 @@ tolerances: {tolwfr: 1.00E-10, }
  ETOT  4  -10.650479895004    -4.361E-05 3.400E-05 3.026E-03
  ETOT  5  -10.650480110863    -2.159E-07 3.543E-06 3.822E-05
  ETOT  6  -10.650480113568    -2.705E-09 9.919E-07 4.558E-07
- ETOT  7  -10.650480113573    -4.460E-12 1.086E-07 1.351E-08
- ETOT  8  -10.650480113573    -3.197E-14 3.251E-08 6.105E-11
- ETOT  9  -10.650480113573    -4.796E-14 3.635E-09 7.705E-13
- ETOT 10  -10.650480113573    -1.226E-13 1.106E-09 1.063E-14
- ETOT 11  -10.650480113573     1.954E-14 1.244E-10 1.569E-16
- ETOT 12  -10.650480113573     6.217E-14 9.409E-11 4.617E-20
+ ETOT  7  -10.650480113573    -4.412E-12 1.086E-07 1.351E-08
+ ETOT  8  -10.650480113573    -1.084E-13 3.251E-08 6.105E-11
+ ETOT  9  -10.650480113573     1.243E-14 3.635E-09 7.705E-13
+ ETOT 10  -10.650480113573    -1.261E-13 1.106E-09 1.063E-14
+ ETOT 11  -10.650480113573    -8.349E-14 1.244E-10 1.569E-16
+ ETOT 12  -10.650480113573     1.918E-13 9.409E-11 4.618E-20
 
  At SCF step   12   max residual=  9.41E-11 < tolwfr=  1.00E-10 =>converged.
 
@@ -244,7 +242,7 @@ lattice_vectors:
 lattice_lengths: [   7.49533,    7.49533,    7.49533, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.9775400E+02
-convergence: {deltae:  6.217E-14, res2:  4.617E-20, residm:  9.409E-11, diffor: null, }
+convergence: {deltae:  1.918E-13, res2:  4.618E-20, residm:  9.409E-11, diffor: null, }
 etotal    :  -1.06504801E+01
 entropy   :   0.00000000E+00
 fermie    :   2.64298940E-03
@@ -305,16 +303,16 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
-kinetic             :  3.17738215442630E+00
-hartree             :  8.82768331457459E-01
-xc                  : -4.92109852545852E+00
+kinetic             :  3.17738215442579E+00
+hartree             :  8.82768331457058E-01
+xc                  : -4.92109852545822E+00
 Ewald energy        : -8.48789573682593E+00
 psp_core            :  1.45806676895480E+00
-local_psp           : -2.88768955248007E+00
-non_local_psp       :  1.27986446353117E-01
+local_psp           : -2.88768955247945E+00
+non_local_psp       :  1.27986446353123E-01
 total_energy        : -1.06504801135728E+01
 total_energy_eV     : -2.89814302663727E+02
-band_energy         : -1.41905065681861E+00
+band_energy         : -1.41905065681899E+00
 ...
 
 
@@ -373,29 +371,29 @@ meta: {optdriver: 8, wfk_task: 10, }
    m=n=1:3, ikb=1, ik=1
 
 ;   (   0.627058  -0.488341 ,   0.376713   0.444342 ,   0.000000  -0.000000 ,    )
-;   (   0.084993   0.043799 ,   0.025018  -0.110480 ,  -0.630589   0.470951 ,    )
-;   (  -0.113705  -0.058595 ,  -0.033469   0.147802 ,   0.043305  -0.032342 ,    )
+;   (   0.084992   0.043799 ,   0.025018  -0.110479 ,  -0.630589   0.470951 ,    )
+;   (  -0.113702  -0.058593 ,  -0.033468   0.147797 ,   0.043306  -0.032343 ,    )
 
    Writing bottom of the overlap matrix: M_mn(ikb,ik)
    m=n=num_bands-2:num_bands, ikb=nntot, ik=nkpt
 
-;   (   0.518664  -0.234985 ,   0.416867  -0.345859 ,  -0.010414   0.008640 ,    )
-;   (  -0.201197   0.410790 ,   0.040405  -0.175881 ,  -0.176862   0.118026 ,    )
-;   (  -0.053262   0.108747 ,   0.028444  -0.058028 ,   0.663568  -0.427793 ,    )
+;   (   0.518664  -0.234985 ,   0.416867  -0.345859 ,  -0.010416   0.008642 ,    )
+;   (  -0.201201   0.410798 ,   0.040406  -0.175885 ,  -0.176813   0.117995 ,    )
+;   (  -0.053248   0.108717 ,   0.028443  -0.058017 ,   0.663581  -0.427802 ,    )
 
    Writing top of the initial projections matrix: A_mn(ik)
    m=1:3, n=1:3, ik=1
 
 ;   (   0.368118   0.000000 ,   0.368118   0.000000 ,   0.368118   0.000000 ,    )
-;   (   0.340112  -0.000000 ,   0.117307  -0.000000 ,   0.043518  -0.000000 ,    )
-;   (  -0.229400   0.000000 ,  -0.156936   0.000000 ,   0.532570   0.000000 ,    )
+;   (   0.340113  -0.000000 ,   0.117306  -0.000000 ,   0.043517  -0.000000 ,    )
+;   (  -0.229402   0.000000 ,  -0.156931  -0.000000 ,   0.532570   0.000000 ,    )
 
    Writing bottom of the initial projections matrix: A_mn(ik)
    m=num_bands-2:num_bands, n=nwan-2:nwan, ik=nkpt
 
-;   (   0.225109   0.000000 ,   0.225109  -0.000000 ,   0.225109   0.000000 ,    )
-;   (  -0.123913  -0.000000 ,  -0.333770   0.000000 ,   0.457682  -0.000000 ,    )
-;   (  -0.456945   0.000000 ,   0.335784  -0.000000 ,   0.121161  -0.000000 ,    )
+;   (   0.225109  -0.000000 ,   0.225109   0.000000 ,   0.225109   0.000000 ,    )
+;   (  -0.123946  -0.000000 ,  -0.333745   0.000000 ,   0.457691   0.000000 ,    )
+;   (  -0.456936   0.000000 ,   0.335809  -0.000000 ,   0.121127   0.000000 ,    )
 
    mlwfovlp :  mlwfovlp_run completed -
 -  see t14o_DS2_w90.wout for details.
@@ -415,7 +413,7 @@ meta: {optdriver: 8, wfk_task: 10, }
                       -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
             fcart2     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
--          fftalg         312
+-          fftalg         512
            getwfk1          0
            getwfk2         -1
            istwfk        2    3    6    7    4    5    8    9
@@ -449,7 +447,7 @@ P           mkmem           8
                        5.0000000000E-01  0.0000000000E+00  5.0000000000E-01
                        5.0000000000E-01  5.0000000000E-01  0.0000000000E+00
           spgroup         216
-           strten1    -8.0716605285E-06 -8.0716605285E-06 -8.0716605285E-06
+           strten1    -8.0716605266E-06 -8.0716605266E-06 -8.0716605266E-06
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            strten2     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -571,10 +569,10 @@ P           mkmem           8
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          3.9  wall=          4.0
+- Proc.   0 individual time (sec): cpu=          2.4  wall=          2.4
 
 ================================================================================
 
  Calculation completed.
 .Delivered   0 WARNINGs and   3 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          3.9  wall=          4.0
++Overall time at end (sec) : cpu=          2.4  wall=          2.4

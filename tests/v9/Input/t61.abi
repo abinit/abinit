@@ -15,8 +15,8 @@ nshiftk  1
 shiftk   0.0 0.0 0.0
 
 ph_nqpath 3
-ph_qpath 
-  0 0 0 
+ph_qpath
+  0 0 0
   0.5 0 0
   0.5 0.5 0
 
@@ -60,7 +60,7 @@ getdvdb3   -1
 eph_intmeth3 2
 eph_phrange3 1 6  # This just for testing purposes.
 #rifcsph3     100  # This just for testing purposes
-eph_ngqpt_fine3 8 8 8 
+eph_ngqpt_fine3 8 8 8
 sigma_erange3 0.2 0.2 eV   # Select kpts in fine mesh within this energy window.
 ngkpt3    8 8 8
 nshiftk3  1
@@ -90,14 +90,15 @@ znucl 3 9
 #%% executable = abinit
 #%% need_cpp_vars = HAVE_NETCDF_MPI
 #%% test_chain = t57.abi, t58.abi, t59.abi, t60.abi, t61.abi
+#%% exclude_builders = eos_nvhpc_*
 #%% [files]
-#%% files_to_test = 
+#%% files_to_test =
 #%%   t61.abo, tolnlines = 30, tolabs = 20.0, tolrel = 5.0e-2
 #%% [paral_info]
 #%% max_nprocs = 10
 #%% [extra_info]
 #%% authors = M. Giantomassi
 #%% keywords = NC, DFPT, EPH, RTA
-#%% description = 
+#%% description =
 #%%   Calculation of the imaginary part of the Fan-Migdal self-energy matrix elements.
 #%%<END TEST_INFO>
