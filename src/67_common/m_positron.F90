@@ -815,7 +815,7 @@ subroutine setup_positron(atindx,atindx1,cg,cprj,dtefield,dtfil,dtset,ecore,eige
    end if
 
    ! In some cases cprj are kept in memory, so we have to update them before the call of vtorho
-   if (dtset%cprj_in_memory/=0) then
+   if (dtset%cprj_in_memory==2) then
      iatom=0
      call wrtout(std_out,' Computing cprj from wavefunctions (positron)')
      call ctocprj(atindx,cg,1,cprj,gmet,gprimd,iatom,0,&
