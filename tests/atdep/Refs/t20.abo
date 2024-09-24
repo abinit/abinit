@@ -13,7 +13,7 @@
  acknowledgments of the ABINIT effort.
  For more information, see http://www.abinit.org .
 
-.Starting date : 13 Dec 2020.
+.Starting date : 13 Sep 2024.
   
  #############################################################################
  ######################### ECHO OF INPUT FILE ################################
@@ -71,6 +71,7 @@
  dielec_constant         5.2000000000
  born_charge             5.3100000000   -2.6550000000
  ngqpt1                  6    6    6
+ ngqpt2                 12   12   12
  enunit                  1 (Phonon frequencies in cm-1)
  USE IDEAL POSITIONS TO COMPUTE SPECTRUM
  USE NON-ANALYTICAL CORRECTIONS (LO-TO)

@@ -432,8 +432,10 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
 
      if (fockcommon%usepaw==1) then
        qphon=qvec_j;nfftotf=product(ngfftf(1:3))
-       cplex_dij=1;ndij=nspden_fock
-       ABI_MALLOC(dijhat,(cplex_dij*gs_ham%dimekb1,natom,ndij,cplex_fock))
+       ndij=nspden_fock
+       ! dimekb1 is dimensioned as cplex_dij*lmnmax*(lmnmax+1)/2
+       cplex_dij=2*gs_ham%dimekb1/(gs_ham%lmnmax*(gs_ham%lmnmax+1))
+       ABI_MALLOC(dijhat,(gs_ham%dimekb1,natom,ndij,cplex_fock))
        dijhat=zero
        do iatom=1,natom
          itypat=gs_ham%typat(iatom)
@@ -444,7 +446,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
 &         natom,ndij,nfftf,nfftotf,nspden_fock,nspden_fock,fockbz%pawang,fockcommon%pawfgrtab(iatom),&
 &         fockcommon%pawtab(itypat),vfock,qphon,gs_ham%ucvol,gs_ham%xred)
          do ii=1,cplex_fock
-           ind=(ii-1)*lmn2_size
+           ind=(ii-1)*lmn2_size*cplex_dij
            dijhat(1:cplex_dij*lmn2_size,iatom,:,ii)=dijhat_tmp(ind+1:ind+cplex_dij*lmn2_size,:)
          end do
          ABI_FREE(dijhat_tmp)

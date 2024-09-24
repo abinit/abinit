@@ -1,6 +1,6 @@
 
-.Version 9.9.3 of ABINIT 
-.(MPI version, prepared for a x86_64_darwin21.5.0_gnu12.1 computer) 
+.Version 10.1.4.5 of ABINIT, released Sep 2024.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2024 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,14 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 24 Apr 2023.
-- ( at 22h17 )
+.Starting date : Wed 18 Sep 2024.
+- ( at 17h21 )
   
-- input  file    -> /Users/gmatteo/git_repos/abinit_gwr/_build/tests/Test_suite/gwr_t07/t07.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop/tests/TestBot_MPI1/gwr_t07/t07.abi
 - output file    -> t07.abo
 - root for input  files -> t07i
 - root for output files -> t07o
-
 
  DATASET    1 : space group Fm -3 m (#225); Bravais cF (face-center cubic)
 ================================================================================
@@ -38,7 +37,6 @@ P This job should need less than                       3.675 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.053 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 ================================================================================
-
 
  DATASET    2 : space group Fm -3 m (#225); Bravais cF (face-center cubic)
 ================================================================================
@@ -60,19 +58,20 @@ _ WF disk file :      0.204 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
 -
-- outvars: echo of selected default values                                      
--   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+- outvars: echo of selected default values
+-   iomode0 =  0 , fftalg0 =512 , wfoptalg0 =  0
 -
-- outvars: echo of global parameters not present in the input file              
+- outvars: echo of global parameters not present in the input file
 -  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
+-          iomode           1
             acell      7.7034756000E+00  7.7034756000E+00  7.7034756000E+00 Bohr
               amu      6.94100000E+00  1.89984032E+01
              ecut      1.50000000E+01 Hartree
           ecuteps1     0.00000000E+00 Hartree
           ecuteps2     4.00000000E+00 Hartree
--          fftalg         312
+-          fftalg         512
            getden1          0
            getden2          1
            istwfk        1
@@ -132,9 +131,9 @@ P           mkmem           1
            tolvrs2     0.00000000E+00
             typat      1  2
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                      -2.0382518572E+00  0.0000000000E+00  0.0000000000E+00
+                      -2.0382518572E+00 -4.3552371229E-18  4.3552371229E-18
             xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                      -3.8517378000E+00  0.0000000000E+00  0.0000000000E+00
+                      -3.8517378000E+00 -8.2302054061E-18  8.2302054061E-18
              xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        5.0000000000E-01 -5.0000000000E-01 -5.0000000000E-01
             znucl        3.00000    9.00000
@@ -169,8 +168,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     15.000   => boxcut(ratio)=   2.10595
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /Users/gmatteo/git_repos/abinit_gwr/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/Li.psp8
-- pspatm: opening atomic psp file    /Users/gmatteo/git_repos/abinit_gwr/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/Li.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/Li.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/Li.psp8
 - Li    ONCVPSP-3.3.0  r_core=   1.20595   1.00838
 -  3.00000   3.00000    171101                znucl, zion, pspdat
     8   -1012    1    4       400   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -183,8 +182,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
              1   -2.259133   -0.579420
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /Users/gmatteo/git_repos/abinit_gwr/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/F.upf
-- pspatm: opening atomic psp file    /Users/gmatteo/git_repos/abinit_gwr/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/F.upf
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/F.upf
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/F.upf
 - F Generated using ONCVPSP code by D. R. Hamann
 -  9.00000   7.00000  201202                  znucl, zion, pspdat
 12 -1012 2 -1 824                             pspcod,pspxc,lmax,lloc,mmax
@@ -212,10 +211,10 @@ tolerances: {tolvrs: 1.00E-08, }
      iter   Etot(hartree)      deltaE(h)  residm     vres2
  ETOT  1  -30.879911984472    -3.088E+01 2.604E-03 2.575E+01
  ETOT  2  -30.889611666833    -9.700E-03 2.816E-04 1.419E+00
- ETOT  3  -30.890944821017    -1.333E-03 2.034E-04 4.139E-01
+ ETOT  3  -30.890944821016    -1.333E-03 2.034E-04 4.139E-01
  ETOT  4  -30.891370355960    -4.255E-04 2.284E-05 1.249E-03
  ETOT  5  -30.891370725126    -3.692E-07 3.633E-07 2.898E-06
- ETOT  6  -30.891370726017    -8.911E-10 4.293E-08 7.313E-09
+ ETOT  6  -30.891370726017    -8.910E-10 4.293E-08 7.313E-09
 
  At SCF step    6       vres2   =  7.31E-09 < tolvrs=  1.00E-08 =>converged.
 
@@ -235,7 +234,7 @@ lattice_vectors:
 lattice_lengths: [   5.44718,    5.44718,    5.44718, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   1.1428787E+02
-convergence: {deltae: -8.911E-10, res2:  7.313E-09, residm:  4.293E-08, diffor: null, }
+convergence: {deltae: -8.910E-10, res2:  7.313E-09, residm:  4.293E-08, diffor: null, }
 etotal    :  -3.08913707E+01
 entropy   :   0.00000000E+00
 fermie    :   6.49017473E-02
@@ -272,7 +271,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
-    2     -2.03825185722459     0.00000000000000     0.00000000000000
+    2     -2.03825185722459    -0.00000000000000     0.00000000000000
 
  cartesian forces (hartree/bohr) at end:
     1     -0.00000000000000    -0.00000000000000    -0.00000000000000
@@ -295,16 +294,16 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
-kinetic             :  2.07182978317724E+01
-hartree             :  8.46610847061922E+00
-xc                  : -7.04588978214417E+00
+kinetic             :  2.07182978317722E+01
+hartree             :  8.46610847061909E+00
+xc                  : -7.04588978214413E+00
 Ewald energy        : -2.02305295457931E+01
-psp_core            :  5.88173805351175E-01
-local_psp           : -2.77439144220041E+01
-non_local_psp       : -5.64361708381828E+00
-total_energy        : -3.08913707260168E+01
-total_energy_eV     : -8.40596946787210E+02
-band_energy         : -4.06073161977043E+00
+psp_core            :  5.88173805351174E-01
+local_psp           : -2.77439144220037E+01
+non_local_psp       : -5.64361708381823E+00
+total_energy        : -3.08913707260167E+01
+total_energy_eV     : -8.40596946787208E+02
+band_energy         : -4.06073161977030E+00
 ...
 
 
@@ -372,11 +371,11 @@ meta: {optdriver: 6, }
  For band1: 1 , band2: 2
   0.00000E+00  2.39011E-02  2.39011E-02  2.39011E-02
  For band1: 1 , band2: 3
-  0.00000E+00  5.14930E-03  5.14930E-03  7.34877E-04
+  0.00000E+00  5.14754E-03  5.14754E-03  7.38531E-04
  For band1: 1 , band2: 4
-  0.00000E+00  6.85820E-03  6.85820E-03  2.20535E-02
+  0.00000E+00  6.86100E-03  6.86100E-03  2.20534E-02
  For band1: 1 , band2: 5
-  0.00000E+00  2.03443E-02  2.03443E-02  7.38160E-04
+  0.00000E+00  2.03438E-02  2.03438E-02  7.36023E-04
 
  === KS gaps after direct diagonalization ===
  Direct band gap semiconductor
@@ -394,6 +393,7 @@ meta: {optdriver: 6, }
 ================================================================================
   
  -outvars: echo values of variables after computation  --------
+-          iomode           1
             acell      7.7034756000E+00  7.7034756000E+00  7.7034756000E+00 Bohr
               amu      6.94100000E+00  1.89984032E+01
              ecut      1.50000000E+01 Hartree
@@ -405,7 +405,7 @@ meta: {optdriver: 6, }
                       -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
             fcart2     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
--          fftalg         312
+-          fftalg         512
            getden1          0
            getden2          1
            istwfk        1
@@ -469,9 +469,9 @@ P           mkmem           1
            tolvrs2     0.00000000E+00
             typat      1  2
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                      -2.0382518572E+00  0.0000000000E+00  0.0000000000E+00
+                      -2.0382518572E+00 -4.3552371229E-18  4.3552371229E-18
             xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                      -3.8517378000E+00  0.0000000000E+00  0.0000000000E+00
+                      -3.8517378000E+00 -8.2302054061E-18  8.2302054061E-18
              xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        5.0000000000E-01 -5.0000000000E-01 -5.0000000000E-01
             znucl        3.00000    9.00000
@@ -561,15 +561,10 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          1.4  wall=          1.5
+- Proc.   0 individual time (sec): cpu=          1.0  wall=          1.1
 
 ================================================================================
 
  Calculation completed.
-.Delivered   1 WARNINGs and   3 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          1.4  wall=          1.5
-- [ALL OK] MEMORY CONSUMPTION REPORT FOR C CODE:
--   There were 98 allocations and 98 deallocations in C code
-- [ALL OK] MEMORY CONSUMPTION REPORT FOR FORTRAN CODE:
--   There were 896937 allocations and 896937 deallocations in Fortran
--   Remaining memory at the end of the calculation is 0
+.Delivered   0 WARNINGs and   3 COMMENTs to log file.
++Overall time at end (sec) : cpu=          1.0  wall=          1.1

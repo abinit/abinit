@@ -1,6 +1,6 @@
 
-.Version 9.11.2 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 10.1.4.5 of ABINIT, released Sep 2024.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2024 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 15 Jul 2023.
-- ( at 11h58 )
+.Starting date : Fri 13 Sep 2024.
+- ( at 19h07 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v1_t35/t35.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v1_t35/t35.abi
 - output file    -> t35.abo
 - root for input  files -> t35i
 - root for output files -> t35o
@@ -58,10 +58,10 @@ _ WF disk file :      0.009 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
 -
-- outvars: echo of selected default values                                      
--   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+- outvars: echo of selected default values
+-   iomode0 =  0 , fftalg0 =512 , wfoptalg0 =  0
 -
-- outvars: echo of global parameters not present in the input file              
+- outvars: echo of global parameters not present in the input file
 -  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
@@ -70,7 +70,7 @@ _ WF disk file :      0.009 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
            diemac      1.00000000E+00
              ecut      5.00000000E+00 Hartree
            enunit           2
--          fftalg         312
+-          fftalg         512
               ixc           3
               kpt      2.50000000E-01  2.50000000E-01  2.50000000E-01
            kptopt           0
@@ -136,8 +136,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/14si.phoney_mod
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/14si.phoney_mod
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/14si.phoney_mod
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/14si.phoney_mod
 - 2 bohr rc 15 hartree ec psp for silicon 8 November 1991 (new)
 - 14.00000   4.00000    980710                znucl, zion, pspdat
     5    3    2    2       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -231,7 +231,7 @@ tolerances: {tolwfr: 1.00E-16, }
  kpt#   1, nband=  4, wtk=  1.00000, kpt=  0.2500  0.2500  0.2500 (reduced coord)
   -3.99001    3.36355    3.36355    4.04951
 
- ETOT  6  -3.7295802208573    -5.964E-13 2.504E-14 2.273E-11
+ ETOT  6  -3.7295802208573    -5.977E-13 2.504E-14 2.273E-11
 
  prteigrs : about to open file t35o_EIG
  Fermi (or HOMO) energy (hartree) =   0.14882   Average Vxc (hartree)=  -0.29141
@@ -243,7 +243,7 @@ tolerances: {tolwfr: 1.00E-16, }
  kpt#   1, nband=  4, wtk=  1.00000, kpt=  0.2500  0.2500  0.2500 (reduced coord)
   -3.99000    3.36356    3.36356    4.04951
 
- ETOT  7  -3.7295802208573    -2.709E-14 1.219E-15 2.678E-13
+ ETOT  7  -3.7295802208573    -2.753E-14 1.219E-15 2.678E-13
 
  prteigrs : about to open file t35o_EIG
  Fermi (or HOMO) energy (hartree) =   0.14882   Average Vxc (hartree)=  -0.29141
@@ -255,7 +255,7 @@ tolerances: {tolwfr: 1.00E-16, }
  kpt#   1, nband=  4, wtk=  1.00000, kpt=  0.2500  0.2500  0.2500 (reduced coord)
   -3.99000    3.36356    3.36356    4.04951
 
- ETOT  8  -3.7295802208573     7.550E-15 9.515E-17 1.627E-15
+ ETOT  8  -3.7295802208573     6.661E-15 9.515E-17 1.627E-15
 
  prteigrs : about to open file t35o_EIG
  Fermi (or HOMO) energy (hartree) =   0.14882   Average Vxc (hartree)=  -0.29141
@@ -285,7 +285,7 @@ lattice_vectors:
 lattice_lengths: [   6.00000,    6.00000,    6.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.1600000E+02
-convergence: {deltae:  7.550E-15, res2:  1.627E-15, residm:  9.515E-17, diffor: null, }
+convergence: {deltae:  6.661E-15, res2:  1.627E-15, residm:  9.515E-17, diffor: null, }
 etotal    :  -3.72958022E+00
 entropy   :   0.00000000E+00
 fermie    :   1.48816941E-01
@@ -357,7 +357,7 @@ local_psp           : -1.32074107112918E+00
 non_local_psp       :  8.48758144158613E-01
 total_energy        : -3.72958022085728E+00
 total_energy_eV     : -1.01487039026411E+02
-band_energy         : -2.92371578208326E-02
+band_energy         : -2.92371578208322E-02
 ...
 
 
@@ -367,9 +367,9 @@ band_energy         : -2.92371578208326E-02
  nonlocal contribution to red. grads
     1       0.000000000000      0.000000000000     -0.000000000000
  local psp contribution to red. grads
-    1      -0.000000000000      0.000000000000     -0.000000000000
+    1       0.000000000000     -0.000000000000     -0.000000000000
  residual contribution to red. grads
-    1       0.000000000000     -0.000000000000      0.000000000000
+    1      -0.000000000000      0.000000000000      0.000000000000
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  2.69440238E-04  sigma(3 2)=  0.00000000E+00
@@ -392,7 +392,7 @@ band_energy         : -2.92371578208326E-02
            enunit           2
            etotal     -3.7295802209E+00
             fcart     -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
--          fftalg         312
+-          fftalg         512
               ixc           3
               kpt      2.50000000E-01  2.50000000E-01  2.50000000E-01
            kptopt           0
@@ -516,10 +516,10 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          0.4  wall=          0.4
+- Proc.   0 individual time (sec): cpu=          0.3  wall=          0.5
 
 ================================================================================
 
  Calculation completed.
 .Delivered   8 WARNINGs and   6 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          0.4  wall=          0.4
++Overall time at end (sec) : cpu=          0.3  wall=          0.5

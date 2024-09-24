@@ -28,6 +28,7 @@
 
 program anaddb
 
+ use, intrinsic :: iso_c_binding
  use defs_basis
  use m_xmpi
  use m_xomp
@@ -40,11 +41,8 @@ program anaddb
  use m_phonons
  use m_gruneisen
  use m_supercell
- use, intrinsic :: iso_c_binding
  use m_nctk
-#ifdef HAVE_NETCDF
  use netcdf
-#endif
 
  use m_build_info,     only : abinit_version
  use m_io_tools,       only : open_file, flush_unit
@@ -79,8 +77,9 @@ program anaddb
  integer:: comm, iblok, iblok_stress, iblok_epsinf, iblock_quadrupoles, ii
  integer:: ierr, iphl2, lenstr, lwsym, mtyp, mpert, msize, natom
  integer:: nsym, ntypat, usepaw, nproc, my_rank, ana_ncid, prt_internalstr
+ integer:: phdos_ncid, ncerr
  logical:: iam_master
- integer:: rfelfd(4), rfphon(4), rfstrs(4), ngqpt_coarse(3)
+ integer:: rfelfd(4), rfphon(4), rfstrs(4), ngqpt_coarse(3), units(2)
  integer:: count_wminmax(2)
  integer, allocatable:: d2flg(:)
  real(dp):: etotal, tcpu, tcpui, twall, twalli !,cpu, wall, gflops
@@ -112,14 +111,12 @@ program anaddb
  type(asrq0_t):: asrq0
  type(crystal_t):: crystal
  type(supercell_type), allocatable:: thm_scells(:)
-#ifdef HAVE_NETCDF
- integer:: phdos_ncid, ncerr
-#endif
 
 !******************************************************************
 
  ! Change communicator for I/O (mandatory!)
  call abi_io_redirect(new_io_comm = xmpi_world)
+ units = [std_out, ab_out]
 
  ! Initialize MPI
  call xmpi_init()
@@ -178,7 +175,6 @@ program anaddb
  msize = ddb_hdr%msize
  call ddb_hdr%free()
 
-
  ! Read the input file, and store the information in a long string of characters
  ! strlen from defs_basis module
  if (iam_master) then
@@ -229,7 +225,7 @@ program anaddb
 !******************************************************************
 ! Read the DDB information, also perform some checks, and symmetrize partially the DDB
  write(msg, '(a, a)' )' read the DDB information and perform some checks',ch10
- call wrtout([std_out, ab_out], msg)
+ call wrtout(units, msg)
 
  call ddb%from_file(filnam(3), ddb_hdr, crystal, comm, prtvol = inp%prtvol)
  call ddb_hdr%free()
@@ -264,7 +260,6 @@ program anaddb
  ! Open the netcdf file that will contain the anaddb results
  ana_ncid = nctk_noid
  if (iam_master) then
-#ifdef HAVE_NETCDF
    NCF_CHECK_MSG(nctk_open_create(ana_ncid, trim(filnam(8))//"_anaddb.nc", xmpi_comm_self), "Creating anaddb.nc")
    ncerr = nctk_def_dims(ana_ncid, [ &
        nctkdim_t('number_of_atoms', natom), &
@@ -281,7 +276,6 @@ program anaddb
    NCF_CHECK(nctk_set_datamode(ana_ncid))
    NCF_CHECK(nf90_put_var(ana_ncid, nctk_idname(ana_ncid, "anaddb_input_string"), string(:lenstr)))
    NCF_CHECK(crystal%ncwrite(ana_ncid))
-#endif
  end if
 
  ! Calculation of Gruneisen parameters.
@@ -307,9 +301,9 @@ program anaddb
  qdrp_cart = zero
  if (mtyp == BLKTYP_d3E_lw) then
    write(msg, '(2a, (80a), 2a)') ch10, ('=',ii = 1, 80)
-   call wrtout([ab_out, std_out],msg, 'COLL')
+   call wrtout(units, msg)
    lwsym = 1
-   iblock_quadrupoles = ddb_lw%get_quadrupoles(ddb_hdr%ddb_version,lwsym, BLKTYP_d3E_lw, qdrp_cart)
+   iblock_quadrupoles = ddb_lw%get_quadrupoles(ddb_hdr%ddb_version, lwsym, BLKTYP_d3E_lw, qdrp_cart)
  end if
 
  ! The default value is 1. Here we set the flags to zero if Q*is not available.
@@ -337,7 +331,6 @@ program anaddb
  end if
 
  if (my_rank == master) then
-#ifdef HAVE_NETCDF
    ncerr = nctk_def_arrays(ana_ncid, [&
    nctkarr_t('emacro_cart', "dp", 'number_of_cartesian_directions, number_of_cartesian_directions'), &
    nctkarr_t('quadrupoles_cart', "dp", 'three, three, three, number_of_atoms'), &
@@ -356,7 +349,6 @@ program anaddb
      "asr", "chneut", "dipdip", "symdynmat", "dipquad", "quadquad"], &
      [inp%asr, inp%chneut, inp%dipdip, inp%symdynmat, inp%dipquad, inp%quadquad])
    NCF_CHECK(ncerr)
-#endif
  end if
 
 !***************************************************************************
@@ -428,7 +420,6 @@ program anaddb
 
    ! Save to the netcdf
    if (my_rank == master) then
-#ifdef HAVE_NETCDF
      ncerr = nctk_def_arrays(ana_ncid, [nctkarr_t("dchide", "dp", "three, three, three")], defmode=.True.)
      NCF_CHECK(ncerr)
      NCF_CHECK(nctk_set_datamode(ana_ncid))
@@ -442,7 +433,6 @@ program anaddb
        NCF_CHECK(nctk_set_datamode(ana_ncid))
        NCF_CHECK(nf90_put_var(ana_ncid, nctk_idname(ana_ncid, "dchidt"), dchidt))
      end if
-#endif
    end if
 
  end if  ! nlflag
@@ -454,12 +444,12 @@ program anaddb
    ! ifc to be calculated for interpolation
    write(msg, '(a, a, (80a), a, a, a, a)' ) ch10, ('=',ii = 1, 80), ch10, ch10, &
     ' Calculation of the interatomic forces ',ch10
-   call wrtout([std_out, ab_out], msg)
+   call wrtout(units, msg)
 
 ! TODO : check if this wrtout should be removed in latest merge 17 feb 2017
    call timein(tcpu, twall)
    write(msg, '(a, f11.3, a, f11.3, a)' )'-begin at tcpu',tcpu-tcpui, '  and twall',twall-twalli, ' sec'
-   call wrtout([std_out, ab_out], msg)
+   call wrtout(units, msg)
 
    if (any(inp%qrefine(:) > 1)) then
      ! Gaal-Nagy's algorithm in PRB 73 014117 [[cite:GaalNagy2006]]
@@ -519,7 +509,7 @@ program anaddb
 !***************************************************************************
  if (inp%ifcflag == 1 .and. any(inp%prtdos==[1, 2])) then
    write(msg, '(a, (80a), 4a)')ch10, ('=',ii = 1, 80), ch10, ch10, ' Calculation of phonon density of states ',ch10
-   call wrtout([std_out, ab_out], msg)
+   call wrtout(units, msg)
 
    ! Only 1 shift in q-mesh
    wminmax = zero
@@ -541,13 +531,11 @@ program anaddb
      call phdos%print_debye(crystal%ucvol)
      call phdos%print_thermo(strcat(filnam(8), "_THERMO"), inp%ntemper, inp%tempermin, inp%temperinc)
 
-#ifdef HAVE_NETCDF
      ncerr = nctk_open_create(phdos_ncid, strcat(filnam(8), "_PHDOS.nc"), xmpi_comm_self)
      NCF_CHECK_MSG(ncerr, "Creating PHDOS.nc file")
      NCF_CHECK(crystal%ncwrite(phdos_ncid))
      call phdos%ncwrite(phdos_ncid)
      NCF_CHECK(nf90_close(phdos_ncid))
-#endif
    end if
 
    call phdos%free()
@@ -565,14 +553,14 @@ program anaddb
     ' Calculation of phonon density of states, ',ch10, &
     '    thermodynamical properties, ',ch10, &
     '    and Debye-Waller factors.',ch10
-   call wrtout([std_out, ab_out], msg)
+   call wrtout(units, msg)
 
    if (inp%thmflag == 1) then
      call harmonic_thermo(Ifc, crystal, ddb%amu, inp, ab_out, filnam(8), comm)
 
    else if (inp%thmflag == 2) then
      write(msg, '(a, (80a), a, a, a, a)' ) ch10, ('=',ii = 1, 80), ch10, ch10, ' Entering thm9 routine with thmflag = 2 ',ch10
-     call wrtout([std_out, ab_out], msg)
+     call wrtout(units, msg)
      call harmonic_thermo(Ifc, crystal, ddb%amu, inp, ab_out, filnam(8), comm, thmflag = inp%thmflag)
    end if
  end if
@@ -585,11 +573,10 @@ program anaddb
 !***************************************************************************
  if (inp%ifcflag == 1 .and. inp%lwfflag > 0 ) then
    write(msg, '(a, (80a), 4a)')ch10, ('=',ii = 1, 80), ch10, ch10, ' Calculation of lattice Wannier functions ',ch10
-   call wrtout([std_out, ab_out], msg)
-   call run_lattice_wannier(ifc = Ifc, crystal = crystal, dtset = inp, &
-        & prefix = filnam(8), comm = comm)
+   call wrtout(units, msg)
+   call run_lattice_wannier(ifc = Ifc, crystal = crystal, dtset = inp, prefix = filnam(8), comm = comm)
    write(msg, '(a, (80a))')ch10, ('=',ii = 1, 80)
-   call wrtout([std_out, ab_out], msg)
+   call wrtout(units, msg)
  endif
 
 
@@ -686,7 +673,7 @@ program anaddb
     end if
 
     write(msg, '(a, (80a), a)' ) ch10, ('=',ii = 1, 80), ch10
-    call wrtout([std_out, ab_out], msg)
+    call wrtout(units, msg)
 
     call ddb_diel(crystal, ddb%amu, inp, dielt_rlx, displ, d2cart, epsinf, fact_oscstr, &
       ab_out, lst, mpert, natom, 0, phfrq, comm, ana_ncid)
@@ -706,11 +693,9 @@ end if  ! dieflag!=0 or inp%nph2l /= 0
    ! Raman susceptibilities for the 1st list (only TO  modes at q = Gamma)
    call ramansus(d2cart, dchide, dchidt, displ, mpert, natom, phfrq, qphon, qphnrm(1), rsus, crystal%ucvol)
 
-#ifdef HAVE_NETCDF
    if (my_rank == master) then
      call nctk_defwrite_raman_terms(ana_ncid, natom, rsus, phfrq)
    end if
-#endif
 
    ! EO coef:
    call electrooptic(dchide, inp%dieflag, epsinf, fact_oscstr, natom, phfrq, inp%prtmbm, rsus, crystal%ucvol)
@@ -724,16 +709,14 @@ end if  ! condition on nlflag
  if (inp%nph2l /= 0) then
 
    write(msg, '(a, (80a), a, a, a, a)' ) ch10, ('=',ii = 1, 80), ch10, ch10, ' Treat the second list of vectors ',ch10
-   call wrtout([std_out, ab_out], msg)
+   call wrtout(units, msg)
 
    if (my_rank == master) then
-#ifdef HAVE_NETCDF
      iphl2 = 0
      call nctk_defwrite_nonana_terms(ana_ncid, iphl2, inp%nph2l, inp%qph2l, natom, phfrq, displ, "define")
      if (inp%nlflag == 1) then
        call nctk_defwrite_nonana_raman_terms(ana_ncid, iphl2, inp%nph2l, natom, rsus, "define")
      end if
-#endif
    end if
 !  Get the log of product of the square of the phonon frequencies without non-analyticities (q = 0)
 !  For the Lyddane-Sachs-Teller relation, it is stored in lst(nph2+1)
@@ -763,10 +746,8 @@ end if  ! condition on nlflag
      ! TODO: Mode effective charge could be printed here for LO modes (EB)
 
      if (my_rank == master) then
-#ifdef HAVE_NETCDF
        ! Loop is not MPI-parallelized--> no need for MPI-IO API.
        call nctk_defwrite_nonana_terms(ana_ncid, iphl2, inp%nph2l, inp%qph2l, natom, phfrq, displ, "write")
-#endif
      end if
 
      !  Get the log of product of the square of the phonon frequencies with non-analyticities (q-->0)
@@ -782,11 +763,9 @@ end if  ! condition on nlflag
      ! Write Raman susceptibilities for the 2nd list (can includes LO modes if q /= 0 0 0)
      if (inp%nlflag == 1) then
        call ramansus(d2cart, dchide, dchidt, displ, mpert, natom, phfrq, qphon, qphnrm(1), rsus, crystal%ucvol)
-#ifdef HAVE_NETCDF
        if (my_rank == master) then
          call nctk_defwrite_nonana_raman_terms(ana_ncid, iphl2, inp%nph2l, natom, rsus, "write")
        end if
-#endif
      end if  ! nlflag = 1 (Raman suscep for the 2nd list of wv.)
    end do  ! iphl2
 
@@ -815,7 +794,7 @@ end if  ! condition on nlflag
    ! Here treating the internal strain tensors at Gamma point
    write(msg, '(a, a, (80a), a, a, a, a)') ch10, ('=',ii = 1, 80), ch10, ch10, &
     ' Calculation of the internal-strain  tensor',ch10
-   call wrtout([std_out, ab_out], msg)
+   call wrtout(units, msg)
 
    if (inp%instrflag == 1) then
      call wrtout(std_out, 'instrflag = 1, so extract the internal strain constant from the 2DTE')
@@ -841,7 +820,7 @@ end if  ! condition on nlflag
    ! here treating the elastic tensors at Gamma Point
    write(msg, '(a, a, (80a), a, a, a, a, a, a)') ch10, ('=',ii = 1, 80), ch10, ch10, &
     ' Calculation of the elastic and compliances tensor (Voigt notation)',ch10
-   call wrtout([std_out, ab_out], msg)
+   call wrtout(units, msg)
 
    if (any(inp%elaflag == [1, 2, 3, 4, 5])) then
      call wrtout(std_out, 'so extract the elastic constant from the 2DTE')
@@ -877,7 +856,7 @@ end if  ! condition on nlflag
    write(msg, '(a, a, (80a), a, a, a, a, a)') ch10, ('=',ii = 1, 80), ch10, ch10, &
    ' Calculation of the tensor related to piezoelectric effetc',ch10, &
    '  (Elastic indices in Voigt notation)',ch10
-   call wrtout([std_out, ab_out], msg)
+   call wrtout(units, msg)
 
    if (any(inp%piezoflag == [1, 2, 3, 4, 5, 6, 7]) .or. inp%dieflag == 4 .or. inp%elaflag == 4) then
      call wrtout(std_out, 'extract the piezoelectric constant from the 2DTE')
@@ -907,7 +886,7 @@ end if  ! condition on nlflag
    ! Here treating the flexoelectric tensor
    write(msg, '(a, a, (80a), a, a, a, a)') ch10, ('=',ii = 1, 80), ch10, ch10, &
    ' Calculation of the tensors related to flexoelectric effect',ch10
-   call wrtout([std_out, ab_out], msg)
+   call wrtout(units, msg)
 
    ! Compute and print the contributions to the flexoelectric tensor
    call ddb_flexo(inp%asr, asrq0%d2asr, ddb, ddb_lw, ddb_hdr%ddb_version, crystal, &
@@ -942,9 +921,7 @@ end if  ! condition on nlflag
 
  ! Close files
  if (iam_master) then
-#ifdef HAVE_NETCDF
    NCF_CHECK(nf90_close(ana_ncid))
-#endif
  end if
 
  call timein(tcpu, twall)
@@ -963,7 +940,7 @@ end if  ! condition on nlflag
   ('=',ii = 1, 80), ch10, ch10, &
    '+Total cpu time',tsec(1), '  and wall time',tsec(2), ' sec',ch10, ch10, &
    ' anaddb : the run completed succesfully.'
- call wrtout([std_out, ab_out], msg)
+ call wrtout(units, msg)
 
  if (iam_master) then
    ! Write YAML document with the final summary.
