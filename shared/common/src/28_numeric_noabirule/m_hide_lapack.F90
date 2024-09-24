@@ -52,12 +52,10 @@ MODULE m_hide_lapack
  use m_xmpi
  use m_errors
  use m_slk
-
  use m_linalg_interfaces
 
  use m_time,       only : cwtime
  use m_fstrings,   only : firstchar
- !use m_slk,        only : matrix_scalapack, processor_scalapack
 
  implicit none
 

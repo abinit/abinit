@@ -40,7 +40,7 @@ module m_respfn_driver
  use defs_datatypes, only : pseudopotential_type, ebands_t
  use defs_abitypes, only : MPI_type
  use m_time,        only : timab
- use m_fstrings,    only : strcat
+ use m_fstrings,    only : strcat, endswith
  use m_symtk,       only : matr3inv, littlegroup_q, symmetrize_xred
  use m_fft,         only : zerosym, fourdp
  use m_kpts,        only : symkchk
@@ -760,7 +760,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  end if ! choice for charge density initialization
 
 !>>> Initialize kinetic energy density
- if (dtset%usekden==1) then 
+ if (dtset%usekden==1) then
 
    if (dtset%getkden/=0.or.dtset%irdkden/=0) then
      ! Choice 1: read kinetic energy density from a disk file and broadcast data
@@ -837,7 +837,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  else
     ABI_MALLOC(xcctau3d,(0))
  end if
- 
+
 
 !Determine by which method the local ionic potential and/or
 ! the pseudo core charge density have to be computed
@@ -858,7 +858,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
        coretau_method=2
     end if
  end if
- 
+
 
 !Local ionic potential and/or pseudo core charge by method 1
  if (vloc_method==1.or.coredens_method==1) then
@@ -952,7 +952,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
    end do
  end if
 
- ABI_FREE(vhartr) 
+ ABI_FREE(vhartr)
 
  if(dtset%prtvol==-level) call wrtout(std_out,' respfn: ground-state density and potential set up.')
 
@@ -979,7 +979,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
    call timab(561,2,tsec)
 
  end if
- 
+
 !-----2. Frozen-wavefunctions and Ewald(q=0) parts of 2DTE
 
  dyfr_nondiag=0;if (psps%usepaw==1.and.rfphon==1) dyfr_nondiag=1
@@ -1146,7 +1146,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  if(allocated(xcctau3d)) then
     ABI_FREE(xcctau3d)
  end if
- 
+
  if(dtset%prtvol==-level) call wrtout(std_out,' respfn: frozen wavef. and Ewald(q=0) part of 2DTE done.')
 
  call timab(136,2,tsec)
@@ -1316,7 +1316,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
            do i1pert = 1,natom+8
              do i1dir = 1, 3
                if (rfpert_lw(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)==1) then
-                 if (pertsy(i1dir,i1pert)==-1) then 
+                 if (pertsy(i1dir,i1pert)==-1) then
                    pertsy(i1dir,i1pert)=1
                    write(message,'(a,i2,a,i4)' )'    idir=',i1dir,'    ipert=',i1pert
                    call wrtout(ab_out,message,'COLL')
@@ -1572,22 +1572,21 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 &   dtset%typat,rfdir,rfpert,rfphon,rfstrs,psps%usepaw,usevdw,psps%ziontypat)
 
 
-!  Initialize ddb header object
-   call ddb_hdr%init(dtset,psps,pawtab,&
-&   dscrpt=' Note : temporary (transfer) database ',&
-&   nblok=1,xred=xred,occ=occ,ngfft=ngfft)
+   ! Initialize ddb header object
+   call ddb_hdr%init(dtset,psps,pawtab, dscrpt=' Note : temporary (transfer) database ', &
+     nblok=1,xred=xred,occ=occ,ngfft=ngfft)
 
-!  Initialize ddb object
+   ! Initialize ddb object
    call ddb%init(dtset, nblok=1, mpert=mpert, with_d2E=.true.)
 
-! Set the values for the 2nd order derivatives
+   ! Set the values for the 2nd order derivatives
    call ddb%set_qpt(iblok=1, qpt=qphon(1:3))
    call ddb%set_d2matr(1, d2matr, blkflg)
 
-! Output dynamical matrix
+   ! Output dynamical matrix
    call ddb%write(ddb_hdr, dtfil%fnameabo_ddb)
 
-! Deallocate ddb object
+   ! Deallocate ddb object
    call ddb_hdr%free()
    call ddb%free()
 

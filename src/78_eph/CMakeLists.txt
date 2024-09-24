@@ -2,18 +2,20 @@
 # 78_eph
 #
 add_library(78_eph STATIC
+  m_berry_curvature.F90
   m_cumulant.F90
   m_eph_double_grid.F90
   m_ephwg.F90
   m_frohlich.F90
   m_gstore.F90
   m_gkk.F90
+  m_gwpt.F90
   m_migdal_eliashberg.F90
   m_phgamma.F90
   m_phpi.F90
   m_rta.F90
   m_sigmaph.F90
-  m_berry_curvature.F90
+  m_varpeq.F90
   )
 
 set_target_properties(78_eph
