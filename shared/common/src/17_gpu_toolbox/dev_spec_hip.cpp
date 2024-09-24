@@ -224,7 +224,7 @@ void c_get_ndevice_(int* ndev)
 {
   *ndev=0;
   int deviceCount;
-  HIP_API_CHECK(hipGetDeviceCount(&deviceCount));
+  hipGetDeviceCount(&deviceCount);
   for (int idev = 0; idev < deviceCount; ++idev)
     {
       hipDeviceProp_t deviceProp;

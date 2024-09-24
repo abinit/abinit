@@ -13,8 +13,11 @@ that had not yet been documented.
 <!-- TO BE CHANGED Merge requests up to and including MR984. Also, MRXXX to MRYYY are taken into account. -->
 
 The list of contributors includes:
+J. Abreu, F. Akhmetov (Radioteddy on github), J.-M. Beuken, A. Blanchet, F. Bruneval, M. Cote, M. Giantomassi, X. Gonze, B. Guster, P. Kesterner,
+L. MacEnulty, D.D. O'Regan, S. Rostami,
+M. Royo, A. Sasani, M. Stengel, M. Torrent, M. Verstraete, A. Zabalo, J. Zwanziger.
 G. Antonius, L. Baguet, J.-M. Beuken, F. Bottin, J. Bouchet, J. Bouquiaux, A. Donkov, F. Gendron, M. Giantomassi, X. Gonze, 
-F. Goudreault, B. Guster, P. Kestener, L. Mac Enulty, M. Mignolet, 
+F. Goudreault, B. Guster, P. Kestener, M. Mignolet, 
 S. Ponce, M. Sarraute, M. Torrent, V. Vasilchenko, M. Verstraete, J. Zwanziger 
 
 It is worthwhile to read carefully all the modifications that are mentioned in the present file,
@@ -449,7 +452,7 @@ are relative to modifications/improvements of ABINIT v9.10 with respect to v9.8.
 
 The list of contributors includes:
 J. Abreu, F. Akhmetov (Radioteddy on github), J.-M. Beuken, A. Blanchet, F. Bruneval, M. Cote, M. Giantomassi, X. Gonze, B. Guster, P. Kesterner,
-L. Mac Enulty, M. Mignolet, D.D. O'Regan, S. Rostami,
+L. MacEnulty, M. Mignolet, D.D. O'Regan, S. Rostami,
 M. Royo, A. Sasani, M. Stengel, M. Torrent, M. Verstraete, A. Zabalo, J. Zwanziger.
 
 It is worthwhile to read carefully all the modifications that are mentioned in the present file,
@@ -531,7 +534,7 @@ See also the input variables [[pawujv]]. The tutorial and corresponding tests "u
 The tests v5_38, v5_39, v5_40, v6_41 have been suppressed, and replaced by [[test:v9_105]], 
 [[test:v9_106]], [[test:v9_107]], [[test:v9_108]], [[test:v9_109]]. This is also documented in [[topic:CalcUJ]].
 
-By Lorien Mac Enulty with help from David D. O'Regan (MR905, 912).
+By Lórien MacEnulty with help from David D. O'Regan (MR905, 912).
 
 **B.4** Cumulant method for spectral function
 
@@ -1885,7 +1888,7 @@ The new syntax is:
     anaddb run.in > run.log 2> run.err &
 
 See tests [[test:v8_52]] for a standard analysis of the DDB file and
-[[test:v7_94]] for the (old implementation) of electron-phonon calculations in anaddb.
+test v7_94 for the (old implementation) of electron-phonon calculations in anaddb.
 
 !!! important
 
@@ -1917,7 +1920,7 @@ List of new input variables that rely on this feature:
 - [[pp_dirpath]]: Used in all the input files of the Test Suite
 - [[output_file@anaddb]], [[ddb_filepath@anaddb]], [[gkk_filepath@anaddb]], [[eph_prefix@anaddb]].
   See tests [[test:v8_52]] for a standard analysis of the DDB file and
-  [[test:v7_94]] for the (old implementation) of electron-phonon calculations in anaddb.
+  test v7_94 for the (old implementation) of electron-phonon calculations in anaddb.
 
 By M. Giantomassi
 
@@ -2635,7 +2638,7 @@ The new syntax is:
     anaddb run.in > run.log 2> run.err &
 
 See tests [[test:v8_52]] for a standard analysis of the DDB file and
-[[test:v7_94]] for the (old implementation) of electron-phonon calculations in anaddb.
+test v7_94 for the (old implementation) of electron-phonon calculations in anaddb.
 
 !!! important
 
@@ -2667,7 +2670,7 @@ List of new input variables that rely on this feature:
 - [[pp_dirpath]]: cannot be tested  EXPLICITLY because system dependent but used by runtests.py when generating the input file.
 - [[output_file@anaddb]], [[ddb_filepath@anaddb]], [[gkk_filepath@anaddb]], [[eph_prefix@anaddb]].
   See tests [[test:v8_52]] for a standard analysis of the DDB file and
-  [[test:v7_94]] for the (old implementation) of electron-phonon calculations in anaddb.
+  test v7_94 for the (old implementation) of electron-phonon calculations in anaddb.
 
 By M. Giantomassi
 
@@ -3250,7 +3253,7 @@ B.4 The python library [AbiPy](https://github.com/abinit/abipy), for launching A
 B.5 A new algorithm (Wigner-Seitz cell based) for computing the weights for the phonon band structure interpolation in ANADDB
     has been implemented. It has replaced the old algorithm in case [[brav@anaddb]] = 1.
     The old algorithm is still available for back-compatibility purposes, now corresponding to [[brav@anaddb]] = -1,
-    see [[test:v7_93]], although there is no real reason for using it.
+    see test:v7_93, although there is no real reason for using it.
     The new algorithm is very general, respect better the symmetries, and should even supercede
     the use of other values of [[brav@anaddb]].
     By G. Petretto following discussions with GM Rignanese and XGonze, and tests by Henrique Pereira Miranda.

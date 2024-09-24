@@ -212,8 +212,6 @@ contains
 !! SOURCE
 subroutine tdks_init(tdks ,codvsn, dtfil, dtset, mpi_enreg, pawang, pawrad, pawtab, psps)
 
- implicit none
-
  !Arguments ------------------------------------
  !scalars
  class(tdks_type),           intent(inout)        :: tdks
@@ -354,8 +352,6 @@ end subroutine tdks_init
 !! SOURCE
 subroutine tdks_free(tdks,dtset,mpi_enreg,psps)
 
- implicit none
-
  !Arguments ------------------------------------
  !scalars
  class(tdks_type),           intent(inout) :: tdks
@@ -472,8 +468,6 @@ end subroutine tdks_free
 !!
 !! SOURCE
 subroutine first_setup(codvsn,dtfil,dtset,ecut_eff,mpi_enreg,pawrad,pawtab,psps,psp_gencond,tdks)
-
- implicit none
 
  !Arguments ------------------------------------
  !scalars
@@ -749,8 +743,6 @@ end subroutine first_setup
 !! SOURCE
 subroutine second_setup(dtset, mpi_enreg, pawang, pawrad, pawtab, psps, psp_gencond, tdks)
 
- implicit none
-
  !Arguments ------------------------------------
  !scalars
  integer,                    intent(in)    :: psp_gencond
@@ -1022,8 +1014,6 @@ end subroutine second_setup
 !!
 !! SOURCE
 subroutine read_wfk(dtfil, dtset, ecut_eff, fname_wfk, mpi_enreg, tdks)
-
- implicit none
 
  !Arguments ------------------------------------
  !scalars
