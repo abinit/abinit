@@ -96,7 +96,7 @@ natom,nblok,prt_internalstr)
 
 !Local variables------------------------------------
 !scalars
- integer :: idirA,idirB,ier,ii1,ii2,ipertA,ipertB,ivarA,ivarB
+ integer :: idirA,idirB,ier,ii1,ipertA,ipertB,ivarA,ivarB
  character(len=500) :: direction,message
 !arrays
  real(dp) :: Amatr(3*natom-3,3*natom-3),Apmatr(3*natom,3*natom)
