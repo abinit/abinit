@@ -31,9 +31,7 @@ MODULE m_iowf
  use m_abi_etsf
  use m_nctk
  use m_wfk
-#ifdef HAVE_NETCDF
  use netcdf
-#endif
  use m_hdr
  use m_ebands
 
@@ -153,7 +151,7 @@ subroutine outresid(dtset,kptns,mband,nband,nkpt,nsppol,resid)
          call wrtout(std_out, msg)
        end do
      else if(ikpt==nkpt_eff+1)then
-       write(msg,'(2a)')' outwf : prtvol=0 or 1, do not print more k-points.',ch10
+       write(msg,'(2a)')' outresid : prtvol=0 or 1, do not print more k-points.',ch10
        if(dtset%prtvol>=2) call wrtout(ab_out, msg)
        call wrtout(std_out, msg)
      end if
@@ -330,7 +328,6 @@ subroutine outwf(cg,dtset,psps,eigen,filnam,hdr,kg,kptns,mband,mcg,mkmem,&
    if (dtset%iomode==IO_MODE_MPI)  iomode = IO_MODE_MPI
    if (dtset%iomode==IO_MODE_ETSF) iomode = IO_MODE_ETSF
 
-#ifdef HAVE_NETCDF
    if (dtset%iomode == IO_MODE_ETSF .and. dtset%usewvl == 0) then
      call cg_ncwrite(filnam,hdr,dtset,response,mpw,mband,nband,nkpt,nsppol,&
        dtset%nspinor,mcg,mkmem,eigen,occ,cg,npwarr,kg,mpi_enreg,done)
@@ -351,7 +348,6 @@ subroutine outwf(cg,dtset,psps,eigen,filnam,hdr,kg,kptns,mband,mcg,mkmem,&
      ABI_WARNING(msg)
      iomode=IO_MODE_MPI
    end if
-#endif
 
    call cwtime(cpu, wall, gflops, "start")
    call wrtout(std_out, sjoin(ch10,'  outwf: writing wavefunctions to:', trim(filnam), "with iomode:", iomode2str(iomode)))
@@ -397,9 +393,7 @@ subroutine outwf(cg,dtset,psps,eigen,filnam,hdr,kg,kptns,mband,mcg,mkmem,&
      call hdr_io(fform,hdr,rdwr,wff2)
      call WffKg(wff2,1)
    else if (wff2%iomode==IO_MODE_ETSF .and. iam_master) then
-#ifdef HAVE_NETCDF
      NCF_CHECK(hdr%ncwrite(wff2%unwff, fform, nc_define=.True.))
-#endif
    end if
 
    do spin=1,nsppol
@@ -659,8 +653,6 @@ end subroutine outwf
 !!
 !! SOURCE
 
-#ifdef HAVE_NETCDF
-
 subroutine cg_ncwrite(fname,hdr,dtset,response,mpw,mband,nband,nkpt,nsppol,nspinor,mcg,&
                       mkmem,eigen,occ,cg,npwarr,kg,mpi_enreg,done)
 
@@ -706,7 +698,7 @@ subroutine cg_ncwrite(fname,hdr,dtset,response,mpw,mband,nband,nkpt,nsppol,nspin
  done = .False.
 
  path = nctk_ncify(fname)
- call wrtout(std_out, sjoin("in cg_ncwrite with path:", path))
+ call wrtout(std_out, sjoin(" In cg_ncwrite with path:", path))
 
  ! communicators and ranks
  comm_cell = mpi_enreg%comm_cell; me_cell = mpi_enreg%me_cell; nproc_cell = mpi_enreg%nproc_cell
@@ -793,12 +785,11 @@ subroutine cg_ncwrite(fname,hdr,dtset,response,mpw,mband,nband,nkpt,nsppol,nspin
    !single_writer = .True.
 
    write(msg,'(5a,l1)')&
-     "same layout Writing WFK file: ",trim(path),", with iomode: ",trim(iomode2str(iomode)),", single writer: ",single_writer
-   call wrtout(std_out,msg,'PERS', do_flush=.True.)
+     " same layout --> writing WFK file: ",trim(path),", with iomode: ",trim(iomode2str(iomode)),", single writer: ",single_writer
+   call wrtout(std_out,msg, 'PERS', do_flush=.True.)
 
    if (.not. single_writer) then
 
-#ifdef HAVE_NETCDF
      ! master opens the file and write the metadata.
      if (xmpi_comm_rank(comm_cell) == master) then
        ncerr = nf90_einval
@@ -976,8 +967,7 @@ subroutine cg_ncwrite(fname,hdr,dtset,response,mpw,mband,nband,nkpt,nsppol,nspin
 
      done = .True.
      call cwtime_report(" collective ncwrite", cpu, wall, gflops)
-#endif
-! HAVE_NETCDF
+
    else ! single_writer
      if (nproc_cell > 1) then
        ABI_WARNING("Slow version without MPI-IO support. Processors send data to master...")
@@ -1032,7 +1022,7 @@ subroutine cg_ncwrite(fname,hdr,dtset,response,mpw,mband,nband,nkpt,nsppol,nspin
            if (action==2) then
              call xmpi_exch(kg(:,1+ikg:npw_k+ikg),3*npw_k,source,kg_k,master,comm_cell,2*mtag+1,ierr)
              call xmpi_exch(cg(:,icg+1:icg+nband_k*npw_k*my_nspinor),2*nband_k*npw_k*my_nspinor,&
-&             source,cg_k,master,comm_cell,2*mtag+2,ierr)
+                            source,cg_k,master,comm_cell,2*mtag+2,ierr)
            else
              call xmpi_exch(kg_k,3*npw_k,source,kg_k,master,comm_cell,2*mtag+1,ierr)
              call xmpi_exch(cg_k,2*nband_k*npw_k*my_nspinor,source,cg_k,master,comm_cell,2*mtag+2,ierr)
@@ -1072,7 +1062,6 @@ subroutine cg_ncwrite(fname,hdr,dtset,response,mpw,mband,nband,nkpt,nsppol,nspin
  else ! not same_layout
 
    if (nctk_has_mpiio) then
-#ifdef HAVE_NETCDF
      call wrtout(std_out, &
        sjoin("scattered data. writing WFK file",trim(path),", with iomode: ",iomode2str(iomode)), 'PERS', do_flush=.True.)
 
@@ -1237,8 +1226,6 @@ subroutine cg_ncwrite(fname,hdr,dtset,response,mpw,mband,nband,nkpt,nsppol,nspin
      done = .True.
 
      call cwtime_report(" scattered ncwrite", cpu, wall, gflops)
-#endif
-! HAVE_NETCDF
    end if !nctk_has_mpiio
  end if
 
@@ -1462,9 +1449,6 @@ subroutine ncwrite_eigen1_occ(ncid, nband, mband, nkpt, nsppol, eigen, occ3d)
 
 end subroutine ncwrite_eigen1_occ
 !!***
-
-#endif
-! HAVE_NETCDF
 
 !----------------------------------------------------------------------
 

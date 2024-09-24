@@ -540,9 +540,9 @@ type(abimover_specs),intent(out) :: specs
    specs%crit4xml='tolmxf'
 !  Name of specs%method
    if (ab_mover%ionmov==2) then
-     specs%method = 'Broyden-Fletcher-Goldfard-Shanno method (forces)'
+     specs%method = 'Broyden-Fletcher-Goldfarb-Shanno method (forces)'
    else
-     specs%method = 'Broyden-Fletcher-Goldfard-Shanno method (forces,Tot energy)'
+     specs%method = 'Broyden-Fletcher-Goldfarb-Shanno method (forces,Tot energy)'
    end if
 !  Number of history
    specs%nhist = 3
@@ -714,7 +714,7 @@ case (15)
    specs%type4xml='lbfgs'
    specs%crit4xml='tolmxf'
 !  Name of specs%method
-   specs%method = 'Limited-memory Broyden-Fletcher-Goldfard-Shanno method'
+   specs%method = 'Limited-memory Broyden-Fletcher-Goldfarb-Shanno method'
 !  Number of history
    specs%nhist = 3
 !  This is the initialization for ionmov==23
