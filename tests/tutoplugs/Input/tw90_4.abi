@@ -43,7 +43,7 @@ shiftk1      0.00   0.00   0.00  # default shift
  getden2 1   ! Usual file handling data
  prtden2 1
  kptopt2 1       # Option for the automatic generation of k points
-  ngkpt2 4 4 4 
+  ngkpt2 4 4 4
 nshiftk2 1
  shiftk2 0.0 0.0 0.0
 
@@ -77,7 +77,7 @@ w90iniprj3 2
 #%% [shell]
 #%% pre_commands = iw_cp tw90_4o_DS3_w90.win tw90_4o_DS3_w90.win
 #%% [files]
-#%% files_to_test = 
+#%% files_to_test =
 #%%   tw90_4.abo, tolnlines=    8,   tolabs=  2.0e-04,   tolrel=  3.00e-02, fld_options = -medium
 #%% [paral_info]
 #%% max_nprocs = 1

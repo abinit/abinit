@@ -205,6 +205,7 @@ program abinit
  call abimem_init(args%abimem_level, limit_mb=args%abimem_limit_mb)
 #endif
 
+
 !------------------------------------------------------------------------------
 
  ! 2) Initialize overall timing of run:
@@ -254,6 +255,9 @@ program abinit
    call wrtout([std_out, ab_out], msg)
  end if
 
+ msg=' abinit : after writing the name of files '
+ call wrtout(std_out,msg,'PERS')
+
  ! Test if the netcdf library supports MPI-IO
  call nctk_test_mpiio()
 
@@ -290,8 +294,7 @@ program abinit
  ABI_MALLOC(results_out, (0:ndtset_alloc))
 
  ! Initialize results_out datastructure
- call init_results_out(dtsets,1,1,mpi_enregs, mx%natom, mx%mband_upper, mx%nkpt,npsp,&
-  mx%nsppol, mx%ntypat, results_out)
+ call init_results_out(dtsets,1,1,mpi_enregs, mx%natom, mx%mband_upper, mx%nkpt,npsp, mx%nsppol, mx%ntypat, results_out)
 
  ! Gather contributions to results_out from images of the cell, if needed
  test_img = (mx%nimage/=1.and.maxval(dtsets(:)%npimage)>1)
@@ -343,7 +346,7 @@ program abinit
 
 !------------------------------------------------------------------------------
 
-!13) Perform additional checks on input data
+ ! 13) Perform additional checks on input data
 
  call chkinp(dtsets, ab_out, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads, xmpi_world)
 

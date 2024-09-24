@@ -638,8 +638,8 @@ subroutine make_invovl(ham, dimffnl, ffnl, ph3d, mpi_enreg)
        atom_projs(1,1,:) = atom_projs(1,1,:) / sqrt2
        atom_projs(2,1,:) = zero
      end if
-     if(ham%istwf_k == 2) then
-       atom_projs(:,:,:) = atom_projs(:,:,:)*sqrt2
+     if(ham%istwf_k > 1) then
+       atom_projs(:,:,:) = atom_projs(:,:,:) * sqrt2
      end if
 
 
@@ -1263,7 +1263,7 @@ end subroutine apply_block
    do itypat=1,ham%ntypat
      nprojs = nprojs + count(ham%indlmn(3,:,itypat)>0)*ham%nattyp(itypat)
    end do
-   cplx = 2; if(ham%istwf_k == 2) cplx = 1
+   cplx = 2; if(ham%istwf_k > 1) cplx = 1
 
    req_mem = 0
    req_mem = req_mem + dp * cplx * int(nprojs, c_size_t) * int(nprojs, c_size_t)                       ! gram_projs
@@ -1376,8 +1376,9 @@ subroutine apply_invovl_ompgpu(ham, cwavef, sm1cwavef, cwaveprj, npw, ndat, mpi_
   !multiply by S^1
   ABI_NVTX_START_RANGE(NVTX_INVOVL_INNER)
   call solve_inner_ompgpu(invovl, ham, cplx, mpi_enreg, proj, ndat*nspinor, sm1proj, PtPsm1proj, block_sliced)
-  !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(3) MAP(to:sm1proj,PtPsm1proj)
+  !$OMP TARGET TEAMS DISTRIBUTE MAP(to:sm1proj,PtPsm1proj)
   do idat  =1, ndat*nspinor
+    !$OMP PARALLEL DO COLLAPSE(2) PRIVATE(iproj,icplx)
     do iproj = 1, nprojs
       do icplx = 1, cplx
         sm1proj(icplx,iproj,idat) = - sm1proj(icplx,iproj,idat)
@@ -1548,9 +1549,10 @@ subroutine solve_inner_ompgpu(invovl, ham, cplx, mpi_enreg, proj, ndat, sm1proj,
    !$OMP END TARGET DATA
 #endif
 
-   !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(3) &
-   !$OMP& PRIVATE(idat,iproj,icplx) MAP(to:proj,resid,PtPsm1proj)
+   !$OMP TARGET TEAMS DISTRIBUTE &
+   !$OMP& PRIVATE(idat) MAP(to:proj,resid,PtPsm1proj)
    do idat =1, ndat
+     !$OMP PARALLEL DO COLLAPSE(2) PRIVATE(iproj,icplx)
      do iproj =1, nprojs
        do icplx = 1,cplx
          resid(icplx, iproj, idat) = proj(icplx, iproj, idat) - resid(icplx, iproj, idat) - PtPsm1proj(icplx, iproj, idat)
@@ -1598,9 +1600,10 @@ subroutine solve_inner_ompgpu(invovl, ham, cplx, mpi_enreg, proj, ndat, sm1proj,
    ! add preconditionned residual
    call apply_block_ompgpu(ham, cplx, invovl%inv_s_approx, nprojs, ndat, resid, precondresid, block_sliced)
 
-   !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(3) &
-   !$OMP& PRIVATE(idat,iproj,icplx) MAP(to:sm1proj,precondresid)
+   !$OMP TARGET TEAMS DISTRIBUTE &
+   !$OMP& PRIVATE(idat) MAP(to:sm1proj,precondresid)
    do idat =1, ndat
+     !$OMP PARALLEL DO PRIVATE(iproj,icplx) COLLAPSE(2)
      do iproj =1, nprojs
        do icplx = 1,cplx
          sm1proj(icplx, iproj, idat) = sm1proj(icplx, iproj, idat) + precondresid(icplx, iproj, idat)

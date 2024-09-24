@@ -260,7 +260,7 @@ module m_dvdb
   ! Number of v1 potentials present in file.
 
   integer :: nqpt
-  ! Number of q-points
+  ! Number of q-points (usually the IBZ)
 
   integer :: natom
    ! Number of atoms

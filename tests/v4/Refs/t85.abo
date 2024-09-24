@@ -1,6 +1,6 @@
 
-.Version 9.11.2 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 10.1.4.5 of ABINIT, released Sep 2024.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2024 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 15 Jul 2023.
-- ( at 12h01 )
+.Starting date : Fri 13 Sep 2024.
+- ( at 19h10 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v4_t85/t85.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v4_t85/t85.abi
 - output file    -> t85.abo
 - root for input  files -> t85i
 - root for output files -> t85o
@@ -90,10 +90,10 @@ _ WF disk file :      0.310 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
 -
-- outvars: echo of selected default values                                      
--   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+- outvars: echo of selected default values
+-   iomode0 =  0 , fftalg0 =512 , wfoptalg0 =  0
 -
-- outvars: echo of global parameters not present in the input file              
+- outvars: echo of global parameters not present in the input file
 -  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
@@ -110,7 +110,7 @@ _ WF disk file :      0.310 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
          ecutsigx      3.70827987E+00 Hartree
           ecutwfn      6.00000000E+00 Hartree
            enunit           2
--          fftalg         312
+-          fftalg         512
         freqremax1     0.00000000E+00 Hartree
         freqremax2     1.00000000E+00 Hartree
         freqremax3     0.00000000E+00 Hartree
@@ -432,8 +432,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.01132
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
 -  Troullier-Martins psp for element  Al        Thu Oct 27 17:31:05 EDT 1994
 - 13.00000   3.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -469,7 +469,7 @@ tolerances: {tolwfr: 1.00E-10, }
  ETOT  3  -2.4777725099716    -2.460E-05 2.683E-05 2.434E-05
  ETOT  4  -2.4777725332916    -2.332E-08 2.557E-08 1.560E-07
  ETOT  5  -2.4777725334742    -1.826E-10 1.502E-10 9.721E-10
- ETOT  6  -2.4777725334755    -1.293E-12 6.929E-11 3.527E-12
+ ETOT  6  -2.4777725334755    -1.312E-12 6.929E-11 3.527E-12
 
  At SCF step    6   max residual=  6.93E-11 < tolwfr=  1.00E-10 =>converged.
 
@@ -489,7 +489,7 @@ lattice_vectors:
 lattice_lengths: [   5.41078,    5.41078,    5.41078, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   1.1201209E+02
-convergence: {deltae: -1.293E-12, res2:  3.527E-12, residm:  6.929E-11, diffor: null, }
+convergence: {deltae: -1.312E-12, res2:  3.527E-12, residm:  6.929E-11, diffor: null, }
 etotal    :  -2.47777253E+00
 entropy   :   0.00000000E+00
 fermie    :   2.75190256E-01
@@ -562,18 +562,18 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
-kinetic             :  8.92187590187914E-01
-hartree             :  3.39807425191162E-03
-xc                  : -1.20605025377335E+00
+kinetic             :  8.92187590187971E-01
+hartree             :  3.39807425196570E-03
+xc                  : -1.20605025377332E+00
 Ewald energy        : -2.69627278273813E+00
 psp_core            :  5.93380416496286E-03
-local_psp           :  1.33781061290998E-01
-non_local_psp       :  4.84032132168667E-01
-internal            : -2.38299037444703E+00
-'-kT*entropy'       : -9.47821590284899E-02
-total_energy        : -2.47777253347552E+00
-total_energy_eV     : -6.74236195261671E+01
-band_energy         :  4.08122356901058E-01
+local_psp           :  1.33781061291866E-01
+non_local_psp       :  4.84032132167609E-01
+internal            : -2.38299037444708E+00
+'-kT*entropy'       : -9.47821590284490E-02
+total_energy        : -2.47777253347553E+00
+total_energy_eV     : -6.74236195261673E+01
+band_energy         :  4.08122356901001E-01
 ...
 
 
@@ -682,7 +682,7 @@ meta: {optdriver: 3, gwcalctyp: 2, }
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1  -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000
-       -0.000   0.000   0.000  -0.000  -0.000   0.000   0.000   0.000   0.000
+        0.000   0.000   0.000  -0.000  -0.000   0.000   0.000   0.000   0.000
 
     2  -0.000  -7.928   0.313   0.794   0.330   0.794   0.330   0.794   0.329
        -0.000   0.000  -0.000  -0.000   0.000  -0.000   0.000   0.000  -0.000
@@ -722,7 +722,7 @@ meta: {optdriver: 3, gwcalctyp: 2, }
   chi0(G,G') at the    6 th omega   0.0000   3.8998 [eV]
        1       2       3       4       5       6       7       8       9
     1  -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000
-       -0.000  -0.000  -0.000   0.000   0.000   0.000   0.000  -0.000  -0.000
+        0.000  -0.000  -0.000   0.000   0.000   0.000   0.000  -0.000  -0.000
 
     2  -0.000  -6.378   0.208   0.473   0.275   0.473   0.275   0.473   0.275
        -0.000   0.000  -0.000  -0.000   0.000  -0.000  -0.000   0.000   0.000
@@ -746,7 +746,7 @@ meta: {optdriver: 3, gwcalctyp: 2, }
   chi0(G,G') at the    9 th omega   0.0000  43.0948 [eV]
        1       2       3       4       5       6       7       8       9
     1  -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000
-       -0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000  -0.000  -0.000
+        0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000  -0.000  -0.000
 
     2  -0.000  -1.231   0.012   0.004   0.018   0.004   0.018   0.004   0.017
        -0.000   0.000  -0.000  -0.000   0.000   0.000   0.000   0.000   0.000
@@ -761,10 +761,10 @@ meta: {optdriver: 3, gwcalctyp: 2, }
    Upper and lower wings at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
       0.014  -0.001   0.001   0.002  -0.002  -0.002   0.002   0.001  -0.001
-     -0.000   0.000   0.000  -0.000  -0.000   0.000   0.000   0.000   0.000
+      0.000   0.000   0.000  -0.000  -0.000   0.000   0.000   0.000   0.000
        1       2       3       4       5       6       7       8       9
       0.014  -0.001   0.001   0.002  -0.002  -0.002   0.002   0.001  -0.001
-     -0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000  -0.000  -0.000
+      0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000  -0.000  -0.000
 
 
    Upper and lower wings at the    2 th omega   6.8028   0.0000 [eV]
@@ -806,10 +806,10 @@ meta: {optdriver: 3, gwcalctyp: 2, }
    Upper and lower wings at the    6 th omega   0.0000   3.8998 [eV]
        1       2       3       4       5       6       7       8       9
       0.136  -0.002   0.002   0.005  -0.005  -0.005   0.005   0.002  -0.002
-     -0.000  -0.000  -0.000   0.000   0.000   0.000   0.000  -0.000  -0.000
+      0.000  -0.000  -0.000   0.000   0.000   0.000   0.000  -0.000  -0.000
        1       2       3       4       5       6       7       8       9
       0.136  -0.002   0.002   0.005  -0.005  -0.005   0.005   0.002  -0.002
-     -0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000  -0.000  -0.000
+      0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000  -0.000  -0.000
 
 
    Upper and lower wings at the    7 th omega   0.0000  10.6897 [eV]
@@ -833,10 +833,10 @@ meta: {optdriver: 3, gwcalctyp: 2, }
    Upper and lower wings at the    9 th omega   0.0000  43.0948 [eV]
        1       2       3       4       5       6       7       8       9
       0.940  -0.001   0.001   0.003  -0.003  -0.003   0.003   0.001  -0.001
-     -0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000  -0.000  -0.000
+      0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000  -0.000  -0.000
        1       2       3       4       5       6       7       8       9
       0.940  -0.001   0.001   0.003  -0.003  -0.003   0.003   0.001  -0.001
-     -0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000  -0.000  -0.000
+      0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000  -0.000  -0.000
 
 
 
@@ -928,7 +928,7 @@ meta: {optdriver: 3, gwcalctyp: 2, }
         0.000  -0.000   0.000  -0.000  -0.000  -0.000  -0.000  -0.000   0.000
 
     2  -0.223  -2.418   0.176   0.377   0.142   0.377   0.141   0.377   0.141
-        0.000  -0.000  -0.000   0.000  -0.000  -0.000  -0.000  -0.000  -0.000
+        0.000   0.000  -0.000   0.000  -0.000  -0.000  -0.000  -0.000  -0.000
 
   chi0(G,G') at the    2 th omega   6.8028   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
@@ -1081,10 +1081,10 @@ meta: {optdriver: 3, gwcalctyp: 2, }
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1 -10.643  -0.226  -0.230  -0.220  -0.207  -0.220  -0.207  -0.210  -0.215
-        0.000  -0.000   0.000  -0.000  -0.000  -0.000  -0.000  -0.000  -0.000
+       -0.000  -0.000   0.000  -0.000  -0.000  -0.000  -0.000  -0.000  -0.000
 
     2  -0.226  -3.101   0.177   0.450   0.163   0.450   0.163   0.360   0.288
-        0.000  -0.000   0.000   0.000  -0.000  -0.000  -0.000  -0.000  -0.000
+        0.000   0.000   0.000   0.000  -0.000  -0.000  -0.000  -0.000  -0.000
 
   chi0(G,G') at the    2 th omega   6.8028   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
@@ -1692,7 +1692,7 @@ data: !SigmaeeData |
             fcart2     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
             fcart3     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
             fcart4     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
--          fftalg         312
+-          fftalg         512
         freqremax1     0.00000000E+00 Hartree
         freqremax2     1.00000000E+00 Hartree
         freqremax3     0.00000000E+00 Hartree
@@ -1939,7 +1939,7 @@ P           mkmem           8
                        5.0000000000E-01  0.0000000000E+00  5.0000000000E-01
                        5.0000000000E-01  5.0000000000E-01  0.0000000000E+00
           spgroup         225
-           strten1    -1.7060414116E-04 -1.7060414116E-04 -1.7060414116E-04
+           strten1    -1.7060414115E-04 -1.7060414115E-04 -1.7060414115E-04
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            strten2     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -2072,10 +2072,10 @@ P           mkmem           8
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          4.5  wall=          4.6
+- Proc.   0 individual time (sec): cpu=          2.4  wall=          2.4
 
 ================================================================================
 
  Calculation completed.
 .Delivered   4 WARNINGs and   5 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          4.5  wall=          4.6
++Overall time at end (sec) : cpu=          2.4  wall=          2.4

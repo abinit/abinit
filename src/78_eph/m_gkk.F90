@@ -135,7 +135,7 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
  character(len=500) :: msg, what
  character(len=fnlen) :: fname, gkkfilnam
 !arrays
- integer :: g0_k(3),symq(4,2,cryst%nsym)
+ integer :: g0_k(3),symq(4,2,cryst%nsym), units(2)
  integer,allocatable :: kg_k(:,:),kg_kq(:,:),nband(:,:),nband_kq(:,:),wfd_istwfk(:)
  real(dp) :: kk(3),kq(3),qpt(3),phfrq(3*cryst%natom),dvdb_qdamp(1)
  real(dp),allocatable :: displ_cart(:,:,:),displ_red(:,:,:), eigens_kq(:,:,:)
@@ -150,9 +150,11 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
 
 !************************************************************************
 
+ units = [std_out, ab_out]
+
  what = "(GKK files)"; if (dtset%eph_task == -2) what = "GKQ file"
  write(msg, '(3a)') " Computation of electron-phonon coupling matrix elements ", trim(what), ch10
- call wrtout([std_out, ab_out], msg, do_flush=.True.)
+ call wrtout(units, msg, do_flush=.True.)
 
  if (psps%usepaw == 1) then
    ABI_ERROR("PAW not implemented")
@@ -534,7 +536,7 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
 
  call cwtime(cpu, wall, gflops, "stop")
  write(msg, '(2a)') " Computation of gkq matrix elements with ", trim(what)
- call wrtout([std_out, ab_out], msg, do_flush=.True.)
+ call wrtout(units, msg, do_flush=.True.)
  call wrtout(std_out, sjoin("cpu-time:", sec2str(cpu), ",wall-time:", sec2str(wall)), do_flush=.True.)
 
  if (dtset%eph_task == -2 .and. i_am_master) then
@@ -596,9 +598,8 @@ subroutine ncwrite_v1qnu(dvdb, dtset, ifc, out_ncpath)
  use m_bz_mesh, only : kpath_t, kpath_new
 
 !Arguments ------------------------------------
-!scalars
+ class(dvdb_t),intent(inout) :: dvdb
  type(dataset_type),target,intent(in) :: dtset
- type(dvdb_t),intent(inout) :: dvdb
  type(ifc_type),intent(in) :: ifc
  character(len=*),intent(in) :: out_ncpath
 
@@ -609,13 +610,13 @@ subroutine ncwrite_v1qnu(dvdb, dtset, ifc, out_ncpath)
  integer :: iq, nu, iatom, ii, jj, kk
  real(dp) :: inv_qepsq, qtau, phre, phim, rtmp
  logical :: with_lr_model
+ type(kpath_t) :: qpath
 !arrays
- integer :: ngfft(18)
+ integer :: ngfft(18), units(2)
  real(dp) :: phfreqs(dvdb%natom3),qpt(3)
  real(dp) :: displ_cart(2,3, dvdb%cryst%natom, dvdb%natom3), displ_red(2,dvdb%natom3,dvdb%natom3)
  real(dp),allocatable :: v1scf(:,:,:,:), v1_qnu(:,:,:,:), v1lr_atm(:,:,:,:), v1lr_qnu(:,:,:,:)
- type(kpath_t) :: qpath
- real(dp) :: bounds(3,6), qpt_red(3), qpt_cart(3),  glr(3), values(dvdb%natom3)
+ real(dp) :: bounds(3,6), qpt_red(3), qpt_cart(3), glr(3), values(dvdb%natom3)
 
 !************************************************************************
 
@@ -641,6 +642,8 @@ subroutine ncwrite_v1qnu(dvdb, dtset, ifc, out_ncpath)
  bounds(:, 6) = tol3 * [+0.50000,  +0.25000, +0.75000] !  # W
 
  qpath = kpath_new(bounds, dvdb%cryst%gprimd, dtset%ndivsm)
+
+ units = [std_out, ab_out]
 
  do iq=1,qpath%npts
    qpt_red = qpath%points(:, iq)
@@ -677,9 +680,9 @@ subroutine ncwrite_v1qnu(dvdb, dtset, ifc, out_ncpath)
  qpt = dtset%qptn
 
  call wrtout(std_out, sjoin(" Writing Delta V_{q,nu)(r) potentials to file:", out_ncpath), do_flush=.True.)
- call wrtout([std_out, ab_out], sjoin(ch10, "- Results stored in: ", out_ncpath))
+ call wrtout(units, sjoin(ch10, "- Results stored in: ", out_ncpath))
  call wrtout(std_out, sjoin(" Using qpt:", ktoa(qpt)))
- !call wrtout([std_out, ab_out], " Use `abiopen.py out_V1QAVG.nc -e` to visualize results")
+ !call wrtout(units, " Use `abiopen.py out_V1QAVG.nc -e` to visualize results")
  call dvdb%print(unit=std_out)
 
  ! Define FFT mesh
@@ -687,11 +690,11 @@ subroutine ncwrite_v1qnu(dvdb, dtset, ifc, out_ncpath)
  nfft = product(ngfft(1:3))
 
  if (dtset%eph_task == -16) then
-   call wrtout([std_out, ab_out], " Assuming q-point already in the DVDB file. No interpolation.")
+   call wrtout(units, " Assuming q-point already in the DVDB file. No interpolation.")
    interpolated = 0
 
  else if (dtset%eph_task == +16) then
-   call wrtout([std_out, ab_out], " Using Fourier interpolation.")
+   call wrtout(units, " Using Fourier interpolation.")
     comm_rpt = xmpi_comm_self
     call dvdb%ftinterp_setup(dtset%ddb_ngqpt, qptopt1, 1, dtset%ddb_shiftq, nfft, ngfft, comm_rpt)
     interpolated = 1
@@ -756,7 +759,7 @@ subroutine ncwrite_v1qnu(dvdb, dtset, ifc, out_ncpath)
    call dvdb%ftinterp_qpt(qpt, nfft, ngfft, v1scf, dvdb%comm_rpt)
  end if
 
- ! Compute scattering potential in phonon representations instead ot atomic one.
+ ! Compute scattering potential the in phonon representations instead ot atomic one.
  ! v1_qnu = \sum_{ka} phdispl{ka}(q,nu) D_{ka,q} V_scf(r)
  ! NOTE: prefactor 1/sqrt(2 w(q,nu)) is not included in the potentials saved to file.
  ! v1_qnu(2, nfft, nspden, natom3), v1scf(cplex, nfft, nspden, natom3)
