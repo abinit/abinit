@@ -36,6 +36,7 @@ MODULE m_oper
  private
 
  public :: init_oper
+ public :: init_oper_ndat
  public :: diff_oper
  public :: destroy_oper
  public :: print_oper
@@ -43,6 +44,8 @@ MODULE m_oper
  public :: downfold_oper
  public :: identity_oper
  public :: copy_oper
+ public :: copy_oper_from_ndat
+ public :: copy_oper_to_ndat
  public :: trace_oper
  public :: upfold_oper
  public :: prod_oper
@@ -66,6 +69,11 @@ MODULE m_oper
 !
 !  integer :: mband
 !  ! Number of bands
+
+  ! Wether ks and matlu are stored on GPU
+  integer :: gpu_option
+
+  integer :: ndat
 
   integer :: has_operks
   ! Is the operator allocated in the KS basis ?
@@ -148,7 +156,7 @@ subroutine init_oper(paw_dmft,oper,nkpt,wtk,shiftk,opt_ksloc)
  type(oper_type), intent(inout) :: oper
  real(dp), target, optional :: wtk(paw_dmft%nkpt)
 !Local variables ------------------------------------
- integer :: optksloc
+ integer :: optksloc,ndat_
 !************************************************************************
 
  DBG_ENTER("COLL")
@@ -159,9 +167,11 @@ subroutine init_oper(paw_dmft,oper,nkpt,wtk,shiftk,opt_ksloc)
  !if(optksloc/=3) then
     ! FIXME: empty line!
  !endif
+ ndat_=1;
 
  oper%has_operks    = 0
  oper%has_opermatlu = 0
+ oper%gpu_option    = ABI_GPU_DISABLED
 
 ! ===================
 !  Integers
@@ -172,6 +182,7 @@ subroutine init_oper(paw_dmft,oper,nkpt,wtk,shiftk,opt_ksloc)
  oper%nsppol  = paw_dmft%nsppol
  oper%paral   = 0
  oper%shiftk  = 0
+ oper%ndat    = ndat_
 
  if (present(shiftk)) oper%shiftk = shiftk
 
@@ -192,7 +203,7 @@ subroutine init_oper(paw_dmft,oper,nkpt,wtk,shiftk,opt_ksloc)
 ! ===================
  if (optksloc == 1 .or. optksloc == 3) then
 
-   ABI_MALLOC(oper%ks,(oper%mbandc,oper%mbandc,oper%nkpt,oper%nsppol))
+   ABI_MALLOC(oper%ks,(oper%mbandc,oper%mbandc,oper%nkpt,oper%nsppol*ndat_))
    oper%has_operks  = 1
    oper%ks(:,:,:,:) = czero
 
@@ -204,12 +215,107 @@ subroutine init_oper(paw_dmft,oper,nkpt,wtk,shiftk,opt_ksloc)
  if (optksloc == 2 .or. optksloc == 3) then
    ABI_MALLOC(oper%matlu,(oper%natom))
    oper%has_opermatlu = 1
-   call init_matlu(oper%natom,oper%nspinor,oper%nsppol,paw_dmft%lpawu(:),oper%matlu(:))
+   call init_matlu(oper%natom,oper%nspinor,oper%nsppol*ndat_,paw_dmft%lpawu(:),oper%matlu(:))
  end if ! optksloc=2 or optksloc=3
 
  DBG_EXIT("COLL")
 
 end subroutine init_oper
+!!***
+
+!!****f* m_oper/init_oper_ndat
+!! NAME
+!! init_oper_ndat
+!!
+!! FUNCTION
+!!  Allocate variables used in type oper_type.
+!!
+!! INPUTS
+!!
+!! OUTPUTS
+!! oper  = operator of type oper_type
+!!
+!! SOURCE
+
+subroutine init_oper_ndat(paw_dmft,oper,ndat,nkpt,wtk,opt_ksloc)
+
+ use defs_basis
+ use m_matlu, only : init_matlu
+ use m_paw_dmft, only : paw_dmft_type
+ use m_errors
+
+!Arguments ------------------------------------
+!scalars
+ integer, optional, intent(in) :: nkpt
+ integer, intent(in) :: ndat
+ integer, optional, intent(in) :: opt_ksloc
+!type
+ type(paw_dmft_type), intent(in) :: paw_dmft
+ type(oper_type), intent(inout) :: oper
+!arrays
+ real(dp), pointer, optional :: wtk(:)
+!oper variables ------------------------------------
+ integer :: iatom,optksloc
+
+!************************************************************************
+ DBG_ENTER("COLL")
+ if(present(opt_ksloc)) then
+   optksloc=opt_ksloc
+ else
+   optksloc=3
+ endif
+
+ if(optksloc/=3) then
+    ! FIXME: empty line!
+ endif
+
+ oper%has_operks=0
+ oper%has_opermatlu=0
+! ===================
+!  Integers
+! ===================
+ oper%ndat=ndat
+ oper%nsppol=paw_dmft%nsppol
+ oper%nspinor=paw_dmft%nspinor
+ oper%mbandc=paw_dmft%mbandc
+ oper%natom=paw_dmft%natom
+
+! ===================
+!  KS variables
+! ===================
+ if(optksloc==1.or.optksloc==3) then
+   if(.not.present(nkpt)) then
+     oper%nkpt=paw_dmft%nkpt
+   else
+     oper%nkpt=nkpt
+   endif
+! allocate(oper%wtk(oper%nkpt))
+   if(.not.present(wtk)) then
+     oper%wtk=>paw_dmft%wtk
+   else
+     oper%wtk=>wtk
+   endif
+   ABI_MALLOC(oper%ks,(paw_dmft%mbandc,paw_dmft%mbandc,oper%nkpt,paw_dmft%nsppol*ndat))
+   oper%has_operks=1
+   oper%ks=czero
+ endif
+
+! ===================
+!  matlu variables
+! ===================
+ if(optksloc==2.or.optksloc==3) then
+   oper%has_opermatlu=0
+   ABI_MALLOC(oper%matlu,(oper%natom))
+   oper%has_opermatlu=1
+   call init_matlu(oper%natom,paw_dmft%nspinor,paw_dmft%nsppol*ndat,paw_dmft%lpawu,oper%matlu)
+   do iatom=1,oper%natom
+    oper%matlu(iatom)%mat=czero
+   enddo
+ endif
+
+ DBG_EXIT("COLL")
+
+end subroutine init_oper_ndat
 !!***
 
 !!****f* m_oper/destroy_oper
@@ -299,6 +405,96 @@ subroutine copy_oper(oper1,oper2)
  DBG_EXIT("COLL")
 
 end subroutine copy_oper
+!!***
+
+!!****f* m_oper/copy_oper_from_ndat
+!! NAME
+!! copy_oper_from_ndat
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SOURCE
+
+subroutine copy_oper_from_ndat(oper1,oper2,ndat)
+
+ use defs_basis
+ use m_matlu, only : copy_matlu_from_ndat
+ use m_errors
+
+!Arguments ------------------------------------
+!type
+ type(oper_type),intent(in) :: oper1
+ type(oper_type),intent(inout) :: oper2(ndat) !vz_i
+ integer,intent(in) :: ndat
+
+!oper variables-------------------------------
+ integer ::  ib, ib1, ikpt, isppol, idat
+! *********************************************************************
+ DBG_ENTER("COLL")
+ ABI_CHECK(oper1%ndat==ndat, "Bad value for ndat!")
+ do idat=1,ndat
+   if(oper1%has_opermatlu==1.and.oper2(idat)%has_opermatlu==1)  then
+     call copy_matlu_from_ndat(oper1%matlu,oper2(idat)%matlu,oper1%natom,ndat,idat)
+   endif
+
+   if(oper1%has_operks==1.and.oper2(idat)%has_operks==1) then
+     do isppol=1,oper1%nsppol
+       oper2(idat)%ks(:,:,:,isppol)=oper1%ks(:,:,:,isppol+(idat-1)*oper1%nsppol)
+     enddo
+   endif
+ enddo
+
+ DBG_EXIT("COLL")
+end subroutine copy_oper_from_ndat
+!!***
+
+!!****f* m_oper/copy_oper_to_ndat
+!! NAME
+!! copy_oper_to_ndat
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SOURCE
+
+subroutine copy_oper_to_ndat(oper1,oper2,ndat)
+
+ use defs_basis
+ use m_matlu, only : copy_matlu_to_ndat
+ use m_errors
+
+!Arguments ------------------------------------
+!type
+ type(oper_type),intent(in) :: oper1(ndat)
+ type(oper_type),intent(inout) :: oper2 !vz_i
+ integer,intent(in) :: ndat
+
+!oper variables-------------------------------
+ integer ::  ib, ib1, ikpt, isppol, idat
+! *********************************************************************
+ DBG_ENTER("COLL")
+ ABI_CHECK(oper2%ndat==ndat, "Bad value for ndat!")
+ do idat=1,ndat
+   if(oper1(idat)%has_opermatlu==1.and.oper2%has_opermatlu==1)  then
+     call copy_matlu_to_ndat(oper1(idat)%matlu,oper2%matlu,oper2%natom,ndat,idat)
+   endif
+
+   if(oper1(idat)%has_operks==1.and.oper2%has_operks==1) then
+     do isppol=1,oper2%nsppol
+       oper2%ks(:,:,:,isppol+(idat-1)*oper2%nsppol)=oper1(idat)%ks(:,:,:,isppol)
+     enddo
+   endif
+ enddo
+
+ DBG_EXIT("COLL")
+end subroutine copy_oper_to_ndat
 !!***
 
 !!****f* m_oper/print_oper
@@ -548,6 +744,7 @@ subroutine downfold_oper(oper,paw_dmft,procb,iproc,option,op_ks_diag)
 !oper variables-------------------------------
  integer :: iatom,ib,ik,ikpt,isppol,lpawu,mbandc,ndim
  integer :: ndim_max,nspinor,opt,paral,shift
+ integer :: idat,ndat
  character(len=500) :: message
  complex(dpc), allocatable :: mat_temp(:,:),mat_temp2(:,:),mat_temp3(:,:)
 ! *********************************************************************
