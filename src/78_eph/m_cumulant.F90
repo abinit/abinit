@@ -1242,7 +1242,6 @@ subroutine cumulant_kubo_transport(self, dtset, cryst)
 
  ABI_CALLOC(self%n_ehst, (2, self%nsppol, self%ntemp))
 
-print *, "cumulant_kubo_transport: allocated stuff"
  self%transport_fermie = dtset%eph_fermie
  self%transport_extrael = dtset%eph_extrael
  self%transport_mu_e = self%mu_e
@@ -1263,7 +1262,6 @@ print *, "cumulant_kubo_transport: allocated stuff"
 
  call ebands_get_carriers(self%ebands, self%ntemp, self%kTmesh, self%transport_mu_e, self%n_ehst)
 
-print *, "cumulant_kubo_transport: e bands called"
 
  time_opt =0
  cnt = 0
@@ -1285,7 +1283,6 @@ print *, "cumulant_kubo_transport: e bands called"
      do ib=self%bmin,self%bmax
        !if (ib > self%bmin) cycle ! MG HACK To be able to run tests quickly.
        ib_eph = ib - self%bmin + 1
-print *, "cumulant_kubo_transport: spin, k, band ", spin, ikcalc, ib_eph
        eig_nk = self%ebands%eig(ib, ik_ibz, spin)
        wr_step = self%wrmesh_b(2,ib_eph,my_ik,spin) - self%wrmesh_b(1,ib_eph,my_ik,spin)
        vr(:) = self%vbks(:, ib, ik_ibz, spin)
@@ -1377,7 +1374,6 @@ print *, "cumulant_kubo_transport: spin, k, band ", spin, ikcalc, ib_eph
    !call xmpi_sum(self%conductivity_mu , self%kcalc_comm%value, ierr)
  end do !my_spin
 
-print *, "cumulant_kubo_transport: loops done"
  max_occ = two / (self%nspinor * self%nsppol)
  fact0 = max_occ * (siemens_SI / Bohr_meter / cryst%ucvol) / 100
  self%conductivity_mu = fact0 * self%l0  ! siemens cm^-1
