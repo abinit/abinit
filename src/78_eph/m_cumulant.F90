@@ -1183,7 +1183,7 @@ subroutine cumulant_kubo_transport(self, dtset, cryst)
  character(len=500) :: msg
 !arrays
  real(dp),allocatable :: kernel(:), dfdw_acc(:),Aw(:),Aw_l0(:),dfdw_l0(:)!test_Aw(:), test_dfdw(:)
- real(dp),allocatable :: kernel_dm(:), Aw_dm(:),Aw_l0_dm(:),dfdw_l0_dm(:)
+ real(dp),allocatable :: kernel_dm(:), Aw_dm(:),Aw_l0_dm(:)
  complex(dp),allocatable :: gdm_vals(:)
  real(dp) :: int_Aw
  real(dp) :: int_Aw_dm
