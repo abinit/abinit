@@ -1885,7 +1885,7 @@ Variable(
     vartype="integer",
     topics=['TuningSpeedMem_expert'],
     dimensions="scalar",
-    defaultval="None",
+    defaultval="0",
     mnemonics="C-PRoJectors IN MEMORY",
     characteristics=['[[DEVELOP]]'],
     added_in_version="",
@@ -1915,8 +1915,11 @@ and the Hamiltonian becomes:
 $$ H_{non-local}|\psi> = \sum_a\sum_{i,j} |p_{a,i}> D_{a,ij} cprj(a,j) $$
 
 With [[cprj_in_memory]] = 0, "cprj" coefficients are computed on-the-fly in many parts of the code, including ground-state computations.
-If [[cprj_in_memory]] = 1 (or any non-zero value), "cprj" coefficients are stored in memory during the whole computation, and they evolve as the wave-functions do.
-Some algorithms can take advantage of this feature and reduce the computational time.
+If [[cprj_in_memory]] = 1, "cprj" coefficients are computed and stored in memory at the diagonalization step. This option is available only for LOBPCG ([[wfoptalg]]=114) and Chebyshev filtering ([[wfoptalg]]=111).
+If [[cprj_in_memory]] = 2, "cprj" coefficients are stored in memory during the whole computation, and they evolve as the wave-functions do. This feature is available only for [[wfoptalg]]=10.
+
+[[cprj_in_memory]] > 0 is expected to be faster than [[cprj_in_memory]] = 0.
+
 For now, [[cprj_in_memory]] = 1 is implemented only in the following context:
 
 * [[optdriver]] = 0 : ground-state computation. If optdriver/=0, [[cprj_in_memory]] is set to 0 automatically.
@@ -1931,7 +1934,7 @@ For now, [[cprj_in_memory]] = 1 is implemented only in the following context:
 
 * [[nucdipmom]] = 0 : without nuclear dipolar moments
 
-See [[cprj_update_lvl]] for a fine tuning of "cprj" updates (i.e. when they are computed directly from wavefunctions).
+For [[cprj_in_memory]] = 2, see [[cprj_update_lvl]] for a fine tuning of "cprj" updates (i.e. when they are computed directly from wavefunctions).
 
 """,
 ),
@@ -1952,6 +1955,7 @@ This variable is used to control the updates of "cprj" coefficients, which are k
 $$ cprj(a,i) = <p_{a,i}|\psi> $$
 
 Read the [[cprj_in_memory]] documentation for details about the notations.
+This feature is available only for [[cprj_in_memory]] = 2.
 "cprj" coefficients are computed at the beginning of the run and evolves as the wave-function do.
 In principle, there is no need to compute "cprj" coefficients directly from the wave-functions again after they are initialized.
 However, numerical errors can accumulate and lead to a significant difference between "cprj" coefficients and wave-functions.
@@ -1980,7 +1984,6 @@ cprj_update_lvl |   A |   B |   C |   D |   E
 
 The updates B, C and E add one computation of "cprj" coefficients per SCF step (see [[nstep]]), whereas the update D add one computation per "line" (see [[nline]]).
 Places D and E are activated only for negative values of [[cprj_update_lvl]] and should be used only for debugging.
-Indeed, in these cases performances are very likely worse than [[cprj_update_lvl]] = 0 (so [[cprj_in_memory]] = 0).
 One can count the number of non-local operations done in a dataset using [[nonlop_ylm_count]] to precisely measure the effect of [[cprj_update_lvl]].
 """,
 ),
