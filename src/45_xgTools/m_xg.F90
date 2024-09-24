@@ -3261,7 +3261,7 @@ contains
             !$OMP TARGET ENTER DATA MAP(alloc:vecR_buf)
             !$OMP TARGET DATA USE_DEVICE_PTR(xgBlock%vecR,vecR_buf)
             call MPI_ALLREDUCE(xgBlock%vecR, vecR_buf,&
-            &    xgBlock%cols*fact*xgBlock%rows,MPI_DOUBLE_COMPLEX,MPI_SUM,comm_,ierierr)
+            &    xgBlock%cols*fact*xgBlock%rows,MPI_DOUBLE,MPI_SUM,comm_,ierierr)
             xgBlock%vecR(1:xgBlock%cols,1:fact*xgBlock%rows)=vecR_buf(1:xgBlock%cols,1:fact*xgBlock%rows)
             !$OMP END TARGET DATA
             !$OMP TARGET EXIT DATA MAP(delete:vecR_buf)
@@ -3269,6 +3269,7 @@ contains
 # endif
 #else
 !FIXME For several compilers, OMP doesn't work correctly with structured types, so use pointers
+            xgBlock__vecR => xgBlock%vecR
 # ifdef HAVE_MPI2_INPLACE
             !$OMP TARGET DATA USE_DEVICE_PTR(xgBlock__vecR)
             call MPI_ALLREDUCE(MPI_IN_PLACE,xgBlock__vecR,&
@@ -3313,7 +3314,7 @@ contains
 # else
             ABI_MALLOC(vecC_buf,(xgBlock%rows,xgBlock%cols))
             !$OMP TARGET ENTER DATA MAP(alloc:vecC_buf)
-            !$OMP TARGET DATA USE_DEVICE_PTR(xgBlock%vecR,vecR_buf)
+            !$OMP TARGET DATA USE_DEVICE_PTR(xgBlock%vecC,vecC_buf)
             call MPI_ALLREDUCE(xgBlock%vecC, vecC_buf,&
             &    xgBlock%cols*xgBlock%rows,MPI_DOUBLE_COMPLEX,MPI_SUM,comm_,ierr)
             xgBlock%vecC(1:xgBlock%cols,1:xgBlock%rows)=vecC_buf(1:xgBlock%cols,1:xgBlock%rows)
@@ -3323,6 +3324,7 @@ contains
 # endif
 #else
 !FIXME For several compilers, OMP doesn't work correctly with structured types, so use pointers
+            xgBlock__vecC => xgBlock%vecC
 # ifdef HAVE_MPI2_INPLACE
             !$OMP TARGET DATA USE_DEVICE_PTR(xgBlock__vecC)
             call MPI_ALLREDUCE(MPI_IN_PLACE,xgBlock__vecC,&
@@ -3331,7 +3333,7 @@ contains
 # else
             ABI_MALLOC(vecC_buf,(xgBlock%rows,xgBlock%cols))
             !$OMP TARGET ENTER DATA MAP(alloc:vecC_buf)
-            !$OMP TARGET DATA USE_DEVICE_PTR(xgBlock%vecR,vecR_buf)
+            !$OMP TARGET DATA USE_DEVICE_PTR(xgBlock%vecC,vecC_buf)
             call MPI_ALLREDUCE(xgBlock__vecC, vecC_buf,&
             &    xgBlock%cols*xgBlock%rows,MPI_DOUBLE_COMPLEX,MPI_SUM,comm_,ierr)
             xgBlock__vecC(1:xgBlock%cols,1:xgBlock%rows)=vecC_buf(1:xgBlock%cols,1:xgBlock%rows)
