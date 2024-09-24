@@ -123,8 +123,8 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
  integer,parameter :: istwfk_1 = 1, tim_getgh1c = 1, berryopt0 = 0, useylmgr1 = 0, master = 0, ndims=3, paral_kgb0 = 0
  integer :: sij_opt,usecprj,usevnl,optlocal,optnl,opt_gvnlx1, nu
  integer :: spin, iq, ik, nk_path, nq_path, ierr, npw_k, npw_kq, my_rank, nprocs, n1, n2, n3, n4, n5, n6, cplex
- integer :: natom, natom3, nsppol, nspden, nspinor, qptopt, db_iqpt, comm_cart, me_cart
- integer :: nfft,nfftf,mgfft,mgfftf, my_npert, my_ip, idir, ipert, ipc, nkpg_k, nkpg_kq, ncerr, ncid, my_nkpath, my_nqpath
+ integer :: natom, natom3, nsppol, nspden, nspinor, qptopt, comm_cart, me_cart
+ integer :: nfft,nfftf,mgfft,mgfftf, my_npert, my_ip, idir, ipert, ipc, ncerr, ncid, my_nkpath, my_nqpath
  integer :: in_k, im_kq, my_is, my_ik, my_iq, nband, nb_in_g, ii, band_n, band_m, bstart, bstop, my_nspins, np, tot_nscf_ierr
  !integer :: linalg_max_size
  real(dp) :: cpu_all,wall_all,gflops_all, eig0nk, eshift
@@ -144,13 +144,13 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
  integer,allocatable :: kg_k(:,:), kg_kq(:,:), qmap_symrec(:,:), my_ik_inds(:), my_iq_inds(:), my_spins(:), my_iperts(:)
  integer,allocatable :: pert_table(:,:), my_pinfo(:,:)
  real(dp) :: kk(3), qq(3), kq(3), phfreqs(3*cryst%natom), phfreqs_ev(3*cryst%natom), fake_path(3,2)
- real(dp),allocatable :: grad_berry(:,:), kinpw_k(:), kinpw_kq(:), dkinpw(:)
+ real(dp),allocatable :: grad_berry(:,:), kinpw_k(:), kinpw_kq(:) !, dkinpw(:)
  real(dp),allocatable :: cg_k(:,:,:), cg_kq(:,:,:), gsc_k(:,:,:), gsc_kq(:,:,:),eig_k(:), eig_kq(:)
  real(dp),allocatable :: v1scf(:,:,:,:), vlocal1(:,:,:,:), vlocal(:,:,:,:), gkq_atm(:,:,:,:), gkq_nu(:,:,:,:), gkq2_nu(:,:,:)
  real(dp),allocatable :: gvnlx1(:,:), gs1c(:,:), h1kets_kq(:,:,:), displ_cart(:,:,:,:),displ_red(:,:,:,:)
  real(dp),allocatable :: kpg_k(:,:), ph3d_k(:,:,:), ffnl_k(:,:,:,:), vlocal_k(:,:,:,:)
  real(dp),allocatable :: kpg_kq(:,:), ph3d_kq(:,:,:), ffnl_kq(:,:,:,:), vlocal_kq(:,:,:,:)
- real(dp),allocatable :: ylm_kq(:,:), ylm_k(:,:), ylmgr_kq(:,:,:), rvec(:), ph3d(:,:,:), ph3d1(:,:,:)
+ real(dp),allocatable :: ylm_kq(:,:), ylm_k(:,:), ylmgr_kq(:,:,:), rvec(:) !, ph3d(:,:,:), ph3d1(:,:,:)
  logical :: reorder, periods(ndims), keepdim(ndims)
  type(pawcprj_type),allocatable  :: cwaveprj0(:,:)
 !************************************************************************
@@ -651,6 +651,73 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
                  sjoin("WARNING:", itoa(tot_nscf_ierr), "NSCF runs did not converge within tolwfr", ftoa(dtset%tolwfr), ". Increase nstep!"))
    end if
  end if
+
+
+#if 1
+ print *, "Recomputing q-points from scratch..."
+ do my_iq=1,my_nqpath
+   iq = my_iq_inds(my_iq)
+   print *, "iq", iq
+   qq = qpath%points(:,iq); qq_is_gamma = sum(qq**2) < tol14
+   kq = kk + qq
+
+   ! Compute u_{m k+q}(g)
+   call nscf%setup_kpt(spin, kq, istwfk_1, nband, cryst, dtset, psps, pawtab, pawfgr, &
+                       npw_kq, kg_kq, kpg_kq, ph3d_kq, kinpw_kq, ffnl_kq, vlocal_kq, cg_kq, gsc_kq, gs_ham_kq)
+   !print *, "kq:", kq, "npw_kq", npw_kq
+
+   ! cache.
+   use_cg_kq = .False.
+   !use_cg_kq = (my_iq > 1 .and. ucache_kq%use_cache)
+   !if (use_cg_kq) call ucache_kq%get_kpt(kq, istwfk_1, npw_kq, nspinor, nband, kg_kq, cg_kq)
+
+   ! We can use cg_k as input for the NSCF for a very quick return
+   !if (qq_is_gamma) then
+   !  use_cg_kq = .True.; cg_kq = cg_k
+   !end if
+
+   !use_cg_kq = .False.; cg_kq = zero
+   call nscf%solve_kpt(spin, kq, istwfk_1, nband, cryst, dtset, dtfil, gs_ham_kq, &
+                       use_cg_kq, npw_kq, cg_kq, gsc_kq, eig_kq, msg, ierr)
+
+   !call nscf%solve_kpt(spin, kq, istwfk_1, nband, cryst, dtset, dtfil, gs_ham_kq, &
+   !                    .True., npw_kq, cg_kq, gsc_kq, eig_kq, msg, ierr)
+
+   ABI_WARNING_IF(ierr /= 0, msg)
+   !tot_nscf_ierr = tot_nscf_ierr + ierr
+
+   !call ucache_kq%store_kpt(kq, istwfk_1, npw_kq, nspinor, nband, kg_kq, cg_kq)
+
+   ! This to have the same gauge when qq = 0.
+   !if (qq_is_gamma) cg_kq = cg_k
+
+   ! Make sure all procs in pert_comm have the same wavefunctions at k+q
+   !call xmpi_bcast(cg_kq, master, pert_comm%value, ierr)
+   !if (psps%usepaw == 1) call xmpi_bcast(gsc_kq, master, pert_comm%value, ierr)
+
+   spin = 1
+   NCF_CHECK(nf90_put_var(ncid, vid("all_eigens_kq"), eig_kq, start=[1,iq,spin]))
+
+   ABI_SFREE(gs1c)
+   ABI_SFREE(ylm_kq)
+   ABI_SFREE(ylmgr_kq)
+   ABI_SFREE(vlocal1)
+   ABI_SFREE(v1scf)
+   ABI_SFREE(vlocal_kq)
+   ABI_SFREE(ph3d_kq)
+   ABI_SFREE(kpg_kq)
+   ABI_SFREE(kinpw_kq)
+   ABI_SFREE(ffnl_kq)
+   ABI_SFREE(kg_kq)
+   ABI_SFREE(eig_kq)
+   ABI_SFREE(cg_kq)
+   ABI_SFREE(gsc_kq)
+   ABI_SFREE(h1kets_kq)
+   call gs_ham_kq%free()
+
+end do
+#endif
+
 
  NCF_CHECK(nf90_close(ncid))
  call xmpi_barrier(comm)

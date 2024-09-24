@@ -284,7 +284,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  ! and have take the w-dependence into account.
  ! but all the operations can be restricted to a small G-sphere of kinetic energy ecuteps that can be handled
  ! with a coarser FFT mesh.
- ! Another distint advantage of such splitting is that one can handle the divergence in vc(q,g) for |q+g| --> 0
+ ! Another distinct advantage of such splitting is that one can handle the divergence in vc(q,g) for |q+g| --> 0
  ! using well know techniques from GW and the anysotropic behavior of e-1(q) for q --> 0 in low-dimensional systems.
  ! The disavantage is that one needs to compute the GWPT e-ph matrix in two steps, first Sig_x and then Sigma_x,
  ! so cetain operations such as the k-point mapping, and the computation of the form factors are performed twice

@@ -2656,8 +2656,8 @@ subroutine nscf_solve_kpt(nscf, isppol, kpt, istwf_k, nband_k, cryst, dtset, dtf
          foldre=mod(fold1+fold2,21)
          foldim=mod(3*fold1+2*fold2,19)
 
-         cg_k(1,index,iband) =dble(foldre)
-         cg_k(2,index,iband) =dble(foldim)
+         cg_k(1,index,iband) = dble(foldre)
+         cg_k(2,index,iband) = dble(foldim)
 
          ! XG030513: Time-reversal symmetry for k=gamma imposes zero imaginary part at G=0
          ! XG: I do not know what happens for spin-orbit here.
@@ -2686,8 +2686,7 @@ subroutine nscf_solve_kpt(nscf, isppol, kpt, istwf_k, nband_k, cryst, dtset, dtf
  ierr = 1; msg = ""
  do inonsc=1,dtset%nstep
 
-   !call rmm_diis(inonsc, ikpt, isppol, cg_k, dtset, eig_k, occ_k, enlx_k, gs_hamk, kinpw_k, gsc, &
-   !              mpi_enreg, nband_k, npw_k, nspinor, resid_k, rmm_diis_status)
+   call cg_kfilter(npw_k, nspinor, nband_k, gs_hamk%kinpw_k, cg_k)
 
    call cgwf(dtset%berryopt, cg_k, cgq, dtset%chkexit, cpus0, dphase_k, dtefield, dtfil%filnam_ds(1), &
              gsc_k, gs_hamk, icg0, igsc0, ikpt0, inonsc, isppol, nband_k, mcg, mcgq0, mgsc, mkgq0, &

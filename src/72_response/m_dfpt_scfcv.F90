@@ -18,6 +18,9 @@
 
 #include "abi_common.h"
 
+! nvtx related macro definition
+#include "nvtx_macros.h"
+
 module m_dfpt_scfcv
 
  use defs_basis
@@ -33,6 +36,7 @@ module m_dfpt_scfcv
  use m_hdr
  use m_dtfil
  use m_hamiltonian
+ use m_gemm_nonlop_projectors
 #ifdef HAVE_NETCDF
  use netcdf
 #endif
@@ -86,6 +90,10 @@ module m_dfpt_scfcv
  use m_dfpt_nstwf,   only : dfpt_nstpaw, dfpt_nstwf
  use m_mkcore,         only : dfpt_mkcore
  use m_spacepar,   only : hartrestr, make_vectornd, symrhg
+
+#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
+ use m_nvtx_data
+#endif
 
  implicit none
 
@@ -511,6 +519,20 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  deltae_mq=zero ; fermie1_mq=zero ; epaw1_mq=zero ; eberry_mq=zero ; elmag1_mq=zero
  res2_mq=zero
 
+ ! Handling GEMM nonlop use
+ ! Not enabled by default for CPU and CUDA implementations
+ ! Enabled if using OpenMP GPU offload
+ gemm_nonlop_use_gemm = .false.
+
+ ! OpenMP GPU offload case (GEMM nonlop used by default)
+ if(dtset%gpu_option == ABI_GPU_OPENMP .or. dtset%use_gemm_nonlop == 1) then
+   gemm_nonlop_use_gemm = .true.
+   call init_gemm_nonlop(dtset%nkpt)
+ end if
+
+ gemm_nonlop_is_distributed = .false.
+ if(dtset%gpu_nl_distrib == 1) gemm_nonlop_is_distributed = .true.
+
 !Examine tolerance criteria, and eventually  print a line to the output
 !file (with choice=1, the only non-dummy arguments of scprqt are
 !nstep, tollist and iscf - still, diffor,res2,prtfor,fcart are here initialized to 0)
@@ -708,6 +730,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 
  quitsum_request = xmpi_request_null; timelimit_exit = 0
 
+ ABI_NVTX_START_RANGE(NVTX_DFPT_SCF)
  do istep=1,max(1,nstep)
 
    ! Handle time limit condition.
@@ -1144,6 +1167,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 !  Note that there are different "exit" instructions within the loop
 !  ######################################################################
  end do ! istep
+ ABI_NVTX_END_RANGE()
 
  ! Avoid pending requests if itime == ntime.
  call xmpi_wait(quitsum_request,ierr)
@@ -1256,6 +1280,12 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 !endif
 
 
+ ! Cleaning GEMM nonlop data
+ if(gemm_nonlop_use_gemm) then
+   call destroy_gemm_nonlop(dtset%nkpt)
+   gemm_nonlop_use_gemm = .false.
+ end if
+
 !Eventually close the dot file, before calling dfpt_nstdy
  if ((ipert==dtset%natom+2.and.sum((dtset%qptn(1:3))**2)<=1.0d-7.and.&
 & (dtset%berryopt/=4 .and.dtset%berryopt/= 6.and.dtset%berryopt/= 7.and.&
@@ -1366,6 +1396,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  call timab(150,2,tsec)
  call timab(160,1,tsec)
 
+
 !calculate Born effective charge and store it in d2lo
  if ((dtset%berryopt== 4.or.dtset%berryopt== 6.or.dtset%berryopt== 7.or.&
 & dtset%berryopt==14.or.dtset%berryopt==16.or.dtset%berryopt==17).and.&
@@ -1375,6 +1406,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
    blkflg(:,dtset%natom+2,:,1:dtset%natom)=1
  end if
 
+
 !calculate dielectric tensor and store it in d2lo
  if ((dtset%berryopt== 4.or.dtset%berryopt== 6.or.dtset%berryopt== 7.or.&
 & dtset%berryopt==14.or.dtset%berryopt==16.or.dtset%berryopt==17).and.&
@@ -1383,6 +1415,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 &   mpi_enreg,mpw,mpw1,mpert,nkpt,npwarr,npwar1,dtset%nsppol,dtset%nspinor,pwindall,qmat,rprimd)
    blkflg(:,dtset%natom+2,:,dtset%natom+2)=1
  end if
+
 
 !If SCF convergence was not reached (for nstep>0),
 !print a warning to the output file (non-dummy arguments: nstep,
@@ -3061,6 +3094,8 @@ subroutine dfpt_nstdy(atindx,blkflg,cg,cg1,cplex,dtfil,dtset,d2bbb,d2lo,d2nl,eig
 
  DBG_ENTER("COLL")
 
+ ABI_NVTX_START_RANGE(NVTX_DFPT_NSTDY)
+
 !Not valid for PAW
  if (psps%usepaw==1) then
    msg='This routine cannot be used for PAW (use dfpt_nstpaw instead) !'
@@ -3449,6 +3484,8 @@ subroutine dfpt_nstdy(atindx,blkflg,cg,cg1,cplex,dtfil,dtset,d2bbb,d2lo,d2nl,eig
  ABI_FREE(eig1_k)
 
  call timab(111,2,tsec)
+
+ ABI_NVTX_END_RANGE()
 
  DBG_EXIT("COLL")
 

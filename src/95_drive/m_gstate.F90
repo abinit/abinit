@@ -39,9 +39,7 @@ module m_gstate
  use m_ddb
  use m_bandfft_kpt
  use m_invovl
- use m_gemm_nonlop
- use m_gemm_nonlop_gpu
- use m_gemm_nonlop_ompgpu
+ use m_gemm_nonlop_projectors
  use m_wfk
  use m_nctk
  use m_hdr
@@ -439,26 +437,17 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 
  ! Handling GEMM nonlop use
  ! Not enabled by default for CPU and CUDA implementations
- ! Enabled if using OpenMP GPU offload
+ ! Enabled if using OpenMP GPU offload (only implementation)
  gemm_nonlop_use_gemm = .false.
 
- ! OpenMP GPU offload case (GEMM nonlop used by default)
- if(dtset%gpu_option == ABI_GPU_OPENMP) then
-   gemm_nonlop_use_gemm = .true.
-   call init_gemm_nonlop_ompgpu(dtset%nkpt)
- else if(dtset%use_gemm_nonlop == 1) then
-   gemm_nonlop_use_gemm = .true.
-   ! CUDA & Kokkos case (same routine used)
-   if(dtset%gpu_option == ABI_GPU_LEGACY .or. dtset%gpu_option == ABI_GPU_KOKKOS) then
-     call init_gemm_nonlop(dtset%nkpt)
-     call init_gemm_nonlop_gpu(dtset%nkpt)
-   ! CPU case
-   else if(dtset%gpu_option == ABI_GPU_DISABLED) then
-     call init_gemm_nonlop(dtset%nkpt)
-   end if
- end if
  gemm_nonlop_is_distributed = .false.
  if(dtset%gpu_nl_distrib == 1) gemm_nonlop_is_distributed = .true.
+ if(dtset%gpu_nl_splitsize > 0) gemm_nonlop_nblocks = dtset%gpu_nl_splitsize
+
+ if(dtset%gpu_option == ABI_GPU_OPENMP .or. dtset%use_gemm_nonlop == 1) then
+   gemm_nonlop_use_gemm = .true.
+   call init_gemm_nonlop(dtset%gpu_option)
+ end if
 
 !Set up the Ylm for each k point
  if ( dtset%tfkinfunc /= 2) then
@@ -1773,14 +1762,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 
 !Clean gemm_nonlop work spaces
  if(gemm_nonlop_use_gemm) then
-   if(dtset%gpu_option == ABI_GPU_OPENMP) then
-     call destroy_gemm_nonlop_ompgpu()
-   else if(dtset%gpu_option==ABI_GPU_LEGACY .or. dtset%gpu_option==ABI_GPU_KOKKOS) then
-     call destroy_gemm_nonlop_gpu(dtset%nkpt)
-     call destroy_gemm_nonlop(dtset%nkpt)
-   else if(dtset%gpu_option==ABI_GPU_DISABLED) then
-     call destroy_gemm_nonlop(dtset%nkpt)
-   end if
+   call destroy_gemm_nonlop(dtset%gpu_option)
    gemm_nonlop_use_gemm = .false.
  end if
 
