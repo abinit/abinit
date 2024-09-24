@@ -1130,7 +1130,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
      end if
      if (initialized/=0.and.dtset%usewvl == 0.and.ipositron/=1) then
        ! In some cases cprj are kept in memory, so we have to update them before the call of vtorho
-       if (dtset%cprj_in_memory/=0) then
+       if (dtset%cprj_in_memory==2) then
          iatom=0
          idir=0
          iorder_cprj=0
