@@ -652,7 +652,6 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
    end if
  end if
 
-
 #if 0
  print *, "Recomputing q-points from scratch..."
  do my_iq=1,my_nqpath
