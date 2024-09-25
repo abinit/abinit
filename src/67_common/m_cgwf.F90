@@ -2464,16 +2464,6 @@ subroutine nscf_setup_kpt(nscf, isppol, kpt, istwf_k, nband_k, cryst, dtset, psp
  ! Compute g-sphere for this k-point from ecut
  call get_kg(kpt, istwf_k, dtset%ecut, cryst%gmet, npw_k, kg_k)
 
- !block
- !integer :: mg1, mg2, mg3
- !mg1 =maxval(abs(kg_k(1,:))); mg1 = 2*mg1 + 1
- !mg2 =maxval(abs(kg_k(2,:))); mg2 = 2*mg2 + 1
- !mg3 =maxval(abs(kg_k(3,:))); mg3 = 2*mg3 + 1
- !ABI_CHECK_ILEQ(mg1, nscf%ngfft(1), "ngfft(1) too small")
- !ABI_CHECK_ILEQ(mg2, nscf%ngfft(2), "ngfft(2) too small")
- !ABI_CHECK_ILEQ(mg3, nscf%ngfft(3), "ngfft(3) too small")
- !end block
-
  ! Compute kinetic energy.
  ABI_MALLOC(kinpw_k, (npw_k))
  call mkkin(dtset%ecut, dtset%ecutsm, dtset%effmass_free, cryst%gmet, kg_k, kinpw_k, kpt, npw_k, 0, 0)
@@ -2492,12 +2482,11 @@ subroutine nscf_setup_kpt(nscf, isppol, kpt, istwf_k, nband_k, cryst, dtset, psp
                        dtset%typat, cryst%xred, nfft, mgfft, nscf%ngfft, cryst%rprimd, dtset%nloalg, &
                        comm_atom=mpi_enreg%comm_atom, mpi_atmtab=mpi_enreg%my_atmtab, mpi_spintab=mpi_enreg%my_isppoltab, &
                        usecprj=dtset%usepaw, ph1d=ph1d, nucdipmom=dtset%nucdipmom, gpu_option=dtset%gpu_option)
-
  ABI_FREE(ph1d)
+ !gs_hamk%ekb = zero
 
  ! Set up local potential vlocal on the coarse FFT mesh from vtrial taking into account the spin.
  ! Also, continue to initialize the Hamiltonian.
-
  nvloc = gs_hamk%nvloc
  ABI_CALLOC(vlocal, (n4, n5, n6, nvloc))
 
@@ -2513,19 +2502,19 @@ subroutine nscf_setup_kpt(nscf, isppol, kpt, istwf_k, nband_k, cryst, dtset, psp
    !call gs_hamk%load_spin(isppol, vxctaulocal=vxctaulocal)
  end if
 
- ! Compute nonlocal form factors ffnl_k at (k+G)
- ABI_MALLOC(ffnl_k, (npw_k, 1, psps%lmnmax, psps%ntypat))
-
  ! Spherical Harmonics for useylm == 1.
  ABI_MALLOC(ylm_k, (npw_k, psps%mpsang**2 * psps%useylm))
 
- ! Set up the spherical harmonics (Ylm) at k and k+q. See also dfpt_looppert
+ ! Set up the spherical harmonics (Ylm) at k.
  if (psps%useylm == 1) then
    optder = 0; if (useylmgr0 == 1) optder = 1
    nband_ks = nband_k
    call initylmg(cryst%gprimd, kg_k, kpt, mkmem1, nscf%mpi_enreg, psps%mpsang, npw_k, nband_ks, mkmem1,&
-                [npw_k], dtset%nsppol, optder, cryst%rprimd, ylm_k, ylmgr)
+                 [npw_k], dtset%nsppol, optder, cryst%rprimd, ylm_k, ylmgr)
  end if
+
+ ! Compute nonlocal form factors ffnl_k at (k+G)
+ ABI_MALLOC(ffnl_k, (npw_k, 1, psps%lmnmax, psps%ntypat))
 
  call mkffnl_objs(cryst, psps, 1, ffnl_k, ider0, idir0, kg_k, kpg_k, kpt, nkpg, npw_k, ylm_k, ylmgr_dum)
  ABI_FREE(ylm_k)
@@ -2540,9 +2529,10 @@ subroutine nscf_setup_kpt(nscf, isppol, kpt, istwf_k, nband_k, cryst, dtset, psp
  call gs_hamk%load_k(kpt_k=kpt, istwf_k=istwf_k, npw_k=npw_k, &
                      kinpw_k=kinpw_k, kg_k=kg_k, kpg_k=kpg_k, ffnl_k=ffnl_k, ph3d_k=ph3d_k, &
                      compute_ph3d=(paral_kgb0/=1), compute_gbound=(paral_kgb0/=1))
+                     !compute_ph3d=.True., compute_gbound=.True.)
 
- ABI_MALLOC(cg_k, (2, npw_k * nspinor, nband_k))
- ABI_MALLOC(gsc_k, (2, npw_k * nspinor, nband_k * dtset%usepaw))
+ ABI_MALLOC(cg_k, (2, npw_k*nspinor, nband_k))
+ ABI_MALLOC(gsc_k, (2, npw_k*nspinor, nband_k*dtset%usepaw))
 
  end associate
 
@@ -2597,8 +2587,7 @@ subroutine nscf_solve_kpt(nscf, isppol, kpt, istwf_k, nband_k, cryst, dtset, dtf
 !Local variables ------------------------------
 !scalars
  integer,parameter :: paral_kgb0 = 0, mcgq0 = 0, mkgq0 = 0, nkpt1 = 1, pwind_alloc0 = 0, use_subvnlx0 = 0, use_subovl0 = 0, ider0 = 0, idir0 = 0
- integer,parameter :: icg0 = 0, igsc0 = 0, ikpt0 = 0, quit0 = 0, ortalgo_3 = 3, mkmem1 = 1
- integer,parameter :: useylmgr0 = 0
+ integer,parameter :: icg0 = 0, igsc0 = 0, ikpt0 = 0, quit0 = 0, ortalgo_3 = 3, mkmem1 = 1, useylmgr0 = 0
  integer :: mcg, mgsc, n1, n2, n3, n4, n5, n6, nfft, nfftf, mgfft, mgfftf, inonsc, npwsp, me_g0, linalg_max_size
  integer :: ipw, ispinor, nspinor, ii, iband
  real(dp),parameter :: cpus0 = zero
@@ -2650,8 +2639,8 @@ subroutine nscf_solve_kpt(nscf, isppol, kpt, istwf_k, nband_k, cryst, dtset, dtf
 
  !gs_hamk%kinpw_k = zero
  ierr = 1; msg = ""
- do inonsc=1,dtset%nstep
 
+ do inonsc=1,dtset%nstep
    !call cg_kfilter(npw_k, nspinor, nband_k, gs_hamk%kinpw_k, cg_k)
 
    call cgwf(dtset%berryopt, cg_k, cgq, dtset%chkexit, cpus0, dphase_k, dtefield, dtfil%filnam_ds(1), &
