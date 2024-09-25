@@ -2599,10 +2599,7 @@ subroutine nscf_solve_kpt(nscf, isppol, kpt, istwf_k, nband_k, cryst, dtset, dtf
  integer,parameter :: icg0 = 0, igsc0 = 0, ikpt0 = 0, quit0 = 0, ortalgo_3 = 3, mkmem1 = 1
  integer,parameter :: useylmgr0 = 0
  integer :: mcg, mgsc, n1, n2, n3, n4, n5, n6, nfft, nfftf, mgfft, mgfftf, inonsc, npwsp, me_g0, linalg_max_size
- integer :: ipw, ispinor, index, nspinor
- integer, parameter :: int64 = selected_int_kind(18)
- integer(KIND=int64) :: seed
- integer :: fold1,fold2,foldim,foldre,iband, ii
+ integer :: ipw, ispinor, nspinor, ii, iband
  real(dp),parameter :: cpus0 = zero
  real(dp) :: max_resid
  type(efield_type) :: dtefield
@@ -2633,40 +2630,7 @@ subroutine nscf_solve_kpt(nscf, isppol, kpt, istwf_k, nband_k, cryst, dtset, dtf
 
  if (.not. use_cg_k) then
    ! Initialize the wavefunctions with random numbers. See wfconv
-   !TODO
-   !call ncgtk_randomize(istwf_k, npw_k, nspinor, nband, me_g0, cg_k)
-
-   do iband=1,nband_k
-     index = 0
-     do ispinor=1,nspinor
-       do ipw=1,npw_k
-         index=index+1
-         seed=(iband-1)*npw_k*nspinor + (ispinor-1)*npw_k + ipw
-
-         ! For portability, use only integer numbers
-         ! The series of couples (fold1,fold2) is periodic with a period of
-         ! 3x5x7x11x13x17x19x23x29x31, that is, larger than 2**32, the largest integer*4
-         ! fold1 is between 0 and 34, fold2 is between 0 and 114. As sums of five
-         ! uniform random variables, their distribution is close to a gaussian
-         fold1=modulo(seed,3)+modulo(seed,5)+modulo(seed,7)+modulo(seed,11)+modulo(seed,13)
-         fold2=modulo(seed,17)+modulo(seed,19)+modulo(seed,23)+modulo(seed,29)+modulo(seed,31)
-
-         ! The gaussian distributions are folded, in order to be back to a uniform distribution
-         ! foldre is between 0 and 20, foldim is between 0 and 18
-         foldre=mod(fold1+fold2,21)
-         foldim=mod(3*fold1+2*fold2,19)
-
-         cg_k(1,index,iband) = dble(foldre)
-         cg_k(2,index,iband) = dble(foldim)
-
-         ! XG030513: Time-reversal symmetry for k=gamma imposes zero imaginary part at G=0
-         ! XG: I do not know what happens for spin-orbit here.
-         if (istwf_k == 2 .and. me_g0 == 1) then
-           cg_k(2,1,iband)=zero
-         end if
-       end do ! ipw
-     end do ! ispinor
-   end do ! iband
+   call cg_randomize(istwf_k, npw_k, nspinor, nband_k, me_g0, cg_k)
 
    ! Multiply with envelope function to reduce kinetic energy
    call cg_envlop(cg_k, dtset%ecut, cryst%gmet, icg0, kg_k, kpt, mcg, nband_k, npw_k, dtset%nspinor)
@@ -2686,7 +2650,7 @@ subroutine nscf_solve_kpt(nscf, isppol, kpt, istwf_k, nband_k, cryst, dtset, dtf
  ierr = 1; msg = ""
  do inonsc=1,dtset%nstep
 
-   call cg_kfilter(npw_k, nspinor, nband_k, gs_hamk%kinpw_k, cg_k)
+   !call cg_kfilter(npw_k, nspinor, nband_k, gs_hamk%kinpw_k, cg_k)
 
    call cgwf(dtset%berryopt, cg_k, cgq, dtset%chkexit, cpus0, dphase_k, dtefield, dtfil%filnam_ds(1), &
              gsc_k, gs_hamk, icg0, igsc0, ikpt0, inonsc, isppol, nband_k, mcg, mcgq0, mgsc, mkgq0, &
@@ -2694,6 +2658,8 @@ subroutine nscf_solve_kpt(nscf, isppol, kpt, istwf_k, nband_k, cryst, dtset, dtf
              dtset%nsppol, dtset%ortalg, dtset%prtvol, &
              pwind, pwind_alloc0, pwnsfac, pwnsfacq, quit0, resid, &
              subham, subovl, subvnlx, dtset%tolrde, dtset%tolwfr_diago, use_subovl0, use_subvnlx0, mod(dtset%wfoptalg, 100), zshift)
+
+   !call cg_kfilter(npw_k, nspinor, nband_k, gs_hamk%kinpw_k, cg_k)
 
    ! subspace rotation (without this, cgwf will never converge!)
    call subdiago(cg_k, eig_k, evec, gsc_k, icg0, igsc0, istwf_k, mcg, mgsc, nband_k, npw_k, dtset%nspinor, paral_kgb0, &
