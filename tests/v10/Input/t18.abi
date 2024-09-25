@@ -76,8 +76,8 @@ xred     0.240000000000000   0.255000000000000   0.249000000000000
 #xred     0.250000000000000   0.250000000000000   0.250000000000000 
 #         0.000000000000000   0.000000000000000   0.000000000000000 
 
-pp_dirpath="$ABI_PSPDIR/Pseudodojo_paw_pbe_standard/"
-pseudos="P.xml, Al.xml"
+pp_dirpath="$ABI_PSPDIR/Pseudodojo_nc_sr_04_pbe_standard_psp8/"
+pseudos="P.psp8, Al.psp8"
 
 ##############################################################
 # This section is used only for regression testing of ABINIT #
@@ -85,15 +85,15 @@ pseudos="P.xml, Al.xml"
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% need_cpp_vars = HAVE_DFTI
+#%% need_cpp_vars = !HAVE_DFTI
 #%% [files]
 #%% files_to_test = 
-#%%   t13.abo, tolnlines=  0, tolabs=  0, tolrel= 0, fld_options = -ridiculous
+#%%   t18.abo, tolnlines=  0, tolabs=  0, tolrel= 0, fld_options = -ridiculous
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]
 #%% authors = L. Baguet
-#%% keywords = PAW,CPRJ
-#%% description = Compare cprj_in_memory=1 with cprj_in_memory=0 (lobpcg2 and chebfi2). PAW,istwfk>1
+#%% keywords = NC,CPRJ
+#%% description = Compare cprj_in_memory=1 with cprj_in_memory=0 (lobpcg2 and chebfi2). NC,istwfk>1
 #%%<END TEST_INFO>
  

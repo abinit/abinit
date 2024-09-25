@@ -34,6 +34,8 @@ inp_files = [
 "t30.abi",
 "t31.abi",
 "t32.abi",
+"t36.abi", # test cprj_in_memory=1 (PAW,istwfk>1,no DFTI)
+"t37.abi", # test cprj_in_memory=1 (NC,istwfk>1,no DFTI)
 "t38.abi", # test cprj_in_memory=1 (PAW,nspinor=2,compare xg_nonlop_option=0 and 1)
 "t39.abi", # test cprj_in_memory=1 (PAW,istwfk=1,npkpt>1)
 "t40.abi", # test cprj_in_memory=1 (PAW,nspinor=2)
@@ -43,8 +45,8 @@ inp_files = [
 "t45.abi", # test chebfi2 (istwfk>1,norm conserving,DFTI)
 "t46.abi", # test chebfi2 (istwfk>1,paw,not DFTI)
 "t47.abi", # test chebfi2 (istwfk>1,norm conserving,not DFTI)
-"t48.abi", # test cprj_in_memory=1 (PAW,istwfk>1)
-"t49.abi", # test cprj_in_memory=1 (NC,istwfk>1)
+"t48.abi", # test cprj_in_memory=1 (PAW,istwfk>1,DFTI)
+"t49.abi", # test cprj_in_memory=1 (NC,istwfk>1,DFTI)
 #"t50.abi", # test cprj_in_memory=1 (NC,nspinor=2) ! not working yet
 "t51.abi",
 "t52.abi",
