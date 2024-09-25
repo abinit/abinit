@@ -158,9 +158,9 @@ contains
  real(dp),allocatable :: kin11(:,:),kin12(:),kin21(:),kin22(:)
  real(dp),allocatable :: kin11_k(:),kin12_k(:),kin21_k(:),kin22_k(:),Kth(:),Stp(:)
  real(dp),allocatable :: psinablapsi(:,:,:),sig_abs(:)
- 
+
 ! *********************************************************************************
- 
+
 ! ---------------------------------------------------------------------------------
 ! Read input data
 
@@ -212,13 +212,13 @@ contains
  if (me==master) then
    if (iomode==IO_MODE_ETSF) then
      NCF_CHECK(nctk_open_read(ncid,filnam1,xmpi_comm_self))
-     call hdr_ncread(hdr,ncid,fform1)
+     call hdr%ncread(ncid,fform1)
    else
      if (open_file(filnam1,msg,newunit=opt_unt,form="unformatted",status="old")/=0) then
        ABI_ERROR(msg)
      end if
-     call hdr_fort_read(hdr,opt_unt,fform1,rewind=.true.)
-   end if 
+     call hdr%fort_read(opt_unt,fform1,rewind=.true.)
+   end if
    ABI_CHECK(fform1/=0,sjoin("Error while reading ",filnam1))
    ABI_CHECK(fform1==610.or.fform1==620,"Conducti requires an OPT file with fform=610 or 620!")
  end if
@@ -481,7 +481,7 @@ contains
      nband_k=nband(ikpt+(isppol-1)*nkpt)
      mykpt=.not.(proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,isppol,me))
      master_band=minval(mpi_enreg%proc_distrb(ikpt,1:nband_k,isppol))
-     
+
 !    In case of non MPI-IO, has to read all (n,m) dipoles for this k-point
 !      Master node reads and send to relevant processor
      if (.not.iomode_estf_mpiio.and.me==master) then
@@ -489,13 +489,13 @@ contains
          psinablapsi=zero
 #ifdef HAVE_NETCDF
          if (nc_unlimited) then
-           nc_start_6=[1,1,1,ikpt,isppol,1] ; nc_count_6=[2,3,mband,1,1,mband] ; nc_stride_6=[1,1,1,1,1,1] 
+           nc_start_6=[1,1,1,ikpt,isppol,1] ; nc_count_6=[2,3,mband,1,1,mband] ; nc_stride_6=[1,1,1,1,1,1]
            NCF_CHECK(nf90_get_var(ncid,varid,psinablapsi,start=nc_start_6,stride=nc_stride_6,count=nc_count_6))
          else if (.not.read_half_dipoles) then
-           nc_start_6=[1,1,1,1,ikpt,isppol] ; nc_count_6=[2,3,mband,mband,1,1] ; nc_stride_6=[1,1,1,1,1,1] 
+           nc_start_6=[1,1,1,1,ikpt,isppol] ; nc_count_6=[2,3,mband,mband,1,1] ; nc_stride_6=[1,1,1,1,1,1]
            NCF_CHECK(nf90_get_var(ncid,varid,psinablapsi,start=nc_start_6,stride=nc_stride_6,count=nc_count_6))
          else
-           nc_start_5=[1,1,1,ikpt,isppol] ; nc_count_5=[2,3,(mband*(mband+1))/2,1,1] ; nc_stride_5=[1,1,1,1,1] 
+           nc_start_5=[1,1,1,ikpt,isppol] ; nc_count_5=[2,3,(mband*(mband+1))/2,1,1] ; nc_stride_5=[1,1,1,1,1]
            NCF_CHECK(nf90_get_var(ncid,varid,psinablapsi,start=nc_start_5,stride=nc_stride_5,count=nc_count_5))
          end if
 #endif
@@ -504,7 +504,7 @@ contains
          bsize=nband_k**2;if (read_half_dipoles) bsize=(nband_k*(nband_k+1))/2
          read(opt_unt)(psinablapsi(1:2,1,ijband),ijband=1,bsize)
          read(opt_unt)(psinablapsi(1:2,2,ijband),ijband=1,bsize)
-         read(opt_unt)(psinablapsi(1:2,3,ijband),ijband=1,bsize)           
+         read(opt_unt)(psinablapsi(1:2,3,ijband),ijband=1,bsize)
        end if
        if (.not.mykpt) then
          call xmpi_exch(psinablapsi,pnp_size,master,psinablapsi,master_band,comm,etiq,ierr)
@@ -539,7 +539,7 @@ contains
            call xmpi_exch(psinablapsi,pnp_size,master,psinablapsi,me,comm,etiq,ierr)
          end if
          call xmpi_bcast(psinablapsi,master,mpi_enreg%comm_band,mpierr)
-       end if  
+       end if
 
 !      LOOP OVER BANDS n
        do iband=1,nband_k
@@ -551,18 +551,18 @@ contains
 !        Select bands for current proc
          myband=(mpi_enreg%proc_distrb(ikpt,iband,isppol)==me)
          if (myband) then
-       
+
 !          In case of MPI-IO, read valence-valence dipoles for band n
            if (iomode_estf_mpiio) then
 #ifdef HAVE_NETCDF
              if (nc_unlimited) then
-               nc_start_6=[1,1,iband,ikpt,isppol,1] ; nc_count_6=[2,3,1,1,1,mband] ; nc_stride_6=[1,1,1,1,1,1] 
+               nc_start_6=[1,1,iband,ikpt,isppol,1] ; nc_count_6=[2,3,1,1,1,mband] ; nc_stride_6=[1,1,1,1,1,1]
                NCF_CHECK(nf90_get_var(ncid,varid,psinablapsi,start=nc_start_6,stride=nc_stride_6,count=nc_count_6))
              else if (.not.read_half_dipoles) then
-               nc_start_6=[1,1,1,iband,ikpt,isppol] ; nc_count_6=[2,3,mband,1,1,1] ; nc_stride_6=[1,1,1,1,1,1] 
+               nc_start_6=[1,1,1,iband,ikpt,isppol] ; nc_count_6=[2,3,mband,1,1,1] ; nc_stride_6=[1,1,1,1,1,1]
                NCF_CHECK(nf90_get_var(ncid,varid,psinablapsi,start=nc_start_6,stride=nc_stride_6,count=nc_count_6))
              else
-               nc_start_5=[1,1,(iband*(iband-1))/2+1,ikpt,isppol] ; nc_count_5=[2,3,iband,1,1] ; nc_stride_5=[1,1,1,1,1] 
+               nc_start_5=[1,1,(iband*(iband-1))/2+1,ikpt,isppol] ; nc_count_5=[2,3,iband,1,1] ; nc_stride_5=[1,1,1,1,1]
                NCF_CHECK(nf90_get_var(ncid,varid,psinablapsi,start=nc_start_5,stride=nc_stride_5,count=nc_count_5))
              end if
 #endif
@@ -584,7 +584,7 @@ contains
                  bd_stride=merge(mband,nband_k,iomode==IO_MODE_ETSF)
                  ijband=(my_iband-1)*bd_stride+jband
                end if
-                 
+
                do l2=1,3
                  do l1=1,3
                    dhdk2_r(l1,l2)=dhdk2_r(l1,l2)+(&
@@ -670,7 +670,7 @@ contains
  call xmpi_sum(deltae,comm,mpierr)
  call xmpi_min(deltae_min,comm,mpierr)
  deltae=deltae/mpi_enreg%nproc_band
- 
+
  ABI_FREE(psinablapsi)
 
 !---------------------------------------------------------------------------------
@@ -785,7 +785,7 @@ contains
  if (me==master) then
    call msig(sig_abs,mom,oml1,filnam_out)
  end if
- 
+
 !---------------------------------------------------------------------------------
 ! End
 
@@ -966,7 +966,7 @@ else if (need_emissivity) then
      ABI_ERROR(msg)
    end if
  end if
-   
+
 !Send data to all procs
  call xmpi_bcast(dom,master,comm,mpierr)
  call xmpi_bcast(omin,master,comm,mpierr)
@@ -991,13 +991,13 @@ else if (need_emissivity) then
  if (me==master) then
    if (iomode==IO_MODE_ETSF) then
      NCF_CHECK(nctk_open_read(ncid,filnam2,xmpi_comm_self))
-     call hdr_ncread(hdr,ncid,fform2)
+     call hdr%ncread(ncid,fform2)
    else
      if (open_file(filnam2,msg,newunit=opt2_unt,form="unformatted",status="old")/=0) then
        ABI_ERROR(msg)
      end if
-     call hdr_fort_read(hdr,opt2_unt,fform2,rewind=.true.)
-   end if 
+     call hdr%fort_read(opt2_unt,fform2,rewind=.true.)
+   end if
    ABI_CHECK(fform2/=0,sjoin("Error while reading ",filnam2))
    ABI_CHECK(fform2==611.or.fform2==612.or.fform2==613,"OPT2 file format should be fform=611/612/613!")
  end if
@@ -1184,7 +1184,7 @@ else if (need_emissivity) then
    ABI_MALLOC(sigx1,(nphicor,mom,natom,nsppol))
    sigx1=zero
  end if
- 
+
  if (need_emissivity) then
    ABI_MALLOC(oml_emis,(mom))
    omin_emis=minval(eigen0)
@@ -1254,7 +1254,7 @@ else if (need_emissivity) then
 !      Master node reads and send to relevant processor
      if (.not.iomode_estf_mpiio.and.me==master) then
        if (iomode==IO_MODE_ETSF) then
-         nc_start=[1,1,1,1,1,ikpt,isppol];nc_stride=[1,1,1,1,1,1,1] 
+         nc_start=[1,1,1,1,1,ikpt,isppol];nc_stride=[1,1,1,1,1,1,1]
          nc_count=[2,3,nphicor,natom,mband,1,1]
 #ifdef HAVE_NETCDF
          NCF_CHECK(nf90_get_var(ncid,varid,psinablapsi2,start=nc_start,stride=nc_stride,count=nc_count))
@@ -1290,7 +1290,7 @@ else if (need_emissivity) then
 
        ABI_MALLOC(eig0_k,(nband_k))
        ABI_MALLOC(occ_k,(nband_k))
-       
+
        if (need_absorption) sigx1_k=zero
        if (need_emissivity) emisx_k=zero
 
@@ -1305,7 +1305,7 @@ else if (need_emissivity) then
            call xmpi_exch(psinablapsi2,pnp_size,master,psinablapsi2,me,comm,etiq,ierr)
          end if
          call xmpi_bcast(psinablapsi2,master,mpi_enreg%comm_band,mpierr)
-       end if  
+       end if
 
 !      LOOP OVER BANDS
        do iband=1,nband_k
@@ -1323,7 +1323,7 @@ else if (need_emissivity) then
 
 !          In case of MPI-IO, read core-valence dipoles for band n
            if (iomode_estf_mpiio) then
-             nc_start=[1,1,1,1,iband,ikpt,isppol];nc_stride=[1,1,1,1,1,1,1] 
+             nc_start=[1,1,1,1,iband,ikpt,isppol];nc_stride=[1,1,1,1,1,1,1]
              nc_count=[2,3,nphicor,natom,1,1,1]
 #ifdef HAVE_NETCDF
              NCF_CHECK(nf90_get_var(ncid,varid,psinablapsi2,start=nc_start,stride=nc_stride,count=nc_count))
@@ -1375,11 +1375,11 @@ else if (need_emissivity) then
 !      Accumulate k-point contribution
        if (need_absorption) then
          sigx1(1:nphicor,1:mom,1:natom,isppol)=sigx1(1:nphicor,1:mom,1:natom,isppol) &
-&                                              +wtk(ikpt)*sigx1_k(1:nphicor,1:mom,1:natom)   
+&                                              +wtk(ikpt)*sigx1_k(1:nphicor,1:mom,1:natom)
        end if
        if (need_emissivity) then
          emisx(1:nphicor,1:mom,1:natom,isppol)=emisx(1:nphicor,1:mom,1:natom,isppol) &
-&                                              +wtk(ikpt)*emisx_k(1:nphicor,1:mom,1:natom)   
+&                                              +wtk(ikpt)*emisx_k(1:nphicor,1:mom,1:natom)
        end if
 
 !      Validity limit
@@ -1480,7 +1480,7 @@ else if (need_emissivity) then
      end do
    endif
  end if
-   
+
 !Emissivity: post-processing
  if (need_emissivity) then
 
@@ -1536,10 +1536,10 @@ else if (need_emissivity) then
      end do
    endif
  end if
-  
+
 !---------------------------------------------------------------------------------
 ! Output results
-   
+
 !Only master node outputs results in files (only master node)
  if (me==master) then
 
@@ -1641,7 +1641,7 @@ else if (need_emissivity) then
      end do
     close(ems_unt)
   end if
-    
+
 !    _s_emisX and tot_emisX files
    if (need_emissivity.and.nsppol==2) then
      if (open_file(trim(filnam_out)//'_s_emisX',msg,newunit=ems_s_unt,form='formatted',action="write")/=0) then
@@ -1659,7 +1659,7 @@ else if (need_emissivity) then
      close(ems_s_unt)
      close(ems_tot_unt)
    end if
-   
+
  endif ! master node
 
 !---------------------------------------------------------------------------------

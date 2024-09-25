@@ -500,7 +500,7 @@ type(dvdb_t) function dvdb_new(path, comm) result(new)
    read(unt, err=10, iomsg=msg) new%numv1
 
    ! Get important dimensions from the first header and rewind the file.
-   call hdr_fort_read(new%hdr_ref, unt, new%fform)
+   call new%hdr_ref%fort_read(unt, new%fform)
    if (dvdb_check_fform(new%fform, "read_dvdb", msg) /= 0) then
      ABI_ERROR(sjoin("While reading:", path, ch10, msg))
    end if
@@ -533,7 +533,7 @@ type(dvdb_t) function dvdb_new(path, comm) result(new)
 
    nqpt = 0
    do iv1=1,new%numv1
-     call hdr_fort_read(hdr1, unt, fform)
+     call hdr1%fort_read(unt, fform)
      if (dvdb_check_fform(fform, "read_dvdb", msg) /= 0) then
        ABI_ERROR(sjoin("While reading hdr of v1 potential of index:", itoa(iv1), ch10, msg))
      end if
@@ -4076,7 +4076,7 @@ integer function my_hdr_skip(unit, idir, ipert, qpt, msg) result(ierr)
 !************************************************************************
 
  ierr = 0; msg = ""
- call hdr_fort_read(tmp_hdr, unit, fform)
+ call tmp_hdr%fort_read(unit, fform)
  ierr = dvdb_check_fform(fform, "read_dvdb", msg)
  if (ierr /= 0) return
 
@@ -4343,12 +4343,12 @@ subroutine dvdb_merge_files(nfiles, v1files, dvdb_filepath, prtvol)
 
    if (endswith(v1files(ii), ".nc")) then
       NCF_CHECK(nctk_open_read(units(ii), v1files(ii), xmpi_comm_self))
-      call hdr_ncread(hdr1_list(ii), units(ii), fform)
+      call hdr1_list(ii)%ncread(units(ii), fform)
    else
      if (open_file(v1files(ii), msg, newunit=units(ii), form="unformatted", action="read", status="old") /= 0) then
        ABI_ERROR(msg)
      end if
-     call hdr_fort_read(hdr1_list(ii), units(ii), fform)
+     call hdr1_list(ii)%fort_read(units(ii), fform)
    end if
 
    if (dvdb_check_fform(fform, "merge_dvdb", msg) /= 0) then
@@ -6000,7 +6000,7 @@ subroutine dvdb_interpolate_and_write(dvdb, dtset, new_dvdb_fname, ngfft, ngfftf
    read(unt, err=10, iomsg=msg) dvdb%version
    read(unt, err=10, iomsg=msg) dvdb%numv1
 
-   call hdr_fort_read(hdr_ref, unt, fform)
+   call hdr_ref%fort_read(unt, fform)
    if (dvdb_check_fform(fform, "read_dvdb", msg) /= 0) then
      ABI_ERROR(sjoin("While reading:", dvdb%path, ch10, msg))
    end if

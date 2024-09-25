@@ -156,7 +156,7 @@ program ioprof
      ! This trick is needed because the initialization of
      ! the header is *IMPOSSIBLE* if we don't have a full ABINIT input file!
      !
-     call hdr_read_from_fname(hdr,hdr_fnames(ii),fform,comm)
+     call hdr%from_fname(hdr_fnames(ii),fform,comm)
      ABI_CHECK(fform/=0,"fform==0")
 
      call hdr%echo(fform,4,unit=std_out)

@@ -156,7 +156,7 @@ program abitk
  case ("hdr_print")
    ABI_CHECK(nargs > 1, "FILE argument is required.")
    call get_command_argument(2, path)
-   call hdr_read_from_fname(hdr, path, fform, comm)
+   call hdr%from_fname(path, fform, comm)
    ABI_CHECK(fform /= 0, "fform == 0")
    rdwr = 3; if (prtvol > 0) rdwr = 4
    call hdr%echo(fform, rdwr, unit=std_out)

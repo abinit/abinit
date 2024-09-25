@@ -425,9 +425,9 @@ subroutine hscr_io(hscr, fform, rdwr, unt, comm, master, iomode)
    !if (my_rank == master) then
      ! Read the abinit header, rewinding of the file (if any) is done here.
      if (iomode==IO_MODE_FORTRAN) then
-       call hdr_fort_read(hscr%hdr, unt, fform, rewind=(rdwr==1))
+       call hscr%hdr%fort_read(unt, fform, rewind=(rdwr==1))
      else if (iomode==IO_MODE_ETSF) then
-       call hdr_ncread(hscr%hdr, unt, fform)
+       call hscr%hdr%ncread(unt, fform)
      end if
 
      ! Reset the variables absent in old versions.
@@ -848,7 +848,7 @@ type(hscr_t) function hscr_new(varname, dtset,ep,hdr_abinit,ikxc,test_type,torde
  end if
 
  ! Copy the abinit header.
- call hdr_copy(hdr_abinit, Hscr%Hdr)
+ call hdr_abinit%copy(Hscr%Hdr)
 
  ! Initialize quantities related to the screening file
  hscr%id         =id
@@ -1099,7 +1099,7 @@ subroutine hscr_copy(Hscr_in, Hscr_cp)
  Hscr_cp%zcut     = Hscr_in%zcut
 
  ! Copy the abinit Header
- call hdr_copy(Hscr_in%Hdr,Hscr_cp%Hdr)
+ call Hscr_in%Hdr%copy(Hscr_cp%Hdr)
 
  Hscr_cp%titles(:) = Hscr_in%titles(:)
 

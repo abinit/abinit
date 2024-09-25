@@ -53,9 +53,7 @@ program optic
  use m_eprenorms
  use m_crystal
  use m_argparse
-#ifdef HAVE_NETCDF
  use netcdf
-#endif
 
  use m_build_info,     only : abinit_version
  use defs_datatypes,   only : ebands_t
@@ -81,9 +79,7 @@ program optic
  integer :: nks_per_proc,work_size,lin1,lin2,nlin1,nlin2,nlin3
  integer :: linel1,linel2,linel3,nonlin1,nonlin2,nonlin3
  integer :: iomode0,comm,nproc,my_rank, optic_ncid
-#ifdef HAVE_NETCDF
  integer :: ncid, varid, ncerr
-#endif
  integer :: num_lin_comp=1,num_nonlin_comp=0,num_linel_comp=0,num_nonlin2_comp=0
  integer :: autoparal=0,max_ncpus=0
  integer :: nonlin_comp(27) = 0, linel_comp(27) = 0, nonlin2_comp(27) = 0
@@ -235,7 +231,7 @@ program optic
    if (iomode0 == IO_MODE_MPI) iomode0 = IO_MODE_FORTRAN
    call wfk_open_read(wfk0,wfkfile,formeig0,iomode0,get_unit(),xmpi_comm_self)
    ! Get header from the gs file
-   call hdr_copy(wfk0%hdr, hdr)
+   call wfk0%hdr%copy(hdr)
 
    ! Identify the type of RF Wavefunction files
    use_ncevk = .False.
@@ -252,19 +248,13 @@ program optic
 
      if (.not. use_ncevk(ii)) then
        call wfk_open_read(wfks(ii), infiles(ii), formeig1, iomode_ddk(ii), get_unit(), xmpi_comm_self)
-       call hdr_copy(wfks(ii)%hdr, hdr_ddk(ii))
+       call wfks(ii)%hdr%copy(hdr_ddk(ii))
      else
 
-#ifdef HAVE_NETCDF
        NCF_CHECK(nctk_open_read(ncid, infiles(ii), xmpi_comm_self))
-       call hdr_ncread(hdr_ddk(ii), ncid, fform)
+       call hdr_ddk(ii)%ncread( ncid, fform)
        ABI_CHECK(fform /= 0, sjoin("Error while reading:", infiles(ii)))
-
        NCF_CHECK(nf90_close(ncid))
-#else
-       ABI_ERROR("Netcdf not available!")
-#endif
-
      end if
    end do
 
@@ -419,7 +409,6 @@ program optic
 
    do ii=1,3
      if (.not. use_ncevk(ii)) cycle
-#ifdef HAVE_NETCDF
      NCF_CHECK(nctk_open_read(ncid, infiles(ii), xmpi_comm_self))
      varid = nctk_idname(ncid, "h1_matrix_elements")
      outeig => eigen11
@@ -427,9 +416,6 @@ program optic
      if (ii == 3) outeig => eigen13
      NCF_CHECK(nf90_get_var(ncid, varid, outeig, count=[2, mband, mband, nkpt, nsppol]))
      NCF_CHECK(nf90_close(ncid))
-#else
-     ABI_ERROR("Netcdf not available!")
-#endif
    end do
 
    bdtot0_index=0 ; bdtot_index=0
@@ -514,7 +500,6 @@ program optic
    write(std_out,'(27i4)') nonlin2_comp(1:num_nonlin2_comp)
    write(std_out,'(a,i1)') ' linear optic matrix elements will be printed :',prtlincompmatrixelements
 
-#ifdef HAVE_NETCDF
    ! Open netcdf file that will contain output results (only master is supposed to write)
    NCF_CHECK_MSG(nctk_open_create(optic_ncid, strcat(prefix, "_OPTIC.nc"), xmpi_comm_self), "Creating _OPTIC.nc")
 
@@ -646,7 +631,6 @@ program optic
      "broadening", "domega", "maxomega", "scissor", "tolerance"], &
      [broadening, domega, maxomega, scissor, tolerance])
    NCF_CHECK(ncerr)
-#endif
  end if
 
  ! Get velocity matrix elements in cartesian coordinates from reduced coords.
@@ -811,11 +795,9 @@ program optic
    call flush_unit(std_out)
  end if
 
-#ifdef HAVE_NETCDF
  if (my_rank == master) then
    NCF_CHECK(nf90_close(optic_ncid))
  end if
-#endif
 
  ! Write information on file about the memory before ending mpi module, if memory profiling is enabled
  call abinit_doctor(filnam)

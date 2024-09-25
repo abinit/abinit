@@ -4635,7 +4635,6 @@ subroutine wfd_read_wfk(Wfd, wfk_fname, iomode, out_hdr)
  real(dp),allocatable :: eig_k(:), cg_k(:,:), out_cg(:,:), work(:,:,:,:), allcg_k(:,:)
  logical,allocatable :: my_readmask(:,:,:)
  character(len=6) :: tag_spin(2)
-
 !************************************************************************
 
  ! Keep track of time spent in wfd_read_wfk
@@ -4668,7 +4667,7 @@ subroutine wfd_read_wfk(Wfd, wfk_fname, iomode, out_hdr)
  end if
 
  if (master_only) call hdr%bcast(wfd%master, wfd%my_rank, wfd%comm)
- if (present(out_hdr)) call hdr_copy(hdr, out_hdr)
+ if (present(out_hdr)) call hdr%copy(out_hdr)
 
  ! TODO: Perform more consistency check btw Hdr and Wfd.
  ! Output the header of the GS wavefunction file.

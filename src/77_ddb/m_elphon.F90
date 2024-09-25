@@ -608,7 +608,7 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam,comm)
        ABI_ERROR(message)
      end if
      !read the header of file
-     call hdr_fort_read(hdr1, unitfskgrid, fform)
+     call hdr1%fort_read(unitfskgrid, fform)
      ABI_CHECK(fform/=0,'denser grid GKK header was mis-read. fform == 0')
    end if
    call hdr1%bcast(master,me,comm)
@@ -1776,7 +1776,7 @@ subroutine rchkGSheader (hdr,natom,nband,unitgkk)
 !using ddb files from other configurations
 !
  rewind(unitgkk)
- call hdr_fort_read(hdr, unitgkk, fform)
+ call hdr%fort_read(unitgkk, fform)
  ABI_CHECK(fform/=0," GKK header mis-read. fform == 0")
 
  if (hdr%natom /= natom) then

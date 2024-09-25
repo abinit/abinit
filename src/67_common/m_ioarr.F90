@@ -407,8 +407,7 @@ subroutine ioarr(accessfil,arr,dtset,etotal,fform,fildata,hdr,mpi_enreg, &
      ! Read the header and broadcast it in comm_cell
      ! FIXME: Use xmpi_comm_self for the time-being because, in loper, ioarr
      ! is called by me==0
-     call hdr_read_from_fname(hdr0, file_etsf, fform_dum, comm_cell)
-     !call hdr_read_from_fname(hdr0, file_etsf, fform_dum, xmpi_comm_self)
+     call hdr0%from_fname(file_etsf, fform_dum, comm_cell)
      ABI_CHECK(fform_dum/=0, "hdr_read_from_fname returned fform 0")
 
      ! Compare the internal header and the header from the file
@@ -1024,7 +1023,7 @@ subroutine read_rhor(fname, cplex, nspden, nfft, ngfft, pawread, mpi_enreg, orho
        ABI_ERROR(msg)
      end if
 
-     call hdr_fort_read(ohdr, unt, fform)
+     call ohdr%fort_read(unt, fform)
 
      ! Check important dimensions.
      ABI_CHECK(fform /= 0, sjoin("fform == 0 while reading:", my_fname))
@@ -1048,7 +1047,7 @@ subroutine read_rhor(fname, cplex, nspden, nfft, ngfft, pawread, mpi_enreg, orho
 
    case (IO_MODE_ETSF)
      NCF_CHECK(nctk_open_read(unt, my_fname, xmpi_comm_self))
-     call hdr_ncread(ohdr, unt, fform)
+     call ohdr%ncread(unt, fform)
 
      ! Check important dimensions.
      ABI_CHECK(fform /= 0, sjoin("fform == 0 while reading:", my_fname))
@@ -1263,9 +1262,9 @@ integer function fort_denpot_skip(unit, msg) result(ierr)
 ! *********************************************************************
 
  ierr = 1
- call hdr_fort_read(hdr, unit, fform)
+ call hdr%fort_read(unit, fform)
  if (fform == 0) then
-    msg = "hdr_fort_read returned fform == 0"; return
+   msg = "hdr_fort_read returned fform == 0"; return
  end if
 
  nspden = hdr%nspden

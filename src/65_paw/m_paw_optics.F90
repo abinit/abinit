@@ -295,7 +295,7 @@ CONTAINS  !=====================================================================
 
  already_has_nabla=all(pawtab(:)%has_nabla==2)
  call pawnabla_init(mpsang,dtset%ntypat,pawrad,pawtab)
- 
+
 !Compute spin-orbit contributions if necessary
  if (dtset%pawspnorb==1) then
    option_core=0
@@ -328,7 +328,7 @@ CONTAINS  !=====================================================================
        NCF_CHECK(nctk_set_collective(ncid,varid))
      end if
      NCF_CHECK(nctk_set_datamode(ncid))
-   end if     
+   end if
  end if
  if (iomode_etsf_mpiio) then
    !If MPI-IO, store only ib elements for each jb
@@ -348,7 +348,7 @@ CONTAINS  !=====================================================================
    psinablapsi=zero
  end if
  pnp_size=size(psinablapsi)
- 
+
 !Determine if cprj datastructure is distributed over bands
  mband_cprj=mcprj/(my_nspinor*mkmem*nsppol)
  cprj_paral_band=(mband_cprj<mband)
@@ -434,7 +434,7 @@ CONTAINS  !=====================================================================
          psinablapsi(:,:,jbshift+1:jbshift+bsize)=zero
          psinablapsi_paw(:,:,jbshift+1:jbshift+bsize)=zero
          if (dtset%pawspnorb==1) psinablapsi_soc(:,:,jbshift+1:jbshift+bsize)=zero
-           
+
 !        2-A Computation of <psi_tild_n|-i.nabla|psi_tild_m>
 !        ----------------------------------------------------------------------------------
 !        Note: <psi_nk|-i.nabla|psi_mk> => Sum_g[ <G|Psi_nk>^* <G|Psi_mk> G ]
@@ -489,7 +489,7 @@ CONTAINS  !=====================================================================
 
          end if ! myband
 
-       
+
 !        2-B Computation of <psi_n|p_i><p_j|psi_m>(<phi_i|-i.nabla|phi_j>-<tphi_i|-i.nabla|tphi_j>)
 !        ----------------------------------------------------------------------------------
 !        Non relativistic contribution
@@ -505,7 +505,7 @@ CONTAINS  !=====================================================================
          end if
          if (myband) then
 
-           do ib=1,ibmax          
+           do ib=1,ibmax
 
              ibsp=(ib-1)*my_nspinor ; jbsp=(jb-1)*my_nspinor
              do ispinor=1,my_nspinor
@@ -515,7 +515,7 @@ CONTAINS  !=====================================================================
                    itypat=dtset%typat(iatom)
                    lmn_size=pawtab(itypat)%lmn_size
                    do jlmn=1,lmn_size
-                     do ilmn=1,lmn_size                  
+                     do ilmn=1,lmn_size
                        nabla_ij(:)=pawtab(itypat)%nabla_ij(:,ilmn,jlmn)
                        if (ib>jb) nabla_ij(:)=-pawtab(itypat)%nabla_ij(:,jlmn,ilmn)
                        cpnm1=cprj_k(iatom,ibsp)%cp(1,ilmn)*cprj_k(iatom,jbsp)%cp(1,jlmn)
@@ -631,15 +631,15 @@ CONTAINS  !=====================================================================
            if (myband) then
              psinablapsi=psinablapsi+psinablapsi_paw
              if (dtset%pawspnorb==1) psinablapsi=psinablapsi+psinablapsi_soc
-           end if       
+           end if
            if (store_half_dipoles) then
              nc_start_5=[1,1,(jb*(jb-1))/2+1,ikpt,isppol];nc_stride_5=[1,1,1,1,1]
-             nc_count_5=[0,0,0,0,0];if (myband) nc_count_5=[2,3,jb,1,1] 
+             nc_count_5=[0,0,0,0,0];if (myband) nc_count_5=[2,3,jb,1,1]
 #ifdef HAVE_NETCDF
              NCF_CHECK(nf90_put_var(ncid,varid,psinablapsi,start=nc_start_5,stride=nc_stride_5,count=nc_count_5))
 #endif
            else
-             nc_start_6=[1,1,1,jb,ikpt,isppol];nc_stride_6=[1,1,1,1,1,1]           
+             nc_start_6=[1,1,1,jb,ikpt,isppol];nc_stride_6=[1,1,1,1,1,1]
              nc_count_6=[0,0,0,0,0,0];if (myband) nc_count_6=[2,3,mband,1,1,1]
 #ifdef HAVE_NETCDF
              NCF_CHECK(nf90_put_var(ncid,varid,psinablapsi,start=nc_start_6,stride=nc_stride_6,count=nc_count_6))
@@ -680,19 +680,19 @@ CONTAINS  !=====================================================================
          end if
        end if
 
-!      >>> This my kpt and I am the master node: I write the data    
+!      >>> This my kpt and I am the master node: I write the data
        if (.not.iomode_etsf_mpiio) then
          if (i_am_master) then
            if (iomode==IO_MODE_ETSF) then
 #ifdef HAVE_NETCDF
              if (nc_unlimited) then
-               nc_start_6=[1,1,1,ikpt,isppol,1] ; nc_count_6=[2,3,mband,1,1,mband] ; nc_stride_6=[1,1,1,1,1,1] 
+               nc_start_6=[1,1,1,ikpt,isppol,1] ; nc_count_6=[2,3,mband,1,1,mband] ; nc_stride_6=[1,1,1,1,1,1]
                NCF_CHECK(nf90_put_var(ncid,varid,psinablapsi,start=nc_start_6,stride=nc_stride_6,count=nc_count_6))
              else if (.not.store_half_dipoles) then
-               nc_start_6=[1,1,1,1,ikpt,isppol] ; nc_count_6=[2,3,mband,mband,1,1] ; nc_stride_6=[1,1,1,1,1,1] 
+               nc_start_6=[1,1,1,1,ikpt,isppol] ; nc_count_6=[2,3,mband,mband,1,1] ; nc_stride_6=[1,1,1,1,1,1]
                NCF_CHECK(nf90_put_var(ncid,varid,psinablapsi,start=nc_start_6,stride=nc_stride_6,count=nc_count_6))
              else
-               nc_start_5=[1,1,1,ikpt,isppol] ; nc_count_5=[2,3,(mband*(mband+1))/2,1,1] ; nc_stride_5=[1,1,1,1,1] 
+               nc_start_5=[1,1,1,ikpt,isppol] ; nc_count_5=[2,3,(mband*(mband+1))/2,1,1] ; nc_stride_5=[1,1,1,1,1]
                NCF_CHECK(nf90_put_var(ncid,varid,psinablapsi,start=nc_start_5,stride=nc_stride_5,count=nc_count_5))
              end if
 #endif
@@ -703,29 +703,29 @@ CONTAINS  !=====================================================================
              write(ount)(psinablapsi(1:2,3,ib),ib=1,bsize)
            end if
 
-!        >>> This my kpt and I am not the master node: I send the data    
+!        >>> This my kpt and I am not the master node: I send the data
          else if (i_am_master_band.and.i_am_master_spfft) then
            if (mpi_enreg%me_kpt/=master_spfftband) then
              ABI_BUG('Problem with band communicator!')
            end if
            call xmpi_exch(psinablapsi,pnp_size,mpi_enreg%me_kpt,psinablapsi,master,spaceComm_kpt,etiq,ierr)
          end if
-       end if  
+       end if
 
-!    >>> This is not my kpt and I am the master node: I receive the data and I write    
+!    >>> This is not my kpt and I am the master node: I receive the data and I write
      elseif ((.not.iomode_etsf_mpiio).and.i_am_master) then ! mykpt
        sender=master_spfftband
        call xmpi_exch(psinablapsi,pnp_size,sender,psinablapsi,master,spaceComm_kpt,etiq,ierr)
        if (iomode==IO_MODE_ETSF) then
 #ifdef HAVE_NETCDF
          if (nc_unlimited) then
-           nc_start_6=[1,1,1,ikpt,isppol,1] ; nc_count_6=[2,3,mband,1,1,mband] ; nc_stride_6=[1,1,1,1,1,1] 
+           nc_start_6=[1,1,1,ikpt,isppol,1] ; nc_count_6=[2,3,mband,1,1,mband] ; nc_stride_6=[1,1,1,1,1,1]
            NCF_CHECK(nf90_put_var(ncid,varid,psinablapsi,start=nc_start_6,stride=nc_stride_6,count=nc_count_6))
          else if (.not.store_half_dipoles) then
-           nc_start_6=[1,1,1,1,ikpt,isppol] ; nc_count_6=[2,3,mband,mband,1,1] ; nc_stride_6=[1,1,1,1,1,1] 
+           nc_start_6=[1,1,1,1,ikpt,isppol] ; nc_count_6=[2,3,mband,mband,1,1] ; nc_stride_6=[1,1,1,1,1,1]
            NCF_CHECK(nf90_put_var(ncid,varid,psinablapsi,start=nc_start_6,stride=nc_stride_6,count=nc_count_6))
          else
-           nc_start_5=[1,1,1,ikpt,isppol] ; nc_count_5=[2,3,(mband*(mband+1))/2,1,1] ; nc_stride_5=[1,1,1,1,1] 
+           nc_start_5=[1,1,1,ikpt,isppol] ; nc_count_5=[2,3,(mband*(mband+1))/2,1,1] ; nc_stride_5=[1,1,1,1,1]
            NCF_CHECK(nf90_put_var(ncid,varid,psinablapsi,start=nc_start_5,stride=nc_stride_5,count=nc_count_5))
          end if
 #endif
@@ -993,7 +993,7 @@ CONTAINS  !=====================================================================
  if (i_am_master) then
 !  ====> NETCDF format
    if (iomode==IO_MODE_ETSF) then
-     fformopt=611 
+     fformopt=611
 #ifdef HAVE_NETCDF
 !    Open/create nc file
      NCF_CHECK(nctk_open_create(ncid,nctk_ncify(dtfil%fnameabo_app_opt2),xmpi_comm_self))
@@ -1098,7 +1098,7 @@ CONTAINS  !=====================================================================
        NCF_CHECK(nctk_set_collective(ncid,varid))
      end if
      NCF_CHECK(nctk_set_datamode(ncid))
-   end if     
+   end if
  end if
  if (iomode_etsf_mpiio) then
    !If MPI-IO, store only elements for one band
@@ -1114,7 +1114,7 @@ CONTAINS  !=====================================================================
    end if
  end if
  pnp_size=size(psinablapsi)
- 
+
 !Determine if cprj datastructure is distributed over bands
  mband_cprj=mcprj/(my_nspinor*mkmem*nsppol)
  cprj_paral_band=(mband_cprj<mband)
@@ -1321,7 +1321,7 @@ CONTAINS  !=====================================================================
 
 !        Write to OPT2 file in case of MPI-IO
          if (iomode_etsf_mpiio.and.i_am_master_spfft) then
-           nc_start=[1,1,1,1,jb,ikpt,isppol];nc_stride=[1,1,1,1,1,1,1] 
+           nc_start=[1,1,1,1,jb,ikpt,isppol];nc_stride=[1,1,1,1,1,1,1]
            if (myband) then
              if (use_spinorbit) psinablapsi=psinablapsi+psinablapsi_soc
              nc_count=[2,3,nphicor,natom,1,1,1]
@@ -1334,7 +1334,7 @@ CONTAINS  !=====================================================================
          end if
 
        end do ! jb
-       
+
        if (mkmem/=0) then
          ibg = ibg +  my_nspinor*nband_cprj_k
        end if
@@ -1361,11 +1361,11 @@ CONTAINS  !=====================================================================
          end if
        end if
 
-!      >>> This my kpt and I am the master node: I write the data    
+!      >>> This my kpt and I am the master node: I write the data
        if (.not.iomode_etsf_mpiio) then
          if (i_am_master) then
            if (iomode==IO_MODE_ETSF) then
-             nc_start=[1,1,1,1,1,ikpt,isppol];nc_stride=[1,1,1,1,1,1,1] 
+             nc_start=[1,1,1,1,1,ikpt,isppol];nc_stride=[1,1,1,1,1,1,1]
              nc_count=[2,3,nphicor,natom,mband,1,1]
 #ifdef HAVE_NETCDF
              NCF_CHECK(nf90_put_var(ncid,varid,psinablapsi,start=nc_start,stride=nc_stride,count=nc_count))
@@ -1391,21 +1391,21 @@ CONTAINS  !=====================================================================
              end if
            end if
 
-!        >>> This my kpt and I am not the master node: I send the data    
+!        >>> This my kpt and I am not the master node: I send the data
          else if (i_am_master_band.and.i_am_master_spfft) then
            if (mpi_enreg%me_kpt/=master_spfftband) then
              ABI_BUG('Problem with band communicator!')
            end if
            call xmpi_exch(psinablapsi,pnp_size,mpi_enreg%me_kpt,psinablapsi,master,spaceComm_kpt,etiq,ierr)
          end if
-       end if  
+       end if
 
-!    >>> This is not my kpt and I am the master node: I receive the data and I write    
+!    >>> This is not my kpt and I am the master node: I receive the data and I write
      elseif ((.not.iomode_etsf_mpiio).and.i_am_master) then ! mykpt
        sender=master_spfftband
        call xmpi_exch(psinablapsi,pnp_size,sender,psinablapsi,master,spaceComm_kpt,etiq,ierr)
        if (iomode==IO_MODE_ETSF) then
-         nc_start=[1,1,1,1,1,ikpt,isppol];nc_stride=[1,1,1,1,1,1,1] 
+         nc_start=[1,1,1,1,1,ikpt,isppol];nc_stride=[1,1,1,1,1,1,1]
          nc_count=[2,3,nphicor,natom,mband,1,1]
 #ifdef HAVE_NETCDF
          NCF_CHECK(nf90_put_var(ncid,varid,psinablapsi,start=nc_start,stride=nc_stride,count=nc_count))
@@ -1553,7 +1553,7 @@ CONTAINS  !=====================================================================
  iomode=IO_MODE_FORTRAN ; spaceComm=xmpi_comm_self; me=0
 
 ! Read the header of the optic files
- call hdr_read_from_fname(hdr, filnam1, fform1, spaceComm)
+ call hdr%from_fname(filnam1, fform1, spaceComm)
  call hdr%free()
  if (fform1 /= 610) then
    ABI_ERROR("Abinit8 requires an OPT file with fform = 610")
@@ -2133,13 +2133,13 @@ CONTAINS  !=====================================================================
 
 !      >>>> Calculate g_ij=(g_x,g_y,g_z) = sqrt(4pi/3) int dOmega Ylm Ylm' S1-1,0,1
 !              using real Gaunt coefficients
-       gx_re=zero;gy_re=zero;gz_re=zero         
+       gx_re=zero;gy_re=zero;gz_re=zero
        gx_im=zero;gy_im=zero;gz_im=zero
        if3=zero
 
 !      jl was set as a flag for invalid combinations
 !        i.e. m=-(l+1) or m=(l+1)
-!      In these cases, cgc=0 ; so gx=gy=gz=0 
+!      In these cases, cgc=0 ; so gx=gy=gz=0
        if (jl/=-1) then
          if3=intf3(iln,jln)
          klm_re=merge((jlm_re*(jlm_re-1))/2+ilm,(ilm*(ilm-1))/2+jlm_re,ilm<=jlm_re)
@@ -2217,7 +2217,7 @@ CONTAINS  !=====================================================================
 
      end do ! ilmn
    end do ! jlmn
-     
+
 !  Symetrization
    if (option_core==0.and.lmn_size>1) then
      do jlmn=2,lmn_size
@@ -2229,7 +2229,7 @@ CONTAINS  !=====================================================================
              avg=half*(soc_ij(2,jj,ii,ilmn,jlmn)+soc_ij(2,jj,ii,ilmn,jlmn))
              soc_ij(2,jj,ii,ilmn,jlmn)=avg ; soc_ij(2,jj,ii,jlmn,ilmn)=avg
            end do
-         end do           
+         end do
        end do
      end do
    end if
@@ -2238,12 +2238,12 @@ CONTAINS  !=====================================================================
    ABI_FREE(intf3)
 
  end do  ! iatom
- 
+
 !Reduction in case of parallelism
  if (paral_atom) then
    call xmpi_sum(phisocphj,my_comm_atom,ierr)
  end if
- 
+
 !Destroy atom table(s) used for parallelism
  call free_my_atmtab(my_atmtab,my_atmtab_allocated)
 

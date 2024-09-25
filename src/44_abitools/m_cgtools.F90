@@ -5899,7 +5899,7 @@ end subroutine cg_set_imag0_to_zero
 !!  cg_randomize
 !!
 !! FUNCTION
-!!  Initialize block of wavefunctions with random numbers.
+!!  Initialize block of wavefunctions with random numbers. See wfconv
 !!
 !! INPUTS
 !!

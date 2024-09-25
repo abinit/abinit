@@ -31,9 +31,7 @@ module m_ddb
  use m_ddb_hdr
  use m_dtset
  use m_nctk
-#ifdef HAVE_NETCDF
  use netcdf
-#endif
 
  use m_io_tools,       only : iomode_from_fname
  use defs_datatypes,   only : pseudopotential_type
@@ -5099,8 +5097,6 @@ subroutine ddb_write_nc(ddb, ddb_hdr, filename, comm, with_psps)
    if (xmpi_comm_rank(comm) /= master) return
  end if
 
-#ifdef HAVE_NETCDF
-
  ! =====================
  ! Header and dimensions
  ! =====================
@@ -5260,10 +5256,6 @@ subroutine ddb_write_nc(ddb, ddb_hdr, filename, comm, with_psps)
 
    end if
  end do
-
-#else
- ABI_ERROR("NETCDF support required to write DDB.nc file.")
-#endif
 
 end subroutine ddb_write_nc
 !!***

@@ -8120,7 +8120,7 @@ subroutine gwr_gamma_gw(gwr, nfftf, ngfftf, vpsp)
  end do ! spin
 
  ABI_CALLOC(gw_rhor, (nfftf, dtset%nspden))
- call hdr_copy(gwr%wfk_hdr, hdr_sigma)
+ call gwr%wfk_hdr%copy(hdr_sigma)
 
  ! NRM WARNING: only the master has bands on Wfd_nato_master so it prints everything and computes gw_rhor
  !
