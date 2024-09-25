@@ -4056,7 +4056,8 @@ subroutine me_altcalc(amu,eigvec,lm_magsus,lm_zfield,phongreen_fm,magsus,natom,n
 !scalars
  integer :: i,iat1,iat2,idir1,idir2,icol,im,imode1,imode2,irow,j,k,l
  integer :: zfield_unit
- real(dp) :: mcell,mfac1,mfac2
+ real(dp) :: mcell,mfac1,mfac2,norm
+ complex*16,parameter :: ure=(1.d0,0.d0),uim=(0.d0,1.d0)
 !arrays
  real(dp), allocatable :: mass(:)
  complex(dpc), allocatable :: me_altcalcspec(:,:)
@@ -4066,6 +4067,8 @@ subroutine me_altcalc(amu,eigvec,lm_magsus,lm_zfield,phongreen_fm,magsus,natom,n
  complex(dpc) :: nm_zfield(ndim,3*natom)
  complex(dpc) :: nm_fmzeff_tr(3*natom,3)
  complex(dpc) :: nm_phongreen(3*natom,3*natom)
+ complex(dpc) :: basein(2,2),baseout(2,2),rmat(2,2)
+ complex(dpc) :: vecin(2),vecout(2)
 
 ! *************************************************************************
 
@@ -4112,6 +4115,43 @@ subroutine me_altcalc(amu,eigvec,lm_magsus,lm_zfield,phongreen_fm,magsus,natom,n
      end do
    end do
  end do
+
+!tmp change the phase of mode 21
+! do i=1, natom*3
+!   eigdisp(i,21)= (0.d0,1.d0)*eigdisp(i,21)
+! end do
+
+!enforce a circularly polarized pair of modes 20 and 21
+!B
+ baseout(:,1)=1.d0/sqrt(2.d0)*(/ure,uim/)
+ baseout(:,2)=1.d0/sqrt(2.d0)*(/ure,-uim/)
+
+!A
+ norm=dot_product(eigdisp(1:2,20),eigdisp(1:2,20))
+ basein(:,2)=1.d0/sqrt(norm)*eigdisp(1:2,20)    
+
+ norm=dot_product(eigdisp(1:2,21),eigdisp(1:2,21))
+ basein(:,1)=1.d0/sqrt(norm)*eigdisp(1:2,21) 
+
+! rmat=matmul(baseout,transpose(conjg(basein)))
+! rmat=matmul(transpose(conjg(baseout)),basein)
+  rmat=matmul(basein,transpose(conjg(baseout)))
+
+ do i= 1, 3*natom, 3
+   vecin(1:2)= eigdisp(i:i+1,20)
+!   vecout(:)= matmul(rmat,vecin)
+!   vecout(:)= matmul(vecin,transpose(conjg(rmat)))
+    vecout(:)=matmul(transpose(conjg(rmat)),vecin)
+   eigdisp(i:i+1,20)= vecout(1:2)
+
+   vecin(1:2)= eigdisp(i:i+1,21)
+!   vecout(:)= matmul(rmat,vecin)
+!   vecout(:)= matmul(vecin,transpose(conjg(rmat)))
+    vecout(:)=matmul(transpose(conjg(rmat)),vecin)
+   eigdisp(i:i+1,21)= vecout(1:2)
+ end do
+
+!now do the calculation
  do i=1, ndim
    nm_zfield(i,1:3*natom)=matmul(zfield(i,1:3*natom),eigdisp)
  end do
