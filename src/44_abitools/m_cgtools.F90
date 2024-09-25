@@ -46,6 +46,7 @@ module m_cgtools
  use m_time,          only : timab, cwtime, cwtime_report
  use m_numeric_tools, only : hermit, rhophi
  use m_pawcprj,       only : pawcprj_type,pawcprj_axpby,pawcprj_zaxpby
+ use m_abi_linalg
 
  implicit none
 
