@@ -2380,6 +2380,7 @@ subroutine nscf_init(nscf, dtset, dtfil, cryst, comm)
 
  call read_rhor(dtfil%filpotin, cplex1, dtset%nspden, nfftf, nscf%ngfftf, pawread0, nscf%mpi_enreg, nscf%vtrial, pot_hdr, pot_pawrhoij, comm, &
                 allow_interp=.False.)
+ !scf%vtrial = zero
 
  pot_cryst = pot_hdr%get_crystal()
  if (cryst%compare(pot_cryst, header=" Comparing input crystal with POT crystal") /= 0) then
@@ -2647,6 +2648,7 @@ subroutine nscf_solve_kpt(nscf, isppol, kpt, istwf_k, nband_k, cryst, dtset, dtf
  ABI_MALLOC(subham, (nband_k*(nband_k+1)))
  ABI_MALLOC(evec, (2*nband_k, nband_k))
 
+ !gs_hamk%kinpw_k = zero
  ierr = 1; msg = ""
  do inonsc=1,dtset%nstep
 
