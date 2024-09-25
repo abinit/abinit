@@ -150,7 +150,7 @@ module m_gstore
  use m_geometry,       only : wigner_seitz
  use m_kg,             only : getph, mkkpg, mkkin
  use defs_datatypes,   only : ebands_t, pseudopotential_type
- use m_hdr,            only : hdr_type, fform_from_ext, hdr_ncread
+ use m_hdr,            only : hdr_type, fform_from_ext
  use m_symtk,          only : matr3inv
  use m_kpts,           only : kpts_ibz_from_kptrlatt, kpts_timrev_from_kptopt, kpts_map, kpts_sort, kpts_pack_in_stars, &
                               kptrlatt_from_ngkpt
@@ -4027,7 +4027,7 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, if
    ! TODO Should compare ebands_file with input ebands
    !NCF_CHECK(ebands_ncwrite(ebands, ncid))
 
-   call hdr_ncread(wfk0_hdr, ncid, fform)
+   call wfk0_hdr%ncread(ncid, fform)
    ABI_CHECK(fform /= 0, sjoin("Error while reading:", path))
 
    ! Read gstore dimensions
@@ -4395,7 +4395,7 @@ subroutine gstore_check_restart(filepath, dtset, nqbz, done_qbz_spin, restart, c
       ! Use gstore_completed to understand if the previous GSTORE run completed else we need to restart.
       NCF_CHECK(nctk_open_read(root_ncid, filepath, xmpi_comm_self))
       NCF_CHECK(nf90_get_var(root_ncid, root_vid("gstore_completed"), gstore_completed))
-      call hdr_ncread(gstore_hdr, root_ncid, gstore_fform)
+      call gstore_hdr%ncread(root_ncid, gstore_fform)
       ABI_CHECK_INEQ(gstore_fform, 0, "Wrong gstore_fform")
       call gstore_hdr%vs_dtset(dtset); call gstore_hdr%free()
 

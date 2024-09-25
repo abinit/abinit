@@ -386,13 +386,13 @@ subroutine wfk_open_read(Wfk, fname, formeig, iomode, funt, comm, Hdr_out)
  !if (.not. endswith(fname, ".nc") .and. xmpi_comm_size == 1) wfk%iomode == IO_MODE_FORTRAN
 
  ! Reads fform and the Header.
- call hdr_read_from_fname(Wfk%Hdr,fname,Wfk%fform,comm)
+ call wfk%Hdr%from_fname(fname, wfk%fform,comm)
  ABI_CHECK(Wfk%fform /= 0, "fform == 0")
 
  if (Wfk%debug) call Wfk%Hdr%echo(Wfk%fform, 4, unit=std_out)
 
  ! Copy the header if required.
- if (present(Hdr_out)) call hdr_copy(Wfk%Hdr,Hdr_out)
+ if (present(Hdr_out)) call Wfk%Hdr%copy(Hdr_out)
 
  ! Useful dimensions
  Wfk%mband   = MAXVAL(Wfk%Hdr%nband)
@@ -523,7 +523,7 @@ subroutine wfk_open_write(Wfk, Hdr, fname, formeig, iomode, funt, comm, write_hd
  Wfk%fform     = 2
 
  ! Copy the header
- call hdr_copy(Hdr,Wfk%Hdr)
+ call Hdr%copy(Wfk%Hdr)
 
  ! Master writes fform and the Header (write it afterwards if IO_MODE_ETSF)
  if (Wfk%my_rank==Wfk%master .and. do_write_hdr .and. iomode /= IO_MODE_ETSF) then
@@ -2741,7 +2741,7 @@ type(ebands_t) function wfk_read_ebands(path, comm, out_hdr) result(ebands)
 
  call wfk_read_eigenvalues(path, eigen, hdr, comm)
  ebands = ebands_from_hdr(hdr, maxval(hdr%nband), eigen)
- if (present(out_hdr)) call hdr_copy(hdr, out_hdr)
+ if (present(out_hdr)) call hdr%copy(out_hdr)
 
  ABI_FREE(eigen)
  call hdr%free()
@@ -4785,7 +4785,7 @@ subroutine wfk_prof(wfk_fname, formeig, nband, comm)
  my_rank = xmpi_comm_rank(comm); nproc = xmpi_comm_size(comm)
  sc_mode = xmpio_collective
 
- call hdr_read_from_fname(hdr,wfk_fname,fform,comm)
+ call hdr%from_fname(wfk_fname, fform, comm)
 
  ! nband_read is the max number of bands we can read from this file.
  nband_read = nband
@@ -5341,8 +5341,8 @@ subroutine wfk_diff(fname1,fname2,formeig,comm,ierr)
  my_rank = xmpi_comm_rank(comm); nproc   = xmpi_comm_size(comm)
  sc_mode = xmpio_collective
 
- call hdr_read_from_fname(Hdr1,fname1,fform1,comm)
- call hdr_read_from_fname(Hdr2,fname2,fform2,comm)
+ call hdr1%from_fname(fname1,fform1,comm)
+ call hdr2%from_fname(fname2,fform2,comm)
 
  ABI_CHECK(fform1==fform2,"fform1 != fform2")
  ABI_CHECK(Hdr1%nsppol==Hdr2%nsppol,"nsppol1 != nsppol2")
@@ -5521,7 +5521,7 @@ subroutine wfk_klist2mesh(in_wfkpath, kerange_path, dtset, comm)
  ! NOTE: KERANGE is written by sigtk_kpts_in_erange in m_sigtk module.
  NCF_CHECK(nctk_open_read(ncid, kerange_path, xmpi_comm_self))
  ! Read header associated to the fine k-mesh
- call hdr_ncread(fine_hdr, ncid, fform)
+ call fine_hdr%ncread(ncid, fform)
  fform_kerange = fform_from_ext("KERANGE.nc")
  ABI_CHECK(fform == fform_kerange, sjoin("Wrong fform. Got: ", itoa(fform), ", Expecting: ", itoa(fform_kerange)))
  ! Read eigenvalues and kmask

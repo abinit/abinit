@@ -32,9 +32,7 @@ module m_common
 #if defined DEV_YP_VDWXC
  use m_xc_vdw
 #endif
-#ifdef HAVE_NETCDF
  use netcdf
-#endif
  use m_nctk
  use m_crystal
  use m_wfk
@@ -1974,15 +1972,13 @@ type(ebands_t) function ebands_from_file(path, comm) result(new)
    new = ebands_from_hdr(hdr, maxval(hdr%nband), gs_eigen)
 
  else if (endswith(path, ".nc")) then
-#ifdef HAVE_NETCDF
    NCF_CHECK(nctk_open_read(ncid, path, comm))
-   call hdr_ncread(hdr, ncid, fform)
+   call hdr%ncread(ncid, fform)
    ABI_CHECK(fform /= 0, "fform == 0")
    ABI_MALLOC(gs_eigen, (hdr%mband, hdr%nkpt, hdr%nsppol))
    NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "eigenvalues"), gs_eigen))
    new = ebands_from_hdr(hdr, maxval(hdr%nband), gs_eigen)
    NCF_CHECK(nf90_close(ncid))
-#endif
  else
    ABI_ERROR(sjoin("Don't know how to construct crystal structure from: ", path, ch10, "Supported extensions: _WFK or .nc"))
  end if
@@ -2022,7 +2018,7 @@ type(crystal_t) function crystal_from_file(path, comm) result(new)
 
  ! Assume file with Abinit header
  ! TODO: Should add routine to read crystal from structure without hdr
- call hdr_read_from_fname(hdr, path, fform, comm)
+ call hdr%from_fname(path, fform, comm)
  ABI_CHECK(fform /= 0, "fform == 0")
  new = hdr%get_crystal()
  call hdr%free()

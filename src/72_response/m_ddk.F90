@@ -536,7 +536,7 @@ subroutine ddkstore_compute_ddk(ds, wfk_path, prefix, dtset, psps, pawtab, ngfft
  ! Output EVK file in netcdf format.
  if (my_rank == master .and. write_ncfile .and. dtset%prtevk == 1) then
    ! Have to build hdr on k-grid with info about perturbation.
-   call hdr_copy(hdr, tmp_hdr)
+   call hdr%copy(tmp_hdr)
    tmp_hdr%qptn = zero
 
    !fname = strcat(prefix, "NEW_EVK.nc")

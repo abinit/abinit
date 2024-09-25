@@ -64,7 +64,7 @@ module m_dfpt_cgwf
 !!
 !! FUNCTION
 !!  Simplied interface to the Sternheimer solver.
-!!  Wrapper around dfpt_cgwf routine.
+!!  Wrapper around the dfpt_cgwf routine.
 !!
 !! SOURCE
 
@@ -1718,6 +1718,17 @@ end subroutine full_active_wf1
 !!   Initialize the object.
 !!
 !! INPUT
+!! dtset
+!! npw_k
+!! npw_kq
+!! nspinor
+!! nband
+!! nband_me
+!! fermie1_idir_ipert
+!! use_cache
+!! work_ngfft
+!! mpi_enreg
+!! comm_band
 !!
 !! OUTPUT
 !!
@@ -1739,16 +1750,12 @@ subroutine stern_init(stern, dtset, npw_k, npw_kq, nspinor, nband, nband_me, fer
 !scalars
  integer :: natom, usepaw
 ! *************************************************************************
-
  natom = dtset%natom; usepaw = dtset%usepaw
 
  stern%npw_k = npw_k; stern%npw_kq = npw_kq; stern%nspinor = nspinor; stern%nband = nband; stern%dtset => dtset
- stern%usepaw = usepaw
- stern%nband_me = nband_me
- stern%usedcwavef = 0
- stern%use_cache = use_cache
- stern%work_ngfft = work_ngfft
- if (use_cache) then
+ stern%usepaw = usepaw; stern%nband_me = nband_me; stern%usedcwavef = 0
+ stern%use_cache = use_cache; stern%work_ngfft = work_ngfft
+ if (stern%use_cache) then
    ABI_MALLOC(stern%work, (2, work_ngfft(4), work_ngfft(5), work_ngfft(6)))
  end if
 
@@ -1837,7 +1844,6 @@ subroutine stern_solve(stern, u1_band, band_me, idir, ipert, qpt, gs_hamkq, rf_h
 #ifdef HAVE_GW_DPC
  complex(gwpc),pointer :: full_ug1_dp_ptr(:)
 #endif
-
 ! *************************************************************************
 
  ! TODO: grad_berry is problematic because in dfpt_cgwf, the array is declared with

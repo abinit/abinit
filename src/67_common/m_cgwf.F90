@@ -34,7 +34,7 @@ module m_cgwf
  use defs_datatypes,  only : pseudopotential_type
  use m_fstrings,      only : sjoin, itoa, ftoa, ktoa
  use m_dtset,         only : dataset_type
- use m_hdr,           only : hdr_type, hdr_read_from_fname
+ use m_hdr,           only : hdr_type
  use m_time,          only : timab
  use m_numeric_tools, only : rhophi
  use m_pawcprj,       only : pawcprj_type, pawcprj_alloc, pawcprj_put, pawcprj_copy, &
@@ -2353,9 +2353,10 @@ subroutine nscf_init(nscf, dtset, dtfil, cryst, comm)
  end if
 
  call wrtout(units, sjoin(" Reading KS GS potential from: ", dtfil%filpotin))
- call hdr_read_from_fname(pot_hdr, dtfil%filpotin, fform, comm)
+ call pot_hdr%from_fname(dtfil%filpotin, fform, comm)
  ABI_CHECK(fform /= 0, "hdr_read_from_fname returned fform 0")
- !call pot_hdr%vs_dtset(dtset)
+ ! TODO
+ !ABI_CHECK(fform_contains("potential", msg), msg)
 
  ! Init FFT mesh from file as we don't want to interpolate the potential
  call ngfft_seq(nscf%ngfftf, pot_hdr%ngfft)
@@ -2526,6 +2527,7 @@ subroutine nscf_setup_kpt(nscf, isppol, kpt, istwf_k, nband_k, cryst, dtset, psp
 
  ABI_MALLOC(ph3d_k, (2, npw_k, gs_hamk%matblk))
 
+ !gs_hamk%phkpxred => null()
  call gs_hamk%load_k(kpt_k=kpt, istwf_k=istwf_k, npw_k=npw_k, &
                      kinpw_k=kinpw_k, kg_k=kg_k, kpg_k=kpg_k, ffnl_k=ffnl_k, ph3d_k=ph3d_k, &
                      compute_ph3d=(paral_kgb0/=1), compute_gbound=(paral_kgb0/=1))
@@ -2603,30 +2605,25 @@ subroutine nscf_solve_kpt(nscf, isppol, kpt, istwf_k, nband_k, cryst, dtset, dtf
  ! See vtorho.F90 for the sequence of calls needed to initialize the GS Hamiltonian.
  associate (mpi_enreg => nscf%mpi_enreg, kg_k => gs_hamk%kg_k)
 
- !==== Initialize most of the Hamiltonian ====
- ! Allocate all arrays and initialize quantities that do not depend on k and spin.
-
  ! FFT meshes from input file, not necessarly equal to the ones found in the external files.
  nfftf = product(nscf%ngfftf(1:3)); mgfftf = maxval(nscf%ngfftf(1:3))
  nfft = product(nscf%ngfft(1:3)) ; mgfft = maxval(nscf%ngfft(1:3))
  n1 = nscf%ngfft(1); n2 = nscf%ngfft(2); n3 = nscf%ngfft(3); n4 = nscf%ngfft(4); n5 = nscf%ngfft(5); n6 = nscf%ngfft(6)
  nspinor = dtset%nspinor
 
- npwarr_k = npw_k; npwsp = npw_k * nspinor; me_g0 = 1
- mcg = npw_k * nspinor * nband_k; mgsc = mcg * dtset%usepaw
+ npwarr_k = npw_k; npwsp = npw_k * nspinor; me_g0 = 1; mcg = npw_k * nspinor * nband_k; mgsc = mcg * dtset%usepaw
 
  ABI_MALLOC(resid, (nband_k))
  ABI_MALLOC(eig_k, (nband_k))
 
  if (.not. use_cg_k) then
-   ! Initialize the wavefunctions with random numbers. See wfconv
+   ! Initialize the wavefunctions with random numbers.
    call cg_randomize(istwf_k, npw_k, nspinor, nband_k, me_g0, cg_k)
-
    ! Multiply with envelope function to reduce kinetic energy
-   call cg_envlop(cg_k, dtset%ecut, cryst%gmet, icg0, kg_k, kpt, mcg, nband_k, npw_k, dtset%nspinor)
+   call cg_envlop(cg_k, dtset%ecut, cryst%gmet, icg0, kg_k, kpt, mcg, nband_k, npw_k, nspinor)
  end if
 
- ! Ortoghonalize input trial states (this is important, even whe cg_k is already initialized from a previous kpt
+ ! Ortoghonalize input trial states (this is important, even whe cg_k is already initialized from a previous k-point.
  call pw_orthon(icg0, igsc0, istwf_k, mcg, mgsc, npwsp, nband_k, ortalgo_3, gsc_k, dtset%usepaw, cg_k, me_g0, xmpi_comm_self)
 
  ! linalg initialisation (required by subdiago)
@@ -2641,7 +2638,7 @@ subroutine nscf_solve_kpt(nscf, isppol, kpt, istwf_k, nband_k, cryst, dtset, dtf
  ierr = 1; msg = ""
 
  do inonsc=1,dtset%nstep
-   !call cg_kfilter(npw_k, nspinor, nband_k, gs_hamk%kinpw_k, cg_k)
+  !call cg_kfilter(npw_k, nspinor, nband_k, gs_hamk%kinpw_k, cg_k)
 
    call cgwf(dtset%berryopt, cg_k, cgq, dtset%chkexit, cpus0, dphase_k, dtefield, dtfil%filnam_ds(1), &
              gsc_k, gs_hamk, icg0, igsc0, ikpt0, inonsc, isppol, nband_k, mcg, mcgq0, mgsc, mkgq0, &

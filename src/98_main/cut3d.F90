@@ -157,7 +157,7 @@ program cut3d
 
    ! Read the header and extract dimensions.
    write(std_out,*)
-   call hdr_read_from_fname(hdr, filrho, fform0, comm)
+   call hdr%from_fname(filrho, fform0, comm)
    ABI_CHECK(fform0 /= 0, "hdr_read returned fform = 0")
    abifile = abifile_from_fform(fform0)
    ABI_CHECK(abifile%fform /= 0, "Cannot detect abifile from fform")
