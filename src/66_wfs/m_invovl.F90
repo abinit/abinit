@@ -495,7 +495,9 @@ subroutine make_invovl(ham, dimffnl, ffnl, ph3d, mpi_enreg)
  integer :: ikpt_this_proc,cplex_dij
  logical :: parity
  real(dp) :: tsec(2)
+#if defined(HAVE_FC_ISO_C_BINDING) && defined(HAVE_GPU_CUDA)
  character(len=500) :: message
+#endif
  character :: blas_transpose
 
  type(invovl_kpt_type), pointer :: invovl

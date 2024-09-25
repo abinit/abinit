@@ -545,8 +545,9 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
        write(msg,'(a)') "cprj_in_memory must 0 (not used), 1 (LOBPCG or Chebfi) or 2 (Conjugate Gradient). Change cprj_in_memory."
        ABI_CHECK(test,msg)
        test = dt%usepaw==1.or.dt%nspinor==1
-       ABI_CHECK(test,"With cprj_in_memory/=0, nspinor=2 is not available with Norm-Concerving pseudo-potentials. Use nspinor=1, or
-       PAW pseudos, or set cprj_in_memory to 0.")
+       write(msg,'(a,a)') "With cprj_in_memory/=0, nspinor=2 is not available with Norm-Concerving pseudo-potentials.",&
+        & " Use nspinor=1, or PAW pseudos, or set cprj_in_memory to 0."
+       ABI_CHECK(test,msg)
        if (dt%cprj_in_memory==1.and.dt%wfoptalg==10) then
          ABI_ERROR_NOSTOP('cprj_in_memory must be 2 for Conjugate Gradient (not 1).',ierr)
        end if
