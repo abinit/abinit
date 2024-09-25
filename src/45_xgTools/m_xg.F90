@@ -2095,28 +2095,28 @@ contains
       case (SPACE_R)
         xgBlockA__vecR => xgBlockA%vecR
         xgBlockW__vecR => xgBlockW%vecR
-        !!$OMP TARGET DATA USE_DEVICE_PTR(xgBlockA__vecR,xgBlockW__vecR)
-        !call abi_gpu_xheevd(1,jobz,uplo,xgBlockA%cols, &
-        !    c_loc(xgBlockA__vecR),xgBlockA%LDim, &
-        !    c_loc(xgBlockW__vecR),info)
-        !!$OMP END TARGET DATA
-        call checkResize(iwork,liwork,5*xgBlockA%rows+3)
-        call checkResize(rwork,lrwork,2*xgBlockA%rows*xgBlockA%rows+6*xgBlockA%rows+1)
-        !$OMP TARGET UPDATE FROM(xgBlockA__vecR)
-        call dsyevd(jobz,uplo,xgBlockA%cols, &
-          xgBlockA%vecR,xgBlockA%LDim, &
-          xgBlockW%vecR, rwork, lrwork, &
-          iwork, liwork,info)
-        !$OMP TARGET UPDATE TO(xgBlockA__vecR)
-        !$OMP TARGET UPDATE TO(xgBlockW__vecR)
-        if ( rwork(1) > lrwork ) then
-          !write(std_out,*) "Allocate work from", lrwork, "to", int(rwork(1))
-          call checkResize(rwork,lrwork,int(rwork(1)))
-        end if
-        if ( iwork(1) > liwork ) then
-          !write(std_out,*) "Allocate work from", liwork, "to", int(iwork(1))
-          call checkResize(iwork,liwork,int(iwork(1)))
-        end if
+        !$OMP TARGET DATA USE_DEVICE_PTR(xgBlockA__vecR,xgBlockW__vecR)
+        call abi_gpu_xheevd(1,jobz,uplo,xgBlockA%cols, &
+            c_loc(xgBlockA__vecR),xgBlockA%LDim, &
+            c_loc(xgBlockW__vecR),info)
+        !$OMP END TARGET DATA
+        !call checkResize(iwork,liwork,5*xgBlockA%rows+3)
+        !call checkResize(rwork,lrwork,2*xgBlockA%rows*xgBlockA%rows+6*xgBlockA%rows+1)
+        !!$OMP TARGET UPDATE FROM(xgBlockA__vecR)
+        !call dsyevd(jobz,uplo,xgBlockA%cols, &
+        !  xgBlockA%vecR,xgBlockA%LDim, &
+        !  xgBlockW%vecR, rwork, lrwork, &
+        !  iwork, liwork,info)
+        !!$OMP TARGET UPDATE TO(xgBlockA__vecR)
+        !!$OMP TARGET UPDATE TO(xgBlockW__vecR)
+        !if ( rwork(1) > lrwork ) then
+        !  !write(std_out,*) "Allocate work from", lrwork, "to", int(rwork(1))
+        !  call checkResize(rwork,lrwork,int(rwork(1)))
+        !end if
+        !if ( iwork(1) > liwork ) then
+        !  !write(std_out,*) "Allocate work from", liwork, "to", int(iwork(1))
+        !  call checkResize(iwork,liwork,int(iwork(1)))
+        !end if
 
       case (SPACE_C)
         xgBlockA__vecC => xgBlockA%vecC
