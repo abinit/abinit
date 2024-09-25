@@ -39,7 +39,7 @@ module m_getghc
  use m_fock,        only : fock_common_type, fock_get_getghc_call
  use m_fock_getghc, only : fock_getghc, fock_ACE_getghc
  use m_nonlop,      only : nonlop
- use m_gemm_nonlop, only : gemm_nonlop_use_gemm
+ use m_gemm_nonlop_projectors, only : gemm_nonlop_use_gemm
  use m_fft,         only : fourwf
  use m_getghc_ompgpu,  only : getghc_ompgpu
 

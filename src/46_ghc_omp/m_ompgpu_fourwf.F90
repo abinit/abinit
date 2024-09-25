@@ -138,10 +138,6 @@ subroutine ompgpu_fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,ist
    ABI_ERROR(msg)
  end if
 
- if(cplex==2)  then
-   ABI_ERROR("gpu_fourwf: cplex == 2 is not treated in GPU mode")
- end if
-
  !*************** CUDA INITIALISATION STAGE ****
  if (fourwf_initialized == 0) then
    call alloc_ompgpu_fourwf(ngfft,ndat)
@@ -206,21 +202,7 @@ subroutine ompgpu_fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,ist
 
    cfft_size = 2*n1*n2*n3*ndat
 
-#if defined HAVE_GPU_CUDA
-   byte_count=sizeof(work_gpu)
-   !$OMP TARGET DATA USE_DEVICE_PTR(work_gpu)
-   call gpu_memset(c_loc(work_gpu), 0, byte_count)
-   !$OMP END TARGET DATA
-#elif defined HAVE_GPU_HIP
-   !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(3) PRIVATE(i1,i2,i3)  MAP(to:work_gpu)
-   do i3=1,n3*ndat
-     do i2=1,n2
-       do i1=1,n1
-         work_gpu(:,i1,i2,i3) = 0
-       end do
-     end do
-   end do
-#endif
+   call gpu_set_to_zero(work_gpu,int(2,c_size_t)*n1*n2*n3*ndat)
 
    ! During GPU calculation we do some pre-calculation on symetries
    if((istwf_k==2) .or. (istwf_k==4) .or. (istwf_k==6) .or. (istwf_k==8)) then
@@ -330,20 +312,45 @@ subroutine ompgpu_fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,ist
    !$OMP TASKWAIT
 
    ! call gpu routine to  Apply local potential
-   !!$OMP TARGET TEAMS LOOP &
-   !$OMP TARGET TEAMS DISTRIBUTE &
-   !$OMP& PRIVATE(idat) MAP(to:denpot,fofr)
-   do idat = 1, ndat
-     !$OMP PARALLEL DO COLLAPSE(3) PRIVATE(i1,i2,i3)
-     do i3=1, n3
-       do i2=1, n2
-         do i1=1, n1
-           fofr(1, i1, i2, i3+(idat-1)*n3) = fofr(1, i1, i2, i3+(idat-1)*n3) * denpot(i1,i2,i3)
-           fofr(2, i1, i2, i3+(idat-1)*n3) = fofr(2, i1, i2, i3+(idat-1)*n3) * denpot(i1,i2,i3)
+   if(cplex==1) then
+     !!$OMP TARGET TEAMS LOOP &
+     !$OMP TARGET TEAMS DISTRIBUTE &
+     !$OMP& PRIVATE(idat) MAP(to:denpot,fofr)
+     do idat = 1, ndat
+       !$OMP PARALLEL DO COLLAPSE(3) PRIVATE(i1,i2,i3)
+       do i3=1, n3
+         do i2=1, n2
+           do i1=1, n1
+             fofr(1, i1, i2, i3+(idat-1)*n3) = fofr(1, i1, i2, i3+(idat-1)*n3) * denpot(i1,i2,i3)
+             fofr(2, i1, i2, i3+(idat-1)*n3) = fofr(2, i1, i2, i3+(idat-1)*n3) * denpot(i1,i2,i3)
+           end do
          end do
        end do
      end do
-   end do
+   else ! cplex==2
+     !$OMP TARGET DATA USE_DEVICE_PTR(fofr,work_gpu)
+     call copy_gpu_to_gpu(c_loc(work_gpu), c_loc(fofr), INT(2,c_size_t)*n1*n2*n3*ndat*dp)
+     !$OMP END TARGET DATA
+
+     !!$OMP TARGET TEAMS LOOP &
+     !$OMP TARGET TEAMS DISTRIBUTE &
+     !$OMP& PRIVATE(idat) MAP(to:denpot,fofr,work_gpu)
+     do idat = 1, ndat
+       !$OMP PARALLEL DO COLLAPSE(3) PRIVATE(i1,i2,i3)
+       do i3=1, n3
+         do i2=1, n2
+           do i1=1, n1
+             fofr(1, i1, i2, i3+(idat-1)*n3) = &
+             &    work_gpu(1, i1, i2, i3+(idat-1)*n3) * denpot(2*i1-1,i2,i3)&
+             &    - work_gpu(2, i1, i2, i3+(idat-1)*n3) * denpot(2*i1,i2,i3)
+             fofr(2, i1, i2, i3+(idat-1)*n3) = &
+             &    work_gpu(2, i1, i2, i3+(idat-1)*n3) * denpot(2*i1-1,i2,i3)&
+             &    + work_gpu(1, i1, i2, i3+(idat-1)*n3) * denpot(2*i1,i2,i3)
+           end do
+         end do
+       end do
+     end do
+   end if
  end if
 
  if(option==2 .or. option==3) then
