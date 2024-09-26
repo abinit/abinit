@@ -1232,7 +1232,7 @@ has_vectornd = (with_vectornd .EQ. 1)
 &                 gs_hamkq%kg_kp,gs_hamkq%kpg_kp,gs_hamkq%kpt_kp,gs_hamkq%lmnmax,&
 &                 gs_hamkq%mgfft,mpi_enreg,ndat,gs_hamkq%natom,gs_hamkq%nattyp,gs_hamkq%ngfft,&
 &                 gs_hamkq%nloalg,gs_hamkq%npw_kp,gs_hamkq%nspinor,gs_hamkq%ntypat,gs_hamkq%phkpxred,&
-&                 gs_hamkq%ph1d,gs_hamkq%ph3d_kp,gs_hamkq%ucvol,gs_hamkq%useylm,gpu_option=dtset%gpu_option)
+&                 gs_hamkq%ph1d,gs_hamkq%ph3d_kp,gs_hamkq%ucvol,gs_hamkq%useylm,is_kprime=.true.,gpu_option=dtset%gpu_option)
                end if
 
 !            === Wave-vector perturbation
@@ -1266,7 +1266,7 @@ has_vectornd = (with_vectornd .EQ. 1)
 &                 gs_hamkq%kg_kp,gs_hamkq%kpg_kp,gs_hamkq%kpt_kp,gs_hamkq%lmnmax,&
 &                 gs_hamkq%mgfft,mpi_enreg,ndat,gs_hamkq%natom,gs_hamkq%nattyp,gs_hamkq%ngfft,gs_hamkq%nloalg,&
 &                 gs_hamkq%npw_kp,gs_hamkq%nspinor,gs_hamkq%ntypat,gs_hamkq%phkpxred,gs_hamkq%ph1d,&
-&                 gs_hamkq%ph3d_kp,gs_hamkq%ucvol,gs_hamkq%useylm,gpu_option=dtset%gpu_option)
+&                 gs_hamkq%ph3d_kp,gs_hamkq%ucvol,gs_hamkq%useylm,is_kprime=.true.,gpu_option=dtset%gpu_option)
                end if
 
 
@@ -1298,7 +1298,7 @@ has_vectornd = (with_vectornd .EQ. 1)
 &                 gs_hamkq%kpg_kp,gs_hamkq%kpt_kp,gs_hamkq%lmnmax,gs_hamkq%mgfft,mpi_enreg,ndat,&
 &                 gs_hamkq%natom,gs_hamkq%nattyp,gs_hamkq%ngfft,gs_hamkq%nloalg,gs_hamkq%npw_kp,&
 &                 gs_hamkq%nspinor,gs_hamkq%ntypat,gs_hamkq%phkpxred,gs_hamkq%ph1d,gs_hamkq%ph3d_kp,&
-&                 gs_hamkq%ucvol,gs_hamkq%useylm,gpu_option=dtset%gpu_option)
+&                 gs_hamkq%ucvol,gs_hamkq%useylm,is_kprime=.true.,gpu_option=dtset%gpu_option)
                end if
              end if ! ipert
 
