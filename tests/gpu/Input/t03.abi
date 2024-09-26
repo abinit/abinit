@@ -4,9 +4,12 @@
 # Test for Abinit: use of a Graphics Processing Unit
 #
 # Test collinear and non-collinear magnetsm
-# use_gpu_cuda should be automatically set
+# gpu_option should be automatically set
 # Low cut-off for test; too few k-points
 # ================================================================
+
+# Errata: GPU automatic setup disabled since ABINIT 9.11.6.9
+ gpu_option 1
 
 # === Datasets
 ndtset 2
@@ -111,6 +114,7 @@ prtden 0  prteig 0  prtwf 0
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
+#%% exclude_builders = eos_nvhpc_23.9_elpa
 #%% [files]
 #%% files_to_test = 
 #%%   t03.abo, tolnlines = 64, tolabs = 7.0e-4, tolrel = 8.5e-2

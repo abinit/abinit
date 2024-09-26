@@ -9,7 +9,7 @@
 !! Contain also routine to evaluate the energy,forces and stresses
 !!
 !! COPYRIGHT
-!! Copyright (C) 2010-2022 ABINIT group (AM)
+!! Copyright (C) 2010-2024 ABINIT group (AM)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -653,7 +653,7 @@ subroutine effective_potential_generateDipDip(eff_pot,ncell,option,asr,comm,file
  integer :: full_nrpt
  real(dp), allocatable :: full_cell_atmfrc(:,:,:,:,:), full_cell_short_atmfrc(:,:,:,:,:), full_cell_ewald_atmfrc(:,:,:,:,:)
 
- integer :: in_file_option 
+ integer :: in_file_option
 ! *************************************************************************
 
 !0 MPI variables
@@ -1010,11 +1010,11 @@ end if
     do irpt = 1,eff_pot%harmonics_terms%ifcs%nrpt
      if(any(abs(eff_pot%harmonics_terms%ifcs%atmfrc(:,:,:,:,irpt)) > tol8))then
          has_totFC = .True.
-         cycle 
+         cycle
       end if
     end do
 
-  if (has_totFC .and. in_file_option==1) then   ! 
+  if (has_totFC .and. in_file_option==1) then   !
     !   print *, '   >>>>>                HAS TOTAL FC'
     !     ! Copy LR into total_atmfrc
       do irpt=1,ifc_tmp%nrpt ! LR IRPT
@@ -1040,7 +1040,7 @@ end if
             end if
           end if
         end do
-      end do   
+      end do
   else
       ! Copy LR into total_atmfrc
       do irpt=1,ifc_tmp%nrpt ! LR IRPT
@@ -1053,7 +1053,7 @@ end if
           end if
         end do
       end do
-        
+
       ! Copy SR into total_atmfrc
       do irpt=1,eff_pot%harmonics_terms%ifcs%nrpt ! SR IRPT
         do irpt2=1, full_nrpt
@@ -2240,6 +2240,7 @@ end subroutine effective_potential_writeAbiInput
 subroutine effective_potential_evaluate(eff_pot,energy,fcart,gred,strten,natom,rprimd,&
 &                                       displacement,du_delta,strain,xred,&
 &                                       compute_anharmonic,verbose,filename,elec_eval,efield)
+! TODO : add time input
 
 !Arguments ------------------------------------
 !scalars

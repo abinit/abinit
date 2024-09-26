@@ -11,14 +11,14 @@
 !! * spin_mc_t : MCMC. It defines how to move spins in one step,
 !! attempt function: whether to accept move
 !! accecpt/reject method which define what to do if move is
-!! accepted or rejected!! . 
+!! accepted or rejected!! .
 !!
 !! Subroutines:
 !! TODO: add this when F2003 doc style is determined.
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2022 ABINIT group (hexu)
+!! Copyright (C) 2001-2024 ABINIT group (hexu)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -50,7 +50,7 @@
        real(dp) ::  Sold(3), Snew(3) ! old and new S for one spin
        real(dp) :: angle   ! an angle to rotate by average
        real(dp) :: energy, deltaE ! energy and the change of energy when change one spin
-       real(dp) :: temperature  
+       real(dp) :: temperature
        real(dp) :: beta  ! 1/(kb T)
        integer :: nspin   ! number of spins
        integer :: nstep  ! number of steps

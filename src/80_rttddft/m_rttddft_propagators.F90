@@ -6,7 +6,7 @@
 !!  Contains various propagators for the KS orbitals
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2021-2022 ABINIT group (FB)
+!!  Copyright (C) 2021-2024 ABINIT group (FB)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -331,9 +331,10 @@ subroutine rttddft_propagator_er(dtset, ham_k, istep, mpi_enreg, psps, tdks, cal
          gemm_nonlop_ikpt_this_proc_being_treated = my_ikpt
          if (istep <= tdks%first_step) then
             !Init the arrays
-            call make_gemm_nonlop(my_ikpt,ham_k%npw_fft_k,ham_k%lmnmax,ham_k%ntypat,     &
-                               & ham_k%indlmn, ham_k%nattyp, ham_k%istwf_k, ham_k%ucvol, &
-                               & ham_k%ffnl_k, ham_k%ph3d_k, ham_k%kpt_k, ham_k%kg_k, ham_k%kpg_k)
+            call make_gemm_nonlop(my_ikpt,ham_k%npw_fft_k,ham_k%lmnmax, &
+                ham_k%ntypat, ham_k%indlmn, ham_k%nattyp, ham_k%istwf_k, &
+                ham_k%ucvol,  ham_k%ffnl_k, &
+                ham_k%ph3d_k, ham_k%kpt_k, ham_k%kg_k, ham_k%kpg_k)
          end if
       end if
 

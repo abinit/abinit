@@ -1,0 +1,77 @@
+# Test geometry optimization of diamond and graphene, starting from distorted structures, and post identification of the symmetric structure.
+# Low ecut.
+
+ndtset 4 
+udtset 2 2
+
+
+# Diamond lattice
+acell1? 3*6.70
+rprim1? 0 .5 .5 .5 0 .5 .5 .5 0
+ngkpt1?  2 2 2
+
+
+# Distorted diamond, C2/m with inversion located at the origin
+   xred11
+            0.0000000000E+00    5.0000000000E-03   -5.0000000000E-03
+            2.5000000000E-01    2.4500000000E-01    2.5500000000E-01
+
+# Distorted diamond, C2/m with first atom located at the origin
+   xred12
+            3*0.0d0
+            2.5000000000E-01    2.4500000000E-01    2.5500000000E-01
+   chksymtnons12 0
+
+
+
+
+# Distorted graphene
+acell2? 2*4.6487   6
+rprim2?  1.0 0 0   -0.5 sqrt(0.75) 0   0.0 0.0 1.0
+ngkpt2?  2 2 1
+
+
+# Distorted graphene, C2/m with inversion located at the origin
+   xred21
+            2/3 1/3  0.01
+            1/3 2/3 -0.01
+
+# Distorted graphene
+   xred22
+            0.66 0.33  0.00
+            0.33 0.66 0.00
+   chksymtnons22 0
+
+
+
+# Common data
+natom 2
+typat 1 1
+ntypat  1
+znucl 6
+ecut 20
+tolrff 0.01
+tolmxf 1.d-6
+nshiftk  1
+shiftk   0.0 0.0 0.0
+ionmov 2
+ntime  20
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/6c.pspnc"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t01.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0
+#%% [paral_info]
+#%% max_nprocs = 10
+#%% [extra_info]
+#%% authors = X. Gonze
+#%% keywords = 
+#%% description = 
+#%%   Test the post identification of more symmetric structures obtained after geometry optimization
+#%%   Consider diamond and graphene, with low ecut and number of k points. 
+#%%<END TEST_INFO>

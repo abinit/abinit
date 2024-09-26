@@ -105,6 +105,7 @@ inp_files = [
     "t92.abi",  # check extended fpmd routines with low number of bands
     "t93.abi",  # energy, forces for PAW non-collinear, with usexcnhat=0
     "t94.abi",  # energy, stress for PAW non-collinear, with usexcnhat=0
+    "t95.abi",  # energy, convergence for NC mGGA input with UPFv2.0 format psp
 
     # Optics with spin-orbit coupling
     "t100.abi", # Optical conductivity with spin-orbit coupling - ABINIT step
@@ -143,6 +144,7 @@ inp_files = [
     "t141.abi",  # test orbital magnetism with DDK wavefunctions on AlP solid with nspinor 2
     "t142.abi",  # test orbital magnetism with DDK wavefunctions on AlP solid with nsppol 2
     "t143.abi",  # test orbital magnetism with DDK wavefunctions and metallic sodium
+    "t144.abi",  # test orbital magnetism with discretized DDK wavefunctions on AlP solid
     "t145.abi",  # test quadrupole calculation with all negative KB energies As PSP
     "t146.abi",  # test antisymmetric vector potential response and quadrupoles of HF molecule
     "t147.abi",  # test total vector potential response and quadrupoles of HF molecule
@@ -174,4 +176,16 @@ inp_files = [
     "t197.abi",  # test treatment of inaccurate POSCAR file
     "t198.abi",  # test treatment of inaccurate POSCAR file
     "t199.abi",  # test treatment of inaccurate POSCAR file
+
+    # new tolwfr usage
+    "t200.abi",  # tolwfr with other tolerances
+    "t201.abi",  # tolwfr with tolvrs + nbdbuf with lobpcg
+    "t202.abi",  # tolwfr_diago with tolvrs and tolvrs+tolwfr with lobpcg
+
+    # nblock_lobpcg
+    "t205.abi",  # test nblock_lobpcg input
+
+    # Chebfi2
+    "t206.abi",  # check that various algorithm give the same results (including wfoptalg=111). istwfk=1.
+    "t207.abi",  # same as t206 but with nspinor=2
 ]

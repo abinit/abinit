@@ -6,7 +6,7 @@
 !!  This module collects low-level procedures used by the other psp modules
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2022 ABINIT group (XG, DCA, MM, DRH, FrD, GZ, AF)
+!!  Copyright (C) 1998-2024 ABINIT group (XG, DCA, MM, DRH, FrD, GZ, AF)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1184,11 +1184,16 @@ subroutine psp8lo(amesh, epsatm, mmax, mqgrid, qgrid, q2vq, rad, vloc, yp1, ypn,
 
 !Choose submultiple of input mesh
  mesh_mult=int(amesh/amesh_new) + 1
+ !mesh_mult = 1  ! DEBUG
  mmax_new=mesh_mult*(mmax-1)+1
  amesh_new=amesh/dble(mesh_mult)
 
  ABI_MALLOC(rad_new,(mmax_new))
  ABI_MALLOC(rvlpz_new,(mmax_new))
+
+ !print *, "in psp8lo with mesh_mult:", mesh_mult
+ !print *, "in psp8lo with mmax_new:", mmax_new
+ !print *, "in psp8lo with amesh_new:", amesh_new
 
  if(mesh_mult==1) then
    rad_new(:)=rad(:)

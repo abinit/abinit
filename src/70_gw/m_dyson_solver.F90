@@ -6,7 +6,7 @@
 !!  This module contains procedures to solve the Dyson equation to find QP energies.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2022 ABINIT group (MG)
+!! Copyright (C) 2008-2024 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -58,8 +58,14 @@ MODULE m_dyson_solver
  type, public :: sigma_pade_t
 
     integer :: npts
+    ! Number of points
+
     character(len=1) :: branch_cut
+
     complex(dp),pointer :: zmesh(:) => null(), sigc_cvals(:) => null()
+    ! pointer to input mesh and values.
+
+    !real(d) :: wmax = -one
 
  contains
 
@@ -130,7 +136,7 @@ CONTAINS  !====================================================================
 !!     %sigxcme(ib1:ib2,jkibz,io,is)= Sigma_xc as a function of frequency.
 !!     %sigcme4sd (ib1:ib2,jkibz,io,is)= Diagonal matrix elements of \Sigma_c  at frequencies around the KS eigenvalue
 !!     %sigxcme4sd(ib1:ib2,jkibz,io,is)= Diagonal matrix elements of \Sigma_xc at frequencies around the KS eigenvalue
-!!    where ib1 and ib2 are the band indeces included in the GW calculation for this k-point.
+!!    where ib1 and ib2 are the band indices included in the GW calculation for this k-point.
 !!
 !! SOURCE
 
@@ -762,13 +768,25 @@ subroutine sigma_pade_init(self, npts, zmesh, sigc_cvals, branch_cut)
  complex(dp),target,intent(in) :: zmesh(npts), sigc_cvals(npts)
  character(len=*),intent(in) :: branch_cut
 
+!Local variables-------------------------------
+!scalars
+! integer :: ii
+
 ! *************************************************************************
 
  self%npts = npts
- self%branch_cut = branch_cut
 
- self%zmesh => zmesh
- self%sigc_cvals => sigc_cvals
+ ! Select first points according to wmax.
+ !if (wmax > zero) then
+ !  do ii=1,npts
+ !    if (real(zmesh(ii)) > wmax) exit
+ !  end do
+ !  self%npts = ii-1
+ !end if
+
+ self%branch_cut = branch_cut
+ self%zmesh => zmesh(1:self%npts)
+ self%sigc_cvals => sigc_cvals(1:self%npts)
 
 end subroutine sigma_pade_init
 !!***

@@ -6,7 +6,7 @@
 !!  This module provides wrappers for the FFTW3 routines: in-place and out-of-place version.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2022 ABINIT group (MG, FD)
+!! Copyright (C) 2009-2024 ABINIT group (MG, FD)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -77,6 +77,7 @@ MODULE m_fftw3
  public :: fftw3_fftug          ! G-->R. 3D zero-padded FFT of lengths nx, ny, nz. Mainly used for wavefunctions
  public :: fftw3_fftur          ! R-->G, 3D zero-padded FFT of lengths nx, ny, nz. Mainly used for wavefunctions
  public :: fftw3_use_lib_threads
+ public :: fftw3_spawn_threads_here
 
  public :: fftw3_mpifourdp
 
