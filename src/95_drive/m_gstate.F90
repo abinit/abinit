@@ -579,8 +579,8 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 
 !Initialize header
  gscase=0
- call hdr_init(bstruct,codvsn,dtset,hdr,pawtab,gscase,psps,wvl%descr,&
-& comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
+ call hdr%init(bstruct,codvsn,dtset,pawtab,gscase,psps,wvl%descr,&
+               comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
 
 !Clean band structure datatype (should use it more in the future !)
  call ebands_free(bstruct)

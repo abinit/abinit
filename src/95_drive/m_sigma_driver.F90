@@ -3372,7 +3372,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
 
  ! Create Sigma header
  ! TODO Fix problems with symmorphy and k-points
- call hdr_init(ks_ebands,codvsn,Dtset,Hdr_out,Pawtab,pertcase0,Psps,wvl)
+ call Hdr_out%init(ks_ebands,codvsn,Dtset,Pawtab,pertcase0,Psps,wvl)
 
  ! Get Pawrhoij from the header of the WFK file
  ABI_MALLOC(Pawrhoij, (Cryst%natom*Dtset%usepaw))

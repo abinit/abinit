@@ -4,7 +4,6 @@
 !!
 !! FUNCTION
 !!
-!!
 !! COPYRIGHT
 !!  Copyright (C) 1999-2024 ABINIT group (XG, DRH, MB, XW, MT, SPr, MJV)
 !!  This file is distributed under the terms of the
@@ -1095,7 +1094,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 
 !  Initialize header, update it with evolving variables
    gscase=0 ! A GS WF file is read
-   call hdr_init(ebands_k,codvsn,dtset,hdr0,pawtab,gscase,psps,wvl%descr,&
+   call hdr0%init(ebands_k,codvsn,dtset,pawtab,gscase,psps,wvl%descr,&
      comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
 
    call hdr0%update(bantot_rbz,etotal,fermie,fermie,& ! CP: duplicated fermie to fit new def of hdr_update
@@ -1262,10 +1261,10 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
    ABI_FREE(doccde_tmp)
 
 !  Initialize header
-   call hdr_init(ebands_kq,codvsn,dtset,hdr,pawtab,pertcase,psps,wvl%descr, &
+   call hdr%init(ebands_kq,codvsn,dtset,pawtab,pertcase,psps,wvl%descr, &
      comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab )
    if (.not.kramers_deg) then
-     call hdr_init(ebands_kmq,codvsn,dtset,hdr,pawtab,pertcase,psps,wvl%descr, &
+     call hdr%init(ebands_kmq,codvsn,dtset,pawtab,pertcase,psps,wvl%descr, &
        comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab )
    end if
 

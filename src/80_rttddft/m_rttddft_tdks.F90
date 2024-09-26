@@ -40,7 +40,7 @@ module m_rttddft_tdks
  use m_extfpmd,          only: extfpmd_type
  use m_gemm_nonlop_projectors, only: init_gemm_nonlop, destroy_gemm_nonlop
  use m_geometry,         only: fixsym
- use m_hdr,              only: hdr_type, hdr_init
+ use m_hdr,              only: hdr_type
  use m_initylmg,         only: initylmg
  use m_invovl,           only: init_invovl, destroy_invovl
  use m_io_tools,         only: open_file
@@ -615,8 +615,8 @@ subroutine first_setup(codvsn,dtfil,dtset,ecut_eff,mpi_enreg,pawrad,pawtab,psps,
 
  !** Initialize header
  gscase=0
- call hdr_init(bstruct,codvsn,dtset,tdks%hdr,pawtab,gscase,psps,tdks%wvl%descr,&
-             & comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
+ call tdks%hdr%init(bstruct,codvsn,dtset,pawtab,gscase,psps,tdks%wvl%descr,&
+                    comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
 
  !Clean band structure datatype
  call ebands_free(bstruct)
