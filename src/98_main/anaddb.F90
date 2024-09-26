@@ -6,7 +6,7 @@
 !! Main routine for analysis of the interatomic force constants and associated properties.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2022 ABINIT group (XG,DCA,JCC,CL,XW,GA,MR)
+!! Copyright (C) 1999-2024 ABINIT group (XG,DCA,JCC,CL,XW,GA,MR)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -29,7 +29,6 @@
 program anaddb
 
  use defs_basis
- use m_build_info
  use m_xmpi
  use m_xomp
  use m_abicore
@@ -47,6 +46,7 @@ program anaddb
  use netcdf
 #endif
 
+ use m_build_info,     only : abinit_version
  use m_io_tools,       only : open_file, flush_unit
  use m_fstrings,       only : int2char4, itoa, sjoin, strcat, inupper
  use m_specialmsg,     only : specialmsg_getcount, herald

@@ -6,7 +6,7 @@
 !!   Driver for EPH calculations
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2009-2022 ABINIT group (MG, MVer, GA)
+!!  Copyright (C) 2009-2024 ABINIT group (MG, MVer, GA)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -48,7 +48,6 @@ module m_eph_driver
  use m_time,            only : cwtime, cwtime_report
  use m_fstrings,        only : strcat, sjoin, ftoa, itoa
  use m_fftcore,         only : print_ngfft
- use m_frohlichmodel,   only : frohlichmodel,polaronmass
  use m_rta,             only : rta_driver, ibte_driver
  use m_mpinfo,          only : destroy_mpi_enreg, initmpi_seq
  use m_pawang,          only : pawang_type
@@ -70,6 +69,8 @@ module m_eph_driver
  use m_migdal_eliashberg, only : migdal_eliashberg_iso !, migdal_eliashberg_aniso
  use m_berry_curvature,  only : berry_curvature
  use m_cumulant,        only : cumulant_driver
+ use m_frohlich,        only : frohlich_t, frohlichmodel_zpr, frohlichmodel_polaronmass
+ use m_gwpt,            only : gwpt_run
 
  implicit none
 
@@ -147,25 +148,26 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  integer :: ii,comm,nprocs,my_rank,psp_gencond,mgfftf,nfftf
  integer :: iblock_dielt_zeff, iblock_dielt, iblock_quadrupoles, ddb_nqshift, ierr, npert_miss
  integer :: omp_ncpus, work_size, nks_per_proc, mtyp, mpert, lwsym !msize,
- integer :: iatdir, iq2dir, iq1dir, quad_unt, iatom, jj
+ integer :: iatdir, iq2dir, iq1dir, quad_unt, iatom, jj, qptopt
  integer :: ncid ! ,ncerr
  real(dp):: eff, mempercpu_mb, max_wfsmem_mb, nonscal_mem
  real(dp) :: ecore,ecut_eff,ecutdg_eff,gsqcutc_eff,gsqcutf_eff
  real(dp) :: cpu,wall,gflops
- logical :: use_wfk, use_wfq, use_dvdb, use_sigeph
+ logical :: use_wfk, use_wfq, use_dvdb, use_sigeph, use_drhodb
  character(len=500) :: msg
- character(len=fnlen) :: wfk0_path, wfq_path, ddb_filepath, dvdb_filepath, sigeph_filepath, path
+ character(len=fnlen) :: wfk0_path, wfq_path, ddb_filepath, dvdb_filepath, sigeph_filepath, path, drhodb_filepath
  type(hdr_type) :: wfk0_hdr, wfq_hdr
  type(crystal_t) :: cryst, cryst_ddb
  type(ebands_t) :: ebands, ebands_kq
  type(ddb_type) :: ddb, ddb_lw
  type(ddb_hdr_type) :: ddb_hdr
- type(dvdb_t) :: dvdb
+ type(dvdb_t) :: dvdb, drhodb
  type(ifc_type) :: ifc
  type(pawfgr_type) :: pawfgr
  type(mpi_type) :: mpi_enreg
  type(phdos_t) :: phdos
  type(gstore_t) :: gstore
+ type(frohlich_t) :: frohlich
 !arrays
  integer :: ngfftc(18), ngfftf(18), count_wminmax(2), units(2)
  real(dp),parameter :: k0(3)=zero
@@ -225,6 +227,11 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
    dvdb_filepath = dtfil%filddbsin; ii = len_trim(dvdb_filepath); dvdb_filepath(ii-2:ii+1) = "DVDB"
  end if
 
+ drhodb_filepath = dtfil%fildrhodbin
+ if (drhodb_filepath == ABI_NOFILE) then
+   drhodb_filepath = dtfil%filddbsin; ii = len_trim(drhodb_filepath); drhodb_filepath(ii-2:ii+1) = "DRHODB"
+ end if
+
  sigeph_filepath = dtfil%filsigephin
 
  use_wfk = all(dtset%eph_task /= [0, 5, -5, 6, +15, -15, -16, 16])
@@ -241,15 +248,15 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  end if
 
  use_dvdb = (dtset%eph_task /= 0 .and. dtset%eph_frohlichm /= 1 .and. abs(dtset%eph_task) /= 7)
-
  use_sigeph = (dtset%eph_task == 9)
+ use_drhodb = (dtset%eph_task == 17)
 
  if (my_rank == master) then
    ! GA: Let ddb object handle the error at reading time
    !if (.not. file_exists(ddb_filepath)) ABI_ERROR(sjoin("Cannot find DDB file:", ddb_filepath))
    if (use_dvdb .and. .not. file_exists(dvdb_filepath)) ABI_ERROR(sjoin("Cannot find DVDB file:", dvdb_filepath))
-
    if (use_sigeph .and. .not. file_exists(sigeph_filepath)) ABI_ERROR(sjoin("Cannot find SIGEPH file:", sigeph_filepath))
+   if (use_drhodb .and. .not. file_exists(drhodb_filepath)) ABI_ERROR(sjoin("Cannot find DRHODB file:", drhodb_filepath))
 
    ! Accept WFK file in Fortran or netcdf format.
    if (use_wfk .and. nctk_try_fort_or_ncfile(wfk0_path, msg) /= 0) then
@@ -381,7 +388,6 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
        call wrtout(ab_out,msg)
      end if
    end if
-
    if (use_wfk) call ebands_write(ebands, dtset%prtebands, dtfil%filnam_ds(4))
  end if
 
@@ -560,9 +566,10 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
 
  call cwtime_report(" eph%ifc:", cpu, wall, gflops)
 
- ! Initialize the object used to read DeltaVscf (required if eph_task /= 0)
+ ! Initialize the object used to read DeltaVscf
  if (use_dvdb) then
    dvdb = dvdb_new(dvdb_filepath, comm)
+   ABI_CHECK(dvdb%has_fields("pot1", msg), sjoin(dvdb_filepath, msg))
 
    ! DVDB cryst comes from DPPT --> no time-reversal if q /= 0
    ! Change the value so that we use the same as the GS part.
@@ -617,6 +624,45 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
    if (my_rank == master) then
      call dvdb%print()
      call dvdb%list_perts([-1, -1, -1], npert_miss)
+     ABI_CHECK(npert_miss == 0, sjoin(itoa(npert_miss), "independent perturbation(s) are missing in the DVDB file!"))
+   end if
+ end if
+
+ if (use_drhodb) then
+   ! Store DRHODB as a DVDB object
+   drhodb = dvdb_new(drhodb_filepath, comm)
+   !ABI_CHECK(dvdb%has_fields("den1", msg), sjoin(drhodb_filepath, msg))
+
+   ! DVDB cryst comes from DPPT --> no time-reversal if q /= 0
+   ! Change the value so that we use the same as the GS part.
+   drhodb%cryst%timrev = cryst%timrev
+   if (cryst%compare(drhodb%cryst, header=" Comparing WFK crystal with DRHODB crystal") /= 0) then
+     ABI_ERROR("Crystal structure from WFK and DRHODB do not agree! Check messages above!")
+   end if
+   if (dtset%prtvol > 10) drhodb%debug = .True.
+
+   ! This to symmetrize the DFPT densities.
+   drhodb%symv1 = dtset%symv1scf
+
+   ! Copy brav variable
+   drhodb%brav = dtset%brav
+
+   ! Select algorithm for generating the list of R-points and the weigths used to compute W(r,R)
+   drhodb%rspace_cell = dtset%dvdb_rspace_cell
+
+   !call drhodb%load_ddb(dtset%prtvol, comm, ddb=ddb)
+
+   ! Set qdamp, quadrupoles and all long-range terms to 0
+   drhodb%qdamp = 0
+   drhodb%qstar = 0
+   drhodb%has_quadrupoles = .False.
+   drhodb%add_lr = 0
+   drhodb%has_dielt = .False.; drhodb%dielt = 0
+   drhodb%has_zeff = .False.; drhodb%zeff = 0; drhodb%zeff_raw = 0
+
+   if (my_rank == master) then
+     call drhodb%print()
+     call drhodb%list_perts([-1, -1, -1], npert_miss)
      ABI_CHECK(npert_miss == 0, sjoin(itoa(npert_miss), "independent perturbation(s) are missing in the DVDB file!"))
    end if
  end if
@@ -697,7 +743,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  case (6)
    ! Estimate zero-point renormalization and temperature-dependent electronic structure using the Frohlich model
    if (my_rank == master) then
-     call frohlichmodel(cryst, dtset, efmasdeg, efmasval, ifc)
+     call frohlichmodel_zpr(frohlich, cryst, dtset, efmasdeg, efmasval, ifc)
    end if
 
  case (7)
@@ -715,7 +761,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  case (10)
    ! Estimate polaron effective mass in the triply-degenerate VB or CB cubic case
    if (my_rank == master) then
-     call polaronmass(cryst, dtset, efmasdeg, efmasval, ifc)
+     call frohlichmodel_polaronmass(frohlich, cryst, dtset, efmasdeg, efmasval, ifc)
    end if
 
  case (11)
@@ -746,9 +792,13 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
    !else
    !  path = strcat(dtfil%filnam_ds(4), "_GSTORE.nc")
    !  call wrtout(units, sjoin(" Computing GSTORE file:", dtfil%filgstorein))
+   ! Customize input vars for this task.
+   !  dtset%gstore_qzone = "ibz"; dtset%gstore_kzone = "bz"; dtset%gstore_cplex = 2; dtset%gstore_with_vk = 1
    !  call gstore%init(path, dtset, wfk0_hdr, cryst, ebands, ifc, comm)
    !  call gstore%compute(wfk0_path, ngfftc, ngfftf, dtset, cryst, ebands, dvdb, ifc, &
    !                      pawfgr, pawang, pawrad, pawtab, psps, mpi_enreg, comm)
+   !  call gstore%free()
+   !  call gstore%from_ncpath(path, with_cplex2, dtset, cryst, ebands, ifc, comm)
    !end if
    !call variational_polaron(gstore, dtset, dtfil)
    !call gstore%free()
@@ -760,14 +810,17 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
      call gstore%from_ncpath(dtfil%filgstorein, with_cplex2, dtset, cryst, ebands, ifc, comm)
    else
      path = strcat(dtfil%filnam_ds(4), "_GSTORE.nc")
-     call wrtout(units, sjoin(" Computing GSTORE file:", dtfil%filgstorein))
-     dtset%gstore_qzone = "ibz"; dtset%gstore_kzone = "bz"
+     call wrtout(units, sjoin(" Computing GSTORE file:", dtfil%filgstorein, "for Berry curvature from scracth"))
+     ! Customize input vars for this eph_task.
+     dtset%gstore_qzone = "ibz"; dtset%gstore_kzone = "bz"; dtset%gstore_cplex = 2; dtset%gstore_with_vk = 1
      call gstore%init(path, dtset, wfk0_hdr, cryst, ebands, ifc, comm)
      call gstore%compute(wfk0_path, ngfftc, ngfftf, dtset, cryst, ebands, dvdb, ifc, &
                          pawfgr, pawang, pawrad, pawtab, psps, mpi_enreg, comm)
+     call gstore%free()
+     call gstore%from_ncpath(path, with_cplex2, dtset, cryst, ebands, ifc, comm)
    end if
 
-   call berry_curvature(gstore, dtset, dtfil, ifc, dielt, zeff, qdrp_cart)
+   call berry_curvature(gstore, dtset, dtfil)
    call gstore%free()
 
  case (15, -15)
@@ -788,7 +841,8 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
      ABI_WARNING("eph_task in [16, -16] (test_phrotation) does not support nprocs > 1. Running in sequential.")
    end if
 
-   call test_phrotation(ifc, cryst, dtset%ph_ngqpt, comm)
+   qptopt = ebands%kptopt; if (dtset%qptopt /= 0) qptopt = dtset%qptopt
+   call test_phrotation(ifc, cryst, qptopt, dtset%ph_ngqpt, comm)
 
    dvdb%comm = xmpi_comm_self
    if (my_rank == master) then
@@ -797,6 +851,11 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
      ! Compute \delta V_{q,nu)(r) and dump results to netcdf file.
      call ncwrite_v1qnu(dvdb, dtset, ifc, strcat(dtfil%filnam_ds(4), "_V1QNU.nc"))
    end if
+
+ case (17)
+   ! Compute e-ph matrix elements with the GWPT formalism.
+   call gwpt_run(wfk0_path, dtfil, ngfftc, ngfftf, dtset, cryst, ebands, dvdb, drhodb, ifc, wfk0_hdr, &
+                 pawfgr, pawang, pawrad, pawtab, psps, mpi_enreg, comm)
 
  case default
    ABI_ERROR(sjoin("Unsupported value of eph_task:", itoa(dtset%eph_task)))
@@ -807,6 +866,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  !=====================
  call cryst%free()
  call dvdb%free()
+ call drhodb%free()
  call ddb%free()
  call ddb_hdr%free()
  call ifc%free()

@@ -6,7 +6,7 @@
 !! Module containing the definition of the crystal_t data type and methods used to handle it.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2022 ABINIT group (MG, YP, MJV, GA)
+!!  Copyright (C) 2008-2024 ABINIT group (MG, YP, MJV, GA)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -19,7 +19,7 @@
 
 #include "abi_common.h"
 
-MODULE m_crystal
+module m_crystal
 
  use defs_basis
  use m_errors
@@ -94,6 +94,9 @@ MODULE m_crystal
   ! 2 => take advantage of time-reversal symmetry.
 
   real(dp) :: ucvol
+  ! Real space unit cell volume.
+
+  !real(dp) :: bzvol
   ! Real space unit cell volume.
 
   logical :: use_antiferro
@@ -976,7 +979,7 @@ subroutine crystal_print(Cryst, header, unit, mode_paral, prtvol)
 
 !Arguments ------------------------------------
 !scalars
- integer,optional,intent(in) :: unit,prtvol
+ integer,optional,intent(in) :: unit, prtvol
  character(len=*),optional,intent(in) :: mode_paral
  character(len=*),optional,intent(in) :: header
  class(crystal_t),intent(in) :: Cryst
@@ -1666,7 +1669,7 @@ subroutine crystal_ncread(cryst, ncid)
 
 ! *************************************************************************
 
-   !NCF_CHECK(nf90_inq_varid(ncid, varname, varid)) 
+   !NCF_CHECK(nf90_inq_varid(ncid, varname, varid))
 
  ! ---------------
  ! Read dimensions
@@ -1726,7 +1729,7 @@ subroutine crystal_ncread(cryst, ncid)
  ABI_ERROR("netcdf library not available")
 #endif
 
-end subroutine crystal_ncread       
+end subroutine crystal_ncread
 !!***
 
 !----------------------------------------------------------------------
@@ -1974,7 +1977,7 @@ subroutine prtposcar(fcart, fnameradix, natom, ntypat, rprimd, typat, ucvol, xre
  integer :: natoms_this_type(ntypat)
  character(len=2) :: symbol
  character(len=7) :: natoms_this_type_str
- character(len=100) :: chem_formula, natoms_all_types
+ character(len=100) :: chem_formula, natoms_all_types, atomsstring_all_types
  character(len=500) :: msg
 
 !************************************************************************
@@ -1992,6 +1995,7 @@ subroutine prtposcar(fcart, fnameradix, natom, ntypat, rprimd, typat, ucvol, xre
  end do
 
  chem_formula = ""
+ atomsstring_all_types = "  "
  do itypat=1, ntypat
    call atomdata_from_znucl(atom, znucl(itypat))
    symbol = atom%symbol
@@ -2003,14 +2007,18 @@ subroutine prtposcar(fcart, fnameradix, natom, ntypat, rprimd, typat, ucvol, xre
      write (natoms_this_type_str, '(I3)') natoms_this_type(itypat)
    end if
    chem_formula = trim(chem_formula) // symbol // trim(natoms_this_type_str)
+   atomsstring_all_types = trim(atomsstring_all_types) // "  " // symbol
  end do
 
- write (iout,'(2a)') "ABINIT generated POSCAR file. Title string - should be chemical formula... ",trim(chem_formula)
+ write (iout,'(3a,E24.14)') "ABINIT generated POSCAR file. Chemical formula is ",trim(chem_formula), &
+&  "  Volume (AA^3) = ", ucvol*Bohr_Ang*Bohr_Ang*Bohr_Ang
 
- write (iout,'(E24.14)') -ucvol*Bohr_Ang*Bohr_Ang*Bohr_Ang
+ write (iout,'(E10.1)')  1.0_dp
  write (iout,'(3E24.14,1x)') Bohr_Ang*rprimd(:,1) ! (angstr? bohr?)
  write (iout,'(3E24.14,1x)') Bohr_Ang*rprimd(:,2)
  write (iout,'(3E24.14,1x)') Bohr_Ang*rprimd(:,3)
+
+ write (iout, '(a)') atomsstring_all_types
 
  natoms_all_types = "   "
  do itypat=1, ntypat
@@ -2201,5 +2209,5 @@ subroutine get_redcart_qdirs(cryst, nq, qdirs, qlen)
 end subroutine get_redcart_qdirs
 !!***
 
-END MODULE m_crystal
+end module m_crystal
 !!***

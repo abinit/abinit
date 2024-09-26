@@ -6,7 +6,7 @@
 !!  DFPT long-wave calculation of spatial dispersion properties
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2019-2022 ABINIT group (MR, MS)
+!!  Copyright (C) 2019-2024 ABINIT group (MR, MS)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -149,7 +149,7 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
  integer :: mpert,my_natom,n1,nkxc,nk3xc,ntypat,n3xccc,nylmgr
  integer :: option,optorth,psp_gencond,rdwrpaw,spaceworld,timrev,tim_mkrho
  integer :: usexcnhat,useylmgr
- real(dp) :: ecore,ecutdg_eff,ecut_eff,enxc,etot,fermie,fermih,gsqcut_eff,gsqcutc_eff,residm ! CP added fermih
+ real(dp) :: ecore,ecutdg_eff,ecut_eff,enxc,etot,fermie,fermih,gsqcut_eff,gsqcutc_eff,residm
  real(dp) :: ucvol,vxcavg
  logical :: non_magnetic_xc
  character(len=500) :: msg
@@ -407,16 +407,12 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
 
 !Update header, with evolving variables, when available
 !Here, rprimd, xred and occ are available
- etot=hdr%etot ; fermie=hdr%fermie ; fermih=hdr%fermih ; residm=hdr%residm ! CP added fermih
+ etot=hdr%etot ; fermie=hdr%fermie ; fermih=hdr%fermih ; residm=hdr%residm
+
 !If parallelism over atom, hdr is distributed
-! CP modified
  call hdr%update(bantot,etot,fermie,fermih,&
 & residm,rprimd,occ,pawrhoij,xred,dtset%amu_orig(:,1), &
 & comm_atom=mpi_enreg%comm_atom, mpi_atmtab=mpi_enreg%my_atmtab)
-! call hdr%update(bantot,etot,fermie,&
-!& residm,rprimd,occ,pawrhoij,xred,dtset%amu_orig(:,1), &
-!& comm_atom=mpi_enreg%comm_atom, mpi_atmtab=mpi_enreg%my_atmtab)
- ! End CP modified
 
 !Clean band structure datatype (should use it more in the future !)
  call ebands_free(bstruct)
@@ -800,7 +796,7 @@ end subroutine longwave
 !!  Write the relevant spatial-dispersion quantities in Cartesian coordinates
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2022 ABINIT group (MR)
+!!  Copyright (C) 2022-2024 ABINIT group (MR)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .

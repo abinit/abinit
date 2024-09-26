@@ -5,6 +5,7 @@ authors: EB
 <!--- This is the source file for this topics. Can be edited. -->
 
 This page gives hints on how to perform calculation with constrained atomic magnetic moments with the ABINIT package.
+It should be updated with the latest algorithm for Lagrangian constraints, using [[constraint_kind]]
 
 ## Introduction
 

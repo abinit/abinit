@@ -1,5 +1,5 @@
 This directory, v8, contains tests which
-are related to the development of the various development in
+are related to various developments in
 version 8.x.x of Abinit
 
 Please, see the README file in the tests directory (above this one) to get help.

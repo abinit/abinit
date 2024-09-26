@@ -16,14 +16,14 @@
 !! * spin_potential_t_initialize
 !! * spin_potential_t_finalize
 !! * spin_potential_t_total_Heff : calculate total Heff (no Langevin term)
-!! * spin_potential_t_Heff_to_dSdt: 
+!! * spin_potential_t_Heff_to_dSdt:
 !!  * spin_potential_t_get_dSdt : dSdt, Langevin term is an input.
 !!  * spin_potential_t_get_Langevin_Heff
 
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2022 ABINIT group (TO, hexu)
+!! Copyright (C) 2001-2024 ABINIT group (TO, hexu)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -132,8 +132,8 @@ contains
     type(mbsupercell_t), target, intent(inout) :: supercell
     integer :: master, my_rank, comm, nproc, ierr
     logical :: iam_master
-    call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
- 
+    call init_mpi_info(master, iam_master, my_rank, comm, nproc)
+
     self%supercell=>supercell
     self%ms(:)=supercell%spin%ms(:)
     call xmpi_bcast(self%ms, master, comm, ierr)
@@ -178,7 +178,7 @@ contains
     integer :: i
     integer :: master, my_rank, comm, nproc
     logical :: iam_master
-    call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
+    call init_mpi_info(master, iam_master, my_rank, comm, nproc)
     if(iam_master) then
        do i=1, self%nspin
           tmp(:, i)=params%spin_mag_field(:)
@@ -193,7 +193,7 @@ contains
     real(dp), intent(in) :: external_hfield(:,:)
     integer :: master, my_rank, comm, nproc, ierr
     logical :: iam_master
-    call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
+    call init_mpi_info(master, iam_master, my_rank, comm, nproc)
     self%has_external_hfield = .true.
     self%external_hfield = external_hfield
     call xmpi_bcast(self%has_external_hfield, master, comm, ierr)
@@ -215,7 +215,7 @@ contains
     real(dp), intent(in) :: val
     integer :: master, my_rank, comm, nproc
     logical :: iam_master
-    call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
+    call init_mpi_info(master, iam_master, my_rank, comm, nproc)
     if(iam_master) then
        call self%coeff_coo%add_entry(ind=[i,j],val=val)
     endif
@@ -228,7 +228,7 @@ contains
     integer :: i
     integer :: master, my_rank, comm, nproc
     logical :: iam_master
-    call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
+    call init_mpi_info(master, iam_master, my_rank, comm, nproc)
 
     if (iam_master) then
        do i = 1, size(ilist)
@@ -247,7 +247,7 @@ contains
 
     integer :: master, my_rank, comm, nproc
     logical :: iam_master
-    call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
+    call init_mpi_info(master, iam_master, my_rank, comm, nproc)
 
     if(iam_master) then
        do ia = 1, 3, 1
@@ -270,7 +270,7 @@ contains
     integer :: ispin
 
     if (.not. self%csr_mat_ready) then
-       call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
+       call init_mpi_info(master, iam_master, my_rank, comm, nproc)
        if(iam_master) then
           call spmat_convert(self%coeff_coo, self%bilinear_csr_mat)
        endif
@@ -353,7 +353,7 @@ contains
     integer :: i, j
     integer :: master, my_rank, comm, nproc, ierr
     logical :: iam_master
-    call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
+    call init_mpi_info(master, iam_master, my_rank, comm, nproc)
 
     self%Htmp(:,:)=0.0_dp
     etmp=0.0_dp
@@ -399,7 +399,7 @@ contains
 !    integer :: i, j
 !    integer :: master, my_rank, comm, nproc, ierr
 !    logical :: iam_master
-!    call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
+!    call init_mpi_info(master, iam_master, my_rank, comm, nproc)
 !
 !
 !    if (.not. self%csr_mat_ready) then
@@ -430,7 +430,7 @@ contains
     integer, intent(in) :: ispin
     real(dp), intent(inout) ::deltaE
     !real(dp) ::  Eold, Enew
-    real(dp) :: tmp(3), dS(3) 
+    real(dp) :: tmp(3), dS(3)
 
     ! naive implementation, for test only
     !real(dp) :: Stmp(3,self%nspin), Enew, Eold

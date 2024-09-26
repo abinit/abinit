@@ -6,7 +6,7 @@
 !!  Routines to initialize k-point and q-point sampling from input file.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2022 ABINIT group (DCA, XG, GMR)
+!!  Copyright (C) 1998-2024 ABINIT group (DCA, XG, GMR)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -212,6 +212,7 @@ subroutine inkpts(bravais,chksymbreak,fockdownsampling,iout,iscf,istwfk,jdtset,&
    ! Normalize the k-point weights when occopt/=2
    ! Check that k point weights add to 1 when occopt==2
    if  (iscf>0.or.iscf==-1.or.iscf==-3.or.(iscf==-2.and.response==1))  then
+     wtk = one
      call intagm(dprarr,intarr,jdtset,marr,nkpt,string(1:lenstr),'wtk',tread,'DPR')
      if(tread==1) wtk(1:nkpt)=dprarr(1:nkpt)
 

@@ -16,16 +16,19 @@ subroutine xmpi_land_log0d(xval, comm)
  logical,intent(inout) :: xval
  integer,intent(in) :: comm
 
-#ifdef HAVE_MPI
 !Local variables-------------------------------
  integer :: ierr
- logical :: out_val
+#if defined HAVE_MPI
+ logical :: out_val(1)
+#endif
 
 ! *************************************************************************
 
+ ierr=0
+#if defined HAVE_MPI
  if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
-   call MPI_ALLREDUCE(xval, out_val, 1, MPI_LOGICAL, MPI_LAND, comm, ierr)
-   xval = out_val
+   call MPI_ALLREDUCE([xval], out_val, 1, MPI_LOGICAL, MPI_LAND, comm, ierr)
+   xval = out_val(1)
  end if
 #endif
 
@@ -235,7 +238,7 @@ subroutine xmpi_lor_log3d(xval,comm)
    n2 = size(xval,2)
    n3 = size(xval,3)
 
-!  #if defined HAVE_MPI2 && defined HAVE_MPI2_INPLACE
+!  #if defined HAVE_MPI2_INPLACE
 !  call MPI_ALLREDUCE(MPI_IN_PLACE,xval,n1*n2*n3,MPI_LOGICAL,MPI_LOR,comm,ierr)
 !  #else
    ABI_STAT_MALLOC(xsum,(n1,n2,n3), ierr)
