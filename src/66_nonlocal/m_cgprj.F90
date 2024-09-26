@@ -103,6 +103,7 @@ contains
 !!                      only used if nloalg(2)>0
 !!  ucvol= unit cell volume
 !!  useylm=governs the way the nonlocal operator is to be applied
+!!  is_kprime=wether provided arrays relate to K or Kprime for Hamiltonian operator (optional, for GEMM nonlop)
 !!
 !! SIDE EFFECTS
 !!  cwaveprj(natom,nspinor) <type(pawcprj_type)>=projected input wave function <Proj_i|Cnk> with all NL projectors
@@ -119,7 +120,7 @@ contains
  subroutine getcprj(choice,cpopt,cwavef,cwaveprj,ffnl,&
 &                   idir,indlmn,istwf_k,kg_k,kpg,kpoint,lmnmax,mgfft,mpi_enreg,ndat,&
 &                   natom,nattyp,ngfft,nloalg,npw_k,nspinor,ntypat,&
-&                   phkxred,ph1d,ph3d,ucvol,useylm,gpu_option)
+&                   phkxred,ph1d,ph3d,ucvol,useylm,is_kprime,gpu_option)
 
 !Arguments -------------------------------
 !scalars
@@ -127,6 +128,7 @@ contains
  integer,intent(in) :: mgfft,natom,npw_k,nspinor,ntypat,useylm
  integer,intent(in),optional :: gpu_option
  real(dp),intent(in) :: ucvol
+ logical,intent(in),optional :: is_kprime
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: indlmn(6,lmnmax,ntypat),kg_k(3,npw_k),nattyp(ntypat)
@@ -138,9 +140,9 @@ contains
 
 !Local variables-------------------------------
 !scalars
- logical :: no_opernla_mv,no_opernla_gemm
+ logical :: no_opernla_mv,no_opernla_gemm,l_is_kprime
  integer :: choice_,cplex,dimffnl,ia,ia1,ia2,ia3,ia4,iatm,ic,ii,ilmn,ishift,ispinor,itypat,idat,nprojs,shift,iatom,igrad
- integer :: jc,matblk,mincat,nd2gxdt,ndgxdt,nincat,nkpg,nkpg_,nlmn,signs,l_gpu_option,ik
+ integer :: jc,matblk,mincat,nd2gxdt,ndgxdt,nincat,nkpg,nkpg_,nlmn,signs,l_gpu_option
 !arrays
  real(dp) :: tsec(2)
  integer,allocatable :: cplex_dgxdt(:),cplex_d2gxdt(:),indlmn_typ(:,:)
@@ -161,6 +163,7 @@ contains
  if (cpopt==1.and.choice==1) return
 
  l_gpu_option=ABI_GPU_DISABLED; if(present(gpu_option)) l_gpu_option = gpu_option
+ l_is_kprime=.false.; if(present(is_kprime)) l_is_kprime = is_kprime
 
 !Not available for useylm=0
  if (useylm==0) then
@@ -380,7 +383,6 @@ contains
 
    if(cplex==1) ABI_BUG("toto")
    if (nloalg(2)<=0) ABI_BUG("toto")
-   if(gemm_nonlop_kpt(ik)%nprojs==0) ABI_BUG("toto")
 
    nprojs = 0
    do itypat=1,ntypat
@@ -416,7 +418,7 @@ contains
    call opernla_gemm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,&
    &       d2gxdt_dum_in,vdgxdt,ffnl,vgx,&
    &       idir,indlmn,istwf_k,kpg_,matblk,mpi_enreg,nd2gxdt,ndgxdt,nkpg_,&
-   &       npw_k,nspinor,ph3d,signs,ucvol,ndat,ntypat,lmnmax,nattyp,.false.,&
+   &       npw_k,nspinor,ph3d,signs,ucvol,ndat,ntypat,lmnmax,nattyp,l_is_kprime,&
    &       -1,0,cpopt,&
    &       nprojs,&
    &       cwavef,&
