@@ -4067,8 +4067,8 @@ subroutine me_altcalc(amu,eigvec,lm_magsus,lm_zfield,phongreen_fm,magsus,natom,n
  complex(dpc) :: nm_zfield(ndim,3*natom)
  complex(dpc) :: nm_fmzeff_tr(3*natom,3)
  complex(dpc) :: nm_phongreen(3*natom,3*natom)
- complex(dpc) :: basein(2,2),baseout(2,2),rmat(2,2)
- complex(dpc) :: vecin(2),vecout(2)
+ complex(dpc) :: basein(2,2),baseout(2,2),rmat(2,2),hmat(2,2)
+ complex(dpc) :: vecin(2),vecout(2),totbasein(3*natom,2),totbaseout(3*natom,2)
 
 ! *************************************************************************
 
@@ -4127,33 +4127,43 @@ subroutine me_altcalc(amu,eigvec,lm_magsus,lm_zfield,phongreen_fm,magsus,natom,n
  baseout(:,2)=1.d0/sqrt(2.d0)*(/ure,-uim/)
 
 !A
- norm=dot_product(eigdisp(1:2,20),eigdisp(1:2,20))
- basein(:,2)=1.d0/sqrt(norm)*eigdisp(1:2,20)    
+! norm=dot_product(eigdisp(1:2,20),eigdisp(1:2,20))
+! basein(:,1)=1.d0/sqrt(norm)*eigdisp(1:2,20)    
 
- norm=dot_product(eigdisp(1:2,21),eigdisp(1:2,21))
- basein(:,1)=1.d0/sqrt(norm)*eigdisp(1:2,21) 
+! norm=dot_product(eigdisp(1:2,21),eigdisp(1:2,21))
+! basein(:,2)=1.d0/sqrt(norm)*eigdisp(1:2,21) 
+
+  basein(:,1)=eigdisp(1:2,20)
+  basein(:,2)=eigdisp(1:2,21)
+  hmat=matmul(transpose(conjg(basein)),basein)
+
+  basein=basein/sqrt(hmat(1,1))
 
 ! rmat=matmul(baseout,transpose(conjg(basein)))
-! rmat=matmul(transpose(conjg(baseout)),basein)
-  rmat=matmul(basein,transpose(conjg(baseout)))
+ rmat=matmul(transpose(conjg(baseout)),basein)
+!  rmat=matmul(basein,transpose(conjg(baseout)))
 
- do i= 1, 3*natom, 3
-   vecin(1:2)= eigdisp(i:i+1,20)
-!   vecout(:)= matmul(rmat,vecin)
-!   vecout(:)= matmul(vecin,transpose(conjg(rmat)))
-    vecout(:)=matmul(transpose(conjg(rmat)),vecin)
-   eigdisp(i:i+1,20)= vecout(1:2)
+ totbasein(:,1)=eigdisp(:,20)
+ totbasein(:,2)=eigdisp(:,21)
+ totbaseout=matmul(totbasein,transpose(conjg(rmat)))
+ eigdisp(:,20)=totbaseout(:,1)
+ eigdisp(:,21)=totbaseout(:,2)
 
-   vecin(1:2)= eigdisp(i:i+1,21)
-!   vecout(:)= matmul(rmat,vecin)
+! do i= 1, 3*natom, 3
+!   vecin(1:2)= eigdisp(i:i+1,20)
+!   vecout(:)=matmul(transpose(conjg(rmat)),vecin)
+!   eigdisp(i:i+1,20)= vecout(1:2)
+!
+!   vecin(1:2)= eigdisp(i:i+1,21)
 !   vecout(:)= matmul(vecin,transpose(conjg(rmat)))
-    vecout(:)=matmul(transpose(conjg(rmat)),vecin)
-   eigdisp(i:i+1,21)= vecout(1:2)
- end do
+!   vecout(:)=matmul(transpose(conjg(rmat)),vecin)
+!   eigdisp(i:i+1,21)= vecout(1:2)
+! end do
 
 !now do the calculation
  do i=1, ndim
-   nm_zfield(i,1:3*natom)=matmul(zfield(i,1:3*natom),eigdisp)
+!   nm_zfield(i,1:3*natom)=matmul(conjg(zfield(i,1:3*natom)),eigdisp)
+    nm_zfield(i,1:3*natom)=matmul(zfield(i,1:3*natom),eigdisp)
  end do
  nm_fmzeff_tr=matmul(transpose(conjg(eigdisp)),fmzeff_tr)
  nm_phongreen=matmul(transpose(conjg(eigdisp)),matmul(phongreen_fm,eigdisp))
