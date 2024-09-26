@@ -124,7 +124,6 @@ program optic
  namelist /COMPUTATIONS/ num_lin_comp, lin_comp, num_nonlin_comp, nonlin_comp, &
           num_linel_comp, linel_comp, num_nonlin2_comp, nonlin2_comp
  namelist /TEMPERATURE/ epfile
-
 ! *********************************************************************************
 
  ! Change communicator for I/O (mandatory!)
@@ -462,7 +461,7 @@ program optic
 
  ABI_MALLOC(doccde, (mband * nkpt * nsppol))
 
- call ebands_init(bantot, ks_ebands, hdr%nelect, hdr%ne_qFD, hdr%nh_qFD, hdr%ivalence,&
+ call ebands_init(ks_ebands, bantot, hdr%nelect, hdr%ne_qFD, hdr%nh_qFD, hdr%ivalence,&
      doccde, eigen0, hdr%istwfk, hdr%kptns, &
      hdr%nband, nkpt, hdr%npwarr, nsppol, hdr%nspinor, hdr%tphysel, broadening, hdr%occopt, hdr%occ, hdr%wtk, &
      hdr%cellcharge, hdr%kptopt, hdr%kptrlatt_orig, hdr%nshiftk_orig, hdr%shiftk_orig, &

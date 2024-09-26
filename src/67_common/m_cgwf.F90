@@ -95,7 +95,7 @@ module m_cgwf
 
    procedure :: setup_kpt => nscf_setup_kpt
     ! Prepare call to nscf_solve_kpt.
-    ! Computes k-dependent terms, gs_hamk and allocates wavefunction block for this k-point
+    ! Computes k-dependent terms, gs_ham_k and allocates wavefunction block for this k-point
 
    procedure :: solve_kpt => nscf_solve_kpt
     ! Solves the NSCF equation for given k-point and spin.
@@ -1295,22 +1295,22 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
  ABI_FREE(vresid)
  ABI_FREE(gs_direc)
 
- if (gen_eigenpb)  then
+ if (gen_eigenpb) then
    ABI_FREE(scwavef)
    ABI_FREE(direc_tmp)
  end if
 
- if (gen_eigenpb.and.(inonsc==1))  then
+ if (gen_eigenpb.and.(inonsc==1)) then
    ABI_FREE(ghc_all)
  end if
 
- if(wfopta10==2.or.wfopta10==3)  then
+ if(wfopta10==2.or.wfopta10==3) then
    ABI_FREE(ghcws)
    ABI_FREE(gh_direcws)
  end if
  ABI_FREE(gvnlx_dummy)
 
- if(wfopta10==2.or.wfopta10==3)  then
+ if(wfopta10==2.or.wfopta10==3) then
    ABI_FREE(work)
  end if
 
@@ -2356,7 +2356,7 @@ subroutine nscf_init(nscf, dtset, dtfil, cryst, comm)
  call wrtout(units, sjoin(" Reading KS GS potential from: ", dtfil%filpotin))
  call pot_hdr%from_fname(dtfil%filpotin, fform, comm)
  ABI_CHECK(fform /= 0, "hdr_read_from_fname returned fform 0")
- ABI_CHECK(fform_contains(fform, "potential", msg), msg)
+ ABI_CHECK(fform_contains(fform, "vtrial", msg), msg)
 
  ! Init FFT mesh from file as we don't want to interpolate the potential
  call ngfft_seq(nscf%ngfftf, pot_hdr%ngfft)
@@ -2394,11 +2394,11 @@ end subroutine nscf_init
 
 !!****f* m_cgwf/nscf_setup_kpt
 !! NAME
-!!  nscf_setup_kp
+!!  nscf_setup_kpt
 !!
 !! FUNCTION
 !!  Prepare call to nscf_solve_kpt.
-!!  Computes k-dependent temrms, gs_hamk and allocates wavefunction block for this k-point
+!!  Computes k-dependent temms, gs_ham_k and allocates wavefunction block for this k-point
 !!
 !! INPUT
 !! isppol=Spin index
@@ -2410,17 +2410,16 @@ end subroutine nscf_init
 !! pawfgr <type(pawfgr_type)>=fine grid parameters and related data
 !!
 !! OUTPUT
-!!  gs_hamk <type(gs_hamiltonian_type)>=all data for the Hamiltonian at k
 !!  kg_k=
 !!  cg_g
 !!  gsc_k
 !!  eig_k
-!!  gs_hamk
+!!  gs_ham_k <type(gs_hamiltonian_type)>=all data for the Hamiltonian at k
 !!
 !! SOURCE
 
 subroutine nscf_setup_kpt(nscf, isppol, kpt, istwf_k, nband_k, cryst, dtset, psps, pawtab, pawfgr, &
-                          npw_k, kg_k, kpg_k, ph3d_k, kinpw_k, ffnl_k, vlocal, cg_k, gsc_k, gs_hamk)
+                          npw_k, kg_k, kpg_k, ph3d_k, kinpw_k, ffnl_k, vlocal, cg_k, gsc_k, gs_ham_k)
 
 !Arguments ------------------------------------
  class(nscf_t),intent(inout) :: nscf
@@ -2431,7 +2430,7 @@ subroutine nscf_setup_kpt(nscf, isppol, kpt, istwf_k, nband_k, cryst, dtset, psp
  type(pseudopotential_type),intent(in) :: psps
  type(pawtab_type),intent(in) :: pawtab(cryst%ntypat*psps%usepaw)
  type(pawfgr_type),intent(in) :: pawfgr
- type(gs_hamiltonian_type),intent(out) :: gs_hamk
+ type(gs_hamiltonian_type),intent(out) :: gs_ham_k
 !arrays
  integer,intent(out) :: npw_k
  integer,allocatable,intent(out) :: kg_k(:,:)
@@ -2479,28 +2478,28 @@ subroutine nscf_setup_kpt(nscf, isppol, kpt, istwf_k, nband_k, cryst, dtset, psp
  ABI_MALLOC(ph1d, (2,3*(2*mgfft+1)*cryst%natom))
  call getph(cryst%atindx, cryst%natom, n1, n2, n3, ph1d, cryst%xred)
 
- call init_hamiltonian(gs_hamk, psps, pawtab, nspinor, dtset%nsppol, dtset%nspden, cryst%natom, &
+ call init_hamiltonian(gs_ham_k, psps, pawtab, nspinor, dtset%nsppol, dtset%nspden, cryst%natom, &
                        dtset%typat, cryst%xred, nfft, mgfft, nscf%ngfft, cryst%rprimd, dtset%nloalg, &
                        comm_atom=mpi_enreg%comm_atom, mpi_atmtab=mpi_enreg%my_atmtab, mpi_spintab=mpi_enreg%my_isppoltab, &
                        usecprj=dtset%usepaw, ph1d=ph1d, nucdipmom=dtset%nucdipmom, gpu_option=dtset%gpu_option)
  ABI_FREE(ph1d)
- !gs_hamk%ekb = zero
+ !gs_ham_k%ekb = zero
 
  ! Set up local potential vlocal on the coarse FFT mesh from vtrial taking into account the spin.
  ! Also, continue to initialize the Hamiltonian.
- nvloc = gs_hamk%nvloc
+ nvloc = gs_ham_k%nvloc
  ABI_CALLOC(vlocal, (n4, n5, n6, nvloc))
 
  call gspot_transgrid_and_pack(isppol, psps%usepaw, paral_kgb0, nfft, nscf%ngfft, nfftf, &
-                               dtset%nspden, gs_hamk%nvloc, 1, pawfgr, mpi_enreg, nscf%vtrial, vlocal)
+                               dtset%nspden, gs_ham_k%nvloc, 1, pawfgr, mpi_enreg, nscf%vtrial, vlocal)
 
- call gs_hamk%load_spin(isppol, vlocal=vlocal, with_nonlocal=.true.)
+ call gs_ham_k%load_spin(isppol, vlocal=vlocal, with_nonlocal=.true.)
 
  if (dtset%usekden /= 0) then
    ABI_ERROR("nscf_init with mgga not yet coded")
    !call gspot_transgrid_and_pack(isppol, psps%usepaw, paral_kgb0, dtset%nfft, dtset%ngfft, nfftf, &
-   !                              dtset%nspden, gs_hamk%nvloc, 4, pawfgr, mpi_enreg, vxctau, vxctaulocal)
-   !call gs_hamk%load_spin(isppol, vxctaulocal=vxctaulocal)
+   !                              dtset%nspden, gs_ham_k%nvloc, 4, pawfgr, mpi_enreg, vxctau, vxctaulocal)
+   !call gs_ham_k%load_spin(isppol, vxctaulocal=vxctaulocal)
  end if
 
  ! Spherical Harmonics for useylm == 1.
@@ -2516,7 +2515,6 @@ subroutine nscf_setup_kpt(nscf, isppol, kpt, istwf_k, nband_k, cryst, dtset, psp
 
  ! Compute nonlocal form factors ffnl_k at (k+G)
  ABI_MALLOC(ffnl_k, (npw_k, 1, psps%lmnmax, psps%ntypat))
-
  call mkffnl_objs(cryst, psps, 1, ffnl_k, ider0, idir0, kg_k, kpg_k, kpt, nkpg, npw_k, ylm_k, ylmgr_dum)
  ABI_FREE(ylm_k)
 
@@ -2525,13 +2523,13 @@ subroutine nscf_setup_kpt(nscf, isppol, kpt, istwf_k, nband_k, cryst, dtset, psp
  !  - Prepare various tabs in case of band-FFT parallelism
  !  - Load k-dependent quantities in the Hamiltonian
 
- ABI_MALLOC(ph3d_k, (2, npw_k, gs_hamk%matblk))
+ ABI_MALLOC(ph3d_k, (2, npw_k, gs_ham_k%matblk))
 
- !gs_hamk%phkpxred => null()
- call gs_hamk%load_k(kpt_k=kpt, istwf_k=istwf_k, npw_k=npw_k, &
-                     kinpw_k=kinpw_k, kg_k=kg_k, kpg_k=kpg_k, ffnl_k=ffnl_k, ph3d_k=ph3d_k, &
-                     compute_ph3d=(paral_kgb0/=1), compute_gbound=(paral_kgb0/=1))
-                     !compute_ph3d=.True., compute_gbound=.True.)
+ !gs_ham_k%phkpxred => null()
+ call gs_ham_k%load_k(kpt_k=kpt, istwf_k=istwf_k, npw_k=npw_k, &
+                      kinpw_k=kinpw_k, kg_k=kg_k, kpg_k=kpg_k, ffnl_k=ffnl_k, ph3d_k=ph3d_k, &
+                      compute_ph3d=(paral_kgb0/=1), compute_gbound=(paral_kgb0/=1))
+                      !compute_ph3d=.True., compute_gbound=.True.)
 
  ABI_MALLOC(cg_k, (2, npw_k*nspinor, nband_k))
  ABI_MALLOC(gsc_k, (2, npw_k*nspinor, nband_k*dtset%usepaw))
@@ -2554,10 +2552,9 @@ end subroutine nscf_setup_kpt
 !! dtset<dataset_type>=All input variables for this dataset.
 !! dtfil <type(datafiles_type)>=variables related to files
 !! cryst=Crystalline structure
-!! gs_hamk
+!! gs_ham_k <type(gs_hamiltonian_type)>=all data for the Hamiltonian at k
 !!
 !! OUTPUT
-!!  gs_hamk <type(gs_hamiltonian_type)>=all data for the Hamiltonian at k
 !!  kg_k=
 !!  cg_g
 !!  gsc_k
@@ -2567,7 +2564,7 @@ end subroutine nscf_setup_kpt
 !!
 !! SOURCE
 
-subroutine nscf_solve_kpt(nscf, isppol, kpt, istwf_k, nband_k, cryst, dtset, dtfil, gs_hamk, use_cg_k, & ! in
+subroutine nscf_solve_kpt(nscf, isppol, kpt, istwf_k, nband_k, cryst, dtset, dtfil, gs_ham_k, use_cg_k, & ! in
                           npw_k, cg_k, gsc_k, eig_k, msg, ierr)  ! out
 
 !Arguments ------------------------------------
@@ -2578,7 +2575,7 @@ subroutine nscf_solve_kpt(nscf, isppol, kpt, istwf_k, nband_k, cryst, dtset, dtf
  type(dataset_type),intent(in) :: dtset
  type(datafiles_type), intent(in) :: dtfil
  type(crystal_t),intent(in) :: cryst
- type(gs_hamiltonian_type),intent(inout) :: gs_hamk
+ type(gs_hamiltonian_type),intent(inout) :: gs_ham_k
 !arrays
  real(dp),intent(inout) :: cg_k(2, npw_k * dtset%nspinor, nband_k)
  real(dp),intent(inout) :: gsc_k(2, npw_k * dtset%nspinor, nband_k * dtset%usepaw)
@@ -2603,7 +2600,7 @@ subroutine nscf_solve_kpt(nscf, isppol, kpt, istwf_k, nband_k, cryst, dtset, dtf
 ! *************************************************************************
 
  ! See vtorho.F90 for the sequence of calls needed to initialize the GS Hamiltonian.
- associate (mpi_enreg => nscf%mpi_enreg, kg_k => gs_hamk%kg_k)
+ associate (mpi_enreg => nscf%mpi_enreg, kg_k => gs_ham_k%kg_k)
 
  ! FFT meshes from input file, not necessarly equal to the ones found in the external files.
  nfftf = product(nscf%ngfftf(1:3)); mgfftf = maxval(nscf%ngfftf(1:3))
@@ -2634,24 +2631,24 @@ subroutine nscf_solve_kpt(nscf, isppol, kpt, istwf_k, nband_k, cryst, dtset, dtf
  ABI_MALLOC(subham, (nband_k*(nband_k+1)))
  ABI_MALLOC(evec, (2*nband_k, nband_k))
 
- !gs_hamk%kinpw_k = zero
+ !gs_ham_k%kinpw_k = zero
  ierr = 1; msg = ""
 
  do inonsc=1,dtset%nstep
-  !call cg_kfilter(npw_k, nspinor, nband_k, gs_hamk%kinpw_k, cg_k)
+  !call cg_kfilter(npw_k, nspinor, nband_k, gs_ham_k%kinpw_k, cg_k)
 
    call cgwf(dtset%berryopt, cg_k, cgq, dtset%chkexit, cpus0, dphase_k, dtefield, dtfil%filnam_ds(1), &
-             gsc_k, gs_hamk, icg0, igsc0, ikpt0, inonsc, isppol, nband_k, mcg, mcgq0, mgsc, mkgq0, &
+             gsc_k, gs_ham_k, icg0, igsc0, ikpt0, inonsc, isppol, nband_k, mcg, mcgq0, mgsc, mkgq0, &
              mpi_enreg, npw_k, nband_k, dtset%nbdblock, nkpt1, dtset%nline, npw_k, npwarr_k, dtset%nspinor, &
              dtset%nsppol, dtset%ortalg, dtset%prtvol, &
              pwind, pwind_alloc0, pwnsfac, pwnsfacq, quit0, resid, &
              subham, subovl, subvnlx, dtset%tolrde, dtset%tolwfr_diago, use_subovl0, use_subvnlx0, mod(dtset%wfoptalg, 100), zshift)
 
-   !call cg_kfilter(npw_k, nspinor, nband_k, gs_hamk%kinpw_k, cg_k)
+   !call cg_kfilter(npw_k, nspinor, nband_k, gs_ham_k%kinpw_k, cg_k)
 
    ! subspace rotation (without this, cgwf will never converge!)
    call subdiago(cg_k, eig_k, evec, gsc_k, icg0, igsc0, istwf_k, mcg, mgsc, nband_k, npw_k, dtset%nspinor, paral_kgb0, &
-                 subham, subovl, use_subovl0, gs_hamk%usepaw, me_g0)
+                 subham, subovl, use_subovl0, gs_ham_k%usepaw, me_g0)
 
    ! Fix the phase of the wavefunctions.
    !call cgtk_fixphase(cg_k, gsc_k, icg0, igsc0, istwf_k, mcg, mgsc, mpi_enreg, nband_k, npw_k, dtset%usepaw)

@@ -38,7 +38,6 @@ module m_eph_path
  use m_nctk
  use m_dtset
  use m_dtfil
- !use m_clib
 
  use defs_abitypes,    only : mpi_type
  use defs_datatypes,   only : ebands_t, pseudopotential_type
@@ -51,7 +50,7 @@ module m_eph_path
  use m_pawrad,         only : pawrad_type
  use m_pawtab,         only : pawtab_type
  use m_pawfgr,         only : pawfgr_type
-! use m_phonons,       only : phstore_t, phstore_new
+ !use m_phonons,       only : phstore_t, phstore_new
  !use m_pstat,         only : pstat_t
  use m_cgwf,           only : nscf_t
  use m_bz_mesh,        only : kpath_t, kpath_new
@@ -199,7 +198,7 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
  if (bstop <= 0) bstop = nband
  nb_in_g = bstop - bstart + 1
 
- ! Values of eph_path_brange should be validated at this level!
+ ! Values of eph_path_brange must be validated at this level!
  ABI_CHECK_IRANGE(bstart, 1, nband, "Wrong eph_path_brange(1)")
  ABI_CHECK_IRANGE(bstop, 1, nband, "Wrong eph_path_brange(2)t")
  ABI_CHECK_IGEQ(bstop, bstart, "eph_path_brange(2) < eph_path_brange(1)")
@@ -434,7 +433,7 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
  do my_is=1,my_nspins
    spin = my_spins(my_is)
 
-   ! Loop over k-points in k-path (MPI parallelized)
+   ! Loop over k-points in k-path (MPI parallelized).
    do my_ik=1,my_nkpath
      ik = my_ik_inds(my_ik)
      kk = kpath%points(:, ik)
@@ -469,7 +468,7 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
      ABI_MALLOC(vlocal, (n4, n5, n6, gs_ham_k%nvloc))
      ABI_MALLOC(ylm_k, (npw_k, psps%mpsang*psps%mpsang*psps%useylm))
 
-     ! Loop over q-points in 1-path (MPI parallelized)
+     ! Loop over q-points in q-path (MPI parallelized)
      ! All procs in pert_comm enter this loop with the same ik/iq indices.
      ! FIXME: I don't know why but all_eigens_kq are not smooth as a function of q!
      do my_iq=1,my_nqpath
@@ -711,7 +710,6 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
    ABI_SFREE(gsc_kq)
    ABI_SFREE(h1kets_kq)
    call gs_ham_kq%free()
-
 end do
 #endif
 
@@ -809,11 +807,9 @@ end do
  ABI_FREE(comm_my_is)
  ABI_FREE(my_spins)
 
- call qpath%free()
- call kpath%free()
+ call qpath%free(); call kpath%free()
+ call ucache_k%free(); call ucache_kq%free()
  call nscf%free()
- call ucache_k%free()
- call ucache_kq%free()
  call qpt_comm%free(); call kpt_comm%free(); call pert_comm%free()
 
  !call abi_linalg_finalize(dtset%gpu_option)
