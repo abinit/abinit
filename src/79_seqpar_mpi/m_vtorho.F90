@@ -1613,6 +1613,9 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
         call xmpi_barrier(paw_dmft%spacecomm)
         ! call xmpi_barrier(mpi_enreg%comm_world)
         call flush_unit(std_out)
+
+        ! Need new DMFT occupations
+
 #else
          ABI_ERROR('Cannot use use_dmft == 10 with #HAVE_PYTHON_INVOCATION set to false.')
 #endif
