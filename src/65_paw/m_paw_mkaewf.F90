@@ -36,14 +36,13 @@ module m_paw_mkaewf
  use netcdf
 #endif
 
- use defs_datatypes,   only : ebands_t
  use defs_abitypes,    only : MPI_type
  use m_io_tools,       only : flush_unit
  use m_numeric_tools,  only : wrap2_zero_one
  use m_fftcore,        only : sphereboundary
  use m_geometry,       only : xcart2xred
  use m_crystal,        only : crystal_t
- use m_ebands,         only : ebands_ncwrite
+ use m_ebands,         only : ebands_ncwrite, ebands_t
  use m_pawrad,         only : pawrad_type
  use m_pawtab,         only : pawtab_type, pawtab_get_lsize
  use m_pawfgrtab,      only : pawfgrtab_type, pawfgrtab_init, pawfgrtab_free, pawfgrtab_print

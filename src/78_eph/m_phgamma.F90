@@ -32,6 +32,7 @@
 
 module m_phgamma
 
+ use, intrinsic :: iso_c_binding
  use defs_basis
  use m_abicore
  use m_xmpi
@@ -43,7 +44,6 @@ module m_phgamma
  use m_ifc
  use m_ebands
  use m_fstab
- use, intrinsic :: iso_c_binding
  use m_nctk
  use netcdf
  use m_wfk
@@ -72,7 +72,7 @@ module m_phgamma
  use m_cgtools,        only : cg_zdotc
  use m_kg,             only : getph, mkkpg
  use m_dynmat,         only : symdyma, ftgam_init, ftgam, asrif9
- use defs_datatypes,   only : ebands_t, pseudopotential_type
+ use defs_datatypes,   only : pseudopotential_type
  use m_bz_mesh,        only : kpath_t, kpath_new
  use m_special_funcs,  only : fermi_dirac
  use m_kpts,           only : kpts_ibz_from_kptrlatt, tetra_from_kptrlatt, listkk, kpts_timrev_from_kptopt, kpts_map

@@ -140,7 +140,7 @@ module m_gwr
  use m_sigtk
  use m_hide_blas
 
- use defs_datatypes,  only : pseudopotential_type, ebands_t
+ use defs_datatypes,  only : pseudopotential_type
  use defs_abitypes,   only : mpi_type
  use m_gwdefs,        only : GW_TOL_DOCC, GW_TOLQ0, GW_TOL_W0, GW_Q0_DEFAULT, cone_gw, czero_gw, j_gw, sigijtab_t, &
                              sigijtab_free, g0g0w

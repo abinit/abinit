@@ -34,11 +34,8 @@ module m_migdal_eliashberg
 
  use m_time,            only : cwtime, cwtime_report, sec2str
  use m_fstrings,        only : strcat, sjoin !, tolower, itoa, ftoa, ktoa, ltoa, strcat
- !use m_numeric_tools,  only : arth, get_diag
  use m_copy,            only : alloc_copy
- use defs_datatypes ,   only : ebands_t
- !use m_kpts,           only : kpts_timrev_from_kptopt
- use m_ebands,          only : edos_t, ebands_get_edos
+ use m_ebands,          only : ebands_t, edos_t, ebands_get_edos
  use m_gstore,          only : gstore_t
 
  implicit none

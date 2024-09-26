@@ -20,17 +20,15 @@
 
 module m_phpi
 
+ use, intrinsic :: iso_c_binding
  use defs_basis
  use m_abicore
  use m_xmpi
  use m_errors
  use m_ifc
  use m_ebands
- use, intrinsic :: iso_c_binding
  use m_nctk
-#ifdef HAVE_NETCDF
  use netcdf
-#endif
  use m_wfk
  use m_ddb
  use m_dvdb
@@ -40,7 +38,7 @@ module m_phpi
  use m_dtset
  use m_dtfil
 
- use defs_datatypes,    only : pseudopotential_type, ebands_t
+ use defs_datatypes,    only : pseudopotential_type
  use defs_abitypes,     only : mpi_type
  use m_time,            only : cwtime
  use m_fstrings,        only : sjoin, itoa, ftoa, ktoa, ltoa, strcat
@@ -549,9 +547,7 @@ subroutine eph_phpi(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,e
    call out_phpi(std_out, Pi_ph, phfrq, qpt, natom3)
  end if
 
-#ifdef HAVE_NETCDF
  if (i_am_master) call out_phpi_nc(dtfil, cryst, Pi_ph, phfrq, qpt, natom3)
-#endif
 
  ! Free memory
  call cwtime(cpu,wall,gflops,"stop")
@@ -669,8 +665,6 @@ subroutine out_phpi_nc(dtfil, cryst, Pi_ph, phfrq, qpt, natom3)
  integer :: ncid, ncerr
  character(len=fnlen) :: fname
 
-#ifdef HAVE_NETCDF
-
  ! Initialize NetCDF file.
  fname = strcat(dtfil%filnam_ds(4),"_Pi.nc")
  NCF_CHECK(nctk_open_create(ncid, fname, xmpi_comm_self))
@@ -711,10 +705,6 @@ subroutine out_phpi_nc(dtfil, cryst, Pi_ph, phfrq, qpt, natom3)
 
  ! Close file
  NCF_CHECK(nf90_close(ncid))
-
-#else
- ABI_ERROR("NETCDF support required to write Pi.nc file.")
-#endif
 
 end subroutine out_phpi_nc
 !!***

@@ -47,7 +47,7 @@ module m_gstate
  use m_dtfil
  use m_extfpmd
 
- use defs_datatypes,     only : pseudopotential_type, ebands_t
+ use defs_datatypes,     only : pseudopotential_type
  use defs_abitypes,      only : MPI_type
  use m_time,             only : timab
  use m_symtk,            only : matr3inv

@@ -40,7 +40,7 @@ module m_sigma_driver
  use m_crystal
  use m_cgtools
 
- use defs_datatypes,  only : pseudopotential_type, ebands_t
+ use defs_datatypes,  only : pseudopotential_type
  use defs_abitypes,   only : MPI_type
  use m_time,          only : timab
  use m_numeric_tools, only : imax_loc
@@ -53,7 +53,7 @@ module m_sigma_driver
  use m_fft_mesh,      only : get_gfft, setmesh
  use m_fft,           only : fourdp
  use m_ioarr,         only : fftdatar_write, read_rhor
- use m_ebands,        only : ebands_update_occ, ebands_copy, ebands_report_gap, ebands_get_valence_idx, ebands_get_bandenergy,&
+ use m_ebands,        only : ebands_t, ebands_update_occ, ebands_copy, ebands_report_gap, ebands_get_valence_idx, ebands_get_bandenergy,&
                              ebands_free, ebands_init, ebands_ncwrite, ebands_interpolate_kpath, get_eneocc_vect, &
                              ebands_enclose_degbands, ebands_get_gaps, gaps_t
  use m_energies,      only : energies_type, energies_init

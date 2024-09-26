@@ -43,7 +43,7 @@ module m_gkk
  use m_fstrings,       only : itoa, sjoin, ktoa, ltoa, strcat
  use m_symtk,          only : littlegroup_q
  use m_fftcore,        only : get_kg
- use defs_datatypes,   only : ebands_t, pseudopotential_type
+ use defs_datatypes,   only : pseudopotential_type
  use m_crystal,        only : crystal_t
  use m_bz_mesh,        only : findqg0
  use m_cgtools,        only : dotprod_g
@@ -147,7 +147,6 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
  real(dp),allocatable :: dummy_vtrial(:,:),gvnlx1(:,:), gs1c(:,:), gkq_atm(:,:,:,:)
  logical,allocatable :: bks_mask(:,:,:),bks_mask_kq(:,:,:),keep_ur(:,:,:),keep_ur_kq(:,:,:)
  type(pawcprj_type),allocatable  :: cwaveprj0(:,:) !natom,nspinor*usecprj)
-
 !************************************************************************
 
  units = [std_out, ab_out]

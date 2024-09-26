@@ -30,7 +30,7 @@ module m_chi0
  use m_wfd
  use m_dtset
 
- use defs_datatypes,    only : pseudopotential_type, ebands_t
+ use defs_datatypes,    only : pseudopotential_type
  use m_fstrings,        only : ftoa, sjoin, itoa
  use m_gwdefs,          only : GW_TOL_DOCC, GW_TOL_W0, czero_gw, em1params_t, g0g0w
  use m_numeric_tools,   only : imin_loc, print_arr
@@ -38,7 +38,7 @@ module m_chi0
  use m_crystal,         only : crystal_t
  use m_fft_mesh,        only : rotate_FFT_mesh, get_gfft
  use m_occ,             only : getnel
- use m_ebands,          only : pack_eneocc, unpack_eneocc, ebands_has_metal_scheme
+ use m_ebands,          only : ebands_t, pack_eneocc, unpack_eneocc, ebands_has_metal_scheme
  use m_bz_mesh,         only : kmesh_t, littlegroup_t
  use m_gsphere,         only : gsphere_t
  use m_io_tools,        only : flush_unit

@@ -42,7 +42,6 @@ MODULE m_ioarr
  use netcdf
 
  use defs_abitypes,   only : mpi_type
- use defs_datatypes,  only : ebands_t
  use defs_wvltypes,   only : wvl_denspot_type
  use m_time,          only : cwtime, cwtime_report, timab
  use m_io_tools,      only : iomode_from_fname, iomode2str, open_file, get_unit

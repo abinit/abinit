@@ -35,7 +35,7 @@ MODULE m_haydock
  use m_time,              only : timab
  use m_fstrings,          only : strcat, sjoin, itoa, int2char4
  use m_io_tools,          only : file_exists, open_file
- use defs_datatypes,      only : ebands_t, pseudopotential_type
+ use defs_datatypes,      only : pseudopotential_type
  use m_geometry,          only : normv
  use m_hide_blas,         only : xdotc, xgemv
  use m_hide_lapack,       only : matrginv
@@ -50,7 +50,7 @@ MODULE m_haydock
  use m_pawtab,            only : pawtab_type
  use m_vcoul,             only : vcoul_t
  use m_hexc,              only : hexc_init, hexc_interp_init, hexc_free, hexc_interp_free, &
-&                                hexc_build_hinterp, hexc_matmul_tda, hexc_matmul_full, hexc_t, hexc_matmul_elphon, hexc_interp_t
+                                 hexc_build_hinterp, hexc_matmul_tda, hexc_matmul_full, hexc_t, hexc_matmul_elphon, hexc_interp_t
  use m_exc_spectra,       only : exc_write_data, exc_eps_rpa, exc_write_tensor, mdfs_ncwrite
  use m_eprenorms,         only : eprenorms_t, renorm_bst
  use m_wfd_optic,         only : calc_optical_mels

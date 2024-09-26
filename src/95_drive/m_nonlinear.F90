@@ -33,7 +33,7 @@ module m_nonlinear
  use m_dtset
  use m_dtfil
 
- use defs_datatypes, only : pseudopotential_type, ebands_t
+ use defs_datatypes, only : pseudopotential_type
  use defs_abitypes, only : MPI_type
  use m_fstrings, only : sjoin, itoa
  use m_time,     only : timab
@@ -55,7 +55,7 @@ module m_nonlinear
  use m_paw_ij,      only : paw_ij_type, paw_ij_init, paw_ij_free, paw_ij_nullify, paw_ij_print
  use m_pawfgrtab,   only : pawfgrtab_type, pawfgrtab_init, pawfgrtab_free
  use m_pawrhoij,    only : pawrhoij_type, pawrhoij_alloc, pawrhoij_free, pawrhoij_copy, &
-&                          pawrhoij_bcast, pawrhoij_nullify, pawrhoij_inquire_dim
+                           pawrhoij_bcast, pawrhoij_nullify, pawrhoij_inquire_dim
  use m_pawdij,      only : pawdij, symdij
  use m_paw_finegrid,only : pawexpiqr
  use m_pawxc,       only : pawxc_get_nkxc

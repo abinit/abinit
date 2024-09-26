@@ -42,7 +42,7 @@ module m_eph_driver
  use m_distribfft
  use netcdf
 
- use defs_datatypes,    only : pseudopotential_type, ebands_t
+ use defs_datatypes,    only : pseudopotential_type
  use defs_abitypes,     only : MPI_type
  use m_io_tools,        only : file_exists, open_file
  use m_time,            only : cwtime, cwtime_report

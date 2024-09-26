@@ -28,13 +28,14 @@ module m_cohsex
  use m_errors
  use m_abicore
 
- use defs_datatypes,  only : pseudopotential_type, ebands_t
+ use defs_datatypes,  only : pseudopotential_type
  use m_time,          only : timab
  use m_fstrings,      only : sjoin, itoa
  use m_hide_blas,     only : xdotc, xgemv
  use m_numeric_tools, only : hermitianize, imin_loc
  use m_geometry,      only : normv
  use m_crystal,       only : crystal_t
+ use m_ebands,        only : ebands_t
  use m_bz_mesh,       only : kmesh_t, findqg0, littlegroup_t
  use m_gsphere,       only : gsphere_t
  use m_fft_mesh,      only : get_gfft, rotate_fft_mesh, cigfft

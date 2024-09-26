@@ -149,7 +149,7 @@ module m_gstore
  use m_cgtools,        only : cg_zdotc
  use m_geometry,       only : wigner_seitz
  use m_kg,             only : getph, mkkpg, mkkin
- use defs_datatypes,   only : ebands_t, pseudopotential_type
+ use defs_datatypes,   only : pseudopotential_type
  use m_hdr,            only : hdr_type, fform_from_ext
  use m_symtk,          only : matr3inv
  use m_kpts,           only : kpts_ibz_from_kptrlatt, kpts_timrev_from_kptopt, kpts_map, kpts_sort, kpts_pack_in_stars, &

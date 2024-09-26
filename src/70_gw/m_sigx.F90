@@ -29,7 +29,7 @@ module m_sigx
  use m_errors
  use m_time
 
- use defs_datatypes,  only : pseudopotential_type, ebands_t
+ use defs_datatypes,  only : pseudopotential_type
  use m_fstrings,      only : itoa, sjoin, ktoa, ltoa
  use m_hide_blas,     only : xdotc, xgemv
  use m_numeric_tools, only : hermitianize
@@ -52,6 +52,7 @@ module m_sigx
  use m_oscillators,   only : rho_tw_g
  use m_esymm,         only : esymm_t, esymm_symmetrize_mels, esymm_failed
  use m_occ,           only : get_fact_spin_tol_empty
+ use m_ebands,        only : ebands_t
 
  implicit none
 

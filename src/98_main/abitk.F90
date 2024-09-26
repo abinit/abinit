@@ -39,7 +39,6 @@ program abitk
  use netcdf
  use m_nctk
 
- use defs_datatypes,   only : ebands_t
  use m_build_info,     only : abinit_version
  use m_fstrings,       only : sjoin, strcat, basename, itoa
  use m_io_tools,       only : open_file, enforce_fortran_io

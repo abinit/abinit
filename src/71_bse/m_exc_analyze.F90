@@ -28,7 +28,7 @@ module m_exc_analyze
  use m_xmpi
  use m_errors
 
- use defs_datatypes,      only : pseudopotential_type, ebands_t
+ use defs_datatypes,      only : pseudopotential_type
  use m_io_tools,          only : open_file
  use m_numeric_tools,     only : iseven, wrap2_zero_one
  use m_bz_mesh,           only : kmesh_t
@@ -43,6 +43,7 @@ module m_exc_analyze
  use m_pawcprj,           only : pawcprj_type, pawcprj_alloc, pawcprj_free
  use m_paw_pwaves_lmn,    only : paw_pwaves_lmn_t, paw_pwaves_lmn_init, paw_pwaves_lmn_free
  use m_paw_nhat,          only : nhatgrid
+ use m_ebands,            only :  ebands_t
 
  implicit none
 

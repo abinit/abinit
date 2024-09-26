@@ -48,11 +48,9 @@ module m_rta
  use m_dtset
  use m_dtfil
  use m_krank
-#ifdef HAVE_NETCDF
  use netcdf
-#endif
 
- use defs_datatypes,   only : pseudopotential_type, ebands_t
+ use defs_datatypes,   only : pseudopotential_type
  use m_io_tools,       only : open_file
  use m_time,           only : cwtime, cwtime_report
  use m_crystal,        only : crystal_t
@@ -683,9 +681,7 @@ subroutine compute_rta(self, cryst, dtset, dtfil, comm)
  integer,parameter :: nvecs0 = 0, master = 0
  integer :: nsppol, nkibz, ib, ik_ibz, iw, spin, ii, jj, itemp, irta, itens, iscal, cnt
  integer :: ntens, edos_intmeth, ifermi, iel, nvals, my_rank
-#ifdef HAVE_NETCDF
  integer :: ncid
-#endif
  !character(len=500) :: msg
  character(len=fnlen) :: path
  real(dp) :: emin, emax, edos_broad, edos_step, max_occ, kT, Tkelv, linewidth, fact0, cpu, wall, gflops
@@ -988,13 +984,11 @@ subroutine compute_rta(self, cryst, dtset, dtfil, comm)
    call self%print_rta_txt_files(cryst, dtset, dtfil)
 
    ! Creates the netcdf file used to store the results of the calculation.
-#ifdef HAVE_NETCDF
    path = strcat(dtfil%filnam_ds(4), "_RTA.nc")
    call wrtout(units, ch10//sjoin("- Writing RTA transport results to:", path))
    NCF_CHECK(nctk_open_create(ncid, path , xmpi_comm_self))
    call self%rta_ncwrite(cryst, dtset, ncid)
    NCF_CHECK(nf90_close(ncid))
-#endif
  end if
 
  call cwtime_report(" compute_rta", cpu, wall, gflops)
@@ -1228,7 +1222,6 @@ subroutine rta_ncwrite(self, cryst, dtset, ncid)
 
  call cwtime(cpu, wall, gflops, "start")
 
-#ifdef HAVE_NETCDF
  ! Write to netcdf file
  NCF_CHECK(cryst%ncwrite(ncid))
  NCF_CHECK(ebands_ncwrite(self%ebands, ncid))
@@ -1326,7 +1319,6 @@ subroutine rta_ncwrite(self, cryst, dtset, ncid)
  NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "mobility_mu"), self%mobility_mu))
  !NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "conductivity_mu"), self%conductivity_mu))
  !NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "resistivity_mu"), self%resistivity_mu))
-#endif
 
  call cwtime_report(" rta_ncwrite", cpu, wall, gflops)
 
@@ -1617,9 +1609,7 @@ subroutine ibte_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
  integer :: spin, ikcalc, nkcalc, nbsum, nbcalc, itemp, iter, ierr, bsize
  integer :: nkibz, nsppol, band_k, ik_ibz, bmin, bmax, band_sum, ntemp, ii, jj, iq_sum, btype, nsp
  integer :: ikq_ibz, isym_kq, trev_kq, cnt, tag, nprocs, receiver, my_rank, isym, itime, isym_lgk
-#ifdef HAVE_NETCDF
  integer :: ncid, grp_ncid, ncerr
-#endif
  real(dp) :: kT, mu_e, e_nk, dfde_nk, tau_nk, lw_nk, max_adiff, cpu, wall, gflops, btype_fact, abs_tol, rtmp
  logical :: send_data
  character(len=500) :: msg
@@ -1694,7 +1684,6 @@ subroutine ibte_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
  end do
 
  call cwtime(cpu, wall, gflops, "start")
-#ifdef HAVE_NETCDF
  ! Master reads and sends data to the rank treating (ikcalc, spin).
  if (my_rank == master) then
    NCF_CHECK(nctk_open_read(ncid, dtfil%filsigephin, xmpi_comm_self))
@@ -1780,7 +1769,7 @@ subroutine ibte_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
  if (my_rank == master) then
    NCF_CHECK(nf90_close(ncid))
  end if
-#endif
+
  call cwtime_report(" sigeph IO", cpu, wall, gflops)
 
  ! Solve the linearized BTE with B = 0.
@@ -2085,7 +2074,6 @@ subroutine ibte_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
    ! Print IBTE results to stdout and other external txt files (for the test suite)
    !call ibte%print_rta_txt_files(cryst, dtset, dtfil)
    ! Creates the netcdf file used to store the results of the calculation.
-#ifdef HAVE_NETCDF
    !path = strcat(dtfil%filnam_ds(4), "_RTA.nc")
    !call wrtout(units, ch10//sjoin("- Writing IBTE transport results to:", path))
    !NCF_CHECK(nctk_open_modify(ncid, path , xmpi_comm_self))
@@ -2099,8 +2087,6 @@ subroutine ibte_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "kcalc2ebands"), ibte%kcalc2ebands))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "kibz"), ibte%ebands%kptns))
    NCF_CHECK(nf90_close(ncid))
-#endif
-
  end if ! master
 
  ! Free memory

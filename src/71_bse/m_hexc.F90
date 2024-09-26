@@ -33,7 +33,7 @@ MODULE m_hexc
 
  use m_time,              only : timab
  use m_fstrings,          only : indent, strcat, sjoin, itoa
- use defs_datatypes,      only : ebands_t, pseudopotential_type
+ use defs_datatypes,      only : pseudopotential_type
  use m_hide_blas,         only : xdotc, xgemv
  use m_numeric_tools,     only : print_arr, symmetrize, hermitianize, wrap2_pmhalf
  use m_crystal,           only : crystal_t
@@ -45,6 +45,7 @@ MODULE m_hexc
  use m_vcoul,             only : vcoul_t
  use m_bseinterp,         only : interpolator_t, interpolator_init, interpolator_normalize, &
                                  interpolator_free, int_alloc_work, int_free_work
+ use m_ebands,            only : ebands_t
 
  implicit none
 

@@ -38,7 +38,7 @@ module m_varpeq
  use m_ifc
  use m_wfd
 
- use defs_datatypes,    only : ebands_t, pseudopotential_type
+ use defs_datatypes,    only : pseudopotential_type
  use m_fstrings,        only : sjoin, ktoa, ftoa, strcat, ltoa, itoa
  use m_time,            only : cwtime_report, cwtime
  use m_io_tools,        only : file_exists, iomode_from_fname, open_file
@@ -50,7 +50,7 @@ module m_varpeq
  use m_gstore,          only : gstore_t, gqk_t
  use m_supercell,       only : supercell_type
  use m_paw_sphharm,     only : ylm_angular_mesh
- use m_fftcore,         only : ngfft_seq !, get_kg
+ use m_fftcore,         only : ngfft_seq
  use m_ephtk,           only : ephtk_get_mpw_gmax
  use m_dynmat,          only : phdispl_from_eigvec
  use m_phonons,         only : pheigvec_rotate

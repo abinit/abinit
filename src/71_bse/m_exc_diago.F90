@@ -32,7 +32,7 @@ MODULE m_exc_diago
  use m_sort
  use m_slk
 
- use defs_datatypes,    only : pseudopotential_type, ebands_t
+ use defs_datatypes,    only : pseudopotential_type
  use m_io_tools,        only : open_file
  use m_fstrings,        only : int2char4
  use m_numeric_tools,   only : print_arr, hermitianize
@@ -40,7 +40,7 @@ MODULE m_exc_diago
  use m_crystal,         only : crystal_t
  use m_kpts,            only : listkk
  use m_bz_mesh,         only : kmesh_t
- use m_ebands,          only : ebands_report_gap
+ use m_ebands,          only : ebands_t, ebands_report_gap
  use m_eprenorms,       only : eprenorms_t
  use m_wfd,             only : wfdgw_t
  use m_paw_hr,          only : pawhur_t

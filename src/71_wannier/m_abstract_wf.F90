@@ -39,27 +39,25 @@ module m_abstract_wf
 #ifdef FC_NAG
  use f90_unix_dir
 #endif
-#ifdef HAVE_NETCDF
  use netcdf
-#endif
  use m_nctk
  use m_hdr
  use m_dtset
  use m_dtfil
 
- use m_build_info,      only :  abinit_version
+ use m_build_info,   only :  abinit_version
  use defs_wvltypes,  only : wvl_internal_type
- use defs_datatypes, only : pseudopotential_type, ebands_t
- use defs_abitypes, only : MPI_type
- use m_io_tools, only : delete_file
- use m_fstrings,      only : strcat, sjoin, itoa
- use m_fftcore,  only : ngfft_seq, get_kg
- use m_crystal,  only : crystal_t
- use m_ebands,   only : ebands_expandk, ebands_free
- use m_pawtab,   only : pawtab_type
- use m_pawrhoij, only: pawrhoij_copy
- use m_pawcprj,  only : pawcprj_type
- use m_wfd, only: wfd_t, wfd_init, wave_t, WFD_STORED
+ use defs_datatypes, only : pseudopotential_type
+ use defs_abitypes,  only : MPI_type
+ use m_io_tools,     only : delete_file
+ use m_fstrings,     only : strcat, sjoin, itoa
+ use m_fftcore,      only : ngfft_seq, get_kg
+ use m_crystal,      only : crystal_t
+ use m_ebands,       only : ebands_t, ebands_expandk, ebands_free
+ use m_pawtab,       only : pawtab_type
+ use m_pawrhoij,     only: pawrhoij_copy
+ use m_pawcprj,      only : pawcprj_type
+ use m_wfd,          only: wfd_t, wfd_init, wave_t, WFD_STORED
 
  implicit none
 

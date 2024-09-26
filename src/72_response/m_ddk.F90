@@ -46,11 +46,12 @@ MODULE m_ddk
  use m_io_tools,      only : iomode_from_fname
  use m_time,          only : cwtime, cwtime_report
  use defs_abitypes,   only : MPI_type
- use defs_datatypes,  only : ebands_t, pseudopotential_type
+ use defs_datatypes,  only : pseudopotential_type
  use m_vkbr,          only : vkbr_t, nc_ihr_comm, vkbr_init, vkbr_free
  use m_pawtab,        only : pawtab_type
  use m_wfk,           only : wfk_read_ebands !, wfk_read_h1mat
  use m_wfd,           only : wfd_t, wfd_init, wave_t
+ use m_ebands,        only : ebands_t
 
  implicit none
 

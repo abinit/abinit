@@ -37,7 +37,7 @@ module m_respfn_driver
  use m_dtset
  use m_dtfil
 
- use defs_datatypes, only : pseudopotential_type, ebands_t
+ use defs_datatypes, only : pseudopotential_type
  use defs_abitypes, only : MPI_type
  use m_time,        only : timab
  use m_fstrings,    only : strcat, endswith
@@ -62,7 +62,6 @@ module m_respfn_driver
  use m_pawrhoij,    only : pawrhoij_type, pawrhoij_alloc, pawrhoij_free, pawrhoij_copy, &
                            pawrhoij_bcast, pawrhoij_nullify, pawrhoij_inquire_dim, &
                            pawrhoij_print_rhoij, pawrhoij_io
-
  use m_pawdij,      only : pawdij, symdij, pawdij_print_dij
  use m_pawfgr,      only : pawfgr_type, pawfgr_init, pawfgr_destroy
  use m_paw_finegrid,only : pawexpiqr

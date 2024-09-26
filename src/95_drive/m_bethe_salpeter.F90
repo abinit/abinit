@@ -38,7 +38,7 @@ module m_bethe_salpeter
  use m_crystal
  use m_screen
 
- use defs_datatypes,    only : pseudopotential_type, ebands_t
+ use defs_datatypes,    only : pseudopotential_type
  use defs_abitypes,     only : MPI_type
  use m_gwdefs,          only : GW_Q0_DEFAULT
  use m_time,            only : timab
@@ -52,7 +52,7 @@ module m_bethe_salpeter
  use m_fft,             only : fourdp
  use m_bz_mesh,         only : kmesh_t, get_ng0sh, find_qmesh, make_mesh
  use m_double_grid,     only : double_grid_t, double_grid_init, double_grid_free
- use m_ebands,          only : ebands_init, ebands_print, ebands_copy, ebands_free, &
+ use m_ebands,          only : ebands_t, ebands_init, ebands_print, ebands_copy, ebands_free, &
                                ebands_update_occ, ebands_get_valence_idx, ebands_apply_scissors, ebands_report_gap
  use m_kg,              only : getph
  use m_gsphere,         only : gsphere_t
