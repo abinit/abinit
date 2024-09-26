@@ -1461,7 +1461,7 @@ subroutine setup_bse(codvsn,acell,rprim,ngfft_osc,Dtset,Dtfil,BS_files,Psps,Pawt
  ABI_MALLOC(npwarr,(Dtset%nkpt))
  npwarr=BSP%npwwfn
 
- call ebands_init(bantot,ks_ebands,Dtset%nelect,Dtset%ne_qFD,Dtset%nh_qFD,Dtset%ivalence,&
+ call ebands_init(ks_ebands, bantot, Dtset%nelect,Dtset%ne_qFD,Dtset%nh_qFD,Dtset%ivalence,&
    doccde,eigen,Dtset%istwfk,Kmesh%ibz,Dtset%nband,&
    Kmesh%nibz,npwarr,Dtset%nsppol,Dtset%nspinor,Dtset%tphysel,Dtset%tsmear,Dtset%occopt,occfact,Kmesh%wt,&
    dtset%cellcharge(1), dtset%kptopt, dtset%kptrlatt_orig, dtset%nshiftk_orig, dtset%shiftk_orig, &
@@ -2059,7 +2059,7 @@ subroutine setup_bse_interp(Dtset,Dtfil,BSp,Cryst,Kmesh, &
  ABI_MALLOC(npwarr,(kmesh_dense%nibz))
  npwarr=BSP%npwwfn
 
- call ebands_init(bantot_dense,ks_ebands_dense,Dtset%nelect,Dtset%ne_qFD,Dtset%nh_qFD,Dtset%ivalence,&
+ call ebands_init(ks_ebands_dense, bantot_dense, Dtset%nelect,Dtset%ne_qFD,Dtset%nh_qFD,Dtset%ivalence,&
                   doccde,eigen,Hdr_wfk_dense%istwfk,Kmesh_dense%ibz,nbands_temp,&
                   Kmesh_dense%nibz,npwarr,Hdr_wfk_dense%nsppol,Hdr_wfk_dense%nspinor,Hdr_wfk_dense%tphysel,Hdr_wfk_dense%tsmear,&
                   Hdr_wfk_dense%occopt,occfact,Kmesh_dense%wt,&

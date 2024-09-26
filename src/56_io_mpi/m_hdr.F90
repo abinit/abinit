@@ -306,7 +306,7 @@ contains
  public :: abifile_from_varname
  public :: abifile_from_fform
  public :: fform_from_ext          ! Return the value of fform to be used from the file extension.
- public :: fform_contains
+ public :: fform_contains          ! Test whether fform provides varname.
  public :: varname_from_fname      ! Return the name of the netcdf variable stored in a file from the file extension.
 
  ! Generic interface of the routines hdr_skip
@@ -546,6 +546,7 @@ end function fform_from_ext
 !!  fform_contains
 !!
 !! FUNCTION
+!!  Test whether fform provides varname.
 !!
 !! SOURCE
 

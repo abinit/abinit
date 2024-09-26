@@ -3348,11 +3348,11 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
  ABI_MALLOC(npwarr,(Dtset%nkpt))
  npwarr(:)=Sigp%npwwfn
 
- call ebands_init(bantot,ks_ebands,Dtset%nelect,Dtset%ne_qFD,Dtset%nh_qFD,Dtset%ivalence,&
-   doccde,eigen,Dtset%istwfk,Kmesh%ibz,Dtset%nband,&
-   Kmesh%nibz,npwarr,nsppol,Dtset%nspinor,Dtset%tphysel,Dtset%tsmear,Dtset%occopt,occfact,Kmesh%wt,&
-   dtset%cellcharge(1), dtset%kptopt, dtset%kptrlatt_orig, dtset%nshiftk_orig, dtset%shiftk_orig,&
-   dtset%kptrlatt, dtset%nshiftk, dtset%shiftk)
+ call ebands_init(ks_ebands, bantot, Dtset%nelect,Dtset%ne_qFD,Dtset%nh_qFD,Dtset%ivalence,&
+                  doccde,eigen,Dtset%istwfk,Kmesh%ibz,Dtset%nband,&
+                  Kmesh%nibz,npwarr,nsppol,Dtset%nspinor,Dtset%tphysel,Dtset%tsmear,Dtset%occopt,occfact,Kmesh%wt,&
+                  dtset%cellcharge(1), dtset%kptopt, dtset%kptrlatt_orig, dtset%nshiftk_orig, dtset%shiftk_orig,&
+                  dtset%kptrlatt, dtset%nshiftk, dtset%shiftk)
 
  ABI_FREE(doccde)
  ABI_FREE(eigen)

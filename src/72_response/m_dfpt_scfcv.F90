@@ -37,9 +37,7 @@ module m_dfpt_scfcv
  use m_dtfil
  use m_hamiltonian
  use m_gemm_nonlop_projectors
-#ifdef HAVE_NETCDF
  use netcdf
-#endif
 
  use defs_datatypes, only : pseudopotential_type
  use defs_abitypes, only : MPI_type
@@ -1477,14 +1475,12 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
      ! This part is obsolete. I keep it just to maintain compatibility with the fileformat.
      if (mpi_enreg%me_g0 == 1) then
        if (dtset%iomode == IO_MODE_ETSF) then
-#ifdef HAVE_NETCDF
          NCF_CHECK(nctk_open_modify(ncid, nctk_ncify(fi1o), xmpi_comm_self))
          ncerr = nctk_def_one_array(ncid, nctkarr_t('rhog1_g0', "dp", "two"), varid=varid)
          NCF_CHECK(ncerr)
          NCF_CHECK(nctk_set_datamode(ncid))
          NCF_CHECK(nf90_put_var(ncid, varid, rhog1(:,1)))
          NCF_CHECK(nf90_close(ncid))
-#endif
        else
          ! Handle Fortran files.
          if (open_file(fi1o, msg, newunit=ncid, form='unformatted', status='old', action="readwrite") /= 0) then

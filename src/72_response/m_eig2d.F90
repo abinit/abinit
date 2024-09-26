@@ -27,9 +27,7 @@ MODULE m_eig2d
  use m_errors
  use m_abicore
  use m_nctk
-#ifdef HAVE_NETCDF
  use netcdf
-#endif
  use m_xmpi
  use m_ebands
  use m_cgtools
@@ -234,11 +232,9 @@ subroutine eigr2d_ncwrite(eigr2d,iqpt,wtq,ncid)
  type(eigr2d_t),intent(in) :: eigr2d
 
 !Local variables-------------------------------
-#ifdef HAVE_NETCDF
  integer :: ncerr
  integer :: cplex,cart_dir,one_dim
  character(len=200) :: temp
-
 ! *************************************************************************
 
  ! ==============================================
@@ -273,11 +269,6 @@ subroutine eigr2d_ncwrite(eigr2d,iqpt,wtq,ncid)
  NCF_CHECK(nf90_put_var(ncid, vid('current_q_point'), iqpt))
  NCF_CHECK(nf90_put_var(ncid, vid('current_q_point_weight'), wtq))
  NCF_CHECK(nf90_put_var(ncid, vid('second_derivative_eigenenergies'), eigr2d%eigr2d))
-
-#else
- ABI_ERROR("ETSF-IO support is not activated. ")
-#endif
-
 
 contains
  integer function vid(vname)
@@ -438,12 +429,9 @@ subroutine fan_ncwrite(fan2d,iqpt,wtq,ncid)
  type(fan_t),intent(in) :: fan2d
 
 !Local variables-------------------------------
-#ifdef HAVE_NETCDF
  integer :: ncerr
  integer :: cplex,cart_dir,one_dim
  character(len=200) :: temp
-
-
 ! *************************************************************************
 
  ! ==============================================
@@ -482,10 +470,6 @@ subroutine fan_ncwrite(fan2d,iqpt,wtq,ncid)
  NCF_CHECK(nf90_put_var(ncid, vid('current_q_point_weight'), wtq))
  NCF_CHECK(nf90_put_var(ncid, vid('second_derivative_eigenenergies_actif'), fan2d%fan2d))
 
-#else
- ABI_ERROR("netcdf support is not activated. ")
-#endif
-
 contains
  integer function vid(vname)
    character(len=*),intent(in) :: vname
@@ -521,9 +505,7 @@ subroutine gkk_ncwrite(gkk2d,iqpt,wtq,ncid)
  type(gkk_t),intent(in) :: gkk2d
 
 !Local variables-------------------------------
-#ifdef HAVE_NETCDF
  integer :: cplex,one_dim,ncerr,vid_
-
 ! *************************************************************************
 
  ! ==============================================
@@ -562,10 +544,6 @@ subroutine gkk_ncwrite(gkk2d,iqpt,wtq,ncid)
  NCF_CHECK(nf90_put_var(ncid, vid_, wtq))
  vid_=vid('second_derivative_eigenenergies_actif')
  NCF_CHECK(nf90_put_var(ncid, vid_, gkk2d%gkk2d))
-
-#else
- ABI_ERROR("netcdf support is not activated. ")
-#endif
 
 contains
  integer function vid(vname)
@@ -1761,7 +1739,7 @@ subroutine eig2tot(dtfil,xred,psps,pawtab,natom,bdeigrf,clflg,dim_eig2nkq,eigen0
 &   dtset%symrel,dtset%tnons,dtset%symafm)
 !  Electronic band energies.
    bantot= dtset%mband*dtset%nkpt*dtset%nsppol
-   call ebands_init(bantot,Bands,dtset%nelect,dtset%ne_qFD,dtset%nh_qFD,dtset%ivalence,&
+   call ebands_init(bands, bantot, dtset%nelect,dtset%ne_qFD,dtset%nh_qFD,dtset%ivalence,&
 &   doccde,eigen0,hdr0%istwfk,hdr0%kptns,&
 &   hdr0%nband, hdr0%nkpt,hdr0%npwarr,hdr0%nsppol,hdr0%nspinor,&
 &   hdr0%tphysel,hdr0%tsmear,hdr0%occopt,hdr0%occ,hdr0%wtk,&
@@ -1770,7 +1748,6 @@ subroutine eig2tot(dtfil,xred,psps,pawtab,natom,bdeigrf,clflg,dim_eig2nkq,eigen0
 !
    if(ieig2rf == 4 ) then
 !    Output of the Fan.nc file.
-#ifdef HAVE_NETCDF
      fname = strcat(dtfil%filnam_ds(4),"_FAN.nc")
      call fan_init(fan,fan2d,dtset%mband,hdr0%nsppol,nkpt_rbz,dtset%natom)
      NCF_CHECK_MSG(nctk_open_create(ncid, fname, xmpi_comm_self), "Creating FAN file")
@@ -1778,17 +1755,12 @@ subroutine eig2tot(dtfil,xred,psps,pawtab,natom,bdeigrf,clflg,dim_eig2nkq,eigen0
      NCF_CHECK(ebands_ncwrite(Bands, ncid))
      call fan_ncwrite(fan2d,dtset%qptn(:),dtset%wtq, ncid)
      NCF_CHECK(nf90_close(ncid))
-#else
-     ABI_ERROR("Dynamical calculation with ieig2rf 4 only work with NETCDF support.")
-     ABI_UNUSED(ncid)
-#endif
      ABI_FREE(fan)
    end if
 !  print _GKK.nc file for this perturbation. Note that the GKK file will only be produced if
 !  abinit is compiled with netcdf.
    if(ieig2rf == 5 ) then
 !    Output of the GKK.nc file.
-#ifdef HAVE_NETCDF
      fname = strcat(dtfil%filnam_ds(4),"_GKK.nc")
      call gkk_init(gkk,gkk2d,dtset%mband,hdr0%nsppol,nkpt_rbz,dtset%natom,3)
      NCF_CHECK_MSG(nctk_open_create(ncid, fname, xmpi_comm_self), "Creating GKK file")
@@ -1796,10 +1768,6 @@ subroutine eig2tot(dtfil,xred,psps,pawtab,natom,bdeigrf,clflg,dim_eig2nkq,eigen0
      NCF_CHECK(ebands_ncwrite(Bands, ncid))
      call gkk_ncwrite(gkk2d,dtset%qptn(:),dtset%wtq, ncid)
      NCF_CHECK(nf90_close(ncid))
-#else
-     ABI_ERROR("Dynamical calculation with ieig2rf 5 only work with NETCDF support.")
-     ABI_UNUSED(ncid)
-#endif
      ABI_FREE(gkk)
    end if
 
