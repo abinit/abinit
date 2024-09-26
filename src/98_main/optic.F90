@@ -56,7 +56,6 @@ program optic
  use netcdf
 
  use m_build_info,     only : abinit_version
- use defs_datatypes,   only : ebands_t
  use m_specialmsg,     only : specialmsg_getcount, herald
  use m_time ,          only : asctime, timein
  use m_symtk,          only : mati3inv, matr3inv
@@ -66,8 +65,6 @@ program optic
  use m_fstrings,       only : int2char4, itoa, sjoin, strcat, endswith, basename
 
  implicit none
-
-!Arguments -----------------------------------
 
 !Local variables-------------------------------
  integer,parameter :: formeig0 = 0, formeig1 = 1, master = 0
@@ -85,11 +82,9 @@ program optic
  integer :: nonlin_comp(27) = 0, linel_comp(27) = 0, nonlin2_comp(27) = 0
  integer :: lin_comp(9) = [11, 22 ,33, 12, 13, 21, 23, 31, 32]
  integer :: prtlincompmatrixelements=0, nband_sum = -1
- real(dp) :: domega, eff
- real(dp) :: broadening,maxomega,scissor,tolerance
+ real(dp) :: domega, eff, broadening,maxomega,scissor,tolerance
  real(dp) :: tcpu,tcpui,twall,twalli
- logical :: do_antiresonant, do_temperature
- logical :: do_ep_renorm
+ logical :: do_antiresonant, do_temperature, do_ep_renorm
  logical,parameter :: remove_inv = .False.
  type(hdr_type) :: hdr
  type(ebands_t) :: ks_ebands, eph_ebands
@@ -107,8 +102,7 @@ program optic
  real(dp), ABI_CONTIGUOUS pointer :: outeig(:)
  complex(dpc),allocatable :: pmat(:,:,:,:,:)
  logical :: use_ncevk(0:3)
- character(len=fnlen) :: filnam,wfkfile,ddkfile_1,ddkfile_2,ddkfile_3,filnam_out, epfile,fname
- character(len=fnlen) :: infiles(0:3)
+ character(len=fnlen) :: filnam,wfkfile,ddkfile_1,ddkfile_2,ddkfile_3,filnam_out, epfile,fname, infiles(0:3)
  character(len=256) :: prefix,tmp_radix
  character(len=10) :: s1,s2,s3,stemp
  character(len=24) :: codename, start_datetime

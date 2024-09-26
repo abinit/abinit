@@ -41,7 +41,7 @@ module m_ebands
  use m_dtset
  use m_yaml
 
- use defs_datatypes,   only : ebands_t
+ use defs_datatypes,   only : ebands_base_t
  use m_copy,           only : alloc_copy
  use m_io_tools,       only : file_exists, open_file
  use m_time,           only : cwtime, cwtime_report
@@ -70,20 +70,20 @@ module m_ebands
 
 !----------------------------------------------------------------------
 
-!!!!****t* m_ebands/ebands_t
-!!!! NAME
-!!!! ebands_t
-!!!!
-!!!! FUNCTION
-!!!!
-!!!! SOURCE
+!!****t* m_ebands/ebands_t
+!! NAME
+!! ebands_t
 !!
-!!type ebands_t, extends(ebands_base_t)
+!! FUNCTION
 !!
-!!contains
+!! SOURCE
 !!
-!!end type ebands_t
-!!!!***
+type, extends(ebands_base_t), public :: ebands_t
+
+!contains
+
+end type ebands_t
+!!***
 
  ! Ebands methods
  public :: ebands_init             ! Main creation method.

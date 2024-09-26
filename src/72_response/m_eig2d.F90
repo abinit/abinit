@@ -37,7 +37,7 @@ MODULE m_eig2d
  use m_ddb_hdr
  use m_ddb
 
- use defs_datatypes, only : pseudopotential_type, ebands_t
+ use defs_datatypes, only : pseudopotential_type
  use defs_abitypes, only : MPI_type
  use m_time,       only : timab
  use m_fstrings,   only : strcat
@@ -45,6 +45,7 @@ MODULE m_eig2d
  use m_pawtab,     only : pawtab_type
  use m_double_grid,only : kptfine_av
  use m_mpinfo,     only : distrb2, proc_distrb_cycle
+ use m_ebands,     only : ebands_t
 
  implicit none
 

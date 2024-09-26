@@ -32,7 +32,7 @@ module m_berry_curvature
 
  use m_time,            only : cwtime, cwtime_report
  use m_fstrings,        only : strcat, sjoin, ktoa
- use defs_datatypes,    only : ebands_t
+ use m_ebands,          only : ebands_t
  use m_kpts,            only : kpts_timrev_from_kptopt, kpts_map, smpbz
  use m_ddb_hdr,         only : ddb_hdr_type, BLKTYP_d2E_mbc
  use m_ddb,             only : ddb_type

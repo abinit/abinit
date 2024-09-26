@@ -60,7 +60,7 @@ module m_sigmaph
  use m_mkffnl
 
  use defs_abitypes,    only : mpi_type
- use defs_datatypes,   only : ebands_t, pseudopotential_type
+ use defs_datatypes,   only : pseudopotential_type
  use m_time,           only : cwtime, cwtime_report, timab, sec2str
  use m_fstrings,       only : itoa, ftoa, sjoin, ktoa, ltoa, strcat
  use m_numeric_tools,  only : arth, c2r, get_diag, linfit, iseven, simpson_cplx, simpson, print_arr, inrange

@@ -40,11 +40,12 @@ module m_eph_path
  use m_dtfil
 
  use defs_abitypes,    only : mpi_type
- use defs_datatypes,   only : ebands_t, pseudopotential_type
+ use defs_datatypes,   only : pseudopotential_type
  use m_time,           only : cwtime, cwtime_report, timab, sec2str
  use m_fstrings,       only : itoa, ftoa, sjoin, ktoa, ltoa, strcat
  use m_cgtools,        only : cg_zdotc
  use m_crystal,        only : crystal_t
+ use m_ebands,         only : ebands_t
  use m_getgh1c,        only : getgh1c, rf_transgrid_and_pack, getgh1c_setup
  use m_pawang,         only : pawang_type
  use m_pawrad,         only : pawrad_type

@@ -61,7 +61,7 @@ module defs_datatypes
 !!
 !! SOURCE
 
- type ebands_t
+ type ebands_base_t
 
   integer :: bantot                ! Total number of bands (sum(nband(:))
   integer :: ivalence              ! Highest valence band index (useful when occopt=9 only)
@@ -153,7 +153,7 @@ module defs_datatypes
   real(dp),allocatable :: shiftk(:,:)
   ! shiftk(3, nshiftk)
 
- end type ebands_t
+ end type ebands_base_t
 !!***
 
 !----------------------------------------------------------------------

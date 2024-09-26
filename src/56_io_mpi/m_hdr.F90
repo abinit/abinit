@@ -53,7 +53,7 @@ module m_hdr
  use m_symtk,         only : print_symmetries
  !use m_kpts,          only : kpts_timrev_from_kptopt
  use defs_wvltypes,   only : wvl_internal_type
- use defs_datatypes,  only : ebands_t, pseudopotential_type
+ use defs_datatypes,  only : ebands_base_t, pseudopotential_type
  use m_pawtab,        only : pawtab_type
  use m_pawrhoij,      only : pawrhoij_type, pawrhoij_alloc, pawrhoij_copy, pawrhoij_free, &
                              pawrhoij_io, pawrhoij_inquire_dim
@@ -927,7 +927,7 @@ end subroutine hdr_malloc
 !! and most of its content from dtset and psps, and put default values for evolving variables.
 !!
 !! INPUTS
-!! ebands <type(ebands_t)>=band structure information including Brillouin zone description
+!! ebands <type(ebands_base_t)>=band structure information including Brillouin zone description
 !! codvsn=code version
 !! dtset <type(dataset_type)>=all input variables for this dataset
 !! pawtab(ntypat*usepaw) <type(pawtab_type)>=paw tabulated starting data
@@ -949,10 +949,10 @@ subroutine hdr_init(hdr, ebands, codvsn, dtset, pawtab, pertcase, psps, wvl, &
 !Arguments ------------------------------------
 !scalars
  class(hdr_type),intent(inout) :: hdr !vz_i
+ class(ebands_base_t),intent(in) :: ebands
  integer,intent(in) :: pertcase
  integer,intent(in),optional :: comm_atom
  character(len=8),intent(in) :: codvsn
- type(ebands_t),intent(in) :: ebands
  type(dataset_type),intent(in) :: dtset
  type(pseudopotential_type),intent(in) :: psps
  type(wvl_internal_type),intent(in) :: wvl
@@ -1288,12 +1288,12 @@ subroutine hdr_init_lowlvl(hdr,ebands,psps,pawtab,wvl,&
 !Arguments ------------------------------------
 !scalars
  class(hdr_type),intent(inout) :: hdr
+ class(ebands_base_t),intent(in) :: ebands
  integer,intent(in) :: natom,nsym,nspden,intxc,ixc,usewvl,pawcpxocc,pawspnorb,pertcase
  integer,intent(in) :: ivalence,kptopt,nshiftk_orig,nshiftk,icoulomb
  integer, intent(in),optional :: comm_atom
  real(dp),intent(in) :: ecut,ecutsm,dilatmx,stmbias,pawecutdg,nelect,ne_qFD,nh_qFD,cellcharge
  character(len=8),intent(in) :: codvsn
- type(ebands_t),intent(in) :: ebands
  type(pseudopotential_type),intent(in) :: psps
  type(wvl_internal_type),intent(in) :: wvl
 !arrays

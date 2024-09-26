@@ -37,7 +37,7 @@ module m_outscfcv
  use m_dtset
  use m_dtfil
 
- use defs_datatypes,     only : pseudopotential_type, ebands_t
+ use defs_datatypes,     only : pseudopotential_type
  use defs_abitypes,      only : MPI_type
  use m_time,             only : timab
  use m_io_tools,         only : open_file

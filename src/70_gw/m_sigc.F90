@@ -26,7 +26,7 @@ module m_sigc
  use m_splines
  use m_dtset
 
- use defs_datatypes,  only : pseudopotential_type, ebands_t
+ use defs_datatypes,  only : pseudopotential_type
  use m_hide_blas,     only : xdotc, xgemv, xgemm, xherk
  use m_hide_lapack,   only : xheev
  use m_numeric_tools, only : hermitianize, imin_loc, coeffs_gausslegint
@@ -52,6 +52,7 @@ module m_sigc
  use m_paw_pwaves_lmn,only : paw_pwaves_lmn_t
  use m_hide_lapack,   only : xheev
  use m_occ,           only : get_fact_spin_tol_empty
+ use m_ebands,        only : ebands_t
 
  implicit none
 

@@ -43,7 +43,7 @@ module m_dfpt_loopert
  use m_hdr
  use m_ebands
 
- use defs_datatypes, only : pseudopotential_type, ebands_t
+ use defs_datatypes, only : pseudopotential_type
  use defs_abitypes, only : MPI_type
  use m_occ,        only : getnel
  use m_io_tools,   only : file_exists

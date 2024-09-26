@@ -29,7 +29,6 @@ module m_a2ftr
  use m_splines
  use m_ebands
 
- use defs_datatypes,    only : ebands_t
  use m_io_tools,        only : open_file
  use m_numeric_tools,   only : simpson_int
  use m_hide_lapack,     only : matrginv

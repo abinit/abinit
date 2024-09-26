@@ -23,13 +23,12 @@ module m_rttddft_output
 
  use defs_basis
  use defs_abitypes,   only: MPI_type
- use defs_datatypes,  only: pseudopotential_type, ebands_t
-
+ use defs_datatypes,  only: pseudopotential_type
  use m_common,        only: prteigrs
  use m_crystal,       only: crystal_init, crystal_t
  use m_dtfil,         only: datafiles_type
  use m_dtset,         only: dataset_type
- use m_ebands,        only: ebands_init, ebands_free
+ use m_ebands,        only: ebands_t, ebands_init, ebands_free
  use m_epjdos,        only: dos_calcnwrite, partial_dos_fractions, &
                           & partial_dos_fractions_paw,epjdos_t,    &
                           & epjdos_new, prtfatbands, fatbands_ncwrite

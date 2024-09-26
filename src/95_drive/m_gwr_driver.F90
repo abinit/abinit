@@ -42,7 +42,7 @@ module m_gwr_driver
  use m_nctk
  use, intrinsic :: iso_c_binding
 
- use defs_datatypes,    only : pseudopotential_type, ebands_t
+ use defs_datatypes,    only : pseudopotential_type
  use defs_abitypes,     only : MPI_type
  use m_time,            only : timab
  use m_io_tools,        only : file_exists, open_file, get_unit, iomode_from_fname

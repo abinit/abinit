@@ -30,8 +30,7 @@ MODULE m_qparticles
  use m_nctk
  use m_distribfft
 
-
- use defs_datatypes,   only : pseudopotential_type, ebands_t
+ use defs_datatypes,   only : pseudopotential_type
  use defs_abitypes,    only : MPI_type
  use m_io_tools,       only : open_file, file_exists, isncfile
  use m_fstrings,       only : int2char10, itoa, sjoin
@@ -39,7 +38,7 @@ MODULE m_qparticles
  use m_gwdefs,         only : sigparams_t
  use m_crystal,        only : crystal_t
  use m_bz_mesh,        only : kmesh_t
- use m_ebands,         only : ebands_get_valence_idx
+ use m_ebands,         only : ebands_get_valence_idx, ebands_t
  use m_sigma,          only : sigma_t
  use m_pawtab,         only : pawtab_type
  use m_pawrhoij,       only : pawrhoij_type, pawrhoij_alloc, pawrhoij_io, pawrhoij_inquire_dim

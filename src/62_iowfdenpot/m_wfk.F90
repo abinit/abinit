@@ -69,7 +69,7 @@ module m_wfk
  use m_symkpt
 
  use defs_abitypes,  only : MPI_type
- use defs_datatypes, only : pseudopotential_type, ebands_t
+ use defs_datatypes, only : pseudopotential_type
  use defs_wvltypes,  only : wvl_internal_type
  use m_build_info,   only : abinit_version
  use m_geometry,     only : metric
@@ -2736,7 +2736,6 @@ type(ebands_t) function wfk_read_ebands(path, comm, out_hdr) result(ebands)
  type(hdr_type) :: hdr
 !arrays
  real(dp),pointer :: eigen(:,:,:)
-
 !************************************************************************
 
  call wfk_read_eigenvalues(path, eigen, hdr, comm)

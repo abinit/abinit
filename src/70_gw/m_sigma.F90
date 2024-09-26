@@ -34,7 +34,7 @@ MODULE m_sigma
  use netcdf
  use m_wfd
 
- use defs_datatypes,   only : ebands_t
+ use m_ebands,         only : ebands_t
  use defs_abitypes,    only : MPI_type
  use m_numeric_tools,  only : c2r
  use m_gwdefs,         only : unt_gw, unt_sig, unt_sgr, unt_sgm, unt_gwdiag, sigparams_t, sigma_needs_w, unt_sigc

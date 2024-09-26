@@ -24,17 +24,15 @@ module m_rttddft_tdks
 
  use defs_basis
  use defs_abitypes,      only: MPI_type
- use defs_datatypes,     only: pseudopotential_type, ebands_t
+ use defs_datatypes,     only: pseudopotential_type
  use defs_wvltypes,      only: wvl_data, nullify_wvl_data
-
  use libxc_functionals,  only: libxc_functionals_get_hybridparams
- use m_bandfft_kpt,      only: bandfft_kpt, bandfft_kpt_init1, &
-                             & bandfft_kpt_destroy_array
+ use m_bandfft_kpt,      only: bandfft_kpt, bandfft_kpt_init1, bandfft_kpt_destroy_array
  use m_cgprj,            only: ctocprj
  use m_common,           only: setup1
  use m_dtfil,            only: datafiles_type
  use m_dtset,            only: dataset_type
- use m_ebands,           only: ebands_from_dtset, ebands_free, unpack_eneocc
+ use m_ebands,           only: ebands_t, ebands_from_dtset, ebands_free, unpack_eneocc
  use m_energies,         only: energies_type, energies_init
  use m_errors,           only: msg_hndl, assert
  use m_extfpmd,          only: extfpmd_type

@@ -31,9 +31,7 @@ module m_ephwg
  use m_dtset
  use m_htetra
  use m_nctk
-#ifdef HAVE_NETCDF
  use netcdf
-#endif
  use m_crystal
  use m_ifc
  use m_lgroup
@@ -41,7 +39,6 @@ module m_ephwg
  use m_eph_double_grid
  use m_krank
 
- use defs_datatypes,    only : ebands_t
  use m_time,            only : cwtime, cwtime_report
  use m_symtk,           only : matr3inv
  use m_numeric_tools,   only : arth, inrange, wrap2_pmhalf

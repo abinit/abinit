@@ -35,12 +35,13 @@ MODULE m_iowf
  use m_hdr
  use m_ebands
 
- use defs_abitypes, only : MPI_type
+
  use m_time,           only : cwtime, cwtime_report, timab
  use m_io_tools,       only : get_unit, flush_unit, iomode2str
  use m_fstrings,       only : endswith, sjoin
  use m_numeric_tools,  only : mask2blocks
- use defs_datatypes,   only : ebands_t, pseudopotential_type
+ use defs_abitypes,    only : MPI_type
+ use defs_datatypes,   only : pseudopotential_type
  use m_cgtools,        only : cg_zcopy
  use m_crystal,        only : crystal_t
  use m_rwwf,           only : rwwf

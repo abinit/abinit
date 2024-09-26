@@ -33,7 +33,6 @@ module m_cumulant
  use m_dtfil
  use netcdf
 
- use defs_datatypes,   only : ebands_t
  use defs_abitypes,    only : MPI_type
  use m_io_tools,       only : open_file, file_exists, is_open
  use m_time,           only : cwtime, cwtime_report
@@ -41,7 +40,6 @@ module m_cumulant
  use m_numeric_tools,  only : simpson_cplx, arth, c2r, simpson, safe_div, simpson_int, ctrap, linfit, linspace
  use m_fstrings,       only : strcat, sjoin, itoa, ltoa, stoa, ftoa
  use m_distribfft,     only : init_distribfft_seq
- !use m_kpts,           only : kpts_timrev_from_kptopt
  use m_mpinfo,         only : destroy_mpi_enreg, initmpi_seq
  use m_fft,            only : fourdp
  use m_fftcore,        only : ngfft_seq,fftalg_isavailable

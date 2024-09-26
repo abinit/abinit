@@ -29,7 +29,6 @@ module m_iogkk
  use m_krank
  use m_hdr
 
- use defs_datatypes,    only : ebands_t
  use defs_abitypes,     only : MPI_type
  use m_numeric_tools,   only : wrap2_pmhalf
  use m_io_tools,        only : open_file, get_unit
@@ -38,6 +37,7 @@ module m_iogkk
  use m_crystal,         only : crystal_t
  use m_ifc,             only : ifc_type
  use m_dynmat,          only : d2sym3
+ use m_ebands,          only : ebands_t
 
  implicit none
 

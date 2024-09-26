@@ -33,7 +33,6 @@ module m_gwpt
  use m_hide_blas
  use m_copy
  use m_ifc
- use m_ebands
  use m_wfk
  use m_ddb
  use m_ddk
@@ -57,7 +56,7 @@ module m_gwpt
  use m_xcdata
 
  use defs_abitypes,    only : mpi_type
- use defs_datatypes,   only : ebands_t, pseudopotential_type
+ use defs_datatypes,   only : pseudopotential_type
  use m_gwdefs,         only : GW_Q0_DEFAULT
  use m_time,           only : cwtime, cwtime_report, timab, sec2str
  use m_fstrings,       only : itoa, ftoa, sjoin, ktoa, ltoa, strcat
@@ -87,6 +86,7 @@ module m_gwpt
  use m_drivexc,        only : check_kxc
  use m_occ,            only : get_fact_spin_tol_empty
  use m_ppmodel,        only : PPM_HYBERTSEN_LOUIE, PPM_GODBY_NEEDS
+ use m_ebands,         only : ebands_t
 
  implicit none
 

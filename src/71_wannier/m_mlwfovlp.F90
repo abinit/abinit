@@ -39,7 +39,7 @@ module m_mlwfovlp
  use m_dtfil
  use m_krank
 
- use defs_datatypes, only : pseudopotential_type, ebands_t
+ use defs_datatypes, only : pseudopotential_type
  use defs_abitypes, only : MPI_type
  use m_io_tools, only : delete_file, get_unit, open_file
  use m_hide_lapack,     only : matrginv, xheev
@@ -49,7 +49,7 @@ module m_mlwfovlp
  use m_geometry,  only : xred2xcart, rotmat, wigner_seitz
  use m_crystal,  only : crystal_t
  use m_fftcore,  only : sphereboundary
- use m_ebands,   only : ebands_ncwrite, ebands_interp_kmesh
+ use m_ebands,   only : ebands_t, ebands_ncwrite, ebands_interp_kmesh
  use m_pawang,   only : pawang_type
  use m_pawrad,   only : pawrad_type, simp_gen
  use m_pawtab,   only : pawtab_type
@@ -57,7 +57,6 @@ module m_mlwfovlp
  use m_paw_sphharm, only : ylm_cmplx, initylmr
  use m_paw_overlap, only : smatrix_pawinit
  use m_evdw_wannier, only : evdw_wannier
- !use m_fft,         only : fourwf
  use m_abstract_wf, only: abstract_wf,  wann_ksetting_t, cg_cprj, wfd_wf
  use m_wannier_io,  only: write_eigenvalues, write_Amn, compute_and_write_unk, write_Mmn
 

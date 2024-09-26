@@ -36,7 +36,7 @@ module m_wfk_analyze
  use m_distribfft
 
  use m_io_tools,        only : iomode_from_fname
- use defs_datatypes,    only : pseudopotential_type, ebands_t
+ use defs_datatypes,    only : pseudopotential_type
  use defs_abitypes,     only : mpi_type
  use m_time,            only : timab
  use m_fstrings,        only : strcat, sjoin, itoa, ftoa

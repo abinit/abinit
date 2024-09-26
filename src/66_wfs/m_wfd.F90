@@ -34,8 +34,9 @@ module m_wfd
  use m_hdr
  use m_distribfft
  use m_cgtools
+ use m_ebands
 
- use defs_datatypes,   only : pseudopotential_type, ebands_t
+ use defs_datatypes,   only : pseudopotential_type
  use defs_abitypes,    only : mpi_type
  use m_gwdefs,         only : one_gw
  use m_time,           only : cwtime, cwtime_report, timab

@@ -29,9 +29,7 @@ module m_sigtk
  use m_ebands
  use m_crystal
  use m_xmpi
-#ifdef HAVE_NETCDF
  use netcdf
-#endif
  use m_nctk
  use m_hdr
  use m_dtset
@@ -40,7 +38,7 @@ module m_sigtk
  use m_build_info,   only : abinit_version
  use m_fstrings,     only : sjoin, ltoa, strcat, itoa, ftoa
  use m_io_tools,     only : open_file
- use defs_datatypes, only : ebands_t, pseudopotential_type
+ use defs_datatypes, only : pseudopotential_type
  use defs_wvltypes,  only : wvl_internal_type
  use m_pawtab,       only : pawtab_type
  use m_kpts,         only : kpts_ibz_from_kptrlatt, kpts_timrev_from_kptopt, kpts_map
@@ -746,7 +744,6 @@ subroutine sigtk_kpts_in_erange(dtset, cryst, ebands, psps, pawtab, prefix, comm
 
    ! Write netcdf file used to perform NSCF run and EPH calculations with eph_task = -4.
    path = strcat(prefix, "_KERANGE.nc")
-#ifdef HAVE_NETCDF
    NCF_CHECK(nctk_open_create(ncid, path, xmpi_comm_self))
    ! Write crystalline structure, fine_hdr and fine_ebands defined on the fine k-mesh.
    ! fine_ebands will be used to compare with the ab-initio NSCF eigenvalues.
@@ -774,7 +771,6 @@ subroutine sigtk_kpts_in_erange(dtset, cryst, ebands, psps, pawtab, prefix, comm
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "sigma_erange"), dtset%sigma_erange))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "einterp"), params))
    NCF_CHECK(nf90_close(ncid))
-#endif
  end if
 
  ABI_FREE(kshe_mask)

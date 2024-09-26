@@ -55,7 +55,7 @@ module m_common
  use m_invars1,           only : invars0, invars1m, indefo
  use m_time,              only : timab, time_set_papiopt
  use defs_abitypes,       only : MPI_type
- use defs_datatypes,      only : pspheader_type, ebands_t
+ use defs_datatypes,      only : pspheader_type
  use m_pspheads,          only : inpspheads, pspheads_comm
  use m_kpts,              only : kpts_timrev_from_kptopt
 

@@ -33,7 +33,6 @@ module m_ephtk
 
  use m_fstrings,     only : itoa, sjoin, ltoa, ftoa, ktoa
  use m_bz_mesh,      only : isamek
- use defs_datatypes, only : ebands_t
  use m_fftcore,      only : get_kg
 
  implicit none

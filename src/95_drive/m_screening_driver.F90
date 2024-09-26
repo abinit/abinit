@@ -38,7 +38,7 @@ module m_screening_driver
  use m_distribfft
  use m_crystal
 
- use defs_datatypes,  only : pseudopotential_type, ebands_t
+ use defs_datatypes,  only : pseudopotential_type
  use defs_abitypes,   only : MPI_type
  use m_time,          only : timab
  use m_io_tools,      only : open_file, file_exists, iomode_from_fname
@@ -48,7 +48,7 @@ module m_screening_driver
  use m_geometry,      only : normv, vdotw, mkrdim, metric
  use m_gwdefs,        only : GW_TOLQ0, GW_TOLQ, em1params_t, GW_Q0_DEFAULT
  use m_mpinfo,        only : destroy_mpi_enreg, initmpi_seq
- use m_ebands,        only : ebands_update_occ, ebands_copy, ebands_get_valence_idx, ebands_get_occupied, &
+ use m_ebands,        only : ebands_t,  ebands_update_occ, ebands_copy, ebands_get_valence_idx, ebands_get_occupied, &
                              ebands_apply_scissors, ebands_free, ebands_has_metal_scheme, ebands_ncwrite, ebands_init, &
                              gaps_t, ebands_get_gaps
  use m_bz_mesh,       only : kmesh_t, littlegroup_t, littlegroup_free, get_ng0sh, find_qmesh

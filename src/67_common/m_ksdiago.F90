@@ -36,7 +36,7 @@ module m_ksdiago
  use m_hdr
  use m_wfk
 
- use defs_datatypes,      only : pseudopotential_type, ebands_t
+ use defs_datatypes,      only : pseudopotential_type
  use defs_abitypes,       only : MPI_type
  use m_gwdefs,            only : GW_TOLQ0, GW_Q0_DEFAULT !, cone_gw, czero_gw, j_gw
  use m_dtset,             only : dataset_type

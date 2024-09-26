@@ -26,7 +26,6 @@ module m_eph_double_grid
  use m_ebands
  use m_abicore
 
- use defs_datatypes,   only : ebands_t
  use m_numeric_tools,  only : wrap2_pmhalf
  use m_symtk,          only : mati3inv
  use m_crystal,        only : crystal_t
