@@ -873,7 +873,7 @@ subroutine init_mywfc(mywfc, ebands, wfd , cg, cprj, cryst, &
         ABI_ERROR(msg)
       end if
 
-      call hdr_init_lowlvl(self%hdr_bz,self%ebands_bz,psps,pawtab,dummy_wvl,abinit_version,&
+      call self%hdr_bz%init_lowlvl(self%ebands_bz,psps,pawtab,dummy_wvl,abinit_version,&
         hdr%pertcase,hdr%natom,hdr%nsym,hdr%nspden,hdr%ecut,dtset%pawecutdg,hdr%ecutsm,dtset%dilatmx,&
         hdr%intxc,hdr%ixc,hdr%stmbias,hdr%usewvl,dtset%pawcpxocc,dtset%pawspnorb,dtset%ngfft,dtset%ngfftdg,hdr%so_psp,&
         hdr%qptn,cryst%rprimd,cryst%xred,hdr%symrel,hdr%tnons,hdr%symafm,hdr%typat,hdr%amu,hdr%icoulomb,&

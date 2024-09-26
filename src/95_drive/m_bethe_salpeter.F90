@@ -1494,7 +1494,7 @@ subroutine setup_bse(codvsn,acell,rprim,ngfft_osc,Dtset,Dtfil,BS_files,Psps,Pawt
  ABI_FREE(val_indices)
  !
  ! === Create the BSE header ===
- call hdr_init(ks_ebands,codvsn,Dtset,Hdr_bse,Pawtab,pertcase0,Psps,wvl)
+ call hdr_bse%init(ks_ebands,codvsn,Dtset,Pawtab,pertcase0,Psps,wvl)
 
  ! === Get Pawrhoij from the header of the WFK file ===
  ABI_MALLOC(Pawrhoij,(Cryst%natom*Dtset%usepaw))

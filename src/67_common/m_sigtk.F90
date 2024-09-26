@@ -663,7 +663,7 @@ subroutine sigtk_kpts_in_erange(dtset, cryst, ebands, psps, pawtab, prefix, comm
  end if
 
  ! Build new header with fine k-mesh (note kptrlatt_orig == kptrlatt)
- call hdr_init_lowlvl(fine_hdr, fine_ebands, psps, pawtab, dummy_wvl, abinit_version, pertcase0, &
+ call fine_hdr%init_lowlvl(fine_ebands, psps, pawtab, dummy_wvl, abinit_version, pertcase0, &
    dtset%natom, dtset%nsym, dtset%nspden, dtset%ecut, dtset%pawecutdg, dtset%ecutsm, dtset%dilatmx, &
    dtset%intxc, dtset%ixc, dtset%stmbias, dtset%usewvl, dtset%pawcpxocc, dtset%pawspnorb, dtset%ngfft, dtset%ngfftdg, &
    dtset%so_psp, dtset%qptn, cryst%rprimd, cryst%xred, cryst%symrel, cryst%tnons, cryst%symafm, cryst%typat, &

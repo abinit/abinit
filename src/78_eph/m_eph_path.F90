@@ -542,7 +542,7 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
        ! Allocate vlocal1 with correct cplex. Note nvloc.
        ABI_MALLOC(vlocal1, (cplex*n4, n5, n6, gs_ham_kq%nvloc))
 
-#if 0
+#if 1
        !===== Load the k/k+q dependent parts of the Hamiltonian
        ! Load k-dependent part in the Hamiltonian datastructure
        call gs_ham_kq%load_k(kpt_k=kk, npw_k=npw_k, istwf_k=istwfk_1, kg_k=kg_k, kpg_k=kpg_k, &

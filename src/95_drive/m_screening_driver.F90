@@ -2179,7 +2179,7 @@ subroutine setup_screening(codvsn,acell,rprim,wfk_fname,Dtset,Psps,Pawtab,&
  ABI_FREE(npwarr)
 
  ! Initialize abinit header for the screening part
- call hdr_init(ks_ebands,codvsn,Dtset,Hdr_out,Pawtab,pertcase0,Psps,wvl)
+ call Hdr_out%init(ks_ebands,codvsn,Dtset,Pawtab,pertcase0,Psps,wvl)
 
  ! Get Pawrhoij from the header.
  ABI_MALLOC(Pawrhoij,(Cryst%natom*Dtset%usepaw))

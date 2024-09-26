@@ -5917,7 +5917,7 @@ subroutine cg_randomize(istwf_k, npw_k, nspinor, nband_k, me_g0, cg_k)
  integer :: ipw, ispinor, index
  integer, parameter :: int64 = selected_int_kind(18)
  integer(KIND=int64) :: seed
- integer :: fold1,fold2,foldim,foldre,iband, ii
+ integer :: fold1,fold2,foldim,foldre,iband
 ! *************************************************************************
 
  do iband=1,nband_k

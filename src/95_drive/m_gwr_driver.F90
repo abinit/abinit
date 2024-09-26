@@ -672,7 +672,7 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
    owfk_ebands%eig = zero
    owfk_ebands%istwfk = istwfk_ik
    !print *, "owfk_ebands%npwarr:",  owfk_ebands%npwarr; stop
-   call hdr_init(owfk_ebands, codvsn, dtset, owfk_hdr, pawtab, 0, psps, wvl%descr)
+   call owfk_hdr%init(owfk_ebands, codvsn, dtset, pawtab, 0, psps, wvl%descr)
 
    ! Change the value of istwfk taken from dtset.
    ABI_REMALLOC(owfk_hdr%istwfk, (dtset%nkpt))

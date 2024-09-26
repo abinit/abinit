@@ -4483,7 +4483,7 @@ subroutine wfk_to_bz(in_path, dtset, psps, pawtab, out_path, hdr_bz, ebands_bz)
  kfull => ebands_bz%kptns
 
  ! Build new header and update pawrhoij.
- call hdr_init_lowlvl(hdr_bz,ebands_bz,psps,pawtab,dummy_wvl,abinit_version,&
+ call hdr_bz%init_lowlvl(ebands_bz,psps,pawtab,dummy_wvl,abinit_version,&
    ihdr%pertcase,ihdr%natom,ihdr%nsym,ihdr%nspden,ihdr%ecut,dtset%pawecutdg,ihdr%ecutsm,dtset%dilatmx,&
    ihdr%intxc,ihdr%ixc,ihdr%stmbias,ihdr%usewvl,dtset%pawcpxocc,dtset%pawspnorb,dtset%ngfft,dtset%ngfftdg,ihdr%so_psp,&
    ihdr%qptn,cryst%rprimd,cryst%xred,ihdr%symrel,ihdr%tnons,ihdr%symafm,ihdr%typat,ihdr%amu,ihdr%icoulomb,&

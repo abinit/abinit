@@ -34,7 +34,7 @@ module m_cgwf
  use defs_datatypes,  only : pseudopotential_type
  use m_fstrings,      only : sjoin, itoa, ftoa, ktoa
  use m_dtset,         only : dataset_type
- use m_hdr,           only : hdr_type
+ use m_hdr,           only : hdr_type, fform_contains
  use m_time,          only : timab
  use m_numeric_tools, only : rhophi
  use m_pawcprj,       only : pawcprj_type, pawcprj_alloc, pawcprj_put, pawcprj_copy, &
@@ -2341,6 +2341,7 @@ subroutine nscf_init(nscf, dtset, dtfil, cryst, comm)
  integer :: fform, nfftf
  type(crystal_t) :: pot_cryst
  type(hdr_type) :: pot_hdr
+ character(len=500) :: msg
 !arrays
  integer :: units(2)
  type(pawrhoij_type),allocatable :: pot_pawrhoij(:)
@@ -2355,8 +2356,7 @@ subroutine nscf_init(nscf, dtset, dtfil, cryst, comm)
  call wrtout(units, sjoin(" Reading KS GS potential from: ", dtfil%filpotin))
  call pot_hdr%from_fname(dtfil%filpotin, fform, comm)
  ABI_CHECK(fform /= 0, "hdr_read_from_fname returned fform 0")
- ! TODO
- !ABI_CHECK(fform_contains("potential", msg), msg)
+ ABI_CHECK(fform_contains(fform, "potential", msg), msg)
 
  ! Init FFT mesh from file as we don't want to interpolate the potential
  call ngfft_seq(nscf%ngfftf, pot_hdr%ngfft)
@@ -2591,7 +2591,7 @@ subroutine nscf_solve_kpt(nscf, isppol, kpt, istwf_k, nband_k, cryst, dtset, dtf
  integer,parameter :: paral_kgb0 = 0, mcgq0 = 0, mkgq0 = 0, nkpt1 = 1, pwind_alloc0 = 0, use_subvnlx0 = 0, use_subovl0 = 0, ider0 = 0, idir0 = 0
  integer,parameter :: icg0 = 0, igsc0 = 0, ikpt0 = 0, quit0 = 0, ortalgo_3 = 3, mkmem1 = 1, useylmgr0 = 0
  integer :: mcg, mgsc, n1, n2, n3, n4, n5, n6, nfft, nfftf, mgfft, mgfftf, inonsc, npwsp, me_g0, linalg_max_size
- integer :: ipw, ispinor, nspinor, ii, iband
+ integer :: nspinor, ii, iband
  real(dp),parameter :: cpus0 = zero
  real(dp) :: max_resid
  type(efield_type) :: dtefield

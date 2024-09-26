@@ -24,7 +24,6 @@ module m_rttddft
  use defs_basis
  use defs_abitypes,      only: MPI_type
  use defs_datatypes,     only: pseudopotential_type
-
  use m_dtset,            only: dataset_type
  use m_energies,         only: energies_type
  use m_hamiltonian,      only: init_hamiltonian, gs_hamiltonian_type
@@ -61,7 +60,7 @@ contains
 !!  rttddft_setup_ele_step
 !!
 !! FUNCTION
-!!  Init/Update various quantities needed before performing 
+!!  Init/Update various quantities needed before performing
 !!  propagation of KS orbitals
 !!
 !! INPUTS
@@ -97,7 +96,7 @@ subroutine rttddft_setup_ele_step(dtset, mpi_enreg, psps, tdks)
 
  my_natom=mpi_enreg%my_natom
 
- !** Update various quantities that needs to be changed 
+ !** Update various quantities that needs to be changed
  !** after a change of xred during the nuclear step
 
  !Compute large sphere G^2 cut-off (gsqcut) and box / sphere ratio
@@ -109,7 +108,7 @@ subroutine rttddft_setup_ele_step(dtset, mpi_enreg, psps, tdks)
  !   call getcut(tdks%boxcut,dtset%ecut,tdks%gmet,tdks%gsqcut,dtset%iboxcut, &
  !             & std_out,k0,tdks%pawfgr%ngfft)
  !end if
- 
+
  !Compute structure factor phases (exp(2Pi i G.xred)) on coarse and fine grid
  call getph(tdks%atindx,dtset%natom,tdks%pawfgr%ngfftc(1),tdks%pawfgr%ngfftc(2), &
           & tdks%pawfgr%ngfftc(3),tdks%ph1d,tdks%xred)
@@ -119,13 +118,13 @@ subroutine rttddft_setup_ele_step(dtset, mpi_enreg, psps, tdks)
  else
     tdks%ph1df(:,:)=tdks%ph1d(:,:)
  end if
- 
+
  !PAW specific
  if (psps%usepaw==1) then
     !Check for non-overlapping PAW spheres
     call chkpawovlp(dtset%natom,psps%ntypat,dtset%pawovlp,tdks%pawtab,tdks%rmet, &
                   & dtset%typat,tdks%xred)
- 
+
     !Identify parts of the rectangular grid where the density has to be calculated
     !FB: Needed?
     optcut=0;optgr0=dtset%pawstgylm;optgr1=0;optgr2=0;optrad=1-dtset%pawstgylm
@@ -287,7 +286,7 @@ subroutine rttddft_init_hamiltonian(dtset, energies, gs_hamk, istep, mpi_enreg, 
                      & comm,my_natom,dtset%natom,dtset%ntypat,tdks%pawrhoij,tdks%pawtab, &
                      & dtset%typat,comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
    end if
-   
+
    !** Computation of on-site densities/potentials/energies
    !** Force the recomputation of on-site potentials and Dij
    call paw_an_reset_flags(tdks%paw_an)
@@ -320,7 +319,7 @@ subroutine rttddft_init_hamiltonian(dtset, energies, gs_hamk, istep, mpi_enreg, 
       energies%e_pawdc=energies%e_pawdc-SUM(vpotzero(:))*tdks%zion+ &
                           & vpotzero(2)*dtset%cellcharge(1)
    end if
-   
+
    !** Dij computation
    !FB: @MT fatvshift?
    nfftotf=tdks%pawfgr%ngfft(1)*tdks%pawfgr%ngfft(2)*tdks%pawfgr%ngfft(3)
@@ -333,7 +332,7 @@ subroutine rttddft_init_hamiltonian(dtset, energies, gs_hamk, istep, mpi_enreg, 
              & fatvshift=one,comm_atom=mpi_enreg%comm_atom,                          &
              & mpi_atmtab=mpi_enreg%my_atmtab,mpi_comm_grid=mpi_enreg%comm_fft,      &
              & nucdipmom=dtset%nucdipmom)
-   
+
    !Symetrize Dij
    call symdij(tdks%gprimd,tdks%indsym,ipert,my_natom,dtset%natom,dtset%nsym, &
              & psps%ntypat,0,tdks%paw_ij,tdks%pawang,dtset%pawprtvol,         &
@@ -353,6 +352,6 @@ subroutine rttddft_init_hamiltonian(dtset, energies, gs_hamk, istep, mpi_enreg, 
 
 end subroutine rttddft_init_hamiltonian
 !!***
- 
+
 end module m_rttddft
 !!***
