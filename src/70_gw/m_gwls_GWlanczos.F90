@@ -19,7 +19,6 @@
 
 #include "abi_common.h"
 
-
 module m_gwls_GWlanczos
 !----------------------------------------------------------------------------------------------------
 ! This module implements the Lanczos scheme to band diagonalize an implicit operator.
@@ -42,8 +41,6 @@ use m_pawang
 use m_errors
 
 use m_io_tools,         only : get_unit
-use m_paw_dmft,         only : paw_dmft_type
-use m_ebands,           only : ebands_init, ebands_free
 
 implicit none
 save

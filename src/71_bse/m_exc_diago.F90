@@ -40,7 +40,7 @@ MODULE m_exc_diago
  use m_crystal,         only : crystal_t
  use m_kpts,            only : listkk
  use m_bz_mesh,         only : kmesh_t
- use m_ebands,          only : ebands_t, ebands_report_gap
+ use m_ebands,          only : ebands_t
  use m_eprenorms,       only : eprenorms_t
  use m_wfd,             only : wfdgw_t
  use m_paw_hr,          only : pawhur_t
@@ -160,7 +160,7 @@ subroutine exc_diago_driver(Wfd,Bsp,BS_files,KS_BSt,QP_BSt,Cryst,Kmesh,Psps,&
    end select
    !
    if (my_rank==master) then
-     call ebands_report_gap(QP_BSt,header="QP bands",unit=std_out,gaps=gaps)
+     call QP_BSt%report_gap(header="QP bands",unit=std_out,gaps=gaps)
      gw_gap = MINVAL(gaps(2,:))
      call exc_print_eig(BSp,BS_files%out_eig,gw_gap,exc_gap)
    end if

@@ -49,7 +49,7 @@ module m_mlwfovlp
  use m_geometry,  only : xred2xcart, rotmat, wigner_seitz
  use m_crystal,  only : crystal_t
  use m_fftcore,  only : sphereboundary
- use m_ebands,   only : ebands_t, ebands_ncwrite, ebands_interp_kmesh
+ use m_ebands,   only : ebands_t
  use m_pawang,   only : pawang_type
  use m_pawrad,   only : pawrad_type, simp_gen
  use m_pawtab,   only : pawtab_type
@@ -801,7 +801,7 @@ class(abstract_wf), pointer :: mywfc
      NCF_CHECK(nctk_open_create(ncid, abiwan_fname, xmpi_comm_self))
      NCF_CHECK(hdr%ncwrite(ncid, fform_from_ext("ABIWAN"), nc_define=.True.))
      NCF_CHECK(crystal%ncwrite(ncid))
-     NCF_CHECK(ebands_ncwrite(ebands, ncid))
+     NCF_CHECK(ebands%ncwrite(ncid))
 
      ncerr = nctk_def_dims(ncid, [ &
        nctkdim_t("mwan", mwan), &
@@ -3756,7 +3756,7 @@ subroutine wan_ncwrite_gwan(wan, dtfil, cryst, ebands, pert_comm)
    NCF_CHECK(nctk_open_create(root_ncid, gwan_filepath, pert_comm%value))
    NCF_CHECK(cryst%ncwrite(root_ncid))
    !NCF_CHECK(hdr%ncwrite(root_ncid))
-   NCF_CHECK(ebands_ncwrite(ebands, root_ncid))
+   NCF_CHECK(ebands%ncwrite(root_ncid))
  else
    NCF_CHECK(nctk_open_modify(root_ncid, gwan_filepath, pert_comm%value))
  end if
@@ -3984,8 +3984,8 @@ subroutine wan_interp_ebands(wan_spin, cryst, in_ebands, intp_kptrlatt, intp_nsh
 
  ! Build new ebands object with memory to be filled.
  band_block(:) = [1, wan_spin(1)%max_nwan]
- out_ebands = ebands_interp_kmesh(in_ebands, cryst, params, intp_kptrlatt, intp_nshiftk, intp_shiftk, &
-                                  band_block, comm, malloc_only=.True.)
+ out_ebands = in_ebands%interp_kmesh(cryst, params, intp_kptrlatt, intp_nshiftk, intp_shiftk, &
+                                     band_block, comm, malloc_only=.True.)
  out_ebands%eig = zero
 
  do spin=1,in_ebands%nsppol

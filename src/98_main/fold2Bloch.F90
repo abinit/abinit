@@ -45,6 +45,7 @@ program fold2Bloch
 
  use m_fstrings,       only : strcat
  use m_io_tools,       only : get_unit, iomode_from_fname, open_file, prompt
+
  implicit none
 
 !Arguments --------------------------------------------------------------
@@ -136,7 +137,7 @@ real(dp), allocatable :: cg(:,:), eig(:),kpts(:,:), weights(:),coefc(:,:), nkval
  fform = fform_from_ext("FOLD2BLOCH.nc")
  NCF_CHECK(wfk%hdr%ncwrite(ncid, fform, nc_define=.True.))
  NCF_CHECK(cryst%ncwrite(ncid))
- NCF_CHECK(ebands_ncwrite(ebands, ncid))
+ NCF_CHECK(ebands%ncwrite(ncid))
 
  ncerr = nctk_def_dims(ncid, [ &
  nctkdim_t("nk_unfolded", nkpt * nfold), &
@@ -154,9 +155,9 @@ real(dp), allocatable :: cg(:,:), eig(:),kpts(:,:), weights(:),coefc(:,:), nkval
  NCF_CHECK(nf90_inq_varid(ncid, "spectral_weights", weights_varid))
  NCF_CHECK(nctk_set_datamode(ncid))
  NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "fold_matrix"), fold_matrix))
- call cryst%free()
 
- call ebands_free(ebands)
+ call cryst%free()
+ call ebands%free()
 
  do csppol=1, nsppol
    if (nsppol==1) then !Determine spin polarization for output file

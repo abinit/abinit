@@ -339,7 +339,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  ! Electron band energies.
  bantot= dtset%mband*dtset%nkpt*dtset%nsppol
  ABI_CALLOC(doccde, (bantot))
- call ebands_init(ebands, bantot,dtset%nelect,dtset%ne_qFD,dtset%nh_qFD,dtset%ivalence,&
+ call ebands%init(bantot,dtset%nelect,dtset%ne_qFD,dtset%nh_qFD,dtset%ivalence,&
    doccde,eigen,hdr%istwfk,hdr%kptns,hdr%nband,&
    hdr%nkpt,hdr%npwarr,hdr%nsppol,hdr%nspinor,hdr%tphysel,hdr%tsmear,hdr%occopt,hdr%occ,hdr%wtk,&
    hdr%cellcharge, hdr%kptopt, hdr%kptrlatt_orig, hdr%nshiftk_orig, hdr%shiftk_orig, &
@@ -1273,9 +1273,9 @@ if (dtset%prt_lorbmag==1) then
  if (me == master .and. dtset%tfkinfunc==0) then
    call timab(1178,1,tsec)
    if (size(dtset%kptbounds, dim=2) > 0) then
-     call ebands_write(ebands, dtset%prtebands, dtfil%filnam_ds(4), kptbounds=dtset%kptbounds)
+     call ebands%write(dtset%prtebands, dtfil%filnam_ds(4), kptbounds=dtset%kptbounds)
    else
-     call ebands_write(ebands, dtset%prtebands, dtfil%filnam_ds(4))
+     call ebands%write(dtset%prtebands, dtfil%filnam_ds(4))
    end if
    call timab(1178,2,tsec)
  end if
@@ -1283,7 +1283,7 @@ if (dtset%prt_lorbmag==1) then
 !Optionally provide Xcrysden output for the Fermi surface (Only master writes)
  if (me == master .and. dtset%prtfsurf == 1) then
    call timab(1179,1,tsec)
-   if (ebands_write_bxsf(ebands,crystal,dtfil%fnameabo_app_bxsf) /= 0) then
+   if (ebands%write_bxsf(crystal,dtfil%fnameabo_app_bxsf) /= 0) then
      msg = "Cannot produce BXSF file with Fermi surface, see log file for more info"
      ABI_WARNING(msg)
      call wrtout(ab_out, msg)
@@ -1294,7 +1294,7 @@ if (dtset%prt_lorbmag==1) then
 !output nesting factor for Fermi surface (requires ph_nqpath)
  if (me == master .and. dtset%prtnest>0 .and. dtset%ph_nqpath > 0) then
    call timab(1180,1,tsec)
-   ierr = ebands_write_nesting(ebands,crystal,dtfil%fnameabo_app_nesting,dtset%prtnest,&
+   ierr = ebands%write_nesting(crystal,dtfil%fnameabo_app_nesting,dtset%prtnest,&
      dtset%tsmear,dtset%fermie_nest,dtset%ph_qpath(:,1:dtset%ph_nqpath),msg)
    if (ierr /= 0) then
      ABI_WARNING(msg)
@@ -1313,14 +1313,14 @@ if (dtset%prt_lorbmag==1) then
  ! BoltzTraP output files in GENEric format
  if (dtset%prtbltztrp == 1 .and. me==master)then
    call timab(1182,1,tsec)
-   call ebands_prtbltztrp(ebands, crystal, dtfil%filnam_ds(4))
+   call ebands%prtbltztrp(crystal, dtfil%filnam_ds(4))
    call timab(1182,2,tsec)
  endif
 
  ! Band structure interpolation from eigenvalues computed on the k-mesh.
  if (nint(dtset%einterp(1)) /= 0 .and. dtset%kptopt > 0) then
    call timab(1183,1,tsec)
-   call ebands_interpolate_kpath(ebands, dtset, crystal, [0, 0], dtfil%filnam_ds(4), comm)
+   call ebands%interpolate_kpath(dtset, crystal, [0, 0], dtfil%filnam_ds(4), comm)
    call timab(1183,2,tsec)
  end if
 
@@ -1336,7 +1336,7 @@ if (dtset%prt_lorbmag==1) then
    NCF_CHECK(nctk_open_create(ncid, fname, xmpi_comm_self))
    NCF_CHECK(hdr%ncwrite(ncid, fform_den, spinat=dtset%spinat, nc_define=.True.))
    NCF_CHECK(crystal%ncwrite(ncid))
-   NCF_CHECK(ebands_ncwrite(ebands, ncid))
+   NCF_CHECK(ebands%ncwrite(ncid))
    ! Add energy, forces, stresses
    NCF_CHECK(results_gs_ncwrite(results_gs, ncid, dtset%ecut, dtset%pawecutdg))
 
@@ -1364,7 +1364,7 @@ if (dtset%prt_lorbmag==1) then
  ABI_SFREE(intgden)
 
  call crystal%free()
- call ebands_free(ebands)
+ call ebands%free()
 
  ! Destroy atom table used for parallelism
  call free_my_atmtab(my_atmtab,my_atmtab_allocated)

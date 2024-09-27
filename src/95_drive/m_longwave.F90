@@ -104,13 +104,6 @@ contains
 !! PARENTS
 !!      m_driver
 !!
-!! CHILDREN
-!!      check_kxc,ddb_hdr%free,ddb_hdr%open_write,ddb_hdr_init,
-!!      dfpt_lw_doutput,ebands_free
-!!      fourdp,hdr%free,hdr%update,hdr_init,inwffil,kpgio,matr3inv,mkcore,mkrho
-!!      pawfgr_init,pspini,read_rhor,rhotoxc,setsym,setup1,symmetrize_xred
-!!      wffclose,xcdata_init
-!!
 !! SOURCE
 
 subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
@@ -392,7 +385,7 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
 & psps,rprimd,comm_mpi=mpi_enreg%comm_cell)
 
 !Initialize band structure datatype
- bstruct = ebands_from_dtset(dtset, npwarr)
+ call bstruct%from_dtset(dtset, npwarr)
 
 !Initialize PAW atomic occupancies to zero
  ABI_MALLOC(pawrhoij,(0))
@@ -412,7 +405,7 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
 & comm_atom=mpi_enreg%comm_atom, mpi_atmtab=mpi_enreg%my_atmtab)
 
 !Clean band structure datatype (should use it more in the future !)
- call ebands_free(bstruct)
+ call bstruct%free()
 
 !Initialize wavefunction files and wavefunctions.
  ireadwf0=1

@@ -557,7 +557,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    npwarr_ => npwarr
  end if
 
- bstruct = ebands_from_dtset(dtset, npwarr_)
+ call bstruct%from_dtset(dtset, npwarr_)
 
  if (dtset%paral_kgb/=0)  then
    ABI_FREE(npwarr_)
@@ -583,7 +583,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
                comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
 
 !Clean band structure datatype (should use it more in the future !)
- call ebands_free(bstruct)
+ call bstruct%free()
 
 !Update header, with evolving variables, when available
 !Here, rprimd, xred and occ are available
@@ -1428,7 +1428,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  ABI_MALLOC(doccde,(dtset%mband*dtset%nkpt*dtset%nsppol))
  doccde=zero
 
- call ebands_init(ebands, bantot, dtset%nelect,dtset%ne_qFD,dtset%nh_qFD,dtset%ivalence,&
+ call ebands%init(bantot, dtset%nelect,dtset%ne_qFD,dtset%nh_qFD,dtset%ivalence,&
                   doccde,eigen,hdr%istwfk,hdr%kptns,hdr%nband,&
                   hdr%nkpt,hdr%npwarr,hdr%nsppol,hdr%nspinor,hdr%tphysel,hdr%tsmear,hdr%occopt,hdr%occ,hdr%wtk,&
                   hdr%cellcharge, hdr%kptopt, hdr%kptrlatt_orig, hdr%nshiftk_orig, hdr%shiftk_orig, &
@@ -1439,7 +1439,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  ABI_FREE(doccde)
 
  ! Compute and print the gaps.
- call ebands_report_gap(ebands,header="Gap info",unit=std_out,mode_paral="COLL",gaps=results_gs%gaps)
+ call ebands%report_gap(header="Gap info",unit=std_out,mode_paral="COLL",gaps=results_gs%gaps)
 
  call timab(1226,2,tsec)
  call timab(1227,3,tsec)
@@ -1486,7 +1486,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    wfkfull_path = strcat(dtfil%filnam_ds(4), "_FULL_WFK")
    if (dtset%iomode == IO_MODE_ETSF) wfkfull_path = nctk_ncify(wfkfull_path)
    call wfk_to_bz(filnam, dtset, psps, pawtab, wfkfull_path, hdr_bz, ebands_bz)
-   call hdr_bz%free(); call ebands_free(ebands_bz); call cryst%free()
+   call hdr_bz%free(); call ebands_bz%free(); call cryst%free()
  end if
 
  call timab(1227,2,tsec)
@@ -1742,7 +1742,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  end if
 
  call hdr%free()
- call ebands_free(ebands)
+ call ebands%free()
 
  if (me == master .and. dtset%prtxml == 1) then
 !  The dataset given in argument has been treated, then we output its variables.

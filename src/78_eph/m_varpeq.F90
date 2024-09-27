@@ -783,7 +783,7 @@ subroutine varpeq_ncwrite(self, dtset, dtfil)
 
    ! Write the crystal (TR & invsersion symmetry only) & ebands dataset_type
    NCF_CHECK(self%cryst%ncwrite(ncid))
-   NCF_CHECK(ebands_ncwrite(self%gstore%ebands, ncid))
+   NCF_CHECK(self%gstore%ebands%ncwrite(ncid))
 
    ! Add varpeq dimensions.
    ncerr = nctk_def_dims(ncid, [ &
@@ -1416,7 +1416,7 @@ subroutine varpeq_init(self, gstore, dtset)
  ! Datatypes and pointers
  self%gstore => gstore
  call gstore%cryst%copy(self%cryst)
- self%gaps = ebands_get_gaps(gstore%ebands, ierr)
+ self%gaps = gstore%ebands%get_gaps(ierr)
 
  ! Initialize polaronic states for each spin
  ABI_MALLOC(self%polstate, (gstore%my_nspins))

@@ -1222,10 +1222,10 @@ subroutine cumulant_kubo_transport(self, dtset, cryst)
    end if
 
    ! Compute Fermi level for different T values.
-   call ebands_get_muT_with_fd(self%ebands, self%ntemp, self%kTmesh, dtset%spinmagntarget, dtset%prtvol, self%transport_mu_e, comm)
+   call self%ebands%get_muT_with_fd(self%ntemp, self%kTmesh, dtset%spinmagntarget, dtset%prtvol, self%transport_mu_e, comm)
  end if
 
- call ebands_get_carriers(self%ebands, self%ntemp, self%kTmesh, self%transport_mu_e, self%n_ehst)
+ call self%ebands%get_carriers(self%ntemp, self%kTmesh, self%transport_mu_e, self%n_ehst)
 
  time_opt =0
  cnt = 0
@@ -1803,9 +1803,9 @@ subroutine cumulant_free(self)
  ABI_SFREE(self%kTmesh)
  ABI_SFREE(self%mu_e)
  ABI_SFREE(self%n_ehst)
- call destroy_mpi_enreg(self%ce_mpi_enreg)
- call ebands_free(self%ebands)
 
+ call destroy_mpi_enreg(self%ce_mpi_enreg)
+ call self%ebands%free()
  call self%spin_comm%free()
  call self%kcalc_comm%free()
  call self%wt_comm%free()

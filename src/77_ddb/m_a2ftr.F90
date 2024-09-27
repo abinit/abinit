@@ -1887,7 +1887,7 @@ subroutine get_tau_k(Cryst,ifc,Bst,elph_ds,elph_tr_ds,eigenGS,max_occ)
 
    Bst%occopt = 3
    Bst%tsmear = Temp*kb_HaK
-   call ebands_update_occ(Bst,-99.99_dp)
+   call Bst%update_occ(-99.99_dp)
    write(message,'(a,f12.6,a,E20.12)')'At T=',Temp,' Fermi level is:',Bst%fermie
    call wrtout(std_out,message,'COLL')
 

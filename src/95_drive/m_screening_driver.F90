@@ -48,9 +48,7 @@ module m_screening_driver
  use m_geometry,      only : normv, vdotw, mkrdim, metric
  use m_gwdefs,        only : GW_TOLQ0, GW_TOLQ, em1params_t, GW_Q0_DEFAULT
  use m_mpinfo,        only : destroy_mpi_enreg, initmpi_seq
- use m_ebands,        only : ebands_t,  ebands_update_occ, ebands_copy, ebands_get_valence_idx, ebands_get_occupied, &
-                             ebands_apply_scissors, ebands_free, ebands_has_metal_scheme, ebands_ncwrite, ebands_init, &
-                             gaps_t, ebands_get_gaps
+ use m_ebands,        only : ebands_t,  gaps_t
  use m_bz_mesh,       only : kmesh_t, littlegroup_t, littlegroup_free, get_ng0sh, find_qmesh
  use m_kg,            only : getph
  use m_gsphere,       only : gsphere_t, setshells
@@ -502,9 +500,9 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  ABI_MALLOC(ks_vbik   ,(ks_ebands%nkpt, ks_ebands%nsppol))
  ABI_MALLOC(qp_vbik   ,(ks_ebands%nkpt, ks_ebands%nsppol))
 
- call ebands_update_occ(ks_ebands, Dtset%spinmagntarget, prtvol=0)
- ks_occ_idx = ebands_get_occupied(ks_ebands,tol8) ! tol8 to be consistent when the density
- ks_vbik    = ebands_get_valence_idx(ks_ebands)
+ call ks_ebands%update_occ(Dtset%spinmagntarget, prtvol=0)
+ ks_occ_idx = ks_ebands%get_occupied(tol8) ! tol8 to be consistent when the density
+ ks_vbik    = ks_ebands%get_valence_idx()
 
  ibocc(:)=MAXVAL(ks_occ_idx(:,:),DIM=1) ! Max occupied band index for each spin.
  ABI_FREE(ks_occ_idx)
@@ -698,7 +696,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 
 ! Initialize qp_ebands using KS bands
 ! In case of SCGW, update qp_ebands using the QPS file.
- call ebands_copy(ks_ebands, qp_ebands)
+ call ks_ebands%copy(qp_ebands)
 
  call timab(319,2,tsec) ! screening(1)
 
@@ -737,8 +735,8 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
    end if
 
    ! Calculate new occ. factors and fermi level.
-   call ebands_update_occ(qp_ebands, Dtset%spinmagntarget)
-   qp_vbik(:,:) = ebands_get_valence_idx(qp_ebands)
+   call qp_ebands%update_occ(Dtset%spinmagntarget)
+   qp_vbik(:,:) = qp_ebands%get_valence_idx()
 
    ! === Update only the wfg treated with GW ===
    ! For PAW update and re-symmetrize cprj in the full BZ, TODO add rotation in spinor space
@@ -761,7 +759,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
    ' update of the energies in W by a scissor operator',ch10,&
    ' applying a scissor operator of [eV] : ',Ep%mbpt_sciss*Ha_eV,ch10
    call wrtout([ab_out, std_out], msg)
-   call ebands_apply_scissors(qp_ebands,Ep%mbpt_sciss)
+   call qp_ebands%apply_scissors(Ep%mbpt_sciss)
  else if (update_energies) then
    write(msg,'(4a)')&
     ' screening : performing a first self-consistency',ch10,&
@@ -771,7 +769,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
    call rdgw(qp_ebands,gw_fname,igwene,extrapolate=.FALSE.)
    !call rdgw(qp_ebands,gw_fname,igwene,extrapolate=.TRUE.)
    ABI_FREE(igwene)
-   call ebands_update_occ(qp_ebands, Dtset%spinmagntarget)
+   call qp_ebands%update_occ(Dtset%spinmagntarget)
  end if
 
 !========================
@@ -1003,7 +1001,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 
    if (dtset%userie == 4242) then
        call wrtout(std_out, sjoin("userie == 4242 --> Using minimax mesh with ntau:", itoa(dtset%nfreqim)))
-       gaps = ebands_get_gaps(ks_ebands, gap_err)
+       gaps = ks_ebands%get_gaps(gap_err)
        ABI_CHECK(gap_err == 0, "gap_err")
        ! ================================
        ! Setup tau/omega mesh and weights
@@ -1149,7 +1147,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 
      ! Add the intraband term if required and metallic occupation scheme is used.
      add_chi0_intraband=.FALSE. !add_chi0_intraband=.TRUE.
-     if (add_chi0_intraband .and. ebands_has_metal_scheme(qp_ebands)) then
+     if (add_chi0_intraband .and. qp_ebands%has_metal_scheme()) then
 
        ABI_MALLOC_OR_DIE(chi0intra,(Ep%npwe*Ep%nI,Ep%npwe*Ep%nJ,Ep%nomega), ierr)
 
@@ -1236,7 +1234,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
        if (dtset%iomode == IO_MODE_ETSF) then
          NCF_CHECK(nctk_open_create(unt_susc, nctk_ncify(dtfil%fnameabo_sus), xmpi_comm_self))
          NCF_CHECK(cryst%ncwrite(unt_susc))
-         NCF_CHECK(ebands_ncwrite(qp_ebands, unt_susc))
+         NCF_CHECK(qp_ebands%ncwrite(unt_susc))
        else
          unt_susc=Dtfil%unchi0
          if (open_file(dtfil%fnameabo_sus,msg,unit=unt_susc,status='unknown',form='unformatted') /= 0) then
@@ -1504,7 +1502,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
        if (dtset%iomode == IO_MODE_ETSF) then
          NCF_CHECK(nctk_open_create(unt_em1, nctk_ncify(dtfil%fnameabo_scr), xmpi_comm_self))
          NCF_CHECK(cryst%ncwrite(unt_em1))
-         NCF_CHECK(ebands_ncwrite(qp_ebands, unt_em1))
+         NCF_CHECK(qp_ebands%ncwrite(unt_em1))
        else
          unt_em1=Dtfil%unscr
          if (open_file(dtfil%fnameabo_scr,msg,unit=unt_em1,status='unknown',form='unformatted') /= 0) then
@@ -1589,8 +1587,8 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  call Ep%free()
  call Hdr_wfk%free()
  call Hdr_local%free()
- call ebands_free(ks_ebands)
- call ebands_free(qp_ebands)
+ call ks_ebands%free()
+ call qp_ebands%free()
  call destroy_mpi_enreg(MPI_enreg_seq)
  call littlegroup_free(ltg_q)
  ABI_FREE(Ltg_q)
@@ -2159,7 +2157,7 @@ subroutine setup_screening(codvsn,acell,rprim,wfk_fname,Dtset,Psps,Pawtab,&
  ABI_MALLOC(npwarr,(Hdr_wfk%nkpt))
  npwarr(:)=Ep%npwwfn
 
- call ebands_init(ks_ebands, bantot, Dtset%nelect,Dtset%ne_qFD,Dtset%nh_qFD,Dtset%ivalence,&
+ call ks_ebands%init(bantot, Dtset%nelect,Dtset%ne_qFD,Dtset%nh_qFD,Dtset%ivalence,&
                   doccde,eigen,Dtset%istwfk,Kmesh%ibz,Dtset%nband,&
                   Kmesh%nibz,npwarr,Dtset%nsppol,Dtset%nspinor,Dtset%tphysel,Dtset%tsmear,Dtset%occopt,occfact,Kmesh%wt,&
                   dtset%cellcharge(1), dtset%kptopt, dtset%kptrlatt_orig, dtset%nshiftk_orig, dtset%shiftk_orig, &
@@ -2172,7 +2170,7 @@ subroutine setup_screening(codvsn,acell,rprim,wfk_fname,Dtset,Psps,Pawtab,&
  !write(std_out,*)MAXVAL(ABS(occfact(:)-ks_ebands%occ(:)))
 
  !TODO call ebands_update_occ here
- !$call ebands_update_occ(ks_ebands,spinmagntarget,Dtset%prtvol)
+ !call ks_ebands%update_occ(spinmagntarget,Dtset%prtvol)
 
  ABI_FREE(doccde)
  ABI_FREE(eigen)

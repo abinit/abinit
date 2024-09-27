@@ -1732,7 +1732,7 @@ subroutine ugb_from_wfk_file(ugb, ik_ibz, spin, istwf_k, kpoint, nband_k, &
  call ugb%print(units, dtset%prtvol)
 
  call wfk_hdr%free()
- call ebands_free(wfk_ebands)
+ call wfk_ebands%free()
 
 end subroutine ugb_from_wfk_file
 !!***
@@ -2094,7 +2094,7 @@ subroutine hyb_free(hyb)
  ! Free datatypes
  call hyb%wfd%free()
  call hyb%vcgen%free()
- call ebands_free(hyb%ebands)
+ call hyb%ebands%free()
 
 end subroutine hyb_free
 !!***

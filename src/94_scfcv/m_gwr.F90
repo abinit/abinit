@@ -880,11 +880,11 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  gwr%mpi_enreg => mpi_enreg
 
  ! Initialize qp_ebands with KS values.
- call ebands_copy(ks_ebands, gwr%qp_ebands)
- call ebands_copy(ks_ebands, gwr%qp_ebands_prev)
+ call ks_ebands%copy(gwr%qp_ebands)
+ call ks_ebands%copy(gwr%qp_ebands_prev)
 
  ABI_MALLOC(gwr%ks_vbik, (gwr%ks_ebands%nkpt, gwr%ks_ebands%nsppol))
- gwr%ks_vbik(:,:) = ebands_get_valence_idx(gwr%ks_ebands)
+ gwr%ks_vbik(:,:) = gwr%ks_ebands%get_valence_idx()
 
  gwr%nspinor = dtset%nspinor; gwr%nsppol = dtset%nsppol; gwr%nspden = dtset%nspden; gwr%nsig_ab = gwr%nspinor ** 2
  gwr%natom = dtset%natom; gwr%usepaw = dtset%usepaw
@@ -1003,10 +1003,10 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  ! ==========================
  ! Setup k-points in Sigma_nk
  ! ==========================
- gwr%ks_gaps = ebands_get_gaps(ks_ebands, gap_err)
+ gwr%ks_gaps = ks_ebands%get_gaps(gap_err)
  if (my_rank == master) then
-   !call ebands_print(ks_ebands, [std_out], header="KS band structure", prtvol=gwr%dtset%prtvol)
-   !call ebands_print_gaps(ks_ebands, [ab_out], header="KS gaps (Fermi energy set to zero)")
+   !call ks_ebands%print([std_out], header="KS band structure", prtvol=gwr%dtset%prtvol)
+   !call ks_ebands%print_gaps([ab_out], header="KS gaps (Fermi energy set to zero)")
    call gwr%ks_gaps%print(units, header="Kohn-Sham gaps and band edges from IBZ mesh")
  end if
 
@@ -1090,8 +1090,8 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
      cnt = 0
      do spin=1,gwr%nsppol
        bstop = gwr%bstart_ks(ikcalc, spin) + gwr%nbcalc_ks(ikcalc, spin) - 1
-       call ebands_enclose_degbands(ks_ebands, ik_ibz, spin, gwr%bstart_ks(ikcalc, spin), bstop, changed, TOL_EDIFF, &
-                                    degblock=degblock)
+       call ks_ebands%enclose_degbands(ik_ibz, spin, gwr%bstart_ks(ikcalc, spin), bstop, changed, TOL_EDIFF, &
+                                       degblock=degblock)
        if (changed) then
          gwr%nbcalc_ks(ikcalc, spin) = bstop - gwr%bstart_ks(ikcalc, spin) + 1
          cnt = cnt + 1
@@ -1586,7 +1586,7 @@ end block
    NCF_CHECK(nctk_open_create(ncid, gwr%gwrnc_path, xmpi_comm_self))
    ! Write structure and ebands
    NCF_CHECK(cryst%ncwrite(ncid))
-   NCF_CHECK(ebands_ncwrite(ks_ebands, ncid))
+   NCF_CHECK(ks_ebands%ncwrite(ncid))
 
    ! Add GWR dimensions.
    smat_bsize1 = gwr%b2gw - gwr%b1gw + 1
@@ -1937,8 +1937,8 @@ subroutine gwr_free(gwr)
  ABI_SFREE(gwr%chinpw_qibz)
 
  call gwr%ks_gaps%free()
- call ebands_free(gwr%qp_ebands)
- call ebands_free(gwr%qp_ebands_prev)
+ call gwr%qp_ebands%free()
+ call gwr%qp_ebands_prev%free()
  call gwr%kcalc_wfd%free()
  call gwr%wfk_hdr%free()
 
@@ -2095,7 +2095,7 @@ subroutine gwr_load_kcalc_wfd(gwr, wfk_path, tmp_kstab)
  ABI_FREE(wfd_istwfk)
  ABI_FREE(bks_mask)
 
- call ebands_free(ks_ebands)
+ call ks_ebands%free()
  call wfk_hdr%free()
 
  ! Read KS wavefunctions.
@@ -2166,7 +2166,7 @@ subroutine gwr_read_ugb_from_wfk(gwr, wfk_path)
    ABI_WARNING(sjoin("WFK file contains", itoa(min_nband), "states while you're asking for:", itoa(nbsum)))
    nbsum = min_nband
  end if
- call ebands_free(wfk_ebands)
+ call wfk_ebands%free()
 
  ! ==============================================
  ! Build Green's functions in g-space for given k
@@ -5741,7 +5741,7 @@ end if
 
    ! Recompute occupancies and set fermie to zero.
    ! FIXME: Possible problem here if the QP energies are not ordered!
-   call ebands_update_occ(gwr%qp_ebands, gwr%dtset%spinmagntarget, prtvol=gwr%dtset%prtvol, fermie_to_zero=.True.)
+   call gwr%qp_ebands%update_occ(gwr%dtset%spinmagntarget, prtvol=gwr%dtset%prtvol, fermie_to_zero=.True.)
  end if
 
  if (gwr%comm%me == 0) then
@@ -5833,7 +5833,7 @@ end if
    msg = "Kohn-Sham gaps and band edges from IBZ mesh"
    call gwr%ks_gaps%print(units, header=msg)
 
-   new_gaps = ebands_get_gaps(gwr%qp_ebands, ierr)
+   new_gaps = gwr%qp_ebands%get_gaps(ierr)
    write(msg,"(a,i0,a)")" QP gaps and band edges taking into account Sigma_nk corrections for ",gwr%nkcalc," k-points"
    call new_gaps%print(units, header=msg)
    if (ierr /= 0) then
@@ -6533,7 +6533,7 @@ subroutine gwr_check_scf_cycle(gwr, converged)
 
  if (gwr%comm%me == master) then
    write(msg, "(a,i0,a)") "QP gaps at iteration: ",gwr%scf_iteration," (Fermi energy set to zero)"
-   call ebands_print_gaps(gwr%qp_ebands, units, header=msg)
+   call gwr%qp_ebands%print_gaps(units, header=msg)
    if (.not. converged) then
      call wrtout(units," Not converged --> start new iteration ...")
    !else
@@ -6900,7 +6900,7 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
  ks_eig => gwr%ks_ebands%eig
  mband = gwr%ks_ebands%mband
 
- is_metallic = ebands_has_metal_scheme(now_ebands)
+ is_metallic = now_ebands%has_metal_scheme()
 
  ! Setup weight (2 for spin unpolarized systems, 1 for polarized).
  ! spin_fact is used to normalize the occupation factors to one.

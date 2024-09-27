@@ -1969,7 +1969,7 @@ type(ebands_t) function ebands_from_file(path, comm) result(new)
  ! NOTE: Assume file with header. Must use wfk_read_eigenvalues to handle Fortran WFK
  if (endswith(path, "_WFK") .or. endswith(path, "_WFK.nc")) then
    call wfk_read_eigenvalues(path, gs_eigen, hdr, comm)
-   new = ebands_from_hdr(hdr, maxval(hdr%nband), gs_eigen)
+   call new%from_hdr(hdr, maxval(hdr%nband), gs_eigen)
 
  else if (endswith(path, ".nc")) then
    NCF_CHECK(nctk_open_read(ncid, path, comm))
@@ -1977,7 +1977,7 @@ type(ebands_t) function ebands_from_file(path, comm) result(new)
    ABI_CHECK(fform /= 0, "fform == 0")
    ABI_MALLOC(gs_eigen, (hdr%mband, hdr%nkpt, hdr%nsppol))
    NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "eigenvalues"), gs_eigen))
-   new = ebands_from_hdr(hdr, maxval(hdr%nband), gs_eigen)
+   call new%from_hdr(hdr, maxval(hdr%nband), gs_eigen)
    NCF_CHECK(nf90_close(ncid))
  else
    ABI_ERROR(sjoin("Don't know how to construct crystal structure from: ", path, ch10, "Supported extensions: _WFK or .nc"))

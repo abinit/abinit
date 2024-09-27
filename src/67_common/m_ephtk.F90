@@ -419,13 +419,13 @@ subroutine ephtk_update_ebands(dtset, ebands, header)
    "   From WFK file: occopt = ",ebands%occopt,", tsmear = ",ebands%tsmear,ch10,&
    "   From input:    occopt = ",dtset%occopt,", tsmear = ",dtset%tsmear,ch10
    call wrtout(unts, msg)
-   call ebands_set_scheme(ebands, dtset%occopt, dtset%tsmear, dtset%spinmagntarget, dtset%prtvol)
+   call ebands%set_scheme(dtset%occopt, dtset%tsmear, dtset%spinmagntarget, dtset%prtvol)
 
    if (abs(dtset%mbpt_sciss) > tol6) then
      ! Apply the scissor operator
      call wrtout(unts, sjoin(" Applying scissors operator to the conduction states with value: ", &
                  ftoa(dtset%mbpt_sciss * Ha_eV, fmt="(f6.2)"), " (eV)"))
-     call ebands_apply_scissors(ebands, dtset%mbpt_sciss)
+     call ebands%apply_scissors(dtset%mbpt_sciss)
    end if
  end if
 
@@ -433,21 +433,21 @@ subroutine ephtk_update_ebands(dtset, ebands, header)
  if (dtset%eph_fermie /= zero) then
    ABI_CHECK(dtset%eph_extrael == zero, "eph_fermie and eph_extrael are mutually exclusive")
    call wrtout(unts, sjoin(" Fermi level set by the user at:", ftoa(dtset%eph_fermie * Ha_eV, fmt="(f6.2)"), " (eV)"))
-   call ebands_set_fermie(ebands, dtset%eph_fermie, msg)
+   call ebands%set_fermie(dtset%eph_fermie, msg)
    call wrtout(unts, msg)
 
  else if (abs(dtset%eph_extrael) > zero) then
    call wrtout(unts, sjoin(" Adding eph_extrael:", ftoa(dtset%eph_extrael), "to input nelect:", ftoa(ebands%nelect)))
-   call ebands_set_scheme(ebands, dtset%occopt, dtset%tsmear, dtset%spinmagntarget, dtset%prtvol, update_occ=.False.)
-   call ebands_set_extrael(ebands, dtset%eph_extrael, nholes, dtset%spinmagntarget, msg)
+   call ebands%set_scheme(dtset%occopt, dtset%tsmear, dtset%spinmagntarget, dtset%prtvol, update_occ=.False.)
+   call ebands%set_extrael(dtset%eph_extrael, nholes, dtset%spinmagntarget, msg)
    call wrtout(unts, msg)
  end if
 
  ! Recompute occupations. This is needed if WFK files have been produced in a NSCF run
  ! since occ are set to zero, and fermie is taken from the previous density.
  if (dtset%kptopt > 0) then
-   call ebands_update_occ(ebands, dtset%spinmagntarget, prtvol=dtset%prtvol)
-   call ebands_print(ebands, [std_out], header=header, prtvol=dtset%prtvol)
+   call ebands%update_occ(dtset%spinmagntarget, prtvol=dtset%prtvol)
+   call ebands%print([std_out], header=header, prtvol=dtset%prtvol)
  end if
 
 end subroutine ephtk_update_ebands

@@ -546,7 +546,7 @@ subroutine ddkstore_compute_ddk(ds, wfk_path, prefix, dtset, psps, pawtab, ngfft
    !tmp_hdr%pertcase = 0
    !NCF_CHECK(tmp_hdr%ncwrite(ncid, 43, nc_define=.True.))
    !NCF_CHECK(cryst%ncwrite(ncid))
-   !NCF_CHECK(ebands_ncwrite(ebands, ncid))
+   !NCF_CHECK(ebands%ncwrite(ncid))
    !if (ds%only_diago) then
    !  ncerr = nctk_def_arrays(ncid, [ &
    !    nctkarr_t('vred_diagonal', "dp", "three, max_number_of_states, number_of_kpoints, number_of_spins")], defmode=.True.)
@@ -570,7 +570,7 @@ subroutine ddkstore_compute_ddk(ds, wfk_path, prefix, dtset, psps, pawtab, ngfft
      tmp_hdr%pertcase = 3 * cryst%natom + ii
      NCF_CHECK(tmp_hdr%ncwrite(ncid, 43, nc_define=.True.))
      NCF_CHECK(cryst%ncwrite(ncid))
-     NCF_CHECK(ebands_ncwrite(ebands, ncid))
+     NCF_CHECK(ebands%ncwrite(ncid))
      ncerr = nctk_def_arrays(ncid, [ &
        nctkarr_t('h1_matrix_elements', "dp", &
         "two, max_number_of_states, max_number_of_states, number_of_kpoints, number_of_spins")], defmode=.True.)
@@ -600,7 +600,7 @@ subroutine ddkstore_compute_ddk(ds, wfk_path, prefix, dtset, psps, pawtab, ngfft
 
  ! Free memory
  call wfd%free()
- call ebands_free(ebands)
+ call ebands%free()
  call cryst%free()
  call hdr%free()
 

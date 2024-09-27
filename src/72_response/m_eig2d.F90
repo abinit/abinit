@@ -1740,7 +1740,7 @@ subroutine eig2tot(dtfil,xred,psps,pawtab,natom,bdeigrf,clflg,dim_eig2nkq,eigen0
 &   dtset%symrel,dtset%tnons,dtset%symafm)
 !  Electronic band energies.
    bantot= dtset%mband*dtset%nkpt*dtset%nsppol
-   call ebands_init(bands, bantot, dtset%nelect,dtset%ne_qFD,dtset%nh_qFD,dtset%ivalence,&
+   call bands%init(bantot, dtset%nelect,dtset%ne_qFD,dtset%nh_qFD,dtset%ivalence,&
 &   doccde,eigen0,hdr0%istwfk,hdr0%kptns,&
 &   hdr0%nband, hdr0%nkpt,hdr0%npwarr,hdr0%nsppol,hdr0%nspinor,&
 &   hdr0%tphysel,hdr0%tsmear,hdr0%occopt,hdr0%occ,hdr0%wtk,&
@@ -1753,7 +1753,7 @@ subroutine eig2tot(dtfil,xred,psps,pawtab,natom,bdeigrf,clflg,dim_eig2nkq,eigen0
      call fan_init(fan,fan2d,dtset%mband,hdr0%nsppol,nkpt_rbz,dtset%natom)
      NCF_CHECK_MSG(nctk_open_create(ncid, fname, xmpi_comm_self), "Creating FAN file")
      NCF_CHECK(crystal%ncwrite(ncid))
-     NCF_CHECK(ebands_ncwrite(Bands, ncid))
+     NCF_CHECK(Bands%ncwrite(ncid))
      call fan_ncwrite(fan2d,dtset%qptn(:),dtset%wtq, ncid)
      NCF_CHECK(nf90_close(ncid))
      ABI_FREE(fan)
@@ -1766,7 +1766,7 @@ subroutine eig2tot(dtfil,xred,psps,pawtab,natom,bdeigrf,clflg,dim_eig2nkq,eigen0
      call gkk_init(gkk,gkk2d,dtset%mband,hdr0%nsppol,nkpt_rbz,dtset%natom,3)
      NCF_CHECK_MSG(nctk_open_create(ncid, fname, xmpi_comm_self), "Creating GKK file")
      NCF_CHECK(crystal%ncwrite(ncid))
-     NCF_CHECK(ebands_ncwrite(Bands, ncid))
+     NCF_CHECK(bands%ncwrite(ncid))
      call gkk_ncwrite(gkk2d,dtset%qptn(:),dtset%wtq, ncid)
      NCF_CHECK(nf90_close(ncid))
      ABI_FREE(gkk)
@@ -1812,15 +1812,11 @@ subroutine eig2tot(dtfil,xred,psps,pawtab,natom,bdeigrf,clflg,dim_eig2nkq,eigen0
    end if
  !end if  ! master
 
- if (allocated(fan)) then
-   ABI_FREE(fan)
- end if
- if (allocated(gkk)) then
-   ABI_FREE(gkk)
- end if
+ ABI_SFREE(fan)
+ ABI_SFREE(gkk)
 
  call crystal%free()
- call ebands_free(Bands)
+ call Bands%free()
  call fan_free(fan2d)
  call gkk_free(gkk2d)
 

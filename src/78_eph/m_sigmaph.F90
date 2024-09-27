@@ -2723,7 +2723,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
  ! Build (linear) mesh of K * temperatures. tsmesh(1:3) = [start, step, num]
  call dtset%get_ktmesh(new%ntemp, new%kTmesh)
 
- gaps = ebands_get_gaps(ebands, gap_err)
+ gaps = ebands%get_gaps(gap_err)
 
  ! Frequency mesh for sigma(w) and spectral functions.
  ! TODO: Use GW variables but change default
@@ -2855,7 +2855,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
      cnt = 0
      do spin=1,new%nsppol
        bstop = new%bstart_ks(ikcalc, spin) + new%nbcalc_ks(ikcalc, spin) - 1
-       call ebands_enclose_degbands(ebands, ik_ibz, spin, new%bstart_ks(ikcalc, spin), bstop, changed, TOL_EDIFF, &
+       call ebands%enclose_degbands(ik_ibz, spin, new%bstart_ks(ikcalc, spin), bstop, changed, TOL_EDIFF, &
                                     degblock=degblock)
        if (changed) then
          new%nbcalc_ks(ikcalc, spin) = bstop - new%bstart_ks(ikcalc, spin) + 1
@@ -2973,7 +2973,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
      ! In principle this should be large enough but it seems that the linewidths in v8[160] are slightly affected.
      ! Select indices for energy window.
 
-     call ebands_get_bands_from_erange(ebands, new%elow, new%ehigh, new%bsum_start, new%bsum_stop)
+     call ebands%get_bands_from_erange(new%elow, new%ehigh, new%bsum_start, new%bsum_stop)
      new%bsum_stop = min(new%bsum_stop, mband)
      ABI_CHECK(new%bsum_start <= new%bsum_stop, "bsum_start > bsum_bstop")
      new%nbsum = new%bsum_stop - new%bsum_start + 1
@@ -3300,7 +3300,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
    intp_kptrlatt(:,3) = [0, 0, ebands%kptrlatt(3,3)*dtset%bs_interp_kmult(3)]
 
    intp_nshiftk = 1; intp_shiftk = zero
-   ebands_dense = ebands_interp_kmesh(ebands, cryst, params, intp_kptrlatt, &
+   ebands_dense = ebands%interp_kmesh(cryst, params, intp_kptrlatt, &
                                       intp_nshiftk, intp_shiftk, band_block, comm)
    new%use_doublegrid = .True.
  end if
@@ -3313,7 +3313,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
    if (abs(dtset%mbpt_sciss) > tol6) then
      ! Apply the scissor operator to the dense mesh
      call wrtout(std_out, sjoin(" Apply the scissor operator to the dense CB with:",ftoa(dtset%mbpt_sciss)))
-     call ebands_apply_scissors(ebands_dense, dtset%mbpt_sciss)
+     call ebands_dense%apply_scissors(dtset%mbpt_sciss)
    end if
  end if
 
@@ -3336,9 +3336,9 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
      if (ebands%nshiftk == my_nshiftq) downsample = downsample .or. any(ebands%shiftk /= my_shiftq)
      if (downsample) then
        ABI_COMMENT("K-mesh != Q-mesh for self-energy. Will downsample electron energies.")
-       tmp_ebands = ebands_downsample(ebands, cryst, qptrlatt, my_nshiftq, my_shiftq)
+       tmp_ebands = ebands%downsample(cryst, qptrlatt, my_nshiftq, my_shiftq)
        new%ephwg = ephwg_from_ebands(cryst, ifc, tmp_ebands, bstart, new%nbsum, comm)
-       call ebands_free(tmp_ebands)
+       call tmp_ebands%free()
      else
        new%ephwg = ephwg_from_ebands(cryst, ifc, ebands, bstart, new%nbsum, comm)
      end if
@@ -3364,15 +3364,15 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
 
    call cwtime(cpu, wall, gflops, "start")
    if (new%use_doublegrid) then
-     call ebands_get_muT_with_fd(ebands_dense, new%ntemp, new%ktmesh, dtset%spinmagntarget, dtset%prtvol, new%mu_e, comm)
+     call ebands_dense%get_muT_with_fd(new%ntemp, new%ktmesh, dtset%spinmagntarget, dtset%prtvol, new%mu_e, comm)
    else
-     call ebands_get_muT_with_fd(ebands, new%ntemp, new%ktmesh, dtset%spinmagntarget, dtset%prtvol, new%mu_e, comm)
+     call ebands%get_muT_with_fd(new%ntemp, new%ktmesh, dtset%spinmagntarget, dtset%prtvol, new%mu_e, comm)
    end if
 
    call cwtime_report(" get_mu_e", cpu, wall, gflops)
  endif
 
- call ebands_free(ebands_dense)
+ call ebands_dense%free()
 
  if (my_rank == master) then
    call gaps%print(units, kTmesh=new%ktmesh, mu_e=new%mu_e, header="Gaps, band edges and relative position wrt Fermi level")
@@ -3463,7 +3463,7 @@ subroutine sigmaph_write(self, dtset, cryst, ebands, wfk_hdr, dtfil, comm)
    if (dtset%prtdos == 1) edos_intmeth = 1
    edos_step = dtset%dosdeltae; edos_broad = dtset%tsmear
    call wrtout(std_out, " Computing electron dos. Use prtdos 0 to disable this part...", do_flush=.True.)
-   edos = ebands_get_edos(ebands, cryst, edos_intmeth, edos_step, edos_broad, comm)
+   edos = ebands%get_edos(cryst, edos_intmeth, edos_step, edos_broad, comm)
    if (my_rank == master) then
      path = strcat(dtfil%filnam_ds(4), "_EDOS")
      call wrtout(ab_out, sjoin("- Writing electron DOS to file:", path))
@@ -3483,7 +3483,7 @@ subroutine sigmaph_write(self, dtset, cryst, ebands, wfk_hdr, dtfil, comm)
 
    NCF_CHECK(wfk_hdr%ncwrite(ncid, fform_from_ext("SIGEPH.nc"), nc_define=.True.))
    NCF_CHECK(cryst%ncwrite(ncid))
-   NCF_CHECK(ebands_ncwrite(ebands, ncid))
+   NCF_CHECK(ebands%ncwrite(ncid))
    if (dtset%prtdos /= 0) then
      NCF_CHECK(edos%ncwrite(ncid))
    end if
@@ -3921,7 +3921,7 @@ type(ebands_t) function sigmaph_get_ebands(self, cryst, ebands, brange, kcalc2eb
  ! including valence states to allow to compute different doping
  ! MG: TODO: Do we really need this!
  mband = maxval(self%bstop_ks)
- new = ebands_chop(ebands, 1, mband)
+ new = ebands%chop(1, mband)
  !mband = ebands%mband
  !call ebands_copy(ebands, new)
  !bmin = 1; bmax = mband

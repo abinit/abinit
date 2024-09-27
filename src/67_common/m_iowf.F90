@@ -35,7 +35,6 @@ MODULE m_iowf
  use m_hdr
  use m_ebands
 
-
  use m_time,           only : cwtime, cwtime_report, timab
  use m_io_tools,       only : get_unit, flush_unit, iomode2str
  use m_fstrings,       only : endswith, sjoin
@@ -746,7 +745,7 @@ subroutine cg_ncwrite(fname,hdr,dtset,response,mpw,mband,nband,nkpt,nsppol,nspin
    formeig = 0
    ABI_MALLOC(eigen3d, (mband,nkpt,nsppol))
    call unpack_eneocc(nkpt,nsppol,mband,nband,eigen,eigen3d)
-   gs_ebands = ebands_from_hdr(hdr, mband, eigen3d); gs_ebands%occ = occ3d
+   call gs_ebands%from_hdr(hdr, mband, eigen3d); gs_ebands%occ = occ3d
    ABI_FREE(eigen3d)
  else
    formeig = 1
@@ -805,7 +804,7 @@ subroutine cg_ncwrite(fname,hdr,dtset,response,mpw,mband,nband,nkpt,nsppol,nspin
 
        if (response == 0) then
          ! Write Gs bands
-         NCF_CHECK(ebands_ncwrite(gs_ebands, ncid))
+         NCF_CHECK(gs_ebands%ncwrite(ncid))
        else
          ! Write H1 matrix elements and occupancies.
          ! Note that GS eigens are not written here.
@@ -987,7 +986,7 @@ subroutine cg_ncwrite(fname,hdr,dtset,response,mpw,mband,nband,nkpt,nsppol,nspin
 
        ! Write eigenvalues and occupations (these arrays are not MPI-distributed)
        if (response == 0) then
-         NCF_CHECK(ebands_ncwrite(gs_ebands, wfk%fh))
+         NCF_CHECK(gs_ebands%ncwrite(wfk%fh))
        else
          call ncwrite_eigen1_occ(wfk%fh, nband, mband, nkpt, nsppol, eigen, occ3d)
        end if
@@ -1080,7 +1079,7 @@ subroutine cg_ncwrite(fname,hdr,dtset,response,mpw,mband,nband,nkpt,nsppol,nspin
 
        ! Write eigenvalues and occupations (these arrays are not MPI-distributed)
        if (response == 0) then
-         NCF_CHECK(ebands_ncwrite(gs_ebands, ncid))
+         NCF_CHECK(gs_ebands%ncwrite(ncid))
        else
          call ncwrite_eigen1_occ(ncid, nband, mband, nkpt, nsppol, eigen, occ3d)
        end if
@@ -1231,7 +1230,7 @@ subroutine cg_ncwrite(fname,hdr,dtset,response,mpw,mband,nband,nkpt,nsppol,nspin
  end if
 
  call crystal%free()
- if (response == 0) call ebands_free(gs_ebands)
+ if (response == 0) call gs_ebands%free()
 
  ABI_FREE(occ3d)
 

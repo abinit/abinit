@@ -333,7 +333,7 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
      NCF_CHECK_MSG(nctk_open_create(ncid, fname, xmpi_comm_self), "Creating GKQ file")
      NCF_CHECK(cryst%ncwrite(ncid))
      ! Write bands on k mesh.
-     NCF_CHECK(ebands_ncwrite(ebands_k, ncid))
+     NCF_CHECK(ebands_k%ncwrite(ncid))
      ncerr = nctk_def_dims(ncid, [nctkdim_t('number_of_phonon_modes', natom3)], defmode=.True.)
      NCF_CHECK(ncerr)
      ncerr = nctk_def_iscalars(ncid, [character(len=nctk_slen) :: &
@@ -524,7 +524,7 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
      if (i_am_master) then
        NCF_CHECK_MSG(nctk_open_create(ncid, fname, xmpi_comm_self), "Creating GKK file")
        NCF_CHECK(cryst%ncwrite(ncid))
-       NCF_CHECK(ebands_ncwrite(ebands_k, ncid))
+       NCF_CHECK(ebands_k%ncwrite(ncid))
        call gkk_ncwrite(gkk2d, qpt, 1.0_dp,  ncid)
        NCF_CHECK(nf90_close(ncid))
      end if

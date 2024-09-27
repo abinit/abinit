@@ -818,7 +818,7 @@ subroutine fftdatar_write(varname,path,iomode,hdr,crystal,ngfft,cplex,nfft,nspde
      ! Add information on the crystalline structure.
      NCF_CHECK(crystal%ncwrite(ncid))
      if (present(ebands)) then
-       NCF_CHECK(ebands_ncwrite(ebands, ncid))
+       NCF_CHECK(ebands%ncwrite(ncid))
      end if
 
      ! Add full pawrhoij datastructure.
@@ -896,11 +896,11 @@ subroutine fftdatar_write_from_hdr(varname,path,iomode,hdr,ngfft,cplex,nfft,nspd
      ABI_CHECK(size(eigen) ==  mband * hdr%nkpt * hdr%nsppol, "Wrong size(eigen)")
      ABI_MALLOC(ene3d, (mband, hdr%nkpt, hdr%nsppol))
      call unpack_eneocc(hdr%nkpt, hdr%nsppol, mband, hdr%nband, eigen, ene3d)
-     ebands = ebands_from_hdr(hdr, mband, ene3d)
+     call ebands%from_hdr(hdr, mband, ene3d)
      ABI_FREE(ene3d)
 
     call fftdatar_write(varname,path,iomode,hdr,crystal,ngfft,cplex,nfft,nspden,datar,mpi_enreg,ebands=ebands)
-    call ebands_free(ebands)
+    call ebands%free()
  else
     call fftdatar_write(varname,path,iomode,hdr,crystal,ngfft,cplex,nfft,nspden,datar,mpi_enreg)
  end if
