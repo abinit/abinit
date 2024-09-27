@@ -399,8 +399,12 @@ There was a Bug when doing AHC computations with dipoles+quadrupoles activated.
 In that case the DDB block dimension is bigger, from $(3*mpert)^2$ to $(3*mpert)^3$
 and a reshaping is needed in ddb_get_dielt_zeff.
 This has been fixed.
+There was also a bug for phonons in supercells, for
+the reconstruction of the dynamical matrices using crystal symmetries.
+The dimensionless real-space and reciprocal-space primitive translations were used instead of their dimensional
+counterpart.
 
-From S. Ponce (MR952)
+From S. Ponce (MR952 and MR985)
 
 **D.21**
 Get rid of all cp added/cp modified lines.
