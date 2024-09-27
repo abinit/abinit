@@ -57,10 +57,6 @@ module m_gemm_nonlop_projectors
  use, intrinsic :: iso_c_binding, only : c_int32_t, c_int64_t, c_float, c_double, c_size_t, c_loc, c_ptr
 #endif
 
-#ifdef HAVE_GPU_MARKERS
- use m_nvtx
-#endif
-
  implicit none
 
  private
@@ -757,10 +753,6 @@ contains
   real(dp), ABI_CONTIGUOUS pointer :: projs_r(:,:,:)
   real(dp), ABI_CONTIGUOUS pointer :: projs_i(:,:,:)
 
-#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
-       call nvtxStartRange("prep_projectors")
-#endif
-
   ik=1; if(is_kprime) ik=2
   if(istwf_k <= 1) then
     projs => gemm_nonlop_kpt(ik)%projs
@@ -976,9 +968,6 @@ contains
   !$OMP TARGET EXIT DATA MAP(delete:ph3d) IF(gpu_option==ABI_GPU_OPENMP .and. map_ph3d)
 #endif
 
-#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
-       call nvtxEndRange()
-#endif
  end subroutine prep_projectors
 !!***
 
@@ -1025,9 +1014,6 @@ contains
   real(dp), ABI_CONTIGUOUS pointer :: dprojs_(:,:,:), dprojs_r_(:,:,:), dprojs_i_(:,:,:)
   real(dp),allocatable,target :: dprojs_tmp(:,:,:),dprojs_r_tmp(:,:,:),dprojs_i_tmp(:,:,:)
 
-#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
-       call nvtxStartRange("prep_dprojectors2")
-#endif
 
   ik=1; if(is_kprime) ik=2
   if(istwf_k <= 1) then
@@ -1684,9 +1670,6 @@ contains
   !$OMP TARGET EXIT DATA MAP(delete:ph3d) IF(gpu_option==ABI_GPU_OPENMP .and. map_ph3d)
 #endif
 
-#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
-       call nvtxEndRange()
-#endif
  end subroutine prep_dprojectors
 !!***
 
