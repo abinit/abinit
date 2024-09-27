@@ -361,7 +361,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  type(paw_ij_type),intent(inout) :: paw_ij(my_natom*psps%usepaw)
  type(pawfgrtab_type),intent(inout) :: pawfgrtab(my_natom*psps%usepaw)
  type(pawrhoij_type),target,intent(inout) :: pawrhoij(my_natom*psps%usepaw)
- type(pawtab_type),intent(in) :: pawtab(ntypat*psps%usepaw)
+ type(pawtab_type),intent(inout) :: pawtab(ntypat*psps%usepaw)
 
 !Local variables-------------------------------
 !scalars
