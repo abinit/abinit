@@ -47,7 +47,7 @@ program atdep
   use m_argparse
 
   use m_ifc,              only : ifc_type
-  use m_crystal,          only : crystal_t, crystal_free
+  use m_crystal,          only : crystal_t
   use m_ddb,              only : ddb_type
   use m_tdep_abitypes,    only : Qbz_type, tdep_init_crystal, tdep_init_ifc, tdep_init_ddb, tdep_write_ddb, &
 &                                tdep_destroy_qbz, tdep_destroy_ddb, tdep_ifc2phi2
@@ -620,7 +620,7 @@ program atdep
    ABI_FREE(distance)
    ABI_FREE(Rlatt_cart)
    call Ifc%free()
-   call crystal_free(Crystal)
+   call Crystal%free()
    call tdep_destroy_eigen2nd(Eigen2nd_path)
    call tdep_destroy_eigen2nd(Eigen2nd_MP)
    call tdep_destroy_sym(Sym)
@@ -667,7 +667,7 @@ program atdep
    ABI_FREE(Phi4_ref)
  end if
  call Ifc%free()
- call crystal_free(Crystal)
+ call Crystal%free()
  call tdep_destroy_sym(Sym)
  call tdep_destroy_qbz(Qbz)
  call tdep_destroy_qpt(Qpt)

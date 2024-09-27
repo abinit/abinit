@@ -21,13 +21,13 @@
 
 module m_crystal
 
+ use, intrinsic :: iso_c_binding
  use defs_basis
  use m_errors
  use m_abicore
  use m_atomdata
  use m_xmpi
  use m_nctk
- use, intrinsic :: iso_c_binding
  use netcdf
 
  use m_io_tools,       only : file_exists
@@ -188,6 +188,9 @@ module m_crystal
 
  contains
 
+   procedure :: init => crystal_init
+    ! Main Creation method.
+
    procedure :: ncwrite => crystal_ncwrite
    ! Write the object in netcdf format
 
@@ -265,8 +268,8 @@ module m_crystal
 
  end type crystal_t
 
- public :: crystal_init            ! Main Creation method.
- public :: crystal_free            ! Main Destruction method.
+ !public :: crystal_init            ! Main Creation method.
+ !public :: crystal_free            ! Main Destruction method.
  public :: symbols_crystal         ! Return an array with the atomic symbol:["Sr","Ru","O1","O2","O3"]
  public :: prt_cif                 ! Print CIF file.
  public :: prtposcar               ! output VASP style POSCAR and FORCES files.
@@ -318,14 +321,14 @@ CONTAINS  !=====================================================================
 !!
 !! SOURCE
 
-subroutine crystal_init(amu,Cryst,space_group,natom,npsp,ntypat,nsym,rprimd,typat,xred,&
+subroutine crystal_init(cryst,amu,space_group,natom,npsp,ntypat,nsym,rprimd,typat,xred,&
                         zion,znucl,timrev,use_antiferro,remove_inv,title,&
                         symrel,tnons,symafm) ! Optional
 
 !Arguments ------------------------------------
 !scalars
+ class(crystal_t),intent(inout) :: Cryst
  integer,intent(in) :: natom,ntypat,nsym,timrev,space_group,npsp
- type(crystal_t),intent(inout) :: Cryst
  logical,intent(in) :: remove_inv,use_antiferro
 !arrays
  integer,intent(in) :: typat(natom)
@@ -434,7 +437,7 @@ type(crystal_t) function crystal_without_symmetries(self) result(new)
  real(dp),parameter :: new_tnons(3,1) = zero
 ! *************************************************************************
 
- call crystal_init(self%amu, new, 1, self%natom, self%npsp, self%ntypat, 1, self%rprimd, self%typat, &
+ call new%init(self%amu, 1, self%natom, self%npsp, self%ntypat, 1, self%rprimd, self%typat, &
   self%xred, self%zion, self%znucl, timrev1, .False., .False., self%title, &
   symrel=identity_3d, tnons=new_tnons, symafm=new_symafm)
 
@@ -474,7 +477,7 @@ type(crystal_t) function crystal_trinv_only(self) result(new)
    new_symrel(:,:,1) = identity_3d; new_symrel(:,:,2) = self%symrel(:,:,inv_idx)
    new_symafm(1) = 1; new_symafm(2) = self%symafm(inv_idx)
 
-   call crystal_init(self%amu, new, 2, self%natom, self%npsp, self%ntypat, 2, self%rprimd, self%typat, &
+   call new%init(self%amu, 2, self%natom, self%npsp, self%ntypat, 2, self%rprimd, self%typat, &
      self%xred, self%zion, self%znucl, timrev2, .False., .False., self%title, &
      symrel=new_symrel, tnons=new_tnons, symafm=new_symafm)
  endif
@@ -1180,7 +1183,7 @@ end subroutine crystal_print_abivars
 !!
 !! SOURCE
 
-subroutine symbols_crystal(natom,ntypat,npsp,symbols,typat,znucl)
+subroutine symbols_crystal(natom, ntypat, npsp, symbols, typat, znucl)
 
 !Arguments ------------------------------------
 !scalars
@@ -1771,8 +1774,6 @@ end subroutine crystal_ncread
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! NOTES
 !!
 !! SOURCE
 

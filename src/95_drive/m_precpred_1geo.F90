@@ -29,9 +29,7 @@ module m_precpred_1geo
  use m_abihist
  use m_xmpi
  use m_nctk
-#ifdef HAVE_NETCDF
  use netcdf
-#endif
 #if defined HAVE_LOTF
  use lotfpath
  use m_pred_lotf
@@ -39,7 +37,7 @@ module m_precpred_1geo
 
  use m_fstrings,           only : strcat, sjoin, itoa
  use m_geometry,           only : chkdilatmx
- use m_crystal,            only : crystal_init, crystal_t
+ use m_crystal,            only : crystal_t
  use m_pred_bfgs,          only : pred_bfgs, pred_lbfgs
  use m_pred_delocint,      only : pred_delocint
  use m_pred_fire,          only : pred_fire
@@ -225,16 +223,14 @@ subroutine precpred_1geo(ab_mover,ab_xfh,amu_curr,deloc,dt_chkdilatmx,comm_cell,
          ! Init crystal
          hist%ihist = abihist_findIndex(hist,-1)
          call hist2var(acell,hist,ab_mover%natom,rprimd,xred,DEBUG)
-         call crystal_init(amu_curr,crystal,0,ab_mover%natom,&
+         call crystal%init(amu_curr,0,ab_mover%natom,&
            npsp,ab_mover%ntypat,ab_mover%nsym,rprimd,ab_mover%typat,xred,&
            [(-one, ii=1,ab_mover%ntypat)],ab_mover%znucl,2,.False.,.False.,"dilatmx_structure",&
            symrel=ab_mover%symrel,tnons=ab_mover%tnons,symafm=ab_mover%symafm)
 
-#ifdef HAVE_NETCDF
          ! Write netcdf file
          filename = strcat(filnam_ds4, "_DILATMX_STRUCT.nc")
          NCF_CHECK(crystal%ncwrite_path(filename))
-#endif
          call crystal%free()
        end if
        call xmpi_barrier(comm_cell)

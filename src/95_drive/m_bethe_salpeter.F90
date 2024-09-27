@@ -208,7 +208,7 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
  type(kmesh_t) :: Kmesh,Qmesh
  type(gsphere_t) :: Gsph_x,Gsph_c,Gsph_x_dense,Gsph_c_dense
  type(Hdr_type) :: Hdr_wfk,Hdr_bse
- type(ebands_t) :: ks_ebands,qp_ebands,ks_ebands_dense,qp_ebands_dense
+ type(ebands_t) :: ks_ebands, qp_ebands, ks_ebands_dense, qp_ebands_dense
  type(Energies_type) :: KS_energies
  type(vcoul_t) :: Vcp, Vcp_dense
  type(wfdgw_t) :: Wfd, Wfd_dense
@@ -244,7 +244,6 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
  type(pawhur_t),allocatable :: Hur(:)
  type(Paw_ij_type),allocatable :: KS_paw_ij(:)
  type(Paw_an_type),allocatable :: KS_paw_an(:)
-
 !************************************************************************
 
  DBG_ENTER('COLL')

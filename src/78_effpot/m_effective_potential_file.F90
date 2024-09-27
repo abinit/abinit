@@ -41,7 +41,7 @@ module m_effective_potential_file
  use m_io_tools,   only : open_file, get_unit
  use m_geometry,   only : xcart2xred, xred2xcart, metric
  use m_symfind,    only : symfind, symlatt
- use m_crystal,    only : crystal_t, crystal_init
+ use m_crystal,    only : crystal_t
  use m_dynmat,     only : dfpt_prtph
  use m_abihist,    only : abihist,abihist_init,abihist_free,abihist_copy,read_md_hist
  use m_ddb_internalstr, only : ddb_internalstr
@@ -2072,7 +2072,7 @@ end subroutine system_getDimFromXML
  end do
 
 !Warning znucl is dimension with ntypat = nspsp hence alchemy is not supported here
- call crystal_init(all_amu,Crystal,space_group,natom,npsp,ntypat,nsym,rprimd,typat,xred,&
+ call crystal%init(all_amu,space_group,natom,npsp,ntypat,nsym,rprimd,typat,xred,&
 &  zion,znucl,timrev,.FALSE.,.FALSE.,title,&
 &  symrel=symrel(:,:,1:nsym),tnons=tnons(:,1:nsym),symafm=symafm(1:nsym))
 
@@ -2248,7 +2248,7 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
 &          ' ---'
       call wrtout(std_out,message,'COLL')
   end if
-  call crystal_init(ddb%amu,effective_potential%crystal,&
+  call effective_potential%crystal%init(ddb%amu,&
 &                   space_group,crystal%natom,crystal%npsp,&
 &                   crystal%ntypat,nsym,crystal%rprimd,&
 &                   crystal%typat,crystal%xred,crystal%zion,&
