@@ -281,7 +281,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  type(epjdos_t) :: dos
  type(plowannier_type) :: wan
  type(self_type) :: selfr
- type(self_type) :: self
+ type(self_type), target :: self
  type(green_type) :: greenr
  type(matlu_type), pointer :: opt_selflimit(:) => null()
 
