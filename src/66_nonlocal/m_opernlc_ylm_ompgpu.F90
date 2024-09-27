@@ -904,28 +904,32 @@ subroutine opernlc_ylm_ompgpu(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,c
 !Accumulate dgxdtfac related to overlap (Sij) (PAW)
 !-------------------------------------------------------------------
  if (optder>=1.and.(paw_opt==3.or.paw_opt==4)) then ! Use Sij, overlap contribution
-   !$OMP TARGET TEAMS DISTRIBUTE &
-   !$OMP& PARALLEL DO COLLAPSE(4) &
+   !$OMP TARGET TEAMS DISTRIBUTE COLLAPSE(2) &
    !$OMP& MAP(to:sij,dgxdt,dgxdtfac_sij) &
-   !$OMP& PRIVATE(idat,ispinor,ia,jlmn,j0lmn,jjlmn,jlm,ilmn,ilm,i0lmn,ijlmn) &
+   !$OMP& PRIVATE(idat,ispinor) &
    !$OMP& IF(gpu_option==ABI_GPU_OPENMP)
    do idat=1,ndat
    do ispinor=1,nspinor
+     !$OMP PARALLEL DO COLLAPSE(2) PRIVATE(ia,jlmn,j0lmn,jjlmn,jlm,ilmn,ilm,i0lmn,ijlmn,ii)
      do ia=1,nincat
        do jlmn=1,nlmn
          j0lmn=jlmn*(jlmn-1)/2
          jjlmn=j0lmn+jlmn
          do mu=1,ndgxdtfac
-           dgxdtfac_sij(1:cplex,mu,jlmn+(ia-1)*nlmn+ibeg,ispinor+(idat-1)*nspinor)=&
-           &    dgxdtfac_sij(1:cplex,mu,jlmn+(ia-1)*nlmn+ibeg,ispinor+(idat-1)*nspinor)&
-           &    + sij(jjlmn) * dgxdt(1:cplex,mu,jlmn+(ia-1)*nlmn+ibeg,ispinor+(idat-1)*nspinor)
+           do ii=1,cplex
+             dgxdtfac_sij(ii,mu,jlmn+(ia-1)*nlmn+ibeg,ispinor+(idat-1)*nspinor)=&
+             &    dgxdtfac_sij(ii,mu,jlmn+(ia-1)*nlmn+ibeg,ispinor+(idat-1)*nspinor)&
+             &    + sij(jjlmn) * dgxdt(ii,mu,jlmn+(ia-1)*nlmn+ibeg,ispinor+(idat-1)*nspinor)
+           end do
          end do
          do ilmn=1,jlmn-1
            ijlmn=j0lmn+ilmn
            do mu=1,ndgxdtfac
-             dgxdtfac_sij(1:cplex,mu,jlmn+(ia-1)*nlmn+ibeg,ispinor+(idat-1)*nspinor)=&
-             &    dgxdtfac_sij(1:cplex,mu,jlmn+(ia-1)*nlmn+ibeg,ispinor+(idat-1)*nspinor)&
-             &    + sij(ijlmn) * dgxdt(1:cplex,mu,ilmn+(ia-1)*nlmn+ibeg,ispinor+(idat-1)*nspinor)
+             do ii=1,cplex
+               dgxdtfac_sij(ii,mu,jlmn+(ia-1)*nlmn+ibeg,ispinor+(idat-1)*nspinor)=&
+               &    dgxdtfac_sij(ii,mu,jlmn+(ia-1)*nlmn+ibeg,ispinor+(idat-1)*nspinor)&
+               &    + sij(ijlmn) * dgxdt(ii,mu,ilmn+(ia-1)*nlmn+ibeg,ispinor+(idat-1)*nspinor)
+             end do
            end do
          end do
          if(jlmn<nlmn) then
@@ -933,9 +937,11 @@ subroutine opernlc_ylm_ompgpu(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,c
              i0lmn=ilmn*(ilmn-1)/2
              ijlmn=i0lmn+jlmn
              do mu=1,ndgxdtfac
-               dgxdtfac_sij(1:cplex,mu,jlmn+(ia-1)*nlmn+ibeg,ispinor+(idat-1)*nspinor)=&
-               &    dgxdtfac_sij(1:cplex,mu,jlmn+(ia-1)*nlmn+ibeg,ispinor+(idat-1)*nspinor)&
-               &    + sij(ijlmn) * dgxdt(1:cplex,mu,ilmn+(ia-1)*nlmn+ibeg,ispinor+(idat-1)*nspinor)
+               do ii=1,cplex
+                 dgxdtfac_sij(ii,mu,jlmn+(ia-1)*nlmn+ibeg,ispinor+(idat-1)*nspinor)=&
+                 &    dgxdtfac_sij(ii,mu,jlmn+(ia-1)*nlmn+ibeg,ispinor+(idat-1)*nspinor)&
+                 &    + sij(ijlmn) * dgxdt(ii,mu,ilmn+(ia-1)*nlmn+ibeg,ispinor+(idat-1)*nspinor)
+               end do
              end do
            end do
          end if
