@@ -388,9 +388,9 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 !arrays
  integer(int32), ABI_CONTIGUOUS pointer :: kg_k(:,:) => null()
  real(dp) :: dielar(7),dphase_k(3),kpoint(3),qpt(3),rhodum(1),tsec(2),ylmgr_dum(0,0,0)
- real(dp),allocatable :: EigMin(:,:),buffer1(:),buffer2(:),cgq(:,:)
+ real(dp),allocatable :: EigMin(:,:),buffer1(:),cgq(:,:)
  real(dp),allocatable :: cgrkxc(:,:),doccde(:)
- real(dp),allocatable :: dphasek(:,:),ek_k(:),ek_k_nd(:,:,:),eknk(:),eknk_nd(:,:,:,:,:),end_k(:)
+ real(dp),allocatable :: dphasek(:,:),ek_k(:),eknk(:),eknk_nd(:,:,:,:,:),end_k(:)
  real(dp),allocatable :: enlx_k(:),enlxnk(:),focknk(:),fockfornk(:,:,:),ffnl(:,:,:,:),grnl_k(:,:), xcart(:,:)
  real(dp),allocatable :: grnlnk(:,:)
 
@@ -521,7 +521,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  if(dtset%usewvl==0) then
    ABI_MALLOC(eknk,(mbdkpsp))
    ABI_MALLOC(enlxnk,(mbdkpsp))
-   ABI_MALLOC(eknk_nd,(dtset%nsppol,dtset%nkpt,2,dtset%mband,dtset%mband*paw_dmft%use_dmft))
+   ABI_MALLOC(eknk_nd,(2,dtset%mband,dtset%mband,dtset%nkpt,dtset%nsppol*paw_dmft%use_dmft))
    ABI_MALLOC(EigMin,(2,dtset%mband))
    ABI_MALLOC(grnlnk,(3*natom,mbdkpsp*optforces))
    if (usefock) then
@@ -866,7 +866,6 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        ABI_MALLOC(ek_k,(nband_k))
        ABI_MALLOC(end_k,(nband_k))
        ABI_MALLOC(enlx_k,(nband_k))
-       ABI_MALLOC(ek_k_nd,(2,nband_k,nband_k*paw_dmft%use_dmft))
        ABI_MALLOC(occ_k,(nband_k))
        ABI_MALLOC(zshift,(nband_k))
        ABI_MALLOC(grnl_k,(3*natom,nband_k*optforces))
@@ -1042,7 +1041,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 !      nonlocal energy, forces,
 !      and update of rhor to this k-point and this spin polarization.
        call vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,&
-&       dtset,eig_k,ek_k,ek_k_nd,end_k,enlx_k,fixed_occ,grnl_k,gs_hamk,&
+&       dtset,eig_k,ek_k,eknk_nd(:,:,:,ikpt,isppol),end_k,enlx_k,fixed_occ,grnl_k,gs_hamk,&
 &       ibg,icg,ikpt,iscf,isppol,kg_k,kinpw,mband_cprj,mcg,mcgq,mcprj_local,mkgq,&
 &       mpi_enreg,dtset%mpw,natom,nband_k,nbdbuf_eff,dtset%nkpt,istep,nnsclo_now,npw_k,npwarr,&
 &       occ_k,optforces,prtvol,pwind,pwind_alloc,pwnsfac,pwnsfacq,resid_k,&
@@ -1099,7 +1098,6 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
          focknk (1+bdtot_index : nband_k+bdtot_index) = fock%fock_common%eigen_ikpt (:)
          if (optforces>0) fockfornk(:,:,1+bdtot_index : nband_k+bdtot_index) = fock%fock_common%forces_ikpt(:,:,:)
        end if
-       if(paw_dmft%use_dmft==1) eknk_nd(isppol,ikpt,:,:,:) = ek_k_nd(:,:,:)
        resid(1+bdtot_index : nband_k+bdtot_index) = resid_k(:)
        if (optforces>0) grnlnk(:,1+bdtot_index : nband_k+bdtot_index) = grnl_k(:,:)
        enlxnk(1+bdtot_index : nband_k+bdtot_index) = enlx_k(:)
@@ -1140,7 +1138,6 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 #endif
 
        ABI_FREE(ek_k)
-       ABI_FREE(ek_k_nd)
        ABI_FREE(end_k)
        ABI_FREE(grnl_k)
        ABI_FREE(occ_k)
@@ -1249,9 +1246,6 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
 !      If needed, exchange the values of eigen,resid,eknk,enlxnk,grnlnk
        ABI_MALLOC(buffer1,((4+3*natom*optforces+dtset%usefock+3*natom*dtset%usefock*optforces)*mbdkpsp))
-       if(paw_dmft%use_dmft==1) then
-         ABI_MALLOC(buffer2,(mb2dkpsp*paw_dmft%use_dmft))
-       end if
 !      Pack eigen,resid,eknk,enlxnk,grnlnk in buffer1
        buffer1(1          :  mbdkpsp)=eigen(:)
        buffer1(1+  mbdkpsp:2*mbdkpsp)=resid(:)
@@ -1269,30 +1263,11 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
            buffer1(index1+1:index1+3*natom*mbdkpsp)=reshape(fockfornk,(/(3*natom)*mbdkpsp/) )
          end if
        end if
-       if(paw_dmft%use_dmft==1) then
-         nnn=0
-         do ikpt=1,dtset%nkpt
-           do isppol=1,dtset%nsppol
-             do iband=1,dtset%mband
-               do iband1=1,dtset%mband
-                 do iplex=1,2
-                   nnn=nnn+1
-                   buffer2(nnn)=eknk_nd(isppol,ikpt,iplex,iband,iband1)
-                 end do
-               end do
-             end do
-           end do
-         end do
-         if(nnn.ne.mb2dkpsp)  then
-           write(msg,*)' BUG in vtorho2, buffer2',nnn,mb2dkpsp
-           ABI_BUG(msg)
-         end if
-       end if
 !      Build sum of everything
        call timab(48,1,tsec)
        call xmpi_sum(buffer1,mpi_enreg%comm_kpt,ierr)
 !      if(mpi_enreg%paral_kgb/=1.and.paw_dmft%use_dmft==1) then
-       if(paw_dmft%use_dmft==1) call xmpi_sum(buffer2,mpi_enreg%comm_kpt,ierr)
+       if(paw_dmft%use_dmft==1) call xmpi_sum(eknk_nd(:,:,:,:,:),mpi_enreg%comm_kpt,ierr)
        call timab(48,2,tsec)
 
 !      Unpack eigen,resid,eknk,enlxnk,grnlnk in buffer1
@@ -1310,24 +1285,6 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
            index1=index1+mbdkpsp
            fockfornk(:,:,:)=reshape(buffer1(index1+1:index1+3*natom*mbdkpsp),(/3,natom,mbdkpsp/) )
          end if
-       end if
-       if(paw_dmft%use_dmft==1) then
-         nnn=0
-         do ikpt=1,dtset%nkpt
-           do isppol=1,dtset%nsppol
-             do iband=1,dtset%mband
-               do iband1=1,dtset%mband
-                 do iplex=1,2
-                   nnn=nnn+1
-                   eknk_nd(isppol,ikpt,iplex,iband,iband1)=buffer2(nnn)
-                 end do
-               end do
-             end do
-           end do
-         end do
-       end if
-       if(allocated(buffer2))  then
-         ABI_FREE(buffer2)
        end if
        ABI_FREE(buffer1)
        call timab(989,2,tsec)
@@ -1354,20 +1311,20 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        call timab(991,1,tsec)
 
        if (dtset%dmftcheck>=0.and.dtset%usedmft>=1.and.(sum(pawtab(:)%upawu)>=tol8.or.  &
-&       sum(pawtab(:)%jpawu)>tol8).and.dtset%dmft_entropy==0) energies%entropy=zero
+&       sum(pawtab(:)%jpawu)>tol8).and.(dtset%dmft_entropy==0.or.(dtset%dmft_entropy==2.and.dtset%dmft_integral==0))) energies%entropy=zero
 
 !      ==  0 to a dmft calculation and do not use lda occupations
 !      ==  1 to a lda calculation with the dmft loop
        if(dtset%dmftcheck==-1) dmft_dftocc=1
 
 !      ==  initialise occnd
-       paw_dmft%occnd=zero
+       paw_dmft%occnd(:,:,:,:,:) = zero
 
        bdtot_index = 1
        do isppol=1,dtset%nsppol
          do ikpt=1,dtset%nkpt
            do iband=1,dtset%nband(ikpt+(isppol-1)*dtset%nkpt)
-             paw_dmft%occnd(1,iband,iband,ikpt,isppol)=occ(bdtot_index)
+             paw_dmft%occnd(1,iband,iband,ikpt,isppol) = occ(bdtot_index)
              bdtot_index = bdtot_index + 1
            end do
          end do
@@ -1419,11 +1376,6 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
            ABI_WARNING(msg)
          end if
 
-!        ==  allocate paw_dmft%psichi and paw_dmft%eigen_dft
-         call init_dmft(dmatpawu,dtset,energies%e_fermie,dtfil%fnameabo_app,&
-           dtfil%filnam_ds(3),dtset%nspinor,paw_dmft,pawtab,psps,dtset%typat)
-         call print_dmft(paw_dmft,dtset%pawprtvol)
-
 !        ==  gather crystal structure date into data "cryst_struc"
          remove_inv=.false.
          if(dtset%nspden==4) remove_inv=.true.
@@ -1432,15 +1384,18 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
           dtset%nspden==2.and.dtset%nsppol==1,remove_inv,hdr%title,&
           dtset%symrel,dtset%tnons,dtset%symafm)
 
+!        ==  allocate paw_dmft%psichi and paw_dmft%eigen_dft
+         call init_dmft(cryst_struc,energies%e_fermie,paw_dmft,dtset%ucrpa)
+         call print_dmft(paw_dmft,dtset%pawprtvol)
+
 !        ==  compute psichi
          call xmpi_barrier(spaceComm_distrb)
-         call init_oper(paw_dmft,dft_occup)
+         call init_oper(paw_dmft,dft_occup,opt_ksloc=2)
          call flush_unit(std_out)
          call timab(620,1,tsec)
-         call datafordmft(cryst_struc,cprj,gs_hamk%dimcprj,dtset,eigen,energies%e_fermie,&
-&         dft_occup,dtset%mband,mband_cprj,dtset%mkmem,mpi_enreg,&
-&         dtset%nkpt,my_nspinor,dtset%nsppol,occ,&
-&         paw_dmft,paw_ij,pawang,pawtab,psps,usecprj_local,dtfil%unpaw)
+         call datafordmft(cg(:,:),cprj(:,:),cryst_struc,dft_occup,gs_hamk%dimcprj,dtset,eigen(:),mband_cprj,mpi_enreg,&
+                        & my_nspinor,occ(:),paw_dmft,paw_ij,pawtab(:),usecprj_local,dtset%nbandkss)
+
          call timab(620,2,tsec)
          call flush_unit(std_out)
 
@@ -1448,10 +1403,11 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 !        ==  solve dmft loop
          call xmpi_barrier(spaceComm_distrb)
 
-         call dmft_solve(cryst_struc,istep,dft_occup,paw_dmft,pawang,pawtab,dtset%pawprtvol)
+         call dmft_solve(cryst_struc,istep,dft_occup,mpi_enreg,paw_dmft,pawang,pawtab(:),dtset%pawprtvol)
          edmft=paw_dmft%edmft
          energies%e_paw=energies%e_paw+edmft
          energies%e_pawdc=energies%e_pawdc+edmft
+         if (dtset%dmft_entropy == 2 .and. dtset%dmft_integral == 1) energies%entropy = paw_dmft%sdmft
          call flush_unit(std_out)
 !        paw_dmft%occnd(:,:,:,:,:)=0.5_dp
 
@@ -1537,9 +1493,9 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
            locc_test = abs(occ(bdtot_index))>tol8
 !          dmft
            if(paw_dmft%use_dmft>=1.and.dtset%nbandkss==0) then
-             if(paw_dmft%band_in(iband)) then
+             if(paw_dmft%band_in(iband).or.paw_dmft%dmft_use_all_bands) then
                if( paw_dmft%use_dmft == 1 .and. dmft_dftocc == 1 ) then ! test of the code
-                 paw_dmft%occnd(1,iband,iband,ikpt,isppol)=occ(bdtot_index)
+                 paw_dmft%occnd(1,iband,iband,ikpt,isppol) = occ(bdtot_index)
                end if
                locc_test = abs(paw_dmft%occnd(1,iband,iband,ikpt,isppol))+&
 &               abs(paw_dmft%occnd(2,iband,iband,ikpt,isppol))>tol8
@@ -1550,7 +1506,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 !            dmft
              if(paw_dmft%use_dmft==1.and.dtset%nbandkss==0) then
                ebandldatot=ebandldatot+dtset%wtk(ikpt)*occ(bdtot_index)*eigen(bdtot_index)
-               if(paw_dmft%band_in(iband)) then
+               if(paw_dmft%band_in(iband).or.paw_dmft%dmft_use_all_bands) then
                  ebandlda=ebandlda+dtset%wtk(ikpt)*occ(bdtot_index)*eigen(bdtot_index)
                  ekinlda=ekinlda+dtset%wtk(ikpt)*occ(bdtot_index)*eknk(bdtot_index)
                  occ(bdtot_index)=paw_dmft%occnd(1,iband,iband,ikpt,isppol)
@@ -1575,12 +1531,13 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
            bdtot_index=bdtot_index+1
            if(paw_dmft%use_dmft==1.and.dtset%nbandkss==0) then
              do iband1=1,nband_k
-               if(paw_dmft%band_in(iband).and.paw_dmft%band_in(iband1)) then
+               if((paw_dmft%band_in(iband).and.paw_dmft%band_in(iband1)).or. &
+                & (paw_dmft%dmft_use_all_bands.and.iband==iband1)) then
 !                write(std_out,*) "II+", isppol,ikpt,iband,iband1
                  ekindmft2=ekindmft2  +  dtset%wtk(ikpt)*paw_dmft%occnd(1,iband,iband1,ikpt,isppol)*&
-&                 eknk_nd(isppol,ikpt,1,iband,iband1)
+&                 eknk_nd(1,iband,iband1,ikpt,isppol)
                  ekindmft2=ekindmft2  -  dtset%wtk(ikpt)*paw_dmft%occnd(2,iband,iband1,ikpt,isppol)*&
-&                 eknk_nd(isppol,ikpt,2,iband,iband1)
+&                 eknk_nd(2,iband,iband1,ikpt,isppol)
 !                write(std_out,*) "II", occnd(1,iband,iband1,ikpt,isppol),eknk_nd(isppol,ikpt,iband,iband1)
                end if
              end do

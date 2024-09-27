@@ -972,12 +972,6 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 !write(std_out,*) "dtset%usedmft",dtset%usedmft
  use_sc_dmft=dtset%usedmft
 ! if(dtset%paral_kgb>0) use_sc_dmft=0
- call init_sc_dmft(dtset%nbandkss,dtset%dmftbandi,dtset%dmftbandf,dtset%dmft_read_occnd,dtset%mband,&
-& dtset%nband,dtset%nkpt,dtset%nspden, &
-& dtset%nspinor,dtset%nsppol,occ,dtset%usedmft,paw_dmft,use_sc_dmft,dtset%dmft_solv,mpi_enreg)
- if (paw_dmft%use_dmft==1.and.me==0) then
-   call readocc_dmft(paw_dmft,dtfil%filnam_ds(3),dtfil%filnam_ds(4))
- end if
  !Should be done inside init_sc_dmft
  if ( dtset%usedmft /= 0 ) then
    call data4entropyDMFT_init(paw_dmft%forentropyDMFT,&
@@ -1025,7 +1019,6 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    call setsym_ylm(gprimd,pawang%l_max-1,dtset%nsym,dtset%pawprtvol,rprimd,symrec,pawang%zarot)
 
 !  2-Initialize and compute data for DFT+U, EXX, or DFT+DMFT
-   if(paw_dmft%use_dmft==1) call print_sc_dmft(paw_dmft,dtset%pawprtvol)
    call pawpuxinit(dtset%dmatpuopt,dtset%exchmix,dtset%f4of2_sla,dtset%f6of2_sla,&
 &     is_dfpt,args_gs%jpawu,dtset%lexexch,dtset%lpawu,dtset%nspinor,dtset%ntypat,dtset%optdcmagpawu,pawang,dtset%pawprtvol,&
 &     pawrad,pawtab,args_gs%upawu,dtset%usedmft,dtset%useexexch,dtset%usepawu,ucrpa=dtset%ucrpa)
@@ -1033,6 +1026,11 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    ! DEBUG:
    !if (me == master) call pawtab_print(Pawtab)
  end if
+
+call init_sc_dmft(dtset,paw_dmft,args_gs%dmatpawu(:,:,:,:),dtfil%filname_ds(3),dtfil%fnameabo_app,gprimd(:,:),kg(:,:),mpi_enreg, &
+                & npwarr(:),occ(:),pawang,pawrad(:),pawtab(:),rprimd(:,:),ucvol,dtfil%unpaw,use_sc_dmft,xred(:,:),ylm(:,:))
+if (paw_dmft%use_dmft == 1 .and. me == 0) call readocc_dmft(paw_dmft,dtfil%filname_ds(3),dtfil%filname_ds(4))
+if (paw_dmft%use_dmft == 1) call print_sc_dmft(paw_dmft,dtset%pawprtvol)
 
 !###########################################################
 !### 11. Initialize (eventually) electron-positron data and
