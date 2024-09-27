@@ -374,7 +374,7 @@ program optic
  end if
 
  ! Initializes crystal object
- call crystal_init(hdr%amu, cryst, 0, hdr%natom, hdr%npsp, hdr%ntypat, &
+ call cryst%init(hdr%amu, 0, hdr%natom, hdr%npsp, hdr%ntypat, &
    hdr%nsym, hdr%rprimd, hdr%typat, hdr%xred, hdr%zionpsp, hdr%znuclpsp, 1, &
    (hdr%nspden==2 .and. hdr%nsppol==1),remove_inv, hdr%title,&
    hdr%symrel, hdr%tnons, hdr%symafm)

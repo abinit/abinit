@@ -33,7 +33,7 @@ module m_dtset
  use m_symkpt,       only : symkpt
  use m_geometry,     only : mkrdim, metric, littlegroup_pert, irreducible_set_pert
  use m_parser,       only : intagm, chkvars_in_string
- use m_crystal,      only : crystal_t, crystal_init
+ use m_crystal,      only : crystal_t
 
  implicit none
 
@@ -2948,7 +2948,7 @@ type(crystal_t) function dtset_get_crystal(dtset, img) result(cryst)
  gw_timrev = 1; if (any(dtset%kptopt == [3, 4])) gw_timrev = 0
  gw_timrev = gw_timrev + 1
 
- call crystal_init(dtset%amu_orig(:, img), cryst, dtset%spgroup, dtset%natom, dtset%npsp, &
+ call cryst%init(dtset%amu_orig(:, img), dtset%spgroup, dtset%natom, dtset%npsp, &
                    dtset%ntypat, dtset%nsym, my_rprimd, dtset%typat, my_xred, dtset%ziontypat, dtset%znucl, gw_timrev, &
                    dtset%nspden==2 .and. dtset%nsppol==1, remove_inv, my_title,&
                    symrel=dtset%symrel, tnons=dtset%tnons, symafm=dtset%symafm)
@@ -2973,7 +2973,6 @@ subroutine dtset_get_ktmesh(dtset, ntemp, ktmesh)
  class(dataset_type),intent(in) :: dtset
  integer,intent(out) :: ntemp
  real(dp),allocatable,intent(out) :: ktmesh(:)
-
 ! *********************************************************************
 
  ntemp = nint(dtset%tmesh(3))

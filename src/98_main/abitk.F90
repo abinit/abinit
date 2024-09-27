@@ -79,7 +79,6 @@ program abitk
  real(dp),allocatable :: bounds(:,:), kTmesh(:), mu_e(:)
  real(dp),allocatable :: shiftk(:,:), new_shiftk(:,:), wtk(:), kibz(:,:), kbz(:,:)
  real(dp),allocatable :: n_ehst(:,:,:)
-
 !*******************************************************
 
  ! Change communicator for I/O (mandatory!)

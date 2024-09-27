@@ -45,7 +45,7 @@ module m_outscfcv
  use m_geometry,         only : bonds_lgth_angles
  use m_electronpositron, only : electronpositron_type,electronpositron_calctype
  use m_oper,             only : oper_type,init_oper,destroy_oper
- use m_crystal,          only : crystal_init, crystal_t, prt_cif
+ use m_crystal,          only : crystal_t, prt_cif
  use m_results_gs,       only : results_gs_type, results_gs_ncwrite
  use m_ioarr,            only : ioarr, fftdatar_write
  use m_nucprop,          only : calc_efg,calc_fc
@@ -331,7 +331,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  if (dtset%nspden==4 .and. dtset%usedmft==1) remove_inv=.true. ! MG: why this?
 
  timrev = 2; if (any(dtset%kptopt == [3, 4])) timrev= 1
- call crystal_init(dtset%amu_orig(:,1),crystal,dtset%spgroup,natom,dtset%npsp,ntypat, &
+ call crystal%init(dtset%amu_orig(:,1),dtset%spgroup,natom,dtset%npsp,ntypat, &
    dtset%nsym,rprimd,dtset%typat,xred,dtset%ziontypat,dtset%znucl,timrev,&
    dtset%nspden==2.and.dtset%nsppol==1,remove_inv,hdr%title,&
    dtset%symrel,dtset%tnons,dtset%symafm)

@@ -41,7 +41,7 @@ MODULE m_eig2d
  use defs_abitypes, only : MPI_type
  use m_time,       only : timab
  use m_fstrings,   only : strcat
- use m_crystal,    only : crystal_init,  crystal_t
+ use m_crystal,    only : crystal_t
  use m_pawtab,     only : pawtab_type
  use m_double_grid,only : kptfine_av
  use m_mpinfo,     only : distrb2, proc_distrb_cycle
@@ -1734,7 +1734,7 @@ subroutine eig2tot(dtfil,xred,psps,pawtab,natom,bdeigrf,clflg,dim_eig2nkq,eigen0
 !  Initialize crystal structure for FAN.nc and GKK.nc files
    remove_inv=.false.
    if(dtset%nspden==4 .and. dtset%usedmft==1) remove_inv=.true.
-   call crystal_init(dtset%amu_orig(:,1),Crystal,dtset%spgroup,dtset%natom,dtset%npsp,psps%ntypat, &
+   call crystal%init(dtset%amu_orig(:,1),dtset%spgroup,dtset%natom,dtset%npsp,psps%ntypat, &
 &   dtset%nsym,rprimd,dtset%typat,xred,dtset%ziontypat,dtset%znucl,1,&
 &   dtset%nspden==2.and.dtset%nsppol==1,remove_inv,hdr0%title,&
 &   dtset%symrel,dtset%tnons,dtset%symafm)

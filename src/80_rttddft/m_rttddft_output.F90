@@ -25,7 +25,7 @@ module m_rttddft_output
  use defs_abitypes,   only: MPI_type
  use defs_datatypes,  only: pseudopotential_type
  use m_common,        only: prteigrs
- use m_crystal,       only: crystal_init, crystal_t
+ use m_crystal,       only: crystal_t
  use m_dtfil,         only: datafiles_type
  use m_dtset,         only: dataset_type
  use m_ebands,        only: ebands_t
@@ -424,7 +424,7 @@ subroutine prt_den(dtfil, dtset, istep, mpi_enreg, psps, tdks)
    !FB: Maybe this should be moved out of that subroutine if needed in other outputs than densities
    remove_inv=.false.
    timrev = 2; if (any(dtset%kptopt == [3, 4])) timrev= 1
-   call crystal_init(dtset%amu_orig(:,1),crystal,dtset%spgroup,natom,dtset%npsp,psps%ntypat, &
+   call crystal%init(dtset%amu_orig(:,1),dtset%spgroup,natom,dtset%npsp,psps%ntypat, &
      dtset%nsym,tdks%rprimd,dtset%typat,tdks%xred,dtset%ziontypat,dtset%znucl,timrev,&
      dtset%nspden==2.and.dtset%nsppol==1,remove_inv,tdks%hdr%title,&
      dtset%symrel,dtset%tnons,dtset%symafm)
@@ -535,7 +535,7 @@ subroutine prt_dos(dtfil, dtset, istep, mpi_enreg, psps, tdks)
 
  remove_inv=.false.
  timrev = 2; if (any(dtset%kptopt == [3, 4])) timrev= 1
- call crystal_init(dtset%amu_orig(:,1),crystal,dtset%spgroup,natom,dtset%npsp,psps%ntypat, &
+ call crystal%init(dtset%amu_orig(:,1),dtset%spgroup,natom,dtset%npsp,psps%ntypat, &
    dtset%nsym,tdks%rprimd,dtset%typat,tdks%xred,dtset%ziontypat,dtset%znucl,timrev,&
    dtset%nspden==2.and.dtset%nsppol==1,remove_inv,tdks%hdr%title,&
    dtset%symrel,dtset%tnons,dtset%symafm)

@@ -5015,7 +5015,7 @@ type(crystal_t) function hdr_get_crystal(hdr, gw_timrev, remove_inv) result(crys
 
  space_group = 0 ! FIXME not known at this level.
 
- call crystal_init(hdr%amu,cryst,space_group,hdr%natom,hdr%npsp,hdr%ntypat,hdr%nsym,hdr%rprimd,hdr%typat,hdr%xred,&
+ call cryst%init(hdr%amu,space_group,hdr%natom,hdr%npsp,hdr%ntypat,hdr%nsym,hdr%rprimd,hdr%typat,hdr%xred,&
    hdr%zionpsp,hdr%znuclpsp,my_timrev,use_antiferro,rinv,hdr%title,&
    symrel=hdr%symrel,tnons=hdr%tnons,symafm=hdr%symafm) ! Optional
 
