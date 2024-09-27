@@ -39,7 +39,7 @@ MODULE m_paw_correlations
  use m_paw_ij,      only : paw_ij_type,paw_ij_gather, paw_ij_free, paw_ij_nullify
  use m_paw_sphharm, only : mat_mlms2jmj,mat_slm2ylm,slxyzs
  use m_paw_io,      only : pawio_print_ij
- use m_paw_yukawa,  only : compute_slater,get_lambda 
+ !use m_paw_yukawa,  only : compute_slater,get_lambda 
  use m_paral_atom,  only : get_my_atmtab,free_my_atmtab
  use m_copy,        only : alloc_copy
 

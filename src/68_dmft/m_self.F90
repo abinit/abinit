@@ -377,7 +377,7 @@ end subroutine print_self
 subroutine dc_self(charge_loc,hdc,hu,paw_dmft,pawtab,occ_matlu)
 
  use m_pawtab, only : pawtab_type
- use m_paw_exactDC, only : compute_exactDC
+ !use m_paw_exactDC, only : compute_exactDC
 
 !Arguments ------------------------------------
 !type
