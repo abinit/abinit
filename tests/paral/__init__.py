@@ -34,6 +34,7 @@ inp_files = [
 "t30.abi",
 "t31.abi",
 "t32.abi",
+"t35.abi", # test xg_nonlop_option=1 (PAW,istwfk=1)
 "t36.abi", # test cprj_in_memory=1 (PAW,istwfk>1,no DFTI)
 "t37.abi", # test cprj_in_memory=1 (NC,istwfk>1,no DFTI)
 "t38.abi", # test cprj_in_memory=1 (PAW,nspinor=2,compare xg_nonlop_option=0 and 1)
@@ -91,6 +92,4 @@ inp_files = [
 "t99.abi",
 "t100.abi",
 "t101.abi",
-"t105.abi", # test xg_nonlop_option=1 (PAW,istwfk=1)
-"t106.abi", # test xg_nonlop_option=1 (PAW,istwfk>1)
 ]
