@@ -80,61 +80,64 @@ module m_ebands
 !!
 type, extends(ebands_base_t), public :: ebands_t
 
-!contains
+contains
+
+ procedure :: init => ebands_init
+   ! Main creation method.
+
+ procedure :: free => ebands_free
+   ! Destruction method.
+
+ procedure :: from_hdr => ebands_from_hdr
+ ! Init object from the abinit header.
+ procedure :: from_dtset => ebands_from_dtset
+ ! Init object from the abinit dataset.
+
+ procedure :: copy => ebands_copy                     ! Copy of the ebands_t.
+ procedure :: move_alloc            =>   ebands_move_alloc               ! Transfer allocation.
+ procedure :: print                 =>   ebands_print                    ! Printout basic info on the data type.
+ procedure :: get_bandenergy        =>   ebands_get_bandenergy           ! Returns the band energy of the system.
+ procedure :: get_valence_idx       =>   ebands_get_valence_idx          ! Gives the index of the (valence|bands at E_f).
+ procedure :: get_bands_from_erange =>   ebands_get_bands_from_erange    ! Return the indices of the mix and max band within an energy window.
+ procedure :: vcbm_range_from_gaps  =>   ebands_vcbm_range_from_gaps     ! Find band and energy range for states close to the CBM/VBM given input energies.
+ procedure :: apply_scissors        =>   ebands_apply_scissors           ! Apply scissors operator (no k-dependency)
+ procedure :: get_occupied          =>   ebands_get_occupied             ! Returns band indices after wich occupations are less than an input value.
+ procedure :: enclose_degbands      =>   ebands_enclose_degbands         ! Adjust band indices such that all degenerate states are treated.
+ procedure :: get_bands_e0          =>   ebands_get_bands_e0             ! Find min/max band indices crossing energy e0
+ procedure :: get_erange            =>   ebands_get_erange               ! Compute the minimum and maximum energy enclosing a list of states.
+ procedure :: nelect_per_spin       =>   ebands_nelect_per_spin          ! Returns number of electrons per spin channel
+ procedure :: get_minmax            =>   ebands_get_minmax               ! Returns min and Max value of (eig|occ|doccde).
+ procedure :: has_metal_scheme      =>   ebands_has_metal_scheme         ! .True. if metallic occupation scheme is used.
+ procedure :: write_bxsf            =>   ebands_write_bxsf               ! Write 3D energies for Fermi surface visualization (XSF format)
+ procedure :: update_occ            =>   ebands_update_occ               ! Update the occupation numbers.
+ procedure :: set_scheme            =>   ebands_set_scheme               ! Set the occupation scheme.
+ procedure :: set_fermie            =>   ebands_set_fermie               ! Change the fermi level (assume metallic scheme).
+ procedure :: set_extrael           =>   ebands_set_extrael              ! Add extrael to initial number of electrons to simulate e/h doping. (assume metallic scheme).
+ procedure :: get_muT_with_fd       =>   ebands_get_muT_with_fd          ! Change the number of electrons (assume metallic scheme).
+ procedure :: calc_nelect           =>   ebands_calc_nelect              ! Compute nelect from Fermi level and Temperature.
+ procedure :: report_gap            =>   ebands_report_gap               ! Print info on the fundamental and direct gap.
+ procedure :: ncwrite               =>   ebands_ncwrite                  ! Write object to NETCDF file (use ncid)
+ procedure :: ncwrite_path          =>   ebands_ncwrite_path             ! Dump the object into NETCDF file (use filepath)
+ procedure :: write_nesting         =>   ebands_write_nesting            ! Calculate the nesting function and output data to file.
+ procedure :: expandk               =>   ebands_expandk                  ! Build a new ebands_t in the full BZ.
+ procedure :: downsample            =>   ebands_downsample               ! Build a new ebands_t with a downsampled IBZ.
+ procedure :: chop                  =>   ebands_chop                     ! Build a new ebands_t with selected nbands.
+ procedure :: get_edos              =>   ebands_get_edos                 ! Compute e-DOS from band structure.
+ procedure :: get_jdos              =>   ebands_get_jdos                 ! Compute electron joint-DOS from band structure.
+ procedure :: get_edos_matrix_elements => ebands_get_edos_matrix_elements ! Compute e-DOS and other DOS-like quantities involving ! vectorial or tensorial matrix elements.
+ procedure :: interp_kmesh          =>   ebands_interp_kmesh             ! Use SWK to interpolate energies on a k-mesh.
+ procedure :: interp_kpath          =>   ebands_interp_kpath             ! Interpolate energies on a k-path.
+ procedure :: interpolate_kpath     =>   ebands_interpolate_kpath
+ procedure :: prtbltztrp            =>   ebands_prtbltztrp               ! Output files for BoltzTraP code.
+ procedure :: write                 =>   ebands_write                    ! Driver routine to write bands in different txt formats.
+ procedure :: get_carriers          =>   ebands_get_carriers             ! Compute carrier concentration from input Fermi level and list of Temperatures.
+ procedure :: get_gaps              =>   ebands_get_gaps                 ! Build the gaps object from a bandstructure.
+ procedure :: print_gaps            =>   ebands_print_gaps               ! Helper function to print gaps directrly from ebands.
 
 end type ebands_t
 !!***
 
- ! Ebands methods
- public :: ebands_init             ! Main creation method.
- public :: ebands_from_hdr         ! Init object from the abinit header.
- public :: ebands_from_dtset       ! Init object from the abinit dataset.
- public :: ebands_free             ! Destruction method.
- public :: ebands_copy             ! Copy of the ebands_t.
- public :: ebands_move_alloc       ! Transfer allocation.
- public :: ebands_print            ! Printout basic info on the data type.
- public :: ebands_get_bandenergy   ! Returns the band energy of the system.
- public :: ebands_get_valence_idx  ! Gives the index of the (valence|bands at E_f).
- public :: ebands_get_bands_from_erange   ! Return the indices of the mix and max band within an energy window.
- public :: ebands_vcbm_range_from_gaps ! Find band and energy range for states close to the CBM/VBM given input energies.
- public :: ebands_apply_scissors   ! Apply scissors operator (no k-dependency)
- public :: ebands_get_occupied     ! Returns band indices after wich occupations are less than an input value.
- public :: ebands_enclose_degbands ! Adjust band indices such that all degenerate states are treated.
- public :: ebands_get_bands_e0     ! Find min/max band indices crossing energy e0
- public :: ebands_get_erange       ! Compute the minimum and maximum energy enclosing a list of states.
- public :: ebands_nelect_per_spin  ! Returns number of electrons per spin channel
- public :: ebands_get_minmax       ! Returns min and Max value of (eig|occ|doccde).
- public :: ebands_has_metal_scheme ! .True. if metallic occupation scheme is used.
- public :: ebands_write_bxsf       ! Write 3D energies for Fermi surface visualization (XSF format)
- public :: ebands_update_occ       ! Update the occupation numbers.
- public :: ebands_set_scheme       ! Set the occupation scheme.
- public :: ebands_set_fermie       ! Change the fermi level (assume metallic scheme).
- public :: ebands_set_extrael      ! Add extrael to initial number of electrons to simulate e/h doping.
-                                   ! (assume metallic scheme).
- public :: ebands_get_muT_with_fd  ! Change the number of electrons (assume metallic scheme).
- public :: ebands_calc_nelect      ! Compute nelect from Fermi level and Temperature.
- public :: ebands_report_gap       ! Print info on the fundamental and direct gap.
- public :: ebands_ncwrite          ! Write object to NETCDF file (use ncid)
- public :: ebands_ncwrite_path     ! Dump the object into NETCDF file (use filepath)
- public :: ebands_write_nesting    ! Calculate the nesting function and output data to file.
- public :: ebands_expandk          ! Build a new ebands_t in the full BZ.
- public :: ebands_downsample       ! Build a new ebands_t with a downsampled IBZ.
- public :: ebands_chop             ! Build a new ebands_t with selected nbands.
- public :: ebands_get_edos         ! Compute e-DOS from band structure.
- public :: ebands_get_jdos         ! Compute electron joint-DOS from band structure.
-
- public :: ebands_get_edos_matrix_elements ! Compute e-DOS and other DOS-like quantities involving
-                                           ! vectorial or tensorial matrix elements.
-
- public :: ebands_interp_kmesh     ! Use SWK to interpolate energies on a k-mesh.
- public :: ebands_interp_kpath     ! Interpolate energies on a k-path.
- public :: ebands_interpolate_kpath
-
- public :: ebands_prtbltztrp          ! Output files for BoltzTraP code.
- public :: ebands_prtbltztrp_tau_out  ! Output files for BoltzTraP code,
- public :: ebands_write               ! Driver routine to write bands in different txt formats.
- public :: ebands_get_carriers        ! Compute carrier concentration from input Fermi level and list of Temperatures.
-!!***
+ public :: ebands_prtbltztrp_tau_out       ! Output files for BoltzTraP code,
 
 !----------------------------------------------------------------------
 
@@ -330,7 +333,7 @@ end type ebands_t
 
    character(len=500),allocatable :: errmsg_spin(:)
      ! errmsg_spin(nsppol)
-     ! String with human-readable error messages if ierr(spin) != 0.
+     ! String with human-readable error message if ierr(spin) != 0.
 
  contains
 
@@ -341,9 +344,6 @@ end type ebands_t
    ! Print info on the gaps
 
  end type gaps_t
-
- public :: ebands_get_gaps     ! Build the gaps object from a bandstructure.
- public :: ebands_print_gaps   ! Helper function to print gaps directrly from ebands.
 !!***
 
 !!****t* m_ebands/klinterp_t
@@ -908,10 +908,11 @@ end subroutine ebands_init
 !!
 !! SOURCE
 
-type(ebands_t) function ebands_from_hdr(hdr, mband, ene3d, nelect) result(ebands)
+subroutine ebands_from_hdr(ebands, hdr, mband, ene3d, nelect)
 
 !Arguments ------------------------------------
 !scalars
+ class(ebands_t),intent(out) :: ebands
  integer,intent(in) :: mband
  type(hdr_type),intent(in) :: hdr
  real(dp),optional,intent(in) :: nelect
@@ -945,7 +946,7 @@ type(ebands_t) function ebands_from_hdr(hdr, mband, ene3d, nelect) result(ebands
  ABI_FREE(ugly_doccde)
  ABI_FREE(ugly_ene)
 
-end function ebands_from_hdr
+end subroutine ebands_from_hdr
 !!***
 
 !----------------------------------------------------------------------
@@ -968,10 +969,11 @@ end function ebands_from_hdr
 !!
 !! SOURCE
 
-type(ebands_t) function ebands_from_dtset(dtset, npwarr, nband) result(new)
+subroutine ebands_from_dtset(new, dtset, npwarr, nband)
 
 !Arguments ------------------------------------
 !scalars
+ class(ebands_t),intent(out) :: new
  type(dataset_type),target,intent(in) :: dtset
  integer,target,optional,intent(in) :: nband(dtset%nkpt * dtset%nsppol)
 !arrays
@@ -1005,7 +1007,7 @@ type(ebands_t) function ebands_from_dtset(dtset, npwarr, nband) result(new)
  ABI_FREE(ugly_ene)
  ABI_FREE(ugly_occ)
 
-end function ebands_from_dtset
+end subroutine ebands_from_dtset
 !!***
 
 !----------------------------------------------------------------------
@@ -1370,8 +1372,8 @@ subroutine get_eneocc_vect(ebands, arr_name, vect)
 
 !Arguments ------------------------------------
 !scalars
- character(len=*),intent(in) :: arr_name
  class(ebands_t),intent(in) :: ebands
+ character(len=*),intent(in) :: arr_name
  real(dp),intent(out) :: vect(ebands%bantot)
 
 !Local variables-------------------------------
@@ -3776,10 +3778,10 @@ subroutine ebands_expandk(inb, cryst, ecut_eff, force_istwfk1, dksqmax, bz2ibz, 
 
 !Arguments ------------------------------------
 !scalars
+ class(ebands_t),intent(in) :: inb
  real(dp),intent(in) :: ecut_eff
  real(dp),intent(out) :: dksqmax
  logical,intent(in) :: force_istwfk1
- class(ebands_t),intent(in) :: inb
  class(ebands_t),intent(out) :: outb
  class(crystal_t),intent(in) :: cryst
 !arrays
@@ -3931,7 +3933,7 @@ type(ebands_t) function ebands_downsample(self, cryst, in_kptrlatt, in_nshiftk, 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: in_nshiftk
- type(ebands_t),intent(in) :: self
+ class(ebands_t),intent(in) :: self
  type(crystal_t),intent(in) :: cryst
 !arrays
  integer,intent(in) :: in_kptrlatt(3,3)

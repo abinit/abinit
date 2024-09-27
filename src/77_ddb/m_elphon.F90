@@ -386,7 +386,7 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam,comm)
    elph_ds%fermie = anaddb_dtset%elph_fermie
    write(message,'(a,E20.12)')' Fermi level set by the user at :',elph_ds%fermie
    call wrtout(std_out,message,'COLL')
-   Bst = ebands_from_hdr(Hdr,nband,eigenGS)
+   call Bst%from_hdr(Hdr,nband,eigenGS)
  else if (abs(anaddb_dtset%ep_extrael) > tol10) then
    if (abs(anaddb_dtset%ep_extrael) > 1.0d2) then
      write(message,'(a,E20.12)')' Doping set by the user is (negative for el doping) :',&
@@ -398,19 +398,19 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam,comm)
 &   anaddb_dtset%ep_extrael
    call wrtout(std_out,message,'COLL')
    elph_ds%nelect = elph_ds%nelect + anaddb_dtset%ep_extrael
-   bst = ebands_from_hdr(Hdr,nband,eigenGS,nelect=elph_ds%nelect)
+   call bst%from_hdr(Hdr,nband,eigenGS,nelect=elph_ds%nelect)
 
 !  set Bst to use FD occupations:
    Bst%occopt = 3
 !   Bst%tsmear = 0.00001_dp ! is this small etol9 Bst%tsmeatol90001_dp ! last used
    Bst%tsmear = tol9 ! is this small etol9 Bst%tsmeatol90001_dp ! last used
 !  Calculate occupation numbers.
-   call ebands_update_occ(Bst,-99.99_dp)
+   call Bst%update_occ(-99.99_dp)
    write(message,'(a,E20.12)')' Fermi level is now calculated to be :',Bst%fermie
    call wrtout(std_out,message,'COLL')
    elph_ds%fermie = BSt%fermie
  else
-   bst = ebands_from_hdr(Hdr,nband,eigenGS)
+   call bst%from_hdr(Hdr,nband,eigenGS)
  end if
  call wrtout(std_out,message,'COLL')
 
@@ -470,24 +470,24 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam,comm)
      elph_ds%fermie = anaddb_dtset%elph_fermie
      write(message,'(a,E20.12)')' Fermi level set by the user at :',elph_ds%fermie
      call wrtout(std_out,message,'COLL')
-     bst = ebands_from_hdr(Hdr,nband,eigenGS)
+     call bst%from_hdr(Hdr,nband,eigenGS)
    else if (abs(anaddb_dtset%ep_extrael) > tol10) then
      write(message,'(a,E20.12)')' Additional electrons per unit cell set by the user at :',anaddb_dtset%ep_extrael
      call wrtout(std_out,message,'COLL')
      elph_ds%nelect = elph_ds%nelect + anaddb_dtset%ep_extrael
-     bst = ebands_from_hdr(Hdr,nband,eigenGS,nelect=elph_ds%nelect)
+     call bst%from_hdr(Hdr,nband,eigenGS,nelect=elph_ds%nelect)
 
 !    set Bst to use FD occupations:
      Bst%occopt = 3
 !     Bst%tsmear = 0.00001_dp ! is this small etol9 Bst%tsmeatol90001_dp ! last used
      Bst%tsmear = tol9 ! is this small etol9 Bst%tsmeatol90001_dp ! last used
 !    Calculate occupation numbers.
-     call ebands_update_occ(Bst,-99.99_dp)
+     call Bst%update_occ(-99.99_dp)
      write(message,'(a,E20.12)')' Fermi level is now calculated to be :',Bst%fermie
      call wrtout(std_out,message,'COLL')
      elph_ds%fermie = BSt%fermie
    else
-     bst = ebands_from_hdr(Hdr,nband,eigenGS)
+     call bst%from_hdr(Hdr,nband,eigenGS)
    end if
    call wrtout(std_out,message,'COLL')
  end if !modify band_gap
@@ -626,8 +626,8 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam,comm)
 
 !  Reinit the structure storing the eigevalues.
 !  Be careful. This part has not been tested.
-   call ebands_free(Bst)
-   bst = ebands_from_hdr(hdr1,nband,eigenGS_fine)
+   call Bst%free()
+   call bst%from_hdr(hdr1,nband,eigenGS_fine)
 
    elph_ds%k_fine%nkptirr = hdr1%nkpt
    ABI_MALLOC(elph_ds%k_fine%kptirr,(3,elph_ds%k_fine%nkptirr))
@@ -777,7 +777,7 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam,comm)
 !Output of the Fermi Surface
  if (anaddb_dtset%prtfsurf == 1 .and. master == me) then
    fname=trim(elph_ds%elph_base_name) // '_BXSF'
-   if (ebands_write_bxsf(Bst, Cryst, fname) /= 0) then
+   if (bst%write_bxsf(Cryst, fname) /= 0) then
      ABI_WARNING("Cannot produce file for Fermi surface, check log file for more info")
    end if
  end if
@@ -1372,7 +1372,7 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam,comm)
 !=====================================================
 
 !clean and deallocate junk
- call ebands_free(Bst)
+ call Bst%free()
  call elph_ds_clean(elph_ds)
  call elph_tr_ds_clean(elph_tr_ds)
  call hdr%free()
@@ -4972,7 +4972,7 @@ subroutine get_nv_fs_temp(elph_ds,BSt,eigenGS,gprimd,max_occ,elph_tr_ds)
    Bst%occopt = 3
    Bst%tsmear = Temp*kb_HaK
    tmp_elphsmear = Temp*kb_HaK
-   call ebands_update_occ(Bst,-99.99_dp)
+   call Bst%update_occ(-99.99_dp)
    write(message,'(a,f12.6,a,E20.12)')'At T=',Temp,' Fermi level is:',Bst%fermie
    call wrtout(std_out,message,'COLL')
    if (abs(elph_ds%fermie) < tol10) then

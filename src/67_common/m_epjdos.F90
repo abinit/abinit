@@ -1742,7 +1742,7 @@ subroutine fatbands_ncwrite(dos, crystal, ebands, hdr, dtset, psps, pawtab, ncid
  ! Write header, crystal structure and band energies.
  NCF_CHECK(hdr%ncwrite(ncid, fform, nc_define=.True.))
  NCF_CHECK(crystal%ncwrite(ncid))
- NCF_CHECK(ebands_ncwrite(ebands, ncid))
+ NCF_CHECK(ebands%ncwrite(ncid))
 
  ! Add fatband-specific quantities
  ncerr = nctk_def_dims(ncid, [ &

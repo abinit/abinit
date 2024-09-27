@@ -455,7 +455,7 @@ program optic
 
  ABI_MALLOC(doccde, (mband * nkpt * nsppol))
 
- call ebands_init(ks_ebands, bantot, hdr%nelect, hdr%ne_qFD, hdr%nh_qFD, hdr%ivalence,&
+ call ks_ebands%init(bantot, hdr%nelect, hdr%ne_qFD, hdr%nh_qFD, hdr%ivalence,&
      doccde, eigen0, hdr%istwfk, hdr%kptns, &
      hdr%nband, nkpt, hdr%npwarr, nsppol, hdr%nspinor, hdr%tphysel, broadening, hdr%occopt, hdr%occ, hdr%wtk, &
      hdr%cellcharge, hdr%kptopt, hdr%kptrlatt_orig, hdr%nshiftk_orig, hdr%shiftk_orig, &
@@ -466,7 +466,7 @@ program optic
  !ks_ebands = ebands_from_hdr(hdr, mband, ene3d, nelect) result(ebands)
 
  !YG : should we use broadening for ebands_init
- call ebands_update_occ(ks_ebands, -99.99d0)
+ call ks_ebands%update_occ(-99.99d0)
 
   !size of the frequency range
  nomega=int((maxomega+domega*0.001_dp)/domega)
@@ -500,7 +500,7 @@ program optic
    ! Note that we write the KS bands without EPH interaction (if any).
    NCF_CHECK(hdr%ncwrite(optic_ncid, 666, nc_define=.True.))
    NCF_CHECK(cryst%ncwrite(optic_ncid))
-   NCF_CHECK(ebands_ncwrite(ks_ebands, optic_ncid))
+   NCF_CHECK(ks_ebands%ncwrite(optic_ncid))
 
    ! Add optic input variables.
    NCF_CHECK(nctk_def_dims(optic_ncid, [nctkdim_t("ntemp", ep_ntemp), nctkdim_t("nomega", nomega)], defmode=.True.))
@@ -654,7 +654,7 @@ program optic
  call wrtout(std_out," optic : Call linopt")
 
  do itemp=1,ep_ntemp
-   call ebands_copy(ks_ebands, eph_ebands)
+   call ks_ebands%copy(eph_ebands)
    if (do_ep_renorm) call renorm_bst(Epren, eph_ebands, cryst, itemp, do_lifetime=.True.,do_check=.True.)
    do ii=1,num_lin_comp
      lin1 = int(lin_comp(ii)/10.0_dp)
@@ -672,7 +672,7 @@ program optic
      call linopt(ii, itemp, nband_sum, cryst, ks_ebands, eph_ebands, pmat, &
        lin1, lin2, nomega, domega, scissor, broadening, tmp_radix, optic_ncid, prtlincompmatrixelements, comm)
    end do
-   call ebands_free(eph_ebands)
+   call eph_ebands%free()
  end do
 
  if (do_ep_renorm) call eprenorms_free(Epren)
@@ -754,7 +754,7 @@ program optic
  do ii=1,3
    call hdr_ddk(ii)%free()
  end do
- call ebands_free(ks_ebands)
+ call ks_ebands%free()
  call cryst%free()
 
  call timein(tcpu, twall)

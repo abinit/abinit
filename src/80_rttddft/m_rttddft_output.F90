@@ -28,7 +28,7 @@ module m_rttddft_output
  use m_crystal,       only: crystal_init, crystal_t
  use m_dtfil,         only: datafiles_type
  use m_dtset,         only: dataset_type
- use m_ebands,        only: ebands_t, ebands_init, ebands_free
+ use m_ebands,        only: ebands_t
  use m_epjdos,        only: dos_calcnwrite, partial_dos_fractions, &
                           & partial_dos_fractions_paw,epjdos_t,    &
                           & epjdos_new, prtfatbands, fatbands_ncwrite
@@ -431,7 +431,7 @@ subroutine prt_den(dtfil, dtset, istep, mpi_enreg, psps, tdks)
    !Electron band energies.
    bantot= dtset%mband*dtset%nkpt*dtset%nsppol
    ABI_CALLOC(doccde, (bantot))
-   call ebands_init(ebands, bantot, dtset%nelect,dtset%ne_qFD,dtset%nh_qFD,dtset%ivalence,         &
+   call ebands%init(bantot, dtset%nelect,dtset%ne_qFD,dtset%nh_qFD,dtset%ivalence,         &
      doccde,tdks%eigen,dtset%istwfk,dtset%kptns,dtset%nband,dtset%nkpt,tdks%npwarr,dtset%nsppol, &
      dtset%nspinor,dtset%tphysel,dtset%tsmear,dtset%occopt,tdks%occ0,dtset%wtk,&
      dtset%cellcharge(1),dtset%kptopt,dtset%kptrlatt_orig,dtset%nshiftk_orig,dtset%shiftk_orig, &
@@ -451,7 +451,7 @@ subroutine prt_den(dtfil, dtset, istep, mpi_enreg, psps, tdks)
    end if
 
    call crystal%free()
-   call ebands_free(ebands)
+   call ebands%free()
  end if
 
 end subroutine prt_den
@@ -542,7 +542,7 @@ subroutine prt_dos(dtfil, dtset, istep, mpi_enreg, psps, tdks)
  !Electron band energies.
  bantot= dtset%mband*dtset%nkpt*dtset%nsppol
  ABI_CALLOC(doccde, (bantot))
- call ebands_init(ebands, bantot,dtset%nelect,dtset%ne_qFD,dtset%nh_qFD,dtset%ivalence,         &
+ call ebands%init(bantot,dtset%nelect,dtset%ne_qFD,dtset%nh_qFD,dtset%ivalence,         &
    doccde,tdks%eigen,dtset%istwfk,dtset%kptns,dtset%nband,dtset%nkpt,tdks%npwarr,dtset%nsppol, &
    dtset%nspinor,dtset%tphysel,dtset%tsmear,dtset%occopt,tdks%occ0,dtset%wtk,&
    dtset%cellcharge(1),dtset%kptopt,dtset%kptrlatt_orig,dtset%nshiftk_orig,dtset%shiftk_orig, &
@@ -585,7 +585,7 @@ subroutine prt_dos(dtfil, dtset, istep, mpi_enreg, psps, tdks)
 
  call dos%free()
  call crystal%free()
- call ebands_free(ebands)
+ call ebands%free()
 
 end subroutine prt_dos
 !!***

@@ -2739,7 +2739,7 @@ type(ebands_t) function wfk_read_ebands(path, comm, out_hdr) result(ebands)
 !************************************************************************
 
  call wfk_read_eigenvalues(path, eigen, hdr, comm)
- ebands = ebands_from_hdr(hdr, maxval(hdr%nband), eigen)
+ call ebands%from_hdr(hdr, maxval(hdr%nband), eigen)
  if (present(out_hdr)) call hdr%copy(out_hdr)
 
  ABI_FREE(eigen)
@@ -4467,7 +4467,7 @@ subroutine wfk_to_bz(in_path, dtset, psps, pawtab, out_path, hdr_bz, ebands_bz)
 
  ! Build new header for owfk. This is the most delicate part since all the arrays in hdr_full
  ! that depend on k-points must be consistent with kfull and nkfull.
- call ebands_expandk(ebands_ibz, cryst, ecut_eff, force_istwfk1, dksqmax, bz2ibz, ebands_bz)
+ call ebands_ibz%expandk(cryst, ecut_eff, force_istwfk1, dksqmax, bz2ibz, ebands_bz)
 
  if (dksqmax > tol12) then
    write(msg, '(3a,es16.6,4a)' )&
@@ -4661,7 +4661,7 @@ subroutine wfk_to_bz(in_path, dtset, psps, pawtab, out_path, hdr_bz, ebands_bz)
  ABI_FREE(cg_kf)
 
  call cryst%free()
- call ebands_free(ebands_ibz)
+ call ebands_ibz%free()
  call iwfk%close()
  call owfk%close()
 
@@ -5535,8 +5535,8 @@ subroutine wfk_klist2mesh(in_wfkpath, kerange_path, dtset, comm)
  !ABI_FREE(krange2ibz)
  NCF_CHECK(nf90_close(ncid))
  ! Build fine_ebands
- fine_ebands = ebands_from_hdr(fine_hdr, fine_mband, fine_eigen)
- !call ebands_print(fine_ebands, [std_out], header="SKW interpolated energies", prtvol=dtset%prtvol)
+ call fine_ebands%from_hdr(fine_hdr, fine_mband, fine_eigen)
+ !call fine_ebands%print([std_out], header="SKW interpolated energies", prtvol=dtset%prtvol)
  ABI_FREE(fine_eigen)
 
  if (my_rank == master) then
@@ -5559,7 +5559,7 @@ subroutine wfk_klist2mesh(in_wfkpath, kerange_path, dtset, comm)
    ABI_ERROR(msg)
  end if
  iwfk_ebands = wfk_read_ebands(my_inpath, xmpi_comm_self)
- !call ebands_print(iwfk_ebands, [std_out], header="iwfk_ebands", prtvol=dtset%prtvol)
+ !call iwfk_ebands%print([std_out], header="iwfk_ebands", prtvol=dtset%prtvol)
 
  iomode = iomode_from_fname(my_inpath)
  call wfk_open_read(iwfk, my_inpath, formeig0, iomode, get_unit(), xmpi_comm_self)
@@ -5657,10 +5657,10 @@ subroutine wfk_klist2mesh(in_wfkpath, kerange_path, dtset, comm)
  !  ABI_WARNING(msg)
  !end if
 
- call ebands_update_occ(fine_ebands, dtset%spinmagntarget, prtvol=dtset%prtvol)
+ call fine_ebands%update_occ(dtset%spinmagntarget, prtvol=dtset%prtvol)
  !call pack_eneocc(nkpt, nsppol, mband, nband, bantot, array3d, vect)
  !fine_hdr%occ = reshape(fine_ebands%occ, fine_ebands%mband (1:nband_k, ikin, spin)
- call ebands_print(fine_ebands, [std_out], header="fine_ebands", prtvol=dtset%prtvol)
+ call fine_ebands%print([std_out], header="fine_ebands", prtvol=dtset%prtvol)
 
  out_wfkpath = strcat(in_wfkpath, ".tmp")
  if (iomode == IO_MODE_ETSF) out_wfkpath = strcat(out_wfkpath, ".nc")
@@ -5669,7 +5669,7 @@ subroutine wfk_klist2mesh(in_wfkpath, kerange_path, dtset, comm)
  if (iomode == IO_MODE_ETSF) then
   ! Add crystal structure and ebands if netcdf output.
    NCF_CHECK(cryst%ncwrite(owfk%fh))
-   NCF_CHECK(ebands_ncwrite(fine_ebands, owfk%fh))
+   NCF_CHECK(fine_ebands%ncwrite(owfk%fh))
  end if
 
  call fine_hdr%free()
@@ -5726,8 +5726,8 @@ subroutine wfk_klist2mesh(in_wfkpath, kerange_path, dtset, comm)
  !ABI_FREE(kshe_mask)
 
  call cryst%free()
- call ebands_free(iwfk_ebands)
- call ebands_free(fine_ebands)
+ call iwfk_ebands%free()
+ call fine_ebands%free()
  call iwfk%close()
  call owfk%close()
 
@@ -5964,7 +5964,7 @@ subroutine wfk_check_symtab(in_wfkpath, comm)
  !ABI_FREE(occ_k)
 
  call cryst%free()
- call ebands_free(ks_ebands)
+ call ks_ebands%free()
  call wfk%close()
 
 end subroutine wfk_check_symtab

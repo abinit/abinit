@@ -53,9 +53,7 @@ module m_sigma_driver
  use m_fft_mesh,      only : get_gfft, setmesh
  use m_fft,           only : fourdp
  use m_ioarr,         only : fftdatar_write, read_rhor
- use m_ebands,        only : ebands_t, ebands_update_occ, ebands_copy, ebands_report_gap, ebands_get_valence_idx, ebands_get_bandenergy,&
-                             ebands_free, ebands_init, ebands_ncwrite, ebands_interpolate_kpath, get_eneocc_vect, &
-                             ebands_enclose_degbands, ebands_get_gaps, gaps_t
+ use m_ebands,        only : ebands_t, gaps_t
  use m_energies,      only : energies_type, energies_init
  use m_bz_mesh,       only : kmesh_t, littlegroup_t, littlegroup_free, isamek, get_ng0sh, find_qmesh
  use m_gsphere,       only : gsphere_t, merge_and_sort_kg, setshells
@@ -422,8 +420,8 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  ABI_MALLOC(ks_vbik, (ks_ebands%nkpt, ks_ebands%nsppol))
  ABI_MALLOC(qp_vbik, (ks_ebands%nkpt, ks_ebands%nsppol))
 
- !call ebands_update_occ(ks_ebands,Dtset%spinmagntarget,prtvol=0)
- ks_vbik(:,:) = ebands_get_valence_idx(ks_ebands)
+ !call ks_ebands%update_occ(Dtset%spinmagntarget,prtvol=0)
+ ks_vbik(:,:) = ks_ebands%get_valence_idx()
 
  ! ============================
  ! ==== PAW initialization ====
@@ -1038,7 +1036,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  !=== qp_ebands stores energies and occ. used for the calculation ===
  !  * Initialize qp_ebands with KS values.
  !  * In case of SC update qp_ebands using the QPS file.
- call ebands_copy(ks_ebands, qp_ebands)
+ call ks_ebands%copy(qp_ebands)
 
  ABI_MALLOC(qp_rhor, (nfftf, Dtset%nspden))
  ABI_MALLOC(qp_taur, (nfftf, Dtset%nspden * Dtset%usekden))
@@ -1117,8 +1115,8 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 
    ! Compute QP occupation numbers.
    call wrtout(std_out,'sigma: calculating QP occupation numbers:')
-   call ebands_update_occ(qp_ebands, Dtset%spinmagntarget, prtvol=0)
-   qp_vbik(:,:) = ebands_get_valence_idx(qp_ebands)
+   call qp_ebands%update_occ(Dtset%spinmagntarget, prtvol=0)
+   qp_vbik(:,:) = qp_ebands%get_valence_idx()
 
 !  #ifdef DEV_HAVE_SCGW_SYM
    ! Calculate the irreducible representations of the new QP amplitdues.
@@ -1297,7 +1295,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
    write(msg,'(5a,f9.4,3a,es21.14,2a,es21.14)')ch10,&
     ' QP results after the unitary transformation in the KS subspace: ',ch10,ch10,&
     '  Number of electrons    = ',qp_rhog(1,1)*Cryst%ucvol,ch10,ch10,&
-    '  QP Band energy    [Ha] = ',ebands_get_bandenergy(qp_ebands),ch10,&
+    '  QP Band energy    [Ha] = ',qp_ebands%get_bandenergy(),ch10,&
     '  QP Hartree energy [Ha] = ',ehartree
    call wrtout(ab_out,msg)
    write(msg,'(a,80a)')ch10,('-',ii=1,80)
@@ -1629,7 +1627,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
    Sr%egw=qp_ebands%eig
    !
    ! * Recalculate the new fermi level.
-   call ebands_update_occ(qp_ebands, Dtset%spinmagntarget, prtvol=0)
+   call qp_ebands%update_occ(Dtset%spinmagntarget, prtvol=0)
  end if
 
  ! In case of AC refer all the energies wrt to the fermi level
@@ -1942,7 +1940,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 
  if (wfd%my_rank == master) then
    ! Write info on the run on ab_out, then open files to store final results.
-   call ebands_report_gap(ks_ebands,header='KS Band Gaps',unit=ab_out)
+   call ks_ebands%report_gap(header='KS Band Gaps',unit=ab_out)
    if(dtset%ucrpa == 0) then
      call write_sigma_header(Sigp,Er,Cryst,Kmesh,Qmesh)
    end if
@@ -2767,8 +2765,8 @@ endif
    if (Sigp%nkptgw==Kmesh%nibz) then
 
      ! Recalculate new occupations and Fermi level.
-     call ebands_update_occ(qp_ebands,Dtset%spinmagntarget,prtvol=Dtset%prtvol)
-     qp_vbik(:,:) = ebands_get_valence_idx(qp_ebands)
+     call qp_ebands%update_occ(Dtset%spinmagntarget,prtvol=Dtset%prtvol)
+     qp_vbik(:,:) = qp_ebands%get_valence_idx()
 
      write(msg,'(2a,3x,2(es16.6,a))')ch10,' New Fermi energy : ',qp_ebands%fermie,' Ha ,',qp_ebands%fermie*Ha_eV,' eV'
      call wrtout(units, msg)
@@ -2785,11 +2783,11 @@ endif
      end if
 
      ! Report the QP gaps (Fundamental and direct)
-     call ebands_report_gap(qp_ebands,header='QP Band Gaps',unit=ab_out)
+     call qp_ebands%report_gap(header='QP Band Gaps',unit=ab_out)
 
      ! Band structure interpolation from QP energies computed on the k-mesh.
      if (nint(dtset%einterp(1)) /= 0 .and. all(sigp%minbdgw == sigp%minbnd) .and. all(sigp%maxbdgw == sigp%maxbnd)) then
-       call ebands_interpolate_kpath(qp_ebands, dtset, cryst, [sigp%minbdgw, sigp%maxbdgw], dtfil%filnam_ds(4), comm)
+       call qp_ebands%interpolate_kpath(dtset, cryst, [sigp%minbdgw, sigp%maxbdgw], dtfil%filnam_ds(4), comm)
      end if
    end if ! Sigp%nkptgw==Kmesh%nibz
    !
@@ -2828,7 +2826,7 @@ endif
      NCF_CHECK(nctk_open_create(ncid, strcat(dtfil%filnam_ds(4), '_SIGRES.nc'), xmpi_comm_self))
      NCF_CHECK(nctk_defnwrite_ivars(ncid, ["sigres_version"], [1]))
      NCF_CHECK(cryst%ncwrite(ncid))
-     NCF_CHECK(ebands_ncwrite(ks_ebands, ncid))
+     NCF_CHECK(ks_ebands%ncwrite(ncid))
      NCF_CHECK(Sr%ncwrite(Sigp, Er, ncid)) ! WARNING!! If gw1rdm>0 then Er is no longer present!!
      ! Add qp_rhor. Note that qp_rhor == ks_rhor if wavefunctions are not updated.
      !ncerr = nctk_write_datar("qp_rhor",path,ngfft,cplex,nfft,nspden,&
@@ -2929,8 +2927,8 @@ endif
  call PPm%free()
  call Hdr_sigma%free()
  call Hdr_wfk%free()
- call ebands_free(ks_ebands)
- call ebands_free(qp_ebands)
+ call ks_ebands%free()
+ call qp_ebands%free()
  call KS_me%free()
  call esymm_free(KS_sym)
  ABI_FREE(KS_sym)
@@ -3348,7 +3346,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
  ABI_MALLOC(npwarr,(Dtset%nkpt))
  npwarr(:)=Sigp%npwwfn
 
- call ebands_init(ks_ebands, bantot, Dtset%nelect,Dtset%ne_qFD,Dtset%nh_qFD,Dtset%ivalence,&
+ call ks_ebands%init(bantot, Dtset%nelect,Dtset%ne_qFD,Dtset%nh_qFD,Dtset%ivalence,&
                   doccde,eigen,Dtset%istwfk,Kmesh%ibz,Dtset%nband,&
                   Kmesh%nibz,npwarr,nsppol,Dtset%nspinor,Dtset%tphysel,Dtset%tsmear,Dtset%occopt,occfact,Kmesh%wt,&
                   dtset%cellcharge(1), dtset%kptopt, dtset%kptrlatt_orig, dtset%nshiftk_orig, dtset%shiftk_orig,&
@@ -3361,14 +3359,14 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
  ! Calculate KS occupation numbers and ks_vbk(nkibz, nsppol) ====
  ! ks_vbk gives the (valence|last Fermi band) index for each k and spin.
  ! spinmagntarget is passed to fermi.F90 to fix the problem with newocc in case of magnetic metals
- call ebands_update_occ(ks_ebands, Dtset%spinmagntarget, prtvol=0)
+ call ks_ebands%update_occ(Dtset%spinmagntarget, prtvol=0)
 
- gaps = ebands_get_gaps(ks_ebands, gap_err)
+ gaps = ks_ebands%get_gaps(gap_err)
  call gaps%print([std_out])
- call ebands_report_gap(ks_ebands, unit=std_out)
+ call ks_ebands%report_gap(unit=std_out)
 
  ABI_MALLOC(val_indices,(ks_ebands%nkpt, nsppol))
- val_indices = ebands_get_valence_idx(ks_ebands)
+ val_indices = ks_ebands%get_valence_idx()
 
  ! Create Sigma header
  ! TODO Fix problems with symmorphy and k-points
@@ -3535,7 +3533,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
      do ikcalc=1,Sigp%nkptgw
 
        if (kmesh%has_IBZ_item(Sigp%kptgw(:,ikcalc), ikibz, G0)) then
-         call ebands_enclose_degbands(ks_ebands,ikibz,isppol, &
+         call ks_ebands%enclose_degbands(ikibz,isppol, &
                Sigp%minbnd(ikcalc,isppol),Sigp%maxbnd(ikcalc,isppol),changed,tol_enediff)
 
          if (changed) then

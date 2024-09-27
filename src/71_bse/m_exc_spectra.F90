@@ -172,8 +172,8 @@ subroutine build_spectra(BSp,BS_files,Cryst,Kmesh,KS_BSt,QP_BSt,Psps,Pawtab,Wfd,
      ost_fname = strcat(BS_files%out_basename,prefix,"_EXC_OST")
 
      !TODO for RPA
-     call ebands_copy(KS_BST, EPBSt)
-     call ebands_copy(QP_BST, EP_QPBSt)
+     call KS_BST%copy(EPBSt)
+     call QP_BST%copy(EP_QPBSt)
 
      if (BS_files%in_eig /= BSE_NOFILE) then
        filbseig = strcat(BS_files%in_eig,prefix)
@@ -256,14 +256,14 @@ subroutine build_spectra(BSp,BS_files,Cryst,Kmesh,KS_BSt,QP_BSt,Psps,Pawtab,Wfd,
      path = strcat(BS_files%out_basename, strcat(prefix,"_MDF.nc"))
      NCF_CHECK_MSG(nctk_open_create(ncid, path, xmpi_comm_self), sjoin("Creating MDF file:", path))
      NCF_CHECK(cryst%ncwrite(ncid))
-     NCF_CHECK(ebands_ncwrite(QP_BSt, ncid))
+     NCF_CHECK(QP_BSt%ncwrite(ncid))
      ! Write dielectric functions.
      call mdfs_ncwrite(ncid, Bsp, eps_exc,eps_rpanlf,eps_gwnlf)
      NCF_CHECK(nf90_close(ncid))
 
      !TODO
-     call ebands_free(EPBSt)
-     call ebands_free(EP_QPBSt)
+     call EPBSt%free()
+     call EP_QPBSt%free()
    end do
 
    ABI_FREE(eps_rpanlf)

@@ -21,6 +21,7 @@
 
 module m_gwr_driver
 
+ use, intrinsic :: iso_c_binding
 #ifdef HAVE_MPI2
  use mpi
 #endif
@@ -40,7 +41,6 @@ module m_gwr_driver
  use m_distribfft
  use netcdf
  use m_nctk
- use, intrinsic :: iso_c_binding
 
  use defs_datatypes,    only : pseudopotential_type
  use defs_abitypes,     only : MPI_type
@@ -668,7 +668,7 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
    end if
 
    ! Build header with new npwarr and nband.
-   owfk_ebands = ebands_from_dtset(dtset, npwarr_ik, nband=nband_iks)
+   call owfk_ebands%from_dtset(dtset, npwarr_ik, nband=nband_iks)
    owfk_ebands%eig = zero
    owfk_ebands%istwfk = istwfk_ik
    !print *, "owfk_ebands%npwarr:",  owfk_ebands%npwarr; stop
@@ -789,21 +789,21 @@ end if
    end do
    call xmpi_sum(owfk_ebands%eig, comm, ierr)
 
-   call ebands_update_occ(owfk_ebands, dtset%spinmagntarget, prtvol=dtset%prtvol, fermie_to_zero=.False.)
+   call owfk_ebands%update_occ(dtset%spinmagntarget, prtvol=dtset%prtvol, fermie_to_zero=.False.)
 
    if (my_rank == master) then
      if (write_wfk .and. iomode__ == IO_MODE_ETSF) then
-       NCF_CHECK(ebands_ncwrite_path(owfk_ebands, cryst, out_path))
+       NCF_CHECK(owfk_ebands%ncwrite_path(cryst, out_path))
        !print *, "owfk_ebands%istwfk", owfk_ebands%istwfk; stop
      end if
-     call ebands_print_gaps(owfk_ebands, units, header="KS gaps after direct diagonalization")
+     call owfk_ebands%print_gaps(units, header="KS gaps after direct diagonalization")
      if (cc4s_task) call cc4s_write_eigens(owfk_ebands, dtfil)
    end if
 
    ABI_FREE(npwarr_ik)
    ABI_FREE(istwfk_ik)
    ABI_FREE(nband_iks)
-   call owfk_hdr%free(); call ebands_free(owfk_ebands); call hyb%free(); call diago_pool%free()
+   call owfk_hdr%free(); call owfk_ebands%free(); call hyb%free(); call diago_pool%free()
 
  else if (string_in(dtset%gwr_task, "CC4S_FROM_WFK")) then
    ! Read orbitals from an external WFK file and produce output files for CC4S.
@@ -836,7 +836,7 @@ end if
        call ugb%free()
      end do
    end do
-   call wfk_hdr%free(); call ebands_free(ks_ebands); call diago_pool%free()
+   call wfk_hdr%free(); call ks_ebands%free(); call diago_pool%free()
 
  else
    ! ====================================================
@@ -867,7 +867,7 @@ end if
      call wfk_cryst%free()
 
      ! Make sure that ef is inside the gap if semiconductor.
-     call ebands_update_occ(ks_ebands, dtset%spinmagntarget, prtvol=dtset%prtvol, fermie_to_zero=.True.)
+     call ks_ebands%update_occ(dtset%spinmagntarget, prtvol=dtset%prtvol, fermie_to_zero=.True.)
 
      ! Here we change the GS bands (Fermi level, scissors operator ...)
      ! All the modifications to ebands should be done here.
@@ -976,7 +976,7 @@ end if
  ABI_SFREE(pawfgrtab)
  ABI_SFREE(ks_paw_an)
 
- call cryst%free(); call wfk_hdr%free(); call ebands_free(ks_ebands); call destroy_mpi_enreg(mpi_enreg_seq)
+ call cryst%free(); call wfk_hdr%free(); call ks_ebands%free(); call destroy_mpi_enreg(mpi_enreg_seq)
  call gwr%free()
 
 end subroutine gwr_driver

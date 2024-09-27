@@ -3158,7 +3158,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
  edos_intmeth = 2; if (dtset%prtdos /= 0) edos_intmeth = dtset%prtdos
  edos_step = dtset%dosdeltae; edos_broad = dtset%tsmear
  edos_step = 0.01 * eV_Ha; edos_broad = 0.3 * eV_Ha
- edos = ebands_get_edos(ebands, cryst, edos_intmeth, edos_step, edos_broad, comm)
+ edos = ebands%get_edos(cryst, edos_intmeth, edos_step, edos_broad, comm)
 
  ! Store DOS per spin channel
  n0(:) = edos%gef(1:edos%nsppol)
@@ -3352,7 +3352,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
    ! Master creates the netcdf file used to store the results of the calculation.
    NCF_CHECK(nctk_open_create(ncid, path, xmpi_comm_self))
    NCF_CHECK(cryst%ncwrite(ncid))
-   NCF_CHECK(ebands_ncwrite(ebands, ncid))
+   NCF_CHECK(ebands%ncwrite(ncid))
    NCF_CHECK(edos%ncwrite(ncid))
 
    ! Add dimensions.
@@ -4593,14 +4593,14 @@ subroutine find_ewin(nqibz, qibz, cryst, ebands, ltetra, fs_ewin, comm)
  ! 1 is low, 2 is high, 3 is for the workspace
  ABI_MALLOC(wtqs, (nqibz, ebands%nsppol, 3))
  ewins(1) = half * eV_Ha; elows(1) = ebands%fermie - ewins(1); ehighs(1) = ebands%fermie + ewins(1)
- call ebands_get_bands_from_erange(ebands, elows(1), ehighs(1), bstarts(1), bstops(1))
+ call ebands%get_bands_from_erange(elows(1), ehighs(1), bstarts(1), bstops(1))
  call calc_dbldelta(cryst, ebands, ltetra, bstarts(1), bstops(1), nqibz, qibz, wtqs(:,:,1), comm)
  if (unt /= -1) write(unt, *) wtqs(:,:,1)
 
  !ewins(2) = five * eV_Ha; elows(2) = ebands%fermie - ewins(2); ehighs(2) = ebands%fermie + ewins(2)
  ewins(2) = two * eV_Ha; elows(2) = ebands%fermie - ewins(2); ehighs(2) = ebands%fermie + ewins(2)
  ewins(2) = one * eV_Ha; elows(2) = ebands%fermie - ewins(2); ehighs(2) = ebands%fermie + ewins(2)
- call ebands_get_bands_from_erange(ebands, elows(2), ehighs(2), bstarts(2), bstops(2))
+ call ebands%get_bands_from_erange(elows(2), ehighs(2), bstarts(2), bstops(2))
  call calc_dbldelta(cryst, ebands, ltetra, bstarts(2), bstops(2), nqibz, qibz, wtqs(:,:,2), comm)
  if (unt /= -1) write(unt, *) wtqs(:,:,2)
 
@@ -4613,7 +4613,7 @@ subroutine find_ewin(nqibz, qibz, cryst, ebands, ltetra, fs_ewin, comm)
  ! Bisection part.
  do
    ewins(3) = (ewins(1) + ewins(2)) / two; elows(3) = ebands%fermie - ewins(3); ehighs(3) = ebands%fermie + ewins(3)
-   call ebands_get_bands_from_erange(ebands, elows(3), ehighs(3), bstarts(3), bstops(3))
+   call ebands%get_bands_from_erange(elows(3), ehighs(3), bstarts(3), bstops(3))
    call calc_dbldelta(cryst, ebands, ltetra, bstarts(3), bstops(3), nqibz, qibz, wtqs(:,:,3), comm)
    if (unt /= -1) write(unt, *) wtqs(:,:,3)
 

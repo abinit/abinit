@@ -189,7 +189,7 @@ subroutine sigtk_kcalc_from_qprange(dtset, cryst, ebands, qprange, nkcalc, kcalc
 
  mband = ebands%mband
 
- val_indices = ebands_get_valence_idx(ebands)
+ val_indices = ebands%get_valence_idx()
 
  if (any(dtset%sigma_ngkpt /= 0)) then
     call wrtout(std_out, " Generating list of k-points for self-energy from sigma_ngkpt and qprange.")
@@ -285,7 +285,7 @@ subroutine sigtk_kcalc_from_gaps(dtset, ebands, gaps, nkcalc, kcalc, bstart_ks, 
  ABI_CHECK(maxval(gaps%ierr) == 0, "qprange 0 cannot be used because I cannot find the gap (gap_err !=0)")
 
  nsppol = ebands%nsppol
- val_indices = ebands_get_valence_idx(ebands)
+ val_indices = ebands%get_valence_idx()
 
  ! Include the direct and the fundamental KS gap.
  ! The problem here is that kptgw and nkptgw do not depend on the spin and therefore
@@ -610,7 +610,7 @@ subroutine sigtk_kpts_in_erange(dtset, cryst, ebands, psps, pawtab, prefix, comm
    call wrtout(units, msg)
    call wrtout(units, sjoin(" SKW parameters (einterp): ", ltoa(dtset%einterp)))
    call wrtout(units, sjoin(repeat("=", 92), ch10))
-   !call ebands_print(ebands, [std_out], header, prtvol=dtset%prtvol)
+   !call ebands%print([std_out], header, prtvol=dtset%prtvol)
 
    ! Consistency check.
    if (all(dtset%sigma_erange == zero)) then
@@ -623,7 +623,7 @@ subroutine sigtk_kpts_in_erange(dtset, cryst, ebands, psps, pawtab, prefix, comm
 
  if (assume_gap) then
    ! Compute gaps using input ebands.
-   gaps = ebands_get_gaps(ebands, gap_err)
+   gaps = ebands%get_gaps(gap_err)
    if (gap_err /= 0) then
      ABI_ERROR("Cannot compute fundamental and direct gap (likely metal).")
    end if
@@ -643,16 +643,16 @@ subroutine sigtk_kpts_in_erange(dtset, cryst, ebands, psps, pawtab, prefix, comm
  band_block = [1, ebands%mband]
  params = 0; params(1) = 1; params(2) = 5; if (nint(dtset%einterp(1)) == 1) params = dtset%einterp
 
- fine_ebands = ebands_interp_kmesh(ebands, cryst, params, fine_kptrlatt, &
+ fine_ebands = ebands%interp_kmesh(cryst, params, fine_kptrlatt, &
                                    dtset%sigma_nshiftk, dtset%sigma_shiftk, band_block, comm)
  fine_ebands%istwfk = 1
 
- call ebands_update_occ(fine_ebands, dtset%spinmagntarget, prtvol=dtset%prtvol)
- call ebands_print(fine_ebands, [std_out], header="FINE EBANDS", prtvol=dtset%prtvol)
+ call fine_ebands%update_occ(dtset%spinmagntarget, prtvol=dtset%prtvol)
+ call fine_ebands%print([std_out], header="FINE EBANDS", prtvol=dtset%prtvol)
 
  if (assume_gap) then
    ! Compute gaps using fine_ebands.
-   fine_gaps = ebands_get_gaps(fine_ebands, gap_err)
+   fine_gaps = fine_ebands%get_gaps(gap_err)
    if (gap_err /= 0) then
      ABI_ERROR("Cannot compute fundamental and direct gap (likely metal).")
    end if
@@ -754,7 +754,7 @@ subroutine sigtk_kpts_in_erange(dtset, cryst, ebands, psps, pawtab, prefix, comm
    !
    NCF_CHECK(fine_hdr%ncwrite(ncid, fform_from_ext("KERANGE.nc"), nc_define=.True.))
    NCF_CHECK(cryst%ncwrite(ncid))
-   NCF_CHECK(ebands_ncwrite(fine_ebands, ncid))
+   NCF_CHECK(fine_ebands%ncwrite(ncid))
    NCF_CHECK(nctk_def_dims(ncid, [nctkdim_t("nkpt_inerange", nkpt_inerange)], defmode=.True.))
    ! Define extra arrays.
    ncerr = nctk_def_arrays(ncid, [ &
@@ -777,7 +777,7 @@ subroutine sigtk_kpts_in_erange(dtset, cryst, ebands, psps, pawtab, prefix, comm
  ABI_FREE(krange2ibz)
 
  call fine_gaps%free()
- call ebands_free(fine_ebands)
+ call fine_ebands%free()
  call fine_hdr%free()
 
 end subroutine sigtk_kpts_in_erange

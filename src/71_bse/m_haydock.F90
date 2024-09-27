@@ -304,8 +304,8 @@ subroutine exc_haydock_driver(BSp,BS_files,Cryst,Kmesh,Hdr_bse,KS_BSt,QP_Bst,Wfd
  prefix = ""
  do itemp = 1, ntemp
 
-   call ebands_copy(hexc%KS_BSt, EPBSt)
-   call ebands_copy(hexc%QP_BSt, EP_QPBSt)
+   call hexc%KS_BSt%copy(EPBSt)
+   call hexc%QP_BSt%copy(EP_QPBSt)
 
    ! =================================================
    ! == Calculate elphon vector in transition space ==
@@ -535,7 +535,7 @@ subroutine exc_haydock_driver(BSp,BS_files,Cryst,Kmesh,Hdr_bse,KS_BSt,QP_Bst,Wfd
      path = strcat(BS_files%out_basename,strcat(prefix,"_MDF.nc"))
      NCF_CHECK(nctk_open_create(ncid, path, xmpi_comm_self))
      NCF_CHECK(cryst%ncwrite(ncid))
-     NCF_CHECK(ebands_ncwrite(QP_bst, ncid))
+     NCF_CHECK(QP_bst%ncwrite(ncid))
      call mdfs_ncwrite(ncid, Bsp, green, eps_rpanlf, eps_gwnlf)
      NCF_CHECK(nf90_close(ncid))
    end if
@@ -546,13 +546,12 @@ subroutine exc_haydock_driver(BSp,BS_files,Cryst,Kmesh,Hdr_bse,KS_BSt,QP_Bst,Wfd
    ABI_FREE(dos_ks)
    ABI_FREE(dos_gw)
 
-   call ebands_free(EPBSt)
-   call ebands_free(EP_QPBst)
+   call EPBSt%free()
+   call EP_QPBst%free()
 
  end do ! itemp loop
 
  ABI_FREE(opt_cvk)
-
  ABI_FREE(kets)
 
  call timab(694,2,tsec) ! exc_haydock_driver(apply

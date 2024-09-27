@@ -373,7 +373,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
    if (dtset%prtfsurf /= 0) then
      path = strcat(dtfil%filnam_ds(4), "_BXSF")
      call wrtout(units, sjoin("- Writing Fermi surface to file:", path))
-     if (ebands_write_bxsf(ebands, cryst, path) /= 0) then
+     if (ebands%write_bxsf(cryst, path) /= 0) then
        msg = "Cannot produce file for Fermi surface, check log file for more info"
        ABI_WARNING(msg)
        call wrtout(ab_out, msg)
@@ -384,13 +384,13 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
    if (dtset%prtnest /= 0 .and. dtset%ph_nqpath > 0) then
      path = strcat(dtfil%filnam_ds(4), "_NEST")
      call wrtout(ab_out, sjoin("- Writing nesting factor to file:", path))
-     if (ebands_write_nesting(ebands, cryst, path, dtset%prtnest, &
+     if (ebands%write_nesting(cryst, path, dtset%prtnest, &
          dtset%tsmear, dtset%fermie_nest, dtset%ph_qpath(:,1:dtset%ph_nqpath), msg) /= 0) then
        ABI_WARNING(msg)
        call wrtout(ab_out,msg)
      end if
    end if
-   if (use_wfk) call ebands_write(ebands, dtset%prtebands, dtfil%filnam_ds(4))
+   if (use_wfk) call ebands%write(dtset%prtebands, dtfil%filnam_ds(4))
  end if
 
  call cwtime_report(" eph%ebands_postprocess:", cpu, wall, gflops)
@@ -515,7 +515,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  if (dtset%prtbltztrp == 1 .and. my_rank == master) then
    call ifc%outphbtrap(cryst, dtset%ph_ngqpt, dtset%ph_nqshift, dtset%ph_qshift, dtfil%filnam_ds(4))
    ! BoltzTraP output files in GENEric format
-   call ebands_prtbltztrp(ebands, cryst, dtfil%filnam_ds(4))
+   call ebands%prtbltztrp(cryst, dtfil%filnam_ds(4))
  end if
 
  ! Output phonon isosurface in Xcrysden format.
@@ -864,8 +864,8 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  call ddb%free()
  call ifc%free()
  call wfk0_hdr%free()
- call ebands_free(ebands)
- call ebands_free(ebands_kq)
+ call ebands%free()
+ call ebands_kq%free()
  call pawfgr_destroy(pawfgr)
  call destroy_mpi_enreg(mpi_enreg)
 

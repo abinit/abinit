@@ -412,7 +412,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  call timab(135,1,tsec)
 
 !Initialize band structure datatype
- bstruct = ebands_from_dtset(dtset, npwarr)
+ call bstruct%from_dtset(dtset, npwarr)
 
 !Initialize PAW atomic occupancies
  if (psps%usepaw==1) then
@@ -441,7 +441,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
    comm_atom=mpi_enreg%comm_atom, mpi_atmtab=mpi_enreg%my_atmtab)
 
 !Clean band structure datatype (should use it more in the future !)
- call ebands_free(bstruct)
+ call bstruct%free()
 
 !Initialize wavefunction files and wavefunctions.
  ireadwf0=1

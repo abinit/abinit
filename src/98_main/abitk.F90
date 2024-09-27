@@ -206,15 +206,15 @@ program abitk
  case ("ebands_print", "ebands_xmgrace", "ebands_gnuplot")
    call get_path_ebands(path, ebands, comm)
    if (command == "ebands_print") then
-     call ebands_print(ebands, [std_out], prtvol=prtvol)
+     call ebands%print([std_out], prtvol=prtvol)
    else
      prtebands = 1; if (command == "ebands_gnuplot") prtebands = 2
-     call ebands_write(ebands, prtebands, basename(path))
+     call ebands%write(prtebands, basename(path))
    end if
 
  case ("ebands_gaps")
    call get_path_ebands_cryst(path, ebands, cryst, comm)
-   call ebands_print_gaps(ebands, [std_out])
+   call ebands%print_gaps([std_out])
 
  case ("ebands_edos", "ebands_jdos")
    call get_path_ebands_cryst(path, ebands, cryst, comm)
@@ -223,7 +223,7 @@ program abitk
    ABI_CHECK(get_arg("broad", broad, msg, default=0.06 * eV_Ha) == 0, msg)
 
    if (command == "ebands_edos") then
-     edos = ebands_get_edos(ebands, cryst, intmeth, step, broad, comm)
+     edos = ebands%get_edos(cryst, intmeth, step, broad, comm)
      call edos%print(std_out, header="Electron DOS")
      out_path = strcat(basename(path), "_EDOS")
      call wrtout(std_out, sjoin("Writing electron DOS to file:", out_path))
@@ -231,13 +231,13 @@ program abitk
 
    else if (command == "ebands_jdos") then
      NOT_IMPLEMENTED_ERROR()
-     jdos = ebands_get_jdos(ebands, cryst, intmeth, step, broad, comm, ierr)
+     jdos = ebands%get_jdos(cryst, intmeth, step, broad, comm, ierr)
      !call jdos%write(strcat(basename(path), "_EJDOS"))
    end if
 
  case ("ebands_bxsf")
    call get_path_ebands_cryst(path, ebands, cryst, comm)
-   if (ebands_write_bxsf(ebands, cryst, strcat(basename(path), "_BXSF")) /= 0)  then
+   if (ebands%write_bxsf(cryst, strcat(basename(path), "_BXSF")) /= 0)  then
      ABI_ERROR("Cannot produce file for Fermi surface in BXSF format. Check log file for info.")
    end if
 
@@ -267,15 +267,15 @@ program abitk
    call parse_skw_params(skw_params)
    !ABI_CHECK(get_arg_list("einterp", ivec9, lenr, msg, exclude="ngkpt", want_len=9) == 0, msg)
    !if (nint(dtset%einterp(1)) == 1) skw_params = dtset%einterp
-   ebands_kpath = ebands_interp_kpath(ebands, cryst, kpath, skw_params, [1, ebands%mband], comm)
+   ebands_kpath = ebands%interp_kpath(cryst, kpath, skw_params, [1, ebands%mband], comm)
 
    !call wrtout(std_out, sjoin(" Writing interpolated bands to:",  path)
    ABI_CHECK(get_arg("prtebands", prtebands, msg, default=2) == 0, msg)
-   call ebands_write(ebands_kpath, prtebands, path)
+   call ebands_kpath%write(prtebands, path)
 
-   !ebands_kmesh = ebands_interp_kmesh(ebands, cryst, skw_params, intp_kptrlatt, intp_nshiftk, intp_shiftk, &
+   !ebands_kmesh = ebands%interp_kmesh(cryst, skw_params, intp_kptrlatt, intp_nshiftk, intp_shiftk, &
    !     band_block, comm, out_prefix)
-   !call ebands_free(ebands_kmesh)
+   !call ebands_kmesh%free()
 
  case ("skw_compare")
    ! Get energies on the IBZ from path
@@ -288,22 +288,22 @@ program abitk
    kpath = kpath_new(other_ebands%kptns, other_cryst%gprimd, -1)
 
    call parse_skw_params(skw_params)
-   ebands_kpath = ebands_interp_kpath(ebands, cryst, kpath, skw_params, [1, ebands%mband], comm)
+   ebands_kpath = ebands%interp_kpath(cryst, kpath, skw_params, [1, ebands%mband], comm)
 
    ! Compare gaps
    ABI_CHECK(get_arg("is-metal", is_metal, msg, default=.False.) == 0, msg)
    if (.not. is_metal) then
      write(std_out, "(2a)")" Will try to compare gaps. Use --is-metal option to skip this check.",ch10
-     call ebands_print_gaps(other_ebands, [std_out], header="Ab-initio gaps")
-     call ebands_print_gaps(ebands_kpath, [std_out], header="SKW interpolated gaps")
+     call other_ebands%print_gaps([std_out], header="Ab-initio gaps")
+     call ebands_kpath%print_gaps([std_out], header="SKW interpolated gaps")
    end if
 
    !ABI_CHECK(get_arg("prtebands", prtebands, msg, default=2) == 0, msg)
    !call ebands_write(ebands_kpath, prtebands, path)
 
    ! Write EBANDS file
-   NCF_CHECK(ebands_ncwrite_path(other_ebands, cryst, "abinitio_EBANDS.nc"))
-   NCF_CHECK(ebands_ncwrite_path(ebands_kpath, other_cryst, "skw_EBANDS.nc"))
+   NCF_CHECK(other_ebands%ncwrite_path(cryst, "abinitio_EBANDS.nc"))
+   NCF_CHECK(ebands_kpath%ncwrite_path(other_cryst, "skw_EBANDS.nc"))
 
    call wrtout(std_out, &
      ch10//" Use `abicomp.py ebands abinitio_EBANDS.nc skw_EBANDS.nc -p combiplot` to compare the bands with AbiPy.", &
@@ -326,7 +326,7 @@ program abitk
    ABI_CHECK(get_arg("spinmagntarget", spinmagntarget, msg, default=-99.99_dp) == 0, msg)
 
    ebands%nelect = ebands%nelect + extrael
-   gaps = ebands_get_gaps(ebands, ierr)
+   gaps = ebands%get_gaps(ierr)
 
    ABI_CHECK(get_arg_list("tmesh", tmesh, lenr, msg, default_list=[5._dp, 59._dp, 6._dp] ) == 0, msg)
    ntemp = nint(tmesh(3))
@@ -335,14 +335,14 @@ program abitk
    kTmesh = arth(tmesh(1), tmesh(2), ntemp) * kb_HaK
 
    ABI_MALLOC(mu_e, (ntemp))
-   call ebands_get_muT_with_fd(ebands, ntemp, kTmesh, spinmagntarget, prtvol, mu_e, comm)
+   call ebands%get_muT_with_fd(ntemp, kTmesh, spinmagntarget, prtvol, mu_e, comm)
    !mu_e = 6.715 * eV_Ha
 
    call gaps%print([std_out], header="KS gaps", kTmesh=kTmesh, mu_e=mu_e)
    !stop
 
    ABI_MALLOC(n_ehst, (2, ebands%nsppol, ntemp))
-   call ebands_get_carriers(ebands, ntemp, kTmesh, mu_e, n_ehst)
+   call ebands%get_carriers(ntemp, kTmesh, mu_e, n_ehst)
 
    !write(msg, "(a16,a32,a32)") 'Temperature [K]', 'e/h density [cm^-3]', 'e/h mobility [cm^2/Vs]'
    do spin=1,ebands%nsppol
@@ -358,7 +358,7 @@ program abitk
    ABI_CHECK(get_arg("step", step, msg, default=0.02 * eV_Ha) == 0, msg)
    ABI_CHECK(get_arg("broad", broad, msg, default=0.06 * eV_Ha) == 0, msg)
 
-   edos = ebands_get_edos(ebands, cryst, intmeth, step, broad, comm)
+   edos = ebands%get_edos(cryst, intmeth, step, broad, comm)
    call edos%print(std_out, header="Electron DOS")
    call edos%get_carriers(ntemp, kTmesh, mu_e, n_ehst)
 
@@ -441,7 +441,7 @@ program abitk
 
  ! Deallocate memory to make memcheck happy.
  call hdr%free(); call cryst%free(); call other_cryst%free(); call kpath%free()
- call ebands_free(ebands); call ebands_free(ebands_kpath); call ebands_free(other_ebands)
+ call ebands%free(); call ebands_kpath%free(); call other_ebands%free()
  call edos%free(); call jdos%free(); call gaps%free()
 
  ABI_SFREE(kibz)

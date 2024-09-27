@@ -410,11 +410,11 @@ type(rta_t) function rta_new(dtset, dtfil, ngfftc, cryst, ebands, pawtab, psps, 
  nsppol = new%nsppol
 
  ABI_MALLOC(new%eminmax_spin, (2, nsppol))
- new%eminmax_spin = ebands_get_minmax(ebands, "eig")
+ new%eminmax_spin = ebands%get_minmax("eig")
 
  if (new%assume_gap) then
    ! Get gaps
-   new%gaps = ebands_get_gaps(ebands, ierr)
+   new%gaps = ebands%get_gaps(ierr)
    if (ierr /= 0) then
      do spin=1, nsppol
        ABI_WARNING(trim(new%gaps%errmsg_spin(spin)))
@@ -442,10 +442,10 @@ type(rta_t) function rta_new(dtset, dtfil, ngfftc, cryst, ebands, pawtab, psps, 
    kptrlatt = 0
    kptrlatt(1,1) = dtset%sigma_ngkpt(1); kptrlatt(2,2) = dtset%sigma_ngkpt(2); kptrlatt(3,3) = dtset%sigma_ngkpt(3)
 
-   tmp_ebands = ebands_downsample(ebands, cryst, kptrlatt, dtset%sigma_nshiftk, dtset%sigma_shiftk)
+   tmp_ebands = ebands%downsample(cryst, kptrlatt, dtset%sigma_nshiftk, dtset%sigma_shiftk)
    new%ebands = sigmaph%get_ebands(cryst, tmp_ebands, [new%bmin, new%bmax], &
                                    new%kcalc2ebands, new%linewidths, new%vbks, xmpi_comm_self)
-   call ebands_free(tmp_ebands)
+   call tmp_ebands%free()
  else
    !call wrtout(units, sjoin(" Computing integrals with SIGEPH k-mesh:", ebands_kmesh2str(ebands))
    new%ebands = sigmaph%get_ebands(cryst, ebands, [new%bmin, new%bmax], &
@@ -471,8 +471,8 @@ type(rta_t) function rta_new(dtset, dtfil, ngfftc, cryst, ebands, pawtab, psps, 
    !ebands_dense = wfk_read_ebands(wfk_fname_dense, comm)
 
    tmp_ebands = wfk_read_ebands(wfk_fname_dense, comm)
-   ebands_dense = ebands_chop(tmp_ebands, 1, mband)
-   call ebands_free(tmp_ebands)
+   ebands_dense = tmp_ebands%chop(1, mband)
+   call tmp_ebands%free()
    if (my_rank == master) then
      write(std_out, *)" Using kptrlatt: ", ebands_dense%kptrlatt
      write(std_out, *)"       shiftk: ", ebands_dense%shiftk
@@ -516,7 +516,7 @@ type(rta_t) function rta_new(dtset, dtfil, ngfftc, cryst, ebands, pawtab, psps, 
    ! HERE we re-malloc new%ebands and %linewidths on the fine k-mesh.
    ! The call must be executed here, once klinterp has been built.
    ! After this point we can use new%ebands to allocate stuff.
-   call ebands_move_alloc(ebands_dense, new%ebands)
+   call ebands_dense%move_alloc(new%ebands)
 
    ! Unlinke the ebands stored in SIGEPH, the eigens read from WFK_FINE have not been
    ! shifted with the scissors operator or updated according to extrael_fermie so do it now.
@@ -573,7 +573,7 @@ type(rta_t) function rta_new(dtset, dtfil, ngfftc, cryst, ebands, pawtab, psps, 
    kptrlatt(1, 1) = dtset%transport_ngkpt(1)
    kptrlatt(2, 2) = dtset%transport_ngkpt(2)
    kptrlatt(3, 3) = dtset%transport_ngkpt(3)
-   tmp_ebands = ebands_downsample(new%ebands, cryst, kptrlatt, 1, [zero, zero, zero])
+   tmp_ebands = new%ebands%downsample(cryst, kptrlatt, 1, [zero, zero, zero])
 
    ! Map the points of the downsampled bands to dense ebands
    timrev = kpts_timrev_from_kptopt(ebands%kptopt)
@@ -610,7 +610,7 @@ type(rta_t) function rta_new(dtset, dtfil, ngfftc, cryst, ebands, pawtab, psps, 
    !print *, "linewidth_mrta", maxval(abs(new%linewidths(:,:,:,:,2)))
 
    ABI_FREE(indkk)
-   call ebands_move_alloc(tmp_ebands, new%ebands)
+   call tmp_ebands%move_alloc(new%ebands)
  end if
 
  ! Same doping case as in sigmaph file.
@@ -636,7 +636,7 @@ type(rta_t) function rta_new(dtset, dtfil, ngfftc, cryst, ebands, pawtab, psps, 
    end if
 
    ! Compute Fermi level for different T values.
-   call ebands_get_muT_with_fd(ebands, new%ntemp, new%kTmesh, dtset%spinmagntarget, dtset%prtvol, new%transport_mu_e, comm)
+   call ebands%get_muT_with_fd(new%ntemp, new%kTmesh, dtset%spinmagntarget, dtset%prtvol, new%transport_mu_e, comm)
  end if
 
  ! TODO: Implement possible change of sigma_erange, useful for convergence studies
@@ -778,7 +778,7 @@ subroutine compute_rta(self, cryst, dtset, dtfil, comm)
  !  Note how we compute the DOS only between [emin, emax] to save time and memory
  !  this implies that IDOS and edos%ifermi are ill-defined
 
- self%edos = ebands_get_edos_matrix_elements(self%ebands, cryst, self%bsize, &
+ self%edos = self%ebands%get_edos_matrix_elements(cryst, self%bsize, &
                                              nvals, tau_vals, nvecs0, dummy_vecs, ntens, vv_tens, &
                                              edos_intmeth, edos_step, edos_broad, &
                                              out_valsdos, dummy_dosvecs, out_tensdos, comm, &
@@ -1107,7 +1107,7 @@ subroutine compute_rta_mobility(self, cryst, comm)
 
  ! Compute (e/h) carriers per unit cell at the different temperatures.
  ABI_CALLOC(self%n_ehst, (2, self%nsppol, self%ntemp))
- call ebands_get_carriers(self%ebands, self%ntemp, self%kTmesh, self%transport_mu_e, self%n_ehst)
+ call self%ebands%get_carriers(self%ntemp, self%kTmesh, self%transport_mu_e, self%n_ehst)
 
  ! Compute conductivity_mu i.e. results in which lifetimes have been computed in a consistent way
  ! with the same the Fermi level. In all the other cases, indeed, we assume that tau does not depend on ef.
@@ -1224,7 +1224,7 @@ subroutine rta_ncwrite(self, cryst, dtset, ncid)
 
  ! Write to netcdf file
  NCF_CHECK(cryst%ncwrite(ncid))
- NCF_CHECK(ebands_ncwrite(self%ebands, ncid))
+ NCF_CHECK(self%ebands%ncwrite(ncid))
  NCF_CHECK(self%edos%ncwrite(ncid))
 
  !nctk_copy from sigeph?
@@ -1562,7 +1562,7 @@ subroutine rta_free(self)
  ABI_SFREE(self%conductivity_mu)
  ABI_SFREE(self%n_ehst)
 
- call ebands_free(self%ebands)
+ call self%ebands%free()
  call self%gaps%free()
  call self%edos%free()
 

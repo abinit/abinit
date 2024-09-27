@@ -878,7 +878,7 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
    ! Add crystalline structure.
    NCF_CHECK(gstore%cryst%ncwrite(ncid))
    ! Add eigenvalues and occupations.
-   NCF_CHECK(ebands_ncwrite(gstore%ebands, ncid))
+   NCF_CHECK(gstore%ebands%ncwrite(ncid))
 
    ! Write gstore dimensions
    ncerr = nctk_def_dims(ncid, [ &
@@ -1422,7 +1422,7 @@ subroutine gstore_print(gstore, units, header, prtvol)
    call wrtout(units, " === Gstore parameters ===")
  end if
 
- !call ebands_print(gstore%ebands, [std_out], header="Electron bands", prtvol=my_prtvol)
+ !call gstore%ebands%print([std_out], header="Electron bands", prtvol=my_prtvol)
  call wrtout(units, sjoin(" kzone:", gstore%kzone))
  call wrtout(units, sjoin(" kfilter:", gstore%kfilter))
  call wrtout(units, sjoin(" nkibz:", itoa(gstore%nkibz)))
@@ -1669,7 +1669,7 @@ subroutine gstore_filter_fs_tetra__(gstore, qbz, qbz2ibz, qibz2bz, kbz, kibz, kb
  cryst => gstore%cryst; ebands => gstore%ebands; nsppol = gstore%nsppol
  ebands_timrev = kpts_timrev_from_kptopt(ebands%kptopt)
 
- call ebands_get_bands_e0(ebands, ebands%fermie, gstore%brange_spin, ierr)
+ call ebands%get_bands_e0(ebands%fermie, gstore%brange_spin, ierr)
  ABI_CHECK(ierr == 0, "Error in ebands_get_bands_e0")
 
  ABI_MALLOC(indkk, (gstore%nkbz))
@@ -1795,7 +1795,7 @@ subroutine gstore_filter_erange__(gstore, qbz, qbz2ibz, qibz2bz, kbz, kibz, kbz2
  cryst => gstore%cryst; ebands => gstore%ebands; nsppol = gstore%nsppol
 
  assume_gap = .not. all(gstore%erange_spin < zero)
- gaps = ebands_get_gaps(ebands, gap_err)
+ gaps = ebands%get_gaps(gap_err)
  if (assume_gap) call gaps%print([std_out]) !, header=msg)
 
  ebands_timrev = kpts_timrev_from_kptopt(ebands%kptopt)
@@ -1928,7 +1928,7 @@ subroutine gstore_filter_qprange__(gstore, dtset, qbz, qbz2ibz, qibz2bz, kbz, ki
  ebands => gstore%ebands
  ebands_timrev = kpts_timrev_from_kptopt(ebands%kptopt)
 
- gaps = ebands_get_gaps(ebands, gap_err)
+ gaps = ebands%get_gaps(gap_err)
  if (my_rank == 0) call gaps%print([std_out])
  if (gap_err /= 0) then
    ABI_ERROR("Cannot compute fundamental and direct gap (likely metal).")
@@ -2685,7 +2685,7 @@ subroutine gstore_free(gstore)
  ABI_SFREE(gstore%glob_nq_spin)
  ABI_SFREE(gstore%erange_spin)
 
- if (gstore%ebands_owns_memory) call ebands_free(gstore%ebands)
+ if (gstore%ebands_owns_memory) call gstore%ebands%free()
 
  call gstore%krank_ibz%free()
  call gstore%qrank_ibz%free()
@@ -4025,7 +4025,7 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, if
    !NCF_CHECK(cryst%ncwrite(ncid))
 
    ! TODO Should compare ebands_file with input ebands
-   !NCF_CHECK(ebands_ncwrite(ebands, ncid))
+   !NCF_CHECK(ebands%ncwrite(ncid))
 
    call wfk0_hdr%ncread(ncid, fform)
    ABI_CHECK(fform /= 0, sjoin("Error while reading:", path))

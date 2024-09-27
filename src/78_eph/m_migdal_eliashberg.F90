@@ -35,7 +35,7 @@ module m_migdal_eliashberg
  use m_time,            only : cwtime, cwtime_report, sec2str
  use m_fstrings,        only : strcat, sjoin !, tolower, itoa, ftoa, ktoa, ltoa, strcat
  use m_copy,            only : alloc_copy
- use m_ebands,          only : ebands_t, edos_t, ebands_get_edos
+ use m_ebands,          only : ebands_t, edos_t
  use m_gstore,          only : gstore_t
 
  implicit none
@@ -286,7 +286,7 @@ subroutine migdal_eliashberg_iso(gstore, dtset, dtfil)
  edos_intmeth = 2; if (dtset%prtdos /= 0) edos_intmeth = dtset%prtdos
  edos_step = dtset%dosdeltae; edos_broad = dtset%tsmear
  edos_step = 0.01 * eV_Ha; edos_broad = 0.3 * eV_Ha
- edos = ebands_get_edos(ebands, cryst, edos_intmeth, edos_step, edos_broad, gstore%comm)
+ edos = ebands%get_edos(cryst, edos_intmeth, edos_step, edos_broad, gstore%comm)
 
  !! Store DOS per spin channel
  !n0(:) = edos%gef(1:edos%nsppol)

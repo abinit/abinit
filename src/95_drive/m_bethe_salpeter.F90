@@ -52,8 +52,7 @@ module m_bethe_salpeter
  use m_fft,             only : fourdp
  use m_bz_mesh,         only : kmesh_t, get_ng0sh, find_qmesh, make_mesh
  use m_double_grid,     only : double_grid_t, double_grid_init, double_grid_free
- use m_ebands,          only : ebands_t, ebands_init, ebands_print, ebands_copy, ebands_free, &
-                               ebands_update_occ, ebands_get_valence_idx, ebands_apply_scissors, ebands_report_gap
+ use m_ebands,          only : ebands_t
  use m_kg,              only : getph
  use m_gsphere,         only : gsphere_t
  use m_vcoul,           only : vcoul_t
@@ -806,9 +805,9 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
    ! Compute QP occupation numbers.
    call wrtout(std_out,'bethe_salpeter: calculating QP occupation numbers')
 
-   call ebands_update_occ(qp_ebands,Dtset%spinmagntarget,prtvol=0)
+   call qp_ebands%update_occ(Dtset%spinmagntarget,prtvol=0)
    ABI_MALLOC(qp_vbik,(qp_ebands%nkpt,qp_ebands%nsppol))
-   qp_vbik(:,:) = ebands_get_valence_idx(qp_ebands)
+   qp_vbik(:,:) = qp_ebands%get_valence_idx()
    ABI_FREE(qp_vbik)
 
    call wfd%mkrho(cryst, psps, qp_ebands, ngfftf, nfftf, qp_rhor)
@@ -958,8 +957,8 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
  call Qmesh%free()
  call Hdr_wfk%free()
  call Hdr_bse%free()
- call ebands_free(ks_ebands)
- call ebands_free(qp_ebands)
+ call ks_ebands%free()
+ call qp_ebands%free()
  call Vcp%free()
  call pawhur_free(Hur)
  ABI_FREE(Hur)
@@ -976,8 +975,8 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
    call Gsph_c_dense%free()
    call Kmesh_dense%free()
    call Qmesh_dense%free()
-   call ebands_free(ks_ebands_dense)
-   call ebands_free(qp_ebands_dense)
+   call ks_ebands_dense%free()
+   call qp_ebands_dense%free()
    call Vcp_dense%free()
    call Hdr_wfk_dense%free()
  end if
@@ -1461,7 +1460,7 @@ subroutine setup_bse(codvsn,acell,rprim,ngfft_osc,Dtset,Dtfil,BS_files,Psps,Pawt
  ABI_MALLOC(npwarr,(Dtset%nkpt))
  npwarr=BSP%npwwfn
 
- call ebands_init(ks_ebands, bantot, Dtset%nelect,Dtset%ne_qFD,Dtset%nh_qFD,Dtset%ivalence,&
+ call ks_ebands%init(bantot, Dtset%nelect,Dtset%ne_qFD,Dtset%nh_qFD,Dtset%ivalence,&
    doccde,eigen,Dtset%istwfk,Kmesh%ibz,Dtset%nband,&
    Kmesh%nibz,npwarr,Dtset%nsppol,Dtset%nspinor,Dtset%tphysel,Dtset%tsmear,Dtset%occopt,occfact,Kmesh%wt,&
    dtset%cellcharge(1), dtset%kptopt, dtset%kptrlatt_orig, dtset%nshiftk_orig, dtset%shiftk_orig, &
@@ -1473,14 +1472,14 @@ subroutine setup_bse(codvsn,acell,rprim,ngfft_osc,Dtset,Dtfil,BS_files,Psps,Pawt
 
  !TODO Occupancies are zero if NSCF. One should calculate the occupancies from the energies when
  ! the occupation scheme for semiconductors is used.
- call ebands_update_occ(ks_ebands,Dtset%spinmagntarget,prtvol=Dtset%prtvol)
+ call ks_ebands%update_occ(Dtset%spinmagntarget,prtvol=Dtset%prtvol)
 
- call ebands_print(ks_ebands, [std_out], "Band structure read from the WFK file", prtvol=Dtset%prtvol)
+ call ks_ebands%print([std_out], "Band structure read from the WFK file", prtvol=Dtset%prtvol)
 
- call ebands_report_gap(ks_ebands,header=" KS band structure",unit=std_out,mode_paral="COLL")
+ call ks_ebands%report_gap(header=" KS band structure",unit=std_out,mode_paral="COLL")
 
  ABI_MALLOC(val_indices,(ks_ebands%nkpt,ks_ebands%nsppol))
- val_indices = ebands_get_valence_idx(ks_ebands)
+ val_indices = ks_ebands%get_valence_idx()
 
  do spin=1,ks_ebands%nsppol
    val_idx(spin) = val_indices(1,spin)
@@ -1576,7 +1575,7 @@ subroutine setup_bse(codvsn,acell,rprim,ngfft_osc,Dtset,Dtfil,BS_files,Psps,Pawt
 
  BSp%nkbz = Kmesh%nbz
 
- call ebands_copy(ks_ebands,qp_ebands)
+ call ks_ebands%copy(qp_ebands)
  ABI_MALLOC(igwene,(qp_ebands%mband,qp_ebands%nkpt,qp_ebands%nsppol))
  igwene=zero
 
@@ -1588,7 +1587,7 @@ subroutine setup_bse(codvsn,acell,rprim,ngfft_osc,Dtset,Dtfil,BS_files,Psps,Pawt
    if (ABS(BSp%mbpt_sciss)>tol6) then
      write(msg,'(a,f8.2,a)')' Applying a scissors operator energy= ',BSp%mbpt_sciss*Ha_eV," [eV] on top of the KS energies."
      call wrtout(std_out,msg)
-     call ebands_apply_scissors(qp_ebands,BSp%mbpt_sciss)
+     call qp_ebands%apply_scissors(BSp%mbpt_sciss)
    else
      write(msg,'(a,f8.2,a)')' Using KS energies since mbpt_sciss= ',BSp%mbpt_sciss*Ha_eV," [eV]."
      call wrtout(std_out,msg)
@@ -1619,7 +1618,7 @@ subroutine setup_bse(codvsn,acell,rprim,ngfft_osc,Dtset,Dtfil,BS_files,Psps,Pawt
    if (ABS(BSp%mbpt_sciss)>tol6) then
      write(msg,'(a,f8.2,a)')' Applying a scissors operator ',BSp%mbpt_sciss*Ha_eV," [eV] on top of the QP energies!"
      ABI_COMMENT(msg)
-     call ebands_apply_scissors(qp_ebands,BSp%mbpt_sciss)
+     call qp_ebands%apply_scissors(BSp%mbpt_sciss)
    end if
 
  CASE (BSE_HTYPE_RPA_QP)
@@ -1629,7 +1628,7 @@ subroutine setup_bse(codvsn,acell,rprim,ngfft_osc,Dtset,Dtfil,BS_files,Psps,Pawt
    ABI_ERROR(sjoin("Unknown value for Bsp%calc_type: ", itoa(Bsp%calc_type)))
  END SELECT
 
- call ebands_report_gap(qp_ebands,header=" QP band structure",unit=std_out,mode_paral="COLL")
+ call qp_ebands%report_gap(header=" QP band structure",unit=std_out,mode_paral="COLL")
 
  ! Transitions are ALWAYS ordered in c-v-k mode with k being the slowest index.
  ! FIXME: linewidths not coded.
@@ -2059,7 +2058,7 @@ subroutine setup_bse_interp(Dtset,Dtfil,BSp,Cryst,Kmesh, &
  ABI_MALLOC(npwarr,(kmesh_dense%nibz))
  npwarr=BSP%npwwfn
 
- call ebands_init(ks_ebands_dense, bantot_dense, Dtset%nelect,Dtset%ne_qFD,Dtset%nh_qFD,Dtset%ivalence,&
+ call ks_ebands_dense%init(bantot_dense, Dtset%nelect,Dtset%ne_qFD,Dtset%nh_qFD,Dtset%ivalence,&
                   doccde,eigen,Hdr_wfk_dense%istwfk,Kmesh_dense%ibz,nbands_temp,&
                   Kmesh_dense%nibz,npwarr,Hdr_wfk_dense%nsppol,Hdr_wfk_dense%nspinor,Hdr_wfk_dense%tphysel,Hdr_wfk_dense%tsmear,&
                   Hdr_wfk_dense%occopt,occfact,Kmesh_dense%wt,&
@@ -2074,20 +2073,20 @@ subroutine setup_bse_interp(Dtset,Dtfil,BSp,Cryst,Kmesh, &
 
  !TODO Occupancies are zero if NSCF. One should calculate the occupancies from the energies when
  ! the occupation scheme for semiconductors is used.
- call ebands_update_occ(ks_ebands_dense,Dtset%spinmagntarget,prtvol=Dtset%prtvol)
- call ebands_print(ks_ebands_dense, [std_out], "Interpolated band structure read from the WFK file", prtvol=Dtset%prtvol)
- call ebands_report_gap(ks_ebands_dense,header="Interpolated KS band structure",unit=std_out,mode_paral="COLL")
+ call ks_ebands_dense%update_occ(Dtset%spinmagntarget,prtvol=Dtset%prtvol)
+ call ks_ebands_dense%print([std_out], "Interpolated band structure read from the WFK file", prtvol=Dtset%prtvol)
+ call ks_ebands_dense%report_gap(header="Interpolated KS band structure",unit=std_out,mode_paral="COLL")
 
  BSp%nkbz_interp = Kmesh_dense%nbz
 
- call ebands_copy(ks_ebands_dense,qp_ebands_dense)
+ call ks_ebands_dense%copy(qp_ebands_dense)
 
  SELECT CASE (Bsp%calc_type)
  CASE (BSE_HTYPE_RPA_KS)
    if (ABS(BSp%mbpt_sciss)>tol6) then
      write(msg,'(a,f8.2,a)')' Applying a scissors operator energy= ',BSp%mbpt_sciss*Ha_eV," [eV] on top of the KS energies."
      call wrtout(std_out,msg)
-     call ebands_apply_scissors(qp_ebands_dense,BSp%mbpt_sciss)
+     call qp_ebands_dense%apply_scissors(BSp%mbpt_sciss)
    else
      write(msg,'(a,f8.2,a)')' Using KS energies since mbpt_sciss= ',BSp%mbpt_sciss*Ha_eV," [eV]."
      call wrtout(std_out,msg)
@@ -2101,7 +2100,7 @@ subroutine setup_bse_interp(Dtset,Dtfil,BSp,Cryst,Kmesh, &
    ABI_ERROR(sjoin("Unknown value for Bsp%calc_type: ", itoa(Bsp%calc_type)))
  END SELECT
 
- call ebands_report_gap(qp_ebands_dense,header=" Interpolated QP band structure",unit=std_out,mode_paral="COLL")
+ call qp_ebands_dense%report_gap(header=" Interpolated QP band structure",unit=std_out,mode_paral="COLL")
 
  ! Transitions are ALWAYS ordered in c-v-k mode with k being the slowest index.
  ! FIXME: linewidths not coded.
