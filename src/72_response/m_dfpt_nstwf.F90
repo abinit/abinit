@@ -1108,12 +1108,6 @@ has_vectornd = (with_vectornd .EQ. 1)
        call rf_hamkq%load_k(npw_k=npw_k,dkinpw_k=dkinpw)
 
 !      Allocate memory space for one band
-       if (need_wfk)  then
-         !ABI_MALLOC(cwave0,(2,npw_k*nspinor*ndat))
-       end if
-       if (need_wf1)  then
-         !ABI_MALLOC(cwavef,(2,npw1_k*nspinor*ndat))
-       end if
        ABI_MALLOC(gh1,(2,npw1_k*nspinor*ndat))
 #ifdef HAVE_OPENMP_OFFLOAD
        !$OMP TARGET ENTER DATA MAP(alloc:gh1) IF(gpu_option==ABI_GPU_OPENMP)
@@ -1136,9 +1130,6 @@ has_vectornd = (with_vectornd .EQ. 1)
        call proc_distrb_band(band_procs,mpi_enreg%proc_distrb,ikpt,isppol,nband_k,&
 &        mpi_enreg%me_band,mpi_enreg%me_kpt,mpi_enreg%comm_band)
 
-
-
-
        ABI_MALLOC(gvnlx1,    (2,npw1_k*nspinor*ndat))
        ABI_MALLOC(gvnlx1_tmp,(2,npw1_k*nspinor))
 #ifdef HAVE_OPENMP_OFFLOAD
@@ -1152,22 +1143,9 @@ has_vectornd = (with_vectornd .EQ. 1)
 #endif
        end if
 
-
-
-
-
-
-
-
-
 !      LOOP OVER BANDS
        iband_me = 0
        do iband=1,nband_k,ndat
-
-
-
-
-!!!!!!!!!!!!!!!!! 1) INIT
 
 !        Skip band if not to be treated by this proc
          if (xmpi_paral==1) then
@@ -1201,14 +1179,6 @@ has_vectornd = (with_vectornd .EQ. 1)
            &    cg1(:,1+(iband_me-ndat)*npw1_k*nspinor+icg1:iband_me*npw1_k*nspinor+icg1)
          end if
 
-
-
-
-
-
-
-
-
 !        LOOP OVER PERTURBATION DIRECTIONS
          do kdir1=1,mdir1
            idir1=jdir1(kdir1)
@@ -1235,24 +1205,16 @@ has_vectornd = (with_vectornd .EQ. 1)
 #endif
            end if
 
-
            ! Setup gemm_nonlop
            if (gemm_nonlop_use_gemm) then
              !set the global variable indicating to gemm_nonlop where to get its data from
              gemm_nonlop_ikpt_this_proc_being_treated = ikpt
            end if ! gemm_nonlop_use_gemm
 
-
 !          Extract ground state projected WF and derivatives in idir1 direction
            if (usecprj==1) then
              cpopt=1
 
-
-
-
-
-
-!!!!!!!!!!!!!!!!! 2) PHONONS
 !            === Atomic displ. perturbation
              if (ipert<=dtset%natom) then
                ABI_MALLOC(cwaveprj0_idir1,(dtset%natom,nspinor*ndat))
@@ -1280,13 +1242,6 @@ has_vectornd = (with_vectornd .EQ. 1)
              else if (ipert==dtset%natom+1) then
                cwaveprj0_idir1 => cwaveprj0
 
-
-
-
-
-
-
-!!!!!!!!!!!!!!!!! 3) Electric Field
 !            == Electric field perturbation
              else if (ipert==dtset%natom+2) then
                ABI_MALLOC(cwaveprj0_idir1,(dtset%natom,nspinor*ndat))
@@ -1310,12 +1265,6 @@ has_vectornd = (with_vectornd .EQ. 1)
 &                 gs_hamkq%ph3d_kp,gs_hamkq%ucvol,gs_hamkq%useylm,is_kprime=.true.,gpu_option=gpu_option)
                end if
 
-
-
-
-
-
-!!!!!!!!!!!!!!!!! 4) DDK
 !            === Strain perturbation
              else if (ipert==dtset%natom+3.or.ipert==dtset%natom+4) then
                if ((ipert1==dtset%natom+3.or.ipert1==dtset%natom+4).and.(istr==istr1)) then
@@ -1347,11 +1296,6 @@ has_vectornd = (with_vectornd .EQ. 1)
              cwaveprj0_idir1 => cwaveprj0
            end if
 
-
-
-
-
-
 !          Eventually compute 1st-order kinetic operator
            if (ipert1==dtset%natom+1) then
              call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass_free,gmet,kg_k,dkinpw,kpoint,npw_k,idir1,0)
@@ -1362,11 +1306,6 @@ has_vectornd = (with_vectornd .EQ. 1)
 !          Finalize initialization of 1st-order NL hamiltonian
            if (need_pawij10) rf_hamkq%e1kbfr => e1kbfr(:,:,:,:,idir1)
 
-
-
-
-
-!!!!!!!!!!!!!!!!! 5) Read DDK file
 !          Read DDK wave function (if ipert1=electric field)
            if (ipert1==dtset%natom+2) then
              usevnl=1
@@ -1396,21 +1335,6 @@ has_vectornd = (with_vectornd .EQ. 1)
              usevnl=0
            end if
 
-
-
-
-
-
-           !ABI_MALLOC(cwave0,   (2,npw_k *nspinor*ndat))
-           !ABI_MALLOC(cwavef,   (2,npw1_k*nspinor*ndat))
-           !ABI_MALLOC(gh1,      (2,npw1_k*nspinor*ndat))
-           !ABI_MALLOC(gs1,      (2,npw1_k*nspinor*ndat))
-           !ABI_MALLOC(cwaveprj0,(dtset%natom,nspinor*ndat))
-
-
-
-
-!!!!!!!!!!!!!!!!! 6) GetGH1C call
 !          Get |H^(j2)-Eps_k_i.S^(j2)|u0_k_i> (VHxc-dependent part not taken into account) and S^(j2)|u0>
            lambda=eig_k(iband);berryopt=0;optlocal=0
            optnl=0;if (ipert1/=dtset%natom+1.or.idir==idir1) optnl=1
@@ -1443,7 +1367,6 @@ has_vectornd = (with_vectornd .EQ. 1)
              end if
            end if
 
-!!!!!!!!!!!!!!!!! 7) Scary looking loop...
 !          If needed, compute here <delta_u^(j1)_k_i|H^(j2)-Eps_k_i.S^(j2)|u0_k_i>
 !          with delta_u^(j1)=-1/2 Sum_{j}[<u0_k+q_j|S^(j1)|u0_k_i>.|u0_k+q_j>]
 !          (see PRB 78, 035105 (2008) [[cite:Audouze2008]], Eq. (42))
@@ -1483,7 +1406,7 @@ has_vectornd = (with_vectornd .EQ. 1)
                do iband_=1, nband_k
                  if (bands_treated_now(iband_) == 0) cycle
 
-  ! distribute gvnlx1 to my subcomm
+! distribute gvnlx1 to my subcomm
                  if(gpu_option==ABI_GPU_DISABLED) then
                    gvnlx1_tmp = zero
                  else if(gpu_option==ABI_GPU_OPENMP) then
@@ -1501,14 +1424,14 @@ has_vectornd = (with_vectornd .EQ. 1)
                    end if
                  end if
 
-  ! TODO CHECK IF IT IS BAND_PROCS(IBAND_)
+! TODO CHECK IF IT IS BAND_PROCS(IBAND_)
                  !call xmpi_bcast(gvnlx1_tmp, band_procs(iband_), mpi_enreg%comm_band, ierr)
                  if(xmpi_comm_size(mpi_enreg%comm_band)>1) then
                    call xmpi_sum(gvnlx1_tmp,mpi_enreg%comm_band,ierr,use_omp_map=use_ompgpu)
                  end if
 
                  if (option == 1) then
-  ! in case I need to reuse the ch1c (option 1) then load them here
+! in case I need to reuse the ch1c (option 1) then load them here
                    if(gpu_option==ABI_GPU_DISABLED) then
                      ch1c_tmp(:,1:nband_me) = ch1c(:,1:nband_me,iband_,ikpt_me)
                    else
@@ -1520,21 +1443,21 @@ has_vectornd = (with_vectornd .EQ. 1)
                  end if
 
 
-  !            Compute -Sum_{j}[<u0_k+q_j|H^(j2)-Eps_k_i.S^(j2)|u0_k_i>.|u0_k+q_j>
+!            Compute -Sum_{j}[<u0_k+q_j|H^(j2)-Eps_k_i.S^(j2)|u0_k_i>.|u0_k+q_j>
                  call projbd(cgq,gvnlx1_tmp,-1,icgq,0,istwf_k,mcgq,0,nband_me,npw1_k,nspinor,&
   &                 dum1,ch1c_tmp,option,tim_projbd,0,mpi_enreg%me_g0,mpi_enreg%comm_fft,gpu_option=gpu_option)
 
-  !sum over all jband by combining the projbd
+!sum over all jband by combining the projbd
                  if(xmpi_comm_size(mpi_enreg%comm_band)>1) then
                    call xmpi_sum(gvnlx1_tmp,mpi_enreg%comm_band,ierr,use_omp_map=use_ompgpu)
                  end if
 
-  ! keep my own gvnlx
-                 if (iband_ == iband+idat-1) then
-  ! if bands are parallelized, I have only projected against bands on my cpu
-  !   Pc|work>  = |work> - Sum_l <psi_{k+q, l}|work> |psi_{k+q, l}>
-  !             = Sum_nproc_band (|work> - Sum_{my l} <psi_{k+q, l}|work> |psi_{k+q, l}>) - (nproc_band-1) |work>
-  !TODO: make this a blas call? zaxpy
+! keep my own gvnlx
+               if (iband_ == iband+idat-1) then
+! if bands are parallelized, I have only projected against bands on my cpu
+!   Pc|work>  = |work> - Sum_l <psi_{k+q, l}|work> |psi_{k+q, l}>
+!             = Sum_nproc_band (|work> - Sum_{my l} <psi_{k+q, l}|work> |psi_{k+q, l}>) - (nproc_band-1) |work>
+!TODO: make this a blas call? zaxpy
                    if(gpu_option==ABI_GPU_DISABLED) then
                      gvnlx1(:,1+(idat-1)*npw1_k*nspinor:idat*npw1_k*nspinor) = &
                        gvnlx1_tmp - (my_nproc_band-1)*gvnlx1(:,1+(idat-1)*npw1_k*nspinor:idat*npw1_k*nspinor)
@@ -1550,7 +1473,7 @@ has_vectornd = (with_vectornd .EQ. 1)
                  end if
 
                  if (option == 0) then
-  ! save ch1c for all of the iband_ on each proc, for later use. First band index only for my nband_me which matches cgq
+! save ch1c for all of the iband_ on each proc, for later use. First band index only for my nband_me which matches cgq
                    if(gpu_option==ABI_GPU_DISABLED) then
                      ch1c(:,1:nband_me,iband_,ikpt_me) = ch1c_tmp(:,1:nband_me)
                    else if(gpu_option==ABI_GPU_OPENMP) then
@@ -1562,14 +1485,7 @@ has_vectornd = (with_vectornd .EQ. 1)
                  end if
                end do ! iband_
              end do !idat
-             !ABI_FREE(gvnlx1_tmp)
 
-
-
-
-
-
-!!!!!!!!!!!!!!!!! 8) End of that scary looking loop...
              if (has_dcwf) then
                if (ipert==ipert1.and.idir==idir1) then
                  if(gpu_option==ABI_GPU_DISABLED) then
@@ -1607,9 +1523,7 @@ has_vectornd = (with_vectornd .EQ. 1)
                  end do !idat
                end if
              end if
-             !ABI_FREE(gvnlx1)
            end if
-
 
 
            if (has_dcwf.and.is_metal_or_qne0) then
@@ -1624,7 +1538,7 @@ has_vectornd = (with_vectornd .EQ. 1)
              do jband=1,nband_k
                if (mpi_enreg%proc_distrb(ikpt,jband,isppol)==me) then
                  jband_me = jband_me + 1
-  ! gvnlx1 depends on j only, I have it, and everyone needs it
+! gvnlx1 depends on j only, I have it, and everyone needs it
                  if(gpu_option==ABI_GPU_DISABLED) then
                    gvnlx2(:,1+(jband-1)*npw1_k*nspinor:jband*npw1_k*nspinor)=cgq(:,1+npw1_k*nspinor*(jband_me-1)+icgq:npw1_k*nspinor*jband_me+icgq)
                  else if(gpu_option==ABI_GPU_OPENMP) then
@@ -1635,7 +1549,7 @@ has_vectornd = (with_vectornd .EQ. 1)
 #endif
                  end if
                end if
-  ! xmpi bcast the current jband to other procs in band pool
+! xmpi bcast the current jband to other procs in band pool
              end do
 
              if(xmpi_comm_size(mpi_enreg%comm_band)>1) then
@@ -1643,14 +1557,9 @@ has_vectornd = (with_vectornd .EQ. 1)
              end if
            end if
 
+           do idat=1,ndat
 
-
-
-
-         do idat=1,ndat
-
-           bands_treated_now => bands_treated_now_ndat(:,idat)
-
+             bands_treated_now => bands_treated_now_ndat(:,idat)
 
 !          If needed, compute here <delta_u^(j1)_k_i|H-Eps_k_i.S|u^(j2)_k_i>
 !          This is equal to <delta_u^(j1)_k_i|H-Eps_k_i.S|delta_u^(j2)_k_i>  (I)
@@ -1663,91 +1572,81 @@ has_vectornd = (with_vectornd .EQ. 1)
 !          where Eps1_k,q_ij=<u0_k+q_j|H^(j2)-1/2(Eps_k+q_j-Eps_k_i)S^(j2)|u0_k_i>
 !          At first call (when j1=j2), cs1c=<u0_k_i|S^(j1)|u0_k+q_j> is stored
 !          For the next calls, it is re-used.
-           if (has_dcwf.and.is_metal_or_qne0) then
-             !ABI_BUG("Section not tested !")
-             !ABI_MALLOC(gvnlx1,(2,npw1_k*nspinor))
+             if (has_dcwf.and.is_metal_or_qne0) then
 ! dotX is local to my proc, and should accumulate sum over all jband, for my iband_me
-             dotr=zero;doti=zero
+               dotr=zero;doti=zero
 ! flag to broadcast the j dependent vector in the band pool, to get full sum over j
-             do_bcast = 0
+               do_bcast = 0
 ! flag to do scalar product: only needed if we are saving cs1c or if the band is occupied
-             do_scprod = 0
-             if ((ipert==ipert1.and.idir==idir1)) then
-               do_bcast = 1
-               do_scprod = 1
-             end if
-             invocc=zero
-             if (abs(occ_k(iband+idat-1))>tol8) then
-               invocc=two/occ_k(iband+idat-1)
-               do_scprod = 1
-             end if
-             ! does anyone else need the cgq(j) below?
-             do iband_ = 1, nband_k
-               if (bands_treated_now(iband_) > 0 .and. abs(occ_k(iband_))>tol8) then
+               do_scprod = 0
+               if ((ipert==ipert1.and.idir==idir1)) then
                  do_bcast = 1
+                 do_scprod = 1
                end if
-             end do
+               invocc=zero
+               if (abs(occ_k(iband+idat-1))>tol8) then
+                 invocc=two/occ_k(iband+idat-1)
+                 do_scprod = 1
+               end if
+               ! does anyone else need the cgq(j) below?
+               do iband_ = 1, nband_k
+                 if (bands_treated_now(iband_) > 0 .and. abs(occ_k(iband_))>tol8) then
+                   do_bcast = 1
+                 end if
+               end do
 
 
-             if (do_bcast > 0) then
+               if (do_bcast > 0) then
 !              Computation of cs1c=<u0_k_i|S^(j1)|u0_k+q_j>
-!                do _I_ need to calculate the dot1X?
-               if (do_scprod > 0) then
-                 call dotprod_g_batch_half(vdot1r,vdot1i,istwf_k,npw1_k*nspinor,nband_k,2,&
+!                  do _I_ need to calculate the dot1X?
+                 if (do_scprod > 0) then
+                   call dotprod_g_batch_half(vdot1r,vdot1i,istwf_k,npw1_k*nspinor,nband_k,2,&
 &                     gs1(:,1+(idat-1)*npw1_k*nspinor:idat*npw1_k*nspinor),&
 &                     gvnlx2,mpi_enreg%me_g0,mpi_enreg%comm_spinorfft,gpu_option=gpu_option)
 #ifdef HAVE_OPENMP_OFFLOAD
-                 !$OMP TARGET UPDATE FROM(vdot1r,vdot1i) IF(gpu_option==ABI_GPU_OPENMP)
+                   !$OMP TARGET UPDATE FROM(vdot1r,vdot1i) IF(gpu_option==ABI_GPU_OPENMP)
 #endif
-                 if (ipert==ipert1.and.idir==idir1.and.has_dcwf2) then
-                   cs1c(1,:,iband_me-(ndat-idat),ikpt_me)=vdot1r(:)
-                   cs1c(2,:,iband_me-(ndat-idat),ikpt_me)=vdot1i(:)
-                 end if
-               end if
-             end if ! ipert==ipert1.and.idir==idir1 or some iband for some proc in pool is filled
-
-             if (do_scprod > 0) then
-               do jband=1,nband_k
-!                Computation of term (I)
-                 if (has_dcwf2) then
-                   arg=eig_kq(jband)-eig_k(iband+idat-1)
-                   dot2r=cs1c(1,jband,iband_me-(ndat-idat),ikpt_me)
-                   dot2i=cs1c(2,jband,iband_me-(ndat-idat),ikpt_me)
-                   dotr=dotr+(vdot1r(jband)*dot2r+vdot1i(jband)*dot2i)*arg
-                   doti=doti+(vdot1i(jband)*dot2r-vdot1r(jband)*dot2i)*arg
-                 end if
-!                Computation of term (II) TODO: the next two ifs could be combined
-                 if (is_metal) then
-                   if (abs(rocceig(jband,iband+idat-1))>tol8) then
-                     ii=2*jband-1+(iband+idat-2)*2*nband_k
-                     arg=invocc*rocceig(jband,iband+idat-1)*(eig_k(iband+idat-1)-eig_kq(jband))
-                     dot2r=eig1_k(ii)
-                     dot2i=eig1_k(ii+1)
-                     dotr=dotr+arg*(vdot1r(jband)*dot2r-vdot1i(jband)*dot2i)
-                     doti=doti+arg*(vdot1r(jband)*dot2i+dot2r*vdot1i(jband))
+                   if (ipert==ipert1.and.idir==idir1.and.has_dcwf2) then
+                     cs1c(1,:,iband_me-(ndat-idat),ikpt_me)=vdot1r(:)
+                     cs1c(2,:,iband_me-(ndat-idat),ikpt_me)=vdot1i(:)
                    end if
                  end if
-               end do
-             end if ! occ bands
+               end if ! ipert==ipert1.and.idir==idir1 or some iband for some proc in pool is filled
 
-             dotr=quarter*dotr
-             doti=quarter*doti
+               if (do_scprod > 0) then
+                 do jband=1,nband_k
+!                Computation of term (I)
+                   if (has_dcwf2) then
+                     arg=eig_kq(jband)-eig_k(iband+idat-1)
+                     dot2r=cs1c(1,jband,iband_me-(ndat-idat),ikpt_me)
+                     dot2i=cs1c(2,jband,iband_me-(ndat-idat),ikpt_me)
+                     dotr=dotr+(vdot1r(jband)*dot2r+vdot1i(jband)*dot2i)*arg
+                     doti=doti+(vdot1i(jband)*dot2r-vdot1r(jband)*dot2i)*arg
+                   end if
+!                Computation of term (II) TODO: the next two ifs could be combined
+                   if (is_metal) then
+                     if (abs(rocceig(jband,iband+idat-1))>tol8) then
+                       ii=2*jband-1+(iband+idat-2)*2*nband_k
+                       arg=invocc*rocceig(jband,iband+idat-1)*(eig_k(iband+idat-1)-eig_kq(jband))
+                       dot2r=eig1_k(ii)
+                       dot2i=eig1_k(ii+1)
+                       dotr=dotr+arg*(vdot1r(jband)*dot2r-vdot1i(jband)*dot2i)
+                       doti=doti+arg*(vdot1r(jband)*dot2i+dot2r*vdot1i(jband))
+                     end if
+                   end if
+                 end do
+               end if ! occ bands
+
+               dotr=quarter*dotr
+               doti=quarter*doti
 
 !            Note: factor 2 (from d2E/dj1dj2=2E^(j1j2))
 !  Note2: do not sum over bands here - comm_band is a sub communicator of spacecomm, and a full sum is done later
-             d2ovl_k(1,idir1)=d2ovl_k(1,idir1)+wtk_k*occ_k(iband+idat-1)*two*elfd_fact*dotr
-             d2ovl_k(2,idir1)=d2ovl_k(2,idir1)+wtk_k*occ_k(iband+idat-1)*two*elfd_fact*doti
-             !ABI_FREE(gvnlx1)
-           end if
-         end do !idat
+               d2ovl_k(1,idir1)=d2ovl_k(1,idir1)+wtk_k*occ_k(iband+idat-1)*two*elfd_fact*dotr
+               d2ovl_k(2,idir1)=d2ovl_k(2,idir1)+wtk_k*occ_k(iband+idat-1)*two*elfd_fact*doti
+             end if
+           end do !idat
 
-
-
-
-
-
-
-!!!!!!!!!!!!!!!!! 9) Final if
 !          Build the matrix element <u0_k_i|H^(j1)-Eps_k_i.S^(j1)|u^(j2)_k,q_i>
 !          and add contribution to DDB
            if (ipert1/=dtset%natom+1) then
@@ -1766,22 +1665,16 @@ has_vectornd = (with_vectornd .EQ. 1)
              end if
              do idat=1,ndat
                if (abs(occ_k(iband+idat-1))>tol8) then
-  !              Case ipert1=natom+2 (electric field):
-  !              gh1 contains H^(j1)|u0_k_i> (VHxc constant) which corresponds
-  !              to i.d/dk in Eq. (38) of Gonze, PRB 55, 10355 (1997) [[cite:Gonze1997a]].
-  !              * if ipert==natom+2, we apply directly Eq. (38)
-  !              * if ipert/=natom+2, Born effective charges are minus D2E
+!              Case ipert1=natom+2 (electric field):
+!              gh1 contains H^(j1)|u0_k_i> (VHxc constant) which corresponds
+!              to i.d/dk in Eq. (38) of Gonze, PRB 55, 10355 (1997) [[cite:Gonze1997a]].
+!              * if ipert==natom+2, we apply directly Eq. (38)
+!              * if ipert/=natom+2, Born effective charges are minus D2E
                  d2nl_k(1,idir1)=d2nl_k(1,idir1)+wtk_k*occ_k(iband+idat-1)*two*elfd_fact*vdotr(idat)
                  d2nl_k(2,idir1)=d2nl_k(2,idir1)+wtk_k*occ_k(iband+idat-1)*two*elfd_fact*vdoti(idat)
                end if
              end do !idat
 
-
-
-
-
-
-!!!!!!!!!!!!!!!!! 10) Final else DDK
 !            Or compute localisation tensor (ddk)
 !            See M. Veithen thesis Eq(2.5)
 !            MT jan-2010: this is probably not correctly implemented for PAW !!!
@@ -1846,12 +1739,6 @@ has_vectornd = (with_vectornd .EQ. 1)
              end if
            end if
 
-
-
-
-
-
-!!!!!!!!!!!!!!!!! 11) Final getdc1
 !          Accumulate here 1st-order density change due to overlap operator changes (if any)
            if (has_drho) then
 !            Compute here delta_u^(j1)=-1/2 Sum_{j}[<u0_k+q_j|S^(j1)|u0_k_i>.|u0_k+q_j>]
@@ -1899,19 +1786,9 @@ has_vectornd = (with_vectornd .EQ. 1)
              ABI_FREE(cwaveprj0_idir1)
            end if
 
-
-
-
-
 !          End of loops
          end do   ! idir1
        end do     ! iband
-
-
-      ! ABI_BUG("stop")
-
-
-
 
        ABI_FREE(band_procs)
 
@@ -1939,11 +1816,9 @@ has_vectornd = (with_vectornd .EQ. 1)
        ABI_FREE(gh1)
        ABI_FREE(gs1)
        if (need_wfk)  then
-         !ABI_FREE(cwave0)
          nullify(cwave0)
        end if
        if (need_wf1)  then
-         !ABI_FREE(cwavef)
          nullify(cwavef)
        end if
        ABI_FREE(kg_k)
