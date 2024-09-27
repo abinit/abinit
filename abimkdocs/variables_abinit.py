@@ -2749,7 +2749,7 @@ then the recommended value of [[dilatmx]] is 1.05.
 When you have no idea of evolution of the lattice parameters, and suspect that a large increase during geometry optimization is possible, while
 you need an accurate estimation of the geometry, then make a first
 run with [[chkdilatmx]]=0, producing an inaccurate, but much better estimation, followed by a second run using
-the newly estimated geometry, with [[chkdilatmx]]=0 and [[dilatmx]] set to 1.05.
+the newly estimated geometry, with [[chkdilatmx]]=1 (the default) and [[dilatmx]] set to 1.05.
 If you are not in search of an accurate estimation of the lattice parameters anyhow, then run with [[chkdilatmx]]=0 only once.
 
 In the default mode ([[chkdilatmx]] = 1), when the [[dilatmx]] threshold is exceeded,
@@ -2757,8 +2757,10 @@ ABINIT will rescale uniformly the
 tentative new primitive vectors to a value that leads at most to 90% of the
 maximal allowed [[dilatmx]] deviation from 1. It will do this three times (to
 prevent the geometry optimization algorithms to have taken a too large trial
-step), but afterwards will stop and exit. Setting [[chkdilatmx]] == 0 allows one to
-book a larger planewave basis, but will not rescale the tentative new primitive vectors
+step), but afterwards will stop and exit. 
+
+Setting [[chkdilatmx]] == 0 allows one to
+book a larger planewave basis (if [[dilatmx]] is set to be bigger than 1), but will not rescale the tentative new primitive vectors
 nor lead to an exit when the [[dilatmx]] threshold is exceeded.
 The obtained optimized primitive vectors will not be exactly the ones corresponding to the planewave basis set
 determined using [[ecut]] at the latter primitive vectors. Still, as an intermediate step in a geometry search
@@ -3764,7 +3766,11 @@ This input variable is important when performing relaxation of unit cell size
 and shape (non-zero [[optcell]]). Using a non-zero [[ecutsm]], the total
 energy curves as a function of [[ecut]], or [[acell]], can be smoothed,
 keeping consistency with the stress (and automatically including the Pulay
-stress). The recommended value is 0.5 Ha. Actually, when [[optcell]]/=0,
+stress). 
+
+The recommended value is 0.5 Ha in such a case (non-zero [[optcell]]).. 
+
+Actually, when [[optcell]]/=0,
 ABINIT requires [[ecutsm]] to be larger than zero. If you want to optimize
 cell shape and size without smoothing the total energy curve (a dangerous
 thing to do), use a very small [[ecutsm]], on the order of one microHartree.
@@ -13677,6 +13683,8 @@ Allows one to optimize the unit cell shape and dimensions, when [[ionmov]] >= 2 
 determined, by using the same algorithms as for the nuclei positions.
 May modify [[acell]] and/or [[rprim]]. The ionic positions are ALWAYS
 updated, according to the forces. A target stress tensor might be defined, see [[strtarget]].
+In most cell relaxations ([[optcell]]/=0), the user should define [[ecutsm]], [[dilatmx]], and [[tolrff]], because the default values
+are NOT aimed at cell relaxation runs. The user should also be aware that convergence studies might need to modify the value of [[tolmxf]], the default being decent, but possibly not sufficiently stringent.
 
   * **optcell** = 0: modify nuclear positions, since [[ionmov]] = 2 or 3, but no cell shape and dimension optimisation.
   * **optcell** = 1: optimisation of volume only (do not modify [[rprim]], and allow an homogeneous dilatation of the three components of [[acell]])
@@ -13690,7 +13698,7 @@ A few details require attention when performing unit cell optimisation:
   * one has to get rid of the discontinuities due to discrete changes of plane wave number with cell size, by using a suitable value of [[ecutsm]];
   * one has to allow for the possibility of a larger sphere of plane waves, by using [[dilatmx]];
   * one might have to adjust the scale of stresses to the scale of forces, by using [[strfact]].
-  * if all the reduced coordinates of atoms are fixed by symmetry, one cannot use [[toldff]] to stop the SCF cycle. (Suggestion: use [[toldfe]] with a small value, like 1.0d-10)
+  * if all the reduced coordinates of atoms are fixed by symmetry, one cannot use [[tolrff]] (or [[toldff]]) to stop the SCF cycle. (Suggestion: use [[tolvrs]] with a small value, like 1.0d-14)
 
 It is STRONGLY suggested first to optimize the ionic positions without cell
 shape and size optimization (**optcell** = 0), then start the cell shape and
@@ -19431,12 +19439,14 @@ Effective only when SCF cycles are done ([[iscf]]>0).
 Because of machine precision, it is not worth to try to obtain differences in
 energy that are smaller than about 1.0d-12 of the total energy. To get
 accurate stresses may be quite demanding.
+
 When the geometry is optimized (relaxation of atomic positions or primitive
-vectors), the use of [[toldfe]] is to be avoided. The use of [[toldff]] or
-[[tolrff]] is by far preferable, in order to have a handle on the geometry
+vectors), the use of [[toldfe]] is to be avoided. The use of [[tolrff]] 
+(or [[tolrff]]) is by far preferable, in order to have a handle on the geometry
 characteristics. When all forces vanish by symmetry (e.g. optimization of the
 lattice parameters of a high-symmetry crystal), then place [[toldfe]] to
 1.0d-12, or use (better) [[tolvrs]].
+
 Since [[toldfe]], [[toldff]], [[tolrff]] and [[tolvrs]] are aimed
 at the same goal (causing the SCF cycle to stop), they are seen as a unique
 input variable at reading. Hence, it is forbidden that two of these input
