@@ -328,19 +328,21 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
 !*vqg = 4pi/(G+q)**2
  ABI_MALLOC(vqg,(nfftf))
 
-!*Initialization of the array ghc1
-!*ghc1 will contain the exact exchange contribution to the Hamiltonian
- ABI_MALLOC(ghc1,(2,npw*ndat))
- ABI_MALLOC(ghc2,(2,npw*ndat))
+ if(need_ghc) then
+  !*Initialization of the array ghc1
+  !*ghc1 will contain the exact exchange contribution to the Hamiltonian
+   ABI_MALLOC(ghc1,(2,npw*ndat))
+   ABI_MALLOC(ghc2,(2,npw*ndat))
 #ifdef HAVE_OPENMP_OFFLOAD
- !$OMP TARGET ENTER DATA MAP(alloc:ghc1,ghc2,vqg) IF(gpu_option==ABI_GPU_OPENMP)
+   !$OMP TARGET ENTER DATA MAP(alloc:ghc1,ghc2,vqg) IF(gpu_option==ABI_GPU_OPENMP)
 #endif
- if(gpu_option==ABI_GPU_DISABLED) then
-   ghc1=zero
-   ghc2=zero
- else if(gpu_option==ABI_GPU_OPENMP) then
-   call gpu_set_to_zero(ghc1, int(2,c_size_t)*npw*ndat)
-   call gpu_set_to_zero(ghc2, int(2,c_size_t)*npw*ndat)
+   if(gpu_option==ABI_GPU_DISABLED) then
+     ghc1=zero
+     ghc2=zero
+   else if(gpu_option==ABI_GPU_OPENMP) then
+     call gpu_set_to_zero(ghc1, int(2,c_size_t)*npw*ndat)
+     call gpu_set_to_zero(ghc2, int(2,c_size_t)*npw*ndat)
+   end if
  end if
 !*Initialization of the array vlocpsi_r
 !*vlocpsi_r = partial local Fock operator applied to cwavef in r-space and summed over all occupied (jkpt,mu)
@@ -1279,11 +1281,6 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
    !$OMP TARGET EXIT DATA MAP(delete:cwavef_r,vqg,vlocpsi_r) IF(gpu_option==ABI_GPU_OPENMP)
 #endif
    ABI_FREE(cwavef_r)
-#ifdef HAVE_OPENMP_OFFLOAD
-   !$OMP TARGET EXIT DATA MAP(delete:ghc1,ghc2) IF(gpu_option==ABI_GPU_OPENMP)
-#endif
-   ABI_FREE(ghc1)
-   ABI_FREE(ghc2)
    ABI_FREE(vlocpsi_r)
    ABI_FREE(dummytab)
    ABI_FREE(vqg)
