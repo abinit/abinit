@@ -1028,7 +1028,7 @@ class AbinitProject(NotebookWriter):
             #########################
             # Intgegration with CMAKE
             #########################
-            # Will update the following sections
+            # This section update the following parts of CMakeList.txt
 
             #add_library(78_eph STATIC
             #  m_berry_curvature.F90
@@ -1043,8 +1043,6 @@ class AbinitProject(NotebookWriter):
             #  ...
             #  )
 
-
-            """
             def enclose(lines, magic, path):
                 try:
                     start = lines.index(magic)
@@ -1064,14 +1062,15 @@ class AbinitProject(NotebookWriter):
 
             cmakelist_path = os.path.join(dirpath, "CMakeLists.txt")
             dirname = os.path.basename(dirpath)
-            magic = f"add_library({dirname} STATIC"
             lines = [l.strip() for l in open(cmakelist_path).readlines()]
 
+            magic = f"add_library({dirname} STATIC"
             start, stop = enclose(lines, magic, cmakelist_path)
             del lines[start+1:stop-1]
             lines[start+1:start+1] = mod.sources
-            #print("\n".join(lines))
+            print("\n".join(lines))
 
+            """
             # This section is optional!
             magic = f"target_link_libraries({dirname}"
             try:
