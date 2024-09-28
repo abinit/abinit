@@ -822,7 +822,7 @@ subroutine getspinrot(rprimd, spinrot, symrel)
 
    ! Transform symmetry matrix in the system defined by rprimd
    call matr3inv(rprimd, rprimd_invt)
-   coord(:,1:3)=rprimd_invt(1:3,:)
+   coord=TRANSPOSE(rprimd_invt)
    call matr3inv(coord,coordinvt)
    matr1(:,:) = MATMUL(symrel1,coord)
    matr2(:,:) = MATMUL(TRANSPOSE(coordinvt),matr1)
