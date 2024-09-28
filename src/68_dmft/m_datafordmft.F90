@@ -928,7 +928,7 @@ subroutine datafordmft(cg,cprj,cryst_struc,dft_occup,dimcprj,dtset,eigen,mband_c
      opt_renorm = 3
      if (dtset%ucrpa >= 1 .or. paw_dmft%dmft_kspectralfunc == 1) opt_renorm = 2
      call chipsi_renormalization(paw_dmft,opt=opt_renorm)
-     call chipsi_print(paw_dmft,pawtab(:),t2g,x2my2d)
+     call chipsi_print(paw_dmft,pawtab(:))
    end if ! proc=me
  end if
 !!***
@@ -1108,7 +1108,7 @@ end subroutine datafordmft
 !!
 !! SOURCE
 
-subroutine chipsi_print(paw_dmft,pawtab,t2g,x2my2d)
+subroutine chipsi_print(paw_dmft,pawtab)
 
 !Arguments ------------------------------------
 !scalars
