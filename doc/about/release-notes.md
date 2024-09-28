@@ -419,8 +419,16 @@ From M. Torrent
 
 **D.23**
 Handle the Debye-Waller when only VB in the active space.
-
-From S. Ponce (MR972)
+There was a bug in the case where highest
+energy state was degenerate and when the interpolation
+of the potential was used. In that case the Sternheimer
+contribution was omitted.
+Other bug fix : missing i eta in the de-
+nominator of the Debye-Waller term on the active space.
+Such factor is important to exactly cancel the Fan term on the active
+space. This missing factor was only present when us-
+ing the Fourier interpolation of the perturbed potential.
+From S. Ponce (MR972 and commit a84206b4)
 
 **D.24**
 Bug fixes for the LRUJ utility, documentation, and subroutines. 
@@ -712,7 +720,7 @@ By X. Gonze (commits 1d56e983f and dfd207458)
 
 **D.14** In m_phgamma.F90, spin-resolved calculations for the case prteliash==3 did not work correctly 
 since phonon linewidths were calculated for spin=1 only. spin>=2 values are filled by NaNs. This small addition fixes the issue.
-Also, a minot format fix.
+Also, a minor format fix.
 By F. Akhmetov (Radioteddy on Github). commit bd76768 on abinit github, but directly ported to the trunk/release-9.10 branch.
 
 **D.15** Fix parser problem. The input would not be parsed correctly when more than one environment variable is present in the input file.
