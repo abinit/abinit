@@ -435,7 +435,7 @@ subroutine datafordmft(cg,cprj,cryst_struc,dft_occup,dimcprj,dtset,eigen,mband_c
            siz_wan = paw_dmft%radgrid(itypat)%mesh_size
            siz_paw = min(siz_wan,paw_dmft%int_meshsz(itypat))
            rint = paw_dmft%radgrid(itypat)%rad(siz_proj)
-           
+          
            if (verif) then
              lmn_size = pawtab(itypat)%lmn_size
              do ilmn=1,lmn_size
