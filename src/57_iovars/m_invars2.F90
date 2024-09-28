@@ -1434,7 +1434,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,2,string(1:lenstr),'eph_tols_idelta',tread,'DPR')
  if (tread == 1) dtset%eph_tols_idelta = dprarr(1:2)
 
- call intagm(dprarr,intarr,jdtset,marr,2,string(1:lenstr),'eph_fix_wavevec',tread,'DPR')
+ call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'eph_fix_wavevec',tread,'DPR')
  if (tread == 1) dtset%eph_fix_wavevec = dprarr(1:3)
 
  call intagm(dprarr,intarr,jdtset,marr,2,string(1:lenstr),'eph_phrange',tread,'INT')

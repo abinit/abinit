@@ -144,7 +144,7 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
  integer,allocatable :: kg_k(:,:), kg_kq(:,:), qmap_symrec(:,:), my_ik_inds(:), my_iq_inds(:), my_spins(:), my_iperts(:)
  integer,allocatable :: pert_table(:,:), my_pinfo(:,:)
  real(dp) :: kk(3), qq(3), kq(3), phfreqs(3*cryst%natom), phfreqs_ev(3*cryst%natom), fake_path(3,2)
- real(dp),allocatable :: grad_berry(:,:), kinpw_k(:), kinpw_kq(:) !, dkinpw(:)
+ real(dp),allocatable :: grad_berry(:,:), kinpw_k(:), kinpw_kq(:)
  real(dp),allocatable :: cg_k(:,:,:), cg_kq(:,:,:), gsc_k(:,:,:), gsc_kq(:,:,:),eig_k(:), eig_kq(:)
  real(dp),allocatable :: v1scf(:,:,:,:), vlocal1(:,:,:,:), vlocal(:,:,:,:), gkq_atm(:,:,:,:), gkq_nu(:,:,:,:), gkq2_nu(:,:,:)
  real(dp),allocatable :: gvnlx1(:,:), gs1c(:,:), h1kets_kq(:,:,:), displ_cart(:,:,:,:),displ_red(:,:,:,:)
