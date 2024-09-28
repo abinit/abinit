@@ -2389,6 +2389,14 @@ subroutine nscf_init(nscf, dtset, dtfil, cryst, comm)
  end if
  call pot_cryst%free(); call pot_hdr%free()
 
+ ! Set up local potential vlocal on the coarse FFT mesh from vtrial taking into account the spin.
+ ! Also, continue to initialize the Hamiltonian.
+ !nvloc = gs_ham_k%nvloc
+ !ABI_CALLOC(vlocal, (n4, n5, n6, nvloc))
+
+ !call gspot_transgrid_and_pack(isppol, psps%usepaw, paral_kgb0, nfft, nscf%ngfft, nfftf, &
+ !                              dtset%nspden, gs_ham_k%nvloc, 1, pawfgr, mpi_enreg, nscf%vtrial, vlocal)
+
 end subroutine nscf_init
 !!***
 
