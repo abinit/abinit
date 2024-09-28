@@ -499,7 +499,7 @@ subroutine wedge_product(produv,u,v,wedgebasis)
 
 ! local
 !scalars
- integer :: igprimd, ii, irprimd
+ integer :: igprimd, irprimd
 
 ! *********************************************************************
 
@@ -797,7 +797,7 @@ subroutine getspinrot(rprimd, spinrot, symrel)
 
 !Local variables-------------------------------
 !scalars
- integer :: det,ii
+ integer :: det
  real(dp) :: cos_phi,norminv,phi,scprod,sin_phi
  !character(len=500) :: msg
 !arrays
@@ -1431,7 +1431,6 @@ subroutine chkdilatmx(chkdilatmx_,dilatmx,rprimd,rprimd_orig,dilatmx_errmsg)
 
 !Local variables-------------------------------
 !scalars
- integer :: ii,jj,mu
  real(dp) :: alpha,dilatmx_new
 !arrays
  real(dp) :: eigval(3),gprimd_orig(3,3),met(3,3),old_to_new(3,3)

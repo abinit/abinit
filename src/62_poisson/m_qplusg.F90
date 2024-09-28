@@ -66,7 +66,7 @@ subroutine cmod_qpg(nq, iq, q, npwvec, gvec, gprimd, qplusg)
 
 !Local variables ------------------------------
 !scalars
- integer :: ig,ii
+ integer :: ig
 !arrays
  real(dp) :: gmet(3,3),gpq(3)
 
