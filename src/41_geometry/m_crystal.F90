@@ -268,8 +268,6 @@ module m_crystal
 
  end type crystal_t
 
- !public :: crystal_init            ! Main Creation method.
- !public :: crystal_free            ! Main Destruction method.
  public :: symbols_crystal         ! Return an array with the atomic symbol:["Sr","Ru","O1","O2","O3"]
  public :: prt_cif                 ! Print CIF file.
  public :: prtposcar               ! output VASP style POSCAR and FORCES files.
@@ -1429,7 +1427,6 @@ subroutine crystal_point_group(cryst, ptg_nsym, ptg_symrel, ptg_symrec, has_inve
 !arrays
  integer :: work_symrel(3,3,cryst%nsym)
  integer,allocatable :: symafm(:)
-
 ! *************************************************************************
 
  my_include_timrev = .False.; if (present(include_timrev)) my_include_timrev = include_timrev
@@ -1521,7 +1518,6 @@ integer function crystal_ncwrite(cryst, ncid) result(ncerr)
 !arrays
  character(len=2) :: symbols(cryst%ntypat)
  character(len=80) :: psp_desc(cryst%ntypat),symbols_long(cryst%ntypat)
-
 ! *************************************************************************
 
  ! TODO alchemy not treated correctly by ETSF_IO specs.
@@ -1700,10 +1696,7 @@ subroutine crystal_ncread(cryst, ncid)
 !Local variables ------------------------------------
 !scalars
  integer :: use_antiferro
-
 ! *************************************************************************
-
- !NCF_CHECK(nf90_inq_varid(ncid, varname, varid))
 
  ! ---------------
  ! Read dimensions

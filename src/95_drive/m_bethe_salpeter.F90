@@ -1472,9 +1472,7 @@ subroutine setup_bse(codvsn,acell,rprim,ngfft_osc,Dtset,Dtfil,BS_files,Psps,Pawt
  !TODO Occupancies are zero if NSCF. One should calculate the occupancies from the energies when
  ! the occupation scheme for semiconductors is used.
  call ks_ebands%update_occ(Dtset%spinmagntarget,prtvol=Dtset%prtvol)
-
  call ks_ebands%print([std_out], "Band structure read from the WFK file", prtvol=Dtset%prtvol)
-
  call ks_ebands%report_gap(header=" KS band structure",unit=std_out,mode_paral="COLL")
 
  ABI_MALLOC(val_indices,(ks_ebands%nkpt,ks_ebands%nsppol))
@@ -1484,7 +1482,7 @@ subroutine setup_bse(codvsn,acell,rprim,ngfft_osc,Dtset,Dtfil,BS_files,Psps,Pawt
    val_idx(spin) = val_indices(1,spin)
    write(msg,'(a,i2,a,i0)')" For spin : ",spin," val_idx ",val_idx(spin)
    call wrtout(std_out,msg)
-   if ( ANY(val_indices(1,spin) /= val_indices(:,spin)) ) then
+   if (any(val_indices(1,spin) /= val_indices(:,spin)) ) then
      ABI_ERROR("BSE code does not support metals")
    end if
  end do

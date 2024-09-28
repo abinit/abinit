@@ -652,8 +652,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  integer :: mpw,ierr,it,imyq,band, ignore_kq, ignore_ibsum_kq
  integer :: n1,n2,n3,n4,n5,n6,nspden,nu, iang
  integer :: sij_opt,usecprj,usevnl,optlocal,optnl,opt_gvnlx1
- integer :: nfft,nfftf,mgfft,mgfftf,nkpg,nkpg1,nq,cnt,imyp, q_start, q_stop, restart
- integer :: enough_stern
+ integer :: nfft,nfftf,mgfft,mgfftf,nkpg,nkpg1,nq,cnt,imyp, q_start, q_stop, restart, enough_stern
  integer :: nbcalc_ks,nbsum,bsum_start, bsum_stop, bstart_ks,my_ikcalc,ikcalc,bstart,bstop,iatom, sendcount
  integer :: comm_rpt, osc_npw, stern_comm
  integer :: ffnlk_request, ffnl1_request, nelem, cgq_request
@@ -1099,7 +1098,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
    ! In principle one may store vtrial in the DVDB but getpot_filepath is simpler to implement.
    call wrtout(units, sjoin(" Reading GS KS potential for Sternheimer from: ", dtfil%filpotin))
    call read_rhor(dtfil%filpotin, cplex1, nspden, nfftf, ngfftf, pawread0, mpi_enreg, vtrial, pot_hdr, pot_pawrhoij, comm, &
-                  allow_interp=.True.)
+                  allow_interp=.True., want_varname="vtrial")
    pot_cryst = pot_hdr%get_crystal()
    if (cryst%compare(pot_cryst, header=" Comparing input crystal with POT crystal") /= 0) then
      ABI_ERROR("Crystal structure from WFK and POT do not agree! Check messages above!")
@@ -1308,7 +1307,6 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
        if (dtset%eph_stern /= 0) then
          ABI_CALLOC(stern_dw, (2, natom3, natom3, nbcalc_ks))
          enough_stern = 0
-
        end if
      end if
 

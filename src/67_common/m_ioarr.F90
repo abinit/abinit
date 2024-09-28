@@ -938,6 +938,7 @@ end subroutine fftdatar_write_from_hdr
 !! [allow_interp]=If True, the density read from file will be interpolated if the mesh differs from the one
 !!   expected by the caller. This option is usually used in **self-consistent** calculations.
 !!   If False (default), the code stops if the two meshes are different.
+!! [varname]=If present, check whether file contains varname
 !!
 !! OUTPUT
 !! orhor(cplex*nfft,nspden)=The density on the real space mesh.
@@ -961,7 +962,7 @@ end subroutine fftdatar_write_from_hdr
 !! SOURCE
 
 subroutine read_rhor(fname, cplex, nspden, nfft, ngfft, pawread, mpi_enreg, orhor, ohdr, pawrhoij, comm, &
-                     check_hdr, allow_interp) ! Optional
+                     check_hdr, allow_interp, want_varname) ! Optional
 
 !Arguments ------------------------------------
 !scalars
@@ -971,6 +972,7 @@ subroutine read_rhor(fname, cplex, nspden, nfft, ngfft, pawread, mpi_enreg, orho
  type(hdr_type),intent(out) :: ohdr
  type(hdr_type),optional,intent(in) :: check_hdr
  logical,optional,intent(in) :: allow_interp
+ character(len=*),optional,intent(in) :: want_varname
 !arrays
  integer,intent(in) :: ngfft(18)
  real(dp),intent(out) :: orhor(cplex*nfft,nspden)
@@ -1026,10 +1028,10 @@ subroutine read_rhor(fname, cplex, nspden, nfft, ngfft, pawread, mpi_enreg, orho
 
      ! Check important dimensions.
      ABI_CHECK(fform /= 0, sjoin("fform == 0 while reading:", my_fname))
-     !if (fform /= fform_den) then
-     !  write(msg, "(3a, 2(a, i0))")' File: ',trim(my_fname),ch10,' is not a density file. fform: ',fform,", expecting: ", fform_den
-     !  ABI_WARNING(msg)
-     !end if
+     if (present(want_varname)) then
+       ABI_CHECK(fform_contains(fform, want_varname, msg), msg)
+     end if
+
      cplex_file = 1
      if (ohdr%pertcase /= 0) then
        cplex_file = 2; if (ohdr%qptn(1)**2 + ohdr%qptn(2)**2 + ohdr%qptn(3)**2 <1.d-14) cplex_file= 1

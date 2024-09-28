@@ -2380,7 +2380,7 @@ subroutine nscf_init(nscf, dtset, dtfil, cryst, comm)
  ABI_MALLOC(nscf%vtrial, (nfftf, dtset%nspden))
 
  call read_rhor(dtfil%filpotin, cplex1, dtset%nspden, nfftf, nscf%ngfftf, pawread0, nscf%mpi_enreg, nscf%vtrial, pot_hdr, pot_pawrhoij, comm, &
-                allow_interp=.False.)
+                allow_interp=.False., want_varname="vtrial")
  !scf%vtrial = zero
 
  pot_cryst = pot_hdr%get_crystal()
@@ -2587,7 +2587,7 @@ subroutine nscf_solve_kpt(nscf, isppol, kpt, istwf_k, nband_k, cryst, dtset, dtf
 !scalars
  integer,parameter :: paral_kgb0 = 0, mcgq0 = 0, mkgq0 = 0, nkpt1 = 1, pwind_alloc0 = 0, use_subvnlx0 = 0, use_subovl0 = 0, ider0 = 0, idir0 = 0
  integer,parameter :: icg0 = 0, igsc0 = 0, ikpt0 = 0, quit0 = 0, ortalgo_3 = 3, mkmem1 = 1, useylmgr0 = 0
- integer :: mcg, mgsc, n1, n2, n3, n4, n5, n6, nfft, nfftf, mgfft, mgfftf, inonsc, npwsp, me_g0, linalg_max_size
+ integer :: mcg, mgsc, n1, n2, n3, n4, n5, n6, nfft, nfftf, mgfft, mgfftf, inonsc, npwsp, me_g0, linalg_max_size, band
  integer :: nspinor, ii, iband
  real(dp),parameter :: cpus0 = zero
  real(dp) :: max_resid
@@ -2623,6 +2623,9 @@ subroutine nscf_solve_kpt(nscf, isppol, kpt, istwf_k, nband_k, cryst, dtset, dtf
  ! Ortoghonalize input trial states (this is important, even whe cg_k is already initialized from a previous k-point.
  call pw_orthon(icg0, igsc0, istwf_k, mcg, mgsc, npwsp, nband_k, ortalgo_3, gsc_k, dtset%usepaw, cg_k, me_g0, xmpi_comm_self)
 
+ !gs_ham_k%kinpw_k = zero
+ !call cg_kfilter(npw_k, nspinor, nband_k, gs_ham_k%kinpw_k, cg_k)
+
  ! linalg initialisation (required by subdiago)
  linalg_max_size=maxval(dtset%nband(:))
  call abi_linalg_init(linalg_max_size, RUNL_GSTATE, dtset%wfoptalg, paral_kgb0,&
@@ -2631,11 +2634,8 @@ subroutine nscf_solve_kpt(nscf, isppol, kpt, istwf_k, nband_k, cryst, dtset, dtf
  ABI_MALLOC(subham, (nband_k*(nband_k+1)))
  ABI_MALLOC(evec, (2*nband_k, nband_k))
 
- !gs_ham_k%kinpw_k = zero
  ierr = 1; msg = ""
-
  do inonsc=1,dtset%nstep
-  !call cg_kfilter(npw_k, nspinor, nband_k, gs_ham_k%kinpw_k, cg_k)
 
    call cgwf(dtset%berryopt, cg_k, cgq, dtset%chkexit, cpus0, dphase_k, dtefield, dtfil%filnam_ds(1), &
              gsc_k, gs_ham_k, icg0, igsc0, ikpt0, inonsc, isppol, nband_k, mcg, mcgq0, mgsc, mkgq0, &
@@ -2644,11 +2644,15 @@ subroutine nscf_solve_kpt(nscf, isppol, kpt, istwf_k, nband_k, cryst, dtset, dtf
              pwind, pwind_alloc0, pwnsfac, pwnsfacq, quit0, resid, &
              subham, subovl, subvnlx, dtset%tolrde, dtset%tolwfr_diago, use_subovl0, use_subvnlx0, mod(dtset%wfoptalg, 100), zshift)
 
-   !call cg_kfilter(npw_k, nspinor, nband_k, gs_ham_k%kinpw_k, cg_k)
-
    ! subspace rotation (without this, cgwf will never converge!)
    call subdiago(cg_k, eig_k, evec, gsc_k, icg0, igsc0, istwf_k, mcg, mgsc, nband_k, npw_k, dtset%nspinor, paral_kgb0, &
                  subham, subovl, use_subovl0, gs_ham_k%usepaw, me_g0)
+
+   !do band=1,nband_k
+   !  !ii = band*(band-1)/2 + band
+   !  ii = band*(band-1) + band
+   !  eig_k(band) = subham(ii)
+   !end do
 
    ! Fix the phase of the wavefunctions.
    !call cgtk_fixphase(cg_k, gsc_k, icg0, igsc0, istwf_k, mcg, mgsc, mpi_enreg, nband_k, npw_k, dtset%usepaw)
@@ -2657,7 +2661,7 @@ subroutine nscf_solve_kpt(nscf, isppol, kpt, istwf_k, nband_k, cryst, dtset, dtf
    if (dtset%nbdbuf >= 0) then
      max_resid = maxval(resid(1:max(1,nband_k-dtset%nbdbuf)))
    else
-     ABI_ERROR(sjoin('Bad value of nbdbuf:', itoa(dtset%nbdbuf)))
+     ABI_ERROR(sjoin('Bad value for nbdbuf:', itoa(dtset%nbdbuf)))
    end if
 
    ! Exit loop over inonsc if converged

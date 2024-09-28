@@ -43,7 +43,6 @@ module m_exc_analyze
  use m_pawcprj,           only : pawcprj_type, pawcprj_alloc, pawcprj_free
  use m_paw_pwaves_lmn,    only : paw_pwaves_lmn_t, paw_pwaves_lmn_init, paw_pwaves_lmn_free
  use m_paw_nhat,          only : nhatgrid
- use m_ebands,            only :  ebands_t
 
  implicit none
 
@@ -68,7 +67,6 @@ contains
 !! BS_files<excfiles>=filenames used in the Bethe-Salpeter part.
 !! Kmesh<kmesh_t>=Info on the k-point sampling for wave functions.
 !! Cryst<crystal_t>=Structure defining the crystalline structure.
-!! KS_Bst<ebands_t>
 !! Pawtab(Cryst%ntypat*usepaw)<pawtab_type>=PAW tabulated starting data
 !! Pawrad(ntypat*usepaw)<type(pawrad_type)>=paw radial mesh and related data.
 !! Psps <pseudopotential_type>=variables related to pseudopotentials.
