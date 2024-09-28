@@ -2095,28 +2095,28 @@ contains
       case (SPACE_R)
         xgBlockA__vecR => xgBlockA%vecR
         xgBlockW__vecR => xgBlockW%vecR
-        !!$OMP TARGET DATA USE_DEVICE_PTR(xgBlockA__vecR,xgBlockW__vecR)
-        !call abi_gpu_xheevd(1,jobz,uplo,xgBlockA%cols, &
-        !    c_loc(xgBlockA__vecR),xgBlockA%LDim, &
-        !    c_loc(xgBlockW__vecR),info)
-        !!$OMP END TARGET DATA
-        call checkResize(iwork,liwork,5*xgBlockA%rows+3)
-        call checkResize(rwork,lrwork,2*xgBlockA%rows*xgBlockA%rows+6*xgBlockA%rows+1)
-        !$OMP TARGET UPDATE FROM(xgBlockA__vecR)
-        call dsyevd(jobz,uplo,xgBlockA%cols, &
-          xgBlockA%vecR,xgBlockA%LDim, &
-          xgBlockW%vecR, rwork, lrwork, &
-          iwork, liwork,info)
-        !$OMP TARGET UPDATE TO(xgBlockA__vecR)
-        !$OMP TARGET UPDATE TO(xgBlockW__vecR)
-        if ( rwork(1) > lrwork ) then
-          !write(std_out,*) "Allocate work from", lrwork, "to", int(rwork(1))
-          call checkResize(rwork,lrwork,int(rwork(1)))
-        end if
-        if ( iwork(1) > liwork ) then
-          !write(std_out,*) "Allocate work from", liwork, "to", int(iwork(1))
-          call checkResize(iwork,liwork,int(iwork(1)))
-        end if
+        !$OMP TARGET DATA USE_DEVICE_PTR(xgBlockA__vecR,xgBlockW__vecR)
+        call abi_gpu_xheevd(1,jobz,uplo,xgBlockA%cols, &
+            c_loc(xgBlockA__vecR),xgBlockA%LDim, &
+            c_loc(xgBlockW__vecR),info)
+        !$OMP END TARGET DATA
+        !call checkResize(iwork,liwork,5*xgBlockA%rows+3)
+        !call checkResize(rwork,lrwork,2*xgBlockA%rows*xgBlockA%rows+6*xgBlockA%rows+1)
+        !!$OMP TARGET UPDATE FROM(xgBlockA__vecR)
+        !call dsyevd(jobz,uplo,xgBlockA%cols, &
+        !  xgBlockA%vecR,xgBlockA%LDim, &
+        !  xgBlockW%vecR, rwork, lrwork, &
+        !  iwork, liwork,info)
+        !!$OMP TARGET UPDATE TO(xgBlockA__vecR)
+        !!$OMP TARGET UPDATE TO(xgBlockW__vecR)
+        !if ( rwork(1) > lrwork ) then
+        !  !write(std_out,*) "Allocate work from", lrwork, "to", int(rwork(1))
+        !  call checkResize(rwork,lrwork,int(rwork(1)))
+        !end if
+        !if ( iwork(1) > liwork ) then
+        !  !write(std_out,*) "Allocate work from", liwork, "to", int(iwork(1))
+        !  call checkResize(iwork,liwork,int(iwork(1)))
+        !end if
 
       case (SPACE_C)
         xgBlockA__vecC => xgBlockA%vecC
@@ -2537,31 +2537,31 @@ contains
         xgBlockA__vecR => xgBlockA%vecR
         xgBlockB__vecR => xgBlockB%vecR
         xgBlockW__vecR => xgBlockW%vecR
-        !$OMP TARGET UPDATE FROM(xgBlockA__vecR)
-        !$OMP TARGET UPDATE FROM(xgBlockB__vecR)
-        call checkResize(iwork,liwork,5*xgBlockA%rows+3)
-        call checkResize(rwork,lrwork,2*xgBlockA%rows*xgBlockA%rows+6*xgBlockA%rows+1)
-        call dsygvd(itype, jobz, uplo, xgBlockA%rows, xgBlockA%vecR, xgBlockA%ldim, &
-          xgBlockB%vecR, xgBlockB%ldim, xgBlockW%vecR, rwork, lrwork, iwork, liwork, info)
-        !$OMP TARGET UPDATE TO(xgBlockA__vecR)
-        !$OMP TARGET UPDATE TO(xgBlockB__vecR)
-        !$OMP TARGET UPDATE TO(xgBlockW__vecR)
-        if ( rwork(1) > lrwork ) then
-          !write(std_out,*) "Allocate work from", lrwork, "to", int(rwork(1))
-          call checkResize(rwork,lrwork,int(rwork(1)))
-        end if
-        if ( iwork(1) > liwork ) then
-          !write(std_out,*) "Allocate work from", liwork, "to", int(iwork(1))
-          call checkResize(iwork,liwork,int(iwork(1)))
-        end if
-        !!$OMP TARGET DATA USE_DEVICE_PTR(xgBlockA__vecR,xgBlockB__vecR,xgBlockW__vecR)
-        !call abi_gpu_xhegvd(1, itype, jobz, uplo, &
-        !  &             xgBlockA%rows, &
-        !  &             c_loc(xgBlockA__vecR), xgBlockA%ldim, &
-        !  &             c_loc(xgBlockB__vecR), xgBlockB%ldim, &
-        !  &             c_loc(xgBlockW__vecR), &
-        !  &             info)
-        !!$OMP END TARGET DATA
+        !!$OMP TARGET UPDATE FROM(xgBlockA__vecR)
+        !!$OMP TARGET UPDATE FROM(xgBlockB__vecR)
+        !call checkResize(iwork,liwork,5*xgBlockA%rows+3)
+        !call checkResize(rwork,lrwork,2*xgBlockA%rows*xgBlockA%rows+6*xgBlockA%rows+1)
+        !call dsygvd(itype, jobz, uplo, xgBlockA%rows, xgBlockA%vecR, xgBlockA%ldim, &
+        !  xgBlockB%vecR, xgBlockB%ldim, xgBlockW%vecR, rwork, lrwork, iwork, liwork, info)
+        !!$OMP TARGET UPDATE TO(xgBlockA__vecR)
+        !!$OMP TARGET UPDATE TO(xgBlockB__vecR)
+        !!$OMP TARGET UPDATE TO(xgBlockW__vecR)
+        !if ( rwork(1) > lrwork ) then
+        !  !write(std_out,*) "Allocate work from", lrwork, "to", int(rwork(1))
+        !  call checkResize(rwork,lrwork,int(rwork(1)))
+        !end if
+        !if ( iwork(1) > liwork ) then
+        !  !write(std_out,*) "Allocate work from", liwork, "to", int(iwork(1))
+        !  call checkResize(iwork,liwork,int(iwork(1)))
+        !end if
+        !$OMP TARGET DATA USE_DEVICE_PTR(xgBlockA__vecR,xgBlockB__vecR,xgBlockW__vecR)
+        call abi_gpu_xhegvd(1, itype, jobz, uplo, &
+          &             xgBlockA%rows, &
+          &             c_loc(xgBlockA__vecR), xgBlockA%ldim, &
+          &             c_loc(xgBlockB__vecR), xgBlockB%ldim, &
+          &             c_loc(xgBlockW__vecR), &
+          &             info)
+        !$OMP END TARGET DATA
 #endif
 
       case (SPACE_C)
@@ -3261,7 +3261,7 @@ contains
             !$OMP TARGET ENTER DATA MAP(alloc:vecR_buf)
             !$OMP TARGET DATA USE_DEVICE_PTR(xgBlock%vecR,vecR_buf)
             call MPI_ALLREDUCE(xgBlock%vecR, vecR_buf,&
-            &    xgBlock%cols*fact*xgBlock%rows,MPI_DOUBLE_COMPLEX,MPI_SUM,comm_,ierierr)
+            &    xgBlock%cols*fact*xgBlock%rows,MPI_DOUBLE,MPI_SUM,comm_,ierierr)
             xgBlock%vecR(1:xgBlock%cols,1:fact*xgBlock%rows)=vecR_buf(1:xgBlock%cols,1:fact*xgBlock%rows)
             !$OMP END TARGET DATA
             !$OMP TARGET EXIT DATA MAP(delete:vecR_buf)
@@ -3269,6 +3269,7 @@ contains
 # endif
 #else
 !FIXME For several compilers, OMP doesn't work correctly with structured types, so use pointers
+            xgBlock__vecR => xgBlock%vecR
 # ifdef HAVE_MPI2_INPLACE
             !$OMP TARGET DATA USE_DEVICE_PTR(xgBlock__vecR)
             call MPI_ALLREDUCE(MPI_IN_PLACE,xgBlock__vecR,&
@@ -3313,7 +3314,7 @@ contains
 # else
             ABI_MALLOC(vecC_buf,(xgBlock%rows,xgBlock%cols))
             !$OMP TARGET ENTER DATA MAP(alloc:vecC_buf)
-            !$OMP TARGET DATA USE_DEVICE_PTR(xgBlock%vecR,vecR_buf)
+            !$OMP TARGET DATA USE_DEVICE_PTR(xgBlock%vecC,vecC_buf)
             call MPI_ALLREDUCE(xgBlock%vecC, vecC_buf,&
             &    xgBlock%cols*xgBlock%rows,MPI_DOUBLE_COMPLEX,MPI_SUM,comm_,ierr)
             xgBlock%vecC(1:xgBlock%cols,1:xgBlock%rows)=vecC_buf(1:xgBlock%cols,1:xgBlock%rows)
@@ -3323,6 +3324,7 @@ contains
 # endif
 #else
 !FIXME For several compilers, OMP doesn't work correctly with structured types, so use pointers
+            xgBlock__vecC => xgBlock%vecC
 # ifdef HAVE_MPI2_INPLACE
             !$OMP TARGET DATA USE_DEVICE_PTR(xgBlock__vecC)
             call MPI_ALLREDUCE(MPI_IN_PLACE,xgBlock__vecC,&
@@ -3331,7 +3333,7 @@ contains
 # else
             ABI_MALLOC(vecC_buf,(xgBlock%rows,xgBlock%cols))
             !$OMP TARGET ENTER DATA MAP(alloc:vecC_buf)
-            !$OMP TARGET DATA USE_DEVICE_PTR(xgBlock%vecR,vecR_buf)
+            !$OMP TARGET DATA USE_DEVICE_PTR(xgBlock%vecC,vecC_buf)
             call MPI_ALLREDUCE(xgBlock__vecC, vecC_buf,&
             &    xgBlock%cols*xgBlock%rows,MPI_DOUBLE_COMPLEX,MPI_SUM,comm_,ierr)
             xgBlock__vecC(1:xgBlock%cols,1:xgBlock%rows)=vecC_buf(1:xgBlock%cols,1:xgBlock%rows)

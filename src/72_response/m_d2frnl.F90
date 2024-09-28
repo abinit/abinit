@@ -1116,6 +1116,7 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
      ABI_FREE(pawrhoij_tot)
    end if
  end if
+
  call gs_ham%free()
  call timab(159,2,tsec)
 

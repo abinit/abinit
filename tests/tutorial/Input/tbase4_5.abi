@@ -41,7 +41,8 @@ shiftk  0.5 0.0 0.0
 
 #Definition of the SCF procedure
 nstep 10          # Maximal number of SCF cycles
-toldff 5.0d-5
+toldff 5.0d-5     # The reduced positions of the atoms are not uniquely determined by symmetry.
+                  # Thus, a better SCF stopping criterion than toldfe can be used.
 
 #Definition of occupation numbers
 occopt 4
@@ -49,7 +50,7 @@ tsmear 0.04
 
 #The relaxation
 ionmov 2
-tolmxf 5.0d-4
+tolmxf 5.0d-4    # This might be not sufficiently converged. The default is more stringent.
 ntime 10
 
 ##############################################################
@@ -67,7 +68,7 @@ ntime 10
 #%% authors = Unknown
 #%% keywords =
 #%% description =
-#%%   Crystalline aluminum
+#%%   Crystalline aluminum slab
 #%%
 #%%   Determination of the surface energy of aluminum :
 #%%   a minimal slab.
