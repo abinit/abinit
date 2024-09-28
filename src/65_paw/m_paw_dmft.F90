@@ -2619,6 +2619,8 @@ subroutine init_paral_dmft(paw_dmft,distrib,nfreq)
 
  nproc_freq = min(nfreq,nproc)
 
+ distrib%shiftk = 0
+
  if (nproc_freq < nproc) distrib%nw_mem(nproc_freq:nproc-1) = 0
  ifreq = 1
  do irank=0,nproc_freq-1
@@ -2652,6 +2654,7 @@ subroutine init_paral_dmft(paw_dmft,distrib,nfreq)
      if (irank < residu) nkpt_proc = nkpt_proc + 1
      distrib%nkpt_mem(irank) = nkpt_proc
      distrib%procb(ikpt:ikpt+nkpt_proc-1) = irank
+     distrib%shiftk = ikpt - 1
      ikpt = ikpt + nkpt_proc
    end do ! irank
 
@@ -2685,6 +2688,7 @@ subroutine init_paral_dmft(paw_dmft,distrib,nfreq)
        if (irank+iirank == myproc) then
          distrib%me_kpt  = ikpt - 1
          distrib%me_freq = iirank
+         distrib%shiftk  = ikpt - 1
        end if
      end do ! iirank
      irank = irank + nproc_freq
