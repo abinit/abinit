@@ -1017,7 +1017,6 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    end if
    psps%n1xccc=maxval(pawtab(1:psps%ntypat)%usetcore)
    call setsym_ylm(gprimd,pawang%l_max-1,dtset%nsym,dtset%pawprtvol,rprimd,symrec,pawang%zarot)
-
 !  2-Initialize and compute data for DFT+U, EXX, or DFT+DMFT
    call pawpuxinit(dtset%dmatpuopt,dtset%exchmix,dtset%f4of2_sla,dtset%f6of2_sla,&
 &     is_dfpt,args_gs%jpawu,dtset%lexexch,dtset%lpawu,dtset%nspinor,dtset%ntypat,dtset%optdcmagpawu,pawang,dtset%pawprtvol,&
@@ -1028,10 +1027,10 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    !if (me == master) call pawtab_print(Pawtab)
  end if
 
-call init_sc_dmft(dtset,paw_dmft,args_gs%dmatpawu(:,:,:,:),dtfil%filnam_ds(3),dtfil%fnameabo_app,gprimd(:,:),kg(:,:),mpi_enreg, &
-                & npwarr(:),occ(:),pawang,pawrad(:),pawtab(:),rprimd(:,:),ucvol,dtfil%unpaw,use_sc_dmft,xred(:,:),ylm(:,:))
-if (paw_dmft%use_dmft == 1 .and. me == 0) call readocc_dmft(paw_dmft,dtfil%filnam_ds(3),dtfil%filnam_ds(4))
-if (paw_dmft%use_dmft == 1) call print_sc_dmft(paw_dmft,dtset%pawprtvol)
+ call init_sc_dmft(dtset,paw_dmft,args_gs%dmatpawu(:,:,:,:),dtfil%filnam_ds(3),dtfil%fnameabo_app,gprimd(:,:),kg(:,:),mpi_enreg, &
+                 & npwarr(:),occ(:),pawang,pawrad(:),pawtab(:),rprimd(:,:),ucvol,dtfil%unpaw,use_sc_dmft,xred(:,:),ylm(:,:))
+ if (paw_dmft%use_dmft == 1 .and. me == 0) call readocc_dmft(paw_dmft,dtfil%filnam_ds(3),dtfil%filnam_ds(4))
+ if (paw_dmft%use_dmft == 1) call print_sc_dmft(paw_dmft,dtset%pawprtvol)
 
 !###########################################################
 !### 11. Initialize (eventually) electron-positron data and

@@ -1034,8 +1034,8 @@ subroutine init_sc_dmft(dtset,paw_dmft,dmatpawu,fnamei,fnametmp_app,gprimd,kg,mp
    if (lpawu > 3) ABI_ERROR("lpawu > 3 is not handled")
    if (t2g .and. lpawu /= 2 .and. lpawu /= -1) ABI_ERROR("lpawu/=2 and dmft_t2g=1 are not compatible")
    if (x2my2d .and. lpawu /= 2 .and. lpawu /= -1) ABI_ERROR("lpawu/=2 and dmft_x2my2d=1 are not compatible")
-   if (t2g) lpawu = 1
-   if (x2my2d) lpawu = 0
+   if (t2g .and. lpawu /= -1) lpawu = 1
+   if (x2my2d .and. lpawu /= -1) lpawu = 0
    if (lpawu > maxlpawu) maxlpawu = lpawu
    paw_dmft%lpawu(iatom) = lpawu
  end do ! iatom
@@ -1194,7 +1194,7 @@ subroutine init_sc_dmft(dtset,paw_dmft,dmatpawu,fnamei,fnametmp_app,gprimd,kg,mp
  ! Now build radial grid by extending the PAW mesh up to max(rmax,size(proj))
  use_full_chipsi = paw_dmft%dmft_use_full_chipsi == 1 
  paw_dmft%int_meshsz => pawrad(:)%int_meshsz
- 
+
  if (use_full_chipsi) then
    if (mpi_enreg%nproc_fft > 1) ABI_ERROR("Case nproc_fft > 1 and dmft_use_full_chipsi=1 not handled")
    ABI_MALLOC(paw_dmft%phimtphi,(maxval(pawrad(1:ntypat)%int_meshsz),paw_dmft%maxnproju,ntypat))

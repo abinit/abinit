@@ -274,7 +274,6 @@ CONTAINS  !=====================================================================
      if(pawtab(itypat)%lexexch==-1) pawtab(itypat)%useexexch=0
      if(pawtab(itypat)%lexexch/=-1) pawtab(itypat)%useexexch=useexexch
    end if
-
 !  Select only atoms with +U
    if(lcur/=-1) then
 
@@ -809,7 +808,6 @@ CONTAINS  !=====================================================================
             
        write(message,*) "Build DMFT orbital for atom type",itypat
        call wrtout(std_out,message,"COLL")
-       
        if (dmft_proj(itypat) > 0) then   ! read phi from PAW dataset 
          write(message,*) "Taking atomic wavefunction",dmft_proj(itypat),"from PAW dataset"
          call wrtout(std_out,message,"COLL")
