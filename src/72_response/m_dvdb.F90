@@ -5855,7 +5855,7 @@ subroutine dvdb_load_efield(dvdb, pot_paths, comm)
    ! TODO: Should implement symmetries so that only the irred pots are needed.
    call wrtout(std_out, sjoin("Loading Efield DFPT potential from:", pot_paths(ii)))
    call read_rhor(pot_paths(ii), cplex1, dvdb%nspden, nfft, dvdb%ngfft, pawread0, &
-     dvdb%mpi_enreg, v1e_red(:,:,ii), hdr, pawrhoij, comm, allow_interp=.True.)
+     dvdb%mpi_enreg, v1e_red(:,:,ii), hdr, pawrhoij, comm, allow_interp=.True., want_varname="first_order_potential")
 
    ! Consistency check: expecting E-field perturbation.
    idir = mod(hdr%pertcase - 1, 3) + 1; ipert = (hdr%pertcase - idir) / 3 + 1

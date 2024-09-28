@@ -636,7 +636,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  ! In principle one may store GS vtrial in the DVDB but getpot_filepath is simpler to implement.
  call wrtout(units, sjoin(" Reading KS GS potential for Sternheimer from: ", dtfil%filpotin))
  call read_rhor(dtfil%filpotin, cplex1, nspden, nfftf, ngfftf, pawread0, mpi_enreg, vtrial, pot_hdr, pot_pawrhoij, comm, &
-                allow_interp=.True.)
+                allow_interp=.True., want_varname="vtrial")
  pot_cryst = pot_hdr%get_crystal()
  if (cryst%compare(pot_cryst, header=" Comparing input crystal with POT crystal") /= 0) then
    ABI_ERROR("Crystal structure from WFK and POT do not agree! Check messages above!")
@@ -724,7 +724,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  ! The GS density is needed for vxc1_qq and the model dielectric function
  ABI_CALLOC(rhor, (nfftf, nspden))
  call read_rhor(dtfil%fildensin, cplex1, nspden, nfftf, ngfftf, pawread0, mpi_enreg, rhor, den_hdr, den_pawrhoij, comm, &
-                allow_interp=.True.)
+                allow_interp=.True., want_varname="density")
  den_cryst = den_hdr%get_crystal()
  if (cryst%compare(den_cryst, header=" Comparing input crystal with DEN crystal") /= 0) then
    ABI_ERROR("Crystal structure from WFK and DEN do not agree! Check messages above!")

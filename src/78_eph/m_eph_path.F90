@@ -3,7 +3,7 @@
 !!  m_eph_path
 !!
 !! FUNCTION
-!!  Compute e-ph matrix elements g(k,q) along an arbitray path either in k- or q-space
+!!  Compute the e-ph matrix elements g(k,q) along an arbitrary path either in k- or q-space.
 !!
 !! COPYRIGHT
 !!  Copyright (C) 2008-2024 ABINIT group (MG)
@@ -179,6 +179,7 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
    call qpath%print(units, header=sjoin("q-point path for g(k,q) with fixed k:", ktoa(dtset%eph_fix_wavevec)), prtvol=dtset%prtvol)
    fake_path(:,1) = dtset%eph_fix_wavevec; fake_path(:,2) = dtset%eph_fix_wavevec + one
    kpath = kpath_new(fake_path, cryst%gprimd, 0)
+   !kpath%points = zero
    nk_path = 1
 
  case ("q")
@@ -665,32 +666,10 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
 
    ! cache.
    use_cg_kq = .False.
-   !use_cg_kq = (my_iq > 1 .and. ucache_kq%use_cache)
-   !if (use_cg_kq) call ucache_kq%get_kpt(kq, istwfk_1, npw_kq, nspinor, nband, kg_kq, cg_kq)
-
-   ! We can use cg_k as input for the NSCF for a very quick return
-   !if (qq_is_gamma) then
-   !  use_cg_kq = .True.; cg_kq = cg_k
-   !end if
-
-   !use_cg_kq = .False.; cg_kq = zero
    call nscf%solve_kpt(spin, kq, istwfk_1, nband, cryst, dtset, dtfil, gs_ham_kq, &
                        use_cg_kq, npw_kq, cg_kq, gsc_kq, eig_kq, msg, ierr)
 
-   !call nscf%solve_kpt(spin, kq, istwfk_1, nband, cryst, dtset, dtfil, gs_ham_kq, &
-   !                    .True., npw_kq, cg_kq, gsc_kq, eig_kq, msg, ierr)
-
    ABI_WARNING_IF(ierr /= 0, msg)
-   !tot_nscf_ierr = tot_nscf_ierr + ierr
-
-   !call ucache_kq%store_kpt(kq, istwfk_1, npw_kq, nspinor, nband, kg_kq, cg_kq)
-
-   ! This to have the same gauge when qq = 0.
-   !if (qq_is_gamma) cg_kq = cg_k
-
-   ! Make sure all procs in pert_comm have the same wavefunctions at k+q
-   !call xmpi_bcast(cg_kq, master, pert_comm%value, ierr)
-   !if (psps%usepaw == 1) call xmpi_bcast(gsc_kq, master, pert_comm%value, ierr)
 
    spin = 1
    NCF_CHECK(nf90_put_var(ncid, vid("all_eigens_kq"), eig_kq, start=[1,iq,spin]))
@@ -810,8 +789,8 @@ end do
 
  call qpath%free(); call kpath%free()
  call ucache_k%free(); call ucache_kq%free()
- call nscf%free()
  call qpt_comm%free(); call kpt_comm%free(); call pert_comm%free()
+ call nscf%free()
 
  !call abi_linalg_finalize(dtset%gpu_option)
  call cwtime_report(" eph_path: MPI barrier before returning.", cpu_all, wall_all, gflops_all, end_str=ch10, comm=comm)
