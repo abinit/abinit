@@ -833,7 +833,7 @@ CONTAINS  !=====================================================================
          if (me == 0) then
            do ir=1,meshsz
              read(505,*,iostat=ierr) pawtab(itypat)%proj(ir)
-           end do
+           end do ! ir
            close(505)
          end if ! me=0
          call xmpi_bcast(ierr,0,xmpi_world,ir)
@@ -850,7 +850,7 @@ CONTAINS  !=====================================================================
        int1 = sqrt(int1)  
        
        if (me == 0) then
-         open(unit=505,file="dmft_orbital_normalized",status="unknown",form="formatted")
+         open(unit=505,file="dmft_orbital",status="unknown",form="formatted")
          do ir=1,meshsz
            write(505,*) pawrad_tmp%rad(ir),pawtab(itypat)%proj(ir)/int1
          end do

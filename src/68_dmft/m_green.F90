@@ -278,12 +278,12 @@ subroutine init_green(green,paw_dmft,opt_oper_ksloc,wtype,opt_moments,opt_moment
 
  !green%has_charge_matlu_solver = 0
  ABI_MALLOC(green%charge_matlu_solver,(nsppol+1,natom))
- green%charge_matlu_solver = zero
+ green%charge_matlu_solver(:,:) = zero
  green%has_charge_matlu_solver = 1
 
  !green%has_charge_matlu_prev = 0
  ABI_MALLOC(green%charge_matlu_prev,(nsppol+1,natom))
- green%charge_matlu_prev = zero
+ green%charge_matlu_prev(:,:) = zero
  green%has_charge_matlu_prev = 1
 
  call init_oper(paw_dmft,green%occup,opt_ksloc=optoccup_ksloc)
@@ -321,10 +321,10 @@ subroutine init_green(green,paw_dmft,opt_oper_ksloc,wtype,opt_moments,opt_moment
  green%ichargeloc_cv = 0
  green%ifermie_cv    = 0
 
- if (paw_dmft%dmft_solv >= 5) ABI_MALLOC(green%ecorr_qmc,(natom))
-   !ABI_MALLOC(green%ecorr_qmc,(natom))
-   !green%ecorr_qmc(:) = zero
- !end if
+ if (paw_dmft%dmft_solv >= 5) then
+   ABI_MALLOC(green%ecorr_qmc,(natom))
+   green%ecorr_qmc(:) = zero
+ end if
 
  green%fileprt_tau = 0
  green%fileprt_w = 0
@@ -872,9 +872,9 @@ subroutine print_green(char1,green,option,paw_dmft,pawprtvol,opt_wt,opt_decim)
      tmpfil = trim(paw_dmft%filapp)//'_DFTDMFT_SpectralFunction_kresolved_'//trim(char1)
      if (open_file(tmpfil,message,newunit=spfkresolved_unt,status='unknown',form='formatted') /= 0) &
        & ABI_ERROR(message)
-   end if ! option=5
-   iall = 0
-   if (option == 5) then
+   !end if ! option=5
+   !iall = 0
+   !if (option == 5) then
      ABI_MALLOC(sf,(nkpt,green%nw))
      sf(:,:) = czero
      do ifreq=1,green%nw

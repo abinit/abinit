@@ -67,29 +67,45 @@ MODULE m_paw_dmft
 
  type, public :: mpi_distrib_dmft_type
 
+   ! Two parallelization types:
+   ! Type 1: parallelization over kpt and then frequencies
+   ! Type 2: parallelization over frequencies only
+
    integer :: comm_freq
+   ! Frequency communicator (type 1)
 
    integer :: comm_kpt
+   ! Kpt communicator (type 1)
 
    integer :: me_freq
+   ! Rank in comm_freq (type 1)
 
    integer :: me_kpt
+   ! Rank in comm_kpt (type 1)
    
    integer :: nw
+   ! Number of frequencies (either nwlo or nwr, same for both types)
 
    integer :: shiftk
+   ! Shift from kpt index on the current CPU to the physical index (type 1)
 
    integer, allocatable :: nkpt_mem(:)
+   ! Number of kpt handled by each CPU (type 1)
 
    integer, allocatable :: nw_mem(:)
+   ! Number of frequencies handled by each CPU (type 2)
 
    integer, allocatable :: nw_mem_kptparal(:)
+   ! Number of frequencies handled by each CPU (type 1)
 
    integer, allocatable :: procb(:)
+   ! Rank in comm_kpt of the CPU handling each kpt (type 1)
 
    integer, allocatable :: procf(:)
+   ! Rank in the world communicator of the CPU handling each frequency (type 2)
 
    integer, allocatable :: proct(:)
+   ! Rank in comm_freq of the CPU handling each frequency (type 1)
 
  end type mpi_distrib_dmft_type
 
@@ -110,26 +126,20 @@ MODULE m_paw_dmft
 
  type, public :: paw_dmft_type
  
+  integer :: dmft_blockdiag
+  ! Block diagonalize Hamiltonian in the local basis
+
   integer :: dmft_dc
   ! Type of double counting used in DMFT
-
-  integer :: dmft_iter
-  ! Nb of iterations for dmft
-
-  integer :: dmft_kspectralfunc
-  ! =0 Default
-  ! =1 Activate calculation of k-resolved spectral function
-
-  integer :: dmft_solv
-  ! Choice of solver for DMFT
-
-  integer :: dmftcheck
-  ! Check various part of the implementation
 
   integer :: dmft_entropy
   ! = 0: do not compute entropy
   ! = 1: compute entropy with an integration over self-consistent calculations
   ! = 2: compute entropy with an integration over impurity models
+
+  integer :: dmft_fermi_algo
+  ! =1 : use Newton's method to compute the Fermi level
+  ! =2 : use Halley's method to compute the Fermi level
 
   integer :: dmft_gaussorder
   ! Order of the Gauss-Legendre quadrature for each interval of the thermodynamic integration when dmft_integral=1
@@ -138,45 +148,90 @@ MODULE m_paw_dmft
   ! =1: Compute the thermodynamic integration over the impurity models, for dmft_entropy=2
   ! =0: Do not compute the integral, but compute all the other terms of the Luttinger-Ward functional
 
+  integer :: dmft_iter
+  ! Nb of iterations for dmft
+
+  integer :: dmft_kspectralfunc
+  ! =0 Default
+  ! =1 Activate calculation of k-resolved spectral function
+
   integer :: dmft_log_freq
   ! = 0: do not use log frequencies
   ! = 1: use log frequencies
 
-!  integer :: dmft_mag
-!  ! 0 if non magnetic calculation, 1 if magnetic calculation
-
   integer :: dmft_nlambda
   ! Number of intervals for the thermodynamic integration when dmft_integral=1
-
-  integer :: dmft_nwlo
-  ! Number of imaginary frequencies 
-
-  integer :: dmft_nwr
-  ! Number of real frequencies
 
   integer :: dmft_nwli
   ! Physical index of the last imaginary frequency (/=dmft_nwlo when dmft_log_freq=1)
 
-  integer :: dmftqmc_l
-  ! Number of points on the imaginary time grid
+  integer :: dmft_nwlo
+  ! Number of imaginary frequencies
 
-  integer :: dmftqmc_seed
-  ! Seed for CTQMC (only for ABINIT)
+  integer :: dmft_nwr
+  ! Number of real frequencies
 
-  integer :: dmftqmc_therm
-  ! Number of thermalization steps for CTQMC (only for ABINIT, and for TRIQS when we don't restart from a previous configuration)
+  integer :: dmft_prgn
+  ! Specify the way of printing the green function.
+  !  =1   print green
+  !  =2   print self
+
+  integer :: dmft_prt_maxent
+  ! =1 to print Maxent files
+
+  integer :: dmft_prtwan
+  ! =1 to print Wannier functions
+
+  integer :: dmft_read_occnd
+  ! Flag to read/write DMFT occupations
+  ! =0 : Occupations are written but not read
+  ! =1 : Occupations are read from I_DMFTOCCND, with I the root for input file
+  ! =2 : Occupations are read from O_DMFTOCCND, with O the root for input file
+
+  integer :: dmft_rslf
+  ! Flag to read the self-energy at each iteration
+  ! =-1 : Self-energy is set to 0
+  ! =0 : Self-energy is set to double counting
+  ! =1 : Self-energy is read from file
+
+  integer :: dmft_solv
+  ! Choice of solver for DMFT
+
+  integer :: dmft_t2g
+  ! Only use t2g orbitals
+
+  integer :: dmft_use_full_chipsi
+  ! =0 Only use the PAW contribution sum_i <pi|Psi_tilde> |Phi> to compute <Chi|Psi>
+  ! =1 Use the full formula |Psi_tilde> + sum_i <pi|Psi_tilde> (|Phi> - |Phi_tilde>) to compute <Chi|Psi>
+
+  integer :: dmft_wanorthnorm
+  ! =2 orthonormalisation of Wannier functions for each k-point
+  ! =3 orthonormalisation over the sum over k-points
+
+  integer :: dmft_x2my2d
+  ! Only use x2my2d orbital
+
+  integer :: dmftbandf
+  ! Highest correlated band
+
+  integer :: dmftbandi
+  ! Lowest correlated band
+
+  integer :: dmftcheck
+  ! Check various part of the implementation
 
   integer :: dmftctqmc_basis
   ! Basis in which to perform the CTQMC calculation
   ! 0 : Slm basis, 1 : diagonalize local Hamiltonian, 2: diagonalize the density matrix
-  !
-  integer :: dmft_blockdiag
-  ! Block diagonalize Hamiltonian in the local basis
 
   integer :: dmftctqmc_check
   ! ABINIT CTQMC: perform a check on the impurity and/or bath operator 
   ! only for debug
   ! 0 : nothing, 1 : impurity, 2 : bath, 3 : both
+
+  integer :: dmftctqmc_config
+  ! ABINIT CTQMC: Enables histogram of occupations
+  ! 0 : nothing, 1 : enabled
 
   integer :: dmftctqmc_correl
   ! ABINIT CTQMC: Gives analysis for CTQMC 
@@ -191,22 +246,18 @@ MODULE m_paw_dmft
   ! ABINIT CTQMC: compute green function noise for each imaginary time 
   ! 0 : nothing, 1 : activated
 
-  integer :: dmftctqmc_config
-  ! ABINIT CTQMC: Enables histogram of occupations 
-  ! 0 : nothing, 1 : enabled
-
   integer :: dmftctqmc_meas
   ! ABINIT/TRIQS CTQMC: measurements are done every dmftctqmc_meas step 
+
+  integer :: dmftctqmc_mov
+  ! ABINIT CTQMC: Gives movie for CTQMC
+  ! 0 : nothing, 1 : 1 file Movie_RANK.tex for each cpu
 
   integer :: dmftctqmc_mrka
   ! ABINIT CTQMC: Write a temporary file Spectra_RANK.dat with the sweep evolution of
   ! the number of electron for each flavor
   ! The measurement is done every dmftctqmc_meas*dmftctqmc_mrka sweep
   ! e.g. : meas=2 mrka=10 -> every 20 sweeps sum_i c+(ti)c(t'i) is measured
-
-  integer :: dmftctqmc_mov
-  ! ABINIT CTQMC: Gives movie for CTQMC
-  ! 0 : nothing, 1 : 1 file Movie_RANK.tex for each cpu 
 
   integer :: dmftctqmc_order
   ! ABINIT CTQMC: Gives perturbation order of CTQMC solver
@@ -247,55 +298,27 @@ MODULE m_paw_dmft
   integer :: dmftctqmc_triqs_therm
   ! TRIQS CTQMC: Number of thermalization steps when we restart from a previous configuration
 
-  integer :: dmft_x2my2d
-  ! Only use x2my2d orbital 
+  integer :: dmftqmc_l
+  ! Number of points on the imaginary time grid
 
-  integer :: dmft_t2g
-  ! Only use t2g orbitals 
+!  integer :: dmft_mag
+!  ! 0 if non magnetic calculation, 1 if magnetic calculation
 
-  integer :: dmftbandi
-  ! Lowest correlated band
+  integer :: dmftqmc_seed
+  ! Seed for CTQMC (only for ABINIT)
 
-  integer :: dmftbandf
-  ! Highest correlated band
-  
-  integer :: dmft_fermi_algo
-  ! =1 : use Newton's method to compute the Fermi level
-  ! =2 : use Halley's method to compute the Fermi level
-  
-  integer :: dmft_prt_maxent
-  ! =1 to print Maxent files
-
-  integer :: dmft_prtwan
-  ! =1 to print Wannier functions
-
-  integer :: dmft_read_occnd
-  ! Flag to read/write DMFT occupations
-  ! =0 : Occupations are written but not read
-  ! =1 : Occupations are read from I_DMFTOCCND, with I the root for input file
-  ! =2 : Occupations are read from O_DMFTOCCND, with O the root for input file
-
-  integer :: dmft_rslf
-  ! Flag to read the self-energy at each iteration
-  ! =-1 : Self-energy is set to 0
-  ! =0 : Self-energy is set to double counting
-  ! =1 : Self-energy is read from file
-
-  integer :: dmft_prgn
-  ! Precise the way of printing the green function.
-  !  =1   print green
-  !  =2   print self
-  
-  integer :: dmft_use_full_chipsi
-  ! =0 Only use the PAW contribution sum_i <pi|Psi_tilde> |Phi> to compute <Chi|Psi>
-  ! =1 Use the full formula |Psi_tilde> + sum_i <pi|Psi_tilde> (|Phi> - |Phi_tilde>) to compute <Chi|Psi>
-
-  integer :: dmft_wanorthnorm
-  ! =2 orthonormalisation of Wannier functions for each k-point
-  ! =3 orthonormalisation over the sum over k-points
+  integer :: dmftqmc_therm
+  ! Number of thermalization steps for CTQMC (only for ABINIT, and for TRIQS when we don't restart from a previous configuration)
 
   integer :: idmftloop
   ! Current iteration in the DFT+DMFT loop
+
+  integer :: ientropy
+  ! activate evaluation of terms for alternative calculation of entropy in DMFT
+
+  integer :: lchipsiortho
+  ! =0 <Chi|Psi> has not been orthonormalized
+  ! =1 <Chi|Psi> has been orthonormalized
 
   integer :: maxlpawu         
   ! Maximal correlated l
@@ -315,6 +338,9 @@ MODULE m_paw_dmft
   integer :: mkmem
   ! Number of k-points in memory on the current process
 
+  integer :: myproc
+  ! Rank in comm_world
+
   integer :: natom
   ! Number of atoms
 
@@ -326,6 +352,9 @@ MODULE m_paw_dmft
 
   !integer :: nspden
   ! Number of spin densities
+
+  integer :: nproc
+  ! Total number of MPI processes
 
   integer :: nspinor
   ! Number of spinor components
@@ -345,34 +374,24 @@ MODULE m_paw_dmft
   integer :: prtvol
   ! Flag for different print options
 
+  integer :: spacecomm
+  ! MPI_COMM_WORLD
+
   integer :: unpaw
   ! File number for cprj
 
-  integer :: lchipsiortho
-  ! =0 <Chi|Psi> has not been orthonormalized
-  ! =1 <Chi|Psi> has been orthonormalized
+  integer :: use_dmft
+  ! 1 if non diagonal occupations are used, else 0
 
   integer :: use_fixed_self
   ! Impose a fixed self-energy during the first use_fixed_self iterations
 
-  integer :: ientropy
-  ! activate evaluation of terms for alternative calculation of entropy in DMFT
-  
-  integer :: use_dmft
-  ! 1 if non diagonal occupations are used, else 0
-
   integer :: use_sc_dmft
   ! 1 for charge-self consistent calculations
-  
-  ! MPI related variables
-  integer :: myproc
-  ! Rank in comm_world
-  
-  integer :: nproc
-  ! Total number of MPI processes
-   
-  integer :: spacecomm
-  ! MPI_COMM_WORLD
+
+  logical :: dmft_use_all_bands
+  ! =0 Only consider the DMFT contribution on the correlated bands
+  ! =1 Considers the DMFT contribution on every band
 
   logical :: dmftctqmc_triqs_leg_measure
   ! TRIQS CTQMC: Flag to activate Legendre measurement
@@ -386,29 +405,16 @@ MODULE m_paw_dmft
   logical :: dmftctqmc_triqs_move_shift
   ! TRIQS CTQMC: Flag to activate the shift move
 
+  logical :: dmftctqmc_triqs_off_diag
+  ! TRIQS CTQMC: Flag to include the off-diagonal elements of the hybridization
+
   logical :: dmftctqmc_triqs_time_invariance
   ! TRIQS CTQMC: Flag to activate the use of time invariance for the sampling
   ! of the density matrix
 
-  logical :: dmftctqmc_triqs_off_diag
-  ! TRIQS CTQMC: Flag to include the off-diagonal elements of the hybridization
-
   logical :: dmftctqmc_triqs_use_norm_as_weight
   ! TRIQS CTQMC: Flag to activate the use of the norm of the matrix as weight
   ! instead of the trace
-  
-  logical :: dmft_use_all_bands
-  ! =0 Only consider the DMFT contribution on the correlated bands
-  ! =1 Considers the DMFT contribution on every band
-  
-  real(dp) :: dmftqmc_n
-  ! ABINIT/TRIQS CTQMC: Nb of sweeps
-  
-  real(dp) :: edmft
-  ! DMFT correction to the energy
-
-  real(dp) :: sdmft
-  ! DMFT correction to the entropy
 
   real(dp) :: dmft_charge_prec
   ! Precision on charge required for determination of fermi level (fermi_green) with newton method
@@ -420,6 +426,10 @@ MODULE m_paw_dmft
   real(dp) :: dmft_fermi_step
   ! Step increment to find the upper and lower bounds of the Fermi level
 
+  real(dp) :: dmft_lcpr
+  ! Required precision on local correlated charge in order to stop SCF
+  ! DMFT cycle (integrate_green) => ichargeloc_cv
+
   real(dp) :: dmft_mxsf
   ! Mixing coefficient for Self-Energy during the SCF DMFT cycle.
 
@@ -430,30 +440,6 @@ MODULE m_paw_dmft
   real(dp) :: dmft_wanrad
   ! Maximal radius for print of the Wannier functions
 
-  real(dp) :: dmft_lcpr
-  ! Required precision on local correlated charge in order to stop SCF
-  ! DMFT cycle (integrate_green) => ichargeloc_cv
-
-  real(dp) :: fermie
-  ! DMFT Fermi level
-
-  real(dp) :: u_for_s
-  ! Variable for evaluation of correlation energy for U=0 in the entropic
-  ! calculation
-
-  real(dp) :: j_for_s
-  ! Variable for evaluation of correlation energy for U=0 in the entropic
-  ! calculation
-
-  real(dp) :: fermie_dft
-  ! DFT Fermi level
-
-  real(dp) :: nelectval
-  ! Number of valence electrons
-  
-  real(dp) :: temp
-  ! Temperature (Ha)
-
   real(dp) :: dmftctqmc_triqs_det_precision_error
   ! TRIQS CTQMC: Error threshold for the deviation of the determinant.
 
@@ -463,17 +449,46 @@ MODULE m_paw_dmft
   real(dp) :: dmftctqmc_triqs_det_singular_threshold
   ! TRIQS CTQMC: Threshold when checking if the determinant is singular.
 
-  real(dp) :: dmftctqmc_triqs_move_global_prob
-  ! TRIQS CTQMC: Proposal probability for the global move
-
   real(dp) :: dmftctqmc_triqs_epsilon
   ! TRIQS CTQMC: Threshold for singular values of the kernel matrix for the DLR fit
-  
+
   real(dp) :: dmftctqmc_triqs_imag_threshold
   ! TRIQS CTQMC: Threshold for the imaginary part of F(tau)
 
   real(dp) :: dmftctqmc_triqs_lambda
   ! TRIQS CTQMC: Cutoff for the real frequency grid for the DLR fit
+
+  real(dp) :: dmftctqmc_triqs_move_global_prob
+  ! TRIQS CTQMC: Proposal probability for the global move
+
+  real(dp) :: dmftqmc_n
+  ! ABINIT/TRIQS CTQMC: Nb of sweeps
+
+  real(dp) :: edmft
+  ! DMFT correction to the energy
+
+  real(dp) :: fermie
+  ! DMFT Fermi level
+
+  real(dp) :: fermie_dft
+  ! DFT Fermi level
+
+  real(dp) :: j_for_s
+  ! Variable for evaluation of correlation energy for U=0 in the entropic
+  ! calculation
+
+  real(dp) :: nelectval
+  ! Number of valence electrons
+
+  real(dp) :: sdmft
+  ! DMFT correction to the entropy
+
+  real(dp) :: temp
+  ! Temperature (Ha)
+
+  real(dp) :: u_for_s
+  ! Variable for evaluation of correlation energy for U=0 in the entropic
+  ! calculation
 
   character(len=fnlen) :: filapp
   ! Output file name
@@ -484,12 +499,12 @@ MODULE m_paw_dmft
   integer, allocatable :: bandc_proc(:)
   ! Proc index (on comm_band) for each correlated band in DMFT (for kgb paral)
 
+  integer, allocatable :: exclude_bands(:)
+  ! Gives the bands than are not in the DMFT calculations.
+
   integer, allocatable :: include_bands(:)
   ! For each bands included in the calculation (1..mbandc), include_bands
   ! gives the index in the full band index  (1...mband)
-
-  integer, allocatable :: exclude_bands(:)
-  ! Gives the bands than are not in the DMFT calculations.
 
   integer, allocatable :: lpawu(:)
   ! Correlated l for each atom (set to -1 if not correlated)
@@ -912,8 +927,8 @@ subroutine init_sc_dmft(dtset,paw_dmft,dmatpawu,fnamei,fnametmp_app,gprimd,kg,mp
  
  ! for entropy (alternate external calculation)
  paw_dmft%ientropy =  0
- paw_dmft%u_for_s  =  dble(4.1)
- paw_dmft%j_for_s  =  half
+ paw_dmft%u_for_s  =  4.1_dp
+ paw_dmft%j_for_s  =  0.5_dp
  
 !=======================
 !==  Fixed self for input
@@ -967,7 +982,7 @@ subroutine init_sc_dmft(dtset,paw_dmft,dmatpawu,fnamei,fnametmp_app,gprimd,kg,mp
  paw_dmft%dmftctqmc_order  = dtset%dmftctqmc_order
  paw_dmft%dmftctqmc_config = dtset%dmftctqmc_config
 
- if (dmft_solv == 5 .or. dmft_solv == 8) then
+ if (dmft_solv == 5 .or. dmft_solv >= 8) then
    write(message,'(a,a,i6)') ch10,&
      & '=> Seed for CT-QMC inside DMFT is dmftqmc_seed=',paw_dmft%dmftqmc_seed
    call wrtout(std_out,message,'COLL')
@@ -1016,8 +1031,8 @@ subroutine init_sc_dmft(dtset,paw_dmft,dmatpawu,fnamei,fnametmp_app,gprimd,kg,mp
    ABI_ERROR(message)
  end if
  
- t2g    = (paw_dmft%dmft_t2g == 1)
- x2my2d = (paw_dmft%dmft_x2my2d == 1)
+ t2g    = paw_dmft%dmft_t2g == 1
+ x2my2d = paw_dmft%dmft_x2my2d == 1
  
  if ((t2g .or. x2my2d) .and. paw_dmft%dmft_dc == 8) then
    message = "dmft_dc=8 is not implemented for the cases t2g and x2my2d"
@@ -1092,7 +1107,7 @@ subroutine init_sc_dmft(dtset,paw_dmft,dmatpawu,fnamei,fnametmp_app,gprimd,kg,mp
      write(message,'(4x,a,i5,3a)') "File number",grid_unt," called ",trim(tmpfil)," does not exist"
      call wrtout(std_out,message,'COLL')
      message = "Cannot continue: the missing file coming from Maxent code is needed"
-     ABI_WARNING(message)
+     ABI_ERROR(message)
    end if ! not lexist
 
    if (iexist2 == 1) then
@@ -1196,10 +1211,17 @@ subroutine init_sc_dmft(dtset,paw_dmft,dmatpawu,fnamei,fnametmp_app,gprimd,kg,mp
  paw_dmft%int_meshsz => pawrad(:)%int_meshsz
 
  if (use_full_chipsi) then
-   if (mpi_enreg%nproc_fft > 1) ABI_ERROR("Case nproc_fft > 1 and dmft_use_full_chipsi=1 not handled")
+   if (mpi_enreg%nproc_fft > 1) then
+     message = "Case nproc_fft > 1 and dmft_use_full_chipsi=1 not handled"
+     ABI_ERROR(message)
+   end if
    ABI_MALLOC(paw_dmft%phimtphi,(maxval(pawrad(1:ntypat)%int_meshsz),paw_dmft%maxnproju,ntypat))
    ABI_MALLOC(paw_dmft%phimtphi_int,(paw_dmft%maxnproju,ntypat))
  else
+   if (paw_dmft%dmft_prtwan == 1) then
+     message = "Case dmft_prtwan=1 and dmft_use_full_chipsi=0 not handled"
+     ABI_ERROR(message)
+   end if
    ABI_MALLOC(paw_dmft%phi_int,(paw_dmft%maxnproju,ntypat))
  end if
 
@@ -1235,10 +1257,9 @@ subroutine init_sc_dmft(dtset,paw_dmft,dmatpawu,fnamei,fnametmp_app,gprimd,kg,mp
    nproju = pawtab(itypat)%nproju
    do iproj=1,nproju
      indproj = pawtab(itypat)%lnproju(iproj)
-     if (use_full_chipsi .or. paw_dmft%dmft_prtwan == 1) &
-       & paw_dmft%phimtphi(1:siz_paw,iproj,itypat) = pawtab(itypat)%phi(1:siz_paw,indproj)- &
-                                                   & pawtab(itypat)%tphi(1:siz_paw,indproj)
-     if (use_full_chipsi) then                                           
+     if (use_full_chipsi) then
+       paw_dmft%phimtphi(1:siz_paw,iproj,itypat) = pawtab(itypat)%phi(1:siz_paw,indproj)- &
+                                                 & pawtab(itypat)%tphi(1:siz_paw,indproj)
        call simp_gen(paw_dmft%phimtphi_int(iproj,itypat),pawtab(itypat)%proj(1:siz_proj)* &
             & paw_dmft%phimtphi(1:siz_proj,iproj,itypat),paw_dmft%radgrid(itypat),r_for_intg=rint)
      else
@@ -1300,7 +1321,6 @@ subroutine init_sc_dmft(dtset,paw_dmft,dmatpawu,fnamei,fnametmp_app,gprimd,kg,mp
        ndim   = 2*lpawu + 1
 
        if (.not. lcycle(lpawu+1)) then  ! if this l has not been visited
-         ! The indexes of ylm are reordered so that this can be accessed faster later
          if (t2g) then
            do im=1,ndim
              paw_dmft%ylm(1:npw,im,lpawu+1,ik) = ylm(ikg+1:ikg+npw,4+mt2g(im))
@@ -1542,7 +1562,7 @@ subroutine init_dmft(cryst_struc,fermie_dft,paw_dmft,ucrpa)
  !paw_dmft%dmftcheck=dtset%dmftcheck
 
  if (paw_dmft%dmftcheck == -1) then
-   message = ' init_dmft: dmftcheck=-1 should not happend here'
+   message = ' init_dmft: dmftcheck=-1 should not happen here'
    ABI_BUG(message)
  end if
 ! paw_dmft%dmft_log_freq=1 ! use logarithmic frequencies.
