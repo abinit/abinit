@@ -211,7 +211,7 @@ subroutine dmft_solve(cryst_struc,istep,dft_occup,mpi_enreg,paw_dmft,pawang,pawt
                                                                 
  if (paw_dmft%dmft_solv /= -1) then
    call chipsi_renormalization(paw_dmft,opt=opt_renorm)
-   if (myproc == 0) call chipsi_print(paw_dmft,pawtab(:),t2g,x2my2d)
+   if (myproc == 0) call chipsi_print(paw_dmft,pawtab(:))
    if (paw_dmft%dmft_prtwan == 1) then
      call compute_wannier(paw_dmft,mpi_enreg)
      if (myproc == 0) call print_wannier(paw_dmft,istep)
