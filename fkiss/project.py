@@ -1067,10 +1067,13 @@ class AbinitProject(NotebookWriter):
             magic = f"add_library({dirname} STATIC"
             start, stop = enclose(lines, magic, cmakelist_path)
             del lines[start+1:stop-1]
-            lines[start+1:start+1] = mod.sources
-            print("\n".join(lines))
+            lines[start+1:start+1] = [(3*" " + s) for s in mod.sources]
+            s = "\n".join(lines)
+            print(s)
+            #with open(cmakelist_path, "wt") as fh:
+            #    fh.write(s)
 
-            """
+
             # This section is optional!
             magic = f"target_link_libraries({dirname}"
             try:
@@ -1080,10 +1083,10 @@ class AbinitProject(NotebookWriter):
                 #print("\n".join(lines))
 
             except ValueError:
+                print(f"{dirname=} does not export libraries!")
                 pass
-                #print(f"{dirname=} does not export libraries!")
             """
-
+            """
 
     def touch_alldeps(self, verbose=0):
         """
