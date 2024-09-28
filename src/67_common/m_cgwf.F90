@@ -2656,12 +2656,6 @@ subroutine nscf_solve_kpt(nscf, isppol, kpt, istwf_k, nband_k, cryst, dtset, dtf
    call subdiago(cg_k, eig_k, evec, gsc_k, icg0, igsc0, istwf_k, mcg, mgsc, nband_k, npw_k, dtset%nspinor, paral_kgb0, &
                  subham, subovl, use_subovl0, gs_ham_k%usepaw, me_g0)
 
-   !do band=1,nband_k
-   !  !ii = band*(band-1)/2 + band
-   !  ii = band*(band-1) + band
-   !  eig_k(band) = subham(ii)
-   !end do
-
    ! Fix the phase of the wavefunctions.
    !call cgtk_fixphase(cg_k, gsc_k, icg0, igsc0, istwf_k, mcg, mgsc, mpi_enreg, nband_k, npw_k, dtset%usepaw)
 

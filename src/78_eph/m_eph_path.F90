@@ -51,12 +51,9 @@ module m_eph_path
  use m_pawrad,         only : pawrad_type
  use m_pawtab,         only : pawtab_type
  use m_pawfgr,         only : pawfgr_type
- !use m_phonons,       only : phstore_t, phstore_new
- !use m_pstat,         only : pstat_t
  use m_cgwf,           only : nscf_t
  use m_bz_mesh,        only : kpath_t, kpath_new
  use m_wfd,            only : u0_cache_t
- !use m_abi_linalg,     only : abi_linalg_init, abi_linalg_finalize
 
  implicit none
 
@@ -179,7 +176,6 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
    call qpath%print(units, header=sjoin("q-point path for g(k,q) with fixed k:", ktoa(dtset%eph_fix_wavevec)), prtvol=dtset%prtvol)
    fake_path(:,1) = dtset%eph_fix_wavevec; fake_path(:,2) = dtset%eph_fix_wavevec + one
    kpath = kpath_new(fake_path, cryst%gprimd, 0)
-   !kpath%points = zero
    nk_path = 1
 
  case ("q")
@@ -422,14 +418,9 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
  ! The cache allows one the reuse the wavefunctions of the previous k/q to init the NSCF cycle
  ! It usually reduces the number of iterations by 3-4 but it requires more memory.
  tot_nscf_ierr = 0
- use_cache = .True.
- use_cache = .False.
+ use_cache = .True. !; use_cache = .False.
  call ucache_k%init(use_cache .and. my_nkpath > 1, ngfft)
  call ucache_kq%init(use_cache .and. my_nqpath > 1, ngfft)
-
- !linalg_max_size = maxval(dtset%nband(:))
- !call abi_linalg_init(linalg_max_size, RUNL_GSTATE, dtset%wfoptalg, paral_kgb0,&
- !                     dtset%gpu_option, dtset%use_slk, dtset%np_slk, nscf%mpi_enreg%comm_bandspinorfft)
 
  ! Loop over spins (MPI parallelized)
  do my_is=1,my_nspins
@@ -472,7 +463,6 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
 
      ! Loop over q-points in q-path (MPI parallelized)
      ! All procs in pert_comm enter this loop with the same ik/iq indices.
-     ! FIXME: I don't know why but all_eigens_kq are not smooth as a function of q!
      do my_iq=1,my_nqpath
        iq = my_iq_inds(my_iq)
        qq = qpath%points(:,iq); qq_is_gamma = sum(qq**2) < tol14
@@ -481,7 +471,6 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
        ! Compute u_{m k+q}(g)
        call nscf%setup_kpt(spin, kq, istwfk_1, nband, cryst, dtset, psps, pawtab, pawfgr, &
                            npw_kq, kg_kq, kpg_kq, ph3d_kq, kinpw_kq, ffnl_kq, vlocal_kq, cg_kq, gsc_kq, gs_ham_kq)
-       !print *, "kq:", kq, "npw_kq", npw_kq
 
        ! cache.
        use_cg_kq = (my_iq > 1 .and. ucache_kq%use_cache)
@@ -543,7 +532,6 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
        ! Allocate vlocal1 with correct cplex. Note nvloc.
        ABI_MALLOC(vlocal1, (cplex*n4, n5, n6, gs_ham_kq%nvloc))
 
-#if 1
        !===== Load the k/k+q dependent parts of the Hamiltonian
        ! Load k-dependent part in the Hamiltonian datastructure
        call gs_ham_kq%load_k(kpt_k=kk, npw_k=npw_k, istwf_k=istwfk_1, kg_k=kg_k, kpg_k=kpg_k, &
@@ -597,7 +585,6 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
        if (pert_comm%nproc > 1) call xmpi_sum(gkq_atm, pert_comm%value, ierr)
 
        call ephtk_gkknu_from_atm(nb_in_g, nb_in_g, 1, natom, gkq_atm, phfreqs, displ_red, gkq_nu)
-#endif
 
        ! Write |g|^2 for this q.
        !if (pert_comm%me == master) then
@@ -650,50 +637,6 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
    end if
  end if
 
-
-#if 0
- call wrtout(std_out, "Recomputing q-points from scratch...")
- do my_iq=1,my_nqpath
-   iq = my_iq_inds(my_iq)
-   call wrtout(std_out, sjoin("iq:", itoa(iq)))
-   qq = qpath%points(:,iq); qq_is_gamma = sum(qq**2) < tol14
-   kq = kk + qq
-
-   ! Compute u_{m k+q}(g)
-   call nscf%setup_kpt(spin, kq, istwfk_1, nband, cryst, dtset, psps, pawtab, pawfgr, &
-                       npw_kq, kg_kq, kpg_kq, ph3d_kq, kinpw_kq, ffnl_kq, vlocal_kq, cg_kq, gsc_kq, gs_ham_kq)
-   !print *, "kq:", kq, "npw_kq", npw_kq
-
-   ! cache.
-   use_cg_kq = .False.
-   call nscf%solve_kpt(spin, kq, istwfk_1, nband, cryst, dtset, dtfil, gs_ham_kq, &
-                       use_cg_kq, npw_kq, cg_kq, gsc_kq, eig_kq, msg, ierr)
-
-   ABI_WARNING_IF(ierr /= 0, msg)
-
-   spin = 1
-   NCF_CHECK(nf90_put_var(ncid, vid("all_eigens_kq"), eig_kq, start=[1,iq,spin]))
-
-   ABI_SFREE(gs1c)
-   ABI_SFREE(ylm_kq)
-   ABI_SFREE(ylmgr_kq)
-   ABI_SFREE(vlocal1)
-   ABI_SFREE(v1scf)
-   ABI_SFREE(vlocal_kq)
-   ABI_SFREE(ph3d_kq)
-   ABI_SFREE(kpg_kq)
-   ABI_SFREE(kinpw_kq)
-   ABI_SFREE(ffnl_kq)
-   ABI_SFREE(kg_kq)
-   ABI_SFREE(eig_kq)
-   ABI_SFREE(cg_kq)
-   ABI_SFREE(gsc_kq)
-   ABI_SFREE(h1kets_kq)
-   call gs_ham_kq%free()
-end do
-#endif
-
-
  NCF_CHECK(nf90_close(ncid))
  call xmpi_barrier(comm)
 
@@ -719,25 +662,26 @@ end do
      do spin=1,nsppol
        call wrtout(units, sjoin(" Energies_kq in eV for spin:", itoa(spin)))
        do iq=1, nq_path
-         if (.not. any(iq /= [1, nq_path])) cycle
+         if (all(iq /= [1, nq_path])) cycle
          NCF_CHECK(nf90_get_var(ncid, vid("all_eigens_kq"), eig_kq, start=[1,iq,spin]))
          do ii=0,(nband-1)/8
-           write(msg, '(a, 8es10.2)' )' ene:',(eig_kq(band_m) * Ha_eV, band_m=1+ii*8,min(nband,8+ii*8))
+           write(msg, '(a, 8es16.6)' )' ene:',(eig_kq(band_m) * Ha_eV, band_m=1+ii*8,min(nband,8+ii*8))
            call wrtout(units, msg)
          end do
        end do
      end do
      ABI_FREE(eig_kq)
 
-   else ! (nk_path > 1)
+   else
+     ! (nk_path > 1)
      ABI_MALLOC(eig_k, (nband))
      do spin=1,nsppol
        call wrtout(units, sjoin(" Energies_k in eV for spin:", itoa(spin)))
        do ik=1, nk_path
          NCF_CHECK(nf90_get_var(ncid, vid("all_eigens_k"), eig_k, start=[1,ik,spin]))
-         if (.not. any(ik /= [1, nk_path])) cycle
+         if (all(ik /= [1, nk_path])) cycle
          do ii=0,(nband-1)/8
-           write(msg, '(a, 8es10.2)' )' ene:',(eig_k(band_n) * Ha_eV, band_n=1+ii*8,min(nband,8+ii*8))
+           write(msg, '(a, 8es16.6)' )' ene:',(eig_k(band_n) * Ha_eV, band_n=1+ii*8,min(nband,8+ii*8))
            call wrtout(units, msg)
          end do
        end do
@@ -752,9 +696,9 @@ end do
 
    do spin=1,nsppol
      do ik=1, nk_path
-       !if (.not. any(ik /= [1, nk_path])) cycle
+       if (all(ik /= [1, nk_path])) cycle
        do iq=1, nq_path
-         !if (.not. any(iq /= [1, nq_path])) cycle
+         if (all(iq /= [1, nq_path])) cycle
          NCF_CHECK(nf90_get_var(ncid, vid("gkq2_nu"), gkq2_nu, start=[1,1,1,iq,ik,spin]))
          !call epth_gkq2_nu_average(natom3, bstart, nb, phfreqs, eig_k, eig_kq, gkq2_nu)
          do nu=1,natom3
