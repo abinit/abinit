@@ -356,7 +356,9 @@ subroutine psolver_rhohxc(enhartr, enxc, envxc, icoulomb, ixc, &
 
 !  Add n_c here:
    if(n3xccc>0 .and. add_n_c_here) then
-     rhonow(1:nfft,1:nspden)=rhonow(1:nfft,1:nspden)+xccc3d(1:nfft)
+     do ispin=1,nspden
+       rhonow(:,ispin)=rhonow(:,ispin)+xccc3d(:)
+     end do
    end if
 !  Remove \hat{n} here:
    if(test_nhat .and. rest_hat_n_here) then
