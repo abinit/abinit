@@ -733,7 +733,7 @@ subroutine init_sc_dmft(dtset,paw_dmft,dmatpawu,fnamei,fnametmp_app,gprimd,kg,mp
  !paw_dmft%nspden      = nspden
  
  paw_dmft%dmft_read_occnd = dtset%dmft_read_occnd
- 
+
  ABI_MALLOC(paw_dmft%occnd,(2,mband,mband,nkpt,nsppol*use_dmft))
  ABI_MALLOC(paw_dmft%band_in,(mband*use_dmft))
  ABI_MALLOC(paw_dmft%include_bands,((dmftbandf-dmftbandi+1)*use_dmft))
@@ -1140,7 +1140,7 @@ subroutine init_sc_dmft(dtset,paw_dmft,dmatpawu,fnamei,fnametmp_app,gprimd,kg,mp
 ! Imaginary frequencies
 !=======================
 ! Set up log frequencies
- if (dtset%ucrpa == 0) call construct_nwlo_dmft(paw_dmft)
+ if (dtset%ucrpa == 0 .and. paw_dmft%dmft_nwlo > 0) call construct_nwlo_dmft(paw_dmft)
 
  if (paw_dmft%dmftcheck == 1 .and. dmft_solv < 4) paw_dmft%dmftqmc_l = 64
 
@@ -2067,15 +2067,10 @@ subroutine construct_nwlo_dmft(paw_dmft)
   ABI_FREE(omega_li)
   ABI_MALLOC(paw_dmft%omega_lo,(nwlo)) 
   ABI_MALLOC(paw_dmft%wgt_wlo,(nwlo))
-  write(*,*) "Debug_1",nwlo,size(omega_lo_tmp),size(wgt_wlo)
   paw_dmft%omega_lo(1:nwlo) = omega_lo_tmp(1:nwlo)
-  write(*,*) "Debug_2"
   paw_dmft%wgt_wlo(1:nwlo) = wgt_wlo(1:nwlo)
-  write(*,*) "Debug_3"
   ABI_FREE(omega_lo_tmp)
-  write(*,*) "Debug_4"
   ABI_FREE(wgt_wlo)
-  write(*,*) "Debug_5"
 
 !=========================================================
 !== do not construct log. freq. and use linear frequencies

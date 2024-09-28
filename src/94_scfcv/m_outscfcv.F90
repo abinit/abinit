@@ -1190,7 +1190,7 @@ if (dtset%prt_lorbmag==1) then
 
       ! Read self energy on real axis obtained from Maxent
        call rw_self(selfr,paw_dmft,prtopt=5,opt_rw=1,opt_imagonly=opt_imagonly, &
-     & opt_selflimit=opt_selflimit(:),opt_hdc=self%hdc%matlu(:),pawang=pawang,cryst_struc=crystal)
+     & opt_selflimit=opt_selflimit(:),opt_hdc=self%hdc%matlu(:),opt_maxent=1)
 
       ! Check: from self on real axis, recompute self on Imaginary axis.
        call selfreal2imag_self(selfr,self,paw_dmft%filapp,paw_dmft)

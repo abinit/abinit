@@ -1021,15 +1021,16 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 !  2-Initialize and compute data for DFT+U, EXX, or DFT+DMFT
    call pawpuxinit(dtset%dmatpuopt,dtset%exchmix,dtset%f4of2_sla,dtset%f6of2_sla,&
 &     is_dfpt,args_gs%jpawu,dtset%lexexch,dtset%lpawu,dtset%nspinor,dtset%ntypat,dtset%optdcmagpawu,pawang,dtset%pawprtvol,&
-&     pawrad,pawtab,args_gs%upawu,dtset%usedmft,dtset%useexexch,dtset%usepawu,ucrpa=dtset%ucrpa)
+&     pawrad,pawtab,args_gs%upawu,dtset%usedmft,dtset%useexexch,dtset%usepawu,ucrpa=dtset%ucrpa,dmft_proj=dtset%dmft_proj(:),&
+&     dmft_dc=dtset%dmft_dc)
 
    ! DEBUG:
    !if (me == master) call pawtab_print(Pawtab)
  end if
 
-call init_sc_dmft(dtset,paw_dmft,args_gs%dmatpawu(:,:,:,:),dtfil%filname_ds(3),dtfil%fnameabo_app,gprimd(:,:),kg(:,:),mpi_enreg, &
+call init_sc_dmft(dtset,paw_dmft,args_gs%dmatpawu(:,:,:,:),dtfil%filnam_ds(3),dtfil%fnameabo_app,gprimd(:,:),kg(:,:),mpi_enreg, &
                 & npwarr(:),occ(:),pawang,pawrad(:),pawtab(:),rprimd(:,:),ucvol,dtfil%unpaw,use_sc_dmft,xred(:,:),ylm(:,:))
-if (paw_dmft%use_dmft == 1 .and. me == 0) call readocc_dmft(paw_dmft,dtfil%filname_ds(3),dtfil%filname_ds(4))
+if (paw_dmft%use_dmft == 1 .and. me == 0) call readocc_dmft(paw_dmft,dtfil%filnam_ds(3),dtfil%filnam_ds(4))
 if (paw_dmft%use_dmft == 1) call print_sc_dmft(paw_dmft,dtset%pawprtvol)
 
 !###########################################################
