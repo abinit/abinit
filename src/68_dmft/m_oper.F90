@@ -180,9 +180,9 @@ subroutine init_oper(paw_dmft,oper,nkpt,wtk,shiftk,opt_ksloc)
 
 ! allocate(oper%wtk(oper%nkpt))
  if (present(wtk)) then
-   oper%wtk => wtk
+   oper%wtk => wtk(:)
  else
-   oper%wtk => paw_dmft%wtk
+   oper%wtk => paw_dmft%wtk(:)
  end if ! present(wtk)
  
 ! ===================
