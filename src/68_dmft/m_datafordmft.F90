@@ -160,7 +160,7 @@ subroutine datafordmft(cg,cprj,cryst_struc,dft_occup,dimcprj,dtset,eigen,mband_c
  nsppol  = paw_dmft%nsppol
  nsppol_mem = sum(mpi_enreg%my_isppoltab(1:nsppol)) 
  pawprtvol  = dtset%pawprtvol
- prt_wan    = (paw_dmft%dmft_prtwan == 1)
+ prt_wan    = paw_dmft%dmft_prtwan == 1
  
  if (abs(pawprtvol) >= 3) then
    write(message,*) " number of k-points used is nkpt=nkpt ",nkpt
@@ -217,11 +217,11 @@ subroutine datafordmft(cg,cprj,cryst_struc,dft_occup,dimcprj,dtset,eigen,mband_c
  nbandf = paw_dmft%dmftbandf
  !lprojchi=.false.
  !lprojchi = .true.
- t2g    = (paw_dmft%dmft_t2g == 1)
- x2my2d = (paw_dmft%dmft_x2my2d == 1)
- use_full_chipsi = (paw_dmft%dmft_use_full_chipsi == 1)
+ t2g    = paw_dmft%dmft_t2g == 1
+ x2my2d = paw_dmft%dmft_x2my2d == 1
+ use_full_chipsi = paw_dmft%dmft_use_full_chipsi == 1
 
- if ((use_full_chipsi) .and. mpi_enreg%nproc_fft > 1) then
+ if (use_full_chipsi .and. mpi_enreg%nproc_fft > 1) then
    message = "datafordmft not working when nproc_fft > 1 and either use_full_chipsi or prt_wan"
    ABI_ERROR(message)
  end if
@@ -1386,7 +1386,7 @@ subroutine chipsi_renormalization(paw_dmft,opt)
  real(dp) :: pawprtvol
  type(oper_type) :: norm,oper_temp
  character(len=500) :: message
- real(dp), pointer :: wtk_tmp(:) => null()
+ real(dp), allocatable :: wtk_tmp(:) 
 !arrays
 ! real(dp),allocatable :: e0pde(:,:,:),omegame0i(:)
 !************************************************************************
@@ -1484,10 +1484,10 @@ subroutine chipsi_renormalization(paw_dmft,opt)
 
 !== Build identity for norm%ks (option=1)
  !call identity_oper(norm,1)
- ABI_MALLOC(wtk_tmp,(nkpt))
 !== Deduce norm%matlu from norm%ks with new psichi
  if (paw_dmft%dmft_kspectralfunc == 1) then
    !call identity_oper(oper_temp,2)
+   ABI_MALLOC(wtk_tmp,(nkpt))
    wtk_tmp(:) = one
    call init_oper(paw_dmft,norm,nkpt=1,wtk=wtk_tmp,opt_ksloc=2)
    do jkpt=1,nkpt  ! jkpt
@@ -1502,6 +1502,7 @@ subroutine chipsi_renormalization(paw_dmft,opt)
      call diff_matlu('Overlap after renormalization','Identity',&
        & norm%matlu(:),oper_temp%matlu(:),natom,1,tol6,zero_or_one=1)
    end do ! jkpt
+   ABI_FREE(wtk_tmp)
    !call destroy_oper(oper_temp)
  else !dmft_kspectralfunc
    write(message,'(2a)') ch10,'  ===== Calling loc_oper'
@@ -1541,9 +1542,6 @@ subroutine chipsi_renormalization(paw_dmft,opt)
 
  call destroy_oper(norm)
  call destroy_oper(oper_temp)
-
- ABI_FREE(wtk_tmp)
- wtk_tmp => null()
 
  paw_dmft%lchipsiortho = 1
 

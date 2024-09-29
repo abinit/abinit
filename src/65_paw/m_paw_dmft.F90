@@ -1211,10 +1211,6 @@ subroutine init_sc_dmft(dtset,paw_dmft,dmatpawu,fnamei,fnametmp_app,gprimd,kg,mp
  paw_dmft%int_meshsz => pawrad(:)%int_meshsz
 
  if (use_full_chipsi) then
-   if (mpi_enreg%nproc_fft > 1) then
-     message = "Case nproc_fft > 1 and dmft_use_full_chipsi=1 not handled"
-     ABI_ERROR(message)
-   end if
    ABI_MALLOC(paw_dmft%phimtphi,(maxval(pawrad(1:ntypat)%int_meshsz),paw_dmft%maxnproju,ntypat))
    ABI_MALLOC(paw_dmft%phimtphi_int,(paw_dmft%maxnproju,ntypat))
  else

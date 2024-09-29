@@ -148,7 +148,7 @@ subroutine init_oper(paw_dmft,oper,nkpt,wtk,shiftk,opt_ksloc)
  type(paw_dmft_type), intent(in) :: paw_dmft
  type(oper_type), intent(inout) :: oper
 !arrays
- real(dp), pointer, optional :: wtk(:)
+ real(dp), target, optional :: wtk(:)
 !oper variables ------------------------------------
  integer :: optksloc
 !************************************************************************
