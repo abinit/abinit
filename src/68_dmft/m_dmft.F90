@@ -209,7 +209,7 @@ subroutine dmft_solve(cryst_struc,istep,dft_occup,mpi_enreg,paw_dmft,pawang,pawt
    call xmpi_matlu(loc_levels%matlu(:),natom,paw_dmft%distrib%comm_kpt)
  end if ! dmft_solv>=5
                                                                 
- if (paw_dmft%dmft_solv /= -2) then
+ if (paw_dmft%dmft_solv /= -1) then
    call chipsi_renormalization(paw_dmft,opt=opt_renorm)
    if (myproc == 0) call chipsi_print(paw_dmft,pawtab(:))
    if (paw_dmft%dmft_prtwan == 1) then
