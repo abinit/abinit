@@ -148,7 +148,7 @@ subroutine init_oper(paw_dmft,oper,nkpt,wtk,shiftk,opt_ksloc)
  type(paw_dmft_type), intent(in) :: paw_dmft
  type(oper_type), intent(inout) :: oper
 !arrays
- real(dp), target, optional :: wtk(:)
+ real(dp), pointer, optional :: wtk(:)
 !oper variables ------------------------------------
  integer :: optksloc
 !************************************************************************
@@ -180,9 +180,9 @@ subroutine init_oper(paw_dmft,oper,nkpt,wtk,shiftk,opt_ksloc)
 
 ! allocate(oper%wtk(oper%nkpt))
  if (present(wtk)) then
-   oper%wtk => wtk(:)
+   oper%wtk => wtk
  else
-   oper%wtk => paw_dmft%wtk(:)
+   oper%wtk => paw_dmft%wtk
  end if ! present(wtk)
  
 ! ===================
@@ -1634,7 +1634,7 @@ subroutine gather_oper_ks(oper,distrib,paw_dmft,opt_diag)
      end do ! ib1
    end do ! ikpt
    
-   call xmpi_sum(buffer(:),distrib%comm_freq,ierr)   
+   call xmpi_sum(buffer(:),distrib%comm_freq,ierr)
    
    call xmpi_allgatherv(buffer(:),recvcounts(myproc+1),&
       & buffer_tot(:),recvcounts(:),displs(:),distrib%comm_kpt,ierr)

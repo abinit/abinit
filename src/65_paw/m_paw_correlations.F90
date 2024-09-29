@@ -808,6 +808,8 @@ CONTAINS  !=====================================================================
             
        write(message,*) "Build DMFT orbital for atom type",itypat
        call wrtout(std_out,message,"COLL")
+       if (allocated(pawtab(itypat)%proj)) ABI_FREE(pawtab(itypat)%proj)
+       if (allocated(pawtab(itypat)%proj2)) ABI_FREE(pawtab(itypat)%proj2)
        if (dmft_proj(itypat) > 0) then   ! read phi from PAW dataset 
          write(message,*) "Taking atomic wavefunction",dmft_proj(itypat),"from PAW dataset"
          call wrtout(std_out,message,"COLL")

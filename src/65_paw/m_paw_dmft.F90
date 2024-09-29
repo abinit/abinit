@@ -2674,7 +2674,7 @@ subroutine init_paral_dmft(paw_dmft,distrib,nfreq)
      if (irank < residu) nkpt_proc = nkpt_proc + 1
      distrib%nkpt_mem(irank) = nkpt_proc
      distrib%procb(ikpt:ikpt+nkpt_proc-1) = irank
-     distrib%shiftk = ikpt - 1
+     if (myproc == irank) distrib%shiftk = ikpt - 1
      ikpt = ikpt + nkpt_proc
    end do ! irank
 

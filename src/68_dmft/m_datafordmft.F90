@@ -1386,7 +1386,7 @@ subroutine chipsi_renormalization(paw_dmft,opt)
  real(dp) :: pawprtvol
  type(oper_type) :: norm,oper_temp
  character(len=500) :: message
- real(dp), allocatable :: wtk_tmp(:)
+ real(dp), pointer :: wtk_tmp(:) => null()
 !arrays
 ! real(dp),allocatable :: e0pde(:,:,:),omegame0i(:)
 !************************************************************************
@@ -1489,7 +1489,7 @@ subroutine chipsi_renormalization(paw_dmft,opt)
  if (paw_dmft%dmft_kspectralfunc == 1) then
    !call identity_oper(oper_temp,2)
    wtk_tmp(:) = one
-   call init_oper(paw_dmft,norm,nkpt=1,wtk=wtk_tmp(:),opt_ksloc=2)
+   call init_oper(paw_dmft,norm,nkpt=1,wtk=wtk_tmp,opt_ksloc=2)
    do jkpt=1,nkpt  ! jkpt
      norm%shiftk = jkpt - 1
      call downfold_oper(norm,paw_dmft,option=2)
@@ -1543,6 +1543,7 @@ subroutine chipsi_renormalization(paw_dmft,opt)
  call destroy_oper(oper_temp)
 
  ABI_FREE(wtk_tmp)
+ wtk_tmp => null()
 
  paw_dmft%lchipsiortho = 1
 

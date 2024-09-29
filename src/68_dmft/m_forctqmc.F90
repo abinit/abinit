@@ -44,7 +44,7 @@ MODULE m_forctqmc
     & rotatevee_hu,vee_type,vee_ndim2tndim_hu_r
  use m_io_tools, only : flush_unit,open_file
  use m_matlu, only : add_matlu,checkreal_matlu,chi_matlu,copy_matlu,destroy_matlu,diag_matlu,diff_matlu, &
-     & fac_matlu,gather_matlu,init_matlu,matlu_type,magmomforb_matlu,magmomfspin_matlu, &
+     & fac_matlu,gather_matlu,identity_matlu,init_matlu,matlu_type,magmomforb_matlu,magmomfspin_matlu, &
      & magmomfzeeman_matlu,print_matlu,printplot_matlu,prod_matlu,rotate_matlu,shift_matlu,&
      & slm2ylm_matlu,sym_matlu,xmpi_matlu,zero_matlu
  use m_oper, only : destroy_oper,gather_oper,init_oper,inverse_oper,oper_type
@@ -3307,8 +3307,8 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,weiss,energy_level,udens,vee)
    ABI_MALLOC(wdlr_tmp,(wdlr_size))
    ndlr_ptr = C_LOC(ndlr)
    wdlr_ptr = C_LOC(wdlr_tmp)
-   call build_dlr(wdlr_size,ndlr_ptr,wdlr_ptr,paw_dmft%dmftctqmc_triqs_lambda, &
-      & paw_dmft%dmftctqmc_triqs_epsilon)
+   !call build_dlr(wdlr_size,ndlr_ptr,wdlr_ptr,paw_dmft%dmftctqmc_triqs_lambda, &
+   !   & paw_dmft%dmftctqmc_triqs_epsilon)
    ABI_MALLOC(wdlr,(ndlr))
    ABI_MALLOC(wdlr_beta,(ndlr))
    ABI_MALLOC(wdlr2,(ndlr))
@@ -3354,7 +3354,7 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,weiss,energy_level,udens,vee)
    
    ! Calculation of Gauss-Legendre grid (on [-1,1]) of size N, only the zeros of [1...0] are returned, so the symmetric points
    ! on [0...-1] are added afterwards
-   call grule(ngauss,tpoints(:),tweights(:))
+   !call grule(ngauss,tpoints(:),tweights(:))
    
    ! Fill the symmetric t-points on [-1,0]
    do i=1,ngauss/2  ! valid in both cases N odd and N even
@@ -3429,21 +3429,21 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,weiss,energy_level,udens,vee)
      iilam = ilam
      if (ilam == ntot) iilam = 0
  
-     call Ctqmc_triqs_run(rot_inv,leg_measure,off_diag,paw_dmft%dmftctqmc_triqs_move_shift, &
-        & paw_dmft%dmftctqmc_triqs_move_double,density_matrix_measure, &
-        & paw_dmft%dmftctqmc_triqs_time_invariance,paw_dmft%dmftctqmc_triqs_use_norm_as_weight, &
-        & paw_dmft%dmftctqmc_triqs_loc_n_min,paw_dmft%dmftctqmc_triqs_loc_n_max, &
-        & paw_dmft%dmftctqmc_triqs_seed_a,paw_dmft%dmftctqmc_triqs_seed_b,nflavor,ntau, &
-        & nleg,int(paw_dmft%dmftqmc_n/paw_dmft%nproc),paw_dmft%dmftctqmc_meas, &
-        & paw_dmft%dmftqmc_therm,paw_dmft%dmftctqmc_triqs_therm, &
-        & paw_dmft%dmftctqmc_triqs_det_init_size, &
-        & paw_dmft%dmftctqmc_triqs_det_n_operations_before_check,ntau_delta, &
-        & paw_dmft%dmftctqmc_triqs_nbins_histo,paw_dmft%myproc,nspinor,iatom,iilam,beta, &
-        & paw_dmft%dmftctqmc_triqs_move_global_prob,paw_dmft%dmftctqmc_triqs_imag_threshold, &
-        & paw_dmft%dmftctqmc_triqs_det_precision_warning, &
-        & paw_dmft%dmftctqmc_triqs_det_precision_error, &
-        & paw_dmft%dmftctqmc_triqs_det_singular_threshold,lam_list(ilam),ftau_ptr,gtau_ptr,gl_ptr,udens_ptr, &
-        & vee_ptr,levels_ptr,mself_1_ptr,mself_2_ptr,Eu_ptr,occ_ptr)
+    ! call Ctqmc_triqs_run(rot_inv,leg_measure,off_diag,paw_dmft%dmftctqmc_triqs_move_shift, &
+    !    & paw_dmft%dmftctqmc_triqs_move_double,density_matrix_measure, &
+    !    & paw_dmft%dmftctqmc_triqs_time_invariance,paw_dmft%dmftctqmc_triqs_use_norm_as_weight, &
+    !    & paw_dmft%dmftctqmc_triqs_loc_n_min,paw_dmft%dmftctqmc_triqs_loc_n_max, &
+    !    & paw_dmft%dmftctqmc_triqs_seed_a,paw_dmft%dmftctqmc_triqs_seed_b,nflavor,ntau, &
+    !    & nleg,int(paw_dmft%dmftqmc_n/paw_dmft%nproc),paw_dmft%dmftctqmc_meas, &
+    !    & paw_dmft%dmftqmc_therm,paw_dmft%dmftctqmc_triqs_therm, &
+    !    & paw_dmft%dmftctqmc_triqs_det_init_size, &
+    !    & paw_dmft%dmftctqmc_triqs_det_n_operations_before_check,ntau_delta, &
+    !    & paw_dmft%dmftctqmc_triqs_nbins_histo,paw_dmft%myproc,nspinor,iatom,iilam,beta, &
+    !    & paw_dmft%dmftctqmc_triqs_move_global_prob,paw_dmft%dmftctqmc_triqs_imag_threshold, &
+    !    & paw_dmft%dmftctqmc_triqs_det_precision_warning, &
+    !    & paw_dmft%dmftctqmc_triqs_det_precision_error, &
+    !    & paw_dmft%dmftctqmc_triqs_det_singular_threshold,lam_list(ilam),ftau_ptr,gtau_ptr,gl_ptr,udens_ptr, &
+    !    & vee_ptr,levels_ptr,mself_1_ptr,mself_2_ptr,Eu_ptr,occ_ptr)
         
      if (paw_dmft%dmft_integral == 1 .and. ilam < ntot) then
        i = mod(ilam,ngauss)
@@ -3858,9 +3858,9 @@ subroutine fit_dlr(m,n,fun,con,jac,jac_con,x)
 
  do i=1,maxiter
 
-   call slsqp(m,meq,la,n,x(:),xl(:),xu(:),f,c(:),g(:),a(:,:),acc,iter,mode,w(:),l_w, &
-            & jw(:),l_jw,alpha,f0,gs,h1,h2,h3,h4,t,t0,tol,iexact,incons,ireset,itermx, &
-            & line,n1,n2,n3)
+  ! call slsqp(m,meq,la,n,x(:),xl(:),xu(:),f,c(:),g(:),a(:,:),acc,iter,mode,w(:),l_w, &
+  !          & jw(:),l_jw,alpha,f0,gs,h1,h2,h3,h4,t,t0,tol,iexact,incons,ireset,itermx, &
+  !          & line,n1,n2,n3)
 
    if (abs(mode) /= 1) exit
    if (mode == -1) then
