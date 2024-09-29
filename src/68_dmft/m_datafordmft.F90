@@ -1489,7 +1489,7 @@ subroutine chipsi_renormalization(paw_dmft,opt)
    !call identity_oper(oper_temp,2)
    ABI_MALLOC(wtk_tmp,(nkpt))
    wtk_tmp(:) = one
-   call init_oper(paw_dmft,norm,nkpt=1,wtk=wtk_tmp,opt_ksloc=2)
+   call init_oper(paw_dmft,norm,nkpt=1,wtk=wtk_tmp(:),opt_ksloc=2)
    do jkpt=1,nkpt  ! jkpt
      norm%shiftk = jkpt - 1
      call downfold_oper(norm,paw_dmft,option=2)
