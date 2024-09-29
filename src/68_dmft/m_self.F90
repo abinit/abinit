@@ -1191,7 +1191,7 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
 !       write(std_out,*) "before",self%oper(1)%matlu(1)%mat(1,1,1,1,1)
 !       write(std_out,*) "before",self%hdc%matlu(1)%mat(1,1,1,1,1)
        call copy_matlu(self%hdc%matlu(:),self%oper(ifreq)%matlu(:),natom)
-       if (nspinor == 1 .and. nsppol == 2) then
+       if (nspinor == 1 .and. nsppol == 2 .and. paw_dmft%dmft_dc >= 5) then
          do iatom=1,natom
            lpawu = paw_dmft%lpawu(iatom)
            if (lpawu == -1) cycle

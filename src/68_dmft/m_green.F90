@@ -1174,7 +1174,7 @@ subroutine compute_green(green,paw_dmft,prtopt,self,opt_self,opt_nonxsum,opt_non
    nmoments = green%nmoments
    call compute_moments_ks(green,self,paw_dmft,opt_self=optself,opt_log=optlog, &
       & opt_quick_restart=opt_quick_restart)
-   if (paw_dmft%lchipsiortho == 1) then
+   if (paw_dmft%lchipsiortho == 1 .or. optself == 1) then
      call downfold_oper(green%moments(1),paw_dmft,option=2)
      do i=2,green%nmoments
        call downfold_oper(green%moments(i),paw_dmft,option=option)
@@ -1191,7 +1191,7 @@ subroutine compute_green(green,paw_dmft,prtopt,self,opt_self,opt_nonxsum,opt_non
  mkmem = green%distrib%nkpt_mem(myproc)
  shift_green = shift
  if (green%oper(1)%has_operks == 0) shift_green = 0
-  
+
  do ifreq=1,green%nw
    !if(present(iii)) write(6,*) ch10,'ifreq  self', ifreq,self%oper(ifreq)%matlu(1)%mat(1,1,1,1,1)
 !   ====================================================
@@ -1412,7 +1412,7 @@ subroutine compute_green(green,paw_dmft,prtopt,self,opt_self,opt_nonxsum,opt_non
    !write(message,'(2a)') ch10,' loc'
    !call wrtout(std_out,message,'COLL')
    !call flush(std_out)
-   if (paw_dmft%lchipsiortho == 1) then
+   if (paw_dmft%lchipsiortho == 1 .or. optself == 1) then
      call downfold_oper(green%oper(ifreq),paw_dmft,procb=green%distrib%procb(:),iproc=me_kpt,option=option)
     !if(ifreq==1) then
     !  write(std_out,*) "4411",green_temp%matlu(1)%mat(4,4,1,1,1)
@@ -1515,7 +1515,7 @@ subroutine compute_green(green,paw_dmft,prtopt,self,opt_self,opt_nonxsum,opt_non
       !do iatom=1,green%oper(ifreq)%natom
       ! if(green%oper(ifreq)%matlu(iatom)%lpawu.ne.-1) then
          !call xmpi_sum(green%oper(ifreq)%matlu(iatom)%mat,spacecomm,ierr)
-   if (paw_dmft%lchipsiortho == 1) &
+   if (paw_dmft%lchipsiortho == 1 .or. optself == 1) &
      & call gather_oper(green%oper(:),green%distrib,paw_dmft,opt_ksloc=2,opt_commkpt=1)
      !  endif
      !enddo ! iatom
@@ -1600,7 +1600,7 @@ subroutine integrate_green(green,paw_dmft,prtopt,opt_ksloc,opt_after_solver,opt_
 !Arguments ------------------------------------
 !type
  !type(crystal_t),intent(in) :: cryst_struc
- type(green_type),intent(inout) :: green
+ type(green_type), intent(inout) :: green
  !type(MPI_type), intent(in) :: mpi_enreg
  !type(pawang_type),intent(in) :: pawang
  type(paw_dmft_type), intent(inout) :: paw_dmft
@@ -1608,10 +1608,10 @@ subroutine integrate_green(green,paw_dmft,prtopt,opt_ksloc,opt_after_solver,opt_
  integer, optional, intent(in) :: opt_after_solver,opt_diff,opt_fill_occnd,opt_ksloc,opt_self
  !integer, optional, intent(in) :: opt_nonxsum
 !local variables-------------------------------
- integer :: band_index,correction,i,iatom,ib,ib1,icomp_chloc,ifreq,ikpt,im,isppol
+ integer :: band_index,i,iatom,ib,ib1,icomp_chloc,ifreq,ikpt,im,isppol
  integer :: lpawu,mbandc,myproc,natom,nband_k,ndim,nkpt,nmoments,nspinor
  integer :: nsppol,optaftsolv,optfilloccnd,option,optksloc,optself
- real(dp) :: diff_chloc,fac
+ real(dp) :: correction,diff_chloc,fac
  complex(dpc) :: omega
  character(len=500) :: message
  real(dp) :: tsec(2)
@@ -1651,7 +1651,6 @@ subroutine integrate_green(green,paw_dmft,prtopt,opt_ksloc,opt_after_solver,opt_
  !spacecomm=paw_dmft%spacecomm
  myproc = paw_dmft%myproc
  !nproc=paw_dmft%nproc
-
 
 ! Initialise integers
  !mband   = paw_dmft%mband
@@ -2036,6 +2035,7 @@ subroutine integrate_green(green,paw_dmft,prtopt,opt_ksloc,opt_after_solver,opt_
 !  - Compute trace over ks density matrix
    call trace_oper(green%occup,green%charge_ks,green%charge_matlu(:,:),1)
    if (paw_dmft%dmft_use_all_bands) then
+
      band_index = 0
      correction = zero
      do isppol=1,nsppol
@@ -2043,7 +2043,7 @@ subroutine integrate_green(green,paw_dmft,prtopt,opt_ksloc,opt_after_solver,opt_
          nband_k = paw_dmft%nband(ikpt+(isppol-1)*nkpt)
          do ib=1,nband_k
            if (paw_dmft%band_in(ib)) cycle
-           correction = correction +  & 
+           correction = correction + & 
              & occup_fd(paw_dmft%eigen(ib+band_index),paw_dmft%fermie,paw_dmft%temp)*green%occup%wtk(ikpt)
          end do ! ib
          band_index = band_index + nband_k
@@ -2176,7 +2176,7 @@ subroutine icip_green(char1,green,paw_dmft,pawprtvol,self,opt_self,opt_moments,o
 
  optmoments = 0
  if (present(opt_moments)) optmoments = opt_moments
- 
+
  call init_green(green,paw_dmft,opt_moments=optmoments)
 
 ! useless test ok
@@ -2457,10 +2457,10 @@ subroutine fourier_green(cryst_struc,green,paw_dmft,pawang,opt_ksloc,opt_tw)
      iparal=0
      do iatom=1, natom
 !  put to zero (usefull at least for parallelism)
-       do ifreq=1,green%nw
-         green%oper(ifreq)%matlu(iatom)%mat=czero
-       enddo
        if(green%oper(1)%matlu(iatom)%lpawu.ne.-1) then
+         do ifreq=1,green%nw
+           green%oper(ifreq)%matlu(iatom)%mat=czero
+         enddo
          ndim=2*green%oper(1)%matlu(iatom)%lpawu+1
          do is = 1 , nsppol
            do ispinor = 1, nspinor
@@ -2488,6 +2488,7 @@ subroutine fourier_green(cryst_struc,green,paw_dmft,pawang,opt_ksloc,opt_tw)
      enddo ! iatom
      call xmpi_barrier(spacecomm)
      do iatom=1,natom
+       if (green%oper(1)%matlu(iatom)%lpawu==-1) cycle
        do ifreq=1,green%nw
        call xmpi_sum(green%oper(ifreq)%matlu(iatom)%mat,spacecomm,ierr)
        enddo
