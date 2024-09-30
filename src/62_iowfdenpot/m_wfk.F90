@@ -5774,7 +5774,7 @@ subroutine wfk_check_symtab(in_wfkpath, comm)
 !scalars
  integer,parameter :: formeig0 = 0, master = 0, kptopt1 = 1
  integer :: spin, nband_k, mpw, mband, nspinor, ik_ibz, ik_bz !, ierr, ikf
- integer :: nsppol, iomode, npw_kf, npw_ki, istwf_kf, istwf_ki, ii, my_rank, ebands_timrev, nkibz, nkbz
+ integer :: nsppol, iomode, npw_kf, npw_ki, istwf_kf, istwf_ki, ii, my_rank, nkibz, nkbz
  integer :: isym_k, trev_k, g0_k(3)
  logical :: isirr_k
  character(len=500) :: msg
@@ -5810,10 +5810,8 @@ subroutine wfk_check_symtab(in_wfkpath, comm)
  mband = wfk%mband; nsppol = wfk%nsppol; nspinor = wfk%nspinor
 
  cryst = wfk%hdr%get_crystal()
- ebands_timrev = kpts_timrev_from_kptopt(kptopt1)
- !ebands_timrev = kpts_timrev_from_kptopt(ks_ebands%kptopt)
 
- ! Get IBZ with kptopt1
+ ! Get IBZ with kptopt1 ! ks_ebands%kptopt
  call kpts_ibz_from_kptrlatt(cryst, ks_ebands%kptrlatt, kptopt1, ks_ebands%nshiftk, ks_ebands%shiftk, &
                              nkibz, kibz, wtk, nkbz, kbz) !, bz2ibz=bz2ibz)
 
@@ -5824,7 +5822,7 @@ subroutine wfk_check_symtab(in_wfkpath, comm)
  ! Build symmetry tables using the two conventions.
 
  ABI_MALLOC(symrec_kbz2ibz, (6, nkbz))
- if (kpts_map("symrec", ebands_timrev, cryst, krank_ibz, nkbz, kbz, symrec_kbz2ibz) /= 0) then
+ if (kpts_map("symrec", kptopt1, cryst, krank_ibz, nkbz, kbz, symrec_kbz2ibz) /= 0) then
    ABI_ERROR("Cannot map kBZ to IBZ!")
  end if
  ! Index of IBZ k-point in the full BZ (used to access IBZ in the WFK)
@@ -5840,7 +5838,7 @@ subroutine wfk_check_symtab(in_wfkpath, comm)
  end do
 
  ABI_MALLOC(symrel_kbz2ibz, (6, nkbz))
- if (kpts_map("symrel", ebands_timrev, cryst, krank_ibz, nkbz, kbz, symrel_kbz2ibz) /= 0) then
+ if (kpts_map("symrel", kptopt1, cryst, krank_ibz, nkbz, kbz, symrel_kbz2ibz) /= 0) then
    ABI_ERROR("Cannot map kBZ to IBZ!")
  end if
  ! Index of IBZ k-point in the full BZ (used to access IBZ in the WFK)

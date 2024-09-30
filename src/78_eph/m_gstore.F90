@@ -605,7 +605,7 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
 !scalars
  integer,parameter :: master = 0
  integer :: all_nproc, my_rank, ierr, my_nshiftq, nsppol, spin, natom3, cnt, qtimrev, with_cplex
- integer :: ik_ibz, ik_bz, iq_bz, iq_ibz, ebands_timrev, max_nq, max_nk, ncid, spin_ncid, ncerr, gstore_fform
+ integer :: ik_ibz, ik_bz, iq_bz, iq_ibz, max_nq, max_nk, ncid, spin_ncid, ncerr, gstore_fform
  integer :: my_is, my_ik, my_iq, nq
  logical :: keep_umats, has_abiwan, has_gwan, write_gstore
  real(dp) :: cpu, wall, gflops, weight_qq, gstore_fill_dp
@@ -715,7 +715,7 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
  ABI_MALLOC(qbz2ibz, (6, gstore%nqbz))
  gstore%qrank_ibz = krank_from_kptrlatt(gstore%nqibz, gstore%qibz, qptrlatt, compute_invrank=.False.)
 
- if (kpts_map("symrec", qtimrev, cryst, gstore%qrank_ibz, gstore%nqbz, qbz, qbz2ibz) /= 0) then
+ if (kpts_map("symrec", gstore%qptopt, cryst, gstore%qrank_ibz, gstore%nqbz, qbz, qbz2ibz) /= 0) then
    ABI_ERROR("Cannot map qBZ to IBZ!")
  end if
 
@@ -747,9 +747,8 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
  ! TODO This ambiguity should be removed. Change cgtk_rotate so that we can use the symrec convention.
 
  ABI_MALLOC(kbz2ibz, (6, gstore%nkbz))
- ebands_timrev = kpts_timrev_from_kptopt(ebands%kptopt)
  gstore%krank_ibz = krank_from_kptrlatt(gstore%nkibz, gstore%kibz, ebands%kptrlatt, compute_invrank=.False.)
- if (kpts_map("symrel", ebands_timrev, cryst, gstore%krank_ibz, gstore%nkbz, kbz, kbz2ibz) /= 0) then
+ if (kpts_map("symrel", ebands%kptopt, cryst, gstore%krank_ibz, gstore%nkbz, kbz, kbz2ibz) /= 0) then
    ABI_ERROR("Cannot map kBZ to IBZ!")
  end if
 
@@ -1645,7 +1644,7 @@ subroutine gstore_filter_fs_tetra__(gstore, qbz, qbz2ibz, qibz2bz, kbz, kibz, kb
 !Local variables-------------------------------
 !scalars
  integer,parameter :: tetra_opt0 = 0
- integer :: nsppol, ierr, cnt, spin, band, ib, ii, max_nb, all_nproc, my_rank, comm, ebands_timrev
+ integer :: nsppol, ierr, cnt, spin, band, ib, ii, max_nb, all_nproc, my_rank, comm
  integer :: ik_bz, ik_ibz, iflag, nk_in_star
  real(dp) :: max_occ
  character(len=80) :: errorstring
@@ -1667,7 +1666,6 @@ subroutine gstore_filter_fs_tetra__(gstore, qbz, qbz2ibz, qibz2bz, kbz, kibz, kb
 
  ! NB: here we recompute brange_spin
  cryst => gstore%cryst; ebands => gstore%ebands; nsppol = gstore%nsppol
- ebands_timrev = kpts_timrev_from_kptopt(ebands%kptopt)
 
  call ebands%get_bands_e0(ebands%fermie, gstore%brange_spin, ierr)
  ABI_CHECK(ierr == 0, "Error in ebands_get_bands_e0")
@@ -1773,7 +1771,7 @@ subroutine gstore_filter_erange__(gstore, qbz, qbz2ibz, qibz2bz, kbz, kibz, kbz2
 !Local variables-------------------------------
 !scalars
  integer,parameter :: tetra_opt0 = 0
- integer :: nsppol, cnt, spin, ii, all_nproc, my_rank, comm, ebands_timrev, band ! ierr,
+ integer :: nsppol, cnt, spin, ii, all_nproc, my_rank, comm, band ! ierr,
  integer :: ik_bz, ik_ibz, iflag, nk_in_star, gap_err
  logical :: assume_gap
  real(dp) :: ee, abs_erange1, abs_erange2, vmax, cmin
@@ -1798,7 +1796,6 @@ subroutine gstore_filter_erange__(gstore, qbz, qbz2ibz, qibz2bz, kbz, kibz, kbz2
  gaps = ebands%get_gaps(gap_err)
  if (assume_gap) call gaps%print([std_out]) !, header=msg)
 
- ebands_timrev = kpts_timrev_from_kptopt(ebands%kptopt)
 
  select_kbz_spin = 0; cnt = 0
 
@@ -1909,7 +1906,7 @@ subroutine gstore_filter_qprange__(gstore, dtset, qbz, qbz2ibz, qibz2bz, kbz, ki
 
 !Local variables-------------------------------
 !scalars
- integer :: spin, ik_bz, ik_ibz, gap_err, qprange, ik_calc, nkcalc, mapl_kk(6), ebands_timrev, my_rank
+ integer :: spin, ik_bz, ik_ibz, gap_err, qprange, ik_calc, nkcalc, mapl_kk(6), my_rank
  type(ebands_t),pointer :: ebands
  type(gaps_t) :: gaps
 !arrays
@@ -1926,7 +1923,6 @@ subroutine gstore_filter_qprange__(gstore, dtset, qbz, qbz2ibz, qibz2bz, kbz, ki
  end if
 
  ebands => gstore%ebands
- ebands_timrev = kpts_timrev_from_kptopt(ebands%kptopt)
 
  gaps = ebands%get_gaps(gap_err)
  if (my_rank == 0) call gaps%print([std_out])
@@ -1955,7 +1951,7 @@ subroutine gstore_filter_qprange__(gstore, dtset, qbz, qbz2ibz, qibz2bz, kbz, ki
  select_kbz_spin = 0
  do spin=1,gstore%nsppol
    do ik_calc=1,nkcalc
-     if (kpts_map("symrel", ebands_timrev, gstore%cryst, gstore%krank_ibz, 1, kcalc(:,ik_calc), mapl_kk) /= 0) then
+     if (kpts_map("symrel", ebands%kptopt, gstore%cryst, gstore%krank_ibz, 1, kcalc(:,ik_calc), mapl_kk) /= 0) then
        ABI_ERROR(sjoin("Cannot map kcalc to IBZ with kcalc:", ktoa(kcalc(:,ik_calc))))
      end if
      ! Change select_kbz_spin
@@ -2008,7 +2004,7 @@ subroutine recompute_select_qbz_spin(gstore, qbz, qbz2ibz, qibz2bz, kbz, kibz, k
 
 !Local variables-------------------------------
 !scalars
- integer :: all_nproc, my_rank, ierr, ii, ik_bz, iq_bz, iq_ibz, ikq_ibz, ikq_bz, len_kpts_ptr, ebands_timrev, spin
+ integer :: all_nproc, my_rank, ierr, ii, ik_bz, iq_bz, iq_ibz, ikq_ibz, ikq_bz, len_kpts_ptr, ebands_kptopt, spin
 !arrays
  integer,allocatable :: map_kq(:,:)
  real(dp) :: qpt(3)
@@ -2019,7 +2015,7 @@ subroutine recompute_select_qbz_spin(gstore, qbz, qbz2ibz, qibz2bz, kbz, kibz, k
  ABI_UNUSED(qbz2ibz)
 
  all_nproc = xmpi_comm_size(gstore%comm); my_rank = xmpi_comm_rank(gstore%comm)
- ebands_timrev = kpts_timrev_from_kptopt(gstore%ebands%kptopt)
+ ebands_kptopt = gstore%ebands%kptopt
 
  select_qbz_spin = 0
 
@@ -2036,7 +2032,7 @@ subroutine recompute_select_qbz_spin(gstore, qbz, qbz2ibz, qibz2bz, kbz, kibz, k
      iq_bz = qibz2bz(iq_ibz)
      ! k + q_ibz --> k IBZ --> k BZ
 
-     if (kpts_map("symrel", ebands_timrev, gstore%cryst, gstore%krank_ibz, len_kpts_ptr, kpts_ptr, map_kq, qpt=qpt) /= 0) then
+     if (kpts_map("symrel", ebands_kptopt, gstore%cryst, gstore%krank_ibz, len_kpts_ptr, kpts_ptr, map_kq, qpt=qpt) /= 0) then
        ABI_ERROR("Cannot map k+q to IBZ!")
      end if
 
@@ -2068,7 +2064,7 @@ subroutine recompute_select_qbz_spin(gstore, qbz, qbz2ibz, qibz2bz, kbz, kibz, k
      !iq_ibz = qbz2ibz(1, iq_bz)
      ! k + q_bz --> k IBZ --> k BZ
 
-     if (kpts_map("symrel", ebands_timrev, gstore%cryst, gstore%krank_ibz, len_kpts_ptr, kpts_ptr, map_kq, qpt=qpt) /= 0) then
+     if (kpts_map("symrel", ebands_kptopt, gstore%cryst, gstore%krank_ibz, len_kpts_ptr, kpts_ptr, map_kq, qpt=qpt) /= 0) then
        ABI_ERROR("Cannot map k+q to IBZ!")
      end if
 
@@ -2158,7 +2154,7 @@ subroutine gstore_fill_bks_mask(gstore, mband, nkibz, nsppol, bks_mask)
 
 !Local variables-------------------------------
 !scalars
- integer :: my_is, my_ik, my_iq, spin, ik_ibz, iqk_ibz, ebands_timrev
+ integer :: my_is, my_ik, my_iq, spin, ik_ibz, iqk_ibz, ebands_kptopt
  real(dp) :: weight_q, cpu, wall, gflops
  type(gqk_t),pointer :: gqk
  type(crystal_t),pointer :: cryst
@@ -2171,7 +2167,7 @@ subroutine gstore_fill_bks_mask(gstore, mband, nkibz, nsppol, bks_mask)
 
  bks_mask = .False.
  cryst => gstore%cryst
- ebands_timrev = kpts_timrev_from_kptopt(gstore%ebands%kptopt)
+ ebands_kptopt = gstore%ebands%kptopt
 
  do my_is=1,gstore%my_nspins
    gqk => gstore%gqk(my_is); spin = gstore%my_spins(my_is)
@@ -2188,7 +2184,7 @@ subroutine gstore_fill_bks_mask(gstore, mband, nkibz, nsppol, bks_mask)
    do my_iq=1,gqk%my_nq
      call gqk%myqpt(my_iq, gstore, weight_q, qpt)
 
-     if (kpts_map("symrel", ebands_timrev, cryst, gstore%krank_ibz, gqk%my_nk, gqk%my_kpts, map_kq, qpt=qpt) /= 0) then
+     if (kpts_map("symrel", ebands_kptopt, cryst, gstore%krank_ibz, gqk%my_nk, gqk%my_kpts, map_kq, qpt=qpt) /= 0) then
        ABI_ERROR(sjoin("Cannot map k+q to IBZ with qpt:", ktoa(qpt)))
      end if
 
@@ -2238,7 +2234,6 @@ subroutine gstore_fill_bks_mask_pp_mesh(gstore, ecut, mband, nkibz, nsppol, my_p
 !Local variables-------------------------------
 !scalars
  integer,parameter :: istwfk1 = 1
- integer :: my_is, my_ik, my_iq, spin, ik_ibz, ikq_ibz, ebands_timrev, b1, b2, ipp_bz, my_mpw, my_gmax(3), ierr, onpw
  real(dp) :: weight_q, cpu, wall, gflops
  type(gqk_t),pointer :: gqk
  type(crystal_t),pointer :: cryst
@@ -2251,7 +2246,6 @@ subroutine gstore_fill_bks_mask_pp_mesh(gstore, ecut, mband, nkibz, nsppol, my_p
 
  ! TODO: These loops can be parallelized using bsum_comm and pert_comm if needed.
  bks_mask = .False.; cryst => gstore%cryst
- ebands_timrev = kpts_timrev_from_kptopt(gstore%ebands%kptopt)
  mpw = 0; gmax = 0
 
  do my_is=1,gstore%my_nspins
@@ -2270,7 +2264,7 @@ subroutine gstore_fill_bks_mask_pp_mesh(gstore, ecut, mband, nkibz, nsppol, my_p
      ! We also need the image of k+q in the IBZ for the outgoing state <psi_mkq|.
      do my_iq=1,gqk%my_nq
        call gqk%myqpt(my_iq, gstore, weight_q, qpt)
-       if (kpts_map("symrel", ebands_timrev, cryst, gstore%krank_ibz, 1, kk, map_kq, qpt=qpt) /= 0) then
+       if (kpts_map("symrel", ebands_kptopt, cryst, gstore%krank_ibz, 1, kk, map_kq, qpt=qpt) /= 0) then
          ABI_ERROR(sjoin("Cannot map k+q to IBZ with qpt:", ktoa(qpt)))
        end if
        ikq_ibz = map_kq(1, 1)
@@ -2283,7 +2277,7 @@ subroutine gstore_fill_bks_mask_pp_mesh(gstore, ecut, mband, nkibz, nsppol, my_p
    ! These states are summed over so use b1 and b2.
    do ipp_bz=my_pp_start_spin(spin), my_pp_stop_spin(spin)
      pp = pp_mesh%bz(:,ipp_bz)
-     if (kpts_map("symrel", ebands_timrev, cryst, gstore%krank_ibz, gqk%my_nk, gqk%my_kpts, map_kq, qpt=-pp) /= 0) then
+     if (kpts_map("symrel", ebands_kptopt, cryst, gstore%krank_ibz, gqk%my_nk, gqk%my_kpts, map_kq, qpt=-pp) /= 0) then
        ABI_ERROR(sjoin("Cannot map k-p to IBZ with qpt:", ktoa(qpt), "and pp:", ktoa(pp)))
      end if
 
@@ -2304,7 +2298,8 @@ subroutine gstore_fill_bks_mask_pp_mesh(gstore, ecut, mband, nkibz, nsppol, my_p
 
      do ipp_bz=my_pp_start_spin(spin), my_pp_stop_spin(spin)
        pp = pp_mesh%bz(:,ipp_bz)
-       if (kpts_map("symrel", ebands_timrev, cryst, gstore%krank_ibz, gqk%my_nk, gqk%my_kpts, map_kq, qpt=qpt-pp) /= 0) then
+
+       if (kpts_map("symrel", ebands_kptopt, cryst, gstore%krank_ibz, gqk%my_nk, gqk%my_kpts, map_kq, qpt=qpt-pp) /= 0) then
          ABI_ERROR(sjoin("Cannot map k+q-p to IBZ with qpt:", ktoa(qpt), "and pp:", ktoa(pp)))
        end if
 
@@ -2766,7 +2761,7 @@ subroutine gqk_dbldelta_qpt(gqk, my_iq, gstore, eph_intmeth, eph_fsmear, qpt, we
 !Local variables ------------------------------
 !scalars
  real(dp), parameter :: min_smear = tol9
- integer :: nb, nkbz, spin, my_ik, ib, ib1, ib2, band1, band2, nesting, ebands_timrev
+ integer :: nb, nkbz, spin, my_ik, ib, ib1, ib2, band1, band2, nesting
  integer :: ik_ibz, isym_k, trev_k, tsign_k, g0_k(3)
  integer :: ikq_ibz, isym_kq, trev_kq, tsign_kq, g0_kq(3), ii, i1, i2, i3, cnt, ik_bz, ltetra
  real(dp) :: g1, g2, sigma !, weight_k !, cpu, wall, gflops
@@ -2784,7 +2779,6 @@ subroutine gqk_dbldelta_qpt(gqk, my_iq, gstore, eph_intmeth, eph_fsmear, qpt, we
  nb = gqk%nb; nkbz = gstore%nkbz; spin = gqk%spin
 
  ebands => gstore%ebands; cryst => gstore%cryst
- ebands_timrev = kpts_timrev_from_kptopt(ebands%kptopt)
 
  call gqk%myqpt(my_iq, gstore, weight_q, qpt)
 
@@ -2805,7 +2799,7 @@ subroutine gqk_dbldelta_qpt(gqk, my_iq, gstore, eph_intmeth, eph_fsmear, qpt, we
 
    ! Find k + q in the IBZ for all my k-points.
    ABI_MALLOC(my_kqmap, (6, gqk%my_nk))
-   if (kpts_map("symrel", ebands_timrev, cryst, gstore%krank_ibz, gqk%my_nk, gqk%my_kpts, my_kqmap, qpt=qpt) /= 0) then
+   if (kpts_map("symrel", ebands%kptopt, cryst, gstore%krank_ibz, gqk%my_nk, gqk%my_kpts, my_kqmap, qpt=qpt) /= 0) then
      ABI_ERROR(sjoin("Cannot map k+q to IBZ with qpt:", ktoa(qpt)))
    end if
 
@@ -2904,7 +2898,7 @@ subroutine gqk_dbldelta_qpt(gqk, my_iq, gstore, eph_intmeth, eph_fsmear, qpt, we
    ABI_MALLOC(kmesh_map, (6, nkbz))
 
    ! Find correspondence between libtetra mesh and the IBZ.
-   if (kpts_map("symrec", ebands_timrev, cryst, gstore%krank_ibz, nkbz, kmesh, kmesh_map) /= 0) then
+   if (kpts_map("symrec", ebands%kptopt, cryst, gstore%krank_ibz, nkbz, kmesh, kmesh_map) /= 0) then
      ABI_ERROR("Cannot map libtetra mesh to IBZ")
    end if
 
@@ -2914,7 +2908,7 @@ subroutine gqk_dbldelta_qpt(gqk, my_iq, gstore, eph_intmeth, eph_fsmear, qpt, we
    end do
 
    ! Map libtetra BZ mesh + q to IBZ and fill eig_kq
-   if (kpts_map("symrec", ebands_timrev, cryst, gstore%krank_ibz, nkbz, kmesh, kmesh_map, qpt=qpt) /= 0) then
+   if (kpts_map("symrec", ebands%kptopt, cryst, gstore%krank_ibz, nkbz, kmesh, kmesh_map, qpt=qpt) /= 0) then
      ABI_ERROR(sjoin("Cannot map libtetra k+q to IBZ with qpt:", ktoa(qpt)))
    end if
 
@@ -3158,7 +3152,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
 !scalars
  integer,parameter :: tim_getgh1c = 1, berryopt0 = 0, ider0 = 0, idir0 = 0, LOG_MODQ = 5
  integer,parameter :: useylmgr = 0, useylmgr1 = 0, master = 0, ndat1 = 1
- integer :: my_rank,nproc,mband,nsppol,nkibz,idir,ipert,ebands_timrev, iq_bz
+ integer :: my_rank,nproc,mband,nsppol,nkibz,idir,ipert, iq_bz
  integer :: cplex,natom,natom3,ipc,nspinor, nskip_tetra_kq
  integer :: bstart_k,bstart_kq,nband_k,nband_kq,band_k, in_k, im_kq !ib1,ib2, band_kq,
  integer :: ik_ibz,ikq_ibz,isym_k,isym_kq,trev_k,trev_kq
@@ -3220,7 +3214,6 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
  ! Copy important dimensions
  natom = cryst%natom; natom3 = 3 * natom; nsppol = ebands%nsppol; nspinor = ebands%nspinor; nspden = dtset%nspden
  nkibz = ebands%nkpt; mband = ebands%mband
- ebands_timrev = kpts_timrev_from_kptopt(ebands%kptopt)
 
  ! FFT meshes
  nfftf = product(ngfftf(1:3)); mgfftf = maxval(ngfftf(1:3))
@@ -3614,7 +3607,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
        ! ============================================
        kq_bz = kk_bz + qq_bz
 
-       if (kpts_map("symrel", ebands_timrev, cryst, gstore%krank_ibz, 1, kq_bz, indkk_kq) /= 0) then
+       if (kpts_map("symrel", ebands%kptopt, cryst, gstore%krank_ibz, 1, kq_bz, indkk_kq) /= 0) then
          write(msg, '(3a)' ) &
           "Cannot find k+q in kmesh", ch10, 'Action: check your WFK file and the (k, q) point input variables.'
           ABI_ERROR(msg)
