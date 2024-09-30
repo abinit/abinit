@@ -11,8 +11,8 @@
  tolwfr 1e-20
  nstep 100
 
- eph_fix_korq1 "k"; eph_fix_wavevec1 0.0 0.0 0.0
- eph_fix_korq2 "q"; eph_fix_wavevec2 0.11 0 0
+ eph_fix_korq1 "k"; eph_fix_wavevec 0.0 0.0 0.0
+ eph_fix_korq2 "q"; eph_fix_wavevec 0.11 0 0
 
  prtphbands 0
  prtphdos 0
@@ -31,7 +31,7 @@
  nshiftk 1
  shiftk 0 0 0
 
- #mixprec 1 boxcutmin 1.1   # Important to speedup the calculation and reduce memory.
+ mixprec 1 boxcutmin 1.1   # Important to speedup the calculation and reduce memory.
 
  pp_dirpath = "$ABI_PSPDIR"
  pseudos = "O.psp8, Mg-sp-gw.psp8"
@@ -58,8 +58,8 @@
 
 # DATASET 1
 # g(k,q) at fixed q along this k-path.
- nkpath2 3
- ndivsm2 4
+ nkpath2 5
+ ndivsm2 5
  kptbounds2
     +0.00000  +0.00000  +0.00000  # $\Gamma$
     +0.50000  +0.00000  +0.50000  # X

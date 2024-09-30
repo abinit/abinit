@@ -431,6 +431,10 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
      ik = my_ik_inds(my_ik)
      kk = kpath%points(:, ik)
 
+     !if )my_ik == 1)
+     ! TODO
+     !call nscf%setup_spin(spin, dtset, pawfgr, gs_ham_k, vlocal)
+
      ! Compute u_{nk}(g)
      ! NB: The Hamiltonian has pointers to the _k arrays in output so we cannot dellocate them till the end.
      ! This is the reason why we use vlocal_k (vlocal_kq) although this term does not depend on k
@@ -731,10 +735,8 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
  ABI_FREE(comm_my_is)
  ABI_FREE(my_spins)
 
- call qpath%free(); call kpath%free()
- call ucache_k%free(); call ucache_kq%free()
- call qpt_comm%free(); call kpt_comm%free(); call pert_comm%free()
- call nscf%free()
+ call qpath%free(); call kpath%free(); call ucache_k%free(); call ucache_kq%free()
+ call qpt_comm%free(); call kpt_comm%free(); call pert_comm%free(); call nscf%free()
 
  !call abi_linalg_finalize(dtset%gpu_option)
  call cwtime_report(" eph_path: MPI barrier before returning.", cpu_all, wall_all, gflops_all, end_str=ch10, comm=comm)

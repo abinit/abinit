@@ -195,8 +195,8 @@ contains
 !!  end1=1st-order nuclear dipole energy part of 2nd-order total energy
 !!  enl0=0th-order nonlocal pseudopot. part of 2nd-order total energy.
 !!  enl1=1st-order nonlocal pseudopot. part of 2nd-order total energy.
-!!  evxctau0=0th-order energy from vxctau  
-!!  evxctau1=1st-order energy from vxctau  
+!!  evxctau0=0th-order energy from vxctau
+!!  evxctau1=1st-order energy from vxctau
 !!  gh1c_set(2,mpw1*nspinor*mband_mem*mk1mem*nsppol*dim_eig2rf)= set of <G|H^{(1)}|nK>
 !!  gh0c1_set(2,mpw1*nspinor*mband_mem*mk1mem*nsppol*dim_eig2rf)= set of <G|H^{(0)}|\Psi^{(1)}>
 !!      The wavefunction is orthogonal to the active space (for metals). It is not
@@ -464,7 +464,7 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
  if(has_vxctau) then
     ABI_MALLOC(vxctaulocal,(n4,n5,n6,gs_hamkq%nvloc,4))
  end if
- 
+
  has_vectornd = (with_vectornd .EQ. 1)
  if(has_vectornd) then
     ABI_MALLOC(vectornd_pac,(n4,n5,n6,gs_hamkq%nvloc,3))
@@ -686,16 +686,12 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
      end if
      ABI_FREE(ffnlk)
      ABI_FREE(ffnl1)
-     if (allocated(ffnl1_test)) then
-       ABI_FREE(ffnl1_test)
-     end if
+     ABI_SFREE(ffnl1_test)
      ABI_FREE(eig0_k)
      ABI_FREE(eig0_kq)
      ABI_FREE(rocceig)
      ABI_FREE(ph3d)
-     if (allocated(ph3d1)) then
-       ABI_FREE(ph3d1)
-     end if
+     ABI_SFREE(ph3d1)
 
 !    Save eigenvalues (hartree), residuals (hartree**2)
      eigen1 (1+bd2tot_index : 2*nband_k**2+bd2tot_index) = eig1_k(:)
@@ -793,16 +789,11 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
  ABI_FREE(rhoaug1)
  ABI_FREE(vlocal)
  ABI_FREE(vlocal1)
- if(allocated(vxctaulocal)) then
-    ABI_FREE(vxctaulocal)
- end if
- if(allocated(vectornd_pac)) then
-    ABI_FREE(vectornd_pac)
- end if
- if(allocated(vectornd_pac_idir)) then
-    ABI_FREE(vectornd_pac_idir)
- end if
- 
+
+ ABI_SFREE(vxctaulocal)
+ ABI_SFREE(vectornd_pac)
+ ABI_SFREE(vectornd_pac_idir)
+
  call timab(124,2,tsec)
 
 !=== MPI communications ==================
