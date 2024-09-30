@@ -2234,6 +2234,7 @@ subroutine gstore_fill_bks_mask_pp_mesh(gstore, ecut, mband, nkibz, nsppol, my_p
 !Local variables-------------------------------
 !scalars
  integer,parameter :: istwfk1 = 1
+ integer :: b1, b2, ebands_kptopt, ierr, ikq_ibz, ik_ibz, ipp_bz, my_ik, my_iq, spin, my_is, onpw, my_mpw, my_gmax(3)
  real(dp) :: weight_q, cpu, wall, gflops
  type(gqk_t),pointer :: gqk
  type(crystal_t),pointer :: cryst
@@ -2246,6 +2247,7 @@ subroutine gstore_fill_bks_mask_pp_mesh(gstore, ecut, mband, nkibz, nsppol, my_p
 
  ! TODO: These loops can be parallelized using bsum_comm and pert_comm if needed.
  bks_mask = .False.; cryst => gstore%cryst
+ ebands_kptopt = gstore%ebands%kptopt
  mpw = 0; gmax = 0
 
  do my_is=1,gstore%my_nspins

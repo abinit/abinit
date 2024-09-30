@@ -694,7 +694,7 @@ integer function kpts_map(mode, kptopt, cryst, krank, nkpt2, kpt2, map, qpt, dks
    ! wavefunctions should be rewritten almost completely.
 
    call krank%get_mapping(nkpt2, kpt2, dksqmax, cryst%gmet, map, &
-                          cryst%nsym, cryst%symafm, cryst%symrec, timrev, use_symrec=.True., qpt=my_qpt)
+                          nsym, cryst%symafm, cryst%symrec, timrev, use_symrec=.True., qpt=my_qpt)
 
  case default
    ABI_ERROR(sjoin("Invalid mode:", mode))
