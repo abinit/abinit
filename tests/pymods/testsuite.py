@@ -3210,6 +3210,59 @@ def exec2class(exec_name):
     }.get(exec_name, BaseTest)
 
 
+def do_work(qin, qout, run_func, run_func_kwargs, print_lock, kill_me, thread_mode=False):
+    done = {'type': 'proc_done'}
+    all_done = False
+    try:
+        #while not all_done and not (thread_mode and self._kill_me):
+        while not all_done and not (thread_mode and kill_me):
+            test = qin.get(block=True, timeout=2)
+            if test is None:  # reached the end
+                all_done = True
+            else:
+                qout.put(run_func(test, print_lock=print_lock, **run_func_kwargs))
+
+    except EmptyQueueError:
+        # If that happen it is a probably a bug
+        done['error'] = RuntimeError('Task queue is unexpectedly empty.')
+
+    except Exception as e:
+        # Any other error is reported
+        done['error'] = e
+        try:
+            done['task'] = test.full_id
+        except (AttributeError, NameError):
+            pass
+
+    finally:
+        qout.put(done)
+
+
+def run_and_check_test(test, print_lock=None, **kwargs):
+    """Helper function to execute the test. Must be thread-safe."""
+
+    workdir = kwargs.pop("workdir")
+    build_env = kwargs.pop("build_env")
+    job_runner = kwargs.pop("job_runner")
+    nprocs = kwargs.pop("nprocs")
+    runmode = kwargs.pop("runmode")
+
+    testdir = os.path.abspath(os.path.join(workdir, test.suite_name + "_" + test.id))
+
+    # Run the test
+    test.run(build_env, job_runner, testdir, print_lock=print_lock, nprocs=nprocs, runmode=runmode, **kwargs)
+
+    # Write HTML summary
+    test.write_html_report()
+
+    # Remove useless files in workdir.
+    test.clean_workdir()
+
+    d = test.results_dump()
+    d['type'] = 'result'
+    return d
+
+
 class ChainOfTests(object):
     """
     A list of tests that should be executed together due to inter-dependencies.
@@ -3767,39 +3820,12 @@ class AbinitTestSuite(object):
             raise ValueError(
                 "Cannot have more than two tests with the same full_id")
 
-    def start_workers(self, nprocs, runner):
+    def start_workers(self, py_nprocs, run_func, run_func_kwargs):
         """
-        Start nprocs new processes that will get tests from a queue and run
-        them with runner and put the result of the runner in an output queue.
+        Start py_nprocs new processes that will get tests from a queue and run
+        them with run_func and put the result of the run_func in an output queue.
         Return the task/input queue (to be closed only) and the results/output queue.
         """
-
-        def worker(qin, qout, print_lock, thread_mode=False):
-            done = {'type': 'proc_done'}
-            all_done = False
-            try:
-                while not all_done and not (thread_mode and self._kill_me):
-                    test = qin.get(block=True, timeout=2)
-                    if test is None:  # reached the end
-                        all_done = True
-                    else:
-                        qout.put(runner(test, print_lock=print_lock))
-
-            except EmptyQueueError:
-                # If that happen it is a probably a bug
-                done['error'] = RuntimeError('Task queue is unexpectedly empty.')
-
-            except Exception as e:
-                # Any other error is reported
-                done['error'] = e
-                try:
-                    done['task'] = test.full_id
-                except (AttributeError, NameError):
-                    pass
-
-            finally:
-                qout.put(done)
-
         print_lock = Lock()
         task_q = Queue()
         res_q = Queue()
@@ -3808,18 +3834,18 @@ class AbinitTestSuite(object):
             # fill the queue
             task_q.put(test)
 
-        for _ in range(nprocs):
+        for _ in range(py_nprocs):
             # one end signal for each worker
             task_q.put(None)
 
-        for i in range(nprocs - 1):
+        for i in range(py_nprocs - 1):
             # create and start subprocesses
-            p = Process(target=worker, args=(task_q, res_q, print_lock))
+            p = Process(target=do_work, args=(task_q, res_q, run_func, run_func_kwargs, print_lock, self._kill_me))
             self._processes.append(p)
             p.start()
 
         # Add the worker as a thread of the main process
-        t = Thread(target=worker, args=(task_q, res_q, print_lock, True))
+        t = Thread(target=do_work, args=(task_q, res_q, run_func, run_func_kwargs, print_lock, self._kill_me, True))
         # make it daemon so it will die if the main process is interrupted early
         t.daemon = True
         t.start()
@@ -3874,7 +3900,7 @@ class AbinitTestSuite(object):
 
         return results
 
-    def run_tests(self, build_env, workdir, runner,
+    def run_tests(self, build_env, workdir, job_runner,
                   nprocs=1, py_nprocs=1, runmode="static", **kwargs):
         """
         Execute the list of tests (main entry point for client code)
@@ -3882,7 +3908,7 @@ class AbinitTestSuite(object):
         Args:
             build_env: `BuildEnv` instance with info on the build environment.
             workdir: Working directory (string)
-            runner: `JobRunner` instance
+            job_runner: `JobRunner` instance
             nprocs: number of MPI processes to use for a single test.
             py_nprocs: number of py_nprocs for tests
         """
@@ -3919,25 +3945,13 @@ class AbinitTestSuite(object):
             self.nprocs = nprocs
             self.py_nprocs = py_nprocs
 
-            def run_and_check_test(test, print_lock=None):
-                """Helper function to execute the test. Must be thread-safe."""
-
-                testdir = os.path.abspath(os.path.join(
-                    self.workdir, test.suite_name + "_" + test.id))
-
-                # Run the test
-                test.run(build_env, runner, testdir, print_lock=print_lock,
-                         nprocs=nprocs, runmode=runmode, **kwargs)
-
-                # Write HTML summary
-                test.write_html_report()
-
-                # Remove useless files in workdir.
-                test.clean_workdir()
-
-                d = test.results_dump()
-                d['type'] = 'result'
-                return d
+            run_func_kwargs = dict(
+                workdir=self.workdir,
+                build_env=build_env,
+                job_runner=job_runner,
+                nprocs=self.nprocs,
+                runmode=runmode,
+            )
 
             ##############################
             # And now let's run the tests
@@ -3948,21 +3962,19 @@ class AbinitTestSuite(object):
                 logger.info("Sequential version")
                 for test in self:
                     # discard the return value because tests are directly modified
-                    run_and_check_test(test)
+                    run_and_check_test(test, **run_func_kwargs)
 
             elif py_nprocs > 1:
                 logger.info("Parallel version with py_nprocs = %s" % py_nprocs)
 
-                task_q, res_q = self.start_workers(
-                    py_nprocs, run_and_check_test)
+                task_q, res_q = self.start_workers(py_nprocs, run_and_check_test, run_func_kwargs)
 
-                timeout_1test = float(runner.timebomb.timeout)
+                timeout_1test = float(job_runner.timebomb.timeout)
                 if timeout_1test <= 0.1:
                     timeout_1test = 240.
 
                 # Wait for all tests to be done gathering results
-                results = self.wait_loop(py_nprocs, len(
-                    self.tests), timeout_1test, res_q)
+                results = self.wait_loop(py_nprocs, len(self.tests), timeout_1test, res_q)
 
                 # remove this to let python garbage collect processes and avoid
                 # Pickle to complain (it does not accept processes for security reasons)
@@ -4067,7 +4079,7 @@ class AbinitTestSuite(object):
             # Create the HTML index.
             DNS = {
                 "self": self,
-                "runner": runner,
+                "runner": job_runner,
                 "user_name": username,
                 "hostname": gethostname(),
                 "test_headings": ['ID', 'Status', 'run_etime (s)', 'tot_etime (s)'],
@@ -4119,7 +4131,7 @@ class AbinitTestSuite(object):
                 run_etime = ${sec2str(self.run_etime)} <br>
                 no_pyprocs = ${self.py_nprocs} <br>
                 no_MPI = ${self.nprocs} <br>
-                ${str2html(str(runner))}
+                ${str2html(str(job_runner))}
             <hr>
             """
 
