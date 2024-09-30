@@ -81,4 +81,3 @@ pseudos="P.psp8, Al.psp8"
 #%% keywords = NC
 #%% description = Same as v9[209] but with npband=4. Compare chebfi2 with respect to other algorithms (istwfk>1,NC).
 #%%<END TEST_INFO>
- 
