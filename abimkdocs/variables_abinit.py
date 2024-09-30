@@ -2731,7 +2731,7 @@ ABINIT will rescale uniformly the
 tentative new primitive vectors to a value that leads at most to 90% of the
 maximal allowed [[dilatmx]] deviation from 1. It will do this three times (to
 prevent the geometry optimization algorithms to have taken a too large trial
-step), but afterwards will stop and exit. 
+step), but afterwards will stop and exit.
 
 Setting [[chkdilatmx]] == 0 allows one to
 book a larger planewave basis (if [[dilatmx]] is set to be bigger than 1), but will not rescale the tentative new primitive vectors
@@ -3740,9 +3740,9 @@ This input variable is important when performing relaxation of unit cell size
 and shape (non-zero [[optcell]]). Using a non-zero [[ecutsm]], the total
 energy curves as a function of [[ecut]], or [[acell]], can be smoothed,
 keeping consistency with the stress (and automatically including the Pulay
-stress). 
+stress).
 
-The recommended value is 0.5 Ha in such a case (non-zero [[optcell]]).. 
+The recommended value is 0.5 Ha in such a case (non-zero [[optcell]])..
 
 Actually, when [[optcell]]/=0,
 ABINIT requires [[ecutsm]] to be larger than zero. If you want to optimize
@@ -4375,6 +4375,7 @@ The choice is among:
               are interpolated with Fourier transform.
               An array D(R) with the decay of the W(R,r) as a function of R is computed and saved to file
               In the second case (-15) the q-points are taken directly from the DVDB file.
+* 18 --> Compute e-ph matrix g(k,q) along high-symmetry path. See [[eph_fix_wavevec]] and other related variables.
 
 
 !!! important
@@ -19417,7 +19418,7 @@ energy that are smaller than about 1.0d-12 of the total energy. To get
 accurate stresses may be quite demanding.
 
 When the geometry is optimized (relaxation of atomic positions or primitive
-vectors), the use of [[toldfe]] is to be avoided. The use of [[tolrff]] 
+vectors), the use of [[toldfe]] is to be avoided. The use of [[tolrff]]
 (or [[tolrff]]) is by far preferable, in order to have a handle on the geometry
 characteristics. When all forces vanish by symmetry (e.g. optimization of the
 lattice parameters of a high-symmetry crystal), then place [[toldfe]] to

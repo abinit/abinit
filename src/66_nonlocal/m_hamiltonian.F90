@@ -427,6 +427,9 @@ module m_hamiltonian
    ! ACE quantities needed to calculate Fock exact exchange in the ACE context
 
  contains
+
+   !procedure :: init => gs_hamiltonian_init
+
    procedure :: free => destroy_hamiltonian
     ! Free the memory in the GS Hamiltonian
 
@@ -1816,9 +1819,6 @@ subroutine load_k_rf_hamiltonian(rf_Ham,dkinpw_k,ddkinpw_k,npw_k)
  class(rf_hamiltonian_type),intent(inout),target :: rf_Ham
 !arrays
  real(dp),intent(in),optional,target :: dkinpw_k(:),ddkinpw_k(:)
-
-!Local variables-------------------------------
-
 ! *************************************************************************
 
  DBG_ENTER("COLL")

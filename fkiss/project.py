@@ -228,7 +228,7 @@ class FortranFile(object):
             if os.path.join("shared", "libpaw") in head:
                 #print("Setting dirlevel to 30 for shared/libpaw/src since head:", head)
                 return 39
-            cprint("Cannot detect dirlevel in: %s" % self.path, "red")
+            cprint("Cannot detect dirlevel in: %s" % self.path, color="red")
             raise
 
     @lazy_property
@@ -683,7 +683,8 @@ class AbinitProject(NotebookWriter):
             #dtypes.update(self.all_datatypes)
             for mod in f.modules:
                 for dtype in mod.types:
-                    assert dtype.name not in dtypes
+                    if dtype.name in dtypes:
+                        cprint("dtype.name `%s` is already in dtypes dict:" % dtype.name, color="red")
                     dtypes[dtype.name] = (dtype, f)
 
         return {k: dtypes[k] for k in sorted(dtypes.keys())}
@@ -710,14 +711,14 @@ class AbinitProject(NotebookWriter):
                 interface = name2interface[what]
                 print(interface.to_string(verbose=verbose))
             else:
-                cprint("Cannot find interface `%s` in project" % what, "red")
+                cprint("Cannot find interface `%s` in project" % what, color="red")
                 matches = difflib.get_close_matches(what, name2interface.keys())
                 if matches:
-                    cprint("Perhaps you meant: {}".format(matches), "red")
+                    cprint("Perhaps you meant: {}".format(matches), color="red")
         else:
             # Print all interfaces.
             for interface in name2interface.values():
-                cprint(repr(interface), "yellow")
+                cprint(repr(interface), color="yellow")
                 print(interface.to_string(verbose=verbose))
                 print("")
 
@@ -732,10 +733,10 @@ class AbinitProject(NotebookWriter):
             if obj is not None: return obj
 
         # Print closest matches
-        cprint("Cannot find public entity `%s`" % str(name), "red")
+        cprint("Cannot find public entity `%s`" % str(name), color="red")
         matches = difflib.get_close_matches(name, all_names)
         if matches:
-            cprint("Perhaps you meant: {}".format(matches), "red")
+            cprint("Perhaps you meant: {}".format(matches), color="red")
 
         return None
 
@@ -751,7 +752,7 @@ class AbinitProject(NotebookWriter):
 
         # Print closest matches
         matches = difflib.get_close_matches(name, all_names)
-        if matches: cprint("Perhaps you meant: {}".format(matches), "red")
+        if matches: cprint("Perhaps you meant: {}".format(matches), color="red")
 
         return None
 
@@ -882,7 +883,7 @@ class AbinitProject(NotebookWriter):
         # explicit "use external_module" or an explicit "include foo.h" so
         # that I can map these names to external libraries.
         # This means that I **cannot generate** the entire file in a programmatic way
-        # but only the libraries entries.
+        # but only the library entries.
         try:
             from ConfigParser import ConfigParser
         except ImportError:
@@ -1025,8 +1026,11 @@ class AbinitProject(NotebookWriter):
                 with open(abinitdir_path, "wt") as fh:
                     fh.write(s)
 
+            # TODO
+            return
+
             #########################
-            # Intgegration with CMAKE
+            # Integration with CMAKE
             #########################
             # This section update the following parts of CMakeList.txt
 
@@ -1057,22 +1061,41 @@ class AbinitProject(NotebookWriter):
                 #print(lines)
                 raise ValueError(f"Cannot find closing `)` after {magic=} in {path}")
 
+            def parse_amf(filepath):
+                r"""
+                EXTRA_DIST += \
+                  md5.h \
+                  xmalloc.h
+                """
+                if not os.path.exists(filepath):
+                    return []
+
+                with open(filepath, "rt") as fh:
+                    lines = fh.readlines()
+
+                head = "EXTRA_DIST +="
+                if not lines[0].startswith(head):
+                    raise ValueError(f"In {filepath=}: {lines[0]=} should start with {head=}")
+
+                return [l.replace(r"\\", "").strip() for l in lines[1:]]
+
             # Get list of source files (F, C, C++)
             mod = load_mod(os.path.join(dirpath, "abinit.src"))
+            extras = parse_amf(os.path.join(dirpath, "abinit.amf"))
+            print(extras)
 
             cmakelist_path = os.path.join(dirpath, "CMakeLists.txt")
-            dirname = os.path.basename(dirpath)
             lines = [l.strip() for l in open(cmakelist_path).readlines()]
 
+            dirname = os.path.basename(dirpath)
             magic = f"add_library({dirname} STATIC"
             start, stop = enclose(lines, magic, cmakelist_path)
             del lines[start+1:stop-1]
-            lines[start+1:start+1] = [(3*" " + s) for s in mod.sources]
+            lines[start+1:start+1] = [(2*" " + s) for s in mod.sources]
             s = "\n".join(lines)
             print(s)
             #with open(cmakelist_path, "wt") as fh:
             #    fh.write(s)
-
 
             # This section is optional!
             magic = f"target_link_libraries({dirname}"
@@ -1085,8 +1108,6 @@ class AbinitProject(NotebookWriter):
             except ValueError:
                 print(f"{dirname=} does not export libraries!")
                 pass
-            """
-            """
 
     def touch_alldeps(self, verbose=0):
         """
@@ -1132,21 +1153,21 @@ class AbinitProject(NotebookWriter):
             count = len(fort_file.subroutines) + len(fort_file.functions)
             if count == 0: continue
             if fort_file.name in white_list:
-                cprint("WHITE_LIST [%s] Found %d procedure(s) outside modules!" % (fort_file.name, count), "green")
+                cprint("WHITE_LIST [%s] Found %d procedure(s) outside modules!" % (fort_file.name, count), color="green")
             else:
-                cprint("[%s] Found %d procedure(s) outside modules!" % (fort_file.name, count), "red")
+                cprint("[%s] Found %d procedure(s) outside modules!" % (fort_file.name, count), color="red")
                 retcode += 1
 
         # check_dirlevel()
         for fort_file in self.fort_files.values():
             for child in fort_file.all_usedby_mods:
                 if child.dirlevel < fort_file.dirlevel:
-                    cprint("%s should be below level: %s" % (repr(child), fort_file.dirlevel), "red")
+                    cprint("%s should be below level: %s" % (repr(child), fort_file.dirlevel), color="red")
                     retcode += 1
 
         #retcode += self.check_abirules(verbose=verbose)
 
-        cprint("retcode %d" % retcode, "green" if retcode == 0 else "red")
+        cprint("retcode %d" % retcode, color="green" if retcode == 0 else "red")
         return retcode
 
     def check_abirules(self, verbose=0):
@@ -1171,7 +1192,6 @@ class AbinitProject(NotebookWriter):
         # Find files with procedures.
         paths = sorted(set(p.path for p in obj.parents))
         if verbose: print(paths)
-        # TODO from pymods.tools import Editor
         from fkiss.tools import Editor
         return Editor().edit_files(paths, ask_for_exit=True)
 
@@ -1232,7 +1252,7 @@ class AbinitProject(NotebookWriter):
         for _, fort_file in self.iter_dirname_fortfile():
             orphans = find_orphans_in_fort_file(fort_file)
             if orphans:
-                cprint("Found %d orphans in file: %s" % (len(orphans), fort_file.basename), "yellow")
+                cprint("Found %d orphans in file: %s" % (len(orphans), fort_file.basename), color="yellow")
                 for o in orphans:
                     print("\t", repr(o))
 
@@ -1354,11 +1374,11 @@ class AbinitProject(NotebookWriter):
         obj = self.find_public_entity(name)
 
         if obj is None:
-            cprint("Cannot find public entity `%s` in Abinit project." % name, "red")
+            cprint("Cannot find public entity `%s` in Abinit project." % name, color="red")
             return None
         if not obj.is_procedure:
             cprint("Only procedures can be visualized with graphviz. Received class: %s" % obj.__class__,
-                   "yellow")
+                   color="yellow")
             return None
 
         # https://www.graphviz.org/doc/info/
