@@ -23627,8 +23627,8 @@ Variable(
     added_in_version="9.5.2",
     text=r"""
 Enables the calculation of contributions to the energy, entropy, stresses,
-number of electrons and chemical potential using the extended first principle
-molecular dynamics model for high temperature simulations.
+number of electrons and chemical potential using the extended First Principle
+Molecular Dynamics model for high temperature simulations.
 
 For now, ExtFPMD is only available with [[occopt]] = 3, with [[tsmear]] defined
 as the electronic temperature. More occupation options will be supported in the
@@ -23673,7 +23673,7 @@ Variable(
     mnemonics="EXTended FPMD: Number of Bands",
     added_in_version="10.1.0",
     text=r"""
-Specifies the number of bands to use for extended FPMD contributions when using [[useextfpmd]] = 5.
+Specifies the number of bands to use for extended First-Principles Molecular Dynamics contributions when using [[useextfpmd]] = 5.
 This acts like [[nband]] for a conventional calculation. **extfpmd_nband** must be sufficiently high
 so that its occupancy is close to zero. Extended FPMD contributions will be computed from [[nband]] to [[extfpmd_nband]].
 
