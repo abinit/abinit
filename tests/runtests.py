@@ -400,7 +400,7 @@ def main():
 
     cprint("Running on %s -- system %s -- ncpus %s -- Python %s -- %s" % (
           gethostname(), system, ncpus_detected, platform.python_version(), _my_name),
-          'green', attrs=['underline'])
+          color='green', attrs=['underline'])
 
     # Compile the code before running the tests.
     if options.make:
