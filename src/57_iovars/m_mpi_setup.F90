@@ -408,9 +408,6 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
      cycle
    end if
 
-   ! Set cprj_in_memory to zero if paral_kgb has been activated by autoparal
-   if (dtsets(idtset)%paral_kgb/=0) dtsets(idtset)%cprj_in_memory = 0
-
    response=0
    if (dtsets(idtset)%rfddk/=0 .or. dtsets(idtset)%rf2_dkdk/=0 .or. dtsets(idtset)%rf2_dkde/=0 .or. &
 &   dtsets(idtset)%rfelfd/=0 .or. dtsets(idtset)%rfphon/=0 .or. dtsets(idtset)%rfstrs/=0 .or. &
@@ -839,6 +836,21 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
              'When the use of GPU is on, the number of FFT processors, npfft, must be 1',ch10,&
              'However, npfft=',mpi_enregs(idtset)%nproc_fft
              ABI_ERROR(msg)
+           end if
+
+           if((dtsets(idtset)%cprj_in_memory/=0)) then
+             if (mpi_enregs(idtset)%nproc_spinor/=1) then
+               write(msg,'(3a,i0)') &
+               'If cprj_in_memory/=0, the number of processors for spinors, npspinor, must be 1',ch10,&
+               'However, npspinor=',mpi_enregs(idtset)%nproc_spinor
+               ABI_ERROR(msg)
+             end if
+             if(mpi_enregs(idtset)%nproc_fft/=1)then
+               write(msg,'(3a,i0)') &
+               'If cprj_in_memory/=0, the number of FFT processors, npfft, must be 1',ch10,&
+               'However, npfft=',mpi_enregs(idtset)%nproc_fft
+               ABI_ERROR(msg)
+             end if
            end if
 
            if(modulo(dtsets(idtset)%ngfft(2),mpi_enregs(idtset)%nproc_fft)/=0)then

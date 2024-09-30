@@ -2528,6 +2528,15 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'use_gemm_nonlop',tread,'INT')
  if(tread==1) dtset%use_gemm_nonlop=intarr(1)
 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'cprj_in_memory',tread,'INT')
+ if(tread==1) dtset%cprj_in_memory=intarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'cprj_update_lvl',tread,'INT')
+ if(tread==1) dtset%cprj_update_lvl=intarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'xg_nonlop_option',tread,'INT')
+ if(tread==1) dtset%xg_nonlop_option=intarr(1)
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'useylm',tread,'INT')
  if(tread==1) dtset%useylm=intarr(1)
 
@@ -2541,6 +2550,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    dtset%useylm=1
    dtset%userec=1
  end if
+ if (dtset%cprj_in_memory/=0) dtset%useylm=1
 
  ionmov=dtset%ionmov ; densfor_pred=dtset%densfor_pred ; iscf=dtset%iscf ; nqpt=dtset%nqpt
  kptopt=dtset%kptopt; nberry=dtset%nberry ; berryopt=dtset%berryopt
@@ -2618,9 +2628,6 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    dtset%nloalg(2)=1 ; if(intarr(1)<0)dtset%nloalg(2)=-1
    dtset%nloalg(3)=abs(intarr(1))-1
  end if
-
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'cprj_update_lvl',tread,'INT')
- if(tread==1) dtset%cprj_update_lvl=intarr(1)
 
  ! LOOP variables
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nline',tread,'INT')
@@ -4058,28 +4065,6 @@ if (dtset%usekden==1) then
 
  ABI_FREE(intarr)
  ABI_FREE(dprarr)
-
- !Now all inputs are read, we can determine if "cprj_in_memory" implementation can be used or not
- dtset%cprj_in_memory=0
- if (dtset%cprj_update_lvl/=0) then
-   dtset%cprj_in_memory=1
-   ! Must be ground state computation...
-   if (dtset%optdriver/=0) dtset%cprj_in_memory = 0
-   ! ...with PAW...
-   if (dtset%usepaw/=1) dtset%cprj_in_memory = 0
-   ! ... and Conjugate Gradient...
-   if (dtset%wfoptalg/=10) dtset%cprj_in_memory = 0
-   ! ...without kgb parallelization...
-   if (dtset%paral_kgb/=0) dtset%cprj_in_memory = 0
-   ! ...without RMM-DIIS...
-   if (dtset%rmm_diis/=0) dtset%cprj_in_memory = 0
-   ! ...without electric field...
-   if (dtset%berryopt/=0) dtset%cprj_in_memory = 0
-   ! ...without Fock exchange...
-   if (dtset%usefock/=0) dtset%cprj_in_memory = 0
-   ! ...without nuclear dipolar moments...
-   if (sum(abs(dtset%nucdipmom))>tol16) dtset%cprj_in_memory = 0
- end if
 
  if (dtset%nqptdm == -1) then
    cryst = dtset%get_crystal(1)

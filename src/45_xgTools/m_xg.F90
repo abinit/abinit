@@ -67,6 +67,9 @@ module m_xg
   integer, parameter, public :: SPACE_C =  2
   integer, parameter, public :: SPACE_CR = 3
 
+  integer, parameter, public :: SMALL2BIG =  1
+  integer, parameter, public :: BIG2SMALL = -1
+
   integer, parameter, public :: COLS2ROWS =  1
   integer, parameter, public :: ROWS2COLS = -1
 
@@ -94,14 +97,22 @@ module m_xg
   integer, parameter :: tim_apply_diag = 1689
   integer, parameter :: tim_invertri   = 1696
 
-  integer, parameter :: tim_scale      = 2000
-  integer, parameter :: tim_colw_dot   = 2001
-  integer, parameter :: tim_colw_mul   = 2002
-  integer, parameter :: tim_colw_cymax = 2003
-  integer, parameter :: tim_colw_div   = 2004
-  integer, parameter :: tim_colw_norm2 = 2005
-  integer, parameter :: tim_saxpy      = 2006
-  integer, parameter :: tim_minmax     = 2007
+  integer, parameter :: tim_scale       = 2000
+  integer, parameter :: tim_colw_dot    = 2001
+  integer, parameter :: tim_colw_mul    = 2002
+  integer, parameter :: tim_colw_cymax  = 2003
+  integer, parameter :: tim_colw_div    = 2004
+  integer, parameter :: tim_colw_norm2  = 2005
+  integer, parameter :: tim_saxpy       = 2006
+  integer, parameter :: tim_minmax      = 2007
+  integer, parameter :: tim_partialcopy = 2008
+  integer, parameter :: tim_gemmcyclic  = 2009
+  integer, parameter :: tim_yxmax       = 2010
+  integer, parameter :: tim_ymax        = 2011
+  integer, parameter :: tim_add         = 2012
+  integer, parameter :: tim_add_diag    = 2013
+  integer, parameter :: tim_invert      = 2014
+  integer, parameter :: tim_invert_sy   = 2015
 
   integer, save, private :: lrwork = 0
   integer, save, private :: lcwork = 0
@@ -208,6 +219,7 @@ module m_xg
   public :: xgBlock_prefetch_async
   public :: xgBlock_get ! LB-06/03/24: Be careful, this routine is not used (so not tested)
   public :: xgBlock_copy
+  public :: xgBlock_partialcopy
   public :: xgBlock_pack
   public :: xgBlock_getSize
 
@@ -232,21 +244,35 @@ module m_xg
   public :: xgBlock_hpgvd
 
   public :: xgBlock_gemm
+  public :: xgBlock_trmmR
   public :: xgBlock_add
   public :: xgBlock_cshift
   public :: xgBlock_colwiseNorm2
   public :: xgBlock_colwiseDotProduct
   public :: xgBlock_colwiseDivision
+  public :: xgBlock_ymax
+  public :: xgBlock_yxmax
   public :: xgBlock_colwiseCymax
   public :: xgBlock_saxpy
   public :: xgBlock_colwiseMul
   public :: xgBlock_scale
+  public :: xgBlock_transpose
+  public :: xgBlock_r2c
+  public :: xgBlock_c2r
 
   public :: xgBlock_apply_diag
+  public :: xgBlock_add_diag
 
   public :: xgBlock_mpi_sum
+  public :: xgBlock_mpi_send
+  public :: xgBlock_mpi_isend
+  public :: xgBlock_mpi_recv
+  public :: xgBlock_gemm_mpi_cyclic_permutation
 
+  public :: xgBlock_invert
+  public :: xgBlock_invert_sy
   public :: xgBlock_invert_tri
+  public :: xgBlock_yxpa
 
   public :: xgBlock_zero
   public :: xgBlock_zerotri
@@ -261,6 +287,7 @@ module m_xg
 
   public :: xgBlock_reshape
   public :: xgBlock_reshape_spinor
+  public :: xgBlock_free_reshape
   public :: xgBlock_print
   public :: xgBlock_getId
   public :: xgBlock_get_im_g0
@@ -1276,7 +1303,7 @@ contains
   !!****f* m_xg/me_g0
   !!
   !! NAME
-  !! comm
+  !! me_g0
 
   function me_g0(xgBlock)
     type(xgBlock_t), intent(in) :: xgBlock
@@ -1333,9 +1360,10 @@ contains
     type(xgBlock_t), intent(in) :: xgBlock
     integer :: rows
     rows = xgBlock%rows
-    if ( rows /= xgBlock%ldim ) then
-      ABI_WARNING("rows/ldim ! Be very careful at what you are doing")
-    end if
+    !LB-31/05/24 : this warning is too verbose when activated... (even with correct coding!)
+    !if ( rows /= xgBlock%ldim ) then
+    !  ABI_WARNING("rows/ldim ! Be very careful at what you are doing")
+    !end if
   end function rows
   !!***
 
@@ -1346,7 +1374,7 @@ contains
 
   subroutine xgBlock_copy(xgBlockA, xgBlockB, inc1, inc2)
 
-    type(xgBlock_t),   intent(inout) :: xgBlockA
+    type(xgBlock_t),   intent(in   ) :: xgBlockA
     type(xgBlock_t),   intent(inout) :: xgBlockB
     integer, optional, intent(in   ) :: inc1
     integer, optional, intent(in   ) :: inc2
@@ -1442,6 +1470,115 @@ contains
 
   end subroutine xgBlock_copy
   !!***
+
+!!****f* m_xg/xgBlock_partialcopy
+!!
+!! NAME
+!! xgBlock_partialcopy
+
+  subroutine xgBlock_partialcopy(xgBlock_in, xgBlock_out, shift_row, shift_col, option)
+
+    type(xgBlock_t), intent(in   ) :: xgBlock_in
+    type(xgBlock_t), intent(inout) :: xgBlock_out
+    integer,intent(in) :: shift_row,shift_col
+    integer,intent(in) :: option
+
+    integer :: icol,ncols_small,ncols_big
+    integer :: nrows_small,nrows_big
+    integer :: shift_col_big,end_row,max_col
+    double precision :: tsec(2)
+
+    call timab(tim_partialcopy,1,tsec)
+
+    if (xgBlock_in%gpu_option/=ABI_GPU_DISABLED) then
+      ABI_ERROR('Not implemented for GPU')
+    end if
+    call xgBlock_check_gpu_option(xgBlock_in,xgBlock_out)
+
+    if (option==SMALL2BIG) then
+      ncols_big   = xgBlock_out%cols
+      nrows_big   = xgBlock_out%rows
+      ncols_small = xgBlock_in%cols
+      nrows_small = xgBlock_in%rows
+    else if (option==BIG2SMALL) then
+      ncols_big   = xgBlock_in%cols
+      nrows_big   = xgBlock_in%rows
+      ncols_small = xgBlock_out%cols
+      nrows_small = xgBlock_out%rows
+    else
+      ABI_ERROR('Bad option')
+    end if
+    if (xgBlock_in%space/=xgBlock_out%space) then
+      ABI_ERROR('xgBlockA%space/=xgBlockB%space')
+    end if
+    if (ncols_small>ncols_big) then
+      ABI_ERROR('ncols_small>ncols_big')
+    end if
+    if (nrows_small>nrows_big) then
+      ABI_ERROR('nrows_small>nrows_big')
+    end if
+    if (shift_row<0) then
+      ABI_ERROR('start_row<0')
+    end if
+    if (shift_col<0) then
+      ABI_ERROR('start_col<0')
+    end if
+
+    end_row = shift_row + nrows_small
+    if (end_row>nrows_big) then
+      ABI_ERROR('end_row>nrows_big')
+    end if
+
+    max_col = shift_col + ncols_small
+    if (max_col>ncols_big) then
+      ABI_ERROR('max_col>nrows_big')
+    end if
+
+    if (option==SMALL2BIG) then ! copy small matrix into the big one
+      select case(xgBlock_in%space)
+      case (SPACE_R)
+        do icol=1,ncols_small
+          shift_col_big = shift_col + (icol-1)
+          xgBlock_out%vecR(1+shift_row:end_row,1+shift_col_big) = xgBlock_in%vecR(1:nrows_small,icol)
+        end do
+      case (SPACE_CR)
+        do icol=1,ncols_small
+          shift_col_big = shift_col + (icol-1)
+          xgBlock_out%vecR(1+2*shift_row:2*end_row,1+shift_col_big) = xgBlock_in%vecR(1:2*nrows_small,icol)
+        end do
+      case(SPACE_C)
+        do icol=1,ncols_small
+          shift_col_big = shift_col + (icol-1)
+          xgBlock_out%vecC(1+shift_row:end_row,1+shift_col_big) = xgBlock_in%vecC(1:nrows_small,icol)
+        end do
+      end select
+    else if (option==BIG2SMALL) then ! copy a part of the big matrix in the small one
+      select case(xgBlock_in%space)
+      case (SPACE_R)
+        do icol=1,ncols_small
+          shift_col_big = shift_col + (icol-1)
+          xgBlock_out%vecR(1:nrows_small,icol) = xgBlock_in%vecR(1+shift_row:end_row,1+shift_col_big)
+        end do
+      case (SPACE_CR)
+        if (shift_row>0) xgBlock_out%me_g0 = 0
+        do icol=1,ncols_small
+          shift_col_big = shift_col + (icol-1)
+          xgBlock_out%vecR(1:2*nrows_small,icol) = xgBlock_in%vecR(1+2*shift_row:2*end_row,1+shift_col_big)
+        end do
+      case(SPACE_C)
+        do icol=1,ncols_small
+          shift_col_big = shift_col + (icol-1)
+          xgBlock_out%vecC(1:nrows_small,icol) = xgBlock_in%vecC(1+shift_row:end_row,1+shift_col_big)
+        end do
+      end select
+    else
+      ABI_ERROR('Bad option')
+    end if
+
+    call timab(tim_partialcopy,2,tsec)
+
+  end subroutine xgBlock_partialcopy
+!!***
 
   !!****f* m_xg/xgBlock_pack
   !!
@@ -1915,6 +2052,49 @@ contains
 
   end subroutine xgBlock_gemmC
   !!***
+
+!!****f* m_xg/xgBlock_trmmR
+!!
+!! NAME
+!! xgBlock_trmmR
+
+  subroutine xgBlock_trmmR(side, uplo, transa, diag, alpha, xgBlockA, xgBlockB)
+
+    character, intent(in) :: transa,side,uplo,diag
+    double precision, intent(in) :: alpha
+    type(xgBlock_t), intent(in) :: xgBlockA
+    type(xgBlock_t), intent(inout) :: xgBlockB
+
+    complex(kind=8) :: calpha
+
+    if (xgBlockA%gpu_option/=ABI_GPU_DISABLED) then
+      ABI_ERROR('Not implemented for GPU')
+    end if
+    call xgBlock_check_gpu_option(xgBlockA,xgBlockB)
+
+    if ( xgBlockA%space /= xgBlockB%space .or. xgBlockB%space /= xgBlockB%space ) then
+      ABI_ERROR("Not same space")
+    end if
+
+    select case(xgBlockA%space)
+    case (SPACE_R)
+      call dtrmm(side,uplo,transa,diag,transa,xgBlockB%rows,xgBlockB%cols,&
+        alpha,xgBlockA%vecR, xgBlockA%LDim, &
+        xgBlockB%vecR, xgBlockB%LDim)
+    case (SPACE_CR)
+      ABI_ERROR("Not implemented")
+      !call dtrmm(side,uplo,transa,diag,transa,xgBlockB%rows,xgBlockB%cols,&
+      !  alpha,xgBlockA%vecR, xgBlockA%LDim, &
+      !  xgBlockB%vecR, xgBlockB%LDim)
+    case(SPACE_C)
+      calpha = dcmplx(alpha,0.d0)
+      call ztrmm(side,uplo,transa,diag,transa,xgBlockB%rows,xgBlockB%cols,&
+        calpha,xgBlockA%vecC, xgBlockA%LDim, &
+        xgBlockB%vecC, xgBlockB%LDim)
+    end select
+
+  end subroutine xgBlock_trmmR
+!!***
 
   !!****f* m_xg/xgBlock_potrf
   !!
@@ -3028,6 +3208,65 @@ contains
   end subroutine xgBlock_trsmC
   !!***
 
+  !!****f* m_xg/xgBlock_ymax
+  !!
+  !! NAME
+  !! xgBlock_ymax
+  subroutine xgBlock_ymax(xgBlockA, da, shift, nblocks, nspinor)
+
+    type(xgBlock_t), intent(inout) :: xgBlockA
+    type(xgBlock_t), intent(in   ) :: da
+    integer, intent(in) :: shift,nblocks,nspinor
+
+    integer :: iblock,ispinor,ncols_nospin
+    double precision :: tsec(2)
+
+    call timab(tim_ymax,1,tsec)
+
+    if (xgBlockA%gpu_option/=ABI_GPU_DISABLED) then
+      ABI_ERROR('Not implemented for GPU')
+    end if
+    call xgBlock_check_gpu_option(xgBlockA,da)
+
+    ncols_nospin = xgBlockA%cols / nspinor
+    if ( da%rows /= nblocks*ncols_nospin ) then
+      ABI_ERROR("rows(da)/=nblocks*ncols_nospin")
+    end if
+    if ( shift<0 ) then
+      ABI_ERROR("shift<0")
+    end if
+    if ( shift+ncols_nospin > da%rows ) then
+      ABI_ERROR("shift+xgBlockA%cols > da%rows")
+    end if
+
+    select case(xgBlockA%space)
+    case (SPACE_R)
+      !$omp parallel do shared(da,xgBlockA), &
+      !$omp& schedule(static)
+      do iblock = 1, ncols_nospin
+        do ispinor = 1, nspinor
+          xgBlockA%vecR(:,nspinor*(iblock-1)+ispinor) = - da%vecR(iblock+shift,1) * xgBlockA%vecR(:,nspinor*(iblock-1)+ispinor)
+        end do
+      end do
+      !$omp end parallel do
+    case (SPACE_CR)
+      ABI_ERROR("Not implemented")
+    case (SPACE_C)
+      !$omp parallel do shared(da,xgBlockA), &
+      !$omp& schedule(static)
+      do iblock = 1, ncols_nospin
+        do ispinor = 1, nspinor
+          xgBlockA%vecC(:,nspinor*(iblock-1)+ispinor) = - da%vecR(iblock+shift,1) * xgBlockA%vecC(:,nspinor*(iblock-1)+ispinor)
+        end do
+      end do
+      !$omp end parallel do
+    end select
+
+    call timab(tim_ymax,2,tsec)
+
+  end subroutine xgBlock_ymax
+  !!***
+
   !!****f* m_xg/xgBlock_colwiseCymax
   !!
   !! NAME
@@ -3147,6 +3386,63 @@ contains
   end subroutine xgBlock_colwiseCymax
   !!***
 
+!!****f* m_xg/xgBlock_yxmax
+!!
+!! NAME
+!! xgBlock_yxmax
+
+  subroutine xgBlock_yxmax(xgBlockA, da, xgBlockB)
+
+    type(xgBlock_t), intent(inout) :: xgBlockA
+    type(xgBlock_t), intent(in   ) :: da
+    type(xgBlock_t), intent(in   ) :: xgBlockB
+
+    integer :: iblock
+    double precision :: tsec(2)
+
+    call timab(tim_yxmax,1,tsec)
+
+    if (xgBlockA%gpu_option/=ABI_GPU_DISABLED) then
+      ABI_ERROR('Not implemented for GPU')
+    end if
+    call xgBlock_check_gpu_option(xgBlockA,da)
+    call xgBlock_check_gpu_option(xgBlockA,da)
+
+    if ( xgBlockA%space /= xgBlockB%space ) then
+      ABI_ERROR("Must be same space for ymax")
+    end if
+    if ( xgBlockA%LDim /= xgBlockB%LDim ) then
+      ABI_ERROR("Must have same LDim for ymax")
+    end if
+    if ( xgBlockA%cols /= xgBlockB%cols ) then
+      ABI_ERROR("Must have same cols for ymax")
+    end if
+    if ( da%rows /= xgBlockA%cols ) then
+      ABI_ERROR("Must have same cols for ymax")
+    end if
+
+    select case(xgBlockA%space)
+    case (SPACE_R,SPACE_CR)
+      !$omp parallel do shared(da,xgBlockB,xgBlockA), &
+      !$omp& schedule(static)
+      do iblock = 1, xgBlockA%cols
+        xgBlockA%vecR(:,iblock) = xgBlockA%vecR(:,iblock) - da%vecR(iblock,1) * xgBlockB%vecR(:,iblock)
+      end do
+      !$omp end parallel do
+    case (SPACE_C)
+      !$omp parallel do shared(da,xgBlockB,xgBlockA), &
+      !$omp& schedule(static)
+      do iblock = 1, xgBlockA%cols
+        xgBlockA%vecC(:,iblock) = xgBlockA%vecC(:,iblock) - da%vecR(iblock,1) * xgBlockB%vecC(:,iblock)
+      end do
+      !$omp end parallel do
+    end select
+
+    call timab(tim_yxmax,2,tsec)
+
+  end subroutine xgBlock_yxmax
+!!***
+
   !!****f* m_xg/xgBlock_apply_diag
   !!
   !! NAME
@@ -3191,10 +3487,10 @@ contains
     end if
 
     if (space(diag)==SPACE_R) then
-      call xgBlock_reverseMap_1dR(diag,array)
+      call xgBlock_reverseMap_1dR(diag,array,array_dim=diag%rows)
       call xgBlock_colwiseMulR(Y_spinor,array)
     else if (space(diag)==SPACE_C) then
-      call xgBlock_reverseMap_1dC(diag,arrayc)
+      call xgBlock_reverseMap_1dC(diag,arrayc,array_dim=diag%rows)
       call xgBlock_colwiseMulC(Y_spinor,arrayc)
     end if
 
@@ -3202,6 +3498,99 @@ contains
 
   end subroutine xgBlock_apply_diag
   !!***
+
+!****f* m_xg/xgBlock_add_diag
+!
+! NAME
+! xgBlock_add_diag
+
+  subroutine xgBlock_add_diag(X, diag, nspinor, Y)
+
+    type(xgBlock_t) , intent(in)    :: X
+    type(xgBlock_t) , intent(in)    :: diag
+    integer,          intent(in)    :: nspinor
+    type(xgBlock_t) , intent(inout) :: Y
+
+    integer :: iblock,rows,cols
+    type(xgBlock_t) :: X_spinor, Y_spinor
+    double precision :: tsec(2)
+
+    call timab(tim_add_diag,1,tsec)
+
+    if (X%gpu_option/=ABI_GPU_DISABLED) then
+      ABI_ERROR('Not implemented for GPU')
+    end if
+    call xgBlock_check_gpu_option(X,diag)
+    call xgBlock_check_gpu_option(X,Y)
+
+    if (X%rows/=nspinor*diag%rows) then
+      ABI_ERROR('xgBlock%rows/=nspinor*xgBlock_diag%rows')
+    end if
+    if (diag%cols/=1) then
+      ABI_ERROR('xgBlock_diag should have one column')
+    end if
+    if (diag%space==SPACE_CR) then
+      ABI_ERROR('space(diag) should be SPACE_C or SPACE_R')
+    end if
+    if (X%space==SPACE_R) then
+      if (diag%space/=SPACE_R) then
+        ABI_ERROR('If space(X)==SPACE_R, space(diag) should be SPACE_R')
+      end if
+    end if
+
+    call xgBlock_check(Y,X)
+
+    call xgBlock_reshape_spinor(X,X_spinor,nspinor,ROWS2COLS)
+    call xgBlock_reshape_spinor(Y,Y_spinor,nspinor,ROWS2COLS)
+
+    rows = X_spinor%rows
+    cols = X_spinor%cols
+
+    select case(X%space)
+    case (SPACE_R)
+      !$omp parallel do shared(X_spinor,Y_spinor,diag), &
+      !$omp& schedule(static)
+      do iblock = 1, cols
+        Y_spinor%vecR(1:rows,iblock) = Y_spinor%vecR(1:rows,iblock) &
+          & + X_spinor%vecR(1:rows,iblock) * diag%vecR(1:rows,1)
+      end do
+    case (SPACE_CR)
+      if (diag%space==SPACE_R) then
+        !$omp parallel do shared(X_spinor,Y_spinor,diag), &
+        !$omp& schedule(static)
+        do iblock = 1, cols
+          Y_spinor%vecR(1:2*rows:2,iblock) = Y_spinor%vecR(1:2*rows:2,iblock) &
+            & + X_spinor%vecR(1:2*rows:2,iblock) * diag%vecR(1:rows,1)
+          Y_spinor%vecR(2:2*rows:2,iblock) = Y_spinor%vecR(2:2*rows:2,iblock) &
+            & + X_spinor%vecR(2:2*rows:2,iblock) * diag%vecR(1:rows,1)
+        end do
+      else
+        ABI_ERROR('Not implemented')
+      end if
+    case (SPACE_C)
+      if (diag%space==SPACE_C) then
+        !$omp parallel do shared(X_spinor,Y_spinor,diag), &
+        !$omp& schedule(static)
+        do iblock = 1, cols
+          Y_spinor%vecC(1:rows,iblock) = Y_spinor%vecC(1:rows,iblock) &
+            & + X_spinor%vecC(1:rows,iblock) * diag%vecC(1:rows,1)
+        end do
+      else if (diag%space==SPACE_R) then
+        !$omp parallel do shared(X_spinor,Y_spinor,diag), &
+        !$omp& schedule(static)
+        do iblock = 1, cols
+          Y_spinor%vecC(1:rows,iblock) = Y_spinor%vecC(1:rows,iblock) &
+            & + X_spinor%vecC(1:rows,iblock) * diag%vecR(1:rows,1)
+        end do
+      else
+        ABI_ERROR('Not implemented')
+      end if
+    end select
+
+    call timab(tim_add_diag,2,tsec)
+
+  end subroutine xgBlock_add_diag
+!!***
 
   !!****f* m_xg/xgBlock_mpi_sum
   !!
@@ -3358,52 +3747,214 @@ contains
   end subroutine xgBlock_mpi_sum
   !!***
 
-  !!****f* m_xg/xgBlock_invert_tri
+  !!****f* m_xg/xgBlock_mpi_send
   !!
   !! NAME
-  !! xgBlock_invert_tri
+  !! xgBlock_mpi_send
 
-  subroutine xgBlock_invert_tri(uplo,diag,xgBlock)
+  subroutine xgBlock_mpi_send(xgBlock,dest,tag,comm)
 
-    type(xgBlock_t), intent(inout) :: xgBlock
-    character, intent(in) :: uplo,diag
+    type(xgBlock_t) , intent(in) :: xgBlock
+    integer,intent(in) :: dest,tag
+    integer,intent(in),optional :: comm
 
-    integer :: info
+    integer :: ierr,comm_
+    real(dp), pointer :: vec(:,:)
+
+    if (xgBlock%gpu_option/=ABI_GPU_DISABLED) then
+      ABI_ERROR('Not implemented for GPU')
+    end if
+
+    if (.not.present(comm)) then
+      comm_ = xgBlock%spacedim_comm
+    else
+      comm_ = comm
+    end if
+
+    call xgBlock_reverseMap(xgBlock,vec)
+    call xmpi_send(vec,dest,tag,comm_,ierr)
+
+  end subroutine xgBlock_mpi_send
+  !!***
+
+  !!****f* m_xg/xgBlock_mpi_isend
+  !!
+  !! NAME
+  !! xgBlock_mpi_isend
+
+  subroutine xgBlock_mpi_isend(xgBlock,dest,tag,request,comm)
+
+    type(xgBlock_t) , intent(in) :: xgBlock
+    integer,intent(in) :: dest,tag
+    integer,intent(inout) :: request
+    integer,intent(in),optional :: comm
+
+    integer :: ierr,comm_
+    real(dp), pointer :: vec(:,:)
+
+    if (xgBlock%gpu_option/=ABI_GPU_DISABLED) then
+      ABI_ERROR('Not implemented for GPU')
+    end if
+
+    if (.not.present(comm)) then
+      comm_ = xgBlock%spacedim_comm
+    else
+      comm_ = comm
+    end if
+
+    call xgBlock_reverseMap(xgBlock,vec)
+    call xmpi_isend(vec,dest,tag,comm_,request,ierr)
+
+  end subroutine xgBlock_mpi_isend
+  !!***
+
+  !!****f* m_xg/xgBlock_mpi_recv
+  !!
+  !! NAME
+  !! xgBlock_mpi_recv
+
+  subroutine xgBlock_mpi_recv(xgBlock,source,tag,comm)
+
+    type(xgBlock_t) , intent(inout) :: xgBlock
+    integer,intent(in) :: source,tag
+    integer,intent(in),optional :: comm
+
+    integer :: ierr,comm_
+    real(dp), pointer :: vec(:,:)
+
+    if (xgBlock%gpu_option/=ABI_GPU_DISABLED) then
+      ABI_ERROR('Not implemented for GPU')
+    end if
+
+    if (.not.present(comm)) then
+      comm_ = xgBlock%spacedim_comm
+    else
+      comm_ = comm
+    end if
+
+    call xgBlock_reverseMap(xgBlock,vec)
+    call xmpi_recv(vec,source,tag,comm_,ierr)
+
+  end subroutine xgBlock_mpi_recv
+  !!***
+
+  !!****f* m_xg/xgBlock_gemm_mpi_cyclic_permutation
+  !!
+  !! NAME
+  !! xgBlock_gemm_mpi_cyclic_permutation
+
+  subroutine xgBlock_gemm_mpi_cyclic_permutation(xgBlockA,xgBlockB,xgBlockW,me_comm,blocksize,comm)
+
+    type(xgBlock_t) , intent(in)    :: xgBlockA,xgBlockB
+    type(xgBlock_t) , intent(inout) :: xgBlockW
+    integer,intent(in) :: blocksize,me_comm
+    integer,intent(in),optional :: comm
+
+    logical :: multiblock
+    integer :: ierr,comm_,source,dest,tag,request
+    integer :: iblock_left,iblock_right,iblock_mpi,nblocks_mpi,nblocks_left,nblocks_right
+    integer :: shift_col,shift_row,shift_col_mpi,shift_row_mpi
     double precision :: tsec(2)
+    type(xg_t) :: xg_mpi_work
+    type(xg_t) :: subB,subB_mpi
 
-    call timab(tim_invertri,1,tsec)
+    call timab(tim_gemmcyclic,1,tsec)
 
-    if (xgBlock%rows/=xgBlock%cols) then
-      ABI_ERROR('nrows/=ncols')
+    if (xgBlockA%gpu_option/=ABI_GPU_DISABLED) then
+      ABI_ERROR('Not implemented for GPU')
+    end if
+    call xgBlock_check_gpu_option(xgBlockA,xgBlockB)
+    call xgBlock_check_gpu_option(xgBlockA,xgBlockW)
+
+    if (.not.present(comm)) then
+      comm_ = xgBlockA%spacedim_comm
+    else
+      comm_ = comm
     end if
 
-    if (xgBlock%gpu_option==ABI_GPU_KOKKOS) then
-      ABI_ERROR('Not implemented for GPU Kokkos')
-    end if
-    if (xgBlock%gpu_option==ABI_GPU_OPENMP) then
-      call xgBlock_copy_from_gpu(xgBlock) !FIXME Avoid that transfer
-    end if
+    nblocks_mpi = xmpi_comm_size(comm_)
 
-    select case(xgBlock%space)
-    case (SPACE_R)
-      call DTRTRI(uplo,diag,xgBlock%rows,xgBlock%vecR,xgBlock%LDim,info)
-    case (SPACE_CR)
-      ABI_ERROR("Not implemented")
-    case (SPACE_C)
-      call ZTRTRI(uplo,diag,xgBlock%rows,xgBlock%vecC,xgBlock%LDim,info)
-    end select
-
-    if (xgBlock%gpu_option==ABI_GPU_OPENMP) then
-      call xgBlock_copy_to_gpu(xgBlock) !FIXME Avoid that transfer
+    if (xgBlockA%rows/=xgBlockW%rows) then
+      ABI_ERROR('rows(xgBlockA)/=rows(xgBlockW)')
+    end if
+    if (xgBlockB%rows/=nblocks_mpi*xgBlockA%cols) then
+      ABI_ERROR('rows(xgBlockB)/=nblocks_mpi*cols(xgBlockA)')
+    end if
+    if (xgBlockB%cols/=nblocks_mpi*xgBlockW%cols) then
+      ABI_ERROR('cols(xgBlockB)/=nblocks_mpi*cols(xgBlockW)')
     end if
 
-    if (info/=0) then
-      ABI_ERROR('info/=0 : something bad happened in xtrtri')
+    if (nblocks_mpi==1) then
+
+      call timab(tim_gemmcyclic,2,tsec)
+      call xgBlock_gemm('n','n',1.0d0,xgBlockA,xgBlockB,1.d0,xgBlockW)
+      call timab(tim_gemmcyclic,1,tsec)
+
+    else
+
+      nblocks_left  = xgBlockA%cols / blocksize
+      nblocks_right = xgBlockB%cols / (blocksize*nblocks_mpi)
+      multiblock = .false.
+      if (nblocks_left>1.or.nblocks_right>1) then
+        multiblock = .true.
+      end if
+
+      call xg_init(xg_mpi_work,xgBlockA%space,xgBlockA%rows,xgBlockA%cols,xmpi_comm_null)
+      call xg_init(subB_mpi,xgBlockB%space,xgBlockB%rows/nblocks_mpi,xgBlockB%cols/nblocks_mpi,xmpi_comm_null)
+      if (multiblock) then
+        call xg_init(subB,xgBlockB%space,blocksize,blocksize,xmpi_comm_null)
+      end if
+
+      do iblock_mpi=1,nblocks_mpi
+
+        shift_row_mpi = mod((iblock_mpi-1)+me_comm,nblocks_mpi) * blocksize
+        shift_col_mpi = me_comm * blocksize
+        if (.not.multiblock) then
+          call xgBlock_partialcopy(xgBlockB,subB_mpi%self,shift_row_mpi,shift_col_mpi,BIG2SMALL)
+        else
+          do iblock_right=1,nblocks_right
+            do iblock_left=1,nblocks_left
+              shift_row = shift_row_mpi + (iblock_left-1) * blocksize*nblocks_mpi
+              shift_col = shift_col_mpi + (iblock_right-1) * blocksize*nblocks_mpi
+              call xgBlock_partialcopy(xgBlockB,subB%self,shift_row,shift_col,BIG2SMALL)
+              shift_row = (iblock_left-1) * blocksize
+              shift_col = (iblock_right-1) * blocksize
+              call xgBlock_partialcopy(subB%self,subB_mpi%self,shift_row,shift_col,SMALL2BIG)
+            end do
+          end do
+        end if
+
+        if (iblock_mpi==1) then
+          call timab(tim_gemmcyclic,2,tsec)
+          call xgBlock_gemm('n','n',1.0d0,xgBlockA,subB_mpi%self,1.d0,xgBlockW)
+          call timab(tim_gemmcyclic,1,tsec)
+        else
+          tag = iblock_mpi
+          dest = mod(me_comm-(iblock_mpi-1),nblocks_mpi)
+          if (dest<0) dest=dest+nblocks_mpi
+          call xgBlock_mpi_isend(xgBlockA,dest,tag,request,comm=comm_)
+          source = mod(me_comm+(iblock_mpi-1),nblocks_mpi)
+          call xgBlock_mpi_recv(xg_mpi_work%self,source,tag,comm=comm_)
+          call timab(tim_gemmcyclic,2,tsec)
+          call xgBlock_gemm('n','n',1.0d0,xg_mpi_work%self,subB_mpi%self,1.d0,xgBlockW)
+          call timab(tim_gemmcyclic,1,tsec)
+        end if
+
+        if (iblock_mpi>1) call xmpi_wait(request,ierr)
+
+      end do
+
+      call xg_free(xg_mpi_work)
+      call xg_free(subB_mpi)
+      if (multiblock) then
+        call xg_free(subB)
+      end if
+
     end if
 
-    call timab(tim_invertri,2,tsec)
+    call timab(tim_gemmcyclic,2,tsec)
 
-  end subroutine xgBlock_invert_tri
+  end subroutine xgBlock_gemm_mpi_cyclic_permutation
   !!***
 
   !!****f* m_xg/xgBlock_colwiseMulR
@@ -3757,6 +4308,9 @@ contains
     real(dp), ABI_CONTIGUOUS pointer :: xgBlockA__vecR(:,:), xgBlockB__vecR(:,:)
     complex(dpc), ABI_CONTIGUOUS pointer :: xgBlockA__vecC(:,:), xgBlockB__vecC(:,:)
 #endif
+    double precision :: tsec(2)
+
+    call timab(tim_add,1,tsec)
 
     if ( xgBlockA%space /= xgBlockB%space ) then
       ABI_ERROR("Must be same space for add")
@@ -3819,6 +4373,8 @@ contains
         !call zaxpy(xgBlockA%cols*xgBlockA%LDim,1.d0,xgBlockB%vecR,1,xgBlockA%vecR1)
       end select
     end if
+
+    call timab(tim_add,2,tsec)
 
   end subroutine xgBlock_add
   !!***
@@ -4056,16 +4612,17 @@ contains
   !! NAME
   !! xgBlock_colwiseDotProduct
 
-  subroutine xgBlock_colwiseDotProduct(xgBlockA,xgBlockB,dot,max_val,max_elt,min_val,min_elt)
+  subroutine xgBlock_colwiseDotProduct(xgBlockA,xgBlockB,dot,max_val,max_elt,min_val,min_elt,comm_loc)
 
     type(xgBlock_t)  , intent(in   ) :: xgBlockA
     type(xgBlock_t)  , intent(in   ) :: xgBlockB
     type(xgBlock_t)  , intent(inout) :: dot
+    integer, intent(in), optional :: comm_loc
     double precision , intent(  out), optional :: max_val
     integer          , intent(  out), optional :: max_elt
     double precision , intent(  out), optional :: min_val
     integer          , intent(  out), optional :: min_elt
-    integer :: icol,fact
+    integer :: icol,fact,comm_
     double precision,external :: ddot
     double complex,external :: zdotc !conjugated dot product
 
@@ -4080,8 +4637,14 @@ contains
     call timab(tim_colw_dot,1,tsec)
 
     call xgBlock_check(xgBlockA,xgBlockB)
-    if (comm(xgBlockA)/=comm(xgBlockB)) then
-      ABI_ERROR('xgBlockA and xgBlockB should have the same comm')
+
+    comm_=comm(xgBlockA)
+    if (present(comm_loc)) then
+      comm_ = comm_loc
+    else
+      if (comm(xgBlockA)/=comm(xgBlockB)) then
+        ABI_ERROR('xgBlockA and xgBlockB should have the same comm')
+      end if
     end if
     call xgBlock_check_gpu_option(xgBlockA,xgBlockB)
     call xgBlock_check_gpu_option(xgBlockA,dot)
@@ -4338,7 +4901,7 @@ contains
 
     end if ! gpu_option
 
-    call xgBlock_mpi_sum(dot,comm=comm(xgBlockA))
+    call xgBlock_mpi_sum(dot,comm=comm_)
 
     call timab(tim_colw_dot,2,tsec)
 
@@ -4758,6 +5321,146 @@ contains
   end subroutine xgBlock_scaleC
   !!***
 
+  !!****f* m_xg/xgBlock_transpose
+  !!
+  !! NAME
+  !! xgBlock_transpose
+
+  subroutine xgBlock_transpose(xgBlockI,xgBlockO)
+
+    type(xgBlock_t) , intent(inout) :: xgBlockI,xgBlockO
+    integer :: nrows,ncols
+
+    if (xgBlockI%gpu_option/=ABI_GPU_DISABLED) then
+      ABI_ERROR('Not implemented for GPU')
+    end if
+    call xgBlock_check_gpu_option(xgBlockI,xgBlockO)
+
+    nrows = xgBlockI%rows
+    ncols = xgBlockI%cols
+    if (nrows/=xgBlockO%cols) then
+      ABI_ERROR('nrowsI/=ncolsO')
+    end if
+    if (ncols/=xgBlockO%rows) then
+      ABI_ERROR('ncolsI/=nrowsO')
+    end if
+
+    select case(xgBlockI%space)
+    case (SPACE_R)
+      xgBlockO%vecR = TRANSPOSE(xgBlockI%vecR)
+    case (SPACE_CR)
+      ABI_ERROR("Not implemented")
+    case (SPACE_C)
+      xgBlockO%vecC = TRANSPOSE(CONJG(xgBlockI%vecC))
+    end select
+
+  end subroutine xgBlock_transpose
+  !!***
+
+  !!****f* m_xg/xgBlock_r2c
+  !!
+  !! NAME
+  !! xgBlock_r2c
+
+  subroutine xgBlock_r2c(xgBlockR,xgBlockC,nspinor)
+
+    integer         , intent(in) :: nspinor
+    type(xgBlock_t) , intent(in) :: xgBlockR
+    type(xgBlock_t) , intent(inout) :: xgBlockC
+    integer :: nrows,ncols,col
+    double precision,allocatable :: zeros(:)
+
+    if (xgBlockR%gpu_option/=ABI_GPU_DISABLED) then
+      ABI_ERROR('Not implemented for GPU')
+    end if
+    call xgBlock_check_gpu_option(xgBlockR,xgBlockC)
+
+    if (space(xgBlockR)/=SPACE_R) then
+      ABI_ERROR('space(xgBlockR)/=SPACE_R')
+    end if
+    if (space(xgBlockC)/=SPACE_C .and. space(xgBLockC)/=SPACE_CR) then
+      ABI_ERROR('space(xgBlockC)/=SPACE_C')
+    end if
+    if (space(xgBlockC)==SPACE_CR .and. nspinor/=1) then
+      ABI_ERROR('This should not happen')
+    end if
+
+    nrows = xgBlockR%rows
+    ncols = xgBlockR%cols
+    if (nspinor*nrows/=xgBlockC%rows) then
+      ABI_ERROR('nspinor*nrowsR/=nrowsC')
+    end if
+    if (nspinor*ncols/=xgBlockC%cols) then
+      ABI_ERROR('nspinor*ncolsR/=ncolsC')
+    end if
+
+    if (space(xgBlockC)==SPACE_C) then
+      ABI_MALLOC(zeros,(nrows))
+      zeros=zero
+      do col = 1,ncols
+        xgBlockC%vecC(1:nrows,col) = dcmplx(xgBlockR%vecR(1:nrows,col),zeros)
+        if (nspinor==2) then
+          xgBlockC%vecC(1+nrows:2*nrows,col      ) = dcmplx(zeros,zeros)
+          xgBlockC%vecC(1      :  nrows,col+ncols) = dcmplx(zeros,zeros)
+          xgBlockC%vecC(1+nrows:2*nrows,col+ncols) = dcmplx(xgBlockR%vecR(1:nrows,col),zeros)
+        end if
+      end do
+      ABI_FREE(zeros)
+    else ! space(C)==SPACE_CR
+      do col = 1,ncols
+        xgBlockC%vecR(1:2*nrows-1:2,col) = xgBlockR%vecR(1:nrows,col)
+        xgBlockC%vecR(2:2*nrows  :2,col) = zero
+      end do
+    end if
+
+  end subroutine xgBlock_r2c
+  !!***
+
+  !!****f* m_xg/xgBlock_c2r
+  !!
+  !! NAME
+  !! xgBlock_c2r
+
+  subroutine xgBlock_c2r(xgBlockC,xgBlockR)
+
+    type(xgBlock_t) , intent(in) :: xgBlockC
+    type(xgBlock_t) , intent(inout) :: xgBlockR
+    integer :: nrows,ncols,col
+
+    if (xgBlockR%gpu_option/=ABI_GPU_DISABLED) then
+      ABI_ERROR('Not implemented for GPU')
+    end if
+    call xgBlock_check_gpu_option(xgBlockR,xgBlockC)
+
+    if (space(xgBlockR)/=SPACE_R) then
+      ABI_ERROR('space(xgBlockR)/=SPACE_R')
+    end if
+    if (space(xgBlockC)/=SPACE_C .and. space(xgBLockC)/=SPACE_CR) then
+      ABI_ERROR('space(xgBlockC)/=SPACE_C')
+    end if
+
+    nrows = xgBlockR%rows
+    ncols = xgBlockR%cols
+    if (nrows/=xgBlockC%rows) then
+      ABI_ERROR('nrowsR/=nrowsC')
+    end if
+    if (ncols/=xgBlockC%cols) then
+      ABI_ERROR('ncolsR/=ncolsC')
+    end if
+
+    if (space(xgBlockC)==SPACE_C) then
+      do col = 1,ncols
+        xgBlockR%vecR(1:nrows,col) = dble(xgBlockC%vecC(1:nrows,col))
+      end do
+    else ! space(C)==SPACE_CR
+      do col = 1,ncols
+        xgBlockR%vecR(1:nrows,col) = xgBlockC%vecR(1:2*nrows-1:2,col)
+      end do
+    end if
+
+  end subroutine xgBlock_c2r
+  !!***
+
   !!****f* m_xg/xgBlock_getSize
   !!
   !! NAME
@@ -4928,7 +5631,7 @@ contains
   subroutine xgBlock_reshape_spinor(xgBlock,xgBlock_spinor,nspinor,option)
     use iso_c_binding
     integer, intent(in   ) :: nspinor,option
-    type(xgBlock_t), intent(inout) :: xgBlock
+    type(xgBlock_t), intent(in   ) :: xgBlock
     type(xgBlock_t), intent(inout) :: xgBlock_spinor
 
     integer :: nrows,ncols
@@ -4962,6 +5665,66 @@ contains
   end subroutine xgBlock_reshape_spinor
   !!***
 
+  !!****f* m_xg/xgBlock_free_reshape
+  !!
+  !! NAME
+  !! xgBlock_free_reshape
+  subroutine xgBlock_free_reshape(xgBlock,newrows,newcols,newldim,new_me_g0)
+    use iso_c_binding
+    type(xgBlock_t) , intent(inout) :: xgBlock
+    integer         , intent(in   ) :: newrows,newcols
+    integer,optional, intent(in   ) :: newldim
+    integer,optional, intent(in   ) :: new_me_g0
+
+    integer :: newshape(2)
+    type(c_ptr) :: cptr
+
+    if (newrows<1.or.newcols<1) then
+      ABI_ERROR("Bad new shape")
+    end if
+
+    if ( xgBLock%Ldim*xgBlock%cols < newrows*newcols ) then
+      write(std_out,*) "xgBLock%rows", xgBLock%rows
+      write(std_out,*) "xgBlock%cols", xgBlock%cols
+      write(std_out,*) "newrows", newrows
+      write(std_out,*) "newcols", newcols
+      write(std_out,*) "xgBLock%rows*xgBlock%cols", xgBLock%rows*xgBlock%cols
+      write(std_out,*) "newrows*newcols", newrows*newcols
+      ABI_ERROR("Bad shape (ldim*cols<newrows*newcols")
+    end if
+
+    xgBlock%LDim = newrows
+    if (present(newldim)) then
+      if (newldim<newrows) then
+        ABI_ERROR("newldim<newrows")
+      end if
+      if ( xgBLock%Ldim*xgBlock%cols < newldim*newcols ) then
+        ABI_ERROR("Bad shape (ldim*cols<newldim*newcols")
+      end if
+      xgBlock%LDim = newldim
+    end if
+    xgBlock%rows = newrows
+    xgBlock%cols = newcols
+    newshape(1)  = newrows
+    newshape(2)  = newcols
+    select case(xgBLock%space)
+    case (SPACE_R)
+      cptr = getClocR(xgBlock%LDim,xgBlock%cols,xgBlock%vecR)
+      call c_f_pointer(cptr,xgBlock%vecR,newshape)
+    case (SPACE_CR)
+      cptr = getClocR(2*xgBlock%LDim,xgBlock%cols,xgBlock%vecR)
+      newshape(1) = 2*newshape(1)
+      call c_f_pointer(cptr,xgBlock%vecR,newshape)
+      if (present(new_me_g0)) then
+        xgBlock%me_g0=new_me_g0
+      end if
+    case (SPACE_C)
+      cptr = getClocC(xgBlock%LDim,xgBlock%cols,xgBlock%vecC)
+      call c_f_pointer(cptr,xgBlock%vecC,newshape)
+    end select
+  end subroutine xgBlock_free_reshape
+  !!***
+
   !!****f* m_xg/xgBlock_zero
   !!
   !! NAME
@@ -4984,7 +5747,7 @@ contains
     double precision :: tsec(2)
 
     call timab(tim_zero,1,tsec)
-    
+
     fact = 1 ; if (xgBlock%space==SPACE_CR) fact = 2
 
     if (xgBlock%gpu_option==ABI_GPU_KOKKOS) then
@@ -5191,6 +5954,261 @@ contains
     call timab(tim_zero_im_g0,2,tsec)
 
   end subroutine xgBlock_zero_im_g0
+  !!***
+
+  !!****f* m_xg/xgBlock_invert
+  !!
+  !! NAME
+  !! xgBlock_invert
+
+  subroutine xgBlock_invert(xgBlockA,xgBlockW,xg_input)
+
+    type(xgBlock_t), intent(inout) :: xgBlockA,xgblockW
+    type(xgBlock_t), optional,intent(in) :: xg_input
+
+    integer :: nn,nrows,info,ldim
+    integer,allocatable :: ipiv(:)
+    double precision :: tsec(2)
+
+    call timab(tim_invert,1,tsec)
+
+    if (xgBlockA%gpu_option/=ABI_GPU_DISABLED) then
+      ABI_ERROR('Not implemented for GPU')
+    end if
+    call xgBlock_check_gpu_option(xgBlockA,xgBlockW)
+    if (present(xg_input)) then
+      call xgBlock_check_gpu_option(xgBlockA,xg_input)
+    end if
+
+    call xgBlock_getsize(xgBlockA,nrows,nn,ldim=ldim)
+    if (nrows/=nn) then
+      ABI_ERROR('nrows/=ncols')
+    end if
+    if (cols(xgBlockW)/=nn) then
+      ABI_ERROR('cols(xgBlockW)/=ncols')
+    end if
+    if (rows(xgBlockW)/=nn) then
+      ABI_ERROR('rows(xgBlockW)/=nrows')
+    end if
+
+    if (present(xg_input)) then
+      if (cols(xg_input)/=nn) then
+        ABI_ERROR('cols(xgBlockB)/=ncols')
+      end if
+      if (rows(xg_input)/=nn) then
+        ABI_ERROR('rows(xgBlockB)/=nrows')
+      end if
+      call xgBlock_copy(xg_input,xgBlockA)
+    end if
+
+    ABI_MALLOC(ipiv,(nn))
+
+    select case(xgBlockA%space)
+    case (SPACE_R)
+      call DGETRF(nn,nn,xgBlockA%vecR,ldim,ipiv,info)
+      if (info==0) then
+        call DGETRI(nn,xgBlockA%vecR,ldim,ipiv,xgBlockW%vecR,nn,info)
+      else
+        ABI_ERROR('info/=0 : something bad happened in xgetrf')
+      end if
+    case (SPACE_CR)
+      ABI_ERROR("Not implemented")
+      !call DGETRF(nn,nn,xgBlockA%vecR,ldim,ipiv,info)
+      !if (info==0) then
+      !  call DGETRI(nn,xgBlockA%vecR,ldim,ipiv,xgBlockW%vecR,nn,info)
+      !else
+      !  ABI_ERROR('info/=0 : something bad happened in xgetrf')
+      !end if
+    case (SPACE_C)
+      call ZGETRF(nn,nn,xgBlockA%vecC,ldim,ipiv,info)
+      if (info==0) then
+        call ZGETRI(nn,xgBlockA%vecC,ldim,ipiv,xgBlockW%vecC,nn,info)
+      else
+        ABI_ERROR('info/=0 : something bad happened in xgetrf')
+      end if
+    end select
+
+    ABI_FREE(ipiv)
+
+    if (info/=0) then
+      ABI_ERROR('info/=0 : something bad happened in xgetri')
+    end if
+
+    call timab(tim_invert,2,tsec)
+
+  end subroutine xgBlock_invert
+  !!***
+
+  !!****f* m_xg/xgBlock_invert_sy
+  !!
+  !! NAME
+  !! xgBlock_invert_sy
+
+  subroutine xgBlock_invert_sy(xgBlockA,xgBlockW,xg_input)
+
+    type(xgBlock_t), intent(inout)       :: xgBlockA,xgblockW
+    type(xgBlock_t), optional,intent(in) :: xg_input
+
+    integer :: nn,nrows,ldim,info
+    integer :: ii,jj
+    integer,allocatable :: ipiv(:)
+    double precision :: tsec(2)
+
+    call timab(tim_invert_sy,1,tsec)
+
+    if (xgBlockA%gpu_option/=ABI_GPU_DISABLED) then
+      ABI_ERROR('Not implemented for GPU')
+    end if
+    call xgBlock_check_gpu_option(xgBlockA,xgBlockW)
+    if (present(xg_input)) then
+      call xgBlock_check_gpu_option(xgBlockA,xg_input)
+    end if
+
+    call xgBlock_getsize(xgBlockA,nrows,nn,ldim=ldim)
+    if (nrows/=nn) then
+      ABI_ERROR('nrows/=ncols')
+    end if
+    if (cols(xgBlockW)/=nn) then
+      ABI_ERROR('cols(xgBlockW)/=ncols')
+    end if
+    if (rows(xgBlockW)/=nn) then
+      ABI_ERROR('rows(xgBlockW)/=nrows')
+    end if
+
+    if (present(xg_input)) then
+      if (cols(xg_input)/=nn) then
+        ABI_ERROR('cols(xg_input)/=ncols')
+      end if
+      if (rows(xg_input)/=nn) then
+        ABI_ERROR('rows(xg_input)/=nrows')
+      end if
+      call xgBlock_copy(xg_input,xgBlockA)
+    end if
+
+    ABI_MALLOC(ipiv,(nn))
+
+    select case(xgBlockA%space)
+    case (SPACE_R)
+      call DSYTRF('U',nn,xgBlockA%vecR,ldim,ipiv,xgBlockW%vecR,nn,info)
+      if (info==0) then
+        call DSYTRI('U',nn,xgBlockA%vecR,ldim,ipiv,xgBlockW%vecR,info)
+        if (info/=0) then
+          ABI_ERROR('info/=0 : something bad happened in dsytri')
+        end if
+      else
+        ABI_ERROR('info/=0 : something bad happened in dsytrf')
+      end if
+      ! complete the matrix
+      do ii=1, nn
+        do jj=1, ii-1
+           xgBlockA%vecR(ii,jj) = xgBlockA%vecR(jj,ii)
+        end do
+      end do
+    case (SPACE_CR)
+      ABI_ERROR("Not implemented")
+    case (SPACE_C)
+      call ZHETRF('U',nn,xgBlockA%vecC,ldim,ipiv,xgBlockW%vecC,nn,info)
+      if (info==0) then
+        call ZHETRI('U',nn,xgBlockA%vecC,ldim,ipiv,xgBlockW%vecC,info)
+        if (info/=0) then
+          ABI_ERROR('info/=0 : something bad happened in zhetri')
+        end if
+      else
+        ABI_ERROR('info/=0 : something bad happened in zhetrf')
+      end if
+      ! complete the matrix
+      do ii=1, nn
+        do jj=1, ii-1
+           xgBlockA%vecC(ii,jj) = CONJG(xgBlockA%vecC(jj,ii))
+        end do
+      end do
+    end select
+
+    ABI_FREE(ipiv)
+
+    call timab(tim_invert_sy,2,tsec)
+
+  end subroutine xgBlock_invert_sy
+  !!***
+
+  !!****f* m_xg/xgBlock_invert_tri
+  !!
+  !! NAME
+  !! xgBlock_invert_tri
+
+  subroutine xgBlock_invert_tri(uplo,diag,xgBlock)
+
+    type(xgBlock_t), intent(inout) :: xgBlock
+    character, intent(in) :: uplo,diag
+
+    integer :: info
+    double precision :: tsec(2)
+
+    call timab(tim_invertri,1,tsec)
+
+    if (xgBlock%rows/=xgBlock%cols) then
+      ABI_ERROR('nrows/=ncols')
+    end if
+
+    if (xgBlock%gpu_option==ABI_GPU_KOKKOS) then
+      ABI_ERROR('Not implemented for GPU Kokkos')
+    end if
+    if (xgBlock%gpu_option==ABI_GPU_OPENMP) then
+      call xgBlock_copy_from_gpu(xgBlock) !FIXME Avoid that transfer
+    end if
+
+    select case(xgBlock%space)
+    case (SPACE_R)
+      call DTRTRI(uplo,diag,xgBlock%rows,xgBlock%vecR,xgBlock%LDim,info)
+    case (SPACE_CR)
+      ABI_ERROR("Not implemented")
+    case (SPACE_C)
+      call ZTRTRI(uplo,diag,xgBlock%rows,xgBlock%vecC,xgBlock%LDim,info)
+    end select
+
+    if (xgBlock%gpu_option==ABI_GPU_OPENMP) then
+      call xgBlock_copy_to_gpu(xgBlock) !FIXME Avoid that transfer
+    end if
+
+    if (info/=0) then
+      ABI_ERROR('info/=0 : something bad happened in xtrtri')
+    end if
+
+    call timab(tim_invertri,2,tsec)
+
+  end subroutine xgBlock_invert_tri
+  !!***
+
+  !!****f* m_xg/xgBlock_yxpa
+  !!
+  !! NAME
+  !! xgBlock_yxpa
+
+  subroutine xgBlock_yxpa(xgBlockA,xgBlockB,aa)
+
+    double precision,intent(in) :: aa
+    type(xgBlock_t), intent(in) :: xgBlockA
+    type(xgBlock_t), intent(inout) :: xgBlockB
+
+    integer :: nrows
+
+    if (xgBlockA%gpu_option/=ABI_GPU_DISABLED) then
+      ABI_ERROR('Not implemented for GPU')
+    end if
+    call xgBlock_check_gpu_option(xgBlockA,xgBlockB)
+
+    nrows = rows(xgBlockA)
+
+    select case(xgBlockA%space)
+    case (SPACE_R)
+      xgBlockB%vecR(1:nrows,:) = xgBlockA%vecR(1:nrows,:) + aa
+    case (SPACE_CR)
+      xgBlockB%vecR(1:2*nrows,:) = xgBlockA%vecR(1:2*nrows,:) + aa
+    case (SPACE_C)
+      xgBlockB%vecC(1:nrows,:) = xgBlockA%vecC(1:nrows,:) + aa*(1.0d0,1.0d0)
+    end select
+
+  end subroutine xgBlock_yxpa
   !!***
 
   !!****f* m_xg/xgBlock_one

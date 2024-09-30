@@ -40,6 +40,9 @@ module m_cgprj
  use m_time,           only : timab
  use m_io_tools,       only : flush_unit
 
+ use m_xg
+ use m_xg_nonlop
+
  implicit none
 
  private
@@ -48,6 +51,10 @@ module m_cgprj
  public :: getcprj
  public :: cprj_rotate
  public :: ctocprj
+ public :: xg_cprj_copy
+
+ integer,parameter,public :: XG_TO_CPRJ=1
+ integer,parameter,public :: CPRJ_TO_XG=2
 !!***
 
 contains
@@ -1046,6 +1053,115 @@ contains
 
  end subroutine cprj_rotate
 !!***
+
+ subroutine xg_cprj_copy(cprj,xg_cprj,xg_nonlop,option)
+ 
+   implicit none
+ 
+   integer, intent(in) :: option
+   type(pawcprj_type),intent(inout)   :: cprj(:,:)
+   type(xgBlock_t), intent(inout) :: xg_cprj
+   type(xg_nonlop_t), intent(in)  :: xg_nonlop
+ 
+   real(dp),pointer :: cprj_contiguous(:,:)
+   integer :: cplex,iatom,iband,iband_spin,ilmn,ispinor
+   integer :: natom,nband_cprj,nlmn,nspinor
+   integer :: start,end,space_cprj
+   integer,allocatable :: nlmn_shift(:)
+ 
+   if (option/=XG_TO_CPRJ.and.option/=CPRJ_TO_XG) then
+     ABI_ERROR('Bad option')
+   end if
+ 
+   natom   = xg_nonlop%natom
+   nspinor = xg_nonlop%nspinor
+ 
+   nband_cprj   = cols(xg_cprj)/nspinor
+ 
+   if (size(cprj,1)/=natom) then
+     ABI_ERROR('Bad size for cprj (for dim=1)')
+   end if
+   if (size(cprj,2)/=nband_cprj*nspinor) then
+     ABI_ERROR('Bad size for cprj (for dim=2)')
+   end if
+ 
+   space_cprj = space(xg_cprj)
+   cplex=2;if (space_cprj==SPACE_R) cplex=1
+ 
+   call xgBlock_reverseMap(xg_cprj,cprj_contiguous)
+ 
+   if (size(cprj_contiguous,1)/=cplex*xg_nonlop%cprjdim) then
+     ABI_ERROR('Bad size for cprj_contiguous (for dim=1)')
+   end if
+ 
+   ABI_MALLOC(nlmn_shift,(natom))
+   nlmn_shift(1) = 0
+   ! Check nlm for every atom and fill nlmn_shift
+   do iband=1,nband_cprj
+     do ispinor=1,nspinor
+       iband_spin = (iband-1)*nspinor+ispinor
+       do iatom=1,natom
+         nlmn=xg_nonlop%nlmn_natom(iatom)
+         if (size(cprj(iatom,iband_spin)%cp)/=2*nlmn) then ! NOTE: cprj%cp size is always (2,nlmn) even in the real case
+           ABI_ERROR('Bad size for cprj_cwavef_bands%cp')
+         end if
+         if (iatom<natom) then
+           nlmn_shift(iatom+1) = nlmn_shift(iatom) + nlmn
+         end if
+       end do
+     end do
+   end do
+
+   ! Do the copy
+   if (option==CPRJ_TO_XG) then
+     !$omp parallel default (none) &
+     !$omp& shared(xg_nonlop,nlmn_shift,cprj_contiguous,cprj), &
+     !$omp& firstprivate(cplex,nband_cprj,nspinor,natom), &
+     !$omp& private(iband,ispinor,iatom,iband_spin,nlmn,start,end)
+     !$omp do collapse(3)
+     do iband=1,nband_cprj
+       do ispinor=1,nspinor
+         do iatom=1,natom
+           iband_spin = (iband-1)*nspinor+ispinor
+           nlmn=xg_nonlop%nlmn_natom(iatom)
+           do ilmn=1,nlmn
+             start = 1+cplex*(ilmn-1)+cplex*nlmn_shift(iatom)
+             end   = cplex*ilmn      +cplex*nlmn_shift(iatom)
+             cprj_contiguous(start:end,iband_spin) = &
+               cprj(iatom,iband_spin)%cp(1:cplex,ilmn)
+           end do
+         end do
+       end do
+     end do
+     !$omp end do
+     !$omp end parallel
+   else if (option==XG_TO_CPRJ) then
+     !$omp parallel default (none) &
+     !$omp& shared(xg_nonlop,nlmn_shift,cprj_contiguous,cprj), &
+     !$omp& firstprivate(cplex,nband_cprj,nspinor,natom), &
+     !$omp& private(iband,ispinor,iatom,iband_spin,nlmn,start,end)
+     !$omp do collapse(3)
+     do iband=1,nband_cprj
+       do ispinor=1,nspinor
+         do iatom=1,natom
+           iband_spin = (iband-1)*nspinor+ispinor
+           nlmn=xg_nonlop%nlmn_natom(iatom)
+           do ilmn=1,nlmn
+             start = 1+cplex*(ilmn-1)+cplex*nlmn_shift(iatom)
+             end   = cplex*ilmn      +cplex*nlmn_shift(iatom)
+             cprj(iatom,iband_spin)%cp(1:cplex,ilmn) = &
+               cprj_contiguous(start:end,iband_spin)
+           end do
+         end do
+       end do
+     end do
+     !$omp end do
+     !$omp end parallel
+   end if
+
+   ABI_FREE(nlmn_shift)
+ 
+ end subroutine xg_cprj_copy
 
 end module m_cgprj
 !!***

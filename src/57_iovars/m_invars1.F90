@@ -2304,7 +2304,8 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%chneut=1      
    dtsets(idtset)%cineb_start=7
    dtsets(idtset)%corecs(:) = zero
-   dtsets(idtset)%cprj_update_lvl=0
+   dtsets(idtset)%cprj_in_memory=0
+   dtsets(idtset)%cprj_update_lvl=3
 !  D
    dtsets(idtset)%ddamp=0.1_dp
    dtsets(idtset)%delayperm=0
@@ -2828,6 +2829,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%write_files = "default"
 !  X
    dtsets(idtset)%xclevel  = 0
+   dtsets(idtset)%xg_nonlop_option  = 0
    dtsets(idtset)%xc_denpos = tol14
    dtsets(idtset)%xc_taupos = tol14
    dtsets(idtset)%xc_tb09_c = 99.99_dp

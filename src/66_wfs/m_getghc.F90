@@ -2056,7 +2056,7 @@ subroutine multithreaded_getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lamb
 
 !Local variables-------------------------------
 !scalars
- integer :: firstelt, firstprj, lastelt, lastprj,usegvnlxc
+ integer :: firstelt, firstprj, lastelt, lastprj,usegvnlxc,usegsc
  integer :: nthreads
  integer :: ithread
  integer :: chunk
@@ -2078,7 +2078,7 @@ subroutine multithreaded_getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lamb
  ! Disabling multithreading for GPU variants (getghc_ompgpu is not thread-safe for now)
  !$omp parallel default (none) &
  !$omp& private(ithread,nthreads,chunk,firstband,lastband,residuchunk,firstelt,lastelt), &
- !$omp& private(firstprj,lastprj,usegvnlxc,fftw3_use_lib_threads_sav), &
+ !$omp& private(firstprj,lastprj,usegvnlxc,usegsc,fftw3_use_lib_threads_sav), &
  !$omp& shared(cwavef,ghc,gsc, gvnlxc,spacedim,spacedim_prj,ndat,kg_fft_k,kg_fft_kp,gs_ham,cwaveprj,mpi_enreg), &
  !$omp& shared(gemm_nonlop_use_gemm), &
  !$omp& firstprivate(cpopt,lambda,prtvol,sij_opt,tim_getghc,type_calc,select_k_default) &
@@ -2118,6 +2118,8 @@ subroutine multithreaded_getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lamb
  end if
  usegvnlxc=1
  if (size(gvnlxc)<=1) usegvnlxc=0
+ usegsc=0
+ if (gs_ham%usepaw==1.and.sij_opt==1) usegsc=1
 
  if ( lastband /= 0 ) then
    firstelt = (firstband-1)*spacedim+1
@@ -2128,13 +2130,13 @@ subroutine multithreaded_getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lamb
    if ( present(kg_fft_k) ) then
      if (present(kg_fft_kp)) then
        call getghc(cpopt,cwavef(:,firstelt:lastelt),cwaveprj(:,firstprj:lastprj),&
-&      ghc(:,firstelt:lastelt),gsc(:,firstelt:lastelt*gs_ham%usepaw),&
+&      ghc(:,firstelt:lastelt),gsc(:,firstelt:lastelt*usegsc),&
 &      gs_ham,gvnlxc(:,firstelt:lastelt*usegvnlxc),lambda, mpi_enreg,lastband-firstband+1,&
 &      prtvol,sij_opt,tim_getghc,type_calc,&
 &      select_k=select_k_default,kg_fft_k=kg_fft_k,kg_fft_kp=kg_fft_kp)
      else
        call getghc(cpopt,cwavef(:,firstelt:lastelt),cwaveprj(:,firstprj:lastprj),&
-&      ghc(:,firstelt:lastelt),gsc(:,firstelt:lastelt*gs_ham%usepaw),&
+&      ghc(:,firstelt:lastelt),gsc(:,firstelt:lastelt*usegsc),&
 &      gs_ham,gvnlxc(:,firstelt:lastelt*usegvnlxc),lambda, mpi_enreg,lastband-firstband+1,&
 &      prtvol,sij_opt,tim_getghc,type_calc,&
 &      select_k=select_k_default,kg_fft_k=kg_fft_k)
@@ -2142,13 +2144,13 @@ subroutine multithreaded_getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lamb
    else
      if (present(kg_fft_kp)) then
        call getghc(cpopt,cwavef(:,firstelt:lastelt),cwaveprj(:,firstprj:lastprj),&
-&      ghc(:,firstelt:lastelt),gsc(:,firstelt:lastelt*gs_ham%usepaw),&
+&      ghc(:,firstelt:lastelt),gsc(:,firstelt:lastelt*usegsc),&
 &      gs_ham,gvnlxc(:,firstelt:lastelt*usegvnlxc),lambda, mpi_enreg,lastband-firstband+1,&
 &      prtvol,sij_opt,tim_getghc,type_calc,&
 &      select_k=select_k_default,kg_fft_kp=kg_fft_kp)
      else
        call getghc(cpopt,cwavef(:,firstelt:lastelt),cwaveprj(:,firstprj:lastprj),&
-&      ghc(:,firstelt:lastelt),gsc(:,firstelt:lastelt*gs_ham%usepaw),&
+&      ghc(:,firstelt:lastelt),gsc(:,firstelt:lastelt*usegsc),&
 &      gs_ham,gvnlxc(:,firstelt:lastelt*usegvnlxc),lambda, mpi_enreg,lastband-firstband+1,&
 &      prtvol,sij_opt,tim_getghc,type_calc,&
 &      select_K=select_k_default)
