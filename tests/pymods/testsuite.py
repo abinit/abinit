@@ -378,7 +378,6 @@ class FileToTest(object):
             'debug': fldebug,
         }
 
-
         if forced_tolerance == 'high':
             opts['tolerance'] = 1.01e-10
         elif forced_tolerance == 'medium':
@@ -1924,6 +1923,8 @@ pp_dirpath $ABI_PSPDIR
         forced_tolerance   String: Force the use of fldiff tool with the specified tolerance.
                            Possible values are: default (from test config), high(1.e-10),
                                                 medium (1.e-8), easy (1.e-5), ridiculous (1.e-2)
+        useylm            Change Abinit input file to use useylm e.g. useylm 1
+        gpu_option        Change Abinit input file to use gpu_option e.g. useylm 1
         ================  ====================================================================
 
         .. warning:
@@ -1953,6 +1954,8 @@ pp_dirpath $ABI_PSPDIR
         self.sub_timeout = kwargs.get("sub_timeout", self.sub_timeout)
         simplified_diff = kwargs.get("simplified_diff")
         forced_tolerance = kwargs.get("forced_tolerance")
+        self.useylm = kwargs.get("useylm", None)
+        self.gpu_option = kwargs.get("gpu_option", None)
 
         timeout = self.sub_timeout
         if self.build_env.has_bin("timeout") and timeout > 0.0:
@@ -2053,8 +2056,7 @@ pp_dirpath $ABI_PSPDIR
                 use_files_file = True
 
             if use_files_file:
-                self.keep_files(
-                    [self.stdin_fname, self.stdout_fname, self.stderr_fname])
+                self.keep_files([self.stdin_fname, self.stdout_fname, self.stderr_fname])
                 # Legacy mode: create files file and invoke exec with syntax: `abinit < run.files`
                 with open(self.stdin_fname, "wt") as fh:
                     fh.writelines(self.make_stdin())
@@ -2121,7 +2123,7 @@ pp_dirpath $ABI_PSPDIR
                 self.fld_isok = self.fld_isok and isok
 
                 if simplified_test:
-                  f.fld_options= fld_options_sav
+                    f.fld_options= fld_options_sav
 
                 if not self.exec_error and f.has_line_count_error:
                     f.do_html_diff = True
@@ -2736,8 +2738,14 @@ class AbinitTest(BaseTest):
         app = extra.append
 
         if 'output_file = "' not in line:
-            #app('output_file = "%s"' % (self.id + ".out"))
             app('output_file = "%s"' % (self.id + ".abo"))
+
+        # Add input variables to Abinit input file
+        if self.useylm is not None and self.executable == "abinit":
+            app("useylm %d" % self.useylm)
+
+        if self.gpu_option is not None and self.executable == "abinit":
+            app("gpu_option %d" % self.gpu_option)
 
         # Prefix for input/output/temporary files
         i_prefix = self.input_prefix if self.input_prefix else self.id + "i"
@@ -3866,8 +3874,8 @@ class AbinitTestSuite(object):
 
         return results
 
-    def run_tests(self, build_env, workdir, runner, nprocs=1, py_nprocs=1,
-                  runmode="static", **kwargs):
+    def run_tests(self, build_env, workdir, runner,
+                  nprocs=1, py_nprocs=1, runmode="static", **kwargs):
         """
         Execute the list of tests (main entry point for client code)
 

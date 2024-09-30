@@ -426,14 +426,12 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
  do my_is=1,my_nspins
    spin = my_spins(my_is)
 
+   !call nscf%setup_spin(spin, dtset, pawfgr, gs_ham_k, vlocal)
+
    ! Loop over k-points in k-path (MPI parallelized).
    do my_ik=1,my_nkpath
      ik = my_ik_inds(my_ik)
      kk = kpath%points(:, ik)
-
-     !if )my_ik == 1)
-     ! TODO
-     !call nscf%setup_spin(spin, dtset, pawfgr, gs_ham_k, vlocal)
 
      ! Compute u_{nk}(g)
      ! NB: The Hamiltonian has pointers to the _k arrays in output so we cannot dellocate them till the end.
