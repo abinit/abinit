@@ -3972,8 +3972,7 @@ class AbinitTestSuite(object):
 
                 if results is None:
                     # In principle this should not happen!
-                    print(
-                        "WARNING: wait_loop returned None instead of results. Will try to continue execution!")
+                    print("WARNING: wait_loop returned None instead of results. Will try to continue execution!")
 
                 else:
                     # update local tests instances with the results of their running in a remote process
@@ -4184,9 +4183,9 @@ class AbinitTestSuite(object):
         return Results(self)
 
     def terminate(self):
-        '''
+        """
         Kill all workers
-        '''
+        """
         for p in self._processes:
             p.terminate()
         self._kill_me = True
