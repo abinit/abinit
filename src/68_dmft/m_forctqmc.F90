@@ -3858,9 +3858,9 @@ subroutine fit_dlr(m,n,fun,con,jac,jac_con,x)
 
  do i=1,maxiter
 
-  ! call slsqp(m,meq,la,n,x(:),xl(:),xu(:),f,c(:),g(:),a(:,:),acc,iter,mode,w(:),l_w, &
-  !          & jw(:),l_jw,alpha,f0,gs,h1,h2,h3,h4,t,t0,tol,iexact,incons,ireset,itermx, &
-  !          & line,n1,n2,n3)
+   call slsqp(m,meq,la,n,x(:),xl(:),xu(:),f,c(:),g(:),a(:,:),acc,iter,mode,w(:),l_w, &
+            & jw(:),l_jw,alpha,f0,gs,h1,h2,h3,h4,t,t0,tol,iexact,incons,ireset,itermx, &
+            & line,n1,n2,n3)
 
    if (abs(mode) /= 1) exit
    if (mode == -1) then
