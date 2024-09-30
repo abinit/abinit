@@ -88,7 +88,7 @@ subroutine berry_curvature(gstore, dtset, dtfil)
 !scalars
  integer,parameter :: master = 0, LOG_MODQ = 5
  integer :: nproc, my_rank, ierr, comm, mpert, msize
- integer :: my_is, spin, nsppol, ntypat, natom, natom3, ib1, ib2, band1, band2, nb, ebands_timrev
+ integer :: my_is, spin, nsppol, ntypat, natom, natom3, ib1, ib2, band1, band2, nb
  integer :: ik_ibz, isym_k, trev_k, tsign_k, g0_k(3)
  integer :: ikq_ibz, isym_kq, trev_kq, tsign_kq, g0_kq(3)
  integer :: iq_ibz, isym_q, trev_q, tsign_q, g0_q(3)
@@ -124,7 +124,6 @@ subroutine berry_curvature(gstore, dtset, dtfil)
  natom = cryst%natom; ntypat = cryst%ntypat
  natom3 = 3 * cryst%natom; nsppol = ebands%nsppol
  spin_occ = one; if (nsppol == 1 .and. dtset%nspinor == 1) spin_occ = two
- ebands_timrev = kpts_timrev_from_kptopt(ebands%kptopt)
 
  if (my_rank == master) then
    call wrtout(std_out, " Computing berry curvature", pre_newlines=2)
@@ -161,7 +160,7 @@ subroutine berry_curvature(gstore, dtset, dtfil)
      iq_glob = my_iq + gqk%my_qstart - 1
 
      ! Find k+q in the IBZ for all my k-points.
-     if (kpts_map("symrel", ebands_timrev, cryst, gstore%krank_ibz, gqk%my_nk, gqk%my_kpts, my_kqmap, qpt=qq_ibz) /= 0) then
+     if (kpts_map("symrel", ebands%kptopt, cryst, gstore%krank_ibz, gqk%my_nk, gqk%my_kpts, my_kqmap, qpt=qq_ibz) /= 0) then
        ABI_ERROR(sjoin("Cannot map k+q to IBZ with qpt:", ktoa(qq_ibz)))
      end if
 

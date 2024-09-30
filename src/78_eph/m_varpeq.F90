@@ -2858,8 +2858,7 @@ end subroutine polstate_gather
 !!
 !! SOURCE
 
-type(krank_t) function polstate_get_krank_glob(self, mode, kptrlatt) &
-    result(krank_kpts)
+type(krank_t) function polstate_get_krank_glob(self, mode, kptrlatt) result(krank_kpts)
 
 !Arguments ------------------------------------
 !scalars
@@ -2954,9 +2953,9 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
 !scalars
  integer,parameter :: master = 0, ndat1 = 1
  integer :: my_rank, ib, irsp, ir, uc_idx, mpw, band, bstart ! nfft, nfftf, mgfft, mgfftf, n1, n2, n3, n4, n5, n6,
- integer :: natom, natom3, nsppol, nspinor, nspden, nkibz, mband, spin, ik, sc_nfft, ebands_timrev, cnt, nproc, num_writes, ii
+ integer :: natom, natom3, nsppol, nspinor, nspden, nkibz, mband, spin, ik, sc_nfft, cnt, nproc, num_writes, ii
  integer :: ik_ibz, isym_k, trev_k, npw_k, istwf_k, npw_kq_ibz, istwf_k_ibz, nkpg_k, ierr, nk, spinor, spad, nkbz, ncid
- integer :: nqibz, iq, qtimrev, iq_ibz, isym_q, trev_q, qptopt, uc_iat, sc_iat, nu, nqbz, ip ! icell,
+ integer :: nqibz, iq, iq_ibz, isym_q, trev_q, qptopt, uc_iat, sc_iat, nu, nqbz, ip ! icell,
  logical :: isirr_k, isirr_q, have_scell_q, use_displaced_scell
  real(dp) :: cpu_all, wall_all, gflops_all, spread
  character(len=500) :: msg
@@ -3032,7 +3031,6 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
    ABI_MALLOC(displ_cart_qbz, (2, 3, cryst%natom, cryst%natom * 3))
    ABI_MALLOC(pheigvec_qbz, (2, 3, cryst%natom, 3*cryst%natom))
 
-   qtimrev = kpts_timrev_from_kptopt(qptopt)
    nqbz = product(ngqpt)
    call kptrlatt_from_ngkpt(ngqpt, qptrlatt_)
    qrank_ibz = krank_from_kptrlatt(nqibz, qibz, qptrlatt_, compute_invrank=.False.)
@@ -3048,7 +3046,7 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
        cnt = cnt + 1; if (mod(cnt, nproc) /= my_rank) cycle ! MPI parallelism inside comm.
        qq = vpq%qpts_spin(:, iq, spin)
        ! Note symrec here
-       if (kpts_map("symrec", qtimrev, cryst, qrank_ibz, 1, qq, mapl_qq) /= 0) then
+       if (kpts_map("symrec", qptopt, cryst, qrank_ibz, 1, qq, mapl_qq) /= 0) then
          ABI_ERROR("Cannot map qBZ to IBZ!")
        end if
        iq_ibz = mapl_qq(1); isym_q = mapl_qq(2)
@@ -3137,7 +3135,6 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
 
  call wrtout(std_out, " varpeq_plot: computing polaron wavefunction in real space.", pre_newlines=1)
 
- ebands_timrev = kpts_timrev_from_kptopt(ebands%kptopt)
  krank_ibz = krank_from_kptrlatt(ebands%nkpt, ebands%kptns, ebands%kptrlatt, compute_invrank=.False.)
 
  ! Initialize the wave function descriptor.
@@ -3153,7 +3150,7 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
    do ik=1, vpq%nk_spin(spin)
      kk = vpq%kpts_spin(:, ik, spin)
      ! Note symrel option
-     if (kpts_map("symrel", ebands_timrev, cryst, krank_ibz, 1, kk, mapl_k) /= 0) then
+     if (kpts_map("symrel", ebands%kptopt, cryst, krank_ibz, 1, kk, mapl_k) /= 0) then
        write(msg, '(4a)' )"k-mesh is not closed!",ch10, "k-point could not be generated from a symmetrical one.",trim(ltoa(kk))
        ABI_ERROR(msg)
      end if
@@ -3227,7 +3224,7 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
      cnt = cnt + 1; if (mod(cnt, nproc) /= my_rank) cycle ! MPI parallelism inside comm.
 
      kk = vpq%kpts_spin(:, ik, spin)
-     if (kpts_map("symrel", ebands_timrev, cryst, krank_ibz, 1, kk, mapl_k) /= 0) then
+     if (kpts_map("symrel", ebands%kptopt, cryst, krank_ibz, 1, kk, mapl_k) /= 0) then
        write(msg, '(4a)' )"k-mesh is not closed!",ch10, "k-point could not be generated from a symmetrical one.",trim(ltoa(kk))
        ABI_ERROR(msg)
      end if
