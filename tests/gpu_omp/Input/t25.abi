@@ -122,4 +122,5 @@
 #%% keywords = PAW, DFPT
 #%% description =
 #%%   Preparation for a nonlinear calculation : GS + linear response (stresses), using GEMM nonlop.
+#%%   Related tests: v8 t83 and gpu_omp t21 .
 #%%<END TEST_INFO>
