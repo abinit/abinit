@@ -4,6 +4,7 @@
  ionmov2 0
  nstep2 25
  toldfe2 1.0d-12
+ gpu_option2 2
 
 #DATASET 1  PBE (the pseudopotentials for C and H are with PBE XC)
 
@@ -22,7 +23,7 @@
  diemac 1.0d0   diemix 0.5d0
  ecut 13   pawecutdg 35
  ionmov 2
- ntime 15 
+ ntime 15
  tolrff 0.02
  tolmxf 5.0d-5
 
@@ -34,6 +35,7 @@
  occopt 7
  tsmear 0.01
  nband 4
+ bandpp 4
  nbdbuf 0
 
  nstep 6
@@ -50,7 +52,7 @@
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   t15.abo, tolnlines = 0, tolabs = 0.000e-00, tolrel = 0.000e-00, fld_options = -easy
+#%%   t28.abo, tolnlines = 0, tolabs = 0.000e-00, tolrel = 0.000e-00, fld_options = -easy
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]
