@@ -71,16 +71,22 @@ contains
 ! *************************************************************************
 
    ABI_MALLOC(gxfac_2ndphase,(cplex_fac,nprojs,ndat))
+#ifdef HAVE_OPENMP_OFFLOAD
    !$OMP TARGET ENTER DATA MAP(alloc:gxfac_2ndphase)
+#endif
    call gpu_set_to_zero(gxfac_2ndphase, int(cplex_fac,c_size_t)*nprojs*ndat)
    if (optder>=1) then
      ABI_MALLOC(dgxdtfac_2ndphase,(cplex_fac,ndgxdtfac,nprojs,ndat))
+#ifdef HAVE_OPENMP_OFFLOAD
      !$OMP TARGET ENTER DATA MAP(alloc:dgxdtfac_2ndphase)
+#endif
      call gpu_set_to_zero(dgxdtfac_2ndphase, int(cplex_fac,c_size_t)*ndgxdtfac*nprojs*ndat)
    end if
    if (optder>=2) then
      ABI_MALLOC(d2gxdtfac_2ndphase,(cplex_fac,nd2gxdtfac,nprojs,ndat))
+#ifdef HAVE_OPENMP_OFFLOAD
      !$OMP TARGET ENTER DATA MAP(alloc:dgxdtfac_2ndphase)
+#endif
      call gpu_set_to_zero(d2gxdtfac_2ndphase, int(cplex_fac,c_size_t)*nd2gxdtfac*nprojs*ndat)
    end if
 
@@ -104,15 +110,21 @@ contains
 ! *************************************************************************
 
   if(allocated(gxfac_2ndphase)) then
+#ifdef HAVE_OPENMP_OFFLOAD
     !$OMP TARGET EXIT DATA MAP(delete:gxfac_2ndphase)
+#endif
     ABI_FREE(gxfac_2ndphase)
   end if
   if(allocated(dgxdtfac_2ndphase)) then
+#ifdef HAVE_OPENMP_OFFLOAD
     !$OMP TARGET EXIT DATA MAP(delete:dgxdtfac_2ndphase)
+#endif
     ABI_FREE(dgxdtfac_2ndphase)
   end if
   if(allocated(d2gxdtfac_2ndphase)) then
+#ifdef HAVE_OPENMP_OFFLOAD
     !$OMP TARGET EXIT DATA MAP(delete:d2gxdtfac_2ndphase)
+#endif
     ABI_FREE(d2gxdtfac_2ndphase)
   end if
 
