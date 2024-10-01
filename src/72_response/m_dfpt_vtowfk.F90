@@ -234,7 +234,7 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
  integer :: iband,idir0,ierr,igs,igscq,ii,dim_dcwf,inonsc
  integer :: iband_me,nband_me !, unit_me
  integer :: iorder_cprj,iorder_cprj1,ipw,iscf_mod,ispinor,me,mgscq,nkpt_max
- integer :: option,opt_gvnlx1,quit,test_ddk
+ integer :: option,opt_gvnlx1,quit,test_ddk,ndat
  integer :: tocceig,usedcwavef,ptr,shift_band
  real(dp) :: aa,ai,ar,eig0nk,resid,residk,scprod,energy_factor
  character(len=500) :: msg
@@ -305,9 +305,14 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
 !TODO MJV: PAW mband_mem
    mgscq=mpw1*nspinor*mband_mem
    ABI_MALLOC_OR_DIE(gscq,(2,mgscq), ierr)
+#ifdef HAVE_OPENMP_OFFLOAD
+   !$OMP TARGET ENTER DATA MAP(alloc:gscq)       IF(gs_hamkq%gpu_option==ABI_GPU_OPENMP)
+#endif
 
+   ABI_NVTX_START_RANGE(NVTX_GETGSC)
    call getgsc(cgq,cprjq,gs_hamkq,gscq,ibgq,icgq,igscq,ikpt,isppol,mcgq,mcprjq,&
-&   mgscq,mpi_enreg,natom,nband_k,npw1_k,dtset%nspinor,select_k=KPRIME_H_KPRIME)
+&   mgscq,mpi_enreg,dtset%bandpp,natom,nband_k,npw1_k,dtset%nspinor,select_k=KPRIME_H_KPRIME)
+   ABI_NVTX_END_RANGE()
 !  2-Initialize additional scalars/arrays
    iorder_cprj=0;iorder_cprj1=0
    dim_dcwf=npw1_k*nspinor;if (ipert==natom+2.or.ipert==natom+10.or.ipert==natom+11) dim_dcwf=0
@@ -344,12 +349,10 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
 !==================  LOOP OVER BANDS ==================================
 !======================================================================
 
+ ndat=1;if (mpi_enreg%paral_kgb==1) ndat=mpi_enreg%bandpp
  call proc_distrb_band(rank_band,mpi_enreg%proc_distrb,ikpt,isppol,mband,&
 &  mpi_enreg%me_band,mpi_enreg%me_kpt,mpi_enreg%comm_band)
 
-#ifdef HAVE_OPENMP_OFFLOAD
- !$OMP TARGET ENTER DATA MAP(to:cgq,gscq)       IF(gs_hamkq%gpu_option==ABI_GPU_OPENMP)
-#endif
  iband_me = 0
  do iband=1,nband_k
 
@@ -609,7 +612,7 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
        eloc0_k(iband) = zero
        option=2;if (iscf_mod>0.and.inonsc==nnsclo_now) option=3
        call dfpt_accrho(cplex,cwave0,cwave1,cwavef,cwaveprj0,cwaveprj1,eloc0_k(iband),&
-&       gs_hamkq,iband,idir,ipert,isppol,dtset%kptopt,mpi_enreg,natom,nband_k,ncpgr,&
+&       gs_hamkq,iband,idir,ipert,isppol,dtset%kptopt,mpi_enreg,1,natom,nband_k,ncpgr,&
 &       npw_k,npw1_k,nspinor,occ_k,option,pawrhoij1,rhoaug1,tim_fourwf,tocceig,wtk_k)
        if(ipert==natom+10.or.ipert==natom+11) eloc0_k(iband)=energy_factor*eloc0_k(iband)/two
 
@@ -653,9 +656,6 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
 !==================  END LOOP OVER BANDS ==============================
 !======================================================================
 
-#ifdef HAVE_OPENMP_OFFLOAD
- !$OMP TARGET EXIT DATA MAP(release:cgq,gscq) IF(gs_hamkq%gpu_option==ABI_GPU_OPENMP)
-#endif
 ! select eig1 matrix for only my slice of bands at present k-point
 ! this enables global xmpi_sum in dfpt_vtorho without double counting
  ii = 0
@@ -702,6 +702,9 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
    end if
  end if
  ABI_FREE(dcwavef)
+#ifdef HAVE_OPENMP_OFFLOAD
+ !$OMP TARGET EXIT DATA MAP(delete:gscq) IF(gs_hamkq%usepaw==1 .and. gs_hamkq%gpu_option==ABI_GPU_OPENMP)
+#endif
  ABI_FREE(gscq)
  ABI_FREE(gsc)
  ABI_FREE(cwaveprj0)

@@ -1964,7 +1964,7 @@ subroutine wfd_ug2cprj(Wfd,band,ik_ibz,spin,choice,idir,natom,Cryst,cwaveprj,sor
  if (want_sorted) then
    ! Output cprj are sorted.
    call getcprj(choice,cpopt,cwavef,cwaveprj,ffnl,&
-     idir,Wfd%indlmn,istwf_k,kg_k,kpg,kpoint,Wfd%lmnmax,Wfd%mgfft,Wfd%MPI_enreg,&
+     idir,Wfd%indlmn,istwf_k,kg_k,kpg,kpoint,Wfd%lmnmax,Wfd%mgfft,Wfd%MPI_enreg,1,&
      Cryst%natom,Cryst%nattyp,Wfd%ngfft,Wfd%nloalg,npw_k,Wfd%nspinor,Cryst%ntypat,&
      phkxred,Wfd%ph1d,ph3d,Cryst%ucvol,1)
 
@@ -1983,7 +1983,7 @@ subroutine wfd_ug2cprj(Wfd,band,ik_ibz,spin,choice,idir,natom,Cryst,cwaveprj,sor
 
    ! Calculate sorted cprj.
    call getcprj(choice,cpopt,cwavef,Cprj_srt,ffnl,&
-    idir,Wfd%indlmn,istwf_k,kg_k,kpg,kpoint,Wfd%lmnmax,Wfd%mgfft,Wfd%MPI_enreg,&
+    idir,Wfd%indlmn,istwf_k,kg_k,kpg,kpoint,Wfd%lmnmax,Wfd%mgfft,Wfd%MPI_enreg,1,&
     Cryst%natom,Cryst%nattyp,Wfd%ngfft,Wfd%nloalg,npw_k,Wfd%nspinor,Cryst%ntypat,&
     phkxred,Wfd%ph1d,ph3d,Cryst%ucvol,1)
 

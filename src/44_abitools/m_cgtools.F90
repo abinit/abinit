@@ -48,6 +48,8 @@ module m_cgtools
  use m_pawcprj,       only : pawcprj_type,pawcprj_axpby,pawcprj_zaxpby
  use m_abi_linalg
 
+ use, intrinsic :: iso_c_binding, only: c_size_t, c_loc
+
  implicit none
 
  private
@@ -86,6 +88,8 @@ module m_cgtools
  public :: set_istwfk               ! Returns the value of istwfk associated to the input k-point.
  public :: sqnorm_g                 ! Square of the norm in reciprocal space.
  public :: dotprod_g                ! Scalar product <vec1|vect2> of complex vectors vect1 and vect2 (can be the same)
+ public :: dotprod_g_batch_half     ! Scalar product <vec1|vect2> of complex vectors vect1 and vect2 (can be the same)
+ public :: dotprod_g_batch_full     ! Scalar product <vec1|vect2> of complex vectors vect1 and vect2 (can be the same)
  public :: matrixelmt_g             ! matrix element <wf1|O|wf2> of two wavefunctions, in reciprocal space,
                                     ! for an operator diagonal in G-space.
  public :: dotprod_v                ! Dot product of two potentials (integral over FFT grid).
@@ -1092,6 +1096,279 @@ subroutine dotprod_g(dotr, doti, istwf_k, npw, option, vect1, vect2, me_g0, comm
  end if
 
 end subroutine dotprod_g
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_cgtools/dotprod_g_batch
+!! NAME
+!! dotprod_g_batch
+!!
+!! FUNCTION
+!! Compute scalar product <vec1|vect2> of complex vectors vect1 and vect2 (can be the same)
+!! Take into account the storage mode of the vectors (istwf_k)
+!! If option=1, compute only real part, if option=2 compute also imaginary part.
+!! If the number of calls to the dot product scales quadratically
+!! with the volume of the system, it is preferable not to
+!! call the present routine, but but to write a specially
+!! optimized routine, that will avoid many branches related to
+!! the existence of 'option' and 'istwf_k'.
+!!
+!! INPUTS
+!!  istwf_k=option parameter that describes the storage of wfs
+!!  vect1(2,npw)=first vector (one should take its complex conjugate)
+!!  vect2(2,npw)=second vector
+!!  npw= (effective) number of planewaves at this k point (including spinorial level)
+!!  option= 1 if only real part to be computed,
+!!          2 if both real and imaginary.
+!!          3 if in case istwf_k==1 must compute real and imaginary parts,
+!!               but if  istwf_k >1 must compute only real part
+!!  me_g0=1 if this processor treats G=0, 0 otherwise
+!!  comm=MPI communicator used to reduce the results.
+!!
+!! OUTPUT
+!!  $doti=\Im ( <vect1|vect2> )$ , output only if option=2 and eventually option=3.
+!!  $dotr=\Re ( <vect1|vect2> )$
+!!
+!! SOURCE
+
+subroutine dotprod_g_batch_half(dotr, doti, istwf_k, npw, ndat, option, vect1, vect2, me_g0, comm, gpu_option)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: istwf_k,npw,ndat,option,me_g0,comm
+ integer,optional,intent(in) :: gpu_option
+ real(dp),target,intent(out) :: doti(ndat),dotr(ndat)
+!arrays
+ real(dp),target,intent(in) :: vect1(2,npw),vect2(2,npw,ndat)
+
+!Local variables-------------------------------
+ integer :: ierr,idat,ii,l_gpu_option
+ real(dp) :: dotarr(2)
+
+! *************************************************************************
+
+ l_gpu_option=ABI_GPU_DISABLED; if(present(gpu_option)) l_gpu_option = gpu_option
+ ! Init results indipendently of option.
+ if(l_gpu_option==ABI_GPU_DISABLED) then
+   dotr = zero;  doti = zero
+ else if(l_gpu_option==ABI_GPU_OPENMP) then
+#ifdef HAVE_OPENMP_OFFLOAD
+   call gpu_set_to_zero(dotr,int(ndat,c_size_t))
+   call gpu_set_to_zero(doti,int(ndat,c_size_t))
+#endif
+ end if
+
+ if (istwf_k==1) then
+   ! General k-point
+
+   if(option==1)then
+#ifdef HAVE_OPENMP_OFFLOAD
+     !$OMP TARGET TEAMS DISTRIBUTE PRIVATE(idat,dotarr) MAP(to:vect1,vect2,dotr) &
+     !$OMP& IF(l_gpu_option==ABI_GPU_OPENMP)
+#endif
+     do idat=1,ndat
+       dotarr = zero
+       !$OMP PARALLEL DO PRIVATE(ii) REDUCTION(+:dotarr)
+       do ii=1,npw
+         dotarr(1) = dotarr(1) + vect1(1,ii)*vect2(1,ii,idat) + vect1(2,ii)*vect2(2,ii,idat)
+       end do
+       dotr(idat) = dotarr(1)
+     end do
+   else
+#ifdef HAVE_OPENMP_OFFLOAD
+     !$OMP TARGET TEAMS DISTRIBUTE PRIVATE(idat,dotarr) MAP(to:vect1,vect2,dotr,doti) &
+     !$OMP& IF(l_gpu_option==ABI_GPU_OPENMP)
+#endif
+     do idat=1,ndat
+       dotarr = zero
+       !$OMP PARALLEL DO PRIVATE(ii) REDUCTION(+:dotarr)
+       do ii=1,npw
+         dotarr(1) = dotarr(1) + vect1(1,ii)*vect2(1,ii,idat) + vect1(2,ii)*vect2(2,ii,idat)
+         dotarr(2) = dotarr(2) + vect1(1,ii)*vect2(2,ii,idat) - vect1(2,ii)*vect2(1,ii,idat)
+       end do
+       dotr(idat) = dotarr(1)
+       doti(idat) = dotarr(2)
+     end do
+   end if
+
+ else if (istwf_k==2 .and. me_g0==1) then
+   ! Gamma k-point and I have G=0
+#ifdef HAVE_OPENMP_OFFLOAD
+   !$OMP TARGET TEAMS DISTRIBUTE PRIVATE(idat,dotarr) MAP(to:vect1,vect2,dotr) &
+   !$OMP& IF(l_gpu_option==ABI_GPU_OPENMP)
+#endif
+   do idat=1,ndat
+     dotarr = zero
+     dotr(idat)=half*vect1(1,1)*vect2(1,1,idat)
+     !$OMP PARALLEL DO PRIVATE(ii) REDUCTION(+:dotarr)
+     do ii=2,npw
+       dotarr(1) = dotarr(1) + vect1(1,ii)*vect2(1,ii,idat) + vect1(2,ii)*vect2(2,ii,idat)
+     end do
+     dotr(idat) = two * dotarr(1)
+   end do
+   if (option==2) doti=zero
+
+ else
+   ! Other TR k-points
+#ifdef HAVE_OPENMP_OFFLOAD
+   !$OMP TARGET TEAMS DISTRIBUTE PRIVATE(idat,dotarr) MAP(to:vect1,vect2,dotr) &
+   !$OMP& IF(l_gpu_option==ABI_GPU_OPENMP)
+#endif
+   do idat=1,ndat
+     dotarr = zero
+     !$OMP PARALLEL DO PRIVATE(ii) REDUCTION(+:dotarr)
+     do ii=1,npw
+       dotarr(1) = dotarr(1) + vect1(1,ii)*vect2(1,ii,idat) + vect1(2,ii)*vect2(2,ii,idat)
+     end do
+     dotr(idat) = two * dotarr(1)
+   end do
+   if (option==2) doti=zero
+ end if
+
+ !Reduction in case of parallelism
+ if (xmpi_comm_size(comm) > 1) then
+   if (option==1.or.istwf_k/=1) then
+#ifdef HAVE_OPENMP_OFFLOAD
+     !$OMP TARGET UPDATE FROM(dotr) IF(l_gpu_option==ABI_GPU_OPENMP)
+#endif
+     call xmpi_sum(dotr,comm,ierr)
+#ifdef HAVE_OPENMP_OFFLOAD
+     !$OMP TARGET UPDATE TO(dotr) IF(l_gpu_option==ABI_GPU_OPENMP)
+#endif
+   else
+#ifdef HAVE_OPENMP_OFFLOAD
+     !$OMP TARGET UPDATE FROM(dotr,doti) IF(l_gpu_option==ABI_GPU_OPENMP)
+#endif
+     call xmpi_sum(dotr,comm,ierr)
+     call xmpi_sum(doti,comm,ierr)
+#ifdef HAVE_OPENMP_OFFLOAD
+     !$OMP TARGET UPDATE TO(dotr,doti) IF(l_gpu_option==ABI_GPU_OPENMP)
+#endif
+   end if
+ end if
+
+end subroutine dotprod_g_batch_half
+!!***
+
+
+subroutine dotprod_g_batch_full(dotr, doti, istwf_k, npw, ndat, option, vect1, vect2, me_g0, comm, gpu_option)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: istwf_k,npw,ndat,option,me_g0,comm
+ integer,optional,intent(in) :: gpu_option
+ real(dp),target,intent(out) :: doti(ndat),dotr(ndat)
+!arrays
+ real(dp),target,intent(in) :: vect1(2,npw,ndat),vect2(2,npw,ndat)
+
+!Local variables-------------------------------
+ integer :: ierr,idat,ii,l_gpu_option
+ real(dp) :: dotarr(2)
+
+! *************************************************************************
+
+ l_gpu_option=ABI_GPU_DISABLED; if(present(gpu_option)) l_gpu_option = gpu_option
+ ! Init results indipendently of option.
+ if(l_gpu_option==ABI_GPU_DISABLED) then
+   dotr = zero;  doti = zero
+ else if(l_gpu_option==ABI_GPU_OPENMP) then
+#ifdef HAVE_OPENMP_OFFLOAD
+   call gpu_set_to_zero(dotr,int(ndat,c_size_t))
+   call gpu_set_to_zero(doti,int(ndat,c_size_t))
+#endif
+ end if
+
+ if (istwf_k==1) then
+   ! General k-point
+
+   if(option==1)then
+#ifdef HAVE_OPENMP_OFFLOAD
+     !$OMP TARGET TEAMS DISTRIBUTE PRIVATE(idat,dotarr) MAP(to:vect1,vect2,dotr) &
+     !$OMP& IF(l_gpu_option==ABI_GPU_OPENMP)
+#endif
+     do idat=1,ndat
+       dotarr = zero
+       !$OMP PARALLEL DO PRIVATE(ii) REDUCTION(+:dotarr)
+       do ii=1,npw
+         dotarr(1) = dotarr(1) + vect1(1,ii,idat)*vect2(1,ii,idat) + vect1(2,ii,idat)*vect2(2,ii,idat)
+       end do
+       dotr(idat) = dotarr(1)
+     end do
+   else
+#ifdef HAVE_OPENMP_OFFLOAD
+     !$OMP TARGET TEAMS DISTRIBUTE PRIVATE(idat,dotarr) MAP(to:vect1,vect2,dotr,doti) &
+     !$OMP& IF(l_gpu_option==ABI_GPU_OPENMP)
+#endif
+     do idat=1,ndat
+       dotarr = zero
+       !$OMP PARALLEL DO PRIVATE(ii) REDUCTION(+:dotarr)
+       do ii=1,npw
+         dotarr(1) = dotarr(1) + vect1(1,ii,idat)*vect2(1,ii,idat) + vect1(2,ii,idat)*vect2(2,ii,idat)
+         dotarr(2) = dotarr(2) + vect1(1,ii,idat)*vect2(2,ii,idat) - vect1(2,ii,idat)*vect2(1,ii,idat)
+       end do
+       dotr(idat) = dotarr(1)
+       doti(idat) = dotarr(2)
+     end do
+   end if
+
+ else if (istwf_k==2 .and. me_g0==1) then
+   ! Gamma k-point and I have G=0
+#ifdef HAVE_OPENMP_OFFLOAD
+   !$OMP TARGET TEAMS DISTRIBUTE PRIVATE(idat,dotarr) MAP(to:vect1,vect2,dotr) &
+   !$OMP& IF(l_gpu_option==ABI_GPU_OPENMP)
+#endif
+   do idat=1,ndat
+     dotarr = zero
+     dotr(idat)=half*vect1(1,1,idat)*vect2(1,1,idat)
+     !$OMP PARALLEL DO PRIVATE(ii) REDUCTION(+:dotarr)
+     do ii=2,npw
+       dotarr(1) = dotarr(1) + vect1(1,ii,idat)*vect2(1,ii,idat) + vect1(2,ii,idat)*vect2(2,ii,idat)
+     end do
+     dotr(idat) = two * dotarr(1)
+   end do
+   if (option==2) doti=zero
+
+ else
+   ! Other TR k-points
+#ifdef HAVE_OPENMP_OFFLOAD
+   !$OMP TARGET TEAMS DISTRIBUTE PRIVATE(idat,dotarr) MAP(to:vect1,vect2,dotr) &
+   !$OMP& IF(l_gpu_option==ABI_GPU_OPENMP)
+#endif
+   do idat=1,ndat
+     dotarr = zero
+     !$OMP PARALLEL DO PRIVATE(ii) REDUCTION(+:dotarr)
+     do ii=1,npw
+       dotarr(1) = dotarr(1) + vect1(1,ii,idat)*vect2(1,ii,idat) + vect1(2,ii,idat)*vect2(2,ii,idat)
+     end do
+     dotr(idat) = two * dotarr(1)
+   end do
+   if (option==2) doti=zero
+ end if
+
+ !Reduction in case of parallelism
+ if (xmpi_comm_size(comm) > 1) then
+   if (option==1.or.istwf_k/=1) then
+#ifdef HAVE_OPENMP_OFFLOAD
+     !$OMP TARGET UPDATE FROM(dotr) IF(l_gpu_option==ABI_GPU_OPENMP)
+#endif
+     call xmpi_sum(dotr,comm,ierr)
+#ifdef HAVE_OPENMP_OFFLOAD
+     !$OMP TARGET UPDATE TO(dotr) IF(l_gpu_option==ABI_GPU_OPENMP)
+#endif
+   else
+#ifdef HAVE_OPENMP_OFFLOAD
+     !$OMP TARGET UPDATE FROM(dotr,doti) IF(l_gpu_option==ABI_GPU_OPENMP)
+#endif
+     call xmpi_sum(dotr,comm,ierr)
+     call xmpi_sum(doti,comm,ierr)
+#ifdef HAVE_OPENMP_OFFLOAD
+     !$OMP TARGET UPDATE TO(dotr,doti) IF(l_gpu_option==ABI_GPU_OPENMP)
+#endif
+   end if
+ end if
+
+end subroutine dotprod_g_batch_full
 !!***
 
 !----------------------------------------------------------------------
