@@ -38,4 +38,6 @@ inp_files = [
 "t16.abi", # With batching
 "t17.abi", # With batching, Use GEMM nonlop
 "t18.abi", # With batching, Use GPU OpenMP
+# Weird single-band test with istwfk==2 on Fock (based on libxc#73)
+"t19.abi", # With batching, Use GPU OpenMP
 ]
