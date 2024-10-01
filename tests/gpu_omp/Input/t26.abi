@@ -1,10 +1,9 @@
 # Crystalline silicon : computation of the total energy using PBE0 functional
-# PAW. No forces nor stresses.
+# Norm-conserving. Check forces and stresses.
 
-ndtset 2         #  First LDA, then PBE0 from LibXC, then native ABINIT PBE0
-optstress 0
-optforces 0
-use_gemm_nonlop 1
+ndtset 3         #  First LDA, then PBE0 from LibXC, then native ABINIT PBE0
+
+gpu_option 2
 
 #Definition of the unit cell
 acell 3*10.217         # Data from PRB 48, 5058
@@ -18,6 +17,7 @@ znucl 14          # The keyword "znucl" refers to the atomic number of the
                   # possible type(s) of atom. The pseudopotential(s) 
                   # mentioned in the "files" file must correspond
                   # to the type(s) of atom. Here, the only type is Silicon.
+istwfk *1
 
 
 #Definition of the atoms
@@ -29,11 +29,9 @@ xred              # This keyword indicate that the location of the atoms
    1/4  1/4  1/4  # Triplet giving the REDUCED coordinate of atom 2.
                   # Note the use of fractions (remember the limited 
                   # interpreter capabilities of ABINIT)
-istwfk *1
 
 #Definition of the planewave basis set
 ecut  6.0         # Maximal kinetic energy cut-off, in Hartree
-pawecutdg 10.0
 
 #Definition of the k-point grid
 kptopt 1          # Option for the automatic generation of k points, taking
@@ -59,19 +57,20 @@ getwfk -1        # Start from previous wavefunctions to ease convergence
 #Additional (and facultative) variables for Hartree-Fock
 nkpthf  27          # number of k-point in the full-BZ 
 nbandhf  4         # number of occupied states
+bandpp   5
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "Si.LDA_PW-JTH.xml"
+ pseudos "PseudosGTH_pwteter/14si.pspgth"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
-#%% files_to_test = t02.abo, tolnlines=4, tolabs=1.000e-08, tolrel=5.000e-04
+#%% files_to_test = t26.abo, tolnlines=54, tolabs=1.000e-08, tolrel=5.000e-04
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]
-#%% authors = M. Sarraute
+#%% authors = X. Gonze, C. Martins
 #%% keywords = HF, PBE0
-#%% description = Test of PBE0 in sequential case, PAW, from LibXC
+#%% description = Test of PBE0 in sequential case, norm conserving, from LibXC
 #%%<END TEST_INFO>
