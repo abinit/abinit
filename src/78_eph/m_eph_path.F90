@@ -117,7 +117,7 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
 
 !Local variables ------------------------------
 !scalars
- integer,parameter :: istwfk_1 = 1, tim_getgh1c = 1, berryopt0 = 0, useylmgr1 = 0, master = 0, ndims=3, paral_kgb0 = 0
+ integer,parameter :: istwfk_1 = 1, tim_getgh1c = 1, berryopt0 = 0, useylmgr1 = 0, master = 0, ndims=3, paral_kgb0 = 0, ndat1 = 1
  integer :: sij_opt,usecprj,usevnl,optlocal,optnl,opt_gvnlx1, nu
  integer :: spin, iq, ik, nk_path, nq_path, ierr, npw_k, npw_kq, my_rank, nprocs, n1, n2, n3, n4, n5, n6, cplex
  integer :: natom, natom3, nsppol, nspden, nspinor, qptopt, comm_cart, me_cart
@@ -566,7 +566,7 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
            eshift = eig0nk - dtset%dfpt_sciss
 
            call getgh1c(berryopt0, cg_k(:,:,band_n), cwaveprj0, h1kets_kq(:,:,in_k), &
-                        grad_berry, gs1c, gs_ham_kq, gvnlx1, idir, ipert, eshift, nscf%mpi_enreg, optlocal, &
+                        grad_berry, gs1c, gs_ham_kq, gvnlx1, idir, ipert, [eshift], nscf%mpi_enreg, ndat1, optlocal, &
                         optnl, opt_gvnlx1, rf_ham_kq, sij_opt, tim_getgh1c, usevnl)
          end do
 
