@@ -277,7 +277,7 @@ subroutine dfpt_1wf(cg,cg1,cg2,cplex,ddk_f,d2_dkdk_f,d2_dkdk_f2,&
    
    !Compute < g |\partial_{gamma} H^{(0)} | u_{i,k}^{\lambda2} >
    call getgh1c(berryopt,cwavef2,dum_cwaveprj,gv1c,dum_grad_berry,&
- & dum_gs1,gs_hamkq,dum_gvnl1,i3dir,natom+1,dum_lambda,mpi_enreg,optlocal,&
+ & dum_gs1,gs_hamkq,dum_gvnl1,i3dir,natom+1,(/dum_lambda/),mpi_enreg,1,optlocal,&
  & optnl,opt_gvnl1,rf_hamkq,sij_opt,tim_getgh1c,usevnl)
     
    !Apply the dot product with the ket wf (take into account occupation here)

@@ -677,11 +677,11 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
 !    If OpenMP GPU, load "hamiltonian" on GPU device
      if (dtset%gpu_option == ABI_GPU_OPENMP) then
        if(dtset%paral_kgb==0) then
-         call ompgpu_load_hamilt_buffers(gs_hamk%kg_k,gs_hamk%kg_kp)
+         call ompgpu_load_hamilt_buffers(gs_hamk%kg_k,gs_hamk%kg_kp,gs_hamk%ffnl_k,gs_hamk%ph3d_k)
        else if(istwf_k==1) then
-         call ompgpu_load_hamilt_buffers(gs_hamk%kg_k,gs_hamk%kg_kp,kg_k_gather=my_bandfft_kpt%kg_k_gather)
+         call ompgpu_load_hamilt_buffers(gs_hamk%kg_k,gs_hamk%kg_kp,gs_hamk%ffnl_k,gs_hamk%ph3d_k,kg_k_gather=my_bandfft_kpt%kg_k_gather)
        else if(istwf_k==2) then
-         call ompgpu_load_hamilt_buffers(gs_hamk%kg_k,gs_hamk%kg_kp,kg_k_gather=my_bandfft_kpt%kg_k_gather_sym)
+         call ompgpu_load_hamilt_buffers(gs_hamk%kg_k,gs_hamk%kg_kp,gs_hamk%ffnl_k,gs_hamk%ph3d_k,kg_k_gather=my_bandfft_kpt%kg_k_gather_sym)
        else
          ABI_ERROR("istwfk > 2 is not handled with OpenMP GPU offload mode !")
        end if

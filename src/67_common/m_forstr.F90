@@ -941,12 +941,18 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
      call mkffnl(psps%dimekb,dimffnl,psps%ekb,ffnl,psps%ffspl,gs_hamk%gmet,gs_hamk%gprimd,&
 &     ider,idir,psps%indlmn,kg_k,kpg_k,kpoint,psps%lmnmax,psps%lnmax,psps%mpsang,psps%mqgrid_ff,&
 &     nkpg,npw_k,ntypat,psps%pspso,psps%qgrid_ff,rmet,psps%usepaw,psps%useylm,ylm_k,ylmgr_k)
+#ifdef HAVE_OPENMP_OFFLOAD
+     !$OMP TARGET ENTER DATA MAP(to:ffnl) IF(gpu_option==ABI_GPU_OPENMP)
+#endif
      if ((stress_needed==1).and.(usefock_loc).and.(psps%usepaw==1))then
        ider_str=1; dimffnl_str=7;idir_str=-7
        ABI_MALLOC(ffnl_str,(npw_k,dimffnl_str,psps%lmnmax,ntypat))
        call mkffnl(psps%dimekb,dimffnl_str,psps%ekb,ffnl_str,psps%ffspl,gs_hamk%gmet,gs_hamk%gprimd,&
 &       ider_str,idir_str,psps%indlmn,kg_k,kpg_k,kpoint,psps%lmnmax,psps%lnmax,psps%mpsang,psps%mqgrid_ff,&
 &       nkpg,npw_k,ntypat,psps%pspso,psps%qgrid_ff,rmet,psps%usepaw,psps%useylm,ylm_k,ylmgr_k)
+#ifdef HAVE_OPENMP_OFFLOAD
+       !$OMP TARGET ENTER DATA MAP(to:ffnl_str) IF(gpu_option==ABI_GPU_OPENMP)
+#endif
      end if
 
 !    Load k-dependent part in the Hamiltonian datastructure
@@ -971,11 +977,11 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
 !    If OpenMP GPU, load "hamiltonian" on GPU device
      if (gpu_option == ABI_GPU_OPENMP) then
        if(mpi_enreg%paral_kgb==0) then
-         call ompgpu_load_hamilt_buffers(gs_hamk%kg_k,gs_hamk%kg_kp)
+         call ompgpu_load_hamilt_buffers(gs_hamk%kg_k,gs_hamk%kg_kp,gs_hamk%ffnl_k,gs_hamk%ph3d_k)
        else if(gs_hamk%istwf_k==1) then
-         call ompgpu_load_hamilt_buffers(gs_hamk%kg_k,gs_hamk%kg_kp,kg_k_gather=my_bandfft_kpt%kg_k_gather)
+         call ompgpu_load_hamilt_buffers(gs_hamk%kg_k,gs_hamk%kg_kp,gs_hamk%ffnl_k,gs_hamk%ph3d_k,kg_k_gather=my_bandfft_kpt%kg_k_gather)
        else
-         call ompgpu_load_hamilt_buffers(gs_hamk%kg_k,gs_hamk%kg_kp,kg_k_gather=my_bandfft_kpt%kg_k_gather_sym)
+         call ompgpu_load_hamilt_buffers(gs_hamk%kg_k,gs_hamk%kg_kp,gs_hamk%ffnl_k,gs_hamk%ph3d_k,kg_k_gather=my_bandfft_kpt%kg_k_gather_sym)
        end if
      end if
 
@@ -1262,6 +1268,9 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
        ABI_FREE(enlout_2d)
        ABI_FREE(enlout_2d_stress)
      end if
+#ifdef HAVE_OPENMP_OFFLOAD
+     !$OMP TARGET EXIT DATA MAP(delete:ffnl) IF(gpu_option==ABI_GPU_OPENMP)
+#endif
      ABI_FREE(ffnl)
      ABI_FREE(kg_k)
      ABI_FREE(kpg_k)
@@ -1277,6 +1286,9 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
        ABI_FREE(kstr6)
      end if
      if ((stress_needed==1).and.(usefock_loc).and.(psps%usepaw==1))then
+#ifdef HAVE_OPENMP_OFFLOAD
+       !$OMP TARGET EXIT DATA MAP(delete:ffnl_str) IF(gpu_option==ABI_GPU_OPENMP)
+#endif
        ABI_FREE(ffnl_str)
      end if
 

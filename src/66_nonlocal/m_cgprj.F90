@@ -37,6 +37,8 @@ module m_cgprj
                         pawcprj_set_zero, pawcprj_mpi_sum, pawcprj_copy, pawcprj_lincom
  use m_opernla_ylm, only : opernla_ylm
  use m_opernla_ylm_mv, only : opernla_ylm_mv
+ use m_opernla_gemm,   only : opernla_gemm
+ use m_gemm_nonlop_projectors
  use m_time,           only : timab
  use m_io_tools,       only : flush_unit
 
@@ -108,6 +110,7 @@ contains
 !!                      only used if nloalg(2)>0
 !!  ucvol= unit cell volume
 !!  useylm=governs the way the nonlocal operator is to be applied
+!!  is_kprime=wether provided arrays relate to K or Kprime for Hamiltonian operator (optional, for GEMM nonlop)
 !!
 !! SIDE EFFECTS
 !!  cwaveprj(natom,nspinor) <type(pawcprj_type)>=projected input wave function <Proj_i|Cnk> with all NL projectors
@@ -122,35 +125,40 @@ contains
 !! SOURCE
 
  subroutine getcprj(choice,cpopt,cwavef,cwaveprj,ffnl,&
-&                   idir,indlmn,istwf_k,kg_k,kpg,kpoint,lmnmax,mgfft,mpi_enreg,&
+&                   idir,indlmn,istwf_k,kg_k,kpg,kpoint,lmnmax,mgfft,mpi_enreg,ndat,&
 &                   natom,nattyp,ngfft,nloalg,npw_k,nspinor,ntypat,&
-&                   phkxred,ph1d,ph3d,ucvol,useylm)
+&                   phkxred,ph1d,ph3d,ucvol,useylm,is_kprime,gpu_option)
 
 !Arguments -------------------------------
 !scalars
- integer,intent(in) :: choice,cpopt,idir,istwf_k,lmnmax
+ integer,intent(in) :: choice,cpopt,idir,istwf_k,lmnmax,ndat
  integer,intent(in) :: mgfft,natom,npw_k,nspinor,ntypat,useylm
+ integer,intent(in),optional :: gpu_option
  real(dp),intent(in) :: ucvol
+ logical,intent(in),optional :: is_kprime
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: indlmn(6,lmnmax,ntypat),kg_k(3,npw_k),nattyp(ntypat)
  integer,intent(in) :: ngfft(18),nloalg(3)
- real(dp),intent(in) :: cwavef(2,npw_k*nspinor)
+ real(dp),intent(in) :: cwavef(2,npw_k*nspinor*ndat)
  real(dp),intent(in),target :: ffnl(:,:,:,:),kpg(:,:),ph3d(:,:,:)
  real(dp),intent(in) :: kpoint(3),ph1d(2,3*(2*mgfft+1)*natom),phkxred(2,natom)
- type(pawcprj_type),intent(inout) :: cwaveprj(natom,nspinor)
+ type(pawcprj_type),intent(inout) :: cwaveprj(natom,nspinor*ndat)
 
 !Local variables-------------------------------
 !scalars
- logical :: no_opernla_mv
- integer :: choice_,cplex,dimffnl,ia,ia1,ia2,ia3,ia4,iatm,ic,ii,ilmn,ishift,ispinor,itypat
- integer :: jc,matblk,mincat,nd2gxdt,ndgxdt,nincat,nkpg,nkpg_,nlmn,signs
+ logical :: no_opernla_mv,no_opernla_gemm,l_is_kprime
+ integer :: choice_,cplex,dimffnl,ia,ia1,ia2,ia3,ia4,iatm,ic,ii,ilmn,ishift,ispinor,itypat,idat,nprojs,shift,iatom,igrad
+ integer :: jc,matblk,mincat,nd2gxdt,ndgxdt,nincat,nkpg,nkpg_,nlmn,signs,l_gpu_option
 !arrays
  real(dp) :: tsec(2)
  integer,allocatable :: cplex_dgxdt(:),cplex_d2gxdt(:),indlmn_typ(:,:)
  real(dp),allocatable :: d2gxdt(:,:,:,:,:),dgxdt(:,:,:,:,:),ffnl_typ(:,:,:)
  real(dp),allocatable :: gx(:,:,:,:)
+ real(dp),allocatable :: vgx(:,:,:),vdgxdt(:,:,:)
  real(dp), pointer :: kpg_(:,:),ph3d_(:,:,:)
+ real(dp), allocatable :: temp_realvec(:)
+ real(dp) :: d2gxdt_dum_in(1,1,1,1,1)
 
 ! *********************************************************************
 
@@ -160,6 +168,9 @@ contains
 
 !Nothing to do in that case
  if (cpopt==1.and.choice==1) return
+
+ l_gpu_option=ABI_GPU_DISABLED; if(present(gpu_option)) l_gpu_option = gpu_option
+ l_is_kprime=.false.; if(present(is_kprime)) l_is_kprime = is_kprime
 
 !Not available for useylm=0
  if (useylm==0) then
@@ -195,6 +206,7 @@ contains
  end if
 
  no_opernla_mv = nloalg(1)==4.or.nloalg(1)==8.or.nloalg(1)==10 ! have to be consistent with nonlop_ylm
+ no_opernla_gemm = (.not. gemm_nonlop_use_gemm) .or. choice==4 .or. choice==6 .or. ndat==1
 
 !Define dimensions of projected scalars
  dimffnl=size(ffnl,2)
@@ -245,124 +257,228 @@ contains
    ph3d_ => ph3d
  end if
 
-!Loop over atom types
- ia1=1;iatm=0
- do itypat=1,ntypat
-   ia2=ia1+nattyp(itypat)-1;if (ia2<ia1) cycle
-   nlmn=count(indlmn(3,:,itypat)>0)
+ if(no_opernla_gemm) then
+  !Loop over atom types
+   ia1=1;iatm=0
+   do itypat=1,ntypat
+     ia2=ia1+nattyp(itypat)-1;if (ia2<ia1) cycle
+     nlmn=count(indlmn(3,:,itypat)>0)
 
-!  Retrieve some data for this type of atom
-   ABI_MALLOC(indlmn_typ,(6,nlmn))
-   ABI_MALLOC(ffnl_typ,(npw_k,dimffnl,nlmn))
-   indlmn_typ(:,1:nlmn)=indlmn(:,1:nlmn,itypat)
-   ffnl_typ(:,:,1:nlmn)=ffnl(:,:,1:nlmn,itypat)
+  !  Retrieve some data for this type of atom
+     ABI_MALLOC(indlmn_typ,(6,nlmn))
+     ABI_MALLOC(ffnl_typ,(npw_k,dimffnl,nlmn))
+     indlmn_typ(:,1:nlmn)=indlmn(:,1:nlmn,itypat)
+     ffnl_typ(:,:,1:nlmn)=ffnl(:,:,1:nlmn,itypat)
 
-!  Loop on blocks of atoms inside type
-   do ia3=ia1,ia2,mincat
-     ia4=min(ia2,ia3+mincat-1);nincat=ia4-ia3+1
-!     Prepare the phase factors if they were not already computed
-     if (nloalg(2)<=0) then
-       call ph1d3d(ia3,ia4,kg_k,matblk,natom,npw_k,ngfft(1),ngfft(2),ngfft(3),&
-&       phkxred,ph1d,ph3d_)
-     end if
+  !  Loop on blocks of atoms inside type
+     do ia3=ia1,ia2,mincat
+       ia4=min(ia2,ia3+mincat-1);nincat=ia4-ia3+1
+  !     Prepare the phase factors if they were not already computed
+       if (nloalg(2)<=0) then
+         call ph1d3d(ia3,ia4,kg_k,matblk,natom,npw_k,ngfft(1),ngfft(2),ngfft(3),&
+  &       phkxred,ph1d,ph3d_)
+       end if
 
-!    Allocate memory for projected scalars
-     ABI_MALLOC(gx,(cplex,nlmn,nincat,nspinor))
-     ABI_MALLOC(dgxdt,(cplex,ndgxdt,nlmn,nincat,nspinor))
-     ABI_MALLOC(d2gxdt,(cplex,nd2gxdt,nlmn,nincat,nspinor))
-     ABI_MALLOC(cplex_dgxdt,(ndgxdt))
-     ABI_MALLOC(cplex_d2gxdt,(nd2gxdt))
+  !    Allocate memory for projected scalars
+       ABI_MALLOC(gx,(cplex,nlmn,nincat,nspinor*ndat))
+       ABI_MALLOC(dgxdt,(cplex,ndgxdt,nlmn,nincat,nspinor*ndat))
+       ABI_MALLOC(d2gxdt,(cplex,nd2gxdt,nlmn,nincat,nspinor*ndat))
+       ABI_MALLOC(cplex_dgxdt,(ndgxdt))
+       ABI_MALLOC(cplex_d2gxdt,(nd2gxdt))
 
-!    Retrieve eventually <p_i|c> coeffs
-     if (cpopt==1) then
-       do ispinor=1,nspinor
-         do ia=1,nincat
-           gx(1:cplex,1:nlmn,ia,ispinor)=cwaveprj(iatm+ia,ispinor)%cp(1:cplex,1:nlmn)
-         end do
-       end do
-     end if
-
-!    Compute <p_i|c> scalars (and derivatives) for this block of atoms
-     if (abs(choice_)>1.or.no_opernla_mv) then
-       call timab(1291,1,tsec)
-       call opernla_ylm(choice_,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxdt,ffnl_typ,gx,&
-&       ia3,idir,indlmn_typ,istwf_k,kpg_,matblk,mpi_enreg,nd2gxdt,ndgxdt,nincat,nkpg_,nlmn,&
-&       nloalg,npw_k,nspinor,ph3d_,signs,ucvol,cwavef)
-       call timab(1291,2,tsec)
-     else
-       call timab(1292,1,tsec)
-       call opernla_ylm_mv(choice_,cplex,dimffnl,ffnl_typ,gx,&
-&       ia3,indlmn_typ,istwf_k,matblk,mpi_enreg,nincat,nlmn,&
-&       nloalg,npw_k,nspinor,ph3d_,ucvol,cwavef)
-       call timab(1292,2,tsec)
-     end if
-
-!    Transfer result to output variable cwaveprj
-     if (cpopt==0) then
-       do ispinor=1,nspinor
-         do ia=1,nincat
-           cwaveprj(iatm+ia,ispinor)%nlmn=nlmn
-           cwaveprj(iatm+ia,ispinor)%cp(1:cplex,1:nlmn)=gx(1:cplex,1:nlmn,ia,ispinor)
-           if(cplex==1) cwaveprj(iatm+ia,ispinor)%cp(2,1:nlmn)=zero
-         end do
-       end do
-     end if
-     if (cpopt>=0.and.choice>1) then
-       ishift=0
-       if ((idir>0).and.(cwaveprj(1,1)%ncpgr>ndgxdt)) ishift=idir-1
-       if(cplex==2)then
-         do ispinor=1,nspinor
+  !    Retrieve eventually <p_i|c> coeffs
+       if (cpopt==1) then
+         do ispinor=1,nspinor*ndat
            do ia=1,nincat
-!             cwaveprj(iatm+ia,ispinor)%ncpgr=ndgxdt+nd2gxdt
-             if (ndgxdt>0) cwaveprj(iatm+ia,ispinor)%dcp(1:2,1+ishift:ndgxdt+ishift,1:nlmn)=&
-&             dgxdt(1:2,1:ndgxdt,1:nlmn,ia,ispinor)
-             if (nd2gxdt>0)cwaveprj(iatm+ia,ispinor)%dcp(1:2,ndgxdt+1+ishift:ndgxdt+nd2gxdt+ishift,1:nlmn)=&
-&             d2gxdt(1:2,1:nd2gxdt,1:nlmn,ia,ispinor)
-           end do
-         end do
-       else
-!        cplex_dgxdt(i)  = 1 if dgxdt(1,i,:,:)  is real, 2 if it is pure imaginary
-!        cplex_d2gxdt(i) = 1 if d2gxdt(1,i,:,:) is real, 2 if it is pure imaginary
-         do ispinor=1,nspinor
-           do ia=1,nincat
-!             cwaveprj(iatm+ia,ispinor)%ncpgr=ndgxdt+nd2gxdt
-             if (ndgxdt>0) then
-               do ilmn =1,nlmn
-                 do ii = 1,ndgxdt
-                   ic = cplex_dgxdt(ii) ; jc = 3 - ic
-                   cwaveprj(iatm+ia,ispinor)%dcp(ic,ii+ishift,ilmn)=dgxdt(1,ii,ilmn,ia,ispinor)
-                   cwaveprj(iatm+ia,ispinor)%dcp(jc,ii+ishift,ilmn)=zero
-                 end do
-               end do
-             end if
-             if (nd2gxdt>0) then
-               do ilmn =1,nlmn
-                 do ii = 1,nd2gxdt
-                   ic = cplex_d2gxdt(ii) ; jc = 3 - ic
-                   cwaveprj(iatm+ia,ispinor)%dcp(ic,ndgxdt+ii+ishift,ilmn)=d2gxdt(1,ii,ilmn,ia,ispinor)
-                   cwaveprj(iatm+ia,ispinor)%dcp(jc,ndgxdt+ii+ishift,ilmn)=zero
-                 end do
-               end do
-             end if
+             gx(1:cplex,1:nlmn,ia,ispinor)=cwaveprj(iatm+ia,ispinor)%cp(1:cplex,1:nlmn)
            end do
          end do
        end if
-     end if
 
-!    End loop inside block of atoms
-     iatm=iatm+nincat
-     ABI_FREE(gx)
-     ABI_FREE(dgxdt)
-     ABI_FREE(d2gxdt)
-     ABI_FREE(cplex_dgxdt)
-     ABI_FREE(cplex_d2gxdt)
+  !    Compute <p_i|c> scalars (and derivatives) for this block of atoms
+       if (abs(choice_)>1.or.no_opernla_mv) then
+         do idat=1,ndat
+           call timab(1291,1,tsec)
+           call opernla_ylm(choice_,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,&
+  &         d2gxdt(:,:,:,:,1+nspinor*(idat-1):nspinor*idat),&
+  &         dgxdt(:,:,:,:,1+nspinor*(idat-1):nspinor*idat),ffnl_typ,&
+  &         gx(:,:,:,1+nspinor*(idat-1):nspinor*idat),&
+  &         ia3,idir,indlmn_typ,istwf_k,kpg_,matblk,mpi_enreg,nd2gxdt,ndgxdt,nincat,nkpg_,nlmn,&
+  &         nloalg,npw_k,nspinor,ph3d_,signs,ucvol,cwavef(:,1+npw_k*nspinor*(idat-1):npw_k*nspinor*idat))
+           call timab(1291,2,tsec)
+         end do
+       else
+         call timab(1292,1,tsec)
+         do idat=1,ndat
+           call opernla_ylm_mv(choice_,cplex,dimffnl,ffnl_typ,gx(:,:,:,1+nspinor*(idat-1):nspinor*idat),&
+  &         ia3,indlmn_typ,istwf_k,matblk,mpi_enreg,nincat,nlmn,&
+  &         nloalg,npw_k,nspinor,ph3d_,ucvol,cwavef(:,1+npw_k*nspinor*(idat-1):npw_k*nspinor*idat))
+         end do
+         call timab(1292,2,tsec)
+       end if
+
+  !    Transfer result to output variable cwaveprj
+       if (cpopt==0) then
+         do ispinor=1,nspinor*ndat
+           do ia=1,nincat
+             cwaveprj(iatm+ia,ispinor)%nlmn=nlmn
+             cwaveprj(iatm+ia,ispinor)%cp(1:cplex,1:nlmn)=gx(1:cplex,1:nlmn,ia,ispinor)
+             if(cplex==1) cwaveprj(iatm+ia,ispinor)%cp(2,1:nlmn)=zero
+           end do
+         end do
+       end if
+       if (cpopt>=0.and.choice>1) then
+         ishift=0
+         if ((idir>0).and.(cwaveprj(1,1)%ncpgr>ndgxdt)) ishift=idir-1
+         if(cplex==2)then
+           do ispinor=1,nspinor*ndat
+             do ia=1,nincat
+  !             cwaveprj(iatm+ia,ispinor)%ncpgr=ndgxdt+nd2gxdt
+               if (ndgxdt>0) cwaveprj(iatm+ia,ispinor)%dcp(1:2,1+ishift:ndgxdt+ishift,1:nlmn)=&
+  &             dgxdt(1:2,1:ndgxdt,1:nlmn,ia,ispinor)
+               if (nd2gxdt>0)cwaveprj(iatm+ia,ispinor)%dcp(1:2,ndgxdt+1+ishift:ndgxdt+nd2gxdt+ishift,1:nlmn)=&
+  &             d2gxdt(1:2,1:nd2gxdt,1:nlmn,ia,ispinor)
+             end do
+           end do
+         else
+  !        cplex_dgxdt(i)  = 1 if dgxdt(1,i,:,:)  is real, 2 if it is pure imaginary
+  !        cplex_d2gxdt(i) = 1 if d2gxdt(1,i,:,:) is real, 2 if it is pure imaginary
+           do ispinor=1,nspinor*ndat
+             do ia=1,nincat
+  !             cwaveprj(iatm+ia,ispinor)%ncpgr=ndgxdt+nd2gxdt
+               if (ndgxdt>0) then
+                 do ilmn =1,nlmn
+                   do ii = 1,ndgxdt
+                     ic = cplex_dgxdt(ii) ; jc = 3 - ic
+                     cwaveprj(iatm+ia,ispinor)%dcp(ic,ii+ishift,ilmn)=dgxdt(1,ii,ilmn,ia,ispinor)
+                     cwaveprj(iatm+ia,ispinor)%dcp(jc,ii+ishift,ilmn)=zero
+                   end do
+                 end do
+               end if
+               if (nd2gxdt>0) then
+                 do ilmn =1,nlmn
+                   do ii = 1,nd2gxdt
+                     ic = cplex_d2gxdt(ii) ; jc = 3 - ic
+                     cwaveprj(iatm+ia,ispinor)%dcp(ic,ndgxdt+ii+ishift,ilmn)=d2gxdt(1,ii,ilmn,ia,ispinor)
+                     cwaveprj(iatm+ia,ispinor)%dcp(jc,ndgxdt+ii+ishift,ilmn)=zero
+                   end do
+                 end do
+               end if
+             end do
+           end do
+         end if
+       end if
+
+  !    End loop inside block of atoms
+       iatm=iatm+nincat
+       ABI_FREE(gx)
+       ABI_FREE(dgxdt)
+       ABI_FREE(d2gxdt)
+       ABI_FREE(cplex_dgxdt)
+       ABI_FREE(cplex_d2gxdt)
+     end do
+
+  !  End loop over atom types
+     ia1=ia2+1
+     ABI_FREE(indlmn_typ)
+     ABI_FREE(ffnl_typ)
    end do
 
-!  End loop over atom types
-   ia1=ia2+1
-   ABI_FREE(indlmn_typ)
-   ABI_FREE(ffnl_typ)
- end do
+ else
+
+   ! Batched GEMM call : proceed "ndat" bands at once with GEMM opernla
+
+   if(cplex==1) ABI_BUG("toto")
+   if (nloalg(2)<=0) ABI_BUG("toto")
+
+   nprojs = 0
+   do itypat=1,ntypat
+     nprojs = nprojs + count(indlmn(3,:,itypat)>0)*nattyp(itypat)
+   end do
+
+   ABI_MALLOC(cplex_dgxdt,(ndgxdt))
+   ABI_MALLOC(cplex_d2gxdt,(nd2gxdt))
+   ABI_MALLOC(vgx,(cplex,nprojs,nspinor*ndat))
+   ABI_MALLOC(vdgxdt,(cplex,ndgxdt*nprojs,nspinor*ndat))
+   vgx(:,:,:) = zero
+   vdgxdt(:,:,:) = zero
+#ifdef HAVE_OPENMP_OFFLOAD
+   !$OMP TARGET ENTER DATA MAP(to:vgx,vdgxdt,kpg_) IF (l_gpu_option==ABI_GPU_OPENMP)
+#endif
+
+!  Retrieve eventually <p_i|c> coeffs
+   if (cpopt==1) then
+    do idat=1, ndat*nspinor
+      shift = 0
+      do iatom = 1, natom
+        nlmn = cwaveprj(iatom, idat)%nlmn
+        vgx(1:cplex, shift+1:shift+nlmn, idat) = cwaveprj(iatom, idat)%cp(1:cplex, 1:nlmn)
+        shift = shift + nlmn
+      end do
+    end do
+   end if
+
+   if (cplex /= 2) then
+     ABI_MALLOC(temp_realvec,(npw_k*nspinor*ndat))
+   end if
+
+   call opernla_gemm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,&
+   &       d2gxdt_dum_in,vdgxdt,ffnl,vgx,&
+   &       idir,indlmn,istwf_k,kpg_,matblk,mpi_enreg,nd2gxdt,ndgxdt,nkpg_,&
+   &       npw_k,nspinor,ph3d,signs,ucvol,ndat,ntypat,lmnmax,nattyp,l_is_kprime,&
+   &       -1,0,cpopt,&
+   &       nprojs,&
+   &       cwavef,&
+   &       temp_realvec,&
+   &       l_gpu_option,.false.)
+
+#ifdef HAVE_OPENMP_OFFLOAD
+   !$OMP TARGET UPDATE FROM(vgx,vdgxdt) IF (l_gpu_option==ABI_GPU_OPENMP)
+#endif
+
+
+!  Transfer result to output variable cwaveprj
+   if (cpopt==0) then
+     do idat=1, ndat*nspinor
+       shift = 0
+       do iatom = 1, natom
+         nlmn = cwaveprj(iatom, idat)%nlmn
+         cwaveprj(iatom, idat)%cp(1:cplex, 1:nlmn) = vgx(1:cplex, shift+1:shift+nlmn, idat)
+         shift = shift + nlmn
+       end do
+     end do
+   end if
+
+   if (cpopt>=0.and.choice>1) then
+     ishift=0
+     if ((idir>0).and.(cwaveprj(1,1)%ncpgr>ndgxdt)) ishift=idir-1
+     if(cplex==2)then
+       do idat=1, ndat*nspinor
+         shift = 0
+         do iatom = 1, natom
+           nlmn = cwaveprj(iatom, idat)%nlmn
+           do igrad=1,ndgxdt
+             cwaveprj(iatom, idat)%dcp(1:cplex,igrad,1:nlmn) = &
+             &                   vdgxdt(1:cplex, shift+1:shift+nlmn, idat)
+             shift = shift + nlmn
+           end do
+         end do
+       end do
+     else
+       ABI_BUG("toto")
+     end if
+   end if
+
+
+#ifdef HAVE_OPENMP_OFFLOAD
+   !$OMP TARGET EXIT DATA MAP(delete:vgx,vdgxdt,kpg_) IF (l_gpu_option==ABI_GPU_OPENMP)
+#endif
+   ABI_FREE(vgx)
+   ABI_FREE(vdgxdt)
+   ABI_FREE(cplex_dgxdt)
+   ABI_FREE(cplex_d2gxdt)
+
+ end if
 
  if (nkpg==0) then
    ABI_FREE(kpg_)
@@ -906,8 +1022,8 @@ contains
            call timab(1294,1,tsec)
            call getcprj(choice,cpopt,cwavef(:,iwf1:iwf2),cwaveprj(:,icp1:icp2),&
 &           ffnl,jdir,indlmn_atm,istwf_k,kg_k,kpg_k,kpoint,psps%lmnmax,&
-&           mgfft,mpi_enreg,ncprj,nattyp_atm,ngfft,nloalg,&
-&           npw_nk,my_nspinor,ntypat0,phkxred,ph1d_atm,ph3d,ucvol,psps%useylm)
+&           mgfft,mpi_enreg,1,ncprj,nattyp_atm,ngfft,nloalg,&
+&           npw_nk,my_nspinor,ntypat0,phkxred,ph1d_atm,ph3d,ucvol,psps%useylm,.false.)
            call timab(1294,2,tsec)
          end do
        end do
