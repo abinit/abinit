@@ -36,6 +36,8 @@ module m_forstr
  use m_dtset
  use m_extfpmd
  use m_ompgpu_utils
+ use m_xg
+ use m_xg_nonlop
 
  use defs_datatypes,     only : pseudopotential_type
  use defs_abitypes,      only : MPI_type
@@ -72,7 +74,7 @@ module m_forstr
  use m_paw_nhat,         only : pawmknhat
  use m_rhotoxc,          only : rhotoxc
  use m_dfpt_mkvxc,       only : dfpt_mkvxc, dfpt_mkvxc_noncoll
- use m_cgprj,            only : ctocprj
+ use m_cgprj,            only : ctocprj,xg_cprj_copy,CPRJ_TO_XG
  use m_psolver,          only : psolver_hartree
  use m_wvl_psi,          only : wvl_nl_gradient
  use m_fft,              only : fourdp
@@ -262,7 +264,7 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
 &                 ntypat,nvresid,occ,optfor,optres,paw_ij,pawang,pawfgr,&
 &                 pawfgrtab,pawrad,pawrhoij,pawtab,ph1d,ph1df,psps,rhog,rhor,rprimd,stress_needed,&
 &                 strscondft,strsxc,strten,symrec,synlgr,ucvol,usecprj,vhartr,vpsp,&
-&                 vxc,vxctau,wvl,xccc3d,xcctau3d,xred,ylm,ylmgr,qvpotzero)
+&                 vxc,vxctau,wvl,xccc3d,xcctau3d,xred,ylm,ylmgr,qvpotzero,xg_nonlop)
 
 !Arguments ------------------------------------
 !scalars
@@ -281,6 +283,7 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
  type(pseudopotential_type),intent(in) :: psps
  type(wvl_data),intent(inout) :: wvl
  type(fock_type),pointer, intent(inout) :: fock
+ type(xg_nonlop_t), intent(inout) :: xg_nonlop
 !arrays
  integer,intent(in) :: atindx1(dtset%natom),indsym(4,dtset%nsym,dtset%natom)
  integer,intent(in) :: kg(3,dtset%mpw*dtset%mkmem),nattyp(ntypat),ngfftf(18)
@@ -314,7 +317,7 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
 !Local variables-------------------------------
 !scalars
  integer :: comm_grid,ifft,ispden,ncpgr,occopt_,optgr,optgr2,option,optnc,optstr,optstr2,iorder_cprj,ctocprj_choice
- integer :: idir,iatom,unpaw,mcgbz
+ integer :: idir,iatom,unpaw,mcgbz,usexg
  integer,allocatable :: dimcprj(:)
  real(dp) ::dum,dum1,ucvol_
  logical :: apply_residual
@@ -407,12 +410,14 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
        end if
      end if
    end if
+   usexg = 0
+   if (dtset%cprj_in_memory==1) usexg = 1
    call forstrnps(cg,cprj,dtset%ecut,dtset%ecutsm,dtset%effmass_free,eigen,electronpositron,fock,grnl,&
 &   dtset%istwfk,kg,kinstr,nlstr,dtset%kptns,dtset%mband,mcg,mcprj,dtset%mgfft,dtset%mkmem,&
 &   mpi_enreg,psps%mpsang,dtset%mpw,my_natom,dtset%natom,dtset%nband,dtset%nfft,dtset%ngfft,&
 &   dtset%nkpt,dtset%nloalg,npwarr,dtset%nspden,dtset%nspinor,dtset%nsppol,dtset%nsym,ntypat,&
 &   dtset%nucdipmom,occ,optfor,paw_ij,pawtab,ph1d,psps,rprimd,stress_needed,symrec,dtset%typat,&
-&   usecprj,dtset%usefock,dtset%gpu_option,dtset%wtk,xred,ylm,ylmgr)
+&   usecprj,dtset%usefock,usexg,dtset%gpu_option,dtset%wtk,xred,ylm,ylmgr,xg_nonlop)
 !DEBUG
 !   write(6,*)' after forstrnps, nlstr=',nlstr(1:6)
 !ENDDEBUG
@@ -614,17 +619,18 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
 &  grnl,istwfk,kg,kinstr,npsstr,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_enreg,mpsang,&
 &  mpw,my_natom,natom,nband,nfft,ngfft,nkpt,nloalg,npwarr,nspden,nspinor,nsppol,nsym,&
 &  ntypat,nucdipmom,occ,optfor,paw_ij,pawtab,ph1d,psps,rprimd,&
-&  stress_needed,symrec,typat,usecprj,usefock,gpu_option,wtk,xred,ylm,ylmgr)
+&  stress_needed,symrec,typat,usecprj,usefock,usexg,gpu_option,wtk,xred,ylm,ylmgr,xg_nonlop)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: mband,mcg,mcprj,mgfft,mkmem,mpsang,mpw,my_natom,natom,nfft,nkpt
  integer,intent(in) :: nspden,nsppol,nspinor,nsym,ntypat,optfor,stress_needed
- integer,intent(in) :: usecprj,usefock,gpu_option
+ integer,intent(in) :: usecprj,usefock,usexg,gpu_option
  real(dp),intent(in) :: ecut,ecutsm,effmass_free
  type(electronpositron_type),pointer :: electronpositron
  type(MPI_type),intent(inout) :: mpi_enreg
  type(pseudopotential_type),intent(in) :: psps
+ type(xg_nonlop_t),intent(inout) :: xg_nonlop
 !arrays
  integer,intent(in) :: istwfk(nkpt),kg(3,mpw*mkmem),nband(nkpt*nsppol)
  integer,intent(in) :: ngfft(18),nloalg(3),npwarr(nkpt)
@@ -649,6 +655,7 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
  integer :: nnlout,npw_k,paw_opt,signs,spaceComm
  integer :: tim_nonlop,tim_nonlop_prep,usecprj_local,use_ACE_old
  integer :: blocksize,iblock,iblocksize,ibs,nblockbd
+ integer :: space,me_g0,ncols_cprj
  real(dp) :: ar,renorm_factor,dfsm,ecutsm_inv,fact_kin,fsm,htpisq,kgc1
  real(dp) :: kgc2,kgc3,kin,xx
  type(gs_hamiltonian_type) :: gs_hamk
@@ -672,7 +679,9 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
  type(bandfft_kpt_type),pointer :: my_bandfft_kpt => null()
  type(pawcprj_type),target,allocatable :: cwaveprj(:,:)
  type(pawcprj_type),pointer :: cwaveprj_idat(:,:)
-
+ type(xgBlock_t) :: xgx0,xgeigen,xgforces,xgstress
+ type(xg_t) :: cprj_xgx0,cprj_work
+ real(dp),allocatable :: enlout_2d(:,:),enlout_2d_stress(:,:)
 
 !*************************************************************************
 
@@ -775,6 +784,10 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
 !  Continue to initialize the Hamiltonian (PAW DIJ coefficients)
    call gs_hamk%load_spin(isppol,with_nonlocal=.true.)
    if (usefock_loc) fockcommon%isppol=isppol
+
+  if (usexg==1) then
+    if (xg_nonlop%paw) call xg_nonlop_make_Dij(xg_nonlop,paw_ij,isppol,gs_hamk%atindx)
+  end if
 
 !  Loop over k points
    ikg=0
@@ -908,10 +921,14 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
        ABI_FREE(gprimd)
      end if
 
-!    Compute (k+G) vectors
-     nkpg=3*nloalg(3)
-     ABI_MALLOC(kpg_k,(npw_k,nkpg))
-     if (nkpg>0) then
+!    Compute (k+G) vectors (only if useylm=1)
+     if (usexg/=1) then
+       nkpg=3*nloalg(3)
+       ABI_MALLOC(kpg_k,(npw_k,nkpg))
+       if (nkpg>0) call mkkpg(kg_k,kpg_k,kpoint,nkpg,npw_k)
+     else ! cprj_in_memory = 1
+       nkpg=3
+       ABI_MALLOC(kpg_k,(npw_k,nkpg))
        call mkkpg(kg_k,kpg_k,kpoint,nkpg,npw_k)
      end if
 
@@ -941,7 +958,7 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
 &     kg_k=kg_k,kpg_k=kpg_k,ffnl_k=ffnl,ph3d_k=ph3d,compute_gbound=compute_gbound,compute_ph3d=.true.)
 
 !    Load band-FFT tabs (transposed k-dependent arrays)
-     if (mpi_enreg%paral_kgb==1) then
+     if (mpi_enreg%paral_kgb==1.and.usexg/=1) then
        call bandfft_kpt_savetabs(my_bandfft_kpt,ffnl=ffnl_sav,ph3d=ph3d_sav,kpg=kpg_k_sav)
        call prep_bandfft_tabs(gs_hamk,ikpt,mkmem,mpi_enreg)
        call gs_hamk%load_k(npw_fft_k=my_bandfft_kpt%ndatarecv, &
@@ -967,6 +984,10 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
        gemm_nonlop_ikpt_this_proc_being_treated = my_ikpt
      end if
 
+     if (usexg==1) then
+       call xg_nonlop_make_k(xg_nonlop,my_ikpt,istwf_k,mpi_enreg%me_g0,mpi_enreg%me_g0_fft,npw_k,ffnl,ph3d,kpg_k,.true.)
+     end if
+
 !    Loop over (blocks of) bands; accumulate forces and/or stresses
 !    The following is now wrong. In sequential, nblockbd=nband_k/bandpp
 !    blocksize= bandpp (JB 2016/04/16)
@@ -975,6 +996,12 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
      ABI_MALLOC(occblock,(blocksize))
      ABI_MALLOC(weight,(blocksize))
      ABI_MALLOC(enlout,(nnlout*blocksize))
+     if (usexg==1) then
+       ABI_MALLOC(enlout_2d,(3*natom,blocksize*optfor))
+       ABI_MALLOC(enlout_2d_stress,(6,blocksize*stress_needed))
+       if (optfor==1) enlout_2d=zero
+       if (stress_needed==1) enlout_2d_stress=zero
+     end if
      occblock=zero;weight=zero;enlout(:)=zero
      if (usefock_loc) then
        if (fockcommon%optstr) then
@@ -989,6 +1016,12 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
      end if
 
      call timab(922,2,tsec)
+
+     if (usexg==1) then
+       ncols_cprj = bandpp*my_nspinor
+       call xg_init(cprj_xgx0,xg_nonlop%space_cprj,xg_nonlop%cprjdim,ncols_cprj,comm=xg_nonlop%comm_band)
+       call xg_init(cprj_work,xg_nonlop%space_cprj,xg_nonlop%cprjdim,ncols_cprj,comm=xg_nonlop%comm_band)
+     end if
 
      do iblock=1,nblockbd
 
@@ -1021,32 +1054,86 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
 
          lambda(1:blocksize)= eigen(1+(iblock-1)*blocksize+bdtot_index:iblock*blocksize+bdtot_index)
          ABI_NVTX_START_RANGE(NVTX_FORSTR_NONLOP)
-         if (mpi_enreg%paral_kgb/=1) then
+         if (mpi_enreg%paral_kgb/=1.and.usexg/=1) then
            call nonlop(choice,cpopt,cwaveprj,enlout,gs_hamk,idir,lambda,mpi_enreg,blocksize,nnlout,&
 &           paw_opt,signs,nonlop_dum,tim_nonlop,cwavef,cwavef)
-         else
+         else if (usexg/=1) then
            ! here we MUST pass option gpu_option=ABI_GPU_DISABLED, as cwavef here is a host memory buffer
            call prep_nonlop(choice,cpopt,cwaveprj,enlout,gs_hamk,idir,lambda,blocksize,&
 &           mpi_enreg,nnlout,paw_opt,signs,nonlop_dum,tim_nonlop_prep,cwavef,cwavef,&
 &           already_transposed=.False.,gpu_option=ABI_GPU_DISABLED)
-         end if
+         else ! usexg==1
+
+           if ( istwf_k > 1 ) then ! Real only
+             space = SPACE_CR
+           else ! complex
+             space = SPACE_C
+           end if
+           me_g0 = -1
+           if (space==SPACE_CR) then
+             me_g0 = 0
+             if (istwf_k == 2) then
+               if (mpi_enreg%me_g0 == 1) me_g0 = 1
+             end if
+           end if
+           call xgBlock_map(xgx0,cwavef,space,npw_k*my_nspinor,blocksize,comm=mpi_enreg%comm_band,me_g0=me_g0,&
+ &         gpu_option=gpu_option)
+           call xgBlock_map_1d(xgeigen,lambda,SPACE_R,blocksize)
+
+           if (psps%usepaw==1.and.usecprj_local==1) then
+             call xg_cprj_copy(cwaveprj,cprj_xgx0%self,xg_nonlop,CPRJ_TO_XG)
+           else
+             call xg_nonlop_getcprj(xg_nonlop,xgx0,cprj_xgx0%self,cprj_work%self)
+           end if
+
+           if (optfor==1) call xgBlock_map(xgforces,enlout_2d,SPACE_R,3*natom,blocksize)
+           if (stress_needed==1) call xgBlock_map(xgstress,enlout_2d_stress,SPACE_R,6,blocksize)
+
+           if (optfor==1.and.stress_needed==0) then
+             call xg_nonlop_forces_stress(xg_nonlop,xgx0,cprj_xgx0%self,cprj_work%self,xgeigen,&
+               forces=xgforces)
+           end if
+           if (optfor==0.and.stress_needed==1) then
+             call xg_nonlop_forces_stress(xg_nonlop,xgx0,cprj_xgx0%self,cprj_work%self,xgeigen,&
+               stress=xgstress,gprimd=gs_hamk%gprimd)
+           end if
+           if (optfor==1.and.stress_needed==1) then
+             call xg_nonlop_forces_stress(xg_nonlop,xgx0,cprj_xgx0%self,cprj_work%self,xgeigen,&
+               forces=xgforces,stress=xgstress,gprimd=gs_hamk%gprimd)
+           end if
+
+         end if ! end usexg==1
          ABI_NVTX_END_RANGE()
+
          if ((stress_needed==1).and.(usefock_loc).and.(psps%usepaw==1))then
            call gs_hamk%load_k(ffnl_k=ffnl_str)
          end if
 
 !        Accumulate non-local contributions from n,k
-         if (optfor==1) then
-           do iblocksize=1,blocksize
-             ibs=nnlout*(iblocksize-1)
-             grnl(1:3*natom)=grnl(1:3*natom)+weight(iblocksize)*enlout(ibs+1+ishift:ibs+3*natom+ishift)
-           end do
-         end if
-         if (stress_needed==1) then
-           do iblocksize=1,blocksize
-             ibs=nnlout*(iblocksize-1)
-             npsstr(1:6)=npsstr(1:6) + weight(iblocksize)*enlout(ibs+1:ibs+6)
-           end do
+         if (usexg/=1) then
+           if (optfor==1) then
+             do iblocksize=1,blocksize
+               ibs=nnlout*(iblocksize-1)
+               grnl(1:3*natom)=grnl(1:3*natom)+weight(iblocksize)*enlout(ibs+1+ishift:ibs+3*natom+ishift)
+             end do
+           end if
+           if (stress_needed==1) then
+             do iblocksize=1,blocksize
+               ibs=nnlout*(iblocksize-1)
+               npsstr(1:6)=npsstr(1:6) + weight(iblocksize)*enlout(ibs+1:ibs+6)
+             end do
+           end if
+         else
+           if (optfor==1) then
+             do iblocksize=1,blocksize
+               grnl(1:3*natom)=grnl(1:3*natom)+weight(iblocksize)*enlout_2d(1:3*natom,iblocksize)
+             end do
+           end if
+           if (stress_needed==1) then
+             do iblocksize=1,blocksize
+               npsstr(1:6) = npsstr(1:6) + weight(iblocksize)*enlout_2d_stress(1:6,iblocksize)
+             end do
+           end if
          end if
 
          call timab(924,2,tsec)
@@ -1128,6 +1215,11 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
 
      end do ! End of loop on block of bands
 
+     if (usexg==1) then
+       call xg_free(cprj_xgx0)
+       call xg_free(cprj_work)
+     end if
+
      call timab(927,1,tsec)
 
 !    Restore the bandfft tabs
@@ -1166,6 +1258,10 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
      ABI_FREE(occblock)
      ABI_FREE(weight)
      ABI_FREE(enlout)
+     if (usexg==1) then
+       ABI_FREE(enlout_2d)
+       ABI_FREE(enlout_2d_stress)
+     end if
      ABI_FREE(ffnl)
      ABI_FREE(kg_k)
      ABI_FREE(kpg_k)
@@ -1187,6 +1283,11 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
      call timab(927,2,tsec)
 
    end do ! End k point loop
+
+   if (usexg==1) then
+     if (xg_nonlop%paw) call xg_nonlop_destroy_Dij(xg_nonlop)
+   end if
+
  end do ! End loop over spins
 
  call timab(928,1,tsec)

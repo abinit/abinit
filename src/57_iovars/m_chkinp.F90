@@ -95,7 +95,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
  integer :: nproc,nspden,nspinor,nsppol,optdriver,mismatch_fft_tnons,response
  integer :: fftalg,usepaw,usewvl
  integer :: ttoldfe,ttoldff,ttolrff,ttolvrs,ttolwfr
- logical :: twvl,allowed,berryflag
+ logical :: test,twvl,allowed,berryflag
  logical :: wvlbigdft=.false.
  logical :: xc_is_lda,xc_is_gga,xc_is_mgga,xc_is_hybrid,xc_is_tb09,xc_need_kden
  real(dp) :: dz,sumalch,summix,sumocc,ucvol,wvl_hgrid,zatom
@@ -520,6 +520,47 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      endif
 
    enddo
+
+!  cprj_in_memory
+   if (dt%cprj_in_memory/=0) then
+     if (dt%optdriver/=RUNL_GSTATE) then
+       ABI_ERROR_NOSTOP('cprj_in_memory/=0 is implemented only for ground state (optdriver=0).',ierr)
+     else
+       if (dt%useylm /= 1) then
+         ABI_ERROR_NOSTOP('cprj_in_memory/=0 requires the input variable "useylm" to be 1',ierr)
+       end if
+       ABI_CHECK(dt%gpu_option==0,"cprj_in_memory/=0 is not implemented for GPUs. Change cprj_in_memory or gpu_option.")
+       write(msg,'(a)') "cprj_in_memory/=0 is not compatible with use_gemm_nonlop/=0. Change cprj_in_memory or use_gemm_nonlop."
+       ABI_CHECK(dt%use_gemm_nonlop==0,msg)
+       test = dt%wfoptalg==10 .or. dt%wfoptalg==114 .or. dt%wfoptalg==111
+       write(msg,'(a)') "With cprj_in_memory/=0, only wfoptalg==10,114 or 111 are implemented. Change cprj_in_memory or wfoptalg."
+       ABI_CHECK(test,msg)
+       ABI_CHECK(dt%rmm_diis==0, "With cprj_in_memory/=0, rmm_diis/=0 is not implemented. Change cprj_in_memory or rmm_diis.")
+       ABI_CHECK(dt%berryopt==0, "With cprj_in_memory/=0, berryopt/=0 is not implemented. Change cprj_in_memory or berryopt.")
+       ABI_CHECK(dt%usefock==0, "With cprj_in_memory/=0, usefock/=0 is not implemented. Change cprj_in_memory or usefock.")
+       test = sum(abs(dt%nucdipmom))<tol16
+       ABI_CHECK(test,"With cprj_in_memory/=0, nuclear dipolar moments are not implemented. Change cprj_in_memory or nucdipmom.")
+       !
+       test=dt%cprj_in_memory==0.or.dt%cprj_in_memory==1.or.dt%cprj_in_memory==2
+       write(msg,'(a)') "cprj_in_memory must 0 (not used), 1 (LOBPCG or Chebfi) or 2 (Conjugate Gradient). Change cprj_in_memory."
+       ABI_CHECK(test,msg)
+       test = dt%usepaw==1.or.dt%nspinor==1
+       write(msg,'(a,a)') "With cprj_in_memory/=0, nspinor=2 is not available with Norm-Concerving pseudo-potentials.",&
+        & " Use nspinor=1, or PAW pseudos, or set cprj_in_memory to 0."
+       ABI_CHECK(test,msg)
+       if (dt%cprj_in_memory==1.and.dt%wfoptalg==10) then
+         ABI_ERROR_NOSTOP('cprj_in_memory must be 2 for Conjugate Gradient (not 1).',ierr)
+       end if
+       if (dt%cprj_in_memory==2.and.(dt%wfoptalg==114.or.dt%wfoptalg==111)) then
+         dt%cprj_in_memory=1
+         ABI_ERROR_NOSTOP('cprj_in_memory must be 1 for LOBPCG or Chebfi (not 2).',ierr)
+       end if
+       if (dt%wfoptalg/=111.and.dt%xg_nonlop_option/=0) then
+         dt%xg_nonlop_option=0
+         ABI_ERROR_NOSTOP('xg_nonlop_option/=0 is usefull only for Chebfi (wfoptalg=111).',ierr)
+       end if
+     end if
+   end if
 
 !  d3e_pert1_atpol
    call chkint_ge(0,0,cond_string,cond_values,ierr,'d3e_pert1_atpol(1)',dt%d3e_pert1_atpol(1),1,iout)
