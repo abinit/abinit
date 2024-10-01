@@ -1872,12 +1872,12 @@ subroutine fock_ACE_getghc(cwavef,ghc,gs_ham,mpi_enreg,ndat,gpu_option)
 !Local variables-------------------------------
 ! Scalars
  complex(dpc), parameter :: cminusone  = (-1._dp,0._dp)
- integer :: ikpt,ipw,my_nspinor,nband_k,npw,idat,gpu_option_
+ integer :: iband,ikpt,ipw,my_nspinor,nband_k,npw,idat,gpu_option_
  real(dp) :: eigen
  type(fock_common_type),pointer :: fockcommon
 ! Arrays
  real(dp) :: tsec(2)
- real(dp), allocatable :: mat(:,:,:),ghc1(:,:)
+ real(dp), allocatable :: mat(:,:,:),ghc1(:,:),vdotr(:),vdoti(:)
  real(dp), ABI_CONTIGUOUS pointer :: xi(:,:,:)
 
 ! *************************************************************************
@@ -1898,21 +1898,39 @@ subroutine fock_ACE_getghc(cwavef,ghc,gs_ham,mpi_enreg,ndat,gpu_option)
 !*Initialization of the array ghc1
 !*ghc1 will contain the exact exchange contribution to the Hamiltonian
  ABI_MALLOC(ghc1,(2,npw*my_nspinor*ndat))
- ABI_MALLOC(mat,(2,nband_k,ndat))
+ ghc1=zero
 
  xi => gs_ham%fockACE_k%xi(:,:,:)
 
  if(gpu_option_==ABI_GPU_DISABLED) then
-   call abi_zgemm_2r('C', 'N', nband_k, ndat, npw, cone, &
-                     xi, npw, &
-                     cwavef, npw, &
-                     czero, &
-                     mat, nband_k)
-   call abi_zgemm_2r('N', 'N', npw, ndat, nband_k, cminusone, &
-                     xi, npw, &
-                     mat, nband_k, &
-                     czero, &
-                     ghc1, npw)
+   if(gs_ham%istwf_k==1) then
+     ABI_MALLOC(mat,(2,nband_k,ndat))
+     call abi_zgemm_2r('C', 'N', nband_k, ndat, npw, cone, &
+                       xi, npw, &
+                       cwavef, npw, &
+                       czero, &
+                       mat, nband_k)
+     call abi_zgemm_2r('N', 'N', npw, ndat, nband_k, cminusone, &
+                       xi, npw, &
+                       mat, nband_k, &
+                       czero, &
+                       ghc1, npw)
+     ABI_FREE(mat)
+   else
+     ABI_MALLOC(vdotr,(nband_k))
+     ABI_MALLOC(vdoti,(nband_k))
+     do idat=1,ndat
+       call dotprod_g_batch_half(vdotr,vdoti,gs_ham%istwf_k,npw*my_nspinor,nband_k,2,&
+       &    cwavef(:,1+(idat-1)*npw:idat*npw),xi(:,:,:),mpi_enreg%me_g0,mpi_enreg%comm_fft)
+
+       do iband=1, nband_k
+         ghc1(1,1+(idat-1)*npw:idat*npw)=ghc1(1,1+(idat-1)*npw:idat*npw)-vdotr(iband)*xi(1,:,iband)
+         ghc1(2,1+(idat-1)*npw:idat*npw)=ghc1(2,1+(idat-1)*npw:idat*npw)-vdotr(iband)*xi(2,:,iband)
+       end do
+     end do
+     ABI_FREE(vdotr)
+     ABI_FREE(vdoti)
+   end if
 
    !* If the calculation is parallelized, perform an MPI_allreduce to sum all the contributions in the array ghc
    ! ghc(:,:)=ghc(:,:)/mpi_enreg%nproc_spkpt + ghc1(:,:)
@@ -1922,22 +1940,49 @@ subroutine fock_ACE_getghc(cwavef,ghc,gs_ham,mpi_enreg,ndat,gpu_option)
 
  else if(gpu_option_==ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
-   !$OMP TARGET ENTER DATA MAP(alloc:xi,ghc1,mat)
-   !$OMP TARGET UPDATE TO(xi)
-   !$OMP TARGET DATA USE_DEVICE_PTR(xi,cwavef,mat,ghc1)
-   call abi_gpu_xgemm(2, 'C', 'N', nband_k, ndat, npw, cone, &
-                     c_loc(xi), npw, &
-                     c_loc(cwavef), npw, &
-                     czero, &
-                     c_loc(mat), nband_k)
-   call abi_gpu_xgemm(2, 'N', 'N', npw, ndat, nband_k, cminusone, &
-                     c_loc(xi), npw, &
-                     c_loc(mat), nband_k, &
-                     czero, &
-                     c_loc(ghc1), npw)
-   !$OMP END TARGET DATA
+   !$OMP TARGET ENTER DATA MAP(alloc:xi,ghc1)
+   if(gs_ham%istwf_k==1) then
+     ABI_MALLOC(mat,(2,nband_k,ndat))
+     !$OMP TARGET ENTER DATA MAP(alloc:mat)
+     !$OMP TARGET UPDATE TO(xi)
+     !$OMP TARGET DATA USE_DEVICE_PTR(xi,cwavef,mat,ghc1)
+     call abi_gpu_xgemm(2, 'C', 'N', nband_k, ndat, npw, cone, &
+                       c_loc(xi), npw, &
+                       c_loc(cwavef), npw, &
+                       czero, &
+                       c_loc(mat), nband_k)
+     call abi_gpu_xgemm(2, 'N', 'N', npw, ndat, nband_k, cminusone, &
+                       c_loc(xi), npw, &
+                       c_loc(mat), nband_k, &
+                       czero, &
+                       c_loc(ghc1), npw)
+     !$OMP END TARGET DATA
 
-   !$OMP TARGET UPDATE FROM(ghc1)
+     !$OMP TARGET EXIT DATA MAP(delete:mat)
+     ABI_FREE(mat)
+   else
+     ABI_MALLOC(vdotr,(nband_k))
+     ABI_MALLOC(vdoti,(nband_k))
+     !$OMP TARGET ENTER DATA MAP(alloc:vdotr,vdoti)
+     do idat=1,ndat
+       call dotprod_g_batch_half(vdotr,vdoti,gs_ham%istwf_k,npw*my_nspinor,nband_k,2,&
+       &    cwavef(:,1+(idat-1)*npw:idat*npw),xi(:,:,:),mpi_enreg%me_g0,mpi_enreg%comm_fft,&
+       &    gpu_option=gpu_option_)
+
+       !$OMP TARGET TEAMS DISTRIBUTE PRIVATE(iband) MAP(ghc1,xi,vdotr)
+       do iband=1, nband_k
+         !$OMP PARALLEL DO PRIVATE(ipw)
+         do ipw=1,npw
+           ghc1(1,ipw+(idat-1)*npw)=ghc1(1,ipw+(idat-1)*npw)-vdotr(iband)*xi(1,ipw,iband)
+           ghc1(2,ipw+(idat-1)*npw)=ghc1(2,ipw+(idat-1)*npw)-vdotr(iband)*xi(2,ipw,iband)
+         end do
+       end do
+     end do
+     !$OMP TARGET EXIT DATA MAP(delete:vdotr,vdoti)
+     ABI_FREE(vdotr)
+     ABI_FREE(vdoti)
+   end if
+
    !* If the calculation is parallelized, perform an MPI_allreduce to sum all the contributions in the array ghc
    ! ghc(:,:)=ghc(:,:)/mpi_enreg%nproc_spkpt + ghc1(:,:)
 
@@ -1946,12 +1991,12 @@ subroutine fock_ACE_getghc(cwavef,ghc,gs_ham,mpi_enreg,ndat,gpu_option)
    !$OMP END TARGET DATA
 
    ! call xmpi_sum(ghc,mpi_enreg%comm_kpt,ier)
+   !$OMP TARGET UPDATE FROM(ghc1)
 
-   !$OMP TARGET EXIT DATA MAP(delete:xi,ghc1,mat)
+   !$OMP TARGET EXIT DATA MAP(delete:xi,ghc1)
 #endif
  end if
 
- ABI_FREE(mat)
 
 ! ============================================
 ! === Calculate the contribution to energy ===
