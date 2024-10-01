@@ -1026,8 +1026,6 @@ class AbinitProject(NotebookWriter):
                 with open(abinitdir_path, "wt") as fh:
                     fh.write(s)
 
-            return
-
             # TODO
             #########################
             # Integration with CMAKE
