@@ -1008,7 +1008,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
                  call getcprj(1,0,direc_tmp,cprj_band_srt,&
 &                 gs_hamk%ffnl_k,0,gs_hamk%indlmn,gs_hamk%istwf_k,gs_hamk%kg_k,&
 &                 gs_hamk%kpg_k,gs_hamk%kpt_k,gs_hamk%lmnmax,gs_hamk%mgfft,&
-&                 mpi_enreg,gs_hamk%natom,gs_hamk%nattyp,gs_hamk%ngfft,gs_hamk%nloalg,&
+&                 mpi_enreg,1,gs_hamk%natom,gs_hamk%nattyp,gs_hamk%ngfft,gs_hamk%nloalg,&
 &                 gs_hamk%npw_k,gs_hamk%nspinor,gs_hamk%ntypat,gs_hamk%phkxred,gs_hamk%ph1d,&
 &                 gs_hamk%ph3d_k,gs_hamk%ucvol,gs_hamk%useylm)
 
@@ -1122,7 +1122,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
            if (finite_field) then  ! must update cprj for the new wavefunction
              call getcprj(1,0,cwavef,cprj_band_srt,&
 &             gs_hamk%ffnl_k,0,gs_hamk%indlmn,istwf_k,gs_hamk%kg_k,gs_hamk%kpg_k,gs_hamk%kpt_k,&
-&             gs_hamk%lmnmax,gs_hamk%mgfft,mpi_enreg,natom,gs_hamk%nattyp,&
+&             gs_hamk%lmnmax,gs_hamk%mgfft,mpi_enreg,1,natom,gs_hamk%nattyp,&
 &             gs_hamk%ngfft,gs_hamk%nloalg,gs_hamk%npw_k,gs_hamk%nspinor,gs_hamk%ntypat,&
 &             gs_hamk%phkxred,gs_hamk%ph1d,gs_hamk%ph3d_k,gs_hamk%ucvol,gs_hamk%useylm)
              call pawcprj_put(gs_hamk%atindx,cprj_band_srt,cprj_k,gs_hamk%natom,iband,0,ikpt,&

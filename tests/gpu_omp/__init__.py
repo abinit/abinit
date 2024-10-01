@@ -42,5 +42,5 @@ inp_files = [
 "t22.abi", # prep for t23, t24
 "t23.abi", # test respfn for phonons and electric field, with qpt (GEMM nonlop CPU)
 "t24.abi", # test respfn for phonons and electric field, with qpt
-#"t25.abi", # test respfn for stresses, no qpt
+"t25.abi", # test respfn for stresses, no qpt
 ]

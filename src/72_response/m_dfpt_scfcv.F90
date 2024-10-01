@@ -36,7 +36,6 @@ module m_dfpt_scfcv
  use m_hdr
  use m_dtfil
  use m_hamiltonian
- use m_gemm_nonlop_projectors
  use netcdf
 
  use defs_datatypes, only : pseudopotential_type
@@ -517,20 +516,6 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  deltae_mq=zero ; fermie1_mq=zero ; epaw1_mq=zero ; eberry_mq=zero ; elmag1_mq=zero
  res2_mq=zero
 
- ! Handling GEMM nonlop use
- ! Not enabled by default for CPU and CUDA implementations
- ! Enabled if using OpenMP GPU offload
- gemm_nonlop_use_gemm = .false.
-
- ! OpenMP GPU offload case (GEMM nonlop used by default)
- if(dtset%gpu_option == ABI_GPU_OPENMP .or. dtset%use_gemm_nonlop == 1) then
-   gemm_nonlop_use_gemm = .true.
-   call init_gemm_nonlop(dtset%nkpt)
- end if
-
- gemm_nonlop_is_distributed = .false.
- if(dtset%gpu_nl_distrib == 1) gemm_nonlop_is_distributed = .true.
-
 !Examine tolerance criteria, and eventually  print a line to the output
 !file (with choice=1, the only non-dummy arguments of scprqt are
 !nstep, tollist and iscf - still, diffor,res2,prtfor,fcart are here initialized to 0)
@@ -711,6 +696,11 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
    call make_vectornd(1,gsqcut,psps%usepaw,mpi_enreg,dtset%natom,nfftf,&
    & ngfftf,dtset%nspden,dtset%nucdipmom,rprimd,vectornd,xred)
  endif
+
+#ifdef HAVE_OPENMP_OFFLOAD
+ ! Upload cgq array to GPU
+ !$OMP TARGET ENTER DATA MAP(to:cgq) IF(dtset%gpu_option==ABI_GPU_OPENMP)
+#endif
 
  call timab(154,2,tsec)
 
@@ -1278,12 +1268,6 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 !endif
 
 
- ! Cleaning GEMM nonlop data
- if(gemm_nonlop_use_gemm) then
-   call destroy_gemm_nonlop(dtset%nkpt)
-   gemm_nonlop_use_gemm = .false.
- end if
-
 !Eventually close the dot file, before calling dfpt_nstdy
  if ((ipert==dtset%natom+2.and.sum((dtset%qptn(1:3))**2)<=1.0d-7.and.&
 & (dtset%berryopt/=4 .and.dtset%berryopt/= 6.and.dtset%berryopt/= 7.and.&
@@ -1535,6 +1519,10 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  end if
 
 !Deallocate arrays
+#ifdef HAVE_OPENMP_OFFLOAD
+ !$OMP TARGET EXIT DATA MAP(delete:cgq) IF(dtset%gpu_option==ABI_GPU_OPENMP)
+#endif
+
  ABI_FREE(fcart)
  ABI_FREE(vtrial1)
  if (.not.kramers_deg) then
@@ -2434,7 +2422,7 @@ subroutine dfpt_nselt(blkflg,cg,cg1,cplex,&
 
 
 ! *********************************************************************
-
+ ABI_NVTX_START_RANGE(NVTX_DFPT_NSELT)
 !Init me
  comm = mpi_enreg%comm_cell
  me   = mpi_enreg%me_kpt
@@ -2713,6 +2701,7 @@ g0term=0; if (rfstrs_ref_==1) g0term=1
  ABI_FREE(kg_k)
  ABI_FREE(kg1_k)
  ABI_FREE(vpsp1)
+ ABI_NVTX_END_RANGE()
 
 end subroutine dfpt_nselt
 !!***
@@ -3685,6 +3674,7 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
 ! *********************************************************************
 
  DBG_ENTER('COLL')
+ ABI_NVTX_START_RANGE(NVTX_DFPT_RHOFERMI)
 
 !Check arguments validity
  if (ipert>natom.and.ipert/=natom+3.and.ipert/=natom+4.and.ipert/=natom+5) then
@@ -4196,6 +4186,7 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
  call timab(127,2,tsec)
  call timab(121,2,tsec)
 
+ ABI_NVTX_END_RANGE()
  DBG_EXIT('COLL')
 
 end subroutine dfpt_rhofermi
@@ -4301,7 +4292,7 @@ subroutine dfpt_wfkfermi(cg,cgq,cplex,cprj,cprjq,&
  integer :: iband_me, nband_me
  integer :: ipw,me,nkpt_max,optlocal,optnl,opt_accrho,opt_corr
  integer :: opt_gvnlx1,sij_opt,tim_fourwf,tim_getgh1c,usevnl
- real(dp) :: dotr,lambda,wtband
+ real(dp) :: dotr(1),lambda,wtband
  character(len=500) :: msg
 !arrays
  real(dp) :: dum_grad_berry(1,1),dum_gvnlx1(1,1),dum_gs1(1,1),tsec(2)
@@ -4311,6 +4302,7 @@ subroutine dfpt_wfkfermi(cg,cgq,cplex,cprj,cprjq,&
 ! *********************************************************************
 
  DBG_ENTER('COLL')
+ ABI_NVTX_START_RANGE(NVTX_DFPT_WFKFERMI)
 
 !Check arguments validity
  if (ipert>gs_hamkq%natom.and.ipert/=gs_hamkq%natom+3.and.ipert/=gs_hamkq%natom+4.and.ipert/=gs_hamkq%natom+5) then !SPr rfmagn deb
@@ -4407,21 +4399,21 @@ subroutine dfpt_wfkfermi(cg,cgq,cplex,cprj,cprjq,&
 !    Apply H^(1)-Esp.S^(1) to Psi^(0) (H(^1)=only (NL+kin) frozen part)
      lambda=eig0_k(iband)
      call getgh1c(berryopt,cwave0,cwaveprj0,gh1,dum_grad_berry,dum_gs1,gs_hamkq,dum_gvnlx1,&
-&     idir,ipert,lambda,mpi_enreg,optlocal,optnl,opt_gvnlx1,rf_hamkq,sij_opt,&
+&     idir,ipert,(/lambda/),mpi_enreg,1,optlocal,optnl,opt_gvnlx1,rf_hamkq,sij_opt,&
 &     tim_getgh1c,usevnl)
 !    Compute Eig1=<Psi^(0)|H^(1)-Eps.S^(1)|Psi(0)>
-     call dotprod_g(dotr,lambda,gs_hamkq%istwf_k,npw_k*nspinor,1,cwave0,gh1,mpi_enreg%me_g0, &
+     call dotprod_g(dotr(1),lambda,gs_hamkq%istwf_k,npw_k*nspinor,1,cwave0,gh1,mpi_enreg%me_g0, &
 &     mpi_enreg%comm_spinorfft)
      indx=2*iband-1+(iband-1)*2*nband_k
-     eig1_k(indx)=dotr
+     eig1_k(indx)=dotr(1)
 !    Compute the fixed contribution to the 1st-order Fermi energy
      fe1fixed_k(iband)=two*wtband*eig1_k(indx)
      fe1norm_k(iband) =two*wtband
 
 !    Accumulate contribution to density and PAW occupation matrix
 
-     call dfpt_accrho(cplex,cwave0,cwaveq,cwaveq,cwaveprj0,cwaveprjq,dotr,&
-       gs_hamkq,iband,0,0,isppol,kptopt,mpi_enreg,gs_hamkq%natom,nband_k,ncpgr,&
+     call dfpt_accrho(cplex,cwave0,cwaveq,cwaveq,cwaveprj0,cwaveprjq,dotr(1),&
+       gs_hamkq,iband,0,0,isppol,kptopt,mpi_enreg,1,gs_hamkq%natom,nband_k,ncpgr,&
        npw_k,npw1_k,nspinor,occ_k,opt_accrho,pawrhoijfermi,rhoaug,tim_fourwf,&
        opt_corr,wtk_k)
    end if ! End of non-zero occupation and rocceig
@@ -4449,6 +4441,7 @@ subroutine dfpt_wfkfermi(cg,cgq,cplex,cprj,cprjq,&
 
  call timab(130,2,tsec)
 
+ ABI_NVTX_END_RANGE()
  DBG_EXIT('COLL')
 
 end subroutine dfpt_wfkfermi
