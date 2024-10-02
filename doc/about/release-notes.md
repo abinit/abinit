@@ -1,3 +1,53 @@
+## v10.2
+
+Version 10.2, released on October 5, 2024.
+List of changes with respect to version 10.0.
+<!-- Release notes updated on Sep 28, 2024. -->
+
+Many thanks to the contributors to the ABINIT project between
+March 2024 and October 2024.
+<!-- (with some late contributions until XXX 2024). -->
+These release notes
+are relative to modifications/improvements of ABINIT v10.2 with respect to v10.0, with also some late fixes to v10.0, after March 2024,
+that had not yet been documented.
+<!-- TO BE CHANGED Merge requests up to and including MR984. Also, MRXXX to MRYYY are taken into account. -->
+
+TO BE CHANGED
+
+The list of contributors includes:
+J. Abreu, F. Akhmetov (Radioteddy on github), J.-M. Beuken, A. Blanchet, F. Bruneval, M. Cote, M. Giantomassi, X. Gonze, B. Guster, P. Kesterner,
+L. MacEnulty, D.D. O'Regan, S. Rostami,
+M. Royo, A. Sasani, M. Stengel, M. Torrent, M. Verstraete, A. Zabalo, J. Zwanziger.
+G. Antonius, L. Baguet, J.-M. Beuken, F. Bottin, J. Bouchet, J. Bouquiaux, A. Donkov, F. Gendron, M. Giantomassi, X. Gonze,
+F. Goudreault, B. Guster, P. Kestener, M. Mignolet,
+S. Ponce, M. Sarraute, M. Torrent, V. Vasilchenko, M. Verstraete, J. Zwanziger
+
+It is worthwhile to read carefully all the modifications that are mentioned in the present file,
+and examine the links to help files or test cases.
+This might take some time ...
+
+Xavier
+
+* * *
+
+### **A.** Important remarks and warnings.
+
+
+* * *
+
+### **B.** Most noticeable achievements
+
+
+* * *
+
+### **C.** Changes for the developers (including information about compilers)
+
+
+* * *
+
+### **D.**  Other changes (or on-going developments, not yet finalized, as well as miscellaneous bug fixes)
+
+
 ## v10.0
 
 Version 10.0, released on March 18, 2024.
