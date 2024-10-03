@@ -1004,7 +1004,7 @@ subroutine compute_green(green,paw_dmft,prtopt,self,opt_self,opt_nonxsum,opt_non
  integer :: band_index,diag,i,ib,ierr,ifreq,ikpt,info,isppol,lwork,mbandc
  integer :: me_kpt,mkmem,myproc,natom,nband_k,nkpt,nmoments,nspinor,nsppol
  integer :: opt_quick_restart,option,optlog,optnonxsum,optnonxsum2,optself
- integer :: shift,shift_green,spacecomm
+ integer :: shift,shift_green,spacecomm,gpu_option
  real(dp) :: beta,correction,eigen,fac,fermilevel,temp,wtk
  complex(dpc) :: green_tmp,omega_current,trace_tmp
  character(len=500) :: message
@@ -1061,6 +1061,7 @@ subroutine compute_green(green,paw_dmft,prtopt,self,opt_self,opt_nonxsum,opt_non
  nspinor = paw_dmft%nspinor
  nsppol  = paw_dmft%nsppol
  temp    = paw_dmft%temp
+ gpu_option = paw_dmft%gpu_option
 
  if (optlog == 1) then
    ABI_MALLOC(eig,(mbandc))

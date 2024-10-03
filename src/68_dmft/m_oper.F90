@@ -740,7 +740,7 @@ end subroutine inverse_oper
 !!
 !! SOURCE
 
-subroutine downfold_oper(oper,paw_dmft,procb,iproc,option,op_ks_diag)
+subroutine downfold_oper(oper,paw_dmft,procb,iproc,option,op_ks_diag,gpu_option)
 
  use m_paw_dmft, only : paw_dmft_type
  use m_abi_linalg, only : abi_xgemm
@@ -748,13 +748,13 @@ subroutine downfold_oper(oper,paw_dmft,procb,iproc,option,op_ks_diag)
 !Arguments ------------------------------------
  type(oper_type), intent(inout) :: oper
  type(paw_dmft_type), intent(in) :: paw_dmft
- integer, optional, intent(in) :: iproc,option
+ integer, optional, intent(in) :: iproc,option,gpu_option
  integer, optional, intent(in) :: procb(oper%nkpt)
  real(dp), optional, intent(in) :: op_ks_diag(oper%mbandc,oper%nkpt,oper%nsppol)
 !oper variables-------------------------------
  integer :: iatom,ib,ik,ikpt,isppol,lpawu,mbandc,ndim
  integer :: ndim_max,nspinor,opt,paral,shift
- integer :: idat,ndat
+ integer :: l_gpu_option
  character(len=500) :: message
  complex(dpc), allocatable :: mat_temp(:,:),mat_temp2(:,:),mat_temp3(:,:)
 ! *********************************************************************
@@ -769,6 +769,7 @@ call nvtxStartRange("downfold_oper",20)
    ABI_ERROR(message)
  end if
 
+ l_gpu_option=ABI_GPU_DISABLED; if(present(gpu_option)) l_gpu_option=gpu_option
  mbandc   = oper%mbandc
  nspinor  = oper%nspinor
  ndim_max = nspinor * (2*paw_dmft%maxlpawu+1)
@@ -910,7 +911,7 @@ end subroutine downfold_oper
 !!
 !! SOURCE
 
-subroutine upfold_oper(oper,paw_dmft,procb,iproc)
+subroutine upfold_oper(oper,paw_dmft,procb,iproc,gpu_option)
 
  use m_paw_dmft, only : paw_dmft_type
  use m_abi_linalg, only : abi_xgemm
@@ -918,10 +919,10 @@ subroutine upfold_oper(oper,paw_dmft,procb,iproc)
 !Arguments ------------------------------------
  type(oper_type), intent(inout)  :: oper
  type(paw_dmft_type), intent(in) :: paw_dmft
- integer, optional, intent(in)   :: iproc
+ integer, optional, intent(in)   :: iproc,gpu_option
  integer, optional, intent(in)   :: procb(oper%nkpt)
 !Local variables-------------------------------
- integer :: iatom,ik,ikpt,isppol,lpawu,mbandc
+ integer :: iatom,ik,ikpt,isppol,lpawu,mbandc,l_gpu_option
  integer :: ndim,ndim_max,nspinor,paral,shift
  complex(dpc), allocatable :: mat_temp(:,:),mat_temp2(:,:)
 ! *********************************************************************
@@ -934,6 +935,8 @@ subroutine upfold_oper(oper,paw_dmft,procb,iproc)
 !   write(6,*) size(procb)
 !   write(6,*) size(procb2)
 !   write(6,*) procb2(1),procb2(16)
+
+ l_gpu_option=ABI_GPU_DISABLED; if(present(gpu_option)) l_gpu_option=gpu_option
 
  DBG_ENTER("COLL")
 
