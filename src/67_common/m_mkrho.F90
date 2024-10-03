@@ -137,7 +137,7 @@ contains
 
 subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phnons,&
 &                rhog,rhor,rprimd,tim_mkrho,ucvol,wvl_den,wvl_wfs,&
-&                extfpmd,option) !optional
+&                option,extfpmd) !optional
 
 !Arguments ------------------------------------
 !scalars
