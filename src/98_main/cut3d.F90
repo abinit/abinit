@@ -41,9 +41,7 @@ program cut3d
  use m_xmpi
  use m_nctk
  use m_abicore
-#ifdef HAVE_NETCDF
  use netcdf
-#endif
 #if defined FC_NAG
  use f90_unix_proc
 #endif

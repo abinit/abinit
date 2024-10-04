@@ -27,9 +27,7 @@ module m_ddb_elast
  use m_crystal
  use m_ddb
  use m_nctk
-#ifdef HAVE_NETCDF
  use netcdf
-#endif
 
  use m_fstrings,       only : itoa, sjoin
  use m_hide_lapack,    only : matrginv
@@ -689,7 +687,6 @@ subroutine ddb_elast(inp,crystal,blkval,compl,compl_clamped,compl_stress,d2asr,&
  ! Units are GPa for elastic constants and GPa^-1 for compliance constants
 
  if (ncid /= nctk_noid) then
-#ifdef HAVE_NETCDF
    ! Define dimensions
    NCF_CHECK(nctk_def_basedims(ncid, defmode=.True.))
 
@@ -719,10 +716,6 @@ subroutine ddb_elast(inp,crystal,blkval,compl,compl_clamped,compl_stress,d2asr,&
    NCF_CHECK(nf90_put_var(ncid, vid('elastic_constants_relaxed_ion'), elast))
    NCF_CHECK(nf90_put_var(ncid, vid('elastic_constants_clamped_ion'), elast_clamped))
    NCF_CHECK(nf90_put_var(ncid, vid('elastic_constants_relaxed_ion_stress_corrected'), elast_stress))
-
-#else
-   ABI_ERROR("Netcdf support not enabled")
-#endif
  end if
 
 contains

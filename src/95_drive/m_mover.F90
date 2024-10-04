@@ -32,9 +32,7 @@ module m_mover
  use m_nctk
  use m_dtfil
  use m_yaml
-#ifdef HAVE_NETCDF
  use netcdf
-#endif
 #if defined HAVE_LOTF
  use lotfpath
  use m_pred_lotf
@@ -317,7 +315,6 @@ real(dp) :: k0(3)
  me=xmpi_comm_rank(comm)
 
 
-#if defined HAVE_NETCDF
  filename=trim(ab_mover%filnam_ds(4))//'_HIST.nc'
 
  if (ab_mover%restartxf<0)then
@@ -365,7 +362,6 @@ real(dp) :: k0(3)
    end if
 
  end if !if (ab_mover%restartxf<=0)
-#endif
 
 !###########################################################
 !### 05. Allocate the hist structure
@@ -780,13 +776,11 @@ real(dp) :: k0(3)
 !    ### 13. Write the history into the _HIST file
 !    ###
 
-#if defined HAVE_NETCDF
      if (need_writeHIST.and.me==master) then
        ifirst=merge(0,1,(itime>1.or.icycle>1))
        call write_md_hist(hist,filename,ifirst,itime_hist,ab_mover%natom,scfcv_args%dtset%nctime,&
 &       ab_mover%ntypat,ab_mover%typat,amu_curr,ab_mover%znucl,ab_mover%dtion,scfcv_args%dtset%mdtemp)
      end if
-#endif
 
 !    ###########################################################
 !    ### 14. Output after SCFCV
@@ -1669,9 +1663,7 @@ subroutine wrt_moldyn_netcdf(amass,dtset,itime,option,moldyn_file,mpi_enreg,&
  use m_results_gs
  use m_abicore
  use m_errors
-#if defined HAVE_NETCDF
  use netcdf
-#endif
 
  use m_io_tools,   only : open_file, get_unit
  use m_geometry,   only : xcart2xred, xred2xcart, metric
@@ -1693,7 +1685,6 @@ subroutine wrt_moldyn_netcdf(amass,dtset,itime,option,moldyn_file,mpi_enreg,&
  integer,save :: ipos=0
  integer :: iatom,ii
  character(len=500) :: msg
-#if defined HAVE_NETCDF
  integer :: AtomNumDimid,AtomNumId,CelId,CellVolumeId,DimCoordid,DimScalarid,DimVectorid
  integer :: EkinDimid,EkinId,EpotDimid,EpotId,EntropyDimid,EntropyId,MassDimid,MassId,NbAtomsid
  integer :: ncerr,ncid,PosId,StressDimid,StressId,TensorSymDimid
@@ -1702,30 +1693,22 @@ subroutine wrt_moldyn_netcdf(amass,dtset,itime,option,moldyn_file,mpi_enreg,&
  real(dp) :: ekin,ucvol
  character(len=fnlen) :: ficname
  character(len=16) :: chain
-#endif
 !arrays
-#if defined HAVE_NETCDF
  integer :: PrimVectId(3)
  real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3)
  real(dp),allocatable ::  xcart(:,:)
  real(dp),pointer :: vcart(:,:),vred(:,:),vtmp(:,:)
-#endif
-
 ! *************************************************************************
 
 !Only done by master processor, every nctime step
  if (mpi_enreg%me==0.and.dtset%nctime>0) then
 
 !  Netcdf file name
-#if defined HAVE_NETCDF
    ficname = trim(moldyn_file)//'.nc'
-#endif
 
 !  Xcart from Xred
-#if defined HAVE_NETCDF
    ABI_MALLOC(xcart,(3,dtset%natom))
    call xred2xcart(dtset%natom,rprimd,xcart,xred)
-#endif
 
 !  ==========================================================================
 !  First time step: write header of netcdf file
@@ -1734,7 +1717,6 @@ subroutine wrt_moldyn_netcdf(amass,dtset,itime,option,moldyn_file,mpi_enreg,&
 
      ipos=0
 
-#if defined HAVE_NETCDF
 !    Write message
      write(msg,'(4a)')ch10,' Open file ',trim(ficname),' to store molecular dynamics information.'
      call wrtout(std_out,msg,'COLL')
@@ -1839,7 +1821,6 @@ subroutine wrt_moldyn_netcdf(amass,dtset,itime,option,moldyn_file,mpi_enreg,&
      NCF_CHECK_MSG(ncerr,'nf90_enddef')
      ncerr = nf90_close(ncid)
      NCF_CHECK_MSG(ncerr,'nf90_close')
-#endif
    end if
 
 !  ==========================================================================
@@ -1849,7 +1830,6 @@ subroutine wrt_moldyn_netcdf(amass,dtset,itime,option,moldyn_file,mpi_enreg,&
 
      ipos=ipos+1
 
-#if defined HAVE_NETCDF
 !    Write message
      write(msg,'(3a)')ch10,' Store molecular dynamics information in file ',trim(ficname)
      call wrtout(std_out,msg,'COLL')
@@ -1960,7 +1940,6 @@ subroutine wrt_moldyn_netcdf(amass,dtset,itime,option,moldyn_file,mpi_enreg,&
 !    Close file
      ncerr = nf90_close(ncid)
      NCF_CHECK_MSG(ncerr,'nf90_close')
-#endif
    end if
 
 !  ==========================================================================
@@ -1993,18 +1972,11 @@ subroutine wrt_moldyn_netcdf(amass,dtset,itime,option,moldyn_file,mpi_enreg,&
      close(unpos)
    end if
 
-#if defined HAVE_NETCDF
    ABI_FREE(xcart)
-#endif
 
 !  ==========================================================================
 !  End if master proc
  end if
-
-!Fake lines
-#if !defined HAVE_NETCDF
- if (.false.) write(std_out,*) moldyn_file,results_gs%etotal,rprimd(1,1)
-#endif
 
 end subroutine wrt_moldyn_netcdf
 !!***

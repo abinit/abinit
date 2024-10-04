@@ -29,9 +29,7 @@ MODULE m_ddb_hdr
  use m_dtset
  use m_crystal
  use m_nctk
-#ifdef HAVE_NETCDF
  use netcdf
-#endif
 
  use defs_datatypes, only : pseudopotential_type
  use m_copy,      only : alloc_copy
@@ -2182,10 +2180,8 @@ subroutine ddb_hdr_close(ddb_hdr, comm)
     ddb_hdr%has_open_file_txt = .false.
   end if
   if (ddb_hdr%has_open_file_nc) then
-#ifdef HAVE_NETCDF
     ncerr = nf90_close(ddb_hdr%ncid)
     ddb_hdr%has_open_file_nc = .false.
-#endif
   end if
 
 end subroutine ddb_hdr_close

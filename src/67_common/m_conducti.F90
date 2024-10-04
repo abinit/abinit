@@ -30,9 +30,7 @@ module m_conducti
  use m_wfk
  use m_hdr
  use m_nctk
-#ifdef HAVE_NETCDF
  use netcdf
-#endif
 
  use defs_abitypes,  only : MPI_type
  use m_io_tools,     only : open_file, close_unit, get_unit
@@ -253,15 +251,11 @@ contains
    if (iomode==IO_MODE_ETSF) then
      varid=nctk_idname(ncid,"eigenvalues")
      ABI_MALLOC(eig0nc,(mband,nkpt,nsppol))
-#ifdef HAVE_NETCDF
      NCF_CHECK(nf90_get_var(ncid,varid,eig0nc))
-#endif
      eigen0 = reshape(eig0nc,[mband*nkpt*nsppol])
      ABI_FREE(eig0nc)
      !Close file here because the rest will possibly be read with collective I/O
-#ifdef HAVE_NETCDF
      NCF_CHECK(nf90_close(ncid))
-#endif
    else
      read(opt_unt)(eigen0(iband),iband=1,mband*nkpt*nsppol)
    end if
@@ -419,10 +413,8 @@ contains
      if (nproc>1) then
        NCF_CHECK(nctk_set_collective(ncid,varid))
      end if
-#ifdef HAVE_NETCDF
      nc_unlimited=(nf90_inq_dimid(ncid,"unlimited_bands",dimid)==NF90_NOERR)
      read_half_dipoles=(nf90_inq_dimid(ncid,"max_number_of_state_pairs",dimid)==NF90_NOERR)
-#endif
    else
      if (me==master) then
        NCF_CHECK(nctk_open_read(ncid,filnam1,xmpi_comm_self))
@@ -430,10 +422,8 @@ contains
        !if (nctk_has_mpiio.and.(.not.use_netcdf_mpiio)) then
        !  NCF_CHECK(nctk_set_collective(ncid,varid))
        !end if
-#ifdef HAVE_NETCDF
        nc_unlimited=(nf90_inq_dimid(ncid,"unlimited_bands",dimid)==NF90_NOERR)
        read_half_dipoles=(nf90_inq_dimid(ncid,"max_number_of_state_pairs",dimid)==NF90_NOERR)
-#endif
      end if
      call xmpi_bcast(nc_unlimited,master,comm,ierr)
      call xmpi_bcast(read_half_dipoles,master,comm,ierr)
@@ -487,7 +477,6 @@ contains
      if (.not.iomode_estf_mpiio.and.me==master) then
        if (iomode==IO_MODE_ETSF) then
          psinablapsi=zero
-#ifdef HAVE_NETCDF
          if (nc_unlimited) then
            nc_start_6=[1,1,1,ikpt,isppol,1] ; nc_count_6=[2,3,mband,1,1,mband] ; nc_stride_6=[1,1,1,1,1,1]
            NCF_CHECK(nf90_get_var(ncid,varid,psinablapsi,start=nc_start_6,stride=nc_stride_6,count=nc_count_6))
@@ -498,7 +487,6 @@ contains
            nc_start_5=[1,1,1,ikpt,isppol] ; nc_count_5=[2,3,(mband*(mband+1))/2,1,1] ; nc_stride_5=[1,1,1,1,1]
            NCF_CHECK(nf90_get_var(ncid,varid,psinablapsi,start=nc_start_5,stride=nc_stride_5,count=nc_count_5))
          end if
-#endif
        else
          psinablapsi=zero
          bsize=nband_k**2;if (read_half_dipoles) bsize=(nband_k*(nband_k+1))/2
@@ -554,7 +542,6 @@ contains
 
 !          In case of MPI-IO, read valence-valence dipoles for band n
            if (iomode_estf_mpiio) then
-#ifdef HAVE_NETCDF
              if (nc_unlimited) then
                nc_start_6=[1,1,iband,ikpt,isppol,1] ; nc_count_6=[2,3,1,1,1,mband] ; nc_stride_6=[1,1,1,1,1,1]
                NCF_CHECK(nf90_get_var(ncid,varid,psinablapsi,start=nc_start_6,stride=nc_stride_6,count=nc_count_6))
@@ -565,7 +552,6 @@ contains
                nc_start_5=[1,1,(iband*(iband-1))/2+1,ikpt,isppol] ; nc_count_5=[2,3,iband,1,1] ; nc_stride_5=[1,1,1,1,1]
                NCF_CHECK(nf90_get_var(ncid,varid,psinablapsi,start=nc_start_5,stride=nc_stride_5,count=nc_count_5))
              end if
-#endif
            end if
 
 !          LOOP OVER BANDS m
@@ -804,9 +790,7 @@ contains
  end if
  if (iomode == IO_MODE_ETSF) then
    if (iomode_estf_mpiio.or.me==master) then
-#ifdef HAVE_NETCDF
      NCF_CHECK(nf90_close(ncid))
-#endif
    end if
  else if (me==master) then
    ierr=close_unit(opt_unt,msg)
@@ -1032,9 +1016,7 @@ else if (need_emissivity) then
    if (iomode==IO_MODE_ETSF) then
      varid=nctk_idname(ncid,"eigenvalues")
      ABI_MALLOC(eig0nc,(mband,nkpt,nsppol))
-#ifdef HAVE_NETCDF
      NCF_CHECK(nf90_get_var(ncid,varid,eig0nc))
-#endif
      eigen0 = reshape(eig0nc,[mband*nkpt*nsppol])
      ABI_FREE(eig0nc)
    else
@@ -1046,9 +1028,7 @@ else if (need_emissivity) then
 !Read core states
  if (me==master) then
    if (iomode==IO_MODE_ETSF) then
-#ifdef HAVE_NETCDF
      NCF_CHECK(nctk_get_dim(ncid,"number_of_core_states",nphicor))
-#endif
    else
      read(opt2_unt) nphicor
    end if
@@ -1063,7 +1043,6 @@ else if (need_emissivity) then
 
  if (me==master) then
    if (iomode==IO_MODE_ETSF) then
-#ifdef HAVE_NETCDF
      varid=nctk_idname(ncid,"n_quantum_number_core")
      NCF_CHECK(nf90_get_var(ncid,varid,ncor))
      varid=nctk_idname(ncid,"l_quantum_number_core")
@@ -1074,7 +1053,6 @@ else if (need_emissivity) then
      NCF_CHECK(nf90_get_var(ncid,varid,energy_cor))
 !Close here netcdf file here because the rest has to be read with collective I/O
      NCF_CHECK(nf90_close(ncid))
-#endif
    else
      do icor=1,nphicor
        read(unit=opt2_unt,err=23,end=23) ncor(icor),lcor(icor),kappacor(icor),energy_cor(icor)
@@ -1256,9 +1234,7 @@ else if (need_emissivity) then
        if (iomode==IO_MODE_ETSF) then
          nc_start=[1,1,1,1,1,ikpt,isppol];nc_stride=[1,1,1,1,1,1,1]
          nc_count=[2,3,nphicor,natom,mband,1,1]
-#ifdef HAVE_NETCDF
          NCF_CHECK(nf90_get_var(ncid,varid,psinablapsi2,start=nc_start,stride=nc_stride,count=nc_count))
-#endif
        else
          psinablapsi2=zero
          if (fform2==612) then ! New OPT2 file format
@@ -1325,9 +1301,7 @@ else if (need_emissivity) then
            if (iomode_estf_mpiio) then
              nc_start=[1,1,1,1,iband,ikpt,isppol];nc_stride=[1,1,1,1,1,1,1]
              nc_count=[2,3,nphicor,natom,1,1,1]
-#ifdef HAVE_NETCDF
              NCF_CHECK(nf90_get_var(ncid,varid,psinablapsi2,start=nc_start,stride=nc_stride,count=nc_count))
-#endif
            end if
 
 !          LOOP OVER ATOMS
@@ -1417,9 +1391,7 @@ else if (need_emissivity) then
  !Close core-valence dipoles file
  if (iomode == IO_MODE_ETSF) then
    if (iomode_estf_mpiio.or.me==master) then
-#ifdef HAVE_NETCDF
      NCF_CHECK(nf90_close(ncid))
-#endif
    end if
  else if (me==master) then
    ierr=close_unit(opt2_unt,msg)
