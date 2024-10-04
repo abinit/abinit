@@ -1419,7 +1419,6 @@ subroutine cumulant_kubo_transport(self, dtset, cryst)
  ABI_SFREE(dfdw_l0)
  ABI_SFREE(gdm_vals)
 
-
 end subroutine cumulant_kubo_transport
 
 !!***
@@ -1860,13 +1859,21 @@ subroutine cumulant_free(self)
  !ABI_SFREE(self%ce_spfunc_wr)
  ABI_SFREE(self%conductivity_mu)
  ABI_SFREE(self%mobility_mu)
+ ABI_SFREE(self%mobility_mu_dm)
  ABI_SFREE(self%transport_mu_e)
+ ABI_SFREE(self%conductivity_mu_dm)
+
  ABI_SFREE(self%print_dfdw)
  ABI_SFREE(self%seebeck)
+ ABI_SFREE(self%seebeck_dm)
  ABI_SFREE(self%kappa)
+ ABI_SFREE(self%kappa_dm)
  ABI_SFREE(self%l0)
+ ABI_SFREE(self%l0_dm)
  ABI_SFREE(self%l1)
+ ABI_SFREE(self%l1_dm)
  ABI_SFREE(self%l2)
+ ABI_SFREE(self%l2_dm)
  ABI_SFREE(self%time_mesh)
  ABI_SFREE(self%ct_vals)
  ABI_SFREE(self%c1)
