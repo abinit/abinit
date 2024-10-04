@@ -1223,7 +1223,7 @@ end subroutine add_matlu
        else if(itau==4) then
          write(message,'(8x,a,f12.6)')   'Trace of matlu matrix is:'&
 &         ,traceloc(iatom,nsppol+1)
-         call wrtout(std_out,  message,'COLL')
+         call wrtout(std_out,  message,'COLL')                               
        endif
      endif
    endif
@@ -3031,37 +3031,39 @@ end subroutine add_matlu
      end do
    end do
 
-     !=====================================
-     ! Reshape product matrix into matlu format 
-     !=====================================
 
-     call gather_matlu(matlu(iatom),gathermatlu(iatom),iatom,option=-1,prtopt=1)
+     !=====================================                                     
+     ! Reshape product matrix into matlu format                                 
+     !=====================================                                     
+                                                                                 
+ !call gather_matlu(matlu,gathermatlu,natom,option=-1,prtopt=1)             
 
-     !=====================================
-     ! Print matlu
-     !=====================================
 
-     if(optprt>2) then
-       ABI_MALLOC(mat_out_c,(2*ll+1,2*ll+1)) 
-       do isppol=1,matlu(1)%nsppol
-         do ispinor=1,matlu(1)%nspinor
-           do ispinor2=1,matlu(1)%nspinor
-             mat_out_c(:,:) = matlu(iatom)%mat(:,:,isppol,ispinor,ispinor2)
-
-             write(message,'(2a, i2, a, i2, a, i2)') ch10,"Orbital angular momentum matrix, isppol=", isppol, ", ispinor=",&
-&            ispinor,", ispinor2=", ispinor2
-             call wrtout(std_out,message,'COLL')
-             do im1=1,ll*2+1
-               write(message,'(12(1x,9(1x,"(",f9.5,",",f9.5,")")))')&
-      &         (mat_out_c(im1,im2),im2=1,ll*2+1)
-               call wrtout(std_out,message,'COLL')
-             end do
-
-           end do ! ispinor2
-         end do ! ispinor
-       end do ! isppol
-       ABI_FREE(mat_out_c)
-     endif
+     !=====================================                                                                                   
+     ! Print matlu                                                                                                            
+     !=====================================                                                                                   
+                                                                                                                              
+     if(optprt>2) then                                                                                                        
+         ABI_MALLOC(mat_out_c,(2*ll+1,2*ll+1))
+         do isppol=1,matlu(1)%nsppol                                                                                            
+           do ispinor=1,matlu(1)%nspinor                                                                                        
+             do ispinor2=1,matlu(1)%nspinor                                                                                     
+               mat_out_c(:,:) = matlu(iatom)%mat(:,:,isppol,ispinor,ispinor2)                                                   
+                                                                                                                              
+               write(message,'(2a, i2, a, i2, a, i2)') ch10,"Orbital angular momentum matrix, isppol=", isppol, ", ispinor=",&  
+  &            ispinor,", ispinor2=", ispinor2                                                                                  
+               call wrtout(std_out,message,'COLL')                                                                              
+               do im1=1,ll*2+1                                                                                                  
+                 write(message,'(12(1x,9(1x,"(",f9.5,",",f9.5,")")))')&                                                         
+        &         (mat_out_c(im1,im2),im2=1,ll*2+1)                                                                             
+                 call wrtout(std_out,message,'COLL')                                                                            
+               end do                                                                                                           
+                                                                                                                              
+             end do ! ispinor2                                                                                                  
+           end do ! ispinor                                                                                                     
+         end do ! isppol
+         ABI_FREE(mat_out_c)                                                                                                       
+     endif                                                                                                                    
 
    end if !lpawu
  end do !atom 
@@ -3302,7 +3304,7 @@ end subroutine add_matlu
      ! Reshape product matrix into matlu format 
      !=====================================
 
-    call gather_matlu(matlu,gathermatlu,natom,option=-1,prtopt=1)
+    !call gather_matlu(matlu,gathermatlu,natom,option=-1,prtopt=1)
 
 
      !=====================================
@@ -3598,7 +3600,7 @@ end subroutine add_matlu
      ! Reshape product matrix into matlu format 
      !=====================================
 
-    call gather_matlu(matlu,gathermatlu,natom,option=-1,prtopt=1)
+    !call gather_matlu(matlu,gathermatlu,natom,option=-1,prtopt=1)
 
 
      !=====================================
