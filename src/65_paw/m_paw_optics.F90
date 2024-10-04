@@ -31,9 +31,7 @@ MODULE m_paw_optics
  use m_dtset
  use m_dtfil
  use m_nctk
-#ifdef HAVE_NETCDF
  use netcdf
-#endif
 
  use defs_datatypes, only : pseudopotential_type
  use defs_abitypes,  only : MPI_type
@@ -226,16 +224,13 @@ CONTAINS  !=====================================================================
 
 !I/O mode is netCDF or Fortran
  iomode=merge(IO_MODE_ETSF,IO_MODE_FORTRAN_MASTER,dtset%iomode==IO_MODE_ETSF)
-#ifdef HAVE_NETCDF
  if (use_netcdf_forced) iomode=IO_MODE_ETSF
-#endif
 
  !(master proc only)
  if (i_am_master) then
    fformopt=610 ; if (compute_half_dipoles) fformopt=620
 !  ====> NETCDF format
    if (iomode==IO_MODE_ETSF) then
-#ifdef HAVE_NETCDF
 !    Open/create nc file
      NCF_CHECK(nctk_open_create(ncid,nctk_ncify(dtfil%fnameabo_app_opt),xmpi_comm_self))
 !    Write header data
@@ -268,10 +263,6 @@ CONTAINS  !=====================================================================
      NCF_CHECK(nf90_put_var(ncid,varid,reshape(eigen0,[mband,nkpt,nsppol])))
      !Close file here because the rest has possibly to be written with collective I/O
      NCF_CHECK(nf90_close(ncid))
-#else
-     msg = "In order to use iomode=3 and prtnabla>0 together, NetCDF support must be enabled!"
-     ABI_ERROR(msg)
-#endif
 !  ====> Standard FORTRAN binary format
    else if (iomode==IO_MODE_FORTRAN_MASTER) then
      if (open_file(dtfil%fnameabo_app_opt,msg,newunit=ount,form="unformatted",status="unknown")/= 0) then
@@ -635,15 +626,11 @@ CONTAINS  !=====================================================================
            if (store_half_dipoles) then
              nc_start_5=[1,1,(jb*(jb-1))/2+1,ikpt,isppol];nc_stride_5=[1,1,1,1,1]
              nc_count_5=[0,0,0,0,0];if (myband) nc_count_5=[2,3,jb,1,1]
-#ifdef HAVE_NETCDF
              NCF_CHECK(nf90_put_var(ncid,varid,psinablapsi,start=nc_start_5,stride=nc_stride_5,count=nc_count_5))
-#endif
            else
              nc_start_6=[1,1,1,jb,ikpt,isppol];nc_stride_6=[1,1,1,1,1,1]
              nc_count_6=[0,0,0,0,0,0];if (myband) nc_count_6=[2,3,mband,1,1,1]
-#ifdef HAVE_NETCDF
              NCF_CHECK(nf90_put_var(ncid,varid,psinablapsi,start=nc_start_6,stride=nc_stride_6,count=nc_count_6))
-#endif
            end if
          end if
 
@@ -684,7 +671,6 @@ CONTAINS  !=====================================================================
        if (.not.iomode_etsf_mpiio) then
          if (i_am_master) then
            if (iomode==IO_MODE_ETSF) then
-#ifdef HAVE_NETCDF
              if (nc_unlimited) then
                nc_start_6=[1,1,1,ikpt,isppol,1] ; nc_count_6=[2,3,mband,1,1,mband] ; nc_stride_6=[1,1,1,1,1,1]
                NCF_CHECK(nf90_put_var(ncid,varid,psinablapsi,start=nc_start_6,stride=nc_stride_6,count=nc_count_6))
@@ -695,7 +681,6 @@ CONTAINS  !=====================================================================
                nc_start_5=[1,1,1,ikpt,isppol] ; nc_count_5=[2,3,(mband*(mband+1))/2,1,1] ; nc_stride_5=[1,1,1,1,1]
                NCF_CHECK(nf90_put_var(ncid,varid,psinablapsi,start=nc_start_5,stride=nc_stride_5,count=nc_count_5))
              end if
-#endif
            else
              bsize=nband_k**2;if (store_half_dipoles) bsize=(nband_k*(nband_k+1))/2
              write(ount)(psinablapsi(1:2,1,ib),ib=1,bsize)
@@ -717,7 +702,6 @@ CONTAINS  !=====================================================================
        sender=master_spfftband
        call xmpi_exch(psinablapsi,pnp_size,sender,psinablapsi,master,spaceComm_kpt,etiq,ierr)
        if (iomode==IO_MODE_ETSF) then
-#ifdef HAVE_NETCDF
          if (nc_unlimited) then
            nc_start_6=[1,1,1,ikpt,isppol,1] ; nc_count_6=[2,3,mband,1,1,mband] ; nc_stride_6=[1,1,1,1,1,1]
            NCF_CHECK(nf90_put_var(ncid,varid,psinablapsi,start=nc_start_6,stride=nc_stride_6,count=nc_count_6))
@@ -728,7 +712,6 @@ CONTAINS  !=====================================================================
            nc_start_5=[1,1,1,ikpt,isppol] ; nc_count_5=[2,3,(mband*(mband+1))/2,1,1] ; nc_stride_5=[1,1,1,1,1]
            NCF_CHECK(nf90_put_var(ncid,varid,psinablapsi,start=nc_start_5,stride=nc_stride_5,count=nc_count_5))
          end if
-#endif
        else
          bsize=nband_k**2;if (store_half_dipoles) bsize=(nband_k*(nband_k+1))/2
          write(ount)(psinablapsi(1:2,1,ib),ib=1,bsize)
@@ -746,9 +729,7 @@ CONTAINS  !=====================================================================
 !Close file
  if (i_am_master.or.(iomode_etsf_mpiio.and.i_am_master_spfft)) then
    if (iomode==IO_MODE_ETSF) then
-#ifdef HAVE_NETCDF
      NCF_CHECK(nf90_close(ncid))
-#endif
    else
      ierr=close_unit(ount,msg)
      ABI_CHECK(ierr==0,"Error while closing OPT file")
@@ -985,16 +966,13 @@ CONTAINS  !=====================================================================
 
 !I/O mode is netCDF or Fortran
  iomode=merge(IO_MODE_ETSF,IO_MODE_FORTRAN_MASTER,dtset%iomode==IO_MODE_ETSF)
-#ifdef HAVE_NETCDF
  if (use_netcdf_forced) iomode=IO_MODE_ETSF
-#endif
 
  !(master proc only)
  if (i_am_master) then
 !  ====> NETCDF format
    if (iomode==IO_MODE_ETSF) then
      fformopt=611
-#ifdef HAVE_NETCDF
 !    Open/create nc file
      NCF_CHECK(nctk_open_create(ncid,nctk_ncify(dtfil%fnameabo_app_opt2),xmpi_comm_self))
 !    Write header data
@@ -1043,10 +1021,6 @@ CONTAINS  !=====================================================================
      NCF_CHECK(nf90_put_var(ncid,varid,reshape(eigen0,[mband,nkpt,nsppol])))
      !Close file here because the rest has possibly to be written with collective I/O
      NCF_CHECK(nf90_close(ncid))
-#else
-     msg = "In order to use iomode=3 and prtnabla>0 together, NetCDF support must be enabled!"
-     ABI_ERROR(msg)
-#endif
 !  ====> Standard FORTRAN binary file format
    else if (iomode==IO_MODE_FORTRAN_MASTER) then
      fformopt=612  ! MT 12sept21: change the OPT2 Fortran file format
@@ -1328,9 +1302,7 @@ CONTAINS  !=====================================================================
            else
              nc_count=[0,0,0,0,0,0,0]
            end if
-#ifdef HAVE_NETCDF
            NCF_CHECK(nf90_put_var(ncid,varid,psinablapsi,start=nc_start,stride=nc_stride,count=nc_count))
-#endif
          end if
 
        end do ! jb
@@ -1367,9 +1339,7 @@ CONTAINS  !=====================================================================
            if (iomode==IO_MODE_ETSF) then
              nc_start=[1,1,1,1,1,ikpt,isppol];nc_stride=[1,1,1,1,1,1,1]
              nc_count=[2,3,nphicor,natom,mband,1,1]
-#ifdef HAVE_NETCDF
              NCF_CHECK(nf90_put_var(ncid,varid,psinablapsi,start=nc_start,stride=nc_stride,count=nc_count))
-#endif
            else
              if (fformopt==612) then ! New OPT2 file format
                write(ount) (((psinablapsi(1:2,1,ic,iatom,jb),ic=1,nphicor),iatom=1,natom),jb=1,nband_k)
@@ -1407,9 +1377,7 @@ CONTAINS  !=====================================================================
        if (iomode==IO_MODE_ETSF) then
          nc_start=[1,1,1,1,1,ikpt,isppol];nc_stride=[1,1,1,1,1,1,1]
          nc_count=[2,3,nphicor,natom,mband,1,1]
-#ifdef HAVE_NETCDF
          NCF_CHECK(nf90_put_var(ncid,varid,psinablapsi,start=nc_start,stride=nc_stride,count=nc_count))
-#endif
        else
          if (fformopt==612) then ! New OPT2 file format
            write(ount) (((psinablapsi(1:2,1,ic,iatom,jb),ic=1,nphicor),iatom=1,natom),jb=1,nband_k)
@@ -1441,9 +1409,7 @@ CONTAINS  !=====================================================================
 !Close file
  if (i_am_master.or.(iomode_etsf_mpiio.and.i_am_master_spfft)) then
    if (iomode==IO_MODE_ETSF) then
-#ifdef HAVE_NETCDF
      NCF_CHECK(nf90_close(ncid))
-#endif
    else
      ierr=close_unit(ount,msg)
      ABI_CHECK(ierr==0,"Error while closing OPT2 file")

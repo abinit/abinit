@@ -224,7 +224,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
      ABI_MALLOC(magmom_spin(iatom)%value,(2*(2*lpawu+1),2*(2*lpawu+1)))
      magmom_spin(iatom)%value=czero
      ABI_MALLOC(magmom_tot(iatom)%value,(2*(2*lpawu+1),2*(2*lpawu+1)))
-     magmom_tot(iatom)%value=czero  
+     magmom_tot(iatom)%value=czero
      dmat_diag(iatom)%mat=czero
    end if
  end do
@@ -1347,15 +1347,15 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
            write(message,'(a,2x,2a)') ch10, " == Making rotation for magnetic moments", ch10
            call wrtout(std_out,message,'COLL')
            if(opt_diag == 0) then
-             write(message,'(a,2x,2a)') ch10, " --> Hamiltonian is already diagonal in Slm", ch10 
-             call wrtout(std_out,message,'COLL')     
+             write(message,'(a,2x,2a)') ch10, " --> Hamiltonian is already diagonal in Slm", ch10
+             call wrtout(std_out,message,'COLL')
              do iflavor1=1,tndim
                do iflavor2=1,tndim
                  if(iflavor1==iflavor2) then
                    eigvectmatlu(iatom,1)%value(iflavor1,iflavor2)=cone
                  else
                    eigvectmatlu(iatom,1)%value(iflavor1,iflavor2)=czero
-                 end if 
+                 end if
                end do
              end do
            end if
@@ -1367,7 +1367,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
            !call print_matlu(matlumag_orb,iatom,prtopt=1)
            call gather_matlu(matlumag_orb,magmom_orb(iatom),natom=1,option=1,prtopt=0)
            call destroy_matlu(matlumag_orb,natom=1)
-          
+
            ! == spin angular momentum
            call init_matlu(natom=1,nspinor=paw_dmft%nspinor,nsppol=paw_dmft%nsppol,lpawu_natom=paw_dmft%lpawu,matlu=matlumag_spin)
            call zero_matlu(matlumag_spin,natom=1)
@@ -1376,7 +1376,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
            !call print_matlu(matlumag_spin,natom,prtopt=1)
            call gather_matlu(matlumag_spin,magmom_spin(iatom),natom=1,option=1,prtopt=0)
            call destroy_matlu(matlumag_spin,natom=1)
-          
+
            ! == total angular momentum
            call init_matlu(natom=1,nspinor=paw_dmft%nspinor,nsppol=paw_dmft%nsppol,lpawu_natom=paw_dmft%lpawu,matlu=matlumag_tot)
            call zero_matlu(matlumag_tot,natom=1)
@@ -1385,7 +1385,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
            !call print_matlu(matlumag_tot,natom=1,prtopt=1)
            call gather_matlu(matlumag_tot,magmom_tot(iatom),natom=1,option=1,prtopt=0)
            call destroy_matlu(matlumag_tot,natom=1)
-          
+
          end if !dmftctqmc_config
          !======================
 
@@ -1418,7 +1418,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
            write(message,'(a,2x,2a)') ch10, " == Making rotation for magnetic moments", ch10
            call wrtout(std_out,message,'COLL')
            if(opt_diag == 0) then
-             write(message,'(a,2x,2a)') ch10, " --> Hamiltonian is already diagonal in Slm", ch10                 
+             write(message,'(a,2x,2a)') ch10, " --> Hamiltonian is already diagonal in Slm", ch10
              call wrtout(std_out,message,'COLL')
              do iflavor1=1,tndim
                do iflavor2=1,tndim
@@ -1426,7 +1426,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
                    eigvectmatlu(iatom,1)%value(iflavor1,iflavor2)=cone
                  else
                    eigvectmatlu(iatom,1)%value(iflavor1,iflavor2)=czero
-                 end if 
+                 end if
                end do
              end do
            end if
@@ -1438,7 +1438,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
            !call print_matlu(matlumag_orb,iatom,prtopt=1)
            call gather_matlu(matlumag_orb,magmom_orb(iatom),natom=1,option=1,prtopt=0)
            call destroy_matlu(matlumag_orb,natom=1)
-          
+
            ! == spin angular momentum
            call init_matlu(natom=1,nspinor=paw_dmft%nspinor,nsppol=paw_dmft%nsppol,lpawu_natom=paw_dmft%lpawu,matlu=matlumag_spin)
            call zero_matlu(matlumag_spin,natom=1)
@@ -1447,7 +1447,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
            !call print_matlu(matlumag_spin,natom,prtopt=1)
            call gather_matlu(matlumag_spin,magmom_spin(iatom),natom=1,option=1,prtopt=0)
            call destroy_matlu(matlumag_spin,natom=1)
-           
+
            ! == total angular momentum
            call init_matlu(natom=1,nspinor=paw_dmft%nspinor,nsppol=paw_dmft%nsppol,lpawu_natom=paw_dmft%lpawu,matlu=matlumag_tot)
            call zero_matlu(matlumag_tot,natom=1)
@@ -1456,7 +1456,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
            !call print_matlu(matlumag_tot,natom=1,prtopt=1)
            call gather_matlu(matlumag_tot,magmom_tot(iatom),natom=1,option=1,prtopt=0)
            call destroy_matlu(matlumag_tot,natom=1)
-          
+
          end if !dmftctqmc_config
          !======================
          call CtqmcoffdiagInterface_run(hybridoffdiag,fw1_nd(1:paw_dmft%dmftqmc_l,:,:),Gtau=gtmp_nd,&
@@ -1689,10 +1689,10 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
  end if
 
 ! =================================================================
-! 
-!  === Compute magnetic moments from CT-QMC occupations for 
+!
+!  === Compute magnetic moments from CT-QMC occupations for
 !  the x,y and z axes when SOC is activated
-! 
+!
 ! =================================================================
 if(paw_dmft%nspinor .eq. 2) then
   ABI_MALLOC(matlumag,(natom))
@@ -2830,7 +2830,7 @@ subroutine ctqmc_calltriqs(paw_dmft,cryst_struc,hu,levels_ctqmc,gtmp_nd,gw_tmp_n
   write(filename, '(a, a)') trim(paw_dmft%filnamei), "_abinit_output_for_py.nc"
   write(std_out, '(3a)') ch10, "    Creating NETCDF file: ", trim(filename)
   NCF_CHECK(nf90_create(filename, NF90_CLOBBER, ncid))
- 
+
   ! Defining the dimensions of the variables to write in the NETCDF file
   NCF_CHECK(nf90_def_dim(ncid, "one", 1, dim_one_id))
   NCF_CHECK(nf90_def_dim(ncid, "nflavor", nflavor, dim_nflavor_id))
@@ -2838,14 +2838,14 @@ subroutine ctqmc_calltriqs(paw_dmft,cryst_struc,hu,levels_ctqmc,gtmp_nd,gw_tmp_n
   NCF_CHECK(nf90_def_dim(ncid, "nwli", paw_dmft%dmft_nwli, dim_nwli_id))
   NCF_CHECK(nf90_def_dim(ncid, "qmc_l", paw_dmft%dmftqmc_l, dim_qmc_l_id))
   NCF_CHECK(nf90_def_dim(ncid, "nleg", nleg, dim_nleg_id))
- 
+
   dim_u_mat_ij_id = (/ dim_nflavor_id, dim_nflavor_id /)
   dim_u_mat_ijkl_id = (/ dim_nflavor_id, dim_nflavor_id, dim_nflavor_id, dim_nflavor_id /)
   dim_fw1_id = (/ dim_nflavor_id, dim_nflavor_id, dim_nwli_id /)
   dim_g_iw_id = (/ dim_nwli_id, dim_nflavor_id, dim_nflavor_id /)
   dim_gtau_id = (/ dim_qmc_l_id, dim_nflavor_id, dim_nflavor_id /)
   dim_gl_id = (/ dim_nleg_id, dim_nflavor_id, dim_nflavor_id /)
- 
+
   ! Defining the variables
   NCF_CHECK(nf90_def_var(ncid, "rot_inv",         NF90_INT, dim_one_id,           var_rot_inv_id))
   NCF_CHECK(nf90_def_var(ncid, "leg_measure",     NF90_INT, dim_one_id,           var_leg_measure_id))
@@ -2873,12 +2873,12 @@ subroutine ctqmc_calltriqs(paw_dmft,cryst_struc,hu,levels_ctqmc,gtmp_nd,gw_tmp_n
   NCF_CHECK(nf90_def_var(ncid, "gl",              NF90_DOUBLE, dim_gl_id,         var_gl_id))
   NCF_CHECK(nf90_def_var(ncid, "spacecomm",       NF90_INT, dim_one_id,           var_spacecomm_id))
   NCF_CHECK(nf90_enddef(ncid))
- 
+
   ! Filling the variables with actual data
-  if (rot_inv) then 
-   NCF_CHECK(nf90_put_var(ncid, var_rot_inv_id,       1))  
-  else 
-   NCF_CHECK(nf90_put_var(ncid, var_rot_inv_id,       0))  
+  if (rot_inv) then
+   NCF_CHECK(nf90_put_var(ncid, var_rot_inv_id,       1))
+  else
+   NCF_CHECK(nf90_put_var(ncid, var_rot_inv_id,       0))
   end if
   if (leg_measure) then
    NCF_CHECK(nf90_put_var(ncid, var_leg_measure_id,   1))
@@ -2923,20 +2923,20 @@ subroutine ctqmc_calltriqs(paw_dmft,cryst_struc,hu,levels_ctqmc,gtmp_nd,gw_tmp_n
   NCF_CHECK(nf90_close(ncid))
 
   write(std_out, '(4a)') ch10, "    NETCDF file ", trim(filename), " written; Launching python invocation"
- 
+
   ! Invoking python to execute the script
   ! call Invoke_python_triqs (paw_dmft%myproc, trim(paw_dmft%filnamei)//c_null_char, paw_dmft%spacecomm)
   call Invoke_python_triqs (paw_dmft%myproc, trim(paw_dmft%filnamei)//c_null_char)
   call xmpi_barrier(paw_dmft%spacecomm)
   call flush_unit(std_out)
- 
+
   ! Allocating the fortran variables for the results
   ABI_MALLOC(new_re_g_iw,(nflavor,nflavor, paw_dmft%dmft_nwli))
   ABI_MALLOC(new_im_g_iw,(nflavor,nflavor, paw_dmft%dmft_nwli))
   ABI_MALLOC(new_g_tau,(nflavor,nflavor, paw_dmft%dmftqmc_l))
   ABI_MALLOC(new_gl,(nflavor,nflavor, nleg))
   i = (0, 1)
-  
+
   ! Check if file exists
   write(filename, '(a, a)') trim(paw_dmft%filnamei), "_py_output_for_abinit.nc"
 
@@ -2951,7 +2951,7 @@ subroutine ctqmc_calltriqs(paw_dmft,cryst_struc,hu,levels_ctqmc,gtmp_nd,gw_tmp_n
 
   ! Opening the NETCDF file
   NCF_CHECK(nf90_open(filename, nf90_nowrite, ncid))
- 
+
   ! Read from the file
   ! Re{G_iw}
   write(std_out, '(2a)') ch10, "    -- Re[G(iw_n)]"
@@ -2985,12 +2985,12 @@ subroutine ctqmc_calltriqs(paw_dmft,cryst_struc,hu,levels_ctqmc,gtmp_nd,gw_tmp_n
     end do
    end do
   end do
- 
+
   ! Deallocating
   ABI_FREE(new_re_g_iw)
   ABI_FREE(new_im_g_iw)
   ABI_FREE(new_g_tau)
-  ABI_FREE(new_gl) 
+  ABI_FREE(new_gl)
 #endif
 #endif
  elseif(paw_dmft%dmft_solv == 6 .or. paw_dmft%dmft_solv == 7) then

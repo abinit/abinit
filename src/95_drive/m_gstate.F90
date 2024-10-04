@@ -2072,12 +2072,10 @@ subroutine clnup1(acell,dtset,eigen,fermie,fermih, fnameabo_dos,fnameabo_eig,gre
 &     vxcavg,dtset%wtk)
    end if
 
-#if defined HAVE_NETCDF
    if (dtset%prteig==1 .and. me == master) then
      filename=trim(fnameabo_eig)//'.nc'
      call write_eig(eigen,fermie,filename,dtset%kptns,dtset%mband,dtset%nband,dtset%nkpt,dtset%nsppol)
    end if
-#endif
  end if
 
 !Compute and print location of maximal and minimal density
@@ -2647,9 +2645,7 @@ subroutine outxfhist(ab_xfh,natom,option,wff2,ios)
  use m_xmpi
  use m_wffile
  use m_errors
-#if defined HAVE_NETCDF
  use netcdf
-#endif
 
 !Arguments ------------------------------------
  integer          ,intent(in)    :: natom,option
@@ -2662,13 +2658,9 @@ subroutine outxfhist(ab_xfh,natom,option,wff2,ios)
  real(dp),allocatable :: xfhist_tmp(:)
  character(len=500) :: msg
 !no_abirules
-#if defined HAVE_NETCDF
  integer :: ncerr
  integer :: nxfh_id, mxfh_id, xfdim2_id, dim2inout_id, dimr3_id,xfhist_id
  integer :: nxfh_tmp,mxfh_tmp,xfdim2_tmp,dim2inout_tmp
-#endif
-
-
 ! *************************************************************************
 
  ncid_hdr = wff2%unwff
@@ -2715,7 +2707,6 @@ subroutine outxfhist(ab_xfh,natom,option,wff2,ios)
      end do
      ABI_FREE(xfhist_tmp)
 
-#if defined HAVE_NETCDF
    else if (wff2%iomode == IO_MODE_NETCDF) then
 !    check if nxfh and xfhist are defined
      ncerr = nf90_inq_dimid(ncid=ncid_hdr,name="nxfh",dimid=nxfh_id)
@@ -2783,7 +2774,6 @@ subroutine outxfhist(ab_xfh,natom,option,wff2,ios)
      NCF_CHECK_MSG(ncerr," outxfhist : fill xfhist")
 
 !    end NETCDF definition ifdef
-#endif
    end if  ! end iomode if
 
 !  ### (Option=2) Read in number of iterations
@@ -2807,14 +2797,12 @@ subroutine outxfhist(ab_xfh,natom,option,wff2,ios)
      call xderiveRead(wff2,ab_xfh%nxfh,ierr)
      call xderiveRRecEnd(wff2,ierr)
 
-#if defined HAVE_NETCDF
    else if (wff2%iomode == IO_MODE_NETCDF) then
      ncerr = nf90_inq_dimid(ncid=ncid_hdr,name="nxfh",dimid=nxfh_id)
      NCF_CHECK_MSG(ncerr," outxfhist : inquire nxfh")
      ncerr = nf90_Inquire_Dimension(ncid=ncid_hdr,dimid=nxfh_id,&
 &     len=ab_xfh%nxfh)
      NCF_CHECK_MSG(ncerr,"  outxfhist : get nxfh")
-#endif
    end if
 
 !  ### (Option=3) Read in iteration content
@@ -2849,7 +2837,6 @@ subroutine outxfhist(ab_xfh,natom,option,wff2,ios)
 
 !  FIXME: should this be inside the if not mpi as above for options 1 and 2?
 !  it is placed here because the netcdf read is a single operation
-#if defined HAVE_NETCDF
    if (wff2%iomode == IO_MODE_NETCDF) then
      ncerr = nf90_inq_dimid(ncid=ncid_hdr,name="nxfh",dimid=nxfh_id)
      NCF_CHECK_MSG(ncerr," outxfhist : inquire nxfh")
@@ -2863,7 +2850,6 @@ subroutine outxfhist(ab_xfh,natom,option,wff2,ios)
 &     start=(/1,1,1,1/),count=(/3,natom+4,2,ab_xfh%nxfhr/))
      NCF_CHECK_MSG(ncerr," outxfhist : read xfhist")
    end if
-#endif
 
  else
 !  write(std_out,*)' outxfhist : option ', option , ' not available '

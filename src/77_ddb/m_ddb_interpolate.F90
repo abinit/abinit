@@ -30,9 +30,7 @@ module m_ddb_interpolate
  use m_ddb_hdr
  use m_ifc
  use m_nctk
-#ifdef HAVE_NETCDF
  use netcdf
-#endif
 
  use m_anaddb_dataset, only : anaddb_dataset_type
  use m_bz_mesh,         only : make_path
