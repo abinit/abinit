@@ -1,22 +1,66 @@
+## v10.2
+
+Version 10.2, released on October 5, 2024.
+List of changes with respect to version 10.0.
+<!-- Release notes updated on Sep 28, 2024. -->
+
+Many thanks to the contributors to the ABINIT project between
+March 2024 and October 2024.
+<!-- (with some late contributions until XXX 2024). -->
+These release notes
+are relative to modifications/improvements of ABINIT v10.2 with respect to v10.0, with also some late fixes to v10.0, after March 2024,
+that had not yet been documented.
+<!-- TO BE CHANGED Merge requests up to and including MR984. Also, MRXXX to MRYYY are taken into account. -->
+
+TO BE CHANGED
+
+The list of contributors includes:
+G. Antonius, L. Baguet, J.-M. Beuken, F. Bottin, J. Bouchet, J. Bouquiaux, A. Donkov, F. Gendron, M. Giantomassi, X. Gonze,
+F. Goudreault, B. Guster, P. Kestener, M. Mignolet,
+S. Ponce, M. Sarraute, M. Torrent, V. Vasilchenko, M. Verstraete, J. Zwanziger
+
+It is worthwhile to read carefully all the modifications that are mentioned in the present file,
+and examine the links to help files or test cases.
+This might take some time ...
+
+Xavier
+
+* * *
+
+### **A.** Important remarks and warnings.
+
+
+* * *
+
+### **B.** Most noticeable achievements
+
+
+* * *
+
+### **C.** Changes for the developers (including information about compilers)
+
+
+* * *
+
+### **D.**  Other changes (or on-going developments, not yet finalized, as well as miscellaneous bug fixes)
+
+
 ## v10.0
 
 Version 10.0, released on March 18, 2024.
 List of changes with respect to version 9.10.
-<!-- Release notes updated on Mar 18, 2024. -->
+<!-- Release notes updated on Oct 2, 2024. -->
 
 Many thanks to the contributors to the ABINIT project between
 May 2023 and March 2024.
-<!-- (with some late contributions until XXX 2024). -->
+<!-- (with some late contributions until 11 Sep 2024). -->
 These release notes
-are relative to modifications/improvements of ABINIT v10.0 with respect to v9.10, with also some late fixes to v9.10, after Nov 2023, 
+are relative to modifications/improvements of ABINIT v10.0 with respect to v9.10, with also some late fixes to v10.0, after March 2024, 
 that had not yet been documented.
-<!-- TO BE CHANGED Merge requests up to and including MR984. Also, MRXXX to MRYYY are taken into account. -->
+<!-- TO BE CHANGED Merge requests up to and including MR984. Also, take into account : MR985 (backported from v10.1), MR999 to MR1003, MR1008, MR1011, MR1015, MR1018, MR1020, MR1021, MR1023, MR1031, MR1037, MR1039, MR1040, MR1053, MR1054 -->
 
 The list of contributors includes:
-J. Abreu, F. Akhmetov (Radioteddy on github), J.-M. Beuken, A. Blanchet, F. Bruneval, M. Cote, M. Giantomassi, X. Gonze, B. Guster, P. Kesterner,
-L. MacEnulty, D.D. O'Regan, S. Rostami,
-M. Royo, A. Sasani, M. Stengel, M. Torrent, M. Verstraete, A. Zabalo, J. Zwanziger.
-G. Antonius, L. Baguet, J.-M. Beuken, F. Bottin, J. Bouchet, J. Bouquiaux, A. Donkov, F. Gendron, M. Giantomassi, X. Gonze, 
+G. Antonius, L. Baguet, J.-M. Beuken, F. Bottin, J. Bouchet, J. Bouquiaux, F. Brieuc, A. Donkov, F. Gendron, M. Giantomassi, X. Gonze, 
 F. Goudreault, B. Guster, P. Kestener, M. Mignolet, 
 S. Ponce, M. Sarraute, M. Torrent, V. Vasilchenko, M. Verstraete, J. Zwanziger 
 
@@ -446,6 +490,50 @@ DDB support has been added for the molecular Berry curvature. A new block type h
 When computing the molecular Berry curvature (eph_task=14), it is now written to a ddb file (*_BERRY_DBB).
 
 From M. Mignolet (MR984)
+
+**D.26** Bug fixes for Gstore, Molecular Berry curvature and VdW DFT-D3 
+
+Gstore module: incorrect parallelization over spins would make abinit crash when computing the GSTORE.nc with nsppol=2.
+Molecular Berry curvature module: incorrect initialization of the DDB would result in a crash when using kptopt!=3.
+VdW DFT-D3 module: the max/min values of the C6 coefficient would not be displayed correctly if larger than 100.
+Partially fix issue #160, removed tests libxc/t34,35 .
+Multidataset parsing ignoring ? wildcard when the first index is above 10.
+
+From M. Mignolet (MR999, MR1011, MR1015)
+
+**D.27** 
+
+Add new DFT-D3 compatible XC functionals + slight changes in doc. Typo in CPU name corrected.
+Suppress -mtune when -march is specified (march=>mtune); this is problematic with clang v<15.
+Several improvements of the build system (including better openMP detection).
+Autodetect ZDOT bugfix (autotools & cmake) + autodetect some important MPI features (cmake).
+
+From M. Torrent (MR1000, MR1001, MR1008, MR1031, MR1037)
+
+**D.28**
+
+Fix usecase of istwfk==2 when using CHEBFI as diago algorithm .
+Add tests checking Kokkos code path.
+Fixes for OpenMP GPU (LOBPCG multi-GPU and istwfk==2).
+Fix race condition in inwffil (cg_envlop kernel).
+Various fixes related to OpenMP GPU code.
+
+From M. Sarraute (MR1002, MR1003, MR1018, MR1020, MR1023, MR1053)
+
+**D.29**
+
+Chebfi2 norm-conserving.
+Fix istwfk2.
+Fix openblas.
+
+From L. Baguet (MR1021, MR1039, MR1040)
+
+
+**D.30**
+
+Fix restartxf -1 in Molecular Dynamics
+
+From F. Brieuc (MR1054)
 
 * * *
 
