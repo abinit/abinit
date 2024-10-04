@@ -434,9 +434,9 @@ contains
       end if
     end if
     if (size(enl_ndat)>0) then
-      ABI_MALLOC(enl_,(size(enl_ndat,1),1,nspinor**2,size(enl_ndat,4),ndat))
+      ABI_MALLOC(enl_,(size(enl_ndat,1),1,nspinor**2,ndat,size(enl_ndat,5)))
       do idat=1,ndat
-        do ii=1,size(enl,4)
+        do ii=1,size(enl_ndat,5)
           do ispden=1,nspinor**2
             if (dimenl2==natom .and. usepaw==1) then
               enl_(:,1,ispden,idat,ii)=enl_ndat(:,iatom_only,ispden,idat,ii)
