@@ -36,7 +36,7 @@ module m_fock_getghc
  use m_fftcore,      only : sphereboundary
  use m_fft,          only : fftpac, fourwf, fourdp
  use m_fstrings,     only : sjoin, itoa
- use m_hamiltonian,  only : gs_hamiltonian_type, K_H_KPRIME, init_hamiltonian
+ use m_hamiltonian,  only : gs_hamiltonian_type, K_H_KPRIME
  use m_pawdij,       only : pawdijhat
  use m_paw_nhat,     only : pawmknhat_psipsi
  use m_spacepar,     only : hartre
@@ -129,7 +129,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
 
 ! *************************************************************************
 !return
- 
+
  ncount=ncount+1
 
  call timab(1504,1,tsec) ; call timab(1505,-1,tsec) ; call timab(1515,-1,tsec) ; call timab(1541,-1,tsec)
@@ -423,7 +423,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
        rhog_munu(2,ifft) = rhog_munu(2,ifft) * vqg(ifft)
      end do
 
-     call timab(1515,2,tsec) ; call timab(1513,-1,tsec) ; call timab(1545,-2,tsec) 
+     call timab(1515,2,tsec) ; call timab(1513,-1,tsec) ; call timab(1545,-2,tsec)
      call fourdp(cplex_fock,rhog_munu,vfock,+1,mpi_enreg,nfftf,1,ngfftf,tim_fourdp_fock_getghc)
      call timab(1513,2,tsec) ; call timab(1515,-1,tsec) ; call timab(1545,-1,tsec)
 #endif
@@ -457,7 +457,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
          ABI_FREE(dijhat_tmp)
        end do
        signs=2; cpopt=2;idir=0; paw_opt=1;nnlout=1;tim_nonlop=17
-       
+
        if(need_ghc) then
          choice=1
          call timab(1515,2,tsec) ; call timab(1514,-1,tsec) ; call timab(1546,-2,tsec)
@@ -465,7 +465,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
 &         ndat1,nnlout,paw_opt,signs,gsc_dum,tim_nonlop,vectin_dum,gvnlxc,enl=dijhat,&
 &         select_k=K_H_KPRIME)
          call timab(1514,2,tsec) ; call timab(1515,-1,tsec) ; call timab(1546,-1,tsec)
-         ghc2=ghc2-gvnlxc*occ*wtk       
+         ghc2=ghc2-gvnlxc*occ*wtk
        end if
 
 ! Forces calculation
@@ -506,7 +506,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
            call nonlop(choice,cpopt,cwaveocc_prj,enlout_dum,gs_ham,idir,(/zero/),mpi_enreg,&
 &           ndat1,nnlout,paw_opt,signs,gsc_dum,tim_nonlop,vectin_dum,&
 &           strout,enl=dijhat,select_k=K_H_KPRIME)
-           call timab(1514,2,tsec) ; call timab(1515,-1,tsec) ; call timab(1546,-1,tsec) 
+           call timab(1514,2,tsec) ; call timab(1515,-1,tsec) ; call timab(1546,-1,tsec)
            call dotprod_g(dotr(idir),doti,gs_ham%istwf_k,npw,2,cwavef,strout,mpi_enreg%me_g0,mpi_enreg%comm_fft)
            fockcommon%stress_ikpt(idir,fockcommon%ieigen)=fockcommon%stress_ikpt(idir,fockcommon%ieigen)-&
 &           dotr(idir)*occ*wtk/gs_ham%ucvol
@@ -661,7 +661,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
 !   if (fockcommon%ieigen/=0) fockcommon%ieigen=0
 
  else
- 
+
 !  *Restore gs_ham datastructure
 
    if (associated(gs_ham%ph3d_kp)) then
@@ -745,7 +745,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
    ABI_FREE(dummytab)
    ABI_FREE(vfock)
    ABI_FREE(vqg)
- 
+
  endif
 
  call timab(1504,2,tsec) ; call timab(1507,-2,tsec) ; call timab(1515,-2,tsec) ; call timab(1547,-2,tsec)
@@ -893,7 +893,7 @@ subroutine fock2ACE(cg,cprj,fock,istwfk,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_e
 
 !Initialize Hamiltonian (k- and spin-independent terms)
 
- call init_hamiltonian(gs_hamk,psps,pawtab,nspinor,nsppol,nspden,natom,&
+ call gs_hamk%init(psps,pawtab,nspinor,nsppol,nspden,natom,&
 & typat,xred,nfft,mgfft,ngfft,rprimd,nloalg,usecprj=usecprj,&
 & comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,mpi_spintab=mpi_enreg%my_isppoltab,&
 & paw_ij=paw_ij,ph1d=ph1d,fock=fock,&
@@ -1222,7 +1222,7 @@ subroutine fock_ACE_getghc(cwavef,ghc,gs_ham,mpi_enreg)
  real(dp) :: doti,dotr,eigen
  type(fock_common_type),pointer :: fockcommon
 ! Arrays
- real(dp) :: tsec(2) 
+ real(dp) :: tsec(2)
  real(dp), allocatable :: ghc1(:,:),xi(:,:)
 
 ! *************************************************************************

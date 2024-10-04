@@ -553,8 +553,7 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
                                     pawfgr, nscf%mpi_enreg, nscf%vtrial, v1scf(:,:,:,my_ip), vlocal, vlocal1)
 
          ! Prepare application of the NL part.
-         call init_rf_hamiltonian(cplex, gs_ham_kq, ipert, rf_ham_kq, has_e1kbsc=.true.)
-
+         call rf_ham_kq%init(cplex, gs_ham_kq, ipert, has_e1kbsc=.true.)
          call rf_ham_kq%load_spin(spin, vlocal1=vlocal1, with_nonlocal=.true.)
 
          ! Calculate dvscf * psi_k, results stored in h1kets_kq on the k+q sphere.

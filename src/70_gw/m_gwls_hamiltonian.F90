@@ -41,7 +41,7 @@ use m_crystal
 
 use defs_abitypes,      only : MPI_type
 use m_io_tools,         only : get_unit
-use m_hamiltonian,      only : gs_hamiltonian_type, copy_hamiltonian
+use m_hamiltonian,      only : gs_hamiltonian_type
 use m_pawcprj,          only : pawcprj_type
 use m_vcoul,            only : vcoul_t
 use m_gsphere,          only : gsphere_t
@@ -1377,117 +1377,45 @@ call destroy_mpi_enreg(mpi_enreg)
 
 !NOTE : the syntax if(allocated(a)) ABI_FREE(a) result in an error if "a" is not allocated; since the macro replace
 !ABI_MALLOC by more than one line of text, the second lines and up get outside the if... if() then syntax is equired.
-if(allocated(cg)) then
-  ABI_FREE(cg)
-end if
-if(allocated(gbound)) then
-  ABI_FREE(gbound)
-end if
-if(allocated(kg_k)) then
-  ABI_FREE(kg_k)
-end if
-if(allocated(ffnl)) then
-  ABI_FREE(ffnl)
-end if
-if(allocated(ph3d)) then
-  ABI_FREE(ph3d)
-end if
-if(allocated(kinpw)) then
-  ABI_FREE(kinpw)
-end if
-if(allocated(vxc)) then
-  ABI_FREE(vxc)
-end if
-if(allocated(vlocal)) then
-  ABI_FREE(vlocal)
-end if
-if(allocated(conjgrprj)) then
-  ABI_FREE(conjgrprj)
-end if
-if(allocated(istwfk)) then
-  ABI_FREE(istwfk)
-end if
-if(allocated(dummy2)) then
-  ABI_FREE(dummy2)
-end if
-if(allocated(dummy3)) then
-  ABI_FREE(dummy3)
-end if
-if(allocated(eig)) then
-  ABI_FREE(eig)
-end if
-if(allocated(scprod2)) then
-  ABI_FREE(scprod2)
-end if
-if(allocated(pcon)) then
-  ABI_FREE(pcon)
-end if
-if(allocated(psik1)) then
-  ABI_FREE(psik1)
-end if
-if(allocated(psik2)) then
-  ABI_FREE(psik2)
-end if
-if(allocated(psik3)) then
-  ABI_FREE(psik3)
-end if
-if(allocated(psik4)) then
-  ABI_FREE(psik4)
-end if
-if(allocated(psikb1)) then
-  ABI_FREE(psikb1)
-end if
-if(allocated(psikb2)) then
-  ABI_FREE(psikb2)
-end if
-if(allocated(psikb3)) then
-  ABI_FREE(psikb3)
-end if
-if(allocated(psikb4)) then
-  ABI_FREE(psikb4)
-end if
-if(allocated(psig1)) then
-  ABI_FREE(psig1)
-end if
-if(allocated(psig2)) then
-  ABI_FREE(psig2)
-end if
-if(allocated(psig3)) then
-  ABI_FREE(psig3)
-end if
-if(allocated(psig4)) then
-  ABI_FREE(psig4)
-end if
-if(allocated(psir1)) then
-  ABI_FREE(psir1)
-end if
-if(allocated(psir2)) then
-  ABI_FREE(psir2)
-end if
-if(allocated(psir3)) then
-  ABI_FREE(psir3)
-end if
-if(allocated(psidg)) then
-  ABI_FREE(psidg)
-end if
-if(allocated(vxc_dg)) then
-  ABI_FREE(vxc_dg)
-end if
-if(allocated(denpot)) then
-  ABI_FREE(denpot)
-end if
-if(allocated(kernel_wavefunctions_FFT)) then
-  ABI_FREE(kernel_wavefunctions_FFT)
-end if
-if(allocated(valence_wavefunctions_FFT)) then
-  ABI_FREE(valence_wavefunctions_FFT)
-end if
+ABI_SFREE(cg)
+ABI_SFREE(gbound)
+ABI_SFREE(kg_k)
+ABI_SFREE(ffnl)
+ABI_SFREE(ph3d)
+ABI_SFREE(kinpw)
+ABI_SFREE(vxc)
+ABI_SFREE(vlocal)
+ABI_SFREE(conjgrprj)
+ABI_SFREE(istwfk)
+ABI_SFREE(dummy2)
+ABI_SFREE(dummy3)
+ABI_SFREE(eig)
+ABI_SFREE(scprod2)
+ABI_SFREE(pcon)
+ABI_SFREE(psik1)
+ABI_SFREE(psik2)
+ABI_SFREE(psik3)
+ABI_SFREE(psik4)
+ABI_SFREE(psikb1)
+ABI_SFREE(psikb2)
+ABI_SFREE(psikb3)
+ABI_SFREE(psikb4)
+ABI_SFREE(psig1)
+ABI_SFREE(psig2)
+ABI_SFREE(psig3)
+ABI_SFREE(psig4)
+ABI_SFREE(psir1)
+ABI_SFREE(psir2)
+ABI_SFREE(psir3)
+ABI_SFREE(psidg)
+ABI_SFREE(vxc_dg)
+ABI_SFREE(denpot)
+ABI_SFREE(kernel_wavefunctions_FFT)
+ABI_SFREE(valence_wavefunctions_FFT)
 if(associated(gvec)) then
   ABI_FREE(gvec)
 end if
-if(allocated(vc_sqrt)) then
-  ABI_FREE(vc_sqrt)
-end if
+ABI_SFREE(vc_sqrt)
 
 end subroutine destroy_H
 !!***
@@ -1550,7 +1478,7 @@ dtset = dtset2%copy()
 
 call copy_mpi_enreg(mpi_enreg2,mpi_enreg)
 
-call copy_hamiltonian(gs_hamk,gs_hamk2)
+call gs_hamk2%copy(gs_hamk)
 
 !Then we copy the standard types
 cpopt   = cpopt2

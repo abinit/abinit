@@ -428,15 +428,15 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
 !* Norm-conserving: Constant kleimann-Bylander energies are copied from psps to gs_hamk.
 !* PAW: Initialize the overlap coefficients and allocate the Dij coefficients.
 
- call init_hamiltonian(gs_hamkq,psps,pawtab,dtset%nspinor,nsppol,nspden,natom,&
+ call gs_hamkq%init(psps,pawtab,dtset%nspinor,nsppol,nspden,natom,&
 & dtset%typat,xred,dtset%nfft,dtset%mgfft,dtset%ngfft,rprimd,dtset%nloalg,&
 & paw_ij=paw_ij,comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,mpi_spintab=mpi_enreg%my_isppoltab,&
 & usecprj=usecprj,ph1d=ph1d,nucdipmom=dtset%nucdipmom,gpu_option=dtset%gpu_option)
 
- call init_rf_hamiltonian(cplex,gs_hamkq,ipert,rf_hamkq,has_e1kbsc=.true.,paw_ij1=paw_ij1,&
+ call rf_hamkq%init(cplex,gs_hamkq,ipert,has_e1kbsc=.true.,paw_ij1=paw_ij1,&
 & comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,mpi_spintab=mpi_enreg%my_isppoltab)
  if ((ipert==natom+10.and.idir>3).or.ipert==natom+11) then
-   call init_rf_hamiltonian(cplex,gs_hamkq,ipert,rf_hamk_dir2,has_e1kbsc=.true.,paw_ij1=paw_ij1,&
+   call rf_hamk_dir2%init(cplex,gs_hamkq,ipert,has_e1kbsc=.true.,paw_ij1=paw_ij1,&
 &   comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,mpi_spintab=mpi_enreg%my_isppoltab)
  end if
 

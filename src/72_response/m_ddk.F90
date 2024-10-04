@@ -745,15 +745,13 @@ type(ddkop_t) function ddkop_new(dtset, cryst, pawtab, psps, mpi_enreg, mpw, ngf
    ! 2) Perform the setup needed for the non-local factors:
    ! * Norm-conserving: Constant kleimann-Bylander energies are copied from psps to gs_hamk.
    ! * PAW: Initialize the overlap coefficients and allocate the Dij coefficients.
-   call init_hamiltonian(new%gs_hamkq(idir), psps, pawtab, dtset%nspinor, dtset%nsppol, dtset%nspden, cryst%natom,&
+   call new%gs_hamkq(idir)%init(psps, pawtab, dtset%nspinor, dtset%nsppol, dtset%nspden, cryst%natom,&
      cryst%typat, cryst%xred, nfft, mgfft, ngfft, cryst%rprimd, dtset%nloalg)
      !paw_ij=paw_ij,comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,mpi_spintab=mpi_enreg%my_isppoltab,&
      !usecprj=usecprj,ph1d=ph1d,nucdipmom=dtset%nucdipmom,gpu_option=dtset%gpu_option)
 
    ! Prepare application of the NL part.
-   call init_rf_hamiltonian(cplex1, new%gs_hamkq(idir), new%ipert, new%rf_hamkq(idir), has_e1kbsc=.true.)
-     !&paw_ij1=paw_ij1,comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,&
-     !&mpi_spintab=mpi_enreg%my_isppoltab)
+   call new%rf_hamkq(idir)%init(cplex1, new%gs_hamkq(idir), new%ipert, has_e1kbsc=.true.)
  end do
 
 end function ddkop_new

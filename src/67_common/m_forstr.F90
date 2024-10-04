@@ -59,7 +59,7 @@ module m_forstr
  use m_initylmg,         only : initylmg
  use m_xchybrid,         only : xchybrid_ncpp_cc
  use m_kg,               only : mkkpg
- use m_hamiltonian,      only : init_hamiltonian, gs_hamiltonian_type !,K_H_KPRIME
+ use m_hamiltonian,      only : gs_hamiltonian_type !,K_H_KPRIME
  use m_electronpositron, only : electronpositron_type, electronpositron_calctype
  use m_bandfft_kpt,      only : bandfft_kpt, bandfft_kpt_type, prep_bandfft_tabs, &
 &                               bandfft_kpt_savetabs, bandfft_kpt_restoretabs
@@ -752,7 +752,7 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
 
 !Initialize Hamiltonian (k-independent terms)
 
- call init_hamiltonian(gs_hamk,psps,pawtab,nspinor,nsppol,nspden,natom,&
+ call gs_hamk%init(psps,pawtab,nspinor,nsppol,nspden,natom,&
 & typat,xred,nfft,mgfft,ngfft,rprimd,nloalg,usecprj=usecprj_local,&
 & comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,mpi_spintab=mpi_enreg%my_isppoltab,&
 & paw_ij=paw_ij,ph1d=ph1d,electronpositron=electronpositron,fock=fock,&

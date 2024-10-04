@@ -39,7 +39,7 @@ module m_cgwf
  use m_numeric_tools, only : rhophi
  use m_pawcprj,       only : pawcprj_type, pawcprj_alloc, pawcprj_put, pawcprj_copy, &
                              pawcprj_get, pawcprj_mpi_allgather, pawcprj_free, pawcprj_symkn
- use m_hamiltonian,   only : gs_hamiltonian_type, init_hamiltonian, gspot_transgrid_and_pack
+ use m_hamiltonian,   only : gs_hamiltonian_type, gspot_transgrid_and_pack
  use m_crystal,       only : crystal_t
  use m_fock,          only : fock_set_ieigen, fock_set_getghc_call
  use m_getghc,        only : getghc
@@ -2546,10 +2546,10 @@ subroutine nscf_setup_kpt(nscf, isppol, kpt, istwf_k, nband_k, cryst, dtset, psp
  ABI_MALLOC(ph1d, (2,3*(2*mgfft+1)*cryst%natom))
  call getph(cryst%atindx, cryst%natom, n1, n2, n3, ph1d, cryst%xred)
 
- call init_hamiltonian(gs_ham_k, psps, pawtab, nspinor, dtset%nsppol, dtset%nspden, cryst%natom, &
-                       dtset%typat, cryst%xred, nfft, mgfft, nscf%ngfft, cryst%rprimd, dtset%nloalg, &
-                       comm_atom=mpi_enreg%comm_atom, mpi_atmtab=mpi_enreg%my_atmtab, mpi_spintab=mpi_enreg%my_isppoltab, &
-                       usecprj=dtset%usepaw, ph1d=ph1d, nucdipmom=dtset%nucdipmom, gpu_option=dtset%gpu_option)
+ call gs_ham_k%init(psps, pawtab, nspinor, dtset%nsppol, dtset%nspden, cryst%natom, &
+                    dtset%typat, cryst%xred, nfft, mgfft, nscf%ngfft, cryst%rprimd, dtset%nloalg, &
+                    comm_atom=mpi_enreg%comm_atom, mpi_atmtab=mpi_enreg%my_atmtab, mpi_spintab=mpi_enreg%my_isppoltab, &
+                    usecprj=dtset%usepaw, ph1d=ph1d, nucdipmom=dtset%nucdipmom, gpu_option=dtset%gpu_option)
  ABI_FREE(ph1d)
 
  ! Set up local potential vlocal on the coarse FFT mesh from vtrial taking into account the spin.

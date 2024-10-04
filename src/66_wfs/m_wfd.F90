@@ -67,7 +67,7 @@ module m_wfd
  use m_initylmg,       only : initylmg
  use m_mkffnl,         only : mkffnl
  use m_cgprj,          only : getcprj
- use m_hamiltonian,    only : init_hamiltonian,gs_hamiltonian_type
+ use m_hamiltonian,    only : gs_hamiltonian_type
  use m_nonlop,         only : nonlop
 
  implicit none
@@ -5353,7 +5353,7 @@ subroutine wfdgw_get_nl_me(Wfd, cryst, psps, pawtab, bks_mask, nl_bks)
    ABI_ERROR("The construction of the non-local contribution is not tested/implemented for usepaw==1!")
  end if
  ! Initialize the Hamiltonian on the coarse FFT mesh.
- call init_hamiltonian(ham_k, psps, pawtab, nspinor1, nsppol1, nspden1, natom, cryst%typat, cryst%xred, &
+ call ham_k%init(psps, pawtab, nspinor1, nsppol1, nspden1, natom, cryst%typat, cryst%xred, &
     Wfd%nfft, Wfd%mgfft, Wfd%ngfft, cryst%rprimd, Wfd%nloalg)
 
  ! Continue to prepare the GS Hamiltonian (note spin1)

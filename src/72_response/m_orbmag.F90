@@ -17,7 +17,7 @@
 !! OUTPUT
 !!
 !! NOTES
-!! These routines implement the theory developed in Zwanziger, Torrent, Gonze 
+!! These routines implement the theory developed in Zwanziger, Torrent, Gonze
 !! Phys Rev B 107, 165157 (2023). This paper will be referred to the comments as ZTG23.
 !!
 !! SOURCE
@@ -48,7 +48,7 @@ module m_orbmag
   use m_cgtools,          only : projbd
   use m_geometry,         only : metric
   use m_getghc,           only : getghc
-  use m_hamiltonian,      only : init_hamiltonian, gs_hamiltonian_type, gspot_transgrid_and_pack
+  use m_hamiltonian,      only : gs_hamiltonian_type, gspot_transgrid_and_pack
   use m_kg,               only : getph,mkkin,mkkpg,ph1d3d
   use m_mkffnl,           only : mkffnl
   use m_mpinfo,           only : proc_distrb_cycle,proc_distrb_nband
@@ -80,7 +80,7 @@ module m_orbmag
                                                &(/3,3,3/))
 
 
-  ! these parameters name the various output terms                                             
+  ! these parameters name the various output terms
   integer,parameter :: ibcc=1,ibvv1=2,ibvv2=3
   integer,parameter :: imcc=4,imvv1=5,imvv2=6
   integer,parameter :: imnl=7,imlr=8,imbm=9,imsob1=10
@@ -165,8 +165,8 @@ CONTAINS  !=====================================================================
 !! orbmag
 !!
 !! FUNCTION
-!! This routine computes the orbital magnetization and Berry curvature based on input 
-!! wavefunctions and DDK wavefuntions. 
+!! This routine computes the orbital magnetization and Berry curvature based on input
+!! wavefunctions and DDK wavefuntions.
 !!
 !! COPYRIGHT
 !! Copyright (C) 2003-2024 ABINIT  group
@@ -202,7 +202,7 @@ CONTAINS  !=====================================================================
 !!  psps <type(pseudopotential_type)>=variables related to pseudopotentials
 !!  rprimd(3,3)=real space translation vectors
 !!  vtrial(nfftf,dtset%nspden)=GS potential (Hartree)
-!!  vxctau(nfftf,nspden,4*usekden)=derivative of e_xc with respect to kinetic energy density, for mGGA  
+!!  vxctau(nfftf,nspden,4*usekden)=derivative of e_xc with respect to kinetic energy density, for mGGA
 !!  xred(3,dtset%natom)=reduced dimensionless atomic coordinates
 !!  ylm(mpw*mkmem_rbz,psps%mpsang*psps%mpsang*psps%useylm)=all ylm's
 !!  ylmgr(mpw*mkmem_rbz,3,psps%mpsang*psps%mpsang*psps%useylm)=gradients of ylm's
@@ -342,7 +342,7 @@ subroutine orbmag(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mkmem_rbz,mp
  !==== Initialize most of the Hamiltonian ====
  !Allocate all arrays and initialize quantities that do not depend on k and spin.
  !gs_hamk is the normal hamiltonian at k
- call init_hamiltonian(gs_hamk,psps,pawtab,dtset%nspinor,dtset%nsppol,dtset%nspden,dtset%natom,&
+ call gs_hamk%init(psps,pawtab,dtset%nspinor,dtset%nsppol,dtset%nspden,dtset%natom,&
       & dtset%typat,xred,dtset%nfft,dtset%mgfft,dtset%ngfft,rprimd,dtset%nloalg,nucdipmom=dtset%nucdipmom,&
       & paw_ij=paw_ij)
 
@@ -556,7 +556,7 @@ subroutine orbmag(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mkmem_rbz,mp
      call orbmag_nl1_k(atindx,cprj_k,dimlmn,dterm,dtset,ikpt,isppol,m1_k,mcprjk,mkmem_rbz,&
        & nband_k,nl1_option,occ_k,pawtab,ucvol)
      orbmag_terms(:,:,isppol,:,imlr) = orbmag_terms(:,:,isppol,:,imlr) + m1_k
-     
+
      ! ZTG23 Eq. 43
      nl1_option = 2 ! BM
      call orbmag_nl1_k(atindx,cprj_k,dimlmn,dterm,dtset,ikpt,isppol,m1_k,mcprjk,mkmem_rbz,&
@@ -1047,9 +1047,9 @@ subroutine orbmag_cc_k(atindx,b1_k,cprj1_k,dimlmn,dtset,eig_k,fermie,gs_hamk,ikp
          ! compute H|Pc du> and S|Pc du>
          call getghc(cpopt,ket,cwaveprj1,ghc,gsc,gs_hamk,gvnlxc,lams,mpi_enreg,&
            & ndat,dtset%prtvol,sij_opt,tim_getghc,type_calc)
-      
+
          bra(1:2,1:npwsp) = pcg1_k(1:2,(nn-1)*npwsp+1:nn*npwsp,bdir)
-         
+
          dotr = DOT_PRODUCT(bra(1,:),ghc(1,:))+DOT_PRODUCT(bra(2,:),ghc(2,:))
          doti = DOT_PRODUCT(bra(1,:),ghc(2,:))-DOT_PRODUCT(bra(2,:),ghc(1,:))
          m1 = m1 + prefac_m*CMPLX(dotr,doti)
@@ -1187,7 +1187,7 @@ subroutine orbmag_vv_k(atindx,b1_k,b2_k,cg_k,cprj_k,dimlmn,dtset,eig_k,fermie,gs
  cpopt = 4 ! cprj and derivs in memory
  choice = 5 ! apply dS/dk
  paw_opt = 3 ! retain dS/dk|u>
- signs = 2 
+ signs = 2
  nnlout = 1
 
  do adir = 1, 3
@@ -1388,7 +1388,7 @@ subroutine make_pcg1(atindx,cg_k,cg1_k,cprj_k,dimlmn,dtset,gs_hamk,&
       ! direction adir
       call nonlop(choice,cpopt,cwaveprj,enlout,gs_hamk,adir,lambda,mpi_enreg,ndat,&
         & nnlout,paw_opt,signs,svectout,tim_nonlop,cwavef,vectout)
- 
+
       !! form vcg1 = -1/2 \sum |u_j^0><u_j^0|S^1|u_i^0>, the valence band part of cg1
       vcg1 = zero
       do jband = 1, nband_k
@@ -1444,7 +1444,7 @@ end subroutine make_pcg1
 !! TODO
 !!
 !! NOTES
-!!  lamb shielding of core electrons contributes -m.lambsig to orbital magnetic 
+!!  lamb shielding of core electrons contributes -m.lambsig to orbital magnetic
 !!  moment
 !!
 !! SOURCE
@@ -2380,7 +2380,7 @@ subroutine dterm_alloc(dterm,lmnmax,lmn2max,natom,ndij,pawspnorb)
   else
     dterm%has_SOB1=0
   end if
-  
+
 
 end subroutine dterm_alloc
 !!***
@@ -2745,7 +2745,7 @@ subroutine make_d(atindx,dterm,dtset,gprimd,paw_an,paw_ij,pawang,pawrad,pawtab,p
  ! onsite angular momentum expectation values
  call dterm_LR(atindx,dterm,dtset,gprimd,pawrad,pawtab)
 
- ! onsite <A_0.A_n> interaction between magnetic field and nuclear dipole  
+ ! onsite <A_0.A_n> interaction between magnetic field and nuclear dipole
  call dterm_BM(atindx,dterm,dtset,gntselect,gprimd,my_lmax,pawrad,pawtab,realgnt)
 
  ! transfers paw_ij to dterm%aij because it's convenient

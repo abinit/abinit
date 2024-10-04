@@ -26,7 +26,7 @@ module m_rttddft
  use defs_datatypes,     only: pseudopotential_type
  use m_dtset,            only: dataset_type
  use m_energies,         only: energies_type
- use m_hamiltonian,      only: init_hamiltonian, gs_hamiltonian_type
+ use m_hamiltonian,      only: gs_hamiltonian_type
  use m_kg,               only: getph
  use m_nonlop,           only: nonlop
  use m_paw_an,           only: paw_an_reset_flags
@@ -344,7 +344,7 @@ subroutine rttddft_init_hamiltonian(dtset, energies, gs_hamk, istep, mpi_enreg, 
  !** Allocate all arrays and initialize quantities that do not depend on k and spin.
  !FB: Should recompute cprj if ions have moved right?
  usecprj_local=0; if (psps%usepaw==1 .and. dtset%ionmov==0) usecprj_local=1
- call init_hamiltonian(gs_hamk,psps,tdks%pawtab,dtset%nspinor,dtset%nsppol,dtset%nspden,dtset%natom,dtset%typat,    &
+ call gs_hamk%init(psps,tdks%pawtab,dtset%nspinor,dtset%nsppol,dtset%nspden,dtset%natom,dtset%typat,    &
                      & tdks%xred,dtset%nfft,dtset%mgfft,dtset%ngfft,tdks%rprimd,dtset%nloalg,paw_ij=tdks%paw_ij,    &
                      & ph1d=tdks%ph1d,usecprj=usecprj_local,comm_atom=mpi_enreg%comm_atom,                          &
                      & mpi_atmtab=mpi_enreg%my_atmtab,mpi_spintab=mpi_enreg%my_isppoltab,nucdipmom=dtset%nucdipmom, &
