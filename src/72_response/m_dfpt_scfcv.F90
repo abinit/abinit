@@ -2459,7 +2459,7 @@ subroutine dfpt_nselt(blkflg,cg,cg1,cplex,&
  nfftot=n1*n2*n3
 
 !Initialize Hamiltonian (k-independent terms) - NCPP only
- call init_hamiltonian(gs_hamk,psps,pawtab_dum,nspinor,nsppol,nspden,natom,&
+ call gs_hamk%init(psps,pawtab_dum,nspinor,nsppol,nspden,natom,&
 & typat,xred,nfft,mgfft,ngfft,rprimd,nloalg,ph1d=ph1d)
 
  bantot = 0
@@ -3167,7 +3167,7 @@ subroutine dfpt_nstdy(atindx,blkflg,cg,cg1,cplex,dtfil,dtset,d2bbb,d2lo,d2nl,eig
 !1) Allocate all arrays and initialize quantities that do not depend on k and spin.
 !2) Perform the setup needed for the non-local factors:
 !3) Constant kleimann-Bylander energies are copied from psps to gs_hamk.
- call init_hamiltonian(gs_hamkq,psps,pawtab,dtset%nspinor,nsppol,nspden,dtset%natom,&
+ call gs_hamkq%init(psps,pawtab,dtset%nspinor,nsppol,nspden,dtset%natom,&
 & dtset%typat,xred,nfft,dtset%mgfft,ngfft,rprimd,dtset%nloalg,ph1d=ph1d,&
 & gpu_option=dtset%gpu_option)
 
@@ -3757,11 +3757,11 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
  end if
 
 !Initialize most of the Hamiltonian (arrays and quantities that do not depend on k + nl form factors)
- call init_hamiltonian(gs_hamkq,psps,pawtab,dtset%nspinor,nsppol,nspden,natom,&
+ call gs_hamkq%init(psps,pawtab,dtset%nspinor,nsppol,nspden,natom,&
 & dtset%typat,xred,dtset%nfft,dtset%mgfft,dtset%ngfft,rprimd,dtset%nloalg,&
 & paw_ij=paw_ij,usecprj=usecprj,ph1d=ph1d,gpu_option=dtset%gpu_option,&
 & mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom,mpi_spintab=mpi_enreg%my_isppoltab)
- call init_rf_hamiltonian(cplex,gs_hamkq,ipert,rf_hamkq,paw_ij1=paw_ij1fr,&
+ call rf_hamkq%init(cplex,gs_hamkq,ipert,paw_ij1=paw_ij1fr,&
 & mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom,mpi_spintab=mpi_enreg%my_isppoltab)
 
 

@@ -56,7 +56,7 @@ module m_vtorho
  use m_pawcprj,            only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_getdim
  use m_pawfgr,             only : pawfgr_type
  use m_energies,           only : energies_type
- use m_hamiltonian,        only : init_hamiltonian, gs_hamiltonian_type, gspot_transgrid_and_pack
+ use m_hamiltonian,        only : gs_hamiltonian_type, gspot_transgrid_and_pack
  use m_bandfft_kpt,        only : bandfft_kpt, bandfft_kpt_type, bandfft_kpt_set_ikpt, &
                                   bandfft_kpt_savetabs, bandfft_kpt_restoretabs, prep_bandfft_tabs
  use m_electronpositron,   only : electronpositron_type,electronpositron_calctype
@@ -610,7 +610,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
  !==== Initialize most of the Hamiltonian ====
  ! Allocate all arrays and initialize quantities that do not depend on k and spin.
- call init_hamiltonian(gs_hamk,psps,pawtab,dtset%nspinor,dtset%nsppol,dtset%nspden,natom,&
+ call gs_hamk%init(psps,pawtab,dtset%nspinor,dtset%nsppol,dtset%nspden,natom,&
   dtset%typat,xred,dtset%nfft,dtset%mgfft,dtset%ngfft,rprimd,dtset%nloalg,&
   paw_ij=paw_ij,ph1d=ph1d,usecprj=usecprj_local,electronpositron=electronpositron,fock=fock,&
   comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,mpi_spintab=mpi_enreg%my_isppoltab,&

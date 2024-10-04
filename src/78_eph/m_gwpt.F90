@@ -616,12 +616,12 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  ABI_MALLOC(ph1d, (2,3*(2*mgfft+1)*natom))
  call getph(cryst%atindx, natom, n1, n2, n3, ph1d, cryst%xred)
 
- call init_hamiltonian(gs_ham_kqmp, psps, pawtab, nspinor, nsppol, nspden, natom, &
+ call gs_ham_kqmp%init(psps, pawtab, nspinor, nsppol, nspden, natom, &
    dtset%typat, cryst%xred, nfft, mgfft, ngfft, cryst%rprimd, dtset%nloalg, &
    comm_atom=mpi_enreg%comm_atom, mpi_atmtab=mpi_enreg%my_atmtab, mpi_spintab=mpi_enreg%my_isppoltab, &
    usecprj=usecprj, ph1d=ph1d, nucdipmom=dtset%nucdipmom, gpu_option=dtset%gpu_option)
 
- call init_hamiltonian(gs_ham_kmp, psps, pawtab, nspinor, nsppol, nspden, natom, &
+ call gs_ham_kmp%init(psps, pawtab, nspinor, nsppol, nspden, natom, &
    dtset%typat, cryst%xred, nfft, mgfft, ngfft, cryst%rprimd, dtset%nloalg, &
    comm_atom=mpi_enreg%comm_atom, mpi_atmtab=mpi_enreg%my_atmtab, mpi_spintab=mpi_enreg%my_isppoltab, &
    usecprj=usecprj, ph1d=ph1d, nucdipmom=dtset%nucdipmom, gpu_option=dtset%gpu_option)
@@ -1302,7 +1302,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
                                         pawfgr, mpi_enreg, vtrial, v1scf_qq(:,:,:,imyp), vlocal, vlocal1_qq(:,:,:,:,imyp))
 
              call gs_ham_kqmp%load_spin(spin, vlocal=vlocal, with_nonlocal=.true.)
-             call init_rf_hamiltonian(cplex, gs_ham_kqmp, ipert, rf_ham_kqmp, has_e1kbsc=.true.)
+             call rf_ham_kqmp%init(cplex, gs_ham_kqmp, ipert, has_e1kbsc=.true.)
              call rf_ham_kqmp%load_spin(spin, vlocal1=vlocal1_qq(:,:,:,:,imyp), with_nonlocal=.true.)
 
              ! This call is not optimal because there are quantities in out that do not depend on idir,ipert
@@ -1386,7 +1386,7 @@ if (.not. qq_is_gamma) then
              ! Same operations but for -qq
              ! ===========================
              call gs_ham_kmp%load_spin(spin, vlocal=vlocal, with_nonlocal=.true.)
-             call init_rf_hamiltonian(cplex, gs_ham_kmp, ipert, rf_ham_kmp, has_e1kbsc=.true.)
+             call rf_ham_kmp%init(cplex, gs_ham_kmp, ipert, has_e1kbsc=.true.)
              call rf_ham_kmp%load_spin(spin, vlocal1=vlocal1_mqq(:,:,:,:,imyp), with_nonlocal=.true.)
 
              call getgh1c_setup(gs_ham_kmp, rf_ham_kmp, dtset, psps, kqmp, kmp, idir, ipert, &             ! In

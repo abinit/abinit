@@ -487,10 +487,10 @@ subroutine ksdiago(Diago_ctl, nband_k, nfftc, mgfftc, ngfftc, natom, &
 
  ! Initialize the Hamiltonian datatype on the coarse FFT mesh.
  if (present(electronpositron)) then
-   call init_hamiltonian(gs_hamk, psps, pawtab, nspinor, nsppol, nspden, natom, typat, xred, nfftc, &
+   call gs_hamk%init(psps, pawtab, nspinor, nsppol, nspden, natom, typat, xred, nfftc, &
     mgfftc, ngfftc, rprimd, nloalg, paw_ij=paw_ij, usecprj=0, electronpositron=electronpositron)
  else
-   call init_hamiltonian(gs_hamk, psps, pawtab, nspinor, nsppol, nspden, natom, typat, xred, nfftc, &
+   call gs_hamk%init(psps, pawtab, nspinor, nsppol, nspden, natom, typat, xred, nfftc, &
     mgfftc, ngfftc, rprimd, nloalg, paw_ij=paw_ij, usecprj=0)
  end if
 
@@ -1049,10 +1049,10 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
 
  ! Initialize the Hamiltonian on the coarse FFT mesh.
  if (present(electronpositron)) then
-   call init_hamiltonian(gs_hamk, psps, pawtab, nspinor, nsppol, nspden, cryst%natom, cryst%typat, cryst%xred, nfftc, &
+   call gs_hamk%init(psps, pawtab, nspinor, nsppol, nspden, cryst%natom, cryst%typat, cryst%xred, nfftc, &
     mgfftc, ngfftc, cryst%rprimd, dtset%nloalg, paw_ij=paw_ij, usecprj=0, electronpositron=electronpositron)
  else
-   call init_hamiltonian(gs_hamk, psps, pawtab, nspinor, nsppol, nspden, cryst%natom, cryst%typat, cryst%xred, nfftc, &
+   call gs_hamk%init(psps, pawtab, nspinor, nsppol, nspden, cryst%natom, cryst%typat, cryst%xred, nfftc, &
     mgfftc, ngfftc, cryst%rprimd, dtset%nloalg, paw_ij=paw_ij, usecprj=0)
  end if
 
