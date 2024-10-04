@@ -604,6 +604,8 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
  if (present(enl_ndat)) then
    enl_ndat_ptr => enl_ndat
    dimenl1=size(enl_ndat,1);dimenl2=size(enl_ndat,2);dimekbq=size(enl_ndat,5)
+ else
+   ABI_MALLOC(enl_ndat_ptr, (0,0,0,0,0))
  end if
 
 
@@ -707,7 +709,7 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
    if (present(enl_ndat)) then
      ABI_MALLOC(enl_ndat_,(size(enl_ndat_ptr,1),1,hamk%nspinor**2,size(enl_ndat_ptr,5),ndat))
      do idat=1,ndat
-       do ii=1,size(enl_ndat_ptr,4)
+       do ii=1,size(enl_ndat_ptr,5)
          do ispden=1,hamk%nspinor**2
            if (dimenl2==hamk%natom .and. hamk%usepaw==1) then
              enl_ndat_(:,1,ispden,ii,idat)=enl_ndat_ptr(:,iatom_only_,ispden,idat,ii)
@@ -732,9 +734,7 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
          end if
        end do
      end do
-     ABI_MALLOC(enl_ndat_,(0,0,0,0,0))
    else
-     ABI_MALLOC(enl_ndat_,(0,0,0,0,0))
      ABI_MALLOC(enl_,(0,0,0,0))
    end if
    if (allocated(hamk%sij)) then
@@ -983,6 +983,9 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
  end if
  if (kpgout_allocated) then
    ABI_FREE(kpgout)
+ end if
+ if (.not. present(enl_ndat)) then
+   ABI_FREE(enl_ndat_ptr)
  end if
 
  call timab(220+tim_nonlop,2,tsec)
