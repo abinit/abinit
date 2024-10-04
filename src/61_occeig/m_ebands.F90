@@ -77,7 +77,7 @@ module m_ebands
 !! FUNCTION
 !!
 !! SOURCE
-!!
+
 type, extends(ebands_base_t), public :: ebands_t
 
 contains
@@ -93,7 +93,7 @@ contains
  procedure :: from_dtset => ebands_from_dtset
  ! Init object from the abinit dataset.
 
- procedure :: copy => ebands_copy                     ! Copy of the ebands_t.
+ procedure :: copy                  => ebands_copy                       ! Copy of the ebands_t.
  procedure :: move_alloc            =>   ebands_move_alloc               ! Transfer allocation.
  procedure :: print                 =>   ebands_print                    ! Printout basic info on the data type.
  procedure :: get_bandenergy        =>   ebands_get_bandenergy           ! Returns the band energy of the system.
