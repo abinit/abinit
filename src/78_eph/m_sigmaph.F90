@@ -72,7 +72,7 @@ module m_sigmaph
  use m_crystal,        only : crystal_t
  use m_kpts,           only : kpts_ibz_from_kptrlatt, kpts_timrev_from_kptopt, kpts_map
  use m_occ,            only : occ_fd, occ_be !occ_dfde,
- use m_kg,             only : getph, mkkpg
+ use m_kg,             only : getph, mkkpg, mkkin
  use m_bz_mesh,        only : isamek
  use m_getgh1c,        only : getgh1c, rf_transgrid_and_pack, getgh1c_setup
  use m_ioarr,          only : read_rhor
@@ -636,7 +636,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
 !Local variables ------------------------------
 !scalars
- integer,parameter :: tim_getgh1c1 = 1, berryopt0 = 0, istw1 = 1, ider0 = 0, idir0 = 0, istwfk1 = 1
+ integer,parameter :: tim_getgh1c1 = 1, berryopt0 = 0, istw1 = 1, ider0 = 0, idir0 = 0, istwfk_1 = 1
  integer,parameter :: useylmgr0 = 0, master = 0, ndat1 = 1
  integer,parameter :: cplex1 = 1, pawread0 = 0
  integer :: band_me, nband_me
@@ -655,7 +655,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  integer :: nfft,nfftf,mgfft,mgfftf,nkpg,nkpg1,nq,cnt,imyp, q_start, q_stop, restart, enough_stern
  integer :: nbcalc_ks,nbsum,bsum_start, bsum_stop, bstart_ks,my_ikcalc,ikcalc,bstart,bstop,iatom, sendcount
  integer :: comm_rpt, osc_npw, stern_comm
- integer :: ffnlk_request, ffnl1_request, nelem, cgq_request
+ integer :: ffnl_k_request, ffnl_kq_request, nelem, cgq_request
  real(dp) :: cpu,wall,gflops,cpu_all,wall_all,gflops_all,cpu_ks,wall_ks,gflops_ks,cpu_dw,wall_dw,gflops_dw
  real(dp) :: cpu_setk, wall_setk, gflops_setk, cpu_qloop, wall_qloop, gflops_qloop, gf_val
  real(dp) :: ecut,eshift,weight_q,rfact,gmod2,hmod2,ediff,weight, inv_qepsq, simag, q0rad
@@ -672,7 +672,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  type(hdr_type) :: pot_hdr
  type(phstore_t) :: phstore
  type(u1_cache_t) :: u1c
- type(stern_t),target :: stern
+ type(stern_t) :: stern
  type(pstat_t) :: pstat
  character(len=5000) :: msg
  character(len=fnlen) :: sigeph_filepath
@@ -690,8 +690,8 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  real(dp) :: gdw2, gdw2_stern, rtmp
  real(dp) :: fermie1_idir_ipert(3,cryst%natom)
  real(dp),allocatable :: displ_cart(:,:,:,:),displ_red(:,:,:,:)
- real(dp),allocatable :: grad_berry(:,:),kinpw1(:),kpg1_k(:,:),kpg_k(:,:),dkinpw(:)
- real(dp),allocatable :: ffnlk(:,:,:,:),ffnl1(:,:,:,:),ph3d(:,:,:),ph3d1(:,:,:),v1scf(:,:,:,:)
+ real(dp),allocatable :: grad_berry(:,:),kinpw_k(:), kinpw_kq(:),kpg_kq(:,:),kpg_k(:,:),dkinpw(:)
+ real(dp),allocatable :: ffnl_k(:,:,:,:),ffnl_kq(:,:,:,:),ph3d_k(:,:,:),ph3d_kq(:,:,:),v1scf(:,:,:,:)
  real(dp),allocatable :: gkq_atm(:,:,:),gkq_nu(:,:,:),gkq0_atm(:,:,:,:), gaussw_qnu(:)
  real(dp),allocatable :: cg1s_kq(:,:,:,:), h1kets_kq_allperts(:,:,:,:)
  real(dp),allocatable :: stern_ppb(:,:,:,:), stern_dw(:,:,:,:)
@@ -1243,11 +1243,22 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
    ABI_MALLOC(kpg_k, (npw_k, nkpg))
    if (nkpg > 0) call mkkpg(kg_k, kpg_k, kk, nkpg, npw_k)
 
-   ! Compute nonlocal form factors ffnlk at (k+G)
-   ABI_MALLOC(ffnlk, (npw_k, 1, psps%lmnmax, psps%ntypat))
+   ! Compute nonlocal form factors ffnl_k at (k+G)
+   ABI_MALLOC(ffnl_k, (npw_k, 1, psps%lmnmax, psps%ntypat))
+   call mkffnl_objs(cryst, psps, 1, ffnl_k, ider0, idir0, kg_k, kpg_k, kk, nkpg, npw_k, ylm_k, ylmgr_dum, &
+                    comm=sigma%pert_comm%value) !, request=ffnl_k_request)
 
-   call mkffnl_objs(cryst, psps, 1, ffnlk, ider0, idir0, kg_k, kpg_k, kk, nkpg, npw_k, ylm_k, ylmgr_dum, &
-                    comm=sigma%pert_comm%value, request=ffnlk_request)
+   ABI_MALLOC(kinpw_k, (npw_k))
+   call mkkin(dtset%ecut, dtset%ecutsm, dtset%effmass_free, cryst%gmet, kg_k, kinpw_k, kk, npw_k, 0, 0)
+
+#define BYPASS_GETGH1_SETUP 1
+
+#if BYPASS_GETGH1_SETUP == 1
+   ! Load k-dependent part in the Hamiltonian datastructure
+   ABI_MALLOC(ph3d_k, (2, npw_k, gs_hamkq%matblk))
+   call gs_hamkq%load_k(kpt_k=kk, npw_k=npw_k, istwf_k=istwfk_1, kg_k=kg_k, kpg_k=kpg_k, kinpw_k=kinpw_k, &
+                        ph3d_k=ph3d_k, ffnl_k=ffnl_k, compute_ph3d=.true., compute_gbound=.true.)
+#endif
 
    call cwtime_report(" Setup kcalc", cpu_setk, wall_setk, gflops_setk)
 
@@ -1520,7 +1531,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
        ! Get istwf_kq, npw_kq, kg_kq for k+q.
        call wfd%get_gvec_gbound(cryst%gmet, ecut, kq, ikq_ibz, isirr_kq, dtset%nloalg, & ! in
-                                istwf_kq, npw_kq, kg_kq, nkpg1, kpg1_k, gbound_kq)       ! out
+                                istwf_kq, npw_kq, kg_kq, nkpg1, kpg_kq, gbound_kq)       ! out
 
        !call timab(1901, 2, tsec)
        !call timab(1902, 1, tsec)
@@ -1564,13 +1575,26 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
        ! Compute k+q+G vectors
        !nkpg1 = 3*dtset%nloalg(3)
-       !ABI_MALLOC(kpg1_k, (npw_kq, nkpg1))
-       !if (nkpg1 > 0) call mkkpg(kg_kq, kpg1_k, kq, nkpg1, npw_kq)
+       !ABI_MALLOC(kpg_kq, (npw_kq, nkpg1))
+       !if (nkpg1 > 0) call mkkpg(kg_kq, kpg_kq, kq, nkpg1, npw_kq)
 
-       ! Compute nonlocal form factors ffnl1 at (k+q+G)
-       ABI_MALLOC(ffnl1, (npw_kq, 1, psps%lmnmax, psps%ntypat))
-       call mkffnl_objs(cryst, psps, 1, ffnl1, ider0, idir0, kg_kq, kpg1_k, kq, nkpg1, npw_kq, ylm_kq, ylmgr_kq, &
-                        comm=sigma%pert_comm%value, request=ffnl1_request)
+       ! Compute nonlocal form factors ffnl_kq at (k+q+G)
+       ABI_MALLOC(ffnl_kq, (npw_kq, 1, psps%lmnmax, psps%ntypat))
+       call mkffnl_objs(cryst, psps, 1, ffnl_kq, ider0, idir0, kg_kq, kpg_kq, kq, nkpg1, npw_kq, ylm_kq, ylmgr_kq, &
+                        comm=sigma%pert_comm%value) !, request=ffnl_kq_request)
+
+
+       ABI_MALLOC(kinpw_kq, (npw_kq))
+       call mkkin(dtset%ecut, dtset%ecutsm, dtset%effmass_free, cryst%gmet, kg_kq, kinpw_kq, kq, npw_kq, 0, 0)
+
+       !===== Load the k/k+q dependent parts of the Hamiltonian
+
+       ! Load k+q-dependent part in the Hamiltonian datastructure
+#if BYPASS_GETGH1_SETUP == 1
+       ABI_MALLOC(ph3d_kq, (2, npw_kq, gs_hamkq%matblk))
+       call gs_hamkq%load_kprime(kpt_kp=kq, npw_kp=npw_kq, istwf_kp=istwfk_1, kg_kp=kg_kq, kpg_kp=kpg_kq, kinpw_kp=kinpw_kq, &
+                                 ph3d_kp=ph3d_kq, ffnl_kp=ffnl_kq, compute_ph3d=.true., compute_gbound=.true.)
+#endif
 
        if (dtset%eph_stern /= 0 .and. .not. sigma%imag_only) then
          ! Build global array with GS wavefunctions cg_kq at k+q to prepare call to dfpt_cgwf.
@@ -1668,15 +1692,17 @@ end if
          call rf_hamkq%init(cplex, gs_hamkq, ipert, has_e1kbsc=.true.)
          call rf_hamkq%load_spin(spin, vlocal1=vlocal1(:,:,:,:,imyp), with_nonlocal=.true.)
 
-         if (ffnlk_request /= xmpi_request_null) call xmpi_wait(ffnlk_request, ierr)
-         if (ffnl1_request /= xmpi_request_null) call xmpi_wait(ffnl1_request, ierr)
+         !if (ffnl_k_request /= xmpi_request_null) call xmpi_wait(ffnl_k_request, ierr)
+         !if (ffnl_kq_request /= xmpi_request_null) call xmpi_wait(ffnl_kq_request, ierr)
 
+#if BYPASS_GETGH1_SETUP == 0
          ! This call is not optimal because there are quantities in out that do not depend on idir,ipert
          call getgh1c_setup(gs_hamkq, rf_hamkq, dtset, psps, kk, kq, idir, ipert, &  ! In
            cryst%natom, cryst%rmet, cryst%gprimd, cryst%gmet, istwf_k, &             ! In
            npw_k, npw_kq, useylmgr0, kg_k, ylm_k, kg_kq, ylm_kq, ylmgr_kq, &         ! In
-           dkinpw, nkpg, nkpg1, kpg_k, kpg1_k, kinpw1, ffnlk, ffnl1, ph3d, ph3d1, &  ! Out
+           dkinpw, nkpg, nkpg1, kpg_k, kpg_kq, kinpw_kq, ffnl_k, ffnl_kq, ph3d_k, ph3d_kq, &  ! Out
            reuse_kpg_k=1, reuse_kpg1_k=1, reuse_ffnlk=1, reuse_ffnl1=1)              ! Reuse some arrays
+#endif
 
          ! Compute H(1) applied to GS wavefunction Psi_nk(0)
          do ib_k=1,nbcalc_ks
@@ -1734,8 +1760,8 @@ end if
                u1c_ib_k = u1c%find_band(band_ks)
                if (u1c_ib_k /= -1) then
                  call cgtk_change_gsphere(nspinor, &
-                                          u1c%prev_npw_kq, istwfk1, u1c%prev_kg_kq, u1c%prev_cg1s_kq(1,1,ipc,u1c_ib_k), &
-                                          npw_kq, istwfk1, kg_kq, cg1s_kq(1,1,ipc,ib_k), work_ngfft, work)
+                                          u1c%prev_npw_kq, istwfk_1, u1c%prev_kg_kq, u1c%prev_cg1s_kq(1,1,ipc,u1c_ib_k), &
+                                          npw_kq, istwfk_1, kg_kq, cg1s_kq(1,1,ipc,ib_k), work_ngfft, work)
                else
                  cg1s_kq(:,:,ipc,ib_k) = zero
                end if
@@ -1756,10 +1782,13 @@ end if
          end if ! sternheimer
 
          call rf_hamkq%free()
-         ABI_FREE(kinpw1)
+
+#if BYPASS_GETGH1_SETUP == 0
+         ABI_FREE(kinpw_kq)
          ABI_FREE(dkinpw)
-         ABI_FREE(ph3d)
-         ABI_SFREE(ph3d1)
+         ABI_SFREE(ph3d_k)
+         ABI_SFREE(ph3d_kq)
+#endif
        end do ! imyp  (loop over perturbations)
 
        !call timab(1902, 2, tsec)
@@ -2268,8 +2297,12 @@ end if
        ABI_FREE(bra_kq)
        ABI_FREE(cgwork)
        ABI_FREE(h1kets_kq)
-       ABI_FREE(kpg1_k)
-       ABI_FREE(ffnl1)
+       ABI_FREE(kpg_kq)
+       ABI_FREE(ffnl_kq)
+       ABI_FREE(kinpw_kq)
+#if BYPASS_GETGH1_SETUP == 1
+       ABI_FREE(ph3d_kq)
+#endif
 
        if (osc_ecut /= zero) then
          ABI_FREE(osc_gvecq)
@@ -2282,7 +2315,7 @@ end if
          write(msg,'(4(a,i0),a)') " k-point [",my_ikcalc,"/",sigma%my_nkcalc, "] q-point [",imyq,"/",sigma%my_nqibz_k,"]"
          call cwtime_report(msg, cpu, wall, gflops)
        end if
-     end do ! iq_ibz_k (sum over q-points in IBZ_k)
+     end do ! imyq (sum over q-points in IBZ_k)
 
      call cwtime_report(" Fan-Migdal q-loop", cpu_qloop, wall_qloop, gflops_qloop)
 
@@ -2534,12 +2567,16 @@ end if
 
    ABI_FREE(kg_k)
    ABI_FREE(kg_kq)
-   ABI_SFREE(kpg1_k)
+   ABI_SFREE(kpg_kq)
    ABI_FREE(ylm_k)
    ABI_FREE(ylm_kq)
    ABI_FREE(ylmgr_kq)
    ABI_FREE(kpg_k)
-   ABI_FREE(ffnlk)
+   ABI_FREE(ffnl_k)
+   ABI_FREE(kinpw_k)
+#if BYPASS_GETGH1_SETUP == 1
+   ABI_FREE(ph3d_k)
+#endif
 
    !call abimem_report("end kcalc_loop", std_out)
    !call wrtout(std_out, sjoin("xmpi_count_requests", itoa(xmpi_count_requests)))
@@ -2573,13 +2610,13 @@ end if
 
  call gs_hamkq%free()
  call wfd%free()
+ call phstore%free()
+ call u1c%free()
+ call sigma%free()
  call pawcprj_free(cwaveprj0)
  ABI_FREE(cwaveprj0)
  call pawcprj_free(cwaveprj)
  ABI_FREE(cwaveprj)
- call phstore%free()
- call u1c%free()
- call sigma%free()
 
  ! This to make sure that the parallel output of SIGEPH is completed
  call xmpi_barrier(comm)
@@ -2622,7 +2659,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
 
 !Local variables ------------------------------
 !scalars
- integer,parameter :: master = 0, istwfk1 = 1
+ integer,parameter :: master = 0, istwfk_1 = 1
  integer :: my_rank,my_nshiftq,cnt,nprocs,ik_ibz,ndeg, iq_ibz, qptopt, qtimrev
  integer :: ii, ierr, spin, gap_err, ikcalc, qprange_, bstop !it,
  integer :: jj, bstart, natom, natom3 !, ip, iatom, idir, pertcase,
