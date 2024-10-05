@@ -68,13 +68,13 @@ module m_sigmaph
  use m_special_funcs,  only : gaussian
  use m_fftcore,        only : ngfft_seq, sphereboundary, get_kg, kgindex
  use m_cgtk,           only : cgtk_rotate, cgtk_change_gsphere
- use m_cgtools,        only : cg_zdotc, cg_real_zdotc, cg_zgemm, fxphas_seq
+ use m_cgtools,        only : cg_zdotc, cg_real_zdotc, cg_zgemm
  use m_crystal,        only : crystal_t
  use m_kpts,           only : kpts_ibz_from_kptrlatt, kpts_timrev_from_kptopt, kpts_map
  use m_occ,            only : occ_fd, occ_be !occ_dfde,
  use m_kg,             only : getph, mkkpg, mkkin
  use m_bz_mesh,        only : isamek
- use m_getgh1c,        only : getgh1c, rf_transgrid_and_pack, getgh1c_setup
+ use m_getgh1c,        only : getgh1c, rf_transgrid_and_pack
  use m_ioarr,          only : read_rhor
  use m_paw_sphharm,    only : ylm_angular_mesh
  use m_pawang,         only : pawang_type
@@ -85,6 +85,7 @@ module m_sigmaph
  use m_dfpt_cgwf,      only : stern_t
  use m_phonons,        only : phstore_t, phstore_new
  use m_pstat,          only : pstat_t
+ use m_initylmg,       only : initylmg_k
 
  implicit none
 
@@ -636,9 +637,8 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
 !Local variables ------------------------------
 !scalars
- integer,parameter :: tim_getgh1c1 = 1, berryopt0 = 0, istw1 = 1, ider0 = 0, idir0 = 0, istwfk_1 = 1
- integer,parameter :: useylmgr0 = 0, master = 0, ndat1 = 1
- integer,parameter :: cplex1 = 1, pawread0 = 0
+ integer,parameter :: tim_getgh1c1 = 1, berryopt0 = 0, ider0 = 0, idir0 = 0, istwfk_1 = 1
+ integer,parameter :: useylmgr0 = 0, master = 0, ndat1 = 1, cplex1 = 1, pawread0 = 0, optder0 = 0
  integer :: band_me, nband_me
  integer :: my_rank,nsppol,nkpt,iq_ibz,iq_ibz_k,my_npert ! iq_ibz_frohl,iq_bz_frohl,
  integer :: cplex,db_iqpt,natom,natom3,ipc,nspinor,nprocs, qptopt ! = 1
@@ -655,7 +655,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  integer :: nfft,nfftf,mgfft,mgfftf,nkpg,nkpg1,nq,cnt,imyp, q_start, q_stop, restart, enough_stern
  integer :: nbcalc_ks,nbsum,bsum_start, bsum_stop, bstart_ks,my_ikcalc,ikcalc,bstart,bstop,iatom, sendcount
  integer :: comm_rpt, osc_npw, stern_comm
- integer :: ffnl_k_request, ffnl_kq_request, nelem, cgq_request
+ integer :: nelem, cgq_request ! ffnl_k_request, ffnl_kq_request,
  real(dp) :: cpu,wall,gflops,cpu_all,wall_all,gflops_all,cpu_ks,wall_ks,gflops_ks,cpu_dw,wall_dw,gflops_dw
  real(dp) :: cpu_setk, wall_setk, gflops_setk, cpu_qloop, wall_qloop, gflops_qloop, gf_val
  real(dp) :: ecut,eshift,weight_q,rfact,gmod2,hmod2,ediff,weight, inv_qepsq, simag, q0rad
@@ -690,7 +690,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  real(dp) :: gdw2, gdw2_stern, rtmp
  real(dp) :: fermie1_idir_ipert(3,cryst%natom)
  real(dp),allocatable :: displ_cart(:,:,:,:),displ_red(:,:,:,:)
- real(dp),allocatable :: grad_berry(:,:),kinpw_k(:), kinpw_kq(:),kpg_kq(:,:),kpg_k(:,:),dkinpw(:)
+ real(dp),allocatable :: grad_berry(:,:),kinpw_k(:), kinpw_kq(:),kpg_kq(:,:),kpg_k(:,:)
  real(dp),allocatable :: ffnl_k(:,:,:,:),ffnl_kq(:,:,:,:),ph3d_k(:,:,:),ph3d_kq(:,:,:),v1scf(:,:,:,:)
  real(dp),allocatable :: gkq_atm(:,:,:),gkq_nu(:,:,:),gkq0_atm(:,:,:,:), gaussw_qnu(:)
  real(dp),allocatable :: cg1s_kq(:,:,:,:), h1kets_kq_allperts(:,:,:,:)
@@ -698,12 +698,12 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  logical,allocatable :: ihave_ikibz_spin(:,:), bks_mask(:,:,:),keep_ur(:,:,:)
  real(dp),allocatable :: bra_kq(:,:),kets_k(:,:,:),h1kets_kq(:,:,:,:),cgwork(:,:)
  real(dp),allocatable :: ph1d(:,:),vlocal(:,:,:,:),vlocal1(:,:,:,:,:)
- real(dp),allocatable :: ylm_kq(:,:),ylm_k(:,:),ylmgr_kq(:,:,:)
+ real(dp),allocatable :: ylm_kq(:,:),ylm_k(:,:)
  real(dp),allocatable :: vtrial(:,:),gvnlx1(:,:),work(:,:,:,:), vcar_ibz(:,:,:,:)
  real(dp),allocatable :: gs1c(:,:),nqnu_tlist(:),dtw_weights(:,:),dt_tetra_weights(:,:,:),dwargs(:),alpha_mrta(:)
  real(dp),allocatable :: delta_e_minus_emkq(:), gkq_allgather(:,:,:),f_tlist_b(:,:)
  !real(dp),allocatable :: phfreqs_qibz(:,:), pheigvec_qibz(:,:,:,:), eigvec_qpt(:,:,:)
- real(dp) :: ylmgr_dum(1,1,1)
+ real(dp) :: ylmgr_k_dum(1,1,1), ylmgr_kq_dum(1,1,1)
  logical,allocatable :: osc_mask(:)
  real(dp),allocatable :: gkq2_lr(:,:,:)
  complex(dpc) :: cp3(3)
@@ -1232,11 +1232,12 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
    kg_k = wfd%kdata(ik_ibz)%kg_k
    ABI_MALLOC(kg_kq, (3, mpw))
 
-   ! Spherical Harmonics for useylm == 1.
-   ! FIXME: These arrays should be allocated with npw_k and npw_kq. See getgh1c_setup
-   ABI_MALLOC(ylm_k, (mpw, psps%mpsang**2 * psps%useylm))
-   ABI_MALLOC(ylm_kq, (mpw, psps%mpsang**2 * psps%useylm))
-   ABI_MALLOC(ylmgr_kq, (mpw, 3, psps%mpsang**2 * psps%useylm * useylmgr0))
+#if 0
+   ! Spherical Harmonics at k for useylm == 1.
+   ABI_MALLOC(ylm_k, (npw_k, psps%mpsang**2 * psps%useylm))
+   if (psps%useylm == 1) then
+     call initylmg_k(npw_k, psps%mpsang, optder0, cryst%rprimd, cryst%gprimd, kk, kg_k, ylm_k, ylmgr_k_dum)
+   end if
 
    ! Compute k+G vectors
    nkpg = 3*dtset%nloalg(3)
@@ -1245,19 +1246,20 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
    ! Compute nonlocal form factors ffnl_k at (k+G)
    ABI_MALLOC(ffnl_k, (npw_k, 1, psps%lmnmax, psps%ntypat))
-   call mkffnl_objs(cryst, psps, 1, ffnl_k, ider0, idir0, kg_k, kpg_k, kk, nkpg, npw_k, ylm_k, ylmgr_dum, &
+   call mkffnl_objs(cryst, psps, 1, ffnl_k, ider0, idir0, kg_k, kpg_k, kk, nkpg, npw_k, ylm_k, ylmgr_k_dum, &
                     comm=sigma%pert_comm%value) !, request=ffnl_k_request)
+   ABI_FREE(ylm_k)
 
    ABI_MALLOC(kinpw_k, (npw_k))
    call mkkin(dtset%ecut, dtset%ecutsm, dtset%effmass_free, cryst%gmet, kg_k, kinpw_k, kk, npw_k, 0, 0)
 
-#define BYPASS_GETGH1_SETUP 1
-
-#if BYPASS_GETGH1_SETUP == 1
    ! Load k-dependent part in the Hamiltonian datastructure
    ABI_MALLOC(ph3d_k, (2, npw_k, gs_hamkq%matblk))
    call gs_hamkq%load_k(kpt_k=kk, npw_k=npw_k, istwf_k=istwfk_1, kg_k=kg_k, kpg_k=kpg_k, kinpw_k=kinpw_k, &
                         ph3d_k=ph3d_k, ffnl_k=ffnl_k, compute_ph3d=.true., compute_gbound=.true.)
+#else
+   call gs_hamkq%eph_setup_k("k" , kk, istwfk_1, npw_k, kg_k, dtset, cryst, psps, &
+                             nkpg, kpg_k, ffnl_k, kinpw_k, ph3d_k, sigma%pert_comm%value)
 #endif
 
    call cwtime_report(" Setup kcalc", cpu_setk, wall_setk, gflops_setk)
@@ -1542,8 +1544,8 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
        if (osc_ecut /= zero) then
          ! Compute "small" G-sphere centered on qpt and gbound for zero-padded FFT for oscillators.
-         call get_kg(qpt, istw1, abs(osc_ecut), cryst%gmet, osc_npw, osc_gvecq)
-         call sphereboundary(osc_gbound_q, istw1, osc_gvecq, wfd%mgfft, osc_npw)
+         call get_kg(qpt, istwfk_1, abs(osc_ecut), cryst%gmet, osc_npw, osc_gvecq)
+         call sphereboundary(osc_gbound_q, istwfk_1, osc_gvecq, wfd%mgfft, osc_npw)
 
          ! Compute correspondence G-sphere --> FFT mesh.
          ABI_MALLOC(osc_indpw, (osc_npw))
@@ -1564,36 +1566,30 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
        ABI_MALLOC(gs1c, (2, npw_kq*nspinor*((sij_opt+1)/2)))
        ABI_MALLOC(gvnlx1, (2, npw_kq*nspinor))
 
-       ! Set up the spherical harmonics (Ylm) at k and k+q. See also dfpt_looppert
-       !if (psps%useylm == 1) then
-       !   optder = 0; if (useylmgr0 == 1) optder = 1
-       !   call initylmg(cryst%gprimd, kg_k, kk, mkmem1, mpi_enreg, psps%mpsang, mpw, nband, mkmem1, &
-       !     [npw_k], dtset%nsppol, optder, cryst%rprimd, ylm_k, ylmgr)
-       !   call initylmg(cryst%gprimd, kg_kq, kq, mkmem1, mpi_enreg, psps%mpsang, mpw, nband, mkmem1, &
-       !     [npw_kq], dtset%nsppol, optder, cryst%rprimd, ylm_kq, ylmgr_kq)
-       !end if
-
-       ! Compute k+q+G vectors
-       !nkpg1 = 3*dtset%nloalg(3)
-       !ABI_MALLOC(kpg_kq, (npw_kq, nkpg1))
-       !if (nkpg1 > 0) call mkkpg(kg_kq, kpg_kq, kq, nkpg1, npw_kq)
+#if 0
+       ! Spherical Harmonics at k+q for useylm == 1.
+       ABI_MALLOC(ylm_kq, (npw_kq, psps%mpsang**2 * psps%useylm))
+       if (psps%useylm == 1) then
+         call initylmg_k(npw_kq, psps%mpsang, optder0, cryst%rprimd, cryst%gprimd, kq, kg_kq, ylm_kq, ylmgr_kq_dum)
+       end if
 
        ! Compute nonlocal form factors ffnl_kq at (k+q+G)
        ABI_MALLOC(ffnl_kq, (npw_kq, 1, psps%lmnmax, psps%ntypat))
-       call mkffnl_objs(cryst, psps, 1, ffnl_kq, ider0, idir0, kg_kq, kpg_kq, kq, nkpg1, npw_kq, ylm_kq, ylmgr_kq, &
+       call mkffnl_objs(cryst, psps, 1, ffnl_kq, ider0, idir0, kg_kq, kpg_kq, kq, nkpg1, npw_kq, ylm_kq, ylmgr_kq_dum, &
                         comm=sigma%pert_comm%value) !, request=ffnl_kq_request)
-
+       ABI_FREE(ylm_kq)
 
        ABI_MALLOC(kinpw_kq, (npw_kq))
        call mkkin(dtset%ecut, dtset%ecutsm, dtset%effmass_free, cryst%gmet, kg_kq, kinpw_kq, kq, npw_kq, 0, 0)
 
-       !===== Load the k/k+q dependent parts of the Hamiltonian
-
        ! Load k+q-dependent part in the Hamiltonian datastructure
-#if BYPASS_GETGH1_SETUP == 1
        ABI_MALLOC(ph3d_kq, (2, npw_kq, gs_hamkq%matblk))
        call gs_hamkq%load_kprime(kpt_kp=kq, npw_kp=npw_kq, istwf_kp=istwfk_1, kg_kp=kg_kq, kpg_kp=kpg_kq, kinpw_kp=kinpw_kq, &
                                  ph3d_kp=ph3d_kq, ffnl_kp=ffnl_kq, compute_ph3d=.true., compute_gbound=.true.)
+
+#else
+       call gs_hamkq%eph_setup_k("kq", kq, istwfk_1, npw_kq, kg_kq, dtset, cryst, psps, &
+                                 nkpg, kpg_kq, ffnl_kq, kinpw_kq, ph3d_kq, sigma%pert_comm%value)
 #endif
 
        if (dtset%eph_stern /= 0 .and. .not. sigma%imag_only) then
@@ -1692,18 +1688,6 @@ end if
          call rf_hamkq%init(cplex, gs_hamkq, ipert, has_e1kbsc=.true.)
          call rf_hamkq%load_spin(spin, vlocal1=vlocal1(:,:,:,:,imyp), with_nonlocal=.true.)
 
-         !if (ffnl_k_request /= xmpi_request_null) call xmpi_wait(ffnl_k_request, ierr)
-         !if (ffnl_kq_request /= xmpi_request_null) call xmpi_wait(ffnl_kq_request, ierr)
-
-#if BYPASS_GETGH1_SETUP == 0
-         ! This call is not optimal because there are quantities in out that do not depend on idir,ipert
-         call getgh1c_setup(gs_hamkq, rf_hamkq, dtset, psps, kk, kq, idir, ipert, &  ! In
-           cryst%natom, cryst%rmet, cryst%gprimd, cryst%gmet, istwf_k, &             ! In
-           npw_k, npw_kq, useylmgr0, kg_k, ylm_k, kg_kq, ylm_kq, ylmgr_kq, &         ! In
-           dkinpw, nkpg, nkpg1, kpg_k, kpg_kq, kinpw_kq, ffnl_k, ffnl_kq, ph3d_k, ph3d_kq, &  ! Out
-           reuse_kpg_k=1, reuse_kpg1_k=1, reuse_ffnlk=1, reuse_ffnl1=1)              ! Reuse some arrays
-#endif
-
          ! Compute H(1) applied to GS wavefunction Psi_nk(0)
          do ib_k=1,nbcalc_ks
            if (sigma%bsum_comm%skip(ib_k, root=root_bcalc(ib_k))) cycle ! MPI parallelism inside bsum_comm
@@ -1783,12 +1767,6 @@ end if
 
          call rf_hamkq%free()
 
-#if BYPASS_GETGH1_SETUP == 0
-         ABI_FREE(kinpw_kq)
-         ABI_FREE(dkinpw)
-         ABI_SFREE(ph3d_k)
-         ABI_SFREE(ph3d_kq)
-#endif
        end do ! imyp  (loop over perturbations)
 
        !call timab(1902, 2, tsec)
@@ -2300,9 +2278,7 @@ end if
        ABI_FREE(kpg_kq)
        ABI_FREE(ffnl_kq)
        ABI_FREE(kinpw_kq)
-#if BYPASS_GETGH1_SETUP == 1
        ABI_FREE(ph3d_kq)
-#endif
 
        if (osc_ecut /= zero) then
          ABI_FREE(osc_gvecq)
@@ -2568,15 +2544,10 @@ end if
    ABI_FREE(kg_k)
    ABI_FREE(kg_kq)
    ABI_SFREE(kpg_kq)
-   ABI_FREE(ylm_k)
-   ABI_FREE(ylm_kq)
-   ABI_FREE(ylmgr_kq)
    ABI_FREE(kpg_k)
    ABI_FREE(ffnl_k)
    ABI_FREE(kinpw_k)
-#if BYPASS_GETGH1_SETUP == 1
    ABI_FREE(ph3d_k)
-#endif
 
    !call abimem_report("end kcalc_loop", std_out)
    !call wrtout(std_out, sjoin("xmpi_count_requests", itoa(xmpi_count_requests)))

@@ -283,8 +283,8 @@ def main():
                       help="[string] Force the use of fldiff comparison tool with the specified tolerance. "+
                            "Possible values are: default (from test config), high(1.e-10), medium (1.e-8), easy (1.e-5), ridiculous (1.e-2)")
 
-    parser.add_option("--useylm", type=int, default=None, help="Use useylm in the ABINIT input files")
-    parser.add_option("--gpu-option", type=int, default=None, help="Use gpu_option in the ABINIT input files")
+    parser.add_option("--useylm", type=int, default=None, help="Use useylm in all the ABINIT input files")
+    parser.add_option("--gpu-option", type=int, default=None, help="Use gpu_option in all the ABINIT input files")
 
     parser.add_option("--touch", default="",
                       help=("Used in conjunction with `-m`."
