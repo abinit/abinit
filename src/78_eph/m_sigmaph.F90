@@ -1437,7 +1437,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
      end do
 
      ! Distribute q-points, compute tetra weigths.
-     call sigmaph_setup_qloop(sigma, dtset, cryst, ebands, dvdb, spin, ikcalc, nfftf, ngfftf, sigma%pqb_comm%value)
+     call sigmaph_setup_qloop(sigma, dtset, cryst, ebands, dvdb, spin, ikcalc, sigma%pqb_comm%value)
      !call timab(1900, 2, tsec)
 
      ! ==========================================
@@ -1484,7 +1484,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
          ! Use Fourier interpolation to get DFPT potentials for this qpt (hopefully in cache).
          db_iqpt = sigma%ind_ibzk2ibz(1, iq_ibz_k)
          qq_ibz = sigma%qibz(:, db_iqpt)
-         call dvdb%get_ftqbz(cryst, qpt, cplex, nfftf, ngfftf, v1scf, sigma%pert_comm%value)
+         call dvdb%get_ftqbz(qpt, cplex, nfftf, ngfftf, v1scf, sigma%pert_comm%value)
        else
          ! Read and reconstruct the dvscf potentials for qpt and my_npert perturbations.
          db_iqpt = sigma%ind_q2dvdb_k(1, iq_ibz_k)
@@ -4452,23 +4452,19 @@ end function sigmaph_skip_phmode
 !!  dvdb<dbdb_type>=Database with the DFPT SCF potentials.
 !!  spin: spin index.
 !!  ikcalc=Index of the k-point to compute.
-!!  nfftf=Number of fft-points on the fine grid for interpolated potential
-!!  ngfftf(18)=information on 3D FFT for interpolated potential
 !!  comm= MPI communicator
 !!
 !! SOURCE
 
-subroutine sigmaph_setup_qloop(self, dtset, cryst, ebands, dvdb, spin, ikcalc, nfftf, ngfftf, comm)
+subroutine sigmaph_setup_qloop(self, dtset, cryst, ebands, dvdb, spin, ikcalc, comm)
 
 !Arguments ------------------------------------
- integer,intent(in) :: spin, ikcalc, nfftf, comm
+ integer,intent(in) :: spin, ikcalc, comm
  type(dataset_type),intent(in) :: dtset
  type(crystal_t),intent(in) :: cryst
  class(sigmaph_t),intent(inout) :: self
  type(ebands_t),intent(in) :: ebands
  type(dvdb_t),intent(inout) :: dvdb
-!arrays
- integer,intent(in) :: ngfftf(18)
 
 !Local variables-------------------------------
  integer,parameter :: master = 0

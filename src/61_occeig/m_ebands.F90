@@ -81,6 +81,7 @@ module m_ebands
 type, extends(ebands_base_t), public :: ebands_t
 
 contains
+!!***
 
  procedure :: init => ebands_init
    ! Main creation method.

@@ -3059,7 +3059,6 @@ end subroutine dvdb_ftinterp_qpt
 !!  Internal tables must be prepared in advance by calling `dvdb_ftinterp_setup`.
 !!
 !! INPUTS
-!!  cryst<crystal_t>=crystal structure parameters
 !!  qbz(3)= q-point in the BZ in reduced coordinates.
 !!  nfft=Number of fft-points treated by this processors
 !!  ngfft(18)=contain all needed information about 3D FFT
@@ -3069,13 +3068,12 @@ end subroutine dvdb_ftinterp_qpt
 !!
 !! SOURCE
 
-subroutine dvdb_get_ftqbz(db, cryst, qbz, cplex, nfft, ngfft, v1scf, comm)
+subroutine dvdb_get_ftqbz(db, qbz, cplex, nfft, ngfft, v1scf, comm)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nfft, comm
  integer,intent(out) :: cplex
- type(crystal_t),intent(in) :: cryst
  class(dvdb_t),intent(inout) :: db
 !arrays
  integer,intent(in) :: ngfft(18)
@@ -3116,8 +3114,6 @@ end subroutine dvdb_get_ftqbz
 !!  cryst<crystal_t>=crystal structure parameters
 !!  dtset<dataset_type>=All input variables for this dataset
 !!  qbz(3)=Q-point in BZ
-!!  qq_ibz(3)=Q-point in IBZ
-!!  mapc_qq(6)=Symmetry mapping qbz, see m_kpts.f for a description
 !!  nfft=Number of fft-points treated by this processors
 !!  ngfft(18)=contain all needed information about 3D FFT
 !!  nkxc=second dimension of the array kxc, see rhohxc.f for a description
@@ -3133,7 +3129,7 @@ end subroutine dvdb_get_ftqbz
 !!
 !! SOURCE
 
-subroutine dvdb_get_vxc1_ftqbz(db, dtset, cryst, qbz, qq_ibz, mapc_qq, drho_cplex, nfft, ngfft, nkxc, kxc, &
+subroutine dvdb_get_vxc1_ftqbz(db, dtset, cryst, qbz, drho_cplex, nfft, ngfft, nkxc, kxc, &
                                vxc1, non_magnetic_xc, usexcnhat, comm)
 
 !Arguments ------------------------------------
@@ -3141,12 +3137,12 @@ subroutine dvdb_get_vxc1_ftqbz(db, dtset, cryst, qbz, qq_ibz, mapc_qq, drho_cple
  class(dvdb_t),intent(inout) :: db
  integer,intent(in) :: nfft, nkxc, usexcnhat, comm
  integer,intent(out) :: drho_cplex
- real(dp),intent(in) :: qbz(3), qq_ibz(3)
+ real(dp),intent(in) :: qbz(3)
  type(dataset_type),intent(in) :: dtset
  type(crystal_t),intent(in) :: cryst
  logical,intent(in) :: non_magnetic_xc
 !arrays
- integer,intent(in) :: ngfft(18), mapc_qq(6)
+ integer,intent(in) :: ngfft(18)
  real(dp),intent(in) :: kxc(nfft,nkxc)
  real(dp),allocatable,intent(out) :: vxc1(:,:,:,:)
 
@@ -3159,7 +3155,7 @@ subroutine dvdb_get_vxc1_ftqbz(db, dtset, cryst, qbz, qq_ibz, mapc_qq, drho_cple
 ! *************************************************************************
 
  ! Get rho1(cplex, nfftf, nspden, my_npert))
- call db%get_ftqbz(cryst, qbz, drho_cplex, nfft, ngfft, vxc1, comm)
+ call db%get_ftqbz(qbz, drho_cplex, nfft, ngfft, vxc1, comm)
 
  option = 2 ! if 2, treat only density change
  ABI_MALLOC(vxc1, (drho_cplex, nfft, dtset%nspden, db%my_npert))

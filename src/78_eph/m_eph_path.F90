@@ -525,7 +525,7 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
        ! ====================================
        ! After this branch we have allocated v1scf(cplex, nfftf, nspden, my_npert))
        if (need_ftinterp) then
-         call dvdb%get_ftqbz(cryst, qq, cplex, nfftf, ngfftf, v1scf, pert_comm%value)
+         call dvdb%get_ftqbz(qq, cplex, nfftf, ngfftf, v1scf, pert_comm%value)
        else
          ! Read and reconstruct the dvscf potentials for qq and my_npert perturbations.
          call dvdb%readsym_qbz(cryst, qq, qmap_symrec(:,iq), cplex, nfftf, ngfftf, v1scf, pert_comm%value)
