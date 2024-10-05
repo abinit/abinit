@@ -2591,7 +2591,6 @@ subroutine nscf_setup_kpt(nscf, isppol, kpt, istwf_k, nband_k, cryst, dtset, psp
  !  - Load k-dependent quantities in the Hamiltonian
 
  ABI_MALLOC(ph3d_k, (2, npw_k, gs_ham_k%matblk))
-
  call gs_ham_k%load_k(kpt_k=kpt, istwf_k=istwf_k, npw_k=npw_k, &
                       kinpw_k=kinpw_k, kg_k=kg_k, kpg_k=kpg_k, ffnl_k=ffnl_k, ph3d_k=ph3d_k, &
                       compute_ph3d=(nscf%paral_kgb0/=1), compute_gbound=(nscf%paral_kgb0/=1))

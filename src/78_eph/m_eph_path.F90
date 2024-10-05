@@ -46,7 +46,7 @@ module m_eph_path
  use m_cgtools,        only : cg_zdotc
  use m_crystal,        only : crystal_t
  use m_ebands,         only : ebands_t
- use m_getgh1c,        only : getgh1c, rf_transgrid_and_pack, getgh1c_setup
+ use m_getgh1c,        only : getgh1c, rf_transgrid_and_pack
  use m_pawang,         only : pawang_type
  use m_pawrad,         only : pawrad_type
  use m_pawtab,         only : pawtab_type
