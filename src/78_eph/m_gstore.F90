@@ -3561,7 +3561,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
 
      if (need_ftinterp) then
        ! Fourier interpolation.
-       call dvdb%get_ftqbz(cryst, qq_bz, cplex, nfftf, ngfftf, v1scf, gqk%pert_comm%value)
+       call dvdb%get_ftqbz(qq_bz, cplex, nfftf, ngfftf, v1scf, gqk%pert_comm%value)
      else
        ! Read and reconstruct the dvscf potentials for qpt and my_npert perturbations.
        !db_iqpt = dvdb%findq(qq_ibz)
