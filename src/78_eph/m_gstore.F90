@@ -163,6 +163,7 @@ module m_gstore
  use m_pawtab,         only : pawtab_type
  use m_pawfgr,         only : pawfgr_type
  use m_mlwfovlp,       only : wan_t
+ use m_initylmg,       only : initylmg_k
 
  implicit none
 
@@ -3153,7 +3154,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
 !Local variables ------------------------------
 !scalars
  integer,parameter :: tim_getgh1c = 1, berryopt0 = 0, ider0 = 0, idir0 = 0, LOG_MODQ = 5
- integer,parameter :: useylmgr = 0, useylmgr1 = 0, master = 0, ndat1 = 1
+ integer,parameter :: useylmgr = 0, useylmgr1 = 0, master = 0, ndat1 = 1, optder0 = 0
  integer :: my_rank,nproc,mband,nsppol,nkibz,idir,ipert, iq_bz
  integer :: cplex,natom,natom3,ipc,nspinor, nskip_tetra_kq
  integer :: bstart_k,bstart_kq,nband_k,nband_kq,band_k, in_k, im_kq !ib1,ib2, band_kq,
@@ -3178,8 +3179,9 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
  integer,allocatable :: kg_k(:,:), kg_kq(:,:), nband(:,:), wfd_istwfk(:), qmap_symrec(:,:)
  integer,allocatable :: iq_buf(:,:), done_qbz_spin(:,:), my_iqibz_inds(:)
  !integer,allocatable :: qibz2dvdb(:) !, displs(:), recvcounts(:)
+ real(dp) :: ylmgr_k_dum(1,1,1), ylmgr_kq_dum(1,1,1)
  real(dp) :: kk_bz(3),kq_bz(3),kk_ibz(3),kq_ibz(3), qq_bz(3), qq_ibz(3), vk(3)
- real(dp) :: phfrq(3*cryst%natom), ylmgr_dum(1,1,1)
+ real(dp) :: phfrq(3*cryst%natom)
  real(dp),allocatable :: displ_cart_qibz(:,:,:,:), displ_red_qibz(:,:,:,:), pheigvec_qibz(:,:,:,:)
  real(dp),allocatable :: displ_cart_qbz(:,:,:,:), displ_red_qbz(:,:,:,:), pheigvec_qbz(:,:,:,:)
  real(dp),allocatable :: grad_berry(:,:), kinpw_k(:), kinpw_kq(:), kpg_kq(:,:), kpg_k(:,:) !, dkinpw(:)
@@ -3187,7 +3189,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
  real(dp),allocatable :: v1scf(:,:,:,:), gkq_atm(:,:,:,:),gkq_nu(:,:,:,:)
  real(dp),allocatable :: bras_kq(:,:,:), kets_k(:,:,:), h1kets_kq(:,:,:), cgwork(:,:)
  real(dp),allocatable :: ph1d(:,:), vlocal(:,:,:,:), vlocal1(:,:,:,:,:)
- real(dp),allocatable :: ylm_kq(:,:), ylm_k(:,:), ylmgr_kq(:,:,:)
+ real(dp),allocatable :: ylm_kq(:,:), ylm_k(:,:)
  real(dp),allocatable :: dummy_vtrial(:,:), gvnlx1(:,:), work(:,:,:,:)
  real(dp),allocatable :: gs1c(:,:), vk_cart_ibz(:,:,:) !, vkmat_cart_ibz(:,:,:,:)
  real(dp),allocatable :: my_gbuf(:,:,:,:,:,:), buf_wqnu(:,:), buf_eigvec_cart(:,:,:,:,:)
@@ -3301,12 +3303,6 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
  ! Allow PW-arrays dimensioned with mpw
  ABI_MALLOC(kg_k, (3, mpw))
  ABI_MALLOC(kg_kq, (3, mpw))
-
- ! Spherical Harmonics for useylm == 1.
- ! FIXME: These arrays should be allocated with npw_k and npw_kq. See getgh1c_setup
- ABI_MALLOC(ylm_k, (mpw, psps%mpsang*psps%mpsang*psps%useylm))
- ABI_MALLOC(ylm_kq, (mpw, psps%mpsang*psps%mpsang*psps%useylm))
- ABI_MALLOC(ylmgr_kq, (mpw, 3, psps%mpsang*psps%mpsang*psps%useylm*useylmgr1))
 
  usecprj = 0
  ABI_MALLOC(cwaveprj0, (natom, nspinor*usecprj))
@@ -3496,8 +3492,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
 
  ! Loop over my spins.
  do my_is=1,gstore%my_nspins
-   spin = gstore%my_spins(my_is)
-   gqk => gstore%gqk(my_is)
+   spin = gstore%my_spins(my_is); gqk => gstore%gqk(my_is)
    my_npert = gqk%my_npert
    NCF_CHECK(nf90_inq_ncid(root_ncid, strcat("gqk", "_spin", itoa(spin)), spin_ncid))
 
@@ -3647,54 +3642,67 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
        gen_eigenpb = psps%usepaw == 1; sij_opt = 0; if (gen_eigenpb) sij_opt = 1
        ABI_MALLOC(gs1c, (2, npw_kq*nspinor*((sij_opt+1)/2)))
 
-       ! Set up the spherical harmonics (Ylm) at k and k+q. See also dfpt_looppert
-       !if (psps%useylm == 1) then
-       !   optder = 0; if (useylmgr == 1) optder = 1
-       !   call initylmg(cryst%gprimd, kg_k, kk_bz, mkmem1, mpi_enreg, psps%mpsang, mpw, nband, mkmem1,&
-       !     [npw_k], dtset%nsppol, optder, cryst%rprimd, ylm_k, ylmgr)
-       !   call initylmg(cryst%gprimd, kg_kq, kq_bz, mkmem1, mpi_enreg, psps%mpsang, mpw, nband, mkmem1,&
-       !     [npw_kq], dtset%nsppol, optder, cryst%rprimd, ylm_kq, ylmgr_kq)
-       !end if
-
+#if 0
        ! Compute k+G vectors
        nkpg_k = 3 * dtset%nloalg(3)
        ABI_MALLOC(kpg_k, (npw_k, nkpg_k))
        if (nkpg_k > 0) call mkkpg(kg_k, kpg_k, kk_bz, nkpg_k, npw_k)
 
+       ! Spherical Harmonics at k for useylm == 1.
+       ABI_MALLOC(ylm_k, (npw_k, psps%mpsang**2 * psps%useylm))
+       if (psps%useylm == 1) then
+         call initylmg_k(npw_k, psps%mpsang, optder0, cryst%rprimd, cryst%gprimd, kk_bz, kg_k, ylm_k, ylmgr_k_dum)
+       end if
+
        ! Compute nonlocal form factors ffnl_k at (k+G)
        ABI_MALLOC(ffnl_k, (npw_k, 1, psps%lmnmax, psps%ntypat))
-       call mkffnl_objs(cryst, psps, 1, ffnl_k, ider0, idir0, kg_k, kpg_k, kk_bz, nkpg_k, npw_k, ylm_k, ylmgr_dum, &
+       call mkffnl_objs(cryst, psps, 1, ffnl_k, ider0, idir0, kg_k, kpg_k, kk_bz, nkpg_k, npw_k, ylm_k, ylmgr_k_dum, &
                         comm=gqk%pert_comm%value) !, request=ffnlk_request)
+       ABI_FREE(ylm_k)
 
        ! Compute k+q+G vectors
        nkpg_kq = 3 * dtset%nloalg(3)
        ABI_MALLOC(kpg_kq, (npw_kq, nkpg_kq))
        if (nkpg_kq > 0) call mkkpg(kg_kq, kpg_kq, kq_bz, nkpg_kq, npw_kq)
 
+       ! Spherical Harmonics at k+q for useylm == 1.
+       ABI_MALLOC(ylm_kq, (npw_kq, psps%mpsang**2 * psps%useylm))
+       if (psps%useylm == 1) then
+         call initylmg_k(npw_kq, psps%mpsang, optder0, cryst%rprimd, cryst%gprimd, kq_bz, kg_kq, ylm_kq, ylmgr_kq_dum)
+       end if
+
        ! Compute nonlocal form factors ffnl_kq at (k+q+G)
        ABI_MALLOC(ffnl_kq, (npw_kq, 1, psps%lmnmax, psps%ntypat))
-       call mkffnl_objs(cryst, psps, 1, ffnl_kq, ider0, idir0, kg_kq, kpg_kq, kq_bz, nkpg_kq, npw_kq, ylm_kq, ylmgr_kq, &
+       call mkffnl_objs(cryst, psps, 1, ffnl_kq, ider0, idir0, kg_kq, kpg_kq, kq_bz, nkpg_kq, npw_kq, ylm_kq, ylmgr_kq_dum, &
                         comm=gqk%pert_comm%value) ! request=ffnl1_request)
+       ABI_FREE(ylm_kq)
 
-        ! Compute (1/2) (2 Pi)**2 (k+q+G)**2:
-        ABI_CALLOC(kinpw_k, (npw_k))
-        ABI_CALLOC(kinpw_kq, (npw_kq))
-        call mkkin(dtset%ecut, dtset%ecutsm, dtset%effmass_free, cryst%gmet, kg_k, kinpw_k, kk_bz, npw_k, 0, 0)
-        call mkkin(dtset%ecut, dtset%ecutsm, dtset%effmass_free, cryst%gmet, kg_kq, kinpw_kq, kq_bz, npw_kq, 0, 0)
+       ! Compute (1/2) (2 Pi)**2 (k+q+G)**2:
+       ABI_CALLOC(kinpw_k, (npw_k))
+       ABI_CALLOC(kinpw_kq, (npw_kq))
+       call mkkin(dtset%ecut, dtset%ecutsm, dtset%effmass_free, cryst%gmet, kg_k, kinpw_k, kk_bz, npw_k, 0, 0)
+       call mkkin(dtset%ecut, dtset%ecutsm, dtset%effmass_free, cryst%gmet, kg_kq, kinpw_kq, kq_bz, npw_kq, 0, 0)
 
-        ABI_MALLOC(ph3d_k, (2, npw_k, gs_hamkq%matblk))
-        ABI_MALLOC(ph3d_kq, (2, npw_kq, gs_hamkq%matblk))
+       ABI_MALLOC(ph3d_k, (2, npw_k, gs_hamkq%matblk))
+       ABI_MALLOC(ph3d_kq, (2, npw_kq, gs_hamkq%matblk))
 
-        !===== Load the k/k+q dependent parts of the Hamiltonian
-        ! Load k-dependent part in the Hamiltonian datastructure
-        call gs_hamkq%load_k(kpt_k=kk_bz, npw_k=npw_k, istwf_k=istwf_k, kg_k=kg_k, kpg_k=kpg_k, &
-                             ph3d_k=ph3d_k, ffnl_k=ffnl_k, compute_ph3d=.true., compute_gbound=.true.)
+       !===== Load the k/k+q dependent parts of the Hamiltonian
+       ! Load k-dependent part in the Hamiltonian datastructure
+       call gs_hamkq%load_k(kpt_k=kk_bz, npw_k=npw_k, istwf_k=istwf_k, kg_k=kg_k, kpg_k=kpg_k, &
+                            ph3d_k=ph3d_k, ffnl_k=ffnl_k, compute_ph3d=.true., compute_gbound=.true.)
 
-        ! Load k+q-dependent part in the Hamiltonian datastructure
-        call gs_hamkq%load_kprime(kpt_kp=kq_bz, npw_kp=npw_kq, istwf_kp=istwf_kq, kg_kp=kg_kq, kpg_kp=kpg_kq, &
-                                  kinpw_kp=kinpw_kq, ffnl_kp=ffnl_kq, compute_gbound=.true.)
+       ! Load k+q-dependent part in the Hamiltonian datastructure
+       call gs_hamkq%load_kprime(kpt_kp=kq_bz, npw_kp=npw_kq, istwf_kp=istwf_kq, kg_kp=kg_kq, kpg_kp=kpg_kq, &
+                                 kinpw_kp=kinpw_kq, ffnl_kp=ffnl_kq, compute_gbound=.true.)
 
-        if (.not. qq_is_gamma) call gs_hamkq%load_kprime(ph3d_kp=ph3d_kq, compute_ph3d=.true.)
+       if (.not. qq_is_gamma) call gs_hamkq%load_kprime(ph3d_kp=ph3d_kq, compute_ph3d=.true.)
+
+#else
+       call gs_hamkq%eph_setup_k("k" , kk_bz, istwf_k, npw_k, kg_k,  dtset, cryst, psps, &
+                                 nkpg_k, kpg_k, ffnl_k, kinpw_k, ph3d_k, gqk%pert_comm%value)
+       call gs_hamkq%eph_setup_k("kq", kq_bz, istwf_k, npw_kq, kg_kq, dtset, cryst, psps, &
+                                 nkpg_kq, kpg_kq, ffnl_kq, kinpw_kq, ph3d_kq, gqk%pert_comm%value)
+#endif
 
        ! Loop over my atomic perturbations and compute gkq_atm.
        gkq_atm = zero
@@ -3739,6 +3747,8 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
        ABI_FREE(ph3d_kq)
        ABI_FREE(kinpw_k)
        ABI_FREE(kinpw_kq)
+       !ABI_FREE(ylm_k)
+       !ABI_FREE(ylm_kq)
 
        ! Collect gkq_atm inside pert_comm so that all procs can operate on the data.
        if (gqk%pert_comm%nproc > 1) call xmpi_sum(gkq_atm, gqk%pert_comm%value, ierr)
@@ -3818,9 +3828,6 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
  ABI_FREE(vlocal)
  ABI_FREE(kg_k)
  ABI_FREE(kg_kq)
- ABI_FREE(ylm_k)
- ABI_FREE(ylm_kq)
- ABI_FREE(ylmgr_kq)
  ABI_FREE(displ_cart_qbz)
  ABI_FREE(displ_cart_qibz)
  ABI_FREE(displ_red_qbz)

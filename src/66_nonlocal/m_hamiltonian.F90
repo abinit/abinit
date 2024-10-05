@@ -36,9 +36,12 @@ module m_hamiltonian
  use m_errors
  use m_xmpi
 
+ use m_fstrings,          only : sjoin
  use defs_datatypes,      only : pseudopotential_type
  use defs_abitypes,       only : MPI_type
+ use m_dtset,             only : dataset_type
  use m_copy,              only : addr_copy
+ use m_crystal,           only : crystal_t
  use m_geometry,          only : metric
  use m_pawtab,            only : pawtab_type
  use m_pawfgr,            only : pawfgr_type
@@ -49,8 +52,10 @@ module m_hamiltonian
  use m_paw_ij,            only : paw_ij_type
  use m_paral_atom,        only : get_my_atmtab, free_my_atmtab
  use m_electronpositron,  only : electronpositron_type, electronpositron_calctype
- use m_kg,                only : ph1d3d, getph
+ use m_kg,                only : ph1d3d, getph, mkkin, mkkpg
  use m_fock,              only : fock_common_type, fock_BZ_type, fock_ACE_type, fock_type
+ use m_mkffnl,            only : mkffnl_objs
+ use m_initylmg,          only : initylmg_k
 
 #if defined HAVE_GPU_CUDA
  use m_manage_cuda
@@ -436,6 +441,8 @@ module m_hamiltonian
 
    procedure :: load_spin => gsham_load_spin
     ! Setup of the spin-dependent part of the GS Hamiltonian
+
+   procedure :: eph_setup_k => gsham_eph_setup_k
 
    procedure :: load_k => gsham_load_k
     ! Setup of the k-dependent part of the GS Hamiltonian
@@ -952,6 +959,78 @@ subroutine gsham_init(ham,Psps,pawtab,nspinor,nsppol,nspden,natom,typat,&
  DBG_EXIT("COLL")
 
 end subroutine gsham_init
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_hamiltonian/gsham_eph_setup_k
+!! NAME
+!!  gsham_eph_setup_k
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! SOURCE
+
+subroutine gsham_eph_setup_k(ham, which_k, kk, istwf_k, npw_k, kg_k, dtset, cryst, psps, &  ! in
+                            nkpg_k, kpg_k, ffnl_k, kinpw_k, ph3d_k, comm)                  ! out
+
+!Arguments ------------------------------------
+!scalars
+ class(gs_hamiltonian_type),intent(inout) :: ham
+ character(len=*),intent(in) :: which_k
+ type(dataset_type),intent(in) :: dtset
+ type(crystal_t),intent(in) :: cryst
+ type(pseudopotential_type),intent(in) :: psps
+ integer,intent(in) :: istwf_k, npw_k, comm
+ integer,intent(out) :: nkpg_k
+!arrays
+ real(dp),intent(in) :: kk(3)
+ integer,intent(in) :: kg_k(3,npw_k)
+ real(dp),allocatable,intent(out) :: kpg_k(:,:), ffnl_k(:,:,:,:), kinpw_k(:), ph3d_k(:,:,:) !, gbound_k(:,:)
+
+!Local variables-------------------------------
+!scalars
+ integer,parameter :: ider0 = 0, idir0 = 0, optder0 = 0
+!arrays
+ real(dp) :: ylmgr_k_dum(1,1,1)
+ real(dp),allocatable :: ylm_k(:,:)
+! *************************************************************************
+
+ ! Compute k+G vectors
+ nkpg_k = 3 * dtset%nloalg(3)
+ ABI_MALLOC(kpg_k, (npw_k, nkpg_k))
+ if (nkpg_k > 0) call mkkpg(kg_k, kpg_k, kk, nkpg_k, npw_k)
+
+ ! Spherical Harmonics at k for useylm == 1.
+ ABI_MALLOC(ylm_k, (npw_k, psps%mpsang**2 * psps%useylm))
+ if (psps%useylm == 1) call initylmg_k(npw_k, psps%mpsang, optder0, cryst%rprimd, cryst%gprimd, kk, kg_k, ylm_k, ylmgr_k_dum)
+
+ ! Compute nonlocal form factors ffnl_k at (k+G)
+ ABI_MALLOC(ffnl_k, (npw_k, 1, psps%lmnmax, psps%ntypat))
+ call mkffnl_objs(cryst, psps, 1, ffnl_k, ider0, idir0, kg_k, kpg_k, kk, nkpg_k, npw_k, ylm_k, ylmgr_k_dum, comm=comm)
+ ABI_FREE(ylm_k)
+
+ ! Compute (1/2) (2 Pi)**2 (kG)**2:
+ ABI_CALLOC(kinpw_k, (npw_k))
+ call mkkin(dtset%ecut, dtset%ecutsm, dtset%effmass_free, cryst%gmet, kg_k, kinpw_k, kk, npw_k, 0, 0)
+
+ ABI_MALLOC(ph3d_k, (2, npw_k, ham%matblk))
+
+ ! Load the k dependent parts of the Hamiltonian
+ select case (which_k)
+ case ("k")
+   call ham%load_k(kpt_k=kk, npw_k=npw_k, istwf_k=istwf_k, kg_k=kg_k, kpg_k=kpg_k, kinpw_k=kinpw_k, &
+                   ph3d_k=ph3d_k, ffnl_k=ffnl_k, compute_ph3d=.true., compute_gbound=.true.)
+ case ("kq")
+   call ham%load_kprime(kpt_kp=kk, npw_kp=npw_k, istwf_kp=istwf_k, kg_kp=kg_k, kpg_kp=kpg_k, kinpw_kp=kinpw_k, &
+                        ph3d_kp=ph3d_k, ffnl_kp=ffnl_k, compute_ph3d=.true., compute_gbound=.true.)
+ case default
+   ABI_ERROR(sjoin("Invalid value for which_k:", which_k))
+ end select
+
+end subroutine gsham_eph_setup_k
 !!***
 
 !----------------------------------------------------------------------

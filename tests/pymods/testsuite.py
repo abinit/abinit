@@ -2741,6 +2741,7 @@ class AbinitTest(BaseTest):
             app('output_file = "%s"' % (self.id + ".abo"))
 
         # Add input variables to Abinit input file
+        #print(f"{self.useylm=}")
         if self.useylm is not None and self.executable == "abinit":
             app("useylm %d" % self.useylm)
 
@@ -3246,6 +3247,7 @@ def run_and_check_test(test, print_lock=None, **kwargs):
     job_runner = kwargs.pop("job_runner")
     nprocs = kwargs.pop("nprocs")
     runmode = kwargs.pop("runmode")
+    #print(kwargs)
 
     testdir = os.path.abspath(os.path.join(workdir, test.suite_name + "_" + test.id))
 
@@ -3524,8 +3526,7 @@ class ChainOfTests(object):
         for test in self:
             if fail_all:
                 test.force_skip = True
-            test.run(build_env, runner, workdir=self.workdir,
-                     nprocs=nprocs, **kwargs)
+            test.run(build_env, runner, workdir=self.workdir, nprocs=nprocs, **kwargs)
             if test.had_timeout:
                 fail_all = True
 
@@ -3952,6 +3953,8 @@ class AbinitTestSuite(object):
                 nprocs=self.nprocs,
                 runmode=runmode,
             )
+            # Add kwargs
+            run_func_kwargs.update(kwargs)
 
             ##############################
             # And now let's run the tests
