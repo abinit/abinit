@@ -651,9 +651,6 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  ! ===========================================
  call pspini(dtset, dtfil, ecore, psp_gencond, gsqcutc_eff, gsqcutf_eff, pawrad, pawtab, psps, cryst%rprimd, comm_mpi=comm)
 
- ! TODO: Make sure that all subdrivers work with useylm == 1
- !ABI_CHECK(dtset%useylm == 0, "useylm != 0 not implemented/tested")
-
  ! Relase nkpt-based arrays in dtset to decrease memory requirement if dense sampling.
  ! EPH routines should not access them after this point.
  if (all(dtset%eph_task /= [6, 10])) call dtset%free_nkpt_arrays()
@@ -668,7 +665,6 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
    continue
 
  case (1)
-   ABI_CHECK(dtset%useylm == 0, "useylm != 0 not implemented/tested")
    ! Compute phonon linewidths in metals.
    call eph_phgamma(wfk0_path, dtfil, ngfftc, ngfftf, dtset, cryst, ebands, dvdb, ifc, &
                     pawfgr, pawang, pawrad, pawtab, psps, mpi_enreg, comm)
@@ -680,13 +676,13 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
                 pawfgr, pawang, pawrad, pawtab, psps, mpi_enreg, comm)
 
  case (3)
-   ! Compute phonon self-energy.
+   ! Compute phonon-electron self-energy.
    ABI_CHECK(dtset%useylm == 0, "useylm != 0 not implemented/tested")
    call eph_phpi(wfk0_path, wfq_path, dtfil, ngfftc, ngfftf, dtset, cryst, ebands, ebands_kq, dvdb, ifc, &
                  pawfgr, pawang, pawrad, pawtab, psps, mpi_enreg, comm)
 
  case (4, -4)
-   ! Compute electron self-energy (phonon contribution).
+   ! Compute electron-phonon self-energy (phonon contribution).
    call sigmaph(wfk0_path, dtfil, ngfftc, ngfftf, dtset, cryst, ebands, dvdb, ifc, wfk0_hdr, &
                 pawfgr, pawang, pawrad, pawtab, psps, mpi_enreg, comm)
 
@@ -706,9 +702,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
 
  case (6)
    ! Estimate zero-point renormalization and temperature-dependent electronic structure using the Frohlich model.
-   if (my_rank == master) then
-     call frohlichmodel_zpr(frohlich, cryst, dtset, efmasdeg, efmasval, ifc)
-   end if
+   if (my_rank == master) call frohlichmodel_zpr(frohlich, cryst, dtset, efmasdeg, efmasval, ifc)
 
  case (7)
    ! Compute phonon-limited RTA from SIGEPH.nc file.
@@ -724,12 +718,9 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
 
  case (10)
    ! Estimate polaron effective mass in the triply-degenerate VB or CB cubic case
-   if (my_rank == master) then
-     call frohlichmodel_polaronmass(frohlich, cryst, dtset, efmasdeg, efmasval, ifc)
-   end if
+   if (my_rank == master) call frohlichmodel_polaronmass(frohlich, cryst, dtset, efmasdeg, efmasval, ifc)
 
  case (11)
-   ABI_CHECK(dtset%useylm == 0, "useylm != 0 not implemented/tested")
    ! Compute and write e-ph matrix elements to GSTORE.nc file.
    if (dtfil%filgstorein /= ABI_NOFILE) then
      call wrtout(units, sjoin(" Restarting GSTORE computation from:", dtfil%filgstorein))
@@ -800,7 +791,6 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
    call varpeq_plot(wfk0_path, ngfftc, dtset, dtfil, cryst, ebands, pawtab, psps, comm)
 
  case (14)
-   !ABI_CHECK(dtset%useylm == 0, "useylm != 0 not implemented/tested")
    ! Molecular Berry Curvature.
    if (dtfil%filgstorein /= ABI_NOFILE) then
      call wrtout(units, sjoin(" Computing Berry curvature from pre-existent GSTORE file:", dtfil%filgstorein))
@@ -847,14 +837,14 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
    end if
 
  case (17)
-   ABI_CHECK(dtset%useylm == 0, "useylm != 0 not implemented/tested")
    ! Compute e-ph matrix elements with the GWPT formalism.
+   ABI_CHECK(dtset%useylm == 0, "useylm != 0 not implemented/tested")
    call gwpt_run(wfk0_path, dtfil, ngfftc, ngfftf, dtset, cryst, ebands, dvdb, drhodb, ifc, wfk0_hdr, &
                  pawfgr, pawang, pawrad, pawtab, psps, mpi_enreg, comm)
 
  case (18)
-   ABI_CHECK(dtset%useylm == 0, "useylm != 0 not implemented/tested")
    ! Compute e-ph matrix elements along a q-path
+   ABI_CHECK(dtset%useylm == 0, "useylm != 0 not implemented/tested")
    call eph_path_run(dtfil, dtset, cryst, ebands, dvdb, ifc, pawfgr, pawang, pawrad, pawtab, psps, comm)
 
  case default

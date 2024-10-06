@@ -74,9 +74,9 @@ contains  !=====================================================
 !! FUNCTION
 !!  Compute e-ph matrix elements g(k,q) along an arbitray path either in k- or q-space.
 !!  Wavefunctions at k and k+q are computed non self-consistently starting from the GS potential read
-!!  from file by invoking the CG eigesolver.
+!!  from file by invoking the CG eigensolver.
 !!  The DFPT potential at q are usually obtained via Fourier interpolation but it is also possible
-!!  to use fully ab-iniio potentials provided the DVDB file has all the q-points along the path.
+!!  to use fully ab-initio potentials provided the DVDB file contains all the q-points along the path.
 !!  This requires performing DFPT calculations for all the q-points and then merging
 !!  all the POT1 files with the mrgdv utility.
 !!
@@ -94,6 +94,7 @@ contains  !=====================================================
 !! comm=MPI communicator.
 !!
 !! OUTPUT
+!! Only writing.
 !!
 !! SOURCE
 
@@ -146,8 +147,7 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
  real(dp),allocatable :: v1scf(:,:,:,:), vlocal1(:,:,:,:), vlocal(:,:,:,:), gkq_atm(:,:,:,:), gkq_nu(:,:,:,:), gkq2_nu(:,:,:)
  real(dp),allocatable :: gvnlx1(:,:), gs1c(:,:), h1kets_kq(:,:,:), displ_cart(:,:,:,:),displ_red(:,:,:,:)
  real(dp),allocatable :: kpg_k(:,:), ph3d_k(:,:,:), ffnl_k(:,:,:,:), vlocal_k(:,:,:,:)
- real(dp),allocatable :: kpg_kq(:,:), ph3d_kq(:,:,:), ffnl_kq(:,:,:,:), vlocal_kq(:,:,:,:)
- real(dp),allocatable :: ylm_kq(:,:), ylm_k(:,:), ylmgr_kq(:,:,:), rvec(:) !, ph3d(:,:,:), ph3d1(:,:,:)
+ real(dp),allocatable :: kpg_kq(:,:), ph3d_kq(:,:,:), ffnl_kq(:,:,:,:), vlocal_kq(:,:,:,:), rvec(:)
  logical :: reorder, periods(ndims), keepdim(ndims)
  type(pawcprj_type),allocatable  :: cwaveprj0(:,:)
 !************************************************************************
@@ -430,8 +430,7 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
 
    ! Loop over k-points in k-path (MPI parallelized).
    do my_ik=1,my_nkpath
-     ik = my_ik_inds(my_ik)
-     kk = kpath%points(:, ik)
+     ik = my_ik_inds(my_ik); kk = kpath%points(:, ik)
 
      ! Compute u_{nk}(g)
      ! NB: The Hamiltonian has pointers to the _k arrays in output so we cannot dellocate them till the end.
@@ -461,13 +460,11 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
 
      ! Allocate vlocal. Note nvloc
      ABI_MALLOC(vlocal, (n4, n5, n6, gs_ham_k%nvloc))
-     ABI_MALLOC(ylm_k, (npw_k, psps%mpsang*psps%mpsang*psps%useylm))
 
      ! Loop over q-points in q-path (MPI parallelized)
      ! All procs in pert_comm enter this loop with the same ik/iq indices.
      do my_iq=1,my_nqpath
-       iq = my_iq_inds(my_iq)
-       qq = qpath%points(:,iq); qq_is_gamma = sum(qq**2) < tol14
+       iq = my_iq_inds(my_iq); qq = qpath%points(:,iq); qq_is_gamma = sum(qq**2) < tol14
        kq = kk + qq
 
        ! Compute u_{m k+q}(g)
@@ -483,7 +480,6 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
          use_cg_kq = .True.; cg_kq = cg_k
        end if
 
-       !use_cg_kq = .False.; cg_kq = zero
        call nscf%solve_kpt(spin, kq, istwfk_1, nband, cryst, dtset, dtfil, gs_ham_kq, &
                            use_cg_kq, npw_kq, cg_kq, gsc_kq, eig_kq, msg, ierr)
 
@@ -516,8 +512,6 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
        ! if PAW, one has to solve a generalized eigenproblem
        gen_eigenpb = psps%usepaw == 1; sij_opt = 0; if (gen_eigenpb) sij_opt = 1
        ABI_MALLOC(gs1c, (2, npw_kq*nspinor*((sij_opt+1)/2)))
-       ABI_MALLOC(ylm_kq, (npw_kq, psps%mpsang*psps%mpsang*psps%useylm))
-       ABI_MALLOC(ylmgr_kq, (npw_kq, 3, psps%mpsang*psps%mpsang*psps%useylm*useylmgr1))
        ABI_MALLOC(h1kets_kq, (2, npw_kq*nspinor, nb_in_g))
 
        ! ====================================
@@ -594,8 +588,6 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
        !end if
 
        ABI_FREE(gs1c)
-       ABI_FREE(ylm_kq)
-       ABI_FREE(ylmgr_kq)
        ABI_FREE(vlocal1)
        ABI_FREE(v1scf)
        ABI_FREE(vlocal_kq)
@@ -611,7 +603,6 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
        call gs_ham_kq%free()
      end do ! my_iq
 
-     ABI_FREE(ylm_k)
      ABI_FREE(vlocal)
      ABI_FREE(vlocal_k)
      ABI_FREE(ph3d_k)
@@ -735,9 +726,7 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
  call qpath%free(); call kpath%free(); call ucache_k%free(); call ucache_kq%free()
  call qpt_comm%free(); call kpt_comm%free(); call pert_comm%free(); call nscf%free()
 
- !call abi_linalg_finalize(dtset%gpu_option)
  call cwtime_report(" eph_path: MPI barrier before returning.", cpu_all, wall_all, gflops_all, end_str=ch10, comm=comm)
- !stop
 
 contains
  integer function vid(var_name)

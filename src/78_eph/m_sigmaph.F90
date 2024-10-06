@@ -1232,35 +1232,8 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
    kg_k = wfd%kdata(ik_ibz)%kg_k
    ABI_MALLOC(kg_kq, (3, mpw))
 
-#if 0
-   ! Spherical Harmonics at k for useylm == 1.
-   ABI_MALLOC(ylm_k, (npw_k, psps%mpsang**2 * psps%useylm))
-   if (psps%useylm == 1) then
-     call initylmg_k(npw_k, psps%mpsang, optder0, cryst%rprimd, cryst%gprimd, kk, kg_k, ylm_k, ylmgr_k_dum)
-   end if
-
-   ! Compute k+G vectors
-   nkpg = 3*dtset%nloalg(3)
-   ABI_MALLOC(kpg_k, (npw_k, nkpg))
-   if (nkpg > 0) call mkkpg(kg_k, kpg_k, kk, nkpg, npw_k)
-
-   ! Compute nonlocal form factors ffnl_k at (k+G)
-   ABI_MALLOC(ffnl_k, (npw_k, 1, psps%lmnmax, psps%ntypat))
-   call mkffnl_objs(cryst, psps, 1, ffnl_k, ider0, idir0, kg_k, kpg_k, kk, nkpg, npw_k, ylm_k, ylmgr_k_dum, &
-                    comm=sigma%pert_comm%value) !, request=ffnl_k_request)
-   ABI_FREE(ylm_k)
-
-   ABI_MALLOC(kinpw_k, (npw_k))
-   call mkkin(dtset%ecut, dtset%ecutsm, dtset%effmass_free, cryst%gmet, kg_k, kinpw_k, kk, npw_k, 0, 0)
-
-   ! Load k-dependent part in the Hamiltonian datastructure
-   ABI_MALLOC(ph3d_k, (2, npw_k, gs_hamkq%matblk))
-   call gs_hamkq%load_k(kpt_k=kk, npw_k=npw_k, istwf_k=istwfk_1, kg_k=kg_k, kpg_k=kpg_k, kinpw_k=kinpw_k, &
-                        ph3d_k=ph3d_k, ffnl_k=ffnl_k, compute_ph3d=.true., compute_gbound=.true.)
-#else
    call gs_hamkq%eph_setup_k("k" , kk, istwfk_1, npw_k, kg_k, dtset, cryst, psps, &
                              nkpg, kpg_k, ffnl_k, kinpw_k, ph3d_k, sigma%pert_comm%value)
-#endif
 
    call cwtime_report(" Setup kcalc", cpu_setk, wall_setk, gflops_setk)
 
@@ -1566,31 +1539,8 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
        ABI_MALLOC(gs1c, (2, npw_kq*nspinor*((sij_opt+1)/2)))
        ABI_MALLOC(gvnlx1, (2, npw_kq*nspinor))
 
-#if 0
-       ! Spherical Harmonics at k+q for useylm == 1.
-       ABI_MALLOC(ylm_kq, (npw_kq, psps%mpsang**2 * psps%useylm))
-       if (psps%useylm == 1) then
-         call initylmg_k(npw_kq, psps%mpsang, optder0, cryst%rprimd, cryst%gprimd, kq, kg_kq, ylm_kq, ylmgr_kq_dum)
-       end if
-
-       ! Compute nonlocal form factors ffnl_kq at (k+q+G)
-       ABI_MALLOC(ffnl_kq, (npw_kq, 1, psps%lmnmax, psps%ntypat))
-       call mkffnl_objs(cryst, psps, 1, ffnl_kq, ider0, idir0, kg_kq, kpg_kq, kq, nkpg1, npw_kq, ylm_kq, ylmgr_kq_dum, &
-                        comm=sigma%pert_comm%value) !, request=ffnl_kq_request)
-       ABI_FREE(ylm_kq)
-
-       ABI_MALLOC(kinpw_kq, (npw_kq))
-       call mkkin(dtset%ecut, dtset%ecutsm, dtset%effmass_free, cryst%gmet, kg_kq, kinpw_kq, kq, npw_kq, 0, 0)
-
-       ! Load k+q-dependent part in the Hamiltonian datastructure
-       ABI_MALLOC(ph3d_kq, (2, npw_kq, gs_hamkq%matblk))
-       call gs_hamkq%load_kprime(kpt_kp=kq, npw_kp=npw_kq, istwf_kp=istwfk_1, kg_kp=kg_kq, kpg_kp=kpg_kq, kinpw_kp=kinpw_kq, &
-                                 ph3d_kp=ph3d_kq, ffnl_kp=ffnl_kq, compute_ph3d=.true., compute_gbound=.true.)
-
-#else
        call gs_hamkq%eph_setup_k("kq", kq, istwfk_1, npw_kq, kg_kq, dtset, cryst, psps, &
                                  nkpg, kpg_kq, ffnl_kq, kinpw_kq, ph3d_kq, sigma%pert_comm%value)
-#endif
 
        if (dtset%eph_stern /= 0 .and. .not. sigma%imag_only) then
          ! Build global array with GS wavefunctions cg_kq at k+q to prepare call to dfpt_cgwf.
@@ -1766,7 +1716,6 @@ end if
          end if ! sternheimer
 
          call rf_hamkq%free()
-
        end do ! imyp  (loop over perturbations)
 
        !call timab(1902, 2, tsec)
