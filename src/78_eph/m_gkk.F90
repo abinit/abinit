@@ -137,13 +137,13 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
 !arrays
  integer :: g0_k(3),symq(4,2,cryst%nsym), units(2)
  integer,allocatable :: kg_k(:,:),kg_kq(:,:),nband(:,:),nband_kq(:,:),wfd_istwfk(:)
+ real(dp) :: ylmgr_k_dum(1,1,1), ylmgr_kq_dum(1,1,1)
  real(dp) :: kk(3),kq(3),qpt(3),phfrq(3*cryst%natom),dvdb_qdamp(1)
  real(dp),allocatable :: displ_cart(:,:,:),displ_red(:,:,:), eigens_kq(:,:,:)
- real(dp),allocatable :: grad_berry(:,:),kinpw1(:),kpg1_k(:,:),kpg_k(:,:),dkinpw(:)
- real(dp),allocatable :: ffnlk(:,:,:,:),ffnl1(:,:,:,:),ph3d(:,:,:),ph3d1(:,:,:)
+ real(dp),allocatable :: grad_berry(:,:),kinpw_kq(:),kpg_kq(:,:),kpg_k(:,:),dkinpw(:)
+ real(dp),allocatable :: ffnl_k(:,:,:,:),ffnl_kq(:,:,:,:),ph3d_k(:,:,:),ph3d_kq(:,:,:)
  real(dp),allocatable :: v1scf(:,:,:,:),gkk(:,:,:,:,:), bras(:,:,:),kets(:,:,:),h1_kets(:,:,:)
- real(dp),allocatable :: ph1d(:,:),vlocal(:,:,:,:),vlocal1(:,:,:,:,:)
- real(dp),allocatable :: ylm_kq(:,:),ylm_k(:,:),ylmgr_kq(:,:,:)
+ real(dp),allocatable :: ph1d(:,:),vlocal(:,:,:,:),vlocal1(:,:,:,:,:), ylm_kq(:,:),ylm_k(:,:)
  real(dp),allocatable :: dummy_vtrial(:,:),gvnlx1(:,:), gs1c(:,:), gkq_atm(:,:,:,:)
  logical,allocatable :: bks_mask(:,:,:),bks_mask_kq(:,:,:),keep_ur(:,:,:),keep_ur_kq(:,:,:)
  type(pawcprj_type),allocatable  :: cwaveprj0(:,:) !natom,nspinor*usecprj)
@@ -253,9 +253,9 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
  ABI_MALLOC(kg_kq, (3, mpw))
 
  ! Spherical Harmonics for useylm==1.
+ ! TODO: These arrays should be allocated with npw_k and npw_kq
  ABI_MALLOC(ylm_k,(mpw, psps%mpsang*psps%mpsang*psps%useylm))
  ABI_MALLOC(ylm_kq,(mpw, psps%mpsang*psps%mpsang*psps%useylm))
- ABI_MALLOC(ylmgr_kq,(mpw, 3, psps%mpsang*psps%mpsang*psps%useylm*useylmgr1))
 
  ! TODO FOR PAW
  usecprj = 0
@@ -449,8 +449,8 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
        ! This call is not optimal because there are quantities in out that do not depend on idir,ipert
        call getgh1c_setup(gs_hamkq,rf_hamkq,dtset,psps,kk,kq,idir,ipert,&    ! In
          cryst%natom,cryst%rmet,cryst%gprimd,cryst%gmet,istwf_k,&            ! In
-         npw_k,npw_kq,useylmgr1,kg_k,ylm_k,kg_kq,ylm_kq,ylmgr_kq,&           ! In
-         dkinpw,nkpg,nkpg1,kpg_k,kpg1_k,kinpw1,ffnlk,ffnl1,ph3d,ph3d1)       ! Out
+         npw_k,npw_kq,useylmgr1,kg_k,ylm_k,kg_kq,ylm_kq,ylmgr_kq_dum,&       ! In
+         dkinpw,nkpg,nkpg1,kpg_k,kpg_kq,kinpw_kq,ffnl_k,ffnl_kq,ph3d_k,ph3d_kq)       ! Out
 
        ! Calculate dvscf * psi_k, results stored in h1_kets on the k+q sphere.
        ! Compute H(1) applied to GS wavefunction Psi(0)
@@ -464,15 +464,15 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
                       optnl,opt_gvnlx1,rf_hamkq,sij_opt,tim_getgh1c,usevnl)
        end do
 
-       ABI_FREE(kinpw1)
-       ABI_FREE(kpg1_k)
+       ABI_FREE(kinpw_kq)
        ABI_FREE(kpg_k)
+       ABI_FREE(kpg_kq)
        ABI_FREE(dkinpw)
-       ABI_FREE(ffnlk)
-       ABI_FREE(ffnl1)
-       ABI_FREE(ph3d)
+       ABI_FREE(ffnl_k)
+       ABI_FREE(ffnl_kq)
        ABI_FREE(gs1c)
-       ABI_SFREE(ph3d1)
+       ABI_FREE(ph3d_k)
+       ABI_SFREE(ph3d_kq)
 
        ! Calculate elphmat(j,i) = <psi_{k+q,j}|dvscf_q*psi_{k,i}> for this perturbation.
        ! The array eig1_k contains:
@@ -560,7 +560,6 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
  ABI_FREE(kg_kq)
  ABI_FREE(ylm_k)
  ABI_FREE(ylm_kq)
- ABI_FREE(ylmgr_kq)
 
  call gs_hamkq%free()
  call wfd_k%free()

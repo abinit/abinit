@@ -1,6 +1,6 @@
 # C in diamond structure.
 # Very rough 2x2x2 q-point grid; low ecut.
-ndtset 8
+ndtset 9
 
 getwfk   20      # Read GS wavefunctions from DS20_WFK
 getddb   20      # Read DDB files from DS20_DDB
@@ -135,6 +135,19 @@ symsigma8 1
 nband8    4
 zcut8     0.1 eV
 
+#############
+## Dataset 9
+#############
+# Similar to dataset 6 but with useylm 1
+eph_task9 4
+useylm9   1
+eph_stern9 1
+eph_ngqpt_fine9  4 4 4
+getdvdb_filepath9 "t44o_DS20_DVDB"
+getpot_filepath9 "t41o_DS1_POT"
+symsigma9 1
+eph_intmeth9 2
+nband9     20
 
 #########
 # Global

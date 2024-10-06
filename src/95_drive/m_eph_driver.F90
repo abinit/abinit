@@ -844,7 +844,6 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
 
  case (18)
    ! Compute e-ph matrix elements along a q-path
-   ABI_CHECK(dtset%useylm == 0, "useylm != 0 not implemented/tested")
    call eph_path_run(dtfil, dtset, cryst, ebands, dvdb, ifc, pawfgr, pawang, pawrad, pawtab, psps, comm)
 
  case default
