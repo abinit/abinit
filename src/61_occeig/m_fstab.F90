@@ -192,7 +192,6 @@ subroutine fstab_free(fstab)
 
 !Arguments ------------------------------------
  class(fstab_t),intent(inout) :: fstab
-
 ! ************************************************************************
 
  ! integer
