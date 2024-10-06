@@ -2539,7 +2539,6 @@ subroutine nscf_setup_kpt(nscf, isppol, kpt, istwf_k, nband_k, cryst, dtset, psp
  ! Compute (k+G) vectors (only if useylm=1)
  nkpg = 3 * dtset%nloalg(3)
  ABI_MALLOC(kpg_k, (npw_k, nkpg))
- !print *, "nkpg:", nkpg
  if (nscf%paral_kgb0 /= 1 .and. nkpg > 0) call mkkpg(kg_k, kpg_k, kpt, nkpg, npw_k)
 
  ! Get one-dimensional structure factor information on the coarse grid.

@@ -1,5 +1,5 @@
 # Calculation of phonon linewidths and e-ph coupling parameter lambda
-ndtset 5
+ndtset 6
 
 optdriver 7
 #nsppol  2
@@ -88,6 +88,13 @@ eph_ngqpt_fine4 8 8 8
 ###############
 eph_intmeth5  1       # FS integration with Adaptive Gaussian
 eph_fsmear5  -1 eV    # Adaptive Gaussian broadening (negative value)
+
+###############
+## DATASET 6 ##
+###############
+useylm6       1       # Test application of NL part with Ylm.
+eph_intmeth6  1       # FS integration with Adaptive Gaussian
+eph_fsmear6  -1 eV    # Adaptive Gaussian broadening (negative value)
 
 # Geometry
 acell 3*7.5
