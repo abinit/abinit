@@ -1,23 +1,17 @@
-# Computation of e-ph matrix g(k,q) along high-symmetry path. 
+# Computation of e-ph matrix g(k,q) along high-symmetry path.
  ndtset 2
 
  optdriver 7
- eph_task 18
+ eph_task 18  # Activate computation of g(k,q) along high-symmetry path.
 
- nband 20
- nbdbuf 8
+ eph_path_brange 6 8  # Compute g(k,q) only for this band  range
+ # Options governing the NSCF computation of wavefunctions
+ nband 20       # Will compute 20 bands
+ nbdbuf 8       # Exclude last 8 states when checking for convergence IMPORTANT!
+ tolwfr 1e-20   # Stopping criterio for NSCF computation
+ nstep 100      # Max number if NSCF iterations.
 
- eph_path_brange 6 8
- tolwfr 1e-20
- nstep 100
-
- eph_fix_korq1 "k"; eph_fix_wavevec1 0.0 0.0 0.0
- eph_fix_korq2 "q"; eph_fix_wavevec2 0.11 0 0
-
- prtphbands 0
- prtphdos 0
- #mixprec 1 boxcutmin 1.1   # Important to speedup the calculation and reduce memory.
-
+ # Need GS potential to start NSCF.
  getpot_filepath "MgO_eph_zpr/flow_zpr_mgo/w0/t0/outdata/out_POT.nc"
 
  ngkpt 12 12 12 eph_ngqpt_fine 12 12 12 getwfk_filepath "teph4zpr_3o_DS3_WFK"
@@ -26,20 +20,11 @@
  ddb_ngqpt 4 4 4
  getdvdb_filepath "teph4zpr_2_DVDB"
 
- ecut 35.0
-
- nshiftk 1
- shiftk 0 0 0
-
- #mixprec 1 boxcutmin 1.1   # Important to speedup the calculation and reduce memory.
-
- pp_dirpath = "$ABI_PSPDIR"
- pseudos = "O.psp8, Mg-sp-gw.psp8"
-
- structure = "abifile:MgO_eph_zpr/flow_zpr_mgo/w0/t0/outdata/out_DEN.nc"
-
+############
 # DATASET 1
+############
 # g(k,q) at fixed k along this q-path.
+ eph_fix_korq1 "k"; eph_fix_wavevec1 0.0 0.0 0.0
  ph_ndivsm1 5
  ph_nqpath1 5
  ph_qpath1
@@ -56,8 +41,11 @@
     +0.62500  +0.25000  +0.62500  # U
     +0.50000  +0.00000  +0.50000  # X
 
+############
 # DATASET 1
+############
 # g(k,q) at fixed q along this k-path.
+ eph_fix_korq2 "q"; eph_fix_wavevec2 0.11 0 0
  nkpath2 5
  ndivsm2 5
  kptbounds2
@@ -74,6 +62,19 @@
     +0.62500  +0.25000  +0.62500  # U
     +0.50000  +0.00000  +0.50000  # X
 
+ useylm2 1 # This just to test useylm 1 with eph_task 18
+
+# Global variables.
+ prtphbands 0
+ prtphdos 0
+ ecut 35.0
+ nshiftk 1
+ shiftk 0 0 0
+
+ pp_dirpath = "$ABI_PSPDIR"
+ pseudos = "O.psp8, Mg-sp-gw.psp8"
+
+ structure = "abifile:MgO_eph_zpr/flow_zpr_mgo/w0/t0/outdata/out_DEN.nc"
 
 ##############################################################
 # This section is used only for regression testing of ABINIT #
