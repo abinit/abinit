@@ -666,7 +666,6 @@ integer function kpts_map(mode, kptopt, cryst, krank, nkpt2, kpt2, map, qpt, dks
  integer :: timrev, nsym
 !arrays
  real(dp) :: my_qpt(3)
-
 ! *************************************************************************
 
  my_qpt = zero; if (present(qpt)) my_qpt = qpt
@@ -704,6 +703,20 @@ integer function kpts_map(mode, kptopt, cryst, krank, nkpt2, kpt2, map, qpt, dks
 
  ierr = merge(1, 0, dksqmax > my_tol)
  !if (ierr /= 0) call wrtout(std_out, sjoin(" CRITICAL WARNING: dksqmax ", ftoa(dksqmax), " > ", ftoa(my_tol)))
+
+ !ABI_MALLOC(map, (nkpt2))
+ !do ii=1,nkpt2
+ !  map(ii)%ik_ibz
+ !  map(ii)%isym
+ !  map(ii)%trev
+ !  map(ii)%g0
+ !  map(ii)%isirr_kq =
+ !  ikq_ibz = indkk_kq(1, 1)
+ !  isym_kq = indkk_kq(2, 1)
+ !  trev_kq = indkk_kq(6, 1)
+ !  g0_kq = indkk_kq(3:5, 1)
+ !  isirr_kq = (isym_kq == 1 .and. trev_kq == 0 .and. all(g0_kq == 0))
+ !end do
 
 end function kpts_map
 !!***

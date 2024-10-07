@@ -749,6 +749,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  ABI_MALLOC(kg_kqmp, (3, mpw))
  ! Spherical Harmonics for useylm == 1.
  ! FIXME: These arrays should allocated with npw_k, npw_kq
+ ! but shoul recheck the API used to symmetrized wavefunctions.
  ABI_MALLOC(ylm_k, (mpw, psps%mpsang**2 * psps%useylm))
  ABI_MALLOC(ylm_kq, (mpw, psps%mpsang**2 * psps%useylm))
  ABI_MALLOC(ylm_kmp, (mpw, psps%mpsang**2 * psps%useylm))
