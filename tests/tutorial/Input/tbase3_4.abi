@@ -58,10 +58,13 @@ getwfk -1         # This is to speed up the calculation, by restarting
 
 #Definition of the SCF procedure
 nstep 10          # Maximal number of SCF cycles
-toldfe 1.0d-6     # Will stop when, twice in a row, the difference
+tolvrs 1.0d-14    # Will stop when, twice in a row, the difference
                   # between two consecutive evaluations of total energy
                   # differ by less than toldfe (in Hartree)
-                  # This value is way too large for most realistic studies of materials
+                  # This value is REALISTIC for most realistic studies of materials
+                  # However, the usage of tolrff (or possibly toldff) is to be preferred for most materials.
+                  # In the specific case of Silicon, where symmetry induces vanishing of forces,
+                  # tolrff (or toldff) cannot be used, unfortunately.
 diemac 12.0       # Although this is not mandatory, it is worth to
                   # precondition the SCF cycle. The model dielectric
                   # function used as the standard preconditioner

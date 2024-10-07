@@ -27,9 +27,7 @@ module m_dft_energy
  use m_hamiltonian
  use m_errors
  use m_xmpi
- use m_gemm_nonlop
- use m_gemm_nonlop_gpu
- use m_gemm_nonlop_ompgpu
+ use m_gemm_nonlop_projectors
  use m_xcdata
  use m_cgtools
  use m_dtset
@@ -679,35 +677,21 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
 !    If OpenMP GPU, load "hamiltonian" on GPU device
      if (dtset%gpu_option == ABI_GPU_OPENMP) then
        if(dtset%paral_kgb==0) then
-         call ompgpu_load_hamilt_buffers(gs_hamk%kg_k,gs_hamk%kg_kp)
+         call ompgpu_load_hamilt_buffers(gs_hamk%kg_k,gs_hamk%kg_kp,gs_hamk%ffnl_k,gs_hamk%ph3d_k)
        else if(istwf_k==1) then
-         call ompgpu_load_hamilt_buffers(gs_hamk%kg_k,gs_hamk%kg_kp,kg_k_gather=my_bandfft_kpt%kg_k_gather)
+         call ompgpu_load_hamilt_buffers(gs_hamk%kg_k,gs_hamk%kg_kp,gs_hamk%ffnl_k,gs_hamk%ph3d_k,kg_k_gather=my_bandfft_kpt%kg_k_gather)
        else if(istwf_k==2) then
-         call ompgpu_load_hamilt_buffers(gs_hamk%kg_k,gs_hamk%kg_kp,kg_k_gather=my_bandfft_kpt%kg_k_gather_sym)
+         call ompgpu_load_hamilt_buffers(gs_hamk%kg_k,gs_hamk%kg_kp,gs_hamk%ffnl_k,gs_hamk%ph3d_k,kg_k_gather=my_bandfft_kpt%kg_k_gather_sym)
        else
          ABI_ERROR("istwfk > 2 is not handled with OpenMP GPU offload mode !")
        end if
      end if
 
+     choice=1-gs_hamk%usepaw ; signs=1 ; idir=0 ; nnlout=blocksize
+
 !    Setup gemm_nonlop
      if (gemm_nonlop_use_gemm) then
        gemm_nonlop_ikpt_this_proc_being_treated = my_ikpt
-       if(dtset%gpu_option==ABI_GPU_DISABLED) then
-         call make_gemm_nonlop(my_ikpt,gs_hamk%npw_fft_k,gs_hamk%lmnmax, &
-             gs_hamk%ntypat, gs_hamk%indlmn, gs_hamk%nattyp, gs_hamk%istwf_k, &
-             gs_hamk%ucvol, gs_hamk%ffnl_k, &
-             gs_hamk%ph3d_k, gs_hamk%kpt_k, gs_hamk%kg_k, gs_hamk%kpg_k)
-       else if(dtset%gpu_option==ABI_GPU_LEGACY .or. dtset%gpu_option==ABI_GPU_KOKKOS) then
-         call make_gemm_nonlop_gpu(my_ikpt,gs_hamk%npw_fft_k,gs_hamk%lmnmax, &
-             gs_hamk%ntypat, gs_hamk%indlmn, gs_hamk%nattyp, gs_hamk%istwf_k, &
-             gs_hamk%ucvol, gs_hamk%ffnl_k, &
-             gs_hamk%ph3d_k, gs_hamk%kpt_k, gs_hamk%kg_k, gs_hamk%kpg_k)
-       else if(dtset%gpu_option==ABI_GPU_OPENMP) then
-         call make_gemm_nonlop_ompgpu(my_ikpt,gs_hamk%npw_fft_k,gs_hamk%lmnmax, &
-             gs_hamk%ntypat, gs_hamk%indlmn, gs_hamk%nattyp, gs_hamk%istwf_k, &
-             gs_hamk%ucvol, gs_hamk%ffnl_k, &
-             gs_hamk%ph3d_k, gs_hamk%kpt_k, gs_hamk%kg_k, gs_hamk%kpg_k)
-       end if
      end if
 
 #if defined HAVE_GPU_CUDA
@@ -731,7 +715,6 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
          cwavef(:,1:npw_k*my_nspinor*blocksize)=&
 &         cg(:,1+(iblock-1)*npw_k*my_nspinor*blocksize+icg:iblock*npw_k*my_nspinor*blocksize+icg)
 
-         choice=1-gs_hamk%usepaw ; signs=1 ; idir=0 ; nnlout=blocksize
          paw_opt=gs_hamk%usepaw;cpopt=gs_hamk%usepaw-1
 
          if (mpi_enreg%paral_kgb/=1) then
