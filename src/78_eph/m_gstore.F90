@@ -142,7 +142,7 @@ module m_gstore
  !use m_yaml,          only : yamldoc_t
  use m_numeric_tools,  only : arth, get_diag, isdiagmat
  use m_krank,          only : krank_t, krank_new, krank_from_kptrlatt, get_ibz2bz, star_from_ibz_idx
- use m_io_tools,       only : iomode_from_fname, file_exists !, open_file
+ use m_io_tools,       only : iomode_from_fname, file_exists
  use m_special_funcs,  only : gaussian
  use m_copy,           only : alloc_copy
  use m_fftcore,        only : ngfft_seq, get_kg
@@ -155,7 +155,7 @@ module m_gstore
  use m_kpts,           only : kpts_ibz_from_kptrlatt, kpts_timrev_from_kptopt, kpts_map, kpts_sort, kpts_pack_in_stars, &
                               kptrlatt_from_ngkpt
  use m_bz_mesh,        only : kmesh_t
- use m_getgh1c,        only : getgh1c, rf_transgrid_and_pack, getgh1c_setup
+ use m_getgh1c,        only : getgh1c, rf_transgrid_and_pack
  use m_ifc,            only : ifc_type
  use m_phonons,        only : pheigvec_rotate
  use m_pawang,         only : pawang_type
@@ -2780,7 +2780,6 @@ subroutine gqk_dbldelta_qpt(gqk, my_iq, gstore, eph_intmeth, eph_fsmear, qpt, we
 !----------------------------------------------------------------------
 
  nb = gqk%nb; nkbz = gstore%nkbz; spin = gqk%spin
-
  ebands => gstore%ebands; cryst => gstore%cryst
 
  call gqk%myqpt(my_iq, gstore, weight_q, qpt)
@@ -3088,7 +3087,7 @@ subroutine gstore_set_perts_distrib(gstore, cryst, dvdb, my_npert)
    if (gqk%pert_comm%nproc > 1) then
      ! Activate parallelism over perturbations
      ! Build table with list of perturbations treated by this MPI rank inside pert_comm.
-     ABI_WARNING("GSTORE with pert_comm%nproc > 1 not tested")
+     !ABI_WARNING("GSTORE with pert_comm%nproc > 1 not tested")
      my_npert = gqk%my_npert
      call ephtk_set_pertables(cryst%natom, my_npert, pert_table, my_pinfo, gqk%pert_comm%value)
      call dvdb%set_pert_distrib(my_npert, cryst%natom * 3, my_pinfo, pert_table, gqk%pert_comm%value)
@@ -3189,9 +3188,8 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
  real(dp),allocatable :: v1scf(:,:,:,:), gkq_atm(:,:,:,:),gkq_nu(:,:,:,:)
  real(dp),allocatable :: bras_kq(:,:,:), kets_k(:,:,:), h1kets_kq(:,:,:), cgwork(:,:)
  real(dp),allocatable :: ph1d(:,:), vlocal(:,:,:,:), vlocal1(:,:,:,:,:)
- real(dp),allocatable :: ylm_kq(:,:), ylm_k(:,:)
  real(dp),allocatable :: dummy_vtrial(:,:), gvnlx1(:,:), work(:,:,:,:)
- real(dp),allocatable :: gs1c(:,:), vk_cart_ibz(:,:,:) !, vkmat_cart_ibz(:,:,:,:)
+ real(dp),allocatable :: gs1c_kq(:,:), vk_cart_ibz(:,:,:) !, vkmat_cart_ibz(:,:,:,:)
  real(dp),allocatable :: my_gbuf(:,:,:,:,:,:), buf_wqnu(:,:), buf_eigvec_cart(:,:,:,:,:)
  logical,allocatable :: bks_mask(:,:,:),keep_ur(:,:,:)
  type(pawcprj_type),allocatable  :: cwaveprj0(:,:)
@@ -3238,8 +3236,10 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
  need_ftinterp = .True.
  !need_ftinterp = .False.
 
+ ! TODO
 #if 0
  call dvdb%need_ftinterp(qstore%nqibz, gstore%qibz, gstore%qptopt, qmap_symrec, need_ftinterp)
+ ABI_FREE(qmap_symrec)
 #endif
 
  if (.not. need_ftinterp .and. dtset%eph_use_ftinterp /= 0) then
@@ -3250,7 +3250,6 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
  if (need_ftinterp) then
    call wrtout(units, " Cannot find all IBZ q-points in the DVDB --> Activating Fourier interpolation.")
    call dvdb%ftinterp_setup(dtset%ddb_ngqpt, gstore%qptopt, 1, dtset%ddb_shiftq, nfftf, ngfftf, comm_rpt)
-
  else
    call wrtout(units, " DVDB file contains all q-points in the IBZ --> Reading DFPT potentials from file.")
  end if
@@ -3490,6 +3489,9 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
  ! The price to pay is an increase in the number of calls to get_ftqbz but for small systems this part does not dominate
  ! Alternatively, one cah have two versions that will be invoked depending on my_nk, my_nq
 
+ ! if PAW, one has to solve a generalized eigenproblem
+ gen_eigenpb = psps%usepaw == 1; sij_opt = 0; if (gen_eigenpb) sij_opt = 1
+
  ! Loop over my spins.
  do my_is=1,gstore%my_nspins
    spin = gstore%my_spins(my_is); gqk => gstore%gqk(my_is)
@@ -3497,6 +3499,8 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
    NCF_CHECK(nf90_inq_ncid(root_ncid, strcat("gqk", "_spin", itoa(spin)), spin_ncid))
 
    ! Allocate workspace for wavefunctions using mpw and nb
+   ! FIXLE: Should be allocated with npw_k and npw_kw but one has to change wfd_sym_ug_kg to get rid of mpw
+
    nb = gqk%nb
    ABI_MALLOC(bras_kq, (2, mpw*nspinor, nb))
    ABI_MALLOC(kets_k, (2, mpw*nspinor, nb))
@@ -3596,14 +3600,13 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
        isirr_k = (isym_k == 1 .and. trev_k == 0 .and. all(g0_k == 0))
        kk_ibz = ebands%kptns(:,ik_ibz)
 
-       ! Number of bands crossing the Fermi level at k
+       ! Number of bands at k
        bstart_k = gqk%bstart; nband_k = gqk%nb
 
-       ! ============================================
-       ! Find symmetrical image of k+q in in the kIBZ
-       ! ============================================
+       ! =========================================
+       ! Find symmetrical image of k+q in the kIBZ
+       ! =========================================
        kq_bz = kk_bz + qq_bz
-
        if (kpts_map("symrel", ebands%kptopt, cryst, gstore%krank_ibz, 1, kq_bz, indkk_kq) /= 0) then
          write(msg, '(3a)' ) &
           "Cannot find k+q in kmesh", ch10, 'Action: check your WFK file and the (k, q) point input variables.'
@@ -3626,7 +3629,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
          end if
        end if
 
-       ! Number of bands crossing the Fermi level at k+q
+       ! Number of bands at k+q
        bstart_kq = gqk%bstart; nband_kq = gqk%nb
        ABI_CHECK(nband_k <= nb .and. nband_kq <= nb, "wrong nband")
 
@@ -3638,15 +3641,13 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
        call wfd%sym_ug_kg(ecut, kq_bz, kq_ibz, bstart_kq, nband_kq, spin, mpw, indkk_kq(:,1), cryst, &
                           work_ngfft, work, istwf_kq, npw_kq, kg_kq, bras_kq)
 
-       ! if PAW, one has to solve a generalized eigenproblem
-       gen_eigenpb = psps%usepaw == 1; sij_opt = 0; if (gen_eigenpb) sij_opt = 1
-       ABI_MALLOC(gs1c, (2, npw_kq*nspinor*((sij_opt+1)/2)))
-
-       call gs_hamkq%eph_setup_k("k" , kk_bz, istwf_k, npw_k, kg_k,  dtset, cryst, psps, &
+       call gs_hamkq%eph_setup_k("k" , kk_bz, istwf_k, npw_k, kg_k, dtset, cryst, psps, &
                                  nkpg_k, kpg_k, ffnl_k, kinpw_k, ph3d_k, gqk%pert_comm%value)
 
        call gs_hamkq%eph_setup_k("kq", kq_bz, istwf_k, npw_kq, kg_kq, dtset, cryst, psps, &
                                  nkpg_kq, kpg_kq, ffnl_kq, kinpw_kq, ph3d_kq, gqk%pert_comm%value)
+
+       ABI_MALLOC(gs1c_kq, (2, npw_kq*nspinor*((sij_opt+1)/2)))
 
        ! Loop over my atomic perturbations and compute gkq_atm.
        gkq_atm = zero
@@ -3666,7 +3667,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
            eshift = eig0nk - dtset%dfpt_sciss
 
            call getgh1c(berryopt0, kets_k(:,:,in_k), cwaveprj0, h1kets_kq(:,:,in_k), &
-                        grad_berry, gs1c, gs_hamkq, gvnlx1, idir, ipert, (/eshift/), mpi_enreg, 1, optlocal, &
+                        grad_berry, gs1c_kq, gs_hamkq, gvnlx1, idir, ipert, (/eshift/), mpi_enreg, 1, optlocal, &
                         optnl, opt_gvnlx1, rf_hamkq, sij_opt, tim_getgh1c, usevnl)
          end do
 
@@ -3682,7 +3683,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
 
        end do ! my_ip
 
-       ABI_FREE(gs1c)
+       ABI_FREE(gs1c_kq)
        ABI_FREE(ffnl_k)
        ABI_FREE(ffnl_kq)
        ABI_FREE(kpg_k)
@@ -3691,8 +3692,6 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
        ABI_FREE(ph3d_kq)
        ABI_FREE(kinpw_k)
        ABI_FREE(kinpw_kq)
-       !ABI_FREE(ylm_k)
-       !ABI_FREE(ylm_kq)
 
        ! Collect gkq_atm inside pert_comm so that all procs can operate on the data.
        if (gqk%pert_comm%nproc > 1) call xmpi_sum(gkq_atm, gqk%pert_comm%value, ierr)
@@ -4110,7 +4109,6 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, if
      end if
      call xmpi_bcast(gstore%delta_ef_kibz_spin, master, comm, ierr)
    end if
-
  end if
 
  ! Construct crystal and ebands from the GS WFK file.
