@@ -80,4 +80,3 @@ pseudos="P.xml, Al.xml"
 #%% keywords = PAW
 #%% description = Same as v9[208] but with npband=4. Compare chebfi2 with respect to other algorithms (istwfk>1).
 #%%<END TEST_INFO>
- 
