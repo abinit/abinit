@@ -759,7 +759,7 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
          if (optrw == 1) then
            tmpfil = trim(paw_dmft%filnamei)//'Self_ra-omega_iatom'//trim(tag_at)//'_isppol'//tag_is
          else
-           tmpfil  = trim(paw_dmft%filapp)//'Self_ra-omega_iatom'//trim(tag_at)//'_isppol'//tag_is
+           tmpfil = trim(paw_dmft%filapp)//'Self_ra-omega_iatom'//trim(tag_at)//'_isppol'//tag_is
          end if ! optrw
        else
          if (present(opt_char)) then
@@ -777,11 +777,6 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
        unitselffunc_arr(iall) = get_unit()
        ABI_CHECK(unitselffunc_arr(iall) > 0, "Cannot find free IO unit!")
        
-       if (optrw == 2) then
-         unitselffunc_arr2(iall) = get_unit()
-         ABI_CHECK(unitselffunc_arr2(iall) > 0, "Cannot find free IO unit!")
-       end if ! optrw=2
-
        !- For the Tentative rotation of the self-energy file (create file)
        if (optrw == 2 .and. optmaxent > 0) then
          iflavor = 0
@@ -832,13 +827,22 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
              !write(std_out,*) "5"
 #ifdef FC_NAG
          open(unit=unitselffunc_arr(iall),file=trim(tmpfil),status='unknown',form='formatted',recl=ABI_RECL)
-         if (optrw == 2) open(unit=unitselffunc_arr2(iall),file=trim(tmpfil2),status='unknown',form='formatted',recl=ABI_RECL)
 #else
          open(unit=unitselffunc_arr(iall),file=trim(tmpfil),status='unknown',form='formatted')
-         if (optrw == 2) open(unit=unitselffunc_arr2(iall),file=trim(tmpfil2),status='unknown',form='formatted')
 #endif
          rewind(unitselffunc_arr(iall))
-         if (optrw == 2) rewind(unitselffunc_arr2(iall))
+
+         if (optrw == 2) then
+           unitselffunc_arr2(iall) = get_unit()
+           ABI_CHECK(unitselffunc_arr2(iall) > 0, "Cannot find free IO unit!")
+#ifdef FC_NAG
+           open(unit=unitselffunc_arr2(iall),file=trim(tmpfil2),status="unknown",form="formatted",recl=ABI_RECL)
+#else
+           open(unit=unitselffunc_arr2(iall),file=trim(tmpfil2),status="unknown",form="formatted")
+#endif
+           rewind(unitselffunc_arr2(iall))
+         end if ! optrw=2
+
              !write(std_out,*) "61",nrecl
          if (prtopt >= 3) then
            write(message,'(a,a,a,i4)') '    opened file : ',trim(tmpfil),' unit',unitselffunc_arr(iall)
