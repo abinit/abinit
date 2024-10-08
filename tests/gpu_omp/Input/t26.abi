@@ -72,5 +72,5 @@ bandpp   5
 #%% [extra_info]
 #%% authors = X. Gonze, C. Martins
 #%% keywords = HF, PBE0
-#%% description = Test of PBE0 in sequential case, norm conserving, from LibXC
+#%% description = Test of PBE0 with GPU, norm conserving, from LibXC
 #%%<END TEST_INFO>
