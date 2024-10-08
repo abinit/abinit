@@ -149,7 +149,7 @@ subroutine datafordmft(cg,cprj,cryst_struc,dft_occup,dimcprj,dtset,eigen,mband_c
 !DBG_ENTER("COLL")
 !Fake test to keep fermie as argument. REMOVE IT AS SOON AS POSSIBLE ...
  !if(fermie>huge(zero))chinorm=zero
- 
+
  !facpara=1 !mpi_enreg%nproc
  mband   = paw_dmft%mband
  mbandc  = paw_dmft%mbandc
@@ -365,7 +365,9 @@ subroutine datafordmft(cg,cprj,cryst_struc,dft_occup,dimcprj,dtset,eigen,mband_c
  icg = 0
  ibuf_psi = 0
  ibuf_chipsi = 0
- 
+
+ buf_chipsi(:) = czero
+
  do isppol=1,nsppol
  
    if (mpi_enreg%my_isppoltab(isppol) == 0) cycle
@@ -397,7 +399,7 @@ subroutine datafordmft(cg,cprj,cryst_struc,dft_occup,dimcprj,dtset,eigen,mband_c
        else
          if (mpi_enreg%proc_distrb(ikpt,iband,isppol) /= me_kpt) verif = .false.
        end if
-       
+     
        if (verif) ib = ib + 1
        
        if (paw_dmft%band_in(iband)) then
@@ -405,8 +407,8 @@ subroutine datafordmft(cg,cprj,cryst_struc,dft_occup,dimcprj,dtset,eigen,mband_c
        else
          icgb = icgb + npw*nspinor
          cycle
-       end if       
-              
+       end if  
+
        if (verif) call pawcprj_get(cryst_struc%atindx1(:),cwaveprj(:,:),cprj(:,:),natom,ib,icprj,ikpt,&
                                  & 0,isppol,mband_cprj,dtset%mkmem,natom,1,nband_k_cprj,&
                                  & nspinor,nsppol,paw_dmft%unpaw,mpicomm=mpi_enreg%comm_kpt,&
@@ -479,9 +481,9 @@ subroutine datafordmft(cg,cprj,cryst_struc,dft_occup,dimcprj,dtset,eigen,mband_c
                if (verif) then 
                  do iproj=1,nproju
                    buf_chipsi(ibuf_chipsi) = buf_chipsi(ibuf_chipsi) + &
-                                           & cwprj(iproj,im) * paw_dmft%phimtphi_int(iproj,itypat)
+                                           & cwprj(iproj,im)*paw_dmft%phimtphi_int(iproj,itypat)
                    if (prt_wan) paw_dmft%buf_psi(ibuf_psi+1:ibuf_psi+siz_paw) = paw_dmft%buf_psi(ibuf_psi+1:ibuf_psi+siz_paw) + &
-                     & cwprj(iproj,im) * paw_dmft%phimtphi(1:siz_paw,iproj,itypat)
+                     & cwprj(iproj,im)*paw_dmft%phimtphi(1:siz_paw,iproj,itypat)
                  end do ! iproj
                end if ! verif
                
@@ -490,10 +492,8 @@ subroutine datafordmft(cg,cprj,cryst_struc,dft_occup,dimcprj,dtset,eigen,mband_c
                if (verif) then
                  do iproj=1,nproju
                    buf_chipsi(ibuf_chipsi) = buf_chipsi(ibuf_chipsi) + &
-                                           & cwprj(iproj,im) * paw_dmft%phi_int(iproj,itypat)
+                                           & cwprj(iproj,im)*paw_dmft%phi_int(iproj,itypat)
                  end do ! iproj
-               else
-                 buf_chipsi(ibuf_chipsi) = czero
                end if ! verif
              
              end if ! use_full_chipsi
@@ -1317,7 +1317,9 @@ subroutine chipsi_print(paw_dmft,pawtab)
  if (present(loc_levels)) then
    call copy_matlu(loc_levels%matlu(:),energy_level%matlu(:),natom)
  else
-   call downfold_oper(energy_level,paw_dmft,option=3,op_ks_diag=paw_dmft%eigen_dft(:,:,:))
+   call downfold_oper(energy_level,paw_dmft,option=3,procb=paw_dmft%distrib%procb(:), &
+                    & iproc=paw_dmft%distrib%me_kpt,op_ks_diag=paw_dmft%eigen_dft(:,:,:))
+   call xmpi_matlu(energy_level%matlu(:),natom,paw_dmft%distrib%comm_kpt)
  end if 
 ! write(message,'(a,2x,a,f13.5)') ch10," == Print Energy levels before sym and only DFT"
 ! call wrtout(std_out,message,'COLL')
@@ -1477,7 +1479,7 @@ subroutine chipsi_renormalization(paw_dmft,opt)
 !===============================================
 !==  Compute norm with new psichi
 !===============================================
- write(message,'(2a)') ch10,'  ===== Compute norm with new psichi'
+ write(message,'(2a)') ch10,'  ===== Compute norm with new chipsi'
  call wrtout(std_out,message,'COLL')
  call init_oper(paw_dmft,oper_temp,opt_ksloc=2)
  call identity_oper(oper_temp,2)
@@ -1494,7 +1496,7 @@ subroutine chipsi_renormalization(paw_dmft,opt)
      norm%shiftk = jkpt - 1
      call downfold_oper(norm,paw_dmft,option=2)
      write(message,'(2a,i5)') &
-       & ch10,"  == Check: Overlap with renormalized psichi for k-point",jkpt
+       & ch10,"  == Check: Overlap with renormalized chipsi for k-point",jkpt
      call wrtout(std_out,message,'COLL')
      call print_matlu(norm%matlu(:),natom,prtopt=1)
 !== Check that norm is now the identity
@@ -1516,7 +1518,7 @@ subroutine chipsi_renormalization(paw_dmft,opt)
 !== Print norm%matlu unsymetrized with new psichi
    if (pawprtvol > 2) then
      write(message,'(4a,2a)') &
-      &  ch10,"  == Check: Overlap with renormalized psichi without symmetrization is == "
+      &  ch10,"  == Check: Overlap with renormalized chipsi without symmetrization is == "
      call wrtout(std_out,message,'COLL')
      call print_matlu(norm%matlu(:),natom,prtopt=1)
    end if ! pawprtvol>2
@@ -1528,7 +1530,7 @@ subroutine chipsi_renormalization(paw_dmft,opt)
 !== Print norm%matlu symetrized with new psichi
    if (pawprtvol > 2) then
      write(message,'(4a,2a)') &
-      & ch10,"  == Check: Overlap with renormalized psichi and symetrization is =="
+      & ch10,"  == Check: Overlap with renormalized chipsi and symetrization is =="
      call wrtout(std_out,message,'COLL')
      call print_matlu(norm%matlu(:),natom,prtopt=1,opt_diag=-1)
    end if
@@ -1637,7 +1639,7 @@ subroutine normalizechipsi(nkpt,paw_dmft,jkpt)
    if (nkpt > 1) call sym_matlu(norm1%matlu(:),paw_dmft)
 
    if (pawprtvol > 2) then
-     write(message,'(2a)') ch10,'  - Print norm with current psichi '
+     write(message,'(2a)') ch10,'  - Print norm with current chipsi '
      call wrtout(std_out,message,'COLL')
      call print_matlu(norm1%matlu(:),natom,prtopt=1,opt_exp=1)
    end if
@@ -1780,7 +1782,7 @@ subroutine normalizechipsi(nkpt,paw_dmft,jkpt)
    !  end if
 
    if (pawprtvol > 2) then
-     write(message,'(2a)') ch10,'  - Print norm with new psichi '
+     write(message,'(2a)') ch10,'  - Print norm with new chipsi '
      call wrtout(std_out,message,'COLL')
      call print_matlu(norm1%matlu(:),natom,prtopt=1)
    end if
@@ -1794,7 +1796,7 @@ subroutine normalizechipsi(nkpt,paw_dmft,jkpt)
    call add_matlu(norm1%matlu(:),norm2%matlu(:),norm3%matlu(:),natom,-1)
    call destroy_oper(norm2)
    if (pawprtvol > 2) then
-     write(message,'(2a)') ch10,'  - Print norm with new psichi minus Identity '
+     write(message,'(2a)') ch10,'  - Print norm with new chipsi minus Identity '
      call wrtout(std_out,message,'COLL')
      call print_matlu(norm3%matlu(:),natom,prtopt=1,opt_exp=1)
    end if

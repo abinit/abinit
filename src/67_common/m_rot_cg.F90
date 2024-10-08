@@ -162,7 +162,7 @@ subroutine rot_cg(occ_nd,cwavef,npw,nband,blocksize,nspinor,first_bandc,nbandc,o
 
 !Arguments ------------------------------------
 !scalars
-  integer,intent(in) :: npw,nband,blocksize,nspinor,first_bandc,nbandc
+  integer, intent(in) :: npw,nband,blocksize,nspinor,first_bandc,nbandc
 !! type(MPI_type),intent(inout) :: mpi_enreg
 !! type(dataset_type),intent(in) :: dtset
 !! type(paw_dmft_type), intent(in)  :: band_in
@@ -175,19 +175,22 @@ subroutine rot_cg(occ_nd,cwavef,npw,nband,blocksize,nspinor,first_bandc,nbandc,o
   integer :: ig,ispinor,n,np
   character(len=500) :: message
 !arrays
-  real(kind=dp) :: occ_diag_red(nbandc)
-  complex(kind=dpc) :: occ_nd_cpx(nbandc,nbandc)
-  complex(kind=dpc) :: cwavef_rot!_g(nbandc,nspinor)
+  real(kind=dp), allocatable :: occ_diag_red(:)
+  complex(kind=dpc), allocatable :: cwavef_rot(:,:,:),occ_nd_cpx(:,:)
 ! *************************************************************************
 
   DBG_ENTER("COLL")
 
-  if(nband /= blocksize) then
+  if (nband /= blocksize) then
     message = " DMFT in KGB cannot be used with multiple blocks yet. Make sure that bandpp*npband = nband."
     ABI_ERROR(message)
   end if
 
 !! Initialisation
+
+  ABI_MALLOC(cwavef_rot,(npw,nbandc,nspinor)) 
+  ABI_MALLOC(occ_diag_red,(nbandc))
+  ABI_MALLOC(occ_nd_cpx,(nbandc,nbandc))
 
   do np=1,nbandc
     do n=1,nbandc
@@ -209,24 +212,38 @@ subroutine rot_cg(occ_nd,cwavef,npw,nband,blocksize,nspinor,first_bandc,nbandc,o
 
 !! Compute the corresponding wave functions if nothing wrong happened
   ! $c^{rot}_{n,k}(g) =  \sum_{n'} [\bar{f_{n',n}} * c_{n',k}(g)]$
-  !do ig=1,npw
-  cwavef(:,:,first_bandc:first_bandc+nbandc-1,:) = zero
+!  do ig=1,npw
+!  cwavef_rot_g(:,:) = czero
+!    do n=1,nbandc
+!      do np=1,nbandc
+!        cwavef_rot_g(n,:) = cwavef_rot_g(n,:) + occ_nd_cpx(np, n) * &
+!&                           cmplx(cwavef(1,ig,np+first_bandc-1,:),cwavef(2,ig,np+first_bandc-1,:), kind=dpc)
+!      end do ! np
+!    end do ! n
+!    cwavef(1,ig,first_bandc:first_bandc+nbandc-1,:) = dreal(cwavef_rot_g)
+!    cwavef(2,ig,first_bandc:first_bandc+nbandc-1,:) = dimag(cwavef_rot_g)
+!  end do ! npw
+
+  cwavef_rot(:,:,:) = czero
+
   do ispinor=1,nspinor
     do n=1,nbandc
       do np=1,nbandc
         do ig=1,npw
-          cwavef_rot = conjg(occ_nd_cpx(np,n)) * &
-             & cmplx(cwavef(1,ig,np+first_bandc-1,ispinor), &
-             &       cwavef(2,ig,np+first_bandc-1,ispinor),kind=dpc)
-          cwavef(1,ig,n+first_bandc-1,ispinor) = cwavef(1,ig,n+first_bandc-1,ispinor) + dreal(cwavef_rot)
-          cwavef(2,ig,n+first_bandc-1,ispinor) = cwavef(2,ig,n+first_bandc-1,ispinor) + dimag(cwavef_rot)
+          cwavef_rot(ig,n,ispinor) = cwavef_rot(ig,n,ispinor) + conjg(occ_nd_cpx(np,n))* &
+                                   & cmplx(cwavef(1,ig,np+first_bandc-1,ispinor), &
+                                   &       cwavef(2,ig,np+first_bandc-1,ispinor),kind=dpc)
         end do ! ig
       end do ! np
     end do ! n
-    !cwavef(1,ig,first_bandc:first_bandc+nbandc-1,:) = dreal(cwavef_rot_g)
-    !cwavef(2,ig,first_bandc:first_bandc+nbandc-1,:) = dimag(cwavef_rot_g)
-  end do ! nspinor
+  end do ! ispinor
+  cwavef(1,1:npw,first_bandc:first_bandc+nbandc-1,:) = dble(cwavef_rot(1:npw,:,:))
+  cwavef(2,1:npw,first_bandc:first_bandc+nbandc-1,:) = aimag(cwavef_rot(1:npw,:,:))
       
+  ABI_FREE(cwavef_rot)
+  ABI_FREE(occ_diag_red)
+  ABI_FREE(occ_nd_cpx)
+ 
   DBG_EXIT("COLL")
     
  end subroutine rot_cg

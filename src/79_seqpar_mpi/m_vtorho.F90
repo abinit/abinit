@@ -438,7 +438,6 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  type(gemm_nonlop_gpu_type) :: gemm_nonlop_gpu_obj
 #endif
 
-
 ! *********************************************************************
 
  DBG_ENTER("COLL")
@@ -1303,7 +1302,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 &     dtset%nkpt,dtset%nspinor,dtset%nsppol,occ,dtset%occopt,prtvol,dtset%tphysel,&
 &     dtset%tsmear,dtset%wtk,prtstm=dtset%prtstm,stmbias=dtset%stmbias,extfpmd=extfpmd)
      call timab(990,2,tsec)
-     
+   
 !    !=========  DMFT call begin ============================================
      dmft_dftocc=0
      if(paw_dmft%use_dmft==1.and.psps%usepaw==1.and.dtset%nbandkss==0) then
@@ -1392,8 +1391,9 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
          call init_oper(paw_dmft,dft_occup,opt_ksloc=2)
          call flush_unit(std_out)
          call timab(620,1,tsec)
-         call datafordmft(cg(:,:),cprj(:,:),cryst_struc,dft_occup,gs_hamk%dimcprj,dtset,eigen(:),mband_cprj,mpi_enreg,&
-                        & my_nspinor,occ(:),paw_dmft,paw_ij,pawtab(:),usecprj_local,dtset%nbandkss)
+        
+         call datafordmft(cg(:,:),cprj(:,:),cryst_struc,dft_occup,gs_hamk%dimcprj(:),dtset,eigen(:),mband_cprj,mpi_enreg,&
+                        & my_nspinor,occ(:),paw_dmft,paw_ij(:),pawtab(:),usecprj_local,dtset%nbandkss)
 
          call timab(620,2,tsec)
          call flush_unit(std_out)
