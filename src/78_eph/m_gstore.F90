@@ -3558,8 +3558,6 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
        ABI_CHECK(db_iqpt /= -1, sjoin("Could not find symmetric of q-point:", ktoa(qq_bz), "in DVDB file."))
        ! The first entry in qbz2dvdb gives the index in dvdb%qpts.
        ! The other entries in mapc_qq are OK as they refer to symmetries.
-       !qmap_symrec(:,iq_ibz)
-       !NOT_IMPLEMENTED_ERROR()
        qbz2dvdb = gqk%my_q2ibz(:, my_iq); qbz2dvdb(1) = db_iqpt
        call dvdb%readsym_qbz(cryst, qq_bz, qbz2dvdb, cplex, nfftf, ngfftf, v1scf, gqk%pert_comm%value)
      end if

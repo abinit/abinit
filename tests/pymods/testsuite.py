@@ -1955,7 +1955,7 @@ pp_dirpath $ABI_PSPDIR
         self.sub_timeout = kwargs.get("sub_timeout", self.sub_timeout)
         simplified_diff = kwargs.get("simplified_diff")
         forced_tolerance = kwargs.get("forced_tolerance")
-        self.abimem_level = kwargs.get("abimem_level")
+        self.abimem_level = kwargs.get("abimem_level", 0)
         self.useylm = kwargs.get("useylm")
         self.gpu_option = kwargs.get("gpu_option")
 
