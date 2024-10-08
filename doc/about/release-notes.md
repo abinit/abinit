@@ -34,6 +34,43 @@ Xavier
 
 ### **B.** Most noticeable achievements
 
+**B.1** GPU porting of the DFPT part of ABINIT
+
+The new GPU porting of ABINIT has been continued. 
+In the previous release 10.0, two implementations (OpenMP or KOKKOS+CUDA) for ground-state calculations [[optdriver]]=0
+had been made available. In the present release 10.2, the Density-Functional Perturbation Theory implementation [[optdriver]]=1
+has been ported. Numerous tests are available, in the directory tests/gpu_omp, tests 11 to 25
+See the description of the GPU possibilities of ABINIT in the documentation, input variable [[gpu_option]]=2.
+
+By M. Sarraute and M. Torrent (MR XX)
+
+**B.2** Interface to coupled-cluster CC4S calculations.
+
+The file needed as input for computations with the CC4S package, <https://manuals.cc4s.org/user-manual>,
+allowing to perform coupled-cluster calculations (e.g. CCSD), perturbative triples (and more), 
+can be produced using [[optdriver]]=6 and [[gwr_task]]="CC4S".
+This functionality, available in v10.0 has now been more extensively tested.
+See tests : gwr_07 and gwr_09 
+
+By M. Giantomassi (MR XX)
+
+**B.3** The Chebicheff filtering algorithm has been generalized to PAW with Spin-Orbit Coupling
+
+See tests : paral 44 to 47, as well as v10 3 to 6.
+
+By L. Baguet (MR XX)
+
+**B.4** Speed-up of the PAW calculations
+
+The coefficients of the wavefunctions giving the in-sphere contribution, denoted "cprj" can now be stored in memory, 
+thanks to the input variable [[cprj_in_memory]]. This brings speed-up of the PAW calculations (on the order of 20%-30%).
+This new developmentIt has been well tested already (+see the tests), 
+but the users are advised to check for themselves the results from turning on this new implementation (still mentioned as being "in development").
+
+Available only for the ground state (or also for the DPFT ?)
+
+By L. Baguet (MR XX)
+
 
 * * *
 
@@ -44,6 +81,22 @@ Xavier
 
 ### **D.**  Other changes (or on-going developments, not yet finalized, as well as miscellaneous bug fixes)
 
+**D.1** New tests of the GPU (KOKKOS+CUDA) porting of ABINIT are available, in directory tests/gpu_kokkos, tests 1 and 2. See input variable [[gpu_option]]=3.
+
+By M. Sarraute and M. Torrent (MR XX)
+
+**D.2** New tests of the GPU (OpenMP) porting of ABINIT are available, in directory tests/gpu_omp, tests 4 and 9. See input variable [[gpu_option]]=2.
+
+By M. Sarraute and M. Torrent (MR XX)
+
+**D.3** New tests of the chemical shielding and recognition of symmetries (trigonal and hexagonal groups).
+Tests v10_2, v10_40 and v3_98 .
+
+By J.Zwanziger (MR XX)
+
+**D.4** New tests of the chemical shielding and recognition of symmetries (trigonal and hexagonal groups).
+
+By J.Zwanziger (MR XX)
 
 ## v10.0
 
