@@ -320,13 +320,13 @@ subroutine tdks_init(tdks ,codvsn, dtfil, dtset, mpi_enreg, pawang, pawrad, pawt
    ABI_ERROR("TD Electric field only work with spherical harmonics (useylm=1)")
  end if
  !Init vector potential and associated constants
- call tdks%tdef%init(dtset%td_ef_type,dtset%td_ef_pol,dtset%td_ef_ezero,dtset%td_ef_tzero, &
-                   & dtset%td_ef_lambda,dtset%td_ef_tau,dtset%nkpt,dtset%kptns)
- call tdks%tdef%update(dtset,mpi_enreg,(tdks%first_step-1)*dtset%dtele,tdks%rprimd,tdks%gprimd,tdks%kg, &
-                   & psps%mpsang,tdks%npwarr,tdks%ylm,tdks%ylmgr)
  if (dtset%td_ef_type/=0 .or. dtset%prtcurrent/=0) then
     ABI_MALLOC(tdks%current,(3,dtset%nsppol))
  end if
+ call tdks%tdef%init(dtset%td_ef_type,dtset%td_ef_pol,dtset%td_ef_ezero,dtset%td_ef_tzero, &
+                   & dtset%td_ef_lambda,dtset%td_ef_tau,dtset%td_ef_induced_vecpot,dtset%nkpt,dtset%kptns)
+ call tdks%tdef%update(dtset,mpi_enreg,(tdks%first_step-1)*dtset%dtele,tdks%rprimd,tdks%gprimd,tdks%kg, &
+                   & psps%mpsang,tdks%npwarr,tdks%ylm,tdks%ylmgr,tdks%current)
 
  !7) Keep initial cg and cproj in memory for occupations
  !Keep initial wavefunction in memory

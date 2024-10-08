@@ -128,7 +128,7 @@ subroutine rttddft_output(dtfil, dtset, istep, mpi_enreg, psps, tdks)
       if (dtset%td_restart==0 .and. mpi_enreg%me == 0) then
          write(msg,'(a)') "# RT-TDDFT -- Electric field file. All quantities are in Hartree atomic units."
          call wrtout(tdks%tdef_unit,msg)
-         write(msg,'(a)') "# step  time  E_x  E_y  E_z  A_x  A_y  A_z"
+         write(msg,'(a)') "# step  time  E_x  E_y  E_z  A_x  A_y  A_z A_ext_x A_ext_y A_ext_z A_ind_x A_ind_y A_ind_z"
          call wrtout(tdks%tdef_unit,msg)
       end if
    end if
@@ -159,15 +159,16 @@ subroutine rttddft_output(dtfil, dtset, istep, mpi_enreg, psps, tdks)
  if (do_write_log) call wrtout(std_out,msg)
 
  !** Writes in energy file
- write(msg,'(i0,1X,f15.5,11(f14.8,1X))') istep-1, (istep-1)*tdks%dt, tdks%etot, tdks%energies%e_kinetic,              &
-                                    & tdks%energies%e_hartree, tdks%energies%e_xc, tdks%energies%e_ewald,             &
-                                    & tdks%energies%e_corepsp, tdks%energies%e_localpsp, tdks%energies%e_nlpsp_vfock, &
-                                    & tdks%energies%e_paw, tdks%energies%e_entropy, tdks%energies%e_vdw_dftd
+ write(msg,'(i0,1X,f15.5,11(f14.8,1X))') istep-1, (istep-1)*tdks%dt, tdks%etot, tdks%energies%e_kinetic,                 &
+                                       & tdks%energies%e_hartree, tdks%energies%e_xc, tdks%energies%e_ewald,             &
+                                       & tdks%energies%e_corepsp, tdks%energies%e_localpsp, tdks%energies%e_nlpsp_vfock, &
+                                       & tdks%energies%e_paw, tdks%energies%e_entropy, tdks%energies%e_vdw_dftd
  call wrtout(tdks%tdener_unit,msg)
 
  !** Writes TD elec. field and associated vector potential if needed
  if (dtset%td_ef_type /= 0) then
-   write(msg,'(i0,1X,f15.5,1X,3(f14.8,1X),3(f14.8,1X))') istep, istep*tdks%dt, tdks%tdef%efield(:), tdks%tdef%vecpot(:)
+   write(msg,'(i0,1X,f15.5,1X,12(f14.8,1X))') istep, istep*tdks%dt, tdks%tdef%efield(:), tdks%tdef%vecpot(:), & 
+                                            & tdks%tdef%vecpot_ext(:), tdks%tdef%vecpot_ind(:,1)
    call wrtout(tdks%tdef_unit,msg)
  end if
 

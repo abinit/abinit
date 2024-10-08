@@ -45,15 +45,19 @@ module m_rttddft_tdef
    integer  :: ef_type       !type of TD electric feld (Dirac or sin^2 pulse)
    real(dp) :: efield(3)     !TD external elec. field perturbation
    real(dp) :: ef_ezero(3)   !E_0 = |E_0|*polarization
-   real(dp) :: vecpot(3)     !associated vector potential (in velocity gauge)
-   real(dp) :: vecpot_red(3) !vector potential in reduced coord.
+   real(dp) :: vecpot(3)     !total vector potential
+   real(dp) :: vecpot_ext(3) !external vector potential
+   real(dp) :: vecpot_ind(3,2) !induced vector potential at t and t-dt
+   real(dp) :: vecpot_red(3) !total vector potential in reduced coord. (in reciprocal space)
    real(dp) :: ef_tzero      !time at which elec field is switched on
    real(dp) :: ef_omega      !angular freq. of TD elec field
    real(dp) :: ef_tau        !time width of the pulse
    real(dp) :: ef_sin_a      !useful constant for sin^2 pulse
    real(dp) :: ef_sin_b      !useful constant for sin^2 pulse
-   real(dp),allocatable :: kpa(:,:) ! contains kpts + A 
-                                    ! (in reduced coordinates in reciprocal space)
+   real(dp), allocatable :: kpa(:,:) ! contains kpts + A 
+                                     ! (in reduced coordinates in reciprocal space)
+   logical  :: induced_vecpot ! Add the vector potential induced by the current density
+                              ! in the Hamiltonian
 
    contains
 
@@ -83,19 +87,21 @@ contains
 !!  td_ef_lambda = wavelength (for sin^2 pulse)
 !!  td_ef_tau = time width of the pulse (for sin^2 pulse)
 !!  time = propagation time
+!!  nkpt = number of kpoints
+!!  kpts = kpoints array
 !!
 !! OUTPUT
 !!  [tdef = updated tdef structure]
 !!
 !! SOURCE
-subroutine tdef_init(tdef, td_ef_type, td_ef_pol, td_ef_ezero, td_ef_tzero, td_ef_lambda, td_ef_tau, nkpt, kpts)
+subroutine tdef_init(tdef,td_ef_type,td_ef_pol,td_ef_ezero,td_ef_tzero,td_ef_lambda,td_ef_tau,td_ef_induced_vecpot,nkpt,kpts)
 
  implicit none
 
  !Arguments ------------------------------------
  !scalars
  class(tdef_type), intent(inout) :: tdef
- integer,          intent(in)    :: td_ef_type, nkpt
+ integer,          intent(in)    :: td_ef_type, td_ef_induced_vecpot, nkpt
  real(dp),         intent(in)    :: td_ef_ezero, td_ef_tzero, td_ef_lambda, td_ef_tau
  !arrays
  real(dp),         intent(in)    :: kpts(:,:)
@@ -106,16 +112,25 @@ subroutine tdef_init(tdef, td_ef_type, td_ef_pol, td_ef_ezero, td_ef_tzero, td_e
 ! ***********************************************************************
 
  
- tdef%ef_type = td_ef_type
- tdef%ef_ezero(:) = td_ef_pol(:)*td_ef_ezero
- tdef%ef_tau      = td_ef_tau
- tdef%ef_omega    = 2.0_dp*pi*Sp_Lt/td_ef_lambda !2*pi*f=2*pi*c/lambda
- tdef%ef_tzero    = td_ef_tzero
- tdef%ef_sin_a    = 2.0_dp*pi/td_ef_tau + tdef%ef_omega
- tdef%ef_sin_b    = 2.0_dp*pi/td_ef_tau - tdef%ef_omega
+ tdef%ef_type  = td_ef_type
+ tdef%ef_ezero = td_ef_pol*td_ef_ezero
+ tdef%ef_tau   = td_ef_tau
+ tdef%ef_omega = 2.0_dp*pi*Sp_Lt/td_ef_lambda !2*pi*f=2*pi*c/lambda
+ tdef%ef_tzero = td_ef_tzero
+ tdef%ef_sin_a = 2.0_dp*pi/td_ef_tau + tdef%ef_omega
+ tdef%ef_sin_b = 2.0_dp*pi/td_ef_tau - tdef%ef_omega
+ if (td_ef_induced_vecpot == 0) then
+   tdef%induced_vecpot = .false.
+ else if (td_ef_induced_vecpot == 1) then
+   tdef%induced_vecpot = .true.
+ else
+    ABI_ERROR("Wrong value of td_ef_induced_vecpot")
+ end if
  
  tdef%efield = 0.0_dp
  tdef%vecpot = 0.0_dp
+ tdef%vecpot_ext = 0.0_dp
+ tdef%vecpot_ind = 0.0_dp
  tdef%vecpot_red = 0.0_dp
  
  ABI_MALLOC(tdef%kpa,(3,nkpt))
@@ -134,14 +149,23 @@ end subroutine tdef_init
 !!
 !! INPUTS
 !!  [tdef = tdef structure to update]
-!!  time = propagation time
-!!  rprimd = primitive vectors
+!!  dtset = dataset structure
+!!  mpi_enreg = MPI communicators structure
+!!  time = propagation time 
+!!  rprimd = cell vectors (direct space)
+!!  gprimd = cell vectors (reciprocal space)
+!!  kg = kpoints in reciprocal space
+!!  mpsang = 1+maximum angular momentum for nonlocal pseudopotential (required by initylmg)
+!!  npwarr = array holding npw for each k point
+!!  ylm = real spherical harmonics for each G and k point
+!!  ylmgr = gradient of real spherical harmonics for each G and k point
+!!  current = total current density
 !!
 !! OUTPUT
 !!  [tdef = updated tdef structure]
 !!
 !! SOURCE
-subroutine tdef_update(tdef, dtset, mpi_enreg, time, rprimd, gprimd, kg, mpsang, npwarr, ylm, ylmgr)
+subroutine tdef_update(tdef,dtset,mpi_enreg,time,rprimd,gprimd,kg,mpsang,npwarr,ylm,ylmgr,current)
 
  implicit none
 
@@ -156,6 +180,7 @@ subroutine tdef_update(tdef, dtset, mpi_enreg, time, rprimd, gprimd, kg, mpsang,
  integer,            intent(in)    :: kg(:,:)
  integer,            intent(in)    :: mpsang
  integer,            intent(in)    :: npwarr(:)
+ real(dp),           intent(in)    :: current(:,:)
  real(dp),           intent(out)   :: ylm(:,:)
  real(dp),           intent(out)   :: ylmgr(:,:,:)
 
@@ -163,6 +188,7 @@ subroutine tdef_update(tdef, dtset, mpi_enreg, time, rprimd, gprimd, kg, mpsang,
  character(len=500) :: msg
  real(dp)           :: t
  integer            :: i
+ real(dp)           :: tmp(3)
 
 ! ***********************************************************************
 
@@ -178,35 +204,48 @@ subroutine tdef_update(tdef, dtset, mpi_enreg, time, rprimd, gprimd, kg, mpsang,
          tdef%efield(:) = zero
       end if
       if (time >= tdef%ef_tzero) then
-         tdef%vecpot(:) = -tdef%ef_ezero(:)
+         tdef%vecpot_ext(:) = -tdef%ef_ezero(:)
       end if
-      tdef%vecpot_red = matmul(transpose(rprimd),tdef%vecpot)/(2.0_dp*pi)
    !Pulse with sin^2 shape:
    !E(t) = E0*cos(w*(t-t0))*sin^2(pi*(t-t0)/tau)
    !A(t) = -(E0/2w)*sin(w*(t-t0))+E0/(4*(2pi/tau+w))*sin((2pi/tau+w)*(t-t0))+E0/(4(2pi/taur-w))*sin((2pi/tau-w)*(t-t0))
    case(2)
       if (time >= tdef%ef_tzero+tdef%ef_tau) then
-         tdef%efield(:) = 0.0_dp
+         tdef%efield(:) = zero
       else if (time >= tdef%ef_tzero) then
          t = time-tdef%ef_tzero
          tdef%efield(:) = tdef%ef_ezero*cos(tdef%ef_omega*t)*sin(pi*t/tdef%ef_tau)**2
-         tdef%vecpot(:) = tdef%ef_ezero*(-sin(tdef%ef_omega*t)/(2.0_dp*tdef%ef_omega) &
-                                       & +sin(tdef%ef_sin_a*t)/(4.0_dp*tdef%ef_sin_a) &
-                                       & +sin(tdef%ef_sin_b*t)/(4.0_dp*tdef%ef_sin_b))
+         tdef%vecpot_ext(:) = tdef%ef_ezero*(-sin(tdef%ef_omega*t)/(2.0_dp*tdef%ef_omega) &
+                                           & +sin(tdef%ef_sin_a*t)/(4.0_dp*tdef%ef_sin_a) &
+                                           & +sin(tdef%ef_sin_b*t)/(4.0_dp*tdef%ef_sin_b))
       end if
-      tdef%vecpot_red(:) = matmul(transpose(rprimd),tdef%vecpot)/(2.0_dp*pi)
    case default
       write(msg,"(a)") "Unknown electric field type - check the value of td_ef_type"
       ABI_ERROR(msg)
  end select
+
+ !Induced vector potential
+ !Should deal with sppol?! How?
+ tmp = tdef%vecpot_ind(:,1)
+ tdef%vecpot_ind(:,1) = 2*tdef%vecpot_ind(:,1) - tdef%vecpot_ind(:,2) + 4.0_dp*pi*(dtset%dtele**2)*current(:,1)
+ tdef%vecpot_ind(:,2) = tmp
+ if (tdef%induced_vecpot) then
+   tdef%vecpot = tdef%vecpot_ext + tdef%vecpot_ind(:,1)
+ else
+    tdef%vecpot = tdef%vecpot_ext
+ end if
+
+ tdef%vecpot_red = matmul(transpose(rprimd),tdef%vecpot)
+
  if (tdef%ef_type /= 0) then
    !Update the k+A grid used in cprojs
+   !Divide by 2pi here seems necessary
    do i = 1,3
-      tdef%kpa(i,:) = dtset%kptns(i,:) + tdef%vecpot_red(i)
+      tdef%kpa(i,:) = dtset%kptns(i,:) + tdef%vecpot_red(i)/(two*pi)
    end do
-      ! update the spherical harmonics (computed at k+G+A)
-      call initylmg(gprimd,kg,tdef%kpa,dtset%mkmem,mpi_enreg,mpsang,dtset%mpw,dtset%nband, &
-                  & dtset%nkpt,npwarr,dtset%nsppol,0,rprimd,ylm,ylmgr)
+   ! update the spherical harmonics (computed at k+G+A)
+   call initylmg(gprimd,kg,tdef%kpa,dtset%mkmem,mpi_enreg,mpsang,dtset%mpw,dtset%nband, &
+               & dtset%nkpt,npwarr,dtset%nsppol,0,rprimd,ylm,ylmgr)
  end if
 
 end subroutine tdef_update

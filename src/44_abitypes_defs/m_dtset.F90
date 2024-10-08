@@ -626,6 +626,7 @@ type, public :: dataset_type
  integer :: td_prtstr
  integer :: td_propagator
  integer :: td_ef_type
+ integer :: td_ef_induced_vecpot
  integer :: td_restart
  integer :: tfkinfunc
  integer :: tim1rev
@@ -872,10 +873,10 @@ type, public :: dataset_type
  real(dp) :: strprecon
  real(dp) :: td_maxene
  real(dp) :: td_scthr
- real(dp) :: td_ef_tzero
- real(dp) :: td_ef_tau
- real(dp) :: td_ef_lambda
  real(dp) :: td_ef_ezero
+ real(dp) :: td_ef_lambda
+ real(dp) :: td_ef_tau
+ real(dp) :: td_ef_tzero
  real(dp) :: tfw_toldfe
  real(dp) :: tl_radius
  real(dp) :: tolcum = zero
@@ -2023,6 +2024,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%td_restart         = dtin%td_restart
  dtout%td_propagator      = dtin%td_propagator
  dtout%td_ef_type         = dtin%td_ef_type
+ dtout%td_ef_induced_vecpot = dtin%td_ef_induced_vecpot
  dtout%td_scthr           = dtin%td_scthr
  dtout%td_ef_tzero        = dtin%td_ef_tzero
  dtout%td_ef_tau          = dtin%td_ef_tau
@@ -3572,7 +3574,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' structure '
 !T
  list_vars=trim(list_vars)//' td_exp_order td_maxene td_mexcit td_scnmax td_prtstr td_restart td_propagator td_scthr'
- list_vars=trim(list_vars)//' td_ef_type td_ef_tzero td_ef_tau td_ef_lambda td_ef_pol td_ef_ezero'
+ list_vars=trim(list_vars)//' td_ef_type td_ef_induced_vecpot td_ef_tzero td_ef_tau td_ef_lambda td_ef_pol td_ef_ezero'
  list_vars=trim(list_vars)//' tfkinfunc temperature test_effpot test_prt_ph tfw_toldfe tim1rev timopt'
  list_vars=trim(list_vars)//' tmesh tmpdata_prefix transport_ngkpt'
  list_vars=trim(list_vars)//' tl_nprccg tl_radius tnons tolcum toldfe tolmxde toldff tolimg tolmxf tolrde tolrff tolsym'
