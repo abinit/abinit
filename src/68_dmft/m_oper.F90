@@ -1499,7 +1499,7 @@ subroutine gather_oper(oper,distrib,paw_dmft,opt_ksloc,master,opt_diag,opt_commk
    do irank=2,nproc
      displs(irank) = displs(irank-1) + recvcounts(irank-1)
    end do ! irank
-   
+ 
    ABI_MALLOC(buffer,(recvcounts(myproc+1)))
    ABI_MALLOC(buffer_tot,(siz_buf*nw))
    
@@ -1590,7 +1590,8 @@ subroutine gather_oper_ks(oper,distrib,paw_dmft,opt_diag)
  type(paw_dmft_type), intent(in) :: paw_dmft
  integer, optional, intent(in) :: opt_diag
 !oper variables-------------------------------
- integer :: ib,ib1,ibuf,ierr,ikpt,irank,isppol,mbandc,me_kpt,myproc,nkpt,nproc,nsppol,siz_buf
+ integer :: ib,ib1,ibuf,ierr,ikpt,irank,isppol,mbandc
+ integer :: me_kpt,myproc,nkpt,nproc,nproc_freq,nsppol,nw,siz_buf
  logical :: diag
  integer, allocatable :: displs(:),recvcounts(:)
  complex(dpc), allocatable :: buffer(:),buffer_tot(:)
@@ -1602,7 +1603,10 @@ subroutine gather_oper_ks(oper,distrib,paw_dmft,opt_diag)
  nkpt   = paw_dmft%nkpt
  nproc  = paw_dmft%nproc
  nsppol = paw_dmft%nsppol
- 
+ nw     = distrib%nw 
+
+ nproc_freq = nproc / nkpt 
+
  diag = .false.
  if (present(opt_diag)) then
    if (opt_diag == 1) diag = .true.
@@ -1618,9 +1622,16 @@ subroutine gather_oper_ks(oper,distrib,paw_dmft,opt_diag)
  do irank=2,nproc
    displs(irank) = displs(irank-1) + recvcounts(irank-1)
  end do ! irank
-  
- ABI_MALLOC(buffer,(recvcounts(myproc+1)))
+ 
+ siz_buf = recvcounts(myproc+1)
+ if () then
+   siz_buf = mbandc
+   if (.not. diag) siz_buf = siz_buf * mbandc 
+ end if 
+ ABI_MALLOC(buffer,(siz_buf))
  ABI_MALLOC(buffer_tot,(recvcounts(nproc)+displs(nproc)))
+
+ buffer(:) = czero
  
  do isppol=1,nsppol
   
