@@ -1,8 +1,8 @@
 ## v10.2
 
-Version 10.2, released on October 5, 2024.
+Version 10.2, released on October 9, 2024.
 List of changes with respect to version 10.0.
-<!-- Release notes updated on Sep 28, 2024. -->
+<!-- Release notes updated on Oct 8, 2024. -->
 
 Many thanks to the contributors to the ABINIT project between
 March 2024 and October 2024.
@@ -34,42 +34,64 @@ Xavier
 
 ### **B.** Most noticeable achievements
 
-**B.1** GPU porting of the DFPT part of ABINIT
+**B.1** GPU porting of the DFPT driver of ABINIT
 
-The new GPU porting of ABINIT has been continued. 
+The GPU porting of ABINIT using recent libraries/compilers has been continued. 
 In the previous release 10.0, two implementations (OpenMP or KOKKOS+CUDA) for ground-state calculations [[optdriver]]=0
-had been made available. In the present release 10.2, the Density-Functional Perturbation Theory implementation [[optdriver]]=1
-has been ported. Numerous tests are available, in the directory tests/gpu_omp, tests 11 to 25
+had been made available. In the present release 10.2, the Density-Functional Perturbation Theory [[optdriver]]=1
+has been ported using OpenMP. Numerous tests are available, in the directory tests/gpu_omp, tests 11 to 25
 See the description of the GPU possibilities of ABINIT in the documentation, input variable [[gpu_option]]=2.
 
 By M. Sarraute and M. Torrent (MR XX)
 
-**B.2** Interface to coupled-cluster CC4S calculations.
+
+**B.2** GPU porting of Fock calculations 
+
+Similarly, the Fock calculation has been ported to GPU, using OpenMP.
+Tests are available, in the directory tests/gpu_omp, tests 26 to 29.
+See the description of the GPU possibilities of ABINIT in the documentation, input variable [[gpu_option]]=2.
+
+By M. Sarraute and M. Torrent (MR XX)
+
+
+**B.3** Interface to coupled-cluster CC4S calculations 
 
 The file needed as input for computations with the CC4S package, <https://manuals.cc4s.org/user-manual>,
 allowing to perform coupled-cluster calculations (e.g. CCSD), perturbative triples (and more), 
 can be produced using [[optdriver]]=6 and [[gwr_task]]="CC4S".
-This functionality, available in v10.0 has now been more extensively tested.
+This functionality, available in v10.0, can now be considered in production.
 See tests : gwr_07 and gwr_09 
 
 By M. Giantomassi (MR XX)
 
-**B.3** The Chebicheff filtering algorithm has been generalized to PAW with Spin-Orbit Coupling
+**B.4** The variational polaron equation methodology 
+
+This methodology is described in [[ref:Vasilchenko2022]]. It allows to compute the polaron formation energy,
+and other characteristics of a polaron, from the electronic band structure, the phonon band structure, and the electron-phonon coupling.
+To use it, select [[optdriver]]=7 and [[eph_task]]=13.
+Related input variables : varpeq_aseed, varpeq_erange, varpeq_gau_params, varpeq_interpolate, varpeq_orth, varpeq_nstep, varpeq_pkind, varpeq_tolgrs, varpeq_pc_nupdate, varpeq_pc_factor.
+
+At present, no documentation of input variables, and no tests are available...
+
+By V. Vasilchenko, with help from M. Giantomassi (MR XX).
+
+**B.5** Speed-up of the PAW calculations
+
+The coefficients of the wavefunctions giving the in-sphere contribution, denoted "cprj" can now be stored in memory, 
+thanks to the input variable [[cprj_in_memory]]. This brings speed-up of the PAW calculations (on the order of 20%-30%).
+There are many tests of this functionality, v10 10 to 18, paral 35 to 40, as well as 48 to 50,
+but, as usual, the users are advised to check for themselves the results from turning on this new implementation (still mentioned as being "in development").
+
+Available only for the ground state. See the other limitations in the documentation of [[cprj_in_memory]]
+
+By L. Baguet (MR XX)
+
+**B.6** The Chebicheff filtering algorithm has been generalized to PAW with Spin-Orbit Coupling
 
 See tests : paral 44 to 47, as well as v10 3 to 6.
 
 By L. Baguet (MR XX)
 
-**B.4** Speed-up of the PAW calculations
-
-The coefficients of the wavefunctions giving the in-sphere contribution, denoted "cprj" can now be stored in memory, 
-thanks to the input variable [[cprj_in_memory]]. This brings speed-up of the PAW calculations (on the order of 20%-30%).
-This new developmentIt has been well tested already (+see the tests), 
-but the users are advised to check for themselves the results from turning on this new implementation (still mentioned as being "in development").
-
-Available only for the ground state (or also for the DPFT ?)
-
-By L. Baguet (MR XX)
 
 
 * * *
