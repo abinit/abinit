@@ -642,13 +642,15 @@ subroutine phgamma_ncwrite(gams, cryst, ifc, ncid)
 
 !Local variables-------------------------------
 !scalars
- integer :: iq_ibz,spin,mu
+ integer :: iq_ibz,spin,mu, units(2)
  real(dp) :: lambda_tot
  character(len=500) :: msg
 !arrays
  real(dp) :: phfrq(3*cryst%natom), gamma_ph(3*cryst%natom), lambda_ph(3*cryst%natom)
  real(dp) :: displ_cart(2,3*cryst%natom,3*cryst%natom)
 ! *************************************************************************
+
+ units = [std_out, ab_out]
 
  ! Write data to files for each q point, also compute total lambda.
  lambda_tot = zero
@@ -683,16 +685,16 @@ subroutine phgamma_ncwrite(gams, cryst, ifc, ncid)
          ' q-point =',gams%qibz(:, iq_ibz),ch10,&
          ' Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)'
      end if
-     call wrtout([std_out, ab_out], msg)
+     call wrtout(units, msg)
 
      do mu=1,gams%natom3
        write(msg,'(i5,es20.6,2es16.6)')mu, phfrq(mu), gamma_ph(mu), lambda_ph(mu)
-       call wrtout([std_out, ab_out], msg)
+       call wrtout(units, msg)
      end do
 
    end do
    ! Add blank lines to output files between spins
-   call wrtout([std_out, ab_out], "")
+   call wrtout(units, "")
  end do
 
  write(ab_out,"(a,f8.4)")" lambda= ",lambda_tot
@@ -3071,8 +3073,8 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
 
 !Local variables ------------------------------
 !scalars
- integer,parameter :: tim_getgh1c = 1, berryopt0 = 0, ider0 = 0, idir0 = 0, qptopt1 = 1
- integer,parameter :: useylmgr = 0, useylmgr1 = 0, master = 0, ndat1 = 1, eph_scalprod0 = 0
+ integer,parameter :: tim_getgh1c = 1, berryopt0 = 0, qptopt1 = 1
+ integer,parameter :: master = 0, ndat1 = 1, eph_scalprod0 = 0
  integer :: my_rank,nproc,mband,nsppol,nkibz,idir,ipert,iq_ibz
  integer :: cplex,db_iqpt,natom,natom3,ipc,ipc1,ipc2,nspinor,onpw
  integer :: bstart_k,bstart_kq,nband_k,nband_kq,band_k, band_kq, ib_k, ib_kq !ib1,ib2,
@@ -3082,8 +3084,8 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
  integer :: ii,jj,ipw,mpw,my_mpw,mnb,ierr,cnt,ncid
  integer :: n1,n2,n3,n4,n5,n6,nspden,do_ftv1q, ltetra
  integer :: sij_opt,usecprj,usevnl,optlocal,optnl,opt_gvnlx1
- integer :: nfft,nfftf,mgfft,mgfftf,kq_count,nkpg,nkpg1,edos_intmeth
- integer :: jene, iene, comm_rpt, nesting, my_npert, my_ip, my_iq, ncerr
+ integer :: nfft,nfftf,mgfft,mgfftf,kq_count,nkpg,dos_intmeth
+ integer :: jene, iene, comm_rpt, nesting, my_npert, my_ip, my_iq, ncerr, edos_intmeth
  real(dp) :: cpu, wall, gflops, cpu_q, wall_q, gflops_q, cpu_k, wall_k, gflops_k, cpu_all, wall_all, gflops_all
  real(dp) :: edos_step, edos_broad, sigma, ecut, eshift, eig0nk
  logical :: gen_eigenpb, need_velocities, isirr_k, isirr_kq
@@ -3109,21 +3111,19 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
  real(dp) :: kk(3),kq(3),kk_ibz(3),kq_ibz(3),qpt(3), lf(2),rg(2),res(2), vk(3), vkq(3)
  real(dp) :: wminmax(2), n0(ebands%nsppol)
  real(dp) :: resvv_in(2,9), resvv_out(2,9), phfrq(3*cryst%natom)
- real(dp) :: ylmgr_dum(1,1,1)
  real(dp),allocatable :: kinpw_k(:), kinpw_kq(:)
  real(dp),allocatable :: displ_cart(:,:,:,:), displ_red(:,:,:,:)
- real(dp),allocatable :: grad_berry(:,:), kpg_kq(:,:), kpg_k(:,:), dkinpw(:)
+ real(dp),allocatable :: grad_berry(:,:), kpg_kq(:,:), kpg_k(:,:)
  real(dp),allocatable :: ffnl_k(:,:,:,:), ffnl_kq(:,:,:,:), ph3d_k(:,:,:), ph3d_kq(:,:,:)
  real(dp),allocatable :: v1scf(:,:,:,:), tgam(:,:,:), gkk_atm(:,:,:,:) !,gkq_nu(:,:,:,:)
  real(dp),allocatable :: bras_kq(:,:,:), kets_k(:,:,:), h1kets_kq(:,:,:), cgwork(:,:)
  real(dp),allocatable :: ph1d(:,:), vlocal(:,:,:,:), vlocal1(:,:,:,:,:)
- !real(dp),allocatable :: ylm_kq(:,:), ylm_k(:,:)
  real(dp),allocatable :: dummy_vtrial(:,:), gvnlx1(:,:), work(:,:,:,:)
  real(dp),allocatable :: gs1c_kq(:,:), v1_work(:,:,:,:), vcar_ibz(:,:,:,:)
  real(dp),allocatable :: wt_ek(:,:), wt_ekq(:,:), dbldelta_wts(:,:)
  real(dp), allocatable :: tgamvv_in(:,:,:,:),  vv_kk(:,:,:), tgamvv_out(:,:,:,:), vv_kkq(:,:,:)
  real(dp), allocatable :: tmp_vals_ee(:,:,:,:,:), emesh(:)
- real(dp) :: ylmgr_k_dum(1,1,1), ylmgr_kq_dum(1,1,1)
+ !real(dp) :: ylmgr_k_dum(1,1,1), ylmgr_kq_dum(1,1,1), ylmgr_dum(1,1,1)
  logical,allocatable :: bks_mask(:,:,:),keep_ur(:,:,:)
  type(fstab_t),target,allocatable :: fstab(:)
  type(pawcprj_type),allocatable  :: cwaveprj0(:,:)
@@ -3557,10 +3557,6 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
  ABI_MALLOC(kg_k, (3, mpw))
  ABI_MALLOC(kg_kq, (3, mpw))
 
- ! Spherical Harmonics for useylm == 1.
- !ABI_MALLOC(ylm_k, (mpw, psps%mpsang*psps%mpsang*psps%useylm))
- !ABI_MALLOC(ylm_kq, (mpw, psps%mpsang*psps%mpsang*psps%useylm))
-
  ! TODO FOR PAW
  usecprj = 0
  ABI_MALLOC(cwaveprj0, (natom, nspinor*usecprj))
@@ -3891,6 +3887,10 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
        ABI_FREE(ffnl_kq)
        ABI_FREE(kpg_kq)
        ABI_FREE(kpg_k)
+       ABI_FREE(kinpw_k)
+       ABI_FREE(kinpw_kq)
+       ABI_FREE(ph3d_k)
+       ABI_FREE(ph3d_kq)
 
        ! Collect gkk_atm inside pert_comm so that all procs can operate on the data.
        if (pert_comm%nproc > 1) call xmpi_sum(gkk_atm, pert_comm%value, ierr)
@@ -4068,10 +4068,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
      ABI_FREE(h1kets_kq)
      ABI_FREE(gkk_atm)
      !ABI_FREE(gkq_nu)
-     ABI_FREE(ph3d_k)
-     ABI_FREE(ph3d_kq)
-     ABI_SFREE(kinpw_k)
-     ABI_FREE(kinpw_kq)
+
      ABI_SFREE(wt_ek)
      ABI_SFREE(wt_ekq)
 
@@ -4147,6 +4144,18 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
    call xmpi_sum(gams%vals_out_qibz, qs_comm%value, ierr)
  end if
  if (dtset%prteliash == 3) call xmpi_sum(gams%vals_ee, qs_comm%value, ierr)
+
+ ! Close the netcdf file then master reopens it
+ !if (ncwrite_comm%value /= xmpi_comm_null) then
+ !  NCF_CHECK(nf90_close(ncid))
+ !end if
+ !call xmpi_barrier(comm)
+
+ !ncid = nctk_noid
+ !if (my_rank == master) then
+ !  NCF_CHECK(nctk_open_modify(ncid, path, xmpi_comm_self))
+ !  NCF_CHECK(nctk_set_datamode(ncid))
+ !end if
 
  ! Deallocate MPI communicators.
  call pert_comm%free(); call qpt_comm%free(); call bsum_comm%free(); call qs_comm%free()

@@ -62,6 +62,32 @@ module m_kpts
  private :: get_kpt_fullbz           ! Create full grid of kpoints from kptrlatt and shiftk
 !!***
 
+!!   type, public :: kinds_t
+!!     integer :: ibz_idx
+!!     integer :: isym
+!!     integer :: trev
+!!     integer :: g0(3)
+!!     logical :: is_irred
+!!   contains
+!!     !procedure :: init => kmap_init
+!!     !procedure :: free => kmap_free
+!!   end type kinds_t
+!!  !!***
+!!
+!!   type, public :: kmap_t
+!!     integer :: nkpt
+!!     integer :: kptopt
+!!     integer :: ierr
+!!     character(len=500) :: err_msg
+!!     character(len=20) :: mode
+!!     real(dp) :: qpt(3) = zero
+!!     type(kinds_t),allocatable :: inds(:)
+!!   contains
+!!     !procedure :: init => kmap_init
+!!     !procedure :: free => kmap_free
+!!   end type bzlint_t
+!!  !!***
+
 !----------------------------------------------------------------------
 
 !!****t* m_kpts/bzlint_t
@@ -675,7 +701,7 @@ integer function kpts_map(mode, kptopt, cryst, krank, nkpt2, kpt2, map, qpt, dks
  if(kptopt==2 .or. kptopt==3) then
    nsym = 1
  else
-  nsym = cryst%nsym
+   nsym = cryst%nsym
  end if
 
  select case (mode)
@@ -706,16 +732,12 @@ integer function kpts_map(mode, kptopt, cryst, krank, nkpt2, kpt2, map, qpt, dks
 
  !ABI_MALLOC(map, (nkpt2))
  !do ii=1,nkpt2
- !  map(ii)%ik_ibz
- !  map(ii)%isym
- !  map(ii)%trev
- !  map(ii)%g0
- !  map(ii)%isirr_kq =
- !  ikq_ibz = indkk_kq(1, 1)
- !  isym_kq = indkk_kq(2, 1)
- !  trev_kq = indkk_kq(6, 1)
- !  g0_kq = indkk_kq(3:5, 1)
- !  isirr_kq = (isym_kq == 1 .and. trev_kq == 0 .and. all(g0_kq == 0))
+ !  map(ii)%mode = mode
+ !  map(ii)%ibz_idx = indkk_kq(1, ii)
+ !  map(ii)%isym    = indkk_kq(2, ii)
+ !  map(ii)%trev    = indkk_kq(6, ii)
+ !  map(ii)%g0      = indkk_kq(3:5, ii)
+ !  map(ii)%is_irred = (map(ii)%isym == 1 .and. map(ii)%trev == 0 .and. all(map%g0 == 0))
  !end do
 
 end function kpts_map

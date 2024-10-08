@@ -377,6 +377,7 @@ end type ebands_t
     ! Interpolate values at an arbitrary k-point.
 
  end type klinterp_t
+!!***
 
  public :: klinterp_new         ! Build interpolator.
 

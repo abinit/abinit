@@ -1923,6 +1923,7 @@ pp_dirpath $ABI_PSPDIR
         forced_tolerance   String: Force the use of fldiff tool with the specified tolerance.
                            Possible values are: default (from test config), high(1.e-10),
                                                 medium (1.e-8), easy (1.e-5), ridiculous (1.e-2)
+        abimem_level      Run executable with abimem_level.
         useylm            Change Abinit input file to use useylm e.g. useylm 1
         gpu_option        Change Abinit input file to use gpu_option e.g. useylm 1
         ================  ====================================================================
@@ -1954,8 +1955,9 @@ pp_dirpath $ABI_PSPDIR
         self.sub_timeout = kwargs.get("sub_timeout", self.sub_timeout)
         simplified_diff = kwargs.get("simplified_diff")
         forced_tolerance = kwargs.get("forced_tolerance")
-        self.useylm = kwargs.get("useylm", None)
-        self.gpu_option = kwargs.get("gpu_option", None)
+        self.abimem_level = kwargs.get("abimem_level")
+        self.useylm = kwargs.get("useylm")
+        self.gpu_option = kwargs.get("gpu_option")
 
         timeout = self.sub_timeout
         if self.build_env.has_bin("timeout") and timeout > 0.0:
@@ -2073,6 +2075,8 @@ pp_dirpath $ABI_PSPDIR
 
                 path = os.path.join(self.workdir, os.path.basename(self.inp_fname))
                 bin_argstr = path + " " + self.exec_args
+                if self.abimem_level > 0:
+                    bin_argstr += " --abimem-level %d" % self.abimem_level
                 #print("Using .abi mode with bin_argstr", bin_argstr)
 
             #print("Invoking binary:", self.bin_path, "with bin_argstr", bin_argstr)

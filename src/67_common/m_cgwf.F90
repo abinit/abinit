@@ -55,7 +55,7 @@ module m_cgwf
  use m_pawrhoij,      only : pawrhoij_type
  use m_pawfgr,        only : pawfgr_type
  use m_mkffnl,        only : mkffnl_objs
- use m_initylmg,      only : initylmg
+ use m_initylmg,      only : initylmg_k
  use m_abi_linalg,    only : abi_linalg_init, abi_linalg_finalize
  use m_cgtk,          only : cgtk_fixphase
 
@@ -2507,12 +2507,11 @@ subroutine nscf_setup_kpt(nscf, isppol, kpt, istwf_k, nband_k, cryst, dtset, psp
 
 !Local variables ------------------------------
 !scalars
- integer,parameter :: nkpt1 = 1, use_subovl0 = 0, ider0 = 0, idir0 = 0, mkmem1 = 1, useylmgr0 = 0
- integer :: nvloc, nkpg, n1, n2, n3, n4, n5, n6, nfft, nfftf, mgfft, mgfftf, optder, nspinor
+ integer,parameter :: nkpt1 = 1, use_subovl0 = 0, ider0 = 0, idir0 = 0, mkmem1 = 1, useylmgr0 = 0, optder0=0
+ integer :: nvloc, nkpg, n1, n2, n3, n4, n5, n6, nfft, nfftf, mgfft, mgfftf, nspinor
  !character(len=500) :: msg
 !arrays
- integer :: nband_ks(dtset%nsppol)
- real(dp) :: ylmgr_dum(1,1,1), ylmgr(0, 0)
+ real(dp) :: ylmgr_dum(1,1,1)
  real(dp),allocatable :: ph1d(:,:), ylm_k(:,:)
 ! *************************************************************************
 
@@ -2568,15 +2567,10 @@ subroutine nscf_setup_kpt(nscf, isppol, kpt, istwf_k, nband_k, cryst, dtset, psp
    !call gs_ham_k%load_spin(isppol, vxctaulocal=vxctaulocal)
  end if
 
- ! Spherical Harmonics for useylm == 1.
- ABI_MALLOC(ylm_k, (npw_k, psps%mpsang**2 * psps%useylm))
-
  ! Set up the spherical harmonics (Ylm) at k.
+ ABI_MALLOC(ylm_k, (npw_k, psps%mpsang**2 * psps%useylm))
  if (psps%useylm == 1) then
-   optder = 0; if (useylmgr0 == 1) optder = 1
-   nband_ks = nband_k
-   call initylmg(cryst%gprimd, kg_k, kpt, mkmem1, nscf%mpi_enreg, psps%mpsang, npw_k, nband_ks, mkmem1,&
-                 [npw_k], dtset%nsppol, optder, cryst%rprimd, ylm_k, ylmgr)
+   call initylmg_k(npw_k, psps%mpsang, optder0, cryst%rprimd, cryst%gprimd, kpt, kg_k, ylm_k, ylmgr_dum)
  end if
 
  ! Compute nonlocal form factors ffnl_k at (k+G)
@@ -2659,10 +2653,10 @@ subroutine nscf_solve_kpt(nscf, isppol, kpt, istwf_k, nband_k, cryst, dtset, dtf
  integer :: npwarr_k(1), pwind(pwind_alloc0,2,3)
  real(dp) :: pwnsfac(2,pwind_alloc0), pwnsfacq(2,mkgq0), zshift(nband_k), cgq(2, mcgq0), dphase_k(3)
  real(dp) :: subovl(nband_k*(nband_k+1)*use_subovl0), subvnlx(nband_k*(nband_k+1)*use_subvnlx0)
- real(dp),allocatable :: subham(:), resid(:), evec(:,:)
+ real(dp),allocatable :: subham(:), resid_k(:), evec(:,:)
 ! *************************************************************************
 
- ! See vtorho.F90 for the sequence of calls needed to initialize the GS Hamiltonian.
+ ! See vtorho.F90 for the sequence of calls required to initialize the GS Hamiltonian.
  associate (mpi_enreg => nscf%mpi_enreg, kg_k => gs_ham_k%kg_k)
 
  ! FFT meshes from input file, not necessarly equal to the ones found in the external files.
@@ -2673,7 +2667,7 @@ subroutine nscf_solve_kpt(nscf, isppol, kpt, istwf_k, nband_k, cryst, dtset, dtf
 
  npwarr_k = npw_k; npwsp = npw_k * nspinor; me_g0 = 1; mcg = npw_k * nspinor * nband_k; mgsc = mcg * dtset%usepaw
 
- ABI_MALLOC(resid, (nband_k))
+ ABI_MALLOC(resid_k, (nband_k))
  ABI_MALLOC(eig_k, (nband_k))
 
  if (.not. use_cg_k) then
@@ -2703,7 +2697,7 @@ subroutine nscf_solve_kpt(nscf, isppol, kpt, istwf_k, nband_k, cryst, dtset, dtf
              gsc_k, gs_ham_k, icg0, igsc0, ikpt0, inonsc, isppol, nband_k, mcg, mcgq0, mgsc, mkgq0, &
              mpi_enreg, npw_k, nband_k, dtset%nbdblock, nkpt1, dtset%nline, npw_k, npwarr_k, dtset%nspinor, &
              dtset%nsppol, dtset%ortalg, dtset%prtvol, &
-             pwind, pwind_alloc0, pwnsfac, pwnsfacq, quit0, resid, &
+             pwind, pwind_alloc0, pwnsfac, pwnsfacq, quit0, resid_k, &
              subham, subovl, subvnlx, dtset%tolrde, dtset%tolwfr_diago, use_subovl0, use_subvnlx0, mod(dtset%wfoptalg, 100), zshift)
 
    ! subspace rotation (without this, cgwf will never converge!)
@@ -2712,7 +2706,7 @@ subroutine nscf_solve_kpt(nscf, isppol, kpt, istwf_k, nband_k, cryst, dtset, dtf
 
    ! Check for convergence.
    if (dtset%nbdbuf >= 0) then
-     max_resid = maxval(resid(1:max(1,nband_k-dtset%nbdbuf)))
+     max_resid = maxval(resid_k(1:max(1,nband_k-dtset%nbdbuf)))
    else
      ABI_ERROR(sjoin('Bad value for nbdbuf:', itoa(dtset%nbdbuf)))
    end if
@@ -2727,7 +2721,7 @@ subroutine nscf_solve_kpt(nscf, isppol, kpt, istwf_k, nband_k, cryst, dtset, dtf
      if (dtset%prtvol > 10) then
        do ii=0,(nband_k-1)/8
          write(msg, '(a,8es10.2)' )' ene:',(eig_k(iband) * Ha_eV,iband=1+ii*8,min(nband_k,8+ii*8)); call wrtout(std_out, msg)
-         write(msg, '(a,8es10.2)' )' res:',(resid(iband),        iband=1+ii*8,min(nband_k,8+ii*8)); call wrtout(std_out, msg)
+         write(msg, '(a,8es10.2)' )' res:',(resid_k(iband),        iband=1+ii*8,min(nband_k,8+ii*8)); call wrtout(std_out, msg)
        end do
      end if
 
@@ -2747,7 +2741,7 @@ subroutine nscf_solve_kpt(nscf, isppol, kpt, istwf_k, nband_k, cryst, dtset, dtf
 
  ABI_FREE(subham)
  ABI_FREE(evec)
- ABI_FREE(resid)
+ ABI_FREE(resid_k)
  end associate
 
 end subroutine nscf_solve_kpt

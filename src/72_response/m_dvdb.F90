@@ -369,8 +369,7 @@ module m_dvdb
    ! Read and return all the 3*natom DFPT potentials (either from file or symmetrized)
 
    procedure :: readsym_qbz => dvdb_readsym_qbz
-   ! Reconstruct the DFPT potential for a q-point in the BZ starting
-   ! from its symmetrical image in the IBZ.
+   ! Reconstruct the DFPT potential for a q-point in the BZ from its symmetrical image in the IBZ.
 
    procedure :: read_vxc1_qbz => dvdb_read_vxc1_qbz
    ! Compute the first-order change of exchange-correlation potential
@@ -1302,13 +1301,13 @@ end subroutine dvdb_readsym_allv1
 !! FUNCTION
 !! This is the MAIN ENTRY POINT for client code.
 !! Reconstruct the DFPT potential for a q-point in the BZ starting
-!! from its symmetrical image in the IBZ. Implements caching mechanism to reduce IO.
+!! from its symmetrical image in the IBZ.
 !!
 !! INPUTS
 !!  cryst<crystal_t>=crystal structure parameters
 !!  qbz(3)=Q-point in BZ.
-!!  indq2db(6)=Symmetry mapping qbz --> DVDB qpoints produced using the SYMREC convention.
-!!    Note that indq2db(1) should give the index in the set of q-points in the DVDB
+!!  qbz2db(6)=Symmetry mapping qbz --> DVDB qpoints produced using the SYMREC convention.
+!!    Note that qbz2db(1) should give the index in the set of q-points in the DVDB
 !!    that is not necessarly ORDERED as the IBZ computed by the Abinit routines.
 !!  nfft=Number of fft-points treated by this processors
 !!  ngfft(18)=contain all needed information about 3D FFT
@@ -1321,7 +1320,7 @@ end subroutine dvdb_readsym_allv1
 !!
 !! SOURCE
 
-subroutine dvdb_readsym_qbz(db, cryst, qbz, indq2db, cplex, nfft, ngfft, v1scf, comm)
+subroutine dvdb_readsym_qbz(db, cryst, qbz, qbz2db, cplex, nfft, ngfft, v1scf, comm)
 
 !Arguments ------------------------------------
 !scalars
@@ -1330,8 +1329,8 @@ subroutine dvdb_readsym_qbz(db, cryst, qbz, indq2db, cplex, nfft, ngfft, v1scf, 
  type(crystal_t),intent(in) :: cryst
  class(dvdb_t),intent(inout) :: db
 !arrays
- integer,intent(in) :: ngfft(18), indq2db(6)
  real(dp),intent(in) :: qbz(3)
+ integer,intent(in) :: ngfft(18), qbz2db(6)
  real(dp),allocatable,intent(out) :: v1scf(:,:,:,:)
 
 !Local variables-------------------------------
@@ -1349,10 +1348,10 @@ subroutine dvdb_readsym_qbz(db, cryst, qbz, indq2db, cplex, nfft, ngfft, v1scf, 
  ! Keep track of total time spent.
  call timab(1802, 1, tsec)
 
- db_iqpt = indq2db(1)
+ db_iqpt = qbz2db(1)
 
  ! IS(q_dvdb) + g0q = q_bz
- isym = indq2db(2); itimrev = indq2db(6) + 1; g0q = indq2db(3:5)
+ isym = qbz2db(2); itimrev = qbz2db(6) + 1; g0q = qbz2db(3:5)
  isirr_q = (isym == 1 .and. itimrev == 1 .and. all(g0q == 0))
 
  ! Read the dvscf potentials in the IBZ for all 3*natom perturbations.
