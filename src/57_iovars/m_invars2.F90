@@ -2159,6 +2159,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'td_ef_type',tread,'INT')
  if(tread==1) dtset%td_ef_type=intarr(1)
 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'td_ef_induced_vecpot',tread,'INT')
+ if(tread==1) dtset%td_ef_induced_vecpot=intarr(1)
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'td_ef_tzero',tread,'TIM')
  if(tread==1) dtset%td_ef_tzero=dprarr(1)
 

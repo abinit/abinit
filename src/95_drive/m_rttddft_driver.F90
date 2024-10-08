@@ -125,7 +125,7 @@ subroutine rttddft(codvsn,dtfil,dtset,mpi_enreg,pawang,pawrad,pawtab,psps)
  !Compute initial electronic density
  call rttddft_calc_density(dtset,mpi_enreg,psps,tdks)
 
- !Compute current at t
+ !Compute current at t=0 (or t-dt)
  if (dtset%prtcurrent/=0) then
    call rttddft_calc_current(tdks,dtset,dtfil,psps,mpi_enreg)
  end if
@@ -148,7 +148,7 @@ subroutine rttddft(codvsn,dtfil,dtset,mpi_enreg,pawang,pawrad,pawtab,psps)
 
    !Update electric field and vector potential value
    call tdks%tdef%update(dtset,mpi_enreg,istep*tdks%dt,tdks%rprimd,tdks%gprimd,tdks%kg, &
-                       & psps%mpsang,tdks%npwarr,tdks%ylm,tdks%ylmgr)
+                       & psps%mpsang,tdks%npwarr,tdks%ylm,tdks%ylmgr,tdks%current)
 
    !Compute new electronic density at t
    call rttddft_calc_density(dtset,mpi_enreg,psps,tdks)
