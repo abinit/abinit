@@ -43,4 +43,9 @@ inp_files = [
 "t23.abi", # test respfn for phonons and electric field, with qpt (GEMM nonlop CPU)
 "t24.abi", # test respfn for phonons and electric field, with qpt
 "t25.abi", # test respfn for stresses, no qpt
+#Fock
+"t26.abi", # Silicium, norm-conserving
+"t27.abi", # Silicium, PAW
+"t28.abi", # Methane, PAW
+"t29.abi", # Helium, single-band, istwfk==2
 ]

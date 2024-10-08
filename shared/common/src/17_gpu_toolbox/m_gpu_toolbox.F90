@@ -114,6 +114,12 @@ module m_gpu_toolbox
       integer(kind=C_INT32_T), intent(inout) :: deviceId
     end subroutine gpu_get_device
 
+    subroutine gpu_get_max_mem(max_mem) bind(c, name='gpu_get_max_mem_cpp')
+      use, intrinsic :: iso_c_binding
+      implicit none
+      integer(kind=C_SIZE_T), intent(inout) :: max_mem
+    end subroutine gpu_get_max_mem
+
     subroutine gpu_get_free_mem(free_mem) bind(c, name='gpu_get_free_mem_cpp')
       use, intrinsic :: iso_c_binding
       implicit none
@@ -138,22 +144,25 @@ module m_gpu_toolbox
     end subroutine gpu_memory_advise_f
 
     !!! FFT related routines
-    subroutine gpu_fft_plan_destroy() bind(c, name='gpu_fft_plan_destroy_cpp')
+    subroutine gpu_fft_plan_destroy(fft_plan_id) bind(c, name='gpu_fft_plan_destroy_cpp')
       use, intrinsic :: iso_c_binding
       implicit none
+      integer    , intent(in)  :: fft_plan_id
     end subroutine gpu_fft_plan_destroy
 
-    subroutine gpu_fft_stream_synchronize() bind(c, name='gpu_fft_stream_synchronize_cpp')
+    subroutine gpu_fft_stream_synchronize(fft_plan_id) bind(c, name='gpu_fft_stream_synchronize_cpp')
       use, intrinsic :: iso_c_binding
       implicit none
+      integer    , intent(in)  :: fft_plan_id
     end subroutine gpu_fft_stream_synchronize
 
-    subroutine gpu_fft_plan_many(rank, n,&
+    subroutine gpu_fft_plan_many(fft_plan_id, rank, n,&
         inembed, istride, idist,&
         onembed, ostride, odist,&
         ffttype, batch ) bind(c, name='gpu_fft_plan_many_cpp')
       use, intrinsic :: iso_c_binding
       implicit none
+      integer    , intent(in)  :: fft_plan_id
       integer    , intent(in)  :: rank
       type(c_ptr), intent(in)  :: n
       type(c_ptr), intent(in)  :: inembed, onembed
@@ -161,9 +170,10 @@ module m_gpu_toolbox
       integer    , intent(in)  :: ffttype, batch
     end subroutine gpu_fft_plan_many
 
-    subroutine gpu_fft_exec_z2z(idata, odata, direction) bind(c, name='gpu_fft_exec_z2z_cpp')
+    subroutine gpu_fft_exec_z2z(fft_plan_id, idata, odata, direction) bind(c, name='gpu_fft_exec_z2z_cpp')
       use, intrinsic :: iso_c_binding
       implicit none
+      integer    , intent(in)  :: fft_plan_id
       type(c_ptr), intent(in)    :: idata, odata
       integer    , intent(in)    :: direction
     end subroutine gpu_fft_exec_z2z

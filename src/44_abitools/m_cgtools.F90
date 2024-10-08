@@ -1205,7 +1205,7 @@ subroutine dotprod_g_batch_half(dotr, doti, istwf_k, npw, ndat, option, vect1, v
      do ii=2,npw
        dotarr(1) = dotarr(1) + vect1(1,ii)*vect2(1,ii,idat) + vect1(2,ii)*vect2(2,ii,idat)
      end do
-     dotr(idat) = two * dotarr(1)
+     dotr(idat) = + two * (dotr(idat)+dotarr(1))
    end do
    if (option==2) doti=zero
 
@@ -1325,7 +1325,7 @@ subroutine dotprod_g_batch_full(dotr, doti, istwf_k, npw, ndat, option, vect1, v
      do ii=2,npw
        dotarr(1) = dotarr(1) + vect1(1,ii,idat)*vect2(1,ii,idat) + vect1(2,ii,idat)*vect2(2,ii,idat)
      end do
-     dotr(idat) = two * dotarr(1)
+     dotr(idat) = + two * (dotr(idat)+dotarr(1))
    end do
    if (option==2) doti=zero
 
