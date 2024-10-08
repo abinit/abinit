@@ -240,7 +240,7 @@ subroutine dmft_solve(cryst_struc,istep,dft_occup,mpi_enreg,paw_dmft,pawang,pawt
 !  ===========================================================================
    write(message,'(6a)') &
     & ch10,' ===============================================================', &
-    & ch10,' =====  DFT Green Function Calculation with renormalized psichi', &
+    & ch10,' =====  DFT Green Function Calculation with renormalized chipsi', &
     & ch10,' ==============================================================='
  end if ! dmft_solv/=1
  call timab(621,2,tsec(:))

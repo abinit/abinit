@@ -1223,6 +1223,8 @@ subroutine compute_green(green,paw_dmft,prtopt,self,opt_self,opt_nonxsum,opt_non
      !call init_oper(paw_dmft,green_temp)
    if (green%oper(ifreq)%has_operks == 0) then
      ABI_MALLOC(green%oper(ifreq)%ks,(mbandc,mbandc,mkmem,nsppol))
+     green%oper(ifreq)%nkpt = mkmem
+     green%oper(ifreq)%paral = 1
      green%oper(ifreq)%shiftk = shift
    end if 
    
@@ -3567,7 +3569,7 @@ subroutine newton(green,self,paw_dmft,x_input,x_precision,max_iter,&
  !option = 2  ! Halley method
  !option = 1  ! Newton method
  option = paw_dmft%dmft_fermi_algo
- step   = paw_dmft%dmft_fermi_step
+ step = paw_dmft%dmft_fermi_step
  
 !write(std_out,*) "ldaprint",opt_noninter
 
@@ -3585,6 +3587,7 @@ subroutine newton(green,self,paw_dmft,x_input,x_precision,max_iter,&
  l_minus = .false.
  l_plus  = .false.
  Fxoptimum = one
+ x_optimum = zero
 !========================================
 !start iteration to find fermi level
 !========================================
@@ -3677,7 +3680,7 @@ subroutine newton(green,self,paw_dmft,x_input,x_precision,max_iter,&
 
    end if ! l_minus and l_plus
 
-   if (abs(Fx) < abs(Fxoptimum)) then
+   if ((abs(Fx) < abs(Fxoptimum)) .or. (iter == 1)) then
      Fxoptimum = Fx
      x_optimum = x_input
    end if ! abs(Fx)<abs(Fxoptimum)
@@ -3916,7 +3919,7 @@ subroutine compute_nb_elec(green,self,paw_dmft,Fx,nb_elec_x,fermie,option,Fxprim
      
      do isppol=1,nsppol
        do ikpt=1,mkmem
-         wtk = green%oper(1)%wtk(ikpt+shift)
+         wtk = paw_dmft%wtk(ikpt+shift)
          do ib=1,mbandc
            oper_tmp%ks(ib,ib,ikpt,isppol) = oper_tmp%ks(ib,ib,ikpt,isppol) + omega + &
               & fermie - paw_dmft%eigen_dft(ib,ikpt+shift,isppol)
@@ -3961,7 +3964,7 @@ subroutine compute_nb_elec(green,self,paw_dmft,Fx,nb_elec_x,fermie,option,Fxprim
            band_index = band_index + nband_k
            cycle
          end if 
-         wtk = green%oper(1)%wtk(ikpt)
+         wtk = paw_dmft%wtk(ikpt)
          do ib=1,nband_k
            if (paw_dmft%band_in(ib)) cycle
            eig = paw_dmft%eigen(ib+band_index) 

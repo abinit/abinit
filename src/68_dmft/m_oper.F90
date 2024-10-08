@@ -90,6 +90,9 @@ MODULE m_oper
   integer :: nsppol
   ! Number of spin polarizations
 
+  integer :: paral
+  ! =1 if the operator has been memory-parallelized over kpt, 0 otherwise
+
   integer :: shiftk
   ! Shift to get the physical kpt index (when the operator is memory-parallelized over kpt)
   
@@ -171,12 +174,15 @@ subroutine init_oper(paw_dmft,oper,nkpt,wtk,shiftk,opt_ksloc)
  oper%natom   = paw_dmft%natom
  oper%nspinor = paw_dmft%nspinor 
  oper%nsppol  = paw_dmft%nsppol 
+ oper%paral   = 0
  oper%shiftk  = 0
  
  if (present(shiftk)) oper%shiftk = shiftk
 
  oper%nkpt = paw_dmft%nkpt
  if (present(nkpt)) oper%nkpt = nkpt
+
+ if (present(shiftk) .or. oper%nkpt /= paw_dmft%nkpt) oper%paral = 1
 
 ! allocate(oper%wtk(oper%nkpt))
  if (present(wtk)) then
@@ -500,7 +506,7 @@ subroutine inverse_oper(oper,option,procb,iproc)
  !  ABI_MALLOC(procb2,(nkpt))
  !end if
  paral = 0
- if (present(procb) .and. present(iproc) .and. oper%shiftk == 0) paral = 1
+ if (present(procb) .and. present(iproc) .and. oper%paral == 0) paral = 1
  !  procb2 => procb(:)
  !end if
 
@@ -602,7 +608,7 @@ subroutine downfold_oper(oper,paw_dmft,procb,iproc,option,op_ks_diag)
  paral    = 0 
  shift    = oper%shiftk
  
- if (present(procb) .and. present(iproc) .and. shift == 0) paral = 1
+ if (present(procb) .and. present(iproc) .and. oper%paral == 0) paral = 1
  
  opt = 1
  if (present(option)) opt = option
@@ -800,7 +806,7 @@ subroutine upfold_oper(oper,paw_dmft,procb,iproc)
  paral    = 0
  shift    = oper%shiftk
  
- if (present(procb) .and. present(iproc) .and. shift == 0) paral = 1
+ if (present(procb) .and. present(iproc) .and. oper%paral == 0) paral = 1
  
  oper%ks(:,:,:,:) = czero
  
