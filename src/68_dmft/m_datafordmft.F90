@@ -1986,14 +1986,14 @@ subroutine chipsi_gather(paw_dmft)
 !Arguments ------------------------------------
  type(paw_dmft_type), intent(inout) :: paw_dmft
 !Local variables ------------------------------
- integer :: iatom,ib,ibuf,ierr,ikpt,im,irank,isppol,lpawu,mbandc,mkmem
- integer :: myproc,natom,ndim,nproc,nspinor,nsppol,shift,siz_buf
+ integer :: iatom,ib,ibuf,ierr,ikpt,im,irank,isppol,lpawu,mbandc,me_kpt
+ integer :: mkmem,natom,ndim,nproc,nspinor,nsppol,shift,siz_buf
  integer, allocatable :: displs(:),recvcounts(:)
  complex(dpc), allocatable :: buffer(:),buffer_tot(:)
 !************************************************************************
 
- myproc  = paw_dmft%myproc
- mkmem   = paw_dmft%distrib%nkpt_mem(myproc)
+ me_kpt  = paw_dmft%distrib%me_kpt
+ mkmem   = paw_dmft%distrib%nkpt_mem(me_kpt)
  mbandc  = paw_dmft%mbandc
  natom   = paw_dmft%natom
  nproc   = paw_dmft%nproc
@@ -2018,7 +2018,7 @@ subroutine chipsi_gather(paw_dmft)
    displs(irank) = displs(irank-1) + recvcounts(irank-1)
  end do ! irank
 
- ABI_MALLOC(buffer,(recvcounts(myproc+1)))
+ ABI_MALLOC(buffer,(recvcounts(me_kpt+1)))
  ABI_MALLOC(buffer_tot,(recvcounts(nproc)+displs(nproc)))
 
  ibuf = 0
@@ -2038,7 +2038,7 @@ subroutine chipsi_gather(paw_dmft)
    end do ! iatom
  end do ! ikpt
 
- call xmpi_allgatherv(buffer(:),recvcounts(myproc+1),buffer_tot(:),recvcounts(:),displs(:),paw_dmft%distrib%comm_kpt,ierr)
+ call xmpi_allgatherv(buffer(:),recvcounts(me_kpt+1),buffer_tot(:),recvcounts(:),displs(:),paw_dmft%distrib%comm_kpt,ierr)
 
  ibuf = 0
  do ikpt=1,paw_dmft%nkpt
