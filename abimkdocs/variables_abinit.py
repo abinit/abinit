@@ -1891,11 +1891,11 @@ Variable(
     added_in_version="",
     text=r"""
 For systems with many atoms, non-local operations are the most time-consuming part of the computation.
-The non-local contribution of the wave-function $\psi$ to the energy writes:
+The non-local contribution of the wavefunction $\psi$ to the energy writes:
 
 $$ E_{non-local} = \sum_a\sum_{i,j} <\psi|p_{a,i}> e_{a,ij} <p_{a,j}|\psi> $$
 
-and the Hamiltonian applied to a wave-function is:
+and the Hamiltonian applied to a wavefunction is:
 
 $$ H_{non-local}|\psi> = \sum_a\sum_{ij} |p_{a,i}> D_{a,ij} <p_{a,i}|\psi> $$
 
@@ -1916,7 +1916,7 @@ $$ H_{non-local}|\psi> = \sum_a\sum_{i,j} |p_{a,i}> D_{a,ij} cprj(a,j) $$
 
 With [[cprj_in_memory]] = 0, "cprj" coefficients are computed on-the-fly in many parts of the code, including ground-state computations.
 If [[cprj_in_memory]] = 1, "cprj" coefficients are computed and stored in memory at the diagonalization step. This option is available only for LOBPCG ([[wfoptalg]]=114) and Chebyshev filtering ([[wfoptalg]]=111).
-If [[cprj_in_memory]] = 2, "cprj" coefficients are stored in memory during the whole computation, and they evolve as the wave-functions do. This feature is available only for [[wfoptalg]]=10.
+If [[cprj_in_memory]] = 2, "cprj" coefficients are stored in memory during the whole computation, and they evolve as the wavefunctions do. This feature is available only for [[wfoptalg]]=10.
 
 [[cprj_in_memory]] > 0 is expected to be faster than [[cprj_in_memory]] = 0 for big systems (many atoms and/or many bands).
 
