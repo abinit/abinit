@@ -202,7 +202,7 @@ subroutine dmft_solve(cryst_struc,istep,dft_occup,mpi_enreg,paw_dmft,pawang,pawt
                                                                 ! ought to be  generalized  in the  future
  ! Downfold the KS eigenvalues                                                     
  if (paw_dmft%dmft_solv >= 5) then
-   mkmem = paw_dmft%distrib%nkpt_mem(myproc)
+   mkmem = paw_dmft%distrib%nkpt_mem(paw_dmft%distrib%me_kpt)
    shift = paw_dmft%distrib%shiftk
    call init_oper(paw_dmft,loc_levels,nkpt=mkmem,shiftk=shift,opt_ksloc=2)
    call downfold_oper(loc_levels,paw_dmft,option=3,op_ks_diag=paw_dmft%eigen_dft(:,1+shift:mkmem+shift,:))     

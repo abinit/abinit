@@ -336,7 +336,7 @@ subroutine init_green(green,paw_dmft,opt_oper_ksloc,wtype,opt_moments,opt_moment
  if (green%has_moments == 1) then
    green%nmoments = 5
    shift = green%distrib%shiftk
-   mkmem = green%distrib%nkpt_mem(paw_dmft%myproc)
+   mkmem = green%distrib%nkpt_mem(green%distrib%me_kpt)
    ABI_MALLOC(green%moments,(green%nmoments))
    call init_oper(paw_dmft,green%moments(1),nkpt=mkmem,shiftk=shift,opt_ksloc=2)
    do i=2,green%nmoments
@@ -1188,7 +1188,7 @@ subroutine compute_green(green,paw_dmft,prtopt,self,opt_self,opt_nonxsum,opt_non
  
  if (green%w_type /= "real") ABI_MALLOC(omega_fac,(nmoments))
  shift = green%distrib%shiftk  
- mkmem = green%distrib%nkpt_mem(myproc)
+ mkmem = green%distrib%nkpt_mem(green%distrib%me_kpt)
  shift_green = shift
  if (green%oper(1)%has_operks == 0) shift_green = 0
 
@@ -3862,7 +3862,7 @@ subroutine compute_nb_elec(green,self,paw_dmft,Fx,nb_elec_x,fermie,option,Fxprim
 
    green%charge_ks = zero
    
-   mkmem = green%distrib%nkpt_mem(paw_dmft%myproc)
+   mkmem = green%distrib%nkpt_mem(green%distrib%me_kpt)
    shift = green%distrib%shiftk
    nmoments = 1
    if (green%has_moments == 1) nmoments = green%nmoments
@@ -4467,7 +4467,7 @@ subroutine compute_trace_moments_ks(green,self,paw_dmft)
 !************************************************************************
  
  mbandc = paw_dmft%mbandc
- mkmem  = green%distrib%nkpt_mem(paw_dmft%myproc)
+ mkmem  = green%distrib%nkpt_mem(green%distrib%me_kpt)
  natom  = paw_dmft%natom
  nsppol = paw_dmft%nsppol
  shift  = green%distrib%shiftk
