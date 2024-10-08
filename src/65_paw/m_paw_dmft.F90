@@ -2610,7 +2610,7 @@ subroutine init_paral_dmft(paw_dmft,distrib,nfreq)
  type(mpi_distrib_dmft_type), intent(inout) :: distrib
  integer, intent(in) :: nfreq
 !Local variables-------------------------------
- integer :: deltakpt,deltaw,ierr,ifreq,ikpt,iirank,irank,myproc,nfreq_proc
+ integer :: deltakpt,deltaw,ierr,ifreq,ikpt,irank,myproc,nfreq_proc
  integer :: nkpt,nkpt_proc,nproc,nproc_freq,nproc_kpt,residu,spacecomm
 ! *********************************************************************
 
@@ -2620,10 +2620,9 @@ subroutine init_paral_dmft(paw_dmft,distrib,nfreq)
  spacecomm = paw_dmft%spacecomm
  
  distrib%nw = nfreq
+ distrib%shiftk = 0
 
- ABI_MALLOC(distrib%nkpt_mem,(0:nproc-1))
  ABI_MALLOC(distrib%nw_mem,(0:nproc-1))
- ABI_MALLOC(distrib%nw_mem_kptparal,(0:nproc-1))
  ABI_MALLOC(distrib%procb,(nkpt))
  ABI_MALLOC(distrib%procf,(nfreq))
  ABI_MALLOC(distrib%proct,(nfreq))
@@ -2634,8 +2633,6 @@ subroutine init_paral_dmft(paw_dmft,distrib,nfreq)
  residu = nfreq - deltaw*nproc
 
  nproc_freq = min(nfreq,nproc)
-
- distrib%shiftk = 0
 
  if (nproc_freq < nproc) distrib%nw_mem(nproc_freq:nproc-1) = 0
  ifreq = 1
@@ -2652,17 +2649,19 @@ subroutine init_paral_dmft(paw_dmft,distrib,nfreq)
  nproc_kpt  = min(nkpt,nproc)
  nproc_freq = nproc / nkpt
 
+ ABI_MALLOC(distrib%nkpt_mem,(0:nproc-1))
+ ABI_MALLOC(distrib%nw_mem_kptparal,(0:nproc_freq))
+
+ if (nproc > nproc_kpt) distrib%nkpt_mem(nproc_kpt:nproc-1) = 0
+ distrib%nw_mem_kptparal(nproc_freq) = 0
+
  if (nproc_freq <= 1) then ! parallelization on kpt only
 
    deltakpt = nkpt / nproc
    residu   = nkpt - deltakpt*nproc
 
-   distrib%nw_mem_kptparal(0:nproc_kpt-1) = nfreq
+   distrib%nw_mem_kptparal(0) = nfreq
    distrib%proct(:) = 0
-   if (nproc > nproc_kpt) then
-     distrib%nkpt_mem(nproc_kpt:nproc-1) = 0
-     distrib%nw_mem_kptparal(nproc_kpt:nproc-1) = 0
-   end if
 
    ikpt = 1
    do irank=0,nproc_kpt-1
@@ -2674,60 +2673,48 @@ subroutine init_paral_dmft(paw_dmft,distrib,nfreq)
      ikpt = ikpt + nkpt_proc
    end do ! irank
 
-   distrib%comm_freq = xmpi_comm_self
-   distrib%comm_kpt  = spacecomm
-   distrib%me_freq   = 0
-   distrib%me_kpt    = myproc
+   distrib%comm_kpt = spacecomm
+   distrib%me_kpt   = mod(myproc,nproc_kpt)
+   distrib%me_freq  = myproc / nproc_kpt
+   
+   call MPI_COMM_SPLIT(spacecomm,distrib%me_kpt,distrib%me_freq,distrib%comm_freq,ierr)
+
+   distrib%me_kpt = myproc
 
  else ! parallelization on both kpt and frequencies
 
    deltaw = nfreq / nproc_freq
    residu = nfreq - deltaw*nproc_freq
 
-   if (nproc > nkpt*nproc_freq) then
-     distrib%nkpt_mem(nkpt*nproc_freq:nproc-1) = 0
-     distrib%nw_mem_kptparal(nkpt*nproc_freq:nproc-1) = 0
-   end if
+   distrib%nkpt_mem(0:nkpt-1) = 1
 
-   distrib%nkpt_mem(0:nkpt*nproc_freq-1) = 1
-
-   irank = 0
    do ikpt=1,nkpt
-     ifreq = 1
      distrib%procb(ikpt) = ikpt - 1
-     do iirank=0,nproc_freq-1
-       nfreq_proc = deltaw
-       if (iirank < residu) nfreq_proc = nfreq_proc + 1
-       if (nfreq_proc > 0 .and. ikpt == 1) distrib%proct(ifreq:ifreq+nfreq_proc-1) = iirank
-       ifreq = ifreq + nfreq_proc
-       distrib%nw_mem_kptparal(irank+iirank) = nfreq_proc
-       if (irank+iirank == myproc) then
-         distrib%me_kpt  = ikpt - 1
-         distrib%me_freq = iirank
-         distrib%shiftk  = ikpt - 1
-       end if
-     end do ! iirank
-     irank = irank + nproc_freq
-   end do ! ifreq
+   end do ! ikpt
 
+   ifreq = 1
+   do irank=0,nproc_freq-1
+     nfreq_proc = deltaw
+     if (irank < residu) nfreq_proc = nfreq_proc + 1
+     if (nfreq_proc > 0) distrib%proct(ifreq:ifreq+nfreq_proc-1) = irank
+     ifreq = ifreq + nfreq_proc
+     distrib%nw_mem_kptparal(irank) = nfreq_proc
+   end do ! irank 
+  
+   distrib%me_kpt  = myproc/nproc_freq
+   distrib%me_freq = mod(myproc,nproc_freq)
+   distrib%shiftk  = distrib%me_kpt
+
+   call MPI_COMM_SPLIT(spacecomm,distrib%me_freq,distrib%me_kpt,distrib%comm_kpt,ierr)
+ 
    if (myproc >= nkpt*nproc_freq) then
-     distrib%me_kpt  = 0
-     distrib%me_freq = nproc_freq + myproc - nkpt*nproc_freq
+     distrib%me_kpt  = myproc - nkpt*nproc_freq
+     distrib%me_freq = nproc_freq 
    end if
 
    call MPI_COMM_SPLIT(spacecomm,distrib%me_kpt,distrib%me_freq,distrib%comm_freq,ierr)
 
-   if (myproc >= nkpt*nproc_freq) then
-     distrib%me_kpt  = nkpt + myproc - nkpt*nproc_freq
-     distrib%me_freq = 0
-   end if
-
-   call MPI_COMM_SPLIT(spacecomm,distrib%me_freq,distrib%me_kpt,distrib%comm_kpt,ierr)
-
-   if (myproc >= nkpt*nproc_freq) then
-     distrib%me_freq = -1
-     distrib%me_kpt  = -1
-   end if
+   if (myproc >= nkpt*nproc_freq) distrib%me_kpt = myproc/nproc_freq
 
  end if ! nproc_freq<=1
 
