@@ -10,7 +10,7 @@ March 2024 and October 2024.
 These release notes
 are relative to modifications/improvements of ABINIT v10.2 with respect to v10.0, with also some late fixes to v10.0, after March 2024,
 that had not yet been documented.
-<!-- TO BE CHANGED Merge requests up to and including MR984. Also, MRXXX to MRYYY are taken into account. -->
+<!-- TO BE CHANGED Merge requests from MR986 up to and including MR1062. Also, MRXXX to MRYYY are taken into account. -->
 
 TO BE CHANGED
 
