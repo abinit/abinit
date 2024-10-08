@@ -137,7 +137,7 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
 !arrays
  integer :: g0_k(3),symq(4,2,cryst%nsym), units(2)
  integer,allocatable :: kg_k(:,:),kg_kq(:,:),nband(:,:),nband_kq(:,:),wfd_istwfk(:)
- real(dp) :: ylmgr_k_dum(1,1,1), ylmgr_kq_dum(1,1,1)
+ real(dp) :: ylmgr_kq_dum(1,1,1) ! ylmgr_k_dum(1,1,1),
  real(dp) :: kk(3),kq(3),qpt(3),phfrq(3*cryst%natom),dvdb_qdamp(1)
  real(dp),allocatable :: displ_cart(:,:,:),displ_red(:,:,:), eigens_kq(:,:,:)
  real(dp),allocatable :: grad_berry(:,:),kinpw_kq(:),kpg_kq(:,:),kpg_k(:,:),dkinpw(:)

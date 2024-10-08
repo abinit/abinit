@@ -147,8 +147,7 @@ module m_gstore
  use m_copy,           only : alloc_copy
  use m_fftcore,        only : ngfft_seq, get_kg
  use m_cgtools,        only : cg_zdotc
- use m_geometry,       only : wigner_seitz
- use m_kg,             only : getph, mkkpg, mkkin
+ use m_kg,             only : getph
  use defs_datatypes,   only : pseudopotential_type
  use m_hdr,            only : hdr_type, fform_from_ext
  use m_symtk,          only : matr3inv
@@ -163,7 +162,6 @@ module m_gstore
  use m_pawtab,         only : pawtab_type
  use m_pawfgr,         only : pawfgr_type
  use m_mlwfovlp,       only : wan_t
- use m_initylmg,       only : initylmg_k
 
  implicit none
 
@@ -3174,11 +3172,11 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
  character(len=500) :: msg
 !arrays
  integer :: g0_k(3), g0_kq(3), g0_q(3), work_ngfft(18),gmax(3),indkk_kq(6,1), units(2)
- integer :: mapc_qq2dvdb(6) ! mapl_k(6), mapl_kq(6), mapl_kqmp(6), mapl_kmp(6), mapc_qq(6),
+ integer :: qbz2dvdb(6) ! mapl_k(6), mapl_kq(6), mapl_kqmp(6), mapl_kmp(6), mapc_qq(6),
  integer,allocatable :: kg_k(:,:), kg_kq(:,:), nband(:,:), wfd_istwfk(:), qmap_symrec(:,:)
  integer,allocatable :: iq_buf(:,:), done_qbz_spin(:,:), my_iqibz_inds(:)
  !integer,allocatable :: qibz2dvdb(:) !, displs(:), recvcounts(:)
- real(dp) :: ylmgr_k_dum(1,1,1), ylmgr_kq_dum(1,1,1)
+ !real(dp) :: ylmgr_k_dum(1,1,1), ylmgr_kq_dum(1,1,1)
  real(dp) :: kk_bz(3),kq_bz(3),kk_ibz(3),kq_ibz(3), qq_bz(3), qq_ibz(3), vk(3)
  real(dp) :: phfrq(3*cryst%natom)
  real(dp),allocatable :: displ_cart_qibz(:,:,:,:), displ_red_qibz(:,:,:,:), pheigvec_qibz(:,:,:,:)
@@ -3233,14 +3231,9 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
  !comm_rpt = bqs_comm%value
 
  ! qmap_symrec gives the mapping gstore%ibz --> dvdb%ibz
- need_ftinterp = .True.
- !need_ftinterp = .False.
-
- ! TODO
-#if 0
- call dvdb%need_ftinterp(qstore%nqibz, gstore%qibz, gstore%qptopt, qmap_symrec, need_ftinterp)
+ call dvdb%need_ftinterp(gstore%nqibz, gstore%qibz, gstore%qptopt, qmap_symrec, need_ftinterp)
  ABI_FREE(qmap_symrec)
-#endif
+ !need_ftinterp = .True.
 
  if (.not. need_ftinterp .and. dtset%eph_use_ftinterp /= 0) then
    ABI_WARNING("Enforcing FT interpolation for q-points even if it's not strictly needed.")
@@ -3338,11 +3331,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
  ABI_MALLOC(displ_red_qibz, (2, 3, cryst%natom, natom3))
  ABI_MALLOC(pheigvec_qbz, (2, 3, cryst%natom, 3*cryst%natom))
  ABI_MALLOC(pheigvec_qibz, (2, 3, cryst%natom, 3*cryst%natom))
-
  ABI_CALLOC(dummy_vtrial, (nfftf, nspden))
-
- ! Create ddkop object to compute group velocities (if needed)
- ddkop = ddkop_new(dtset, cryst, pawtab, psps, wfd%mpi_enreg, mpw, wfd%ngfft)
 
  ! Open GSTORE file, and read table used for restarting.
  NCF_CHECK(nctk_open_modify(root_ncid, gstore%path, gstore%comm))
@@ -3411,6 +3400,9 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
  else
    call wrtout(std_out, sjoin(" Restarting GSTORE calculation. Found: ", itoa(ndone), " (qpt, spin) entries already computed"))
  end if
+
+ ! Create ddkop object to compute group velocities (if needed)
+ ddkop = ddkop_new(dtset, cryst, pawtab, psps, wfd%mpi_enreg, mpw, wfd%ngfft)
 
  if (gstore%with_vk /= 0 .and. ndone == 0) then
    call wrtout(std_out, " Computing and writing velocity operator matrix elements in the IBZ", pre_newlines=1)
@@ -3499,8 +3491,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
    NCF_CHECK(nf90_inq_ncid(root_ncid, strcat("gqk", "_spin", itoa(spin)), spin_ncid))
 
    ! Allocate workspace for wavefunctions using mpw and nb
-   ! FIXLE: Should be allocated with npw_k and npw_kw but one has to change wfd_sym_ug_kg to get rid of mpw
-
+   ! FIXME: Should be allocated with npw_k and npw_kw but one has to change wfd_sym_ug_kg to get rid of mpw
    nb = gqk%nb
    ABI_MALLOC(bras_kq, (2, mpw*nspinor, nb))
    ABI_MALLOC(kets_k, (2, mpw*nspinor, nb))
@@ -3563,14 +3554,14 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
        call dvdb%get_ftqbz(qq_bz, cplex, nfftf, ngfftf, v1scf, gqk%pert_comm%value)
      else
        ! Read and reconstruct the dvscf potentials for qpt and my_npert perturbations.
-       !db_iqpt = dvdb%findq(qq_ibz)
-       !ABI_CHECK(db_iqpt /= -1, sjoin("Could not find symmetric of q-point:", ktoa(qq_bz), "in DVDB file."))
-       ! The first entry in mapc_qq2dvdb gives the index in dvdb%qpts.
+       db_iqpt = dvdb%findq(qq_ibz)
+       ABI_CHECK(db_iqpt /= -1, sjoin("Could not find symmetric of q-point:", ktoa(qq_bz), "in DVDB file."))
+       ! The first entry in qbz2dvdb gives the index in dvdb%qpts.
        ! The other entries in mapc_qq are OK as they refer to symmetries.
-       !qmap_symrec(iq_ibz, :)
-       NOT_IMPLEMENTED_ERROR()
-       mapc_qq2dvdb = gqk%my_q2ibz(:, my_iq); mapc_qq2dvdb(1) = db_iqpt
-       call dvdb%readsym_qbz(cryst, qq_bz, mapc_qq2dvdb, cplex, nfftf, ngfftf, v1scf, gqk%pert_comm%value)
+       !qmap_symrec(:,iq_ibz)
+       !NOT_IMPLEMENTED_ERROR()
+       qbz2dvdb = gqk%my_q2ibz(:, my_iq); qbz2dvdb(1) = db_iqpt
+       call dvdb%readsym_qbz(cryst, qq_bz, qbz2dvdb, cplex, nfftf, ngfftf, v1scf, gqk%pert_comm%value)
      end if
 
      ! Allocate vlocal1 with correct cplex. Note nvloc and my_npert.
@@ -3609,7 +3600,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
        kq_bz = kk_bz + qq_bz
        if (kpts_map("symrel", ebands%kptopt, cryst, gstore%krank_ibz, 1, kq_bz, indkk_kq) /= 0) then
          write(msg, '(3a)' ) &
-          "Cannot find k+q in kmesh", ch10, 'Action: check your WFK file and the (k, q) point input variables.'
+          "Cannot find k+q in k-mesh", ch10, 'Check your WFK file and the (k,q) point input variables.'
           ABI_ERROR(msg)
        end if
 
@@ -3755,6 +3746,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
  !if (my_rank == master) then
    NCF_CHECK(nf90_put_var(root_ncid, root_vid("gstore_completed"), 1))
  !end if
+ NCF_CHECK(nf90_sync(root_ncid))
  call xmpi_barrier(gstore%comm)
  NCF_CHECK(nf90_close(root_ncid))
  call xmpi_barrier(gstore%comm)
@@ -3778,7 +3770,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
  ABI_FREE(pheigvec_qbz)
  ABI_FREE(pheigvec_qibz)
  ABI_FREE(done_qbz_spin)
- ABI_SFREE(qmap_symrec)
+
 
  call ddkop%free()
  call gs_hamkq%free()
