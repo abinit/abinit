@@ -89,12 +89,12 @@ CONTAINS  !=====================================================================
      do ir=2,meshsz
        if (ir == 2) then
          ! Use a trapezoidal rule 
-         U_inside(ir) = half * (proj2(1)*(pawrad%rad(1)**k) + proj2(2)*(pawrad%rad(2)**k)) * &
-                 & (pawrad%rad(2) - pawrad%rad(1))
+         U_inside(ir) = half * (proj2(1)*(pawrad%rad(1)**k)+proj2(2)*(pawrad%rad(2)**k)) * &
+                 & (pawrad%rad(2)-pawrad%rad(1))
        else if (ir == 3 .and. mesh_type == 3) then 
          ! simp_gen doesn't handle this case, so we use a trapezoidal rule instead
-         U_inside(ir) = U_inside(2) + half * (proj2(2)*(pawrad%rad(2)**k) + proj2(3)*(pawrad%rad(3)**k)) * &
-                 & (pawrad%rad(3) - pawrad%rad(2))
+         U_inside(ir) = U_inside(2) + half*(proj2(2)*(pawrad%rad(2)**k)+proj2(3)*(pawrad%rad(3)**k))* &
+                 & (pawrad%rad(3)-pawrad%rad(2))
        else 
          ! Use Simpson rule when enough points are available 
          call simp_gen(U_inside(ir),proj2(1:ir)*(pawrad%rad(1:ir)**k),pawrad,r_for_intg=pawrad%rad(ir))
@@ -120,32 +120,30 @@ CONTAINS  !=====================================================================
      do ir=2,meshsz
      
        dum1 = zero ! very important
-       dum2 = zero
        
-       call bessel_iv(half+k,lambda*pawrad%rad(ir),dum1,y1(ir),dum2)
+       call bessel_iv(half+dble(k),lambda*pawrad%rad(ir),dum1,y1(ir),dum2)
        y1(ir) = y1(ir) / sqrt(pawrad%rad(ir))
        
        if (ir == 2) then
          ! Use a trapezoidal rule
-         U_inside(ir) = half * (proj2(1)*y1(1) + proj2(2)*y1(2)) * &
-                 & (pawrad%rad(2) - pawrad%rad(1))
+         U_inside(ir) = half * (proj2(1)*y1(1)+proj2(2)*y1(2)) * &
+                 & (pawrad%rad(2)-pawrad%rad(1))
        else if (ir == 3 .and. mesh_type == 3) then
          ! simp_gen doesn't handle this case, so we use a trapezoidal rule instead
-         U_inside(ir) = U_inside(2) + half * (proj2(2)*y1(2) + proj2(3)*y1(3)) * &
-                 & (pawrad%rad(3) - pawrad%rad(2))
+         U_inside(ir) = U_inside(2) + half*(proj2(2)*y1(2)+proj2(3)*y1(3)) * &
+                 & (pawrad%rad(3)-pawrad%rad(2))
        else
          ! Use Simpson rule when enough points are available
          call simp_gen(U_inside(ir),proj2(1:ir)*y1(1:ir),pawrad,r_for_intg=pawrad%rad(ir))
        end if ! ir
        
        dum1 = zero ! very important
-       dum2 = zero
-       call bessel_kv(half+k,lambda*pawrad%rad(ir),dum1,y2(ir),dum2)
+       call bessel_kv(half+dble(k),lambda*pawrad%rad(ir),dum1,y2(ir),dum2)
        y2(ir) = y2(ir) / sqrt(pawrad%rad(ir))
      end do ! ir
      
      U_outside(1) = zero
-     U_outside(2:meshsz) = two * (two*dble(k)+one) * U_inside(2:meshsz) * proj2(2:meshsz) * y2(2:meshsz)
+     U_outside(2:meshsz) = two * (two*dble(k)+one)*U_inside(2:meshsz)*proj2(2:meshsz)*y2(2:meshsz)
      call simp_gen(Fk(k/2+1),U_outside(:),pawrad,r_for_intg=r_for_intg)
      
    end do ! k
@@ -256,7 +254,7 @@ CONTAINS  !=====================================================================
             & fac,nprint,info,nfev,fjac(:,:),ldfjac,r(:),lr,qtf(:),wa1(:),wa2(:),wa3(:),wa4(:))
   
    if (info /= 1) then
-     write(message, * ) "Error in hybrd, info is equal to",info
+     write(message,*) "Error in hybrd, info is equal to",info
      ABI_ERROR(message)
    end if
  
@@ -270,7 +268,7 @@ CONTAINS  !=====================================================================
  subroutine get_coulomb_u(lmb,uu)
  
 !Arguments ------------------------------------
- real(dp), intent(in)  :: lmb
+ real(dp), intent(in) :: lmb
  real(dp), intent(out) :: uu
 !Local variables ------------------------------
  real(dp) :: Fk(lpawu+1)
@@ -286,7 +284,7 @@ CONTAINS  !=====================================================================
 !Arguments ------------------------------------
  integer, intent(in) :: iflag,n
  real(dp), intent(in) :: lmb_eps(n)
- real(dp), intent(out) :: uj(n)
+ real(dp), intent(inout) :: uj(n)
  !Local variables ------------------------------
  real(dp) :: eps,f4of2,f6of2,factor,J2,J4,J6,Jh,lmb
  real(dp) :: Fk(lpawu+1)
@@ -304,19 +302,19 @@ CONTAINS  !=====================================================================
  else if (lpawu == 2) then
    f4of2  = dble(0.625) 
    factor = (one+f4of2) / dble(14)
-   J2 = Fk(2) * factor
-   J4 = Fk(3) * factor / f4of2
-   Jh = (J2+J4) * half
+   J2 = Fk(2) 
+   J4 = Fk(3) / f4of2
+   Jh = (J2+J4) * factor * half
  else if (lpawu == 3) then
    f4of2  = dble(0.6681) 
    f6of2  = dble(0.4943) 
    factor = (dble(286.)+dble(195.)*f4of2+dble(250.)*f6of2) / dble(6435.)
-   J2 = Fk(2) * factor 
-   J4 = Fk(3) * factor / f4of2 
-   J6 = Fk(4) * factor / f6of2 
-   Jh = (J2+J4+J6) * third
+   J2 = Fk(2)  
+   J4 = Fk(3) / f4of2 
+   J6 = Fk(4) / f6of2 
+   Jh = (J2+J4+J6) * factor * third
  else
-   write(message, '(a,i0,2a)' ) ' lpawu=',lpawu,ch10,' lpawu not equal to 0, 1, 2 or 3 is not allowed'
+   write(message,'(a,i0,2a)') ' lpawu=',lpawu,ch10,' lpawu not equal to 0, 1, 2 or 3 is not allowed'
    ABI_ERROR(message)
  end if ! lpawu
          

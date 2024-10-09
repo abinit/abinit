@@ -245,6 +245,14 @@ CONTAINS  !=====================================================================
    int_meshsz=pawrad(itypat)%int_meshsz
    lcur=-1
 
+   if (use_dmft > 0) then
+     if (dmft_dc == 8 .and. (f4of2_sla(itypat) >= -0.1_dp .or. &
+         & f6of2_sla(itypat) >= -0.1_dp)) then
+       message = "dmft_dc=8 not compatible with custom f4of2 and f6of2"
+       ABI_ERROR(message)
+     end if 
+   end if
+
 !  PAW+U data
    if (usepawu/=0.or.use_dmft>0) then
      lcur=llpawu(itypat)
@@ -469,6 +477,7 @@ CONTAINS  !=====================================================================
        end if
        sz1=2*lpawu+1
        ABI_MALLOC(pawtab(itypat)%vee,(sz1,sz1,sz1,sz1))
+
        call calc_vee(pawtab(itypat)%f4of2_sla,pawtab(itypat)%f6of2_sla,pawtab(itypat)%jpawu,&
              &       pawtab(itypat)%lpawu,pawang,pawtab(itypat)%upawu,pawtab(itypat)%vee,Loc_prtvol)
 
@@ -860,18 +869,13 @@ CONTAINS  !=====================================================================
        end if ! me=0
        
        if (dmft_dc == 8) then
-         
-         if (pawtab(itypat)%f4of2_sla>=-0.1_dp .or. pawtab(itypat)%f6of2_sla>=-0.1_dp) then
-           message = "dmft_dc=8 not compatible with custom f4of2 and f6of2"
-           ABI_ERROR(message)
-         end if 
                   
          ABI_MALLOC(pawtab(itypat)%proj2,(meshsz))
 
          pawtab(itypat)%proj2(1:meshsz) = (pawtab(itypat)%proj(1:meshsz)/int1)**2
          ! Get correspondence U,J <-> lamb,eps 
-         call get_lambda(lcur,pawrad_tmp,pawtab(itypat)%proj2(:),meshsz,pawtab(itypat)%upawu, &
-           & pawtab(itypat)%jpawu,lambda,eps)
+         call get_lambda(lcur,pawrad_tmp,pawtab(itypat)%proj2(:),meshsz, &
+                       & pawtab(itypat)%upawu,pawtab(itypat)%jpawu,lambda,eps)
          pawtab(itypat)%lambda = lambda
          pawtab(itypat)%eps = eps
          ABI_MALLOC(Fk,(lcur+1))
@@ -887,8 +891,8 @@ CONTAINS  !=====================================================================
          call wrtout(std_out,message,"COLL")
 
          ! Recompute matrix elements with new Slater integrals
-         f4of2 = - one
-         f6of2 = - one
+         f4of2 = -one
+         f6of2 = -one
          uh = Fk(1)
 
          if (lcur == 1) then
@@ -950,7 +954,7 @@ CONTAINS  !=====================================================================
 !Arguments ---------------------------------------------
 !scalars
  integer,intent(in) :: lpawu
-    integer,optional,intent(in) :: prtvol
+ integer,optional,intent(in) :: prtvol
  real(dp),intent(in) :: upawu,jpawu
  real(dp),intent(inout) :: f4of2_sla,f6of2_sla
  type(pawang_type), intent(in) :: pawang
@@ -962,7 +966,7 @@ CONTAINS  !=====================================================================
  integer :: isela,iselb
  integer :: klm0u,klma,klmb,kyc,lkyc
  integer :: lmkyc,lmpawu
-    integer :: m1,m11,m2,m21,m3,m31,m4,m41,prtvol_
+ integer :: m1,m11,m2,m21,m3,m31,m4,m41,prtvol_
  integer :: mkyc,sz1
  real(dp) :: ak,f4of2,f6of2
  character(len=500) :: message
