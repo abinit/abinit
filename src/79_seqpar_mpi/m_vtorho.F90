@@ -396,16 +396,13 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  integer :: nband_k,nband_cprj_k,nbuf,neglect_pawhat,nfftot,nkpg,nkpt1,nnsclo_now
  integer :: nproc_distrb,npw_k,nspden_rhoij,option,prtvol,quit,nblk_gemm_nonlop
  integer :: spaceComm_distrb,usecprj_local,usefock_ACE,usetimerev
-#if defined HAVE_GPU_CUDA
- integer(c_int64_t)   :: ph3d_size
-#endif
- logical :: berryflag,computesusmat,fixed_occ,has_vectornd
+ logical :: berryflag,computesusmat,fixed_occ,has_vectornd,exists
  logical :: locc_test,paral_atom,remove_inv,usefock,with_vxctau
  logical :: do_last_ortho,wvlbigdft=.false.,do_invS
  integer :: dmft_dftocc
  real(dp) :: edmft,ebandlda,ebanddmft,ebandldatot,ekindmft,ekindmft2,ekinlda
  real(dp) :: min_occ,vxcavg_dum,strsxc(6)
- character(len=500) :: msg
+ character(len=500) :: msg, filename
  type(bandfft_kpt_type),pointer :: my_bandfft_kpt => null()
  type(gs_hamiltonian_type) :: gs_hamk
 !arrays
@@ -417,6 +414,8 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  real(dp),allocatable :: enlx_k(:),enlxnk(:),focknk(:),fockfornk(:,:,:),ffnl(:,:,:,:),grnl_k(:,:), xcart(:,:)
  real(dp),allocatable :: grnlnk(:,:)
  class(abstract_wf), pointer :: mywfc
+ integer :: exclude_bands(hdr%mband, hdr%nsppol)
+ logical :: exclude_bands_ind(hdr%mband, hdr%nsppol)
 
 #if defined HAVE_GPU && defined HAVE_YAKL
  real(c_double), ABI_CONTIGUOUS pointer :: kinpw(:) => null()
@@ -1587,8 +1586,59 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
          nkpt=dtset%nkpt, &
          npwarr=npwarr, nsppol=dtset%nsppol, ntypat=dtset%ntypat, occ=occ, pawang=pawang, &
          pawrad=pawrad, pawtab=pawtab, prtvol=dtset%prtvol, &
-         psps=psps, rprimd=rprimd, ucvol=ucvol, xred=xred)
+         psps=psps, rprimd=rprimd, ucvol=ucvol, xred=xred, exclude_bands=exclude_bands)
         call xmpi_barrier(spaceComm_distrb)
+
+        ! Need to know if a band is in or not for the calculation, for correcting occupations and density
+        do iband=1, hdr%mband
+          do isppol=1, hdr%nsppol
+            exclude_bands_ind(iband,isppol) = .true.
+          enddo
+        enddo
+        do iband=1, hdr%mband
+          do isppol=1, hdr%nsppol
+            if (exclude_bands(iband,isppol) /= 0) then
+              exclude_bands_ind(exclude_bands(iband,isppol),isppol) = .false.
+            endif
+          enddo
+        enddo
+
+        do isppol=1, hdr%nsppol
+          do iband=1, paw_dmft%dmftbandi-1
+            if (exclude_bands_ind(iband,isppol) .eqv. .true.) then
+              write(msg, '(a)') "ERROR: Inconsistency between the excluded bands for Wannier90 and the dmftbandi/dmftbandf ABINIT keywords. TODO: remove this duplication of information."
+              ABI_ERROR(msg)
+            endif
+          enddo
+          do iband=paw_dmft%dmftbandi, paw_dmft%dmftbandf
+            if (exclude_bands_ind(iband,isppol) .eqv. .false.) then
+              write(msg, '(a)') "ERROR: Inconsistency between the excluded bands for Wannier90 and the dmftbandi/dmftbandf ABINIT keywords. TODO: remove this duplication of information."
+              ABI_ERROR(msg)
+            endif
+          enddo
+          do iband=paw_dmft%dmftbandf+1, hdr%mband
+            if (exclude_bands_ind(iband,isppol) .eqv. .true.) then
+              write(msg, '(a)') "ERROR: Inconsistency between the excluded bands for Wannier90 and the dmftbandi/dmftbandf ABINIT keywords. TODO: remove this duplication of information."
+              ABI_ERROR(msg)
+            endif
+          enddo
+        enddo
+
+        ! Print data needed for full charge self-consistency
+        write(filename, '(a, a)') trim(dtfil%filnam_ds(4)), "_w90.abinit"
+        write(msg,'(3a)') " ===== Printing data needed for full charge self-consistency in DFT+DMFT in ", trim(filename), " file"
+        call wrtout(std_out, msg, 'COLL')
+        open(unit=100, file=filename)
+         write(100, "(a, f12.6)") "Fermie", energies%e_fermie
+         write(100, "(a, i5)")  "Nkpt", dtset%nkpt
+         write(100, "(a, i5)")  "Nband", dtset%mband
+         do ikpt=1,dtset%nkpt
+           write(100,'(a,3f8.4,a,i4,a)' ) ' k-point ', dtset%kptns(1:3,ikpt), ' number ',ikpt,' :'
+           do ii=0,(dtset%mband-1)/12
+             write(100,'(12f6.3)') occ(1+ii*12+(ikpt-1)*dtset%mband:min(12+ii*12,dtset%mband)+(ikpt-1)*dtset%mband)
+           end do
+         end do
+        close(100)
 
         ! Perform DMFT. No need for most of the pipeline in dmft_solve.
         ! We directly call the python_invocation.
@@ -1600,24 +1650,85 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
         call flush_unit(std_out)
 
         ! Invoking python to execute the script
-        ! write(msg, '(a, i4)') ch10, paw_dmft%myproc
-        ! call wrtout(std_out, msg, 'COLL')
-        ! write(msg, '(a, a)') ch10, trim(dtfil%filnam_ds(3))//c_null_char
-        ! call wrtout(std_out, msg, 'COLL')
-        ! write(msg, '(a, a)') ch10, paw_dmft%spacecomm
-        ! call wrtout(std_out, msg, 'COLL')
-        ! call Invoke_python_triqs (paw_dmft%myproc, trim(dtfil%filnam_ds(3))//c_null_char, paw_dmft%spacecomm)
         write(msg, '(a)') trim(dtfil%filnam_ds(3))
-        !call Invoke_python_triqs (paw_dmft%myproc, trim(dtfil%filnam_ds(3))//c_null_char, mpi_enreg%comm_world)
         call invoke_python_run_script (paw_dmft%myproc, msg, mpi_enreg%comm_world)
         call xmpi_barrier(paw_dmft%spacecomm)
-        ! call xmpi_barrier(mpi_enreg%comm_world)
         call flush_unit(std_out)
 
         ! Need new DMFT occupations
+        ! They can be found in the file dtfil%filenam_ds(4)_w90.deltaN
+        ! Check if file exists
+        write(filename, '(2a)') trim(dtfil%filnam_ds(4)), '_w90.deltaN'
+        inquire(file=filename, exist=exists)
+        if (.not.exists) then
+            write(msg, '(3a)') "    ERROR: The file ", trim(filename), " does not exist. It means there was a problem with the DMFT. Abort."
+            ABI_ERROR(msg)
+        endif
+
+        ! Compute new energy terms due to non diagonal occupations and DMFT.
+        bdtot_index=1
+        do isppol=1,dtset%nsppol
+          do ikpt=1,dtset%nkpt
+            nband_k=dtset%nband(ikpt+(isppol-1)*dtset%nkpt)
+            do iband=1,nband_k
+
+              locc_test = abs(occ(bdtot_index))>tol8
+              write(msg, '(a,2i4,a,l2,a,l2,a,f12.6,a,2f20.6)') 'isppol, ikpt, iband: ', ikpt, iband, '; band_in: ', exclude_bands_ind(iband, isppol), '; locc_test: ', locc_test, '; occ: ', occ(bdtot_index), '; paw_dmft%occnd: ', paw_dmft%occnd(1,iband,iband,ikpt,isppol), paw_dmft%occnd(2,iband,iband,ikpt,isppol)
+              call wrtout(std_out, msg, 'COLL')
+              if(paw_dmft%band_in(iband)) then
+                if( paw_dmft%use_dmft == 1 .and. dmft_dftocc == 1 ) then ! test of the code
+                  paw_dmft%occnd(1,iband,iband,ikpt,isppol)=occ(bdtot_index)
+                end if
+                locc_test = abs(paw_dmft%occnd(1,iband,iband,ikpt,isppol))+&
+        &        abs(paw_dmft%occnd(2,iband,iband,ikpt,isppol))>tol8
+              end if
+              bdtot_index=bdtot_index+1
+
+         !      if (locc_test) then
+        !!        dmft
+         !        if(paw_dmft%use_dmft==1.and.dtset%nbandkss==0) then
+         !          ebandldatot=ebandldatot+dtset%wtk(ikpt)*occ(bdtot_index)*eigen(bdtot_index)
+         !          if(paw_dmft%band_in(iband)) then
+         !            ebandlda=ebandlda+dtset%wtk(ikpt)*occ(bdtot_index)*eigen(bdtot_index)
+         !            ekinlda=ekinlda+dtset%wtk(ikpt)*occ(bdtot_index)*eknk(bdtot_index)
+         !            occ(bdtot_index)=paw_dmft%occnd(1,iband,iband,ikpt,isppol)
+         !            ebanddmft=ebanddmft+dtset%wtk(ikpt)*occ(bdtot_index)*eigen(bdtot_index)
+         !            ekindmft=ekindmft+dtset%wtk(ikpt)*occ(bdtot_index)*eknk(bdtot_index)
+         !          end if
+         !        end if
+
+         !        energies%e_eigenvalues = energies%e_eigenvalues + &
+        &!         dtset%wtk(ikpt)*occ(bdtot_index)*eigen(bdtot_index)
+         !        energies%e_kinetic = energies%e_kinetic + &
+        &!         dtset%wtk(ikpt)*occ(bdtot_index)*eknk(bdtot_index)
+         !        energies%e_nlpsp_vfock = energies%e_nlpsp_vfock + &
+        &!         dtset%wtk(ikpt)*occ(bdtot_index)*enlxnk(bdtot_index)
+         !        if (usefock) then
+         !          energies%e_fock=energies%e_fock + half*focknk(bdtot_index)*occ(bdtot_index)*dtset%wtk(ikpt)
+         !          if (optforces>0) fock%fock_common%forces(:,:)=fock%fock_common%forces(:,:)+&
+        &!           dtset%wtk(ikpt)*occ(bdtot_index)*fockfornk(:,:,bdtot_index)
+         !        end if
+         !        if (optforces>0) grnl(:)=grnl(:)+dtset%wtk(ikpt)*occ(bdtot_index)*grnlnk(:,bdtot_index)
+         !      end if
+         !      bdtot_index=bdtot_index+1
+         !      if(paw_dmft%use_dmft==1.and.dtset%nbandkss==0) then
+         !        do iband1=1,nband_k
+         !          if(paw_dmft%band_in(iband).and.paw_dmft%band_in(iband1)) then
+        !!            write(std_out,*) "II+", isppol,ikpt,iband,iband1
+         !            ekindmft2=ekindmft2  +  dtset%wtk(ikpt)*paw_dmft%occnd(1,iband,iband1,ikpt,isppol)*&
+        &!             eknk_nd(isppol,ikpt,1,iband,iband1)
+         !            ekindmft2=ekindmft2  -  dtset%wtk(ikpt)*paw_dmft%occnd(2,iband,iband1,ikpt,isppol)*&
+        &!             eknk_nd(isppol,ikpt,2,iband,iband1)
+        !!            write(std_out,*) "II", occnd(1,iband,iband1,ikpt,isppol),eknk_nd(isppol,ikpt,iband,iband1)
+         !          end if
+         !        end do
+         !      end if
+            end do
+          end do
+        end do
 
 #else
-         ABI_ERROR('Cannot use use_dmft == 10 with #HAVE_PYTHON_INVOCATION set to false.')
+        ABI_ERROR('Cannot use use_dmft == 10 with #HAVE_PYTHON_INVOCATION set to false.')
 #endif
 
      end if ! usedmft
