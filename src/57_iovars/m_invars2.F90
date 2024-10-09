@@ -2432,7 +2432,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    do iatom=1,dtset%natom
      if(dtset%lpawu(dtset%typat(iatom))>0) natomcor=natomcor+1
    enddo
-   if(natomcor>1) dtset%dmft_wanorthnorm=2
+   if(natomcor>1.and.dtset%dmft_solv/=6.and.dtset%dmft_solv/=7) dtset%dmft_wanorthnorm=2
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_wanorthnorm',tread,'INT')
    if(tread==1) dtset%dmft_wanorthnorm=intarr(1)
 
