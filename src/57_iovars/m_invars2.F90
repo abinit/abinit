@@ -2665,6 +2665,11 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
        if(tread==1) dtset%dmft_triqs_wmax=dprarr(1)
      end if
    end if
+ elseif (dtset%usedmft==10) then
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmftbandi',tread,'INT')
+   if(tread==1) dtset%dmftbandi=intarr(1)
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmftbandf',tread,'INT')
+   if(tread==1) dtset%dmftbandf=intarr(1)
  end if
 
  if (dtset%usepawu/=0.or.(dtset%usedmft>0.and.dtset%usedmft/=10)) then
