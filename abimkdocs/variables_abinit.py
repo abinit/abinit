@@ -4392,6 +4392,10 @@ The choice is among:
          Save results in GSTORE.nc file (requires netcdf library with MPI-IO support).
          The k-mesh must be equal to the one associated to the input WFK file, the q-mesh is specified
          by [[eph_ngqpt_fine]] (NB: the q-mesh must be a sub-mesh of the k-mesh or equal).
+* 12 --> Migdal-Eliashberg equations (isotropic case).
+* -12 --> Migdal-Eliashberg equations (anisotropic case). IN DEVELOPMENT.
+* 13 --> Variational polaron equations
+* -13 --> Compute polaron wavefunctions and atomic displacements in the supercell and write results to files
 * 14 --> Compute the molecular Berry curvature from GSTORE.nc. No support for metals or non-collinear magnetism yet. Reference: [[cite:Saparov2022]], [[cite:Coh2023]].
 * 15, -15 --> Write the average in r-space of the DFPT potentials to the V1QAVG.nc file.
               In the first case (+15) the q-points are specified via [[ph_nqpath]] and [[ph_qpath]]. The code assumes the
@@ -4399,6 +4403,8 @@ The choice is among:
               are interpolated with Fourier transform.
               An array D(R) with the decay of the W(R,r) as a function of R is computed and saved to file
               In the second case (-15) the q-points are taken directly from the DVDB file.
+* 16, -16 --> test_phrotation TO BE DOCUMENTED.
+* 17 --> Compute e-ph matrix elements with the GWPT formalism  IN DEVELOPMENT.
 
 
 !!! important
