@@ -71,26 +71,26 @@ This functionality, available in v10.0, can now be considered in production.
 It has been tested and debugged.
 Moreover, there is a new option gwr_task = "CC4S_FROM_WFK" to read orbitals from file instead of using direct diagonalization.
 The support for [[istwfk]]=2 has been added.
-See tests : gwr_07 and gwr_09 
+See tests : gwr_07 and gwr_09, 10 and 11. 
 
-By M. Giantomassi (MR 1006) and F. Bruneval (MR1024). Additionally with a bug fix for filepath parsing from M. Sarraute (MR1026).
+By M. Giantomassi (MR 1006) and F. Bruneval (MR1024). Additionally, with a bug fix for filepath parsing from M. Sarraute (MR1026).
 
 **B.4** The variational polaron equation methodology 
 
 This methodology is described in [[ref:Vasilchenko2022]]. It allows to compute the polaron formation energy,
 and other characteristics of a polaron, from the electronic band structure, the phonon band structure, and the electron-phonon coupling.
 To use it, select [[optdriver]]=7 and [[eph_task]]=13.
-Related input variables : varpeq_aseed, varpeq_erange, varpeq_gau_params, varpeq_interpolate, varpeq_orth, varpeq_nstep, varpeq_pkind, varpeq_tolgrs, varpeq_pc_nupdate, varpeq_pc_factor.
+Related input variables : varpeq_aseed, varpeq_erange, varpeq_gau_params, varpeq_interpolate, varpeq_orth, varpeq_nstep, varpeq_pkind, varpeq_tolgrs, varpeq_pc_nupdate, varpeq_pc_factor, getvarpeq, getvarpeq_filepath..
 
-At present, no documentation of input variables, and no tests are available...
+At present, NO DOCUMENTATION  of input variables, and NO TESTS are available...
 
 By V. Vasilchenko, with help from M. Giantomassi (MR 1047).
 
-**B.5** Speed-up of the PAW calculation, thanks to cprj_in_memory.s
+**B.5** Speed-up of the PAW calculation, thanks to cprj_in_memory. 
 
 The coefficients of the wavefunctions giving the in-sphere contribution, denoted "cprj" can now be stored in memory, 
 thanks to the input variable [[cprj_in_memory]]. This brings speed-up of the PAW calculations (on the order of 20%-30%).
-There are many tests of this functionality, v10 10 to 18, paral 35 to 40, as well as 48 to 50,
+There are many tests of this functionality, v10 10 to 18, paral 35 to 40, as well as paral 48 to 50, and v9 71 to 74.
 but, as usual, the users are advised to check for themselves the results from turning on this new implementation (still mentioned as being "in development").
 
 Available only for the ground state. See the other limitations in the documentation of [[cprj_in_memory]]
@@ -107,6 +107,8 @@ useylm must be 1 (set automatically if [[cprj_in_memory]]=1), legendre polynomia
 [[nspinor]]=2 does not work properly, most probably because SOC is not implemented with useylm=1 (but works well for PAW). This case is forbidden at the moment.
 At last : it also contains a small fix of tolwfr_diago which was not used in lobpcg (tolwfr was used instead). This has a small impact on few references.
 
+SHOULD DOCUMENT xg_nonlop_option input variable, used in paral 35 and 38, also v10 10.
+
 By L. Baguet (MR 1058)
 
 **B.6** The Chebicheff filtering algorithm has been generalized to PAW with Spin-Orbit Coupling
@@ -117,8 +119,9 @@ By L. Baguet (MR XX)
 
 **B.7** Wannier90 with spinors
 
-Several improvements of the Wannier90 usage togehter with ABINIT: enable w90 output with spinor wave functions, improvements to parallel calls,
+Several improvements of the Wannier90 usage together with ABINIT: enable w90 output with spinor wave functions, improvements to parallel calls,
 general cleaning of mlwf routines.
+See tests wannier90 05 and 44.
 
 By M. Verstraete  and He Xu (MR1005).
 
@@ -185,32 +188,34 @@ Fix compilation with NVHPC 23.11-24.7 by switching mkrho optionals positions.
 By M. Sarraute (MR1056, MR1060, MR1061)
 
 
-**D.1** New tests of the GPU (KOKKOS+CUDA) porting of ABINIT are available, in directory tests/gpu_kokkos, tests 1 and 2. See input variable [[gpu_option]]=3.
+**D.1** Tests of the GPU (KOKKOS+CUDA) porting of ABINIT are available, in directory tests/gpu_kokkos, tests 1 and 2, nonlop with BLAS, chebycheff. 
+See input variable [[gpu_option]]=3.
 
-By M. Sarraute / or P. Kesteneer ?  and M. Torrent (MR XX)
+By M. Sarraute and M. Torrent (b3b2ce14ca1)
 
-**D.2** New tests of the GPU (OpenMP) porting of ABINIT are available, in directory tests/gpu_omp, tests 4 and 9. See input variable [[gpu_option]]=2.
-Needed to fix usecase of istwfk==2 when using CHEBFI as diago algorithm
- Small fixes around ELPA+GPU, Cray and GPU-aware MPI
+**D.2** New tests of the GPU (OpenMP) porting of ABINIT are available, in directory tests/gpu_omp, tests 4 to 9. See input variable [[gpu_option]]=2.
+Bug fix :  istwfk==2 when using CHEBFI as diago algorithm.
+Small fixes around ELPA+GPU, Cray and GPU-aware MPI have been done.
 
 By M. Sarraute and M. Torrent (MR1002, MR1004)
 
-**D.3** New tests of the chemical shielding and 
+**D.3** Correct bugs in the recognition of symmetries (trigonal and hexagonal groups).
 
-Correct bugs in symsghexa
-recognition of symmetries (trigonal and hexagonal groups).
 Work of Matthieu Verstraete and Joe Zwanziger based on a user's report of a Wyckoff position error in space groups 151 and 153. 
 Update symsghexa and update relevant tests. Provide a new test v10[02] that tests all Wyckoff positions in groups 143-167, the trigonal groups.
-Tests v10_2, v10_40 and v3_98 .
+See also tests v10_40 and v3_98 .
 By J.Zwanziger and M. Verstraete (MR1019, MR1025)
 
 
-Also, PEAD wavefunctions added to orbmag capabilities : 
+**D.3** New developments and tests related to the chemical shielding, orbital magnetization, nuclear dipole moment.
+PEAD wavefunctions added to orbmag capabilities : 
 Can call [[orbmag]] and [[berryopt]] -2 together, to compute orbital magnetic moment using PEAD derivative wavefunctions (instead of DFPT-based DDK wavefunctions).
 By J.Zwanziger (MR993)
 
 Add spatial symmetry (kptopt 4) to nuclear dipole moment in GS
-Kptopt 4 now allowed for systems with nuclear dipole moments (nucdipmom). Usually not much symmetry is left once a single nuclear dipole moment has been added, but there may be some.
+Kptopt 4 now allowed for systems with nuclear dipole moments (nucdipmom). 
+Usually not much symmetry is left once a single nuclear dipole moment has been added, but there may be some.
+See test v10 40
 By J.Zwanziger (MR1016)
 
 Remove requirement for m_orbmag routine to have pawxcdev 0; the default 1 works fine also, and the flexibility in pawxcdev makes the m_orbmag routine compatible with more features (mgga related, hybrid functional related, etc)
@@ -222,22 +227,48 @@ By J.Zwanziger (MR1052)
 
 
 **D. ** Miscellaneous developments for ground state. 
-This includes the
-rework of istwfk=2 with xg_tools (both CPU and GPU),.
+This includes the rework of istwfk=2 with xg_tools (both CPU and GPU).
 and the extension of istwfk>2 to lobpcg2 and chebfi2 (but works only with DFTI - the FFT from MKL). 
 Tested in test v10[03,04] and paral[44,45] for DFTI. Same inputs are tested without DFTI in v10[05,06] and paral[46,47], but they use only istwfk=1 and 2.
+The Chebicheff filtering algorithm has been generalized to PAW with Spin-Orbit Coupling
+See tests : paral 44 to 47, as well as v10 3 to 6.
 
-By L. Baguet (MR1022)
+By L. Baguet (MR 1014,1021,1022)
 
 **D. **
 Add new input variable gstore_gmode in ["phonon", "atom"] to save e-ph matrix elements in the atom representation.
-This is documented, but there is no test available yet.
+This is documented, but there is NO TEST AVAILABLE yet.
 
 By M. Giantomassi (MR1006)
+
+**D. **
+Add new input variables getabiwan and getabiwan_filepath. Define the name and path of the ABIWAN.nc file with the Wannier rotation matrices produced by ABINIT
+when wannier90 in invoked in library mode.
+This is documented, but there is NO TEST AVAILABLE yet.
+
+By M. Giantomassi (ac10911a)
+
+
+**D. **
+Add new input variables getgwan and getgwan_filepath. Define the name and path of the GWAN.nc file with the e-ph matrix elements in the Wannier representation 
+when wannier90 in invoked in library mode.
+This is documented, but there is NO TEST AVAILABLE yet.
+
+By M. Giantomassi (5c6ff934)
+
+
+**D. ** Add new input variables getdrhodb, getdrhodb_filepath, irddrhodb. TO BE DOCUMENTED, NO TEST (except the fake one gwpt_04). 
+
+By Siyu Chen (867b11f9)
 
 **D. ** Modify build system in order to include cmake files in 'make dist'. Modifications needed to compile with cmake.
 
 By M. Torrent (MR986, MR1032)
+
+**D. ** Test post-process mode of Wannier90 with wfk_task "wannier". Upgraded tutoplugs tw90_7 for that purpose.,
+
+By M. Giantomassi (5c5ff934b4c) on top of HeXu initial tutoplugs tw90_7 test (63fb2a6be73).
+
 
 
 **D. ** DMFT improvements.
@@ -311,7 +342,7 @@ Now, one should be able to run non-linear response DFPT calculations with VCA, s
 By C. Paillard (MR1033)
 
 **D. **
-A bug was introduced in Abinit v9.8 when updating the format of _EIG2D file to make them real DDB files that can be merged.
+A bug had been introduced in Abinit v9.8 when updating the format of _EIG2D file to make them real DDB files that can be merged.
 In the case of ieig2rf > 2, only the Sternheimer part of the EIG2D should be written to file. This was achieved using the
 outbsd routine by copying the eig2nkq array into eig2nkq_tmp in the eig2tot subroutine.
 When the outbsd routine was replaced by ddb%set_d2eig_reshape(), the eig2nkq was passed instead of the correct eig2nkq_tmp one,
@@ -324,7 +355,7 @@ the same printing done in eig2tot.
 
 Fix EIGR2D files for the case ieig2rf=5.
 Move writing of EIGR2D files in eig2stern.
-Add a test comparing an EIGR2D file against reference.
+Add a test comparing an EIGR2D file against reference (teph_tdep_legacy 5).
 
 The electron-phonon legacy scripts have been put back in the package, and have been updated to work with Python 3.6 and to support the new EIGR2D.nc DDB file format.
 
@@ -376,6 +407,18 @@ By M. Giantomassi (MR1049, MR1050)
 m_kpts:kpts_map was always assuming spatial symmetries for mapping one set of k-points on another. This was causing gstore_compute to crash when trying to use a _WFK file generated with kptopt=3, and with gstore_kzone="bz".
 
 By M. Mignolet (MR1057)
+
+**D. ** GWPT implementation is on-going. See [[eph_task]]=17. Testing has been initialized, see gwpt 1-4.
+
+By M. Giantomassi (5b9bb0e88ab, 306ccc446a2, c03fa967bde) 
+
+**D. ** New test for mGGA Norm conserving.
+Copper atom isolated in a box.
+Tests the reading of the upf2 potential, and inputs related to the model core kinetic energy density, then their usage.
+nc_xccc_gspace 0 calculates model core contribution in real space, and is much cleaner (0 kinE and density outside NLCC radius)
+Density (+kinE) mixing works much better than potential mixing: in the vacuum the mGGA potential is very sensitive
+
+By M. Vertraete  (43214101824)
 
 **D. ** Miscellaneous bug fixes and cleaning
 
@@ -872,7 +915,8 @@ From L. Baguet (MR1021, MR1039, MR1040)
 
 **D.30**
 
-Fix restartxf -1 in Molecular Dynamics
+Fix restartxf -1 in Molecular Dynamics. See tests v10 81 & 82.
+
 
 From F. Brieuc (MR1054)
 
