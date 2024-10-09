@@ -10,7 +10,7 @@ March 2024 and October 2024.
 These release notes
 are relative to modifications/improvements of ABINIT v10.2 with respect to v10.0, with also some late fixes to v10.0, after March 2024,
 that had not yet been documented.
-<!-- TO BE CHANGED Merge requests from MR986 up to and including MR1062. Also, MRXXX to MRYYY are taken into account. -->
+<!-- TO BE CHANGED Merge requests from MR986 up to and including MR1062. Also, MRXXX to MRYYY ... are taken into account. -->
 
 TO BE CHANGED
 
@@ -27,22 +27,27 @@ Xavier
 
 * * *
 
-### **A.** Important remarks and warnings.
+### **A.** Remarks and warnings.
+
+**A.1** Renamed input variable shiftfactor_extfpmd has been replaced by [[extfpmd_eshift]]. This is an energy shift, not a multiplying factor.
 
 
 * * *
 
-### **B.** Most noticeable achievements
+### **B.** Most noticeable developments
 
 **B.1** GPU porting of the DFPT driver of ABINIT
 
-The GPU porting of ABINIT using recent libraries/compilers has been continued. 
+The global GPU porting of ABINIT using recent libraries/compilers has been continued. 
 In the previous release 10.0, two implementations (OpenMP or KOKKOS+CUDA) for ground-state calculations [[optdriver]]=0
-had been made available. In the present release 10.2, the Density-Functional Perturbation Theory [[optdriver]]=1
-has been ported using OpenMP. Numerous tests are available, in the directory tests/gpu_omp, tests 11 to 25
+had been made available. 
+
+In the present release 10.2, the Density-Functional Perturbation Theory [[optdriver]]=1
+has been ported using OpenMP.  Numerous tests are available, in the directory tests/gpu_omp, tests 11 to 25
+
 See the description of the GPU possibilities of ABINIT in the documentation, input variable [[gpu_option]]=2.
 
-By M. Sarraute and M. Torrent (MR XX)
+By M. Sarraute and M. Torrent (MR 1027, MR1055)
 
 
 **B.2** GPU porting of Fock calculations 
@@ -51,7 +56,7 @@ Similarly, the Fock calculation has been ported to GPU, using OpenMP.
 Tests are available, in the directory tests/gpu_omp, tests 26 to 29.
 See the description of the GPU possibilities of ABINIT in the documentation, input variable [[gpu_option]]=2.
 
-By M. Sarraute and M. Torrent (MR XX)
+By M. Sarraute and M. Torrent (MR 1027X)
 
 
 **B.3** Interface to coupled-cluster CC4S calculations 
@@ -60,9 +65,12 @@ The file needed as input for computations with the CC4S package, <https://manual
 allowing to perform coupled-cluster calculations (e.g. CCSD), perturbative triples (and more), 
 can be produced using [[optdriver]]=6 and [[gwr_task]]="CC4S".
 This functionality, available in v10.0, can now be considered in production.
+It has been tested and debugged.
+Moreover, there is a new option gwr_task = "CC4S_FROM_WFK" to read orbitals from file instead of using direct diagonalization.
+The support for [[istwfk]]=2 has been added.
 See tests : gwr_07 and gwr_09 
 
-By M. Giantomassi (MR XX)
+By M. Giantomassi (MR 1006) and F. Bruneval (MR1024). Additionally with a bug fix for filepath parsing from M. Sarraute (MR1026).
 
 **B.4** The variational polaron equation methodology 
 
@@ -73,9 +81,9 @@ Related input variables : varpeq_aseed, varpeq_erange, varpeq_gau_params, varpeq
 
 At present, no documentation of input variables, and no tests are available...
 
-By V. Vasilchenko, with help from M. Giantomassi (MR XX).
+By V. Vasilchenko, with help from M. Giantomassi (MR 1047).
 
-**B.5** Speed-up of the PAW calculations
+**B.5** Speed-up of the PAW calculation, thanks to cprj_in_memory.s
 
 The coefficients of the wavefunctions giving the in-sphere contribution, denoted "cprj" can now be stored in memory, 
 thanks to the input variable [[cprj_in_memory]]. This brings speed-up of the PAW calculations (on the order of 20%-30%).
@@ -84,7 +92,19 @@ but, as usual, the users are advised to check for themselves the results from tu
 
 Available only for the ground state. See the other limitations in the documentation of [[cprj_in_memory]]
 
-By L. Baguet (MR XX)
+More detailed explanation ...
+The routines use a new module (xg_nonlop) in which all data needed to compute non-local operations are stored, using the xg_tools library.
+Main xg_nonlop routines (equivalent of opernla/b/c/d) are based on matrix-matrix operations.
+For now xg_nonlop is used only at the ground state level, but it is used to compute forces (with [[optforces]]=1 or 2) and stress (done after Abidev).
+It is available with :
+PAW, nsppol=1/2, nspinor=1/2, istwfk=1/2/>2, MPI (npkpt+npband) + openMP
+It is also available for Norm-Conserving, but with the following constraints :
+
+useylm must be 1 (set automatically if [[cprj_in_memory]]=1), legendre polynomials are not implemented
+[[nspinor]]=2 does not work properly, most probably because SOC is not implemented with useylm=1 (but works well for PAW). This case is forbidden at the moment.
+At last : it also contains a small fix of tolwfr_diago which was not used in lobpcg (tolwfr was used instead). This has a small impact on few references.
+
+By L. Baguet (MR 1058)
 
 **B.6** The Chebicheff filtering algorithm has been generalized to PAW with Spin-Orbit Coupling
 
@@ -92,33 +112,273 @@ See tests : paral 44 to 47, as well as v10 3 to 6.
 
 By L. Baguet (MR XX)
 
+**B.7** Wannier90 with spinors
+
+Several improvements of the Wannier90 usage togehter with ABINIT: enable w90 output with spinor wave functions, improvements to parallel calls,
+general cleaning of mlwf routines.
+
+By M. Verstraete  and He Xu (MR1005).
+
+**B.8** New developments and bug fixes in extended First-Principles Molecular Dynamics (high temperature).
+
+Computes extfpmd high energy contributions with a discrete sum on the orbitals. 
+Activated with [[useextfpmd]]=5. Controlled with the new input variable [[extfpmd_nband]]. 
+This allows ABINIT to compute smooth DOS between Kohn-Sham eingenstates and extended ideal electronic states.
+See test v9_92.
+
+Also, fixed [[useextfpmd]]=4 by computing the band shift. Now [[useextfpmd]]=1 and [[useextfpmd]]=4 show very similar results (not exactly equal though).
+
+Adding extfpmd_eshift in hdr of wave functions (optional in order not to break post processing tools) : this allows for a faster restart of a calculation from the wavefunctions.
+
+By A. Blanchet (MR1013).
 
 
 * * *
 
-### **C.** Changes for the developers (including information about compilers)
+### **C.** Changes for the developers or for the installation of ABINIT (including information about compilers)
 
+
+**C. ** The "MINIMAL" tag has been added to a selected set of automatic tests (about 20 abi files). 
+They cover the basic functionalities of ABINIT, and the detection of failures is modified and made more robust. 
+There should not be false failures due to tight tolerances.
+So, this should be the ideal set of tests to be executed after a new installation.
+Use "runtests.py -k MINIMAL". Also, "make check-local" and "make check-am" trigger this suite, and a global "make" .
+
+By M. Verstrate, M. Torrent and X. Gonze (MR1035, MR1041)
+
+**C. ** oneapi and newer intel compilers refuse the old syntax -mkl=cluster, moved to -qmkl. Presume all future compilations will be done with this. Modified config/m4/sd_math_linalg_core.m4 .
+
+By M. Verstraete (MR1007)
 
 * * *
 
 ### **D.**  Other changes (or on-going developments, not yet finalized, as well as miscellaneous bug fixes)
 
+**D.1** Work on the ground-state GPU porting of ABINIT has continued.
+
+Concerning eigensolvers on AMD GPU :
+By eigensolver routines, I refer to LAPACK DSYGVD/ZHEGVD and DSYEVD/ZHEEVD, which are provided on GPU by AMD HipSOLVER and NVIDIA CuSOLVER under specific names.
+As of today, DSYGVD and DSYEVD are significantly slower on AMD GPU, and usually account for most of execution time in Adastra GPU partition.
+But somehow, the complex variants ZHEGVD and ZHEEVD are incredibly slow, which lead me to introduce the following workaround:
+
+Use ZHEGVJ instead of ZHEGVD : J stands for Jacobi and it takes two extra parameter for tolerance and max step.
+
+This MR raise max step from 1 to 100, as numerical issues would sometime occur otherwise. Performance impact seems light
+
+
+Use ZHEEVD on CPU : AMD HIP provides a ZHEEVJ but I can't seem to make it work
+
+Running ZHEEVD on CPU is slow... but faster than AMD HIP ZHEEVD
+
+Concerning GPU-aware MPI :
+This concept consists of providing GPU buffers addresses to MPI routines. If GPU-direct is enabled, data will transmit between GPU interconnect, aka NVlink (NVIDIA) or InfinityFabric (AMD), UAlink (next-gen AMD/Intel). In ABINIT, it can be enabled using enable_mpi_gpu_aware=yes  in Autotools buildsys (CMake buildsys uses autodetect).
+This usually bring performance improvements, if GPU-direct is enabled, works fine on NVIDIA A100... but works erratically on AMD MI250.
+It is only used to perform a MPI_SUM  in xg_RayleighRitz , which is a performance bottleneck on GPU.
+Anyway, I discovered that this section was broken for some usecases (istwfk==2, AMD GPU) in XG submod so I fixed it 
+
+By M. Sarraute (MR1056)
+
+
 **D.1** New tests of the GPU (KOKKOS+CUDA) porting of ABINIT are available, in directory tests/gpu_kokkos, tests 1 and 2. See input variable [[gpu_option]]=3.
 
-By M. Sarraute and M. Torrent (MR XX)
+By M. Sarraute / or P. Kesteneer ?  and M. Torrent (MR XX)
 
 **D.2** New tests of the GPU (OpenMP) porting of ABINIT are available, in directory tests/gpu_omp, tests 4 and 9. See input variable [[gpu_option]]=2.
+Needed to fix usecase of istwfk==2 when using CHEBFI as diago algorithm
+ Small fixes around ELPA+GPU, Cray and GPU-aware MPI
 
-By M. Sarraute and M. Torrent (MR XX)
+By M. Sarraute and M. Torrent (MR1002, MR1004)
 
-**D.3** New tests of the chemical shielding and recognition of symmetries (trigonal and hexagonal groups).
+**D.3** New tests of the chemical shielding and 
+
+Correct bugs in symsghexa
+recognition of symmetries (trigonal and hexagonal groups).
+Work of Matthieu Verstraete and Joe Zwanziger based on a user's report of a Wyckoff position error in space groups 151 and 153. 
+Update symsghexa and update relevant tests. Provide a new test v10[02] that tests all Wyckoff positions in groups 143-167, the trigonal groups.
 Tests v10_2, v10_40 and v3_98 .
+By J.Zwanziger and M. Verstraete (MR1019, MR1025)
 
-By J.Zwanziger (MR XX)
 
-**D.4** New tests of the chemical shielding and recognition of symmetries (trigonal and hexagonal groups).
+Also, PEAD wavefunctions added to orbmag capabilities : 
+Can call [[orbmag]] and [[berryopt]] -2 together, to compute orbital magnetic moment using PEAD derivative wavefunctions (instead of DFPT-based DDK wavefunctions).
+By J.Zwanziger (MR993)
 
-By J.Zwanziger (MR XX)
+Add spatial symmetry (kptopt 4) to nuclear dipole moment in GS
+Kptopt 4 now allowed for systems with nuclear dipole moments (nucdipmom). Usually not much symmetry is left once a single nuclear dipole moment has been added, but there may be some.
+By J.Zwanziger (MR1016)
+
+Remove requirement for m_orbmag routine to have pawxcdev 0; the default 1 works fine also, and the flexibility in pawxcdev makes the m_orbmag routine compatible with more features (mgga related, hybrid functional related, etc)
+By J.Zwanziger (MR1051)
+
+Correct fock_getghc code to allow for cplex_dij = 2 case; necessary for use with nucdipmom . Now for example pbe0 calculations run together with nuclear dipole moments, allowing NMR shieldings to be calculated in the hybrid functional case.
+
+By J.Zwanziger (MR1052)
+
+
+**D. ** Miscellaneous developments for ground state. 
+This includes the
+rework of istwfk=2 with xg_tools (both CPU and GPU),.
+and the extension of istwfk>2 to lobpcg2 and chebfi2 (but works only with DFTI - the FFT from MKL). 
+Tested in test v10[03,04] and paral[44,45] for DFTI. Same inputs are tested without DFTI in v10[05,06] and paral[46,47], but they use only istwfk=1 and 2.
+
+By L. Baguet (MR1022)
+
+**D. **
+Add new input variable gstore_gmode in ["phonon", "atom"] to save e-ph matrix elements in the atom representation.
+This is documented, but there is no test available yet.
+
+By M. Giantomassi (MR1006)
+
+**D. ** Modify build system in order to include cmake files in 'make dist'. Modifications needed to compile with cmake.
+
+By M. Torrent (MR986, MR1032)
+
+
+**D. ** DMFT improvements.
+Fixing size name of susceptibility files in DMFT.
+Include local charge susceptibility in 62_ctqmc and results for tau = beta.
+By F. Gendron (MR987 and MR1030)
+
+
+**D. Fix an error when using ABI_GPU_LEGACY with xg_tools (wfoptalg=114 or 111).
+
+By L. Baguet (MR988)
+
+
+**D. ** Manage GPU markers with compilation flag rather than input param
+
+By M. Sarraute (MR989)
+
+**D. ** Add documentation for eph_task=14, and small correciton to release notes.
+
+By M. Mignolet (MR990)
+
+**D. ** Fix: velocity was not read from hist file with restartxf
+
+By He Xu (MR991)
+
+**D. ** Multibinit fixes: multibinit spin monte carlo did not run ; multibinit did not read more than one single-ion anisotropy from xml file.
+
+By He Xu (MR992)
+
+**D. ** Embryo documentation for cmake build 
+
+By P. Kestener (MR994)
+
+**D. ** Fix support for new compilers: ifort / ifx oneAPI 2024 ( replace some implicit loop by an explicit one ) and improve detection of cray compilers.
+
+By J.-M. Beuken (MR995)
+
+**D. ** Correct some small defects in the GPU version (test residue)
+
+By M. Torrent (MR996)
+
+**D. ** Pawrhoij fixing : Correct indexing in write/read of pawrhoij datastructures to POT and DEN files when qphase=2 ;
+Correct indexing in storing of pawrhoij datastructures after rotation in the symmetrization subroutine when qphase=2 . 
+
+By Oliviero Bistoni (MR998)
+
+**D. **
+Fix race condition in inwffil (cg_envlop kernel) occurring when ABINIT is compiled with -O0  with OpenMP parallelism enabled.
+-O0  might be used for debugging and it is always handy when code numerically behaves the same regardless of optimization flags.
+
+By M. Sarraute (MR1023)
+
+**D. **
+Fix wrong start and count in eph_task -2 when nsppol = 2. 
+Create indata/tmpdata directories if dirs do not exist.
+Set OMP_NUM_THREADS to 1 if env var is undefined
+
+By M. Giantomassi (MR124)
+
+**D. ** Fixed a nasty bug in m_fftcore.F90 . The remainder != 1 check must be performed outside the loop. Otherwise, for a valid number of nproc_fft the code throws an error and stops.
+
+By V. Vasilchenko (MR1028)
+
+**D. ** Fix:Virtual Crystal Approximation and useylm=1.
+In 64_psp/m_pspini.F90, filling the ffspl array when useylm=1 lead in certain cases to segmentation fault due iln set to ilmn, 
+thus running beyond ffspl dimension psps%lnmax. 
+The filling of ffspl has been revised, as well as the indexation in psps%indlmn (see lines 514 - 554, where most of the changes were made).
+Similar index problems in 66_nonlocal/m_mkffnl.F90, that has thus been modified.
+Now, one should be able to run non-linear response DFPT calculations with VCA, such as the electro-optic response.
+
+By C. Paillard (MR1033)
+
+**D. **
+A bug was introduced in Abinit v9.8 when updating the format of _EIG2D file to make them real DDB files that can be merged.
+In the case of ieig2rf > 2, only the Sternheimer part of the EIG2D should be written to file. This was achieved using the
+outbsd routine by copying the eig2nkq array into eig2nkq_tmp in the eig2tot subroutine.
+When the outbsd routine was replaced by ddb%set_d2eig_reshape(), the eig2nkq was passed instead of the correct eig2nkq_tmp one,
+resulting in a bug --> the fully EIG2D was printed to file instead of the partial Sternheimer only one.
+See documentation for explanation https://docs.abinit.org/variables/dfpt/#ieig2rf
+This bug is corrected here. In addition, it was not optimal as it could be printed directly in eig2stern, therefore avoiding the duplication of a large array in eig2nkq_tmp. This has been moved.
+In particular, I moved the printing from m_dfpt_looppert to m_eig2d/eig2stern
+Indeed the printing of EIGR2D should be done inside eig2stern, to mirror
+the same printing done in eig2tot.
+
+Fix EIGR2D files for the case ieig2rf=5.
+Move writing of EIGR2D files in eig2stern.
+Add a test comparing an EIGR2D file against reference.
+
+The electron-phonon legacy scripts have been put back in the package, and have been updated to work with Python 3.6 and to support the new EIGR2D.nc DDB file format.
+
+By S. Ponce (MR1036, MR1045) and G. Antonius (MR1043), with help from X. Gonze.
+
+**D. **
+Authorize HF with time-reversal symmetry when a single k-point is used 
+
+By F. Bruneval (MR1038)
+
+**D. **
+AbiDev 2024 hackathon tutorial fixes, specifically to the lruj tutorial, the eph_legacy (as much as I could before Samuel took over) 
+and the DFPT2 modifications.  LRUJ tutorial fixes and acknowledgements changes.
+
+By L. MacEnulty (MR1044)
+
+**D. ** Migration of a set of files previously present in the Dokuwiki of ABINIT, to the inner documentation of ABINIT.
+
+By M. Azizi (MR1046)
+
+**D. ** Write magmoms to GSR.nc file in order to re-train chgnet
+
+By M. Giantomassi (MR1047)
+
+
+**D. ** Fix regression in eph_driver when DDB file contains dynamical quadrupoles.
+
+By M. Giantomassi (MR1047)
+
+**D. ** Very preliminary work to support wannier-based interpolation of e-ph matrix elements
+
+By M. Giantomassi (MR1047)
+
+**D. ** Acceleration of the 'atdep' test series and normalization of eigenvectors
+
+By F. Bottin (MR1048)
+
+**D. ** Fix portability issues in GWR code:
+Fix SIGSEGV when calling PZLATRA, likely due to ABI mismatch between gcc and intel scalapack
+in functions returning complex results. Replace PZLATRA calls with home-made implementation.
+Fix wrong index in slk_get_trace
+Allocate dummy_vec scalapack matrix before calling heevm and here the compiler is too picky because dummy_vec is never referenced when computing eigenvalues only!
+
+By M. Giantomassi (MR1049, MR1050)
+
+
+**D. ** Fix internal mapping of k-points when kptopt = 2 or 3
+
+m_kpts:kpts_map was always assuming spatial symmetries for mapping one set of k-points on another. This was causing gstore_compute to crash when trying to use a _WFK file generated with kptopt=3, and with gstore_kzone="bz".
+
+By M. Mignolet (MR1057)
+
+**D. ** Miscellaneous bug fixes and cleaning
+
+By He Xu (MR1009), by M. Verstraete (MR1025)
+
+
+
+
+
 
 ## v10.0
 
