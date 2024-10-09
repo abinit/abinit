@@ -865,38 +865,35 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
  ! paw_dmft%idmftloop=0
  ! paw_dmft%mbandc  = 0
  if(use_dmft == 10) then
-  ABI_MALLOC(paw_dmft%occnd,(2,mband,mband,nkpt,nsppol*0))
-  ABI_MALLOC(paw_dmft%band_in,(mband*0))
-  ABI_MALLOC(paw_dmft%include_bands,((dmftbandf-dmftbandi+1)*0))
-  ABI_MALLOC(paw_dmft%exclude_bands,(mband*0))
+   ABI_MALLOC(paw_dmft%occnd,(2,mband,mband,nkpt,nsppol*1))
+   ABI_MALLOC(paw_dmft%band_in,(mband*1))
+   ABI_MALLOC(paw_dmft%include_bands,((dmftbandf-dmftbandi+1)*1))
+   ABI_MALLOC(paw_dmft%exclude_bands,(mband*1))
  ! else
- !  ABI_MALLOC(paw_dmft%occnd,(2,mband,mband,nkpt,nsppol*use_dmft))
- !  ABI_MALLOC(paw_dmft%band_in,(mband*use_dmft))
- !  ABI_MALLOC(paw_dmft%include_bands,((dmftbandf-dmftbandi+1)*use_dmft))
- ! ABI_MALLOC(paw_dmft%exclude_bands,(mband*use_dmft))
+   ! ABI_MALLOC(paw_dmft%occnd,(2,mband,mband,nkpt,nsppol*use_dmft))
+   ! ABI_MALLOC(paw_dmft%band_in,(mband*use_dmft))
+   ! ABI_MALLOC(paw_dmft%include_bands,((dmftbandf-dmftbandi+1)*use_dmft))
+   ! ABI_MALLOC(paw_dmft%exclude_bands,(mband*use_dmft))
  endif
-! allocate(paw_dmft%ph0phiiint()
-
 
  icb=0
  mbandc = 0
- if(use_dmft /= 10) then
-  do iband=1, mband
-   if (iband >= dmftbandi .and. iband <= dmftbandf) then
-    paw_dmft%band_in(iband)=.true.
-    mbandc = mbandc + 1
-    paw_dmft%include_bands(mbandc) = iband
-   else
-     icb = icb + 1
-     paw_dmft%exclude_bands(icb) = iband
-   end if ! band>=bandi and band<=bandf
+ do iband=1, mband
+  if (iband >= dmftbandi .and. iband <= dmftbandf) then
+   paw_dmft%band_in(iband)=.true.
+   mbandc = mbandc + 1
+   paw_dmft%include_bands(mbandc) = iband
+  else
+    icb = icb + 1
+    paw_dmft%exclude_bands(icb) = iband
+  end if ! band>=bandi and band<=bandf
  end do ! iband
  paw_dmft%mbandc = mbandc
 
  bdtot_index = 1
  do isppol=1,nsppol
    do ikpt=1,nkpt
-     nband_k = paw_dmft%nband(ikpt+(isppol-1)*nkpt)
+     nband_k = nband(ikpt+(isppol-1)*nkpt)
      do iband=1,nband_k
        paw_dmft%occnd(1,iband,iband,ikpt,isppol) = occ(bdtot_index)
        bdtot_index = bdtot_index + 1
@@ -1914,9 +1911,9 @@ subroutine construct_nwlo_dmft(paw_dmft)
   omega_lo_tmp(1) = temp * pi
   omega_lo_tmp(nwlo) = temp * pi * dble(2*nwli-1)
 
-!==================================
-!== Construct weight for log. freq.
-!==================================
+  !==================================
+  !== Construct weight for log. freq.
+  !==================================
 
   ABI_MALLOC(tospline_lo,(nwlo))
   ABI_MALLOC(splined_li,(nwli))
@@ -1942,47 +1939,49 @@ subroutine construct_nwlo_dmft(paw_dmft)
   wgt_wlo(1:nwlo) = zero ! very important for xmpi_sum
   ybcbeg = czero
   ybcend = czero
-! ============= END Set up =============
+  ! ============= END Set up =============
 
   tospline_lo(:) = czero
 
   do ifreq=omegaBegin,omegaEnd
-!    do ifreq1=1,paw_dmft%dmft_nwlo
+  ! do ifreq1=1,paw_dmft%dmft_nwlo
     tospline_lo(ifreq) = cone
-!    tospline_lo(ifreq1)=ifreq1**2-ifreq1
-!    enddo
-!    ybcbeg=cmplx(one/tol16**2,zero)
-!    ybcend=cmplx(one/tol16**2,zero)
+    ! tospline_lo(ifreq1)=ifreq1**2-ifreq1
+    ! enddo
+    ! ybcbeg=cmplx(one/tol16**2,zero)
+    ! ybcend=cmplx(one/tol16**2,zero)
 
-!==  spline delta function
+    !==  spline delta function
     call spline_complex(omega_lo_tmp(:),tospline_lo(:),nwlo, &
                       & ybcbeg,ybcend,ysplin2_lo(:))
-!   do ifreq1=1,paw_dmft%dmft_nwlo
-!    write(6588,*) paw_dmft%omega_lo(ifreq1),ysplin2_lo(ifreq1)
-!   enddo
+    ! do ifreq1=1,paw_dmft%dmft_nwlo
+    !  write(6588,*) paw_dmft%omega_lo(ifreq1),ysplin2_lo(ifreq1)
+    ! enddo
 
     call splint_complex(nwlo,omega_lo_tmp(:),tospline_lo(:), &
                       & ysplin2_lo(:),nwli,omega_li(:),splined_li(:))
 
     tospline_lo(ifreq) = czero
 
-!==         accumulate weights
+    !==         accumulate weights
     wgt_wlo(ifreq) = sum(dble(splined_li(:)))
-! do ifreq1=1,paw_dmft%dmft_nwlo
-!  write(6688,*) paw_dmft%omega_lo(ifreq1),tospline_lo(ifreq1)
-! enddo
-! do ifreq1=1,paw_dmft%dmft_nwli
-!  write(6788,*) paw_dmft%omega_li(ifreq1),splined_li(ifreq1)
+    ! do ifreq1=1,paw_dmft%dmft_nwlo
+    !  write(6688,*) paw_dmft%omega_lo(ifreq1),tospline_lo(ifreq1)
+    ! enddo
+
+    ! do ifreq1=1,paw_dmft%dmft_nwli
+    !  write(6788,*) paw_dmft%omega_li(ifreq1),splined_li(ifreq1)
+
   end do ! ifreq
-! ============= Gatherall  =============
+  ! ============= Gatherall  =============
   call xmpi_sum(wgt_wlo(1:nwlo),spacecomm,residu)
-! ============= END Gatherall ==========
+  ! ============= END Gatherall ==========
   ! end parallelisation over frequencies
 
   ABI_FREE(tospline_lo)
   ABI_FREE(splined_li)
   ABI_FREE(ysplin2_lo)
-! if(abs(dtset%pawprtvol)>=3) then
+  ! if(abs(dtset%pawprtvol)>=3) then
   write(message,'(a,18x,2(2x,a21))') ch10,"Log. Freq","weight"
   call wrtout(std_out,message,'COLL')
   do ifreq=1,nwlo
@@ -2007,7 +2006,7 @@ subroutine construct_nwlo_dmft(paw_dmft)
   call wrtout(std_out,message,'COLL')
   write(message,'(3x,a,i6,2(2x,e13.5))') "--ifreq--",nwli,omega_li(nwli)
   call wrtout(std_out,message,'COLL')
-!   endif
+  ! endif
   ABI_FREE(select_log)
   ABI_FREE(omega_li)
   ABI_MALLOC(paw_dmft%omega_lo,(nwlo))
