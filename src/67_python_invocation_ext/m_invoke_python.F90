@@ -79,15 +79,15 @@ module m_invoke_python
         ABI_ERROR(msg)
      endif
 
+     write(f2c_string, '(a)') trim(triqs_pythpath)//c_null_char
+     ierr = init_python_interpreter(f2c_string)
+     write(msg, '(a, i3)') "   ierr from initialization: ", ierr
+     call wrtout(std_out, msg, 'COLL')
      if (ierr == 1) then
         write(msg, '(a)') '   invoke_python_triqs: ERROR could not initialize properly the python interpreter.'
         ABI_ERROR(msg)
      endif
 
-     write(f2c_string, '(a)') trim(triqs_pythpath)//c_null_char
-     ierr = init_python_interpreter(f2c_string)
-     write(msg, '(a, i3)') "   ierr from initialization: ", ierr
-     call wrtout(std_out, msg, 'COLL')
      write(msg, '(a)') "   invoke_python_triqs: interpreter initialized"
      call wrtout(std_out, msg, 'COLL')
 
@@ -122,8 +122,6 @@ module m_invoke_python
      write(msg, '(a)') "   ######################################"
      call wrtout(std_out, msg, 'COLL')
 
-     write(msg, '(a, i3)') "   ierr from execution: ", ierr
-     call wrtout(std_out, msg, 'COLL')
      call mpi_barrier(MPI_COMM_WORLD,ierr)
 
      if (ierr == 1) then
