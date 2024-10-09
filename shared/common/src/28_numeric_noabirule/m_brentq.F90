@@ -42,7 +42,7 @@ CONTAINS  !=====================================================================
 !! Brent's root finding method (taken from scipy).
 !!
 !! INPUTS
-!! f= subroutine for which the optimization is to be done, of the form subroutine f(x,fx)
+!! f= subroutine corresponding to the function for which the optimization is to be done, of the form subroutine f(x,fx)
 !! xa,xb= interval on which to perform the optimization
 !! xtol,rtol=tolerance criterion, the output root x0 will satisfy the criterion 
 !!           abs(x-x0) < xtol + rtol * x0 with x the true root, default value on scipy are
@@ -55,55 +55,55 @@ CONTAINS  !=====================================================================
 !!
 !! SOURCE
 
-subroutine brentq(f, xa, xb, xtol, rtol, iter, xcur, ierr)
+subroutine brentq(f,xa,xb,xtol,rtol,iter,xcur,ierr)
 
  implicit none
 
 ! Written by Charles Harris charles.harris@sdl.usu.edu 
 
 !Arguments ------------------------------------
-!scalars
-  real(dp), intent(in)  :: xa, xb, xtol, rtol
-  integer, intent(in)   :: iter
+  real(dp), intent(in) :: xa,xb,xtol,rtol
+  integer, intent(in) :: iter
   real(dp), intent(out) :: xcur
-  external              :: f
-  integer, intent(out)  :: ierr
-
+  external :: f
+  integer, intent(out) :: ierr
 !Local variables ------------------------------
-  real(dp) :: xpre, xblk, fpre, fcur, fblk, spre, scur, sbis, delta, stry, dpre, dblk
-  integer  :: i
+  integer :: i
+  real(dp) :: dblk,delta,dpre,fblk,fcur,fpre,sbis,scur,spre,stry,xblk,xpre
   character(len=200) :: msg
+!************************************************************************
 
   xpre = xa
   xcur = xb
   xblk = zero
-  fpre = zero 
-  fcur = zero
   fblk = zero 
   spre = zero 
   scur = zero 
   ierr = 0
  
 ! the tolerance is 2*delta 
-  call f(xpre, fpre)
-  call f(xcur, fcur)
+  call f(xpre,fpre)
+  call f(xcur,fcur)
  
   if (fpre == zero) then
+    ierr = 1
     xcur = xpre
     return 
   end if
 
   if (fcur == zero) then
+    ierr = 1
     return
-  end if
+  end if 
 
-  if (sign(one,fpre)==sign(one,fcur)) then
-    msg='Sign error in brentq'
+  if (sign(one,fpre) == sign(one,fcur)) then
+    msg = 'Sign error in brentq'
     ABI_ERROR(msg)
   end if
 
-  do i=1,iter 
-    if ((fpre .ne. zero) .and. (fcur .ne. zero) .and. (sign(one,fpre) .ne. sign(one,fcur))) then
+  do i=1,iter
+ 
+    if ((fpre /= zero) .and. (fcur /= zero) .and. (sign(one,fpre) /= sign(one,fcur))) then
       xblk = xpre
       fblk = fpre
       spre = xcur - xpre
@@ -114,14 +114,13 @@ subroutine brentq(f, xa, xb, xtol, rtol, iter, xcur, ierr)
       xpre = xcur
       xcur = xblk
       xblk = xpre
-
       fpre = fcur
       fcur = fblk
       fblk = fpre
     end if
 
-    delta = (xtol + rtol*abs(xcur))/two
-    sbis = (xblk - xcur)/two;
+    delta = (xtol+rtol*abs(xcur)) * half
+    sbis = (xblk - xcur) * half
     if ((fcur == zero) .or. (abs(sbis) < delta)) then
       ierr = 1 
       return 
@@ -130,15 +129,15 @@ subroutine brentq(f, xa, xb, xtol, rtol, iter, xcur, ierr)
     if ((abs(spre) > delta) .and. (abs(fcur) < abs(fpre))) then
       if (xpre == xblk) then
         ! interpolate 
-        stry = -fcur*(xcur - xpre)/(fcur - fpre)
+        stry = -fcur * (xcur-xpre) / (fcur-fpre)
       else 
-        !extrapolate 
-        dpre = (fpre - fcur)/(xpre - xcur)
-        dblk = (fblk - fcur)/(xblk - xcur)
-        stry = -fcur*(fblk*dblk - fpre*dpre) /(dblk*dpre*(fblk - fpre))
+        ! extrapolate 
+        dpre = (fpre-fcur) / (xpre-xcur)
+        dblk = (fblk-fcur) / (xblk-xcur)
+        stry = -fcur * (fblk*dblk-fpre*dpre) / (dblk*dpre*(fblk-fpre))
       end if
 
-      if (2*abs(stry) < MIN(abs(spre), three*abs(sbis) - delta)) then
+      if (two*abs(stry) < min(abs(spre),three*abs(sbis)-delta)) then
         ! good short step 
         spre = scur
         scur = stry
@@ -166,10 +165,10 @@ subroutine brentq(f, xa, xb, xtol, rtol, iter, xcur, ierr)
       end if
     end if
 
-    call f(xcur, fcur) 
+    call f(xcur,fcur) 
 
-  end do
-
+  end do ! i
+ 
 end subroutine brentq
 !!***
 
