@@ -367,7 +367,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 !wannier interface
  call timab(1152,1,tsec)
 
- if (dtset%prtwant==2) then
+ if (dtset%prtwant==2 .and. ( dtset%usedmft /= 10 ) ) then
        call wfd_run_wannier(cryst=crystal, ebands=ebands, hdr=hdr, mpi_enreg=mpi_enreg, &
          & ngfftc=ngfft, ngfftf=ngfft, dtset=dtset, dtfil=dtfil,  &
          & pawang=pawang,  pawrad=pawrad, pawtab=pawtab, psps=psps, &
