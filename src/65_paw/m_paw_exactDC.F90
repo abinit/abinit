@@ -77,48 +77,53 @@ CONTAINS  !=====================================================================
  real(dp), intent(out) :: edc,edcdc
 !Local variables ------------------------------
  integer :: i,ir,j,k,l,ln,m,m1,mm,minusm,meshsz,ndim
- real(dp) :: excint,phi,rho,rpart,rs1,sedcdc,sexc,svxc,theta,vxcf
+ real(dp) :: excint,phi,rho,rs1,sexc,svxc,theta,vxcf
  real(dp) :: ecc(1),exx(1),kcart(3),rs1s(1),vcc(1),vxx(1)
  complex(dpc) :: ylm_c
- real(dp), allocatable :: edcdci(:),exc(:,:,:),exci(:),phis(:),rho_angle(:,:)
- real(dp), allocatable :: thetas(:),tweights(:),vhar_angle(:,:),vtot(:,:,:)
- real(dp), allocatable :: vxc(:,:,:),vxci(:,:,:),ylm(:,:,:)
+ real(dp), allocatable :: exc(:,:,:),exci(:),phis(:),rho_angle(:,:)
+ real(dp), allocatable :: thetas(:),tweights(:),vxc(:,:,:),vxci(:,:,:),ylm(:,:,:)
  !************************************************************************
- 
+
+ ! VERY IMPORTANT: This routine assumes that the occupation matrix is in the real spherical
+ ! harmonics basis. If you want to change that for some reason, don't forget to add some 
+ ! complex conjugates (since in the complex case you have rho(r) = sum rho_ij
+ ! conj(Yli) * Ylj, which I have simplified here in rho(r) = sum rho_ij Yli * Ylj)
+
  ln = 13  ! Size of angular mesh, same as eDMFT
  meshsz = size(pawtab%proj2(:)) ! Size of radial mesh
  ndim = 2*lpawu + 1
  
- ABI_MALLOC(edcdci,(meshsz))
  ABI_MALLOC(exc,(ln+1,2*ln+1,meshsz)) 
  ABI_MALLOC(exci,(meshsz))
  ABI_MALLOC(phis,(2*ln+1)) 
  ABI_MALLOC(rho_angle,(ln+1,2*ln+1))
  ABI_MALLOC(thetas,(ln+1)) 
  ABI_MALLOC(tweights,(ln+1))
- ABI_MALLOC(vhar_angle,(ln+1,2*ln+1))
- ABI_MALLOC(vtot,(ln+1,2*ln+1,meshsz))
  ABI_MALLOC(vxc,(ln+1,2*ln+1,meshsz))
  ABI_MALLOC(vxci,(meshsz,ndim,ndim)) 
  ABI_MALLOC(ylm,(ln+1,2*ln+1,ndim)) 
 
  vdc(:,:) = czero
  edc = zero
+
+ <n(r)> = <Phi(r)^d * Phi(r)>
+ <n(r)> = Phi_i^d(r) Phi_j(r) <c_i^d c_j> = rho_ji Phi_i^d(r) Phi_j(r)
+ n(r) = sum Phi_i^d(r) c_i^d Phi_j(r) c_j
+      =  
  
  ! Hartree contribution
  
  do l=1,ndim
-   do k=1,ndim
-     do j=1,ndim
+   do j=1,ndim
+     do k=1,ndim
        do i=1,ndim
-         vdc(i,j) = vdc(i,j) + (pawtab%vee(i,k,j,l)+pawtab%vee(k,i,l,j))*occ(k,l)
-         edc = edc + pawtab%vee(i,j,k,l)*dble(occ(i,k)*occ(j,l))
+         vdc(i,j) = vdc(i,j) + pawtab%vee(i,k,j,l)*occ(k,l)
+         edc = edc + pawtab%vee(i,k,j,l)*dble(occ(i,j)*occ(k,l))
        end do ! i
-     end do ! j
-   end do ! k 
- end do ! l
- 
- vdc(:,:) = half * vdc(:,:)
+     end do ! k
+   end do ! j
+ end do ! l 
+
  edc = half * edc
  
  ! XC contribution
@@ -150,21 +155,18 @@ CONTAINS  !=====================================================================
    end do ! j
  end do ! m
  
- rho_angle(:,:)  = zero
- vhar_angle(:,:) = zero
+ rho_angle(:,:) = zero
  
  do m1=1,ndim
    do m=1,ndim
-     rho_angle(:,:)  = rho_angle(:,:) + dble(occ(m,m1))*ylm(:,:,m)*ylm(:,:,m1)
-     vhar_angle(:,:) = vhar_angle(:,:) + dble(vdc(m,m1))*ylm(:,:,m)*ylm(:,:,m1)
+     rho_angle(:,:) = rho_angle(:,:) + dble(occ(m,m1))*ylm(:,:,m)*ylm(:,:,m1)
    end do ! m
  end do ! m1
   
  do ir=1,meshsz
    do j=1,2*ln+1
      do i=1,ln+1
-       rpart = pawtab%proj2(ir) / (max(pawrad%rad(ir),epsilon(one))**2)
-       rho = rho_angle(i,j) * rpart
+       rho = rho_angle(i,j) * pawtab%proj2(ir) / (max(pawrad%rad(ir),epsilon(one))**2)
        rs1 = (four_pi * rho / three)**(third) 
        rs1s(1) = rs1
        call ExchangeLDA(exx(:),vxx(:),rs1s(:),pawtab%lambda,1)
@@ -172,14 +174,12 @@ CONTAINS  !=====================================================================
        vxc(i,j,ir) = vxx(1) * half / pawtab%eps
        rs1s(1) = one / (max(rs1,epsilon(one)))
        call CorrLDA_2(ecc(:),vcc(:),rs1s(:),pawtab%lambda,pawtab%eps,1)
-       exc(i,j,ir)  = exc(i,j,ir) + ecc(1) * half 
-       vxc(i,j,ir)  = vxc(i,j,ir) + vcc(1) * half
-       vtot(i,j,ir) = vxc(i,j,ir) + vhar_angle(i,j)*rpart
+       exc(i,j,ir) = exc(i,j,ir) + ecc(1)*half 
+       vxc(i,j,ir) = vxc(i,j,ir) + vcc(1)*half
      end do ! i
    end do ! j
  end do ! ir
 
- edcdci(:) = zero
  exci(:) = zero
 
  ! Integrals over theta and phi
@@ -189,44 +189,38 @@ CONTAINS  !=====================================================================
      do ir=1,meshsz
        svxc = zero
        sexc = zero
-       sedcdc = zero
        do j=1,2*ln+1
          svxc = svxc + two_pi*sum(ylm(:,j,m)*ylm(:,j,m1)*tweights(:)* &
-            & vxc(:,j,ir)) /dble(2*ln+1)
+              & vxc(:,j,ir))/dble(2*ln+1)
          sexc = sexc + two_pi*sum(ylm(:,j,m)*ylm(:,j,m1)*tweights(:)* &
-            & exc(:,j,ir))*dble(occ(m,m1))/dble(2*ln+1)
-         sedcdc = sedcdc + two_pi*sum(ylm(:,j,m)*ylm(:,j,m1)*tweights(:)* &
-            & vtot(i,j,ir))*dble(occ(m,m1))/dble(2*ln+1)
+              & exc(:,j,ir))*dble(occ(m,m1))/dble(2*ln+1)
        end do ! j
        vxci(ir,m,m1) = svxc 
        exci(ir) = exci(ir) + sexc
-       edcdci(ir) = edcdci(ir) + sedcdc
      end do ! ir
    end do ! m
  end do ! m1
 
  ! Integrals over r
 
- call simp_gen(edcdc,edcdci(:)*pawtab%proj2(:),pawrad,r_for_intg=pawrad%rad(meshsz))
  call simp_gen(excint,exci(:)*pawtab%proj2(:),pawrad,r_for_intg=pawrad%rad(meshsz))
  edc = edc + excint
- 
+ edcdc = zero
+
  do m1=1,ndim
    do m=1,ndim
      call simp_gen(vxcf,vxci(:,m,m1)*pawtab%proj2(:),pawrad,r_for_intg=pawrad%rad(meshsz))
-     vdc(m,m1) = vdc(m,m1) + cmplx(vxcf,zero,kind=dp)
+     vdc(m,m1) = vdc(m,m1) + cmplx(vxcf,zero,kind=dp) 
+     edcdc = edcdc + dble(vdc(m,m1)*occ(m,m1))
    end do ! m
  end do ! m1
- 
- ABI_FREE(edcdci)
+
  ABI_FREE(exc) 
  ABI_FREE(exci)
  ABI_FREE(phis) 
  ABI_FREE(rho_angle)
  ABI_FREE(thetas) 
  ABI_FREE(tweights)
- ABI_FREE(vhar_angle)
- ABI_FREE(vtot)
  ABI_FREE(vxc)
  ABI_FREE(vxci) 
  ABI_FREE(ylm) 
