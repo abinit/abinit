@@ -46,8 +46,9 @@ In the present release 10.2, the Density-Functional Perturbation Theory [[optdri
 has been ported using OpenMP.  Numerous tests are available, in the directory tests/gpu_omp, tests 11 to 25
 
 See the description of the GPU possibilities of ABINIT in the documentation, input variable [[gpu_option]]=2.
+For the description of the modifications of ABINIT, see the MR below.
 
-By M. Sarraute and M. Torrent (MR 1027, MR1055)
+By M. Sarraute and M. Torrent (MR 1027, MR1055, MR1059)
 
 
 **B.2** GPU porting of Fock calculations 
@@ -56,7 +57,9 @@ Similarly, the Fock calculation has been ported to GPU, using OpenMP.
 Tests are available, in the directory tests/gpu_omp, tests 26 to 29.
 See the description of the GPU possibilities of ABINIT in the documentation, input variable [[gpu_option]]=2.
 
-By M. Sarraute and M. Torrent (MR 1027X)
+For the description of the modifications of ABINIT, see the MR below.
+
+By M. Sarraute and M. Torrent (MR 1062)
 
 
 **B.3** Interface to coupled-cluster CC4S calculations 
@@ -176,7 +179,10 @@ This usually bring performance improvements, if GPU-direct is enabled, works fin
 It is only used to perform a MPI_SUM  in xg_RayleighRitz , which is a performance bottleneck on GPU.
 Anyway, I discovered that this section was broken for some usecases (istwfk==2, AMD GPU) in XG submod so I fixed it 
 
-By M. Sarraute (MR1056)
+Fix unprotected OpenMP TARGET directives.
+Fix compilation with NVHPC 23.11-24.7 by switching mkrho optionals positions.
+
+By M. Sarraute (MR1056, MR1060, MR1061)
 
 
 **D.1** New tests of the GPU (KOKKOS+CUDA) porting of ABINIT are available, in directory tests/gpu_kokkos, tests 1 and 2. See input variable [[gpu_option]]=3.
