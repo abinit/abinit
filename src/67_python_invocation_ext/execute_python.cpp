@@ -50,7 +50,6 @@ static void* libpython_handle = NULL;
 
 extern "C" {
 int init_python_interpreter(const char* python_so) {
- fprintf(stdout, "In init_python_interpreter.");
  char* error;
  libpython_handle = dlopen(python_so, RTLD_GLOBAL | RTLD_LAZY);
  if (!libpython_handle) {
@@ -101,7 +100,11 @@ int execute_python_file(const char* filename) {
 
  // LOAD(PyRun_SimpleString, int, const char *);
  LOAD(PyRun_SimpleFile, int, FILE*, const char*);
- (*PyRun_SimpleFile)(file, filename);
+ int result = PyRun_SimpleFile(file, filename);
+ if (result == -1) {
+  fprintf(stderr, "return of PyRun_SimpleFile %d \n", result);
+  return 1;
+ }
 
  return 0;
 }
