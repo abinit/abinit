@@ -21,8 +21,8 @@
 
 MODULE m_brentq
 
- use m_errors
  use defs_basis
+ use m_errors
 
  implicit none
 

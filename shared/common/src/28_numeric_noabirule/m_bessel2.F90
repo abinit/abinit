@@ -21,6 +21,7 @@
 
 MODULE m_bessel2
 
+ use defs_basis
  use m_errors
 
  implicit none
@@ -54,24 +55,23 @@ CONTAINS  !=====================================================================
  subroutine bessel_iv(k,xr,xi,ivr,ivi)
 
 !Arguments ------------------------------------
- double precision, intent(in)  :: k,xr,xi
- double precision, intent(out) :: ivr,ivi
+ real(dp), intent(in) :: k,xr,xi
+ real(dp), intent(out) :: ivr,ivi
 !Local variables ------------------------------
- double precision :: pi,s
- double precision :: cyr(1),cyi(1),cyrk(1),cyik(1)
- integer :: nz,ierr
+ integer :: ierr,nz
+ real(dp) :: s
+ real(dp) :: cyi(1),cyik(1),cyr(1),cyrk(1)
 !************************************************************************
- pi = ACOS(-dble(1.))
 
  call zbesi(xr,xi,abs(k),1,1,cyr,cyi,nz,ierr)
- if (k >= 0.) then
+ if (k >= zero) then
    ivr = cyr(1)
    ivi = cyi(1)
  else
-   s = sin(k * pi) * dble(2.) / pi
+   s = sin(abs(k)*pi) * two / pi
    call zbesk(xr,xi,abs(k),1,1,cyrk,cyik,nz,ierr)
-   ivr = cyr(1) + s * cyrk(1)
-   ivi = cyi(1) + s * cyik(1) 
+   ivr = cyr(1) + s*cyrk(1)
+   ivi = cyi(1) + s*cyik(1) 
  end if
 
  end subroutine bessel_iv
@@ -100,22 +100,18 @@ CONTAINS  !=====================================================================
  subroutine bessel_kv(k,xr,xi,kvr,kvi)
 
 !Arguments ------------------------------------
- double precision, intent(in)  :: k,xr,xi
- double precision, intent(out) :: kvr,kvi
+ real(dp), intent(in) :: k,xi,xr
+ real(dp), intent(out) :: kvi,kvr
 !Local variables ------------------------------
- double precision :: cyr(1),cyi(1)
- integer :: nz,ierr
+ integer :: ierr,nz
+ real(dp) :: cyi(1),cyr(1)
 !************************************************************************
-  
- if (xi == 0. .and. xr <= 0.) then
-   ABI_ERROR("Input value in bessel_kv is < 0")
- end if 
 
  call zbesk(xr,xi,abs(k),1,1,cyr,cyi,nz,ierr)
 
- if (xi == 0.) then
+ if (xi == zero) then
    kvr = cyr(1)
-   kvi = dble(0.)
+   kvi = zero
  else
    kvr = cyr(1)
    kvi = cyi(1)
@@ -280,8 +276,8 @@ CONTAINS  !=====================================================================
 !C     COMPLEX CONE,CSGN,CW,CY,CZERO,Z,ZN
       DOUBLE PRECISION AA, ALIM, ARG, CONEI, CONER, CSGNI, CSGNR, CYI, &
      & CYR, DIG, ELIM, FNU, FNUL, PI, RL, R1M5, STR, TOL, ZI, ZNI, ZNR, &
-     & ZR, AZ, BB, FN, ASCLE, RTOL, ATOL, STI !,AZABS, D1MACH
-      INTEGER I, IERR, INU, K, KODE, K1,K2,N,NZ,NN!, I1MACH
+     & ZR, AZ, BB, FN, ASCLE, RTOL, ATOL, STI 
+      INTEGER I, IERR, INU, K, KODE, K1,K2,N,NZ,NN
       DIMENSION CYR(N), CYI(N)
       DATA PI /3.14159265358979324D0/
       DATA CONER, CONEI /1.0D0,0.0D0/
