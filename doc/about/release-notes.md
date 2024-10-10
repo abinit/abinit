@@ -4,6 +4,8 @@ Version 10.2, released on October 10, 2024.
 List of changes with respect to version 10.0.
 <!-- Release notes updated on Oct 9, 2024. -->
 
+WARNING : THESE v10.2 RELEASE NOTES HAVE NOT YET BEEN EXAMINED CAREFULLY AND APPROVED BY THE DEVELOPERS. MOREOVER THEY ARE INCOMPLETE. THE PRESENT v10.2 RELEASE IS ONLY A BETA RELEASE.
+
 Many thanks to the contributors to the ABINIT project between
 March 2024 and October 2024.
 <!-- (with some late contributions until XXX 2024). -->
