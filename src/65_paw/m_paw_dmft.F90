@@ -33,10 +33,10 @@ MODULE m_paw_dmft
  use m_dtset
 
  !use defs_datatypes, only : pseudopotential_type
- use defs_abitypes,  only : MPI_type
- use m_io_tools,     only : open_file
- use m_pawrad,       only : pawrad_type
- use m_pawtab,       only : pawtab_type
+ use defs_abitypes, only : MPI_type
+ use m_io_tools, only : open_file
+ use m_pawrad, only : pawrad_type
+ use m_pawtab, only : pawtab_type
 
  implicit none
 
@@ -52,7 +52,7 @@ MODULE m_paw_dmft
  public :: saveocc_dmft
  public :: readocc_dmft
 
- private :: init_paral_dmft, init_sc_dmft_paralkgb, destroy_paral_dmft, destroy_sc_dmft_paralkgb
+ private :: init_paral_dmft,init_sc_dmft_paralkgb,destroy_paral_dmft,destroy_sc_dmft_paralkgb
 !!***
 
 !----------------------------------------------------------------------
@@ -67,7 +67,7 @@ MODULE m_paw_dmft
 
  type, public :: mpi_distrib_dmft_type
 
-   ! Two parallelization types:
+   ! Two types of parallelization
    ! Type 1: parallelization over kpt and then frequencies
    ! Type 2: parallelization over frequencies only
 
@@ -90,19 +90,19 @@ MODULE m_paw_dmft
    ! Shift from kpt index on the current CPU to the physical index (type 1)
 
    integer, allocatable :: nkpt_mem(:)
-   ! Number of kpt handled by each CPU (type 1)
+   ! Number of kpt handled by each CPU of the kpt communicator (type 1)
 
    integer, allocatable :: nw_mem(:)
-   ! Number of frequencies handled by each CPU (type 2)
+   ! Number of frequencies handled by each CPU of the global communicator (type 2)
 
    integer, allocatable :: nw_mem_kptparal(:)
-   ! Number of frequencies handled by each CPU (type 1)
+   ! Number of frequencies handled by each CPU of the frequency communicator (type 1)
 
    integer, allocatable :: procb(:)
    ! Rank in comm_kpt of the CPU handling each kpt (type 1)
 
    integer, allocatable :: procf(:)
-   ! Rank in the world communicator of the CPU handling each frequency (type 2)
+   ! Rank in the global communicator of the CPU handling each frequency (type 2)
 
    integer, allocatable :: proct(:)
    ! Rank in comm_freq of the CPU handling each frequency (type 1)
@@ -336,7 +336,9 @@ MODULE m_paw_dmft
   ! Total number of correlated bands
   
   integer :: mkmem
-  ! Number of k-points in memory on the current process
+  ! Number of k-points handled by the current process in the 
+  ! DFT parallelization (different than distrib%nkpt_mem, in
+  ! DMFT parallelization)
 
   integer :: myproc
   ! Rank in comm_world
@@ -682,7 +684,7 @@ subroutine init_sc_dmft(dtset,paw_dmft,dmatpawu,fnamei,fnametmp_app,gprimd,kg,mp
  character(len=fnlen), optional, intent(in) :: fnamei,fnametmp_app
 !Local variables ------------------------------------
  integer :: bdtot_index,dmft_solv,dmftbandi,dmftbandf,fac,grid_unt,i
- integer :: iatom,iatom1,iband,icb,iexist2,ifreq,ig,ik,ikg,ikpt,im,im1
+ integer :: iatom,iatom1,iband,icb,ierr,ifreq,ig,ik,ikg,ikpt,im,im1
  integer :: indproj,ioerr,iproj,ir,irot,isppol,isym,itypat,lpawu,lpawu1,maxlpawu
  integer :: mband,mbandc,mesh_size,mesh_type,mkmem,mpw,myproc,natom,nband_k,ndim
  integer :: ngrid,nkpt,nproc,nproju,npw,nspinor,nsppol
@@ -766,7 +768,7 @@ subroutine init_sc_dmft(dtset,paw_dmft,dmatpawu,fnamei,fnametmp_app,gprimd,kg,mp
  do isym=1,nsym
    if (dtset%symafm(isym) < 0) then
      message = 'symafm negative is not implemented in DMFT '
-!     ABI_ERROR(message)
+     ABI_ERROR(message)
    end if
  end do ! isym
  
@@ -1096,21 +1098,19 @@ subroutine init_sc_dmft(dtset,paw_dmft,dmatpawu,fnamei,fnametmp_app,gprimd,kg,mp
 ! Real frequencies
 !=======================
 
- iexist2 = 1
  if (dtset%iscf < 0 .and. dmft_solv >= 5 .and. dmft_solv <= 8) then
    tmpfil = trim(paw_dmft%filapp)//'_spectralfunction_realfrequencygrid'
    inquire(file=trim(tmpfil),exist=lexist)!,recl=nrecl)
    !  write(6,*) "inquire",lexist
    grid_unt = 2000
    if (.not.lexist) then
-     iexist2 = 0
      write(message,'(4x,a,i5,3a)') "File number",grid_unt," called ",trim(tmpfil)," does not exist"
      call wrtout(std_out,message,'COLL')
      message = "Cannot continue: the missing file coming from Maxent code is needed"
      ABI_ERROR(message)
    end if ! not lexist
 
-   if (iexist2 == 1) then
+   if (myproc == 0) then
 #ifdef FC_NAG
      open(unit=grid_unt,file=trim(tmpfil),status='unknown',form='formatted',recl=ABI_RECL)
 #else
@@ -1124,21 +1124,19 @@ subroutine init_sc_dmft(dtset,paw_dmft,dmatpawu,fnamei,fnametmp_app,gprimd,kg,mp
      call wrtout(std_out,message,'COLL')
      write(message,'(a,a,a,i4)') 'opened file : ',trim(tmpfil),' unit',grid_unt
      call wrtout(std_out,message,'COLL')
-     read(grid_unt,*) ngrid
+     read(grid_unt,*,iostat=ioerr) ngrid
      ABI_MALLOC(paw_dmft%omega_r,(ngrid))
-     if (ioerr < 0) then
-       message = "Error reading grid file"
-       ABI_ERROR(message)
-     end if ! ioerr<0
      do ifreq=1,ngrid
-       read(grid_unt,*) paw_dmft%omega_r(ifreq)
+       read(grid_unt,*,iostat=ioerr) paw_dmft%omega_r(ifreq)
          !paw_dmft%omega_r(ifreq)=paw_dmft%omega_r(ifreq)
      end do ! ifreq
-     if (ioerr < 0) then
-       message = "Error reading grid file"
-       ABI_ERROR(message)
-     end if ! ioerr<0
-   end if ! iexist2
+     close(grid_unt)
+   end if ! myproc=0
+   call xmpi_bcast(ioerr,0,xmpi_world,ierr)
+   if (ioerr /= 0) ABI_ERROR("Error when reading grid file")
+   call xmpi_bcast(ngrid,0,xmpi_world,ierr)
+   if (myproc /= 0) ABI_MALLOC(paw_dmft%omega_r,(ngrid))
+   call xmpi_bcast(paw_dmft%omega_r(:),0,xmpi_world,ierr)
  else
    ABI_MALLOC(paw_dmft%omega_r,(2*paw_dmft%dmft_nwr))
    ! Set up real frequencies for spectral function in Hubbard one.
@@ -1227,6 +1225,8 @@ subroutine init_sc_dmft(dtset,paw_dmft,dmatpawu,fnamei,fnametmp_app,gprimd,kg,mp
  do itypat=1,ntypat
    lpawu = pawtab(itypat)%lpawu
    if (lpawu == -1) cycle
+   if (t2g) lpawu = 1
+   if (x2my2d) lpawu = 0
    mesh_type = pawrad(itypat)%mesh_type
    lstep = pawrad(itypat)%lstep
    rstep = pawrad(itypat)%rstep
@@ -1996,7 +1996,7 @@ subroutine construct_nwlo_dmft(paw_dmft)
   spacecomm = paw_dmft%spacecomm
   deltaw = nwlo / nproc 
   residu = nwlo - nproc*deltaw
-  if (myproc < nproc - residu) then
+  if (myproc < nproc-residu) then
     omegaBegin = 1 + myproc*deltaw 
     omegaEnd   = (myproc+1) * deltaw
   else
