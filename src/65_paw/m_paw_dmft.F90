@@ -1646,17 +1646,17 @@ subroutine init_dmft(cryst_struc,dmatpawu,dtset,fermie_dft,fnamei,fnametmp_app,p
 
  paw_dmft%lchipsiortho = 0
 
-!=========================================================
-!== if we use ctqmc impurity solver
-!=========================================================
-! IMPORTANT : paw_dmft%hybrid is corrupted somewhere in DMFT routines on
-! tikal_psc and max2_open64. Use a local hybrid in qmc_prep even if not optimal.
-! Anyway initializing ctqmc here is not good and produce the same result for
-! dmft_iter=1 which speed up the convergence ...
-! FIXME : Move this to init_sc_dmft and find bug
+ !=========================================================
+ !== if we use ctqmc impurity solver
+ !=========================================================
+ ! IMPORTANT : paw_dmft%hybrid is corrupted somewhere in DMFT routines on
+ ! tikal_psc and max2_open64. Use a local hybrid in qmc_prep even if not optimal.
+ ! Anyway initializing ctqmc here is not good and produce the same result for
+ ! dmft_iter=1 which speed up the convergence ...
+ ! FIXME : Move this to init_sc_dmft and find bug
  if (paw_dmft%dmft_solv == 5) then ! CTQMC initialisation
  !  write(message,'(a,2x,a,f13.5)') ch10," == Initializing CTQMC"
-!   call wrtout(std_out,message,'COLL')
+ !   call wrtout(std_out,message,'COLL')
 
    ABI_MALLOC(paw_dmft%hybrid,(paw_dmft%natom))
    do iatom=1,paw_dmft%natom
@@ -1682,8 +1682,8 @@ subroutine init_dmft(cryst_struc,dmatpawu,dtset,fermie_dft,fnamei,fnametmp_app,p
                                 &  opt_spectra  = paw_dmft%dmftctqmc_mrka,  &
                                 &  opt_gmove    = paw_dmft%dmftctqmc_gmove )
    end do ! iatom
-  ! write(message,'(a,2x,a,f13.5)') ch10,&
-!&  " == Initialization CTQMC done"
+   ! write(message,'(a,2x,a,f13.5)') ch10,&
+   !&  " == Initialization CTQMC done"
    !call wrtout(std_out,message,'COLL')
  end if ! dmft_solv=5
 
