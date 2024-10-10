@@ -7,7 +7,7 @@
 !! and for each angular momentum.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2022 ABINIT group (DCA, XG, GMR, MT, DRH)
+!!  Copyright (C) 1998-2024 ABINIT group (DCA, XG, GMR, MT, DRH)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -260,7 +260,7 @@ subroutine mkffnl(dimekb, dimffnl, ekb, ffnl, ffspl, gmet, gprimd, ider, idir, i
 
 !Local variables-------------------------------
 !scalars
- integer :: ider_tmp,iffnl,ig,ig0,il,ilm,ilmn,iln,iln0,im,itypat,mu,mua,mub,nlmn,nu,nua,nub
+ integer :: ider_tmp,iffnl,ig,ig0,il,ilm,ilmn,iln,iln0,im,iylm,itypat,mu,mua,mub,nlmn,nu,nua,nub
  integer :: nprocs, my_rank, cnt, ierr
  real(dp),parameter :: renorm_factor=0.5d0/pi**2,tol_norm=tol10
  real(dp) :: ecut,ecutsm,effmass_free,fact,kpg1,kpg2,kpg3,kpgc1,kpgc2,kpgc3,rmetab,yp1
@@ -376,7 +376,7 @@ subroutine mkffnl(dimekb, dimffnl, ekb, ffnl, ffspl, gmet, gprimd, ider, idir, i
    end if
  else
    if (nkpg<3) then
-     ecut=huge(0.0d0)*0.1d0;ecutsm=zero;effmass_free=one
+     ecut=huge(zero)*0.1d0;ecutsm=zero;effmass_free=one
      ! Note that with ecutsm=0, the right kinetic energy is computed
      call mkkin(ecut,ecutsm,effmass_free,gmet,kg,kpgnorm,kpt,npw,0,0)
 !$OMP PARALLEL DO
@@ -494,16 +494,17 @@ subroutine mkffnl(dimekb, dimffnl, ekb, ffnl, ffspl, gmet, gprimd, ider, idir, i
          ! ffnl_prime_prime(K,l,m,n)=6 reduced coordinates of d2(ffnl)/dK^cart.dK^cart
 
          if (useylm==1) then
+           iylm = il**2 + il + 1 + im
 !$OMP PARALLEL DO
            do ig=1,npw
-             ffnl(ig,1,iffnl,itypat)=ylm(ig,ilm)*wk_ffnl1(ig)
+             ffnl(ig,1,iffnl,itypat)=ylm(ig,iylm)*wk_ffnl1(ig)
            end do
 
            if (ider>=1) then
 !$OMP PARALLEL DO COLLAPSE(2)
              do mu=1,3
                do ig=1,npw
-                 dffnl_red(ig,mu)=ylm(ig,ilm)*wk_ffnl2(ig)*kpgn(ig,mu)+ylm_gr(ig,mu,ilm)*wk_ffnl1(ig)
+                 dffnl_red(ig,mu)=ylm(ig,iylm)*wk_ffnl2(ig)*kpgn(ig,mu)+ylm_gr(ig,mu,iylm)*wk_ffnl1(ig)
                end do
              end do
              ! Special cases |k+g|=0
@@ -594,10 +595,10 @@ subroutine mkffnl(dimekb, dimffnl, ekb, ffnl, ffspl, gmet, gprimd, ider, idir, i
 !$OMP PARALLEL DO
                do ig=1,npw
                  d2ffnl_red(ig,mu)= &
-                 ylm_gr(ig,3+mu,ilm)*wk_ffnl1(ig) &
-                 + (rmetab-kpgn(ig,mua)*kpgn(ig,mub))*ylm(ig,ilm)*wk_ffnl2(ig)*kpgnorm_inv(ig) &
-                 + ylm(ig,ilm)*kpgn(ig,mua)*kpgn(ig,mub)*wk_ffnl3(ig) &
-                 + (ylm_gr(ig,mua,ilm)*kpgn(ig,mub)+ylm_gr(ig,mub,ilm)*kpgn(ig,mua))*wk_ffnl2(ig)
+                 ylm_gr(ig,3+mu,iylm)*wk_ffnl1(ig) &
+                 + (rmetab-kpgn(ig,mua)*kpgn(ig,mub))*ylm(ig,iylm)*wk_ffnl2(ig)*kpgnorm_inv(ig) &
+                 + ylm(ig,iylm)*kpgn(ig,mua)*kpgn(ig,mub)*wk_ffnl3(ig) &
+                 + (ylm_gr(ig,mua,iylm)*kpgn(ig,mub)+ylm_gr(ig,mub,iylm)*kpgn(ig,mua))*wk_ffnl2(ig)
                end do
                ! Special cases |k+g|=0
                if (ig0>0) then

@@ -4,11 +4,12 @@
 # Classes needed for the temperature_final.py script
 # 2015 : Spin + Lifetime coding
 # 2020 : Port to python3
+# 2024 : Port to python3.6 + adapt for the new version of EIGR2D.nc files.
 
 #from __future__ import division, print_function
 import numpy as N
 from numpy import zeros
-from numpy import complex, float
+#from numpy import complex, float
 import itertools as Iter
 from functools import partial
 import multiprocessing
@@ -77,8 +78,8 @@ class system:
     self.kpt = root.variables['reduced_coordinates_of_kpoints'][:,:]
     self.eigenvalues = root.variables['eigenvalues'][:,:,:] #number_of_spins, number_of_kpoints, max_number_of_states
     self.rprimd = root.variables['primitive_vectors'][:,:]
-    self.zpm = root.variables['zero_point_motion'][:,:,:,:,:] # nsppol, number_of_temperature, 
-                                                   # number_of_kpoints, max_number_of_states, cplex 
+    self.zpm = root.variables['zero_point_motion'][:,:,:,:,:] # nsppol, number_of_temperature,
+                                                   # number_of_kpoints, max_number_of_states, cplex
     root.close()
 
 # Read _EIG.nc file
@@ -86,10 +87,10 @@ class system:
     if not (os.path.isfile(filefullpath)):
       raise Exception('The file "%s" does not exists!' %filefullpath)
     root = nc.Dataset(filefullpath,'r')
-    self.EIG = root.variables['Eigenvalues'][:,:,:] # nsppol,nkpt,nband 
+    self.EIG = root.variables['Eigenvalues'][:,:,:] # nsppol,nkpt,nband
     self.Kptns = root.variables['Kptns'][:,:]
     NBandK = root.variables['NBandK'][:]
-    self.nband =  N.int(NBandK[0,0])
+    self.nband =  int(NBandK[0,0])
     root.close()
 
 # Open the Fan.nc file and read it
@@ -102,7 +103,7 @@ class system:
     self.nband = len(root.dimensions['max_number_of_states'])
     self.nsppol = len(root.dimensions['number_of_spins'])
     self.occ = root.variables['occupations'][:,:,:] # number_of_spins, number_of_kpoints, max_number_of_states
-    GKKtmp = root.variables['second_derivative_eigenenergies_actif'][:,:,:,:,:] #max_number_of_states,number_of_atoms, 
+    GKKtmp = root.variables['second_derivative_eigenenergies_actif'][:,:,:,:,:] #max_number_of_states,number_of_atoms,
                                        # number_of_cartesian_directions, number_of_kpoints, product_mband_nsppol*2
     GKKtmp2 = N.einsum('ijkno->nokji', GKKtmp)
     #GKKtmp2(nkpt,nband*nsppol*2,3,natom,nband)
@@ -111,7 +112,7 @@ class system:
     self.GKK = 1j*GKKtmp4
     self.GKK += GKKtmp3
     self.GKK_bis = N.reshape(self.GKK,(self.nkpt,self.nsppol,self.nband,3,self.natom,self.nband))
-    self.eigenvalues = root.variables['eigenvalues'][:,:,:] #number_of_spins, number_of_kpoints, max_number_of_states   
+    self.eigenvalues = root.variables['eigenvalues'][:,:,:] #number_of_spins, number_of_kpoints, max_number_of_states
     self.kpt = root.variables['reduced_coordinates_of_kpoints'][:,:]
     self.iqpt = root.variables['current_q_point'][:]
     self.wtq = root.variables['current_q_point_weight'][:]
@@ -125,24 +126,30 @@ class system:
     root = nc.Dataset(filefullpath,'r')
     self.natom = len(root.dimensions['number_of_atoms'])
     self.nkpt = len(root.dimensions['number_of_kpoints'])
-    self.nband = len(root.dimensions['max_number_of_states'])
+    self.nband = len(root.dimensions['maximum_number_of_bands'])
     self.nsppol = len(root.dimensions['number_of_spins'])
     self.occ = root.variables['occupations'][:,:,:] # number_of_spins, number_of_kpoints, max_number_of_states
-    EIG2Dtmp = root.variables['second_derivative_eigenenergies'][:,:,:,:,:,:,:] #number_of_atoms, 
+    group = root.groups['d2eig']
+    EIG2Dtmp = group.variables['matrix_values'][:,:,:,:,:,:,:,:,:]#number_of_d2eig_blocks, number_of_spins, number_of_kpoints, maximum_number_of_bands, number_of_perturbations, number_of_cartesian_directions, number_of_perturbations, number_of_cartesian_directions, cplex
+    #EIG2Dtmp = root.variables['second_derivative_eigenenergies'][:,:,:,:,:,:,:] #number_of_atoms,
                                        # number_of_cartesian_directions, number_of_atoms, number_of_cartesian_directions,
                                        # number_of_kpoints, product_mband_nsppol, cplex
-    EIG2Dtmp2 = N.einsum('ijklmno->mnlkjio', EIG2Dtmp)
-    #EIG2Dtmp2(nkpt,mband*nsppol,3,natom,3,natom,2)
-    self.EIG2D = 1j*EIG2Dtmp2[...,1]
-    self.EIG2D += EIG2Dtmp2[...,0]
+    # SP: we assume only 1 q-points (no merge) per file and only 1 spin channel
+    EIG2Dtmp2 = EIG2Dtmp[0,0,:,:,:,:,:,:,:] # (nkpt, mband, npert, 3, npert, 3, 2)
+    # From (nkpt, mband, npert, 3, npert, 3, 2) --> (nkpt,mband*nsppol,3,natom,3,natom,2)
+    EIG2Dtmp3 = N.einsum('ijklmno->ijlknmo', EIG2Dtmp2)
+
+    self.EIG2D = 1j*EIG2Dtmp3[...,1]
+    self.EIG2D += EIG2Dtmp3[...,0]
     #EIG2D(nkpt,mband*nsppol,3,natom,3,natom)
     self.EIG2D_bis = N.reshape(self.EIG2D,(self.nkpt,self.nsppol,self.nband,3,self.natom,3,self.natom))
     #EIG2D_bis(nkpt,nband,nsppol,3,natom,3,natom)
-    self.eigenvalues = root.variables['eigenvalues'][:,:,:] #number_of_spins, number_of_kpoints, max_number_of_states   
+    #self.eigenvalues = root.variables['eigenvalues'][:,:,:] #number_of_spins, number_of_kpoints, max_number_of_states
     self.kpt = root.variables['reduced_coordinates_of_kpoints'][:,:]
-    self.iqpt = root.variables['current_q_point'][:]
-    self.wtq = root.variables['current_q_point_weight'][:]
-    self.rprimd = root.variables['primitive_vectors'][:,:]
+    self.iqpt = root.groups['d2eig'].variables['reduced_coordinates_of_qpoints'][:]
+    #self.iqpt = root.variables['current_q_point'][:]
+    #self.wtq = root.variables['current_q_point_weight'][:]
+    #self.rprimd = root.variables['primitive_vectors'][:,:]
     root.close()
 
 # Open the DDB file and read it
@@ -157,33 +164,33 @@ class system:
       typatdone = 0
       for line in DDB:
         if line.find('natom') > -1:
-          self.natom = N.int(line.split()[1])
+          self.natom = int(line.split()[1])
         if line.find('nkpt') > -1:
-          self.nkpt = N.int(line.split()[1])
+          self.nkpt = int(line.split()[1])
           self.kpt  = zeros((self.nkpt,3))
         if line.find('ntypat') > -1:
-          self.ntypat = N.int(line.split()[1])
+          self.ntypat = int(line.split()[1])
         if line.find('nband') > -1:
-          self.nband = N.int(line.split()[1])
+          self.nband = int(line.split()[1])
         if line.find('acell') > -1:
           line = line.replace('D','E')
           tmp = line.split()
-          self.acell = [N.float(tmp[1]),N.float(tmp[2]),N.float(tmp[3])]
+          self.acell = [float(tmp[1]),float(tmp[2]),float(tmp[3])]
         if Flag2:
           line = line.replace('D','E')
           for ii in N.arange(3,self.ntypat):
-            self.amu[ii] = N.float(line.split()[ii-3])
+            self.amu[ii] = float(line.split()[ii-3])
             Flag2 = False
         if line.find('amu') > -1:
           line = line.replace('D','E')
           self.amu = zeros((self.ntypat))
           if self.ntypat > 3:
             for ii in N.arange(3):
-              self.amu[ii] = N.float(line.split()[ii+1])
-              Flag2 = True 
+              self.amu[ii] = float(line.split()[ii+1])
+              Flag2 = True
           else:
             for ii in N.arange(self.ntypat):
-              self.amu[ii] = N.float(line.split()[ii+1])
+              self.amu[ii] = float(line.split()[ii+1])
         if line.find(' kpt ') > -1:
           line = line.replace('D','E')
           tmp = line.split()
@@ -193,7 +200,7 @@ class system:
         if ikpt < self.nkpt and ikpt > 0:
           line = line.replace('D','E')
           tmp = line.split()
-          self.kpt[ikpt,0:3] = [float(tmp[0]),float(tmp[1]),float(tmp[2])]  
+          self.kpt[ikpt,0:3] = [float(tmp[0]),float(tmp[1]),float(tmp[2])]
           ikpt += 1
           continue
         if Flag == 2:
@@ -215,22 +222,22 @@ class system:
           line = line.replace('D','E')
           if (self.natom-typatdone)*1.0/12 < 1.001:
             for ii in N.arange(self.natom-typatdone):
-              self.typat[typatdone+ii] = N.float(line.split()[ii])
+              self.typat[typatdone+ii] = float(line.split()[ii])
               Flag3 = False
           else:
             for ii in N.arange(12):
-              self.typat[typatdone+ii] = N.float(line.split()[ii])
+              self.typat[typatdone+ii] = float(line.split()[ii])
             typatdone += 12
         if line.find(' typat') > -1:
           self.typat = zeros((self.natom))
           if self.natom > 12:
             for ii in N.arange(12):
-              self.typat[ii] = N.float(line.split()[ii+1])
+              self.typat[ii] = float(line.split()[ii+1])
               Flag3 = True
               typatdone = 12
           else:
             for ii in N.arange(self.natom):
-              self.typat[ii] = N.float(line.split()[ii+1])
+              self.typat[ii] = float(line.split()[ii+1])
         # Read the actual d2E/dRdR matrix
         if Flag == 3:
           line = line.replace('D','E')
@@ -241,7 +248,7 @@ class system:
         if line.find('qpt') > -1:
           line = line.replace('D','E')
           tmp = line.split()
-          self.iqpt = [N.float(tmp[1]),N.float(tmp[2]),N.float(tmp[3])]
+          self.iqpt = [float(tmp[1]),float(tmp[2]),float(tmp[3])]
           Flag = 3
           self.IFC = zeros((3,self.natom,3,self.natom),dtype=complex)
 
@@ -257,7 +264,7 @@ def compute_dynmat(DDB):
 # Calcul of gprimd from rprimd
   rprimd = DDB.rprim*DDB.acell
   gprimd = N.linalg.inv(N.matrix(rprimd))
-# Transform from 2nd-order matrix (non-cartesian coordinates, 
+# Transform from 2nd-order matrix (non-cartesian coordinates,
 # masses not included, asr not included ) from DDB to
 # dynamical matrix, in cartesian coordinates, asr not imposed.
   IFC_cart = zeros((3,DDB.natom,3,DDB.natom),dtype=complex)
@@ -290,7 +297,7 @@ def compute_dynmat(DDB):
 # Solve the eigenvalue problem with linear algebra (Diagonalize the matrix)
   [eigval,eigvect]=N.linalg.eigh(Dyn_mat)
 
-# Orthonormality relation 
+# Orthonormality relation
   ipert = 0
   for ii in N.arange(DDB.natom):
     for dir1 in N.arange(3):
@@ -309,7 +316,7 @@ def compute_dynmat(DDB):
 
 # The acoustic phonon at Gamma should NOT contribute because they should be zero.
 # Moreover with the translational invariance the ZPM will be 0 anyway for these
-# modes but the FAN and DDW will have a non physical value. We should therefore 
+# modes but the FAN and DDW will have a non physical value. We should therefore
 # neglect these values.
 #  if N.allclose(DDB.iqpt,[0.0,0.0,0.0]) == True:
 #    omega[0] = 0.0
@@ -425,7 +432,7 @@ def get_bose(natom,omega,temp_info):
 
 def gaussian(ifreq,omegatmp,gaussian_smearing):
   x = (ifreq - omegatmp)/gaussian_smearing
-  gaussian = 1.0/(N.sqrt(N.pi)) * (1.0/gaussian_smearing) * N.exp(-(x**2))  
+  gaussian = 1.0/(N.sqrt(N.pi)) * (1.0/gaussian_smearing) * N.exp(-(x**2))
   return gaussian
 
 def fermidirac(freq,center,smearing):
@@ -445,7 +452,7 @@ def lorentzian(freq,center,smearing):
 
 # Compute the dynamical ZPR with temperature dependence
 def dynamic_zpm_temp(arguments,ddw_save,ddw_save2,type,temp_info,smearing,eig0,degen,energy,gaussian_smearing):
-  
+
   if type == 1 or type == 2:
     nbqpt,wtq,eigq_files,DDB_files,EIGR2D_files,GKK_files = arguments
     GKKterm = system(directory='.',filename=GKK_files)
@@ -483,7 +490,7 @@ def dynamic_zpm_temp(arguments,ddw_save,ddw_save2,type,temp_info,smearing,eig0,d
 # Find phonon freq and eigendisplacement from _DDB
   omega,eigvect,gprimd=compute_dynmat(DDB)
 
-# Compute the displacement = eigenvectors of the DDB. 
+# Compute the displacement = eigenvectors of the DDB.
 # Due to metric problem in reduce coordinate we have to work in cartesian
 # but then go back to reduce because our EIGR2D matrix elements are in reduced coord.
   fan_corr =  zeros((ntemp,EIGR2D.nkpt,EIGR2D.nband,EIGR2D.nsppol),dtype=complex)
@@ -534,7 +541,7 @@ def dynamic_zpm_temp(arguments,ddw_save,ddw_save2,type,temp_info,smearing,eig0,d
     delta_E_sm = N.einsum('i,ljk->ljik',N.ones((EIGR2D.nband)),(2*occtmp-1))*smearing*1j # spin,ikpt,iband,jband
     num1 = N.einsum('ij,mkl->mkijl',bose,N.ones((EIGR2D.nsppol,EIGR2D.nkpt,EIGR2D.nband))) +1.0 \
           - N.einsum('ij,mkl->mkijl',N.ones((3*EIGR2D.natom,ntemp)),occtmp) # spin,k,mod,temp,band # bef was (imode,tmp,band)
-    deno1 = N.einsum('mijk,l->mijkl',delta_E,N.ones(3*EIGR2D.natom),dtype=N.complex)
+    deno1 = N.einsum('mijk,l->mijkl',delta_E,N.ones(3*EIGR2D.natom),dtype=complex)
 
     if type==1: # dynamic
       deno1 -= N.einsum('mijk,l->mijkl',N.ones((EIGR2D.nsppol,EIGR2D.nkpt,EIGR2D.nband,EIGR2D.nband)),omegatmp) #spin,ikpt,iband,jband,imode
@@ -543,22 +550,22 @@ def dynamic_zpm_temp(arguments,ddw_save,ddw_save2,type,temp_info,smearing,eig0,d
     #imag_part1 = N.pi*fermidirac(deno1,0.0,gaussian_smearing)
     #imag_part1 = N.pi*lorentzian(deno1,0.0,gaussian_smearing)
     #imag_part1 = gaussian_smearing/(deno1*deno1 + gaussian_smearing*gaussian_smearing)
-    deno1 += N.einsum('mijk,l->mijkl',delta_E_sm,N.ones(3*EIGR2D.natom),dtype=N.complex)
+    deno1 += N.einsum('mijk,l->mijkl',delta_E_sm,N.ones(3*EIGR2D.natom),dtype=complex)
 
     div1 = N.einsum('ijklm,ijnmk->iklmjn',num1,1.0/deno1) # (spin,k,mod,temp,jband)/(spin,ikpt,iband,jband,mode) => (ispin,imod,tmp,jband,ikpt,iband)
 
     num2 = N.einsum('ij,mkl->mkijl',bose,N.ones((EIGR2D.nsppol,EIGR2D.nkpt,EIGR2D.nband))) \
           + N.einsum('ij,mkl->mkijl',N.ones((3*EIGR2D.natom,ntemp)),occtmp) #imode,tmp,jband
-    deno2 = N.einsum('mijk,l->mijkl',delta_E,N.ones((3*EIGR2D.natom),dtype=N.complex)) 
+    deno2 = N.einsum('mijk,l->mijkl',delta_E,N.ones((3*EIGR2D.natom),dtype=complex))
 
     if type==1: # dynamic
       deno2 += N.einsum('mijk,l->mijkl',N.ones((EIGR2D.nsppol,EIGR2D.nkpt,EIGR2D.nband,EIGR2D.nband)),omegatmp) #spin,ikpt,iband,jband,imode
-    
+
     imag_part2 = N.pi*gaussian(deno2,0.0,gaussian_smearing)
     #imag_part2 = N.pi*fermidirac(deno2,0.0,gaussian_smearing)
     #imag_part2 = N.pi*lorentzian(deno2,0.0,gaussian_smearing)
     #imag_part2 = gaussian_smearing/(deno2*deno2 + gaussian_smearing*gaussian_smearing)
-    deno2 -= N.einsum('mijk,l->mijkl',delta_E_sm,N.ones(3*EIGR2D.natom),dtype=N.complex)
+    deno2 -= N.einsum('mijk,l->mijkl',delta_E_sm,N.ones(3*EIGR2D.natom),dtype=complex)
 
     div2 = N.einsum('ijklm,ijnmk->iklmjn',num2,1.0/deno2) # (spin,k,mod,temp,jband)/(spin,ikpt,iband,jband,mode) => (ispin,imod,tmp,jband,ikpt,iband)
 
@@ -575,7 +582,7 @@ def dynamic_zpm_temp(arguments,ddw_save,ddw_save2,type,temp_info,smearing,eig0,d
     ddw_tmp = N.einsum('ijklm->mijl',ddw_addQ) # (ispin,ikpt, iband, imode)
     g_kk = fan_tmp - ddw_tmp
 
-    # Eliashberg function 
+    # Eliashberg function
     a2F =  zeros((len(energy),EIGR2D.nsppol,EIGR2D.nkpt,EIGR2D.nband),dtype=complex)
     for ifreq,freq in enumerate(energy):
       for imode in N.arange(3*EIGR2D.natom):
@@ -589,10 +596,10 @@ def dynamic_zpm_temp(arguments,ddw_save,ddw_save2,type,temp_info,smearing,eig0,d
   for ifreq,freq in enumerate(energy):
     for imode in N.arange(3*EIGR2D.natom):
       PDOS[ifreq] += gaussian(freq,omegatmp[imode],gaussian_smearing)
-  
+
   # From the equations ddw_corr has no physical imaginary part
   ddw_corr.imag = 0.0
-  
+
   eigen_corr = (fan_corr[:,:,:,:] - ddw_corr[:,:,:,:])*wtq
 
   total_corr[0,:,:,:,:] = eigen_corr[:,:,:,:]

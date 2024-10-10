@@ -1,8 +1,8 @@
 
-.Version 9.3.1 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 10.1.4.5 of ABINIT, released Sep 2024.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2022 ABINIT group . 
+.Copyright (C) 1998-2024 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,14 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h30 )
+.Starting date : Fri 13 Sep 2024.
+- ( at 19h12 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v7_t10/t10.in
-- output file    -> t10.out
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v7_t10/t10.abi
+- output file    -> t10.abo
 - root for input  files -> t10i
 - root for output files -> t10o
-
 
  Symmetries : space group Fm -3 m (#225); Bravais cF (face-center cubic)
 ================================================================================
@@ -43,10 +42,10 @@ _ WF disk file :      4.955 Mbytes ; DEN or POT disk file :      0.213 Mbytes.
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
 -
-- outvars: echo of selected default values                                      
--   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+- outvars: echo of selected default values
+-   iomode0 =  0 , fftalg0 =512 , wfoptalg0 =  0
 -
-- outvars: echo of global parameters not present in the input file              
+- outvars: echo of global parameters not present in the input file
 -  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
@@ -56,7 +55,7 @@ _ WF disk file :      4.955 Mbytes ; DEN or POT disk file :      0.213 Mbytes.
           dilatmx      1.02000000E+00
              ecut      2.50000000E+01 Hartree
            ecutsm      5.00000000E-01 Hartree
--          fftalg         312
+-          fftalg         512
            ionmov           2
               ixc          11
               kpt     -8.33333333E-02 -1.66666667E-01  0.00000000E+00
@@ -296,8 +295,8 @@ meta: {optdriver: 0, ionmov: 2, optcell: 2, iscf: 7, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/Ni-psval-icmod3.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/Ni-psval-icmod3.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/Ni-psval-icmod3.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/Ni-psval-icmod3.psp8
 - Ni    ONCVPSP  r_core=  1.20  1.26  1.56
 - 28.00000  18.00000    150616                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -318,7 +317,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     466.324     466.302
 
 ================================================================================
 
-=== [ionmov= 2] Broyden-Fletcher-Goldfard-Shanno method (forces)            
+=== [ionmov= 2] Broyden-Fletcher-Goldfarb-Shanno method (forces)            
 ================================================================================
 
 --- Iteration: (1/2) Internal Cycle: (1/1)
@@ -336,14 +335,14 @@ tolerances: {tolvrs: 1.00E-09, }
  ETOT  1  -167.53454150242    -1.68E+02 4.24E-01 1.08E+03 1.474
  ETOT  2  -167.05687711639     4.78E-01 6.16E-02 3.02E+03 0.206
  ETOT  3  -167.94325313354    -8.86E-01 1.61E-02 7.87E+00 0.738
- ETOT  4  -167.94424737617    -9.94E-04 2.60E-03 3.15E-01 0.688
+ ETOT  4  -167.94424737618    -9.94E-04 2.60E-03 3.15E-01 0.688
  ETOT  5  -167.94445092138    -2.04E-04 2.94E-04 4.83E-02 0.638
  ETOT  6  -167.94452472961    -7.38E-05 7.56E-04 7.91E-03 0.603
  ETOT  7  -167.94455048074    -2.58E-05 3.70E-04 1.74E-04 0.566
  ETOT  8  -167.94455067255    -1.92E-07 3.66E-04 5.12E-06 0.562
  ETOT  9  -167.94455067519    -2.65E-09 1.29E-03 2.02E-07 0.563
  ETOT 10  -167.94455067538    -1.87E-10 3.64E-04 1.21E-08 0.563
- ETOT 11  -167.94455067539    -4.52E-12 1.42E-03 1.52E-10 0.563
+ ETOT 11  -167.94455067539    -5.49E-12 1.42E-03 1.52E-10 0.563
 
  At SCF step   11       vres2   =  1.52E-10 < tolvrs=  1.00E-09 =>converged.
 
@@ -363,7 +362,7 @@ lattice_vectors:
 lattice_lengths: [   4.70356,    4.70356,    4.70356, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   7.3580817E+01
-convergence: {deltae: -4.519E-12, res2:  1.517E-10, residm:  1.418E-03, diffor: null, }
+convergence: {deltae: -5.485E-12, res2:  1.517E-10, residm:  1.418E-03, diffor: null, }
 etotal    :  -1.67944551E+02
 entropy   :   0.00000000E+00
 fermie    :   4.19051430E-01
@@ -411,9 +410,9 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  Lengths [Bohr]
   4.70355833428402E+00  4.70355833428402E+00  4.70355833428402E+00
  Stress tensor in cartesian coordinates (strten) [Ha/bohr^3]
- -1.97374405344639E-03  0.00000000000000E+00  0.00000000000000E+00
-  0.00000000000000E+00 -1.97374405344639E-03  0.00000000000000E+00
-  0.00000000000000E+00  0.00000000000000E+00 -1.97374405344636E-03
+ -1.97374405342392E-03  0.00000000000000E+00  0.00000000000000E+00
+  0.00000000000000E+00 -1.97374405342390E-03  0.00000000000000E+00
+  0.00000000000000E+00  0.00000000000000E+00 -1.97374405342395E-03
  Total energy (etotal) [Ha]= -1.67944550675387E+02
 
 --- Iteration: (2/2) Internal Cycle: (1/1)
@@ -428,16 +427,16 @@ tolerances: {tolvrs: 1.00E-09, }
 ...
 
      iter   Etot(hartree)     deltaE(h) residm    vres2    magn
- ETOT  1  -167.44512320581    -1.67E+02 4.25E-03 2.30E+01 0.729
- ETOT  2  -167.44412348937     1.00E-03 8.19E-04 5.90E+00 0.717
+ ETOT  1  -167.44512320582    -1.67E+02 4.25E-03 2.30E+01 0.729
+ ETOT  2  -167.44412348938     1.00E-03 8.19E-04 5.90E+00 0.717
  ETOT  3  -167.44247157400     1.65E-03 1.69E-03 1.11E+01 0.761
- ETOT  4  -167.44604927697    -3.58E-03 1.37E-03 4.76E-04 0.740
- ETOT  5  -167.44604988418    -6.07E-07 1.27E-03 4.52E-05 0.741
- ETOT  6  -167.44604992409    -3.99E-08 5.13E-04 8.22E-06 0.742
- ETOT  7  -167.44604993168    -7.59E-09 3.49E-04 1.20E-06 0.742
- ETOT  8  -167.44604993257    -8.87E-10 1.19E-04 5.47E-08 0.742
- ETOT  9  -167.44604993260    -2.79E-11 7.37E-05 1.02E-09 0.742
- ETOT 10  -167.44604993260    -4.49E-12 2.45E-05 5.08E-11 0.742
+ ETOT  4  -167.44604927698    -3.58E-03 1.37E-03 4.76E-04 0.740
+ ETOT  5  -167.44604988419    -6.07E-07 1.27E-03 4.52E-05 0.741
+ ETOT  6  -167.44604992410    -3.99E-08 5.13E-04 8.22E-06 0.742
+ ETOT  7  -167.44604993169    -7.59E-09 3.49E-04 1.20E-06 0.742
+ ETOT  8  -167.44604993258    -8.89E-10 1.19E-04 5.47E-08 0.742
+ ETOT  9  -167.44604993261    -2.70E-11 7.37E-05 1.02E-09 0.742
+ ETOT 10  -167.44604993261    -4.18E-12 2.45E-05 5.08E-11 0.742
 
  At SCF step   10       vres2   =  5.08E-11 < tolvrs=  1.00E-09 =>converged.
 
@@ -457,7 +456,7 @@ lattice_vectors:
 lattice_lengths: [   4.98207,    4.98207,    4.98207, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   8.7440711E+01
-convergence: {deltae: -4.491E-12, res2:  5.076E-11, residm:  2.446E-05, diffor: null, }
+convergence: {deltae: -4.178E-12, res2:  5.076E-11, residm:  2.446E-05, diffor: null, }
 etotal    :  -1.67446050E+02
 entropy   :   0.00000000E+00
 fermie    :   3.37514849E-01
@@ -494,21 +493,21 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  Gradient of E wrt nuclear positions in reduced coordinates (gred)
   0.00000000000000E+00  0.00000000000000E+00  0.00000000000000E+00
  Scale of Primitive Cell (acell) [bohr]
-  4.98206694305395E+00  4.98206694305395E+00  4.98206694305395E+00
+  4.98206694305079E+00  4.98206694305079E+00  4.98206694305078E+00
  Real space primitive translations (rprimd) [bohr]
-  0.00000000000000E+00  3.52285331975878E+00  3.52285331975878E+00
-  3.52285331975878E+00  0.00000000000000E+00  3.52285331975878E+00
-  3.52285331975878E+00  3.52285331975878E+00  0.00000000000000E+00
- Unitary Cell Volume (ucvol) [Bohr^3]=  8.74407106323742E+01
+  0.00000000000000E+00  3.52285331975654E+00  3.52285331975654E+00
+  3.52285331975654E+00  0.00000000000000E+00  3.52285331975654E+00
+  3.52285331975654E+00  3.52285331975654E+00  0.00000000000000E+00
+ Unitary Cell Volume (ucvol) [Bohr^3]=  8.74407106322074E+01
  Angles (23,13,12)= [degrees]
   6.00000000000000E+01  6.00000000000000E+01  6.00000000000000E+01
  Lengths [Bohr]
-  4.98206694305395E+00  4.98206694305395E+00  4.98206694305395E+00
+  4.98206694305078E+00  4.98206694305078E+00  4.98206694305078E+00
  Stress tensor in cartesian coordinates (strten) [Ha/bohr^3]
-  6.40016176987732E-02  0.00000000000000E+00  0.00000000000000E+00
-  0.00000000000000E+00  6.40016176987733E-02  0.00000000000000E+00
-  0.00000000000000E+00  0.00000000000000E+00  6.40016176987733E-02
- Total energy (etotal) [Ha]= -1.67446049932600E+02
+  6.40016176986528E-02  0.00000000000000E+00  0.00000000000000E+00
+  0.00000000000000E+00  6.40016176986528E-02  0.00000000000000E+00
+  0.00000000000000E+00  0.00000000000000E+00  6.40016176986527E-02
+ Total energy (etotal) [Ha]= -1.67446049932610E+02
 
  Difference of energy with previous step (new-old):
            Absolute (Ha)= 4.98501E-01
@@ -538,8 +537,8 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  cartesian forces (eV/Angstrom) at end:
     1     -0.00000000000000    -0.00000000000000    -0.00000000000000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
- length scales=  4.982066943054  4.982066943054  4.982066943054 bohr
-              =  2.636396277934  2.636396277934  2.636396277934 angstroms
+ length scales=  4.982066943051  4.982066943051  4.982066943051 bohr
+              =  2.636396277932  2.636396277932  2.636396277932 angstroms
  prteigrs : about to open file t10o_EIG
  Fermi (or HOMO) energy (hartree) =   0.33751   Average Vxc (hartree)=  -0.47528
  Magnetization (Bohr magneton)=  7.42044040E-01
@@ -566,18 +565,18 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 1, itime: 2, icycle: 1, }
 comment             : Components of total free energy in Hartree
-kinetic             :  7.57337867228853E+01
-hartree             :  4.80922365545982E+01
-xc                  : -2.12691274477223E+01
-Ewald energy        : -1.05418475961027E+02
-psp_core            :  3.93416746142696E+00
-local_psp           : -1.44661745663184E+02
-non_local_psp       : -2.38560659912286E+01
-internal            : -1.67445224324252E+02
-'-kT*entropy'       : -8.25608347824033E-04
-total_energy        : -1.67446049932600E+02
-total_energy_eV     : -4.55643874055670E+03
-band_energy         : -1.83397698719932E+01
+kinetic             :  7.57337867229121E+01
+hartree             :  4.80922365545754E+01
+xc                  : -2.12691274477256E+01
+Ewald energy        : -1.05418475961094E+02
+psp_core            :  3.93416746143446E+00
+local_psp           : -1.44661745663116E+02
+non_local_psp       : -2.38560659912479E+01
+internal            : -1.67445224324262E+02
+'-kT*entropy'       : -8.25608347825270E-04
+total_energy        : -1.67446049932610E+02
+total_energy_eV     : -4.55643874055698E+03
+band_energy         : -1.83397698719691E+01
 ...
 
 
@@ -603,7 +602,7 @@ band_energy         : -1.83397698719932E+01
            ecutsm      5.00000000E-01 Hartree
            etotal     -1.6744604993E+02
             fcart     -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
--          fftalg         312
+-          fftalg         512
            ionmov           2
               ixc          11
               kpt     -8.33333333E-02 -1.66666667E-01  0.00000000E+00
@@ -899,10 +898,10 @@ P           mkmem          28
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         51.3  wall=         51.5
+- Proc.   0 individual time (sec): cpu=         17.3  wall=         17.6
 
 ================================================================================
 
  Calculation completed.
-.Delivered   4 WARNINGs and   3 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         51.3  wall=         51.5
+.Delivered   3 WARNINGs and   4 COMMENTs to log file.
++Overall time at end (sec) : cpu=         17.3  wall=         17.6

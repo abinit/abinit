@@ -6,7 +6,7 @@
 !! Compute RF charge density rho1(r) and rho1(G) in electrons/bohr**3
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2022 ABINIT group (DCA, XG, GMR, LSI, AR, MB, MT, SPr)
+!!  Copyright (C) 1998-2024 ABINIT group (DCA, XG, GMR, LSI, AR, MB, MT, SPr)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -19,6 +19,9 @@
 
 #include "abi_common.h"
 
+! nvtx related macro definition
+#include "nvtx_macros.h"
+
 module m_dfpt_mkrho
 
  use defs_basis
@@ -26,7 +29,6 @@ module m_dfpt_mkrho
  use m_errors
  use m_cgtools
  use m_xmpi
-
 
  use defs_abitypes, only : MPI_type
  use m_time,            only : timab
@@ -41,6 +43,10 @@ module m_dfpt_mkrho
  use m_paral_atom,      only : get_my_atmtab
  use m_mpinfo,          only : proc_distrb_cycle
  use m_cgprj,           only : getcprj
+
+#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
+ use m_nvtx_data
+#endif
 
  implicit none
 
@@ -157,6 +163,7 @@ subroutine dfpt_mkrho(cg,cg1,cplex,gprimd,irrzon,istwfk_rbz,&
 ! *************************************************************************
 
 !DBG_ENTER("COLL")
+ ABI_NVTX_START_RANGE(NVTX_DFPT_MKRHO)
 
  if(nspden==4)then
 !  NOTE: see mkrho for the modifications needed for non-collinear treatment
@@ -531,6 +538,7 @@ subroutine dfpt_mkrho(cg,cg1,cplex,gprimd,irrzon,istwfk_rbz,&
 !We now have both rho(r) and rho(G), symmetrized, and if nsppol=2
 !we also have the spin-up density, symmetrized, in rhor1(:,2).
 
+ ABI_NVTX_END_RANGE()
 !DBG_EXIT("COLL")
 
 end subroutine dfpt_mkrho
@@ -596,35 +604,35 @@ end subroutine dfpt_mkrho
 
 subroutine dfpt_accrho(cplex,cwave0,cwave1,cwavef,cwaveprj0,cwaveprj1,&
 &                  eloc0_k,gs_hamkq,iband,idir,ipert,isppol,kptopt,&
-&                  mpi_enreg,natom,nband_k,ncpgr,npw_k,npw1_k,nspinor,occ_k,&
+&                  mpi_enreg,ndat,natom,nband_k,ncpgr,npw_k,npw1_k,nspinor,occ_k,&
 &                  option,pawrhoij1,rhoaug1,tim_fourwf,wf_corrected,&
 &                  wtk_k,comm_atom,mpi_atmtab)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: cplex,iband,idir,ipert,isppol,kptopt,natom,nband_k
+ integer,intent(in) :: cplex,iband,idir,ipert,isppol,kptopt,natom,nband_k,ndat
  integer,intent(in) :: ncpgr,npw_k,npw1_k,nspinor,option,tim_fourwf,wf_corrected
  integer,optional,intent(in) :: comm_atom
  integer,optional,target,intent(in) :: mpi_atmtab(:)
  real(dp),intent(in) :: wtk_k
- real(dp),intent(out) :: eloc0_k
+ real(dp),intent(out) :: eloc0_k(ndat)
  type(gs_hamiltonian_type),intent(inout),target :: gs_hamkq
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
- real(dp),intent(in),target :: cwave0(2,npw_k*nspinor),cwave1(2,npw1_k*nspinor),cwavef(2,npw1_k*nspinor)
+ real(dp),intent(in),target :: cwave0(2,npw_k*nspinor*ndat),cwave1(2,npw1_k*nspinor*ndat),cwavef(2,npw1_k*nspinor*ndat)
  real(dp),intent(in) :: occ_k(nband_k)
  real(dp),intent(inout) :: rhoaug1(cplex*gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,gs_hamkq%nvloc)
- type(pawcprj_type),intent(in) :: cwaveprj0(natom,nspinor*gs_hamkq%usecprj)
- type(pawcprj_type),intent(in) :: cwaveprj1(natom,nspinor*gs_hamkq%usepaw)
+ type(pawcprj_type),intent(in) :: cwaveprj0(natom,nspinor*ndat*gs_hamkq%usecprj)
+ type(pawcprj_type),intent(in) :: cwaveprj1(natom,nspinor*ndat*gs_hamkq%usepaw)
  type(pawrhoij_type),intent(inout) :: pawrhoij1(:)
 
 !Local variables-------------------------------
 !scalars
  integer,parameter :: level=14
- integer :: choice,cplex_cprj,i1,i2,i3,ispinor,my_comm_atom,my_natom,n1,n2,n3,option_rhoij
+ integer :: choice,cplex_cprj,i1,i2,i3,idat,ispinor,my_comm_atom,my_natom,n1,n2,n3,option_rhoij,gpu_option
  logical :: my_atmtab_allocated,paral_atom
- logical :: usetimerev
- real(dp) :: im0,im1,re0,re1,valuer,diag,offdiag,weight
+ logical :: use_timerev,use_zeromag
+ real(dp) :: valuer,diag,offdiag,weight
  real(dp) :: im0_up,im1_up,re0_up,re1_up,im0_down,im1_down,re0_down,re1_down
 !arrays
  integer,pointer :: my_atmtab(:)
@@ -634,16 +642,22 @@ subroutine dfpt_accrho(cplex,cwave0,cwave1,cwavef,cwaveprj0,cwaveprj1,&
  real(dp),allocatable :: wfraug_up(:,:,:,:),wfraug_down(:,:,:,:)
  real(dp),pointer :: cwavef_sp(:,:),cwavef_up(:,:),cwavef_down(:,:)
  real(dp),pointer :: cwave0_up(:,:),cwave0_down(:,:),cwave1_up(:,:),cwave1_down(:,:)
- real(dp),pointer :: vlocal(:,:,:,:)=>null()
+ real(dp), ABI_CONTIGUOUS pointer :: vlocal(:,:,:,:)=>null()
  type(pawcprj_type),allocatable :: cwaveprj_tmp(:,:)
 
 ! *********************************************************************
  DBG_ENTER("COLL")
+ ABI_NVTX_START_RANGE(NVTX_DFPT_ACCRHO)
+
+ if (gs_hamkq%nvloc==4 .and. ndat>1) then
+   ABI_ERROR("nvloc==4 isn't supported with ndat~bandpp > 1 !")
+ end if
 
  if (option/=1.and.option/=2.and.option/=3) return
+ gpu_option=gs_hamkq%gpu_option
 
 !Initializations
- ABI_MALLOC(rhoaug,(gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,gs_hamkq%nvloc))
+ ABI_MALLOC(rhoaug,(cplex*gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,gs_hamkq%nvloc))
  n1=gs_hamkq%ngfft(1);n2=gs_hamkq%ngfft(2);n3=gs_hamkq%ngfft(3)
  if (option==2.or.option==3) eloc0_k=zero
  if (option==2.or.option==3) vlocal => gs_hamkq%vlocal
@@ -651,7 +665,11 @@ subroutine dfpt_accrho(cplex,cwave0,cwave1,cwavef,cwaveprj0,cwaveprj1,&
 !Loop on spinorial components
 ! TODO : double loop on spinors for full rhoaug1 matrix if nspden =4
  if (gs_hamkq%nvloc/=4) then  ! see later EB FR
-   ABI_MALLOC(wfraug1,(2,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6))
+   ABI_MALLOC(wfraug1,(2,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6*ndat))
+#ifdef HAVE_OPENMP_OFFLOAD
+   !$OMP TARGET ENTER DATA MAP(alloc:wfraug1) IF(gpu_option==ABI_GPU_OPENMP)
+   !$OMP TARGET ENTER DATA MAP(to:rhoaug1) IF(gpu_option==ABI_GPU_OPENMP)
+#endif
 
    do ispinor=1,nspinor
 
@@ -661,32 +679,24 @@ subroutine dfpt_accrho(cplex,cwave0,cwave1,cwavef,cwaveprj0,cwaveprj1,&
 !  Fourier transform of cwavef. Here, rhoaug is a dummy variable.
      if (wf_corrected==0.or.option==2.or.option==3) then
        if (ispinor==1) then
-         cwavef_sp => cwavef(:,1:npw1_k)
+         cwavef_sp => cwavef(:,1:npw1_k*ndat)
        else
-         cwavef_sp => cwavef(:,1+npw1_k:2*npw1_k)
+         cwavef_sp => cwavef(:,1+npw1_k*ndat:2*npw1_k*ndat)
        end if
        !make an inverse FFT from cwavef_sp to wfraug1
        call fourwf(cplex,rhoaug,cwavef_sp,dummy,wfraug1,gs_hamkq%gbound_kp,gs_hamkq%gbound_kp,&
-&       gs_hamkq%istwf_k,gs_hamkq%kg_kp,gs_hamkq%kg_kp,gs_hamkq%mgfft,mpi_enreg,1,gs_hamkq%ngfft,&
+&       gs_hamkq%istwf_k,gs_hamkq%kg_kp,gs_hamkq%kg_kp,gs_hamkq%mgfft,mpi_enreg,ndat,gs_hamkq%ngfft,&
 &       gs_hamkq%npw_kp,1,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,0,tim_fourwf,&
-&       weight,weight,use_gpu_cuda=gs_hamkq%use_gpu_cuda)
+&       weight,weight,gpu_option=gpu_option)
        nullify(cwavef_sp)
+
      end if
 
-!  Compute contribution of this band to zero-order potential part of the 2nd-order total energy
+!  Compute contribution of bands in ndat to zero-order potential part of the 2nd-order total energy
 !  NB: this is spinor diagonal
      if (option==2.or.option==3) then
-       valuer=zero
-       do i3=1,n3
-         do i2=1,n2
-           do i1=1,n1
-             valuer=valuer+vlocal(i1,i2,i3,1)*(wfraug1(1,i1,i2,i3)**2+wfraug1(2,i1,i2,i3)**2)
-           end do
-         end do
-       end do
-
-!    Local potential energy of this band
-       eloc0_k=eloc0_k+two*valuer/dble(gs_hamkq%nfft)
+       call update_potential_contrib(eloc0_k,wfraug1,vlocal,&
+       &    n1,n2,n3,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,gs_hamkq%nvloc,gs_hamkq%nfft,ndat,gpu_option)
      end if ! option
 
 !  Part devoted to the accumulation of the 1st-order density
@@ -699,62 +709,54 @@ subroutine dfpt_accrho(cplex,cwave0,cwave1,cwavef,cwaveprj0,cwaveprj1,&
 !    transform must be computed. In both case the result is in wfraug1.
        if (wf_corrected==1) then
          if (ispinor==1) then
-           cwavef_sp => cwave1(:,1:npw1_k)
+           cwavef_sp => cwave1(:,1:npw1_k*ndat)
          else
-           cwavef_sp => cwave1(:,1+npw1_k:2*npw1_k)
+           cwavef_sp => cwave1(:,1+npw1_k*ndat:2*npw1_k*ndat)
          end if
          call fourwf(cplex,rhoaug,cwavef_sp,dummy,wfraug1,gs_hamkq%gbound_kp,gs_hamkq%gbound_kp,&
-&         gs_hamkq%istwf_k,gs_hamkq%kg_kp,gs_hamkq%kg_kp,gs_hamkq%mgfft,mpi_enreg,1,gs_hamkq%ngfft,&
+&         gs_hamkq%istwf_k,gs_hamkq%kg_kp,gs_hamkq%kg_kp,gs_hamkq%mgfft,mpi_enreg,ndat,gs_hamkq%ngfft,&
 &         gs_hamkq%npw_kp,1,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,0,tim_fourwf,&
-&         weight,weight,use_gpu_cuda=gs_hamkq%use_gpu_cuda)
+&         weight,weight,gpu_option=gpu_option)
          nullify(cwavef_sp)
        end if
 
 !    Compute 0-order WF in real space
 ! TODO: add loop over ispinor_prime here
-       ABI_MALLOC(wfraug,(2,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6))
+       ABI_MALLOC(wfraug,(2,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6*ndat))
+#ifdef HAVE_OPENMP_OFFLOAD
+   !$OMP TARGET ENTER DATA MAP(alloc:wfraug) IF(gpu_option==ABI_GPU_OPENMP)
+#endif
        if (ispinor==1) then
-         cwavef_sp => cwave0(:,1:npw_k)
+         cwavef_sp => cwave0(:,1:npw_k*ndat)
        else
-         cwavef_sp => cwave0(:,1+npw_k:2*npw_k)
+         cwavef_sp => cwave0(:,1+npw_k*ndat:2*npw_k*ndat)
        end if
        call fourwf(1,rhoaug,cwavef_sp,dummy,wfraug,gs_hamkq%gbound_k,gs_hamkq%gbound_k,&
-&       gs_hamkq%istwf_k,gs_hamkq%kg_k,gs_hamkq%kg_k,gs_hamkq%mgfft,mpi_enreg,1,gs_hamkq%ngfft,&
+&       gs_hamkq%istwf_k,gs_hamkq%kg_k,gs_hamkq%kg_k,gs_hamkq%mgfft,mpi_enreg,ndat,gs_hamkq%ngfft,&
 &       gs_hamkq%npw_k,1,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,0,tim_fourwf,&
-&       weight,weight,use_gpu_cuda=gs_hamkq%use_gpu_cuda)
+&       weight,weight,gpu_option=gpu_option)
        nullify(cwavef_sp)
 
 !    The factor 2 is not the spin factor (see Eq.44 of PRB55,10337 (1997) [[cite:Gonze1997]])
-       weight=two*occ_k(iband)*wtk_k/gs_hamkq%ucvol
 !    Accumulate 1st-order density
-       if (cplex==2) then
-         do i3=1,n3
-           do i2=1,n2
-             do i1=1,n1
-               re0=wfraug(1,i1,i2,i3)  ; im0=wfraug(2,i1,i2,i3)
-               re1=wfraug1(1,i1,i2,i3) ; im1=wfraug1(2,i1,i2,i3)
-! TODO: check which terms (ispinor ispinorp) enter a given element of rhoaug1
-               rhoaug1(2*i1-1,i2,i3,1)=rhoaug1(2*i1-1,i2,i3,1)+weight*(re0*re1+im0*im1)
-               rhoaug1(2*i1  ,i2,i3,1)=rhoaug1(2*i1  ,i2,i3,1)+weight*(re0*im1-im0*re1)
-             end do
-           end do
-         end do
-       else
-         do i3=1,n3
-           do i2=1,n2
-             do i1=1,n1
-               rhoaug1(i1,i2,i3,1)=rhoaug1(i1,i2,i3,1) &
-&               +weight*(wfraug(1,i1,i2,i3)*wfraug1(1,i1,i2,i3) &
-&               +wfraug(2,i1,i2,i3)*wfraug1(2,i1,i2,i3))
-             end do
-           end do
-         end do
-       end if
+
+     call accumulate_1st_order_density(rhoaug1,wfraug,wfraug1,&
+     &    cplex,n1,n2,n3,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,gs_hamkq%nvloc,&
+     &    ndat,nband_k,iband,gs_hamkq%ucvol,wtk_k,occ_k,gpu_option)
+
+#ifdef HAVE_OPENMP_OFFLOAD
+       !$OMP TARGET EXIT DATA MAP(delete:wfraug) IF(gpu_option==ABI_GPU_OPENMP)
+#endif
        ABI_FREE(wfraug)
      end if ! option
 
+
    end do ! Loop on spinorial components if nspden=1 or 2
 
+#ifdef HAVE_OPENMP_OFFLOAD
+   !$OMP TARGET EXIT DATA MAP(delete:wfraug1) IF(gpu_option==ABI_GPU_OPENMP)
+   !$OMP TARGET EXIT DATA MAP(from:rhoaug1)   IF(gpu_option==ABI_GPU_OPENMP)
+#endif
    ABI_FREE(wfraug1)
  else ! nvloc = 4
 ! The same lines of code are in 72_response/dfpt_mkrho.F90
@@ -774,14 +776,14 @@ subroutine dfpt_accrho(cplex,cwave0,cwave1,cwavef,cwaveprj0,cwaveprj1,&
      call fourwf(cplex,rhoaug(:,:,:,1),cwavef_up,dummy,wfraug1_up,gs_hamkq%gbound_kp,gs_hamkq%gbound_kp,&
 &     gs_hamkq%istwf_k,gs_hamkq%kg_kp,gs_hamkq%kg_kp,gs_hamkq%mgfft,mpi_enreg,1,gs_hamkq%ngfft,&
 &     gs_hamkq%npw_kp,1,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,0,tim_fourwf,&
-&     weight,weight,use_gpu_cuda=gs_hamkq%use_gpu_cuda)
+&     weight,weight,gpu_option=gpu_option)
      nullify(cwavef_up)
 
      cwavef_down => cwavef(:,1+npw1_k:2*npw1_k) ! wfs down spin-polarized
      call fourwf(cplex,rhoaug(:,:,:,1),cwavef_down,dummy,wfraug1_down,gs_hamkq%gbound_kp,gs_hamkq%gbound_kp,&
 &     gs_hamkq%istwf_k,gs_hamkq%kg_kp,gs_hamkq%kg_kp,gs_hamkq%mgfft,mpi_enreg,1,gs_hamkq%ngfft,&
 &     gs_hamkq%npw_kp,1,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,0,tim_fourwf,&
-&     weight,weight,use_gpu_cuda=gs_hamkq%use_gpu_cuda)
+&     weight,weight,gpu_option=gpu_option)
      nullify(cwavef_down)
    end if
    if (option==2.or.option==3) then
@@ -823,21 +825,21 @@ subroutine dfpt_accrho(cplex,cwave0,cwave1,cwavef,cwaveprj0,cwaveprj1,&
        call fourwf(cplex,rhoaug(:,:,:,1),cwave1_up,dummy,wfraug1_up,gs_hamkq%gbound_kp,gs_hamkq%gbound_kp,&
 &       gs_hamkq%istwf_k,gs_hamkq%kg_kp,gs_hamkq%kg_kp,gs_hamkq%mgfft,mpi_enreg,1,gs_hamkq%ngfft,&
 &       gs_hamkq%npw_kp,1,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,0,tim_fourwf,&
-&       weight,weight,use_gpu_cuda=gs_hamkq%use_gpu_cuda)
+&       weight,weight,gpu_option=gpu_option)
        nullify(cwave1_up)
 
        call fourwf(cplex,rhoaug(:,:,:,1),cwave1_down,dummy,wfraug1_down,gs_hamkq%gbound_kp,gs_hamkq%gbound_kp,&
 &       gs_hamkq%istwf_k,gs_hamkq%kg_kp,gs_hamkq%kg_kp,gs_hamkq%mgfft,mpi_enreg,1,gs_hamkq%ngfft,&
 &       gs_hamkq%npw_kp,1,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,0,tim_fourwf,&
-&       weight,weight,use_gpu_cuda=gs_hamkq%use_gpu_cuda)
+&       weight,weight,gpu_option=gpu_option)
        nullify(cwave1_down)
      end if
 
 
 ! EB FR build spinorial wavefunctions
 ! zero order
-     cwave0_up => cwave0(:,1:npw_k)
-     cwave0_down => cwave0(:,1+npw_k:2*npw_k)
+     cwave0_up => cwave0(:,1:npw_k*ndat)
+     cwave0_down => cwave0(:,1+npw_k*ndat:2*npw_k*ndat)
      ABI_MALLOC(wfraug_up,(2,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6))
      ABI_MALLOC(wfraug_down,(2,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6))
      wfraug_up(:,:,:,:)=zero
@@ -849,12 +851,12 @@ subroutine dfpt_accrho(cplex,cwave0,cwave1,cwavef,cwaveprj0,cwaveprj1,&
      call fourwf(1,rhoaug(:,:,:,2),cwave0_up,dummy,wfraug_up,gs_hamkq%gbound_k,gs_hamkq%gbound_k,&
 &     gs_hamkq%istwf_k,gs_hamkq%kg_k,gs_hamkq%kg_k,gs_hamkq%mgfft,mpi_enreg,1,gs_hamkq%ngfft,&
 &     gs_hamkq%npw_k,1,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,0,tim_fourwf,&
-&     weight,weight,use_gpu_cuda=gs_hamkq%use_gpu_cuda)
+&     weight,weight,gpu_option=gpu_option)
      nullify(cwave0_up)
      call fourwf(1,rhoaug(:,:,:,2),cwave0_down,dummy,wfraug_down,gs_hamkq%gbound_k,gs_hamkq%gbound_k,&
 &     gs_hamkq%istwf_k,gs_hamkq%kg_k,gs_hamkq%kg_k,gs_hamkq%mgfft,mpi_enreg,1,gs_hamkq%ngfft,&
 &     gs_hamkq%npw_k,1,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,0,tim_fourwf,&
-&     weight,weight,use_gpu_cuda=gs_hamkq%use_gpu_cuda)
+&     weight,weight,gpu_option=gpu_option)
      nullify(cwave0_down)
 !    Accumulate 1st-order density (x component)
      re0_up=zero;im0_up=zero;re1_up=zero;im1_up=zero;re0_down=zero;im0_down=zero
@@ -943,24 +945,30 @@ subroutine dfpt_accrho(cplex,cwave0,cwave1,cwavef,cwaveprj0,cwaveprj1,&
    call get_my_atmtab(my_comm_atom,my_atmtab,my_atmtab_allocated,paral_atom,natom,my_natom_ref=my_natom)
 
    cplex_cprj=2;if (gs_hamkq%istwf_k>1) cplex_cprj=1
-   option_rhoij=2;usetimerev=(kptopt>0.and.kptopt<3)
+   option_rhoij=2
+   use_timerev=(kptopt>0.and.kptopt<3)
+   use_zeromag=.false.;if (my_natom>0) use_zeromag=(pawrhoij1(1)%nspden==4.and.gs_hamkq%nvloc==1)
 
    if (gs_hamkq%usecprj==1) then
-     call pawaccrhoij(gs_hamkq%atindx,cplex_cprj,cwaveprj0,cwaveprj1,ipert,isppol,&
-&     my_natom,natom,nspinor,occ_k(iband),option_rhoij,pawrhoij1,usetimerev,wtk_k,&
-&     comm_atom=my_comm_atom,mpi_atmtab=my_atmtab)
+     do idat=1,ndat
+       call pawaccrhoij(gs_hamkq%atindx,cplex_cprj,cwaveprj0(:,1+(idat-1)*nspinor:idat*nspinor),&
+  &     cwaveprj1(:,1+(idat-1)*nspinor:idat*nspinor),ipert,isppol,my_natom,&
+  &     natom,nspinor,occ_k(iband+idat-1),option_rhoij,pawrhoij1,use_timerev,use_zeromag,wtk_k,&
+  &     comm_atom=my_comm_atom,mpi_atmtab=my_atmtab)
+     end do
    else
-     ABI_MALLOC(cwaveprj_tmp,(natom,nspinor))
+       ABI_BUG("toto")
+     ABI_MALLOC(cwaveprj_tmp,(natom,nspinor*ndat))
      call pawcprj_alloc(cwaveprj_tmp,ncpgr,gs_hamkq%dimcprj)
      choice=2
      call getcprj(choice,0,cwave0,cwaveprj_tmp,&
 &     gs_hamkq%ffnl_k,idir,gs_hamkq%indlmn,gs_hamkq%istwf_k,&
 &     gs_hamkq%kg_k,gs_hamkq%kpg_k,gs_hamkq%kpt_k,gs_hamkq%lmnmax,&
-&     gs_hamkq%mgfft,mpi_enreg,gs_hamkq%natom,gs_hamkq%nattyp,gs_hamkq%ngfft,&
+&     gs_hamkq%mgfft,mpi_enreg,ndat,gs_hamkq%natom,gs_hamkq%nattyp,gs_hamkq%ngfft,&
 &     gs_hamkq%nloalg,gs_hamkq%npw_k,gs_hamkq%nspinor,gs_hamkq%ntypat,gs_hamkq%phkxred,&
 &     gs_hamkq%ph1d,gs_hamkq%ph3d_k,gs_hamkq%ucvol,gs_hamkq%useylm)
-     call pawaccrhoij(gs_hamkq%atindx,cplex_cprj,cwaveprj_tmp,cwaveprj1,ipert,isppol,&
-&     my_natom,gs_hamkq%natom,nspinor,occ_k(iband),option_rhoij,pawrhoij1,usetimerev,wtk_k, &
+     call pawaccrhoij(gs_hamkq%atindx,cplex_cprj,cwaveprj_tmp,cwaveprj1,ipert,isppol,my_natom,&
+&     gs_hamkq%natom,nspinor,occ_k(iband),option_rhoij,pawrhoij1,use_timerev,use_zeromag,wtk_k, &
 &     comm_atom=my_comm_atom,mpi_atmtab=my_atmtab)
      call pawcprj_free(cwaveprj_tmp)
      ABI_FREE(cwaveprj_tmp)
@@ -968,7 +976,104 @@ subroutine dfpt_accrho(cplex,cwave0,cwave1,cwavef,cwaveprj0,cwaveprj1,&
 
  end if
 
+ ABI_NVTX_END_RANGE()
  DBG_EXIT("COLL")
+ contains
+
+   !  Compute contribution of bands in ndat to zero-order potential part of the 2nd-order total energy
+   !  This routine was separated from main code to accomodate OpenMP offloading with NVHPC
+   subroutine update_potential_contrib(eloc0_k,wfraug1,vlocal,n1,n2,n3,n4,n5,n6,nvloc,nfft,ndat,gpu_option)
+     integer,intent(in) :: n1,n2,n3,n4,n5,n6,nvloc,ndat,nfft,gpu_option
+     real(dp),intent(in) :: wfraug1(2,n4,n5,n6*ndat),vlocal(n4,n5,n6,nvloc)
+     real(dp),intent(inout) :: eloc0_k(ndat)
+     integer :: idat,i1,i2,i3
+     real(dp) :: valuer,nfft_r
+
+     nfft_r=dble(nfft)
+#ifdef HAVE_OPENMP_OFFLOAD
+     !$OMP TARGET TEAMS DISTRIBUTE &
+     !$OMP& MAP(to:wfraug1,vlocal) MAP(tofrom:eloc0_k) PRIVATE(idat,valuer) &
+     !$OMP& IF(gpu_option==ABI_GPU_OPENMP)
+#endif
+     do idat=1,ndat
+       valuer=zero
+       !$OMP PARALLEL DO COLLAPSE(3) PRIVATE(i1,i2,i3) REDUCTION(+:valuer)
+       do i3=1,n3
+         do i2=1,n2
+           do i1=1,n1
+             valuer=valuer+vlocal(i1,i2,i3,1)*(wfraug1(1,i1,i2,i3+n3*(idat-1))**2+wfraug1(2,i1,i2,i3+n3*(idat-1))**2)
+           end do
+         end do
+       end do
+       !    Local potential energy of this band
+       eloc0_k(idat)=eloc0_k(idat)+two*valuer/nfft_r
+     end do
+
+#ifndef HAVE_OPENMP_OFFLOAD
+     ! Make testfarm happy
+     ABI_UNUSED((/gpu_option/))
+#endif
+   end subroutine update_potential_contrib
+
+   !  Accumulate 1st-order density
+   !  This routine was separated from main code to accomodate OpenMP offloading with NVHPC
+   subroutine accumulate_1st_order_density(rhoaug1,wfraug,wfraug1,&
+   &    cplex,n1,n2,n3,n4,n5,n6,nvloc,ndat,nband_k,iband,ucvol,wtk_k,occ_k,gpu_option)
+     integer,intent(in)  :: cplex,n1,n2,n3,n4,n5,n6,nvloc,ndat,nband_k,iband,gpu_option
+     real(dp),intent(in) :: ucvol,wtk_k
+     real(dp),intent(inout) :: rhoaug1(cplex*n4,n5,n6,nvloc)
+     real(dp),intent(in) :: wfraug(2,n4,n5,n6*ndat),wfraug1(2,n4,n5,n6*ndat),occ_k(nband_k)
+
+     integer  :: i1,i2,i3,idat
+     real(dp) :: weight
+
+     if (cplex==2) then
+       do idat=1,ndat
+         weight=two*occ_k(iband+idat-1)*wtk_k/ucvol
+#ifdef HAVE_OPENMP_OFFLOAD
+         !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(3) &
+         !$OMP& MAP(to:wfraug1,wfraug,rhoaug1) PRIVATE(i3,i2,i1) &
+         !$OMP& IF(gpu_option==ABI_GPU_OPENMP)
+#endif
+         do i3=1,n3
+           do i2=1,n2
+             do i1=1,n1
+! TODO: check which terms (ispinor ispinorp) enter a given element of rhoaug1
+               rhoaug1(2*i1-1,i2,i3,1)=rhoaug1(2*i1-1,i2,i3,1) &
+&               +weight*(wfraug(1,i1,i2,i3+n6*(idat-1))*wfraug1(1,i1,i2,i3+n6*(idat-1)) &
+&               +wfraug(2,i1,i2,i3+n6*(idat-1))*wfraug1(2,i1,i2,i3+n6*(idat-1)))
+               rhoaug1(2*i1  ,i2,i3,1)=rhoaug1(2*i1  ,i2,i3,1) &
+&               +weight*(wfraug(1,i1,i2,i3+n6*(idat-1))*wfraug1(2,i1,i2,i3+n6*(idat-1)) &
+&               -wfraug(2,i1,i2,i3+n6*(idat-1))*wfraug1(1,i1,i2,i3+n6*(idat-1)))
+             end do
+           end do
+         end do
+       end do
+     else
+       do idat=1,ndat
+         weight=two*occ_k(iband+idat-1)*wtk_k/ucvol
+#ifdef HAVE_OPENMP_OFFLOAD
+         !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(3) &
+         !$OMP& MAP(to:wfraug1,wfraug,rhoaug1) PRIVATE(i3,i2,i1) &
+         !$OMP& IF(gpu_option==ABI_GPU_OPENMP)
+#endif
+         do i3=1,n3
+           do i2=1,n2
+             do i1=1,n1
+               rhoaug1(i1,i2,i3,1)=rhoaug1(i1,i2,i3,1) &
+&               +weight*(wfraug(1,i1,i2,i3+n6*(idat-1))*wfraug1(1,i1,i2,i3+n6*(idat-1)) &
+&               +wfraug(2,i1,i2,i3+n6*(idat-1))*wfraug1(2,i1,i2,i3+n6*(idat-1)))
+             end do
+           end do
+         end do
+       end do
+     end if
+
+#ifndef HAVE_OPENMP_OFFLOAD
+     ! Make testfarm happy
+     ABI_UNUSED((/gpu_option/))
+#endif
+   end subroutine accumulate_1st_order_density
 
 end subroutine dfpt_accrho
 !!***

@@ -6,7 +6,7 @@
 !!  Calculate diagonal and off-diagonal matrix elements of the exchange part of the self-energy operator.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1999-2022 ABINIT group (FB, GMR, VO, LR, RWG, MG, RShaltaf)
+!!  Copyright (C) 1999-2024 ABINIT group (FB, GMR, VO, LR, RWG, MG, RShaltaf)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -51,6 +51,7 @@ module m_sigx
  use m_sigma,         only : sigma_t, sigma_distribute_bks
  use m_oscillators,   only : rho_tw_g
  use m_esymm,         only : esymm_t, esymm_symmetrize_mels, esymm_failed
+ use m_occ,           only : get_fact_spin_tol_empty
 
  implicit none
 
@@ -231,18 +232,9 @@ subroutine calc_sigx_me(sigmak_ibz, ikcalc, bmin, bmax, cryst, qp_ebands, Sigp, 
  end if
 
  ! MRM allow lower occ numbers
- ! Normalization of theta_mu_minus_esum. If nsppol==2, qp_occ $\in [0,1]$
- select case (nsppol)
- case (1)
-   fact_spin = half; tol_empty = tol_empty_in          ! below this value the state is assumed empty
-   if (nspinor == 2) then
-     fact_spin = one; tol_empty = half * tol_empty_in  ! below this value the state is assumed empty
-   end if
- case (2)
-   fact_spin = one; tol_empty = half * tol_empty_in  ! to be consistent and obtain similar results if a metallic
- case default                                        ! spin unpolarized system is treated using nsppol==2
-   ABI_BUG(sjoin('Wrong nsppol:', itoa(nsppol)))
- end select
+ ! Set tolerance used to decide if a band is empty
+ ! and normalization of theta_mu_minus_esum. If nsppol == 2, qp_occ $\in [0,1]$
+ call get_fact_spin_tol_empty(nsppol, nspinor, tol_empty_in, fact_spin, tol_empty)
 
  ! Table for \Sigmax_ij matrix elements.
  Sigxij_tab => Sigp%Sigxij_tab(ikcalc, 1:nsppol)
@@ -493,7 +485,7 @@ subroutine calc_sigx_me(sigmak_ibz, ikcalc, bmin, bmax, cryst, qp_ebands, Sigp, 
 
            izero=0
            call pawmknhat_psipsi(Cprj_ksum,Cprj_kgw(:,i2:i2+spad),ider0,izero,cryst%natom,&
-                                 cryst%natom,x_nfft,x_ngfft,nhat12_grdim,nspinor,cryst%ntypat,Pawang,Pawfgrtab,&
+                                 cryst%natom,x_nfft,x_ngfft,nhat12_grdim,nspinor,cryst%ntypat,1,1,Pawang,Pawfgrtab,&
                                  grnhat12,nhat12,pawtab)
 
          else
@@ -506,8 +498,8 @@ subroutine calc_sigx_me(sigmak_ibz, ikcalc, bmin, bmax, cryst, qp_ebands, Sigp, 
              ! Add on-site contribution, projectors are already in BZ.
              i2=jb; if (nspinor==2) i2=(2*jb-1)
              spad = nspinor - 1
-             call paw_rho_tw_g(npwx,nspinor,nspinor,cryst%natom,cryst%ntypat,cryst%typat,cryst%xred,Gsph_x%gvec,&
-                               Cprj_ksum(:,:),Cprj_kgw(:,i2:i2+spad),Pwij_qg,rhotwg_ki(:,jb))
+             call paw_rho_tw_g(cryst,Pwij_qg,npwx,nspinor,nspinor,Gsph_x%gvec,&
+                               Cprj_ksum(:,:),Cprj_kgw(:,i2:i2+spad),rhotwg_ki(:,jb))
            end if
            if (psps%usepaw==1.and.pawcross==1) then ! Add paw cross term
              call paw_cross_rho_tw_g(nspinor,npwx,nfftf,ngfftf,1,use_padfftf,igfftfxg0,gboundf,&
@@ -533,7 +525,7 @@ subroutine calc_sigx_me(sigmak_ibz, ikcalc, bmin, bmax, cryst, qp_ebands, Sigp, 
            !   * If nspinor == 2, we evaluate <band_sum,up|jb,up> and <band_sum,dwn|jb,dwn>,
            !     and impose orthonormalization since npwwfn might be < npwvec.
            !   * Note the use of i_sz_resid and not i_sz, to account for the possibility
-           !     to have generalized KS basis set from hybrid
+           !     to have generalized KS basis set from hybrid.
 
            if (nspinor == 1) then
              rhotwg_ki(1, jb) = czero_gw
@@ -586,7 +578,7 @@ subroutine calc_sigx_me(sigmak_ibz, ikcalc, bmin, bmax, cryst, qp_ebands, Sigp, 
                gwpc_sigxme2 = xdot_tmp * theta_mu_minus_esum2
 
                ! Accumulate and symmetrize Sigma_x matrix elements.
-               ! -wtqm comes from time-reversal (exchange of band indeces)
+               ! -wtqm comes from time-reversal (exchange of band indices)
                is_idx = spin; if (nspinor == 2) is_idx = iab
                sigxme_tmp(jb, kb, is_idx) = sigxme_tmp(jb, kb, is_idx) + &
                   (wtqp + wtqm) * DBLE(gwpc_sigxme) + (wtqp - wtqm) * j_gw * AIMAG(gwpc_sigxme)

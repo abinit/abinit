@@ -25,7 +25,9 @@ kptgw?2      0.000    0.000    0.000
 bdgw?2       4  5 
 
 getwfk       2
-ppmfrq      16.7 eV
+ppmfrq      16.7 eV  # It is easier (and safer) to let ABINIT compute and use the Drude plasma frequency, 
+                     # instead of selecting a value by hand. This would be done thanks to the default value ppmfrq 0.0 .
+
 
 # Definition of the unit cell: fcc
 acell  3*10.26         # Experimental lattice constants
@@ -67,7 +69,6 @@ istwfk  *1         # This is mandatory in all the GW steps.
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% exclude_builders = .*_nag_7.0_.*
 #%% test_chain = tgw1_2.abi, tgw1_3.abi, tgw1_4.abi, tgw1_5.abi
 #%% [files]
 #%% files_to_test = 

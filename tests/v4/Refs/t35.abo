@@ -1,8 +1,8 @@
 
-.Version 9.3.1 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 10.1.4.5 of ABINIT, released Sep 2024.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2022 ABINIT group . 
+.Copyright (C) 1998-2024 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,14 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h26 )
+.Starting date : Fri 13 Sep 2024.
+- ( at 19h09 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v4_t35/t35.in
-- output file    -> t35.out
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v4_t35/t35.abi
+- output file    -> t35.abo
 - root for input  files -> t35i
 - root for output files -> t35o
-
 
  DATASET    1 : space group Pm -3 m (#221); Bravais cP (primitive cubic)
 ================================================================================
@@ -34,11 +33,10 @@
 -    mband =           1        mffmem =           1         mkmem =           1
        mpw =         738          nfft =       13824          nkpt =           1
 ================================================================================
-P This job should need less than                       4.235 Mbytes of memory.
+P This job should need less than                       4.623 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.013 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
 ================================================================================
-
 
  DATASET    2 : space group Pm -3 m (#221); Bravais cP (primitive cubic)
 ================================================================================
@@ -51,11 +49,10 @@ _ WF disk file :      0.013 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
 -    mband =           1        mffmem =           1         mkmem =           4
        mpw =         384          nfft =       13824          nkpt =           4
 ================================================================================
-P This job should need less than                       2.513 Mbytes of memory.
+P This job should need less than                       2.918 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.025 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
 ================================================================================
-
 
  DATASET    3 : space group Pm -3 m (#221); Bravais cP (primitive cubic)
 ================================================================================
@@ -68,7 +65,7 @@ _ WF disk file :      0.025 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
 -    mband =           1        mffmem =           1         mkmem =           4
        mpw =         384          nfft =       13824          nkpt =           4
 ================================================================================
-P This job should need less than                       2.513 Mbytes of memory.
+P This job should need less than                       2.918 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.025 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
 ================================================================================
@@ -77,10 +74,10 @@ _ WF disk file :      0.025 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
 -
-- outvars: echo of selected default values                                      
--   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+- outvars: echo of selected default values
+-   iomode0 =  0 , fftalg0 =512 , wfoptalg0 =  0
 -
-- outvars: echo of global parameters not present in the input file              
+- outvars: echo of global parameters not present in the input file
 -  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
@@ -89,7 +86,7 @@ _ WF disk file :      0.025 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
            diemac      1.00000000E+00
            diemix      5.00000000E-01
              ecut      2.50000000E+01 Hartree
--          fftalg         312
+-          fftalg         512
            getden1          0
            getden2          1
            getden3          1
@@ -212,8 +209,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     25.000   => boxcut(ratio)=   2.13258
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/2he_ca_30t.psp
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/2he_ca_30t.psp
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/2he_ca_30t.psp
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/2he_ca_30t.psp
 - Helium, fhi98PP : TM-type, LDA, l=0 local
 -  2.00000   2.00000       211                znucl, zion, pspdat
     6    1    0    0       415   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -240,11 +237,11 @@ tolerances: {tolwfr: 1.00E-14, }
      iter   Etot(hartree)      deltaE(h)  residm     vres2
  ETOT  1  -2.5288610690640    -2.529E+00 2.569E-05 7.430E+00
  ETOT  2  -2.5315635154522    -2.702E-03 1.136E-08 1.301E+00
- ETOT  3  -2.5321447438709    -5.812E-04 1.017E-05 1.547E-02
+ ETOT  3  -2.5321447438708    -5.812E-04 1.017E-05 1.547E-02
  ETOT  4  -2.5321456243350    -8.805E-07 7.705E-09 2.822E-05
  ETOT  5  -2.5321456255059    -1.171E-09 1.962E-11 8.084E-07
  ETOT  6  -2.5321456255201    -1.417E-11 8.111E-14 4.750E-09
- ETOT  7  -2.5321456255214    -1.278E-12 2.018E-14 1.658E-11
+ ETOT  7  -2.5321456255214    -1.280E-12 2.018E-14 1.658E-11
  ETOT  8  -2.5321456255214     0.000E+00 1.374E-15 9.241E-13
 
  At SCF step    8   max residual=  1.37E-15 < tolwfr=  1.00E-14 =>converged.
@@ -596,7 +593,7 @@ total_energy_dc     : -2.53028085253474E+00
            etotal2    -2.5321456255E+00
            etotal3    -2.5321456255E+00
             fcart1    -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
--          fftalg         312
+-          fftalg         512
            getden1          0
            getden2          1
            getden3          1
@@ -725,7 +722,7 @@ P           mkmem3          4
 -
 - [2] Ab initio pseudopotentials for electronic structure calculations of poly-atomic systems, 
 - using density-functional theory.
-- M. Fuchs, M. Scheffler, Comput. Phys. Commun. 119, 67 (1999).
+- M. Fuchs and, M. Scheffler, Comput. Phys. Commun. 119, 67 (1999).
 - Comment: Some pseudopotential generated using the FHI code were used.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#fuchs1999
 -
@@ -779,10 +776,10 @@ P           mkmem3          4
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          0.8  wall=          0.8
+- Proc.   0 individual time (sec): cpu=          0.6  wall=          0.6
 
 ================================================================================
 
  Calculation completed.
-.Delivered   8 WARNINGs and   7 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          0.8  wall=          0.8
+.Delivered  14 WARNINGs and   8 COMMENTs to log file.
++Overall time at end (sec) : cpu=          0.6  wall=          0.6

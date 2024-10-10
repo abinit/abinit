@@ -1,8 +1,8 @@
 
-.Version 9.7.4 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 10.1.4.5 of ABINIT, released Sep 2024.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2022 ABINIT group . 
+.Copyright (C) 1998-2024 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,14 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed  4 May 2022.
-- ( at 01h23 )
+.Starting date : Fri 13 Sep 2024.
+- ( at 19h08 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Test_suite/v2_t05/t05.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v2_t05/t05.abi
 - output file    -> t05.abo
 - root for input  files -> t05i
 - root for output files -> t05o
-
 
  DATASET    1 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
@@ -40,7 +39,6 @@ P This job should need less than                       1.827 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.023 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
-
 
  DATASET    2 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
@@ -68,7 +66,6 @@ P Main chain + nonlop.f + opernl.f      1.314 Mbytes.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.023 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
-
 
  DATASET    3 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
@@ -101,15 +98,17 @@ _ WF disk file :      0.023 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
 -
-- outvars: echo of selected default values                                      
--   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+- outvars: echo of selected default values
+-   iomode0 =  0 , fftalg0 =512 , wfoptalg0 =  0
 -
-- outvars: echo of global parameters not present in the input file              
+- outvars: echo of global parameters not present in the input file
 -  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
             acell      1.0000000000E+01  1.0000000000E+01  1.2500000000E+01 Bohr
               amu      1.00000000E+00
+              asr           0
+           chneut           0
            diecut      1.20000000E+00 Hartree
            diegap      2.00000000E-01 Hartree
            diemac1     1.00000000E+06
@@ -119,7 +118,7 @@ _ WF disk file :      0.023 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
            diemix2     1.00000000E+00
            diemix3     7.00000000E-01
              ecut      2.00000000E+00 Hartree
--          fftalg         312
+-          fftalg         512
            getddk1          0
            getddk2          2
            getddk3          2
@@ -219,8 +218,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      2.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/14si.Hamann_mod
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/14si.Hamann_mod
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/14si.Hamann_mod
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/14si.Hamann_mod
 -   Si psp produced from Hamann's atompp on 14 Feb 1990 ( !! OLD, for tests only )
 - 14.00000   4.00000    900214                znucl, zion, pspdat
     5    3    2    0       770   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -260,21 +259,21 @@ tolerances: {tolwfr: 1.00E-22, }
  ETOT  6  -6.6499924689013    -7.622E-07 3.987E-09 8.508E-07
  ETOT  7  -6.6499924737567    -4.855E-09 2.109E-11 7.961E-09
  ETOT  8  -6.6499924737995    -4.280E-11 8.178E-14 2.366E-10
- ETOT  9  -6.6499924738005    -1.001E-12 1.871E-14 3.387E-11
+ ETOT  9  -6.6499924738005    -9.965E-13 1.871E-14 3.387E-11
  ETOT 10  -6.6499924738006    -9.681E-14 6.017E-16 1.194E-12
- ETOT 11  -6.6499924738006    -2.132E-14 1.046E-16 4.695E-14
- ETOT 12  -6.6499924738006    -9.770E-15 6.202E-19 2.611E-15
- ETOT 13  -6.6499924738007    -2.665E-14 8.403E-20 3.124E-16
+ ETOT 11  -6.6499924738006    -2.043E-14 1.046E-16 4.695E-14
+ ETOT 12  -6.6499924738006    -1.510E-14 6.202E-19 2.611E-15
+ ETOT 13  -6.6499924738007    -2.309E-14 8.403E-20 3.124E-16
  ETOT 14  -6.6499924738006     3.109E-14 5.399E-21 4.587E-18
- ETOT 15  -6.6499924738006    -4.441E-15 2.805E-22 1.714E-18
- ETOT 16  -6.6499924738006     1.865E-14 8.589E-23 2.600E-19
+ ETOT 15  -6.6499924738006    -6.217E-15 2.805E-22 1.714E-18
+ ETOT 16  -6.6499924738006     1.510E-14 8.589E-23 2.600E-19
 
  At SCF step   16   max residual=  8.59E-23 < tolwfr=  1.00E-22 =>converged.
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  3.12986279E-04  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)=  3.12986279E-04  sigma(3 1)= -1.77328978E-15
-  sigma(3 3)= -2.52556365E-03  sigma(2 1)=  3.58207080E-15
+  sigma(2 2)=  3.12986279E-04  sigma(3 1)= -1.77315749E-15
+  sigma(3 3)= -2.52556365E-03  sigma(2 1)=  3.58198459E-15
 
 
 --- !ResultsGS
@@ -287,21 +286,21 @@ lattice_vectors:
 lattice_lengths: [  10.00000,   10.00000,   12.50000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
 lattice_volume:   1.2500000E+03
-convergence: {deltae:  1.865E-14, res2:  2.600E-19, residm:  8.589E-23, diffor: null, }
+convergence: {deltae:  1.510E-14, res2:  2.600E-19, residm:  8.589E-23, diffor: null, }
 etotal    :  -6.64999247E+00
 entropy   :   0.00000000E+00
 fermie    :  -2.16518912E-01
 cartesian_stress_tensor: # hartree/bohr^3
-- [  3.12986279E-04,   3.58207080E-15,  -1.77328978E-15, ]
-- [  3.58207080E-15,   3.12986279E-04,   0.00000000E+00, ]
-- [ -1.77328978E-15,   0.00000000E+00,  -2.52556365E-03, ]
+- [  3.12986279E-04,   3.58198459E-15,  -1.77315749E-15, ]
+- [  3.58198459E-15,   3.12986279E-04,   0.00000000E+00, ]
+- [ -1.77315749E-15,   0.00000000E+00,  -2.52556365E-03, ]
 pressure_GPa:   1.8629E+01
 xred      :
 - [  0.0000E+00,   0.0000E+00,   0.0000E+00, Si]
 - [  0.0000E+00,   0.0000E+00,   2.0000E-01, Si]
 cartesian_forces: # hartree/bohr
-- [ -1.77653260E-13,  -1.62772686E-13,  -1.39442274E+00, ]
-- [  1.77653260E-13,   1.62772686E-13,   1.39442274E+00, ]
+- [ -1.77691326E-13,  -1.62722079E-13,  -1.39442274E+00, ]
+- [  1.77691326E-13,   1.62722079E-13,   1.39442274E+00, ]
 force_length_stats: {min:   1.39442274E+00, max:   1.39442274E+00, mean:   1.39442274E+00, }
 ...
 
@@ -314,7 +313,7 @@ force_length_stats: {min:   1.39442274E+00, max:   1.39442274E+00, mean:   1.394
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   63.060E-24; max=  85.888E-24
+ Mean square residual over all n,k,spin=   63.060E-24; max=  85.889E-24
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.000000000000      0.000000000000      0.200000000000
@@ -348,28 +347,28 @@ force_length_stats: {min:   1.39442274E+00, max:   1.39442274E+00, mean:   1.394
 --- !EnergyTerms
 iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
-kinetic             :  2.96063057516735E+00
+kinetic             :  2.96063057516736E+00
 hartree             :  3.61408459242119E+00
 xc                  : -2.28228607110879E+00
 Ewald energy        : -1.81143676288751E+00
 psp_core            :  3.60621757934793E-01
 local_psp           : -9.27524992720742E+00
 non_local_psp       : -2.16356638120233E-01
-total_energy        : -6.64999247380061E+00
-total_energy_eV     : -1.80955497870699E+02
+total_energy        : -6.64999247380062E+00
+total_energy_eV     : -1.80955497870700E+02
 band_energy         : -2.27894887944559E+00
 ...
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  3.12986279E-04  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)=  3.12986279E-04  sigma(3 1)= -1.77328978E-15
-  sigma(3 3)= -2.52556365E-03  sigma(2 1)=  3.58207080E-15
+  sigma(2 2)=  3.12986279E-04  sigma(3 1)= -1.77315749E-15
+  sigma(3 3)= -2.52556365E-03  sigma(2 1)=  3.58198459E-15
 
 -Cartesian components of stress tensor (GPa)         [Pressure=  1.8629E+01 GPa]
 - sigma(1 1)=  9.20837270E+00  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  9.20837270E+00  sigma(3 1)= -5.21719778E-11
-- sigma(3 3)= -7.43046354E+01  sigma(2 1)=  1.05388144E-10
+- sigma(2 2)=  9.20837270E+00  sigma(3 1)= -5.21680857E-11
+- sigma(3 3)= -7.43046354E+01  sigma(2 1)=  1.05385607E-10
 
 ================================================================================
 == DATASET  2 ==================================================================
@@ -445,15 +444,15 @@ tolerances: {tolwfr: 1.00E-22, }
 
  ETOT  5  -1.8548649908854     -7.742E-10 1.432E-11 0.000E+00
 
- ETOT  6  -1.8548649908912     -5.875E-12 1.050E-14 0.000E+00
+ ETOT  6  -1.8548649908912     -5.877E-12 1.050E-14 0.000E+00
 
- ETOT  7  -1.8548649908913     -3.175E-14 8.653E-16 0.000E+00
+ ETOT  7  -1.8548649908913     -2.909E-14 8.653E-16 0.000E+00
 
- ETOT  8  -1.8548649908913     -1.865E-14 7.570E-19 0.000E+00
+ ETOT  8  -1.8548649908913     -2.109E-14 7.570E-19 0.000E+00
 
- ETOT  9  -1.8548649908913      5.995E-15 5.768E-20 0.000E+00
+ ETOT  9  -1.8548649908913      7.105E-15 5.768E-20 0.000E+00
 
- ETOT 10  -1.8548649908913      1.554E-15 8.365E-23 0.000E+00
+ ETOT 10  -1.8548649908913      1.776E-15 8.365E-23 0.000E+00
 
  At SCF step   10   max residual=  8.37E-23 < tolwfr=  1.00E-22 =>converged.
 ================================================================================
@@ -462,8 +461,8 @@ tolerances: {tolwfr: 1.00E-22, }
 
  Mean square residual over all n,k,spin=   58.865E-24; max=  83.654E-24
    0.0000  0.0000  0.1250    1  8.36543E-23 kpt; spin; max resid(k); each band:
-  7.53E-23 8.37E-23 8.37E-23 5.13E-23
-   0.0000  0.0000  0.3750    1  6.29738E-23 kpt; spin; max resid(k); each band:
+  7.53E-23 8.37E-23 8.37E-23 5.14E-23
+   0.0000  0.0000  0.3750    1  6.29739E-23 kpt; spin; max resid(k); each band:
   4.39E-23 6.30E-23 3.50E-23 3.50E-23
  dfpt_looppert : ek2=    4.0425899627E+00
           f-sum rule ratio=    9.9240807077E-01
@@ -594,9 +593,9 @@ tolerances: {tolwfr: 1.00E-15, }
 
  ETOT 10   321.52514121998     -3.364E-09 5.370E-12 1.318E-09
 
- ETOT 11   321.52514121997     -4.803E-12 2.726E-15 4.867E-11
+ ETOT 11   321.52514121997     -4.746E-12 2.726E-15 4.867E-11
 
- ETOT 12   321.52514121997     -7.958E-13 9.459E-16 1.910E-12
+ ETOT 12   321.52514121997     -6.537E-13 9.459E-16 1.910E-12
 
  At SCF step   12   max residual=  9.46E-16 < tolwfr=  1.00E-15 =>converged.
 -open ddk wf file :t05o_DS2_1WF9
@@ -605,7 +604,7 @@ tolerances: {tolwfr: 1.00E-15, }
  ----iterations are completed or convergence reached----
 
  Mean square residual over all n,k,spin=   75.287E-17; max=  94.592E-17
-   0.0000  0.0000  0.1250    1  7.64605E-16 kpt; spin; max resid(k); each band:
+   0.0000  0.0000  0.1250    1  7.64604E-16 kpt; spin; max resid(k); each band:
   7.65E-16 6.98E-16 6.98E-16 3.77E-16
    0.0000  0.0000  0.3750    1  9.45921E-16 kpt; spin; max resid(k); each band:
   8.18E-16 9.46E-16 8.60E-16 8.60E-16
@@ -662,7 +661,7 @@ tolerances: {tolwfr: 1.00E-15, }
 
  ETOT  5  -44.634798990013     -2.395E-03 3.642E-05 1.083E-01
 
- ETOT  6  -44.635521879127     -7.229E-04 2.515E-06 1.459E-02
+ ETOT  6  -44.635521879126     -7.229E-04 2.515E-06 1.459E-02
 
  ETOT  7  -44.635651183106     -1.293E-04 1.956E-07 2.387E-04
 
@@ -672,9 +671,9 @@ tolerances: {tolwfr: 1.00E-15, }
 
  ETOT 10  -44.635653563871     -5.290E-09 4.859E-12 5.524E-09
 
- ETOT 11  -44.635653563924     -5.377E-11 4.759E-14 7.470E-11
+ ETOT 11  -44.635653563924     -5.387E-11 4.759E-14 7.470E-11
 
- ETOT 12  -44.635653563924      4.974E-14 9.581E-16 3.588E-11
+ ETOT 12  -44.635653563924      1.350E-13 9.581E-16 3.588E-11
 
  At SCF step   12   max residual=  9.58E-16 < tolwfr=  1.00E-15 =>converged.
 -open ddk wf file :t05o_DS2_1WF9
@@ -904,7 +903,7 @@ tolerances: {tolwfr: 1.00E-15, }
   
   Effective charges, in cartesian coordinates,
   (from electric field response) 
-   if specified in the inputs, asr has been imposed
+   if specified in the inputs, charge neutrality has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
   
@@ -917,7 +916,7 @@ tolerances: {tolwfr: 1.00E-15, }
   
   Effective charges, in cartesian coordinates,
   (from phonon response) 
-   if specified in the inputs, asr has been imposed
+   if specified in the inputs, charge neutrality has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
   
@@ -944,7 +943,7 @@ tolerances: {tolwfr: 1.00E-15, }
 -  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00
 -  7.373976E+03
  chkph3 : WARNING -
-  Dynamical matrix incomplete, phonon frequencies may be wrong, check input variables rfatpol and rfdir.
+  Dynamical matrix incomplete, phonon frequencies may be wrong, see the log file for more explanations.
 
   Phonon at Gamma, with non-analyticity in the
   direction (cartesian coordinates)  0.00000  0.00000  1.00000
@@ -955,7 +954,7 @@ tolerances: {tolwfr: 1.00E-15, }
 -  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00
 -  7.373982E+03
  chkph3 : WARNING -
-  Dynamical matrix incomplete, phonon frequencies may be wrong, check input variables rfatpol and rfdir.
+  Dynamical matrix incomplete, phonon frequencies may be wrong, see the log file for more explanations.
 
 == END DATASET(S) ==============================================================
 ================================================================================
@@ -963,6 +962,8 @@ tolerances: {tolwfr: 1.00E-15, }
  -outvars: echo values of variables after computation  --------
             acell      1.0000000000E+01  1.0000000000E+01  1.2500000000E+01 Bohr
               amu      1.00000000E+00
+              asr           0
+           chneut           0
            diecut      1.20000000E+00 Hartree
            diegap      2.00000000E-01 Hartree
            diemac1     1.00000000E+06
@@ -975,13 +976,13 @@ tolerances: {tolwfr: 1.00E-15, }
            etotal1    -6.6499924738E+00
            etotal2    -1.8548649909E+00
            etotal3    -4.4635653564E+01
-            fcart1    -1.7765326029E-13 -1.6277268624E-13 -1.3944227395E+00
-                       1.7765326029E-13  1.6277268624E-13  1.3944227395E+00
+            fcart1    -1.7769132557E-13 -1.6272207945E-13 -1.3944227395E+00
+                       1.7769132557E-13  1.6272207945E-13  1.3944227395E+00
             fcart2     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
             fcart3     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
--          fftalg         312
+-          fftalg         512
            getddk1          0
            getddk2          2
            getddk3          2
@@ -1034,7 +1035,7 @@ P          mk1mem           2
            rfphon3          1
           spgroup           1
            strten1     3.1298627926E-04  3.1298627924E-04 -2.5255636492E-03
-                       0.0000000000E+00 -1.7732897818E-15  3.5820707971E-15
+                       0.0000000000E+00 -1.7731574900E-15  3.5819845878E-15
            strten2     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            strten3     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -1053,6 +1054,11 @@ P          mk1mem           2
             znucl       14.00000
 
 ================================================================================
+
+ The spacegroup number, the magnetic point group, and/or the number of symmetries
+ have changed between the initial recognition based on the input file
+ and a postprocessing based on the final acell, rprim, and xred.
+ More details in the log file.
 
 
 - Timing analysis has been suppressed with timopt=0
@@ -1142,10 +1148,10 @@ P          mk1mem           2
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          1.2  wall=          1.7
+- Proc.   0 individual time (sec): cpu=          0.7  wall=          0.8
 
 ================================================================================
 
  Calculation completed.
-.Delivered   9 WARNINGs and  10 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          1.2  wall=          1.7
+.Delivered  20 WARNINGs and  11 COMMENTs to log file.
++Overall time at end (sec) : cpu=          0.7  wall=          0.8

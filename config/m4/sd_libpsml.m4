@@ -1,4 +1,4 @@
-## Copyright (C) 2019-2022 ABINIT group (Yann Pouillon)
+## Copyright (C) 2019-2024 ABINIT group (Yann Pouillon)
 
 #
 # PSeudopotential Markup Language I/O library (LibPSML)
@@ -83,12 +83,13 @@ AC_DEFUN([SD_LIBPSML_INIT], [
   # Declare environment variables
   AC_ARG_VAR([LIBPSML_CPPFLAGS], [C preprocessing flags for LibPSML.])
   AC_ARG_VAR([LIBPSML_FCFLAGS], [Fortran flags for LibPSML.])
+  AC_ARG_VAR([LIBPSML_FFLAGS], [Fortran flags for LibPSML (better use LIBPSML_FCFLAGS).])
   AC_ARG_VAR([LIBPSML_LDFLAGS], [Linker flags for LibPSML.])
   AC_ARG_VAR([LIBPSML_LIBS], [Library flags for LibPSML.])
 
   # Detect use of environment variables
   if test "${sd_libpsml_enable}" = "yes" -o "${sd_libpsml_enable}" = "auto"; then
-    tmp_libpsml_vars="${LIBPSML_CPPFLAGS}${LIBPSML_FCFLAGS}${LIBPSML_LDFLAGS}${LIBPSML_LIBS}"
+    tmp_libpsml_vars="${LIBPSML_CPPFLAGS}${LIBPSML_FFLAGS}${LIBPSML_FCFLAGS}${LIBPSML_LDFLAGS}${LIBPSML_LIBS}"
     if test "${sd_libpsml_init}" = "def" -a ! -z "${tmp_libpsml_vars}"; then
       sd_libpsml_enable="yes"
       sd_libpsml_init="env"
@@ -125,6 +126,7 @@ AC_DEFUN([SD_LIBPSML_INIT], [
         sd_libpsml_ldflags="${sd_libpsml_ldflags_def}"
         sd_libpsml_libs="${sd_libpsml_libs_def}"
         test ! -z "${LIBPSML_CPPFLAGS}" && sd_libpsml_cppflags="${LIBPSML_CPPFLAGS}"
+        test ! -z "${LIBPSML_FFLAGS}" && sd_libpsml_fcflags="${LIBPSML_FFLAGS}"
         test ! -z "${LIBPSML_FCFLAGS}" && sd_libpsml_fcflags="${LIBPSML_FCFLAGS}"
         test ! -z "${LIBPSML_LDFLAGS}" && sd_libpsml_ldflags="${LIBPSML_LDFLAGS}"
         test ! -z "${LIBPSML_LIBS}" && sd_libpsml_libs="${LIBPSML_LIBS}"
@@ -357,7 +359,7 @@ AC_DEFUN([_SD_LIBPSML_CHECK_CONFIG], [
   fi
 
   # Environment variables conflict with --with-* options
-  tmp_libpsml_vars="${LIBPSML_CPPFLAGS}${LIBPSML_FCFLAGS}${LIBPSML_LDFLAGS}${LIBPSML_LIBS}"
+  tmp_libpsml_vars="${LIBPSML_CPPFLAGS}${LIBPSML_FFLAGS}${LIBPSML_FCFLAGS}${LIBPSML_LDFLAGS}${LIBPSML_LIBS}"
   tmp_libpsml_invalid="no"
   if test ! -z "${tmp_libpsml_vars}" -a ! -z "${with_libpsml}"; then
     case "${sd_libpsml_policy}" in

@@ -7,7 +7,7 @@
 !! as well as other files with the ABINIT header.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2022 ABINIT group (GMR, RC, LSI, XG, NCJ, JFB, MCote, LPizzagalli)
+!! Copyright (C) 1999-2024 ABINIT group (GMR, RC, LSI, XG, NCJ, JFB, MCote, LPizzagalli)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -38,7 +38,6 @@ program cut3d
 
  use defs_basis
  use m_errors
- use m_build_info
  use m_xmpi
  use m_nctk
  use m_abicore
@@ -53,6 +52,7 @@ program cut3d
  use m_crystal
 
  use defs_abitypes,     only : MPI_type
+ use m_build_info,      only : abinit_version
  use m_specialmsg,      only : specialmsg_getcount, herald
  use m_fstrings,        only : endswith, sjoin, itoa
  use m_time,            only : timein
@@ -527,9 +527,9 @@ program cut3d
              read(std_in,*) gridshift1, gridshift2, gridshift3
              shift_tau(:) = gridshift1*rprimd(:,1)/(nr1+1) + gridshift2*rprimd(:,2)/(nr2+1) + gridshift3*rprimd(:,3)/(nr3+1)
            end if
-!
-!            Generate translated coordinates to match density shift
-!
+           !
+           ! Generate translated coordinates to match density shift
+           !
            ABI_MALLOC(tau2,(3,natom))
            do iatom = 1,natom
              tau2(:,iatom) = xcart(:,iatom) - shift_tau(:)

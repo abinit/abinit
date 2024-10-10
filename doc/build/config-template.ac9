@@ -308,6 +308,10 @@
 #
 #FCFLAGS_OPENMP="-fopenmp"
 
+# Fortran compiler custom OpenMP GPU offload flags
+#
+#FCFLAGS_OPENMP_OFFLOAD="-fopenmp"
+
 # Fortran compiler custom optimization flags (when with_optim_flavor=custom)
 #
 #FCFLAGS_OPTIM="-O5"
@@ -493,6 +497,13 @@
 #
 #with_mpi_flavor="native"
 
+# Activate code branches to perform MPI operations on GPU buffers,
+# which allow performance gains on intra-node communications.
+# WARNING: this feature requires a MPI that is "GPU-aware", which usually
+# means "compiled with CUDA/ROCm support"
+#
+#enable_mpi_gpu_aware="no"
+
 # Activate the MPI_IN_PLACE option whenever possible (default is no)
 # WARNING: this feature requires MPI2, ignored if the MPI library
 # is not MPI2 compliant.
@@ -612,6 +623,15 @@
 #
 #GPU_LIBS="-L/usr/local/cuda/lib64 -lcublas -lcufft -lcudart"
 
+# GPU arch, useful for autosetting OpenMP offload flags (default is NVIDIA Ampere)
+# Example values : - 60 (NVIDIA Pascal)
+#                  - 70 (NVIDIA Volta)
+#                  - 75 (NVIDIA Turing)
+#                  - 80 (NVIDIA Ampere)
+#                  - 90 (NVIDIA Hopper)
+#
+#GPU_ARCH=80
+
                        # ------------------------------ #
 
 # Advanced GPU options (experts only)
@@ -657,7 +677,7 @@
 
 # Supported libraries:
 #
-#   * AOCL      : AMD Optimizing CPU Libraries
+#   * aocl      : AMD Optimizing CPU Libraries
 #                 https://developer.amd.com/amd-aocl/
 #
 #   * atlas     : Automatically Tuned Linear Algebra Software
@@ -685,6 +705,11 @@
 #
 #   * none      : just check user-specified libraries, do not try to
 #                 detect their type
+#
+#
+#   * nvpl      : Nvidia Performance Library (NVPL)
+#                 (only for ARM processors)
+#                 https://docs.nvidia.com/nvpl/
 #
 #   * openblas  : OpenBLAS - An Optimized BLAS Library
 #                 https://www.openblas.net/
@@ -766,6 +791,7 @@
 #   * dfti          : native MKL FFT library
 #   * fftw3         : serial FFTW3 library
 #   * fftw3-threads : threaded FFTW3 library
+#   * nvpl          : NVPL: Nvidia Performance Library (only for ARM)
 #   * pfft          : MPI-parallel PFFT library (for maintainers only)
 #   * goedecker     : Abinit internal FFT
 #
@@ -915,6 +941,31 @@
 # Library flags for BigDFT (default is unset)
 #
 #BIGDFT_LIBS="-L/usr/local/lib/bigdft -lbigdft -lpoissonsolver -labinit"
+
+                       # ------------------------------ #
+
+# Kokkos Core library
+# Website: http://kokkos.org/
+
+# Enable Kokkos Core support (default is no)
+#
+#with_kokkos="yes"
+
+# C++ flags for Kokkos Core (default is unset)
+#
+#KOKKOS_CXXFLAGS="-I/usr/local/include/kokkos"
+
+# Fortran flags for Kokkos Core (default is unset)
+#
+#KOKKOS_FCFLAGS="-I/usr/local/include/kokkos"
+
+# Link flags for Kokkos Core (default is unset)
+#
+#KOKKOS_LDFLAGS=""
+
+# Library flags for Kokkos Core (default is unset)
+#
+#KOKKOS_LIBS="-L/usr/local/lib/kokkos -lkokkoscore"
 
                        # ------------------------------ #
 
@@ -1193,6 +1244,28 @@
 #
 #XMLF90_LIBS="-L/usr/local/lib -lxmlf90"
 
+                       # ------------------------------ #
+
+# YAKL (Yet Another Kernel Launcher) library
+# Small C++ framework used in ABINIT for GPU memory pool allocation
+# Website: https://github.com/mrnorman/YAKL
+
+# Enable YAKL support (default is no)
+#
+#with_yakl="yes"
+
+# Fortran flags for YAKL (default is unset)
+#
+#YAKL_FCFLAGS="-I/usr/local/include/yakl"
+
+# Link flags for YAKL (default is unset)
+#
+#YAKL_LDFLAGS=""
+
+# Library flags for YAKL (default is unset)
+#
+#YAKL_LIBS="-L/usr/local/lib/yakl -lyakl_fortran_interface"
+
 # -------------------------------------------------------------------------- #
 # Profiling and performance analysis                                         #
 # -------------------------------------------------------------------------- #
@@ -1323,17 +1396,9 @@
 #
 # Uncomment the following lines at your own risks
 
-# Enable BSE unpacking (gmatteo)
-#
-#enable_bse_unpacked="yes"
-
 # Enable optimized cRPA build for ifort <=17 (routerovitch)
 #
 #enable_crpa_optim="yes"
-
-# Enable exports (pouillon)
-#
-#enable_exports="yes"
 
 # Enable double precision for GW calculations (gmatteo)
 #
@@ -1355,9 +1420,17 @@
 #
 #enable_openmp="yes"
 
+# Enable OpenMP GPU offload (sarrautem, torrent)
+#
+#enable_openmp_offload="yes"
+
 # Enable ZDOTC and ZDOTU bugfix (gmatteo)
 #
 #enable_zdot_bugfix="yes"
+
+# Activate workaround for buggy MPI interfaces (not having interfaces for scalars)
+#
+#enable_mpi_interfaces_bugfix="yes"
 
 # -------------------------------------------------------------------------- #
 # Maintainer options                                                         #

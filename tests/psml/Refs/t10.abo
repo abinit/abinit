@@ -1,8 +1,8 @@
 
-.Version 9.3.1 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 10.1.4.5 of ABINIT, released Sep 2024.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2022 ABINIT group . 
+.Copyright (C) 1998-2024 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,16 +14,16 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h19 )
+.Starting date : Fri 13 Sep 2024.
+- ( at 19h02 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/psml_t10/t10.in
-- output file    -> t10.out
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/psml_t10/t10.abi
+- output file    -> t10.abo
 - root for input  files -> t10i
 - root for output files -> t10o
 
 - inpspheads : Reading pseudopotential header in XML form from 
--   /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/26_Fe_atom.psml
+-   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/26_Fe_atom.psml
 - psxml2ab: ps_Number_of_Projectors not relativistic     0
 - psxml2ab: ps_Number_of_Projectors scalar relativistic     4
 - psxml2ab: ps_Projector_L     0
@@ -45,7 +45,6 @@
 - psxml2ab: Exchange-correlation functional    2 :    XC_GGA_C_PBE ( 130)
 - psxml2ab: Relativistically generated pseudopotential (not necessarily SOC!):   dirac
 - psxml2ab: Spin-polarized pseudopotential:     no
-
  DATASET    1 : space group Im -3 m (#229); Bravais cI (body-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  1.
@@ -61,7 +60,6 @@ P This job should need less than                       2.827 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.361 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
-
 
  DATASET    2 : space group Im -3 m (#229); Bravais cI (body-center cubic)
 ================================================================================
@@ -83,10 +81,10 @@ _ WF disk file :      0.720 Mbytes ; DEN or POT disk file :      0.053 Mbytes.
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
 -
-- outvars: echo of selected default values                                      
--   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+- outvars: echo of selected default values
+-   iomode0 =  0 , fftalg0 =512 , wfoptalg0 =  0
 -
-- outvars: echo of global parameters not present in the input file              
+- outvars: echo of global parameters not present in the input file
 -  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
@@ -95,7 +93,7 @@ _ WF disk file :      0.720 Mbytes ; DEN or POT disk file :      0.053 Mbytes.
         bs_loband1          0
         bs_loband2          0       0
              ecut      1.00000000E+01 Hartree
--          fftalg         312
+-          fftalg         512
               ixc     -101130
            jdtset        1    2
               kpt      8.33333333E-02  8.33333333E-02  8.33333333E-02
@@ -284,8 +282,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.10453
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/26_Fe_atom.psml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/26_Fe_atom.psml
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/26_Fe_atom.psml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/26_Fe_atom.psml
 - Fe    ATM4.2.6
 - 26.00000   8.00000         0                znucl, zion, pspdat
     9 -101130    3   -1        -1   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -320,11 +318,11 @@ tolerances: {toldfe: 1.00E-08, }
  ETOT  4  -24.301168364608    -5.594E-03 1.844E-03 3.178E-02
  ETOT  5  -24.301228818864    -6.045E-05 2.586E-04 8.231E-05
  ETOT  6  -24.301228945225    -1.264E-07 5.597E-04 1.325E-07
- ETOT  7  -24.301228945417    -1.919E-10 1.314E-05 1.075E-09
- ETOT  8  -24.301228945473    -5.614E-11 2.639E-05 1.407E-10
+ ETOT  7  -24.301228945417    -1.920E-10 1.314E-05 1.075E-09
+ ETOT  8  -24.301228945473    -5.609E-11 2.639E-05 1.407E-10
 
  At SCF step    8, etot is converged : 
-  for the second time, diff in etot=  5.614E-11 < toldfe=  1.000E-08
+  for the second time, diff in etot=  5.609E-11 < toldfe=  1.000E-08
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  3.30759556E-02  sigma(3 2)=  0.00000000E+00
@@ -342,7 +340,7 @@ lattice_vectors:
 lattice_lengths: [   4.69690,    4.69690,    4.69690, ]
 lattice_angles: [109.471, 109.471, 109.471, ] # degrees, (23, 13, 12)
 lattice_volume:   7.9764987E+01
-convergence: {deltae: -5.614E-11, res2:  1.407E-10, residm:  2.639E-05, diffor: null, }
+convergence: {deltae: -5.609E-11, res2:  1.407E-10, residm:  2.639E-05, diffor: null, }
 etotal    :  -2.43012289E+01
 entropy   :   0.00000000E+00
 fermie    :   4.04768289E-01
@@ -399,17 +397,17 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
-kinetic             :  1.12866329802862E+01
-hartree             :  4.52802637631763E-01
+kinetic             :  1.12866329802863E+01
+hartree             :  4.52802637631775E-01
 xc                  : -1.24763383097563E+01
 Ewald energy        : -2.14723277850123E+01
 psp_core            :  3.44153796902551E+00
-local_psp           : -2.33449124154935E+00
-non_local_psp       : -3.19904865788436E+00
+local_psp           : -2.33449124154939E+00
+non_local_psp       : -3.19904865788442E+00
 internal            : -2.43012324072588E+01
-'-kT*entropy'       :  3.46178536557374E-06
+'-kT*entropy'       :  3.46178536559406E-06
 total_energy        : -2.43012289454735E+01
-total_energy_eV     : -6.61270069105022E+02
+total_energy_eV     : -6.61270069105021E+02
 band_energy         :  1.54398336703188E+00
 ...
 
@@ -459,7 +457,7 @@ tolerances: {toldfe: 1.00E-05, }
 ...
 
      iter   Etot(hartree)     deltaE(h) residm    vres2    magn
- ETOT  1  -23.309047667267    -2.33E+01 2.44E-02 1.86E+03 1.056
+ ETOT  1  -23.309047667266    -2.33E+01 2.44E-02 1.86E+03 1.056
  ETOT  2  -24.150296657643    -8.41E-01 3.89E-02 1.77E+02 0.852
  ETOT  3  -24.291577822410    -1.41E-01 2.21E-02 9.08E+00 0.467
  ETOT  4  -24.300372399703    -8.79E-03 1.87E-03 2.33E-01 0.148
@@ -560,18 +558,18 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 2, }
 comment             : Components of total free energy in Hartree
-kinetic             :  1.12863373810934E+01
-hartree             :  4.52737961339622E-01
-xc                  : -1.24762757934903E+01
+kinetic             :  1.12863373810931E+01
+hartree             :  4.52737961339648E-01
+xc                  : -1.24762757934904E+01
 Ewald energy        : -2.14723277850123E+01
 psp_core            :  3.44153796902551E+00
-local_psp           : -2.33431284302280E+00
-non_local_psp       : -3.19892932196546E+00
+local_psp           : -2.33431284302284E+00
+non_local_psp       : -3.19892932196512E+00
 internal            : -2.43012324320323E+01
-'-kT*entropy'       :  3.51489041920153E-06
+'-kT*entropy'       :  3.51489041920305E-06
 total_energy        : -2.43012289171419E+01
 total_energy_eV     : -6.61270068334081E+02
-band_energy         :  1.54390400125474E+00
+band_energy         :  1.54390400125472E+00
 ...
 
 
@@ -598,7 +596,7 @@ band_energy         :  1.54390400125474E+00
            etotal2    -2.4301228917E+01
             fcart1    -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
             fcart2    -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
--          fftalg         312
+-          fftalg         512
               ixc     -101130
            jdtset        1    2
               kpt      8.33333333E-02  8.33333333E-02  8.33333333E-02
@@ -856,10 +854,10 @@ P           mkmem          14
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          4.7  wall=          4.7
+- Proc.   0 individual time (sec): cpu=          2.5  wall=          2.6
 
 ================================================================================
 
  Calculation completed.
-.Delivered   2 WARNINGs and   2 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          4.7  wall=          4.7
+.Delivered   0 WARNINGs and   3 COMMENTs to log file.
++Overall time at end (sec) : cpu=          2.5  wall=          2.6

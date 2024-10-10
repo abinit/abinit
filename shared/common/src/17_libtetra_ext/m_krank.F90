@@ -6,7 +6,7 @@
 !! This module deals with rank objects for hashing k-point vector lists
 !!
 !! COPYRIGHT
-!! Copyright (C) 2010-2022 ABINIT group (MVer, HM, MG)
+!! Copyright (C) 2010-2024 ABINIT group (MVer, HM, MG)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -29,6 +29,8 @@ module m_krank
  use defs_basis
  use m_abicore
  use m_errors
+
+ use m_fstrings, only : itoa, sjoin
 
  implicit none
 
@@ -650,13 +652,14 @@ end subroutine krank_get_mapping
 !!
 !! SOURCE
 
-subroutine get_ibz2bz(nibz, nbz, bz2ibz, ibz2bz, ierr)
+subroutine get_ibz2bz(nibz, nbz, bz2ibz, ibz2bz, err_msg, ierr)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nibz, nbz
  integer,intent(in) :: bz2ibz(6, nbz)
  integer,intent(out) :: ierr
+ character(len=*),intent(out) :: err_msg
 !arrays
  integer,allocatable,intent(out) :: ibz2bz(:)
 
@@ -681,6 +684,10 @@ subroutine get_ibz2bz(nibz, nbz, bz2ibz, ibz2bz, ierr)
  end do
 
  ierr = merge(0, 1, cnt == nibz)
+ err_msg = ""
+ if (ierr /= 0) then
+   err_msg = sjoin("The number of points in the IBZ computed from symmetry table is: ", itoa(cnt), " while it should be: ", itoa(nibz))
+ end if
 
 end subroutine get_ibz2bz
 !!***

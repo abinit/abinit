@@ -8,7 +8,7 @@
 !!  and the procedures to perform this calculation.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2012-2022 ABINIT group (CMartins,FJ,FA,MT)
+!!  Copyright (C) 2012-2024 ABINIT group (CMartins,FJ,FA,MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -35,6 +35,7 @@ module m_fock
  use m_pawfgrtab
  use m_pawcprj
  use m_cgtools
+ use m_nctk
  use m_dtset
 
  use defs_abitypes,     only : MPI_type
@@ -45,7 +46,6 @@ module m_fock
  use m_fft,             only : zerosym, fourwf
  use m_kg,              only : ph1d3d, getph
  use m_kpts,            only : listkk
-
  use m_barevcoul,       only : barevcoul
 
  implicit none
@@ -188,8 +188,8 @@ module m_fock
 ! Pointers to PAW-types (associated only if usepaw==1)
 ! Note that these are references to already existing objects.
 
-  type(pawtab_type), pointer :: pawtab(:)
-  type(pawfgr_type),pointer :: pawfgr
+  type(pawtab_type), pointer :: pawtab(:) => null()
+  type(pawfgr_type),pointer :: pawfgr => null()
   type(pawfgrtab_type),allocatable :: pawfgrtab(:)
 
  end type fock_common_type
@@ -251,7 +251,6 @@ module m_fock
     ! tab_icg,(mkpt,my_nsppol))
     ! indices of cprj(ikpt) in the arrays cprj for each k-point jkpt
 
-
   integer, allocatable :: tab_ikpt(:)
     ! tab_ikpt,(mkpt))
     ! indices of k-point ikpt in IBZ which corresponds to each k-point jkpt in full BZ
@@ -289,13 +288,13 @@ module m_fock
 
  type,public :: fock_ACE_type
 
-! ===== Real pointers
   real(dp), allocatable :: xi(:,:,:)
 
  end type fock_ACE_type
 !----------------------------------------------------------------------
 
  public :: fock_init                  ! Initialize the object.
+ !public :: fock_from_wfk              ! Initialize the object from external WFK file.
  public :: fock_set_ieigen            ! Set the value of ieigen to the value given in argument.
  public :: fock_updateikpt            ! Update the value of energies%e_xc and energies%e_xcdc with Fock contribution.
  public :: fock_destroy               ! Free memory.
@@ -322,15 +321,9 @@ contains
 !!  fockbz_create
 !!
 !! FUNCTION
-!!  Create a fock_type structure.
+!!  Create a fock__BZ_type structure.
 !!
 !! INPUTS
-!!
-!! OUTPUT
-!!  none
-!!
-!! SIDE EFFECTS
-!!  fock <type(fock_type)>= all the quantities to calculate Fock exact exchange are allocated
 !!
 !! NOTES
 !!
@@ -350,9 +343,6 @@ subroutine fockbz_create(fockbz,mgfft,mpw,mkpt,mkptband,my_nsppol,n4,n5,n6,use_A
  type(fock_BZ_type) , intent(inout) :: fockbz
 
 !Local variables-------------------------------
-!scalars
-!arrays
-! character(len=500) :: message                   ! to be uncommented, if needed
 
 ! *************************************************************************
 
@@ -432,20 +422,17 @@ end subroutine fockbz_create
 !!  fock_init
 !!
 !! FUNCTION
-!!  Init all scalars, arrays and pointers in the structure.
+!!  Init fock_t object
 !!
 !! INPUTS
 !!  cg(2,mcg)= wavefunctions
 !!  dtset <type(dataset_type)>= all input variables for this dataset
 !!  gsqcut= Fourier cutoff on G^2 used to calculate charge density
 !!  kg(3,mpw*mkmem)= reduced planewave coordinates.
-!!  mcg= size of wave-functions array (cg) =mpw*nspinor*mband*mkmem*nsppol
+!!  mcg= size of wave-functions array (cg) = mpw*nspinor*mband*mkmem*nsppol
 !!  mpi_enreg=information about MPI parallelization
 !!  npwarr_bz(nkpt)= number of planewaves in basis at this k point
 !!  occ(mband*nkpt*nsppol)= occupation number for each band (often 2) at each k point
-!!
-!! OUTPUT
-!!  none
 !!
 !! SIDE EFFECTS
 !!  fock <type(fock_type)>= all the quantities to calculate Fock exact exchange are initialized
@@ -496,11 +483,7 @@ subroutine fock_init(atindx,cplex,dtset,fock,gsqcut,kg,mpi_enreg,nattyp,npwarr,p
  DBG_ENTER("COLL")
 
  call timab(1501,1,tsec)
-
- if (dtset%nspinor/=1) then
-   ABI_ERROR('Hartree-Fock option can be used only with option nspinor=1.')
- end if
-
+ ABI_CHECK_IEQ(dtset%nspinor, 1, 'Hartree-Fock option can be used only with option nspinor = 1')
 
 ! =====================================
 ! === Define useful local variables ===
@@ -702,7 +685,7 @@ subroutine fock_init(atindx,cplex,dtset,fock,gsqcut,kg,mpi_enreg,nattyp,npwarr,p
 ! === Initialize the convergence options ===
 ! ==========================================
    write(msg,'(2a)') ch10,'Fock_init: initialization of Fock operator parameters:'
-   call wrtout(std_out,msg,'COLL')
+   call wrtout(std_out,msg)
 
    fockcommon%fock_converged=.false.
    fockcommon%scf_converged=.false.
@@ -714,13 +697,13 @@ subroutine fock_init(atindx,cplex,dtset,fock,gsqcut,kg,mpi_enreg,nattyp,npwarr,p
    if (dtset%nnsclohf==0) then
      fockcommon%nnsclo_hf=1
      msg=' - The parameter nnsclohf is set to its default value 1.'
-     call wrtout(std_out,msg,'COLL')
+     call wrtout(std_out,msg)
 !* Default value is set to 1 (updating cgocc at each step)
 !* May be useful to put default to 3
    else
      fockcommon%nnsclo_hf=dtset%nnsclohf
      write(msg,'(a,i3)') ' - The parameter nnsclohf is set to the value:', dtset%nnsclohf
-     call wrtout(std_out,msg,'COLL')
+     call wrtout(std_out,msg)
 !* value chosen by the user
    end if
 
@@ -1120,12 +1103,8 @@ end subroutine fock_init
 !!
 !! INPUTS
 !!  fock <type(fock_type)>= all the quantities to calculate Fock exact exchange
-!!  gs_ham <type(gs_hamiltonian_type)>= all data for the Hamiltonian to be applied
-!!  ikpt= reduced planewave coordinates.
-!!  isppol= number of planewaves in basis at this k point
-!!
-!! OUTPUT
-!!  none
+!!  ikpt= k-point index
+!!  isppol= Spin index
 !!
 !! SIDE EFFECTS
 !!   The field fock%eigen_ikpt is also set to 0.d0.
@@ -1219,7 +1198,6 @@ subroutine fock_destroy(fock)
 
 ! *************************************************************************
 
- DBG_ENTER("COLL")
  if (fock%fock_common%use_ACE/=0) then
    ABI_FREE(fock%fockACE)
  end if
@@ -1227,7 +1205,6 @@ subroutine fock_destroy(fock)
  ABI_FREE(fock%fock_BZ)
  ABI_FREE(fock)
 
- DBG_EXIT("COLL")
 end subroutine fock_destroy
 
 subroutine fock_common_destroy(fock)
@@ -1770,7 +1747,7 @@ subroutine fock_updatecwaveocc(cg,cprj,dtset,fock,indsym,mcg,mcprj,&
              ABI_MALLOC(dummytab2,(2,npwj))
              call fourwf(1,dummytab3,cgocc(:,1:npwj),dummytab2,fockbz%cwaveocc_bz(:,:,:,:,my_jband+jbg,my_jsppol), &
 &             gbound_k,gbound_k,jstwfk,kg_k,kg_k,mgfft,mpi_enreg,1,ngfft,&
-&             npwj,npwj,n4,n5,n6,tim_fourwf0,0,weight1,weight1,use_gpu_cuda=dtset%use_gpu_cuda)
+&             npwj,npwj,n4,n5,n6,tim_fourwf0,0,weight1,weight1,gpu_option=dtset%gpu_option)
              ABI_FREE(dummytab2)
 
            else
@@ -1934,6 +1911,7 @@ subroutine fock_print(fockcommon,fockbz,header,unit,mode_paral,prtvol)
  character(len=*),optional,intent(in) :: header
  type(fock_common_type),intent(in) :: fockcommon
  type(fock_BZ_type),intent(in) :: fockbz
+
 !Local variables-------------------------------
  integer :: my_unt,my_prtvol
  character(len=4) :: my_mode
@@ -1965,9 +1943,9 @@ subroutine fock_print(fockcommon,fockbz,header,unit,mode_paral,prtvol)
 ! call wrtout(my_unt,msg,my_mode)
 
  ! Extra info.
- if (my_prtvol > 0) then
-   call wrtout(my_unt,"Extra info not available",my_mode)
- end if
+ !if (my_prtvol > 0) then
+ !  call wrtout(my_unt,"Extra info not available",my_mode)
+ !end if
 
 end subroutine fock_print
 !!***
@@ -2024,7 +2002,7 @@ subroutine bare_vqg(qphon,gsqcut,gmet,izero,hyb_mixing,hyb_mixing_sr,hyb_range_f
  integer :: ii,ii1,ing,n1,n2,n3,qeq0,qeq05
  real(dp),parameter :: tolfix=1.000000001e0_dp ! Same value as the one used in hartre
  real(dp) :: cutoff,gs,rcut,divgq0,gqg2p3,gqgm12,gqgm13,gqgm23,gs2,gs3
- character(len=100) :: msg
+ !character(len=500) :: msg
  logical  :: shortrange
 !arrays
  integer :: id(3)
@@ -2033,8 +2011,7 @@ subroutine bare_vqg(qphon,gsqcut,gmet,izero,hyb_mixing,hyb_mixing_sr,hyb_range_f
 ! *************************************************************************
 
  if (abs(hyb_mixing_sr)>tol8.and.abs(hyb_range_fock)<tol8) then
-   msg='SR mixing<>0 while range separation=0!'
-   ABI_BUG(msg)
+   ABI_BUG('SR mixing<>0 while range separation=0!')
  end if
 
 !Treatment of the divergence at q+g=zero
@@ -2079,7 +2056,7 @@ subroutine bare_vqg(qphon,gsqcut,gmet,izero,hyb_mixing,hyb_mixing_sr,hyb_range_f
        vqg(1)=hyb_mixing*divgq0+hyb_mixing*(pi/hyb_range_fock**2)
     endif
  end if
- 
+
  if (abs(hyb_mixing_sr)>tol8) then
     shortrange=.true.
     rcut=hyb_range_fock
@@ -2175,7 +2152,6 @@ end subroutine bare_vqg
 !!***
 
 !!****f* ABINIT/strfock
-!!
 !! NAME
 !! strfock
 !!
@@ -2208,28 +2184,34 @@ end subroutine bare_vqg
 !! SOURCE
 
 subroutine strfock(gprimd,gsqcut,fockstr,hyb_mixing,hyb_mixing_sr,hyb_range_fock,mpi_enreg,nfft,ngfft,&
-&                  nkpt_bz,rhog,ucvol,qphon,&
-&                 rhog2) ! optional argument
+                   nkpt_bz,ndat,rhog,ucvol,qphon,&
+                   rhog2,gpu_option) ! optional argument
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: nfft,nkpt_bz
+ integer,intent(in) :: nfft,nkpt_bz,ndat
+ integer,intent(in),optional :: gpu_option
  real(dp),intent(in) :: gsqcut,hyb_mixing,hyb_mixing_sr,hyb_range_fock,ucvol
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: ngfft(18)
- real(dp),intent(in) :: gprimd(3,3),rhog(2,nfft),qphon(3)
- real(dp),intent(in),optional :: rhog2(2,nfft)
- real(dp),intent(out) :: fockstr(6)
+ real(dp),intent(in) :: gprimd(3,3),rhog(2,nfft,ndat),qphon(3)
+ real(dp),intent(in),optional :: rhog2(2,nfft,ndat)
+ real(dp),intent(out) :: fockstr(6,ndat)
 
 !Local variables-------------------------------
 !scalars
  integer,parameter :: im=2,re=1
- integer :: i1,i2,i3,id1,id2,id3,ierr,ig1,ig2,ig3,ii,irho2,me_fft,n1,n2,n3,nproc_fft
+ integer :: i1,i2,i3,id1,id2,id3,ierr,ig1,ig2,ig3,ii,irho2,idat,me_fft,n1,n2,n3,nproc_fft
  real(dp) :: arg,cutoff,gsquar,rcut,rhogsq,tolfix=1.000000001_dp,tot,tot1,divgq0
- character(len=100) :: msg
+#ifdef HAVE_OPENMP_OFFLOAD
+ ! Cray has trouble with reduction on array, so we use 6 scalars instead
+ real(dp) :: fockstr1,fockstr2,fockstr3,fockstr4,fockstr5,fockstr6
+#endif
+ !character(len=500) :: msg
 !arrays
  real(dp) :: gcart(3),tsec(2)
+ real(dp), allocatable :: v_gcart(:,:,:,:)
  integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:),ffti2_local(:)
  integer, ABI_CONTIGUOUS pointer :: fftn3_distrib(:),ffti3_local(:)
 
@@ -2238,11 +2220,14 @@ subroutine strfock(gprimd,gsqcut,fockstr,hyb_mixing,hyb_mixing_sr,hyb_range_fock
  call timab(568,1,tsec)
 
  if (abs(hyb_mixing_sr)>tol8.and.abs(hyb_range_fock)<tol8) then
-   msg='strfock: SR mixing<>0 while range separation=0!'
-   ABI_BUG(msg)
+   ABI_BUG('strfock: SR mixing<>0 while range separation=0!')
  end if
 
- fockstr(:)=zero
+ !if(gpu_option==ABI_GPU_DISABLED) then
+   fockstr(:,:)=zero
+ !else(gpu_option==ABI_GPU_OPENMP) then
+ !  gpu_set_to_zero(fockstr, 6*ndat)
+ !end if
  rcut= (three*nkpt_bz*ucvol/four_pi)**(one/three)
  irho2=0;if (present(rhog2)) irho2=1
  divgq0=two_pi/three*rcut**2
@@ -2262,6 +2247,10 @@ subroutine strfock(gprimd,gsqcut,fockstr,hyb_mixing,hyb_mixing_sr,hyb_range_fock
  ! Get the distrib associated with this fft_grid
  call ptabs_fourdp(mpi_enreg,n2,n3,fftn2_distrib,ffti2_local,fftn3_distrib,ffti3_local)
 
+ if(gpu_option==ABI_GPU_DISABLED) then
+ !$OMP PARALLEL DO &
+ !$OMP& PRIVATE(idat,i3,i2,i1,ig3,ig2,ig1,tot,tot1,ii,gcart,gsquar,rhogsq,arg)
+ do idat=1,ndat
  do i3=1,n3
    ig3=i3-(i3/id3)*n3-1
    do i2=1,n2
@@ -2280,17 +2269,17 @@ subroutine strfock(gprimd,gsqcut,fockstr,hyb_mixing,hyb_mixing_sr,hyb_range_fock
          gsquar=gcart(1)**2+gcart(2)**2+gcart(3)**2
 !        take |rho(G)|^2 for complex rhog
          if (irho2==0) then
-           rhogsq=rhog(re,ii)**2+rhog(im,ii)**2
+           rhogsq=rhog(re,ii,idat)**2+rhog(im,ii,idat)**2
          else
-           rhogsq=rhog(re,ii)*rhog2(re,ii)+rhog(im,ii)*rhog2(im,ii)
+           rhogsq=rhog(re,ii,idat)*rhog2(re,ii,idat)+rhog(im,ii,idat)*rhog2(im,ii,idat)
          end if
 !        Case G=0:
          if(gsquar<tol10) then
            if (abs(hyb_mixing_sr)>tol8) cycle
            if (abs(hyb_mixing)>tol8) then
-             fockstr(1)=fockstr(1)+hyb_mixing*divgq0*rhogsq
-             fockstr(2)=fockstr(2)+hyb_mixing*divgq0*rhogsq
-             fockstr(3)=fockstr(3)+hyb_mixing*divgq0*rhogsq
+             fockstr(1,idat)=fockstr(1,idat)+hyb_mixing*divgq0*rhogsq
+             fockstr(2,idat)=fockstr(2,idat)+hyb_mixing*divgq0*rhogsq
+             fockstr(3,idat)=fockstr(3,idat)+hyb_mixing*divgq0*rhogsq
              cycle
            end if
          end if
@@ -2307,21 +2296,107 @@ subroutine strfock(gprimd,gsqcut,fockstr,hyb_mixing,hyb_mixing_sr,hyb_range_fock
            arg=-gsquar*pi**2/(hyb_range_fock**2)
            tot=tot+hyb_mixing_sr*rhogsq*piinv/(gsquar**2)*(1.d0-exp(arg)*(1-arg))
          end if
-         fockstr(1)=fockstr(1)+tot*gcart(1)*gcart(1)+tot1
-         fockstr(2)=fockstr(2)+tot*gcart(2)*gcart(2)+tot1
-         fockstr(3)=fockstr(3)+tot*gcart(3)*gcart(3)+tot1
-         fockstr(4)=fockstr(4)+tot*gcart(3)*gcart(2)
-         fockstr(5)=fockstr(5)+tot*gcart(3)*gcart(1)
-         fockstr(6)=fockstr(6)+tot*gcart(2)*gcart(1)
+         fockstr(1,idat)=fockstr(1,idat)+tot*gcart(1)*gcart(1)+tot1
+         fockstr(2,idat)=fockstr(2,idat)+tot*gcart(2)*gcart(2)+tot1
+         fockstr(3,idat)=fockstr(3,idat)+tot*gcart(3)*gcart(3)+tot1
+         fockstr(4,idat)=fockstr(4,idat)+tot*gcart(3)*gcart(2)
+         fockstr(5,idat)=fockstr(5,idat)+tot*gcart(3)*gcart(1)
+         fockstr(6,idat)=fockstr(6,idat)+tot*gcart(2)*gcart(1)
        end do
      end if
    end do
  end do
+ end do !ndat
+ else if(gpu_option==ABI_GPU_OPENMP) then
+   ABI_MALLOC(v_gcart, (3,n1,n2,n3))
+#ifdef HAVE_OPENMP_OFFLOAD
+   !$OMP TARGET ENTER DATA MAP(alloc:v_gcart)
 
-!DO not remove : seems needed to avoid problem with pathscale compiler, in parallel
-#ifdef FC_IBM
- write(std_out,*)' strfock : before mpi_comm, fockstr=',fockstr
+   !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO &
+   !$OMP& PRIVATE(idat,i3,i2,i1,ig3,ig2,ig1,tot,tot1,ii,gcart,gsquar,rhogsq,arg) &
+   !$OMP& MAP(to:v_gcart)
+   do i3=1,n3
+     do i2=1,n2
+       do i1=1,n1
+         ig3=i3-(i3/id3)*n3-1
+         ig2=i2-(i2/id2)*n2-1
+         ig1=i1-(i1/id1)*n1-1
+
+!        Compute cartesian components of G
+         v_gcart(1,i1,i2,i3)=gprimd(1,1)*(dble(ig1)+qphon(1))+gprimd(1,2)*(dble(ig2)+qphon(2))+gprimd(1,3)*(dble(ig3)+qphon(3))
+         v_gcart(2,i1,i2,i3)=gprimd(2,1)*(dble(ig1)+qphon(1))+gprimd(2,2)*(dble(ig2)+qphon(2))+gprimd(2,3)*(dble(ig3)+qphon(3))
+         v_gcart(3,i1,i2,i3)=gprimd(3,1)*(dble(ig1)+qphon(1))+gprimd(3,2)*(dble(ig2)+qphon(2))+gprimd(3,3)*(dble(ig3)+qphon(3))
+       end do
+     end do
+   end do
+
+   !$OMP TARGET TEAMS DISTRIBUTE &
+   !$OMP& PRIVATE(idat,fockstr1,fockstr2,fockstr3,fockstr4,fockstr5,fockstr6) &
+   !$OMP& MAP(to:rhog,v_gcart) MAP(tofrom:fockstr)
+   do idat=1,ndat
+     fockstr1=zero
+     fockstr2=zero
+     fockstr3=zero
+     fockstr4=zero
+     fockstr5=zero
+     fockstr6=zero
+   !$OMP PARALLEL DO COLLAPSE(3) PRIVATE(i3,i2,i1,tot,tot1,ii,gsquar,rhogsq,arg) &
+   !$OMP& REDUCTION(+:fockstr1,fockstr2,fockstr3,fockstr4,fockstr5,fockstr6)
+   do i3=1,n3
+     do i2=1,n2
+       do i1=1,n1
+         tot=zero; tot1=zero
+         ii=i1+n1*(ffti2_local(i2)-1+(n2/nproc_fft)*(i3-1))
+         if (fftn2_distrib(i2)==me_fft) then
+  !        Compute |G+q|^2
+           gsquar=v_gcart(1,i1,i2,i3)**2+v_gcart(2,i1,i2,i3)**2+v_gcart(3,i1,i2,i3)**2
+  !        take |rho(G)|^2 for complex rhog
+           rhogsq=rhog(re,ii,idat)**2+rhog(im,ii,idat)**2
+  !        Case G=0:
+           if(gsquar<tol10) then
+             if (abs(hyb_mixing)>tol8 .and. abs(hyb_mixing_sr)<tol8) then
+               fockstr1=fockstr1+hyb_mixing*divgq0*rhogsq
+               fockstr2=fockstr2+hyb_mixing*divgq0*rhogsq
+               fockstr3=fockstr3+hyb_mixing*divgq0*rhogsq
+             end if
+
+           else
+
+    !        Spencer-Alavi screening
+             if (abs(hyb_mixing)>tol8) then
+               arg=two_pi*rcut*sqrt(gsquar)
+               tot=hyb_mixing*rhogsq*piinv/(gsquar**2)*(1-cos(arg)-arg*sin(arg)/two)
+               tot1=hyb_mixing*rhogsq/three*rcut*sin(arg)/sqrt(gsquar)
+             end if
+
+    !        Erfc screening
+             if (abs(hyb_mixing_sr)>tol8) then
+               arg=-gsquar*pi**2/(hyb_range_fock**2)
+               tot=tot+hyb_mixing_sr*rhogsq*piinv/(gsquar**2)*(1.d0-exp(arg)*(1-arg))
+             end if
+             fockstr1=fockstr1+tot*v_gcart(1,i1,i2,i3)*v_gcart(1,i1,i2,i3)+tot1
+             fockstr2=fockstr2+tot*v_gcart(2,i1,i2,i3)*v_gcart(2,i1,i2,i3)+tot1
+             fockstr3=fockstr3+tot*v_gcart(3,i1,i2,i3)*v_gcart(3,i1,i2,i3)+tot1
+             fockstr4=fockstr4+tot*v_gcart(3,i1,i2,i3)*v_gcart(2,i1,i2,i3)
+             fockstr5=fockstr5+tot*v_gcart(3,i1,i2,i3)*v_gcart(1,i1,i2,i3)
+             fockstr6=fockstr6+tot*v_gcart(2,i1,i2,i3)*v_gcart(1,i1,i2,i3)
+           end if
+         end if
+       end do
+     end do
+   end do
+   fockstr(1,idat)=fockstr1
+   fockstr(2,idat)=fockstr2
+   fockstr(3,idat)=fockstr3
+   fockstr(4,idat)=fockstr4
+   fockstr(5,idat)=fockstr5
+   fockstr(6,idat)=fockstr6
+   end do !ndat
+
+   !$OMP TARGET EXIT DATA MAP(delete:v_gcart)
 #endif
+   ABI_FREE(v_gcart)
+ end if
 
 !Init mpi_comm
  if(mpi_enreg%nproc_fft>1)then
@@ -2330,19 +2405,15 @@ subroutine strfock(gprimd,gsqcut,fockstr,hyb_mixing,hyb_mixing_sr,hyb_range_fock
    call timab(48,2,tsec)
  end if
 
-#ifdef FC_IBM
-!DO not remove : seems needed to avoid problem with pathscale compiler, in parallel
- write(std_out,*)' strfock : after mpi_comm, fockstr=',fockstr
-#endif
 
 !Normalize and add term -efock/ucvol on diagonal
 !efock has been set to zero because it is not yet known. It will be added later.
- fockstr(1)=-fockstr(1)
- fockstr(2)=-fockstr(2)
- fockstr(3)=-fockstr(3)
- fockstr(4)=-fockstr(4)
- fockstr(5)=-fockstr(5)
- fockstr(6)=-fockstr(6)
+ fockstr(1,:)=-fockstr(1,:)
+ fockstr(2,:)=-fockstr(2,:)
+ fockstr(3,:)=-fockstr(3,:)
+ fockstr(4,:)=-fockstr(4,:)
+ fockstr(5,:)=-fockstr(5,:)
+ fockstr(6,:)=-fockstr(6,:)
 
  call timab(568,2,tsec)
 

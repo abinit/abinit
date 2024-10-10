@@ -6,7 +6,7 @@
 !!  This module contains basic tools for numeric computations.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2022 ABINIT group (MG, GMR, MJV, XG, MVeithen, NH, FJ, MT, DCS, FrD, Olevano, Reining, Sottile, AL)
+!! Copyright (C) 2008-2024 ABINIT group (MG, GMR, MJV, XG, MVeithen, NH, FJ, MT, DCS, FrD, Olevano, Reining, Sottile, AL)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -61,8 +61,7 @@ MODULE m_numeric_tools
  public :: coeffs_gausslegint    ! Compute the coefficients (supports and weights) for Gauss-Legendre integration.
  public :: simpson_cplx          ! Integrate a complex function via extended Simpson's rule.
  public :: hermitianize          ! Force a square matrix to be hermitian
- public :: mkherm                ! Make the complex array(2,ndim,ndim) hermitian, by adding half of it
-                                 ! to its hermitian conjugate.
+ public :: mkherm                ! Make the complex array(2,ndim,ndim) hermitian, by adding half of it to its hermitian conjugate.
  public :: hermit                ! Rdefine diagonal elements of packed matrix to impose Hermiticity.
  public :: symmetrize            ! Force a square matrix to be symmetric
  public :: pack_matrix           ! Packs a matrix into hermitian format
@@ -79,14 +78,11 @@ MODULE m_numeric_tools
  public :: cmplx_sphcart         ! Convert an array of cplx numbers from spherical to Cartesian coordinates or vice versa.
  public :: pfactorize            ! Factorize a number in terms of an user-specified set of prime factors.
  public :: isordered             ! Check the ordering of a sequence.
- public :: wrap2_zero_one        ! Transforms a real number in a reduced number in the interval [0,1[
-                                 ! where 1 is not included (tol12)
- public :: wrap2_pmhalf          ! Transforms a real number in areduced number in the interval ]-1/2,1/2]
-                                 ! where -1/2 is not included (tol12)
+ public :: wrap2_zero_one        ! Transforms a real number in a reduced number in the interval [0,1[ ! where 1 is not included (tol12)
+ public :: wrap2_pmhalf          ! Transforms a real number in areduced number in the interval ]-1/2,1/2] ! where -1/2 is not included (tol12)
  public :: interpol3d_0d         ! Linear interpolation in 3D
  public :: interpol3d_1d         ! Linear interpolation in 3D for an array
- public :: interpol3d_indices    ! Computes the indices in a cube which are neighbors to the point
-                                 ! to be interpolated in interpol3d
+ public :: interpol3d_indices    ! Computes the indices in a cube which are neighbors to the point to be interpolated in interpol3d
  public :: interpolate_denpot    ! Liner interpolation of scalar field e.g. density of potential
  public :: simpson_int           ! Simpson integral of a tabulated function. Returns arrays with integrated values
  public :: simpson               ! Simpson integral of a tabulated function. Returns scalar with the integral on the full mesh.
@@ -249,7 +245,7 @@ MODULE m_numeric_tools
 !!
 !! SOURCE
 
- type,public :: stats_t
+ type, public :: stats_t
    real(dp) :: mean
    real(dp) :: stdev
    real(dp) :: min
@@ -4914,16 +4910,14 @@ pure function interpol3d_0d(r, nr1, nr2, nr3, grid) result(res)
  real(dp),intent(in) :: grid(nr1,nr2,nr3),r(3)
 
 !Local variables--------------------------------------------------------
-!scalars
  integer :: ir1,ir2,ir3,pr1,pr2,pr3
- real(dp) :: res1,res2,res3,res4,res5,res6,res7,res8
- real(dp) :: x1,x2,x3
+ real(dp) :: res1,res2,res3,res4,res5,res6,res7,res8, x1,x2,x3
 
 ! *************************************************************************
 
- call interpol3d_indices (r,nr1,nr2,nr3,ir1,ir2,ir3, pr1,pr2,pr3)
+ call interpol3d_indices(r,nr1,nr2,nr3,ir1,ir2,ir3, pr1,pr2,pr3)
 
-!weight
+ ! weight
  x1=one+r(1)*nr1-real(ir1)
  x2=one+r(2)*nr2-real(ir2)
  x3=one+r(3)*nr3-real(ir3)
@@ -6080,8 +6074,6 @@ end subroutine kramerskronig
 !! OUTPUT
 !! scalar product of the two vectors
 !!
-!! SIDE EFFECTS
-!!
 !! WARNINGS
 !! vector size is not checked
 !!
@@ -6091,7 +6083,6 @@ end subroutine kramerskronig
 !!
 !! MG: FIXME: Well, optized blas1 is for sure better than what you wrote!
 !! Now I dont' have time to update ref files
-!!
 !!
 !! SOURCE
 
@@ -6124,7 +6115,7 @@ end function dotproduct
 !! invcb
 !!
 !! FUNCTION
-!! Compute a set of inverse cubic roots as fast as possible :
+!! Compute a set of inverse cubic roots as fast as possible:
 !! rspts(:)=rhoarr(:)$^\frac{-1}{3}$
 !!
 !! INPUTS
@@ -6160,7 +6151,6 @@ subroutine invcb(rhoarr,rspts,npts)
 !do ipts=1,npts
 !rspts(ipts)=sign( (abs(rhoarr(ipts)))**m1thrd,rhoarr(ipts))
 !end do
-!
 
  rhomtrd=sign( (abs(rhoarr(1)))**m1thrd, rhoarr(1) )
  rhom1=one/rhoarr(1)
@@ -6168,7 +6158,7 @@ subroutine invcb(rhoarr,rspts,npts)
  do ipts=2,npts
    rho=rhoarr(ipts)
    prod=rho*rhom1
-!  If the previous point is too far ...
+   ! If the previous point is too far ...
    if(prod < 0.01_dp .or. prod > 10._dp )then
      rhomtrd=sign( (abs(rho))**m1thrd , rho )
      rhom1=one/rho
@@ -6200,7 +6190,7 @@ end subroutine invcb
 !!
 !! FUNCTION
 !!  Subroutine safe_div performs "safe division", that is to prevent overflow,
-!!  underflow, NaN, or infinity errors.  An alternate value is returned if the
+!!  underflow, NaN, or infinity errors. An alternate value is returned if the
 !!  division cannot be performed. (bmy, 2/26/08)
 !!
 !!  For more information, see the discussion on:
@@ -6282,32 +6272,28 @@ end subroutine bool2index
 !!  fit as a scalar (RMSerr).
 !!
 !! INPUTS
-!!  npoints = number of data points
-!!  xvals(npoints) = x-values of those data points
-!!  yvals(npoints) = y-values of those data points
 !!  degree = order of the polynomial
+!!  npts = number of data points
+!!  xvals(npts) = x-values of those data points
+!!  yvals(npts) = y-values of those data points
 !!
 !! OUTPUT
 !!  coeffs(degree+1) = coefficients of the polynomial regression
 !!  RMSerr = unbiased RMS error on the fit
-!!            RMSerr=\sqrt{\frac{1}{npoints-1}*
-!!                      \sum_i^npoints{(fitval-yvals(i))**2}}
+!!            RMSerr=\sqrt{\frac{1}{npts-1}*
+!!                      \sum_i^npts{(fitval-yvals(i))**2}}
 !!
 !! SOURCE
-!!  Polynomial regression algorithm from Rosetta Code under Creative Commons
-!!  and GNU Free Documentation License.
-!!  Link: https://rosettacode.org/wiki/Polynomial_regression#Fortranf
-!!  Some variables changed to simplify.
+!!
 
-subroutine polynomial_regression(npoints,xvals,yvals,degree,coeffs,RMSerr)
+subroutine polynomial_regression(degree,npts,xvals,yvals,coeffs,RMSerr)
 
 !Arguments ------------------------------------
-
 !scalars
- integer                     :: npoints,degree
+ integer                     :: degree,npts
  real(dp),intent(out)        :: RMSerr
 !arrays
- real(dp),intent(in)         :: xvals(1:npoints),yvals(1:npoints)
+ real(dp),intent(in)         :: xvals(1:npts),yvals(1:npts)
  real(dp),intent(out)        :: coeffs(degree+1)
 
 !Local variables-------------------------------
@@ -6315,51 +6301,49 @@ subroutine polynomial_regression(npoints,xvals,yvals,degree,coeffs,RMSerr)
  integer                     :: ncoeffs,icoeff,ipoint,info
  real(dp)                    :: residual,fitval
 !arrays
- integer,allocatable         :: ipiv(:)
- real(dp),allocatable        :: work(:)
- real(dp),allocatable        :: A(:,:),AT(:,:),ATA(:,:)
-!characters
- !character(len=500)          :: message
+ integer,allocatable         :: tmp(:)
+ real(dp),allocatable        :: tmptwo(:), A(:,:),ATA(:,:)
 
 !####################################################################
 !#####################  Get Polynomial Fit  #########################
 
   ncoeffs=degree+1
 
-  ABI_MALLOC(ipiv,(ncoeffs))
-  ABI_MALLOC(work,(ncoeffs))
-  ABI_MALLOC(A,(size(xvals),ncoeffs))
-  ABI_MALLOC(AT,(ncoeffs,size(xvals)))
+  ABI_MALLOC(tmp,(ncoeffs))
+  ABI_MALLOC(tmptwo,(ncoeffs))
+  ABI_MALLOC(A,(npts,ncoeffs))
   ABI_MALLOC(ATA,(ncoeffs,ncoeffs))
 
-  !Prepare the matrix A
-  do icoeff=0,ncoeffs-1
-    do ipoint=1,size(xvals)
-       if (icoeff==0.and.xvals(ipoint)==0.0) then
-          A(ipoint,icoeff+1) = 1.0
+  !Construct a polynomial for all input xvalues
+  do icoeff=1,ncoeffs
+    do ipoint=1,npts
+       if (icoeff==1.and.xvals(ipoint)==0.0) then
+          A(ipoint,icoeff) = 1.0
        else
-          A(ipoint,icoeff+1) = xvals(ipoint)**icoeff
+          A(ipoint,icoeff) = xvals(ipoint)**(icoeff-1)
        end if
     end do
   end do
 
-  AT  = transpose(A)
-  ATA = matmul(AT,A)
+  !Get matrix product of transpose of A and A
+  ATA = matmul(transpose(A),A)
 
-  !Call LAPACK subroutines DGETRF and DGETRI
-  call DGETRF(ncoeffs,ncoeffs,ATA,ncoeffs,ipiv,info)
+  !Compute LU factorization of ATA
+  call DGETRF(ncoeffs,ncoeffs,ATA,ncoeffs,tmp,info)
   ABI_CHECK(info == 0, sjoin('LAPACK DGETRF in polynomial regression returned:', itoa(info)))
 
-  call DGETRI(ncoeffs,ATA,ncoeffs,ipiv,work,ncoeffs,info)
+  !Compute inverse of the LU factorized version of ATA
+  call DGETRI(ncoeffs,ATA,ncoeffs,tmp,tmptwo,ncoeffs,info)
   ABI_CHECK(info == 0, sjoin('LAPACK DGETRI in polynomial regression returned:', itoa(info)))
 
-  coeffs = matmul(matmul(ATA,AT),yvals)
+  !Harvest polynomial coefficients
+  coeffs = matmul(matmul(ATA,transpose(A)),yvals)
 
 !####################################################################
 !##############  RMS error on the polynomial fit  ###################
 
   residual=0.0d0
-  do ipoint=1,npoints
+  do ipoint=1,npts
     fitval=0.0d0
     do icoeff=1,ncoeffs
       if (icoeff==1.and.xvals(ipoint)==0.0) then
@@ -6370,17 +6354,12 @@ subroutine polynomial_regression(npoints,xvals,yvals,degree,coeffs,RMSerr)
     end do
     residual=residual+(fitval-yvals(ipoint))**2
   end do
-  RMSerr=sqrt(residual/(real(npoints-1,8)))
+  RMSerr=sqrt(residual/(real(npts-1,8)))
 
-
-!####################################################################
-!########################  Deallocations  ###########################
-
-  ABI_FREE(ipiv)
-  ABI_FREE(work)
   ABI_FREE(A)
-  ABI_FREE(AT)
   ABI_FREE(ATA)
+  ABI_FREE(tmp)
+  ABI_FREE(tmptwo)
 
 end subroutine polynomial_regression
 !!***

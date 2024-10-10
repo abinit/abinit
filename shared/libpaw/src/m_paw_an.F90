@@ -9,7 +9,7 @@
 !!  for a given atom.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2013-2022 ABINIT group (MT, FJ)
+!! Copyright (C) 2013-2024 ABINIT group (MT, FJ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2215,7 +2215,6 @@ subroutine paw_an_isendreceive_fillbuffer(paw_an, atmtab_send,atm_indx_send,npaw
        end do
      end do
    end if
-
    if (paw_an1%has_vxcval==2) then
      do i1=1,nspden
        do i2=1,v_size

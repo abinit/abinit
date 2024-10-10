@@ -1,8 +1,8 @@
 
-.Version 9.3.3 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 10.1.4.5 of ABINIT, released Sep 2024.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2022 ABINIT group . 
+.Copyright (C) 1998-2024 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,14 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun 13 Dec 2020.
-- ( at 16h07 )
+.Starting date : Fri 13 Sep 2024.
+- ( at 19h07 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/bousquet_beauty/tests/TestBot_MPI1/tutorial_tspin_1/tspin_1.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/tutorial_tspin_1/tspin_1.abi
 - output file    -> tspin_1.abo
 - root for input  files -> tspin_1i
 - root for output files -> tspin_1o
-
 
  DATASET    1 : space group Im -3 m (#229); Bravais cI (body-center cubic)
 ================================================================================
@@ -34,11 +33,10 @@
 -    mband =          10        mffmem =           1         mkmem =           6
        mpw =         301          nfft =        5832          nkpt =           6
 ================================================================================
-P This job should need less than                       3.452 Mbytes of memory.
+P This job should need less than                       3.616 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.278 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
 ================================================================================
-
 
  DATASET    2 : space group Im -3 m (#229); Bravais cI (body-center cubic)
 ================================================================================
@@ -51,7 +49,7 @@ _ WF disk file :      0.278 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
 -    mband =          10        mffmem =           1         mkmem =           6
        mpw =         301          nfft =        5832          nkpt =           6
 ================================================================================
-P This job should need less than                       4.625 Mbytes of memory.
+P This job should need less than                       4.789 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.553 Mbytes ; DEN or POT disk file :      0.091 Mbytes.
 ================================================================================
@@ -60,10 +58,10 @@ _ WF disk file :      0.553 Mbytes ; DEN or POT disk file :      0.091 Mbytes.
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
 -
-- outvars: echo of selected default values                                      
--   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+- outvars: echo of selected default values
+-   iomode0 =  0 , fftalg0 =512 , wfoptalg0 =  0
 -
-- outvars: echo of global parameters not present in the input file              
+- outvars: echo of global parameters not present in the input file
 -  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
@@ -72,7 +70,7 @@ _ WF disk file :      0.553 Mbytes ; DEN or POT disk file :      0.091 Mbytes.
         bs_loband1          0
         bs_loband2          0       0
              ecut      1.80000000E+01 Hartree
--          fftalg         312
+-          fftalg         512
               ixc       -1012
            jdtset        1    2
               kpt      1.25000000E-01  1.25000000E-01  1.25000000E-01
@@ -201,8 +199,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     18.000   => boxcut(ratio)=   2.00790
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/bousquet_beauty/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/Fe.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/bousquet_beauty/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/Fe.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/Fe.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/Fe.psp8
 - Fe    ONCVPSP-3.3.0  r_core=   1.26437   1.20546   1.56719
 - 26.00000  16.00000    171102                znucl, zion, pspdat
     8   -1012    2    4       600   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -237,9 +235,9 @@ tolerances: {tolvrs: 1.00E-10, }
  ETOT  5  -123.42819673353    -9.975E-06 3.582E-05 2.559E-04
  ETOT  6  -123.42819712090    -3.874E-07 2.486E-06 1.672E-06
  ETOT  7  -123.42819713302    -1.212E-08 5.345E-07 1.085E-07
- ETOT  8  -123.42819713376    -7.322E-10 4.139E-08 8.234E-10
- ETOT  9  -123.42819713379    -3.629E-11 1.234E-08 1.494E-10
- ETOT 10  -123.42819713379    -1.663E-12 9.539E-10 2.582E-12
+ ETOT  8  -123.42819713376    -7.316E-10 4.139E-08 8.234E-10
+ ETOT  9  -123.42819713379    -3.523E-11 1.234E-08 1.494E-10
+ ETOT 10  -123.42819713379    -2.075E-12 9.539E-10 2.582E-12
 
  At SCF step   10       vres2   =  2.58E-12 < tolvrs=  1.00E-10 =>converged.
 
@@ -259,7 +257,7 @@ lattice_vectors:
 lattice_lengths: [   4.69386,    4.69386,    4.69386, ]
 lattice_angles: [109.471, 109.471, 109.471, ] # degrees, (23, 13, 12)
 lattice_volume:   7.9610044E+01
-convergence: {deltae: -1.663E-12, res2:  2.582E-12, residm:  9.539E-10, diffor: null, }
+convergence: {deltae: -2.075E-12, res2:  2.582E-12, residm:  9.539E-10, diffor: null, }
 etotal    :  -1.23428197E+02
 entropy   :   0.00000000E+00
 fermie    :   5.02091694E-01
@@ -316,18 +314,18 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
-kinetic             :  5.13627457608421E+01
-hartree             :  2.72741191102799E+01
-xc                  : -1.68557429939035E+01
+kinetic             :  5.13627457608453E+01
+hartree             :  2.72741191102821E+01
+xc                  : -1.68557429939040E+01
 Ewald energy        : -8.59449965935601E+01
 psp_core            :  3.04389195498897E+00
-local_psp           : -9.79591560897602E+01
-non_local_psp       : -4.32811628543430E+00
+local_psp           : -9.79591560897644E+01
+non_local_psp       : -4.32811628543502E+00
 internal            : -1.23407255136547E+02
-'-kT*entropy'       : -2.09419972463974E-02
-total_energy        : -1.23428197133794E+02
+'-kT*entropy'       : -2.09419972463979E-02
+total_energy        : -1.23428197133793E+02
 total_energy_eV     : -3.35865205135541E+03
-band_energy         : -1.32720405266829E+01
+band_energy         : -1.32720405266836E+01
 ...
 
 
@@ -380,12 +378,12 @@ tolerances: {tolvrs: 1.00E-10, }
  ETOT  2  -122.79583702854     1.18E-01 4.47E-02 9.97E+02 1.777
  ETOT  3  -123.42788527642    -6.32E-01 1.56E-02 3.90E+00 1.698
  ETOT  4  -123.43135426888    -3.47E-03 2.70E-04 1.19E-02 1.649
- ETOT  5  -123.43139664975    -4.24E-05 6.58E-05 4.09E-03 1.613
+ ETOT  5  -123.43139664974    -4.24E-05 6.58E-05 4.09E-03 1.613
  ETOT  6  -123.43140690077    -1.03E-05 4.29E-06 5.12E-04 1.599
  ETOT  7  -123.43141301170    -6.11E-06 9.53E-07 6.71E-06 1.574
  ETOT  8  -123.43141307036    -5.87E-08 1.08E-07 6.15E-07 1.571
- ETOT  9  -123.43141307094    -5.79E-10 1.92E-08 1.69E-09 1.571
- ETOT 10  -123.43141307096    -1.38E-11 3.10E-09 4.91E-11 1.571
+ ETOT  9  -123.43141307094    -5.80E-10 1.92E-08 1.69E-09 1.571
+ ETOT 10  -123.43141307095    -1.12E-11 3.10E-09 4.91E-11 1.571
 
  At SCF step   10       vres2   =  4.91E-11 < tolvrs=  1.00E-10 =>converged.
 
@@ -405,7 +403,7 @@ lattice_vectors:
 lattice_lengths: [   4.69386,    4.69386,    4.69386, ]
 lattice_angles: [109.471, 109.471, 109.471, ] # degrees, (23, 13, 12)
 lattice_volume:   7.9610044E+01
-convergence: {deltae: -1.381E-11, res2:  4.907E-11, residm:  3.097E-09, diffor: null, }
+convergence: {deltae: -1.117E-11, res2:  4.907E-11, residm:  3.097E-09, diffor: null, }
 etotal    :  -1.23431413E+02
 entropy   :   0.00000000E+00
 fermie    :   5.01569440E-01
@@ -478,18 +476,18 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 2, }
 comment             : Components of total free energy in Hartree
-kinetic             :  5.13703722486347E+01
-hartree             :  2.72606018866806E+01
-xc                  : -1.68795367954723E+01
+kinetic             :  5.13703722486271E+01
+hartree             :  2.72606018866745E+01
+xc                  : -1.68795367954713E+01
 Ewald energy        : -8.59449965935601E+01
 psp_core            :  3.04389195498897E+00
-local_psp           : -9.79481331981509E+01
-non_local_psp       : -4.32135215659629E+00
-internal            : -1.23419152653475E+02
-'-kT*entropy'       : -1.22604174797856E-02
-total_energy        : -1.23431413070955E+02
-total_energy_eV     : -3.35873956145598E+03
-band_energy         : -1.33063491100161E+01
+local_psp           : -9.79481331981392E+01
+non_local_psp       : -4.32135215659425E+00
+internal            : -1.23419152653474E+02
+'-kT*entropy'       : -1.22604174797783E-02
+total_energy        : -1.23431413070954E+02
+total_energy_eV     : -3.35873956145595E+03
+band_energy         : -1.33063491100111E+01
 ...
 
 
@@ -516,7 +514,7 @@ band_energy         : -1.33063491100161E+01
            etotal2    -1.2343141307E+02
             fcart1    -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
             fcart2    -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
--          fftalg         312
+-          fftalg         512
               ixc       -1012
            jdtset        1    2
               kpt      1.25000000E-01  1.25000000E-01  1.25000000E-01
@@ -704,10 +702,10 @@ P           mkmem           6
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          5.2  wall=          5.2
+- Proc.   0 individual time (sec): cpu=          2.2  wall=          2.4
 
 ================================================================================
 
  Calculation completed.
-.Delivered   7 WARNINGs and   2 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          5.2  wall=          5.2
+.Delivered  30 WARNINGs and   3 COMMENTs to log file.
++Overall time at end (sec) : cpu=          2.2  wall=          2.4

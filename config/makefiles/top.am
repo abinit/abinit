@@ -1,3 +1,7 @@
+BUILT_SOURCES = $(top_srcdir)/.version
+$(top_srcdir)/.version:
+	echo $(VERSION) > $@-t && mv $@-t $@
+
 # Additional files to distribute
 EXTRA_DIST += \
 	KNOWN_PROBLEMS \
@@ -5,13 +9,14 @@ EXTRA_DIST += \
 	INSTALL_CentOS.md \
 	INSTALL_EasyBuild.md \
 	INSTALL_MacOS.md \
-    INSTALL_Ubuntu.md \
+	INSTALL_Ubuntu.md \
 	INSTALL_gpu.md \
 	RELNOTES \
 	abimkdocs \
 	abimkdocs_plugin \
 	abimkdocs_tests \
 	abinit_theme \
+	abinit.pc.in \
 	abisrc.py \
 	abisrc_requirements.txt \
 	autogen.sh \
@@ -24,7 +29,7 @@ EXTRA_DIST += \
 	doc/topics/documents/howto_chebfi.pdf \
 	doc/topics/documents/hybrids-2017.pdf \
 	doc/topics/documents/noncol.pdf \
-	mkdocs.yml \
+	mkdocs.yml.in \
 	mksite.py \
 	requirements.txt \
 	scripts \
@@ -42,7 +47,7 @@ CLEANFILES += \
 install-data-local: config.pc
 	$(INSTALL) -d -m 755 $(DESTDIR)$(libdir)/pkgconfig
 	$(INSTALL_DATA) -m 644 config.pc \
-	 $(DESTDIR)$(libdir)/pkgconfig/abinit.pc
+	$(DESTDIR)$(libdir)/pkgconfig/abinit.pc
 
 # Files to uninstall
 uninstall-local:
@@ -55,8 +60,10 @@ basic_tests:
 # Let Automake know how to perform basic tests
 #check-local:
 #$(MAKE) basic_tests @SET_MAKE@
+#check-local:
+#	cat $(top_srcdir)/tests/built-in/README
 check-local:
-	cat $(top_srcdir)/tests/built-in/README
+	cd $(abspath $(top_builddir))/tests && $(abspath $(top_srcdir))/tests/runtests.py --no-logo --no-colors --keyword MINIMAL --yaml-simplified-diff --forced-tolerance=easy && rm -rf $(abspath $(top_builddir))/tests/Test_suite $(abspath $(top_builddir))/tests/.*.pickle && echo "For these quick tests, the tests/Test_suite directory has been erased!"
 
 # Set of internal tests
 test_fast:
@@ -78,7 +85,7 @@ test_wannier90:
 	cp $(top_builddir)/src/98_main/abinit $(top_srcdir)/tests/built-in/Input/abinit && cd $(top_srcdir)/tests/built-in/Input && export ABI_PSPDIR="../../Psps_for_tests" && ./abinit testin_wannier90.abi >& testin_wannier90.stdout && cat testin_wannier90t_STATUS  && rm -f abinit *DDB *EIG *out* *nc *WFK *DEN *chk *eig *mmn *amn *abo* *o_* *t_STATUS*
 
 tests_in:
-	$(MAKE) test_fast test_v1 test_v5 test_libxc test_wannier90 
+	$(MAKE) test_fast test_v1 test_v5 test_libxc test_wannier90
 
 # ---------------------------------------------------------------------------- #
 
@@ -164,6 +171,16 @@ binary_package_lite:
 	 rm -rf usr share/doc; \
 	 mkdir -p etc; \
 	 chmod -R o+rX *
+
+dist-hook:
+	echo $(VERSION) > $(distdir)/.tarball-version
+	(GITGEN_VERSION=`(cd @top_srcdir@ && ./config/scripts/git-version-gen\
+                .tarball-version)` ; \
+	 test "x$(VERSION)" = "x$${GITGEN_VERSION}" || \
+         ((echo "Stale version;"; echo $(VERSION); echo "$${GITGEN_VERSION}"; \
+           echo "Please run:" ; \
+           echo "     (cd @top_srcdir@ && ./config/script/makemake)" ; \
+           echo "before make dist") 1>&2 ; rm -r $(distdir) ; exit 1))
 
 dist-lite: distdir
 	tardir=$(distdir) && \

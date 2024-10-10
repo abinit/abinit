@@ -1,8 +1,8 @@
 
-.Version 9.3.1 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 10.1.4.5 of ABINIT, released Sep 2024.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2022 ABINIT group . 
+.Copyright (C) 1998-2024 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,14 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h17 )
+.Starting date : Fri 13 Sep 2024.
+- ( at 19h00 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/fast_t17-t19-t20-t21-t23/t19.in
-- output file    -> t19.out
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/fast_t17-t19-t20-t21-t23/t19.abi
+- output file    -> t19.abo
 - root for input  files -> t17o
 - root for output files -> t19o
-
 
  Symmetries : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
@@ -34,7 +33,7 @@
 -    mband =           5        mffmem =           1         mkmem =           1
        mpw =         338          nfft =       12000          nkpt =           1
 ================================================================================
-P This job should need less than                       5.739 Mbytes of memory.
+P This job should need less than                       5.896 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.043 Mbytes ; DEN or POT disk file :      0.185 Mbytes.
 ================================================================================
@@ -43,10 +42,10 @@ _ WF disk file :      0.043 Mbytes ; DEN or POT disk file :      0.185 Mbytes.
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
 -
-- outvars: echo of selected default values                                      
--   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+- outvars: echo of selected default values
+-   iomode0 =  0 , fftalg0 =512 , wfoptalg0 =  0
 -
-- outvars: echo of global parameters not present in the input file              
+- outvars: echo of global parameters not present in the input file
 -  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
@@ -56,7 +55,7 @@ _ WF disk file :      0.043 Mbytes ; DEN or POT disk file :      0.185 Mbytes.
            diemix      3.33333333E-01
              ecut      7.00000000E+00 Hartree
            enunit           2
--          fftalg         312
+-          fftalg         512
             intxc           1
            irdwfk           1
            isecur          -2
@@ -119,8 +118,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      7.000   => boxcut(ratio)=   2.09906
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -195,8 +194,8 @@ xred      :
 - [ -1.7683E-01,   0.0000E+00,   0.0000E+00, Si]
 - [  1.7683E-01,   0.0000E+00,   0.0000E+00, Si]
 cartesian_forces: # hartree/bohr
-- [ -1.77516724E-02,   1.81834406E-14,  -1.23465739E-13, ]
-- [  1.77516724E-02,  -1.81834406E-14,   1.23465739E-13, ]
+- [ -1.77516724E-02,   1.82581561E-14,  -1.23476236E-13, ]
+- [  1.77516724E-02,  -1.82581561E-14,   1.23476236E-13, ]
 force_length_stats: {min:   1.77516724E-02, max:   1.77516724E-02, mean:   1.77516724E-02, }
 ...
 
@@ -229,12 +228,12 @@ force_length_stats: {min:   1.77516724E-02, max:   1.77516724E-02, mean:   1.775
  cartesian forces (hartree/bohr) at end:
     1     -0.01775167241644     0.00000000000002    -0.00000000000012
     2      0.01775167241644    -0.00000000000002     0.00000000000012
- frms,max,avg= 1.0248933E-02 1.7751672E-02  -1.211E-09 -1.416E-12  1.232E-13 h/b
+ frms,max,avg= 1.0248933E-02 1.7751672E-02  -1.211E-09 -1.416E-12  1.231E-13 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1     -0.91282762076581     0.00000000000094    -0.00000000000635
-    2      0.91282762076581    -0.00000000000094     0.00000000000635
- frms,max,avg= 5.2702127E-01 9.1282762E-01  -6.229E-08 -7.283E-11  6.335E-12 e/A
+    1     -0.91282762076582     0.00000000000094    -0.00000000000635
+    2      0.91282762076582    -0.00000000000094     0.00000000000635
+ frms,max,avg= 5.2702127E-01 9.1282762E-01  -6.229E-08 -7.283E-11  6.329E-12 e/A
  length scales= 12.000000000000  8.000000000000  8.000000000000 bohr
               =  6.350126503080  4.233417668720  4.233417668720 angstroms
  prteigrs : about to open file t19o_EIG
@@ -256,12 +255,12 @@ force_length_stats: {min:   1.77516724E-02, max:   1.77516724E-02, mean:   1.775
 --- !EnergyTerms
 iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
-kinetic             :  2.58499152011895E+00
+kinetic             :  2.58499152011894E+00
 hartree             :  1.56155643206061E+00
 xc                  : -3.23835938637350E+00
 Ewald energy        : -5.45969459425895E+00
 psp_core            :  2.98722879456821E-02
-local_psp           : -6.11150555404363E+00
+local_psp           : -6.11150555404362E+00
 non_local_psp       :  1.96150768232113E+00
 total_energy        : -8.67163161222970E+00
 total_energy_eV     : -2.35967096492893E+02
@@ -290,9 +289,9 @@ band_energy         : -1.38440898403221E+00
              ecut      7.00000000E+00 Hartree
            enunit           2
            etotal     -8.6716316122E+00
-            fcart     -1.7751672416E-02  1.8183440553E-14 -1.2346573864E-13
-                       1.7751672416E-02 -1.8183440553E-14  1.2346573864E-13
--          fftalg         312
+            fcart     -1.7751672416E-02  1.8258156101E-14 -1.2347623644E-13
+                       1.7751672416E-02 -1.8258156101E-14  1.2347623644E-13
+-          fftalg         512
             intxc           1
            irdwfk           1
            isecur          -2
@@ -325,6 +324,11 @@ P           mkmem           1
             znucl       14.00000
 
 ================================================================================
+
+ The spacegroup number, the magnetic point group, and/or the number of symmetries
+ have changed between the initial recognition based on the input file
+ and a postprocessing based on the final acell, rprim, and xred.
+ More details in the log file.
 
 
 - Timing analysis has been suppressed with timopt=0
@@ -413,10 +417,10 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          0.7  wall=          0.7
+- Proc.   0 individual time (sec): cpu=          0.5  wall=          0.5
 
 ================================================================================
 
  Calculation completed.
-.Delivered  13 WARNINGs and   4 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          0.7  wall=          0.7
+.Delivered  26 WARNINGs and   5 COMMENTs to log file.
++Overall time at end (sec) : cpu=          0.5  wall=          0.5

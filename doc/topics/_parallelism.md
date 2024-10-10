@@ -21,8 +21,11 @@ export OMP_NUM_THREADS=4
 mpirun -n 10 abinit run.abi > log 2> err   
 ```
 
-In the latter, the standard output of the application is redirected to `log` while `err` collects the standard error.
 The command *mpirun* might possibly be replaced by *mpiexec* depending on your system.
+In the latter, the standard output of the application is redirected to `log` while `err` collects the standard error.
+Note that the control of output in the parallel case needs to be adapted, as for massively parallel runs, 
+one cannot afford to have some of the output files that are usually created, see 
+the [[help:abinit#control-of-output-in-the-parallel-cas|abinit help file]] for more explanation and how to change the default behavior (_LOG/_NOLOG files).
 
 * For ground-state calculations, the code has been parallelized (MPI-based parallelism) 
   on the k-points, the spins, the spinor components, the bands, and the FFT grid and plane wave coefficients. 
@@ -47,7 +50,13 @@ The command *mpirun* might possibly be replaced by *mpiexec* depending on your s
   The workload for the different images has been distributed. This parallelization level can be combined 
   with the parallelism described above, leading to speed-up beyond 5000. 
 
-* For ground-state calculations, GPUs can be used. The implementation is based on CUDA+MAGMA. 
+* For ground-state calculations, GPUs can be used. There are two available GPU programming models:
+  openMP offload (openMP v5+) compatible with Nvidia and AMD accelerators, Kokkos+cuda
+  compatible with Nvidia accelerators. See [[gpu_option]] keyword.  
+  Obvioulsy, to benefit from GPU acceleration, ABINIT has to be compiled in a specific way,
+  using a GPU compatible compiler (`nvhpc`, `aocc`, `gcc`), activating the relevant compilation
+  options and linking to specific libraries (`cuda toolkit`, `ROCm`, ...).  
+  This implementation is still EXPERIMENTAL (january 2024).
 
 * For ground-state calculations, the wavelet part of ABINIT (BigDFT) is also very 
   well parallelized: MPI band parallelism, combined with GPUs. 

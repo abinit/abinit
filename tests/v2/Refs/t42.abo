@@ -1,8 +1,8 @@
 
-.Version 9.3.1 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 10.1.4.5 of ABINIT, released Sep 2024.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2022 ABINIT group . 
+.Copyright (C) 1998-2024 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,14 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h25 )
+.Starting date : Fri 13 Sep 2024.
+- ( at 19h08 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v2_t42/t42.in
-- output file    -> t42.out
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v2_t42/t42.abi
+- output file    -> t42.abo
 - root for input  files -> t42i
 - root for output files -> t42o
-
 
  DATASET    1 : space group R3 m (#160); Bravais hR (rhombohedral)
 ================================================================================
@@ -34,11 +33,10 @@
 -    mband =           1        mffmem =           1         mkmem =           1
        mpw =         655          nfft =       27000          nkpt =           1
 ================================================================================
-P This job should need less than                       7.868 Mbytes of memory.
+P This job should need less than                       8.662 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.012 Mbytes ; DEN or POT disk file :      0.208 Mbytes.
 ================================================================================
-
 
  DATASET    2 : space group R3 m (#160); Bravais hR (rhombohedral)
 ================================================================================
@@ -58,7 +56,6 @@ P This job should need less than                       8.716 Mbytes of memory.
 _ WF disk file :      0.202 Mbytes ; DEN or POT disk file :      0.208 Mbytes.
 ================================================================================
 
-
  DATASET    3 : space group R3 m (#160); Bravais hR (rhombohedral)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  3.
@@ -76,7 +73,6 @@ P This job should need less than                       8.716 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.202 Mbytes ; DEN or POT disk file :      0.208 Mbytes.
 ================================================================================
-
 
  DATASET    4 : space group R3 m (#160); Bravais hR (rhombohedral)
 ================================================================================
@@ -100,10 +96,10 @@ _ WF disk file :      0.202 Mbytes ; DEN or POT disk file :      0.208 Mbytes.
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
 -
-- outvars: echo of selected default values                                      
--   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+- outvars: echo of selected default values
+-   iomode0 =  0 , fftalg0 =512 , wfoptalg0 =  0
 -
-- outvars: echo of global parameters not present in the input file              
+- outvars: echo of global parameters not present in the input file
 -  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
@@ -118,7 +114,7 @@ _ WF disk file :      0.202 Mbytes ; DEN or POT disk file :      0.208 Mbytes.
            diemac      1.00000000E+00
            diemix      5.00000000E-01
              ecut      9.00000000E+00 Hartree
--          fftalg         312
+-          fftalg         512
            getden1          0
            getden2          1
            getden3          1
@@ -225,8 +221,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosHGH_pwteter/2he.2.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosHGH_pwteter/2he.2.hgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosHGH_pwteter/2he.2.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosHGH_pwteter/2he.2.hgh
 - Hartwigsen-Goedecker-Hutter psp for He,  from PRB58, 3641 (1998)
 -  2.00000   2.00000     10605                znucl, zion, pspdat
     3    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -244,8 +240,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          --- l  ekb(1:nproj) -->
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosHGH_pwteter/1h.1.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosHGH_pwteter/1h.1.hgh
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosHGH_pwteter/1h.1.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosHGH_pwteter/1h.1.hgh
 - Hartwigsen-Goedecker-Hutter psp for H,  from PRB58, 3641 (1998)
 -  1.00000   1.00000     10605                znucl, zion, pspdat
     3    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -285,12 +281,12 @@ tolerances: {tolwfr: 1.00E-22, }
  ETOT  5  -2.4623799779379    -1.499E-07 2.281E-10 1.842E-05
  ETOT  6  -2.4623799961969    -1.826E-08 1.064E-10 5.883E-07
  ETOT  7  -2.4623799968405    -6.436E-10 2.862E-12 3.808E-09
- ETOT  8  -2.4623799968448    -4.347E-12 1.923E-14 1.948E-10
- ETOT  9  -2.4623799968449    -2.798E-14 2.898E-16 1.103E-12
- ETOT 10  -2.4623799968449    -3.553E-14 5.599E-18 5.389E-15
- ETOT 11  -2.4623799968449     3.597E-14 4.418E-20 1.206E-16
- ETOT 12  -2.4623799968449     3.997E-15 3.987E-22 6.889E-19
- ETOT 13  -2.4623799968449    -2.265E-14 5.600E-23 1.733E-19
+ ETOT  8  -2.4623799968448    -4.355E-12 1.923E-14 1.948E-10
+ ETOT  9  -2.4623799968449    -2.087E-14 2.898E-16 1.103E-12
+ ETOT 10  -2.4623799968449    -3.997E-14 5.599E-18 5.389E-15
+ ETOT 11  -2.4623799968449     4.263E-14 4.418E-20 1.206E-16
+ ETOT 12  -2.4623799968449     0.000E+00 3.987E-22 6.889E-19
+ ETOT 13  -2.4623799968449    -1.954E-14 5.600E-23 1.733E-19
 
  At SCF step   13   max residual=  5.60E-23 < tolwfr=  1.00E-22 =>converged.
 
@@ -310,7 +306,7 @@ lattice_vectors:
 lattice_lengths: [  10.00000,   10.00000,   10.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
 lattice_volume:   1.0000000E+03
-convergence: {deltae: -2.265E-14, res2:  1.733E-19, residm:  5.600E-23, diffor: null, }
+convergence: {deltae: -1.954E-14, res2:  1.733E-19, residm:  5.600E-23, diffor: null, }
 etotal    :  -2.46238000E+00
 entropy   :   0.00000000E+00
 fermie    :  -8.06803674E-01
@@ -337,9 +333,9 @@ force_length_stats: {min:   3.89588468E-02, max:   3.89588468E-02, mean:   3.895
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   56.001E-24; max=  56.001E-24
-   0.0000  0.0000  0.0000    1  5.60014E-23 kpt; spin; max resid(k); each band:
-   5.60E-23
+ Mean square residual over all n,k,spin=   56.003E-24; max=  56.003E-24
+   0.0000  0.0000  0.0000    1  5.60034E-23 kpt; spin; max resid(k); each band:
+  5.60E-23
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.115470060000      0.115470060000      0.115470060000
@@ -357,8 +353,8 @@ force_length_stats: {min:   3.89588468E-02, max:   3.89588468E-02, mean:   3.895
  frms,max,avg= 2.2492901E-02 2.2492901E-02   2.127E-12  2.127E-12  2.127E-12 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1      1.15663135974859     1.15663135974859     1.15663135974859
-    2     -1.15663135974859    -1.15663135974859    -1.15663135974859
+    1      1.15663135974858     1.15663135974858     1.15663135974858
+    2     -1.15663135974858    -1.15663135974858    -1.15663135974858
  frms,max,avg= 1.1566314E+00 1.1566314E+00   1.094E-10  1.094E-10  1.094E-10 e/A
  length scales= 10.000000000000 10.000000000000 10.000000000000 bohr
               =  5.291772085900  5.291772085900  5.291772085900 angstroms
@@ -389,7 +385,7 @@ psp_core            : -1.42868342966491E-05
 local_psp           : -4.70362879058126E+00
 non_local_psp       :  0.00000000000000E+00
 total_energy        : -2.46237999684489E+00
-total_energy_eV     : -6.70047673033319E+01
+total_energy_eV     : -6.70047673033318E+01
 band_energy         : -1.61360734724849E+00
 monopole_correction :  1.41864873974033E-01
 monopole_correction_eV:  3.86033954195793E+00
@@ -618,9 +614,9 @@ force_length_stats: {min: null, max: null, mean: null, }
 
  Mean square residual over all n,k,spin=   37.243E-11; max=  92.277E-11
    0.0000  0.0000  0.0000    1  9.22768E-10 kpt; spin; max resid(k); each band:
-   2.87E-22  5.62E-10  9.23E-10  8.60E-11  3.06E-10  5.49E-10  5.81E-10  7.07E-11
-   5.33E-11  2.76E-11  4.29E-10  5.53E-10  3.91E-10  8.44E-10  7.42E-11  4.33E-10
-   1.46E-10  7.83E-10  1.19E-10  5.19E-10
+  2.87E-22 5.62E-10 9.23E-10 8.60E-11 3.06E-10 5.49E-10 5.81E-10 7.07E-11
+  5.33E-11 2.76E-11 4.29E-10 5.53E-10 3.91E-10 8.44E-10 7.42E-11 4.33E-10
+  1.46E-10 7.83E-10 1.19E-10 5.19E-10
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.115470060000      0.115470060000      0.115470060000
@@ -681,8 +677,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -1, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosHGH_pwteter/2he.2.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosHGH_pwteter/2he.2.hgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosHGH_pwteter/2he.2.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosHGH_pwteter/2he.2.hgh
 - Hartwigsen-Goedecker-Hutter psp for He,  from PRB58, 3641 (1998)
 -  2.00000   2.00000     10605                znucl, zion, pspdat
     3    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -700,8 +696,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -1, paral_kgb: 0, }
          --- l  ekb(1:nproj) -->
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosHGH_pwteter/1h.1.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosHGH_pwteter/1h.1.hgh
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosHGH_pwteter/1h.1.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosHGH_pwteter/1h.1.hgh
 - Hartwigsen-Goedecker-Hutter psp for H,  from PRB58, 3641 (1998)
 -  1.00000   1.00000     10605                znucl, zion, pspdat
     3    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -805,7 +801,7 @@ P newkpt: treating     20 bands with npw=     655 for ikpt=   1 by node    0
   11 1.16492E+00 8.477E-02 3.609E-02 4.902E-02 1.692E-01  4.21E-02 -7.81E-02 -9.11E-02
   12 1.17744E+00 1.835E-02 3.128E-02 6.127E-04 2.314E-02 -4.38E-03 -2.69E-02  3.77E-03
   13 1.17744E+00 1.835E-02 5.406E-03 3.609E-02 1.355E-02 -1.40E-02  8.56E-03 -2.21E-02
-  14 1.23212E+00 7.117E-05 3.294E-06 8.650E-05 1.237E-04  1.69E-05 -2.02E-05 -1.03E-04
+  14 1.23212E+00 7.117E-05 3.295E-06 8.650E-05 1.237E-04  1.69E-05 -2.02E-05 -1.03E-04
   15 1.23212E+00 7.122E-05 1.392E-04 5.589E-05 1.858E-05 -8.82E-05 -5.08E-05  3.22E-05
   16 1.23936E+00 3.496E-03 4.878E-03 5.586E-03 2.380E-05 -5.22E-03  3.41E-04 -3.65E-04
   17 1.23936E+00 3.496E-03 2.112E-03 1.407E-03 6.969E-03  1.72E-03 -3.84E-03 -3.13E-03
@@ -895,9 +891,9 @@ force_length_stats: {min: null, max: null, mean: null, }
 
  Mean square residual over all n,k,spin=   37.243E-11; max=  92.277E-11
    0.0000  0.0000  0.0000    1  9.22768E-10 kpt; spin; max resid(k); each band:
-   2.87E-22  5.62E-10  9.23E-10  8.60E-11  3.06E-10  5.49E-10  5.81E-10  7.07E-11
-   5.33E-11  2.76E-11  4.29E-10  5.53E-10  3.91E-10  8.44E-10  7.42E-11  4.33E-10
-   1.46E-10  7.83E-10  1.19E-10  5.19E-10
+  2.87E-22 5.62E-10 9.23E-10 8.60E-11 3.06E-10 5.49E-10 5.81E-10 7.07E-11
+  5.33E-11 2.76E-11 4.29E-10 5.53E-10 3.91E-10 8.44E-10 7.42E-11 4.33E-10
+  1.46E-10 7.83E-10 1.19E-10 5.19E-10
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.115470060000      0.115470060000      0.115470060000
@@ -958,8 +954,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -1, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosHGH_pwteter/2he.2.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosHGH_pwteter/2he.2.hgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosHGH_pwteter/2he.2.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosHGH_pwteter/2he.2.hgh
 - Hartwigsen-Goedecker-Hutter psp for He,  from PRB58, 3641 (1998)
 -  2.00000   2.00000     10605                znucl, zion, pspdat
     3    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -977,8 +973,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -1, paral_kgb: 0, }
          --- l  ekb(1:nproj) -->
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosHGH_pwteter/1h.1.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosHGH_pwteter/1h.1.hgh
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosHGH_pwteter/1h.1.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosHGH_pwteter/1h.1.hgh
 - Hartwigsen-Goedecker-Hutter psp for H,  from PRB58, 3641 (1998)
 -  1.00000   1.00000     10605                znucl, zion, pspdat
     3    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1083,7 +1079,7 @@ P newkpt: treating     20 bands with npw=     655 for ikpt=   1 by node    0
   12 1.18723E+00 8.579E-03 1.453E-02 2.522E-04 1.096E-02 -1.91E-03 -1.26E-02  1.66E-03
   13 1.18723E+00 8.581E-03 2.627E-03 1.691E-02 6.204E-03 -6.67E-03  4.04E-03 -1.02E-02
   14 1.23730E+00 4.810E-05 3.436E-05 1.505E-05 9.491E-05  2.27E-05 -5.71E-05 -3.78E-05
-  15 1.23730E+00 4.819E-05 6.201E-05 8.125E-05 1.327E-06 -7.10E-05  9.07E-06 -1.04E-05
+  15 1.23730E+00 4.819E-05 6.201E-05 8.125E-05 1.328E-06 -7.10E-05  9.07E-06 -1.04E-05
   16 1.24405E+00 3.047E-03 5.903E-03 7.014E-04 2.537E-03 -2.03E-03 -3.87E-03  1.33E-03
   17 1.24405E+00 3.048E-03 1.903E-04 5.394E-03 3.558E-03 -1.01E-03  8.23E-04 -4.38E-03
   18 1.24617E+00 0.000E+00 0.000E+00 0.000E+00 0.000E+00  0.00E+00  0.00E+00  0.00E+00
@@ -1172,9 +1168,9 @@ force_length_stats: {min: null, max: null, mean: null, }
 
  Mean square residual over all n,k,spin=   37.243E-11; max=  92.277E-11
    0.0000  0.0000  0.0000    1  9.22768E-10 kpt; spin; max resid(k); each band:
-   2.87E-22  5.62E-10  9.23E-10  8.60E-11  3.06E-10  5.49E-10  5.81E-10  7.07E-11
-   5.33E-11  2.76E-11  4.29E-10  5.53E-10  3.91E-10  8.44E-10  7.42E-11  4.33E-10
-   1.46E-10  7.83E-10  1.19E-10  5.19E-10
+  2.87E-22 5.62E-10 9.23E-10 8.60E-11 3.06E-10 5.49E-10 5.81E-10 7.07E-11
+  5.33E-11 2.76E-11 4.29E-10 5.53E-10 3.91E-10 8.44E-10 7.42E-11 4.33E-10
+  1.46E-10 7.83E-10 1.19E-10 5.19E-10
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.115470060000      0.115470060000      0.115470060000
@@ -1215,7 +1211,7 @@ force_length_stats: {min: null, max: null, mean: null, }
            etotal1    -2.4623799968E+00
             fcart1     2.2492900672E-02  2.2492900672E-02  2.2492900672E-02
                       -2.2492900672E-02 -2.2492900672E-02 -2.2492900672E-02
--          fftalg         312
+-          fftalg         512
            getden1          0
            getden2          1
            getden3          1
@@ -1369,10 +1365,10 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          1.6  wall=          1.7
+- Proc.   0 individual time (sec): cpu=          1.1  wall=          1.1
 
 ================================================================================
 
  Calculation completed.
-.Delivered  16 WARNINGs and  30 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          1.6  wall=          1.7
+.Delivered  30 WARNINGs and  35 COMMENTs to log file.
++Overall time at end (sec) : cpu=          1.1  wall=          1.1

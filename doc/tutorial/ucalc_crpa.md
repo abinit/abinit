@@ -10,6 +10,9 @@ This tutorial aims at showing how to perform a calculation of _U_ and _J_ in
 Abinit using cRPA. This method is well adapted in particular to determine _U_
 and _J_ as they can be used in DFT+DMFT. The implementation is described in [[cite:Amadon2014]].
 
+Note that there is another methodology to compute _U_ and _J_, see the 
+[Linear response U(J)](/tutorial/lruj) tutorial.
+
 It might be useful that you already know how to do PAW calculations using
 ABINIT but it is not mandatory (you can follow the two tutorials on PAW in
 ABINIT ([PAW1](/tutorial/paw1), [PAW2](/tutorial/paw2))).

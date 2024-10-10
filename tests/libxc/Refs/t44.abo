@@ -1,8 +1,8 @@
 
-.Version 9.3.2 of ABINIT 
-.(sequential version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 10.1.4.5 of ABINIT, released Sep 2024.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2022 ABINIT group . 
+.Copyright (C) 1998-2024 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,14 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Thu 10 Dec 2020.
-- ( at 18h05 )
+.Starting date : Fri 13 Sep 2024.
+- ( at 19h01 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_serial/bruneval_bugfix_inclvkb/tests/TestBot_MPI1/libxc_t44/t44.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/libxc_t44/t44.abi
 - output file    -> t44.abo
 - root for input  files -> t44i
 - root for output files -> t44o
-
 
  DATASET    1 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -39,7 +38,6 @@ P This job should need less than                       1.838 Mbytes of memory.
 _ WF disk file :      0.120 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
 
-
  DATASET    2 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  2.
@@ -55,7 +53,6 @@ P This job should need less than                       1.838 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.120 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
-
 
  DATASET    3 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -73,7 +70,6 @@ P This job should need less than                       1.838 Mbytes of memory.
 _ WF disk file :      0.120 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
 
-
  DATASET    4 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  4.
@@ -89,7 +85,6 @@ P This job should need less than                       1.838 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.120 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
-
 
  DATASET    5 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -107,7 +102,6 @@ P This job should need less than                       1.838 Mbytes of memory.
 _ WF disk file :      0.120 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
 
-
  DATASET    6 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  6.
@@ -123,7 +117,6 @@ P This job should need less than                       1.838 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.120 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
-
 
  DATASET    7 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -141,7 +134,6 @@ P This job should need less than                       1.838 Mbytes of memory.
 _ WF disk file :      0.120 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
 
-
  DATASET    8 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  8.
@@ -157,7 +149,6 @@ P This job should need less than                       1.838 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.120 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
-
 
  DATASET    9 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -175,7 +166,6 @@ P This job should need less than                       1.838 Mbytes of memory.
 _ WF disk file :      0.120 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
 
-
  DATASET   10 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 10.
@@ -191,7 +181,6 @@ P This job should need less than                       1.838 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.120 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
-
 
  DATASET   11 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -209,7 +198,6 @@ P This job should need less than                       1.838 Mbytes of memory.
 _ WF disk file :      0.120 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
 
-
  DATASET   12 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 12.
@@ -225,7 +213,6 @@ P This job should need less than                       1.838 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.120 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
-
 
  DATASET   13 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -247,10 +234,10 @@ _ WF disk file :      0.120 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
 -
-- outvars: echo of selected default values                                      
--   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+- outvars: echo of selected default values
+-   iomode0 =  0 , fftalg0 =512 , wfoptalg0 =  0
 -
-- outvars: echo of global parameters not present in the input file              
+- outvars: echo of global parameters not present in the input file
 -  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
@@ -262,7 +249,7 @@ _ WF disk file :      0.120 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
          ecutsigx      8.00000000E+00 Hartree
           ecutwfn      8.00000000E+00 Hartree
            enunit           1
--          fftalg         312
+-          fftalg         512
            getqps1         -1
            getqps2         -1
            getqps3         -1
@@ -786,8 +773,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_serial/bruneval_bugfix_inclvkb/tests/Psps_for_tests/C.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_serial/bruneval_bugfix_inclvkb/tests/Psps_for_tests/C.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/C.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/C.psp8
 - C     ONCVPSP-3.2.3  r_core=   1.51078   1.70218
 -  6.00000   4.00000    160922                znucl, zion, pspdat
     8   11    1    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -825,8 +812,8 @@ tolerances: {tolvrs: 1.00E-15, }
  ETOT  3  -11.729560116512    -1.175E-06 2.913E-05 5.009E-05
  ETOT  4  -11.729560133945    -1.743E-08 3.706E-06 1.033E-06
  ETOT  5  -11.729560134278    -3.327E-10 1.743E-07 7.567E-10
- ETOT  6  -11.729560134278    -2.380E-13 3.165E-08 6.238E-13
- ETOT  7  -11.729560134278     5.151E-14 1.644E-09 5.555E-16
+ ETOT  6  -11.729560134278    -2.416E-13 3.165E-08 6.238E-13
+ ETOT  7  -11.729560134278     5.862E-14 1.644E-09 5.555E-16
 
  At SCF step    7       vres2   =  5.56E-16 < tolvrs=  1.00E-15 =>converged.
 
@@ -846,7 +833,7 @@ lattice_vectors:
 lattice_lengths: [   4.76636,    4.76636,    4.76636, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   7.6567759E+01
-convergence: {deltae:  5.151E-14, res2:  5.555E-16, residm:  1.644E-09, diffor: null, }
+convergence: {deltae:  5.862E-14, res2:  5.555E-16, residm:  1.644E-09, diffor: null, }
 etotal    :  -1.17295601E+01
 entropy   :   0.00000000E+00
 fermie    :   3.96241984E-01
@@ -859,9 +846,9 @@ xred      :
 - [  0.0000E+00,   0.0000E+00,   0.0000E+00,  C]
 - [  2.5000E-01,   2.5000E-01,   2.5000E-01,  C]
 cartesian_forces: # hartree/bohr
-- [ -3.27240542E-24,   2.61792433E-24,  -1.96344325E-24, ]
-- [  3.27240542E-24,  -2.61792433E-24,   1.96344325E-24, ]
-force_length_stats: {min:   4.62788012E-24, max:   4.62788012E-24, mean:   4.62788012E-24, }
+- [ -6.54481083E-25,   2.48926657E-41,   6.54481083E-25, ]
+- [  6.54481083E-25,  -2.48926657E-41,  -6.54481083E-25, ]
+force_length_stats: {min:   9.25576024E-25, max:   9.25576024E-25, mean:   9.25576024E-25, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -875,43 +862,43 @@ force_length_stats: {min:   4.62788012E-24, max:   4.62788012E-24, mean:   4.627
 
  Mean square residual over all n,k,spin=   25.136E-12; max=  16.435E-10
   -0.2500 -0.2500  0.0000    1  6.71691E-18 kpt; spin; max resid(k); each band:
-   3.99E-20  2.03E-19  1.58E-18  1.58E-18  2.51E-18  1.91E-18  2.93E-18  2.89E-18
-   3.58E-18  2.54E-18  1.80E-19  5.49E-18  5.34E-18  6.72E-18
+  3.99E-20 2.03E-19 1.58E-18 1.58E-18 2.51E-18 1.91E-18 2.93E-18 2.89E-18
+  3.58E-18 2.54E-18 1.80E-19 5.49E-18 5.34E-18 6.72E-18
   -0.2500  0.2500  0.0000    1  8.19306E-11 kpt; spin; max resid(k); each band:
-   1.83E-19  2.24E-19  2.18E-18  2.57E-19  1.42E-18  8.85E-20  5.85E-18  2.16E-18
-   2.70E-19  1.05E-17  1.98E-18  3.54E-18  1.51E-17  8.19E-11
+  1.83E-19 2.24E-19 2.18E-18 2.57E-19 1.42E-18 8.85E-20 5.85E-18 2.16E-18
+  2.70E-19 1.05E-17 1.98E-18 3.54E-18 1.51E-17 8.19E-11
    0.5000  0.5000  0.0000    1  5.27023E-19 kpt; spin; max resid(k); each band:
-   1.93E-20  2.07E-20  2.31E-19  2.33E-19  4.83E-19  5.09E-19  5.99E-20  1.08E-19
-   5.27E-19  4.20E-19  2.80E-19  2.31E-19  1.52E-21  1.69E-21
+  1.93E-20 2.07E-20 2.31E-19 2.33E-19 4.83E-19 5.09E-19 5.99E-20 1.08E-19
+  5.27E-19 4.20E-19 2.80E-19 2.31E-19 1.52E-21 1.69E-21
   -0.2500  0.5000  0.2500    1  1.64353E-09 kpt; spin; max resid(k); each band:
-   1.45E-19  8.11E-20  8.94E-19  3.92E-19  2.78E-18  2.95E-18  1.98E-19  2.83E-19
-   1.74E-17  1.62E-17  9.09E-20  7.91E-20  3.86E-10  1.64E-09
+  1.45E-19 8.11E-20 8.94E-19 3.92E-19 2.78E-18 2.95E-18 1.98E-19 2.83E-19
+  1.74E-17 1.62E-17 9.09E-20 7.91E-20 3.86E-10 1.64E-09
    0.5000  0.0000  0.0000    1  1.50560E-18 kpt; spin; max resid(k); each band:
-   6.01E-20  1.77E-19  1.42E-18  1.42E-18  6.11E-19  5.33E-19  5.29E-19  1.25E-18
-   8.89E-19  1.45E-18  5.23E-19  5.15E-19  1.51E-18  1.50E-18
+  6.01E-20 1.77E-19 1.42E-18 1.42E-18 6.11E-19 5.33E-19 5.29E-19 1.25E-18
+  8.89E-19 1.45E-18 5.23E-19 5.15E-19 1.51E-18 1.50E-18
    0.0000  0.0000  0.0000    1  4.83046E-18 kpt; spin; max resid(k); each band:
-   1.81E-20  4.68E-18  4.68E-18  4.67E-18  3.29E-20  3.29E-20  3.33E-20  1.21E-19
-   3.51E-20  6.73E-19  3.30E-21  4.75E-18  4.75E-18  4.83E-18
+  1.81E-20 4.68E-18 4.68E-18 4.67E-18 3.29E-20 3.29E-20 3.33E-20 1.21E-19
+  3.51E-20 6.73E-19 3.30E-21 4.75E-18 4.75E-18 4.83E-18
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.250000000000      0.250000000000      0.250000000000
- rms dE/dt=  1.0502E-23; max dE/dt=  1.7647E-23; dE/dt below (all hartree)
+ rms dE/dt=  9.1835E-24; max dE/dt=  1.3235E-23; dE/dt below (all hartree)
     1      -0.000000000000      0.000000000000      0.000000000000
-    2       0.000000000000     -0.000000000000      0.000000000000
+    2      -0.000000000000      0.000000000000      0.000000000000
 
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
     2      0.89174999627579     0.89174999627579     0.89174999627579
 
  cartesian forces (hartree/bohr) at end:
-    1     -0.00000000000000     0.00000000000000    -0.00000000000000
-    2      0.00000000000000    -0.00000000000000     0.00000000000000
- frms,max,avg= 2.6719078E-24 3.2724054E-24   0.000E+00  0.000E+00  0.000E+00 h/b
+    1     -0.00000000000000     0.00000000000000     0.00000000000000
+    2      0.00000000000000    -0.00000000000000    -0.00000000000000
+ frms,max,avg= 5.3438157E-25 6.5448108E-25   0.000E+00  0.000E+00  0.000E+00 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1     -0.00000000000000     0.00000000000000    -0.00000000000000
-    2      0.00000000000000    -0.00000000000000     0.00000000000000
- frms,max,avg= 1.3739501E-22 1.6827384E-22   0.000E+00  0.000E+00  0.000E+00 e/A
+    1     -0.00000000000000     0.00000000000000     0.00000000000000
+    2      0.00000000000000    -0.00000000000000    -0.00000000000000
+ frms,max,avg= 2.7479003E-23 3.3654768E-23   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  6.740653087852  6.740653087852  6.740653087852 bohr
               =  3.566999985103  3.566999985103  3.566999985103 angstroms
  prteigrs : about to open file t44o_DS1_EIG
@@ -951,10 +938,10 @@ xc                  : -4.27325480542850E+00
 Ewald energy        : -1.27864121744519E+01
 psp_core            :  1.36841387056176E+00
 local_psp           : -3.60688076094452E+00
-non_local_psp       : -7.12828627288617E-01
+non_local_psp       : -7.12828627288616E-01
 total_energy        : -1.17295601342781E+01
 total_energy_eV     : -3.19177563322795E+02
-band_energy         :  1.00056854390747E-01
+band_energy         :  1.00056854390748E-01
 ...
 
 
@@ -1004,8 +991,8 @@ meta: {optdriver: 4, gwcalctyp: 25, }
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/bruneval/devel/abinit-develop/tests/Psps_for_tests/C.psp8
-- pspatm: opening atomic psp file    /home/bruneval/devel/abinit-develop/tests/Psps_for_tests/C.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/C.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/C.psp8
 - C     ONCVPSP-3.2.3  r_core=   1.51078   1.70218
 -  6.00000   4.00000    160922                znucl, zion, pspdat
     8   11    1    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1075,7 +1062,7 @@ meta: {optdriver: 4, gwcalctyp: 25, }
 
   Number of electrons    =    8.0000
 
-  QP Band energy    [Ha] =  1.00056854390747E-01
+  QP Band energy    [Ha] =  1.00056854390748E-01
   QP Hartree energy [Ha] =  8.53940825218230E-01
 
 --------------------------------------------------------------------------------
@@ -1375,8 +1362,8 @@ meta: {optdriver: 4, gwcalctyp: 25, }
 
   Number of electrons    =    8.0000
 
-  QP Band energy    [Ha] = -3.64446286419444E-01
-  QP Hartree energy [Ha] =  8.60011492324270E-01
+  QP Band energy    [Ha] = -3.64446286416605E-01
+  QP Hartree energy [Ha] =  8.60011492323727E-01
 
 --------------------------------------------------------------------------------
 
@@ -1580,7 +1567,7 @@ data: !SigmaeeData |
 .  kptgw no:  1; Maximum DeltaE = (   0.021  -0.000) for band index:  7
 .  kptgw no:  2; Maximum DeltaE = (   0.021   0.000) for band index:  6
 .  kptgw no:  3; Maximum DeltaE = (   0.023   0.000) for band index:  8
-.  kptgw no:  4; Maximum DeltaE = (   0.019  -0.000) for band index:  7
+.  kptgw no:  4; Maximum DeltaE = (   0.019   0.000) for band index:  7
 .  kptgw no:  5; Maximum DeltaE = (   0.018   0.000) for band index:  7
 .  kptgw no:  6; Maximum DeltaE = (   0.024   0.000) for band index:  7
 
@@ -1675,8 +1662,8 @@ meta: {optdriver: 4, gwcalctyp: 25, }
 
   Number of electrons    =    8.0000
 
-  QP Band energy    [Ha] = -3.59981846640565E-01
-  QP Hartree energy [Ha] =  8.59853656894328E-01
+  QP Band energy    [Ha] = -3.59981846638151E-01
+  QP Hartree energy [Ha] =  8.59853656893808E-01
 
 --------------------------------------------------------------------------------
 
@@ -1877,11 +1864,11 @@ data: !SigmaeeData |
 
  Convergence of QP corrections
  >>>>> For spin  1 <<<<<
-.  kptgw no:  1; Maximum DeltaE = (  -0.001  -0.000) for band index:  2
+.  kptgw no:  1; Maximum DeltaE = (  -0.001   0.000) for band index:  2
 .  kptgw no:  2; Maximum DeltaE = (  -0.001  -0.000) for band index:  2
-.  kptgw no:  3; Maximum DeltaE = (  -0.001  -0.000) for band index:  7
+.  kptgw no:  3; Maximum DeltaE = (  -0.001   0.000) for band index:  7
 .  kptgw no:  4; Maximum DeltaE = (  -0.001  -0.000) for band index:  1
-.  kptgw no:  5; Maximum DeltaE = (  -0.001   0.000) for band index: 10
+.  kptgw no:  5; Maximum DeltaE = (  -0.001  -0.000) for band index: 10
 .  kptgw no:  6; Maximum DeltaE = (  -0.001  -0.000) for band index:  2
 
 ================================================================================
@@ -1975,8 +1962,8 @@ meta: {optdriver: 4, gwcalctyp: 25, }
 
   Number of electrons    =    8.0000
 
-  QP Band energy    [Ha] = -3.60127782584480E-01
-  QP Hartree energy [Ha] =  8.59874609123948E-01
+  QP Band energy    [Ha] = -3.60127782582045E-01
+  QP Hartree energy [Ha] =  8.59874609123441E-01
 
 --------------------------------------------------------------------------------
 
@@ -2181,7 +2168,7 @@ data: !SigmaeeData |
 .  kptgw no:  2; Maximum DeltaE = (   0.000  -0.000) for band index:  6
 .  kptgw no:  3; Maximum DeltaE = (   0.000  -0.000) for band index:  8
 .  kptgw no:  4; Maximum DeltaE = (   0.000   0.000) for band index:  7
-.  kptgw no:  5; Maximum DeltaE = (   0.000  -0.000) for band index:  7
+.  kptgw no:  5; Maximum DeltaE = (   0.000   0.000) for band index:  7
 .  kptgw no:  6; Maximum DeltaE = (   0.000   0.000) for band index:  7
 
 ================================================================================
@@ -2275,8 +2262,8 @@ meta: {optdriver: 4, gwcalctyp: 25, }
 
   Number of electrons    =    8.0000
 
-  QP Band energy    [Ha] = -3.60111671751668E-01
-  QP Hartree energy [Ha] =  8.59873678693352E-01
+  QP Band energy    [Ha] = -3.60111671749239E-01
+  QP Hartree energy [Ha] =  8.59873678692850E-01
 
 --------------------------------------------------------------------------------
 
@@ -2478,9 +2465,9 @@ data: !SigmaeeData |
  Convergence of QP corrections
  >>>>> For spin  1 <<<<<
 .  kptgw no:  1; Maximum DeltaE = (  -0.000  -0.000) for band index:  2
-.  kptgw no:  2; Maximum DeltaE = (  -0.000   0.000) for band index:  8
-.  kptgw no:  3; Maximum DeltaE = (  -0.000   0.000) for band index:  7
-.  kptgw no:  4; Maximum DeltaE = (  -0.000   0.000) for band index:  1
+.  kptgw no:  2; Maximum DeltaE = (  -0.000  -0.000) for band index:  8
+.  kptgw no:  3; Maximum DeltaE = (  -0.000  -0.000) for band index:  7
+.  kptgw no:  4; Maximum DeltaE = (  -0.000  -0.000) for band index:  1
 .  kptgw no:  5; Maximum DeltaE = (  -0.000   0.000) for band index:  5
 .  kptgw no:  6; Maximum DeltaE = (  -0.000   0.000) for band index:  8
 
@@ -2519,8 +2506,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_serial/bruneval_bugfix_inclvkb/tests/Psps_for_tests/C.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_serial/bruneval_bugfix_inclvkb/tests/Psps_for_tests/C.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/C.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/C.psp8
 - C     ONCVPSP-3.2.3  r_core=   1.51078   1.70218
 -  6.00000   4.00000    160922                znucl, zion, pspdat
     8   11    1    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2553,15 +2540,15 @@ tolerances: {tolvrs: 1.00E-15, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -11.752322269370    -1.175E+01 1.070E-08 1.905E-03
- ETOT  2  -11.752363158442    -4.089E-05 4.406E-11 2.882E-05
- ETOT  3  -11.752363372677    -2.142E-07 3.139E-09 1.677E-07
- ETOT  4  -11.752363373732    -1.056E-09 1.307E-11 1.785E-09
- ETOT  5  -11.752363373737    -4.889E-12 2.649E-13 5.768E-11
- ETOT  6  -11.752363373737     1.439E-13 2.825E-14 3.769E-12
- ETOT  7  -11.752363373737     6.040E-14 1.808E-15 1.210E-14
- ETOT  8  -11.752363373737     3.197E-14 1.700E-16 5.312E-15
- ETOT  9  -11.752363373737    -3.553E-15 1.513E-17 4.388E-17
+ ETOT  1  -11.752322269368    -1.175E+01 1.070E-08 1.905E-03
+ ETOT  2  -11.752363158440    -4.089E-05 4.406E-11 2.882E-05
+ ETOT  3  -11.752363372675    -2.142E-07 3.139E-09 1.677E-07
+ ETOT  4  -11.752363373730    -1.056E-09 1.307E-11 1.785E-09
+ ETOT  5  -11.752363373735    -4.645E-12 2.649E-13 5.768E-11
+ ETOT  6  -11.752363373735     1.705E-13 2.825E-14 3.769E-12
+ ETOT  7  -11.752363373735     5.507E-14 1.808E-15 1.210E-14
+ ETOT  8  -11.752363373735    -4.086E-14 1.700E-16 5.312E-15
+ ETOT  9  -11.752363373735     8.704E-14 1.513E-17 4.388E-17
 
  At SCF step    9       vres2   =  4.39E-17 < tolvrs=  1.00E-15 =>converged.
 
@@ -2581,7 +2568,7 @@ lattice_vectors:
 lattice_lengths: [   4.76636,    4.76636,    4.76636, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   7.6567759E+01
-convergence: {deltae: -3.553E-15, res2:  4.388E-17, residm:  1.513E-17, diffor: null, }
+convergence: {deltae:  8.704E-14, res2:  4.388E-17, residm:  1.513E-17, diffor: null, }
 etotal    :  -1.17523634E+01
 entropy   :   0.00000000E+00
 fermie    :   3.66796327E-01
@@ -2594,9 +2581,9 @@ xred      :
 - [  0.0000E+00,   0.0000E+00,   0.0000E+00,  C]
 - [  2.5000E-01,   2.5000E-01,   2.5000E-01,  C]
 cartesian_forces: # hartree/bohr
-- [ -1.96344325E-24,   1.30896217E-24,   1.96344325E-24, ]
-- [  1.96344325E-24,  -1.30896217E-24,  -1.96344325E-24, ]
-force_length_stats: {min:   3.06978839E-24, max:   3.06978839E-24, mean:   3.06978839E-24, }
+- [ -1.96344325E-24,  -3.73389986E-41,   1.96344325E-24, ]
+- [  1.96344325E-24,   3.73389986E-41,  -1.96344325E-24, ]
+force_length_stats: {min:   2.77672807E-24, max:   2.77672807E-24, mean:   2.77672807E-24, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -2609,44 +2596,44 @@ force_length_stats: {min:   3.06978839E-24, max:   3.06978839E-24, mean:   3.069
  ----iterations are completed or convergence reached----
 
  Mean square residual over all n,k,spin=   42.177E-20; max=  15.125E-18
-  -0.2500 -0.2500  0.0000    1  4.65968E-19 kpt; spin; max resid(k); each band:
-   2.12E-19  2.71E-20  7.02E-20  7.02E-20  1.73E-19  4.66E-19  3.52E-20  3.52E-20
-   3.34E-19  3.31E-19  1.63E-21  8.94E-20  8.94E-20  1.76E-19
+  -0.2500 -0.2500  0.0000    1  4.65969E-19 kpt; spin; max resid(k); each band:
+  2.12E-19 2.71E-20 7.02E-20 7.02E-20 1.73E-19 4.66E-19 3.52E-20 3.52E-20
+  3.34E-19 3.31E-19 1.63E-21 8.94E-20 8.94E-20 1.76E-19
   -0.2500  0.2500  0.0000    1  4.45368E-18 kpt; spin; max resid(k); each band:
-   2.32E-19  6.43E-20  2.00E-19  3.42E-20  2.92E-19  3.05E-22  2.26E-19  3.50E-19
-   3.42E-20  3.00E-19  5.05E-19  1.75E-19  1.30E-19  4.45E-18
-   0.5000  0.5000  0.0000    1  3.78231E-19 kpt; spin; max resid(k); each band:
-   7.69E-20  7.74E-20  1.94E-19  1.94E-19  3.45E-19  3.44E-19  4.64E-22  4.64E-22
-   3.77E-19  3.78E-19  1.95E-19  1.94E-19  7.88E-24  7.72E-24
+  2.32E-19 6.43E-20 2.00E-19 3.42E-20 2.92E-19 3.05E-22 2.26E-19 3.50E-19
+  3.42E-20 3.00E-19 5.05E-19 1.75E-19 1.30E-19 4.45E-18
+   0.5000  0.5000  0.0000    1  3.78232E-19 kpt; spin; max resid(k); each band:
+  7.69E-20 7.74E-20 1.94E-19 1.94E-19 3.45E-19 3.44E-19 4.64E-22 4.64E-22
+  3.77E-19 3.78E-19 1.95E-19 1.94E-19 7.88E-24 7.72E-24
   -0.2500  0.5000  0.2500    1  1.51253E-17 kpt; spin; max resid(k); each band:
-   5.44E-20  5.47E-20  1.82E-19  1.82E-19  3.61E-19  3.66E-19  1.98E-19  1.99E-19
-   2.33E-19  2.34E-19  2.43E-19  2.45E-19  2.79E-18  1.51E-17
+  5.44E-20 5.47E-20 1.82E-19 1.82E-19 3.61E-19 3.66E-19 1.98E-19 1.99E-19
+  2.33E-19 2.34E-19 2.43E-19 2.45E-19 2.79E-18 1.51E-17
    0.5000  0.0000  0.0000    1  4.56317E-19 kpt; spin; max resid(k); each band:
-   8.18E-20  2.43E-19  4.46E-20  4.45E-20  2.02E-19  1.99E-19  1.99E-19  4.43E-19
-   3.63E-19  4.56E-19  1.99E-19  1.99E-19  4.46E-20  4.46E-20
+  8.18E-20 2.43E-19 4.46E-20 4.45E-20 2.02E-19 1.99E-19 1.99E-19 4.43E-19
+  3.63E-19 4.56E-19 1.99E-19 1.99E-19 4.46E-20 4.46E-20
    0.0000  0.0000  0.0000    1  2.48237E-19 kpt; spin; max resid(k); each band:
-   2.48E-19  3.59E-20  3.59E-20  3.59E-20  1.91E-22  1.91E-22  1.90E-22  1.05E-22
-   2.48E-19  9.50E-26  9.14E-26  3.52E-20  3.52E-20  3.53E-20
+  2.48E-19 3.59E-20 3.59E-20 3.59E-20 1.91E-22 1.91E-22 1.90E-22 1.05E-22
+  2.48E-19 9.50E-26 9.14E-26 3.52E-20 3.52E-20 3.53E-20
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.250000000000      0.250000000000      0.250000000000
- rms dE/dt=  1.0502E-23; max dE/dt=  1.3235E-23; dE/dt below (all hartree)
+ rms dE/dt=  5.6954E-24; max dE/dt=  8.8233E-24; dE/dt below (all hartree)
     1      -0.000000000000      0.000000000000      0.000000000000
-    2       0.000000000000      0.000000000000      0.000000000000
+    2       0.000000000000      0.000000000000     -0.000000000000
 
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
     2      0.89174999627579     0.89174999627579     0.89174999627579
 
  cartesian forces (hartree/bohr) at end:
-    1     -0.00000000000000     0.00000000000000     0.00000000000000
-    2      0.00000000000000    -0.00000000000000    -0.00000000000000
- frms,max,avg= 1.7723432E-24 1.9634432E-24   0.000E+00  0.000E+00  0.000E+00 h/b
+    1     -0.00000000000000    -0.00000000000000     0.00000000000000
+    2      0.00000000000000     0.00000000000000    -0.00000000000000
+ frms,max,avg= 1.6031447E-24 1.9634432E-24   0.000E+00  0.000E+00  0.000E+00 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1     -0.00000000000000     0.00000000000000     0.00000000000000
-    2      0.00000000000000    -0.00000000000000    -0.00000000000000
- frms,max,avg= 9.1137542E-23 1.0096430E-22   0.000E+00  0.000E+00  0.000E+00 e/A
+    1     -0.00000000000000    -0.00000000000000     0.00000000000000
+    2      0.00000000000000     0.00000000000000    -0.00000000000000
+ frms,max,avg= 8.2437008E-23 1.0096430E-22   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  6.740653087852  6.740653087852  6.740653087852 bohr
               =  3.566999985103  3.566999985103  3.566999985103 angstroms
  prteigrs : about to open file t44o_DS7_EIG
@@ -2680,25 +2667,25 @@ force_length_stats: {min:   3.06978839E-24, max:   3.06978839E-24, mean:   3.069
 --- !EnergyTerms
 iteration_state     : {dtset: 7, }
 comment             : Components of total free energy in Hartree
-kinetic             :  7.40473788646367E+00
-hartree             :  8.54725424855624E-01
-xc                  : -3.59722258151832E+00
+kinetic             :  7.40473788646560E+00
+hartree             :  8.54725424854793E-01
+xc                  : -3.59722258151573E+00
 Ewald energy        : -1.27864121744519E+01
 psp_core            :  1.36841387056176E+00
-local_psp           : -3.59748714961152E+00
-non_local_psp+x     : -1.39911865003622E+00
-total_energy        : -1.17523633737369E+01
+local_psp           : -3.59748714960805E+00
+non_local_psp+x     : -1.39911865004121E+00
+total_energy        : -1.17523633737347E+01
 ...
 
 
 --- !EnergyTermsDC
 iteration_state     : {dtset: 7, }
 comment             : '"Double-counting" decomposition of free energy'
-band_energy         : -3.70788659458260E-01
+band_energy         : -3.70788659456335E-01
 Ewald energy        : -1.27864121744519E+01
 psp_core            :  1.36841387056176E+00
-xc_dc               :  3.64237124116927E-02
-total_energy_dc     : -1.17523632509367E+01
+xc_dc               :  3.64237124118828E-02
+total_energy_dc     : -1.17523632509346E+01
 ...
 
 
@@ -2748,8 +2735,8 @@ meta: {optdriver: 3, gwcalctyp: 0, }
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_serial/bruneval_bugfix_inclvkb/tests/Psps_for_tests/C.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_serial/bruneval_bugfix_inclvkb/tests/Psps_for_tests/C.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/C.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/C.psp8
 - C     ONCVPSP-3.2.3  r_core=   1.51078   1.70218
 -  6.00000   4.00000    160922                znucl, zion, pspdat
     8   11    1    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2852,10 +2839,10 @@ meta: {optdriver: 3, gwcalctyp: 0, }
    Upper and lower wings at the    2 th omega   0.0000  31.1801 [eV]
        1       2       3       4       5       6       7       8       9
       0.552   0.005  -0.005  -0.016   0.016   0.016  -0.016  -0.005   0.005
-      0.000   0.005   0.005  -0.016  -0.016   0.016   0.016  -0.005  -0.005
+     -0.000   0.005   0.005  -0.016  -0.016   0.016   0.016  -0.005  -0.005
        1       2       3       4       5       6       7       8       9
       0.552   0.005  -0.005  -0.016   0.016   0.016  -0.016  -0.005   0.005
-      0.000  -0.005  -0.005   0.016   0.016  -0.016  -0.016   0.005   0.005
+     -0.000  -0.005  -0.005   0.016   0.016  -0.016  -0.016   0.005   0.005
 
 
 
@@ -3217,7 +3204,7 @@ meta: {optdriver: 3, gwcalctyp: 20, }
   chi0(G,G') at the    2 th omega   0.0000  31.1801 [eV]
        1       2       3       4       5       6       7       8       9
     1  -0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000
-       -0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000
+        0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000
 
     2   0.000  -2.487   0.000  -0.306   0.000  -0.306   0.000  -0.306  -0.000
        -0.000   0.000  -0.655  -0.000  -0.188  -0.000  -0.188   0.000  -0.188
@@ -3241,10 +3228,10 @@ meta: {optdriver: 3, gwcalctyp: 20, }
    Upper and lower wings at the    2 th omega   0.0000  31.1801 [eV]
        1       2       3       4       5       6       7       8       9
       0.599   0.006  -0.006  -0.017   0.017   0.017  -0.017  -0.006   0.006
-     -0.000   0.006   0.006  -0.017  -0.017   0.017   0.017  -0.006  -0.006
+      0.000   0.006   0.006  -0.017  -0.017   0.017   0.017  -0.006  -0.006
        1       2       3       4       5       6       7       8       9
       0.599   0.006  -0.006  -0.017   0.017   0.017  -0.017  -0.006   0.006
-     -0.000  -0.006  -0.006   0.017   0.017  -0.017  -0.017   0.006   0.006
+      0.000  -0.006  -0.006   0.017   0.017  -0.017  -0.017   0.006   0.006
 
 
 
@@ -3451,8 +3438,8 @@ meta: {optdriver: 4, gwcalctyp: 20, }
 
   Number of electrons    =    8.0000
 
-  QP Band energy    [Ha] = -3.60112464536440E-01
-  QP Hartree energy [Ha] =  8.59873763357446E-01
+  QP Band energy    [Ha] = -3.60112464534008E-01
+  QP Hartree energy [Ha] =  8.59873763356937E-01
 
 --------------------------------------------------------------------------------
 
@@ -3765,7 +3752,7 @@ meta: {optdriver: 3, gwcalctyp: 20, }
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1  -0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000
-        0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000
+       -0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000
 
     2   0.000  -5.728  -0.000  -0.998   0.000  -0.998   0.000  -0.998   0.000
        -0.000   0.000  -2.267  -0.000  -0.732  -0.000  -0.732  -0.000  -0.732
@@ -3773,7 +3760,7 @@ meta: {optdriver: 3, gwcalctyp: 20, }
   chi0(G,G') at the    2 th omega   0.0000  31.1801 [eV]
        1       2       3       4       5       6       7       8       9
     1  -0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000
-       -0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000
+        0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000
 
     2   0.000  -2.483   0.000  -0.300   0.000  -0.300   0.000  -0.300   0.000
        -0.000   0.000  -0.653   0.000  -0.183  -0.000  -0.183   0.000  -0.183
@@ -3797,10 +3784,10 @@ meta: {optdriver: 3, gwcalctyp: 20, }
    Upper and lower wings at the    2 th omega   0.0000  31.1801 [eV]
        1       2       3       4       5       6       7       8       9
       0.598   0.006  -0.006  -0.017   0.017   0.017  -0.017  -0.006   0.006
-     -0.000   0.006   0.006  -0.017  -0.017   0.017   0.017  -0.006  -0.006
+      0.000   0.006   0.006  -0.017  -0.017   0.017   0.017  -0.006  -0.006
        1       2       3       4       5       6       7       8       9
       0.598   0.006  -0.006  -0.017   0.017   0.017  -0.017  -0.006   0.006
-     -0.000  -0.006  -0.006   0.017   0.017  -0.017  -0.017   0.006   0.006
+      0.000  -0.006  -0.006   0.017   0.017  -0.017  -0.017   0.006   0.006
 
 
 
@@ -3945,8 +3932,8 @@ meta: {optdriver: 4, gwcalctyp: 0, }
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_serial/bruneval_bugfix_inclvkb/tests/Psps_for_tests/C.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_serial/bruneval_bugfix_inclvkb/tests/Psps_for_tests/C.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/C.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/C.psp8
 - C     ONCVPSP-3.2.3  r_core=   1.51078   1.70218
 -  6.00000   4.00000    160922                znucl, zion, pspdat
     8   11    1    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -4091,8 +4078,8 @@ data: !SigmaeeData |
            etotal11    0.0000000000E+00
            etotal12    0.0000000000E+00
            etotal13    0.0000000000E+00
-            fcart1    -3.2724054154E-24  2.6179243323E-24 -1.9634432492E-24
-                       3.2724054154E-24 -2.6179243323E-24  1.9634432492E-24
+            fcart1    -6.5448108308E-25  2.4892665724E-41  6.5448108308E-25
+                       6.5448108308E-25 -2.4892665724E-41 -6.5448108308E-25
             fcart2     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
             fcart3     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -4103,8 +4090,8 @@ data: !SigmaeeData |
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
             fcart6     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-            fcart7    -1.9634432492E-24  1.3089621662E-24  1.9634432492E-24
-                       1.9634432492E-24 -1.3089621662E-24 -1.9634432492E-24
+            fcart7    -1.9634432492E-24 -3.7338998587E-41  1.9634432492E-24
+                       1.9634432492E-24  3.7338998587E-41 -1.9634432492E-24
             fcart8     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
             fcart9     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -4117,7 +4104,7 @@ data: !SigmaeeData |
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
             fcart13    0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
--          fftalg         312
+-          fftalg         512
            getqps1         -1
            getqps2         -1
            getqps3         -1
@@ -4516,7 +4503,7 @@ P           mkmem           6
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            strten6     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-           strten7     5.5281582854E-03  5.5281582854E-03  5.5281582854E-03
+           strten7     5.5281582855E-03  5.5281582855E-03  5.5281582855E-03
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            strten8     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -4605,51 +4592,10 @@ P           mkmem           6
 
 ================================================================================
 
-- Total cpu        time (s,m,h):         35.5        0.59      0.010
-- Total wall clock time (s,m,h):         35.6        0.59      0.010
--
-- For major independent code sections, cpu and wall times (sec),
--  as well as % of the time and number of calls for node 0-
--<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = 0>
-- cpu_time =           35.5, wall_time =           35.6
--
-- routine                        cpu     %       wall     %      number of calls  Gflops    Speedup Efficacity
--                                                                  (-1=no count)
-- fourdp                        13.991  39.5     14.046  39.5         294168      -1.00        1.00       1.00
-- HF_getghc_main                 7.226  20.4      7.233  20.3         350196      -1.00        1.00       1.00
-- sigma/=fourdp                  7.105  20.0      7.138  20.1              8      -1.00        1.00       1.00
-- invars2                        0.784   2.2      0.786   2.2             13      -1.00        1.00       1.00
-- pspini                         0.619   1.7      0.622   1.7             13      -1.00        1.00       1.00
-- fourwf%(pot)                   0.548   1.5      0.551   1.5           6949      -1.00        0.99       0.99
-- xc:pot/=fourdp                 0.275   0.8      0.280   0.8             78      -1.00        0.98       0.98
-- abinit(2)                      0.222   0.6      0.223   0.6              1      -1.00        1.00       1.00
-- ewald                          0.222   0.6      0.220   0.6             19      -1.00        1.01       1.01
-- others (120)                   0.538   1.5      0.532   1.5             -1      -1.00        1.01       1.01
--<END_TIMER>
--
-- subtotal                      31.531  88.9     31.631  89.0                                  1.00       1.00
 
-- For major independent code sections, cpu and wall times (sec),
-- as well as % of the total time and number of calls 
+- Timing analysis has been suppressed with timopt=0
 
--<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = world>
-- cpu_time =          35.5, wall_time =          35.6
--
-- routine                         cpu     %       wall     %      number of calls Gflops    Speedup Efficacity
--                                                                  (-1=no count)
-- fourdp                        13.991  39.5     14.046  39.5         294168      -1.00        1.00       1.00
-- HF_getghc_main                 7.226  20.4      7.233  20.3         350196      -1.00        1.00       1.00
-- sigma/=fourdp                  7.105  20.0      7.138  20.1              8      -1.00        1.00       1.00
-- invars2                        0.784   2.2      0.786   2.2             13      -1.00        1.00       1.00
-- pspini                         0.619   1.7      0.622   1.7             13      -1.00        1.00       1.00
-- fourwf%(pot)                   0.548   1.5      0.551   1.5           6949      -1.00        0.99       0.99
-- xc:pot/=fourdp                 0.275   0.8      0.280   0.8             78      -1.00        0.98       0.98
-- abinit(2)                      0.222   0.6      0.223   0.6              1      -1.00        1.00       1.00
-- ewald                          0.222   0.6      0.220   0.6             19      -1.00        1.01       1.01
-- others (120)                   0.538   1.5      0.532   1.5             -1      -1.00        1.01       1.01
--<END_TIMER>
 
-- subtotal                      31.531  88.9     31.631  89.0                                  1.00       1.00
 
 ================================================================================
 
@@ -4734,10 +4680,10 @@ P           mkmem           6
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         35.5  wall=         35.6
+- Proc.   0 individual time (sec): cpu=         15.5  wall=         17.8
 
 ================================================================================
 
  Calculation completed.
-.Delivered  35 WARNINGs and  32 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         35.5  wall=         35.6
+.Delivered  23 WARNINGs and  33 COMMENTs to log file.
++Overall time at end (sec) : cpu=         15.5  wall=         17.8

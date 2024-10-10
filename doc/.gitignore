@@ -35,6 +35,7 @@ topics/Abipy.md
 topics/APPA.md
 topics/Artificial.md
 topics/aTDEP.md
+topics/AtomCentered.md
 topics/AtomManipulator.md
 topics/AtomTypes.md
 topics/Bader.md
@@ -48,7 +49,7 @@ topics/ConstrainedPol.md
 topics/Control.md
 topics/Coulomb.md
 topics/CrossingBarriers.md
-topics/CRPA.md
+topics/CalcUJ.md
 topics/crystal.md
 topics/DFT+U.md
 topics/DeltaSCF.md
@@ -77,6 +78,7 @@ topics/GW.md
 topics/GWR.md
 topics/GWls.md
 topics/Hybrids.md
+topics/Install.md
 topics/k-points.md
 topics/LatticeModel.md
 topics/LatticeWannier.md
@@ -89,6 +91,7 @@ topics/MagMom.md
 topics/MolecularDynamics.md
 topics/Macroave.md
 topics/multidtset.md
+topics/NMR.md
 topics/nonlinear.md
 topics/Optic.md
 topics/Output.md

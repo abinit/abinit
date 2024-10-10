@@ -1,0 +1,48 @@
+# He atom : reference test (very quick) for all LibXC functionals. nstep=1, nline=1.
+# Not accurate, only portability check.
+# Similar to t04, but for one functional that does not work on all workers.
+
+ndtset 1
+
+ixc1 -104131
+
+#Common data
+acell 3*5
+diemac 1.0d0
+diemix 0.5d0
+ecut 50
+
+kptopt 0
+kpt 3*0.25
+natom 1
+nband 1
+nkpt 1
+nline 1 
+nstep 1
+ntypat 1
+tolwfr 1.0d-14
+typat 1 
+znucl 2
+xred 3*0
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "02he.bare"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% exclude_builders = bob_gnu_13.2_openmp
+#%% [files]
+#%% files_to_test = 
+#%%   t34.abo, tolnlines = 38, tolabs = 1.1e-2, tolrel = 8.0e-6, fld_options = -medium
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = Unknown
+#%% keywords = MINIMAL
+#%% description = 
+#%%   Isolated Helium atom
+#%%   Test one functional from libXC that was present in ABINITv5 (LDAs and GGAs). 
+#%%   This is to check the portability for different platform.
+#%%   Extremely quick (nstep=1, nline=1). 
+#%%<END TEST_INFO>

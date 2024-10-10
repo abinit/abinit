@@ -6,7 +6,7 @@
 !!  FIXME: add description.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2022 ABINIT group (JB)
+!!  Copyright (C) 2014-2024 ABINIT group (JB)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -35,6 +35,7 @@ module m_scfcv
  use m_hdr
  use m_extfpmd
  use m_dtfil
+ use m_xg_nonlop
 
  use defs_datatypes,     only : pseudopotential_type
  use defs_abitypes,      only : MPI_type
@@ -71,7 +72,7 @@ module m_scfcv
 !!  This structured datatype contains the necessary data
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2022 ABINIT group (JB)
+!!  Copyright (C) 2014-2024 ABINIT group (JB)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -107,6 +108,7 @@ module m_scfcv
    type(wffile_type),pointer :: wffnow => null()
    type(wvl_data),pointer :: wvl => null()
    type(paw_dmft_type), pointer :: paw_dmft => null()
+   type(xg_nonlop_t) :: xg_nonlop
 
    !arrays
    integer,pointer :: atindx(:) => null()
@@ -175,7 +177,7 @@ subroutine scfcv_init(this,atindx,atindx1,cg,cprj,cpus,&
 &  nfftf,npwarr,occ,pawang,pawfgr,pawrad,pawrhoij,&
 &  pawtab,phnons,psps,pwind,pwind_alloc,pwnsfac,rec_set,&
 &  resid,results_gs,scf_history,fatvshift,&
-&  symrec,taug,taur,wvl,ylm,ylmgr,paw_dmft,wffnew,wffnow)
+&  symrec,taug,taur,wvl,ylm,ylmgr,paw_dmft,wffnew,wffnow,xg_nonlop)
 
 
 !Arguments ------------------------------------
@@ -229,6 +231,7 @@ subroutine scfcv_init(this,atindx,atindx1,cg,cprj,cpus,&
  type(paw_dmft_type), intent(in),target :: paw_dmft
  type(wffile_type),intent(in),target :: wffnew,wffnow
  type(pawcprj_type), allocatable,intent(in),target :: cprj(:,:)
+ type(xg_nonlop_t),intent(inout) :: xg_nonlop
 !Local variables -------------------------
 !scalars
  logical :: DEBUG=.FALSE.
@@ -321,6 +324,7 @@ subroutine scfcv_init(this,atindx,atindx1,cg,cprj,cpus,&
  this%wffnow=>wffnow
  !this%xred=>xred
  !this%xred_old=>xred_old
+ this%xg_nonlop=xg_nonlop
 
 
  !!!!!!!!! INITIALIZE or REINITIALIZE parallelization here !!
@@ -666,7 +670,7 @@ subroutine scfcv_scfcv(this, electronpositron, itimes, rhog, rhor, rprimd, xred,
     this%nfftf,this%npwarr,&
     this%occ,this%paw_dmft,this%pawang,this%pawfgr,this%pawrad,this%pawrhoij,this%pawtab,this%phnons,this%psps,this%pwind,&
     this%pwind_alloc,this%pwnsfac,this%rec_set,this%resid,this%results_gs,rhog,rhor,rprimd,&
-    this%scf_history,this%symrec,this%taug,this%taur,this%wffnew,this%wvl,xred,xred_old,this%ylm,this%ylmgr,&
+    this%scf_history,this%symrec,this%taug,this%taur,this%wffnew,this%wvl,this%xg_nonlop,xred,xred_old,this%ylm,this%ylmgr,&
     conv_retcode)
 
 end subroutine scfcv_scfcv

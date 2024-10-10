@@ -111,5 +111,5 @@ prtdensph 1  ratsph 2*2.3 ! Printing of local magnetic moment
 #%%   * Computation of band structure in PAW+U
 #%%   * Calculation of partial DOS (diffs of partial DOS is not done)
 #%%   * Calculation of Fatbands (diff of a fatband file is done)
-#%% topics = PAW, DFT+U, ElecBandStructure
+#%% topics = PAW, DFT+U, ElecBandStructure, AtomCentered
 #%%<END TEST_INFO>

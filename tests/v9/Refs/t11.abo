@@ -1,8 +1,8 @@
 
-.Version 9.7.4 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 10.1.4.5 of ABINIT, released Sep 2024.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2022 ABINIT group . 
+.Copyright (C) 1998-2024 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,19 +14,18 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed  4 May 2022.
-- ( at 01h26 )
+.Starting date : Fri 13 Sep 2024.
+- ( at 19h15 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Test_suite/v9_t11-t12/t11.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v9_t11-t12/t11.abi
 - output file    -> t11.abo
 - root for input  files -> t11i
 - root for output files -> t11o
 
 - inpspheads : Reading pseudopotential header in XML form from 
--   /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ga.xml
+-   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ga.xml
 - inpspheads : Reading pseudopotential header in XML form from 
--   /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/As.xml
-
+-   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/As.xml
  DATASET    1 : space group F-4 3 m (#216); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  1.
@@ -44,7 +43,6 @@ P This job should need less than                      24.090 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.182 Mbytes ; DEN or POT disk file :      0.714 Mbytes.
 ================================================================================
-
 
  DATASET    2 : space group F-4 3 m (#216); Bravais cF (face-center cubic)
 ================================================================================
@@ -64,7 +62,6 @@ P This job should need less than                      19.973 Mbytes of memory.
 _ WF disk file :      0.388 Mbytes ; DEN or POT disk file :      0.714 Mbytes.
 ================================================================================
 
-
  DATASET    3 : space group F-4 3 m (#216); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  3.
@@ -83,7 +80,6 @@ P This job should need less than                      23.394 Mbytes of memory.
 _ WF disk file :      3.093 Mbytes ; DEN or POT disk file :      0.714 Mbytes.
 ================================================================================
 
-
  DATASET    4 : space group F-4 3 m (#216); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  4 (RF).
@@ -101,7 +97,6 @@ P This job should need less than                      12.782 Mbytes of memory.
 _ WF disk file :      3.093 Mbytes ; DEN or POT disk file :      0.091 Mbytes.
 ================================================================================
 
-
  DATASET    5 : space group F-4 3 m (#216); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  5 (RF).
@@ -118,7 +113,6 @@ P This job should need less than                      12.782 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      3.093 Mbytes ; DEN or POT disk file :      0.091 Mbytes.
 ================================================================================
-
 
  DATASET    6 : space group F-4 3 m (#216); Bravais cF (face-center cubic)
 ================================================================================
@@ -141,10 +135,10 @@ _ WF disk file :      3.093 Mbytes ; DEN or POT disk file :      0.091 Mbytes.
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
 -
-- outvars: echo of selected default values                                      
--   iomode0 =  0 , fftalg0 =312 , wfoptalg0 = 10
+- outvars: echo of selected default values
+-   iomode0 =  0 , fftalg0 =512 , wfoptalg0 = 10
 -
-- outvars: echo of global parameters not present in the input file              
+- outvars: echo of global parameters not present in the input file
 -  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
@@ -152,7 +146,7 @@ _ WF disk file :      3.093 Mbytes ; DEN or POT disk file :      0.091 Mbytes.
               amu      6.97230000E+01  7.49215900E+01
            diemac      1.00000000E+01
              ecut      6.00000000E+00 Hartree
--          fftalg         312
+-          fftalg         512
            getden1          0
            getden2          1
            getden3          1
@@ -496,9 +490,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
          ecut(hartree)=     24.000   => boxcut(ratio)=   2.17791
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ga.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ga.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ga.xml
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ga.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ga.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ga.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  6 (lmn_size= 18), orbitals=   0   0   1   1   2   2
  Spheres core radius: rc_sph= 2.10359248
@@ -516,9 +510,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/As.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/As.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/As.xml
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/As.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/As.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/As.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  6 (lmn_size= 18), orbitals=   0   0   1   1   2   2
  Spheres core radius: rc_sph= 2.10391912
@@ -553,14 +547,14 @@ tolerances: {tolwfr: 1.00E-12, }
  ETOT  1  -191.29622772688    -1.913E+02 2.168E-01 2.882E+01
  ETOT  2  -191.41504238913    -1.188E-01 5.334E-05 1.346E+00
  ETOT  3  -191.40324005523     1.180E-02 2.790E-04 1.899E-01
- ETOT  4  -191.40286574969     3.743E-04 1.265E-05 1.248E-02
+ ETOT  4  -191.40286574968     3.743E-04 1.265E-05 1.248E-02
  ETOT  5  -191.40293684377    -7.109E-05 1.628E-06 2.851E-03
  ETOT  6  -191.40298119128    -4.435E-05 8.236E-08 1.802E-04
  ETOT  7  -191.40298664216    -5.451E-06 1.303E-08 7.931E-06
  ETOT  8  -191.40298664979    -7.629E-09 8.051E-10 3.400E-07
  ETOT  9  -191.40298665613    -6.337E-09 3.143E-11 4.324E-08
- ETOT 10  -191.40298665634    -2.148E-10 3.643E-12 2.286E-09
- ETOT 11  -191.40298665640    -6.278E-11 9.410E-13 8.974E-11
+ ETOT 10  -191.40298665634    -2.146E-10 3.643E-12 2.286E-09
+ ETOT 11  -191.40298665640    -6.330E-11 9.411E-13 8.974E-11
 
  At SCF step   11   max residual=  9.41E-13 < tolwfr=  1.00E-12 =>converged.
 
@@ -580,7 +574,7 @@ lattice_vectors:
 lattice_lengths: [   7.49533,    7.49533,    7.49533, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.9775400E+02
-convergence: {deltae: -6.278E-11, res2:  8.974E-11, residm:  9.410E-13, diffor: null, }
+convergence: {deltae: -6.330E-11, res2:  8.974E-11, residm:  9.411E-13, diffor: null, }
 etotal    :  -1.91402987E+02
 entropy   :   0.00000000E+00
 fermie    :   1.34017190E-01
@@ -593,9 +587,9 @@ xred      :
 - [  0.0000E+00,   0.0000E+00,   0.0000E+00, Ga]
 - [  2.5000E-01,   2.5000E-01,   2.5000E-01, As]
 cartesian_forces: # hartree/bohr
-- [ -1.01609254E-28,  -2.03218507E-28,   3.04827761E-28, ]
-- [  1.01609254E-28,   2.03218507E-28,  -3.04827761E-28, ]
-force_length_stats: {min:   3.80187015E-28, max:   3.80187015E-28, mean:   3.80187015E-28, }
+- [ -2.03218507E-28,   1.01609254E-28,   2.03218507E-28, ]
+- [  2.03218507E-28,  -1.01609254E-28,  -2.03218507E-28, ]
+force_length_stats: {min:   3.04827761E-28, max:   3.04827761E-28, mean:   3.04827761E-28, }
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
@@ -605,15 +599,15 @@ force_length_stats: {min:   3.80187015E-28, max:   3.80187015E-28, mean:   3.801
     1   2.10359     5.609481     5.609481     11.218961     0.000000
     2   2.10392     6.399747     6.399747     12.799495    -0.000000
  ---------------------------------------------------------------------
-  Sum:             12.009228    12.009228     24.018456     0.000000
- Total magnetization (from the atomic spheres):             0.000000
- Total magnetization (exact up - dn):                       0.000000
+  Sum:             12.009228    12.009228     24.018456    -0.000000
+ Total magnetization (from the atomic spheres):            -0.000000
+ Total magnetization (exact up - dn):                      -0.000000
 
  PAW TEST:
  ==== Compensation charge inside spheres ============
  The following values must be close to each other ...
- Compensation charge over spherical meshes =     16.386022093202111
- Compensation charge over fine fft grid    =     16.386024367572027
+ Compensation charge over spherical meshes =     16.386022093104170
+ Compensation charge over fine fft grid    =     16.386024367527476
 
  ==== Results concerning PAW augmentation regions ====
 
@@ -745,27 +739,27 @@ force_length_stats: {min:   3.80187015E-28, max:   3.80187015E-28, mean:   3.801
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   47.789E-14; max=  94.100E-14
+ Mean square residual over all n,k,spin=   47.789E-14; max=  94.107E-14
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.250000000000      0.250000000000      0.250000000000
- rms dE/dt=  1.6452E-27; max dE/dt=  2.1541E-27; dE/dt below (all hartree)
+ rms dE/dt=  1.8655E-27; max dE/dt=  2.1541E-27; dE/dt below (all hartree)
     1      -0.000000000000     -0.000000000000      0.000000000000
-    2      -0.000000000000      0.000000000000     -0.000000000000
+    2       0.000000000000     -0.000000000000      0.000000000000
 
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
     2      1.40231960276350     1.40231960276350     1.40231960276350
 
  cartesian forces (hartree/bohr) at end:
-    1     -0.00000000000000    -0.00000000000000     0.00000000000000
-    2      0.00000000000000     0.00000000000000    -0.00000000000000
- frms,max,avg= 2.1950108E-28 3.0482776E-28   0.000E+00  0.000E+00  0.000E+00 h/b
+    1     -0.00000000000000     0.00000000000000     0.00000000000000
+    2      0.00000000000000    -0.00000000000000    -0.00000000000000
+ frms,max,avg= 1.7599239E-28 2.0321851E-28   0.000E+00  0.000E+00  0.000E+00 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1     -0.00000000000000    -0.00000000000000     0.00000000000000
-    2      0.00000000000000     0.00000000000000    -0.00000000000000
- frms,max,avg= 1.1287198E-26 1.5674872E-26   0.000E+00  0.000E+00  0.000E+00 e/A
+    1     -0.00000000000000     0.00000000000000     0.00000000000000
+    2      0.00000000000000    -0.00000000000000    -0.00000000000000
+ frms,max,avg= 9.0498918E-27 1.0449915E-26   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales= 10.600000000000 10.600000000000 10.600000000000 bohr
               =  5.609278411054  5.609278411054  5.609278411054 angstroms
  prteigrs : about to open file t11o_DS1_EIG
@@ -786,28 +780,28 @@ force_length_stats: {min:   3.80187015E-28, max:   3.80187015E-28, mean:   3.801
 --- !EnergyTerms
 iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
-kinetic             :  1.19403757774671E+01
-hartree             :  5.94173168263904E+01
-xc                  : -4.24330487091131E+00
+kinetic             :  1.19403757774738E+01
+hartree             :  5.94173168262145E+01
+xc                  : -4.24330487094194E+00
 Ewald energy        : -9.99618247882910E+01
 psp_core            :  4.42469542721763E+00
-local_psp           : -1.59318243679553E+02
-spherical_terms     : -3.66199938127778E+00
-total_energy        : -1.91402984688958E+02
-total_energy_eV     : -5.20834008832095E+03
+local_psp           : -1.59318243679354E+02
+spherical_terms     : -3.66199938126205E+00
+total_energy        : -1.91402984688943E+02
+total_energy_eV     : -5.20834008832054E+03
 ...
 
 
 --- !EnergyTermsDC
 iteration_state     : {dtset: 1, }
 comment             : '"Double-counting" decomposition of free energy'
-band_energy         : -1.82333192371269E+01
+band_energy         : -1.82333192371309E+01
 Ewald energy        : -9.99618247882910E+01
 psp_core            :  4.42469542721763E+00
-xc_dc               : -5.82270621859777E+01
-spherical_terms     : -1.94054758722266E+01
+xc_dc               : -5.82270621857918E+01
+spherical_terms     : -1.94054758724088E+01
 total_energy_dc     : -1.91402986656405E+02
-total_energy_dc_eV  : -5.20834014185788E+03
+total_energy_dc_eV  : -5.20834014185789E+03
 ...
 
 
@@ -920,13 +914,13 @@ force_length_stats: {min: null, max: null, mean: null, }
     1   2.10359     5.609481     5.609481     11.218961     0.000000
     2   2.10392     6.399747     6.399747     12.799495    -0.000000
  ---------------------------------------------------------------------
-  Sum:             12.009228    12.009228     24.018456     0.000000
- Total magnetization (from the atomic spheres):             0.000000
- Total magnetization (exact up - dn):                       0.000000
+  Sum:             12.009228    12.009228     24.018456    -0.000000
+ Total magnetization (from the atomic spheres):            -0.000000
+ Total magnetization (exact up - dn):                      -0.000000
 
  PAW TEST:
  ==== Compensation charge inside spheres ============
- Compensation charge over spherical meshes =     16.386021787804211
+ Compensation charge over spherical meshes =     16.386021787759766
 
  ==== Results concerning PAW augmentation regions ====
 
@@ -1058,7 +1052,7 @@ force_length_stats: {min: null, max: null, mean: null, }
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   37.164E-14; max=  89.497E-14
+ Mean square residual over all n,k,spin=   37.164E-14; max=  89.504E-14
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.250000000000      0.250000000000      0.250000000000
@@ -1165,7 +1159,7 @@ lattice_vectors:
 lattice_lengths: [   7.49533,    7.49533,    7.49533, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.9775400E+02
-convergence: {deltae:  0.000E+00, res2:  0.000E+00, residm:  8.951E-13, diffor:  0.000E+00, }
+convergence: {deltae:  0.000E+00, res2:  0.000E+00, residm:  8.950E-13, diffor:  0.000E+00, }
 etotal    :  -1.91402987E+02
 entropy   :   0.00000000E+00
 fermie    :   1.34017190E-01
@@ -1185,13 +1179,13 @@ force_length_stats: {min: null, max: null, mean: null, }
     1   2.10359     5.609481     5.609481     11.218961     0.000000
     2   2.10392     6.399747     6.399747     12.799495    -0.000000
  ---------------------------------------------------------------------
-  Sum:             12.009228    12.009228     24.018456     0.000000
- Total magnetization (from the atomic spheres):             0.000000
- Total magnetization (exact up - dn):                       0.000000
+  Sum:             12.009228    12.009228     24.018456    -0.000000
+ Total magnetization (from the atomic spheres):            -0.000000
+ Total magnetization (exact up - dn):                      -0.000000
 
  PAW TEST:
  ==== Compensation charge inside spheres ============
- Compensation charge over spherical meshes =     16.386021787804211
+ Compensation charge over spherical meshes =     16.386021787759766
 
  ==== Results concerning PAW augmentation regions ====
 
@@ -1323,7 +1317,7 @@ force_length_stats: {min: null, max: null, mean: null, }
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   37.721E-14; max=  89.506E-14
+ Mean square residual over all n,k,spin=   37.721E-14; max=  89.504E-14
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.250000000000      0.250000000000      0.250000000000
@@ -1413,7 +1407,7 @@ tolerances: {tolwfr: 1.00E-08, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  -11.575129960328     -1.158E+01 0.000E+00 0.000E+00
+-ETOT  1  -11.575129961272     -1.158E+01 0.000E+00 0.000E+00
 
  At SCF step    1   max residual=  0.00E+00 < tolwfr=  1.00E-08 =>converged.
 ================================================================================
@@ -1422,7 +1416,7 @@ tolerances: {tolwfr: 1.00E-08, }
 
  Mean square residual over all n,k,spin=   00.000E+00; max=  00.000E+00
  dfpt_looppert : ek2=    5.9027893890E+01
-          f-sum rule ratio=    3.7523919264E-01
+          f-sum rule ratio=    3.7523919267E-01
  prteigrs : about to open file t11t_1WF1_EIG
  Expectation of eigenvalue derivatives (hartree) for nkpt=  16  k points, SPIN UP:
   (in case of degenerate eigenvalues, averaged derivative)
@@ -1445,19 +1439,19 @@ tolerances: {tolwfr: 1.00E-08, }
 
  Nine components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
-     kin0=   2.35541296E+00 eigvalue=   2.09694710E+00  local=  -1.54215752E+00
+     kin0=   2.35541297E+00 eigvalue=   2.09694710E+00  local=  -1.54215752E+00
  4,5,6: 1st-order hamiltonian combined with 1st and 0th-order wfs
      kin1=  -2.21495792E+01  Hartree=   0.00000000E+00     xc=   0.00000000E+00
  7,8,9: eventually, occupation + non-local contributions
-    edocc=   8.56664331E+00     enl0=   5.53629477E-01   enl1=  -1.45602604E+00
+    edocc=   8.56664331E+00     enl0=   5.53629478E-01   enl1=  -1.45602604E+00
  10: eventually, PAW "on-site" Hxc contribution: epaw1=   0.00000000E+00
  1-10 gives the relaxation energy (to be shifted if some occ is /=2.0)
    erelax=  -1.15751300E+01
  11 Contribution from 1st-order change of wavefunctions overlap
  eovl1 =   2.27672526E-01
   No Ewald or frozen-wf contrib.: the relaxation energy is the total one
- 2DEtotal=   -0.1157512996E+02 Ha. Also 2DEtotal=   -0.314975304580E+03 eV
-    (  non-var. 2DEtotal :   -1.1575130119E+01 Ha)
+ 2DEtotal=   -0.1157512996E+02 Ha. Also 2DEtotal=   -0.314975304606E+03 eV
+    (  non-var. 2DEtotal :   -1.1575130120E+01 Ha)
 ================================================================================
 
  ---- first-order wavefunction calculations are completed ----
@@ -1527,7 +1521,7 @@ tolerances: {tolwfr: 1.00E-08, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  -11.575129960098     -1.158E+01 0.000E+00 0.000E+00
+-ETOT  1  -11.575129961041     -1.158E+01 0.000E+00 0.000E+00
 
  At SCF step    1   max residual=  0.00E+00 < tolwfr=  1.00E-08 =>converged.
 ================================================================================
@@ -1536,7 +1530,7 @@ tolerances: {tolwfr: 1.00E-08, }
 
  Mean square residual over all n,k,spin=   00.000E+00; max=  00.000E+00
  dfpt_looppert : ek2=    5.9027893890E+01
-          f-sum rule ratio=    3.7523919264E-01
+          f-sum rule ratio=    3.7523919266E-01
  prteigrs : about to open file t11t_1WF1_EIG
  Expectation of eigenvalue derivatives (hartree) for nkpt=  16  k points, SPIN UP:
   (in case of degenerate eigenvalues, averaged derivative)
@@ -1559,19 +1553,19 @@ tolerances: {tolwfr: 1.00E-08, }
 
  Nine components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
-     kin0=   2.35541296E+00 eigvalue=   2.09694710E+00  local=  -1.54215752E+00
+     kin0=   2.35541297E+00 eigvalue=   2.09694710E+00  local=  -1.54215752E+00
  4,5,6: 1st-order hamiltonian combined with 1st and 0th-order wfs
      kin1=  -2.21495792E+01  Hartree=   0.00000000E+00     xc=   0.00000000E+00
  7,8,9: eventually, occupation + non-local contributions
-    edocc=   8.56664331E+00     enl0=   5.53629477E-01   enl1=  -1.45602604E+00
+    edocc=   8.56664331E+00     enl0=   5.53629478E-01   enl1=  -1.45602604E+00
  10: eventually, PAW "on-site" Hxc contribution: epaw1=   0.00000000E+00
  1-10 gives the relaxation energy (to be shifted if some occ is /=2.0)
    erelax=  -1.15751300E+01
  11 Contribution from 1st-order change of wavefunctions overlap
  eovl1 =   2.27672526E-01
   No Ewald or frozen-wf contrib.: the relaxation energy is the total one
- 2DEtotal=   -0.1157512996E+02 Ha. Also 2DEtotal=   -0.314975304574E+03 eV
-    (  non-var. 2DEtotal :   -1.1575130119E+01 Ha)
+ 2DEtotal=   -0.1157512996E+02 Ha. Also 2DEtotal=   -0.314975304599E+03 eV
+    (  non-var. 2DEtotal :   -1.1575130120E+01 Ha)
 ================================================================================
 
  ---- first-order wavefunction calculations are completed ----
@@ -1641,7 +1635,7 @@ tolerances: {tolwfr: 1.00E-08, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  -11.575129959866     -1.158E+01 0.000E+00 0.000E+00
+-ETOT  1  -11.575129960809     -1.158E+01 0.000E+00 0.000E+00
 
  At SCF step    1   max residual=  0.00E+00 < tolwfr=  1.00E-08 =>converged.
 ================================================================================
@@ -1650,7 +1644,7 @@ tolerances: {tolwfr: 1.00E-08, }
 
  Mean square residual over all n,k,spin=   00.000E+00; max=  00.000E+00
  dfpt_looppert : ek2=    5.9027893890E+01
-          f-sum rule ratio=    3.7523919263E-01
+          f-sum rule ratio=    3.7523919266E-01
  prteigrs : about to open file t11t_1WF1_EIG
  Expectation of eigenvalue derivatives (hartree) for nkpt=  16  k points, SPIN UP:
   (in case of degenerate eigenvalues, averaged derivative)
@@ -1673,19 +1667,19 @@ tolerances: {tolwfr: 1.00E-08, }
 
  Nine components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
-     kin0=   2.35541296E+00 eigvalue=   2.09694710E+00  local=  -1.54215752E+00
+     kin0=   2.35541297E+00 eigvalue=   2.09694710E+00  local=  -1.54215752E+00
  4,5,6: 1st-order hamiltonian combined with 1st and 0th-order wfs
      kin1=  -2.21495792E+01  Hartree=   0.00000000E+00     xc=   0.00000000E+00
  7,8,9: eventually, occupation + non-local contributions
-    edocc=   8.56664331E+00     enl0=   5.53629477E-01   enl1=  -1.45602604E+00
+    edocc=   8.56664331E+00     enl0=   5.53629478E-01   enl1=  -1.45602604E+00
  10: eventually, PAW "on-site" Hxc contribution: epaw1=   0.00000000E+00
  1-10 gives the relaxation energy (to be shifted if some occ is /=2.0)
    erelax=  -1.15751300E+01
  11 Contribution from 1st-order change of wavefunctions overlap
  eovl1 =   2.27672526E-01
   No Ewald or frozen-wf contrib.: the relaxation energy is the total one
- 2DEtotal=   -0.1157512996E+02 Ha. Also 2DEtotal=   -0.314975304567E+03 eV
-    (  non-var. 2DEtotal :   -1.1575130119E+01 Ha)
+ 2DEtotal=   -0.1157512996E+02 Ha. Also 2DEtotal=   -0.314975304593E+03 eV
+    (  non-var. 2DEtotal :   -1.1575130120E+01 Ha)
 ================================================================================
 
  ---- first-order wavefunction calculations are completed ----
@@ -1702,12 +1696,12 @@ tolerances: {tolwfr: 1.00E-08, }
            diemac      1.00000000E+01
              ecut      6.00000000E+00 Hartree
            etotal1    -1.9140298666E+02
-           etotal4    -1.1575129960E+01
-           etotal5    -1.1575129960E+01
-           etotal6    -1.1575129960E+01
-            fcart1    -1.0160925370E-28 -2.0321850741E-28  3.0482776111E-28
-                       1.0160925370E-28  2.0321850741E-28 -3.0482776111E-28
--          fftalg         312
+           etotal4    -1.1575129961E+01
+           etotal5    -1.1575129961E+01
+           etotal6    -1.1575129961E+01
+            fcart1    -2.0321850741E-28  1.0160925370E-28  2.0321850741E-28
+                       2.0321850741E-28 -1.0160925370E-28 -2.0321850741E-28
+-          fftalg         512
            getden1          0
            getden2          1
            getden3          1
@@ -2092,10 +2086,10 @@ P          mk1mem6         16
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         13.2  wall=         13.4
+- Proc.   0 individual time (sec): cpu=          5.9  wall=          5.9
 
 ================================================================================
 
  Calculation completed.
-.Delivered  37 WARNINGs and  11 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         13.2  wall=         13.4
+.Delivered  49 WARNINGs and  11 COMMENTs to log file.
++Overall time at end (sec) : cpu=          5.9  wall=          5.9

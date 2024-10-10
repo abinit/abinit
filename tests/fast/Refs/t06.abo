@@ -1,8 +1,8 @@
 
-.Version 9.3.1 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 10.1.4.5 of ABINIT, released Sep 2024.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2022 ABINIT group . 
+.Copyright (C) 1998-2024 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,14 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h17 )
+.Starting date : Fri 13 Sep 2024.
+- ( at 19h00 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/fast_t03-t05-t06-t07-t08-t09-t11-t12-t14-t16/t06.in
-- output file    -> t06.out
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/fast_t03-t05-t06-t07-t08-t09-t11-t12-t14-t16/t06.abi
+- output file    -> t06.abo
 - root for input  files -> t05o
 - root for output files -> t06o
-
 
  Symmetries : space group F-4 3 m (#216); Bravais cF (face-center cubic)
 ================================================================================
@@ -34,7 +33,7 @@
 -    mband =           4        mffmem =           1         mkmem =           2
        mpw =         184          nfft =        4096          nkpt =           2
 ================================================================================
-P This job should need less than                       1.743 Mbytes of memory.
+P This job should need less than                       1.860 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.024 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
@@ -43,10 +42,10 @@ _ WF disk file :      0.024 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
 -
-- outvars: echo of selected default values                                      
--   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+- outvars: echo of selected default values
+-   iomode0 =  0 , fftalg0 =512 , wfoptalg0 =  0
 -
-- outvars: echo of global parameters not present in the input file              
+- outvars: echo of global parameters not present in the input file
 -  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
@@ -55,7 +54,7 @@ _ WF disk file :      0.024 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
            diemac      1.20000000E+01
              ecut      5.80000000E+00 Hartree
            enunit           2
--          fftalg         312
+-          fftalg         512
             intxc           1
            irdwfk           1
               kpt      1.00000000E+00  1.00000000E+00  1.00000000E+00
@@ -133,8 +132,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      5.800   => boxcut(ratio)=   2.03365
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -166,7 +165,7 @@ tolerances: {tolwfr: 1.00E-12, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -8.8582479417566    -8.858E+00 6.311E-21 6.269E-29
+ ETOT  1  -8.8582479417566    -8.858E+00 6.311E-21 6.946E-29
 
  At SCF step    1   max residual=  6.31E-21 < tolwfr=  1.00E-12 =>converged.
 
@@ -186,7 +185,7 @@ lattice_vectors:
 lattice_lengths: [   7.25711,    7.25711,    7.25711, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.7025701E+02
-convergence: {deltae: -8.858E+00, res2:  6.269E-29, residm:  6.311E-21, diffor: null, }
+convergence: {deltae: -8.858E+00, res2:  6.946E-29, residm:  6.311E-21, diffor: null, }
 etotal    :  -8.85824794E+00
 entropy   :   0.00000000E+00
 fermie    :   1.86070637E-01
@@ -199,9 +198,9 @@ xred      :
 - [  0.0000E+00,   0.0000E+00,   0.0000E+00, Si]
 - [  2.5000E-01,   2.5000E-01,   2.5000E-01, Si]
 cartesian_forces: # hartree/bohr
-- [ -3.07454916E-31,   3.07454916E-31,  -5.12424860E-31, ]
-- [  3.07454916E-31,  -3.07454916E-31,   5.12424860E-31, ]
-force_length_stats: {min:   6.72038903E-31, max:   6.72038903E-31, mean:   6.72038903E-31, }
+- [ -1.60937073E-48,   1.60937073E-48,   2.04969944E-31, ]
+- [  1.60937073E-48,  -1.60937073E-48,  -2.04969944E-31, ]
+force_length_stats: {min:   2.04969944E-31, max:   2.04969944E-31, mean:   2.04969944E-31, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -217,23 +216,23 @@ force_length_stats: {min:   6.72038903E-31, max:   6.72038903E-31, mean:   6.720
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.250000000000      0.250000000000      0.250000000000
- rms dE/dt=  3.3261E-30; max dE/dt=  2.1036E-30; dE/dt below (all hartree)
-    1      -0.000000000000      0.000000000000      0.000000000000
-    2      -0.000000000000     -0.000000000000      0.000000000000
+ rms dE/dt=  1.2145E-30; max dE/dt=  2.1036E-30; dE/dt below (all hartree)
+    1       0.000000000000      0.000000000000      0.000000000000
+    2       0.000000000000      0.000000000000      0.000000000000
 
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
     2      1.35775097531303     1.35775097531303     1.35775097531303
 
  cartesian forces (hartree/bohr) at end:
-    1     -0.00000000000000     0.00000000000000    -0.00000000000000
-    2      0.00000000000000    -0.00000000000000     0.00000000000000
- frms,max,avg= 3.8800184E-31 5.1242486E-31   0.000E+00  0.000E+00  0.000E+00 h/b
+    1     -0.00000000000000     0.00000000000000     0.00000000000000
+    2      0.00000000000000    -0.00000000000000    -0.00000000000000
+ frms,max,avg= 1.1833945E-31 2.0496994E-31   0.000E+00  0.000E+00  0.000E+00 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1     -0.00000000000000     0.00000000000000    -0.00000000000000
-    2      0.00000000000000    -0.00000000000000     0.00000000000000
- frms,max,avg= 1.9951855E-29 2.6349944E-29   0.000E+00  0.000E+00  0.000E+00 e/A
+    1     -0.00000000000000     0.00000000000000     0.00000000000000
+    2      0.00000000000000    -0.00000000000000    -0.00000000000000
+ frms,max,avg= 6.0852588E-30 1.0539977E-29   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales= 10.263110000000 10.263110000000 10.263110000000 bohr
               =  5.431003901252  5.431003901252  5.431003901252 angstroms
  prteigrs : about to open file t06o_EIG
@@ -254,13 +253,13 @@ force_length_stats: {min:   6.72038903E-31, max:   6.72038903E-31, mean:   6.720
 iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
 kinetic             :  3.00784354324260E+00
-hartree             :  5.50475055136972E-01
+hartree             :  5.50475055136971E-01
 xc                  : -3.53413263971835E+00
 Ewald energy        : -8.39791921808003E+00
 psp_core            :  8.48892598836918E-02
-local_psp           : -2.49161789779772E+00
+local_psp           : -2.49161789779771E+00
 non_local_psp       :  1.92221395557625E+00
-total_energy        : -8.85824794175659E+00
+total_energy        : -8.85824794175658E+00
 total_energy_eV     : -2.41045185070193E+02
 band_energy         :  2.22652719489170E-01
 ...
@@ -286,9 +285,9 @@ band_energy         :  2.22652719489170E-01
              ecut      5.80000000E+00 Hartree
            enunit           2
            etotal     -8.8582479418E+00
-            fcart     -3.0745491580E-31  3.0745491580E-31 -5.1242485966E-31
-                       3.0745491580E-31 -3.0745491580E-31  5.1242485966E-31
--          fftalg         312
+            fcart     -1.6093707258E-48  1.6093707258E-48  2.0496994387E-31
+                       1.6093707258E-48 -1.6093707258E-48 -2.0496994387E-31
+-          fftalg         512
             intxc           1
            irdwfk           1
               kpt      1.00000000E+00  1.00000000E+00  1.00000000E+00
@@ -336,6 +335,11 @@ P           mkmem           2
             znucl       14.00000
 
 ================================================================================
+
+ The spacegroup number, the magnetic point group, and/or the number of symmetries
+ have changed between the initial recognition based on the input file
+ and a postprocessing based on the final acell, rprim, and xred.
+ More details in the log file.
 
 
 - Timing analysis has been suppressed with timopt=0
@@ -429,5 +433,5 @@ P           mkmem           2
 ================================================================================
 
  Calculation completed.
-.Delivered   1 WARNINGs and   1 COMMENTs to log file.
+.Delivered   2 WARNINGs and   2 COMMENTs to log file.
 +Overall time at end (sec) : cpu=          0.4  wall=          0.4

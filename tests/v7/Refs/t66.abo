@@ -1,8 +1,8 @@
 
-.Version 9.3.1 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 10.1.4.5 of ABINIT, released Sep 2024.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2022 ABINIT group . 
+.Copyright (C) 1998-2024 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,14 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h32 )
+.Starting date : Fri 13 Sep 2024.
+- ( at 19h13 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v7_t66/t66.in
-- output file    -> t66.out
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v7_t66/t66.abi
+- output file    -> t66.abo
 - root for input  files -> t66i
 - root for output files -> t66o
-
 
  DATASET    1 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -34,11 +33,10 @@
 -    mband =           5        mffmem =           1         mkmem =           4
        mpw =         194          nfft =        4096          nkpt =           4
 ================================================================================
-P This job should need less than                       2.380 Mbytes of memory.
+P This job should need less than                       2.496 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.120 Mbytes ; DEN or POT disk file :      0.065 Mbytes.
 ================================================================================
-
 
  DATASET    2 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -60,10 +58,10 @@ _ WF disk file :      0.120 Mbytes ; DEN or POT disk file :      0.065 Mbytes.
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
 -
-- outvars: echo of selected default values                                      
--   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+- outvars: echo of selected default values
+-   iomode0 =  0 , fftalg0 =512 , wfoptalg0 =  0
 -
-- outvars: echo of global parameters not present in the input file              
+- outvars: echo of global parameters not present in the input file
 -  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
@@ -71,7 +69,7 @@ _ WF disk file :      0.120 Mbytes ; DEN or POT disk file :      0.065 Mbytes.
               amu      2.80855000E+01
            diemac      1.20000000E+01
              ecut      6.00000000E+00 Hartree
--          fftalg         312
+-          fftalg         512
            getwfk1          0
            getwfk2         -1
            istwfk1       2    0    0    0
@@ -243,8 +241,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.00850
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosGTH_pwteter/14si.pspgth
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosGTH_pwteter/14si.pspgth
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosGTH_pwteter/14si.pspgth
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosGTH_pwteter/14si.pspgth
 - Goedecker-Teter-Hutter  Fri May 31 17:22:04 EDT 1996
 - 14.00000   4.00000    960531                znucl, zion, pspdat
     2    1    1    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -281,13 +279,13 @@ tolerances: {tolwfr: 1.00E-14, }
      iter   Etot(hartree)      deltaE(h)  residm     vres2
  ETOT  1  -7.8618190211833    -7.862E+00 1.677E-03 7.452E+00
  ETOT  2  -7.8672083247803    -5.389E-03 2.858E-06 2.569E-01
- ETOT  3  -7.8673316881058    -1.234E-04 2.751E-06 3.256E-03
+ ETOT  3  -7.8673316881059    -1.234E-04 2.751E-06 3.256E-03
  ETOT  4  -7.8673326446059    -9.565E-07 2.388E-08 3.211E-06
  ETOT  5  -7.8673326453024    -6.965E-10 1.741E-10 1.316E-08
- ETOT  6  -7.8673326453076    -5.278E-12 9.381E-12 6.586E-11
- ETOT  7  -7.8673326453076    -6.217E-15 1.997E-13 4.372E-13
- ETOT  8  -7.8673326453076     1.066E-14 1.025E-14 2.106E-14
- ETOT  9  -7.8673326453076     6.217E-15 7.299E-15 1.532E-16
+ ETOT  6  -7.8673326453076    -5.272E-12 9.381E-12 6.586E-11
+ ETOT  7  -7.8673326453077    -3.197E-14 1.997E-13 4.372E-13
+ ETOT  8  -7.8673326453076     2.576E-14 1.025E-14 2.106E-14
+ ETOT  9  -7.8673326453076     2.309E-14 7.299E-15 1.532E-16
 
  At SCF step    9   max residual=  7.30E-15 < tolwfr=  1.00E-14 =>converged.
 
@@ -307,7 +305,7 @@ lattice_vectors:
 lattice_lengths: [   7.22451,    7.22451,    7.22451, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.6663072E+02
-convergence: {deltae:  6.217E-15, res2:  1.532E-16, residm:  7.299E-15, diffor: null, }
+convergence: {deltae:  2.309E-14, res2:  1.532E-16, residm:  7.299E-15, diffor: null, }
 etotal    :  -7.86733265E+00
 entropy   :   0.00000000E+00
 fermie    :   2.66842638E-01
@@ -378,16 +376,16 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
-kinetic             :  3.10948168183450E+00
-hartree             :  5.58262621654837E-01
+kinetic             :  3.10948168183453E+00
+hartree             :  5.58262621654847E-01
 xc                  : -2.40661992270632E+00
 Ewald energy        : -8.43581958561899E+00
 psp_core            : -2.64619322653027E-01
-local_psp           : -2.25612474878306E+00
-non_local_psp       :  1.82810663096443E+00
-total_energy        : -7.86733264530763E+00
+local_psp           : -2.25612474878315E+00
+non_local_psp       :  1.82810663096450E+00
+total_energy        : -7.86733264530762E+00
 total_energy_eV     : -2.14081008565775E+02
-band_energy         :  6.59179494950955E-01
+band_energy         :  6.59179494950963E-01
 ...
 
 
@@ -430,8 +428,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.00850
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosGTH_pwteter/14si.pspgth
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosGTH_pwteter/14si.pspgth
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosGTH_pwteter/14si.pspgth
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosGTH_pwteter/14si.pspgth
 - Goedecker-Teter-Hutter  Fri May 31 17:22:04 EDT 1996
 - 14.00000   4.00000    960531                znucl, zion, pspdat
     2    1    1    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -466,7 +464,7 @@ tolerances: {toldfe: 1.00E-07, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -7.8903009585119    -7.890E+00 3.430E-11 2.594E-02
+ ETOT  1  -7.8903009585120    -7.890E+00 3.430E-11 2.594E-02
  ETOT  2  -7.8905539429103    -2.530E-04 1.146E-12 4.047E-03
  ETOT  3  -7.8905634386633    -9.496E-06 6.460E-08 2.678E-04
  ETOT  4  -7.8905640398121    -6.011E-07 9.072E-10 1.135E-05
@@ -514,12 +512,12 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  ---------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
  Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   2.00000     0.927705     0.927705      1.855410    -0.000000
-    2   2.00000     0.927705     0.927705      1.855410    -0.000000
+    1   2.00000     0.927705     0.927705      1.855410     0.000000
+    2   2.00000     0.927705     0.927705      1.855410     0.000000
  ---------------------------------------------------------------------
-  Sum:              1.855410     1.855410      3.710821    -0.000000
- Total magnetization (from the atomic spheres):            -0.000000
- Total magnetization (exact up - dn):                      -0.000000
+  Sum:              1.855410     1.855410      3.710821     0.000000
+ Total magnetization (from the atomic spheres):             0.000000
+ Total magnetization (exact up - dn):                       0.000000
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -609,7 +607,7 @@ total_energy_dc     : -7.89058415901845E+00
                       -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
             fcart2    -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
                       -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
--          fftalg         312
+-          fftalg         512
            getwfk1          0
            getwfk2         -1
            istwfk1       2    0    0    0
@@ -829,10 +827,10 @@ P           mkmem           4
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         10.1  wall=         10.2
+- Proc.   0 individual time (sec): cpu=          4.7  wall=          5.4
 
 ================================================================================
 
  Calculation completed.
-.Delivered   4 WARNINGs and   6 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         10.1  wall=         10.2
+.Delivered   3 WARNINGs and   7 COMMENTs to log file.
++Overall time at end (sec) : cpu=          4.7  wall=          5.4

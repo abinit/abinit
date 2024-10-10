@@ -7,7 +7,7 @@
 !! equation.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2015-2022 ABINIT group (LB,MT)
+!!  Copyright (C) 2015-2024 ABINIT group (LB,MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -563,8 +563,8 @@ subroutine rf2_apply_hamiltonian(cg_jband,cprj_jband,cwave,cwaveprj,h_cwave,s_cw
      cwave_j => cg_jband(:,1+(jband-1)*size_wf:jband*size_wf,1)
      if (has_cprj_jband) cprj_j => cprj_jband(:,1+(jband-1)*size_cprj:jband*size_cprj)
      iddk(:,:) = zero;if (ipert==natom+2) iddk(:,:)=cg_jband(:,1+(jband-1)*size_wf:jband*size_wf,2)
-     call getgh1c(berryopt,cwave_j,cprj_j,h_cwave,cwave_empty,s_cwave,gs_hamkq,iddk,idir,ipert,zero,&
-                  mpi_enreg,optlocal,optnl,opt_gvnlx1,rf_hamk_idir,sij_opt,tim_getgh1c,usevnl,conj=compute_conjugate)
+     call getgh1c(berryopt,cwave_j,cprj_j,h_cwave,cwave_empty,s_cwave,gs_hamkq,iddk,idir,ipert,(/zero/),&
+                  mpi_enreg,1,optlocal,optnl,opt_gvnlx1,rf_hamk_idir,sij_opt,tim_getgh1c,usevnl,conj=compute_conjugate)
      do iband=1,nband_k
        cwave_i => cg_jband(:,1+(iband-1)*size_wf:iband*size_wf,1)
        call dotprod_g(dotr,doti,gs_hamkq%istwf_k,size_wf,2,cwave_i,h_cwave,mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
@@ -586,8 +586,8 @@ subroutine rf2_apply_hamiltonian(cg_jband,cprj_jband,cwave,cwaveprj,h_cwave,s_cw
      ABI_FREE(iddk)
    end if ! end tests
 
-   call getgh1c(berryopt,cwave,cwaveprj,h_cwave,cwave_empty,s_cwave,gs_hamkq,gvnlx1,idir,ipert,zero,&
-                mpi_enreg,optlocal,optnl,opt_gvnlx1,rf_hamk_idir,sij_opt,tim_getgh1c,usevnl,conj=compute_conjugate)
+   call getgh1c(berryopt,cwave,cwaveprj,h_cwave,cwave_empty,s_cwave,gs_hamkq,gvnlx1,idir,ipert,(/zero/),&
+                mpi_enreg,1,optlocal,optnl,opt_gvnlx1,rf_hamk_idir,sij_opt,tim_getgh1c,usevnl,conj=compute_conjugate)
 
 ! *******************************************************************************************
 ! apply H^(2)

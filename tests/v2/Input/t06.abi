@@ -22,6 +22,10 @@
  diemac4  1.0
  tolwfr4  1.0d-12
 
+#Compatibility
+     asr   0   # The default value 1 is preferable, this is only to keep backward compatibility for the automatic tests
+  chneut   0   # The default value 1 is preferable, this is only to keep backward compatibility for the automatic tests
+
 #Common data
  acell   3*10.26
  amu 28.086

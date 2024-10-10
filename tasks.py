@@ -51,11 +51,13 @@ ALL_BINARIES = [
     "mrgscr",
     "multibinit",
     "optic",
-    "tdep",
+    "atdep",
     "testtransposer",
     "lruj",
 ]
 
+import platform
+SYSTEM = platform.system()
 
 @contextmanager
 def cd(path):
@@ -112,10 +114,15 @@ def make(ctx, jobs="auto", touch=False, clean=False, binary=""):
         # TODO Check for errors in make.stderr
         #cprint("Exit code: %s" % retcode, "green" if retcode == 0 else "red")
 
+        #if SYSTEM == "Darwin":
+        #    for binary in ALL_BINARIES:
+        #        cmd = f"codesign -v --force --deep src/98_main/{binary}"
+        #        cprint("Executing: %s" % cmd, "yellow")
+        #        ctx.run(cmd, pty=True)
 
 @task
 def clean(ctx):
-    """Remove object files in src and shared. Do not object files in fallbacks"""
+    """Remove object files in src and shared. Do not remove object files in fallbacks"""
     top = find_top_build_tree(".", with_abinit=False)
     with cd(top):
         ctx.run("cd src && make clean && cd ..", pty=True)
@@ -155,7 +162,7 @@ def makemake(ctx):
 def makedeep(ctx, jobs="auto"):
     """Execute `makemake && make clean && make`"""
     makemake(ctx)
-    make(ctk, jobs=jobs, clean=True)
+    make(ctx, jobs=jobs, clean=True)
 
 
 @task
@@ -435,13 +442,6 @@ def submodules(ctx):
         ctx.run("git submodule update --remote --init", pty=True)
         ctx.run("git submodule update --recursive --remote", pty=True)
 
-
-def run(cmd):
-    cprint(f"Executing: `{cmd}`", color="green")
-    ctx.run(cmd)
-
-
-
 @task
 def branchoff(ctx, start_point):
     """"Checkout new branch from start_point e.g. `trunk/release-9.0` and set default upstream to origin."""
@@ -449,6 +449,10 @@ def branchoff(ctx, start_point):
         remote, branch = start_point.split("/")
     except:
         remote = "trunk"
+
+    def run(cmd):
+        cprint(f"Executing: `{cmd}`", color="green")
+        ctx.run(cmd)
 
     run(f"git fetch {remote}")
     # Create new branch `test_v9.0` using trunk/release-9.0 as start_point:
@@ -463,6 +467,11 @@ def branchoff(ctx, start_point):
 @task
 def dryrun_merge(ctx, start_point):
     """"Merge `remote/branch` in dry-run mode."""
+
+    def run(cmd):
+        cprint(f"Executing: `{cmd}`", color="green")
+        ctx.run(cmd)
+
     run(f"git merge --no-commit --no-ff {start_point}")
 
     print("""
