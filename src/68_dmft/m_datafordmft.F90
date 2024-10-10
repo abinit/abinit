@@ -106,7 +106,7 @@ contains
 !! SOURCE
 
 subroutine datafordmft(cg,cprj,cryst_struc,dft_occup,dimcprj,dtset,eigen,mband_cprj,mpi_enreg,&
-  & my_nspinor,occ,paw_dmft,paw_ij,pawtab,usecprj,nbandkss)
+                     & my_nspinor,occ,paw_dmft,paw_ij,pawtab,usecprj,nbandkss)
   
 !Arguments ------------------------------------
 !scalars
@@ -222,7 +222,7 @@ subroutine datafordmft(cg,cprj,cryst_struc,dft_occup,dimcprj,dtset,eigen,mband_c
  use_full_chipsi = paw_dmft%dmft_use_full_chipsi == 1
 
  if (use_full_chipsi .and. mpi_enreg%nproc_fft > 1) then
-   message = "datafordmft not working when nproc_fft > 1 and either use_full_chipsi or prt_wan"
+   message = "datafordmft not working when nproc_fft > 1 and use_full_chipsi"
    ABI_ERROR(message)
  end if
  !natom=cryst_struc%natom
@@ -343,8 +343,7 @@ subroutine datafordmft(cg,cprj,cryst_struc,dft_occup,dimcprj,dtset,eigen,mband_c
    siz_buf = siz_buf + ndim
    siz_buf_psi = siz_buf_psi + ndim*paw_dmft%radgrid(itypat)%mesh_size
  end do ! iatom
- siz_buf = siz_buf * mbandc * nspinor  
- siz_buf = siz_buf * mkmem * nsppol_mem
+ siz_buf = siz_buf * mbandc * nspinor * mkmem * nsppol_mem
  siz_buf_psi = siz_buf_psi * mbandc * nspinor * mkmem * nsppol_mem  
    
  ABI_MALLOC(recvcounts,(nproc_spkpt))
@@ -928,7 +927,7 @@ subroutine datafordmft(cg,cprj,cryst_struc,dft_occup,dimcprj,dtset,eigen,mband_c
      opt_renorm = 3
      if (dtset%ucrpa >= 1 .or. paw_dmft%dmft_kspectralfunc == 1) opt_renorm = 2
      call chipsi_renormalization(paw_dmft,opt=opt_renorm)
-     call chipsi_print(paw_dmft,pawtab(:))
+     if (paw_dmft%myproc == 0) call chipsi_print(paw_dmft,pawtab(:))
    end if ! proc=me
  end if
 !!***
@@ -1523,7 +1522,6 @@ subroutine chipsi_renormalization(paw_dmft,opt)
      call print_matlu(norm%matlu(:),natom,prtopt=1)
    end if ! pawprtvol>2
 
-
 !== Symetrise norm%matlu with new psichi
    call sym_matlu(norm%matlu(:),paw_dmft)
 
@@ -1868,17 +1866,17 @@ subroutine normalizechipsi(nkpt,paw_dmft,jkpt)
  !      enddo ! ib
 
 !     Math: orthogonalisation of overlap
-     write(std_out,*)"jkpt=",jkpt
+     write(std_out,*) "jkpt=",jkpt
      do itot=1,dimoverlap
        write(std_out,'(100f7.3)') (largeoverlap(itot,itot1),itot1=1,dimoverlap)
      end do
      call invsqrt_matrix(largeoverlap(:,:),dimoverlap,dum)
        !sqrtmatinv=largeoverlap
-     write(std_out,*)"jkpt=",jkpt
+     write(std_out,*) "jkpt=",jkpt
      do itot=1,dimoverlap
        write(std_out,'(100f7.3)') (largeoverlap(itot,itot1),itot1=1,dimoverlap)
      end do
-     write(std_out,*)"jkpt=",jkpt
+     write(std_out,*) "jkpt=",jkpt
      do itot=1,dimoverlap
        write(std_out,'(100e9.3)') (largeoverlap(itot,itot1),itot1=1,dimoverlap)
      end do
@@ -1886,7 +1884,6 @@ subroutine normalizechipsi(nkpt,paw_dmft,jkpt)
      call abi_xgemm("n","n",dimoverlap,mbandc,dimoverlap,cone,largeoverlap(:,:),dimoverlap,&
                   & chipsivect(:,:),dimoverlap,czero,mat_tmp(:,:),dimoverlap)
      
-
       ! do ib=1,mbandc
       !   wanall=czero
       !   do itot=1,dimoverlap
@@ -2243,7 +2240,7 @@ subroutine compute_wannier(paw_dmft,mpi_enreg)
  nsppol  = paw_dmft%nsppol
 
  ABI_MALLOC(paw_dmft%wannier,(paw_dmft%maxmeshsize,nspinor*(2*paw_dmft%maxlpawu+1)*nsppol,natom))
- paw_dmft%wannier(:,:,:) = zero
+ paw_dmft%wannier(:,:,:) = czero
  ibuf_psi = 0
 
  do isppol=1,nsppol
@@ -2345,7 +2342,7 @@ subroutine print_wannier(paw_dmft,istep)
    open(unit=unt,file=tmpfil,status='unknown',form='formatted')
    rewind(unt)
    do ir=1,paw_dmft%radgrid(itypat)%mesh_size
-     write(unt,*) paw_dmft%radgrid(itypat)%rad(ir),(paw_dmft%wannier(ir,iflavor,iatom),iflavor=1,nflavor)
+     write(unt,*) paw_dmft%radgrid(itypat)%rad(ir),(dble(paw_dmft%wannier(ir,iflavor,iatom)),iflavor=1,nflavor)
    end do ! ir
    close(unt)
  end do ! iatom
