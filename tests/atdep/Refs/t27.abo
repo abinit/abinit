@@ -13,7 +13,7 @@
  acknowledgments of the ABINIT effort.
  For more information, see http://www.abinit.org .
 
-.Starting date :  9 Apr 2021.
+.Starting date : 13 Sep 2024.
   
  #############################################################################
  ######################### ECHO OF INPUT FILE ################################
@@ -2728,7 +2728,7 @@
  
  ========================= Elastic anisotropy =================================
  Elastic anisotropy index : A_U= 5*G_V/G_R + K_V/K_R - 6 =    0.128
- Bulk anisotropy ratio : A_B= (B_V-B_R)/(B_V+B_R) =   -0.000
+ Bulk anisotropy ratio : A_B= (B_V-B_R)/(B_V+B_R) =    0.000
  Shear anisotropy ratio : A_G= (G_V-G_R)/(G_V+G_R) =    0.013
   
  #############################################################################
@@ -2746,7 +2746,7 @@
   Delta_F2= (< (F_MD - F_TDEP)^2 >)**0.5 
   Sigma   = (< (F_MD - F_TDEP)^2 >/<F_MD**2>)**0.5 
      <U_MD>            U_0              U_1              U_2              U_3            Delta_U          Delta_U2          Delta_F2          Sigma
-  -768.49875       -768.66870          0.00000          0.18675         -0.01680         -0.00000          0.03433          0.00573          0.24691
+  -768.49875       -768.66870          0.00000          0.18675         -0.01680          0.00000          0.03433          0.00573          0.24691
  NOTE : in the harmonic and classical limit (T>>T_Debye), U_2=3/2*kB*T=      0.15511
  
  See the etotMDvsTDEP.dat & fcartMDvsTDEP.dat files

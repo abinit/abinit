@@ -1,20 +1,120 @@
+## v10.2
+
+Version 10.2, released on October 5, 2024.
+List of changes with respect to version 10.0.
+<!-- Release notes updated on Sep 28, 2024. -->
+
+Many thanks to the contributors to the ABINIT project between
+March 2024 and October 2024.
+<!-- (with some late contributions until XXX 2024). -->
+These release notes
+are relative to modifications/improvements of ABINIT v10.2 with respect to v10.0, with also some late fixes to v10.0, after March 2024,
+that had not yet been documented.
+<!-- TO BE CHANGED Merge requests up to and including MR984. Also, MRXXX to MRYYY are taken into account. -->
+
+TO BE CHANGED
+
+The list of contributors includes:
+G. Antonius, L. Baguet, J.-M. Beuken, F. Bottin, J. Bouchet, J. Bouquiaux, A. Donkov, F. Gendron, M. Giantomassi, X. Gonze,
+F. Goudreault, B. Guster, P. Kestener, M. Mignolet,
+S. Ponce, M. Sarraute, M. Torrent, V. Vasilchenko, M. Verstraete, J. Zwanziger
+
+It is worthwhile to read carefully all the modifications that are mentioned in the present file,
+and examine the links to help files or test cases.
+This might take some time ...
+
+Xavier
+
+* * *
+
+### **A.** Important remarks and warnings.
+
+
+* * *
+
+### **B.** Most noticeable achievements
+
+**B.1** GPU porting of the DFPT part of ABINIT
+
+The new GPU porting of ABINIT has been continued. 
+In the previous release 10.0, two implementations (OpenMP or KOKKOS+CUDA) for ground-state calculations [[optdriver]]=0
+had been made available. In the present release 10.2, the Density-Functional Perturbation Theory implementation [[optdriver]]=1
+has been ported. Numerous tests are available, in the directory tests/gpu_omp, tests 11 to 25
+See the description of the GPU possibilities of ABINIT in the documentation, input variable [[gpu_option]]=2.
+
+By M. Sarraute and M. Torrent (MR XX)
+
+**B.2** Interface to coupled-cluster CC4S calculations.
+
+The file needed as input for computations with the CC4S package, <https://manuals.cc4s.org/user-manual>,
+allowing to perform coupled-cluster calculations (e.g. CCSD), perturbative triples (and more), 
+can be produced using [[optdriver]]=6 and [[gwr_task]]="CC4S".
+This functionality, available in v10.0 has now been more extensively tested.
+See tests : gwr_07 and gwr_09 
+
+By M. Giantomassi (MR XX)
+
+**B.3** The Chebicheff filtering algorithm has been generalized to PAW with Spin-Orbit Coupling
+
+See tests : paral 44 to 47, as well as v10 3 to 6.
+
+By L. Baguet (MR XX)
+
+**B.4** Speed-up of the PAW calculations
+
+The coefficients of the wavefunctions giving the in-sphere contribution, denoted "cprj" can now be stored in memory, 
+thanks to the input variable [[cprj_in_memory]]. This brings speed-up of the PAW calculations (on the order of 20%-30%).
+This new developmentIt has been well tested already (+see the tests), 
+but the users are advised to check for themselves the results from turning on this new implementation (still mentioned as being "in development").
+
+Available only for the ground state (or also for the DPFT ?)
+
+By L. Baguet (MR XX)
+
+
+* * *
+
+### **C.** Changes for the developers (including information about compilers)
+
+
+* * *
+
+### **D.**  Other changes (or on-going developments, not yet finalized, as well as miscellaneous bug fixes)
+
+**D.1** New tests of the GPU (KOKKOS+CUDA) porting of ABINIT are available, in directory tests/gpu_kokkos, tests 1 and 2. See input variable [[gpu_option]]=3.
+
+By M. Sarraute and M. Torrent (MR XX)
+
+**D.2** New tests of the GPU (OpenMP) porting of ABINIT are available, in directory tests/gpu_omp, tests 4 and 9. See input variable [[gpu_option]]=2.
+
+By M. Sarraute and M. Torrent (MR XX)
+
+**D.3** New tests of the chemical shielding and recognition of symmetries (trigonal and hexagonal groups).
+Tests v10_2, v10_40 and v3_98 .
+
+By J.Zwanziger (MR XX)
+
+**D.4** New tests of the chemical shielding and recognition of symmetries (trigonal and hexagonal groups).
+
+By J.Zwanziger (MR XX)
+
 ## v10.0
 
 Version 10.0, released on March 18, 2024.
 List of changes with respect to version 9.10.
-<!-- Release notes updated on Mar 18, 2024. -->
+<!-- Release notes updated on Oct 2, 2024. -->
 
 Many thanks to the contributors to the ABINIT project between
 May 2023 and March 2024.
-<!-- (with some late contributions until XXX 2024). -->
+<!-- (with some late contributions until 11 Sep 2024). -->
 These release notes
-are relative to modifications/improvements of ABINIT v10.0 with respect to v9.10, with also some late fixes to v9.10, after Nov 2023, 
+are relative to modifications/improvements of ABINIT v10.0 with respect to v9.10, with also some late fixes to v10.0, after March 2024, 
 that had not yet been documented.
-<!-- TO BE CHANGED Merge requests up to and including MR984. Also, MRXXX to MRYYY are taken into account. -->
+<!-- TO BE CHANGED Merge requests up to and including MR984. Also, take into account : MR985 (backported from v10.1), MR999 to MR1003, MR1008, MR1011, MR1015, MR1018, MR1020, MR1021, MR1023, MR1031, MR1037, MR1039, MR1040, MR1053, MR1054 -->
 
 The list of contributors includes:
-G. Antonius, L. Baguet, J.-M. Beuken, F. Bottin, J. Bouchet, J. Bouquiaux, A. Donkov, F. Gendron, M. Giantomassi, X. Gonze, 
-F. Goudreault, B. Guster, P. Kestener, L. Mac Enulty, M. Mignolet, 
+G. Antonius, L. Baguet, J.-M. Beuken, F. Bottin, J. Bouchet, J. Bouquiaux, F. Brieuc, A. Donkov, F. Gendron, M. Giantomassi, X. Gonze, 
+F. Goudreault, B. Guster, P. Kestener, M. Mignolet, 
 S. Ponce, M. Sarraute, M. Torrent, V. Vasilchenko, M. Verstraete, J. Zwanziger 
 
 It is worthwhile to read carefully all the modifications that are mentioned in the present file,
@@ -396,8 +496,12 @@ There was a Bug when doing AHC computations with dipoles+quadrupoles activated.
 In that case the DDB block dimension is bigger, from $(3*mpert)^2$ to $(3*mpert)^3$
 and a reshaping is needed in ddb_get_dielt_zeff.
 This has been fixed.
+There was also a bug for phonons in supercells, for
+the reconstruction of the dynamical matrices using crystal symmetries.
+The dimensionless real-space and reciprocal-space primitive translations were used instead of their dimensional
+counterpart.
 
-From S. Ponce (MR952)
+From S. Ponce (MR952 and MR985)
 
 **D.21**
 Get rid of all cp added/cp modified lines.
@@ -412,8 +516,16 @@ From M. Torrent
 
 **D.23**
 Handle the Debye-Waller when only VB in the active space.
-
-From S. Ponce (MR972)
+There was a bug in the case where highest
+energy state was degenerate and when the interpolation
+of the potential was used. In that case the Sternheimer
+contribution was omitted.
+Other bug fix : missing i eta in the de-
+nominator of the Debye-Waller term on the active space.
+Such factor is important to exactly cancel the Fan term on the active
+space. This missing factor was only present when us-
+ing the Fourier interpolation of the perturbed potential.
+From S. Ponce (MR972 and commit a84206b4)
 
 **D.24**
 Bug fixes for the LRUJ utility, documentation, and subroutines. 
@@ -432,6 +544,50 @@ When computing the molecular Berry curvature (eph_task=14), it is now written to
 
 From M. Mignolet (MR984)
 
+**D.26** Bug fixes for Gstore, Molecular Berry curvature and VdW DFT-D3 
+
+Gstore module: incorrect parallelization over spins would make abinit crash when computing the GSTORE.nc with nsppol=2.
+Molecular Berry curvature module: incorrect initialization of the DDB would result in a crash when using kptopt!=3.
+VdW DFT-D3 module: the max/min values of the C6 coefficient would not be displayed correctly if larger than 100.
+Partially fix issue #160, removed tests libxc/t34,35 .
+Multidataset parsing ignoring ? wildcard when the first index is above 10.
+
+From M. Mignolet (MR999, MR1011, MR1015)
+
+**D.27** 
+
+Add new DFT-D3 compatible XC functionals + slight changes in doc. Typo in CPU name corrected.
+Suppress -mtune when -march is specified (march=>mtune); this is problematic with clang v<15.
+Several improvements of the build system (including better openMP detection).
+Autodetect ZDOT bugfix (autotools & cmake) + autodetect some important MPI features (cmake).
+
+From M. Torrent (MR1000, MR1001, MR1008, MR1031, MR1037)
+
+**D.28**
+
+Fix usecase of istwfk==2 when using CHEBFI as diago algorithm .
+Add tests checking Kokkos code path.
+Fixes for OpenMP GPU (LOBPCG multi-GPU and istwfk==2).
+Fix race condition in inwffil (cg_envlop kernel).
+Various fixes related to OpenMP GPU code.
+
+From M. Sarraute (MR1002, MR1003, MR1018, MR1020, MR1023, MR1053)
+
+**D.29**
+
+Chebfi2 norm-conserving.
+Fix istwfk2.
+Fix openblas.
+
+From L. Baguet (MR1021, MR1039, MR1040)
+
+
+**D.30**
+
+Fix restartxf -1 in Molecular Dynamics
+
+From F. Brieuc (MR1054)
+
 * * *
 
 
@@ -449,7 +605,7 @@ are relative to modifications/improvements of ABINIT v9.10 with respect to v9.8.
 
 The list of contributors includes:
 J. Abreu, F. Akhmetov (Radioteddy on github), J.-M. Beuken, A. Blanchet, F. Bruneval, M. Cote, M. Giantomassi, X. Gonze, B. Guster, P. Kesterner,
-L. Mac Enulty, M. Mignolet, D.D. O'Regan, S. Rostami,
+L. MacEnulty, M. Mignolet, D.D. O'Regan, S. Rostami,
 M. Royo, A. Sasani, M. Stengel, M. Torrent, M. Verstraete, A. Zabalo, J. Zwanziger.
 
 It is worthwhile to read carefully all the modifications that are mentioned in the present file,
@@ -531,7 +687,7 @@ See also the input variables [[pawujv]]. The tutorial and corresponding tests "u
 The tests v5_38, v5_39, v5_40, v6_41 have been suppressed, and replaced by [[test:v9_105]], 
 [[test:v9_106]], [[test:v9_107]], [[test:v9_108]], [[test:v9_109]]. This is also documented in [[topic:CalcUJ]].
 
-By Lorien Mac Enulty with help from David D. O'Regan (MR905, 912).
+By Lórien MacEnulty with help from David D. O'Regan (MR905, 912).
 
 **B.4** Cumulant method for spectral function
 
@@ -705,7 +861,7 @@ By X. Gonze (commits 1d56e983f and dfd207458)
 
 **D.14** In m_phgamma.F90, spin-resolved calculations for the case prteliash==3 did not work correctly 
 since phonon linewidths were calculated for spin=1 only. spin>=2 values are filled by NaNs. This small addition fixes the issue.
-Also, a minot format fix.
+Also, a minor format fix.
 By F. Akhmetov (Radioteddy on Github). commit bd76768 on abinit github, but directly ported to the trunk/release-9.10 branch.
 
 **D.15** Fix parser problem. The input would not be parsed correctly when more than one environment variable is present in the input file.
@@ -1885,7 +2041,7 @@ The new syntax is:
     anaddb run.in > run.log 2> run.err &
 
 See tests [[test:v8_52]] for a standard analysis of the DDB file and
-[[test:v7_94]] for the (old implementation) of electron-phonon calculations in anaddb.
+test v7_94 for the (old implementation) of electron-phonon calculations in anaddb.
 
 !!! important
 
@@ -1917,7 +2073,7 @@ List of new input variables that rely on this feature:
 - [[pp_dirpath]]: Used in all the input files of the Test Suite
 - [[output_file@anaddb]], [[ddb_filepath@anaddb]], [[gkk_filepath@anaddb]], [[eph_prefix@anaddb]].
   See tests [[test:v8_52]] for a standard analysis of the DDB file and
-  [[test:v7_94]] for the (old implementation) of electron-phonon calculations in anaddb.
+  test v7_94 for the (old implementation) of electron-phonon calculations in anaddb.
 
 By M. Giantomassi
 
@@ -2635,7 +2791,7 @@ The new syntax is:
     anaddb run.in > run.log 2> run.err &
 
 See tests [[test:v8_52]] for a standard analysis of the DDB file and
-[[test:v7_94]] for the (old implementation) of electron-phonon calculations in anaddb.
+test v7_94 for the (old implementation) of electron-phonon calculations in anaddb.
 
 !!! important
 
@@ -2667,7 +2823,7 @@ List of new input variables that rely on this feature:
 - [[pp_dirpath]]: cannot be tested  EXPLICITLY because system dependent but used by runtests.py when generating the input file.
 - [[output_file@anaddb]], [[ddb_filepath@anaddb]], [[gkk_filepath@anaddb]], [[eph_prefix@anaddb]].
   See tests [[test:v8_52]] for a standard analysis of the DDB file and
-  [[test:v7_94]] for the (old implementation) of electron-phonon calculations in anaddb.
+  test v7_94 for the (old implementation) of electron-phonon calculations in anaddb.
 
 By M. Giantomassi
 
@@ -3250,7 +3406,7 @@ B.4 The python library [AbiPy](https://github.com/abinit/abipy), for launching A
 B.5 A new algorithm (Wigner-Seitz cell based) for computing the weights for the phonon band structure interpolation in ANADDB
     has been implemented. It has replaced the old algorithm in case [[brav@anaddb]] = 1.
     The old algorithm is still available for back-compatibility purposes, now corresponding to [[brav@anaddb]] = -1,
-    see [[test:v7_93]], although there is no real reason for using it.
+    see test:v7_93, although there is no real reason for using it.
     The new algorithm is very general, respect better the symmetries, and should even supercede
     the use of other values of [[brav@anaddb]].
     By G. Petretto following discussions with GM Rignanese and XGonze, and tests by Henrique Pereira Miranda.

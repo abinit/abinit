@@ -1,6 +1,6 @@
 
-.Version 9.11.2 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 10.1.4.5 of ABINIT, released Sep 2024.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2024 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 15 Jul 2023.
-- ( at 11h58 )
+.Starting date : Fri 13 Sep 2024.
+- ( at 19h08 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v1_t66/t66.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v1_t66/t66.abi
 - output file    -> t66.abo
 - root for input  files -> t66i
 - root for output files -> t66o
@@ -58,10 +58,10 @@ _ WF disk file :      0.024 Mbytes ; DEN or POT disk file :      0.069 Mbytes.
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
 -
-- outvars: echo of selected default values                                      
--   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+- outvars: echo of selected default values
+-   iomode0 =  0 , fftalg0 =512 , wfoptalg0 =  0
 -
-- outvars: echo of global parameters not present in the input file              
+- outvars: echo of global parameters not present in the input file
 -  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
@@ -72,7 +72,7 @@ _ WF disk file :      0.024 Mbytes ; DEN or POT disk file :      0.069 Mbytes.
            diemix      5.00000000E-01
              ecut1     1.20000000E+01 Hartree
              ecut2     1.50000000E+01 Hartree
--          fftalg         312
+-          fftalg         512
            getwfk          -1
          getxcart          -1
            ionmov1          2
@@ -147,8 +147,8 @@ meta: {optdriver: 0, ionmov: 2, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     12.000   => boxcut(ratio)=   2.05208
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/1h.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/1h.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/1h.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/1h.pspnc
 -  Troullier-Martins psp for element  H         Thu Oct 27 17:28:54 EDT 1994
 -  1.00000   1.00000    940714                znucl, zion, pspdat
     1    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -167,7 +167,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     349.000     349.000
 
 ================================================================================
 
-=== [ionmov= 2] Broyden-Fletcher-Goldfard-Shanno method (forces)            
+=== [ionmov= 2] Broyden-Fletcher-Goldfarb-Shanno method (forces)            
 ================================================================================
 
 --- Iteration: (1/5) Internal Cycle: (1/1)
@@ -239,11 +239,11 @@ force_length_stats: {min:   1.71884946E-02, max:   1.71884946E-02, mean:   1.718
  -1.03934937308710E-01  0.00000000000000E+00  0.00000000000000E+00
   1.03934937308710E-01  0.00000000000000E+00  0.00000000000000E+00
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 1.71885E-02 9.92378E-03 (free atoms)
-  1.71884945888673E-02 -0.00000000000000E+00 -0.00000000000000E+00
- -1.71884945888673E-02 -0.00000000000000E+00 -0.00000000000000E+00
+  1.71884945888676E-02 -0.00000000000000E+00 -0.00000000000000E+00
+ -1.71884945888676E-02 -0.00000000000000E+00 -0.00000000000000E+00
  Gradient of E wrt nuclear positions in reduced coordinates (gred)
- -1.20319462122071E-01 -0.00000000000000E+00 -0.00000000000000E+00
-  1.20319462122071E-01  0.00000000000000E+00  0.00000000000000E+00
+ -1.20319462122073E-01 -0.00000000000000E+00 -0.00000000000000E+00
+  1.20319462122073E-01  0.00000000000000E+00  0.00000000000000E+00
  Total energy (etotal) [Ha]= -1.14236942213804E+00
 
 --- Iteration: (2/5) Internal Cycle: (1/1)
@@ -316,11 +316,11 @@ force_length_stats: {min:   8.11642552E-03, max:   8.11642552E-03, mean:   8.116
  -1.01479438081729E-01  0.00000000000000E+00  0.00000000000000E+00
   1.01479438081729E-01  0.00000000000000E+00  0.00000000000000E+00
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 8.11643E-03 4.68602E-03 (free atoms)
-  8.11642552339095E-03 -0.00000000000000E+00 -0.00000000000000E+00
- -8.11642552339095E-03 -0.00000000000000E+00 -0.00000000000000E+00
+  8.11642552339101E-03 -0.00000000000000E+00 -0.00000000000000E+00
+ -8.11642552339101E-03 -0.00000000000000E+00 -0.00000000000000E+00
  Gradient of E wrt nuclear positions in reduced coordinates (gred)
- -5.68149786637367E-02 -0.00000000000000E+00 -0.00000000000000E+00
-  5.68149786637367E-02  0.00000000000000E+00  0.00000000000000E+00
+ -5.68149786637371E-02 -0.00000000000000E+00 -0.00000000000000E+00
+  5.68149786637371E-02  0.00000000000000E+00  0.00000000000000E+00
  Total energy (etotal) [Ha]= -1.14280831311117E+00
 
  Difference of energy with previous step (new-old):
@@ -397,11 +397,11 @@ force_length_stats: {min:   1.25961492E-03, max:   1.25961492E-03, mean:   1.259
  -9.92825989202663E-02  0.00000000000000E+00  0.00000000000000E+00
   9.92825989202663E-02  0.00000000000000E+00  0.00000000000000E+00
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 1.25961E-03 7.27239E-04 (free atoms)
- -1.25961492071268E-03 -0.00000000000000E+00 -0.00000000000000E+00
-  1.25961492071268E-03 -0.00000000000000E+00 -0.00000000000000E+00
+ -1.25961492071284E-03 -0.00000000000000E+00 -0.00000000000000E+00
+  1.25961492071284E-03 -0.00000000000000E+00 -0.00000000000000E+00
  Gradient of E wrt nuclear positions in reduced coordinates (gred)
-  8.81730444498876E-03  0.00000000000000E+00  0.00000000000000E+00
- -8.81730444498876E-03 -0.00000000000000E+00 -0.00000000000000E+00
+  8.81730444498986E-03  0.00000000000000E+00  0.00000000000000E+00
+ -8.81730444498986E-03 -0.00000000000000E+00 -0.00000000000000E+00
  Total energy (etotal) [Ha]= -1.14291702760826E+00
 
  Difference of energy with previous step (new-old):
@@ -423,8 +423,8 @@ tolerances: {toldff: 5.00E-06, }
  ETOT  1  -1.1429190367445    -1.143E+00 2.550E-11 4.485E-04 1.087E-03 1.723E-04
  ETOT  2  -1.1429194201434    -3.834E-07 9.219E-13 5.232E-05 1.657E-04 6.619E-06
  ETOT  3  -1.1429194665036    -4.636E-08 2.961E-10 8.495E-08 8.212E-05 7.550E-05
- ETOT  4  -1.1429194665534    -4.977E-11 4.157E-13 3.882E-10 2.415E-07 7.526E-05
- ETOT  5  -1.1429194665535    -1.432E-13 1.378E-15 1.483E-10 1.184E-07 7.538E-05
+ ETOT  4  -1.1429194665534    -4.976E-11 4.157E-13 3.882E-10 2.415E-07 7.526E-05
+ ETOT  5  -1.1429194665535    -1.448E-13 1.378E-15 1.483E-10 1.184E-07 7.538E-05
 
  At SCF step    5, forces are converged : 
   for the second time, max diff in force=  1.184E-07 < toldff=  5.000E-06
@@ -445,7 +445,7 @@ lattice_vectors:
 lattice_lengths: [   7.00000,    5.00000,    5.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
 lattice_volume:   1.7500000E+02
-convergence: {deltae: -1.432E-13, res2:  1.483E-10, residm:  1.378E-15, diffor:  1.184E-07, }
+convergence: {deltae: -1.448E-13, res2:  1.483E-10, residm:  1.378E-15, diffor:  1.184E-07, }
 etotal    :  -1.14291947E+00
 entropy   :   0.00000000E+00
 fermie    :  -3.32262354E-01
@@ -478,11 +478,11 @@ force_length_stats: {min:   7.53773932E-05, max:   7.53773932E-05, mean:   7.537
  -9.95777311141472E-02  0.00000000000000E+00  0.00000000000000E+00
   9.95777311141472E-02  0.00000000000000E+00  0.00000000000000E+00
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 7.53774E-05 4.35192E-05 (free atoms)
-  7.53773931636883E-05 -0.00000000000000E+00 -0.00000000000000E+00
- -7.53773931636883E-05 -0.00000000000000E+00 -0.00000000000000E+00
+  7.53773931637938E-05 -0.00000000000000E+00 -0.00000000000000E+00
+ -7.53773931637938E-05 -0.00000000000000E+00 -0.00000000000000E+00
  Gradient of E wrt nuclear positions in reduced coordinates (gred)
- -5.27641752145818E-04 -0.00000000000000E+00 -0.00000000000000E+00
-  5.27641752145818E-04  0.00000000000000E+00  0.00000000000000E+00
+ -5.27641752146556E-04 -0.00000000000000E+00 -0.00000000000000E+00
+  5.27641752146556E-04  0.00000000000000E+00  0.00000000000000E+00
  Total energy (etotal) [Ha]= -1.14291946655353E+00
 
  Difference of energy with previous step (new-old):
@@ -538,9 +538,9 @@ xred      :
 - [ -9.9561E-02,   0.0000E+00,   0.0000E+00,  H]
 - [  9.9561E-02,   0.0000E+00,   0.0000E+00,  H]
 cartesian_forces: # hartree/bohr
-- [  6.59635620E-07,  -0.00000000E+00,  -0.00000000E+00, ]
-- [ -6.59635620E-07,  -0.00000000E+00,  -0.00000000E+00, ]
-force_length_stats: {min:   6.59635620E-07, max:   6.59635620E-07, mean:   6.59635620E-07, }
+- [  6.59635621E-07,  -0.00000000E+00,  -0.00000000E+00, ]
+- [ -6.59635621E-07,  -0.00000000E+00,  -0.00000000E+00, ]
+force_length_stats: {min:   6.59635621E-07, max:   6.59635621E-07, mean:   6.59635621E-07, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -558,11 +558,11 @@ force_length_stats: {min:   6.59635620E-07, max:   6.59635620E-07, mean:   6.596
  -9.95610671265106E-02  0.00000000000000E+00  0.00000000000000E+00
   9.95610671265106E-02  0.00000000000000E+00  0.00000000000000E+00
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 6.59636E-07 3.80841E-07 (free atoms)
-  6.59635620383047E-07 -0.00000000000000E+00 -0.00000000000000E+00
- -6.59635620383047E-07 -0.00000000000000E+00 -0.00000000000000E+00
+  6.59635620527836E-07 -0.00000000000000E+00 -0.00000000000000E+00
+ -6.59635620527836E-07 -0.00000000000000E+00 -0.00000000000000E+00
  Gradient of E wrt nuclear positions in reduced coordinates (gred)
- -4.61744934268133E-06 -0.00000000000000E+00 -0.00000000000000E+00
-  4.61744934268133E-06  0.00000000000000E+00  0.00000000000000E+00
+ -4.61744934369485E-06 -0.00000000000000E+00 -0.00000000000000E+00
+  4.61744934369485E-06  0.00000000000000E+00  0.00000000000000E+00
  Total energy (etotal) [Ha]= -1.14291947542642E+00
 
  Difference of energy with previous step (new-old):
@@ -667,8 +667,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     15.000   => boxcut(ratio)=   2.06487
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/1h.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/1h.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/1h.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/1h.pspnc
 -  Troullier-Martins psp for element  H         Thu Oct 27 17:28:54 EDT 1994
 -  1.00000   1.00000    940714                znucl, zion, pspdat
     1    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -698,8 +698,8 @@ tolerances: {toldff: 5.00E-06, }
  ETOT  2  -1.1437707534505    -1.766E-07 1.610E-09 6.932E-04 5.161E-05 3.624E-04
  ETOT  3  -1.1437707840494    -3.060E-08 2.843E-09 2.580E-06 1.914E-05 3.433E-04
  ETOT  4  -1.1437707856102    -1.561E-09 1.459E-10 2.098E-09 1.485E-05 3.581E-04
- ETOT  5  -1.1437707856105    -2.722E-13 1.371E-14 1.117E-10 3.661E-07 3.585E-04
- ETOT  6  -1.1437707856105    -7.772E-15 1.209E-15 3.021E-13 1.893E-08 3.585E-04
+ ETOT  5  -1.1437707856105    -2.727E-13 1.371E-14 1.117E-10 3.661E-07 3.585E-04
+ ETOT  6  -1.1437707856105    -9.548E-15 1.209E-15 3.021E-13 1.893E-08 3.585E-04
 
  At SCF step    6, forces are converged : 
   for the second time, max diff in force=  1.893E-08 < toldff=  5.000E-06
@@ -720,7 +720,7 @@ lattice_vectors:
 lattice_lengths: [   7.00000,    5.00000,    5.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
 lattice_volume:   1.7500000E+02
-convergence: {deltae: -7.772E-15, res2:  3.021E-13, residm:  1.209E-15, diffor:  1.893E-08, }
+convergence: {deltae: -9.548E-15, res2:  3.021E-13, residm:  1.209E-15, diffor:  1.893E-08, }
 etotal    :  -1.14377079E+00
 entropy   :   0.00000000E+00
 fermie    :  -3.32418100E-01
@@ -781,14 +781,14 @@ iteration_state     : {dtset: 2, }
 comment             : Components of total free energy in Hartree
 kinetic             :  1.02697169982013E+00
 hartree             :  4.25248573939556E-01
-xc                  : -6.49999189404674E-01
+xc                  : -6.49999189404675E-01
 Ewald energy        : -2.53512409379765E-01
 psp_core            :  9.59703539458021E-04
-local_psp           : -1.69343916412519E+00
+local_psp           : -1.69343916412520E+00
 non_local_psp       :  0.00000000000000E+00
 total_energy        : -1.14377078561049E+00
 total_energy_eV     : -3.11235858951008E+01
-band_energy         : -6.64836199319506E-01
+band_energy         : -6.64836199319505E-01
 ...
 
 
@@ -815,11 +815,11 @@ band_energy         : -6.64836199319506E-01
              ecut2     1.50000000E+01 Hartree
            etotal1    -1.1429194754E+00
            etotal2    -1.1437707856E+00
-            fcart1     6.5963562038E-07 -0.0000000000E+00 -0.0000000000E+00
-                      -6.5963562038E-07 -0.0000000000E+00 -0.0000000000E+00
+            fcart1     6.5963562053E-07 -0.0000000000E+00 -0.0000000000E+00
+                      -6.5963562053E-07 -0.0000000000E+00 -0.0000000000E+00
             fcart2     3.5849610731E-04 -0.0000000000E+00 -0.0000000000E+00
                       -3.5849610731E-04 -0.0000000000E+00 -0.0000000000E+00
--          fftalg         312
+-          fftalg         512
            getwfk          -1
          getxcart          -1
            ionmov1          2
@@ -957,10 +957,10 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          1.3  wall=          1.5
+- Proc.   0 individual time (sec): cpu=          1.1  wall=          1.1
 
 ================================================================================
 
  Calculation completed.
 .Delivered  29 WARNINGs and  10 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          1.3  wall=          1.5
++Overall time at end (sec) : cpu=          1.1  wall=          1.1

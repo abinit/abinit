@@ -8,7 +8,7 @@
 !! This should really help to do the transposition operataion
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2017-2024 ABINIT group (J. Bieder)
+!!  Copyright (C) 2017-2024 ABINIT group (J. Bieder, L. Baguet)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -103,14 +103,10 @@ module m_xgTransposer
     integer :: ncolsColsRows
     integer :: mpiAlgo
     integer :: type
-    integer :: perPair
+    integer :: me_g0_fft
     integer :: gpu_option = ABI_GPU_DISABLED
     integer :: gpu_kokkos_nthrd = 1
-#if defined HAVE_GPU && defined HAVE_YAKL
-    real(kind=c_double), ABI_CONTIGUOUS pointer:: buffer(:,:) => null()
-#else
-    double precision, allocatable :: buffer(:,:)
-#endif
+    real(dp), ABI_CONTIGUOUS pointer:: buffer(:,:) => null()
   end type xgTransposer_t
 
   public :: xgTransposer_constructor
@@ -129,7 +125,7 @@ module m_xgTransposer
 !! xgTransposer_constructor
 
   subroutine xgTransposer_constructor(xgTransposer,xgBlock_linalg,xgBlock_colsrows,nspinor,&
-      state,algo,comm_rows,comm_cols,ncpu_cols,ncpu_rows,gpu_option)
+      state,algo,comm_rows,comm_cols,ncpu_cols,ncpu_rows,me_g0_fft,gpu_option)
 
     type(xgTransposer_t)   , intent(inout) :: xgTransposer
     type(xgBlock_t), target, intent(in   ) :: xgBlock_linalg
@@ -139,6 +135,7 @@ module m_xgTransposer
     integer                , intent(in   ) :: nspinor
     integer                , intent(in   ) :: state
     integer                , intent(in   ) :: algo
+    integer                , intent(in   ) :: me_g0_fft
     integer , optional     , intent(in   ) :: gpu_option
     integer :: commLinalg
     integer :: ncols
@@ -161,6 +158,7 @@ module m_xgTransposer
     xgTransposer%xgBlock_colsrows => xgBlock_colsrows
     xgTransposer%state = state
     xgTransposer%nspinor = nspinor
+    xgTransposer%me_g0_fft = me_g0_fft
     xgTransposer%gpu_option = ABI_GPU_DISABLED
     if(present(gpu_option)) xgTransposer%gpu_option = gpu_option
     commLinalg = comm(xgBlock_linalg)
@@ -222,17 +220,6 @@ module m_xgTransposer
           !ncpuCols = ncols
         end if
       end if
-
-      select case ( space(xgBlock_linalg) )
-        case (SPACE_CR, SPACE_R)
-          xgTransposer%perPair = 2
-        case (SPACE_C)
-          xgTransposer%perPair = 1
-        case default
-          ABI_ERROR("Space value unknown !")
-      end select
-
-      !write(*,*) "There is a total of ", nrows/xgTransposer%perPair, "rows of real pairs for ", ncpuRows, "fft cpu"
 
       ! Build the lookup table
       ABI_MALLOC(xgTransposer%lookup,(1:ncols))
@@ -312,6 +299,7 @@ module m_xgTransposer
 
     xgTransposer%mpiAlgo = xgTransposerInitialized%mpiAlgo
     xgTransposer%nspinor = xgTransposerInitialized%nspinor
+    xgTransposer%me_g0_fft = xgTransposerInitialized%me_g0_fft
     xgTransposer%gpu_option = xgTransposerInitialized%gpu_option
 
     ncpuCols = xgTransposer%mpiData(MPI_COLS)%size
@@ -331,17 +319,6 @@ module m_xgTransposer
           ABI_ERROR(message)
         end if
       end if
-
-      select case ( space(xgBlock_linalg) )
-        case (SPACE_CR, SPACE_R)
-          xgTransposer%perPair = 2
-        case (SPACE_C)
-          xgTransposer%perPair = 1
-        case default
-          ABI_ERROR("Space value unknown !")
-      end select
-
-      !write(*,*) "There is a total of ", nrows/xgTransposer%perPair, "rows of real pairs for ", ncpuRows, "fft cpu"
 
       ! Build the lookup table
       ABI_MALLOC(xgTransposer%lookup,(1:ncols))
@@ -453,7 +430,7 @@ module m_xgTransposer
     integer :: ncpuCols,ncpuRows
 
     ABI_MALLOC(xgTransposer%nrowsLinalg,(xgTransposer%mpiData(MPI_LINALG)%size))
-    nRealPairs = rows(xgTransposer%xgBlock_linalg)/xgTransposer%perPair !number of pair of reals
+    nRealPairs = rows(xgTransposer%xgBlock_linalg)
     if (MOD(nRealPairs,xgTransposer%nspinor)/=0) then
       ABI_ERROR('nspinor should divide nRealPairs!')
     end if
@@ -487,28 +464,29 @@ module m_xgTransposer
   subroutine xgTransposer_makeXgBlock(xgTransposer)
 
     type(xgTransposer_t), intent(inout) :: xgTransposer
+#if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD && !defined HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
+    real(dp), ABI_CONTIGUOUS pointer :: xgTransposer__buffer(:,:)
+#endif
     !integer :: cols, rows
 
     select case (xgTransposer%state)
     case (STATE_LINALG)
       ! Assume xgBlock_colsrows is empty and not constructed because user cannot
       ! predict the size
-      if(xgTransposer%gpu_option == ABI_GPU_KOKKOS) then
+      if ( associated(xgTransposer%buffer) ) then
+        if(xgTransposer%gpu_option == ABI_GPU_KOKKOS) then
 #if defined HAVE_GPU && defined HAVE_YAKL
-        if ( associated(xgTransposer%buffer) ) then
           ABI_FREE_MANAGED(xgTransposer%buffer)
-        end if
 #endif
-      else
-!FIXME Settle this
-#if defined HAVE_GPU && defined HAVE_YAKL
-        if ( associated(xgTransposer%buffer) ) then
-#else
-        if ( allocated(xgTransposer%buffer) ) then
-#endif
+        else
           if(xgTransposer%gpu_option == ABI_GPU_OPENMP) then
 #if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
+#ifdef HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
             !$OMP TARGET EXIT DATA MAP(delete:xgTransposer%buffer)
+#else
+            xgTransposer__buffer => xgTransposer%buffer
+            !$OMP TARGET EXIT DATA MAP(delete:xgTransposer__buffer)
+#endif
 #endif
           end if
           ABI_FREE(xgTransposer%buffer)
@@ -527,13 +505,18 @@ module m_xgTransposer
         end if
         if(xgTransposer%gpu_option == ABI_GPU_OPENMP) then
 #if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
+#ifdef HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
           !$OMP TARGET ENTER DATA MAP(alloc:xgTransposer%buffer)
+#else
+          xgTransposer__buffer => xgTransposer%buffer
+          !$OMP TARGET ENTER DATA MAP(alloc:xgTransposer__buffer)
+#endif
 #endif
         end if
         call xgBlock_map(xgTransposer%xgBlock_colsrows,xgTransposer%buffer,space(xgTransposer%xgBlock_linalg),&
-          xgTransposer%perPair*xgTransposer%nrowsColsRows,&
+          xgTransposer%nrowsColsRows,&
           xgTransposer%ncolsColsRows,xgTransposer%mpiData(MPI_ROWS)%comm,&
-          gpu_option=xgTransposer%gpu_option)
+          me_g0=xgTransposer%me_g0_fft,gpu_option=xgTransposer%gpu_option)
       end if
     case (STATE_COLSROWS)
       ABI_ERROR("Not yet implemented")
@@ -643,7 +626,8 @@ module m_xgTransposer
      rdispls(icpu) = rdispls(icpu-1)+recvcounts(icpu-1)
    end do
 
-   call xgBlock_reverseMap(xgTransposer%xgBlock_linalg,recvbuf,xgTransposer%perPair,cols(xgTransposer%xgBlock_linalg)*nrowsLinalgMe)
+   call xgBlock_reverseMap(xgTransposer%xgBlock_linalg,recvbuf,&
+     & rows=1,cols=cols(xgTransposer%xgBlock_linalg)*nrowsLinalgMe)
 
 #if defined(HAVE_GPU_CUDA) && defined(HAVE_KOKKOS) && defined(HAVE_YAKL)
    ! just for debug
@@ -852,7 +836,7 @@ module m_xgTransposer
      end do
 
      call xgBlock_reverseMap(xgTransposer%xgBlock_linalg,sendbuf, &
-&      xgTransposer%perPair,cols(xgTransposer%xgBlock_linalg)*nrowsLinalgMe)
+&      rows=1,cols=cols(xgTransposer%xgBlock_linalg)*nrowsLinalgMe)
      if(xgTransposer%gpu_option == ABI_GPU_OPENMP) then
 #if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
        !$OMP TARGET UPDATE FROM(sendbuf)
@@ -914,8 +898,9 @@ module m_xgTransposer
      !call xmpi_barrier(xgTransposer%mpiData(MPI_LINALG)%comm)
      do icpu = 0, ncpu_cols-1
        !write(*,*) me, "->", icpu, "from col ",icpu*ncolsColsRows+1, " number of rows:", nrowsLinalgMe
-       call xgBlock_setBlock(xgTransposer%xgBlock_linalg,xgBlock_toTransposed,icpu*ncolsColsRows+1,nrowsLinalgMe,ncolsColsRows)
-       call xgBlock_reverseMap(xgBlock_toTransposed,sendptrbuf(icpu+1)%ptr,xgTransposer%perPair,ncolsColsRows*nrowsLinalgMe)
+       call xgBlock_setBlock(xgTransposer%xgBlock_linalg,xgBlock_toTransposed,nrowsLinalgMe,ncolsColsRows,fcol=icpu*ncolsColsRows+1)
+       call xgBlock_reverseMap(xgBlock_toTransposed,sendptrbuf(icpu+1)%ptr,&
+         rows=1,cols=ncolsColsRows*nrowsLinalgMe)
        call timab(tim_gatherv,1,tsec)
        call xmpi_gatherv(sendptrbuf(icpu+1)%ptr,2*ncolsColsRows*nrowsLinalgMe,recvbuf,recvcounts,rdispls,icpu,comm,ierr)
        call timab(tim_gatherv,2,tsec)
@@ -1007,7 +992,7 @@ module m_xgTransposer
     ncolsColsRows = xgTransposer%ncolsColsRows
     nPair = nrowsColsRows*ncolsColsRows
 
-    call xgBlock_reverseMap(xgTransposer%xgBlock_colsrows,bufferOrdered,xgTransposer%perPair,nPair)
+    call xgBlock_reverseMap(xgTransposer%xgBlock_colsrows,bufferOrdered,rows=1,cols=nPair)
 
     nspinor = xgTransposer%nspinor
     nrowsLinalg => xgTransposer%nrowsLinalg
@@ -1135,6 +1120,9 @@ module m_xgTransposer
     type(xgTransposer_t), intent(inout) :: xgTransposer
     double precision :: tsec(2)
     integer :: i
+#if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD && !defined HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
+    real(dp), ABI_CONTIGUOUS pointer :: xgTransposer__buffer(:,:)
+#endif
 
     call timab(tim_free,1,tsec)
 #ifdef HAVE_MPI
@@ -1155,22 +1143,20 @@ module m_xgTransposer
       ABI_FREE(xgTransposer%nrowsLinalg)
     end if
 
-    if(xgTransposer%gpu_option == ABI_GPU_KOKKOS) then
+    if ( associated(xgTransposer%buffer) ) then
+      if(xgTransposer%gpu_option == ABI_GPU_KOKKOS) then
 #if defined HAVE_GPU && defined HAVE_YAKL
-      if ( associated(xgTransposer%buffer) ) then
         ABI_FREE_MANAGED(xgTransposer%buffer)
-      end if
 #endif
-    else
-!FIXME Settle this
-#if defined HAVE_GPU && defined HAVE_YAKL
-      if ( associated(xgTransposer%buffer) ) then
-#else
-      if ( allocated(xgTransposer%buffer) ) then
-#endif
+      else
         if(xgTransposer%gpu_option == ABI_GPU_OPENMP) then
 #if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
+#ifdef HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
           !$OMP TARGET EXIT DATA MAP(delete:xgTransposer%buffer)
+#else
+          xgTransposer__buffer => xgTransposer%buffer
+          !$OMP TARGET EXIT DATA MAP(delete:xgTransposer__buffer)
+#endif
 #endif
         end if
         ABI_FREE(xgTransposer%buffer)

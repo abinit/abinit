@@ -18,6 +18,9 @@
 
 #include "abi_common.h"
 
+! nvtx related macro definition
+#include "nvtx_macros.h"
+
 module m_dfpt_vtowfk
 
  use defs_basis
@@ -43,6 +46,10 @@ module m_dfpt_vtowfk
  use m_dfpt_cgwf,    only : dfpt_cgwf, full_active_wf1
  use m_getghc,       only : getgsc, getghc_nucdip, getghc_mGGA
  use m_getgh1c,      only : getgh1ndc, getgh1c_mGGA
+
+#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
+ use m_nvtx_data
+#endif
 
  implicit none
 
@@ -227,7 +234,7 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
  integer :: iband,idir0,ierr,igs,igscq,ii,dim_dcwf,inonsc
  integer :: iband_me,nband_me !, unit_me
  integer :: iorder_cprj,iorder_cprj1,ipw,iscf_mod,ispinor,me,mgscq,nkpt_max
- integer :: option,opt_gvnlx1,quit,test_ddk
+ integer :: option,opt_gvnlx1,quit,test_ddk,ndat
  integer :: tocceig,usedcwavef,ptr,shift_band
  real(dp) :: aa,ai,ar,eig0nk,resid,residk,scprod,energy_factor
  character(len=500) :: message
@@ -246,6 +253,8 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
 ! *********************************************************************
 
  DBG_ENTER('COLL')
+
+ ABI_NVTX_START_RANGE(NVTX_DFPT_VTOWFK)
 
 !Keep track of total time spent in dfpt_vtowfk
  call timab(128,1,tsec)
@@ -296,9 +305,14 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
 !TODO MJV: PAW mband_mem
    mgscq=mpw1*nspinor*mband_mem
    ABI_MALLOC_OR_DIE(gscq,(2,mgscq), ierr)
+#ifdef HAVE_OPENMP_OFFLOAD
+   !$OMP TARGET ENTER DATA MAP(alloc:gscq)       IF(gs_hamkq%gpu_option==ABI_GPU_OPENMP)
+#endif
 
+   ABI_NVTX_START_RANGE(NVTX_GETGSC)
    call getgsc(cgq,cprjq,gs_hamkq,gscq,ibgq,icgq,igscq,ikpt,isppol,mcgq,mcprjq,&
-&   mgscq,mpi_enreg,natom,nband_k,npw1_k,dtset%nspinor,select_k=KPRIME_H_KPRIME)
+&   mgscq,mpi_enreg,dtset%bandpp,natom,nband_k,npw1_k,dtset%nspinor,select_k=KPRIME_H_KPRIME)
+   ABI_NVTX_END_RANGE()
 !  2-Initialize additional scalars/arrays
    iorder_cprj=0;iorder_cprj1=0
    dim_dcwf=npw1_k*nspinor;if (ipert==natom+2.or.ipert==natom+10.or.ipert==natom+11) dim_dcwf=0
@@ -335,6 +349,7 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
 !==================  LOOP OVER BANDS ==================================
 !======================================================================
 
+ ndat=1;if (mpi_enreg%paral_kgb==1) ndat=mpi_enreg%bandpp
  call proc_distrb_band(rank_band,mpi_enreg%proc_distrb,ikpt,isppol,mband,&
 &  mpi_enreg%me_band,mpi_enreg%me_kpt,mpi_enreg%comm_band)
 
@@ -597,7 +612,7 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
        eloc0_k(iband) = zero
        option=2;if (iscf_mod>0.and.inonsc==nnsclo_now) option=3
        call dfpt_accrho(cplex,cwave0,cwave1,cwavef,cwaveprj0,cwaveprj1,eloc0_k(iband),&
-&       gs_hamkq,iband,idir,ipert,isppol,dtset%kptopt,mpi_enreg,natom,nband_k,ncpgr,&
+&       gs_hamkq,iband,idir,ipert,isppol,dtset%kptopt,mpi_enreg,1,natom,nband_k,ncpgr,&
 &       npw_k,npw1_k,nspinor,occ_k,option,pawrhoij1,rhoaug1,tim_fourwf,tocceig,wtk_k)
        if(ipert==natom+10.or.ipert==natom+11) eloc0_k(iband)=energy_factor*eloc0_k(iband)/two
 
@@ -687,6 +702,9 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
    end if
  end if
  ABI_FREE(dcwavef)
+#ifdef HAVE_OPENMP_OFFLOAD
+ !$OMP TARGET EXIT DATA MAP(delete:gscq) IF(gs_hamkq%usepaw==1 .and. gs_hamkq%gpu_option==ABI_GPU_OPENMP)
+#endif
  ABI_FREE(gscq)
  ABI_FREE(gsc)
  ABI_FREE(cwaveprj0)
@@ -715,6 +733,8 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
 
  call timab(130,2,tsec)
  call timab(128,2,tsec)
+
+ ABI_NVTX_END_RANGE()
 
  DBG_EXIT('COLL')
 
@@ -799,6 +819,7 @@ subroutine corrmetalwf1(cgq,cprjq,cwavef,cwave1,cwaveprj,cwaveprj1,cycle_bands,e
  real(dp) :: edocc_tmp
 !arrays
  integer :: bands_treated_now(nband)
+ integer, allocatable :: nlmn(:)
  real(dp) :: tsec(2)
  real(dp),allocatable :: cwcorr(:,:)
  type(pawcprj_type) :: cwaveprj1_corr(natom,nspinor*usepaw)
@@ -821,7 +842,10 @@ subroutine corrmetalwf1(cgq,cprjq,cwavef,cwave1,cwaveprj,cwaveprj1,cycle_bands,e
  wf_corrected=0
 
  if(usepaw==1) then
-   call pawcprj_alloc(cwaveprj1_corr, cwaveprj1(1,1)%ncpgr, cwaveprj1(:,1)%nlmn)
+   ABI_MALLOC(nlmn,(natom))
+   nlmn(:)=cwaveprj1(:,1)%nlmn
+   call pawcprj_alloc(cwaveprj1_corr, cwaveprj1(1,1)%ncpgr, nlmn)
+   ABI_FREE(nlmn)
  end if
 
 ! loop iband_ over all bands being treated for the moment
