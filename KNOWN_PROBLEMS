@@ -16,7 +16,11 @@ The present revision ABINITv10.3.0 is for developments
 ================================================================
 0. Platforms
 
+<<<<<<< HEAD
 For ABINITv10.3.0, list closed on 2024 11 XX
+=======
+For ABINITv10.2.1, list closed on 2024 10 10
+>>>>>>> release-10.2
 after installation and successful tests for the standard set of platforms,
 as mentioned on
 https://bbportal.abinit.org/#/status
