@@ -1891,11 +1891,11 @@ Variable(
     added_in_version="",
     text=r"""
 For systems with many atoms, non-local operations are the most time-consuming part of the computation.
-The non-local contribution of the wave-function $\psi$ to the energy writes:
+The non-local contribution of the wavefunction $\psi$ to the energy writes:
 
 $$ E_{non-local} = \sum_a\sum_{i,j} <\psi|p_{a,i}> e_{a,ij} <p_{a,j}|\psi> $$
 
-and the Hamiltonian applied to a wave-function is:
+and the Hamiltonian applied to a wavefunction is:
 
 $$ H_{non-local}|\psi> = \sum_a\sum_{ij} |p_{a,i}> D_{a,ij} <p_{a,i}|\psi> $$
 
@@ -1916,7 +1916,7 @@ $$ H_{non-local}|\psi> = \sum_a\sum_{i,j} |p_{a,i}> D_{a,ij} cprj(a,j) $$
 
 With [[cprj_in_memory]] = 0, "cprj" coefficients are computed on-the-fly in many parts of the code, including ground-state computations.
 If [[cprj_in_memory]] = 1, "cprj" coefficients are computed and stored in memory at the diagonalization step. This option is available only for LOBPCG ([[wfoptalg]]=114) and Chebyshev filtering ([[wfoptalg]]=111).
-If [[cprj_in_memory]] = 2, "cprj" coefficients are stored in memory during the whole computation, and they evolve as the wave-functions do. This feature is available only for [[wfoptalg]]=10.
+If [[cprj_in_memory]] = 2, "cprj" coefficients are stored in memory during the whole computation, and they evolve as the wavefunctions do. This feature is available only for [[wfoptalg]]=10.
 
 [[cprj_in_memory]] > 0 is expected to be faster than [[cprj_in_memory]] = 0 for big systems (many atoms and/or many bands).
 
@@ -4364,16 +4364,20 @@ The choice is among:
          Save results in GSTORE.nc file (requires netcdf library with MPI-IO support).
          The k-mesh must be equal to the one associated to the input WFK file, the q-mesh is specified
          by [[eph_ngqpt_fine]] (NB: the q-mesh must be a sub-mesh of the k-mesh or equal).
-* 14 --> Compute the molecular Berry curvature from GSTORE.nc. No support for metals or non-collinear magnetism yet.
-         Reference: [[cite:Saparov2022]], [[cite:Coh2023]].
+* 12 --> Migdal-Eliashberg equations (isotropic case).
+* -12 --> Migdal-Eliashberg equations (anisotropic case). IN DEVELOPMENT.
+* 13 --> Variational polaron equations
+* -13 --> Compute polaron wavefunctions and atomic displacements in the supercell and write results to files
+* 14 --> Compute the molecular Berry curvature from GSTORE.nc. No support for metals or non-collinear magnetism yet. Reference: [[cite:Saparov2022]], [[cite:Coh2023]].
 * 15, -15 --> Write the average in r-space of the DFPT potentials to the V1QAVG.nc file.
               In the first case (+15) the q-points are specified via [[ph_nqpath]] and [[ph_qpath]]. The code assumes the
               input DVDB contains q-points in the IBZ and the potentials along the path
               are interpolated with Fourier transform.
               An array D(R) with the decay of the W(R,r) as a function of R is computed and saved to file
               In the second case (-15) the q-points are taken directly from the DVDB file.
+* 16, -16 --> test_phrotation TO BE DOCUMENTED.
+* 17 --> Compute e-ph matrix elements with the GWPT formalism  IN DEVELOPMENT.
 * 18 --> Compute e-ph matrix g(k,q) along high-symmetry path. See [[eph_fix_wavevec]] and other related variables.
-
 
 !!! important
 
@@ -10995,7 +10999,7 @@ Variable(
     text=r"""
 [[nbdbuf]] gives the number of bands, the highest in energy, that, among the
 [[nband]] bands, are to be considered as part of a buffer.
-A negative value is interpreted as percentage of [[nband]] (added in v9).
+A negative value (between -1 and -100) is interpreted as percentage of [[nband]] (added in v9). The value -101 is special (TO BE SPECIFIED ?)
 
 
 !!! important
