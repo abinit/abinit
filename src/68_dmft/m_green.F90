@@ -3435,6 +3435,8 @@ subroutine fermi_green(green,paw_dmft,self)
 
  ! Precompute some useful quantities so that the update of the moments can be done in constant time at each iteration
  green%trace_fermie(1) = cmplx(paw_dmft%nsppol*paw_dmft%mbandc,zero,kind=dp)
+ if (paw_dmft%nsppol == 1 .and. paw_dmft%nspinor == 1) green%trace_fermie(1) = &
+               & green%trace_fermie(1) * two
  if (green%has_moments == 1) call compute_trace_moments_ks(green,self,paw_dmft)
   
 !=====================
@@ -3942,10 +3944,11 @@ subroutine compute_nb_elec(green,self,paw_dmft,Fx,nb_elec_x,fermie,option,Fxprim
      
      ! DO NOT REPLACE THE LINES BELOW WITH A DOT_PRODUCT: THIS IS NOT EQUIVALENT SINCE THESE ARE COMPLEX QUANTITIES
      ! AND DOT_PRODUCT(X,Y)=SUM(CONJG(X(:))*Y(:))
-     green%charge_ks = green%charge_ks + dble(sum(trace_moments(1:nmoments)*omega_fac(1:nmoments)))
-     if (opt >= 1) Fxprime = Fxprime + dble(sum(trace_moments_prime(1:nmoments)*omega_fac(1:nmoments)))
-     if (opt == 2) Fxdouble = Fxdouble + dble(sum(trace_moments_double(1:nmoments)*omega_fac(1:nmoments)))
-     
+     if (green%distrib%me_kpt == 0) then
+       green%charge_ks = green%charge_ks + dble(sum(trace_moments(1:nmoments)*omega_fac(1:nmoments)))
+       if (opt >= 1) Fxprime = Fxprime + dble(sum(trace_moments_prime(1:nmoments)*omega_fac(1:nmoments)))
+       if (opt == 2) Fxdouble = Fxdouble + dble(sum(trace_moments_double(1:nmoments)*omega_fac(1:nmoments)))
+     end if 
    end do ! ifreq
    
    call xmpi_sum(green%charge_ks,paw_dmft%spacecomm,ierr)
