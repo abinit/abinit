@@ -632,17 +632,18 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
 !    call checkdiag_matlu(weiss_for_rot%oper(ifreq)%matlu,natom,tol6)
    end do
 
+
    if(paw_dmft%myproc .eq. mod(nproc+1,nproc)) then
-     if (open_file(trim(paw_dmft%filapp)//"_atom__G0w_.dat", message, newunit=unt) /= 0) then
+     if (open_file(trim(paw_dmft%filapp)//"_atom_G0w_.dat", message, newunit=unt) /= 0) then
        ABI_ERROR(message)
      end if
      do ifreq=1,paw_dmft%dmft_nwlo
        write(unt,'(29f21.14)') paw_dmft%omega_lo(ifreq),&
-&       (((weiss_for_rot%oper(ifreq)%matlu(0)%mat(im1,im1,isppol,ispinor,ispinor),&
+&       (((weiss_for_rot%oper(ifreq)%matlu(natom)%mat(im1,im1,isppol,ispinor,ispinor),&
 &       im1=1,3),ispinor=1,nspinor),isppol=1,nsppol)
      end do
      close(unt)
-   end if
+  end if
 
    call flush_unit(std_out)
    if(pawprtvol>=3) then
