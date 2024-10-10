@@ -175,7 +175,7 @@ Variable(
     text=r"""
 Gives the masses in atomic mass units for each kind of atom in the input cell. These
 masses are used in performing molecular dynamical atomic motion if
-[[geoopt]] = "viscous" or "quenched" or if [[moldyn]] = "nve_verlet" (corresponding to [[ionmov]] = 1, 6, 7 or 8).
+[[geoopt]] = "viscous" or "quenched" (corresponding to [[ionmov]] = 1 or 7) or if [[moldyn]] /= "none".
 They are also used in phonon calculations during the diagonalization of the dynamical matrix.
 Note that one may set all masses to 1 for certain cases in which merely structural relaxation is desired and not
 actual molecular dynamics.
@@ -3618,8 +3618,8 @@ Variable(
     mnemonics="Delta Time for IONs",
     added_in_version="before_v9",
     text=r"""
-Used for controlling ion time steps. If [[geoopt]] is set to "viscous", "quenched" or "fire",
-or if [[moldyn]] is set to "nve_verlet" ([[ionmov]] is set to 1, 6, 7 and 15), then
+Used for controlling ion time steps. If [[geoopt]] is set to "viscous", "quenched" or "fire"
+([[ionmov]] is set to 1, 7 or 15), or if [[moldyn]] /= "none", then
 molecular dynamics is  used to update atomic positions in response to forces.
 The parameter [[dtion]] is a time step in atomic units of time. (One atomic
 time unit is 2.418884e-17 seconds, which is the value of Planck's constant in
@@ -8088,6 +8088,12 @@ No meaning for RF calculations.
     **Cell optimization:** Yes (if [[optcell]]/=0)
     **Related variables:** The initial time step [[dtion]]
 
+  * 16 --> Langevin molecular dynamics. The equation of motion of the ions are described
+    with the algorithm proposed in [[cite:Quigley2004]].
+    **Purpose:** Molecular dynamics
+    **Cell optimization:** No (Use [[optcell]] = 0 only)
+    **Related variables:** time step ([[dtion]]), temperatures ([[mdtemp]]) and friction coefficient ([[vis]]).
+
   * 20 --> Direct inversion of the iterative subspace.
     Given a starting point [[xred]] that is a vector of length 3*[[natom]] (reduced nuclei coordinates),
     and unit cell parameters ([[rprimd]]) this routine uses the DIIS (direct inversion of the iterative subspace)
@@ -10475,13 +10481,16 @@ Variable(
     mnemonics="Molecular Dynamics TEMPeratures",
     added_in_version="before_v9",
     text=r"""
-Give the initial and final temperature of the Nose-Hoover thermostat
-([[ionmov]] = 8) and Langevin dynamics ([[ionmov]] = 9), in Kelvin. This
+Give the initial and final temperature of the Nose-Hoover thermostat [[moldyn]] = "nvt_nose"
+([[ionmov]] = 8), Langevin dynamics [[moldyn]] = "nvt_langevin" ([[ionmov]] = 16),
+Martyna thermostats [[moldyn]] = "npt_martyna" or "nst_martyna" ([[ionmov]] = 13), in Kelvin. This
 temperature will change linearly from the initial temperature **mdtemp(1)** at
 itime=1 to the final temperature **mdtemp(2)** at the end of the [[ntime]] timesteps.
 
-In the case of the isokinetic molecular dynamics ([[moldyn]] = "nvt_isokin"), **mdtemp(1)** allows ABINIT
-to generate velocities ([[vel]]) to start the run if they are not provided by the user or if they all vanish. However **mdtemp(2)** is not used (even if it must be defined to please the parser). If some velocities are non-zero, **mdtemp** is not used, the kinetic energy computed from the velocities is kept constant during the run.
+In the case of the isokinetic molecular dynamics [[moldyn]] = "nvt_isokin" ([[ionmov]] = 12), **mdtemp(1)** allows ABINIT
+to generate velocities ([[vel]]) to start the run if they are not provided by the user or if they all vanish.
+However **mdtemp(2)** is not used (even if it must be defined to please the parser). If some velocities are non-zero,
+**mdtemp** is not used, the kinetic energy computed from the velocities is kept constant during the run.
 """,
 ),
 
@@ -10744,10 +10753,10 @@ Choice of algorithm for the molecular dynamics simulation, and possibly changes 
   * "none" --> Do not move ions (**default behaviour**)
 
   * "nve_verlet" --> Molecular dynamics using the Verlet algorithm, see [[cite:Allen1987a]] p 81].
-  The only related parameter is the time step ([[dtion]]).
-  **Purpose:** Molecular dynamics
-  **Cell optimization:** No (Use [[optcell]] = 0 only)
-  **Related variables:** time step [[dtion]], index of atoms fixed [[iatfix]]
+    The only related parameter is the time step ([[dtion]]).
+    **Purpose:** Molecular dynamics
+    **Cell optimization:** No (Use [[optcell]] = 0 only)
+    **Related variables:** time step [[dtion]], index of atoms fixed [[iatfix]]
 
   * "nvt_isokin" --> Isokinetic ensemble molecular dynamics.
     The equation of motion of the ions in contact with a thermostat are solved with the
@@ -10774,6 +10783,12 @@ Choice of algorithm for the molecular dynamics simulation, and possibly changes 
     **Cell optimization:** No (Use [[optcell]] = 0 only)
     **Related variables:** The time step ([[dtion]]), the temperatures ([[mdtemp]]),
     the number of thermostats ([[nnos]]), and the masses of thermostats ([[qmass]]).
+  
+  * "nvt_langevin" --> Langevin molecular dynamics. The equation of motion of the ions are described
+    with the algorithm proposed in [[cite:Quigley2004]].
+    **Purpose:** Molecular dynamics
+    **Cell optimization:** No (Use [[optcell]] = 0 only)
+    **Related variables:** time step ([[dtion]]), temperatures ([[mdtemp]]) and friction coefficient ([[vis]]).
 
   * "npt_martyna" --> Isothermal/isobaric ensemble. The equation of motion of the ions in contact with a thermostat
     and a barostat are solved with the algorithm proposed in [[cite:Martyna1996]].
@@ -10792,11 +10807,11 @@ Choice of algorithm for the molecular dynamics simulation, and possibly changes 
     the number of thermostats ([[nnos]]), and the masses of thermostats ([[qmass]]).
 
   * "nve_velverlet" --> Simple constant energy molecular dynamics using
-   the velocity Verlet symplectic algorithm (second order), see [[cite:Hairer2003]].
-   The only related parameter is the time step ([[dtion]]).
-   **Purpose:** Molecular dynamics
-   **Cell optimization:** No (Use [[optcell]] = 0 only)
-   **Related variables:** time step [[dtion]]
+    the velocity Verlet symplectic algorithm (second order), see [[cite:Hairer2003]].
+    The only related parameter is the time step ([[dtion]]).
+    **Purpose:** Molecular dynamics
+    **Cell optimization:** No (Use [[optcell]] = 0 only)
+    **Related variables:** time step [[dtion]]
 """,
 ),
 
@@ -17208,10 +17223,10 @@ Variable(
     added_in_version="before_v9",
     text=r"""
 This are the masses of the chains of [[nnos]] thermostats to be used when
-[[moldyn]] = "nvt_nose" or "npt_martyna" or "npt_martyna" (Molecular Dynamics) or [[imgmov]] = 13 (Path Integral Molecular
+[[moldyn]] = "nvt_nose" or "npt_martyna" or "nst_martyna" (Molecular Dynamics) or [[imgmov]] = 13 (Path Integral Molecular
 Dynamics).
 
-If [[moldyn]] = "nvt_nose" or "npt_martyna" or "npt_martyna" (Molecular Dynamics), this temperature control can be used
+If [[moldyn]] = "nvt_nose" or "npt_martyna" or "nst_martyna" (Molecular Dynamics), this temperature control can be used
 with  [[optcell]] =0, 1 (homogeneous cell deformation) or 2 (full cell deformation).
 If [[imgmov]] = 13 (Path Integral Molecular Dynamics), this temperature control
 can be used with  [[optcell]] =0 (NVT ensemble) or 2 (fully flexible NPT
