@@ -2042,7 +2042,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  if(tread==1)then
    dtset%nbdbuf=intarr(1)
    ! A negative value is interpreted as percentage of nband, except -101. Anyhow, nbdbuf must be strictly bigger than -102
-   ABI_CHECK(dtset%nbdbuf < -101, "nbdbuf should be > -102")
+   ABI_CHECK(dtset%nbdbuf > -102, "nbdbuf should be > -102")
    if (dtset%nbdbuf < 0) then
      if (dtset%nbdbuf/=-101) then
        dtset%nbdbuf = max(nint(abs(dtset%nbdbuf) / 100.0_dp * maxval(dtset%nband)), 1)
