@@ -1632,7 +1632,7 @@ subroutine gstore_filter_fs_tetra__(gstore, qbz, qbz2ibz, qibz2bz, kbz, kibz, kb
 
 !Arguments ------------------------------------
 !scalars
- class(gstore_t),target,intent(inout) :: gstore
+ class(gstore_t),intent(inout) :: gstore
  real(dp),intent(in) :: qbz(3, gstore%nqbz)
  real(dp),target,intent(in) :: kbz(3, gstore%nqbz), kibz(3, gstore%nkibz)
  integer,intent(in) :: qbz2ibz(6,gstore%nqbz), qibz2bz(gstore%nqibz)
@@ -1646,9 +1646,7 @@ subroutine gstore_filter_fs_tetra__(gstore, qbz, qbz2ibz, qibz2bz, kbz, kibz, kb
  integer :: nsppol, ierr, cnt, spin, band, ib, ii, max_nb, all_nproc, my_rank, comm
  integer :: ik_bz, ik_ibz, iflag, nk_in_star
  real(dp) :: max_occ
- character(len=80) :: errorstring
- type(ebands_t),pointer :: ebands
- type(crystal_t),pointer :: cryst
+ character(len=80) :: error_string
  type(htetra_t) :: ktetra
 !arrays
  integer,allocatable :: indkk(:), kstar_bz_inds(:)
@@ -1656,16 +1654,16 @@ subroutine gstore_filter_fs_tetra__(gstore, qbz, qbz2ibz, qibz2bz, kbz, kibz, kb
  real(dp),allocatable :: eig_ibz(:)
 !----------------------------------------------------------------------
 
- comm = gstore%comm
- all_nproc = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
+ associate (cryst => gstore%cryst, ebands => gstore%ebands)
+
+ comm = gstore%comm; all_nproc = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
+ nsppol = gstore%nsppol
 
  ! Use the tetrahedron method to filter k- and k+q points on the FS in metals
  ! and define gstore%brange_spin automatically.
  call wrtout(std_out, sjoin(" Filtering k-points using:", gstore%kfilter))
 
  ! NB: here we recompute brange_spin
- cryst => gstore%cryst; ebands => gstore%ebands; nsppol = gstore%nsppol
-
  call ebands%get_bands_e0(ebands%fermie, gstore%brange_spin, ierr)
  ABI_CHECK(ierr == 0, "Error in ebands_get_bands_e0")
 
@@ -1674,8 +1672,8 @@ subroutine gstore_filter_fs_tetra__(gstore, qbz, qbz2ibz, qibz2bz, kbz, kibz, kb
 
  rlatt = ebands%kptrlatt; call matr3inv(rlatt, klatt)
  call htetra_init(ktetra, indkk, gstore%cryst%gprimd, klatt, kbz, gstore%nkbz, gstore%kibz, gstore%nkibz, &
-                  ierr, errorstring, gstore%comm)
- ABI_CHECK(ierr == 0, errorstring)
+                  ierr, error_string, gstore%comm)
+ ABI_CHECK(ierr == 0, error_string)
 
  ABI_MALLOC(eig_ibz, (gstore%nkibz))
  max_occ = two / (ebands%nspinor * nsppol)
@@ -1735,6 +1733,7 @@ subroutine gstore_filter_fs_tetra__(gstore, qbz, qbz2ibz, qibz2bz, kbz, kibz, kb
  ABI_FREE(eig_ibz)
  ABI_FREE(indkk)
  call ktetra%free()
+ end associate
 
 end subroutine gstore_filter_fs_tetra__
 !!***
@@ -1759,7 +1758,7 @@ subroutine gstore_filter_erange__(gstore, qbz, qbz2ibz, qibz2bz, kbz, kibz, kbz2
 
 !Arguments ------------------------------------
 !scalars
- class(gstore_t),target,intent(inout) :: gstore
+ class(gstore_t),intent(inout) :: gstore
  real(dp),intent(in) :: qbz(3, gstore%nqbz)
  real(dp),target,intent(in) :: kbz(3, gstore%nqbz), kibz(3, gstore%nkibz)
  integer,intent(in) :: qbz2ibz(6,gstore%nqbz), qibz2bz(gstore%nqibz)
@@ -1774,22 +1773,20 @@ subroutine gstore_filter_erange__(gstore, qbz, qbz2ibz, qibz2bz, kbz, kibz, kbz2
  integer :: ik_bz, ik_ibz, iflag, nk_in_star, gap_err
  logical :: assume_gap
  real(dp) :: ee, abs_erange1, abs_erange2, vmax, cmin
- type(ebands_t),pointer :: ebands
- type(crystal_t),pointer :: cryst
  type(gaps_t) :: gaps
 !arrays
  integer,allocatable :: kstar_bz_inds(:)
 !----------------------------------------------------------------------
 
- comm = gstore%comm
- all_nproc = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
+ associate (cryst => gstore%cryst, ebands => gstore%ebands)
+
+ comm = gstore%comm; all_nproc = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
+ nsppol = gstore%nsppol
 
  ! filter k and k + q points according to erange and define gstore%brange_spin automatically.
  ! NB: here we recompute brange_spin
  call wrtout(std_out, sjoin(" Filtering k-points using gstore_erange:", &
                             ltoa(reshape(gstore%erange_spin, [2 * gstore%nsppol]) * Ha_eV), "(eV)"))
-
- cryst => gstore%cryst; ebands => gstore%ebands; nsppol = gstore%nsppol
 
  assume_gap = .not. all(gstore%erange_spin < zero)
  gaps = ebands%get_gaps(gap_err)
@@ -1870,6 +1867,7 @@ subroutine gstore_filter_erange__(gstore, qbz, qbz2ibz, qibz2bz, kbz, kibz, kbz2
                                 select_kbz_spin, select_qbz_spin)
 
  call gaps%free()
+ end associate
 
 end subroutine gstore_filter_erange__
 !!***
@@ -1894,7 +1892,7 @@ subroutine gstore_filter_qprange__(gstore, dtset, qbz, qbz2ibz, qibz2bz, kbz, ki
 
 !Arguments ------------------------------------
 !scalars
- class(gstore_t),target,intent(inout) :: gstore
+ class(gstore_t),intent(inout) :: gstore
  type(dataset_type),intent(in) :: dtset
  real(dp),intent(in) :: qbz(3, gstore%nqbz)
  real(dp),target,intent(in) :: kbz(3, gstore%nqbz), kibz(3, gstore%nkibz)
@@ -1906,12 +1904,20 @@ subroutine gstore_filter_qprange__(gstore, dtset, qbz, qbz2ibz, qibz2bz, kbz, ki
 !Local variables-------------------------------
 !scalars
  integer :: spin, ik_bz, ik_ibz, gap_err, qprange, ik_calc, nkcalc, mapl_kk(6), my_rank
- type(ebands_t),pointer :: ebands
  type(gaps_t) :: gaps
 !arrays
  integer,allocatable :: bstart_ks(:,:), nbcalc_ks(:,:)
  real(dp),allocatable :: kcalc(:,:)
 !----------------------------------------------------------------------
+
+ ABI_UNUSED(kbz2ibz)
+ ABI_UNUSED(kbz)
+ ABI_UNUSED(kibz)
+ ABI_UNUSED(qbz2ibz)
+ ABI_UNUSED(qbz)
+ ABI_UNUSED(qibz2bz)
+
+ associate (cryst => gstore%cryst, ebands => gstore%ebands)
 
  my_rank = xmpi_comm_rank(gstore%comm)
 
@@ -1920,8 +1926,6 @@ subroutine gstore_filter_qprange__(gstore, dtset, qbz, qbz2ibz, qibz2bz, kbz, ki
  if (gstore%qzone /= "bz") then
    ABI_ERROR(sjoin('qprange filtering requires gstore_qzone = "bz" while it is: ', gstore%qzone))
  end if
-
- ebands => gstore%ebands
 
  gaps = ebands%get_gaps(gap_err)
  if (my_rank == 0) call gaps%print([std_out])
@@ -1970,6 +1974,7 @@ subroutine gstore_filter_qprange__(gstore, dtset, qbz, qbz2ibz, qibz2bz, kbz, ki
  ABI_FREE(nbcalc_ks)
 
  call gaps%free()
+ end associate
 
 end subroutine gstore_filter_qprange__
 !!***
@@ -2156,16 +2161,16 @@ subroutine gstore_fill_bks_mask(gstore, mband, nkibz, nsppol, bks_mask)
  integer :: my_is, my_ik, my_iq, spin, ik_ibz, iqk_ibz, ebands_kptopt
  real(dp) :: weight_q, cpu, wall, gflops
  type(gqk_t),pointer :: gqk
- type(crystal_t),pointer :: cryst
 !arrays
  integer,allocatable :: map_kq(:,:)
  real(dp) :: qpt(3)
 !----------------------------------------------------------------------
 
+ associate (cryst => gstore%cryst, ebands => gstore%ebands)
+
  call cwtime(cpu, wall, gflops, "start")
 
  bks_mask = .False.
- cryst => gstore%cryst
  ebands_kptopt = gstore%ebands%kptopt
 
  do my_is=1,gstore%my_nspins
@@ -2197,6 +2202,7 @@ subroutine gstore_fill_bks_mask(gstore, mband, nkibz, nsppol, bks_mask)
  end do
 
  call cwtime_report(" gstore_fill_bks_mask", cpu, wall, gflops)
+ end associate
 
 end subroutine gstore_fill_bks_mask
 !!***
@@ -3151,7 +3157,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
 !Local variables ------------------------------
 !scalars
  integer,parameter :: tim_getgh1c = 1, berryopt0 = 0, ider0 = 0, idir0 = 0, LOG_MODQ = 5
- integer,parameter :: useylmgr = 0, useylmgr1 = 0, master = 0, ndat1 = 1, optder0 = 0
+ integer,parameter :: master = 0, ndat1 = 1
  integer :: my_rank,nproc,mband,nsppol,nkibz,idir,ipert, iq_bz
  integer :: cplex,natom,natom3,ipc,nspinor, nskip_tetra_kq
  integer :: bstart_k,bstart_kq,nband_k,nband_kq,band_k, in_k, im_kq !ib1,ib2, band_kq,
@@ -3171,19 +3177,16 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
  type(gqk_t),pointer :: gqk
  character(len=500) :: msg
 !arrays
- integer :: g0_k(3), g0_kq(3), g0_q(3), work_ngfft(18),gmax(3),indkk_kq(6,1), units(2)
- integer :: qbz2dvdb(6) ! mapl_k(6), mapl_kq(6), mapl_kqmp(6), mapl_kmp(6), mapc_qq(6),
+ integer :: g0_k(3), g0_kq(3), g0_q(3), work_ngfft(18),gmax(3),indkk_kq(6,1), units(2), qbz2dvdb(6)
  integer,allocatable :: kg_k(:,:), kg_kq(:,:), nband(:,:), wfd_istwfk(:), qmap_symrec(:,:)
  integer,allocatable :: iq_buf(:,:), done_qbz_spin(:,:), my_iqibz_inds(:)
  !integer,allocatable :: qibz2dvdb(:) !, displs(:), recvcounts(:)
- !real(dp) :: ylmgr_k_dum(1,1,1), ylmgr_kq_dum(1,1,1)
- real(dp) :: kk_bz(3),kq_bz(3),kk_ibz(3),kq_ibz(3), qq_bz(3), qq_ibz(3), vk(3)
- real(dp) :: phfrq(3*cryst%natom)
+ real(dp) :: kk_bz(3),kq_bz(3),kk_ibz(3),kq_ibz(3), qq_bz(3), qq_ibz(3), vk(3), phfrq(3*cryst%natom)
  real(dp),allocatable :: displ_cart_qibz(:,:,:,:), displ_red_qibz(:,:,:,:), pheigvec_qibz(:,:,:,:)
  real(dp),allocatable :: displ_cart_qbz(:,:,:,:), displ_red_qbz(:,:,:,:), pheigvec_qbz(:,:,:,:)
- real(dp),allocatable :: grad_berry(:,:), kinpw_k(:), kinpw_kq(:), kpg_kq(:,:), kpg_k(:,:) !, dkinpw(:)
+ real(dp),allocatable :: grad_berry(:,:), kinpw_k(:), kinpw_kq(:), kpg_kq(:,:), kpg_k(:,:)
  real(dp),allocatable :: ffnl_k(:,:,:,:), ffnl_kq(:,:,:,:), ph3d_k(:,:,:), ph3d_kq(:,:,:)
- real(dp),allocatable :: v1scf(:,:,:,:), gkq_atm(:,:,:,:),gkq_nu(:,:,:,:)
+ real(dp),allocatable :: v1scf(:,:,:,:), gkq_atm(:,:,:,:), gkq_nu(:,:,:,:)
  real(dp),allocatable :: bras_kq(:,:,:), kets_k(:,:,:), h1kets_kq(:,:,:), cgwork(:,:)
  real(dp),allocatable :: ph1d(:,:), vlocal(:,:,:,:), vlocal1(:,:,:,:,:)
  real(dp),allocatable :: dummy_vtrial(:,:), gvnlx1(:,:), work(:,:,:,:)
@@ -3623,6 +3626,8 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
        ABI_CHECK(nband_k <= nb .and. nband_kq <= nb, "wrong nband")
 
        ! Get npw_k, kg_k and symmetrize wavefunctions from IBZ (if needed).
+       ! TODO: these routines now should allocate wavefunctions as
+       !real(dp),intent(out) :: cgs_kbz(2, npw_k*self%nspinor, nband)
        call wfd%sym_ug_kg(ecut, kk_bz, kk_ibz, bstart_k, nband_k, spin, mpw, gqk%my_k2ibz(:, my_ik), cryst, &
                           work_ngfft, work, istwf_k, npw_k, kg_k, kets_k)
 
@@ -3656,7 +3661,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
            eshift = eig0nk - dtset%dfpt_sciss
 
            call getgh1c(berryopt0, kets_k(:,:,in_k), cwaveprj0, h1kets_kq(:,:,in_k), &
-                        grad_berry, gs1c_kq, gs_hamkq, gvnlx1, idir, ipert, (/eshift/), mpi_enreg, 1, optlocal, &
+                        grad_berry, gs1c_kq, gs_hamkq, gvnlx1, idir, ipert, (/eshift/), mpi_enreg, ndat1, optlocal, &
                         optnl, opt_gvnlx1, rf_hamkq, sij_opt, tim_getgh1c, usevnl)
          end do
 
@@ -3768,7 +3773,6 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
  ABI_FREE(pheigvec_qbz)
  ABI_FREE(pheigvec_qibz)
  ABI_FREE(done_qbz_spin)
-
 
  call ddkop%free()
  call gs_hamkq%free()
