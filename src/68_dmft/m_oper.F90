@@ -1665,9 +1665,9 @@ subroutine gather_oper_ks(oper,distrib,paw_dmft,opt_diag)
  ABI_MALLOC(buffer,(siz_buf))
  ABI_MALLOC(buffer_tot,(recvcounts(nproc)+displs(nproc)))
 
- buffer(:) = czero
- 
  do isppol=1,nsppol
+
+   buffer(:) = czero
   
    ibuf = 0
    do ikpt=1,nkpt
