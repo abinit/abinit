@@ -1929,9 +1929,14 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    end if
 
 !  nbdbuf
-!  Must be greater or equal to 0. Note that a negative value is permitted in input, but immediately
+!  At this stage, nbdbuf Must be greater or equal to 0, or take the special value -101. 
+!  Note that other negative values are permitted in input, but immediately
 !  transformed to a fraction of the number of bands hence a positive number.
-   call chkint_ge(0,0,cond_string,cond_values,ierr,'nbdbuf',dt%nbdbuf,0,iout)
+   call chkint_ge(0,0,cond_string,cond_values,ierr,'nbdbuf',dt%nbdbuf,-101,iout)
+   if(dt%nbdbuf/=-101)then
+     cond_string(1)='nbdbuf' ; cond_values(1)=dt%nbdbuf
+     call chkint_ge(1,1,cond_string,cond_values,ierr,'nbdbuf',dt%nbdbuf,0,iout)
+   endif
 
 
 !  nbandkss

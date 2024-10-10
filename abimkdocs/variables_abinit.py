@@ -11027,7 +11027,7 @@ Variable(
     text=r"""
 [[nbdbuf]] gives the number of bands, the highest in energy, that, among the
 [[nband]] bands, are to be considered as part of a buffer.
-A negative value is interpreted as percentage of [[nband]] (added in v9).
+A negative value (between -1 and -100) is interpreted as percentage of [[nband]] (added in v9). The value -101 is special (TO BE SPECIFIED ?)
 
 
 !!! important
