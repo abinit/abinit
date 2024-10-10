@@ -4336,6 +4336,8 @@ subroutine wfd_sym_ug_kg(self, ecut, kk_bz, kk_ibz, bstart, nband, spin, mpw, in
  integer,intent(in) :: indkk(6)
  integer,intent(out) :: kg_kbz(3, mpw)
  real(dp),intent(in) :: kk_bz(3), kk_ibz(3)
+ ! TODO: these routines now should allocate wavefunctions as
+ !real(dp),intent(out) :: cgs_kbz(2, npw_kq*self%nspinor, nband)
  real(dp),intent(out) :: cgs_kbz(2, mpw*self%nspinor, nband)
  real(dp),intent(out) :: work(2, work_ngfft(4), work_ngfft(5), work_ngfft(6))
  logical ,optional, intent(in) :: force_rotate
@@ -4363,14 +4365,14 @@ subroutine wfd_sym_ug_kg(self, ecut, kk_bz, kk_ibz, bstart, nband, spin, mpw, in
    endif
  endif
 
-
-
-
  ! Get npw_kbz, kg_kbz and symmetrize wavefunctions from IBZ (if needed).
  ! Be careful with time-reversal symmetry.
  if (.not. rotate) then
    ! Copy u_k(G)
    istwf_kbz = self%istwfk(ik_ibz); npw_kbz = self%npwarr(ik_ibz)
+   !ABI_MALLOC(kg_kbz, (3, npw_kbz))
+   !ABI_MALLOC(cgs_kbz, (2, npw_kbz*self%nspinor, nband))
+
    ABI_CHECK(mpw >= npw_kbz, "mpw < npw_kbz")
    kg_kbz(:,1:npw_kbz) = self%kdata(ik_ibz)%kg_k
    do ib=1,nband
@@ -4384,6 +4386,8 @@ subroutine wfd_sym_ug_kg(self, ecut, kk_bz, kk_ibz, bstart, nband, spin, mpw, in
    ABI_CHECK(mpw >= npw_kbz, "mpw < npw_kbz")
    kg_kbz(:,1:npw_kbz) = gtmp(:,:npw_kbz)
    ABI_FREE(gtmp)
+   !ABI_MALLOC(kg_kbz, (3, npw_kbz))
+   !ABI_MALLOC(cgs_kbz, (2, npw_kbz*self%nspinor, nband))
 
    ! Use cg_kirr as workspace array, results stored in cgs_kbz.
    istwf_kirr = self%istwfk(ik_ibz); npw_kirr = self%npwarr(ik_ibz)

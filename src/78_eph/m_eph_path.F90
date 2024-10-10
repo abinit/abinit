@@ -610,7 +610,7 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
      ABI_FREE(kinpw_k)
      ABI_FREE(ffnl_k)
      ABI_FREE(kg_k)
-     ABI_SFREE(eig_k)
+     ABI_FREE(eig_k)
      ABI_FREE(cg_k)
      ABI_FREE(gsc_k)
      call gs_ham_k%free()
