@@ -1,8 +1,8 @@
 
-.Version 9.3.2 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu8.3 computer) 
+.Version 10.1.4.5 of ABINIT, released Sep 2024.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2022 ABINIT group . 
+.Copyright (C) 1998-2024 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,14 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Thu 10 Dec 2020.
-- ( at 09h48 )
+.Starting date : Fri 13 Sep 2024.
+- ( at 19h15 )
   
-- input  file    -> /home/marm314/abinit/tests/Test_suite/v9_t33-t34-t35/t34.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v9_t33-t34-t35/t34.abi
 - output file    -> t34.abo
 - root for input  files -> t34i
 - root for output files -> t34o
-
 
  DATASET    1 : space group Fm -3 m (#225); Bravais cF (face-center cubic)
 ================================================================================
@@ -34,7 +33,7 @@
 -    mband =           8        mffmem =           1         mkmem =           6
        mpw =          40          nfft =        1000          nkpt =           6
 ================================================================================
-P This job should need less than                       0.811 Mbytes of memory.
+P This job should need less than                       0.840 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.031 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 ================================================================================
@@ -43,10 +42,10 @@ _ WF disk file :      0.031 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
 -
-- outvars: echo of selected default values                                      
+- outvars: echo of selected default values
 -   iomode0 =  0 , fftalg0 =512 , wfoptalg0 =  0
 -
-- outvars: echo of global parameters not present in the input file              
+- outvars: echo of global parameters not present in the input file
 -  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
@@ -169,8 +168,8 @@ meta: {optdriver: 4, gwcalctyp: 21, }
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/marm314/abinit/tests/Psps_for_tests/He-GGA.psp8
-- pspatm: opening atomic psp file    /home/marm314/abinit/tests/Psps_for_tests/He-GGA.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/He-GGA.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/He-GGA.psp8
 - He    ONCVPSP-3.2.3.1  r_core=   1.26476   1.13601
 -  2.00000   2.00000    170510                znucl, zion, pspdat
     8   11    1    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -241,7 +240,7 @@ meta: {optdriver: 4, gwcalctyp: 21, }
 
   Number of electrons    =    2.0000
 
-  QP Band energy    [Ha] = -7.95592502835262E-01
+  QP Band energy    [Ha] = -7.95592502835264E-01
   QP Hartree energy [Ha] =  3.53069363469165E-01
 
 --------------------------------------------------------------------------------
@@ -589,10 +588,10 @@ P           mkmem           6
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          2.2  wall=          2.3
+- Proc.   0 individual time (sec): cpu=          2.3  wall=          2.3
 
 ================================================================================
 
  Calculation completed.
-.Delivered   1 WARNINGs and   8 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          2.2  wall=          2.3
+.Delivered   0 WARNINGs and   9 COMMENTs to log file.
++Overall time at end (sec) : cpu=          2.3  wall=          2.3

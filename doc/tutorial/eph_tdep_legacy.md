@@ -1,12 +1,12 @@
 ---
-authors: SP
+authors: SP, LMac
 ---
 
 # Tutorial EPH Temperature-Dependence (Legacy)
 
 ## Electron-phonon Temperature-DEPendence of the Electronic Structure.
 
-This tutorial aims at showing how to get the following physical properties, for periodic solids:
+This tutorial aims to show how to get the following physical properties for periodic solids:
 
   * The zero-point-motion renormalization (ZPR) of eigenenergies
 
@@ -16,26 +16,25 @@ This tutorial aims at showing how to get the following physical properties, for 
 
 It should take about 1 hour.
 
-WARNING : This tutorial concerns an old procedure to obtain the temperature-dependence of the electronic structure, that is why it is labelled "legacy".
+WARNING : This tutorial concerns an outdated procedure of obtaining the temperature-dependence of the electronic structure, as indicated by the "legacy" qualifier.
 
-For the theory related to the temperature-dependent calculations, please read
+For the theory related to temperature-dependent calculations, please read
 the following papers: [[cite:Ponce2015]], [[cite:Ponce2014]] and [[cite:Ponce2014a]].
 
 There are three ways to compute the temperature dependence with Abinit:
 
   * **Using Anaddb**: historically the first implementation.
 
-  * **Using post-processing python scripts**: This way provides more options and is more efficient (less disk space, less memory demanding). 
-    This option **requires Netcdf** (both in Abinit and python). In this tutorial, we only focus on this approach.
+  * **Using a post-processing python scripts**: This route provides more options and is more efficient (i.e., requires less disk space and less memory), but it **requires Netcdf** (both in Abinit and python). The current tutorial focuses on this approach.
 
-  * **Using an interpolation of the perturbed potential**: This new way is covered 
-   in the [ZPR and T-dependent band structures](/tutorial/eph4zpr) tutorial.  
+  * **Using an interpolation of the perturbed potential**: This new method is covered 
+   in the [ZPR and T-dependent band structures](/tutorial/eph4zpr) tutorial.
 
 !!! important
 
     In order to run the python script you need:
 
-      * python 2.7.6 or higher, python3 is not supported
+      * python3
       * numpy 1.7.1 or higher
       * netCDF4 and netCDF4 for python
       * scipy 0.12.0 or higher
@@ -44,9 +43,9 @@ There are three ways to compute the temperature dependence with Abinit:
 
         sudo apt-get install netcdf-bin
         sudo apt-get install python-dev
-        pip install numpy
-        pip install scipy
-        pip install netcdf4
+        pip3 install numpy
+        pip3 install scipy
+        pip3 install netcdf4
 
     A list of configuration files for clusters is available in the
     [abiconfig repository](https://github.com/abinit/abiconfig)
@@ -77,9 +76,9 @@ and the [Abipy tutorials](https://github.com/abinit/abitutorials).
 ## 1 Calculation of the ZPR of eigenenergies at q=Γ.
 
 The reference input files for this tutorial are located in
-~abinit/tests/tutorespfn/Input and the corresponding reference output files
-are in ~abinit/tests/tutorespfn/Refs.
-The prefix for files is **teph_tdep_legacy**. As usual, we use the shorthand `~abinit` to indicate
+~/abinit/tests/tutorespfn/Input and the corresponding reference output files
+are in ~/abinit/tests/tutorespfn/Refs.
+The prefix for files is **teph_tdep_legacy**. As usual, we use the shorthand `~/abinit` to indicate
 the root directory where the abinit package has been deployed, but most often
 consider the paths relative to this directory.
 
@@ -103,17 +102,17 @@ The electron-phonon matrix elements are produced because of [[ieig2rf]]3=5 ,
 this option generating the needed netCDF files teph_tdep_legacy_1o_DS3_EIGR2D.nc and teph_tdep_legacy_1o_DS3_GKK.nc .
 
 In order to run abinit, we suggest that you create a working directory, why not call it `Work`,
-as subdirectory of ~abinit/tests/tutorespfn/Input, then
+as subdirectory of ~/abinit/tests/tutorespfn/Input, then
 copy/modify the relevant files. Explicitly:
 
-    cd ~abinit/tests/tutorespfn/Input
+    cd ~/abinit/tests/tutorespfn/Input
     mkdir Work
     cd Work
     cp ../teph_tdep_legacy*in .
 
 Finally, issue
 
-    abinit teph_tdep_legacy_1.abi 
+    abinit teph_tdep_legacy_1.abi > teph_tdep_legacy_1.log
 
 The calculation will produce several _EIG.nc, _DDB, EIGR2D.nc and EIGI2D.nc files, 
 that contain respectively the eigenvalues (GS or perturbed), 
@@ -123,14 +122,14 @@ the renormalization of the eigenenergies and the electron-phonon matrix
 elements used to compute the lifetime of the electronic states.
 
 You can now copy three post-processing python files from
-~abinit/scripts/post_processing/temperature-dependence .
+~/abinit/scripts/.
 Make sure you are in the directory containing the output files produced by the code and issue:
 
-    cp ~abinit/scripts/post_processing/temperature-dependence/temperature_final.py .
-    cp ~abinit/scripts/post_processing/temperature-dependence/rf_final.py .
-    cp ~abinit/scripts/post_processing/plot_bs.py .
+    cp ~/abinit/scripts/post_processing/temperature-dependence/temperature_final.py .
+    cp ~/abinit/scripts/post_processing/temperature-dependence/rf_mods.py .
+    cp ~/abinit/scripts/post_processing/plot_bs.py .
 
-in which ~abinit has been replaced by the proper path.
+in which ~/abinit has been replaced by your own path to the abinit directory.
 
 
 <!--
@@ -473,7 +472,7 @@ working directory (if not yet done) and launch the python script with:
 
 Examination of the same HOMO and LUMO bands at k=$\Gamma$ for a 4x4x4 q-point grid gives a very different result
 than previously. 
-The zero-point renormalization (ZPR) is the change of the bandgap at 0 K and was (band 4 - band 3):
+The zero-point renormalization (ZPR) is the change of the bandgap at 0 K and was (band 5 - band 4):
    
     -0.012507 - 0.017727 = -0.030234 eV
 

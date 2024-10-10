@@ -1,6 +1,6 @@
 # -*- Autoconf -*-
 #
-# Copyright (C) 2005-2022 ABINIT Group (Yann Pouillon)
+# Copyright (C) 2005-2024 ABINIT Group (Yann Pouillon)
 #
 # This file is part of the ABINIT software package. For license information,
 # please see the COPYING file in the top-level directory of the ABINIT source
@@ -131,6 +131,37 @@ AC_DEFUN([_ABI_CC_CHECK_IBM],[
 ]) # _ABI_CC_CHECK_IBM
 
 
+# _ABI_CC_CHECK_INTEL_oneAPI(COMPILER)
+# ------------------------------------
+#
+# Checks whether the specified C compiler is the Intel oneAPI C compiler.
+# If yes, tries to determine its version number and sets the abi_cc_vendor
+# and abi_cc_version variables accordingly.
+#
+AC_DEFUN([_ABI_CC_CHECK_INTEL_ONEAPI],[
+  # Do some sanity checking of the arguments
+  m4_if([$1], , [AC_FATAL([$0: missing argument 1])])dnl
+
+  dnl AC_MSG_CHECKING([if we are using the Intel C compiler])
+  cc_info_string=`$1 -V 2>&1 | head -n 1`
+  abi_result=`echo "${cc_info_string}" | grep '^Intel(R) oneAPI'`
+  if test "${abi_result}" = ""; then
+    abi_result="no"
+    cc_info_string=""
+    abi_cc_vendor="unknown"
+    abi_cc_version="unknown"
+  else
+    AC_DEFINE([CC_INTEL_ONEAPI],1,[Define to 1 if you are using the Intel oneAPI C compiler.])
+    abi_cc_vendor="intel"
+    abi_cc_version=`echo "${abi_result}" | sed -e 's/.*Version //; s/ .*//'`
+    if test "${abi_cc_version}" = "${abi_result}"; then
+      abi_cc_version="unknown"
+    fi
+    abi_result="yes"
+  fi
+  dnl AC_MSG_RESULT(${abi_result})
+]) # _ABI_CC_CHECK_INTEL_oneAPI
+
 
 # _ABI_CC_CHECK_INTEL(COMPILER)
 # -----------------------------
@@ -165,6 +196,40 @@ AC_DEFUN([_ABI_CC_CHECK_INTEL],[
 
 
 
+# _ABI_CC_CHECK_CRAY(COMPILER)
+# ----------------------------
+#
+# Checks whether the specified C compiler is the CRAY Clang compiler.
+# If yes, tries to determine its version number and sets the abi_cc_vendor
+# and abi_cc_version variables accordingly.
+#
+AC_DEFUN([_ABI_CC_CHECK_CRAY],[
+  # Do some sanity checking of the arguments
+  m4_if([$1], [], [AC_FATAL([$0: missing argument 1])])dnl
+
+  dnl AC_MSG_CHECKING([if we are using the CRAY Clang C compiler])
+  cc_info_string=`$1 --version 2>/dev/null | head -n 1`
+  abi_result=`echo "${cc_info_string}" | grep 'Cray clang'`
+  if test "${abi_result}" = ""; then
+    abi_result="no"
+    cc_info_string=""
+    abi_cc_vendor="unknown"
+    abi_cc_version="unknown"
+  else
+    AC_DEFINE([CC_CRAY],1,
+      [Define to 1 if you are using the CRAY Clang C compiler.])
+    abi_cc_vendor="cray"
+    abi_cc_version=`echo ${abi_result} | sed -e 's/.*ersion //; s/ .*//'`
+    if test "${abi_cc_version}" = "${abi_result}"; then
+      abi_cc_version="unknown"
+    fi
+    abi_result="yes"
+  fi
+  dnl AC_MSG_RESULT(${abi_result})
+]) # _ABI_CC_CHECK_CRAY
+
+
+
 # _ABI_CC_CHECK_LLVM(COMPILER)
 # ----------------------------
 #
@@ -196,6 +261,39 @@ AC_DEFUN([_ABI_CC_CHECK_LLVM],[
   fi
   dnl AC_MSG_RESULT(${abi_result})
 ]) # _ABI_CC_CHECK_LLVM
+
+
+
+# _ABI_CC_CHECK_NVHPC(COMPILER)
+# ---------------------------
+#
+# Checks whether the specified C compiler is the NVIDIA HPC SDK C compiler.
+# If yes, tries to determine its version number and sets the abi_cc_vendor
+# and abi_cc_version variables accordingly.
+#
+AC_DEFUN([_ABI_CC_CHECK_NVHPC],[
+  # Do some sanity checking of the arguments
+  m4_if([$1], , [AC_FATAL([$0: missing argument 1])])dnl
+
+  dnl AC_MSG_CHECKING([if we are using the NVHPC C compiler])
+  cc_info_string=`$1 -V 2> /dev/null | grep "^nvc"`
+  abi_result=`echo "${cc_info_string}"`
+  if test "${abi_result}" = ""; then
+    abi_result="no"
+    cc_info_string=""
+    abi_cc_vendor="unknown"
+    abi_cc_version="unknown"
+  else
+    AC_DEFINE([CC_NVHPC],1,[Define to 1 if you are using the NVIDIA HPC SDK C compiler.])
+    abi_cc_vendor="nvhpc"
+    abi_cc_version=`echo "${abi_result}" | cut -f2 -d" "`
+    if test "${abi_cc_version}" = ""; then
+      abi_cc_version="unknown"
+    fi
+    abi_result="yes"
+  fi
+  dnl AC_MSG_RESULT(${abi_result})
+]) # _ABI_CC_CHECK_NVHPC
 
 
 
@@ -384,7 +482,7 @@ AC_DEFUN([ABI_PROG_CC],[
       fi
     fi
   fi
-  AC_PROG_CC([ mpiicc mpicc icc xlc CC cc gcc ])
+  AC_PROG_CC([ cc mpiicc mpicc icc icx xlc CC gcc ])
 
   # Fail if no C compiler is available
   if test "${CC}" = ""; then
@@ -414,10 +512,19 @@ AC_DEFUN([ABI_PROG_CC],[
     _ABI_CC_CHECK_ARM(${CC})
   fi
   if test "${abi_cc_vendor}" = "unknown"; then
+    _ABI_CC_CHECK_INTEL_ONEAPI(${CC})
+  fi
+  if test "${abi_cc_vendor}" = "unknown"; then
     _ABI_CC_CHECK_INTEL(${CC})
   fi
   if test "${abi_cc_vendor}" = "unknown"; then
+    _ABI_CC_CHECK_CRAY(${CC})
+  fi
+  if test "${abi_cc_vendor}" = "unknown"; then
     _ABI_CC_CHECK_LLVM(${CC})
+  fi
+  if test "${abi_cc_vendor}" = "unknown"; then
+    _ABI_CC_CHECK_NVHPC(${CC})
   fi
   if test "${abi_cc_vendor}" = "unknown"; then
     _ABI_CC_CHECK_PGI(${CC})

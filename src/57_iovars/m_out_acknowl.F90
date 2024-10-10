@@ -6,7 +6,7 @@
 !! Echo acknowledgments for the ABINIT code.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2022 ABINIT group (XG)
+!!  Copyright (C) 2008-2024 ABINIT group (XG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -80,7 +80,7 @@ subroutine out_acknowl(dtsets,iout,ndtset_alloc,npsp,pspheads)
 
 !Allocate and initialize, for each possible reference, the flag for citation,
 !the priority of the citation, the reference, and the comment.
- nrefs=45
+ nrefs=46
  ABI_MALLOC(cite,(nrefs))
  ABI_MALLOC(ref,(nrefs))
  ABI_MALLOC(comment,(nrefs))
@@ -484,8 +484,17 @@ subroutine out_acknowl(dtsets,iout,ndtset_alloc,npsp,pspheads)
   ' DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#zwanziger2023'
  priority(45)=20
 
+ ref(46)=' Facilities and practices for linear response Hubbard parameters U and J in Abinit.'//ch10//&
+  " L. MacEnulty, M. Giantomassi, B. Amadon, G.-M. Rignanese and D.D. O'Regan"// &
+  ' Electron. Struct. 6 037003 (2024).'
+ comment(46)=&
+  " Comment: to be cited in case the Hubbard U or Hund's J are calculated using the lrUJ utility"//ch10//&
+  ' or the renovated functionalities of UJdet, i.e., macro_uj>0.'//ch10//&
+  ' DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#MacEnulty2024'
+ priority(46)=20
 
-!---------------------------------------------------------------------------------------------
+ 
+ !---------------------------------------------------------------------------------------------
 !Determine the papers to be cited
 
 !Generic papers, not subject to conditions for citations
@@ -618,6 +627,9 @@ subroutine out_acknowl(dtsets,iout,ndtset_alloc,npsp,pspheads)
 
 !  If prtnabla>0 and nspinor==, cite Brouwer2021
    if(dtsets(idtset)%prtnabla>0.and.dtsets(idtset)%nspinor==2.and.dtsets(idtset)%pawspnorb>0 )cite(44)=1
+
+!  If macro_uj>0, cite MacEnulty2024
+   if(dtsets(idtset)%macro_uj>0 )cite(46)=1
 
  end do
 

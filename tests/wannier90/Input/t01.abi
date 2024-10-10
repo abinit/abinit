@@ -2,7 +2,7 @@
 
 
 #First dataset : SC run with kpoints in the IBZ
-  nband   8     
+  nband   8
   nstep  30
  irdwfk 0
  prtwant 2
@@ -33,7 +33,7 @@ istwfk 8*1
  ecut 20.00             ! This is also too low
 # pawecutdg 40.00             ! This is also too low
  ixc 1
- natom  2  
+ natom  2
  ntypat  2
  rprim   0 .5 .5  .5 0 .5  .5 .5 0
  xred 3*0.00d0 3*0.25d0
@@ -48,12 +48,12 @@ istwfk 8*1
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = t01.abo, tolnlines=   15,   tolabs=  1.5e-04,   tolrel=  1.00e-01
-#%% extra_inputs=t01o_w90.win 
+#%% extra_inputs=t01o_w90.win
 #%% [paral_info]
 #%% max_nprocs = 8
 #%% [extra_info]
 #%% keywords = NC
-#%% description = 
+#%% description =
 #%%  Gallium Arsenide, zinc-blende. 8 bands. prtwant=2
 #%%  Should still be completed by the call to wannier90, and subsequent fldiff use...
 #%% topics = Wannier

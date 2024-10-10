@@ -56,7 +56,6 @@ optforces 0
 optstress 0
 pawcpxocc 2
 usexcnhat 0
-pawxcdev 0
 
 paral_atom 0
 paral_kgb 0
@@ -90,6 +89,6 @@ pseudos="Na.xml"
 #%% [extra_info]
 #%% authors = J. Zwanziger
 #%% keywords = PAW
-#%% description = 
-#%% topics = DFPT
+#%% description = Orbital magnetism in metallic sodium 
+#%% topics = NMR, MagField
 #%%<END TEST_INFO>

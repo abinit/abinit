@@ -1,8 +1,8 @@
 
-.Version 9.3.1 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 10.1.4.5 of ABINIT, released Sep 2024.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2022 ABINIT group . 
+.Copyright (C) 1998-2024 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,14 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h25 )
+.Starting date : Fri 13 Sep 2024.
+- ( at 19h08 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v2_t88/t88.in
-- output file    -> t88.out
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v2_t88/t88.abi
+- output file    -> t88.abo
 - root for input  files -> t88i
 - root for output files -> t88o
-
 
  DATASET    1 : space group Am m 2 (# 38); Bravais oC (1-face-center ortho.)
 ================================================================================
@@ -34,11 +33,10 @@
 -    mband =           5        mffmem =           1         mkmem =           1
        mpw =        6027          nfft =      216000          nkpt =           1
 ================================================================================
-P This job should need less than                      61.923 Mbytes of memory.
+P This job should need less than                      68.239 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.462 Mbytes ; DEN or POT disk file :      1.650 Mbytes.
 ================================================================================
-
 
  DATASET    2 : space group Am m 2 (# 38); Bravais oC (1-face-center ortho.)
 ================================================================================
@@ -51,11 +49,10 @@ _ WF disk file :      0.462 Mbytes ; DEN or POT disk file :      1.650 Mbytes.
 -    mband =           5        mffmem =           1         mkmem =           1
        mpw =        6027          nfft =      216000          nkpt =           1
 ================================================================================
-P This job should need less than                      61.923 Mbytes of memory.
+P This job should need less than                      68.239 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.462 Mbytes ; DEN or POT disk file :      1.650 Mbytes.
 ================================================================================
-
 
  DATASET    3 : space group Am m 2 (# 38); Bravais oC (1-face-center ortho.)
 ================================================================================
@@ -68,11 +65,10 @@ _ WF disk file :      0.462 Mbytes ; DEN or POT disk file :      1.650 Mbytes.
 -    mband =           5        mffmem =           1         mkmem =           1
        mpw =        6027          nfft =      216000          nkpt =           1
 ================================================================================
-P This job should need less than                      61.924 Mbytes of memory.
+P This job should need less than                      68.240 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.462 Mbytes ; DEN or POT disk file :      1.650 Mbytes.
 ================================================================================
-
 
  DATASET    4 : space group Am m 2 (# 38); Bravais oC (1-face-center ortho.)
 ================================================================================
@@ -85,11 +81,10 @@ _ WF disk file :      0.462 Mbytes ; DEN or POT disk file :      1.650 Mbytes.
 -    mband =           5        mffmem =           1         mkmem =           1
        mpw =        6027          nfft =      216000          nkpt =           1
 ================================================================================
-P This job should need less than                      61.923 Mbytes of memory.
+P This job should need less than                      68.239 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.462 Mbytes ; DEN or POT disk file :      1.650 Mbytes.
 ================================================================================
-
 
  DATASET    5 : space group Am m 2 (# 38); Bravais oC (1-face-center ortho.)
 ================================================================================
@@ -102,11 +97,10 @@ _ WF disk file :      0.462 Mbytes ; DEN or POT disk file :      1.650 Mbytes.
 -    mband =           5        mffmem =           1         mkmem =           1
        mpw =        6027          nfft =      216000          nkpt =           1
 ================================================================================
-P This job should need less than                      61.923 Mbytes of memory.
+P This job should need less than                      68.239 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.462 Mbytes ; DEN or POT disk file :      1.650 Mbytes.
 ================================================================================
-
 
  DATASET    6 : space group Am m 2 (# 38); Bravais oC (1-face-center ortho.)
 ================================================================================
@@ -119,7 +113,7 @@ _ WF disk file :      0.462 Mbytes ; DEN or POT disk file :      1.650 Mbytes.
 -    mband =           5        mffmem =           1         mkmem =           1
        mpw =        6027          nfft =      216000          nkpt =           1
 ================================================================================
-P This job should need less than                      61.923 Mbytes of memory.
+P This job should need less than                      68.239 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.462 Mbytes ; DEN or POT disk file :      1.650 Mbytes.
 ================================================================================
@@ -128,10 +122,10 @@ _ WF disk file :      0.462 Mbytes ; DEN or POT disk file :      1.650 Mbytes.
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
 -
-- outvars: echo of selected default values                                      
--   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+- outvars: echo of selected default values
+-   iomode0 =  0 , fftalg0 =512 , wfoptalg0 =  0
 -
-- outvars: echo of global parameters not present in the input file              
+- outvars: echo of global parameters not present in the input file
 -  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
@@ -139,7 +133,7 @@ _ WF disk file :      0.462 Mbytes ; DEN or POT disk file :      1.650 Mbytes.
               amu      1.00794000E+00  1.59994000E+01
         delayperm         200
              ecut      1.00000000E+01 Hartree
--          fftalg         312
+-          fftalg         512
          friction      1.50000000E-03
            getwfk1          0
            getwfk2          1
@@ -230,8 +224,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.10744
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/1h.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/1h.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/1h.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/1h.pspnc
 -  Troullier-Martins psp for element  H         Thu Oct 27 17:28:54 EDT 1994
 -  1.00000   1.00000    940714                znucl, zion, pspdat
     1    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -243,8 +237,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          --- l  ekb(1:nproj) -->
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/8o.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/8o.pspnc
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/8o.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/8o.pspnc
 -  Troullier-Martins psp for element  O         Thu Oct 27 17:29:57 EDT 1994
 -  8.00000   6.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -272,8 +266,8 @@ tolerances: {toldff: 1.00E-05, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2    diffor    maxfor
- ETOT  1  -15.493897184667    -1.549E+01 2.752E-02 1.455E+03 2.241E-01 2.241E-01
- ETOT  2  -16.029740027586    -5.358E-01 2.397E-03 6.136E+02 3.906E-01 1.893E-01
+ ETOT  1  -15.493897184660    -1.549E+01 2.752E-02 1.455E+03 2.241E-01 2.241E-01
+ ETOT  2  -16.029740027584    -5.358E-01 2.397E-03 6.136E+02 3.906E-01 1.893E-01
  ETOT  3  -16.773920665108    -7.442E-01 8.712E-03 5.403E+01 1.371E-01 5.293E-02
  ETOT  4  -16.807245651054    -3.332E-02 1.124E-04 2.133E+01 2.240E-02 3.052E-02
  ETOT  5  -16.815818769640    -8.573E-03 1.975E-05 1.191E+01 1.089E-02 1.963E-02
@@ -285,12 +279,12 @@ tolerances: {toldff: 1.00E-05, }
  ETOT 11  -16.821792766368    -4.904E-07 4.658E-08 1.056E-01 5.270E-05 1.277E-04
  ETOT 12  -16.821792727249     3.912E-08 1.598E-09 4.547E-02 1.056E-04 2.221E-04
  ETOT 13  -16.821792763875    -3.663E-08 7.569E-10 1.508E-02 2.817E-05 1.939E-04
- ETOT 14  -16.821792778828    -1.495E-08 1.140E-09 1.250E-03 7.509E-05 1.242E-04
+ ETOT 14  -16.821792778827    -1.495E-08 1.140E-09 1.250E-03 7.509E-05 1.242E-04
  ETOT 15  -16.821792787316    -8.489E-09 5.829E-10 1.965E-04 5.865E-05 1.829E-04
  ETOT 16  -16.821792796301    -8.985E-09 1.767E-10 4.176E-05 3.244E-05 1.504E-04
  ETOT 17  -16.821792796945    -6.433E-10 1.650E-11 1.844E-05 1.060E-05 1.610E-04
- ETOT 18  -16.821792797026    -8.181E-11 8.450E-12 8.079E-06 6.081E-06 1.550E-04
- ETOT 19  -16.821792797082    -5.584E-11 3.855E-12 2.059E-06 4.549E-06 1.595E-04
+ ETOT 18  -16.821792797026    -8.172E-11 8.450E-12 8.079E-06 6.081E-06 1.550E-04
+ ETOT 19  -16.821792797082    -5.599E-11 3.855E-12 2.059E-06 4.549E-06 1.595E-04
 
  At SCF step   19, forces are converged : 
   for the second time, max diff in force=  4.549E-06 < toldff=  1.000E-05
@@ -311,7 +305,7 @@ lattice_vectors:
 lattice_lengths: [  20.00000,   20.00000,   20.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
 lattice_volume:   8.0000000E+03
-convergence: {deltae: -5.584E-11, res2:  2.059E-06, residm:  3.855E-12, diffor:  4.549E-06, }
+convergence: {deltae: -5.599E-11, res2:  2.059E-06, residm:  3.855E-12, diffor:  4.549E-06, }
 etotal    :  -1.68217928E+01
 entropy   :   0.00000000E+00
 fermie    :  -2.38812056E-01
@@ -328,7 +322,7 @@ cartesian_forces: # hartree/bohr
 - [ -1.02979255E-04,  -5.65365820E-05,  -0.00000000E+00, ]
 - [ -5.65365820E-05,  -1.02979255E-04,  -0.00000000E+00, ]
 - [  1.59515837E-04,   1.59515837E-04,  -0.00000000E+00, ]
-force_length_stats: {min:   1.17478134E-04, max:   2.25589459E-04, mean:   1.53515242E-04, }
+force_length_stats: {min:   1.17478134E-04, max:   2.25589459E-04, mean:   1.53515243E-04, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -347,8 +341,8 @@ force_length_stats: {min:   1.17478134E-04, max:   2.25589459E-04, mean:   1.535
        0.011700000000      0.122500000000      0.000000000000
        0.015700000000      0.015700000000      0.000000000000
  rms dE/dt=  3.0760E-02; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
-    1      -0.035543523976     -0.036472377427      0.000000000000
-    2      -0.036472377427     -0.035543523976      0.000000000000
+    1      -0.035543523975     -0.036472377427      0.000000000000
+    2      -0.036472377427     -0.035543523975      0.000000000000
     3      -0.040793425798     -0.040793425798      0.000000000000
 
  cartesian coordinates (angstrom) at end:
@@ -357,15 +351,15 @@ force_length_stats: {min:   1.17478134E-04, max:   2.25589459E-04, mean:   1.535
     3      0.16616164349726     0.16616164349726     0.00000000000000
 
  cartesian forces (hartree/bohr) at end:
-    1     -0.00010297925455    -0.00005653658200    -0.00000000000000
-    2     -0.00005653658200    -0.00010297925455    -0.00000000000000
-    3      0.00015951583655     0.00015951583655    -0.00000000000000
+    1     -0.00010297925456    -0.00005653658199    -0.00000000000000
+    2     -0.00005653658199    -0.00010297925456    -0.00000000000000
+    3      0.00015951583656     0.00015951583656    -0.00000000000000
  frms,max,avg= 9.3388572E-05 1.5951584E-04   1.880E-03  1.880E-03  0.000E+00 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1     -0.00529540573493    -0.00290722769217    -0.00000000000000
-    2     -0.00290722769217    -0.00529540573493    -0.00000000000000
-    3      0.00820263342711     0.00820263342711    -0.00000000000000
+    1     -0.00529540573566    -0.00290722769191    -0.00000000000000
+    2     -0.00290722769191    -0.00529540573566    -0.00000000000000
+    3      0.00820263342757     0.00820263342757    -0.00000000000000
  frms,max,avg= 4.8022330E-03 8.2026334E-03   9.668E-02  9.668E-02  0.000E+00 e/A
  length scales= 20.000000000000 20.000000000000 20.000000000000 bohr
               = 10.583544171800 10.583544171800 10.583544171800 angstroms
@@ -378,16 +372,16 @@ force_length_stats: {min:   1.17478134E-04, max:   2.25589459E-04, mean:   1.535
 --- !EnergyTerms
 iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
-kinetic             :  9.24208457670790E+00
-hartree             :  1.46408093825648E+01
-xc                  : -4.46482989575682E+00
+kinetic             :  9.24208457670811E+00
+hartree             :  1.46408093825651E+01
+xc                  : -4.46482989575687E+00
 Ewald energy        :  1.41059981962043E+00
 psp_core            :  1.66149645181518E-03
-local_psp           : -4.02509266298779E+01
-non_local_psp       :  2.59880845320747E+00
-total_energy        : -1.68217927970823E+01
-total_energy_eV     : -4.57744261014790E+02
-band_energy         : -4.14762131545174E+00
+local_psp           : -4.02509266298785E+01
+non_local_psp       :  2.59880845320750E+00
+total_energy        : -1.68217927970824E+01
+total_energy_eV     : -4.57744261014793E+02
+band_energy         : -4.14762131545301E+00
 ...
 
 
@@ -453,8 +447,8 @@ tolerances: {toldff: 1.00E-05, }
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2    diffor    maxfor
  ETOT  1  -16.821792796928    -1.682E+01 7.414E-16 2.497E-07 1.538E-04 1.538E-04
- ETOT  2  -16.821792796973    -4.484E-11 4.738E-16 9.453E-08 7.005E-06 1.608E-04
- ETOT  3  -16.821792797137    -1.640E-10 2.154E-12 1.415E-08 3.505E-06 1.573E-04
+ ETOT  2  -16.821792796973    -4.501E-11 4.738E-16 9.453E-08 7.005E-06 1.608E-04
+ ETOT  3  -16.821792797137    -1.639E-10 2.154E-12 1.415E-08 3.505E-06 1.573E-04
 
  At SCF step    3, forces are converged : 
   for the second time, max diff in force=  3.505E-06 < toldff=  1.000E-05
@@ -475,7 +469,7 @@ lattice_vectors:
 lattice_lengths: [  20.00000,   20.00000,   20.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
 lattice_volume:   8.0000000E+03
-convergence: {deltae: -1.640E-10, res2:  1.415E-08, residm:  2.154E-12, diffor:  3.505E-06, }
+convergence: {deltae: -1.639E-10, res2:  1.415E-08, residm:  2.154E-12, diffor:  3.505E-06, }
 etotal    :  -1.68217928E+01
 entropy   :   0.00000000E+00
 fermie    :  -2.38801750E-01
@@ -513,13 +507,13 @@ force_length_stats: {min:   1.15524934E-04, max:   2.22428814E-04, mean:   1.511
   1.17000000000000E-02  1.22500000000000E-01  0.00000000000000E+00
   1.57000000000000E-02  1.57000000000000E-02  0.00000000000000E+00
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 1.57281E-04 9.19943E-05 (free atoms)
- -1.00746637362484E-04 -5.65342854561685E-05 -0.00000000000000E+00
- -5.65342854561685E-05 -1.00746637362484E-04 -0.00000000000000E+00
-  1.57280922818652E-04  1.57280922818652E-04 -0.00000000000000E+00
+ -1.00746637358536E-04 -5.65342854569073E-05 -0.00000000000000E+00
+ -5.65342854569073E-05 -1.00746637358536E-04 -0.00000000000000E+00
+  1.57280922815444E-04  1.57280922815444E-04 -0.00000000000000E+00
  Gradient of E wrt nuclear positions in reduced coordinates (gred)
-  2.01493274724968E-03  1.13068570912337E-03  0.00000000000000E+00
-  1.13068570912337E-03  2.01493274724968E-03  0.00000000000000E+00
- -3.14561845637304E-03 -3.14561845637304E-03 -0.00000000000000E+00
+  2.01493274717073E-03  1.13068570913815E-03  0.00000000000000E+00
+  1.13068570913815E-03  2.01493274717073E-03  0.00000000000000E+00
+ -3.14561845630887E-03 -3.14561845630887E-03 -0.00000000000000E+00
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 0.00000E+00 0.00000E+00 (free atoms)
   0.00000000000000E+00  0.00000000000000E+00  0.00000000000000E+00
   0.00000000000000E+00  0.00000000000000E+00  0.00000000000000E+00
@@ -540,8 +534,8 @@ tolerances: {toldff: 1.00E-05, }
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2    diffor    maxfor
  ETOT  1  -16.821792797135    -1.682E+01 2.585E-17 5.005E-09 8.348E-07 1.581E-04
- ETOT  2  -16.821792797135    -6.253E-13 8.164E-18 1.797E-09 9.798E-07 1.571E-04
- ETOT  3  -16.821792797137    -1.940E-12 4.194E-14 2.803E-10 4.852E-07 1.576E-04
+ ETOT  2  -16.821792797135    -4.761E-13 8.164E-18 1.797E-09 9.798E-07 1.571E-04
+ ETOT  3  -16.821792797137    -2.046E-12 4.194E-14 2.803E-10 4.852E-07 1.576E-04
 
  At SCF step    3, forces are converged : 
   for the second time, max diff in force=  4.852E-07 < toldff=  1.000E-05
@@ -562,7 +556,7 @@ lattice_vectors:
 lattice_lengths: [  20.00000,   20.00000,   20.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
 lattice_volume:   8.0000000E+03
-convergence: {deltae: -1.940E-12, res2:  2.803E-10, residm:  4.194E-14, diffor:  4.852E-07, }
+convergence: {deltae: -2.046E-12, res2:  2.803E-10, residm:  4.194E-14, diffor:  4.852E-07, }
 etotal    :  -1.68217928E+01
 entropy   :   0.00000000E+00
 fermie    :  -2.38802908E-01
@@ -600,23 +594,23 @@ force_length_stats: {min:   1.15812554E-04, max:   2.22909959E-04, mean:   1.515
   1.17000000000000E-02  1.22500000000000E-01  0.00000000000000E+00
   1.57000000000000E-02  1.57000000000000E-02  0.00000000000000E+00
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 1.57621E-04 9.22038E-05 (free atoms)
- -1.01062932911886E-04 -5.65582107279465E-05 -0.00000000000000E+00
- -5.65582107279470E-05 -1.01062932911886E-04 -0.00000000000000E+00
-  1.57621143639833E-04  1.57621143639833E-04 -0.00000000000000E+00
+ -1.01062932912432E-04 -5.65582107280287E-05 -0.00000000000000E+00
+ -5.65582107280287E-05 -1.01062932912432E-04 -0.00000000000000E+00
+  1.57621143640460E-04  1.57621143640460E-04 -0.00000000000000E+00
  Gradient of E wrt nuclear positions in reduced coordinates (gred)
-  2.02125865823772E-03  1.13116421455893E-03  0.00000000000000E+00
-  1.13116421455894E-03  2.02125865823772E-03  0.00000000000000E+00
- -3.15242287279666E-03 -3.15242287279666E-03 -0.00000000000000E+00
+  2.02125865824865E-03  1.13116421456057E-03  0.00000000000000E+00
+  1.13116421456057E-03  2.02125865824865E-03  0.00000000000000E+00
+ -3.15242287280921E-03 -3.15242287280921E-03 -0.00000000000000E+00
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 2.74161E-06 1.48743E-06 (free atoms)
- -2.74161067235451E-06 -1.53846326208287E-06  0.00000000000000E+00
- -1.53846326208287E-06 -2.74161067235451E-06  0.00000000000000E+00
-  2.69638719044264E-07  2.69638719044264E-07  0.00000000000000E+00
- Kinetic energy of ions (ekin) [Ha]=  2.02796501989079E-08
+ -2.74161067224708E-06 -1.53846326210298E-06  0.00000000000000E+00
+ -1.53846326210298E-06 -2.74161067224708E-06  0.00000000000000E+00
+  2.69638719038764E-07  2.69638719038764E-07  0.00000000000000E+00
+ Kinetic energy of ions (ekin) [Ha]=  2.02796501978527E-08
  Total energy (etotal) [Ha]= -1.68217927971372E+01
 
  Difference of energy with previous step (new-old):
-           Absolute (Ha)=-5.32907E-14
-           Relative     =-3.16796E-15
+           Absolute (Ha)=-6.75016E-14
+           Relative     =-4.01274E-15
 
 --- Iteration: ( 1/10) Internal Cycle: (3/4)
 --------------------------------------------------------------------------------
@@ -633,8 +627,8 @@ tolerances: {toldff: 1.00E-05, }
  ETOT  1  -16.821792072284    -1.682E+01 6.505E-14 9.878E-06 9.792E-06 1.478E-04
  ETOT  2  -16.821792074172    -1.888E-09 1.967E-14 2.901E-06 3.976E-05 1.081E-04
  ETOT  3  -16.821792079549    -5.377E-09 7.606E-11 7.193E-07 2.087E-05 1.289E-04
- ETOT  4  -16.821792079628    -7.932E-11 5.782E-13 3.319E-07 1.825E-06 1.271E-04
- ETOT  5  -16.821792079632    -3.539E-12 2.958E-14 2.149E-07 1.507E-07 1.270E-04
+ ETOT  4  -16.821792079628    -7.935E-11 5.782E-13 3.319E-07 1.825E-06 1.271E-04
+ ETOT  5  -16.821792079632    -3.467E-12 2.958E-14 2.149E-07 1.507E-07 1.270E-04
 
  At SCF step    5, forces are converged : 
   for the second time, max diff in force=  1.507E-07 < toldff=  1.000E-05
@@ -655,7 +649,7 @@ lattice_vectors:
 lattice_lengths: [  20.00000,   20.00000,   20.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
 lattice_volume:   8.0000000E+03
-convergence: {deltae: -3.539E-12, res2:  2.149E-07, residm:  2.958E-14, diffor:  1.507E-07, }
+convergence: {deltae: -3.467E-12, res2:  2.149E-07, residm:  2.958E-14, diffor:  1.507E-07, }
 etotal    :  -1.68217921E+01
 entropy   :   0.00000000E+00
 fermie    :  -2.38808124E-01
@@ -669,8 +663,8 @@ xred      :
 - [  1.1696E-02,   1.2249E-01,   0.0000E+00,  H]
 - [  1.5701E-02,   1.5701E-02,   0.0000E+00,  O]
 cartesian_forces: # hartree/bohr
-- [ -7.56636138E-05,  -5.13095514E-05,  -0.00000000E+00, ]
-- [ -5.13095514E-05,  -7.56636138E-05,  -0.00000000E+00, ]
+- [ -7.56636137E-05,  -5.13095514E-05,  -0.00000000E+00, ]
+- [ -5.13095514E-05,  -7.56636137E-05,  -0.00000000E+00, ]
 - [  1.26973165E-04,   1.26973165E-04,  -0.00000000E+00, ]
 force_length_stats: {min:   9.14201975E-05, max:   1.79567172E-04, mean:   1.20802522E-04, }
 ...
@@ -685,27 +679,27 @@ force_length_stats: {min:   9.14201975E-05, max:   1.79567172E-04, mean:   1.208
 ---OUTPUT-----------------------------------------------------------------------
 
  Cartesian coordinates (xcart) [bohr]
-  2.44986291946638E+00  2.33923076836896E-01  0.00000000000000E+00
-  2.33923076836896E-01  2.44986291946638E+00  0.00000000000000E+00
+  2.44986291946639E+00  2.33923076836895E-01  0.00000000000000E+00
+  2.33923076836895E-01  2.44986291946639E+00  0.00000000000000E+00
   3.14013481935952E-01  3.14013481935952E-01  0.00000000000000E+00
  Reduced coordinates (xred)
-  1.22493145973319E-01  1.16961538418448E-02  0.00000000000000E+00
-  1.16961538418448E-02  1.22493145973319E-01  0.00000000000000E+00
+  1.22493145973319E-01  1.16961538418447E-02  0.00000000000000E+00
+  1.16961538418447E-02  1.22493145973319E-01  0.00000000000000E+00
   1.57006740967976E-02  1.57006740967976E-02  0.00000000000000E+00
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 1.26973E-04 7.37561E-05 (free atoms)
- -7.56636137505531E-05 -5.13095514494224E-05 -0.00000000000000E+00
- -5.13095514494224E-05 -7.56636137505531E-05 -0.00000000000000E+00
-  1.26973165199976E-04  1.26973165199976E-04 -0.00000000000000E+00
+ -7.56636137391397E-05 -5.13095514469881E-05 -0.00000000000000E+00
+ -5.13095514469881E-05 -7.56636137391397E-05 -0.00000000000000E+00
+  1.26973165186128E-04  1.26973165186128E-04 -0.00000000000000E+00
  Gradient of E wrt nuclear positions in reduced coordinates (gred)
-  1.51327227501106E-03  1.02619102898845E-03  0.00000000000000E+00
-  1.02619102898845E-03  1.51327227501106E-03  0.00000000000000E+00
- -2.53946330399951E-03 -2.53946330399951E-03 -0.00000000000000E+00
+  1.51327227478279E-03  1.02619102893976E-03  0.00000000000000E+00
+  1.02619102893976E-03  1.51327227478279E-03  0.00000000000000E+00
+ -2.53946330372257E-03 -2.53946330372257E-03 -0.00000000000000E+00
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 9.80144E-07 5.43420E-07 (free atoms)
-  9.80144261613869E-07  5.54189918773055E-07  0.00000000000000E+00
-  5.54189918773043E-07  9.80144261613869E-07  0.00000000000000E+00
-  2.47108871364886E-07  2.47108871364886E-07  0.00000000000000E+00
- Kinetic energy of ions (ekin) [Ha]=  4.11032864416131E-09
- Total energy (etotal) [Ha]= -1.68217920796319E+01
+  9.80144261452829E-07  5.54189918798174E-07  0.00000000000000E+00
+  5.54189918798174E-07  9.80144261452829E-07  0.00000000000000E+00
+  2.47108871366434E-07  2.47108871366434E-07  0.00000000000000E+00
+ Kinetic energy of ions (ekin) [Ha]=  4.11032864365475E-09
+ Total energy (etotal) [Ha]= -1.68217920796318E+01
 
  Difference of energy with previous step (new-old):
            Absolute (Ha)= 7.17505E-07
@@ -727,7 +721,7 @@ tolerances: {toldff: 1.00E-05, }
  ETOT  2  -16.821793435240    -4.151E-09 2.755E-14 6.910E-06 6.004E-05 1.931E-04
  ETOT  3  -16.821793447407    -1.217E-08 1.783E-10 1.443E-06 3.199E-05 1.611E-04
  ETOT  4  -16.821793447643    -2.361E-10 1.991E-12 6.543E-07 3.326E-06 1.644E-04
- ETOT  5  -16.821793447646    -3.229E-12 3.138E-14 4.758E-07 1.206E-07 1.645E-04
+ ETOT  5  -16.821793447646    -3.247E-12 3.138E-14 4.758E-07 1.206E-07 1.645E-04
 
  At SCF step    5, forces are converged : 
   for the second time, max diff in force=  1.206E-07 < toldff=  1.000E-05
@@ -748,7 +742,7 @@ lattice_vectors:
 lattice_lengths: [  20.00000,   20.00000,   20.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
 lattice_volume:   8.0000000E+03
-convergence: {deltae: -3.229E-12, res2:  4.758E-07, residm:  3.138E-14, diffor:  1.206E-07, }
+convergence: {deltae: -3.247E-12, res2:  4.758E-07, residm:  3.138E-14, diffor:  1.206E-07, }
 etotal    :  -1.68217934E+01
 entropy   :   0.00000000E+00
 fermie    :  -2.38797283E-01
@@ -778,26 +772,26 @@ force_length_stats: {min:   1.22688988E-04, max:   2.32691442E-04, mean:   1.593
 ---OUTPUT-----------------------------------------------------------------------
 
  Cartesian coordinates (xcart) [bohr]
-  2.45009801442616E+00  2.34055418991877E-01  0.00000000000000E+00
-  2.34055418991877E-01  2.45009801442616E+00  0.00000000000000E+00
+  2.45009801442615E+00  2.34055418991880E-01  0.00000000000000E+00
+  2.34055418991880E-01  2.45009801442615E+00  0.00000000000000E+00
   3.14024710887137E-01  3.14024710887137E-01  0.00000000000000E+00
  Reduced coordinates (xred)
-  1.22504900721308E-01  1.17027709495939E-02  0.00000000000000E+00
-  1.17027709495939E-02  1.22504900721308E-01  0.00000000000000E+00
+  1.22504900721307E-01  1.17027709495940E-02  0.00000000000000E+00
+  1.17027709495940E-02  1.22504900721307E-01  0.00000000000000E+00
   1.57012355443568E-02  1.57012355443568E-02  0.00000000000000E+00
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 1.64538E-04 9.67531E-05 (free atoms)
- -1.09803018234291E-04 -5.47346779871053E-05 -0.00000000000000E+00
- -5.47346779871053E-05 -1.09803018234291E-04 -0.00000000000000E+00
-  1.64537696221397E-04  1.64537696221397E-04 -0.00000000000000E+00
+ -1.09803018235132E-04 -5.47346779855660E-05 -0.00000000000000E+00
+ -5.47346779855660E-05 -1.09803018235132E-04 -0.00000000000000E+00
+  1.64537696220699E-04  1.64537696220699E-04 -0.00000000000000E+00
  Gradient of E wrt nuclear positions in reduced coordinates (gred)
-  2.19606036468583E-03  1.09469355974211E-03  0.00000000000000E+00
-  1.09469355974211E-03  2.19606036468583E-03  0.00000000000000E+00
- -3.29075392442794E-03 -3.29075392442794E-03 -0.00000000000000E+00
+  2.19606036470264E-03  1.09469355971132E-03  0.00000000000000E+00
+  1.09469355971132E-03  2.19606036470264E-03  0.00000000000000E+00
+ -3.29075392441397E-03 -3.29075392441397E-03 -0.00000000000000E+00
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 6.78532E-06 3.79153E-06 (free atoms)
- -6.78531568536668E-06 -4.30067879802220E-06  0.00000000000000E+00
- -4.30067879802217E-06 -6.78531568536668E-06  0.00000000000000E+00
-  3.92995858451144E-07  3.92995858451144E-07  0.00000000000000E+00
- Kinetic energy of ions (ekin) [Ha]=  1.23081074845387E-07
+ -6.78531568430726E-06 -4.30067879795807E-06  0.00000000000000E+00
+ -4.30067879795807E-06 -6.78531568430726E-06  0.00000000000000E+00
+  3.92995858403399E-07  3.92995858403399E-07  0.00000000000000E+00
+ Kinetic energy of ions (ekin) [Ha]=  1.23081074816864E-07
  Total energy (etotal) [Ha]= -1.68217934476459E+01
 
  Difference of energy with previous step (new-old):
@@ -820,7 +814,7 @@ tolerances: {toldff: 1.00E-05, }
  ETOT  2  -16.821791881984    -5.203E-09 4.640E-14 6.445E-06 6.118E-05 8.760E-05
  ETOT  3  -16.821791894141    -1.216E-08 1.878E-10 2.499E-06 3.255E-05 1.202E-04
  ETOT  4  -16.821791894454    -3.125E-10 2.150E-12 1.146E-06 3.719E-06 1.164E-04
- ETOT  5  -16.821791894467    -1.330E-11 1.194E-13 7.073E-07 3.305E-07 1.161E-04
+ ETOT  5  -16.821791894467    -1.329E-11 1.194E-13 7.073E-07 3.305E-07 1.161E-04
 
  At SCF step    5, forces are converged : 
   for the second time, max diff in force=  3.305E-07 < toldff=  1.000E-05
@@ -841,7 +835,7 @@ lattice_vectors:
 lattice_lengths: [  20.00000,   20.00000,   20.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
 lattice_volume:   8.0000000E+03
-convergence: {deltae: -1.330E-11, res2:  7.073E-07, residm:  1.194E-13, diffor:  3.305E-07, }
+convergence: {deltae: -1.329E-11, res2:  7.073E-07, residm:  1.194E-13, diffor:  3.305E-07, }
 etotal    :  -1.68217919E+01
 entropy   :   0.00000000E+00
 fermie    :  -2.38811104E-01
@@ -871,27 +865,27 @@ force_length_stats: {min:   8.32549957E-05, max:   1.64197068E-04, mean:   1.102
 ---OUTPUT-----------------------------------------------------------------------
 
  Cartesian coordinates (xcart) [bohr]
-  2.44982819585822E+00  2.33895512908589E-01  0.00000000000000E+00
-  2.33895512908589E-01  2.44982819585822E+00  0.00000000000000E+00
-  3.14023774850655E-01  3.14023774850655E-01  0.00000000000000E+00
+  2.44982819585824E+00  2.33895512908591E-01  0.00000000000000E+00
+  2.33895512908591E-01  2.44982819585824E+00  0.00000000000000E+00
+  3.14023774850654E-01  3.14023774850654E-01  0.00000000000000E+00
  Reduced coordinates (xred)
-  1.22491409792911E-01  1.16947756454295E-02  0.00000000000000E+00
-  1.16947756454295E-02  1.22491409792911E-01  0.00000000000000E+00
+  1.22491409792912E-01  1.16947756454295E-02  0.00000000000000E+00
+  1.16947756454295E-02  1.22491409792912E-01  0.00000000000000E+00
   1.57011887425327E-02  1.57011887425327E-02  0.00000000000000E+00
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 1.16105E-04 6.73494E-05 (free atoms)
- -6.78305945579728E-05 -4.82742659745213E-05 -0.00000000000000E+00
- -4.82742659745211E-05 -6.78305945579726E-05 -0.00000000000000E+00
-  1.16104860532494E-04  1.16104860532494E-04 -0.00000000000000E+00
+ -6.78305945551400E-05 -4.82742659745029E-05 -0.00000000000000E+00
+ -4.82742659745029E-05 -6.78305945551400E-05 -0.00000000000000E+00
+  1.16104860529643E-04  1.16104860529643E-04 -0.00000000000000E+00
  Gradient of E wrt nuclear positions in reduced coordinates (gred)
-  1.35661189115946E-03  9.65485319490427E-04  0.00000000000000E+00
-  9.65485319490422E-04  1.35661189115945E-03  0.00000000000000E+00
- -2.32209721064988E-03 -2.32209721064987E-03 -0.00000000000000E+00
+  1.35661189110280E-03  9.65485319490058E-04  0.00000000000000E+00
+  9.65485319490058E-04  1.35661189110280E-03  0.00000000000000E+00
+ -2.32209721059285E-03 -2.32209721059285E-03 -0.00000000000000E+00
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 4.68415E-07 3.08680E-07 (free atoms)
- -4.40761608147573E-07 -1.22850151040138E-07  0.00000000000000E+00
- -1.22850151040150E-07 -4.40761608147573E-07  0.00000000000000E+00
-  4.68414912585556E-07  4.68414912585556E-07  0.00000000000000E+00
- Kinetic energy of ions (ekin) [Ha]=  6.78386880202187E-09
- Total energy (etotal) [Ha]= -1.68217918944671E+01
+ -4.40761608354106E-07 -1.22850151023840E-07  0.00000000000000E+00
+ -1.22850151023840E-07 -4.40761608354106E-07  0.00000000000000E+00
+  4.68414912569804E-07  4.68414912569804E-07  0.00000000000000E+00
+ Kinetic energy of ions (ekin) [Ha]=  6.78386880191865E-09
+ Total energy (etotal) [Ha]= -1.68217918944670E+01
 
  Difference of energy with previous step (new-old):
            Absolute (Ha)= 1.55318E-06
@@ -912,8 +906,8 @@ tolerances: {toldff: 1.00E-05, }
  ETOT  1  -16.821791292171    -1.682E+01 1.892E-13 2.468E-05 1.396E-05 1.021E-04
  ETOT  2  -16.821791296638    -4.467E-09 5.595E-14 9.655E-06 6.791E-05 3.423E-05
  ETOT  3  -16.821791313402    -1.676E-08 2.211E-10 1.100E-06 3.577E-05 7.000E-05
- ETOT  4  -16.821791313535    -1.334E-10 1.095E-12 4.953E-07 2.321E-06 6.768E-05
- ETOT  5  -16.821791313541    -5.652E-12 3.430E-14 3.468E-07 1.279E-07 6.758E-05
+ ETOT  4  -16.821791313535    -1.333E-10 1.095E-12 4.953E-07 2.321E-06 6.768E-05
+ ETOT  5  -16.821791313541    -5.748E-12 3.430E-14 3.468E-07 1.279E-07 6.758E-05
 
  At SCF step    5, forces are converged : 
   for the second time, max diff in force=  1.279E-07 < toldff=  1.000E-05
@@ -934,7 +928,7 @@ lattice_vectors:
 lattice_lengths: [  20.00000,   20.00000,   20.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
 lattice_volume:   8.0000000E+03
-convergence: {deltae: -5.652E-12, res2:  3.468E-07, residm:  3.430E-14, diffor:  1.279E-07, }
+convergence: {deltae: -5.748E-12, res2:  3.468E-07, residm:  3.430E-14, diffor:  1.279E-07, }
 etotal    :  -1.68217913E+01
 entropy   :   0.00000000E+00
 fermie    :  -2.38812050E-01
@@ -951,7 +945,7 @@ cartesian_forces: # hartree/bohr
 - [ -3.30009829E-05,  -3.45747850E-05,  -0.00000000E+00, ]
 - [ -3.45747850E-05,  -3.30009829E-05,  -0.00000000E+00, ]
 - [  6.75757680E-05,   6.75757680E-05,  -0.00000000E+00, ]
-force_length_stats: {min:   4.77962408E-05, max:   9.55665675E-05, mean:   6.37196830E-05, }
+force_length_stats: {min:   4.77962408E-05, max:   9.55665675E-05, mean:   6.37196831E-05, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -964,27 +958,27 @@ force_length_stats: {min:   4.77962408E-05, max:   9.55665675E-05, mean:   6.371
 ---OUTPUT-----------------------------------------------------------------------
 
  Cartesian coordinates (xcart) [bohr]
-  2.44970263848645E+00  2.33801574272422E-01  0.00000000000000E+00
-  2.33801574272422E-01  2.44970263848645E+00  0.00000000000000E+00
-  3.14080202766137E-01  3.14080202766137E-01  0.00000000000000E+00
+  2.44970263848647E+00  2.33801574272424E-01  0.00000000000000E+00
+  2.33801574272424E-01  2.44970263848647E+00  0.00000000000000E+00
+  3.14080202766134E-01  3.14080202766134E-01  0.00000000000000E+00
  Reduced coordinates (xred)
-  1.22485131924323E-01  1.16900787136211E-02  0.00000000000000E+00
-  1.16900787136211E-02  1.22485131924323E-01  0.00000000000000E+00
-  1.57040101383068E-02  1.57040101383068E-02  0.00000000000000E+00
+  1.22485131924324E-01  1.16900787136212E-02  0.00000000000000E+00
+  1.16900787136212E-02  1.22485131924324E-01  0.00000000000000E+00
+  1.57040101383067E-02  1.57040101383067E-02  0.00000000000000E+00
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 6.75758E-05 3.90184E-05 (free atoms)
- -3.30009829277059E-05 -3.45747850352804E-05 -0.00000000000000E+00
- -3.45747850352802E-05 -3.30009829277059E-05 -0.00000000000000E+00
-  6.75757679629862E-05  6.75757679629860E-05 -0.00000000000000E+00
+ -3.30009829323794E-05 -3.45747850364544E-05 -0.00000000000000E+00
+ -3.45747850364544E-05 -3.30009829323796E-05 -0.00000000000000E+00
+  6.75757679688335E-05  6.75757679688335E-05 -0.00000000000000E+00
  Gradient of E wrt nuclear positions in reduced coordinates (gred)
-  6.60019658554117E-04  6.91495700705608E-04  0.00000000000000E+00
-  6.91495700705603E-04  6.60019658554117E-04  0.00000000000000E+00
- -1.35151535925972E-03 -1.35151535925972E-03 -0.00000000000000E+00
+  6.60019658647588E-04  6.91495700729087E-04  0.00000000000000E+00
+  6.91495700729087E-04  6.60019658647593E-04  0.00000000000000E+00
+ -1.35151535937667E-03 -1.35151535937667E-03 -0.00000000000000E+00
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 4.68415E-07 3.08680E-07 (free atoms)
- -4.40761608147573E-07 -1.22850151040138E-07  0.00000000000000E+00
- -1.22850151040150E-07 -4.40761608147573E-07  0.00000000000000E+00
-  4.68414912585556E-07  4.68414912585556E-07  0.00000000000000E+00
- Kinetic energy of ions (ekin) [Ha]=  6.78386880202187E-09
- Total energy (etotal) [Ha]= -1.68217913135409E+01
+ -4.40761608354106E-07 -1.22850151023840E-07  0.00000000000000E+00
+ -1.22850151023840E-07 -4.40761608354106E-07  0.00000000000000E+00
+  4.68414912569804E-07  4.68414912569804E-07  0.00000000000000E+00
+ Kinetic energy of ions (ekin) [Ha]=  6.78386880191865E-09
+ Total energy (etotal) [Ha]= -1.68217913135410E+01
 
  Difference of energy with previous step (new-old):
            Absolute (Ha)= 5.80926E-07
@@ -1005,8 +999,8 @@ tolerances: {toldff: 1.00E-05, }
  ETOT  1  -16.821791115959    -1.682E+01 2.014E-13 1.925E-05 1.396E-05 5.774E-05
  ETOT  2  -16.821791119256    -3.298E-09 4.608E-14 8.858E-06 6.246E-05 2.166E-05
  ETOT  3  -16.821791133890    -1.463E-08 1.897E-10 6.253E-07 3.322E-05 2.850E-05
- ETOT  4  -16.821791133988    -9.782E-11 9.187E-13 2.600E-07 2.051E-06 2.645E-05
- ETOT  5  -16.821791133994    -6.448E-12 1.579E-14 1.885E-07 6.256E-08 2.641E-05
+ ETOT  4  -16.821791133988    -9.787E-11 9.187E-13 2.600E-07 2.051E-06 2.645E-05
+ ETOT  5  -16.821791133994    -6.445E-12 1.579E-14 1.885E-07 6.256E-08 2.641E-05
 
  At SCF step    5, forces are converged : 
   for the second time, max diff in force=  6.256E-08 < toldff=  1.000E-05
@@ -1027,7 +1021,7 @@ lattice_vectors:
 lattice_lengths: [  20.00000,   20.00000,   20.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
 lattice_volume:   8.0000000E+03
-convergence: {deltae: -6.448E-12, res2:  1.885E-07, residm:  1.579E-14, diffor:  6.256E-08, }
+convergence: {deltae: -6.445E-12, res2:  1.885E-07, residm:  1.579E-14, diffor:  6.256E-08, }
 etotal    :  -1.68217911E+01
 entropy   :   0.00000000E+00
 fermie    :  -2.38812442E-01
@@ -1057,26 +1051,26 @@ force_length_stats: {min:   2.09222140E-05, max:   3.73520263E-05, mean:   2.639
 ---OUTPUT-----------------------------------------------------------------------
 
  Cartesian coordinates (xcart) [bohr]
-  2.44964666324571E+00  2.33738085278531E-01  0.00000000000000E+00
-  2.33738085278531E-01  2.44964666324571E+00  0.00000000000000E+00
-  3.14148428633693E-01  3.14148428633693E-01  0.00000000000000E+00
+  2.44964666324572E+00  2.33738085278530E-01  0.00000000000000E+00
+  2.33738085278530E-01  2.44964666324572E+00  0.00000000000000E+00
+  3.14148428633691E-01  3.14148428633691E-01  0.00000000000000E+00
  Reduced coordinates (xred)
-  1.22482333162285E-01  1.16869042639266E-02  0.00000000000000E+00
-  1.16869042639266E-02  1.22482333162285E-01  0.00000000000000E+00
-  1.57074214316847E-02  1.57074214316847E-02  0.00000000000000E+00
+  1.22482333162286E-01  1.16869042639265E-02  0.00000000000000E+00
+  1.16869042639265E-02  1.22482333162286E-01  0.00000000000000E+00
+  1.57074214316846E-02  1.57074214316846E-02  0.00000000000000E+00
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 2.64119E-05 1.58838E-05 (free atoms)
- -6.53714357051380E-06 -1.98747275234991E-05 -0.00000000000000E+00
- -1.98747275234991E-05 -6.53714357051380E-06 -0.00000000000000E+00
-  2.64118710940130E-05  2.64118710940130E-05 -0.00000000000000E+00
+ -6.53714356599008E-06 -1.98747275226418E-05 -0.00000000000000E+00
+ -1.98747275226418E-05 -6.53714356599008E-06 -0.00000000000000E+00
+  2.64118710886318E-05  2.64118710886318E-05 -0.00000000000000E+00
  Gradient of E wrt nuclear positions in reduced coordinates (gred)
-  1.30742871410276E-04  3.97494550469983E-04  0.00000000000000E+00
-  3.97494550469983E-04  1.30742871410276E-04  0.00000000000000E+00
- -5.28237421880259E-04 -5.28237421880259E-04 -0.00000000000000E+00
+  1.30742871319802E-04  3.97494550452835E-04  0.00000000000000E+00
+  3.97494550452835E-04  1.30742871319802E-04  0.00000000000000E+00
+ -5.28237421772637E-04 -5.28237421772637E-04 -0.00000000000000E+00
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 9.15244E-07 6.50148E-07 (free atoms)
- -9.15243670001189E-07 -7.96742393618397E-07 -0.00000000000000E+00
- -7.96742393618393E-07 -9.15243670001189E-07 -0.00000000000000E+00
-  6.55476088938913E-07  6.55476088938913E-07 -0.00000000000000E+00
- Kinetic energy of ions (ekin) [Ha]=  1.52362223603107E-08
+ -9.15243670032184E-07 -7.96742393630868E-07 -0.00000000000000E+00
+ -7.96742393630868E-07 -9.15243670032184E-07 -0.00000000000000E+00
+  6.55476088928779E-07  6.55476088928779E-07 -0.00000000000000E+00
+ Kinetic energy of ions (ekin) [Ha]=  1.52362223600640E-08
  Total energy (etotal) [Ha]= -1.68217911339943E+01
 
  Difference of energy with previous step (new-old):
@@ -1098,8 +1092,8 @@ tolerances: {toldff: 1.00E-05, }
  ETOT  1  -16.821791204327    -1.682E+01 6.952E-14 1.223E-05 1.267E-05 2.035E-05
  ETOT  2  -16.821791206304    -1.977E-09 3.083E-14 6.369E-06 5.132E-05 3.524E-05
  ETOT  3  -16.821791216389    -1.009E-08 1.302E-10 3.074E-07 2.759E-05 1.020E-05
- ETOT  4  -16.821791216458    -6.897E-11 7.120E-13 1.100E-07 1.766E-06 1.181E-05
- ETOT  5  -16.821791216461    -2.355E-12 6.263E-15 8.093E-08 2.081E-08 1.183E-05
+ ETOT  4  -16.821791216458    -6.893E-11 7.120E-13 1.100E-07 1.766E-06 1.181E-05
+ ETOT  5  -16.821791216461    -2.466E-12 6.263E-15 8.093E-08 2.081E-08 1.183E-05
 
  At SCF step    5, forces are converged : 
   for the second time, max diff in force=  2.081E-08 < toldff=  1.000E-05
@@ -1120,7 +1114,7 @@ lattice_vectors:
 lattice_lengths: [  20.00000,   20.00000,   20.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
 lattice_volume:   8.0000000E+03
-convergence: {deltae: -2.355E-12, res2:  8.093E-08, residm:  6.263E-15, diffor:  2.081E-08, }
+convergence: {deltae: -2.466E-12, res2:  8.093E-08, residm:  6.263E-15, diffor:  2.081E-08, }
 etotal    :  -1.68217912E+01
 entropy   :   0.00000000E+00
 fermie    :  -2.38812124E-01
@@ -1137,7 +1131,7 @@ cartesian_forces: # hartree/bohr
 - [  1.18340318E-05,  -6.68091224E-06,  -0.00000000E+00, ]
 - [ -6.68091224E-06,   1.18340318E-05,  -0.00000000E+00, ]
 - [ -5.15311960E-06,  -5.15311960E-06,  -0.00000000E+00, ]
-force_length_stats: {min:   7.28761163E-06, max:   1.35896614E-05, mean:   1.14889782E-05, }
+force_length_stats: {min:   7.28761162E-06, max:   1.35896614E-05, mean:   1.14889782E-05, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -1150,31 +1144,31 @@ force_length_stats: {min:   7.28761163E-06, max:   1.35896614E-05, mean:   1.148
 ---OUTPUT-----------------------------------------------------------------------
 
  Cartesian coordinates (xcart) [bohr]
-  2.44963753139249E+00  2.33702604468493E-01  0.00000000000000E+00
-  2.33702604468493E-01  2.44963753139249E+00  0.00000000000000E+00
-  3.14214606421984E-01  3.14214606421984E-01  0.00000000000000E+00
+  2.44963753139252E+00  2.33702604468495E-01  0.00000000000000E+00
+  2.33702604468495E-01  2.44963753139252E+00  0.00000000000000E+00
+  3.14214606421980E-01  3.14214606421980E-01  0.00000000000000E+00
  Reduced coordinates (xred)
-  1.22481876569625E-01  1.16851302234247E-02  0.00000000000000E+00
-  1.16851302234247E-02  1.22481876569625E-01  0.00000000000000E+00
-  1.57107303210992E-02  1.57107303210992E-02  0.00000000000000E+00
+  1.22481876569626E-01  1.16851302234247E-02  0.00000000000000E+00
+  1.16851302234247E-02  1.22481876569626E-01  0.00000000000000E+00
+  1.57107303210990E-02  1.57107303210990E-02  0.00000000000000E+00
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 1.18340E-05 6.85133E-06 (free atoms)
-  1.18340318430441E-05 -6.68091223844408E-06 -0.00000000000000E+00
- -6.68091223844408E-06  1.18340318430441E-05 -0.00000000000000E+00
- -5.15311960459981E-06 -5.15311960460024E-06 -0.00000000000000E+00
+  1.18340318392659E-05 -6.68091224091259E-06 -0.00000000000000E+00
+ -6.68091224091259E-06  1.18340318392659E-05 -0.00000000000000E+00
+ -5.15311959835307E-06 -5.15311959835307E-06 -0.00000000000000E+00
  Gradient of E wrt nuclear positions in reduced coordinates (gred)
- -2.36680636860882E-04  1.33618244768882E-04 -0.00000000000000E+00
-  1.33618244768882E-04 -2.36680636860882E-04 -0.00000000000000E+00
-  1.03062392091996E-04  1.03062392092005E-04  0.00000000000000E+00
+ -2.36680636785318E-04  1.33618244818252E-04 -0.00000000000000E+00
+  1.33618244818252E-04 -2.36680636785318E-04 -0.00000000000000E+00
+  1.03062391967061E-04  1.03062391967061E-04  0.00000000000000E+00
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 6.94787E-07 4.31926E-07 (free atoms)
- -3.16782936091200E-07 -5.06400210944109E-07 -0.00000000000000E+00
- -5.06400210944109E-07 -3.16782936091200E-07 -0.00000000000000E+00
-  6.94786712087509E-07  6.94786712087509E-07 -0.00000000000000E+00
- Kinetic energy of ions (ekin) [Ha]=  1.47343950459457E-08
+ -3.16782936084818E-07 -5.06400210945076E-07 -0.00000000000000E+00
+ -5.06400210945076E-07 -3.16782936084818E-07 -0.00000000000000E+00
+  6.94786712087929E-07  6.94786712087929E-07 -0.00000000000000E+00
+ Kinetic energy of ions (ekin) [Ha]=  1.47343950459571E-08
  Total energy (etotal) [Ha]= -1.68217912164608E+01
 
  Difference of energy with previous step (new-old):
-           Absolute (Ha)=-8.24665E-08
-           Relative     =-4.90236E-09
+           Absolute (Ha)=-8.24666E-08
+           Relative     =-4.90237E-09
 
 --- Iteration: ( 6/10) Internal Cycle: (1/1)
 --------------------------------------------------------------------------------
@@ -1189,10 +1183,10 @@ tolerances: {toldff: 1.00E-05, }
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2    diffor    maxfor
  ETOT  1  -16.821791468094    -1.682E+01 3.208E-14 5.015E-06 1.000E-05 8.465E-06
- ETOT  2  -16.821791468849    -7.547E-10 1.376E-14 2.908E-06 3.356E-05 4.202E-05
+ ETOT  2  -16.821791468849    -7.546E-10 1.376E-14 2.908E-06 3.356E-05 4.202E-05
  ETOT  3  -16.821791473238    -4.389E-09 5.840E-11 1.098E-07 1.851E-05 2.351E-05
- ETOT  4  -16.821791473280    -4.185E-11 4.866E-13 2.621E-08 1.495E-06 2.501E-05
- ETOT  5  -16.821791473281    -1.492E-12 1.891E-15 1.887E-08 2.211E-08 2.499E-05
+ ETOT  4  -16.821791473280    -4.186E-11 4.866E-13 2.621E-08 1.495E-06 2.501E-05
+ ETOT  5  -16.821791473281    -1.418E-12 1.891E-15 1.887E-08 2.211E-08 2.499E-05
 
  At SCF step    5, forces are converged : 
   for the second time, max diff in force=  2.211E-08 < toldff=  1.000E-05
@@ -1213,7 +1207,7 @@ lattice_vectors:
 lattice_lengths: [  20.00000,   20.00000,   20.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
 lattice_volume:   8.0000000E+03
-convergence: {deltae: -1.492E-12, res2:  1.887E-08, residm:  1.891E-15, diffor:  2.211E-08, }
+convergence: {deltae: -1.418E-12, res2:  1.887E-08, residm:  1.891E-15, diffor:  2.211E-08, }
 etotal    :  -1.68217915E+01
 entropy   :   0.00000000E+00
 fermie    :  -2.38811198E-01
@@ -1243,26 +1237,26 @@ force_length_stats: {min:   2.18509791E-05, max:   3.53353811E-05, mean:   2.634
 ---OUTPUT-----------------------------------------------------------------------
 
  Cartesian coordinates (xcart) [bohr]
-  2.44966308757312E+00  2.33692186103424E-01  0.00000000000000E+00
-  2.33692186103424E-01  2.44966308757312E+00  0.00000000000000E+00
-  3.14268919776697E-01  3.14268919776697E-01  0.00000000000000E+00
+  2.44966308757313E+00  2.33692186103418E-01  0.00000000000000E+00
+  2.33692186103418E-01  2.44966308757313E+00  0.00000000000000E+00
+  3.14268919776694E-01  3.14268919776694E-01  0.00000000000000E+00
  Reduced coordinates (xred)
-  1.22483154378656E-01  1.16846093051712E-02  0.00000000000000E+00
-  1.16846093051712E-02  1.22483154378656E-01  0.00000000000000E+00
-  1.57134459888348E-02  1.57134459888348E-02  0.00000000000000E+00
+  1.22483154378656E-01  1.16846093051709E-02  0.00000000000000E+00
+  1.16846093051709E-02  1.22483154378656E-01  0.00000000000000E+00
+  1.57134459888347E-02  1.57134459888347E-02  0.00000000000000E+00
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 2.49859E-05 1.56472E-05 (free atoms)
-  2.15846433147739E-05  3.40124426311678E-06 -0.00000000000000E+00
-  3.40124426311678E-06  2.15846433147739E-05 -0.00000000000000E+00
- -2.49858875778902E-05 -2.49858875778902E-05 -0.00000000000000E+00
+  2.15846433160507E-05  3.40124426367926E-06 -0.00000000000000E+00
+  3.40124426367926E-06  2.15846433160502E-05 -0.00000000000000E+00
+ -2.49858875797295E-05 -2.49858875797297E-05 -0.00000000000000E+00
  Gradient of E wrt nuclear positions in reduced coordinates (gred)
- -4.31692866295478E-04 -6.80248852623355E-05 -0.00000000000000E+00
- -6.80248852623355E-05 -4.31692866295478E-04 -0.00000000000000E+00
-  4.99717751557805E-04  4.99717751557805E-04  0.00000000000000E+00
+ -4.31692866321013E-04 -6.80248852735852E-05 -0.00000000000000E+00
+ -6.80248852735852E-05 -4.31692866321005E-04 -0.00000000000000E+00
+  4.99717751594590E-04  4.99717751594594E-04  0.00000000000000E+00
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 6.14618E-07 3.13488E-07 (free atoms)
-  1.09561502259292E-07 -2.29078758110013E-07 -0.00000000000000E+00
- -2.29078758110013E-07  1.09561502259292E-07 -0.00000000000000E+00
-  6.14618481802788E-07  6.14618481802788E-07 -0.00000000000000E+00
- Kinetic energy of ions (ekin) [Ha]=  1.11357708649865E-08
+  1.09561502262243E-07 -2.29078758129608E-07 -0.00000000000000E+00
+ -2.29078758129608E-07  1.09561502262243E-07 -0.00000000000000E+00
+  6.14618481794109E-07  6.14618481794109E-07 -0.00000000000000E+00
+ Kinetic energy of ions (ekin) [Ha]=  1.11357708646931E-08
  Total energy (etotal) [Ha]= -1.68217914732812E+01
 
  Difference of energy with previous step (new-old):
@@ -1282,9 +1276,9 @@ tolerances: {toldff: 1.00E-05, }
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2    diffor    maxfor
  ETOT  1  -16.821791801313    -1.682E+01 4.329E-14 1.249E-06 6.699E-06 2.617E-05
- ETOT  2  -16.821791801475    -1.620E-10 4.067E-15 8.258E-07 1.682E-05 4.299E-05
+ ETOT  2  -16.821791801475    -1.622E-10 4.067E-15 8.258E-07 1.682E-05 4.299E-05
  ETOT  3  -16.821791802609    -1.134E-09 1.693E-11 3.371E-08 9.999E-06 3.299E-05
- ETOT  4  -16.821791802636    -2.745E-11 3.502E-13 3.148E-09 1.324E-06 3.432E-05
+ ETOT  4  -16.821791802636    -2.744E-11 3.502E-13 3.148E-09 1.324E-06 3.432E-05
 
  At SCF step    4, forces are converged : 
   for the second time, max diff in force=  1.324E-06 < toldff=  1.000E-05
@@ -1305,7 +1299,7 @@ lattice_vectors:
 lattice_lengths: [  20.00000,   20.00000,   20.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
 lattice_volume:   8.0000000E+03
-convergence: {deltae: -2.745E-11, res2:  3.148E-09, residm:  3.502E-13, diffor:  1.324E-06, }
+convergence: {deltae: -2.744E-11, res2:  3.148E-09, residm:  3.502E-13, diffor:  1.324E-06, }
 etotal    :  -1.68217918E+01
 entropy   :   0.00000000E+00
 fermie    :  -2.38810189E-01
@@ -1335,26 +1329,26 @@ force_length_stats: {min:   2.63953818E-05, max:   4.85319528E-05, mean:   3.377
 ---OUTPUT-----------------------------------------------------------------------
 
  Cartesian coordinates (xcart) [bohr]
-  2.44970566524613E+00  2.33700515204043E-01  0.00000000000000E+00
-  2.33700515204043E-01  2.44970566524613E+00  0.00000000000000E+00
-  3.14307099930461E-01  3.14307099930461E-01  0.00000000000000E+00
+  2.44970566524614E+00  2.33700515204041E-01  0.00000000000000E+00
+  2.33700515204041E-01  2.44970566524614E+00  0.00000000000000E+00
+  3.14307099930458E-01  3.14307099930458E-01  0.00000000000000E+00
  Reduced coordinates (xred)
-  1.22485283262306E-01  1.16850257602021E-02  0.00000000000000E+00
-  1.16850257602021E-02  1.22485283262306E-01  0.00000000000000E+00
-  1.57153549965230E-02  1.57153549965230E-02  0.00000000000000E+00
+  1.22485283262307E-01  1.16850257602020E-02  0.00000000000000E+00
+  1.16850257602020E-02  1.22485283262307E-01  0.00000000000000E+00
+  1.57153549965229E-02  1.57153549965229E-02  0.00000000000000E+00
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 3.43173E-05 2.04091E-05 (free atoms)
-  2.45029734378260E-05  9.81429948735887E-06 -0.00000000000000E+00
-  9.81429948735931E-06  2.45029734378260E-05 -0.00000000000000E+00
- -3.43172729251851E-05 -3.43172729251851E-05 -0.00000000000000E+00
+  2.45029734383545E-05  9.81429948734955E-06 -0.00000000000000E+00
+  9.81429948734955E-06  2.45029734383545E-05 -0.00000000000000E+00
+ -3.43172729257036E-05 -3.43172729257036E-05 -0.00000000000000E+00
  Gradient of E wrt nuclear positions in reduced coordinates (gred)
- -4.90059468756521E-04 -1.96285989747177E-04 -0.00000000000000E+00
- -1.96285989747186E-04 -4.90059468756521E-04 -0.00000000000000E+00
-  6.86345458503703E-04  6.86345458503703E-04  0.00000000000000E+00
+ -4.90059468767090E-04 -1.96285989746991E-04 -0.00000000000000E+00
+ -1.96285989746991E-04 -4.90059468767090E-04 -0.00000000000000E+00
+  6.86345458514072E-04  6.86345458514072E-04  0.00000000000000E+00
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 4.66084E-07 2.80075E-07 (free atoms)
-  3.68435687625585E-07 -3.01909855665984E-09 -0.00000000000000E+00
- -3.01909855665984E-09  3.68435687625585E-07 -0.00000000000000E+00
-  4.66084456404572E-07  4.66084456404572E-07 -0.00000000000000E+00
- Kinetic energy of ions (ekin) [Ha]=  6.58510634650127E-09
+  3.68435687600587E-07 -3.01909857402637E-09 -0.00000000000000E+00
+ -3.01909857402637E-09  3.68435687600587E-07 -0.00000000000000E+00
+  4.66084456414112E-07  4.66084456414112E-07 -0.00000000000000E+00
+ Kinetic energy of ions (ekin) [Ha]=  6.58510634672698E-09
  Total energy (etotal) [Ha]= -1.68217918026363E+01
 
  Difference of energy with previous step (new-old):
@@ -1374,8 +1368,8 @@ tolerances: {toldff: 1.00E-05, }
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2    diffor    maxfor
  ETOT  1  -16.821792131720    -1.682E+01 1.553E-14 1.255E-07 3.897E-06 3.388E-05
- ETOT  2  -16.821792131737    -1.738E-11 4.296E-16 6.680E-08 3.469E-06 3.701E-05
- ETOT  3  -16.821792131770    -3.264E-11 1.528E-12 1.484E-08 3.071E-06 3.394E-05
+ ETOT  2  -16.821792131737    -1.736E-11 4.296E-16 6.680E-08 3.469E-06 3.701E-05
+ ETOT  3  -16.821792131770    -3.261E-11 1.528E-12 1.484E-08 3.071E-06 3.394E-05
 
  At SCF step    3, forces are converged : 
   for the second time, max diff in force=  3.071E-06 < toldff=  1.000E-05
@@ -1396,7 +1390,7 @@ lattice_vectors:
 lattice_lengths: [  20.00000,   20.00000,   20.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
 lattice_volume:   8.0000000E+03
-convergence: {deltae: -3.264E-11, res2:  1.484E-08, residm:  1.528E-12, diffor:  3.071E-06, }
+convergence: {deltae: -3.261E-11, res2:  1.484E-08, residm:  1.528E-12, diffor:  3.071E-06, }
 etotal    :  -1.68217921E+01
 entropy   :   0.00000000E+00
 fermie    :  -2.38810169E-01
@@ -1426,26 +1420,26 @@ force_length_stats: {min:   2.47679241E-05, max:   4.79949458E-05, mean:   3.251
 ---OUTPUT-----------------------------------------------------------------------
 
  Cartesian coordinates (xcart) [bohr]
-  2.44975292650356E+00  2.33720492000081E-01  0.00000000000000E+00
-  2.33720492000081E-01  2.44975292650356E+00  0.00000000000000E+00
-  3.14328679671374E-01  3.14328679671374E-01  0.00000000000000E+00
+  2.44975292650358E+00  2.33720492000078E-01  0.00000000000000E+00
+  2.33720492000078E-01  2.44975292650358E+00  0.00000000000000E+00
+  3.14328679671371E-01  3.14328679671371E-01  0.00000000000000E+00
  Reduced coordinates (xred)
-  1.22487646325178E-01  1.16860246000040E-02  0.00000000000000E+00
-  1.16860246000040E-02  1.22487646325178E-01  0.00000000000000E+00
-  1.57164339835687E-02  1.57164339835687E-02  0.00000000000000E+00
+  1.22487646325179E-01  1.16860246000039E-02  0.00000000000000E+00
+  1.16860246000039E-02  1.22487646325179E-01  0.00000000000000E+00
+  1.57164339835686E-02  1.57164339835686E-02  0.00000000000000E+00
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 3.39376E-05 1.98058E-05 (free atoms)
-  2.13030207027523E-05  1.26345309627216E-05 -0.00000000000000E+00
-  1.26345309627216E-05  2.13030207027523E-05 -0.00000000000000E+00
- -3.39375516654734E-05 -3.39375516654739E-05 -0.00000000000000E+00
+  2.13030206952008E-05  1.26345309630169E-05 -0.00000000000000E+00
+  1.26345309630169E-05  2.13030206952004E-05 -0.00000000000000E+00
+ -3.39375516582177E-05 -3.39375516582177E-05 -0.00000000000000E+00
  Gradient of E wrt nuclear positions in reduced coordinates (gred)
- -4.26060414055046E-04 -2.52690619254431E-04 -0.00000000000000E+00
- -2.52690619254431E-04 -4.26060414055046E-04 -0.00000000000000E+00
-  6.78751033309469E-04  6.78751033309478E-04  0.00000000000000E+00
+ -4.26060413904017E-04 -2.52690619260338E-04 -0.00000000000000E+00
+ -2.52690619260338E-04 -4.26060413904008E-04 -0.00000000000000E+00
+  6.78751033164355E-04  6.78751033164355E-04  0.00000000000000E+00
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 4.75243E-07 2.73623E-07 (free atoms)
-  4.75243233640544E-07  1.52736105666430E-07 -0.00000000000000E+00
-  1.52736105666434E-07  4.75243233640544E-07 -0.00000000000000E+00
-  2.96190797799604E-07  2.96190797800009E-07 -0.00000000000000E+00
- Kinetic energy of ions (ekin) [Ha]=  3.01646875202555E-09
+  4.75243233662417E-07  1.52736105674073E-07 -0.00000000000000E+00
+  1.52736105674073E-07  4.75243233662417E-07 -0.00000000000000E+00
+  2.96190797797831E-07  2.96190797797831E-07 -0.00000000000000E+00
+ Kinetic energy of ions (ekin) [Ha]=  3.01646875203391E-09
  Total energy (etotal) [Ha]= -1.68217921317697E+01
 
  Difference of energy with previous step (new-old):
@@ -1517,27 +1511,27 @@ force_length_stats: {min:   2.28546384E-05, max:   4.49659598E-05, mean:   3.022
 ---OUTPUT-----------------------------------------------------------------------
 
  Cartesian coordinates (xcart) [bohr]
-  2.44979242966491E+00  2.33745184751132E-01  0.00000000000000E+00
-  2.33745184751132E-01  2.44979242966491E+00  0.00000000000000E+00
-  3.14336425736642E-01  3.14336425736643E-01  0.00000000000000E+00
+  2.44979242966491E+00  2.33745184751129E-01  0.00000000000000E+00
+  2.33745184751129E-01  2.44979242966491E+00  0.00000000000000E+00
+  3.14336425736642E-01  3.14336425736642E-01  0.00000000000000E+00
  Reduced coordinates (xred)
-  1.22489621483246E-01  1.16872592375566E-02  0.00000000000000E+00
-  1.16872592375566E-02  1.22489621483246E-01  0.00000000000000E+00
+  1.22489621483245E-01  1.16872592375565E-02  0.00000000000000E+00
+  1.16872592375565E-02  1.22489621483245E-01  0.00000000000000E+00
   1.57168212868321E-02  1.57168212868321E-02  0.00000000000000E+00
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 3.17957E-05 1.84590E-05 (free atoms)
-  1.88004620528489E-05  1.29952730753434E-05 -0.00000000000000E+00
-  1.29952730753434E-05  1.88004620528489E-05 -0.00000000000000E+00
- -3.17957351281921E-05 -3.17957351281921E-05 -0.00000000000000E+00
+  1.88004620522207E-05  1.29952730755199E-05 -0.00000000000000E+00
+  1.29952730755201E-05  1.88004620522209E-05 -0.00000000000000E+00
+ -3.17957351277411E-05 -3.17957351277411E-05 -0.00000000000000E+00
  Gradient of E wrt nuclear positions in reduced coordinates (gred)
- -3.76009241056978E-04 -2.59905461506868E-04 -0.00000000000000E+00
- -2.59905461506868E-04 -3.76009241056978E-04 -0.00000000000000E+00
-  6.35914702563842E-04  6.35914702563842E-04  0.00000000000000E+00
+ -3.76009241044415E-04 -2.59905461510398E-04 -0.00000000000000E+00
+ -2.59905461510402E-04 -3.76009241044419E-04 -0.00000000000000E+00
+  6.35914702554821E-04  6.35914702554821E-04  0.00000000000000E+00
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 4.55527E-07 2.50521E-07 (free atoms)
-  4.55526730141032E-07  2.35462484269515E-07 -0.00000000000000E+00
-  2.35462484269519E-07  4.55526730141032E-07 -0.00000000000000E+00
-  1.39553454129523E-07  1.39553454129905E-07 -0.00000000000000E+00
- Kinetic energy of ions (ekin) [Ha]=  1.05112482924822E-09
- Total energy (etotal) [Ha]= -1.68217923989424E+01
+  4.55526730056554E-07  2.35462484272278E-07 -0.00000000000000E+00
+  2.35462484272278E-07  4.55526730056554E-07 -0.00000000000000E+00
+  1.39553454138057E-07  1.39553454137651E-07 -0.00000000000000E+00
+ Kinetic energy of ions (ekin) [Ha]=  1.05112482917546E-09
+ Total energy (etotal) [Ha]= -1.68217923989425E+01
 
  Difference of energy with previous step (new-old):
            Absolute (Ha)=-2.67173E-07
@@ -1608,26 +1602,26 @@ force_length_stats: {min:   1.62553202E-05, max:   3.25028446E-05, mean:   2.167
 ---OUTPUT-----------------------------------------------------------------------
 
  Cartesian coordinates (xcart) [bohr]
-  2.44982962116030E+00  2.33770364181112E-01  0.00000000000000E+00
-  2.33770364181112E-01  2.44982962116030E+00  0.00000000000000E+00
-  3.14332801673252E-01  3.14332801673253E-01  0.00000000000000E+00
+  2.44982962116030E+00  2.33770364181110E-01  0.00000000000000E+00
+  2.33770364181110E-01  2.44982962116030E+00  0.00000000000000E+00
+  3.14332801673254E-01  3.14332801673253E-01  0.00000000000000E+00
  Reduced coordinates (xred)
-  1.22491481058015E-01  1.16885182090556E-02  0.00000000000000E+00
-  1.16885182090556E-02  1.22491481058015E-01  0.00000000000000E+00
-  1.57166400836626E-02  1.57166400836626E-02  0.00000000000000E+00
+  1.22491481058015E-01  1.16885182090555E-02  0.00000000000000E+00
+  1.16885182090555E-02  1.22491481058015E-01  0.00000000000000E+00
+  1.57166400836627E-02  1.57166400836627E-02  0.00000000000000E+00
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 2.29830E-05 1.32703E-05 (free atoms)
-  1.17431936973091E-05  1.12397881569103E-05 -0.00000000000000E+00
-  1.12397881569105E-05  1.17431936973091E-05 -0.00000000000000E+00
- -2.29829818542196E-05 -2.29829818542198E-05 -0.00000000000000E+00
+  1.17431937000374E-05  1.12397881575743E-05 -0.00000000000000E+00
+  1.12397881575743E-05  1.17431937000378E-05 -0.00000000000000E+00
+ -2.29829818576117E-05 -2.29829818576117E-05 -0.00000000000000E+00
  Gradient of E wrt nuclear positions in reduced coordinates (gred)
- -2.34863873946182E-04 -2.24795763138206E-04 -0.00000000000000E+00
- -2.24795763138210E-04 -2.34863873946182E-04 -0.00000000000000E+00
-  4.59659637084392E-04  4.59659637084397E-04  0.00000000000000E+00
+ -2.34863874000748E-04 -2.24795763151485E-04 -0.00000000000000E+00
+ -2.24795763151485E-04 -2.34863874000756E-04 -0.00000000000000E+00
+  4.59659637152233E-04  4.59659637152233E-04  0.00000000000000E+00
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 3.93633E-07 2.22396E-07 (free atoms)
-  3.93632833613845E-07  2.59634956571341E-07 -0.00000000000000E+00
-  2.59634956571341E-07  3.93632833613845E-07 -0.00000000000000E+00
-  1.45640770492260E-08  1.45640770508008E-08 -0.00000000000000E+00
- Kinetic energy of ions (ekin) [Ha]=  4.14736850672074E-10
+  3.93632833535529E-07  2.59634956576169E-07 -0.00000000000000E+00
+  2.59634956576169E-07  3.93632833535529E-07 -0.00000000000000E+00
+  1.45640770751207E-08  1.45640770747387E-08 -0.00000000000000E+00
+ Kinetic energy of ions (ekin) [Ha]=  4.14736850584564E-10
  Total energy (etotal) [Ha]= -1.68217926175550E+01
 
  Difference of energy with previous step (new-old):
@@ -1648,20 +1642,20 @@ force_length_stats: {min:   1.62553202E-05, max:   3.25028446E-05, mean:   2.167
     3      -0.036437445426     -0.036437445426      0.000000000000
 
  cartesian coordinates (angstrom) at end:
-    1      1.29639400044670     0.12370594876843     0.00000000000000
-    2      0.12370594876843     1.29639400044670     0.00000000000000
+    1      1.29639400044671     0.12370594876843     0.00000000000000
+    2      0.12370594876843     1.29639400044671     0.00000000000000
     3      0.16633775455773     0.16633775455773     0.00000000000000
 
  cartesian forces (hartree/bohr) at end:
     1      0.00001174319370     0.00001123978816    -0.00000000000000
     2      0.00001123978816     0.00001174319370    -0.00000000000000
-    3     -0.00002298298185    -0.00002298298185    -0.00000000000000
+    3     -0.00002298298186    -0.00002298298186    -0.00000000000000
  frms,max,avg= 1.3270292E-05 2.2982982E-05   1.845E-03  1.845E-03  0.000E+00 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1      0.00060385924838     0.00057797309687    -0.00000000000000
-    2      0.00057797309687     0.00060385924838    -0.00000000000000
-    3     -0.00118183234525    -0.00118183234525    -0.00000000000000
+    1      0.00060385924852     0.00057797309691    -0.00000000000000
+    2      0.00057797309691     0.00060385924852    -0.00000000000000
+    3     -0.00118183234543    -0.00118183234543    -0.00000000000000
  frms,max,avg= 6.8238578E-04 1.1818323E-03   9.487E-02  9.487E-02  0.000E+00 e/A
  length scales= 20.000000000000 20.000000000000 20.000000000000 bohr
               = 10.583544171800 10.583544171800 10.583544171800 angstroms
@@ -1674,16 +1668,16 @@ force_length_stats: {min:   1.62553202E-05, max:   3.25028446E-05, mean:   2.167
 --- !EnergyTerms
 iteration_state     : {dtset: 2, itime: 10, icycle: 1, }
 comment             : Components of total free energy in Hartree
-kinetic             :  9.24260768602630E+00
-hartree             :  1.46418347973764E+01
-xc                  : -4.46499170752614E+00
+kinetic             :  9.24260768602628E+00
+hartree             :  1.46418347973763E+01
+xc                  : -4.46499170752613E+00
 Ewald energy        :  1.41185015531728E+00
 psp_core            :  1.66149645181518E-03
 local_psp           : -4.02534219960294E+01
-non_local_psp       :  2.59866695082877E+00
+non_local_psp       :  2.59866695082875E+00
 total_energy        : -1.68217926175550E+01
 total_energy_eV     : -4.57744256129604E+02
-band_energy         : -4.14776527636075E+00
+band_energy         : -4.14776527636073E+00
 ...
 
  rms coord change=  1.0342E-05   atom, delta coord (reduced):
@@ -1737,7 +1731,7 @@ _setup2: Arith. and geom. avg. npw (full set) are   12053.000   12053.000
 
 ================================================================================
 
-=== [ionmov= 2] Broyden-Fletcher-Goldfard-Shanno method (forces)            
+=== [ionmov= 2] Broyden-Fletcher-Goldfarb-Shanno method (forces)            
 ================================================================================
 
 --- Iteration: ( 1/10) Internal Cycle: (1/1)
@@ -1753,8 +1747,8 @@ tolerances: {toldff: 1.00E-05, }
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2    diffor    maxfor
  ETOT  1  -16.821792796928    -1.682E+01 7.414E-16 2.497E-07 1.538E-04 1.538E-04
- ETOT  2  -16.821792796973    -4.484E-11 4.738E-16 9.453E-08 7.005E-06 1.608E-04
- ETOT  3  -16.821792797137    -1.640E-10 2.154E-12 1.415E-08 3.505E-06 1.573E-04
+ ETOT  2  -16.821792796973    -4.501E-11 4.738E-16 9.453E-08 7.005E-06 1.608E-04
+ ETOT  3  -16.821792797137    -1.639E-10 2.154E-12 1.415E-08 3.505E-06 1.573E-04
 
  At SCF step    3, forces are converged : 
   for the second time, max diff in force=  3.505E-06 < toldff=  1.000E-05
@@ -1775,7 +1769,7 @@ lattice_vectors:
 lattice_lengths: [  20.00000,   20.00000,   20.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
 lattice_volume:   8.0000000E+03
-convergence: {deltae: -1.640E-10, res2:  1.415E-08, residm:  2.154E-12, diffor:  3.505E-06, }
+convergence: {deltae: -1.639E-10, res2:  1.415E-08, residm:  2.154E-12, diffor:  3.505E-06, }
 etotal    :  -1.68217928E+01
 entropy   :   0.00000000E+00
 fermie    :  -2.38801750E-01
@@ -1813,13 +1807,13 @@ force_length_stats: {min:   1.15524934E-04, max:   2.22428814E-04, mean:   1.511
   1.17000000000000E-02  1.22500000000000E-01  0.00000000000000E+00
   1.57000000000000E-02  1.57000000000000E-02  0.00000000000000E+00
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 1.57281E-04 9.19943E-05 (free atoms)
- -1.00746637362484E-04 -5.65342854561685E-05 -0.00000000000000E+00
- -5.65342854561685E-05 -1.00746637362484E-04 -0.00000000000000E+00
-  1.57280922818652E-04  1.57280922818652E-04 -0.00000000000000E+00
+ -1.00746637358536E-04 -5.65342854569073E-05 -0.00000000000000E+00
+ -5.65342854569073E-05 -1.00746637358536E-04 -0.00000000000000E+00
+  1.57280922815444E-04  1.57280922815444E-04 -0.00000000000000E+00
  Gradient of E wrt nuclear positions in reduced coordinates (gred)
-  2.01493274724968E-03  1.13068570912337E-03  0.00000000000000E+00
-  1.13068570912337E-03  2.01493274724968E-03  0.00000000000000E+00
- -3.14561845637304E-03 -3.14561845637304E-03 -0.00000000000000E+00
+  2.01493274717073E-03  1.13068570913815E-03  0.00000000000000E+00
+  1.13068570913815E-03  2.01493274717073E-03  0.00000000000000E+00
+ -3.14561845630887E-03 -3.14561845630887E-03 -0.00000000000000E+00
  Total energy (etotal) [Ha]= -1.68217927971372E+01
 
 --- Iteration: ( 2/10) Internal Cycle: (1/1)
@@ -1834,11 +1828,11 @@ tolerances: {toldff: 1.00E-05, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2    diffor    maxfor
- ETOT  1  -16.821792758360    -1.682E+01 1.032E-12 9.895E-05 2.549E-05 1.466E-04
+ ETOT  1  -16.821792758361    -1.682E+01 1.032E-12 9.895E-05 2.549E-05 1.466E-04
  ETOT  2  -16.821792774709    -1.635E-08 2.446E-13 4.720E-05 1.442E-04 2.225E-05
  ETOT  3  -16.821792852172    -7.746E-08 9.892E-10 2.995E-06 7.610E-05 7.843E-05
- ETOT  4  -16.821792852644    -4.714E-10 4.676E-12 1.257E-06 4.425E-06 7.400E-05
- ETOT  5  -16.821792852654    -1.079E-11 6.752E-14 9.200E-07 1.234E-07 7.395E-05
+ ETOT  4  -16.821792852644    -4.715E-10 4.676E-12 1.257E-06 4.425E-06 7.400E-05
+ ETOT  5  -16.821792852654    -1.063E-11 6.752E-14 9.200E-07 1.234E-07 7.395E-05
 
  At SCF step    5, forces are converged : 
   for the second time, max diff in force=  1.234E-07 < toldff=  1.000E-05
@@ -1859,7 +1853,7 @@ lattice_vectors:
 lattice_lengths: [  20.00000,   20.00000,   20.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
 lattice_volume:   8.0000000E+03
-convergence: {deltae: -1.079E-11, res2:  9.200E-07, residm:  6.752E-14, diffor:  1.234E-07, }
+convergence: {deltae: -1.063E-11, res2:  9.200E-07, residm:  6.752E-14, diffor:  1.234E-07, }
 etotal    :  -1.68217929E+01
 entropy   :   0.00000000E+00
 fermie    :  -2.38813237E-01
@@ -1889,26 +1883,26 @@ force_length_stats: {min:   5.35047410E-05, max:   1.04575855E-04, mean:   7.052
 ---OUTPUT-----------------------------------------------------------------------
 
  Cartesian coordinates (xcart) [bohr]
-  2.44989925336264E+00  2.33943465714544E-01  0.00000000000000E+00
-  2.33943465714544E-01  2.44989925336264E+00  0.00000000000000E+00
-  3.14157280922819E-01  3.14157280922819E-01  0.00000000000000E+00
+  2.44989925336264E+00  2.33943465714543E-01  0.00000000000000E+00
+  2.33943465714543E-01  2.44989925336264E+00  0.00000000000000E+00
+  3.14157280922815E-01  3.14157280922815E-01  0.00000000000000E+00
  Reduced coordinates (xred)
   1.22494962668132E-01  1.16971732857272E-02  0.00000000000000E+00
   1.16971732857272E-02  1.22494962668132E-01  0.00000000000000E+00
-  1.57078640461409E-02  1.57078640461409E-02  0.00000000000000E+00
+  1.57078640461408E-02  1.57078640461408E-02  0.00000000000000E+00
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 7.39463E-05 4.30266E-05 (free atoms)
- -4.49959268833374E-05 -2.89503690864700E-05 -0.00000000000000E+00
- -2.89503690864700E-05 -4.49959268833374E-05 -0.00000000000000E+00
-  7.39462959698073E-05  7.39462959698073E-05 -0.00000000000000E+00
+ -4.49959268848162E-05 -2.89503690887353E-05 -0.00000000000000E+00
+ -2.89503690887351E-05 -4.49959268848160E-05 -0.00000000000000E+00
+  7.39462959735513E-05  7.39462959735515E-05 -0.00000000000000E+00
  Gradient of E wrt nuclear positions in reduced coordinates (gred)
-  8.99918537666747E-04  5.79007381729399E-04  0.00000000000000E+00
-  5.79007381729399E-04  8.99918537666747E-04  0.00000000000000E+00
- -1.47892591939615E-03 -1.47892591939615E-03 -0.00000000000000E+00
- Total energy (etotal) [Ha]= -1.68217928526544E+01
+  8.99918537696325E-04  5.79007381774706E-04  0.00000000000000E+00
+  5.79007381774702E-04  8.99918537696320E-04  0.00000000000000E+00
+ -1.47892591947103E-03 -1.47892591947103E-03 -0.00000000000000E+00
+ Total energy (etotal) [Ha]= -1.68217928526543E+01
 
  Difference of energy with previous step (new-old):
            Absolute (Ha)=-5.55172E-08
-           Relative     =-3.30032E-09
+           Relative     =-3.30031E-09
 
 --- Iteration: ( 3/10) Internal Cycle: (1/1)
 --------------------------------------------------------------------------------
@@ -1923,10 +1917,10 @@ tolerances: {toldff: 1.00E-05, }
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2    diffor    maxfor
  ETOT  1  -16.821792801129    -1.682E+01 6.146E-13 6.878E-05 2.349E-05 5.923E-05
- ETOT  2  -16.821792812462    -1.133E-08 1.727E-13 3.347E-05 1.206E-04 6.133E-05
+ ETOT  2  -16.821792812461    -1.133E-08 1.727E-13 3.347E-05 1.206E-04 6.133E-05
  ETOT  3  -16.821792866936    -5.447E-08 6.973E-10 2.001E-06 6.396E-05 4.299E-06
- ETOT  4  -16.821792867279    -3.429E-10 3.529E-12 8.004E-07 3.816E-06 5.150E-06
- ETOT  5  -16.821792867288    -9.713E-12 4.545E-14 5.828E-07 9.264E-08 5.242E-06
+ ETOT  4  -16.821792867279    -3.428E-10 3.529E-12 8.004E-07 3.816E-06 5.150E-06
+ ETOT  5  -16.821792867288    -9.710E-12 4.545E-14 5.828E-07 9.264E-08 5.242E-06
 
  At SCF step    5, forces are converged : 
   for the second time, max diff in force=  9.264E-08 < toldff=  1.000E-05
@@ -1947,7 +1941,7 @@ lattice_vectors:
 lattice_lengths: [  20.00000,   20.00000,   20.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
 lattice_volume:   8.0000000E+03
-convergence: {deltae: -9.713E-12, res2:  5.828E-07, residm:  4.545E-14, diffor:  9.264E-08, }
+convergence: {deltae: -9.710E-12, res2:  5.828E-07, residm:  4.545E-14, diffor:  9.264E-08, }
 etotal    :  -1.68217929E+01
 entropy   :   0.00000000E+00
 fermie    :  -2.38814693E-01
@@ -1961,9 +1955,9 @@ xred      :
 - [  1.1694E-02,   1.2249E-01,   0.0000E+00,  H]
 - [  1.5715E-02,   1.5715E-02,   0.0000E+00,  O]
 cartesian_forces: # hartree/bohr
-- [  5.24223964E-06,  -4.02243187E-06,  -0.00000000E+00, ]
-- [ -4.02243187E-06,   5.24223964E-06,  -0.00000000E+00, ]
-- [ -1.21980777E-06,  -1.21980777E-06,  -0.00000000E+00, ]
+- [  5.24223964E-06,  -4.02243186E-06,  -0.00000000E+00, ]
+- [ -4.02243186E-06,   5.24223964E-06,  -0.00000000E+00, ]
+- [ -1.21980778E-06,  -1.21980778E-06,  -0.00000000E+00, ]
 force_length_stats: {min:   1.72506870E-06, max:   6.60764970E-06, mean:   4.98012270E-06, }
 ...
 
@@ -1977,26 +1971,26 @@ force_length_stats: {min:   1.72506870E-06, max:   6.60764970E-06, mean:   4.980
 ---OUTPUT-----------------------------------------------------------------------
 
  Cartesian coordinates (xcart) [bohr]
-  2.44981466735899E+00  2.33889051498475E-01  0.00000000000000E+00
-  2.33889051498475E-01  2.44981466735899E+00  0.00000000000000E+00
-  3.14296281142538E-01  3.14296281142538E-01  0.00000000000000E+00
+  2.44981466735898E+00  2.33889051498467E-01  0.00000000000000E+00
+  2.33889051498467E-01  2.44981466735898E+00  0.00000000000000E+00
+  3.14296281142550E-01  3.14296281142550E-01  0.00000000000000E+00
  Reduced coordinates (xred)
-  1.22490733367949E-01  1.16944525749238E-02  0.00000000000000E+00
-  1.16944525749238E-02  1.22490733367949E-01  0.00000000000000E+00
-  1.57148140571269E-02  1.57148140571269E-02  0.00000000000000E+00
+  1.22490733367949E-01  1.16944525749233E-02  0.00000000000000E+00
+  1.16944525749233E-02  1.22490733367949E-01  0.00000000000000E+00
+  1.57148140571275E-02  1.57148140571275E-02  0.00000000000000E+00
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 5.24224E-06 3.16751E-06 (free atoms)
-  5.24223963946509E-06 -4.02243186662407E-06 -0.00000000000000E+00
- -4.02243186662407E-06  5.24223963946509E-06 -0.00000000000000E+00
- -1.21980777284124E-06 -1.21980777284124E-06 -0.00000000000000E+00
+  5.24223964110050E-06 -4.02243186401049E-06 -0.00000000000000E+00
+ -4.02243186401049E-06  5.24223964110050E-06 -0.00000000000000E+00
+ -1.21980777708958E-06 -1.21980777708958E-06 -0.00000000000000E+00
  Gradient of E wrt nuclear positions in reduced coordinates (gred)
- -1.04844792789302E-04  8.04486373324814E-05 -0.00000000000000E+00
-  8.04486373324814E-05 -1.04844792789302E-04 -0.00000000000000E+00
-  2.43961554568248E-05  2.43961554568248E-05  0.00000000000000E+00
- Total energy (etotal) [Ha]= -1.68217928672883E+01
+ -1.04844792822010E-04  8.04486372802098E-05 -0.00000000000000E+00
+  8.04486372802098E-05 -1.04844792822010E-04 -0.00000000000000E+00
+  2.43961555417916E-05  2.43961555417916E-05  0.00000000000000E+00
+ Total energy (etotal) [Ha]= -1.68217928672882E+01
 
  Difference of energy with previous step (new-old):
            Absolute (Ha)=-1.46339E-08
-           Relative     =-8.69934E-10
+           Relative     =-8.69938E-10
 
  At Broyd/MD step   3, gradients are converged : 
   max grad (force/stress) = 5.2422E-06 < tolmxf= 5.0000E-05 ha/bohr (free atoms)
@@ -2016,20 +2010,20 @@ force_length_stats: {min:   1.72506870E-06, max:   6.60764970E-06, mean:   4.980
     3      -0.036944851910     -0.036944851910      0.000000000000
 
  cartesian coordinates (angstrom) at end:
-    1      1.29638608723587     0.12376875539173     0.00000000000000
-    2      0.12376875539173     1.29638608723587     0.00000000000000
+    1      1.29638608723587     0.12376875539172     0.00000000000000
+    2      0.12376875539172     1.29638608723587     0.00000000000000
     3      0.16631842872523     0.16631842872523     0.00000000000000
 
  cartesian forces (hartree/bohr) at end:
-    1      0.00000524223964    -0.00000402243187    -0.00000000000000
-    2     -0.00000402243187     0.00000524223964    -0.00000000000000
-    3     -0.00000121980777    -0.00000121980777    -0.00000000000000
+    1      0.00000524223964    -0.00000402243186    -0.00000000000000
+    2     -0.00000402243186     0.00000524223964    -0.00000000000000
+    3     -0.00000121980778    -0.00000121980778    -0.00000000000000
  frms,max,avg= 3.1675075E-06 5.2422396E-06   1.848E-03  1.848E-03  0.000E+00 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1      0.00026956677801    -0.00020684174563    -0.00000000000000
-    2     -0.00020684174563     0.00026956677801    -0.00000000000000
-    3     -0.00006272503238    -0.00006272503238    -0.00000000000000
+    1      0.00026956677809    -0.00020684174550    -0.00000000000000
+    2     -0.00020684174550     0.00026956677809    -0.00000000000000
+    3     -0.00006272503260    -0.00006272503260    -0.00000000000000
  frms,max,avg= 1.6287977E-04 2.6956678E-04   9.505E-02  9.505E-02  0.000E+00 e/A
  length scales= 20.000000000000 20.000000000000 20.000000000000 bohr
               = 10.583544171800 10.583544171800 10.583544171800 angstroms
@@ -2042,14 +2036,14 @@ force_length_stats: {min:   1.72506870E-06, max:   6.60764970E-06, mean:   4.980
 --- !EnergyTerms
 iteration_state     : {dtset: 3, itime: 3, icycle: 1, }
 comment             : Components of total free energy in Hartree
-kinetic             :  9.24261216010450E+00
+kinetic             :  9.24261216010451E+00
 hartree             :  1.46418437515814E+01
-xc                  : -4.46499291384299E+00
-Ewald energy        :  1.41182805014598E+00
+xc                  : -4.46499291384298E+00
+Ewald energy        :  1.41182805014601E+00
 psp_core            :  1.66149645181518E-03
 local_psp           : -4.02534245943792E+01
 non_local_psp       :  2.59867918265026E+00
-total_energy        : -1.68217928672883E+01
+total_energy        : -1.68217928672882E+01
 total_energy_eV     : -4.57744262925191E+02
 band_energy         : -4.14782192261260E+00
 ...
@@ -2105,7 +2099,7 @@ _setup2: Arith. and geom. avg. npw (full set) are   12053.000   12053.000
 
 ================================================================================
 
-=== [ionmov= 3] Broyden-Fletcher-Goldfard-Shanno method (forces,Tot energy) 
+=== [ionmov= 3] Broyden-Fletcher-Goldfarb-Shanno method (forces,Tot energy) 
 ================================================================================
 
 --- Iteration: ( 1/10) Internal Cycle: (1/1)
@@ -2121,8 +2115,8 @@ tolerances: {toldff: 1.00E-05, }
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2    diffor    maxfor
  ETOT  1  -16.821792796928    -1.682E+01 7.414E-16 2.497E-07 1.538E-04 1.538E-04
- ETOT  2  -16.821792796973    -4.484E-11 4.738E-16 9.453E-08 7.005E-06 1.608E-04
- ETOT  3  -16.821792797137    -1.640E-10 2.154E-12 1.415E-08 3.505E-06 1.573E-04
+ ETOT  2  -16.821792796973    -4.501E-11 4.738E-16 9.453E-08 7.005E-06 1.608E-04
+ ETOT  3  -16.821792797137    -1.639E-10 2.154E-12 1.415E-08 3.505E-06 1.573E-04
 
  At SCF step    3, forces are converged : 
   for the second time, max diff in force=  3.505E-06 < toldff=  1.000E-05
@@ -2143,7 +2137,7 @@ lattice_vectors:
 lattice_lengths: [  20.00000,   20.00000,   20.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
 lattice_volume:   8.0000000E+03
-convergence: {deltae: -1.640E-10, res2:  1.415E-08, residm:  2.154E-12, diffor:  3.505E-06, }
+convergence: {deltae: -1.639E-10, res2:  1.415E-08, residm:  2.154E-12, diffor:  3.505E-06, }
 etotal    :  -1.68217928E+01
 entropy   :   0.00000000E+00
 fermie    :  -2.38801750E-01
@@ -2181,13 +2175,13 @@ force_length_stats: {min:   1.15524934E-04, max:   2.22428814E-04, mean:   1.511
   1.17000000000000E-02  1.22500000000000E-01  0.00000000000000E+00
   1.57000000000000E-02  1.57000000000000E-02  0.00000000000000E+00
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 1.57281E-04 9.19943E-05 (free atoms)
- -1.00746637362484E-04 -5.65342854561685E-05 -0.00000000000000E+00
- -5.65342854561685E-05 -1.00746637362484E-04 -0.00000000000000E+00
-  1.57280922818652E-04  1.57280922818652E-04 -0.00000000000000E+00
+ -1.00746637358536E-04 -5.65342854569073E-05 -0.00000000000000E+00
+ -5.65342854569073E-05 -1.00746637358536E-04 -0.00000000000000E+00
+  1.57280922815444E-04  1.57280922815444E-04 -0.00000000000000E+00
  Gradient of E wrt nuclear positions in reduced coordinates (gred)
-  2.01493274724968E-03  1.13068570912337E-03  0.00000000000000E+00
-  1.13068570912337E-03  2.01493274724968E-03  0.00000000000000E+00
- -3.14561845637304E-03 -3.14561845637304E-03 -0.00000000000000E+00
+  2.01493274717073E-03  1.13068570913815E-03  0.00000000000000E+00
+  1.13068570913815E-03  2.01493274717073E-03  0.00000000000000E+00
+ -3.14561845630887E-03 -3.14561845630887E-03 -0.00000000000000E+00
  Total energy (etotal) [Ha]= -1.68217927971372E+01
 
 --- Iteration: ( 2/10) Internal Cycle: (1/1)
@@ -2202,11 +2196,11 @@ tolerances: {toldff: 1.00E-05, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2    diffor    maxfor
- ETOT  1  -16.821792758360    -1.682E+01 1.032E-12 9.895E-05 2.549E-05 1.466E-04
+ ETOT  1  -16.821792758361    -1.682E+01 1.032E-12 9.895E-05 2.549E-05 1.466E-04
  ETOT  2  -16.821792774709    -1.635E-08 2.446E-13 4.720E-05 1.442E-04 2.225E-05
  ETOT  3  -16.821792852172    -7.746E-08 9.892E-10 2.995E-06 7.610E-05 7.843E-05
- ETOT  4  -16.821792852644    -4.714E-10 4.676E-12 1.257E-06 4.425E-06 7.400E-05
- ETOT  5  -16.821792852654    -1.079E-11 6.752E-14 9.200E-07 1.234E-07 7.395E-05
+ ETOT  4  -16.821792852644    -4.715E-10 4.676E-12 1.257E-06 4.425E-06 7.400E-05
+ ETOT  5  -16.821792852654    -1.063E-11 6.752E-14 9.200E-07 1.234E-07 7.395E-05
 
  At SCF step    5, forces are converged : 
   for the second time, max diff in force=  1.234E-07 < toldff=  1.000E-05
@@ -2227,7 +2221,7 @@ lattice_vectors:
 lattice_lengths: [  20.00000,   20.00000,   20.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
 lattice_volume:   8.0000000E+03
-convergence: {deltae: -1.079E-11, res2:  9.200E-07, residm:  6.752E-14, diffor:  1.234E-07, }
+convergence: {deltae: -1.063E-11, res2:  9.200E-07, residm:  6.752E-14, diffor:  1.234E-07, }
 etotal    :  -1.68217929E+01
 entropy   :   0.00000000E+00
 fermie    :  -2.38813237E-01
@@ -2257,26 +2251,26 @@ force_length_stats: {min:   5.35047410E-05, max:   1.04575855E-04, mean:   7.052
 ---OUTPUT-----------------------------------------------------------------------
 
  Cartesian coordinates (xcart) [bohr]
-  2.44989925336264E+00  2.33943465714544E-01  0.00000000000000E+00
-  2.33943465714544E-01  2.44989925336264E+00  0.00000000000000E+00
-  3.14157280922819E-01  3.14157280922819E-01  0.00000000000000E+00
+  2.44989925336264E+00  2.33943465714543E-01  0.00000000000000E+00
+  2.33943465714543E-01  2.44989925336264E+00  0.00000000000000E+00
+  3.14157280922815E-01  3.14157280922815E-01  0.00000000000000E+00
  Reduced coordinates (xred)
   1.22494962668132E-01  1.16971732857272E-02  0.00000000000000E+00
   1.16971732857272E-02  1.22494962668132E-01  0.00000000000000E+00
-  1.57078640461409E-02  1.57078640461409E-02  0.00000000000000E+00
+  1.57078640461408E-02  1.57078640461408E-02  0.00000000000000E+00
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 7.39463E-05 4.30266E-05 (free atoms)
- -4.49959268833374E-05 -2.89503690864700E-05 -0.00000000000000E+00
- -2.89503690864700E-05 -4.49959268833374E-05 -0.00000000000000E+00
-  7.39462959698073E-05  7.39462959698073E-05 -0.00000000000000E+00
+ -4.49959268848162E-05 -2.89503690887353E-05 -0.00000000000000E+00
+ -2.89503690887351E-05 -4.49959268848160E-05 -0.00000000000000E+00
+  7.39462959735513E-05  7.39462959735515E-05 -0.00000000000000E+00
  Gradient of E wrt nuclear positions in reduced coordinates (gred)
-  8.99918537666747E-04  5.79007381729399E-04  0.00000000000000E+00
-  5.79007381729399E-04  8.99918537666747E-04  0.00000000000000E+00
- -1.47892591939615E-03 -1.47892591939615E-03 -0.00000000000000E+00
- Total energy (etotal) [Ha]= -1.68217928526544E+01
+  8.99918537696325E-04  5.79007381774706E-04  0.00000000000000E+00
+  5.79007381774702E-04  8.99918537696320E-04  0.00000000000000E+00
+ -1.47892591947103E-03 -1.47892591947103E-03 -0.00000000000000E+00
+ Total energy (etotal) [Ha]= -1.68217928526543E+01
 
  Difference of energy with previous step (new-old):
            Absolute (Ha)=-5.55172E-08
-           Relative     =-3.30032E-09
+           Relative     =-3.30031E-09
 
 --- Iteration: ( 3/10) Internal Cycle: (1/1)
 --------------------------------------------------------------------------------
@@ -2290,19 +2284,19 @@ tolerances: {toldff: 1.00E-05, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2    diffor    maxfor
- ETOT  1  -16.821792783713    -1.682E+01 7.850E-13 8.656E-05 2.614E-05 5.804E-05
- ETOT  2  -16.821792797982    -1.427E-08 2.168E-13 4.203E-05 1.352E-04 7.717E-05
- ETOT  3  -16.821792866456    -6.847E-08 8.764E-10 2.527E-06 7.169E-05 6.951E-06
- ETOT  4  -16.821792866889    -4.334E-10 4.407E-12 1.016E-06 4.269E-06 1.084E-05
- ETOT  5  -16.821792866899    -9.486E-12 5.737E-14 7.398E-07 1.050E-07 1.095E-05
+ ETOT  1  -16.821792783708    -1.682E+01 7.850E-13 8.656E-05 2.614E-05 5.804E-05
+ ETOT  2  -16.821792797978    -1.427E-08 2.168E-13 4.204E-05 1.352E-04 7.717E-05
+ ETOT  3  -16.821792866455    -6.848E-08 8.765E-10 2.527E-06 7.169E-05 6.952E-06
+ ETOT  4  -16.821792866889    -4.340E-10 4.408E-12 1.016E-06 4.269E-06 1.084E-05
+ ETOT  5  -16.821792866899    -9.557E-12 5.737E-14 7.399E-07 1.050E-07 1.095E-05
 
  At SCF step    5, forces are converged : 
   for the second time, max diff in force=  1.050E-07 < toldff=  1.000E-05
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  1.17298870E-04  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)=  1.17298870E-04  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)=  1.34866356E-04  sigma(2 1)=  2.17188295E-07
+  sigma(1 1)=  1.17298869E-04  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)=  1.17298869E-04  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)=  1.34866356E-04  sigma(2 1)=  2.17188276E-07
 
 
 --- !ResultsGS
@@ -2315,13 +2309,13 @@ lattice_vectors:
 lattice_lengths: [  20.00000,   20.00000,   20.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
 lattice_volume:   8.0000000E+03
-convergence: {deltae: -9.486E-12, res2:  7.398E-07, residm:  5.737E-14, diffor:  1.050E-07, }
+convergence: {deltae: -9.557E-12, res2:  7.399E-07, residm:  5.737E-14, diffor:  1.050E-07, }
 etotal    :  -1.68217929E+01
 entropy   :   0.00000000E+00
 fermie    :  -2.38815747E-01
 cartesian_stress_tensor: # hartree/bohr^3
-- [  1.17298870E-04,   2.17188295E-07,   0.00000000E+00, ]
-- [  2.17188295E-07,   1.17298870E-04,   0.00000000E+00, ]
+- [  1.17298869E-04,   2.17188276E-07,   0.00000000E+00, ]
+- [  2.17188276E-07,   1.17298869E-04,   0.00000000E+00, ]
 - [  0.00000000E+00,   0.00000000E+00,   1.34866356E-04, ]
 pressure_GPa:  -3.6233E+00
 xred      :
@@ -2329,76 +2323,76 @@ xred      :
 - [  1.1694E-02,   1.2249E-01,   0.0000E+00,  H]
 - [  1.5716E-02,   1.5716E-02,   0.0000E+00,  O]
 cartesian_forces: # hartree/bohr
-- [  1.09482677E-05,  -1.16422654E-06,  -0.00000000E+00, ]
-- [ -1.16422654E-06,   1.09482677E-05,  -0.00000000E+00, ]
-- [ -9.78404120E-06,  -9.78404120E-06,  -0.00000000E+00, ]
-force_length_stats: {min:   1.10099950E-05, max:   1.38367238E-05, mean:   1.19522379E-05, }
+- [  1.09496041E-05,  -1.16355712E-06,  -0.00000000E+00, ]
+- [ -1.16355712E-06,   1.09496041E-05,  -0.00000000E+00, ]
+- [ -9.78604700E-06,  -9.78604700E-06,  -0.00000000E+00, ]
+force_length_stats: {min:   1.10112531E-05, max:   1.38395604E-05, mean:   1.19540222E-05, }
 ...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
-    1        2.00000          2.47406282
-    2        2.00000          2.47406282
+    1        2.00000          2.47406283
+    2        2.00000          2.47406283
     3        2.00000          5.85676975
 
 ---OUTPUT-----------------------------------------------------------------------
 
  Cartesian coordinates (xcart) [bohr]
-  2.44980457043017E+00  2.33883007020201E-01  0.00000000000000E+00
-  2.33883007020201E-01  2.44980457043017E+00  0.00000000000000E+00
-  3.14312422549626E-01  3.14312422549626E-01  0.00000000000000E+00
+  2.44980456806544E+00  2.33883005604562E-01  0.00000000000000E+00
+  2.33883005604562E-01  2.44980456806544E+00  0.00000000000000E+00
+  3.14312426329995E-01  3.14312426329995E-01  0.00000000000000E+00
  Reduced coordinates (xred)
-  1.22490228521509E-01  1.16941503510101E-02  0.00000000000000E+00
-  1.16941503510101E-02  1.22490228521509E-01  0.00000000000000E+00
-  1.57156211274813E-02  1.57156211274813E-02  0.00000000000000E+00
- Cartesian forces (fcart) [Ha/bohr]; max,rms= 1.09483E-05 6.94338E-06 (free atoms)
-  1.09482677349657E-05 -1.16422653866403E-06 -0.00000000000000E+00
- -1.16422653866403E-06  1.09482677349657E-05 -0.00000000000000E+00
- -9.78404119630167E-06 -9.78404119630167E-06 -0.00000000000000E+00
+  1.22490228403272E-01  1.16941502802281E-02  0.00000000000000E+00
+  1.16941502802281E-02  1.22490228403272E-01  0.00000000000000E+00
+  1.57156213164997E-02  1.57156213164997E-02  0.00000000000000E+00
+ Cartesian forces (fcart) [Ha/bohr]; max,rms= 1.09496E-05 6.94445E-06 (free atoms)
+  1.09496041216257E-05 -1.16355712019567E-06 -0.00000000000000E+00
+ -1.16355712019567E-06  1.09496041216257E-05 -0.00000000000000E+00
+ -9.78604700143022E-06 -9.78604700143022E-06 -0.00000000000000E+00
  Gradient of E wrt nuclear positions in reduced coordinates (gred)
- -2.18965354699314E-04  2.32845307732805E-05 -0.00000000000000E+00
-  2.32845307732805E-05 -2.18965354699314E-04 -0.00000000000000E+00
-  1.95680823926033E-04  1.95680823926033E-04  0.00000000000000E+00
- Total energy (etotal) [Ha]= -1.68217928668990E+01
+ -2.18992082432513E-04  2.32711424039134E-05 -0.00000000000000E+00
+  2.32711424039134E-05 -2.18992082432513E-04 -0.00000000000000E+00
+  1.95720940028604E-04  1.95720940028604E-04  0.00000000000000E+00
+ Total energy (etotal) [Ha]= -1.68217928668988E+01
 
  Difference of energy with previous step (new-old):
-           Absolute (Ha)=-1.42446E-08
-           Relative     =-8.46792E-10
+           Absolute (Ha)=-1.42444E-08
+           Relative     =-8.46784E-10
 
  At Broyd/MD step   3, gradients are converged : 
-  max grad (force/stress) = 1.0948E-05 < tolmxf= 5.0000E-05 ha/bohr (free atoms)
+  max grad (force/stress) = 1.0950E-05 < tolmxf= 5.0000E-05 ha/bohr (free atoms)
 
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   24.063E-15; max=  57.367E-15
+ Mean square residual over all n,k,spin=   24.064E-15; max=  57.370E-15
  reduced coordinates (array xred) for    3 atoms
-       0.122490228522      0.011694150351      0.000000000000
-       0.011694150351      0.122490228522      0.000000000000
-       0.015715621127      0.015715621127      0.000000000000
+       0.122490228403      0.011694150280      0.000000000000
+       0.011694150280      0.122490228403      0.000000000000
+       0.015715621316      0.015715621316      0.000000000000
  rms dE/dt=  3.0157E-02; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
-    1      -0.037153215374     -0.036910965488      0.000000000000
-    2      -0.036910965488     -0.037153215374      0.000000000000
-    3      -0.036738569195     -0.036738569195      0.000000000000
+    1      -0.037153233905     -0.036910970680      0.000000000000
+    2      -0.036910970680     -0.037153233905      0.000000000000
+    3      -0.036738520882     -0.036738520882      0.000000000000
 
  cartesian coordinates (angstrom) at end:
-    1      1.29638074417126     0.12376555679159     0.00000000000000
-    2      0.12376555679159     1.29638074417126     0.00000000000000
-    3      0.16632697038997     0.16632697038997     0.00000000000000
+    1      1.29638074291990     0.12376555604246     0.00000000000000
+    2      0.12376555604246     1.29638074291990     0.00000000000000
+    3      0.16632697239046     0.16632697239046     0.00000000000000
 
  cartesian forces (hartree/bohr) at end:
-    1      0.00001094826773    -0.00000116422654    -0.00000000000000
-    2     -0.00000116422654     0.00001094826773    -0.00000000000000
-    3     -0.00000978404120    -0.00000978404120    -0.00000000000000
- frms,max,avg= 6.9433814E-06 1.0948268E-05   1.847E-03  1.847E-03  0.000E+00 h/b
+    1      0.00001094960412    -0.00000116355712    -0.00000000000000
+    2     -0.00000116355712     0.00001094960412    -0.00000000000000
+    3     -0.00000978604700    -0.00000978604700    -0.00000000000000
+ frms,max,avg= 6.9444528E-06 1.0949604E-05   1.847E-03  1.847E-03  0.000E+00 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1      0.00056298251531    -0.00005986693064    -0.00000000000000
-    2     -0.00005986693064     0.00056298251531    -0.00000000000000
-    3     -0.00050311558467    -0.00050311558467    -0.00000000000000
- frms,max,avg= 3.5704300E-04 5.6298252E-04   9.496E-02  9.496E-02  0.000E+00 e/A
+    1      0.00056305123507    -0.00005983250776    -0.00000000000000
+    2     -0.00005983250776     0.00056305123507    -0.00000000000000
+    3     -0.00050321872731    -0.00050321872731    -0.00000000000000
+ frms,max,avg= 3.5709809E-04 5.6305124E-04   9.496E-02  9.496E-02  0.000E+00 e/A
  length scales= 20.000000000000 20.000000000000 20.000000000000 bohr
               = 10.583544171800 10.583544171800 10.583544171800 angstroms
  prteigrs : about to open file t88o_DS4_EIG
@@ -2410,32 +2404,32 @@ force_length_stats: {min:   1.10099950E-05, max:   1.38367238E-05, mean:   1.195
 --- !EnergyTerms
 iteration_state     : {dtset: 4, itime: 3, icycle: 1, }
 comment             : Components of total free energy in Hartree
-kinetic             :  9.24264339415886E+00
-hartree             :  1.46419035479916E+01
-xc                  : -4.46500239924059E+00
-Ewald energy        :  1.41189497323922E+00
+kinetic             :  9.24264340147408E+00
+hartree             :  1.46419035619961E+01
+xc                  : -4.46500240146212E+00
+Ewald energy        :  1.41189498891291E+00
 psp_core            :  1.66149645181518E-03
-local_psp           : -4.02535661295141E+01
-non_local_psp       :  2.59867225001428E+00
-total_energy        : -1.68217928668990E+01
-total_energy_eV     : -4.57744262914597E+02
-band_energy         : -4.14783999411248E+00
+local_psp           : -4.02535661626621E+01
+non_local_psp       :  2.59867224839058E+00
+total_energy        : -1.68217928668988E+01
+total_energy_eV     : -4.57744262914592E+02
+band_energy         : -4.14783999834513E+00
 ...
 
- rms coord change=  9.1131E-06   atom, delta coord (reduced):
-     1       -0.000009771478     -0.000005849649      0.000000000000
-     2       -0.000005849649     -0.000009771478      0.000000000000
-     3        0.000015621127      0.000015621127      0.000000000000
+ rms coord change=  9.1132E-06   atom, delta coord (reduced):
+     1       -0.000009771597     -0.000005849720      0.000000000000
+     2       -0.000005849720     -0.000009771597      0.000000000000
+     3        0.000015621316      0.000015621316      0.000000000000
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  1.17298870E-04  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)=  1.17298870E-04  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)=  1.34866356E-04  sigma(2 1)=  2.17188295E-07
+  sigma(1 1)=  1.17298869E-04  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)=  1.17298869E-04  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)=  1.34866356E-04  sigma(2 1)=  2.17188276E-07
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -3.6233E+00 GPa]
-- sigma(1 1)=  3.45105131E+00  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  3.45105131E+00  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)=  3.96790451E+00  sigma(2 1)=  6.38989916E-03
+- sigma(1 1)=  3.45105130E+00  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  3.45105130E+00  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  3.96790451E+00  sigma(2 1)=  6.38989861E-03
 
 ================================================================================
 == DATASET  5 ==================================================================
@@ -2489,8 +2483,8 @@ tolerances: {toldff: 1.00E-05, }
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2    diffor    maxfor
  ETOT  1  -16.821792796928    -1.682E+01 7.414E-16 2.497E-07 1.538E-04 1.538E-04
- ETOT  2  -16.821792796973    -4.484E-11 4.738E-16 9.453E-08 7.005E-06 1.608E-04
- ETOT  3  -16.821792797137    -1.640E-10 2.154E-12 1.415E-08 3.505E-06 1.573E-04
+ ETOT  2  -16.821792796973    -4.501E-11 4.738E-16 9.453E-08 7.005E-06 1.608E-04
+ ETOT  3  -16.821792797137    -1.639E-10 2.154E-12 1.415E-08 3.505E-06 1.573E-04
 
  At SCF step    3, forces are converged : 
   for the second time, max diff in force=  3.505E-06 < toldff=  1.000E-05
@@ -2511,7 +2505,7 @@ lattice_vectors:
 lattice_lengths: [  20.00000,   20.00000,   20.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
 lattice_volume:   8.0000000E+03
-convergence: {deltae: -1.640E-10, res2:  1.415E-08, residm:  2.154E-12, diffor:  3.505E-06, }
+convergence: {deltae: -1.639E-10, res2:  1.415E-08, residm:  2.154E-12, diffor:  3.505E-06, }
 etotal    :  -1.68217928E+01
 entropy   :   0.00000000E+00
 fermie    :  -2.38801750E-01
@@ -2549,13 +2543,13 @@ force_length_stats: {min:   1.15524934E-04, max:   2.22428814E-04, mean:   1.511
   1.17000000000000E-02  1.22500000000000E-01  0.00000000000000E+00
   1.57000000000000E-02  1.57000000000000E-02  0.00000000000000E+00
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 1.57281E-04 9.19943E-05 (free atoms)
- -1.00746637362484E-04 -5.65342854561685E-05 -0.00000000000000E+00
- -5.65342854561685E-05 -1.00746637362484E-04 -0.00000000000000E+00
-  1.57280922818652E-04  1.57280922818652E-04 -0.00000000000000E+00
+ -1.00746637358536E-04 -5.65342854569073E-05 -0.00000000000000E+00
+ -5.65342854569073E-05 -1.00746637358536E-04 -0.00000000000000E+00
+  1.57280922815444E-04  1.57280922815444E-04 -0.00000000000000E+00
  Gradient of E wrt nuclear positions in reduced coordinates (gred)
-  2.01493274724968E-03  1.13068570912337E-03  0.00000000000000E+00
-  1.13068570912337E-03  2.01493274724968E-03  0.00000000000000E+00
- -3.14561845637304E-03 -3.14561845637304E-03 -0.00000000000000E+00
+  2.01493274717073E-03  1.13068570913815E-03  0.00000000000000E+00
+  1.13068570913815E-03  2.01493274717073E-03  0.00000000000000E+00
+ -3.14561845630887E-03 -3.14561845630887E-03 -0.00000000000000E+00
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 0.00000E+00 0.00000E+00 (free atoms)
   0.00000000000000E+00  0.00000000000000E+00  0.00000000000000E+00
   0.00000000000000E+00  0.00000000000000E+00  0.00000000000000E+00
@@ -2582,7 +2576,7 @@ tolerances: {toldff: 1.00E-05, }
  ETOT  5  -16.821637531345    -1.287E-07 2.714E-09 1.137E-02 2.360E-05 7.646E-03
  ETOT  6  -16.821637855001    -3.237E-07 5.114E-09 3.554E-03 1.309E-04 7.769E-03
  ETOT  7  -16.821637864105    -9.105E-09 4.694E-10 1.570E-03 1.841E-05 7.787E-03
- ETOT  8  -16.821637864105     6.644E-13 8.600E-11 7.460E-04 2.573E-06 7.785E-03
+ ETOT  8  -16.821637864105     7.425E-13 8.600E-11 7.460E-04 2.573E-06 7.785E-03
  ETOT  9  -16.821637864452    -3.469E-10 3.140E-11 2.763E-04 2.996E-06 7.787E-03
 
  At SCF step    9, forces are converged : 
@@ -2634,27 +2628,27 @@ force_length_stats: {min:   7.58638781E-03, max:   1.10118586E-02, mean:   8.728
 ---OUTPUT-----------------------------------------------------------------------
 
  Cartesian coordinates (xcart) [bohr]
-  2.43813505831637E+00  2.67814593290247E-01  0.00000000000000E+00
-  2.67814593290247E-01  2.43813505831637E+00  0.00000000000000E+00
-  3.32584858651886E-01  3.32584858651886E-01  0.00000000000000E+00
+  2.43813505831639E+00  2.67814593290245E-01  0.00000000000000E+00
+  2.67814593290245E-01  2.43813505831639E+00  0.00000000000000E+00
+  3.32584858651885E-01  3.32584858651885E-01  0.00000000000000E+00
  Reduced coordinates (xred)
-  1.21906752915819E-01  1.33907296645123E-02  0.00000000000000E+00
-  1.33907296645123E-02  1.21906752915819E-01  0.00000000000000E+00
+  1.21906752915819E-01  1.33907296645122E-02  0.00000000000000E+00
+  1.33907296645122E-02  1.21906752915819E-01  0.00000000000000E+00
   1.66292429325943E-02  1.66292429325943E-02  0.00000000000000E+00
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 7.78656E-03 5.12475E-03 (free atoms)
-  7.58367440238724E-03  2.02885517351941E-04 -0.00000000000000E+00
-  2.02885517351942E-04  7.58367440238724E-03 -0.00000000000000E+00
- -7.78655991973919E-03 -7.78655991973919E-03 -0.00000000000000E+00
+  7.58367440239914E-03  2.02885517353477E-04 -0.00000000000000E+00
+  2.02885517353477E-04  7.58367440239914E-03 -0.00000000000000E+00
+ -7.78655991975262E-03 -7.78655991975262E-03 -0.00000000000000E+00
  Gradient of E wrt nuclear positions in reduced coordinates (gred)
- -1.51673488047745E-01 -4.05771034703883E-03 -0.00000000000000E+00
- -4.05771034703883E-03 -1.51673488047745E-01 -0.00000000000000E+00
-  1.55731198394784E-01  1.55731198394784E-01  0.00000000000000E+00
+ -1.51673488047983E-01 -4.05771034706954E-03 -0.00000000000000E+00
+ -4.05771034706955E-03 -1.51673488047983E-01 -0.00000000000000E+00
+  1.55731198395052E-01  1.55731198395052E-01  0.00000000000000E+00
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 1.13468E-03 5.90138E-04 (free atoms)
-  6.77691898770330E-04  1.13468176378369E-03  8.82850855327096E-05
- -4.61466972998543E-04 -9.20473900235461E-04 -4.65950502933101E-04
-  2.82131592964290E-04  9.01047754047796E-05  1.21458872848025E-04
- Kinetic energy of ions (ekin) [Ha]=  4.27961235431958E-03
- Total energy (etotal) [Ha]= -1.68216378644515E+01
+  6.77691898770545E-04  1.13468176378365E-03  8.82850855327096E-05
+ -4.61466972998584E-04 -9.20473900235246E-04 -4.65950502933101E-04
+  2.82131592964279E-04  9.01047754047686E-05  1.21458872848025E-04
+ Kinetic energy of ions (ekin) [Ha]=  4.27961235431931E-03
+ Total energy (etotal) [Ha]= -1.68216378644516E+01
 
  Difference of energy with previous step (new-old):
            Absolute (Ha)= 1.54933E-04
@@ -2679,8 +2673,8 @@ tolerances: {toldff: 1.00E-05, }
  ETOT  5  -16.820834134457    -1.447E-07 2.839E-09 1.161E-02 2.585E-05 1.564E-02
  ETOT  6  -16.820834461883    -3.274E-07 5.230E-09 3.665E-03 1.347E-04 1.577E-02
  ETOT  7  -16.820834471157    -9.275E-09 5.001E-10 1.618E-03 1.825E-05 1.579E-02
- ETOT  8  -16.820834471115     4.237E-11 9.694E-11 7.662E-04 2.567E-06 1.578E-02
- ETOT  9  -16.820834471516    -4.010E-10 3.519E-11 2.851E-04 3.548E-06 1.579E-02
+ ETOT  8  -16.820834471115     4.251E-11 9.694E-11 7.662E-04 2.567E-06 1.578E-02
+ ETOT  9  -16.820834471516    -4.009E-10 3.519E-11 2.851E-04 3.548E-06 1.579E-02
 
  At SCF step    9, forces are converged : 
   for the second time, max diff in force=  3.548E-06 < toldff=  1.000E-05
@@ -2701,7 +2695,7 @@ lattice_vectors:
 lattice_lengths: [  20.00000,   20.00000,   20.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
 lattice_volume:   8.0000000E+03
-convergence: {deltae: -4.010E-10, res2:  2.851E-04, residm:  3.519E-11, diffor:  3.548E-06, }
+convergence: {deltae: -4.009E-10, res2:  2.851E-04, residm:  3.519E-11, diffor:  3.548E-06, }
 etotal    :  -1.68208345E+01
 entropy   :   0.00000000E+00
 fermie    :  -2.40175098E-01
@@ -2731,27 +2725,27 @@ force_length_stats: {min:   1.54607024E-02, max:   2.23251800E-02, mean:   1.774
 ---OUTPUT-----------------------------------------------------------------------
 
  Cartesian coordinates (xcart) [bohr]
-  2.42572179985349E+00  3.01321479078515E-01  0.00000000000000E+00
-  3.01321479078515E-01  2.42572179985349E+00  0.00000000000000E+00
-  3.51223636836907E-01  3.51223636836907E-01  0.00000000000000E+00
+  2.42572179985353E+00  3.01321479078507E-01  0.00000000000000E+00
+  3.01321479078507E-01  2.42572179985353E+00  0.00000000000000E+00
+  3.51223636836905E-01  3.51223636836905E-01  0.00000000000000E+00
  Reduced coordinates (xred)
-  1.21286089992674E-01  1.50660739539257E-02  0.00000000000000E+00
-  1.50660739539257E-02  1.21286089992674E-01  0.00000000000000E+00
-  1.75611818418454E-02  1.75611818418454E-02  0.00000000000000E+00
+  1.21286089992677E-01  1.50660739539253E-02  0.00000000000000E+00
+  1.50660739539253E-02  1.21286089992677E-01  0.00000000000000E+00
+  1.75611818418452E-02  1.75611818418452E-02  0.00000000000000E+00
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 1.57863E-02 1.04162E-02 (free atoms)
-  1.54571996015208E-02  3.29086537312125E-04 -0.00000000000000E+00
-  3.29086537312124E-04  1.54571996015208E-02 -0.00000000000000E+00
- -1.57862861388329E-02 -1.57862861388329E-02 -0.00000000000000E+00
+  1.54571996015538E-02  3.29086537308948E-04 -0.00000000000000E+00
+  3.29086537308950E-04  1.54571996015538E-02 -0.00000000000000E+00
+ -1.57862861388627E-02 -1.57862861388627E-02 -0.00000000000000E+00
  Gradient of E wrt nuclear positions in reduced coordinates (gred)
- -3.09143992030415E-01 -6.58173074624250E-03 -0.00000000000000E+00
- -6.58173074624247E-03 -3.09143992030415E-01 -0.00000000000000E+00
-  3.15725722776658E-01  3.15725722776658E-01  0.00000000000000E+00
+ -3.09143992031075E-01 -6.58173074617897E-03 -0.00000000000000E+00
+ -6.58173074617899E-03 -3.09143992031075E-01 -0.00000000000000E+00
+  3.15725722777254E-01  3.15725722777254E-01  0.00000000000000E+00
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 1.13862E-03 5.88234E-04 (free atoms)
-  8.81289527853468E-04  1.13861949125484E-03  8.82816028277409E-05
- -4.57466280020787E-04 -7.16813226075848E-04 -4.65932121933389E-04
-  2.69041519728346E-04  7.70222773186759E-05  1.21454081490375E-04
- Kinetic energy of ions (ekin) [Ha]=  4.13258859207686E-03
- Total energy (etotal) [Ha]= -1.68208344715159E+01
+  8.81289527854114E-04  1.13861949125482E-03  8.82816028277409E-05
+ -4.57466280020806E-04 -7.16813226075202E-04 -4.65932121933389E-04
+  2.69041519728306E-04  7.70222773186364E-05  1.21454081490375E-04
+ Kinetic energy of ions (ekin) [Ha]=  4.13258859207664E-03
+ Total energy (etotal) [Ha]= -1.68208344715158E+01
 
  Difference of energy with previous step (new-old):
            Absolute (Ha)= 8.03393E-04
@@ -2775,7 +2769,7 @@ tolerances: {toldff: 1.00E-05, }
  ETOT  4  -16.820772596328    -1.147E-05 1.530E-07 3.418E-03 9.299E-04 1.602E-02
  ETOT  5  -16.820772644277    -4.795E-08 1.500E-09 2.527E-03 3.454E-05 1.598E-02
  ETOT  6  -16.820772654532    -1.026E-08 1.010E-10 1.575E-03 8.122E-06 1.598E-02
- ETOT  7  -16.820772658675    -4.143E-09 6.674E-11 6.960E-04 1.816E-06 1.598E-02
+ ETOT  7  -16.820772658675    -4.142E-09 6.674E-11 6.960E-04 1.816E-06 1.598E-02
 
  At SCF step    7, forces are converged : 
   for the second time, max diff in force=  1.816E-06 < toldff=  1.000E-05
@@ -2796,7 +2790,7 @@ lattice_vectors:
 lattice_lengths: [  20.00000,   20.00000,   20.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
 lattice_volume:   8.0000000E+03
-convergence: {deltae: -4.143E-09, res2:  6.960E-04, residm:  6.674E-11, diffor:  1.816E-06, }
+convergence: {deltae: -4.142E-09, res2:  6.960E-04, residm:  6.674E-11, diffor:  1.816E-06, }
 etotal    :  -1.68207727E+01
 entropy   :   0.00000000E+00
 fermie    :  -2.39974808E-01
@@ -2826,27 +2820,27 @@ force_length_stats: {min:   1.52559751E-02, max:   2.26008737E-02, mean:   1.770
 ---OUTPUT-----------------------------------------------------------------------
 
  Cartesian coordinates (xcart) [bohr]
-  2.45458268849414E+00  3.35929914413652E-01  0.00000000000000E+00
-  3.35929914413652E-01  2.45458268849414E+00  0.00000000000000E+00
-  3.67191238356588E-01  3.67191238356588E-01  0.00000000000000E+00
+  2.45458268849428E+00  3.35929914413647E-01  0.00000000000000E+00
+  3.35929914413647E-01  2.45458268849428E+00  0.00000000000000E+00
+  3.67191238356580E-01  3.67191238356580E-01  0.00000000000000E+00
  Reduced coordinates (xred)
-  1.22729134424707E-01  1.67964957206826E-02  0.00000000000000E+00
-  1.67964957206826E-02  1.22729134424707E-01  0.00000000000000E+00
-  1.83595619178294E-02  1.83595619178294E-02  0.00000000000000E+00
+  1.22729134424714E-01  1.67964957206823E-02  0.00000000000000E+00
+  1.67964957206823E-02  1.22729134424714E-01  0.00000000000000E+00
+  1.83595619178290E-02  1.83595619178290E-02  0.00000000000000E+00
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 1.59812E-02 1.04152E-02 (free atoms)
-  1.52378530039817E-02  7.43378051134056E-04 -0.00000000000000E+00
-  7.43378051134057E-04  1.52378530039817E-02 -0.00000000000000E+00
- -1.59812310551158E-02 -1.59812310551158E-02 -0.00000000000000E+00
+  1.52378530039656E-02  7.43378051135051E-04 -0.00000000000000E+00
+  7.43378051135050E-04  1.52378530039656E-02 -0.00000000000000E+00
+ -1.59812310551006E-02 -1.59812310551006E-02 -0.00000000000000E+00
  Gradient of E wrt nuclear positions in reduced coordinates (gred)
- -3.04757060079635E-01 -1.48675610226811E-02 -0.00000000000000E+00
- -1.48675610226811E-02 -3.04757060079635E-01 -0.00000000000000E+00
-  3.19624621102316E-01  3.19624621102316E-01  0.00000000000000E+00
+ -3.04757060079311E-01 -1.48675610227010E-02 -0.00000000000000E+00
+ -1.48675610227010E-02 -3.04757060079311E-01 -0.00000000000000E+00
+  3.19624621102012E-01  3.19624621102012E-01  0.00000000000000E+00
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 1.50805E-03 6.75007E-04 (free atoms)
-  1.50804552173398E-03  1.15288391135606E-03  8.82653212220754E-05
- -4.42907496900505E-04 -8.97624971880526E-05 -4.65846190971182E-04
-  2.28585035546083E-04  3.66012068747793E-05  1.21431681948478E-04
- Kinetic energy of ions (ekin) [Ha]=  4.70098253475036E-03
- Total energy (etotal) [Ha]= -1.68207726586749E+01
+  1.50804552173585E-03  1.15288391135600E-03  8.82653212220754E-05
+ -4.42907496900568E-04 -8.97624971861850E-05 -4.65846190971182E-04
+  2.28585035545969E-04  3.66012068746656E-05  1.21431681948478E-04
+ Kinetic energy of ions (ekin) [Ha]=  4.70098253475426E-03
+ Total energy (etotal) [Ha]= -1.68207726586748E+01
 
  Difference of energy with previous step (new-old):
            Absolute (Ha)= 6.18128E-05
@@ -2871,10 +2865,10 @@ tolerances: {toldff: 1.00E-05, }
  ETOT  5  -16.820901716052    -8.704E-07 6.303E-09 8.449E-02 5.501E-05 1.904E-03
  ETOT  6  -16.820903305290    -1.589E-06 3.405E-08 2.458E-02 2.772E-04 1.884E-03
  ETOT  7  -16.820903326541    -2.125E-08 1.851E-09 1.103E-02 1.097E-05 1.894E-03
- ETOT  8  -16.820903352562    -2.602E-08 5.206E-10 5.047E-03 1.675E-05 1.894E-03
+ ETOT  8  -16.820903352563    -2.602E-08 5.206E-10 5.047E-03 1.675E-05 1.894E-03
  ETOT  9  -16.820903367048    -1.449E-08 3.223E-10 1.607E-03 1.957E-05 1.889E-03
- ETOT 10  -16.820903368894    -1.845E-09 5.408E-11 3.016E-04 7.371E-06 1.886E-03
- ETOT 11  -16.820903368991    -9.782E-11 1.190E-11 5.891E-05 1.568E-06 1.886E-03
+ ETOT 10  -16.820903368893    -1.845E-09 5.408E-11 3.016E-04 7.371E-06 1.886E-03
+ ETOT 11  -16.820903368991    -9.787E-11 1.190E-11 5.891E-05 1.568E-06 1.886E-03
 
  At SCF step   11, forces are converged : 
   for the second time, max diff in force=  1.568E-06 < toldff=  1.000E-05
@@ -2895,7 +2889,7 @@ lattice_vectors:
 lattice_lengths: [  20.00000,   20.00000,   20.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
 lattice_volume:   8.0000000E+03
-convergence: {deltae: -9.782E-11, res2:  5.891E-05, residm:  1.190E-11, diffor:  1.568E-06, }
+convergence: {deltae: -9.787E-11, res2:  5.891E-05, residm:  1.190E-11, diffor:  1.568E-06, }
 etotal    :  -1.68209034E+01
 entropy   :   0.00000000E+00
 fermie    :  -2.38247683E-01
@@ -2925,27 +2919,27 @@ force_length_stats: {min:   1.57832539E-04, max:   2.58885580E-03, mean:   1.778
 ---OUTPUT-----------------------------------------------------------------------
 
  Cartesian coordinates (xcart) [bohr]
-  2.56755010230808E+00  3.72319120524070E-01  0.00000000000000E+00
-  3.72319120524070E-01  2.56755010230808E+00  0.00000000000000E+00
-  3.77742261078993E-01  3.77742261078993E-01  0.00000000000000E+00
+  2.56755010230850E+00  3.72319120524050E-01  0.00000000000000E+00
+  3.72319120524050E-01  2.56755010230850E+00  0.00000000000000E+00
+  3.77742261078968E-01  3.77742261078968E-01  0.00000000000000E+00
  Reduced coordinates (xred)
-  1.28377505115404E-01  1.86159560262035E-02  0.00000000000000E+00
-  1.86159560262035E-02  1.28377505115404E-01  0.00000000000000E+00
-  1.88871130539497E-02  1.88871130539497E-02  0.00000000000000E+00
+  1.28377505115425E-01  1.86159560262025E-02  0.00000000000000E+00
+  1.86159560262025E-02  1.28377505115425E-01  0.00000000000000E+00
+  1.88871130539484E-02  1.88871130539484E-02  0.00000000000000E+00
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 1.88555E-03 1.22153E-03 (free atoms)
- -1.77394455650008E-03  1.88554901514805E-03 -0.00000000000000E+00
-  1.88554901514805E-03 -1.77394455650008E-03 -0.00000000000000E+00
- -1.11604458647971E-04 -1.11604458647971E-04 -0.00000000000000E+00
+ -1.77394455655974E-03  1.88554901517322E-03 -0.00000000000000E+00
+  1.88554901517322E-03 -1.77394455655974E-03 -0.00000000000000E+00
+ -1.11604458613484E-04 -1.11604458613485E-04 -0.00000000000000E+00
  Gradient of E wrt nuclear positions in reduced coordinates (gred)
-  3.54788911300015E-02 -3.77109803029609E-02 -0.00000000000000E+00
- -3.77109803029609E-02  3.54788911300015E-02 -0.00000000000000E+00
-  2.23208917295941E-03  2.23208917295941E-03  0.00000000000000E+00
+  3.54788911311948E-02 -3.77109803034644E-02 -0.00000000000000E+00
+ -3.77109803034645E-02  3.54788911311948E-02 -0.00000000000000E+00
+  2.23208917226967E-03  2.23208917226971E-03  0.00000000000000E+00
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 2.34200E-03 9.35509E-04 (free atoms)
-  2.34199683446744E-03  1.18133046785127E-03  8.82098727619679E-05
- -4.13458460892210E-04  7.45192561897539E-04 -4.65553545415955E-04
-  1.74006260235012E-04 -1.78569637920443E-05  1.21355398310928E-04
- Kinetic energy of ions (ekin) [Ha]=  7.85538410774396E-03
- Total energy (etotal) [Ha]= -1.68209033689914E+01
+  2.34199683446976E-03  1.18133046785115E-03  8.82098727619678E-05
+ -4.13458460892332E-04  7.45192561899862E-04 -4.65553545415954E-04
+  1.74006260234873E-04 -1.78569637921829E-05  1.21355398310928E-04
+ Kinetic energy of ions (ekin) [Ha]=  7.85538410775633E-03
+ Total energy (etotal) [Ha]= -1.68209033689913E+01
 
  Difference of energy with previous step (new-old):
            Absolute (Ha)=-1.30710E-04
@@ -2972,12 +2966,12 @@ tolerances: {toldff: 1.00E-05, }
  ETOT  7  -16.811518736243    -2.281E-07 7.208E-09 4.116E-02 4.224E-05 3.641E-02
  ETOT  8  -16.811518840080    -1.038E-07 1.781E-09 1.924E-02 3.661E-05 3.645E-02
  ETOT  9  -16.811518875224    -3.514E-08 7.889E-10 6.077E-03 1.589E-05 3.646E-02
- ETOT 10  -16.811518883160    -7.935E-09 2.136E-10 1.283E-03 1.765E-05 3.648E-02
+ ETOT 10  -16.811518883160    -7.936E-09 2.136E-10 1.283E-03 1.765E-05 3.648E-02
  ETOT 11  -16.811518881109     2.050E-09 1.008E-10 3.039E-04 1.398E-05 3.646E-02
  ETOT 12  -16.811518881291    -1.814E-10 1.775E-10 5.971E-05 2.261E-05 3.648E-02
- ETOT 13  -16.811518882678    -1.388E-09 8.381E-11 1.200E-05 1.818E-05 3.647E-02
- ETOT 14  -16.811518883865    -1.186E-09 3.318E-11 2.012E-06 8.305E-06 3.647E-02
- ETOT 15  -16.811518883894    -2.974E-11 2.388E-12 3.987E-07 6.211E-07 3.647E-02
+ ETOT 13  -16.811518882678    -1.387E-09 8.381E-11 1.200E-05 1.818E-05 3.647E-02
+ ETOT 14  -16.811518883864    -1.186E-09 3.318E-11 2.012E-06 8.305E-06 3.647E-02
+ ETOT 15  -16.811518883894    -3.001E-11 2.388E-12 3.987E-07 6.211E-07 3.647E-02
 
  At SCF step   15, forces are converged : 
   for the second time, max diff in force=  6.211E-07 < toldff=  1.000E-05
@@ -2998,7 +2992,7 @@ lattice_vectors:
 lattice_lengths: [  20.00000,   20.00000,   20.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
 lattice_volume:   8.0000000E+03
-convergence: {deltae: -2.974E-11, res2:  3.987E-07, residm:  2.388E-12, diffor:  6.211E-07, }
+convergence: {deltae: -3.001E-11, res2:  3.987E-07, residm:  2.388E-12, diffor:  6.211E-07, }
 etotal    :  -1.68115189E+01
 entropy   :   0.00000000E+00
 fermie    :  -2.34598337E-01
@@ -3028,26 +3022,26 @@ force_length_stats: {min:   3.65408697E-02, max:   4.84333630E-02, mean:   4.050
 ---OUTPUT-----------------------------------------------------------------------
 
  Cartesian coordinates (xcart) [bohr]
-  2.76330162813063E+00  4.12717115109559E-01  0.00000000000000E+00
-  4.12717115109559E-01  2.76330162813063E+00  0.00000000000000E+00
-  3.82806168000885E-01  3.82806168000885E-01  0.00000000000000E+00
+  2.76330162813124E+00  4.12717115109529E-01  0.00000000000000E+00
+  4.12717115109529E-01  2.76330162813124E+00  0.00000000000000E+00
+  3.82806168000849E-01  3.82806168000849E-01  0.00000000000000E+00
  Reduced coordinates (xred)
-  1.38165081406532E-01  2.06358557554779E-02  0.00000000000000E+00
-  2.06358557554779E-02  1.38165081406532E-01  0.00000000000000E+00
-  1.91403084000443E-02  1.91403084000443E-02  0.00000000000000E+00
+  1.38165081406562E-01  2.06358557554764E-02  0.00000000000000E+00
+  2.06358557554764E-02  1.38165081406562E-01  0.00000000000000E+00
+  1.91403084000424E-02  1.91403084000424E-02  0.00000000000000E+00
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 3.64730E-02 2.36085E-02 (free atoms)
- -3.64730367451446E-02  2.22547735936963E-03 -0.00000000000000E+00
-  2.22547735936963E-03 -3.64730367451446E-02 -0.00000000000000E+00
-  3.42475593857750E-02  3.42475593857750E-02 -0.00000000000000E+00
+ -3.64730367452548E-02  2.22547735936908E-03 -0.00000000000000E+00
+  2.22547735936909E-03 -3.64730367452547E-02 -0.00000000000000E+00
+  3.42475593858857E-02  3.42475593858857E-02 -0.00000000000000E+00
  Gradient of E wrt nuclear positions in reduced coordinates (gred)
-  7.29460734902893E-01 -4.45095471873925E-02 -0.00000000000000E+00
- -4.45095471873925E-02  7.29460734902893E-01 -0.00000000000000E+00
- -6.84951187715500E-01 -6.84951187715500E-01 -0.00000000000000E+00
+  7.29460734905095E-01 -4.45095471873817E-02 -0.00000000000000E+00
+ -4.45095471873817E-02  7.29460734905095E-01 -0.00000000000000E+00
+ -6.84951187717713E-01 -6.84951187717713E-01 -0.00000000000000E+00
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 2.70417E-03 1.07949E-03 (free atoms)
-  2.70417462380924E-03  1.25087438000335E-03  8.80668484308841E-05
- -3.41328742723057E-04  1.10995942495417E-03 -4.64798692446192E-04
-  1.46166360925697E-04 -4.53857742354886E-05  1.21158631507810E-04
- Kinetic energy of ions (ekin) [Ha]=  1.01554619092961E-02
+  2.70417462380949E-03  1.25087438000394E-03  8.80668484308837E-05
+ -3.41328742722466E-04  1.10995942495443E-03 -4.64798692446190E-04
+  1.46166360925643E-04 -4.53857742355419E-05  1.21158631507809E-04
+ Kinetic energy of ions (ekin) [Ha]=  1.01554619092986E-02
  Total energy (etotal) [Ha]= -1.68115188838944E+01
 
  Difference of energy with previous step (new-old):
@@ -3074,13 +3068,13 @@ tolerances: {toldff: 1.00E-05, }
  ETOT  6  -16.790534050799    -6.076E-06 7.671E-08 9.011E-02 3.846E-04 6.583E-02
  ETOT  7  -16.790534318822    -2.680E-07 4.965E-09 3.766E-02 5.015E-05 6.588E-02
  ETOT  8  -16.790534424856    -1.060E-07 1.368E-09 1.804E-02 3.475E-05 6.591E-02
- ETOT  9  -16.790534464931    -4.007E-08 7.434E-10 5.378E-03 1.685E-05 6.593E-02
+ ETOT  9  -16.790534464930    -4.007E-08 7.434E-10 5.378E-03 1.685E-05 6.593E-02
  ETOT 10  -16.790534471443    -6.512E-09 1.583E-10 1.215E-03 1.464E-05 6.594E-02
- ETOT 11  -16.790534466568     4.874E-09 1.690E-10 3.088E-04 1.751E-05 6.592E-02
+ ETOT 11  -16.790534466569     4.874E-09 1.690E-10 3.088E-04 1.751E-05 6.592E-02
  ETOT 12  -16.790534468974    -2.405E-09 2.557E-10 6.020E-05 2.497E-05 6.594E-02
- ETOT 13  -16.790534471018    -2.044E-09 1.089E-10 1.647E-05 1.702E-05 6.593E-02
+ ETOT 13  -16.790534471017    -2.043E-09 1.089E-10 1.647E-05 1.702E-05 6.593E-02
  ETOT 14  -16.790534472331    -1.313E-09 4.006E-11 1.993E-06 7.646E-06 6.594E-02
- ETOT 15  -16.790534472386    -5.491E-11 3.055E-12 5.053E-07 5.913E-07 6.594E-02
+ ETOT 15  -16.790534472385    -5.470E-11 3.055E-12 5.053E-07 5.913E-07 6.594E-02
 
  At SCF step   15, forces are converged : 
   for the second time, max diff in force=  5.913E-07 < toldff=  1.000E-05
@@ -3101,7 +3095,7 @@ lattice_vectors:
 lattice_lengths: [  20.00000,   20.00000,   20.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
 lattice_volume:   8.0000000E+03
-convergence: {deltae: -5.491E-11, res2:  5.053E-07, residm:  3.055E-12, diffor:  5.913E-07, }
+convergence: {deltae: -5.470E-11, res2:  5.053E-07, residm:  3.055E-12, diffor:  5.913E-07, }
 etotal    :  -1.67905345E+01
 entropy   :   0.00000000E+00
 fermie    :  -2.31593580E-01
@@ -3131,26 +3125,26 @@ force_length_stats: {min:   6.59382333E-02, max:   9.23651853E-02, mean:   7.474
 ---OUTPUT-----------------------------------------------------------------------
 
  Cartesian coordinates (xcart) [bohr]
-  2.94896350718442E+00  4.63273684252100E-01  0.00000000000000E+00
-  4.63273684252100E-01  2.94896350718442E+00  0.00000000000000E+00
-  3.87820319748014E-01  3.87820319748014E-01  0.00000000000000E+00
+  2.94896350718489E+00  4.63273684252197E-01  0.00000000000000E+00
+  4.63273684252197E-01  2.94896350718489E+00  0.00000000000000E+00
+  3.87820319747979E-01  3.87820319747979E-01  0.00000000000000E+00
  Reduced coordinates (xred)
-  1.47448175359221E-01  2.31636842126050E-02  0.00000000000000E+00
-  2.31636842126050E-02  1.47448175359221E-01  0.00000000000000E+00
-  1.93910159874007E-02  1.93910159874007E-02  0.00000000000000E+00
+  1.47448175359244E-01  2.31636842126098E-02  0.00000000000000E+00
+  2.31636842126098E-02  1.47448175359244E-01  0.00000000000000E+00
+  1.93910159873989E-02  1.93910159873989E-02  0.00000000000000E+00
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 6.59353E-02 4.37506E-02 (free atoms)
- -6.59352878312830E-02  6.23238954308430E-04 -0.00000000000000E+00
-  6.23238954308422E-04 -6.59352878312830E-02 -0.00000000000000E+00
-  6.53120488769746E-02  6.53120488769746E-02 -0.00000000000000E+00
+ -6.59352878313968E-02  6.23238954289650E-04 -0.00000000000000E+00
+  6.23238954289650E-04 -6.59352878313968E-02 -0.00000000000000E+00
+  6.53120488771071E-02  6.53120488771071E-02 -0.00000000000000E+00
  Gradient of E wrt nuclear positions in reduced coordinates (gred)
-  1.31870575662566E+00 -1.24647790861686E-02 -0.00000000000000E+00
- -1.24647790861684E-02  1.31870575662566E+00 -0.00000000000000E+00
- -1.30624097753949E+00 -1.30624097753949E+00 -0.00000000000000E+00
+  1.31870575662794E+00 -1.24647790857930E-02 -0.00000000000000E+00
+ -1.24647790857930E-02  1.31870575662794E+00 -0.00000000000000E+00
+ -1.30624097754214E+00 -1.30624097754214E+00 -0.00000000000000E+00
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 1.65744E-03 7.40106E-04 (free atoms)
-  1.65743745489738E-03  1.35899100929200E-03  8.78158639347564E-05
- -2.28674443407484E-04  6.77656603486142E-05 -4.63474047955070E-04
-  2.04171492032279E-04  1.31652673582087E-05  1.20813337692687E-04
- Kinetic energy of ions (ekin) [Ha]=  5.30032447763542E-03
+  1.65743745489301E-03  1.35899100929325E-03  8.78158639347558E-05
+ -2.28674443406225E-04  6.77656603442555E-05 -4.63474047955067E-04
+  2.04171492032473E-04  1.31652673584040E-05  1.20813337692686E-04
+ Kinetic energy of ions (ekin) [Ha]=  5.30032447762538E-03
  Total energy (etotal) [Ha]= -1.67905344723855E+01
 
  Difference of energy with previous step (new-old):
@@ -3169,14 +3163,14 @@ tolerances: {toldff: 1.00E-05, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2    diffor    maxfor
- ETOT  1  -16.792766784968    -1.679E+01 2.037E-08 8.514E-01 3.401E-03 6.776E-02
+ ETOT  1  -16.792766784969    -1.679E+01 2.037E-08 8.514E-01 3.401E-03 6.776E-02
  ETOT  2  -16.792304995221     4.618E-04 7.005E-09 9.579E-01 1.157E-02 5.619E-02
  ETOT  3  -16.793509781841    -1.205E-03 1.642E-05 5.761E-02 7.279E-03 6.347E-02
  ETOT  4  -16.793531936486    -2.215E-05 3.448E-07 1.960E-02 8.028E-04 6.267E-02
  ETOT  5  -16.793532100267    -1.638E-07 6.833E-09 1.373E-02 2.652E-05 6.270E-02
  ETOT  6  -16.793532367453    -2.672E-07 3.368E-09 5.049E-03 8.239E-05 6.262E-02
- ETOT  7  -16.793532380178    -1.273E-08 3.528E-10 2.120E-03 1.858E-05 6.260E-02
- ETOT  8  -16.793532384200    -4.022E-09 7.369E-11 9.580E-04 3.515E-06 6.261E-02
+ ETOT  7  -16.793532380179    -1.273E-08 3.528E-10 2.120E-03 1.858E-05 6.260E-02
+ ETOT  8  -16.793532384200    -4.021E-09 7.369E-11 9.580E-04 3.515E-06 6.261E-02
  ETOT  9  -16.793532385504    -1.304E-09 3.608E-11 3.327E-04 3.031E-06 6.261E-02
 
  At SCF step    9, forces are converged : 
@@ -3228,26 +3222,26 @@ force_length_stats: {min:   6.06513090E-02, max:   8.85443923E-02, mean:   6.994
 ---OUTPUT-----------------------------------------------------------------------
 
  Cartesian coordinates (xcart) [bohr]
-  2.93582193965523E+00  5.25748771698010E-01  0.00000000000000E+00
-  5.25748771698010E-01  2.93582193965523E+00  0.00000000000000E+00
-  4.04539843939934E-01  4.04539843939934E-01  0.00000000000000E+00
+  2.93582193965497E+00  5.25748771698231E-01  0.00000000000000E+00
+  5.25748771698231E-01  2.93582193965497E+00  0.00000000000000E+00
+  4.04539843939937E-01  4.04539843939937E-01  0.00000000000000E+00
  Reduced coordinates (xred)
-  1.46791096982762E-01  2.62874385849005E-02  0.00000000000000E+00
-  2.62874385849005E-02  1.46791096982762E-01  0.00000000000000E+00
-  2.02269921969967E-02  2.02269921969967E-02  0.00000000000000E+00
+  1.46791096982748E-01  2.62874385849115E-02  0.00000000000000E+00
+  2.62874385849115E-02  1.46791096982748E-01  0.00000000000000E+00
+  2.02269921969968E-02  2.02269921969968E-02  0.00000000000000E+00
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 6.26103E-02 4.10924E-02 (free atoms)
- -6.06185964521390E-02 -1.99174375606519E-03 -0.00000000000000E+00
- -1.99174375606519E-03 -6.06185964521390E-02 -0.00000000000000E+00
-  6.26103402082042E-02  6.26103402082042E-02 -0.00000000000000E+00
+ -6.06185964520801E-02 -1.99174375607775E-03 -0.00000000000000E+00
+ -1.99174375607775E-03 -6.06185964520801E-02 -0.00000000000000E+00
+  6.26103402081579E-02  6.26103402081579E-02 -0.00000000000000E+00
  Gradient of E wrt nuclear positions in reduced coordinates (gred)
-  1.21237192904278E+00  3.98348751213038E-02  0.00000000000000E+00
-  3.98348751213038E-02  1.21237192904278E+00  0.00000000000000E+00
- -1.25220680416408E+00 -1.25220680416408E+00 -0.00000000000000E+00
+  1.21237192904160E+00  3.98348751215549E-02  0.00000000000000E+00
+  3.98348751215550E-02  1.21237192904160E+00  0.00000000000000E+00
+ -1.25220680416316E+00 -1.25220680416316E+00 -0.00000000000000E+00
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 2.71249E-03 1.11110E-03 (free atoms)
- -1.12944911757598E-03  1.43065384626980E-03  8.74495851080645E-05
- -1.50389474469267E-04 -2.71249041173856E-03 -4.61540903727129E-04
-  3.73582607187125E-04  1.83373066992711E-04  1.20309426831984E-04
- Kinetic energy of ions (ekin) [Ha]=  1.27716643832990E-02
+ -1.12944911758640E-03  1.43065384627051E-03  8.74495851080633E-05
+ -1.50389474468537E-04 -2.71249041174896E-03 -4.61540903727123E-04
+  3.73582607187732E-04  1.83373066993321E-04  1.20309426831982E-04
+ Kinetic energy of ions (ekin) [Ha]=  1.27716643833840E-02
  Total energy (etotal) [Ha]= -1.67935323855039E+01
 
  Difference of energy with previous step (new-old):
@@ -3269,17 +3263,17 @@ tolerances: {toldff: 1.00E-05, }
  ETOT  1  -16.777249011790    -1.678E+01 4.985E-07 5.018E+01 3.091E-02 4.916E-02
  ETOT  2  -16.786989758213    -9.741E-03 1.723E-07 1.628E+01 9.937E-02 5.302E-02
  ETOT  3  -16.814916558501    -2.793E-02 4.897E-04 4.495E+00 5.259E-02 1.178E-02
- ETOT  4  -16.815612733577    -6.962E-04 7.842E-06 2.030E+00 5.418E-03 1.389E-02
+ ETOT  4  -16.815612733578    -6.962E-04 7.842E-06 2.030E+00 5.418E-03 1.389E-02
  ETOT  5  -16.815644972995    -3.224E-05 2.380E-07 1.212E+00 7.483E-04 1.464E-02
  ETOT  6  -16.815662223476    -1.725E-05 2.331E-07 5.293E-01 8.817E-04 1.545E-02
- ETOT  7  -16.815663335396    -1.112E-06 8.262E-08 1.860E-01 1.821E-04 1.563E-02
+ ETOT  7  -16.815663335395    -1.112E-06 8.262E-08 1.860E-01 1.821E-04 1.563E-02
  ETOT  8  -16.815663375616    -4.022E-08 9.830E-09 8.110E-02 2.959E-05 1.560E-02
  ETOT  9  -16.815663442781    -6.716E-08 3.542E-09 3.005E-02 4.999E-05 1.565E-02
  ETOT 10  -16.815663474786    -3.201E-08 2.155E-09 6.088E-03 2.421E-05 1.566E-02
  ETOT 11  -16.815663471259     3.527E-09 9.563E-10 1.490E-03 3.741E-05 1.570E-02
  ETOT 12  -16.815663477320    -6.061E-09 5.799E-10 2.060E-04 2.052E-05 1.568E-02
- ETOT 13  -16.815663477988    -6.680E-10 8.287E-11 2.526E-05 1.186E-06 1.568E-02
- ETOT 14  -16.815663478031    -4.297E-11 4.571E-12 4.140E-06 3.791E-06 1.567E-02
+ ETOT 13  -16.815663477987    -6.676E-10 8.287E-11 2.526E-05 1.186E-06 1.568E-02
+ ETOT 14  -16.815663478031    -4.320E-11 4.571E-12 4.140E-06 3.791E-06 1.567E-02
 
  At SCF step   14, forces are converged : 
   for the second time, max diff in force=  3.791E-06 < toldff=  1.000E-05
@@ -3300,7 +3294,7 @@ lattice_vectors:
 lattice_lengths: [  20.00000,   20.00000,   20.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
 lattice_volume:   8.0000000E+03
-convergence: {deltae: -4.297E-11, res2:  4.140E-06, residm:  4.571E-12, diffor:  3.791E-06, }
+convergence: {deltae: -4.320E-11, res2:  4.140E-06, residm:  4.571E-12, diffor:  3.791E-06, }
 etotal    :  -1.68156635E+01
 entropy   :   0.00000000E+00
 fermie    :  -2.40554417E-01
@@ -3330,26 +3324,26 @@ force_length_stats: {min:   6.86471490E-03, max:   1.90466164E-02, mean:   1.498
 ---OUTPUT-----------------------------------------------------------------------
 
  Cartesian coordinates (xcart) [bohr]
-  2.56476955425297E+00  5.91300121432153E-01  0.00000000000000E+00
-  5.91300121432153E-01  2.56476955425297E+00  0.00000000000000E+00
-  4.43515887165998E-01  4.43515887165998E-01  0.00000000000000E+00
+  2.56476955425135E+00  5.91300121432394E-01  0.00000000000000E+00
+  5.91300121432394E-01  2.56476955425135E+00  0.00000000000000E+00
+  4.43515887166084E-01  4.43515887166084E-01  0.00000000000000E+00
  Reduced coordinates (xred)
-  1.28238477712648E-01  2.95650060716076E-02  0.00000000000000E+00
-  2.95650060716076E-02  1.28238477712648E-01  0.00000000000000E+00
-  2.21757943582999E-02  2.21757943582999E-02  0.00000000000000E+00
+  1.28238477712568E-01  2.95650060716197E-02  0.00000000000000E+00
+  2.95650060716197E-02  1.28238477712568E-01  0.00000000000000E+00
+  2.21757943583042E-02  2.21757943583042E-02  0.00000000000000E+00
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 1.56745E-02 9.26566E-03 (free atoms)
-  1.56745433483611E-02 -1.08204568945090E-02 -0.00000000000000E+00
- -1.08204568945090E-02  1.56745433483611E-02 -0.00000000000000E+00
- -4.85408645385202E-03 -4.85408645385202E-03 -0.00000000000000E+00
+  1.56745433487004E-02 -1.08204568945667E-02 -0.00000000000000E+00
+ -1.08204568945667E-02  1.56745433487004E-02 -0.00000000000000E+00
+ -4.85408645413367E-03 -4.85408645413367E-03 -0.00000000000000E+00
  Gradient of E wrt nuclear positions in reduced coordinates (gred)
- -3.13490866967221E-01  2.16409137890181E-01 -0.00000000000000E+00
-  2.16409137890181E-01 -3.13490866967221E-01 -0.00000000000000E+00
-  9.70817290770404E-02  9.70817290770404E-02  0.00000000000000E+00
+ -3.13490866974008E-01  2.16409137891335E-01 -0.00000000000000E+00
+  2.16409137891335E-01 -3.13490866974008E-01 -0.00000000000000E+00
+  9.70817290826733E-02  9.70817290826733E-02  0.00000000000000E+00
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 6.11216E-03 2.59646E-03 (free atoms)
- -4.54266663424818E-03  1.38140054816179E-03  8.67014324946234E-05
- -1.86116559835242E-04 -6.11216462251687E-03 -4.57592308283174E-04
-  5.88355033602740E-04  3.99772782599259E-04  1.19280150226557E-04
- Kinetic energy of ions (ekin) [Ha]=  6.28484793290010E-02
+ -4.54266663425990E-03  1.38140054816161E-03  8.67014324946198E-05
+ -1.86116559835360E-04 -6.11216462252852E-03 -4.57592308283156E-04
+  5.88355033603474E-04  3.99772782600000E-04  1.19280150226553E-04
+ Kinetic energy of ions (ekin) [Ha]=  6.28484793292505E-02
  Total energy (etotal) [Ha]= -1.68156634780307E+01
 
  Difference of energy with previous step (new-old):
@@ -3368,21 +3362,21 @@ tolerances: {toldff: 1.00E-05, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2    diffor    maxfor
- ETOT  1  -16.380454031537    -1.638E+01 1.312E-05 1.852E+02 5.869E-01 6.026E-01
- ETOT  2  -16.491040124917    -1.106E-01 3.449E-07 1.485E+01 1.803E-01 7.457E-01
- ETOT  3  -16.516670017785    -2.563E-02 5.347E-04 1.751E+01 5.228E-02 7.010E-01
- ETOT  4  -16.518531261633    -1.861E-03 2.505E-05 7.530E+00 9.821E-03 7.102E-01
- ETOT  5  -16.518605520325    -7.426E-05 8.255E-07 4.069E+00 3.226E-03 7.129E-01
- ETOT  6  -16.518618939395    -1.342E-05 4.084E-07 1.930E+00 1.424E-04 7.130E-01
- ETOT  7  -16.518620739884    -1.800E-06 1.611E-07 9.167E-01 3.312E-04 7.132E-01
- ETOT  8  -16.518622164588    -1.425E-06 6.733E-08 3.184E-01 3.427E-05 7.133E-01
- ETOT  9  -16.518622410107    -2.455E-07 1.713E-08 9.874E-02 3.605E-04 7.135E-01
- ETOT 10  -16.518622488127    -7.802E-08 1.261E-08 3.086E-02 1.896E-04 7.134E-01
- ETOT 11  -16.518622489028    -9.008E-10 2.632E-09 4.639E-03 1.244E-04 7.135E-01
- ETOT 12  -16.518622483007     6.021E-09 4.785E-10 7.707E-04 9.241E-05 7.134E-01
- ETOT 13  -16.518622500152    -1.714E-08 3.488E-10 1.076E-04 4.742E-05 7.135E-01
- ETOT 14  -16.518622501570    -1.417E-09 5.430E-11 2.808E-05 6.406E-06 7.135E-01
- ETOT 15  -16.518622501494     7.595E-11 1.038E-11 4.279E-06 2.065E-06 7.135E-01
+ ETOT  1  -16.380454031532    -1.638E+01 1.312E-05 1.852E+02 5.869E-01 6.026E-01
+ ETOT  2  -16.491040124913    -1.106E-01 3.449E-07 1.485E+01 1.803E-01 7.457E-01
+ ETOT  3  -16.516670017781    -2.563E-02 5.347E-04 1.751E+01 5.228E-02 7.010E-01
+ ETOT  4  -16.518531261628    -1.861E-03 2.505E-05 7.530E+00 9.821E-03 7.102E-01
+ ETOT  5  -16.518605520321    -7.426E-05 8.255E-07 4.069E+00 3.226E-03 7.129E-01
+ ETOT  6  -16.518618939391    -1.342E-05 4.084E-07 1.930E+00 1.424E-04 7.130E-01
+ ETOT  7  -16.518620739880    -1.800E-06 1.611E-07 9.167E-01 3.312E-04 7.132E-01
+ ETOT  8  -16.518622164584    -1.425E-06 6.733E-08 3.184E-01 3.427E-05 7.133E-01
+ ETOT  9  -16.518622410103    -2.455E-07 1.713E-08 9.874E-02 3.605E-04 7.135E-01
+ ETOT 10  -16.518622488123    -7.802E-08 1.261E-08 3.086E-02 1.896E-04 7.134E-01
+ ETOT 11  -16.518622489024    -9.008E-10 2.632E-09 4.639E-03 1.244E-04 7.135E-01
+ ETOT 12  -16.518622483003     6.021E-09 4.785E-10 7.707E-04 9.241E-05 7.134E-01
+ ETOT 13  -16.518622500148    -1.714E-08 3.488E-10 1.076E-04 4.742E-05 7.135E-01
+ ETOT 14  -16.518622501565    -1.417E-09 5.430E-11 2.808E-05 6.406E-06 7.135E-01
+ ETOT 15  -16.518622501490     7.520E-11 1.038E-11 4.279E-06 2.065E-06 7.135E-01
 
  At SCF step   15, forces are converged : 
   for the second time, max diff in force=  2.065E-06 < toldff=  1.000E-05
@@ -3390,7 +3384,7 @@ tolerances: {toldff: 1.00E-05, }
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  1.77117099E-05  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  1.77117099E-05  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)=  1.61327700E-04  sigma(2 1)= -1.39349140E-05
+  sigma(3 3)=  1.61327700E-04  sigma(2 1)= -1.39349141E-05
 
 
 --- !ResultsGS
@@ -3403,13 +3397,13 @@ lattice_vectors:
 lattice_lengths: [  20.00000,   20.00000,   20.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
 lattice_volume:   8.0000000E+03
-convergence: {deltae:  7.595E-11, res2:  4.279E-06, residm:  1.038E-11, diffor:  2.065E-06, }
+convergence: {deltae:  7.520E-11, res2:  4.279E-06, residm:  1.038E-11, diffor:  2.065E-06, }
 etotal    :  -1.65186225E+01
 entropy   :   0.00000000E+00
 fermie    :  -2.54742058E-01
 cartesian_stress_tensor: # hartree/bohr^3
-- [  1.77117099E-05,  -1.39349140E-05,   0.00000000E+00, ]
-- [ -1.39349140E-05,   1.77117099E-05,   0.00000000E+00, ]
+- [  1.77117099E-05,  -1.39349141E-05,   0.00000000E+00, ]
+- [ -1.39349141E-05,   1.77117099E-05,   0.00000000E+00, ]
 - [  0.00000000E+00,   0.00000000E+00,   1.61327700E-04, ]
 pressure_GPa:  -1.9295E+00
 xred      :
@@ -3417,8 +3411,8 @@ xred      :
 - [  3.2264E-02,   9.3517E-02,   0.0000E+00,  H]
 - [  2.5168E-02,   2.5168E-02,   0.0000E+00,  O]
 cartesian_forces: # hartree/bohr
-- [  7.13462380E-01,  -1.65724769E-02,  -0.00000000E+00, ]
-- [ -1.65724769E-02,   7.13462380E-01,  -0.00000000E+00, ]
+- [  7.13462381E-01,  -1.65724769E-02,  -0.00000000E+00, ]
+- [ -1.65724769E-02,   7.13462381E-01,  -0.00000000E+00, ]
 - [ -6.96889904E-01,  -6.96889904E-01,  -0.00000000E+00, ]
 force_length_stats: {min:   7.13654829E-01, max:   9.85551153E-01, mean:   8.04286937E-01, }
 ...
@@ -3433,27 +3427,27 @@ force_length_stats: {min:   7.13654829E-01, max:   9.85551153E-01, mean:   8.042
 ---OUTPUT-----------------------------------------------------------------------
 
  Cartesian coordinates (xcart) [bohr]
-  1.87033881397873E+00  6.45277170530665E-01  0.00000000000000E+00
-  6.45277170530665E-01  1.87033881397873E+00  0.00000000000000E+00
-  5.03352625560134E-01  5.03352625560134E-01  0.00000000000000E+00
+  1.87033881397612E+00  6.45277170530856E-01  0.00000000000000E+00
+  6.45277170530856E-01  1.87033881397612E+00  0.00000000000000E+00
+  5.03352625560284E-01  5.03352625560284E-01  0.00000000000000E+00
  Reduced coordinates (xred)
-  9.35169406989364E-02  3.22638585265332E-02  0.00000000000000E+00
-  3.22638585265332E-02  9.35169406989365E-02  0.00000000000000E+00
-  2.51676312780067E-02  2.51676312780067E-02  0.00000000000000E+00
+  9.35169406988061E-02  3.22638585265428E-02  0.00000000000000E+00
+  3.22638585265428E-02  9.35169406988061E-02  0.00000000000000E+00
+  2.51676312780142E-02  2.51676312780142E-02  0.00000000000000E+00
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 7.13462E-01 4.70215E-01 (free atoms)
-  7.13462380498794E-01 -1.65724768632788E-02 -0.00000000000000E+00
- -1.65724768632788E-02  7.13462380498794E-01 -0.00000000000000E+00
- -6.96889903635516E-01 -6.96889903635516E-01 -0.00000000000000E+00
+  7.13462380507674E-01 -1.65724768624405E-02 -0.00000000000000E+00
+ -1.65724768624405E-02  7.13462380507674E-01 -0.00000000000000E+00
+ -6.96889903645234E-01 -6.96889903645234E-01 -0.00000000000000E+00
  Gradient of E wrt nuclear positions in reduced coordinates (gred)
- -1.42692476099759E+01  3.31449537265576E-01 -0.00000000000000E+00
-  3.31449537265576E-01 -1.42692476099759E+01 -0.00000000000000E+00
-  1.39377980727103E+01  1.39377980727103E+01  0.00000000000000E+00
+ -1.42692476101535E+01  3.31449537248809E-01 -0.00000000000000E+00
+  3.31449537248809E-01 -1.42692476101535E+01 -0.00000000000000E+00
+  1.39377980729047E+01  1.39377980729047E+01  0.00000000000000E+00
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 7.19933E-03 3.09276E-03 (free atoms)
- -5.66049446286477E-03  1.01045468103577E-03  8.50076018088604E-05
- -5.26438843225794E-04 -7.19933016820131E-03 -4.48652618695148E-04
-  6.74542164787366E-04  4.89644125155591E-04  1.16949849874615E-04
- Kinetic energy of ions (ekin) [Ha]=  8.87661697457381E-02
- Total energy (etotal) [Ha]= -1.65186225014936E+01
+ -5.66049446286528E-03  1.01045468103364E-03  8.50076018088522E-05
+ -5.26438843227774E-04 -7.19933016820167E-03 -4.48652618695105E-04
+  6.74542164787495E-04  4.89644125155738E-04  1.16949849874603E-04
+ Kinetic energy of ions (ekin) [Ha]=  8.87661697457505E-02
+ Total energy (etotal) [Ha]= -1.65186225014899E+01
 
  Difference of energy with previous step (new-old):
            Absolute (Ha)= 2.97041E-01
@@ -3473,25 +3467,25 @@ force_length_stats: {min:   7.13654829E-01, max:   9.85551153E-01, mean:   8.042
        0.032263858527      0.093516940699      0.000000000000
        0.025167631278      0.025167631278      0.000000000000
  rms dE/dt=  9.4043E+00; max dE/dt=  1.3924E+01; dE/dt below (all hartree)
-    1     -14.282846512182      0.317850635059      0.000000000000
-    2       0.317850635059    -14.282846512182      0.000000000000
-    3      13.924199170504     13.924199170504      0.000000000000
+    1     -14.282846512361      0.317850635042      0.000000000000
+    2       0.317850635042    -14.282846512361      0.000000000000
+    3      13.924199170697     13.924199170697      0.000000000000
 
  cartesian coordinates (angstrom) at end:
-    1      0.98974067269879     0.34146597186827     0.00000000000000
-    2      0.34146597186827     0.98974067269880     0.00000000000000
-    3      0.26636273733036     0.26636273733036     0.00000000000000
+    1      0.98974067269742     0.34146597186837     0.00000000000000
+    2      0.34146597186837     0.98974067269742     0.00000000000000
+    3      0.26636273733044     0.26636273733044     0.00000000000000
 
  cartesian forces (hartree/bohr) at end:
-    1      0.71346238049879    -0.01657247686328    -0.00000000000000
-    2     -0.01657247686328     0.71346238049879    -0.00000000000000
-    3     -0.69688990363552    -0.69688990363552    -0.00000000000000
+    1      0.71346238050767    -0.01657247686244    -0.00000000000000
+    2     -0.01657247686244     0.71346238050767    -0.00000000000000
+    3     -0.69688990364523    -0.69688990364523    -0.00000000000000
  frms,max,avg= 4.7021479E-01 7.1346238E-01   6.799E-04  6.799E-04  0.000E+00 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1     36.68770761528400    -0.85219095251520    -0.00000000000000
-    2     -0.85219095251520    36.68770761528400    -0.00000000000000
-    3    -35.83551666276880   -35.83551666276880    -0.00000000000000
+    1     36.68770761574062    -0.85219095247209    -0.00000000000000
+    2     -0.85219095247209    36.68770761574062    -0.00000000000000
+    3    -35.83551666326853   -35.83551666326853    -0.00000000000000
  frms,max,avg= 2.4179414E+01 3.6687708E+01   3.496E-02  3.496E-02  0.000E+00 e/A
  length scales= 20.000000000000 20.000000000000 20.000000000000 bohr
               = 10.583544171800 10.583544171800 10.583544171800 angstroms
@@ -3504,16 +3498,16 @@ force_length_stats: {min:   7.13654829E-01, max:   9.85551153E-01, mean:   8.042
 --- !EnergyTerms
 iteration_state     : {dtset: 5, itime: 10, icycle: 1, }
 comment             : Components of total free energy in Hartree
-kinetic             :  1.11305854769433E+01
-hartree             :  1.71329531326445E+01
-xc                  : -4.88749475490193E+00
-Ewald energy        :  4.77578409775433E+00
+kinetic             :  1.11305854769546E+01
+hartree             :  1.71329531326560E+01
+xc                  : -4.88749475490411E+00
+Ewald energy        :  4.77578409777303E+00
 psp_core            :  1.66149645181518E-03
-local_psp           : -4.71401166303627E+01
-non_local_psp       :  2.46800467997713E+00
-total_energy        : -1.65186225014936E+01
-total_energy_eV     : -4.49494577726575E+02
-band_energy         : -4.85203911888235E+00
+local_psp           : -4.71401166303989E+01
+non_local_psp       :  2.46800467997760E+00
+total_energy        : -1.65186225014899E+01
+total_energy_eV     : -4.49494577726475E+02
+band_energy         : -4.85203911888643E+00
 ...
 
  rms coord change=  1.7337E-02   atom, delta coord (reduced):
@@ -3524,7 +3518,7 @@ band_energy         : -4.85203911888235E+00
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  1.77117099E-05  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  1.77117099E-05  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)=  1.61327700E-04  sigma(2 1)= -1.39349140E-05
+  sigma(3 3)=  1.61327700E-04  sigma(2 1)= -1.39349141E-05
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -1.9295E+00 GPa]
 - sigma(1 1)=  5.21096409E-01  sigma(3 2)=  0.00000000E+00
@@ -3583,8 +3577,8 @@ tolerances: {toldff: 1.00E-05, }
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2    diffor    maxfor
  ETOT  1  -16.821792796928    -1.682E+01 7.414E-16 2.497E-07 1.538E-04 1.538E-04
- ETOT  2  -16.821792796973    -4.484E-11 4.738E-16 9.453E-08 7.005E-06 1.608E-04
- ETOT  3  -16.821792797137    -1.640E-10 2.154E-12 1.415E-08 3.505E-06 1.573E-04
+ ETOT  2  -16.821792796973    -4.501E-11 4.738E-16 9.453E-08 7.005E-06 1.608E-04
+ ETOT  3  -16.821792797137    -1.639E-10 2.154E-12 1.415E-08 3.505E-06 1.573E-04
 
  At SCF step    3, forces are converged : 
   for the second time, max diff in force=  3.505E-06 < toldff=  1.000E-05
@@ -3605,7 +3599,7 @@ lattice_vectors:
 lattice_lengths: [  20.00000,   20.00000,   20.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
 lattice_volume:   8.0000000E+03
-convergence: {deltae: -1.640E-10, res2:  1.415E-08, residm:  2.154E-12, diffor:  3.505E-06, }
+convergence: {deltae: -1.639E-10, res2:  1.415E-08, residm:  2.154E-12, diffor:  3.505E-06, }
 etotal    :  -1.68217928E+01
 entropy   :   0.00000000E+00
 fermie    :  -2.38801750E-01
@@ -3643,13 +3637,13 @@ force_length_stats: {min:   1.15524934E-04, max:   2.22428814E-04, mean:   1.511
   1.17000000000000E-02  1.22500000000000E-01  0.00000000000000E+00
   1.57000000000000E-02  1.57000000000000E-02  0.00000000000000E+00
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 1.57281E-04 9.19943E-05 (free atoms)
- -1.00746637362484E-04 -5.65342854561685E-05 -0.00000000000000E+00
- -5.65342854561685E-05 -1.00746637362484E-04 -0.00000000000000E+00
-  1.57280922818652E-04  1.57280922818652E-04 -0.00000000000000E+00
+ -1.00746637358536E-04 -5.65342854569073E-05 -0.00000000000000E+00
+ -5.65342854569073E-05 -1.00746637358536E-04 -0.00000000000000E+00
+  1.57280922815444E-04  1.57280922815444E-04 -0.00000000000000E+00
  Gradient of E wrt nuclear positions in reduced coordinates (gred)
-  2.01493274724968E-03  1.13068570912337E-03  0.00000000000000E+00
-  1.13068570912337E-03  2.01493274724968E-03  0.00000000000000E+00
- -3.14561845637304E-03 -3.14561845637304E-03 -0.00000000000000E+00
+  2.01493274717073E-03  1.13068570913815E-03  0.00000000000000E+00
+  1.13068570913815E-03  2.01493274717073E-03  0.00000000000000E+00
+ -3.14561845630887E-03 -3.14561845630887E-03 -0.00000000000000E+00
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 0.00000E+00 0.00000E+00 (free atoms)
   0.00000000000000E+00  0.00000000000000E+00  0.00000000000000E+00
   0.00000000000000E+00  0.00000000000000E+00  0.00000000000000E+00
@@ -3679,7 +3673,7 @@ tolerances: {toldff: 1.00E-05, }
  ETOT  5  -16.821129528449    -4.195E-07 2.765E-09 4.234E-02 3.778E-05 1.290E-02
  ETOT  6  -16.821130394324    -8.659E-07 1.845E-08 1.163E-02 2.037E-04 1.310E-02
  ETOT  7  -16.821130404104    -9.780E-09 9.058E-10 5.341E-03 5.810E-06 1.310E-02
- ETOT  8  -16.821130410932    -6.828E-09 1.988E-10 2.417E-03 6.482E-06 1.311E-02
+ ETOT  8  -16.821130410932    -6.827E-09 1.988E-10 2.417E-03 6.482E-06 1.311E-02
 
  At SCF step    8, forces are converged : 
   for the second time, max diff in force=  6.482E-06 < toldff=  1.000E-05
@@ -3700,7 +3694,7 @@ lattice_vectors:
 lattice_lengths: [  20.00000,   20.00000,   20.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
 lattice_volume:   8.0000000E+03
-convergence: {deltae: -6.828E-09, res2:  2.417E-03, residm:  1.988E-10, diffor:  6.482E-06, }
+convergence: {deltae: -6.827E-09, res2:  2.417E-03, residm:  1.988E-10, diffor:  6.482E-06, }
 etotal    :  -1.68211304E+01
 entropy   :   0.00000000E+00
 fermie    :  -2.37294480E-01
@@ -3730,27 +3724,27 @@ force_length_stats: {min:   1.31144118E-02, max:   1.79014087E-02, mean:   1.471
 ---OUTPUT-----------------------------------------------------------------------
 
  Cartesian coordinates (xcart) [bohr]
-  2.52107668530397E+00  2.39273136034337E-01  0.00000000000000E+00
-  2.39273136034337E-01  2.52107668530397E+00  0.00000000000000E+00
+  2.52107668530398E+00  2.39273136034335E-01  0.00000000000000E+00
+  2.39273136034335E-01  2.52107668530398E+00  0.00000000000000E+00
   3.11934781730513E-01  3.11934781730513E-01  0.00000000000000E+00
  Reduced coordinates (xred)
-  1.26053834265199E-01  1.19636568017169E-02  0.00000000000000E+00
-  1.19636568017169E-02  1.26053834265199E-01  0.00000000000000E+00
-  1.55967390865257E-02  1.55967390865257E-02  0.00000000000000E+00
+  1.26053834265199E-01  1.19636568017168E-02  0.00000000000000E+00
+  1.19636568017168E-02  1.26053834265199E-01  0.00000000000000E+00
+  1.55967390865256E-02  1.55967390865256E-02  0.00000000000000E+00
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 1.31067E-02 8.59222E-03 (free atoms)
- -1.31067393024919E-02  4.48531813187083E-04 -0.00000000000000E+00
-  4.48531813187083E-04 -1.31067393024919E-02 -0.00000000000000E+00
-  1.26582074893048E-02  1.26582074893048E-02 -0.00000000000000E+00
+ -1.31067393024597E-02  4.48531813195955E-04 -0.00000000000000E+00
+  4.48531813195954E-04 -1.31067393024597E-02 -0.00000000000000E+00
+  1.26582074892637E-02  1.26582074892637E-02 -0.00000000000000E+00
  Gradient of E wrt nuclear positions in reduced coordinates (gred)
-  2.62134786049838E-01 -8.97063626374167E-03 -0.00000000000000E+00
- -8.97063626374167E-03  2.62134786049838E-01 -0.00000000000000E+00
- -2.53164149786096E-01 -2.53164149786096E-01 -0.00000000000000E+00
+  2.62134786049193E-01 -8.97063626391910E-03 -0.00000000000000E+00
+ -8.97063626391909E-03  2.62134786049193E-01 -0.00000000000000E+00
+ -2.53164149785274E-01 -2.53164149785274E-01 -0.00000000000000E+00
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 8.93308E-04 5.56827E-04 (free atoms)
-  7.80576075679006E-04 -7.62177016609780E-04  2.51973123424217E-04
-  7.81229243475221E-04  8.93307599976861E-04 -2.24199876006228E-04
- -2.05478671569376E-04  1.62286104456221E-04 -9.82839198981913E-05
- Kinetic energy of ions (ekin) [Ha]=  3.63234498361468E-03
- Total energy (etotal) [Ha]= -1.68211304109319E+01
+  7.80576075679221E-04 -7.62177016609821E-04  2.51973123424217E-04
+  7.81229243475180E-04  8.93307599977076E-04 -2.24199876006228E-04
+ -2.05478671569387E-04  1.62286104456210E-04 -9.82839198981913E-05
+ Kinetic energy of ions (ekin) [Ha]=  3.63234498361536E-03
+ Total energy (etotal) [Ha]= -1.68211304109318E+01
 
  Difference of energy with previous step (new-old):
            Absolute (Ha)= 6.62386E-04
@@ -3769,7 +3763,7 @@ tolerances: {toldff: 1.00E-05, }
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2    diffor    maxfor
  ETOT  1  -16.820482867755    -1.682E+01 3.704E-09 9.126E-02 2.384E-03 1.549E-02
- ETOT  2  -16.820492855693    -9.988E-06 1.833E-10 2.428E-02 3.237E-03 1.824E-02
+ ETOT  2  -16.820492855692    -9.988E-06 1.833E-10 2.428E-02 3.237E-03 1.824E-02
  ETOT  3  -16.820529079220    -3.622E-05 7.871E-07 1.629E-02 2.017E-03 1.641E-02
  ETOT  4  -16.820534114651    -5.035E-06 5.097E-08 5.654E-03 4.713E-04 1.683E-02
  ETOT  5  -16.820534154449    -3.980E-08 4.024E-10 3.403E-03 1.580E-05 1.684E-02
@@ -3826,27 +3820,27 @@ force_length_stats: {min:   1.69747671E-02, max:   2.13947593E-02, mean:   1.844
 ---OUTPUT-----------------------------------------------------------------------
 
  Cartesian coordinates (xcart) [bohr]
-  2.55022093369755E+00  2.39345863012922E-01  0.00000000000000E+00
-  2.39345863012922E-01  2.55022093369755E+00  0.00000000000000E+00
-  3.17400462815361E-01  3.17400462815361E-01  0.00000000000000E+00
+  2.55022093369766E+00  2.39345863012940E-01  0.00000000000000E+00
+  2.39345863012940E-01  2.55022093369766E+00  0.00000000000000E+00
+  3.17400462815353E-01  3.17400462815353E-01  0.00000000000000E+00
  Reduced coordinates (xred)
-  1.27511046684877E-01  1.19672931506461E-02  0.00000000000000E+00
-  1.19672931506461E-02  1.27511046684877E-01  0.00000000000000E+00
-  1.58700231407681E-02  1.58700231407681E-02  0.00000000000000E+00
+  1.27511046684883E-01  1.19672931506470E-02  0.00000000000000E+00
+  1.19672931506470E-02  1.27511046684883E-01  0.00000000000000E+00
+  1.58700231407676E-02  1.58700231407676E-02  0.00000000000000E+00
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 1.68838E-02 1.07187E-02 (free atoms)
- -1.68837601110235E-02  1.75538070624677E-03 -0.00000000000000E+00
-  1.75538070624677E-03 -1.68837601110235E-02 -0.00000000000000E+00
-  1.51283794047767E-02  1.51283794047767E-02 -0.00000000000000E+00
+ -1.68837601110227E-02  1.75538070624517E-03 -0.00000000000000E+00
+  1.75538070624517E-03 -1.68837601110227E-02 -0.00000000000000E+00
+  1.51283794047775E-02  1.51283794047775E-02 -0.00000000000000E+00
  Gradient of E wrt nuclear positions in reduced coordinates (gred)
-  3.37675202220470E-01 -3.51076141249354E-02 -0.00000000000000E+00
- -3.51076141249354E-02  3.37675202220470E-01 -0.00000000000000E+00
- -3.02567588095535E-01 -3.02567588095535E-01 -0.00000000000000E+00
+  3.37675202220454E-01 -3.51076141249035E-02 -0.00000000000000E+00
+ -3.51076141249035E-02  3.37675202220454E-01 -0.00000000000000E+00
+ -3.02567588095550E-01 -3.02567588095550E-01 -0.00000000000000E+00
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 9.07539E-04 5.01433E-04 (free atoms)
-  4.50276328588823E-04 -9.07539178350147E-04 -4.67796603866127E-05
-  8.22583224100536E-04  3.84958608859009E-04 -5.99945919464014E-04
- -8.32020659041884E-05  1.90627485877727E-04 -7.95146729756058E-05
- Kinetic energy of ions (ekin) [Ha]=  2.75641163237778E-03
- Total energy (etotal) [Ha]= -1.68205341966460E+01
+  4.50276328590006E-04 -9.07539178349963E-04 -4.67796603866127E-05
+  8.22583224100720E-04  3.84958608860192E-04 -5.99945919464014E-04
+ -8.32020659042745E-05  1.90627485877641E-04 -7.95146729756058E-05
+ Kinetic energy of ions (ekin) [Ha]=  2.75641163237930E-03
+ Total energy (etotal) [Ha]= -1.68205341966462E+01
 
  Difference of energy with previous step (new-old):
            Absolute (Ha)= 5.96214E-04
@@ -3870,8 +3864,8 @@ tolerances: {toldff: 1.00E-05, }
  ETOT  4  -16.821007741268    -2.171E-06 3.081E-08 3.405E-03 2.893E-04 1.337E-02
  ETOT  5  -16.821007756901    -1.563E-08 5.105E-10 2.434E-03 1.035E-05 1.337E-02
  ETOT  6  -16.821007835156    -7.825E-08 1.236E-09 7.171E-04 5.970E-05 1.331E-02
- ETOT  7  -16.821007837130    -1.974E-09 8.212E-11 3.275E-04 8.251E-06 1.330E-02
- ETOT  8  -16.821007837177    -4.750E-11 1.482E-11 1.546E-04 6.676E-07 1.330E-02
+ ETOT  7  -16.821007837129    -1.974E-09 8.212E-11 3.275E-04 8.251E-06 1.330E-02
+ ETOT  8  -16.821007837177    -4.756E-11 1.482E-11 1.546E-04 6.676E-07 1.330E-02
 
  At SCF step    8, forces are converged : 
   for the second time, max diff in force=  6.676E-07 < toldff=  1.000E-05
@@ -3892,7 +3886,7 @@ lattice_vectors:
 lattice_lengths: [  20.00000,   20.00000,   20.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
 lattice_volume:   8.0000000E+03
-convergence: {deltae: -4.750E-11, res2:  1.546E-04, residm:  1.482E-11, diffor:  6.676E-07, }
+convergence: {deltae: -4.756E-11, res2:  1.546E-04, residm:  1.482E-11, diffor:  6.676E-07, }
 etotal    :  -1.68210078E+01
 entropy   :   0.00000000E+00
 fermie    :  -2.37280942E-01
@@ -3922,27 +3916,27 @@ force_length_stats: {min:   1.34819937E-02, max:   1.56949463E-02, mean:   1.421
 ---OUTPUT-----------------------------------------------------------------------
 
  Cartesian coordinates (xcart) [bohr]
-  2.54635462126143E+00  2.54838927005722E-01  0.00000000000000E+00
-  2.54838927005722E-01  2.54635462126143E+00  0.00000000000000E+00
-  3.27044567906225E-01  3.27044567906225E-01  0.00000000000000E+00
+  2.54635462126166E+00  2.54838927005753E-01  0.00000000000000E+00
+  2.54838927005753E-01  2.54635462126166E+00  0.00000000000000E+00
+  3.27044567906208E-01  3.27044567906208E-01  0.00000000000000E+00
  Reduced coordinates (xred)
-  1.27317731063072E-01  1.27419463502861E-02  0.00000000000000E+00
-  1.27419463502861E-02  1.27317731063072E-01  0.00000000000000E+00
-  1.63522283953112E-02  1.63522283953112E-02  0.00000000000000E+00
+  1.27317731063083E-01  1.27419463502877E-02  0.00000000000000E+00
+  1.27419463502877E-02  1.27317731063083E-01  0.00000000000000E+00
+  1.63522283953104E-02  1.63522283953104E-02  0.00000000000000E+00
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 1.33008E-02 8.23178E-03 (free atoms)
- -1.33008179914266E-02  2.20281504854286E-03 -0.00000000000000E+00
-  2.20281504854286E-03 -1.33008179914266E-02 -0.00000000000000E+00
-  1.10980029428837E-02  1.10980029428837E-02 -0.00000000000000E+00
+ -1.33008179914911E-02  2.20281504854797E-03 -0.00000000000000E+00
+  2.20281504854797E-03 -1.33008179914911E-02 -0.00000000000000E+00
+  1.10980029429431E-02  1.10980029429431E-02 -0.00000000000000E+00
  Gradient of E wrt nuclear positions in reduced coordinates (gred)
-  2.66016359828531E-01 -4.40563009708572E-02 -0.00000000000000E+00
- -4.40563009708572E-02  2.66016359828531E-01 -0.00000000000000E+00
- -2.21960058857674E-01 -2.21960058857674E-01 -0.00000000000000E+00
+  2.66016359829821E-01 -4.40563009709594E-02 -0.00000000000000E+00
+ -4.40563009709594E-02  2.66016359829821E-01 -0.00000000000000E+00
+ -2.21960058858862E-01 -2.21960058858862E-01 -0.00000000000000E+00
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 1.04521E-03 5.60801E-04 (free atoms)
- -5.35720661247214E-04 -7.52950254883333E-04  1.16324263491563E-04
-  1.04521384744559E-03 -6.32604295259521E-04 -6.18764650432919E-04
-  5.62598895905740E-05  2.89128401036808E-04 -2.70594747157187E-05
- Kinetic energy of ions (ekin) [Ha]=  3.79580136874281E-03
- Total energy (etotal) [Ha]= -1.68210078371770E+01
+ -5.35720661245236E-04 -7.52950254882962E-04  1.16324263491563E-04
+  1.04521384744596E-03 -6.32604295257544E-04 -6.18764650432919E-04
+  5.62598895904260E-05  2.89128401036660E-04 -2.70594747157187E-05
+ Kinetic energy of ions (ekin) [Ha]=  3.79580136873727E-03
+ Total energy (etotal) [Ha]= -1.68210078371769E+01
 
  Difference of energy with previous step (new-old):
            Absolute (Ha)=-4.73641E-04
@@ -3971,9 +3965,9 @@ tolerances: {toldff: 1.00E-05, }
  ETOT  9  -16.821421834524    -1.403E-08 3.642E-10 2.999E-03 2.478E-05 1.178E-02
  ETOT 10  -16.821421836858    -2.334E-09 1.078E-10 6.264E-04 1.035E-05 1.179E-02
  ETOT 11  -16.821421835689     1.169E-09 2.985E-11 1.387E-04 9.817E-06 1.180E-02
- ETOT 12  -16.821421836832    -1.143E-09 3.267E-11 1.347E-05 1.332E-05 1.178E-02
- ETOT 13  -16.821421836946    -1.137E-10 6.518E-12 3.097E-06 5.254E-06 1.179E-02
- ETOT 14  -16.821421836957    -1.089E-11 1.815E-12 5.750E-07 3.224E-06 1.179E-02
+ ETOT 12  -16.821421836833    -1.143E-09 3.267E-11 1.347E-05 1.332E-05 1.178E-02
+ ETOT 13  -16.821421836946    -1.136E-10 6.518E-12 3.097E-06 5.254E-06 1.179E-02
+ ETOT 14  -16.821421836957    -1.098E-11 1.815E-12 5.750E-07 3.224E-06 1.179E-02
 
  At SCF step   14, forces are converged : 
   for the second time, max diff in force=  3.224E-06 < toldff=  1.000E-05
@@ -3994,7 +3988,7 @@ lattice_vectors:
 lattice_lengths: [  20.00000,   20.00000,   20.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
 lattice_volume:   8.0000000E+03
-convergence: {deltae: -1.089E-11, res2:  5.750E-07, residm:  1.815E-12, diffor:  3.224E-06, }
+convergence: {deltae: -1.098E-11, res2:  5.750E-07, residm:  1.815E-12, diffor:  3.224E-06, }
 etotal    :  -1.68214218E+01
 entropy   :   0.00000000E+00
 fermie    :  -2.39652222E-01
@@ -4024,26 +4018,26 @@ force_length_stats: {min:   1.06684268E-02, max:   1.66680244E-02, mean:   1.266
 ---OUTPUT-----------------------------------------------------------------------
 
  Cartesian coordinates (xcart) [bohr]
-  2.44076938427050E+00  2.81559661363651E-01  0.00000000000000E+00
-  2.81559661363651E-01  2.44076938427050E+00  0.00000000000000E+00
-  3.44585136447384E-01  3.44585136447384E-01  0.00000000000000E+00
+  2.44076938427074E+00  2.81559661363730E-01  0.00000000000000E+00
+  2.81559661363730E-01  2.44076938427074E+00  0.00000000000000E+00
+  3.44585136447364E-01  3.44585136447364E-01  0.00000000000000E+00
  Reduced coordinates (xred)
-  1.22038469213525E-01  1.40779830681825E-02  0.00000000000000E+00
-  1.40779830681825E-02  1.22038469213525E-01  0.00000000000000E+00
-  1.72292568223692E-02  1.72292568223692E-02  0.00000000000000E+00
+  1.22038469213537E-01  1.40779830681865E-02  0.00000000000000E+00
+  1.40779830681865E-02  1.22038469213537E-01  0.00000000000000E+00
+  1.72292568223682E-02  1.72292568223682E-02  0.00000000000000E+00
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 1.17861E-02 7.49410E-03 (free atoms)
-  1.06025784906161E-02  1.18349457845901E-03 -0.00000000000000E+00
-  1.18349457845901E-03  1.06025784906161E-02 -0.00000000000000E+00
- -1.17860730690752E-02 -1.17860730690752E-02 -0.00000000000000E+00
+  1.06025784906187E-02  1.18349457845179E-03 -0.00000000000000E+00
+  1.18349457845179E-03  1.06025784906187E-02 -0.00000000000000E+00
+ -1.17860730690705E-02 -1.17860730690705E-02 -0.00000000000000E+00
  Gradient of E wrt nuclear positions in reduced coordinates (gred)
- -2.12051569812323E-01 -2.36698915691803E-02 -0.00000000000000E+00
- -2.36698915691803E-02 -2.12051569812323E-01 -0.00000000000000E+00
-  2.35721461381503E-01  2.35721461381503E-01  0.00000000000000E+00
+ -2.12051569812374E-01 -2.36698915690359E-02 -0.00000000000000E+00
+ -2.36698915690359E-02 -2.12051569812374E-01 -0.00000000000000E+00
+  2.35721461381409E-01  2.35721461381409E-01  0.00000000000000E+00
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 1.60212E-03 8.47803E-04 (free atoms)
- -1.42214746002780E-03 -2.45274120806910E-04  1.99734851667038E-04
-  1.17450604207111E-03 -1.60211846596096E-03 -5.03929354130824E-04
-  7.69667966014677E-05  3.59301256065454E-04  1.05659651938679E-04
- Kinetic energy of ions (ekin) [Ha]=  7.94034585092846E-03
+ -1.42214746002780E-03 -2.45274120806485E-04  1.99734851667038E-04
+  1.17450604207153E-03 -1.60211846596095E-03 -5.03929354130824E-04
+  7.69667966014405E-05  3.59301256065426E-04  1.05659651938679E-04
+ Kinetic energy of ions (ekin) [Ha]=  7.94034585092880E-03
  Total energy (etotal) [Ha]= -1.68214218369571E+01
 
  Difference of energy with previous step (new-old):
@@ -4072,10 +4066,10 @@ tolerances: {toldff: 1.00E-05, }
  ETOT  8  -16.816682472861    -8.978E-09 1.190E-09 6.775E-03 1.862E-06 3.349E-02
  ETOT  9  -16.816682484999    -1.214E-08 3.494E-10 2.613E-03 2.799E-05 3.351E-02
  ETOT 10  -16.816682486695    -1.696E-09 1.004E-10 5.766E-04 7.349E-06 3.352E-02
- ETOT 11  -16.816682485538     1.158E-09 3.327E-11 1.276E-04 1.107E-05 3.353E-02
+ ETOT 11  -16.816682485538     1.157E-09 3.327E-11 1.276E-04 1.107E-05 3.353E-02
  ETOT 12  -16.816682486659    -1.121E-09 2.725E-11 1.312E-05 1.425E-05 3.352E-02
- ETOT 13  -16.816682486756    -9.721E-11 5.471E-12 3.162E-06 5.829E-06 3.352E-02
- ETOT 14  -16.816682486783    -2.674E-11 2.068E-12 5.569E-07 3.446E-06 3.352E-02
+ ETOT 13  -16.816682486756    -9.738E-11 5.471E-12 3.162E-06 5.829E-06 3.352E-02
+ ETOT 14  -16.816682486783    -2.672E-11 2.068E-12 5.569E-07 3.446E-06 3.352E-02
 
  At SCF step   14, forces are converged : 
   for the second time, max diff in force=  3.446E-06 < toldff=  1.000E-05
@@ -4096,7 +4090,7 @@ lattice_vectors:
 lattice_lengths: [  20.00000,   20.00000,   20.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
 lattice_volume:   8.0000000E+03
-convergence: {deltae: -2.674E-11, res2:  5.569E-07, residm:  2.068E-12, diffor:  3.446E-06, }
+convergence: {deltae: -2.672E-11, res2:  5.569E-07, residm:  2.068E-12, diffor:  3.446E-06, }
 etotal    :  -1.68166825E+01
 entropy   :   0.00000000E+00
 fermie    :  -2.41599252E-01
@@ -4126,26 +4120,26 @@ force_length_stats: {min:   3.35513924E-02, max:   4.53090557E-02, mean:   3.747
 ---OUTPUT-----------------------------------------------------------------------
 
  Cartesian coordinates (xcart) [bohr]
-  2.34394726638540E+00  3.11171660733363E-01  0.00000000000000E+00
-  3.11171660733363E-01  2.34394726638540E+00  0.00000000000000E+00
-  3.61734188956370E-01  3.61734188956370E-01  0.00000000000000E+00
+  2.34394726638565E+00  3.11171660733462E-01  0.00000000000000E+00
+  3.11171660733462E-01  2.34394726638565E+00  0.00000000000000E+00
+  3.61734188956348E-01  3.61734188956348E-01  0.00000000000000E+00
  Reduced coordinates (xred)
-  1.17197363319270E-01  1.55585830366682E-02  0.00000000000000E+00
-  1.55585830366682E-02  1.17197363319270E-01  0.00000000000000E+00
-  1.80867094478185E-02  1.80867094478185E-02  0.00000000000000E+00
+  1.17197363319282E-01  1.55585830366731E-02  0.00000000000000E+00
+  1.55585830366731E-02  1.17197363319282E-01  0.00000000000000E+00
+  1.80867094478174E-02  1.80867094478174E-02  0.00000000000000E+00
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 3.35187E-02 2.18691E-02 (free atoms)
-  3.35187174195654E-02 -1.48037689188634E-03 -0.00000000000000E+00
- -1.48037689188634E-03  3.35187174195654E-02 -0.00000000000000E+00
- -3.20383405276791E-02 -3.20383405276791E-02 -0.00000000000000E+00
+  3.35187174195380E-02 -1.48037689188383E-03 -0.00000000000000E+00
+ -1.48037689188383E-03  3.35187174195380E-02 -0.00000000000000E+00
+ -3.20383405276542E-02 -3.20383405276542E-02 -0.00000000000000E+00
  Gradient of E wrt nuclear positions in reduced coordinates (gred)
- -6.70374348391309E-01  2.96075378377268E-02 -0.00000000000000E+00
-  2.96075378377268E-02 -6.70374348391308E-01 -0.00000000000000E+00
-  6.40766810553582E-01  6.40766810553582E-01  0.00000000000000E+00
+ -6.70374348390760E-01  2.96075378376767E-02 -0.00000000000000E+00
+  2.96075378376766E-02 -6.70374348390760E-01 -0.00000000000000E+00
+  6.40766810553083E-01  6.40766810553083E-01  0.00000000000000E+00
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 1.78968E-03 7.84786E-04 (free atoms)
- -1.09014153465690E-03 -1.37908230444226E-05  2.46985897069730E-05
-  8.48181905034992E-04 -1.78968060635690E-03 -5.39288863899752E-04
-  1.15318013740645E-05  3.36872329001449E-04  1.64254647475539E-04
- Kinetic energy of ions (ekin) [Ha]=  7.01333544848566E-03
+ -1.09014153465872E-03 -1.37908230441147E-05  2.46985897069730E-05
+  8.48181905035300E-04 -1.78968060635872E-03 -5.39288863899752E-04
+  1.15318013741603E-05  3.36872329001544E-04  1.64254647475539E-04
+ Kinetic energy of ions (ekin) [Ha]=  7.01333544849677E-03
  Total energy (etotal) [Ha]= -1.68166824867830E+01
 
  Difference of energy with previous step (new-old):
@@ -4222,27 +4216,27 @@ force_length_stats: {min:   4.68675060E-02, max:   5.94442608E-02, mean:   5.105
 ---OUTPUT-----------------------------------------------------------------------
 
  Cartesian coordinates (xcart) [bohr]
-  2.29779271083581E+00  3.37006650848958E-01  0.00000000000000E+00
-  3.37006650848958E-01  2.29779271083581E+00  0.00000000000000E+00
-  3.70094106400064E-01  3.70094106400064E-01  0.00000000000000E+00
+  2.29779271083582E+00  3.37006650849092E-01  0.00000000000000E+00
+  3.37006650849092E-01  2.29779271083582E+00  0.00000000000000E+00
+  3.70094106400055E-01  3.70094106400055E-01  0.00000000000000E+00
  Reduced coordinates (xred)
-  1.14889635541791E-01  1.68503325424479E-02  0.00000000000000E+00
-  1.68503325424479E-02  1.14889635541791E-01  0.00000000000000E+00
-  1.85047053200032E-02  1.85047053200032E-02  0.00000000000000E+00
+  1.14889635541791E-01  1.68503325424546E-02  0.00000000000000E+00
+  1.68503325424546E-02  1.14889635541791E-01  0.00000000000000E+00
+  1.85047053200028E-02  1.85047053200028E-02  0.00000000000000E+00
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 4.66405E-02 2.96774E-02 (free atoms)
-  4.66405183145897E-02 -4.60707840385429E-03 -0.00000000000000E+00
- -4.60707840385429E-03  4.66405183145897E-02 -0.00000000000000E+00
- -4.20334399107354E-02 -4.20334399107354E-02 -0.00000000000000E+00
+  4.66405183145903E-02 -4.60707840386508E-03 -0.00000000000000E+00
+ -4.60707840386508E-03  4.66405183145903E-02 -0.00000000000000E+00
+ -4.20334399107253E-02 -4.20334399107253E-02 -0.00000000000000E+00
  Gradient of E wrt nuclear positions in reduced coordinates (gred)
- -9.32810366291794E-01  9.21415680770858E-02 -0.00000000000000E+00
-  9.21415680770858E-02 -9.32810366291794E-01 -0.00000000000000E+00
-  8.40668798214708E-01  8.40668798214709E-01  0.00000000000000E+00
+ -9.32810366291807E-01  9.21415680773016E-02 -0.00000000000000E+00
+  9.21415680773016E-02 -9.32810366291807E-01 -0.00000000000000E+00
+  8.40668798214505E-01  8.40668798214505E-01  0.00000000000000E+00
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 7.04548E-04 4.01237E-04 (free atoms)
-  7.04548008677593E-04 -1.77895847404836E-04  8.71734718561584E-05
-  3.57603715846784E-04 -5.39815551382545E-04 -6.41212453950048E-04
- -1.14439998051267E-04  1.88351344437936E-04  1.85149342915834E-04
- Kinetic energy of ions (ekin) [Ha]=  2.46319074777778E-03
- Total energy (etotal) [Ha]= -1.68123143677318E+01
+  7.04548008675224E-04 -1.77895847404712E-04  8.71734718561584E-05
+  3.57603715846908E-04 -5.39815551384914E-04 -6.41212453950048E-04
+ -1.14439998051126E-04  1.88351344438077E-04  1.85149342915834E-04
+ Kinetic energy of ions (ekin) [Ha]=  2.46319074777741E-03
+ Total energy (etotal) [Ha]= -1.68123143677320E+01
 
  Difference of energy with previous step (new-old):
            Absolute (Ha)= 4.36812E-03
@@ -4269,9 +4263,9 @@ tolerances: {toldff: 1.00E-05, }
  ETOT  7  -16.820130312206    -5.778E-08 4.343E-09 2.135E-02 6.641E-06 1.975E-02
  ETOT  8  -16.820130349201    -3.699E-08 1.250E-09 9.011E-03 2.072E-05 1.973E-02
  ETOT  9  -16.820130365592    -1.639E-08 4.858E-10 3.231E-03 2.196E-05 1.971E-02
- ETOT 10  -16.820130369163    -3.571E-09 1.523E-10 6.628E-04 1.406E-05 1.970E-02
- ETOT 11  -16.820130369212    -4.964E-11 1.502E-11 1.346E-04 1.707E-06 1.970E-02
- ETOT 12  -16.820130369291    -7.886E-11 5.622E-12 1.390E-05 5.840E-07 1.970E-02
+ ETOT 10  -16.820130369162    -3.571E-09 1.523E-10 6.628E-04 1.406E-05 1.970E-02
+ ETOT 11  -16.820130369212    -4.967E-11 1.502E-11 1.346E-04 1.707E-06 1.970E-02
+ ETOT 12  -16.820130369291    -7.881E-11 5.622E-12 1.390E-05 5.840E-07 1.970E-02
 
  At SCF step   12, forces are converged : 
   for the second time, max diff in force=  5.840E-07 < toldff=  1.000E-05
@@ -4292,7 +4286,7 @@ lattice_vectors:
 lattice_lengths: [  20.00000,   20.00000,   20.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
 lattice_volume:   8.0000000E+03
-convergence: {deltae: -7.886E-11, res2:  1.390E-05, residm:  5.622E-12, diffor:  5.840E-07, }
+convergence: {deltae: -7.881E-11, res2:  1.390E-05, residm:  5.622E-12, diffor:  5.840E-07, }
 etotal    :  -1.68201304E+01
 entropy   :   0.00000000E+00
 fermie    :  -2.40426115E-01
@@ -4322,26 +4316,26 @@ force_length_stats: {min:   1.94306582E-02, max:   2.78538777E-02, mean:   2.223
 ---OUTPUT-----------------------------------------------------------------------
 
  Cartesian coordinates (xcart) [bohr]
-  2.43226841925155E+00  3.35799665427256E-01  0.00000000000000E+00
-  3.35799665427256E-01  2.43226841925155E+00  0.00000000000000E+00
-  3.68107662089117E-01  3.68107662089117E-01  0.00000000000000E+00
+  2.43226841925134E+00  3.35799665427372E-01  0.00000000000000E+00
+  3.35799665427372E-01  2.43226841925134E+00  0.00000000000000E+00
+  3.68107662089123E-01  3.68107662089123E-01  0.00000000000000E+00
  Reduced coordinates (xred)
-  1.21613420962578E-01  1.67899832713628E-02  0.00000000000000E+00
-  1.67899832713628E-02  1.21613420962578E-01  0.00000000000000E+00
-  1.84053831044558E-02  1.84053831044558E-02  0.00000000000000E+00
+  1.21613420962567E-01  1.67899832713686E-02  0.00000000000000E+00
+  1.67899832713686E-02  1.21613420962567E-01  0.00000000000000E+00
+  1.84053831044562E-02  1.84053831044562E-02  0.00000000000000E+00
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 1.96957E-02 1.30424E-02 (free atoms)
-  1.94288258320777E-02  2.66839944493649E-04 -0.00000000000000E+00
-  2.66839944493649E-04  1.94288258320777E-02 -0.00000000000000E+00
- -1.96956657765713E-02 -1.96956657765713E-02 -0.00000000000000E+00
+  1.94288258320546E-02  2.66839944462786E-04 -0.00000000000000E+00
+  2.66839944462788E-04  1.94288258320546E-02 -0.00000000000000E+00
+ -1.96956657765174E-02 -1.96956657765174E-02 -0.00000000000000E+00
  Gradient of E wrt nuclear positions in reduced coordinates (gred)
- -3.88576516641554E-01 -5.33679888987298E-03 -0.00000000000000E+00
- -5.33679888987298E-03 -3.88576516641554E-01 -0.00000000000000E+00
-  3.93913315531427E-01  3.93913315531427E-01  0.00000000000000E+00
+ -3.88576516641092E-01 -5.33679888925572E-03 -0.00000000000000E+00
+ -5.33679888925577E-03 -3.88576516641092E-01 -0.00000000000000E+00
+  3.93913315530347E-01  3.93913315530347E-01  0.00000000000000E+00
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 2.87646E-03 1.16049E-03 (free atoms)
-  2.87645974357876E-03 -2.23777362979999E-04  8.82204022180707E-05
- -1.18053625132719E-04  1.76978545475802E-03 -7.39215628448466E-04
- -2.15523546838613E-04 -5.41112088195402E-06  2.23264672092723E-04
- Kinetic energy of ions (ekin) [Ha]=  1.24512774984367E-02
+  2.87645974357597E-03 -2.23777362980132E-04  8.82204022180707E-05
+ -1.18053625132852E-04  1.76978545475524E-03 -7.39215628448466E-04
+ -2.15523546838430E-04 -5.41112088177032E-06  2.23264672092723E-04
+ Kinetic energy of ions (ekin) [Ha]=  1.24512774984119E-02
  Total energy (etotal) [Ha]= -1.68201303692910E+01
 
  Difference of energy with previous step (new-old):
@@ -4371,10 +4365,10 @@ tolerances: {toldff: 1.00E-05, }
  ETOT  9  -16.813506252982    -3.447E-08 1.204E-09 1.485E-02 4.610E-06 3.703E-02
  ETOT 10  -16.813506270528    -1.755E-08 4.813E-10 2.956E-03 2.681E-05 3.705E-02
  ETOT 11  -16.813506256843     1.369E-08 3.485E-10 7.668E-04 2.928E-05 3.702E-02
- ETOT 12  -16.813506266137    -9.294E-09 5.793E-10 1.582E-04 4.301E-05 3.706E-02
- ETOT 13  -16.813506271409    -5.272E-09 1.454E-10 1.984E-05 2.067E-05 3.704E-02
+ ETOT 12  -16.813506266137    -9.295E-09 5.793E-10 1.582E-04 4.301E-05 3.706E-02
+ ETOT 13  -16.813506271409    -5.271E-09 1.454E-10 1.984E-05 2.067E-05 3.704E-02
  ETOT 14  -16.813506271966    -5.566E-10 3.642E-11 4.599E-06 5.268E-06 3.704E-02
- ETOT 15  -16.813506271982    -1.696E-11 5.006E-12 5.919E-07 2.236E-07 3.704E-02
+ ETOT 15  -16.813506271982    -1.691E-11 5.006E-12 5.919E-07 2.236E-07 3.704E-02
 
  At SCF step   15, forces are converged : 
   for the second time, max diff in force=  2.236E-07 < toldff=  1.000E-05
@@ -4395,7 +4389,7 @@ lattice_vectors:
 lattice_lengths: [  20.00000,   20.00000,   20.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
 lattice_volume:   8.0000000E+03
-convergence: {deltae: -1.696E-11, res2:  5.919E-07, residm:  5.006E-12, diffor:  2.236E-07, }
+convergence: {deltae: -1.691E-11, res2:  5.919E-07, residm:  5.006E-12, diffor:  2.236E-07, }
 etotal    :  -1.68135063E+01
 entropy   :   0.00000000E+00
 fermie    :  -2.34524755E-01
@@ -4425,27 +4419,27 @@ force_length_stats: {min:   3.72609096E-02, max:   4.66931831E-02, mean:   4.040
 ---OUTPUT-----------------------------------------------------------------------
 
  Cartesian coordinates (xcart) [bohr]
-  2.71541399289638E+00  3.12550004037746E-01  0.00000000000000E+00
-  3.12550004037746E-01  2.71541399289638E+00  0.00000000000000E+00
-  3.50471673975499E-01  3.50471673975499E-01  0.00000000000000E+00
+  2.71541399289585E+00  3.12550004037767E-01  0.00000000000000E+00
+  3.12550004037767E-01  2.71541399289585E+00  0.00000000000000E+00
+  3.50471673975531E-01  3.50471673975531E-01  0.00000000000000E+00
  Reduced coordinates (xred)
-  1.35770699644819E-01  1.56275002018873E-02  0.00000000000000E+00
-  1.56275002018873E-02  1.35770699644819E-01  0.00000000000000E+00
-  1.75235836987749E-02  1.75235836987749E-02  0.00000000000000E+00
+  1.35770699644792E-01  1.56275002018883E-02  0.00000000000000E+00
+  1.56275002018883E-02  1.35770699644792E-01  0.00000000000000E+00
+  1.75235836987766E-02  1.75235836987766E-02  0.00000000000000E+00
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 3.70428E-02 2.34687E-02 (free atoms)
- -3.70427978576051E-02  4.02573142903181E-03 -0.00000000000000E+00
-  4.02573142903181E-03 -3.70427978576051E-02 -0.00000000000000E+00
-  3.30170664285733E-02  3.30170664285733E-02 -0.00000000000000E+00
+ -3.70427978574970E-02  4.02573142902848E-03 -0.00000000000000E+00
+  4.02573142902848E-03 -3.70427978574970E-02 -0.00000000000000E+00
+  3.30170664284685E-02  3.30170664284685E-02 -0.00000000000000E+00
  Gradient of E wrt nuclear positions in reduced coordinates (gred)
-  7.40855957152102E-01 -8.05146285806363E-02 -0.00000000000000E+00
- -8.05146285806362E-02  7.40855957152102E-01 -0.00000000000000E+00
- -6.60341328571466E-01 -6.60341328571466E-01 -0.00000000000000E+00
+  7.40855957149941E-01 -8.05146285805695E-02 -0.00000000000000E+00
+ -8.05146285805695E-02  7.40855957149941E-01 -0.00000000000000E+00
+ -6.60341328569371E-01 -6.60341328569371E-01 -0.00000000000000E+00
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 4.57515E-03 1.96372E-03 (free atoms)
-  4.57515184660602E-03 -2.16438924086576E-04  5.70565070989839E-05
- -4.52401880579605E-04  3.61254133731032E-03 -5.43578224123801E-04
- -2.89952680777536E-04 -1.76407314100441E-04  2.40385014372870E-04
- Kinetic energy of ions (ekin) [Ha]=  3.42470016574339E-02
- Total energy (etotal) [Ha]= -1.68135062719825E+01
+  4.57515184660301E-03 -2.16438924087842E-04  5.70565070989839E-05
+ -4.52401880580871E-04  3.61254133730732E-03 -5.43578224123801E-04
+ -2.89952680777267E-04 -1.76407314100172E-04  2.40385014372870E-04
+ Kinetic energy of ions (ekin) [Ha]=  3.42470016573865E-02
+ Total energy (etotal) [Ha]= -1.68135062719824E+01
 
  Difference of energy with previous step (new-old):
            Absolute (Ha)= 6.62410E-03
@@ -4468,16 +4462,16 @@ tolerances: {toldff: 1.00E-05, }
  ETOT  3  -16.773679144516    -4.075E-02 4.511E-04 2.018E+00 3.395E-02 8.237E-02
  ETOT  4  -16.773859313917    -1.802E-04 1.257E-06 1.110E+00 1.680E-03 8.384E-02
  ETOT  5  -16.773869287455    -9.974E-06 2.544E-08 7.918E-01 1.255E-04 8.396E-02
- ETOT  6  -16.773885716415    -1.643E-05 1.478E-07 2.749E-01 5.307E-04 8.449E-02
- ETOT  7  -16.773887001351    -1.285E-06 1.470E-08 1.065E-01 1.274E-04 8.461E-02
+ ETOT  6  -16.773885716416    -1.643E-05 1.478E-07 2.749E-01 5.307E-04 8.449E-02
+ ETOT  7  -16.773887001352    -1.285E-06 1.470E-08 1.065E-01 1.274E-04 8.461E-02
  ETOT  8  -16.773887424000    -4.226E-07 4.861E-09 5.160E-02 8.145E-05 8.469E-02
  ETOT  9  -16.773887487924    -6.392E-08 1.410E-09 1.563E-02 2.615E-05 8.472E-02
  ETOT 10  -16.773887499554    -1.163E-08 2.547E-10 3.275E-03 1.852E-05 8.473E-02
  ETOT 11  -16.773887450878     4.868E-08 8.511E-10 1.130E-03 4.090E-05 8.469E-02
  ETOT 12  -16.773887491949    -4.107E-08 1.154E-09 2.151E-04 5.234E-05 8.474E-02
- ETOT 13  -16.773887500398    -8.449E-09 2.738E-10 4.287E-05 1.960E-05 8.472E-02
+ ETOT 13  -16.773887500399    -8.449E-09 2.738E-10 4.287E-05 1.960E-05 8.472E-02
  ETOT 14  -16.773887501463    -1.065E-09 6.347E-11 5.335E-06 5.040E-06 8.473E-02
- ETOT 15  -16.773887501493    -2.967E-11 7.960E-12 1.280E-06 3.308E-07 8.473E-02
+ ETOT 15  -16.773887501493    -2.949E-11 7.960E-12 1.280E-06 3.308E-07 8.473E-02
 
  At SCF step   15, forces are converged : 
   for the second time, max diff in force=  3.308E-07 < toldff=  1.000E-05
@@ -4498,7 +4492,7 @@ lattice_vectors:
 lattice_lengths: [  20.00000,   20.00000,   20.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
 lattice_volume:   8.0000000E+03
-convergence: {deltae: -2.967E-11, res2:  1.280E-06, residm:  7.960E-12, diffor:  3.308E-07, }
+convergence: {deltae: -2.949E-11, res2:  1.280E-06, residm:  7.960E-12, diffor:  3.308E-07, }
 etotal    :  -1.67738875E+01
 entropy   :   0.00000000E+00
 fermie    :  -2.29536536E-01
@@ -4528,27 +4522,27 @@ force_length_stats: {min:   8.48380919E-02, max:   1.13736423E-01, mean:   9.447
 ---OUTPUT-----------------------------------------------------------------------
 
  Cartesian coordinates (xcart) [bohr]
-  3.00884301602331E+00  2.91822554674561E-01  0.00000000000000E+00
-  2.91822554674561E-01  3.00884301602331E+00  0.00000000000000E+00
-  3.35342647638981E-01  3.35342647638981E-01  0.00000000000000E+00
+  3.00884301602279E+00  2.91822554674455E-01  0.00000000000000E+00
+  2.91822554674455E-01  3.00884301602279E+00  0.00000000000000E+00
+  3.35342647639020E-01  3.35342647639020E-01  0.00000000000000E+00
  Reduced coordinates (xred)
-  1.50442150801165E-01  1.45911277337280E-02  0.00000000000000E+00
-  1.45911277337280E-02  1.50442150801165E-01  0.00000000000000E+00
-  1.67671323819490E-02  1.67671323819490E-02  0.00000000000000E+00
+  1.50442150801139E-01  1.45911277337227E-02  0.00000000000000E+00
+  1.45911277337227E-02  1.50442150801139E-01  0.00000000000000E+00
+  1.67671323819510E-02  1.67671323819510E-02  0.00000000000000E+00
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 8.47288E-02 5.51069E-02 (free atoms)
- -8.47287957132414E-02  4.30499968951090E-03 -0.00000000000000E+00
-  4.30499968951090E-03 -8.47287957132414E-02 -0.00000000000000E+00
-  8.04237960237305E-02  8.04237960237305E-02 -0.00000000000000E+00
+ -8.47287957132010E-02  4.30499968952594E-03 -0.00000000000000E+00
+  4.30499968952594E-03 -8.47287957132010E-02 -0.00000000000000E+00
+  8.04237960236751E-02  8.04237960236751E-02 -0.00000000000000E+00
  Gradient of E wrt nuclear positions in reduced coordinates (gred)
-  1.69457591426483E+00 -8.60999937902179E-02 -0.00000000000000E+00
- -8.60999937902179E-02  1.69457591426483E+00 -0.00000000000000E+00
- -1.60847592047461E+00 -1.60847592047461E+00 -0.00000000000000E+00
+  1.69457591426402E+00 -8.60999937905187E-02 -0.00000000000000E+00
+ -8.60999937905187E-02  1.69457591426402E+00 -0.00000000000000E+00
+ -1.60847592047350E+00 -1.60847592047350E+00 -0.00000000000000E+00
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 3.87971E-03 1.65138E-03 (free atoms)
-  3.87970930472540E-03 -3.01973753027950E-04  2.69494056891007E-04
- -2.35737473913235E-04  3.00553743237289E-03 -2.85344563870374E-04
- -2.34040588994624E-04 -2.00325032287529E-04  2.49971494348975E-04
- Kinetic energy of ions (ekin) [Ha]=  2.46983108774841E-02
- Total energy (etotal) [Ha]= -1.67738875014929E+01
+  3.87970930472513E-03 -3.01973753030042E-04  2.69494056891007E-04
+ -2.35737473915327E-04  3.00553743237263E-03 -2.85344563870374E-04
+ -2.34040588994476E-04 -2.00325032287381E-04  2.49971494348975E-04
+ Kinetic energy of ions (ekin) [Ha]=  2.46983108774809E-02
+ Total energy (etotal) [Ha]= -1.67738875014930E+01
 
  Difference of energy with previous step (new-old):
            Absolute (Ha)= 3.96188E-02
@@ -4568,25 +4562,25 @@ force_length_stats: {min:   8.48380919E-02, max:   1.13736423E-01, mean:   9.447
        0.014591127734      0.150442150801      0.000000000000
        0.016767132382      0.016767132382      0.000000000000
  rms dE/dt=  1.1022E+00; max dE/dt=  1.7024E+00; dE/dt below (all hartree)
-    1       1.702422445652     -0.078253462403      0.000000000000
-    2      -0.078253462403      1.702422445652      0.000000000000
-    3      -1.600629389088     -1.600629389088      0.000000000000
+    1       1.702422445651     -0.078253462404      0.000000000000
+    2      -0.078253462404      1.702422445651      0.000000000000
+    3      -1.600629389086     -1.600629389086      0.000000000000
 
  cartesian coordinates (angstrom) at end:
-    1      1.59221114830473     0.15442584488629     0.00000000000000
-    2      0.15442584488629     1.59221114830473     0.00000000000000
-    3      0.17745568619878     0.17745568619878     0.00000000000000
+    1      1.59221114830445     0.15442584488623     0.00000000000000
+    2      0.15442584488623     1.59221114830445     0.00000000000000
+    3      0.17745568619880     0.17745568619880     0.00000000000000
 
  cartesian forces (hartree/bohr) at end:
-    1     -0.08472879571324     0.00430499968951    -0.00000000000000
-    2      0.00430499968951    -0.08472879571324    -0.00000000000000
-    3      0.08042379602373     0.08042379602373    -0.00000000000000
+    1     -0.08472879571320     0.00430499968953    -0.00000000000000
+    2      0.00430499968953    -0.08472879571320    -0.00000000000000
+    3      0.08042379602368     0.08042379602368    -0.00000000000000
  frms,max,avg= 5.5106944E-02 8.4728796E-02  -3.923E-04 -3.923E-04  0.000E+00 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1     -4.35692948736739     0.22137196607654    -0.00000000000000
-    2      0.22137196607654    -4.35692948736739    -0.00000000000000
-    3      4.13555752129085     4.13555752129085    -0.00000000000000
+    1     -4.35692948736531     0.22137196607731    -0.00000000000000
+    2      0.22137196607731    -4.35692948736531    -0.00000000000000
+    3      4.13555752128800     4.13555752128800    -0.00000000000000
  frms,max,avg= 2.8337128E+00 4.3569295E+00  -2.017E-02 -2.017E-02  0.000E+00 e/A
  length scales= 20.000000000000 20.000000000000 20.000000000000 bohr
               = 10.583544171800 10.583544171800 10.583544171800 angstroms
@@ -4599,16 +4593,16 @@ force_length_stats: {min:   8.48380919E-02, max:   1.13736423E-01, mean:   9.447
 --- !EnergyTerms
 iteration_state     : {dtset: 6, itime: 10, icycle: 1, }
 comment             : Components of total free energy in Hartree
-kinetic             :  8.81639282605405E+00
-hartree             :  1.36024693100120E+01
-xc                  : -4.31319532173195E+00
-Ewald energy        :  2.35346056176891E-01
+kinetic             :  8.81639282605463E+00
+hartree             :  1.36024693100132E+01
+xc                  : -4.31319532173212E+00
+Ewald energy        :  2.35346056177849E-01
 psp_core            :  1.66149645181518E-03
-local_psp           : -3.77905379725733E+01
-non_local_psp       :  2.67397610411756E+00
-total_energy        : -1.67738875014929E+01
-total_energy_eV     : -4.56440691627581E+02
-band_energy         : -3.91410817948626E+00
+local_psp           : -3.77905379725759E+01
+non_local_psp       :  2.67397610411753E+00
+total_energy        : -1.67738875014930E+01
+total_energy_eV     : -4.56440691627582E+02
+band_energy         : -3.91410817948665E+00
 ...
 
  rms coord change=  1.3252E-02   atom, delta coord (reduced):
@@ -4640,25 +4634,25 @@ band_energy         : -3.91410817948626E+00
            etotal4    -1.6821792867E+01
            etotal5    -1.6518622501E+01
            etotal6    -1.6773887501E+01
-            fcart1    -1.0297925455E-04 -5.6536581998E-05 -0.0000000000E+00
-                      -5.6536581998E-05 -1.0297925455E-04 -0.0000000000E+00
-                       1.5951583655E-04  1.5951583655E-04 -0.0000000000E+00
-            fcart2     1.1743193697E-05  1.1239788157E-05 -0.0000000000E+00
-                       1.1239788157E-05  1.1743193697E-05 -0.0000000000E+00
-                      -2.2982981854E-05 -2.2982981854E-05 -0.0000000000E+00
-            fcart3     5.2422396395E-06 -4.0224318666E-06 -0.0000000000E+00
-                      -4.0224318666E-06  5.2422396395E-06 -0.0000000000E+00
-                      -1.2198077728E-06 -1.2198077728E-06 -0.0000000000E+00
-            fcart4     1.0948267735E-05 -1.1642265387E-06 -0.0000000000E+00
-                      -1.1642265387E-06  1.0948267735E-05 -0.0000000000E+00
-                      -9.7840411963E-06 -9.7840411963E-06 -0.0000000000E+00
-            fcart5     7.1346238050E-01 -1.6572476863E-02 -0.0000000000E+00
-                      -1.6572476863E-02  7.1346238050E-01 -0.0000000000E+00
-                      -6.9688990364E-01 -6.9688990364E-01 -0.0000000000E+00
+            fcart1    -1.0297925456E-04 -5.6536581993E-05 -0.0000000000E+00
+                      -5.6536581993E-05 -1.0297925456E-04 -0.0000000000E+00
+                       1.5951583656E-04  1.5951583656E-04 -0.0000000000E+00
+            fcart2     1.1743193700E-05  1.1239788158E-05 -0.0000000000E+00
+                       1.1239788158E-05  1.1743193700E-05 -0.0000000000E+00
+                      -2.2982981858E-05 -2.2982981858E-05 -0.0000000000E+00
+            fcart3     5.2422396411E-06 -4.0224318640E-06 -0.0000000000E+00
+                      -4.0224318640E-06  5.2422396411E-06 -0.0000000000E+00
+                      -1.2198077771E-06 -1.2198077771E-06 -0.0000000000E+00
+            fcart4     1.0949604122E-05 -1.1635571202E-06 -0.0000000000E+00
+                      -1.1635571202E-06  1.0949604122E-05 -0.0000000000E+00
+                      -9.7860470014E-06 -9.7860470014E-06 -0.0000000000E+00
+            fcart5     7.1346238051E-01 -1.6572476862E-02 -0.0000000000E+00
+                      -1.6572476862E-02  7.1346238051E-01 -0.0000000000E+00
+                      -6.9688990365E-01 -6.9688990365E-01 -0.0000000000E+00
             fcart6    -8.4728795713E-02  4.3049996895E-03 -0.0000000000E+00
                        4.3049996895E-03 -8.4728795713E-02 -0.0000000000E+00
                        8.0423796024E-02  8.0423796024E-02 -0.0000000000E+00
--          fftalg         312
+-          fftalg         512
          friction      1.50000000E-03
            getwfk1          0
            getwfk2          1
@@ -4696,9 +4690,9 @@ P           mkmem           1
                        0.0000000000E+00  0.0000000000E+00  2.1509825579E-07
            strten3     1.1729964971E-04  1.1729964971E-04  1.3486634903E-04
                        0.0000000000E+00  0.0000000000E+00  2.1726852102E-07
-           strten4     1.1729886962E-04  1.1729886962E-04  1.3486635573E-04
-                       0.0000000000E+00  0.0000000000E+00  2.1718829455E-07
-           strten5     1.7711709918E-05  1.7711709918E-05  1.6132770011E-04
+           strten4     1.1729886943E-04  1.1729886943E-04  1.3486635573E-04
+                       0.0000000000E+00  0.0000000000E+00  2.1718827576E-07
+           strten5     1.7711709917E-05  1.7711709917E-05  1.6132770011E-04
                        0.0000000000E+00  0.0000000000E+00 -1.3934914050E-05
            strten6     1.3176897282E-04  1.3176897282E-04  1.3295915934E-04
                        0.0000000000E+00  0.0000000000E+00 -2.4056038679E-06
@@ -4709,9 +4703,9 @@ P           mkmem           1
               vel1     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-              vel2     3.9363283361E-07  2.5963495657E-07 -0.0000000000E+00
-                       2.5963495657E-07  3.9363283361E-07 -0.0000000000E+00
-                       1.4564077049E-08  1.4564077051E-08 -0.0000000000E+00
+              vel2     3.9363283354E-07  2.5963495658E-07 -0.0000000000E+00
+                       2.5963495658E-07  3.9363283354E-07 -0.0000000000E+00
+                       1.4564077075E-08  1.4564077075E-08 -0.0000000000E+00
               vel3     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -4722,7 +4716,7 @@ P           mkmem           1
                       -5.2643884323E-04 -7.1993301682E-03 -4.4865261870E-04
                        6.7454216479E-04  4.8964412516E-04  1.1694984987E-04
               vel6     3.8797093047E-03 -3.0197375303E-04  2.6949405689E-04
-                      -2.3573747391E-04  3.0055374324E-03 -2.8534456387E-04
+                      -2.3573747392E-04  3.0055374324E-03 -2.8534456387E-04
                       -2.3404058899E-04 -2.0032503229E-04  2.4997149435E-04
               vis      5.00000000E+01
            xangst1     1.2964841610E+00  1.2382746681E-01  0.0000000000E+00
@@ -4734,9 +4728,9 @@ P           mkmem           1
            xangst3     1.2963860872E+00  1.2376875539E-01  0.0000000000E+00
                        1.2376875539E-01  1.2963860872E+00  0.0000000000E+00
                        1.6631842873E-01  1.6631842873E-01  0.0000000000E+00
-           xangst4     1.2963807442E+00  1.2376555679E-01  0.0000000000E+00
-                       1.2376555679E-01  1.2963807442E+00  0.0000000000E+00
-                       1.6632697039E-01  1.6632697039E-01  0.0000000000E+00
+           xangst4     1.2963807429E+00  1.2376555604E-01  0.0000000000E+00
+                       1.2376555604E-01  1.2963807429E+00  0.0000000000E+00
+                       1.6632697239E-01  1.6632697239E-01  0.0000000000E+00
            xangst5     9.8974067270E-01  3.4146597187E-01  0.0000000000E+00
                        3.4146597187E-01  9.8974067270E-01  0.0000000000E+00
                        2.6636273733E-01  2.6636273733E-01  0.0000000000E+00
@@ -4752,9 +4746,9 @@ P           mkmem           1
             xcart3     2.4498146674E+00  2.3388905150E-01  0.0000000000E+00
                        2.3388905150E-01  2.4498146674E+00  0.0000000000E+00
                        3.1429628114E-01  3.1429628114E-01  0.0000000000E+00
-            xcart4     2.4498045704E+00  2.3388300702E-01  0.0000000000E+00
-                       2.3388300702E-01  2.4498045704E+00  0.0000000000E+00
-                       3.1431242255E-01  3.1431242255E-01  0.0000000000E+00
+            xcart4     2.4498045681E+00  2.3388300560E-01  0.0000000000E+00
+                       2.3388300560E-01  2.4498045681E+00  0.0000000000E+00
+                       3.1431242633E-01  3.1431242633E-01  0.0000000000E+00
             xcart5     1.8703388140E+00  6.4527717053E-01  0.0000000000E+00
                        6.4527717053E-01  1.8703388140E+00  0.0000000000E+00
                        5.0335262556E-01  5.0335262556E-01  0.0000000000E+00
@@ -4770,9 +4764,9 @@ P           mkmem           1
              xred3     1.2249073337E-01  1.1694452575E-02  0.0000000000E+00
                        1.1694452575E-02  1.2249073337E-01  0.0000000000E+00
                        1.5714814057E-02  1.5714814057E-02  0.0000000000E+00
-             xred4     1.2249022852E-01  1.1694150351E-02  0.0000000000E+00
-                       1.1694150351E-02  1.2249022852E-01  0.0000000000E+00
-                       1.5715621127E-02  1.5715621127E-02  0.0000000000E+00
+             xred4     1.2249022840E-01  1.1694150280E-02  0.0000000000E+00
+                       1.1694150280E-02  1.2249022840E-01  0.0000000000E+00
+                       1.5715621316E-02  1.5715621316E-02  0.0000000000E+00
              xred5     9.3516940699E-02  3.2263858527E-02  0.0000000000E+00
                        3.2263858527E-02  9.3516940699E-02  0.0000000000E+00
                        2.5167631278E-02  2.5167631278E-02  0.0000000000E+00
@@ -4870,10 +4864,10 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         61.3  wall=         61.9
+- Proc.   0 individual time (sec): cpu=         38.7  wall=         43.4
 
 ================================================================================
 
  Calculation completed.
-.Delivered   9 WARNINGs and  12 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         61.3  wall=         61.9
+.Delivered   8 WARNINGs and  19 COMMENTs to log file.
++Overall time at end (sec) : cpu=         38.7  wall=         43.4

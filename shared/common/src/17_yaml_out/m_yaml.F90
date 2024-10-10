@@ -8,7 +8,7 @@
 !!  strings, numbers, dictionaries from m_pair_list and 1D arrays of dictionaries.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2022 ABINIT group (TC, MG)
+!! Copyright (C) 2009-2024 ABINIT group (TC, MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1473,6 +1473,7 @@ end subroutine yamldoc_write_unit_and_free
 !!  Write Yaml document to a list of units and free memory.
 !!
 !! INPUTS
+!!  units=List of unit numbers.
 !!  [newline]= set to false to prevent adding newlines after fields. Default: True
 !!
 !! SOURCE

@@ -1,8 +1,8 @@
 
-.Version 9.3.1 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 10.1.4.5 of ABINIT, released Sep 2024.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2022 ABINIT group . 
+.Copyright (C) 1998-2024 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,14 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h24 )
+.Starting date : Fri 13 Sep 2024.
+- ( at 19h07 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v1_t30/t30.in
-- output file    -> t30.out
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v1_t30/t30.abi
+- output file    -> t30.abo
 - root for input  files -> t30i
 - root for output files -> t30o
-
 
  Symmetries : space group Pm m m (# 47); Bravais oP (primitive ortho.)
 ================================================================================
@@ -34,18 +33,18 @@
 -    mband =           1        mffmem =           1         mkmem =           1
        mpw =       16869          nfft =      262144          nkpt =           1
 ================================================================================
-P This job should need less than                      73.724 Mbytes of memory.
+P This job should need less than                      80.952 Mbytes of memory.
 P Max. in main chain + fourwf.f
 P            6 blocks of mpw  integer numbers, for      0.386 Mbytes.
-P           21 blocks of mpw  real(dp)  numbers, for      2.703 Mbytes.
+P           15 blocks of mpw  real(dp)  numbers, for      1.931 Mbytes.
 P            2 blocks of nfft integer numbers, for      2.000 Mbytes.
-P           34 blocks of nfft real(dp)  numbers, for     68.000 Mbytes.
+P           38 blocks of nfft real(dp)  numbers, for     76.000 Mbytes.
 P              Additional     real(dp)  numbers, for      0.404 Mbytes.
 P              With residue estimated to be             0.231 Mbytes.
 P
 P Comparison of the memory needs of different chains
-P Main chain + fourwf.f                73.724 Mbytes.
-P Main chain + nonlop.f + opernl.f     65.660 Mbytes.
+P Main chain + fourwf.f                80.952 Mbytes.
+P Main chain + nonlop.f + opernl.f     72.887 Mbytes.
 P XC chain                             58.834 Mbytes.
 P mkrho chain                          61.343 Mbytes.
 P fourdp chain                         61.086 Mbytes.
@@ -59,10 +58,10 @@ _ WF disk file :      0.259 Mbytes ; DEN or POT disk file :      2.002 Mbytes.
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
 -
-- outvars: echo of selected default values                                      
--   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+- outvars: echo of selected default values
+-   iomode0 =  0 , fftalg0 =512 , wfoptalg0 =  0
 -
-- outvars: echo of global parameters not present in the input file              
+- outvars: echo of global parameters not present in the input file
 -  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
@@ -71,7 +70,7 @@ _ WF disk file :      0.259 Mbytes ; DEN or POT disk file :      2.002 Mbytes.
            diemac      1.00000000E+00
            diemix      5.00000000E-01
              ecut      2.00000000E+02 Hartree
--          fftalg         312
+-          fftalg         512
               ixc          20
               kpt      2.50000000E-01  2.50000000E-01  2.50000000E-01
            kptopt           0
@@ -126,8 +125,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=    200.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -257,7 +256,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 
  Mean square residual over all n,k,spin=   19.152E-10; max=  19.152E-10
    0.2500  0.2500  0.2500    1  1.91524E-09 kpt; spin; max resid(k); each band:
-   1.92E-09
+  1.92E-09
  reduced coordinates (array xred) for    1 atoms
        0.000000000000      0.000000000000      0.000000000000
  rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
@@ -290,16 +289,16 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
-kinetic             :  2.74481240934274E+00
-hartree             :  9.49841515111505E-01
-xc                  : -4.74920757555752E-01
+kinetic             :  2.74481240934310E+00
+hartree             :  9.49841515111641E-01
+xc                  : -4.74920757555820E-01
 Ewald energy        : -1.13491899179226E+00
 psp_core            :  2.01061929829747E-07
-local_psp           : -4.41187628039637E+00
+local_psp           : -4.41187628039677E+00
 non_local_psp       :  0.00000000000000E+00
-total_energy        : -2.32706190422821E+00
-total_energy_eV     : -6.33225747419365E+01
-band_energy         : -7.17351163996808E-01
+total_energy        : -2.32706190422818E+00
+total_energy_eV     : -6.33225747419356E+01
+band_energy         : -7.17351163997035E-01
 ...
 
 
@@ -334,7 +333,7 @@ band_energy         : -7.17351163996808E-01
              ecut      2.00000000E+02 Hartree
            etotal     -2.3270619042E+00
             fcart     -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
--          fftalg         312
+-          fftalg         512
               ixc          20
               kpt      2.50000000E-01  2.50000000E-01  2.50000000E-01
            kptopt           0
@@ -361,6 +360,11 @@ P           mkmem           1
             znucl        2.00000
 
 ================================================================================
+
+ The spacegroup number, the magnetic point group, and/or the number of symmetries
+ have changed between the initial recognition based on the input file
+ and a postprocessing based on the final acell, rprim, and xred.
+ More details in the log file.
 
 
 - Timing analysis has been suppressed with timopt=0
@@ -449,10 +453,10 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          0.7  wall=          0.7
+- Proc.   0 individual time (sec): cpu=          0.6  wall=          1.6
 
 ================================================================================
 
  Calculation completed.
-.Delivered   7 WARNINGs and   6 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          0.7  wall=          0.7
+.Delivered   8 WARNINGs and   7 COMMENTs to log file.
++Overall time at end (sec) : cpu=          0.6  wall=          1.6

@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2022 ABINIT group (DCA, XG, GMR, GZ, MT, FF, DRH)
+!!  Copyright (C) 1998-2024 ABINIT group (DCA, XG, GMR, GZ, MT, FF, DRH)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1463,7 +1463,7 @@ subroutine scalewf_nonlop(istwf_k,mpi_enreg,npw,option,vect)
 !  Storage for the Gamma point. The component of the G=0 vector
 !  should not be scaled, and no G=0 imaginary part is allowed.
    if(istwf_k==2)then
-     if (mpi_enreg%me_g0==1) then
+     if (mpi_enreg%me_g0_fft==1) then
        vect(2,1)=zero
 !$OMP PARALLEL DO
        do ipw=2,npw

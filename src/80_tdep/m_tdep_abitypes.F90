@@ -81,7 +81,8 @@ contains
   call crystal_init(Invar%amu,Crystal,Sym%spgroup,Invar%natom_unitcell,npsp,&
 &   Invar%ntypat,Sym%nsym,Lattice%rprimdt,Invar%typat_unitcell,Sym%xred_zero,&
 &  zion,znucl,timrev,use_antiferro,remove_inv,title,&
-&  Sym%ptsymrel(:,:,1:Sym%nsym),Sym%tnons(:,1:Sym%nsym),Sym%symafm(1:Sym%nsym)) ! Optional
+!BUG&  Sym%ptsymrel(:,:,1:Sym%nsym),Sym%tnons(:,1:Sym%nsym),Sym%symafm(1:Sym%nsym)) ! Optional
+&  Sym%symrel(:,:,1:Sym%nsym),Sym%tnons(:,1:Sym%nsym),Sym%symafm(1:Sym%nsym)) ! Optional
   ABI_FREE(title)
   ABI_FREE(znucl)
   ABI_FREE(zion)
@@ -322,9 +323,8 @@ contains
  end subroutine tdep_init_ddb
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-! GA: This routine uses the old way of writing DDB files.
-!     However, it is no longer called in the code.
-!     If you want to start using it again, please fix the writing of the DDB.
+! GA: This routine is no longer called in the code.
+!     I updated the DDB io, but it has not been tested for this routine.
  subroutine tdep_write_ddb(Crystal,DDB,Eigen2nd,Invar,Lattice,MPIdata,Qbz,Sym)
 
   implicit none
@@ -356,7 +356,11 @@ contains
   type(crystal_t) :: Crystal_tmp
 
 !FB  nblok=Qbz%nqibz
-  nblok=Qbz%nqbz
+
+!GA: I am confused whether nblok should be nqbz or nqibz
+!    In the previous implementation, nblok was set to nqbz
+!    but the number of block written to file was nqibz
+  nblok=Qbz%nqibz
   choice=2
   mband=1
 !FB  mpert=Invar%natom_unitcell+6
@@ -472,7 +476,8 @@ contains
   ddb_hdr%amu=Invar%amu
   ddb_hdr%nband=1
   ddb_hdr%symafm=0
-  ddb_hdr%symrel=Sym%ptsymrel
+!BUG  ddb_hdr%symrel=Sym%ptsymrel
+  ddb_hdr%symrel=Sym%symrel
   ddb_hdr%typat=Invar%typat_unitcell
   ddb_hdr%kpt=0
   ddb_hdr%occ=0
@@ -483,19 +488,14 @@ contains
   ddb_hdr%zion=0
   ddb_hdr%znucl=0
 
-  if (MPIdata%iam_master) then
-!FB  write(Invar%stdlog,*) 'BEFORE OPEN DDB'
-    call ddb_hdr%open_write(filename, unddb)
-    call ddb_hdr%free()
+  ddb%mpert = mpert
+  ddb%msize = msize
 
-!FB  write(Invar%stdlog,*) 'BEFORE WRITE BLOK'
-! Print each blok of the DDB
-    do iq_ibz=1,Qbz%nqibz
-!FB  do iq_ibz=1,Qbz%nqbz
-      call ddb%write_block(iq_ibz,choice,mband,mpert,msize,Qbz%nqibz,unddb)
-    end do
-    close(unddb)
-  end if
+  if (MPIdata%iam_master) then
+
+    call ddb%write(ddb_hdr, filename)
+
+  end if  
 
 !!!!!!!!! Test !!!!!!!!
   nqshft=1

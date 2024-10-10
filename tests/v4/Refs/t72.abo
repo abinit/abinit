@@ -1,8 +1,8 @@
 
-.Version 9.3.1 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 10.1.4.5 of ABINIT, released Sep 2024.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2022 ABINIT group . 
+.Copyright (C) 1998-2024 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,14 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h26 )
+.Starting date : Fri 13 Sep 2024.
+- ( at 19h10 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v4_t72-t73-t74/t72.in
-- output file    -> t72.out
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v4_t72-t73-t74/t72.abi
+- output file    -> t72.abo
 - root for input  files -> t72i
 - root for output files -> t72o
-
 
  DATASET   11 : space group F-4 3 m (#216); Bravais cF (face-center cubic)
 ================================================================================
@@ -34,11 +33,10 @@
 -    mband =           5        mffmem =           1         mkmem =           2
        mpw =          74          nfft =        1728          nkpt =           2
 ================================================================================
-P This job should need less than                       1.308 Mbytes of memory.
+P This job should need less than                       1.358 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.013 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
-
 
  DATASET   21 : space group F-4 3 m (#216); Bravais cF (face-center cubic)
 ================================================================================
@@ -51,11 +49,10 @@ _ WF disk file :      0.013 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 -    mband =           4        mffmem =           1         mkmem =          15
        mpw =          77          nfft =        1728          nkpt =          15
 ================================================================================
-P This job should need less than                       1.176 Mbytes of memory.
+P This job should need less than                       1.225 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.072 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
-
 
  DATASET   22 : space group F-4 3 m (#216); Bravais cF (face-center cubic)
 ================================================================================
@@ -68,11 +65,10 @@ _ WF disk file :      0.072 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 -    mband =           4        mffmem =           1         mkmem =          15
        mpw =          77          nfft =        1728          nkpt =          15
 ================================================================================
-P This job should need less than                       1.176 Mbytes of memory.
+P This job should need less than                       1.225 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.072 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
-
 
  DATASET   23 : space group F-4 3 m (#216); Bravais cF (face-center cubic)
 ================================================================================
@@ -85,7 +81,7 @@ _ WF disk file :      0.072 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 -    mband =           4        mffmem =           1         mkmem =          15
        mpw =          77          nfft =        1728          nkpt =          15
 ================================================================================
-P This job should need less than                       1.176 Mbytes of memory.
+P This job should need less than                       1.225 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.072 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
@@ -94,10 +90,10 @@ _ WF disk file :      0.072 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
 -
-- outvars: echo of selected default values                                      
--   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+- outvars: echo of selected default values
+-   iomode0 =  0 , fftalg0 =512 , wfoptalg0 =  0
 -
-- outvars: echo of global parameters not present in the input file              
+- outvars: echo of global parameters not present in the input file
 -  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
@@ -109,7 +105,7 @@ _ WF disk file :      0.072 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
          berryopt23        -1
       chksymbreak           0
              ecut      3.00000000E+00 Hartree
--          fftalg         312
+-          fftalg         512
            getden11         0
            getden21        11
            getden22        11
@@ -287,8 +283,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      3.000   => boxcut(ratio)=   2.05016
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
 -  Troullier-Martins psp for element  Al        Thu Oct 27 17:31:05 EDT 1994
 - 13.00000   3.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -305,8 +301,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
              1    1.353815
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/33as.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/33as.pspnc
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/33as.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/33as.pspnc
 -  Troullier-Martins psp for element  As        Thu Oct 27 17:37:14 EDT 1994
 - 33.00000   5.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -336,17 +332,17 @@ tolerances: {toldfe: 1.00E-12, }
      iter   Etot(hartree)      deltaE(h)  residm     vres2
  ETOT  1  -10.088993844650    -1.009E+01 1.111E-02 1.219E+00
  ETOT  2  -10.094201850272    -5.208E-03 7.095E-08 3.515E-02
- ETOT  3  -10.094342566206    -1.407E-04 4.453E-06 3.277E-03
+ ETOT  3  -10.094342566204    -1.407E-04 4.453E-06 3.277E-03
  ETOT  4  -10.094352263492    -9.697E-06 1.648E-07 1.116E-04
  ETOT  5  -10.094352443076    -1.796E-07 2.905E-09 1.029E-06
  ETOT  6  -10.094352445013    -1.937E-09 3.379E-11 2.127E-08
- ETOT  7  -10.094352445042    -2.913E-11 4.666E-13 6.125E-10
- ETOT  8  -10.094352445043    -1.256E-12 2.924E-14 3.325E-12
- ETOT  9  -10.094352445043    -1.776E-15 4.351E-16 4.775E-14
- ETOT 10  -10.094352445043    -1.776E-15 5.143E-18 1.450E-17
+ ETOT  7  -10.094352445042    -2.914E-11 4.666E-13 6.124E-10
+ ETOT  8  -10.094352445043    -1.313E-12 2.924E-14 3.325E-12
+ ETOT  9  -10.094352445043    -8.882E-15 4.354E-16 4.787E-14
+ ETOT 10  -10.094352445043     2.309E-14 5.157E-18 1.449E-17
 
  At SCF step   10, etot is converged : 
-  for the second time, diff in etot=  1.776E-15 < toldfe=  1.000E-12
+  for the second time, diff in etot=  2.309E-14 < toldfe=  1.000E-12
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  2.50331248E-04  sigma(3 2)=  0.00000000E+00
@@ -364,7 +360,7 @@ lattice_vectors:
 lattice_lengths: [   7.50702,    7.50702,    7.50702, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.9914923E+02
-convergence: {deltae: -1.776E-15, res2:  1.450E-17, residm:  5.143E-18, diffor: null, }
+convergence: {deltae:  2.309E-14, res2:  1.449E-17, residm:  5.157E-18, diffor: null, }
 etotal    :  -1.00943524E+01
 entropy   :   0.00000000E+00
 fermie    :   7.12761064E-02
@@ -377,9 +373,9 @@ xred      :
 - [  0.0000E+00,   0.0000E+00,   0.0000E+00, Al]
 - [  2.5000E-01,   2.5000E-01,   2.5000E-01, As]
 cartesian_forces: # hartree/bohr
-- [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
-- [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
-force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
+- [ -6.81128804E-32,  -6.81128804E-32,   6.81128804E-32, ]
+- [  6.81128804E-32,   6.81128804E-32,  -6.81128804E-32, ]
+force_length_stats: {min:   1.17974970E-31, max:   1.17974970E-31, mean:   1.17974970E-31, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -391,27 +387,27 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   17.827E-19; max=  51.433E-19
+ Mean square residual over all n,k,spin=   17.872E-19; max=  51.566E-19
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.250000000000      0.250000000000      0.250000000000
- rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
+ rms dE/dt=  5.9043E-31; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
     1       0.000000000000      0.000000000000      0.000000000000
-    2       0.000000000000      0.000000000000      0.000000000000
+    2       0.000000000000      0.000000000000     -0.000000000000
 
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
     2      1.40450654002815     1.40450654002815     1.40450654002815
 
  cartesian forces (hartree/bohr) at end:
-    1     -0.00000000000000    -0.00000000000000    -0.00000000000000
-    2     -0.00000000000000    -0.00000000000000    -0.00000000000000
- frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 h/b
+    1     -0.00000000000000    -0.00000000000000     0.00000000000000
+    2      0.00000000000000     0.00000000000000    -0.00000000000000
+ frms,max,avg= 6.8112880E-32 6.8112880E-32   0.000E+00  0.000E+00  0.000E+00 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1     -0.00000000000000    -0.00000000000000    -0.00000000000000
-    2     -0.00000000000000    -0.00000000000000    -0.00000000000000
- frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
+    1     -0.00000000000000    -0.00000000000000     0.00000000000000
+    2      0.00000000000000     0.00000000000000    -0.00000000000000
+ frms,max,avg= 3.5025048E-30 3.5025048E-30   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales= 10.616530850000 10.616530850000 10.616530850000 bohr
               =  5.618026160113  5.618026160113  5.618026160113 angstroms
  prteigrs : about to open file t72o_DS11_EIG
@@ -425,16 +421,16 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 11, }
 comment             : Components of total free energy in Hartree
-kinetic             :  2.92740821510649E+00
-hartree             :  7.97512420601030E-01
+kinetic             :  2.92740821510645E+00
+hartree             :  7.97512420600950E-01
 xc                  : -4.34129937169317E+00
 Ewald energy        : -8.47467935444799E+00
 psp_core            :  7.33476114489264E-01
-local_psp           : -2.38281143523839E+00
-non_local_psp       :  6.46040966139343E-01
+local_psp           : -2.38281143523831E+00
+non_local_psp       :  6.46040966139353E-01
 total_energy        : -1.00943524450434E+01
-total_energy_eV     : -2.74681299200206E+02
-band_energy         : -6.71396043980774E-01
+total_energy_eV     : -2.74681299200207E+02
+band_energy         : -6.71396043977732E-01
 ...
 
 
@@ -543,7 +539,7 @@ force_length_stats: {min: null, max: null, mean: null, }
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   39.586E-24; max=  97.645E-24
+ Mean square residual over all n,k,spin=   39.584E-24; max=  97.645E-24
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.250000000000      0.250000000000      0.250000000000
@@ -655,7 +651,7 @@ force_length_stats: {min: null, max: null, mean: null, }
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   39.028E-24; max=  98.563E-24
+ Mean square residual over all n,k,spin=   39.026E-24; max=  98.562E-24
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.250000000000      0.250000000000      0.250000000000
@@ -767,7 +763,7 @@ force_length_stats: {min: null, max: null, mean: null, }
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   38.611E-24; max=  97.644E-24
+ Mean square residual over all n,k,spin=   38.610E-24; max=  97.645E-24
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.250000000000      0.250000000000      0.250000000000
@@ -797,9 +793,9 @@ force_length_stats: {min: null, max: null, mean: null, }
       chksymbreak           0
              ecut      3.00000000E+00 Hartree
            etotal11   -1.0094352445E+01
-            fcart11   -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
--          fftalg         312
+            fcart11   -6.8112880438E-32 -6.8112880438E-32  6.8112880438E-32
+                       6.8112880438E-32  6.8112880438E-32 -6.8112880438E-32
+-          fftalg         512
            getden11         0
            getden21        11
            getden22        11
@@ -1029,10 +1025,10 @@ P           mkmem23        15
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          1.3  wall=          1.3
+- Proc.   0 individual time (sec): cpu=          0.9  wall=          1.2
 
 ================================================================================
 
  Calculation completed.
-.Delivered   4 WARNINGs and  22 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          1.3  wall=          1.3
+.Delivered   6 WARNINGs and  23 COMMENTs to log file.
++Overall time at end (sec) : cpu=          0.9  wall=          1.2

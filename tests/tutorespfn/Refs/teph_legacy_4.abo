@@ -1,8 +1,8 @@
 
-.Version 9.7.4 of ANADDB 
-.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 10.1.4.5 of ANADDB, released Sep 2024.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2022 ABINIT group . 
+.Copyright (C) 1998-2024 ABINIT group . 
  ANADDB comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed  4 May 2022.
-- ( at 03h29 )
+.Starting date : Fri 13 Sep 2024.
+- ( at 19h03 )
   
 
 ================================================================================
@@ -65,19 +65,25 @@
 
  read the DDB information and perform some checks
 
+
+  ==== Info on the Cryst% object ====
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  3.7500000  3.7500000  G(1)= -0.1333333  0.1333333  0.1333333
  R(2)=  3.7500000  0.0000000  3.7500000  G(2)=  0.1333333 -0.1333333  0.1333333
  R(3)=  3.7500000  3.7500000  0.0000000  G(3)=  0.1333333  0.1333333 -0.1333333
  Unit cell volume ucvol=  1.0546875E+02 bohr^3
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
- Now the whole DDB is in central memory
+ Time-reversal symmetry is present
+ Reduced atomic positions [iatom, xred, symbol]:
+    1)    0.0000000  0.0000000  0.0000000  Al
+
+ DDB file with 3 blocks has been read.
 
 ================================================================================
 
  Calculation of the interatomic forces 
 
--begin at tcpu      0.031  and twall      0.038 sec
+-begin at tcpu      0.030  and twall      0.030 sec
        Homogeneous q point set in the B.Z.
  Grid q points  :        8
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -159,7 +165,7 @@
  mka2f: isotropic lambda =     8.542685E-02
  mka2f: omegalog  =     1.038371E-03 (Ha)     3.278912E+02 (Kelvin)
  mka2f: input mustar =     1.360000E-01
--mka2f: MacMillan Tc =     2.645390E+05 (Ha)     8.353470E+10 (Kelvin)
+-mka2f: MacMillan Tc =     2.645390E+05 (Ha)     8.353469E+10 (Kelvin)
 
 ================================================================================
 
@@ -179,12 +185,12 @@
   Mode number    1   Energy    0.000000E+00
  Attention : low frequency mode.
    (Could be unstable or acoustic mode)
--  1  0.00000000E+00  0.00000000E+00  4.50906598E-03
+-  1  0.00000000E+00  4.34839795E-07 -4.50906596E-03
 -     0.00000000E+00  0.00000000E+00  0.00000000E+00
   Mode number    2   Energy    0.000000E+00
  Attention : low frequency mode.
    (Could be unstable or acoustic mode)
--  1  0.00000000E+00 -4.50906598E-03  0.00000000E+00
+-  1  0.00000000E+00  4.50906596E-03  4.34840416E-07
 -     0.00000000E+00  0.00000000E+00  0.00000000E+00
   Mode number    3   Energy    0.000000E+00
  Attention : low frequency mode.
@@ -198,13 +204,13 @@
  Symmetry characters of vibration mode #   1
        degenerate with vibration modes #   2 to    3
   3.0 -3.0 -1.0  1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0 -1.0  1.0  1.0 -1.0 -1.0  1.0
-  0.0 -0.0 -0.0  0.0  0.0 -0.0 -0.0  0.0  1.0 -1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0
-  0.0 -0.0 -0.0  0.0 -0.0  0.0 -0.0  0.0  1.0 -1.0  1.0 -1.0 -1.0  1.0 -1.0  1.0
+ -0.0  0.0  0.0 -0.0 -0.0  0.0  0.0 -0.0  1.0 -1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0
+ -0.0  0.0  0.0 -0.0 -0.0  0.0 -0.0  0.0  1.0 -1.0  1.0 -1.0 -1.0  1.0 -1.0  1.0
 -
-- Proc.   0 individual time (sec): cpu=          2.3  wall=          2.3
+- Proc.   0 individual time (sec): cpu=          1.4  wall=          1.4
 
 ================================================================================
 
-+Total cpu time      2.330  and wall time      2.348 sec
++Total cpu time      1.378  and wall time      1.407 sec
 
  anaddb : the run completed succesfully.

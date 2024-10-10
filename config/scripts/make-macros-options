@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright (C) 2005-2022 ABINIT Group (Yann Pouillon)
+# Copyright (C) 2005-2024 ABINIT Group (Yann Pouillon)
 #
 # This file is part of the ABINIT software package. For license information,
 # please see the COPYING file in the top-level directory of the ABINIT source
@@ -253,7 +253,7 @@ def parse_opt(opt,opt_ivar,values):
   else:
 
     if ( values == "@float" ):
-      ret += """ if test "${%s}" != ""; then
+      ret += r""" if test "${%s}" != ""; then
     opt_ok="no"
     test "`echo "${%s}" | \\
       ${EGREP} -e '^-?[[0-9]]+\.[[0-9]]+$'`" != "" && opt_ok="yes"
@@ -281,7 +281,7 @@ def parse_opt(opt,opt_ivar,values):
 """ % (opt,opt,opt)
 
     elif ( values == "@install" ):
-      ret += """ if test "${%s}" != ""; then
+      ret += r""" if test "${%s}" != ""; then
     opt_ok="yes"
     if test "${%s}" != "no" -a "${%s}" != "yes"; then
       if test \! -d "${%s}" -o \! -r "${%s}"; then
@@ -337,7 +337,7 @@ def parse_opt(opt,opt_ivar,values):
 """ % (opt,arg,opt,arg)
 
     elif ( values == "@readabledir" ):
-      ret += """ if test "${%s}" != ""; then
+      ret += r""" if test "${%s}" != ""; then
     opt_ok="yes"
     if test \! -d "${%s}" -o \! -r "${%s}"; then
       opt_ok="no"
@@ -650,7 +650,9 @@ for arg in all_args:
 
 changed = chg_rem + chg_new + chg_mod + chg_ren + chg_dep
 if ( changed == "" ):
-  changed = "AC_MSG_NOTICE([no change in user interface to report])"
+  changed = """\
+  AC_MSG_NOTICE([])
+  AC_MSG_NOTICE([no change in user interface to report])"""
 else:
   changed = """\
   AC_MSG_NOTICE([])

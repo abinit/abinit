@@ -8,7 +8,7 @@
 !!  wrt k, and the corresponding wave functions
 !!
 !! COPYRIGHT
-!! Copyright (C) 2016-2022 ABINIT group (MJV, HM, MG)
+!! Copyright (C) 2016-2024 ABINIT group (MJV, HM, MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -747,7 +747,7 @@ type(ddkop_t) function ddkop_new(dtset, cryst, pawtab, psps, mpi_enreg, mpw, ngf
    call init_hamiltonian(new%gs_hamkq(idir), psps, pawtab, dtset%nspinor, dtset%nsppol, dtset%nspden, cryst%natom,&
      cryst%typat, cryst%xred, nfft, mgfft, ngfft, cryst%rprimd, dtset%nloalg)
      !paw_ij=paw_ij,comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,mpi_spintab=mpi_enreg%my_isppoltab,&
-     !usecprj=usecprj,ph1d=ph1d,nucdipmom=dtset%nucdipmom,use_gpu_cuda=dtset%use_gpu_cuda)
+     !usecprj=usecprj,ph1d=ph1d,nucdipmom=dtset%nucdipmom,gpu_option=dtset%gpu_option)
 
    ! Prepare application of the NL part.
    call init_rf_hamiltonian(cplex1, new%gs_hamkq(idir), new%ipert, new%rf_hamkq(idir), has_e1kbsc=.true.)
@@ -906,7 +906,7 @@ subroutine ddkop_apply(self, eig0nk, npw_k, nspinor, cwave, cwaveprj)
    do idir=1,3
      sij_opt = self%gs_hamkq(idir)%usepaw
      call getgh1c(berryopt0, cwave, cwaveprj, self%gh1c(:,:,idir), &
-       grad_berry, self%gs1c(:,:,idir), self%gs_hamkq(idir), gvnlx1, idir, self%ipert, eshift, self%mpi_enreg, optlocal0, &
+       grad_berry, self%gs1c(:,:,idir), self%gs_hamkq(idir), gvnlx1, idir, self%ipert, (/eshift/), self%mpi_enreg, 1, optlocal0, &
        optnl, opt_gvnlx1, self%rf_hamkq(idir), sij_opt, tim_getgh1c, usevnl0)
    end do
 

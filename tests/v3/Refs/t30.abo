@@ -1,8 +1,8 @@
 
-.Version 9.3.1 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 10.1.4.5 of ABINIT, released Sep 2024.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2022 ABINIT group . 
+.Copyright (C) 1998-2024 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,14 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h25 )
+.Starting date : Fri 13 Sep 2024.
+- ( at 19h08 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v3_t30/t30.in
-- output file    -> t30.out
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v3_t30/t30.abi
+- output file    -> t30.abo
 - root for input  files -> t30i
 - root for output files -> t30o
-
 
  DATASET    1 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -34,11 +33,10 @@
 -    mband =          15        mffmem =           1         mkmem =           2
        mpw =         188          nfft =        4096          nkpt =           2
 ================================================================================
-P This job should need less than                       1.818 Mbytes of memory.
+P This job should need less than                       1.935 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.088 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
-
 
  DATASET    2 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -51,11 +49,10 @@ _ WF disk file :      0.088 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 -    mband =          10        mffmem =           1         mkmem =           2
        mpw =         188          nfft =        4096          nkpt =           2
 ================================================================================
-P This job should need less than                       1.784 Mbytes of memory.
+P This job should need less than                       1.901 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.059 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
-
 
  DATASET    3 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -68,11 +65,10 @@ _ WF disk file :      0.059 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 -    mband =          10        mffmem =           1         mkmem =           2
        mpw =         188          nfft =        4096          nkpt =           2
 ================================================================================
-P This job should need less than                       1.784 Mbytes of memory.
+P This job should need less than                       1.901 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.059 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
-
 
  DATASET    4 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -85,11 +81,10 @@ _ WF disk file :      0.059 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 -    mband =          10        mffmem =           1         mkmem =           2
        mpw =         188          nfft =        4096          nkpt =           2
 ================================================================================
-P This job should need less than                       1.784 Mbytes of memory.
+P This job should need less than                       1.901 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.059 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
-
 
  DATASET    5 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -102,11 +97,10 @@ _ WF disk file :      0.059 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 -    mband =          10        mffmem =           1         mkmem =           2
        mpw =         188          nfft =        4096          nkpt =           2
 ================================================================================
-P This job should need less than                       1.784 Mbytes of memory.
+P This job should need less than                       1.901 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.059 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
-
 
  DATASET    6 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -119,7 +113,7 @@ _ WF disk file :      0.059 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 -    mband =          10        mffmem =           1         mkmem =           2
        mpw =         188          nfft =        4096          nkpt =           2
 ================================================================================
-P This job should need less than                       1.784 Mbytes of memory.
+P This job should need less than                       1.901 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.059 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
@@ -128,10 +122,10 @@ _ WF disk file :      0.059 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
 -
-- outvars: echo of selected default values                                      
--   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+- outvars: echo of selected default values
+-   iomode0 =  0 , fftalg0 =512 , wfoptalg0 =  0
 -
-- outvars: echo of global parameters not present in the input file              
+- outvars: echo of global parameters not present in the input file
 -  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
@@ -152,7 +146,7 @@ _ WF disk file :      0.059 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
          ecutsigx      1.50304505E+00 Hartree
           ecutwfn      6.00000000E+00 Hartree
            enunit           2
--          fftalg         312
+-          fftalg         512
            getscr1          0
            getscr2          0
            getscr3          2
@@ -256,12 +250,6 @@ P           mkmem           2
         optdriver4          4
         optdriver5          4
         optdriver6          4
-           ppmfrq1     0.00000000E+00 Hartree
-           ppmfrq2     6.06363869E-01 Hartree
-           ppmfrq3     6.06363869E-01 Hartree
-           ppmfrq4     0.00000000E+00 Hartree
-           ppmfrq5     0.00000000E+00 Hartree
-           ppmfrq6     0.00000000E+00 Hartree
           ppmodel1          1
           ppmodel2          1
           ppmodel3          1
@@ -389,8 +377,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.00203
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -427,8 +415,8 @@ tolerances: {tolwfr: 1.00E-16, }
  ETOT  4  -8.8591156624155    -1.719E-06 1.780E-07 7.346E-06
  ETOT  5  -8.8591156691175    -6.702E-09 5.915E-10 7.408E-09
  ETOT  6  -8.8591156691241    -6.647E-12 2.221E-13 8.464E-11
- ETOT  7  -8.8591156691242    -6.928E-14 2.832E-15 3.853E-13
- ETOT  8  -8.8591156691242     0.000E+00 9.474E-17 1.846E-15
+ ETOT  7  -8.8591156691242    -7.638E-14 2.832E-15 3.853E-13
+ ETOT  8  -8.8591156691242     5.329E-15 9.474E-17 1.846E-15
 
  At SCF step    8   max residual=  9.47E-17 < tolwfr=  1.00E-16 =>converged.
 
@@ -448,7 +436,7 @@ lattice_vectors:
 lattice_lengths: [   7.24784,    7.24784,    7.24784, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.6922266E+02
-convergence: {deltae:  0.000E+00, res2:  1.846E-15, residm:  9.474E-17, diffor: null, }
+convergence: {deltae:  5.329E-15, res2:  1.846E-15, residm:  9.474E-17, diffor: null, }
 etotal    :  -8.85911567E+00
 entropy   :   0.00000000E+00
 fermie    :   1.87386398E-01
@@ -461,9 +449,9 @@ xred      :
 - [  0.0000E+00,   0.0000E+00,   0.0000E+00, Si]
 - [  2.5000E-01,   2.5000E-01,   2.5000E-01, Si]
 cartesian_forces: # hartree/bohr
-- [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
-- [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
-force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
+- [  3.07848158E-31,  -3.07848158E-31,  -3.07848158E-31, ]
+- [ -3.07848158E-31,   3.07848158E-31,   3.07848158E-31, ]
+force_length_stats: {min:   5.33208651E-31, max:   5.33208651E-31, mean:   5.33208651E-31, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -479,23 +467,23 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.250000000000      0.250000000000      0.250000000000
- rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
+ rms dE/dt=  2.2722E-30; max dE/dt=  1.0518E-30; dE/dt below (all hartree)
     1       0.000000000000      0.000000000000      0.000000000000
-    2       0.000000000000      0.000000000000      0.000000000000
+    2      -0.000000000000      0.000000000000      0.000000000000
 
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
     2      1.35601659701187     1.35601659701187     1.35601659701187
 
  cartesian forces (hartree/bohr) at end:
-    1     -0.00000000000000    -0.00000000000000    -0.00000000000000
-    2     -0.00000000000000    -0.00000000000000    -0.00000000000000
- frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 h/b
+    1      0.00000000000000    -0.00000000000000    -0.00000000000000
+    2     -0.00000000000000     0.00000000000000     0.00000000000000
+ frms,max,avg= 3.0784816E-31 3.0784816E-31   0.000E+00  0.000E+00  0.000E+00 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1     -0.00000000000000    -0.00000000000000    -0.00000000000000
-    2     -0.00000000000000    -0.00000000000000    -0.00000000000000
- frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
+    1      0.00000000000000    -0.00000000000000    -0.00000000000000
+    2     -0.00000000000000     0.00000000000000     0.00000000000000
+ frms,max,avg= 1.5830187E-29 1.5830187E-29   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales= 10.250000000000 10.250000000000 10.250000000000 bohr
               =  5.424066388047  5.424066388047  5.424066388047 angstroms
  prteigrs : about to open file t30o_DS1_EIG
@@ -524,9 +512,9 @@ Ewald energy        : -8.40866036158725E+00
 psp_core            :  8.52154029747779E-02
 local_psp           : -2.48150743853323E+00
 non_local_psp       :  1.91834823241460E+00
-total_energy        : -8.85911566912421E+00
+total_energy        : -8.85911566912422E+00
 total_energy_eV     : -2.41068797132680E+02
-band_energy         :  2.30348102009029E-01
+band_energy         :  2.30348102009028E-01
 ...
 
 
@@ -611,7 +599,7 @@ meta: {optdriver: 3, gwcalctyp: 0, }
 
  calculating chi0 at frequencies [eV] :
   1    0.000000E+00    0.000000E+00
-  2    0.000000E+00    1.650000E+01
+  2    0.000000E+00    1.662818E+01
 
 
 --------------------------------------------------------------------------------
@@ -622,16 +610,16 @@ meta: {optdriver: 3, gwcalctyp: 0, }
     1  -0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000
         0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000
 
-    2   0.000 -11.943   0.000  -0.141   0.000  -0.141  -0.000  -0.141  -0.000
-       -0.000   0.000  -5.027  -0.000  -0.225  -0.000  -0.225   0.000  -0.225
+    2   0.000 -11.943   0.000  -0.141   0.000  -0.141   0.000  -0.141  -0.000
+       -0.000   0.000  -5.027  -0.000  -0.225   0.000  -0.225  -0.000  -0.225
 
-  chi0(G,G') at the    2 th omega   0.0000  16.5000 [eV]
+  chi0(G,G') at the    2 th omega   0.0000  16.6282 [eV]
        1       2       3       4       5       6       7       8       9
     1  -0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000
-       -0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000
+        0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000
 
-    2   0.000  -3.269   0.000   0.073  -0.000   0.073   0.000   0.073  -0.000
-       -0.000  -0.000  -1.146  -0.000  -0.063   0.000  -0.063   0.000  -0.063
+    2   0.000  -3.237  -0.000   0.072   0.000   0.072  -0.000   0.072   0.000
+       -0.000   0.000  -1.134  -0.000  -0.062   0.000  -0.062  -0.000  -0.062
 
  For q-point:  0.000010 0.000020 0.000030
   dielectric constant =  23.1737
@@ -643,19 +631,19 @@ meta: {optdriver: 3, gwcalctyp: 0, }
    Upper and lower wings at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
       0.043   0.004  -0.004  -0.011   0.011   0.011  -0.011  -0.004   0.004
-     -0.000   0.004   0.004  -0.011  -0.011   0.011   0.011  -0.004  -0.004
+      0.000   0.004   0.004  -0.011  -0.011   0.011   0.011  -0.004  -0.004
        1       2       3       4       5       6       7       8       9
       0.043   0.004  -0.004  -0.011   0.011   0.011  -0.011  -0.004   0.004
-     -0.000  -0.004  -0.004   0.011   0.011  -0.011  -0.011   0.004   0.004
+      0.000  -0.004  -0.004   0.011   0.011  -0.011  -0.011   0.004   0.004
 
 
-   Upper and lower wings at the    2 th omega   0.0000  16.5000 [eV]
+   Upper and lower wings at the    2 th omega   0.0000  16.6282 [eV]
        1       2       3       4       5       6       7       8       9
-      0.491   0.008  -0.008  -0.023   0.023   0.023  -0.023  -0.008   0.008
-     -0.000   0.008   0.008  -0.023  -0.023   0.023   0.023  -0.008  -0.008
+      0.495   0.007  -0.007  -0.022   0.022   0.022  -0.022  -0.007   0.007
+      0.000   0.007   0.007  -0.022  -0.022   0.022   0.022  -0.007  -0.007
        1       2       3       4       5       6       7       8       9
-      0.491   0.008  -0.008  -0.023   0.023   0.023  -0.023  -0.008   0.008
-     -0.000  -0.008  -0.008   0.023   0.023  -0.023  -0.023   0.008   0.008
+      0.495   0.007  -0.007  -0.022   0.022   0.022  -0.022  -0.007   0.007
+      0.000  -0.007  -0.007   0.022   0.022  -0.022  -0.022   0.007   0.007
 
 
 
@@ -668,16 +656,16 @@ meta: {optdriver: 3, gwcalctyp: 0, }
     1 -13.124  -1.678   2.920  -1.952  -2.128  -1.952  -2.128  -1.952  -2.128
         0.000  -1.678  -2.920  -1.952   2.128  -1.952   2.128  -1.952   2.128
 
-    2  -1.678  -7.367  -0.000   0.242   0.000   0.242   0.000   0.242  -0.000
-        1.678   0.000  -3.858   0.000   0.228   0.000   0.228  -0.000   0.228
+    2  -1.678  -7.367  -0.000   0.242  -0.000   0.242   0.000   0.242   0.000
+        1.678   0.000  -3.858  -0.000   0.228   0.000   0.228  -0.000   0.228
 
-  chi0(G,G') at the    2 th omega   0.0000  16.5000 [eV]
+  chi0(G,G') at the    2 th omega   0.0000  16.6282 [eV]
        1       2       3       4       5       6       7       8       9
-    1  -2.832  -0.535   0.556  -0.376  -0.498  -0.376  -0.498  -0.376  -0.498
-       -0.000  -0.535  -0.556  -0.376   0.498  -0.376   0.498  -0.376   0.498
+    1  -2.799  -0.530   0.549  -0.371  -0.492  -0.371  -0.492  -0.371  -0.492
+       -0.000  -0.530  -0.549  -0.371   0.492  -0.371   0.492  -0.371   0.492
 
-    2  -0.535  -1.891  -0.000   0.072   0.000   0.072   0.000   0.072   0.000
-        0.535   0.000  -0.835  -0.000   0.001   0.000   0.001  -0.000   0.001
+    2  -0.530  -1.871  -0.000   0.072   0.000   0.072  -0.000   0.072   0.000
+        0.530   0.000  -0.826   0.000   0.001  -0.000   0.001  -0.000   0.001
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point    2 :     45.87  [%]
 
@@ -690,16 +678,16 @@ meta: {optdriver: 3, gwcalctyp: 0, }
     1 -14.013   0.176  -2.098  -2.098   0.176  -2.246  -2.246  -2.246  -2.246
         0.000   0.176   2.098  -2.098  -0.176  -2.246   2.246  -2.246   2.246
 
-    2   0.176 -14.817  -0.000  -0.157  -0.000   0.852  -0.000   0.852   0.000
+    2   0.176 -14.817   0.000  -0.157   0.000   0.852  -0.000   0.852  -0.000
        -0.176   0.000  -3.239  -0.000  -1.773  -0.000  -0.040   0.000  -0.040
 
-  chi0(G,G') at the    2 th omega   0.0000  16.5000 [eV]
+  chi0(G,G') at the    2 th omega   0.0000  16.6282 [eV]
        1       2       3       4       5       6       7       8       9
-    1  -2.201   0.174  -0.476  -0.476   0.174  -0.385  -0.385  -0.385  -0.385
-        0.000   0.174   0.476  -0.476  -0.174  -0.385   0.385  -0.385   0.385
+    1  -2.174   0.173  -0.471  -0.471   0.173  -0.380  -0.380  -0.380  -0.380
+        0.000   0.173   0.471  -0.471  -0.173  -0.380   0.380  -0.380   0.380
 
-    2   0.174  -3.405   0.000   0.033  -0.000   0.111  -0.000   0.111   0.000
-       -0.174   0.000  -0.838  -0.000  -0.197   0.000  -0.079  -0.000  -0.079
+    2   0.173  -3.369  -0.000   0.033  -0.000   0.110   0.000   0.110  -0.000
+       -0.173  -0.000  -0.829  -0.000  -0.194   0.000  -0.078   0.000  -0.078
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point    3 :     47.58  [%]
 
@@ -712,16 +700,16 @@ meta: {optdriver: 3, gwcalctyp: 0, }
     1 -10.831  -0.280  -2.145  -0.280  -2.145  -2.145  -0.280  -2.145  -0.280
         0.000  -0.280   2.145  -0.280   2.145  -2.145   0.280  -2.145   0.280
 
-    2  -0.280 -13.493  -0.000   2.422  -0.000  -0.395  -0.000  -0.395   0.000
-        0.280   0.000  -3.432   0.000  -0.216   0.000  -0.358  -0.000  -0.358
+    2  -0.280 -13.493   0.000   2.422   0.000  -0.395  -0.000  -0.395   0.000
+        0.280   0.000  -3.432  -0.000  -0.216  -0.000  -0.358   0.000  -0.358
 
-  chi0(G,G') at the    2 th omega   0.0000  16.5000 [eV]
+  chi0(G,G') at the    2 th omega   0.0000  16.6282 [eV]
        1       2       3       4       5       6       7       8       9
-    1  -1.345   0.022  -0.361   0.022  -0.361  -0.361   0.022  -0.361   0.022
-        0.000   0.022   0.361   0.022   0.361  -0.361  -0.022  -0.361  -0.022
+    1  -1.328   0.022  -0.357   0.022  -0.357  -0.357   0.022  -0.357   0.022
+       -0.000   0.022   0.357   0.022   0.357  -0.357  -0.022  -0.357  -0.022
 
-    2   0.022  -3.378  -0.000   0.271  -0.000   0.022   0.000   0.022  -0.000
-       -0.022   0.000  -0.924  -0.000  -0.029   0.000  -0.119  -0.000  -0.119
+    2   0.022  -3.344   0.000   0.267  -0.000   0.022  -0.000   0.022   0.000
+       -0.022   0.000  -0.915   0.000  -0.029   0.000  -0.118  -0.000  -0.118
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point    4 :     61.75  [%]
 
@@ -734,16 +722,16 @@ meta: {optdriver: 3, gwcalctyp: 0, }
     1 -16.049  -1.585  -2.029  -2.323  -2.097  -2.097  -2.323  -2.029  -1.585
         0.000  -1.585   2.029  -2.323   2.097  -2.097   2.323  -2.029   1.585
 
-    2  -1.585 -16.049  -0.000  -0.101  -0.000   1.856  -0.000  -0.244   0.000
-        1.585   0.000  -2.310   0.000  -0.000   0.000   0.108  -0.000   0.000
+    2  -1.585 -16.049  -0.000  -0.101  -0.000   1.856  -0.000  -0.244  -0.000
+        1.585   0.000  -2.310  -0.000  -0.000   0.000   0.108  -0.000  -0.000
 
-  chi0(G,G') at the    2 th omega   0.0000  16.5000 [eV]
+  chi0(G,G') at the    2 th omega   0.0000  16.6282 [eV]
        1       2       3       4       5       6       7       8       9
-    1  -3.312  -0.170  -0.505  -0.529  -0.483  -0.483  -0.529  -0.505  -0.170
-        0.000  -0.170   0.505  -0.529   0.483  -0.483   0.529  -0.505   0.170
+    1  -3.275  -0.168  -0.500  -0.524  -0.478  -0.478  -0.524  -0.500  -0.168
+        0.000  -0.168   0.500  -0.524   0.478  -0.478   0.524  -0.500   0.168
 
-    2  -0.170  -3.312  -0.000  -0.064   0.000   0.175  -0.000   0.027  -0.000
-        0.170  -0.000  -0.470  -0.000   0.000  -0.000  -0.033   0.000  -0.000
+    2  -0.168  -3.275  -0.000  -0.062  -0.000   0.173   0.000   0.027  -0.000
+        0.168  -0.000  -0.465   0.000  -0.000  -0.000  -0.033   0.000  -0.000
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point    5 :     38.49  [%]
 
@@ -756,16 +744,16 @@ meta: {optdriver: 3, gwcalctyp: 0, }
     1 -15.267  -1.453  -2.149  -2.149  -1.453  -1.453  -2.149  -2.149  -1.453
         0.000  -1.453   2.149  -2.149   1.453  -1.453   2.149  -2.149   1.453
 
-    2  -1.453 -13.846   0.000  -0.014  -0.000   3.408   0.000  -0.014  -0.000
-        1.453   0.000  -1.971  -0.000  -0.000   0.000  -0.136   0.000   0.000
+    2  -1.453 -13.846  -0.000  -0.014  -0.000   3.408   0.000  -0.014   0.000
+        1.453   0.000  -1.971   0.000  -0.000   0.000  -0.136   0.000  -0.000
 
-  chi0(G,G') at the    2 th omega   0.0000  16.5000 [eV]
+  chi0(G,G') at the    2 th omega   0.0000  16.6282 [eV]
        1       2       3       4       5       6       7       8       9
-    1  -3.195  -0.304  -0.529  -0.529  -0.304  -0.304  -0.529  -0.529  -0.304
-       -0.000  -0.304   0.529  -0.529   0.304  -0.304   0.529  -0.529   0.304
+    1  -3.159  -0.300  -0.523  -0.523  -0.300  -0.300  -0.523  -0.523  -0.300
+       -0.000  -0.300   0.523  -0.523   0.300  -0.300   0.523  -0.523   0.300
 
-    2  -0.304  -3.402   0.000   0.015  -0.000   0.386   0.000   0.015  -0.000
-        0.304  -0.000  -0.520   0.000  -0.000   0.000  -0.015  -0.000  -0.000
+    2  -0.300  -3.367  -0.000   0.015   0.000   0.381   0.000   0.015   0.000
+        0.300  -0.000  -0.515   0.000  -0.000  -0.000  -0.015   0.000  -0.000
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point    6 :     39.56  [%]
 
@@ -887,8 +875,8 @@ QP_gap     :    4.443
 Delta_QP_KS:    0.752
 data: !SigmaeeData |
      Band     E0 <VxcDFT>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
-        4   3.621 -10.660 -12.321   2.871   0.778  -0.286  -9.719   0.942   4.562
-        5   7.312  -9.286  -4.719  -2.477   0.810  -0.234  -7.592   1.694   9.006
+        4   3.621 -10.660 -12.321   2.871   0.778  -0.286  -9.719   0.942   4.563
+        5   7.312  -9.286  -4.719  -2.477   0.811  -0.234  -7.592   1.694   9.006
 ...
 
 
@@ -1288,8 +1276,8 @@ data: !SigmaeeData |
            etotal4     0.0000000000E+00
            etotal5     0.0000000000E+00
            etotal6     0.0000000000E+00
-            fcart1    -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
+            fcart1     3.0784815814E-31 -3.0784815814E-31 -3.0784815814E-31
+                      -3.0784815814E-31  3.0784815814E-31  3.0784815814E-31
             fcart2     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
             fcart3     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -1300,7 +1288,7 @@ data: !SigmaeeData |
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
             fcart6     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
--          fftalg         312
+-          fftalg         512
            getscr1          0
            getscr2          0
            getscr3          2
@@ -1404,12 +1392,6 @@ P           mkmem           2
         optdriver4          4
         optdriver5          4
         optdriver6          4
-           ppmfrq1     0.00000000E+00 Hartree
-           ppmfrq2     6.06363869E-01 Hartree
-           ppmfrq3     6.06363869E-01 Hartree
-           ppmfrq4     0.00000000E+00 Hartree
-           ppmfrq5     0.00000000E+00 Hartree
-           ppmfrq6     0.00000000E+00 Hartree
           ppmodel1          1
           ppmodel2          1
           ppmodel3          1
@@ -1595,10 +1577,10 @@ P           mkmem           2
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          2.3  wall=          2.4
+- Proc.   0 individual time (sec): cpu=          1.4  wall=          1.5
 
 ================================================================================
 
  Calculation completed.
-.Delivered   6 WARNINGs and   6 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          2.3  wall=          2.4
+.Delivered   0 WARNINGs and   7 COMMENTs to log file.
++Overall time at end (sec) : cpu=          1.4  wall=          1.5

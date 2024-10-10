@@ -1,8 +1,8 @@
 
-.Version 9.3.2 of ABINIT 
-.(sequential version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 10.1.4.5 of ABINIT, released Sep 2024.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2022 ABINIT group . 
+.Copyright (C) 1998-2024 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,14 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Thu 10 Dec 2020.
-- ( at 18h19 )
+.Starting date : Fri 13 Sep 2024.
+- ( at 19h10 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_serial/bruneval_bugfix_inclvkb/tests/TestBot_MPI1/v4_t84/t84.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v4_t84/t84.abi
 - output file    -> t84.abo
 - root for input  files -> t84i
 - root for output files -> t84o
-
 
  DATASET    1 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -34,11 +33,10 @@
 -    mband =          35        mffmem =           1         mkmem =           8
        mpw =         200          nfft =        5832          nkpt =           8
 ================================================================================
-P This job should need less than                       3.148 Mbytes of memory.
+P This job should need less than                       3.317 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.856 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
 ================================================================================
-
 
  DATASET    2 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -51,11 +49,10 @@ _ WF disk file :      0.856 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
 -    mband =          16        mffmem =           1         mkmem =           8
        mpw =         200          nfft =        5832          nkpt =           8
 ================================================================================
-P This job should need less than                       2.636 Mbytes of memory.
+P This job should need less than                       2.805 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.393 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
 ================================================================================
-
 
  DATASET    3 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -68,11 +65,10 @@ _ WF disk file :      0.393 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
 -    mband =          30        mffmem =           1         mkmem =           8
        mpw =         200          nfft =        5832          nkpt =           8
 ================================================================================
-P This job should need less than                       3.012 Mbytes of memory.
+P This job should need less than                       3.181 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.734 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
 ================================================================================
-
 
  DATASET    4 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -85,7 +81,7 @@ _ WF disk file :      0.734 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
 -    mband =          30        mffmem =           1         mkmem =           8
        mpw =         200          nfft =        5832          nkpt =           8
 ================================================================================
-P This job should need less than                       3.012 Mbytes of memory.
+P This job should need less than                       3.181 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.734 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
 ================================================================================
@@ -94,10 +90,10 @@ _ WF disk file :      0.734 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
 -
-- outvars: echo of selected default values                                      
--   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+- outvars: echo of selected default values
+-   iomode0 =  0 , fftalg0 =512 , wfoptalg0 =  0
 -
-- outvars: echo of global parameters not present in the input file              
+- outvars: echo of global parameters not present in the input file
 -  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
@@ -114,7 +110,7 @@ _ WF disk file :      0.734 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
          ecutsigx      3.56069426E+00 Hartree
           ecutwfn      6.00000000E+00 Hartree
            enunit           2
--          fftalg         312
+-          fftalg         512
         freqremax1     0.00000000E+00 Hartree
         freqremax2     1.00000000E+00 Hartree
         freqremax3     0.00000000E+00 Hartree
@@ -330,8 +326,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_serial/bruneval_bugfix_inclvkb/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_serial/bruneval_bugfix_inclvkb/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -464,14 +460,14 @@ iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
 kinetic             :  3.01335511165570E+00
 hartree             :  5.52776062708892E-01
-xc                  : -3.53505959707194E+00
-Ewald energy        : -8.39800922793230E+00
+xc                  : -3.53505959707193E+00
+Ewald energy        : -8.39800922793231E+00
 psp_core            :  8.48919894711432E-02
 local_psp           : -2.49365851219965E+00
 non_local_psp       :  1.91753403130340E+00
-total_energy        : -8.85817014206475E+00
+total_energy        : -8.85817014206476E+00
 total_energy_eV     : -2.41043068032915E+02
-band_energy         :  2.24819328102812E-01
+band_energy         :  2.24819328102811E-01
 ...
 
 
@@ -580,7 +576,7 @@ meta: {optdriver: 3, gwcalctyp: 2, }
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1  -0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000
-       -0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000
+        0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000
 
     2   0.000 -15.574   0.000  -0.242   0.000  -0.187   0.000  -0.201  -0.000
        -0.000   0.000  -5.111   0.000  -0.367  -0.000  -0.349   0.000  -0.361
@@ -628,7 +624,7 @@ meta: {optdriver: 3, gwcalctyp: 2, }
   chi0(G,G') at the    7 th omega   0.0000  11.2383 [eV]
        1       2       3       4       5       6       7       8       9
     1  -0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000
-       -0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000
+        0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000
 
     2   0.000  -7.738  -0.000  -0.021   0.000   0.023   0.000   0.011  -0.000
        -0.000  -0.000  -1.774   0.000  -0.181  -0.000  -0.167   0.000  -0.177
@@ -713,10 +709,10 @@ meta: {optdriver: 3, gwcalctyp: 2, }
    Upper and lower wings at the    7 th omega   0.0000  11.2383 [eV]
        1       2       3       4       5       6       7       8       9
       0.324   0.008  -0.008  -0.024   0.024   0.024  -0.024  -0.008   0.008
-     -0.000   0.008   0.008  -0.024  -0.024   0.024   0.024  -0.008  -0.008
+      0.000   0.008   0.008  -0.024  -0.024   0.024   0.024  -0.008  -0.008
        1       2       3       4       5       6       7       8       9
       0.324   0.008  -0.008  -0.024   0.024   0.024  -0.024  -0.008   0.008
-     -0.000  -0.008  -0.008   0.024   0.024  -0.024  -0.024   0.008   0.008
+      0.000  -0.008  -0.008   0.024   0.024  -0.024  -0.024   0.008   0.008
 
 
    Upper and lower wings at the    8 th omega   0.0000  23.6669 [eV]
@@ -927,7 +923,7 @@ meta: {optdriver: 3, gwcalctyp: 2, }
     1   1.625   1.066   0.032  -1.007   0.659  -1.007   0.659   1.066   0.032
        -0.209   0.659   1.007   0.032  -1.066   0.032  -1.066   0.659   1.007
 
-    2   0.659   7.148   0.248  -0.898   1.096  -0.771   0.959   2.406   0.817
+    2   0.659   7.149   0.248  -0.898   1.096  -0.771   0.959   2.406   0.817
        -1.066 -15.547   2.990  -0.369   1.674  -0.374   1.254   0.488   3.011
 
   chi0(G,G') at the    5 th omega  27.2114   0.0000 [eV]
@@ -936,7 +932,7 @@ meta: {optdriver: 3, gwcalctyp: 2, }
        -0.033   0.315   0.111  -0.084  -0.277  -0.084  -0.283   0.317   0.112
 
     2   0.316   5.851  -0.049   0.452  -0.238   0.327  -0.264  -0.360   0.367
-       -0.283  -4.123   0.838  -0.386   1.416  -0.180   1.348   1.360  -0.106
+       -0.283  -4.123   0.838  -0.386   1.416  -0.181   1.348   1.360  -0.106
 
   chi0(G,G') at the    6 th omega   0.0000   4.0999 [eV]
        1       2       3       4       5       6       7       8       9
@@ -1084,7 +1080,7 @@ meta: {optdriver: 3, gwcalctyp: 2, }
        -0.447  -0.739  -2.233   0.098  -0.960   0.119  -0.884   0.481   0.671
 
     2  -0.739  14.237   0.434  -0.617  -2.000  -1.208  -2.021  -0.993   0.941
-        0.671 -11.548   2.630   0.103   1.404   0.354   1.278   0.400   0.468
+        0.671 -11.548   2.630   0.103   1.404   0.354   1.279   0.400   0.468
 
   chi0(G,G') at the    5 th omega  27.2114   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
@@ -1162,15 +1158,15 @@ meta: {optdriver: 3, gwcalctyp: 2, }
        -3.531  -0.341   0.870   0.998  -2.068   0.997  -2.068  -0.341   0.870
 
     2  -0.341  -2.682  -3.532   1.334  -3.305   1.532  -3.487   2.620  -5.577
-       -2.068 -14.690  -0.299  -1.117  -0.098  -1.117  -0.525  -0.850  -1.768
+       -2.068 -14.690  -0.300  -1.117  -0.098  -1.117  -0.524  -0.850  -1.768
 
   chi0(G,G') at the    5 th omega  27.2114   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1   3.285   0.906   0.012   0.086   0.793   0.087   0.793   0.906   0.011
        -0.123   0.793  -0.087   0.011  -0.906   0.012  -0.906   0.793  -0.086
 
-    2   0.793  -1.106  -0.484   0.114   3.383  -0.092   2.097   1.586  -0.123
-       -0.906 -12.868   0.559  -0.482  -0.799   0.534  -1.036   2.348   0.495
+    2   0.793  -1.106  -0.484   0.114   3.383  -0.092   2.096   1.586  -0.123
+       -0.906 -12.869   0.559  -0.482  -0.799   0.534  -1.036   2.349   0.495
 
   chi0(G,G') at the    6 th omega   0.0000   4.0999 [eV]
        1       2       3       4       5       6       7       8       9
@@ -1236,15 +1232,15 @@ meta: {optdriver: 3, gwcalctyp: 2, }
 
   chi0(G,G') at the    4 th omega  20.4085   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
-    1  12.184  -1.346  -0.370   3.772   2.803   3.888   0.616   3.885  -0.330
+    1  12.184  -1.346  -0.370   3.772   2.802   3.888   0.616   3.885  -0.330
        -5.307  -0.330  -3.885   0.616  -3.889   2.802  -3.771  -0.369   1.346
 
-    2  -0.330  11.798   0.086   0.251  -0.000  -0.656   0.092  -0.137   0.000
-        1.346  -5.141   1.816   0.598  -0.000  -0.260   1.576   0.103   0.000
+    2  -0.330  11.799   0.086   0.251  -0.000  -0.656   0.092  -0.137   0.000
+        1.346  -5.141   1.816   0.598  -0.000  -0.260   1.576   0.104   0.000
 
   chi0(G,G') at the    5 th omega  27.2114   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
-    1   4.056  -0.051   0.401   0.705   0.748   0.369   1.047   1.314  -0.125
+    1   4.056  -0.051   0.401   0.705   0.748   0.369   1.047   1.313  -0.125
        -0.302  -0.126  -1.311   1.062  -0.371   0.745  -0.696   0.406   0.050
 
     2  -0.126   4.045   0.028   0.215  -0.000   0.351  -0.111   0.082   0.000
@@ -1607,7 +1603,7 @@ data: !SigmaeeData |
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
             fcart4     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
--          fftalg         312
+-          fftalg         512
         freqremax1     0.00000000E+00 Hartree
         freqremax2     1.00000000E+00 Hartree
         freqremax3     0.00000000E+00 Hartree
@@ -1787,51 +1783,10 @@ P           mkmem           8
 
 ================================================================================
 
-- Total cpu        time (s,m,h):         17.1        0.28      0.005
-- Total wall clock time (s,m,h):         17.1        0.29      0.005
--
-- For major independent code sections, cpu and wall times (sec),
--  as well as % of the time and number of calls for node 0-
--<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = 0>
-- cpu_time =           17.1, wall_time =           17.1
--
-- routine                        cpu     %       wall     %      number of calls  Gflops    Speedup Efficacity
--                                                                  (-1=no count)
-- sigma/=fourdp                  4.880  28.6      4.897  28.6              2      -1.00        1.00       1.00
-- fourwf%(pot)                   2.588  15.2      2.605  15.2           8747      -1.00        0.99       0.99
-- projbd                         0.317   1.9      0.302   1.8          13014      -1.00        1.05       1.05
-- invars2                        0.206   1.2      0.207   1.2              4      -1.00        1.00       1.00
-- vtowfk(ssdiag)                 0.199   1.2      0.200   1.2             -1      -1.00        1.00       1.00
-- pspini                         0.178   1.0      0.178   1.0              4      -1.00        1.00       1.00
-- nonlop(apply)                  0.155   0.9      0.169   1.0           8747      -1.00        0.92       0.92
-- getghc-other                   0.123   0.7      0.122   0.7             -1      -1.00        1.01       1.01
-- timing timab                   0.108   0.6      0.108   0.6             10      -1.00        1.00       1.00
-- others (120)                   0.232   1.4      0.229   1.3             -1      -1.00        1.01       1.01
--<END_TIMER>
--
-- subtotal                       8.987  52.7      9.017  52.7                                  1.00       1.00
 
-- For major independent code sections, cpu and wall times (sec),
-- as well as % of the total time and number of calls 
+- Timing analysis has been suppressed with timopt=0
 
--<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = world>
-- cpu_time =          17.1, wall_time =          17.1
--
-- routine                         cpu     %       wall     %      number of calls Gflops    Speedup Efficacity
--                                                                  (-1=no count)
-- sigma/=fourdp                  4.880  28.6      4.897  28.6              2      -1.00        1.00       1.00
-- fourwf%(pot)                   2.588  15.2      2.605  15.2           8747      -1.00        0.99       0.99
-- projbd                         0.317   1.9      0.302   1.8          13014      -1.00        1.05       1.05
-- invars2                        0.206   1.2      0.207   1.2              4      -1.00        1.00       1.00
-- vtowfk(ssdiag)                 0.199   1.2      0.200   1.2             -1      -1.00        1.00       1.00
-- pspini                         0.178   1.0      0.178   1.0              4      -1.00        1.00       1.00
-- nonlop(apply)                  0.155   0.9      0.169   1.0           8747      -1.00        0.92       0.92
-- getghc-other                   0.123   0.7      0.122   0.7             -1      -1.00        1.01       1.01
-- timing timab                   0.108   0.6      0.108   0.6             10      -1.00        1.00       1.00
-- others (120)                   0.232   1.4      0.229   1.3             -1      -1.00        1.01       1.01
--<END_TIMER>
 
-- subtotal                       8.987  52.7      9.017  52.7                                  1.00       1.00
 
 ================================================================================
 
@@ -1915,10 +1870,10 @@ P           mkmem           8
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         17.1  wall=         17.1
+- Proc.   0 individual time (sec): cpu=          7.7  wall=          7.7
 
 ================================================================================
 
  Calculation completed.
-.Delivered   8 WARNINGs and   9 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         17.1  wall=         17.1
+.Delivered   4 WARNINGs and  10 COMMENTs to log file.
++Overall time at end (sec) : cpu=          7.7  wall=          7.7

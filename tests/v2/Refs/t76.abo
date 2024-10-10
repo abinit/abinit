@@ -1,8 +1,8 @@
 
-.Version 9.3.1 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 10.1.4.5 of ABINIT, released Sep 2024.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2022 ABINIT group . 
+.Copyright (C) 1998-2024 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,14 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h25 )
+.Starting date : Fri 13 Sep 2024.
+- ( at 19h08 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v2_t76-t77/t76.in
-- output file    -> t76.out
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v2_t76-t77/t76.abi
+- output file    -> t76.abo
 - root for input  files -> t76i
 - root for output files -> t76o
-
 
  DATASET    1 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -34,11 +33,10 @@
 -    mband =           4        mffmem =           1         mkmem =           2
        mpw =         184          nfft =        4096          nkpt =           2
 ================================================================================
-P This job should need less than                       1.744 Mbytes of memory.
+P This job should need less than                       1.860 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.024 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
-
 
  DATASET    2 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -51,11 +49,10 @@ _ WF disk file :      0.024 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 -    mband =           4        mffmem =           1         mkmem =           3
        mpw =         190          nfft =        4096          nkpt =           3
 ================================================================================
-P This job should need less than                       1.260 Mbytes of memory.
+P This job should need less than                       1.377 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.037 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
-
 
  DATASET    3 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -68,11 +65,10 @@ _ WF disk file :      0.037 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 -    mband =           4        mffmem =           1         mkmem =          17
        mpw =         180          nfft =        4096          nkpt =          17
 ================================================================================
-P This job should need less than                       1.447 Mbytes of memory.
+P This job should need less than                       1.564 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.189 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
-
 
  DATASET    4 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -85,11 +81,10 @@ _ WF disk file :      0.189 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 -    mband =           4        mffmem =           1         mkmem =           2
        mpw =         184          nfft =        4096          nkpt =           2
 ================================================================================
-P This job should need less than                       2.393 Mbytes of memory.
+P This job should need less than                       2.509 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.047 Mbytes ; DEN or POT disk file :      0.065 Mbytes.
 ================================================================================
-
 
  DATASET    5 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -102,11 +97,10 @@ _ WF disk file :      0.047 Mbytes ; DEN or POT disk file :      0.065 Mbytes.
 -    mband =           4        mffmem =           1         mkmem =           2
        mpw =         184          nfft =        4096          nkpt =           2
 ================================================================================
-P This job should need less than                       1.744 Mbytes of memory.
+P This job should need less than                       1.860 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.024 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
-
 
  DATASET    6 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -119,7 +113,7 @@ _ WF disk file :      0.024 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 -    mband =           8        mffmem =           1         mkmem =           2
        mpw =         184          nfft =        4096          nkpt =           2
 ================================================================================
-P This job should need less than                       1.834 Mbytes of memory.
+P This job should need less than                       2.067 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.047 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
@@ -128,10 +122,10 @@ _ WF disk file :      0.047 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
 -
-- outvars: echo of selected default values                                      
--   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+- outvars: echo of selected default values
+-   iomode0 =  0 , fftalg0 =512 , wfoptalg0 =  0
 -
-- outvars: echo of global parameters not present in the input file              
+- outvars: echo of global parameters not present in the input file
 -  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
@@ -144,7 +138,7 @@ _ WF disk file :      0.047 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
         bs_loband5          0
         bs_loband6          0
              ecut      5.80000000E+00 Hartree
--          fftalg         312
+-          fftalg         512
            getden1          0
            getden2          1
            getden3          1
@@ -370,8 +364,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      5.800   => boxcut(ratio)=   2.03365
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -407,8 +401,8 @@ tolerances: {tolwfr: 1.00E-14, }
  ETOT  3  -8.8582465251465    -1.437E-04 5.351E-07 2.361E-03
  ETOT  4  -8.8582479346287    -1.409E-06 7.078E-09 6.937E-06
  ETOT  5  -8.8582479417112    -7.083E-09 3.656E-11 5.344E-08
- ETOT  6  -8.8582479417765    -6.525E-11 2.952E-13 1.655E-10
- ETOT  7  -8.8582479417765    -6.750E-14 2.738E-15 6.178E-13
+ ETOT  6  -8.8582479417765    -6.526E-11 2.952E-13 1.655E-10
+ ETOT  7  -8.8582479417765    -4.796E-14 2.738E-15 6.178E-13
 
  At SCF step    7   max residual=  2.74E-15 < tolwfr=  1.00E-14 =>converged.
 
@@ -428,7 +422,7 @@ lattice_vectors:
 lattice_lengths: [   7.25711,    7.25711,    7.25711, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.7025701E+02
-convergence: {deltae: -6.750E-14, res2:  6.178E-13, residm:  2.738E-15, diffor: null, }
+convergence: {deltae: -4.796E-14, res2:  6.178E-13, residm:  2.738E-15, diffor: null, }
 etotal    :  -8.85824794E+00
 entropy   :   0.00000000E+00
 fermie    :   1.86070630E-01
@@ -490,7 +484,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
 kinetic             :  3.00784352157874E+00
-hartree             :  5.50475033042512E-01
+hartree             :  5.50475033042513E-01
 xc                  : -3.53413262691203E+00
 Ewald energy        : -8.39791921808003E+00
 psp_core            :  8.48892598836918E-02
@@ -498,7 +492,7 @@ local_psp           : -2.49161778019670E+00
 non_local_psp       :  1.92221386890730E+00
 total_energy        : -8.85824794177652E+00
 total_energy_eV     : -2.41045185070736E+02
-band_energy         :  2.22652665922316E-01
+band_energy         :  2.22652665922308E-01
 ...
 
 
@@ -691,10 +685,10 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   9.16E-15  2.42E-15  5.12E-15  5.18E-15
  -1.3943E-01 -4.4132E-02  1.6952E-01  1.6952E-01
  Non-SCF case, kpt   16 (  0.50000  0.50000  0.00000), residuals and eigenvalues=
-  2.61E-15  1.74E-15  6.37E-15  3.66E-15
+  2.61E-15  1.74E-15  6.69E-15  3.85E-15
  -7.3665E-02 -7.3665E-02  1.0775E-01  1.0775E-01
  Non-SCF case, kpt   17 (  0.50000  0.00000  0.50000), residuals and eigenvalues=
-  1.44E-16  4.20E-15  6.60E-15  6.00E-15
+  1.42E-16  4.21E-15  6.94E-15  6.31E-15
  -7.3665E-02 -7.3665E-02  1.0775E-01  1.0775E-01
 
 
@@ -730,7 +724,7 @@ force_length_stats: {min: null, max: null, mean: null, }
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   59.491E-16; max=  97.636E-16
+ Mean square residual over all n,k,spin=   59.664E-16; max=  97.636E-16
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.250000000000      0.250000000000      0.250000000000
@@ -820,7 +814,7 @@ tolerances: {tolwfr: 1.00E-14, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -8.8582479417765    -8.858E+00 2.752E-15 1.761E-28
+ ETOT  1  -8.8582479417765    -8.858E+00 2.752E-15 1.519E-28
 
  At SCF step    1   max residual=  2.75E-15 < tolwfr=  1.00E-14 =>converged.
 
@@ -840,7 +834,7 @@ lattice_vectors:
 lattice_lengths: [   7.25711,    7.25711,    7.25711, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.7025701E+02
-convergence: {deltae: -8.858E+00, res2:  1.761E-28, residm:  2.752E-15, diffor: null, }
+convergence: {deltae: -8.858E+00, res2:  1.519E-28, residm:  2.752E-15, diffor: null, }
 etotal    :  -8.85824794E+00
 entropy   :   0.00000000E+00
 fermie    :   1.86070633E-01
@@ -912,7 +906,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 iteration_state     : {dtset: 4, }
 comment             : Components of total free energy in Hartree
 kinetic             :  3.00784352157874E+00
-hartree             :  5.50475033042511E-01
+hartree             :  5.50475033042512E-01
 xc                  : -3.53413262691203E+00
 Ewald energy        : -8.39791921808003E+00
 psp_core            :  8.48892598836918E-02
@@ -977,7 +971,7 @@ tolerances: {tolwfr: 1.00E-14, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -8.8582479417765    -8.858E+00 2.751E-15 5.101E-29
+ ETOT  1  -8.8582479417765    -8.858E+00 2.751E-15 4.425E-29
 
  At SCF step    1   max residual=  2.75E-15 < tolwfr=  1.00E-14 =>converged.
 
@@ -997,7 +991,7 @@ lattice_vectors:
 lattice_lengths: [   7.25711,    7.25711,    7.25711, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.7025701E+02
-convergence: {deltae: -8.858E+00, res2:  5.101E-29, residm:  2.751E-15, diffor: null, }
+convergence: {deltae: -8.858E+00, res2:  4.425E-29, residm:  2.751E-15, diffor: null, }
 etotal    :  -8.85824794E+00
 entropy   :   0.00000000E+00
 fermie    :   1.86070633E-01
@@ -1059,7 +1053,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 iteration_state     : {dtset: 5, }
 comment             : Components of total free energy in Hartree
 kinetic             :  3.00784352157874E+00
-hartree             :  5.50475033042511E-01
+hartree             :  5.50475033042513E-01
 xc                  : -3.53413262691203E+00
 Ewald energy        : -8.39791921808003E+00
 psp_core            :  8.48892598836918E-02
@@ -1124,7 +1118,7 @@ tolerances: {tolwfr: 1.00E-14, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -8.8582479417765    -8.858E+00 2.752E-15 5.045E-29
+ ETOT  1  -8.8582479417765    -8.858E+00 2.752E-15 9.542E-29
 
  At SCF step    1   max residual=  2.75E-15 < tolwfr=  1.00E-14 =>converged.
 
@@ -1144,7 +1138,7 @@ lattice_vectors:
 lattice_lengths: [   7.25711,    7.25711,    7.25711, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.7025701E+02
-convergence: {deltae: -8.858E+00, res2:  5.045E-29, residm:  2.752E-15, diffor: null, }
+convergence: {deltae: -8.858E+00, res2:  9.542E-29, residm:  2.752E-15, diffor: null, }
 etotal    :  -8.85824794E+00
 entropy   :   0.00000000E+00
 fermie    :   1.86070633E-01
@@ -1253,7 +1247,7 @@ band_energy         :  2.22652697142222E-01
                       -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
             fcart6    -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
                       -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
--          fftalg         312
+-          fftalg         512
            getden1          0
            getden2          1
            getden3          1
@@ -1528,10 +1522,10 @@ P           mkmem6          2
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          1.2  wall=          1.3
+- Proc.   0 individual time (sec): cpu=          1.0  wall=          1.1
 
 ================================================================================
 
  Calculation completed.
-.Delivered  16 WARNINGs and   9 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          1.2  wall=          1.3
+.Delivered  22 WARNINGs and  10 COMMENTs to log file.
++Overall time at end (sec) : cpu=          1.0  wall=          1.1

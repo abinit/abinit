@@ -1,8 +1,8 @@
 
-.Version 9.9.2 of ANADDB 
-.(MPI version, prepared for a x86_64_linux_gnu10.3 computer) 
+.Version 10.1.4.5 of ANADDB, released Sep 2024.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2022 ABINIT group . 
+.Copyright (C) 1998-2024 ABINIT group . 
  ANADDB comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 27 Mar 2023.
-- ( at 11h53 )
+.Starting date : Fri 13 Sep 2024.
+- ( at 19h04 )
   
 
 ================================================================================
@@ -31,13 +31,20 @@
 
  read the DDB information and perform some checks
 
+
+  ==== Info on the Cryst% object ====
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  5.0510000  5.0510000  G(1)= -0.0989903  0.0989903  0.0989903
  R(2)=  5.0510000  0.0000000  5.0510000  G(2)=  0.0989903 -0.0989903  0.0989903
  R(3)=  5.0510000  5.0510000  0.0000000  G(3)=  0.0989903  0.0989903 -0.0989903
  Unit cell volume ucvol=  2.5772830E+02 bohr^3
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
- Now the whole DDB is in central memory
+ Time-reversal symmetry is present
+ Reduced atomic positions [iatom, xred, symbol]:
+    1)    0.0000000  0.0000000  0.0000000  Si
+    2)    0.2500000  0.2500000  0.2500000  Si
+
+ DDB file with 4 blocks has been read.
 
 ================================================================================
 
@@ -49,7 +56,7 @@
     1     z      0.000000    0.000000    0.000001    0.000001    0.000001   13.473554
     2     x     -0.000001    0.000000    0.000000  -13.473554    0.000001    0.000001
     2     y      0.000000    0.000002   -0.000000    0.000001  -13.473554   -0.000000
-    2     z     -0.000000    0.000000    0.000001    0.000000   -0.000001  -13.473554
+    2     z     -0.000000   -0.000000    0.000001    0.000000   -0.000001  -13.473554
 
 ================================================================================
 
@@ -74,7 +81,7 @@
        3               3       -0.077121        0.000000
 
  Effective charge tensors after 
- imposition of the charge neutrality,
+ imposition of the charge neutrality (if requested by user),
  and eventual restriction to some part :
    atom    displacement
          1         1    0.000000E+00    0.000000E+00    0.000000E+00
@@ -93,9 +100,9 @@
  Type-II electronic (clamped ion) flexoelectric tensor (units= nC/m) 
 
             xx          yy          zz          yz          xz          xy
-   xx   -1.437438   -1.010971   -1.010971    0.000000    0.000000   -0.000000
+   xx   -1.437438   -1.010971   -1.010971    0.000000   -0.000000   -0.000000
    yy   -1.010971   -1.437438   -1.010971    0.000000    0.000000   -0.000000
-   zz   -1.010971   -1.010971   -1.437438    0.000000    0.000000    0.000000
+   zz   -1.010971   -1.010971   -1.437438    0.000000   -0.000000    0.000000
    yz    0.000000    0.000000    0.000000   -0.229349    0.000000    0.000000
    xz    0.000000    0.000000    0.000000    0.000000   -0.229349    0.000000
    xy   -0.000000   -0.000000   -0.000000    0.000000    0.000000   -0.229349
@@ -111,7 +118,7 @@
     1     z      0.000000    0.000000    0.000001    0.000001    0.000001    6.736777   -0.000000    0.000000    6.736777
     2     x     -0.000001    0.000000    0.000000   -6.736777    0.000000    0.000000   -6.736777    0.000001    0.000001
     2     y      0.000000    0.000001   -0.000000    0.000000   -6.736777   -0.000001    0.000001   -6.736777    0.000000
-    2     z     -0.000000    0.000000    0.000001    0.000000   -0.000001   -6.736777    0.000000   -0.000000   -6.736777
+    2     z     -0.000000   -0.000000    0.000001    0.000000   -0.000001   -6.736777    0.000000   -0.000000   -6.736777
 
  Force-response internal strain tensor from long-wave magnitudes (units: Hartree/Bohr)
 
@@ -137,7 +144,7 @@
 
             xx          yy          zz          yz          xz          xy
    xx   -0.000000   -0.000000   -0.000000   -0.000000    0.000000   -0.000000
-   yy    0.000000   -0.000000   -0.000000    0.000000    0.000000   -0.000000
+   yy    0.000000    0.000000    0.000000    0.000000   -0.000000   -0.000000
    zz    0.000000    0.000000    0.000000    0.000000   -0.000000    0.000000
    yz   -0.000000   -0.000000   -0.000000   -0.111311   -0.000000   -0.000000
    xz   -0.000000    0.000000    0.000000    0.000000   -0.111311   -0.000000
@@ -236,10 +243,10 @@
    zx   -0.000000    0.000000    0.000000    0.000000   -0.340660    0.000000
    yx   -0.000000   -0.000000    0.000000    0.000000    0.000000   -0.340660
 -
-- Proc.   0 individual time (sec): cpu=          0.1  wall=          0.1
+- Proc.   0 individual time (sec): cpu=          0.0  wall=          0.0
 
 ================================================================================
 
-+Total cpu time      0.103  and wall time      0.114 sec
++Total cpu time      0.030  and wall time      0.030 sec
 
  anaddb : the run completed succesfully.

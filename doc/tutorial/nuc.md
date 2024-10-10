@@ -71,21 +71,39 @@ isotope of oxygen with a non-zero quadrupole moment.
 After running the file *tnuc_1.abi* through Abinit, you can find the following
 near the end of the output file:
 
-Electric Field Gradient Calculation 
+	Electric Field Gradient Calculation 
 
-    Atom   1, typat   1: Cq =      0.000000 MHz     eta =      0.000000
-     
-          efg eigval :     -0.152323
-    -         eigvec :      0.000000     0.000000    -1.000000
-          efg eigval :     -0.054274
-    -         eigvec :      0.707107    -0.707107    -0.000000
-          efg eigval :      0.206597
-    -         eigvec :      0.707107     0.707107     0.000000
-     
-          total efg :      0.076161     0.130436     0.000000
-          total efg :      0.130436     0.076161     0.000000
-          total efg :      0.000000     0.000000    -0.152323
- 
+
+	   atom :    1   typat :    1
+
+	   Nuclear quad. mom. (barns) :    1.0000   Cq (MHz) :    0.0000   eta :    0.0000
+
+	      efg eigval (au) :     -0.152323 ; (V/m^2) :  -1.48017693E+21
+	-         eigvec :     -0.000000    -0.000000    -1.000000
+
+	      efg eigval (au) :     -0.054274 ; (V/m^2) :  -5.27401886E+20
+	-         eigvec :      0.707107    -0.707107     0.000000
+
+	      efg eigval (au) :      0.206597 ; (V/m^2) :   2.00757882E+21
+	-         eigvec :      0.707107     0.707107    -0.000000
+
+	      total efg :      0.076161     0.130436    -0.000000
+	      total efg :      0.130436     0.076161    -0.000000
+	      total efg :     -0.000000    -0.000000    -0.152323
+
+
+	      efg_el :      0.095557     0.004024    -0.000000
+	      efg_el :      0.004024     0.095557    -0.000000
+	      efg_el :     -0.000000    -0.000000    -0.191114
+
+	      efg_ion :     -0.099183     0.005966     0.000000
+	      efg_ion :      0.005966    -0.099183     0.000000
+	      efg_ion :      0.000000     0.000000     0.198365
+
+	      efg_paw :      0.079787     0.120445     0.000000
+	      efg_paw :      0.120445     0.079787     0.000000
+	      efg_paw :      0.000000     0.000000    -0.159574
+
 This fragment gives the gradient at the first atom, which was silicon. Note
 that the gradient is not zero, but the coupling is---that's because the
 quadrupole moment of Si-29 is zero, so although there's a gradient there's
@@ -93,31 +111,35 @@ nothing in the nucleus for it to couple to.
 
 Atom 3 is an oxygen atom, and its entry in the output is:
 
-    Atom   3, typat   2: Cq =      6.615041 MHz     eta =      0.140313
-     
-          efg eigval :     -1.100599
-    -         eigvec :      0.707107    -0.707107     0.000000
-          efg eigval :      0.473085
-    -         eigvec :     -0.000000    -0.000000    -1.000000
-          efg eigval :      0.627514
-    -         eigvec :      0.707107     0.707107    -0.000000
-     
-          total efg :     -0.236543     0.864057    -0.000000
-          total efg :      0.864057    -0.236543    -0.000000
-          total efg :     -0.000000    -0.000000     0.473085
-     
-     
-          efg_el :     -0.036290    -0.075078    -0.000000
-          efg_el :     -0.075078    -0.036290    -0.000000
-          efg_el :     -0.000000    -0.000000     0.072579
-     
-          efg_ion :     -0.016807     0.291185    -0.000000
-          efg_ion :      0.291185    -0.016807    -0.000000
-          efg_ion :     -0.000000    -0.000000     0.033615
-     
-          efg_paw :     -0.183446     0.647950     0.000000
-          efg_paw :      0.647950    -0.183446     0.000000
-          efg_paw :      0.000000     0.000000     0.366891
+	   atom :    3   typat :    2
+
+	   Nuclear quad. mom. (barns) :   -0.0256   Cq (MHz) :    6.6150   eta :    0.1403
+
+	      efg eigval (au) :     -1.100599 ; (V/m^2) :  -1.06949233E+22
+	-         eigvec :      0.707107    -0.707107     0.000000
+
+	      efg eigval (au) :      0.473085 ; (V/m^2) :   4.59714112E+21
+	-         eigvec :      0.000000     0.000000    -1.000000
+
+	      efg eigval (au) :      0.627514 ; (V/m^2) :   6.09778216E+21
+	-         eigvec :      0.707107     0.707107     0.000000
+
+	      total efg :     -0.236543     0.864057     0.000000
+	      total efg :      0.864057    -0.236543     0.000000
+	      total efg :      0.000000     0.000000     0.473085
+
+
+	      efg_el :     -0.036290    -0.075078     0.000000
+	      efg_el :     -0.075078    -0.036290     0.000000
+	      efg_el :      0.000000     0.000000     0.072579
+
+	      efg_ion :     -0.016807     0.291185    -0.000000
+	      efg_ion :      0.291185    -0.016807    -0.000000
+	      efg_ion :     -0.000000    -0.000000     0.033615
+
+	      efg_paw :     -0.183446     0.647950     0.000000
+	      efg_paw :      0.647950    -0.183446     0.000000
+	      efg_paw :      0.000000     0.000000     0.366891
  
 Now we see the electric field gradient coupling, in frequency units, along
 with the asymmetry of the coupling tensor, and, finally, the three
@@ -186,7 +208,7 @@ The chemical shielding is routinely measured in NMR spectroscopy, and arises fro
 currents induced by an external magnetic field. From an energetic point of view, it can be
 understood as the joint response between an external magnetic field, and the nuclear magnetic
 dipole moment at an atomic site, that is,
-$$ \sigma_{ij} = \frac{\partial^2 E}{\partial_i m\partial_j B} $$
+$$ \sigma_{ij} = \frac{\partial^2 E}{\partial m_i\partial B_j} $$
 for shielding $\sigma$ and magnetic dipole $m$. 
 The total energy could then be viewed as
 $$ E = E^0 - m\cdot B + m_i\sigma_{ij}B_j, $$
@@ -202,7 +224,7 @@ are quite complex; in highly abbreviated form we evaluate
 $$ \partial E/\partial B_\alpha = -M_{\alpha} = \frac{i}{2}\epsilon_{\alpha\beta\gamma}\sum_n^{\mathrm{occ}} \int d\mathbf{k} 
 \langle \partial_{k_\beta} u_{n\mathbf{k}}|(H_{\mathbf{k}}+E_{\mathbf{k}})|\partial_{k_\gamma} u_{n\mathbf{k}}\rangle $$
 for the induced magnetic moment $M$ in direction $\alpha$. Notice the implied summation over the antisymmetric unit tensor $\epsilon_{\alpha\beta\gamma}$;
-the structure is hence of a cross product, which yields the circulation induced by the Hamiltonian.
+the structure is hence that of a cross product, which yields the circulation induced by the Hamiltonian.
 In the full PAW treatment implemented in Abinit there are a number of other related terms as well. Note
 in this expression the appearance of the derivatives of the wavefunctions; these are obtained from the DDK
 perturbation in Abinit, as was examined in 
@@ -215,48 +237,69 @@ making up $\sigma_{ij}$.  Here is a sample input file:
 
 {% dialog tests/tutorial/Input/tnuc_4.abi %}
 
-This file is for an isolated neon atom, that is, a neon atom at the center of a large box. There are two chained calculations, first, the ground state,
-and then, the DDK perturbation ([[rfelfd]] = 2 or equivalently [[rfddk]] = 1). In both cases, a nuclear magnetic dipole moment is applied to the
-neon atom with the input variable [[nucdipmom]]. The orbital magnetic moment calculation is triggered at the end of 
-the DDK calculation with
+This file is for an isolated neon atom, that is, a neon atom at the
+center of a large box. There are two chained calculations: first, the
+ground state, and then, the DDK perturbation ([[rfelfd]] = 2 or
+equivalently [[rfddk]] = 1). In both cases, a nuclear magnetic dipole
+moment is applied to the neon atom with the input variable
+[[nucdipmom]]. The orbital magnetic moment calculation is triggered at
+the end of the DDK calculation with
 
     orbmag2 2
 
-Both calculations must be done with the nuclear dipole moment on the atom of interest, in the direction of interest. Here, there is only a single
-atom, and due to spherical symmetry, all directions are equivalent, so it is sufficient to use
+Both calculations must be done with the nuclear dipole moment on the
+atom of interest, in the direction of interest. Here, there is only a
+single atom, and due to spherical symmetry, all directions are
+equivalent, so it is sufficient to use
 
     nucdipmom 1.0 0.0 0.0
 
-Notice that we use a dipole moment of size 1; this is purely for convenience as we will see below. Running this file should take 3 minutes or so. After
-completion you will find in the output file:
+Notice that we use a dipole moment of size 1; this is purely for
+convenience as we will see below. Running this file should take 3
+minutes or so. After completion you will find in the output file:
 
     Orbital magnetic moment computed with DFPT derivative wavefunctions
 
     Orbital magnetic moment, Cartesian directions :
-    -5.54888268E-04 -1.71209435E-14  1.51847951E-14
+    -5.54877537E-04  6.30837909E-15  4.28342968E-15
     
     
     Chern vector, Cartesian directions :
-    -2.52162344E-09 -1.72263462E-17  1.13073711E-17
+    -2.52162344E-09  1.10115145E-17  6.96089655E-18
 
-The first result is the induced magnetic moment, which is a vector--note that it points in the original dipole direction. To get the shielding, divide the
-dipole strength (1), and multiply by (-1) to get the normal NMR sign convention--the result is 554.9~ppm. This result is underconverged--the
-fully converged result, with [[ecut]]=30, is 552.1 ppm. For comparison, the all-electron, wavefunction-based calculation using post-Hartree-Fock CCSD(T) 
-of [[cite:Vaara2003relativistic]] yields 551.9 ppm, so clearly the present method is capable of excellent accuracy. 
-The second line is the Chern vector [[cite:Ceresoli2006]], that is, the integral of the Berry 
-curvature, which outside of exotic topological insulators, should be zero. We include it as a convergence check. In this fast test run we obtained
-$-2.5\times 10^{-9}$; in fully converged calculations one would like numbers about 3 orders of magnitude smaller.
+The first result is the induced magnetic moment, which is a
+vector--note that it points in the original dipole direction. To get
+the shielding, divide the dipole strength (here, 1), and multiply by
+(-1) to get the normal NMR sign convention--the result is
+554.9~ppm. This result is underconverged--the fully converged result,
+with [[ecut]]=30, is 552.1 ppm. For comparison, the all-electron,
+wavefunction-based calculation using post-Hartree-Fock CCSD(T) of
+[[cite:Vaara2003relativistic]] yields 551.9 ppm, so clearly the
+present method is capable of excellent accuracy.  The second line is
+the Chern vector [[cite:Ceresoli2006]], that is, the integral of the
+Berry curvature, which outside of exotic topological insulators,
+should be zero. We include it as a convergence check. In this fast
+test calculation we obtained $-2.5\times 10^{-9}$; in fully converged
+calculations one would like numbers about 3 orders of magnitude
+smaller.
 
-A final detail to note: the induced moment due to the filled core orbitals, is due to what is called the Lamb shielding. Usual PAW datasets do not 
-include this value, but you can add it to your input file with the variable [[lambsig]]. To compute it you must obtain the core wavefunctions, which is 
-a normal option in Atompaw (see [tutorial PAW2](/tutorial/paw2)). Then, you can integrate the core wavefunctions to generate the Lamb shielding,
-through
+A final detail to note: the induced moment due to the filled core
+orbitals, is due to what is called the Lamb shielding. Usual PAW
+datasets do not include this value, but you can add it to your input
+file with the variable [[lambsig]]. To compute it you must obtain the
+core wavefunctions, which is a normal option in Atompaw (see [tutorial
+PAW2](/tutorial/paw2)). Then, you can integrate the core wavefunctions
+to generate the Lamb shielding, through
 
 $$ \sigma_{Lamb} = \frac{\alpha^2}{3}\sum^{cores}_n \left\langle\psi_n|\frac{1}{r}|\psi_n\right\rangle $$
 
 where $\alpha$ is the fine structure constant.
 
-Moving forward, should you want to compute the shielding tensor for an atomic site in a solid, the procedure is identical, except that you will have to run the sequence 
-three times, once for each direction of the applied dipole. Then you will have obtained three component vectors $M_\alpha$, $M_\beta$, and $M_\gamma$, which you can
-assemble into a $3\times 3$ matrix, and diagonalize to find the principal values and directions. The result is the shielding tensor at the
-site of interest, and orientated with respect to the Cartesian directions.
+Moving forward, should you want to compute the shielding tensor for an
+atomic site in a solid, the procedure is identical, except that you
+will have to run the sequence three times, once for each direction of
+the applied dipole. Then you will have obtained three component
+vectors $M_\alpha$, $M_\beta$, and $M_\gamma$, which you can assemble
+into a $3\times 3$ matrix, and diagonalize to find the principal
+values and directions. The result is the shielding tensor at the site
+of interest, and orientated with respect to the Cartesian directions.

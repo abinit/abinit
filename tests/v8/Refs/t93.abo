@@ -1,8 +1,8 @@
 
-.Version 9.3.1 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 10.1.4.5 of ABINIT, released Sep 2024.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2022 ABINIT group . 
+.Copyright (C) 1998-2024 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,14 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h36 )
+.Starting date : Fri 13 Sep 2024.
+- ( at 19h15 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v8_t93/t93.in
-- output file    -> t93.out
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v8_t93/t93.abi
+- output file    -> t93.abo
 - root for input  files -> t93i
 - root for output files -> t93o
-
 
  DATASET    1 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -34,11 +33,10 @@
 -    mband =          32        mffmem =           1         mkmem =           3
        mpw =         544          nfft =       13824          nkpt =           3
 ================================================================================
-P This job should need less than                       6.832 Mbytes of memory.
+P This job should need less than                       7.254 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.799 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
 ================================================================================
-
 
  DATASET    2 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -51,11 +49,10 @@ _ WF disk file :      0.799 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
 -    mband =          32        mffmem =           1         mkmem =           3
        mpw =         544          nfft =       13824          nkpt =           3
 ================================================================================
-P This job should need less than                       6.832 Mbytes of memory.
+P This job should need less than                       7.254 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.799 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
 ================================================================================
-
 
  DATASET    3 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -68,7 +65,7 @@ _ WF disk file :      0.799 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
 -    mband =          32        mffmem =           1         mkmem =           3
        mpw =         544          nfft =       13824          nkpt =           3
 ================================================================================
-P This job should need less than                       6.832 Mbytes of memory.
+P This job should need less than                       7.254 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.799 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
 ================================================================================
@@ -77,10 +74,10 @@ _ WF disk file :      0.799 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
 -
-- outvars: echo of selected default values                                      
--   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+- outvars: echo of selected default values
+-   iomode0 =  0 , fftalg0 =512 , wfoptalg0 =  0
 -
-- outvars: echo of global parameters not present in the input file              
+- outvars: echo of global parameters not present in the input file
 -  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
@@ -93,7 +90,7 @@ _ WF disk file :      0.799 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
           ecutwfn1     0.00000000E+00 Hartree
           ecutwfn2     1.20000000E+01 Hartree
           ecutwfn3     1.20000000E+01 Hartree
--          fftalg         312
+-          fftalg         512
         freqremax1     0.00000000E+00 Hartree
         freqremax2     5.51239881E-01 Hartree
         freqremax3     0.00000000E+00 Hartree
@@ -257,8 +254,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     12.000   => boxcut(ratio)=   2.13033
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/Si_r.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/Si_r.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/Si_r.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/Si_r.psp8
 - Si    ONCVPSP  r_core=  1.60  1.72  1.92
 - 14.00000   4.00000    160518                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -296,36 +293,36 @@ tolerances: {tolwfr: 1.00E-16, }
      iter   Etot(hartree)      deltaE(h)  residm     vres2
  ETOT  1  -8.3608235884002    -8.361E+00 9.859E-03 7.458E+00
  ETOT  2  -8.3662952006456    -5.472E-03 4.101E-03 2.049E-01
- ETOT  3  -8.3663857221175    -9.052E-05 1.910E-03 1.330E-03
- ETOT  4  -8.3663861731742    -4.511E-07 1.868E-03 4.231E-05
+ ETOT  3  -8.3663857221176    -9.052E-05 1.910E-03 1.330E-03
+ ETOT  4  -8.3663861731743    -4.511E-07 1.868E-03 4.231E-05
  ETOT  5  -8.3663861801635    -6.989E-09 7.439E-04 2.051E-06
- ETOT  6  -8.3663861805121    -3.486E-10 2.691E-04 5.562E-08
- ETOT  7  -8.3663861805202    -8.059E-12 6.890E-05 1.302E-10
- ETOT  8  -8.3663861805202     1.066E-14 2.209E-05 7.090E-13
- ETOT  9  -8.3663861805202     5.329E-15 5.443E-06 1.724E-15
- ETOT 10  -8.3663861805202    -8.527E-14 1.740E-06 2.346E-17
- ETOT 11  -8.3663861805202     3.730E-14 4.287E-07 2.670E-19
- ETOT 12  -8.3663861805202    -3.020E-14 1.381E-07 3.340E-21
- ETOT 13  -8.3663861805202     6.395E-14 3.409E-08 2.125E-23
- ETOT 14  -8.3663861805202    -3.197E-14 1.108E-08 3.987E-25
- ETOT 15  -8.3663861805202    -1.776E-15 2.740E-09 4.693E-26
- ETOT 16  -8.3663861805202    -1.243E-14 8.989E-10 4.783E-26
- ETOT 17  -8.3663861805202    -3.553E-15 2.227E-10 3.857E-26
- ETOT 18  -8.3663861805202     0.000E+00 7.363E-11 4.523E-26
- ETOT 19  -8.3663861805202    -3.553E-15 1.827E-11 3.693E-26
- ETOT 20  -8.3663861805202    -1.776E-15 6.066E-12 3.836E-26
- ETOT 21  -8.3663861805202     0.000E+00 1.494E-12 3.462E-26
- ETOT 22  -8.3663861805202     1.776E-15 4.738E-13 3.748E-26
- ETOT 23  -8.3663861805202    -1.776E-15 1.374E-13 3.285E-26
- ETOT 24  -8.3663861805202     0.000E+00 5.357E-14 2.609E-26
- ETOT 25  -8.3663861805202    -1.776E-15 1.657E-14 3.017E-26
- ETOT 26  -8.3663861805202     3.553E-15 6.432E-15 2.957E-26
- ETOT 27  -8.3663861805202     0.000E+00 1.973E-15 2.523E-26
- ETOT 28  -8.3663861805202    -3.553E-15 7.686E-16 2.702E-26
- ETOT 29  -8.3663861805202     0.000E+00 2.350E-16 2.739E-26
- ETOT 30  -8.3663861805202     5.329E-15 9.360E-17 2.544E-26
+ ETOT  6  -8.3663861805121    -3.487E-10 2.691E-04 5.562E-08
+ ETOT  7  -8.3663861805201    -8.010E-12 6.890E-05 1.302E-10
+ ETOT  8  -8.3663861805202    -2.309E-14 2.209E-05 7.088E-13
+ ETOT  9  -8.3663861805202    -6.395E-14 5.443E-06 1.721E-15
+ ETOT 10  -8.3663861805203    -6.928E-14 1.740E-06 2.331E-17
+ ETOT 11  -8.3663861805203     4.974E-14 4.287E-07 2.602E-19
+ ETOT 12  -8.3663861805202     9.770E-14 1.381E-07 3.277E-21
+ ETOT 13  -8.3663861805202    -6.217E-14 3.409E-08 2.115E-23
+ ETOT 14  -8.3663861805202    -3.197E-14 1.108E-08 3.665E-25
+ ETOT 15  -8.3663861805202     0.000E+00 2.740E-09 5.254E-26
+ ETOT 16  -8.3663861805203    -7.105E-15 8.989E-10 5.245E-26
+ ETOT 17  -8.3663861805203     0.000E+00 2.227E-10 4.199E-26
+ ETOT 18  -8.3663861805203    -1.776E-15 7.363E-11 4.475E-26
+ ETOT 19  -8.3663861805203    -5.329E-15 1.827E-11 3.730E-26
+ ETOT 20  -8.3663861805203     0.000E+00 6.066E-12 3.846E-26
+ ETOT 21  -8.3663861805203     3.553E-15 1.494E-12 3.619E-26
+ ETOT 22  -8.3663861805203    -3.553E-15 4.738E-13 3.286E-26
+ ETOT 23  -8.3663861805203     0.000E+00 1.374E-13 3.159E-26
+ ETOT 24  -8.3663861805203     0.000E+00 5.357E-14 2.897E-26
+ ETOT 25  -8.3663861805203    -1.776E-15 1.657E-14 2.901E-26
+ ETOT 26  -8.3663861805203     5.329E-15 6.432E-15 3.295E-26
+ ETOT 27  -8.3663861805203     0.000E+00 1.973E-15 3.202E-26
+ ETOT 28  -8.3663861805203     0.000E+00 7.686E-16 3.281E-26
+ ETOT 29  -8.3663861805203     0.000E+00 2.350E-16 2.834E-26
+ ETOT 30  -8.3663861805203    -1.776E-15 9.690E-17 3.213E-26
 
- At SCF step   30   max residual=  9.36E-17 < tolwfr=  1.00E-16 =>converged.
+ At SCF step   30   max residual=  9.69E-17 < tolwfr=  1.00E-16 =>converged.
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -3.88625423E-04  sigma(3 2)=  0.00000000E+00
@@ -343,7 +340,7 @@ lattice_vectors:
 lattice_lengths: [   7.22451,    7.22451,    7.22451, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.6663072E+02
-convergence: {deltae:  5.329E-15, res2:  2.544E-26, residm:  9.360E-17, diffor: null, }
+convergence: {deltae: -1.776E-15, res2:  3.213E-26, residm:  9.690E-17, diffor: null, }
 etotal    :  -8.36638618E+00
 entropy   :   0.00000000E+00
 fermie    :   1.75191570E-01
@@ -356,9 +353,9 @@ xred      :
 - [  0.0000E+00,   0.0000E+00,   0.0000E+00, Si]
 - [  2.5000E-01,   2.5000E-01,   2.5000E-01, Si]
 cartesian_forces: # hartree/bohr
-- [ -9.88295937E-30,   3.50324616E-46,   9.88295937E-30, ]
-- [  9.88295937E-30,   0.00000000E+00,  -9.88295937E-30, ]
-force_length_stats: {min:   1.39766152E-29, max:   1.39766152E-29, mean:   1.39766152E-29, }
+- [  0.00000000E+00,  -3.29431979E-30,  -3.29431979E-30, ]
+- [  0.00000000E+00,   3.29431979E-30,   3.29431979E-30, ]
+force_length_stats: {min:   4.65887173E-30, max:   4.65887173E-30, mean:   4.65887173E-30, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -370,27 +367,27 @@ force_length_stats: {min:   1.39766152E-29, max:   1.39766152E-29, mean:   1.397
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   48.309E-18; max=  93.601E-18
+ Mean square residual over all n,k,spin=   47.280E-18; max=  96.901E-18
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.250000000000      0.250000000000      0.250000000000
- rms dE/dt=  5.7482E-29; max dE/dt=  8.4145E-29; dE/dt below (all hartree)
-    1      -0.000000000000     -0.000000000000      0.000000000000
-    2       0.000000000000     -0.000000000000     -0.000000000000
+ rms dE/dt=  3.7631E-29; max dE/dt=  5.0487E-29; dE/dt below (all hartree)
+    1       0.000000000000      0.000000000000      0.000000000000
+    2      -0.000000000000      0.000000000000      0.000000000000
 
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
     2      1.35165088504101     1.35165088504101     1.35165088504101
 
  cartesian forces (hartree/bohr) at end:
-    1     -0.00000000000000     0.00000000000000     0.00000000000000
-    2      0.00000000000000     0.00000000000000    -0.00000000000000
- frms,max,avg= 8.0694025E-30 9.8829594E-30   0.000E+00  0.000E+00  0.000E+00 h/b
+    1      0.00000000000000    -0.00000000000000    -0.00000000000000
+    2      0.00000000000000     0.00000000000000     0.00000000000000
+ frms,max,avg= 2.6898008E-30 3.2943198E-30   0.000E+00  0.000E+00  0.000E+00 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1     -0.00000000000000     0.00000000000000     0.00000000000000
-    2      0.00000000000000     0.00000000000000    -0.00000000000000
- frms,max,avg= 4.1494533E-28 5.0820216E-28   0.000E+00  0.000E+00  0.000E+00 e/A
+    1      0.00000000000000    -0.00000000000000    -0.00000000000000
+    2      0.00000000000000     0.00000000000000     0.00000000000000
+ frms,max,avg= 1.3831511E-28 1.6940072E-28   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales= 10.217000000000 10.217000000000 10.217000000000 bohr
               =  5.406603540164  5.406603540164  5.406603540164 angstroms
  prteigrs : about to open file t93o_DS1_EIG
@@ -407,16 +404,16 @@ force_length_stats: {min:   1.39766152E-29, max:   1.39766152E-29, mean:   1.397
 --- !EnergyTerms
 iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
-kinetic             :  3.29660454276292E+00
-hartree             :  6.26192467228721E-01
-xc                  : -3.13838997666425E+00
+kinetic             :  3.29660454276408E+00
+hartree             :  6.26192467228399E-01
+xc                  : -3.13838997666402E+00
 Ewald energy        : -8.43581958561899E+00
 psp_core            :  5.61002511661397E-01
-local_psp           : -2.40541093389006E+00
-non_local_psp       :  1.12943479400004E+00
-total_energy        : -8.36638618052023E+00
-total_energy_eV     : -2.27660945879135E+02
-band_energy         : -1.88754758765131E-02
+local_psp           : -2.40541093388900E+00
+non_local_psp       :  1.12943479399788E+00
+total_energy        : -8.36638618052026E+00
+total_energy_eV     : -2.27660945879136E+02
+band_energy         : -1.88754758767864E-02
 ...
 
 
@@ -804,37 +801,37 @@ meta: {optdriver: 3, gwcalctyp: 2, }
    Upper and lower wings at the   17 th omega   0.0000   8.4649 [eV]
        1       2       3       4       5       6       7       8       9
       0.088   0.005  -0.005  -0.014   0.014   0.014  -0.014  -0.005   0.005
-      0.000   0.005   0.005  -0.014  -0.014   0.014   0.014  -0.005  -0.005
+     -0.000   0.005   0.005  -0.014  -0.014   0.014   0.014  -0.005  -0.005
        1       2       3       4       5       6       7       8       9
       0.088   0.005  -0.005  -0.014   0.014   0.014  -0.014  -0.005   0.005
-      0.000  -0.005  -0.005   0.014   0.014  -0.014  -0.014   0.005   0.005
+     -0.000  -0.005  -0.005   0.014   0.014  -0.014  -0.014   0.005   0.005
 
 
    Upper and lower wings at the   18 th omega   0.0000  16.7088 [eV]
        1       2       3       4       5       6       7       8       9
       0.169   0.005  -0.005  -0.016   0.016   0.016  -0.016  -0.005   0.005
-      0.000   0.005   0.005  -0.016  -0.016   0.016   0.016  -0.005  -0.005
+     -0.000   0.005   0.005  -0.016  -0.016   0.016   0.016  -0.005  -0.005
        1       2       3       4       5       6       7       8       9
       0.169   0.005  -0.005  -0.016   0.016   0.016  -0.016  -0.005   0.005
-      0.000  -0.005  -0.005   0.016   0.016  -0.016  -0.016   0.005   0.005
+     -0.000  -0.005  -0.005   0.016   0.016  -0.016  -0.016   0.005   0.005
 
 
    Upper and lower wings at the   19 th omega   0.0000  29.7952 [eV]
        1       2       3       4       5       6       7       8       9
       0.228   0.005  -0.005  -0.015   0.015   0.015  -0.015  -0.005   0.005
-      0.000   0.005   0.005  -0.015  -0.015   0.015   0.015  -0.005  -0.005
+     -0.000   0.005   0.005  -0.015  -0.015   0.015   0.015  -0.005  -0.005
        1       2       3       4       5       6       7       8       9
       0.228   0.005  -0.005  -0.015   0.015   0.015  -0.015  -0.005   0.005
-      0.000  -0.005  -0.005   0.015   0.015  -0.015  -0.015   0.005   0.005
+     -0.000  -0.005  -0.005   0.015   0.015  -0.015  -0.015   0.005   0.005
 
 
    Upper and lower wings at the   20 th omega   0.0000  50.5685 [eV]
        1       2       3       4       5       6       7       8       9
       0.257   0.004  -0.004  -0.013   0.013   0.013  -0.013  -0.004   0.004
-      0.000   0.004   0.004  -0.013  -0.013   0.013   0.013  -0.004  -0.004
+     -0.000   0.004   0.004  -0.013  -0.013   0.013   0.013  -0.004  -0.004
        1       2       3       4       5       6       7       8       9
       0.257   0.004  -0.004  -0.013   0.013   0.013  -0.013  -0.004   0.004
-      0.000  -0.004  -0.004   0.013   0.013  -0.013  -0.013   0.004   0.004
+     -0.000  -0.004  -0.004   0.013   0.013  -0.013  -0.013   0.004   0.004
 
 
 
@@ -1340,13 +1337,13 @@ data: !SigmaeeData |
            etotal1    -8.3663861805E+00
            etotal2     0.0000000000E+00
            etotal3     0.0000000000E+00
-            fcart1    -9.8829593685E-30  3.5032461608E-46  9.8829593685E-30
-                       9.8829593685E-30  0.0000000000E+00 -9.8829593685E-30
+            fcart1     0.0000000000E+00 -3.2943197895E-30 -3.2943197895E-30
+                       0.0000000000E+00  3.2943197895E-30  3.2943197895E-30
             fcart2     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
             fcart3     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
--          fftalg         312
+-          fftalg         512
         freqremax1     0.00000000E+00 Hartree
         freqremax2     5.51239881E-01 Hartree
         freqremax3     0.00000000E+00 Hartree
@@ -1573,10 +1570,10 @@ P           mkmem           3
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         17.8  wall=         17.9
+- Proc.   0 individual time (sec): cpu=          7.7  wall=          7.7
 
 ================================================================================
 
  Calculation completed.
-.Delivered  17 WARNINGs and   6 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         17.8  wall=         17.9
+.Delivered  14 WARNINGs and   7 COMMENTs to log file.
++Overall time at end (sec) : cpu=          7.7  wall=          7.7

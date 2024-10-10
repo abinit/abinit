@@ -6,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2022 ABINIT group (FJ, MT)
+!!  Copyright (C) 1998-2024 ABINIT group (FJ, MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -18,6 +18,9 @@
 #endif
 
 #include "abi_common.h"
+
+! nvtx related macro definition
+#include "nvtx_macros.h"
 
 module m_atm2fft
 
@@ -35,6 +38,10 @@ module m_atm2fft
  use m_pawtab,      only : pawtab_type
  use m_fft,         only : zerosym, fourdp
  use m_mpinfo,      only : set_mpi_enreg_fft, unset_mpi_enreg_fft, initmpi_seq
+
+#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
+ use m_nvtx_data
+#endif
 
  implicit none
 
@@ -217,6 +224,10 @@ subroutine atm2fft(atindx1,atmrho,atmvloc,dyfrn,dyfrv,eltfrn,gauss,gmet,gprimd,&
  integer :: itypat,jj,js,ka,kb,kd,kg,me_fft,my_comm_fft,ndir,n1,n2,n3,nproc_fft,paral_kgb_fft
  integer :: shift1,shift2,shift3
  logical :: have_g0
+#ifdef FC_NVHPC
+!Silly trick to prevent NVHPC optimization issue
+ logical :: nothing=.false.
+#endif
  real(dp),parameter :: tolfix=1.0000001_dp, vcutgeo(3)=zero
  real(dp) :: aa,alf2pi2,bb,cc,cutoff,dbl_ig1,dbl_ig2,dbl_ig3,dd,dg1,dg2,d2g,diff
  real(dp) :: dn_at,d2n_at,d2n_at2,dq,dq2div6,dqdiv6,dqm1,dv_at,ee,ff,gauss1,gauss2,gg,gmag,gsquar,n_at
@@ -224,10 +235,12 @@ subroutine atm2fft(atindx1,atmrho,atmvloc,dyfrn,dyfrv,eltfrn,gauss,gmet,gprimd,&
  real(dp) :: tmpvi,tmpvr,v_at,xnorm
  character(len=500) :: message
  type(distribfft_type),pointer :: my_distribfft
+ type(distribfft_type),target :: my_distribfft_
  type(mpi_type) :: mpi_enreg_fft
 !arrays
  integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:),ffti2_local(:)
  real(dp), ABI_CONTIGUOUS pointer :: tvalespl(:,:),tcorespl(:,:),ttaucorespl(:,:)
+ real(dp), pointer :: dncdq0, dtaucdq0, dnvdq0
  integer,save :: idx(12)=(/1,1,2,2,3,3,3,2,3,1,2,1/)
  integer  :: delta(6)=(/1,1,1,0,0,0/)
  real(dp) :: dgm(3,3,6),d2gm(3,3,6,6),gcart(3),tsec(2)
@@ -239,7 +252,6 @@ subroutine atm2fft(atindx1,atmrho,atmvloc,dyfrn,dyfrv,eltfrn,gauss,gmet,gprimd,&
 ! *************************************************************************
 
  DBG_ENTER("COLL")
-
 !Check optional arguments
  if (present(comm_fft)) then
    if ((.not.present(paral_kgb)).or.(.not.present(me_g0))) then
@@ -255,7 +267,7 @@ subroutine atm2fft(atindx1,atmrho,atmvloc,dyfrn,dyfrv,eltfrn,gauss,gmet,gprimd,&
  if (present(distribfft)) then
    my_distribfft => distribfft
  else
-   ABI_MALLOC(my_distribfft,)
+   my_distribfft => my_distribfft_
    call init_distribfft_seq(my_distribfft,'f',n2,n3,'fourdp')
  end if
  if (n2==my_distribfft%n2_coarse) then
@@ -368,10 +380,16 @@ subroutine atm2fft(atindx1,atmrho,atmvloc,dyfrn,dyfrv,eltfrn,gauss,gmet,gprimd,&
      tcorespl => pawtab(itypat)%tcorespl
      tvalespl => pawtab(itypat)%tvalespl
      ttaucorespl => pawtab(itypat)%tcoretauspl
+     dncdq0 => pawtab(itypat)%dncdq0
+     dnvdq0 => pawtab(itypat)%dnvdq0
+     dtaucdq0 => pawtab(itypat)%dtaucdq0
    else
      tcorespl => psps%nctab(itypat)%tcorespl
      tvalespl => psps%nctab(itypat)%tvalespl
-     ttaucorespl => null()
+     ttaucorespl => psps%nctab(itypat)%ttaucorespl
+     dncdq0 => psps%nctab(itypat)%dncdq0
+     dnvdq0 => psps%nctab(itypat)%dnvdq0
+     dtaucdq0 => psps%nctab(itypat)%dtaucdq0
    end if
 
    do i3=1,n3
@@ -398,6 +416,10 @@ subroutine atm2fft(atindx1,atmrho,atmvloc,dyfrn,dyfrv,eltfrn,gauss,gmet,gprimd,&
 
 !            Compute structure factor for all atoms of given type:
              do ia=ia1,ia2
+#ifdef FC_NVHPC
+               !Silly trick to prevent NVHPC optimization issue
+               if(nothing) write(100,*) shift1,shift2,shift3
+#endif                 
                shift1=1+n1+(ia-1)*(2*n1+1)
                shift2=1+n2+(ia-1)*(2*n2+1)+natom*(2*n1+1)
                shift3=1+n3+(ia-1)*(2*n3+1)+natom*(2*n1+1+2*n2+1)
@@ -450,6 +472,8 @@ subroutine atm2fft(atindx1,atmrho,atmvloc,dyfrn,dyfrv,eltfrn,gauss,gmet,gprimd,&
                else
                  n_at=zero
                end if
+!DEBUG MJV for mGGA NC potentials
+!write (1003, *)  jj, n_at, '#optn==1 jj n_at xccc/xcctau in recip space'
              end if
 
 !            Compute sum of local atomic potentials or densities
@@ -547,21 +571,13 @@ subroutine atm2fft(atindx1,atmrho,atmvloc,dyfrn,dyfrv,eltfrn,gauss,gmet,gprimd,&
                if (optn==1) then
                  if (have_g0) then
                    if (optn2==1) then
-                     if (usepaw ==1) then
-                       dn_at=pawtab(itypat)%dncdq0
-                     else
-                       dn_at=psps%nctab(itypat)%dncdq0
-                     end if
+                     dn_at=dncdq0
                    else if (optn2==2) then
-                     if (usepaw == 1) then
-                       dn_at=pawtab(itypat)%dnvdq0
-                     else
-                       dn_at=psps%nctab(itypat)%dnvdq0
-                     end if
+                      dn_at=dnvdq0
                    else if (optn2==3) then
                      dn_at=-two*gauss1*alf2pi2
-                   else if (optn2==4.and.usepaw==1) then
-                     dn_at=pawtab(itypat)%dtaucdq0
+                   else if (optn2==4) then
+                     dn_at=dtaucdq0
                    end if
                    if (opteltfr==1) then
                      d2n_at = 0
@@ -863,7 +879,6 @@ subroutine atm2fft(atindx1,atmrho,atmvloc,dyfrn,dyfrv,eltfrn,gauss,gmet,gprimd,&
 
  if (.not.present(distribfft)) then
    call destroy_distribfft(my_distribfft)
-   ABI_FREE(my_distribfft)
  end if
 
  DBG_EXIT("COLL")
@@ -1018,17 +1033,24 @@ subroutine dfpt_atm2fft(atindx,cplex,gmet,gprimd,gsqcut,idir,ipert,&
  integer :: ii,itypat,jj,me_fft,my_comm_fft,n1,n2,n3,nattyp,nproc_fft,ntype,paral_kgb_fft
  integer :: optn,optv,optn2,shift1,shift2,shift3,type1,type2
  logical :: have_g0,qeq0,qeq05
+#ifdef FC_NVHPC
+!Silly trick to prevent NVHPC optimization issue
+ logical :: nothing=.false.
+#endif
  real(dp),parameter :: tolfix=1.0000001_dp
  real(dp) :: aa,alf2pi2,bb,cc,cutoff,dd,diff,dq,dq2div6,dqdiv6,dqm1,ee,ff
  real(dp) :: gauss1,gauss2,gmag,gq1,gq2,gq3,gsquar,n_at,dn_at,ph12i,ph12r,ph1i
  real(dp) :: ph1r,ph2i,ph2r,ph3i,ph3r,phqim,phqre,qxred2pi
  real(dp) :: sfi,sfqi,sfqr,sfr,term_n,term_v,v_at,dv_at,xnorm
  type(distribfft_type),pointer :: my_distribfft
+ type(distribfft_type),target :: my_distribfft_
  type(mpi_type) :: mpi_enreg_fft
 !arrays
  integer :: eps1(6)=(/1,2,3,2,3,1/),eps2(6)=(/1,2,3,3,1,2/),jdir(ndir)
  integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:)
  real(dp), ABI_CONTIGUOUS pointer :: tvalespl(:,:),tcorespl(:,:)
+ real(dp), ABI_CONTIGUOUS pointer :: ttaucorespl(:,:)
+ real(dp), pointer :: dncdq0, dtaucdq0, dnvdq0
  real(dp) ::  gq(6),gcart(3)
  real(dp),allocatable :: phim_igia(:),phre_igia(:),workn(:,:,:),workv(:,:,:)
 
@@ -1039,6 +1061,7 @@ subroutine dfpt_atm2fft(atindx,cplex,gmet,gprimd,gsqcut,idir,ipert,&
 ! *************************************************************************
 
  DBG_ENTER("COLL")
+ ABI_NVTX_START_RANGE(NVTX_DFPT_ATM2FFT)
 
 !  Check optional arguments
  if (present(comm_fft)) then
@@ -1132,8 +1155,8 @@ subroutine dfpt_atm2fft(atindx,cplex,gmet,gprimd,gsqcut,idir,ipert,&
    if (present(distribfft)) then
      my_distribfft => distribfft
    else
-     ABI_MALLOC(my_distribfft,)
-     call init_distribfft_seq(my_distribfft,'f',n2,n3,'fourdp')
+     my_distribfft => my_distribfft_
+     call init_distribfft_seq(my_distribfft_,'f',n2,n3,'fourdp')
    end if
    if (n2==my_distribfft%n2_coarse) then
      fftn2_distrib => my_distribfft%tab_fftdp2_distrib
@@ -1213,9 +1236,17 @@ subroutine dfpt_atm2fft(atindx,cplex,gmet,gprimd,gsqcut,idir,ipert,&
      if (usepaw == 1) then
        tcorespl => pawtab(itypat)%tcorespl
        tvalespl => pawtab(itypat)%tvalespl
+       ttaucorespl => pawtab(itypat)%tcoretauspl
+       dncdq0 => pawtab(itypat)%dncdq0
+       dnvdq0 => pawtab(itypat)%dnvdq0
+       dtaucdq0 => pawtab(itypat)%dtaucdq0
      else
        tcorespl => psps%nctab(itypat)%tcorespl
        tvalespl => psps%nctab(itypat)%tvalespl
+       ttaucorespl => psps%nctab(itypat)%ttaucorespl
+       dncdq0 => psps%nctab(itypat)%dncdq0
+       dnvdq0 => psps%nctab(itypat)%dnvdq0
+       dtaucdq0 => psps%nctab(itypat)%dtaucdq0
      end if
 
      ii=0
@@ -1262,6 +1293,10 @@ subroutine dfpt_atm2fft(atindx,cplex,gmet,gprimd,gsqcut,idir,ipert,&
                phim_igia(:) = zero
 
                do ia=ia1,ia2
+#ifdef FC_NVHPC
+                 !Silly trick to prevent NVHPC optimization issue
+                 if(nothing) write(100,*) shift1,shift2,shift3
+#endif                 
                  shift1=1+n1+(ia-1)*(2*n1+1)
                  shift2=1+n2+(ia-1)*(2*n2+1)+natom*(2*n1+1)
                  shift3=1+n3+(ia-1)*(2*n3+1)+natom*(2*n1+1+2*n2+1)
@@ -1316,17 +1351,9 @@ subroutine dfpt_atm2fft(atindx,cplex,gmet,gprimd,gsqcut,idir,ipert,&
 !                Also get (dn^AT(q)/dq)/q:
                  if (have_g0) then
                    if (optn2==1) then
-                     if (usepaw == 1) then
-                       dn_at=pawtab(itypat)%dncdq0
-                     else
-                       dn_at=psps%nctab(itypat)%dncdq0
-                     end if
+                     dn_at=dncdq0
                    else if (optn2==2) then
-                     if (usepaw == 1) then
-                       dn_at=pawtab(itypat)%dnvdq0
-                     else
-                       dn_at=psps%nctab(itypat)%dnvdq0
-                     end if
+                     dn_at=dnvdq0
                    else if (optn2==3) then
                      dn_at=-two*gauss1*alf2pi2
                    end if
@@ -1511,12 +1538,12 @@ subroutine dfpt_atm2fft(atindx,cplex,gmet,gprimd,gsqcut,idir,ipert,&
 
    if (.not.present(distribfft)) then
      call destroy_distribfft(my_distribfft)
-     ABI_FREE(my_distribfft)
    end if
 
 !  End the condition of non-electric-field
  end if
 
+ ABI_NVTX_END_RANGE()
  DBG_EXIT("COLL")
 
 end subroutine dfpt_atm2fft

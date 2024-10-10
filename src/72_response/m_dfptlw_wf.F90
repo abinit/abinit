@@ -7,7 +7,7 @@
 !!  FIXME: add description.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2022 ABINIT group (MR)
+!!  Copyright (C) 2022-2024 ABINIT group (MR)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -277,7 +277,7 @@ subroutine dfpt_1wf(cg,cg1,cg2,cplex,ddk_f,d2_dkdk_f,d2_dkdk_f2,&
    
    !Compute < g |\partial_{gamma} H^{(0)} | u_{i,k}^{\lambda2} >
    call getgh1c(berryopt,cwavef2,dum_cwaveprj,gv1c,dum_grad_berry,&
- & dum_gs1,gs_hamkq,dum_gvnl1,i3dir,natom+1,dum_lambda,mpi_enreg,optlocal,&
+ & dum_gs1,gs_hamkq,dum_gvnl1,i3dir,natom+1,(/dum_lambda/),mpi_enreg,1,optlocal,&
  & optnl,opt_gvnl1,rf_hamkq,sij_opt,tim_getgh1c,usevnl)
     
    !Apply the dot product with the ket wf (take into account occupation here)

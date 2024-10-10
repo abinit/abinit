@@ -1,8 +1,8 @@
 
-.Version 9.7.4 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 10.1.4.5 of ABINIT, released Sep 2024.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2022 ABINIT group . 
+.Copyright (C) 1998-2024 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,19 +14,18 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed  4 May 2022.
-- ( at 01h14 )
+.Starting date : Fri 13 Sep 2024.
+- ( at 19h15 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Test_suite/v8_t87-t88-t89/t89.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v8_t87-t88-t89/t89.abi
 - output file    -> t89.abo
 - root for input  files -> t89i
 - root for output files -> t89o
 
 - inpspheads : Reading pseudopotential header in XML form from 
--   /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Al.xml
+-   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Al.xml
 - inpspheads : Reading pseudopotential header in XML form from 
--   /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/As.LDA_PW-JTH_sp.xml
-
+-   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/As.LDA_PW-JTH_sp.xml
  DATASET    5 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  5 (RF).
@@ -44,7 +43,6 @@ P This job should need less than                       2.589 Mbytes of memory.
 _ WF disk file :      0.280 Mbytes ; DEN or POT disk file :      0.053 Mbytes.
 ================================================================================
 
-
  DATASET    6 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  6 (RF).
@@ -61,7 +59,6 @@ P This job should need less than                       2.589 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.280 Mbytes ; DEN or POT disk file :      0.053 Mbytes.
 ================================================================================
-
 
  DATASET    7 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
@@ -85,10 +82,10 @@ _ WF disk file :      0.280 Mbytes ; DEN or POT disk file :      0.091 Mbytes.
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
 -
-- outvars: echo of selected default values                                      
--   iomode0 =  0 , fftalg0 =312 , wfoptalg0 = 10
+- outvars: echo of selected default values
+-   iomode0 =  0 , fftalg0 =512 , wfoptalg0 = 10
 -
-- outvars: echo of global parameters not present in the input file              
+- outvars: echo of global parameters not present in the input file
 -  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
@@ -107,7 +104,7 @@ _ WF disk file :      0.280 Mbytes ; DEN or POT disk file :      0.091 Mbytes.
    d3e_pert3_elfd6          0
    d3e_pert3_elfd7          1
              ecut      3.50000000E+00 Hartree
--          fftalg         312
+-          fftalg         512
            getddk           3
          getdelfd5          0
          getdelfd6          4
@@ -279,9 +276,9 @@ meta: {optdriver: 1, }
          ecut(hartree)=      7.000   => boxcut(ratio)=   2.01497
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Al.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Al.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Al.xml
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Al.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Al.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Al.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.90363307
@@ -299,9 +296,9 @@ meta: {optdriver: 1, }
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/As.LDA_PW-JTH_sp.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/As.LDA_PW-JTH_sp.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/As.LDA_PW-JTH_sp.xml
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/As.LDA_PW-JTH_sp.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/As.LDA_PW-JTH_sp.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/As.LDA_PW-JTH_sp.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 2.10391912
@@ -352,7 +349,7 @@ tolerances: {tolwfr: 1.00E-20, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   1445.7566278310      1.446E+03 5.252E-21 0.000E+00
+-ETOT  1   1445.7566278308      1.446E+03 5.252E-21 0.000E+00
 
  At SCF step    1   max residual=  5.25E-21 < tolwfr=  1.00E-20 =>converged.
 ================================================================================
@@ -391,7 +388,7 @@ tolerances: {tolwfr: 1.00E-20, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   1445.7566278170      1.446E+03 5.252E-21 0.000E+00
+-ETOT  1   1445.7566278168      1.446E+03 5.252E-21 0.000E+00
 
  At SCF step    1   max residual=  5.25E-21 < tolwfr=  1.00E-20 =>converged.
 ================================================================================
@@ -430,7 +427,7 @@ tolerances: {tolwfr: 1.00E-20, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   1445.7566278021      1.446E+03 5.252E-21 0.000E+00
+-ETOT  1   1445.7566278019      1.446E+03 5.252E-21 0.000E+00
 
  At SCF step    1   max residual=  5.25E-21 < tolwfr=  1.00E-20 =>converged.
 ================================================================================
@@ -470,7 +467,7 @@ tolerances: {tolwfr: 1.00E-20, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   817.18443525582      8.172E+02 8.607E-21 0.000E+00
+-ETOT  1   817.18443525647      8.172E+02 8.607E-21 0.000E+00
 
  At SCF step    1   max residual=  8.61E-21 < tolwfr=  1.00E-20 =>converged.
 ================================================================================
@@ -510,14 +507,14 @@ tolerances: {tolwfr: 1.00E-20, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   817.18443526811      8.172E+02 8.607E-21 0.000E+00
+-ETOT  1   817.18443526876      8.172E+02 8.607E-21 0.000E+00
 
  At SCF step    1   max residual=  8.61E-21 < tolwfr=  1.00E-20 =>converged.
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   10.310E-22; max=  86.074E-22
+ Mean square residual over all n,k,spin=   10.310E-22; max=  86.073E-22
 
  Two components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -550,7 +547,7 @@ tolerances: {tolwfr: 1.00E-20, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   817.18443528132      8.172E+02 8.607E-21 0.000E+00
+-ETOT  1   817.18443528197      8.172E+02 8.607E-21 0.000E+00
 
  At SCF step    1   max residual=  8.61E-21 < tolwfr=  1.00E-20 =>converged.
 ================================================================================
@@ -662,7 +659,7 @@ tolerances: {tolwfr: 1.00E-18, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  -25131.460078494     -2.513E+04 4.934E-19 0.000E+00
+-ETOT  1  -25131.460078586     -2.513E+04 4.934E-19 0.000E+00
 
  At SCF step    1   max residual=  4.93E-19 < tolwfr=  1.00E-18 =>converged.
 ================================================================================
@@ -703,7 +700,7 @@ tolerances: {tolwfr: 1.00E-18, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  -25131.460079467     -2.513E+04 4.934E-19 0.000E+00
+-ETOT  1  -25131.460079558     -2.513E+04 4.934E-19 0.000E+00
 
  At SCF step    1   max residual=  4.93E-19 < tolwfr=  1.00E-18 =>converged.
 ================================================================================
@@ -744,14 +741,14 @@ tolerances: {tolwfr: 1.00E-18, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  -25131.460080259     -2.513E+04 9.694E-19 0.000E+00
+-ETOT  1  -25131.460080350     -2.513E+04 9.693E-19 0.000E+00
 
  At SCF step    1   max residual=  9.69E-19 < tolwfr=  1.00E-18 =>converged.
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   85.653E-21; max=  96.935E-20
+ Mean square residual over all n,k,spin=   85.653E-21; max=  96.928E-20
 
  Two components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -786,7 +783,7 @@ tolerances: {tolwfr: 1.00E-18, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  -5473.8704686069     -5.474E+03 6.318E-19 0.000E+00
+-ETOT  1  -5473.8704686523     -5.474E+03 6.318E-19 0.000E+00
 
  At SCF step    1   max residual=  6.32E-19 < tolwfr=  1.00E-18 =>converged.
 ================================================================================
@@ -828,7 +825,7 @@ tolerances: {tolwfr: 1.00E-18, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  -5473.8704689993     -5.474E+03 6.318E-19 0.000E+00
+-ETOT  1  -5473.8704690448     -5.474E+03 6.318E-19 0.000E+00
 
  At SCF step    1   max residual=  6.32E-19 < tolwfr=  1.00E-18 =>converged.
 ================================================================================
@@ -870,14 +867,14 @@ tolerances: {tolwfr: 1.00E-18, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  -5473.8704689467     -5.474E+03 6.318E-19 0.000E+00
+-ETOT  1  -5473.8704689922     -5.474E+03 6.318E-19 0.000E+00
 
  At SCF step    1   max residual=  6.32E-19 < tolwfr=  1.00E-18 =>converged.
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   80.918E-21; max=  63.175E-20
+ Mean square residual over all n,k,spin=   80.917E-21; max=  63.175E-20
 
  Two components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -912,7 +909,7 @@ tolerances: {tolwfr: 1.00E-18, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  -5473.8704679299     -5.474E+03 6.318E-19 0.000E+00
+-ETOT  1  -5473.8704679753     -5.474E+03 6.318E-19 0.000E+00
 
  At SCF step    1   max residual=  6.32E-19 < tolwfr=  1.00E-18 =>converged.
 ================================================================================
@@ -954,7 +951,7 @@ tolerances: {tolwfr: 1.00E-18, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  -5473.8704678575     -5.474E+03 6.318E-19 0.000E+00
+-ETOT  1  -5473.8704679029     -5.474E+03 6.318E-19 0.000E+00
 
  At SCF step    1   max residual=  6.32E-19 < tolwfr=  1.00E-18 =>converged.
 ================================================================================
@@ -996,7 +993,7 @@ tolerances: {tolwfr: 1.00E-18, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  -5473.8704683650     -5.474E+03 6.318E-19 0.000E+00
+-ETOT  1  -5473.8704684106     -5.474E+03 6.318E-19 0.000E+00
 
  At SCF step    1   max residual=  6.32E-19 < tolwfr=  1.00E-18 =>converged.
 ================================================================================
@@ -1592,7 +1589,7 @@ NONLINEAR :  perts :  1.2 /  4.1 /  4.3
          eHxc21_nhat/2 =         1.21933852,        0.00000000
                 exc3/6 =         1.51641897,        0.00000000
             exc3_paw/6 =         0.04195004,        0.00000000
- >>>>>>>>>>>>>>> e3tot =         1.15453153,        0.00000000
+ >>>>>>>>>>>>>>> e3tot =         1.15453154,        0.00000000
 
 -inwffil : will read wavefunctions from disk file t89o_DS4_1WF11
 -dfptnl_loop : read the wavefunctions from file: t89o_DS4_1WF11
@@ -1977,7 +1974,7 @@ NONLINEAR :  perts :  2.1 /  4.2 /  4.3
 
 NONLINEAR :  perts :  2.1 /  4.3 /  4.3
 
-        sum_psi1H1psi1 =        75.65640299,        0.00000000
+        sum_psi1H1psi1 =        75.65640300,        0.00000000
    sum_lambda1psi1psi1 =        11.11006110,        0.00000000
  sum_lambda1psi0S1psi1 =        -2.71328760,        0.00000000
        sum_psi0H2psi1a =        -3.41694776,        0.00000000
@@ -2006,7 +2003,7 @@ NONLINEAR :  perts :  2.2 /  4.1 /  4.1
          eHxc21_nhat/2 =        -5.35142783,        0.00000000
                 exc3/6 =         1.68584527,        0.00000000
             exc3_paw/6 =         0.01401979,        0.00000000
- >>>>>>>>>>>>>>> e3tot =        97.25370700,        0.00000000
+ >>>>>>>>>>>>>>> e3tot =        97.25370701,        0.00000000
 
 -inwffil : will read wavefunctions from disk file t89o_DS4_1WF11
 -dfptnl_loop : read the wavefunctions from file: t89o_DS4_1WF11
@@ -2485,7 +2482,7 @@ NONLINEAR :  perts :  4.1 /  4.2 /  4.1
 
 NONLINEAR :  perts :  4.1 /  4.3 /  4.1
 
-        sum_psi1H1psi1 =      -267.91887038,        0.00000000
+        sum_psi1H1psi1 =      -267.91887037,        0.00000000
    sum_lambda1psi1psi1 =       -78.35007938,        0.00000000
  sum_lambda1psi0S1psi1 =         0.00000000,        0.00000000
        sum_psi0H2psi1a =         0.00000000,        0.00000000
@@ -2609,7 +2606,7 @@ NONLINEAR :  perts :  4.1 /  4.1 /  4.2
          eHxc21_nhat/2 =         0.00000000,        0.00000000
                 exc3/6 =         6.36815787,        0.00000000
             exc3_paw/6 =        -0.24796323,        0.00000000
- >>>>>>>>>>>>>>> e3tot =      -305.03498252,        0.00000000
+ >>>>>>>>>>>>>>> e3tot =      -305.03498251,        0.00000000
 
 -inwffil : will read wavefunctions from disk file t89o_DS4_1WF11
 -dfptnl_loop : read the wavefunctions from file: t89o_DS4_1WF11
@@ -2636,7 +2633,7 @@ NONLINEAR :  perts :  4.1 /  4.2 /  4.2
 
 NONLINEAR :  perts :  4.1 /  4.3 /  4.2
 
-        sum_psi1H1psi1 =       544.66728984,        0.00000000
+        sum_psi1H1psi1 =       544.66728983,        0.00000000
    sum_lambda1psi1psi1 =       181.16804013,        0.00000000
  sum_lambda1psi0S1psi1 =         0.00000000,        0.00000000
        sum_psi0H2psi1a =         0.00000000,        0.00000000
@@ -2760,7 +2757,7 @@ NONLINEAR :  perts :  4.1 /  4.1 /  4.3
          eHxc21_nhat/2 =         0.00000000,        0.00000000
                 exc3/6 =         6.36815787,        0.00000000
             exc3_paw/6 =        -0.24796315,        0.00000000
- >>>>>>>>>>>>>>> e3tot =      -305.03498244,        0.00000000
+ >>>>>>>>>>>>>>> e3tot =      -305.03498243,        0.00000000
 
 -inwffil : will read wavefunctions from disk file t89o_DS4_1WF11
 -dfptnl_loop : read the wavefunctions from file: t89o_DS4_1WF11
@@ -2769,7 +2766,7 @@ NONLINEAR :  perts :  4.1 /  4.1 /  4.3
 
 NONLINEAR :  perts :  4.1 /  4.2 /  4.3
 
-        sum_psi1H1psi1 =       544.66728984,        0.00000000
+        sum_psi1H1psi1 =       544.66728983,        0.00000000
    sum_lambda1psi1psi1 =       181.16804013,        0.00000000
  sum_lambda1psi0S1psi1 =         0.00000000,        0.00000000
        sum_psi0H2psi1a =         0.00000000,        0.00000000
@@ -2778,7 +2775,7 @@ NONLINEAR :  perts :  4.1 /  4.2 /  4.3
          eHxc21_nhat/2 =         0.00000000,        0.00000000
                 exc3/6 =       -14.25577379,        0.00000000
             exc3_paw/6 =         0.49030223,        0.00000000
- >>>>>>>>>>>>>>> e3tot =       712.06985841,        0.00000000
+ >>>>>>>>>>>>>>> e3tot =       712.06985840,        0.00000000
 
 -inwffil : will read wavefunctions from disk file t89o_DS4_1WF12
 -dfptnl_loop : read the wavefunctions from file: t89o_DS4_1WF12
@@ -2930,7 +2927,7 @@ NONLINEAR :  perts :  4.2 /  4.2 /  4.2
          eHxc21_nhat/2 =         0.00000000,        0.00000000
                 exc3/6 =        -9.81716730,        0.00000000
             exc3_paw/6 =         0.50433284,        0.00000000
- >>>>>>>>>>>>>>> e3tot =       822.28107684,        0.00000000
+ >>>>>>>>>>>>>>> e3tot =       822.28107683,        0.00000000
 
 -inwffil : will read wavefunctions from disk file t89o_DS4_1WF12
 -dfptnl_loop : read the wavefunctions from file: t89o_DS4_1WF12
@@ -3054,7 +3051,7 @@ NONLINEAR :  perts :  4.2 /  2.3 /  4.3
 
 NONLINEAR :  perts :  4.2 /  4.1 /  4.3
 
-        sum_psi1H1psi1 =       544.66728983,        0.00000000
+        sum_psi1H1psi1 =       544.66728982,        0.00000000
    sum_lambda1psi1psi1 =       181.16804012,        0.00000000
  sum_lambda1psi0S1psi1 =         0.00000000,        0.00000000
        sum_psi0H2psi1a =         0.00000000,        0.00000000
@@ -3072,7 +3069,7 @@ NONLINEAR :  perts :  4.2 /  4.1 /  4.3
 
 NONLINEAR :  perts :  4.2 /  4.2 /  4.3
 
-        sum_psi1H1psi1 =      -210.02927351,        0.00000000
+        sum_psi1H1psi1 =      -210.02927350,        0.00000000
    sum_lambda1psi1psi1 =      -101.12590366,        0.00000000
  sum_lambda1psi0S1psi1 =         0.00000000,        0.00000000
        sum_psi0H2psi1a =         0.00000000,        0.00000000
@@ -3090,7 +3087,7 @@ NONLINEAR :  perts :  4.2 /  4.2 /  4.3
 
 NONLINEAR :  perts :  4.2 /  4.3 /  4.3
 
-        sum_psi1H1psi1 =      -391.74614579,        0.00000000
+        sum_psi1H1psi1 =      -391.74614578,        0.00000000
    sum_lambda1psi1psi1 =      -101.12590365,        0.00000000
  sum_lambda1psi0S1psi1 =         0.00000000,        0.00000000
        sum_psi0H2psi1a =         0.00000000,        0.00000000
@@ -3215,7 +3212,7 @@ NONLINEAR :  perts :  4.3 /  4.1 /  4.3
          eHxc21_nhat/2 =         0.00000000,        0.00000000
                 exc3/6 =         6.36815787,        0.00000000
             exc3_paw/6 =        -0.24796326,        0.00000000
- >>>>>>>>>>>>>>> e3tot =      -340.14875505,        0.00000000
+ >>>>>>>>>>>>>>> e3tot =      -340.14875504,        0.00000000
 
 -inwffil : will read wavefunctions from disk file t89o_DS4_1WF11
 -dfptnl_loop : read the wavefunctions from file: t89o_DS4_1WF11
@@ -3233,7 +3230,7 @@ NONLINEAR :  perts :  4.3 /  4.2 /  4.3
          eHxc21_nhat/2 =         0.00000000,        0.00000000
                 exc3/6 =         6.36815787,        0.00000000
             exc3_paw/6 =        -0.24796320,        0.00000000
- >>>>>>>>>>>>>>> e3tot =      -340.14875499,        0.00000000
+ >>>>>>>>>>>>>>> e3tot =      -340.14875498,        0.00000000
 
 -inwffil : will read wavefunctions from disk file t89o_DS4_1WF12
 -dfptnl_loop : read the wavefunctions from file: t89o_DS4_1WF12
@@ -3262,195 +3259,195 @@ NONLINEAR :  perts :  4.3 /  4.3 /  4.3
 
      j1       j2       j3              matrix element
   dir pert dir pert dir pert           real part           imaginary part
-   1    1   1    4   1    4        -98.0975672521         -0.0000000000
-   1    1   1    4   2    4         42.1597598497         -0.0000000000
-   1    1   1    4   3    4         42.1597598583          0.0000000000
-   1    1   2    4   1    4         40.6735816620         -0.0000000000
-   1    1   2    4   2    4        -47.3331420113          0.0000000000
-   1    1   2    4   3    4          1.1545315304         -0.0000000000
-   1    1   3    4   1    4         40.6735816727          0.0000000000
-   1    1   3    4   2    4          1.1545315299         -0.0000000000
-   1    1   3    4   3    4        -47.3331420217         -0.0000000000
-   2    1   1    4   1    4        -47.3331420192         -0.0000000000
-   2    1   1    4   2    4         40.6735816658          0.0000000000
-   2    1   1    4   3    4          1.1545315349         -0.0000000000
+   1    1   1    4   1    4        -98.0975672522         -0.0000000000
+   1    1   1    4   2    4         42.1597598497          0.0000000000
+   1    1   1    4   3    4         42.1597598584         -0.0000000000
+   1    1   2    4   1    4         40.6735816620          0.0000000000
+   1    1   2    4   2    4        -47.3331420114          0.0000000000
+   1    1   2    4   3    4          1.1545315305         -0.0000000000
+   1    1   3    4   1    4         40.6735816728         -0.0000000000
+   1    1   3    4   2    4          1.1545315300         -0.0000000000
+   1    1   3    4   3    4        -47.3331420217          0.0000000000
+   2    1   1    4   1    4        -47.3331420193         -0.0000000000
+   2    1   1    4   2    4         40.6735816658         -0.0000000000
+   2    1   1    4   3    4          1.1545315350          0.0000000000
    2    1   2    4   1    4         42.1597598536          0.0000000000
-   2    1   2    4   2    4        -98.0975672520         -0.0000000000
-   2    1   2    4   3    4         42.1597598526          0.0000000000
-   2    1   3    4   1    4          1.1545315360         -0.0000000000
-   2    1   3    4   2    4         40.6735816657          0.0000000000
-   2    1   3    4   3    4        -47.3331420207         -0.0000000000
-   3    1   1    4   1    4        -47.3331420129          0.0000000000
-   3    1   1    4   2    4          1.1545315297         -0.0000000000
+   2    1   2    4   2    4        -98.0975672521          0.0000000000
+   2    1   2    4   3    4         42.1597598527         -0.0000000000
+   2    1   3    4   1    4          1.1545315361         -0.0000000000
+   2    1   3    4   2    4         40.6735816657         -0.0000000000
+   2    1   3    4   3    4        -47.3331420207          0.0000000000
+   3    1   1    4   1    4        -47.3331420130         -0.0000000000
+   3    1   1    4   2    4          1.1545315297          0.0000000000
    3    1   1    4   3    4         40.6735816663          0.0000000000
-   3    1   2    4   1    4          1.1545315310         -0.0000000000
+   3    1   2    4   1    4          1.1545315310          0.0000000000
    3    1   2    4   2    4        -47.3331420176          0.0000000000
    3    1   2    4   3    4         40.6735816681         -0.0000000000
-   3    1   3    4   1    4         42.1597598540          0.0000000000
-   3    1   3    4   2    4         42.1597598570         -0.0000000000
-   3    1   3    4   3    4        -98.0975672595         -0.0000000000
-   1    2   1    4   1    4        113.8995126642         -0.0000000000
-   1    2   1    4   2    4        -62.4250433887         -0.0000000000
-   1    2   1    4   3    4        -62.4250434000          0.0000000000
-   1    2   2    4   1    4        -55.1886024836         -0.0000000000
-   1    2   2    4   2    4         97.2537069970          0.0000000000
-   1    2   2    4   3    4        -22.2248846311         -0.0000000000
-   1    2   3    4   1    4        -55.1886024956          0.0000000000
-   1    2   3    4   2    4        -22.2248846313         -0.0000000000
-   1    2   3    4   3    4         97.2537070100         -0.0000000000
-   2    2   1    4   1    4         97.2537070049         -0.0000000000
-   2    2   1    4   2    4        -55.1886024888          0.0000000000
-   2    2   1    4   3    4        -22.2248846344         -0.0000000000
-   2    2   2    4   1    4        -62.4250433960          0.0000000000
-   2    2   2    4   2    4        113.8995126664         -0.0000000000
-   2    2   2    4   3    4        -62.4250433943          0.0000000000
-   2    2   3    4   1    4        -22.2248846348         -0.0000000000
-   2    2   3    4   2    4        -55.1886024893          0.0000000000
-   2    2   3    4   3    4         97.2537070085         -0.0000000000
-   3    2   1    4   1    4         97.2537069998          0.0000000000
-   3    2   1    4   2    4        -22.2248846280         -0.0000000000
-   3    2   1    4   3    4        -55.1886024907         -0.0000000000
-   3    2   2    4   1    4        -22.2248846284         -0.0000000000
-   3    2   2    4   2    4         97.2537070076          0.0000000000
-   3    2   2    4   3    4        -55.1886024955         -0.0000000000
-   3    2   3    4   1    4        -62.4250433982         -0.0000000000
-   3    2   3    4   2    4        -62.4250434022         -0.0000000000
-   3    2   3    4   3    4        113.8995126790          0.0000000000
-   1    4   1    1   1    4       -101.5345662993         -0.0000000000
+   3    1   3    4   1    4         42.1597598541          0.0000000000
+   3    1   3    4   2    4         42.1597598571         -0.0000000000
+   3    1   3    4   3    4        -98.0975672597         -0.0000000000
+   1    2   1    4   1    4        113.8995126648          0.0000000000
+   1    2   1    4   2    4        -62.4250433890         -0.0000000000
+   1    2   1    4   3    4        -62.4250434004         -0.0000000000
+   1    2   2    4   1    4        -55.1886024839         -0.0000000000
+   1    2   2    4   2    4         97.2537069973          0.0000000000
+   1    2   2    4   3    4        -22.2248846310          0.0000000000
+   1    2   3    4   1    4        -55.1886024959         -0.0000000000
+   1    2   3    4   2    4        -22.2248846312          0.0000000000
+   1    2   3    4   3    4         97.2537070104          0.0000000000
+   2    2   1    4   1    4         97.2537070052         -0.0000000000
+   2    2   1    4   2    4        -55.1886024892         -0.0000000000
+   2    2   1    4   3    4        -22.2248846343          0.0000000000
+   2    2   2    4   1    4        -62.4250433963         -0.0000000000
+   2    2   2    4   2    4        113.8995126670          0.0000000000
+   2    2   2    4   3    4        -62.4250433947          0.0000000000
+   2    2   3    4   1    4        -22.2248846347          0.0000000000
+   2    2   3    4   2    4        -55.1886024896          0.0000000000
+   2    2   3    4   3    4         97.2537070088         -0.0000000000
+   3    2   1    4   1    4         97.2537070002         -0.0000000000
+   3    2   1    4   2    4        -22.2248846280          0.0000000000
+   3    2   1    4   3    4        -55.1886024911          0.0000000000
+   3    2   2    4   1    4        -22.2248846283          0.0000000000
+   3    2   2    4   2    4         97.2537070079          0.0000000000
+   3    2   2    4   3    4        -55.1886024959          0.0000000000
+   3    2   3    4   1    4        -62.4250433986          0.0000000000
+   3    2   3    4   2    4        -62.4250434026          0.0000000000
+   3    2   3    4   3    4        113.8995126797         -0.0000000000
+   1    4   1    1   1    4       -101.5345662993          0.0000000000
    1    4   1    1   2    4         53.0632449789         -0.0000000000
    1    4   1    1   3    4         53.0632449889          0.0000000000
-   1    4   2    1   1    4        128.5665107091          0.0000000000
-   1    4   2    1   2    4         53.0632449812          0.0000000000
+   1    4   2    1   1    4        128.5665107091         -0.0000000000
+   1    4   2    1   2    4         53.0632449812         -0.0000000000
    1    4   2    1   3    4       -183.7268668660         -0.0000000000
-   1    4   3    1   1    4        128.5665107198         -0.0000000000
-   1    4   3    1   2    4       -183.7268668726         -0.0000000000
-   1    4   3    1   3    4         53.0632449789          0.0000000000
-   1    4   1    2   1    4        135.4313965430         -0.0000000000
+   1    4   3    1   1    4        128.5665107198          0.0000000000
+   1    4   3    1   2    4       -183.7268668726          0.0000000000
+   1    4   3    1   3    4         53.0632449789         -0.0000000000
+   1    4   1    2   1    4        135.4313965430          0.0000000000
    1    4   1    2   2    4        -68.8921855461         -0.0000000000
-   1    4   1    2   3    4        -68.8921855562          0.0000000000
+   1    4   1    2   3    4        -68.8921855562         -0.0000000000
    1    4   2    2   1    4       -132.7677947746         -0.0000000000
    1    4   2    2   2    4        -68.8921855506         -0.0000000000
    1    4   2    2   3    4        199.9958844529          0.0000000000
-   1    4   3    2   1    4       -132.7677947851          0.0000000000
+   1    4   3    2   1    4       -132.7677947851         -0.0000000000
    1    4   3    2   2    4        199.9958844614          0.0000000000
    1    4   3    2   3    4        -68.8921855505         -0.0000000000
-   1    4   1    4   1    1        -98.0975672521         -0.0000000000
-   1    4   1    4   2    1        -47.3331420192         -0.0000000000
-   1    4   1    4   3    1        -47.3331420129          0.0000000000
-   1    4   1    4   1    2        113.8995126642         -0.0000000000
-   1    4   1    4   2    2         97.2537070049         -0.0000000000
-   1    4   1    4   3    2         97.2537069998          0.0000000000
-   1    4   1    4   1    4        822.2810768448          0.0000000000
-   1    4   1    4   2    4       -305.0349825162          0.0000000000
-   1    4   1    4   3    4       -305.0349824363         -0.0000000000
-   1    4   2    4   1    1         40.6735816620         -0.0000000000
+   1    4   1    4   1    1        -98.0975672522         -0.0000000000
+   1    4   1    4   2    1        -47.3331420193         -0.0000000000
+   1    4   1    4   3    1        -47.3331420130         -0.0000000000
+   1    4   1    4   1    2        113.8995126648          0.0000000000
+   1    4   1    4   2    2         97.2537070052         -0.0000000000
+   1    4   1    4   3    2         97.2537070002         -0.0000000000
+   1    4   1    4   1    4        822.2810768422         -0.0000000000
+   1    4   1    4   2    4       -305.0349825133          0.0000000000
+   1    4   1    4   3    4       -305.0349824334          0.0000000000
+   1    4   2    4   1    1         40.6735816620          0.0000000000
    1    4   2    4   2    1         42.1597598536          0.0000000000
-   1    4   2    4   3    1          1.1545315310         -0.0000000000
-   1    4   2    4   1    2        -55.1886024836         -0.0000000000
-   1    4   2    4   2    2        -62.4250433960          0.0000000000
-   1    4   2    4   3    2        -22.2248846284         -0.0000000000
-   1    4   2    4   1    4       -340.1487551000          0.0000000000
-   1    4   2    4   2    4       -486.7518547641         -0.0000000000
-   1    4   2    4   3    4        712.0698584067          0.0000000000
-   1    4   3    4   1    1         40.6735816727          0.0000000000
-   1    4   3    4   2    1          1.1545315360         -0.0000000000
-   1    4   3    4   3    1         42.1597598540          0.0000000000
-   1    4   3    4   1    2        -55.1886024956          0.0000000000
-   1    4   3    4   2    2        -22.2248846348         -0.0000000000
-   1    4   3    4   3    2        -62.4250433982         -0.0000000000
-   1    4   3    4   1    4       -340.1487550302         -0.0000000000
-   1    4   3    4   2    4        712.0698584107          0.0000000000
-   1    4   3    4   3    4       -486.7518548337          0.0000000000
+   1    4   2    4   3    1          1.1545315310          0.0000000000
+   1    4   2    4   1    2        -55.1886024839         -0.0000000000
+   1    4   2    4   2    2        -62.4250433963         -0.0000000000
+   1    4   2    4   3    2        -22.2248846283          0.0000000000
+   1    4   2    4   1    4       -340.1487550972          0.0000000000
+   1    4   2    4   2    4       -486.7518547633         -0.0000000000
+   1    4   2    4   3    4        712.0698584014          0.0000000000
+   1    4   3    4   1    1         40.6735816728         -0.0000000000
+   1    4   3    4   2    1          1.1545315361         -0.0000000000
+   1    4   3    4   3    1         42.1597598541          0.0000000000
+   1    4   3    4   1    2        -55.1886024959         -0.0000000000
+   1    4   3    4   2    2        -22.2248846347          0.0000000000
+   1    4   3    4   3    2        -62.4250433986          0.0000000000
+   1    4   3    4   1    4       -340.1487550274          0.0000000000
+   1    4   3    4   2    4        712.0698584054          0.0000000000
+   1    4   3    4   3    4       -486.7518548329         -0.0000000000
    2    4   1    1   1    4         53.0632449789         -0.0000000000
-   2    4   1    1   2    4        128.5665107154         -0.0000000000
+   2    4   1    1   2    4        128.5665107154          0.0000000000
    2    4   1    1   3    4       -183.7268668692          0.0000000000
-   2    4   2    1   1    4         53.0632449812          0.0000000000
-   2    4   2    1   2    4       -101.5345662950         -0.0000000000
+   2    4   2    1   1    4         53.0632449812         -0.0000000000
+   2    4   2    1   2    4       -101.5345662950          0.0000000000
    2    4   2    1   3    4         53.0632449830          0.0000000000
-   2    4   3    1   1    4       -183.7268668726         -0.0000000000
+   2    4   3    1   1    4       -183.7268668726          0.0000000000
    2    4   3    1   2    4        128.5665107142         -0.0000000000
-   2    4   3    1   3    4         53.0632449844         -0.0000000000
+   2    4   3    1   3    4         53.0632449844          0.0000000000
    2    4   1    2   1    4        -68.8921855461         -0.0000000000
-   2    4   1    2   2    4       -132.7677947831         -0.0000000000
-   2    4   1    2   3    4        199.9958844561         -0.0000000000
+   2    4   1    2   2    4       -132.7677947831          0.0000000000
+   2    4   1    2   3    4        199.9958844561          0.0000000000
    2    4   2    2   1    4        -68.8921855506         -0.0000000000
-   2    4   2    2   2    4        135.4313965409          0.0000000000
+   2    4   2    2   2    4        135.4313965409         -0.0000000000
    2    4   2    2   3    4        -68.8921855501         -0.0000000000
    2    4   3    2   1    4        199.9958844614          0.0000000000
    2    4   3    2   2    4       -132.7677947834          0.0000000000
    2    4   3    2   3    4        -68.8921855525          0.0000000000
-   2    4   1    4   1    1         42.1597598497         -0.0000000000
-   2    4   1    4   2    1         40.6735816658          0.0000000000
-   2    4   1    4   3    1          1.1545315297         -0.0000000000
-   2    4   1    4   1    2        -62.4250433887         -0.0000000000
-   2    4   1    4   2    2        -55.1886024888          0.0000000000
-   2    4   1    4   3    2        -22.2248846280         -0.0000000000
-   2    4   1    4   1    4       -305.0349825162          0.0000000000
-   2    4   1    4   2    4       -340.1487549817         -0.0000000000
-   2    4   1    4   3    4        712.0698583906          0.0000000000
-   2    4   2    4   1    1        -47.3331420113          0.0000000000
-   2    4   2    4   2    1        -98.0975672520         -0.0000000000
+   2    4   1    4   1    1         42.1597598497          0.0000000000
+   2    4   1    4   2    1         40.6735816658         -0.0000000000
+   2    4   1    4   3    1          1.1545315297          0.0000000000
+   2    4   1    4   1    2        -62.4250433890         -0.0000000000
+   2    4   1    4   2    2        -55.1886024892         -0.0000000000
+   2    4   1    4   3    2        -22.2248846280          0.0000000000
+   2    4   1    4   1    4       -305.0349825133          0.0000000000
+   2    4   1    4   2    4       -340.1487549788          0.0000000000
+   2    4   1    4   3    4        712.0698583853         -0.0000000000
+   2    4   2    4   1    1        -47.3331420114          0.0000000000
+   2    4   2    4   2    1        -98.0975672521          0.0000000000
    2    4   2    4   3    1        -47.3331420176          0.0000000000
-   2    4   2    4   1    2         97.2537069970          0.0000000000
-   2    4   2    4   2    2        113.8995126664         -0.0000000000
-   2    4   2    4   3    2         97.2537070076          0.0000000000
-   2    4   2    4   1    4       -486.7518547641         -0.0000000000
-   2    4   2    4   2    4        822.2810768362          0.0000000001
-   2    4   2    4   3    4       -305.0349825193         -0.0000000000
-   2    4   3    4   1    1          1.1545315299         -0.0000000000
-   2    4   3    4   2    1         40.6735816657          0.0000000000
-   2    4   3    4   3    1         42.1597598570         -0.0000000000
-   2    4   3    4   1    2        -22.2248846313         -0.0000000000
-   2    4   3    4   2    2        -55.1886024893          0.0000000000
-   2    4   3    4   3    2        -62.4250434022         -0.0000000000
-   2    4   3    4   1    4        712.0698584107          0.0000000000
-   2    4   3    4   2    4       -340.1487551204         -0.0000000001
-   2    4   3    4   3    4       -486.7518547563          0.0000000000
+   2    4   2    4   1    2         97.2537069973          0.0000000000
+   2    4   2    4   2    2        113.8995126670          0.0000000000
+   2    4   2    4   3    2         97.2537070079          0.0000000000
+   2    4   2    4   1    4       -486.7518547633         -0.0000000000
+   2    4   2    4   2    4        822.2810768336         -0.0000000000
+   2    4   2    4   3    4       -305.0349825165          0.0000000000
+   2    4   3    4   1    1          1.1545315300         -0.0000000000
+   2    4   3    4   2    1         40.6735816657         -0.0000000000
+   2    4   3    4   3    1         42.1597598571         -0.0000000000
+   2    4   3    4   1    2        -22.2248846312          0.0000000000
+   2    4   3    4   2    2        -55.1886024896          0.0000000000
+   2    4   3    4   3    2        -62.4250434026          0.0000000000
+   2    4   3    4   1    4        712.0698584054          0.0000000000
+   2    4   3    4   2    4       -340.1487551175          0.0000000000
+   2    4   3    4   3    4       -486.7518547555          0.0000000000
    3    4   1    1   1    4         53.0632449889          0.0000000000
    3    4   1    1   2    4       -183.7268668692          0.0000000000
    3    4   1    1   3    4        128.5665107066         -0.0000000000
    3    4   2    1   1    4       -183.7268668660         -0.0000000000
    3    4   2    1   2    4         53.0632449830          0.0000000000
    3    4   2    1   3    4        128.5665107094         -0.0000000000
-   3    4   3    1   1    4         53.0632449789          0.0000000000
-   3    4   3    1   2    4         53.0632449844         -0.0000000000
+   3    4   3    1   1    4         53.0632449789         -0.0000000000
+   3    4   3    1   2    4         53.0632449844          0.0000000000
    3    4   3    1   3    4       -101.5345662955         -0.0000000000
-   3    4   1    2   1    4        -68.8921855562          0.0000000000
-   3    4   1    2   2    4        199.9958844561         -0.0000000000
-   3    4   1    2   3    4       -132.7677947748         -0.0000000000
+   3    4   1    2   1    4        -68.8921855562         -0.0000000000
+   3    4   1    2   2    4        199.9958844561          0.0000000000
+   3    4   1    2   3    4       -132.7677947748          0.0000000000
    3    4   2    2   1    4        199.9958844529          0.0000000000
    3    4   2    2   2    4        -68.8921855501         -0.0000000000
    3    4   2    2   3    4       -132.7677947781         -0.0000000000
    3    4   3    2   1    4        -68.8921855505         -0.0000000000
    3    4   3    2   2    4        -68.8921855525          0.0000000000
-   3    4   3    2   3    4        135.4313965443         -0.0000000000
-   3    4   1    4   1    1         42.1597598583          0.0000000000
-   3    4   1    4   2    1          1.1545315349         -0.0000000000
+   3    4   3    2   3    4        135.4313965443          0.0000000000
+   3    4   1    4   1    1         42.1597598584         -0.0000000000
+   3    4   1    4   2    1          1.1545315350          0.0000000000
    3    4   1    4   3    1         40.6735816663          0.0000000000
-   3    4   1    4   1    2        -62.4250434000          0.0000000000
-   3    4   1    4   2    2        -22.2248846344         -0.0000000000
-   3    4   1    4   3    2        -55.1886024907         -0.0000000000
-   3    4   1    4   1    4       -305.0349824363         -0.0000000000
-   3    4   1    4   2    4        712.0698583906          0.0000000000
-   3    4   1    4   3    4       -340.1487550464          0.0000000000
-   3    4   2    4   1    1          1.1545315304         -0.0000000000
-   3    4   2    4   2    1         42.1597598526          0.0000000000
+   3    4   1    4   1    2        -62.4250434004         -0.0000000000
+   3    4   1    4   2    2        -22.2248846343          0.0000000000
+   3    4   1    4   3    2        -55.1886024911          0.0000000000
+   3    4   1    4   1    4       -305.0349824334          0.0000000000
+   3    4   1    4   2    4        712.0698583853         -0.0000000000
+   3    4   1    4   3    4       -340.1487550435         -0.0000000000
+   3    4   2    4   1    1          1.1545315305         -0.0000000000
+   3    4   2    4   2    1         42.1597598527         -0.0000000000
    3    4   2    4   3    1         40.6735816681         -0.0000000000
-   3    4   2    4   1    2        -22.2248846311         -0.0000000000
-   3    4   2    4   2    2        -62.4250433943          0.0000000000
-   3    4   2    4   3    2        -55.1886024955         -0.0000000000
-   3    4   2    4   1    4        712.0698584067          0.0000000000
-   3    4   2    4   2    4       -305.0349825193         -0.0000000000
-   3    4   2    4   3    4       -340.1487549855          0.0000000000
-   3    4   3    4   1    1        -47.3331420217         -0.0000000000
-   3    4   3    4   2    1        -47.3331420207         -0.0000000000
-   3    4   3    4   3    1        -98.0975672595         -0.0000000000
-   3    4   3    4   1    2         97.2537070100         -0.0000000000
-   3    4   3    4   2    2         97.2537070085         -0.0000000000
-   3    4   3    4   3    2        113.8995126790          0.0000000000
-   3    4   3    4   1    4       -486.7518548337          0.0000000000
-   3    4   3    4   2    4       -486.7518547563          0.0000000000
-   3    4   3    4   3    4        822.2810767598         -0.0000000000
+   3    4   2    4   1    2        -22.2248846310          0.0000000000
+   3    4   2    4   2    2        -62.4250433947          0.0000000000
+   3    4   2    4   3    2        -55.1886024959          0.0000000000
+   3    4   2    4   1    4        712.0698584014          0.0000000000
+   3    4   2    4   2    4       -305.0349825165          0.0000000000
+   3    4   2    4   3    4       -340.1487549826          0.0000000000
+   3    4   3    4   1    1        -47.3331420217          0.0000000000
+   3    4   3    4   2    1        -47.3331420207          0.0000000000
+   3    4   3    4   3    1        -98.0975672597         -0.0000000000
+   3    4   3    4   1    2         97.2537070104          0.0000000000
+   3    4   3    4   2    2         97.2537070088         -0.0000000000
+   3    4   3    4   3    2        113.8995126797         -0.0000000000
+   3    4   3    4   1    4       -486.7518548329         -0.0000000000
+   3    4   3    4   2    4       -486.7518547555          0.0000000000
+   3    4   3    4   3    4        822.2810767572          0.0000000000
  
 
   Non-linear optical susceptibility tensor d (pm/V)
@@ -3460,16 +3457,16 @@ NONLINEAR :  perts :  4.3 /  4.3 /  4.3
       1      1      2        -13.162994170
       1      1      3        -22.114292236
       1      2      1        -13.162994170
-      1      2      2        -22.114292233
+      1      2      2        -22.114292232
       1      2      3         62.047237850
       1      3      1        -22.114292236
       1      3      2         62.047237850
       1      3      3        -31.065590309
       2      1      1        -13.162994170
-      2      1      2        -22.114292233
+      2      1      2        -22.114292232
       2      1      3         62.047237850
-      2      2      1        -22.114292233
-      2      2      2         45.760360570
+      2      2      1        -22.114292232
+      2      2      2         45.760360569
       2      2      3        -31.065590311
       2      3      1         62.047237850
       2      3      2        -31.065590311
@@ -3482,89 +3479,89 @@ NONLINEAR :  perts :  4.3 /  4.3 /  4.3
       3      2      3        -40.016888371
       3      3      1        -31.065590309
       3      3      2        -40.016888371
-      3      3      3         45.760360566
+      3      3      3         45.760360565
 
  ** Total :                   
-      1      1      1         45.760360573      -0.000000000
+      1      1      1         45.760360573       0.000000000
       1      1      2        -13.162994170      -0.000000000
-      1      1      3        -22.114292236       0.000000000
+      1      1      3        -22.114292236      -0.000000000
       1      2      1        -13.162994170      -0.000000000
-      1      2      2        -22.114292233       0.000000000
-      1      2      3         62.047237850      -0.000000000
-      1      3      1        -22.114292236       0.000000000
-      1      3      2         62.047237850      -0.000000000
-      1      3      3        -31.065590309      -0.000000000
+      1      2      2        -22.114292232      -0.000000000
+      1      2      3         62.047237850       0.000000000
+      1      3      1        -22.114292236      -0.000000000
+      1      3      2         62.047237850       0.000000000
+      1      3      3        -31.065590309       0.000000000
       2      1      1        -13.162994170      -0.000000000
-      2      1      2        -22.114292233       0.000000000
-      2      1      3         62.047237850      -0.000000000
-      2      2      1        -22.114292233       0.000000000
-      2      2      2         45.760360570      -0.000000000
-      2      2      3        -31.065590311       0.000000000
-      2      3      1         62.047237850      -0.000000000
-      2      3      2        -31.065590311       0.000000000
+      2      1      2        -22.114292232      -0.000000000
+      2      1      3         62.047237850       0.000000000
+      2      2      1        -22.114292232      -0.000000000
+      2      2      2         45.760360569       0.000000000
+      2      2      3        -31.065590311      -0.000000000
+      2      3      1         62.047237850       0.000000000
+      2      3      2        -31.065590311      -0.000000000
       2      3      3        -40.016888371      -0.000000000
-      3      1      1        -22.114292236       0.000000000
-      3      1      2         62.047237850      -0.000000000
-      3      1      3        -31.065590309      -0.000000000
-      3      2      1         62.047237850      -0.000000000
-      3      2      2        -31.065590311       0.000000000
+      3      1      1        -22.114292236      -0.000000000
+      3      1      2         62.047237850       0.000000000
+      3      1      3        -31.065590309       0.000000000
+      3      2      1         62.047237850       0.000000000
+      3      2      2        -31.065590311      -0.000000000
       3      2      3        -40.016888371      -0.000000000
-      3      3      1        -31.065590309      -0.000000000
+      3      3      1        -31.065590309       0.000000000
       3      3      2        -40.016888371      -0.000000000
-      3      3      3         45.760360566       0.000000000
+      3      3      3         45.760360565      -0.000000000
 
  ** sum_psi1H1psi1 :          
-      1      1      1         34.978384103      -0.000000000
+      1      1      1         34.978384103       0.000000000
       1      1      2         -6.733336517      -0.000000000
-      1      1      3        -15.684634588       0.000000000
+      1      1      3        -15.684634588      -0.000000000
       1      2      1         -6.733336517      -0.000000000
-      1      2      2        -15.684634583       0.000000000
-      1      2      3         48.032087247      -0.000000000
-      1      3      1        -15.684634588       0.000000000
-      1      3      2         48.032087247      -0.000000000
-      1      3      3        -24.635932652      -0.000000000
+      1      2      2        -15.684634583      -0.000000000
+      1      2      3         48.032087246       0.000000000
+      1      3      1        -15.684634588      -0.000000000
+      1      3      2         48.032087246       0.000000000
+      1      3      3        -24.635932652       0.000000000
       2      1      1         -6.733336517      -0.000000000
-      2      1      2        -15.684634583       0.000000000
-      2      1      3         48.032087247      -0.000000000
-      2      2      1        -15.684634583       0.000000000
-      2      2      2         34.978384099      -0.000000000
-      2      2      3        -24.635932657       0.000000000
-      2      3      1         48.032087247      -0.000000000
-      2      3      2        -24.635932657       0.000000000
+      2      1      2        -15.684634583      -0.000000000
+      2      1      3         48.032087246       0.000000000
+      2      2      1        -15.684634583      -0.000000000
+      2      2      2         34.978384098       0.000000000
+      2      2      3        -24.635932657      -0.000000000
+      2      3      1         48.032087246       0.000000000
+      2      3      2        -24.635932657      -0.000000000
       2      3      3        -33.587230721      -0.000000000
-      3      1      1        -15.684634588       0.000000000
-      3      1      2         48.032087247      -0.000000000
-      3      1      3        -24.635932652      -0.000000000
-      3      2      1         48.032087247      -0.000000000
-      3      2      2        -24.635932657       0.000000000
+      3      1      1        -15.684634588      -0.000000000
+      3      1      2         48.032087246       0.000000000
+      3      1      3        -24.635932652       0.000000000
+      3      2      1         48.032087246       0.000000000
+      3      2      2        -24.635932657      -0.000000000
       3      2      3        -33.587230721      -0.000000000
-      3      3      1        -24.635932652      -0.000000000
+      3      3      1        -24.635932652       0.000000000
       3      3      2        -33.587230721      -0.000000000
-      3      3      3         34.978384091       0.000000000
+      3      3      3         34.978384090      -0.000000000
 
  ** sum_lambda1psi1psi1 :     
       1      1      1         12.119041685      -0.000000000
       1      1      2         -6.890934592      -0.000000000
       1      1      3         -6.890934592       0.000000000
       1      2      1         -6.890934592      -0.000000000
-      1      2      2         -6.890934591       0.000000000
-      1      2      3         14.694210623      -0.000000000
+      1      2      2         -6.890934591      -0.000000000
+      1      2      3         14.694210623       0.000000000
       1      3      1         -6.890934592       0.000000000
-      1      3      2         14.694210623      -0.000000000
+      1      3      2         14.694210623       0.000000000
       1      3      3         -6.890934591      -0.000000000
       2      1      1         -6.890934592      -0.000000000
-      2      1      2         -6.890934591       0.000000000
-      2      1      3         14.694210623      -0.000000000
-      2      2      1         -6.890934591       0.000000000
-      2      2      2         12.119041684       0.000000000
+      2      1      2         -6.890934591      -0.000000000
+      2      1      3         14.694210623       0.000000000
+      2      2      1         -6.890934591      -0.000000000
+      2      2      2         12.119041684      -0.000000000
       2      2      3         -6.890934592       0.000000000
-      2      3      1         14.694210623      -0.000000000
+      2      3      1         14.694210623       0.000000000
       2      3      2         -6.890934592       0.000000000
       2      3      3         -6.890934591      -0.000000000
       3      1      1         -6.890934592       0.000000000
-      3      1      2         14.694210623      -0.000000000
+      3      1      2         14.694210623       0.000000000
       3      1      3         -6.890934591      -0.000000000
-      3      2      1         14.694210623      -0.000000000
+      3      2      1         14.694210623       0.000000000
       3      2      2         -6.890934592       0.000000000
       3      2      3         -6.890934591      -0.000000000
       3      3      1         -6.890934591      -0.000000000
@@ -3655,119 +3652,119 @@ NONLINEAR :  perts :  4.3 /  4.3 /  4.3
                        -0.065228875       -0.065228875        0.147965927
 
  ** Total :                   
-    1          1       -0.139153808        0.092789774        0.092789774        0.000000000        0.000000000       -0.000000000
-                        0.092789774        0.132026396       -0.204014886        0.000000000       -0.000000000        0.000000000
-                        0.092789774       -0.204014886        0.132026396       -0.000000000        0.000000000        0.000000000
-    1          2        0.132026396        0.092789774       -0.204014886        0.000000000       -0.000000000        0.000000000
-                        0.092789774       -0.139153808        0.092789774       -0.000000000        0.000000000       -0.000000000
+    1          1       -0.139153808        0.092789774        0.092789774       -0.000000000       -0.000000000        0.000000000
+                        0.092789774        0.132026396       -0.204014886       -0.000000000       -0.000000000        0.000000000
+                        0.092789774       -0.204014886        0.132026396        0.000000000        0.000000000       -0.000000000
+    1          2        0.132026396        0.092789774       -0.204014886        0.000000000        0.000000000        0.000000000
+                        0.092789774       -0.139153808        0.092789774        0.000000000       -0.000000000       -0.000000000
                        -0.204014886        0.092789774        0.132026396        0.000000000       -0.000000000        0.000000000
-    1          3        0.132026396       -0.204014886        0.092789774       -0.000000000        0.000000000       -0.000000000
-                       -0.204014886        0.132026396        0.092789774        0.000000000       -0.000000000        0.000000000
-                        0.092789774        0.092789774       -0.139153808       -0.000000000        0.000000000        0.000000000
-    2          1        0.147965927       -0.065228875       -0.065228875        0.000000000        0.000000000       -0.000000000
-                       -0.065228875       -0.194468029        0.204601643        0.000000000       -0.000000000        0.000000000
-                       -0.065228875        0.204601643       -0.194468029       -0.000000000        0.000000000        0.000000000
-    2          2       -0.194468029       -0.065228875        0.204601643        0.000000000       -0.000000000        0.000000000
-                       -0.065228875        0.147965927       -0.065228875       -0.000000000        0.000000000       -0.000000000
-                        0.204601643       -0.065228875       -0.194468029        0.000000000       -0.000000000        0.000000000
-    2          3       -0.194468029        0.204601643       -0.065228875       -0.000000000        0.000000000        0.000000000
-                        0.204601643       -0.194468029       -0.065228875        0.000000000       -0.000000000        0.000000000
-                       -0.065228875       -0.065228875        0.147965927        0.000000000        0.000000000       -0.000000000
+    1          3        0.132026396       -0.204014886        0.092789774       -0.000000000       -0.000000000       -0.000000000
+                       -0.204014886        0.132026396        0.092789774       -0.000000000       -0.000000000       -0.000000000
+                        0.092789774        0.092789774       -0.139153808       -0.000000000       -0.000000000        0.000000000
+    2          1        0.147965927       -0.065228875       -0.065228875       -0.000000000        0.000000000        0.000000000
+                       -0.065228875       -0.194468029        0.204601643        0.000000000       -0.000000000       -0.000000000
+                       -0.065228875        0.204601643       -0.194468029        0.000000000       -0.000000000       -0.000000000
+    2          2       -0.194468029       -0.065228875        0.204601643        0.000000000        0.000000000       -0.000000000
+                       -0.065228875        0.147965927       -0.065228875        0.000000000       -0.000000000       -0.000000000
+                        0.204601643       -0.065228875       -0.194468029       -0.000000000       -0.000000000        0.000000000
+    2          3       -0.194468029        0.204601643       -0.065228875        0.000000000       -0.000000000       -0.000000000
+                        0.204601643       -0.194468029       -0.065228875       -0.000000000       -0.000000000       -0.000000000
+                       -0.065228875       -0.065228875        0.147965927       -0.000000000       -0.000000000        0.000000000
  ** sum_psi1H1psi1 :          
-    1          1       -0.024794886        0.043286071        0.043286071        0.000000000        0.000000000       -0.000000000
+    1          1       -0.024794886        0.043286071        0.043286071       -0.000000000        0.000000000        0.000000000
                         0.043286071       -0.093296287        0.071605385        0.000000000       -0.000000000        0.000000000
-                        0.043286071        0.071605385       -0.093296287       -0.000000000        0.000000000        0.000000000
-    1          2       -0.093296287        0.043286071        0.071605385        0.000000000       -0.000000000        0.000000000
-                        0.043286071       -0.024794886        0.043286071       -0.000000000        0.000000000       -0.000000000
+                        0.043286071        0.071605385       -0.093296287        0.000000000        0.000000000       -0.000000000
+    1          2       -0.093296287        0.043286071        0.071605385        0.000000000        0.000000000        0.000000000
+                        0.043286071       -0.024794886        0.043286071        0.000000000       -0.000000000       -0.000000000
                         0.071605385        0.043286071       -0.093296287        0.000000000       -0.000000000        0.000000000
-    1          3       -0.093296287        0.071605385        0.043286071        0.000000000        0.000000000       -0.000000000
-                        0.071605385       -0.093296287        0.043286071        0.000000000       -0.000000000        0.000000000
-                        0.043286071        0.043286071       -0.024794887       -0.000000000        0.000000000        0.000000000
-    2          1        0.057737093       -0.030535878       -0.030535878        0.000000000        0.000000000       -0.000000000
-                       -0.030535878        0.017631327       -0.043750582        0.000000000       -0.000000000        0.000000000
-                       -0.030535878       -0.043750582        0.017631327       -0.000000000        0.000000000        0.000000000
-    2          2        0.017631327       -0.030535878       -0.043750582        0.000000000       -0.000000000        0.000000000
-                       -0.030535878        0.057737093       -0.030535878       -0.000000000        0.000000000       -0.000000000
-                       -0.043750582       -0.030535878        0.017631327        0.000000000       -0.000000000        0.000000000
-    2          3        0.017631327       -0.043750582       -0.030535878       -0.000000000        0.000000000        0.000000000
-                       -0.043750582        0.017631327       -0.030535878        0.000000000       -0.000000000        0.000000000
-                       -0.030535878       -0.030535878        0.057737093        0.000000000        0.000000000       -0.000000000
+    1          3       -0.093296287        0.071605385        0.043286071       -0.000000000       -0.000000000       -0.000000000
+                        0.071605385       -0.093296287        0.043286071       -0.000000000       -0.000000000       -0.000000000
+                        0.043286071        0.043286071       -0.024794887       -0.000000000       -0.000000000        0.000000000
+    2          1        0.057737093       -0.030535878       -0.030535878       -0.000000000        0.000000000        0.000000000
+                       -0.030535878        0.017631327       -0.043750582        0.000000000       -0.000000000       -0.000000000
+                       -0.030535878       -0.043750582        0.017631327        0.000000000       -0.000000000       -0.000000000
+    2          2        0.017631327       -0.030535878       -0.043750582        0.000000000        0.000000000       -0.000000000
+                       -0.030535878        0.057737093       -0.030535878        0.000000000       -0.000000000       -0.000000000
+                       -0.043750582       -0.030535878        0.017631327       -0.000000000       -0.000000000        0.000000000
+    2          3        0.017631327       -0.043750582       -0.030535878        0.000000000       -0.000000000       -0.000000000
+                       -0.043750582        0.017631327       -0.030535878       -0.000000000        0.000000000       -0.000000000
+                       -0.030535878       -0.030535878        0.057737093       -0.000000000       -0.000000000        0.000000000
  ** sum_lambda1psi1psi1 :     
     1          1       -0.124829060        0.049702895        0.049702895        0.000000000       -0.000000000       -0.000000000
                         0.049702895        0.191270797       -0.230074589       -0.000000000        0.000000000        0.000000000
-                        0.049702895       -0.230074589        0.191270797       -0.000000000        0.000000000       -0.000000000
-    1          2        0.191270797        0.049702895       -0.230074589        0.000000000       -0.000000000        0.000000000
-                        0.049702895       -0.124829060        0.049702895       -0.000000000       -0.000000000       -0.000000000
-                       -0.230074589        0.049702895        0.191270797        0.000000000       -0.000000000       -0.000000000
-    1          3        0.191270797       -0.230074589        0.049702895       -0.000000000        0.000000000        0.000000000
+                        0.049702895       -0.230074589        0.191270797       -0.000000000        0.000000000        0.000000000
+    1          2        0.191270797        0.049702895       -0.230074589        0.000000000        0.000000000       -0.000000000
+                        0.049702895       -0.124829060        0.049702895        0.000000000        0.000000000        0.000000000
+                       -0.230074589        0.049702895        0.191270797       -0.000000000        0.000000000        0.000000000
+    1          3        0.191270797       -0.230074589        0.049702895       -0.000000000        0.000000000       -0.000000000
                        -0.230074589        0.191270797        0.049702895        0.000000000       -0.000000000        0.000000000
-                        0.049702895        0.049702895       -0.124829060        0.000000000        0.000000000        0.000000000
-    2          1        0.100990065       -0.036787886       -0.036787886        0.000000000        0.000000000       -0.000000000
-                       -0.036787886       -0.199281600        0.226891510        0.000000000        0.000000000        0.000000000
-                       -0.036787886        0.226891510       -0.199281600       -0.000000000        0.000000000        0.000000000
-    2          2       -0.199281600       -0.036787886        0.226891510        0.000000000        0.000000000       -0.000000000
-                       -0.036787886        0.100990065       -0.036787886        0.000000000        0.000000000       -0.000000000
-                        0.226891510       -0.036787886       -0.199281600       -0.000000000       -0.000000000        0.000000000
+                        0.049702895        0.049702895       -0.124829060       -0.000000000        0.000000000       -0.000000000
+    2          1        0.100990065       -0.036787886       -0.036787886       -0.000000000       -0.000000000        0.000000000
+                       -0.036787886       -0.199281600        0.226891510       -0.000000000       -0.000000000       -0.000000000
+                       -0.036787886        0.226891510       -0.199281600        0.000000000       -0.000000000       -0.000000000
+    2          2       -0.199281600       -0.036787886        0.226891510        0.000000000       -0.000000000        0.000000000
+                       -0.036787886        0.100990065       -0.036787886       -0.000000000       -0.000000000       -0.000000000
+                        0.226891510       -0.036787886       -0.199281600        0.000000000       -0.000000000        0.000000000
     2          3       -0.199281600        0.226891510       -0.036787886       -0.000000000       -0.000000000        0.000000000
-                        0.226891510       -0.199281600       -0.036787886       -0.000000000        0.000000000       -0.000000000
+                        0.226891510       -0.199281600       -0.036787886       -0.000000000       -0.000000000       -0.000000000
                        -0.036787886       -0.036787886        0.100990065        0.000000000       -0.000000000       -0.000000000
  ** sum_lambda1psi0S1psi1 :   
-    1          1        0.000553318       -0.000169159       -0.000169159       -0.000000000        0.000000000       -0.000000000
-                       -0.000169159        0.002254210       -0.002433382        0.000000000       -0.000000000        0.000000000
+    1          1        0.000553318       -0.000169159       -0.000169159        0.000000000       -0.000000000       -0.000000000
+                       -0.000169159        0.002254210       -0.002433382       -0.000000000       -0.000000000        0.000000000
                        -0.000169159       -0.002433382        0.002254210       -0.000000000        0.000000000        0.000000000
-    1          2        0.002254210       -0.000169159       -0.002433382       -0.000000000        0.000000000       -0.000000000
-                       -0.000169159        0.000553318       -0.000169159        0.000000000       -0.000000000       -0.000000000
-                       -0.002433382       -0.000169159        0.002254210       -0.000000000       -0.000000000        0.000000000
+    1          2        0.002254210       -0.000169159       -0.002433382       -0.000000000       -0.000000000        0.000000000
+                       -0.000169159        0.000553318       -0.000169159       -0.000000000        0.000000000       -0.000000000
+                       -0.002433382       -0.000169159        0.002254210        0.000000000       -0.000000000        0.000000000
     1          3        0.002254210       -0.002433382       -0.000169159       -0.000000000        0.000000000        0.000000000
                        -0.002433382        0.002254210       -0.000169159        0.000000000       -0.000000000        0.000000000
                        -0.000169159       -0.000169159        0.000553318        0.000000000        0.000000000       -0.000000000
-    2          1       -0.000907494        0.000589639        0.000589639        0.000000000        0.000000000       -0.000000000
-                        0.000589639        0.005900103       -0.007868257        0.000000000       -0.000000000        0.000000000
-                        0.000589639       -0.007868257        0.005900103       -0.000000000        0.000000000       -0.000000000
-    2          2        0.005900103        0.000589639       -0.007868257       -0.000000000        0.000000000        0.000000000
-                        0.000589639       -0.000907494        0.000589639        0.000000000       -0.000000000        0.000000000
-                       -0.007868257        0.000589639        0.005900103        0.000000000        0.000000000       -0.000000000
-    2          3        0.005900103       -0.007868257        0.000589639        0.000000000       -0.000000000       -0.000000000
-                       -0.007868257        0.005900103        0.000589639       -0.000000000        0.000000000        0.000000000
-                        0.000589639        0.000589639       -0.000907494       -0.000000000        0.000000000       -0.000000000
+    2          1       -0.000907494        0.000589639        0.000589639        0.000000000       -0.000000000       -0.000000000
+                        0.000589639        0.005900103       -0.007868257       -0.000000000        0.000000000       -0.000000000
+                        0.000589639       -0.007868257        0.005900103       -0.000000000       -0.000000000        0.000000000
+    2          2        0.005900103        0.000589639       -0.007868257       -0.000000000       -0.000000000       -0.000000000
+                        0.000589639       -0.000907494        0.000589639       -0.000000000        0.000000000       -0.000000000
+                       -0.007868257        0.000589639        0.005900103       -0.000000000       -0.000000000        0.000000000
+    2          3        0.005900103       -0.007868257        0.000589639        0.000000000       -0.000000000        0.000000000
+                       -0.007868257        0.005900103        0.000589639       -0.000000000        0.000000000       -0.000000000
+                        0.000589639        0.000589639       -0.000907494        0.000000000       -0.000000000        0.000000000
  ** sum_psi0H2psi1a :         
-    1          1       -0.000171498        0.003811279        0.003811279        0.000000000        0.000000000       -0.000000000
-                        0.003811279       -0.003116582       -0.009489086        0.000000000       -0.000000000        0.000000000
-                        0.003811279       -0.009489086       -0.003116582       -0.000000000        0.000000000        0.000000000
+    1          1       -0.000171498        0.003811279        0.003811279       -0.000000000        0.000000000        0.000000000
+                        0.003811279       -0.003116582       -0.009489086        0.000000000       -0.000000000       -0.000000000
+                        0.003811279       -0.009489086       -0.003116582        0.000000000       -0.000000000       -0.000000000
     1          2       -0.003116582        0.003811279       -0.009489086        0.000000000       -0.000000000        0.000000000
-                        0.003811279       -0.000171498        0.003811279       -0.000000000        0.000000000       -0.000000000
-                       -0.009489086        0.003811279       -0.003116582        0.000000000       -0.000000000        0.000000000
-    1          3       -0.003116582       -0.009489086        0.003811279       -0.000000000        0.000000000        0.000000000
-                       -0.009489086       -0.003116582        0.003811279        0.000000000       -0.000000000        0.000000000
-                        0.003811279        0.003811279       -0.000171498        0.000000000        0.000000000       -0.000000000
-    2          1       -0.004364161       -0.001168326       -0.001168326        0.000000000        0.000000000       -0.000000000
-                       -0.001168326        0.007130006        0.005412729        0.000000000       -0.000000000        0.000000000
-                       -0.001168326        0.005412729        0.007130006       -0.000000000        0.000000000        0.000000000
-    2          2        0.007130006       -0.001168326        0.005412729        0.000000000       -0.000000000        0.000000000
-                       -0.001168326       -0.004364161       -0.001168326       -0.000000000        0.000000000       -0.000000000
-                        0.005412729       -0.001168326        0.007130006        0.000000000       -0.000000000        0.000000000
-    2          3        0.007130006        0.005412729       -0.001168326       -0.000000000        0.000000000        0.000000000
-                        0.005412729        0.007130006       -0.001168326        0.000000000       -0.000000000        0.000000000
-                       -0.001168326       -0.001168326       -0.004364161        0.000000000        0.000000000       -0.000000000
+                        0.003811279       -0.000171498        0.003811279       -0.000000000       -0.000000000        0.000000000
+                       -0.009489086        0.003811279       -0.003116582        0.000000000        0.000000000       -0.000000000
+    1          3       -0.003116582       -0.009489086        0.003811279        0.000000000       -0.000000000       -0.000000000
+                       -0.009489086       -0.003116582        0.003811279       -0.000000000       -0.000000000        0.000000000
+                        0.003811279        0.003811279       -0.000171498       -0.000000000        0.000000000       -0.000000000
+    2          1       -0.004364161       -0.001168326       -0.001168326       -0.000000000        0.000000000        0.000000000
+                       -0.001168326        0.007130006        0.005412729        0.000000000       -0.000000000       -0.000000000
+                       -0.001168326        0.005412729        0.007130006        0.000000000       -0.000000000       -0.000000000
+    2          2        0.007130006       -0.001168326        0.005412729        0.000000000       -0.000000000       -0.000000000
+                       -0.001168326       -0.004364161       -0.001168326       -0.000000000       -0.000000000        0.000000000
+                        0.005412729       -0.001168326        0.007130006       -0.000000000        0.000000000       -0.000000000
+    2          3        0.007130006        0.005412729       -0.001168326        0.000000000       -0.000000000       -0.000000000
+                        0.005412729        0.007130006       -0.001168326       -0.000000000       -0.000000000        0.000000000
+                       -0.001168326       -0.001168326       -0.004364161       -0.000000000        0.000000000       -0.000000000
  ** sum_psi0H2psi1b :         
-    1          1        0.005757704       -0.001556436       -0.001556436        0.000000000       -0.000000000        0.000000000
+    1          1        0.005757704       -0.001556436       -0.001556436       -0.000000000       -0.000000000        0.000000000
                        -0.001556436        0.022249636       -0.023161784       -0.000000000        0.000000000        0.000000000
                        -0.001556436       -0.023161784        0.022249636        0.000000000        0.000000000       -0.000000000
-    1          2        0.022249636       -0.001556436       -0.023161784        0.000000000       -0.000000000        0.000000000
-                       -0.001556436        0.005757704       -0.001556436       -0.000000000       -0.000000000        0.000000000
-                       -0.023161784       -0.001556436        0.022249636        0.000000000        0.000000000       -0.000000000
-    1          3        0.022249636       -0.023161784       -0.001556436        0.000000000       -0.000000000        0.000000000
+    1          2        0.022249636       -0.001556436       -0.023161784        0.000000000       -0.000000000       -0.000000000
+                       -0.001556436        0.005757704       -0.001556436       -0.000000000        0.000000000       -0.000000000
+                       -0.023161784       -0.001556436        0.022249636       -0.000000000       -0.000000000        0.000000000
+    1          3        0.022249636       -0.023161784       -0.001556436        0.000000000       -0.000000000       -0.000000000
                        -0.023161784        0.022249636       -0.001556436       -0.000000000        0.000000000        0.000000000
-                       -0.001556436       -0.001556436        0.005757704        0.000000000        0.000000000       -0.000000000
+                       -0.001556436       -0.001556436        0.005757704       -0.000000000        0.000000000        0.000000000
     2          1       -0.009887893        0.003833818        0.003833818        0.000000000       -0.000000000       -0.000000000
-                        0.003833818       -0.024961732        0.023698613       -0.000000000       -0.000000000        0.000000000
-                        0.003833818        0.023698613       -0.024961732       -0.000000000        0.000000000       -0.000000000
-    2          2       -0.024961732        0.003833818        0.023698613       -0.000000000        0.000000000        0.000000000
-                        0.003833818       -0.009887893        0.003833818        0.000000000        0.000000000       -0.000000000
-                        0.023698613        0.003833818       -0.024961732        0.000000000       -0.000000000       -0.000000000
+                        0.003833818       -0.024961732        0.023698613       -0.000000000        0.000000000       -0.000000000
+                        0.003833818        0.023698613       -0.024961732       -0.000000000       -0.000000000        0.000000000
+    2          2       -0.024961732        0.003833818        0.023698613        0.000000000       -0.000000000       -0.000000000
+                        0.003833818       -0.009887893        0.003833818       -0.000000000        0.000000000        0.000000000
+                        0.023698613        0.003833818       -0.024961732       -0.000000000        0.000000000        0.000000000
     2          3       -0.024961732        0.023698613        0.003833818        0.000000000       -0.000000000       -0.000000000
                         0.023698613       -0.024961732        0.003833818       -0.000000000        0.000000000       -0.000000000
-                        0.003833818        0.003833818       -0.009887893       -0.000000000       -0.000000000        0.000000000
+                        0.003833818        0.003833818       -0.009887893       -0.000000000       -0.000000000       -0.000000000
  ** eHxc21_paw :              
     1          1       -0.001574137        0.001129495        0.001129495       -0.000000000       -0.000000000       -0.000000000
                         0.001129495        0.005808318       -0.007623807       -0.000000000       -0.000000000       -0.000000000
@@ -3873,7 +3870,7 @@ NONLINEAR :  perts :  4.3 /  4.3 /  4.3
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
             fcart7     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
--          fftalg         312
+-          fftalg         512
            getddk           3
          getdelfd5          0
          getdelfd6          4
@@ -3981,6 +3978,11 @@ P          mk1mem           8
 
 ================================================================================
 
+ The spacegroup number, the magnetic point group, and/or the number of symmetries
+ have changed between the initial recognition based on the input file
+ and a postprocessing based on the final acell, rprim, and xred.
+ More details in the log file.
+
 
 - Timing analysis has been suppressed with timopt=0
 
@@ -4074,10 +4076,10 @@ P          mk1mem           8
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         19.3  wall=         19.3
+- Proc.   0 individual time (sec): cpu=         13.8  wall=         13.8
 
 ================================================================================
 
  Calculation completed.
-.Delivered 417 WARNINGs and  14 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         19.3  wall=         19.3
+.Delivered 417 WARNINGs and  15 COMMENTs to log file.
++Overall time at end (sec) : cpu=         13.8  wall=         13.8

@@ -70,6 +70,10 @@
    nstep5   60
   tolwfr5   1.0d-15
 
+#Compatibility
+     asr   0   # The default value 1 is preferable, this is only to keep backward compatibility for the automatic tests
+  chneut   0   # The default value 1 is preferable, this is only to keep backward compatibility for the automatic tests
+
 # Common data
    acell   3*10.00
      amu   1.0d0
@@ -113,6 +117,7 @@
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
+#%% exclude_builders = eos_gnu_13.2_serial
 #%% [files]
 #%% files_to_test = 
 #%%   t09.abo, tolnlines = 4, tolabs = 7.0e-10, tolrel = 7.0e-01

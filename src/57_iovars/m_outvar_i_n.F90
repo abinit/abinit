@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2022 ABINIT group (DCA, XG, GMR, MM)
+!!  Copyright (C) 1998-2024 ABINIT group (DCA, XG, GMR, MM)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -150,7 +150,8 @@ subroutine outvar_i_n (dtsets,iout,&
    nimagem(idtset)=dtsets(idtset)%nimage
  end do
 
- firstchar_gpu=' '; if (maxval(dtsets(1:ndtset_alloc)%use_gpu_cuda)>0) firstchar_gpu='-'
+ firstchar_gpu=' '
+ if (maxval(dtsets(1:ndtset_alloc)%gpu_option)/=ABI_GPU_DISABLED) firstchar_gpu='-'
 
 !if(multivals%natom==0)natom=dtsets(1)%natom
  natom=dtsets(1)%natom
@@ -358,6 +359,10 @@ subroutine outvar_i_n (dtsets,iout,&
  intarr(1,:)=dtsets(:)%intxc
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'intxc','INT',0)
 
+ intarr(1,:)=dtsets(:)%invovl_blksliced
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'invovl_blksliced',&
+&             'INT',0,firstchar=firstchar_gpu)
+
  intarr(1,:)=dtsets(:)%ionmov
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'ionmov','INT',0)
 
@@ -396,6 +401,11 @@ subroutine outvar_i_n (dtsets,iout,&
 
  intarr(1,:)=dtsets(:)%irdhaydock
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'irdhaydock','INT',0)
+
+ if (any(dtsets(:)%usekden==1)) then
+   intarr(1,:)=dtsets(:)%irdkden
+   call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'irdkden','INT',0)
+ end if
 
  intarr(1,:)=dtsets(:)%irdpawden
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'irdpawden','INT',0)
@@ -874,6 +884,7 @@ subroutine outvar_i_n (dtsets,iout,&
  else
    narr=1
  end if
+
  do idtset=0,ndtset_alloc       ! specific size for each dataset
    if(dtsets(idtset)%occopt==2)then
      narrm(idtset)=dtsets(idtset)%nkpt*dtsets(idtset)%nsppol
@@ -887,7 +898,7 @@ subroutine outvar_i_n (dtsets,iout,&
  end do
 
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,narr,&
-& narrm,ncid,ndtset_alloc,'nband','INT',multivals%nkpt+multivals%nsppol+multi_occopt)
+              narrm,ncid,ndtset_alloc,'nband','INT',multivals%nkpt+multivals%nsppol+multi_occopt)
 
  intarr(1,0:ndtset_alloc)=dtsets(0:ndtset_alloc)%natvshift
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'natvshift','INT',0)
@@ -910,7 +921,7 @@ subroutine outvar_i_n (dtsets,iout,&
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'nberry','INT',0)
 
  intarr(1,:)=dtsets(:)%nc_xccc_gspace
- call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'nc_xccc_gspace','INT',0) !, firstchar="-")
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'nc_xccc_gspace','INT',0)
 
  intarr(1,:)=dtsets(:)%nconeq
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'nconeq','INT',0)
@@ -976,6 +987,9 @@ subroutine outvar_i_n (dtsets,iout,&
 
  intarr(1,:)=dtsets(:)%nline
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'nline','INT',0)
+
+ intarr(1,:)=dtsets(:)%nblock_lobpcg
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'nblock_lobpcg','INT',0)
 
  intarr(1,:)=dtsets(:)%nloalg(1)
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'nloc_alg','INT',0)
@@ -1122,13 +1136,12 @@ subroutine outvar_i_n (dtsets,iout,&
  do idtset=1,ndtset_alloc       ! specific size for each dataset
    narrm(idtset)=3*dtsets(idtset)%natom
    if (narrm(idtset)>0) then
-     dprarr(1:narrm(idtset),idtset)=&
-&     reshape(dtsets(idtset)%nucdipmom(1:3,1:dtsets(idtset)%natom), [narrm(idtset)])
+     dprarr(1:narrm(idtset),idtset)= reshape(dtsets(idtset)%nucdipmom(1:3,1:dtsets(idtset)%natom), [narrm(idtset)])
    end if
    if(sum(abs( dtsets(idtset)%nucdipmom(1:3,1:dtsets(idtset)%natom))) < tol12 ) narrm(idtset)=0
  end do
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,narr,narrm,ncid,ndtset_alloc,'nucdipmom','DPR',multivals%natom)
- 
+
  intarr(1,:)=dtsets(:)%nucefg
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'nucefg','INT',0)
 

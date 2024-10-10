@@ -7,7 +7,7 @@
 !!  They permit to hide the complex/real form of the WFs.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2022 ABINIT group (FBottin,CS,FDahm,MT)
+!! Copyright (C) 2009-2024 ABINIT group (FBottin,CS,FDahm,MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -56,7 +56,7 @@ CONTAINS
 !!  for a block of band (band-FFT parallelisation)
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2022 ABINIT group (FBottin,CS)
+!! Copyright (C) 1998-2024 ABINIT group (FBottin,CS)
 !! this file is distributed under the terms of the
 !! gnu general public license, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -95,7 +95,7 @@ subroutine xprecon(cg,eval,blocksize,iterationnumber,kinpw,&
  integer,intent(in) :: blocksize,iterationnumber,npw,nspinor,optekin
  integer,intent(in) :: optpcon,vectsize
  integer, intent(in), optional :: timopt,tim_xprecon
- type(mpi_type),intent(inout) :: mpi_enreg
+ type(mpi_type),intent(in) :: mpi_enreg
 !arrays
  real(dp),intent(inout) :: cg(vectsize,blocksize),eval(blocksize,blocksize)
  real(dp),intent(in) :: kinpw(npw)

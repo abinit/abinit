@@ -1,0 +1,104 @@
+# Inspired from v9[141]
+# Crystalline silicon
+
+ndtset 6
+#ndtset 3
+#jdtset 2 3 4
+
+npband 4
+
+cprj_in_memory1 0
+cprj_in_memory2 1
+cprj_in_memory3 0
+cprj_in_memory4 1
+
+cprj_in_memory5 1
+cprj_in_memory6 1
+
+wfoptalg1 114
+wfoptalg2 114
+wfoptalg3 111
+wfoptalg4 111
+
+wfoptalg5 111
+wfoptalg6 111
+
+nblock_lobpcg1 4
+nblock_lobpcg2 4
+
+# unconverged
+ecut 5
+pawecutdg 10
+
+nstep 15
+nline  8
+
+# bands and spinors
+nband  16
+nbdbuf  4
+
+nspinor 2 nspden 4
+
+tolvrs 1.0D-20
+
+kptopt 3
+
+# severely unconverged
+ngkpt 3*2 
+nshiftk 1
+shiftk 3*0
+
+optforces 1
+optstress 1
+
+optforces5 2
+
+optforces6 2
+optstress6 0
+
+prtwf 0
+prteig 0
+prtden 0
+
+# Definition of the unit cell: fcc
+# change cell parameter to increase the stress tensor 
+#acell  3*10.26 
+acell  3*9.5         # Experimental lattice constants in Bohr
+rprim  0.0  0.5  0.5   # FCC primitive vectors (to be scaled by acell)
+       0.5  0.0  0.5
+       0.5  0.5  0.0
+
+# Definition of the atom types
+ntypat  1
+znucl 14
+
+# Definition of the atoms
+natom  2
+typat  1 1
+
+chksymtnons 0
+# change atomic positions in order to have non-zero forces (so we can test them)
+xred
+      0.01  0.02  0.03
+      0.24  0.26  0.28
+
+pp_dirpath "$ABI_PSPDIR"
+pseudos "Si_r.psp8"
+
+##############################################################
+# This section is used only for regression testing of ABINIT #
+##############################################################
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t15.abo, tolnlines=  0, tolabs=  0, tolrel= 0, fld_options = -ridiculous
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = L. Baguet
+#%% keywords = NC,CPRJ
+#%% description = Compare cprj_in_memory=1 with cprj_in_memory=0 (lobpcg2 and chebfi2). NC,nspinor=2.
+#%%<END TEST_INFO>
+ 

@@ -7,7 +7,7 @@
 !! using the "cg" convention, namely real array of shape cg(2,...)
 !!
 !! COPYRIGHT
-!! Copyright (C) 1992-2022 ABINIT group (MG, MT, XG, DCA, GZ, FB, MVer, DCA, GMR, FF)
+!! Copyright (C) 1992-2024 ABINIT group (MG, MT, XG, DCA, GZ, FB, MVer, DCA, GMR, FF)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -40,12 +40,15 @@ module m_cgtools
  use m_abicore
  use m_errors
  use m_xmpi
+ use m_abi_linalg
 
  use m_fstrings,      only : toupper, itoa, sjoin
  use m_time,          only : timab, cwtime, cwtime_report
  use m_numeric_tools, only : hermit, rhophi
- use m_abi_linalg,    only : abi_zgemm_2r, abi_xgemm
  use m_pawcprj,       only : pawcprj_type,pawcprj_axpby,pawcprj_zaxpby
+ use m_abi_linalg
+
+ use, intrinsic :: iso_c_binding, only: c_size_t, c_loc
 
  implicit none
 
@@ -85,6 +88,8 @@ module m_cgtools
  public :: set_istwfk               ! Returns the value of istwfk associated to the input k-point.
  public :: sqnorm_g                 ! Square of the norm in reciprocal space.
  public :: dotprod_g                ! Scalar product <vec1|vect2> of complex vectors vect1 and vect2 (can be the same)
+ public :: dotprod_g_batch_half     ! Scalar product <vec1|vect2> of complex vectors vect1 and vect2 (can be the same)
+ public :: dotprod_g_batch_full     ! Scalar product <vec1|vect2> of complex vectors vect1 and vect2 (can be the same)
  public :: matrixelmt_g             ! matrix element <wf1|O|wf2> of two wavefunctions, in reciprocal space,
                                     ! for an operator diagonal in G-space.
  public :: dotprod_v                ! Dot product of two potentials (integral over FFT grid).
@@ -761,13 +766,14 @@ end subroutine cg_zaxpby
 !!
 !! SOURCE
 
-subroutine cg_zgemv(trans, nrows, ncols, cgmat, vec, matvec, alpha, beta)
+subroutine cg_zgemv(trans, nrows, ncols, cgmat, vec, matvec, alpha, beta, gpu_option)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nrows, ncols
  real(dp),optional,intent(in) :: alpha(2), beta(2)
  character(len=1),intent(in) :: trans
+ integer,optional,intent(in) :: gpu_option
 !arrays
  real(dp),intent(in) :: cgmat(2,nrows*ncols), vec(2,*)
  real(dp),intent(inout) :: matvec(2,*)
@@ -775,12 +781,15 @@ subroutine cg_zgemv(trans, nrows, ncols, cgmat, vec, matvec, alpha, beta)
 !Local variables-------------------------------
 !scalars
  integer :: mm, nn, kk, lda, ldb, ldc
+ integer :: my_gpu_option
  real(dp) :: my_alpha(2), my_beta(2)
+ complex(dpc) :: my_calpha, my_cbeta
 
 ! *************************************************************************
 
  my_alpha = cg_cone;  if (present(alpha)) my_alpha = alpha
  my_beta  = cg_czero; if (present(beta))  my_beta  = beta
+ my_gpu_option = ABI_GPU_DISABLED; if (present(gpu_option))  my_gpu_option  = gpu_option
 
  lda = nrows; mm = nrows; nn = 1; kk = ncols
  if (toupper(trans) /= 'N') then
@@ -788,7 +797,13 @@ subroutine cg_zgemv(trans, nrows, ncols, cgmat, vec, matvec, alpha, beta)
  end if
  ldb = kk; ldc = mm
 
- call ZGEMM(trans, "N", mm, nn, kk, my_alpha, cgmat, lda, vec, ldb, my_beta, matvec, ldc)
+ if(my_gpu_option==ABI_GPU_DISABLED) then
+   call ZGEMM(trans, "N", mm, nn, kk, my_alpha, cgmat, lda, vec, ldb, my_beta, matvec, ldc)
+ else if(my_gpu_option==ABI_GPU_OPENMP) then
+   my_calpha = DCMPLX(my_alpha(1), my_alpha(2))
+   my_cbeta  = DCMPLX(my_beta(1), my_beta(2))
+   call abi_gpu_xgemm(2, trans, "N", mm, nn, kk, my_calpha, cgmat, lda, vec, ldb, my_cbeta, matvec, ldc)
+ end if
  ! ZGEMM(TRANSA,TRANSB,M,N,K,ALPHA,A,LDA,B,LDB,BETA,C,LDC)
 
  !call ZGEMV(trans,mm,nn,my_alpha,cgmat,lda,vec,1,my_beta,matvec,1)
@@ -1080,6 +1095,279 @@ subroutine dotprod_g(dotr, doti, istwf_k, npw, option, vect1, vect2, me_g0, comm
  end if
 
 end subroutine dotprod_g
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_cgtools/dotprod_g_batch
+!! NAME
+!! dotprod_g_batch
+!!
+!! FUNCTION
+!! Compute scalar product <vec1|vect2> of complex vectors vect1 and vect2 (can be the same)
+!! Take into account the storage mode of the vectors (istwf_k)
+!! If option=1, compute only real part, if option=2 compute also imaginary part.
+!! If the number of calls to the dot product scales quadratically
+!! with the volume of the system, it is preferable not to
+!! call the present routine, but but to write a specially
+!! optimized routine, that will avoid many branches related to
+!! the existence of 'option' and 'istwf_k'.
+!!
+!! INPUTS
+!!  istwf_k=option parameter that describes the storage of wfs
+!!  vect1(2,npw)=first vector (one should take its complex conjugate)
+!!  vect2(2,npw)=second vector
+!!  npw= (effective) number of planewaves at this k point (including spinorial level)
+!!  option= 1 if only real part to be computed,
+!!          2 if both real and imaginary.
+!!          3 if in case istwf_k==1 must compute real and imaginary parts,
+!!               but if  istwf_k >1 must compute only real part
+!!  me_g0=1 if this processor treats G=0, 0 otherwise
+!!  comm=MPI communicator used to reduce the results.
+!!
+!! OUTPUT
+!!  $doti=\Im ( <vect1|vect2> )$ , output only if option=2 and eventually option=3.
+!!  $dotr=\Re ( <vect1|vect2> )$
+!!
+!! SOURCE
+
+subroutine dotprod_g_batch_half(dotr, doti, istwf_k, npw, ndat, option, vect1, vect2, me_g0, comm, gpu_option)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: istwf_k,npw,ndat,option,me_g0,comm
+ integer,optional,intent(in) :: gpu_option
+ real(dp),target,intent(out) :: doti(ndat),dotr(ndat)
+!arrays
+ real(dp),target,intent(in) :: vect1(2,npw),vect2(2,npw,ndat)
+
+!Local variables-------------------------------
+ integer :: ierr,idat,ii,l_gpu_option
+ real(dp) :: dotarr(2)
+
+! *************************************************************************
+
+ l_gpu_option=ABI_GPU_DISABLED; if(present(gpu_option)) l_gpu_option = gpu_option
+ ! Init results indipendently of option.
+ if(l_gpu_option==ABI_GPU_DISABLED) then
+   dotr = zero;  doti = zero
+ else if(l_gpu_option==ABI_GPU_OPENMP) then
+#ifdef HAVE_OPENMP_OFFLOAD
+   call gpu_set_to_zero(dotr,int(ndat,c_size_t))
+   call gpu_set_to_zero(doti,int(ndat,c_size_t))
+#endif
+ end if
+
+ if (istwf_k==1) then
+   ! General k-point
+
+   if(option==1)then
+#ifdef HAVE_OPENMP_OFFLOAD
+     !$OMP TARGET TEAMS DISTRIBUTE PRIVATE(idat,dotarr) MAP(to:vect1,vect2,dotr) &
+     !$OMP& IF(l_gpu_option==ABI_GPU_OPENMP)
+#endif
+     do idat=1,ndat
+       dotarr = zero
+       !$OMP PARALLEL DO PRIVATE(ii) REDUCTION(+:dotarr)
+       do ii=1,npw
+         dotarr(1) = dotarr(1) + vect1(1,ii)*vect2(1,ii,idat) + vect1(2,ii)*vect2(2,ii,idat)
+       end do
+       dotr(idat) = dotarr(1)
+     end do
+   else
+#ifdef HAVE_OPENMP_OFFLOAD
+     !$OMP TARGET TEAMS DISTRIBUTE PRIVATE(idat,dotarr) MAP(to:vect1,vect2,dotr,doti) &
+     !$OMP& IF(l_gpu_option==ABI_GPU_OPENMP)
+#endif
+     do idat=1,ndat
+       dotarr = zero
+       !$OMP PARALLEL DO PRIVATE(ii) REDUCTION(+:dotarr)
+       do ii=1,npw
+         dotarr(1) = dotarr(1) + vect1(1,ii)*vect2(1,ii,idat) + vect1(2,ii)*vect2(2,ii,idat)
+         dotarr(2) = dotarr(2) + vect1(1,ii)*vect2(2,ii,idat) - vect1(2,ii)*vect2(1,ii,idat)
+       end do
+       dotr(idat) = dotarr(1)
+       doti(idat) = dotarr(2)
+     end do
+   end if
+
+ else if (istwf_k==2 .and. me_g0==1) then
+   ! Gamma k-point and I have G=0
+#ifdef HAVE_OPENMP_OFFLOAD
+   !$OMP TARGET TEAMS DISTRIBUTE PRIVATE(idat,dotarr) MAP(to:vect1,vect2,dotr) &
+   !$OMP& IF(l_gpu_option==ABI_GPU_OPENMP)
+#endif
+   do idat=1,ndat
+     dotarr = zero
+     dotr(idat)=half*vect1(1,1)*vect2(1,1,idat)
+     !$OMP PARALLEL DO PRIVATE(ii) REDUCTION(+:dotarr)
+     do ii=2,npw
+       dotarr(1) = dotarr(1) + vect1(1,ii)*vect2(1,ii,idat) + vect1(2,ii)*vect2(2,ii,idat)
+     end do
+     dotr(idat) = + two * (dotr(idat)+dotarr(1))
+   end do
+   if (option==2) doti=zero
+
+ else
+   ! Other TR k-points
+#ifdef HAVE_OPENMP_OFFLOAD
+   !$OMP TARGET TEAMS DISTRIBUTE PRIVATE(idat,dotarr) MAP(to:vect1,vect2,dotr) &
+   !$OMP& IF(l_gpu_option==ABI_GPU_OPENMP)
+#endif
+   do idat=1,ndat
+     dotarr = zero
+     !$OMP PARALLEL DO PRIVATE(ii) REDUCTION(+:dotarr)
+     do ii=1,npw
+       dotarr(1) = dotarr(1) + vect1(1,ii)*vect2(1,ii,idat) + vect1(2,ii)*vect2(2,ii,idat)
+     end do
+     dotr(idat) = two * dotarr(1)
+   end do
+   if (option==2) doti=zero
+ end if
+
+ !Reduction in case of parallelism
+ if (xmpi_comm_size(comm) > 1) then
+   if (option==1.or.istwf_k/=1) then
+#ifdef HAVE_OPENMP_OFFLOAD
+     !$OMP TARGET UPDATE FROM(dotr) IF(l_gpu_option==ABI_GPU_OPENMP)
+#endif
+     call xmpi_sum(dotr,comm,ierr)
+#ifdef HAVE_OPENMP_OFFLOAD
+     !$OMP TARGET UPDATE TO(dotr) IF(l_gpu_option==ABI_GPU_OPENMP)
+#endif
+   else
+#ifdef HAVE_OPENMP_OFFLOAD
+     !$OMP TARGET UPDATE FROM(dotr,doti) IF(l_gpu_option==ABI_GPU_OPENMP)
+#endif
+     call xmpi_sum(dotr,comm,ierr)
+     call xmpi_sum(doti,comm,ierr)
+#ifdef HAVE_OPENMP_OFFLOAD
+     !$OMP TARGET UPDATE TO(dotr,doti) IF(l_gpu_option==ABI_GPU_OPENMP)
+#endif
+   end if
+ end if
+
+end subroutine dotprod_g_batch_half
+!!***
+
+
+subroutine dotprod_g_batch_full(dotr, doti, istwf_k, npw, ndat, option, vect1, vect2, me_g0, comm, gpu_option)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: istwf_k,npw,ndat,option,me_g0,comm
+ integer,optional,intent(in) :: gpu_option
+ real(dp),target,intent(out) :: doti(ndat),dotr(ndat)
+!arrays
+ real(dp),target,intent(in) :: vect1(2,npw,ndat),vect2(2,npw,ndat)
+
+!Local variables-------------------------------
+ integer :: ierr,idat,ii,l_gpu_option
+ real(dp) :: dotarr(2)
+
+! *************************************************************************
+
+ l_gpu_option=ABI_GPU_DISABLED; if(present(gpu_option)) l_gpu_option = gpu_option
+ ! Init results indipendently of option.
+ if(l_gpu_option==ABI_GPU_DISABLED) then
+   dotr = zero;  doti = zero
+ else if(l_gpu_option==ABI_GPU_OPENMP) then
+#ifdef HAVE_OPENMP_OFFLOAD
+   call gpu_set_to_zero(dotr,int(ndat,c_size_t))
+   call gpu_set_to_zero(doti,int(ndat,c_size_t))
+#endif
+ end if
+
+ if (istwf_k==1) then
+   ! General k-point
+
+   if(option==1)then
+#ifdef HAVE_OPENMP_OFFLOAD
+     !$OMP TARGET TEAMS DISTRIBUTE PRIVATE(idat,dotarr) MAP(to:vect1,vect2,dotr) &
+     !$OMP& IF(l_gpu_option==ABI_GPU_OPENMP)
+#endif
+     do idat=1,ndat
+       dotarr = zero
+       !$OMP PARALLEL DO PRIVATE(ii) REDUCTION(+:dotarr)
+       do ii=1,npw
+         dotarr(1) = dotarr(1) + vect1(1,ii,idat)*vect2(1,ii,idat) + vect1(2,ii,idat)*vect2(2,ii,idat)
+       end do
+       dotr(idat) = dotarr(1)
+     end do
+   else
+#ifdef HAVE_OPENMP_OFFLOAD
+     !$OMP TARGET TEAMS DISTRIBUTE PRIVATE(idat,dotarr) MAP(to:vect1,vect2,dotr,doti) &
+     !$OMP& IF(l_gpu_option==ABI_GPU_OPENMP)
+#endif
+     do idat=1,ndat
+       dotarr = zero
+       !$OMP PARALLEL DO PRIVATE(ii) REDUCTION(+:dotarr)
+       do ii=1,npw
+         dotarr(1) = dotarr(1) + vect1(1,ii,idat)*vect2(1,ii,idat) + vect1(2,ii,idat)*vect2(2,ii,idat)
+         dotarr(2) = dotarr(2) + vect1(1,ii,idat)*vect2(2,ii,idat) - vect1(2,ii,idat)*vect2(1,ii,idat)
+       end do
+       dotr(idat) = dotarr(1)
+       doti(idat) = dotarr(2)
+     end do
+   end if
+
+ else if (istwf_k==2 .and. me_g0==1) then
+   ! Gamma k-point and I have G=0
+#ifdef HAVE_OPENMP_OFFLOAD
+   !$OMP TARGET TEAMS DISTRIBUTE PRIVATE(idat,dotarr) MAP(to:vect1,vect2,dotr) &
+   !$OMP& IF(l_gpu_option==ABI_GPU_OPENMP)
+#endif
+   do idat=1,ndat
+     dotarr = zero
+     dotr(idat)=half*vect1(1,1,idat)*vect2(1,1,idat)
+     !$OMP PARALLEL DO PRIVATE(ii) REDUCTION(+:dotarr)
+     do ii=2,npw
+       dotarr(1) = dotarr(1) + vect1(1,ii,idat)*vect2(1,ii,idat) + vect1(2,ii,idat)*vect2(2,ii,idat)
+     end do
+     dotr(idat) = + two * (dotr(idat)+dotarr(1))
+   end do
+   if (option==2) doti=zero
+
+ else
+   ! Other TR k-points
+#ifdef HAVE_OPENMP_OFFLOAD
+   !$OMP TARGET TEAMS DISTRIBUTE PRIVATE(idat,dotarr) MAP(to:vect1,vect2,dotr) &
+   !$OMP& IF(l_gpu_option==ABI_GPU_OPENMP)
+#endif
+   do idat=1,ndat
+     dotarr = zero
+     !$OMP PARALLEL DO PRIVATE(ii) REDUCTION(+:dotarr)
+     do ii=1,npw
+       dotarr(1) = dotarr(1) + vect1(1,ii,idat)*vect2(1,ii,idat) + vect1(2,ii,idat)*vect2(2,ii,idat)
+     end do
+     dotr(idat) = two * dotarr(1)
+   end do
+   if (option==2) doti=zero
+ end if
+
+ !Reduction in case of parallelism
+ if (xmpi_comm_size(comm) > 1) then
+   if (option==1.or.istwf_k/=1) then
+#ifdef HAVE_OPENMP_OFFLOAD
+     !$OMP TARGET UPDATE FROM(dotr) IF(l_gpu_option==ABI_GPU_OPENMP)
+#endif
+     call xmpi_sum(dotr,comm,ierr)
+#ifdef HAVE_OPENMP_OFFLOAD
+     !$OMP TARGET UPDATE TO(dotr) IF(l_gpu_option==ABI_GPU_OPENMP)
+#endif
+   else
+#ifdef HAVE_OPENMP_OFFLOAD
+     !$OMP TARGET UPDATE FROM(dotr,doti) IF(l_gpu_option==ABI_GPU_OPENMP)
+#endif
+     call xmpi_sum(dotr,comm,ierr)
+     call xmpi_sum(doti,comm,ierr)
+#ifdef HAVE_OPENMP_OFFLOAD
+     !$OMP TARGET UPDATE TO(dotr,doti) IF(l_gpu_option==ABI_GPU_OPENMP)
+#endif
+   end if
+ end if
+
+end subroutine dotprod_g_batch_full
 !!***
 
 !----------------------------------------------------------------------
@@ -1877,10 +2165,8 @@ subroutine cg_gsph2box(nx,ny,nz,ldx,ldy,ldz,ndat,npw_k,istwf_k,kg_k,iarrsph,oarr
        iy=kg_k(2,ipw); if (iy<0) iy=iy+ny; iy=iy+1
        iz=kg_k(3,ipw); if (iz<0) iz=iz+nz; iz=iz+1
        ifft = ix + (iy-1)*ldx + (iz-1)*ldx*ldy
-#if defined __INTEL_COMPILER && defined HAVE_OPENMP
-       if (ifft==0) then
-         ABI_ERROR("prevent ifort+OMP from miscompiling this section on cronos")
-       end if
+#if (defined FC_NVHPC) || (defined __INTEL_COMPILER && defined HAVE_OPENMP)
+if (ifft<0) stop "prevent from miscompiling this section"
 #endif
        oarrbox(1,ifft+pad_box) = iarrsph(1,ipw+pad_sph)
        oarrbox(2,ifft+pad_box) = iarrsph(2,ipw+pad_sph)
@@ -1910,6 +2196,9 @@ subroutine cg_gsph2box(nx,ny,nz,ldx,ldy,ldz,ndat,npw_k,istwf_k,kg_k,iarrsph,oarr
        iy=kg_k(2,ipw); if(iy<0)iy=iy+ny; iy=iy+1
        iz=kg_k(3,ipw); if(iz<0)iz=iz+nz; iz=iz+1
        ifft = ix + (iy-1)*ldx + (iz-1)*ldx*ldy
+#if defined FC_NVHPC
+if (ifft<0) stop "prevent from miscompiling this section"
+#endif
        ! Construct the coordinates of -k-G
        ixinv=ixinver(ix); iyinv=iyinver(iy); izinv=izinver(iz)
        ifft_inv = ixinv + (iyinv-1)*ldx + (izinv-1)*ldx*ldy
@@ -1982,6 +2271,9 @@ subroutine cg_box2gsph(nx,ny,nz,ldx,ldy,ldz,ndat,npw_k,kg_k,iarrbox,oarrsph,rsca
        iy=kg_k(2,ig); if (iy<0) iy=iy+ny; iy=iy+1
        iz=kg_k(3,ig); if (iz<0) iz=iz+nz; iz=iz+1
        ifft = ix + (iy-1)*ldx + (iz-1)*ldx*ldy
+#if defined FC_NVHPC
+if (ifft<0) stop "prevent from miscompiling this section"
+#endif
        oarrsph(1,ig) = iarrbox(1,ifft)
        oarrsph(2,ig) = iarrbox(2,ifft)
      end do
@@ -1995,6 +2287,9 @@ subroutine cg_box2gsph(nx,ny,nz,ldx,ldy,ldz,ndat,npw_k,kg_k,iarrbox,oarrsph,rsca
          iy=kg_k(2,ig); if (iy<0) iy=iy+ny; iy=iy+1
          iz=kg_k(3,ig); if (iz<0) iz=iz+nz; iz=iz+1
          ifft = ix + (iy-1)*ldx + (iz-1)*ldx*ldy
+#if defined FC_NVHPC
+if (ifft<0) stop "prevent from miscompiling this section"
+#endif
          oarrsph(1,ig+sph_pad) = iarrbox(1,ifft+box_pad)
          oarrsph(2,ig+sph_pad) = iarrbox(2,ifft+box_pad)
        end do
@@ -2009,6 +2304,9 @@ subroutine cg_box2gsph(nx,ny,nz,ldx,ldy,ldz,ndat,npw_k,kg_k,iarrbox,oarrsph,rsca
        iy=kg_k(2,ig); if (iy<0) iy=iy+ny; iy=iy+1
        iz=kg_k(3,ig); if (iz<0) iz=iz+nz; iz=iz+1
        ifft = ix + (iy-1)*ldx + (iz-1)*ldx*ldy
+#if defined FC_NVHPC
+if (ifft<0) stop "prevent from miscompiling this section"
+#endif
        oarrsph(1,ig) = iarrbox(1,ifft) * rscal
        oarrsph(2,ig) = iarrbox(2,ifft) * rscal
      end do
@@ -2022,6 +2320,9 @@ subroutine cg_box2gsph(nx,ny,nz,ldx,ldy,ldz,ndat,npw_k,kg_k,iarrbox,oarrsph,rsca
          iy=kg_k(2,ig); if (iy<0) iy=iy+ny; iy=iy+1
          iz=kg_k(3,ig); if (iz<0) iz=iz+nz; iz=iz+1
          ifft = ix + (iy-1)*ldx + (iz-1)*ldx*ldy
+#if defined FC_NVHPC
+if (ifft<0) stop "prevent from miscompiling this section"
+#endif
          oarrsph(1,ig+sph_pad) = iarrbox(1,ifft+box_pad) * rscal
          oarrsph(2,ig+sph_pad) = iarrbox(2,ifft+box_pad) * rscal
        end do
@@ -3010,12 +3311,13 @@ end subroutine cgpaw_gramschmidt
 !! SOURCE
 
 subroutine projbd(cg,direc,iband0,icg,iscg,istwf_k,mcg,mscg,nband,&
-                  npw,nspinor,scg,scprod,scprod_io,tim_projbd,useoverlap,me_g0,comm)
+                  npw,nspinor,scg,scprod,scprod_io,tim_projbd,useoverlap,me_g0,comm,gpu_option)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: iband0,icg,iscg,istwf_k,mcg,mscg,nband,npw,nspinor
  integer,intent(in) :: scprod_io,tim_projbd,useoverlap,me_g0,comm
+ integer,optional,intent(in) :: gpu_option
 !arrays
  real(dp),intent(in) :: cg(2,mcg),scg(2,mscg*useoverlap)
  real(dp),intent(inout) :: direc(2,npw*nspinor)
@@ -3024,12 +3326,15 @@ subroutine projbd(cg,direc,iband0,icg,iscg,istwf_k,mcg,mscg,nband,&
 !Local variables-------------------------------
 !scalars
  integer :: nbandm,npw_sp,ierr
+ integer :: my_gpu_option
 !arrays
  real(dp) :: tsec(2),bkp_scprod(2),bkp_dirg0(2)
 
 ! *************************************************************************
 
  call timab(210+tim_projbd,1,tsec)
+
+ my_gpu_option = ABI_GPU_DISABLED; if (present(gpu_option))  my_gpu_option  = gpu_option
 
  npw_sp=npw*nspinor
 
@@ -3039,23 +3344,39 @@ subroutine projbd(cg,direc,iband0,icg,iscg,istwf_k,mcg,mscg,nband,&
 
    if (scprod_io==0) then
      if (useoverlap==1) then
-       call cg_zgemv("C",npw_sp,nbandm,scg(1,iscg+1),direc,scprod)
+       call cg_zgemv("C",npw_sp,nbandm,scg(1,iscg+1),direc,scprod,gpu_option=my_gpu_option)
      else
-       call cg_zgemv("C",npw_sp,nbandm,cg(1,icg+1),  direc,scprod)
+       call cg_zgemv("C",npw_sp,nbandm,cg(1,icg+1),  direc,scprod,gpu_option=my_gpu_option)
      end if
      call xmpi_sum(scprod,comm,ierr)
    end if
 
    if (iband0>0.and.iband0<=nbandm) then
-     bkp_scprod = scprod(:,iband0)
+#ifdef HAVE_OPENMP_OFFLOAD
+     !$OMP TARGET MAP(to:bkp_scprod,scprod) IF(my_gpu_option==ABI_GPU_OPENMP)
+#endif
+     bkp_scprod(:) = scprod(:,iband0)
      scprod(:,iband0) = zero
+#ifdef HAVE_OPENMP_OFFLOAD
+     !$OMP END TARGET
+#endif
    end if
 
-   call cg_zgemv("N",npw_sp,nbandm,cg(1,icg+1),scprod,direc,alpha=-cg_cone,beta=cg_cone)
+   call cg_zgemv("N",npw_sp,nbandm,cg(1,icg+1),scprod,direc,alpha=-cg_cone,beta=cg_cone,gpu_option=my_gpu_option)
 
-   if (iband0>0.and.iband0<=nbandm) scprod(:,iband0) = bkp_scprod ! Restore previous value as scprod is output.
+   if (iband0>0.and.iband0<=nbandm) then
+     ! Restore previous value as scprod is output.
+#ifdef HAVE_OPENMP_OFFLOAD
+     !$OMP TARGET MAP(to:bkp_scprod,scprod) IF(my_gpu_option==ABI_GPU_OPENMP)
+#endif
+     scprod(:,iband0) = bkp_scprod(:)
+#ifdef HAVE_OPENMP_OFFLOAD
+     !$OMP END TARGET
+#endif
+   end if
 
  else if (istwf_k>=2) then
+   if(my_gpu_option/=ABI_GPU_DISABLED) ABI_BUG("Use case not handled with OpenMP GPU (use_gpu_cuda==2)")
    !
    !  u_{G0/2}(G) = u_{G0/2}(-G-G0)^*; k = G0/2
    !  hence:
@@ -3073,7 +3394,7 @@ subroutine projbd(cg,direc,iband0,icg,iscg,istwf_k,mcg,mscg,nband,&
          direc(2,1) = zero
        end if
 
-       call cg_zgemv("C",npw_sp,nbandm,scg(1,iscg+1),direc,scprod)
+       call cg_zgemv("C",npw_sp,nbandm,scg(1,iscg+1),direc,scprod,gpu_option=my_gpu_option)
        scprod = two * scprod
        scprod(2,:) = zero
 
@@ -3087,7 +3408,7 @@ subroutine projbd(cg,direc,iband0,icg,iscg,istwf_k,mcg,mscg,nband,&
          direc(2,1) = zero
        end if
 
-       call cg_zgemv("C",npw_sp,nbandm,cg(1,icg+1),direc,scprod)
+       call cg_zgemv("C",npw_sp,nbandm,cg(1,icg+1),direc,scprod,gpu_option=my_gpu_option)
        scprod = two * scprod
        scprod(2,:) = zero
 
@@ -3102,7 +3423,7 @@ subroutine projbd(cg,direc,iband0,icg,iscg,istwf_k,mcg,mscg,nband,&
      scprod(:,iband0) = zero
    end if
 
-   call cg_zgemv("N",npw_sp,nbandm,cg(1,icg+1),scprod,direc,alpha=-cg_cone,beta=cg_cone)
+   call cg_zgemv("N",npw_sp,nbandm,cg(1,icg+1),scprod,direc,alpha=-cg_cone,beta=cg_cone,gpu_option=my_gpu_option)
 
    if (iband0>0.and.iband0<=nbandm) scprod(:,iband0) = bkp_scprod ! Restore previous value as scprod is output.
 
@@ -3172,7 +3493,7 @@ subroutine cg_envlop(cg, ecut, gmet, icgmod, kg, kpoint, mcg, nband, npw, nspino
  ABI_MALLOC(cut_pws,(npw))
 
 !Run through G vectors in basis
-!$OMP PARALLEL DO PRIVATE(gs)
+!$OMP PARALLEL DO PRIVATE(gs,i1,i2,i3)
  do ig=1,npw
    i1=kg(1,ig) ; i2=kg(2,ig) ; i3=kg(3,ig)
 !(k+G)^2 evaluated using metric and kpoint
@@ -3343,7 +3664,7 @@ subroutine cg_precon(cg, eval, istwf_k, kinpw, npw, nspinor, me_g0, optekin, pco
    do ispinor=1,nspinor
      igs=(ispinor-1)*npw
      do ig=1+igs,npw+igs
-       if(kinpw(ig-igs)<huge(0.0_dp)*1.d-11)then
+       if(kinpw(ig-igs)<huge(zero)*1.d-11)then
          ek0=ek0+kinpw(ig-igs)*(cg(1,ig)**2+cg(2,ig)**2)
        end if
      end do
@@ -3352,14 +3673,14 @@ subroutine cg_precon(cg, eval, istwf_k, kinpw, npw, nspinor, me_g0, optekin, pco
  else if (istwf_k>=2)then
    if (istwf_k==2 .and. me_g0 == 1)then
      ek0=zero ; ipw1=2
-     if(kinpw(1)<huge(0.0_dp)*1.d-11)ek0=0.5_dp*kinpw(1)*cg(1,1)**2
+     if(kinpw(1)<huge(zero)*1.d-11)ek0=0.5_dp*kinpw(1)*cg(1,1)**2
    else
      ek0=zero ; ipw1=1
    end if
    do ispinor=1,nspinor
      igs=(ispinor-1)*npw
      do ig=ipw1+igs,npw+igs
-       if(kinpw(ig)<huge(0.0_dp)*1.d-11)then
+       if(kinpw(ig)<huge(zero)*1.d-11)then
          ek0=ek0+kinpw(ig)*(cg(1,ig)**2+cg(2,ig)**2)
        end if
      end do
@@ -3388,7 +3709,7 @@ subroutine cg_precon(cg, eval, istwf_k, kinpw, npw, nspinor, me_g0, optekin, pco
    igs=(ispinor-1)*npw
 !$OMP PARALLEL DO PRIVATE(fac,ig,poly,xx) SHARED(cg,ek0_inv,eval,kinpw,igs,npw,vect,pcon)
    do ig=1+igs,npw+igs
-     if(kinpw(ig-igs)<huge(0.0_dp)*1.d-11)then
+     if(kinpw(ig-igs)<huge(zero)*1.d-11)then
        xx=kinpw(ig-igs)*ek0_inv
 !      Teter polynomial ratio
        poly=27._dp+xx*(18._dp+xx*(12._dp+xx*8._dp))
@@ -3479,7 +3800,7 @@ subroutine cg_precon_block(cg,eval,blocksize,iterationnumber,kinpw,&
      if (me_g0 == 1) then
        do ig=1+igs,1+igs !g=0
          if (iterationnumber==1) then
-           if(kinpw(ig-igs)<huge(0.0_dp)*1.d-11)then
+           if(kinpw(ig-igs)<huge(zero)*1.d-11)then
              xx=kinpw(ig-igs)
 !            teter polynomial ratio
              poly=27._dp+xx*(18._dp+xx*(12._dp+xx*8._dp))
@@ -3503,7 +3824,7 @@ subroutine cg_precon_block(cg,eval,blocksize,iterationnumber,kinpw,&
        end do
        do ig=2+igs,npw+igs
          if (iterationnumber==1) then
-           if(kinpw(ig-igs)<huge(0.0_dp)*1.d-11)then
+           if(kinpw(ig-igs)<huge(zero)*1.d-11)then
              xx=kinpw(ig-igs)
 !            teter polynomial ratio
              poly=27._dp+xx*(18._dp+xx*(12._dp+xx*8._dp))
@@ -3533,7 +3854,7 @@ subroutine cg_precon_block(cg,eval,blocksize,iterationnumber,kinpw,&
      else
        do ig=1+igs,npw+igs
          if (iterationnumber==1) then
-           if(kinpw(ig-igs)<huge(0.0_dp)*1.d-11)then
+           if(kinpw(ig-igs)<huge(zero)*1.d-11)then
              xx=kinpw(ig-igs)
 !            teter polynomial ratio
              poly=27._dp+xx*(18._dp+xx*(12._dp+xx*8._dp))
@@ -3571,9 +3892,9 @@ subroutine cg_precon_block(cg,eval,blocksize,iterationnumber,kinpw,&
      do iblocksize=1,blocksize
        if (me_g0 == 1)then
          ek0(iblocksize)=0.0_dp ; ipw1=2
-         if(kinpw(1)<huge(0.0_dp)*1.d-11)ek0(iblocksize)=0.5_dp*kinpw(1)*cg(1,iblocksize)**2
+         if(kinpw(1)<huge(zero)*1.d-11)ek0(iblocksize)=0.5_dp*kinpw(1)*cg(1,iblocksize)**2
          do ig=ipw1,npw
-           if(kinpw(ig)<huge(0.0_dp)*1.d-11)then
+           if(kinpw(ig)<huge(zero)*1.d-11)then
              ek0(iblocksize)=ek0(iblocksize)+&
 &             kinpw(ig)*(cg(ig,iblocksize)**2+cg(ig+npw-1,iblocksize)**2)
            end if
@@ -3581,7 +3902,7 @@ subroutine cg_precon_block(cg,eval,blocksize,iterationnumber,kinpw,&
        else
          ek0(iblocksize)=0.0_dp ; ipw1=1
          do ig=ipw1,npw
-           if(kinpw(ig)<huge(0.0_dp)*1.d-11)then
+           if(kinpw(ig)<huge(zero)*1.d-11)then
              ek0(iblocksize)=ek0(iblocksize)+&
 &             kinpw(ig)*(cg(ig,iblocksize)**2+cg(ig+npw,iblocksize)**2)
            end if
@@ -3614,7 +3935,7 @@ subroutine cg_precon_block(cg,eval,blocksize,iterationnumber,kinpw,&
        if (me_g0 == 1) then
          do ig=1+igs,1+igs !g=0
            if (iterationnumber==1.or.optpcon==1) then
-             if(kinpw(ig-igs)<huge(0.0_dp)*1.d-11)then
+             if(kinpw(ig-igs)<huge(zero)*1.d-11)then
                xx=kinpw(ig-igs)*ek0_inv(iblocksize)
 !              teter polynomial ratio
                poly=27._dp+xx*(18._dp+xx*(12._dp+xx*8._dp))
@@ -3634,7 +3955,7 @@ subroutine cg_precon_block(cg,eval,blocksize,iterationnumber,kinpw,&
          end do
          do ig=2+igs,npw+igs
            if (iterationnumber==1.or.optpcon==1) then
-             if(kinpw(ig-igs)<huge(0.0_dp)*1.d-11)then
+             if(kinpw(ig-igs)<huge(zero)*1.d-11)then
                xx=kinpw(ig-igs)*ek0_inv(iblocksize)
 !              teter polynomial ratio
                poly=27._dp+xx*(18._dp+xx*(12._dp+xx*8._dp))
@@ -3660,7 +3981,7 @@ subroutine cg_precon_block(cg,eval,blocksize,iterationnumber,kinpw,&
        else
          do ig=1+igs,npw+igs
            if (iterationnumber==1.or.optpcon==1) then
-             if(kinpw(ig-igs)<huge(0.0_dp)*1.d-11)then
+             if(kinpw(ig-igs)<huge(zero)*1.d-11)then
                xx=kinpw(ig-igs)*ek0_inv(iblocksize)
 !              teter polynomial ratio
                poly=27._dp+xx*(18._dp+xx*(12._dp+xx*8._dp))
@@ -3766,7 +4087,7 @@ subroutine cg_zprecon_block(cg,eval,blocksize,iterationnumber,kinpw,&
      igs=(ispinor-1)*npw
      do ig=1+igs,npw+igs
        if (iterationnumber==1) then
-         if(kinpw(ig-igs)<huge(0.0_dp)*1.d-11)then
+         if(kinpw(ig-igs)<huge(zero)*1.d-11)then
            xx=kinpw(ig-igs)
 !          teter polynomial ratio
            poly=27._dp+xx*(18._dp+xx*(12._dp+xx*8._dp))
@@ -3798,7 +4119,7 @@ subroutine cg_zprecon_block(cg,eval,blocksize,iterationnumber,kinpw,&
        do ispinor=1,nspinor
          igs=(ispinor-1)*npw
          do ig=1+igs,npw+igs
-           if(kinpw(ig-igs)<huge(0.0_dp)*1.d-11)then
+           if(kinpw(ig-igs)<huge(zero)*1.d-11)then
              ek0(iblocksize)=ek0(iblocksize)+kinpw(ig-igs)*&
 &             (real(cg(ig,iblocksize))**2+aimag(cg(ig,iblocksize))**2)
            end if
@@ -3827,7 +4148,7 @@ subroutine cg_zprecon_block(cg,eval,blocksize,iterationnumber,kinpw,&
        igs=(ispinor-1)*npw
        do ig=1+igs,npw+igs
          if (iterationnumber==1.or.optpcon==1) then
-           if(kinpw(ig-igs)<huge(0.0_dp)*1.d-11)then
+           if(kinpw(ig-igs)<huge(zero)*1.d-11)then
              xx=kinpw(ig-igs)*ek0_inv(iblocksize)
 !            teter polynomial ratio
              poly=27._dp+xx*(18._dp+xx*(12._dp+xx*8._dp))

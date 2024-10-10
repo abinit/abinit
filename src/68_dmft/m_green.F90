@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2022 ABINIT group (BAmadon)
+!! Copyright (C) 2006-2024 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1345,6 +1345,7 @@ subroutine integrate_green(cryst_struc,green,paw_dmft&
  integer :: mband,mbandc,myproc,natom,ndim,nkpt,nproc,nspinor
  integer :: nsppol,option
  integer :: optksloc,spacecomm,optaftsolv,optnonxsum
+ integer, allocatable :: lpawu_natom(:)
  complex(dpc) :: integral
  character(len=500) :: message
  complex(dpc), allocatable :: ff(:)
@@ -1417,7 +1418,10 @@ subroutine integrate_green(cryst_struc,green,paw_dmft&
 
 ! Allocations
  ABI_MALLOC(matlu_temp,(natom))
- call init_matlu(natom,nspinor,nsppol,green%oper(1)%matlu(:)%lpawu,matlu_temp)
+ ABI_MALLOC(lpawu_natom,(natom))
+ lpawu_natom(:)=green%oper(1)%matlu(:)%lpawu
+ call init_matlu(natom,nspinor,nsppol,lpawu_natom,matlu_temp)
+ ABI_FREE(lpawu_natom)
 
  ABI_MALLOC(ff,(green%nw))
 
@@ -2276,7 +2280,7 @@ end subroutine compa_occup_ks
 !! Do integration in matsubara space
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2022 ABINIT group (BAmadon)
+!! Copyright (C) 2006-2024 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2357,7 +2361,7 @@ end subroutine add_int_fct
 !! Do integration in matsubara space
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2022 ABINIT group (BAmadon)
+!! Copyright (C) 2006-2024 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2479,7 +2483,7 @@ end subroutine int_fct
 !! (A spline is performed )
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2022 ABINIT group (BAmadon)
+!! Copyright (C) 2006-2024 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2612,7 +2616,7 @@ end subroutine fourier_fct
 !! (A spline is performed )
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2022 ABINIT group (BAmadon)
+!! Copyright (C) 2006-2024 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2880,7 +2884,7 @@ end subroutine occup_green_tau
 !! Compute levels for ctqmc
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2022 ABINIT group (BAmadon)
+!! Copyright (C) 1999-2024 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2965,7 +2969,7 @@ end subroutine occup_green_tau
 !!  Compute Fermi level for DMFT or DFT.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2022 ABINIT group (BAmadon)
+!! Copyright (C) 2006-2024 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -3105,7 +3109,7 @@ end subroutine fermi_green
 !!  Compute root of a function with newton methods (newton/halley)
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2022 ABINIT group (BAmadon)
+!! Copyright (C) 2006-2024 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -3455,7 +3459,7 @@ end subroutine newton
 !! do the fourier transformation and print it
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2022 ABINIT group (BAmadon)
+!! Copyright (C) 1999-2024 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

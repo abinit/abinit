@@ -7,7 +7,7 @@
 !!  _SCR and _SUSC file as well as methods used to read/write/echo.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2022 ABINIT group (MG)
+!! Copyright (C) 2008-2024 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -22,6 +22,7 @@
 
 MODULE m_io_screening
 
+ use, intrinsic :: iso_c_binding
  use defs_basis
  use m_abicore
 #if defined HAVE_MPI2
@@ -32,17 +33,18 @@ MODULE m_io_screening
  use m_nctk
  use m_errors
  use m_dtset
- use, intrinsic :: iso_c_binding
  use netcdf
  use m_hdr
  use m_sort
+ use m_crystal
 
  use m_gwdefs,          only : em1params_t, GW_TOLQ
  use m_fstrings,        only : sjoin, itoa, endswith, replace_ch0
  use m_copy,            only : alloc_copy
  use m_io_tools,        only : open_file, file_exists, iomode2str
  use m_numeric_tools,   only : print_arr, remove_copies, imax_loc
- use m_bz_mesh,         only : isequalk
+ use m_bz_mesh,         only : isequalk, kmesh_t
+ use m_gsphere,         only : gsphere_t
 
  implicit none
 
@@ -53,9 +55,9 @@ MODULE m_io_screening
  include 'mpif.h'
 #endif
 
- character(len=nctk_slen),public,parameter :: e_ncname="dielectric_function"
- character(len=nctk_slen),public,parameter :: em1_ncname="inverse_dielectric_function"
- character(len=nctk_slen),public,parameter :: chi0_ncname="polarizability"
+ character(len=nctk_slen),public,parameter :: e_ncname = "dielectric_function"
+ character(len=nctk_slen),public,parameter :: em1_ncname = "inverse_dielectric_function"
+ character(len=nctk_slen),public,parameter :: chi0_ncname = "polarizability"
 
  public :: ncname_from_id       ! return the name of the netcdf variable from the id
 
@@ -240,20 +242,12 @@ MODULE m_io_screening
 
 ! public :: hscr_from_file       ! Read the header from file.
  public :: hscr_io              ! I/O of the header (read/write/echo).
- !public :: hscr_fort_read
- !public :: hscr_fort_write
- !public :: hscr_ncwread
- !public :: hscr_ncwrite
- !public :: hscr_echo            ! I/O of the header (read/write/echo).
 
  public :: hscr_new             ! Create header.
-! public :: hscr_print           ! Print the SCR-related part of the header.
-! public :: hscr_bcast           ! Broadcast the header.
-! public :: hscr_free            ! Free the header.
- !public :: hscr_copy            ! Copy the SCR|SUSC header.
  public :: hscr_merge           ! Merge two or more headers.
  public :: write_screening      ! Write a q-slice of the matrix in G-space.
  public :: read_screening       ! Read the content of the (SCR|SUSC) file placed after the header.
+ public :: get_hscr_qmesh_gsph
 
 ! =====================
 ! Tools used in mrgscr
@@ -820,7 +814,7 @@ end subroutine hscr_print
 !!
 !! SOURCE
 
-type(hscr_t) function hscr_new(varname,dtset,ep,hdr_abinit,ikxc,test_type,tordering,titles,ngvec,gvec) result(hscr)
+type(hscr_t) function hscr_new(varname, dtset,ep,hdr_abinit,ikxc,test_type,tordering,titles,ngvec,gvec) result(hscr)
 
 !Arguments ------------------------------------
 !scalars
@@ -1398,7 +1392,7 @@ end subroutine write_screening
 !! SOURCE
 
 subroutine read_screening(varname,fname,npweA,nqibzA,nomegaA,epsm1,iomode,comm, &
-& iqiA) ! Optional
+                          iqiA) ! Optional
 
 !Arguments ------------------------------------
 !scalars
@@ -1718,11 +1712,11 @@ subroutine hscr_mpio_skip(mpio_fh, fform, offset)
 !scalars
  integer :: bsize_frm,mpi_type_frm
 #ifdef HAVE_MPI_IO
- integer :: ierr,isk,nqlwl
+ integer :: ierr,isk
  !character(len=500) :: msg
 !arrays
  integer(kind=MPI_OFFSET_KIND) :: fmarker,positloc
- integer :: statux(MPI_STATUS_SIZE)
+ integer :: nqlwl(1),statux(MPI_STATUS_SIZE)
 #endif
 
 ! *************************************************************************
@@ -1744,13 +1738,13 @@ subroutine hscr_mpio_skip(mpio_fh, fform, offset)
    ! read nqlwl from the 2d record.
    positloc  = offset + bsize_frm + 9*xmpi_bsize_int
    call MPI_FILE_READ_AT(mpio_fh,positloc,nqlwl,1,MPI_INTEGER,statux,ierr)
-   call wrtout(std_out, sjoin("nqlwl = ",itoa(nqlwl)))
+   call wrtout(std_out, sjoin("nqlwl = ",itoa(nqlwl(1))))
 
    do isk=1,5
      call xmpio_read_frm(mpio_fh,offset,xmpio_single,fmarker,ierr)
    end do
 
-   if (nqlwl>0) then  ! skip qlwl
+   if (nqlwl(1)>0) then  ! skip qlwl
      call xmpio_read_frm(mpio_fh,offset,xmpio_single,fmarker,ierr)
    end if
 
@@ -2417,5 +2411,87 @@ subroutine ioscr_wremove(inpath, ihscr, fname_out, nfreq_tot, freq_indx, ohscr)
 end subroutine ioscr_wremove
 !!***
 
-END MODULE m_io_screening
+!!****f* m_io_screening/get_hscr_qmesh_gsph
+!! NAME
+!! get_hscr_qmesh_gsph
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SOURCE
+
+subroutine get_hscr_qmesh_gsph(w_fname, dtset, cryst, hscr, qmesh, gsph_c, qlwl, comm)
+
+!Arguments ------------------------------------
+!scalars
+ character(len=*),intent(inout) :: w_fname
+ type(dataset_type),intent(inout) :: dtset
+ type(crystal_t),intent(in) :: cryst
+ type(hscr_t),intent(out) :: hscr
+ type(kmesh_t),intent(out) :: qmesh
+ type(gsphere_t),intent(out) :: gsph_c
+ real(dp),allocatable,intent(out) :: qlwl(:,:)
+ integer,intent(in) :: comm
+
+!Local variables-------------------------------
+!scalars
+ integer,parameter :: master = 0
+ integer :: my_rank, fform, npwe_file, nqlwl, ierr
+ character(len=500) :: msg
+
+! *************************************************************************
+
+ my_rank = xmpi_comm_rank(comm) !; nprocs = xmpi_comm_size(comm)
+
+ if (my_rank == master) then
+   ! Read dimensions from the external file.
+   if (.not. file_exists(w_fname)) then
+     w_fname = nctk_ncify(w_fname)
+     ABI_COMMENT(sjoin("File not found. Will try netcdf file: ", w_fname))
+   end if
+   ! Master reads npw and nqlwl from the SCR file.
+   call wrtout(std_out, sjoin('Testing file: ', w_fname))
+   call hscr%from_file(w_fname, fform, xmpi_comm_self); if (dtset%prtvol > 0) call Hscr%print()
+
+   ! Have to change %npweps if it was larger than dim on disk.
+   npwe_file = Hscr%npwe
+   nqlwl     = Hscr%nqlwl
+
+   if (dtset%npweps > npwe_file) then
+     write(msg,'(2(a,i0),2a,i0)')&
+      "The number of G-vectors stored on file (",npwe_file,") is smaller than dtset%npweps: ",dtset%npweps,ch10,&
+      "Calculation will proceed with the maximum available set, npwe_file: ",npwe_file
+     ABI_WARNING(msg)
+     dtset%npweps = npwe_file
+   else if (Dtset%npweps < npwe_file) then
+     write(msg,'(2(a,i0),2a,i0)')&
+      "The number of G-vectors stored on file (",npwe_file,") is larger than dtset%npweps: ",dtset%npweps,ch10,&
+      "Calculation will proceed with dtset%npweps: ",dtset%npweps
+     ABI_COMMENT(msg)
+   end if
+ end if
+
+ call xmpi_bcast(w_fname, master, comm, ierr)
+ call Hscr%bcast(master, my_rank, comm)
+ call xmpi_bcast(dtset%npweps, master, comm, ierr)
+ call xmpi_bcast(nqlwl, master, comm, ierr)
+
+ if (nqlwl > 0) then
+   ABI_MALLOC(qlwl, (3, nqlwl))
+   qlwl = Hscr%qlwl
+ end if
+
+ ! Init qmesh from the SCR file.
+ call Qmesh%init(cryst, Hscr%nqibz, Hscr%qibz, Dtset%kptopt)
+
+ ! The G-sphere for W and Sigma_c is initialized from the g-vectors found in the SCR file.
+ call Gsph_c%init(cryst, dtset%npweps, gvec=Hscr%gvec)
+
+end subroutine get_hscr_qmesh_gsph
+!!***
+
+end module m_io_screening
 !!***

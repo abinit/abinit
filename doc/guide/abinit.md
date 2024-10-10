@@ -401,30 +401,40 @@ specified and read correctly.
 
 At present, this applies to three types of
 variables: those that have the dimension of an energy, those that have a
-dimension of length, and those that have a dimension of magnetic field. The
-first class of variables have the characteristics **ENERGY**, and can be
-specified in atomic units (Hartree), or electron-volts (eV), or milli electron-volts (meV)
-or Rydbergs (Ry), or even Kelvin (K). 
+dimension of length, those that have a dimension of magnetic field, those that have a dimension  of time. i
+
+The first class of variables have the characteristics **ENERGY**, and can be
+specified in atomic units (Ha or Hartree), or electron-volts (eV), or milli electron-volts (meV)
+or Rydbergs (Ry or Rydberg), or Kelvin (K or Kelvin), the latter being a temperature converted to energy thanks to Boltzmann constant.. 
 
 The second class of variables have the characteristics **LENGTH**,
-and can be specified in atomic units (Bohr), nm (nanometer) and angstrom. 
+and can be specified in atomic units (Bohr), nm (nanometer) and Angstrom (Angstr). 
+
 The third class of
 variables have the characteristics **MAGNETIC FIELD**, and can be
-specified in atomic units and Tesla. The abinit parser recognize a dimension
-if it is specified after the list of numbers following the input variable
-keyword, in the input file. The specification can be upper or lower case, or a
+specified in atomic units and Tesla. 
+
+The fourth class of
+variables have the characteristics **TIME**, and can be
+specified in atomic units and seconds.
+
+The abinit parser recognize a dimension if it is specified after the list of numbers following the input variable
+keyword, in the input file. 
+
+The specification can be upper or lower case, or a
 mix thereof. Here is the list of recognized chains of characters:
 
   * Ry or Rydberg or Rydbergs --> Rydberg (for energies) 
   * eV --> electron-volts (for energies) 
-  * K  --> Kelvin (for energies) 
-  * Angstr --> Angstrom (for lengths) 
+  * meV --> millielectron-volts (for energies) 
+  * K or Kelvin --> Kelvin (for energies) 
+  * Ang or Angstr or Anstrom --> Angstrom (for lengths) 
   * nm --> nanometer (for lengths) 
   * T or Tesla --> Tesla (for magnetic fields) 
   * S or Sec or Second --> second (for time) 
 
-Other character chains, like "au" (for atomic units) or "Hartree", or "Bohr" are not recognized, 
-but make the parser choose (by default) atomic units, which is the correct behaviour. Example:
+Some other character chains, like "au" (for atomic units) or "Hartree", or "Bohr" are not really treated, 
+as the parser choose (by default) atomic units, which is the correct behaviour. Example:
     
         acell 8 8 8 angstrom
         ecut 8 Ry
@@ -1123,13 +1133,22 @@ correlation and local pseudopotential (see [[prtpot]]), the Hartree potential
 (see [[prtvha]]), the Hartree+XC potential (see [[prtvhxc]]), the local
 pseudopotential (see [[prtvpsp]]) or the XC potential (see [[prtvxc]]), These
 are defined on the real space grid in Hartree energy units. The underlying
-grid is as described above. If [[nspden]]=2, the different components are the
-spin-up potential and the spin-down potential. In the case [[nspden]]=4, the
-components correspond to the up-up potential, the down-down potential, the
-real part of the up-down potential, and the imaginary part of the up-down
-potential. Note that the Hartree potential is NOT spin-dependent, but in order
+grid is as described above. **cplex** is the
+number of complex components of the potential (**cplex**=1 for GS calculations -the
+density is real-, and **cplex**=1 or 2 for RF, depending on wether q=0 or not).
+If [[nspden]]=2, the different components are the
+spin-up potential and the spin-down potential. 
+
+In the case [[nspden]]=4, for the ground-state, and also for the RF with q=0, the
+components (all real) correspond to the up-up potential, the down-down potential, the
+real part of the up-down potential (also equal to the real part of the down-up potential), and the imaginary part of the up-down
+potential (also equal to minus the imaginary part of the up-down potential). Note that the Hartree potential is NOT spin-dependent, but in order
 to use the same format as for the other potential files, the spin-independent
 array is written twice, once for spin-up and one for spin-down.
+
+In the case [[nspden]]=4, for the response function case, and if q is non-zero (so, **cplex**=2),
+the components (all complex) corresponds to the up-up potential, the down-down potential,
+the up-down potential, and i times the down-up potential.
 
 <a id="wfkfile"></a>
 ###5.7 The wavefunction output file
@@ -1212,6 +1231,7 @@ information on such files:
   * [[prtgeo]] to print a file with a geometrical analysis (bond lengths and bond angles), that also contains an XMOL section
   * [[prt1dm]] to print a one-dimensional projection of potential and density, for the three axes.
 
+<a id="control-of-output-in-the-parallel-case"></a>
 ### 5.9 Control of output in the parallel case
   
 For massively parallel runs, one cannot afford to have some of the output

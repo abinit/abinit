@@ -1,0 +1,70 @@
+# ================================================================
+# Configuration file for ABINIT 9 compilation
+#
+# CPU: AMD Milan EPYC 7763
+# GPU: Nvidia A100 SXM4 80 Go
+# Compilers: Nvidia HPC compilers 23.9
+# Libraries: MKL, Cuda
+# ================================================================
+
+#prefix=${ROOT}/install/${MY_ARCH}/abinit-gpu
+
+ CUDA_PREFIX=${CUDA_HOME}
+
+# Compilers and flags
+# ========================================
+ FC=$FC_MPI
+ CC=$CC_MPI
+ CXX=$CXX_MPI
+ FCFLAGS_EXTRA="-tp=zen3 --fast -fPIC"
+ CFLAGS_EXTRA="-tp=zen3"
+ CXXFLAGS_EXTRA="-tp=zen3"
+ with_optim_flavor="standard"
+ fcflags_opt_80_tdep="-O1 -g"
+ 
+# Parallel compilation
+# ========================================
+ with_mpi="yes"
+ enable_mpi_io="yes"
+ enable_mpi_inplace="yes"
+ enable_openmp="yes"
+ enable_openmp_offload="yes"
+
+# CUDA GPU
+# ========================================
+ GPU_ARCH=80
+ with_gpu="${CUDA_PREFIX}"
+ with_gpu_flavor="cuda-double"
+ NVCC="${CUDA_PREFIX}/bin/nvcc"
+ NVCC_CFLAGS="-O3 -arch=sm_80 -Xptxas=-v -g --use_fast_math --compiler-options -O3,-fPIC,-DHAVE_CONFIG_H  -I${MPI_ROOT}/include"
+ GPU_CFLAGS=" -I${CUDA_PREFIX}/include -I${CUDA_PREFIX}/math_libs/include"
+ GPU_CPPFLAGS="-I${CUDA_PREFIX}/include -I${CUDA_PREFIX}/math_libs/include"
+ GPU_CXXFLAGS="-I${CUDA_PREFIX}/include -I${CUDA_PREFIX}/math_libs/include"
+ GPU_FCFLAGS="-I${CUDA_PREFIX}/include -I${CUDA_PREFIX}/math_libs/include"
+ GPU_LIBS="-L${CUDA_PREFIX}/math_libs/lib64 -L${CUDA_PREFIX}/lib64 -lcusolver -lcublas -lcublasLt -lcufft -lcudart -lstdc++"
+
+# Linear Algebra library
+# ========================================
+with_linalg_flavor="mkl"
+ LINALG_FCFLAGS="${MKL_FFLAGS}"
+ LINALG_LIBS="-L${MKLROOT}/lib/intel64 -lmkl_intel_lp64 -lmkl_scalapack_lp64 -lmkl_blacs_openmpi_lp64 -lmkl_core -lmkl_pgi_thread -lpthread -lm"
+ LINALG_LDFLAGS="${LINALG_LIBS}"
+
+# FFT
+# ========================================
+ with_fft_flavor="dfti"
+
+# NetCDF library
+# ========================================
+ with_hdf5="${HDF5_ROOT}"
+ with_netcdf="${NETCDFC_ROOT}"
+ with_netcdf_fortran="${NETCDFFORTRAN_ROOT}"
+
+# Additional plugins & libs
+# ========================================
+ with_libxc="${BENCH_ROOT}/install/${MY_ARCH}/libxc"
+
+# Miscellaneous options
+# ========================================
+ enable_zdot_bugfix="no"
+ enable_gw_dpc="yes"

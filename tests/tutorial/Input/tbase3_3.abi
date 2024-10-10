@@ -39,6 +39,10 @@ shiftk  0.5 0.5 0.5  # These shifts will be the same for all grids
         0.5 0.0 0.0
         0.0 0.5 0.0
         0.0 0.0 0.5
+# NOTE that the same grids (see ngkpt below) can be generated with only one shift, and a clever choice of the
+# reciprocal space basis vectors, thanks to the use of ithe input variable kptrlatt instead of ngkpt. 
+# Actually the echo of such input k point gris by ABINITT will indeed rely on only one shiftk vector, and the use of kptrlatt.
+# Still, the input and output k point grids are entirely equivalent.
 
 ngkpt1  2 2 2     # Definition of the different grids
 ngkpt2  4 4 4
@@ -54,7 +58,7 @@ nstep 10          # Maximal number of SCF cycles
 toldfe 1.0d-6     # Will stop when, twice in a row, the difference
                   # between two consecutive evaluations of total energy
                   # differ by less than toldfe (in Hartree)
-                  # This value is way too large for most realistic studies of materials
+                  # This value is WAY TOO LARGE for most realistic studies of materials
 diemac 12.0       # Although this is not mandatory, it is worth to
                   # precondition the SCF cycle. The model dielectric
                   # function used as the standard preconditioner

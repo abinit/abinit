@@ -22,12 +22,17 @@ use_ideal_positions 1
 dielec_constant 5.2
 born_charge 5.31 -2.655
 ngqpt1 6 6 6
+ngqpt2 12 12 12
 enunit 1
 TheEnd
  
+# This test is excluded from bob_gnu_13.2_openmp, starting 20240627. Previously, on that machine, with OMP2, it needed 890 secs (!),
+# while on other machines with one core, the timing was on the order of 300..450 secs. Apparently in June 2024 some modification
+# in the branch sarrautem  drove the timing beyond the allowed limit of 900 secs.
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = atdep
+#%% exclude_builders = bob_gnu_13.2_openmp
 #%% md_hist = t20
 #%% [files]
 #%% files_to_test = 
