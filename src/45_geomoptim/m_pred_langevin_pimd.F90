@@ -109,7 +109,7 @@ contains
     pimd_forces(:,:,1)=fcart(:,:)
     pimd_vel(:,:,1)=vel(:,:)
     
-    ! Compute the next values
+    ! Compute next values
     call pimd_langevin_nvt(pimd_etotal,pimd_forces,itime,ab_mover%natom,pimd_param,&
     & 0,rprimd,pimd_stressin,1,pimd_vel,ucvol,pimd_xred,pimd_xred_next,pimd_xred_prev)
     
