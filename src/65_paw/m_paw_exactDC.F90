@@ -84,10 +84,9 @@ CONTAINS  !=====================================================================
  real(dp), allocatable :: thetas(:),tweights(:),vxc(:,:,:),vxci(:,:,:),ylm(:,:,:)
  !************************************************************************
 
- ! VERY IMPORTANT: This routine assumes that the occupation matrix is in the real spherical
- ! harmonics basis. If you want to change that for some reason, don't forget to add some 
- ! complex conjugates (since in the complex case you have rho(r) = sum rho_ij
- ! conj(Yli) * Ylj, which I have simplified here in rho(r) = sum rho_ij Yli * Ylj)
+ ! VERY IMPORTANT: This routine assumes that we work in the real spherical harmonic case.
+ ! If you want to generalize that for the complex case for some reason, the formulas 
+ ! below are not valid, so you would need to add some complex conjugates.
 
  ln = 13  ! Size of angular mesh, same as eDMFT
  meshsz = size(pawtab%proj2(:)) ! Size of radial mesh
@@ -105,11 +104,6 @@ CONTAINS  !=====================================================================
 
  vdc(:,:) = czero
  edc = zero
-
- <n(r)> = <Phi(r)^d * Phi(r)>
- <n(r)> = Phi_i^d(r) Phi_j(r) <c_i^d c_j> = rho_ji Phi_i^d(r) Phi_j(r)
- n(r) = sum Phi_i^d(r) c_i^d Phi_j(r) c_j
-      =  
  
  ! Hartree contribution
  
@@ -117,7 +111,8 @@ CONTAINS  !=====================================================================
    do j=1,ndim
      do k=1,ndim
        do i=1,ndim
-         vdc(i,j) = vdc(i,j) + pawtab%vee(i,k,j,l)*occ(k,l)
+         ! In the complex case, you should use conjg(pawtab%vee(i,k,j,l))
+         vdc(i,j) = vdc(i,j) + pawtab%vee(i,k,j,l)*occ(k,l) 
          edc = edc + pawtab%vee(i,k,j,l)*dble(occ(i,j)*occ(k,l))
        end do ! i
      end do ! k
@@ -159,6 +154,8 @@ CONTAINS  !=====================================================================
  
  do m1=1,ndim
    do m=1,ndim
+     ! In the complex case, you should use ylm(:,:,m)*conjg(ylm(:,:,m1)) 
+     ! (be careful of Abinit conventions, occ(i,j) is <c_j^d c_i>)
      rho_angle(:,:) = rho_angle(:,:) + dble(occ(m,m1))*ylm(:,:,m)*ylm(:,:,m1)
    end do ! m
  end do ! m1
@@ -190,6 +187,7 @@ CONTAINS  !=====================================================================
        svxc = zero
        sexc = zero
        do j=1,2*ln+1
+         ! In the complex case, you should use ylm(:,j,m)*conjg(ylm(:,j,m1))
          svxc = svxc + two_pi*sum(ylm(:,j,m)*ylm(:,j,m1)*tweights(:)* &
               & vxc(:,j,ir))/dble(2*ln+1)
          sexc = sexc + two_pi*sum(ylm(:,j,m)*ylm(:,j,m1)*tweights(:)* &
