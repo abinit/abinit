@@ -34,7 +34,7 @@ module m_dtset
  use m_geometry,     only : mkrdim, metric, littlegroup_pert, irreducible_set_pert
  use m_parser,       only : intagm, chkvars_in_string
  use m_crystal,      only : crystal_t, crystal_init
- 
+
  implicit none
 
  private
@@ -204,6 +204,8 @@ type, public :: dataset_type
  integer :: ga_algor
  integer :: ga_fitness
  integer :: ga_n_rules
+ integer :: getabiwan = 0
+ integer :: getgwan = 0
  integer :: getcell = 0
  integer :: getddb = 0
  integer :: getdvdb = 0
@@ -221,6 +223,7 @@ type, public :: dataset_type
  integer :: getqps = 0
  integer :: getscr = 0
  integer :: getsuscep = 0
+ integer :: getvarpeq = 0
  integer :: getvel = 0
  integer :: getwfk = 0
  integer :: getwfkfine = 0
@@ -654,6 +657,18 @@ type, public :: dataset_type
  integer :: use_oldchi = 1
 !V
  integer :: vacnum
+
+ character(len=fnlen) :: varpeq_aseed = "gaussian"
+ character(len=fnlen) :: varpeq_pkind = "none"
+ integer :: varpeq_interpolate = 0
+ integer :: varpeq_orth = 0
+ integer :: varpeq_nstep = 30
+ integer :: varpeq_pc_nupdate = 20
+ real(dp) :: varpeq_tolgrs = tol6
+ real(dp) :: varpeq_pc_factor = eighth
+ real(dp) :: varpeq_gau_params(2) = [zero, one]
+ real(dp) :: varpeq_erange(2) = zero
+
  integer :: vdw_nfrag
  integer :: vdw_df_ndpts
  integer :: vdw_df_ngpts
@@ -672,6 +687,7 @@ type, public :: dataset_type
  integer :: w90prtunk
 !X
  integer :: xclevel
+ integer :: xg_nonlop_option = 0
  integer :: x1rdm  = 0
 
 !Integer arrays
@@ -1009,7 +1025,10 @@ type, public :: dataset_type
  character(len=fnlen) :: getpot_filepath = ABI_NOFILE
  character(len=fnlen) :: getscr_filepath = ABI_NOFILE
  character(len=fnlen) :: getsigeph_filepath = ABI_NOFILE
+ character(len=fnlen) :: getvarpeq_filepath = ABI_NOFILE
  character(len=fnlen) :: getgstore_filepath = ABI_NOFILE
+ character(len=fnlen) :: getabiwan_filepath = ABI_NOFILE
+ character(len=fnlen) :: getgwan_filepath = ABI_NOFILE
  character(len=fnlen) :: write_files = ABI_NOFILE
  character(len=fnlen) :: geoopt = ABI_NOFILE
  character(len=fnlen) :: moldyn = ABI_NOFILE
@@ -1384,9 +1403,7 @@ end subroutine dtset_initocc_chkneu
 type(dataset_type) function dtset_copy(dtin) result(dtout)
 
 !Arguments ------------------------------------
-!scalars
  class(dataset_type),intent(in) :: dtin
-
 ! *************************************************************************
 
  DBG_ENTER("COLL")
@@ -1586,6 +1603,8 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%getcell            = dtin%getcell
  dtout%getddb             = dtin%getddb
  dtout%getdvdb            = dtin%getdvdb
+ dtout%getabiwan          = dtin%getabiwan
+ dtout%getgwan            = dtin%getgwan
  dtout%getdrhodb          = dtin%getdrhodb
  dtout%getddk             = dtin%getddk
  dtout%getdelfd           = dtin%getdelfd
@@ -1598,6 +1617,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%getkden            = dtin%getkden
  dtout%getocc             = dtin%getocc
  dtout%getpawden          = dtin%getpawden
+ dtout%getvarpeq          = dtin%getvarpeq
  dtout%getddb_filepath    = dtin%getddb_filepath
  dtout%getden_filepath    = dtin%getden_filepath
  dtout%getdvdb_filepath   = dtin%getdvdb_filepath
@@ -1605,7 +1625,10 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%getpot_filepath    = dtin%getpot_filepath
  dtout%getsigeph_filepath = dtin%getsigeph_filepath
  dtout%getgstore_filepath = dtin%getgstore_filepath
+ dtout%getabiwan_filepath = dtin%getabiwan_filepath
+ dtout%getgwan_filepath   = dtin%getgwan_filepath
  dtout%getscr_filepath    = dtin%getscr_filepath
+ dtout%getvarpeq_filepath = dtin%getvarpeq_filepath
  dtout%getwfk_filepath    = dtin%getwfk_filepath
  dtout%getwfkfine_filepath= dtin%getwfkfine_filepath
  dtout%getwfq_filepath    = dtin%getwfq_filepath
@@ -2026,6 +2049,18 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%usexcnhat_orig     = dtin%usexcnhat_orig
  dtout%useylm             = dtin%useylm
  dtout%vacnum             = dtin%vacnum
+
+ dtout%varpeq_aseed       = dtin%varpeq_aseed
+ dtout%varpeq_pkind       = dtin%varpeq_pkind
+ dtout%varpeq_interpolate = dtin%varpeq_interpolate
+ dtout%varpeq_orth        = dtin%varpeq_orth
+ dtout%varpeq_nstep       = dtin%varpeq_nstep
+ dtout%varpeq_tolgrs      = dtin%varpeq_tolgrs
+ dtout%varpeq_pc_nupdate  = dtin%varpeq_pc_nupdate
+ dtout%varpeq_pc_factor   = dtin%varpeq_pc_factor
+ dtout%varpeq_gau_params  = dtin%varpeq_gau_params
+ dtout%varpeq_erange      = dtin%varpeq_erange
+
  dtout%vdw_df_acutmin     = dtin%vdw_df_acutmin
  dtout%vdw_df_aratio      = dtin%vdw_df_aratio
  dtout%vdw_df_damax       = dtin%vdw_df_damax
@@ -2058,6 +2093,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%w90iniprj          = dtin%w90iniprj
  dtout%w90prtunk          = dtin%w90prtunk
  dtout%xclevel            = dtin%xclevel
+ dtout%xg_nonlop_option   = dtin%xg_nonlop_option
  dtout%xc_denpos          = dtin%xc_denpos
  dtout%xc_taupos          = dtin%xc_taupos
  dtout%x1rdm              = dtin%x1rdm
@@ -2330,12 +2366,10 @@ end function dtset_copy
 subroutine dtset_free(dtset)
 
 !Arguments ------------------------------------
-!scalars
  class(dataset_type),intent(inout) :: dtset
-
 ! *************************************************************************
 
-!please, use the same order as the one used in the declaration of the type (see defs_abitypes).
+ ! please, use the same order as the one used in the declaration of the type (see defs_abitypes).
 
  !@dataset_type
 !integer allocatable
@@ -2435,19 +2469,16 @@ end subroutine dtset_free
 subroutine dtset_free_nkpt_arrays(dtset)
 
 !Arguments ------------------------------------
-!scalars
  class(dataset_type),intent(inout) :: dtset
-
 ! *************************************************************************
 
  ABI_SFREE(dtset%istwfk)
- !ABI_SFREE(dtset%nband)
  ABI_SFREE(dtset%kpt)
  ABI_SFREE(dtset%kptns)
  ABI_SFREE(dtset%occ_orig)
  ABI_SFREE(dtset%wtk)
- ! Free HF k-points as well.
- ABI_SFREE(dtset%kptns_hf)
+ ABI_SFREE(dtset%kptns_hf)  ! Free HF k-points as well.
+ !ABI_SFREE(dtset%nband)
 
 end subroutine dtset_free_nkpt_arrays
 !!***
@@ -2495,7 +2526,7 @@ subroutine find_getdtset(dtsets,getvalue,getname,idtset,iget,miximage,mxnimage,n
 
  iget=0
  if(getvalue>0 .or. (getvalue<0 .and. idtset+getvalue>0) )then
-!  In case getvalue is a negative number (so must add to idtset)
+   !In case getvalue is a negative number (so must add to idtset)
    if(getvalue<0 .and. idtset+getvalue>0) iget=idtset+getvalue
    if(getvalue>0)then
      do iget=1,idtset
@@ -2512,11 +2543,11 @@ subroutine find_getdtset(dtsets,getvalue,getname,idtset,iget,miximage,mxnimage,n
      end if
    end if
    write(msg, '(3a,i3,2a)' )&
-&   ' find_getdtset : ',trim(getname),'/=0, take data from output of dataset with index',dtsets(iget)%jdtset,'.',ch10
+     ' find_getdtset : ',trim(getname),'/=0, take data from output of dataset with index',dtsets(iget)%jdtset,'.',ch10
    call wrtout([std_out, ab_out], msg)
  end if
 
-!For the time being, uses a simple interpolation when the images do not match. If only one image, take the first get image.
+ ! For the time being, uses a simple interpolation when the images do not match. If only one image, take the first get image.
  miximage(:,:)=zero
  if(dtsets(idtset)%nimage==1)then
    miximage(1,1)=one
@@ -2736,10 +2767,9 @@ subroutine dtset_get_npert_rbz(dtset, nband_rbz, nkpt_rbz, npert)
    ABI_MALLOC(tnons1_tmp,(3,dtset%nsym))
 !  MJV TODO: check whether prepgkk should be used here
    if (dtset%prepanl /= 1 .and. dtset%berryopt /=4 .and. dtset%berryopt /=6 .and. dtset%berryopt /=7 .and. &
-&   dtset%berryopt /=14 .and. dtset%berryopt /=16 .and. dtset%berryopt /=17) then   !!HONG
+       dtset%berryopt /=14 .and. dtset%berryopt /=16 .and. dtset%berryopt /=17) then   !!HONG
      call littlegroup_pert(gprimd,idir,indsym,std_out,ipert,dtset%natom,dtset%nsym,nsym1,2,&
-&     dtset%symafm,symaf1,symq,symrec,&
-&     dtset%symrel,symrl1_tmp,0,dtset%tnons,tnons1_tmp)
+                           dtset%symafm,symaf1,symq,symrec, dtset%symrel,symrl1_tmp,0,dtset%tnons,tnons1_tmp)
    else
      nsym1 = 1
    end if
@@ -2760,7 +2790,7 @@ subroutine dtset_get_npert_rbz(dtset, nband_rbz, nkpt_rbz, npert)
    timrev_pert=timrev
    if(dtset%ieig2rf>0) then
      call symkpt(0,gmet,indkpt1(:,icase),std_out,dtset%kptns,dtset%nkpt,nkpt_rbz(icase),&
-&     1,symrc1,0,dtset%wtk,wtk_folded, bz2ibz_smap, xmpi_comm_self)
+                 1,symrc1,0,dtset%wtk,wtk_folded, bz2ibz_smap, xmpi_comm_self)
    else
 !    For the time being, the time reversal symmetry is not used
 !    for ddk, elfd, mgfd perturbations.
@@ -2768,7 +2798,7 @@ subroutine dtset_get_npert_rbz(dtset, nband_rbz, nkpt_rbz, npert)
         ipert==dtset%natom+2 .or. dtset%berryopt==4 .or. dtset%berryopt==6 .or. dtset%berryopt==7  &
         .or. dtset%berryopt==14 .or. dtset%berryopt==16 .or. dtset%berryopt==17 )timrev_pert=0  !!HONG
      call symkpt(0,gmet,indkpt1(:,icase),std_out,dtset%kptns,dtset%nkpt,nkpt_rbz(icase),&
-     nsym1,symrc1,timrev_pert,dtset%wtk,wtk_folded, bz2ibz_smap, xmpi_comm_self)
+                 nsym1,symrc1,timrev_pert,dtset%wtk,wtk_folded, bz2ibz_smap, xmpi_comm_self)
    end if
    ABI_FREE(bz2ibz_smap)
    ABI_FREE(wtk_folded)
@@ -2782,7 +2812,7 @@ subroutine dtset_get_npert_rbz(dtset, nband_rbz, nkpt_rbz, npert)
      ikpt1=1
      do ikpt=1,dtset%nkpt
        nband_k=dtset%nband(ikpt+(isppol-1)*dtset%nkpt)
-!      Must test against ikpt1/=nkpt_rbz+1, before evaluate indkpt1(ikpt1)
+       ! Must test against ikpt1/=nkpt_rbz+1, before evaluate indkpt1(ikpt1)
        if(ikpt1/=nkpt_rbz(icase)+1)then
          if(ikpt==indkpt1(ikpt1,icase))then
            nband_rbz(ikpt1+(isppol-1)*nkpt_rbz(icase),icase)=nband_k
@@ -2792,7 +2822,6 @@ subroutine dtset_get_npert_rbz(dtset, nband_rbz, nkpt_rbz, npert)
    end do
 
  end do
-
 
 ! Write YAML doc with the list of irreducible perturbations. Example.
 !
@@ -2885,10 +2914,6 @@ end function dtset_testsusmat
 !!  Build crystal_t object from dtset and image index.
 !!  Note that acell_orig, rprim_orig and xred_orig are used by default
 !!
-!! INPUTS
-!!
-!! OUTPUT
-!!
 !! SOURCE
 
 type(crystal_t) function dtset_get_crystal(dtset, img) result(cryst)
@@ -2913,16 +2938,16 @@ type(crystal_t) function dtset_get_crystal(dtset, img) result(cryst)
  my_xred => dtset%xred_orig(:, :, img)
 
  do ii=1,dtset%ntypat
-    my_title(ii) = "No info on pseudo available"
+   my_title(ii) = "No info on pseudo available"
  end do
 
  gw_timrev = 1; if (any(dtset%kptopt == [3, 4])) gw_timrev = 0
  gw_timrev = gw_timrev + 1
 
  call crystal_init(dtset%amu_orig(:, img), cryst, dtset%spgroup, dtset%natom, dtset%npsp, &
-   dtset%ntypat, dtset%nsym, my_rprimd, dtset%typat, my_xred, dtset%ziontypat, dtset%znucl, gw_timrev, &
-   dtset%nspden==2 .and. dtset%nsppol==1, remove_inv, my_title,&
-   symrel=dtset%symrel, tnons=dtset%tnons, symafm=dtset%symafm)
+                   dtset%ntypat, dtset%nsym, my_rprimd, dtset%typat, my_xred, dtset%ziontypat, dtset%znucl, gw_timrev, &
+                   dtset%nspden==2 .and. dtset%nsppol==1, remove_inv, my_title,&
+                   symrel=dtset%symrel, tnons=dtset%tnons, symafm=dtset%symafm)
 
 end function dtset_get_crystal
 !!***
@@ -3318,7 +3343,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' cd_halfway_freq cd_max_freq cd_subset_freq'
  list_vars=trim(list_vars)//' cellcharge charge chrgat chempot chkdilatmx chkexit chkparal chkprim'
  list_vars=trim(list_vars)//' chksymbreak chksymtnons chneut cineb_start coefficients constraint_kind'
- list_vars=trim(list_vars)//' cprj_update_lvl cpus cpum cpuh'
+ list_vars=trim(list_vars)//' cprj_in_memory cprj_update_lvl cpus cpum cpuh'
 !D
  list_vars=trim(list_vars)//' ddamp ddb_ngqpt ddb_shiftq'
  list_vars=trim(list_vars)//' delayperm densfor_pred densty dfield'
@@ -3379,8 +3404,10 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' getdelfd getdkdk getdkde getden getkden getdvdb getdrhodb getdvdb_filepath getdrhodb_filepath'
  list_vars=trim(list_vars)//' getefmas getkerange_filepath getgam_eig2nkq'
  list_vars=trim(list_vars)//' gethaydock getocc getpawden getpot_filepath getsigeph_filepath getgstore_filepath'
+ list_vars=trim(list_vars)//' getabiwan getabiwan_filepath getgwan getgwan_filepath'
  list_vars=trim(list_vars)//' getqps getscr getscr_filepath'
  list_vars=trim(list_vars)//' getwfkfine getwfkfine_filepath getsuscep'
+ list_vars=trim(list_vars)//' getvarpeq getvarpeq_filepath'
  list_vars=trim(list_vars)//' getvel getwfk getwfk_filepath getwfq getwfq_filepath getxcart getxred'
  list_vars=trim(list_vars)//' get1den get1wf goprecon goprecprm'
  list_vars=trim(list_vars)//' gpu_devices gpu_kokkos_nthrd gpu_linalg_limit gpu_nl_distrib'
@@ -3548,6 +3575,9 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' use_oldchi'
 !V
  list_vars=trim(list_vars)//' vaclst vacnum vacuum vacwidth vcutgeo'
+ list_vars=trim(list_vars)//' varpeq_aseed varpeq_erange varpeq_gau_params'
+ list_vars=trim(list_vars)//' varpeq_interpolate varpeq_orth varpeq_nstep varpeq_pkind'
+ list_vars=trim(list_vars)//' varpeq_tolgrs varpeq_pc_nupdate varpeq_pc_factor'
  list_vars=trim(list_vars)//' vdw_nfrag vdw_supercell'
  list_vars=trim(list_vars)//' vdw_tol vdw_tol_3bt vdw_typfrag vdw_xc'
  list_vars=trim(list_vars)//' vdw_df_acutmin vdw_df_aratio vdw_df_damax'
@@ -3565,7 +3595,8 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' w90iniprj w90prtunk'
  list_vars=trim(list_vars)//' write_files'
 !X
- list_vars=trim(list_vars)//' xcart xc_denpos xc_taupos xc_tb09_c xred xredsph_extra xyzfile x1rdm'
+ list_vars=trim(list_vars)//' xcart xc_denpos xc_taupos xc_tb09_c xg_nonlop_option xred xredsph_extra'
+ list_vars=trim(list_vars)//' xyzfile x1rdm'
 !Y
 !Z
  list_vars=trim(list_vars)//' zcut zeemanfield znucl'

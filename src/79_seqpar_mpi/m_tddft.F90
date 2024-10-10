@@ -32,7 +32,6 @@ module m_tddft
  use m_sort
  use m_dtset
  use m_dtfil
- use m_xmpi, only : xmpi_bcast,xmpi_gatherv,xmpi_scatterv
  use iso_c_binding, only : c_ptr,c_loc,c_f_pointer
 
  use defs_abitypes, only : MPI_type

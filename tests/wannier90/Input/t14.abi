@@ -12,12 +12,12 @@
  getwfk2   -1   # Read WKF in the IBZ
  prtwant2 2
  w90iniprj2 2
- kptopt 2   
-# Note that the kptopt should be the same as in the dataset1. 
+ kptopt 2
+# Note that the kptopt should be the same as in the dataset1.
 # It will use symmetry to generate the fullBZ kpt with kptopt 3, and istwfk 1.
 
 # common dataset.
- nband   8     
+ nband   8
  nstep  30
  useylm 1
  nshiftk 1
@@ -27,10 +27,10 @@
  acell   3*10.60
  amu 69.72  74.9216
  diemac 10.0
- ecut 20.00             ! This is also too low
+ ecut 20.00             # This is also too low
 # pawecutdg 40.00             ! This is also too low
  ixc 1
- natom  2  
+ natom  2
  ntypat  2
  rprim   0 .5 .5  .5 0 .5  .5 .5 0
  xred 3*0.00d0 3*0.25d0
@@ -45,13 +45,13 @@
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = t14.abo, tolnlines=   15,   tolabs=  1.5e-04,   tolrel=  1.00e-01
-#%% extra_inputs=t14o_DS2_w90.win 
+#%% extra_inputs=t14o_DS2_w90.win
 #%% [shell]
 #%% [paral_info]
 #%% max_nprocs = 8
 #%% [extra_info]
 #%% keywords = NC
-#%% description = 
+#%% description =
 #%%  Gallium Arsenide, zinc-blende. 8 bands. prtwant=2
 #%%  Should still be completed by the call to wannier90, and subsequent fldiff use...
 #%%  Adapted from t01, to test wfd-wannier interface

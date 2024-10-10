@@ -244,7 +244,7 @@ module m_wfk
 
 
  public :: wfk_open_read           ! Open the WFK file in read mode.
- public :: wfk_tofullbz            ! Generate a new WFK file with wavefunctions in the full BZ and istwfk==1
+ public :: wfk_to_bz               ! Generate a new WFK file with wavefunctions in the full BZ and istwfk==1
                                    ! Mainly used to interface ABINIT with other codes that
                                    ! cannot handle symmetries e.g. lobster
  public :: wfk_nc2fort             ! Convert a netcdf WFK file to a Fortran WFK file.
@@ -4367,9 +4367,9 @@ end subroutine mpio_write_eigocc_k
 
 !----------------------------------------------------------------------
 
-!!****f* m_wfk/wfk_tofullbz
+!!****f* m_wfk/wfk_to_bz
 !! NAME
-!!  wfk_tofullbz
+!!  wfk_to_bz
 !!
 !! FUNCTION
 !! Generate a new WFK file with wavefunctions in the full BZ and istwfk==1
@@ -4384,7 +4384,8 @@ end subroutine mpio_write_eigocc_k
 !!
 !! OUTPUT
 !!  Output is written to file out_path
-!!  hdr_kfull: header of the WFK file.
+!!  hdr_bz: header of the WFK file in the full BZ
+!!  ebands_bz: Electron energies in the full BZ
 !!
 !! NOTES
 !!  - This routine should be called by a single processor.
@@ -4392,14 +4393,15 @@ end subroutine mpio_write_eigocc_k
 !!
 !! SOURCE
 
-subroutine wfk_tofullbz(in_path, dtset, psps, pawtab, out_path, hdr_kfull)
+subroutine wfk_to_bz(in_path, dtset, psps, pawtab, out_path, hdr_bz, ebands_bz)
 
 !Arguments ------------------------------------
 !scalars
  character(len=*),intent(in) :: in_path,out_path
  type(pseudopotential_type),intent(in) :: psps
  type(dataset_type),intent(in) :: dtset
- type(hdr_type),intent(out) :: hdr_kfull
+ type(hdr_type),intent(out) :: hdr_bz
+ type(ebands_t),target,intent(out) :: ebands_bz
 !arrays
  type(pawtab_type),intent(in) :: pawtab(dtset%ntypat*psps%usepaw)
 
@@ -4417,10 +4419,8 @@ subroutine wfk_tofullbz(in_path, dtset, psps, pawtab, out_path, hdr_kfull)
  type(wfk_t),target :: iwfk
  type(wfk_t) :: owfk
  type(crystal_t) :: cryst
-
  type(hdr_type),pointer :: ihdr
  type(ebands_t) :: ebands_ibz
- type(ebands_t),target :: ebands_full
  type(wvl_internal_type) :: dummy_wvl
 !arrays
  integer :: g0(3),work_ngfft(18),gmax_ki(3),gmax_kf(3),gmax(3)
@@ -4433,7 +4433,7 @@ subroutine wfk_tofullbz(in_path, dtset, psps, pawtab, out_path, hdr_kfull)
 
  if (all(dtset%kptrlatt == 0)) then
    write(msg,"(5a)")&
-     "Cannot produce full WFK file because kptrlatt == 0",ch10,&
+     "Cannot produce full WFK file because kptrlatt == 0",ch10, &
      "Please use nkgpt and shiftk to define a homogeneous k-mesh.",ch10,&
      "Returning to caller"
    ABI_WARNING(msg)
@@ -4446,10 +4446,9 @@ subroutine wfk_tofullbz(in_path, dtset, psps, pawtab, out_path, hdr_kfull)
  if (nctk_try_fort_or_ncfile(my_inpath, msg) /= 0) then
    ABI_ERROR(msg)
  end if
- call wrtout(std_out, sjoin(" Converting:", my_inpath, "to", out_path))
+ call wrtout(std_out, sjoin(" Converting:", my_inpath, "to full BZ", out_path))
 
  in_iomode = iomode_from_fname(my_inpath)
-
  ebands_ibz = wfk_read_ebands(my_inpath, xmpi_comm_self)
 
  ! Open input file, extract dimensions and allocate workspace arrays.
@@ -4469,7 +4468,7 @@ subroutine wfk_tofullbz(in_path, dtset, psps, pawtab, out_path, hdr_kfull)
 
  ! Build new header for owfk. This is the most delicate part since all the arrays in hdr_full
  ! that depend on k-points must be consistent with kfull and nkfull.
- call ebands_expandk(ebands_ibz, cryst, ecut_eff, force_istwfk1, dksqmax, bz2ibz, ebands_full)
+ call ebands_expandk(ebands_ibz, cryst, ecut_eff, force_istwfk1, dksqmax, bz2ibz, ebands_bz)
 
  if (dksqmax > tol12) then
    write(msg, '(3a,es16.6,4a)' )&
@@ -4480,11 +4479,11 @@ subroutine wfk_tofullbz(in_path, dtset, psps, pawtab, out_path, hdr_kfull)
    ABI_ERROR(msg)
  end if
 
- nkfull = ebands_full%nkpt
- kfull => ebands_full%kptns
+ nkfull = ebands_bz%nkpt
+ kfull => ebands_bz%kptns
 
  ! Build new header and update pawrhoij.
- call hdr_init_lowlvl(hdr_kfull,ebands_full,psps,pawtab,dummy_wvl,abinit_version,&
+ call hdr_init_lowlvl(hdr_bz,ebands_bz,psps,pawtab,dummy_wvl,abinit_version,&
    ihdr%pertcase,ihdr%natom,ihdr%nsym,ihdr%nspden,ihdr%ecut,dtset%pawecutdg,ihdr%ecutsm,dtset%dilatmx,&
    ihdr%intxc,ihdr%ixc,ihdr%stmbias,ihdr%usewvl,dtset%pawcpxocc,dtset%pawspnorb,dtset%ngfft,dtset%ngfftdg,ihdr%so_psp,&
    ihdr%qptn,cryst%rprimd,cryst%xred,ihdr%symrel,ihdr%tnons,ihdr%symafm,ihdr%typat,ihdr%amu,ihdr%icoulomb,&
@@ -4492,13 +4491,13 @@ subroutine wfk_tofullbz(in_path, dtset, psps, pawtab, out_path, hdr_kfull)
    dtset%kptrlatt_orig,dtset%kptrlatt,&
    dtset%nshiftk_orig,dtset%nshiftk,dtset%shiftk_orig,dtset%shiftk)
 
- if (psps%usepaw == 1) call pawrhoij_copy(iwfk%hdr%pawrhoij, hdr_kfull%pawrhoij)
+ if (psps%usepaw == 1) call pawrhoij_copy(iwfk%hdr%pawrhoij, hdr_bz%pawrhoij)
 
  out_iomode = iomode_from_fname(out_path)
- call owfk%open_write(hdr_kfull, out_path, iwfk%formeig, out_iomode, get_unit(), xmpi_comm_self)
+ call owfk%open_write(hdr_bz, out_path, iwfk%formeig, out_iomode, get_unit(), xmpi_comm_self)
 
  ! workspace array for BZ wavefunction block.
- mpw_kf = maxval(ebands_full%npwarr)
+ mpw_kf = maxval(ebands_bz%npwarr)
  ABI_MALLOC(cg_kf, (2,mpw_kf*nspinor*mband))
 
  if (out_iomode == IO_MODE_FORTRAN) then
@@ -4664,11 +4663,10 @@ subroutine wfk_tofullbz(in_path, dtset, psps, pawtab, out_path, hdr_kfull)
 
  call cryst%free()
  call ebands_free(ebands_ibz)
- call ebands_free(ebands_full)
  call iwfk%close()
  call owfk%close()
 
-end subroutine wfk_tofullbz
+end subroutine wfk_to_bz
 !!***
 
 !----------------------------------------------------------------------
@@ -5777,7 +5775,7 @@ subroutine wfk_check_symtab(in_wfkpath, comm)
 !scalars
  integer,parameter :: formeig0 = 0, master = 0, kptopt1 = 1
  integer :: spin, nband_k, mpw, mband, nspinor, ik_ibz, ik_bz !, ierr, ikf
- integer :: nsppol, iomode, npw_kf, npw_ki, istwf_kf, istwf_ki, ii, my_rank, ebands_timrev, nkibz, nkbz
+ integer :: nsppol, iomode, npw_kf, npw_ki, istwf_kf, istwf_ki, ii, my_rank, nkibz, nkbz
  integer :: isym_k, trev_k, g0_k(3)
  logical :: isirr_k
  character(len=500) :: msg
@@ -5813,10 +5811,8 @@ subroutine wfk_check_symtab(in_wfkpath, comm)
  mband = wfk%mband; nsppol = wfk%nsppol; nspinor = wfk%nspinor
 
  cryst = wfk%hdr%get_crystal()
- ebands_timrev = kpts_timrev_from_kptopt(kptopt1)
- !ebands_timrev = kpts_timrev_from_kptopt(ks_ebands%kptopt)
 
- ! Get IBZ with kptopt1
+ ! Get IBZ with kptopt1 ! ks_ebands%kptopt
  call kpts_ibz_from_kptrlatt(cryst, ks_ebands%kptrlatt, kptopt1, ks_ebands%nshiftk, ks_ebands%shiftk, &
                              nkibz, kibz, wtk, nkbz, kbz) !, bz2ibz=bz2ibz)
 
@@ -5827,7 +5823,7 @@ subroutine wfk_check_symtab(in_wfkpath, comm)
  ! Build symmetry tables using the two conventions.
 
  ABI_MALLOC(symrec_kbz2ibz, (6, nkbz))
- if (kpts_map("symrec", ebands_timrev, cryst, krank_ibz, nkbz, kbz, symrec_kbz2ibz) /= 0) then
+ if (kpts_map("symrec", kptopt1, cryst, krank_ibz, nkbz, kbz, symrec_kbz2ibz) /= 0) then
    ABI_ERROR("Cannot map kBZ to IBZ!")
  end if
  ! Index of IBZ k-point in the full BZ (used to access IBZ in the WFK)
@@ -5843,7 +5839,7 @@ subroutine wfk_check_symtab(in_wfkpath, comm)
  end do
 
  ABI_MALLOC(symrel_kbz2ibz, (6, nkbz))
- if (kpts_map("symrel", ebands_timrev, cryst, krank_ibz, nkbz, kbz, symrel_kbz2ibz) /= 0) then
+ if (kpts_map("symrel", kptopt1, cryst, krank_ibz, nkbz, kbz, symrel_kbz2ibz) /= 0) then
    ABI_ERROR("Cannot map kBZ to IBZ!")
  end if
  ! Index of IBZ k-point in the full BZ (used to access IBZ in the WFK)

@@ -11,13 +11,13 @@
 
  occopt 1
  kptopt 0
- nkpt 1 toldfe 1.0d-15
+ nkpt 1 tolvrs 1.0d-28
  nsppol 2    spinmagntarget 0.0d0
  ixc 1
 
  ecut 15. pawecutdg 50
  diemac 12.0d0  enunit 2
- nstep 16
+ nstep 15
  acell 3*7.0
  rprim 0.0 0.5 0.5
        0.5 0.0 0.5
