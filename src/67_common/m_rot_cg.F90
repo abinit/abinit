@@ -23,9 +23,10 @@
 module m_rot_cg
 
   use defs_basis
-  use m_xmpi
-  use m_errors
+  use m_abi_linalg, only : abi_xgemm
   use m_abicore
+  use m_errors
+  use m_xmpi  
 
   implicit none
 
@@ -176,7 +177,7 @@ subroutine rot_cg(occ_nd,cwavef,npw,nband,blocksize,nspinor,first_bandc,nbandc,o
   character(len=500) :: message
 !arrays
   real(kind=dp), allocatable :: occ_diag_red(:)
-  complex(kind=dpc), allocatable :: cwavef_rot(:,:,:),occ_nd_cpx(:,:)
+  complex(kind=dpc), allocatable :: mat_tmp(:,:),mat_tmp2(:,:),occ_nd_cpx(:,:)
 ! *************************************************************************
 
   DBG_ENTER("COLL")
@@ -188,7 +189,7 @@ subroutine rot_cg(occ_nd,cwavef,npw,nband,blocksize,nspinor,first_bandc,nbandc,o
 
 !! Initialisation
 
-  ABI_MALLOC(cwavef_rot,(npw,nbandc,nspinor)) 
+  !ABI_MALLOC(cwavef_rot,(npw,nbandc,nspinor)) 
   ABI_MALLOC(occ_diag_red,(nbandc))
   ABI_MALLOC(occ_nd_cpx,(nbandc,nbandc))
 
@@ -224,23 +225,22 @@ subroutine rot_cg(occ_nd,cwavef,npw,nband,blocksize,nspinor,first_bandc,nbandc,o
 !    cwavef(2,ig,first_bandc:first_bandc+nbandc-1,:) = dimag(cwavef_rot_g)
 !  end do ! npw
 
-  cwavef_rot(:,:,:) = czero
-
+  ABI_MALLOC(mat_tmp,(npw,nbandc))
+  ABI_MALLOC(mat_tmp2,(npw,nbandc))
+  occ_nd_cpx(:,:) = conjg(occ_nd_cpx(:,:))
+  
   do ispinor=1,nspinor
-    do n=1,nbandc
-      do np=1,nbandc
-        do ig=1,npw
-          cwavef_rot(ig,n,ispinor) = cwavef_rot(ig,n,ispinor) + conjg(occ_nd_cpx(np,n))* &
-                                   & cmplx(cwavef(1,ig,np+first_bandc-1,ispinor), &
-                                   &       cwavef(2,ig,np+first_bandc-1,ispinor),kind=dpc)
-        end do ! ig
-      end do ! np
-    end do ! n
-  end do ! ispinor
-  cwavef(1,1:npw,first_bandc:first_bandc+nbandc-1,:) = dble(cwavef_rot(1:npw,:,:))
-  cwavef(2,1:npw,first_bandc:first_bandc+nbandc-1,:) = aimag(cwavef_rot(1:npw,:,:))
-      
-  ABI_FREE(cwavef_rot)
+    mat_tmp(:,:) = cmplx(cwavef(1,1:npw,first_bandc:first_bandc+nbandc-1,ispinor), &
+                       & cwavef(2,1:npw,first_bandc:first_bandc+nbandc-1,ispinor))
+    call abi_xgemm("n","n",npw,nbandc,nbandc,cone,mat_tmp(:,:),npw, & 
+                 & occ_nd_cpx(:,:),nbandc,czero,mat_tmp2(:,:),npw)
+    cwavef(1,1:npw,first_bandc:first_bandc+nbandc-1,ispinor) = dble(mat_tmp2(:,:))
+    cwavef(2,1:npw,first_bandc:first_bandc+nbandc-1,ispinor) = aimag(mat_tmp2(:,:))
+  end do ! ispinor 
+
+  !ABI_FREE(cwavef_rot)
+  ABI_FREE(mat_tmp)
+  ABI_FREE(mat_tmp2)
   ABI_FREE(occ_diag_red)
   ABI_FREE(occ_nd_cpx)
  
