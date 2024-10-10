@@ -1427,13 +1427,13 @@ subroutine gather_oper(oper,distrib,paw_dmft,opt_ksloc,master,opt_diag,opt_commk
    end if 
    
    irank2 = 1
-   do irank=0,nproc_kpt
-     do irank1=0,nproc_freq
-       recvcounts(irank) = distrib%nkpt_mem(irank) * distrib%nw_mem_kptparal(irank1)
+   do irank=0,nproc_kpt-1
+     do irank1=0,nproc_freq-1
+       recvcounts(irank2) = distrib%nkpt_mem(irank) * distrib%nw_mem_kptparal(irank1)
        irank2 = irank2 + 1
      end do ! irank1
    end do ! irank
-   if (nproc > nproc_freq) recvcounts(nproc_freq+1:nproc) = 0
+   if (nproc > nproc_freq*nkpt) recvcounts(nproc_freq*nkpt+1:nproc) = 0
 
    recvcounts(:) = mbandc * recvcounts(:)
    if (.not. diag) recvcounts(:) = recvcounts(:) * mbandc
@@ -1522,14 +1522,14 @@ subroutine gather_oper(oper,distrib,paw_dmft,opt_ksloc,master,opt_diag,opt_commk
      displs(irank) = displs(irank-1) + recvcounts(irank-1)
    end do ! irank
 
-   if (optcommkpt == 1 .and. recvcounts(myproc2) == 0) then
+   if (optcommkpt == 1 .and. recvcounts(myproc2+1) == 0) then
      if (nproc_freq > 1) then
        siz_buf = siz_buf * distrib%nw_mem_kptparal(mod(paw_dmft%myproc,nproc_freq))
      else
        siz_buf = siz_buf * nw
      end if 
    else
-     siz_buf = recvcounts(myproc2)  
+     siz_buf = recvcounts(myproc2+1)  
    end if 
  
    ABI_MALLOC(buffer,(siz_buf))
