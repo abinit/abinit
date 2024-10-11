@@ -81,7 +81,6 @@ module m_ebands
 type, extends(ebands_base_t), public :: ebands_t
 
 contains
-!!***
 
  procedure :: init => ebands_init
    ! Main creation method.
@@ -139,6 +138,7 @@ end type ebands_t
 !!***
 
  public :: ebands_prtbltztrp_tau_out       ! Output files for BoltzTraP code,
+!!***
 
 !----------------------------------------------------------------------
 

@@ -4940,7 +4940,7 @@ end subroutine wfk_prof
 !!
 !! SOURCE
 
-subroutine wfk_create_wfkfile(wfk_fname,Hdr,iomode,formeig,Kvars,cwtimes,comm)
+subroutine wfk_create_wfkfile(wfk_fname, Hdr, iomode, formeig, Kvars, cwtimes, comm)
 
 !Arguments ------------------------------------
 !scalars
@@ -4967,7 +4967,7 @@ subroutine wfk_create_wfkfile(wfk_fname,Hdr,iomode,formeig,Kvars,cwtimes,comm)
 
  cwtimes = zero
 
- nband   = RESHAPE(Hdr%nband, (/Hdr%nkpt,Hdr%nsppol/) )
+ nband   = RESHAPE(Hdr%nband, [Hdr%nkpt, Hdr%nsppol])
  nkpt    = Hdr%nkpt
  nsppol  = Hdr%nsppol
  nspinor = Hdr%nspinor
@@ -4981,7 +4981,7 @@ subroutine wfk_create_wfkfile(wfk_fname,Hdr,iomode,formeig,Kvars,cwtimes,comm)
    call get_kg(kpoint,istwfk_k,Hdr%ecut,gmet,npw_k,Kvars(ik_ibz)%kg_k)
    ABI_CHECK(npw_k == Hdr%npwarr(ik_ibz),"npw_k != Hdr%npwarr(ik)")
  end do
- !
+
  ! Open the file for writing.
  sc_mode = xmpio_collective
 
@@ -4995,7 +4995,6 @@ subroutine wfk_create_wfkfile(wfk_fname,Hdr,iomode,formeig,Kvars,cwtimes,comm)
 
  do spin=1,nsppol
    do ik_ibz=1,nkpt
-
      nband_k = nband(ik_ibz,spin)
      npw_k   = Hdr%npwarr(ik_ibz)
      ABI_MALLOC(cg_k, (2,npw_k*nspinor*nband_k))
@@ -5007,14 +5006,14 @@ subroutine wfk_create_wfkfile(wfk_fname,Hdr,iomode,formeig,Kvars,cwtimes,comm)
      ! Fill cg_k, eig_k, occ_k using a deterministic algorithm so that
      ! we can check the correctness of the reading.
      call fill_or_check("fill",Hdr,Kvars(ik_ibz),ik_ibz,spin,formeig,kg_k,cg_k,eig_k,occ_k,ierr)
-     ABI_CHECK(ierr==0,"filling")
+     ABI_CHECK_IEQ(ierr, 0, "filling_or_check")
 
      call cwtime(cpu,wall,gflops,"start")
 
-     call wfk%write_band_block((/1,nband_k/),ik_ibz,spin,sc_mode,kg_k=kg_k,cg_k=cg_k,eig_k=eig_k,occ_k=occ_k)
+     call wfk%write_band_block([1,nband_k],ik_ibz,spin,sc_mode,kg_k=kg_k,cg_k=cg_k,eig_k=eig_k,occ_k=occ_k)
 
      call cwtime(cpu,wall,gflops,"stop")
-     cwtimes = cwtimes + (/cpu,wall/)
+     cwtimes = cwtimes + [cpu, wall]
 
      ABI_FREE(cg_k)
      ABI_FREE(eig_k)
