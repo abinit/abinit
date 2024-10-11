@@ -785,14 +785,10 @@ subroutine compute_migdal_energy(e_hu_migdal,e_hu_migdal_tot,green,paw_dmft,self
        lpawu = paw_dmft%lpawu(iatom)
        if (lpawu == -1) cycle
        integral(iatom) = fac*integral(iatom) - trace_moments(iatom,i)*omega_inv(i)
+       if (i == nmoments) e_hu_migdal(iatom) = e_hu_migdal(iatom) + & 
+            & dble(integral(iatom))*paw_dmft%wgt_wlo(ifreq) 
      end do ! iatom
    end do ! i
-   
-   do iatom=1,natom
-     lpawu = paw_dmft%lpawu(iatom)
-     if (lpawu == -1) cycle
-     e_hu_migdal(iatom) = e_hu_migdal(iatom) + dble(integral(iatom))*paw_dmft%wgt_wlo(ifreq) 
-   end do ! iatom
    
  end do ! ifreq
  
@@ -807,6 +803,7 @@ subroutine compute_migdal_energy(e_hu_migdal,e_hu_migdal_tot,green,paw_dmft,self
  ABI_MALLOC(correction,(natom))
 
  correction(:) = czero
+ e_hu_migdal_tot = zero
  
  do i=1,nmoments
    if (i == 3) cycle
@@ -821,7 +818,6 @@ subroutine compute_migdal_energy(e_hu_migdal,e_hu_migdal_tot,green,paw_dmft,self
  
  ABI_FREE(trace_moments)
  
- e_hu_migdal_tot = zero
  do iatom=1,natom
    !shift=czero
    !if(paw_dmft%dmft_solv==4) shift=self%qmc_shift(iatom)+self%qmc_xmu(iatom)

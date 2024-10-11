@@ -1024,9 +1024,7 @@ subroutine init_sc_dmft(dtset,paw_dmft,dmatpawu,fnamei,fnametmp_app,gprimd,kg,mp
 !==============================
 
  paw_dmft%wtk => dtset%wtk(:)
- !if(dtset%iscf<0) then
- !  paw_dmft%wtk=one/float(dtset%nkpt)
- !endif
+ if (dtset%iscf < 0) paw_dmft%wtk(:) = one / dble(nkpt)
  sumwtk = sum(paw_dmft%wtk(1:nkpt))
  if (abs(sumwtk-one) > tol11 .and. dtset%iscf >= 0) then
    write(message,'(a,f15.11)') ' sum of k-point is incorrect',sumwtk
