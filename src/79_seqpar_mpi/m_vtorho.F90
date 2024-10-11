@@ -991,7 +991,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
          end if
        end if
 
-       if(dtset%wfoptalg == 111 .and. istep <= 1) then
+       if(gemm_nonlop_use_gemm .and. dtset%wfoptalg == 111 .and. istep <= 1) then
          gemm_nonlop_nblocks = dtset%gpu_nl_splitsize
          ! Only compute CHEBFI number of blocks if user didn't set it themselves
          if(gemm_nonlop_nblocks==1) then
