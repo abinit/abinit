@@ -147,7 +147,7 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
  real(dp),allocatable :: v1scf(:,:,:,:), vlocal1(:,:,:,:), vlocal(:,:,:,:), gkq_atm(:,:,:,:), gkq_nu(:,:,:,:), gkq2_nu(:,:,:)
  real(dp),allocatable :: gvnlx1(:,:), gs1c(:,:), h1kets_kq(:,:,:), displ_cart(:,:,:,:),displ_red(:,:,:,:)
  real(dp),allocatable :: kpg_k(:,:), ph3d_k(:,:,:), ffnl_k(:,:,:,:), vlocal_k(:,:,:,:)
- real(dp),allocatable :: kpg_kq(:,:), ph3d_kq(:,:,:), ffnl_kq(:,:,:,:), vlocal_kq(:,:,:,:), rvec(:)
+ real(dp),allocatable :: kpg_kq(:,:), ph3d_kq(:,:,:), ffnl_kq(:,:,:,:), vlocal_kq(:,:,:,:), real_vec(:)
  logical :: reorder, periods(ndims), keepdim(ndims)
  type(pawcprj_type),allocatable  :: cwaveprj0(:,:)
 !************************************************************************
@@ -396,10 +396,10 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
    ! arrays
    NCF_CHECK(nf90_put_var(ncid, vid("kpoints"), kpath%points(:,1:nk_path)))
    NCF_CHECK(nf90_put_var(ncid, vid("qpoints"), qpath%points(:,1:nq_path)))
-   ABI_MALLOC(rvec, (nq_path))
-   rvec = one
-   NCF_CHECK(nf90_put_var(ncid, vid("qweights"), rvec))
-   ABI_FREE(rvec)
+   ABI_MALLOC(real_vec, (nq_path))
+   real_vec = one
+   NCF_CHECK(nf90_put_var(ncid, vid("qweights"), real_vec))
+   ABI_FREE(real_vec)
    NCF_CHECK(nf90_put_var(ncid, vid("eph_fix_korq"), dtset%eph_fix_korq))
    NCF_CHECK(nf90_put_var(ncid, vid("eph_fix_wavevec"), dtset%eph_fix_wavevec))
 

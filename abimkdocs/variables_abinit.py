@@ -4323,7 +4323,7 @@ DDB file i.e. [[ddb_ngqpt]] (default behavior).
     The computation of the e-ph matrix elements requires the knowledge of $\psi_{\bf k}$
     and $\psi_{\bf k + q}$. This means that the k-mesh for electrons found in the WFK must be
     compatible with the one given in *eph_ngqpt_fine*.
-    The code can interpolate DFPT potentials but won't try to interpolate KS wavefunctions.
+    The code can interpolate DFPT potentials but is not able to interpolate KS wavefunctions,
     and will stop if ${\bf k + q}$ is not found in the WFK file.
 """,
 ),
