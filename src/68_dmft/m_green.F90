@@ -3398,7 +3398,7 @@ subroutine fermi_green(green,paw_dmft,self)
  !type(pawang_type),intent(in) :: pawang
  type(self_type), intent(inout) :: self
 !Local variables-------------------------------
- integer :: ib,ierr_hh,ikpt,info,isppol,iw,max_iter,opt_noninter
+ integer :: ierr_hh,max_iter,option
  real(dp) :: f_precision,fermi_old,x_precision
 ! real(dp) :: hx
  character(len=500) :: message
@@ -3410,9 +3410,16 @@ subroutine fermi_green(green,paw_dmft,self)
 !=============
 !headers
 !=============
- write(message,'(2a)') ch10, "  |---Newton method to search Fermi level ------------|"
+ option = paw_dmft%dmft_fermi_algo
+ if (option == 1) then
+   write(message,'(2a)') ch10,"  |---Newton method to search Fermi level ------------|"
+ else if (option == 2) then
+   write(message,'(2a)') ch10,"  |---Halley method to search Fermi level ------------|"
+ else
+   ABI_ERROR("Option not recognized for dmft_fermi_algo")
+ end if ! dmft_fermi_algo
  call wrtout(std_out,message,'COLL')
- write(message,'(2a,f13.6)') ch10, "  |--- Initial value for Fermi level",paw_dmft%fermie
+ write(message,'(2a,f13.6)') ch10,"  |--- Initial value for Fermi level",paw_dmft%fermie
  call wrtout(std_out,message,'COLL')
 
 !========================================
@@ -3445,7 +3452,7 @@ subroutine fermi_green(green,paw_dmft,self)
  write(message,'(a,4x,a,e13.6)') ch10," Precision required :",f_precision
  call wrtout(std_out,message,'COLL')
  if (f_precision < ten) &
-    & call newton(green,self,paw_dmft,paw_dmft%fermie,x_precision,max_iter,f_precision,ierr_hh)
+    & call newton(green,self,paw_dmft,paw_dmft%fermie,x_precision,max_iter,f_precision,ierr_hh,opt_algo=option)
  
 !===========================
 !Deals with errors signals
@@ -3454,10 +3461,10 @@ subroutine fermi_green(green,paw_dmft,self)
    write(message,'(a)') "Warning, check Fermi level"
    call wrtout(std_out,message,'COLL')
 !  call abi_abort('COLL')
-   write(message,'(2a,f13.6)') ch10, "  |---  Final  value for Fermi level (check)",paw_dmft%fermie
+   write(message,'(2a,f13.6)') ch10,"  |---  Final  value for Fermi level (check)",paw_dmft%fermie
    call wrtout(std_out,message,'COLL')
  else if (ierr_hh == -123) then
-   write(message,'(a,f13.6)') " Fermi level is put to",fermi_old
+   write(message,'(a,f13.6)') " Fermi level is set to",fermi_old
    paw_dmft%fermie = fermi_old
    call wrtout(std_out,message,'COLL')
 
@@ -3469,7 +3476,7 @@ subroutine fermi_green(green,paw_dmft,self)
    call wrtout(std_out,message,'COLL')
    write(message,'(4x,a,e13.6)') " Precision achieved on number of electrons :",f_precision
    call wrtout(std_out,message,'COLL')
-   write(message,'(2a,f13.6)') ch10, "  |---  Final  value for Fermi level",paw_dmft%fermie
+   write(message,'(2a,f13.6)') ch10,"  |---  Final value for Fermi level",paw_dmft%fermie
    call wrtout(std_out,message,'COLL')
  end if ! ierr_hh
 
@@ -3530,7 +3537,7 @@ end subroutine fermi_green
 !! SOURCE
 
 subroutine newton(green,self,paw_dmft,x_input,x_precision,max_iter,&
-   & f_precision,ierr_hh)
+   & f_precision,ierr_hh,opt_algo)
 
 !Arguments ------------------------------------
 !scalars
@@ -3545,6 +3552,7 @@ subroutine newton(green,self,paw_dmft,x_input,x_precision,max_iter,&
  integer, intent(out) :: ierr_hh
  real(dp), intent(in) :: f_precision
  real(dp), intent(inout) :: x_input,x_precision
+ integer, optional, intent(in) :: opt_algo
  !real(dp), intent(inout) :: f_precision
  !real(dp), intent(in), optional :: opt_algo
 !Local variables-------------------------------
@@ -3570,7 +3578,8 @@ subroutine newton(green,self,paw_dmft,x_input,x_precision,max_iter,&
  ierr_hh = 0
  !option = 2  ! Halley method
  !option = 1  ! Newton method
- option = paw_dmft%dmft_fermi_algo
+ option = 1
+ if (present(opt_algo)) option = opt_algo
  step = paw_dmft%dmft_fermi_step
  
 !write(std_out,*) "ldaprint",opt_noninter
@@ -3643,7 +3652,7 @@ subroutine newton(green,self,paw_dmft,x_input,x_precision,max_iter,&
      if (x_input < x_minus .or. x_input > x_plus) then
      
        !call compute_nb_elec(green,paw_dmft,Fx,nb_elec_x,xold)
-       write(message,'(a,3f12.6)') " ---",x_input,Fx+paw_dmft%nelectval,Fx
+       write(message,'(a,3f12.6)') " ---",xold,Fx+paw_dmft%nelectval,Fx
        call wrtout(std_out,message,'COLL')
        if (Fx > 0) then
          x_plus = xold
@@ -3763,11 +3772,12 @@ subroutine function_and_deriv(green,self,paw_dmft,x_input,Fx,Fxprime,Fxdouble,op
    !x0 = x_input
    !xminus = x0 - deltax
    !xplus = x0 + deltax
-
+   
    call compute_nb_elec(green,self,paw_dmft,Fx,nb_elec_x,x_input,option=option,Fxprime=Fxprime,Fxdouble=Fxdouble)
 
    write(message,'(a,3f12.6)') "  - ",x_input,nb_elec_x,Fx
    call wrtout(std_out,message,'COLL')
+
 !  write(std_out,*) "Fx", Fx
    !if (abs(Fx) < f_precision) return
 
@@ -3927,7 +3937,7 @@ subroutine compute_nb_elec(green,self,paw_dmft,Fx,nb_elec_x,fermie,option,Fxprim
               & fermie - paw_dmft%eigen_dft(ib,ikpt+shift,isppol)
          end do ! ib
          call xginv(oper_tmp%ks(:,:,ikpt,isppol),mbandc)
-                  
+
          if (opt == 1) then
            Fxprime = Fxprime - sum(oper_tmp%ks(:,:,ikpt,isppol)*transpose(oper_tmp%ks(:,:,ikpt,isppol)))*wtk*fac
          else if (opt == 2) then
@@ -4297,9 +4307,8 @@ subroutine compute_moments_ks(green,self,paw_dmft,opt_self,opt_log,opt_quick_res
  if (present(opt_quick_restart)) optquickrestart = opt_quick_restart
  
  if (optself == 0 .and. optquickrestart == 1) then
-   message = "Case optself=0 and optquickrestart=1 has not been optimized since it is not &
-   & supposed to happen"
-   ABI_WARNING(message)
+   message = "Case optself=0 and optquickrestart=1 is not supposed to happen"
+   ABI_ERROR(message)
  end if 
  
  diag   = 1 - optself
@@ -4348,10 +4357,12 @@ subroutine compute_moments_ks(green,self,paw_dmft,opt_self,opt_log,opt_quick_res
      call trace_oper(green%moments(i+1),dum,trace_loc(:,:),1,trace_ks_cmplx=trace_tmp)
      green%trace_moments_log_ks(i) = trace_tmp / dble(i)
    end do ! i
-   do i=2,self%nmoments
-     call trace_oper(self%moments(i),dum,trace_loc(:,:),1,trace_ks_cmplx=trace_tmp)
-     green%trace_moments_log_ks(i) = green%trace_moments_log_ks(i) + trace_tmp
-   end do ! i
+   if (optself == 1) then
+     do i=2,self%nmoments
+       call trace_oper(self%moments(i),dum,trace_loc(:,:),1,trace_ks_cmplx=trace_tmp)
+       green%trace_moments_log_ks(i) = green%trace_moments_log_ks(i) + trace_tmp
+     end do ! i
+   end if ! optself=1
  end if ! optlog=1 and optquickrestart=0 
  
  if (optlog == 1 .and. optquickrestart == 1) then
@@ -4435,15 +4446,15 @@ end subroutine compute_moments_ks
 !!  self <type(self_type)>= variables related to self-energy
 !!  paw_dmft  <type(paw_dmft_type)>= paw+dmft related data
 !!  The conventions are: 
-!!    trace_fermie(1) = nsppol*mbandc (=tr(Id))
-!!    trace_fermie(2) = tr(m0) (with m0=self%moments(1)-self%hdc+eigen_dft*Id
-!!    trace_fermie(3) = tr(self%moments(2))
-!!    trace_fermie(4) = tr(m0**2)
-!!    trace_fermie(5) = tr(self%moments(3))
-!!    trace_fermie(6) = tr(m0*self%moments(2))
-!!    trace_fermie(7) = tr(m0**3)
-!!    trace_fermie(8) = tr(self%moments(4))
-!!    trace_fermie(9) = tr(m0*self%moments(3))
+!!    trace_fermie(1)  = nsppol*mbandc (=tr(Id))
+!!    trace_fermie(2)  = tr(m0) (with m0=self%moments(1)-self%hdc+eigen_dft*Id
+!!    trace_fermie(3)  = tr(self%moments(2))
+!!    trace_fermie(4)  = tr(m0**2)
+!!    trace_fermie(5)  = tr(self%moments(3))
+!!    trace_fermie(6)  = tr(m0*self%moments(2))
+!!    trace_fermie(7)  = tr(m0**3)
+!!    trace_fermie(8)  = tr(self%moments(4))
+!!    trace_fermie(9)  = tr(m0*self%moments(3))
 !!    trace_fermie(10) = tr(self%moments(2)**2)
 !!    trace_fermie(11) = tr(m0**2*self%moments(2))   
 !!    trace_fermie(12) = tr(m0**4)
@@ -4463,13 +4474,12 @@ subroutine compute_trace_moments_ks(green,self,paw_dmft)
  type(self_type), intent(inout) :: self
  type(paw_dmft_type), intent(in) :: paw_dmft
 !Local variables ------------------------------
- integer :: i,ib,ikpt,isppol,mbandc,mkmem,natom,nsppol,shift
+ integer :: i,ib,ikpt,isppol,mkmem,natom,nsppol,shift
  real(dp) :: dum
  type(oper_type) :: oper_tmp
  real(dp), allocatable :: trace_loc(:,:)
 !************************************************************************
  
- mbandc = paw_dmft%mbandc
  mkmem  = green%distrib%nkpt_mem(green%distrib%me_kpt)
  natom  = paw_dmft%natom
  nsppol = paw_dmft%nsppol
@@ -4487,7 +4497,7 @@ subroutine compute_trace_moments_ks(green,self,paw_dmft)
  
  do isppol=1,nsppol
    do ikpt=1,mkmem
-     do ib=1,mbandc
+     do ib=1,paw_dmft%mbandc
        oper_tmp%ks(ib,ib,ikpt,isppol) = green%moments(2)%ks(ib,ib,ikpt,isppol) + &
           & paw_dmft%eigen_dft(ib,ikpt+shift,isppol)
      end do ! ib
@@ -4526,7 +4536,7 @@ end subroutine compute_trace_moments_ks
 !!  energy_level = local energy levels
 !!  weiss <type(green_type)>= weiss field
 !!  option = 0 : computes the hybridization moments in weiss%moments up to 4th order (including
-!!               the spurious 0th order moment, which needs to be removed from the weiss field later),
+!!               the spurious 0th order moment, which is removed from the weiss field later),
 !!               using the moments of the self-energy and Green's function as inputs
 !!         = 1 : compute the self-energy moments in self%moments using the moments of the hybridization
 !!               and the Green's function (assuming the spurious 0th order moment of the hybridization

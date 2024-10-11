@@ -46,8 +46,6 @@ MODULE m_oper
  public :: trace_oper
  public :: upfold_oper
  public :: prod_oper
- public :: add_oper
- public :: fac_oper
  public :: trace_prod_oper
  public :: gather_oper
  public :: gather_oper_ks
@@ -1187,123 +1185,6 @@ subroutine prod_oper(oper1,oper2,oper3,opt_ksloc,opt_diag)
  DBG_EXIT("COLL")
  
 end subroutine prod_oper
-!!***
-
-!!****f* m_oper/add_oper
-!! NAME
-!! add_oper
-!!
-!! FUNCTION
-!!  Add oper1 and oper2 in oper3
-!!
-!! INPUTS
-!!  oper1,oper2,oper3 <type(oper_type)>= operator
-!!  opt_ksloc=1: add in KS space
-!!           =2: add in local space
-!!  opt_diag = 1 if oper1 and oper2 are diagonal in KS space, 0 otherwise (default)
-!!                
-!! OUTPUT
-!!
-!! SOURCE
-
-subroutine add_oper(oper1,oper2,oper3,opt_ksloc,opt_diag)
-
- use m_matlu, only : add_matlu
-
-!Arguments ------------------------------------
-!type
- type(oper_type), intent(in) :: oper1,oper2
- type(oper_type), intent(inout) :: oper3
- integer, intent(in) :: opt_ksloc
- integer, optional, intent(in)  :: opt_diag
-!oper variables-------------------------------
- integer :: ib,ikpt,isppol
- logical :: diag
-! *********************************************************************
- 
- if (opt_ksloc == 1) then
- 
-   diag = .false.
-   if (present(opt_diag)) then
-     if (opt_diag == 1) diag = .true.
-   end if
-
-   if (diag) then
-     do isppol=1,oper1%nsppol
-       do ikpt=1,oper1%nkpt
-         do ib=1,oper1%mbandc
-           oper3%ks(ib,ib,ikpt,isppol) = oper1%ks(ib,ib,ikpt,isppol) + oper2%ks(ib,ib,ikpt,isppol)
-         end do ! ib
-       end do ! ikpt
-     end do ! isppol
-   else
-     oper3%ks(:,:,:,:) = oper1%ks(:,:,:,:) + oper2%ks(:,:,:,:)
-   end if ! diag
-   
- end if ! opt_ksloc=1
- 
- if (opt_ksloc == 2) call add_matlu(oper1%matlu(:),oper2%matlu(:),oper3%matlu(:),oper1%natom,1)
-
-end subroutine add_oper
-!!***
-
-!!****f* m_oper/fac_oper
-!! NAME
-!! fac_oper
-!!
-!! FUNCTION
-!!  Multiply oper by fac 
-!!
-!! INPUTS
-!!  oper <type(oper_type)>= operator
-!!  fac = factor
-!!  opt_ksloc = 1: in KS space
-!!            = 2: in local space
-!!  opt_diag = 1 if oper is diagonal in KS space, 0 otherwise (default)
-!!                
-!! OUTPUT
-!!
-!! SOURCE
-
-subroutine fac_oper(oper,fac,opt_ksloc,opt_diag)
-
- use m_matlu, only : fac_matlu
-
-!Arguments ------------------------------------
-!type
- type(oper_type), intent(inout) :: oper
- complex(dpc), intent(in) :: fac
- integer, intent(in) :: opt_ksloc
- integer, optional, intent(in) :: opt_diag
-!oper variables-------------------------------
- integer :: ib,ikpt,isppol
- logical :: diag
-! *********************************************************************
- 
- if (opt_ksloc == 1) then
- 
-   diag = .false.
-   if (present(opt_diag)) then
-     if (opt_diag == 1) diag = .true.
-   end if
-
-   if (diag) then
-     do isppol=1,oper%nsppol
-       do ikpt=1,oper%nkpt
-         do ib=1,oper%mbandc
-           oper%ks(ib,ib,ikpt,isppol) = fac * oper%ks(ib,ib,ikpt,isppol) 
-         end do ! ib
-       end do ! ikpt
-     end do ! isppol
-   else
-     oper%ks(:,:,:,:) = fac * oper%ks(:,:,:,:) 
-   end if ! diag
-   
- end if ! opt_ksloc=1
- 
- if (opt_ksloc == 2) call fac_matlu(oper%matlu(:),oper%natom,fac)
-
-end subroutine fac_oper
 !!***
 
 !!****f* m_oper/trace_prod_oper
