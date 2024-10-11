@@ -47,23 +47,22 @@ program ioprof
 !scalars
  integer,parameter :: master=0, MAX_NFILES=50
  integer :: comm,my_rank, rank, nprocs,iomode,formeig,ierr, test_ierr, fform, ncid, ncerr
- integer :: ii,io,check_iomode,method,feg,ount,nband2read,nargs, abimem_level
- integer :: nkibz, nband
+ integer :: ii,io,check_iomode,method,feg,ount,nband2read,nargs, abimem_level, nkibz, nband
  logical,parameter :: verbose=.FALSE.
  logical :: independent
  real(dp) :: abimem_limit_mb
  character(len=24) :: codename
  character(len=500) :: msg,command,arg
- character(len=fnlen) :: new_fname, wfk_source, wfk_dest, wfk_path
+ character(len=fnlen) :: new_filename, wfk_source, wfk_dest, wfk_path
  type(hdr_type) :: hdr
  type(wfk_t) :: wfk
 !arrays
  integer,parameter :: formeigs(2) = [0,1]
  integer,parameter :: io_modes(1) = [IO_MODE_FORTRAN]
- !integer,parameter :: io_modes(1) = (/IO_MODE_MPI/)
- !integer,parameter :: io_modes(1) = (/IO_MODE_ETSF/)
- !integer,parameter :: io_modes(2) = (/IO_MODE_FORTRAN, IO_MODE_MPI/)
- !integer,parameter :: io_modes(3) = (/IO_MODE_FORTRAN, IO_MODE_MPI, IO_MODE_ETSF/)
+ !integer,parameter :: io_modes(1) = [IO_MODE_MPI]
+ !integer,parameter :: io_modes(1) = [IO_MODE_ETSF]
+ !integer,parameter :: io_modes(2) = [IO_MODE_FORTRAN, IO_MODE_MPI]
+ !integer,parameter :: io_modes(3) = [IO_MODE_FORTRAN, IO_MODE_MPI, IO_MODE_ETSF]
  integer :: start3(3), count3(3)
  real(dp) :: cwtimes(2)
  real(dp),allocatable :: waves(:,:), read_waves(:,:)
@@ -103,8 +102,9 @@ program ioprof
    else if (arg == "-h" .or. arg == "--help") then
      ! Document the options.
      write(std_out,*)"-v, --version                 Show version number and exit."
-     write(std_out,*)"info wfk_file                 Print info on WFK file"
-     write(std_out,*)"nc2fort ncfile fortran_file   Convert WFK ncfile to Fortran WFK file"
+     write(std_out,*)"info WFK_FILE                 Print info on WFK file"
+     write(std_out,*)"nc2fort IN_WFK.nc OUT_WFK     Convert IN_WFK ncfile to Fortran OUT_WFK file"
+     write(std_out,*)"nc_tests                      Perform basis tests of netcdf API with MPI-IO"
      write(std_out,*)"-h, --help                    Show this help and exit."
      goto 100
    end if
@@ -128,7 +128,7 @@ program ioprof
  case ("nc2fort")
    ! Converter: netcdf --> Fortran
    if (my_rank /= master) goto 100
-   ABI_CHECK(nargs == 3, "Usage: nc2form wfk_source wfk_dest")
+   ABI_CHECK(nargs == 3, "Usage: nc2form IN_WFK.nc OUT_WFK")
    call get_command_argument(2, wfk_source)
    call get_command_argument(3, wfk_dest)
 
@@ -137,32 +137,31 @@ program ioprof
    end if
    call wfk_nc2fort(wfk_source, wfk_dest)
 
- case ("prof")
+ case ("bench")
    ! Profile
-   ABI_CHECK(nargs > 1, "Usage: bench wfk_path")
+   ABI_CHECK(nargs > 1, "Usage: bench WFK_FILE")
    call get_command_argument(2, wfk_path)
-   if (my_rank /= master) goto 100
+   !if (my_rank /= master) goto 100
+   ! To create a new file.
+   !call wfk_create_wfkfile(new_filename, hdr, iomode, formeig, Kvars, cwtimes, comm)
 
-   formeig = 0
-   nband2read = 1500
+   formeig = 0; nband2read = 1500
    call wfk_prof(wfk_path, formeig, nband2read, comm)
-   ! TO CREATE new file
-   !call wfk_create_wfkfile(new_fname,hdr,iomode,formeig,Kvars,cwtimes,xmpi_comm_self)
 
- case ("nc_test")
+ case ("nc_tests")
 
    call nctk_test_mpiio(print_warning=.True.)
    if (nctk_has_mpiio) then
-     call wrtout(std_out, "[OK] netcdf supports MPI-IO")
+     call wrtout(std_out, " netcdf library supports MPI-IO: [OK] ")
    else
-     call wrtout(std_out, "[FAILED] netcdf does not support MPI-IO")
+     call wrtout(std_out, " netcdf library does not support MPI-IO: [FAILED]")
      call xmpi_abort()
    end if
 
-   new_fname = "__IOPROF__.nc"
-   NCF_CHECK(nctk_open_create(ncid, new_fname, comm))
+   new_filename = "__IOPROF__.nc"
+   NCF_CHECK(nctk_open_create(ncid, new_filename, comm))
 
-   ! define dimensions
+   ! Define dimensions.
    nkibz = nprocs; nband = 100
 
    ncerr = nctk_def_dims(ncid, [ &
@@ -171,6 +170,7 @@ program ioprof
    ], defmode=.True.)
    NCF_CHECK(ncerr)
 
+   ! Define arrays.
    ncerr = nctk_def_arrays(ncid, [ &
      nctkarr_t("waves", "dp", "two, nband, nkibz"), &
      nctkarr_t("compressed_waves", "dp", "two, nband, nkibz"), &
@@ -180,6 +180,8 @@ program ioprof
 
    ! Compress waves to reduce size on disk.
    NCF_CHECK(nf90_def_var_deflate(ncid, vid("compressed_waves"), shuffle=1, deflate=1, deflate_level=5))
+
+   ! Begin writing.
    NCF_CHECK(nctk_set_datamode(ncid))
 
    ABI_CALLOC(read_waves, (2, nband))
@@ -187,9 +189,9 @@ program ioprof
    waves(1, :) = [(one * ii, ii=1,nband)]
    waves(2, :) = [(ten * ii, ii=1,nband)]
    waves = waves * (my_rank + 1)
-
    start3 = [1,1,my_rank+1]; count3 = [2,nband,1]
 
+   ! Write waves in indipendent mode.
    NCF_CHECK(nctk_set_collective(ncid, vid("waves"), independent=.True.))
    do rank=0, nprocs-1
      if (my_rank == rank) then
@@ -198,9 +200,11 @@ program ioprof
      call xmpi_barrier(comm)
    end do
 
+   ! It seems indipendent mode cannot be used with deflated variables.
    !NCF_CHECK(nctk_set_collective(ncid, vid("compressed_waves"), independent=.True.))
    NCF_CHECK(nf90_put_var(ncid, vid("compressed_waves"), waves, start=start3, count=count3))
 
+   ! Write variables in collective mode.
    independent = .False.
    NCF_CHECK(nctk_set_collective(ncid, vid("collective_waves"), independent=independent))
    NCF_CHECK(nf90_put_var(ncid, vid("collective_waves"), waves, start=start3, count=count3))
@@ -210,14 +214,17 @@ program ioprof
    call xmpi_barrier(comm)
 
    ! Now read the data and performs consistency check.
-   NCF_CHECK(nctk_open_read(ncid, new_fname, comm))
+   NCF_CHECK(nctk_open_read(ncid, new_filename, comm))
    test_ierr = 0
 
+   ! Read waves in indipendent mode.
    NCF_CHECK(nctk_set_collective(ncid, vid("waves"), independent=.True.))
    do rank=0, nprocs-1
      if (my_rank == rank) then
        NCF_CHECK(nf90_get_var(ncid, vid("waves"), read_waves, start=start3, count=count3))
        call check_waves("Reading waves", test_ierr)
+       NCF_CHECK(nf90_get_var(ncid, vid("compressed_waves"), read_waves, start=start3, count=count3))
+       call check_waves("Reading compressed waves", test_ierr)
      end if
      call xmpi_barrier(comm)
    end do
@@ -225,22 +232,24 @@ program ioprof
    NCF_CHECK(nf90_get_var(ncid, vid("compressed_waves"), read_waves, start=start3, count=count3))
    call check_waves("Reading compressed waves", test_ierr)
 
+   ! Read waves in collective mode.
    NCF_CHECK(nctk_set_collective(ncid, vid("collective_waves"), independent=independent))
-   NCF_CHECK(nctk_set_collective(ncid, vid("collective_compressed_waves"), independent=independent))
    NCF_CHECK(nf90_get_var(ncid, vid("collective_waves"), read_waves, start=start3, count=count3))
    call check_waves("Reading collective_waves", test_ierr)
+
+   NCF_CHECK(nctk_set_collective(ncid, vid("collective_compressed_waves"), independent=independent))
    NCF_CHECK(nf90_get_var(ncid, vid("collective_compressed_waves"), read_waves, start=start3, count=count3))
    call check_waves("Reading collective_compressed waves", test_ierr)
 
    NCF_CHECK(nf90_close(ncid))
    ABI_FREE(waves)
    ABI_FREE(read_waves)
-   if (my_rank == master) call delete_file(new_fname, ierr)
+   if (my_rank == master) call delete_file(new_filename, ierr)
 
    ABI_CHECK_IEQ(test_ierr, 0, "test_ierr /= 0")
 
- case ("unittests")
-   ! Unit tests.
+ case ("wfk_tests")
+   ! Unit tests for WFK file.
    if (my_rank /= master) goto 100
 
    do ii=1,count(hdr_fnames/=ABI_NOFILE)
@@ -248,7 +257,7 @@ program ioprof
      ! Read the header from an external netcdf file
      ! This trick is needed because the initialization of
      ! the header is *IMPOSSIBLE* if we don't have a full ABINIT input file!
-     call hdr%from_fname(hdr_fnames(ii),fform,comm)
+     call hdr%from_fname(hdr_fnames(ii), fform, comm)
      ABI_CHECK(fform /= 0, "fform==0")
 
      call hdr%echo(fform,4,unit=std_out)
@@ -257,9 +266,9 @@ program ioprof
        formeig = formeigs(feg)
        do io=1,size(io_modes)
          iomode = io_modes(io)
-         new_fname = "NEW_WFK"
-         if (iomode==IO_MODE_ETSF) new_fname = "NEW_WFK.nc"
-         if (file_exists(new_fname)) call delete_file(new_fname,ierr)
+         new_filename = "NEW_WFK"
+         if (iomode==IO_MODE_ETSF) new_filename = "NEW_WFK.nc"
+         if (file_exists(new_filename)) call delete_file(new_filename,ierr)
 
          ! TODO
          if (formeig==1 .and. iomode==IO_MODE_ETSF) then
@@ -270,10 +279,10 @@ program ioprof
          ABI_MALLOC(Kvars, (hdr%nkpt))
 
          if (my_rank == master) then
-           call wrtout(ount,"Calling wfk_create_wfkfile")
-           call wfk_create_wfkfile(new_fname,hdr,iomode,formeig,Kvars,cwtimes,xmpi_comm_self)
-           !call wfk_create_wfkfile(new_fname,hdr,IO_MODE_FORTRAN,formeig,Kvars,cwtimes,xmpi_comm_self)
-           call wrtout(ount,"Done wfk_create_wfkfile")
+           call wrtout(ount, "Calling wfk_create_wfkfile")
+           call wfk_create_wfkfile(new_filename,hdr,iomode,formeig,Kvars,cwtimes,xmpi_comm_self)
+           !call wfk_create_wfkfile(new_filename,hdr,IO_MODE_FORTRAN,formeig,Kvars,cwtimes,xmpi_comm_self)
+           call wrtout(ount, "Done wfk_create_wfkfile")
          end if
 
          if (nprocs > 1) then
@@ -282,15 +291,13 @@ program ioprof
          end if
 
          method = 0
-         call wrtout(std_out,sjoin("Checking file:",new_fname,", with iomode=",itoa(iomode)))
-         call wfk_check_wfkfile(new_fname,hdr,iomode,method,formeig,Kvars,cwtimes,comm,ierr)
+         call wrtout(std_out,sjoin("Checking file:", new_filename, ", with iomode=",itoa(iomode)))
+         call wfk_check_wfkfile(new_filename,hdr,iomode,method,formeig,Kvars,cwtimes,comm,ierr)
 
          write(msg,'(2(a,i0),2(a,f8.2))')" Read with iomode: ",iomode,", nproc: ",nprocs,", cpu: ",cwtimes(1),", wall:",cwtimes(2)
-         call wrtout(ount,msg)
+         call wrtout(ount, msg)
 
-         if (ierr/=0) then
-           ABI_ERROR(sjoin("wfk_check_wfkfile returned ierr ",itoa(ierr)))
-         end if
+         ABI_CHECK(ierr == 0, sjoin("wfk_check_wfkfile returned ierr ",itoa(ierr)))
 
          ! If not netcdf file, try to read the file with the other mode that is compatible with it.
          check_iomode = -100
@@ -298,12 +305,12 @@ program ioprof
          if (iomode == IO_MODE_MPI)     check_iomode = IO_MODE_FORTRAN
 
          if (check_iomode /= -100) then
-           call wrtout(std_out,sjoin("Trying to read file:",new_fname,", with check_iomode=",itoa(check_iomode)))
-           call wfk_check_wfkfile(new_fname,hdr,check_iomode,method,formeig,Kvars,cwtimes,comm,ierr)
+           call wrtout(std_out,sjoin("Trying to read file:",new_filename,", with check_iomode=",itoa(check_iomode)))
+           call wfk_check_wfkfile(new_filename,hdr,check_iomode,method,formeig,Kvars,cwtimes,comm,ierr)
 
            write(msg,'(2(a,i0),2(a,f8.2))')" Read with iomode: ",iomode,", nproc: ",nprocs,", cpu: ",cwtimes(1),", wall:",cwtimes(2)
-           call wrtout(ount,msg)
-           ABI_CHECK(ierr == 0, sjoin("wfk_check_wfkfile returned ierr ",itoa(ierr)))
+           call wrtout(ount, msg)
+           ABI_CHECK(ierr == 0, sjoin("wfk_check_wfkfile returned ierr: ", itoa(ierr)))
          end if
 
          ABI_FREE(Kvars)
@@ -319,21 +326,17 @@ program ioprof
 
  !call wrtout(std_out, ch10//" Analysis completed.)
 
- ! Writes information on file about the memory before ending mpi module, if memory profiling is enabled
  call abinit_doctor("__ioprof")
-
  100 call xmpi_end()
 
 contains
  subroutine check_waves(header, ierr)
    character(len=*),intent(in) :: header
    integer,intent(inout) :: ierr
-   logical :: check
-   check = all(waves == read_waves)
-   if (check) then
-     write(std_out, "(3a,i0)")" [OK] ", trim(header), ", MPI rank: ", my_rank
+   if (all(waves == read_waves)) then
+     write(std_out, "(1x,2a,i0,a)")trim(header), ", MPI rank: ", my_rank, " [OK] "
    else
-     write(std_out, "(3a,i0)")" [FAILED] ", trim(header), ", MPI rank: ", my_rank
+     write(std_out, "(1x,2a,i0,a)")trim(header), ", MPI rank: ", my_rank, " [FAILED] "
      ierr = ierr + 1
    end if
  end subroutine check_waves
