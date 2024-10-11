@@ -3511,7 +3511,7 @@ contains
     integer,          intent(in)    :: nspinor
     type(xgBlock_t) , intent(inout) :: Y
 
-    integer :: iblock,rows,cols
+    integer :: iblock,irow,rows,cols
     type(xgBlock_t) :: X_spinor, Y_spinor
     double precision :: tsec(2)
 
@@ -3548,39 +3548,43 @@ contains
 
     select case(X%space)
     case (SPACE_R)
-      !$omp parallel do shared(X_spinor,Y_spinor,diag), &
-      !$omp& schedule(static)
+      !$omp parallel do collapse(2) shared(X_spinor,Y_spinor,diag) private(iblock,irow)
       do iblock = 1, cols
-        Y_spinor%vecR(1:rows,iblock) = Y_spinor%vecR(1:rows,iblock) &
-          & + X_spinor%vecR(1:rows,iblock) * diag%vecR(1:rows,1)
+        do irow=1,rows
+          Y_spinor%vecR(irow,iblock) = Y_spinor%vecR(irow,iblock) &
+            & + X_spinor%vecR(irow,iblock) * diag%vecR(irow,1)
+        end do
       end do
     case (SPACE_CR)
       if (diag%space==SPACE_R) then
-        !$omp parallel do shared(X_spinor,Y_spinor,diag), &
-        !$omp& schedule(static)
+        !$omp parallel do collapse(2) shared(X_spinor,Y_spinor,diag) private(iblock,irow)
         do iblock = 1, cols
-          Y_spinor%vecR(1:2*rows:2,iblock) = Y_spinor%vecR(1:2*rows:2,iblock) &
-            & + X_spinor%vecR(1:2*rows:2,iblock) * diag%vecR(1:rows,1)
-          Y_spinor%vecR(2:2*rows:2,iblock) = Y_spinor%vecR(2:2*rows:2,iblock) &
-            & + X_spinor%vecR(2:2*rows:2,iblock) * diag%vecR(1:rows,1)
+          do irow=1,rows
+            Y_spinor%vecR(2*irow-1,iblock) = Y_spinor%vecR(2*irow-1,iblock) &
+              & + X_spinor%vecR(2*irow-1,iblock) * diag%vecR(irow,1)
+            Y_spinor%vecR(2*irow  ,iblock) = Y_spinor%vecR(2*irow  ,iblock) &
+              & + X_spinor%vecR(2*irow  ,iblock) * diag%vecR(irow,1)
+          end do
         end do
       else
         ABI_ERROR('Not implemented')
       end if
     case (SPACE_C)
       if (diag%space==SPACE_C) then
-        !$omp parallel do shared(X_spinor,Y_spinor,diag), &
-        !$omp& schedule(static)
+        !$omp parallel do collapse(2) shared(X_spinor,Y_spinor,diag) private(iblock,irow)
         do iblock = 1, cols
-          Y_spinor%vecC(1:rows,iblock) = Y_spinor%vecC(1:rows,iblock) &
-            & + X_spinor%vecC(1:rows,iblock) * diag%vecC(1:rows,1)
+          do irow=1,rows
+            Y_spinor%vecC(irow,iblock) = Y_spinor%vecC(irow,iblock) &
+              & + X_spinor%vecC(irow,iblock) * diag%vecC(irow,1)
+          end do
         end do
       else if (diag%space==SPACE_R) then
-        !$omp parallel do shared(X_spinor,Y_spinor,diag), &
-        !$omp& schedule(static)
+        !$omp parallel do collapse(2) shared(X_spinor,Y_spinor,diag) private(iblock,irow)
         do iblock = 1, cols
-          Y_spinor%vecC(1:rows,iblock) = Y_spinor%vecC(1:rows,iblock) &
-            & + X_spinor%vecC(1:rows,iblock) * diag%vecR(1:rows,1)
+          do irow=1,rows
+            Y_spinor%vecC(irow,iblock) = Y_spinor%vecC(irow,iblock) &
+              & + X_spinor%vecC(irow,iblock) * diag%vecR(irow,1)
+          end do
         end do
       else
         ABI_ERROR('Not implemented')
@@ -3979,7 +3983,6 @@ contains
 
     call timab(tim_colw_mul,1,tsec)
 
-    ABI_UNUSED((/irow/)) ! Use in OpenMP GPU
     rows = size(vec,dim=1)
 
     if (xgBlock%rows/=rows) then
@@ -4045,23 +4048,26 @@ contains
 
       select case(xgBlock%space)
       case (SPACE_R)
-        !$omp parallel do shared(xgBlock,vec), &
-        !$omp& schedule(static)
+        !$omp parallel do collapse(2) shared(xgBlock,vec) private(iblock,irow)
         do iblock = 1, xgBlock%cols
-          xgBlock%vecR(1:rows,iblock) = xgBlock%vecR(1:rows,iblock) * vec(1:rows)
+          do irow = 1, rows
+            xgBlock%vecR(irow,iblock) = xgBlock%vecR(irow,iblock) * vec(irow)
+          end do
         end do
       case (SPACE_CR)
-        !$omp parallel do shared(xgBlock,vec), &
-        !$omp& schedule(static)
+        !$omp parallel do collapse(2) shared(xgBlock,vec) private(iblock,irow)
         do iblock = 1, xgBlock%cols
-          xgBlock%vecR(1:2*rows:2,iblock) = xgBlock%vecR(1:2*rows:2,iblock) * vec(1:rows)
-          xgBlock%vecR(2:2*rows:2,iblock) = xgBlock%vecR(2:2*rows:2,iblock) * vec(1:rows)
+          do irow = 1, rows
+            xgBlock%vecR(2*irow-1,iblock) = xgBlock%vecR(2*irow-1,iblock) * vec(irow)
+            xgBlock%vecR(2*irow  ,iblock) = xgBlock%vecR(2*irow  ,iblock) * vec(irow)
+          end do
         end do
       case (SPACE_C)
-        !$omp parallel do shared(xgBlock,vec), &
-        !$omp& schedule(static)
+        !$omp parallel do collapse(2) shared(xgBlock,vec) private(iblock,irow)
         do iblock = 1, xgBlock%cols
-          xgBlock%vecC(1:rows,iblock) = xgBlock%vecC(1:rows,iblock) * vec(1:rows)
+          do irow = 1, rows
+            xgBlock%vecC(irow,iblock) = xgBlock%vecC(irow,iblock) * vec(irow)
+          end do
         end do
       end select
 
@@ -4143,11 +4149,11 @@ contains
       case (SPACE_R,SPACE_CR)
         ABI_ERROR("Error colwiseMulC")
       case (SPACE_C)
-        !$omp parallel do shared(xgBlock,vec), &
-        !$omp& schedule(static)
+        !$omp parallel do collapse(2) shared(xgBlock,vec) private(iblock,irow)
         do iblock = 1, xgBlock%cols
-          xgBlock%vecC(1:min(xgBlock%rows,rows),iblock) = &
-            xgBlock%vecC(1:min(xgBlock%rows,rows),iblock) * vec(1:min(xgBlock%rows,rows))
+          do irow=1, rows
+            xgBlock%vecC(irow,iblock) = xgBlock%vecC(irow,iblock) * vec(irow)
+          end do
         end do
       end select
 
