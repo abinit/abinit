@@ -584,7 +584,7 @@ subroutine nctk_test_mpiio(print_warning)
  if ((.not. nctk_has_mpiio) .and. my_print_warning) then
    write(msg,"(5a)") &
       "The netcdf library does not support parallel IO, see message above",ch10,&
-      "Abinit won't be able to produce files in parallel e.g. when paral_kgb==1 is used.",ch10,&
+      "Abinit won't be able to produce files in parallel when e.g. paral_kgb == 1 is used.",ch10,&
       "Action: install a netcdf4+HDF5 library with MPI-IO support."
    ABI_WARNING(msg)
  end if
@@ -766,14 +766,14 @@ integer function nctk_open_create(ncid, path, comm) result(ncerr)
    ncerr = nf90_einval
 #ifdef HAVE_NETCDF_MPI
    write(my_string,'(2a)') "- Creating HDf5 file with MPI-IO support: ",trim(path)
-   call wrtout(std_out,my_string)
+   call wrtout(std_out, my_string)
    ! Believe it or not, I have to use xmpi_comm_self even in sequential to avoid weird SIGSEV in the MPI layer!
    ncerr = nf90_create(path, cmode=ior(ior(nf90_netcdf4, nf90_mpiio), nf90_write), ncid=ncid, comm=comm, info=xmpio_info)
 #endif
  else
    ! Note that here we don't enforce nf90_netcdf4 hence the netcdf file with be in classic model.
-   write(my_string,'(2a)') "- Creating HDf5 file with MPI-IO support: ",trim(path)
-   call wrtout(std_out,my_string)
+   write(my_string,'(2a)') "- Creating HDf5 file WITHOUT MPI-IO support: ",trim(path)
+   call wrtout(std_out, my_string)
    !ncerr = nf90_create(path, ior(nf90_clobber, nf90_write), ncid)
    cmode = def_cmode_for_seq_create
    ncerr = nf90_create(path, cmode=cmode, ncid=ncid)
@@ -1056,19 +1056,29 @@ end function nctk_set_datamode
 !! INPUTS
 !!  ncid=Netcdf file identifier.
 !!  varid=Netcdf variable identifier.
+!!  [independent]=True of use indepedent mode.
 !!
 !! SOURCE
 
-integer function nctk_set_collective(ncid, varid) result(ncerr)
+integer function nctk_set_collective(ncid, varid, independent) result(ncerr)
 
 !Arguments ------------------------------------
- integer,intent(in) :: ncid,varid
+ integer,intent(in) :: ncid, varid
+ logical,optional,intent(in) :: independent
 
+!Local variables-------------------------------
+ logical :: independent__
 ! *********************************************************************true
 
   ncerr = nf90_einval
+  independent__ = .false.
 #ifdef HAVE_NETCDF_MPI
-  ncerr = nf90_var_par_access(ncid, varid, nf90_collective)
+  if (present(independent)) independent__ = independent
+  if (independent__) then
+    ncerr = nf90_var_par_access(ncid, varid, nf90_independent)
+  else
+    ncerr = nf90_var_par_access(ncid, varid, nf90_collective)
+  end if
 #else
   ABI_ERROR("nctk_set_collective should not be called if NETCDF does not support MPI-IO")
   ABI_UNUSED((/ncid, varid/))

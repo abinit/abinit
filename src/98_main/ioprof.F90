@@ -33,6 +33,7 @@ program ioprof
  use m_abicore
  use m_hdr
  use netcdf
+ use m_nctk
 
  use m_build_info,     only : abinit_version
  use m_specialmsg,     only : specialmsg_getcount, herald
@@ -44,27 +45,30 @@ program ioprof
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: master=0,MAX_NFILES=50
- integer :: comm,my_rank,nprocs,iomode,formeig,ierr,fform
+ integer,parameter :: master=0, MAX_NFILES=50
+ integer :: comm,my_rank, rank, nprocs,iomode,formeig,ierr, test_ierr, fform, ncid, ncerr
  integer :: ii,io,check_iomode,method,feg,ount,nband2read,nargs, abimem_level
- logical :: verbose=.FALSE.
+ integer :: nkibz, nband
+ logical,parameter :: verbose=.FALSE.
+ logical :: independent
  real(dp) :: abimem_limit_mb
  character(len=24) :: codename
  character(len=500) :: msg,command,arg
- character(len=fnlen) :: new_fname,wfk_source,wfk_dest,wfk_path
+ character(len=fnlen) :: new_fname, wfk_source, wfk_dest, wfk_path
  type(hdr_type) :: hdr
  type(wfk_t) :: wfk
 !arrays
- integer,parameter :: formeigs(2) = (/0,1/)
- integer,parameter :: io_modes(1) = (/IO_MODE_FORTRAN/)
+ integer,parameter :: formeigs(2) = [0,1]
+ integer,parameter :: io_modes(1) = [IO_MODE_FORTRAN]
  !integer,parameter :: io_modes(1) = (/IO_MODE_MPI/)
  !integer,parameter :: io_modes(1) = (/IO_MODE_ETSF/)
  !integer,parameter :: io_modes(2) = (/IO_MODE_FORTRAN, IO_MODE_MPI/)
  !integer,parameter :: io_modes(3) = (/IO_MODE_FORTRAN, IO_MODE_MPI, IO_MODE_ETSF/)
+ integer :: start3(3), count3(3)
  real(dp) :: cwtimes(2)
+ real(dp),allocatable :: waves(:,:), read_waves(:,:)
  type(kvars_t),allocatable :: Kvars(:)
  character(len=fnlen) :: hdr_fnames(MAX_NFILES) = ABI_NOFILE
-
 ! *************************************************************************
 
  ! Change communicator for I/O (mandatory!)
@@ -145,7 +149,95 @@ program ioprof
    ! TO CREATE new file
    !call wfk_create_wfkfile(new_fname,hdr,iomode,formeig,Kvars,cwtimes,xmpi_comm_self)
 
- !case ("nc_tests")
+ case ("nc_test")
+
+   call nctk_test_mpiio(print_warning=.True.)
+   if (nctk_has_mpiio) then
+     call wrtout(std_out, "[OK] netcdf supports MPI-IO")
+   else
+     call wrtout(std_out, "[FAILED] netcdf does not support MPI-IO")
+     call xmpi_abort()
+   end if
+
+   new_fname = "__IOPROF__.nc"
+   NCF_CHECK(nctk_open_create(ncid, new_fname, comm))
+
+   ! define dimensions
+   nkibz = nprocs; nband = 100
+
+   ncerr = nctk_def_dims(ncid, [ &
+      nctkdim_t("nkibz", nkibz), &
+      nctkdim_t("nband", nband) &
+   ], defmode=.True.)
+   NCF_CHECK(ncerr)
+
+   ncerr = nctk_def_arrays(ncid, [ &
+     nctkarr_t("waves", "dp", "two, nband, nkibz"), &
+     nctkarr_t("compressed_waves", "dp", "two, nband, nkibz"), &
+     nctkarr_t("collective_waves", "dp", "two, nband, nkibz"), &
+     nctkarr_t("collective_compressed_waves", "dp", "two, nband, nkibz") &
+   ])
+
+   ! Compress waves to reduce size on disk.
+   NCF_CHECK(nf90_def_var_deflate(ncid, vid("compressed_waves"), shuffle=1, deflate=1, deflate_level=5))
+   NCF_CHECK(nctk_set_datamode(ncid))
+
+   ABI_CALLOC(read_waves, (2, nband))
+   ABI_CALLOC(waves, (2, nband))
+   waves(1, :) = [(one * ii, ii=1,nband)]
+   waves(2, :) = [(ten * ii, ii=1,nband)]
+   waves = waves * (my_rank + 1)
+
+   start3 = [1,1,my_rank+1]; count3 = [2,nband,1]
+
+   NCF_CHECK(nctk_set_collective(ncid, vid("waves"), independent=.True.))
+   do rank=0, nprocs-1
+     if (my_rank == rank) then
+       NCF_CHECK(nf90_put_var(ncid, vid("waves"), waves, start=start3, count=count3))
+     end if
+     call xmpi_barrier(comm)
+   end do
+
+   !NCF_CHECK(nctk_set_collective(ncid, vid("compressed_waves"), independent=.True.))
+   NCF_CHECK(nf90_put_var(ncid, vid("compressed_waves"), waves, start=start3, count=count3))
+
+   independent = .False.
+   NCF_CHECK(nctk_set_collective(ncid, vid("collective_waves"), independent=independent))
+   NCF_CHECK(nf90_put_var(ncid, vid("collective_waves"), waves, start=start3, count=count3))
+   NCF_CHECK(nctk_set_collective(ncid, vid("collective_compressed_waves"), independent=independent))
+   NCF_CHECK(nf90_put_var(ncid, vid("collective_compressed_waves"), waves, start=start3, count=count3))
+   NCF_CHECK(nf90_close(ncid))
+   call xmpi_barrier(comm)
+
+   ! Now read the data and performs consistency check.
+   NCF_CHECK(nctk_open_read(ncid, new_fname, comm))
+   test_ierr = 0
+
+   NCF_CHECK(nctk_set_collective(ncid, vid("waves"), independent=.True.))
+   do rank=0, nprocs-1
+     if (my_rank == rank) then
+       NCF_CHECK(nf90_get_var(ncid, vid("waves"), read_waves, start=start3, count=count3))
+       call check_waves("Reading waves", test_ierr)
+     end if
+     call xmpi_barrier(comm)
+   end do
+
+   NCF_CHECK(nf90_get_var(ncid, vid("compressed_waves"), read_waves, start=start3, count=count3))
+   call check_waves("Reading compressed waves", test_ierr)
+
+   NCF_CHECK(nctk_set_collective(ncid, vid("collective_waves"), independent=independent))
+   NCF_CHECK(nctk_set_collective(ncid, vid("collective_compressed_waves"), independent=independent))
+   NCF_CHECK(nf90_get_var(ncid, vid("collective_waves"), read_waves, start=start3, count=count3))
+   call check_waves("Reading collective_waves", test_ierr)
+   NCF_CHECK(nf90_get_var(ncid, vid("collective_compressed_waves"), read_waves, start=start3, count=count3))
+   call check_waves("Reading collective_compressed waves", test_ierr)
+
+   NCF_CHECK(nf90_close(ncid))
+   ABI_FREE(waves)
+   ABI_FREE(read_waves)
+   if (my_rank == master) call delete_file(new_fname, ierr)
+
+   ABI_CHECK_IEQ(test_ierr, 0, "test_ierr /= 0")
 
  case ("unittests")
    ! Unit tests.
@@ -225,12 +317,31 @@ program ioprof
    ABI_ERROR(sjoin("Unknown command:", command))
  end select
 
- !call wrtout(std_out,ch10//" Analysis completed.)
+ !call wrtout(std_out, ch10//" Analysis completed.)
 
  ! Writes information on file about the memory before ending mpi module, if memory profiling is enabled
  call abinit_doctor("__ioprof")
 
  100 call xmpi_end()
+
+contains
+ subroutine check_waves(header, ierr)
+   character(len=*),intent(in) :: header
+   integer,intent(inout) :: ierr
+   logical :: check
+   check = all(waves == read_waves)
+   if (check) then
+     write(std_out, "(3a,i0)")" [OK] ", trim(header), ", MPI rank: ", my_rank
+   else
+     write(std_out, "(3a,i0)")" [FAILED] ", trim(header), ", MPI rank: ", my_rank
+     ierr = ierr + 1
+   end if
+ end subroutine check_waves
+
+ integer function vid(var_name)
+   character(len=*),intent(in) :: var_name
+   vid = nctk_idname(ncid, var_name)
+ end function vid
 
  end program ioprof
 !!***
