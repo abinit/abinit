@@ -2353,8 +2353,8 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%dmft_solv=5
    if(dtsets(idtset)%ucrpa>0.and.dtsets(idtset)%usedmft==1) dtsets(idtset)%dmft_solv=0
    dtsets(idtset)%dmft_t2g=0
-   dtsets(idtset)%dmft_use_all_bands=1
-   dtsets(idtset)%dmft_use_full_chipsi=1
+   dtsets(idtset)%dmft_use_all_bands=0
+   dtsets(idtset)%dmft_use_full_chipsi=0
    dtsets(idtset)%dmft_wanrad=-1.0_dp
    dtsets(idtset)%dmft_x2my2d=0
    dtsets(idtset)%dmft_tolfreq=tol4

@@ -76,6 +76,8 @@ CONTAINS  !=====================================================================
 !!
 !! INPUTS
 !!  dmatpuopt= select expression for the density matrix
+!!  dmft_dc= option for the double-counting scheme in DMFT
+!!  dmft_proj(ntypat)= option for the choice of the DMFT radial orbital
 !!  exchmix= mixing factor for local exact-exchange
 !!  is_dfpt=true if we are running a DFPT calculation
 !!  jpawu(ntypat)= value of J
@@ -157,7 +159,7 @@ CONTAINS  !=====================================================================
 !arrays
  integer,ABI_CONTIGUOUS pointer :: indlmn(:,:)
  real(dp) :: euijkl_temp(3),euijkl_temp2(3),euijkl_dc(3)
- real(dp),allocatable :: ff(:),Fk(:),gg(:)
+ real(dp),allocatable :: ff(:),fk(:),gg(:)
  type(pawrad_type) :: pawrad_tmp
 ! *************************************************************************
 
@@ -814,27 +816,30 @@ CONTAINS  !=====================================================================
      end if
      
      if (use_dmft > 0) then
-            
-       write(message,*) "Build DMFT orbital for atom type",itypat
+         
+       call int2char4(itypat,tag)
+       ABI_CHECK((tag(1:1)/='#'),'Bug: string length too short!')
+   
+       write(message,*) &
+         & ch10,' =====  Build DMFT radial orbital for atom type ',tag(4-itypat/10:4),' ========'
        call wrtout(std_out,message,"COLL")
+       
        if (allocated(pawtab(itypat)%proj)) ABI_FREE(pawtab(itypat)%proj)
        if (allocated(pawtab(itypat)%proj2)) ABI_FREE(pawtab(itypat)%proj2)
        if (dmft_proj(itypat) > 0) then   ! read phi from PAW dataset 
-         write(message,*) "Taking atomic wavefunction",dmft_proj(itypat),"from PAW dataset"
+         write(message,'(2a,i1,a)') ch10," Using atomic wavefunction n°",dmft_proj(itypat)," from PAW dataset"
          call wrtout(std_out,message,"COLL")
          meshsz = pawrad(itypat)%int_meshsz  
          ABI_MALLOC(pawtab(itypat)%proj,(meshsz))
          pawtab(itypat)%proj(1:meshsz) = pawtab(itypat)%phi(1:meshsz,pawtab(itypat)%lnproju(dmft_proj(itypat)))
        else   ! read orbital from file
-         call int2char4(itypat,tag)
-         ABI_CHECK((tag(1:1)/='#'),'Bug: string length too short!')
-         write(message,*) "Reading wavefunction from file"
-         call wrtout(std_out,message,"COLL")
          tmpfil = 'proj_'//tag(4-itypat/10:4)
+         write(message,*) "Using wavefunction from file",tmpfil
+         call wrtout(std_out,message,"COLL")
          me = xmpi_comm_rank(xmpi_world)
          if (me == 0) inquire(file=trim(tmpfil),exist=lexist)
          call xmpi_bcast(lexist,0,xmpi_world,ierr)
-         if (.not.lexist) ABI_ERROR("File "//trim(tmpfil)//" does not exist !")
+         if (.not. lexist) ABI_ERROR("File "//trim(tmpfil)//" does not exist !")
          if (me == 0) then
            open(unit=505,file=trim(tmpfil),status='unknown',form='formatted')
            read(505,*,iostat=ierr) meshsz
@@ -861,7 +866,7 @@ CONTAINS  !=====================================================================
        int1 = sqrt(int1)  
        
        if (me == 0) then
-         open(unit=505,file="dmft_orbital",status="unknown",form="formatted")
+         open(unit=505,file="dmft_radial_orbital_normalized",status="unknown",form="formatted")
          do ir=1,meshsz
            write(505,*) pawrad_tmp%rad(ir),pawtab(itypat)%proj(ir)/int1
          end do
@@ -878,32 +883,32 @@ CONTAINS  !=====================================================================
                        & pawtab(itypat)%upawu,pawtab(itypat)%jpawu,lambda,eps)
          pawtab(itypat)%lambda = lambda
          pawtab(itypat)%eps = eps
-         ABI_MALLOC(Fk,(lcur+1))
+         ABI_MALLOC(fk,(lcur+1))
          ! Recompute Slater integrals 
-         call compute_slater(lcur,pawrad_tmp,pawtab(itypat)%proj2(:),meshsz,lambda,eps,Fk(:))
-         write(message,*) "Yukawa parameters for atom type:",itypat
+         call compute_slater(lcur,pawrad_tmp,pawtab(itypat)%proj2(:),meshsz,lambda,eps,fk(:))
+         write(message,*) "Yukawa parameters for atom type: ",trim(tag(4-itypat/10:4))
          call wrtout(std_out,message,"COLL")
          write(message,*) "Lambda:",lambda
          call wrtout(std_out,message,"COLL")
          write(message,*) "Epsilon:",eps
          call wrtout(std_out,message,"COLL")
-         write(message,*) "Slater integrals:",Fk(:)
+         write(message,*) "Slater integrals:",fk(:)
          call wrtout(std_out,message,"COLL")
 
          ! Recompute matrix elements with new Slater integrals
          f4of2 = -one
          f6of2 = -one
-         uh = Fk(1)
+         uh = fk(1)
 
          if (lcur == 1) then
-           jh = Fk(2) / dble(5.)
+           jh = fk(2) / dble(5.)
          else if (lcur == 2) then
-           f4of2 = Fk(3) / Fk(2)
-           jh = Fk(2) * (one + f4of2) / dble(14.)
+           f4of2 = fk(3) / fk(2)
+           jh = fk(2) * (one + f4of2) / dble(14.)
          else if (lcur == 3) then
-           f6of2 = Fk(4) / Fk(2)
-           f4of2 = Fk(3) / Fk(2)
-           jh = Fk(2) * (dble(286.)+dble(195.)*f4of2+dble(250.)*f6of2) / dble(6435.)
+           f6of2 = fk(4) / fk(2)
+           f4of2 = fk(3) / fk(2)
+           jh = fk(2) * (dble(286.)+dble(195.)*f4of2+dble(250.)*f6of2) / dble(6435.)
          else
            write(message,'(a,i0,2a)') ' lpawu=',lpawu,ch10, & 
              & ' lpawu not equal to 0 ,1 ,2 or 3 is not allowed'
