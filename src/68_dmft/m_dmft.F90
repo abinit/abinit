@@ -327,9 +327,14 @@ subroutine dmft_solve(cryst_struc,istep,dft_occup,mpi_enreg,paw_dmft,pawang,pawt
 !write(message,'(2a,i3,13x,a)') ch10,'   ===  Compute green function from self-energy'
  opt_fill_occnd = 0
  if (paw_dmft%dmft_entropy == 2 .and. dmft_iter == 1) opt_fill_occnd = 1
+ if (paw_dmft%lchipsiortho /= 1) then
+   call compute_green(green,paw_dmft,1,self,opt_self=1,opt_nonxsum=1)
+   call integrate_green(green,paw_dmft,3)
+ end if 
+
  call fermi_green(green,paw_dmft,self)
  call compute_green(green,paw_dmft,pawprtvol,self,opt_self=1,opt_nonxsum=1,opt_log=opt_log,opt_restart_moments=1)
- call integrate_green(green,paw_dmft,2,opt_fill_occnd=opt_fill_occnd)
+ call integrate_green(green,paw_dmft,0,opt_fill_occnd=opt_fill_occnd)
  if (pawprtvol > -100) call printocc_green(green,5,paw_dmft,3,chtype="Green_inputself")
 !== define weiss field only for the local quantities (opt_oper=2)
 !----------------------------------------------------------------------
@@ -395,7 +400,7 @@ subroutine dmft_solve(cryst_struc,istep,dft_occup,mpi_enreg,paw_dmft,pawang,pawt
 
 !  ==  Compute double counting from charge from green_solver
 !  ---------------------------------------------------------------------
-   if (green%has_charge_matlu_solver /= 2) green%charge_matlu_solver = green%charge_matlu
+   if (green%has_charge_matlu_solver /= 2) green%charge_matlu_solver(:,:) = green%charge_matlu(:,:)
    
    if (paw_dmft%dmft_solv >= 5) then
      call dc_self(green%charge_matlu_solver(:,:),self_new%hdc%matlu(:),hu(:),paw_dmft,pawtab(:),green%occup_tau%matlu(:))
@@ -455,9 +460,14 @@ subroutine dmft_solve(cryst_struc,istep,dft_occup,mpi_enreg,paw_dmft,pawang,pawt
    opt_fill_occnd = 0
    if (idmftloop == dmft_iter .or. (paw_dmft%dmft_entropy == 2 .and. idmftloop == dmft_iter-1)) &
         & opt_fill_occnd = 1
+   if (paw_dmft%lchipsiortho /= 1) then
+     call compute_green(green,paw_dmft,1,self,opt_self=1,opt_nonxsum=1)
+     call integrate_green(green,paw_dmft,3)
+   end if
+
    call fermi_green(green,paw_dmft,self)
    call compute_green(green,paw_dmft,1,self,opt_self=1,opt_nonxsum=1,opt_log=opt_log,opt_restart_moments=1)
-   call integrate_green(green,paw_dmft,3,opt_ksloc=3,opt_diff=1,opt_fill_occnd=opt_fill_occnd) !,opt_nonxsum=1)
+   call integrate_green(green,paw_dmft,0,opt_ksloc=3,opt_diff=1,opt_fill_occnd=opt_fill_occnd) !,opt_nonxsum=1)
    call printocc_green(green,5,paw_dmft,3,chtype="DMFT")
    if (paw_dmft%lchipsiortho == 1 .and. paw_dmft%dmft_prgn == 1) call local_ks_green(green,paw_dmft,prtopt=1)
 !  call printocc_green(green,9,paw_dmft,3,chtype="DMFT FULL")
@@ -730,7 +740,7 @@ subroutine impurity_solve(cryst_struc,green,hu,paw_dmft,pawang,pawtab,&
 !=======================================================================
 !== Treat data from HF QMC
 !=======================================================================
- if (abs(paw_dmft%dmft_solv) >= 5) then
+ if (abs(paw_dmft%dmft_solv) >= 4) then
 !  propagate qmc_shift (useful for compute_energy)
    !if(abs(paw_dmft%dmft_solv)==4) then
    !  self_new%qmc_shift(:)=self_old%qmc_shift(:)

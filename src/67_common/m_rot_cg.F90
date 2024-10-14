@@ -136,8 +136,8 @@ end subroutine diag_occ
 !! and use the resulting base to represent the wave functions.
 !!
 !! INPUTS
-!!   occ_nd(2, nband, nband) = matrix of non diagonal occupations for DMFT
-!!   cwavef(2, npw, nband) = fourier coefficient of wave functions for all bands
+!!   occ_nd(2,nband,nband) = matrix of non diagonal occupations for DMFT
+!!   cwavef(2,npw,nband) = fourier coefficient of wave functions for all bands
 !!   npw = number of G vectors computed in this iteration
 !!   nband = number of band to be processed
 !!   blocksize = size of the block for th LO.. algorithm
@@ -146,9 +146,8 @@ end subroutine diag_occ
 !!   first_bandc = index of the first correlated band
 !!   nbandc = number of bands correlated
 !!
-!!
 !! OUTPUT
-!!   occ_diag(2, nband) = diagonal occupation in the new band space
+!!   occ_diag(2,nband) = diagonal occupation in the new band space
 !!
 !! SIDE EFFECT
 !!   cwavef is rotated with the unitary matrix obtained from the diagonalisation

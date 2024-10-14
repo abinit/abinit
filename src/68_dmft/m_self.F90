@@ -347,7 +347,7 @@ subroutine print_self(self,prtdc,paw_dmft,prtopt)
  call wrtout(std_out,message,'COLL')
  call print_oper(self%oper(self%nw),1,paw_dmft,prtopt)
  if (prtdc == "print_dc") then
-   write(message,'(2a)') ch10,"  == The double counting hamiltonian is (diagonal part)  == "
+   write(message,'(2a)') ch10,"  == The double counting hamiltonian is  == "
    call wrtout(std_out,message,'COLL')
    call print_matlu(self%hdc%matlu(:),paw_dmft%natom,prtopt) !,opt_diag=1)
  end if ! prtdc
@@ -1353,7 +1353,7 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
          do im1=1,ndim
            do im=1,ndim
              icount = icount + 1
-             self%hdc%matlu(iatom)%mat(im,im,isppol) = buffer(icount)
+             self%hdc%matlu(iatom)%mat(im,im1,isppol) = buffer(icount)
            end do ! im
          end do ! im1
        end do ! isppol

@@ -431,7 +431,7 @@ subroutine print_matlu(matlu,natom,prtopt,opt_diag,opt_ab_out,opt_exp,argout,com
 !                  call wrtout(arg_out,  message,mode_paral)
 !                  write(message,'(5x,20e20.14)') (REAL(1.d0/sqrt(matlu(iatom)%mat(m,m,isppol,ispinor,ispinor1))),m=1,2*lpawu+1)
                  else
-                   write(message,'(5x,20f15.10)') (dble(matlu(iatom)%mat(im1+(ispinor-1)*ndim,im+(ispinor1-1)*ndim,isppol)),im=1,ndim)
+                   write(message,'(5x,20f10.5)') (dble(matlu(iatom)%mat(im1+(ispinor-1)*ndim,im+(ispinor1-1)*ndim,isppol)),im=1,ndim)
                  end if ! opt_exp
                else
                  if (present(opt_exp)) then
@@ -441,18 +441,18 @@ subroutine print_matlu(matlu,natom,prtopt,opt_diag,opt_ab_out,opt_exp,argout,com
                      write(message,'(5x,14(2e14.4,2x))') ((matlu(iatom)%mat(im1+(ispinor-1)*ndim,im+(ispinor1-1)*ndim,isppol)),im=1,ndim)
                    end if ! opt_exp=2
                  else
-                   write(message,'(5x,14(2f15.10,2x))') ((matlu(iatom)%mat(im1+(ispinor-1)*ndim,im+(ispinor1-1)*ndim,isppol)),im=1,ndim)
+                   write(message,'(5x,14(2f9.5,2x))') ((matlu(iatom)%mat(im1+(ispinor-1)*ndim,im+(ispinor1-1)*ndim,isppol)),im=1,ndim)
                  end if ! opt_exp
 !&               write(message,'(5x,14(2f15.11,2x))')((matlu(iatom)%mat(m1,m,isppol,ispinor,ispinor1)),m=1,2*lpawu+1)
                end if ! testcmplx
              else if (optdiag == -1) then
-               write(message,'(5x,14(2f15.10,2x))') ((matlu(iatom)%mat(im1+(ispinor-1)*ndim,im+(ispinor1-1)*ndim,isppol)),im=1,ndim)
+               write(message,'(5x,14(2f10.5,2x))') ((matlu(iatom)%mat(im1+(ispinor-1)*ndim,im+(ispinor1-1)*ndim,isppol)),im=1,ndim)
              end if ! optdiag
              call wrtout(arg_out,message,mode_paral)
            end do ! im1
          else if (optdiag >= 1) then
-           if (.not. testcmplx) write(message,'(5x,20f15.10)') (dble(matlu(iatom)%mat(im+(ispinor-1)*ndim,im+(ispinor1-1)*ndim,isppol)),im=1,ndim)
-           if (testcmplx) write(message,'(5x,14(2f15.10,2x))') ((matlu(iatom)%mat(im+(ispinor-1)*ndim,im+(ispinor1-1)*ndim,isppol)),im=1,ndim)
+           if (.not. testcmplx) write(message,'(5x,20f10.5)') (dble(matlu(iatom)%mat(im+(ispinor-1)*ndim,im+(ispinor1-1)*ndim,isppol)),im=1,ndim)
+           if (testcmplx) write(message,'(5x,14(2f9.5,2x))') ((matlu(iatom)%mat(im+(ispinor-1)*ndim,im+(ispinor1-1)*ndim,isppol)),im=1,ndim)
 !            write(std_out,'(5x,14(2f9.5,2x))')((matlu(iatom)%mat(m1,m,isppol,ispinor,ispinor1)),m=1,2*lpawu+1)
            call wrtout(arg_out,message,mode_paral)
          end if ! optdiag
@@ -473,7 +473,7 @@ subroutine print_matlu(matlu,natom,prtopt,opt_diag,opt_ab_out,opt_exp,argout,com
            write(message,'(a,10x,a,a)') ch10,'-- spin components',dspinm(ispinor1,ispinor)
            call wrtout(arg_out,message,mode_paral)
            do im1=1,ndim
-             write(message,'(5x,14(2f15.10,2x))') ((mat_nmrep(im1+(ispinor1-1)*ndim,im+(ispinor-1)*ndim)),im=1,ndim)
+             write(message,'(5x,14(2f9.5,2x))') ((mat_nmrep(im1+(ispinor1-1)*ndim,im+(ispinor-1)*ndim)),im=1,ndim)
              call wrtout(arg_out,message,mode_paral)
            end do ! im1
          end do ! ispinor1
@@ -1065,7 +1065,7 @@ end subroutine add_matlu
    lpawu = matlu(iatom)%lpawu
    if (lpawu == -1) cycle
    
-   !traceloc(:,iatom) = zero
+   traceloc(:,iatom) = zero
    ndim = nspinor * (2*lpawu+1)  
    write(message,'(2a,i4)') ch10,'   -------> For Correlated Atom',iatom
    if (.not. present(itau)) call wrtout(std_out,message,'COLL')
