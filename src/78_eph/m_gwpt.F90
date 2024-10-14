@@ -1013,7 +1013,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
               else
                 ctmp_gwpc = sum(GWPC_CONJG(ur_mkq(:,m_kq)) * ur_nk(:,n_k) * cvxc1_qq_ptr(:,spin,imyp)) / nfftf
               end if
-              ipc = gqk%my_iperts(imyp)
+              ipc = gqk%my_pertcases(imyp)
               gxc_atm(1, m_kq, n_k, ipc) = real(ctmp_gwpc)
               gxc_atm(2, m_kq, n_k, ipc) = aimag(ctmp_gwpc)
             end do ! imyp

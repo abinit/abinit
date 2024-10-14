@@ -226,9 +226,9 @@ subroutine berry_curvature(gstore, dtset, dtfil)
 
            ! Loop over perturbations and accumulate.
            do my_ip1=1,gqk%my_npert
-             ipc1 = gqk%my_iperts(my_ip1)
+             ipc1 = gqk%my_pertcases(my_ip1)
              do my_ip2=1,gqk%my_npert
-               ipc2 = gqk%my_iperts(my_ip2)
+               ipc2 = gqk%my_pertcases(my_ip2)
                ! my_g(my_npert, nb, my_nq, nb, my_nk)
 
                ! 1st term

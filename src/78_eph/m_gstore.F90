@@ -271,11 +271,10 @@ type, public :: gqk_t
   ! v_{m, n,k} for the k in the IBZ
   ! Allocated if gstore%with_vk in (1, 2)
 
-  integer,allocatable :: my_iperts(:)
+  integer,allocatable :: my_pertcases(:)
   ! (my_npert)
   ! List of perturbation indices treated by this MPI proc.
   ! Contiguous indices.
-  ! TODO: Change name as it's a bit ambigous: my_pertcase?
 
   ! FIXME: I don't remember why I decided to have my_npert as first dimension
   ! now it seems much more more natural to me to have
@@ -1371,8 +1370,8 @@ subroutine gstore_set_mpi_grid__(gstore, gstore_cplex, nproc_spin, comm_spin)
 #endif
 
    ! Distribute perturbations inside pert_comm using block distribution.
-   call xmpi_split_block(gqk%natom3, gqk%pert_comm%value, gqk%my_npert, gqk%my_iperts)
-   gqk%my_pert_start = gqk%my_iperts(1)
+   call xmpi_split_block(gqk%natom3, gqk%pert_comm%value, gqk%my_npert, gqk%my_pertcases)
+   gqk%my_pert_start = gqk%my_pertcases(1)
  end do ! my_is
 
  if (my_rank == master) call gstore%print([std_out, ab_out])
@@ -2465,8 +2464,8 @@ subroutine gstore_calc_my_phonons(gstore, store_phdispl)
      call gqk%myqpt(my_iq, gstore, weight_q, qpt)
      call gstore%ifc%fourq(cryst, qpt, phfrq, displ_cart)
 
-     gqk%my_wnuq(:, my_iq) = phfrq(gqk%my_iperts(:))
-     if (store_phdispl) gqk%my_displ_cart(:,:,:,:,my_iq) = displ_cart(:,:,:,gqk%my_iperts(:))
+     gqk%my_wnuq(:, my_iq) = phfrq(gqk%my_pertcases(:))
+     if (store_phdispl) gqk%my_displ_cart(:,:,:,:,my_iq) = displ_cart(:,:,:,gqk%my_pertcases(:))
    end do
 
    ! Note that the computation is replicated across the perturbation communicator.
@@ -2996,7 +2995,7 @@ subroutine gqk_free(gqk)
  ABI_SFREE(gqk%my_displ_cart)
  ABI_SFREE(gqk%my_g)
  ABI_SFREE(gqk%my_g2)
- ABI_SFREE(gqk%my_iperts)
+ ABI_SFREE(gqk%my_pertcases)
  ABI_SFREE(gqk%vk_cart_ibz)
  ABI_SFREE(gqk%vkmat_cart_ibz)
 
@@ -3095,7 +3094,7 @@ subroutine gstore_set_perts_distrib(gstore, cryst, dvdb, my_npert)
      my_npert = gqk%my_npert
      call ephtk_set_pertables(cryst%natom, my_npert, pert_table, my_pinfo, gqk%pert_comm%value)
      call dvdb%set_pert_distrib(my_npert, cryst%natom * 3, my_pinfo, pert_table, gqk%pert_comm%value)
-     ABI_CHECK(all(my_pinfo(3, :) == gqk%my_iperts), "my_pinfo(3, :) != gqk%my_iperts")
+     ABI_CHECK(all(my_pinfo(3, :) == gqk%my_pertcases), "my_pinfo(3, :) != gqk%my_pertcases")
 
      ABI_FREE(my_pinfo)
      ABI_FREE(pert_table)
@@ -4186,8 +4185,8 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, if
      qq_ibz = gstore%qibz(:, iq_ibz)
      call pheigvec_rotate(cryst, qq_ibz, isym_q, trev_q, pheigvec_cart_ibz(:,:,:,:,iq_ibz), pheigvec_cart_qbz, displ_cart_qbz)
 
-     gqk%my_wnuq(:, my_iq) = phfreqs_ibz(gqk%my_iperts(:), iq_ibz)
-     if (store_phdispl) gqk%my_displ_cart(:,:,:,:,my_iq) = displ_cart_qbz(:,:,:,gqk%my_iperts(:))
+     gqk%my_wnuq(:, my_iq) = phfreqs_ibz(gqk%my_pertcases(:), iq_ibz)
+     if (store_phdispl) gqk%my_displ_cart(:,:,:,:,my_iq) = displ_cart_qbz(:,:,:,gqk%my_pertcases(:))
    end do ! my_iq
  end do ! my_is
 
@@ -4230,7 +4229,7 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, if
         do my_ik=1,gqk%my_nk
           ik_glob = my_ik + gqk%my_kstart - 1
           do my_ip=1,gqk%my_npert
-            ipert = gqk%my_iperts(my_ip)
+            ipert = gqk%my_pertcases(my_ip)
             slice_bb = gwork_q(:,:,:, ipert, ik_glob)
 
             ! Put data in the right place and handle conversion g --> |g|^2
