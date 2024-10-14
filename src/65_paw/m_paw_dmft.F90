@@ -573,7 +573,7 @@ MODULE m_paw_dmft
   complex(dpc), allocatable :: zarot(:,:,:,:)
   ! For symmetrization.
 
-  integer, pointer :: dmft_nominal(:) => null()
+  integer, ABI_CONTIGUOUS pointer :: dmft_nominal(:) => null()
   ! Nominal occupancies for each atom (for nominal double counting)
 
   integer, pointer :: indsym(:,:) => null()
@@ -582,25 +582,25 @@ MODULE m_paw_dmft
   integer, pointer :: int_meshsz(:) => null()
   ! Integration radius for the PAW sphere
 
-  integer, pointer :: nband(:) => null()
+  integer, ABI_CONTIGUOUS pointer :: nband(:) => null()
   ! Number of bands for each k-point and polarization
   
-  integer, pointer :: npwarr(:) => null()
+  integer, ABI_CONTIGUOUS pointer :: npwarr(:) => null()
   ! Number of plane waves on current process for each k-point
 
-  integer, pointer :: typat(:) => null()
+  integer, ABI_CONTIGUOUS pointer :: typat(:) => null()
   ! Type of each atom
 
-  real(dp), pointer :: dmft_shiftself(:) => null()
+  real(dp), ABI_CONTIGUOUS pointer :: dmft_shiftself(:) => null()
   ! Initial shift of the self-energy for each atom
   
-  real(dp), pointer :: eigen(:) => null()
+  real(dp), ABI_CONTIGUOUS pointer :: eigen(:) => null()
   ! DFT eigenvalues
 
-  real(dp), pointer :: fixed_self(:,:,:,:) => null()
+  real(dp), ABI_CONTIGUOUS pointer :: fixed_self(:,:,:,:) => null()
   ! Fixed self-energy (only used when use_fixed_self > 0)
   
-  real(dp), pointer :: wtk(:) => null()
+  real(dp), ABI_CONTIGUOUS pointer :: wtk(:) => null()
   ! Weights for each k-point
   
   type(CtqmcInterface), allocatable :: hybrid(:)
@@ -678,9 +678,9 @@ subroutine init_sc_dmft(dtset,paw_dmft,dmatpawu,fnamei,fnametmp_app,gprimd,kg,mp
 ! arrays
  real(dp), optional, intent(in) :: occ(:)
  integer, target, optional, intent(in) :: npwarr(:)
- integer,  contiguous, optional, intent(in) :: kg(:,:)
- real(dp), contiguous, optional, intent(in) :: gprimd(:,:),rprimd(:,:),xred(:,:),ylm(:,:)
- real(dp), contiguous, target, optional, intent(in) :: dmatpawu(:,:,:,:)
+ integer, ABI_CONTIGUOUS optional, intent(in) :: kg(:,:)
+ real(dp), ABI_CONTIGUOUS optional, intent(in) :: gprimd(:,:),rprimd(:,:),xred(:,:),ylm(:,:)
+ real(dp), ABI_CONTIGUOUS target, optional, intent(in) :: dmatpawu(:,:,:,:)
  character(len=fnlen), optional, intent(in) :: fnamei,fnametmp_app
 !Local variables ------------------------------------
  integer :: bdtot_index,dmft_solv,dmftbandi,dmftbandf,fac,grid_unt,i
@@ -2699,7 +2699,7 @@ subroutine init_paral_dmft(paw_dmft,distrib,nfreq)
      distrib%nw_mem_kptparal(irank) = nfreq_proc
    end do ! irank 
   
-   distrib%me_kpt  = myproc/nproc_freq
+   distrib%me_kpt  = myproc / nproc_freq
    distrib%me_freq = mod(myproc,nproc_freq)
    distrib%shiftk  = distrib%me_kpt
 
@@ -2712,7 +2712,7 @@ subroutine init_paral_dmft(paw_dmft,distrib,nfreq)
 
    call MPI_COMM_SPLIT(spacecomm,distrib%me_kpt,distrib%me_freq,distrib%comm_freq,ierr)
 
-   if (myproc >= nkpt*nproc_freq) distrib%me_kpt = myproc/nproc_freq
+   if (myproc >= nkpt*nproc_freq) distrib%me_kpt = myproc / nproc_freq
 
  end if ! nproc_freq<=1
 
