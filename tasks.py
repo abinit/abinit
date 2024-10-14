@@ -620,7 +620,7 @@ $ git merge --abort
 
 
 @task
-def watchdog(ctx, jobs="auto", sleep_time = 5):
+def watchdog(ctx, jobs="auto", sleep_time=5):
     """
     Start watchdog service to watch F90 files and execute `make` when changes are detected.
     """

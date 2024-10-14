@@ -162,7 +162,7 @@ program ioprof
    NCF_CHECK(nctk_open_create(ncid, new_filename, comm))
 
    ! Define dimensions.
-   nkibz = nprocs; nband = 100
+   nkibz = nprocs; nband = 101
 
    ncerr = nctk_def_dims(ncid, [ &
       nctkdim_t("nkibz", nkibz), &
@@ -191,10 +191,11 @@ program ioprof
    waves = waves * (my_rank + 1)
    start3 = [1,1,my_rank+1]; count3 = [2,nband,1]
 
-   ! Write waves in indipendent mode.
+   call wrtout(std_out, "Writing data in indipendent mode...")
    NCF_CHECK(nctk_set_collective(ncid, vid("waves"), independent=.True.))
    do rank=0, nprocs-1
      if (my_rank == rank) then
+       call wrtout(std_out, sjoin("MPI rank:", itoa(my_rank)))
        NCF_CHECK(nf90_put_var(ncid, vid("waves"), waves, start=start3, count=count3))
      end if
      call xmpi_barrier(comm)
@@ -202,9 +203,11 @@ program ioprof
 
    ! It seems indipendent mode cannot be used with deflated variables.
    !NCF_CHECK(nctk_set_collective(ncid, vid("compressed_waves"), independent=.True.))
+   call wrtout(std_out, "Writing compressed data in indipendent mode...")
    NCF_CHECK(nf90_put_var(ncid, vid("compressed_waves"), waves, start=start3, count=count3))
 
    ! Write variables in collective mode.
+   call wrtout(std_out, "Writing data in collective mode...")
    independent = .False.
    NCF_CHECK(nctk_set_collective(ncid, vid("collective_waves"), independent=independent))
    NCF_CHECK(nf90_put_var(ncid, vid("collective_waves"), waves, start=start3, count=count3))
@@ -217,10 +220,11 @@ program ioprof
    NCF_CHECK(nctk_open_read(ncid, new_filename, comm))
    test_ierr = 0
 
-   ! Read waves in indipendent mode.
+   call wrtout(std_out, "Reading data in indipendent mode...")
    NCF_CHECK(nctk_set_collective(ncid, vid("waves"), independent=.True.))
    do rank=0, nprocs-1
      if (my_rank == rank) then
+       call wrtout(std_out, sjoin("MPI rank:", itoa(my_rank)))
        NCF_CHECK(nf90_get_var(ncid, vid("waves"), read_waves, start=start3, count=count3))
        call check_waves("Reading waves", test_ierr)
        NCF_CHECK(nf90_get_var(ncid, vid("compressed_waves"), read_waves, start=start3, count=count3))
@@ -229,14 +233,16 @@ program ioprof
      call xmpi_barrier(comm)
    end do
 
+   call wrtout(std_out, "Reading compressed data in indipendent mode...")
    NCF_CHECK(nf90_get_var(ncid, vid("compressed_waves"), read_waves, start=start3, count=count3))
    call check_waves("Reading compressed waves", test_ierr)
 
-   ! Read waves in collective mode.
+   call wrtout(std_out, "Reading data in collective mode...")
    NCF_CHECK(nctk_set_collective(ncid, vid("collective_waves"), independent=independent))
    NCF_CHECK(nf90_get_var(ncid, vid("collective_waves"), read_waves, start=start3, count=count3))
    call check_waves("Reading collective_waves", test_ierr)
 
+   call wrtout(std_out, "Reading compressed data in collective mode...")
    NCF_CHECK(nctk_set_collective(ncid, vid("collective_compressed_waves"), independent=independent))
    NCF_CHECK(nf90_get_var(ncid, vid("collective_compressed_waves"), read_waves, start=start3, count=count3))
    call check_waves("Reading collective_compressed waves", test_ierr)
@@ -267,7 +273,7 @@ program ioprof
        do io=1,size(io_modes)
          iomode = io_modes(io)
          new_filename = "NEW_WFK"
-         if (iomode==IO_MODE_ETSF) new_filename = "NEW_WFK.nc"
+         if (iomode == IO_MODE_ETSF) new_filename = "NEW_WFK.nc"
          if (file_exists(new_filename)) call delete_file(new_filename,ierr)
 
          ! TODO
@@ -299,7 +305,7 @@ program ioprof
 
          ABI_CHECK(ierr == 0, sjoin("wfk_check_wfkfile returned ierr ",itoa(ierr)))
 
-         ! If not netcdf file, try to read the file with the other mode that is compatible with it.
+         ! If not a netcdf file, try to read the file with the other mode that is compatible with it.
          check_iomode = -100
          if (iomode == IO_MODE_FORTRAN) check_iomode = IO_MODE_MPI
          if (iomode == IO_MODE_MPI)     check_iomode = IO_MODE_FORTRAN

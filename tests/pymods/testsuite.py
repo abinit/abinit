@@ -4086,7 +4086,7 @@ class AbinitTestSuite(object):
             # Create the HTML index.
             DNS = {
                 "self": self,
-                "runner": job_runner,
+                "job_runner": job_runner,
                 "user_name": username,
                 "hostname": gethostname(),
                 "test_headings": ['ID', 'Status', 'run_etime (s)', 'tot_etime (s)'],
