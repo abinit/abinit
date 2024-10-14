@@ -766,12 +766,6 @@ subroutine init_sc_dmft(dtset,paw_dmft,dmatpawu,fnamei,fnametmp_app,gprimd,kg,mp
 !=======================
 !==  Check sym
 !=======================
- do isym=1,nsym
-   if (dtset%symafm(isym) < 0) then
-     message = 'symafm negative is not implemented in DMFT '
-     ABI_ERROR(message)
-   end if
- end do ! isym
  
  if (dmft_solv == 0) then
    do itypat=1,ntypat
@@ -863,25 +857,25 @@ subroutine init_sc_dmft(dtset,paw_dmft,dmatpawu,fnamei,fnametmp_app,gprimd,kg,mp
  call wrtout(ab_out,message,'COLL')
 
  if (dmft_solv == 0) then
-   write(message,'(a,a)') ch10,' DMFT check: no solver and U=J=0'
+   write(message,'(2a)') ch10,' DMFT check: no solver and U=J=0'
  else if (dmft_solv == 1) then
-   write(message,'(a,a)') ch10,' DMFT check: static solver'
+   write(message,'(2a)') ch10,' DMFT check: static solver'
  else if (dmft_solv == -1) then
-   write(message,'(a,a)') ch10,' DMFT check: static solver without renormalization of projectors: should recover DFT+U'
+   write(message,'(2a)') ch10,' DMFT check: static solver without renormalization of projectors: should recover DFT+U'
  else if (dmft_solv == 2) then
-   write(message,'(a,a)') ch10,' DMFT uses the Hubbard one solver'
+   write(message,'(2a)') ch10,' DMFT uses the Hubbard one solver'
  else if (dmft_solv == 4) then
-   write(message,'(a,a)') ch10,' DMFT uses the Hirsch Fye solver'
+   write(message,'(2a)') ch10,' DMFT uses the Hirsch Fye solver'
  else if (dmft_solv == 5) then
-   write(message,'(a,a)') ch10,' DMFT uses the Continuous Time Quantum Monte Carlo solver of ABINIT'
+   write(message,'(2a)') ch10,' DMFT uses the Continuous Time Quantum Monte Carlo solver of ABINIT'
  else if (dmft_solv == 6) then
-   write(message,'(a,a)') ch10,' DMFT uses the Continuous Time Quantum Monte Carlo solver of TRIQS &
+   write(message,'(2a)') ch10,' DMFT uses the Continuous Time Quantum Monte Carlo solver of TRIQS &
      & (with density density interactions)'
  else if (dmft_solv == 7) then
-   write(message,'(a,a)') ch10,' DMFT uses the Continuous Time Quantum Monte Carlo solver of TRIQS &
+   write(message,'(2a)') ch10,' DMFT uses the Continuous Time Quantum Monte Carlo solver of TRIQS &
      & (with rotationally invariant interactions)'
  else if (dmft_solv == 9) then
-   write(message,'(a,a)') ch10,' DMFT uses the python invocation of TRIQS, for which you need to &
+   write(message,'(2a)') ch10,' DMFT uses the python invocation of TRIQS, for which you need to &
      & give your personal script'
  end if ! dmft_solv
  call wrtout(std_out,message,'COLL')
@@ -986,7 +980,7 @@ subroutine init_sc_dmft(dtset,paw_dmft,dmatpawu,fnamei,fnametmp_app,gprimd,kg,mp
  paw_dmft%dmftctqmc_config = dtset%dmftctqmc_config
 
  if (dmft_solv == 5 .or. dmft_solv >= 8) then
-   write(message,'(a,a,i6)') ch10,&
+   write(message,'(2a,i6)') ch10,&
      & '=> Seed for CT-QMC inside DMFT is dmftqmc_seed=',paw_dmft%dmftqmc_seed
    call wrtout(std_out,message,'COLL')
  end if 
@@ -1121,7 +1115,7 @@ subroutine init_sc_dmft(dtset,paw_dmft,dmatpawu,fnamei,fnametmp_app,gprimd,kg,mp
       ! end if
      write(message,'(3a)') ch10,"  == Read grid frequency in file ",trim(tmpfil)
      call wrtout(std_out,message,'COLL')
-     write(message,'(a,a,a,i4)') 'opened file : ',trim(tmpfil),' unit',grid_unt
+     write(message,'(3a,i4)') 'opened file : ',trim(tmpfil),' unit',grid_unt
      call wrtout(std_out,message,'COLL')
      read(grid_unt,*,iostat=ioerr) ngrid
      ABI_MALLOC(paw_dmft%omega_r,(ngrid))
@@ -1398,7 +1392,7 @@ end subroutine init_sc_dmft
 !! G.Kotliar,  S.Y.Savrasov, K.Haule, V.S.Oudovenko, O.Parcollet, C.A.Marianetti.
 !!
 
-subroutine init_dmft(cryst_struc,fermie_dft,paw_dmft,ucrpa)
+subroutine init_dmft(cryst_struc,dtset,fermie_dft,paw_dmft)
 
  !use m_splines
  !use m_CtqmcInterface
@@ -1409,11 +1403,11 @@ subroutine init_dmft(cryst_struc,fermie_dft,paw_dmft,ucrpa)
 !Arguments ------------------------------------
 !scalars
  !integer, intent(in)  :: nspinor
- integer, intent(in) :: ucrpa
+! integer, intent(in) :: ucrpa
  real(dp), intent(in) :: fermie_dft
 !type
  !type(pseudopotential_type), intent(in) :: psps
- !type(dataset_type), intent(in) :: dtset
+ type(dataset_type), intent(in) :: dtset
  !type(pawtab_type), intent(in)  :: pawtab(psps%ntypat*psps%usepaw)
  type(paw_dmft_type), intent(inout) :: paw_dmft
  type(crystal_t), target, intent(in) :: cryst_struc
@@ -1434,16 +1428,23 @@ subroutine init_dmft(cryst_struc,fermie_dft,paw_dmft,ucrpa)
 ! *********************************************************************
  
  !nsppol = dtset%nsppol
- if (ucrpa == 0) then
+ if (dtset%ucrpa == 0) then
    write(message,'(6a)') ch10,' ====================================', &
                        & ch10,' =====  Start of DMFT calculation', &
                        & ch10,' ===================================='
- else if (ucrpa > 0) then
+ else if (dtset%ucrpa > 0) then
    write(message,'(6a)') ch10,' ============================================================', &
                        & ch10,' =====  Initialize construction of Wannier in DMFT routines',&
                        & ch10,' ============================================================'
  end if ! ucrpa
  call wrtout(std_out,message,'COLL')
+
+ do isym=1,paw_dmft%nsym
+   if (dtset%symafm(isym) < 0) then
+     message = 'symafm negative is not implemented in DMFT '
+     ABI_ERROR(message)
+   end if
+ end do ! isym
 
  paw_dmft%indsym => cryst_struc%indsym(4,1:paw_dmft%nsym,1:paw_dmft%natom)
  if (paw_dmft%nspinor == 2) then
@@ -1923,7 +1924,7 @@ subroutine construct_nwlo_dmft(paw_dmft)
 !  ------------ IMPOSE LINEAR MESH for w < 2*w_n=(2*l-1)pi/beta
 !         Check variables (Already done in chkinp if dmft_solv==5)
    if (nlin > nwlo) then
-     write(message,'(a,a,i6)') ch10, &
+     write(message,'(2a,i6)') ch10, &
        & ' ERROR: dmft_nwlo has to be at least equal to 2xdmftqmc_l :',2*paw_dmft%dmftqmc_l
      ABI_ERROR(message)
    end if
@@ -1951,7 +1952,7 @@ subroutine construct_nwlo_dmft(paw_dmft)
        omega_lo_tmp(ifreq+nlin) = (dble(ifreq2)*two+one) * pi * temp
 
        if ((ifreq2+1) > nwli) then
-         write(message,'(a,a,i8)') ch10,&
+         write(message,'(2a,i8)') ch10,&
           & ' BUG: init_dmft,   dimension  of array select_log is about to be overflown',(ifreq2+1)
          ABI_BUG(message)
        end if
@@ -2201,7 +2202,7 @@ subroutine destroy_sc_dmft(paw_dmft)
  if ((.not. allocated(paw_dmft%occnd) .or. .not. allocated(paw_dmft%band_in) &
    & .or. .not. allocated(paw_dmft%include_bands) .or. .not. allocated(paw_dmft%exclude_bands)) &
    & .and. paw_dmft%use_dmft == 1) then
-   write(message,'(a,a,a)') &
+   write(message,'(3a)') &
      & '  an array is not allocated and is not deallocated with use_dmft==1 ',ch10, &
      & '  Action : check the code'
    ABI_WARNING(message)
@@ -2376,7 +2377,7 @@ subroutine print_sc_dmft(paw_dmft,pawprtvol)
      write(message,*) "include_bands",iband,paw_dmft%include_bands(iband)
      call wrtout(std_out,message,'COLL')
    end do ! iband
-   write(message,'(a,a,i4,a)' ) ch10,&
+   write(message,'(2a,i4,a)' ) ch10,&
       & 'The',paw_dmft%mband-paw_dmft%dmftbandf+paw_dmft%dmftbandi-1,&
       & '  Following bands are excluded from the DMFT calculation  '
    call wrtout(std_out,message,'COLL')

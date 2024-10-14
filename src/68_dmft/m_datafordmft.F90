@@ -65,38 +65,34 @@ contains
 !! datafordmft
 !!
 !! FUNCTION
-!!  Compute psichi (and print some data for check)
+!!  Compute chipsi (and print some data for check)
 !!
 !! INPUTS
+!!  cg(2,mpw*dtset%nspinor*mband*mkmem*nsppol)=planewave coefficients of wavefunctions.
+!!  cprj(natom,nspinor*mband*mkmem*nsppol)= <p_lmn|Cnk> coefficients for each WF |Cnk>
+!!                                          and each |p_lmn> non-local projector
 !!  cryst_struc <type(crystal_t)>=crystal structure data
 !!        -gprimd(3,3)=dimensional reciprocal space primitive translations
 !!        -indsym(4,nsym,natom)=indirect indexing array for atom labels
 !!        -symrec(3,3,nsym)=symmetry operations in reciprocal space
 !!        - nsym= number of symetry operations
-!!  cprj(natom,nspinor*mband*mkmem*nsppol)= <p_lmn|Cnk> coefficients for each WF |Cnk>
-!!                                          and each |p_lmn> non-local projector
+!!  dft_occup <type(oper_type)> = DFT occupations of the correlated orbitals
 !!  dimcprj(natom) = dimension for cprj
 !!  dtset <type(dataset_type)>=all input variables for this dataset
 !!  eigen(mband*nkpt*nsppol)=array for holding eigenvalues (hartree)
-!!  fermie= Fermi energy
-!!  dft_occup <type(oper_type)> = occupations in the correlated orbitals in DFT
-!!  mband=maximum number of bands
-!!  mkmem =number of k points treated by this node
+!!  mband_cprj=number of bands on each process of the band communicator
 !!  mpi_enreg=information about MPI parallelization
-!!  nkpt=number of k points.
 !!  my_nspinor=number of spinorial components of the wavefunctions (on current proc)
-!!  nsppol=1 for unpolarized, 2 for spin-polarized
 !!  occ(mband*nkpt*nsppol) = occupancies of KS states.
-!!  paw_dmft  <type(paw_dmft_type)>= paw+dmft related data
+!!  paw_dmft <type(paw_dmft_type)>= paw+dmft related data
 !!  paw_ij(natom*usepaw) <type(paw_ij_type)>=paw arrays given on (i,j) channels
-!!  pawang <type(pawang)>=paw angular mesh and related data
 !!  pawtab(ntypat*usepaw) <type(pawtab_type)>=paw tabulated starting data
-!!  psps <type(pseudopotential_type)>=variables related to pseudopotentials
-!!  unpaw = file number for cprj
+!!  usecprj=1 if cprj datastructure is stored in memory
+!!  nbandkss=number of bands in the KSS file
 !!
 !! OUTPUT
-!!  paw_dmft%psichi(nsppol,nkpt,mband,my_nspinor,dtset%natom,(2*maxlpawu+1))): projections <Psi|chi>
-!!  paw_dmft%eigen(paw_dmft%nsppol,paw_dmft%nkpt,paw_dmft%mband)
+!!  paw_dmft%chipsi((2*maxlpawu+1)*nspinor,mbandc,nkpt,nsppol,natom): projections <Chi|Psi>
+!!  paw_dmft%eigen(paw_dmft%mbandc,paw_dmft%nkpt,paw_dmft%nsppol)
 !!
 !! SIDE EFFECTS
 !!  (only writing, printing)
@@ -188,7 +184,7 @@ subroutine datafordmft(cg,cprj,cryst_struc,dft_occup,dimcprj,dtset,eigen,mband_c
 
 !----------------------------------- MPI-------------------------------------
 
-!Init parallelism
+! Init parallelism
  !spaceComm=mpi_enreg%comm_cell
  !if(mpi_enreg%paral_kgb==1) spaceComm=mpi_enreg%comm_kpt
  !me=mpi_enreg%me_kpt
@@ -233,11 +229,11 @@ subroutine datafordmft(cg,cprj,cryst_struc,dft_occup,dimcprj,dtset,eigen,mband_c
  write(message,'(2a)') ch10,'  == Prepare data for DMFT calculation  '
  call wrtout(std_out,message,'COLL')
  if (abs(pawprtvol) >= 3) then
-   write(message,'(a,a)') ch10,'---------------------------------------------------------------'
+   write(message,'(2a)') ch10,'---------------------------------------------------------------'
 !  call wrtout(ab_out,message,'COLL')
 !  call wrtout(std_out,  message,'COLL')
    call wrtout(std_out,message,'COLL')
-   write(message,'(a,a,a,a,a,a,a,a,a,a,a,a)') ch10,'  Print useful data (as a check)',ch10,&
+   write(message,'(12a)') ch10,'  Print useful data (as a check)',ch10,&
     & '  - Overlap of KS wfc with atomic orbital inside sphere',ch10,&
     & '  - Eigenvalues',ch10,&
     & '  - Weights of k-points',ch10,&
@@ -246,7 +242,7 @@ subroutine datafordmft(cg,cprj,cryst_struc,dft_occup,dimcprj,dtset,eigen,mband_c
 !  call wrtout(ab_out,message,'COLL')
 !  call wrtout(std_out,  message,'COLL')
    call wrtout(std_out,message,'COLL')
-   write(message,'(a,a)') ch10,'---------------------------------------------------------------'
+   write(message,'(2a)') ch10,'---------------------------------------------------------------'
    call wrtout(std_out,message,'COLL')
  end if ! abs(pawprtvol)>=3
  
@@ -314,7 +310,7 @@ subroutine datafordmft(cg,cprj,cryst_struc,dft_occup,dimcprj,dtset,eigen,mband_c
  end do ! isppol
 
  if(abs(pawprtvol) >= 3) then
-   write(message,'(a,a)') ch10,'   datafordmft :  eigenvalues written'
+   write(message,'(2a)') ch10,'   datafordmft :  eigenvalues written'
    call wrtout(std_out,message,'COLL')
  end if
 !==========================================================================
@@ -391,7 +387,7 @@ subroutine datafordmft(cg,cprj,cryst_struc,dft_occup,dimcprj,dtset,eigen,mband_c
      
      do iband=1,nband_k
 
-!      Parallelization: treat only some bands
+       ! Parallelization: treat only some bands
        verif = .true.
        if (paral_kgb == 1) then
          if (mod((iband-1)/mpi_enreg%bandpp,nproc_band) /= me_band) verif = .false.
@@ -692,7 +688,7 @@ subroutine datafordmft(cg,cprj,cryst_struc,dft_occup,dimcprj,dtset,eigen,mband_c
  !end do
  call xmpi_barrier(comm_kpt)
  !call xmpi_sum(buffer1,spaceComm ,ierr)
- if (paral_kgb == 1 .and. nproc_band > 1) call xmpi_sum(buf_chipsi(:),comm_band,ierr) !Build sum over band processors
+ if (paral_kgb == 1 .and. nproc_band > 1) call xmpi_sum(buf_chipsi(:),comm_band,ierr) ! Build sum over band processors
  call xmpi_allgatherv(buf_chipsi(:),siz_buf,buf_chipsi_tot(:),recvcounts(:),displs(:),comm_kpt,ierr)
  
  ABI_FREE(displs)
@@ -807,20 +803,20 @@ subroutine datafordmft(cg,cprj,cryst_struc,dft_occup,dimcprj,dtset,eigen,mband_c
    call wrtout(std_out,message,'COLL')
 
    if (paw_dmft%dmftcheck >= 1) then
-!    print occupations
+     ! print occupations
      write(message,'(2a,i4)') ch10,'  ------ Unsymmetrized Occupations'
      call wrtout(std_out,message,'COLL')
 
      call print_matlu(dft_occup%matlu(:),natom,pawprtvol)
 
-!    print norms
+     ! print norms
      write(message,'(2a,i4)') ch10,'  ------ Unsymmetrized Norm'
      call wrtout(std_out,message,'COLL')
 
      call print_matlu(loc_norm_check%matlu(:),natom,pawprtvol)
    end if ! dmftcheck>=1
 
-!  symetrise and print occupations
+   ! symmetrize and print occupations
    call sym_matlu(dft_occup%matlu(:),paw_dmft)
 
    write(message,'(2a,i4)') ch10,'  ------ Symmetrized Occupations'
@@ -828,7 +824,7 @@ subroutine datafordmft(cg,cprj,cryst_struc,dft_occup,dimcprj,dtset,eigen,mband_c
 
    call print_matlu(dft_occup%matlu(:),natom,pawprtvol)
 
-!  symetrise and print norms
+   ! symmetrize and print norms
    call sym_matlu(loc_norm_check%matlu(:),paw_dmft)
 
    write(message,'(2a,i4)') ch10,'  ------ Symmetrized Norm'
@@ -841,8 +837,8 @@ subroutine datafordmft(cg,cprj,cryst_struc,dft_occup,dimcprj,dtset,eigen,mband_c
    !  dft_occup%matlu(iatom)%mat=loc_occ_check(iatom)%mat
    !end do
 
-!  Tests density matrix DFT+U and density matrix computed here.
-   if (paw_dmft%dmftcheck == 2 .or. (paw_dmft%dmftbandi == 1)) then
+   ! Tests density matrix DFT+U and density matrix computed here.
+   if (paw_dmft%dmftcheck == 2 .or. paw_dmft%dmftbandi == 1) then
      ABI_MALLOC(matlu_temp,(natom))
      call init_matlu(natom,nspinor,nsppol,paw_dmft%lpawu(:),matlu_temp(:))
      isppol   = 1

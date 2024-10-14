@@ -429,7 +429,7 @@ subroutine compute_energy(energies_dmft,green,paw_dmft,pawprtvol,pawtab,self,occ
      energies_dmft%e_hu => energies_dmft%e_hu_dftu(:)
      energies_dmft%e_hu_tot = energies_dmft%e_hu_dftu_tot
      if ((abs(energies_dmft%e_hu_tot-energies_dmft%e_hu_mig_tot) >= tol6) .and. (occ_type /= " lda")) then
-       write(message,'(2a,2e18.8,a)') ch10,'   BUG: Migdal energy and DFT+U energy do not coincide',&
+       write(message,'(2a,2e18.8,2x,a)') ch10,'   BUG: Migdal energy and DFT+U energy do not coincide',&
          & energies_dmft%e_hu_tot,energies_dmft%e_hu_mig_tot,occ_type
        ABI_ERROR(message)
      end if
@@ -685,7 +685,7 @@ subroutine compute_migdal_energy(e_hu_migdal,e_hu_migdal_tot,green,paw_dmft,self
 !DEC$ NOOPTIMIZE
 !#endif
 
- use m_matlu, only : trace_prod_matlu
+ use m_matlu, only : add_matlu,copy_matlu,destroy_matlu,init_matlu,matlu_type,trace_prod_matlu
  use m_xmpi, only : xmpi_sum
 
 !Arguments ------------------------------------
@@ -695,7 +695,7 @@ subroutine compute_migdal_energy(e_hu_migdal,e_hu_migdal_tot,green,paw_dmft,self
  type(paw_dmft_type), intent(in) :: paw_dmft
  real(dp), intent(out) :: e_hu_migdal_tot
  real(dp), intent(inout) :: e_hu_migdal(paw_dmft%natom)
- type(self_type), intent(in) :: self
+ type(self_type), target, intent(in) :: self
 ! integer :: prtopt
 !Local variables-------------------------------
  integer :: i,iatom,ierr,ifreq,im,isppol,lpawu,myproc
@@ -704,6 +704,8 @@ subroutine compute_migdal_energy(e_hu_migdal,e_hu_migdal_tot,green,paw_dmft,self
  !complex(dpc) :: xmig_1,xmig_2,xmig_3,se,shift
  complex(dpc) :: omega
  complex(dpc), allocatable :: correction(:),integral(:),omega_inv(:),trace_moments(:,:)
+ type(matlu_type), allocatable :: self_nwlo_re(:)
+ type(matlu_type), ABI_CONTIGUOUS pointer :: matlu_tmp(:)
  character(len=500) :: message
 ! *********************************************************************
 
@@ -718,7 +720,7 @@ subroutine compute_migdal_energy(e_hu_migdal,e_hu_migdal_tot,green,paw_dmft,self
  beta     = one / paw_dmft%temp
  myproc   = paw_dmft%myproc
  natom    = paw_dmft%natom
- nmoments = 1
+ nmoments = 0
  nspinor  = paw_dmft%nspinor
  nsppol   = paw_dmft%nsppol
  nwlo     = green%nw
@@ -749,19 +751,11 @@ subroutine compute_migdal_energy(e_hu_migdal,e_hu_migdal_tot,green,paw_dmft,self
    call trace_prod_matlu(self%moments(3)%matlu(:),green%moments(2)%matlu(:),natom,trace_moments(:,4),opt_add=1)
    call trace_prod_matlu(self%moments(4)%matlu(:),green%moments(1)%matlu(:),natom,trace_moments(:,4),opt_add=1)
  else
-   ! Simply assume that the first order moment of Sigma*G is Sigma(nwlo) instead of Sigma_0*Downfold(Id)
-   do iatom=1,natom
-     lpawu = paw_dmft%lpawu(iatom)
-     if (lpawu == -1) cycle     
-     trace_moments(iatom,1) = czero
-     ndim = nspinor * (2*lpawu+1)
-     do isppol=1,nsppol
-       do im=1,ndim
-         trace_moments(iatom,1) = trace_moments(iatom,1) + &
-           & cmplx(dble(self%oper(nwlo)%matlu(iatom)%mat(im,im,isppol)),zero,kind=dp)
-       end do ! im
-     end do ! isppol
-   end do ! iatom
+   ABI_MALLOC(self_nwlo_re,(natom))
+   ABI_MALLOC(matlu_tmp,(natom))
+   call init_matlu(natom,nspinor,nsppol,paw_dmft%lpawu(:),matlu_tmp(:))
+   call init_matlu(natom,nspinor,nsppol,paw_dmft%lpawu(:),self_nwlo_re(:))
+   call copy_matlu(self%oper(nwlo)%matlu(:),self_nwlo_re(:),natom,opt_re=1) 
  end if ! moments
  
  fac = one
@@ -777,18 +771,22 @@ subroutine compute_migdal_energy(e_hu_migdal,e_hu_migdal_tot,green,paw_dmft,self
    do i=2,nmoments
      omega_inv(i) = omega_inv(i-1) / omega
    end do ! i
-   
-   call trace_prod_matlu(self%oper(ifreq)%matlu(:),green%oper(ifreq)%matlu(:),natom,integral(:))
-   
+  
+   if (self%has_moments == 1) then
+     matlu_tmp => self%oper(ifreq)%matlu(:)
+   else
+     call add_matlu(self%oper(ifreq)%matlu(:),self_nwlo_re(:),matlu_tmp(:),natom,-1)
+   end if ! moments 
+
+   call trace_prod_matlu(matlu_tmp(:),green%oper(ifreq)%matlu(:),natom,integral(:))   
+
+   integral(:) = fac * integral(:)
+
    do i=1,nmoments
-     do iatom=1,natom
-       lpawu = paw_dmft%lpawu(iatom)
-       if (lpawu == -1) cycle
-       integral(iatom) = fac*integral(iatom) - trace_moments(iatom,i)*omega_inv(i)
-       if (i == nmoments) e_hu_migdal(iatom) = e_hu_migdal(iatom) + & 
-            & dble(integral(iatom))*paw_dmft%wgt_wlo(ifreq) 
-     end do ! iatom
+     integral(:) = integral(:) - trace_moments(:,i)*omega_inv(i)
    end do ! i
+ 
+   e_hu_migdal(:) = e_hu_migdal(:) + dble(integral(:))*paw_dmft%wgt_wlo(ifreq)
    
  end do ! ifreq
  
@@ -797,6 +795,12 @@ subroutine compute_migdal_energy(e_hu_migdal,e_hu_migdal_tot,green,paw_dmft,self
  !xmig_1=zero
  !xmig_2=zero
  !xmig_3=zero
+
+ if (self%has_moments /= 1) then
+   call destroy_matlu(matlu_tmp(:),natom)
+   ABI_FREE(matlu_tmp)
+ end if 
+ matlu_tmp => null()
  
  ABI_FREE(omega_inv)
  ABI_FREE(integral)
@@ -815,7 +819,10 @@ subroutine compute_migdal_energy(e_hu_migdal,e_hu_migdal_tot,green,paw_dmft,self
      if (i == 4) correction(iatom) = correction(iatom) + trace_moments(iatom,i)*(beta**3)/dble(48)
    end do ! iatom
  end do ! i 
- 
+
+ if (self%has_moments == 0) &
+   & call trace_prod_matlu(self%oper(nwlo)%matlu(:),green%occup%matlu(:),natom,correction(:))
+
  ABI_FREE(trace_moments)
  
  do iatom=1,natom
