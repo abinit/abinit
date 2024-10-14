@@ -336,12 +336,10 @@ MODULE m_paw_dmft
   ! Total number of correlated bands
   
   integer :: mkmem
-  ! Number of k-points handled by the current process in the 
-  ! DFT parallelization (different than distrib%nkpt_mem, in
-  ! DMFT parallelization)
+  ! Number of k-points handled by the current process in the DFT part 
 
   integer :: myproc
-  ! Rank in comm_world
+  ! Rank in the global communicator
 
   integer :: natom
   ! Number of atoms
@@ -393,7 +391,7 @@ MODULE m_paw_dmft
 
   logical :: dmft_use_all_bands
   ! =0 Only consider the DMFT contribution on the correlated bands
-  ! =1 Considers the DMFT contribution on every band
+  ! =1 Considers the DMFT contribution on every band 
 
   logical :: dmftctqmc_triqs_leg_measure
   ! TRIQS CTQMC: Flag to activate Legendre measurement
@@ -522,7 +520,7 @@ MODULE m_paw_dmft
   ! occupations on band parallelism
 
   real(dp), allocatable :: bessel(:,:,:,:)
-  ! 4*pi*i**l*jl(|k+G|r)*r/sqrt(ucvol) for each G,r,atom type and kpt
+  ! 4*pi*(i**l)*jl(|k+G|r)*r/sqrt(ucvol) for each G,r,atom type and kpt
 
   real(dp), allocatable :: eigen_dft(:,:,:)
   ! DFT eigenvalues for each correlated band, k-point, polarization
@@ -546,7 +544,7 @@ MODULE m_paw_dmft
   ! Integral of <Chi|Phi-Phi_tilde> for every correlated projector and atom type
 
   real(dp), allocatable :: symrec_cart(:,:,:)
-  ! For symmetrization.
+  ! Symmetries in cartesian coordinates
 
   real(dp), allocatable :: wgt_wlo(:)
   ! Weight of the imaginary frequencies
@@ -568,19 +566,21 @@ MODULE m_paw_dmft
   ! Exp(i(k+G).xred(iatom)) for each G,correlated atom and k
   
   complex(dpc), allocatable :: wannier(:,:,:)
-  ! Wannier functions
+  ! Wannier functions for each r,flavor and atom
   
   complex(dpc), allocatable :: zarot(:,:,:,:)
-  ! For symmetrization.
+  !  Coeffs of the transformation of real spherical
+  !  harmonics under the symmetry operations symrec. 
 
   integer, ABI_CONTIGUOUS pointer :: dmft_nominal(:) => null()
   ! Nominal occupancies for each atom (for nominal double counting)
 
   integer, pointer :: indsym(:,:) => null()
-  ! For symmetrization.
+  ! Label of atom into which iatom is sent by the INVERSE of the
+  ! symmetry operation symrel(isym)
   
   integer, pointer :: int_meshsz(:) => null()
-  ! Integration radius for the PAW sphere
+  ! PAW integration radius for each atom type
 
   integer, ABI_CONTIGUOUS pointer :: nband(:) => null()
   ! Number of bands for each k-point and polarization
@@ -604,10 +604,11 @@ MODULE m_paw_dmft
   ! Weights for each k-point
   
   type(CtqmcInterface), allocatable :: hybrid(:)
-
+ 
   type(data4entropyDMFT_t) :: forentropyDMFT
 
   type(pawrad_type), allocatable :: radgrid(:)
+  ! Radial grid for each type of atom
   
   type(mpi_distrib_dmft_type) :: distrib
   ! MPI parallelization for imaginary frequencies

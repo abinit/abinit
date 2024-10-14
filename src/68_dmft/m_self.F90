@@ -93,7 +93,7 @@ MODULE m_self
   type(oper_type), allocatable :: oper(:)
   ! Operator for self-energy, for each frequency
   
-  real(dp), pointer :: omega(:) => null()
+  real(dp), ABI_CONTIGUOUS pointer :: omega(:) => null()
   ! Value of frequencies
 
   type(mpi_distrib_dmft_type), pointer :: distrib => null()

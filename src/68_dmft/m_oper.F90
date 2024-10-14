@@ -104,7 +104,7 @@ MODULE m_oper
   complex(dpc), allocatable :: ks(:,:,:,:)
   ! In the KS basis  (mbandc,mbandc,nkpt,nsppol)
 
-  real(dp), pointer :: wtk(:) => null()
+  real(dp), ABI_CONTIGUOUS pointer :: wtk(:) => null()
   ! Weights for each kpt
 
  end type oper_type
@@ -582,7 +582,7 @@ subroutine downfold_oper(oper,paw_dmft,procb,iproc,option,op_ks_diag)
  type(paw_dmft_type), intent(in) :: paw_dmft
  integer, optional, intent(in) :: iproc,option
  integer, optional, intent(in) :: procb(oper%nkpt)
- real(dp), contiguous, optional, intent(in) :: op_ks_diag(:,:,:)
+ real(dp), ABI_CONTIGUOUS optional, intent(in) :: op_ks_diag(:,:,:)
 !oper variables-------------------------------
  integer :: iatom,ib,ik,ikpt,isppol,lpawu,mbandc,ndim
  integer :: ndim_max,nspinor,opt,paral,shift
@@ -637,8 +637,6 @@ subroutine downfold_oper(oper,paw_dmft,procb,iproc,option,op_ks_diag)
         
        if (opt == 1 .or. opt == 3) then       
               
-         ! mat_temp(:,:) = chipsi(:,:,ik,isppol,iatom)*oper%ks(:,:,ikpt,isppol)     
-              
          if (opt == 1) then     
                             
            call abi_xgemm("n","n",ndim,mbandc,mbandc,cone,paw_dmft%chipsi(:,:,ik,isppol,iatom),&
@@ -656,26 +654,19 @@ subroutine downfold_oper(oper,paw_dmft,procb,iproc,option,op_ks_diag)
                   
          end if ! opt=1 or 3
                 
-         ! mat_temp2(:,:) = mat_temp(:,:) * chipsi(:,:,ik,isppol,iatom)^C       
-                
          call abi_xgemm("n","c",ndim,ndim,mbandc,cone,mat_temp(:,:),ndim,&
                   & paw_dmft%chipsi(:,:,ik,isppol,iatom),ndim_max,czero,mat_temp2(:,:),ndim)
        
        else if (opt == 2) then
-        
-         ! mat_temp2(:,:) = chipsi(:,:,ik,isppol,iatom) * chipsi(:,:,ik,isppol,iatom)^C
         
          call abi_xgemm("n","c",ndim,ndim,mbandc,cone,paw_dmft%chipsi(:,:,ik,isppol,iatom),&
                   & ndim_max,paw_dmft%chipsi(:,:,ik,isppol,iatom),ndim_max,czero,mat_temp2(:,:),ndim)
                   
        else if (opt == 4) then
        
-         ! mat_temp3(:,:) = chipsi(:,:,ik,isppol,iatom) * chipsi(:,:,ik,isppol,iatom)^C
-       
          call abi_xgemm("n","c",ndim,ndim,mbandc,cone,paw_dmft%chipsi(:,:,ik,isppol,iatom),&
                   & ndim_max,paw_dmft%chipsi(:,:,ik,isppol,iatom),ndim_max,czero,mat_temp3(:,:),ndim)
                   
-         ! mat_temp2(:,:) = mat_temp3(:,:) * mat_temp3(:,:)     
          call abi_xgemm("n","n",ndim,ndim,ndim,cone,mat_temp3(:,:),ndim,&
                   & mat_temp3(:,:),ndim,czero,mat_temp2(:,:),ndim)
        
@@ -824,12 +815,8 @@ subroutine upfold_oper(oper,paw_dmft,procb,iproc)
        
        ik = ikpt + shift ! true kpt index (needed for chipsi)
      
-       ! mat_temp(:,:) = chipsi(:,:,ik,isppol,iatom)^C * matlu(iatom)%mat(:,:,isppol)
-      
        call abi_xgemm("c","n",mbandc,ndim,ndim,cone,paw_dmft%chipsi(:,:,ik,isppol,iatom),&
                 & ndim_max,oper%matlu(iatom)%mat(:,:,isppol),ndim,czero,mat_temp(:,1:ndim),mbandc)
-               
-       ! mat_temp2(:,:) = mat_temp(:,:) * chipsi(:,:,ik,isppol,iatom)        
                
        call abi_xgemm("n","n",mbandc,mbandc,ndim,cone,mat_temp(:,1:ndim),mbandc,&
                 & paw_dmft%chipsi(:,:,ik,isppol,iatom),ndim_max,czero,mat_temp2(:,:),mbandc)
@@ -1292,7 +1279,7 @@ subroutine gather_oper(oper,distrib,paw_dmft,opt_ksloc,master,opt_diag,opt_commk
  nw      = distrib%nw   
 
  nproc_kpt  = min(nkpt,nproc)
- nproc_freq = nproc / nkpt
+ nproc_freq = max(1,nproc/nkpt)
  
  optcommkpt = 0
  if (present(opt_commkpt)) optcommkpt = opt_commkpt
@@ -1314,7 +1301,7 @@ subroutine gather_oper(oper,distrib,paw_dmft,opt_ksloc,master,opt_diag,opt_commk
        irank2 = irank2 + 1
      end do ! irank1
    end do ! irank
-   if (nproc > nproc_freq*nkpt) recvcounts(nproc_freq*nkpt+1:nproc) = 0
+   if (nproc > nproc_freq*nproc_kpt) recvcounts(nproc_freq*nproc_kpt+1:nproc) = 0
 
    recvcounts(:) = mbandc * recvcounts(:)
    if (.not. diag) recvcounts(:) = recvcounts(:) * mbandc

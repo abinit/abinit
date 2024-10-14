@@ -122,7 +122,7 @@ subroutine datafordmft(cg,cprj,cryst_struc,dft_occup,dimcprj,dtset,eigen,mband_c
  integer, intent(in) :: dimcprj(paw_dmft%natom)
  real(dp), intent(in) :: occ(paw_dmft%mband*paw_dmft%nkpt*paw_dmft%nsppol)
  real(dp), target, intent(in) :: eigen(paw_dmft%mband*paw_dmft%nkpt*paw_dmft%nsppol) 
- real(dp), contiguous, intent(in) :: cg(:,:)
+ real(dp), ABI_CONTIGUOUS intent(in) :: cg(:,:)
  type(paw_ij_type), intent(in) :: paw_ij(:)
 ! type(pawcprj_type) :: cprj(cryst_struc%natom,my_nspinor*mband*mkmem*nsppol)
  type(pawcprj_type), intent(in) :: cprj(paw_dmft%natom,my_nspinor*mband_cprj*dtset%mkmem*paw_dmft%nsppol*usecprj)
