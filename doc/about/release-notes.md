@@ -74,17 +74,7 @@ See tests : [[test:gwr_07]], [[test:gwr_09]], [[test:gwr_10]] and [[test:gwr_11]
 
 By M. Giantomassi (MR 1006) and F. Bruneval (MR1024). Additionally, with a bug fix for filepath parsing from M. Sarraute (MR1026).
 
-**B.4** The variational polaron equation methodology 
-
-This methodology is described in [[cite:Vasilchenko2022]]. It allows ABINIT to compute the polaron formation energy,
-and other characteristics of a polaron, from the electronic band structure, the phonon band structure, and the electron-phonon coupling.
-To use it, select [[optdriver]]=7 and [[eph_task]]=13.
-Related input variables : varpeq_aseed, varpeq_erange, varpeq_gau_params, varpeq_interpolate, varpeq_orth, varpeq_nstep, varpeq_pkind, varpeq_tolgrs, varpeq_pc_nupdate, varpeq_pc_factor, getvarpeq, getvarpeq_filepath..
-At present, NO DOCUMENTATION  of input variables, and NO TESTS are available...
-
-By V. Vasilchenko, with help from M. Giantomassi (MR 1047).
-
-**B.5** Speed-up of the calculation (PAW as well as norm-conserving), thanks to cprj_in_memory. 
+**B.4** Speed-up of the calculation (PAW as well as norm-conserving), thanks to cprj_in_memory. 
 
 The coefficients of the wavefunctions giving the in-sphere contribution, denoted "cprj", can now be stored in memory, 
 thanks to the input variable [[cprj_in_memory]]. This brings speed-up of the PAW calculations (on the order of 20%-30%).
@@ -111,7 +101,7 @@ SHOULD DOCUMENT xg_nonlop_option input variable, used in  [[test:paral_35]],  [[
 
 By L. Baguet (MR 1058)
 
-**B.7** Wannier90 with spinors, and other Wannier90 improvements.
+**B.5** Wannier90 with spinors, and other Wannier90 improvements.
 
 There has been several improvements of the Wannier90 usage together with ABINIT: enable w90 output with spinor wave functions, improvements to parallel calls,
 general cleaning of mlwf routines.
@@ -119,7 +109,7 @@ See  [[test:wannier90_05]] and  [[test:wannier90_14]].
 
 By M. Verstraete  and He Xu (MR1005).
 
-**B.8** New developments and bug fixes in extended First-Principles Molecular Dynamics (high temperature).
+**B.6** New developments and bug fixes in extended First-Principles Molecular Dynamics (high temperature).
 
 Now ABINIT can compute extFPMD high energy contributions with a discrete sum on the orbitals. 
 This is activated with [[useextfpmd]]=5, and controlled with the new input variable [[extfpmd_nband]]. 
@@ -313,6 +303,12 @@ By F. Gendron (MR987 and MR1030)
 
 By M. Mignolet (MR990)
 
+**D.20** The variational polaron equation methodology
+Ongoing implementation of the methodology described in [[cite:Vasilchenko2022]]
+Current commit containts intermediate developments & variables, which are used for testing purposes only and are to be modified or removed later on.
+Final release of the framework is expected in the next version of the code.
+
+By V. Vasilchenko, with help from M. Giantomassi (MR 1047).
 
 
 
