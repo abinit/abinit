@@ -268,7 +268,7 @@ By M. Giantomassi (5c6ff934)
 
 **D.12** Add new input variables [[getdrhodb]], [[getdrhodb_filepath]], [[irddrhodb]].
 to read the database with the first-order densities for GWPT calculations.
-NO TEST (except the fake one [[test:gwpt_04]]).  as this feature is still under development.
+NO TEST (except the fake one `test:gwpt_04`.  as this feature is still under development.
 
 By Siyu Chen (867b11f9)
 
