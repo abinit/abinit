@@ -1027,7 +1027,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    !if (me == master) call pawtab_print(Pawtab)
  end if
 
- call init_sc_dmft(dtset,paw_dmft,args_gs%dmatpawu(:,:,:,:),dtfil%filnam_ds(3),dtfil%fnameabo_app,gprimd(:,:),kg(:,:),mpi_enreg, &
+ call init_sc_dmft(dtset,paw_dmft,args_gs%dmatpawu(:,:,:,:),gprimd(:,:),kg(:,:),mpi_enreg, &
                  & npwarr(:),occ(:),pawang,pawrad(:),pawtab(:),rprimd(:,:),ucvol,dtfil%unpaw,use_sc_dmft,xred(:,:),ylm(:,:))
  if (paw_dmft%use_dmft == 1 .and. me == 0) call readocc_dmft(paw_dmft,dtfil%filnam_ds(3),dtfil%filnam_ds(4))
  if (paw_dmft%use_dmft == 1) call print_sc_dmft(paw_dmft,dtset%pawprtvol)

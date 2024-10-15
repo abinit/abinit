@@ -1336,7 +1336,7 @@ subroutine chipsi_print(paw_dmft,pawtab)
 !    write(std_out,*) "DC,fermie",hdc%matlu(iatom)%mat(1,1,1,1,1),paw_dmft%fermie
    !end if
  end do ! iatom
- 
+
  call sym_matlu(energy_level%matlu(:),paw_dmft)
  if (present(nondiag)) call checkdiag_matlu(energy_level%matlu(:),natom,tol7,nondiag)
 

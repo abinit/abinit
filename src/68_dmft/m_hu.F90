@@ -146,6 +146,7 @@ subroutine init_vee(paw_dmft,vee)
    if (lpawu == -1) cycle
    ndim = 2 * (2*lpawu+1)
    ABI_MALLOC(vee(iatom)%mat,(ndim,ndim,ndim,ndim))
+   vee(iatom)%mat(:,:,:,:) = czero
  end do ! iatom
 
 end subroutine init_vee
@@ -240,11 +241,11 @@ subroutine init_hu(hu,paw_dmft,pawtab)
    lpawu = pawtab(itypat)%lpawu
    hu(itypat)%upawu = zero
    hu(itypat)%jpawu = zero
-   if (lpawu == -1) cycle
    !hu(itypat)%jmjbasis = .false.
    if (t2g .and. lpawu == 2) lpawu = 1
    if (x2my2d .and. lpawu == 2) lpawu = 0
    hu(itypat)%lpawu = lpawu
+   if (lpawu == -1) cycle
    ndim  = 2*lpawu + 1 
    tndim = 2 * ndim
    hu(itypat)%upawu = pawtab(itypat)%upawu
@@ -376,8 +377,8 @@ subroutine init_hu(hu,paw_dmft,pawtab)
      end do ! ms1
      upawu = upawu / dble(ndim**2)
      jpawu = upawu - jpawu/dble(2*lpawu*ndim)
-     hu(itypat)%upawu = upawu
-     hu(itypat)%jpawu = jpawu
+     !hu(itypat)%upawu = upawu
+     !hu(itypat)%jpawu = jpawu
    end if ! t2g
    
    xij(tndim,tndim) = 0
@@ -1092,12 +1093,11 @@ subroutine rotatevee_hu(hu,paw_dmft,pawprtvol,rot_mat,rot_type,udens_atoms,vee_r
        if (paw_dmft%dmft_solv /= 6 .and. paw_dmft%dmft_solv /= 7) veetemp(:,:,:,:) &
           & = cmplx(dble(veetemp(:,:,:,:)),zero,kind=dp)
        call vee_ndim2tndim_hu(lpawu,veetemp(:,:,:,:),vee_rotated(iatom)%mat(:,:,:,:))
+       call vee2udensatom_hu(ndim,udens_atoms(iatom)%mat(:,:,1),veetemp(:,:,:,:),"diag")
        ABI_FREE(veetemp)
-       prtonly = 0
      else
        udens_atoms(iatom)%mat(:,:,1)   = hu(itypat)%udens(:,:)
        vee_rotated(iatom)%mat(:,:,:,:) = hu(itypat)%veeslm2(:,:,:,:)
-       prtonly = 1
      end if ! jpawu=zero 
      
      xsum     = zero 
@@ -1130,10 +1130,10 @@ subroutine rotatevee_hu(hu,paw_dmft,pawprtvol,rot_mat,rot_type,udens_atoms,vee_r
        call wrtout(std_out,message,'COLL')
      end if ! pawprtvol>=3
 
-     write(message,'(2a,i4)') ch10,'  -------> For Correlated Species', itypat
+     write(message,'(2a,i4)') ch10,'  -------> For Correlated Species',itypat
      call wrtout(std_out,message,'COLL')
 
-     call vee2udensatom_hu(ndim,udens_atoms(iatom)%mat(:,:,1),vee_rotated(iatom)%mat(:,:,:,:),"diag",prtonly=prtonly)
+     call vee2udensatom_hu(ndim,udens_atoms(iatom)%mat(:,:,1),vee_rotated(iatom)%mat(:,:,:,:),"diag",prtonly=1)
 
 !       udens_atoms(iatom)%value=zero
 !       ij=0
@@ -1982,8 +1982,7 @@ subroutine vee_ndim2tndim_hu(lcor,mat_inp_c,mat_out_c)
      end do ! is1
    end do ! m4
  end do ! is2
- 
- 
+
    ! do m1=1,ndim
    !   do m2=1,ndim
    !     do m3=1,ndim
