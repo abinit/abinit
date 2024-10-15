@@ -29,7 +29,7 @@ Xavier
 
 ### **A.** Remarks and warnings.
 
-**A.1** The input variable shiftfactor_extfpmd has been renamed extfpmd_eshift (NOT DOCUMENTED). This is an energy shift, not a multiplying factor.
+(none)
 
 
 * * *
