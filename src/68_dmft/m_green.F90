@@ -2401,6 +2401,7 @@ subroutine fourier_green(cryst_struc,green,paw_dmft,pawang,opt_ksloc,opt_tw)
 !    treatment, value from different proc will be mixed.
      call xmpi_barrier(spacecomm)
      do iatom=1,natom
+       if (green%oper(1)%matlu(iatom)%lpawu==-1) cycle 
        do itau=1,green%dmftqmc_l
         call xmpi_sum(green_temp%oper_tau(itau)%matlu(iatom)%mat,spacecomm,ierr)
        enddo

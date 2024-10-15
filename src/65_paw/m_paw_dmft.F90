@@ -657,7 +657,7 @@ CONTAINS  !=====================================================================
 !!
 !! SOURCE
 
-subroutine init_sc_dmft(dtset,paw_dmft,dmatpawu,fnamei,fnametmp_app,gprimd,kg,mpi_enreg,npwarr,&
+subroutine init_sc_dmft(dtset,paw_dmft,dmatpawu,gprimd,kg,mpi_enreg,npwarr,&
                         occ,pawang,pawrad,pawtab,rprimd,ucvol,unpaw,use_sc_dmft,xred,ylm)
 
  use m_mpinfo, only : proc_distrb_cycle
@@ -682,7 +682,6 @@ subroutine init_sc_dmft(dtset,paw_dmft,dmatpawu,fnamei,fnametmp_app,gprimd,kg,mp
  integer, ABI_CONTIGUOUS optional, intent(in) :: kg(:,:)
  real(dp), ABI_CONTIGUOUS optional, intent(in) :: gprimd(:,:),rprimd(:,:),xred(:,:),ylm(:,:)
  real(dp), ABI_CONTIGUOUS target, optional, intent(in) :: dmatpawu(:,:,:,:)
- character(len=fnlen), optional, intent(in) :: fnamei,fnametmp_app
 !Local variables ------------------------------------
  integer :: bdtot_index,dmft_solv,dmftbandi,dmftbandf,fac,grid_unt,i
  integer :: iatom,iatom1,iband,icb,ierr,ifreq,ig,ik,ikg,ikpt,im,im1
@@ -893,8 +892,6 @@ subroutine init_sc_dmft(dtset,paw_dmft,dmatpawu,fnamei,fnametmp_app,gprimd,kg,mp
    paw_dmft%nelectval = dtset%nelect - dble(dmftbandi-1)*nsppol*dble(fac)
  end if ! not use_all_bands
  
- paw_dmft%filapp               = fnametmp_app
- paw_dmft%filnamei             = fnamei
  paw_dmft%natpawu              = dtset%natpawu
  paw_dmft%natom                = natom
  paw_dmft%temp                 = dtset%tsmear!*unit_e
@@ -1392,7 +1389,7 @@ end subroutine init_sc_dmft
 !! G.Kotliar,  S.Y.Savrasov, K.Haule, V.S.Oudovenko, O.Parcollet, C.A.Marianetti.
 !!
 
-subroutine init_dmft(cryst_struc,dtset,fermie_dft,paw_dmft)
+subroutine init_dmft(cryst_struc,dtset,fermie_dft,fnamei,fnametmp_app,paw_dmft)
 
  !use m_splines
  !use m_CtqmcInterface
@@ -1411,7 +1408,7 @@ subroutine init_dmft(cryst_struc,dtset,fermie_dft,paw_dmft)
  !type(pawtab_type), intent(in)  :: pawtab(psps%ntypat*psps%usepaw)
  type(paw_dmft_type), intent(inout) :: paw_dmft
  type(crystal_t), target, intent(in) :: cryst_struc
- !character(len=fnlen), intent(in) :: fnametmp_app
+ character(len=fnlen), intent(in) :: fnamei,fnametmp_app
  !character(len=fnlen), intent(in) :: fnamei
 !arrays
  !integer,intent(in) :: typat(dtset%natom)
@@ -1455,6 +1452,9 @@ subroutine init_dmft(cryst_struc,dtset,fermie_dft,paw_dmft)
    end do ! irot
  end if ! nspinor=2
  
+ paw_dmft%filapp   = fnametmp_app
+ paw_dmft%filnamei = fnamei
+
  !unit_e=2_dp
 !=======================
 !==  Check sym

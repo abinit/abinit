@@ -685,7 +685,7 @@ subroutine compute_migdal_energy(e_hu_migdal,e_hu_migdal_tot,green,paw_dmft,self
 !DEC$ NOOPTIMIZE
 !#endif
 
- use m_matlu, only : add_matlu,copy_matlu,destroy_matlu,init_matlu,matlu_type,trace_prod_matlu
+ use m_matlu, only : add_matlu,copy_matlu,destroy_matlu,init_matlu,matlu_type,print_matlu,trace_prod_matlu
  use m_xmpi, only : xmpi_sum
 
 !Arguments ------------------------------------
@@ -757,13 +757,16 @@ subroutine compute_migdal_energy(e_hu_migdal,e_hu_migdal_tot,green,paw_dmft,self
    call init_matlu(natom,nspinor,nsppol,paw_dmft%lpawu(:),self_nwlo_re(:))
    call copy_matlu(self%oper(nwlo)%matlu(:),self_nwlo_re(:),natom,opt_re=1) 
  end if ! moments
+
+ write(*,*) "Debug"
+ call print_matlu(green%occup%matlu(:),natom,1)
  
  fac = one
  if (nsppol == 1 .and. nspinor == 1) fac = two
  
  do ifreq=1,nwlo
  
-   if (self%distrib%procf(ifreq) /= myproc) cycle
+  ! if (self%distrib%procf(ifreq) /= myproc) cycle
  
    omega = cmplx(zero,paw_dmft%omega_lo(ifreq),kind=dp)
    omega_inv(1) = cone / omega
@@ -778,7 +781,7 @@ subroutine compute_migdal_energy(e_hu_migdal,e_hu_migdal_tot,green,paw_dmft,self
      call add_matlu(self%oper(ifreq)%matlu(:),self_nwlo_re(:),matlu_tmp(:),natom,-1)
    end if ! moments 
 
-   call trace_prod_matlu(matlu_tmp(:),green%oper(ifreq)%matlu(:),natom,integral(:))   
+   call trace_prod_matlu(matlu_tmp(:),green%oper(ifreq)%matlu(:),natom,integral(:))  
 
    integral(:) = fac * integral(:)
 
@@ -787,10 +790,14 @@ subroutine compute_migdal_energy(e_hu_migdal,e_hu_migdal_tot,green,paw_dmft,self
    end do ! i
  
    e_hu_migdal(:) = e_hu_migdal(:) + dble(integral(:))*paw_dmft%wgt_wlo(ifreq)
-   
+  
+   write(*,*) "Debug",ifreq
+   call print_matlu(self%oper(ifreq)%matlu(:),natom,1)
+   call print_matlu(green%oper(ifreq)%matlu(:),natom,1)
+
  end do ! ifreq
  
- call xmpi_sum(e_hu_migdal(:),paw_dmft%spacecomm,ierr)
+! call xmpi_sum(e_hu_migdal(:),paw_dmft%spacecomm,ierr)
  
  !xmig_1=zero
  !xmig_2=zero
@@ -821,7 +828,7 @@ subroutine compute_migdal_energy(e_hu_migdal,e_hu_migdal_tot,green,paw_dmft,self
  end do ! i 
 
  if (self%has_moments == 0) &
-   & call trace_prod_matlu(self%oper(nwlo)%matlu(:),green%occup%matlu(:),natom,correction(:))
+   & call trace_prod_matlu(self_nwlo_re(:),green%occup%matlu(:),natom,correction(:))
 
  ABI_FREE(trace_moments)
  

@@ -200,15 +200,6 @@ subroutine dmft_solve(cryst_struc,istep,dft_occup,mpi_enreg,paw_dmft,pawang,pawt
 !if(natomcor>1) opt_renorm=2 ! if number of atoms is larger than one, one must use a new orthogonalization scheme.
  if (paw_dmft%nspinor == 2 .and. (paw_dmft%dmft_solv == 8 .or. paw_dmft%dmft_solv == 9)) opt_renorm = 2 ! necessary to use hybri_limit in qmc_prep_ctqmc
                                                                 ! ought to be  generalized  in the  future
- ! Downfold the KS eigenvalues                                                     
- if (paw_dmft%dmft_solv >= 5) then
-   mkmem = paw_dmft%distrib%nkpt_mem(paw_dmft%distrib%me_kpt)
-   shift = paw_dmft%distrib%shiftk
-   call init_oper(paw_dmft,loc_levels,nkpt=mkmem,shiftk=shift,opt_ksloc=2)
-   call downfold_oper(loc_levels,paw_dmft,option=3,op_ks_diag=paw_dmft%eigen_dft(:,1+shift:mkmem+shift,:))     
-   call xmpi_matlu(loc_levels%matlu(:),natom,paw_dmft%distrib%comm_kpt)
- end if ! dmft_solv>=5
-                                                                
  if (paw_dmft%dmft_solv /= -1) then
    call chipsi_renormalization(paw_dmft,opt=opt_renorm)
    if (myproc == 0) call chipsi_print(paw_dmft,pawtab(:))
@@ -245,6 +236,14 @@ subroutine dmft_solve(cryst_struc,istep,dft_occup,mpi_enreg,paw_dmft,pawang,pawt
  end if ! dmft_solv/=1
  call timab(621,2,tsec(:))
 
+ ! Downfold the KS eigenvalues                                                     
+ if (paw_dmft%dmft_solv >= 5) then
+   call init_oper(paw_dmft,loc_levels,opt_ksloc=2)
+   call downfold_oper(loc_levels,paw_dmft,procb=paw_dmft%distrib%procb(:), &
+                    & iproc=paw_dmft%distrib%me_kpt,option=3,op_ks_diag=paw_dmft%eigen_dft(:,:,:))
+   call xmpi_matlu(loc_levels%matlu(:),natom,paw_dmft%distrib%comm_kpt)
+ end if ! dmft_solv>=5
+
  call wrtout(std_out,message,'COLL')
  opt_log = 0
  if (paw_dmft%dmft_entropy == 2) opt_log = 1
@@ -277,8 +276,8 @@ subroutine dmft_solve(cryst_struc,istep,dft_occup,mpi_enreg,paw_dmft,pawang,pawt
  ! Set Hu in density representation for calculation of entropy if needed...
  if (paw_dmft%dmft_entropy == 1) then
    do itypat=1,ntypat
-     if (hu(itypat)%lpawu /= -1) &
-       & call data4entropyDMFT_setHu(paw_dmft%forentropyDMFT,itypat,dble(hu(itypat)%udens(:,:)))
+     if (hu(itypat)%lpawu == -1) cycle
+     call data4entropyDMFT_setHu(paw_dmft%forentropyDMFT,itypat,dble(hu(itypat)%udens(:,:)))
    end do ! itypat
  end if ! dmft_entropy=1
    
