@@ -1958,14 +1958,16 @@ subroutine integrate_green(green,paw_dmft,prtopt,opt_ksloc,opt_after_solver,opt_
    !call destroy_oper(occup_temp)
    if (optfilloccnd == 1) then
      band_index = 0
+     fac = one
+     if (nsppol == 1 .and. nspinor == 1) fac = two
      do isppol=1,nsppol
        do ikpt=1,nkpt
          do ib1=1,mbandc
            do ib=1,mbandc
              paw_dmft%occnd(1,paw_dmft%include_bands(ib),paw_dmft%include_bands(ib1),&
-                & ikpt,isppol) = dble(green%occup%ks(ib,ib1,ikpt,isppol))
+                & ikpt,isppol) = fac * dble(green%occup%ks(ib,ib1,ikpt,isppol))
              paw_dmft%occnd(2,paw_dmft%include_bands(ib),paw_dmft%include_bands(ib1),&
-                & ikpt,isppol) = aimag(green%occup%ks(ib,ib1,ikpt,isppol))
+                & ikpt,isppol) = fac * aimag(green%occup%ks(ib,ib1,ikpt,isppol))
            end do  ! ib
          end do ! ib1
          if (paw_dmft%dmft_use_all_bands) then
@@ -1973,14 +1975,13 @@ subroutine integrate_green(green,paw_dmft,prtopt,opt_ksloc,opt_after_solver,opt_
            do ib=1,nband_k
              if (paw_dmft%band_in(ib)) cycle
              paw_dmft%occnd(:,:,ib,ikpt,isppol) = zero
-             paw_dmft%occnd(1,ib,ib,ikpt,isppol) = &
+             paw_dmft%occnd(1,ib,ib,ikpt,isppol) = fac * &
                & occup_fd(paw_dmft%eigen(ib+band_index),paw_dmft%fermie,paw_dmft%temp)
            end do ! ib
            band_index = band_index + nband_k
          end if ! use_all_bands       
        end do ! ikpt
      end do ! isppol
-     if (nsppol == 1 .and. nspinor == 1) paw_dmft%occnd(:,:,:,:,:) = two * paw_dmft%occnd(:,:,:,:,:)
    end if ! optfilloccnd
       !   do ib1 = 1, mbandc
       ! do ib = 1, mbandc

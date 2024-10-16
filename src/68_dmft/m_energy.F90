@@ -700,7 +700,7 @@ subroutine compute_migdal_energy(e_hu_migdal,e_hu_migdal_tot,green,paw_dmft,self
 !Local variables-------------------------------
  integer :: i,iatom,ierr,ifreq,im,isppol,lpawu,myproc
  integer :: natom,ndim,nmoments,nspinor,nsppol,nwlo
- real(dp) :: beta,fac
+ real(dp) :: beta
  !complex(dpc) :: xmig_1,xmig_2,xmig_3,se,shift
  complex(dpc) :: omega
  complex(dpc), allocatable :: correction(:),integral(:),omega_inv(:),trace_moments(:,:)
@@ -758,15 +758,9 @@ subroutine compute_migdal_energy(e_hu_migdal,e_hu_migdal_tot,green,paw_dmft,self
    call copy_matlu(self%oper(nwlo)%matlu(:),self_nwlo_re(:),natom,opt_re=1) 
  end if ! moments
 
- write(*,*) "Debug"
- call print_matlu(green%occup%matlu(:),natom,1)
- 
- fac = one
- if (nsppol == 1 .and. nspinor == 1) fac = two
- 
  do ifreq=1,nwlo
  
-  ! if (self%distrib%procf(ifreq) /= myproc) cycle
+   if (self%distrib%procf(ifreq) /= myproc) cycle
  
    omega = cmplx(zero,paw_dmft%omega_lo(ifreq),kind=dp)
    omega_inv(1) = cone / omega
@@ -783,21 +777,15 @@ subroutine compute_migdal_energy(e_hu_migdal,e_hu_migdal_tot,green,paw_dmft,self
 
    call trace_prod_matlu(matlu_tmp(:),green%oper(ifreq)%matlu(:),natom,integral(:))  
 
-   integral(:) = fac * integral(:)
-
    do i=1,nmoments
      integral(:) = integral(:) - trace_moments(:,i)*omega_inv(i)
    end do ! i
  
    e_hu_migdal(:) = e_hu_migdal(:) + dble(integral(:))*paw_dmft%wgt_wlo(ifreq)
   
-   write(*,*) "Debug",ifreq
-   call print_matlu(self%oper(ifreq)%matlu(:),natom,1)
-   call print_matlu(green%oper(ifreq)%matlu(:),natom,1)
-
  end do ! ifreq
  
-! call xmpi_sum(e_hu_migdal(:),paw_dmft%spacecomm,ierr)
+ call xmpi_sum(e_hu_migdal(:),paw_dmft%spacecomm,ierr)
  
  !xmig_1=zero
  !xmig_2=zero
