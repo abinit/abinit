@@ -175,8 +175,8 @@ subroutine rot_cg(occ_nd,cwavef,npw,nband,blocksize,nspinor,first_bandc,nbandc,o
   integer :: ig,ispinor,n,np
   character(len=500) :: message
 !arrays
-  real(kind=dp), allocatable :: occ_diag_red(:)
-  complex(kind=dpc), allocatable :: mat_tmp(:,:),mat_tmp2(:,:),occ_nd_cpx(:,:)
+  real(dp), allocatable :: occ_diag_red(:)
+  complex(dpc), allocatable :: mat_tmp(:,:),mat_tmp2(:,:),occ_nd_cpx(:,:)
 ! *************************************************************************
 
   DBG_ENTER("COLL")
@@ -188,7 +188,7 @@ subroutine rot_cg(occ_nd,cwavef,npw,nband,blocksize,nspinor,first_bandc,nbandc,o
 
 !! Initialisation
 
-  !ABI_MALLOC(cwavef_rot,(npw,nbandc,nspinor)) 
+  !ABI_MALLOC(cwavef_rot_g,(nbandc,nspinor)) 
   ABI_MALLOC(occ_diag_red,(nbandc))
   ABI_MALLOC(occ_nd_cpx,(nbandc,nbandc))
 
@@ -212,11 +212,11 @@ subroutine rot_cg(occ_nd,cwavef,npw,nband,blocksize,nspinor,first_bandc,nbandc,o
 
 !! Compute the corresponding wave functions if nothing wrong happened
   ! $c^{rot}_{n,k}(g) =  \sum_{n'} [\bar{f_{n',n}} * c_{n',k}(g)]$
-!  do ig=1,npw
-!  cwavef_rot_g(:,:) = czero
-!    do n=1,nbandc
-!      do np=1,nbandc
-!        cwavef_rot_g(n,:) = cwavef_rot_g(n,:) + occ_nd_cpx(np, n) * &
+  !do ig=1,npw
+  !cwavef_rot_g(:,:) = czero
+  !  do n=1,nbandc
+  !    do np=1,nbandc
+  !      cwavef_rot_g(n,:) = cwavef_rot_g(n,:) + occ_nd_cpx(np, n) * &
 !&                           cmplx(cwavef(1,ig,np+first_bandc-1,:),cwavef(2,ig,np+first_bandc-1,:), kind=dpc)
 !      end do ! np
 !    end do ! n
@@ -226,7 +226,7 @@ subroutine rot_cg(occ_nd,cwavef,npw,nband,blocksize,nspinor,first_bandc,nbandc,o
 
   ABI_MALLOC(mat_tmp,(npw,nbandc))
   ABI_MALLOC(mat_tmp2,(npw,nbandc))
-  occ_nd_cpx(:,:) = conjg(occ_nd_cpx(:,:))
+  !occ_nd_cpx(:,:) = conjg(occ_nd_cpx(:,:))
   
   do ispinor=1,nspinor
     mat_tmp(:,:) = cmplx(cwavef(1,1:npw,first_bandc:first_bandc+nbandc-1,ispinor), &
@@ -237,7 +237,7 @@ subroutine rot_cg(occ_nd,cwavef,npw,nband,blocksize,nspinor,first_bandc,nbandc,o
     cwavef(2,1:npw,first_bandc:first_bandc+nbandc-1,ispinor) = aimag(mat_tmp2(:,:))
   end do ! ispinor 
 
-  !ABI_FREE(cwavef_rot)
+  !ABI_FREE(cwavef_rot_g)
   ABI_FREE(mat_tmp)
   ABI_FREE(mat_tmp2)
   ABI_FREE(occ_diag_red)

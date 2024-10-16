@@ -2332,7 +2332,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%dmatudiag=0
    dtsets(idtset)%dmft_entropy=0
    dtsets(idtset)%dmft_dc=1
-   dtsets(idtset)%dmft_fermi_algo=2
+   dtsets(idtset)%dmft_fermi_algo=1
    dtsets(idtset)%dmft_fermi_step=0.02_dp
    dtsets(idtset)%dmft_gaussorder=2
    dtsets(idtset)%dmft_integral=1
