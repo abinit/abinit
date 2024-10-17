@@ -3,10 +3,11 @@
 !! m_bessel2
 !!
 !! FUNCTION
-!! Computes modified Bessel functions of the first and second kind (taken from scipy).
+!! Computes modified Bessel functions of the first and second kind. 
+!! These routines were taken from https://www.netlib.org/slatec/.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2023 
+!!  Copyright (C) 2024-2024 ABINIT group 
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .

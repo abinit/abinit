@@ -6,8 +6,8 @@
 !!  This module contains several routines related to the "exact" double counting.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2024 Kristjan Haule
-!! These routines were taken from embedded DMFT 
+!! Copyright (C) 2020 Kristjan Haule
+!! These routines were translated from embedded DMFT. 
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
