@@ -2410,6 +2410,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%fock_icutcoul=3
    dtsets(idtset)%freqim_alpha=five
    dtsets(idtset)%friction=0.001_dp
+   dtsets(idtset)%frictionbar=0.001_dp
    dtsets(idtset)%frzfermi=0
    dtsets(idtset)%fxcartfactor=one ! Should be adjusted to the H2 conversion factor
 !  G

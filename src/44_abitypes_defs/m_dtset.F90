@@ -817,6 +817,7 @@ type, public :: dataset_type
  real(dp) :: freqspmin = zero
  real(dp) :: freqspmax = zero
  real(dp) :: friction
+ real(dp) :: frictionbar
  real(dp) :: fxcartfactor
  real(dp) :: ga_opt_percent
  real(dp) :: gwencomp = 2.0_dp
@@ -2161,6 +2162,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%fband              = dtin%fband
  dtout%focktoldfe         = dtin%focktoldfe
  dtout%friction           = dtin%friction
+ dtout%frictionbar        = dtin%frictionbar
  dtout%fxcartfactor       = dtin%fxcartfactor
  dtout%ga_opt_percent     = dtin%ga_opt_percent
  dtout%gwls_model_parameter = dtin%gwls_model_parameter
@@ -3395,7 +3397,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' fit_tolGF fit_tolMSDE fit_tolMSDF fit_tolMSDFS fit_tolMSDS'
  list_vars=trim(list_vars)//' fockoptmix focktoldfe fockdownsampling fock_icutcoul'
  list_vars=trim(list_vars)//' freqim_alpha freqremax freqremin freqspmax'
- list_vars=trim(list_vars)//' freqspmin friction frzfermi fxcartfactor'
+ list_vars=trim(list_vars)//' freqspmin friction frictionbar frzfermi fxcartfactor'
  list_vars=trim(list_vars)//' f4of2_sla f6of2_sla'
 !G
  list_vars=trim(list_vars)//' ga_algor ga_fitness ga_n_rules ga_opt_percent ga_rules'
