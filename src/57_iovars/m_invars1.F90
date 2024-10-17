@@ -2587,7 +2587,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
      if (dtsets(idtset)%gpu_option == ABI_GPU_DISABLED) then
        dtsets(idtset)%nline = 6
      else
-       dtsets(idtset)%nline = 8
+       dtsets(idtset)%nline = 6
      end if
    end if
 
