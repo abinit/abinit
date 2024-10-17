@@ -956,6 +956,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'friction',tread,'DPR')
  if(tread==1) dtset%friction=dprarr(1)
 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'frictionbar',tread,'DPR')
+ if(tread==1) dtset%frictionbar=dprarr(1)
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'mdwall',tread,'LEN')
  if(tread==1) dtset%mdwall=dprarr(1)
 
@@ -1681,6 +1684,10 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    elseif(INDEX(dtset%moldyn,'nvt_isokin').gt.0) then
      dtset%ionmov=12
    elseif(INDEX(dtset%moldyn,'nvt_langevin').gt.0) then
+     dtset%ionmov=16
+   elseif(INDEX(dtset%moldyn,'npt_langevin').gt.0) then
+     dtset%ionmov=16
+   elseif(INDEX(dtset%moldyn,'nst_langevin').gt.0) then
      dtset%ionmov=16
    elseif(INDEX(dtset%moldyn,'nvt_nose').gt.0) then
      dtset%ionmov=13

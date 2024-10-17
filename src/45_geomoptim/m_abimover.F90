@@ -690,8 +690,8 @@ type(abimover_specs),intent(out) :: specs
 !  ------------------------------------------
 case (16)
 !  TEMPORARLY optcell is not allow
-   specs%isARused=.FALSE.
    specs%isVused=.TRUE.  ! Velocities are used
+   specs%isFconv=.FALSE. ! Convergence is not used for MD
    specs%ncycle=1
 !  Values use in XML Output
    specs%type4xml='langevin'

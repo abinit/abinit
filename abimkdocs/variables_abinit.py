@@ -5084,7 +5084,7 @@ Variable(
     added_in_version="before_v9",
     text=r"""
 Gives the internal friction coefficient (atomic units) for Langevin dynamics
-(when [[ionmov]] = 9): fixed temperature simulations with random forces.
+(when [[ionmov]] is set to 9 or 16, or [[imgmov]] = 9): fixed temperature simulations with random forces.
 
 The equation of motion is:
 $M_I \frac{d^2 R_I}{dt^2}= F_I -$[[friction]]$*M_I \frac{d R_I}{dt} - F_{random,I}$,
@@ -5092,6 +5092,8 @@ where $F_{random,I}$ is a Gaussian random force with average zero and variance [
 The atomic unit of [[friction]] is Hartree*Electronic mass*(atomic unit of Time)/Bohr^2. See [[cite:Chelikowsky2000]] for additional information.
 """,
 ),
+
+# ADD FRICTIONBAR INPUT PARAMETER HERE
 
 Variable(
     abivarname="frzfermi",
@@ -21523,10 +21525,6 @@ are not critical as this is a fictitious damping used to relax structures. A
 typical value for silicon is 400 with [[dtion]] of 350 and atomic mass 28
 [[amu]]. Critical damping is most desirable and is found only by optimizing
 [[vis]] for a given situation.
-
-In the case of Path-Integral Molecular Dynamics using the Langevin Thermostat
-([[imgmov]] = 9), [[vis]] defines the friction coefficient, in atomic units.
-Typical value range is 0.00001-0.001.
 """,
 ),
 

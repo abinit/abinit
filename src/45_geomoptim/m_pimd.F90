@@ -90,10 +90,10 @@ MODULE m_pimd
   integer  :: use_qtb
   integer  :: qtb_file_unit
   real(dp) :: adpimd_gamma
-  real(dp) :: vis
+  real(dp) :: friction
   real(dp) :: bmass
   real(dp) :: dtion
-  real(dp) :: friction
+  real(dp) :: frictionbar
 ! Arrays
   integer ,pointer  :: typat(:)      ! This pointer is associated with dtset%typat
   real(dp),pointer :: amu(:)         ! This pointer is associated with dtset%%amu_orig(:,1)
@@ -165,10 +165,10 @@ subroutine pimd_init(dtset,pimd_param,is_master,force_imgmov)
    pimd_param%optcell     = dtset%optcell
    pimd_param%pitransform = dtset%pitransform
    pimd_param%adpimd_gamma= dtset%adpimd_gamma
-   pimd_param%vis         = dtset%vis
+   pimd_param%friction    = dtset%friction
    pimd_param%bmass       = dtset%bmass
    pimd_param%dtion       = dtset%dtion
-   pimd_param%friction    = dtset%friction
+   pimd_param%frictionbar = dtset%frictionbar
    pimd_param%mdtemp      =>dtset%mdtemp
    pimd_param%pimass      =>dtset%pimass
    pimd_param%strtarget   =>dtset%strtarget
@@ -243,10 +243,10 @@ subroutine pimd_nullify(pimd_param)
  pimd_param%traj_unit    = -1
  pimd_param%use_qtb      =  0
  pimd_param%adpimd_gamma = one
- pimd_param%vis          = zero
+ pimd_param%friction     = zero
  pimd_param%bmass        = zero
  pimd_param%dtion        = zero
- pimd_param%friction     = zero
+ pimd_param%frictionbar  = zero
  nullify(pimd_param%mdtemp)
  nullify(pimd_param%pimass)
  nullify(pimd_param%strtarget)
