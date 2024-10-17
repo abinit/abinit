@@ -72,5 +72,5 @@ bandpp   5
 #%% [extra_info]
 #%% authors = M. Sarraute
 #%% keywords = HF, PBE0
-#%% description = Test of PBE0 in sequential case, PAW, from LibXC
+#%% description = Test of PBE0 with GPU, PAW, from LibXC
 #%%<END TEST_INFO>
