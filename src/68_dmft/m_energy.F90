@@ -698,8 +698,8 @@ subroutine compute_migdal_energy(e_hu_migdal,e_hu_migdal_tot,green,paw_dmft,self
  type(self_type), target, intent(in) :: self
 ! integer :: prtopt
 !Local variables-------------------------------
- integer :: i,iatom,ierr,ifreq,im,isppol,lpawu,myproc
- integer :: natom,ndim,nmoments,nspinor,nsppol,nwlo
+ integer :: i,iatom,ierr,ifreq,lpawu,myproc
+ integer :: natom,nmoments,nspinor,nsppol,nwlo
  real(dp) :: beta
  !complex(dpc) :: xmig_1,xmig_2,xmig_3,se,shift
  complex(dpc) :: omega
@@ -1378,7 +1378,7 @@ subroutine compute_trace_log_loc(green,paw_dmft,trace,opt_inv)
  ABI_MALLOC(work,(2*ndim-1))
  ABI_MALLOC(mat_temp,(ndim,ndim))
  call zheev('n','u',ndim,mat_temp(:,:),ndim,eig(:),work(:),-1,rwork(:),info)
- lwork = work(1)
+ lwork = int(work(1))
  ABI_FREE(work)
  ABI_MALLOC(work,(lwork))
  ABI_FREE(mat_temp)

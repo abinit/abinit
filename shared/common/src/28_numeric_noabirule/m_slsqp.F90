@@ -350,7 +350,6 @@ CONTAINS  !=====================================================================
       DOUBLE PRECISION a(la,n+1), c(la), g(n+1), l((n+1)*(n+2)/2), &
                        mu(la), r(m+n+n+2), s(n+1), u(n+1), v(n+1), w(*), &
                        x(n), xl(n), xu(n), x0(n), &
-                       ddot_sl, dnrm2_, linmin, &
                        acc, alfmin, alpha, f, f0, gs, h1, h2, h3, h4, &
                        hun, one, t, t0, ten, tol, two, ZERO
 
@@ -698,9 +697,9 @@ CONTAINS  !=====================================================================
 !c     revised                        march 1989
 
       DOUBLE PRECISION l,g,a,b,w,xl,xu,x,y, &
-                       diag,ZERO,one,ddot_sl,xnorm
+                       diag,ZERO,one,xnorm
 
-      INTEGER          jw(*),i,ic,id,ie,IF,ig,ih,il,im,ip,iu,iw,&
+      INTEGER          jw(*),i,ic,id,ie,IF,ig,ih,il,ip,iw,&
            i1,i2,i3,i4,la,m,meq,mineq,mode,m1,n,nl,n1,n2,n3,&
            nancnt,j
 
@@ -909,7 +908,7 @@ CONTAINS  !=====================================================================
       INTEGER          jw(*),i,ie,IF,ig,iw,j,k,krank,l,lc,LE,lg,&
                        mc,mc1,me,mg,mode,n
       DOUBLE PRECISION c(lc,n),e(LE,n),g(lg,n),d(lc),f(LE),h(lg),x(n),&
-                       w(*),t,ddot_sl,xnrm,rnorm(1),dnrm2_,epmach,ZERO
+                       w(*),t,xnrm,rnorm(1),epmach,ZERO
       DATA             epmach/2.22d-16/,ZERO/0.0d+00/
 
       mode=2
@@ -1044,7 +1043,7 @@ CONTAINS  !=====================================================================
 
       INTEGER          i,j,LE,lg,me,mg,mode,n,jw(lg)
       DOUBLE PRECISION e(LE,n),f(LE),g(lg,n),h(lg),x(n),w(*),&
-                       ddot_sl,xnorm,dnrm2_,epmach,t,one
+                       xnorm,epmach,t,one
       DATA             epmach/2.22d-16/,one/1.0d+00/
 
 !C  QR-FACTORS OF E AND APPLICATION TO F
@@ -1124,7 +1123,7 @@ CONTAINS  !=====================================================================
 !C               4: INEQUALITY CONSTRAINTS INCOMPATIBLE
 
       DOUBLE PRECISION g,h,x,xnorm,w,u,v,&
-                       ZERO,one,fac,rnorm,dnrm2_,ddot_sl,diff
+                       ZERO,one,fac,rnorm,diff
       INTEGER          INDEX,i,IF,iw,iwdual,iy,iz,j,m,mg,mode,n,n1
       DIMENSION        g(mg,n),h(m),x(n),w(*),INDEX(m)
       diff(u,v)=       u-v
@@ -1239,8 +1238,8 @@ CONTAINS  !=====================================================================
                        k,l,m,mda,mode,n,npp1,nsetp,INDEX(n)
 
       DOUBLE PRECISION a(mda,n),b(m),x(n),w(n),z(m),asave,diff,&
-                       factor,ddot_sl,ZERO,one,wmax,alpha,&
-                       c,s,t,u,v,up,rnorm,unorm,dnrm2_
+                       factor,ZERO,one,wmax,alpha,&
+                       c,s,t,u,v,up,rnorm,unorm
 
       diff(u,v)=       u-v
 
@@ -1429,7 +1428,7 @@ CONTAINS  !=====================================================================
       INTEGER          i,j,jb,k,kp1,krank,l,ldiag,lmax,m,&
                        mda,mdb,n,nb,ip(n)
       DOUBLE PRECISION a(mda,n),b(mdb,nb),h(n),g(n),rnorm(nb),factor,&
-                       tau,ZERO,hmax,diff,tmp,ddot_sl,dnrm2_,u,v
+                       tau,ZERO,hmax,diff,tmp,u,v
       diff(u,v)=       u-v
       DATA             ZERO/0.0d0/, factor/1.0d-3/
 

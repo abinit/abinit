@@ -602,7 +602,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
        call chkint_le(0,1,cond_string,cond_values,ierr,'dmftbandf',dt%dmftbandf,dt%mband,iout)
 
        cond_string(1)='usedmft' ; cond_values(1)=dt%usedmft
-       call chkint_ge(0,1,cond_string,cond_values,ierr,'dmft_entropy',dt%dmft_entropy,0,iout)
+       call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_entropy',dt%dmft_entropy,3,(/0,1,2/),iout)
        call chkint_ge(0,1,cond_string,cond_values,ierr,'dmft_iter',dt%dmft_iter,0,iout)
        call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_kspectralfunc',dt%dmft_kspectralfunc,2,(/0,1/),iout)
 
@@ -611,7 +611,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
          call chkint_eq(0,1,cond_string,cond_values,ierr,'iscf',dt%iscf,2,(/-2,-3/),iout)
        endif
 
-       if((dt%dmft_solv<6.or.dt%dmft_solv>7).and.dt%ucrpa==0.and.dt%dmft_solv/=9) then
+       if(dt%ucrpa==0.and.dt%dmft_solv/=9) then
          cond_string(1)='usedmft' ; cond_values(1)=dt%usedmft
          call chkint_ge(0,1,cond_string,cond_values,ierr,'dmft_nwlo',dt%dmft_nwlo,1,iout)
          call chkint_ge(0,1,cond_string,cond_values,ierr,'dmft_nwli',dt%dmft_nwli,1,iout)
@@ -707,6 +707,10 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
            ABI_ERROR(msg)
          end if
        end if
+       if (dt%dmft_entropy==2) then
+         cond_string(1)='dmft_entropy' ; cond_values(1)=dt%dmft_entropy
+         call chkint_ge(0,1,cond_string,cond_values,ierr,'dmft_nlambda',dt%dmft_nlambda,1,iout)
+       end if 
        if (dt%dmft_entropy==2.and.dt%dmft_solv/=6.and.dt%dmft_solv/=7) then
          write(msg,'(a)') 'dmft_entropy=2 is only implemented for dmft_solv=6 or 7'
          ABI_ERROR(msg)
@@ -720,7 +724,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 
 #if !defined HAVE_TRIQS
    if(dt%dmft_solv>=6.and.dt%dmft_solv<=7) then
-     write(msg, '(a,a,a)' )&
+     write(msg,'(3a)' )&
      ' dmft_solv=6, or 7 is only relevant if the TRIQS library is linked',ch10,&
      ' Action: check compilation options'
      ABI_ERROR(msg)

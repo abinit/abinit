@@ -1486,7 +1486,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang, &
          EE = zero
          do if1=1,nflavor
            do if2=if1+1,nflavor
-             EE = EE + docc(if1,if2)*udens_atoms_for_s(iatom)%mat(if1,if2,1)
+             EE = EE + docc(if1,if2)*dble(udens_atoms_for_s(iatom)%mat(if1,if2,1))
          !      write(std_out,*) udens_atoms_for_s(iatom)%value(if1,if2),docc(if1,if2)
            end do
          end do
@@ -1497,7 +1497,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang, &
          EE = zero
          do if1=1,nflavor
            do if2=if1+1,nflavor
-             EE = EE + docc(if1,if2)*udens_atoms(iatom)%mat(if1,if2,1)
+             EE = EE + dble(docc(if1,if2)*udens_atoms(iatom)%mat(if1,if2,1))
          !      write(std_out,*) udens_atoms(iatom)%value(if1,if2),docc(if1,if2)
            end do
          end do
@@ -2821,7 +2821,7 @@ subroutine ctqmc_calltriqs(paw_dmft,cryst_struc,hu,levels_ctqmc,gtmp_nd,gw_tmp_n
  end do
 
  !u_mat_ijkl   =  Ha_eV * reshape( u_mat_ijkl , [nflavor,nflavor,nflavor,nflavor] )  !column -> row major + conversion
- u_mat_ij     = transpose( hu(itypat)%udens ) * Ha_eV !column -> row major + conversion
+ u_mat_ij     = transpose( dble(hu(itypat)%udens) ) * Ha_eV !column -> row major + conversion
  levels_ctqmc = levels_ctqmc * Ha_eV
 
  !Location array in memory for C++ pointer args to pass
@@ -3220,12 +3220,12 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,weiss,energy_level,udens,vee)
  complex(dpc) :: mself_1,mself_2,omega,sumTerm
  type(c_ptr) :: Eu_ptr,ftau_ptr,gl_ptr,gtau_ptr,levels_ptr,mself_1_ptr,mself_2_ptr
  type(c_ptr) :: ndlr_ptr,occ_ptr,udens_ptr,vee_ptr,wdlr_ptr
- real(dp), allocatable :: Adlr(:,:),Adlr_iw(:,:),bdlr(:),gl_dlr_im(:)
+ real(dp), allocatable :: Adlr(:,:),bdlr(:),gl_dlr_im(:)
  real(dp), allocatable :: gl_dlr_re(:),jbes(:),lam_list(:)
  real(dp), allocatable :: mgreen(:),t(:,:),tpoints(:),tweights(:)
  real(dp), allocatable :: wdlr(:),wdlr_beta(:),wdlr2(:),wdlr3(:),wdlr4(:)
  real(dp), target, allocatable :: occ(:),wdlr_tmp(:)
- complex(dpc), allocatable :: gl_dlr(:,:,:,:),gl_tmp(:,:,:,:),omega_fac(:)
+ complex(dpc), allocatable :: Adlr_iw(:,:),gl_dlr(:,:,:,:),gl_tmp(:,:,:,:),omega_fac(:)
  complex(dpc), target, allocatable :: gl(:,:,:),gtau(:,:,:),levels_ctqmc(:,:)
  complex(dpc), target, allocatable :: moments_self_1(:,:),moments_self_2(:,:)
  type(matlu_type), target, allocatable :: ftau(:)
@@ -3535,7 +3535,7 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,weiss,energy_level,udens,vee)
              iflavor = im + (isppol-1)*ndim
              do ileg=1,nleg
                if (xx >= dble(99)) call jbessel(jbes(ileg),besp,bespp,ileg-1,1,xx)
-               u_nl = sqrt(dble(2*ileg-1))*(-1)**(ifreq-1)*cmplx(zero,one)**(ileg)*jbes(ileg)
+               u_nl = sqrt(dble(2*ileg-1))*(-1)**(ifreq-1)*(j_dpc**(ileg))*jbes(ileg)
                if (nsppol == 1 .and. nspinor == 1) then
                  gl_tmp(ileg,im,im1,isppol) = &
                    & (gl(ileg,iflavor,iflavor1)+gl(ileg,iflavor+ndim,iflavor1+ndim))*half
@@ -3674,7 +3674,7 @@ contains
 subroutine lsq_g(gl,err)
 
 !Arguments ------------------------------------
- real(dp), intent(in) :: gl(ndlr)
+ real(dp), intent(in) :: gl(:)
  real(dp), intent(out) :: err
 !Local variables ------------------------------
 
@@ -3688,8 +3688,8 @@ end subroutine lsq_g
 subroutine jac_lsq_g(gl,jac)
 
 !Arguments ------------------------------------
- real(dp), intent(in) :: gl(ndlr)
- real(dp), intent(out) :: jac(ndlr+1)  ! need dimension ndlr+1 for the SLSQP routine 
+ real(dp), intent(in) :: gl(:)
+ real(dp), intent(inout) :: jac(:)  ! need dimension ndlr+1 for the SLSQP routine 
 !Local variables ------------------------------
 
  jac = zero
@@ -3703,8 +3703,8 @@ end subroutine jac_lsq_g
 subroutine con_moments(gl,con)
 
 !Arguments ------------------------------------
- real(dp), intent(in) :: gl(ndlr)
- real(dp), intent(out) :: con(ncon)
+ real(dp), intent(in) :: gl(:)
+ real(dp), intent(inout) :: con(:)
 !Local variables ------------------------------
  
  con(1) = sum(gl(:)) - mgreen(1)
@@ -3719,9 +3719,11 @@ end subroutine con_moments
 subroutine jac_con_moments(gl,jac_con)
 
 !Arguments ------------------------------------
- real(dp), intent(in) :: gl(ndlr)
- real(dp), intent(out) :: jac_con(ncon,ndlr+1)  ! need dimension ndlr+1 for the SLSQP routine
+ real(dp), intent(in) :: gl(:)
+ real(dp), intent(inout) :: jac_con(:,:)  ! need dimension ndlr+1 for the SLSQP routine
 !Local variables ------------------------------
+
+ ABI_UNUSED(gl(:))
 
  jac_con(1,1:ndlr) = one
  if (ncon > 1) then 
@@ -3792,17 +3794,46 @@ function k_iw(iom,omega)
  complex(dpc) :: k_iw
 ! *********************************************************************
 
- k_iw = one / (cmplx(zero,iom,16)-omega)
+ k_iw = one / (cmplx(zero,iom,kind=dp)-omega)
 
 end function k_iw
 !!***
 
 subroutine fit_dlr(m,n,fun,con,jac,jac_con,x)
 
+ use m_slsqp, only : slsqp
+
 !Arguments ------------------------------------
  integer, intent(in) :: m,n
- real(dp), intent(out) :: x(n)
- external :: fun,con,jac,jac_con
+ real(dp), intent(inout) :: x(n)
+
+ interface
+  
+   subroutine fun(x,f)
+     use defs_basis
+     real(dp), intent(in) :: x(:)
+     real(dp), intent(out) :: f
+   end subroutine fun
+
+   subroutine con(x,c)
+     use defs_basis
+     real(dp), intent(in) :: x(:)
+     real(dp), intent(inout) :: c(:)
+   end subroutine con
+
+   subroutine jac(x,g)
+     use defs_basis
+     real(dp), intent(in) :: x(:) 
+     real(dp), intent(inout) :: g(:)
+   end subroutine jac
+
+   subroutine jac_con(x,a)
+     use defs_basis
+     real(dp), intent(in) :: x(:)
+     real(dp), intent(inout) :: a(:,:)
+   end subroutine jac_con
+
+ end interface
 !Local variables ------------------------------
  integer :: i,iexact,incons,ireset,iter,itermx,l_jw,l_w,la
  integer :: line,maxiter,meq,mineq,mode,n1,n2,n3
@@ -3815,16 +3846,16 @@ subroutine fit_dlr(m,n,fun,con,jac,jac_con,x)
  maxiter = 10000
  meq = m   ! all constraints are equality constraints here
  la = m
- x = zero
- xl = zero
- xu = zero
- xl = xl / zero  ! set lower and upper bounds to NaN (very important, this is how slsqp recognizes that no bounds should be applied)
- xu = xu / zero
+ x(:) = zero
+ xl(:) = zero
+ xu(:) = zero
+ xl(:) = xl(:) / zero  ! set lower and upper bounds to NaN (very important, this is how slsqp recognizes that no bounds should be applied)
+ xu(:) = xu(:) / zero
 
- call fun(x,f)
- call con(x,c)
- call jac(x,g)
- call jac_con(x,a)
+ call fun(x(:),f)
+ call con(x(:),c(:))
+ call jac(x(:),g(:))
+ call jac_con(x(:),a(:,:))
  acc = tol8  ! best not to overconverge the result, in order to avoid overfitting 
  iter = maxiter
  mode = 0

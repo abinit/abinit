@@ -86,7 +86,13 @@ CONTAINS  !=====================================================================
       double precision xtol,epsfcn,factor
       double precision x(n),fvec(n),diag(n),fjac(ldfjac,n),r(lr), &
      &                 qtf(n),wa1(n),wa2(n),wa3(n),wa4(n)
-      external fcn
+      interface 
+        subroutine fcn(n,x,fvec,iflag)
+          integer, intent(in) :: n,iflag
+          double precision, intent(in) :: x(n)
+          double precision, intent(inout) :: fvec(n)
+        end subroutine fcn
+      end interface
 !c     **********
 !c
 !c     subroutine hybrd
@@ -834,6 +840,13 @@ CONTAINS  !=====================================================================
       integer n,ldfjac,iflag,ml,mu
       double precision epsfcn
       double precision x(n),fvec(n),fjac(ldfjac,n),wa1(n),wa2(n)
+      interface 
+        subroutine fcn(n,x,fvec,iflag)
+          integer, intent(in) :: n,iflag
+          double precision, intent(in) :: x(n)
+          double precision, intent(inout) :: fvec(n)
+        end subroutine fcn
+      end interface
 !c     **********
 !c
 !c     subroutine fdjac1
