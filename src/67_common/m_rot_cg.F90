@@ -172,7 +172,7 @@ subroutine rot_cg(occ_nd,cwavef,npw,nband,blocksize,nspinor,first_bandc,nbandc,o
   real(kind=dp), intent(inout) :: occ_diag(blocksize)
 !Local variables-------------------------------
 !scalars
-  integer :: ig,ispinor,n,np
+  integer :: ispinor,n,np
   character(len=500) :: message
 !arrays
   real(dp), allocatable :: occ_diag_red(:)
@@ -230,7 +230,7 @@ subroutine rot_cg(occ_nd,cwavef,npw,nband,blocksize,nspinor,first_bandc,nbandc,o
   
   do ispinor=1,nspinor
     mat_tmp(:,:) = cmplx(cwavef(1,1:npw,first_bandc:first_bandc+nbandc-1,ispinor), &
-                       & cwavef(2,1:npw,first_bandc:first_bandc+nbandc-1,ispinor))
+                       & cwavef(2,1:npw,first_bandc:first_bandc+nbandc-1,ispinor),kind=dp)
     call abi_xgemm("n","n",npw,nbandc,nbandc,cone,mat_tmp(:,:),npw, & 
                  & occ_nd_cpx(:,:),nbandc,czero,mat_tmp2(:,:),npw)
     cwavef(1,1:npw,first_bandc:first_bandc+nbandc-1,ispinor) = dble(mat_tmp2(:,:))

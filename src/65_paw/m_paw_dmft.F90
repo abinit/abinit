@@ -519,9 +519,6 @@ MODULE m_paw_dmft
   ! True for each proc wich has at least one band involved in DMFT non diagonal
   ! occupations on band parallelism
 
-  real(dp), allocatable :: bessel(:,:,:,:)
-  ! 4*pi*(i**l)*jl(|k+G|r)*r/sqrt(ucvol) for each G,r,atom type and kpt
-
   real(dp), allocatable :: eigen_dft(:,:,:)
   ! DFT eigenvalues for each correlated band, k-point, polarization
 
@@ -554,6 +551,9 @@ MODULE m_paw_dmft
 
 !  real(dp), allocatable :: phi0phiiint(:)
 !  ! non diagonal band-occupation for each k-point, polarisation.
+
+  complex(dpc), allocatable :: bessel(:,:,:,:)
+  ! 4*pi*(i**l)*jl(|k+G|r)*r/sqrt(ucvol) for each G,r,atom type and kpt
 
   complex(dpc), allocatable :: buf_psi(:)
   ! Buffer for the computation of Wannier function
@@ -685,12 +685,12 @@ subroutine init_sc_dmft(dtset,paw_dmft,dmatpawu,gprimd,kg,mpi_enreg,npwarr,&
 !Local variables ------------------------------------
  integer :: bdtot_index,dmft_solv,dmftbandi,dmftbandf,fac,grid_unt,i
  integer :: iatom,iatom1,iband,icb,ierr,ifreq,ig,ik,ikg,ikpt,im,im1
- integer :: indproj,ioerr,iproj,ir,irot,isppol,isym,itypat,lpawu,lpawu1,maxlpawu
+ integer :: indproj,ioerr,iproj,ir,irot,isppol,itypat,lpawu,lpawu1,maxlpawu
  integer :: mband,mbandc,mesh_size,mesh_type,mkmem,mpw,myproc,natom,nband_k,ndim
  integer :: ngrid,nkpt,nproc,nproju,npw,nspinor,nsppol
- integer :: nsym,ntypat,nwlo,residu,siz_paw,siz_proj,spacecomm,use_dmft
+ integer :: nsym,ntypat,siz_paw,siz_proj,use_dmft
  logical :: lexist,t2g,use_full_chipsi,verif,x2my2d
- real(dp) :: besp,lstep,norm,rad,rint,rstep,step,sumwtk
+ real(dp) :: bes,besp,lstep,norm,rad,rint,rstep,step,sumwtk
  integer, parameter :: mt2g(3) = (/1,2,4/)
  logical, allocatable :: lcycle(:),typcycle(:)
  real(dp), allocatable :: rmax(:),kpg(:,:),kpg_norm(:)
@@ -1331,11 +1331,9 @@ subroutine init_sc_dmft(dtset,paw_dmft,dmatpawu,gprimd,kg,mpi_enreg,npwarr,&
          do ir=1,paw_dmft%radgrid(itypat)%mesh_size
            rad = paw_dmft%radgrid(itypat)%rad(ir)
            do ig=1,npw
-             call paw_jbessel_4spline(paw_dmft%bessel(ig,ir,itypat,ik),besp,lpawu1,0, &
-                                    & two_pi*kpg_norm(ig)*rad,tol3)
+             call paw_jbessel_4spline(bes,besp,lpawu1,0,two_pi*kpg_norm(ig)*rad,tol3)
              ! Multiply by r since we want to compute Psi(r) * r, for radial integration
-             paw_dmft%bessel(ig,ir,itypat,ik) = four_pi * (j_dpc**lpawu1) * &
-                           & paw_dmft%bessel(ig,ir,itypat,ik) * rad / sqrt(ucvol)
+             paw_dmft%bessel(ig,ir,itypat,ik) = four_pi * (j_dpc**lpawu1) * bes * rad / sqrt(ucvol)
            end do ! ig
          end do ! ir
         typcycle(itypat) = .true.
@@ -1878,7 +1876,7 @@ subroutine construct_nwlo_dmft(paw_dmft)
    !omegamaxmin=paw_dmft%omega_li(paw_dmft%dmft_nwli)-paw_dmft%omega_li(paw_dmft%dmftqmc_l+1)
    ! Number of linear frequencies
    nlin = paw_dmft%dmftqmc_l
-   if (paw_dmft%dmft_solv == 6 .or. paw_dmft%dmft_solv == 7) nlin = nwlo * half
+   if (paw_dmft%dmft_solv == 6 .or. paw_dmft%dmft_solv == 7) nlin = int(nwlo * half)
    omegamaxmin = pi * temp * two * dble(nwli-nlin-1)
 
    !if(cubic_freq==1) then
@@ -2677,7 +2675,7 @@ subroutine init_paral_dmft(paw_dmft,distrib,nfreq)
    distrib%me_kpt   = mod(myproc,nproc_kpt)
    distrib%me_freq  = myproc / nproc_kpt
    
-   call MPI_COMM_SPLIT(spacecomm,distrib%me_kpt,distrib%me_freq,distrib%comm_freq,ierr)
+   call xmpi_comm_split(spacecomm,distrib%me_kpt,distrib%me_freq,distrib%comm_freq,ierr)
 
    distrib%me_kpt = myproc
 
@@ -2705,14 +2703,14 @@ subroutine init_paral_dmft(paw_dmft,distrib,nfreq)
    distrib%me_freq = mod(myproc,nproc_freq)
    distrib%shiftk  = distrib%me_kpt
 
-   call MPI_COMM_SPLIT(spacecomm,distrib%me_freq,distrib%me_kpt,distrib%comm_kpt,ierr)
+   call xmpi_comm_split(spacecomm,distrib%me_freq,distrib%me_kpt,distrib%comm_kpt,ierr)
  
    if (myproc >= nkpt*nproc_freq) then
      distrib%me_kpt  = myproc - nkpt*nproc_freq
      distrib%me_freq = nproc_freq 
    end if
 
-   call MPI_COMM_SPLIT(spacecomm,distrib%me_kpt,distrib%me_freq,distrib%comm_freq,ierr)
+   call xmpi_comm_split(spacecomm,distrib%me_kpt,distrib%me_freq,distrib%comm_freq,ierr)
 
    if (myproc >= nkpt*nproc_freq) distrib%me_kpt = myproc / nproc_freq
 
@@ -2752,8 +2750,8 @@ subroutine destroy_paral_dmft(paw_dmft,distrib)
  ABI_FREE(distrib%proct)
  
  if (paw_dmft%nproc/paw_dmft%nkpt > 1) then
-   call MPI_COMM_FREE(distrib%comm_freq,ierr)
-   call MPI_COMM_FREE(distrib%comm_kpt,ierr)
+   call xmpi_comm_free(distrib%comm_freq)
+   call xmpi_comm_free(distrib%comm_kpt)
  end if  
 
 end subroutine destroy_paral_dmft

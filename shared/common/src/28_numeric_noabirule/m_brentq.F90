@@ -94,10 +94,16 @@ subroutine brentq(f,xa,xb,xtol,rtol,iter,xcur,ierr)
 ! Written by Charles Harris charles.harris@sdl.usu.edu 
 
 !Arguments ------------------------------------
+  interface
+    subroutine f(x,fx)
+      use defs_basis
+      real(dp), intent(in) :: x
+      real(dp), intent(out) :: fx
+    end subroutine f
+  end interface
   real(dp), intent(in) :: xa,xb,xtol,rtol
   integer, intent(in) :: iter
   real(dp), intent(out) :: xcur
-  external :: f
   integer, intent(out) :: ierr
 !Local variables ------------------------------
   integer :: i

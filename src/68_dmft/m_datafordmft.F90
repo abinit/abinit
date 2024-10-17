@@ -136,7 +136,7 @@ subroutine datafordmft(cg,cprj,cryst_struc,dft_occup,dimcprj,dtset,eigen,mband_c
  character(len=500) :: message
  type(oper_type) :: loc_norm_check
  integer, allocatable :: displs(:),recvcounts(:)
- complex(dpc), allocatable :: buf_chipsi(:),buf_chipsi_tot(:),buf_psi(:),cwprj(:,:),psi_tmp(:)
+ complex(dpc), allocatable :: buf_chipsi(:),buf_chipsi_tot(:),cwprj(:,:),psi_tmp(:)
  type(pawcprj_type), allocatable :: cwaveprj(:,:)
  type(matlu_type), allocatable :: matlu_temp(:)
  integer,parameter :: spinor_idxs(2,4) = RESHAPE((/1,1,2,2,1,2,2,1/),(/2,4/))

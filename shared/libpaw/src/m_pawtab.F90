@@ -328,13 +328,13 @@ MODULE m_pawtab
    ! (tTAUcore(q) = FT of pseudo core kinetic density)
 
   real(dp) :: edc
-  ! Double counting energy (only when dmft_dc=8)
+  ! Double counting energy (only used for the exact double counting)
   
   real(dp) :: edcdc
-  ! Integral of Vdc(r)*rho(r) (only when dmft_dc=8)
+  ! Integral of Vdc(r)*rho(r) (only used for the exact double counting)
   
   real(dp) :: eps
-  ! Epsilon parameter for Yukawa potential (only when dmft_dc=8)
+  ! Epsilon parameter for Yukawa potential (only used for the exact double counting)
 
   real(dp) :: ex_cc
    ! Exchange energy for the core-core interaction of the Fock operator
@@ -358,7 +358,7 @@ MODULE m_pawtab
    ! Lamb shielding used in NMR shielding calcs (see m_orbmag.F90)
 
   real(dp) :: lambda
-  ! Lambda parameter for Yukawa potential (only when dmft_dc=8)
+  ! Lambda parameter for Yukawa potential (only used for the exact double counting)
 
   real(dp) :: rpaw
    ! Radius of PAW sphere

@@ -73,8 +73,8 @@ CONTAINS  !=====================================================================
  real(dp), intent(in) :: lambda,eps
  real(dp), intent(out) :: Fk(:)
 !Local variables ------------------------------
- integer :: ind,ir,k,mesh_type
- real(dp) :: dum1,dum2,norm,r_for_intg,y0
+ integer :: ir,k,mesh_type
+ real(dp) :: dum1,dum2,r_for_intg,y0
  real(dp), allocatable :: U_inside(:),U_outside(:),y1(:),y2(:)
  !************************************************************************
 
@@ -290,6 +290,8 @@ CONTAINS  !=====================================================================
  real(dp) :: Fk(lpawu+1)
  character(len=500) :: message
 !************************************************************************
+
+ ABI_UNUSED(iflag)
 
  lmb = lmb_eps(1) 
  eps = lmb_eps(2)

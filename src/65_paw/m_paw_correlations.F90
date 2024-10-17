@@ -837,8 +837,7 @@ CONTAINS  !=====================================================================
          write(message,*) "Using wavefunction from file",tmpfil
          call wrtout(std_out,message,"COLL")
          me = xmpi_comm_rank(xmpi_world)
-         if (me == 0) inquire(file=trim(tmpfil),exist=lexist)
-         call xmpi_bcast(lexist,0,xmpi_world,ierr)
+         inquire(file=trim(tmpfil),exist=lexist)
          if (.not. lexist) ABI_ERROR("File "//trim(tmpfil)//" does not exist !")
          if (me == 0) then
            open(unit=505,file=trim(tmpfil),status='unknown',form='formatted')
@@ -866,7 +865,7 @@ CONTAINS  !=====================================================================
        int1 = sqrt(int1)  
        
        if (me == 0) then
-         open(unit=505,file="dmft_radial_orbital_normalized",status="unknown",form="formatted")
+         open(unit=505,file="dmft_normalized_orbital",status="unknown",form="formatted")
          do ir=1,meshsz
            write(505,*) pawrad_tmp%rad(ir),pawtab(itypat)%proj(ir)/int1
          end do

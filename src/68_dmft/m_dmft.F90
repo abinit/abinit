@@ -98,9 +98,9 @@ subroutine dmft_solve(cryst_struc,istep,dft_occup,mpi_enreg,paw_dmft,pawang,pawt
  type(pawtab_type), intent(inout) :: pawtab(paw_dmft%ntypat)
  type(oper_type), intent(in) :: dft_occup
 !Local variables ------------------------------
- integer :: check,dmft_iter,ib,idmftloop,ikpt,isppol,istep_iter,itypat,mkmem,myproc
- integer :: natom,natomcor,ntypat,opt_fill_occnd,opt_log,opt_maxent,opt_moments
- integer :: opt_moments_weiss,opt_renorm,shift
+ integer :: check,dmft_iter,idmftloop,istep_iter,itypat,myproc
+ integer :: natom,ntypat,opt_fill_occnd,opt_log,opt_maxent,opt_moments
+ integer :: opt_moments_weiss,opt_renorm
  !integer :: iatom
  !logical :: etot_var
  logical :: t2g,x2my2d
