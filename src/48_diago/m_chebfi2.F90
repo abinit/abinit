@@ -211,7 +211,11 @@ subroutine chebfi_init(chebfi,neigenpairs,spacedim,tolerance,ecut,paral_kgb,band
  chebfi%space = space
  chebfi%neigenpairs = neigenpairs
  chebfi%spacedim    = spacedim
- chebfi%tolerance   = tolerance
+ if (tolerance > 0.0) then
+   chebfi%tolerance = tolerance
+ else
+   chebfi%tolerance = 1.0e-20
+ end if
  chebfi%ecut        = ecut
  chebfi%paral_kgb   = paral_kgb
  chebfi%comm_cols   = comm_cols
@@ -498,7 +502,7 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,pcond,eigen,residu,nspinor)
  integer :: spacedim
  integer :: space_res
  integer :: neigenpairs
- integer :: nline,nline_max
+ integer :: nline,nline_max,nline_tolwfr
  integer :: iline, iband, ierr
 ! integer :: comm_fft_save,comm_band_save !FFT and BAND MPI communicators from rest of Abinit, to be saved
  real(dp) :: tolerance
@@ -510,6 +514,7 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,pcond,eigen,residu,nspinor)
  real(dp) :: two_over_r
  real(dp) :: center
  real(dp) :: radius
+ real(dp) :: eig_iband
  type(xg_t) :: DivResults
 !arrays
  real(dp) :: tsec(2)
@@ -630,22 +635,36 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,pcond,eigen,residu,nspinor)
  call timab(tim_oracle,1,tsec)
  nline_max = cheb_oracle1(mineig_global, lambda_minus, lambda_plus, 1D-16, 40)
 
- if (chebfi%paral_kgb == 0) then
-   call xgBlock_reverseMap(DivResults%self,eig,rows=1,cols=neigenpairs)
-   do iband=1, neigenpairs !TODO TODO
-  ! !nline necessary to converge to tolerance
-  ! !nline_tolwfr = cheb_oracle1(dble(eig(iband*2-1,1)), lambda_minus, lambda_plus, tolerance / resids_filter(iband), nline)
-  ! !nline necessary to decrease residual by a constant factor
-  ! !nline_decrease = cheb_oracle1(dble(eig(iband*2-1,1)), lambda_minus, lambda_plus, 0.1D, dtset%nline)
-  ! !nline_bands(iband) = MAX(MIN(nline_tolwfr, nline_decrease, nline_max, chebfi%nline), 1)
-     nline_bands(iband) = nline ! fiddle with this to use locking
-   end do
- else
-   call xgBlock_reverseMap(DivResults%self,eig,rows=1,cols=chebfi%bandpp)
-   do iband=1, chebfi%bandpp !TODO TODO
-     nline_bands(iband) = nline ! fiddle with this to use locking
-   end do
- end if
+ !LTEST
+ ! TO COMPUTE RESIDU
+ !if (chebfi%paw) then
+ !  call xgBlock_colwiseCymax(chebfi%xAXColsRows,chebfi%eigenvalues,chebfi%BXColsRows,chebfi%xAXColsRows)
+ !else
+ !  call xgBlock_colwiseCymax(chebfi%xAXColsRows,chebfi%eigenvalues,chebfi%xXColsRows,chebfi%AX%self)
+ !end if
+
+ !call xgBlock_apply_diag(chebfi%AX%self,pcond,nspinor)
+
+ !call xgBlock_colwiseNorm2(chebfi%AX%self, residu)
+ !LTEST
+
+ !TO GET EIGENVALUES AND RESIDUES HERE
+ !call xgBlock_reverseMap(DivResults%self,eig)
+ do iband=1, neigenpairs !TODO TODO
+   !nline necessary to converge to tolerance
+   eig_iband = eig(1,iband*2-1)
+   !TO COMPUTE RESIDU
+   !nline_tolwfr = cheb_oracle1(eig_iband, lambda_minus, lambda_plus, tolerance / resid, nline)
+   !nline necessary to decrease residual by a constant factor
+   !nline_decrease = cheb_oracle1(dble(eig(iband*2-1,1)), lambda_minus, lambda_plus, 0.1D, dtset%nline)
+   nline_bands(iband) = MAX(MIN(nline_tolwfr, nline_max, chebfi%nline), 0)
+   !nline_bands(iband) = nline ! fiddle with this to use locking
+ end do
+ nline = MAXVAL(nline_bands)
+ !LTEST
+ write(900,*) 'nline = ',nline
+ !LTEST
+
  call timab(tim_oracle,2,tsec)
 
  center = (lambda_plus + lambda_minus)*0.5
