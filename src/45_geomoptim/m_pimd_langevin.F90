@@ -153,7 +153,8 @@ subroutine pimd_langevin_npt(etotal,forces,itimimage,natom,pimd_param,prtvolimg,
  rescale_temp=one;if(zeroforce==1)rescale_temp=dble(ndof)/dble(ndof-3)
  quantummass(1:natom)=pimd_param%amu   (pimd_param%typat(1:natom))*amu_emass
  inertmass  (1:natom)=pimd_param%pimass(pimd_param%typat(1:natom))*amu_emass
- initemp=pimd_param%mdtemp(1)/rescale_temp; thermtemp=pimd_param%mdtemp(2)
+ initemp=pimd_param%mdtemp(1)/rescale_temp
+ thermtemp=pimd_param%mdtemp(2)
  dtion=pimd_param%dtion
  kt=thermtemp*kb_HaK
  friction=pimd_param%friction

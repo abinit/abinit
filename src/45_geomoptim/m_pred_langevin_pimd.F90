@@ -117,12 +117,11 @@ contains
     if(pimd_param%optcell==0) then
       call pimd_langevin_nvt(pimd_etotal,pimd_forces,itime,ab_mover%natom,pimd_param,&
       & 0,rprimd,pimd_stressin,1,pimd_vel,ucvol,pimd_xred,pimd_xred_next,pimd_xred_prev)
-      rprimd_next=rprimd
+      rprimd_next=rprimd ! We do not change primitive vectors
     elseif(pimd_param%optcell==2) then
       call pimd_langevin_npt(pimd_etotal,pimd_forces,itime,ab_mover%natom,pimd_param,&
       & 0,rprimd,rprimd_next,rprimd_prev,pimd_stressin,1,pimd_vel,vel_cell,ucvol,&
       & pimd_xred,pimd_xred_next,pimd_xred_prev)
-      rprimd=rprimd_next
     endif
     
     ! Update hist

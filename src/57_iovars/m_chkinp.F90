@@ -1448,7 +1448,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    if(dt%optcell/=0)then
      if (dt%imgmov==0) then
        cond_string(1)='optcell' ; cond_values(1)=dt%optcell
-       call chkint_eq(1,1,cond_string,cond_values,ierr,'ionmov',dt%ionmov,7,[2,3,13,15,22,25,28],iout)
+       call chkint_eq(1,1,cond_string,cond_values,ierr,'ionmov',dt%ionmov,7,[2,3,13,15,16,22,25,28],iout)
      else
        cond_string(1)='optcell' ; cond_values(1)=dt%optcell
        call chkint_eq(1,1,cond_string,cond_values,ierr,'ionmov',dt%ionmov,1,(/0/),iout)
