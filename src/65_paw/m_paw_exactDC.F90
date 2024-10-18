@@ -23,6 +23,7 @@
 MODULE m_paw_exactDC
 
  use defs_basis
+ use m_abicore
  use m_errors
 
  implicit none
