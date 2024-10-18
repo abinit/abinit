@@ -149,7 +149,7 @@ subroutine init_oper(paw_dmft,oper,nkpt,wtk,shiftk,opt_ksloc)
  type(paw_dmft_type), intent(in) :: paw_dmft
  type(oper_type), intent(inout) :: oper
 !arrays
- real(dp), target, optional :: wtk(:)
+ real(dp), ABI_CONTIGUOUS target, optional :: wtk(:)
 !oper variables ------------------------------------
  integer :: optksloc
 !************************************************************************
@@ -349,7 +349,7 @@ subroutine print_oper(oper,option,paw_dmft,prtopt)
  type(oper_type), intent(in) :: oper
  integer, intent(in) :: option,prtopt
 !oper variables-------------------------------
- integer :: ib,ib1,iband,iband1,iband2,ikpt,isppol,mbandc,nkpt,nkptr
+ integer :: ib,ib1,iband1,iband2,ikpt,isppol,mbandc,nkpt,nkptr
  character(len=2000) :: message
  logical  :: ximag
  real(dp) :: maximag !(3)
@@ -493,7 +493,6 @@ subroutine inverse_oper(oper,option,procb,iproc)
 !oper variables-------------------------------
  integer :: ikpt,isppol,paral
  !complex(dpc),allocatable :: matrix(:,:)
- character(len=500) :: message
  !integer,pointer :: procb2(:) => null()
 !todo_ba: prb with gwpc here: necessary for matcginv but should be dpc
 ! *********************************************************************
@@ -763,7 +762,6 @@ subroutine upfold_oper(oper,paw_dmft,procb,iproc)
  integer :: iatom,ik,ikpt,isppol,lpawu,mbandc
  integer :: ndim,ndim_max,nspinor,paral,shift
  !integer, allocatable :: procb2(:)
- character(len=500) :: message
  complex(dpc), allocatable :: mat_temp(:,:),mat_temp2(:,:)
 ! *********************************************************************
 

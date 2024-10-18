@@ -708,7 +708,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang, &
 
  ! Compute analytical C_ij such that F_ij -> C_ij/iw_n
  ! ---------------------------------------
-   call hybridization_asymptotic_coefficient(cryst_struc,paw_dmft,pawang,hybri_coeff(:))
+   call hybridization_asymptotic_coefficient(cryst_struc,paw_dmft,hybri_coeff(:))
    write(message,'(a,2x,a)') ch10," == Coeff analytical C_ij such that F -> C_ij/iw_n for large frequency"
    call wrtout(std_out,message,'COLL')
 
@@ -781,7 +781,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang, &
 ! Print Weiss
 ! -------------
  if (paw_dmft%dmft_prgn == 1) &
-   & call print_green('Weiss_diag',weiss_for_rot,1,paw_dmft,pawprtvol=1,opt_wt=1,opt_decim=1)
+   & call print_green('Weiss_diag',weiss_for_rot,1,paw_dmft,opt_wt=1,opt_decim=1)
 
  write(message,'(a,2x,a,f13.5)') ch10," == Preparing data for CTQMC"
  call wrtout(std_out,message,'COLL')
@@ -1612,8 +1612,8 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang, &
 ! =========================================================================================
 
  if (paw_dmft%dmft_prgn == 1) then
-   call print_green('QMC_diag_notsym',green,1,paw_dmft,pawprtvol=1,opt_wt=2)
-   call print_green('QMC_diag_notsym',green,1,paw_dmft,pawprtvol=1,opt_wt=1)
+   call print_green('QMC_diag_notsym',green,1,paw_dmft,opt_wt=2)
+   call print_green('QMC_diag_notsym',green,1,paw_dmft,opt_wt=1)
  end if
  !write(message,'(i3,4x,2e21.14)') 6,weiss_for_rot%oper(1)%matlu(1)%mat(1,1,1,1,1)
  !call wrtout(std_out,message,'COLL')  ! debug
@@ -1886,8 +1886,8 @@ end if !nspinor
    call print_matlu(green%oper(1)%matlu(:),natom,1)  ! debug
  end if ! pawprtvol>=3
  if (paw_dmft%dmft_prgn == 1) then
-   call print_green('QMC_sym',green,1,paw_dmft,pawprtvol=1,opt_wt=2)
-   call print_green('QMC_sym',green,1,paw_dmft,pawprtvol=1,opt_wt=1)
+   call print_green('QMC_sym',green,1,paw_dmft,opt_wt=2)
+   call print_green('QMC_sym',green,1,paw_dmft,opt_wt=1)
  end if
 
 !  === Compute Occupations  (Symetrized from oper_tau)
@@ -3215,9 +3215,9 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,weiss,energy_level,udens,vee)
  integer :: nleg,nmoments,nspinor,nsppol,ntau,ntau_delta,ntot,nwlo,p,tndim,wdlr_size
  integer, target :: ndlr
  logical :: density_matrix_measure,leg_measure,off_diag,rot_inv
- real(dp) :: besp,bespp,beta,dx,fact,fact2,minusOmegaTau,occ_tmp,tau,u_nl,xx
+ real(dp) :: besp,bespp,beta,dx,fact,fact2,minusOmegaTau,occ_tmp,tau,xx
  real(dp), target :: Eu
- complex(dpc) :: mself_1,mself_2,omega,sumTerm
+ complex(dpc) :: mself_1,mself_2,omega,sumTerm,u_nl
  type(c_ptr) :: Eu_ptr,ftau_ptr,gl_ptr,gtau_ptr,levels_ptr,mself_1_ptr,mself_2_ptr
  type(c_ptr) :: ndlr_ptr,occ_ptr,udens_ptr,vee_ptr,wdlr_ptr
  real(dp), allocatable :: Adlr(:,:),bdlr(:),gl_dlr_im(:)

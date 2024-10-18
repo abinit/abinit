@@ -371,8 +371,8 @@ subroutine init_hu(hu,paw_dmft,pawtab)
      jpawu = zero
      do ms1=1,ndim
        do ms=1,ndim
-         upawu = upawu + hu(itypat)%vee(ms,ms1,ms,ms1)
-         jpawu = upawu + hu(itypat)%vee(ms,ms1,ms,ms1) - hu(itypat)%vee(ms,ms1,ms1,ms)
+         upawu = upawu + dble(hu(itypat)%vee(ms,ms1,ms,ms1))
+         jpawu = upawu + dble(hu(itypat)%vee(ms,ms1,ms,ms1)-hu(itypat)%vee(ms,ms1,ms1,ms))
        end do ! ms
      end do ! ms1
      upawu = upawu / dble(ndim**2)
@@ -450,7 +450,6 @@ subroutine copy_hu(ntypat,hu,hu_new)
  type(hu_type), intent(inout) :: hu_new(ntypat)
 !Local variables ------------------------------------
  integer :: itypat,lpawu,ndim,tndim
- character(len=500) :: message
 !************************************************************************
 
  do itypat=1,ntypat
@@ -507,7 +506,6 @@ subroutine destroy_hu(hu,ntypat)
  !integer, intent(in) :: t2g,x2my2d
 !Local variables-------------------------------
  integer :: itypat
- character(len=500) :: message
 ! *********************************************************************
  
  do itypat=1,ntypat
@@ -713,7 +711,7 @@ subroutine rotatevee_hu(hu,paw_dmft,pawprtvol,rot_mat,rot_type,udens_atoms,vee_r
  type(vee_type), intent(inout) :: vee_rotated(paw_dmft%natom)
 !Local variables-------------------------------
  integer  :: iatom,itypat,lpawu,m1,m2,mi,ms,ms1,nat_correl
- integer  :: natom,ndim,nspinor,nsppol,prtonly,tndim
+ integer  :: natom,ndim,nspinor,nsppol,tndim
  real(dp) :: f2,jpawu,xsum,xsum2,xsum2new,xsumnew
  character(len=30)  :: basis_vee
  character(len=500) :: message
@@ -2192,7 +2190,7 @@ subroutine udens_slatercondon_hu(fk,lcor)
 !Local variables ---------------------------------------
 !scalars
  character(len=500) :: message
- integer :: kk,m1,m2
+ integer :: m1,m2
 !arrays
  real(dp), allocatable :: aklmlmp(:,:,:),bklmlmp(:,:,:),jdens(:,:),udens(:,:)
 !*********************************************************************
@@ -2452,7 +2450,7 @@ subroutine udens_inglis_hu(fk,lcor)
 !Local variables ---------------------------------------
 !scalars
  character(len=500) :: message
- integer :: kk,m1,m2,tndim
+ integer :: m1,m2,tndim
 !arrays
  real(dp), allocatable :: a2pp(:,:),app(:,:,:),b2pp(:,:),bpp(:,:,:),jdens(:,:),udens(:,:)
 !*********************************************************************

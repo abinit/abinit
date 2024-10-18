@@ -59,7 +59,6 @@ contains
 !!  dft_occup
 !!  mpi_enreg=information about MPI parallelization
 !!  paw_dmft =  data for self-consistent DFT+DMFT calculations.
-!!  pawang <type(pawang)>=paw angular mesh and related data
 !!
 !! OUTPUT
 !!  paw_dmft =  data for self-consistent DFT+DMFT calculations.
@@ -68,13 +67,12 @@ contains
 !!
 !! SOURCE
 
-subroutine hubbard_one(cryst_struc,green,hu,paw_dmft,pawang,pawprtvol,hdc,weiss)
+subroutine hubbard_one(cryst_struc,green,hu,paw_dmft,pawprtvol,hdc,weiss)
 
  use defs_basis
  use m_errors
  use m_abicore
 
- use m_pawang, only : pawang_type
  use m_crystal, only : crystal_t
  use m_green, only : green_type,init_green,destroy_green
  use m_paw_dmft, only : paw_dmft_type
@@ -93,7 +91,6 @@ subroutine hubbard_one(cryst_struc,green,hu,paw_dmft,pawang,pawprtvol,hdc,weiss)
  type(green_type), intent(inout) :: green
  type(paw_dmft_type), intent(in)  :: paw_dmft
  type(hu_type), intent(inout) :: hu(cryst_struc%ntypat)
- type(pawang_type), intent(in) :: pawang
  type(oper_type), intent(inout) :: hdc
  integer, intent(in) :: pawprtvol
  type(green_type), intent(inout) :: weiss

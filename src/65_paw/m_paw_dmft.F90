@@ -632,7 +632,6 @@ CONTAINS  !=====================================================================
 !!  Allocate variables used in type paw_dmft_type.
 !!
 !! INPUTS
-!! dmatpawu  = fixed occupation matrix of correlated orbitals
 !! dtset <type(dataset_type)>=all input variables for this dataset
 !! fnamei = input file name
 !! fnametmp_app = header for the output filename
@@ -657,7 +656,7 @@ CONTAINS  !=====================================================================
 !!
 !! SOURCE
 
-subroutine init_sc_dmft(dtset,paw_dmft,dmatpawu,gprimd,kg,mpi_enreg,npwarr,&
+subroutine init_sc_dmft(dtset,paw_dmft,gprimd,kg,mpi_enreg,npwarr,&
                         occ,pawang,pawrad,pawtab,rprimd,ucvol,unpaw,use_sc_dmft,xred,ylm)
 
  use m_mpinfo, only : proc_distrb_cycle
@@ -678,10 +677,9 @@ subroutine init_sc_dmft(dtset,paw_dmft,dmatpawu,gprimd,kg,mpi_enreg,npwarr,&
  type(pawrad_type), target, optional, intent(in) :: pawrad(:)
 ! arrays
  real(dp), optional, intent(in) :: occ(:)
- integer, target, optional, intent(in) :: npwarr(:)
+ integer, ABI_CONTIGUOUS target, optional, intent(in) :: npwarr(:)
  integer, ABI_CONTIGUOUS optional, intent(in) :: kg(:,:)
  real(dp), ABI_CONTIGUOUS optional, intent(in) :: gprimd(:,:),rprimd(:,:),xred(:,:),ylm(:,:)
- real(dp), ABI_CONTIGUOUS target, optional, intent(in) :: dmatpawu(:,:,:,:)
 !Local variables ------------------------------------
  integer :: bdtot_index,dmft_solv,dmftbandi,dmftbandf,fac,grid_unt,i
  integer :: iatom,iatom1,iband,icb,ierr,ifreq,ig,ik,ikg,ikpt,im,im1
@@ -924,12 +922,6 @@ subroutine init_sc_dmft(dtset,paw_dmft,dmatpawu,gprimd,kg,mpi_enreg,npwarr,&
  paw_dmft%u_for_s  =  4.1_dp
  paw_dmft%j_for_s  =  0.5_dp
  
-!=======================
-!==  Fixed self for input
-!=======================
- paw_dmft%use_fixed_self = dtset%usedmatpu
- paw_dmft%fixed_self => dmatpawu(:,:,:,:)
-
 !=======================
 !==  Choose solver
 !=======================
@@ -1387,7 +1379,7 @@ end subroutine init_sc_dmft
 !! G.Kotliar,  S.Y.Savrasov, K.Haule, V.S.Oudovenko, O.Parcollet, C.A.Marianetti.
 !!
 
-subroutine init_dmft(cryst_struc,dtset,fermie_dft,fnamei,fnametmp_app,paw_dmft)
+subroutine init_dmft(cryst_struc,dmatpawu,dtset,fermie_dft,fnamei,fnametmp_app,paw_dmft)
 
  !use m_splines
  !use m_CtqmcInterface
@@ -1407,6 +1399,7 @@ subroutine init_dmft(cryst_struc,dtset,fermie_dft,fnamei,fnametmp_app,paw_dmft)
  type(paw_dmft_type), intent(inout) :: paw_dmft
  type(crystal_t), target, intent(in) :: cryst_struc
  character(len=fnlen), intent(in) :: fnamei,fnametmp_app
+ real(dp), ABI_CONTIGUOUS target, intent(in) :: dmatpawu(:,:,:,:)
  !character(len=fnlen), intent(in) :: fnamei
 !arrays
  !integer,intent(in) :: typat(dtset%natom)
@@ -1510,8 +1503,8 @@ subroutine init_dmft(cryst_struc,dtset,fermie_dft,fnamei,fnametmp_app,paw_dmft)
 !=======================
 !==  Fixed self for input
 !=======================
-! paw_dmft%use_fixed_self=dtset%usedmatpu
-! paw_dmft%fixed_self=>dmatpawu
+ paw_dmft%use_fixed_self = dtset%usedmatpu
+ paw_dmft%fixed_self => dmatpawu(:,:,:,:)
 
 !=======================
 !==  Choose solver
@@ -2155,6 +2148,7 @@ subroutine destroy_dmft(paw_dmft)
  if (allocated(paw_dmft%eigen_dft)) ABI_FREE(paw_dmft%eigen_dft)
  if (allocated(paw_dmft%symrec_cart)) ABI_FREE(paw_dmft%symrec_cart)
  paw_dmft%eigen => null()
+ paw_dmft%fixed_self => null()
  paw_dmft%indsym => null()
    !if (associated(paw_dmft%omega_lo))  then
    !  ABI_FREE(paw_dmft%omega_lo)
@@ -2227,7 +2221,6 @@ subroutine destroy_sc_dmft(paw_dmft)
  paw_dmft%dmft_shiftself => null()
  paw_dmft%dmft_nominal => null()
  paw_dmft%npwarr => null()
- paw_dmft%fixed_self => null()
  paw_dmft%wtk => null()
  paw_dmft%typat => null()
  paw_dmft%int_meshsz => null()
@@ -2739,7 +2732,6 @@ subroutine destroy_paral_dmft(paw_dmft,distrib)
  type(paw_dmft_type), intent(in) :: paw_dmft
  type(mpi_distrib_dmft_type), intent(inout) :: distrib
 !Local variables-------------------------------
- integer :: ierr
 ! *********************************************************************
 
  ABI_FREE(distrib%nkpt_mem)

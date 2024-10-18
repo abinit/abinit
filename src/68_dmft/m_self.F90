@@ -540,7 +540,7 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
  integer :: i,iall,iatom,iatu,icount,ier,iexist2,iexit,iflavor,ifreq,im,im1,ioerr,ispinor
  integer :: ispinor1,isppol,istep,istep_imp,istepiter,iter,iter_imp,lpawu,master,myproc
  integer :: natom,natom_read,ncount,ndim,ndim_read,nrecl,nspinor,nspinor_read,nsppol
- integer :: nsppol_read,nw_read,optmaxent,optrw,readimagonly,spacecomm,tndim,unitrot
+ integer :: nsppol_read,nw_read,optmaxent,optrw,readimagonly,spacecomm,unitrot
  real(dp) :: fermie_read,x_r,x_i,xtemp
  logical :: lexist,nondiaglevels
  character(len=30000) :: message ! Big buffer to avoid buffer overflow.

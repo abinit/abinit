@@ -1152,7 +1152,7 @@ if (dtset%prt_lorbmag==1) then
      write(msg,'(2a,i3)') ch10,&
 &     '  Warning: Psichi are renormalized in datafordmft because nbandkss is used',dtset%nbandkss
      call wrtout(std_out, msg)
-     call init_dmft(crystal,dtset,e_fermie,dtfil%filnam_ds(3),dtfil%fnameabo_app,paw_dmft)
+     call init_dmft(crystal,dmatpawu(:,:,:,:),dtset,e_fermie,dtfil%filnam_ds(3),dtfil%fnameabo_app,paw_dmft)
      call print_dmft(paw_dmft,dtset%pawprtvol)
 
 !    ==  compute psichi
@@ -1210,12 +1210,10 @@ if (dtset%prt_lorbmag==1) then
        if(me==master) then
          if(dtset%kptopt<0) then
            ! k-resolved Spectral function
-           call print_green("from_realaxisself",greenr,5,paw_dmft,&
-&           pawprtvol=3,opt_wt=1)
+           call print_green("from_realaxisself",greenr,5,paw_dmft,opt_wt=1)
          else
            ! DOS Calculation
-           call print_green("from_realaxisself",greenr,4,paw_dmft,&
-&           pawprtvol=3,opt_wt=1)
+           call print_green("from_realaxisself",greenr,4,paw_dmft,opt_wt=1)
          endif
         !write(6,*) "print green done"
        endif
