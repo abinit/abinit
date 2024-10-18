@@ -2380,7 +2380,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%dmftctqmc_triqs_det_singular_threshold=-1.0_dp
    dtsets(idtset)%dmftctqmc_triqs_epsilon=1.0d-10
    dtsets(idtset)%dmftctqmc_triqs_imag_threshold=1.0d-13
-   dtsets(idtset)%dmftctqmc_triqs_lambda=300
+   dtsets(idtset)%dmftctqmc_triqs_lambda=1000
    dtsets(idtset)%dmftctqmc_triqs_leg_measure=0
    dtsets(idtset)%dmftctqmc_triqs_loc_n_min=0
    dtsets(idtset)%dmftctqmc_triqs_loc_n_max=huge(0)
