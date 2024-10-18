@@ -704,7 +704,7 @@ subroutine impurity_solve(cryst_struc,green,hu,paw_dmft,pawang,pawtab,&
 
 !  == Hubbard One -> green
 !  -------------------
-   call hubbard_one(cryst_struc,green,hu(:),paw_dmft,pawang,pawprtvol,self_old%hdc,weiss)
+   call hubbard_one(cryst_struc,green,hu(:),paw_dmft,pawprtvol,self_old%hdc,weiss)
 
  !else if(abs(paw_dmft%dmft_solv)==4) then
 
@@ -780,7 +780,7 @@ subroutine impurity_solve(cryst_struc,green,hu,paw_dmft,pawang,pawtab,&
 !  -------------------------------------------------------------------
      write(message,'(2a,i3,13x,a)') ch10,'   ===  Direct Fourier transform t->w of Weiss'
      call wrtout(std_out,message,'COLL')
-     call fourier_green(cryst_struc,weiss,paw_dmft,pawang,opt_ksloc=2,opt_tw=1)
+     call fourier_green(cryst_struc,weiss,paw_dmft,opt_ksloc=2,opt_tw=1)
 
      if (pawprtvol >= 3) then
        write(message,'(a,2x,a,f13.5)') ch10,&    ! debug
@@ -821,7 +821,7 @@ subroutine impurity_solve(cryst_struc,green,hu,paw_dmft,pawang,pawtab,&
 
 !  == Print G_loc(w)
 !  --------------------------------------------------------
-   if (paw_dmft%dmft_prgn == 1) call print_green('DMFT_IMPURITY',green,1,paw_dmft,pawprtvol=1,opt_wt=1)
+   if (paw_dmft%dmft_prgn == 1) call print_green('DMFT_IMPURITY',green,1,paw_dmft,opt_wt=1)
  end if ! dmft_solv>=2 and w_type="imag"
 !stop
 
@@ -1035,7 +1035,7 @@ subroutine spectral_function(cryst_struc,green,hu,paw_dmft,&
 !  == Hubbard One
 !  -------------------
    call hubbard_one(cryst_struc,greenr,hu,paw_dmft,&
-&   pawang,prtopt,self_old%hdc,weissr)
+&   prtopt,self_old%hdc,weissr)
 
  else if(abs(paw_dmft%dmft_solv)==4) then
 
@@ -1070,7 +1070,7 @@ subroutine spectral_function(cryst_struc,green,hu,paw_dmft,&
    call dyson(greenr,paw_dmft,selfr,weissr,opt_weissself=2)
  end if
  call compute_green(greenr,paw_dmft,1,selfr,opt_self=1)
- call print_green("realw",greenr,4,paw_dmft,pawprtvol=3)
+ call print_green("realw",greenr,4,paw_dmft)
  call rw_self(selfr,paw_dmft,prtopt=2,opt_rw=2)
 
  if(abs(prtopt)>0) then

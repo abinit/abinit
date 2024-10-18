@@ -686,7 +686,7 @@ end subroutine printocc_green
 !!
 !! SOURCE
 
-subroutine print_green(char1,green,option,paw_dmft,pawprtvol,opt_wt,opt_decim)
+subroutine print_green(char1,green,option,paw_dmft,opt_wt,opt_decim)
 
  use m_fstrings, only : int2char4
  use m_io_tools, only : open_file
@@ -695,7 +695,7 @@ subroutine print_green(char1,green,option,paw_dmft,pawprtvol,opt_wt,opt_decim)
 !type
  type(paw_dmft_type), intent(in) :: paw_dmft
  type(green_type), intent(inout) :: green
- integer, intent(in) :: option,pawprtvol
+ integer, intent(in) :: option
  integer, optional, intent(in) :: opt_wt,opt_decim
  character(len=*), intent(in) :: char1
 !local variables-------------------------------
@@ -1110,7 +1110,7 @@ subroutine compute_green(green,paw_dmft,prtopt,self,opt_self,opt_nonxsum,opt_non
    ABI_MALLOC(rwork,(3*mbandc-2))
    ABI_MALLOC(mat_tmp,(mbandc,mbandc))
    call zheev("n","u",mbandc,mat_tmp(:,:),mbandc,eig(:),work(:),-1,rwork(:),info)
-   lwork = work(1)
+   lwork = int(work(1))
    ABI_FREE(work)
    ABI_MALLOC(work,(lwork))
    green%trace_log = zero
@@ -2192,7 +2192,7 @@ subroutine icip_green(char1,green,paw_dmft,pawprtvol,self,opt_self,opt_moments,o
  if (paw_dmft%dmft_prgn >= 1 .and. paw_dmft%dmft_prgn <= 2) then
    optlocks = paw_dmft%dmft_prgn*2 + 1 ! if dmft_prgn==2 => do not print
    if (paw_dmft%lchipsiortho == 1 .and. pawprtvol > -100) &
-      & call print_green(char1,green,optlocks,paw_dmft,pawprtvol)
+      & call print_green(char1,green,optlocks,paw_dmft)
 !     call print_green('inicip',green,1,paw_dmft,pawprtvol=1,opt_wt=1)
  end if
 
@@ -2232,18 +2232,16 @@ end subroutine icip_green
 !!  cryst_struc <type(crystal_t)>= crystal structure data.
 !!  green  <type(green_type)>= green function data
 !!  paw_dmft  <type(paw_dmft_type)>= paw+dmft related data
-!!  pawang <type(pawang)>=paw angular mesh and related data
 !!
 !! OUTPUT
 !!
 !! SOURCE
 
-subroutine fourier_green(cryst_struc,green,paw_dmft,pawang,opt_ksloc,opt_tw)
+subroutine fourier_green(cryst_struc,green,paw_dmft,opt_ksloc,opt_tw)
 
  use m_crystal, only : crystal_t
  use m_matlu, only : print_matlu,sym_matlu
  use m_oper, only : downfold_oper
- use m_pawang, only : pawang_type
  use m_xmpi, only : xmpi_barrier,xmpi_sum
 
 !Arguments ------------------------------------
@@ -2251,7 +2249,6 @@ subroutine fourier_green(cryst_struc,green,paw_dmft,pawang,opt_ksloc,opt_tw)
  type(crystal_t),intent(in) :: cryst_struc
  type(green_type),intent(inout) :: green
  !type(MPI_type), intent(in) :: mpi_enreg
- type(pawang_type),intent(in) :: pawang
  type(paw_dmft_type), intent(in) :: paw_dmft
  integer,intent(in) :: opt_ksloc,opt_tw ! fourier on ks or local
 
@@ -2555,7 +2552,7 @@ subroutine check_fourier_green(cryst_struc,green,paw_dmft,pawang)
  write(message,'(2a,i3,13x,a)') ch10,'   ===  Inverse Fourier Transform w->t of Weiss Field'
  call wrtout(std_out,message,'COLL')
  call fourier_green(cryst_struc,green_check,paw_dmft,&
-& pawang,opt_ksloc=2,opt_tw=-1)
+& opt_ksloc=2,opt_tw=-1)
 
  write(message,'(3a)') ch10,' === Print (for check by user) of occupation matrix'&
 &   ,' after  fourier transform with respect to initial one'
@@ -2565,7 +2562,7 @@ subroutine check_fourier_green(cryst_struc,green,paw_dmft,pawang)
  write(message,'(2a,i3,13x,a)') ch10,'   ===  Direct Fourier Transform t->w of Weiss Field'
  call wrtout(std_out,message,'COLL')
  call fourier_green(cryst_struc,green_check,paw_dmft,&
-& pawang,opt_ksloc=2,opt_tw=1)
+& opt_ksloc=2,opt_tw=1)
 ! call print_matlu(green%oper(1)%matlu,paw_dmft%natom,1) ! debug
 
  call integrate_green(green_check,paw_dmft,&
@@ -3094,7 +3091,6 @@ subroutine occup_green_tau(green)
 
 !local variables-------------------------------
  integer :: iatom,im,isppol,lpawu,natom,ndim,nspinor,nsppol
- complex(dpc), allocatable :: shift(:)
 ! *********************************************************************
 
  natom   = green%oper_tau(1)%natom
@@ -3294,17 +3290,13 @@ end subroutine occup_green_tau
 !!
 !! SOURCE
 
- subroutine greendftcompute_green(cryst_struc,green,pawang,paw_dmft)
+ subroutine greendftcompute_green(green,paw_dmft)
 
- use m_crystal, only : crystal_t
  use m_matlu, only : print_matlu,sym_matlu
  use m_oper, only : downfold_oper
- use m_pawang, only : pawang_type
  
 !Arguments ------------------------------------
 !scalars
- type(crystal_t),intent(in) :: cryst_struc
- type(pawang_type), intent(in) :: pawang
  type(paw_dmft_type), intent(in)  :: paw_dmft
  type(green_type),intent(inout) :: green
 
@@ -3941,11 +3933,11 @@ subroutine compute_nb_elec(green,self,paw_dmft,Fx,nb_elec_x,fermie,option,Fxprim
          call xginv(oper_tmp%ks(:,:,ikpt,isppol),mbandc)
 
          if (opt == 1) then
-           Fxprime = Fxprime - sum(oper_tmp%ks(:,:,ikpt,isppol)*transpose(oper_tmp%ks(:,:,ikpt,isppol)))*wtk*fac
+           Fxprime = Fxprime - dble(sum(oper_tmp%ks(:,:,ikpt,isppol)*transpose(oper_tmp%ks(:,:,ikpt,isppol))))*wtk*fac
          else if (opt == 2) then
            call abi_xgemm("n","n",mbandc,mbandc,mbandc,cone,oper_tmp%ks(:,:,ikpt,isppol),mbandc,&
                         & oper_tmp%ks(:,:,ikpt,isppol),mbandc,czero,mat_tmp(:,:),mbandc)
-           Fxdouble = Fxdouble + two*sum(oper_tmp%ks(:,:,ikpt,isppol)*transpose(mat_tmp(:,:)))*wtk*fac
+           Fxdouble = Fxdouble + two*dble(sum(oper_tmp%ks(:,:,ikpt,isppol)*transpose(mat_tmp(:,:))))*wtk*fac
          end if ! opt
          do ib=1,mbandc
            green%charge_ks = green%charge_ks + dble(oper_tmp%ks(ib,ib,ikpt,isppol))*wtk*fac

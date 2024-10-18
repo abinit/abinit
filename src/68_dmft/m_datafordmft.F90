@@ -2072,7 +2072,6 @@ end subroutine chipsi_renormalization
 !!  cryst_struc <type(crystal_t)>=crystal structure data
 !!  dft_occup
 !!  paw_dmft =  data for self-consistent DFT+DMFT calculations.
-!!  pawang <type(pawang)>=paw angular mesh and related data
 !!  pawtab <type(pawtab)>
 !!
 !! OUTPUT
@@ -2082,15 +2081,13 @@ end subroutine chipsi_renormalization
 !!
 !! SOURCE
 
-subroutine hybridization_asymptotic_coefficient(cryst_struc,paw_dmft,pawang,hybri_coeff)
-
- use m_pawang, only : pawang_type
+subroutine hybridization_asymptotic_coefficient(cryst_struc,paw_dmft,hybri_coeff)
 
 !Arguments ------------------------------------
 !scalars
  type(crystal_t),intent(in) :: cryst_struc
  type(paw_dmft_type), intent(in) :: paw_dmft
- type(pawang_type), intent(in) :: pawang
+ !type(pawang_type), intent(in) :: pawang
  type(matlu_type), intent(inout) :: hybri_coeff(paw_dmft%natom)
 !Local variables ------------------------------
  type(oper_type)  :: ham_a
