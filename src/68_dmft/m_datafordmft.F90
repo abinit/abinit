@@ -1955,7 +1955,7 @@ subroutine normalizechipsi(nkpt,paw_dmft,jkpt)
 
  end subroutine normalizechipsi
 
- !!****f* m_datafordmft/psichi_renormalization
+!!****f* m_datafordmft/psichi_renormalization
 !! NAME
 !! psichi_renormalization
 !!

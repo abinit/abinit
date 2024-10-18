@@ -25,12 +25,12 @@
 MODULE m_paw_dmft
 
  use defs_basis
- use m_CtqmcInterface
- use m_errors
  use m_abicore
- use m_xmpi
+ use m_CtqmcInterface
  use m_data4entropyDMFT
  use m_dtset
+ use m_errors
+ use m_xmpi
 
  !use defs_datatypes, only : pseudopotential_type
  use defs_abitypes, only : MPI_type
@@ -52,7 +52,7 @@ MODULE m_paw_dmft
  public :: saveocc_dmft
  public :: readocc_dmft
 
- private :: init_paral_dmft,init_sc_dmft_paralkgb,destroy_paral_dmft,destroy_sc_dmft_paralkgb
+ !private :: init_sc_dmft_paralkgb,destroy_sc_dmft_paralkgb
 !!***
 
 !----------------------------------------------------------------------
@@ -62,6 +62,8 @@ MODULE m_paw_dmft
 !!  mpi_distrib_dmft_type
 !!
 !! FUNCTION
+!!  This structured datatype contains the necessary data for the MPI
+!!  parallelization over frequencies and kpts in DFT+DMFT.
 !!
 !! SOURCE
 
@@ -108,6 +110,7 @@ MODULE m_paw_dmft
    ! Rank in comm_freq of the CPU handling each frequency (type 1)
 
  end type mpi_distrib_dmft_type
+!!***
 
 !----------------------------------------------------------------------
 
@@ -142,14 +145,16 @@ MODULE m_paw_dmft
   ! =2 : use Halley's method to compute the Fermi level
 
   integer :: dmft_gaussorder
-  ! Order of the Gauss-Legendre quadrature for each interval of the thermodynamic integration when dmft_integral=1
+  ! Only relevant when dmft_entropy=2 and dmft_integral=1. 
+  ! Order of the Gauss-Legendre quadrature for each interval of the thermodynamic integration.
 
   integer :: dmft_integral
-  ! =1: Compute the thermodynamic integration over the impurity models, for dmft_entropy=2
-  ! =0: Do not compute the integral, but compute all the other terms of the Luttinger-Ward functional
+  ! Only relevant when dmft_entropy=2.
+  ! =1: Compute the thermodynamic integration over the impurity models.
+  ! =0: Do not compute the integral. All the other contributions are still computed.  
 
   integer :: dmft_iter
-  ! Nb of iterations for dmft
+  ! Nb of iterations for DMFT self-consistent cycle.
 
   integer :: dmft_kspectralfunc
   ! =0 Default
@@ -160,7 +165,8 @@ MODULE m_paw_dmft
   ! = 1: use log frequencies
 
   integer :: dmft_nlambda
-  ! Number of intervals for the thermodynamic integration when dmft_integral=1
+  ! Only relevant when dmft_entropy=2 and dmft_integral=1.
+  ! Number of subdivisions of the interval [0,U] for the thermodynamic integration.
 
   integer :: dmft_nwli
   ! Physical index of the last imaginary frequency (/=dmft_nwlo when dmft_log_freq=1)
@@ -205,8 +211,8 @@ MODULE m_paw_dmft
   ! =1 Use the full formula |Psi_tilde> + sum_i <pi|Psi_tilde> (|Phi> - |Phi_tilde>) to compute <Chi|Psi>
 
   integer :: dmft_wanorthnorm
-  ! =2 orthonormalisation of Wannier functions for each k-point
-  ! =3 orthonormalisation over the sum over k-points
+  ! =2 orthonormalization of Wannier functions for each k-point
+  ! =3 orthonormalization over the sum over k-points
 
   integer :: dmft_x2my2d
   ! Only use x2my2d orbital
@@ -290,10 +296,10 @@ MODULE m_paw_dmft
   ! TRIQS CTQMC: Nb of imaginary time points for the hybridization.
 
   integer :: dmftctqmc_triqs_seed_a
-  ! TRIQS CTQMC: The seed is seed_a + rank * seed_b.
+  ! TRIQS CTQMC: The CTQMC seed is seed_a + rank * seed_b.
 
   integer :: dmftctqmc_triqs_seed_b
-  ! TRIQS CTQMC: The seed is seed_a + rank * seed_b.
+  ! TRIQS CTQMC: The CTQMC seed is seed_a + rank * seed_b.
 
   integer :: dmftctqmc_triqs_therm
   ! TRIQS CTQMC: Number of thermalization steps when we restart from a previous configuration
@@ -317,17 +323,17 @@ MODULE m_paw_dmft
   ! activate evaluation of terms for alternative calculation of entropy in DMFT
 
   integer :: lchipsiortho
-  ! =0 <Chi|Psi> has not been orthonormalized
-  ! =1 <Chi|Psi> has been orthonormalized
+  ! =0 <Chi|Psi> is not orthonormalized
+  ! =1 <Chi|Psi> is orthonormalized
 
   integer :: maxlpawu         
-  ! Maximal correlated l
+  ! Maximal correlated l over all atoms
 
   integer :: maxmeshsize
-  ! Maximal size of the radial mesh
+  ! Maximal size of the radial mesh over all atoms
 
   integer :: maxnproju
-  ! Maximal number of correlated projectors
+  ! Maximal number of correlated projectors over all atoms
 
   integer :: mband
   ! Total number of bands
@@ -336,7 +342,8 @@ MODULE m_paw_dmft
   ! Total number of correlated bands
   
   integer :: mkmem
-  ! Number of k-points handled by the current process in the DFT part 
+  ! Number of k-points handled by the current process within the DFT
+  ! parallelization scheme
 
   integer :: myproc
   ! Rank in the global communicator
@@ -406,7 +413,7 @@ MODULE m_paw_dmft
   ! TRIQS CTQMC: Flag to activate the shift move
 
   logical :: dmftctqmc_triqs_off_diag
-  ! TRIQS CTQMC: Flag to include the off-diagonal elements of the hybridization
+  ! TRIQS CTQMC: Flag to sample the off-diagonal elements of the Green's function
 
   logical :: dmftctqmc_triqs_time_invariance
   ! TRIQS CTQMC: Flag to activate the use of time invariance for the sampling
@@ -417,7 +424,7 @@ MODULE m_paw_dmft
   ! instead of the trace
 
   real(dp) :: dmft_charge_prec
-  ! Precision on charge required for determination of fermi level (fermi_green) with newton method
+  ! Precision on charge required for determination of fermi level (fermi_green) 
 
   real(dp) :: dmft_fermi_prec
   ! Required precision on Fermi level (fermi_green) during the DMFT SCF cycle, (=> ifermie_cv)
@@ -462,7 +469,8 @@ MODULE m_paw_dmft
   ! TRIQS CTQMC: Proposal probability for the global move
 
   real(dp) :: dmftqmc_n
-  ! ABINIT/TRIQS CTQMC: Nb of sweeps
+  ! ABINIT CTQMC: Nb of sweeps
+  ! TRIQS CTQMC: Nb of measurements
 
   real(dp) :: edmft
   ! DMFT correction to the energy
@@ -573,7 +581,7 @@ MODULE m_paw_dmft
   !  harmonics under the symmetry operations symrec. 
 
   integer, ABI_CONTIGUOUS pointer :: dmft_nominal(:) => null()
-  ! Nominal occupancies for each atom (for nominal double counting)
+  ! Only relevant when dmft_dc=7. Nominal occupancies for each atom.
 
   integer, pointer :: indsym(:,:) => null()
   ! Label of atom into which iatom is sent by the INVERSE of the
@@ -1225,6 +1233,10 @@ subroutine init_sc_dmft(dtset,paw_dmft,gprimd,kg,mpi_enreg,npwarr,&
    end if ! prtwan=1
    if ((mesh_size /= pawrad(itypat)%mesh_size) .and. mesh_type > 3) then
      message = "mesh_type > 3 is only compatible with dmft_proj=1 and dmft_prtwan=0"
+     ABI_ERROR(message)
+   end if
+   if (mesh_size > pawrad(itypat)%int_meshsz .and. (.not. use_full_chipsi)) then
+     message = "You need to activate use_full_chipsi if you use an orbital which extends outside the PAW sphere"
      ABI_ERROR(message)
    end if 
    call pawrad_init(paw_dmft%radgrid(itypat),mesh_size,mesh_type,rstep,lstep)
