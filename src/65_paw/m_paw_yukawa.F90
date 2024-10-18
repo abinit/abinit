@@ -24,6 +24,7 @@
 MODULE m_paw_yukawa
 
  use defs_basis
+ use m_abicore
  use m_errors
  use m_pawrad, only : pawrad_type
 
