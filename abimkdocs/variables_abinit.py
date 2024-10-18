@@ -5077,23 +5077,38 @@ Variable(
     abivarname="friction",
     varset="rlx",
     vartype="real",
-    topics=['MolecularDynamics_useful'],
+    topics=['PIMD_basic','MolecularDynamics_useful'],
     dimensions="scalar",
     defaultval=0.001,
     mnemonics="internal FRICTION coefficient",
     added_in_version="before_v9",
     text=r"""
 Gives the internal friction coefficient (atomic units) for Langevin dynamics
-(when [[ionmov]] is set to 9 or 16, or [[imgmov]] = 9): fixed temperature simulations with random forces.
+(when [[moldyn]] = "nvt_langevin" or "npt_langevin" or [[ionmov]] = 16 or [[imgmov]] = 9): fixed temperature simulations with random forces.
 
-The equation of motion is:
+The equations of motion are:
 $M_I \frac{d^2 R_I}{dt^2}= F_I -$[[friction]]$*M_I \frac{d R_I}{dt} - F_{random,I}$,
-where $F_{random,I}$ is a Gaussian random force with average zero and variance [[friction]]$*2M_IkT$.
-The atomic unit of [[friction]] is Hartree*Electronic mass*(atomic unit of Time)/Bohr^2. See [[cite:Chelikowsky2000]] for additional information.
+where $F_{random,I}$ is a Gaussian random force with average zero and variance [[friction]]$*2M_IkT/$[[dtion]].
+The atomic unit of [[friction]] is Hartree*Electronic mass*(atomic unit of Time)/Bohr^2. See [[cite:Chelikowsky2000]] and [[cite:Quigley2004]] for additional information.
 """,
 ),
 
-# ADD FRICTIONBAR INPUT PARAMETER HERE
+Variable(
+    abivarname="frictionbar",
+    varset="rlx",
+    vartype="real",
+    topics=['MolecularDynamics_useful'],
+    dimensions="scalar",
+    defaultval=0.001,
+    mnemonics="internal FRICTION coefficient of the BARostat",
+    added_in_version="v10.2",
+    text=r"""
+Gives the internal friction coefficient (atomic units) of the barostat for Langevin dynamics
+(when [[moldyn]] = "npt_langevin" ([[ionmov]] = 16) and [[optcell]] = 2).
+The mass of the barostat ([[bmass]]) must be given in addition.
+See [[cite:Quigley2004]] and [[cite:Quigley2005]] for additional information.
+""",
+),
 
 Variable(
     abivarname="frzfermi",
@@ -7802,7 +7817,7 @@ variables, as well as with the parallelism (see input variable [[npimage]]).
     algorithms for MD or geometry optimization are allowed, using [[ionmov]] (instead of [[imgmov]], this is the exception to the rule)
     and related variables.
   * = 9 or 13 --> **Path-Integral Molecular Dynamics** (see e.g. [[cite:Marx1996]]).
-    Will use 9 for **Langevin thermostat** (associated friction coefficient given by [[vis]])
+    Will use 9 for **Langevin thermostat** (associated friction coefficient given by [[friction]])
     and 13 for **Nose-Hoover thermostat chains** (associated input variables are the number of thermostats in the chains,
     [[nnos]], and the masses of these thermostats [[qmass]]). [[nimage]] is the Trotter number
     (no use of [[dynimage]]); possible transformations of coordinates are defined by [[pitransform]];
@@ -8050,7 +8065,7 @@ No meaning for RF calculations.
   **Cell optimization:** No (Use [[optcell]] = 0 only)
 
   * 12 --> Isokinetic ensemble molecular dynamics.
-    The equation of motion of the ions in contact with a thermostat are solved with the
+    The equations of motion of the ions in contact with a thermostat are solved with the
     algorithm proposed in [[cite:Zhang1997]], as worked out in [[cite:Minary2003]].
     The conservation of the kinetic energy is obtained within machine precision at each step.
     As in [[cite:Evans1983]], when there is no fixing of atoms, the number of degrees of freedom in which the
@@ -8068,7 +8083,7 @@ No meaning for RF calculations.
     **Related variables:** time step ([[dtion]]) and the first temperature in [[mdtemp]] in case
     the velocities [[vel]] are not initialized, or all initialized to zero.
 
-  * 13 --> The equation of motion of the ions in contact with a thermostat
+  * 13 --> The equations of motion of the ions in contact with a thermostat
     and a barostat are solved with the algorithm proposed in [[cite:Martyna1996]].
     If optcell=1 or 2, the mass of the barostat ([[bmass]]) must be given in addition.
     **Purpose:** Molecular dynamics
@@ -8099,11 +8114,12 @@ No meaning for RF calculations.
     **Cell optimization:** Yes (if [[optcell]]/=0)
     **Related variables:** The initial time step [[dtion]]
 
-  * 16 --> Langevin molecular dynamics. The equation of motion of the ions are described
-    with the algorithm proposed in [[cite:Quigley2004]].
+  * 16 --> Langevin molecular dynamics. The equations of motion of the ions are described
+    with the algorithms proposed in [[cite:Quigley2004]] and [[cite:Quigley2005]].
     **Purpose:** Molecular dynamics
-    **Cell optimization:** No (Use [[optcell]] = 0 only)
-    **Related variables:** time step ([[dtion]]), temperatures ([[mdtemp]]) and friction coefficient ([[vis]]).
+    **Cell optimization:** Yes (Use [[optcell]] = 2 only)
+    **Related variables:** time step ([[dtion]]), temperatures ([[mdtemp]]), friction coefficient ([[friction]]).
+    If [[optcell]]/=0, friction coefficient of the barostat ([[frictionbar]]), and the mass of the barostat ([[bmass]]).
 
   * 20 --> Direct inversion of the iterative subspace.
     Given a starting point [[xred]] that is a vector of length 3*[[natom]] (reduced nuclei coordinates),
@@ -8284,14 +8300,16 @@ Variable(
     abivarname="irandom",
     varset="dev",
     vartype="integer",
-    topics=['PIMD_expert'],
+    topics=['PIMD_expert','MolecularDynamics_expert'],
     dimensions="scalar",
     defaultval=3,
     mnemonics="Integer for the choice of the RANDOM number generator",
     characteristics=['[[DEVELOP]]'],
     added_in_version="before_v9",
     text=r"""
-For the time being, only used when [[imgmov]] = 9 (Langevin Path-Integral Molecular Dynamics).
+For the time being, only used when [[imgmov]] = 9 (Langevin Path-Integral Molecular Dynamics),
+or [[moldyn]] = "nvt_langevin" or "npt_langevin" ([[ionmov]] = 16).
+
 [[irandom]] defines the random number generator.
 
 Supported values:
@@ -10770,7 +10788,7 @@ Choice of algorithm for the molecular dynamics simulation, and possibly changes 
     **Related variables:** time step [[dtion]], index of atoms fixed [[iatfix]]
 
   * "nvt_isokin" --> Isokinetic ensemble molecular dynamics.
-    The equation of motion of the ions in contact with a thermostat are solved with the
+    The equations of motion of the ions in contact with a thermostat are solved with the
     algorithm proposed in [[cite:Zhang1997]], as worked out in [[cite:Minary2003]].
     The conservation of the kinetic energy is obtained within machine precision at each step.
     As in [[cite:Evans1983]], when there is no fixing of atoms, the number of degrees of freedom in which the
@@ -10788,34 +10806,44 @@ Choice of algorithm for the molecular dynamics simulation, and possibly changes 
     **Related variables:** time step ([[dtion]]) and the first temperature in [[mdtemp]] in case
     the velocities [[vel]] are not initialized, or all initialized to zero.
 
-  * "nvt_nose" --> Isothermal/isochoric ensemble. The equation of motion of the ions in contact with a thermostat
+  * "nvt_nose" --> Isothermal/isochoric ensemble. The equations of motion of the ions in contact with a thermostat
     with the algorithm proposed in [[cite:Martyna1996]].
     **Purpose:** Molecular dynamics
     **Cell optimization:** No (Use [[optcell]] = 0 only)
     **Related variables:** The time step ([[dtion]]), the temperatures ([[mdtemp]]),
     the number of thermostats ([[nnos]]), and the masses of thermostats ([[qmass]]).
   
-  * "nvt_langevin" --> Langevin molecular dynamics. The equation of motion of the ions are described
-    with the algorithm proposed in [[cite:Quigley2004]].
+  * "nvt_langevin" --> Langevin molecular dynamics. The equations of motion of the ions are described
+    with the algorithms proposed in [[cite:Quigley2004]] and [[cite:Quigley2005]].
     **Purpose:** Molecular dynamics
     **Cell optimization:** No (Use [[optcell]] = 0 only)
-    **Related variables:** time step ([[dtion]]), temperatures ([[mdtemp]]) and friction coefficient ([[vis]]).
+    **Related variables:** time step ([[dtion]]), temperatures ([[mdtemp]]) and friction coefficient ([[friction]]).
+  
+  * "npt_langevin" --> Langevin molecular dynamics at constant pressure. The equations of motion of the ions are described
+    with the algorithms proposed in [[cite:Quigley2004]] and [[cite:Quigley2005]].
+    The mass of the barostat ([[bmass]]) must be given in addition.
+    **Purpose:** Molecular dynamics
+    **Cell optimization:** Yes (Use [[optcell]] = 2 only)
+    **Related variables:** time step ([[dtion]]), temperatures ([[mdtemp]]), friction coefficient ([[friction]]),
+    friction coefficient of the barostat ([[frictionbar]]), and the mass of the barostat ([[bmass]]).
 
-  * "npt_martyna" --> Isothermal/isobaric ensemble. The equation of motion of the ions in contact with a thermostat
+  * "npt_martyna" --> Isothermal/isobaric ensemble. The equations of motion of the ions in contact with a thermostat
     and a barostat are solved with the algorithm proposed in [[cite:Martyna1996]].
-    If optcell=1, the mass of the barostat ([[bmass]]) must be given in addition.
+    The mass of the barostat ([[bmass]]) must be given in addition.
     **Purpose:** Molecular dynamics
     **Cell optimization:** Yes (Use [[optcell]] = 1 only)
     **Related variables:** The time step ([[dtion]]), the temperatures ([[mdtemp]]),
-    the number of thermostats ([[nnos]]), and the masses of thermostats ([[qmass]]).
+    the number of thermostats ([[nnos]]), and the masses of thermostats ([[qmass]]),
+    and the mass of the barostat ([[bmass]]).
 
-  * "nst_martyna" --> Isothermal/isobaric ensemble. The equation of motion of the ions in contact with a thermostat
+  * "nst_martyna" --> Isothermal/isobaric ensemble. The equations of motion of the ions in contact with a thermostat
     and a barostat are solved with the algorithm proposed in [[cite:Martyna1996]].
-    If optcell=2, the mass of the barostat ([[bmass]]) must be given in addition.
+    The mass of the barostat ([[bmass]]) must be given in addition.
     **Purpose:** Molecular dynamics
     **Cell optimization:** Yes (Use [[optcell]] = 2 only)
     **Related variables:** The time step ([[dtion]]), the temperatures ([[mdtemp]]),
-    the number of thermostats ([[nnos]]), and the masses of thermostats ([[qmass]]).
+    the number of thermostats ([[nnos]]), and the masses of thermostats ([[qmass]]),
+    and the mass of the barostat ([[bmass]]).
 
   * "nve_velverlet" --> Simple constant energy molecular dynamics using
     the velocity Verlet symplectic algorithm (second order), see [[cite:Hairer2003]].
@@ -19879,7 +19907,7 @@ eigenstate. With the squared residual expressed in Hartrees^2  (Hartrees
 squared), the largest squared residual (called *residm* in the code) encountered over all
 bands and k-points must be less than **tolwfr** for iterations to halt due to successful convergence.
 Note that if [[iscf]] > 0, this criterion should be replaced by those based on
-[[toldfe]] (preferred for [[geoopt]] or [[moldyn]] == "none"), [[toldff]] [[tolrff]] (preferred for
+[[toldfe]] (preferred for [[geoopt]] or [[moldyn]] = "none"), [[toldff]] [[tolrff]] (preferred for
 [[geoopt]] or [[moldyn]] /= "none"), or [[tolvrs]] (preferred for theoretical reasons!).
 When **tolwfr** is 0.0, this criterion is ignored, and a finite value of
 [[toldfe]], [[toldff]], [[tolrff]] or [[tolvrs]] must be specified. This also imposes a
@@ -21510,13 +21538,13 @@ Variable(
     abivarname="vis",
     varset="rlx",
     vartype="real",
-    topics=['PIMD_basic', 'MolecularDynamics_basic'],
+    topics=['MolecularDynamics_basic'],
     dimensions="scalar",
     defaultval=100,
     mnemonics="VIScosity",
     added_in_version="before_v9",
     text=r"""
-The equation of motion is:
+The equations of motion are:
 
 M  I  d  2  R  I  /dt  2  = F  I  - [[vis]] dR  I  /dt
 
