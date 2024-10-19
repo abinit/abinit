@@ -2757,7 +2757,7 @@ ABINIT will rescale uniformly the
 tentative new primitive vectors to a value that leads at most to 90% of the
 maximal allowed [[dilatmx]] deviation from 1. It will do this three times (to
 prevent the geometry optimization algorithms to have taken a too large trial
-step), but afterwards will stop and exit. 
+step), but afterwards will stop and exit.
 
 Setting [[chkdilatmx]] == 0 allows one to
 book a larger planewave basis (if [[dilatmx]] is set to be bigger than 1), but will not rescale the tentative new primitive vectors
@@ -3766,9 +3766,9 @@ This input variable is important when performing relaxation of unit cell size
 and shape (non-zero [[optcell]]). Using a non-zero [[ecutsm]], the total
 energy curves as a function of [[ecut]], or [[acell]], can be smoothed,
 keeping consistency with the stress (and automatically including the Pulay
-stress). 
+stress).
 
-The recommended value is 0.5 Ha in such a case (non-zero [[optcell]]).. 
+The recommended value is 0.5 Ha in such a case (non-zero [[optcell]]).
 
 Actually, when [[optcell]]/=0,
 ABINIT requires [[ecutsm]] to be larger than zero. If you want to optimize
@@ -10011,7 +10011,7 @@ Variable(
     requires="[[useexexch]] == 1",
     added_in_version="before_v9",
     text=r"""
-Give for each species the value of the angular momentum 
+Give for each species the value of the angular momentum
 on which to apply the exact exchange correction.
 """,
 ),
@@ -13839,8 +13839,8 @@ standard output file, search for "Orbital magnetic moment". This calculation req
 both the ground state and DDK wavefunctions (see [[rfddk]] or [[berryopt]]). The
 preferred way to use [[orbmag]] is at the end of a DFPT DDK calculation. Alternatively, it
 can be called in a ground state calculation if [[berryopt]] -2 has also been called,
-to generate discretized DDK wavefunctions. This latter method works only on a mesh of 
-kpoints, while the DFPT version works for both a mesh and for a single k point (as 
+to generate discretized DDK wavefunctions. This latter method works only on a mesh of
+kpoints, while the DFPT version works for both a mesh and for a single k point (as
 encountered in studying an atom or molecule in a box, or a pariticularly large unit cell).
 Note that convergence with kpt mesh is
 *much* faster using the DFPT approach, and the [[berryopt]] approach is not recommended
@@ -19447,7 +19447,7 @@ energy that are smaller than about 1.0d-12 of the total energy. To get
 accurate stresses may be quite demanding.
 
 When the geometry is optimized (relaxation of atomic positions or primitive
-vectors), the use of [[toldfe]] is to be avoided. The use of [[tolrff]] 
+vectors), the use of [[toldfe]] is to be avoided. The use of [[tolrff]]
 (or [[tolrff]]) is by far preferable, in order to have a handle on the geometry
 characteristics. When all forces vanish by symmetry (e.g. optimization of the
 lattice parameters of a high-symmetry crystal), then place [[toldfe]] to
@@ -24265,5 +24265,69 @@ Abinit versions before 9.8 correspond to [[optdcmagpawu]]=1, without magnetism i
 while [[optdcmagpawu]]=3 takes into account magnetism in the DC term, that is currently the default.
 """,
 ),
+
+Variable(
+    abivarname="getdrhodb",
+    varset="files",
+    vartype="integer",
+    topics=['ElPhonInt_useful'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="GET the DRHODB from...",
+    added_in_version="10.3.0",
+    text=r"""
+This variable can be used when performing GWPT calculations with [[optdriver]] = 17
+to read a DVDB file with the derivative of densities produced in a previous dataset.
+For example, one can concatenate a dataset in which an initial set of DFPT densities
+on a relatively coarse q-mesh is interpolated on a denser q-mesh using [[eph_task]] = 5 and [[eph_ngqpt_fine]].
+
+  * If [[getdrhodb]] == 0, no such use of previously computed output potential file is done.
+
+  * If [[getdrhodb]] is positive, its value gives the index of the dataset from which
+the output potential is to be used as input. However, if the first dataset is treated, -1
+is equivalent to 0, since no dataset has been computed in the same run.
+
+  * If [[getdrhodb]] is -1, the output potential of the previous dataset must be taken,
+which is a frequently occurring case.
+
+  * If [[getdrhodb]] is a negative number, it indicates the number of datasets to go
+backward to find the needed file. Going back beyond the first dataset is equivalent to using zero for the get variable.
+
+Note also that one can also use [[getdrhodb_filepath]] to specify the path of the file directly.
+"""
+),
+
+Variable(
+    abivarname="getdrhodb_filepath",
+    varset="files",
+    vartype="string",
+    topics=['multidtset_useful'],
+    dimensions="scalar",
+    defaultval=None,
+    mnemonics="GET the DRHODB file from FILEPATH",
+    added_in_version="10.3.0",
+    text=r"""
+Specify the path of the DVDB file with the first-order densities using a string instead of the dataset index.
+Alternative to [[getdrhodb]] and [[irddrhodb]]. The string must be enclosed between quotation marks:
+
+    getdrhodb_filepath "../outdata/out_DRHODB"
+"""
+),
+
+
+Variable(
+    abivarname="irddrhodb",
+    varset="files",
+    vartype="integer",
+    topics=['ElPhonInt_useful'],
+    dimensions="scalar",
+    mnemonics="Integer that governs the ReaDing of DRHODB file",
+    added_in_version="10.3.0",
+    text=r"""
+This variable can be used when performing GWPT calculations with [[optdriver]] = 17.
+Set to 1, an *input* DRHODB file will be read. See also [[getdrhodb]]
+""",
+),
+
 
 ]
