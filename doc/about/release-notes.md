@@ -183,7 +183,7 @@ Concerning GPU-aware MPI :
 This concept consists of providing GPU buffers addresses to MPI routines. If GPU-direct is enabled, data will transmit between GPU interconnect, aka NVlink (NVIDIA) or InfinityFabric (AMD), UAlink (next-gen AMD/Intel). In ABINIT, it can be enabled using enable_mpi_gpu_aware=yes  in Autotools buildsys (CMake buildsys uses autodetect).
 This usually bring performance improvements, if GPU-direct is enabled, works fine on NVIDIA A100... but works erratically on AMD MI250.
 It is only used to perform a MPI_SUM  in xg_RayleighRitz , which is a performance bottleneck on GPU.
-Anyway, I discovered that this section was broken for some usecases ([[istwfk]]==2, AMD GPU) in xg submod so I fixed it.
+Anyway, this section was broken for some usecases ([[istwfk]]==2, AMD GPU) in xg submod so it has been fixed.
 
 In addition, there were the following fixes:
 fix unprotected OpenMP TARGET directives ;
@@ -248,11 +248,15 @@ By M. Azizi (MR1046)
 
 By M. Giantomassi (MR1047)
 
+**D.9** Add documentation for [[eph_task]]=14, and small correction to release notes.
+
+By M. Mignolet (MR990)
+
 **D.10**
 Add new input variables [[getabiwan]] and [[getabiwan_filepath]].
 Define the name and path of the ABIWAN.nc file with the Wannier rotation matrices produced by ABINIT
 when wannier90 in invoked in library mode.
-This is documented, but there is NO TEST AVAILABLE yet as this feature is still under development.
+This is documented, but there is no test available yet as this feature is still under development.
 
 By M. Giantomassi (ac10911a)
 
@@ -261,14 +265,14 @@ By M. Giantomassi (ac10911a)
 Add new input variables [[getgwan]] and [[getgwan_filepath]].
 Define the name and path of the GWAN.nc file with the e-ph matrix elements in the Wannier representation
 when wannier90 in invoked in library mode.
-This is documented, but there is NO TEST AVAILABLE yet as this feature is still under development.
+This is documented, but there is no test available yet as this feature is still under development.
 
 By M. Giantomassi (5c6ff934)
 
 
 **D.12** Add new input variables [[getdrhodb]], [[getdrhodb_filepath]], [[irddrhodb]].
 to read the database with the first-order densities for GWPT calculations.
-NO TEST (except the fake one `test:gwpt_04`.  as this feature is still under development.
+There is no test available yet (except the fake one `test:gwpt_04`), as this feature is still under development.
 
 By Siyu Chen (867b11f9)
 
@@ -380,10 +384,8 @@ outbsd routine by copying the eig2nkq array into eig2nkq_tmp in the eig2tot subr
 When the outbsd routine was replaced by ddb%set_d2eig_reshape(), the eig2nkq was passed instead of the correct eig2nkq_tmp one,
 resulting in a bug --> the fully EIG2D was printed to file instead of the partial Sternheimer only one.
 See documentation of [[ieig2rf]] for explanation.
-This bug is corrected here. In addition, it was not optimal as it could be printed directly in eig2stern, therefore avoiding the duplication of a large array in eig2nkq_tmp. This has been moved.
-In particular, I moved the printing from m_dfpt_looppert to m_eig2d/eig2stern
-Indeed the printing of EIGR2D should be done inside eig2stern, to mirror
-the same printing done in eig2tot.
+This bug is corrected here. In addition, the coding was not optimal. The content of the former array eig2nkq_tmp could be printed directly in m_eig2d/eig2stern, 
+instead of inside m_dfpt_looppert, avoiding the allocation of this large array, and mirroring the same printing done in eig2tot.
 
 Fix EIGR2D files for the case [[ieig2rf]]=5.
 Move writing of EIGR2D files in eig2stern.
@@ -394,8 +396,8 @@ The electron-phonon legacy scripts have been put back in the package, and have b
 By S. Ponce (MR1036, MR1045) and G. Antonius (MR1043), with help from X. Gonze.
 
 **E.12**
-AbiDev 2024 hackathon tutorial fixes, specifically to the lruj tutorial, the eph_legacy (as much as I could before Samuel took over)
-and the DFPT2 modifications.  LRUJ tutorial fixes and acknowledgements changes.
+AbiDev 2024 hackathon tutorial fixes, specifically to the lruj tutorial, the eph_legacy and the DFPT2 modifications.  
+LRUJ tutorial fixes and acknowledgements changes.
 
 By L. MacEnulty (MR1044)
 
@@ -1409,7 +1411,7 @@ From P. Kestener (MR843)
 
 **C.3** Improve detection of inlined macros. The developers should now use
 
-    ABI_SFREE(allocateble_array)
+    ABI_SFREE(allocatable_array)
 
 instead of
 
