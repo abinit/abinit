@@ -24294,7 +24294,7 @@ which is a frequently occurring case.
 backward to find the needed file. Going back beyond the first dataset is equivalent to using zero for the get variable.
 
 Note also that one can also use [[getdrhodb_filepath]] to specify the path of the file directly.
-"""
+""",
 ),
 
 Variable(
@@ -24311,7 +24311,7 @@ Specify the path of the DVDB file with the first-order densities using a string 
 Alternative to [[getdrhodb]] and [[irddrhodb]]. The string must be enclosed between quotation marks:
 
     getdrhodb_filepath "../outdata/out_DRHODB"
-"""
+""",
 ),
 
 
@@ -24327,7 +24327,259 @@ Variable(
 This variable can be used when performing GWPT calculations with [[optdriver]] = 17.
 Set to 1, an *input* DRHODB file will be read. See also [[getdrhodb]]
 """,
+),  
+    
+Variable(
+    abivarname="getvarpeq_filepath",
+    varset="eph",
+    vartype="string",
+    topics=['Polaron_basic'],
+    dimensions="scalar",
+    defaultval=None,
+    mnemonics="GET the VARPEQ.nc from FILEPATH",
+    requires="[[eph_task]] in [13, -13]",
+    added_in_version="10.1.4",
+    text=r"""
+This variable defines the path of the VARPEQ.nc file with the variational polaron
+equations optimization results.
+
+This variable can be used when [[eph_task]] == 13 i.e. when we solve the variational
+polaron equations.
+In this case, if [[eph_restart]] == 1, the code assumes we want to
+initialize the solution by restarting/interpolating from the solution available in
+the VARPEQ.nc file.
+
+If [[eph_task]] == -13, the variable is required to produce *.xsf files containing
+polaronic wavefunction and induced displacements that can be visualized with VESTA or Xcrysden.
+""",
+),
+
+Variable(
+    abivarname="getvarpeq",
+    varset="eph",
+    vartype="int",
+    topics=['Polaron_basic'],
+    dimensions="scalar",
+    defaultval=None,
+    mnemonics="GET the VARPEQ.nc from dataset",
+    requires="[[eph_task]] in [13, -13]",
+    added_in_version="10.1.4",
+    text=r"""
+This variable is similar in spirit to [[getvarpeq_filepath]] but uses the dataset index
+instead of the filepath.
+""",
+),
+
+Variable(
+    abivarname="varpeq_aseed",
+    varset="eph",
+    vartype="string",
+    topics=['Polaron_basic'],
+    dimensions="scalar",
+    defaultval="gau_energy",
+    mnemonics="VARiational Polaron EQuations: A_nk-coefficients SEED",
+    requires="[[eph_task]] == 13",
+    added_in_version="10.1.4",
+    text=r"""
+This variable specifies the type of initial seed for the electronic coefficients
+$A_{n\mathbf{k}}$, defining the charge localization in the variational polaron
+equations.
+
+Possible values:
+
+- "gaussian" --> Gaussian bassed on the electronic eigenergies
+  $\varepsilon_{n\mathbf{k}}$:
+
+    $$A_{n\mathbf{k}} \sim e^{-\frac{(\varepsilon_{n\mathbf{k}} - \mu)^2}{2\sigma^2}}.$$
+
+  The mean value $\mu$ and the standard deviation $\sigma$ are defined by the
+  [[varpeq_gau_params]] variable.
+
+- "random" --> Random initialization.
+
+- "even" --> Even contribution from each electronic state $\psi_n{\mathbf{k}}$.
+
+""",
 ),
 
 
+Variable(
+    abivarname="varpeq_pkind",
+    varset="eph",
+    vartype="string",
+    topics=['Polaron_basic'],
+    dimensions="scalar",
+    defaultval="None",
+    mnemonics="VARiational Polaron EQuations: Polaron KIND",
+    requires="[[eph_task]] == 13",
+    added_in_version="10.1.4",
+    text=r"""
+This variable specifies the kind of polaron to be obtained within the variational
+polaron equations framework.
+
+Possible values:
+
+- "electron" --> electron polaron.
+
+- "hole" --> hole polaron.
+
+!!! important
+
+    The "electron"/"hole" option requires exclusively conduction/valence manifold
+    provided in the GSTORE.nc file required to setup the variational polaron
+    equations calculation.
+    Intermixing conduction and valence states will lead to erroneous results.
+
+!!! note
+
+    If the "hole" option is chosen, valence states are flipped, so one always
+    deals with the minimization problem, regardless of the polaron kind.
+
+    Also, the polaron binding and localized state energy $E_p$ and $\varepsilon$
+    are positive in case of a hole polaron, and negatie in case of an electron
+    polaron.
+""",
+),
+
+Variable(
+    abivarname="varpeq_interpolate",
+    varset="eph",
+    vartype="integer",
+    topics=['Polaron_basic'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="VARiational Polaron EQuations: INTERPolation",
+    requires="[[eph_task]] == 13",
+    added_in_version="10.1.4",
+    text=r"""
+If non-zero, this variable activates the interpolation of the initial guess for
+the electronic vector in the variational polaron equations.
+In this case, the code reads a pre-existing VARPEQ.nc file and performs a linear
+interpolation of $A_{n\mathbf{k}}$ provided the metadata found in the netcdf file
+is compatible with the input file.
+
+With this feature, if a polaronic solution is obtained for a certain $\mathbf{k}$-grid,
+it can then be read and interpolated to be used as a starting point for different grids.
+This option is expected to lead the optimization proccess to the same polaronic configuration
+and accelarate the convergence.
+""",
+),
+
+
+Variable(
+    abivarname="varpeq_nstep",
+    varset="eph",
+    vartype="integer",
+    topics=['Polaron_basic'],
+    dimensions="scalar",
+    defaultval=50,
+    mnemonics="VARiational Polaron EQuations: Number of iteration STEPs",
+    requires="[[optdriver]] == 7 and [[eph_task]] == 13",
+    added_in_version="10.1.4",
+    text=r"""
+This variables sets the maximum number of iterations in the optimization of
+variational polaron equations.
+""",
+),
+
+
+Variable(
+    abivarname="varpeq_orth",
+    varset="eph",
+    vartype="integer",
+    topics=['Polaron_basic'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="VARiational Polaron EQuations: ORTHogonalization",
+    requires="[[optdriver]] == 7 and [[eph_task]] == 13",
+    added_in_version="10.1.4",
+    text=r"""
+This variables controls orthogonalization to a previous solution.
+It is used for testing purpose only and likely will be removed in further releases.
+""",
+),
+
+Variable(
+    abivarname="varpeq_pc_nupdate",
+    varset="eph",
+    vartype="integer",
+    topics=['Polaron_basic'],
+    dimensions="scalar",
+    defaultval=30,
+    mnemonics="VARiational Polaron EQuations: PreConditioner N-th step UPDATE",
+    requires="[[optdriver]] == 7 and [[eph_task]] == 13",
+    added_in_version="10.1.4",
+    text=r"""
+This variables controls update of the preconditioner in the variational polaron equation optimization.
+It is used for testing purpose only and likely will be removed in further releases.
+""",
+),
+
+Variable(
+    abivarname="varpeq_tolgrs",
+    varset="eph",
+    vartype="real",
+    topics=['Polaron_basic'],
+    dimensions="scalar",
+    defaultval=1e-6,
+    mnemonics="VARiational Polaron EQuations: TOLerance on the Gradient ReSidual",
+    requires="[[eph_task]] == 13",
+    added_in_version="10.1.4",
+    text=r"""
+This variable sets a tolerance for the electronic gradient residual in the optimization
+of the varitional polaron equations.
+""",
+),
+
+Variable(
+    abivarname="varpeq_pc_factor",
+    varset="eph",
+    vartype="real",
+    topics=['Polaron_basic'],
+    dimensions="scalar",
+    defaultval=0.125,
+    mnemonics="VARiational Polaron EQuations: PreConditioner FACTOR",
+    requires="[[optdriver]] == 7 and [[eph_task]] == 13",
+    added_in_version="10.1.4",
+    text=r"""
+This variables controls the preconditioner in variational polaron equations optimization.
+It is used for testing purpose only and likely will be removed in further releases.
+""",
+),
+
+Variable(
+    abivarname="varpeq_gau_params",
+    varset="eph",
+    vartype="real",
+    topics=['Polaron_basic'],
+    dimensions="(2)",
+    defaultval=[0, 1],
+    mnemonics="VARiational Polaron EQuations: Gaussian PaRameters",
+    requires='[[eph_task]] == 13 and [[varpeq_aseed]] == "gaussian"',
+    added_in_version="10.1.4",
+    text=r"""
+If [[varpeq_aseed]] == "gaussian", this variable defines the mean value and the
+standard deviation [[varpeq_gau_params]](:) = $\mu$, $\sigma$ for the Gaussian function to
+be used as initial seed for the vector electronic coefficients.
+See [[varpeq_aseed]] for details.
+""",
+),
+
+
+Variable(
+    abivarname="varpeq_erange",
+    varset="eph",
+    vartype="real",
+    topics=['Polaron_basic'],
+    dimensions="(2)",
+    defaultval=[0, 0],
+    mnemonics="VARiational Polaron EQuations: Energy Range",
+    requires='[[eph_task]] == 13 and [[varpeq_aseed]] == "gaussian"',
+    added_in_version="10.1.4",
+    text=r"""
+This variables controls the energy window for the inital guess in the variational polaron
+equations optimizaiton.
+It is used for testing purpose only and likely will be removed in further releases.
+""",
+),
 ]
