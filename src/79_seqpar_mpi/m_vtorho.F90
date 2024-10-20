@@ -616,6 +616,10 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
   comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,mpi_spintab=mpi_enreg%my_isppoltab,&
   nucdipmom=dtset%nucdipmom,gpu_option=dtset%gpu_option)
 
+ if (dtset%cprj_in_memory==1) then
+   if (xg_nonlop%paw) call xg_nonlop_make_Dij(xg_nonlop,paw_ij,dtset%nsppol,atindx)
+ end if
+
 !Initializations for PAW (projected wave functions)
  mcprj_local=0 ; mband_cprj=0
  if (psps%usepaw==1) then
@@ -761,9 +765,8 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
      ikg=0
 
      if (dtset%cprj_in_memory==1) then
-       if (xg_nonlop%paw) call xg_nonlop_make_Dij(xg_nonlop,paw_ij,isppol,atindx)
+       if (xg_nonlop%paw) call xg_nonlop_set_Dij_spin(xg_nonlop,isppol)
      end if
-
      ! Set up local potential vlocal on the coarse FFT mesh from vtrial taking into account the spin.
      ! Also, continue to initialize the Hamiltonian.
 
@@ -991,7 +994,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
          end if
        end if
 
-       if(dtset%wfoptalg == 111 .and. istep <= 1) then
+       if(gemm_nonlop_use_gemm .and. dtset%wfoptalg == 111 .and. istep <= 1) then
          gemm_nonlop_nblocks = dtset%gpu_nl_splitsize
          ! Only compute CHEBFI number of blocks if user didn't set it themselves
          if(gemm_nonlop_nblocks==1) then
@@ -1215,15 +1218,16 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        end if
      end if
 
-     if (dtset%cprj_in_memory==1) then
-       if (xg_nonlop%paw) call xg_nonlop_destroy_Dij(xg_nonlop)
-     end if
-
      call timab(986,2,tsec)
 
    end do ! End loop over spins
 
    call timab(988,1,tsec)
+
+   if (dtset%cprj_in_memory==1) then
+     if (xg_nonlop%paw) call xg_nonlop_destroy_Dij(xg_nonlop)
+   end if
+
    if (usefock) then
      if (usefock_ACE==0) then
        call xmpi_sum(energies%e_fock0,mpi_enreg%comm_kpt,ierr)

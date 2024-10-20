@@ -29,7 +29,7 @@ Xavier
 
 ### **A.** Remarks and warnings.
 
-**A.1** The input variable shiftfactor_extfpmd has been renamed extfpmd_eshift (NOT DOCUMENTED). This is an energy shift, not a multiplying factor.
+(none)
 
 
 * * *
@@ -38,9 +38,9 @@ Xavier
 
 **B.1** GPU porting of the DFPT driver of ABINIT
 
-The global GPU porting of ABINIT using recent libraries/compilers, started three years ago, has been continued. 
+The global GPU porting of ABINIT using recent libraries/compilers, started three years ago, has been continued.
 In the previous release 10.0, two implementations (OpenMP or KOKKOS+CUDA) for ground-state calculations [[optdriver]]=0
-had been made available. 
+had been made available.
 
 In the present release 10.2, the Density-Functional Perturbation Theory [[optdriver]]=1
 has been ported, using OpenMP.  Numerous tests are available, [[test:gpu_omp_11]] to [[test:gpu_omp_25]]
@@ -51,7 +51,7 @@ For the description of the modifications of ABINIT, see the Merge Requests (MR) 
 By M. Sarraute and M. Torrent (MR 1027, MR1055, MR1059)
 
 
-**B.2** GPU porting of Fock calculations 
+**B.2** GPU porting of Fock calculations
 
 Similarly, the Fock calculation has been ported to GPU, using OpenMP.
 Tests are available, [[test:gpu_omp_26]] to [[test:gpu_omp_29]].
@@ -62,33 +62,23 @@ For the description of the modifications of ABINIT, see the MR below.
 By M. Sarraute and M. Torrent (MR 1062)
 
 
-**B.3** Interface to coupled-cluster CC4S calculations 
+**B.3** Interface to coupled-cluster CC4S calculations
 
 The file needed as input for computations with the CC4S package, <https://manuals.cc4s.org/user-manual>,
-allowing to perform coupled-cluster calculations (e.g. CCSD), perturbative triples (and more), 
+allowing to perform coupled-cluster calculations (e.g. CCSD), perturbative triples (and more),
 can be produced using [[optdriver]]=6 and [[gwr_task]]="CC4S".
 This functionality was available in v10.0. Now it can be considered in production, as it has been tested reasonably and debugged.
 Moreover, there is a new option [[gwr_task]] = "CC4S_FROM_WFK" to read orbitals from file instead of using direct diagonalization.
 The support for [[istwfk]]=2 has been added.
-See tests : [[test:gwr_07]], [[test:gwr_09]], [[test:gwr_10]] and [[test:gwr_11]]. 
+See tests: [[test:gwr_07]], [[test:gwr_08]], [[test:gwr_09]], [[test:gwr_10]] and [[test:gwr_11]].
 
-By M. Giantomassi (MR 1006) and F. Bruneval (MR1024). Additionally, with a bug fix for filepath parsing from M. Sarraute (MR1026).
+By M. Giantomassi (MR 1006) and F. Bruneval (MR1024).
 
-**B.4** The variational polaron equation methodology 
+**B.4** Speed-up of the calculation (PAW as well as norm-conserving), thanks to cprj_in_memory. 
 
-This methodology is described in [[cite:Vasilchenko2022]]. It allows ABINIT to compute the polaron formation energy,
-and other characteristics of a polaron, from the electronic band structure, the phonon band structure, and the electron-phonon coupling.
-To use it, select [[optdriver]]=7 and [[eph_task]]=13.
-Related input variables : varpeq_aseed, varpeq_erange, varpeq_gau_params, varpeq_interpolate, varpeq_orth, varpeq_nstep, varpeq_pkind, varpeq_tolgrs, varpeq_pc_nupdate, varpeq_pc_factor, getvarpeq, getvarpeq_filepath..
-At present, NO DOCUMENTATION  of input variables, and NO TESTS are available...
-
-By V. Vasilchenko, with help from M. Giantomassi (MR 1047).
-
-**B.5** Speed-up of the calculation (PAW as well as norm-conserving), thanks to cprj_in_memory. 
-
-The coefficients of the wavefunctions giving the in-sphere contribution, denoted "cprj", can now be stored in memory, 
+The coefficients of the wavefunctions giving the in-sphere contribution, denoted "cprj", can now be stored in memory,
 thanks to the input variable [[cprj_in_memory]]. This brings speed-up of the PAW calculations (on the order of 20%-30%).
-There are many tests of this functionality, [[test:v10_10]] to  [[test:v10_18]],  [[test:paral_35]] to [[test:paral_40]], 
+There are many tests of this functionality, [[test:v10_10]] to  [[test:v10_18]],  [[test:paral_35]] to [[test:paral_40]],
  [[test:paral_48]] and  [[test:paral_49]], and  [[test:v9_71]] to  [[test:v9_74]].
 However, as usual, the users are advised to check for themselves the results from turning on this new implementation (still mentioned as being "in development").
 
@@ -103,7 +93,7 @@ PAW, [[nsppol]]=1 or2, [[nspinor]]=1 or 2, [[istwfk]]=all values, MPI ([[np_spkp
 
 It is also available for norm-conserving pseudopotentials, but with the following constraints :
 [[useylm]] must be 1 (set automatically if [[cprj_in_memory]]=1), Legendre polynomials are not implemented.
-[[nspinor]]=2 does not work properly, most probably because SOC is not implemented with [[useylm]]=1 (but works well for PAW). 
+[[nspinor]]=2 does not work properly, most probably because SOC is not implemented with [[useylm]]=1 (but works well for PAW).
 This case is forbidden at the moment (test paral_50 is not activated).
 At last : ABINIT also contains a small fix of [[tolwfr_diago]], which was not used in lobpcg ([[tolwfr]] was used instead). This has a small impact on few references.
 
@@ -111,7 +101,7 @@ SHOULD DOCUMENT xg_nonlop_option input variable, used in  [[test:paral_35]],  [[
 
 By L. Baguet (MR 1058)
 
-**B.7** Wannier90 with spinors, and other Wannier90 improvements.
+**B.5** Wannier90 with spinors, and other Wannier90 improvements.
 
 There has been several improvements of the Wannier90 usage together with ABINIT: enable w90 output with spinor wave functions, improvements to parallel calls,
 general cleaning of mlwf routines.
@@ -119,10 +109,10 @@ See  [[test:wannier90_05]] and  [[test:wannier90_14]].
 
 By M. Verstraete  and He Xu (MR1005).
 
-**B.8** New developments and bug fixes in extended First-Principles Molecular Dynamics (high temperature).
+**B.6** New developments and bug fixes in extended First-Principles Molecular Dynamics (high temperature).
 
-Now ABINIT can compute extFPMD high energy contributions with a discrete sum on the orbitals. 
-This is activated with [[useextfpmd]]=5, and controlled with the new input variable [[extfpmd_nband]]. 
+Now ABINIT can compute extFPMD high energy contributions with a discrete sum on the orbitals.
+This is activated with [[useextfpmd]]=5, and controlled with the new input variable [[extfpmd_nband]].
 This allows ABINIT to compute smooth DOS between Kohn-Sham eingenstates and extended ideal electronic states.
 See  [[test:v9_92]].
 
@@ -138,8 +128,8 @@ By A. Blanchet (MR1013).
 ### **C.** Changes for the developers or for the installation of ABINIT (including information about compilers)
 
 
-**C.1** The "MINIMAL" tag has been added to a selected set of automatic tests (about 20 abi files). 
-They cover the basic functionalities of ABINIT, and the detection of failures is modified and made more robust. 
+**C.1** The "MINIMAL" tag has been added to a selected set of automatic tests (about 20 abi files).
+They cover the basic functionalities of ABINIT, and the detection of failures is modified and made more robust.
 There should not be false failures due to tight tolerances.
 So, this should be the ideal set of tests to be executed after a new installation.
 Use "runtests.py -k MINIMAL". Also, "make check-local" and "make check-am" trigger this suite. POSSIBLY GIVE MORE DETAILS ?
@@ -147,7 +137,7 @@ Use "runtests.py -k MINIMAL". Also, "make check-local" and "make check-am" trigg
 By M. Verstrate, M. Torrent and X. Gonze (MR1035, MR1041)
 
 **C.2** Fix support for new compilers: ifort / ifx oneAPI 2024 ( replace some implicit loop by an explicit one ) and improve detection of cray compilers.
-In addition, oneapi and newer intel compilers refuse the old syntax -mkl=cluster, moved to -qmkl. One can presume that all future compilations will be done with this. 
+In addition, oneapi and newer intel compilers refuse the old syntax -mkl=cluster, moved to -qmkl. One can presume that all future compilations will be done with this.
 So, this has been modified in config/m4/sd_math_linalg_core.m4 .
 
 By J.-M. Beuken (MR995) and M. Verstraete (MR1007)
@@ -173,7 +163,7 @@ By M. Sarraute (MR989)
 Concerning eigensolvers on AMD GPU :
 By eigensolver routines, I refer to LAPACK DSYGVD/ZHEGVD and DSYEVD/ZHEEVD, which are provided on GPU by AMD HipSOLVER and NVIDIA CuSOLVER under specific names.
 As of today, DSYGVD and DSYEVD are significantly slower on AMD GPU, and usually account for most of execution time in Adastra GPU partition.
-But somehow, the complex variants ZHEGVD and ZHEEVD are incredibly slow, which lead to introduce a workaround, 
+But somehow, the complex variants ZHEGVD and ZHEEVD are incredibly slow, which lead to introduce a workaround,
 use ZHEGVJ instead of ZHEGVD : J stands for Jacobi and it takes two extra parameter for tolerance and max step.
 The maximum step number was raised from 1 to 100, as numerical issues would sometime occur otherwise. Performance impact seems light.
 At varianes, ZHEEVD is used on CPU : AMD HIP provides a ZHEEVJ it was not possible to make it work.
@@ -183,16 +173,16 @@ Concerning GPU-aware MPI :
 This concept consists of providing GPU buffers addresses to MPI routines. If GPU-direct is enabled, data will transmit between GPU interconnect, aka NVlink (NVIDIA) or InfinityFabric (AMD), UAlink (next-gen AMD/Intel). In ABINIT, it can be enabled using enable_mpi_gpu_aware=yes  in Autotools buildsys (CMake buildsys uses autodetect).
 This usually bring performance improvements, if GPU-direct is enabled, works fine on NVIDIA A100... but works erratically on AMD MI250.
 It is only used to perform a MPI_SUM  in xg_RayleighRitz , which is a performance bottleneck on GPU.
-Anyway, I discovered that this section was broken for some usecases ([[istwfk]]==2, AMD GPU) in xg submod so I fixed it. 
+Anyway, this section was broken for some usecases ([[istwfk]]==2, AMD GPU) in xg submod so it has been fixed.
 
 In addition, there were the following fixes:
-fix unprotected OpenMP TARGET directives ; 
+fix unprotected OpenMP TARGET directives ;
 fix compilation with NVHPC 23.11-24.7 by switching mkrho optionals positions.
 
 By M. Sarraute (MR1056, MR1060, MR1061)
 
 
-**D.2** Tests of the GPU (KOKKOS+CUDA) porting of ABINIT are available,  [[test:gpu_kokkos_01]] and [[test:gpu_kokkos_02]], nonlop with BLAS, chebycheff. 
+**D.2** Tests of the GPU (KOKKOS+CUDA) porting of ABINIT are available,  [[test:gpu_kokkos_01]] and [[test:gpu_kokkos_02]], nonlop with BLAS, chebycheff.
 See input variable [[gpu_option]]=3.
 
 By M. Sarraute and M. Torrent (b3b2ce14ca1)
@@ -207,11 +197,11 @@ By M. Sarraute and M. Torrent (MR1002, MR1004)
 
 **D.4** New developments and tests related to the chemical shielding, orbital magnetization, nuclear dipole moment.
 
-PEAD wavefunctions have been added to orbital magnetism capabilities : 
+PEAD wavefunctions have been added to orbital magnetism capabilities :
 Can call [[orbmag]] and [[berryopt]]=-2 together, to compute orbital magnetic moment using PEAD derivative wavefunctions (instead of DFPT-based DDK wavefunctions).
 
 Spatial symmetries ([[kptopt]]=4) have been added to nuclear dipole moment in ground state.
-kptopt 4 now allows for systems with nuclear dipole moments ([[nucdipmom]]). 
+kptopt 4 now allows for systems with nuclear dipole moments ([[nucdipmom]]).
 Usually not much symmetry is left once a single nuclear dipole moment has been added, but there may be some.
 See [[test:v10_40]].
 
@@ -223,13 +213,13 @@ IS THERE A TEST ?
 By J.Zwanziger (MR993, MR1016, MR1051, MR1052)
 
 
-**D.5** Miscellaneous developments for ground state. 
+**D.5** Miscellaneous developments for ground state.
 This includes the rework of [[istwfk]]=2 with xg_tools (both CPU and GPU).
-and the extension of [[istwfk]]>2 to lobpcg2 and chebfi2 (but works only with DFTI - the FFT from MKL). 
-Tested in [[test:v10_03]], [[test:v10_04]], [[test:paral_44]] and [[test:paral_45]] for DFTI. 
+and the extension of [[istwfk]]>2 to lobpcg2 and chebfi2 (but works only with DFTI - the FFT from MKL).
+Tested in [[test:v10_03]], [[test:v10_04]], [[test:paral_44]] and [[test:paral_45]] for DFTI.
 Same inputs are tested without DFTI in [[test:v10_05]], [[test:v10_06]], [[test:paral_46]] and [[test:paral_47]], but they use only [[istwfk]]=1 and 2.
 The Chebicheff filtering algorithm has been generalized to PAW with Spin-Orbit Coupling
-See [[test:paral_44]] to [[test:paral_47]], as well as [[test:v10_03]] to [[test:v10_06]]. 
+See [[test:paral_44]] to [[test:paral_47]], as well as [[test:v10_03]] to [[test:v10_06]].
 
 By L. Baguet (MR 1014,1021,1022)
 
@@ -248,31 +238,31 @@ By M. Azizi (MR1046)
 
 By M. Giantomassi (MR1047)
 
-**D.9**
-Add new input variable [[gstore_gmode]] in ["phonon", "atom"] to save e-ph matrix elements in the atom representation.
-This is documented, but there is NO TEST AVAILABLE yet.
+**D.9** Add documentation for [[eph_task]]=14, and small correction to release notes.
 
-By M. Giantomassi (MR1006)
+By M. Mignolet (MR990)
 
 **D.10**
-Add new input variables [[getabiwan]] and [[getabiwan_filepath]]. 
+Add new input variables [[getabiwan]] and [[getabiwan_filepath]].
 Define the name and path of the ABIWAN.nc file with the Wannier rotation matrices produced by ABINIT
 when wannier90 in invoked in library mode.
-This is documented, but there is NO TEST AVAILABLE yet.
+This is documented, but there is no test available yet as this feature is still under development.
 
 By M. Giantomassi (ac10911a)
 
 
 **D.11**
-Add new input variables [[getgwan]] and [[getgwan_filepath]]. 
-Define the name and path of the GWAN.nc file with the e-ph matrix elements in the Wannier representation 
+Add new input variables [[getgwan]] and [[getgwan_filepath]].
+Define the name and path of the GWAN.nc file with the e-ph matrix elements in the Wannier representation
 when wannier90 in invoked in library mode.
-This is documented, but there is NO TEST AVAILABLE yet.
+This is documented, but there is no test available yet as this feature is still under development.
 
 By M. Giantomassi (5c6ff934)
 
 
-**D.12** Add new input variables getdrhodb, getdrhodb_filepath, irddrhodb. TO BE DOCUMENTED, NO TEST (except the fake one test:gwpt_04). 
+**D.12** Add new input variables [[getdrhodb]], [[getdrhodb_filepath]], [[irddrhodb]].
+to read the database with the first-order densities for GWPT calculations.
+There is no test available yet (except the fake one `test:gwpt_04`), as this feature is still under development.
 
 By Siyu Chen (867b11f9)
 
@@ -291,7 +281,7 @@ By M. Giantomassi (MR1047)
 By F. Bottin (MR1048)
 
 **D.16** GWPT implementation is on-going. See [[eph_task]]=17. Testing has been initialized, see test:gwpt_01 to test:gwpt_04
-Note that for the time being, gwpt is commented in tests/\_\_init\_\_.py 
+Note that for the time being, gwpt is commented in tests/\_\_init\_\_.py
 
 By M. Giantomassi (5b9bb0e88ab, 306ccc446a2, c03fa967bde)
 
@@ -313,8 +303,13 @@ By F. Gendron (MR987 and MR1030)
 
 By M. Mignolet (MR990)
 
+**D.20** The variational polaron equation methodology
+Ongoing implementation of the methodology described in [[cite:Vasilchenko2022]], activated with [[optdriver]]=7 and [[eph_task]]=13.
+Current commit containts intermediate developments & variables, which are used for testing purposes only and are to be modified or removed later on.
+Final release of the framework is expected in the next version of the code.
+Related input variables : varpeq_aseed, varpeq_erange, varpeq_gau_params, varpeq_interpolate, varpeq_orth, varpeq_nstep, varpeq_pkind, varpeq_tolgrs, varpeq_pc_nupdate, varpeq_pc_factor, getvarpeq, getvarpeq_filepath.
 
-
+By V. Vasilchenko, with help from M. Giantomassi (MR 1047).
 
 
 ### **E.**  Bug fixes, not yet mentioned in the previous sections of these release notes.
@@ -347,7 +342,7 @@ By He Xu (MR992)
 By M. Torrent (MR996)
 
 **E.6** Pawrhoij fixing : Correct indexing in write/read of pawrhoij datastructures to POT and DEN files when qphase=2 ;
-Correct indexing in storing of pawrhoij datastructures after rotation in the symmetrization subroutine when qphase=2 . 
+Correct indexing in storing of pawrhoij datastructures after rotation in the symmetrization subroutine when qphase=2 .
 
 By Oliviero Bistoni (MR998)
 
@@ -358,7 +353,7 @@ Fix race condition in inwffil (cg_envlop kernel) occurring when ABINIT is compil
 By M. Sarraute (MR1023)
 
 **E.8**
-Fix wrong start and count in [[eph_task]]=-2 when [[nsppol]] = 2. 
+Fix wrong start and count in [[eph_task]]=-2 when [[nsppol]] = 2.
 Create indata/tmpdata directories if dirs do not exist.
 Set OMP_NUM_THREADS to 1 if env var is undefined
 
@@ -369,8 +364,8 @@ By M. Giantomassi (MR124)
 By V. Vasilchenko (MR1028)
 
 **E.10** Fix:Virtual Crystal Approximation and [[useylm]]=1.
-In 64_psp/m_pspini.F90, filling the ffspl array when [[useylm]]=1 lead in certain cases to segmentation fault due iln set to ilmn, 
-thus running beyond ffspl dimension psps%lnmax. 
+In 64_psp/m_pspini.F90, filling the ffspl array when [[useylm]]=1 lead in certain cases to segmentation fault due iln set to ilmn,
+thus running beyond ffspl dimension psps%lnmax.
 The filling of ffspl has been revised, as well as the indexation in psps%indlmn (see lines 514 - 554, where most of the changes were made).
 Similar index problems in 66_nonlocal/m_mkffnl.F90, that has thus been modified.
 Now, one should be able to run non-linear response DFPT calculations with VCA, such as the electro-optic response.
@@ -384,10 +379,8 @@ outbsd routine by copying the eig2nkq array into eig2nkq_tmp in the eig2tot subr
 When the outbsd routine was replaced by ddb%set_d2eig_reshape(), the eig2nkq was passed instead of the correct eig2nkq_tmp one,
 resulting in a bug --> the fully EIG2D was printed to file instead of the partial Sternheimer only one.
 See documentation of [[ieig2rf]] for explanation.
-This bug is corrected here. In addition, it was not optimal as it could be printed directly in eig2stern, therefore avoiding the duplication of a large array in eig2nkq_tmp. This has been moved.
-In particular, I moved the printing from m_dfpt_looppert to m_eig2d/eig2stern
-Indeed the printing of EIGR2D should be done inside eig2stern, to mirror
-the same printing done in eig2tot.
+This bug is corrected here. In addition, the coding was not optimal. The content of the former array eig2nkq_tmp could be printed directly in m_eig2d/eig2stern, 
+instead of inside m_dfpt_looppert, avoiding the allocation of this large array, and mirroring the same printing done in eig2tot.
 
 Fix EIGR2D files for the case [[ieig2rf]]=5.
 Move writing of EIGR2D files in eig2stern.
@@ -398,8 +391,8 @@ The electron-phonon legacy scripts have been put back in the package, and have b
 By S. Ponce (MR1036, MR1045) and G. Antonius (MR1043), with help from X. Gonze.
 
 **E.12**
-AbiDev 2024 hackathon tutorial fixes, specifically to the lruj tutorial, the eph_legacy (as much as I could before Samuel took over) 
-and the DFPT2 modifications.  LRUJ tutorial fixes and acknowledgements changes.
+AbiDev 2024 hackathon tutorial fixes, specifically to the lruj tutorial, the eph_legacy and the DFPT2 modifications.  
+LRUJ tutorial fixes and acknowledgements changes.
 
 By L. MacEnulty (MR1044)
 
@@ -442,14 +435,14 @@ Many thanks to the contributors to the ABINIT project between
 May 2023 and March 2024.
 <!-- (with some late contributions until 11 Sep 2024). -->
 These release notes
-are relative to modifications/improvements of ABINIT v10.0 with respect to v9.10, with also some late fixes to v10.0, after March 2024, 
+are relative to modifications/improvements of ABINIT v10.0 with respect to v9.10, with also some late fixes to v10.0, after March 2024,
 that had not yet been documented.
 <!-- TO BE CHANGED Merge requests up to and including MR984. Also, take into account : MR985 (backported from v10.1), MR999 to MR1003, MR1008, MR1011, MR1015, MR1018, MR1020, MR1021, MR1023, MR1031, MR1037, MR1039, MR1040, MR1053, MR1054 -->
 
 The list of contributors includes:
-G. Antonius, L. Baguet, J.-M. Beuken, F. Bottin, J. Bouchet, J. Bouquiaux, F. Brieuc, A. Donkov, F. Gendron, M. Giantomassi, X. Gonze, 
-F. Goudreault, B. Guster, P. Kestener, M. Mignolet, 
-S. Ponce, M. Sarraute, M. Torrent, V. Vasilchenko, M. Verstraete, J. Zwanziger 
+G. Antonius, L. Baguet, J.-M. Beuken, F. Bottin, J. Bouchet, J. Bouquiaux, F. Brieuc, A. Donkov, F. Gendron, M. Giantomassi, X. Gonze,
+F. Goudreault, B. Guster, P. Kestener, M. Mignolet,
+S. Ponce, M. Sarraute, M. Torrent, V. Vasilchenko, M. Verstraete, J. Zwanziger
 
 It is worthwhile to read carefully all the modifications that are mentioned in the present file,
 and examine the links to help files or test cases.
@@ -464,14 +457,14 @@ Xavier
 **A.1** The input variable rfasr, used in DFPT, in case of phonon perturbations and electric field perturbations has been replaced
 by [[asr]] and [[chneut]]. The latter variables have been used already for some time for a more detailed imposition of the acoustic sum rule
 and the charge neutrality sum rule in the electron-phonon part of ABINIT, and even for a longer time
-in the ANADDB utility. Actually, rfasr was used to initialize [[asr]] and [[chneut]] internally. 
+in the ANADDB utility. Actually, rfasr was used to initialize [[asr]] and [[chneut]] internally.
 The default values for [[asr]] and [[chneut]], namely 1, are however not the same as the previous default value of rfasr, namely 0.
 Thus a large fraction of the reference files of the test have been upgraded to the new default. However, in a sizeable number of reference files
 the old default value has been specified explicitly.
 
 **A.2** The input variables rf1atpol, rf1dir, rf1elfd and rf1phon (and similar input variables for perturbations 2 and 3) have been suppressed.
-They were used in the case of Raman calculations (one derivative with respect to an atomic displacement, and two displacements with respect to an electric field), 
-but have been superceded by rf2_XXX input variables a long time ago. 
+They were used in the case of Raman calculations (one derivative with respect to an atomic displacement, and two displacements with respect to an electric field),
+but have been superceded by rf2_XXX input variables a long time ago.
 
 * * *
 
@@ -492,7 +485,7 @@ New input variables : [[gwr_task]], [[gwr_chi_algo]], [[gwr_sigma_algo]],
 [[gwr_np_kgts]], [[gwr_ucsc_batch]], [[gwr_ntau]],
 [[gwr_boxcutmin]], [[gwr_max_hwtene]], [[gwr_rpa_ncut]], [[gwr_nstep]]. Also, [[gwr_tolqpe]] replaces the obsolete gw_toldfeig input variable.
 
-A introductory tutorial (work in progress) is available, see [[tutorial:gwr_intro]]. 
+A introductory tutorial (work in progress) is available, see [[tutorial:gwr_intro]].
 Tests are provided in the newly created subdirectory tests/gwr, see test:gwr_01 to test:gwr_08
 See also test:paral_78 and test:paral_79
 
@@ -505,7 +498,7 @@ One implementation is based on OpenMP, the other one is based on KOKKOS+CUDA.
 At present, this is only available for ground-state calculations [[optdriver]]=0.
 See the description of the GPU possibilities of ABINIT in the documentation, input variable [[gpu_option]].
 
-The 
+The
 OpenMP implementation works on NVidia accelerators, if ABINIT has been
 compiled with a [[CUDA]] compatible compiler and linked with NVidia FFT/linear algebra
 libraries ([cuFFT](https://docs.nvidia.com/cuda/cufft),
@@ -532,22 +525,22 @@ be set at configure step: --enable-gpu-nvtx.
 Several GPU devices can be detected and used on a node.
 
 GPU regression tests are present in new directories,
-[[test:gpu_omp_01]], [[test:gpu_omp_02]], [[test:gpu_omp_03]], 
+[[test:gpu_omp_01]], [[test:gpu_omp_02]], [[test:gpu_omp_03]],
 [[test:hpc_gpu_omp_01]] to [[test:hpc_gpu_omp_13]],
 as well as in the previously existing directory gpu.
 
 The ABINIT test farm has been upgraded to support those tests. The NVHPC compiler is supported. Also, ABINIT works on Adastra cluster with newest Cray version (23.12).
 
-FOR THE TIME BEING (APRIL 2024), THE DOCUMENTATION TO BUILD THE GPU VERSION OF ABINIT REMAINS TO BE WRITTEN. 
-Still, there are three examples *ac9 files in the directory doc/build of the package, that are also available from 
+FOR THE TIME BEING (APRIL 2024), THE DOCUMENTATION TO BUILD THE GPU VERSION OF ABINIT REMAINS TO BE WRITTEN.
+Still, there are three examples *ac9 files in the directory doc/build of the package, that are also available from
 [https://github.com/abinit/abinit/tree/master/doc/build](https://github.com/abinit/abinit/tree/master/doc/build) .
-Moreover, if you want to be a beta tester and collaborate on this topic, please contact Marc Torrent. 
+Moreover, if you want to be a beta tester and collaborate on this topic, please contact Marc Torrent.
 
-By P. Kesterner, M. Sarraute, J.-M. Beuken, L. Baguet and M. Torrent 
+By P. Kesterner, M. Sarraute, J.-M. Beuken, L. Baguet and M. Torrent
 (MR942, 943, 951, 954, 955, 961, 965, 966, 967, 968, 969, 974, 978)
 
 
-**B.3** CMake build of ABINIT 
+**B.3** CMake build of ABINIT
 
 ABINIT can now be build using CMake instead of the standard configure+make. This is needed to build the GPU version
 of ABINIT relying on KOKKOS. Try :
@@ -559,7 +552,7 @@ Still, the usual build procedure, using autotools is to be preferred by non-expe
 
 Also, the version number of ABINIT is now generated automatically from the git tag information.
 
-By P. Kestener with M. Torrent (MR944, 979) 
+By P. Kestener with M. Torrent (MR944, 979)
 
 
 **B.4** Computation of phonon angular momentum
@@ -575,7 +568,7 @@ It is now possible to govern the printing of files thanks to the "supra"variable
 instead of using the numerous prt* input variables.
 
 This supravariable is introduced while maintaining the underlying logic of the prt file options inside abinit.
-(Experienced) Users can now trigger the presence or absence of a file in a calculation via a string using 
+(Experienced) Users can now trigger the presence or absence of a file in a calculation via a string using
 
 [[write_files]] ``<list_of_file_suffixes_with_options\>"
 
@@ -613,7 +606,7 @@ By M. Torrent (MR 938)
 
 **B.8** Spin-orbit for orbital magnetism.
 
-The spin-orbit coupling has been added to the computation of orbital magnetism. 
+The spin-orbit coupling has been added to the computation of orbital magnetism.
 See [[test:v9_141]].
 
 By J. Zwanziger (MR980)
@@ -622,7 +615,7 @@ By J. Zwanziger (MR980)
 
 The writing of the file needed as input for computations with the CC4S package, <https://manuals.cc4s.org/user-manual>,
 allowing to perform coupled-cluster calculations (e.g. CCSD), perturbative triples (and more), can be activated using [[optdriver]]=6 and [[gwr_task]]="CC4S".
-See test test:gwr_07 
+See test test:gwr_07
 
 By M. Giantomassi (MR 875, 907)
 
@@ -630,7 +623,7 @@ By M. Giantomassi (MR 875, 907)
 
 ### **C.** Changes for the developers (including information about compilers)
 
-**C.1** A new bot called EOS has been included in the test farm, in order to test ABINIT on GPUs. 
+**C.1** A new bot called EOS has been included in the test farm, in order to test ABINIT on GPUs.
 Several flavors of the NVHPC compiler are available.
 
 By J.-M. Beuken, M. Torrent, M. Sarraute, P. Kesterner (MR949)
@@ -660,28 +653,28 @@ By M. Torrent (MR970)
 **D.1**
 There are several improvements related to [[tolwfr]].
 
-Now one can couple [[tolwfr]] with other tolerances. 
+Now one can couple [[tolwfr]] with other tolerances.
 In that case, the SCF loop stops if both criteria are satisfied. The documentation has been upgraded accordingly. See [[test:v9_200]].
 
-The input variable [[tolwfr_diago]] has been added, to distinguish the criterion used for SCF loop 
-and the one used inside diagonalization algorithms to skip lines. 
+The input variable [[tolwfr_diago]] has been added, to distinguish the criterion used for SCF loop
+and the one used inside diagonalization algorithms to skip lines.
 [[tolwfr_diago]] is set to [[tolwfr]] by default. Note that one can define [[tolwfr_diago]] while [[tolwfr]] is not defined.
 
-There is a new use of [[nbdbuf]] (=-101), which is kind of an automatic buffering. 
-In that case, the maximum of residuals is computed as max(res*occ) instead of max(res). 
+There is a new use of [[nbdbuf]] (=-101), which is kind of an automatic buffering.
+In that case, the maximum of residuals is computed as max(res*occ) instead of max(res).
 Used for both [[tolwfr]] and [[tolwfr_diago]]. This is experimental, so not documented yet.
 
 Apart from LOBPCG ([[wfoptalg]]==114), these developments are new features without altering the previous code behavior, as shown in the testsuite.
 See [[test:mpiio_26]], [[test:mpiio_27]], [[test:mpiio_51]],
 [[test:paral_31]],[[test:paral_63]],
-[[test:paral_66]],[[test:paral_86]] 
+[[test:paral_66]],[[test:paral_86]]
 [[test:psic_03]], [[test:v9_202]].
 
 By L. Baguet (MR947)
 
 **D.2**
-Introduced the new [[nblock_lobpcg]] variable (default=1), and set [[bandpp]] accordingly (taking into account npband). 
-If [[bandpp]] is used, set [[nblock_lobpcg]] accordingly (taking into account npband). 
+Introduced the new [[nblock_lobpcg]] variable (default=1), and set [[bandpp]] accordingly (taking into account npband).
+If [[bandpp]] is used, set [[nblock_lobpcg]] accordingly (taking into account npband).
 [[bandpp]] and [[nblock_lobpcg]] cannot be used simultaneously.
 [[bandpp]] should be considered as an internal variable in the future.
 [[autoparal]] behavior is not changed, so it sets [[nblock_lobpcg]] according to [[npband]] and [[bandpp]].
@@ -695,8 +688,8 @@ From L. Baguet (MR957)
 
 
 **D.3**
-Miscellaneous developments for ground state CPU calculations, 
-including refactoring (e.g. create independent Rayleigh-Ritz and Ortho routines, 
+Miscellaneous developments for ground state CPU calculations,
+including refactoring (e.g. create independent Rayleigh-Ritz and Ortho routines,
 originally linked to lobpcg or chebfi modules, and merge of the two RR routines).
 Timing is improved thanks to these modifications, also related to GPU development.
 
@@ -739,7 +732,7 @@ Add two tests, [[test:paral_100]] and [[test:paral_101]] for testing local susce
 By F. Gendron (MR963, MR983)
 
 **D.8**
-Check on consistency of parallelism input variables [[autoparal]] and [[paral_kgb]] with [[optdriver]]. 
+Check on consistency of parallelism input variables [[autoparal]] and [[paral_kgb]] with [[optdriver]].
 Introduce [[chkparal]]. Can be disabled by non-zero [[expert_user]] input variable (already existed, from 9.2).
 See [[test:v67mbpt_36]].
 
@@ -766,7 +759,7 @@ in the microzone around the Gamma point to accelerate the convergence with the n
 
 Numerous tests : [[test:v8_57]], [[test:v8_60]], [[test:v9_60]], [[test:v9_66]] and several tests in the [[tutorial:eph4zpr]]
 
-By M. Giantomassi 
+By M. Giantomassi
 
 **D.11** Progress in the implementation of the strong coupling variational polaron equations.
 
@@ -778,7 +771,7 @@ The new datatype is more modular and allows for reusing the Fröhlich model data
 By V. Vasilchenko (MR971)
 
 **D.12**
-Developments in the aTDEP post-processing application. 
+Developments in the aTDEP post-processing application.
 See e.g. [[test:atdep_38]].
 
 By F. Bottin and J. Bouchet (MR496)
@@ -789,7 +782,7 @@ There are significant documentation updates to [[topic:EFG|EFG]] and [[topic:NMR
 By J. Zwanziger (MR980)
 
 
-**D.14** 
+**D.14**
 Introduced a warning in m_respfn_driver.f90 regarding non-colinear dfpt in metals for norm-conserving psps. I compared results obtained by dfpt to results obtained via finite differences on Fe bcc. Everything seems alright.
 There is no paw implementation yet for [[nspden]]=4.
 
@@ -811,7 +804,7 @@ By G. Antonius (MR931)
 
 **D.17**
 Fixed a typo in 'bs_nstates' docs where direct diago was mapped to 'bs_algorithm=2' while it is 1.
- 
+
 By F. Goudreault (MR945)
 
 **D.18**
@@ -820,7 +813,7 @@ Now local magnetic moment is correctly forced to be zero.
 
 By M Torrent (MR948)
 
-**D.19** 
+**D.19**
 Fix in posdoppler routine.
 
 From A. Donkov, through M. Torrent (MR950)
@@ -846,7 +839,7 @@ From M. Torrent (MR959)
 **D.22**
 Introduced new input variable [[invovl_blksliced]].
 
-From M. Torrent 
+From M. Torrent
 
 **D.23**
 Handle the Debye-Waller when only VB in the active space.
@@ -862,7 +855,7 @@ ing the Fourier interpolation of the perturbed potential.
 From S. Ponce (MR972 and commit a84206b4)
 
 **D.24**
-Bug fixes for the LRUJ utility, documentation, and subroutines. 
+Bug fixes for the LRUJ utility, documentation, and subroutines.
 Polynomial regression subroutine written from scratch to replace that subroutine.
 LRUJ tutorial documentation updated.
 LRUJ post-processor now calculates HP error correctly.
@@ -878,7 +871,7 @@ When computing the molecular Berry curvature (eph_task=14), it is now written to
 
 From M. Mignolet (MR984)
 
-**D.26** Bug fixes for Gstore, Molecular Berry curvature and VdW DFT-D3 
+**D.26** Bug fixes for Gstore, Molecular Berry curvature and VdW DFT-D3
 
 Gstore module: incorrect parallelization over spins would make abinit crash when computing the GSTORE.nc with nsppol=2.
 Molecular Berry curvature module: incorrect initialization of the DDB would result in a crash when using kptopt!=3.
@@ -888,7 +881,7 @@ Multidataset parsing ignoring ? wildcard when the first index is above 10.
 
 From M. Mignolet (MR999, MR1011, MR1015)
 
-**D.27** 
+**D.27**
 
 Add new DFT-D3 compatible XC functionals + slight changes in doc. Typo in CPU name corrected.
 Suppress -mtune when -march is specified (march=>mtune); this is problematic with clang v<15.
@@ -951,13 +944,13 @@ Xavier
 
 * * *
 
-### **A.** Important remarks and warnings. 
+### **A.** Important remarks and warnings.
 
 **A.1** The names of several tutorial files have been changed to make them easier to understand. "gspw" is now "paral_bandpw", "ucrpa" is now "ucalc_crpa",
 "depes" is now "eph_tdep_legacy", "eph" is now "eph_legacy", "ffield" is now "polarization". The tutorial "udet" relying on an old utility
 is now superceded by the tutorial "lruj", see section [B.3](#v9.10.B.3). The name of the topic CRPA has been changed to [[topic:CalcUJ]].
 
-**A.2** The default value for [[dosdeltae@anaddb]] has been changed from 1 cm-1 to 0.2 cm-1, 
+**A.2** The default value for [[dosdeltae@anaddb]] has been changed from 1 cm-1 to 0.2 cm-1,
 and the default value for [[dossmear@anaddb]] has been changed from 5 cm-1 to 1 cm-1.
 Also, the default values for [[dosdeltae@atdep]] has been changed from 4.5d-6 to 0.2 cm-1.
 This is to allow default calculations of thermal expansion using abipy to be more stable numerically.
@@ -968,7 +961,7 @@ By S. Rostami and X. Gonze (commit 8b7697502c)
 
 ### **B.** Most noticeable achievements
 
-**B.1** Orbital magnetization 
+**B.1** Orbital magnetization
 
 The computation of the orbital magnetization and chemical shielding
 (in the converse method, that is, with a nuclear dipole moment added)
@@ -990,11 +983,11 @@ By J. Zwanziger, M. Torrent and X. Gonze (MR895, 904, 917).
 **B.2** Natural optical activity tensor, linear response to a vector potential (orbital magnetic field linear response) and other modifications of the longwave driver.
 
 Computation of the natural optical activity tensor can be performed via the input variable [[lw_natopt]].
-This is demonstrated with the test [[test:lw_8]]. 
+This is demonstrated with the test [[test:lw_8]].
 The topic [[topic:longwave]] has been upgraded.
 
-In addition, the computation of the linear response to a vector potential in the long-wavelength limit 
-has been implemented via minimal modifications of the routines that calculate second derivatives 
+In addition, the computation of the linear response to a vector potential in the long-wavelength limit
+has been implemented via minimal modifications of the routines that calculate second derivatives
 of wavefunctions with respect to wavevector as explained in [[cite:Zabalo2022]].
 See test [[test:v9_146]], and input variable [[rf2_dkdk]] with value 2.
 Related test [[test:v9_147]].
@@ -1019,7 +1012,7 @@ The old utility "ujdet" to compute the U and J parameters in DFT+U with the line
 has been replaced by the new "lruj" utility. The workflow is different.
 The [[tutorial:lruj]] has been written, with three corresponding tests, [[test:lruj_1]], [[test:lruj_2]], [[test:lruj_3]].
 See also the input variables [[pawujv]]. The tutorial and corresponding tests "ujdet" have been suppressed.
-The tests v5_38, v5_39, v5_40, v6_41 have been suppressed, and replaced by [[test:v9_105]], 
+The tests v5_38, v5_39, v5_40, v6_41 have been suppressed, and replaced by [[test:v9_105]],
 [[test:v9_106]], [[test:v9_107]], [[test:v9_108]], [[test:v9_109]]. This is also documented in [[topic:CalcUJ]].
 
 By Lórien MacEnulty with help from David D. O'Regan (MR905, 912).
@@ -1062,7 +1055,7 @@ By M. Giantomassi (MR896)
 
 **B.7** Temperature-dependent XC functionals (free energy), using libXC
 
-The following temperature-dependent XC functionals from libXC are now available: 
+The following temperature-dependent XC functionals from libXC are now available:
 LDA T-dependent functionals from [[cite:Karasiev2014]], with [[ixc]]=-269, from [[cite:Karasiev2018]],
 with [[ixc]]=-318, and from [[cite:Groth2017]], with [[ixc]]=-577.
 Previously, the IIT temperature-dependent Free Energy functional of [[cite:Ichimaru1987]], with [[ixc]]=50
@@ -1074,10 +1067,10 @@ By M. Torrent (MR901)
 
 **B.8** Atomic orbital magnetic moment inside PAW spheres
 
-Implementation of atom-by-atom orbital magnetization integration inside the PAW spheres. 
-x, y and z components are printed. Decomposition on p, d and f orbitals is also done. 
-Works only for PAW+U+SOC (and nspden=4). 
-Works also for orbitals where no U is specified. 
+Implementation of atom-by-atom orbital magnetization integration inside the PAW spheres.
+x, y and z components are printed. Decomposition on p, d and f orbitals is also done.
+Works only for PAW+U+SOC (and nspden=4).
+Works also for orbitals where no U is specified.
 New input flag [[prt_lorbmag]]. See test [[test:v9_112]]. Mentioned in [[topic:AtomCentered]].
 
 By A. Sasani & E. Bousquet (MR915).
@@ -1085,11 +1078,11 @@ By A. Sasani & E. Bousquet (MR915).
 
 **B.9** High-temperature DFT: Improvements of the Extended First-Principles Molecular Dynamic (ExtFPMD) calculations.
 
-[[useextfpmd]]=1 now computes contributions using Fermi gas DOS (which was found to be more stable for pure and mixtures). 
+[[useextfpmd]]=1 now computes contributions using Fermi gas DOS (which was found to be more stable for pure and mixtures).
 Old [[useextfpmd]]=1 is now [[useextfpmd]]=4 (tests were changed accordingly)
 
 [[useextfpmd]]=10 controls the Hybrid Thomas-Fermi / Kohn-Sham scheme see [[cite:Hollebon2022]].
-This model aims at reducing further the needed number of bands at high temperature compared to Extended FPMD. 
+This model aims at reducing further the needed number of bands at high temperature compared to Extended FPMD.
 No documentation is available since it is work in progress.
 
 Added a new input variable [[extfpmd_nbdbuf]] which specifies the number of bands to use for the buffer if [[useextfpmd]] /= 0.
@@ -1108,7 +1101,7 @@ By A. Blanchet (MR883 and MR916)
 <!--
 **B.11** Interface to coupled-cluster CC4S calculations.
 
-The writing of the file needed as input for computations with the CC4S package, <https://manuals.cc4s.org/user-manual>, 
+The writing of the file needed as input for computations with the CC4S package, <https://manuals.cc4s.org/user-manual>,
 allowing to perform coupled-cluster calculations (e.g. CCSD), perturbative triples (and more), can be activated using [[optdriver]]=6 and [[gwr_task]]="CC4S".
 See test test:gwr_07 (not yet activated)..
 
@@ -1142,7 +1135,7 @@ By M. Giantomassi (MR875, MR907)
 
 **D.2** Interface to coupled-cluster CC4S calculations.
 
-The implementation of writing a file needed as input for computations with the CC4S package, <https://manuals.cc4s.org/user-manual>, 
+The implementation of writing a file needed as input for computations with the CC4S package, <https://manuals.cc4s.org/user-manual>,
 is working, but not yet in production.
 By M. Giantomassi (MR 875, 907)
 
@@ -1156,7 +1149,7 @@ This will later allow computing forces/stresses on GPU.
 By M. Torrent (MR886 and 887).
 
 **D.4**
-Added [[prteig]]=2, in order to print EIG.nc file at each timestep (using already used for other variables TIMx suffix). 
+Added [[prteig]]=2, in order to print EIG.nc file at each timestep (using already used for other variables TIMx suffix).
 (No test - should be added).
 By A. Blanchet (MR916).
 
@@ -1186,15 +1179,15 @@ By M. Giantomassi (commit 31e8aa66d8).
 By X. Gonze (commit dabc1b905).
 
 **D.11** Fixed typo in CITATION.cff.
-By P. Kestener (MR910). 
+By P. Kestener (MR910).
 
 **D.12** New topic [[topic:AtomCentered]] created.
 By X. Gonze (commit 425e8c)
 
 **D.13** Improvements of tutorials base3.md and gw1.md in order to better avoid students to commit mistakes.
-By X. Gonze (commits 1d56e983f and dfd207458) 
+By X. Gonze (commits 1d56e983f and dfd207458)
 
-**D.14** In m_phgamma.F90, spin-resolved calculations for the case prteliash==3 did not work correctly 
+**D.14** In m_phgamma.F90, spin-resolved calculations for the case prteliash==3 did not work correctly
 since phonon linewidths were calculated for spin=1 only. spin>=2 values are filled by NaNs. This small addition fixes the issue.
 Also, a minor format fix.
 By F. Akhmetov (Radioteddy on Github). commit bd76768 on abinit github, but directly ported to the trunk/release-9.10 branch.
@@ -1222,10 +1215,10 @@ are relative to modifications/improvements of ABINIT v9.8 with respect to v9.6.
 <!-- Merge requests up to and including MR874. Also, MR881, 882, 885, 891, 892, 894, 897, 898, 899, 900, 902, 903, 911, are taken into account. -->
 
 The list of contributors includes:
-B. Amadon, G. Antonius, L. Baguet, S. Bandyopadhyay, L. Bastogne, J.-M. Beuken, J. Bieder, A. Blanchet, 
-F. Bottin, J. Bouchet, E. Bousquet, F. Brieuc, V. Brousseau-Couture, N. Brouwer, F. Bruneval, M. Cote, 
-C. Espejo, Ph. Ghosez, M. Giantomassi, O. Gingras, X. Gonze, B. Guster, P. Kesterner, 
-R. Outerovich, Ch. Paillard, M. Royo, A. Sasani, B. Sataric, M. Schmitt, F. Soubiran, 
+B. Amadon, G. Antonius, L. Baguet, S. Bandyopadhyay, L. Bastogne, J.-M. Beuken, J. Bieder, A. Blanchet,
+F. Bottin, J. Bouchet, E. Bousquet, F. Brieuc, V. Brousseau-Couture, N. Brouwer, F. Bruneval, M. Cote,
+C. Espejo, Ph. Ghosez, M. Giantomassi, O. Gingras, X. Gonze, B. Guster, P. Kesterner,
+R. Outerovich, Ch. Paillard, M. Royo, A. Sasani, B. Sataric, M. Schmitt, F. Soubiran,
 M. Torrent, M. Verstraete, He Xu, J. Zwanziger.
 
 It is worth to read carefully all the modifications that are mentioned in the present file,
@@ -1245,20 +1238,20 @@ By J. Zwanziger (MR850)
 **A.2**
 Within PAW in ABINIT, the ZORA relativistic factor for all PAW+spin-orbit coupling has been corrected:
 A ^2 was missing for the 1/(1-(v/c)^2) factor.
-This changes slightly all the PAW+SOC results (because the factor is very small), without any influence on physical results. 
+This changes slightly all the PAW+SOC results (because the factor is very small), without any influence on physical results.
 However, previous results cannot be anymore obtained.
 
 By M. Torrent (MR849)
 
 **A.3**
-The default value for [[rfdir]] is now (1 1 1), instead of (0 0 0).  
+The default value for [[rfdir]] is now (1 1 1), instead of (0 0 0).
 The one of [[rfatpol]] is now (1 [[natom]]), instead of (1 1).
 
 By X. Gonze (MR852)
 
 **A.4** The default values of dossmear (@anaddb) and dosdeltae (@anaddb and @atdep) have changed, to smaller values, to improve default accuracy.
 
-By X. Gonze 
+By X. Gonze
 
 **A.5**
 Correction and cleaning of DFT+U with magnetism ([[nspden]]=4), following the merge 881.
@@ -1276,7 +1269,7 @@ xx component of the stress could still be large but shouldn't be checked. This h
 By Xu He (MR897)
 
 **A.7**
-More fix on the generation of symmetry-adapted terms in Multibinit. A more complete set of terms are now generated, with improved time and memory performance. 
+More fix on the generation of symmetry-adapted terms in Multibinit. A more complete set of terms are now generated, with improved time and memory performance.
 
 By Xu He and A. Sasani (MR899)
 
@@ -1301,13 +1294,13 @@ By. X. Gonze (MR903)
 
 **B.1** Lattice Wannier functions can be computed, using the SCDM-k algorithm, or the projected Wannier function algorithm.
 
-The [[tutorial:lattice_wannier]] has been written to teach how to construct such lattice Wannier functions. 
-They are used in localized bases for atomic distortions. 
-One typical use case is to build an effective Hamiltonian of collective, localized, atomic displacements (see the next achievement). 
+The [[tutorial:lattice_wannier]] has been written to teach how to construct such lattice Wannier functions.
+They are used in localized bases for atomic distortions.
+One typical use case is to build an effective Hamiltonian of collective, localized, atomic displacements (see the next achievement).
 
 A script (compare_phbands.py) to compare phonon/LWF band structures is added to the scripts/post_processing directory.
 
-Related input variables : 
+Related input variables :
 [[lwfflag@anaddb]],
 [[lwf_anchor_ibands@anaddb]],
 [[lwf_anchor_proj@anaddb]],
@@ -1322,7 +1315,7 @@ Related input variables :
 Related topic [[topic:LWFModel]].
 See tests [[test:lwf_1]], [[test:v9_110]], and [[test:v9_111]].
 
-This feature is still under heavy development. The current version should be regarded as a "technology preview". 
+This feature is still under heavy development. The current version should be regarded as a "technology preview".
 
 By He Xu (MR844)
 
@@ -1348,7 +1341,7 @@ lwf_temperature@multibinit,
 
 See the tutorial [[tutorial:lwf_model]] and related tests.
 
-This feature is still under heavy development. The current version should be regarded as a "technology preview". 
+This feature is still under heavy development. The current version should be regarded as a "technology preview".
 
 By He Xu (MR851)
 
@@ -1356,41 +1349,41 @@ By He Xu (MR851)
 
 Hybrid Monte-Carlo Mover with NPT ensemble ([[ionmov]]=25).
 
-MULTIBINIT can now be used without 'files' file, as the main ABINIT or ANADDB. 
-Related input variables [[latt_pot_fname@multibinit]], [[latt_harm_pot_fname@multibinit]], 
-[[latt_anharm_pot_fname@multibinit]], [[latt_training_set_fname@multibinit]], 
+MULTIBINIT can now be used without 'files' file, as the main ABINIT or ANADDB.
+Related input variables [[latt_pot_fname@multibinit]], [[latt_harm_pot_fname@multibinit]],
+[[latt_anharm_pot_fname@multibinit]], [[latt_training_set_fname@multibinit]],
 [[latt_test_set_fname@multibinit]], [[spin_pot_fname@multibinit]], [[spin_init_hist_fname@multibinit]], [[slc_pot_fname@multibinit]],
 [[outdata_prefix@multibinit]].
 
-The MULTIBINIT tutorial has been improved. In particular, it is now starting with a global introduction ([[tutorial:multibinit]]).  
+The MULTIBINIT tutorial has been improved. In particular, it is now starting with a global introduction ([[tutorial:multibinit]]).
 
 The following MULTIBINIT features and input variables have been introduced :
-define oblique supercells ([[ncellmat@multibinit]]), print Goal-Function values in CSV format ([[prt_GF_csv@multibinit]]), 
+define oblique supercells ([[ncellmat@multibinit]]), print Goal-Function values in CSV format ([[prt_GF_csv@multibinit]]),
 impose the seed for MULTIBINIT spin/LWF dynamics to obtain reproducible results ([[randomseed@multibinit]]),
 specify three weights for Energy, Forces and Stresses in the calculation of the Goal Function ([[bound_factors@multibinit]]),
 specify three weights for Energy, Forces and Stresses in the calculation of the Goal Function during the fit process ([[fit_factors@multibinit]]),
 specify three weights for Energy, Forces and Stresses in the calculation of the Goal Function during the optimization process ([[opt_factors@multibinit]]),
 specify the relative penalty for the determination of bounding coefficient values ([[bound_penalty@multibinit]]),
-activate the generation of pure displacement coefficients ([[fit_dispterms@multibinit]]), 
+activate the generation of pure displacement coefficients ([[fit_dispterms@multibinit]]),
 specify the number of anharmonic coefficients per symmetric irreducible atom to add during fit process ([[fit_ncoeff_per_iatom@multibinit]]),
 specify the number of coefficients imposed with fixed value as in the input xml during the fit process for the mode
 ([[fit_nimposecoeff@multibinit]]),
 specify the indices of the imposed coefficients with fixed coefficient value during the fit process for the model ([[fit_imposecoeff@multibinit]]),
 
-See the tests in which these input variables are used. 
+See the tests in which these input variables are used.
 
 By He Xu, M. Schmitt, A. Sasani, L. Bastogne, S. Bandyopadhyay, and P. Ghosez (MR812, 851, 868, 894)
 
 
 **B.4** The TDEP formalism implemented in ABINIT (aTDEP), allowing to compute temperature-dependent phonon band structures,
  has been made more robust, and tested extensively. One tutorial ([[tutorial:atdep1]]) is now available.
-See the thirty-seven tests from [[test:atdep_01]] to [[test:atdep_37]] and the tests mentioned in the 
+See the thirty-seven tests from [[test:atdep_01]] to [[test:atdep_37]] and the tests mentioned in the
 tutorial [[tutorial:atdep1]]. Related publication, see [[cite:Bottin2020]].
 
 By F. Bottin, J. Bieder and J. Bouchet (MR 836).
 
 
-**B.5** 
+**B.5**
 The conducti utility can treat Spin-Orbit Coupling for transport properties (within PAW) : conductivity, XANES, transport coefficients, ...
 See [[cite:Brouwer2021]].
 The writing of documentation and tutorial is in progress.
@@ -1405,15 +1398,15 @@ By M. Torrent and N. Brouwer (MR849).
 
 From J.-M. Beuken (MR830).
 
-**C.2** Update build system to allow the use of NVTX library, providing profiling annotations (only when gpu is enabled). 
-This makes more readable profiling and tracing information when viewed with nsys-ui. 
+**C.2** Update build system to allow the use of NVTX library, providing profiling annotations (only when gpu is enabled).
+This makes more readable profiling and tracing information when viewed with nsys-ui.
 If abinit is built without gpu, annotations completely vanish at compile time.
 
 From P. Kestener (MR843)
 
-**C.3** Improve detection of inlined macros. The developers should now use 
+**C.3** Improve detection of inlined macros. The developers should now use
 
-    ABI_SFREE(allocateble_array)
+    ABI_SFREE(allocatable_array)
 
 instead of
 
@@ -1435,7 +1428,7 @@ They were not maintained automatically anymore, so many had become misleading.
 
 From X. Gonze (MR874)
 
-**C.6**  
+**C.6**
 A new type of file 'GSTORE' has been introduced,  for the electron-phonon matrix element storage, where it is taken advantage
 of filters (on energy or band or wavevectors) to reduce the size compared to the more usual EIG1 file type.
 It contains also the related metadata.
@@ -1450,15 +1443,15 @@ By M. Giantomassi (MR870)
 ### **D.**  Other changes (or on-going developments, not yet finalized)
 
 **D.1** New tutorial on the use of the Z2pack postprocessor ([[tutorial:z2pack]]).
-In this tutorial, the topological transition from Z2 trivial to Z2 non-trivial under pressure is reproduced. 
+In this tutorial, the topological transition from Z2 trivial to Z2 non-trivial under pressure is reproduced.
 A test has been added but one needs to install z2pack to test it. See doc/tests/tutoplugs/z2.py, and [[tutorial:z2pack]].
 
 From O. Gingras, V. Brousseau-Couture and M. Cote (MR 871)
 
 **D.2** Improved the Wannier90 tutorial ([[tutorial:wannier90]]).
-There is a new part, that describes projecting the band structure of La$_2$CuO$_4$ to a single orbital 
-($d_{x^2-y^2}$) Hamiltonian. 
-This is the first step in order the study the Mott transition in La$_2$CuO$_4$ using DFT+DMFT. 
+There is a new part, that describes projecting the band structure of La$_2$CuO$_4$ to a single orbital
+($d_{x^2-y^2}$) Hamiltonian.
+This is the first step in order the study the Mott transition in La$_2$CuO$_4$ using DFT+DMFT.
 From this step, one can use TRIQS to study the Mott transition.
 
 From O. Gingras (MR 871)
@@ -1487,13 +1480,13 @@ From M. Giantomassi (MR821)
 
 Miscellaneous improvement of the electron-phonon part of ABINIT (documentation, bug fixes, improved parallelism)
 
-Work in progress : a new tutorial [[tutorial:eph4isotc]] 
+Work in progress : a new tutorial [[tutorial:eph4isotc]]
 to demonstrate the computation of superconducting properties within the isotropic Eliashberg formalism.
 See tests in the [[tutorial:eph4isotc]].
 
 By M. Giantomassi (MR870)
 
-**D.9** Improvements of the cRPA determination of the U and J parameters (default keywords, tests and tutos). 
+**D.9** Improvements of the cRPA determination of the U and J parameters (default keywords, tests and tutos).
 
 From R. Outerovich (MR835)
 
@@ -1514,17 +1507,17 @@ Corrections to the implementation of vdW-DF non-local functional found in files 
 
 From C. Espejo (MR829)
 
-**D.14** 
+**D.14**
 Make use of gvnlxc optional in getghc, which allows memory savings in lobpcg2 and chebfi2. Could be useful in other parts of the code.
 
 From L. Baguet (MR831)
 
 **D.15**
-Miscellaneous changes in DMFT: keyword for Wannier orthonormalisation, 
-implementation of calculation of the weight of configuration in CTMQC, 
-double counting for charge only DFT+DMFT ([[dmft_dc]]=6), work in progress concerning alternate calculation of electronic entropy in DMFT. 
+Miscellaneous changes in DMFT: keyword for Wannier orthonormalisation,
+implementation of calculation of the weight of configuration in CTMQC,
+double counting for charge only DFT+DMFT ([[dmft_dc]]=6), work in progress concerning alternate calculation of electronic entropy in DMFT.
 
-From B. Amadon and R. Outerovich (MR833) 
+From B. Amadon and R. Outerovich (MR833)
 
 **D.16**
 Move DDK reading outside of loop for non var matrix element calculations. Should be much more efficient IO.
@@ -1533,7 +1526,7 @@ From M. Verstraete (MR840)
 
 **D.17**
 Use wfdgw_t subclass in GW/BSE code. This is needed so that the wfd in EPH does not allocate bks_tab whose size scales badly with nprocs and nkibz.
- 
+
 From M. Giantomassi (MR841)
 
 **D.18**
@@ -1541,11 +1534,11 @@ Add spinat to GSR.nc
 
 From M. Giantomassi (MR842)
 
-**D.19** Orbital magnetism progress 
+**D.19** Orbital magnetism progress
 
 From J. Zwanziger (MR847)
 
-**D.20** Fix [[prtwf]] and [[prtpot]] in DFPT 
+**D.20** Fix [[prtwf]] and [[prtpot]] in DFPT
 
 From M. Giantomassi (MR848).
 
@@ -1587,7 +1580,7 @@ From X. Gonze (20230424)
 
 **D.30** Miscellaneous additional bug fixes, typos fixes, or upgrade of build system.
 
-By F. Goudreault (MR816), M. Giantomassi (MR821 and 845), P. Kestener (MR827 and 843), 
+By F. Goudreault (MR816), M. Giantomassi (MR821 and 845), P. Kestener (MR827 and 843),
 A. Blanchet (MR832), C. Paillard (MR834), M. Verstraete (MR837),
 M. Torrent (MR838 and 873), B. Seddon and X. Gonze (MR839 and 855), L. Baguet (MR857),
 J.-M. Beuken (MR882).
@@ -1670,7 +1663,7 @@ By X. Gonze (MR802)
 
 **B.5** The computation of effective mass renormalization due to electron-phonon coupling, treated in the generalized Frohlich model,
 is now available, for cubic materials. An article has been submitted, see <https:arxiv.org/abs/2109.12594>.
-Activate it using [[eph_task]]=10. 
+Activate it using [[eph_task]]=10.
 
 See test [[test:v9_66]].
 
@@ -1778,7 +1771,7 @@ By Wei Chen (modified line 743 in src/95_drive/screening.F90 on 23 April 2021).
 
 **D.12** The input variable [[rfstrs_ref]] has been introduced, but not yet documented and tested, as this is on-going work.
 
-By M. Royo 
+By M. Royo
 
 
 **D.13** Miscellaneous additional bug fixes, or upgrade of build system.
@@ -2602,7 +2595,7 @@ Test tolerance in the new integration weights, tests [[test:v8_52]], [[test:v8_5
 By H. Miranda and M. Giantomassi
 
 **D.7** Test calculation of velocity matrix elements (DDK) with
- [[optdriver]] 8 and [[wfk_task]] "wfk_ddk”, see [[test:v8_59]]. By the way, the 
+ [[optdriver]] 8 and [[wfk_task]] "wfk_ddk”, see [[test:v8_59]]. By the way, the
  other capabilities linked to [[wfk_task]] ("wfk_fullbz", "wfk_einterp", "wfk_optics_fullbz", "wfk_kpts_erange") seem
  not to have been properly advertised.
 

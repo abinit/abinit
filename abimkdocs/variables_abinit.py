@@ -3739,7 +3739,7 @@ energy curves as a function of [[ecut]], or [[acell]], can be smoothed,
 keeping consistency with the stress (and automatically including the Pulay
 stress).
 
-The recommended value is 0.5 Ha in such a case (non-zero [[optcell]])..
+The recommended value is 0.5 Ha in such a case (non-zero [[optcell]]).
 
 Actually, when [[optcell]]/=0,
 ABINIT requires [[ecutsm]] to be larger than zero. If you want to optimize
@@ -11830,19 +11830,28 @@ Variable(
     vartype="integer",
     topics=['SCFControl_expert'],
     dimensions="scalar",
-    defaultval=4,
-    mnemonics="Number of LINE minimisations",
+    defaultval=ValueWithConditions({'[[wfoptalg]] == 1 or 11 ': 6, 'defaultval': 4}),
+    mnemonics="Number of LINE minimizations",
+    commentdefault="4 for conjugate-gradient-based algorithm, 6 for spectrum-filtering-based algorithms",
     added_in_version="before_v9",
     text=r"""
-Gives maximum number of line minimizations allowed in preconditioned conjugate
+For conjugate-gradient based algorithms (conjugate gradient or LOBPCG):
+
+[[nline]] gives the maximum number of line minimizations allowed in preconditioned conjugate
 gradient minimization for each band. The default, 4, is fine.
 Special cases, with degeneracies or near-degeneracies of levels at the Fermi
 energy may require a larger value of [[nline]] (5 or 6 ?). Line minimizations
 will be stopped anyway when improvement gets small (governed by [[tolrde]]).
-With the input variable [[nnsclo]], governs the convergence of the
-wavefunctions for fixed potential.
 Note that [[nline]] = 0 can be used to diagonalize the Hamiltonian matrix in the
 subspace spanned by the input wavefunctions.
+
+For algorithms using spectrum filtering (f.i. Chebyshev filtering, [[wfoptalg]]=1 or 111):
+
+[[nline]] gives the maximum degree of the Chebyshev polynomial used as filtering function.
+The default is 6 to ensure a good quality of the filtering.
+
+With the input variable [[nnsclo]], [[nline]] governs the convergence of the
+wavefunctions for fixed potential.
 """,
 ),
 
@@ -24273,6 +24282,68 @@ Preliminary considerations:
 """,
 ),
 
+Variable(
+    abivarname="getdrhodb",
+    varset="files",
+    vartype="integer",
+    topics=['ElPhonInt_useful'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="GET the DRHODB from...",
+    added_in_version="10.3.0",
+    text=r"""
+This variable can be used when performing GWPT calculations with [[optdriver]] = 17
+to read a DVDB file with the derivative of densities produced in a previous dataset.
+For example, one can concatenate a dataset in which an initial set of DFPT densities
+on a relatively coarse q-mesh is interpolated on a denser q-mesh using [[eph_task]] = 5 and [[eph_ngqpt_fine]].
+
+  * If [[getdrhodb]] == 0, no such use of previously computed output potential file is done.
+
+  * If [[getdrhodb]] is positive, its value gives the index of the dataset from which
+the output potential is to be used as input. However, if the first dataset is treated, -1
+is equivalent to 0, since no dataset has been computed in the same run.
+
+  * If [[getdrhodb]] is -1, the output potential of the previous dataset must be taken,
+which is a frequently occurring case.
+
+  * If [[getdrhodb]] is a negative number, it indicates the number of datasets to go
+backward to find the needed file. Going back beyond the first dataset is equivalent to using zero for the get variable.
+
+Note also that one can also use [[getdrhodb_filepath]] to specify the path of the file directly.
+""",
+),
+
+Variable(
+    abivarname="getdrhodb_filepath",
+    varset="files",
+    vartype="string",
+    topics=['multidtset_useful'],
+    dimensions="scalar",
+    defaultval=None,
+    mnemonics="GET the DRHODB file from FILEPATH",
+    added_in_version="10.3.0",
+    text=r"""
+Specify the path of the DVDB file with the first-order densities using a string instead of the dataset index.
+Alternative to [[getdrhodb]] and [[irddrhodb]]. The string must be enclosed between quotation marks:
+
+    getdrhodb_filepath "../outdata/out_DRHODB"
+""",
+),
+
+
+Variable(
+    abivarname="irddrhodb",
+    varset="files",
+    vartype="integer",
+    topics=['ElPhonInt_useful'],
+    dimensions="scalar",
+    mnemonics="Integer that governs the ReaDing of DRHODB file",
+    added_in_version="10.3.0",
+    text=r"""
+This variable can be used when performing GWPT calculations with [[optdriver]] = 17.
+Set to 1, an *input* DRHODB file will be read. See also [[getdrhodb]]
+""",
+),
 
 Variable(
     abivarname="getvarpeq_filepath",
@@ -24315,7 +24386,6 @@ instead of the filepath.
 """,
 ),
 
-
 Variable(
     abivarname="varpeq_aseed",
     varset="eph",
@@ -24333,7 +24403,7 @@ equations.
 
 Possible values:
 
-- "gau_energy" --> Gaussian bassed on the electronic eigenergies
+- "gau_energy" --> Gaussian based on the electronic eigenergies
   $\varepsilon_{n\mathbf{k}}$:
 
     $$A_{n\mathbf{k}} \sim e^{-\frac{(\varepsilon_{n\mathbf{k}} - \mu)^2}{2\sigma^2}}.$$
@@ -24557,6 +24627,9 @@ to the next one, up to [[varpeq_nstates]].
 
 Variable(
     abivarname="varpeq_gpr_energy",
+    varset="eph",
+    vartype="real",
+    topics=['Polaron_basic'],
     varset="eph",
     vartype="real",
     topics=['Polaron_basic'],
