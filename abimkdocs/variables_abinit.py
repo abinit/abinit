@@ -11860,7 +11860,7 @@ Variable(
     dimensions="scalar",
     defaultval=ValueWithConditions({'[[wfoptalg]] == 1 or 11 ': 6, 'defaultval': 4}),
     mnemonics="Number of LINE minimizations",
-    commentdefault="4 for conjugate-gradient-based algorithm, 6 for spectrum-filtering-based algorithms"
+    commentdefault="4 for conjugate-gradient-based algorithm, 6 for spectrum-filtering-based algorithms",
     added_in_version="before_v9",
     text=r"""
 For conjugate-gradient based algorithms (conjugate gradient or LOBPCG):
