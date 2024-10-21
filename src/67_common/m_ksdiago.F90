@@ -728,7 +728,7 @@ subroutine ksdiago(Diago_ctl, nband_k, nfftc, mgfftc, ngfftc, natom, &
 
      call getcprj(cprj_choice, 0, cwavef, cprj_k(:,ibs1:ibs2), &
        gs_hamk%ffnl_k, idir, gs_hamk%indlmn, gs_hamk%istwf_k, gs_hamk%kg_k, &
-       gs_hamk%kpg_k, gs_hamk%kpt_k, gs_hamk%lmnmax, gs_hamk%mgfft, mpi_enreg_seq, &
+       gs_hamk%kpg_k, gs_hamk%kpt_k, gs_hamk%lmnmax, gs_hamk%mgfft, mpi_enreg_seq, 1, &
        gs_hamk%natom, gs_hamk%nattyp, gs_hamk%ngfft, gs_hamk%nloalg, gs_hamk%npw_k, gs_hamk%nspinor, &
        gs_hamk%ntypat, gs_hamk%phkxred, gs_hamk%ph1d, gs_hamk%ph3d_k, gs_hamk%ucvol, gs_hamk%useylm)
    end do
@@ -1516,7 +1516,7 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
      ibs1 = nspinor * (my_ib - 1) + 1
      call getcprj(cprj_choice, 0, ugb%cg_k(:,:,my_ib), ugb%cprj_k(:,ibs1), &
                   gs_hamk%ffnl_k, idir, gs_hamk%indlmn, gs_hamk%istwf_k, gs_hamk%kg_k, &
-                  gs_hamk%kpg_k, gs_hamk%kpt_k, gs_hamk%lmnmax, gs_hamk%mgfft, mpi_enreg_seq, &
+                  gs_hamk%kpg_k, gs_hamk%kpt_k, gs_hamk%lmnmax, gs_hamk%mgfft, mpi_enreg_seq, 1, &
                   gs_hamk%natom, gs_hamk%nattyp, gs_hamk%ngfft, gs_hamk%nloalg, gs_hamk%npw_k, gs_hamk%nspinor, &
                   gs_hamk%ntypat, gs_hamk%phkxred, gs_hamk%ph1d, gs_hamk%ph3d_k, gs_hamk%ucvol, gs_hamk%useylm)
    end do
@@ -1878,7 +1878,7 @@ subroutine hyb_from_wfk_file(hyb, cryst, dtfil, dtset, psps, pawtab, ngfftc, dia
 
 !Local variables ------------------------------
  integer,parameter :: master = 0
- integer :: nprocs, my_rank, ierr, mband, nkibz, nsppol, spin, ik_ibz, ebands_timrev ! b1, b2,
+ integer :: nprocs, my_rank, ierr, mband, nkibz, nsppol, spin, ik_ibz, ebands_kptopt ! b1, b2,
  real(dp) :: vc_ecut
  character(len=5000) :: msg
  type(hdr_type) :: wfk_hdr
@@ -1985,11 +1985,11 @@ subroutine hyb_from_wfk_file(hyb, cryst, dtfil, dtset, psps, pawtab, ngfftc, dia
  ABI_CHECK(all(abs(hyb%ebands%kptns - hyb%kibz) < tol12), "hyb%ebands%kibz != hyb%kibz")
 
  ! Note symrec convention.
- ebands_timrev = kpts_timrev_from_kptopt(hyb%ebands%kptopt)
+ ebands_kptopt = hyb%ebands%kptopt
  krank_ibz = krank_from_kptrlatt(hyb%nkibz, hyb%kibz, hyb%ebands%kptrlatt, compute_invrank=.False.)
 
  ABI_MALLOC(hyb%kbz2ibz, (6, hyb%nkbz))
- if (kpts_map("symrec", ebands_timrev, cryst, krank_ibz, hyb%nkbz, hyb%kbz, hyb%kbz2ibz) /= 0) then
+ if (kpts_map("symrec", ebands_kptopt, cryst, krank_ibz, hyb%nkbz, hyb%kbz, hyb%kbz2ibz) /= 0) then
    ABI_ERROR("Cannot map kBZ to IBZ!")
  end if
 
@@ -2002,7 +2002,7 @@ subroutine hyb_from_wfk_file(hyb, cryst, dtfil, dtset, psps, pawtab, ngfftc, dia
 
  ! Table with symrel conventions for the symmetrization of the wfs.
  ABI_MALLOC(hyb%kbz2ibz_symrel, (6, hyb%nkbz))
- if (kpts_map("symrel", ebands_timrev, cryst, krank_ibz, hyb%nkbz, hyb%kbz, hyb%kbz2ibz_symrel) /= 0) then
+ if (kpts_map("symrel", ebands_kptopt, cryst, krank_ibz, hyb%nkbz, hyb%kbz, hyb%kbz2ibz_symrel) /= 0) then
    ABI_ERROR("Cannot map kBZ to IBZ!")
  end if
  call krank_ibz%free()

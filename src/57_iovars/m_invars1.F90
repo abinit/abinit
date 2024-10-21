@@ -2146,7 +2146,9 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  if(tread==1) dtset%constraint_kind(1:dtset%ntypat)=intarr(1:dtset%ntypat)
 
 !Some special cases are not compatible with GPU implementation
- if (dtset%optdriver/=0) dtset%gpu_option=ABI_GPU_DISABLED  ! GPU only compatible with GS
+ if (dtset%optdriver/=RUNL_GSTATE .and. dtset%optdriver/=RUNL_RESPFN) then
+   dtset%gpu_option=ABI_GPU_DISABLED  ! GPU only compatible with GS and RESPFN
+ end if
  if (dtset%tfkinfunc/=0) dtset%gpu_option=ABI_GPU_DISABLED  ! Recursion method has its own GPU impl
  if (dtset%nspinor/=1)   dtset%gpu_option=ABI_GPU_DISABLED  ! nspinor=2 not yet GPU compatible
 
@@ -2302,7 +2304,8 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%chneut=1      
    dtsets(idtset)%cineb_start=7
    dtsets(idtset)%corecs(:) = zero
-   dtsets(idtset)%cprj_update_lvl=0
+   dtsets(idtset)%cprj_in_memory=0
+   dtsets(idtset)%cprj_update_lvl=3
 !  D
    dtsets(idtset)%ddamp=0.1_dp
    dtsets(idtset)%delayperm=0
@@ -2571,12 +2574,20 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
 !
    !nline
    dtsets(idtset)%nline=4
-
+   !Specific value for wavelets
    if(dtsets(idtset)%usewvl==1 .and. .not. wvl_bigdft) then
      if(dtsets(idtset)%usepaw==1) then
        dtsets(idtset)%nline=4
      else
        dtsets(idtset)%nline=2
+     end if
+   end if
+   !For Chebyshev filtering algo, nline is the degree of the Chebyshev polynomial
+   if (mod(dtsets(idtset)%wfoptalg,10) == 1) then
+     if (dtsets(idtset)%gpu_option == ABI_GPU_DISABLED) then
+       dtsets(idtset)%nline = 6
+     else
+       dtsets(idtset)%nline = 6
      end if
    end if
 
@@ -2826,6 +2837,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%write_files = "default"
 !  X
    dtsets(idtset)%xclevel  = 0
+   dtsets(idtset)%xg_nonlop_option  = 0
    dtsets(idtset)%xc_denpos = tol14
    dtsets(idtset)%xc_taupos = tol14
    dtsets(idtset)%xc_tb09_c = 99.99_dp

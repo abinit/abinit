@@ -906,7 +906,7 @@ subroutine ddkop_apply(self, eig0nk, npw_k, nspinor, cwave, cwaveprj)
    do idir=1,3
      sij_opt = self%gs_hamkq(idir)%usepaw
      call getgh1c(berryopt0, cwave, cwaveprj, self%gh1c(:,:,idir), &
-       grad_berry, self%gs1c(:,:,idir), self%gs_hamkq(idir), gvnlx1, idir, self%ipert, eshift, self%mpi_enreg, optlocal0, &
+       grad_berry, self%gs1c(:,:,idir), self%gs_hamkq(idir), gvnlx1, idir, self%ipert, (/eshift/), self%mpi_enreg, 1, optlocal0, &
        optnl, opt_gvnlx1, self%rf_hamkq(idir), sij_opt, tim_getgh1c, usevnl0)
    end do
 

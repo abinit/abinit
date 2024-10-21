@@ -90,12 +90,21 @@ void get_gpu_max_mem_(int* device, float* max_mem)
    return;
 }
 
+// Gives max available memory available for current GPU device ---------
+extern "C"
+void gpu_get_max_mem_cpp(size_t* max_mem)
+{
+   size_t free_mem;
+   CUDA_API_CHECK(cudaMemGetInfo(&free_mem, max_mem));
+   return;
+}
+
 // Gives currently free memory available for current GPU device ---------
 extern "C"
 void gpu_get_free_mem_cpp(size_t* free_mem)
 {
    size_t max_mem;
-   cudaMemGetInfo(&max_mem, free_mem);
+   cudaMemGetInfo(free_mem, &max_mem);
    return;
 }
 
