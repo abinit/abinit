@@ -249,7 +249,7 @@ subroutine destroy_matlu(matlu,natom)
 ! *********************************************************************
  
  do iatom=1,natom
-   if (allocated(matlu(iatom)%mat)) ABI_FREE(matlu(iatom)%mat)
+   ABI_SFREE(matlu(iatom)%mat)
  end do ! iatom
 
 end subroutine destroy_matlu
@@ -1121,7 +1121,9 @@ end subroutine add_matlu
    end do ! iatom
  end if ! nsppol>1
  
- if (.not. present(trace_loc)) ABI_FREE(traceloc)
+ if (.not. present(trace_loc)) then
+   ABI_FREE(traceloc)
+ end if 
  traceloc => null()
 
  end subroutine trace_matlu

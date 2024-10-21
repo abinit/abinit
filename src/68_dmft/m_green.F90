@@ -432,20 +432,18 @@ subroutine destroy_green(green)
    ABI_FREE(green%oper)
  end if ! green%oper
  
- if (allocated(green%charge_matlu)) ABI_FREE(green%charge_matlu)
+ ABI_SFREE(green%charge_matlu)
  green%has_charge_matlu = 0
 
- if (allocated(green%charge_matlu_prev)) ABI_FREE(green%charge_matlu_prev)
+ ABI_SFREE(green%charge_matlu_prev)
  green%has_charge_matlu_prev = 0
 
- if (allocated(green%charge_matlu_solver)) ABI_FREE(green%charge_matlu_solver)
+ ABI_SFREE(green%charge_matlu_solver)
  green%has_charge_matlu_solver = 0
  
- if (allocated(green%trace_moments_log_ks)) ABI_FREE(green%trace_moments_log_ks)
- 
- if (allocated(green%trace_moments_log_loc)) ABI_FREE(green%trace_moments_log_loc)
- 
- if (allocated(green%ecorr_qmc)) ABI_FREE(green%ecorr_qmc)
+ ABI_SFREE(green%trace_moments_log_ks)
+ ABI_SFREE(green%trace_moments_log_loc)
+ ABI_SFREE(green%ecorr_qmc)
  
  if (allocated(green%moments)) then
    do i=1,green%nmoments
@@ -503,7 +501,7 @@ subroutine destroy_green_tau(green)
    end do ! itau
    ABI_FREE(green%oper_tau)
  end if ! green%oper_tau
- if (allocated(green%tau)) ABI_FREE(green%tau)
+ ABI_SFREE(green%tau)
 
 end subroutine destroy_green_tau
 !!***
@@ -1186,7 +1184,9 @@ subroutine compute_green(green,paw_dmft,prtopt,self,opt_self,opt_nonxsum,opt_non
    end if ! lchipsiortho=1
  end if ! moments 
  
- if (green%w_type /= "real") ABI_MALLOC(omega_fac,(nmoments))
+ if (green%w_type /= "real") then
+   ABI_MALLOC(omega_fac,(nmoments))
+ end if 
  shift = green%distrib%shiftk  
  mkmem = green%distrib%nkpt_mem(green%distrib%me_kpt)
  shift_green = shift
@@ -1440,13 +1440,15 @@ subroutine compute_green(green,paw_dmft,prtopt,self,opt_self,opt_nonxsum,opt_non
 !     endif
      !call destroy_oper(self_minus_hdc_oper)
      !call destroy_oper(green_temp)
-   if (green%oper(ifreq)%has_operks == 0) ABI_FREE(green%oper(ifreq)%ks)
+   if (green%oper(ifreq)%has_operks == 0) then
+     ABI_FREE(green%oper(ifreq)%ks)
+   end if 
 ! call flush(std_out)
    !endif ! parallelisation
  end do ! ifreq
  !ABI_FREE(procb_ifreq)
  
- if (green%w_type /= "real") ABI_FREE(omega_fac)
+ ABI_SFREE(omega_fac)
  
  if (optlog == 1) then
  
@@ -2522,17 +2524,15 @@ end subroutine fourier_green
 !!
 !! SOURCE
 
-subroutine check_fourier_green(cryst_struc,green,paw_dmft,pawang)
+subroutine check_fourier_green(cryst_struc,green,paw_dmft)
 
  use m_crystal, only : crystal_t
- use m_pawang, only : pawang_type
 
 !Arguments ------------------------------------
 !type
  type(crystal_t),intent(in) :: cryst_struc
  type(green_type),intent(inout) :: green
  !type(MPI_type), intent(in) :: mpi_enreg
- type(pawang_type),intent(in) :: pawang
  type(paw_dmft_type), intent(inout) :: paw_dmft
 
 !local variables-------------------------------
@@ -4015,11 +4015,9 @@ subroutine compute_nb_elec(green,self,paw_dmft,Fx,nb_elec_x,fermie,option,Fxprim
    ABI_FREE(trace_moments)
    ABI_FREE(omega_fac)
    
-   if (opt >= 1) ABI_FREE(trace_moments_prime)
-   if (opt == 2) then
-     ABI_FREE(mat_tmp)
-     ABI_FREE(trace_moments_double)
-   end if ! opt=2
+   ABI_SFREE(trace_moments_prime)
+   ABI_SFREE(mat_tmp)
+   ABI_SFREE(trace_moments_double)
    
    call destroy_oper(oper_tmp)
    
@@ -4312,7 +4310,9 @@ subroutine compute_moments_ks(green,self,paw_dmft,opt_self,opt_log,opt_quick_res
  nsppol = paw_dmft%nsppol
  shift  = green%moments(1)%shiftk 
  
- if (optlog == 1 .and. optquickrestart == 0) ABI_MALLOC(trace_loc,(nsppol+1,natom))
+ if (optlog == 1 .and. optquickrestart == 0) then
+   ABI_MALLOC(trace_loc,(nsppol+1,natom))
+ end if 
   
  if (optself == 1 .and. optquickrestart == 0) then
    call add_matlu(self%moments(1)%matlu(:),self%hdc%matlu(:),green%moments(2)%matlu(:),natom,-1)
@@ -4415,7 +4415,7 @@ subroutine compute_moments_ks(green,self,paw_dmft,opt_self,opt_log,opt_quick_res
    call destroy_oper(oper_tmp2)
  end if ! optself>=1
  
- if (allocated(trace_loc)) ABI_FREE(trace_loc)
+ ABI_SFREE(trace_loc)
   
 end subroutine compute_moments_ks
 !!***

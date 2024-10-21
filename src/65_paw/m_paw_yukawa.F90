@@ -32,7 +32,6 @@ MODULE m_paw_yukawa
 
  private
 
-!public procedures.
  public :: compute_slater   
  public :: get_lambda
 
@@ -58,52 +57,52 @@ CONTAINS  !=====================================================================
 !!  lambda, eps = parameters of the Yukawa potential
 !!
 !! OUTPUT
-!!  Fk(lpawu+1)= Slater integrals
+!!  fk(lpawu+1)= Slater integrals
 !!
 !! SOURCE
 
- subroutine compute_slater(lpawu,pawrad,proj2,meshsz,lambda,eps,Fk)
+ subroutine compute_slater(lpawu,pawrad,proj2,meshsz,lambda,eps,fk)
  
  use m_pawrad, only : pawrad_type,simp_gen
  use m_bessel2, only : bessel_iv,bessel_kv
 
 !Arguments ------------------------------------
  integer, intent(in) :: lpawu,meshsz
- type(pawrad_type), intent(in) :: pawrad
- real(dp), intent(in) :: proj2(:)
  real(dp), intent(in) :: lambda,eps
- real(dp), intent(out) :: Fk(:)
+ real(dp), intent(in) :: proj2(:)
+ real(dp), intent(inout) :: fk(:)
+ type(pawrad_type), intent(in) :: pawrad
 !Local variables ------------------------------
  integer :: ir,k,mesh_type
  real(dp) :: dum1,dum2,r_for_intg,y0
- real(dp), allocatable :: U_inside(:),U_outside(:),y1(:),y2(:)
+ real(dp), allocatable :: u_inside(:),u_outside(:),y1(:),y2(:)
  !************************************************************************
 
  mesh_type  = pawrad%mesh_type 
  r_for_intg = pawrad%rad(meshsz)
- ABI_MALLOC(U_inside,(meshsz)) 
- ABI_MALLOC(U_outside,(meshsz)) 
+ ABI_MALLOC(u_inside,(meshsz)) 
+ ABI_MALLOC(u_outside,(meshsz)) 
 
  if (lambda == zero) then
    do k=0,2*lpawu+1,2
-     U_inside(1) = zero
+     u_inside(1) = zero
      do ir=2,meshsz
        if (ir == 2) then
          ! Use a trapezoidal rule 
-         U_inside(ir) = half * (proj2(1)*(pawrad%rad(1)**k)+proj2(2)*(pawrad%rad(2)**k)) * &
+         u_inside(ir) = half * (proj2(1)*(pawrad%rad(1)**k)+proj2(2)*(pawrad%rad(2)**k)) * &
                  & (pawrad%rad(2)-pawrad%rad(1))
        else if (ir == 3 .and. mesh_type == 3) then 
          ! simp_gen doesn't handle this case, so we use a trapezoidal rule instead
-         U_inside(ir) = U_inside(2) + half*(proj2(2)*(pawrad%rad(2)**k)+proj2(3)*(pawrad%rad(3)**k))* &
+         u_inside(ir) = u_inside(2) + half*(proj2(2)*(pawrad%rad(2)**k)+proj2(3)*(pawrad%rad(3)**k))* &
                  & (pawrad%rad(3)-pawrad%rad(2))
        else 
          ! Use Simpson rule when enough points are available 
-         call simp_gen(U_inside(ir),proj2(1:ir)*(pawrad%rad(1:ir)**k),pawrad,r_for_intg=pawrad%rad(ir))
+         call simp_gen(u_inside(ir),proj2(1:ir)*(pawrad%rad(1:ir)**k),pawrad,r_for_intg=pawrad%rad(ir))
        end if ! ir=2 
      end do ! ir
-     U_outside(1) = zero
-     U_outside(2:meshsz) = two * U_inside(2:meshsz) * proj2(2:meshsz) / (pawrad%rad(2:meshsz)**(k+1))
-     call simp_gen(Fk(k/2+1),U_outside(:),pawrad,r_for_intg=r_for_intg) 
+     u_outside(1) = zero
+     u_outside(2:meshsz) = two * u_inside(2:meshsz) * proj2(2:meshsz) / (pawrad%rad(2:meshsz)**(k+1))
+     call simp_gen(fk(k/2+1),u_outside(:),pawrad,r_for_intg=r_for_intg) 
    end do ! k
 
  else
@@ -116,7 +115,7 @@ CONTAINS  !=====================================================================
      y0 = zero
      if (k == 0) y0 = lambda * sqrt(two/pi)
      y1(1) = y0 
-     U_inside(1) = zero
+     u_inside(1) = zero
      
      do ir=2,meshsz
      
@@ -127,15 +126,15 @@ CONTAINS  !=====================================================================
        
        if (ir == 2) then
          ! Use a trapezoidal rule
-         U_inside(ir) = half * (proj2(1)*y1(1)+proj2(2)*y1(2)) * &
+         u_inside(ir) = half * (proj2(1)*y1(1)+proj2(2)*y1(2)) * &
                  & (pawrad%rad(2)-pawrad%rad(1))
        else if (ir == 3 .and. mesh_type == 3) then
          ! simp_gen doesn't handle this case, so we use a trapezoidal rule instead
-         U_inside(ir) = U_inside(2) + half*(proj2(2)*y1(2)+proj2(3)*y1(3)) * &
+         u_inside(ir) = u_inside(2) + half*(proj2(2)*y1(2)+proj2(3)*y1(3)) * &
                  & (pawrad%rad(3)-pawrad%rad(2))
        else
          ! Use Simpson rule when enough points are available
-         call simp_gen(U_inside(ir),proj2(1:ir)*y1(1:ir),pawrad,r_for_intg=pawrad%rad(ir))
+         call simp_gen(u_inside(ir),proj2(1:ir)*y1(1:ir),pawrad,r_for_intg=pawrad%rad(ir))
        end if ! ir
        
        dum1 = zero ! very important
@@ -143,9 +142,9 @@ CONTAINS  !=====================================================================
        y2(ir) = y2(ir) / sqrt(pawrad%rad(ir))
      end do ! ir
      
-     U_outside(1) = zero
-     U_outside(2:meshsz) = two * (two*dble(k)+one)*U_inside(2:meshsz)*proj2(2:meshsz)*y2(2:meshsz)
-     call simp_gen(Fk(k/2+1),U_outside(:),pawrad,r_for_intg=r_for_intg)
+     u_outside(1) = zero
+     u_outside(2:meshsz) = two * (two*dble(k)+one)*u_inside(2:meshsz)*proj2(2:meshsz)*y2(2:meshsz)
+     call simp_gen(fk(k/2+1),u_outside(:),pawrad,r_for_intg=r_for_intg)
      
    end do ! k
    
@@ -154,10 +153,10 @@ CONTAINS  !=====================================================================
    
  end if ! lambda
 
- Fk(1:lpawu+1) = Fk(1:lpawu+1) / eps
+ fk(1:lpawu+1) = fk(1:lpawu+1) / eps
 
- ABI_FREE(U_inside) 
- ABI_FREE(U_outside) 
+ ABI_FREE(u_inside) 
+ ABI_FREE(u_outside) 
 
  end subroutine compute_slater
 !!***
@@ -202,10 +201,10 @@ CONTAINS  !=====================================================================
 
 !Arguments ------------------------------------
  integer, intent(in) :: lpawu,meshsz
- type(pawrad_type), intent(in) :: pawrad
- real(dp), intent(in) :: proj2(:)
  real(dp), intent(in) :: upawu,jpawu
  real(dp), intent(out) :: lambda,eps
+ real(dp), intent(in) :: proj2(:)
+ type(pawrad_type), intent(in) :: pawrad
 !Local variables ------------------------------
  integer  :: i,ierr,info,ldfjac,lr,maxfev,ml,mode,mu,n,nfev,nprint
  real(dp) :: epsfcn,fac,lmb_temp,upbound,xtol
@@ -272,11 +271,11 @@ CONTAINS  !=====================================================================
  real(dp), intent(in) :: lmb
  real(dp), intent(out) :: uu
 !Local variables ------------------------------
- real(dp) :: Fk(lpawu+1)
+ real(dp) :: fk(lpawu+1)
 !************************************************************************
 
- call compute_slater(lpawu,pawrad,proj2(:),meshsz,lmb,one,Fk(:))
- uu = Fk(1) - upawu
+ call compute_slater(lpawu,pawrad,proj2(:),meshsz,lmb,one,fk(:))
+ uu = fk(1) - upawu
  
  end subroutine get_coulomb_u
 
@@ -287,8 +286,8 @@ CONTAINS  !=====================================================================
  real(dp), intent(in) :: lmb_eps(n)
  real(dp), intent(inout) :: uj(n)
  !Local variables ------------------------------
- real(dp) :: eps,f4of2,f6of2,factor,J2,J4,J6,Jh,lmb
- real(dp) :: Fk(lpawu+1)
+ real(dp) :: eps,f4of2,f6of2,factor,j2,j4,j6,jh,lmb
+ real(dp) :: fk(lpawu+1)
  character(len=500) :: message
 !************************************************************************
 
@@ -296,32 +295,32 @@ CONTAINS  !=====================================================================
 
  lmb = lmb_eps(1) 
  eps = lmb_eps(2)
- call compute_slater(lpawu,pawrad,proj2(:),meshsz,lmb,eps,Fk(:))
- uj(1) = Fk(1) - upawu
+ call compute_slater(lpawu,pawrad,proj2(:),meshsz,lmb,eps,fk(:))
+ uj(1) = fk(1) - upawu
 
  if (lpawu == 1) then
-   J2 = Fk(2) * fifth 
-   Jh = J2
+   j2 = fk(2) * fifth 
+   jh = j2
  else if (lpawu == 2) then
    f4of2  = dble(0.625) 
    factor = (one+f4of2) / dble(14)
-   J2 = Fk(2) 
-   J4 = Fk(3) / f4of2
-   Jh = (J2+J4) * factor * half
+   j2 = fk(2) 
+   j4 = fk(3) / f4of2
+   jh = (j2+j4) * factor * half
  else if (lpawu == 3) then
    f4of2  = dble(0.6681) 
    f6of2  = dble(0.4943) 
    factor = (dble(286.)+dble(195.)*f4of2+dble(250.)*f6of2) / dble(6435.)
-   J2 = Fk(2)  
-   J4 = Fk(3) / f4of2 
-   J6 = Fk(4) / f6of2 
-   Jh = (J2+J4+J6) * factor * third
+   j2 = fk(2)  
+   j4 = fk(3) / f4of2 
+   j6 = fk(4) / f6of2 
+   jh = (j2+j4+j6) * factor * third
  else
    write(message,'(a,i0,2a)') ' lpawu=',lpawu,ch10,' lpawu not equal to 0, 1, 2 or 3 is not allowed'
    ABI_ERROR(message)
  end if ! lpawu
          
- uj(2) = Jh - jpawu
+ uj(2) = jh - jpawu
 
  end subroutine get_coulomb_uj
 

@@ -1381,11 +1381,11 @@ CONTAINS  !=====================================================================
                   CALL I1MCRY(LOG10(1), J, 16383, 10100890, 8715215)
                   CALL I1MCRY(LOG10(2), J, 0, 16226447, 9001388)
                ELSE
-                  WRITE(*,9000)
+                  WRITE(std_out,9000)
                   STOP 779
                   END IF
             ELSE
-               WRITE(*,9000)
+               WRITE(std_out,9000)
                STOP 779
                END IF
             END IF
@@ -1394,7 +1394,7 @@ CONTAINS  !=====================================================================
 !*    SANITY CHECK
       IF (DMACH(4) .GE. 1.0D0) STOP 778
       IF (I .LT. 1 .OR. I .GT. 5) THEN
-         WRITE(*,*) 'D1MACH(I): I =',I,' is out of bounds.'
+         WRITE(std_out,*) 'D1MACH(I): I =',I,' is out of bounds.'
          STOP
          END IF
       D1MACH = DMACH(I)
@@ -1813,7 +1813,7 @@ CONTAINS  !=====================================================================
                IMACH(15) = -64
                IMACH(16) = 63
             ELSE
-               WRITE(*,9010)
+               WRITE(std_out,9010)
                STOP 777
                END IF
             IMACH(11) = IMACH(14)
@@ -1887,7 +1887,7 @@ CONTAINS  !=====================================================================
                GO TO 35
  20            CALL I1MCR1(J, K, 16405, 9876536, 0)
                IF (SMALL(1) .NE. J) THEN
-                  WRITE(*,9020)
+                  WRITE(std_out,9020)
                   STOP 777
                   END IF
 !*              *** CRAY 1, XMP, 2, AND 3 ***
@@ -1929,7 +1929,7 @@ CONTAINS  !=====================================================================
       IF (I .LT. 1  .OR.  I .GT. 16) GO TO 40
       I1MACH = IMACH(I)
       RETURN
- 40   WRITE(*,*) 'I1MACH(I): I =',I,' is out of bounds.'
+ 40   WRITE(std_out,*) 'I1MACH(I): I =',I,' is out of bounds.'
       STOP
 !* /* C source for I1MACH -- remove the * in column 1 */
 !* /* Note that some values may need changing. */

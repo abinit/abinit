@@ -347,7 +347,7 @@ subroutine dmft_solve(cryst_struc,istep,dft_occup,mpi_enreg,paw_dmft,pawang,pawt
 
 !== Check fourier transforms
 !----------------------------------------------------------------------
- if (check == 1) call check_fourier_green(cryst_struc,green,paw_dmft,pawang)
+ if (check == 1) call check_fourier_green(cryst_struc,green,paw_dmft)
 
 !== If QMC is used,  and self energy is not read for file, then
 !== one shifts the self-energy, and thus then weiss will be shifted
@@ -559,7 +559,7 @@ subroutine dmft_solve(cryst_struc,istep,dft_occup,mpi_enreg,paw_dmft,pawang,pawt
 !call flush_unit(std_out)
 !call abi_abort('COLL')
  if (paw_dmft%dmft_solv <= 2 .and. paw_dmft%prtdos >= 1) &
-     & call spectral_function(cryst_struc,green,hu(:),paw_dmft,pawang,pawtab(:),self,pawprtvol)
+     & call spectral_function(cryst_struc,green,hu(:),paw_dmft,pawtab(:),self,pawprtvol)
  call destroy_green(weiss)
  call destroy_green(green)
 !todo_ab rotate back density matrix into unnormalized basis just for
@@ -972,7 +972,6 @@ end subroutine dyson
 !!  green  <type(green_type)>= green function data
 !!  hu  <type(hu_type)>= datatype of type hu
 !!  paw_dmft =  data for self-consistent DFT+DMFT calculations.
-!!  pawang <type(pawang)>=paw angular mesh and related data
 !!  self <type(self_type)>= variables related to self-energy
 !!  prtopt= option for printing
 !!
@@ -984,7 +983,7 @@ end subroutine dyson
 !! SOURCE
 
 subroutine spectral_function(cryst_struc,green,hu,paw_dmft,&
-& pawang,pawtab,self_old,prtopt)
+& pawtab,self_old,prtopt)
 
  use m_dftu_self, only : dftu_self
  use m_green, only : compute_green,copy_green,destroy_green,init_green,print_green
@@ -994,12 +993,10 @@ subroutine spectral_function(cryst_struc,green,hu,paw_dmft,&
 
 !Arguments ------------------------------------
 !scalars
-! type(pawang_type), intent(in) :: pawang
  type(crystal_t),intent(in) :: cryst_struc
  type(green_type), intent(in) :: green
  type(hu_type),intent(inout) :: hu(cryst_struc%ntypat)
  !type(MPI_type), intent(inout) :: mpi_enreg
- type(pawang_type), intent(in) :: pawang
  type(pawtab_type),intent(inout)  :: pawtab(cryst_struc%ntypat)
  type(self_type), intent(inout) :: self_old
  type(paw_dmft_type), intent(inout)  :: paw_dmft

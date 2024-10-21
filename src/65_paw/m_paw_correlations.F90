@@ -824,10 +824,10 @@ CONTAINS  !=====================================================================
          & ch10,' =====  Build DMFT radial orbital for atom type ',tag(4-itypat/10:4),' ========'
        call wrtout(std_out,message,"COLL")
        
-       if (allocated(pawtab(itypat)%proj)) ABI_FREE(pawtab(itypat)%proj)
-       if (allocated(pawtab(itypat)%proj2)) ABI_FREE(pawtab(itypat)%proj2)
+       ABI_SFREE(pawtab(itypat)%proj)
+       ABI_SFREE(pawtab(itypat)%proj2)
        if (dmft_proj(itypat) > 0) then   ! read phi from PAW dataset 
-         write(message,'(2a,i1,a)') ch10," Using atomic wavefunction n°",dmft_proj(itypat)," from PAW dataset"
+         write(message,'(2a,i1,a)') ch10," Using atomic wavefunction number ",dmft_proj(itypat)," from PAW dataset"
          call wrtout(std_out,message,"COLL")
          meshsz = pawrad(itypat)%int_meshsz  
          ABI_MALLOC(pawtab(itypat)%proj,(meshsz))
