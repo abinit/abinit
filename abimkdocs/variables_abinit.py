@@ -24290,12 +24290,12 @@ Variable(
     topics=['TuningSpeedMem_expert'],
     dimensions="scalar",
     defaultval=0,
-    mnemonics="OPTION related to the use of XG_NONLOP routines",
+    mnemonics="OPTION for XG_NONLOP routines",
     added_in_version="10.2.2",
     text=r"""
-    When using [[cprj_in_memory]]=1 with [[wfoptalg]]==111, the non-local terms of the Hamiltonian (see [[cprj_in_memory]])
-    can be computed in two different ways, corresponding to [[xg_nonlop_option]]=0 or 1.
-    [[xg_nonlop_option]]=0 requires more memory than [[xg_nonlop_option]]=1, but much less MPI communications, so it is more efficient.
+When using [[cprj_in_memory]]=1 with [[wfoptalg]]==111, the non-local terms of the Hamiltonian (see [[cprj_in_memory]])
+can be computed in two different ways, corresponding to [[xg_nonlop_option]]=0 or 1.
+[[xg_nonlop_option]]=0 requires more memory than [[xg_nonlop_option]]=1, but much less MPI communications, so it is more efficient.
 """,
 ),
 
