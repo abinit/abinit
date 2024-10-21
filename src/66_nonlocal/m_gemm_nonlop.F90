@@ -86,7 +86,7 @@ contains
 !!
 !! SOURCE
  subroutine gemm_nonlop(atindx1,choice,cpopt,cprjin,dimenl1,dimenl2,dimekbq,dimffnlin,dimffnlout,&
-&                 enl,enlout,ffnlin,ffnlout,gmet,gprimd,idir,indlmn,istwf_k,&
+&                 enl,enl_ndat,enlout,ffnlin,ffnlout,gmet,gprimd,idir,indlmn,istwf_k,&
 &                 kgin,kgout,kpgin,kpgout,kptin,kptout,lambda,lmnmax,matblk,mgfft,&
 &                 mpi_enreg,natom,nattyp,ndat,ngfft,nkpgin,nkpgout,nloalg,&
 &                 nnlout,npwin,npwout,nspinor,nspinortot,ntypat,only_SO,paw_opt,&
@@ -107,7 +107,7 @@ contains
   !arrays
   integer,intent(in),target :: atindx1(natom),indlmn(6,lmnmax,ntypat),kgin(3,npwin)
   integer,intent(in),target :: kgout(3,npwout),nattyp(ntypat),ngfft(18),nloalg(3),typat(natom)
-  real(dp),intent(in),target :: enl(dimenl1,dimenl2,nspinortot**2,dimekbq)
+  real(dp),intent(in),target :: enl(:,:,:,:),enl_ndat(:,:,:,:,:)
   real(dp),intent(in),target :: ffnlin(npwin,dimffnlin,lmnmax,ntypat)
   real(dp),intent(in),target :: ffnlout(npwout,dimffnlout,lmnmax,ntypat),gmet(3,3)
   real(dp),intent(in) :: gprimd(3,3),kptin(3),kptout(3)
@@ -127,7 +127,7 @@ contains
   integer :: nnlout_test
   integer :: iatm, ndgxdt, ndgxdtfac, nd2gxdt, nd2gxdtfac, optder, itypat, ilmn
   integer :: cplex_dgxdt(9), cplex_d2gxdt(18)
-  logical :: local_vectproj
+  logical :: local_vectproj,use_enl_ndat
   real(dp) :: d2gxdt_dum_in(1,1,1,1,1), d2gxdt_dum_out(1,1,1,1,1),d2gxdt_dum_out2(1,1,1,1,1)
   real(dp), allocatable :: sij_typ(:)
   real(dp), ABI_CONTIGUOUS pointer :: projections(:,:,:)
@@ -140,14 +140,14 @@ contains
   integer :: idbeg,idend,idfbeg,idfend,dshift,id2beg,id2end,d2shift,dfshift,enlout_shift
   real(dp) :: work(6)
   integer :: ndgxdt_stored,ishift
-  integer :: mu0,ic,nu,mu,jc
+  integer :: mu0,ic,nu,mu,jc,mua,mub,nua1,nua2,nub1,nub2
   integer,parameter :: alpha(6)=(/1,2,3,3,3,2/),beta(6)=(/1,2,3,2,1,1/)
   integer,parameter :: gamma(3,3)=reshape((/1,6,5,6,2,4,5,4,3/),(/3,3/))
   integer          ::  matblk_,natom_,ntypat_,ispden,dimenl2_,ia_beg,ia_end,dimsij,nkpgin_,nkpgout_
   integer, ABI_CONTIGUOUS pointer :: atindx1_(:),indlmn_(:,:,:),nattyp_(:)
   real(dp),pointer :: ffnlin_(:,:,:,:),ffnlout_(:,:,:,:)
   real(dp),pointer :: ph3din_(:,:,:),ph3dout_(:,:,:)
-  real(dp),pointer :: enl_(:,:,:,:)
+  real(dp),pointer :: enl_(:,:,:,:),enl_ndat_(:,:,:,:,:)
   real(dp), ABI_CONTIGUOUS pointer :: sij_(:,:)
   real(dp), ABI_CONTIGUOUS pointer :: kpgin_(:,:),kpgout_(:,:)
 
@@ -166,7 +166,7 @@ contains
     ABI_BUG('computation not prepared for gemm_nonlop use!')
   end if
   if ( (choice>3.and.choice/=7.and.choice/=5.and.choice/=51.and.signs==2) .or. &
-&      (choice>3.and.choice/=7.and.choice/=23.and.choice/=4.and.choice/=54.and.choice/=55.and.signs==1) .or. &
+&      (choice>3.and.choice/=7.and.choice/=23.and.choice/=4.and.choice/=54.and.choice/=55.and.choice/=6.and.signs==1) .or. &
 &      (useylm/=1) ) then
     ABI_BUG('gemm_nonlop option not supported!')
   end if
@@ -196,6 +196,7 @@ contains
   cplex_enl=1;if (paw_opt>0) cplex_enl=2*dimenl1/(lmnmax*(lmnmax+1)) ! is enl complex?
   cplex_fac=max(cplex,dimekbq)
   if ((nspinortot==2.or.cplex_enl==2).and.paw_opt>0.and.choice/=7) cplex_fac=2 ! is vnl_projections complex?
+  use_enl_ndat=.false. ; if (size(enl_ndat)>0) use_enl_ndat=.true.
 
   ! Processing one atom : set pointers to atom-specific arrays (for opernlc)
   if(iatom_only > 0) then
@@ -224,7 +225,22 @@ contains
         sij_(:,1)=sij(:,1)
       end if
     end if
-    if (size(enl)>0) then
+    if (size(enl_ndat)>0) then
+      ABI_MALLOC(enl_ndat_,(size(enl_ndat,1),1,nspinor**2,ndat,size(enl_ndat,5)))
+      do idat=1,ndat
+        do ii=1,size(enl_ndat,5)
+          do ispden=1,nspinor**2
+            if (dimenl2==natom .and. usepaw==1) then
+              enl_ndat_(:,1,ispden,idat,ii)=enl_ndat(:,iatom_only,ispden,idat,ii)
+            else if (dimenl2==ntypat) then
+              enl_ndat_(:,1,ispden,idat,ii)=enl_ndat(:,itypat,ispden,idat,ii)
+            else
+              enl_ndat_(:,1,ispden,idat,ii)=enl_ndat(:,1,ispden,idat,ii)
+            end if
+          end do
+        end do
+      end do
+    else if (size(enl)>0) then
       ABI_MALLOC(enl_,(size(enl,1),1,nspinor**2,size(enl,4)))
       do ii=1,size(enl,4)
         do ispden=1,nspinor**2
@@ -251,6 +267,7 @@ contains
     ffnlin_     => ffnlin
     ffnlout_    => ffnlout
     enl_        => enl
+    enl_ndat_   => enl_ndat
     sij_        => sij
     indlmn_     => indlmn
     ph3din_     => ph3din
@@ -432,8 +449,10 @@ contains
 
   ! Working buffers for storing 2nd-derivative
   if (nd2gxdt>0) then
-    ABI_MALLOC(d2projections,(cplex, nd2gxdt*nprojs,nspinor*ndat))
-    d2projections(:,:,:) = zero
+    ABI_MALLOC(d2projections,(cplex, nd2gxdt*nprojs, nspinor*ndat))
+    if(cpopt < 4) then
+      d2projections(:,:,:) = zero
+    end if
   else
     ABI_MALLOC(d2projections,(1, 1, ndat))
   end if
@@ -563,6 +582,7 @@ contains
         id2end = d2shift+nattyp_(itypat)*nlmn*ngrads2
 
         do idat = 1,ndat
+          if(use_enl_ndat) enl_ => enl_ndat_(:,:,:,idat,:)
           call opernlc_ylm(atindx1_,cplex,cplex_dgxdt,cplex_d2gxdt,&
 &         cplex_enl,cplex_fac,&
 &         dprojections(:, idbeg:idend, 1+nspinor*(idat-1):nspinor*idat),&
@@ -610,45 +630,49 @@ contains
 
     ! opernld
     if(signs==1) then
-      if(choice==2 .or. choice==3 .or. choice==23 .or. choice==4 .or. choice==54 .or. choice==55) then
+      if(choice==1 .or. choice==2 .or. choice==3 .or. choice==23 .or. choice==4 .or. choice==54 .or. choice==55 .or. choice==6) then
         call opernld_ylm_allwf(choice,cplex,cplex_fac,ddkk,&
         &       dprojections,vnl_dprojections,s_dprojections,d2projections,&
-        &       enlk,enlout,projections,vnl_projections,s_projections,&
-        &       ndat,nd2gxdt,ndgxdt,&
-        &       ndgxdtfac,indlmn,ntypat,lmnmax,nprojs,nnlout,nspinor,paw_opt,&
-        &       nattyp,gpu_option)
+        &       enlk,enlout,fnlk,projections,vnl_projections,s_projections,&
+        &       natom,ndat,nd2gxdt,ndgxdt,&
+        &       ndgxdtfac,indlmn_,ntypat_,lmnmax,nprojs,nnlout,nspinor,paw_opt,&
+        &       strnlk,nattyp_,gpu_option)
       else
-        shift=0; dshift=0; d2shift = 0; iatm=1
-        do itypat=1, ntypat
-          nlmn=count(indlmn(3,:,itypat)>0)
+        shift=0; dshift=0; dfshift = 0; d2shift = 0; iatm=1
+        do itypat=1, ntypat_
+          nlmn=count(indlmn_(3,:,itypat)>0)
 
           ibeg = shift+1
-          iend = shift+nattyp(itypat)*nlmn
+          iend = shift+nattyp_(itypat)*nlmn
 
           idbeg = dshift+1
-          idend = dshift+nattyp(itypat)*nlmn*ngrads
+          idend = dshift+nattyp_(itypat)*nlmn*ngrads
+
+          idfbeg = dshift+1
+          idfend = dshift+nattyp_(itypat)*nlmn*ndgxdtfac
 
           id2beg = d2shift+1
-          id2end = d2shift+nattyp(itypat)*nlmn*ngrads2
+          id2end = d2shift+nattyp_(itypat)*nlmn*ngrads2
 
           do idat=1,ndat
             call opernld_ylm             (choice,cplex,cplex_fac,ddkk(:,idat),&
             &       dprojections    (:, idbeg:idend, 1+nspinor*(idat-1):nspinor*idat),&
-            &       vnl_dprojections(:, idbeg:idend, 1+nspinor*(idat-1):nspinor*idat),&
-            &       s_dprojections  (:, idbeg:idend, 1+nspinor*(idat-1):nspinor*idat),&
+            &       vnl_dprojections(:, idfbeg:idfend, 1+nspinor*(idat-1):nspinor*idat),&
+            &       s_dprojections  (:, idfbeg:idfend, 1+nspinor*(idat-1):nspinor*idat),&
             &       d2projections (:, id2beg:id2end, 1+nspinor*(idat-1):nspinor*idat),&
             &       enlk(idat),enlout(nnlout*(idat-1)+1:nnlout*idat),fnlk(:,idat),&
             &       projections    (:, ibeg:iend, 1+nspinor*(idat-1):nspinor*idat),&
             &       vnl_projections(:, ibeg:iend, 1+nspinor*(idat-1):nspinor*idat),&
             &       s_projections  (:, ibeg:iend, 1+nspinor*(idat-1):nspinor*idat),&
-            &       iatm,natom,1,nd2gxdt,ndgxdt,ndgxdtfac,&
-            &       nattyp(itypat),nlmn,nnlout,nspinor,paw_opt,strnlk(:,idat))
+            &       iatm,natom_,1,nd2gxdt,ndgxdt,ndgxdtfac,&
+            &       nattyp_(itypat),nlmn,nnlout,nspinor,paw_opt,strnlk(:,idat))
           end do
 
-          shift = shift + nattyp(itypat)*nlmn
-          dshift = dshift + nattyp(itypat)*nlmn*ngrads
-          d2shift = d2shift + nattyp(itypat)*nlmn*ngrads2
-          iatm = iatm+nattyp(itypat)
+          shift = shift + nattyp_(itypat)*nlmn
+          dshift = dshift + nattyp_(itypat)*nlmn*ngrads
+          dfshift = dshift + nattyp_(itypat)*nlmn*ndgxdtfac
+          d2shift = d2shift + nattyp_(itypat)*nlmn*ngrads2
+          iatm = iatm+nattyp_(itypat)
         end do
       end if
 
@@ -788,6 +812,53 @@ contains
         ABI_FREE(work7)
       end if
 
+
+     !2nd derivative wrt to 2 strains (elastic tensor):
+     ! - convert from reduced to cartesian coordinates
+     ! - substract volume contribution
+      if (choice==6.and.signs==1.and.paw_opt<=3) then
+        ABI_MALLOC(work1,(6))
+        ABI_MALLOC(work2,(6))
+        ABI_MALLOC(work3,(6+3*natom,6))
+        do idat=1,ndat
+          mu0=(idat-1)*nnlout ! Shift to be applied in enlout array
+          work3(:,:)=reshape(enlout(mu0+1:mu0+6*(6+3*natom)),(/6+3*natom,6/))
+          do mu=1,6
+            call strconv(work3(1:6,mu),gprimd,work3(1:6,mu))
+          end do
+          do mu=1,6+3*natom
+            work1(1:6)=work3(mu,1:6)
+            call strconv(work1,gprimd,work2)
+            work3(mu,1:6)=work2(1:6)
+          end do
+          enlout(mu0+1:mu0+6*(6+3*natom))=reshape(work3(:,:),(/6*(6+3*natom)/))
+          call strconv(strnlk(:,idat),gprimd,strnlk(:,idat))
+          do mub=1,6
+            nub1=alpha(mub);nub2=beta(mub)
+            do mua=1,6
+              mu=mu0+mua+(3*natom+6)*(mub-1)
+              nua1=alpha(mua);nua2=beta(mua)
+              if (mua<=3.and.mub<=3) enlout(mu)=enlout(mu)+enlk(idat)
+              if (mua<=3) enlout(mu)=enlout(mu)-strnlk(mub,idat)
+              if (mub<=3) enlout(mu)=enlout(mu)-strnlk(mua,idat)
+              if (nub1==nua2) enlout(mu)=enlout(mu)-0.25d0*strnlk(gamma(nua1,nub2),idat)
+              if (nub2==nua2) enlout(mu)=enlout(mu)-0.25d0*strnlk(gamma(nua1,nub1),idat)
+              if (nub1==nua1) enlout(mu)=enlout(mu)-0.25d0*strnlk(gamma(nua2,nub2),idat)
+              if (nub2==nua1) enlout(mu)=enlout(mu)-0.25d0*strnlk(gamma(nua2,nub1),idat)
+            end do
+            if (mub<=3) then
+              do nua1=1,natom
+                nua2=3*(nua1-1);mu=mu0+nua2+6+(3*natom+6)*(mub-1)
+                enlout(mu+1:mu+3)=enlout(mu+1:mu+3)-fnlk(nua2+1:nua2+3,idat)
+              end do
+            end if
+          end do
+        end do
+        ABI_FREE(work1)
+        ABI_FREE(work2)
+        ABI_FREE(work3)
+      end if
+
     end if !opernld
 
   end if ! choice>0
@@ -801,7 +872,11 @@ contains
     ABI_FREE(ph3dout_)
     ABI_FREE(ffnlin_)
     ABI_FREE(ffnlout_)
-    ABI_FREE(enl_)
+    if(use_enl_ndat) then
+      ABI_FREE(enl_ndat_)
+    else
+      ABI_FREE(enl_)
+    end if
     ABI_FREE(indlmn_)
     if (size(sij) > 1) then
       ABI_FREE(sij_)

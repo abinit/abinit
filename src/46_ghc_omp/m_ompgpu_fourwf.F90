@@ -47,18 +47,26 @@ module m_ompgpu_fourwf
 #ifdef HAVE_OPENMP_OFFLOAD
 
 ! STATIC vars to avoid too much cuda overhead
+integer :: fourdp_initialized=0
 integer :: fourwf_initialized=0
 
-! FFT plan
-integer :: fft_size=-1
-integer :: ndat_loc=-1
-integer :: npw=-1
+#define FOURDP_ID 1
+#define FOURWF_ID 0
 
-! GPU ffts buffers
+! FFT plans
+integer :: fft_size_fourdp=-1
+integer :: ndat_fourdp=-1
+integer :: fft_size_fourwf=-1
+integer :: ndat_fourwf=-1
+
+! GPU ffts buffers (fourwf)
 real(dp),allocatable,target :: work_gpu(:,:,:,:)
 
 #endif
 
+ public :: ompgpu_fourdp
+ !public :: alloc_ompgpu_fourdp
+ !public :: free_ompgpu_fourdp
  public :: ompgpu_fourwf
  public :: alloc_ompgpu_fourwf
  public :: free_ompgpu_fourwf
@@ -74,8 +82,7 @@ function ompgpu_fourwf_work_mem(ngfft, ndat) result(req_mem)
  integer, intent(in) :: ngfft(:), ndat
  integer(kind=c_size_t) :: req_mem
 
- req_mem = 2 * dp * int(ngfft(1), c_size_t) * int(ngfft(2), c_size_t) * &
- &         int(ngfft(3), c_size_t) * int(ndat, c_size_t)
+ req_mem = int(2, c_size_t) * dp * ngfft(1) * ngfft(2) * ngfft(3) * ndat
 
 end function ompgpu_fourwf_work_mem
 
@@ -86,6 +93,98 @@ end function ompgpu_fourwf_work_mem
 ! Homemade CUDA/HIP interfaces would allow the use of GCC.
 ! But it is likely that OpenMP performance won't be optimal outside GPU vendors compilers.
 #ifdef HAVE_OPENMP_OFFLOAD
+
+subroutine ompgpu_fourdp(cplex,ngfft,ldx,ldy,ldz,ndat,isign,fofg,fofr)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: cplex,ngfft(18),ldx,ldy,ldz,ndat,isign
+!arrays
+ real(dp),intent(inout) :: fofg(2*ldx*ldy*ldz*ndat)
+ real(dp),intent(inout) :: fofr(cplex*ldx*ldy*ldz*ndat)
+
+!Local variables-------------------------------
+!scalars
+ integer      :: n1,n2,n3,nfft_tot
+ complex(dpc) :: norm
+ logical      :: transfer_fofr, transfer_fofg
+ character(len=500) :: msg
+
+! *************************************************************************
+
+ n1=ngfft(1);
+ n2=ngfft(2);
+ n3=ngfft(3);
+ nfft_tot=n1*n2*n3;
+ norm=dcmplx(one/(n1*n2*n3), 0.0_dp)
+
+ !*********** CHECK some compatibilities **************
+ if( (n1/=ldx) .or. (n2/=ldy) .or. (n3/=ldz)) then
+   write(msg,"(a,a,i5,i5,i5,a,i5,i5,i5,a)") "FFT SIZE ERROR: \n when gpu mode is on the fft grid must not be augmented",&
+    "(n1,n2,n3) = (", n1,n2,n3,") whereas (ldx,ldy,ldz) = (", ldx,ldy,ldz, ")"
+   ABI_ERROR(msg)
+ end if
+
+ ! ***********  GPU ALLOCATIONS  ***********************
+
+ if (fourdp_initialized == 0) then
+   call alloc_ompgpu_fourdp(ngfft,ndat)
+ endif !end of initialisation
+
+ ! If fft size has changed, we realloc our buffers
+ if((nfft_tot/=fft_size_fourdp) .or. (ndat/=ndat_fourdp)) then
+   call free_ompgpu_fourdp
+   call alloc_ompgpu_fourdp(ngfft,ndat)
+ end if !end if "fft size changed"
+
+ transfer_fofg=   .not. xomp_target_is_present(c_loc(fofg))
+ transfer_fofr=   .not. xomp_target_is_present(c_loc(fofr))
+
+ !$OMP TARGET ENTER DATA MAP(alloc:fofg)    IF(transfer_fofg)
+ !$OMP TARGET ENTER DATA MAP(alloc:fofr)    IF(transfer_fofr)
+ !$OMP TARGET UPDATE TO(fofg) IF(transfer_fofg .and. isign==FFT_INVERSE)
+ !$OMP TARGET UPDATE TO(fofr) IF(transfer_fofr .and. isign==FFT_FORWARD)
+
+ select case (cplex)
+ case (2)
+   ! Complex to Complex.
+   select case (isign)
+   case (FFT_INVERSE) ! +1
+     !$OMP TARGET DATA USE_DEVICE_PTR(fofg,fofr)
+     call gpu_fft_exec_z2z(FOURDP_ID, c_loc(fofg), c_loc(fofr), FFT_INVERSE)
+     !$OMP END TARGET DATA
+     call gpu_fft_stream_synchronize(FOURDP_ID)
+   case (FFT_FORWARD) ! -1
+     !$OMP TARGET DATA USE_DEVICE_PTR(fofg,fofr)
+     call gpu_fft_exec_z2z(FOURDP_ID, c_loc(fofr), c_loc(fofg), FFT_FORWARD)
+     !$OMP END TARGET DATA
+     call gpu_fft_stream_synchronize(FOURDP_ID)
+     ! Normalize here
+     call abi_gpu_xscal(2,ldx*ldy*ldz*ndat,norm,fofg,1)
+   case default
+     ABI_BUG("Wrong isign")
+   end select
+ case (1)
+   ! Real case.
+   ABI_BUG("Real case for OpenMP GPU fourdp not handled yet !")
+   !select case (isign)
+   !case (ABI_FFTW_BACKWARD) ! +1
+   !  ! +1; G --> R
+   !  call fftw3_c2r_op(nx,ny,nz,ldx,ldy,ldz,ndat,fofg,fofr)
+   !case (ABI_FFTW_FORWARD)  ! -1
+   !  ! -1; R --> G
+   !  call fftw3_r2c_op(nx,ny,nz,ldx,ldy,ldz,ndat,fofr,fofg)
+   !case default
+   !  ABI_BUG("Wrong isign")
+   !end select
+ end select
+
+ !$OMP TARGET UPDATE FROM(fofg) IF(transfer_fofg .and. isign==FFT_FORWARD)
+ !$OMP TARGET UPDATE FROM(fofr) IF(transfer_fofr .and. isign==FFT_INVERSE)
+ !$OMP TARGET EXIT DATA MAP(delete:fofg)    IF(transfer_fofg)
+ !$OMP TARGET EXIT DATA MAP(delete:fofr)    IF(transfer_fofr)
+
+end subroutine ompgpu_fourdp
 
 subroutine ompgpu_fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
 &  kg_kin,kg_kout,mgfft,ndat,ngfft,npwin,npwout,ldx,ldy,ldz,option,weight_r,weight_i)
@@ -147,7 +246,7 @@ subroutine ompgpu_fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,ist
  ! ***********  GPU ALLOCATIONS  ***********************
 
  ! If fft size has changed, we realloc our buffers
- if((nfft_tot/=fft_size) .or. (ndat/=ndat_loc)) then
+ if((nfft_tot/=fft_size_fourwf) .or. (ndat/=ndat_fourwf)) then
    call free_ompgpu_fourwf
    call alloc_ompgpu_fourwf(ngfft,ndat)
  end if !end if "fft size changed"
@@ -268,14 +367,14 @@ subroutine ompgpu_fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,ist
    ! call backward fourrier transform on gpu work_gpu => fofr_gpu
 #if defined HAVE_GPU_HIP && defined FC_LLVM
    !$OMP TARGET DATA USE_DEVICE_ADDR(work_gpu,fofr_amdref)
-   call gpu_fft_exec_z2z(c_loc(work_gpu), c_loc(fofr_amdref), FFT_INVERSE)
+   call gpu_fft_exec_z2z(FOURWF_ID, c_loc(work_gpu), c_loc(fofr_amdref), FFT_INVERSE)
    !$OMP END TARGET DATA
 #else
    !$OMP TARGET DATA USE_DEVICE_PTR(work_gpu,fofr)
-   call gpu_fft_exec_z2z(c_loc(work_gpu), c_loc(fofr), FFT_INVERSE)
+   call gpu_fft_exec_z2z(FOURWF_ID, c_loc(work_gpu), c_loc(fofr), FFT_INVERSE)
    !$OMP END TARGET DATA
 #endif
-   call gpu_fft_stream_synchronize()
+   call gpu_fft_stream_synchronize(FOURWF_ID)
  end if
 
  if(option==0) then
@@ -328,9 +427,7 @@ subroutine ompgpu_fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,ist
        end do
      end do
    else ! cplex==2
-     !$OMP TARGET DATA USE_DEVICE_PTR(fofr,work_gpu)
-     call copy_gpu_to_gpu(c_loc(work_gpu), c_loc(fofr), INT(2,c_size_t)*n1*n2*n3*ndat*dp)
-     !$OMP END TARGET DATA
+     call gpu_copy(work_gpu, fofr, int(2,c_size_t)*n1*n2*n3*ndat)
 
      !!$OMP TARGET TEAMS LOOP &
      !$OMP TARGET TEAMS DISTRIBUTE &
@@ -358,14 +455,14 @@ subroutine ompgpu_fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,ist
    ! call forward fourier transform on gpu: fofr_gpu ==> work_gpu
 #if defined HAVE_GPU_HIP && defined FC_LLVM
    !$OMP TARGET DATA USE_DEVICE_ADDR(work_gpu,fofr_amdref)
-   call gpu_fft_exec_z2z(c_loc(fofr_amdref), c_loc(work_gpu), FFT_FORWARD)
+   call gpu_fft_exec_z2z(FOURWF_ID, c_loc(fofr_amdref), c_loc(work_gpu), FFT_FORWARD)
    !$OMP END TARGET DATA
 #else
    !$OMP TARGET DATA USE_DEVICE_PTR(work_gpu,fofr)
-   call gpu_fft_exec_z2z(c_loc(fofr), c_loc(work_gpu), FFT_FORWARD)
+   call gpu_fft_exec_z2z(FOURWF_ID, c_loc(fofr), c_loc(work_gpu), FFT_FORWARD)
    !$OMP END TARGET DATA
 #endif
-   call gpu_fft_stream_synchronize()
+   call gpu_fft_stream_synchronize(FOURWF_ID)
 
    one=1
    xnorm=one/dble(n1*n2*n3)
@@ -412,13 +509,52 @@ end subroutine ompgpu_fourwf
 !!****************************************************************************************************************
 
 ! Memory allocation routine
-subroutine alloc_ompgpu_fourwf(ngfft, ndat)
+subroutine alloc_ompgpu_fourdp(ngfft, ndat)
  implicit none
  integer, intent(in) :: ngfft(18), ndat
 
  integer :: n1,n2,n3, ldx, ldy, ldz
  integer, target :: t_fft(3)
 
+ fourdp_initialized = 1
+
+ ! Size modification if too little memory allocation
+ n1=ngfft(1)
+ n2=ngfft(2)
+ n3=ngfft(3)
+ ldx = ngfft(4)
+ ldy = ngfft(5)
+ ldz = ngfft(6)
+ fft_size_fourdp=n1*n2*n3
+ ndat_fourdp = ndat
+
+ ! Initialisation des plans FFT
+ t_fft(1) = n3;
+ t_fft(2) = n2;
+ t_fft(3) = n1;
+
+ ! Creation du plan
+ call gpu_fft_plan_many(FOURDP_ID, 3, c_loc(t_fft), c_null_ptr, 1, ldx*ldy*ldz, c_null_ptr, 1, ldx*ldy*ldz, FFT_Z2Z, ndat);
+
+end subroutine alloc_ompgpu_fourdp
+
+subroutine free_ompgpu_fourdp()
+
+ if(fourdp_initialized==0) return
+
+ ! On detruit l'ancien plan
+ call gpu_fft_plan_destroy(FOURDP_ID)
+
+ fourdp_initialized = 0;
+
+end subroutine free_ompgpu_fourdp
+
+subroutine alloc_ompgpu_fourwf(ngfft, ndat)
+ implicit none
+ integer, intent(in) :: ngfft(18), ndat
+
+ integer :: n1,n2,n3, ldx, ldy, ldz
+ integer, target :: t_fft(3),embed(3)
 
  fourwf_initialized = 1
 
@@ -429,16 +565,20 @@ subroutine alloc_ompgpu_fourwf(ngfft, ndat)
  ldx = ngfft(4)
  ldy = ngfft(5)
  ldz = ngfft(6)
- fft_size=n1*n2*n3
- ndat_loc = ndat
+ fft_size_fourwf=n1*n2*n3
+ ndat_fourwf = ndat
 
  ! Initialisation des plans FFT
  t_fft(1) = n3;
  t_fft(2) = n2;
  t_fft(3) = n1;
 
+ embed(1) = ldz
+ embed(2) = ldy
+ embed(3) = ldx
+
  ! Creation du plan
- call gpu_fft_plan_many(3, c_loc(t_fft), c_null_ptr, 1, ldx*ldy*ldz, c_null_ptr, 1, ldx*ldy*ldz, FFT_Z2Z, ndat);
+ call gpu_fft_plan_many(FOURWF_ID, 3, c_loc(t_fft), c_loc(embed), 1, ldx*ldy*ldz, c_loc(embed), 1, ldx*ldy*ldz, FFT_Z2Z, ndat);
 
  ABI_MALLOC(work_gpu, (2,n1,n2,n3*ndat))
  !FIXME Smarter buffer management ?
@@ -454,11 +594,11 @@ subroutine free_ompgpu_fourwf()
  if(fourwf_initialized==0) return
 
  ! On detruit l'ancien plan
- call gpu_fft_plan_destroy()
+ call gpu_fft_plan_destroy(FOURWF_ID)
 
  !FIXME Smarter buffer management ?
 #ifdef HAVE_GPU_HIP
- !$OMP TARGET EXIT DATA MAP(release:work_gpu)
+ !$OMP TARGET EXIT DATA MAP(delete:work_gpu)
 #endif
  ABI_FREE(work_gpu)
 
@@ -468,6 +608,23 @@ end subroutine free_ompgpu_fourwf
 
 #else
 ! interface for unsupported compilers
+subroutine ompgpu_fourdp(cplex,ngfft,ldx,ldy,ldz,ndat,isign,fofg,fofr)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: cplex,ngfft(18),ldx,ldy,ldz,ndat,isign
+!arrays
+ real(dp),intent(inout) :: fofg(2*ldx*ldy*ldz*ndat)
+ real(dp),intent(inout) :: fofr(cplex*ldx*ldy*ldz*ndat)
+
+! *************************************************************************
+
+ ABI_UNUSED((/cplex,ldx,ldy,ldz,ndat,isign/))
+ ABI_UNUSED((/ngfft/))
+ ABI_UNUSED((/fofg,fofr/))
+
+end subroutine ompgpu_fourdp
+
 subroutine ompgpu_fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
 &  kg_kin,kg_kout,mgfft,ndat,ngfft,npwin,npwout,ldx,ldy,ldz,option,weight_r,weight_i)
  implicit none

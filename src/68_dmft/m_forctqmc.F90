@@ -1103,7 +1103,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang, &
    write(message,'(a,2x,2a)') ch10, " ==> Rotation done", ch10       
    call wrtout(std_out,message,'COLL')                                                     
    
- end if !dmftctqmc_config
+ end if ! dmftctqmc_config
  !======================
 
 ! =========================================================================================
@@ -1666,12 +1666,12 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang, &
   write(message,'(a,2x,a)') ch10,"== Magnetic moments from CT-QMC occupation matrix "
   call wrtout(std_out,message,'COLL')
 
-  do iatom=1,cryst_struc%natom
-    lpawu=paw_dmft%lpawu(iatom)
-    if(lpawu .ne. -1) then
-      write(message,'(a,3x,a,i4)') ch10,"-------> For Correlated Atom",iatom
-      call wrtout(std_out,message,'COLL')
-
+  do iatom=1,cryst_struc%natom                                                     
+    lpawu=paw_dmft%lpawu(iatom)                                                    
+    if(lpawu .ne. -1) then                                                         
+      write(message,'(a,3x,a,i4)') ch10,"-------> For Correlated Atom",iatom       
+      call wrtout(std_out,message,'COLL')                                          
+                                                                                   
       ! == orbital angular momentum
       do icomp=1,3 !x,y,z components
         muorb=czero
@@ -1695,7 +1695,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang, &
         call wrtout(std_out,message,'COLL')
         call destroy_matlu(matlumag,(natom))
       end do
-
+ 
       ! == total angular momentum (L_u + 2*S_u)
       do icomp=1,3 !x,y,z components
         muzeem=czero
