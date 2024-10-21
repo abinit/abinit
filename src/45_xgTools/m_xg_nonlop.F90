@@ -172,6 +172,7 @@ module m_xg_nonlop
   public :: xg_nonlop_destroy
   public :: xg_nonlop_make_ekb    ! non paw only
   public :: xg_nonlop_destroy_ekb ! non paw only
+  public :: xg_nonlop_update_weight
   public :: xg_nonlop_init_cplex_alldij ! paw only
   public :: xg_nonlop_make_Dij    ! paw only
   public :: xg_nonlop_set_Dij_spin! paw only
@@ -303,6 +304,30 @@ contains
   call timab(tim_init,2,tsec)
 
  end subroutine xg_nonlop_init
+!!***
+
+!!****f* m_xg_nonlop/xg_nonlop_update_weight
+!! NAME
+!! xg_nonlop_init
+!!
+!! FUNCTION
+!! Compute new weights with respect to ucvol
+!!
+!! INPUTS
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+ subroutine xg_nonlop_update_weight(xg_nonlop,ucvol)
+
+   type(xg_nonlop_t),intent(inout) :: xg_nonlop
+   real(dp),intent(in) :: ucvol
+
+   xg_nonlop%weight=four_pi/sqrt(ucvol)
+
+ end subroutine xg_nonlop_update_weight
 !!***
 
 !!****f* m_xg_nonlop/xg_nonlop_init_cplex_alldij
