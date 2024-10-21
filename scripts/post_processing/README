@@ -56,3 +56,8 @@ post-processing tools
     Script to plot the phonon band structure and compare with the LWF phonon
     band structure from the anaddb output file. The code is documented internally.
     --help option is also available.                                                  
+
+- analyze_rttddft.py
+    Script to analyze the output of a real-time TDDFT run. 
+    Computes the conductivity tensor and associated dielectric function from the 
+    time-dependent current density.
