@@ -113,7 +113,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang, &
  type(oper_type), optional, intent(in) :: loc_levels
 !Local variables ------------------------------
  integer :: i,iatom,icomp,ierr,if1,if2,iflavor1,iflavor2,ifreq,im1,im2,ima,imb,ispa,ispb,ispinor
- integer :: ispinor1,ispinor2,isppol,itypat,lpawu,myproc,natom,natom2,ndim,nflavor,nomega
+ integer :: ispinor1,ispinor2,isppol,itypat,lpawu,myproc,natom,natom2,ndim,nflavor,nomega,nproc
  integer :: nspinor,nsppol,nsppol_imp,ntypat,nwlo,opt_diag,opt_fk,opt_log,opt_nondiag,opt_real
  integer :: opt_rot,rot_type_vee,testcode,testrot,tndim,unt,unt2,useylm
  integer, parameter :: optdb = 0
@@ -162,7 +162,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang, &
  !omega_current=czero
 
 ! Initialise nproc
- !nproc = paw_dmft%nproc
+ nproc = paw_dmft%nproc
  myproc = paw_dmft%myproc
 
 ! ======================================
@@ -655,12 +655,12 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang, &
      end do ! i
    end if ! moments
 
-   if (myproc == 0) then
-     if (open_file(trim(paw_dmft%filapp)//"_atom__G0w_.dat",message,newunit=unt) /= 0) ABI_ERROR(message)
+   if (myproc == mod(nproc+1,nproc)) then
+     if (open_file(trim(paw_dmft%filapp)//"_atom_G0w_.dat",message,newunit=unt) /= 0) ABI_ERROR(message)
      ndim = nspinor * (2*paw_dmft%lpawu(1)+1)
      do ifreq=1,nwlo
        write(unt,'(29f21.14)') paw_dmft%omega_lo(ifreq),&
-         & (((weiss_for_rot%oper(ifreq)%matlu(1)%mat(im1+(ispinor-1)*ndim,im1+(ispinor-1)*ndim,isppol),&
+         & (((weiss_for_rot%oper(ifreq)%matlu(natom)%mat(im1+(ispinor-1)*ndim,im1+(ispinor-1)*ndim,isppol),&
          & im1=1,3),ispinor=1,nspinor),isppol=1,nsppol)
      end do ! ifreq
      close(unt)
@@ -1045,6 +1045,67 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang, &
    ABI_FREE(matlu4)
  end if ! if opt_nondiag=1
 
+ ! =======================
+ ! 
+ ! Rotation of Magnetic moment for CT-QMC
+ !
+ ! =======================
+ if(nspinor .eq. 2 .and. paw_dmft%dmftctqmc_config .gt. 1) then
+   write(message,'(a,2x,2a)') ch10, " == Making rotation for magnetic moments", ch10
+   call wrtout(std_out,message,'COLL')
+
+   !create a rotation matrix for diagonal Hamiltonian 
+   if(opt_diag == 0) then
+     write(message,'(a,2x,2a)') ch10, " --> Hamiltonian is already diagonal in Slm", ch10                 
+     call wrtout(std_out,message,'COLL')
+     do iatom = 1,paw_dmft%natom
+       if(paw_dmft%lpawu(iatom) /= -1) then
+         do iflavor1=1,tndim
+           do iflavor2=1,tndim
+             if(iflavor1==iflavor2) then
+               eigvectmatlu(iatom)%mat(iflavor1,iflavor2,1)=cone
+             else
+               eigvectmatlu(iatom)%mat(iflavor1,iflavor2,1)=czero
+             end if 
+           end do
+         end do
+       end if 
+     end do
+   end if !end opt_diag=0
+
+   ! == orbital angular momentum
+   call init_matlu(natom=natom,nspinor=paw_dmft%nspinor,nsppol=paw_dmft%nsppol,lpawu_natom=paw_dmft%lpawu,matlu=matlumag_orb)
+   call zero_matlu(matlumag_orb,natom=natom)
+   call chi_matlu(matlumag_orb,natom=natom,option=1,optprt=0)
+   call rotate_matlu(matlumag_orb,eigvectmatlu,natom=natom,inverse=1)
+   !call print_matlu(matlumag_orb,iatom,prtopt=1)
+   call gather_matlu(matlumag_orb,magmom_orb,natom=natom,option=1,prtopt=0)
+   call destroy_matlu(matlumag_orb,natom=natom)
+  
+   ! == spin angular momentum
+   call init_matlu(natom=natom,nspinor=paw_dmft%nspinor,nsppol=paw_dmft%nsppol,lpawu_natom=paw_dmft%lpawu,matlu=matlumag_spin)
+   call zero_matlu(matlumag_spin,natom=natom)
+   call chi_matlu(matlumag_spin,natom=natom,option=2,optprt=0)
+   call rotate_matlu(matlumag_spin,eigvectmatlu,natom=natom,inverse=1)
+   !call print_matlu(matlumag_spin,natom,prtopt=1)
+   call gather_matlu(matlumag_spin,magmom_spin,natom=natom,option=1,prtopt=0)
+   call destroy_matlu(matlumag_spin,natom=natom)
+   
+   ! == total angular momentum
+   call init_matlu(natom=natom,nspinor=paw_dmft%nspinor,nsppol=paw_dmft%nsppol,lpawu_natom=paw_dmft%lpawu,matlu=matlumag_tot)
+   call zero_matlu(matlumag_tot,natom=natom)
+   call chi_matlu(matlumag_tot,natom=natom,option=3,optprt=0)
+   call rotate_matlu(matlumag_tot,eigvectmatlu,natom=natom,inverse=1)
+   !call print_matlu(matlumag_tot,natom=1,prtopt=1)
+   call gather_matlu(matlumag_tot,magmom_tot,natom=natom,option=1,prtopt=0)
+   call destroy_matlu(matlumag_tot,natom=natom)
+ 
+   write(message,'(a,2x,2a)') ch10, " ==> Rotation done", ch10       
+   call wrtout(std_out,message,'COLL')                                                     
+   
+ end if !dmftctqmc_config
+ !======================
+
 ! =========================================================================================
 ! Start big loop over atoms to compute hybridization and do the CTQMC
 ! =========================================================================================
@@ -1358,55 +1419,6 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang, &
        ! =================================================================
      if (paw_dmft%dmft_solv == 5) then
 
-         ! =======================
-         ! make rotation matrix of mu and send it to qmc
-         ! =======================
-       if (paw_dmft%dmftctqmc_config >= 1) then
-         write(message,'(a,2x,2a)') ch10, " == Making rotation for magnetic moments", ch10
-         call wrtout(std_out,message,'COLL')
-         if (opt_diag == 0) then
-           write(message,'(a,2x,2a)') ch10, " --> Hamiltonian is already diagonal in Slm", ch10 
-           call wrtout(std_out,message,'COLL')     
-           do iflavor1=1,tndim
-             do iflavor2=1,tndim
-               if (iflavor1 == iflavor2) then
-                 eigvectmatlu(iatom)%mat(iflavor1,iflavor2,1) = cone
-               else
-                 eigvectmatlu(iatom)%mat(iflavor1,iflavor2,1) = czero
-               end if 
-             end do ! iflavor2
-           end do ! iflavor1
-         end if ! opt_diag=0
-           ! == orbital angular momentum
-         call init_matlu(natom=1,nspinor=paw_dmft%nspinor,nsppol=paw_dmft%nsppol,lpawu_natom=paw_dmft%lpawu,matlu=matlumag_orb)
-         call zero_matlu(matlumag_orb,natom=1)
-         call chi_matlu(matlumag_orb,natom=1,option=1,optprt=0)
-         call rotate_matlu(matlumag_orb,eigvectmatlu(iatom),natom=1,inverse=1)
-         !call print_matlu(matlumag_orb,iatom,prtopt=1)
-         call gather_matlu(matlumag_orb,magmom_orb(iatom),natom=1,option=1,prtopt=0)
-         call destroy_matlu(matlumag_orb,natom=1)
-          
-           ! == spin angular momentum
-         call init_matlu(natom=1,nspinor=paw_dmft%nspinor,nsppol=paw_dmft%nsppol,lpawu_natom=paw_dmft%lpawu,matlu=matlumag_spin)
-         call zero_matlu(matlumag_spin,natom=1)
-         call chi_matlu(matlumag_spin,natom=1,option=2,optprt=0)
-         call rotate_matlu(matlumag_spin,eigvectmatlu(iatom),natom=1,inverse=1)
-         !call print_matlu(matlumag_spin,natom,prtopt=1)
-         call gather_matlu(matlumag_spin,magmom_spin(iatom),natom=1,option=1,prtopt=0)
-         call destroy_matlu(matlumag_spin,natom=1)
-          
-           ! == total angular momentum
-         call init_matlu(natom=1,nspinor=paw_dmft%nspinor,nsppol=paw_dmft%nsppol,lpawu_natom=paw_dmft%lpawu,matlu=matlumag_tot)
-         call zero_matlu(matlumag_tot,natom=1)
-         call chi_matlu(matlumag_tot,natom=1,option=3,optprt=0)
-         call rotate_matlu(matlumag_tot,eigvectmatlu(iatom),natom=1,inverse=1)
-           !call print_matlu(matlumag_tot,natom=1,prtopt=1)
-         call gather_matlu(matlumag_tot,magmom_tot(iatom),natom=1,option=1,prtopt=0)
-         call destroy_matlu(matlumag_tot,natom=1)
-          
-       end if !dmftctqmc_config
-         !======================
-
        ABI_MALLOC(docc,(nflavor,nflavor))
        docc(:,:) = zero
        call CtqmcInterface_run(hybrid,fw1(1:paw_dmft%dmftqmc_l,:),Gtau=gtmp(:,:),Gw=gw_tmp(:,:),D=docc(:,:),E=green%ecorr_qmc(iatom),&
@@ -1428,54 +1440,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang, &
 
        ABI_MALLOC(docc,(nflavor,nflavor))
        docc(:,:) = zero
-         ! =======================
-         ! make rotation matrix of mu to send it to qmc
-         ! =======================
-       if (paw_dmft%dmftctqmc_config >= 1) then
-         write(message,'(a,2x,2a)') ch10, " == Making rotation for magnetic moments", ch10
-         call wrtout(std_out,message,'COLL')
-         if (opt_diag == 0) then
-           write(message,'(a,2x,2a)') ch10, " --> Hamiltonian is already diagonal in Slm", ch10                 
-           call wrtout(std_out,message,'COLL')
-           do iflavor1=1,tndim
-             do iflavor2=1,tndim
-               if (iflavor1 == iflavor2) then
-                 eigvectmatlu(iatom)%mat(iflavor1,iflavor2,1) = cone
-               else
-                 eigvectmatlu(iatom)%mat(iflavor1,iflavor2,1) = czero
-               end if 
-             end do
-           end do
-         end if
-           ! == orbital angular momentum
-         call init_matlu(natom=1,nspinor=paw_dmft%nspinor,nsppol=paw_dmft%nsppol,lpawu_natom=paw_dmft%lpawu,matlu=matlumag_orb)
-         call zero_matlu(matlumag_orb,natom=1)
-         call chi_matlu(matlumag_orb,natom=1,option=1,optprt=0)
-         call rotate_matlu(matlumag_orb,eigvectmatlu(iatom),natom=1,inverse=1)
-         !call print_matlu(matlumag_orb,iatom,prtopt=1)
-         call gather_matlu(matlumag_orb,magmom_orb(iatom),natom=1,option=1,prtopt=0)
-         call destroy_matlu(matlumag_orb,natom=1)
-          
-           ! == spin angular momentum
-         call init_matlu(natom=1,nspinor=paw_dmft%nspinor,nsppol=paw_dmft%nsppol,lpawu_natom=paw_dmft%lpawu,matlu=matlumag_spin)
-         call zero_matlu(matlumag_spin,natom=1)
-         call chi_matlu(matlumag_spin,natom=1,option=2,optprt=0)
-         call rotate_matlu(matlumag_spin,eigvectmatlu(iatom),natom=1,inverse=1)
-         !call print_matlu(matlumag_spin,natom,prtopt=1)
-         call gather_matlu(matlumag_spin,magmom_spin(iatom),natom=1,option=1,prtopt=0)
-         call destroy_matlu(matlumag_spin,natom=1)
-           
-           ! == total angular momentum
-         call init_matlu(natom=1,nspinor=paw_dmft%nspinor,nsppol=paw_dmft%nsppol,lpawu_natom=paw_dmft%lpawu,matlu=matlumag_tot)
-         call zero_matlu(matlumag_tot,natom=1)
-         call chi_matlu(matlumag_tot,natom=1,option=3,optprt=0)
-         call rotate_matlu(matlumag_tot,eigvectmatlu(iatom),natom=1,inverse=1)
-           !call print_matlu(matlumag_tot,natom=1,prtopt=1)
-         call gather_matlu(matlumag_tot,magmom_tot(iatom),natom=1,option=1,prtopt=0)
-         call destroy_matlu(matlumag_tot,natom=1)
-          
-       end if ! dmftctqmc_config
-         !======================
+       
        call CtqmcoffdiagInterface_run(hybridoffdiag,fw1_nd(1:paw_dmft%dmftqmc_l,:,:),Gtau=gtmp_nd(:,:,:),&
           & Gw=gw_tmp_nd(:,:,:),D=doccsum,E=green%ecorr_qmc(iatom),Noise=noise,matU=dble(udens_atoms(iatom)%mat(:,:,1)),&
           & Docc=docc(:,:),opt_levels=levels_ctqmc(:),hybri_limit=hybri_limit(:,:),Magmom_orb=REAL(magmom_orb(iatom)%value),&
@@ -1710,10 +1675,10 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang, &
       ! == orbital angular momentum
       do icomp=1,3 !x,y,z components
         muorb=czero
-        call init_matlu(natom=1,nspinor=paw_dmft%nspinor,nsppol=paw_dmft%nsppol,lpawu_natom=paw_dmft%lpawu,matlu=matlumag)
-        call copy_matlu(green%occup_tau%matlu(iatom),matlumag,natom=1)
-        call rotate_matlu(matlumag,eigvectmatlu(iatom),natom=1,inverse=0)
-        call magmomforb_matlu(matlumag,muorb,natom=1,option=icomp,optprt=0)
+        call init_matlu(natom=natom,nspinor=paw_dmft%nspinor,nsppol=paw_dmft%nsppol,lpawu_natom=paw_dmft%lpawu,matlu=matlumag)
+        call copy_matlu(green%occup_tau%matlu,matlumag,natom)
+        call rotate_matlu(matlumag,eigvectmatlu,natom=natom,inverse=0)
+        call magmomforb_matlu(matlumag,muorb,natom=natom,option=icomp,optprt=0)
         write(message,'(a,2x,a,i4,a,f8.4)') ch10," Orbital angular momentum for axis ", icomp, " is ", REAL(muorb)
         call wrtout(std_out,message,'COLL')
         call destroy_matlu(matlumag,(natom))
@@ -1722,10 +1687,10 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang, &
       ! == spin angular momentum
       do icomp=1,3 !x,y,z components
         muspin=czero
-        call init_matlu(natom=1,nspinor=paw_dmft%nspinor,nsppol=paw_dmft%nsppol,lpawu_natom=paw_dmft%lpawu,matlu=matlumag)
-        call copy_matlu(green%occup_tau%matlu(iatom),matlumag,natom=1)
-        call rotate_matlu(matlumag,eigvectmatlu(iatom),natom=1,inverse=0)
-        call magmomfspin_matlu(matlumag,muspin,natom=1,option=icomp,optprt=0)
+        call init_matlu(natom=natom,nspinor=paw_dmft%nspinor,nsppol=paw_dmft%nsppol,lpawu_natom=paw_dmft%lpawu,matlu=matlumag)
+        call copy_matlu(green%occup_tau%matlu,matlumag,natom=natom)
+        call rotate_matlu(matlumag,eigvectmatlu,natom=natom,inverse=0)
+        call magmomfspin_matlu(matlumag,muspin,natom=natom,option=icomp,optprt=0)
         write(message,'(a,2x,a,i4,a,f8.4)') ch10," Spin angular momentum for axis ", icomp, " is ", REAL(muspin)
         call wrtout(std_out,message,'COLL')
         call destroy_matlu(matlumag,(natom))
@@ -1734,10 +1699,10 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang, &
       ! == total angular momentum (L_u + 2*S_u)
       do icomp=1,3 !x,y,z components
         muzeem=czero
-        call init_matlu(natom=1,nspinor=paw_dmft%nspinor,nsppol=paw_dmft%nsppol,lpawu_natom=paw_dmft%lpawu,matlu=matlumag)
-        call copy_matlu(green%occup_tau%matlu(iatom),matlumag,natom=1)
-        call rotate_matlu(matlumag,eigvectmatlu(iatom),natom=1,inverse=0)
-        call magmomfzeeman_matlu(matlumag,muzeem,natom=1,option=icomp,optprt=0)
+        call init_matlu(natom=natom,nspinor=paw_dmft%nspinor,nsppol=paw_dmft%nsppol,lpawu_natom=paw_dmft%lpawu,matlu=matlumag)
+        call copy_matlu(green%occup_tau%matlu,matlumag,natom=natom)
+        call rotate_matlu(matlumag,eigvectmatlu,natom=natom,inverse=0)
+        call magmomfzeeman_matlu(matlumag,muzeem,natom=natom,option=icomp,optprt=0)
         write(message,'(a,2x,a,i4,a,f8.4)') ch10," Zeeman angular momentum for axis ", icomp, " is ", REAL(muzeem)
         call wrtout(std_out,message,'COLL')
         call destroy_matlu(matlumag,(natom))
