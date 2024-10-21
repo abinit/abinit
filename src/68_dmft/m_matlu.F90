@@ -2912,7 +2912,7 @@ end subroutine add_matlu
      ! Reshape product matrix into matlu format 
      !=====================================
 
-     call gather_matlu(matlu(iatom),gathermatlu(iatom),iatom,option=-1,prtopt=1)
+     !call gather_matlu(matlu(iatom),gathermatlu(iatom),iatom,option=-1,prtopt=1)
 
      !=====================================
      ! Print matlu
@@ -3180,7 +3180,7 @@ end subroutine add_matlu
      ! Reshape product matrix into matlu format 
      !=====================================
 
-    call gather_matlu(matlu,gathermatlu,natom,option=-1,prtopt=1)
+    !call gather_matlu(matlu,gathermatlu,natom,option=-1,prtopt=1)
 
 
      !=====================================
@@ -3477,7 +3477,7 @@ end subroutine add_matlu
      ! Reshape product matrix into matlu format 
      !=====================================
 
-    call gather_matlu(matlu,gathermatlu,natom,option=-1,prtopt=1)
+    !call gather_matlu(matlu,gathermatlu,natom,option=-1,prtopt=1)
 
 
      !=====================================
@@ -3588,11 +3588,11 @@ end subroutine add_matlu
     
  ABI_MALLOC(muchi,(natom))
  do iatom=1,natom
-   if(matlu(iatom)%lpawu.ne.-1) then
+   !if(matlu(iatom)%lpawu.ne.-1) then
      tndim=2*(2*matlu(iatom)%lpawu+1)
      ABI_MALLOC(muchi(iatom)%value,(tndim,tndim))
      muchi(iatom)%value=czero
-   end if
+   !end if
  end do 
 
  do iatom=1,natom
@@ -3695,11 +3695,17 @@ end subroutine add_matlu
      ! Reshape matrix into matlu format 
      !=====================================
 
-    call gather_matlu(matlu,muchi(iatom),natom=1,option=-1,prtopt=1)
+   ! call gather_matlu(matlu,muchi(iatom),natom=1,option=-1,prtopt=1)
 
 
    end if !lpawu
  end do !atom
+
+  !=====================================                                
+  ! Reshape matrix into matlu format                                    
+  !=====================================                                
+                                                                            
+  call gather_matlu(matlu,muchi,natom,option=-1,prtopt=1)
 
      !=====================================
      ! Deallocate gathermatlu 
