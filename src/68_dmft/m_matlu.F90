@@ -2908,15 +2908,13 @@ end subroutine add_matlu
      end do
    end do
 
-     !=====================================
-     ! Reshape product matrix into matlu format 
-     !=====================================
 
-     !call gather_matlu(matlu(iatom),gathermatlu(iatom),iatom,option=-1,prtopt=1)
+     !=====================================                                     
+     ! Reshape product matrix into matlu format                                 
+     !=====================================                                     
+                                                                                 
+ !call gather_matlu(matlu,gathermatlu,natom,option=-1,prtopt=1)             
 
-     !=====================================
-     ! Print matlu
-     !=====================================
 
      if(optprt>2) then
        ABI_MALLOC(mat_out_c,(2*ll+1,2*ll+1)) 

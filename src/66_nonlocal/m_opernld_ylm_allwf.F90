@@ -122,14 +122,14 @@ contains
 
 subroutine opernld_ylm_allwf(choice,cplex,cplex_fac,ddkk,&
 &                      dgxdt,dgxdtfac,dgxdtfac_sij,d2gxdt,&
-&                      enlk,enlout,gx,gxfac,gxfac_sij,ndat,nd2gxdt,ndgxdt,&
+&                      enlk,enlout,fnlk,gx,gxfac,gxfac_sij,natom,ndat,nd2gxdt,ndgxdt,&
 &                      ndgxdtfac,indlmn,ntypat,lmnmax,nprojs,nnlout,nspinor,paw_opt,&
-&                      nattyp,gpu_option)
+&                      strnlk,nattyp,gpu_option)
 
  ! Arguments ------------------------------------
  ! scalars
  integer,intent(in) :: choice,paw_opt,ntypat,ndgxdtfac,nd2gxdt,ndgxdt
- integer,intent(in) :: cplex,cplex_fac,ndat,nnlout,nspinor,nprojs,lmnmax,gpu_option
+ integer,intent(in) :: cplex,cplex_fac,natom,ndat,nnlout,nspinor,nprojs,lmnmax,gpu_option
 
  ! arrays
  integer,intent(in) :: indlmn(6,lmnmax,ntypat),nattyp(ntypat)
@@ -142,13 +142,14 @@ subroutine opernld_ylm_allwf(choice,cplex,cplex_fac,ddkk,&
  real(dp),intent(in) :: gxfac_sij(cplex_fac,nprojs,ndat*nspinor)
  real(dp),intent(inout) :: enlout(nnlout*ndat)
  real(dp),intent(inout) :: enlk(ndat),ddkk(6,ndat)
+ real(dp),intent(inout) :: fnlk(3*natom,ndat),strnlk(6,ndat)
 
  ! locals
  integer,parameter :: alpha(6)=(/1,2,3,3,3,2/),beta(6)=(/1,2,3,2,1,1/)
  integer,parameter :: gamma(3,3)=reshape((/1,6,5,6,2,4,5,4,3/),(/3,3/))
  integer :: force_shift, shift, nattyp_i
  integer :: itypat, ilmn, ia, idat, igrad, ii, nlmn, iend, ibeg, iatm, iashift
- integer :: mua, mub, nu, mu, mua1, mua2, muu, mut
+ integer :: mua, mub, nu, mu, mua1, mua2, muu, mut, mushift, nushift
  real(dp) :: esum,esumi
  real(dp) :: d2gx(cplex)
 
@@ -156,7 +157,7 @@ subroutine opernld_ylm_allwf(choice,cplex,cplex_fac,ddkk,&
 
  enlout=zero
  if(paw_opt < 3) then
-   if(choice==1.or.choice==3.or.choice==23) then
+   if(choice==1.or.choice==3.or.choice==23.or.choice==6) then
      shift=0
      iatm=0
      esum=zero
@@ -308,6 +309,146 @@ subroutine opernld_ylm_allwf(choice,cplex,cplex_fac,ddkk,&
            &             enlout((idat-1)*nnlout + (iatm+ia-1)*6 + mu) + two*esum
          end do
        end do
+       end do
+
+       shift = shift + nattyp(itypat)*nlmn
+       iatm = iatm+nattyp(itypat)
+     end do
+   end if
+
+!  ======= Accumulate the elastic tensor contributions ==========
+   if (choice==6) then
+     shift=0; iatm=0
+     do itypat=1, ntypat
+       nlmn=count(indlmn(3,:,itypat)>0)
+       nattyp_i = nattyp(itypat)
+
+#ifdef HAVE_OPENMP_OFFLOAD
+       !$OMP TARGET TEAMS DISTRIBUTE COLLAPSE(3) &
+       !$OMP& MAP(to:fnlk,gxfac,dgxdt) &
+       !$OMP& PRIVATE(idat,ia,esum,mu) &
+       !$OMP& IF(gpu_option==ABI_GPU_OPENMP)
+#endif
+       do idat=1,ndat*nspinor
+       do ia=1,nattyp_i
+         do mu=1,3
+           esum=zero
+           !$OMP PARALLEL DO COLLAPSE(2) REDUCTION(+:esum) PRIVATE(ilmn,ii)
+           do ilmn=1,nlmn
+             do ii=1,cplex
+               esum=esum+gxfac(ii,shift+(ia-1)*nlmn+ilmn,idat) &
+               &    *dgxdt(ii,ndgxdt*shift + (ia-1)*nlmn*ndgxdt + (ilmn-1)*ndgxdt + mu+6,idat)
+             end do
+           end do
+           fnlk((iatm+ia-1)*3+mu,idat)=fnlk((iatm+ia-1)*3+mu,idat)+two*esum
+         end do
+       end do
+       end do
+
+       shift = shift + nattyp(itypat)*nlmn
+       iatm = iatm+nattyp(itypat)
+     end do
+
+
+     shift=0; iatm=0
+     do itypat=1, ntypat
+       nlmn=count(indlmn(3,:,itypat)>0)
+       nattyp_i = nattyp(itypat)
+
+#ifdef HAVE_OPENMP_OFFLOAD
+       !$OMP TARGET TEAMS DISTRIBUTE COLLAPSE(2) &
+       !$OMP& MAP(to:strnlk,gxfac,dgxdt) &
+       !$OMP& PRIVATE(idat,esum,mu) &
+       !$OMP& IF(gpu_option==ABI_GPU_OPENMP)
+#endif
+       do idat=1,ndat*nspinor
+         do mu=1,6
+           esum=zero
+           !$OMP PARALLEL DO COLLAPSE(3) REDUCTION(+:esum) PRIVATE(ilmn,ii,ia)
+           do ia=1,nattyp_i
+             do ilmn=1,nlmn
+               do ii=1,cplex
+                 esum=esum+gxfac(ii,shift+(ia-1)*nlmn+ilmn,idat) &
+                 &    *dgxdt(ii,ndgxdt*shift + (ia-1)*nlmn*ndgxdt + (ilmn-1)*ndgxdt + mu,idat)
+               end do
+             end do
+           end do
+           strnlk(mu,idat)=strnlk(mu,idat)+two*esum
+         end do
+       end do
+
+       shift = shift + nattyp(itypat)*nlmn
+       iatm = iatm+nattyp(itypat)
+     end do
+
+     shift=0; iatm=0
+     do itypat=1, ntypat
+       nlmn=count(indlmn(3,:,itypat)>0)
+       nattyp_i = nattyp(itypat)
+
+#ifdef HAVE_OPENMP_OFFLOAD
+       !$OMP TARGET TEAMS DISTRIBUTE COLLAPSE(3) &
+       !$OMP& MAP(to:enlout,gxfac,dgxdt,dgxdtfac,d2gxdt) &
+       !$OMP& PRIVATE(idat,ia,esum,mu,mua,mub,nu,mushift,nushift) &
+       !$OMP& IF(gpu_option==ABI_GPU_OPENMP)
+#endif
+       do idat=1,ndat*nspinor
+         do mub=1,6
+           do mua=1,6
+             mushift=6*(mub-1);nushift=(3*natom+6)*(mub-1)
+             mu=mushift+mua;nu=nushift+mua
+             esum=zero
+             !$OMP PARALLEL DO COLLAPSE(3) REDUCTION(+:esum) PRIVATE(ilmn,ii)
+             do ia=1,nattyp_i
+               do ilmn=1,nlmn
+                 do ii=1,cplex
+                   esum=esum+gxfac(ii,shift+(ia-1)*nlmn+ilmn,idat)&
+                   &    *d2gxdt(ii,nd2gxdt*shift+(ia-1)*nlmn*nd2gxdt+(ilmn-1)*nd2gxdt+mu,idat)&
+                   &    +dgxdtfac(ii,ndgxdtfac*shift+(ia-1)*nlmn*ndgxdtfac+(ilmn-1)*ndgxdtfac+mua,idat)&
+                   &    *dgxdt(ii,ndgxdt*shift+(ia-1)*nlmn*ndgxdt+(ilmn-1)*ndgxdt+mub,idat)
+                 end do
+               end do
+             end do
+             enlout((idat-1)*nnlout + nu)=enlout((idat-1)*nnlout + nu)+two*esum
+           end do
+         end do
+       end do
+
+       shift = shift + nattyp(itypat)*nlmn
+       iatm = iatm+nattyp(itypat)
+     end do
+
+     shift=0; iatm=0
+     do itypat=1, ntypat
+       nlmn=count(indlmn(3,:,itypat)>0)
+       nattyp_i = nattyp(itypat)
+
+#ifdef HAVE_OPENMP_OFFLOAD
+       !$OMP TARGET TEAMS DISTRIBUTE COLLAPSE(4) &
+       !$OMP& MAP(to:enlout,gxfac,dgxdt,dgxdtfac,d2gxdt) &
+       !$OMP& PRIVATE(idat,ia,esum,mu,mua,mub,nu,mushift,nushift) &
+       !$OMP& IF(gpu_option==ABI_GPU_OPENMP)
+#endif
+       do idat=1,ndat*nspinor
+         do mub=1,6
+           do ia=1,nattyp_i
+             do mua=1,3
+               mushift=36+3*(mub-1);nushift=6+(iatm+ia-1)*3+(3*natom+6)*(mub-1)
+               mu=mushift+mua;nu=nushift+mua
+               esum=zero
+               !$OMP PARALLEL DO REDUCTION(+:esum) PRIVATE(ilmn,ii)
+                 do ilmn=1,nlmn
+                   do ii=1,cplex
+                     esum=esum+(gxfac(ii,shift+(ia-1)*nlmn+ilmn,idat)&
+                     &    *d2gxdt(ii,nd2gxdt*shift+(ia-1)*nlmn*nd2gxdt+(ilmn-1)*nd2gxdt+mu,idat)&
+                     &    +dgxdtfac(ii,ndgxdtfac*shift+(ia-1)*nlmn*ndgxdtfac+(ilmn-1)*ndgxdtfac+mub,idat)&
+                     &    *dgxdt(ii,ndgxdt*shift+(ia-1)*nlmn*ndgxdt+(ilmn-1)*ndgxdt+mua+6,idat))
+                   end do
+                 end do
+               enlout((idat-1)*nnlout + nu)=enlout((idat-1)*nnlout + nu)+two*esum
+             end do
+           end do
+         end do
        end do
 
        shift = shift + nattyp(itypat)*nlmn

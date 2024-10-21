@@ -26,7 +26,7 @@ module m_nvtx_data
 
   implicit none
 
-  integer, parameter :: NUMBER_OF_NVTX_REGIONS = 81
+  integer, parameter :: NUMBER_OF_NVTX_REGIONS = 95
   character(len=32), dimension(NUMBER_OF_NVTX_REGIONS) :: nvtx_names
   integer          , dimension(NUMBER_OF_NVTX_REGIONS) :: nvtx_ids
 
@@ -111,6 +111,20 @@ module m_nvtx_data
   integer, parameter :: NVTX_DFPT_LOOP_EFELD = 79
   integer, parameter :: NVTX_DFPT_LOOP_STRAIN = 80
   integer, parameter :: NVTX_DFPT_LOOP_PHONON = 81
+  integer, parameter :: NVTX_FOURWF = 82
+  integer, parameter :: NVTX_NONLOP = 83
+  integer, parameter :: NVTX_DFPT_NSELT = 84
+  integer, parameter :: NVTX_RESPFN = 85
+  integer, parameter :: NVTX_DFPT_ELT = 86
+  integer, parameter :: NVTX_DFPT_ATM2FFT = 87
+  integer, parameter :: NVTX_DFPT_DYXC = 88
+  integer, parameter :: NVTX_D2FRNL = 89
+  integer, parameter :: NVTX_D2FRNL_KPT = 90
+  integer, parameter :: NVTX_DFPT_RHOFERMI = 91
+  integer, parameter :: NVTX_DFPT_WFKFERMI = 92
+  integer, parameter :: NVTX_GETGSC = 93
+  integer, parameter :: NVTX_DFPT_ACCRHO = 94
+  integer, parameter :: NVTX_DFPT_MKRHO = 95
 
 contains
 
@@ -201,7 +215,21 @@ contains
          & "DFPT_LOOP_DDK", &
          & "DFPT_LOOP_EFELD", &
          & "DFPT_LOOP_STRAIN", &
-         & "DFPT_LOOP_PHONON" &
+         & "DFPT_LOOP_PHONON", &
+         & "FOURWF", &
+         & "NONLOP", &
+         & "DFPT_NSELT", &
+         & "RESPFN", &
+         & "DFPT_ELT", &
+         & "DFPT_ATM2FFT", &
+         & "DFPT_DYXC", &
+         & "D2FRNL", &
+         & "D2FRNL_KPT", &
+         & "DFPT_RHOFERMI", &
+         & "DFPT_WFKFERMI", &
+         & "GETGSC", &
+         & "DFPT_ACCRHO", &
+         & "DFPT_MKRHO" &
          ]
 
     nvtx_ids(1) = NVTX_MAIN_COMPUTATION
@@ -285,6 +313,20 @@ contains
     nvtx_ids(79)= NVTX_DFPT_LOOP_EFELD
     nvtx_ids(80)= NVTX_DFPT_LOOP_STRAIN
     nvtx_ids(81)= NVTX_DFPT_LOOP_PHONON
+    nvtx_ids(82)= NVTX_FOURWF
+    nvtx_ids(83)= NVTX_NONLOP
+    nvtx_ids(84)= NVTX_DFPT_NSELT
+    nvtx_ids(85)= NVTX_RESPFN
+    nvtx_ids(86)= NVTX_DFPT_ELT
+    nvtx_ids(87)= NVTX_DFPT_ATM2FFT
+    nvtx_ids(88)= NVTX_DFPT_DYXC
+    nvtx_ids(89)= NVTX_D2FRNL
+    nvtx_ids(90)= NVTX_D2FRNL_KPT
+    nvtx_ids(91)= NVTX_DFPT_RHOFERMI
+    nvtx_ids(92)= NVTX_DFPT_WFKFERMI
+    nvtx_ids(93)= NVTX_GETGSC
+    nvtx_ids(94)= NVTX_DFPT_ACCRHO
+    nvtx_ids(95)= NVTX_DFPT_MKRHO
 
   end subroutine nvtx_init
 

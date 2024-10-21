@@ -19,6 +19,9 @@
 
 #include "abi_common.h"
 
+! nvtx related macro definition
+#include "nvtx_macros.h"
+
 module m_atm2fft
 
  use defs_basis
@@ -35,6 +38,10 @@ module m_atm2fft
  use m_pawtab,      only : pawtab_type
  use m_fft,         only : zerosym, fourdp
  use m_mpinfo,      only : set_mpi_enreg_fft, unset_mpi_enreg_fft, initmpi_seq
+
+#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
+ use m_nvtx_data
+#endif
 
  implicit none
 
@@ -1054,6 +1061,7 @@ subroutine dfpt_atm2fft(atindx,cplex,gmet,gprimd,gsqcut,idir,ipert,&
 ! *************************************************************************
 
  DBG_ENTER("COLL")
+ ABI_NVTX_START_RANGE(NVTX_DFPT_ATM2FFT)
 
 !  Check optional arguments
  if (present(comm_fft)) then
@@ -1535,6 +1543,7 @@ subroutine dfpt_atm2fft(atindx,cplex,gmet,gprimd,gsqcut,idir,ipert,&
 !  End the condition of non-electric-field
  end if
 
+ ABI_NVTX_END_RANGE()
  DBG_EXIT("COLL")
 
 end subroutine dfpt_atm2fft

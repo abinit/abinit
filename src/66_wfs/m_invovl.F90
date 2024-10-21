@@ -495,7 +495,9 @@ subroutine make_invovl(ham, dimffnl, ffnl, ph3d, mpi_enreg)
  integer :: ikpt_this_proc,cplex_dij
  logical :: parity
  real(dp) :: tsec(2)
+#if defined(HAVE_FC_ISO_C_BINDING) && defined(HAVE_GPU_CUDA)
  character(len=500) :: message
+#endif
  character :: blas_transpose
 
  type(invovl_kpt_type), pointer :: invovl
@@ -767,8 +769,9 @@ subroutine make_invovl(ham, dimffnl, ffnl, ph3d, mpi_enreg)
  end if
 #endif
 
- write(message,*) 'Invovl built'
- call wrtout(std_out,message,'COLL')
+! LB-10/06/24: This message is too verbose on some cases (for example many k-points)
+! write(message,*) 'Invovl built'
+! call wrtout(std_out,message,'COLL')
 
 end subroutine make_invovl
 !!***

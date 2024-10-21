@@ -2184,28 +2184,34 @@ end subroutine bare_vqg
 !! SOURCE
 
 subroutine strfock(gprimd,gsqcut,fockstr,hyb_mixing,hyb_mixing_sr,hyb_range_fock,mpi_enreg,nfft,ngfft,&
-                   nkpt_bz,rhog,ucvol,qphon,&
-                   rhog2) ! optional argument
+                   nkpt_bz,ndat,rhog,ucvol,qphon,&
+                   rhog2,gpu_option) ! optional argument
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: nfft,nkpt_bz
+ integer,intent(in) :: nfft,nkpt_bz,ndat
+ integer,intent(in),optional :: gpu_option
  real(dp),intent(in) :: gsqcut,hyb_mixing,hyb_mixing_sr,hyb_range_fock,ucvol
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: ngfft(18)
- real(dp),intent(in) :: gprimd(3,3),rhog(2,nfft),qphon(3)
- real(dp),intent(in),optional :: rhog2(2,nfft)
- real(dp),intent(out) :: fockstr(6)
+ real(dp),intent(in) :: gprimd(3,3),rhog(2,nfft,ndat),qphon(3)
+ real(dp),intent(in),optional :: rhog2(2,nfft,ndat)
+ real(dp),intent(out) :: fockstr(6,ndat)
 
 !Local variables-------------------------------
 !scalars
  integer,parameter :: im=2,re=1
- integer :: i1,i2,i3,id1,id2,id3,ierr,ig1,ig2,ig3,ii,irho2,me_fft,n1,n2,n3,nproc_fft
+ integer :: i1,i2,i3,id1,id2,id3,ierr,ig1,ig2,ig3,ii,irho2,idat,me_fft,n1,n2,n3,nproc_fft
  real(dp) :: arg,cutoff,gsquar,rcut,rhogsq,tolfix=1.000000001_dp,tot,tot1,divgq0
+#ifdef HAVE_OPENMP_OFFLOAD
+ ! Cray has trouble with reduction on array, so we use 6 scalars instead
+ real(dp) :: fockstr1,fockstr2,fockstr3,fockstr4,fockstr5,fockstr6
+#endif
  !character(len=500) :: msg
 !arrays
  real(dp) :: gcart(3),tsec(2)
+ real(dp), allocatable :: v_gcart(:,:,:,:)
  integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:),ffti2_local(:)
  integer, ABI_CONTIGUOUS pointer :: fftn3_distrib(:),ffti3_local(:)
 
@@ -2217,7 +2223,11 @@ subroutine strfock(gprimd,gsqcut,fockstr,hyb_mixing,hyb_mixing_sr,hyb_range_fock
    ABI_BUG('strfock: SR mixing<>0 while range separation=0!')
  end if
 
- fockstr(:)=zero
+ !if(gpu_option==ABI_GPU_DISABLED) then
+   fockstr(:,:)=zero
+ !else(gpu_option==ABI_GPU_OPENMP) then
+ !  gpu_set_to_zero(fockstr, 6*ndat)
+ !end if
  rcut= (three*nkpt_bz*ucvol/four_pi)**(one/three)
  irho2=0;if (present(rhog2)) irho2=1
  divgq0=two_pi/three*rcut**2
@@ -2237,6 +2247,10 @@ subroutine strfock(gprimd,gsqcut,fockstr,hyb_mixing,hyb_mixing_sr,hyb_range_fock
  ! Get the distrib associated with this fft_grid
  call ptabs_fourdp(mpi_enreg,n2,n3,fftn2_distrib,ffti2_local,fftn3_distrib,ffti3_local)
 
+ if(gpu_option==ABI_GPU_DISABLED) then
+ !$OMP PARALLEL DO &
+ !$OMP& PRIVATE(idat,i3,i2,i1,ig3,ig2,ig1,tot,tot1,ii,gcart,gsquar,rhogsq,arg)
+ do idat=1,ndat
  do i3=1,n3
    ig3=i3-(i3/id3)*n3-1
    do i2=1,n2
@@ -2255,17 +2269,17 @@ subroutine strfock(gprimd,gsqcut,fockstr,hyb_mixing,hyb_mixing_sr,hyb_range_fock
          gsquar=gcart(1)**2+gcart(2)**2+gcart(3)**2
 !        take |rho(G)|^2 for complex rhog
          if (irho2==0) then
-           rhogsq=rhog(re,ii)**2+rhog(im,ii)**2
+           rhogsq=rhog(re,ii,idat)**2+rhog(im,ii,idat)**2
          else
-           rhogsq=rhog(re,ii)*rhog2(re,ii)+rhog(im,ii)*rhog2(im,ii)
+           rhogsq=rhog(re,ii,idat)*rhog2(re,ii,idat)+rhog(im,ii,idat)*rhog2(im,ii,idat)
          end if
 !        Case G=0:
          if(gsquar<tol10) then
            if (abs(hyb_mixing_sr)>tol8) cycle
            if (abs(hyb_mixing)>tol8) then
-             fockstr(1)=fockstr(1)+hyb_mixing*divgq0*rhogsq
-             fockstr(2)=fockstr(2)+hyb_mixing*divgq0*rhogsq
-             fockstr(3)=fockstr(3)+hyb_mixing*divgq0*rhogsq
+             fockstr(1,idat)=fockstr(1,idat)+hyb_mixing*divgq0*rhogsq
+             fockstr(2,idat)=fockstr(2,idat)+hyb_mixing*divgq0*rhogsq
+             fockstr(3,idat)=fockstr(3,idat)+hyb_mixing*divgq0*rhogsq
              cycle
            end if
          end if
@@ -2282,16 +2296,107 @@ subroutine strfock(gprimd,gsqcut,fockstr,hyb_mixing,hyb_mixing_sr,hyb_range_fock
            arg=-gsquar*pi**2/(hyb_range_fock**2)
            tot=tot+hyb_mixing_sr*rhogsq*piinv/(gsquar**2)*(1.d0-exp(arg)*(1-arg))
          end if
-         fockstr(1)=fockstr(1)+tot*gcart(1)*gcart(1)+tot1
-         fockstr(2)=fockstr(2)+tot*gcart(2)*gcart(2)+tot1
-         fockstr(3)=fockstr(3)+tot*gcart(3)*gcart(3)+tot1
-         fockstr(4)=fockstr(4)+tot*gcart(3)*gcart(2)
-         fockstr(5)=fockstr(5)+tot*gcart(3)*gcart(1)
-         fockstr(6)=fockstr(6)+tot*gcart(2)*gcart(1)
+         fockstr(1,idat)=fockstr(1,idat)+tot*gcart(1)*gcart(1)+tot1
+         fockstr(2,idat)=fockstr(2,idat)+tot*gcart(2)*gcart(2)+tot1
+         fockstr(3,idat)=fockstr(3,idat)+tot*gcart(3)*gcart(3)+tot1
+         fockstr(4,idat)=fockstr(4,idat)+tot*gcart(3)*gcart(2)
+         fockstr(5,idat)=fockstr(5,idat)+tot*gcart(3)*gcart(1)
+         fockstr(6,idat)=fockstr(6,idat)+tot*gcart(2)*gcart(1)
        end do
      end if
    end do
  end do
+ end do !ndat
+ else if(gpu_option==ABI_GPU_OPENMP) then
+   ABI_MALLOC(v_gcart, (3,n1,n2,n3))
+#ifdef HAVE_OPENMP_OFFLOAD
+   !$OMP TARGET ENTER DATA MAP(alloc:v_gcart)
+
+   !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO &
+   !$OMP& PRIVATE(idat,i3,i2,i1,ig3,ig2,ig1,tot,tot1,ii,gcart,gsquar,rhogsq,arg) &
+   !$OMP& MAP(to:v_gcart)
+   do i3=1,n3
+     do i2=1,n2
+       do i1=1,n1
+         ig3=i3-(i3/id3)*n3-1
+         ig2=i2-(i2/id2)*n2-1
+         ig1=i1-(i1/id1)*n1-1
+
+!        Compute cartesian components of G
+         v_gcart(1,i1,i2,i3)=gprimd(1,1)*(dble(ig1)+qphon(1))+gprimd(1,2)*(dble(ig2)+qphon(2))+gprimd(1,3)*(dble(ig3)+qphon(3))
+         v_gcart(2,i1,i2,i3)=gprimd(2,1)*(dble(ig1)+qphon(1))+gprimd(2,2)*(dble(ig2)+qphon(2))+gprimd(2,3)*(dble(ig3)+qphon(3))
+         v_gcart(3,i1,i2,i3)=gprimd(3,1)*(dble(ig1)+qphon(1))+gprimd(3,2)*(dble(ig2)+qphon(2))+gprimd(3,3)*(dble(ig3)+qphon(3))
+       end do
+     end do
+   end do
+
+   !$OMP TARGET TEAMS DISTRIBUTE &
+   !$OMP& PRIVATE(idat,fockstr1,fockstr2,fockstr3,fockstr4,fockstr5,fockstr6) &
+   !$OMP& MAP(to:rhog,v_gcart) MAP(tofrom:fockstr)
+   do idat=1,ndat
+     fockstr1=zero
+     fockstr2=zero
+     fockstr3=zero
+     fockstr4=zero
+     fockstr5=zero
+     fockstr6=zero
+   !$OMP PARALLEL DO COLLAPSE(3) PRIVATE(i3,i2,i1,tot,tot1,ii,gsquar,rhogsq,arg) &
+   !$OMP& REDUCTION(+:fockstr1,fockstr2,fockstr3,fockstr4,fockstr5,fockstr6)
+   do i3=1,n3
+     do i2=1,n2
+       do i1=1,n1
+         tot=zero; tot1=zero
+         ii=i1+n1*(ffti2_local(i2)-1+(n2/nproc_fft)*(i3-1))
+         if (fftn2_distrib(i2)==me_fft) then
+  !        Compute |G+q|^2
+           gsquar=v_gcart(1,i1,i2,i3)**2+v_gcart(2,i1,i2,i3)**2+v_gcart(3,i1,i2,i3)**2
+  !        take |rho(G)|^2 for complex rhog
+           rhogsq=rhog(re,ii,idat)**2+rhog(im,ii,idat)**2
+  !        Case G=0:
+           if(gsquar<tol10) then
+             if (abs(hyb_mixing)>tol8 .and. abs(hyb_mixing_sr)<tol8) then
+               fockstr1=fockstr1+hyb_mixing*divgq0*rhogsq
+               fockstr2=fockstr2+hyb_mixing*divgq0*rhogsq
+               fockstr3=fockstr3+hyb_mixing*divgq0*rhogsq
+             end if
+
+           else
+
+    !        Spencer-Alavi screening
+             if (abs(hyb_mixing)>tol8) then
+               arg=two_pi*rcut*sqrt(gsquar)
+               tot=hyb_mixing*rhogsq*piinv/(gsquar**2)*(1-cos(arg)-arg*sin(arg)/two)
+               tot1=hyb_mixing*rhogsq/three*rcut*sin(arg)/sqrt(gsquar)
+             end if
+
+    !        Erfc screening
+             if (abs(hyb_mixing_sr)>tol8) then
+               arg=-gsquar*pi**2/(hyb_range_fock**2)
+               tot=tot+hyb_mixing_sr*rhogsq*piinv/(gsquar**2)*(1.d0-exp(arg)*(1-arg))
+             end if
+             fockstr1=fockstr1+tot*v_gcart(1,i1,i2,i3)*v_gcart(1,i1,i2,i3)+tot1
+             fockstr2=fockstr2+tot*v_gcart(2,i1,i2,i3)*v_gcart(2,i1,i2,i3)+tot1
+             fockstr3=fockstr3+tot*v_gcart(3,i1,i2,i3)*v_gcart(3,i1,i2,i3)+tot1
+             fockstr4=fockstr4+tot*v_gcart(3,i1,i2,i3)*v_gcart(2,i1,i2,i3)
+             fockstr5=fockstr5+tot*v_gcart(3,i1,i2,i3)*v_gcart(1,i1,i2,i3)
+             fockstr6=fockstr6+tot*v_gcart(2,i1,i2,i3)*v_gcart(1,i1,i2,i3)
+           end if
+         end if
+       end do
+     end do
+   end do
+   fockstr(1,idat)=fockstr1
+   fockstr(2,idat)=fockstr2
+   fockstr(3,idat)=fockstr3
+   fockstr(4,idat)=fockstr4
+   fockstr(5,idat)=fockstr5
+   fockstr(6,idat)=fockstr6
+   end do !ndat
+
+   !$OMP TARGET EXIT DATA MAP(delete:v_gcart)
+#endif
+   ABI_FREE(v_gcart)
+ end if
 
 !Init mpi_comm
  if(mpi_enreg%nproc_fft>1)then
@@ -2303,12 +2408,12 @@ subroutine strfock(gprimd,gsqcut,fockstr,hyb_mixing,hyb_mixing_sr,hyb_range_fock
 
 !Normalize and add term -efock/ucvol on diagonal
 !efock has been set to zero because it is not yet known. It will be added later.
- fockstr(1)=-fockstr(1)
- fockstr(2)=-fockstr(2)
- fockstr(3)=-fockstr(3)
- fockstr(4)=-fockstr(4)
- fockstr(5)=-fockstr(5)
- fockstr(6)=-fockstr(6)
+ fockstr(1,:)=-fockstr(1,:)
+ fockstr(2,:)=-fockstr(2,:)
+ fockstr(3,:)=-fockstr(3,:)
+ fockstr(4,:)=-fockstr(4,:)
+ fockstr(5,:)=-fockstr(5,:)
+ fockstr(6,:)=-fockstr(6,:)
 
  call timab(568,2,tsec)
 
