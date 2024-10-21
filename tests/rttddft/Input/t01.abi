@@ -1,6 +1,6 @@
 ########################################################
 # Automatic test for ABINIT:                           #
-#   Nickel 4 atoms, non-magnetic, FCC                  #
+#   Nickel 4 atoms, non-magnetic, FCC, GGA, PAW        #
 #   DS1: GS calculation to create initial WFK          #
 #   DS2: RT-TDDFT calculation using the ER propagator  # 
 #   DS3: RT-TDDFT calculation using the EMR propagator # 
@@ -80,9 +80,9 @@ prtgsr 0
 #%% max_nprocs = 4
 #%% [extra_info]
 #%% authors = F. Brieuc
-#%% keywords = RTTDDFT
+#%% keywords = RTTDDFT, PAW, GGA
 #%% description =
-#%%   FCC Nickel, nonmagnetic, GGA, PAW.
+#%%   FCC Ni, nonmagnetic, GGA, PAW.
 #%%   Tests RT-TDDFT using ER and EMR propagator in PAW.
 #%% topics = RTTDDFT
 #%%<END TEST_INFO>
