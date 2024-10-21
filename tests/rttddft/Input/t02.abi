@@ -79,7 +79,7 @@ prtgsr 0
 #%% max_nprocs = 4
 #%% [extra_info]
 #%% authors = F. Brieuc
-#%% keywords = RTTDDFT
+#%% keywords = RTTDDFT, NC, GGA
 #%% description =
 #%%   FCC Al, GGA, NC.
 #%%   Tests RT-TDDFT using ER and EMR propagator in NC.
