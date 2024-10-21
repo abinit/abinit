@@ -239,6 +239,8 @@ nav:
     - Pre/Post processing: faq/pre_and_post_processing.md
     - Ground state: faq/ground_state.md
     - DFPT: faq/dfpt.md
+    - Troubleshooting (old-dokuwiki): faq/Troubleshooting.md
+    - Tuning (old-dokuwiki) : faq/tuning_abinit.md
     #- GW and BSE faq/gw_and_bse.md
     #- EPH: faq/eph.md
 - Theory:

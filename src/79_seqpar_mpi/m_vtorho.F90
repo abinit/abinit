@@ -34,14 +34,13 @@ module m_vtorho
  use m_wffile
  use m_efield
  use m_cgtools
- use m_gemm_nonlop
- use m_gemm_nonlop_gpu
- use m_gemm_nonlop_ompgpu
+ use m_gemm_nonlop_projectors
  use m_hdr
  use m_dtset
  use m_dtfil
  use m_extfpmd
  use m_ompgpu_utils
+ use m_xg_nonlop
 
  use defs_datatypes,       only : pseudopotential_type
  use defs_abitypes,        only : MPI_type
@@ -303,7 +302,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 &           phnons,phnonsdiel,ph1d,ph1ddiel,psps,fock,&
 &           pwind,pwind_alloc,pwnsfac,resid,residm,rhog,rhor,&
 &           rmet,rprimd,susmat,symrec,taug,taur,tauresid,&
-&           ucvol,usecprj,wffnew,with_vectornd,vectornd,vtrial,vxctau,wvl,xred,&
+&           ucvol,usecprj,wffnew,with_vectornd,vectornd,vtrial,vxctau,wvl,xg_nonlop,xred,&
 &           ylm,ylmgr,ylmdiel, rmm_diis_status)
 
 !Arguments -------------------------------
@@ -328,6 +327,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  type(fock_type),pointer, intent(inout) :: fock
  type(wffile_type), intent(inout) :: wffnew
  type(wvl_data), intent(inout) :: wvl
+ type(xg_nonlop_t),intent(inout) :: xg_nonlop
 !arrays
  integer, intent(in) :: atindx(natom),atindx1(natom),gbound_diel(2*mgfftdiel+8,2)
  integer, intent(in) :: indsym(4,dtset%nsym,natom)
@@ -380,7 +380,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  integer :: spaceComm_distrb,usecprj_local,usefock_ACE,usetimerev
  logical :: berryflag,computesusmat,fixed_occ,has_vectornd
  logical :: locc_test,paral_atom,remove_inv,usefock,with_vxctau
- logical :: do_last_ortho,wvlbigdft=.false.
+ logical :: do_last_ortho,wvlbigdft=.false.,do_invS
  real(dp) :: dmft_dftocc
  real(dp) :: edmft,ebandlda,ebanddmft,ebandldatot,ekindmft,ekindmft2,ekinlda
  real(dp) :: min_occ,vxcavg_dum,strsxc(6)
@@ -616,6 +616,10 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 & comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,mpi_spintab=mpi_enreg%my_isppoltab,&
 & nucdipmom=dtset%nucdipmom,gpu_option=dtset%gpu_option)
 
+ if (dtset%cprj_in_memory==1) then
+   if (xg_nonlop%paw) call xg_nonlop_make_Dij(xg_nonlop,paw_ij,dtset%nsppol,atindx)
+ end if
+
 !Initializations for PAW (projected wave functions)
  mcprj_local=0 ; mband_cprj=0
  if (psps%usepaw==1) then
@@ -745,13 +749,13 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
       vectornd_pac=zero
    end if
 
-  nbdbuf_eff = dtset%nbdbuf
-  ! In metallic case, at first iteration, occupations could be 0. So residm should be computed as usual
-  if (dtset%nbdbuf==-101.and..not.fixed_occ.and.istep==1.and.minval(occ)<tol10) then
-    write(msg,*) 'vtorho: nbdbuf is set to 0 for this step'
-    call wrtout(std_out,msg,'COLL')
-    nbdbuf_eff = 0
-  end if
+   nbdbuf_eff = dtset%nbdbuf
+   ! In metallic case, at first iteration, occupations could be 0. So residm should be computed as usual
+   if (dtset%nbdbuf==-101.and..not.fixed_occ.and.istep==1.and.minval(occ)<tol10) then
+     write(msg,*) 'vtorho: nbdbuf is set to 0 for this step'
+     call wrtout(std_out,msg,'COLL')
+     nbdbuf_eff = 0
+   end if
 
 !  LOOP OVER SPINS
    do isppol=1,dtset%nsppol
@@ -760,6 +764,9 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
      ikpt_loc = 0
      ikg=0
 
+     if (dtset%cprj_in_memory==1) then
+       if (xg_nonlop%paw) call xg_nonlop_set_Dij_spin(xg_nonlop,isppol)
+     end if
      ! Set up local potential vlocal on the coarse FFT mesh from vtrial taking into account the spin.
      ! Also, continue to initialize the Hamiltonian.
 
@@ -925,9 +932,15 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass_free,gmet,kg_k,kinpw,kpoint,npw_k,0,0)
 
 !      Compute (k+G) vectors (only if useylm=1)
-       nkpg=3*optforces*dtset%nloalg(3)
-       ABI_MALLOC(kpg_k,(npw_k,nkpg))
-       if ((mpi_enreg%paral_kgb/=1.or.istep<=1).and.nkpg>0) call mkkpg(kg_k,kpg_k,kpoint,nkpg,npw_k)
+       if (dtset%cprj_in_memory/=1) then
+         nkpg=3*optforces*dtset%nloalg(3)
+         ABI_MALLOC(kpg_k,(npw_k,nkpg))
+         if ((mpi_enreg%paral_kgb/=1.or.istep<=1).and.nkpg>0) call mkkpg(kg_k,kpg_k,kpoint,nkpg,npw_k)
+       else ! cprj_in_memory = 1
+         nkpg=3*optforces
+         ABI_MALLOC(kpg_k,(npw_k,nkpg))
+         if (optforces/=0) call mkkpg(kg_k,kpg_k,kpoint,nkpg,npw_k)
+       end if
 
 !      Compute nonlocal form factors ffnl at all (k+G):
        ider=0;idir=0;dimffnl=1
@@ -973,15 +986,15 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 !      If OpenMP GPU, load "hamiltonian" on GPU device
        if (dtset%gpu_option == ABI_GPU_OPENMP) then
          if(dtset%paral_kgb==0) then
-           call ompgpu_load_hamilt_buffers(gs_hamk%kg_k,gs_hamk%kg_kp)
+           call ompgpu_load_hamilt_buffers(gs_hamk%kg_k,gs_hamk%kg_kp,gs_hamk%ffnl_k,gs_hamk%ph3d_k)
          else if(istwf_k==1) then
-           call ompgpu_load_hamilt_buffers(gs_hamk%kg_k,gs_hamk%kg_kp,kg_k_gather=bandfft_kpt(my_ikpt)%kg_k_gather)
+           call ompgpu_load_hamilt_buffers(gs_hamk%kg_k,gs_hamk%kg_kp,gs_hamk%ffnl_k,gs_hamk%ph3d_k,kg_k_gather=bandfft_kpt(my_ikpt)%kg_k_gather)
          else
-           call ompgpu_load_hamilt_buffers(gs_hamk%kg_k,gs_hamk%kg_kp,kg_k_gather=bandfft_kpt(my_ikpt)%kg_k_gather_sym)
+           call ompgpu_load_hamilt_buffers(gs_hamk%kg_k,gs_hamk%kg_kp,gs_hamk%ffnl_k,gs_hamk%ph3d_k,kg_k_gather=bandfft_kpt(my_ikpt)%kg_k_gather_sym)
          end if
        end if
 
-       if(dtset%wfoptalg == 111 .and. istep <= 1) then
+       if(gemm_nonlop_use_gemm .and. dtset%wfoptalg == 111 .and. istep <= 1) then
          gemm_nonlop_nblocks = dtset%gpu_nl_splitsize
          ! Only compute CHEBFI number of blocks if user didn't set it themselves
          if(gemm_nonlop_nblocks==1) then
@@ -990,50 +1003,22 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
            gemm_nonlop_nblocks = nblk_gemm_nonlop
          end if
          gemm_nonlop_is_distributed = .false.
-         if(gemm_nonlop_nblocks > 1 .and. dtset%gpu_nl_distrib/=0) gemm_nonlop_is_distributed = .true.
+         if(gemm_nonlop_nblocks > 0 .and. dtset%gpu_nl_distrib/=0) gemm_nonlop_is_distributed = .true.
        end if
 
 !      Build inverse of overlap matrix for chebfi
-       if(psps%usepaw == 1 .and. (dtset%wfoptalg == 1 .or. dtset%wfoptalg == 111) .and. istep <= 1) then
-          ABI_NVTX_START_RANGE(NVTX_INVOVL)
-          call make_invovl(gs_hamk, dimffnl, ffnl, ph3d, mpi_enreg)
-          ABI_NVTX_END_RANGE()
+       if (dtset%cprj_in_memory==0) then
+         if(psps%usepaw == 1 .and. (dtset%wfoptalg == 1 .or. dtset%wfoptalg == 111) .and. istep <= 1) then
+            ABI_NVTX_START_RANGE(NVTX_INVOVL)
+            call make_invovl(gs_hamk, dimffnl, ffnl, ph3d, mpi_enreg)
+            ABI_NVTX_END_RANGE()
+         end if
        end if
 
        ! Setup gemm_nonlop
        if (gemm_nonlop_use_gemm) then
          !set the global variable indicating to gemm_nonlop where to get its data from
          gemm_nonlop_ikpt_this_proc_being_treated = my_ikpt
-         if (istep <= 1) then
-           !Init the arrays
-           !FIXME Settle this
-           if ( dtset%gpu_option == ABI_GPU_DISABLED) then
-             call make_gemm_nonlop(my_ikpt,gs_hamk%npw_fft_k,gs_hamk%lmnmax, &
-                 gs_hamk%ntypat, gs_hamk%indlmn, gs_hamk%nattyp, gs_hamk%istwf_k, &
-                 gs_hamk%ucvol, gs_hamk%ffnl_k,&
-                 gs_hamk%ph3d_k,gs_hamk%kpt_k,gs_hamk%kg_k,gs_hamk%kpg_k,&
-                 compute_grad_atom=(optforces>0))
-           else if ( dtset%gpu_option == ABI_GPU_LEGACY .or. dtset%gpu_option == ABI_GPU_KOKKOS) then
-             call make_gemm_nonlop_gpu(my_ikpt,gs_hamk%npw_fft_k,gs_hamk%lmnmax, &
-                 gs_hamk%ntypat, gs_hamk%indlmn, gs_hamk%nattyp, gs_hamk%istwf_k, &
-                 gs_hamk%ucvol, gs_hamk%ffnl_k, &
-                 gs_hamk%ph3d_k,gs_hamk%kpt_k,gs_hamk%kg_k,gs_hamk%kpg_k, &
-                 compute_grad_atom=(optforces>0))
-           else if ( dtset%gpu_option == ABI_GPU_OPENMP) then
-             if(mpi_enreg%paral_kgb==0) then
-               call ompgpu_load_hamilt_buffers(gs_hamk%kg_k,gs_hamk%kg_kp)
-             else if(gs_hamk%istwf_k==1) then
-               call ompgpu_load_hamilt_buffers(gs_hamk%kg_k,gs_hamk%kg_kp,kg_k_gather=bandfft_kpt(my_ikpt)%kg_k_gather)
-             else
-               call ompgpu_load_hamilt_buffers(gs_hamk%kg_k,gs_hamk%kg_kp,kg_k_gather=bandfft_kpt(my_ikpt)%kg_k_gather_sym)
-             end if
-             call make_gemm_nonlop_ompgpu(my_ikpt,gs_hamk%npw_fft_k,gs_hamk%lmnmax, &
-                 gs_hamk%ntypat, gs_hamk%indlmn, gs_hamk%nattyp, gs_hamk%istwf_k, &
-                 gs_hamk%ucvol, gs_hamk%ffnl_k, &
-                 gs_hamk%ph3d_k,gs_hamk%kpt_k,gs_hamk%kg_k,gs_hamk%kpg_k, &
-                 compute_grad_atom=(optforces>0))
-           end if
-         end if
        end if
 
 #if defined HAVE_GPU_CUDA
@@ -1058,6 +1043,12 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
          if ((fock%fock_common%optfor).and.(usefock_ACE==0)) fock%fock_common%forces_ikpt=zero
        end if
 
+       if (dtset%cprj_in_memory==1) then
+         do_invS=xg_nonlop%paw.and.dtset%wfoptalg==111
+         call xg_nonlop_make_k(xg_nonlop,my_ikpt,istwf_k,mpi_enreg%me_g0,mpi_enreg%me_g0_fft,npw_k,ffnl,ph3d,kpg_k,&
+           & istep<=1,compute_invS_approx=do_invS,compute_gram=do_invS)
+       end if
+
        ! Here we initialize the wavefunctions with atomic orbitals at the first GS iteration of the first
        ! relaxation step (if any).
        ! NB: Not all the cases are presently supported.
@@ -1078,7 +1069,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 &       ibg,icg,ikpt,iscf,isppol,kg_k,kinpw,mband_cprj,mcg,mcgq,mcprj_local,mkgq,&
 &       mpi_enreg,dtset%mpw,natom,nband_k,nbdbuf_eff,dtset%nkpt,istep,nnsclo_now,npw_k,npwarr,&
 &       occ_k,optforces,prtvol,pwind,pwind_alloc,pwnsfac,pwnsfacq,resid_k,&
-&       rhoaug,paw_dmft,dtset%wtk(ikpt),zshift, rmm_diis_status(:,ikpt,isppol))
+&       rhoaug,paw_dmft,dtset%wtk(ikpt),xg_nonlop,zshift, rmm_diis_status(:,ikpt,isppol))
        ABI_NVTX_END_RANGE()
 
 ! LB-01/03/2024: Very weird compiler error on eos-nvhpc23.1 if the second call of timab(985,...) is included...
@@ -1232,6 +1223,11 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
    end do ! End loop over spins
 
    call timab(988,1,tsec)
+
+   if (dtset%cprj_in_memory==1) then
+     if (xg_nonlop%paw) call xg_nonlop_destroy_Dij(xg_nonlop)
+   end if
+
    if (usefock) then
      if (usefock_ACE==0) then
        call xmpi_sum(energies%e_fock0,mpi_enreg%comm_kpt,ierr)
