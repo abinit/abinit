@@ -202,11 +202,10 @@ subroutine destroy_energy(energies_dmft,paw_dmft)
  paw_dmft%edmft = energies_dmft%edmft
  
  energies_dmft%e_hu => null()
- if (allocated(energies_dmft%e_dc)) ABI_FREE(energies_dmft%e_dc)
- !if (allocated(energies_dmft%e_hu)) ABI_FREE(energies_dmft%e_hu)
- if (allocated(energies_dmft%e_hu_dftu)) ABI_FREE(energies_dmft%e_hu_dftu)
- if (allocated(energies_dmft%e_hu_mig))  ABI_FREE(energies_dmft%e_hu_mig)
- if (allocated(energies_dmft%e_hu_qmc))  ABI_FREE(energies_dmft%e_hu_qmc)
+ ABI_SFREE(energies_dmft%e_dc)
+ ABI_SFREE(energies_dmft%e_hu_dftu)
+ ABI_SFREE(energies_dmft%e_hu_mig)
+ ABI_SFREE(energies_dmft%e_hu_qmc)
  
 end subroutine destroy_energy
 !!***

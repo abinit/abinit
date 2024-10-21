@@ -7,7 +7,7 @@
 !! This was taken from https://www.netlib.org/minpack/.
 !!
 !! COPYRIGHT
-!! Copyright (c) 2012 Ondřej Čertík
+!! Copyright (c) 2012 Ondrej Certik
 !!
 !! Minpack Copyright Notice (1999) University of Chicago.  All rights reserved
 !!

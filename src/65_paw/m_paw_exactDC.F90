@@ -30,7 +30,6 @@ MODULE m_paw_exactDC
 
  private
 
-!public procedures.
  public :: compute_exactDC
  public :: grule
 
@@ -50,16 +49,16 @@ CONTAINS  !=====================================================================
 !!
 !! INPUTS
 !!  lpawu = angular momentum for correlated species
-!!  vee = interaction tensor
 !!  pawtab <type(pawtab_type)>=paw tabulated starting data
 !!  pawrad <type(pawrad_type)>=paw radial mesh and related data
 !!  occ(2*lpawu+1,2*lpawu+1) = occupation matrix (summed over spins) in 
-!!                             the real spherical harmonics basis
+!!    the real spherical harmonics basis, with the convention 
+!!    occ(i,j) = <c_j^dagger c_i>
 !!
 !! OUTPUT
 !!  vdc(2*lpawu+1,2*lpawu+1) = double counting potential 
 !!  edc = double counting energy
-!!  edcdc = integral of Vdc(r)*rho_corr(r)
+!!  edcdc = integral of Vdc(r)*rho_loc(r)
 !!
 !! SOURCE
 
@@ -73,8 +72,8 @@ CONTAINS  !=====================================================================
  integer, intent(in) :: lpawu
  type(pawtab_type), intent(in) :: pawtab
  type(pawrad_type), intent(in) :: pawrad
- complex(dpc), contiguous, intent(in) :: occ(:,:)
- complex(dpc), contiguous, intent(inout) :: vdc(:,:)
+ complex(dpc), ABI_CONTIGUOUS intent(in) :: occ(:,:)
+ complex(dpc), ABI_CONTIGUOUS intent(inout) :: vdc(:,:)
  real(dp), intent(out) :: edc,edcdc
 !Local variables ------------------------------
  integer :: i,ir,j,k,l,ln,m,m1,mm,minusm,meshsz,ndim
@@ -156,7 +155,6 @@ CONTAINS  !=====================================================================
  do m1=1,ndim
    do m=1,ndim
      ! In the complex case, you should use ylm(:,:,m)*conjg(ylm(:,:,m1)) 
-     ! (be careful of Abinit conventions, occ(i,j) is <c_j^d c_i>)
      rho_angle(:,:) = rho_angle(:,:) + dble(occ(m,m1))*ylm(:,:,m)*ylm(:,:,m1)
    end do ! m
  end do ! m1

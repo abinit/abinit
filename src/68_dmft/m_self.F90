@@ -642,7 +642,7 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
    ABI_MALLOC(selfrotmatlu,(self%nw))
    call init_oper(paw_dmft,energy_level,opt_ksloc=2)
    call init_matlu(natom,nspinor,nsppol,paw_dmft%lpawu(:),level_diag(:))
-   call compute_levels(energy_level,self%hdc,paw_dmft,nondiag=nondiaglevels,loc_levels=loc_levels)
+   call compute_levels(energy_level,self%hdc,paw_dmft,nondiag=nondiaglevels)
    write(message,'(a,2x,a,f13.5)') ch10," == Print non Diagonalized Self Energy for Fermi Level=",paw_dmft%fermie
    call wrtout(std_out,message,'COLL')
    call print_matlu(self%oper(2)%matlu(:),natom,1,compl=1,opt_exp=1)
@@ -1149,7 +1149,7 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
    end do ! iatom
    
    ABI_FREE(unitselffunc_arr)
-   if (optrw == 2) ABI_FREE(unitselffunc_arr2)
+   ABI_SFREE(unitselffunc_arr2)
  end if ! optrw==1 or 2 and myproc==master
  
 !  ===========================

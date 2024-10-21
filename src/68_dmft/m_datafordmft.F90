@@ -68,7 +68,7 @@ contains
 !!  Compute chipsi (and print some data for check)
 !!
 !! INPUTS
-!!  cg(2,mpw*dtset%nspinor*mband*mkmem*nsppol)=planewave coefficients of wavefunctions.
+!!  cg(2,mpw*nspinor*mband*mkmem*nsppol)=planewave coefficients of wavefunctions.
 !!  cprj(natom,nspinor*mband*mkmem*nsppol)= <p_lmn|Cnk> coefficients for each WF |Cnk>
 !!                                          and each |p_lmn> non-local projector
 !!  cryst_struc <type(crystal_t)>=crystal structure data
@@ -79,7 +79,7 @@ contains
 !!  dft_occup <type(oper_type)> = DFT occupations of the correlated orbitals
 !!  dimcprj(natom) = dimension for cprj
 !!  dtset <type(dataset_type)>=all input variables for this dataset
-!!  eigen(mband*nkpt*nsppol)=array for holding eigenvalues (hartree)
+!!  eigen(mband*nkpt*nsppol)=array for holding DFT eigenvalues (hartree)
 !!  mband_cprj=number of bands on each process of the band communicator
 !!  mpi_enreg=information about MPI parallelization
 !!  my_nspinor=number of spinorial components of the wavefunctions (on current proc)
@@ -105,15 +105,12 @@ subroutine datafordmft(cg,cprj,cryst_struc,dft_occup,dimcprj,dtset,eigen,mband_c
                      & my_nspinor,occ,paw_dmft,paw_ij,pawtab,usecprj,nbandkss)
   
 !Arguments ------------------------------------
-!scalars
  integer, intent(in) :: mband_cprj,my_nspinor,usecprj
  integer, optional, intent(in) :: nbandkss
- !real(dp),intent(in) :: fermie
  type(MPI_type), intent(in) :: mpi_enreg
  type(dataset_type), intent(in) :: dtset
  type(oper_type), intent(inout) :: dft_occup !vz_i
  type(crystal_t), intent(in) :: cryst_struc
-!arrays
  type(paw_dmft_type), intent(inout) :: paw_dmft
  integer, intent(in) :: dimcprj(paw_dmft%natom)
  real(dp), intent(in) :: occ(paw_dmft%mband*paw_dmft%nkpt*paw_dmft%nsppol)
@@ -124,12 +121,12 @@ subroutine datafordmft(cg,cprj,cryst_struc,dft_occup,dimcprj,dtset,eigen,mband_c
  type(pawcprj_type), intent(in) :: cprj(paw_dmft%natom,my_nspinor*mband_cprj*dtset%mkmem*paw_dmft%nsppol*usecprj)
  type(pawtab_type), intent(in) :: pawtab(paw_dmft%ntypat)
 !Local variables-------------------------------
- integer :: band_index,comm_band,comm_kpt,iatom,ib,iband,ibandc,ibuf_chipsi,ibuf_psi
- integer :: icg,icgb,icprj,idijeff,ierr,ik,ikpt,ilmn,im,im1,iproj,ir,irank,ispinor,ispinor1,isppol,itypat,lmn_size
- integer :: lpawu,lpawu1,maxlpawu,maxmeshsize,maxnproju,mband,mbandc
+ integer :: band_index,comm_band,comm_kpt,iatom,ib,iband,ibandc,ibuf_chipsi,ibuf_psi,icg,icgb
+ integer :: icprj,idijeff,ierr,ik,ikpt,ilmn,im,im1,iorder_cprj,iproj,ir,irank,ispinor,ispinor1
+ integer :: isppol,itypat,lmn_size,lpawu,lpawu1,maxlpawu,maxmeshsize,maxnproju,mband,mbandc
  integer :: me_band,me_kpt,mkmem,natom,nband_k,nband_k_cprj,nbandf,nbandi,ndim,nkpt
- integer :: nproc_band,nproc_spkpt,nproju,npw,nspinor,nsploop,nsppol,nsppol_mem,opt_renorm,option,paral_kgb,pawprtvol
- integer :: siz_buf,siz_buf_psi,siz_paw,siz_proj,siz_wan,unt
+ integer :: nproc_band,nproc_spkpt,nproju,npw,nspinor,nsploop,nsppol,nsppol_mem,opt_renorm
+ integer :: option,paral_kgb,pawprtvol,siz_buf,siz_buf_psi,siz_paw,siz_proj,siz_wan,unt
  logical :: t2g,prt_wan,use_full_chipsi,verif,x2my2d
  real(dp) :: ima,re,rint
  complex(dpc) :: tmp
@@ -143,10 +140,7 @@ subroutine datafordmft(cg,cprj,cryst_struc,dft_occup,dimcprj,dtset,eigen,mband_c
 !************************************************************************
 
 !DBG_ENTER("COLL")
-!Fake test to keep fermie as argument. REMOVE IT AS SOON AS POSSIBLE ...
- !if(fermie>huge(zero))chinorm=zero
 
- !facpara=1 !mpi_enreg%nproc
  mband   = paw_dmft%mband
  mbandc  = paw_dmft%mbandc
  mkmem   = paw_dmft%mkmem
@@ -185,9 +179,6 @@ subroutine datafordmft(cg,cprj,cryst_struc,dft_occup,dimcprj,dtset,eigen,mband_c
 !----------------------------------- MPI-------------------------------------
 
 ! Init parallelism
- !spaceComm=mpi_enreg%comm_cell
- !if(mpi_enreg%paral_kgb==1) spaceComm=mpi_enreg%comm_kpt
- !me=mpi_enreg%me_kpt
  paral_kgb = mpi_enreg%paral_kgb 
  comm_kpt  = mpi_enreg%comm_cell
  if (paral_kgb == 1) comm_kpt = mpi_enreg%comm_kpt
@@ -202,8 +193,8 @@ subroutine datafordmft(cg,cprj,cryst_struc,dft_occup,dimcprj,dtset,eigen,mband_c
    ABI_ERROR(message)
  end if 
  
- !iorder_cprj=0
- ABI_CHECK(dtset%mkmem/=0,"mkmem==0 not supported anymore!")
+ iorder_cprj = 0
+ ABI_CHECK(dtset%mkmem/=0,"mkmem=0 not supported anymore!")
 !todo_ab: extract cprj from file unpaw in the following..
 !call abi_abort('COLL')
 
@@ -211,17 +202,14 @@ subroutine datafordmft(cg,cprj,cryst_struc,dft_occup,dimcprj,dtset,eigen,mband_c
 
  nbandi = paw_dmft%dmftbandi 
  nbandf = paw_dmft%dmftbandf
- !lprojchi=.false.
- !lprojchi = .true.
  t2g    = paw_dmft%dmft_t2g == 1
  x2my2d = paw_dmft%dmft_x2my2d == 1
  use_full_chipsi = paw_dmft%dmft_use_full_chipsi == 1
 
  if (use_full_chipsi .and. mpi_enreg%nproc_fft > 1) then
-   message = "datafordmft not working when nproc_fft > 1 and use_full_chipsi"
+   message = "datafordmft not working when nproc_fft > 1 and use_full_chipsi=1"
    ABI_ERROR(message)
  end if
- !natom=cryst_struc%natom
 
 !if(mpi_enreg%me==0) write(7886,*) "in datafordmft", mpi_enreg%me, mpi_enreg%nproc
 !if(mpi_enreg%me==1) write(7887,*) "in datafordmft", mpi_enreg%me, mpi_enreg%nproc
@@ -231,7 +219,6 @@ subroutine datafordmft(cg,cprj,cryst_struc,dft_occup,dimcprj,dtset,eigen,mband_c
  if (abs(pawprtvol) >= 3) then
    write(message,'(2a)') ch10,'---------------------------------------------------------------'
 !  call wrtout(ab_out,message,'COLL')
-!  call wrtout(std_out,  message,'COLL')
    call wrtout(std_out,message,'COLL')
    write(message,'(12a)') ch10,'  Print useful data (as a check)',ch10,&
     & '  - Overlap of KS wfc with atomic orbital inside sphere',ch10,&
@@ -240,7 +227,6 @@ subroutine datafordmft(cg,cprj,cryst_struc,dft_occup,dimcprj,dtset,eigen,mband_c
     & '  - Number of spins ',ch10,&
     & '  - Number of states'
 !  call wrtout(ab_out,message,'COLL')
-!  call wrtout(std_out,  message,'COLL')
    call wrtout(std_out,message,'COLL')
    write(message,'(2a)') ch10,'---------------------------------------------------------------'
    call wrtout(std_out,message,'COLL')
@@ -252,12 +238,6 @@ subroutine datafordmft(cg,cprj,cryst_struc,dft_occup,dimcprj,dtset,eigen,mband_c
  end if
 
 !********************* Max Values for U terms.
-!maxlpawu=0
- !maxnproju=0
- !do iatom=1,natom
- !  if(pawtab(dtset%typat(iatom))%lpawu.ne.-1 .and. pawtab(dtset%typat(iatom))%nproju.gt.maxnproju)&
-!&   maxnproju=pawtab(dtset%typat(iatom))%nproju
-! end do
  maxlpawu    = paw_dmft%maxlpawu
  maxmeshsize = paw_dmft%maxmeshsize 
  maxnproju   = paw_dmft%maxnproju
@@ -314,7 +294,7 @@ subroutine datafordmft(cg,cprj,cryst_struc,dft_occup,dimcprj,dtset,eigen,mband_c
    call wrtout(std_out,message,'COLL')
  end if
 !==========================================================================
-!***************** Compute  <Psi|Chi>=\sum_{proja} <Psi|P_a><phi_a|Chi>
+!***************** Compute  <Chi|Psi>=\sum_{proja} <P_a|Psi><Chi|phi_a>
 !==========================================================================
 !write(std_out,*) "size(cprj,dim=1)",size(cprj,dim=1),size(cprj,dim=2),dtset%mband,dtset%mkmem,dtset%nkpt
 
@@ -353,9 +333,10 @@ subroutine datafordmft(cg,cprj,cryst_struc,dft_occup,dimcprj,dtset,eigen,mband_c
    
  ABI_MALLOC(buf_chipsi,(siz_buf))
  ABI_MALLOC(buf_chipsi_tot,(recvcounts(nproc_spkpt)+displs(nproc_spkpt)))
- if (prt_wan) ABI_MALLOC(paw_dmft%buf_psi,(siz_buf_psi))
+ if (prt_wan) then
+   ABI_MALLOC(paw_dmft%buf_psi,(siz_buf_psi))
+ end if 
 
- !nprocband=(mband/mband_cprj)
  icprj = 0 
  icg = 0
  ibuf_psi = 0
@@ -378,12 +359,8 @@ subroutine datafordmft(cg,cprj,cryst_struc,dft_occup,dimcprj,dtset,eigen,mband_c
      icgb = icg 
      ik = ik + 1 
      ibandc = 0 
-     ib = 0
-!    write(2011,*) ikpt
-!    ibsp=ibg
-     !ibandc = 0
 !    LOOP OVER BANDS
-     !ib = 0
+     ib = 0
      
      do iband=1,nband_k
 
@@ -405,21 +382,12 @@ subroutine datafordmft(cg,cprj,cryst_struc,dft_occup,dimcprj,dtset,eigen,mband_c
        end if  
 
        if (verif) call pawcprj_get(cryst_struc%atindx1(:),cwaveprj(:,:),cprj(:,:),natom,ib,icprj,ikpt,&
-                                 & 0,isppol,mband_cprj,dtset%mkmem,natom,1,nband_k_cprj,&
-                                 & nspinor,nsppol,paw_dmft%unpaw,mpicomm=mpi_enreg%comm_kpt,&
+                                 & iorder_cprj,isppol,mband_cprj,dtset%mkmem,natom,1,nband_k_cprj,&
+                                 & my_nspinor,nsppol,paw_dmft%unpaw,mpicomm=mpi_enreg%comm_kpt,&
                                  & proc_distrb=mpi_enreg%proc_distrb(:,:,:))
 
-       do ispinor=1,nspinor
-!        ibsp =~ (ikpt-1)*nband*my_nspinor+iband
-!        ibsp=ibsp+1
-         !icat=1
-!        write(std_out,*) isppol,ikpt,iband,ispinor
-         !iat=0 ! to declare
-         !do itypat=1,dtset%ntypat
-          ! lmn_size=pawtab(itypat)%lmn_size
-!          write(std_out,*) isppol,ikpt,iband,ispinor
+       do ispinor=1,my_nspinor
          do iatom=1,natom
-         
            lpawu = paw_dmft%lpawu(iatom)
            if (lpawu == -1) cycle
            lpawu1 = lpawu
@@ -431,11 +399,13 @@ subroutine datafordmft(cg,cprj,cryst_struc,dft_occup,dimcprj,dtset,eigen,mband_c
            siz_wan = paw_dmft%radgrid(itypat)%mesh_size
            siz_paw = min(siz_wan,paw_dmft%int_meshsz(itypat))
            rint = paw_dmft%radgrid(itypat)%rad(siz_proj)
-          
+         
            if (verif) then
              lmn_size = pawtab(itypat)%lmn_size
              do ilmn=1,lmn_size
+               ! ------------ Select l=lpawu.
                if (pawtab(itypat)%indlmn(1,ilmn) /= lpawu1) cycle
+
                im = pawtab(itypat)%indlmn(2,ilmn) + lpawu1 + 1
                if (x2my2d) then
                  if (im /= 5) cycle
@@ -506,138 +476,6 @@ subroutine datafordmft(cg,cprj,cryst_struc,dft_occup,dimcprj,dtset,eigen,mband_c
    end do ! ikpt
  end do ! isppol
 
-!          ----------   t2g case
-           !if (t2g) m1_t2g = 0
-            ! if (lpawu == 2) then
-!                lpawu==2 must be chosen in input and thus in
-!                pawtab. On the contrary, paw_dmft now has
-!                lpawu=1
-              ! m1_t2g = 0 ! index for psichi which has a dimension 3
-            ! else
-            !   write(message,'(a,a,i4,i4,2a)')  ch10,&
-            !    & '  Wrong use of dmftqmc_t2g',paw_dmft%dmftqmc_t2g,lpawu,ch10,&
-            !    & ' Action: desactivate qmftqmc_t2g or use lpawu=2'
-            !     ABI_ERROR(message)
-            ! end if ! lpawu=2
-          ! end if ! t2g
-!          ----------   t2g case
-!          ----------   x2my2d case
-           !if (x2my2d) m1_x2my2d = 0
-            ! if (lpawu==2) then
-!                lpawu==2 must be chosen in input and thus in
-!                pawtab. On the contrary, paw_dmft now has
-!                lpawu=1
-            !     m1_x2my2d=0 ! index for psichi which has a dimension 1
-            !   else
-            !     write(message,'(a,a,i4,i4,2a)')  ch10,&
-!&                 '  Wrong use of dmftqmc_x2my2d',paw_dmft%dmftqmc_x2my2d,lpawu,ch10,&
-!&                 ' Action: desactivate dmftqmc_x2my2d or use lpawu=2'
-           !      ABI_ERROR(message)
-           !    end if
-           !  end if
-!            ----------   x2my2d case
-!            if(isppol==2) write(std_out,*) "ee",size(cprj(iatom,ibsp)%cp(:,:))
-
-            ! iat=iat+1
-            ! jj1=0
-            ! if(lpawu.ne.-1) then
-
-               !call pawcprj_get(cryst_struc%atindx1,cwaveprj,cprj,natom,ib,ibg,ikpt,&
-!&               iorder_cprj,isppol,mband_cprj,mkmem,natom,1,nband_k_cprj,&
-!&               my_nspinor,nsppol,unpaw,mpicomm=mpi_enreg%comm_kpt,&
-!&               proc_distrb=mpi_enreg%proc_distrb)
-!              write(std_out,*) "M-2",isppol,ikpt,iband,iatom,&
-!              &             (cwaveprj(iatom,ispinor)%cp(1,13)**2+cwaveprj(iatom,ispinor)%cp(2,13)**2) ,ibsp
-
-!              chinorm=(pawtab(itypat)%phiphjint(1))
-               !chinorm=1.d0
-!              write(std_out,*) isppol,ikpt,iband,ispinor,iat
-              ! do ilmn=1,lmn_size
-!                write(std_out,*) ilmn
-!                ------------ Select l=lpawu.
-              !   if (psps%indlmn(1,ilmn,itypat)==lpawu) then
-!                  ------------ Check that the band is choosen (within nbandi and nbandf)
-               !    if(paw_dmft%band_in(iband)) then
-!                    if(ilmn==13) then
-!                    write(std_out,*) "M-2c",isppol,ikpt,iband,iatom
-!                    write(std_out,*) "M-2b",isppol,ikpt,ibandc,&
-!                    &             (cwaveprj(iatom,ispinor)%cp(1,13)**2+cwaveprj(iatom,ispinor)%cp(2,13)**2)
-!                    endif
-!                    write(std_out,*) "inside paw_dmft%band_in",iband
-                 !    jj1=jj1+1
-                 !    if(jj1>pawtab(itypat)%nproju*(2*lpawu+1)) then
-                  !     write(message,'(a,a,a,a)')  ch10,&
-!&                 !      ' jj1 is not correct in datafordmft',ch10,&
-!&                       ' Action: CONTACT Abinit group'
-                  !     ABI_BUG(message)
-                   !  end if ! jj1
-                  !   icount_proj_ilmn=psps%indlmn(3,ilmn,itypat)  ! n: nb of projector
-!                    write(std_out,*) "icount_proj_ilmn",icount_proj_ilmn
-                 !    m1=psps%indlmn(2,ilmn,itypat)+psps%indlmn(1,ilmn,itypat)+1
-!                    ---- if lprochi=true do the sum over every projectors
-!                    ---- if lprochi=false: . do the sum over only ground state projector
-!                    ----                   . and take ph0phiint(icount_proj_ilmn)=1
-
-!                    call pawcprj_get(cryst_struc%atindx1,cwaveprj,cprj,natom,&
-!                    &             ib,ibg,ikpt,iorder_cprj,isppol,mband_cprj,mkmem,&
-!                    &             natom,1,nband_k_cprj,my_nspinor,nsppol,unpaw,&
-!                    &             mpicomm=mpi_enreg%comm_kpt,proc_distrb=mpi_enreg%proc_distrb)
-
-                  !   if(lprojchi.or.icount_proj_ilmn==1) then
-                   !    if(.not.lprojchi) ph0phiint_used=one
-                    !   if(lprojchi) ph0phiint_used=pawtab(itypat)%ph0phiint(icount_proj_ilmn)
-                     !  if(paw_dmft%dmftqmc_t2g==1) then ! t2g case
-
-                      !   if(m1==1.or.m1==2.or.m1==4) then ! t2g case
-                      !     m1_t2g=m1_t2g+1  ! t2g case1
-                      !     m1_t2g_mod=mod(m1_t2g-1,3)+1
-!                          write(std_out,*) "M0",isppol,ikpt,iband,ilmn,cprj(iatom,ibsp)%cp(1,ilmn)
-!                          write(std_out,*) "M1",m1,m1_t2g,iband,ilmn,icount_proj_ilmn
-                       !    paw_dmft%psichi(isppol,ikpt,ibandc,ispinor,iat,m1_t2g_mod)=&  ! t2g case
-!&                      !    paw_dmft%psichi(isppol,ikpt,ibandc,ispinor,iat,m1_t2g_mod)+&  ! t2g case
-!                          &                           cmplx(cprj(iatom,ibsp)%cp(1,ilmn)*ph0phiint_used,&  ! t2g case
-!                          &                           cprj(iatom,ibsp)%cp(2,ilmn)*ph0phiint_used,kind=dp)  ! t2g case
-!&                          cmplx(cwaveprj(iatom,ispinor)%cp(1,ilmn)*ph0phiint_used,&  ! t2g case
-!&                          cwaveprj(iatom,ispinor)%cp(2,ilmn)*ph0phiint_used,kind=dp)  ! t2g case
-                   !      end if  !t2g case
-                    !   else if(paw_dmft%dmftqmc_x2my2d==1) then ! x2my2d case
-                    !     if(m1==5) then ! x2my2d case
-                    !       m1_x2my2d=1  ! x2my2d case1
-                   !        paw_dmft%psichi(isppol,ikpt,ibandc,ispinor,iat,m1_x2my2d)=&      ! x2my2d case
-!&                          paw_dmft%psichi(isppol,ikpt,ibandc,ispinor,iat,m1_x2my2d)+&      ! x2my2d case
-!&                          cmplx(cwaveprj(iatom,ispinor)%cp(1,ilmn)*ph0phiint_used,&       ! x2my2d case
-!&                          cwaveprj(iatom,ispinor)%cp(2,ilmn)*ph0phiint_used,kind=dp)      ! x2my2d case
-              !           end if  !x2my2d case
-               !        else
-      !                   paw_dmft%psichi(isppol,ikpt,ibandc,ispinor,iat,m1)=&
-!&                         paw_dmft%psichi(isppol,ikpt,ibandc,ispinor,iat,m1)+&
-!                        &                         cmplx(cprj(iatom,ibsp)%cp(1,ilmn)*ph0phiint_used,&
-!                        &                         cprj(iatom,ibsp)%cp(2,ilmn)*ph0phiint_used,kind=dp)
-!&                         cmplx(cwaveprj(iatom,ispinor)%cp(1,ilmn)*ph0phiint_used,&
-!&                         cwaveprj(iatom,ispinor)%cp(2,ilmn)*ph0phiint_used,kind=dp)
-
-!                        if(ibandc==3.and.iat==1.and.m1==1) then
-!                        write(std_out,'(a,3i5)') "psichi integers",isppol,ikpt,ispinor
-!                        write(std_out,'(a,2i5,2e16.7)') "psichi IB3 iAT1 IM1",ilmn,icount_proj_ilmn,&
-!                        &             real(paw_dmft%psichi(isppol,ikpt,3,ispinor,1,1)), imag(paw_dmft%psichi(isppol,ikpt,3,ispinor,1,1))
-!                        write(std_out,'(a,2i5,2e16.7)') "cwaveprj IB3 iAT1 IM1",ilmn,icount_proj_ilmn,cwaveprj(iatom,ispinor)%cp(1,ilmn) &
-!                        &                    , cwaveprj(iatom,ispinor)%cp(2,ilmn)
-!                        endif
-              !         end if
-              !       end if ! lprojchi=.true. (always)
-              !     end if ! nband belongs to paw_dmft%band_in
-              !   end if ! L=lpawu
-              ! end do !ilmn : loop over L,M,N
-   !          end if ! If lpawu/=-1
-   !        end do ! iatom
-    !       icat=icat+cryst_struc%nattyp(itypat)
-    !     end do ! itypat
-    !   end do ! ispinor
-    ! end do !iband
-    ! ibg=ibg+nband_k_cprj*my_nspinor
-!    bdtot_index=bdtot_index+nband_k ! useless  (only for occ)
- !  end do !ikpt
- !end do ! isppol
 !do isppol=1,nsppol
 !do ikpt=1,nkpt
 !do ispinor=1,my_nspinor
@@ -665,29 +503,7 @@ subroutine datafordmft(cg,cprj,cryst_struc,dft_occup,dimcprj,dtset,eigen,mband_c
 !********************* Gather information for MPI before printing
 !==========================================================================
 
- !dimpsichi=2*nsppol*nkpt*mband*my_nspinor*natom*(2*paw_dmft%maxlpawu+1)
- !ABI_MALLOC(buffer1,(dimpsichi))
- !buffer1 = zero
- !nnn=0
-!write(176,*) "beg",psichi
- !do isppol=1,nsppol
- !  do ikpt=1,nkpt
- !    do ibandc=1,paw_dmft%mbandc
- !      do ispinor=1,my_nspinor
- !        do iat=1,natom
- !          do m1=1,2*paw_dmft%maxlpawu+1
-!            do m=1,2
- !            nnn=nnn+1
- !            buffer1(nnn)=paw_dmft%psichi(isppol,ikpt,ibandc,ispinor,iat,m1)
-!            enddo
- !          end do
- !        end do
- !      end do
- !    end do
- !  end do
- !end do
  call xmpi_barrier(comm_kpt)
- !call xmpi_sum(buffer1,spaceComm ,ierr)
  if (paral_kgb == 1 .and. nproc_band > 1) call xmpi_sum(buf_chipsi(:),comm_band,ierr) ! Build sum over band processors
  call xmpi_allgatherv(buf_chipsi(:),siz_buf,buf_chipsi_tot(:),recvcounts(:),displs(:),comm_kpt,ierr)
  
@@ -725,30 +541,6 @@ subroutine datafordmft(cg,cprj,cryst_struc,dft_occup,dimcprj,dtset,eigen,mband_c
  
  ABI_FREE(buf_chipsi_tot)
  
- !nnn=0
- !do isppol=1,nsppol
- !  do ikpt=1,nkpt
- !    do ibandc=1,paw_dmft%mbandc
- !      do ispinor=1,my_nspinor
- !        do iat=1,natom
- !          do m1=1,2*paw_dmft%maxlpawu+1
-!            do m=1,2
- !            nnn=nnn+1
- !            paw_dmft%psichi(isppol,ikpt,ibandc,ispinor,iat,m1)=buffer1(nnn)
-!            enddo
-             ! if(ibandc==1) then
-             !   write(6,*) "m1",m1
-             !   write(6,*) "psichi datafordmft",paw_dmft%psichi(isppol,ikpt,ibandc,ispinor,iat,m1)
- !            ! endif
- !          end do
- !        end do
- !      end do
- !    end do
-!   end do
-! end do
-! ABI_FREE(buffer1)
-!write(177,*) "end",psichi
-
 !do isppol=1,nsppol
 !do ikpt=1,nkpt
 !do ibandc=1,paw_dmft%mbandc
@@ -762,26 +554,15 @@ subroutine datafordmft(cg,cprj,cryst_struc,dft_occup,dimcprj,dtset,eigen,mband_c
 !enddo
 !enddo
 
- !call xmpi_barrier(spaceComm)
 !if(mpi_enreg%me.eq.0) write(177,*) "end",psichi
 !if(mpi_enreg%me.eq.1) write(178,*) "end",psichi
 !if(mpi_enreg%me.eq.2) write(179,*) "end",psichi
- !call xmpi_barrier(spaceComm)
-!==========================================================================
-!********* WRITE psichi in file for reference
-!==========================================================================
- !if (me_kpt == 0) call chipsi_print(paw_dmft,pawtab(:),t2g,x2my2d)
- !end if ! proc=me
 
-!********************* Check normalization  and occupations ***************
+!********************* Check normalization and occupations ***************
 ! Only if the complete BZ is sampled (ie paw_dmft%kspectralfunc=0)
 !==========================================================================
  if (paw_dmft%dmft_kspectralfunc == 0) then
  
-   !ABI_MALLOC(loc_occ_check,(natom))
-   !ABI_MALLOC(loc_norm_check,(natom))
-   !call init_matlu(natom,my_nspinor,nsppol,paw_dmft%lpawu(:),loc_occ_check(:))
-   !call init_matlu(natom,my_nspinor,nsppol,paw_dmft%lpawu(:),loc_norm_check(:))
    call init_oper(paw_dmft,loc_norm_check,opt_ksloc=2)
    call chipsi_check(paw_dmft,dft_occup,loc_norm_check)
 !==========================================================================
@@ -791,13 +572,6 @@ subroutine datafordmft(cg,cprj,cryst_struc,dft_occup,dimcprj,dtset,eigen,mband_c
      write(message,*) "normalization computed"
      call wrtout(std_out,message,'COLL')
    end if
-
-   !ABI_MALLOC(loc_occ_check,(natom))
-   !ABI_MALLOC(loc_norm_check,(natom))
-   !call init_matlu(natom,my_nspinor,nsppol,paw_dmft%lpawu(:),loc_occ_check(:))
-   !call init_matlu(natom,my_nspinor,nsppol,paw_dmft%lpawu(:),loc_norm_check(:))
-   !call copy_matlu(xocc_check(:),loc_occ_check(:),natom)
-   !call copy_matlu(xnorm_check(:),loc_norm_check(:),natom)
 
    write(message,'(2a,i4)') ch10," == Check: Occupations and Norm from chipsi are"
    call wrtout(std_out,message,'COLL')
@@ -832,11 +606,6 @@ subroutine datafordmft(cg,cprj,cryst_struc,dft_occup,dimcprj,dtset,eigen,mband_c
 
    call print_matlu(loc_norm_check%matlu(:),natom,pawprtvol)
 
-!  deallocations
-   !do iatom=1,natom
-   !  dft_occup%matlu(iatom)%mat=loc_occ_check(iatom)%mat
-   !end do
-
    ! Tests density matrix DFT+U and density matrix computed here.
    if (paw_dmft%dmftcheck == 2 .or. paw_dmft%dmftbandi == 1) then
      ABI_MALLOC(matlu_temp,(natom))
@@ -844,27 +613,17 @@ subroutine datafordmft(cg,cprj,cryst_struc,dft_occup,dimcprj,dtset,eigen,mband_c
      isppol   = 1
      ispinor  = 1
      ispinor1 = 1
+     nsploop = max(nsppol,nspinor**2)
      do iatom=1,natom
        lpawu = paw_dmft%lpawu(iatom)
        if (lpawu == -1) cycle
-       !if(paw_dmft%lpawu(iatom).ne.-1) then
        ndim = 2*lpawu + 1
-       nsploop = max(nsppol,nspinor**2)
        do idijeff=1,nsploop
-         !ispinor = 0
-         !ispinor1 = 0
          if (nsploop <= 2) then
-           isppol = idijeff ! spinor_idxs(1,idijeff)
-           !ispinor = 1
-           !ispinor1 = 1
+           isppol = idijeff 
          else if (nsploop == 4) then
-           !isppol = 1
            ispinor  = spinor_idxs(1,idijeff)
            ispinor1 = spinor_idxs(2,idijeff)
-         !else if (nsploop == 1) then
-         !  isppol = 1
-         !  ispinor = 1
-         !  ispinor1 = 1
          else
            write(message,'(2a)') " BUG in datafordmft: nsploop should be equal to 2 or 4"
            call wrtout(std_out,message,'COLL')
@@ -906,15 +665,6 @@ subroutine datafordmft(cg,cprj,cryst_struc,dft_occup,dimcprj,dtset,eigen,mband_c
    end if
 
    call destroy_oper(loc_norm_check)
-   !call destroy_matlu(loc_norm_check(:),natom)
-   !ABI_FREE(loc_norm_check)
-   !call destroy_matlu(loc_occ_check(:),natom)
-   !ABI_FREE(loc_occ_check)
-
-   !call destroy_matlu(xocc_check,natom)
-   !call destroy_matlu(xnorm_check,natom)
-   !ABI_FREE(xocc_check)
-   !ABI_FREE(xnorm_check)
  end if ! dmft_kspectralfunc=0
 
  if (present(nbandkss)) then
@@ -930,48 +680,29 @@ subroutine datafordmft(cg,cprj,cryst_struc,dft_occup,dimcprj,dtset,eigen,mband_c
 
  CONTAINS
 
-!!****f* m_datafordmft/psichi_check
+!!****f* m_datafordmft/chipsi_check
 !! NAME
-!!  psichi_check
+!!  chipsi_check
 !!
 !! FUNCTION
-!!  Check psichi: compute occupations
+!!  Check chipsi: compute norm and occupations
 !!
 !! INPUTS
-!!  dtset <type(dataset_type)>=all input variables for this dataset
-!!  maxnproju = maximum number of projector for DFT+U species
-!!  nattyp(ntypat)= # atoms of each type
-!!  mband= number of bands
-!!  nkpt=number of k points
-!!  my_nspinor=number of spinorial components of the wavefunctions (on current proc)
-!!  nsppol=1 for unpolarized, 2 for spin-polarized
-!!  ntypat= number of species
 !!  paw_dmft <type(paw_dmft)>=paw data for the self-consistency
-!!  pawtab(ntypat*usepaw) <type(pawtab_type)>=paw tabulated starting data
-!!  psps <type(pseudopotential_type)>=variables related to pseudopotentials
 !!
 !!  OUTPUTS:
-!!  xocc_check(nsppol,my_nspinor,my_nspinor,natom,2*maxlpawu+1,2*maxlpawu+1): density matrix
-!!  xnorm_check(nsppol,my_nspinor,my_nspinor,natom,2*maxlpawu+1,2*maxlpawu+1): matrix of norms
+!!  xocc_check: density matrix
+!!  xnorm_check: matrix of norms
 !!
 !! SIDE EFFECTS
-!!  check psichi: compute norm and occupations
 !!
 !! SOURCE
 
 subroutine chipsi_check(paw_dmft,xocc_check,xnorm_check)
 
 !Arguments ------------------------------------
-!scalars
- !integer,intent(in) :: nkpt,my_nspinor,nsppol,ntypat
-!arrays
- !integer, intent(in) :: nattyp(ntypat)
- !type(dataset_type),intent(in) :: dtset
- !type(pseudopotential_type),intent(in) :: psps
- !integer, intent(in) :: my_nspinor
  type(paw_dmft_type), intent(in) :: paw_dmft
- type(oper_type), intent(inout) :: xnorm_check,xocc_check !vz_i
- !type(pawtab_type), intent(in) :: pawtab(paw_dmft%ntypat)
+ type(oper_type), intent(inout) :: xnorm_check,xocc_check 
 !Local variables ------------------------------------
  real(dp), allocatable :: occ_dft(:,:,:)
 ! *********************************************************************
@@ -1003,116 +734,30 @@ subroutine chipsi_check(paw_dmft,xocc_check,xnorm_check)
 
  ABI_FREE(occ_dft)
  
-  ! facnsppol=1
-  ! if(my_nspinor==1.and.nsppol==1) then
-  !   facnsppol=2
-  ! end if
-
-  ! ibg=0
-  ! band_index=0
-  ! do isppol=1,nsppol
-   !  do ikpt=1,nkpt
-   !    nband_k=dtset%nband(ikpt+(isppol-1)*nkpt)
-   !    ibandc=0
-   !    do iband=1,nband_k
-   !      if(paw_dmft%band_in(iband)) ibandc=ibandc+1
-   !      do ispinor=1,my_nspinor
-   !        icat=1
-   !        iat=0
-   !        do itypat=1,dtset%ntypat
-   !          lmn_size=pawtab(itypat)%lmn_size
-   !          do iatom=icat,icat+nattyp(itypat)-1
-   !            iat=iat+1
-!              ------------ Select correlated atoms
-    !           if(paw_dmft%lpawu(iatom).ne.-1) then
-    !             chinorm=1.d0
-    !             do ilmn=1,lmn_size
-!                  ------------ Select l=lpawu.
-    !               if (psps%indlmn(1,ilmn,itypat)==paw_dmft%lpawu(iatom).and.&
-!&                   psps%indlmn(3,ilmn,itypat)==1) then
-  !                   do ilmn1=1,lmn_size
-!                      ------------ Select l=lpawu and do not sum over projectors
-!                      (this is already done in paw_dmft%psichi)
-   !                    if (psps%indlmn(1,ilmn1,itypat)==paw_dmft%lpawu(iatom).and.&
-!&                       psps%indlmn(3,ilmn1,itypat)==1) then
-!                        ------------ Check that the band is choosen (within nbandi and nbandf)
-    !                     if(paw_dmft%band_in(iband)) then
-    !                       m=psps%indlmn(2,ilmn,itypat)+psps%indlmn(1,ilmn,itypat)+1
-    !                       m1=psps%indlmn(2,ilmn1,itypat)+psps%indlmn(1,ilmn,itypat)+1
-    !                       if(psps%indlmn(3,ilmn,itypat)==1) then
-    !                         do ispinor1=1,my_nspinor
-    !                           psichic=paw_dmft%psichi(isppol,ikpt,ibandc,ispinor,iat,m)
-    !                           psichic1=paw_dmft%psichi(isppol,ikpt,ibandc,ispinor1,iat,m1)
-!                              ------------ Compute occupation matrix
-    !                           xocc_check(iatom)%mat(m,m1,isppol,ispinor,ispinor1)=&
-!&                               xocc_check(iatom)%mat(m,m1,isppol,ispinor,ispinor1)&
-!                              &               +conjg(psichic)*psichic1*dtset%wtk(ikpt)*facpara*occ(iband+band_index)
-!&                               +conjg(psichic1)*psichic*dtset%wtk(ikpt)*facpara*occ(iband+band_index)/facnsppol
-!                              ------------ Compute norm (should be equal to noccmmp
-!                              (dmatpuopt=1) if all bands are taken into account)
- !                              xnorm_check(iatom)%mat(m,m1,isppol,ispinor,ispinor1)=&
-!&                               xnorm_check(iatom)%mat(m,m1,isppol,ispinor,ispinor1)&
-!                              &               +conjg(psichic)*psichic1*dtset%wtk(ikpt)*facpara
-!&                               +conjg(psichic1)*psichic*dtset%wtk(ikpt)*facpara
- !                            end do ! ispinor1
- !                          end if
- !                        end if ! paw_dmft%band_in
- !                      end if
- !                    end do !ilmn1
- !                  end if
- !                end do !ilmn
- !              end if ! lpawu.ne.-1
- !            end do ! iatom
-     !        icat=icat+nattyp(itypat)
- !          end do ! itypat
- !        end do ! ispinor
- !      end do !iband
- !      band_index=band_index+nband_k
- !      ibg=ibg+nband_k*my_nspinor
- !    end do !ikpt
-!   end do ! isppol
-
  end subroutine chipsi_check
 !DBG_EXIT("COLL")
 end subroutine datafordmft
 !!***
 
-!!****f* m_datafordmft/psichi_print
+!!****f* m_datafordmft/chipsi_print
 !! NAME
-!!  psichi_print
+!!  chipsi_print
 !!
 !! FUNCTION
-!!  Print psichi for reference
+!!  Print chipsi for reference
 !!
 !! INPUTS
-!!  dtset <type(dataset_type)>=all input variables for this dataset
-!!  maxnproju = maximum number of projector for DFT+U species
-!!  nattyp(ntypat)= # atoms of each type
-!!  mband= number of bands
-!!  nkpt=number of k points
-!!  my_nspinor=number of spinorial components of the wavefunctions
-!!  nsppol=1 for unpolarized, 2 for spin-polarized
 !!  paw_dmft <type(paw_dmft)>=paw data for the self-consistency
 !!  pawtab(ntypat*usepaw) <type(pawtab_type)>=paw tabulated starting data
-!!  psichi(2,nsppol,nkpt,mband,my_nspinor,dtset%natom,(2*paw_dmft%maxlpawu+1))) projections for DMFT
-!!  psps <type(pseudopotential_type)>=variables related to pseudopotentials
-!!
 !!
 !! SIDE EFFECTS
-!!  print psichi in forlb.ovlp
+!!  print chipsi in forlb.ovlp
 !!
 !! SOURCE
 
 subroutine chipsi_print(paw_dmft,pawtab)
 
 !Arguments ------------------------------------
-!scalars
- !integer,intent(in) :: nkpt,my_nspinor,nsppol,ntypat
-!arrays
- !integer, intent(in) :: nattyp(ntypat)
- !type(dataset_type),intent(in) :: dtset
- !type(pseudopotential_type),intent(in) :: psps
- !logical, intent(in) :: t2g,x2my2d
  type(paw_dmft_type), intent(in) :: paw_dmft
  type(pawtab_type), intent(in) :: pawtab(paw_dmft%ntypat)
 !Local variables ------------------------------------
@@ -1122,7 +767,7 @@ subroutine chipsi_print(paw_dmft,pawtab)
  character(len=500) :: msg
  integer, parameter :: mt2g(3) = (/1,2,4/)
 ! *********************************************************************
-   !ll = 1
+
    t2g = paw_dmft%dmft_t2g == 1
    x2my2d = paw_dmft%dmft_x2my2d == 1
 
@@ -1149,7 +794,6 @@ subroutine chipsi_print(paw_dmft,pawtab)
 
    write(unt,*) "Bands ",paw_dmft%dmftbandi,paw_dmft%dmftbandf
 
-   !ibg = 0
    do isppol=1,paw_dmft%nsppol
      do ikpt=1,paw_dmft%nkpt
 !      rewind(1023)
@@ -1168,47 +812,7 @@ subroutine chipsi_print(paw_dmft,pawtab)
              lpawu = paw_dmft%lpawu(iatom)
              if (lpawu == -1) cycle
              ndim = 2*lpawu + 1
-             !itypat = paw_dmft%typat(iatom)
-             !lpawu1 = lpawu
-             !if (t2g .or. x2my2d) lpawu1 = 2
-           !icat = 1
-!          write(std_out,*) isppol,ikpt,iband,ispinor
-           !iat = 0 ! to declare
-           !do itypat=1,dtset%ntypat
-             !lmn_size = pawtab(itypat)%lmn_size
-!            write(std_out,*) isppol,ikpt,iband,ispinor
-             !do iatom=icat,icat+nattyp(itypat)-1
-              ! iat = iat + 1
-               !jj1 = 0
-               !if(pawtab(itypat)%lpawu.ne.-1) then
-!                chinorm=(pawtab(itypat)%phiphjint(1))
-               !  chinorm=1.d0
-!                write(std_out,*) isppol,ikpt,iband,ispinor,iat
-                ! m1_t2g=0
-                ! m1_x2my2d=0
              do im=1,ndim
-!                  write(std_out,*) ilmn
-!                  ------------ Select l=lpawu.  ---------------------------------------
-               !if (pawtab(itypat)%indlmn(1,ilmn) /= lpawu1) cycle
-                  ! if (psps%indlmn(1,ilmn,itypat)==pawtab(itypat)%lpawu.and.psps%indlmn(3,ilmn,itypat)==1) then
-!                    ------------ Check that the band is choosen (within nbandi and nbandf)
-                   !  if(paw_dmft%band_in(iband)) then
-                    !   jj1=jj1+1
-                     !  if(jj1>(2*pawtab(itypat)%lpawu+1)) then
-                      !   write(message,'(a,a,i4,i5,i4)') ch10," Error 2 in datafordmft",jj1,pawtab(itypat)%lpawu
-                       !  call wrtout(std_out,  message,'COLL')
-                      !   ABI_ERROR("Aborting now")
-                      ! end if ! jj1
-!                      if(jj1>pawtab(dtset%typat(iatom))%nproju*(2*lpawu+1)) then
-!                      write(message,'(a,a,a,a)')  ch10,&
-!                      &                         'BUG: jj1 is not correct in datafordmft psichi_print',ch10,&
-!                      &                         'Action: CONTACT Abinit group'
-!                      call wrtout(std_out,  message,'COLL')
-!                      call abi_abort('COLL')
-!                      end if ! jj1
-               !m1 = pawtab(itypat)%indlmn(2,ilmn) + pawtab(itypat)%indlmn(1,ilmn) + 1
-!                      ----- Print only when the sum over projectors is done
-!                      write(std_out,*) ilmn,m1
                if (t2g) then
                  im1 = mt2g(im)
                else if (x2my2d) then
@@ -1216,33 +820,14 @@ subroutine chipsi_print(paw_dmft,pawtab)
                else
                  im1 = im
                end if
-                         !m1_t2g=m1_t2g+1
+
                write(unt,'(4i6,3x,2f23.15)') isppol,ispinor,iatom,im1,&
                         & dble(paw_dmft%chipsi(im+(ispinor-1)*ndim,ibandc,ikpt,isppol,iatom)),&
                         & aimag(paw_dmft%chipsi(im+(ispinor-1)*ndim,ibandc,ikpt,isppol,iatom))
-                      ! else if(x2my2d) then
-                      !   if(m1==5) then
-                      !     m1_x2my2d=1
-                      !     write(unt,'(4i6,3x,2f23.15)') isppol, ispinor, iat, m1,&
-!&                           real(paw_dmft%psichi(isppol,ikpt,ibandc,ispinor,iat,m1_x2my2d))/chinorm,&
-!&                           aimag(paw_dmft%psichi(isppol,ikpt,ibandc,ispinor,iat,m1_x2my2d))/chinorm
-               !          end if
-                !       else
-                !         write(unt,'(4i6,3x,2f23.15)') isppol, ispinor, iat, m1,&
-!&                         real(paw_dmft%psichi(isppol,ikpt,ibandc,ispinor,iat,m1))/chinorm,&
-!&                         aimag(paw_dmft%psichi(isppol,ikpt,ibandc,ispinor,iat,m1))/chinorm
-              !         end if
-!                      if natom=1 then jj1 maximal value should be 2*lpawu+1
-               !      end if ! paw_dmft%band_in
-                 !  end if
              end do !im
-             !  end if ! lpawu.ne.-1
            end do ! iatom
-            ! icat=icat+nattyp(itypat)
-           !end do ! itypat
          end do ! ispinor
        end do !iband
-       !ibg=ibg+nband_k*my_nspinor
      end do !ikpt
    end do ! isppol
 !   write(unt,*) "Fermi level (in Ryd)="
@@ -1256,66 +841,42 @@ subroutine chipsi_print(paw_dmft,pawtab)
 !! compute_levels
 !!
 !! FUNCTION
-!! Compute levels for ctqmc
+!! Compute correlated electronic levels for ctqmc
 !!
 !! INPUTS
+!!  hdc= double counting
+!!  paw_dmft <type(paw_dmft)>=paw data for the self-consistency
 !!
 !! OUTPUT
+!!  energy_level= local electronic levels
+!!  nondiag= true if the levels are not diagonal
 !!
 !! NOTES
 !!
 !! SOURCE
 
- subroutine compute_levels(energy_level,hdc,paw_dmft,nondiag,loc_levels)
+ subroutine compute_levels(energy_level,hdc,paw_dmft,nondiag)
 
 !Arguments ------------------------------------
-!scalars
- !type(crystal_t),intent(in) :: cryst_struc
- !type(pawang_type), intent(in) :: pawang
  type(oper_type), intent(in) :: hdc
  type(paw_dmft_type), intent(in) :: paw_dmft
- type(oper_type), intent(inout) :: energy_level !vz_i
+ type(oper_type), intent(inout) :: energy_level 
  logical, optional, intent(out) :: nondiag
- type(oper_type), optional, intent(in) :: loc_levels
 !Local variables ------------------------------
-! scalars
  integer :: iatom,im,isppol,lpawu,natom,ndim
  character(len=500) :: message
-! arrays
 !************************************************************************
 
- !mbandc=paw_dmft%mbandc
- !nkpt=paw_dmft%nkpt
- !nsppol=paw_dmft%nsppol
- !nspinor=paw_dmft%nspinor
  natom = paw_dmft%natom
  if (present(nondiag)) nondiag = .false.
  
-!========================
-!Get KS eigenvalues
-!========================
- !do iband=1,mbandc
- !  do ikpt=1,nkpt
- !    do isppol=1,nsppol
-!      Take \epsilon_{nks}
-!      ========================
-  !     energy_level%ks(isppol,ikpt,iband,iband)=paw_dmft%eigen_dft(isppol,ikpt,iband)
- !    end do
-  ! end do
- !end do
-
-
 !======================================================================
-!Compute atomic levels from projection of \epsilon_{nks} and symetrize
+!Compute atomic levels from projection of \epsilon_{nks} and symmetrize
 !======================================================================
- !call loc_oper(energy_level,paw_dmft,1)
- if (present(loc_levels)) then
-   call copy_matlu(loc_levels%matlu(:),energy_level%matlu(:),natom)
- else
-   call downfold_oper(energy_level,paw_dmft,option=3,procb=paw_dmft%distrib%procb(:), &
-                    & iproc=paw_dmft%distrib%me_kpt,op_ks_diag=paw_dmft%eigen_dft(:,:,:))
-   call xmpi_matlu(energy_level%matlu(:),natom,paw_dmft%distrib%comm_kpt)
- end if 
+
+ call downfold_oper(energy_level,paw_dmft,option=3,procb=paw_dmft%distrib%procb(:), &
+                  & iproc=paw_dmft%distrib%me_kpt,op_ks_diag=paw_dmft%eigen_dft(:,:,:))
+ call xmpi_matlu(energy_level%matlu(:),natom,paw_dmft%distrib%comm_kpt)
 ! write(message,'(a,2x,a,f13.5)') ch10," == Print Energy levels before sym and only DFT"
 ! call wrtout(std_out,message,'COLL')
 ! call print_matlu(energy_level%matlu,natom,1)
@@ -1323,18 +884,14 @@ subroutine chipsi_print(paw_dmft,pawtab)
    lpawu = paw_dmft%lpawu(iatom)
    if (lpawu == -1) cycle
    ndim = paw_dmft%nspinor * (2*lpawu+1)
-   !if(lpawu/=-1) then
    do isppol=1,paw_dmft%nsppol
      do im=1,ndim
-         !do im1=1,2*lpawu+1
        energy_level%matlu(iatom)%mat(im,im,isppol) = energy_level%matlu(iatom)%mat(im,im,isppol) &
           & - paw_dmft%fermie
-        ! end do
      end do ! im
    end do ! isppol
    energy_level%matlu(iatom)%mat(:,:,:) = energy_level%matlu(iatom)%mat(:,:,:) - hdc%matlu(iatom)%mat(:,:,:)
 !    write(std_out,*) "DC,fermie",hdc%matlu(iatom)%mat(1,1,1,1,1),paw_dmft%fermie
-   !end if
  end do ! iatom
 
  call sym_matlu(energy_level%matlu(:),paw_dmft)
@@ -1348,21 +905,21 @@ subroutine chipsi_print(paw_dmft,pawtab)
  end subroutine compute_levels
 !!***
 
-
-!!****f* m_datafordmft/psichi_renormalization
+!!****f* m_datafordmft/chipsi_renormalization
 !! NAME
-!! psichi_renormalization
+!! chipsi_renormalization
 !!
 !! FUNCTION
-!! Renormalize psichi.
+!! Orthonormalize chipsi.
 !!
 !! INPUTS
-!!  cryst_struc <type(crystal_t)>= crystal structure data.
 !!  paw_dmft =  data for DFT+DMFT calculations.
-!!  pawang <type(pawang)>=paw angular mesh and related data
+!!  opt = 2 : orthonormalize for all atoms and each kpt
+!!      = 3 (default) : orthonormalize for all kpt and each atom 
 !!
 !! OUTPUT
-!!  paw_dmft%psichi(nsppol,nkpt,mband,nspinor,dtset%natom,(2*maxlpawu+1))): projections <Psi|chi> are orthonormalized.
+!!  paw_dmft%chipsi((2*maxlpawu+1)*nspinor,mbandc,nkpt,nsppol,natom): 
+!!                    orthonormalized projections <Chi|Psi> 
 !!
 !! NOTES
 !!
@@ -1371,20 +928,14 @@ subroutine chipsi_print(paw_dmft,pawtab)
 subroutine chipsi_renormalization(paw_dmft,opt)
 
 !Arguments ------------------------------------
-!scalars
- !type(crystal_t),intent(in) :: cryst_struc
  type(paw_dmft_type), intent(inout) :: paw_dmft
- !type(pawang_type), intent(in) :: pawang
  integer, optional, intent(in) :: opt
 !Local variables ------------------------------
-!scalars
  integer :: jkpt,natom,nkpt,option
- !real(dp), pointer :: temp_wtk(:) => null()
  real(dp) :: pawprtvol
  type(oper_type) :: norm,oper_temp
  character(len=500) :: message
  real(dp), allocatable :: wtk_tmp(:) 
-!arrays
 ! real(dp),allocatable :: e0pde(:,:,:),omegame0i(:)
 !************************************************************************
 
@@ -1393,16 +944,11 @@ subroutine chipsi_renormalization(paw_dmft,opt)
  option = 3
  if (present(opt)) then
    if (opt == 2 .or. opt == 3) option = opt
-  ! if(opt==3) option=3
  end if
  pawprtvol = 2
 
- !nsppol  = paw_dmft%nsppol
  natom = paw_dmft%natom
  nkpt  = paw_dmft%nkpt
- !mbandc  = paw_dmft%mbandc
- !nspinor = paw_dmft%nspinor
-
 
 !== Normalize psichi
  !if (option == 1) then
@@ -1436,58 +982,50 @@ subroutine chipsi_renormalization(paw_dmft,opt)
 !  ====================================
 !  == renormalize k-point after k-point
 !  ====================================
-   !ABI_MALLOC(temp_wtk,(1))
 
    write(message,'(2a,i5)') ch10,' Nb of K-point',nkpt
    call wrtout(std_out,message,'COLL')
    do jkpt=1,nkpt  ! jkpt
      write(message,'(2a,i5)') ch10,'  == Renormalization for K-point',jkpt
      call wrtout(std_out,message,'COLL')
-    ! temp_wtk(1)=one
      if (paw_dmft%distrib%procb(jkpt) /= paw_dmft%distrib%me_kpt) cycle
      call normalizechipsi(1,paw_dmft,jkpt=jkpt)
    end do ! jkpt
    write(message,'(2a)') ch10,'  ===== K-points all renormalized'
    call wrtout(std_out,message,'COLL')
-   !ABI_FREE(temp_wtk)
 
  else if (option == 3) then  ! option==3
 !  ====================================
 !  == renormalize the sum over k-points
 !  ====================================
-!  allocate(temp_wtk(nkpt))
-   !temp_wtk=>paw_dmft%wtk
-   write(message,'(6a)') ch10,'  ====================================== ',&
+   write(message,'(6a)') ch10, &
+     &      '  ====================================== ',&
      & ch10,'  == Renormalization for all K-points == ',&
-     & ch10,'  ======================================='
+     & ch10,'  ====================================== '
    call wrtout(std_out,message,'COLL')
    call normalizechipsi(nkpt,paw_dmft)
-!  deallocate(temp_wtk)
 
  end if ! option
 
- call chipsi_gather(paw_dmft)
+ ! Gather contribution from each CPU
+ call chipsi_gather(paw_dmft) 
 
 !== Change back repr for norm
 
+!===============================================
+!==  Compute norm with new chipsi
+!===============================================
 
-!===============================================
-!==  Compute norm with new psichi
-!===============================================
  write(message,'(2a)') ch10,'  ===== Compute norm with new chipsi'
  call wrtout(std_out,message,'COLL')
  call init_oper(paw_dmft,oper_temp,opt_ksloc=2)
  call identity_oper(oper_temp,2)
 
-!== Build identity for norm%ks (option=1)
- !call identity_oper(norm,1)
-!== Deduce norm%matlu from norm%ks with new psichi
  if (paw_dmft%dmft_kspectralfunc == 1) then
-   !call identity_oper(oper_temp,2)
    ABI_MALLOC(wtk_tmp,(nkpt))
    wtk_tmp(:) = one
    call init_oper(paw_dmft,norm,nkpt=1,wtk=wtk_tmp(:),opt_ksloc=2)
-   do jkpt=1,nkpt  ! jkpt
+   do jkpt=1,nkpt ! jkpt
      norm%shiftk = jkpt - 1
      call downfold_oper(norm,paw_dmft,option=2)
      write(message,'(2a,i5)') &
@@ -1495,22 +1033,20 @@ subroutine chipsi_renormalization(paw_dmft,opt)
      call wrtout(std_out,message,'COLL')
      call print_matlu(norm%matlu(:),natom,prtopt=1)
 !== Check that norm is now the identity
-     !call identity_oper(oper_temp,2)
      call diff_matlu('Overlap after renormalization','Identity',&
        & norm%matlu(:),oper_temp%matlu(:),natom,1,tol6,zero_or_one=1)
    end do ! jkpt
    ABI_FREE(wtk_tmp)
-   !call destroy_oper(oper_temp)
  else !dmft_kspectralfunc
-   write(message,'(2a)') ch10,'  ===== Calling loc_oper'
+   write(message,'(2a)') ch10,'  ===== Calling downfold_oper'
    call wrtout(std_out,message,'COLL')
    call init_oper(paw_dmft,norm,opt_ksloc=2)
    call downfold_oper(norm,paw_dmft,procb=paw_dmft%distrib%procb(:),iproc=paw_dmft%distrib%me_kpt,option=2)
    call xmpi_matlu(norm%matlu(:),natom,paw_dmft%distrib%comm_kpt)
-   write(message,'(2a)') ch10,'  ===== Finished loc_oper'
+   write(message,'(2a)') ch10,'  ===== Finished downfold_oper'
    call wrtout(std_out,message,'COLL')
 
-!== Print norm%matlu unsymetrized with new psichi
+!== Print unsymmetrized norm%matlu with new chipsi
    if (pawprtvol > 2) then
      write(message,'(4a,2a)') &
       &  ch10,"  == Check: Overlap with renormalized chipsi without symmetrization is == "
@@ -1518,20 +1054,18 @@ subroutine chipsi_renormalization(paw_dmft,opt)
      call print_matlu(norm%matlu(:),natom,prtopt=1)
    end if ! pawprtvol>2
 
-!== Symetrise norm%matlu with new psichi
+!== Symmetrize norm%matlu with new chipsi
    call sym_matlu(norm%matlu(:),paw_dmft)
 
-!== Print norm%matlu symetrized with new psichi
+!== Print symmetrized norm%matlu with new chipsi
    if (pawprtvol > 2) then
      write(message,'(4a,2a)') &
-      & ch10,"  == Check: Overlap with renormalized chipsi and symetrization is =="
+      & ch10,"  == Check: Overlap with renormalized chipsi and symmetrization is =="
      call wrtout(std_out,message,'COLL')
      call print_matlu(norm%matlu(:),natom,prtopt=1,opt_diag=-1)
    end if
 
 !== Check that norm is now the identity
-  ! call init_oper(paw_dmft,oper_temp)
-   !call identity_oper(oper_temp,2)
    call diff_oper('Overlap after renormalization','Identity',norm,oper_temp,0,tol6)
 
  end if ! dmft_kspectralfunc
@@ -1547,17 +1081,19 @@ subroutine chipsi_renormalization(paw_dmft,opt)
 !===========================================================
 !!***
 
-!!****f* psichi_renormalization/normalizepsichi
+!!****f* chipsi_renormalization/normalizechipsi
 !! NAME
-!!  normalizepsichi
+!!  normalizechipsi
 !!
 !! FUNCTION
-!!  normalizepsichi psichi from norm
+!!  Orthonormalize chipsi
 !!
 !! INPUTS
+!!  nkpt = number of kpt
+!!  paw_dmft =  data for DFT+DMFT calculations.
+!!  jkpt = if present, index of the kpt to be orthonormalized
 !!
 !! SIDE EFFECTS
-!!  change psichi: normalizepsichi it
 !!
 !! SOURCE
 
@@ -1566,43 +1102,21 @@ subroutine normalizechipsi(nkpt,paw_dmft,jkpt)
 !Arguments ------------------------------------
  integer, intent(in) :: nkpt
  integer, optional, intent(in) :: jkpt
- !real(dp),pointer :: temp_wtk(:)
-!scalars
- !type(crystal_t),intent(in) :: cryst_struc
  type(paw_dmft_type), intent(inout) :: paw_dmft
- !type(pawang_type), intent(in) :: pawang
 !Local variables ------------------------------
  integer :: dimoverlap,dum,iatom,ib,ikpt,im,isppol,itot,itot1,lpawu,mbandc
  integer :: natom,ndim,ndim_max,nspinor,nsppol,pawprtvol
  type(oper_type) :: norm1,norm2,norm3
  complex(dpc), allocatable :: chipsivect(:,:),largeoverlap(:,:),mat_tmp(:,:)
  character(len=500) :: message
-!scalars
-!arrays
 ! real(dp),allocatable :: e0pde(:,:,:),omegame0i(:)
 !************************************************************************
-   !nsppol  = paw_dmft%nsppol
-   !mbandc  = paw_dmft%mbandc
-   !natom   = cryst_struc%natom
-   !nspinor = paw_dmft%nspinor
  mbandc    = paw_dmft%mbandc
  natom     = paw_dmft%natom
  nspinor   = paw_dmft%nspinor
  nsppol    = paw_dmft%nsppol
  ndim_max  = (2*paw_dmft%maxlpawu+1)*nspinor
  pawprtvol = 3
-   !diag = 0
-   !natomcor=0
-  ! dimoverlap=0
-  ! do iatom=1,natom
-  !   if(paw_dmft%lpawu(iatom).ne.-1) then
-  !     natomcor=natomcor+1
-  !     ndim=2*paw_dmft%lpawu(iatom)+1
-  !     tndim=nspinor*ndim
-  !     dimoverlap=dimoverlap+tndim
-      ! write(6,*) "atom, dimoverlap",iatom,dimoverlap,natomcor
-  !   end if
-  ! end do
 
  if (nkpt /= 1 .and. present(jkpt)) then
    message = 'BUG in chipsi_normalization'
@@ -1620,16 +1134,8 @@ subroutine normalizechipsi(nkpt,paw_dmft,jkpt)
 
    call init_oper(paw_dmft,norm1,opt_ksloc=2)
 
-!    == Build identity for norm1%ks (option=1)
-     !call identity_oper(norm1,1)
-
-     !if(nkpt==1.and.present(jkpt)) then
-     !  call loc_oper(norm1,paw_dmft,1,jkpt=jkpt)
-     !end if
-     !if(.not.present(jkpt)) then
    call downfold_oper(norm1,paw_dmft,procb=paw_dmft%distrib%procb(:),iproc=paw_dmft%distrib%me_kpt,option=2)
    call xmpi_matlu(norm1%matlu(:),natom,paw_dmft%distrib%comm_kpt)
-     !end if
    if (nkpt > 1) call sym_matlu(norm1%matlu(:),paw_dmft)
 
    if (pawprtvol > 2) then
@@ -1637,33 +1143,18 @@ subroutine normalizechipsi(nkpt,paw_dmft,jkpt)
      call wrtout(std_out,message,'COLL')
      call print_matlu(norm1%matlu(:),natom,prtopt=1,opt_exp=1)
    end if
-!    ==-------------------------------------
-!    == Start loop on atoms
-   !ABI_MALLOC(overlap,(natom))
-     !do iatom=1,natom
-     !  if(paw_dmft%lpawu(iatom).ne.-1) then
-     !    ndim=2*paw_dmft%lpawu(iatom)+1
-     !    tndim=nsppol*nspinor*ndim
-     !    ABI_MALLOC(overlap(iatom)%value,(tndim,tndim))
-     !    overlap(iatom)%value=czero
-     !  end if
-     !end do
-!    ==-------------------------------------
 
-!    built large overlap matrix
+!    build large overlap matrix
    write(message,'(2a)') ch10,'  - Overlap (before orthonormalization) -'
    call wrtout(std_out,message,'COLL')
-   !call gather_matlu(norm1%matlu,overlap,cryst_struc%natom,option=1,prtopt=1)
-   !call destroy_oper(norm1)
 
+!  ==-------------------------------------
+!  == Start loop on atoms
    do iatom=1,natom
      lpawu = paw_dmft%lpawu(iatom)
      if (lpawu == -1) cycle
-       !if(paw_dmft%lpawu(iatom).ne.-1) then
      ndim = nspinor * (2*lpawu+1)
      ABI_MALLOC(mat_tmp,(ndim,mbandc))
-     !tndim = nsppol*nspinor*ndim
-         !ABI_MALLOC(sqrtmatinv,(tndim,tndim))
 
 !        == Compute Inverse Square root of overlap : O^{-0.5}
          !do im=1,tndim
@@ -1677,7 +1168,21 @@ subroutine normalizechipsi(nkpt,paw_dmft,jkpt)
          !call wrtout(std_out,message,'COLL')
          !if(diag==0) then
      do isppol=1,nsppol
+       ! if(diag==0) then
        call invsqrt_matrix(norm1%matlu(iatom)%mat(:,:,isppol),ndim,dum)
+       !else
+       !  do im1=1,tndim
+       !    do im=1,tndim
+       !      if (im==im1) then
+       !        norm1%matlu(iatom)%mat(im,im1,isppol)=cone/sqrt(norm1%matlu(iatom)%mat(im,im,isppol)
+       !      else
+       !        norm1%matlu(iatom)%mat(im,im1,isppol)=czero
+       !      end if
+       !    end do
+       ! end do 
+       !end if
+
+!        == Apply O^{-0.5} on chipsi
        do ikpt=1,nkpt
          if (paw_dmft%distrib%procb(ikpt) /= paw_dmft%distrib%me_kpt) cycle
          call abi_xgemm("n","n",ndim,mbandc,ndim,cone,norm1%matlu(iatom)%mat(:,:,isppol), &
@@ -1689,91 +1194,17 @@ subroutine normalizechipsi(nkpt,paw_dmft,jkpt)
      ABI_FREE(mat_tmp)
 
    end do ! iatom
+!  == End loop on atoms
+!  ==-------------------------------------
 
-           !sqrtmatinv=overlap(iatom)%value
-         !else
-         !  sqrtmatinv(:,:)=czero
-         !  do ib=1,tndim
-         !    sqrtmatinv(ib,ib)=cone/(sqrt(overlap(iatom)%value(ib,ib)))
-         !  end do
-         !end if
+!  ======================================================================
+!  == Check norm with new psichi.
+!  ======================================================================
 
-!        == Apply O^{-0.5} on psichi
-       !  ABI_MALLOC(wan,(nsppol,nspinor,ndim))
-!        write(std_out,*) mbandc,nsppol,nspinor,ndim
-!        write(std_out,*)  paw_dmft%psichi(1,1,1,1,1,1)
-       !  do ikpt=1,nkpt
-        !   do ib=1,mbandc
-         !    if(present(jkpt)) then
-         !      ikpt1=jkpt
-         !    else
-         !      ikpt1=ikpt
-         !    end if
-         !    jc=0
-          !   wan=czero
-          !   do isppol=1,nsppol
-          !     do ispinor=1,nspinor
-          !       do im=1,ndim
-!                  write(std_out,*) "psichi", paw_dmft%psichi(isppol,ikpt1,ib,ispinor,iatom,im)
-          !         jc=jc+1
-           !        jc1=0
-            !       do isppol1=1,nsppol
-           !          do ispinor1=1,nspinor
-           !            do im1=1,ndim
-           !              jc1=jc1+1
-           !              wan(isppol,ispinor,im)= wan(isppol,ispinor,im) &
-!&                         + paw_dmft%psichi(isppol1,ikpt1,ib,ispinor1,iatom,im1)*sqrtmatinv(jc,jc1)
-          !             end do ! ispinor1
-           !          end do ! isppol1
-           !        end do ! im1
-          !       end do ! im
-         !      end do ! ispinor
-          !   end do !  isppol
-         !    do isppol=1,nsppol
-          !     do ispinor=1,nspinor
-          !       do im=1,ndim
-          !         paw_dmft%psichi(isppol,ikpt1,ib,ispinor,iatom,im)=wan(isppol,ispinor,im)
-!                  write(std_out,*) "psichi2", paw_dmft%psichi(isppol,ikpt1,ib,ispinor,iatom,im)
-         !        end do ! ispinor
-         !      end do ! isppol
-        !     end do ! im
-        !   end do ! ib
-       !  end do ! ikpt
-       !  ABI_FREE(wan)
-        ! ABI_FREE(sqrtmatinv)
-!        write(std_out,*)  paw_dmft%psichi(1,1,1,1,1,1)
-
-!        ==-------------------------------------
-     !  end if ! lpawu.ne.-1
-    ! end do ! iatom
-!    == End loop on atoms
-!    ==-------------------------------------
-    ! do iatom=1,natom
-     !  if(paw_dmft%lpawu(iatom).ne.-1) then
-    !     ABI_FREE(overlap(iatom)%value)
-    !   end if
-   !  end do
-   !  ABI_FREE(overlap)
-
-!    ======================================================================
-!    == Check norm with new psichi.
-!    ======================================================================
-
-     !call init_oper(paw_dmft,norm1,nkpt=nkpt,wtk=temp_wtk)
-
-     !call identity_oper(norm1,1)
-
-     !if(nkpt==1.and.present(jkpt)) then
-     !  call loc_oper(norm1,paw_dmft,1,jkpt=jkpt)
-     !end if
-     !if(.not.present(jkpt)) then
    call downfold_oper(norm1,paw_dmft,procb=paw_dmft%distrib%procb(:),iproc=paw_dmft%distrib%me_kpt,option=2)
    call xmpi_matlu(norm1%matlu(:),natom,paw_dmft%distrib%comm_kpt)
 
-     !end if
-
    if (nkpt > 1) call sym_matlu(norm1%matlu(:),paw_dmft)
-   !  end if
 
    if (pawprtvol > 2) then
      write(message,'(2a)') ch10,'  - Print norm with new chipsi '
@@ -1781,9 +1212,9 @@ subroutine normalizechipsi(nkpt,paw_dmft,jkpt)
      call print_matlu(norm1%matlu(:),natom,prtopt=1)
    end if
 
-!    ======================================================================
-!    == Check that norm-identity is zero
-!    ======================================================================
+!  ======================================================================
+!  == Check that norm-identity is zero
+!  ======================================================================
    call init_oper(paw_dmft,norm2,opt_ksloc=2)
    call init_oper(paw_dmft,norm3,opt_ksloc=2)
    call identity_oper(norm2,2)
@@ -1809,13 +1240,8 @@ subroutine normalizechipsi(nkpt,paw_dmft,jkpt)
    do iatom=1,natom
      lpawu = paw_dmft%lpawu(iatom)
      if (lpawu == -1) cycle
-     !if(paw_dmft%lpawu(iatom).ne.-1) then
-       !natomcor=natomcor+1
-       !ndim=2*paw_dmft%lpawu(iatom)+1
-       !tndim=nspinor*ndim
      dimoverlap = dimoverlap + 2*lpawu + 1
       ! write(6,*) "atom, dimoverlap",iatom,dimoverlap,natomcor
-     !end if
    end do ! iatom
 
    dimoverlap = dimoverlap * nspinor

@@ -510,11 +510,11 @@ subroutine destroy_hu(hu,ntypat)
  
  do itypat=1,ntypat
 !  if ( allocated(hu(itypat)%vee) )  deallocate(hu(itypat)%vee)
-   if (allocated(hu(itypat)%uqmc))    ABI_FREE(hu(itypat)%uqmc)
-   if (allocated(hu(itypat)%udens))   ABI_FREE(hu(itypat)%udens)
-   if (allocated(hu(itypat)%fk))      ABI_FREE(hu(itypat)%fk)
-   if (allocated(hu(itypat)%vee))     ABI_FREE(hu(itypat)%vee)
-   if (allocated(hu(itypat)%veeslm2)) ABI_FREE(hu(itypat)%veeslm2)
+   ABI_SFREE(hu(itypat)%uqmc)
+   ABI_SFREE(hu(itypat)%udens)
+   ABI_SFREE(hu(itypat)%fk)
+   ABI_SFREE(hu(itypat)%vee)
+   ABI_SFREE(hu(itypat)%veeslm2)
  end do ! itypat
 
 end subroutine destroy_hu

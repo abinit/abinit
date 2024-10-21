@@ -108,7 +108,7 @@ subroutine hubbard_one(cryst_struc,green,hu,paw_dmft,pawprtvol,hdc,weiss)
 ! scalars
  character(len=500) :: message
  integer :: iatom,ifreq,im,im1,isppol,ispinor,ispinor1
- integer :: lpawu,mbandc,natom,ndim,nkpt,nspinor,nsppol,nsppol_imp,testblock,tndim,useylm
+ integer :: lpawu,mbandc,natom,ndim,nkpt,nspinor,nsppol,nsppol_imp,testblock,useylm
 ! complex(dpc) :: g,g0,w
 ! arrays
  complex(dp), allocatable :: Id(:,:,:,:)

@@ -176,7 +176,9 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang, &
  ABI_MALLOC(matlumag_spin,(natom))
  ABI_MALLOC(magmom_tot,(natom))
  ABI_MALLOC(matlumag_tot,(natom))
- if (paw_dmft%ientropy == 1) ABI_MALLOC(udens_atoms_for_s,(natom))
+ if (paw_dmft%ientropy == 1) then
+   ABI_MALLOC(udens_atoms_for_s,(natom))
+ end if 
  ABI_MALLOC(dmat_diag,(natom))
  !ABI_MALLOC(identity,(natom))
  call init_matlu(natom,nspinor,nsppol,paw_dmft%lpawu(:),dmat_diag(:))
@@ -266,7 +268,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang, &
  
  ! Compute atomic levels in Slm basis
  ! ----------------------------------
- call compute_levels(energy_level,self%hdc,paw_dmft,nondiag=nondiaglevels,loc_levels=loc_levels)
+ call compute_levels(energy_level,self%hdc,paw_dmft,nondiag=nondiaglevels)
 
  ! If levels are not diagonal, then diagonalize it (according to
  ! dmftctqmc_basis)
@@ -1392,7 +1394,9 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang, &
        !because size allocation problem with TRIQS paw_dmft%dmft_nwlo must be >= paw_dmft%dmft_nwli
      open(unit=505,file=trim(paw_dmft%filapp)//"_Legendre_coefficients.dat", status='unknown',form='formatted')
    else
-     if (paw_dmft%dmft_solv == 5) ABI_MALLOC(gw_tmp,(paw_dmft%dmft_nwlo,nflavor+1))
+     if (paw_dmft%dmft_solv == 5) then
+       ABI_MALLOC(gw_tmp,(paw_dmft%dmft_nwlo,nflavor+1))
+     end if 
      ABI_MALLOC(gw_tmp_nd,(paw_dmft%dmft_nwlo,nflavor,nflavor+1))
        !use  gw_tmp to put freq
      do ifreq=1,paw_dmft%dmft_nwlo
@@ -1552,7 +1556,9 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang, &
 
      ! Deallocate arrays for CTQMC
      !-----------------------------
-   if (paw_dmft%dmft_solv < 6) ABI_FREE(gw_tmp)
+   if (paw_dmft%dmft_solv < 6) then
+     ABI_FREE(gw_tmp)
+   end if 
    ABI_FREE(gw_tmp_nd)
    ABI_FREE(gtmp)
    ABI_FREE(gtmp_nd)
@@ -3363,10 +3369,16 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,weiss,energy_level,udens,vee)
    
    ABI_MALLOC(levels_ctqmc,(nflavor,nflavor))
    ABI_MALLOC(gtau,(ntau,nflavor,nflavor))
-   if (density_matrix_measure) ABI_MALLOC(occ,(nflavor))
-   if (.not. leg_measure .and. density_matrix_measure) ABI_MALLOC(moments_self_1,(nflavor,nflavor))
-   if (.not. leg_measure .and. density_matrix_measure) ABI_MALLOC(moments_self_2,(nflavor,nflavor))
-   if (leg_measure) ABI_MALLOC(gl,(nleg,nflavor,nflavor))
+   if (density_matrix_measure) then 
+     ABI_MALLOC(occ,(nflavor))
+   end if 
+   if (.not. leg_measure .and. density_matrix_measure) then
+     ABI_MALLOC(moments_self_1,(nflavor,nflavor))
+     ABI_MALLOC(moments_self_2,(nflavor,nflavor))
+   end if 
+   if (leg_measure) then
+     ABI_MALLOC(gl,(nleg,nflavor,nflavor))
+   end if 
    
    levels_ctqmc(:,:) = czero
    do isppol=1,nsppol
