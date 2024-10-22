@@ -209,7 +209,7 @@ subroutine rhotov(constrained_dft,dtset,energies,gprimd,grcondft,gsqcut,intgres,
  integer :: mpi_comm_sphgrid,ixc_current
 !integer :: ii,jj,kk,ipt,nx,ny,nz           !SPr: debug
 !real(dp):: rx,ry,rz                        !SPr: debug
- real(dp) :: doti,e_xcdc_vxctau
+ real(dp) :: doti,e_xcdc_vxctau,bigtsxc
  logical :: add_tfw_,calc_xcdc,non_magnetic_xc,with_vxctau
  logical :: is_hybrid_ncpp,wvlbigdft=.false.
  type(xcdata_type) :: xcdata
@@ -260,9 +260,9 @@ subroutine rhotov(constrained_dft,dtset,energies,gprimd,grcondft,gsqcut,intgres,
  end if
 
  if (ipositron/=1) then
-!  if metaGGA, save current value of vxctau potential
+   !  if metaGGA, save current value of vxctau potential
    if (with_vxctau) vtauresid(:,:)=vxctau(:,:,1)
-!  Compute xc potential (separate up and down if spin-polarized)
+   !  Compute xc potential (separate up and down if spin-polarized)
    if (dtset%icoulomb == 0 .and. dtset%usewvl == 0) then
 
 !    >>>> Hartree potential
@@ -293,7 +293,7 @@ subroutine rhotov(constrained_dft,dtset,energies,gprimd,grcondft,gsqcut,intgres,
          call rhotoxc(energies%e_xc,kxc,mpi_enreg,nfft,ngfft,&
 &         nhat,usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,non_magnetic_xc,n3xccc,optxc,&
 &         rhor,rprimd,strsxc,usexcnhat,vxc,vxcavg,xccc3d,xcdata,&
-&         taur=taur,vhartr=vhartr,vxctau=vxctau_,add_tfw=add_tfw_,xcctau3d=xcctau3d)
+&         bigtsxc=bigtsxc,taur=taur,vhartr=vhartr,vxctau=vxctau_,add_tfw=add_tfw_,xcctau3d=xcctau3d)
          if(mod(dtset%fockoptmix,100)==11)then
            energies%e_xc=energies%e_xc*dtset%auxc_scal
            vxc(:,:)=vxc(:,:)*dtset%auxc_scal
@@ -306,9 +306,17 @@ subroutine rhotov(constrained_dft,dtset,energies,gprimd,grcondft,gsqcut,intgres,
        call rhotoxc(energies%e_xc,kxc,mpi_enreg,nfft,ngfft,&
 &       nhat,usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,non_magnetic_xc,n3xccc,optxc,&
 &       rhor,rprimd,strsxc,usexcnhat,vxc,vxcavg,xccc3d,xcdata,&
-&       taur=taur,vhartr=vhartr,vxctau=vxctau_,add_tfw=add_tfw_,&
+&       bigtsxc=bigtsxc,taur=taur,vhartr=vhartr,vxctau=vxctau_,add_tfw=add_tfw_,&
 &       electronpositron=electronpositron,xcctau3d=xcctau3d)
      end if
+
+!    For finite temperature exchange correlation functionals, add exchange-correlation entropy
+     if(abs(dtset%tphysel)<tol10) then
+       energies%entropy=energies%entropy+bigtsxc/dtset%tsmear
+     else
+       energies%entropy=energies%entropy+bigtsxc/dtset%tphysel
+     end if
+     
      call timab(941,2,tsec)
    elseif (.not. wvlbigdft) then
 !    Use the free boundary solver.

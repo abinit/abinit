@@ -847,6 +847,7 @@ end subroutine mkdenpos
 !!
 !! OUTPUT
 !!  exc(npts)=exchange-correlation energy density (hartree)
+!!  tsxc(npts)=exchange-correlation entropy energy density (hartree)
 !!  vxcrho(npts,nspden)= (d($\rho$*exc)/d($\rho_up$)) (hartree)
 !!                  and  (d($\rho$*exc)/d($\rho_down$)) (hartree)
 !!  === Optional output arguments ===
@@ -897,7 +898,7 @@ end subroutine mkdenpos
 !! SOURCE
 
 subroutine drivexc(ixc,order,npts,nspden,usegradient,uselaplacian,usekden,&
-&          rho_updn,exc,vxcrho,nvxcgrho,nvxclrho,nvxctau,ndvxc,nd2vxc, &       ! mandatory arguments
+&          rho_updn,exc,tsxc,vxcrho,nvxcgrho,nvxclrho,nvxctau,ndvxc,nd2vxc, &       ! mandatory arguments
 &          grho2_updn,vxcgrho,lrho_updn,vxclrho,tau_updn,vxctau,dvxc,d2vxc, &  ! optional arguments
 &          exexch,el_temp,fxcT,hyb_mixing,xc_funcs)                            ! optional parameters
 
@@ -912,7 +913,7 @@ subroutine drivexc(ixc,order,npts,nspden,usegradient,uselaplacian,usekden,&
  real(dp),intent(in) :: rho_updn(npts,nspden)
  real(dp),intent(in),optional :: grho2_updn(npts,(2*nspden-1)*usegradient)
  real(dp),intent(in),optional :: lrho_updn(npts,nspden*uselaplacian),tau_updn(npts,nspden*usekden)
- real(dp),intent(out) :: exc(npts),vxcrho(npts,nspden)
+ real(dp),intent(out) :: exc(npts),tsxc(npts),vxcrho(npts,nspden)
  real(dp),intent(out),optional :: dvxc(npts,ndvxc),d2vxc(npts,nd2vxc),fxcT(:)
  real(dp),intent(out),optional :: vxcgrho(npts,nvxcgrho),vxclrho(npts,nvxclrho),vxctau(npts,nvxctau)
  type(libxc_functional_type),intent(inout),optional :: xc_funcs(2)

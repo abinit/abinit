@@ -5756,6 +5756,7 @@ end subroutine pawxcmpositron
 
 !Local variables-------------------------------
  character(len=100) :: msg
+ real(dp) :: tsxc(npts)
 
 ! *************************************************************************
 
@@ -5805,20 +5806,20 @@ subroutine pawxc_drivexc_abinit()
  if (uselaplacian==1.or.usekden==1) then
    if (uselaplacian==1.and.usekden==1) then
      call drivexc(ixc,order,npts,nspden,usegradient,uselaplacian,usekden,&
-&            rho,exc,vxcrho,nvxcgrho,nvxclrho,nvxctau,ndvxc,nd2vxc, &
+&            rho,exc,tsxc,vxcrho,nvxcgrho,nvxclrho,nvxctau,ndvxc,nd2vxc, &
 &            grho2_updn=grho2,vxcgrho=vxcgrho,&
 &            lrho_updn=lrho,vxclrho=vxclrho,&
 &            tau_updn=tau,vxctau=vxctau,&
 &            dvxc=dvxc,d2vxc=d2vxc,hyb_mixing=hyb_mixing)
    else if (uselaplacian==1) then
      call drivexc(ixc,order,npts,nspden,usegradient,uselaplacian,usekden,&
-&            rho,exc,vxcrho,nvxcgrho,nvxclrho,nvxctau,ndvxc,nd2vxc, &
+&            rho,exc,tsxc,vxcrho,nvxcgrho,nvxclrho,nvxctau,ndvxc,nd2vxc, &
 &            grho2_updn=grho2,vxcgrho=vxcgrho,&
 &            lrho_updn=lrho,vxclrho=vxclrho,&
 &            dvxc=dvxc,d2vxc=d2vxc,hyb_mixing=hyb_mixing)
    else if (usekden==1) then
      call drivexc(ixc,order,npts,nspden,usegradient,uselaplacian,usekden,&
-&            rho,exc,vxcrho,nvxcgrho,nvxclrho,nvxctau,ndvxc,nd2vxc, &
+&            rho,exc,tsxc,vxcrho,nvxcgrho,nvxclrho,nvxctau,ndvxc,nd2vxc, &
 &            grho2_updn=grho2,vxcgrho=vxcgrho,&
 &            tau_updn=tau,vxctau=vxctau,&
 &            dvxc=dvxc,d2vxc=d2vxc,hyb_mixing=hyb_mixing)
@@ -5826,19 +5827,19 @@ subroutine pawxc_drivexc_abinit()
  else if (usegradient==1) then
    if (present(exexch)) then
      call drivexc(ixc,order,npts,nspden,usegradient,uselaplacian,usekden,&
-&            rho,exc,vxcrho,nvxcgrho,nvxclrho,nvxctau,ndvxc,nd2vxc, &
+&            rho,exc,tsxc,vxcrho,nvxcgrho,nvxclrho,nvxctau,ndvxc,nd2vxc, &
 &            grho2_updn=grho2,vxcgrho=vxcgrho,&
 &            dvxc=dvxc,d2vxc=d2vxc,&
 &            exexch=exexch,hyb_mixing=hyb_mixing)
    else
      call drivexc(ixc,order,npts,nspden,usegradient,uselaplacian,usekden,&
-&            rho,exc,vxcrho,nvxcgrho,nvxclrho,nvxctau,ndvxc,nd2vxc, &
+&            rho,exc,tsxc,vxcrho,nvxcgrho,nvxclrho,nvxctau,ndvxc,nd2vxc, &
 &            grho2_updn=grho2,vxcgrho=vxcgrho,&
 &            dvxc=dvxc,d2vxc=d2vxc,hyb_mixing=hyb_mixing)
    end if
  else
    call drivexc(ixc,order,npts,nspden,usegradient,uselaplacian,usekden,&
-&            rho,exc,vxcrho,nvxcgrho,nvxclrho,nvxctau,ndvxc,nd2vxc, &
+&            rho,exc,tsxc,vxcrho,nvxcgrho,nvxclrho,nvxctau,ndvxc,nd2vxc, &
 &            dvxc=dvxc,d2vxc=d2vxc,hyb_mixing=hyb_mixing)
  end if
 
