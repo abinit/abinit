@@ -163,7 +163,7 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
  integer,parameter :: master = 0, cplex1 = 1, ipert0 = 0, idir0 = 0, optrhoij1 = 1
  integer :: ii, comm, nprocs, my_rank, mgfftf, nfftf, omp_ncpus, work_size, nks_per_proc
  integer :: ierr, spin, ik_ibz, nband_k, iomode__, color, io_comm !, kg_varid
- real(dp) :: eff, mempercpu_mb, max_wfsmem_mb, nonscal_mem
+ real(dp) :: eff, mempercpu_mb, max_wfsmem_mb, nonscal_mem, el_temp
  real(dp) :: ecore, ecut_eff, ecutdg_eff, cpu, wall, gflops, diago_cpu, diago_wall, diago_gflops
  logical, parameter :: is_dfpt = .false.
  logical :: read_wfk, write_wfk, cc4s_task, rectangular, rdm_update, call_pawinit, cc4s_from_wfk
@@ -304,6 +304,9 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
  ! Some variables need to be initialized/nullify at start
  usexcnhat = 0
  call energies_init(KS_energies)
+ 
+!Get electronic temperature from dtset
+ el_temp=merge(dtset%tphysel,dtset%tsmear,dtset%tphysel>tol8.and.dtset%occopt/=3.and.dtset%occopt/=9)
 
  den_path = dtfil%fildensin; wfk_path = dtfil%fnamewffk; kden_path = dtfil%filkdensin
  !use_den = f (string_in(dtset%gwr_task, "CC4S_FROM_WFK")) then
@@ -516,7 +519,7 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
 
    !  Calculate onsite vxc with and without core charge.
    nzlmopt=-1; option=0; compch_sph=greatest_real
-   call pawdenpot(compch_sph,KS_energies%e_paw,KS_energies%e_pawdc,ipert0,&
+   call pawdenpot(compch_sph,el_temp,KS_energies%e_paw,KS_energies%e_pawdc,ipert0,&
      Dtset%ixc,Cryst%natom,Cryst%natom,Dtset%nspden,&
      Cryst%ntypat,Dtset%nucdipmom,nzlmopt,option,KS_Paw_an,KS_Paw_an,KS_paw_ij,&
      Pawang,Dtset%pawprtvol,Pawrad,KS_Pawrhoij,Dtset%pawspnorb,&

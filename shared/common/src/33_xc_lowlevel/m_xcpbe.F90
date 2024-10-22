@@ -24,9 +24,7 @@ module m_xcpbe
  use defs_basis
  use m_abicore
  use m_errors
-
  use m_numeric_tools,      only : invcb
- use m_xclda,  only : get_temperature !VVK added
 
  implicit none
 
@@ -5154,7 +5152,7 @@ end subroutine xcpbe
 !!***
 !include 'xctp123_for_m_xcpbe_inc.for' !VVK-added
 
-subroutine xctp123(dvxcdgr,exci,grho2_updn,ixc,npts,nspden,order,rho_updn,rhor,rspts,vxci)
+subroutine xctp123(dvxcdgr,exci,grho2_updn,ixc,npts,nspden,order,rho_updn,rhor,rspts,tsmear,vxci)
 
  implicit none
 
@@ -5164,13 +5162,13 @@ subroutine xctp123(dvxcdgr,exci,grho2_updn,ixc,npts,nspden,order,rho_updn,rhor,r
 !arrays
  real(dp),intent(in) :: grho2_updn(npts,2*nspden-1),rho_updn(npts,nspden)
  real(dp),intent(out) :: dvxcdgr(npts,3),exci(npts),vxci(npts,nspden)
- real(dp),intent(in) :: rhor(npts),rspts(npts)
+ real(dp),intent(in) :: rhor(npts),rspts(npts),tsmear
 
 !Local variables-------------------------------
 !scalars
  integer :: ipt
- real(dp) :: tfac,tsmear,rs,rho,tempf,tred,fxc
- real(dp) :: grho
+ real(dp) :: tfac,rs,rho,tempf,tred,fxc
+ real(dp) :: grho,degauss
  real(dp) :: fxclda,vxclda
  real(dp) :: fx_lda,einx_lda,tsx_lda,vx_lda
  real(dp) :: fc_lda,einc_lda,tsc_lda,vc_lda
@@ -5180,6 +5178,8 @@ subroutine xctp123(dvxcdgr,exci,grho2_updn,ixc,npts,nspden,order,rho_updn,rhor,r
  character(len=500) :: message
 
 ! *************************************************************************
+ 
+write(0,*) tsmear
 
 !Compute tfac=(3._dp*pi**2)**(2._dp/3._dp)/2._dp, tempFermi=tfac*rho**(2/3)
  tfac=(3._dp*pi**2)**(2._dp/3._dp)/2._dp
@@ -5189,8 +5189,6 @@ subroutine xctp123(dvxcdgr,exci,grho2_updn,ixc,npts,nspden,order,rho_updn,rhor,r
  !  MSG_BUG(message)
  !end if
 
-! get tsmear:
- call get_temperature(tsmear,1)
  !tsmear=1.d-10
  degauss = tsmear*2._dp ! setup temperature (in Ry) in defs_basis module
 
@@ -5208,20 +5206,20 @@ subroutine xctp123(dvxcdgr,exci,grho2_updn,ixc,npts,nspden,order,rho_updn,rhor,r
 ! choose this one:
    !call fxc_ksdt_01(fxclda,vxclda,rs,tred,0)
 ! or this one:
-   call fex_lda (rs,fx_lda,einx_lda,tsx_lda,vx_lda)
-   call fec_lda (rs,fc_lda,einc_lda,tsc_lda,vc_lda)
+   call fex_lda (rs,fx_lda,einx_lda,tsx_lda,vx_lda,degauss)
+   call fec_lda (rs,fc_lda,einc_lda,tsc_lda,vc_lda,degauss)
    fxclda = fx_lda + fc_lda
    vxclda = vx_lda + vc_lda
 !
    if(ixc.eq.1001) then
-     call FTGGAx_1 (rho, grho, 5, fx, v1x, v2x, einx, tsx)
-     call FTPBEc (rho, grho, 9, fc, v1c, v2c, einc, tsc)
+     call FTGGAx_1 (rho, grho, 5, fx, v1x, v2x, einx, tsx, degauss)
+     call FTPBEc (rho, grho, 9, fc, v1c, v2c, einc, tsc, degauss)
    elseif(ixc.eq.1002) then
-     call FTGGAx_1 (rho, grho, 6, fx, v1x, v2x, einx, tsx)
-     call FTPBEc (rho, grho, 10, fc, v1c, v2c, einc, tsc)
+     call FTGGAx_1 (rho, grho, 6, fx, v1x, v2x, einx, tsx, degauss)
+     call FTPBEc (rho, grho, 10, fc, v1c, v2c, einc, tsc, degauss)
    elseif(ixc.eq.1003) then
-     call FTGGAx_1 (rho, grho, 7, fx, v1x, v2x, einx, tsx)
-     call FTPBEc (rho, grho, 11, fc, v1c, v2c, einc, tsc)
+     call FTGGAx_1 (rho, grho, 7, fx, v1x, v2x, einx, tsx, degauss)
+     call FTPBEc (rho, grho, 11, fc, v1c, v2c, einc, tsc, degauss)
    else
 !     write(message, '(a,i5)' )&
 !&    'xctp123, ixc!=1001,1002,1003, ixc=',ixc
@@ -5250,7 +5248,7 @@ end subroutine xctp123
 ! The following subroutines are not used (older versions) and could be removed:
 ! tildeBAx, AxPade, BxPade
 !-------------------------------------------------------------------------------
-subroutine fex_lda (rs,fx,einx,tsx,vx)
+subroutine fex_lda (rs,fx,einx,tsx,vx,degauss)
   !-----------------------------------------------------------------------------
   ! VVK: SEP 2014: finite-T exchange based on new improved Pade fits
   ! REF: 
@@ -5258,7 +5256,7 @@ subroutine fex_lda (rs,fx,einx,tsx,vx)
   !-----------------------------------------------------------------------------
 
   implicit none
-  real(DP) :: rs,fx,einx,tsx,vx 
+  real(DP) :: rs,fx,einx,tsx,vx,degauss
   ! rs
   ! x-free-energy per electron
   ! x-internal energy per electron
@@ -5293,7 +5291,7 @@ subroutine fex_lda (rs,fx,einx,tsx,vx)
 end subroutine fex_lda
 !-------------------------------------------------------------------------------
 !-------------------------------------------------------------------------------
-subroutine fec_lda (rs,fc,einc,tsc,vc)
+subroutine fec_lda (rs,fc,einc,tsc,vc,degauss)
   !-----------------------------------------------------------------------------
   ! VVK: 20 JAN 2016: finite-T correlation: KSDT(XC)-TLDA(X)
   ! REF: 
@@ -5301,7 +5299,7 @@ subroutine fec_lda (rs,fc,einc,tsc,vc)
   !-----------------------------------------------------------------------------
 
   implicit none
-  real(DP) :: rs,fc,einc,tsc,vc 
+  real(DP) :: rs,fc,einc,tsc,vc,degauss
   ! rs
   ! c-free-energy per electron
   ! c-internal energy per electron
@@ -5315,9 +5313,9 @@ subroutine fec_lda (rs,fc,einc,tsc,vc)
   real(DP) :: einxc,tsxc
   real(DP) :: fx,einx,tsx,vx
   !
-  call fxc_ksdt_0 (rs, fxc, vxc)
-  call exc_ksdt_0 (rs, einxc,tsxc)
-  call fex_lda (rs,fx,einx,tsx,vx)
+  call fxc_ksdt_0 (rs, fxc, vxc, degauss)
+  call exc_ksdt_0 (rs, einxc,tsxc, degauss)
+  call fex_lda (rs,fx,einx,tsx,vx,degauss)
   fc = fxc - fx
   einc = einxc - einx
   tsc = tsxc - tsx
@@ -5329,14 +5327,14 @@ end subroutine fec_lda
 ! Finite-T GGA X and C
 !------------------------------------------------------------------------------
 !---------------------------------------------------------------
-subroutine FTGGAx_1 (rho, grho, iflag, fx, v1x, v2x, einx, tsx)
+subroutine FTGGAx_1 (rho, grho, iflag, fx, v1x, v2x, einx, tsx, degauss)
   !---------------------------------------------------------------
   !
   ! Karasiev GGA X (without TLDA exchange): see subroutine FxGGA_1
   !
 
   implicit none
-  real(DP) :: rho, grho, fx, v1x, v2x
+  real(DP) :: rho, grho, fx, v1x, v2x, degauss
   ! input: charge and squared gradient
   ! output: energy
   ! output: potential
@@ -5550,7 +5548,7 @@ subroutine FxGGA_2(iflag,s2x,Fx,dFxds2x)
   return
 end subroutine FxGGA_2
 !---------------------------------------------------------------
-subroutine FTPBEc (rho, grho, iflag, fc, v1c, v2c, einc, tsc)
+subroutine FTPBEc (rho, grho, iflag, fc, v1c, v2c, einc, tsc, degauss)
   !---------------------------------------------------------------
   !
   ! finite-T PBE correlation (without LDA part)
@@ -5575,7 +5573,7 @@ subroutine FTPBEc (rho, grho, iflag, fc, v1c, v2c, einc, tsc)
 
   implicit none
   integer, intent(in) :: iflag
-  real(DP), intent(in) :: rho, grho
+  real(DP), intent(in) :: rho, grho, degauss
   real(DP), intent(out):: fc, v1c, v2c, einc, tsc
 
   real(DP), parameter :: ga = 0.031091d0
@@ -5608,7 +5606,7 @@ subroutine FTPBEc (rho, grho, iflag, fc, v1c, v2c, einc, tsc)
   !dtdn = -twothird*t/rho ! (dt/dn)
   dtdn = -twothird*t ! n*(dt/dn)
   ! LDA f_c, einternal_c and T*s_c energies per electron
-  call fec_lda (rs,fc_lda,einc_lda,tsc_lda,vc_lda)
+  call fec_lda (rs,fc_lda,einc_lda,tsc_lda,vc_lda,degauss)
   ! added temporarily for tests
   !call pw (rs, 1, fc_lda, vc_lda)
   !einc_lda = fc_lda
@@ -6424,7 +6422,7 @@ subroutine slater (rs, ex, vx)
 end subroutine slater
 
 !-----------------------------------------------------------------------
-subroutine fxc_ksdt_0(rs,fxc,vxc)
+subroutine fxc_ksdt_0(rs,fxc,vxc,degauss)
   !-----------------------------------------------------------------------------
   !
   ! DESCRIPTION:
@@ -6453,6 +6451,7 @@ subroutine fxc_ksdt_0(rs,fxc,vxc)
   real(8)             :: t,ef
   integer             :: iz
   real(8), intent(out) :: fxc,vxc
+  real(dp),intent(in) :: degauss
   !
   real(8), parameter :: &
        onethird=1.d0/3.d0, &
@@ -6589,7 +6588,7 @@ subroutine fxc_ksdt_0(rs,fxc,vxc)
 end subroutine fxc_ksdt_0
 !
 !-------------------------------------------------------------------------------
-subroutine exc_ksdt_0(rs,exc,tsxc)
+subroutine exc_ksdt_0(rs,exc,tsxc,degauss)
   !-----------------------------------------------------------------------------
   !
   ! DESCRIPTION:
@@ -6618,6 +6617,7 @@ subroutine exc_ksdt_0(rs,exc,tsxc)
   integer             :: iz
   real(8), intent(out) :: exc,tsxc
   real(8)              :: fxc,vxc,sxc,tempF
+  real(dp),intent(in) :: degauss
   !
   real(8), parameter :: &
        onethird=1.D0/3.D0, &
@@ -6662,7 +6662,7 @@ subroutine exc_ksdt_0(rs,exc,tsxc)
   t=degauss/2.0_DP/ef !T=degauss/2.0_DP  
 !
   if(t==0.d0) then
-    call fxc_ksdt_0(rs,fxc,vxc)
+    call fxc_ksdt_0(rs,fxc,vxc, degauss)
     exc=fxc
   else
     tanht=tanh(1.d0/t)

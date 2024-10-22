@@ -26,11 +26,11 @@ module m_drivexc
  use m_abicore
  use m_errors
  use libxc_functionals
- use m_numeric_tools,    only : invcb
- use m_xciit,            only : xciit
- use m_xcpbe,            only : xcpbe, xctp123 !VVK added: xctp123
- use m_xchcth,           only : xchcth
- use m_xclda,  only : xcpzca, xcspol, xctetr, xcwign, xchelu, xcxalp, xclb, xcksdt, get_temperature !VVK added: xcksdt, get_temperature
+ use m_numeric_tools, only: invcb
+ use m_xciit,         only: xciit
+ use m_xcpbe,         only: xcpbe,xctp123
+ use m_xchcth,        only: xchcth
+ use m_xclda,         only: xcpzca,xcspol,xctetr,xcwign,xchelu,xcxalp,xclb,xcksdt
 
  implicit none
 
@@ -837,6 +837,7 @@ end subroutine mkdenpos
 !!  nvxctau=number of components of 1st-derivative of Exc wrt kinetic energy density (nvxctau)
 !!  ndvxc=number of components of  1st-derivative of Vxc (dvxc)
 !!  nd2vxc=number of components of  2nd-derivative of Vxc (d2vxc)
+!!  el_temp=electronic temperature (to be used for finite temperature XC functionals)
 !!  rho_updn(npts,nspden)=spin-up and spin-down densities
 !!    In the calling routine, spin-down density must be equal to spin-up density.
 !!    If nspden=1, only spin-up density must be given (half the total density).
@@ -861,7 +862,6 @@ end subroutine mkdenpos
 !!     be equal to the half the total kinetic energy density.
 !!    If nspden=2, the spin-up and spin-down kinetic energy densities must be given.
 !!  [exexch]=choice of <<<local>>> exact exchange. Active if exexch=3 (only for GGA, and NOT for libxc)
-!!  [el_temp]= electronic temperature (to be used for finite temperature XC functionals)
 !!  [hyb_mixing]= mixing parameter for the native PBEx functionals (ixc=41 and 42)
 !!  [xc_funcs(2)]= <type(libxc_functional_type)>: libxc XC functionals.
 !!
@@ -917,17 +917,18 @@ end subroutine mkdenpos
 !! SOURCE
 
 subroutine drivexc(ixc,order,npts,nspden,usegradient,uselaplacian,usekden,&
-&          rho_updn,exc,vxcrho,nvxcgrho,nvxclrho,nvxctau,ndvxc,nd2vxc, &       ! mandatory arguments
-&          grho2_updn,vxcgrho,lrho_updn,vxclrho,tau_updn,vxctau,dvxc,d2vxc, &  ! optional arguments
-&          exexch,el_temp,fxcT,hyb_mixing,xc_funcs)                            ! optional parameters
+&          rho_updn,exc,vxcrho,nvxcgrho,nvxclrho,nvxctau,ndvxc,nd2vxc,el_temp, & ! mandatory arguments
+&          grho2_updn,vxcgrho,lrho_updn,vxclrho,tau_updn,vxctau,dvxc,d2vxc, &    ! optional arguments
+&          exexch,fxcT,hyb_mixing,xc_funcs)                                      ! optional parameters
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ixc,npts,nspden
  integer,intent(in) :: ndvxc,nd2vxc,nvxcgrho,nvxclrho,nvxctau,order
  integer,intent(in) :: usegradient,uselaplacian,usekden
+ real(dp),intent(in) :: el_temp
  integer,intent(in),optional :: exexch
- real(dp),intent(in),optional :: el_temp,hyb_mixing
+ real(dp),intent(in),optional :: hyb_mixing
 !arrays
  real(dp),intent(in) :: rho_updn(npts,nspden)
  real(dp),intent(in),optional :: grho2_updn(npts,(2*nspden-1)*usegradient)
@@ -1098,8 +1099,8 @@ subroutine drivexc(ixc,order,npts,nspden,usegradient,uselaplacian,usekden,&
    ABI_BUG(message)
  end if
  if(ixc==50) then
-   if(.not.(present(el_temp)).or.(.not.present(fxcT)))then
-     message = 'el_temp or fxcT is not present but are needed for IIT XC functional.'
+   if(.not.(present(fxcT)))then
+     message = 'fxcT is not present but are needed for IIT XC functional.'
      ABI_BUG(message)
    end if
    if (size(fxcT)/=npts) then
@@ -1470,7 +1471,7 @@ subroutine drivexc(ixc,order,npts,nspden,usegradient,uselaplacian,usekden,&
  else if (ixc==91) then
 !  Karasiev-Sjostrom-Dufty-Trickey finite-T XC (no spin-pol)
    if (order**2 <= 1) then
-     call xcksdt(exc,npts,order,rhotot,rspts,vxcrho(:,1))
+     call xcksdt(exc,npts,order,rhotot,rspts,el_temp,vxcrho(:,1))
    else
      if(ndvxc /= 1 )then
        write(message,'(3a,i0,a,i0)')&
@@ -1478,7 +1479,7 @@ subroutine drivexc(ixc,order,npts,nspden,usegradient,uselaplacian,usekden,&
 &       'ixc=',ixc,'ndvxc=',ndvxc
        ABI_BUG(message)
      end if
-     call xcksdt(exc,npts,order,rhotot,rspts,vxcrho(:,1),dvxc)
+     call xcksdt(exc,npts,order,rhotot,rspts,el_temp,vxcrho(:,1),dvxc)
    end if
  else if(ixc==1001 .or. ixc==1002 .or. ixc==1003) then !TGGA, 15 APRIL 2016
    !if(nvxcgrho /= 2 )then !17-APR-2016: commented and added
@@ -1491,7 +1492,7 @@ subroutine drivexc(ixc,order,npts,nspden,usegradient,uselaplacian,usekden,&
    !write(message, '(a,3(i5))' ) 'calling xctp123,ngr2,nspden,order=',ngr2,nspden,order
    !MSG_WARNING(message)
    !output: calling xctp123,ngr2,nspden,order=    1    1    2
-   call xctp123(vxcgrho,exc,grho2_updn,ixc,npts,nspden,order,rho_updn,rhotot,rspts,vxcrho)
+   call xctp123(vxcgrho,exc,grho2_updn,ixc,npts,nspden,order,rho_updn,rhotot,rspts,el_temp,vxcrho)
    !call xchcth(vxcgrho,exc,grho2_updn,ixc,npts,nspden,order,rho_updn,vxcrho)
 !     if (order**2 <= 1) then
 !       call xcpbe(exc,npts,nspden,optpbe,order,rho_updn,vxcrho,ndvxc,ngr2,nd2vxc,&

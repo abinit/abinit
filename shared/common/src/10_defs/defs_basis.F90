@@ -259,9 +259,6 @@ module defs_basis
 !EB suppress *0.5_dp  ! Atomic unit of induction field (in Tesla) * mu_B (in atomic units).
  real(dp), parameter :: mu_B_SI=9.274009994D-24   ! Bohr magneton in SI
  real(dp), parameter :: mu_B = 0.5_dp             ! Bohr magneton in atomic units
-!VVK: 16-APR-2016: not the best solution, but here I added the temperature in Ry (variable as in Quantum-Espresso)
-!VVK: to pass it in fex_lda and fec_lda subroutines in xctp123.F90 file
- real(dp), public, save :: degauss = 0.0001_dp !VVK, this default value will be changed in xctp123 subroutine
 
 !Complex constants
  !double precision

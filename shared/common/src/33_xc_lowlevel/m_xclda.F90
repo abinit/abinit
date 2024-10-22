@@ -41,7 +41,6 @@ module m_xclda
  public :: xclb       ! GGA like part (vx_lb) of the Leeuwen-Baerends XC potential.
  public :: xctfw      ! Thomas-Fermi-Weizsacker functional
  public :: xcksdt     ! corrKSDT ! VVK-added
- public :: get_temperature ! VVK-added
 !!***
 
 contains
@@ -1346,13 +1345,14 @@ end subroutine xctfw
 !!***
 !include 'xcksdt_for_m_xclda_inc.for' !VVK-added
 
-subroutine xcksdt(exc,npt,order,rhor,rspts,vxc,&  !Mandatory arguments
+subroutine xcksdt(exc,npt,order,rhor,rspts,tsmear,vxc,&  !Mandatory arguments
 &                dvxc)                            !Optional arguments
 
  implicit none
 
 !Arguments ------------------------------------
 !scalars
+ real(dp),intent(in) :: tsmear
  integer,intent(in) :: npt,order
 !arrays
  real(dp),intent(in) :: rhor(npt),rspts(npt)
@@ -1362,7 +1362,7 @@ subroutine xcksdt(exc,npt,order,rhor,rspts,vxc,&  !Mandatory arguments
 !Local variables-------------------------------
 !scalars
  integer :: ipt
- real(dp) :: tfac,tsmear,rs,rho,tempf,tred,fxc
+ real(dp) :: tfac,rs,rho,tempf,tred,fxc
 !for numerical derivative of vxc:
  real(dp) :: drho,vxctmp(5) !array to calculate dvxc/drho numerically
  integer :: i
@@ -1391,8 +1391,6 @@ subroutine xcksdt(exc,npt,order,rhor,rspts,vxc,&  !Mandatory arguments
  end if
 
 !calculate exc=fxc, and vxc (orders 1 and 2)
-! get tsmear:
- call get_temperature(tsmear,1)
 !Loop over grid points
  do ipt=1,npt
    rs=rspts(ipt)
@@ -1439,29 +1437,7 @@ subroutine xcksdt(exc,npt,order,rhor,rspts,vxc,&  !Mandatory arguments
 !
 end subroutine xcksdt
 !!***
-subroutine get_temperature(tsmear,ii)
 
- implicit none
-
-!Arguments ------------------------------------
- real(dp),intent(inout) :: tsmear
- integer,intent(in) :: ii
-
-!Local variables-------------------------------
- real(dp),save :: tsmearloc
- character(len=500) :: message
-
- if(ii.eq.0) then 
-   tsmearloc = tsmear
-   write(message,'(a,es18.8,a)')" T-dep. XC: get_temperature: tsmearloc = ",tsmear, " Hartree"
-   !write(message,'(a,t22,a)')" T-dep. XC: get_temperature: tsmearloc = ",tsmear, " Hartree"
-   call wrtout(ab_out,message,'COLL')
-   call wrtout(std_out,message,'COLL')
- elseif(ii.eq.1) then
-   tsmear = tsmearloc
- endif
-
-end subroutine get_temperature
 !!***
 !
 ! Copyright (C) 2014 Orbital-free DFT group at University of Florida

@@ -184,7 +184,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  integer :: rhoxsp_method,comm,test_type,tordering,unt_em1,unt_susc,usexcnhat, ncerr
  real(dp) :: compch_fft,compch_sph,domegareal,e0,ecore,ecut_eff,ecutdg_eff
  real(dp) :: gsqcutc_eff,gsqcutf_eff,gsqcut_shp,omegaplasma,ucvol,vxcavg,gw_gsq,r_s
- real(dp) :: alpha,rhoav,factor,ec_gm
+ real(dp) :: alpha,rhoav,factor,ec_gm,el_temp
  real(dp):: eff,mempercpu_mb,max_wfsmem_mb,nonscal_mem,ug_mem,ur_mem,cprj_mem
  logical :: found,iscompatibleFFT,is_dfpt=.false.,use_tr,is_first_qcalc
  logical :: add_chi0_intraband,update_energies,call_pawinit
@@ -781,6 +781,9 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 !TODO this part has to be rewritten. If I decrease the tol on the occupations
 !I have to code some MPI stuff also if use_tr==.TRUE.
 
+!Get electronic temperature from dtset
+ el_temp=merge(dtset%tphysel,dtset%tsmear,dtset%tphysel>tol8.and.dtset%occopt/=3.and.dtset%occopt/=9)
+
  ABI_MALLOC(rhor,(nfftf,Dtset%nspden))
  ABI_MALLOC(taur,(nfftf,Dtset%nspden*Dtset%usekden))
 
@@ -822,7 +825,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 &   cplex,Dtset%pawxcdev,Cryst%typat,Pawang,Pawtab,has_vxc=1,has_vxcval=0)
 
    nzlmopt=-1; option=0; compch_sph=greatest_real
-   call pawdenpot(compch_sph,KS_energies%e_paw,KS_energies%e_pawdc,ipert,Dtset%ixc,&
+   call pawdenpot(compch_sph,el_temp,KS_energies%e_paw,KS_energies%e_pawdc,ipert,Dtset%ixc,&
 &   Cryst%natom,Cryst%natom,Dtset%nspden,Cryst%ntypat,Dtset%nucdipmom,nzlmopt,option,Paw_an,Paw_an,&
 &   Paw_ij,Pawang,Dtset%pawprtvol,Pawrad,Pawrhoij,Dtset%pawspnorb,Pawtab,Dtset%pawxcdev,Dtset%spnorbscl,&
 &   Dtset%xclevel,Dtset%xc_denpos,Dtset%xc_taupos,Cryst%ucvol,Psps%znuclpsp)
