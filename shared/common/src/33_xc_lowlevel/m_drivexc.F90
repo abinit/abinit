@@ -28,9 +28,9 @@ module m_drivexc
  use libxc_functionals
  use m_numeric_tools,    only : invcb
  use m_xciit,            only : xciit
- use m_xcpbe,            only : xcpbe
+ use m_xcpbe,            only : xcpbe, xctp123 !VVK added: xctp123
  use m_xchcth,           only : xchcth
- use m_xclda,  only : xcpzca, xcspol, xctetr, xcwign, xchelu, xcxalp, xclb
+ use m_xclda,  only : xcpzca, xcspol, xctetr, xcwign, xchelu, xcxalp, xclb, xcksdt, get_temperature !VVK added: xcksdt, get_temperature
 
  implicit none
 
@@ -186,6 +186,17 @@ subroutine echo_xc_name (ixc)
    case (50)
      message = 'LDA at finite T Ichimaru-Iyetomy-Tanaka - ixc=50'
      citation = 'Ichimaru S., Iyetomi H., Tanaka S., Phys. Rep. 149, 91-205 (1987) ' ! [[cite:Ichimaru1987]]
+!--> VVK: T-dependent XC
+   case (91)
+     message = 'TLDA: Karasiev-Sjostrom-Dufty-Trickey - ixc=91'
+     citation = 'V.V. Karasiev, T. Sjostrom, J. Dufty, and S.B. Trickey, PRL 112, 076403 (2014) '
+   case (1001)
+     message = 'TGGA: Karasiev, PBE-parameters - ixc=1001'
+   case (1002)
+     message = 'TGGA: Karasiev, PBEsol-parameters - ixc=1002'
+   case (1003)
+     message = 'TGGA: Karasiev, PBEmol-parameters - ixc=1003'
+!<-- VVK
    case default
      write(message,'(a,i0)')" echo_xc_name does not know how to handle ixc = ",ixc
      ABI_WARNING(message)
@@ -461,6 +472,7 @@ subroutine size_dvxc(ixc,order,nspden,&
  need_gradient=((ixc>=11.and.ixc<=17).or.(ixc==23.or.ixc==24).or. &
 &               (ixc==26.or.ixc==27).or.(ixc>=31.and.ixc<=35).or. &
 &               (ixc==41.or.ixc==42).or.ixc==1402000)
+ need_gradient=((ixc==1001.or.ixc==1002).or.ixc==1003) !VVK added
  if (ixc<0.and.(libxc_isgga.or.libxc_ismgga.or.libxc_ishybrid)) need_gradient=.true.
  if (my_add_tfw) need_gradient=.true.
  if (present(usegradient)) usegradient=merge(1,0,need_gradient)
@@ -518,6 +530,14 @@ subroutine size_dvxc(ixc,order,nspden,&
      else if (ixc==11.or.ixc==12.or.ixc==14.or.ixc==15.or. &
 &             ixc==23.or.ixc==41.or.ixc==42.or.ixc==1402000) then
        ndvxc=15
+!--> VVK
+   else if(ixc==1001 .or. ixc==1002 .or. ixc==1003 ) then !VVK: TGGA
+     ndvxc=15 ! 17-OCT-2026, changed to 15 as in PBE. nvxcdgr=size of dvxcdgr(npts,nvxcdgr) (see above)
+               ! also nvxcdgr=nvxcgrho= size of vxcgrho(npts,nvxcgrho) (see 41_xc_lowlevel/drivexc.F90 line 24
+! modifying thes evalues here do not forget to use the same numbers in 41_xc_lowlevel/size_dvxc.F90
+! and in 41_xc_lowlevel/drivexc.F90 (line 754)
+! (notice: line numbers above correspond to abinit-7.10.4m2)
+!<-- VVK
      else if (ixc<0) then
        if (libxc_has_kxc.or.ixc==-406.or.ixc==-427.or.ixc==-428.or.ixc==-456) then
          ndvxc=2*min(nspden,2)+1 ; if (order==-2) ndvxc=2
@@ -1092,8 +1112,11 @@ subroutine drivexc(ixc,order,npts,nspden,usegradient,uselaplacian,usekden,&
 ! =================================================
 
 !If needed, compute rhotot and rs
- if (ixc==1.or.ixc==2.or.ixc==3.or.ixc==4.or.ixc==5.or.&
-&    ixc==6.or.ixc==21.or.ixc==22.or.ixc==50) then
+! if (ixc==1.or.ixc==2.or.ixc==3.or.ixc==4.or.ixc==5.or.& !VVK: commented
+!&    ixc==6.or.ixc==21.or.ixc==22.or.ixc==50) then       !VVK: commented
+ if (ixc==1.or.ixc==2.or.ixc==3.or.ixc==4.or.ixc==5.or.ixc==6.or.&                      !VVK
+& ixc==21.or.ixc==22.or.ixc==50.or.ixc==91.or.ixc==1001.or.ixc==1002.or.ixc==1003) then !VVK:".or. ixc==91" is added
+                                                                                        !VVK: 15 APR 2015: ".or. ixc==1001" etc. for the TGGA are added
    ABI_MALLOC(rhotot,(npts))
    ABI_MALLOC(rspts,(npts))
    if(nspden==1)then
@@ -1442,6 +1465,39 @@ subroutine drivexc(ixc,order,npts,nspden,usegradient,uselaplacian,usekden,&
    else
      call xciit(exc,fxcT,npts,order,rspts,el_temp,vxcrho(:,1),dvxc)
    end if
+
+!!--> VVK: KSDT XC
+ else if (ixc==91) then
+!  Karasiev-Sjostrom-Dufty-Trickey finite-T XC (no spin-pol)
+   if (order**2 <= 1) then
+     call xcksdt(exc,npts,order,rhotot,rspts,vxcrho(:,1))
+   else
+     if(ndvxc /= 1 )then
+       write(message,'(3a,i0,a,i0)')&
+&       'Wrong value of ndvxc:',ch10,&
+&       'ixc=',ixc,'ndvxc=',ndvxc
+       ABI_BUG(message)
+     end if
+     call xcksdt(exc,npts,order,rhotot,rspts,vxcrho(:,1),dvxc)
+   end if
+ else if(ixc==1001 .or. ixc==1002 .or. ixc==1003) then !TGGA, 15 APRIL 2016
+   !if(nvxcgrho /= 2 )then !17-APR-2016: commented and added
+   if(nvxcgrho /= 3 )then 
+     write(message, '(3a,i0,a,i0)' )&
+&     'Wrong value of nvxcgrho:',ch10,&
+&     'ixc=',ixc,'ndvxcdgr=',nvxcgrho
+     ABI_BUG(message)
+   end if
+   !write(message, '(a,3(i5))' ) 'calling xctp123,ngr2,nspden,order=',ngr2,nspden,order
+   !MSG_WARNING(message)
+   !output: calling xctp123,ngr2,nspden,order=    1    1    2
+   call xctp123(vxcgrho,exc,grho2_updn,ixc,npts,nspden,order,rho_updn,rhotot,rspts,vxcrho)
+   !call xchcth(vxcgrho,exc,grho2_updn,ixc,npts,nspden,order,rho_updn,vxcrho)
+!     if (order**2 <= 1) then
+!       call xcpbe(exc,npts,nspden,optpbe,order,rho_updn,vxcrho,ndvxc,ngr2,nd2vxc,&
+!&       dvxcdgr=vxcgrho,exexch=exexch,grho2_updn=grho2_updn)
+!...
+!!<-- VVK
 
 !>>>>> GGA counterpart of the B3LYP functional
  else if(ixc==1402000) then

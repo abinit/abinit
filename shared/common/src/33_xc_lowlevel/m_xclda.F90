@@ -40,6 +40,8 @@ module m_xclda
  public :: xcxalp     ! X$\alpha$ method.
  public :: xclb       ! GGA like part (vx_lb) of the Leeuwen-Baerends XC potential.
  public :: xctfw      ! Thomas-Fermi-Weizsacker functional
+ public :: xcksdt     ! corrKSDT ! VVK-added
+ public :: get_temperature ! VVK-added
 !!***
 
 contains
@@ -1341,6 +1343,436 @@ subroutine xctfw(temp,exci,fxci,usefxc,rho_updn,vxci,npts,nspden,dvxcdgr,ndvxcdg
  ABI_FREE(rho_updnm1_3)
 
 end subroutine xctfw
+!!***
+!include 'xcksdt_for_m_xclda_inc.for' !VVK-added
+
+subroutine xcksdt(exc,npt,order,rhor,rspts,vxc,&  !Mandatory arguments
+&                dvxc)                            !Optional arguments
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: npt,order
+!arrays
+ real(dp),intent(in) :: rhor(npt),rspts(npt)
+ real(dp),intent(out) :: exc(npt),vxc(npt)
+ real(dp),intent(out),optional :: dvxc(npt)
+
+!Local variables-------------------------------
+!scalars
+ integer :: ipt
+ real(dp) :: tfac,tsmear,rs,rho,tempf,tred,fxc
+!for numerical derivative of vxc:
+ real(dp) :: drho,vxctmp(5) !array to calculate dvxc/drho numerically
+ integer :: i
+!
+ character(len=500) :: message
+
+! *************************************************************************
+
+!Compute tfac=(3._dp*pi**2)**(2._dp/3._dp)/2._dp, tempFermi=tfac*rho**(2/3)
+ tfac=(3._dp*pi**2)**(2._dp/3._dp)/2._dp
+
+!Checks the values of order
+ if(order<0 .or. order>2)then
+   write(message, '(a,a,a,i0)' )&
+&   'With Karasiev-Sjostrom-Dufty-Trickey xc functional, the only',ch10,&
+&   'allowed values for order are 0, 1 or 2, while it is found to be',order
+   ABI_BUG(message)
+ end if
+
+!Checks the compatibility between the order and the presence of the optional arguments
+ if(order <= 1 .and. present(dvxc))then
+   write(message, '(a,a,a,i0)' )&
+&   'The order chosen does not need the presence',ch10,&
+&   'of the vector dvxc, that is needed only with order=2 , while we have',order
+   ABI_BUG(message)
+ end if
+
+!calculate exc=fxc, and vxc (orders 1 and 2)
+! get tsmear:
+ call get_temperature(tsmear,1)
+!Loop over grid points
+ do ipt=1,npt
+   rs=rspts(ipt)
+   rho=rhor(ipt) !0.75_dp/pi/(rs**3)
+   tempf=tfac*rho**(2._dp/3._dp) !(3._dp*pi**2*rho)**(2._dp/3._dp)/2._dp
+   tred=tsmear/tempf
+   call fxc_ksdt_01(fxc,vxc(ipt),rs,tred,0)
+   exc(ipt)=fxc
+   if( (exc(ipt)/=exc(ipt)).or.(vxc(ipt)/=vxc(ipt)) ) then
+     exc(ipt)=0._dp
+     vxc(ipt)=0._dp
+     write(message, '(a,2d12.5)' )&
+&    'fxc or vxc = NaN: rs,tred=',rs,tred
+     ABI_BUG(message)
+   endif
+ end do
+!for order==2, use numerical derivative
+ if(order==2) then
+!  Loop over grid points
+   do ipt=1,npt
+     drho=0.01_dp*rhor(ipt)
+     do i=1,5
+       rho=rhor(ipt)+drho*dble(i-3)
+       rs=(0.75_dp/pi/rho)**(1._dp/3._dp) ! density
+       tempf=tfac*rho**(2._dp/3._dp) !(3._dp*pi**2*rho)**(2._dp/3._dp)/2._dp
+       tred=tsmear/tempf
+       call fxc_ksdt_01(fxc,vxctmp(i),rs,tred,0)
+     enddo
+     dvxc(ipt)=vxctmp(1)-8._dp*vxctmp(2)+8._dp*vxctmp(4)-vxctmp(5)
+     dvxc(ipt)=dvxc(ipt)/(12._dp*drho)
+     if( dvxc(ipt)/=dvxc(ipt) ) then
+       dvxc(ipt)=0._dp
+       write(message, '(a,2d12.5)' )&
+&      'dvxc = NaN: rs,tred=',rs,tred
+       ABI_BUG(message)
+     elseif(dvxc(ipt)>huge(1._dp)) then
+       dvxc(ipt)=0._dp
+       write(message, '(a,2d12.5)' )&
+&      'dvxc = Inf: rs,tred=',rs,tred
+       ABI_BUG(message)
+     endif
+   enddo
+ endif
+!
+end subroutine xcksdt
+!!***
+subroutine get_temperature(tsmear,ii)
+
+ implicit none
+
+!Arguments ------------------------------------
+ real(dp),intent(inout) :: tsmear
+ integer,intent(in) :: ii
+
+!Local variables-------------------------------
+ real(dp),save :: tsmearloc
+ character(len=500) :: message
+
+ if(ii.eq.0) then 
+   tsmearloc = tsmear
+   write(message,'(a,es18.8,a)')" T-dep. XC: get_temperature: tsmearloc = ",tsmear, " Hartree"
+   !write(message,'(a,t22,a)')" T-dep. XC: get_temperature: tsmearloc = ",tsmear, " Hartree"
+   call wrtout(ab_out,message,'COLL')
+   call wrtout(std_out,message,'COLL')
+ elseif(ii.eq.1) then
+   tsmear = tsmearloc
+ endif
+
+end subroutine get_temperature
+!!***
+!
+! Copyright (C) 2014 Orbital-free DFT group at University of Florida
+!
+! This program is free software; you can redistribute it and/or modify
+! it under the terms of the GNU General Public License as published by
+! the Free Software Foundation; either version 2 of the License, or
+! any later version. See the file LICENSE in the root directory of the
+! present distribution, or http://www.gnu.org/copyleft/gpl.txt ,
+! or contact developers via e-mail: vkarasev@qtp.ufl.edu , or paper mail:
+!
+! Quantum Theory Project
+! University of Florida
+! P.O. Box 118435
+! Gainesville, FL 32611
+!
+! This program is distributed in the hope that it will be useful,
+! but WITHOUT ANY WARRANTY; without even the implied warranty of
+! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+! GNU General Public License for more details.
+!
+!-------------------------------------------------------------------------------
+subroutine fxc_ksdt_01(fxc,vxc,rs,t,iz)
+  !-----------------------------------------------------------------------------
+  !
+  ! DESCRIPTION:
+  !   LDA XC free-energy parameterization from Monte Carlo data (unpol/pol) 
+  !
+  !    rs: Wigner-Seitz radius (bohr)
+  !     t: reduced temperature
+  !    iz: 0 - spin-unpolarized, 1 - fully polarized
+  !
+  !   fxc: XC free-energy per particle (hartree)
+  !   vxc: xc potential (hartree)
+  !
+  ! REFERENCES: Valentin V. Karasiev, Travis Sjostrom, James Dufty,
+  !  and S. B. Trickey, Physical Review Letters, 112, 076403 (2014).
+  !
+  !-----------------------------------------------------------------------------
+  ! REVISION LOG:
+  !  21-NOV-2013 Subroutine created (V.V. Karasiev)
+  !-----------------------------------------------------------------------------
+  !
+
+  implicit none
+  real(dp), intent(in) :: rs,t
+  integer, intent(in) :: iz
+  real(dp), intent(out) :: fxc,vxc
+  !
+  real(dp), parameter :: &
+       onethird=1._dp/3._dp, &
+       threehalf=1.5_dp, &
+       !pi=4._dp*atan(1._dp), &
+       lambda=(4._dp/9._dp/pi)**onethird, &
+       a0=1._dp/(pi*lambda)
+  real(dp) :: aa,daa,bb,dbb,cc,dcc,dd,ddd,ee,dee
+  real(dp) :: dtdn,tanht,dtanht,tanhsqrt,dtanhsqrt
+  real(dp) :: f1,dfxcdt,dfxcdrs
+  real(dp) :: num,dnum,den,dden,dnumdrs,ddendrs,n,drsdn
+  !
+  real(dp) :: omega,a(6),b(0:1,4),c(0:1,3),d(0:1,5),e(0:1,5)
+  !
+  data a/0.75_dp,3.04363_dp,-0.092270_dp,1.70350_dp,8.31051_dp,5.1105_dp/
+  !
+  ! /home/vkarasev/fits/fit-Fxc-New-Entropy-newQMC-test2/fit-PIMC-ichimaru-simpl4a-Eint+0tQMC-fixed-Entropy_clean_T0QMC-lmdif-search-ver1-rs75
+  ! or the same is here 
+  ! /home/vkarasev/fits/fit-Fxc-New-Entropy-newQMC-test2/fit-PIMC-ichimaru-simpl4a-Eint+0tQMC-fixed-Entropy_clean_T0QMC-lmdif-search-ver1-rs75-clean
+  data b(0,:)/0.342554_dp,9.141315_dp,0.448483_dp,18.553096_dp/
+  data c(0,:)/0.875130_dp,-0.256320_dp,0.953988_dp/
+  data d(0,:)/0.725917_dp,2.237347_dp,0.280748_dp,4.185911_dp,0.692183_dp/
+  data e(0,:)/0.255415_dp,0.931933_dp,0.115398_dp,17.234117_dp,0.451437_dp/
+  !
+  data b(1,:)/0.329001_dp,111.598308_dp,0.537053_dp,105.086663_dp/
+  data c(1,:)/0.848930_dp,0.167952_dp,0.088820_dp/
+  data d(1,:)/0.551330_dp,180.213159_dp,134.486231_dp,103.861695_dp,17.750710_dp/
+  data e(1,:)/0.153124_dp,19.543945_dp,43.400337_dp,120.255145_dp,15.662836_dp/
+  !
+  if(iz==0) then
+    omega=1._dp
+  elseif(iz==1) then
+    omega=2._dp**onethird
+  endif
+!
+  if(t==0._dp) then
+!fxc
+    f1=-1._dp/rs
+    num=omega*a0*a(1)+b(iz,1)*sqrt(rs)+c(iz,1)*e(iz,1)*rs
+    den=1._dp+d(iz,1)*sqrt(rs)+e(iz,1)*rs
+    fxc=f1*num/den
+!
+    dnumdrs=b(iz,1)/sqrt(rs)/2._dp+c(iz,1)*e(iz,1)
+    ddendrs=d(iz,1)/sqrt(rs)/2._dp+e(iz,1)
+
+    n=3._dp/(4._dp*pi*rs**3) ! density
+    drsdn=-onethird*rs/n ! (drs/dn)
+    !Fxc=n*fxc=n*f1*num/den=n*A*B*C
+    !dFxc/dn=fxc+n*(dA/dn)*B*C+n*a*(dB/dn)*C+n*a*B*(dC/dn)
+    vxc=fxc+(onethird*f1)*num/den &   ! fxc+n*(dA/dn)*B*C
+           + n*f1*(dnumdrs*drsdn)/den &  ! n*a*(dB/dn)*C
+           - n*f1*num*(ddendrs*drsdn)/den**2 ! n*a*B*(dC/dn)   
+  else
+    tanht=tanh(1._dp/t)
+    tanhsqrt=tanh(1._dp/sqrt(t))
+    dtanht=(tanht**2-1._dp)/t**2 !d/dt tanh(1/t)
+    dtanhsqrt=(tanhsqrt**2-1._dp)/t**threehalf/2._dp !d/dt tanh(1/sqrt(t))
+!
+! a(t)
+    num=a(1)+a(2)*t**2+a(3)*t**3+a(4)*t**4
+    den=1._dp+a(5)*t**2+a(6)*t**4
+!
+    dnum=a(2)*2._dp*t+a(3)*3._dp*t**2+a(4)*4._dp*t**3
+    dden=a(5)*2._dp*t+a(6)*4._dp*t**3
+! 
+    aa=a0*tanht*num/den
+    daa=a0*(dtanht*num/den+tanht*dnum/den-tanht*num*dden/den**2)
+! 
+! b(t)
+    num=b(iz,1)+b(iz,2)*t**2+b(iz,3)*t**4
+    den=1._dp+b(iz,4)*t**2+omega*sqrt(3._dp)*b(iz,3)/sqrt(2._dp*lambda**2)*t**4
+! 
+    dnum=b(iz,2)*2._dp*t+b(iz,3)*4._dp*t**3
+    dden=b(iz,4)*2._dp*t+omega*sqrt(3._dp)*b(iz,3)/sqrt(2._dp*lambda**2)*4._dp*t**3
+!
+    bb=tanhsqrt*num/den
+    dbb=dtanhsqrt*num/den+tanhsqrt*dnum/den-tanhsqrt*num*dden/den**2
+!
+! d(t)
+    num=d(iz,1)+d(iz,2)*t**2+d(iz,3)*t**4
+    den=1._dp+d(iz,4)*t**2+d(iz,5)*t**4
+! 
+    dnum=d(iz,2)*2._dp*t+d(iz,3)*4._dp*t**3
+    dden=d(iz,4)*2._dp*t+d(iz,5)*4._dp*t**3
+!
+    dd=tanhsqrt*num/den
+    ddd=dtanhsqrt*num/den+tanhsqrt*dnum/den-tanhsqrt*num*dden/den**2
+!
+! e(t)
+    num=e(iz,1)+e(iz,2)*t**2+e(iz,3)*t**4
+    den=1._dp+e(iz,4)*t**2+e(iz,5)*t**4
+! 
+    dnum=e(iz,2)*2._dp*t+e(iz,3)*4._dp*t**3
+    dden=e(iz,4)*2._dp*t+e(iz,5)*4._dp*t**3
+!
+    ee=tanht*num/den
+    dee=dtanht*num/den+tanht*dnum/den-tanht*num*dden/den**2
+!
+! c(t)
+    num=c(iz,1)+c(iz,2)*exp(-c(iz,3)/t)
+    dnum=c(iz,2)*c(iz,3)*exp(-c(iz,3)/t)/t**2
+    cc=num*ee
+    dcc=dnum*ee+num*dee
+!
+!fxc
+    f1=-1._dp/rs
+    num=omega*aa+bb*sqrt(rs)+cc*rs
+    den=1._dp+dd*sqrt(rs)+ee*rs
+    fxc=f1*num/den
+!
+    dnum=omega*daa+dbb*sqrt(rs)+dcc*rs
+    dnumdrs=bb/sqrt(rs)/2._dp+cc
+    dden=ddd*sqrt(rs)+dee*rs
+    ddendrs=dd/sqrt(rs)/2._dp+ee
+
+    n=3._dp/(4._dp*pi*rs**3) ! density
+    dtdn = -2._dp/3._dp*t/n ! (dt/dn)
+    drsdn=-onethird*rs/n ! (drs/dn)
+    !Fxc=n*fxc=n*f1*num/den=n*A*B*C
+    !dFxc/dn=fxc+n*(dA/dn)*B*C+n*a*(dB/dn)*C+n*a*B*(dC/dn)
+    vxc=fxc+(onethird*f1)*num/den &   ! fxc+n*(dA/dn)*B*C
+      + n*f1*(dnum*dtdn+dnumdrs*drsdn)/den &  ! n*a*(dB/dn)*C
+      - n*f1*num*(dden*dtdn+ddendrs*drsdn)/den**2 ! n*a*B*(dC/dn)
+  endif
+  return
+end subroutine fxc_ksdt_01
+!
+!-------------------------------------------------------------------------------
+subroutine exc_ksdt_01(exc,rs,t,iz)
+  !-----------------------------------------------------------------------------
+  !
+  ! DESCRIPTION:
+  !   LDA XC internal-energy from parameterization of Monte Carlo data (unpol/pol) 
+  !
+  !    rs: Wigner-Seitz radius (bohr)
+  !     t: reduced temperature
+  !    iz: 0 - spin-unpolarized, 1 - fully polarized
+  !
+  !   exc: XC internal-energy per particle (hartree)
+  !
+  ! REFERENCES: Valentin V. Karasiev, Travis Sjostrom, James Dufty,
+  !  and S. B. Trickey, Physical Review Letters, 112, 076403 (2014).
+  !
+  !-----------------------------------------------------------------------------
+  ! REVISION LOG:
+  !  24-NOV-2013 Subroutine created (V.V. Karasiev)
+  !-----------------------------------------------------------------------------
+  !
+
+  implicit none
+  real(dp), intent(in) :: rs,t
+  integer, intent(in) :: iz
+  real(dp), intent(out) :: exc
+  real(dp)              :: fxc,vxc,sxc,tempF
+  !
+  real(dp), parameter :: &
+       onethird=1._dp/3._dp, &
+       threehalf=1.5_dp, &
+       !pi=4._dp*atan(1._dp), &
+       lambda=(4._dp/9._dp/pi)**onethird, &
+       a0=1._dp/(pi*lambda)
+  real(dp) :: aa,daa,bb,dbb,cc,dcc,dd,ddd,ee,dee
+  real(dp) :: dtdn,tanht,dtanht,tanhsqrt,dtanhsqrt
+  real(dp) :: f1,dfxcdt,dfxcdrs
+  real(dp) :: num,dnum,den,dden,dnumdrs,ddendrs,n,drsdn
+  !
+  real(dp) :: omega,a(6),b(0:1,4),c(0:1,3),d(0:1,5),e(0:1,5)
+  !
+  data a/0.75_dp,3.04363_dp,-0.092270_dp,1.70350_dp,8.31051_dp,5.1105_dp/
+  !
+  ! /home/vkarasev/fits/fit-Fxc-New-Entropy-newQMC-test2/fit-PIMC-ichimaru-simpl4a-Eint+0tQMC-fixed-Entropy_clean_T0QMC-lmdif-search-ver1-rs75
+  ! or the same is here 
+  ! /home/vkarasev/fits/fit-Fxc-New-Entropy-newQMC-test2/fit-PIMC-ichimaru-simpl4a-Eint+0tQMC-fixed-Entropy_clean_T0QMC-lmdif-search-ver1-rs75-clean
+  data b(0,:)/0.342554_dp,9.141315_dp,0.448483_dp,18.553096_dp/
+  data c(0,:)/0.875130_dp,-0.256320_dp,0.953988_dp/
+  data d(0,:)/0.725917_dp,2.237347_dp,0.280748_dp,4.185911_dp,0.692183_dp/
+  data e(0,:)/0.255415_dp,0.931933_dp,0.115398_dp,17.234117_dp,0.451437_dp/
+  !
+  data b(1,:)/0.329001_dp,111.598308_dp,0.537053_dp,105.086663_dp/
+  data c(1,:)/0.848930_dp,0.167952_dp,0.088820_dp/
+  data d(1,:)/0.551330_dp,180.213159_dp,134.486231_dp,103.861695_dp,17.750710_dp/
+  data e(1,:)/0.153124_dp,19.543945_dp,43.400337_dp,120.255145_dp,15.662836_dp/
+  !
+  if(iz==0) then
+    omega=1._dp
+  elseif(iz==1) then
+    omega=2._dp**onethird
+  endif
+!
+  if(t==0._dp) then
+    call fxc_ksdt_01(fxc,vxc,rs,t,iz)
+    exc=fxc
+  else
+    tanht=tanh(1._dp/t)
+    tanhsqrt=tanh(1._dp/sqrt(t))
+    dtanht=(tanht**2-1._dp)/t**2 !d/dt tanh(1/t)
+    dtanhsqrt=(tanhsqrt**2-1._dp)/t**threehalf/2._dp !d/dt tanh(1/sqrt(t))
+!
+! a(t)
+    num=a(1)+a(2)*t**2+a(3)*t**3+a(4)*t**4
+    den=1._dp+a(5)*t**2+a(6)*t**4
+!
+    dnum=a(2)*2._dp*t+a(3)*3._dp*t**2+a(4)*4._dp*t**3
+    dden=a(5)*2._dp*t+a(6)*4._dp*t**3
+! 
+    aa=a0*tanht*num/den
+    daa=a0*(dtanht*num/den+tanht*dnum/den-tanht*num*dden/den**2)
+! 
+! b(t)
+    num=b(iz,1)+b(iz,2)*t**2+b(iz,3)*t**4
+    den=1._dp+b(iz,4)*t**2+omega*sqrt(3._dp)*b(iz,3)/sqrt(2._dp*lambda**2)*t**4
+! 
+    dnum=b(iz,2)*2._dp*t+b(iz,3)*4._dp*t**3
+    dden=b(iz,4)*2._dp*t+omega*sqrt(3._dp)*b(iz,3)/sqrt(2._dp*lambda**2)*4._dp*t**3
+!
+    bb=tanhsqrt*num/den
+    dbb=dtanhsqrt*num/den+tanhsqrt*dnum/den-tanhsqrt*num*dden/den**2
+!
+! d(t)
+    num=d(iz,1)+d(iz,2)*t**2+d(iz,3)*t**4
+    den=1._dp+d(iz,4)*t**2+d(iz,5)*t**4
+! 
+    dnum=d(iz,2)*2._dp*t+d(iz,3)*4._dp*t**3
+    dden=d(iz,4)*2._dp*t+d(iz,5)*4._dp*t**3
+!
+    dd=tanhsqrt*num/den
+    ddd=dtanhsqrt*num/den+tanhsqrt*dnum/den-tanhsqrt*num*dden/den**2
+!
+! e(t)
+    num=e(iz,1)+e(iz,2)*t**2+e(iz,3)*t**4
+    den=1._dp+e(iz,4)*t**2+e(iz,5)*t**4
+! 
+    dnum=e(iz,2)*2._dp*t+e(iz,3)*4._dp*t**3
+    dden=e(iz,4)*2._dp*t+e(iz,5)*4._dp*t**3
+!
+    ee=tanht*num/den
+    dee=dtanht*num/den+tanht*dnum/den-tanht*num*dden/den**2
+!
+! c(t)
+    num=c(iz,1)+c(iz,2)*exp(-c(iz,3)/t)
+    dnum=c(iz,2)*c(iz,3)*exp(-c(iz,3)/t)/t**2
+    cc=num*ee
+    dcc=dnum*ee+num*dee
+!
+!fxc
+    f1=-1._dp/rs
+    num=omega*aa+bb*sqrt(rs)+cc*rs
+    den=1._dp+dd*sqrt(rs)+ee*rs
+    fxc=f1*num/den
+!
+    dnum=omega*daa+dbb*sqrt(rs)+dcc*rs
+    dden=ddd*sqrt(rs)+dee*rs
+
+    n=3._dp/(4._dp*pi*rs**3) ! density
+    tempF = (3._dp*PI**2*n)**(2._dp/3._dp)/2._dp*omega**2
+    !dfxc/dt=A*(dB/dt)*C+A*B*(dC/dt)
+    sxc= f1*(dnum)/den &  ! A*(dB/dn)*C
+       - f1*num*(dden)/den**2 ! A*B*(dC/dn)
+    sxc=-sxc/tempF !sxc=-(t/T)*dfxc/dt=-(1/tempF)*dfxc/dt
+    exc=fxc+t*tempF*sxc !exc=fxc+T*sxc=fxc+(t*tempF)*sxc
+  endif
+  return
+end subroutine exc_ksdt_01
 !!***
 
 end module m_xclda

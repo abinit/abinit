@@ -304,6 +304,7 @@ subroutine pawxc_size_dvxc_local()
  need_gradient=((ixc>=11.and.ixc<=17).or.(ixc==23.or.ixc==24).or. &
 &               (ixc==26.or.ixc==27).or.(ixc>=31.and.ixc<=35).or. &
 &               (ixc==41.or.ixc==42).or.ixc==1402000)
+ need_gradient=(ixc==1001.or.ixc==1002.or.ixc=1003) !VVK added
  if (ixc<0) then
    if (libxc_functionals_isgga().or.libxc_functionals_ismgga().or. &
 &      libxc_functionals_is_hybrid()) need_gradient=.true.
@@ -352,6 +353,14 @@ subroutine pawxc_size_dvxc_local()
    else if (ixc==11.or.ixc==12.or.ixc==14.or.ixc==15.or. &
 &           ixc==23.or.ixc==41.or.ixc==42.or.ixc==1402000) then
      ndvxc_=15
+!--> VVK
+   else if(ixc==1001 .or. ixc==1002 .or. ixc==1003 ) then !VVK: TGGA
+     ndvxc_=15 ! 17-OCT-2026, changed to 15 as in PBE. nvxcdgr=size of dvxcdgr(npts,nvxcdgr) (see above)
+               ! also nvxcdgr=nvxcgrho= size of vxcgrho(npts,nvxcgrho) (see 41_xc_lowlevel/drivexc.F90 line 24
+! modifying thes evalues here do not forget to use the same numbers in 41_xc_lowlevel/size_dvxc.F90
+! and in 41_xc_lowlevel/drivexc.F90 (line 754)
+! (notice: line numbers above correspond to abinit-7.10.4m2)
+!<-- VVK
    else if (ixc<0) then
      if (libxc_functionals_has_kxc() then
        ndvxc_=2*min(nspden,2)+1 ; if (order==-2) ndvxc_=2

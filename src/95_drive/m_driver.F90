@@ -69,6 +69,7 @@ module m_driver
  use m_nonlinear,        only : nonlinear
  use m_drivexc,          only : echo_xc_name
  use m_rttddft_driver,   only : rttddft
+ use m_xclda,            only : get_temperature !VVK added
 
 #if defined HAVE_BIGDFT
  use BigDFT_API,   only: xc_init, xc_end, XC_MIXED, XC_ABINIT,&
@@ -683,6 +684,10 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
 !  Exchange-correlation
 
    call echo_xc_name(dtset%ixc)
+   if(dtset%ixc.eq.91) call get_temperature(dtset%tsmear,0) !VVK added !T-dependent LDA(=KSDT)
+   if(dtset%ixc.eq.1001) call get_temperature(dtset%tsmear,0) !VVK added !T-dependent GGA(=PBE parameters)
+   if(dtset%ixc.eq.1002) call get_temperature(dtset%tsmear,0) !VVK added !T-dependent GGA(=PBEsol parameters)
+   if(dtset%ixc.eq.1003) call get_temperature(dtset%tsmear,0) !VVK added !T-dependent GGA(=PBEmol parameters)
 
    if (dtset%ixc<0) then
      el_temp=merge(dtset%tphysel,dtset%tsmear,dtset%tphysel>tol8.and.dtset%occopt/=3.and.dtset%occopt/=9)
