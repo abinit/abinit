@@ -1790,6 +1790,7 @@ CONTAINS  !=====================================================================
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! INPUTS
+!!  el_temp=electronic temperature (hartree)
 !!  ixc= choice of exchange-correlation scheme (see above, and below)
 !!  my_natom=number of atoms treated by current processor
 !!  natom=total number of atoms in cell

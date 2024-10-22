@@ -1720,6 +1720,7 @@ end subroutine pawpsp_rw_atompaw
 !!
 !! INPUTS
 !!  core_mesh<type(pawrad_type)>= radial mesh for the core density
+!!  el_temp=electronic temperature (hartree)
 !!  [coretau_mesh<type(pawrad_type)>]=radial mesh for the core kinetic energy density
 !!  imainmesh= serial number of the main mesh
 !!  ixc=exchange-correlation choice from main routine data file
@@ -2953,6 +2954,7 @@ end subroutine pawpsp_wvl_calc
 !! continue to read the corresponding file and compute the form factors
 !!
 !! INPUTS
+!!  el_temp=electronic temperature (hartree)
 !!  ipsp= id in the array of the currently read pseudo.
 !!  ixc=exchange-correlation choice from main routine data file
 !!  lmax=value of lmax mentioned at the second line of the psp file
@@ -3911,6 +3913,7 @@ end subroutine pawpsp_17in
 !! continue to read the corresponding file and compute the form factors
 !!
 !! INPUTS
+!!  el_temp=electronic temperature (hartree)
 !!  icoulomb==0 : usual reciprocal space computation
 !!           =1 : free boundary conditions are used
 !!  ipsp=id in the array of the currently read pseudo.

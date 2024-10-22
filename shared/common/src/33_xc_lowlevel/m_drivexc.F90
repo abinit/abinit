@@ -837,7 +837,7 @@ end subroutine mkdenpos
 !!  nvxctau=number of components of 1st-derivative of Exc wrt kinetic energy density (nvxctau)
 !!  ndvxc=number of components of  1st-derivative of Vxc (dvxc)
 !!  nd2vxc=number of components of  2nd-derivative of Vxc (d2vxc)
-!!  el_temp=electronic temperature (to be used for finite temperature XC functionals)
+!!  el_temp=electronic temperature (hartree)
 !!  rho_updn(npts,nspden)=spin-up and spin-down densities
 !!    In the calling routine, spin-down density must be equal to spin-up density.
 !!    If nspden=1, only spin-up density must be given (half the total density).

@@ -5178,8 +5178,6 @@ subroutine xctp123(dvxcdgr,exci,grho2_updn,ixc,npts,nspden,order,rho_updn,rhor,r
  character(len=500) :: message
 
 ! *************************************************************************
- 
-write(0,*) tsmear
 
 !Compute tfac=(3._dp*pi**2)**(2._dp/3._dp)/2._dp, tempFermi=tfac*rho**(2/3)
  tfac=(3._dp*pi**2)**(2._dp/3._dp)/2._dp
