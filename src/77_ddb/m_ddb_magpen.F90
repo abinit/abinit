@@ -2406,7 +2406,7 @@ contains
      end do 
    else if (omegaflag==2) then
      call lineal_omega_interp(w0hessian,w0berry,eta,ifcmat_fm, &
-   & invmagsus(:,:,iw),mpatpol,mpdir,mpert,ddb%msize, &
+   & invmagsus(:,:,iw),magsus(:,:,iw),mpatpol,mpdir,mpert,ddb%msize, &
    & natom,ndim,nmdir,int_barddb,omega(iw),zfield(:,:,iw),zfield_tr)
    else if (omegaflag==3) then
      cplx_weta=cmplx(omega(iw),eta,16)
@@ -3248,7 +3248,7 @@ contains
 #include "abi_common.h"
 
 subroutine lineal_omega_interp(blkval,blkval_lw,eta,ifcmat_fm, &
-& invmagsus,mpatpol,mpdir,mpert,msize,natom,ndim,nmdir,int_barddb, &
+& invmagsus,magsus,mpatpol,mpdir,mpert,msize,natom,ndim,nmdir,int_barddb, &
 & omega,zfield,zfield_tr)
 
  use defs_basis
@@ -3268,15 +3268,19 @@ subroutine lineal_omega_interp(blkval,blkval_lw,eta,ifcmat_fm, &
  real(dp), intent(out) :: int_barddb(2,msize,1)
  complex(dpc), intent(out) :: ifcmat_fm(3*natom,3*natom)
  complex(dpc), intent(out) :: invmagsus(ndim,ndim)
+ complex(dpc), intent(out) :: magsus(ndim,ndim)
  complex(dpc), intent(out) :: zfield(ndim,(natom+2)*3)
  complex(dpc), intent(out) :: zfield_tr((natom+2)*3,ndim)
  
 !Local variables -------------------------
 !scalars
- integer :: idir1,idir2,idir3,ipert1,ipert2,ipert3
+ integer :: idir1,idir2,idir3,info,ipert1,ipert2,ipert3
  integer :: iat1,iat2,icol,irow,idir1_red,idir2_red,ipert1_red,ipert2_red
+ integer :: lwork
 !arrays
  real(dp), allocatable :: lhess(:,:,:,:,:)
+ integer, allocatable :: ipiv(:)
+ complex(dpc),allocatable :: work(:),work1(:,:)
  
 ! *********************************************************************
 
@@ -3343,6 +3347,28 @@ subroutine lineal_omega_interp(blkval,blkval_lw,eta,ifcmat_fm, &
      end do
    end do
  end do
+
+!Invert to obtain magsus
+ ABI_MALLOC(work1,(ndim,ndim))
+ work1=invmagsus
+ 
+ ABI_MALLOC(ipiv,(ndim))
+ call zgetrf( ndim, ndim, work1, ndim, ipiv, info )
+ ABI_CHECK(info == 0, sjoin('zgetrf returned:', itoa(info)))
+
+ ABI_MALLOC(work,(2))
+ call zgetri( ndim, work1, ndim, ipiv, work, -1, info )
+ ABI_CHECK(info == 0, sjoin('zgetri returned:', itoa(info)))
+ lwork=int(work(1))
+
+ ABI_REMALLOC(work,(lwork))
+ call zgetri( ndim, work1, ndim, ipiv, work, lwork, info )
+ ABI_CHECK(info == 0, sjoin('zgetri returned:', itoa(info)))
+
+ magsus=work1
+ ABI_FREE(ipiv)
+ ABI_FREE(work)
+ ABI_FREE(work1)
 
 !Finally, the spin-phonon
  do ipert2=1,natom
