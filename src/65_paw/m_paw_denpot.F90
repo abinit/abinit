@@ -78,6 +78,7 @@ CONTAINS  !=====================================================================
 !! INPUTS
 !!  electronpositron <type(electronpositron_type)>=quantities for the electron-positron annihilation (optional argument)
 !!  [hyb_mixing, hyb_mixing_sr]= -- optional-- mixing factors for the global (resp. screened) XC hybrid functional
+!!  el_temp=electronic temperature (hartree)
 !!  ipert=index of perturbation (used only for RF calculation ; set ipert<=0 for GS calculations.
 !!  ixc= choice of exchange-correlation scheme (see above, and below)
 !!  mpi_atmtab(:)=--optional-- indexes of the atoms treated by current proc

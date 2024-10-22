@@ -840,6 +840,7 @@ end function pawxc_is_tb09
 !!             2 if compensation density (nhat) has to be used in Exc/Vxc and double counting energy term
 !!  xclevel= XC functional level
 !!  xc_denpos= lowest allowed density (usually for the computation of the XC functionals)
+!!  el_temp=electronic temperature (hartree)
 !!  ----- Optional arguments -----
 !!  [coretau(nrad*usekden)]= core kinetic energy density (optional)
 !!  [taur(nrad,lm_size,nspden*usekden)]= kinetic energy density on radial mesh (optional)
@@ -2961,6 +2962,7 @@ end subroutine pawxc_dfpt
 !!
 !! INPUTS
 !!  exexch= choice of <<<local>>> exact exchange. Active if exexch>0 (only for GGA)
+!!  el_temp=electronic temperature (hartree)
 !!  ixc= choice of exchange-correlation scheme (see above and below)
 !!  nkxc= size of kxc(nrad,nkxc) (XC kernel)
 !!  nrad= dimension of the radial mesh
@@ -3236,6 +3238,7 @@ end subroutine pawxcsph
 !! INPUTS
 !!  cplex_den= if 1, 1st-order densities are REAL, if 2, COMPLEX
 !!  cplex_vxc= if 1, 1st-order XC potential is complex, if 2, COMPLEX
+!!  el_temp=electronic temperature (hartree)
 !!  ixc= choice of exchange-correlation scheme (see above and below)
 !!  nrad= dimension of the radial mesh
 !!  nspden=number of spin-density components
@@ -3996,6 +3999,7 @@ end subroutine pawxcsphpositron
 !!             2 if compensation density (nhat) has to be used in Exc/Vxc and double counting energy term
 !!  xclevel= XC functional level
 !!  xc_denpos= lowest allowed density (usually for the computation of the XC functionals)
+!!  el_temp=electronic temperature (hartree)
 !!
 !! OUTPUT
 !!  == if option==0, 2, 3, or 4 ==
