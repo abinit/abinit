@@ -1767,7 +1767,7 @@ end subroutine pawpsp_rw_atompaw
 !!
 !! SOURCE
 
-subroutine pawpsp_calc(core_mesh,epsatm,ffspl,imainmesh,hyb_mixing,ixc,lnmax,&
+subroutine pawpsp_calc(core_mesh,el_temp,epsatm,ffspl,imainmesh,hyb_mixing,ixc,lnmax,&
 &          mmax,mqgrid_ff,mqgrid_vl,ncore,nmesh,pawrad,pawtab,pawxcdev,pspversion,&
 &          qgrid_ff,qgrid_vl,radmesh,tncore,tnvale,tproj,tproj_mesh,usexcnhat,vale_mesh,&
 &          vloc_mesh,vlocopt,vlocr,vlspl,xcccrc,xclevel,xc_denpos,zion,znucl,&
@@ -1779,7 +1779,7 @@ subroutine pawpsp_calc(core_mesh,epsatm,ffspl,imainmesh,hyb_mixing,ixc,lnmax,&
  integer,intent(in) :: nmesh,pawxcdev,pspversion,usexcnhat,vlocopt
  integer,intent(in) ::mmax
  integer,intent(in) :: xclevel
- real(dp),intent(in) :: hyb_mixing,xc_denpos,zion,znucl
+ real(dp),intent(in) :: el_temp,hyb_mixing,xc_denpos,zion,znucl
  real(dp),intent(in),optional :: xc_taupos
  real(dp),intent(out) :: epsatm,xcccrc
  type(pawrad_type),intent(in) :: core_mesh,tproj_mesh,vale_mesh
@@ -2254,15 +2254,15 @@ subroutine pawpsp_calc(core_mesh,epsatm,ffspl,imainmesh,hyb_mixing,ixc,lnmax,&
        if (nspden==2) work3(msz+1:2*msz)=half*nhatwk
        if (pawxcdev/=0) then
          call pawxcm(ncorwk,yp1,ypn,0,hyb_mixing,ixc,work1,1,tmp_lmselect,work3,0,non_magnetic_xc,msz,nspden,5,&
-&         pawang_tmp,vloc_mesh,pawxcdev,work2,pawtab%usetcore,0,vxc1,xclevel,xc_denpos)
+&         pawang_tmp,vloc_mesh,pawxcdev,work2,pawtab%usetcore,0,vxc1,xclevel,xc_denpos,el_temp)
          call pawxcm(ncorwk,yp1,ypn,0,hyb_mixing,ixc,work1,1,tmp_lmselect,work3,0,non_magnetic_xc,msz,nspden,5,&
-&         pawang_tmp,vloc_mesh,pawxcdev,work2,pawtab%usetcore,2,vxc2,xclevel,xc_denpos)
+&         pawang_tmp,vloc_mesh,pawxcdev,work2,pawtab%usetcore,2,vxc2,xclevel,xc_denpos,el_temp)
          vxc1=vxc1/sqrt(four_pi);vxc2=vxc2/sqrt(four_pi) ! Deduce Vxc from its first moment
        else
          call pawxc(ncorwk,yp1,ypn,hyb_mixing,ixc,work1,tmp1,1,tmp_lmselect,work3,0,0,non_magnetic_xc,msz,nspden,5,&
-&         pawang_tmp,vloc_mesh,work2,pawtab%usetcore,0,vxc1,xclevel,xc_denpos)
+&         pawang_tmp,vloc_mesh,work2,pawtab%usetcore,0,vxc1,xclevel,xc_denpos,el_temp)
          call pawxc(ncorwk,yp1,ypn,hyb_mixing,ixc,work1,tmp1,1,tmp_lmselect,work3,0,0,non_magnetic_xc,msz,nspden,5,&
-&         pawang_tmp,vloc_mesh,work2,pawtab%usetcore,2,vxc2,xclevel,xc_denpos)
+&         pawang_tmp,vloc_mesh,work2,pawtab%usetcore,2,vxc2,xclevel,xc_denpos,el_temp)
        end if
        LIBPAW_DEALLOCATE(nwk)
        LIBPAW_DEALLOCATE(ncorwk)
@@ -2277,15 +2277,15 @@ subroutine pawpsp_calc(core_mesh,epsatm,ffspl,imainmesh,hyb_mixing,ixc,lnmax,&
        tmp1 => work1
        if (pawxcdev/=0) then
          call pawxcm(ncorwk,yp1,ypn,0,hyb_mixing,ixc,work1,1,tmp_lmselect,nhatwk,0,non_magnetic_xc,msz,1,5,&
-&         pawang_tmp,vloc_mesh,pawxcdev,nwk,pawtab%usetcore,0,vxc1,xclevel,xc_denpos)
+&         pawang_tmp,vloc_mesh,pawxcdev,nwk,pawtab%usetcore,0,vxc1,xclevel,xc_denpos,el_temp)
          call pawxcm(ncorwk,yp1,ypn,0,hyb_mixing,ixc,work1,1,tmp_lmselect,nhatwk,0,non_magnetic_xc,msz,1,5,&
-&         pawang_tmp,vloc_mesh,pawxcdev,nwk,pawtab%usetcore,2,vxc2,xclevel,xc_denpos)
+&         pawang_tmp,vloc_mesh,pawxcdev,nwk,pawtab%usetcore,2,vxc2,xclevel,xc_denpos,el_temp)
          vxc1=vxc1/sqrt(four_pi);vxc2=vxc2/sqrt(four_pi) ! Deduce Vxc from its first moment
        else
          call pawxc(ncorwk,yp1,ypn,hyb_mixing,ixc,work1,tmp1,1,tmp_lmselect,nhatwk,0,0,non_magnetic_xc,msz,1,5,&
-&         pawang_tmp,vloc_mesh,nwk,pawtab%usetcore,0,vxc1,xclevel,xc_denpos)
+&         pawang_tmp,vloc_mesh,nwk,pawtab%usetcore,0,vxc1,xclevel,xc_denpos,el_temp)
          call pawxc(ncorwk,yp1,ypn,hyb_mixing,ixc,work1,tmp1,1,tmp_lmselect,nhatwk,0,0,non_magnetic_xc,msz,1,5,&
-&         pawang_tmp,vloc_mesh,nwk,pawtab%usetcore,2,vxc2,xclevel,xc_denpos)
+&         pawang_tmp,vloc_mesh,nwk,pawtab%usetcore,2,vxc2,xclevel,xc_denpos,el_temp)
        end if
        LIBPAW_DEALLOCATE(nwk)
        LIBPAW_DEALLOCATE(ncorwk)
@@ -2586,14 +2586,14 @@ subroutine pawpsp_calc(core_mesh,epsatm,ffspl,imainmesh,hyb_mixing,ixc,lnmax,&
 
  if (pawxcdev/=0) then
    call pawxcm(ncore,pawtab%exccore,yp1,0,hyb_mixing,ixc,work2,1,tmp_lmselect,work3,0,non_magnetic_xc,core_mesh%mesh_size,&
-&   nspden,4,pawang_tmp,core_mesh,pawxcdev,work1,1,0,tmp1,xclevel,xc_denpos)
+&   nspden,4,pawang_tmp,core_mesh,pawxcdev,work1,1,0,tmp1,xclevel,xc_denpos,el_temp)
  else
    if (present(tcoretau)) then
      call pawxc(ncore,pawtab%exccore,yp1,hyb_mixing,ixc,work2,work1,1,tmp_lmselect,work3,0,0,non_magnetic_xc,core_mesh%mesh_size,&
-&     nspden,4,pawang_tmp,core_mesh,tmp1,1,0,tmp2,xclevel,xc_denpos,coretau=tcoretau,xc_taupos=my_xc_taupos)
+&     nspden,4,pawang_tmp,core_mesh,tmp1,1,0,tmp2,xclevel,xc_denpos,el_temp,coretau=tcoretau,xc_taupos=my_xc_taupos)
    else
      call pawxc(ncore,pawtab%exccore,yp1,hyb_mixing,ixc,work2,work1,1,tmp_lmselect,work3,0,0,non_magnetic_xc,core_mesh%mesh_size,&
-&     nspden,4,pawang_tmp,core_mesh,tmp1,1,0,tmp2,xclevel,xc_denpos)
+&     nspden,4,pawang_tmp,core_mesh,tmp1,1,0,tmp2,xclevel,xc_denpos,el_temp)
    end if
  end if
 
@@ -2997,7 +2997,7 @@ end subroutine pawpsp_wvl_calc
 !!
 !! SOURCE
 
-subroutine pawpsp_17in(epsatm,ffspl,icoulomb,ipsp,hyb_mixing,ixc,lmax,&
+subroutine pawpsp_17in(el_temp,epsatm,ffspl,icoulomb,ipsp,hyb_mixing,ixc,lmax,&
 & lnmax,mmax,mqgrid_ff,mqgrid_vl,pawpsp_header,pawrad,pawtab,&
 & pawxcdev, qgrid_ff,qgrid_vl,usewvl,usexcnhat_in,vlspl,xcccrc,&
 & xclevel,xc_denpos,zion,znucl,&
@@ -3008,7 +3008,7 @@ subroutine pawpsp_17in(epsatm,ffspl,icoulomb,ipsp,hyb_mixing,ixc,lmax,&
  integer,intent(in) :: ipsp,ixc,lmax,lnmax,mqgrid_ff,mqgrid_vl,pawxcdev,usexcnhat_in
  integer,intent(inout) ::mmax
  integer,intent(in) :: xclevel,icoulomb,usewvl
- real(dp),intent(in) :: hyb_mixing,xc_denpos,zion,znucl
+ real(dp),intent(in) :: el_temp,hyb_mixing,xc_denpos,zion,znucl
  real(dp),intent(in),optional :: xc_taupos
  real(dp),intent(out) :: epsatm,xcccrc
  type(pawpsp_header_type),intent(in) :: pawpsp_header
@@ -3838,7 +3838,7 @@ pawtab%lamb_shielding=paw_setuploc%lamb_shielding
 !==========================================================
 !Compute additional atomic data only depending on present DATASET
 
- call pawpsp_calc(core_mesh,epsatm,ffspl,imainmesh,hyb_mixing,ixc,lnmax,&
+ call pawpsp_calc(core_mesh,el_temp,epsatm,ffspl,imainmesh,hyb_mixing,ixc,lnmax,&
 &     mmax,mqgrid_ff,mqgrid_vl,ncore,nmesh,pawrad,pawtab,pawxcdev,pspversion,&
 &     qgrid_ff,qgrid_vl,radmesh,tncore,tnvale,tproj,tproj_mesh,usexcnhat,vale_mesh,&
 &     vloc_mesh,vlocopt,vlocr,vlspl,xcccrc,xclevel,xc_denpos,zion,znucl,&
@@ -3937,7 +3937,7 @@ end subroutine pawpsp_17in
 !!
 !! SOURCE
 
-subroutine pawpsp_7in(epsatm,ffspl,icoulomb,hyb_mixing,ixc,&
+subroutine pawpsp_7in(el_temp,epsatm,ffspl,icoulomb,hyb_mixing,ixc,&
 & lmax,lnmax,mmax,mqgrid_ff,mqgrid_vl,&
 & pawrad,pawtab,pawxcdev,qgrid_ff,qgrid_vl,&
 & usewvl,usexcnhat_in,vlspl,xcccrc,xclevel,xc_denpos,zion,znucl,&
@@ -3949,7 +3949,7 @@ subroutine pawpsp_7in(epsatm,ffspl,icoulomb,hyb_mixing,ixc,&
  integer, intent(in):: lmax,lnmax,mmax
  integer, intent(in):: mqgrid_ff,mqgrid_vl,pawxcdev
  integer, intent(in):: usewvl,usexcnhat_in,xclevel
- real(dp), intent(in):: hyb_mixing,xc_denpos,zion,znucl
+ real(dp), intent(in):: el_temp,hyb_mixing,xc_denpos,zion,znucl
  real(dp), intent(in),optional:: xc_taupos
  real(dp), intent(out):: epsatm,xcccrc
  type(pawrad_type), intent(inout):: pawrad
@@ -3988,7 +3988,7 @@ subroutine pawpsp_7in(epsatm,ffspl,icoulomb,hyb_mixing,ixc,&
 &  vale_mesh,vlocopt,vlocr,vloc_mesh,znucl)
 
  my_xc_taupos=xc_denpos;if(present(xc_taupos)) my_xc_taupos=xc_taupos
- call pawpsp_calc(core_mesh,epsatm,ffspl,imainmesh,hyb_mixing,ixc,lnmax,&
+ call pawpsp_calc(core_mesh,el_temp,epsatm,ffspl,imainmesh,hyb_mixing,ixc,lnmax,&
 &     mmax,mqgrid_ff,mqgrid_vl,ncore,nmesh,pawrad,pawtab,pawxcdev,pspversion,&
 &     qgrid_ff,qgrid_vl,radmesh,tncore,tnvale,tproj,tproj_mesh,usexcnhat,vale_mesh,&
 &     vloc_mesh,vlocopt,vlocr,vlspl,xcccrc,xclevel,xc_denpos,zion,znucl,&
@@ -4864,14 +4864,14 @@ subroutine pawpsp_main( &
 !Local variables-------------------------------
  integer :: has_coretau,has_tproj,has_wvl,ipsp,lmax,lloc,lnmax,mmax,me,mqgrid_ff,mqgrid_vl
  integer :: pspcod,pspxc,usexml
- real(dp),parameter :: xc_denpos_default=tol14
+ real(dp),parameter :: xc_denpos_default=tol14,el_temp=zero
  real(dp) :: my_xc_denpos,my_xc_taupos,r2well,zion,znucl
  character(len=500) :: msg
  type(pawpsp_header_type) :: pawpsp_header
 !arrays
 
 ! *************************************************************************
-
+ 
 !Check consistency of parameters
  if (icoulomb/= 0.or.usewvl==1) then
    if (.not.present(wvl_ngauss)) then
@@ -4943,7 +4943,7 @@ subroutine pawpsp_main( &
 !  Read rest of the PSP file
    if (pspcod==7) then
 !    ABINIT proprietary format
-     call pawpsp_7in(epsatm,ffspl,icoulomb,hyb_mixing,ixc,&
+     call pawpsp_7in(el_temp,epsatm,ffspl,icoulomb,hyb_mixing,ixc,&
 &     lmax,lnmax,mmax,mqgrid_ff,mqgrid_vl,&
 &     pawrad,pawtab,pawxcdev,qgrid_ff,qgrid_vl,&
 &     usewvl,usexcnhat,vlspl,xcccrc,xclevel,my_xc_denpos,zion,znucl,xc_taupos=my_xc_taupos)
@@ -4951,7 +4951,7 @@ subroutine pawpsp_main( &
    else if (pspcod==17)then
 !    XML format
      ipsp=1
-     call pawpsp_17in(epsatm,ffspl,icoulomb,ipsp,hyb_mixing,ixc,lmax,&
+     call pawpsp_17in(el_temp,epsatm,ffspl,icoulomb,ipsp,hyb_mixing,ixc,lmax,&
 &     lnmax,mmax,mqgrid_ff,mqgrid_vl,pawpsp_header,pawrad,pawtab,&
 &     pawxcdev,qgrid_ff,qgrid_vl,usewvl,usexcnhat,vlspl,xcccrc,&
 &     xclevel,my_xc_denpos,zion,znucl,xc_taupos=my_xc_taupos)

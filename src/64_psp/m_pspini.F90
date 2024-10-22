@@ -844,7 +844,7 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
 !scalars
  integer :: ii,il,ilmn,iln,iln0,lloc,lmax,me,mmax
  integer :: paral_mode,pspcod,pspdat,pspxc,useupf,usexml,xmlpaw,unt
- real(dp) :: maxrad,qchrg,r2well,zion,znucl
+ real(dp) :: maxrad,qchrg,r2well,zion,znucl,el_temp
  logical,parameter :: nc_debug = .False.
  !logical,parameter :: nc_debug = .True.
  character(len=500) :: msg,errmsg
@@ -880,6 +880,8 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
 
  nctab%has_tvale = .False.; nctab%has_tcore = .False.
  pspcod = -1
+!Get electronic temperature from dtset
+ el_temp=merge(dtset%tphysel,dtset%tsmear,dtset%tphysel>tol8.and.dtset%occopt/=3.and.dtset%occopt/=9)
 
  if (me==0) then
 !  Dimensions of form factors and Vloc q grids must be the same in Norm-Conserving case
@@ -1157,7 +1159,7 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
 
    else if (pspcod==7)then
      ! PAW "pseudopotentials"
-     call pawpsp_7in(epsatm,ffspl,dtset%icoulomb,ABS(dtset%hyb_mixing),dtset%ixc,&
+     call pawpsp_7in(el_temp,epsatm,ffspl,dtset%icoulomb,ABS(dtset%hyb_mixing),dtset%ixc,&
 &      lmax,psps%lnmax,mmax,psps%mqgrid_ff,psps%mqgrid_vl,&
 &      pawrad,pawtab,dtset%pawxcdev,psps%qgrid_ff,psps%qgrid_vl,&
 &      dtset%usewvl,dtset%usexcnhat_orig,vlspl,xcccrc,dtset%xclevel,&
@@ -1204,7 +1206,7 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
      ! NB for pspcod 11 the reading has already been done above.
    else if (pspcod==17)then
      ! PAW XML pseudopotentials
-     call pawpsp_17in(epsatm,ffspl,dtset%icoulomb,ipsp,ABS(dtset%hyb_mixing),dtset%ixc,lmax,&
+     call pawpsp_17in(el_temp,epsatm,ffspl,dtset%icoulomb,ipsp,ABS(dtset%hyb_mixing),dtset%ixc,lmax,&
 &     psps%lnmax,mmax,psps%mqgrid_ff,psps%mqgrid_vl,pawpsp_header,pawrad,pawtab,&
 &     dtset%pawxcdev,psps%qgrid_ff,psps%qgrid_vl,dtset%usewvl,&
 &     dtset%usexcnhat_orig,vlspl,xcccrc,&
