@@ -24,6 +24,8 @@ module m_xcpbe
  use defs_basis
  use m_abicore
  use m_errors
+ use m_special_funcs,      only : tildeAx,tildeBx,tildeBc,tildeBcII
+ use m_xclda,              only : fex_ksdt,fec_ksdt
  use m_numeric_tools,      only : invcb
 
  implicit none
@@ -32,7 +34,7 @@ module m_xcpbe
 !!***
 
  public :: xcpbe
- public :: xctp123 !KDT16 ! VVK-added
+ public :: xctp123 ! KDT16 (TGGA) finite-temperature xc functional
 !!***
 
 contains
@@ -5149,43 +5151,62 @@ subroutine xcpbe(exci,npts,nspden,option,order,rho_updn,vxci,ndvxci,nd2vxci, & !
 end subroutine xcpbe
 !!***
 
-!!***
-!include 'xctp123_for_m_xcpbe_inc.for' !VVK-added
-
-subroutine xctp123(dvxcdgr,exci,grho2_updn,ixc,npts,nspden,order,rho_updn,rhor,rspts,tsmear,vxci)
-
- implicit none
-
+!!****f* ABINIT/xctp123
+!! NAME
+!! xctp123
+!!
+!! FUNCTION
+!!  Treat TGGA temperature-dependant exchange-correlation functional KDT16,
+!!  return the associated Exc energy, potential, and, in case of response-function,
+!!  functions needed to build the XC kernel.
+!!
+!! NOTES
+!!  Karasiev-Dufty-Trickey (KDT16) TGGA xc-functional
+!!  V.V. Karasiev, J.W. Dufty, and S.B. Trickey, PRL 120(7), 076401 (2018) [[cite:Karasiev2018]]
+!!
+!! INPUTS
+!!  grho2_updn(npts,2*nspden-1)=square of the gradient of the spin-up,
+!!     and, if nspden==2, spin-down, and total density (Hartree/Bohr**2),
+!!     only used if gradient corrected functional (option=2,-2,-4 and 4 or beyond)
+!!  ixc=index of the XC functional
+!!  npts= number of points to be computed
+!!  nspden=1 for unpolarized, 2 for spin-polarized
+!!  rhor=value of electronic density at each point
+!!  rspts(npt)=Wigner-Seitz radii at each point
+!!  tsmear=electronic temperature (hartree)
+!!
+!! OUTPUT
+!!  dvxcdgr(npts,3)=partial derivative of the exchange-correlation
+!!    energy (exci*$\rho$) with respect to the spin-up (dvxcdgr(:,1)),
+!!    spin-down (dvxcdgr(:,2)), or total spin (dvxcdgr(:,3)) gradients of the density
+!!    divided by the norm of the gradient (the definition changed in v3.3)
+!!  exci(npts)=exchange-correlation energy density (hartree)
+!!  vxci(npts,nspden)=input xc potential
+!!
+!! SOURCE
+subroutine xctp123(dvxcdgr,exci,grho2_updn,ixc,npts,nspden,rhor,rspts,tsmear,vxci)
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: ixc,npts,nspden,order
+ integer,intent(in) :: ixc,npts,nspden
 !arrays
- real(dp),intent(in) :: grho2_updn(npts,2*nspden-1),rho_updn(npts,nspden)
- real(dp),intent(out) :: dvxcdgr(npts,3),exci(npts),vxci(npts,nspden)
+ real(dp),intent(in) :: grho2_updn(npts,2*nspden-1)
  real(dp),intent(in) :: rhor(npts),rspts(npts),tsmear
-
+ real(dp),intent(out) :: dvxcdgr(npts,3),exci(npts),vxci(npts,nspden)
 !Local variables-------------------------------
 !scalars
  integer :: ipt
- real(dp) :: tfac,rs,rho,tempf,tred,fxc
+ real(dp) :: tfac,rs,rho,tempf,tred
  real(dp) :: grho,degauss
  real(dp) :: fxclda,vxclda
  real(dp) :: fx_lda,einx_lda,tsx_lda,vx_lda
  real(dp) :: fc_lda,einc_lda,tsc_lda,vc_lda
  real(dp) :: fx, v1x, v2x, einx, tsx
  real(dp) :: fc, v1c, v2c, einc, tsc
-!
- character(len=500) :: message
 
 ! *************************************************************************
 
 !Compute tfac=(3._dp*pi**2)**(2._dp/3._dp)/2._dp, tempFermi=tfac*rho**(2/3)
  tfac=(3._dp*pi**2)**(2._dp/3._dp)/2._dp
-
- !if (order/=1) then
- !  write(message, '(a,i0)' )' Order must be 1 ; argument was ',order
- !  MSG_BUG(message)
- !end if
 
  !tsmear=1.d-10
  degauss = tsmear*2._dp ! setup temperature (in Ry) in defs_basis module
@@ -5194,133 +5215,38 @@ subroutine xctp123(dvxcdgr,exci,grho2_updn,ixc,npts,nspden,order,rho_updn,rhor,r
  do ipt=1,npts
    rs=rspts(ipt)
    rho=rhor(ipt) !0.75_dp/pi/(rs**3)
-   !rho=rho_updn(ipt,1)*2.d0
    tempf=tfac*rho**(2._dp/3._dp) !(3._dp*pi**2*rho)**(2._dp/3._dp)/2._dp
    tred=tsmear/tempf
-   grho = grho2_updn(ipt,1)*4.d0 ! this array must have grad2_rho_up even in
-                                 ! the spin-unpolarized case, such that
-                                 ! grad2_rho=4*grad2_rho_up=4*grad2_rho_dn
+   grho=grho2_updn(ipt,1)*4.d0 ! this array must have grad2_rho_up even in
+                               ! the spin-unpolarized case, such that
+                               ! grad2_rho=4*grad2_rho_up=4*grad2_rho_dn
 ! quantities below (fxclda, fx_lda and fc_lda) are the XC, X and C energy per particle
 ! choose this one:
-   !call fxc_ksdt_01(fxclda,vxclda,rs,tred,0)
+! call fxc_ksdt(fxclda,vxclda,rs,tred,0)
 ! or this one:
-   call fex_lda (rs,fx_lda,einx_lda,tsx_lda,vx_lda,degauss)
-   call fec_lda (rs,fc_lda,einc_lda,tsc_lda,vc_lda,degauss)
-   fxclda = fx_lda + fc_lda
-   vxclda = vx_lda + vc_lda
-!
-   if(ixc.eq.1001) then
-     call FTGGAx_1 (rho, grho, 5, fx, v1x, v2x, einx, tsx, degauss)
-     call FTPBEc (rho, grho, 9, fc, v1c, v2c, einc, tsc, degauss)
-   elseif(ixc.eq.1002) then
-     call FTGGAx_1 (rho, grho, 6, fx, v1x, v2x, einx, tsx, degauss)
-     call FTPBEc (rho, grho, 10, fc, v1c, v2c, einc, tsc, degauss)
-   elseif(ixc.eq.1003) then
-     call FTGGAx_1 (rho, grho, 7, fx, v1x, v2x, einx, tsx, degauss)
-     call FTPBEc (rho, grho, 11, fc, v1c, v2c, einc, tsc, degauss)
-   else
-!     write(message, '(a,i5)' )&
-!&    'xctp123, ixc!=1001,1002,1003, ixc=',ixc
-!     MSG_WARNING(message)
+   call fex_ksdt(rs,fx_lda,einx_lda,tsx_lda,vx_lda,degauss)
+   call fec_ksdt(rs,fc_lda,einc_lda,tsc_lda,vc_lda,degauss)
+   fxclda=fx_lda+fc_lda
+   vxclda=vx_lda+vc_lda
+   if(ixc.eq.60) then
+     call FTGGAx_1(rho,grho,5,fx,v1x,v2x,einx,tsx,degauss)
+     call FTPBEc(rho,grho,9,fc,v1c,v2c,einc,tsc,degauss)
+   elseif(ixc.eq.61) then
+     call FTGGAx_1(rho,grho,6,fx,v1x,v2x,einx,tsx,degauss)
+     call FTPBEc(rho,grho,10,fc,v1c,v2c,einc,tsc,degauss)
+   elseif(ixc.eq.62) then
+     call FTGGAx_1(rho,grho,7,fx,v1x,v2x,einx,tsx,degauss)
+     call FTPBEc(rho,grho,11,fc,v1c,v2c,einc,tsc,degauss)
    endif
-   exci(ipt) = fxclda + (fx + fc)!/rho
-   vxci(ipt,1) = vxclda + v1x + v1c
-   dvxcdgr(ipt,3) = v2x + v2c !d(exc*rho)/d|gradRho|*1/|gradRho|
-! VVK: not sure why these arrays below should be zero in spin-unpolarized case
-   dvxcdgr(ipt,1) = 0.d0 !dvxcdgr(ipt,3)*4.d0 ! d(exc*rho)/d|gradRho_up|*1/|gradRho_up|
-   dvxcdgr(ipt,2) = 0.d0 !dvxcdgr(ipt,1)      ! d(exc*rho)/d|gradRho_dn|*1/|gradRho_dn|
-
+   exci(ipt)=fxclda+(fx+fc)!/rho
+   vxci(ipt,1)=vxclda+v1x+v1c
+   dvxcdgr(ipt,3)=v2x+v2c !d(exc*rho)/d|gradRho|*1/|gradRho|
+   dvxcdgr(ipt,1)=zero !dvxcdgr(ipt,3)*4.d0 ! d(exc*rho)/d|gradRho_up|*1/|gradRho_up|
+   dvxcdgr(ipt,2)=zero !dvxcdgr(ipt,1)      ! d(exc*rho)/d|gradRho_dn|*1/|gradRho_dn|
  enddo
-!
 end subroutine xctp123
 !!***
-! 17-APR-2016:
-! a set of subroutines below is taken from ~/espresso5/espresso-5.2.1m6/flib/functionals_inc.for
-! only small modifications to make it compatible with ABINIT.
-!
-! some details: 
-! fex_lda and fec_lda return X and C energy per electron
-! FTGGAx_1 and FTPBEc return X and C energy density (in Quantum-Espresso)
-! here I changed this, FTGGAx_1 and FTPBEc now return X and C energy density
-! 
-! The following subroutines are not used (older versions) and could be removed:
-! tildeBAx, AxPade, BxPade
-!-------------------------------------------------------------------------------
-subroutine fex_lda (rs,fx,einx,tsx,vx,degauss)
-  !-----------------------------------------------------------------------------
-  ! VVK: SEP 2014: finite-T exchange based on new improved Pade fits
-  ! REF: 
-  !
-  !-----------------------------------------------------------------------------
 
-  implicit none
-  real(DP) :: rs,fx,einx,tsx,vx,degauss
-  ! rs
-  ! x-free-energy per electron
-  ! x-internal energy per electron
-  ! x- T*Entropy per electron
-  ! potential d(n*fx)/dn
-  !  
-  real(DP), parameter :: &
-    twothird = 2._DP/3._DP
-
-  real(DP) :: ex0, vx0
-  real(DP) :: tF,t,dtdn,rho
-  real(DP) :: dfxdt,sx
-  real(DP) :: Ax,dAx,d2Ax
-  !
-  rho = 3._DP/(4._DP*pi*rs**3)
-  tF = (3._DP*PI**2*rho)**twothird/2._DP !tF=Fermi temperature for spin-unpol case
-  t = degauss/2.0_DP/tF
-  !ef=1.841584276_DP/rs/rs 
-  !tred=degauss/2.0_DP/ef
-  dtdn = -twothird*t/rho ! (dt/dn)
-  !
-  call slater (rs, ex0, vx0)
-  !call AxPade (t,Ax,dAx,d2Ax)
-  call tildeAx(t,Ax,dAx,d2Ax)
-  fx = ex0*Ax         ! exchange free-energy per electron
-  vx = vx0*Ax + rho*ex0*dAx*dtdn ! d(n*ex0*Ax)/dn = d(n*ex0)/dn + n*ex0*(dAx/dtred)*(dtred/dn)
-  sx = -ex0*dAx/tF    ! entropy per electron
-  einx = fx + t*tF*sx ! internal energy per electron 
-  tsx = t*tF*sx       ! T*entropy per electron
-  ! 
-  return
-end subroutine fex_lda
-!-------------------------------------------------------------------------------
-!-------------------------------------------------------------------------------
-subroutine fec_lda (rs,fc,einc,tsc,vc,degauss)
-  !-----------------------------------------------------------------------------
-  ! VVK: 20 JAN 2016: finite-T correlation: KSDT(XC)-TLDA(X)
-  ! REF: 
-  !
-  !-----------------------------------------------------------------------------
-
-  implicit none
-  real(DP) :: rs,fc,einc,tsc,vc,degauss
-  ! rs
-  ! c-free-energy per electron
-  ! c-internal energy per electron
-  ! c- T*Entropy per electron
-  ! potential d(n*fc)/dn
-  !  
-  real(DP), parameter :: &
-    twothird = 2._DP/3._DP
-
-  real(DP) :: fxc, vxc
-  real(DP) :: einxc,tsxc
-  real(DP) :: fx,einx,tsx,vx
-  !
-  call fxc_ksdt_0 (rs, fxc, vxc, degauss)
-  call exc_ksdt_0 (rs, einxc,tsxc, degauss)
-  call fex_lda (rs,fx,einx,tsx,vx,degauss)
-  fc = fxc - fx
-  einc = einxc - einx
-  tsc = tsxc - tsx
-  vc = vxc - vx
-  ! 
-  return
-end subroutine fec_lda
 !-------------------------------------------------------------------------------
 ! Finite-T GGA X and C
 !------------------------------------------------------------------------------
@@ -5364,6 +5290,7 @@ subroutine FTGGAx_1 (rho, grho, iflag, fx, v1x, v2x, einx, tsx, degauss)
        c1 = 0.75_DP / pi , &
        c2 = 3.093667726280136_DP, &
        pi34 = 0.6203504908994d0
+  real(DP) :: f_slater,alpha_slater
   !
   ! variables
   rs = pi34 / rho**third
@@ -5380,7 +5307,6 @@ subroutine FTGGAx_1 (rho, grho, iflag, fx, v1x, v2x, einx, tsx, degauss)
   !
   ! Call t-dependent functions
   !
-  !call tildeBAx(t,BAx,dBAx,d2BAx)
   call tildeAx(t,Ax,dAx,d2Ax)
   call tildeBx(t,Bx,dBx,d2Bx)
   !
@@ -5396,7 +5322,11 @@ subroutine FTGGAx_1 (rho, grho, iflag, fx, v1x, v2x, einx, tsx, degauss)
   !
   ! Energy
   !
-  call slater (rs, ex0, vx0)
+  f_slater=-0.687247939924714d0
+  alpha_slater=twothird
+  ex0=f_slater*alpha_slater/rs
+  vx0=four/three*f_slater*alpha_slater/rs
+ 
   if(iflag.le.4) call FxGGA_1(iflag,s2x,FFx,dFFxds2x)
   if(iflag.ge.5) call FxGGA_2(iflag-4,s2x,FFx,dFFxds2x)
   fxunif = ex0*Ax                                 ! LDA exchange free-energy per electron
@@ -5551,7 +5481,7 @@ subroutine FTPBEc (rho, grho, iflag, fc, v1c, v2c, einc, tsc, degauss)
   !
   ! finite-T PBE correlation (without LDA part)
   ! it returns energy fc, einc and tsc densities, 
-  ! the LDA fex_lda and fec_lda return energies per electron.
+  ! the LDA fex_ksdt and fec_ksdt return energies per electron.
   !
   ! iflag=1: PBE with Bc(rs,t) from Pade fit
   ! iflag=2: PBEsol with Bc(rs,t) from Pade fit
@@ -5576,7 +5506,7 @@ subroutine FTPBEc (rho, grho, iflag, fc, v1c, v2c, einc, tsc, degauss)
 
   real(DP), parameter :: ga = 0.031091d0
   real(DP) :: be (12)
-!           pbe         pbesol   pbemol     pbegel
+  !         pbe         pbesol   pbemol     pbegel
   data be / 0.066725d0, 0.046d0, 0.08384d0, 0.046d0, &
             0.066725d0, 0.046d0, 0.08384d0, 0.046d0, &
             0.066725d0, 0.046d0, 0.08384d0, 0.046d0/
@@ -5604,7 +5534,7 @@ subroutine FTPBEc (rho, grho, iflag, fc, v1c, v2c, einc, tsc, degauss)
   !dtdn = -twothird*t/rho ! (dt/dn)
   dtdn = -twothird*t ! n*(dt/dn)
   ! LDA f_c, einternal_c and T*s_c energies per electron
-  call fec_lda (rs,fc_lda,einc_lda,tsc_lda,vc_lda,degauss)
+  call fec_ksdt (rs,fc_lda,einc_lda,tsc_lda,vc_lda,degauss)
   ! added temporarily for tests
   !call pw (rs, 1, fc_lda, vc_lda)
   !einc_lda = fc_lda
@@ -5660,1080 +5590,6 @@ subroutine FTPBEc (rho, grho, iflag, fc, v1c, v2c, einc, tsc, degauss)
   return
 end subroutine FTPBEc
 
-!-------------------------------------------------------------------------------
-subroutine tildeBAx(t,BAx,dBAx,d2BAx)
-  !-----------------------------------------------------------------------------
-  !
-  ! DESCRIPTION:
-  !   tilde Ax Pade fit and first and second derivatives
-  !   w.r.t. reduced temperature t
-  !
-  !     t: reduced temperature, t=T/T_F
-  !    BAx: tildeBx(t)/tildeAx
-  !   dBAx: dBAx(t)/dt
-  !  d2BAx: d^2BAx(t)/dt^2 
-  !
-  ! REFERENCES:
-  ! 
-  !
-  !-----------------------------------------------------------------------------
-  ! REVISION LOG:
-  !  23-JAN-2016 Subroutine created (V.V. Karasiev)
-  !-----------------------------------------------------------------------------
-  !
-
-  implicit none
-  real(DP), intent(in) :: t
-  real(DP), intent(out) :: BAx,dBAx,d2BAx
-  real(DP) :: Ax,dAx,d2Ax
-  real(DP) :: Bx,dBx,d2Bx
-  !
-  call tildeAx(t,Ax,dAx,d2Ax)
-  call tildeBx(t,Bx,dBx,d2Bx)
-  !
-  BAx = Bx/Ax
-  dBAx = dBx/Ax - Bx*dAx/Ax**2
-  d2BAx = d2Bx/Ax - dBx*dAx/Ax**2 & ! derivative of first term in above line
-        - dBx*dAx/Ax**2 - Bx*d2Ax/Ax**2 + 2._DP*Bx*dAx*dAx/Ax**3 ! derivative of second term
-  !
-  return
-end subroutine tildeBAx
-!-------------------------------------------------------------------------------
-! a set of analytical fits to combinations of Fermi-Dirac integrals
-! VVK: Added 23-JAN-2016 
-! see /home/vkarasev/distr/PadeFits_distr/PadeFits/tildeBx.f90
-!-------------------------------------------------------------------------------
-!-------------------------------------------------------------------------------
-subroutine tildeAx(t,Ax,dAx,d2Ax)
-  !-----------------------------------------------------------------------------
-  !
-  ! DESCRIPTION:
-  !   tilde Ax Pade fit and first and second derivatives
-  !   w.r.t. reduced temperature t
-  !
-  !     t: reduced temperature, t=T/T_F
-  !    Ax: tilde Ax(t)
-  !   dAx: dAx(t)/dt
-  !  d2Ax: d^2Ax(t)/dt^2 
-  !
-  ! REFERENCES:
-  ! 
-  !
-  !-----------------------------------------------------------------------------
-  ! REVISION LOG:
-  !  11-SEP-2014 Subroutine created (V.V. Karasiev)
-  !  based on: /home/vkarasev/fits/fit-Fermi-Dirac/fit3-Ax-ver1as3-log-yt.f90
-  !  see also: prm3-Ax-ver1as3-log-ARE-y.out    
-  !-----------------------------------------------------------------------------
-  !
-
-  implicit none
-  real(DP), intent(in) :: t
-  real(DP), intent(out) :: Ax,dAx,d2Ax
-
-  real(DP), parameter :: &
-    aln= -0.0475410604245741_DP,&
-    a52= -0.1065378473507800_DP,&
-    a1 =  0.5823869764908659_DP,&
-    a2 = -0.0068339509356661_DP,&
-    a3 = 11.5469239288490009_DP,&
-    a4 = -0.8465428870889800_DP,&
-    a5 = -0.1212525366470300_DP,&
-    a6 =  1.9902818786101000_DP,&
-    a7 =  0.0000000000000000_DP,&
-    a8 =  0.0744389046707120_DP,&
-    b1 = 19.9256144707979992_DP,&
-    b2 =  5.1663994545590004_DP,&
-    b3 =  2.0463164858237000_DP,&
-    b4 =  0.0744389046707120_DP
-
-  real(DP), parameter :: &
-    !half = 1._DP/2._DP,&
-    onethird = 1._DP/3._DP,&
-    twothird = 2._DP/3._DP,&
-    fourthird = 4._DP/3._DP,&
-    threehalf = 3._DP/2._DP,&
-    fivehalf = 5._DP/2._DP,&
-    sevenhalf = 7._DP/2._DP
-
-  real(DP) y,u,du,d2u
-  real(DP) v,dv,d2v
-  real(DP) dydt,d2ydt2
-  real(DP) num,den,fit,dnum,d2num,dden,d2den,dfit,d2fit
-
-  y = twothird/t**threehalf
-  u = y**twothird
-  du = twothird/y**onethird
-  d2u = -onethird*du/y
-
-  v = y**fourthird
-  dv = fourthird *y**onethird
-  d2v = onethird*dv/y
-
-  dydt = -1._DP/t**fivehalf
-  d2ydt2 = fivehalf/t**sevenhalf
-  
-  num = a52*u**fivehalf &
-        +a1*u+a2*u**2+a3*u**3+a4*u**4 &
-        +a5*u**5+a6*u**6+a7*u**7+a8*u**8 &
-        +aln*log(y)*y**4
-  den = 1._DP+b1*v+b2*v**2+b3*v**3+b4*v**4
-  fit = num/den
-
-  dnum = du*(fivehalf*a52*u**threehalf &
-         +a1+2._DP*a2*u+3._DP*a3*u**2+4._DP*a4*u**3 &
-         +5._DP*a5*u**4+6._DP*a6*u**5+7._DP*a7*u**6+8._DP*a8*u**7) &
-         +aln*y**3+4._DP*aln*log(y)*y**3
-  d2num = d2u*(fivehalf*a52*u**threehalf &
-          +a1+2._DP*a2*u+3._DP*a3*u**2+4._DP*a4*u**3 &
-          +5._DP*a5*u**4+6._DP*a6*u**5+7._DP*a7*u**6+8._DP*a8*u**7) &
-          +du*du*(fivehalf*threehalf*a52*u**half &
-          +2._DP*a2+2._DP*3._DP*a3*u+3._DP*4._DP*a4*u**2 &
-          +4._DP*5._DP*a5*u**3+5._DP*6._DP*a6*u**4 &
-          +6._DP*7._DP*a7*u**5+7._DP*8._DP*a8*u**6) &
-          +7._DP*aln*y**2+12._DP*aln*log(y)*y**2
-
-  dden = dv*(b1+2._DP*b2*v+3._DP*b3*v**2+4._DP*b4*v**3)
-  d2den = d2v*(b1+2._DP*b2*v+3._DP*b3*v**2+4._DP*b4*v**3) &
-          +dv*dv*(2._DP*b2+2._DP*3._DP*b3*v+3._DP*4._DP*b4*v**2)
-
-! derivatives w.r.t. y
-  dfit = dnum/den - num/den**2*dden
-  d2fit = d2num/den - dnum/den**2*dden &
-          - dnum/den**2*dden + 2._DP*num/den**3*dden*dden &
-          - num/den**2*d2den  
-
-! Ax, and derivatives w.r.t. t
-  Ax = fit
-  dAx = dfit * dydt
-  d2Ax = d2fit*dydt**2 + dfit*d2ydt2
-!
-  return
-end subroutine tildeAx
-!
-!-------------------------------------------------------------------------------
-subroutine tildeBx(t,Bx,dBx,d2Bx)
-  !-----------------------------------------------------------------------------
-  !
-  ! DESCRIPTION:
-  !   tilde Bx Pade fit and first and second derivatives
-  !   w.r.t. reduced temperature t
-  !
-  !     t: reduced temperature, t=T/T_F
-  !    Bx: tilde Bx(t)
-  !   dBx: dBx(t)/dt
-  !  d2Bx: d^2Bx(t)/dt^2 
-  !
-  ! REFERENCES:
-  ! 
-  !
-  !-----------------------------------------------------------------------------
-  ! REVISION LOG:
-  !  11-SEP-2014 Subroutine created (V.V. Karasiev)
-  !  based on: /home/vkarasev/fits/fit-Fermi-Dirac/fit3-Bx-ver5-yt.f90
-  !  see also: prm3-Bx-ver5-ARE-y.out
-  !-----------------------------------------------------------------------------
-  !
-
-  implicit none
-  real(DP), intent(in) :: t
-  real(DP), intent(out) :: Bx,dBx,d2Bx
-
-  real(DP), parameter :: &
-    a2 = -3.4341427276599950_DP,&
-    a3 = -0.9066069544311700_DP,&
-    a4 =  2.2386316137237001_DP,&
-    a5 =  2.4232553178542000_DP,&
-    a6 = -0.1339278564306200_DP,&
-    a7 =  0.4392739633708200_DP,&
-    a8 = -0.0497109675177910_DP,&
-    a9 =  0.0000000000000000_DP,&
-    a10=  0.0028609701106953_DP,&
-    b1 =  0.7098198258073800_DP,&
-    b2 =  4.6311326377185997_DP,&
-    b3 = -2.9243190977647000_DP,&
-    b4 =  6.1688157841895004_DP,&
-    b5 = -1.3435764191535999_DP,&
-    b6 =  0.1576046383295400_DP,&
-    b7 =  0.4365792821186800_DP,&
-    b8 = -0.0620444574606262_DP,&
-    b9 =  0.0000000000000000_DP,&
-    b10=  0.0028609701106953_DP
-
-  real(DP), parameter :: &
-    !half = 1._DP/2._DP,&
-    onethird = 1._DP/3._DP,&
-    twothird = 2._DP/3._DP,&
-    !fourthird = 4._DP/3._DP,&
-    threehalf = 3._DP/2._DP,&
-    fivehalf = 5._DP/2._DP,&
-    sevenhalf = 7._DP/2._DP
-
-  real(DP) y,u,du,d2u
-  real(DP) v,dv,d2v
-  real(DP) dydt,d2ydt2
-  real(DP) num,den,fit,dnum,d2num,dden,d2den,dfit,d2fit
-
-  y = twothird/t**threehalf
-  u = y**twothird
-  du = twothird/y**onethird
-  d2u = -onethird*du/y
-
-  v = u 
-  dv = du 
-  d2v = d2u 
-
-  dydt = -1._DP/t**fivehalf
-  d2ydt2 = fivehalf/t**sevenhalf
-  
-  num = a2*u**2+a3*u**3+a4*u**4 &
-        +a5*u**5+a6*u**6+a7*u**7+a8*u**8 &
-        +a9*u**9+a10*u**10
-  den = 1._DP+b1*v+b2*v**2+b3*v**3+b4*v**4 &
-        +b5*v**5+b6*v**6+b7*v**7+b8*v**8+b9*v**9+b10*v**10
-  fit = num/den
-
-  dnum = du*(2._DP*a2*u+3._DP*a3*u**2+4._DP*a4*u**3 &
-         +5._DP*a5*u**4+6._DP*a6*u**5+7._DP*a7*u**6+8._DP*a8*u**7 &
-         +9._DP*a9*u**8+10._DP*a10*u**9)
-
-  d2num = d2u*(2._DP*a2*u+3._DP*a3*u**2+4._DP*a4*u**3 &
-          +5._DP*a5*u**4+6._DP*a6*u**5+7._DP*a7*u**6+8._DP*a8*u**7 &
-          +9._DP*a9*u**8+10._DP*a10*u**9) &
-          +du*du*(2._DP*a2+2._DP*3._DP*a3*u+3._DP*4._DP*a4*u**2 &
-          +4._DP*5._DP*a5*u**3+5._DP*6._DP*a6*u**4 &
-          +6._DP*7._DP*a7*u**5+7._DP*8._DP*a8*u**6 &
-          +8._DP*9._DP*a9*u**7+9._DP*10._DP*a10*u**8)
-
-  dden = dv*(b1+2._DP*b2*v+3._DP*b3*v**2+4._DP*b4*v**3 &
-         +5._DP*b5*v**4+6._DP*b6*v**5+7._DP*b7*v**6+8._DP*b8*v**7 &
-         +9._DP*b9*v**8+10._DP*b10*v**9)
-
-  d2den = d2v*(b1+2._DP*b2*v+3._DP*b3*v**2+4._DP*b4*v**3 &
-          +5._DP*b5*v**4+6._DP*b6*v**5+7._DP*b7*v**6+8._DP*b8*v**7 &
-          +9._DP*b9*v**8+10._DP*b10*v**9) &
-          + dv*dv*(2._DP*b2+2._DP*3._DP*b3*v+3._DP*4._DP*b4*v**2 &
-          +4._DP*5._DP*b5*v**3+5._DP*6._DP*b6*v**4+6._DP*7._DP*b7*v**5+7._DP*8._DP*b8*v**6 &
-          +8._DP*9._DP*b9*v**7+9._DP*10._DP*b10*v**8)
-
-! derivatives w.r.t. y
-  dfit = dnum/den - num/den**2*dden
-  d2fit = d2num/den - dnum/den**2*dden &
-          - dnum/den**2*dden + 2._DP*num/den**3*dden*dden &
-          - num/den**2*d2den  
-
-! Bx, and derivatives w.r.t. t
-  Bx = fit
-  dBx = dfit * dydt
-  d2Bx = d2fit*dydt**2 + dfit*d2ydt2
-!
-  return
-end subroutine tildeBx
-
-!-------------------------------------------------------------------------------
-! Fits above is the most recent version, though it should not be any difference
-! with previous version below
-!-------------------------------------------------------------------------------
-! a set of analytical fits to combinations of Fermi-Dirac integrals
-! VVK: Added Sep, 2014 (see /home/vkarasev/fits/fit-Fermi-Dirac/AxBx.f90)
-!-------------------------------------------------------------------------------
-subroutine AxPade(t,Ax,dAx,d2Ax)
-  !-----------------------------------------------------------------------------
-  !
-  ! DESCRIPTION:
-  !   tilde Ax Pade fit and first and second derivatives w.r.t. reduced
-  !   temperature t
-  !
-  !     t: reduced temperature, t=T/T_F
-  !
-  !    Ax: tilde Ax(t)
-  !   dAx: dAx(t)/dt
-  !  d2Ax: d^2Ax(t)/dt^2 
-  !
-  ! REFERENCES:
-  ! 
-  !
-  !-----------------------------------------------------------------------------
-  ! REVISION LOG:
-  !  11-SEP-2014 Subroutine created (V.V. Karasiev)
-  !-----------------------------------------------------------------------------
-  !
-
-  implicit none
-  real(8), intent(in) :: t
-  real(8), intent(out) :: Ax,dAx,d2Ax
-
-  real(8), parameter :: &
-    aln= -0.0475410604245741d0,&
-    a52= -0.1065378473507800d0,&
-    a1 =  0.5823869764908659d0,&
-    a2 = -0.0068339509356661d0,&
-    a3 = 11.5469239288490009d0,&
-    a4 = -0.8465428870889800d0,&
-    a5 = -0.1212525366470300d0,&
-    a6 =  1.9902818786101000d0,&
-    a7 =  0.0000000000000000d0,&
-    a8 =  0.0744389046707120d0,&
-    b1 = 19.9256144707979992d0,&
-    b2 =  5.1663994545590004d0,&
-    b3 =  2.0463164858237000d0,&
-    b4 =  0.0744389046707120d0
-
-  real(8), parameter :: &
-    !half = 1.d0/2.d0,&
-    onethird = 1.d0/3.d0,&
-    twothird = 2.d0/3.d0,&
-    fourthird = 4.d0/3.d0,&
-    threehalf = 3.d0/2.d0,&
-    fivehalf = 5.d0/2.d0,&
-    sevenhalf = 7.d0/2.d0
-
-  real(8) y,u,du,d2u
-  real(8) v,dv,d2v
-  real(8) dydt,d2ydt2
-  real(8) num,den,fit,dnum,d2num,dden,d2den,dfit,d2fit
-
-  y = twothird/t**threehalf
-  u = y**twothird
-  du = twothird/y**onethird
-  d2u = -onethird*du/y
-
-  v = y**fourthird
-  dv = fourthird *y**onethird
-  d2v = onethird*dv/y
-
-  dydt = -1.d0/t**fivehalf
-  d2ydt2 = fivehalf/t**sevenhalf
-  
-  num = a52*u**fivehalf+&
-        a1*u+a2*u**2+a3*u**3+a4*u**4+&
-        a5*u**5+a6*u**6+a7*u**7+a8*u**8+&
-        aln*log(y)*y**4
-  den = 1.d0+b1*v+b2*v**2+b3*v**3+b4*v**4
-  fit = num/den
-
-  dnum = du*(fivehalf*a52*u**threehalf &
-        +a1+2.d0*a2*u+3.d0*a3*u**2+4.d0*a4*u**3+&
-        5.d0*a5*u**4+6.d0*a6*u**5+7.d0*a7*u**6+8.d0*a8*u**7)+&
-        aln*y**3+4.d0*aln*log(y)*y**3
-  d2num = d2u*(fivehalf*a52*u**threehalf &
-        +a1+2.d0*a2*u+3.d0*a3*u**2+4.d0*a4*u**3+&
-        5.d0*a5*u**4+6.d0*a6*u**5+7.d0*a7*u**6+8.d0*a8*u**7)&
-        +du*du*(fivehalf*threehalf*a52*u**half &
-        +2.d0*a2+2.d0*3.d0*a3*u+3.d0*4.d0*a4*u**2+&
-        4.d0*5.d0*a5*u**3+5.d0*6.d0*a6*u**4+&
-        6.d0*7.d0*a7*u**5+7.d0*8.d0*a8*u**6)+&
-        7.d0*aln*y**2+12.d0*aln*log(y)*y**2
-
-  dden = dv*(b1+2.d0*b2*v+3.d0*b3*v**2+4.d0*b4*v**3)
-  d2den = d2v*(b1+2.d0*b2*v+3.d0*b3*v**2+4.d0*b4*v**3)&
-         + dv*dv*(2.d0*b2+2.d0*3.d0*b3*v+3.d0*4.d0*b4*v**2)
-
-! derivatives w.r.t. y
-  dfit = dnum/den - num/den**2*dden
-  d2fit = d2num/den - dnum/den**2*dden &
-           - dnum/den**2*dden + 2.d0*num/den**3*dden*dden&
-           - num/den**2*d2den  
-
-! Ax, and derivatives w.r.t. t
-  Ax = fit
-  dAx = dfit * dydt
-  d2Ax = d2fit*dydt**2 + dfit*d2ydt2
-!
-  return
-  end subroutine AxPade
-!-------------------------------------------------------------------------------
-subroutine BxPade(t,Bx,dBx,d2Bx)
-  !-----------------------------------------------------------------------------
-  !
-  ! DESCRIPTION:
-  !   tilde Bx Pade fit and first and second derivatives w.r.t. reduced
-  !   temperature t
-  !
-  !     t: reduced temperature, t=T/T_F
-  !
-  !    Bx: tilde Bx(t)
-  !   dBx: dBx(t)/dt
-  !  d2Bx: d^2Bx(t)/dt^2 
-  !
-  ! REFERENCES:
-  ! 
-  !
-  !-----------------------------------------------------------------------------
-  ! REVISION LOG:
-  !  11-SEP-2014 Subroutine created (V.V. Karasiev)
-  !-----------------------------------------------------------------------------
-  !
-
-  implicit none
-  real(8), intent(in) :: t
-  real(8), intent(out) :: Bx,dBx,d2Bx
-
-  real(8), parameter :: &
-    a2 = -3.4341427276599950d0,&
-    a3 = -0.9066069544311700d0,&
-    a4 =  2.2386316137237001d0,&
-    a5 =  2.4232553178542000d0,&
-    a6 = -0.1339278564306200d0,&
-    a7 =  0.4392739633708200d0,&
-    a8 = -0.0497109675177910d0,&
-    a9 =  0.0000000000000000d0,&
-    a10=  0.0028609701106953d0,&
-    b1 =  0.7098198258073800d0,&
-    b2 =  4.6311326377185997d0,&
-    b3 = -2.9243190977647000d0,&
-    b4 =  6.1688157841895004d0,&
-    b5 = -1.3435764191535999d0,&
-    b6 =  0.1576046383295400d0,&
-    b7 =  0.4365792821186800d0,&
-    b8 = -0.0620444574606262d0,&
-    b9 =  0.0000000000000000d0,&
-    b10=  0.0028609701106953d0
-
-  real(8), parameter :: &
-    !half = 1.d0/2.d0,&
-    onethird = 1.d0/3.d0,&
-    twothird = 2.d0/3.d0,&
-    fourthird = 4.d0/3.d0,&
-    threehalf = 3.d0/2.d0,&
-    fivehalf = 5.d0/2.d0,&
-    sevenhalf = 7.d0/2.d0
-
-  real(8) y,u,du,d2u
-  real(8) v,dv,d2v
-  real(8) dydt,d2ydt2
-  real(8) num,den,fit,dnum,d2num,dden,d2den,dfit,d2fit
-
-  y = twothird/t**threehalf
-  u = y**twothird
-  du = twothird/y**onethird
-  d2u = -onethird*du/y
-
-  v = u 
-  dv = du 
-  d2v = d2u 
-
-  dydt = -1.d0/t**fivehalf
-  d2ydt2 = fivehalf/t**sevenhalf
-  
-  num = a2*u**2+a3*u**3+a4*u**4+&
-        a5*u**5+a6*u**6+a7*u**7+a8*u**8+&
-        a9*u**9+a10*u**10
-  den = 1.d0+b1*v+b2*v**2+b3*v**3+b4*v**4+&
-        b5*v**5+b6*v**6+b7*v**7+b8*v**8+b9*v**9+b10*v**10
-  fit = num/den
-
-  dnum = du*(2.d0*a2*u+3.d0*a3*u**2+4.d0*a4*u**3+&
-        5.d0*a5*u**4+6.d0*a6*u**5+7.d0*a7*u**6+8.d0*a8*u**7+&
-        9.d0*a9*u**8+10.d0*a10*u**9)
-
-  d2num = d2u*(2.d0*a2*u+3.d0*a3*u**2+4.d0*a4*u**3+&
-        5.d0*a5*u**4+6.d0*a6*u**5+7.d0*a7*u**6+8.d0*a8*u**7+&
-        9.d0*a9*u**8+10.d0*a10*u**9&
-                                   )&
-        +du*du*(2.d0*a2+2.d0*3.d0*a3*u+3.d0*4.d0*a4*u**2+&
-        4.d0*5.d0*a5*u**3+5.d0*6.d0*a6*u**4+&
-        6.d0*7.d0*a7*u**5+7.d0*8.d0*a8*u**6+&
-        8.d0*9.d0*a9*u**7+9.d0*10.d0*a10*u**8)
-
-  dden = dv*(b1+2.d0*b2*v+3.d0*b3*v**2+4.d0*b4*v**3+&
-                5.d0*b5*v**4+6.d0*b6*v**5+7.d0*b7*v**6+8.d0*b8*v**7&
-               +9.d0*b9*v**8+10.d0*b10*v**9)
-
-  d2den = d2v*(b1+2.d0*b2*v+3.d0*b3*v**2+4.d0*b4*v**3+&
-                  5.d0*b5*v**4+6.d0*b6*v**5+7.d0*b7*v**6+8.d0*b8*v**7&
-                 +9.d0*b9*v**8+10.d0*b10*v**9&
-                                                    )&
-         + dv*dv*(2.d0*b2+2.d0*3.d0*b3*v+3.d0*4.d0*b4*v**2+&
-           4.d0*5.d0*b5*v**3+5.d0*6.d0*b6*v**4+6.d0*7.d0*b7*v**5+7.d0*8.d0*b8*v**6&
-          +8.d0*9.d0*b9*v**7+9.d0*10.d0*b10*v**8)
-
-! derivatives w.r.t. y
-  dfit = dnum/den - num/den**2*dden
-  d2fit = d2num/den - dnum/den**2*dden &
-           - dnum/den**2*dden + 2.d0*num/den**3*dden*dden&
-           - num/den**2*d2den  
-
-! Bx, and derivatives w.r.t. t
-  Bx = fit
-  dBx = dfit * dydt
-  d2Bx = d2fit*dydt**2 + dfit*d2ydt2
-!
-  return
-  end subroutine BxPade
-
-!-------------------------------------------------------------------------------
-subroutine tildeBc(iflag,rs,t,Bc,dBcdrs,dBcdt)
-  !-----------------------------------------------------------------------------
-  !
-  ! DESCRIPTION:
-  !   tilde Bc Pade fit and first and second derivatives
-  !   w.r.t. reduced temperature t
-  !
-  !      t: reduced temperature, t=T/T_F
-  !     Bc: tilde Bc(rs,t)
-  ! dBcdrs: dBxc(rs,t)/drs
-  !  dBcdt: dBc(rs,t)/dt 
-  !
-  ! REFERENCES:
-  ! 
-  !
-  !-----------------------------------------------------------------------------
-  ! REVISION LOG:
-  !  26-JAN-2016 Subroutine created (V.V. Karasiev)
-  !  based on: /home/vkarasev/fits/grad_xc-tildeBc-fit/fit2-tildeBc-P45-v2.f90
-  !  09-FEB-2016 modified
-  !  based on: /home/vkarasev/fits/grad_xc-tildeBc-fit/fit2-tildeBc-P45-v2b.f90
-  !  tildeBc=Pade(rs,t)
-  !  26-MAY-2017: new fit of tilde-Bc which uses more rs data points
-  !  based on: /home/vkarasev/fits/grad_xc-tildeBc-fit-v2b-only
-  !  based on: /home/vkarasev/fits/grad_xc-tildeBc-fit-v2b-V-only/tildeBcV.f90
-  !  based on: /home/vkarasev/fits/grad_xc-tildeBc-fit-v2b-VI-only/tildeBcV.f90
-  !  based on: /home/vkarasev/fits/grad_xc-tildeBc-fit-v2b-VII-only/tildeBcV.f90
-  !  based on: /home/vkarasev/fits/grad_xc-tildeBc-fit-v2b-VIII-only/tildeBcV.f90
-  !  based on: /home/vkarasev/fits/grad_xc-tildeBc-fit-v2b-IX-only/tildeBcV.f90
-  !  based on: /home/vkarasev/fits/grad_xc-tildeBc-fit-v2b-IX-C-only/tildeBcV.f90
-  !  based on: /home/vkarasev/fits/grad_xc-tildeBc-fit-v2b-IX-D-only/tildeBcV.f90
-  !  based on: /home/vkarasev/fits/grad_xc-tildeBc-fit-v2b-IX-E-only/tildeBcV.f90
-  !  based on: /home/vkarasev/fits/grad_xc-tildeBc-fit-v2b-X-E-only/tildeBcV.f90
-  !  based on: /home/vkarasev/fits/grad_xc-tildeBc-fit-v2b-XI-E-only/tildeBcV.f90
-  !  based on: /home/vkarasev/fits/grad_xc-tildeBc-fit-v2b-XII-E-only/tildeBcV.f90
-  !  based on: /home/vkarasev/fits/grad_xc-tildeBc-fit-v2b-XIII-E-only/tildeBcV.f90
-  !  based on: /home/vkarasev/fits/grad_xc-tildeBc-fit-v2b-XIV-E-only/tildeBcV.f90
-  !-----------------------------------------------------------------------------
-  !
-
-  implicit none
-  integer, intent(in) :: iflag
-  real(DP), intent(in) :: rs,t
-  real(DP), intent(out) :: Bc,dBcdrs,dBcdt
-
-  real(8), parameter :: &
-    alpha_n = 0.50000000000000D+00, &
-    alpha_d = 0.15000000000000D+01, &
-    alpha_t = 0.32500000000000D+01, &
-    a1 =  0.30047772904141D+03, &
-    b1 = -0.11166043894641D+03, &
-    a2 = -0.38706401119284D+03, &
-    b2 = -0.45327974938936D+02, &
-    a3 =  0.25112236519758D+04, &
-    b3 = -0.14507109325068D+04, &
-    a4 =  0.52243427453456D+03, &
-    b4 = -0.30665095324907D+02, &
-    c1 =  0.11077393333429D+03, &
-    d1 =  0.12854960224127D+01, &
-    c2 =  0.32355494275181D+03, &
-    d2 =  0.13482659120012D+02, &
-    c3 =  0.45509212104516D+03, &
-    d3 =  0.23416017878226D+02, &
-    c4 =  0.10884351801356D+04, &
-    d4 =  0.24480831491950D+02, &
-    c5 =  0.36112604933128D+00, &
-    d5 =  0.32161372287131D-08, &
-    e1 =  0.32175261286726D+02, &
-    e2 =  0.61853047558212D+02, &
-    e3 =  0.33585054134674D+03, &
-    e4 =  0.12874240529185D+03, &
-    f1 =  0.41006056761680D-02, &
-    f2 =  0.18933118065366D-01, &
-    f3 =  0.24295412676204D-04, &
-    f4 =  0.18369775992299D-07, &
-    f5 =  0.69274680951701D-10
-
-  real(8), parameter :: &
-    !half = 1.d0/2.d0,&
-    onethird = 1.d0/3.d0,&
-    twothird = 2.d0/3.d0,&
-    !fourthird = 4.d0/3.d0,&
-    threehalf = 3.d0/2.d0,&
-    fivehalf = 5.d0/2.d0,&
-    sevenhalf = 7.d0/2.d0
-
-  real(8) rsn,rsd
-  real(8) num,den,dnumdrs,dnumdt,ddendrs,ddendt
-  !
-  if(iflag==5.or.iflag==6.or.iflag==7.or.iflag==8) then 
-    ! Bc(rs,t) = 1
-    Bc = 1._DP
-    dBcdrs = 0._DP
-    dBcdt = 0._DP
-  elseif(iflag==1.or.iflag==2.or.iflag==3.or.iflag==4) then
-    !
-    ! Bc(rs,t) = Pade Fit
-    !
-    rsn = rs**alpha_n
-    rsd = rs**alpha_d
-    !
-    num = 1.d0+(a1+b1*rsn+e1*rsn**2)*t+(a2+b2*rsn+e2*rsn**2)*t**2+(a3+b3*rsn+e3*rsn**2)*t**3+(a4+b4*rsn+e4*rsn**2)*t**4
-    dnumdrs = (b1+2.d0*e1*rsn)*t+(b2+2.d0*e2*rsn)*t**2+(b3+2.d0*e3*rsn)*t**3+(b4+2.d0*e4*rsn)*t**4
-    dnumdrs = dnumdrs * alpha_n*rs**(alpha_n-1.d0)
-    dnumdt = (a1+b1*rsn+e1*rsn**2)+2.d0*(a2+b2*rsn+e2*rsn**2)*t+3.d0*(a3+b3*rsn+e3*rsn**2)*t**2+4.d0*(a4+b4*rsn+e4*rsn**2)*t**3
-    !
-    den = 1.d0+(c1+d1*rsd+f1*rsd**2)*t+(c2+d2*rsd+f2*rsd**2)*t**2+(c3+d3*rsd+f3*rsd**2)*t**3+(c4+d4*rsd+f4*rsd**2)*t**4+(c5+d5*rsd+f5*rsd**2)*t**5
-    ddendrs = (d1+2.d0*f1*rsd)*t+(d2+2.d0*f2*rsd)*t**2+(d3+2.d0*f3*rsd)*t**3+(d4+2.d0*f4*rsd)*t**4+(d5+2.d0*f5*rsd)*t**5
-    ddendrs = ddendrs * alpha_d*rs**(alpha_d-1.d0)
-    ddendt = (c1+d1*rsd+f1*rsd**2)+2.d0*(c2+d2*rsd+f2*rsd**2)*t+3.d0*(c3+d3*rsd+f3*rsd**2)*t**2+4.d0*(c4+d4*rsd+f4*rsd**2)*t**3+5.d0*(c5+d5*rsd+f5*rsd**2)*t**4
-    !
-    Bc = num/den
-    dBcdrs = dnumdrs/den - num*ddendrs/den**2
-    dBcdt = dnumdt/den - num*ddendt/den**2
-    !
-  endif
-  return
-end subroutine tildeBc
-!-------------------------------------------------------------------------------
-subroutine tildeBcII(iflag,rs,t,Bc,dBcdrs,dBcdt)
-  !-----------------------------------------------------------------------------
-  !
-  ! DESCRIPTION:
-  !   tilde Bc Pade fit and first and second derivatives
-  !   w.r.t. reduced temperature t
-  !
-  !      t: reduced temperature, t=T/T_F
-  !     Bc: tilde Bc(rs,t)
-  ! dBcdrs: dBxc(rs,t)/drs
-  !  dBcdt: dBc(rs,t)/dt 
-  !
-  ! REFERENCES:
-  ! 
-  !
-  !-----------------------------------------------------------------------------
-  ! REVISION LOG:
-  !  09-FEB-2016 Subroutine created (V.V. Karasiev)
-  !  based on: /home/vkarasev/fits/grad_xc-tildeBc-fit/fit2-tildeBc-P45-v2b-II.f90
-  !  tildeBcII=Pade(rs,u)/Ax(t), where u=t**alpha_t
-  !-----------------------------------------------------------------------------
-  !
-
-  implicit none
-  integer, intent(in) :: iflag
-  real(DP), intent(in) :: rs,t
-  real(DP), intent(out) :: Bc,dBcdrs,dBcdt
-
-  real(8), parameter :: &
-    alpha_n = 0.75000000000000D+00, &
-    alpha_d = 0.10000000000000D+01, &
-    alpha_t = 0.13333333333333D+01, &
-    a1 =  0.15347929735622D+04, &
-    b1 = -0.84219627176667D+01, &
-    a2 =  0.44868805325009D+04, &
-    b2 = -0.58530532404446D+03, &
-    a3 =  0.69532418328433D+04, &
-    b3 = -0.35678194103563D+04, &
-    a4 = -0.93218590455726D+03, &
-    b4 =  0.34051871203715D+04, &
-    c1 =  0.11159913731638D+04, &
-    d1 =  0.47203417436724D+03, &
-    c2 =  0.18928455226052D-02, &
-    d2 =  0.30978353565417D-02, &
-    c3 =  0.19309591081276D+05, &
-    d3 =  0.16467574170732D-02, &
-    c4 =  0.16584881560245D+04, &
-    d4 =  0.51151114337559D+04, &
-    c5 =  0.13467962617509D+04, &
-    d5 =  0.98716996214546D+04, &
-    e1 =  0.25965951327313D+03, &
-    e2 =  0.27232110869584D+03, &
-    e3 = -0.97350129986349D+02, &
-    e4 =  0.18729855159197D+04, &
-    f1 =  0.22826224012303D+02, &
-    f2 =  0.29742599786418D+02, &
-    f3 =  0.15142142964724D-01, &
-    f4 =  0.69329585676317D+03, &
-    f5 =  0.22183609439600D+01
-
-  real(8), parameter :: &
-    !half = 1.d0/2.d0,&
-    onethird = 1.d0/3.d0,&
-    twothird = 2.d0/3.d0,&
-    !fourthird = 4.d0/3.d0,&
-    threehalf = 3.d0/2.d0,&
-    fivehalf = 5.d0/2.d0,&
-    sevenhalf = 7.d0/2.d0
-
-  real(8) rsn,rsd,u,du
-  real(8) num,den,dnumdrs,dnumdt,ddendrs,ddendt
-  real(8) Ax,dAx,d2Ax
-  !
-  if(iflag==5.or.iflag==6.or.iflag==7.or.iflag==8) then 
-    ! Bc(rs,t) = 1
-    Bc = 1._DP
-    dBcdrs = 0._DP
-    dBcdt = 0._DP
-  elseif(iflag==9.or.iflag==10.or.iflag==11.or.iflag==12) then
-    !
-    ! Bc(rs,t) = Pade Fit
-    !
-    rsn = rs**alpha_n
-    rsd = rs**alpha_d
-    u = t**alpha_t
-    du = alpha_t*t**(alpha_t-1.d0)
-    !
-    num = 1.d0+(a1+b1*rsn+e1*rsn**2)*u+(a2+b2*rsn+e2*rsn**2)*u**2+(a3+b3*rsn+e3*rsn**2)*u**3+(a4+b4*rsn+e4*rsn**2)*u**4
-    dnumdrs = (b1+2.d0*e1*rsn)*u+(b2+2.d0*e2*rsn)*u**2+(b3+2.d0*e3*rsn)*u**3+(b4+2.d0*e4*rsn)*u**4
-    dnumdrs = dnumdrs * alpha_n*rs**(alpha_n-1.d0)
-    dnumdt = (a1+b1*rsn+e1*rsn**2)+2.d0*(a2+b2*rsn+e2*rsn**2)*u+3.d0*(a3+b3*rsn+e3*rsn**2)*u**2+4.d0*(a4+b4*rsn+e4*rsn**2)*u**3
-    dnumdt = dnumdt * du
-  !
-    den = 1.d0+(c1+d1*rsd+f1*rsd**2)*u+(c2+d2*rsd+f2*rsd**2)*u**2+(c3+d3*rsd+f3*rsd**2)*u**3+(c4+d4*rsd+f4*rsd**2)*u**4+(c5+d5*rsd+f5*rsd**2)*u**5
-    ddendrs = (d1+2.d0*f1*rsd)*u+(d2+2.d0*f2*rsd)*u**2+(d3+2.d0*f3*rsd)*u**3+(d4+2.d0*f4*rsd)*u**4+(d5+2.d0*f5*rsd)*u**5
-    ddendrs = ddendrs * alpha_d*rs**(alpha_d-1.d0)
-    ddendt = (c1+d1*rsd+f1*rsd**2)+2.d0*(c2+d2*rsd+f2*rsd**2)*u+3.d0*(c3+d3*rsd+f3*rsd**2)*u**2+4.d0*(c4+d4*rsd+f4*rsd**2)*u**3+5.d0*(c5+d5*rsd+f5*rsd**2)*u**4
-    ddendt = ddendt * du
-    !
-    call tildeAx(t,Ax,dAx,d2Ax)
-    Bc = num/den
-    Bc = Bc/Ax
-    dBcdrs = dnumdrs/den - num*ddendrs/den**2
-    dBcdrs = dBcdrs/Ax
-    ! d((num/den)/Ax)/dt = d(num/den)/dt *1/Ax -  (num/den)*dAx/dt * 1/Ax**2
-    dBcdt = (dnumdt/den - num*ddendt/den**2)/Ax - (num/den)*dAx/Ax**2
-    !
-  endif
-  return
-end subroutine tildeBcII
-
-!
-! Copyright (C) 2001-2014 Quantum ESPRESSO group
-! This file is distributed under the terms of the
-! GNU General Public License. See the file `License'
-! in the root directory of the present distribution,
-! or http://www.gnu.org/copyleft/gpl.txt .
-!-----------------------------------------------------------------------
-!
-!-----------------------------------------------------------------------
-subroutine slater (rs, ex, vx)
-  !-----------------------------------------------------------------------
-  !        Slater exchange with alpha=2/3
-  !
-
-  implicit none
-  real(dp), intent(in) :: rs
-  real(dp), intent(out):: ex, vx
-  real(dp), parameter  :: f= -0.687247939924714d0, alpha = 2.0d0/3.0d0
-  ! f = -9/8*(3/2pi)^(2/3)
-  !
-  ex = f * alpha / rs
-  vx = 4.d0 / 3.d0 * f * alpha / rs
-  !
-  return
-end subroutine slater
-
-!-----------------------------------------------------------------------
-subroutine fxc_ksdt_0(rs,fxc,vxc,degauss)
-  !-----------------------------------------------------------------------------
-  !
-  ! DESCRIPTION:
-  !   LDA XC free-energy parameterization from Monte Carlo data (unpol/pol) 
-  !
-  !    rs: Wigner-Seitz radius (bohr)
-  !     t: reduced temperature
-  !    iz: 0 - spin-unpolarized, 1 - fully polarized
-  !
-  !   fxc: XC free-energy per particle (hartree)
-  !   vxc: xc potential (hartree)
-  !
-  ! REFERENCES:
-  ! 
-
-  !
-  !-----------------------------------------------------------------------------
-  ! REVISION LOG:
-  !  21-NOV-2013 Subroutine created (V.V. Karasiev)
-  !  04-DEC-2013 Parameters are fixed (VVK)
-  !-----------------------------------------------------------------------------
-  !
-
-  implicit none
-  real(8), intent(in) :: rs
-  real(8)             :: t,ef
-  integer             :: iz
-  real(8), intent(out) :: fxc,vxc
-  real(dp),intent(in) :: degauss
-  !
-  real(8), parameter :: &
-       onethird=1.d0/3.d0, &
-       !half=0.5d0, &
-       threehalf=1.5d0, &
-       !pi=4.d0*atan(1.d0), &
-       lambda=(4.d0/9.d0/pi)**onethird, &
-       a0=1.d0/(pi*lambda)
-  real(8) :: aa,daa,bb,dbb,cc,dcc,dd,ddd,ee,dee
-  real(8) :: dtdn,tanht,dtanht,tanhsqrt,dtanhsqrt
-  real(8) :: f1,dfxcdt,dfxcdrs
-  real(8) :: num,dnum,den,dden,dnumdrs,ddendrs,n,drsdn
-  !
-  real(8) :: omega,a(6),b(0:1,4),c(0:1,3),d(0:1,5),e(0:1,5)
-  !
-  data a/0.75d0,3.04363d0,-0.092270d0,1.70350d0,8.31051d0,5.1105d0/
-  !
-  ! /home/vkarasev/fits/fit-Fxc-New-Entropy-newQMC-test2/fit-PIMC-ichimaru-simpl4a-Eint+0tQMC-fixed-Entropy_clean_T0QMC-lmdif-search-ver1-rs75
-  ! or the same is here 
-  ! /home/vkarasev/fits/fit-Fxc-New-Entropy-newQMC-test2/fit-PIMC-ichimaru-simpl4a-Eint+0tQMC-fixed-Entropy_clean_T0QMC-lmdif-search-ver1-rs75-clean
-  data b(0,:)/0.342554d0,9.141315d0,0.448483d0,18.553096d0/
-  data c(0,:)/0.875130d0,-0.256320d0,0.953988d0/
-  data d(0,:)/0.725917d0,2.237347d0,0.280748d0,4.185911d0,0.692183d0/
-  data e(0,:)/0.255415d0,0.931933d0,0.115398d0,17.234117d0,0.451437d0/
-  !
-  data b(1,:)/0.329001d0,111.598308d0,0.537053d0,105.086663d0/
-  data c(1,:)/0.848930d0,0.167952d0,0.088820d0/
-  data d(1,:)/0.551330d0,180.213159d0,134.486231d0,103.861695d0,17.750710d0/
-  data e(1,:)/0.153124d0,19.543945d0,43.400337d0,120.255145d0,15.662836d0/
-  !
-  !modified for QE --------
-  iz=0 !spin-unpol case
-  !------------------------
-  if(iz==0) then
-    omega=1.d0
-  elseif(iz==1) then
-    omega=2.d0**onethird
-  endif
-  !
-  n=3.d0/(4.d0*pi*rs**3) ! density
-  ef=1.841584276_DP/rs/rs * omega**(2.d0/3.d0)
-  t=degauss/2.0_DP/ef !T=degauss/2.0_DP
-  !
-  if(t==0.d0) then
-!fxc
-    f1=-1.d0/rs
-    num=omega*a0*a(1)+b(iz,1)*sqrt(rs)+c(iz,1)*e(iz,1)*rs
-    den=1.d0+d(iz,1)*sqrt(rs)+e(iz,1)*rs
-    fxc=f1*num/den
-!
-    dnumdrs=b(iz,1)/sqrt(rs)/2.d0+c(iz,1)*e(iz,1)
-    ddendrs=d(iz,1)/sqrt(rs)/2.d0+e(iz,1)
-
-    !n=3.d0/(4.d0*pi*rs**3) ! density
-    drsdn=-onethird*rs/n ! (drs/dn)
-    !Fxc=n*fxc=n*f1*num/den=n*A*B*C
-    !dFxc/dn=fxc+n*(dA/dn)*B*C+n*a*(dB/dn)*C+n*a*B*(dC/dn)
-    vxc=fxc+(onethird*f1)*num/den &   ! fxc+n*(dA/dn)*B*C
-           + n*f1*(dnumdrs*drsdn)/den &  ! n*a*(dB/dn)*C
-           - n*f1*num*(ddendrs*drsdn)/den**2 ! n*a*B*(dC/dn)   
-  else
-    tanht=tanh(1.d0/t)
-    tanhsqrt=tanh(1.d0/sqrt(t))
-    dtanht=(tanht**2-1.d0)/t**2 !d/dt tanh(1/t)
-    dtanhsqrt=(tanhsqrt**2-1.d0)/t**threehalf/2.d0 !d/dt tanh(1/sqrt(t))
-!
-! a(t)
-    num=a(1)+a(2)*t**2+a(3)*t**3+a(4)*t**4
-    den=1.d0+a(5)*t**2+a(6)*t**4
-!
-    dnum=a(2)*2.d0*t+a(3)*3.d0*t**2+a(4)*4.d0*t**3
-    dden=a(5)*2.d0*t+a(6)*4.d0*t**3
-! 
-    aa=a0*tanht*num/den
-    daa=a0*(dtanht*num/den+tanht*dnum/den-tanht*num*dden/den**2)
-! 
-! b(t)
-    num=b(iz,1)+b(iz,2)*t**2+b(iz,3)*t**4
-    den=1.d0+b(iz,4)*t**2+sqrt(3.d0)*b(iz,3)/sqrt(2.d0*lambda**2)*t**4
-! 
-    dnum=b(iz,2)*2.d0*t+b(iz,3)*4.d0*t**3
-    dden=b(iz,4)*2.d0*t+sqrt(3.d0)*b(iz,3)/sqrt(2.d0*lambda**2)*4.d0*t**3
-!
-    bb=tanhsqrt*num/den
-    dbb=dtanhsqrt*num/den+tanhsqrt*dnum/den-tanhsqrt*num*dden/den**2
-!
-! d(t)
-    num=d(iz,1)+d(iz,2)*t**2+d(iz,3)*t**4
-    den=1.d0+d(iz,4)*t**2+d(iz,5)*t**4
-! 
-    dnum=d(iz,2)*2.d0*t+d(iz,3)*4.d0*t**3
-    dden=d(iz,4)*2.d0*t+d(iz,5)*4.d0*t**3
-!
-    dd=tanhsqrt*num/den
-    ddd=dtanhsqrt*num/den+tanhsqrt*dnum/den-tanhsqrt*num*dden/den**2
-!
-! e(t)
-    num=e(iz,1)+e(iz,2)*t**2+e(iz,3)*t**4
-    den=1.d0+e(iz,4)*t**2+e(iz,5)*t**4
-! 
-    dnum=e(iz,2)*2.d0*t+e(iz,3)*4.d0*t**3
-    dden=e(iz,4)*2.d0*t+e(iz,5)*4.d0*t**3
-!
-    ee=tanht*num/den
-    dee=dtanht*num/den+tanht*dnum/den-tanht*num*dden/den**2
-!
-! c(t)
-    num=c(iz,1)+c(iz,2)*exp(-c(iz,3)/t)
-    dnum=c(iz,2)*c(iz,3)*exp(-c(iz,3)/t)/t**2
-    cc=num*ee
-    dcc=dnum*ee+num*dee
-!
-!fxc
-    f1=-1.d0/rs
-    num=omega*aa+bb*sqrt(rs)+cc*rs
-    den=1.d0+dd*sqrt(rs)+ee*rs
-    fxc=f1*num/den
-!
-    dnum=omega*daa+dbb*sqrt(rs)+dcc*rs
-    dnumdrs=bb/sqrt(rs)/2.d0+cc
-    dden=ddd*sqrt(rs)+dee*rs
-    ddendrs=dd/sqrt(rs)/2.d0+ee
-
-    !n=3.d0/(4.d0*pi*rs**3) ! density
-    dtdn = -2.d0/3.d0*t/n ! (dt/dn)
-    drsdn=-onethird*rs/n ! (drs/dn)
-    !Fxc=n*fxc=n*f1*num/den=n*A*B*C
-    !dFxc/dn=fxc+n*(dA/dn)*B*C+n*A*(dB/dn)*C+n*A*B*(dC/dn)
-    vxc=fxc+(onethird*f1)*num/den &   ! fxc+n*(dA/dn)*B*C
-           + n*f1*(dnum*dtdn+dnumdrs*drsdn)/den &  ! n*A*(dB/dn)*C
-           - n*f1*num*(dden*dtdn+ddendrs*drsdn)/den**2 ! n*A*B*(dC/dn)
-  endif
-  return
-end subroutine fxc_ksdt_0
-!
-!-------------------------------------------------------------------------------
-subroutine exc_ksdt_0(rs,exc,tsxc,degauss)
-  !-----------------------------------------------------------------------------
-  !
-  ! DESCRIPTION:
-  !   LDA XC internal-energy from parameterization of Monte Carlo data (unpol/pol) 
-  !
-  !    rs: Wigner-Seitz radius (bohr)
-  !     t: reduced temperature
-  !    iz: 0 - spin-unpolarized, 1 - fully polarized
-  !
-  !   exc: XC internal-energy per particle (hartree)
-  !
-  ! REFERENCES:
-  ! 
-
-  !
-  !-----------------------------------------------------------------------------
-  ! REVISION LOG:
-  !  24-NOV-2013 Subroutine created (V.V. Karasiev)
-  !  04-DEC-2013 Parameters are fixed (VVK)
-  !-----------------------------------------------------------------------------
-  !
-
-  implicit none
-  real(8), intent(in) :: rs
-  real(8)             :: t,ef
-  integer             :: iz
-  real(8), intent(out) :: exc,tsxc
-  real(8)              :: fxc,vxc,sxc,tempF
-  real(dp),intent(in) :: degauss
-  !
-  real(8), parameter :: &
-       onethird=1.D0/3.D0, &
-       threehalf=1.5d0, &
-       !pi=4.d0*atan(1.d0), &
-       lambda=(4.d0/9.d0/pi)**onethird, &
-       a0=1.d0/(pi*lambda)
-  real(8) :: aa,daa,bb,dbb,cc,dcc,dd,ddd,ee,dee
-  real(8) :: dtdn,tanht,dtanht,tanhsqrt,dtanhsqrt
-  real(8) :: f1,dfxcdt,dfxcdrs
-  real(8) :: num,dnum,den,dden,dnumdrs,ddendrs,n,drsdn
-  !
-  real(8) :: omega,a(6),b(0:1,4),c(0:1,3),d(0:1,5),e(0:1,5)
-  !
-  data a/0.75d0,3.04363d0,-0.092270d0,1.70350d0,8.31051d0,5.1105d0/
-  !
-  ! /home/vkarasev/fits/fit-Fxc-New-Entropy-newQMC-test2/fit-PIMC-ichimaru-simpl4a-Eint+0tQMC-fixed-Entropy_clean_T0QMC-lmdif-search-ver1-rs75
-  ! or the same is here 
-  ! /home/vkarasev/fits/fit-Fxc-New-Entropy-newQMC-test2/fit-PIMC-ichimaru-simpl4a-Eint+0tQMC-fixed-Entropy_clean_T0QMC-lmdif-search-ver1-rs75-clean
-  data b(0,:)/0.342554d0,9.141315d0,0.448483d0,18.553096d0/
-  data c(0,:)/0.875130d0,-0.256320d0,0.953988d0/
-  data d(0,:)/0.725917d0,2.237347d0,0.280748d0,4.185911d0,0.692183d0/
-  data e(0,:)/0.255415d0,0.931933d0,0.115398d0,17.234117d0,0.451437d0/
-  !
-  data b(1,:)/0.329001d0,111.598308d0,0.537053d0,105.086663d0/
-  data c(1,:)/0.848930d0,0.167952d0,0.088820d0/
-  data d(1,:)/0.551330d0,180.213159d0,134.486231d0,103.861695d0,17.750710d0/
-  data e(1,:)/0.153124d0,19.543945d0,43.400337d0,120.255145d0,15.662836d0/
-  !
-  !modified for QE --------
-  iz=0 !spin-unpol case
-  !------------------------
-  if(iz==0) then
-    omega=1.d0
-  elseif(iz==1) then
-    omega=2.d0**onethird
-  endif
-  !
-  n=3.d0/(4.d0*pi*rs**3) ! density
-  tempF = (3.d0*PI**2*n)**(2.d0/3.d0)/2.d0*omega**2 !tempF=ef= Fermi temperature
-  ef=1.841584276_DP/rs/rs * omega**(2.d0/3.d0)
-  t=degauss/2.0_DP/ef !T=degauss/2.0_DP  
-!
-  if(t==0.d0) then
-    call fxc_ksdt_0(rs,fxc,vxc, degauss)
-    exc=fxc
-  else
-    tanht=tanh(1.d0/t)
-    tanhsqrt=tanh(1.d0/sqrt(t))
-    dtanht=(tanht**2-1.d0)/t**2 !d/dt tanh(1/t)
-    dtanhsqrt=(tanhsqrt**2-1.d0)/t**threehalf/2.d0 !d/dt tanh(1/sqrt(t))
-!
-! a(t)
-    num=a(1)+a(2)*t**2+a(3)*t**3+a(4)*t**4
-    den=1.d0+a(5)*t**2+a(6)*t**4
-!
-    dnum=a(2)*2.d0*t+a(3)*3.d0*t**2+a(4)*4.d0*t**3
-    dden=a(5)*2.d0*t+a(6)*4.d0*t**3
-! 
-    aa=a0*tanht*num/den
-    daa=a0*(dtanht*num/den+tanht*dnum/den-tanht*num*dden/den**2)
-! 
-! b(t)
-    num=b(iz,1)+b(iz,2)*t**2+b(iz,3)*t**4
-    den=1.d0+b(iz,4)*t**2+sqrt(3.d0)*b(iz,3)/sqrt(2.d0*lambda**2)*t**4
-! 
-    dnum=b(iz,2)*2.d0*t+b(iz,3)*4.d0*t**3
-    dden=b(iz,4)*2.d0*t+sqrt(3.d0)*b(iz,3)/sqrt(2.d0*lambda**2)*4.d0*t**3
-!
-    bb=tanhsqrt*num/den
-    dbb=dtanhsqrt*num/den+tanhsqrt*dnum/den-tanhsqrt*num*dden/den**2
-!
-! d(t)
-    num=d(iz,1)+d(iz,2)*t**2+d(iz,3)*t**4
-    den=1.d0+d(iz,4)*t**2+d(iz,5)*t**4
-! 
-    dnum=d(iz,2)*2.d0*t+d(iz,3)*4.d0*t**3
-    dden=d(iz,4)*2.d0*t+d(iz,5)*4.d0*t**3
-!
-    dd=tanhsqrt*num/den
-    ddd=dtanhsqrt*num/den+tanhsqrt*dnum/den-tanhsqrt*num*dden/den**2
-!
-! e(t)
-    num=e(iz,1)+e(iz,2)*t**2+e(iz,3)*t**4
-    den=1.d0+e(iz,4)*t**2+e(iz,5)*t**4
-! 
-    dnum=e(iz,2)*2.d0*t+e(iz,3)*4.d0*t**3
-    dden=e(iz,4)*2.d0*t+e(iz,5)*4.d0*t**3
-!
-    ee=tanht*num/den
-    dee=dtanht*num/den+tanht*dnum/den-tanht*num*dden/den**2
-!
-! c(t)
-    num=c(iz,1)+c(iz,2)*exp(-c(iz,3)/t)
-    dnum=c(iz,2)*c(iz,3)*exp(-c(iz,3)/t)/t**2
-    cc=num*ee
-    dcc=dnum*ee+num*dee
-!
-!fxc
-    f1=-1.d0/rs
-    num=omega*aa+bb*sqrt(rs)+cc*rs
-    den=1.d0+dd*sqrt(rs)+ee*rs
-    fxc=f1*num/den
-!
-    dnum=omega*daa+dbb*sqrt(rs)+dcc*rs
-    dden=ddd*sqrt(rs)+dee*rs
-
-    !n=3.d0/(4.d0*pi*rs**3) ! density
-    !tempF = (3.d0*PI**2*n)**(2.d0/3.d0)/2.d0*omega**2
-    !dfxc/dt=A*(dB/dt)*C+A*B*(dC/dt)
-    sxc= f1*(dnum)/den &  ! A*(dB/dn)*C
-       - f1*num*(dden)/den**2 ! A*B*(dC/dn)
-    sxc=-sxc/tempF !sxc=-(t/T)*dfxc/dt=-(1/tempF)*dfxc/dt
-    exc=fxc+t*tempF*sxc !exc=fxc+T*sxc=fxc+(t*tempF)*sxc
-    tsxc=t*tempF*sxc
-  endif
-  return
-end subroutine exc_ksdt_0
 
 end module m_xcpbe
 !!***
