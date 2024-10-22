@@ -1,6 +1,6 @@
 
-.Version 10.1.4.5 of ABINIT, released Sep 2024.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
+.Version 10.2.2.3 of ABINIT, released Sep 2024.
+.(sequential version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2024 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 13 Sep 2024.
-- ( at 19h01 )
+.Starting date : Tue 22 Oct 2024.
+- ( at 14h01 )
   
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/libxc_t74/t74.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_serial/baguetl_optcell-ecutsm/tests/TestBot_MPI1/libxc_t74/t74.abi
 - output file    -> t74.abo
 - root for input  files -> t74i
 - root for output files -> t74o
@@ -873,8 +873,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.02508
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_serial/baguetl_optcell-ecutsm/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_serial/baguetl_optcell-ecutsm/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
 -  Troullier-Martins psp for element  Al        Thu Oct 27 17:31:05 EDT 1994
 - 13.00000   3.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1037,8 +1037,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.02508
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_serial/baguetl_optcell-ecutsm/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_serial/baguetl_optcell-ecutsm/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
 -  Troullier-Martins psp for element  Al        Thu Oct 27 17:31:05 EDT 1994
 - 13.00000   3.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1198,8 +1198,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.02508
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_serial/baguetl_optcell-ecutsm/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_serial/baguetl_optcell-ecutsm/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
 -  Troullier-Martins psp for element  Al        Thu Oct 27 17:31:05 EDT 1994
 - 13.00000   3.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1230,7 +1230,7 @@ tolerances: {toldfe: 1.00E-08, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -2.4396398201310    -2.440E+00 2.662E-08 4.207E-03
+ ETOT  1  -2.4396398201312    -2.440E+00 2.662E-08 4.207E-03
  ETOT  2  -2.4394513063709     1.885E-04 1.882E-10 1.985E-04
  ETOT  3  -2.4394544022007    -3.096E-06 5.831E-09 2.167E-07
  ETOT  4  -2.4394568816411    -2.479E-06 4.644E-10 3.311E-08
@@ -1314,28 +1314,28 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 3, }
 comment             : Components of total free energy in Hartree
-kinetic             :  8.71754729144176E-01
-hartree             :  3.31798954141102E-03
-xc                  : -1.08293711841981E+00
+kinetic             :  8.71754729144168E-01
+hartree             :  3.31798954141072E-03
+xc                  : -1.08293711841980E+00
 Ewald energy        : -2.71472096493581E+00
 psp_core            :  6.05643856626115E-03
-local_psp           :  1.77741698056399E-01
-non_local_psp+x     :  3.07312821891042E-01
+local_psp           :  1.77741698056421E-01
+non_local_psp+x     :  3.07312821891020E-01
 internal            : -2.43147440615633E+00
-'-kT*entropy'       : -7.98226766387772E-03
-total_energy        : -2.43945667382020E+00
+'-kT*entropy'       : -7.98226766387812E-03
+total_energy        : -2.43945667382021E+00
 ...
 
 
 --- !EnergyTermsDC
 iteration_state     : {dtset: 3, }
 comment             : '"Double-counting" decomposition of free energy'
-band_energy         :  2.86696752317474E-01
+band_energy         :  2.86696752317470E-01
 Ewald energy        : -2.71472096493581E+00
 psp_core            :  6.05643856626115E-03
-xc_dc               : -9.50663394770693E-03
-internal            : -2.43147440799978E+00
-'-kT*entropy'       : -7.98226766387772E-03
+xc_dc               : -9.50663394770634E-03
+internal            : -2.43147440799979E+00
+'-kT*entropy'       : -7.98226766387812E-03
 total_energy_dc     : -2.43945667566366E+00
 ...
 
@@ -1388,7 +1388,7 @@ tolerances: {toldfe: 1.00E-08, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -2.4410698228968    -2.441E+00 2.659E-08 4.267E-03
+ ETOT  1  -2.4410698228969    -2.441E+00 2.659E-08 4.267E-03
  ETOT  2  -2.4408705167684     1.993E-04 1.876E-10 2.010E-04
  ETOT  3  -2.4408737954747    -3.279E-06 5.728E-09 2.108E-07
  ETOT  4  -2.4408763516462    -2.556E-06 4.642E-10 2.853E-08
@@ -1396,7 +1396,7 @@ tolerances: {toldfe: 1.00E-08, }
  ETOT  6  -2.4408761933152     6.927E-08 1.187E-10 4.765E-11
  ETOT  7  -2.4408761697681     2.355E-08 8.005E-11 1.001E-12
  ETOT  8  -2.4408761627231     7.045E-09 5.819E-11 7.717E-13
- ETOT  9  -2.4408761600659     2.657E-09 4.102E-11 7.404E-13
+ ETOT  9  -2.4408761600660     2.657E-09 4.102E-11 7.404E-13
 
  At SCF step    9, etot is converged : 
   for the second time, diff in etot=  2.657E-09 < toldfe=  1.000E-08
@@ -1472,28 +1472,28 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 4, }
 comment             : Components of total free energy in Hartree
-kinetic             :  8.71709782702148E-01
-hartree             :  3.31490054828735E-03
+kinetic             :  8.71709782702143E-01
+hartree             :  3.31490054828701E-03
 xc                  : -1.08150026472114E+00
 Ewald energy        : -2.71472096493581E+00
 psp_core            :  6.05643856626115E-03
-local_psp           :  1.77738239934070E-01
-non_local_psp+x     :  3.04482317210095E-01
-internal            : -2.43291955069609E+00
-'-kT*entropy'       : -7.95660936985241E-03
-total_energy        : -2.44087616006594E+00
+local_psp           :  1.77738239934093E-01
+non_local_psp+x     :  3.04482317210072E-01
+internal            : -2.43291955069610E+00
+'-kT*entropy'       : -7.95660936985264E-03
+total_energy        : -2.44087616006595E+00
 ...
 
 
 --- !EnergyTermsDC
 iteration_state     : {dtset: 4, }
 comment             : '"Double-counting" decomposition of free energy'
-band_energy         :  2.82490373775624E-01
+band_energy         :  2.82490373775623E-01
 Ewald energy        : -2.71472096493581E+00
 psp_core            :  6.05643856626115E-03
-xc_dc               : -6.74540002484930E-03
-internal            : -2.43291955261877E+00
-'-kT*entropy'       : -7.95660936985241E-03
+xc_dc               : -6.74540002485324E-03
+internal            : -2.43291955261878E+00
+'-kT*entropy'       : -7.95660936985264E-03
 total_energy_dc     : -2.44087616198863E+00
 ...
 
@@ -1546,7 +1546,7 @@ tolerances: {toldfe: 1.00E-08, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -2.4410084654954    -2.441E+00 2.659E-08 4.265E-03
+ ETOT  1  -2.4410084654956    -2.441E+00 2.659E-08 4.265E-03
  ETOT  2  -2.4408095553257     1.989E-04 1.876E-10 2.009E-04
  ETOT  3  -2.4408128266990    -3.271E-06 5.733E-09 2.111E-07
  ETOT  4  -2.4408153796494    -2.553E-06 4.642E-10 2.872E-08
@@ -1630,29 +1630,29 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 5, }
 comment             : Components of total free energy in Hartree
-kinetic             :  8.71711460603151E-01
-hartree             :  3.31501697535907E-03
+kinetic             :  8.71711460603136E-01
+hartree             :  3.31501697535887E-03
 xc                  : -1.08155742596523E+00
 Ewald energy        : -2.71472096493581E+00
 psp_core            :  6.05643856626115E-03
-local_psp           :  1.77738424886641E-01
-non_local_psp+x     :  3.04599403022980E-01
-internal            : -2.43285764684665E+00
-'-kT*entropy'       : -7.95754039444758E-03
-total_energy        : -2.44081518724110E+00
+local_psp           :  1.77738424886653E-01
+non_local_psp+x     :  3.04599403022965E-01
+internal            : -2.43285764684666E+00
+'-kT*entropy'       : -7.95754039444804E-03
+total_energy        : -2.44081518724111E+00
 ...
 
 
 --- !EnergyTermsDC
 iteration_state     : {dtset: 5, }
 comment             : '"Double-counting" decomposition of free energy'
-band_energy         :  2.82666698508107E-01
+band_energy         :  2.82666698508098E-01
 Ewald energy        : -2.71472096493581E+00
 psp_core            :  6.05643856626115E-03
-xc_dc               : -6.85982090548748E-03
-internal            : -2.43285764876693E+00
-'-kT*entropy'       : -7.95754039444758E-03
-total_energy_dc     : -2.44081518916138E+00
+xc_dc               : -6.85982090550039E-03
+internal            : -2.43285764876695E+00
+'-kT*entropy'       : -7.95754039444804E-03
+total_energy_dc     : -2.44081518916140E+00
 ...
 
 
@@ -1692,8 +1692,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.02508
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_serial/baguetl_optcell-ecutsm/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_serial/baguetl_optcell-ecutsm/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
 -  Troullier-Martins psp for element  Al        Thu Oct 27 17:31:05 EDT 1994
 - 13.00000   3.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1724,7 +1724,7 @@ tolerances: {toldfe: 1.00E-08, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -2.4671569126660    -2.467E+00 2.718E-08 3.515E-03
+ ETOT  1  -2.4671569126662    -2.467E+00 2.718E-08 3.515E-03
  ETOT  2  -2.4669604731897     1.964E-04 1.790E-10 1.743E-04
  ETOT  3  -2.4669630893503    -2.616E-06 4.562E-09 1.945E-07
  ETOT  4  -2.4669654893545    -2.400E-06 4.639E-10 1.878E-08
@@ -1808,15 +1808,15 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 6, }
 comment             : Components of total free energy in Hartree
-kinetic             :  8.72068636506588E-01
-hartree             :  3.34523572314386E-03
+kinetic             :  8.72068636506586E-01
+hartree             :  3.34523572314391E-03
 xc                  : -1.10771530451568E+00
 Ewald energy        : -2.71472096493581E+00
 psp_core            :  6.05643856626115E-03
-local_psp           :  1.78244247823887E-01
-non_local_psp+x     :  3.03709781365228E-01
+local_psp           :  1.78244247823880E-01
+non_local_psp+x     :  3.03709781365233E-01
 internal            : -2.45901192946638E+00
-'-kT*entropy'       : -7.95340873031749E-03
+'-kT*entropy'       : -7.95340873031750E-03
 total_energy        : -2.46696533819670E+00
 ...
 
@@ -1827,9 +1827,9 @@ comment             : '"Double-counting" decomposition of free energy'
 band_energy         :  2.53706624452403E-01
 Ewald energy        : -2.71472096493581E+00
 psp_core            :  6.05643856626115E-03
-xc_dc               : -4.05403035349694E-03
-internal            : -2.45901193227064E+00
-'-kT*entropy'       : -7.95340873031749E-03
+xc_dc               : -4.05403035349988E-03
+internal            : -2.45901193227065E+00
+'-kT*entropy'       : -7.95340873031750E-03
 total_energy_dc     : -2.46696534100096E+00
 ...
 
@@ -1882,8 +1882,8 @@ tolerances: {toldfe: 1.00E-08, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -2.4322650219815    -2.432E+00 2.691E-08 3.250E-03
- ETOT  2  -2.4322702020404    -5.180E-06 2.592E-10 1.540E-04
+ ETOT  1  -2.4322650219816    -2.432E+00 2.691E-08 3.250E-03
+ ETOT  2  -2.4322702020405    -5.180E-06 2.592E-10 1.540E-04
  ETOT  3  -2.4322719265745    -1.725E-06 5.308E-09 1.908E-07
  ETOT  4  -2.4322738654699    -1.939E-06 5.111E-10 4.804E-08
  ETOT  5  -2.4322738261595     3.931E-08 3.026E-10 1.011E-09
@@ -1965,15 +1965,15 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 7, }
 comment             : Components of total free energy in Hartree
-kinetic             :  8.72637897046997E-01
-hartree             :  3.37504814394149E-03
+kinetic             :  8.72637897047000E-01
+hartree             :  3.37504814394146E-03
 xc                  : -1.09882209977018E+00
 Ewald energy        : -2.71472096493581E+00
 psp_core            :  6.05643856626115E-03
-local_psp           :  1.77617281867484E-01
-non_local_psp+x     :  3.30143760293935E-01
+local_psp           :  1.77617281867485E-01
+non_local_psp+x     :  3.30143760293934E-01
 internal            : -2.42371263878737E+00
-'-kT*entropy'       : -8.56113846874396E-03
+'-kT*entropy'       : -8.56113846874392E-03
 total_energy        : -2.43227377725611E+00
 ...
 
@@ -1981,13 +1981,13 @@ total_energy        : -2.43227377725611E+00
 --- !EnergyTermsDC
 iteration_state     : {dtset: 7, }
 comment             : '"Double-counting" decomposition of free energy'
-band_energy         :  3.16174254617277E-01
+band_energy         :  3.16174254617280E-01
 Ewald energy        : -2.71472096493581E+00
 psp_core            :  6.05643856626115E-03
-xc_dc               : -3.12223693985103E-02
+xc_dc               : -3.12223693985073E-02
 internal            : -2.42371264115078E+00
-'-kT*entropy'       : -8.56113846874396E-03
-total_energy_dc     : -2.43227377961953E+00
+'-kT*entropy'       : -8.56113846874392E-03
+total_energy_dc     : -2.43227377961952E+00
 ...
 
 
@@ -2030,8 +2030,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.02508
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_serial/baguetl_optcell-ecutsm/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_serial/baguetl_optcell-ecutsm/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
 -  Troullier-Martins psp for element  Al        Thu Oct 27 17:31:05 EDT 1994
 - 13.00000   3.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2062,7 +2062,7 @@ tolerances: {toldfe: 1.00E-08, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -2.4251895260912    -2.425E+00 2.172E-08 3.578E-03
+ ETOT  1  -2.4251895260914    -2.425E+00 2.172E-08 3.578E-03
  ETOT  2  -2.4251749824901     1.454E-05 1.456E-10 2.596E-04
  ETOT  3  -2.4251764531785    -1.471E-06 5.241E-09 2.918E-06
  ETOT  4  -2.4251792100701    -2.757E-06 4.765E-10 2.274E-08
@@ -2146,16 +2146,16 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 8, }
 comment             : Components of total free energy in Hartree
-kinetic             :  8.71963358597735E-01
-hartree             :  3.27653964524507E-03
+kinetic             :  8.71963358597734E-01
+hartree             :  3.27653964524510E-03
 xc                  : -1.04097476238341E+00
 Ewald energy        : -2.71472096493581E+00
 psp_core            :  6.05643856626115E-03
-local_psp           :  1.77402685703563E-01
+local_psp           :  1.77402685703562E-01
 non_local_psp+x     :  2.80190748754002E-01
 internal            : -2.41680595605241E+00
-'-kT*entropy'       : -8.37296475564143E-03
-total_energy        : -2.42517892080805E+00
+'-kT*entropy'       : -8.37296475564145E-03
+total_energy        : -2.42517892080806E+00
 ...
 
 
@@ -2165,9 +2165,9 @@ comment             : '"Double-counting" decomposition of free energy'
 band_energy         :  2.75064253489190E-01
 Ewald energy        : -2.71472096493581E+00
 psp_core            :  6.05643856626115E-03
-xc_dc               :  1.67943166726134E-02
+xc_dc               :  1.67943166726133E-02
 internal            : -2.41680595620775E+00
-'-kT*entropy'       : -8.37296475564143E-03
+'-kT*entropy'       : -8.37296475564145E-03
 total_energy_dc     : -2.42517892096339E+00
 ...
 
@@ -2208,8 +2208,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.02508
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_serial/baguetl_optcell-ecutsm/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_serial/baguetl_optcell-ecutsm/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
 -  Troullier-Martins psp for element  Al        Thu Oct 27 17:31:05 EDT 1994
 - 13.00000   3.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2240,14 +2240,14 @@ tolerances: {toldfe: 1.00E-08, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -2.4251891974072    -2.425E+00 2.172E-08 3.578E-03
+ ETOT  1  -2.4251891974074    -2.425E+00 2.172E-08 3.578E-03
  ETOT  2  -2.4251746532900     1.454E-05 1.456E-10 2.596E-04
  ETOT  3  -2.4251761238572    -1.471E-06 5.241E-09 2.918E-06
  ETOT  4  -2.4251788807267    -2.757E-06 4.765E-10 2.274E-08
  ETOT  5  -2.4251786354928     2.452E-07 1.642E-10 2.214E-09
  ETOT  6  -2.4251786024193     3.307E-08 8.270E-11 4.325E-11
  ETOT  7  -2.4251785919912     1.043E-08 4.762E-11 8.867E-13
- ETOT  8  -2.4251785919337     5.751E-11 3.114E-11 5.464E-14
+ ETOT  8  -2.4251785919337     5.750E-11 3.114E-11 5.464E-14
  ETOT  9  -2.4251785914704     4.633E-10 2.131E-11 9.512E-15
 
  At SCF step    9, etot is converged : 
@@ -2324,15 +2324,15 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 9, }
 comment             : Components of total free energy in Hartree
-kinetic             :  8.71963373565876E-01
+kinetic             :  8.71963373565877E-01
 hartree             :  3.27653966988087E-03
 xc                  : -1.04097444335709E+00
 Ewald energy        : -2.71472096493581E+00
 psp_core            :  6.05643856626115E-03
 local_psp           :  1.77402577841539E-01
-non_local_psp+x     :  2.80190851630361E-01
+non_local_psp+x     :  2.80190851630360E-01
 internal            : -2.41680562701898E+00
-'-kT*entropy'       : -8.37296445146959E-03
+'-kT*entropy'       : -8.37296445146960E-03
 total_energy        : -2.42517859147045E+00
 ...
 
@@ -2340,12 +2340,12 @@ total_energy        : -2.42517859147045E+00
 --- !EnergyTermsDC
 iteration_state     : {dtset: 9, }
 comment             : '"Double-counting" decomposition of free energy'
-band_energy         :  2.75064712949484E-01
+band_energy         :  2.75064712949486E-01
 Ewald energy        : -2.71472096493581E+00
 psp_core            :  6.05643856626115E-03
-xc_dc               :  1.67941862457604E-02
-internal            : -2.41680562717431E+00
-'-kT*entropy'       : -8.37296445146959E-03
+xc_dc               :  1.67941862457601E-02
+internal            : -2.41680562717430E+00
+'-kT*entropy'       : -8.37296445146960E-03
 total_energy_dc     : -2.42517859162577E+00
 ...
 
@@ -2389,8 +2389,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.02508
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_serial/baguetl_optcell-ecutsm/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_serial/baguetl_optcell-ecutsm/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
 -  Troullier-Martins psp for element  Al        Thu Oct 27 17:31:05 EDT 1994
 - 13.00000   3.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2421,8 +2421,8 @@ tolerances: {toldfe: 1.00E-08, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -2.4266833696069    -2.427E+00 8.314E-09 8.565E-03
- ETOT  2  -2.4265933439720     9.003E-05 1.799E-10 6.399E-04
+ ETOT  1  -2.4266833696072    -2.427E+00 8.314E-09 8.565E-03
+ ETOT  2  -2.4265933439719     9.003E-05 1.799E-10 6.399E-04
  ETOT  3  -2.4265988502025    -5.506E-06 6.768E-09 8.919E-06
  ETOT  4  -2.4266043962958    -5.546E-06 1.106E-09 3.441E-08
  ETOT  5  -2.4266040191958     3.771E-07 9.783E-10 4.835E-09
@@ -2505,29 +2505,29 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 10, }
 comment             : Components of total free energy in Hartree
-kinetic             :  8.70127989552055E-01
-hartree             :  3.12398637399317E-03
-xc                  : -9.84513707403222E-01
+kinetic             :  8.70127989552052E-01
+hartree             :  3.12398637399316E-03
+xc                  : -9.84513707403215E-01
 Ewald energy        : -2.71472096493581E+00
 psp_core            :  6.05643856626115E-03
-local_psp           :  1.77500304208103E-01
-non_local_psp+x     :  2.23692691382592E-01
-internal            : -2.41873326225603E+00
-'-kT*entropy'       : -7.87068236867905E-03
-total_energy        : -2.42660394462471E+00
+local_psp           :  1.77500304208100E-01
+non_local_psp+x     :  2.23692691382594E-01
+internal            : -2.41873326225602E+00
+'-kT*entropy'       : -7.87068236867912E-03
+total_energy        : -2.42660394462470E+00
 ...
 
 
 --- !EnergyTermsDC
 iteration_state     : {dtset: 10, }
 comment             : '"Double-counting" decomposition of free energy'
-band_energy         :  2.33470694879049E-01
+band_energy         :  2.33470694879048E-01
 Ewald energy        : -2.71472096493581E+00
 psp_core            :  6.05643856626115E-03
-xc_dc               :  5.64605683062830E-02
+xc_dc               :  5.64605683062857E-02
 internal            : -2.41873326318422E+00
-'-kT*entropy'       : -7.87068236867905E-03
-total_energy_dc     : -2.42660394555290E+00
+'-kT*entropy'       : -7.87068236867912E-03
+total_energy_dc     : -2.42660394555289E+00
 ...
 
 
@@ -2567,8 +2567,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.02508
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_serial/baguetl_optcell-ecutsm/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_serial/baguetl_optcell-ecutsm/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
 -  Troullier-Martins psp for element  Al        Thu Oct 27 17:31:05 EDT 1994
 - 13.00000   3.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2599,13 +2599,13 @@ tolerances: {toldfe: 1.00E-08, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -2.4266830407055    -2.427E+00 8.314E-09 8.565E-03
+ ETOT  1  -2.4266830407057    -2.427E+00 8.314E-09 8.565E-03
  ETOT  2  -2.4265930141904     9.003E-05 1.799E-10 6.399E-04
  ETOT  3  -2.4265985202010    -5.506E-06 6.768E-09 8.919E-06
  ETOT  4  -2.4266040662537    -5.546E-06 1.106E-09 3.441E-08
  ETOT  5  -2.4266036891600     3.771E-07 9.783E-10 4.835E-09
  ETOT  6  -2.4266036375272     5.163E-08 9.407E-10 1.658E-10
- ETOT  7  -2.4266036160973     2.143E-08 9.971E-10 1.370E-12
+ ETOT  7  -2.4266036160972     2.143E-08 9.971E-10 1.370E-12
  ETOT  8  -2.4266036156233     4.739E-10 9.253E-10 1.518E-13
  ETOT  9  -2.4266036145888     1.035E-09 7.528E-10 4.583E-14
 
@@ -2683,15 +2683,15 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 11, }
 comment             : Components of total free energy in Hartree
-kinetic             :  8.70128002971845E-01
-hartree             :  3.12398617296957E-03
-xc                  : -9.84513387818603E-01
+kinetic             :  8.70128002971847E-01
+hartree             :  3.12398617296954E-03
+xc                  : -9.84513387818606E-01
 Ewald energy        : -2.71472096493581E+00
 psp_core            :  6.05643856626115E-03
-local_psp           :  1.77500196267154E-01
-non_local_psp+x     :  2.23692795859588E-01
-internal            : -2.41873293291659E+00
-'-kT*entropy'       : -7.87068167215631E-03
+local_psp           :  1.77500196267157E-01
+non_local_psp+x     :  2.23692795859586E-01
+internal            : -2.41873293291660E+00
+'-kT*entropy'       : -7.87068167215624E-03
 total_energy        : -2.42660361458875E+00
 ...
 
@@ -2699,12 +2699,12 @@ total_energy        : -2.42660361458875E+00
 --- !EnergyTermsDC
 iteration_state     : {dtset: 11, }
 comment             : '"Double-counting" decomposition of free energy'
-band_energy         :  2.33471154836064E-01
+band_energy         :  2.33471154836065E-01
 Ewald energy        : -2.71472096493581E+00
 psp_core            :  6.05643856626115E-03
-xc_dc               :  5.64604376886606E-02
+xc_dc               :  5.64604376886590E-02
 internal            : -2.41873293384482E+00
-'-kT*entropy'       : -7.87068167215631E-03
+'-kT*entropy'       : -7.87068167215624E-03
 total_energy_dc     : -2.42660361551698E+00
 ...
 
@@ -2745,8 +2745,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.02508
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_serial/baguetl_optcell-ecutsm/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_serial/baguetl_optcell-ecutsm/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
 -  Troullier-Martins psp for element  Al        Thu Oct 27 17:31:05 EDT 1994
 - 13.00000   3.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2777,13 +2777,13 @@ tolerances: {toldfe: 1.00E-08, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -2.3924521511152    -2.392E+00 4.931E-08 1.724E-03
+ ETOT  1  -2.3924521511153    -2.392E+00 4.931E-08 1.724E-03
  ETOT  2  -2.3925209168748    -6.877E-05 3.719E-10 1.103E-04
  ETOT  3  -2.3925215940846    -6.772E-07 1.094E-08 2.903E-07
  ETOT  4  -2.3925215450640     4.902E-08 1.671E-09 1.336E-08
  ETOT  5  -2.3925215756395    -3.058E-08 6.343E-10 1.697E-09
  ETOT  6  -2.3925215814080    -5.769E-09 2.503E-10 4.642E-11
- ETOT  7  -2.3925215819738    -5.658E-10 1.695E-10 6.638E-12
+ ETOT  7  -2.3925215819739    -5.658E-10 1.695E-10 6.638E-12
 
  At SCF step    7, etot is converged : 
   for the second time, diff in etot=  5.658E-10 < toldfe=  1.000E-08
@@ -2859,29 +2859,29 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 12, }
 comment             : Components of total free energy in Hartree
-kinetic             :  8.81669678093244E-01
-hartree             :  4.08051814863353E-03
-xc                  : -1.04290857485351E+00
+kinetic             :  8.81669678093220E-01
+hartree             :  4.08051814863348E-03
+xc                  : -1.04290857485349E+00
 Ewald energy        : -2.71472096493581E+00
 psp_core            :  6.05643856626115E-03
-local_psp           :  1.87322586753425E-01
-non_local_psp+x     :  2.94729750625304E-01
-internal            : -2.38377056760245E+00
-'-kT*entropy'       : -8.75101437138823E-03
-total_energy        : -2.39252158197384E+00
+local_psp           :  1.87322586753418E-01
+non_local_psp+x     :  2.94729750625302E-01
+internal            : -2.38377056760246E+00
+'-kT*entropy'       : -8.75101437138845E-03
+total_energy        : -2.39252158197385E+00
 ...
 
 
 --- !EnergyTermsDC
 iteration_state     : {dtset: 12, }
 comment             : '"Double-counting" decomposition of free energy'
-band_energy         :  3.29842994292198E-01
+band_energy         :  3.29842994292182E-01
 Ewald energy        : -2.71472096493581E+00
 psp_core            :  6.05643856626115E-03
-xc_dc               : -4.94909138922822E-03
-internal            : -2.38377062346658E+00
-'-kT*entropy'       : -8.75101437138823E-03
-total_energy_dc     : -2.39252163783797E+00
+xc_dc               : -4.94909138922550E-03
+internal            : -2.38377062346659E+00
+'-kT*entropy'       : -8.75101437138845E-03
+total_energy_dc     : -2.39252163783798E+00
 ...
 
 
@@ -2924,8 +2924,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.02508
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_serial/baguetl_optcell-ecutsm/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_serial/baguetl_optcell-ecutsm/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
 -  Troullier-Martins psp for element  Al        Thu Oct 27 17:31:05 EDT 1994
 - 13.00000   3.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2956,46 +2956,46 @@ tolerances: {toldfe: 1.00E-08, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -1.9090778140014    -1.909E+00 9.065E-09 1.846E-01
- ETOT  2  -1.9112244012210    -2.147E-03 2.172E-10 6.391E-02
+ ETOT  1  -1.9090778140021    -1.909E+00 9.065E-09 1.846E-01
+ ETOT  2  -1.9112244012211    -2.147E-03 2.172E-10 6.391E-02
  ETOT  3  -1.9121046224447    -8.802E-04 9.723E-06 3.654E-02
  ETOT  4  -1.9125771061056    -4.725E-04 1.133E-05 2.822E-04
  ETOT  5  -1.9127203646810    -1.433E-04 5.984E-06 2.392E-03
  ETOT  6  -1.9128285076228    -1.081E-04 2.962E-06 4.097E-03
  ETOT  7  -1.9128863051375    -5.780E-05 2.281E-06 1.446E-02
- ETOT  8  -1.9129233777446    -3.707E-05 3.384E-07 2.922E-03
- ETOT  9  -1.9129811446144    -5.777E-05 1.899E-05 3.356E-03
- ETOT 10  -1.9129982288977    -1.708E-05 3.939E-05 2.887E-03
- ETOT 11  -1.9130134648820    -1.524E-05 6.770E-05 1.675E-04
- ETOT 12  -1.9130359091480    -2.244E-05 7.388E-05 8.060E-05
- ETOT 13  -1.9130449132227    -9.004E-06 4.645E-05 9.941E-05
- ETOT 14  -1.9130347712733     1.014E-05 2.057E-05 3.563E-04
- ETOT 15  -1.9130302091382     4.562E-06 7.726E-06 1.377E-04
- ETOT 16  -1.9130333217218    -3.113E-06 2.705E-06 1.106E-04
- ETOT 17  -1.9130336364990    -3.148E-07 9.266E-07 1.514E-04
- ETOT 18  -1.9130321216075     1.515E-06 3.777E-07 4.188E-04
- ETOT 19  -1.9130444741561    -1.235E-05 1.238E-07 8.188E-04
- ETOT 20  -1.9130452142638    -7.401E-07 3.747E-08 3.959E-04
- ETOT 21  -1.9130382583097     6.956E-06 1.259E-08 3.287E-04
- ETOT 22  -1.9130357164649     2.542E-06 6.478E-09 1.306E-04
- ETOT 23  -1.9130316443262     4.072E-06 6.082E-09 3.780E-06
- ETOT 24  -1.9130278454815     3.799E-06 3.492E-09 1.468E-07
- ETOT 25  -1.9130282058675    -3.604E-07 2.257E-09 9.797E-07
- ETOT 26  -1.9130287587321    -5.529E-07 1.677E-09 9.495E-07
- ETOT 27  -1.9130298603267    -1.102E-06 2.131E-09 1.592E-06
- ETOT 28  -1.9130304714734    -6.111E-07 2.771E-09 3.161E-06
- ETOT 29  -1.9130308191677    -3.477E-07 3.666E-09 7.244E-07
- ETOT 30  -1.9130315490344    -7.299E-07 4.561E-09 4.839E-07
+ ETOT  8  -1.9129233777444    -3.707E-05 3.384E-07 2.922E-03
+ ETOT  9  -1.9129811446199    -5.777E-05 1.899E-05 3.356E-03
+ ETOT 10  -1.9129982289174    -1.708E-05 3.939E-05 2.887E-03
+ ETOT 11  -1.9130134648863    -1.524E-05 6.770E-05 1.675E-04
+ ETOT 12  -1.9130359091848    -2.244E-05 7.388E-05 8.061E-05
+ ETOT 13  -1.9130449134280    -9.004E-06 4.645E-05 9.941E-05
+ ETOT 14  -1.9130347712359     1.014E-05 2.057E-05 3.563E-04
+ ETOT 15  -1.9130302090547     4.562E-06 7.726E-06 1.377E-04
+ ETOT 16  -1.9130333211038    -3.112E-06 2.705E-06 1.106E-04
+ ETOT 17  -1.9130336360259    -3.149E-07 9.266E-07 1.514E-04
+ ETOT 18  -1.9130321211846     1.515E-06 3.777E-07 4.191E-04
+ ETOT 19  -1.9130444781076    -1.236E-05 1.237E-07 8.185E-04
+ ETOT 20  -1.9130452108445    -7.327E-07 3.746E-08 3.963E-04
+ ETOT 21  -1.9130382617606     6.949E-06 1.259E-08 3.290E-04
+ ETOT 22  -1.9130357185916     2.543E-06 6.492E-09 1.303E-04
+ ETOT 23  -1.9130316383048     4.080E-06 6.091E-09 3.735E-06
+ ETOT 24  -1.9130278415902     3.797E-06 3.493E-09 1.413E-07
+ ETOT 25  -1.9130282047364    -3.631E-07 2.252E-09 9.766E-07
+ ETOT 26  -1.9130287617603    -5.570E-07 1.676E-09 9.645E-07
+ ETOT 27  -1.9130298586676    -1.097E-06 2.134E-09 1.746E-06
+ ETOT 28  -1.9130304487493    -5.901E-07 2.742E-09 1.545E-06
+ ETOT 29  -1.9130310112541    -5.625E-07 3.540E-09 9.921E-07
+ ETOT 30  -1.9130314573257    -4.461E-07 4.551E-09 9.996E-07
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)= -1.27481776E-04  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)= -1.27481776E-04  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)= -1.27481776E-04  sigma(2 1)=  0.00000000E+00
+  sigma(1 1)= -1.27460701E-04  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)= -1.27460701E-04  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)= -1.27460701E-04  sigma(2 1)=  0.00000000E+00
 
 
  scprqt:  WARNING -
   nstep=   30 was not enough SCF cycles to converge;
-  maximum energy difference=  7.299E-07 exceeds toldfe=  1.000E-08
+  maximum energy difference=  4.461E-07 exceeds toldfe=  1.000E-08
 
 
 --- !ResultsGS
@@ -3008,15 +3008,15 @@ lattice_vectors:
 lattice_lengths: [   5.37401,    5.37401,    5.37401, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   1.0974400E+02
-convergence: {deltae: -7.299E-07, res2:  4.839E-07, residm:  4.561E-09, diffor: null, }
-etotal    :  -1.91303155E+00
+convergence: {deltae: -4.461E-07, res2:  9.996E-07, residm:  4.551E-09, diffor: null, }
+etotal    :  -1.91303146E+00
 entropy   :   0.00000000E+00
-fermie    :   3.10171098E-01
+fermie    :   3.10171363E-01
 cartesian_stress_tensor: # hartree/bohr^3
-- [ -1.27481776E-04,   0.00000000E+00,   0.00000000E+00, ]
-- [  0.00000000E+00,  -1.27481776E-04,   0.00000000E+00, ]
-- [  0.00000000E+00,   0.00000000E+00,  -1.27481776E-04, ]
-pressure_GPa:   3.7506E+00
+- [ -1.27460701E-04,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,  -1.27460701E-04,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,  -1.27460701E-04, ]
+pressure_GPa:   3.7500E+00
 xred      :
 - [  0.0000E+00,   0.0000E+00,   0.0000E+00, Al]
 cartesian_forces: # hartree/bohr
@@ -3027,12 +3027,12 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
-    1        2.00000          0.80264996
+    1        2.00000          0.80264570
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   25.420E-11; max=  45.613E-10
+ Mean square residual over all n,k,spin=   25.576E-11; max=  45.506E-10
  reduced coordinates (array xred) for    1 atoms
        0.000000000000      0.000000000000      0.000000000000
  rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
@@ -3063,41 +3063,41 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 13, }
 comment             : Components of total free energy in Hartree
-kinetic             :  8.72107490916128E-01
-hartree             :  4.81897849945830E-03
+kinetic             :  8.72106717061337E-01
+hartree             :  4.81911033432512E-03
 xc                  :  0.00000000000000E+00
 Ewald energy        : -2.71472096493581E+00
 psp_core            :  6.05643856626115E-03
-local_psp           :  2.71066570277912E-01
-non_local_psp+x     : -3.44553389443448E-01
-internal            : -1.90522487611950E+00
-'-kT*entropy'       : -7.80667291485537E-03
-total_energy        : -1.91303154903435E+00
+local_psp           :  2.71070857151445E-01
+non_local_psp+x     : -3.44557027406335E-01
+internal            : -1.90522486922878E+00
+'-kT*entropy'       : -7.80658809689131E-03
+total_energy        : -1.91303145732567E+00
 ...
 
 
 --- !EnergyTermsDC
 iteration_state     : {dtset: 13, }
 comment             : '"Double-counting" decomposition of free energy'
-band_energy         :  1.03793651058883E-01
+band_energy         :  1.03793065492344E-01
 Ewald energy        : -2.71472096493581E+00
 psp_core            :  6.05643856626115E-03
-xc_dc               :  6.99643789552906E-01
-internal            : -1.90522708575776E+00
-'-kT*entropy'       : -7.80667291485537E-03
-total_energy_dc     : -1.91303375867261E+00
+xc_dc               :  6.99643405527695E-01
+internal            : -1.90522805534951E+00
+'-kT*entropy'       : -7.80658809689131E-03
+total_energy_dc     : -1.91303464344640E+00
 ...
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)= -1.27481776E-04  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)= -1.27481776E-04  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)= -1.27481776E-04  sigma(2 1)=  0.00000000E+00
+  sigma(1 1)= -1.27460701E-04  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)= -1.27460701E-04  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)= -1.27460701E-04  sigma(2 1)=  0.00000000E+00
 
--Cartesian components of stress tensor (GPa)         [Pressure=  3.7506E+00 GPa]
-- sigma(1 1)= -3.75064271E+00  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)= -3.75064271E+00  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)= -3.75064271E+00  sigma(2 1)=  0.00000000E+00
+-Cartesian components of stress tensor (GPa)         [Pressure=  3.7500E+00 GPa]
+- sigma(1 1)= -3.75002268E+00  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)= -3.75002268E+00  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)= -3.75002268E+00  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
 == DATASET 14 ==================================================================
@@ -3125,8 +3125,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.02508
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_serial/baguetl_optcell-ecutsm/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_serial/baguetl_optcell-ecutsm/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
 -  Troullier-Martins psp for element  Al        Thu Oct 27 17:31:05 EDT 1994
 - 13.00000   3.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3157,12 +3157,12 @@ tolerances: {toldfe: 1.00E-08, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -2.4671568800266    -2.467E+00 2.718E-08 3.515E-03
+ ETOT  1  -2.4671568800267    -2.467E+00 2.718E-08 3.515E-03
  ETOT  2  -2.4669604405040     1.964E-04 1.790E-10 1.743E-04
  ETOT  3  -2.4669630566664    -2.616E-06 4.562E-09 1.945E-07
- ETOT  4  -2.4669654566711    -2.400E-06 4.639E-10 1.878E-08
+ ETOT  4  -2.4669654566710    -2.400E-06 4.639E-10 1.878E-08
  ETOT  5  -2.4669653896654     6.701E-08 1.859E-10 1.018E-09
- ETOT  6  -2.4669653336577     5.601E-08 1.231E-10 2.396E-11
+ ETOT  6  -2.4669653336576     5.601E-08 1.231E-10 2.396E-11
  ETOT  7  -2.4669653136523     2.001E-08 8.385E-11 1.448E-12
  ETOT  8  -2.4669653078500     5.802E-09 6.118E-11 1.986E-13
  ETOT  9  -2.4669653055133     2.337E-09 4.292E-11 5.192E-14
@@ -3241,29 +3241,29 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 14, }
 comment             : Components of total free energy in Hartree
-kinetic             :  8.72068635665270E-01
-hartree             :  3.34523565692691E-03
+kinetic             :  8.72068635665266E-01
+hartree             :  3.34523565692695E-03
 xc                  : -1.10771525964946E+00
 Ewald energy        : -2.71472096493581E+00
 psp_core            :  6.05643856626115E-03
-local_psp           :  1.78244246822807E-01
-non_local_psp+x     :  3.03709771000491E-01
+local_psp           :  1.78244246822802E-01
+non_local_psp+x     :  3.03709771000494E-01
 internal            : -2.45901189687352E+00
-'-kT*entropy'       : -7.95340863980398E-03
-total_energy        : -2.46696530551332E+00
+'-kT*entropy'       : -7.95340863980403E-03
+total_energy        : -2.46696530551333E+00
 ...
 
 
 --- !EnergyTermsDC
 iteration_state     : {dtset: 14, }
 comment             : '"Double-counting" decomposition of free energy'
-band_energy         :  2.53706651610654E-01
+band_energy         :  2.53706651610651E-01
 Ewald energy        : -2.71472096493581E+00
 psp_core            :  6.05643856626115E-03
-xc_dc               : -4.05402491889501E-03
+xc_dc               : -4.05402491889437E-03
 internal            : -2.45901189967779E+00
-'-kT*entropy'       : -7.95340863980398E-03
-total_energy_dc     : -2.46696530831759E+00
+'-kT*entropy'       : -7.95340863980403E-03
+total_energy_dc     : -2.46696530831760E+00
 ...
 
 
@@ -3325,26 +3325,26 @@ tolerances: {toldfe: 1.00E-08, }
  ETOT  8  -393.74500615775    -1.331E-08 3.093E-07 4.223E-10
  ETOT  9  -393.74500617359    -1.584E-08 3.082E-07 4.702E-11
  ETOT 10  -393.74500618949    -1.590E-08 3.071E-07 1.262E-11
- ETOT 11  -393.74500620462    -1.514E-08 3.060E-07 2.460E-11
+ ETOT 11  -393.74500620462    -1.513E-08 3.060E-07 2.460E-11
  ETOT 12  -393.74500621938    -1.476E-08 3.049E-07 1.082E-09
  ETOT 13  -393.74500623231    -1.293E-08 3.038E-07 5.198E-10
  ETOT 14  -393.74500624772    -1.541E-08 3.027E-07 7.038E-10
  ETOT 15  -393.74500626217    -1.445E-08 3.016E-07 1.230E-09
- ETOT 16  -393.74500627623    -1.406E-08 3.005E-07 1.704E-09
- ETOT 17  -393.74500629040    -1.417E-08 2.995E-07 2.316E-09
- ETOT 18  -393.74500630446    -1.407E-08 2.984E-07 3.937E-09
- ETOT 19  -393.74500631795    -1.349E-08 2.973E-07 2.498E-09
- ETOT 20  -393.74500633324    -1.528E-08 2.962E-07 3.599E-09
- ETOT 21  -393.74500634695    -1.371E-08 2.952E-07 5.014E-09
- ETOT 22  -393.74500636054    -1.359E-08 2.941E-07 8.497E-09
- ETOT 23  -393.74500637336    -1.283E-08 2.930E-07 5.705E-09
- ETOT 24  -393.74500638869    -1.532E-08 2.920E-07 6.994E-09
- ETOT 25  -393.74500640232    -1.363E-08 2.909E-07 8.384E-09
- ETOT 26  -393.74500641589    -1.358E-08 2.899E-07 1.173E-09
- ETOT 27  -393.74500643381    -1.791E-08 2.888E-07 3.347E-10
- ETOT 28  -393.74500644892    -1.511E-08 2.878E-07 2.349E-09
- ETOT 29  -393.74500646086    -1.194E-08 2.867E-07 8.248E-09
- ETOT 30  -393.74500647190    -1.105E-08 2.857E-07 8.608E-09
+ ETOT 16  -393.74500627623    -1.407E-08 3.005E-07 1.705E-09
+ ETOT 17  -393.74500629040    -1.416E-08 2.995E-07 2.319E-09
+ ETOT 18  -393.74500630446    -1.407E-08 2.984E-07 3.912E-09
+ ETOT 19  -393.74500631797    -1.350E-08 2.973E-07 2.370E-09
+ ETOT 20  -393.74500633332    -1.536E-08 2.962E-07 3.367E-09
+ ETOT 21  -393.74500634708    -1.375E-08 2.952E-07 6.073E-09
+ ETOT 22  -393.74500636006    -1.298E-08 2.941E-07 7.628E-09
+ ETOT 23  -393.74500637368    -1.362E-08 2.930E-07 4.747E-09
+ ETOT 24  -393.74500638913    -1.545E-08 2.920E-07 5.030E-09
+ ETOT 25  -393.74500640317    -1.404E-08 2.909E-07 8.496E-09
+ ETOT 26  -393.74500641586    -1.269E-08 2.899E-07 6.054E-09
+ ETOT 27  -393.74500643087    -1.501E-08 2.888E-07 8.243E-09
+ ETOT 28  -393.74500644401    -1.314E-08 2.878E-07 1.056E-08
+ ETOT 29  -393.74500645716    -1.315E-08 2.867E-07 7.034E-09
+ ETOT 30  -393.74500647233    -1.518E-08 2.857E-07 8.315E-09
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  3.56630731E+00  sigma(3 2)=  0.00000000E+00
@@ -3354,7 +3354,7 @@ tolerances: {toldfe: 1.00E-08, }
 
  scprqt:  WARNING -
   nstep=   30 was not enough SCF cycles to converge;
-  maximum energy difference=  1.105E-08 exceeds toldfe=  1.000E-08
+  maximum energy difference=  1.518E-08 exceeds toldfe=  1.000E-08
 
 
 --- !ResultsGS
@@ -3367,10 +3367,10 @@ lattice_vectors:
 lattice_lengths: [   5.37401,    5.37401,    5.37401, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   1.0974400E+02
-convergence: {deltae: -1.105E-08, res2:  8.608E-09, residm:  2.857E-07, diffor: null, }
+convergence: {deltae: -1.518E-08, res2:  8.315E-09, residm:  2.857E-07, diffor: null, }
 etotal    :  -3.93745006E+02
 entropy   :   0.00000000E+00
-fermie    :   3.00768419E-01
+fermie    :   3.00768420E-01
 cartesian_stress_tensor: # hartree/bohr^3
 - [  3.56630731E+00,   0.00000000E+00,   0.00000000E+00, ]
 - [  0.00000000E+00,   3.56630731E+00,   0.00000000E+00, ]
@@ -3386,7 +3386,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
-    1        2.00000          0.88367418
+    1        2.00000          0.88367419
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -3422,29 +3422,29 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 15, }
 comment             : Components of total free energy in Hartree
-kinetic             :  8.72119590348148E-01
-hartree             :  3.33962342232126E-03
-xc                  : -1.04113659626946E+00
+kinetic             :  8.72119593337388E-01
+hartree             :  3.33962406250308E-03
+xc                  : -1.04113659665866E+00
 Ewald energy        : -2.71472096493581E+00
 psp_core            :  6.05643856626115E-03
-local_psp           :  1.77690083060577E-01
-non_local_psp+x     : -3.91040478354185E+02
-internal            : -3.93737130179993E+02
-'-kT*entropy'       : -7.87629190841324E-03
-total_energy        : -3.93745006471901E+02
+local_psp           :  1.77690080371584E-01
+non_local_psp+x     : -3.91040478355391E+02
+internal            : -3.93737130180648E+02
+'-kT*entropy'       : -7.87629168507203E-03
+total_energy        : -3.93745006472333E+02
 ...
 
 
 --- !EnergyTermsDC
 iteration_state     : {dtset: 15, }
 comment             : '"Double-counting" decomposition of free energy'
-band_energy         : -7.82364978261989E+02
+band_energy         : -7.82364978265644E+02
 Ewald energy        : -2.71472096493581E+00
 psp_core            :  6.05643856626115E-03
-xc_dc               :  3.91336512860365E+02
-internal            : -3.93737129927994E+02
-'-kT*entropy'       : -7.87629190841324E-03
-total_energy_dc     : -3.93745006219902E+02
+xc_dc               :  3.91336512859410E+02
+internal            : -3.93737129932604E+02
+'-kT*entropy'       : -7.87629168507203E-03
+total_energy_dc     : -3.93745006224289E+02
 ...
 
 
@@ -3575,15 +3575,15 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 16, }
 comment             : Components of total free energy in Hartree
-kinetic             :  8.79267484472656E-01
-hartree             :  3.87862605095716E-03
+kinetic             :  8.79267484472654E-01
+hartree             :  3.87862605095709E-03
 xc                  : -1.21034282521744E+00
 Ewald energy        : -2.71472096493581E+00
 psp_core            :  6.05643856626115E-03
 local_psp           :  1.77673161835937E-01
-non_local_psp+x     :  4.48195777122862E-01
+non_local_psp+x     :  4.48195777122861E-01
 internal            : -2.40999230210458E+00
-'-kT*entropy'       : -1.10290832902872E-02
+'-kT*entropy'       : -1.10290832902873E-02
 total_energy        : -2.42102138539487E+00
 ...
 
@@ -3591,12 +3591,12 @@ total_energy        : -2.42102138539487E+00
 --- !EnergyTermsDC
 iteration_state     : {dtset: 16, }
 comment             : '"Double-counting" decomposition of free energy'
-band_energy         :  4.00382259328288E-01
+band_energy         :  4.00382259328286E-01
 Ewald energy        : -2.71472096493581E+00
 psp_core            :  6.05643856626115E-03
 xc_dc               : -1.01710192386800E-01
 internal            : -2.40999245942806E+00
-'-kT*entropy'       : -1.10290832902872E-02
+'-kT*entropy'       : -1.10290832902873E-02
 total_energy_dc     : -2.42102154271835E+00
 ...
 
@@ -3650,8 +3650,8 @@ tolerances: {toldfe: 1.00E-08, }
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
  ETOT  1  -2.4211221430210    -2.421E+00 5.388E-07 3.820E-05
- ETOT  2  -2.4211221941585    -5.114E-08 9.450E-08 1.547E-06
- ETOT  3  -2.4211221959502    -1.792E-09 2.752E-08 1.366E-08
+ ETOT  2  -2.4211221941584    -5.114E-08 9.450E-08 1.547E-06
+ ETOT  3  -2.4211221959500    -1.792E-09 2.752E-08 1.366E-08
  ETOT  4  -2.4211221960927    -1.426E-10 1.959E-08 1.136E-10
 
  At SCF step    4, etot is converged : 
@@ -3728,29 +3728,29 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 17, }
 comment             : Components of total free energy in Hartree
-kinetic             :  8.79268620434786E-01
-hartree             :  3.87655724683491E-03
-xc                  : -1.20968508633345E+00
+kinetic             :  8.79268620433480E-01
+hartree             :  3.87655724677350E-03
+xc                  : -1.20968508633388E+00
 Ewald energy        : -2.71472096493581E+00
 psp_core            :  6.05643856626115E-03
-local_psp           :  1.77655481811033E-01
-non_local_psp+x     :  4.47455738924239E-01
-internal            : -2.41009321428611E+00
-'-kT*entropy'       : -1.10289818066038E-02
-total_energy        : -2.42112219609271E+00
+local_psp           :  1.77655481805289E-01
+non_local_psp+x     :  4.47455738931810E-01
+internal            : -2.41009321428608E+00
+'-kT*entropy'       : -1.10289818066053E-02
+total_energy        : -2.42112219609268E+00
 ...
 
 
 --- !EnergyTermsDC
 iteration_state     : {dtset: 17, }
 comment             : '"Double-counting" decomposition of free energy'
-band_energy         :  4.00177425416083E-01
+band_energy         :  4.00177425416020E-01
 Ewald energy        : -2.71472096493581E+00
 psp_core            :  6.05643856626115E-03
-xc_dc               : -1.01606268966967E-01
-internal            : -2.41009336992043E+00
-'-kT*entropy'       : -1.10289818066038E-02
-total_energy_dc     : -2.42112235172704E+00
+xc_dc               : -1.01606268967615E-01
+internal            : -2.41009336992114E+00
+'-kT*entropy'       : -1.10289818066053E-02
+total_energy_dc     : -2.42112235172775E+00
 ...
 
 
@@ -3790,8 +3790,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.02508
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_serial/baguetl_optcell-ecutsm/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_serial/baguetl_optcell-ecutsm/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
 -  Troullier-Martins psp for element  Al        Thu Oct 27 17:31:05 EDT 1994
 - 13.00000   3.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3822,7 +3822,7 @@ tolerances: {toldfe: 1.00E-08, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -2.4396398201310    -2.440E+00 2.662E-08 4.207E-03
+ ETOT  1  -2.4396398201312    -2.440E+00 2.662E-08 4.207E-03
  ETOT  2  -2.4394513063709     1.885E-04 1.882E-10 1.985E-04
  ETOT  3  -2.4394544022007    -3.096E-06 5.831E-09 2.167E-07
  ETOT  4  -2.4394568816411    -2.479E-06 4.644E-10 3.311E-08
@@ -3906,28 +3906,28 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 18, }
 comment             : Components of total free energy in Hartree
-kinetic             :  8.71754729144176E-01
-hartree             :  3.31798954141102E-03
-xc                  : -1.08293711841981E+00
+kinetic             :  8.71754729144168E-01
+hartree             :  3.31798954141072E-03
+xc                  : -1.08293711841980E+00
 Ewald energy        : -2.71472096493581E+00
 psp_core            :  6.05643856626115E-03
-local_psp           :  1.77741698056399E-01
-non_local_psp+x     :  3.07312821891042E-01
+local_psp           :  1.77741698056421E-01
+non_local_psp+x     :  3.07312821891020E-01
 internal            : -2.43147440615633E+00
-'-kT*entropy'       : -7.98226766387772E-03
-total_energy        : -2.43945667382020E+00
+'-kT*entropy'       : -7.98226766387812E-03
+total_energy        : -2.43945667382021E+00
 ...
 
 
 --- !EnergyTermsDC
 iteration_state     : {dtset: 18, }
 comment             : '"Double-counting" decomposition of free energy'
-band_energy         :  2.86696752317474E-01
+band_energy         :  2.86696752317470E-01
 Ewald energy        : -2.71472096493581E+00
 psp_core            :  6.05643856626115E-03
-xc_dc               : -9.50663394770693E-03
-internal            : -2.43147440799978E+00
-'-kT*entropy'       : -7.98226766387772E-03
+xc_dc               : -9.50663394770634E-03
+internal            : -2.43147440799979E+00
+'-kT*entropy'       : -7.98226766387812E-03
 total_energy_dc     : -2.43945667566366E+00
 ...
 
@@ -3971,8 +3971,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.02508
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_serial/baguetl_optcell-ecutsm/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_serial/baguetl_optcell-ecutsm/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
 -  Troullier-Martins psp for element  Al        Thu Oct 27 17:31:05 EDT 1994
 - 13.00000   3.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -4003,8 +4003,8 @@ tolerances: {toldfe: 1.00E-08, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -2.4266833696069    -2.427E+00 8.314E-09 8.565E-03
- ETOT  2  -2.4265933439720     9.003E-05 1.799E-10 6.399E-04
+ ETOT  1  -2.4266833696072    -2.427E+00 8.314E-09 8.565E-03
+ ETOT  2  -2.4265933439719     9.003E-05 1.799E-10 6.399E-04
  ETOT  3  -2.4265988502025    -5.506E-06 6.768E-09 8.919E-06
  ETOT  4  -2.4266043962958    -5.546E-06 1.106E-09 3.441E-08
  ETOT  5  -2.4266040191958     3.771E-07 9.783E-10 4.835E-09
@@ -4087,29 +4087,29 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 19, }
 comment             : Components of total free energy in Hartree
-kinetic             :  8.70127989552055E-01
-hartree             :  3.12398637399317E-03
-xc                  : -9.84513707403222E-01
+kinetic             :  8.70127989552052E-01
+hartree             :  3.12398637399316E-03
+xc                  : -9.84513707403215E-01
 Ewald energy        : -2.71472096493581E+00
 psp_core            :  6.05643856626115E-03
-local_psp           :  1.77500304208103E-01
-non_local_psp+x     :  2.23692691382592E-01
-internal            : -2.41873326225603E+00
-'-kT*entropy'       : -7.87068236867905E-03
-total_energy        : -2.42660394462471E+00
+local_psp           :  1.77500304208100E-01
+non_local_psp+x     :  2.23692691382594E-01
+internal            : -2.41873326225602E+00
+'-kT*entropy'       : -7.87068236867912E-03
+total_energy        : -2.42660394462470E+00
 ...
 
 
 --- !EnergyTermsDC
 iteration_state     : {dtset: 19, }
 comment             : '"Double-counting" decomposition of free energy'
-band_energy         :  2.33470694879049E-01
+band_energy         :  2.33470694879048E-01
 Ewald energy        : -2.71472096493581E+00
 psp_core            :  6.05643856626115E-03
-xc_dc               :  5.64605683062830E-02
+xc_dc               :  5.64605683062857E-02
 internal            : -2.41873326318422E+00
-'-kT*entropy'       : -7.87068236867905E-03
-total_energy_dc     : -2.42660394555290E+00
+'-kT*entropy'       : -7.87068236867912E-03
+total_energy_dc     : -2.42660394555289E+00
 ...
 
 
@@ -4152,8 +4152,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.02508
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_serial/baguetl_optcell-ecutsm/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_serial/baguetl_optcell-ecutsm/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
 -  Troullier-Martins psp for element  Al        Thu Oct 27 17:31:05 EDT 1994
 - 13.00000   3.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -4184,7 +4184,7 @@ tolerances: {toldfe: 1.00E-08, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -2.4399366838671    -2.440E+00 1.625E-09 2.553E-01
+ ETOT  1  -2.4399366838678    -2.440E+00 1.625E-09 2.553E-01
  ETOT  2  -2.4396133397260     3.233E-04 2.031E-11 2.146E-02
  ETOT  3  -2.4397791629865    -1.658E-04 2.196E-07 7.732E-04
  ETOT  4  -2.4399024537465    -1.233E-04 2.473E-07 8.116E-05
@@ -4196,34 +4196,34 @@ tolerances: {toldfe: 1.00E-08, }
  ETOT 10  -2.4400064282702    -4.431E-06 1.776E-05 1.516E-05
  ETOT 11  -2.4400087438919    -2.316E-06 3.579E-05 3.673E-05
  ETOT 12  -2.4400081292301     6.147E-07 5.660E-05 4.908E-05
- ETOT 13  -2.4400058808097     2.248E-06 5.942E-05 4.739E-05
- ETOT 14  -2.4400041803687     1.700E-06 3.904E-05 5.528E-05
- ETOT 15  -2.4400029151586     1.265E-06 1.837E-05 3.263E-05
- ETOT 16  -2.4400022097338     7.054E-07 7.358E-06 1.713E-05
- ETOT 17  -2.4400021655564     4.418E-08 2.763E-06 5.222E-06
- ETOT 18  -2.4400026497476    -4.842E-07 1.013E-06 3.070E-06
- ETOT 19  -2.4400033458744    -6.961E-07 3.678E-07 2.591E-06
- ETOT 20  -2.4400039496498    -6.038E-07 1.332E-07 1.927E-06
- ETOT 21  -2.4400044208191    -4.712E-07 4.815E-08 1.566E-06
- ETOT 22  -2.4400047991762    -3.784E-07 1.742E-08 5.539E-07
- ETOT 23  -2.4400051241916    -3.250E-07 6.294E-09 3.977E-07
- ETOT 24  -2.4400054492237    -3.250E-07 2.275E-09 9.529E-07
- ETOT 25  -2.4400056649925    -2.158E-07 8.363E-10 2.666E-06
- ETOT 26  -2.4400056948351    -2.984E-08 3.588E-10 3.758E-08
- ETOT 27  -2.4400057385345    -4.370E-08 1.252E-10 1.262E-08
- ETOT 28  -2.4400060338250    -2.953E-07 1.402E-10 2.195E-07
- ETOT 29  -2.4400063358240    -3.020E-07 1.609E-10 7.503E-07
- ETOT 30  -2.4400064815489    -1.457E-07 1.756E-10 6.161E-07
+ ETOT 13  -2.4400058808096     2.248E-06 5.942E-05 4.739E-05
+ ETOT 14  -2.4400041803689     1.700E-06 3.904E-05 5.528E-05
+ ETOT 15  -2.4400029151575     1.265E-06 1.837E-05 3.263E-05
+ ETOT 16  -2.4400022097315     7.054E-07 7.358E-06 1.713E-05
+ ETOT 17  -2.4400021655554     4.418E-08 2.763E-06 5.222E-06
+ ETOT 18  -2.4400026497485    -4.842E-07 1.013E-06 3.070E-06
+ ETOT 19  -2.4400033458773    -6.961E-07 3.678E-07 2.591E-06
+ ETOT 20  -2.4400039496549    -6.038E-07 1.332E-07 1.927E-06
+ ETOT 21  -2.4400044208265    -4.712E-07 4.815E-08 1.566E-06
+ ETOT 22  -2.4400047991853    -3.784E-07 1.742E-08 5.538E-07
+ ETOT 23  -2.4400051242041    -3.250E-07 6.294E-09 3.977E-07
+ ETOT 24  -2.4400054492426    -3.250E-07 2.275E-09 9.532E-07
+ ETOT 25  -2.4400056649996    -2.158E-07 8.363E-10 2.667E-06
+ ETOT 26  -2.4400056947810    -2.978E-08 3.586E-10 3.856E-08
+ ETOT 27  -2.4400057381928    -4.341E-08 1.252E-10 1.182E-08
+ ETOT 28  -2.4400060328014    -2.946E-07 1.402E-10 2.165E-07
+ ETOT 29  -2.4400063341607    -3.014E-07 1.609E-10 7.463E-07
+ ETOT 30  -2.4400064800052    -1.458E-07 1.756E-10 6.131E-07
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  2.93774224E-04  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)=  2.93774224E-04  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)=  2.93774224E-04  sigma(2 1)=  0.00000000E+00
+  sigma(1 1)=  2.93774346E-04  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)=  2.93774346E-04  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)=  2.93774346E-04  sigma(2 1)=  0.00000000E+00
 
 
  scprqt:  WARNING -
   nstep=   30 was not enough SCF cycles to converge;
-  maximum energy difference=  1.457E-07 exceeds toldfe=  1.000E-08
+  maximum energy difference=  1.458E-07 exceeds toldfe=  1.000E-08
 
 
 --- !ResultsGS
@@ -4236,14 +4236,14 @@ lattice_vectors:
 lattice_lengths: [   5.37401,    5.37401,    5.37401, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   1.0974400E+02
-convergence: {deltae: -1.457E-07, res2:  6.161E-07, residm:  1.756E-10, diffor: null, }
+convergence: {deltae: -1.458E-07, res2:  6.131E-07, residm:  1.756E-10, diffor: null, }
 etotal    :  -2.44000648E+00
 entropy   :   0.00000000E+00
-fermie    :   2.50487313E-01
+fermie    :   2.50487314E-01
 cartesian_stress_tensor: # hartree/bohr^3
-- [  2.93774224E-04,   0.00000000E+00,   0.00000000E+00, ]
-- [  0.00000000E+00,   2.93774224E-04,   0.00000000E+00, ]
-- [  0.00000000E+00,   0.00000000E+00,   2.93774224E-04, ]
+- [  2.93774346E-04,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   2.93774346E-04,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   2.93774346E-04, ]
 pressure_GPa:  -8.6431E+00
 xred      :
 - [  0.0000E+00,   0.0000E+00,   0.0000E+00, Al]
@@ -4255,12 +4255,12 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
-    1        2.00000          0.87264323
+    1        2.00000          0.87264320
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   10.558E-12; max=  17.558E-11
+ Mean square residual over all n,k,spin=   10.549E-12; max=  17.557E-11
  reduced coordinates (array xred) for    1 atoms
        0.000000000000      0.000000000000      0.000000000000
  rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
@@ -4291,41 +4291,41 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 20, }
 comment             : Components of total free energy in Hartree
-kinetic             :  8.61697514864798E-01
-hartree             :  2.40830880571964E-03
-xc                  : -5.34473745063949E-01
+kinetic             :  8.61697508662848E-01
+hartree             :  2.40830871721811E-03
+xc                  : -5.34473742944644E-01
 Ewald energy        : -2.71472096493581E+00
 psp_core            :  6.05643856626115E-03
-local_psp           :  1.77899192719999E-01
-non_local_psp+x     : -2.31069470883324E-01
-internal            : -2.43220272592631E+00
-'-kT*entropy'       : -7.80375562257386E-03
-total_energy        : -2.44000648154888E+00
+local_psp           :  1.77899220434549E-01
+non_local_psp+x     : -2.31069492508553E-01
+internal            : -2.43220272400813E+00
+'-kT*entropy'       : -7.80375599711338E-03
+total_energy        : -2.44000648000524E+00
 ...
 
 
 --- !EnergyTermsDC
 iteration_state     : {dtset: 20, }
 comment             : '"Double-counting" decomposition of free energy'
-band_energy         : -9.77211627436488E-02
+band_energy         : -9.77211596972888E-02
 Ewald energy        : -2.71472096493581E+00
 psp_core            :  6.05643856626115E-03
-xc_dc               :  3.74183128532300E-01
-internal            : -2.43220256058090E+00
-'-kT*entropy'       : -7.80375562257386E-03
-total_energy_dc     : -2.44000631620347E+00
+xc_dc               :  3.74183127594640E-01
+internal            : -2.43220255847220E+00
+'-kT*entropy'       : -7.80375599711338E-03
+total_energy_dc     : -2.44000631446931E+00
 ...
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  2.93774224E-04  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)=  2.93774224E-04  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)=  2.93774224E-04  sigma(2 1)=  0.00000000E+00
+  sigma(1 1)=  2.93774346E-04  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)=  2.93774346E-04  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)=  2.93774346E-04  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -8.6431E+00 GPa]
-- sigma(1 1)=  8.64313463E+00  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  8.64313463E+00  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)=  8.64313463E+00  sigma(2 1)=  0.00000000E+00
+- sigma(1 1)=  8.64313821E+00  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  8.64313821E+00  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  8.64313821E+00  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
 == DATASET 21 ==================================================================
@@ -4356,8 +4356,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.02508
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_serial/baguetl_optcell-ecutsm/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_serial/baguetl_optcell-ecutsm/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
 -  Troullier-Martins psp for element  Al        Thu Oct 27 17:31:05 EDT 1994
 - 13.00000   3.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -4528,8 +4528,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.02508
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_serial/baguetl_optcell-ecutsm/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_serial/baguetl_optcell-ecutsm/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
 -  Troullier-Martins psp for element  Al        Thu Oct 27 17:31:05 EDT 1994
 - 13.00000   3.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -4560,13 +4560,13 @@ tolerances: {toldfe: 1.00E-08, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -2.4266830407055    -2.427E+00 8.314E-09 8.565E-03
+ ETOT  1  -2.4266830407057    -2.427E+00 8.314E-09 8.565E-03
  ETOT  2  -2.4265930141904     9.003E-05 1.799E-10 6.399E-04
  ETOT  3  -2.4265985202010    -5.506E-06 6.768E-09 8.919E-06
  ETOT  4  -2.4266040662537    -5.546E-06 1.106E-09 3.441E-08
  ETOT  5  -2.4266036891600     3.771E-07 9.783E-10 4.835E-09
  ETOT  6  -2.4266036375272     5.163E-08 9.407E-10 1.658E-10
- ETOT  7  -2.4266036160973     2.143E-08 9.971E-10 1.370E-12
+ ETOT  7  -2.4266036160972     2.143E-08 9.971E-10 1.370E-12
  ETOT  8  -2.4266036156233     4.739E-10 9.253E-10 1.518E-13
  ETOT  9  -2.4266036145888     1.035E-09 7.528E-10 4.583E-14
 
@@ -4644,15 +4644,15 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 22, }
 comment             : Components of total free energy in Hartree
-kinetic             :  8.70128002971845E-01
-hartree             :  3.12398617296957E-03
-xc                  : -9.84513387818603E-01
+kinetic             :  8.70128002971847E-01
+hartree             :  3.12398617296954E-03
+xc                  : -9.84513387818606E-01
 Ewald energy        : -2.71472096493581E+00
 psp_core            :  6.05643856626115E-03
-local_psp           :  1.77500196267154E-01
-non_local_psp+x     :  2.23692795859588E-01
-internal            : -2.41873293291659E+00
-'-kT*entropy'       : -7.87068167215631E-03
+local_psp           :  1.77500196267157E-01
+non_local_psp+x     :  2.23692795859586E-01
+internal            : -2.41873293291660E+00
+'-kT*entropy'       : -7.87068167215624E-03
 total_energy        : -2.42660361458875E+00
 ...
 
@@ -4660,12 +4660,12 @@ total_energy        : -2.42660361458875E+00
 --- !EnergyTermsDC
 iteration_state     : {dtset: 22, }
 comment             : '"Double-counting" decomposition of free energy'
-band_energy         :  2.33471154836064E-01
+band_energy         :  2.33471154836065E-01
 Ewald energy        : -2.71472096493581E+00
 psp_core            :  6.05643856626115E-03
-xc_dc               :  5.64604376886606E-02
+xc_dc               :  5.64604376886590E-02
 internal            : -2.41873293384482E+00
-'-kT*entropy'       : -7.87068167215631E-03
+'-kT*entropy'       : -7.87068167215624E-03
 total_energy_dc     : -2.42660361551698E+00
 ...
 
@@ -4706,8 +4706,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.02508
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_serial/baguetl_optcell-ecutsm/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_serial/baguetl_optcell-ecutsm/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
 -  Troullier-Martins psp for element  Al        Thu Oct 27 17:31:05 EDT 1994
 - 13.00000   3.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -4738,7 +4738,7 @@ tolerances: {toldfe: 1.00E-08, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -2.4399363556176    -2.440E+00 1.625E-09 2.553E-01
+ ETOT  1  -2.4399363556182    -2.440E+00 1.625E-09 2.553E-01
  ETOT  2  -2.4396130078114     3.233E-04 2.031E-11 2.146E-02
  ETOT  3  -2.4397788297391    -1.658E-04 2.196E-07 7.732E-04
  ETOT  4  -2.4399021200275    -1.233E-04 2.473E-07 8.116E-05
@@ -4746,38 +4746,38 @@ tolerances: {toldfe: 1.00E-08, }
  ETOT  6  -2.4399600845232    -2.398E-05 6.033E-07 4.925E-05
  ETOT  7  -2.4399762740205    -1.619E-05 1.444E-06 7.686E-04
  ETOT  8  -2.4399909698146    -1.470E-05 3.424E-06 6.317E-05
- ETOT  9  -2.4400016632048    -1.069E-05 7.914E-06 9.140E-05
+ ETOT  9  -2.4400016632049    -1.069E-05 7.914E-06 9.140E-05
  ETOT 10  -2.4400060943076    -4.431E-06 1.776E-05 1.516E-05
  ETOT 11  -2.4400084099143    -2.316E-06 3.579E-05 3.674E-05
  ETOT 12  -2.4400077951838     6.147E-07 5.660E-05 4.909E-05
- ETOT 13  -2.4400055465665     2.249E-06 5.942E-05 4.739E-05
- ETOT 14  -2.4400038460418     1.701E-06 3.904E-05 5.527E-05
- ETOT 15  -2.4400025809850     1.265E-06 1.837E-05 3.262E-05
- ETOT 16  -2.4400018756999     7.053E-07 7.358E-06 1.712E-05
- ETOT 17  -2.4400018316399     4.406E-08 2.763E-06 5.218E-06
- ETOT 18  -2.4400023159949    -4.844E-07 1.013E-06 3.067E-06
- ETOT 19  -2.4400030122934    -6.963E-07 3.678E-07 2.588E-06
- ETOT 20  -2.4400036161877    -6.039E-07 1.332E-07 1.924E-06
- ETOT 21  -2.4400040874277    -4.712E-07 4.815E-08 1.563E-06
- ETOT 22  -2.4400044658267    -3.784E-07 1.742E-08 5.561E-07
- ETOT 23  -2.4400047906471    -3.248E-07 6.294E-09 3.992E-07
- ETOT 24  -2.4400051151757    -3.245E-07 2.275E-09 9.437E-07
- ETOT 25  -2.4400053312269    -2.161E-07 8.358E-10 2.621E-06
- ETOT 26  -2.4400053631103    -3.188E-08 3.600E-10 2.885E-08
- ETOT 27  -2.4400054105651    -4.745E-08 1.252E-10 2.135E-08
- ETOT 28  -2.4400057114685    -3.009E-07 1.402E-10 2.429E-07
- ETOT 29  -2.4400060182504    -3.068E-07 1.611E-10 7.473E-07
- ETOT 30  -2.4400061637015    -1.455E-07 1.756E-10 6.180E-07
+ ETOT 13  -2.4400055465666     2.249E-06 5.942E-05 4.739E-05
+ ETOT 14  -2.4400038460420     1.701E-06 3.904E-05 5.527E-05
+ ETOT 15  -2.4400025809859     1.265E-06 1.837E-05 3.262E-05
+ ETOT 16  -2.4400018757015     7.053E-07 7.358E-06 1.712E-05
+ ETOT 17  -2.4400018316406     4.406E-08 2.763E-06 5.218E-06
+ ETOT 18  -2.4400023159941    -4.844E-07 1.013E-06 3.067E-06
+ ETOT 19  -2.4400030122913    -6.963E-07 3.678E-07 2.588E-06
+ ETOT 20  -2.4400036161848    -6.039E-07 1.332E-07 1.924E-06
+ ETOT 21  -2.4400040874242    -4.712E-07 4.815E-08 1.563E-06
+ ETOT 22  -2.4400044658225    -3.784E-07 1.742E-08 5.562E-07
+ ETOT 23  -2.4400047906397    -3.248E-07 6.294E-09 3.992E-07
+ ETOT 24  -2.4400051151615    -3.245E-07 2.275E-09 9.436E-07
+ ETOT 25  -2.4400053312158    -2.161E-07 8.358E-10 2.621E-06
+ ETOT 26  -2.4400053631263    -3.191E-08 3.600E-10 2.865E-08
+ ETOT 27  -2.4400054106582    -4.753E-08 1.252E-10 2.159E-08
+ ETOT 28  -2.4400057117137    -3.011E-07 1.402E-10 2.436E-07
+ ETOT 29  -2.4400060186348    -3.069E-07 1.611E-10 7.481E-07
+ ETOT 30  -2.4400061640599    -1.454E-07 1.756E-10 6.187E-07
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  2.93773594E-04  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)=  2.93773594E-04  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)=  2.93773594E-04  sigma(2 1)=  0.00000000E+00
+  sigma(1 1)=  2.93773572E-04  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)=  2.93773572E-04  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)=  2.93773572E-04  sigma(2 1)=  0.00000000E+00
 
 
  scprqt:  WARNING -
   nstep=   30 was not enough SCF cycles to converge;
-  maximum energy difference=  1.455E-07 exceeds toldfe=  1.000E-08
+  maximum energy difference=  1.454E-07 exceeds toldfe=  1.000E-08
 
 
 --- !ResultsGS
@@ -4790,14 +4790,14 @@ lattice_vectors:
 lattice_lengths: [   5.37401,    5.37401,    5.37401, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   1.0974400E+02
-convergence: {deltae: -1.455E-07, res2:  6.180E-07, residm:  1.756E-10, diffor: null, }
+convergence: {deltae: -1.454E-07, res2:  6.187E-07, residm:  1.756E-10, diffor: null, }
 etotal    :  -2.44000616E+00
 entropy   :   0.00000000E+00
-fermie    :   2.50487386E-01
+fermie    :   2.50487385E-01
 cartesian_stress_tensor: # hartree/bohr^3
-- [  2.93773594E-04,   0.00000000E+00,   0.00000000E+00, ]
-- [  0.00000000E+00,   2.93773594E-04,   0.00000000E+00, ]
-- [  0.00000000E+00,   0.00000000E+00,   2.93773594E-04, ]
+- [  2.93773572E-04,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   2.93773572E-04,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   2.93773572E-04, ]
 pressure_GPa:  -8.6431E+00
 xred      :
 - [  0.0000E+00,   0.0000E+00,   0.0000E+00, Al]
@@ -4809,12 +4809,12 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
-    1        2.00000          0.87264312
+    1        2.00000          0.87264313
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   10.608E-12; max=  17.558E-11
+ Mean square residual over all n,k,spin=   10.609E-12; max=  17.558E-11
  reduced coordinates (array xred) for    1 atoms
        0.000000000000      0.000000000000      0.000000000000
  rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
@@ -4845,41 +4845,41 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 23, }
 comment             : Components of total free energy in Hartree
-kinetic             :  8.61697534109927E-01
-hartree             :  2.40830771135696E-03
-xc                  : -5.34473391725540E-01
+kinetic             :  8.61697535445484E-01
+hartree             :  2.40830772953094E-03
+xc                  : -5.34473392130653E-01
 Ewald energy        : -2.71472096493581E+00
 psp_core            :  6.05643856626115E-03
-local_psp           :  1.77899312873599E-01
-non_local_psp+x     : -2.31069640331588E-01
-internal            : -2.43220240373179E+00
-'-kT*entropy'       : -7.80375996968867E-03
-total_energy        : -2.44000616370148E+00
+local_psp           :  1.77899307556130E-01
+non_local_psp+x     : -2.31069636387402E-01
+internal            : -2.43220240415646E+00
+'-kT*entropy'       : -7.80375990341860E-03
+total_energy        : -2.44000616405988E+00
 ...
 
 
 --- !EnergyTermsDC
 iteration_state     : {dtset: 23, }
 comment             : '"Double-counting" decomposition of free energy'
-band_energy         : -9.77207809274439E-02
+band_energy         : -9.77207817438809E-02
 Ewald energy        : -2.71472096493581E+00
 psp_core            :  6.05643856626115E-03
-xc_dc               :  3.74183062418943E-01
-internal            : -2.43220224487805E+00
-'-kT*entropy'       : -7.80375996968867E-03
-total_energy_dc     : -2.44000600484774E+00
+xc_dc               :  3.74183062758800E-01
+internal            : -2.43220224535463E+00
+'-kT*entropy'       : -7.80375990341860E-03
+total_energy_dc     : -2.44000600525805E+00
 ...
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  2.93773594E-04  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)=  2.93773594E-04  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)=  2.93773594E-04  sigma(2 1)=  0.00000000E+00
+  sigma(1 1)=  2.93773572E-04  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)=  2.93773572E-04  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)=  2.93773572E-04  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -8.6431E+00 GPa]
-- sigma(1 1)=  8.64311609E+00  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  8.64311609E+00  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)=  8.64311609E+00  sigma(2 1)=  0.00000000E+00
+- sigma(1 1)=  8.64311544E+00  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  8.64311544E+00  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  8.64311544E+00  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
 == DATASET 24 ==================================================================
@@ -4907,8 +4907,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.02508
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_serial/baguetl_optcell-ecutsm/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_serial/baguetl_optcell-ecutsm/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
 -  Troullier-Martins psp for element  Al        Thu Oct 27 17:31:05 EDT 1994
 - 13.00000   3.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -5082,8 +5082,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.02508
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_serial/baguetl_optcell-ecutsm/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_serial/baguetl_optcell-ecutsm/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
 -  Troullier-Martins psp for element  Al        Thu Oct 27 17:31:05 EDT 1994
 - 13.00000   3.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -5114,7 +5114,7 @@ tolerances: {toldfe: 1.00E-08, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -2.4251895260912    -2.425E+00 2.172E-08 3.578E-03
+ ETOT  1  -2.4251895260914    -2.425E+00 2.172E-08 3.578E-03
  ETOT  2  -2.4251749824901     1.454E-05 1.456E-10 2.596E-04
  ETOT  3  -2.4251764531785    -1.471E-06 5.241E-09 2.918E-06
  ETOT  4  -2.4251792100701    -2.757E-06 4.765E-10 2.274E-08
@@ -5198,16 +5198,16 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 25, }
 comment             : Components of total free energy in Hartree
-kinetic             :  8.71963358597735E-01
-hartree             :  3.27653964524507E-03
+kinetic             :  8.71963358597734E-01
+hartree             :  3.27653964524510E-03
 xc                  : -1.04097476238341E+00
 Ewald energy        : -2.71472096493581E+00
 psp_core            :  6.05643856626115E-03
-local_psp           :  1.77402685703563E-01
+local_psp           :  1.77402685703562E-01
 non_local_psp+x     :  2.80190748754002E-01
 internal            : -2.41680595605241E+00
-'-kT*entropy'       : -8.37296475564143E-03
-total_energy        : -2.42517892080805E+00
+'-kT*entropy'       : -8.37296475564145E-03
+total_energy        : -2.42517892080806E+00
 ...
 
 
@@ -5217,9 +5217,9 @@ comment             : '"Double-counting" decomposition of free energy'
 band_energy         :  2.75064253489190E-01
 Ewald energy        : -2.71472096493581E+00
 psp_core            :  6.05643856626115E-03
-xc_dc               :  1.67943166726134E-02
+xc_dc               :  1.67943166726133E-02
 internal            : -2.41680595620775E+00
-'-kT*entropy'       : -8.37296475564143E-03
+'-kT*entropy'       : -8.37296475564145E-03
 total_energy_dc     : -2.42517892096339E+00
 ...
 
@@ -5253,17 +5253,17 @@ total_energy_dc     : -2.42517892096339E+00
            etotal10   -2.4266039446E+00
            etotal11   -2.4266036146E+00
            etotal12   -2.3925215820E+00
-           etotal13   -1.9130315490E+00
+           etotal13   -1.9130314573E+00
            etotal14   -2.4669653055E+00
            etotal15   -3.9374500647E+02
            etotal16   -2.4210213854E+00
            etotal17   -2.4211221961E+00
            etotal18   -2.4394566738E+00
            etotal19   -2.4266039446E+00
-           etotal20   -2.4400064815E+00
+           etotal20   -2.4400064800E+00
            etotal21   -2.4214201492E+00
            etotal22   -2.4266036146E+00
-           etotal23   -2.4400061637E+00
+           etotal23   -2.4400061641E+00
            etotal24   -2.4214198220E+00
            etotal25   -2.4251789208E+00
             fcart1    -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
@@ -5656,7 +5656,7 @@ P           mkmem           6
               occ13    2.000000  0.000000  0.000000
                        2.000000  0.000005  0.000000
                        2.000000  1.999999  0.000000
-                       1.797396  1.601304  1.601290
+                       1.797433  1.601285  1.601271
                        2.000000  2.000000  0.000000
                        2.000000  0.000000  0.000000
               occ14    2.000000  0.000000  0.000000
@@ -5760,27 +5760,27 @@ P           mkmem           6
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            strten12    5.2659274531E-05  5.2659274531E-05  5.2659274531E-05
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-           strten13   -1.2748177604E-04 -1.2748177604E-04 -1.2748177604E-04
+           strten13   -1.2746070149E-04 -1.2746070149E-04 -1.2746070149E-04
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            strten14    3.9639043280E-04  3.9639043280E-04  3.9639043280E-04
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-           strten15    3.5663073102E+00  3.5663073102E+00  3.5663073102E+00
+           strten15    3.5663073101E+00  3.5663073101E+00  3.5663073101E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            strten16    1.6382475855E-04  1.6382475855E-04  1.6382475855E-04
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-           strten17    1.6460672290E-04  1.6460672290E-04  1.6460672290E-04
+           strten17    1.6460672287E-04  1.6460672287E-04  1.6460672287E-04
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            strten18    3.5029774013E-04  3.5029774013E-04  3.5029774013E-04
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            strten19    2.1120098172E-04  2.1120098172E-04  2.1120098172E-04
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-           strten20    2.9377422437E-04  2.9377422437E-04  2.9377422437E-04
+           strten20    2.9377434596E-04  2.9377434596E-04  2.9377434596E-04
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            strten21    1.5686571127E-04  1.5686571127E-04  1.5686571127E-04
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            strten22    2.1119883105E-04  2.1119883105E-04  2.1119883105E-04
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-           strten23    2.9377359433E-04  2.9377359433E-04  2.9377359433E-04
+           strten23    2.9377357219E-04  2.9377357219E-04  2.9377357219E-04
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            strten24    1.5686355964E-04  1.5686355964E-04  1.5686355964E-04
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -5843,10 +5843,66 @@ P           mkmem           6
 
 ================================================================================
 
+- Total cpu        time (s,m,h):         12.5        0.21      0.003
+- Total wall clock time (s,m,h):         12.5        0.21      0.003
+-
+- For major independent code sections, cpu and wall times (sec),
+-  as well as % of the time and number of calls for node 0
+-
+-<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = 0>
+- cpu_time =           12.5, wall_time =           12.5
+-
+- routine                                    cpu     %          wall   %        number of calls Gflops    Speedup Efficacity
+-                                                                                (-1=no count)
+- pspini                                    2.879  23.1         2.879  23.0             25      -1.00        1.00       1.00
+- fock_getghc(/=fourXX,nonlop)              2.078  16.7         2.072  16.6          74550      -1.00        1.00       1.00
+- get_dtsets_pspheads                       1.215   9.7         1.215   9.7              1      -1.00        1.00       1.00
+- fourdp                                    1.159   9.3         1.191   9.5          47460      -1.00        0.97       0.97
+- fourwf%(G->r)                             0.964   7.7         0.937   7.5          30093      -1.00        1.03       1.03
+- fourwf%(pot)                              0.653   5.2         0.685   5.5          24353      -1.00        0.95       0.95
+- xc:pot/=fourdp                            0.650   5.2         0.653   5.2            860      -1.00        0.99       0.99
+- getghc(/=fourXX,nonlop,fock_XX)           0.185   1.5         0.179   1.4             -1      -1.00        1.03       1.03
+- ewald                                     0.147   1.2         0.147   1.2             25      -1.00        1.00       1.00
+- nonlop(apply)                             0.140   1.1         0.142   1.1          24353      -1.00        0.99       0.99
+- stress                                    0.139   1.1         0.138   1.1             25      -1.00        1.01       1.01
+- ewald2 (+vdw_dftd)                        0.130   1.0         0.127   1.0             25      -1.00        1.02       1.02
+- timing timab                              0.114   0.9         0.114   0.9             10      -1.00        1.00       1.00
+- vtowfk(ssdiag)                            0.092   0.7         0.084   0.7             -1      -1.00        1.10       1.10
+- projbd                                    0.088   0.7         0.098   0.8          37006      -1.00        0.90       0.90
+- fock_ACE_getghc                           0.069   0.6         0.079   0.6          23321      -1.00        0.87       0.87
+- others (143)                              0.429   3.4         0.434   3.5             -1      -1.00        0.99       0.99
+-<END_TIMER>
+-
+- subtotal                                 11.131  89.3        11.174  89.3                                  1.00       1.00
 
-- Timing analysis has been suppressed with timopt=0
+- For major independent code sections, cpu and wall times (sec),
+- as well as % of the total time and number of calls 
 
+-<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = world>
+- cpu_time =          12.5, wall_time =          12.5
+-
+- routine                                    cpu     %          wall   %        number of calls Gflops    Speedup Efficacity
+-                                                                                (-1=no count)
+- pspini                                    2.879  23.1         2.879  23.0             25      -1.00        1.00       1.00
+- fock_getghc(/=fourXX,nonlop)              2.078  16.7         2.072  16.6          74550      -1.00        1.00       1.00
+- get_dtsets_pspheads                       1.215   9.7         1.215   9.7              1      -1.00        1.00       1.00
+- fourdp                                    1.159   9.3         1.191   9.5          47460      -1.00        0.97       0.97
+- fourwf%(G->r)                             0.964   7.7         0.937   7.5          30093      -1.00        1.03       1.03
+- fourwf%(pot)                              0.653   5.2         0.685   5.5          24353      -1.00        0.95       0.95
+- xc:pot/=fourdp                            0.650   5.2         0.653   5.2            860      -1.00        0.99       0.99
+- getghc(/=fourXX,nonlop,fock_XX)           0.185   1.5         0.179   1.4             -1      -1.00        1.03       1.03
+- ewald                                     0.147   1.2         0.147   1.2             25      -1.00        1.00       1.00
+- nonlop(apply)                             0.140   1.1         0.142   1.1          24353      -1.00        0.99       0.99
+- stress                                    0.139   1.1         0.138   1.1             25      -1.00        1.01       1.01
+- ewald2 (+vdw_dftd)                        0.130   1.0         0.127   1.0             25      -1.00        1.02       1.02
+- timing timab                              0.114   0.9         0.114   0.9             10      -1.00        1.00       1.00
+- vtowfk(ssdiag)                            0.092   0.7         0.084   0.7             -1      -1.00        1.10       1.10
+- projbd                                    0.088   0.7         0.098   0.8          37006      -1.00        0.90       0.90
+- fock_ACE_getghc                           0.069   0.6         0.079   0.6          23321      -1.00        0.87       0.87
+- others (143)                              0.429   3.4         0.434   3.5             -1      -1.00        0.99       0.99
+-<END_TIMER>
 
+- subtotal                                 11.131  89.3        11.174  89.3                                  1.00       1.00
 
 ================================================================================
 
@@ -5936,10 +5992,10 @@ P           mkmem           6
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          9.8  wall=         15.2
+- Proc.   0 individual time (sec): cpu=         12.5  wall=         12.5
 
 ================================================================================
 
  Calculation completed.
-.Delivered 497 WARNINGs and 122 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          9.8  wall=         15.2
+.Delivered 498 WARNINGs and 122 COMMENTs to log file.
++Overall time at end (sec) : cpu=         12.5  wall=         12.5
