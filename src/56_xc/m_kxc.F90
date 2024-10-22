@@ -1042,10 +1042,8 @@ subroutine kxc_driver(Dtset,Cryst,ixc,ngfft,nfft_tot,nspden,rhor,npw,dim_kxcg,kx
 
  if (ixc>=1.and.ixc<11) then ! LDA case
    nkxc= 2*min(nspden,2)-1   ! 1 or 3
-!--> VVK
- else if (ixc==91) then ! TLDA case, same as LDA above
-   nkxc=2*min(nspden,2)-1
-!<-- VVK   
+ elseif (ixc==51) then ! TLDA case, same as LDA above
+   nkxc= 2*min(nspden,2)-1
  else                        ! GGA case
    nkxc=12*min(nspden,2)-5   ! 7 or 19
    ABI_CHECK(dtset%xclevel==2,"Functional should be GGA")
@@ -1317,10 +1315,8 @@ subroutine kxc_ADA(Dtset,Cryst,ixc,ngfft,nfft,nspden,rhor,&
 
  if (ixc>=1.and.ixc<11) then      ! LDA case
    nkxc= 2*min(Dtset%nspden,2)-1  ! 1 or 3
-!--> VVK
- else if (ixc==91) then ! TLDA case, same as LDA above
-   nkxc=2*min(Dtset%nspden,2)-1
-!<-- VVK
+ elseif (ixc==51) then ! TLDA case, same as LDA above
+   nkxc= 2*min(Dtset%nspden,2)-1
  else                             ! GGA case
    nkxc=12*min(Dtset%nspden,2)-5  ! 7 or 19
    ABI_CHECK(dtset%xclevel==2,"Functional should be GGA")
