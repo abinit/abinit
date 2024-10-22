@@ -458,6 +458,10 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  integer :: occopt_bigdft
 #endif
 
+#if defined(HAVE_PYTHON_INVOCATION)
+ real(dp), allocatable :: occnd_tmp(:)
+#endif
+
 ! *********************************************************************
 
  DBG_ENTER("COLL")
@@ -1665,67 +1669,51 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
             ABI_ERROR(msg)
         endif
 
-        ! Compute new energy terms due to non diagonal occupations and DMFT.
-        bdtot_index=1
+        ABI_MALLOC(occnd_tmp, (2*(paw_dmft%dmftbandf+1-paw_dmft%dmftbandi)))
+
+        ! Read new energy terms due to non diagonal occupations and DMFT.
+        open(unit=101, file=filename, status='old')
+        read(101, *) msg
+        write(std_out, *) "Reading 101: ", msg
         do isppol=1,dtset%nsppol
           do ikpt=1,dtset%nkpt
+            read(101, *) msg
+            write(std_out, *) "Reading 101: ", msg
             nband_k=dtset%nband(ikpt+(isppol-1)*dtset%nkpt)
             do iband=1,nband_k
-
-              locc_test = abs(occ(bdtot_index))>tol8
-              write(msg, '(a,2i4,a,l2,a,l2,a,f12.6,a,2f20.6)') 'isppol, ikpt, iband: ', ikpt, iband, '; band_in: ', exclude_bands_ind(iband, isppol), '; locc_test: ', locc_test, '; occ: ', occ(bdtot_index), '; paw_dmft%occnd: ', paw_dmft%occnd(1,iband,iband,ikpt,isppol), paw_dmft%occnd(2,iband,iband,ikpt,isppol)
-              call wrtout(std_out, msg, 'COLL')
-              if(paw_dmft%band_in(iband)) then
-                if( paw_dmft%use_dmft == 1 .and. dmft_dftocc == 1 ) then ! test of the code
-                  paw_dmft%occnd(1,iband,iband,ikpt,isppol)=occ(bdtot_index)
-                end if
-                locc_test = abs(paw_dmft%occnd(1,iband,iband,ikpt,isppol))+&
-        &        abs(paw_dmft%occnd(2,iband,iband,ikpt,isppol))>tol8
-              end if
-              bdtot_index=bdtot_index+1
-
-         !      if (locc_test) then
-        !!        dmft
-         !        if(paw_dmft%use_dmft==1.and.dtset%nbandkss==0) then
-         !          ebandldatot=ebandldatot+dtset%wtk(ikpt)*occ(bdtot_index)*eigen(bdtot_index)
-         !          if(paw_dmft%band_in(iband)) then
-         !            ebandlda=ebandlda+dtset%wtk(ikpt)*occ(bdtot_index)*eigen(bdtot_index)
-         !            ekinlda=ekinlda+dtset%wtk(ikpt)*occ(bdtot_index)*eknk(bdtot_index)
-         !            occ(bdtot_index)=paw_dmft%occnd(1,iband,iband,ikpt,isppol)
-         !            ebanddmft=ebanddmft+dtset%wtk(ikpt)*occ(bdtot_index)*eigen(bdtot_index)
-         !            ekindmft=ekindmft+dtset%wtk(ikpt)*occ(bdtot_index)*eknk(bdtot_index)
-         !          end if
-         !        end if
-
-         !        energies%e_eigenvalues = energies%e_eigenvalues + &
-        &!         dtset%wtk(ikpt)*occ(bdtot_index)*eigen(bdtot_index)
-         !        energies%e_kinetic = energies%e_kinetic + &
-        &!         dtset%wtk(ikpt)*occ(bdtot_index)*eknk(bdtot_index)
-         !        energies%e_nlpsp_vfock = energies%e_nlpsp_vfock + &
-        &!         dtset%wtk(ikpt)*occ(bdtot_index)*enlxnk(bdtot_index)
-         !        if (usefock) then
-         !          energies%e_fock=energies%e_fock + half*focknk(bdtot_index)*occ(bdtot_index)*dtset%wtk(ikpt)
-         !          if (optforces>0) fock%fock_common%forces(:,:)=fock%fock_common%forces(:,:)+&
-        &!           dtset%wtk(ikpt)*occ(bdtot_index)*fockfornk(:,:,bdtot_index)
-         !        end if
-         !        if (optforces>0) grnl(:)=grnl(:)+dtset%wtk(ikpt)*occ(bdtot_index)*grnlnk(:,bdtot_index)
-         !      end if
-         !      bdtot_index=bdtot_index+1
-         !      if(paw_dmft%use_dmft==1.and.dtset%nbandkss==0) then
-         !        do iband1=1,nband_k
-         !          if(paw_dmft%band_in(iband).and.paw_dmft%band_in(iband1)) then
-        !!            write(std_out,*) "II+", isppol,ikpt,iband,iband1
-         !            ekindmft2=ekindmft2  +  dtset%wtk(ikpt)*paw_dmft%occnd(1,iband,iband1,ikpt,isppol)*&
-        &!             eknk_nd(isppol,ikpt,1,iband,iband1)
-         !            ekindmft2=ekindmft2  -  dtset%wtk(ikpt)*paw_dmft%occnd(2,iband,iband1,ikpt,isppol)*&
-        &!             eknk_nd(isppol,ikpt,2,iband,iband1)
-        !!            write(std_out,*) "II", occnd(1,iband,iband1,ikpt,isppol),eknk_nd(isppol,ikpt,iband,iband1)
-         !          end if
-         !        end do
-         !      end if
+              bdtot_index = iband+dtset%mband*(ikpt-1)+dtset%mband*dtset%nkpt*(isppol-1)
+              !do iband1=1,nband_k
+                !if (paw_dmft%band_in(iband) .and. paw_dmft%band_in(iband1)) then
+                if (paw_dmft%band_in(iband)) then
+                  read(101, *) occnd_tmp
+                  write(std_out, *) "occnd_tmp: ", msg
+                  write(std_out, *) occnd_tmp
+                  write(std_out, *) "occ: ", msg
+                  do iband1=1,paw_dmft%dmftbandf+1-paw_dmft%dmftbandi
+                    paw_dmft%occnd(1,iband,paw_dmft%dmftbandi-1+iband1,ikpt,isppol)= - occnd_tmp(2*(iband1-1)+1)/2
+                    if (paw_dmft%dmftbandi-1+iband1==iband) then
+                      write(std_out, *) "iband ", iband, "; iband1 ", iband1, "; occ ",  occ(bdtot_index)
+                      paw_dmft%occnd(1,iband,paw_dmft%dmftbandi-1+iband1,ikpt,isppol) = paw_dmft%occnd(1,iband,paw_dmft%dmftbandi-1+iband1,ikpt,isppol) + occ(bdtot_index)
+                    end if
+                    paw_dmft%occnd(2,iband,paw_dmft%dmftbandi-1+iband1,ikpt,isppol)=occnd_tmp(2*(iband1-1)+2)/2
+                  enddo
+                endif
+              !enddo
             end do
           end do
         end do
+        close(101)
+
+        ABI_FREE(occnd_tmp)
+
+        write(std_out, *) "paw_dmft%occnd Re"
+        do iband=1,dtset%nband(1)
+          write(std_out, *) paw_dmft%occnd(1,iband,:,1,1)
+        enddo
+        write(std_out, *) "paw_dmft%occnd Im"
+        do iband=1,dtset%nband(1)
+          write(std_out, *) paw_dmft%occnd(2,iband,:,1,1)
+        enddo
 
 #else
         ABI_ERROR('Cannot use use_dmft == 10 with #HAVE_PYTHON_INVOCATION set to false.')
@@ -1784,7 +1772,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
            if (locc_test) then
 !            dmft
-             if(paw_dmft%use_dmft==1.and.dtset%nbandkss==0) then
+             if((paw_dmft%use_dmft==1.or.paw_dmft%use_dmft==10).and.dtset%nbandkss==0) then
                ebandldatot=ebandldatot+dtset%wtk(ikpt)*occ(bdtot_index)*eigen(bdtot_index)
                if(paw_dmft%band_in(iband).or.paw_dmft%dmft_use_all_bands) then
                  ebandlda=ebandlda+dtset%wtk(ikpt)*occ(bdtot_index)*eigen(bdtot_index)
@@ -1809,7 +1797,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
              if (optforces>0) grnl(:)=grnl(:)+dtset%wtk(ikpt)*occ(bdtot_index)*grnlnk(:,bdtot_index)
            end if
            bdtot_index=bdtot_index+1
-           if(paw_dmft%use_dmft==1.and.dtset%nbandkss==0) then
+           if((paw_dmft%use_dmft==1.or.paw_dmft%use_dmft==10).and.dtset%nbandkss==0) then
              do iband1=1,nband_k
                if((paw_dmft%band_in(iband).and.paw_dmft%band_in(iband1)).or. &
                 & (paw_dmft%dmft_use_all_bands.and.iband==iband1)) then
