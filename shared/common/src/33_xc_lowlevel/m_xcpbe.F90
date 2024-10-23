@@ -34,7 +34,7 @@ module m_xcpbe
 !!***
 
  public :: xcpbe
- public :: xctp123 ! KDT16 (TGGA) finite-temperature xc functional
+ public :: xckdt16 ! KDT16 (TGGA) finite-temperature xc functional
 !!***
 
 contains
@@ -5151,9 +5151,9 @@ subroutine xcpbe(exci,npts,nspden,option,order,rho_updn,vxci,ndvxci,nd2vxci, & !
 end subroutine xcpbe
 !!***
 
-!!****f* ABINIT/xctp123
+!!****f* ABINIT/xckdt16
 !! NAME
-!! xctp123
+!! xckdt16
 !!
 !! FUNCTION
 !!  Treat TGGA temperature-dependant exchange-correlation functional KDT16,
@@ -5184,7 +5184,7 @@ end subroutine xcpbe
 !!  vxci(npts,nspden)=input xc potential
 !!
 !! SOURCE
-subroutine xctp123(dvxcdgr,exci,grho2_updn,ixc,npts,nspden,rhor,rspts,tsmear,vxci)
+subroutine xckdt16(dvxcdgr,exci,grho2_updn,ixc,npts,nspden,rhor,rspts,tsmear,vxci)
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ixc,npts,nspden
@@ -5229,14 +5229,14 @@ subroutine xctp123(dvxcdgr,exci,grho2_updn,ixc,npts,nspden,rhor,rspts,tsmear,vxc
    fxclda=fx_lda+fc_lda
    vxclda=vx_lda+vc_lda
    if(ixc.eq.60) then
-     call FTGGAx_1(rho,grho,5,fx,v1x,v2x,einx,tsx,degauss)
-     call FTPBEc(rho,grho,9,fc,v1c,v2c,einc,tsc,degauss)
+     call fex_kdt16(rho,grho,5,fx,v1x,v2x,einx,tsx,degauss)
+     call fec_kdt16(rho,grho,9,fc,v1c,v2c,einc,tsc,degauss)
    elseif(ixc.eq.61) then
-     call FTGGAx_1(rho,grho,6,fx,v1x,v2x,einx,tsx,degauss)
-     call FTPBEc(rho,grho,10,fc,v1c,v2c,einc,tsc,degauss)
+     call fex_kdt16(rho,grho,6,fx,v1x,v2x,einx,tsx,degauss)
+     call fec_kdt16(rho,grho,10,fc,v1c,v2c,einc,tsc,degauss)
    elseif(ixc.eq.62) then
-     call FTGGAx_1(rho,grho,7,fx,v1x,v2x,einx,tsx,degauss)
-     call FTPBEc(rho,grho,11,fc,v1c,v2c,einc,tsc,degauss)
+     call fex_kdt16(rho,grho,7,fx,v1x,v2x,einx,tsx,degauss)
+     call fec_kdt16(rho,grho,11,fc,v1c,v2c,einc,tsc,degauss)
    endif
    exci(ipt)=fxclda+(fx+fc)!/rho
    vxci(ipt,1)=vxclda+v1x+v1c
@@ -5244,18 +5244,18 @@ subroutine xctp123(dvxcdgr,exci,grho2_updn,ixc,npts,nspden,rhor,rspts,tsmear,vxc
    dvxcdgr(ipt,1)=zero !dvxcdgr(ipt,3)*4.d0 ! d(exc*rho)/d|gradRho_up|*1/|gradRho_up|
    dvxcdgr(ipt,2)=zero !dvxcdgr(ipt,1)      ! d(exc*rho)/d|gradRho_dn|*1/|gradRho_dn|
  enddo
-end subroutine xctp123
+end subroutine xckdt16
 !!***
 
-!!****f* ABINIT/FTGGAx_1
+!!****f* ABINIT/fex_kdt16
 !! NAME
-!! FTGGAx_1
+!! fex_kdt16
 !!
 !! FUNCTION
 !!  Returns TGGA exchange free energy, internal energy and entropy energy of xc functional KDT16
 !!
 !! NOTES
-!!  Karasiev GGA X (without TLDA exchange): see subroutine FxGGA_1
+!!  Karasiev GGA X (without TLDA exchange): see subroutine enfact1_kdt16
 !!  V.V. Karasiev, J.W. Dufty, and S.B. Trickey, PRL 120(7), 076401 (2018) [[cite:Karasiev2018]]
 !!
 !! INPUTS
@@ -5272,7 +5272,7 @@ end subroutine xctp123
 !!  tsx=exchange entropy energy per electron
 !!
 !! SOURCE
-subroutine FTGGAx_1(rho,grho,iflag,fx,v1x,v2x,einx,tsx,degauss)
+subroutine fex_kdt16(rho,grho,iflag,fx,v1x,v2x,einx,tsx,degauss)
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: iflag
@@ -5332,8 +5332,8 @@ subroutine FTGGAx_1(rho,grho,iflag,fx,v1x,v2x,einx,tsx,degauss)
  ex0=f_slater*alpha_slater/rs
  vx0=four/three*f_slater*alpha_slater/rs
 
- if(iflag.le.4) call FxGGA_1(iflag,s2x,FFx,dFFxds2x)
- if(iflag.ge.5) call FxGGA_2(iflag-4,s2x,FFx,dFFxds2x)
+ if(iflag.le.4) call enfact1_kdt16(iflag,s2x,FFx,dFFxds2x)
+ if(iflag.ge.5) call enfact2_kdt16(iflag-4,s2x,FFx,dFFxds2x)
  fxunif = ex0*Ax                                 ! LDA exchange free-energy per electron
  fx = fxunif*FFx                                 ! GGA exchange free-energy per electron
                                                  ! fx=fxunif*Fx without "n" factor
@@ -5349,12 +5349,12 @@ subroutine FTGGAx_1(rho,grho,iflag,fx,v1x,v2x,einx,tsx,degauss)
  v1x = fx + dfxunif*FFx + fxunif*dFFxds2x*ds2xdn ! d/dn(n*fxunif*FFx(s2x) see above
  v2x = fxunif*dFFxds2x*ds2dg*BAx/agrho !d(n*fxunif*Fx(s2x))/d(gn)*1/(gn)=
 !                                     =fxunif*d(Fx(s2x))/d(s2x) *n*ds2/d(gn) *Bx/Ax)*1/(gn)
-end subroutine FTGGAx_1
+end subroutine fex_kdt16
 !!***
 
-!!****f* ABINIT/FxGGA_1
+!!****f* ABINIT/enfact1_kdt16
 !! NAME
-!! FxGGA_1
+!! enfact1_kdt16
 !!
 !! FUNCTION
 !!  Returns Finite-T GGA KDT16 enhancement factor and its derivative
@@ -5382,7 +5382,7 @@ end subroutine FTGGAx_1
 !!  tsx=exchange entropy energy per electron
 !!
 !! SOURCE
-subroutine FxGGA_1(iflag,s2x,Fx,dFxds2x)
+subroutine enfact1_kdt16(iflag,s2x,Fx,dFxds2x)
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: iflag
@@ -5416,12 +5416,12 @@ subroutine FxGGA_1(iflag,s2x,Fx,dFxds2x)
  endif
  Fx = nom/den - one !remove LDA term (subtract 1) to make it compatible with WE
  dFxds2x = dnom/den - nom*dden/den**2
-end subroutine FxGGA_1
+end subroutine enfact1_kdt16
 !!***
 
-!!****f* ABINIT/FxGGA_1
+!!****f* ABINIT/enfact1_kdt16
 !! NAME
-!! FxGGA_1
+!! enfact1_kdt16
 !!
 !! FUNCTION
 !!  Returns Finite-T GGA KDT16 enhancement factor and its derivative
@@ -5449,7 +5449,7 @@ end subroutine FxGGA_1
 !!  tsx=exchange entropy energy per electron
 !!
 !! SOURCE
-subroutine FxGGA_2(iflag,s2x,Fx,dFxds2x)
+subroutine enfact2_kdt16(iflag,s2x,Fx,dFxds2x)
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: iflag
@@ -5470,12 +5470,12 @@ subroutine FxGGA_2(iflag,s2x,Fx,dFxds2x)
  aa1 = mu(iflag)/kappa(iflag)
  Fx = mu(iflag)*s2x/(one+aa1*abs(s2x)) !remove LDA term (subtract 1) to make it compatible with WE
  dFxds2x = mu(iflag)/(one+aa1*abs(s2x))**2
-end subroutine FxGGA_2
+end subroutine enfact2_kdt16
 !!***
 
-!!****f* ABINIT/FTPBEc
+!!****f* ABINIT/fec_kdt16
 !! NAME
-!! FTPBEc
+!! fec_kdt16
 !!
 !! FUNCTION
 !!  Returns TGGA correlation free energy, internal energy and entropy energy of xc functional KDT16
@@ -5512,7 +5512,7 @@ end subroutine FxGGA_2
 !!  tsc=correlation entropy energy per electron
 !!
 !! SOURCE
-subroutine FTPBEc(rho,grho,iflag,fc,v1c,v2c,einc,tsc,degauss)
+subroutine fec_kdt16(rho,grho,iflag,fc,v1c,v2c,einc,tsc,degauss)
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: iflag
@@ -5599,7 +5599,7 @@ subroutine FTPBEc(rho,grho,iflag,fc,v1c,v2c,einc,tsc,degauss)
 !tsc = rho*(ga/s1)*ds1da*dadf*tsc_lda - t*rho*(ga/s1)*ds1dqc*dqcdt !17-APR-2016: commented in ABINIT version
  tsc =     (ga/s1)*ds1da*dadf*tsc_lda - t*    (ga/s1)*ds1dqc*dqcdt ! energy per electron, 17-APR-2016: ABINIT version
  einc = fc + tsc
-end subroutine FTPBEc
+end subroutine fec_kdt16
 !!***
 
 end module m_xcpbe
