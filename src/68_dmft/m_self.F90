@@ -1112,7 +1112,9 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
 !         if(ifreq==1) write(std_out,*) "shift",self%qmc_shift(1)
        !end if ! dmft_solv=4
      end do ! ifreq
-     if (self%has_moments == 1) call copy_matlu(self%oper(1)%matlu(:),self%moments(1)%matlu(:),natom)
+     if (self%has_moments == 1) then
+       call copy_matlu(self%oper(1)%matlu(:),self%moments(1)%matlu(:),natom)
+     end if 
    else ! test read successfull
 !   call xmpi_barrier(spacecomm)
 !! lignes 924-928 semblent inutiles puisque la valeur de paw_dmft%fermie creee
@@ -1124,22 +1126,18 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
 !!     ABI_FREE(fermie_read2)
      !ncount = natom * nsppol * (nspinor**2) * (self%nw+1) *(maxval(paw_dmft%lpawu(:))*2+1)**2
      ncount = 0
-     !ncount_dc = 0 ! number of elements in buffer for double counting
      do iatom=1,natom
        lpawu = paw_dmft%lpawu(iatom)
        if (lpawu == -1) cycle
        ndim = 2*lpawu + 1
        ncount = ncount + ndim**2
-       !ncount_dc = ncount_dc + ndim
      end do ! iatom
      ncount = ncount * (nspinor**2) * (self%nw+self%nmoments+1) * nsppol
      
-!  ===========================
-!   bcast to other proc
-!  ===========================
+!    ===========================
+!     bcast to other proc
+!    ===========================
      ABI_MALLOC(buffer,(ncount))
-     !ABI_MALLOC(fermie_read2,(1))
-     !buffer(:) = czero
 !! BA+jmb
      !fermie_read2 = zero
    !write(std_out,*) self%nw
@@ -1147,7 +1145,6 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
 
 !      == Send read data to all process
        icount = 0
-       !fermie_read2(1) = fermie_read
 !      Self energy-----------
        do ifreq=1,self%nw
          do iatom=1,natom
@@ -1244,7 +1241,6 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
      do iatom=1,natom
        lpawu = paw_dmft%lpawu(iatom)
        if (lpawu == -1) cycle
-       self%hdc%matlu(iatom)%mat(:,:,:) = czero
        ndim = (2*lpawu+1) * nspinor
        do isppol=1,nsppol
          do im1=1,ndim
@@ -1277,19 +1273,23 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
    end if  ! test read successful
  end if  ! optrw==1
  
- ! Rotate back self
- !-----------------------------
  if (optmaxent > 0 .and. optrw == 1 .and. iexist2 == 1 .and. ioerr == 0 .and. readimagonly == 1) then
  
    write(message,'(4x,2a)') " Rotate Back self in the original basis"
    call wrtout(std_out,message,'COLL')
-   
+  
+   ! Kramers Kronig
+   !-----------------------------
+
    call kramerskronig_self(self,opt_selflimit(:),opt_hdc(:),paw_dmft,paw_dmft%filapp)
    
    call xmpi_matlu(eigvectmatlu(:),natom,spacecomm,master=master,option=2)
       
    call copy_matlu(opt_hdc(:),self%hdc%matlu(:),natom)   
-      
+     
+   ! Rotate back self
+   !-----------------------------
+
    do ifreq=1,self%nw
      if (ifreq < 20) then
        write(message,'(a,2x,a,i4)') ch10," == Print Rotated real axis Self Energy for freq=",ifreq
@@ -1324,13 +1324,6 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
    end if ! optrw=2
 
    call destroy_matlu(eigvectmatlu(:),natom)
-   !do iatom=1,natom
-   !  if(paw_dmft%lpawu(iatom)/=-1) then
-   !    do isppol=1,nsppol
-   !      ABI_FREE(eigvectmatlu(iatom,isppol)%value)
-   !    end do
-   !  end if
-   !end do
    ABI_FREE(eigvectmatlu)
  end if ! optmaxent > 0
 !   - For the Tentative rotation of the self-energy file (end destroy) 
@@ -1341,8 +1334,7 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
  if (optrw == 0) then
    if (paw_dmft%dmft_rslf == 0) then
      !if (paw_dmft%dmft_solv /= 4) then
-     write(message,'(4x,a,a,5i5,2x,e14.7)') "-> Put Self-Energy Equal to double counting term"
-     !call dc_self(green_charge(:,:),self%hdc%matlu(:),hu(:),paw_dmft,pawtab(:),green_occup(:))
+     write(message,'(4x,2a,5i5,2x,e14.7)') "-> Put Self-Energy Equal to double counting term"
      !else if (paw_dmft%dmft_solv == 4) then
      !  write(message,'(4x,a,a,5i5,2x,e14.7)') "-> Put Self-Energy Equal to dc term - shift"
      !end if ! dmft_solv=4
@@ -1362,25 +1354,13 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
        !end if ! dmft_solv=4
      else if (paw_dmft%dmft_rslf == -1) then
        call zero_matlu(self%oper(ifreq)%matlu(:),natom)
-       !do iatom=1,natom
-       !  lpawu = paw_dmft%lpawu(iatom)
-       !  if (lpawu == -1) cycle
-        ! ndim = 2*lpawu + 1
-         !do isppol=1,nsppol
-         !  do ispinor=1,nspinor
-         !    do im=1,ndim
-         !      self%oper(ifreq)%matlu(iatom)%mat(im,im,isppol,ispinor,ispinor) = czero
-         !    end do ! im
-         !  end do ! ispinor
-         !end do ! isppol
-       !end do ! iatom
      end if ! dmft_rslf
    end do ! ifreq
  end if ! optrw=0
 
 ! write(std_out,*) "optrw,use_fixed_self,istep,iter,istep_imp,iter_imp"
 ! write(std_out,*) optrw,paw_dmft%use_fixed_self,istep,iter,istep_imp,iter_imp
- if (optrw == 3 .and. paw_dmft%use_fixed_self > 0 .and. istep <= istep_imp .and. iter <= iter_imp) then
+ if ((optrw == 1 .or. optrw == 3) .and. paw_dmft%use_fixed_self > 0 .and. istep <= istep_imp .and. iter <= iter_imp) then
    write(message,'(4x,a)') "-> Put Self-Energy Equal to imposed self-energy"
    call wrtout(std_out,message,'COLL')
    do ifreq=1,self%nw
@@ -1408,7 +1388,9 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
        end do ! isppol
      end do ! iatom
    end do ! ifreq
-   if (self%has_moments == 1) call copy_matlu(self%oper(1)%matlu(:),self%moments(1)%matlu(:),natom)
+   if (self%has_moments == 1) then
+     call copy_matlu(self%oper(1)%matlu(:),self%moments(1)%matlu(:),natom)
+   end if 
 
  end if ! use_fixed_self
 
