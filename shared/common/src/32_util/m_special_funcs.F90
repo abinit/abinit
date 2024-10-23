@@ -1790,6 +1790,10 @@ end function djp32
 !!  Returns tilde Ax Pade fit and first and second derivatives
 !!  w.r.t. reduced temperature t.
 !!
+!! NOTES
+!!  Karasiev-Dufty-Trickey (KDT16) TGGA xc-functional
+!!  V.V. Karasiev, J.W. Dufty, and S.B. Trickey, PRL 120(7), 076401 (2018) [[cite:Karasiev2018]]
+!!
 !! INPUTS
 !!  t=reduced temperature, t=T/T_F
 !!
@@ -1887,6 +1891,10 @@ end subroutine tildeAx
 !! FUNCTION
 !!  Returns tilde Bx Pade fit and first and second derivatives
 !!  w.r.t. reduced temperature t.
+!!
+!! NOTES
+!!  Karasiev-Dufty-Trickey (KDT16) TGGA xc-functional
+!!  V.V. Karasiev, J.W. Dufty, and S.B. Trickey, PRL 120(7), 076401 (2018) [[cite:Karasiev2018]]
 !!
 !! INPUTS
 !!  t=reduced temperature, t=T/T_F
@@ -2001,6 +2009,10 @@ end subroutine tildeBx
 !!  Returns tilde Bc Pade fit and first and second derivatives
 !!  w.r.t. reduced temperature t.
 !!
+!! NOTES
+!!  Karasiev-Dufty-Trickey (KDT16) TGGA xc-functional
+!!  V.V. Karasiev, J.W. Dufty, and S.B. Trickey, PRL 120(7), 076401 (2018) [[cite:Karasiev2018]]
+!!
 !! INPUTS
 !!  iflag=flag selector integer
 !!  rs=Wigner-Seitz radius (bohr)
@@ -2099,6 +2111,10 @@ end subroutine tildeBc
 !! FUNCTION
 !!  Returns tilde Bc Pade fit (2nd) and first and second derivatives
 !!  w.r.t. reduced temperature t.
+!!
+!! NOTES
+!!  Karasiev-Dufty-Trickey (KDT16) TGGA xc-functional
+!!  V.V. Karasiev, J.W. Dufty, and S.B. Trickey, PRL 120(7), 076401 (2018) [[cite:Karasiev2018]]
 !!
 !! INPUTS
 !!  iflag=flag selector integer

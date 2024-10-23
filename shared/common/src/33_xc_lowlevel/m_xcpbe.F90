@@ -5247,349 +5247,360 @@ subroutine xctp123(dvxcdgr,exci,grho2_updn,ixc,npts,nspden,rhor,rspts,tsmear,vxc
 end subroutine xctp123
 !!***
 
-!-------------------------------------------------------------------------------
-! Finite-T GGA X and C
-!------------------------------------------------------------------------------
-!---------------------------------------------------------------
-subroutine FTGGAx_1 (rho, grho, iflag, fx, v1x, v2x, einx, tsx, degauss)
-  !---------------------------------------------------------------
-  !
-  ! Karasiev GGA X (without TLDA exchange): see subroutine FxGGA_1
-  !
+!!****f* ABINIT/FTGGAx_1
+!! NAME
+!! FTGGAx_1
+!!
+!! FUNCTION
+!!  Returns TGGA exchange free energy, internal energy and entropy energy of xc functional KDT16
+!!
+!! NOTES
+!!  Karasiev GGA X (without TLDA exchange): see subroutine FxGGA_1
+!!  V.V. Karasiev, J.W. Dufty, and S.B. Trickey, PRL 120(7), 076401 (2018) [[cite:Karasiev2018]]
+!!
+!! INPUTS
+!!  rho=density at this point
+!!  grho=gradient of the density at this point
+!!  iflag=flag selector integer
+!!  degauss=setup temperature (Rydberg)
+!!
+!! OUTPUT
+!!  fx=exchange free energy per electron
+!!  v1x=first part of the exchange potnetial
+!!  v2x=second part of the exchange potential
+!!  einx=exchange internal energy per electron
+!!  tsx=exchange entropy energy per electron
+!!
+!! SOURCE
+subroutine FTGGAx_1(rho,grho,iflag,fx,v1x,v2x,einx,tsx,degauss)
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: iflag
+ real(dp),intent(in) :: rho,grho,degauss
+ real(dp),intent(out) :: fx,v1x,v2x,einx,tsx
+!Local variables ------------------------------
+!scalars
+ real(dp) :: rs,tF,t,dtdn
+ real(dp) :: kf,agrho,s1,s2,ds2dn,ds2dg,dsg
+ real(dp) :: Ax,dAx,d2Ax
+ real(dp) :: Bx,dBx,d2Bx
+ real(dp) :: BAx,dBAx,d2BAx
+ real(dp) :: s2x,ds2xdt,ds2xdn
+ real(dp) :: ex0,vx0,fxunif,dfxunif,sx,FFx,dFFxds2x
+ real(dp) :: f_slater,alpha_slater
+ real(dp), parameter :: &
+      twothird = 2._DP*third, &
+      fourthird = 4._DP*third, &
+      eightthird = 8._DP*third, &
+      c1 = 0.75_DP / pi , &
+      c2 = 3.093667726280136_DP, &
+      pi34 = 0.6203504908994d0
 
-  implicit none
-  real(DP) :: rho, grho, fx, v1x, v2x, degauss
-  ! input: charge and squared gradient
-  ! output: energy
-  ! output: potential
-  real(DP) :: einx, tsx
-  ! x-internal energy per electron
-  ! x- T*Entropy per electron
-  integer :: iflag
-  ! local variables
-  real(DP) :: rs,tF,t,dtdn
-  real(DP) :: kf, agrho, s1, s2, ds2dn, ds2dg, dsg
-  ! (3*pi2*|rho|)^(1/3)
-  ! |grho|
-  ! |grho|/(2*kf*|rho|)
-  ! s^2
-  ! n*ds^2/dn
-  ! n*ds^2/d(gn)
-  ! n*ds/d(gn)
-  real(DP) :: Ax,dAx,d2Ax
-  real(DP) :: Bx,dBx,d2Bx
-  real(DP) :: BAx,dBAx,d2BAx
-  real(DP) :: s2x,ds2xdt,ds2xdn
-  real(DP) :: ex0,vx0,fxunif,dfxunif,sx,FFx,dFFxds2x
-  ! numerical coefficients (NB: c2=(3 pi^2)^(1/3) )
-  real(DP), parameter :: &
-       !third = 1._DP / 3._DP, &
-       twothird = 2._DP*third, &
-       fourthird = 4._DP*third, &
-       eightthird = 8._DP*third, &
-       c1 = 0.75_DP / pi , &
-       c2 = 3.093667726280136_DP, &
-       pi34 = 0.6203504908994d0
-  real(DP) :: f_slater,alpha_slater
-  !
-  ! variables
-  rs = pi34 / rho**third
-  tF = (3._DP*PI**2*rho)**twothird/2._DP !tF=Fermi temperature for spin-unpol case
-  t = degauss/2.0_DP/tF !reduced temperature
-  dtdn = -twothird*t!/rho        ! n*(dt/dn)
-  agrho = sqrt (grho)
-  kf = c2 * rho**third           ! (3*pi^2*rho)^(1/3)
-  dsg = 0.5_DP / kf              ! n*ds/d(gn)
-  s1 = agrho * dsg / rho         ! s
-  s2 = s1 * s1                   ! s^2
-  ds2dn = -eightthird*s2          ! n*ds^2/dn
-  ds2dg = agrho/(2._DP*rho*kf**2) ! n*ds^2/d(gn)
-  !
-  ! Call t-dependent functions
-  !
-  call tildeAx(t,Ax,dAx,d2Ax)
-  call tildeBx(t,Bx,dBx,d2Bx)
-  !
-  BAx = Bx/Ax
-  dBAx = dBx/Ax - Bx*dAx/Ax**2
-  d2BAx = d2Bx/Ax - dBx*dAx/Ax**2 & ! derivative of first term in above line
-        - dBx*dAx/Ax**2 - Bx*d2Ax/Ax**2 + 2._DP*Bx*dAx*dAx/Ax**3 ! derivative of second term
-  !
-  s2x = s2*BAx
-  ds2xdt = s2*dBAx
-  ds2xdn = ds2dn*BAx & ! n*(d(s2x)/dn)=d(s2x)/d(s^2) * n*d(s^2)/dn 
-         + ds2xdt*dtdn !              +d(s2x)/dt * n*dt/dn
-  !
-  ! Energy
-  !
-  f_slater=-0.687247939924714d0
-  alpha_slater=twothird
-  ex0=f_slater*alpha_slater/rs
-  vx0=four/three*f_slater*alpha_slater/rs
- 
-  if(iflag.le.4) call FxGGA_1(iflag,s2x,FFx,dFFxds2x)
-  if(iflag.ge.5) call FxGGA_2(iflag-4,s2x,FFx,dFFxds2x)
-  fxunif = ex0*Ax                                 ! LDA exchange free-energy per electron
-  fx = fxunif*FFx                                 ! GGA exchange free-energy per electron
-                                                  ! fx=fxunif*Fx without "n" factor
-  ! sx = -dfx/dt*1/T_F = -d(fxunif*Fx)/dt*1/T_F
-  !    = -{ex0*(dAx/dt)*Fx+fxunif*dFx/d(s2x)*d(s2x)/dt}*1/T_F
-  sx = -(ex0*dAx*FFx + fxunif*dFFxds2x*ds2xdt)/tF ! entropy per electron
-  einx = fx + t*tF*sx                             ! internal energy per electron 
-  tsx = t*tF*sx                                   ! T*entropy per electron
-  !
-  ! Potential=
-  ! = d/dn(n*fxunif*Fx(s2x))=fxunif*Fx + n*(dfxunif/dn)*Fx + n*fxunif*(dFx/d2sx)*(ds2x/dn)
-  ! Pay attention: "*n" factor is included in dtdn, ds2dn, ds2dg, ds2xdn terms (see above). 
-  ! 
-  dfxunif = fxunif*third + ex0*dAx*dtdn !n*(dfxunif/dn)=fxunif*(1/3) + e_x^0*(dAx/dt)* n*(dt/dn)
-  v1x = fx + dfxunif*FFx + fxunif*dFFxds2x*ds2xdn ! d/dn(n*fxunif*FFx(s2x) see above
-  v2x = fxunif*dFFxds2x*ds2dg*BAx/agrho !d(n*fxunif*Fx(s2x))/d(gn)*1/(gn)=
-  !                                     =fxunif*d(Fx(s2x))/d(s2x) *n*ds2/d(gn) *Bx/Ax)*1/(gn)
-  !
-  ! convert energy per electron to energy density
-  !
-  ! 17-APR-2016: these lines are commented in ABINIT version
-  !fx = fx * rho
-  !einx = einx * rho
-  !tsx = tsx * rho
-  !
-  return
+! *************************************************************************
+
+ rs = pi34 / rho**third
+ tF = (3._DP*PI**2*rho)**twothird/2._DP !tF=Fermi temperature for spin-unpol case
+ t = degauss/2.0_DP/tF !reduced temperature
+ dtdn = -twothird*t!/rho        ! n*(dt/dn)
+ agrho = sqrt (grho)
+ kf = c2 * rho**third           ! (3*pi^2*rho)^(1/3)
+ dsg = 0.5_DP / kf              ! n*ds/d(gn)
+ s1 = agrho * dsg / rho         ! s
+ s2 = s1 * s1                   ! s^2
+ ds2dn = -eightthird*s2          ! n*ds^2/dn
+ ds2dg = agrho/(2._DP*rho*kf**2) ! n*ds^2/d(gn)
+!
+! Call t-dependent functions
+!
+ call tildeAx(t,Ax,dAx,d2Ax)
+ call tildeBx(t,Bx,dBx,d2Bx)
+!
+ BAx = Bx/Ax
+ dBAx = dBx/Ax - Bx*dAx/Ax**2
+ d2BAx = d2Bx/Ax - dBx*dAx/Ax**2 & ! derivative of first term in above line
+       - dBx*dAx/Ax**2 - Bx*d2Ax/Ax**2 + 2._DP*Bx*dAx*dAx/Ax**3 ! derivative of second term
+!
+ s2x = s2*BAx
+ ds2xdt = s2*dBAx
+ ds2xdn = ds2dn*BAx & ! n*(d(s2x)/dn)=d(s2x)/d(s^2) * n*d(s^2)/dn 
+        + ds2xdt*dtdn !              +d(s2x)/dt * n*dt/dn
+!
+! Energy
+!
+ f_slater=-0.687247939924714d0
+ alpha_slater=twothird
+ ex0=f_slater*alpha_slater/rs
+ vx0=four/three*f_slater*alpha_slater/rs
+
+ if(iflag.le.4) call FxGGA_1(iflag,s2x,FFx,dFFxds2x)
+ if(iflag.ge.5) call FxGGA_2(iflag-4,s2x,FFx,dFFxds2x)
+ fxunif = ex0*Ax                                 ! LDA exchange free-energy per electron
+ fx = fxunif*FFx                                 ! GGA exchange free-energy per electron
+                                                 ! fx=fxunif*Fx without "n" factor
+! sx = -dfx/dt*1/T_F = -d(fxunif*Fx)/dt*1/T_F
+!    = -{ex0*(dAx/dt)*Fx+fxunif*dFx/d(s2x)*d(s2x)/dt}*1/T_F
+ sx = -(ex0*dAx*FFx + fxunif*dFFxds2x*ds2xdt)/tF ! entropy per electron
+ einx = fx + t*tF*sx                             ! internal energy per electron 
+ tsx = t*tF*sx                                   ! T*entropy per electron
+! Potential=
+! = d/dn(n*fxunif*Fx(s2x))=fxunif*Fx + n*(dfxunif/dn)*Fx + n*fxunif*(dFx/d2sx)*(ds2x/dn)
+! Pay attention: "*n" factor is included in dtdn, ds2dn, ds2dg, ds2xdn terms (see above). 
+ dfxunif = fxunif*third + ex0*dAx*dtdn !n*(dfxunif/dn)=fxunif*(1/3) + e_x^0*(dAx/dt)* n*(dt/dn)
+ v1x = fx + dfxunif*FFx + fxunif*dFFxds2x*ds2xdn ! d/dn(n*fxunif*FFx(s2x) see above
+ v2x = fxunif*dFFxds2x*ds2dg*BAx/agrho !d(n*fxunif*Fx(s2x))/d(gn)*1/(gn)=
+!                                     =fxunif*d(Fx(s2x))/d(s2x) *n*ds2/d(gn) *Bx/Ax)*1/(gn)
 end subroutine FTGGAx_1
-!-------------------------------------------------------------------------------
-! Finite-T GGA enhancement factors
-!-------------------------------------------------------------------------------
-!-------------------------------------------------------------------------------
+!!***
+
+!!****f* ABINIT/FxGGA_1
+!! NAME
+!! FxGGA_1
+!!
+!! FUNCTION
+!!  Returns Finite-T GGA KDT16 enhancement factor and its derivative
+!!
+!! NOTES
+!!  Finite-T GGA enhancement factor and its derivative
+!!  Karasiev GGA X (without TLDA exchange):
+!!  iflag=1  mu=0.21951 (as in PBE), Fmax=1.804
+!!  iflag=2  mu=10/81=0.12345679012345679012d0 (as in PBEsol), Fmax=1.804
+!!  iflag=3  mu=0.27583 (as in PBEmol), Fmax=1.804
+!!  iflag=4  mu=8/81=0.09876543209876543209 (finite-T X GE, see Geldart), Fmax=1.804
+!!  V.V. Karasiev, J.W. Dufty, and S.B. Trickey, PRL 120(7), 076401 (2018) [[cite:Karasiev2018]]
+!!
+!! INPUTS
+!!  iflag=flag selector integer
+!!  s2x=variable
+!!  Fx=enhancement factor
+!!  dFxds2x=derivative of Fx w.r.t. s2x
+!!
+!! OUTPUT
+!!  fx=exchange free energy per electron
+!!  v1x=first part of the exchange potnetial
+!!  v2x=second part of the exchange potential
+!!  einx=exchange internal energy per electron
+!!  tsx=exchange entropy energy per electron
+!!
+!! SOURCE
 subroutine FxGGA_1(iflag,s2x,Fx,dFxds2x)
-  !-----------------------------------------------------------------------------
-  !
-  ! DESCRIPTION:
-  !   Finite-T GGA enhancement factor and its derivative
-  ! Karasiev GGA X (without TLDA exchange):
-  ! iflag=1  mu=0.21951 (as in PBE), Fmax=1.804
-  ! iflag=2  mu=10/81=0.12345679012345679012d0 (as in PBEsol), Fmax=1.804
-  ! iflag=3  mu=0.27583 (as in PBEmol), Fmax=1.804
-  ! iflag=4  mu=8/81=0.09876543209876543209 (finite-T X GE, see Geldart), Fmax=1.804
-  !
-  ! VARIABLES:
-  !   iflag: flag
-  !     s2x: variable
-  !      Fx: enhancemnt factor
-  ! dFxds2x: derivative w.r.t. s2x 
-  !
-  ! REFERENCES:
-  ! 
-  !
-  !-----------------------------------------------------------------------------
-  ! REVISION LOG:
-  !  21-JAN-2016 Subroutine created (V.V. Karasiev)
-  !-----------------------------------------------------------------------------
-  !
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: iflag
+ real(dp),intent(in) :: s2x
+ real(dp),intent(out) :: Fx,dFxds2x
+!Local variables ------------------------------
+!scalars
+ real(dp),parameter :: threehalf=three/two
+ real(dp) :: alpha,expe,den, dden,nom,dnom
+!arrays
+ real(dp) :: Fxmax(4),mu(4),gamma(4)
 
-  implicit none
-  integer, intent(in) :: iflag
-  real(DP), intent(in) :: s2x
-  real(DP), intent(out) :: Fx,dFxds2x
-  real(DP) :: alpha,expe,den, dden,nom,dnom
+! ************************************************************************* 
 
-  real(8), parameter :: &
-    !half = 1._DP/2._DP,&
-    !one = 1._DP,&
-    threehalf = 3._DP/2._DP
-  !
-  ! parameters of the functional
-  real(DP) :: Fxmax(4),mu(4),gamma(4)
-  !           PBE         PBEsol                     PBEmol      Geldart                
-  data Fxmax /1.804_DP,   1.804_DP                 , 1.804_DP,   1.804_DP                 /
-  data    mu /0.21951_DP, 0.12345679012345679012_DP, 0.27583_DP, 0.09876543209876543209_DP/
-  data gamma /0.1_DP    , 0.05_DP                  , 0.1_DP,     0.05_DP                  /
-
-  alpha = mu(iflag)**2/(Fxmax(iflag)**2-one)
-
-  if(s2x.lt.0._DP) then
-    expe = exp(gamma(iflag)*s2x)
-    nom = one+mu(iflag)*s2x*expe
-    dnom = mu(iflag)*expe + mu(iflag)*s2x*gamma(iflag)*expe
-    den = sqrt(one+alpha*s2x**2)
-    dden = alpha*s2x/den
-  else
-    nom = one+mu(iflag)*s2x
-    dnom = mu(iflag)
-    den = sqrt(one+alpha*s2x**2)
-    dden = alpha*s2x/den
-  endif
-  !
-  Fx = nom/den - one !remove LDA term (subtract 1) to make it compatible with WE
-  dFxds2x = dnom/den - nom*dden/den**2
-  !
-  return
+!            PBE         PBEsol                     PBEmol      Geldart                
+ data Fxmax /1.804_DP,   1.804_DP                 , 1.804_DP,   1.804_DP                 /
+ data    mu /0.21951_DP, 0.12345679012345679012_DP, 0.27583_DP, 0.09876543209876543209_DP/
+ data gamma /0.1_DP    , 0.05_DP                  , 0.1_DP,     0.05_DP                  /
+ alpha = mu(iflag)**2/(Fxmax(iflag)**2-one)
+ if(s2x.lt.zero) then
+   expe = exp(gamma(iflag)*s2x)
+   nom = one+mu(iflag)*s2x*expe
+   dnom = mu(iflag)*expe + mu(iflag)*s2x*gamma(iflag)*expe
+   den = sqrt(one+alpha*s2x**2)
+   dden = alpha*s2x/den
+ else
+   nom = one+mu(iflag)*s2x
+   dnom = mu(iflag)
+   den = sqrt(one+alpha*s2x**2)
+   dden = alpha*s2x/den
+ endif
+ Fx = nom/den - one !remove LDA term (subtract 1) to make it compatible with WE
+ dFxds2x = dnom/den - nom*dden/den**2
 end subroutine FxGGA_1
-!-------------------------------------------------------------------------------
+!!***
+
+!!****f* ABINIT/FxGGA_1
+!! NAME
+!! FxGGA_1
+!!
+!! FUNCTION
+!!  Returns Finite-T GGA KDT16 enhancement factor and its derivative
+!!
+!! NOTES
+!!  Finite-T GGA enhancement factor and its derivative
+!!  Karasiev GGA X, finite-T PBE form (without TLDA exchange):
+!!  iflag=1  mu=0.21951 (as in PBE), Fmax=1.804
+!!  iflag=2  mu=10/81=0.12345679012345679012d0 (as in PBEsol), Fmax=1.804
+!!  iflag=3  mu=0.27583 (as in PBEmol), Fmax=1.804
+!!  iflag=4  mu=8/81=0.09876543209876543209 (finite-T X GE, see Geldart), Fmax=1.804
+!!  V.V. Karasiev, J.W. Dufty, and S.B. Trickey, PRL 120(7), 076401 (2018) [[cite:Karasiev2018]]
+!!
+!! INPUTS
+!!  iflag=flag selector integer
+!!  s2x=variable
+!!  Fx=enhancement factor
+!!  dFxds2x=derivative of Fx w.r.t. s2x
+!!
+!! OUTPUT
+!!  fx=exchange free energy per electron
+!!  v1x=first part of the exchange potnetial
+!!  v2x=second part of the exchange potential
+!!  einx=exchange internal energy per electron
+!!  tsx=exchange entropy energy per electron
+!!
+!! SOURCE
 subroutine FxGGA_2(iflag,s2x,Fx,dFxds2x)
-  !-----------------------------------------------------------------------------
-  !
-  ! DESCRIPTION:
-  !   Finite-T GGA enhancement factor and its derivative
-  ! Karasiev GGA X, finite-T PBE form (without TLDA exchange):
-  ! iflag=1  mu=0.21951 (as in PBE), Fmax=1.804
-  ! iflag=2  mu=10/81=0.12345679012345679012d0 (as in PBEsol), Fmax=1.804
-  ! iflag=3  mu=0.27583 (as in PBEmol), Fmax=1.804
-  ! iflag=4  mu=8/81=0.09876543209876543209 (finite-T X GE, see Geldart), Fmax=1.804
-  !
-  ! VARIABLES:
-  !   iflag: flag
-  !     s2x: variable
-  !      Fx: enhancemnt factor
-  ! dFxds2x: derivative w.r.t. s2x 
-  !
-  ! REFERENCES:
-  ! 
-  !
-  !-----------------------------------------------------------------------------
-  ! REVISION LOG:
-  !  21-JAN-2016 Subroutine created (V.V. Karasiev)
-  !-----------------------------------------------------------------------------
-  !
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: iflag
+ real(dp),intent(in) :: s2x
+ real(dp),intent(out) :: Fx,dFxds2x
+!Local variables ------------------------------
+!scalars
+ real(dp),parameter :: threehalf = three/two
+ real(dp) :: aa1
+!arrays
+ real(DP) :: kappa(4),mu(4)
 
-  implicit none
-  integer, intent(in) :: iflag
-  real(DP), intent(in) :: s2x
-  real(DP), intent(out) :: Fx,dFxds2x
-  real(DP) :: aa1,den, dden,nom,dnom
+! *************************************************************************
 
-  real(8), parameter :: &
-    !half = 1._DP/2._DP,&
-    !one = 1._DP,&
-    threehalf = 3._DP/2._DP
-  !
-  ! parameters of the functional
-  real(DP) :: kappa(4),mu(4)
-  !           PBE         PBEsol                     PBEmol      Geldart                
-  data kappa /0.804_DP,   0.804_DP                 , 0.804_DP,   0.804_DP                 /
-  data    mu /0.21951_DP, 0.12345679012345679012_DP, 0.27583_DP, 0.09876543209876543209_DP/
-
-  aa1 = mu(iflag)/kappa(iflag)
-
-  Fx = mu(iflag)*s2x/(one+aa1*abs(s2x)) !remove LDA term (subtract 1) to make it compatible with WE
-  dFxds2x = mu(iflag)/(one+aa1*abs(s2x))**2
-  !
-  return
+!           PBE         PBEsol                     PBEmol      Geldart                
+ data kappa /0.804_DP,   0.804_DP                 , 0.804_DP,   0.804_DP                 /
+ data    mu /0.21951_DP, 0.12345679012345679012_DP, 0.27583_DP, 0.09876543209876543209_DP/
+ aa1 = mu(iflag)/kappa(iflag)
+ Fx = mu(iflag)*s2x/(one+aa1*abs(s2x)) !remove LDA term (subtract 1) to make it compatible with WE
+ dFxds2x = mu(iflag)/(one+aa1*abs(s2x))**2
 end subroutine FxGGA_2
-!---------------------------------------------------------------
-subroutine FTPBEc (rho, grho, iflag, fc, v1c, v2c, einc, tsc, degauss)
-  !---------------------------------------------------------------
-  !
-  ! finite-T PBE correlation (without LDA part)
-  ! it returns energy fc, einc and tsc densities, 
-  ! the LDA fex_ksdt and fec_ksdt return energies per electron.
-  !
-  ! iflag=1: PBE with Bc(rs,t) from Pade fit
-  ! iflag=2: PBEsol with Bc(rs,t) from Pade fit
-  ! iflag=3: PBEmol with Bc(rs,t) from Pade fit
-  ! iflag=4: PBEgel with Bc(rs,t) from Pade fit !<-- for the moment we use the same beta as in PBEsol
-  !
-  ! iflag=5: PBE with Bc(rs,t)=1
-  ! iflag=6: PBEsol with Bc(rs,t)=1
-  ! iflag=7: PBEmol with Bc(rs,t)=1
-  ! iflag=8: PBEgel with Bc(rs,t)=1 !<-- for the moment we use the same beta as in PBEsol
-  !
-  ! iflag=9: PBE with BcII(rs,t) from Pade fit
-  ! iflag=10: PBEsol with BcII(rs,t) from Pade fit
-  ! iflag=11: PBEmol with BcII(rs,t) from Pade fit
-  ! iflag=12: PBEgel with BcII(rs,t) from Pade fit !<-- for the moment we use the same beta as in PBEsol
-  !
+!!***
 
-  implicit none
-  integer, intent(in) :: iflag
-  real(DP), intent(in) :: rho, grho, degauss
-  real(DP), intent(out):: fc, v1c, v2c, einc, tsc
+!!****f* ABINIT/FTPBEc
+!! NAME
+!! FTPBEc
+!!
+!! FUNCTION
+!!  Returns TGGA correlation free energy, internal energy and entropy energy of xc functional KDT16
+!!
+!! NOTES
+!!  finite-T PBE correlation (without LDA part)
+!!  it returns energy fc, einc and tsc densities, 
+!!  the LDA fex_ksdt and fec_ksdt return energies per electron.
+!!  iflag=1: PBE with Bc(rs,t) from Pade fit
+!!  iflag=2: PBEsol with Bc(rs,t) from Pade fit
+!!  iflag=3: PBEmol with Bc(rs,t) from Pade fit
+!!  iflag=4: PBEgel with Bc(rs,t) from Pade fit !<-- for the moment we use the same beta as in PBEsol
+!!  iflag=5: PBE with Bc(rs,t)=1
+!!  iflag=6: PBEsol with Bc(rs,t)=1
+!!  iflag=7: PBEmol with Bc(rs,t)=1
+!!  iflag=8: PBEgel with Bc(rs,t)=1 !<-- for the moment we use the same beta as in PBEsol
+!!  iflag=9: PBE with BcII(rs,t) from Pade fit
+!!  iflag=10: PBEsol with BcII(rs,t) from Pade fit
+!!  iflag=11: PBEmol with BcII(rs,t) from Pade fit
+!!  iflag=12: PBEgel with BcII(rs,t) from Pade fit !<-- for the moment we use the same beta as in PBEsol
+!!  V.V. Karasiev, J.W. Dufty, and S.B. Trickey, PRL 120(7), 076401 (2018) [[cite:Karasiev2018]]
+!!
+!! INPUTS
+!!  rho=density at this point
+!!  grho=gradient of the density at this point
+!!  iflag=flag selector integer
+!!  degauss=setup temperature (Rydberg)
+!!
+!! OUTPUT
+!!  fc=correlation free energy per electron
+!!  v1c=first part of the correlation potnetial
+!!  v2c=second part of the correlation potential
+!!  einc=correlation internal energy per electron
+!!  tsc=correlation entropy energy per electron
+!!
+!! SOURCE
+subroutine FTPBEc(rho,grho,iflag,fc,v1c,v2c,einc,tsc,degauss)
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: iflag
+ real(dp),intent(in) :: rho,grho,degauss
+ real(dp),intent(out):: fc,v1c,v2c,einc,tsc
+!Local variables ------------------------------
+!scalars
+ real(dp),parameter :: ga=0.031091d0
+ real(dp),parameter :: pi34=0.6203504908994d0
+ real(dp),parameter :: xkf=1.919158292677513d0,xks=1.128379167095513d0
+ real(dp),parameter :: twothird=two/three
+ real(dp) :: fc_lda,einc_lda,tsc_lda,vc_lda
+ real(dp) :: Bc,dBcdrs,dBcdt
+ real(dp) :: t,dtdn,tF
+ real(dp) :: kf,ks,rs,drsdn
+ real(dp) :: qc,dqcdn,dqcdt
+ real(dp) :: expe,af,dadf
+ real(dp) :: y,xy,dxy,s1,ds1dqc,ds1da
+ real(dp) :: h0
+!arrays
+ real(dp) :: be(12)
 
-  real(DP), parameter :: ga = 0.031091d0
-  real(DP) :: be (12)
-  !         pbe         pbesol   pbemol     pbegel
-  data be / 0.066725d0, 0.046d0, 0.08384d0, 0.046d0, &
-            0.066725d0, 0.046d0, 0.08384d0, 0.046d0, &
-            0.066725d0, 0.046d0, 0.08384d0, 0.046d0/
-  !real(DP), parameter :: third = 1.d0 / 3.d0, pi34 = 0.6203504908994d0
-  real(DP), parameter :: pi34 = 0.6203504908994d0
-  real(DP), parameter :: xkf = 1.919158292677513d0, xks = 1.128379167095513d0
-  ! pi34=(3/4pi)^(1/3), xkf=(9 pi/4)^(1/3), xks= sqrt(4/pi)
-  real(DP), parameter :: &
-    twothird = 2._DP/3._DP
+! *************************************************************************
 
-  real(DP) :: fc_lda,einc_lda,tsc_lda,vc_lda,sc_lda
-  real(DP) :: Bc,dBcdrs,dBcdt
-  real(DP) :: t, dtdn, tF
-  real(DP) :: kf, ks, rs, drsdn
-  real(DP) :: qc, dqcdn, dqcdt
-  real(DP) :: expe, af, dadf
-  real(DP) :: y, xy, dxy, s1, ds1dqc, ds1da
-  real(DP) :: h0
-  !
-  rs = pi34 / rho**third
-  !drsdn = -third*rs/rho
-  drsdn = -third*rs !n*d(rs)/dn
-  tF = (3._DP*PI**2*rho)**twothird/2._DP !tF=Fermi temperature for spin-unpol case
-  t = degauss/2.0_DP/tF
-  !dtdn = -twothird*t/rho ! (dt/dn)
-  dtdn = -twothird*t ! n*(dt/dn)
-  ! LDA f_c, einternal_c and T*s_c energies per electron
-  call fec_ksdt (rs,fc_lda,einc_lda,tsc_lda,vc_lda,degauss)
-  ! added temporarily for tests
-  !call pw (rs, 1, fc_lda, vc_lda)
-  !einc_lda = fc_lda
-  !tsc_lda = 0._DP
-  !
-  if(iflag.le.8)   call tildeBc(iflag,rs,t,Bc,dBcdrs,dBcdt)  !iflag=1,2,..8
-  if(iflag.gt.8) call tildeBcII(iflag,rs,t,Bc,dBcdrs,dBcdt)  !iflag=9,10,..12
+!         pbe         pbesol   pbemol     pbegel
+ data be / 0.066725d0, 0.046d0, 0.08384d0, 0.046d0, &
+           0.066725d0, 0.046d0, 0.08384d0, 0.046d0, &
+           0.066725d0, 0.046d0, 0.08384d0, 0.046d0/
 
-  kf = xkf/rs
-  ks = xks*sqrt(kf)
-  qc = sqrt(grho)/(2.d0*ks*rho) * sqrt(Bc)
-  !dqcdn = -(7._DP/6._DP)*qc/rho - 0.5_DP*sqrt(grho)/(2.d0*ks*rho)/sqrt(Bc) * dBcdrs*drsdn !d(qc)/dn
-  !dqcdn = -(7._DP/6._DP)*qc - 0.5_DP*sqrt(grho)/(2.d0*ks*rho)/sqrt(Bc) * dBcdrs*drsdn !n*d(qc)/dn
-  !dqcdt = - 0.5_DP*sqrt(grho)/(2.d0*ks*rho)/sqrt(Bc) * dBcdt ! d(qc)/dt
-  dqcdn = -(7._DP/6._DP)*qc + 0.5_DP*qc/Bc * dBcdrs*drsdn !n*d(qc)/dn
-  dqcdt = + 0.5_DP*qc/Bc * dBcdt ! d(qc)/dt
-  expe = exp(-fc_lda/ga)
-  af = be(iflag)/ga/(expe-1.d0) !A(fc_lda)
-  dadf = expe*af**2/be(iflag) !dA(fc_lda)/d(fc_lda)
-  y = af*qc*qc
-  xy = (1.d0 + y) / (1.d0 + y + y * y) 
-  dxy = -y*(2._DP + y)/(1._DP + y + y*y)**2 !d(xy)/dy
-  s1 = 1.d0 + be(iflag)/ga*qc*qc*xy
-  ds1dqc = be(iflag)/ga*2._DP*qc*xy + be(iflag)/ga*qc*qc*dxy * 2._DP*af*qc !d(s1)/d(qc)
-  ds1da = be(iflag)/ga*qc*qc*dxy * qc*qc !d(s1)/dA
-  h0 = ga*log(s1)
-  !fc = rho * h0 ! energy density !17-APR-2016: commented in ABINIT version
-  fc = h0 ! energy per electron, 17-APR-2016: ABINIT version
-  !v1c=d(n*H)/dn=H + n*(dH/ds1)*(ds1/dA)*(dA/d(fc_lda))*(d(fc_lda)/dn) + n*(dH/ds1)*(ds1/d(qc))*{(d(qc)/dn) + (d(qc)/dt)*(dt/dn)}
-  !   = H + (dH/ds1)*(ds1/dA)*(dA/d(fc_lda))*(vc_lda - fc_lda) + (dH/ds1)*(ds1/d(qc))*{(n*d(qc)/dn) + (d(qc)/dt)*(n*dt/dn)}
-  !
-  ! where we used the following: n*d(fc_lda)/dn = vc_lda - fc_lda 
-  ! fc_lda is the energy per electron
-  !
-  v1c = h0 + (ga/s1)*ds1da*dadf*(vc_lda - fc_lda) + (ga/s1)*ds1dqc*(dqcdn + dqcdt*dtdn)
-  v2c = rho * (ga/s1) * ds1dqc * qc/grho
+ rs = pi34 / rho**third
+!drsdn = -third*rs/rho
+ drsdn = -third*rs !n*d(rs)/dn
+ tF = (3._DP*PI**2*rho)**twothird/2._DP !tF=Fermi temperature for spin-unpol case
+ t = degauss/2.0_DP/tF
+!dtdn = -twothird*t/rho ! (dt/dn)
+ dtdn = -twothird*t ! n*(dt/dn)
+! LDA f_c, einternal_c and T*s_c energies per electron
+ call fec_ksdt (rs,fc_lda,einc_lda,tsc_lda,vc_lda,degauss)
+! added temporarily for tests
+!call pw (rs, 1, fc_lda, vc_lda)
+!einc_lda = fc_lda
+!tsc_lda = 0._DP
+!
+ if(iflag.le.8)   call tildeBc(iflag,rs,t,Bc,dBcdrs,dBcdt)  !iflag=1,2,..8
+ if(iflag.gt.8) call tildeBcII(iflag,rs,t,Bc,dBcdrs,dBcdt)  !iflag=9,10,..12
 
-  ! first version:
-  !tsc = rho*(ga/s1) * ds1da * dadf * tsc_lda - rho*(ga/s1) * t*dqcdt
-  !
-  ! LDA quantities per particle:
-  ! sc_lda = -d(fc_lda)/dt)/T_F
-  ! tsc_lda = -t*d(fc_lda)/dt)
-
-  ! GGA entropy and T*s_c density (not per particle)
-  ! sc = -d(n*H)/dt*(1/T_F) = -n*(dH/ds1)*(ds1/dA)*(dA/d(fc_lda))*(d(fc_lda)/dt)/T_F - n*(dH/ds1)*(ds1/d(qc))*(d(qc)/dt)/T_F
-  ! T*sc=t*T_F*sc = -t*d(n*H)/dt = +n*(dH/ds1)*(ds1/dA)*(dA/d(fc_lda))*(-t*d(fc_lda)/dt) - t*n*(dH/ds1)*(ds1/d(qc))*(d(qc)/dt)
-  !tsc = rho*(ga/s1)*ds1da*dadf*tsc_lda - t*rho*(ga/s1)*ds1dqc*dqcdt !17-APR-2016: commented in ABINIT version
-  tsc =     (ga/s1)*ds1da*dadf*tsc_lda - t*    (ga/s1)*ds1dqc*dqcdt ! energy per electron, 17-APR-2016: ABINIT version
-  einc = fc + tsc
-
-  !
-  return
+ kf = xkf/rs
+ ks = xks*sqrt(kf)
+ qc = sqrt(grho)/(2.d0*ks*rho) * sqrt(Bc)
+!dqcdn = -(7._DP/6._DP)*qc/rho - 0.5_DP*sqrt(grho)/(2.d0*ks*rho)/sqrt(Bc) * dBcdrs*drsdn !d(qc)/dn
+!dqcdn = -(7._DP/6._DP)*qc - 0.5_DP*sqrt(grho)/(2.d0*ks*rho)/sqrt(Bc) * dBcdrs*drsdn !n*d(qc)/dn
+!dqcdt = - 0.5_DP*sqrt(grho)/(2.d0*ks*rho)/sqrt(Bc) * dBcdt ! d(qc)/dt
+ dqcdn = -(7._DP/6._DP)*qc + 0.5_DP*qc/Bc * dBcdrs*drsdn !n*d(qc)/dn
+ dqcdt = + 0.5_DP*qc/Bc * dBcdt ! d(qc)/dt
+ expe = exp(-fc_lda/ga)
+ af = be(iflag)/ga/(expe-1.d0) !A(fc_lda)
+ dadf = expe*af**2/be(iflag) !dA(fc_lda)/d(fc_lda)
+ y = af*qc*qc
+ xy = (1.d0 + y) / (1.d0 + y + y * y) 
+ dxy = -y*(2._DP + y)/(1._DP + y + y*y)**2 !d(xy)/dy
+ s1 = 1.d0 + be(iflag)/ga*qc*qc*xy
+ ds1dqc = be(iflag)/ga*2._DP*qc*xy + be(iflag)/ga*qc*qc*dxy * 2._DP*af*qc !d(s1)/d(qc)
+ ds1da = be(iflag)/ga*qc*qc*dxy * qc*qc !d(s1)/dA
+ h0 = ga*log(s1)
+!fc = rho * h0 ! energy density !17-APR-2016: commented in ABINIT version
+ fc = h0 ! energy per electron, 17-APR-2016: ABINIT version
+!v1c=d(n*H)/dn=H + n*(dH/ds1)*(ds1/dA)*(dA/d(fc_lda))*(d(fc_lda)/dn) + n*(dH/ds1)*(ds1/d(qc))*{(d(qc)/dn) + (d(qc)/dt)*(dt/dn)}
+!   = H + (dH/ds1)*(ds1/dA)*(dA/d(fc_lda))*(vc_lda - fc_lda) + (dH/ds1)*(ds1/d(qc))*{(n*d(qc)/dn) + (d(qc)/dt)*(n*dt/dn)}
+!
+! where we used the following: n*d(fc_lda)/dn = vc_lda - fc_lda 
+! fc_lda is the energy per electron
+!
+ v1c = h0 + (ga/s1)*ds1da*dadf*(vc_lda - fc_lda) + (ga/s1)*ds1dqc*(dqcdn + dqcdt*dtdn)
+ v2c = rho * (ga/s1) * ds1dqc * qc/grho
+! first version:
+!tsc = rho*(ga/s1) * ds1da * dadf * tsc_lda - rho*(ga/s1) * t*dqcdt
+!
+! LDA quantities per particle:
+! sc_lda = -d(fc_lda)/dt)/T_F
+! tsc_lda = -t*d(fc_lda)/dt)
+! GGA entropy and T*s_c density (not per particle)
+! sc = -d(n*H)/dt*(1/T_F) = -n*(dH/ds1)*(ds1/dA)*(dA/d(fc_lda))*(d(fc_lda)/dt)/T_F - n*(dH/ds1)*(ds1/d(qc))*(d(qc)/dt)/T_F
+! T*sc=t*T_F*sc = -t*d(n*H)/dt = +n*(dH/ds1)*(ds1/dA)*(dA/d(fc_lda))*(-t*d(fc_lda)/dt) - t*n*(dH/ds1)*(ds1/d(qc))*(d(qc)/dt)
+!tsc = rho*(ga/s1)*ds1da*dadf*tsc_lda - t*rho*(ga/s1)*ds1dqc*dqcdt !17-APR-2016: commented in ABINIT version
+ tsc =     (ga/s1)*ds1da*dadf*tsc_lda - t*    (ga/s1)*ds1dqc*dqcdt ! energy per electron, 17-APR-2016: ABINIT version
+ einc = fc + tsc
 end subroutine FTPBEc
-
+!!***
 
 end module m_xcpbe
 !!***
