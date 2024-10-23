@@ -28,7 +28,7 @@ module m_drivexc
  use libxc_functionals
  use m_numeric_tools, only: invcb
  use m_xciit,         only: xciit
- use m_xcpbe,         only: xcpbe,xctp123
+ use m_xcpbe,         only: xcpbe,xckdt16
  use m_xchcth,        only: xchcth
  use m_xclda,         only: xcpzca,xcspol,xctetr,xcwign,xchelu,xcxalp,xclb,xcksdt
 
@@ -1461,7 +1461,7 @@ subroutine drivexc(ixc,order,npts,nspden,usegradient,uselaplacian,usekden,&
      call xciit(exc,fxcT,npts,order,rspts,el_temp,vxcrho(:,1),dvxc)
    end if
 
-!>>>>> Karasiev-Sjostrom-Dufty-Trickey TLDA (no spin-pol)
+!>>>>> Karasiev-Sjostrom-Dufty-Trickey TLDA (no spin-pol) (KSDT)
  else if (ixc==51) then
    if (order**2 <= 1) then
      call xcksdt(exc,npts,order,rhotot,rspts,el_temp,vxcrho(:,1))
@@ -1475,7 +1475,7 @@ subroutine drivexc(ixc,order,npts,nspden,usegradient,uselaplacian,usekden,&
      call xcksdt(exc,npts,order,rhotot,rspts,el_temp,vxcrho(:,1),dvxc)
    end if
 
-!>>>>> Karasiev-Dufty-Trickey TGGA
+!>>>>> Karasiev-Dufty-Trickey TGGA (KDT16)
  else if(ixc==60.or.ixc==61.or.ixc==62) then
    if(nvxcgrho /= 3 )then 
      write(message, '(3a,i0,a,i0)')&
@@ -1483,7 +1483,7 @@ subroutine drivexc(ixc,order,npts,nspden,usegradient,uselaplacian,usekden,&
 &     'ixc=',ixc,'ndvxcdgr=',nvxcgrho
      ABI_BUG(message)
    end if
-   call xctp123(vxcgrho,exc,grho2_updn,ixc,npts,nspden,rhotot,rspts,el_temp,vxcrho)
+   call xckdt16(vxcgrho,exc,grho2_updn,ixc,npts,nspden,rhotot,rspts,el_temp,vxcrho)
 
 !>>>>> GGA counterpart of the B3LYP functional
  else if(ixc==1402000) then
