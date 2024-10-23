@@ -143,14 +143,11 @@ subroutine init_oper(paw_dmft,oper,nkpt,wtk,shiftk,opt_ksloc)
  use m_paw_dmft, only : paw_dmft_type
 
 !Arguments ------------------------------------
-!scalars
  integer, optional, intent(in) :: nkpt,opt_ksloc,shiftk
-!type
  type(paw_dmft_type), intent(in) :: paw_dmft
  type(oper_type), intent(inout) :: oper
-!arrays
  real(dp), ABI_CONTIGUOUS target, optional :: wtk(:)
-!oper variables ------------------------------------
+!Local variables ------------------------------------
  integer :: optksloc
 !************************************************************************
 
@@ -165,6 +162,7 @@ subroutine init_oper(paw_dmft,oper,nkpt,wtk,shiftk,opt_ksloc)
 
  oper%has_operks    = 0 
  oper%has_opermatlu = 0
+
 ! ===================
 !  Integers
 ! ===================
@@ -204,13 +202,9 @@ subroutine init_oper(paw_dmft,oper,nkpt,wtk,shiftk,opt_ksloc)
 !  matlu variables
 ! ===================
  if (optksloc == 2 .or. optksloc == 3) then
-   !oper%has_opermatlu = 0
    ABI_MALLOC(oper%matlu,(oper%natom))
    oper%has_opermatlu = 1
    call init_matlu(oper%natom,oper%nspinor,oper%nsppol,paw_dmft%lpawu(:),oper%matlu(:))
-   !do iatom=1,oper%natom
-   ! oper%matlu(iatom)%mat=czero
-   !end do
  end if ! optksloc=2 or optksloc=3
 
  DBG_EXIT("COLL")
@@ -237,9 +231,8 @@ subroutine destroy_oper(oper)
  use m_matlu, only : destroy_matlu
 
 !Arguments ------------------------------------
-!scalars
  type(oper_type), intent(inout) :: oper
-!local variables-------------------------------
+!Local variables-------------------------------
  character(len=500) :: message
 !! *********************************************************************
 
@@ -290,29 +283,19 @@ subroutine copy_oper(oper1,oper2)
  use m_matlu, only : copy_matlu
 
 !Arguments ------------------------------------
-!type
  type(oper_type), intent(in) :: oper1
  type(oper_type), intent(inout) :: oper2 !vz_i
-!oper variables-------------------------------
+!Local variables-------------------------------
 ! *********************************************************************
 
  DBG_ENTER("COLL")
   
- if (oper1%has_opermatlu == 1 .and. oper2%has_opermatlu == 1) & 
-   & call copy_matlu(oper1%matlu(:),oper2%matlu(:),oper1%natom)
+ if (oper1%has_opermatlu == 1 .and. oper2%has_opermatlu == 1) then 
+   call copy_matlu(oper1%matlu(:),oper2%matlu(:),oper1%natom)
+ end if 
 
  if (oper1%has_operks == 1 .and. oper2%has_operks == 1) &
     & oper2%ks(:,:,:,:) = oper1%ks(:,:,:,:)
- !  do isppol=1,oper1%nsppol
- !    do ikpt=1,oper1%nkpt
- !      do ib=1,oper1%mbandc
- !        do ib1=1,oper1%mbandc
- !          oper2%ks(isppol,ikpt,ib,ib1)=oper1%ks(isppol,ikpt,ib,ib1)
- !        enddo
- !      enddo
- !    enddo
- !  enddo
- !end if
 
  DBG_EXIT("COLL")
  
@@ -344,21 +327,18 @@ subroutine print_oper(oper,option,paw_dmft,prtopt)
  use m_paw_dmft, only : paw_dmft_type
 
 !Arguments ------------------------------------
-!type
  type(paw_dmft_type), intent(in) :: paw_dmft
  type(oper_type), intent(in) :: oper
  integer, intent(in) :: option,prtopt
-!oper variables-------------------------------
+!Local variables-------------------------------
  integer :: ib,ib1,iband1,iband2,ikpt,isppol,mbandc,nkpt,nkptr
  character(len=2000) :: message
  logical  :: ximag
- real(dp) :: maximag !(3)
+ real(dp) :: maximag 
 ! *********************************************************************
 
  DBG_ENTER("COLL")
  
- !maximag(:)=zero
-
  if (oper%has_opermatlu == 1) then
    write(message,'(2a)') ch10,'   = In the atomic basis'
    call wrtout(std_out,message,'COLL')
@@ -381,15 +361,13 @@ subroutine print_oper(oper,option,paw_dmft,prtopt)
 !     if( (paw_dmft%eigen_dft(1,1,ib)-paw_dmft%fermie).le.0.3) iband2=ib
 !   enddo
 
-   if (abs(prtopt) >= 3 .and. ((option < 5) .or. (option > 8))) then ! .and. oper%has_operks == 1) then
+   if (abs(prtopt) >= 3 .and. ((option < 5) .or. (option > 8))) then 
 !     write(message,'(x,a,a,i4,2x,a)') ch10,'  -KS states'
 !     call wrtout(std_out,message,'COLL')
      nkptr = min(nkpt,4)
      do isppol=1,paw_dmft%nsppol
        write(message,'(a,3x,a,i4)') ch10,"--isppol--",isppol
        call wrtout(std_out,message,'COLL')
-       !nkptr=oper%nkpt
-       !nkptr=min(oper%nkpt,4)
        write(message,'(2a)') ch10,&
          & "   - ( in the following only the value for the first k-points are printed)"
        call wrtout(std_out,message,'COLL')
@@ -408,11 +386,9 @@ subroutine print_oper(oper,option,paw_dmft,prtopt)
              if (abs(aimag(oper%ks(ib,ib,ikpt,isppol))) >= tol10) then
                write(message,'(a,i4,e14.5,3x,e14.5,3x,e21.14)') "   -iband--",ib,&
                  & paw_dmft%eigen_dft(ib,ikpt,isppol),oper%ks(ib,ib,ikpt,isppol)
-               !call wrtout(std_out,message,'COLL')
              else
                write(message,'(a,i4,e14.5,3x,e14.5)') "   -iband--",ib,&
                  & paw_dmft%eigen_dft(ib,ikpt,isppol),dble(oper%ks(ib,ib,ikpt,isppol))
-               !call wrtout(std_out,message,'COLL')
              end if ! imaginary part
              call wrtout(std_out,message,'COLL')
            end if ! option<5
@@ -485,27 +461,19 @@ subroutine inverse_oper(oper,option,procb,iproc)
  use m_hide_lapack, only : xginv
 
 !Arguments ------------------------------------
-!type
  integer, intent(in) :: option
  type(oper_type), intent(inout) :: oper
  integer, optional, intent(in) :: iproc
  integer, optional, intent(in) :: procb(oper%nkpt)
-!oper variables-------------------------------
+!Local variables-------------------------------
  integer :: ikpt,isppol,paral
- !complex(dpc),allocatable :: matrix(:,:)
- !integer,pointer :: procb2(:) => null()
 !todo_ba: prb with gwpc here: necessary for matcginv but should be dpc
 ! *********************************************************************
 
  DBG_ENTER("COLL")
  
- !if (option == 2 .or. option == 3) then
- !  ABI_MALLOC(procb2,(nkpt))
- !end if
  paral = 0
  if (present(procb) .and. present(iproc) .and. oper%paral == 0) paral = 1
- !  procb2 => procb(:)
- !end if
 
  !if (((option == 1 .or. option == 3) .and. (oper%has_operks == 0)) .or. &
  !  & ((option == 2 .or. option == 3) .and. (oper%has_opermatlu == 0))) then
@@ -513,33 +481,24 @@ subroutine inverse_oper(oper,option,procb,iproc)
  !  ABI_ERROR(message)
  !end if
 
- if (option == 2 .or. option == 3) call inverse_matlu(oper%matlu(:),oper%natom)
+ if (option == 2 .or. option == 3) then
+   call inverse_matlu(oper%matlu(:),oper%natom)
+ end if 
  
  if (option == 1 .or. option == 3) then
-   !ABI_MALLOC(matrix,(oper%mbandc,oper%mbandc))
    do isppol=1,oper%nsppol
      do ikpt=1,oper%nkpt
        if (paral == 1) then
          if (procb(ikpt) /= iproc) cycle
        end if 
-    
-      !if ((paral == 1 .and. (procb2(ikpt) == iproc)).or.(paral==0)) then
-         ! matrix(:,:)=oper%ks(isppol,ikpt,:,:)
 !          write(std_out,*) "isppol,ikpt",isppol,ikpt,m
 !          write(std_out,*) "isppol,ikpt",matrix
          !call matcginv_dpc(matrix,oper%mbandc,oper%mbandc)
        call xginv(oper%ks(:,:,ikpt,isppol),oper%mbandc)
-         !oper%ks(isppol,ikpt,:,:)=matrix(:,:)
-       ! endif
      end do ! ikpt
    end do ! isppol
-   !ABI_FREE(matrix)
  end if ! option
 
- !if(option==2.or.option==3) then
- !  ABI_FREE(procb2)
- !endif
- 
  DBG_EXIT("COLL")
  
 end subroutine inverse_oper
@@ -575,8 +534,6 @@ subroutine downfold_oper(oper,paw_dmft,procb,iproc,option,op_ks_diag)
  use m_abi_linalg, only : abi_xgemm
 
 !Arguments ------------------------------------
-!type
- !integer, intent(in):: option
  type(oper_type), intent(inout) :: oper
  type(paw_dmft_type), intent(in) :: paw_dmft
  integer, optional, intent(in) :: iproc,option
@@ -587,13 +544,10 @@ subroutine downfold_oper(oper,paw_dmft,procb,iproc,option,op_ks_diag)
  integer :: ndim_max,nspinor,opt,paral,shift
  character(len=500) :: message
  complex(dpc), allocatable :: mat_temp(:,:),mat_temp2(:,:),mat_temp3(:,:)
- !integer,allocatable :: procb2(:)
- !logical lvz  !vz_d
 ! *********************************************************************
 
  DBG_ENTER("COLL")
    
- !ABI_MALLOC(procb2,(oper%nkpt))
  if (oper%has_opermatlu == 0) then
    message = " Operator is not defined to be used in downfold_oper"
    ABI_ERROR(message)
@@ -609,13 +563,6 @@ subroutine downfold_oper(oper,paw_dmft,procb,iproc,option,op_ks_diag)
  
  opt = 1
  if (present(option)) opt = option
-
- !if(option<0) then
- !endif
-
- !do iatom=1,natom
- !  oper%matlu(iatom)%mat=czero
- !enddo
 
  do iatom=1,oper%natom
    lpawu = oper%matlu(iatom)%lpawu
@@ -680,49 +627,6 @@ subroutine downfold_oper(oper,paw_dmft,procb,iproc,option,op_ks_diag)
    ABI_FREE(mat_temp3)
  end do ! iatom
  
-
- !do isppol=1,nsppol
- ! do ikpt=1,nkpt
- !  ikpt1=ikpt
- !  if(present(jkpt)) ikpt1=jkpt
- !  lvz=paral==0  !vz_d
- !  if(present(iproc)) lvz=lvz.or.(paral==1.and.(procb2(ikpt1)==iproc))  !vz_d
-!!  if ((paral==1.and.(procb2(ikpt1)==iproc)).or.(paral==0)) then    !vz_d
- !  if(lvz) then !vz_d
- !  do ib=1,mbandc
- !   do ib1=1,mbandc
- !    do iatom=1,natom
- !     if(oper%matlu(iatom)%lpawu.ne.-1) then
- !     ndim=2*oper%matlu(iatom)%lpawu+1
- !      do im=1,ndim
- !       do im1=1,ndim
- !        do ispinor=1,nspinor
- !         do ispinor1=1,nspinor
- !           if (im1 == im .and. im1 == 1 .and. ib1 == ib .and. iatom == 1) then
-
-  !          end if
-  !          oper%matlu(iatom)%mat(im,im1,isppol,ispinor,ispinor1)=     &
-!&            oper%matlu(iatom)%mat(im,im1,isppol,ispinor,ispinor1)+    &
-!&            paw_dmft%psichi(isppol,ikpt1,ib,ispinor,iatom,im)*        &
-!&            conjg(paw_dmft%psichi(isppol,ikpt1,ib1,ispinor1,iatom,im1))* &
-!false&            paw_dmft%psichi(isppol,ikpt1,ib1,ispinor1,iatom,im1)*        &
-!false&            conjg(paw_dmft%psichi(isppol,ikpt1,ib,ispinor,iatom,im))* &
-!&            oper%ks(isppol,ikpt,ib,ib1)*oper%wtk(ikpt)
-! one  could suppress wtk here if present(jkpt)
-! ks(ib,ib1)=ks(ib1,ib) -> ib and ib1 can be underchanged !
-!          enddo ! ispinor1
-!         enddo ! ispinor
-!        enddo ! im1
-!       enddo ! im
-!      endif
-!     enddo ! iatom
- !   enddo ! ib
- !  enddo ! ib
- !  endif
- ! enddo ! ikpt
- !enddo ! isppol
- !ABI_FREE(procb2)
-
  DBG_EXIT("COLL")
 
 end subroutine downfold_oper
@@ -751,32 +655,21 @@ subroutine upfold_oper(oper,paw_dmft,procb,iproc)
  use m_abi_linalg, only : abi_xgemm
 
 !Arguments ------------------------------------
-!type
- !integer,intent(in):: option
  type(oper_type), intent(inout)  :: oper
  type(paw_dmft_type), intent(in) :: paw_dmft
  integer, optional, intent(in)   :: iproc
  integer, optional, intent(in)   :: procb(oper%nkpt)
- !integer,optional,intent(in) :: prt
-!oper variables-------------------------------
+!Local variables-------------------------------
  integer :: iatom,ik,ikpt,isppol,lpawu,mbandc
  integer :: ndim,ndim_max,nspinor,paral,shift
- !integer, allocatable :: procb2(:)
  complex(dpc), allocatable :: mat_temp(:,:),mat_temp2(:,:)
 ! *********************************************************************
 
- !ABI_UNUSED(prt)
- !ABI_MALLOC(procb2,(oper%nkpt))
-
- !  procb2=procb
 !   write(6,*) "upfold_oper procb",procb
 !   write(6,*) "iproc",iproc
 !   write(6,*) size(procb)
 !   write(6,*) size(procb2)
 !   write(6,*) procb2(1),procb2(16)
- !else
- !  paral=0
- !endif
 
  DBG_ENTER("COLL")
  
@@ -784,8 +677,6 @@ subroutine upfold_oper(oper,paw_dmft,procb,iproc)
  !  message = " Operator is not defined to be used in upfold_oper"
  !  ABI_ERROR(message)
  !end if
- !if(option<0) then
- !endif
  
  mbandc   = paw_dmft%mbandc 
  nspinor  = paw_dmft%nspinor 
@@ -828,50 +719,6 @@ subroutine upfold_oper(oper,paw_dmft,procb,iproc)
  ABI_FREE(mat_temp) 
  ABI_FREE(mat_temp2)
  
-
- !do isppol=1,nsppol
- !  do ikpt=1,nkpt
- !   if ((paral==1.and.(procb2(ikpt)==iproc)).or.(paral==0)) then
- !    do ib=1,mbandc
- !      do ib1=1,mbandc
-!               if(ib==1.and.ib1==3) write(std_out,*) "IKPT=",ikpt
- !       oper%ks(isppol,ikpt,ib,ib1)=czero
-
-  !       do iatom=1,natom
-  !         if(oper%matlu(iatom)%lpawu.ne.-1) then
-  !           ndim=2*oper%matlu(iatom)%lpawu+1
-  !           do im=1,ndim
-  !             do im1=1,ndim
-  !               do ispinor=1,nspinor
-  !                 do ispinor1=1,nspinor
-
-! psichi(isppol,ikpt,ib,ispinor,iatom,im)=<\chi_{m,R,ispinor)|\Psi(s,k,nu)>
-   !                  oper%ks(isppol,ikpt,ib,ib1)= oper%ks(isppol,ikpt,ib,ib1) &
-!&                     + ( paw_dmft%psichi(isppol,ikpt,ib1,ispinor1,iatom,im1)        &
-!&                     * oper%matlu(iatom)%mat(im,im1,isppol,ispinor,ispinor1)    &
-!&                     * conjg(paw_dmft%psichi(isppol,ikpt,ib,ispinor,iatom,im)))
-              ! if(present(prt).and.(ib==1.and.ib1==1)) then
-              !   write(6,*) "im,im1",im,im1
-              !   write(6,*) "ispinor,ispinor1",ispinor,ispinor1
-              !   write(6,*) "psichi",paw_dmft%psichi(isppol,ikpt,ib1,ispinor1,iatom,im1)
-              !   write(6,*) "psichi 2",paw_dmft%psichi(isppol,ikpt,ib,ispinor,iatom,im1)
-              !   write(6,*) "oper%matlu", oper%matlu(iatom)%mat(im,im1,isppol,ispinor,ispinor1)
-              ! endif
-
-   !                enddo ! ispinor1
-   !              enddo ! ispinor
-   !            enddo ! im1
-   !          enddo ! im
-   !        endif
-   !      enddo ! iatom
-
-   !    enddo ! ib
-   !  enddo ! ib
-   ! endif
-   !enddo ! ikpt
- !enddo ! isppol
- !ABI_FREE(procb2)
-
  DBG_EXIT("COLL")
  
 end subroutine upfold_oper
@@ -899,10 +746,9 @@ subroutine identity_oper(oper,option)
  use m_matlu, only : identity_matlu,zero_matlu
 
 !Arguments ------------------------------------
-!type
  integer, intent(in):: option
  type(oper_type), intent(inout) :: oper
-!oper variables-------------------------------
+!Local variables-------------------------------
  integer :: ib,ikpt,isppol,natom
  character(len=500) :: message
 ! *********************************************************************
@@ -915,12 +761,6 @@ subroutine identity_oper(oper,option)
    ABI_ERROR(message)
  end if
   
- !oper%ks(:,:,:,:) = czero
- 
- !do iatom=1,natom
- ! oper%matlu(iatom)%mat= czero
- !enddo
-
  if (option == 1 .or. option == 3) then
  
    oper%ks(:,:,:,:) = czero
@@ -969,13 +809,11 @@ subroutine diff_oper(char1,char2,occup1,occup2,option,toldiff)
  use m_matlu, only : diff_matlu
 
 !Arguments ------------------------------------
-!type
  type(oper_type), intent(in) :: occup1,occup2
  integer, intent(in) :: option
  real(dp), intent(in) :: toldiff
  character(len=*), intent(in) :: char1,char2
-!local variables-------------------------------
- !integer :: mbandc,nkpt
+!Local variables-------------------------------
  character(len=500) :: message
 ! *********************************************************************
 
@@ -985,9 +823,6 @@ subroutine diff_oper(char1,char2,occup1,occup2,option,toldiff)
    message = " Operators are not defined to be used in diff_oper"
    ABI_ERROR(message)
  end if
- 
- !mbandc = occup1%mbandc
- !nkpt = occup1%nkpt
  
  if (occup1%nkpt /= occup2%nkpt) then
    write(message,'(a,2x,2i9)')' Operators are not equal',occup1%nkpt,occup2%nkpt
@@ -1042,17 +877,15 @@ subroutine trace_oper(oper,trace_ks,trace_loc,opt_ksloc,trace_ks_cmplx)
  use m_matlu, only : trace_matlu
 
 !Arguments ------------------------------------
-!type
  type(oper_type), intent(in) :: oper
  real(dp), intent(out) :: trace_ks  !vz_i
  real(dp), intent(inout) :: trace_loc(oper%nsppol+1,oper%natom) !vz_i
  integer, intent(in) :: opt_ksloc
  complex(dpc), optional, intent(out) :: trace_ks_cmplx
-!oper variables-------------------------------
+!Local variables-------------------------------
  integer :: ib,ikpt,isppol
  complex(dpc) :: trace
  character(len=500) :: message
- !real(dp) :: temp1
 ! *********************************************************************
 
  DBG_ENTER("COLL")
@@ -1080,9 +913,9 @@ subroutine trace_oper(oper,trace_ks,trace_loc,opt_ksloc,trace_ks_cmplx)
 !   write(std_out,*) "temp1",temp1
  end if ! opt_ksloc
  
- if (opt_ksloc == 2 .or. opt_ksloc == 3) call trace_matlu(oper%matlu(:),oper%natom,trace_loc(:,:))
-   !trace_loc=zero
- !end if
+ if (opt_ksloc == 2 .or. opt_ksloc == 3) then
+   call trace_matlu(oper%matlu(:),oper%natom,trace_loc(:,:))
+ end if
 
  DBG_EXIT("COLL")
  
@@ -1113,12 +946,11 @@ subroutine prod_oper(oper1,oper2,oper3,opt_ksloc,opt_diag)
  use m_abi_linalg, only : abi_xgemm
 
 !Arguments ------------------------------------
-!type
  type(oper_type), intent(in)    :: oper1,oper2
  type(oper_type), intent(inout) :: oper3
  integer, intent(in) :: opt_ksloc
  integer, optional, intent(in) :: opt_diag
-!oper variables-------------------------------
+!Local variables-------------------------------
  integer :: ib,ikpt,isppol,mbandc
  logical :: diag
 ! *********************************************************************
@@ -1126,8 +958,8 @@ subroutine prod_oper(oper1,oper2,oper3,opt_ksloc,opt_diag)
  DBG_ENTER("COLL")
  
  if (opt_ksloc == 2 .and. oper1%has_opermatlu == 1 .and. &
-   & oper2%has_opermatlu == 1 .and. oper3%has_opermatlu == 1) &
-   & call prod_matlu(oper1%matlu(:),oper2%matlu(:),oper3%matlu(:),oper1%natom) !
+   & oper2%has_opermatlu == 1 .and. oper3%has_opermatlu == 1) then
+   call prod_matlu(oper1%matlu(:),oper2%matlu(:),oper3%matlu(:),oper1%natom) end if 
 
  if (opt_ksloc == 1 .and. oper1%has_operks == 1 .and. &
     & oper2%has_operks == 1 .and. oper3%has_operks == 1) then
@@ -1150,23 +982,6 @@ subroutine prod_oper(oper1,oper2,oper3,opt_ksloc,opt_diag)
      end do ! isppol
  end if ! opt_ksloc=1
  
- !if(opt_ksloc==1) then
- !  if(oper1%has_operks==1.and.oper2%has_operks==1.and.oper3%has_operks==1) then
- !   do isppol=1,oper1%nsppol
-  !     do ikpt=1,oper1%nkpt
-  !       do ib=1,oper1%mbandc
-  !         do ib1=1,oper1%mbandc
-  !           oper3%ks(isppol,ikpt,ib,ib1)=czero
-  !           do ib2=1,oper1%mbandc
-  !             oper3%ks(isppol,ikpt,ib,ib1)=oper3%ks(isppol,ikpt,ib,ib1)+ oper1%ks(isppol,ikpt,ib,ib2)*oper2%ks(isppol,ikpt,ib2,ib1)
-  !           enddo
-  !         enddo
-  !       enddo
-  !     enddo
-  !   enddo
-  ! endif
- !endif
-
  DBG_EXIT("COLL")
  
 end subroutine prod_oper
@@ -1190,10 +1005,9 @@ end subroutine prod_oper
 subroutine trace_prod_oper(oper1,oper2,trace)
 
 !Arguments ------------------------------------
-!type
  type(oper_type), intent(in) :: oper1,oper2
  complex(dpc), intent(out) :: trace
-!oper variables-------------------------------
+!Local variables-------------------------------
  integer :: ikpt,isppol
  character(len=500) :: message
 ! *********************************************************************
@@ -1252,13 +1066,12 @@ subroutine gather_oper(oper,distrib,paw_dmft,opt_ksloc,master,opt_diag,opt_commk
  use m_xmpi, only : xmpi_allgatherv,xmpi_gatherv,xmpi_sum,xmpi_sum_master
  
 !Arguments ------------------------------------
-!type
  type(oper_type), intent(inout) :: oper(:)
  type(mpi_distrib_dmft_type), intent(in) :: distrib
  type(paw_dmft_type) :: paw_dmft
  integer, intent(in) :: opt_ksloc
  integer, optional, intent(in) :: master,opt_commkpt,opt_diag
-!oper variables-------------------------------
+!Local variables-------------------------------
  integer :: comm,iatom,ib,ib1,ibuf,ierr,ifreq,ikpt,im,im1,irank,irank1,irank2,isppol,lpawu,mbandc
  integer :: myproc,myproc2,natom,ndim,nkpt,nproc,nproc_freq,nproc_kpt,nproc2,nspinor,nsppol,nw,optcommkpt,siz_buf
  logical :: diag
@@ -1427,10 +1240,14 @@ subroutine gather_oper(oper,distrib,paw_dmft,opt_ksloc,master,opt_diag,opt_commk
    
    if (optcommkpt == 1) comm = distrib%comm_freq
    if (present(master)) then
-     if (optcommkpt == 1) call xmpi_sum_master(buffer(:),master,distrib%comm_kpt,ierr)
+     if (optcommkpt == 1) then
+       call xmpi_sum_master(buffer(:),master,distrib%comm_kpt,ierr)
+     end if
      call xmpi_gatherv(buffer(:),recvcounts(myproc2+1),buffer_tot(:),recvcounts(:),displs(:),master,comm,ierr)
    else
-     if (optcommkpt == 1) call xmpi_sum(buffer(:),distrib%comm_kpt,ierr)
+     if (optcommkpt == 1) then
+       call xmpi_sum(buffer(:),distrib%comm_kpt,ierr)
+     end if 
      call xmpi_allgatherv(buffer(:),recvcounts(myproc2+1),buffer_tot(:),recvcounts(:),displs(:),comm,ierr)
    end if  ! present(master)
    
@@ -1484,12 +1301,11 @@ subroutine gather_oper_ks(oper,distrib,paw_dmft,opt_diag)
  use m_xmpi, only : xmpi_allgatherv,xmpi_sum
  
 !Arguments ------------------------------------
-!type
  type(oper_type), intent(inout) :: oper
  type(mpi_distrib_dmft_type), intent(in) :: distrib
  type(paw_dmft_type), intent(in) :: paw_dmft
  integer, optional, intent(in) :: opt_diag
-!oper variables-------------------------------
+!Local variables-------------------------------
  integer :: ib,ib1,ibuf,ierr,ikpt,irank,isppol,mbandc
  integer :: me_kpt,nkpt,nproc,nproc_freq,nsppol,nw,siz_buf
  logical :: diag

@@ -625,7 +625,8 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
    do ifreq=1,self%nw
      call init_oper(paw_dmft,selfrotmatlu(ifreq),opt_ksloc=2)
      if (self%distrib%procf(ifreq) /= myproc) cycle
-     call rotate_matlu(self%oper(ifreq)%matlu(:),eigvectmatlu(:),natom,1,matlu_out=selfrotmatlu(ifreq)%matlu(:))
+     call copy_matlu(self%oper(ifreq)%matlu(:),selfrotmatlu(ifreq)%matlu(:),natom)
+     call rotate_matlu(self%oper(ifreq)%matlu(:),eigvectmatlu(:),natom,1)
    end do ! ifreq
    call gather_oper(selfrotmatlu(:),self%distrib,paw_dmft,2,master=master)
    do ifreq=1,3
