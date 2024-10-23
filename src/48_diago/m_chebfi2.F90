@@ -86,6 +86,7 @@ module m_chebfi2
    integer :: total_spacedim                ! Maybe not needed
    integer :: neigenpairs                   ! Number of eigen values/vectors we want
    integer :: nline                         ! Number of line to perform
+   integer :: nbdbuf                        ! Number of bands in the buffer
    integer :: spacecom                      ! Communicator for MPI
    real(dp) :: tolerance            ! Tolerance on the residu to stop the minimization
    real(dp) :: ecut                 ! Ecut for Chebfi oracle
@@ -176,7 +177,7 @@ module m_chebfi2
 !! SOURCE
 
 subroutine chebfi_init(chebfi,neigenpairs,spacedim,tolerance,ecut,paral_kgb,bandpp, &
-                       nline,space,eigenProblem,spacecom,me_g0,me_g0_fft,paw,comm_rows,comm_cols,&
+                       nline,nbdbuf,space,eigenProblem,spacecom,me_g0,me_g0_fft,paw,comm_rows,comm_cols,&
                        gpu_option,gpu_kokkos_nthrd)
 
  implicit none
@@ -188,6 +189,7 @@ subroutine chebfi_init(chebfi,neigenpairs,spacedim,tolerance,ecut,paral_kgb,band
  integer       , intent(in   ) :: me_g0_fft
  integer       , intent(in   ) :: neigenpairs
  integer       , intent(in   ) :: nline
+ integer       , intent(in   ) :: nbdbuf
  integer       , intent(in   ) :: comm_cols
  integer       , intent(in   ) :: comm_rows
  integer       , intent(in   ) :: paral_kgb
@@ -222,6 +224,7 @@ subroutine chebfi_init(chebfi,neigenpairs,spacedim,tolerance,ecut,paral_kgb,band
  chebfi%bandpp      = bandpp
  chebfi%comm_rows   = comm_rows
  chebfi%nline       = nline
+ chebfi%nbdbuf      = nbdbuf
  chebfi%spacecom    = spacecom
  chebfi%eigenProblem = eigenProblem
  chebfi%me_g0        = me_g0
@@ -470,7 +473,7 @@ end function chebfi_memInfo
 !!
 !! SOURCE
 
-subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,pcond,eigen,residu,nspinor)
+subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,pcond,eigen,occ,residu,nspinor)
 
  implicit none
 
@@ -479,6 +482,7 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,pcond,eigen,residu,nspinor)
  integer,         intent(in)    :: nspinor
  type(xgBlock_t), intent(inout) :: X0
  type(xgBlock_t), intent(inout) :: eigen
+ type(xgBlock_t), intent(in)    :: occ
  type(xgBlock_t), intent(inout) :: residu
  type(xgBlock_t), intent(in)    :: pcond
  interface
@@ -501,8 +505,8 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,pcond,eigen,residu,nspinor)
 !scalars
  integer :: spacedim
  integer :: space_res
- integer :: neigenpairs
- integer :: nline,nline_max,nline_tolwfr
+ integer :: neigenpairs,bandpp
+ integer :: nline,nline_max,nline_tolwfr,nline_decrease,nline_all,nbdbuf
  integer :: iline, iband, ierr
 ! integer :: comm_fft_save,comm_band_save !FFT and BAND MPI communicators from rest of Abinit, to be saved
  real(dp) :: tolerance
@@ -514,13 +518,15 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,pcond,eigen,residu,nspinor)
  real(dp) :: two_over_r
  real(dp) :: center
  real(dp) :: radius
- real(dp) :: eig_iband
+ real(dp) :: eig_iband,res_iband,occ_iband
  type(xg_t) :: DivResults
+ type(xgBlock_t) :: occBlock,occ_reshaped
 !arrays
  real(dp) :: tsec(2)
  !Pointers similar to old Chebfi
  integer,allocatable :: nline_bands(:) !Oracle variable
  real(dp),pointer :: eig(:,:)
+ real(dp),pointer :: residu_(:,:),occ_(:,:)
 
 ! *********************************************************************
 
@@ -528,6 +534,7 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,pcond,eigen,residu,nspinor)
 
  spacedim = chebfi%spacedim
  neigenpairs = chebfi%neigenpairs
+ bandpp = chebfi%bandpp
  nline = chebfi%nline
  chebfi%eigenvalues = eigen
 
@@ -543,8 +550,8 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,pcond,eigen,residu,nspinor)
    ABI_MALLOC(nline_bands,(neigenpairs))
    call xg_init(DivResults, space_res, neigenpairs, 1, gpu_option=chebfi%gpu_option)
  else
-   ABI_MALLOC(nline_bands,(chebfi%bandpp))
-   call xg_init(DivResults, space_res, chebfi%bandpp, 1, gpu_option=chebfi%gpu_option)
+   ABI_MALLOC(nline_bands,(bandpp))
+   call xg_init(DivResults, space_res, bandpp, 1, gpu_option=chebfi%gpu_option)
  end if
 
  tolerance = chebfi%tolerance
@@ -618,7 +625,7 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,pcond,eigen,residu,nspinor)
 !  end if
 
  call timab(tim_RR_q, 1, tsec)
- call chebfi_rayleighRitzQuotients(chebfi, maxeig, mineig, DivResults%self) !OK
+ call chebfi_rayleighRitzQuotients(chebfi, maxeig, mineig, DivResults%self)
 
  if (chebfi%paral_kgb == 1) then
    call xmpi_max(maxeig,maxeig_global,chebfi%spacecom,ierr)
@@ -635,32 +642,59 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,pcond,eigen,residu,nspinor)
  call timab(tim_oracle,1,tsec)
  nline_max = cheb_oracle1(mineig_global, lambda_minus, lambda_plus, 1D-16, 40)
 
- !LTEST
- ! TO COMPUTE RESIDU
- !if (chebfi%paw) then
- !  call xgBlock_colwiseCymax(chebfi%xAXColsRows,chebfi%eigenvalues,chebfi%BXColsRows,chebfi%xAXColsRows)
- !else
- !  call xgBlock_colwiseCymax(chebfi%xAXColsRows,chebfi%eigenvalues,chebfi%xXColsRows,chebfi%AX%self)
- !end if
+ !Compute residu here for oracle, use X_next as a work space
 
- !call xgBlock_apply_diag(chebfi%AX%self,pcond,nspinor)
+ ! X_next = S|Psi>
+ call xgBlock_copy(chebfi%xBXColsRows,chebfi%X_next)
+ ! X_next = - eig * S|Psi>
+ call xgBlock_ymax(chebfi%X_next,DivResults%self,0,1,nspinor)
+ ! X_next = H|Psi> - eig * S|Psi>
+ call xgBlock_add(chebfi%X_next,chebfi%xAXColsRows)
+ ! resid = |X_next|^2
+ call xgBlock_colwiseNorm2(chebfi%X_next, residu)
 
- !call xgBlock_colwiseNorm2(chebfi%AX%self, residu)
- !LTEST
+ if (chebfi%nbdbuf==-101) then
+   occ_reshaped = occ
+   call xgBlock_reshape(occ_reshaped,(/ 1, neigenpairs /))
+   call xgBlock_setBlock(occ_reshaped,occBlock,1,bandpp,fcol=1+xmpi_comm_rank(chebfi%spacecom)*bandpp)
+   call xgBlock_reshape(occBlock,(/ bandpp, 1 /))
+   call xgBlock_apply_diag(residu,occBlock,1)
+ end if
 
- !TO GET EIGENVALUES AND RESIDUES HERE
- !call xgBlock_reverseMap(DivResults%self,eig)
- do iband=1, neigenpairs !TODO TODO
-   !nline necessary to converge to tolerance
-   eig_iband = eig(1,iband*2-1)
-   !TO COMPUTE RESIDU
-   !nline_tolwfr = cheb_oracle1(eig_iband, lambda_minus, lambda_plus, tolerance / resid, nline)
-   !nline necessary to decrease residual by a constant factor
-   !nline_decrease = cheb_oracle1(dble(eig(iband*2-1,1)), lambda_minus, lambda_plus, 0.1D, dtset%nline)
-   nline_bands(iband) = MAX(MIN(nline_tolwfr, nline_max, chebfi%nline), 0)
-   !nline_bands(iband) = nline ! fiddle with this to use locking
+ call xgBlock_reverseMap(residu,residu_,rows=1,cols=bandpp)
+ call xgBlock_reverseMap(DivResults%self,eig,rows=1,cols=bandpp)
+ call xgBlock_reverseMap(occBlock,occ_,rows=1,cols=bandpp)
+ do iband=1, bandpp
+   eig_iband = eig(1,iband)
+   res_iband = residu_(1,iband)
+   occ_iband = occ_(1,iband)
+   if (chebfi%nbdbuf>0) then
+     nbdbuf = chebfi%nbdbuf
+   else if (chebfi%nbdbuf==-101) then
+     nbdbuf = 0
+   end if
+   if (res_iband<tolerance.or.(chebfi%nbdbuf==-101.and.occ_iband<tol4)) then
+     nline_bands(iband) = 0
+     write(900,*) 'iband=',iband,'occ=',occ_iband,'eig=',eig_iband,'residu=',res_iband
+   else
+     !nline necessary to converge to tolerance
+     nline_tolwfr = cheb_oracle1(eig_iband, lambda_minus, lambda_plus, tolerance / res_iband, 1000000)
+     !nline necessary to decrease residual by a constant factor
+     nline_decrease = cheb_oracle1(eig_iband, lambda_minus, lambda_plus, 0.01_dp, 1000000)
+     if (iband<=bandpp-chebfi%nbdbuf) then
+       !nline_bands(iband) = MIN(nline_max, nline_tolwfr, chebfi%nline)
+       nline_bands(iband) = MIN(nline_max, nline_tolwfr, nline_decrease)
+       !nline_bands(iband) = MIN(nline_tolwfr, nline_decrease, nline_max, chebfi%nline)
+     else
+       nline_bands(iband) = 0
+     end if
+     write(900,*) 'iband=',iband,'occ=',occ_iband,'eig=',eig_iband,'residu=',res_iband,'|nline_max,nline_tolwfr,nline_decrease:',nline_max,nline_tolwfr,nline_decrease
+   end if
  end do
+ write(900,*) 'nline_bands:',nline_bands
  nline = MAXVAL(nline_bands)
+ call xmpi_max(nline,nline_all,chebfi%comm_cols,ierr)
+ nline=nline_all
  !LTEST
  write(900,*) 'nline = ',nline
  !LTEST
@@ -685,7 +719,7 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,pcond,eigen,residu,nspinor)
    if (chebfi%paral_kgb == 0) then
      call chebfi_swapInnerBuffers(chebfi, spacedim, neigenpairs)
    else
-     call chebfi_swapInnerBuffers(chebfi, chebfi%total_spacedim, chebfi%bandpp)
+     call chebfi_swapInnerBuffers(chebfi, chebfi%total_spacedim, bandpp)
    end if
    ABI_NVTX_END_RANGE()
    call timab(tim_swap,2,tsec)
@@ -837,10 +871,13 @@ subroutine chebfi_rayleighRitzQuotients(chebfi,maxeig,mineig,DivResults)
    call xg_init(Results2, space_res, chebfi%bandpp, 1, gpu_option=chebfi%gpu_option)
  end if
 
+ ! <Psi|H|Psi>
  call xgBlock_colwiseDotProduct(chebfi%xXColsRows, chebfi%xAXColsRows, Results1%self, comm_loc=xmpi_comm_null)
 
+ ! <Psi|S|Psi>
  call xgBlock_colwiseDotProduct(chebfi%xXColsRows, chebfi%xBXColsRows, Results2%self, comm_loc=xmpi_comm_null)
 
+ ! eig = <Psi|H|Psi> / <Psi|S|Psi>
  call xgBlock_colwiseDivision(Results1%self, Results2%self, DivResults, &
    & maxeig, maxeig_pos, mineig, mineig_pos)
 

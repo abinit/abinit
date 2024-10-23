@@ -3240,32 +3240,50 @@ contains
       ABI_ERROR("shift+xgBlockA%cols > da%rows")
     end if
 
-    select case(xgBlockA%space)
-    case (SPACE_R)
-      !$omp parallel do collapse(3) shared(da,xgBlockA) private(irow,iblock,ispinor)
-      do iblock = 1, ncols_nospin
-        do ispinor = 1, nspinor
-          do irow = 1, nrows
-            xgBlockA%vecR(irow,nspinor*(iblock-1)+ispinor) = - da%vecR(iblock+shift,1) &
-             & * xgBlockA%vecR(irow,nspinor*(iblock-1)+ispinor)
+    if (space(da)==SPACE_R) then
+      select case(xgBlockA%space)
+      case (SPACE_R)
+        !$omp parallel do collapse(3) shared(da,xgBlockA) private(irow,iblock,ispinor)
+        do iblock = 1, ncols_nospin
+          do ispinor = 1, nspinor
+            do irow = 1, nrows
+              xgBlockA%vecR(irow,nspinor*(iblock-1)+ispinor) = - da%vecR(iblock+shift,1) &
+               & * xgBlockA%vecR(irow,nspinor*(iblock-1)+ispinor)
+            end do
           end do
         end do
-      end do
-      !$omp end parallel do
-    case (SPACE_CR)
-      ABI_ERROR("Not implemented")
-    case (SPACE_C)
+        !$omp end parallel do
+      case (SPACE_CR)
+        ABI_ERROR("Not implemented")
+      case (SPACE_C)
+        !$omp parallel do collapse(3) shared(da,xgBlockA) private(irow,iblock,ispinor)
+        do iblock = 1, ncols_nospin
+          do ispinor = 1, nspinor
+            do irow = 1, nrows
+              xgBlockA%vecC(irow,nspinor*(iblock-1)+ispinor) = - da%vecR(iblock+shift,1) &
+               & * xgBlockA%vecC(irow,nspinor*(iblock-1)+ispinor)
+            end do
+          end do
+        end do
+        !$omp end parallel do
+      end select
+    else if (space(da)==SPACE_C) then
+      if (xgBlockA%space/=SPACE_C) then
+        ABI_ERROR('If space(da)=SPACE_C, space(xgBlockA) has to be SPACE_C')
+      end if
       !$omp parallel do collapse(3) shared(da,xgBlockA) private(irow,iblock,ispinor)
       do iblock = 1, ncols_nospin
         do ispinor = 1, nspinor
           do irow = 1, nrows
-            xgBlockA%vecC(irow,nspinor*(iblock-1)+ispinor) = - da%vecR(iblock+shift,1) &
+            xgBlockA%vecC(irow,nspinor*(iblock-1)+ispinor) = - da%vecC(iblock+shift,1) &
              & * xgBlockA%vecC(irow,nspinor*(iblock-1)+ispinor)
           end do
         end do
       end do
       !$omp end parallel do
-    end select
+    else
+      ABI_ERROR('Only SPACE_R or SPACE_C (for da) are implemented.')
+    end if
 
     call timab(tim_ymax,2,tsec)
 
