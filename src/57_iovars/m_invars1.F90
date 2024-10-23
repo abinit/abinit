@@ -2379,6 +2379,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%dmftctqmc_triqs_det_precision_error=1.0d-5
    dtsets(idtset)%dmftctqmc_triqs_det_precision_warning=1.0d-8
    dtsets(idtset)%dmftctqmc_triqs_det_singular_threshold=-1.0_dp
+   dtsets(idtset)%dmftctqmc_triqs_entropy=0
    dtsets(idtset)%dmftctqmc_triqs_epsilon=1.0d-10
    dtsets(idtset)%dmftctqmc_triqs_imag_threshold=1.0d-13
    dtsets(idtset)%dmftctqmc_triqs_lambda=1000

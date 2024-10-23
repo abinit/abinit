@@ -738,30 +738,18 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
        end if
        cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
        call chkint_eq(0,1,cond_string,cond_values,ierr,'dmftctqmc_config',dt%dmftctqmc_config,4,(/0,1,2,3/),iout)
-       if (dt%dmft_entropy==1) then
+       if (dt%dmft_entropy>=1) then
          cond_string(1)='dmft_entropy' ; cond_values(1)=dt%dmft_entropy
          call chkint_ge(0,1,cond_string,cond_values,ierr,'dmft_nlambda',dt%dmft_nlambda,3,iout)
          call chkint_le(0,1,cond_string,cond_values,ierr,'dmft_entropy',dt%dmft_entropy,dt%dmft_nlambda,iout)
          call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_dc',dt%dmft_dc,1,(/1/),iout)
-         if (dt%dmft_solv /= 5 ) then
+         if (dt%dmft_solv /= 5) then
            write(msg,'(3a,i3,a,i3,a,i3,a,i3,a)' )&
            'When dmft_entropy>=1, the impurity solver has to be currently  dmft_solv=5:',ch10, &
            'Action: change your dmft_solv input'
            ABI_ERROR(msg)
          end if
        end if
-       if (dt%dmft_entropy==2) then
-         cond_string(1)='dmft_entropy' ; cond_values(1)=dt%dmft_entropy
-         call chkint_ge(0,1,cond_string,cond_values,ierr,'dmft_nlambda',dt%dmft_nlambda,1,iout)
-       end if 
-       if (dt%dmft_entropy==2.and.dt%dmft_solv/=6.and.dt%dmft_solv/=7) then
-         write(msg,'(a)') 'dmft_entropy=2 is only implemented for dmft_solv=6 or 7'
-         ABI_ERROR(msg)
-       end if 
-       if (dt%dmft_integral==1.and.dt%dmftctqmc_triqs_measure_density_matrix==0) then
-         write(msg,'(a)') 'You need to activate the measurement of the density matrix when dmft_integral=1'
-         ABI_ERROR(msg)
-       end if 
      end if
    end if
 
@@ -777,6 +765,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    if(dt%dmft_solv==6.or.dt%dmft_solv==7) then
      call chkint_ge(0,1,cond_string,cond_values,ierr,'dmftctqmc_triqs_det_init_size',dt%dmftctqmc_triqs_det_init_size,1,iout)
      call chkint_ge(0,1,cond_string,cond_values,ierr,'dmftctqmc_triqs_det_n_operations_before_check',dt%dmftctqmc_triqs_det_n_operations_before_check,1,iout)  
+     call chkint_eq(0,1,cond_string,cond_values,ierr,'dmftctqmc_triqs_entropy',dt%dmftctqmc_triqs_entropy,2,(/0,1/),iout)
      call chkint_eq(0,1,cond_string,cond_values,ierr,'dmftctqmc_triqs_leg_measure',dt%dmftctqmc_triqs_leg_measure,2,(/0,1/),iout)
      call chkint_ge(0,1,cond_string,cond_values,ierr,'dmftctqmc_triqs_loc_n_min',dt%dmftctqmc_triqs_loc_n_min,0,iout)
      call chkint_ge(0,1,cond_string,cond_values,ierr,'dmftctqmc_triqs_loc_n_max',dt%dmftctqmc_triqs_loc_n_max,dt%dmftctqmc_triqs_loc_n_min,iout)
@@ -795,6 +784,11 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      call chkdpr(0,1,cond_string,cond_values,ierr,'dmftctqmc_triqs_imag_threshold',dt%dmftctqmc_triqs_imag_threshold,1,zero,iout)
      call chkdpr(0,1,cond_string,cond_values,ierr,'dmftctqmc_triqs_lambda',dt%dmftctqmc_triqs_lambda,1,zero,iout)
      call chkdpr(0,1,cond_string,cond_values,ierr,'dmftctqmc_triqs_move_global_prob',dt%dmftctqmc_triqs_move_global_prob,1,zero,iout)
+     if (dt%dmft_integral==1.and.dt%dmftctqmc_triqs_measure_density_matrix==0) then
+       write(msg,'(a)') 'You need to activate the measurement of the density matrix when dmft_integral=1'
+       ABI_ERROR(msg)
+     end if
+     call chkint_ge(0,1,cond_string,cond_values,ierr,'dmft_nlambda',dt%dmft_nlambda,1,iout)
    end if 
 
 !  dosdeltae

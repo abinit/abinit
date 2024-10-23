@@ -135,13 +135,11 @@ subroutine alloc_self(self,paw_dmft,opt_oper,wtype,opt_moments)
  use m_oper, only : init_oper
 
 !Arguments ------------------------------------
-!scalars
-!type
  type(self_type), intent(inout) :: self
  type(paw_dmft_type), target, intent(in) :: paw_dmft
  integer, optional, intent(in) :: opt_moments,opt_oper
  character(len=4), optional :: wtype
-!local variables ------------------------------------
+!Local variables ------------------------------------
  integer :: i,ifreq,mkmem,optmoments,optoper,shift
 !************************************************************************
 
@@ -221,15 +219,12 @@ end subroutine alloc_self
 subroutine initialize_self(self,paw_dmft,wtype,opt_moments)
 
 !Arguments ------------------------------------
-!scalars
-!type
  type(self_type), intent(inout) :: self
  type(paw_dmft_type), intent(in) :: paw_dmft
  character(len=4), optional, intent(in) :: wtype
  integer, optional, intent(in) :: opt_moments
-!local variables ------------------------------------
+!Local variables ------------------------------------
 ! character(len=500) :: message
- !integer :: iatom,ifreq
  integer :: optmoments
  character(len=4) :: wtype2
 !************************************************************************
@@ -240,11 +235,6 @@ subroutine initialize_self(self,paw_dmft,wtype,opt_moments)
  if (present(opt_moments)) optmoments = opt_moments
 
  call alloc_self(self,paw_dmft,opt_oper=2,wtype=wtype2,opt_moments=optmoments) !  opt_oper=1 is not useful and not implemented
- !do ifreq=1,self%nw
- !  do iatom=1,paw_dmft%natom
- !    self%oper(ifreq)%matlu(iatom)%mat=czero
- !  end do
- !end do
 ! if(paw_dmft%dmft_rslf==1.and.opt_read==1) then
 !   call rw_self(cryst_struc,self,mpi_enreg,paw_dmft,pawtab,pawprtvol=2,opt_rw=1)
 ! endif
@@ -275,9 +265,8 @@ subroutine destroy_self(self)
  use m_oper, only : destroy_oper
 
 !Arguments ------------------------------------
-!scalars
  type(self_type), intent(inout) :: self
-!local variables-------------------------------
+!Local variables-------------------------------
  integer :: i,ifreq
 ! *********************************************************************
 
@@ -328,12 +317,11 @@ subroutine print_self(self,prtdc,paw_dmft,prtopt)
  use m_oper, only : print_oper
 
 !Arguments ------------------------------------
-!type
  type(paw_dmft_type), intent(in) :: paw_dmft
  type(self_type), intent(in)  :: self
  character(len=*), intent(in) :: prtdc
  integer, intent(in) :: prtopt
-!local variables-------------------------------
+!Local variables-------------------------------
  character(len=500) :: message
 ! *********************************************************************
 
@@ -349,7 +337,7 @@ subroutine print_self(self,prtdc,paw_dmft,prtopt)
  if (prtdc == "print_dc") then
    write(message,'(2a)') ch10,"  == The double counting hamiltonian is  == "
    call wrtout(std_out,message,'COLL')
-   call print_matlu(self%hdc%matlu(:),paw_dmft%natom,prtopt) !,opt_diag=1)
+   call print_matlu(self%hdc%matlu(:),paw_dmft%natom,prtopt) 
  end if ! prtdc
 
 end subroutine print_self
@@ -363,11 +351,11 @@ end subroutine print_self
 !!  Computes the double counting
 !!
 !! INPUTS
+!!  charge_loc : local charge for each polarization and each atom
+!!  hu <type(hu_type)>= U interaction
 !!  paw_dmft <type(paw_dmft_type)> =  variables related to self-consistent DFT+DMFT calculations.
 !!  pawtab <type(pawtab_type)>=paw tabulated starting data
-!!  charge_loc : local charge for each polarization and each atom
 !!  occ_matlu : local occupation matrix
-!!  hu <type(hu_type)>= U interaction
 !!
 !! OUTPUT
 !!  hdc : double counting
@@ -455,7 +443,8 @@ subroutine dc_self(charge_loc,hdc,hu,paw_dmft,pawtab,occ_matlu)
    else
      if (nmdc) then ! Non-magnetic DC
        if (fll) dc = upawu*(ntot-half) - half*jpawu*(ntot-one)
-       if (amf) dc = upawu*ntot*half + (upawu-jpawu)*ntot*half*dble(2*lpawu)/dble(2*lpawu+1)
+       !if (amf) dc = upawu*ntot*half + (upawu-jpawu)*ntot*half*dble(2*lpawu)/dble(2*lpawu+1) ! TO REMOVE
+       if (amf) dc = upawu*ntot*half + (upawu-jpawu)*ntot*half*float(2*lpawu)/float(2*lpawu+1)
        if (dmft_dc == 7) dc = upawu*(dble(paw_dmft%dmft_nominal(iatom))-half) - &
          & half*jpawu*(dble(paw_dmft%dmft_nominal(iatom))-one)
      end if ! nmdc
@@ -464,7 +453,8 @@ subroutine dc_self(charge_loc,hdc,hu,paw_dmft,pawtab,occ_matlu)
        if (.not. nmdc) then ! Magnetic DC
          if (fll) dc = upawu*(ntot-half) - jpawu*(charge_loc(isppol,iatom)-half)
          if (amf) dc = upawu*charge_loc(min(3-isppol,nsppol),iatom) + &
-              & (upawu-jpawu)*charge_loc(isppol,iatom)*dble(2*lpawu)/dble(2*lpawu+1)
+            !  & (upawu-jpawu)*charge_loc(isppol,iatom)*dble(2*lpawu)/dble(2*lpawu+1) ! TO REMOVE
+               & (upawu-jpawu)*charge_loc(isppol,iatom)*float(2*lpawu)/float(2*lpawu+1)
        end if ! not nmdc
        do im=1,ndim
          hdc(iatom)%mat(im,im,isppol) = dc
@@ -501,18 +491,13 @@ end subroutine dc_self
 !!  opt_hdc = double counting (useful when reading from Maxent)
 !!  opt_stop = stop when encountering errors
 !!  opt_maxent = if > 0, read/write Maxent files
-!!  loc_levels = downfold of the KS eigenvalues
-!!  pawtab(ntypat*usepaw) <type(pawtab_type)>=paw tabulated starting data
-!!  green_charge : local charge for each polarization and each atom
-!!  green_occup : local occupation matrix
-!!  hu <type(hu_type)>= U interaction
 !!
 !! OUTPUT
 !!
 !! SOURCE
 
 subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,&
-  & opt_selflimit,opt_hdc,opt_stop,opt_maxent,loc_levels,pawtab,green_charge,green_occup,hu)
+                 & opt_selflimit,opt_hdc,opt_stop,opt_maxent)
 
  use m_datafordmft, only : compute_levels
  use m_fstrings, only : int2char4
@@ -530,12 +515,7 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
  integer, optional, intent(in) :: istep_iter,opt_imagonly,opt_maxent,opt_rw,opt_stop
  character(len=4), optional, intent(in) :: opt_char
  type(matlu_type), optional, intent(inout) :: opt_selflimit(paw_dmft%natom)
- type(matlu_type), optional, intent(in) :: green_occup(paw_dmft%natom),opt_hdc(paw_dmft%natom)
- type(oper_type), optional, intent(in) :: loc_levels
- type(pawtab_type), optional, intent(inout) :: pawtab(:)
- real(dp), optional, intent(in) :: green_charge(paw_dmft%nsppol+1,paw_dmft%natom)
- type(hu_type), optional, intent(in) :: hu(:)
- !type(crystal_t),optional,intent(in) :: cryst_struc
+ type(matlu_type), optional, intent(in) :: opt_hdc(paw_dmft%natom)
 !local variables-------------------------------
  integer :: i,iall,iatom,iatu,icount,ier,iexist2,iexit,iflavor,ifreq,im,im1,ioerr,ispinor
  integer :: ispinor1,isppol,istep,istep_imp,istepiter,iter,iter_imp,lpawu,master,myproc
@@ -622,16 +602,7 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
    call wrtout(std_out,message,'COLL')
 
    ABI_MALLOC(eigvectmatlu,(natom))
-   !do iatom=1,natom
-   !  if(paw_dmft%lpawu(iatom)/=-1) then
-   !    tndim=nspinor*(2*paw_dmft%lpawu(iatom)+1)
-   !    do isppol=1,nsppol
-   !      ABI_MALLOC(eigvectmatlu(iatom,isppol)%value,(tndim,tndim))
-   !    end do
-   !  end if
-   !end do
    call init_matlu(natom,nspinor,nsppol,paw_dmft%lpawu(:),eigvectmatlu(:))
-   !call init_matlu(natom,nspinor,nsppol,paw_dmft%lpawu(:),selfrotmatlu(:))   
  end if ! optmaxent > 0
 !   - For the Tentative rotation of the self-energy file (end init)
 
@@ -803,9 +774,9 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
 
 !           write(std_out,*) "1"
 
-!       ===========================
-!       == Read: check that the file exists
-!       ===========================
+!      ===========================
+!      == Read: check that the file exists
+!      ===========================
        if (optrw == 1) then
 !           write(std_out,*) "3"
          inquire(file=trim(tmpfil),exist=lexist,recl=nrecl)
@@ -855,7 +826,8 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
 !      == Check Header
 !      ===========================
        if (optrw == 2) then
-         write(message,'(3a,5i5,2x,es24.16e3)') "# natom,nsppol,nspinor,ndim,nw,fermilevel",ch10,&
+        ! write(message,'(3a,5i5,2x,es24.16e3)') "# natom,nsppol,nspinor,ndim,nw,fermilevel",ch10,& ! TO REMOVE
+         write(message,'(3a,5i5,2x,e25.17)') "# natom,nsppol,nspinor,ndim,nw,fermilevel",ch10,&
            & "####",natom,nsppol,nspinor,ndim,self%nw,paw_dmft%fermie
          call wrtout(unitselffunc_arr(iall),message,'COLL')
          call wrtout(unitselffunc_arr2(iall),message,'COLL')
@@ -922,44 +894,24 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
                !Is it possible to rewrite the code below to avoid such a long message
                !What about Netcdf binary files ?
              !if (nspinor == 1) then
-           write(message,'(2x,393(es24.16e3,2x))') self%omega(ifreq),&
+           !write(message,'(2x,393(es24.16e3,2x))') self%omega(ifreq),& ! TO REMOVE
+           if (nspinor == 1) then
+           write(message,'(2x,393(e25.17,2x))') self%omega(ifreq),&
             & ((((dble(self%oper(ifreq)%matlu(iatom)%mat(im+(ispinor-1)*ndim,im1+(ispinor1-1)*ndim,isppol)),&
             & aimag(self%oper(ifreq)%matlu(iatom)%mat(im+(ispinor-1)*ndim,im1+(ispinor1-1)*ndim,isppol)),&
             & im=1,ndim),im1=1,ndim),ispinor=1,nspinor),ispinor1=1,nspinor)
-           !else
-           !  write(message,'(2x,393(es18.10,2x))') self%omega(ifreq),&
-!&          !      ((((dble(self%oper(ifreq)%matlu(iatom)%mat(im,im1,isppol,ispinor,ispinor1)),&
-!&          !      aimag(self%oper(ifreq)%matlu(iatom)%mat(im,im1,isppol,ispinor,ispinor1)),&
-!&          !      im=1,ndim),im1=1,ndim),ispinor=1,nspinor),ispinor1=1,nspinor)
-           !end if ! nspinor
+           else
+             write(message,'(2x,393(e18.10,2x))') self%omega(ifreq),&
+       &  ((((dble(self%oper(ifreq)%matlu(iatom)%mat(im+(ispinor-1)*ndim,im1+(ispinor1-1)*ndim,isppol)),&
+       &  aimag(self%oper(ifreq)%matlu(iatom)%mat(im+(ispinor-1)*ndim,im1+(ispinor1-1)*ndim,isppol)),&
+            &  im=1,ndim),im1=1,ndim),ispinor=1,nspinor),ispinor1=1,nspinor)
+           end if ! nspinor
            call wrtout(unitselffunc_arr(iall),message,'COLL')
            call wrtout(unitselffunc_arr2(iall),message,'COLL')
 
            !- For the Tentative rotation of the self-energy file (begin rot)
            !----------------------------------------------------------------
            if (optmaxent > 0) then
-             !call copy_matlu(self%oper(ifreq)%matlu(:),selfrotmatlu(:),natom)
-             !if (ifreq < 3) then
-             !  write(message,'(a,2x,a,i4)') ch10,&
-!&            !        " == Print non Rotated Self Energy for freq=",ifreq
-             !  call wrtout(std_out,message,'COLL')
-             !  call print_matlu(self%oper(ifreq)%matlu(:),natom,1,compl=1)
-             !end if ! ifreq<3
-             !call rotate_matlu(selfrotmatlu(:),eigvectmatlu(:),natom,1)
-             !if (ifreq < 3) then
-             !  write(message,'(a,2x,a,i4)') ch10,&
-!&            !        " == Print Rotated Self Energy for freq=",ifreq
-             !  call wrtout(std_out,message,'COLL')
-             !  call print_matlu(selfrotmatlu(ifreq)%matlu(:),natom,1,compl=1)
-             !else if (ifreq == 3) then
-             !  write(message,'(a,2x,a,i4)') ch10,&
-!&            !        "  (Other frequencies not printed)"
-             !  call wrtout(std_out,message,'COLL')
-             !end if ! ifreq<3
-                 !write(message,'(2x,393(e18.10,2x))')  self%omega(ifreq),&
-                !  ((real(selfrotmatlu(iatom)%mat(im,im,isppol,ispinor,ispinor)),&
-                !  aimag(selfrotmatlu(iatom)%mat(im,im,isppol,ispinor,ispinor)),&
-                !  im=1,ndim),ispinor=1,nspinor)
              !iflavor = 0
              do ispinor=1,nspinor
                do im=1,ndim
@@ -1000,21 +952,7 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
 !                write(std_out,*)" SELF IOERR>"
 !                write(std_out,'(a4,2x,31(e15.8,2x))') xtemp,(s_r(im),s_i(im),im=1,ndim)
 !               endif
-             !do ispinor1=1,nspinor
-             !  do im1=1,ndim
-             !    do ispinor=1,nspinor
-             !      do im=1,ndim
-                    ! self%oper(ifreq)%matlu(iatom)%mat(im+(ispinor-1)*ndim,im1+(ispinor1-1)*ndim,isppol) &
-!&                   !      = cmplx(s_r(im,im1,ispinor,ispinor1),s_i(im,im1,ispinor,ispinor1),kind=dp)
-                 !if((im1==im1).and.(ispinor==ispinor1)) then
-                 !  write(6,*) "Self read",ifreq, self%oper(ifreq)%matlu(iatom)%mat(im,im1,isppol,ispinor,ispinor1)
-                 !endif
-             !      end do ! im
-             !    end do ! ispinor
-             !  end do ! im1
-             !end do ! ispinor1
            self%oper(ifreq)%matlu(iatom)%mat(:,:,isppol) = cmplx(s_r(:,:),s_i(:,:),kind=dp)
-           !end if ! readimagonly=0
          end if ! optrw
        end do ! ifreq
 
@@ -1031,13 +969,10 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
        !- For the Tentative rotation of the self-energy file (end close file)
 
        if (optrw == 1 .and. iexist2 == 1 .and. ioerr == 0 .and. readimagonly == 1) then
-         !if (readimagonly == 1) then ! read from OmegaMaxent
-           !s_r(:,:,:,:) = zero
 
          ! Read self energy from Maxent (imag part) on the real axis
          !----------------------------------------------------------
          do ifreq=1,self%nw
-           !  call zero_matlu(self%oper(ifreq)%matlu(:),natom)
            self%oper(ifreq)%matlu(iatom)%mat(:,:,:) = czero
          end do ! ifreq
          do ispinor=1,nspinor
@@ -1051,36 +986,10 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
            end do ! im
          end do ! ispinor
 
-         ! Kramers Kronig
-         !-------------------
          write(message,'(4x,2a)') " Read only diagonal self energy from Maxent"
          call wrtout(std_out,message,'COLL')
                !write(6,*) "opt_hdc",opt_hdc(1)%mat(1,1,1,1,1)
-         !call kramerskronig_self(self,opt_selflimit(:),opt_hdc(:),paw_dmft,paw_dmft%filapp)
 
-         ! Rotate back rotate_matlu
-         !-----------------------------
-         !if (present(pawang)) then 
-         !  write(message,'(4x,2a)') " Rotate Back self in the original basis"
-         !  call wrtout(std_out,message,'COLL')
-         !  do ifreq=1,self%nw
-         !    if (ifreq < 20) then
-         !      write(message,'(a,2x,a,i4)') ch10,&
-!&        !              " == Print Rotated real axis Self Energy for freq=",ifreq
-         !      call wrtout(std_out,message,'COLL')
-         !      call print_matlu(self%oper(ifreq)%matlu(:),natom,1,compl=1)
-         !    end if ! ifreq<20
-         !    call rotate_matlu(self%oper(ifreq)%matlu(:),eigvectmatlu(:),natom,-1)
-         !    if (ifreq < 20) then
-         !      write(message,'(a,2x,a,i4)') ch10,&
-!&        !              " == Print Rotated back real axis Self Energy for freq=",ifreq
-         !      call wrtout(std_out,message,'COLL')
-         !      call print_matlu(self%oper(ifreq)%matlu(:),natom,1,compl=1)
-         !    end if ! ifreq<20
-         !  end do ! ifreq
-         !end if ! present(pawang)
-
-         !end if ! readimagonly=1
        end if ! optrw=1
 
 !      ===========================
@@ -1089,7 +998,8 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
        if (optrw == 2) then
 !             write(std_out,'(a,2x,31(e15.8,2x))') &
 !&            "SETEST #dc ",(self%hdc%matlu(iatom)%mat(im,im,isppol,ispinor,ispinor),im=1,ndim)
-         write(message,'(a,2x,500(es24.16e3,2x))') &
+         !write(message,'(a,2x,500(es24.16e3,2x))') & ! TO REMOVE
+         write(message,'(a,2x,500(e25.17,2x))') &
           & "#dc ",((((self%hdc%matlu(iatom)%mat(im+(ispinor-1)*ndim,im1+(ispinor1-1)*ndim,isppol),&
             & im=1,ndim),im1=1,ndim),ispinor=1,nspinor),ispinor1=1,nspinor)
          call wrtout(unitselffunc_arr(iall),message,'COLL')
@@ -1114,13 +1024,6 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
 !              write(std_out,*)" HDC IOERR>",ioerr
              !endif
          self%hdc%matlu(iatom)%mat(:,:,isppol) = cmplx(s_r(:,:),s_i(:,:),kind=dp)
-         !self%hdc%matlu(iatom)%mat(:,:,isppol) = czero
-         !do ispinor=1,nspinor
-         !  do im=1,ndim
-         !    self%hdc%matlu(iatom)%mat(im+(ispinor-1)*ndim,im+(ispinor-1)*ndim,isppol) &
-         !      & = cmplx(s_r(im+(ispinor-1)*ndim,1),s_i(im+(ispinor-1)*ndim,1),kind=dp)
-         !  end do ! im
-         !end do ! ispinor
          
          if (self%has_moments == 1) then
            do i=1,self%nmoments
@@ -1132,11 +1035,6 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
              !write(6,*) "read selfhdc",self%hdc%matlu(1)%mat(1,1,1,1,1)
        else if (readimagonly == 1 .and. (.not. present(opt_hdc))) then
          self%hdc%matlu(iatom)%mat(:,:,isppol) = czero
-         !do ispinor=1,nspinor
-         !  do im=1,ndim
-         !    self%hdc%matlu(iatom)%mat(im+(ispinor-1)*ndim,im+(ispinor-1)*ndim,isppol) = czero
-         !  end do ! im
-         !end do ! ispinor
        else
          write(std_out,*) "     self%hdc fixed in kramerskronig_self"
        end if ! optrw
@@ -1157,7 +1055,6 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
 !  ===========================
  if (optrw == 1) then
 !   call xmpi_barrier(spacecomm)
-   !ncount = natom * nsppol * (nspinor**2) * (self%nw+1) *(maxval(paw_dmft%lpawu(:))*2+1)**2
    !write(std_out,*) ncount,maxval(pawtab(:)%lpawu)*2+1
    call xmpi_bcast(iexist2,master,spacecomm,ier)
    call xmpi_bcast(ioerr,master,spacecomm,ier)
@@ -1190,7 +1087,7 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
      !  ABI_ERROR(message)
      !end if
      call wrtout(std_out,message,'COLL')
-     call dc_self(green_charge(:,:),self%hdc%matlu(:),hu(:),paw_dmft,pawtab(:),green_occup(:))
+     !call dc_self(green_charge(:,:),self%hdc%matlu(:),hu(:),paw_dmft,pawtab(:),green_occup(:))
      do ifreq=1,self%nw
 !       write(std_out,*) "before",self%oper(1)%matlu(1)%mat(1,1,1,1,1)
 !       write(std_out,*) "before",self%hdc%matlu(1)%mat(1,1,1,1,1)
@@ -1445,7 +1342,7 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
    if (paw_dmft%dmft_rslf == 0) then
      !if (paw_dmft%dmft_solv /= 4) then
      write(message,'(4x,a,a,5i5,2x,e14.7)') "-> Put Self-Energy Equal to double counting term"
-     call dc_self(green_charge(:,:),self%hdc%matlu(:),hu(:),paw_dmft,pawtab(:),green_occup(:))
+     !call dc_self(green_charge(:,:),self%hdc%matlu(:),hu(:),paw_dmft,pawtab(:),green_occup(:))
      !else if (paw_dmft%dmft_solv == 4) then
      !  write(message,'(4x,a,a,5i5,2x,e14.7)') "-> Put Self-Energy Equal to dc term - shift"
      !end if ! dmft_solv=4

@@ -203,7 +203,7 @@ subroutine rot_cg(occ_nd,cwavef,npw,nband,blocksize,nspinor,first_bandc,nbandc,o
 
 !! Compute the corresponding wave functions if nothing wrong happened
   ! $c^{rot}_{n,k}(g) =  \sum_{n'} [\bar{f_{n',n}} * c_{n',k}(g)]$
-  occ_nd_cpx(:,:) = conjg(occ_nd_cpx(:,:))
+  !occ_nd_cpx(:,:) = conjg(occ_nd_cpx(:,:))  !! TO REMOVE
   
   do ispinor=1,nspinor
     mat_tmp(:,:) = cmplx(cwavef(1,1:npw,first_bandc:first_bandc+nbandc-1,ispinor), &
@@ -222,6 +222,7 @@ subroutine rot_cg(occ_nd,cwavef,npw,nband,blocksize,nspinor,first_bandc,nbandc,o
   DBG_EXIT("COLL")
     
  end subroutine rot_cg
+!!***
 
 end module m_rot_cg
 !!***

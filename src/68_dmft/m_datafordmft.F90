@@ -504,7 +504,10 @@ subroutine datafordmft(cg,cprj,cryst_struc,dft_occup,dimcprj,dtset,eigen,mband_c
 !==========================================================================
 
  call xmpi_barrier(comm_kpt)
- if (paral_kgb == 1 .and. nproc_band > 1) call xmpi_sum(buf_chipsi(:),comm_band,ierr) ! Build sum over band processors
+ if (paral_kgb == 1 .and. nproc_band > 1) then
+   ! Build sum over band processors
+   call xmpi_sum(buf_chipsi(:),comm_band,ierr) 
+ end if 
  call xmpi_allgatherv(buf_chipsi(:),siz_buf,buf_chipsi_tot(:),recvcounts(:),displs(:),comm_kpt,ierr)
  
  ABI_FREE(displs)
@@ -673,10 +676,11 @@ subroutine datafordmft(cg,cprj,cryst_struc,dft_occup,dimcprj,dtset,eigen,mband_c
      opt_renorm = 3
      if (dtset%ucrpa >= 1 .or. paw_dmft%dmft_kspectralfunc == 1) opt_renorm = 2
      call chipsi_renormalization(paw_dmft,opt=opt_renorm)
-     if (paw_dmft%myproc == 0) call chipsi_print(paw_dmft,pawtab(:))
+     if (paw_dmft%myproc == 0) then
+       call chipsi_print(paw_dmft,pawtab(:))
+     end if 
    end if ! proc=me
  end if
-!!***
 
  CONTAINS
 
@@ -736,6 +740,7 @@ subroutine chipsi_check(paw_dmft,xocc_check,xnorm_check)
  
  end subroutine chipsi_check
 !DBG_EXIT("COLL")
+!!***
 end subroutine datafordmft
 !!***
 
@@ -895,7 +900,9 @@ subroutine chipsi_print(paw_dmft,pawtab)
  end do ! iatom
 
  call sym_matlu(energy_level%matlu(:),paw_dmft)
- if (present(nondiag)) call checkdiag_matlu(energy_level%matlu(:),natom,tol7,nondiag)
+ if (present(nondiag)) then
+   call checkdiag_matlu(energy_level%matlu(:),natom,tol7,nondiag)
+ end if 
 
  write(message,'(a,2x,a,f13.5)') ch10," == Print Energy levels for Fermi Level=",paw_dmft%fermie
  call wrtout(std_out,message,'COLL')
@@ -914,8 +921,10 @@ subroutine chipsi_print(paw_dmft,pawtab)
 !!
 !! INPUTS
 !!  paw_dmft =  data for DFT+DMFT calculations.
-!!  opt = 2 : orthonormalize for all atoms and each kpt
-!!      = 3 (default) : orthonormalize for all kpt and each atom 
+!!  opt = 2 : orthonormalize all the atoms at the same time,
+!!            and for each individual kpt
+!!      = 3 (default) : orthonormalize the sum over all kpt,
+!!          and for each individual atom
 !!
 !! OUTPUT
 !!  paw_dmft%chipsi((2*maxlpawu+1)*nspinor,mbandc,nkpt,nsppol,natom): 
@@ -1111,6 +1120,7 @@ subroutine normalizechipsi(nkpt,paw_dmft,jkpt)
  character(len=500) :: message
 ! real(dp),allocatable :: e0pde(:,:,:),omegame0i(:)
 !************************************************************************
+
  mbandc    = paw_dmft%mbandc
  natom     = paw_dmft%natom
  nspinor   = paw_dmft%nspinor
@@ -1136,7 +1146,9 @@ subroutine normalizechipsi(nkpt,paw_dmft,jkpt)
 
    call downfold_oper(norm1,paw_dmft,procb=paw_dmft%distrib%procb(:),iproc=paw_dmft%distrib%me_kpt,option=2)
    call xmpi_matlu(norm1%matlu(:),natom,paw_dmft%distrib%comm_kpt)
-   if (nkpt > 1) call sym_matlu(norm1%matlu(:),paw_dmft)
+   if (nkpt > 1) then
+     call sym_matlu(norm1%matlu(:),paw_dmft)
+   end if 
 
    if (pawprtvol > 2) then
      write(message,'(2a)') ch10,'  - Print norm with current chipsi '
@@ -1149,7 +1161,8 @@ subroutine normalizechipsi(nkpt,paw_dmft,jkpt)
    call wrtout(std_out,message,'COLL')
 
 !  ==-------------------------------------
-!  == Start loop on atoms
+!  == Start loop over atoms
+
    do iatom=1,natom
      lpawu = paw_dmft%lpawu(iatom)
      if (lpawu == -1) cycle
@@ -1194,17 +1207,20 @@ subroutine normalizechipsi(nkpt,paw_dmft,jkpt)
      ABI_FREE(mat_tmp)
 
    end do ! iatom
-!  == End loop on atoms
+
+!  == End loop over atoms
 !  ==-------------------------------------
 
 !  ======================================================================
-!  == Check norm with new psichi.
+!  == Check norm with new chipsi.
 !  ======================================================================
 
    call downfold_oper(norm1,paw_dmft,procb=paw_dmft%distrib%procb(:),iproc=paw_dmft%distrib%me_kpt,option=2)
    call xmpi_matlu(norm1%matlu(:),natom,paw_dmft%distrib%comm_kpt)
 
-   if (nkpt > 1) call sym_matlu(norm1%matlu(:),paw_dmft)
+   if (nkpt > 1) then
+     call sym_matlu(norm1%matlu(:),paw_dmft)
+   end if 
 
    if (pawprtvol > 2) then
      write(message,'(2a)') ch10,'  - Print norm with new chipsi '
@@ -1248,52 +1264,36 @@ subroutine normalizechipsi(nkpt,paw_dmft,jkpt)
 
    ABI_MALLOC(largeoverlap,(dimoverlap,dimoverlap))
    ABI_MALLOC(chipsivect,(dimoverlap,mbandc))
-     !ABI_MALLOC(sqrtmatinv,(dimoverlap,dimoverlap))
-     !ABI_MALLOC(wanall,(dimoverlap))
    ABI_MALLOC(mat_tmp,(dimoverlap,mbandc))
 
-!    Big loop over isppol
+!  Big loop over isppol
    do isppol=1,nsppol
      do ib=1,mbandc
        itot = 0
        do iatom=1,natom
          lpawu = paw_dmft%lpawu(iatom)
          if (lpawu == -1) cycle
-           !if(paw_dmft%lpawu(iatom).ne.-1) then
          ndim = nspinor * (2*lpawu+1)
          do im=1,ndim
-               !do ispinor=1,nspinor
            itot = itot + 1
-                 !if(itot>dimoverlap) write(std_out,*) "itot>ndim",itot,ndim
-                ! write(6,*) "ib,iatom,im,ispinor",ib,iatom,im,ispinor,jkpt
+           !if(itot>dimoverlap) write(std_out,*) "itot>ndim",itot,ndim
+           ! write(6,*) "ib,iatom,im,ispinor",ib,iatom,im,ispinor,jkpt
            chipsivect(itot,ib) = paw_dmft%chipsi(im,ib,jkpt,isppol,iatom)
-               !enddo ! ispinor
          end do ! im
-           !endif
        end do ! iatom
      end do ! ib
 
 
-!     calculation of overlap
+!    Calculation of overlap
      call abi_xgemm("n","c",dimoverlap,dimoverlap,mbandc,cone,chipsivect(:,:),dimoverlap,&
                   & chipsivect(:,:),dimoverlap,czero,largeoverlap(:,:),dimoverlap)
-     !largeoverlap(:,:) = czero
-     !  do ib=1,mbandc
-     !    do itot=1,dimoverlap
-     !      do itot1=1,dimoverlap
-     !         largeoverlap(itot,itot1)=largeoverlap(itot,itot1)+ &
-!&              psichivect(ib,itot)*conjg(psichivect(ib,itot1))
- !          enddo ! itot1
- !        enddo ! itot
- !      enddo ! ib
 
-!     Math: orthogonalisation of overlap
+!    Math: orthogonalization of overlap
      write(std_out,*) "jkpt=",jkpt
      do itot=1,dimoverlap
        write(std_out,'(100f7.3)') (largeoverlap(itot,itot1),itot1=1,dimoverlap)
      end do
      call invsqrt_matrix(largeoverlap(:,:),dimoverlap,dum)
-       !sqrtmatinv=largeoverlap
      write(std_out,*) "jkpt=",jkpt
      do itot=1,dimoverlap
        write(std_out,'(100f7.3)') (largeoverlap(itot,itot1),itot1=1,dimoverlap)
@@ -1305,96 +1305,53 @@ subroutine normalizechipsi(nkpt,paw_dmft,jkpt)
      
      call abi_xgemm("n","n",dimoverlap,mbandc,dimoverlap,cone,largeoverlap(:,:),dimoverlap,&
                   & chipsivect(:,:),dimoverlap,czero,mat_tmp(:,:),dimoverlap)
-     
-      ! do ib=1,mbandc
-      !   wanall=czero
-      !   do itot=1,dimoverlap
-      !     do itot1=1,dimoverlap
-      !        wanall(itot)= wanall(itot)+psichivect(ib,itot1)*sqrtmatinv(itot,itot1)
-       !    enddo ! itot1
-     !      write(std_out,'(3i3,2x,i3,2x,2e15.5,2x,2e15.5)') jkpt,isppol,ib,itot,psichivect(ib,itot),wanall(itot)
-       !  enddo ! itot
-       !  iatomcor=0
-       !  do itot=1,dimoverlap
-        !   psichivect(ib,itot)=wanall(itot)
-       !  enddo
-        ! do iatom=1,natom
-        !   if(paw_dmft%lpawu(iatom).ne.-1) then
-        !     ndim=2*paw_dmft%lpawu(iatom)+1
-        !     iatomcor=iatomcor+1
-        !     do im=1,ndim
-        !       do ispinor=1,nspinor
-        !         paw_dmft%psichi(isppol,jkpt,ib,ispinor,iatom,im)=wanall(iatomcor,isppol,ispinor,im)
-        !       end do ! ispinor
-        !     end do ! im
-        !   endif
-        ! enddo ! iatom
-       !enddo ! ib
-        
+    
+!    Calculation of overlap (check) 
      call abi_xgemm("n","c",dimoverlap,dimoverlap,mbandc,cone,mat_tmp(:,:),dimoverlap,&
                   & mat_tmp(:,:),dimoverlap,czero,largeoverlap(:,:),dimoverlap)
-!     calculation of overlap (check)
-      ! largeoverlap=czero
-      ! do ib=1,mbandc
-      !   do itot=1,dimoverlap
-      !     do itot1=1,dimoverlap
-      !        largeoverlap(itot,itot1)=largeoverlap(itot,itot1)+ &
-!&              psichivect(ib,itot)*conjg(psichivect(ib,itot1))
-      !     enddo ! itot1
-      !   enddo ! itot
-      ! enddo ! ib
 
-     write(std_out,*)"jkpt=",jkpt
+     write(std_out,*) "jkpt=",jkpt
      do itot=1,dimoverlap
        write(std_out,'(100f7.3)') (largeoverlap(itot,itot1),itot1=1,dimoverlap)
      end do
 
-!      psichivect -> psichi
+!    chipsivect -> chipsi
      do ib=1,mbandc
        itot = 0
        do iatom=1,natom
          lpawu = paw_dmft%lpawu(iatom)
          if (lpawu == -1) cycle
-           !if(paw_dmft%lpawu(iatom).ne.-1) then
          ndim = nspinor * (2*lpawu+1)
-             !iatomcor=iatomcor+1
          do im=1,ndim
-               !do ispinor=1,nspinor
            itot = itot + 1
            paw_dmft%chipsi(im,ib,jkpt,isppol,iatom) = mat_tmp(itot,ib)
-               !end do ! ispinor
          end do ! im
-           !endif
        end do ! iatom
      end do ! ib
 
-!   End big loop over isppol
+!  End big loop over isppol
    end do !isppol
 
    ABI_FREE(chipsivect)
-     !ABI_FREE(sqrtmatinv)
-     !ABI_FREE(wanall)
    ABI_FREE(largeoverlap)
    ABI_FREE(mat_tmp)
 
  end if ! option
 
  end subroutine normalizechipsi
+!!***
 
-!!****f* m_datafordmft/psichi_renormalization
+!!****f* chipsi_renormalization/chipsi_gather
 !! NAME
-!! psichi_renormalization
+!! chipsi_gather
 !!
 !! FUNCTION
-!! Renormalize psichi.
+!! Gather chipsi from every CPU (parallelization over kpts).
 !!
 !! INPUTS
-!!  cryst_struc <type(crystal_t)>= crystal structure data.
 !!  paw_dmft =  data for DFT+DMFT calculations.
-!!  pawang <type(pawang)>=paw angular mesh and related data
 !!
 !! OUTPUT
-!!  paw_dmft%psichi(nsppol,nkpt,mband,nspinor,dtset%natom,(2*maxlpawu+1))): projections <Psi|chi> are orthonormalized.
 !!
 !! NOTES
 !!
@@ -1482,10 +1439,10 @@ subroutine chipsi_gather(paw_dmft)
  ABI_FREE(buffer_tot)
 
  end subroutine chipsi_gather
+!!***
 
 end subroutine chipsi_renormalization
 !!***
-
 
 !!****f* m_datafordmft/hybridization_asymptotic_coefficient
 !! NAME
@@ -1629,13 +1586,16 @@ subroutine hybridization_asymptotic_coefficient(cryst_struc,paw_dmft,hybri_coeff
 end subroutine hybridization_asymptotic_coefficient
 !!***
 
-!!****f* m_datafordmft/psichi_renormalization
+!!****f* m_datafordmft/compute_wannier
 !! NAME
-!! psichi_renormalization
+!! compute_wannier
 !!
 !! FUNCTION
+!!  Compute the projected Wannier function in real space.
 !!
 !! INPUTS
+!!  paw_dmft =  data for self-consistent DFT+DMFT calculations.
+!!  mpi_enreg=information about MPI parallelization
 !!
 !! OUTPUT
 !!
@@ -1704,20 +1664,27 @@ subroutine compute_wannier(paw_dmft,mpi_enreg)
 
  end do ! isppol
 
- if (mpi_enreg%paral_kgb == 1 .and. mpi_enreg%nproc_band > 1) call xmpi_sum_master(paw_dmft%wannier(:,:,:),0,mpi_enreg%comm_band,ierr)
- if (mpi_enreg%nproc_spkpt > 1) call xmpi_sum_master(paw_dmft%wannier(:,:,:),0,mpi_enreg%comm_kpt,ierr)
+ ! No need to broadcast on every CPU
+ if (mpi_enreg%paral_kgb == 1 .and. mpi_enreg%nproc_band > 1) then
+   call xmpi_sum_master(paw_dmft%wannier(:,:,:),0,mpi_enreg%comm_band,ierr)
+ end if 
+ call xmpi_sum_master(paw_dmft%wannier(:,:,:),0,mpi_enreg%comm_kpt,ierr)
 
  ABI_FREE(paw_dmft%buf_psi)
 
 end subroutine compute_wannier
+!!***
 
 !!****f* m_datafordmft/print_wannier
 !! NAME
 !! print_wannier
 !!
 !! FUNCTION
+!!  Write projected Wannier functions on file.
 !!
 !! INPUTS
+!!  paw_dmft =  data for self-consistent DFT+DMFT calculations.
+!!  istep = iteration step
 !!
 !! OUTPUT
 !!
@@ -1756,7 +1723,7 @@ subroutine print_wannier(paw_dmft,istep)
    nflavor = (2*lpawu+1) * paw_dmft%nspinor * paw_dmft%nsppol
    call int2char4(iatom,tag_at)
    ABI_CHECK((tag_at(1:1)/='#'),'Bug: string length too short!')
-   tmpfil = trim(paw_dmft%filapp)//'Wannier_functions_iatom'//trim(tag_at)//'_'//tag_iter
+   tmpfil = trim(paw_dmft%filapp)//'Wannier_functions_iatom_'//trim(tag_at)//'_'//tag_iter
    unt = get_unit()
    open(unit=unt,file=tmpfil,status='unknown',form='formatted')
    rewind(unt)

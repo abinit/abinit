@@ -89,8 +89,6 @@ CONTAINS  !=====================================================================
 
 subroutine brentq(f,xa,xb,xtol,rtol,iter,xcur,ierr)
 
- implicit none
-
 ! Written by Charles Harris charles.harris@sdl.usu.edu 
 
 !Arguments ------------------------------------
