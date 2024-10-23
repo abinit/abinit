@@ -342,10 +342,10 @@ subroutine init_green(green,paw_dmft,opt_oper_ksloc,wtype,opt_moments,opt_moment
    do i=2,green%nmoments
      call init_oper(paw_dmft,green%moments(i),nkpt=mkmem,shiftk=shift,opt_ksloc=optmoments_ksloc)
    end do ! i
-   if (paw_dmft%dmft_entropy == 2) then
+   if (paw_dmft%dmftctqmc_triqs_entropy == 1) then
      ABI_MALLOC(green%trace_moments_log_ks,(green%nmoments-1))
      ABI_MALLOC(green%trace_moments_log_loc,(green%nmoments-1))
-   end if  ! dmft_entropy=2
+   end if ! entropy
  end if ! moments 
 
 end subroutine init_green
@@ -1614,7 +1614,7 @@ subroutine integrate_green(green,paw_dmft,prtopt,opt_ksloc,opt_after_solver,opt_
 !local variables-------------------------------
  integer :: band_index,i,iatom,ib,ib1,icomp_chloc,ifreq,ikpt,im,isppol
  integer :: lpawu,mbandc,myproc,natom,nband_k,ndim,nkpt,nmoments,nspinor
- integer :: nsppol,optaftsolv,optfilloccnd,option,optksloc,optself
+ integer :: nsppol,optaftsolv,optdiff,optfilloccnd,option,optksloc,optself
  real(dp) :: correction,diff_chloc,fac
  complex(dpc) :: omega
  character(len=500) :: message
@@ -1673,6 +1673,8 @@ subroutine integrate_green(green,paw_dmft,prtopt,opt_ksloc,opt_after_solver,opt_
 !   charge_loc_old=green%charge_matlu
 ! endif
  icomp_chloc = 0
+ optdiff = 0
+ if (present(opt_diff)) optdiff = opt_diff
 
 ! Choose what to compute
  optksloc = 3
@@ -2088,7 +2090,7 @@ subroutine integrate_green(green,paw_dmft,prtopt,opt_ksloc,opt_after_solver,opt_
 !!***
 
 ! == Precision on charge_matlu (done only if local charge was computed ie not for optksloc=-1)
- if (icomp_chloc == 1 .and. paw_dmft%idmftloop >= 1 .and. present(opt_diff)) then ! if the computation was done here.
+ if (icomp_chloc == 1 .and. paw_dmft%idmftloop >= 1 .and. optdiff == 1) then ! if the computation was done here.
    if (green%has_charge_matlu_prev == 2) then
      diff_chloc = zero
      do iatom=1,natom

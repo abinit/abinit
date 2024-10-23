@@ -2521,6 +2521,8 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
        if(tread==1) dtset%dmftctqmc_triqs_det_precision_warning=dprarr(1)
        call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmftctqmc_triqs_det_singular_threshold',tread,'DPR')
        if(tread==1) dtset%dmftctqmc_triqs_det_singular_threshold=dprarr(1)
+       call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmftctqmc_triqs_entropy',tread,'INT')
+       if(tread==1) dtset%dmftctqmc_triqs_entropy=intarr(1)
        call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmftctqmc_triqs_epsilon',tread,'DPR')
        if(tread==1) dtset%dmftctqmc_triqs_epsilon=dprarr(1)
        call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmftctqmc_triqs_imag_threshold',tread,'DPR')

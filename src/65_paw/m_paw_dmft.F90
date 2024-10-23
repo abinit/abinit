@@ -135,19 +135,18 @@ MODULE m_paw_dmft
 
   integer :: dmft_entropy
   ! = 0: do not compute entropy
-  ! = 1: compute entropy with an integration over self-consistent calculations
-  ! = 2: compute entropy with an integration over impurity models
+  ! >= 1: compute entropy with an integration over self-consistent calculations
 
   integer :: dmft_fermi_algo
   ! =1 : use Newton's method to compute the Fermi level
   ! =2 : use Halley's method to compute the Fermi level
 
   integer :: dmft_gaussorder
-  ! Only relevant when dmft_entropy=2 and dmft_integral=1. 
+  ! Only relevant when dmftctqmc_triqs_entropy=1 and dmft_integral=1. 
   ! Order of the Gauss-Legendre quadrature for each interval of the thermodynamic integration.
 
   integer :: dmft_integral
-  ! Only relevant when dmft_entropy=2.
+  ! Only relevant when dmftctqmc_triqs_entropy=1.
   ! =1: Compute the thermodynamic integration over the impurity models.
   ! =0: Do not compute the integral. All the other contributions are still computed.  
 
@@ -163,7 +162,6 @@ MODULE m_paw_dmft
   ! = 1: use log frequencies
 
   integer :: dmft_nlambda
-  ! Only relevant when dmft_entropy=2 and dmft_integral=1.
   ! Number of subdivisions of the interval [0,U] for the thermodynamic integration.
 
   integer :: dmft_nwli
@@ -274,6 +272,10 @@ MODULE m_paw_dmft
   integer :: dmftctqmc_triqs_det_n_operations_before_check
   ! TRIQS CTQMC: Number of operations before check of the hybridization matrix.
   ! If it is low, the matrix will be checked too often, which can be slow.
+
+  integer :: dmftctqmc_triqs_entropy
+  ! TRIQS CTQMC: Compute the DMFT entropy by integrating several impurity models
+  ! over U.
 
   integer :: dmftctqmc_triqs_loc_n_min
   ! TRIQS CTQMC: Only configurations with a number of electrons in [nlocmin,nlocmax]
@@ -846,8 +848,9 @@ subroutine init_sc_dmft(dtset,paw_dmft,gprimd,kg,mpi_enreg,npwarr,&
    end do ! ikpt
  end do ! isppol
 
- if (paw_dmft%use_sc_dmft /= 0 .and. mpi_enreg%paral_kgb /= 0) &
-   & call init_sc_dmft_paralkgb(paw_dmft,mpi_enreg)
+ if (paw_dmft%use_sc_dmft /= 0 .and. mpi_enreg%paral_kgb /= 0) then
+   call init_sc_dmft_paralkgb(paw_dmft,mpi_enreg)
+ end if 
 
  if (mbandc /= dmftbandf-dmftbandi+1) then
    write(message,'(3a)') ' WARNING init_sc_dmft',ch10,&
@@ -898,7 +901,8 @@ subroutine init_sc_dmft(dtset,paw_dmft,gprimd,kg,mpi_enreg,npwarr,&
  if (.not. paw_dmft%dmft_use_all_bands) then
    fac = 1
    if (nsppol == 1 .and. nspinor == 1) fac = 2
-   paw_dmft%nelectval = dtset%nelect - dble(dmftbandi-1)*nsppol*dble(fac)
+   !paw_dmft%nelectval = dtset%nelect - dble(dmftbandi-1)*nsppol*dble(fac)
+   paw_dmft%nelectval = dtset%nelect - float(dmftbandi-1)*nsppol*fac ! TO REMOVE
  end if ! not use_all_bands
  
  paw_dmft%natpawu              = dtset%natpawu
@@ -1021,13 +1025,15 @@ subroutine init_sc_dmft(dtset,paw_dmft,gprimd,kg,mpi_enreg,npwarr,&
  paw_dmft%dmftctqmc_triqs_lambda                        = dtset%dmftctqmc_triqs_lambda
  paw_dmft%dmftctqmc_triqs_ntau_delta                    = dtset%dmftctqmc_triqs_ntau_delta
  paw_dmft%dmftctqmc_triqs_nbins_histo                   = dtset%dmftctqmc_triqs_nbins_histo
+ paw_dmft%dmftctqmc_triqs_entropy                       = dtset%dmftctqmc_triqs_entropy
  
 !==============================
 !==  Variables for DMFT itself
 !==============================
 
  paw_dmft%wtk => dtset%wtk(:)
- if (dtset%iscf < 0) paw_dmft%wtk(:) = one / dble(nkpt)
+ !if (dtset%iscf < 0) paw_dmft%wtk(:) = one / dble(nkpt)
+ if (dtset%iscf < 0) paw_dmft%wtk(:) = one / float(nkpt) ! TO REMOVE
  sumwtk = sum(paw_dmft%wtk(1:nkpt))
  if (abs(sumwtk-one) > tol11 .and. dtset%iscf >= 0) then
    write(message,'(a,f15.11)') ' sum of k-point is incorrect',sumwtk
@@ -1139,9 +1145,11 @@ subroutine init_sc_dmft(dtset,paw_dmft,gprimd,kg,mpi_enreg,npwarr,&
    ABI_MALLOC(paw_dmft%omega_r,(2*paw_dmft%dmft_nwr))
    ! Set up real frequencies for spectral function in Hubbard one.
    step = 0.00005_dp
-   paw_dmft%omega_r(2*paw_dmft%dmft_nwr) = pi * step * (two*dble(paw_dmft%dmft_nwr-1)+one)
+   !paw_dmft%omega_r(2*paw_dmft%dmft_nwr) = pi * step * (two*dble(paw_dmft%dmft_nwr-1)+one)
+   paw_dmft%omega_r(2*paw_dmft%dmft_nwr) = pi * step * (two*float(paw_dmft%dmft_nwr-1)+one) ! TO REMOVE
    do ifreq=1,2*paw_dmft%dmft_nwr-1
-     paw_dmft%omega_r(ifreq) = pi*step*(two*dble(ifreq-1)+one) - paw_dmft%omega_r(2*paw_dmft%dmft_nwr)
+     !paw_dmft%omega_r(ifreq) = pi*step*(two*dble(ifreq-1)+one) - paw_dmft%omega_r(2*paw_dmft%dmft_nwr)
+     paw_dmft%omega_r(ifreq) = pi*step*(two*float(ifreq-1)+one) - paw_dmft%omega_r(2*paw_dmft%dmft_nwr) ! TO REMOVE
   !  write(std_out,*) ifreq,paw_dmft%omega_r(ifreq)
    end do ! ifreq
 
@@ -1151,7 +1159,9 @@ subroutine init_sc_dmft(dtset,paw_dmft,gprimd,kg,mpi_enreg,npwarr,&
 ! Imaginary frequencies
 !=======================
 ! Set up log frequencies
- if (dtset%ucrpa == 0 .and. paw_dmft%dmft_nwlo > 0) call construct_nwlo_dmft(paw_dmft)
+ if (dtset%ucrpa == 0 .and. paw_dmft%dmft_nwlo > 0) then
+   call construct_nwlo_dmft(paw_dmft)
+ end if 
 
  if (paw_dmft%dmftcheck == 1 .and. dmft_solv < 4) paw_dmft%dmftqmc_l = 64
 
@@ -1683,8 +1693,10 @@ subroutine construct_nwlo_dmft(paw_dmft)
 
 !  ------------  LOGARITHMIC MESH
    deltaomega = half 
-   expfac     = log(omegamaxmin/deltaomega) / (dble(nwlo-nlin-1)*half)
-   prefacexp  = omegamaxmin / (exp(expfac*dble(nwlo-nlin-1))-one)
+   !expfac     = log(omegamaxmin/deltaomega) / (dble(nwlo-nlin-1)*half)
+   expfac = log(omegamaxmin/deltaomega)/(float(nwlo-nlin-1)*half) !! TO REMOVE
+   !prefacexp  = omegamaxmin / (exp(expfac*dble(nwlo-nlin-1))-one)
+   prefacexp = omegamaxmin/(exp(expfac*float(nwlo-nlin-1))-one)  !! TO REMOVE
    ABI_MALLOC(select_log,(nwlo))
 
 !  ------------ IMPOSE LINEAR MESH for w < 2*w_n=(2*l-1)pi/beta
@@ -1978,8 +1990,8 @@ subroutine destroy_sc_dmft(paw_dmft)
  end if 
  call destroy_sc_dmft_paralkgb(paw_dmft)
  if (paw_dmft%use_dmft == 1) then
-   call destroy_paral_dmft(paw_dmft,paw_dmft%distrib)
-   call destroy_paral_dmft(paw_dmft,paw_dmft%distrib_r)
+   call destroy_paral_dmft(paw_dmft%distrib)
+   call destroy_paral_dmft(paw_dmft%distrib_r)
  end if 
 
 end subroutine destroy_sc_dmft
@@ -2324,8 +2336,8 @@ subroutine destroy_sc_dmft_paralkgb(paw_dmft)
  type(paw_dmft_type), intent(inout) :: paw_dmft
 ! *********************************************************************
 
- if (allocated(paw_dmft%bandc_proc)) ABI_FREE(paw_dmft%bandc_proc)
- if (allocated(paw_dmft%use_bandc)) ABI_FREE(paw_dmft%use_bandc)
+ ABI_SFREE(paw_dmft%bandc_proc)
+ ABI_SFREE(paw_dmft%use_bandc)
 
 end subroutine destroy_sc_dmft_paralkgb
 !!***
@@ -2479,10 +2491,9 @@ end subroutine init_paral_dmft
 !!
 !! SOURCE
 
-subroutine destroy_paral_dmft(paw_dmft,distrib)
+subroutine destroy_paral_dmft(distrib)
 
 !Arguments ------------------------------------
- type(paw_dmft_type), intent(in) :: paw_dmft
  type(mpi_distrib_dmft_type), intent(inout) :: distrib
 !Local variables-------------------------------
 ! *********************************************************************

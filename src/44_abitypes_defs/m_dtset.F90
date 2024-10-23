@@ -163,6 +163,7 @@ type, public :: dataset_type
  integer :: dmftctqmc_order
  integer :: dmftctqmc_triqs_det_init_size
  integer :: dmftctqmc_triqs_det_n_operations_before_check
+ integer :: dmftctqmc_triqs_entropy
  integer :: dmftctqmc_triqs_leg_measure
  integer :: dmftctqmc_triqs_loc_n_min
  integer :: dmftctqmc_triqs_loc_n_max
@@ -1541,6 +1542,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%dmftctqmc_triqs_det_precision_error = dtin%dmftctqmc_triqs_det_precision_error
  dtout%dmftctqmc_triqs_det_precision_warning = dtin%dmftctqmc_triqs_det_precision_warning
  dtout%dmftctqmc_triqs_det_singular_threshold = dtin%dmftctqmc_triqs_det_singular_threshold
+ dtout%dmftctqmc_triqs_entropy = dtin%dmftctqmc_triqs_entropy
  dtout%dmftctqmc_triqs_epsilon = dtin%dmftctqmc_triqs_epsilon
  dtout%dmftctqmc_triqs_imag_threshold = dtin%dmftctqmc_triqs_imag_threshold
  dtout%dmftctqmc_triqs_lambda = dtin%dmftctqmc_triqs_lambda
@@ -3426,7 +3428,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' dmftctqmc_mov dmftctqmc_order dmftctqmc_triqs_det_init_size'
  list_vars=trim(list_vars)//' dmftctqmc_triqs_det_n_operations_before_check dmftctqmc_triqs_det_precision_error'
  list_vars=trim(list_vars)//' dmftctqmc_triqs_det_precision_warning dmftctqmc_triqs_det_singular_threshold'
- list_vars=trim(list_vars)//' dmftctqmc_triqs_epsilon dmftctqmc_triqs_imag_threshold dmftctqmc_triqs_lambda'
+ list_vars=trim(list_vars)//' dmftctqmc_triqs_entropy dmftctqmc_triqs_epsilon dmftctqmc_triqs_imag_threshold dmftctqmc_triqs_lambda'
  list_vars=trim(list_vars)//' dmftctqmc_triqs_leg_measure dmftctqmc_triqs_loc_n_min dmftctqmc_triqs_loc_n_max'
  list_vars=trim(list_vars)//' dmftctqmc_triqs_measure_density_matrix dmftctqmc_triqs_move_double'
  list_vars=trim(list_vars)//' dmftctqmc_triqs_move_global_prob dmftctqmc_triqs_move_shift dmftctqmc_triqs_nbins_histo'

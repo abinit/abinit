@@ -1337,7 +1337,9 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        call timab(991,1,tsec)
 
        if (dtset%dmftcheck>=0.and.dtset%usedmft>=1.and.(sum(pawtab(:)%upawu)>=tol8.or.  &
-&       sum(pawtab(:)%jpawu)>tol8).and.(dtset%dmft_entropy==0.or.(dtset%dmft_entropy==2.and.dtset%dmft_integral==0))) energies%entropy=zero
+&       sum(pawtab(:)%jpawu)>tol8).and.(dtset%dmft_entropy==0.or.&
+&       ((dtset%dmft_solv==6.or.dtset%dmft_solv==7).and.(dtset%dmft_integral==0 &
+&       .or.dtset%dmftctqmc_triqs_entropy==0)))) energies%entropy=zero
 
 !      ==  0 to a dmft calculation and do not use lda occupations
 !      ==  1 to a lda calculation with the dmft loop
@@ -1434,7 +1436,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
          edmft=paw_dmft%edmft
          energies%e_paw=energies%e_paw+edmft
          energies%e_pawdc=energies%e_pawdc+edmft
-         if (dtset%dmft_entropy == 2 .and. dtset%dmft_integral == 1) energies%entropy = paw_dmft%sdmft
+         if (dtset%dmftctqmc_triqs_entropy == 1 .and. dtset%dmft_integral == 1) energies%entropy = paw_dmft%sdmft
          call flush_unit(std_out)
 !        paw_dmft%occnd(:,:,:,:,:)=0.5_dp
 

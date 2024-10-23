@@ -975,7 +975,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  use_sc_dmft=dtset%usedmft
 ! if(dtset%paral_kgb>0) use_sc_dmft=0
  !Should be done inside init_sc_dmft
- if ( dtset%usedmft /= 0 ) then
+ if ( dtset%usedmft /= 0 .and. dtset%dmft_entropy > 0) then
    call data4entropyDMFT_init(paw_dmft%forentropyDMFT,&
    dtset%natom,&
    dtset%typat,&
@@ -1691,7 +1691,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 !PAW+DMFT
  call destroy_sc_dmft(paw_dmft)
  ! This call should be done inside destroy_sc_dmft
- if ( dtset%usedmft /= 0 ) then
+ if ( dtset%usedmft /= 0 .and. dtset%dmft_entropy > 0) then
    call data4entropyDMFT_destroy(paw_dmft%forentropyDMFT)
  end if
 

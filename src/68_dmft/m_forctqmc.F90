@@ -86,7 +86,6 @@ contains
 !!  pawang <type(pawang)>=paw angular mesh and related data
 !!  pawprtvol = drive the amount of writed data.
 !!  weiss <type(green_type)>= weiss function
-!!  loc_levels = downfold of the KS eigenvalues
 !!
 !! OUTPUT
 !!  green <type(green_type)>= green function
@@ -97,7 +96,7 @@ contains
 
 
 subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang, &
-                        & pawprtvol,weiss,loc_levels)
+                        & pawprtvol,weiss)
 
 !Arguments ------------------------------------
 !scalars
@@ -110,7 +109,6 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang, &
  integer, intent(in) :: pawprtvol
  type(green_type), target, intent(inout) :: weiss
  type(self_type), intent(inout) :: self
- type(oper_type), optional, intent(in) :: loc_levels
 !Local variables ------------------------------
  integer :: i,iatom,icomp,ierr,if1,if2,iflavor1,iflavor2,ifreq,im1,im2,ima,imb,ispa,ispb,ispinor
  integer :: ispinor1,ispinor2,isppol,itypat,lpawu,myproc,natom,natom2,ndim,nflavor,nomega,nproc
@@ -1429,7 +1427,9 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang, &
 !&       matU=hu(itypat)%udens,opt_levels=levels_ctqmc)
            & matU=dble(udens_atoms(iatom)%mat(:,:,1)),opt_levels=levels_ctqmc(:),Magmom_orb=REAL(magmom_orb(iatom)%value),&
            & Magmom_spin=REAL(magmom_spin(iatom)%value),Magmom_tot=REAL(magmom_tot(iatom)%value),Iatom=iatom,fname=paw_dmft%filapp)
-       call data4entropyDMFT_setDocc(paw_dmft%forentropyDMFT,iatom,docc(:,:))
+       if (paw_dmft%dmft_entropy > 0) then
+         call data4entropyDMFT_setDocc(paw_dmft%forentropyDMFT,iatom,docc(:,:))
+       end if
        ABI_FREE(docc)
          !DO iflavor = 1, nflavor
          !  hybrid%Hybrid%Greens(iflavor)%oper(1:this%samples) = gtmp(1:this%samples,iflavor)
@@ -1773,7 +1773,7 @@ end if !nspinor
  
  if (green%has_moments == 1) then
    opt_log = 0
-   if (paw_dmft%dmft_entropy == 2) opt_log = 1
+   if (paw_dmft%dmftctqmc_triqs_entropy == 1) opt_log = 1
    call compute_moments_loc(green,self,energy_level,weiss_for_rot,1,opt_log=opt_log)
    if (opt_diag /= 0) then
      do i=2,green%nmoments
