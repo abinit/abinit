@@ -1087,7 +1087,6 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
      !  ABI_ERROR(message)
      !end if
      call wrtout(std_out,message,'COLL')
-     !call dc_self(green_charge(:,:),self%hdc%matlu(:),hu(:),paw_dmft,pawtab(:),green_occup(:))
      do ifreq=1,self%nw
 !       write(std_out,*) "before",self%oper(1)%matlu(1)%mat(1,1,1,1,1)
 !       write(std_out,*) "before",self%hdc%matlu(1)%mat(1,1,1,1,1)
@@ -1423,11 +1422,9 @@ subroutine new_self(self,self_new,paw_dmft)
  type(self_type), intent(inout) :: self
  type(self_type), intent(in) :: self_new
  type(paw_dmft_type), intent(in) :: paw_dmft
- !integer,intent(in) :: opt_mix
-!local variables-------------------------------
+!Local variables-------------------------------
  integer :: i,iatom,icount,ifreq,im,im1,isppol,lpawu,natom,ndim,nspinor,nsppol
  real(dp) :: alpha,diff_self,sum_self
- !complex(dpc) :: s1,s2
  character(len=500) :: message
 ! *********************************************************************
 
@@ -1447,35 +1444,8 @@ subroutine new_self(self,self_new,paw_dmft)
      if (lpawu == -1) cycle
      self%oper(ifreq)%matlu(iatom)%mat(:,:,:) = (one-alpha)*self%oper(ifreq)%matlu(iatom)%mat(:,:,:) + &
        & alpha*self_new%oper(ifreq)%matlu(iatom)%mat(:,:,:)  
-
-     
-     !do isppol=1,nsppol
-     !  do ispinor=1,nspinor
-     !    do ispinor1=1,nspinor
-     !      do im=1,ndim
-     !        do im1=1,ndim
-     !          do ifreq=1,self%nw
 !  warning: self_new is the recent self-energy, which is mixed with self
 !  to give self= mixed self energy. self_new is deallocated just after.
-      !           self%oper(ifreq)%matlu(iatom)%mat(im,im1,isppol,ispinor,ispinor1)=     &
-!&                  (one-alpha)*self%oper(ifreq)%matlu(iatom)%mat(im,im1,isppol,ispinor,ispinor1) +    &
-!&                  (alpha)*self_new%oper(ifreq)%matlu(iatom)%mat(im,im1,isppol,ispinor,ispinor1)
-                   !  s1=self%hdc%matlu(iatom)%mat(im,im1,isppol,ispinor,ispinor1)
-                ! s2=self_new%hdc%matlu(iatom)%mat(im,im1,isppol,ispinor,ispinor1)
-             !    if((ispinor==ispinor1).and.(im==im1)) then
-                  ! diff_self=diff_self+dsqrt(real(s1-s2)**2+aimag(s1-s2)**2)
-                  ! sum_self=sum_self+dsqrt(real(s1)**2+aimag(s1)**2)
-                  ! icount=icount+1
-            !     endif
-           !    enddo
-             !  self%hdc%matlu(iatom)%mat(im,im1,isppol,ispinor,ispinor1)=             &
-!&            !   (one-alpha)*self%hdc%matlu(iatom)%mat(im,im1,isppol,ispinor,ispinor1)   +          &
-!&            !   (alpha)*self_new%hdc%matlu(iatom)%mat(im,im1,isppol,ispinor,ispinor1)
-          !   enddo
-         !  enddo
-        ! enddo
-       !enddo
-     !enddo ! isppol
    end do ! iatom
  end do ! ifreq
  
@@ -1483,7 +1453,7 @@ subroutine new_self(self,self_new,paw_dmft)
    lpawu = paw_dmft%lpawu(iatom)
    if (lpawu == -1) cycle
    ndim = nspinor * (2*lpawu+1)
-   icount = icount + nsppol*(ndim**2)
+   icount = icount + nsppol*ndim
    do isppol=1,nsppol
      do im1=1,ndim
        do im=1,ndim
@@ -1507,7 +1477,8 @@ subroutine new_self(self,self_new,paw_dmft)
    end do ! i 
  end if ! moments
  
- diff_self = diff_self / dble(icount)
+ !diff_self = diff_self / dble(icount) ! TO REMOVE
+ diff_self = diff_self / icount
  
  write(message,'(8x,a,e12.5)') "DMFT Loop: Precision on self-energy is",diff_self
  call wrtout(std_out,message,'COLL')
@@ -1635,7 +1606,6 @@ subroutine kramerskronig_self(self,selflimit,selfhdc,paw_dmft,filapp)
  use m_oper, only : gather_oper
  
 !Arguments ------------------------------------
-!type
  type(self_type), intent(inout) :: self
  type(matlu_type), intent(in) :: selfhdc(self%hdc%natom),selflimit(self%hdc%natom)
  type(paw_dmft_type), intent(in) :: paw_dmft
@@ -1643,8 +1613,6 @@ subroutine kramerskronig_self(self,selflimit,selfhdc,paw_dmft,filapp)
 !Local variables-------------------------------
  integer :: iatom,ifreq,im,im1,ispinor,ispinor1,isppol,jfreq
  integer :: lpawu,myproc,natom,ndim,nspinor,nsppol
- !real(dp),allocatable :: selftemp_imag(:)
- !real(dp) :: delta
  character(len=500) :: message
 ! *********************************************************************
 
@@ -1731,95 +1699,6 @@ subroutine kramerskronig_self(self,selflimit,selfhdc,paw_dmft,filapp)
    
  end if ! master node
      
- !do iatom=1,natom
- !  lpawu = self%oper(1)%matlu(iatom)%lpawu
- !  if (lpawu == -1) cycle
- !  ndim = 2*lpawu + 1
- !  do isppol=1,nsppol
- !      do ispinor=1,nspinor
- !        do ispinor1=1,nspinor
- !          do im=1,ndim
- !            do im1=1,ndim
-               !write(6,*) "realpart",real(selflimit(iatom)%mat(im,im1,isppol,ispinor,ispinor1))
- !              do ifreq=1,self%nw
- !                selftemp_re(ifreq)=zero
- !                selftemp_imag(ifreq)=aimag(self%oper(ifreq)%matlu(iatom)%mat(im,im1,isppol,ispinor,ispinor1))
-  !               do jfreq=1,self%nw-1
-  !                 if(jfreq==ifreq) cycle
-!                   selftemp_re(ifreq)=selftemp_re(ifreq) -   &
-! &                   aimag(self%oper(jfreq)%matlu(iatom)%mat(im,im1,isppol,ispinor,ispinor1))  &
-! &                   *(self%omega(ifreq)-self%omega(jfreq)) &
-! &                   /((self%omega(ifreq)-self%omega(jfreq))**2+delta**2)&
-! &                   *(self%omega(jfreq+1)-self%omega(jfreq))
-   !                selftemp_re(ifreq)=selftemp_re(ifreq) -   &
- !&                   aimag(self%oper(jfreq)%matlu(iatom)%mat(im,im1,isppol,ispinor,ispinor1))  &
- !&                   /(self%omega(ifreq)-self%omega(jfreq)) * (self%omega(jfreq+1)-self%omega(jfreq))
- !                enddo
- !                selftemp_re(ifreq)=selftemp_re(ifreq)/pi
-                 !write(671,*)  self%omega(ifreq),selftemp_re(ifreq),selftemp_imag(ifreq)
-  !             enddo
-!                 TEST*************************
-!               do ifreq=1,self%nw
-!                 selftemp_imag(ifreq)=zero
-!                 do jfreq=1,self%nw-1
-!                   if(jfreq==ifreq) cycle
-!!                   selftemp_re(ifreq)=selftemp_re(ifreq) -   &
-!! &                   aimag(self%oper(jfreq)%matlu(iatom)%mat(im,im1,isppol,ispinor,ispinor1))  &
-!! &                   *(self%omega(ifreq)-self%omega(jfreq)) &
-!! &                   /((self%omega(ifreq)-self%omega(jfreq))**2+delta**2)&
-!! &                   *(self%omega(jfreq+1)-self%omega(jfreq))
-!                   selftemp_imag(ifreq)=selftemp_imag(ifreq) +    &
-! &                   selftemp_re(jfreq)  &
-! &                   /(self%omega(ifreq)-self%omega(jfreq)) * (self%omega(jfreq+1)-self%omega(jfreq))
-!                 enddo
-!                 selftemp_imag(ifreq)=selftemp_imag(ifreq)/pi
-!                 write(672,*)  self%omega(ifreq),selftemp_re(ifreq),selftemp_imag(ifreq)
-!               enddo
-!                 TEST*************************
-              ! write(6,*) "TWO FACTOR IS PUT BECAUSE OF MAXENT CODE ??"
-  !             do ifreq=1,self%nw
-!                 write(68,*)  self%omega(ifreq),selftemp_re(ifreq),selftemp_imag(ifreq)
- !                selftemp_re(ifreq)=selftemp_re(ifreq)+ &
- !&                 real(selflimit(iatom)%mat(im,im1,isppol,ispinor,ispinor1)- &
- !&                 selfhdc(iatom)%mat(im,im1,isppol,ispinor,ispinor1))
- !                self%oper(ifreq)%matlu(iatom)%mat(im,im1,isppol,ispinor,ispinor1)&
- ! &                       =cmplx(selftemp_re(ifreq),selftemp_imag(ifreq),kind=dp)/two
-  !&                       =cmplx(0.d0,selftemp_imag(ifreq),kind=dp)/two
-!  &                       =cmplx(selftemp_re(ifreq),0.d0,kind=dp)/two
-  !               self%oper(ifreq)%matlu(iatom)%mat(im,im1,isppol,ispinor,ispinor1)&
-  !&                       =cmplx(selftemp_re(ifreq),0.d0,kind=dp)/two
-  !&                       =cmplx(0.d0,0.d0,kind=dp)/two
-!    The factor two is here to compensate for the factor two in OmegaMaxent..
-!  &                       =cmplx(selftemp_re(ifreq),0.0,kind=dp)
-  !               write(67,*)  self%omega(ifreq),real(self%oper(ifreq)%matlu(iatom)%mat(im,im1,isppol,ispinor,ispinor1))&
-  !               ,aimag(self%oper(ifreq)%matlu(iatom)%mat(im,im1,isppol,ispinor,ispinor1))
-  !             enddo
-   !            write(67,*)
-               !write(68,*)
-               !!!!!!!!!! Z renormalization
-!               i0=389
-!               slope=(selftemp_re(i0+1)-selftemp_re(i0))/&
-!                     (self%omega(i0+1)-self%omega(i0))
-!               y0= selftemp_re(i0)
-!               do ifreq=1,self%nw
-!                 selftemp_re(ifreq)=slope * (self%omega(ifreq)-self%omega(i0)) + y0
-!                 selftemp_imag(ifreq)=zero
-!                 self%oper(ifreq)%matlu(iatom)%mat(im,im1,isppol,ispinor,ispinor1)&
-!  &                       =cmplx(selftemp_re(ifreq),selftemp_imag(ifreq),kind=dp)/two
-!                 write(6777,*)  self%omega(ifreq),real(self%oper(ifreq)%matlu(iatom)%mat(im,im1,isppol,ispinor,ispinor1)),aimag(self%oper(ifreq)%matlu(iatom)%mat(im,im1,isppol,ispinor,ispinor1))
-!               enddo
-               !!!!!!!!!!
-!             enddo
-!           enddo
-!         enddo
-!       enddo
-!     enddo ! isppol
-! end do ! iatom
- !
-     !write(6,*) "self1",aimag(self%oper(489)%matlu(1)%mat(1,1,1,1,1))
-
- !ABI_FREE(selftemp_imag)
-
 end subroutine kramerskronig_self
 !!***
 
@@ -1858,8 +1737,8 @@ subroutine selfreal2imag_self(selfr,self,filapp,paw_dmft)
  !real(dp) :: delta
  type(self_type) :: selftempmatsub
 ! *********************************************************************
+
  !delta=0.0000000
- !ABI_MALLOC(selftempmatsub,(self%nw))
  call initialize_self(selftempmatsub,paw_dmft)
  
  myproc  = paw_dmft%myproc
@@ -1870,7 +1749,6 @@ subroutine selfreal2imag_self(selfr,self,filapp,paw_dmft)
 ! call copy_matlu(selfhdc,self%hdc%matlu,natom)
      !write(6,*) "self3",aimag(selfr%oper(489)%matlu(1)%mat(1,1,1,1,1))
      
- !selftempmatsub(:,:,:,:,:) = czero
  do ifreq=1,self%nw
    if (self%distrib%procf(ifreq) /= myproc) cycle
    omega = cmplx(zero,self%omega(ifreq),kind=dp)
@@ -1904,14 +1782,6 @@ subroutine selfreal2imag_self(selfr,self,filapp,paw_dmft)
                !enddo
                !  write(6700,*)
                do ifreq=1,self%nw
-                 !selftempmatsub(ifreq)=czero
-                 !do jfreq=1,selfr%nw-1
-                 !  selftempmatsub(ifreq)=selftempmatsub(ifreq) -   &
- !&               !    aimag(selfr%oper(jfreq)%matlu(iatom)%mat(im,im1,isppol,ispinor,ispinor1))  &
- !&               !    /(cmplx(zero,self%omega(ifreq),kind=dp)-selfr%omega(jfreq))   &
- !&               !  * (selfr%omega(jfreq+1)-selfr%omega(jfreq))
-                 !enddo
-                 !selftempmatsub(ifreq)=selftempmatsub(ifreq)/pi
                  write(672,*) self%omega(ifreq),&
                    & dble(selftempmatsub%oper(ifreq)%matlu(iatom)%mat(im+(ispinor-1)*ndim,im1+(ispinor1-1)*ndim,isppol)),&
                    & aimag(selftempmatsub%oper(ifreq)%matlu(iatom)%mat(im+(ispinor-1)*ndim,im1+(ispinor1-1)*ndim,isppol))
@@ -1926,7 +1796,6 @@ subroutine selfreal2imag_self(selfr,self,filapp,paw_dmft)
    close(672)
  end if ! master node
   
- !ABI_FREE(selftempmatsub)
  call destroy_self(selftempmatsub)
 
 end subroutine selfreal2imag_self
