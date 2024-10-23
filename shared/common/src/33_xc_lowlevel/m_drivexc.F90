@@ -26,11 +26,11 @@ module m_drivexc
  use m_abicore
  use m_errors
  use libxc_functionals
- use m_numeric_tools,    only : invcb
- use m_xciit,            only : xciit
- use m_xcpbe,            only : xcpbe
- use m_xchcth,           only : xchcth
- use m_xclda,  only : xcpzca, xcspol, xctetr, xcwign, xchelu, xcxalp, xclb
+ use m_numeric_tools, only: invcb
+ use m_xciit,         only: xciit
+ use m_xcpbe,         only: xcpbe,xckdt16
+ use m_xchcth,        only: xchcth
+ use m_xclda,         only: xcpzca,xcspol,xctetr,xcwign,xchelu,xcxalp,xclb,xcksdt
 
  implicit none
 
@@ -183,9 +183,24 @@ subroutine echo_xc_name (ixc)
    case (42)
      message = 'modified PBE0 with alpha=0.33'
      citation = ''
+!      Temperature-dependant XC
+!      LDA
    case (50)
      message = 'LDA at finite T Ichimaru-Iyetomy-Tanaka - ixc=50'
-     citation = 'Ichimaru S., Iyetomi H., Tanaka S., Phys. Rep. 149, 91-205 (1987) ' ! [[cite:Ichimaru1987]]
+     citation = 'Ichimaru S., Iyetomi H., Tanaka S., Phys. Rep. 149, 91-205 (1987)' ! [[cite:Ichimaru1987]]
+   case (51)
+     message = 'TLDA: Karasiev-Sjostrom-Dufty-Trickey - ixc=51'
+     citation = 'V.V. Karasiev, T. Sjostrom, J. Dufty, and S.B. Trickey, PRL 112, 076403 (2014)' ! [[cite:Karasiev2014]]
+!      GGA
+   case (60)
+     message = 'TGGA: Karasiev, PBE-parameters - ixc=60'
+     citation = 'V.V. Karasiev, J.W. Dufty, and S.B. Trickey, PRL 120(7), 076401 (2018)' ! [[cite:Karasiev2018]]
+   case (61)
+     message = 'TGGA: Karasiev, PBEsol-parameters - ixc=61'
+     citation = 'V.V. Karasiev, J.W. Dufty, and S.B. Trickey, PRL 120(7), 076401 (2018)' ! [[cite:Karasiev2018]]
+   case (62)
+     message = 'TGGA: Karasiev, PBEmol-parameters - ixc=62'
+     citation = 'V.V. Karasiev, J.W. Dufty, and S.B. Trickey, PRL 120(7), 076401 (2018)' ! [[cite:Karasiev2018]]
    case default
      write(message,'(a,i0)')" echo_xc_name does not know how to handle ixc = ",ixc
      ABI_WARNING(message)
@@ -460,7 +475,8 @@ subroutine size_dvxc(ixc,order,nspden,&
 !Do we use the gradient?
  need_gradient=((ixc>=11.and.ixc<=17).or.(ixc==23.or.ixc==24).or. &
 &               (ixc==26.or.ixc==27).or.(ixc>=31.and.ixc<=35).or. &
-&               (ixc==41.or.ixc==42).or.ixc==1402000)
+&               (ixc==41.or.ixc==42).or.ixc==1402000.or. &
+&               (ixc==60.or.ixc==61.or.ixc==62))
  if (ixc<0.and.(libxc_isgga.or.libxc_ismgga.or.libxc_ishybrid)) need_gradient=.true.
  if (my_add_tfw) need_gradient=.true.
  if (present(usegradient)) usegradient=merge(1,0,need_gradient)
@@ -511,12 +527,13 @@ subroutine size_dvxc(ixc,order,nspden,&
      if (ixc==1.or.ixc==7.or.ixc==8.or.ixc==9.or.ixc==10.or.ixc==13.or. &
 &        ixc==21.or.ixc==22) then
        ndvxc=min(nspden,2)+1
-     else if ((ixc>=2.and.ixc<=6).or.(ixc>=31.and.ixc<=35).or.ixc==50) then
+     else if ((ixc>=2.and.ixc<=6).or.(ixc>=31.and.ixc<=35).or.ixc==50.or.ixc==51) then
        ndvxc=1
      else if (ixc==12.or.ixc==24) then
        ndvxc=8
      else if (ixc==11.or.ixc==12.or.ixc==14.or.ixc==15.or. &
-&             ixc==23.or.ixc==41.or.ixc==42.or.ixc==1402000) then
+&             ixc==23.or.ixc==41.or.ixc==42.or.ixc==1402000.or. &
+&             ixc==60.or.ixc==61.or.ixc==62) then
        ndvxc=15
      else if (ixc<0) then
        if (libxc_has_kxc.or.ixc==-406.or.ixc==-427.or.ixc==-428.or.ixc==-456) then
@@ -817,6 +834,7 @@ end subroutine mkdenpos
 !!  nvxctau=number of components of 1st-derivative of Exc wrt kinetic energy density (nvxctau)
 !!  ndvxc=number of components of  1st-derivative of Vxc (dvxc)
 !!  nd2vxc=number of components of  2nd-derivative of Vxc (d2vxc)
+!!  el_temp=electronic temperature (hartree)
 !!  rho_updn(npts,nspden)=spin-up and spin-down densities
 !!    In the calling routine, spin-down density must be equal to spin-up density.
 !!    If nspden=1, only spin-up density must be given (half the total density).
@@ -841,7 +859,6 @@ end subroutine mkdenpos
 !!     be equal to the half the total kinetic energy density.
 !!    If nspden=2, the spin-up and spin-down kinetic energy densities must be given.
 !!  [exexch]=choice of <<<local>>> exact exchange. Active if exexch=3 (only for GGA, and NOT for libxc)
-!!  [el_temp]= electronic temperature (to be used for finite temperature XC functionals)
 !!  [hyb_mixing]= mixing parameter for the native PBEx functionals (ixc=41 and 42)
 !!  [xc_funcs(2)]= <type(libxc_functional_type)>: libxc XC functionals.
 !!
@@ -898,17 +915,18 @@ end subroutine mkdenpos
 !! SOURCE
 
 subroutine drivexc(ixc,order,npts,nspden,usegradient,uselaplacian,usekden,&
-&          rho_updn,exc,tsxc,vxcrho,nvxcgrho,nvxclrho,nvxctau,ndvxc,nd2vxc, &       ! mandatory arguments
-&          grho2_updn,vxcgrho,lrho_updn,vxclrho,tau_updn,vxctau,dvxc,d2vxc, &  ! optional arguments
-&          exexch,el_temp,fxcT,hyb_mixing,xc_funcs)                            ! optional parameters
+&          rho_updn,exc,tsxc,vxcrho,nvxcgrho,nvxclrho,nvxctau,ndvxc,nd2vxc,el_temp, & ! mandatory arguments
+&          grho2_updn,vxcgrho,lrho_updn,vxclrho,tau_updn,vxctau,dvxc,d2vxc, &         ! optional arguments
+&          exexch,fxcT,hyb_mixing,xc_funcs)                                           ! optional parameters
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ixc,npts,nspden
  integer,intent(in) :: ndvxc,nd2vxc,nvxcgrho,nvxclrho,nvxctau,order
  integer,intent(in) :: usegradient,uselaplacian,usekden
+ real(dp),intent(in) :: el_temp
  integer,intent(in),optional :: exexch
- real(dp),intent(in),optional :: el_temp,hyb_mixing
+ real(dp),intent(in),optional :: hyb_mixing
 !arrays
  real(dp),intent(in) :: rho_updn(npts,nspden)
  real(dp),intent(in),optional :: grho2_updn(npts,(2*nspden-1)*usegradient)
@@ -1079,8 +1097,8 @@ subroutine drivexc(ixc,order,npts,nspden,usegradient,uselaplacian,usekden,&
    ABI_BUG(message)
  end if
  if(ixc==50) then
-   if(.not.(present(el_temp)).or.(.not.present(fxcT)))then
-     message = 'el_temp or fxcT is not present but are needed for IIT XC functional.'
+   if(.not.(present(fxcT)))then
+     message = 'fxcT is not present but are needed for IIT XC functional.'
      ABI_BUG(message)
    end if
    if (size(fxcT)/=npts) then
@@ -1093,8 +1111,8 @@ subroutine drivexc(ixc,order,npts,nspden,usegradient,uselaplacian,usekden,&
 ! =================================================
 
 !If needed, compute rhotot and rs
- if (ixc==1.or.ixc==2.or.ixc==3.or.ixc==4.or.ixc==5.or.&
-&    ixc==6.or.ixc==21.or.ixc==22.or.ixc==50) then
+ if (ixc==1.or.ixc==2.or.ixc==3.or.ixc==4.or.ixc==5.or.ixc==6.or.&
+&    ixc==21.or.ixc==22.or.ixc==50.or.ixc==51.or.ixc==60.or.ixc==61.or.ixc==62) then
    ABI_MALLOC(rhotot,(npts))
    ABI_MALLOC(rspts,(npts))
    if(nspden==1)then
@@ -1443,6 +1461,30 @@ subroutine drivexc(ixc,order,npts,nspden,usegradient,uselaplacian,usekden,&
    else
      call xciit(exc,fxcT,npts,order,rspts,el_temp,vxcrho(:,1),dvxc)
    end if
+
+!>>>>> Karasiev-Sjostrom-Dufty-Trickey TLDA (no spin-pol) (KSDT)
+ else if (ixc==51) then
+   if (order**2 <= 1) then
+     call xcksdt(exc,npts,order,rhotot,rspts,el_temp,vxcrho(:,1))
+   else
+     if(ndvxc /= 1 )then
+       write(message,'(3a,i0,a,i0)')&
+&       'Wrong value of ndvxc:',ch10,&
+&       'ixc=',ixc,'ndvxc=',ndvxc
+       ABI_BUG(message)
+     end if
+     call xcksdt(exc,npts,order,rhotot,rspts,el_temp,vxcrho(:,1),dvxc)
+   end if
+
+!>>>>> Karasiev-Dufty-Trickey TGGA (KDT16)
+ else if(ixc==60.or.ixc==61.or.ixc==62) then
+   if(nvxcgrho /= 3 )then 
+     write(message, '(3a,i0,a,i0)')&
+&     'Wrong value of nvxcgrho:',ch10,&
+&     'ixc=',ixc,'ndvxcdgr=',nvxcgrho
+     ABI_BUG(message)
+   end if
+   call xckdt16(vxcgrho,exc,grho2_updn,ixc,npts,nspden,rhotot,rspts,el_temp,vxcrho)
 
 !>>>>> GGA counterpart of the B3LYP functional
  else if(ixc==1402000) then

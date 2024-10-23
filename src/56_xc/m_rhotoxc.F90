@@ -792,10 +792,9 @@ subroutine rhotoxc(bigexc,kxc,mpi_enreg,nfft,ngfft, &
            call libxc_functionals_init(auxc_ixc,nspden,xc_functionals=xc_funcs_auxc)
          end if
          call drivexc(auxc_ixc,order,npts,nspden_updn,usegradient,0,0,&
-&          rho_b_updn,exc_b,tsxc_b,vxcrho_b_updn,nvxcgrho,0,0,ndvxc,nd2vxc, &
+&          rho_b_updn,exc_b,tsxc_b,vxcrho_b_updn,nvxcgrho,0,0,ndvxc,nd2vxc,xcdata%tphysel, &
 &          grho2_updn=grho2_b_updn,vxcgrho=vxcgrho_b_updn,dvxc=dvxc_b, &
-&          fxcT=fxc_b,hyb_mixing=xcdata%hyb_mixing,el_temp=xcdata%tphysel,&
-&          xc_funcs=xc_funcs_auxc)
+&          fxcT=fxc_b,hyb_mixing=xcdata%hyb_mixing,xc_funcs=xc_funcs_auxc)
 !        Transfer the xc kernel
          if (nkxc_eff==1.and.ndvxc==15) then
            kxc(ifft:ifft+npts-1,1)=half*(dvxc_b(1:npts,1)+dvxc_b(1:npts,9)+dvxc_b(1:npts,10))
@@ -821,22 +820,22 @@ subroutine rhotoxc(bigexc,kxc,mpi_enreg,nfft,ngfft, &
          call drivexc(ixc,order,npts,nspden_updn,&
 &          usegradient,uselaplacian,usekden,&
 &          rho_b_updn,exc_b,tsxc_b,vxcrho_b_updn,&
-&          nvxcgrho,nvxclrho,nvxctau,ndvxc,nd2vxc, &
+&          nvxcgrho,nvxclrho,nvxctau,ndvxc,nd2vxc,xcdata%tphysel, &
 &          grho2_updn=grho2_b_updn,vxcgrho=vxcgrho_b_updn,&
 &          lrho_updn=lrho_b_updn,vxclrho=vxclrho_b_updn,&
 &          tau_updn=tau_b_updn,vxctau=vxctau_b_updn,&
-&          dvxc=dvxc_b,d2vxc=d2vxc_b,el_temp=xcdata%tphysel,fxcT=fxc_b,&
+&          dvxc=dvxc_b,d2vxc=d2vxc_b,fxcT=fxc_b,&
 &          hyb_mixing=xcdata%hyb_mixing,&
 &          xc_funcs=xc_funcs)
        else
          call drivexc(ixc,order,npts,nspden_updn,&
 &          usegradient,uselaplacian,usekden,&
 &          rho_b_updn,exc_b,tsxc_b,vxcrho_b_updn,&
-&          nvxcgrho,nvxclrho,nvxctau,ndvxc,nd2vxc, &
+&          nvxcgrho,nvxclrho,nvxctau,ndvxc,nd2vxc,xcdata%tphysel, &
 &          grho2_updn=grho2_b_updn,vxcgrho=vxcgrho_b_updn,&
 &          lrho_updn=lrho_b_updn,vxclrho=vxclrho_b_updn,&
 &          tau_updn=tau_b_updn,vxctau=vxctau_b_updn,&
-&          dvxc=dvxc_b,d2vxc=d2vxc_b,el_temp=xcdata%tphysel,fxcT=fxc_b,&
+&          dvxc=dvxc_b,d2vxc=d2vxc_b,fxcT=fxc_b,&
 &          hyb_mixing=xcdata%hyb_mixing)
        end if
 
