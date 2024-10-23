@@ -165,7 +165,7 @@ CONTAINS  !=====================================================================
  integer :: spaceComm_spinor,spaceComm_bandspinor,spaceComm_spinorfft,spaceComm_w
  logical :: already_has_nabla,cprj_paral_band,myband,mykpt,iomode_etsf_mpiio
  logical :: i_am_master,i_am_master_kpt,i_am_master_band,i_am_master_spfft,nc_unlimited,store_half_dipoles
- real(dp) :: cgnm1,cgnm2,cpnm1,cpnm2,cpnm11,cpnm22,cpnm12,cpnm21,cpnm_11m22,cpnm_21p12,cpnm_21m12
+ real(dp) :: cgnm1,cgnm2,cpnm1,cpnm2,cpnm11,cpnm22,cpnm12,cpnm21,cpnm_11m22,cpnm_21p12,cpnm_21m12,el_temp
  character(len=500) :: msg
  type(nctkdim_t) :: nctkdim
 !arrays
@@ -295,11 +295,14 @@ CONTAINS  !=====================================================================
 
  already_has_nabla=all(pawtab(:)%has_nabla==2)
  call pawnabla_init(mpsang,dtset%ntypat,pawrad,pawtab)
+
+!Get electronic temperature from dtset
+ el_temp=merge(dtset%tphysel,dtset%tsmear,dtset%tphysel>tol8.and.dtset%occopt/=3.and.dtset%occopt/=9)
  
 !Compute spin-orbit contributions if necessary
  if (dtset%pawspnorb==1) then
    option_core=0
-   call pawnabla_soc_init(phisocphj,option_core,dtset%ixc,mpi_enreg%my_natom,natom,&
+   call pawnabla_soc_init(el_temp,phisocphj,option_core,dtset%ixc,mpi_enreg%my_natom,natom,&
 &       dtset%nspden,dtset%ntypat,pawang,pawrad,pawrhoij,pawtab,dtset%pawxcdev,&
 &       dtset%spnorbscl,dtset%typat,dtset%xc_denpos,dtset%xc_taupos,znucl,&
 &       comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
@@ -857,7 +860,7 @@ CONTAINS  !=====================================================================
  logical :: iomode_etsf_mpiio,abinitcorewf,use_spinorbit,xmlcorewf
  logical :: i_am_master,i_am_master_band,i_am_master_spfft
  character(len=fnlen) :: filecore
- real(dp) :: cpnm1,cpnm2
+ real(dp) :: cpnm1,cpnm2,el_temp
  character(len=500) :: msg
 !arrays
  integer :: nc_count(7),nc_start(7),nc_stride(7),tmp_shape(3)
@@ -968,11 +971,14 @@ CONTAINS  !=====================================================================
    call pawnabla_core_init(mpsang,dtset%ntypat,pawrad,pawtab,phi_cor,indlmn_cor)
  endif
 
+!Get electronic temperature from dtset
+ el_temp=merge(dtset%tphysel,dtset%tsmear,dtset%tphysel>tol8.and.dtset%occopt/=3.and.dtset%occopt/=9)
+
 !Compute spin-orbit contributions if necessary
  use_spinorbit=(dtset%pawspnorb==1.and.dtset%userie/=111) ! For testing purpose
  if (use_spinorbit) then
    option_core=1
-   call pawnabla_soc_init(phisocphj,option_core,dtset%ixc,mpi_enreg%my_natom,natom,&
+   call pawnabla_soc_init(el_temp,phisocphj,option_core,dtset%ixc,mpi_enreg%my_natom,natom,&
 &       dtset%nspden,dtset%ntypat,pawang,pawrad,pawrhoij,pawtab,dtset%pawxcdev,&
 &       dtset%spnorbscl,dtset%typat,dtset%xc_denpos,dtset%xc_taupos,znucl,&
 &       phi_cor=phi_cor,indlmn_cor=indlmn_cor,&
@@ -1784,6 +1790,7 @@ CONTAINS  !=====================================================================
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! INPUTS
+!!  el_temp=electronic temperature (hartree)
 !!  ixc= choice of exchange-correlation scheme (see above, and below)
 !!  my_natom=number of atoms treated by current processor
 !!  natom=total number of atoms in cell
@@ -1837,7 +1844,7 @@ CONTAINS  !=====================================================================
 !!
 !! SOURCE
 
- subroutine pawnabla_soc_init(phisocphj,option_core,ixc,my_natom,natom,nspden,ntypat,pawang, &
+ subroutine pawnabla_soc_init(el_temp,phisocphj,option_core,ixc,my_natom,natom,nspden,ntypat,pawang, &
 &           pawrad,pawrhoij,pawtab,pawxcdev,spnorbscl,typat,xc_denpos,xc_taupos,znucl, &
 &           phi_cor,indlmn_cor,mpi_atmtab,comm_atom) ! Optional arguments
 
@@ -1845,7 +1852,7 @@ CONTAINS  !=====================================================================
 !scalars
  integer,intent(in) :: ixc,my_natom,natom,nspden,ntypat,option_core,pawxcdev
  integer,optional,intent(in) :: comm_atom
- real(dp),intent(in) :: spnorbscl,xc_denpos,xc_taupos
+ real(dp),intent(in) :: el_temp,spnorbscl,xc_denpos,xc_taupos
  type(pawang_type),intent(in) :: pawang
 !arrays
  integer,intent(in),target,optional :: indlmn_cor(:,:)
@@ -2010,14 +2017,14 @@ CONTAINS  !=====================================================================
      vxc=zero
      call pawxcm(pawtb%coredens,eexc_dum,eexcdc_dum,idum,hyb_mixing_,ixc,kxc_dum,lm_size,&
 &         lmselect,nhat_dum,nkxc,.false.,mesh_size,nspden,option,pawang,pawrd,&
-&         pawxcdev,rho1,usecore,usenhat,vxc,xclevel,xc_denpos)
+&         pawxcdev,rho1,usecore,usenhat,vxc,xclevel,xc_denpos,el_temp)
      potsph(1:mesh_size)=half*(vxc(1:mesh_size,1,1)+vxc(1:mesh_size,1,nspden))
    else
      ABI_MALLOC(vxc,(mesh_size,pawang%angl_size,nspden))
      vxc=zero
      call pawxc(pawtb%coredens,eexc_dum,eexcdc_dum,hyb_mixing_,ixc,kxc_dum,k3xc_dum,&
 &         lm_size,lmselect,nhat_dum,nkxc,nkxc,.false.,mesh_size,nspden,option,pawang,&
-&         pawrd,rho1,usecore,usenhat,vxc,xclevel,xc_denpos,&
+&         pawrd,rho1,usecore,usenhat,vxc,xclevel,xc_denpos,el_temp,&
 &         coretau=pawtb%coretau,taur=tau1,xc_taupos=xc_taupos)
      potsph(1:mesh_size)=zero
      do ipts=1,pawang%angl_size

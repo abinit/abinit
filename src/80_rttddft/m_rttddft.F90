@@ -218,7 +218,7 @@ subroutine rttddft_init_hamiltonian(dtset, energies, gs_hamk, istep, mpi_enreg, 
  logical                   :: calc_ewald
  logical                   :: tfw_activated
  real(dp)                  :: compch_sph
- real(dp)                  :: vxcavg
+ real(dp)                  :: vxcavg,el_temp
  !arrays
  real(dp),allocatable      :: grchempottn(:,:)
  real(dp),allocatable      :: grewtn(:,:)
@@ -268,6 +268,9 @@ subroutine rttddft_init_hamiltonian(dtset, energies, gs_hamk, istep, mpi_enreg, 
  ABI_FREE(grewtn)
  ABI_FREE(kxc)
 
+ ! Get electronic temperature from dtset
+ el_temp=merge(dtset%tphysel,dtset%tsmear,dtset%tphysel>tol8.and.dtset%occopt/=3.and.dtset%occopt/=9)
+
  ! set the zero of the potentials here
  if(dtset%usepotzero==2) tdks%vpsp(:) = tdks%vpsp(:) + tdks%ecore / ( tdks%zion * tdks%ucvol )
 
@@ -294,7 +297,7 @@ subroutine rttddft_init_hamiltonian(dtset, energies, gs_hamk, istep, mpi_enreg, 
    !FB: @MT Changed self_consistent to false here. Is this right?
    call paw_ij_reset_flags(tdks%paw_ij,self_consistent=.false.)
    option=0; compch_sph=-1.d5; nzlmopt=0
-   call pawdenpot(compch_sph,energies%e_paw,energies%e_pawdc,ipert,         &
+   call pawdenpot(compch_sph,el_temp,energies%e_paw,energies%e_pawdc,ipert, &
                 & dtset%ixc,my_natom,dtset%natom,dtset%nspden,psps%ntypat,  &
                 & dtset%nucdipmom,nzlmopt,option,tdks%paw_an,tdks%paw_an,   &
                 & tdks%paw_ij,tdks%pawang,dtset%pawprtvol,tdks%pawrad,      &
