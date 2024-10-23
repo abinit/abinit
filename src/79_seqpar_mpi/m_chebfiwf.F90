@@ -241,7 +241,7 @@ subroutine chebfiwf2_blocksize(gs_hamk,ndat,npw,nband,nspinor,paral_kgb,gpu_opti
 !!
 !! SOURCE
 
-subroutine chebfiwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
+subroutine chebfiwf2(cg,dtset,eig,occ,enl_out,gs_hamk,kinpw,mpi_enreg,&
 &                    nband,npw,nspinor,prtvol,resid)
 
  implicit none
@@ -254,6 +254,7 @@ subroutine chebfiwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
  real(dp),target,intent(out) :: resid(nband)
  real(dp),intent(out) :: enl_out(nband)
  real(dp),target,intent(out) :: eig(nband)
+ real(dp),target,intent(in) :: occ(nband)
  type(dataset_type),intent(in) :: dtset
  type(gs_hamiltonian_type),target,intent(inout) :: gs_hamk
 
@@ -265,7 +266,7 @@ subroutine chebfiwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
  integer :: me_g0,me_g0_fft
  real(dp) :: localmem
  type(chebfi_t) :: chebfi
- type(xgBlock_t) :: xgx0,xgeigen,xgresidu,precond
+ type(xgBlock_t) :: xgx0,xgeigen,xgocc,xgresidu,precond
  ! arrays
  real(dp) :: tsec(2),chebfiMem(2)
  real(dp), allocatable :: l_gvnlxc(:,:)
@@ -379,12 +380,14 @@ subroutine chebfiwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
 
  call xgBlock_map_1d(xgresidu,resid,SPACE_R,nband,gpu_option=dtset%gpu_option)
 
+ call xgBlock_map_1d(xgocc,occ,SPACE_R,nband,gpu_option=dtset%gpu_option)
+
  call timab(tim_chebfiwf2,2,tsec)
 
  ABI_NVTX_START_RANGE(NVTX_CHEBFI2_INIT)
  call chebfi_init(chebfi,nband,l_npw*l_nspinor,dtset%tolwfr_diago,dtset%ecut, &
 &                 dtset%paral_kgb,l_mpi_enreg%bandpp, &
-&                 dtset%nline, space,1, &
+&                 dtset%nline, dtset%nbdbuf, space,1, &
 &                 l_mpi_enreg%comm_bandspinorfft,me_g0,me_g0_fft,l_paw,&
 &                 l_mpi_enreg%comm_spinorfft,l_mpi_enreg%comm_band,&
 &                 l_gs_hamk%gpu_option,gpu_kokkos_nthrd=dtset%gpu_kokkos_nthrd)
@@ -393,7 +396,7 @@ subroutine chebfiwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
 !################    RUUUUUUUN    #####################################
 !######################################################################
 
- call chebfi_run(chebfi,xgx0,getghc_gsc1,getBm1X,precond,xgeigen,xgresidu,nspinor)
+ call chebfi_run(chebfi,xgx0,getghc_gsc1,getBm1X,precond,xgeigen,xgocc,xgresidu,nspinor)
 
 !Free preconditionning since not needed anymore
  if(dtset%gpu_option==ABI_GPU_KOKKOS) then
