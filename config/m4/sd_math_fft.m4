@@ -315,7 +315,7 @@ AC_DEFUN([_SD_FFT_INIT_FLAVORS], [
   # Prepend FFTW3 if available
   if test "${sd_fftw3_init}" != "" -a "${sd_fftw3_enable}" != "no"; then
     if test "${tmp_linalg_has_mkl}" = ""; then
-      sd_fft_selected_flavors="fftw3-threads fftw3 ${sd_fft_selected_flavors}"
+      sd_fft_selected_flavors="fftw3-threads fftw3 aocl AOCL nvpl ${sd_fft_selected_flavors}"
     fi
   fi
 

@@ -26,7 +26,7 @@ module m_nvtx_data
 
   implicit none
 
-  integer, parameter :: NUMBER_OF_NVTX_REGIONS = 65
+  integer, parameter :: NUMBER_OF_NVTX_REGIONS = 95
   character(len=32), dimension(NUMBER_OF_NVTX_REGIONS) :: nvtx_names
   integer          , dimension(NUMBER_OF_NVTX_REGIONS) :: nvtx_ids
 
@@ -95,6 +95,36 @@ module m_nvtx_data
   integer, parameter :: NVTX_FORSTRNPS = 63
   integer, parameter :: NVTX_FORSTR_NONLOP = 64
   integer, parameter :: NVTX_VTOWFK_NONLOP = 65
+  integer, parameter :: NVTX_DFPT_SCF = 66
+  integer, parameter :: NVTX_DFPT_VTORHO = 67
+  integer, parameter :: NVTX_DFPT_VTOWFK = 68
+  integer, parameter :: NVTX_DFPT_CGWF = 69
+  integer, parameter :: NVTX_DFPT_CGWF_CORE = 70
+  integer, parameter :: NVTX_DFPT_LOOP = 71
+  integer, parameter :: NVTX_DFPT_NSTPAW = 72
+  integer, parameter :: NVTX_DFPT_NSTDY = 73
+  integer, parameter :: NVTX_DFPT_NSTWF = 74
+  integer, parameter :: NVTX_DFPT_NSTWF_BAND = 75
+  integer, parameter :: NVTX_GETGH1C = 76
+  integer, parameter :: NVTX_GETGH2C = 77
+  integer, parameter :: NVTX_DFPT_LOOP_DDK = 78
+  integer, parameter :: NVTX_DFPT_LOOP_EFELD = 79
+  integer, parameter :: NVTX_DFPT_LOOP_STRAIN = 80
+  integer, parameter :: NVTX_DFPT_LOOP_PHONON = 81
+  integer, parameter :: NVTX_FOURWF = 82
+  integer, parameter :: NVTX_NONLOP = 83
+  integer, parameter :: NVTX_DFPT_NSELT = 84
+  integer, parameter :: NVTX_RESPFN = 85
+  integer, parameter :: NVTX_DFPT_ELT = 86
+  integer, parameter :: NVTX_DFPT_ATM2FFT = 87
+  integer, parameter :: NVTX_DFPT_DYXC = 88
+  integer, parameter :: NVTX_D2FRNL = 89
+  integer, parameter :: NVTX_D2FRNL_KPT = 90
+  integer, parameter :: NVTX_DFPT_RHOFERMI = 91
+  integer, parameter :: NVTX_DFPT_WFKFERMI = 92
+  integer, parameter :: NVTX_GETGSC = 93
+  integer, parameter :: NVTX_DFPT_ACCRHO = 94
+  integer, parameter :: NVTX_DFPT_MKRHO = 95
 
 contains
 
@@ -169,7 +199,37 @@ contains
          & "RR_HEEV", &
          & "FORSTRNPS", &
          & "FORSTR_NONLOP", &
-         & "VTOWFK_NONLOP" &
+         & "VTOWFK_NONLOP", &
+         & "DFPT_SCF", &
+         & "DFPT_VTORHO", &
+         & "DFPT_VTOWFK", &
+         & "DFPT_CGWF", &
+         & "DFPT_CGWF_CORE", &
+         & "DFPT_LOOP", &
+         & "DFPT_NSTPAW", &
+         & "DFPT_NSTDY", &
+         & "DFPT_NSTWF", &
+         & "DFPT_NSTWF_BAND", &
+         & "GETGH1C", &
+         & "GETGH2C", &
+         & "DFPT_LOOP_DDK", &
+         & "DFPT_LOOP_EFELD", &
+         & "DFPT_LOOP_STRAIN", &
+         & "DFPT_LOOP_PHONON", &
+         & "FOURWF", &
+         & "NONLOP", &
+         & "DFPT_NSELT", &
+         & "RESPFN", &
+         & "DFPT_ELT", &
+         & "DFPT_ATM2FFT", &
+         & "DFPT_DYXC", &
+         & "D2FRNL", &
+         & "D2FRNL_KPT", &
+         & "DFPT_RHOFERMI", &
+         & "DFPT_WFKFERMI", &
+         & "GETGSC", &
+         & "DFPT_ACCRHO", &
+         & "DFPT_MKRHO" &
          ]
 
     nvtx_ids(1) = NVTX_MAIN_COMPUTATION
@@ -237,6 +297,36 @@ contains
     nvtx_ids(63)= NVTX_FORSTRNPS
     nvtx_ids(64)= NVTX_FORSTR_NONLOP
     nvtx_ids(65)= NVTX_VTOWFK_NONLOP
+    nvtx_ids(66)= NVTX_DFPT_SCF
+    nvtx_ids(67)= NVTX_DFPT_VTORHO
+    nvtx_ids(68)= NVTX_DFPT_VTOWFK
+    nvtx_ids(69)= NVTX_DFPT_CGWF
+    nvtx_ids(70)= NVTX_DFPT_CGWF_CORE
+    nvtx_ids(71)= NVTX_DFPT_LOOP
+    nvtx_ids(72)= NVTX_DFPT_NSTPAW
+    nvtx_ids(73)= NVTX_DFPT_NSTDY
+    nvtx_ids(74)= NVTX_DFPT_NSTWF
+    nvtx_ids(75)= NVTX_DFPT_NSTWF_BAND
+    nvtx_ids(76)= NVTX_GETGH1C
+    nvtx_ids(77)= NVTX_GETGH2C
+    nvtx_ids(78)= NVTX_DFPT_LOOP_DDK
+    nvtx_ids(79)= NVTX_DFPT_LOOP_EFELD
+    nvtx_ids(80)= NVTX_DFPT_LOOP_STRAIN
+    nvtx_ids(81)= NVTX_DFPT_LOOP_PHONON
+    nvtx_ids(82)= NVTX_FOURWF
+    nvtx_ids(83)= NVTX_NONLOP
+    nvtx_ids(84)= NVTX_DFPT_NSELT
+    nvtx_ids(85)= NVTX_RESPFN
+    nvtx_ids(86)= NVTX_DFPT_ELT
+    nvtx_ids(87)= NVTX_DFPT_ATM2FFT
+    nvtx_ids(88)= NVTX_DFPT_DYXC
+    nvtx_ids(89)= NVTX_D2FRNL
+    nvtx_ids(90)= NVTX_D2FRNL_KPT
+    nvtx_ids(91)= NVTX_DFPT_RHOFERMI
+    nvtx_ids(92)= NVTX_DFPT_WFKFERMI
+    nvtx_ids(93)= NVTX_GETGSC
+    nvtx_ids(94)= NVTX_DFPT_ACCRHO
+    nvtx_ids(95)= NVTX_DFPT_MKRHO
 
   end subroutine nvtx_init
 
