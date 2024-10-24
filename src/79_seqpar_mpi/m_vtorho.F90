@@ -1671,49 +1671,44 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
         ABI_MALLOC(occnd_tmp, (2*(paw_dmft%dmftbandf+1-paw_dmft%dmftbandi)))
 
-        ! Read new energy terms due to non diagonal occupations and DMFT.
-        open(unit=101, file=filename, status='old')
-        read(101, *) msg
-        write(std_out, *) "Reading 101: ", msg
+        ! Read the new occupations obtained from the DMFT calculation.
         do isppol=1,dtset%nsppol
+          open(unit=101, file=filename, status='old')
+          rewind(unit=101)
+          read(101, *) msg
           do ikpt=1,dtset%nkpt
             read(101, *) msg
-            write(std_out, *) "Reading 101: ", msg
             nband_k=dtset%nband(ikpt+(isppol-1)*dtset%nkpt)
             do iband=1,nband_k
               bdtot_index = iband+dtset%mband*(ikpt-1)+dtset%mband*dtset%nkpt*(isppol-1)
-              !do iband1=1,nband_k
-                !if (paw_dmft%band_in(iband) .and. paw_dmft%band_in(iband1)) then
-                if (paw_dmft%band_in(iband)) then
-                  read(101, *) occnd_tmp
-                  write(std_out, *) "occnd_tmp: ", msg
-                  write(std_out, *) occnd_tmp
-                  write(std_out, *) "occ: ", msg
-                  do iband1=1,paw_dmft%dmftbandf+1-paw_dmft%dmftbandi
-                    paw_dmft%occnd(1,iband,paw_dmft%dmftbandi-1+iband1,ikpt,isppol)= - occnd_tmp(2*(iband1-1)+1)/2
-                    if (paw_dmft%dmftbandi-1+iband1==iband) then
-                      write(std_out, *) "iband ", iband, "; iband1 ", iband1, "; occ ",  occ(bdtot_index)
-                      paw_dmft%occnd(1,iband,paw_dmft%dmftbandi-1+iband1,ikpt,isppol) = paw_dmft%occnd(1,iband,paw_dmft%dmftbandi-1+iband1,ikpt,isppol) + occ(bdtot_index)
-                    end if
-                    paw_dmft%occnd(2,iband,paw_dmft%dmftbandi-1+iband1,ikpt,isppol)=occnd_tmp(2*(iband1-1)+2)/2
-                  enddo
-                endif
-              !enddo
+              paw_dmft%occnd(1,iband,iband,ikpt,isppol) = occ(bdtot_index)
+              if (paw_dmft%band_in(iband)) then
+                read(101, *) occnd_tmp
+                ! Works in the presence of spin-symmetry, at this point
+                do iband1=1,paw_dmft%dmftbandf+1-paw_dmft%dmftbandi
+                  if (ikpt < 5) then
+                    write(std_out,*) "isppol, iband, iband1, occnd, occnd_tmp_re, occnd_tmp_im", isppol, iband, iband1, occ(bdtot_index), occnd_tmp(2*(iband1-1)+1), occnd_tmp(2*(iband1-1)+2)
+                  endif
+                  paw_dmft%occnd(1,iband,paw_dmft%dmftbandi-1+iband1,ikpt,isppol) = paw_dmft%occnd(1,iband,paw_dmft%dmftbandi-1+iband1,ikpt,isppol) + occnd_tmp(2*(iband1-1)+1)
+                  ! if (paw_dmft%dmftbandi-1+iband1==iband) then
+                  !   paw_dmft%occnd(1,iband,paw_dmft%dmftbandi-1+iband1,ikpt,isppol) = paw_dmft%occnd(1,iband,paw_dmft%dmftbandi-1+iband1,ikpt,isppol) + occ(bdtot_index)
+                  ! end if
+                  paw_dmft%occnd(2,iband,paw_dmft%dmftbandi-1+iband1,ikpt,isppol) = + occnd_tmp(2*(iband1-1)+2)
+                enddo
+              endif
             end do
           end do
+          close(101)
         end do
-        close(101)
 
         ABI_FREE(occnd_tmp)
 
-        write(std_out, *) "paw_dmft%occnd Re"
-        do iband=1,dtset%nband(1)
-          write(std_out, *) paw_dmft%occnd(1,iband,:,1,1)
-        enddo
-        write(std_out, *) "paw_dmft%occnd Im"
-        do iband=1,dtset%nband(1)
-          write(std_out, *) paw_dmft%occnd(2,iband,:,1,1)
-        enddo
+        write(msg, '(6a)') &
+        & ch10, '  ================================================== ',&
+        & ch10, '  =====  DMFT  :  END                       ======== ',&
+        & ch10, '  ================================================== '
+        call wrtout(std_out,msg,'COLL')
+        call flush_unit(std_out)
 
 #else
         ABI_ERROR('Cannot use use_dmft == 10 with #HAVE_PYTHON_INVOCATION set to false.')
@@ -1752,6 +1747,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
      end if
 
 !    Compute new energy terms due to non diagonal occupations and DMFT.
+!    It uses the new occupations stored in paw_dmft%occnd.
      bdtot_index=1
      do isppol=1,dtset%nsppol
        do ikpt=1,dtset%nkpt
@@ -1824,6 +1820,8 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        call extfpmd%compute_entropy(energies%entropy_extfpmd,energies%e_fermie,dtset%nkpt,&
 &       dtset%nsppol,dtset%nspinor,dtset%wtk,dtset%nband)
      end if
+
+     write(std_out, *) "paw_dmft%use_sc_dmft = ", paw_dmft%use_sc_dmft
 
      if(paw_dmft%use_dmft==1) then
        energies%e_kinetic = energies%e_kinetic -ekindmft+ekindmft2
