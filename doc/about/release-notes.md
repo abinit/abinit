@@ -43,7 +43,11 @@ In the previous release 10.0, two implementations (OpenMP or KOKKOS+CUDA) for gr
 had been made available.
 
 In the present release 10.2, the Density-Functional Perturbation Theory [[optdriver]]=1
-has been ported, using OpenMP.  Numerous tests are available, [[test:gpu_omp_11]] to [[test:gpu_omp_25]]
+has been ported, using OpenMP, along with the following perturbations:
+- phonons ([[rfphon]])
+- electric field ([[rfelfd]])
+- strains ([[rfstrs]])
+Numerous tests are available, [[test:gpu_omp_11]] to [[test:gpu_omp_25]]
 
 See the description of the GPU possibilities of ABINIT in the documentation, input variable [[gpu_option]]=2 for the OpenMP capabilities.
 For the description of the modifications of ABINIT, see the Merge Requests (MR) below.
