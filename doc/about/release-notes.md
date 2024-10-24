@@ -77,27 +77,28 @@ By M. Giantomassi (MR 1006) and F. Bruneval (MR1024).
 **B.4** Speed-up of the calculation (PAW as well as norm-conserving), thanks to cprj_in_memory. 
 
 The coefficients of the wavefunctions giving the in-sphere contribution, denoted "cprj", can now be stored in memory,
-thanks to the input variable [[cprj_in_memory]]. This brings speed-up of the PAW calculations (on the order of 20%-30%).
-There are many tests of this functionality, [[test:v10_10]] to  [[test:v10_18]],  [[test:paral_35]] to [[test:paral_40]],
+thanks to the input variable [[cprj_in_memory]].
+LOBPCG ([[wfoptalg]]=114) and Chebyshev filtering ([[wfoptalg]]=111) can be accelerated using this option.
+There are many tests of this functionality, [[test:v10_10]] to [[test:v10_18]], [[test:paral_35]] to [[test:paral_40]],
  [[test:paral_48]] and  [[test:paral_49]], and  [[test:v9_71]] to  [[test:v9_74]].
 However, as usual, the users are advised to check for themselves the results from turning on this new implementation (still mentioned as being "in development").
 
+Many parts are now computed with matrix-matrix multiplications, done with BLAS routines ("gemm").
+As a consequence, the efficiency of the implementation strongly depends on the BLAS library, which has to be multi-threaded if used with OpenMP. 
+
 Available only for the ground state. See the other limitations in the documentation of [[cprj_in_memory]].
 
-More detailed explanation ...
-The routines use a new module (xg_nonlop) in which all data needed to compute non-local operations are stored, using the xg_tools library.
-Main xg_nonlop routines (equivalent of opernla/b/c/d) are based on matrix-matrix operations.
-For now xg_nonlop is used only at the ground state level, but it is used to compute forces (with [[optforces]]=1 or 2) and stress.
-It is available with :
-PAW, [[nsppol]]=1 or2, [[nspinor]]=1 or 2, [[istwfk]]=all values, MPI ([[np_spkpt]]+[[npband]]) + openMP.
+It is available for both PAW and norm-conserving (NC) pseudopotentials, but with few constraints for the latter.
+Indeed, NC can be used only with [[useylm]]=1 (set automatically if [[cprj_in_memory]]=1).
+Also [[nspinor]]=2 does not work properly (but works well for PAW). This case is forbidden at the moment (test paral_50 is not activated).
 
-It is also available for norm-conserving pseudopotentials, but with the following constraints :
-[[useylm]] must be 1 (set automatically if [[cprj_in_memory]]=1), Legendre polynomials are not implemented.
-[[nspinor]]=2 does not work properly, most probably because SOC is not implemented with [[useylm]]=1 (but works well for PAW).
-This case is forbidden at the moment (test paral_50 is not activated).
-At last : ABINIT also contains a small fix of [[tolwfr_diago]], which was not used in lobpcg ([[tolwfr]] was used instead). This has a small impact on few references.
+At last : ABINIT also contains a small fix of [[tolwfr_diago]], which was not used in lobpcg ([[tolwfr]] was used instead).
 
-SHOULD DOCUMENT xg_nonlop_option input variable, used in  [[test:paral_35]],  [[test:paral_38]] and  [[test:v10_10]].
+In the case of Chebyshev filtering, two implementations are available, controlled by [[xg_nonlop_option]] (see [[test:paral_35]], [[test:paral_38]]).
+In practice, only the default option has good performance.
+
+In the case of Chebyshev filtering, two implementations are available, controlled by [[xg_nonlop_option]] (see [[test:paral_35]], [[test:paral_38]]).
+In practice, only the default option has good performance.
 
 By L. Baguet (MR 1058)
 
@@ -214,11 +215,12 @@ By J.Zwanziger (MR993, MR1016, MR1051, MR1052)
 
 
 **D.5** Miscellaneous developments for ground state.
-This includes the rework of [[istwfk]]=2 with xg_tools (both CPU and GPU).
-and the extension of [[istwfk]]>2 to lobpcg2 and chebfi2 (but works only with DFTI - the FFT from MKL).
-Tested in [[test:v10_03]], [[test:v10_04]], [[test:paral_44]] and [[test:paral_45]] for DFTI.
+
+This includes the rework of [[istwfk]]=2 with xg_tools (both CPU and GPU) and the extension of [[istwfk]]>2 to lobpcg2 and chebfi2
+(but works only with DFTI - the FFT from MKL).
+Tested in [[test:v10_03]], [[test:v10_04]], [[test:paral_44]] and [[test:paral_45]] for DFTI. 
 Same inputs are tested without DFTI in [[test:v10_05]], [[test:v10_06]], [[test:paral_46]] and [[test:paral_47]], but they use only [[istwfk]]=1 and 2.
-The Chebicheff filtering algorithm has been generalized to PAW with Spin-Orbit Coupling
+The Chebicheff filtering algorithm has been generalized to PAW with Spin-Orbit Coupling.
 See [[test:paral_44]] to [[test:paral_47]], as well as [[test:v10_03]] to [[test:v10_06]].
 
 By L. Baguet (MR 1014,1021,1022)
