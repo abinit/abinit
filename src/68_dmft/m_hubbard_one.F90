@@ -134,7 +134,6 @@ subroutine hubbard_one(cryst_struc,green,hu,paw_dmft,pawprtvol,hdc,weiss)
 !Allocations: levels and eigenvectors
 !======================================
  ABI_MALLOC(level_diag,(natom))
- !ABI_MALLOC(eigvectmatlu,(natom,nsppol))
  ABI_MALLOC(eigvectmatlu,(natom))
  ABI_MALLOC(udens_atoms,(natom))
  call init_matlu(natom,nspinor,nsppol,paw_dmft%lpawu,level_diag)
@@ -143,11 +142,6 @@ subroutine hubbard_one(cryst_struc,green,hu,paw_dmft,pawprtvol,hdc,weiss)
  do iatom=1,cryst_struc%natom
    lpawu=paw_dmft%lpawu(iatom)
    if(lpawu/=-1) then
-     !tndim=nspinor*(2*lpawu+1)
-     !do isppol=1,nsppol
-     !  ABI_MALLOC(eigvectmatlu(iatom,isppol)%value,(tndim,tndim))
-     !end do
-     !ABI_MALLOC(udens_atoms(iatom)%value,(2*(2*lpawu+1),2*(2*lpawu+1)))
      level_diag(iatom)%mat=czero
    end if
  end do
@@ -350,15 +344,6 @@ subroutine hubbard_one(cryst_struc,green,hu,paw_dmft,pawprtvol,hdc,weiss)
  call destroy_matlu(udens_atoms,natom)
  call destroy_matlu(eigvectmatlu,natom)
  ABI_FREE(level_diag)
- !do iatom=1,cryst_struc%natom
- !  lpawu=paw_dmft%lpawu(iatom)
- !  if(lpawu/=-1) then
- !    ABI_FREE(udens_atoms(iatom)%value)
- !    do isppol=1,nsppol
- !      ABI_FREE(eigvectmatlu(iatom,isppol)%value)
- !    end do
- !  end if
- !end do
  ABI_FREE(eigvectmatlu)
  ABI_FREE(udens_atoms)
 !!***
@@ -578,8 +563,8 @@ subroutine green_atomic_hubbard(cryst_struc,green_hubbard,hu,level_diag,paw_dmft
              do jelec=1,nelec
                e_nelec(nelec)%config(iconfig)= e_nelec(nelec)%config(iconfig)   &
 !              &               + hu(cryst_struc%typat(iatom))%udens(occ_level(nelec)%repart(iconfig,ielec), &
-&               + udens_atoms(iatom)%mat(occ_level(nelec)%repart(iconfig,ielec), &
-&               occ_level(nelec)%repart(iconfig,jelec),1)/2.d0 ! udens(i,i)=0
+&               + dble(udens_atoms(iatom)%mat(occ_level(nelec)%repart(iconfig,ielec), &
+&               occ_level(nelec)%repart(iconfig,jelec),1))/2.d0 ! udens(i,i)=0
 !              write(std_out,*) ielec,occ_level(nelec)%repart(iconfig,ielec)
 !              write(std_out,*) jelec,occ_level(nelec)%repart(iconfig,jelec)
 !              write(std_out,*)hu(cryst_struc%typat(iatom))%udens(occ_level(nelec)%repart(iconfig,ielec), &
