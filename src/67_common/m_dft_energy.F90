@@ -279,7 +279,7 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
  integer :: option_rhoij,paw_opt,signs,spaceComm,tim_mkrho,tim_nonlop
  logical :: add_tfw_,paral_atom,use_timerev,use_zeromag,with_vxctau
  logical :: non_magnetic_xc,wvlbigdft=.false.
- real(dp) :: dotr,doti,eeigk,ekk,enlk,evxc,e_xcdc_vxctau,ucvol,ucvol_local,vxcavg
+ real(dp) :: dotr,doti,eeigk,ekk,enlk,evxc,e_xcdc_vxctau,ucvol,ucvol_local,vxcavg,bigsxc
  !character(len=500) :: message
  type(gs_hamiltonian_type) :: gs_hamk
  type(xcdata_type) :: xcdata
@@ -351,7 +351,6 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
  ipositron=electronpositron_calctype(electronpositron)
  add_tfw_=.false.;if (present(add_tfw)) add_tfw_=add_tfw
  non_magnetic_xc=(dtset%usepaw==1.and.mod(abs(dtset%usepawu),10)==4)
-
  if (ipositron/=1) then
 
    if (dtset%icoulomb == 0) then
@@ -363,14 +362,14 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
 !    to be adjusted for the call to rhotoxc
      nk3xc=1
      if (ipositron==0) then
-       call rhotoxc(energies%e_xc,kxc, &
+       call rhotoxc(energies%e_xc,energies%entropy_xc,kxc, &
 &       mpi_enreg,nfftf,ngfftf,nhat,psps%usepaw,nhatgr,nhatgrdim, &
 &       nkxc,nk3xc,non_magnetic_xc,n3xccc,option,rhor,rprimd,strsxc, &
 &       usexcnhat,vxc,vxcavg,xccc3d,xcdata,taur=taur,vhartr=vhartr, &
 &       vxctau=vxctau_,exc_vdw_out=energies%e_xc_vdw,add_tfw=add_tfw_,&
 &       xcctau3d=xcctau3d)
      else
-       call rhotoxc(energies%e_xc,kxc, &
+       call rhotoxc(energies%e_xc,energies%entropy_xc,kxc, &
 &       mpi_enreg,nfftf,ngfftf,nhat,psps%usepaw,nhatgr,nhatgrdim, &
 &       nkxc,nk3xc,non_magnetic_xc,n3xccc,option,rhor,rprimd,strsxc, &
 &       usexcnhat,vxc,vxcavg,xccc3d,xcdata, &

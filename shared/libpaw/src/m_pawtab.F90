@@ -333,6 +333,9 @@ MODULE m_pawtab
   real(dp) :: exccore
    ! Exchange-correlation energy for the core density
 
+  real(dp) :: entropyxccore
+   ! Exchange-correlation entropy for the core density
+
   real(dp) :: exchmix
    ! mixing of exact exchange; default is 0.25 (PBE0)
 
@@ -1294,6 +1297,8 @@ subroutine pawtab_print(Pawtab,header,unit,prtvol,mode_paral)
   end if
   write(msg,'(a,es16.8)')'  XC energy for the core density ..................',Pawtab(ityp)%exccore
   call wrtout(my_unt,msg,my_mode)
+  write(msg,'(a,es16.8)')'  XC entropy for the core density .................',Pawtab(ityp)%entropyxccore
+  call wrtout(my_unt,msg,my_mode)
   write(msg,'(a,es16.8)')'  Lamb shielding due to core density ..............',Pawtab(ityp)%lamb_shielding
   call wrtout(my_unt,msg,my_mode)
   write(msg,'(a,es16.8)')'  Radius of the PAW sphere ........................',Pawtab(ityp)%rpaw
@@ -2243,6 +2248,7 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
    list_dpr(ii)=pawtab%dtaucdq0  ;ii=ii+1
    list_dpr(ii)=pawtab%ex_cc   ;ii=ii+1
    list_dpr(ii)=pawtab%exccore  ;ii=ii+1
+   list_dpr(ii)=pawtab%entropyxccore  ;ii=ii+1
    list_dpr(ii)=pawtab%lamb_shielding  ;ii=ii+1
    list_dpr(ii)=pawtab%rpaw  ;ii=ii+1
    list_dpr(ii)=pawtab%rshp  ;ii=ii+1
@@ -2492,6 +2498,7 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
    pawtab%dtaucdq0=list_dpr(ii)  ;ii=ii+1
    pawtab%ex_cc=list_dpr(ii)  ;ii=ii+1
    pawtab%exccore=list_dpr(ii)  ;ii=ii+1
+   pawtab%entropyxccore=list_dpr(ii)  ;ii=ii+1
    pawtab%lamb_shielding=list_dpr(ii)  ;ii=ii+1
    pawtab%rpaw=list_dpr(ii)  ;ii=ii+1
    pawtab%rshp=list_dpr(ii)  ;ii=ii+1

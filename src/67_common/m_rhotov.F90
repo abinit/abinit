@@ -209,7 +209,7 @@ subroutine rhotov(constrained_dft,dtset,energies,gprimd,grcondft,gsqcut,intgres,
  integer :: mpi_comm_sphgrid,ixc_current
 !integer :: ii,jj,kk,ipt,nx,ny,nz           !SPr: debug
 !real(dp):: rx,ry,rz                        !SPr: debug
- real(dp) :: doti,e_xcdc_vxctau,bigtsxc
+ real(dp) :: doti,e_xcdc_vxctau,bigsxc
  logical :: add_tfw_,calc_xcdc,non_magnetic_xc,with_vxctau
  logical :: is_hybrid_ncpp,wvlbigdft=.false.
  type(xcdata_type) :: xcdata
@@ -290,31 +290,25 @@ subroutine rhotov(constrained_dft,dtset,energies,gprimd,grcondft,gsqcut,intgres,
      call timab(941,1,tsec)
      if (ipositron==0) then
        if(.not.is_hybrid_ncpp .or. mod(dtset%fockoptmix,100)==11)then
-         call rhotoxc(energies%e_xc,kxc,mpi_enreg,nfft,ngfft,&
+         call rhotoxc(energies%e_xc,energies%entropy_xc,kxc,mpi_enreg,nfft,ngfft,&
 &         nhat,usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,non_magnetic_xc,n3xccc,optxc,&
 &         rhor,rprimd,strsxc,usexcnhat,vxc,vxcavg,xccc3d,xcdata,&
-&         bigtsxc=bigtsxc,taur=taur,vhartr=vhartr,vxctau=vxctau_,add_tfw=add_tfw_,xcctau3d=xcctau3d)
+&         taur=taur,vhartr=vhartr,vxctau=vxctau_,add_tfw=add_tfw_,xcctau3d=xcctau3d)
          if(mod(dtset%fockoptmix,100)==11)then
            energies%e_xc=energies%e_xc*dtset%auxc_scal
+           energies%entropy_xc=energies%entropy_xc*dtset%auxc_scal
            vxc(:,:)=vxc(:,:)*dtset%auxc_scal
          end if
        else
-         call xchybrid_ncpp_cc(dtset,energies%e_xc,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,&
+         call xchybrid_ncpp_cc(dtset,energies%e_xc,energies%entropy_xc,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,&
 &         strsxc,vxcavg,xccc3d,vxc=vxc)
        end if
      else
-       call rhotoxc(energies%e_xc,kxc,mpi_enreg,nfft,ngfft,&
+       call rhotoxc(energies%e_xc,energies%entropy_xc,kxc,mpi_enreg,nfft,ngfft,&
 &       nhat,usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,non_magnetic_xc,n3xccc,optxc,&
 &       rhor,rprimd,strsxc,usexcnhat,vxc,vxcavg,xccc3d,xcdata,&
-&       bigtsxc=bigtsxc,taur=taur,vhartr=vhartr,vxctau=vxctau_,add_tfw=add_tfw_,&
+&       taur=taur,vhartr=vhartr,vxctau=vxctau_,add_tfw=add_tfw_,&
 &       electronpositron=electronpositron,xcctau3d=xcctau3d)
-     end if
-
-!    For finite temperature exchange correlation functionals, add exchange-correlation entropy
-     if(abs(dtset%tphysel)<tol10) then
-       energies%entropy=energies%entropy+bigtsxc/dtset%tsmear
-     else
-       energies%entropy=energies%entropy+bigtsxc/dtset%tphysel
      end if
      
      call timab(941,2,tsec)
@@ -342,7 +336,7 @@ subroutine rhotov(constrained_dft,dtset,energies,gprimd,grcondft,gsqcut,intgres,
    end if
  else
    call timab(944,1,tsec)
-   energies%e_hartree=zero;energies%e_xc=zero
+   energies%e_hartree=zero;energies%e_xc=zero;energies%entropy_xc=zero
    call rhohxcpositron(electronpositron,gprimd,kxc,mpi_enreg,nfft,ngfft,nhat,nkxc,dtset%nspden,n3xccc,&
 &   dtset%paral_kgb,rhor,strsxc,ucvol,usexcnhat,usepaw,vhartr,vxc,vxcavg,xccc3d,dtset%xc_denpos)
    call timab(944,2,tsec)

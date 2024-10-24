@@ -216,7 +216,7 @@ subroutine prcref(atindx,dielar,dielinv,&
  integer :: coredens_method,cplex,dielop,iatom,ier,ifft,ii,index,ipw1
  integer :: ipw2,iq,iq0,ispden,klmn,kmix,n1,n2,n3,n3xccc,nfftot,nk3xc,optatm
  integer :: optdyfr,opteltfr,optgr,option,optn,optn2,optstr,optv,vloc_method
- real(dp) :: ai,ar,diemix,diemixmag,eei,enxc
+ real(dp) :: ai,ar,diemix,diemixmag,eei,bigexc,bigsxc
  real(dp) :: mixfac
  real(dp) :: mixfac_eff,mixfacmag,ucvol,vxcavg
  logical :: computediel,non_magnetic_xc
@@ -624,7 +624,7 @@ subroutine prcref(atindx,dielar,dielinv,&
 !    Prepare the call to rhotoxc
      call xcdata_init(xcdata,dtset=dtset)
      nk3xc=1 ; non_magnetic_xc=(dtset%usepaw==1.and.mod(abs(dtset%usepawu),10)==4)
-     call rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft,&
+     call rhotoxc(bigexc,bigsxc,kxc,mpi_enreg,nfft,ngfft,&
 &     work,0,work,0,nkxc,nk3xc,non_magnetic_xc,n3xccc,option,rhor_wk,rprimd,strsxc,1,&
 &     vxc_wk,vxcavg,xccc3d,xcdata,vhartr=vhartr_wk)
      ABI_FREE(xccc3d)
@@ -853,7 +853,7 @@ end subroutine prcref
  integer :: coredens_method,cplex,dielop,iatom,ier,ifft,ii,index,ipw1
  integer :: ipw2,ispden,klmn,kmix,n1,n2,n3,n3xccc,nfftot,nk3xc,optatm
  integer :: optdyfr,opteltfr,optgr,option,optn,optn2,optstr,optv,vloc_method
- real(dp) :: ai,ar,diemix,diemixmag,eei,enxc
+ real(dp) :: ai,ar,diemix,diemixmag,eei,bigexc,bigsxc
  real(dp) :: mixfac
  real(dp) :: mixfac_eff,mixfacmag,ucvol,vxcavg
  logical :: computediel,non_magnetic_xc
@@ -1247,7 +1247,7 @@ end subroutine prcref
    call xcdata_init(xcdata,dtset=dtset)
    nk3xc=1 ; non_magnetic_xc=(dtset%usepaw==1.and.mod(abs(dtset%usepawu),10)==4)
    ABI_MALLOC(work,(0))
-   call rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft,&
+   call rhotoxc(bigexc,bigsxc,kxc,mpi_enreg,nfft,ngfft,&
 &   work,0,work,0,nkxc,nk3xc,non_magnetic_xc,n3xccc,option,rhor_wk,rprimd,strsxc,1,&
 &   vxc_wk,vxcavg,xccc3d,xcdata,vhartr=vhartr_wk)
    ABI_FREE(work)

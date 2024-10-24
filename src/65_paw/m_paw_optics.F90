@@ -1877,7 +1877,7 @@ CONTAINS  !=====================================================================
  integer :: lm_size,ln_size,ln_size_j,ln_size_cor,nspinor_cor
  integer :: ilmn,ilm,iln,jl,jm,jm_re,jm_im,jlmn,jlm,jlm_re,jlm_im,jln,js,klm_re,klm_im
  logical :: my_atmtab_allocated,paral_atom
- real(dp) :: avg,cgc,compch_sph_dum,eexc_dum,eexcdc_dum,jmj
+ real(dp) :: avg,cgc,compch_sph_dum,eexc_dum,ssxc_dum,eexcdc_dum,jmj
  real(dp) :: fact_re,fact_im,gx_re,gx_im,gy_re,gy_im,gz_re,gz_im,if3
  character(len=500) :: msg
 !arrays
@@ -2015,14 +2015,14 @@ CONTAINS  !=====================================================================
    if (pawxcdev/=0) then
      ABI_MALLOC(vxc,(mesh_size,lm_size,nspden))
      vxc=zero
-     call pawxcm(pawtb%coredens,eexc_dum,eexcdc_dum,idum,hyb_mixing_,ixc,kxc_dum,lm_size,&
+     call pawxcm(pawtb%coredens,eexc_dum,eexcdc_dum,ssxc_dum,idum,hyb_mixing_,ixc,kxc_dum,lm_size,&
 &         lmselect,nhat_dum,nkxc,.false.,mesh_size,nspden,option,pawang,pawrd,&
 &         pawxcdev,rho1,usecore,usenhat,vxc,xclevel,xc_denpos,el_temp)
      potsph(1:mesh_size)=half*(vxc(1:mesh_size,1,1)+vxc(1:mesh_size,1,nspden))
    else
      ABI_MALLOC(vxc,(mesh_size,pawang%angl_size,nspden))
      vxc=zero
-     call pawxc(pawtb%coredens,eexc_dum,eexcdc_dum,hyb_mixing_,ixc,kxc_dum,k3xc_dum,&
+     call pawxc(pawtb%coredens,eexc_dum,eexcdc_dum,ssxc_dum,hyb_mixing_,ixc,kxc_dum,k3xc_dum,&
 &         lm_size,lmselect,nhat_dum,nkxc,nkxc,.false.,mesh_size,nspden,option,pawang,&
 &         pawrd,rho1,usecore,usenhat,vxc,xclevel,xc_denpos,el_temp,&
 &         coretau=pawtb%coretau,taur=tau1,xc_taupos=xc_taupos)

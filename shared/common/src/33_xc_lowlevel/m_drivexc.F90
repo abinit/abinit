@@ -864,7 +864,7 @@ end subroutine mkdenpos
 !!
 !! OUTPUT
 !!  exc(npts)=exchange-correlation energy density (hartree)
-!!  tsxc(npts)=exchange-correlation entropy energy density (hartree)
+!!  sxc(npts)=exchange-correlation entropy density
 !!  vxcrho(npts,nspden)= (d($\rho$*exc)/d($\rho_up$)) (hartree)
 !!                  and  (d($\rho$*exc)/d($\rho_down$)) (hartree)
 !!  === Optional output arguments ===
@@ -915,7 +915,7 @@ end subroutine mkdenpos
 !! SOURCE
 
 subroutine drivexc(ixc,order,npts,nspden,usegradient,uselaplacian,usekden,&
-&          rho_updn,exc,tsxc,vxcrho,nvxcgrho,nvxclrho,nvxctau,ndvxc,nd2vxc,el_temp, & ! mandatory arguments
+&          rho_updn,exc,sxc,vxcrho,nvxcgrho,nvxclrho,nvxctau,ndvxc,nd2vxc,el_temp, & ! mandatory arguments
 &          grho2_updn,vxcgrho,lrho_updn,vxclrho,tau_updn,vxctau,dvxc,d2vxc, &         ! optional arguments
 &          exexch,fxcT,hyb_mixing,xc_funcs)                                           ! optional parameters
 
@@ -931,7 +931,7 @@ subroutine drivexc(ixc,order,npts,nspden,usegradient,uselaplacian,usekden,&
  real(dp),intent(in) :: rho_updn(npts,nspden)
  real(dp),intent(in),optional :: grho2_updn(npts,(2*nspden-1)*usegradient)
  real(dp),intent(in),optional :: lrho_updn(npts,nspden*uselaplacian),tau_updn(npts,nspden*usekden)
- real(dp),intent(out) :: exc(npts),tsxc(npts),vxcrho(npts,nspden)
+ real(dp),intent(out) :: exc(npts),sxc(npts),vxcrho(npts,nspden)
  real(dp),intent(out),optional :: dvxc(npts,ndvxc),d2vxc(npts,nd2vxc),fxcT(:)
  real(dp),intent(out),optional :: vxcgrho(npts,nvxcgrho),vxclrho(npts,nvxclrho),vxctau(npts,nvxctau)
  type(libxc_functional_type),intent(inout),optional :: xc_funcs(2)
@@ -1484,7 +1484,7 @@ subroutine drivexc(ixc,order,npts,nspden,usegradient,uselaplacian,usekden,&
 &     'ixc=',ixc,'ndvxcdgr=',nvxcgrho
      ABI_BUG(message)
    end if
-   call xckdt16(vxcgrho,exc,grho2_updn,ixc,npts,nspden,rhotot,rspts,el_temp,vxcrho)
+   call xckdt16(vxcgrho,exc,sxc,grho2_updn,ixc,npts,nspden,rhotot,rspts,el_temp,vxcrho)
 
 !>>>>> GGA counterpart of the B3LYP functional
  else if(ixc==1402000) then

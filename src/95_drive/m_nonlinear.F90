@@ -179,7 +179,7 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,pawang,pawra
  logical :: is_dfpt=.true.,nmxc
  real(dp),parameter :: k0(3)=(/zero,zero,zero/)
  real(dp) :: boxcut,compch_fft,compch_sph,ecore,ecut_eff,ecutdg_eff,ecutf
- real(dp) :: eei,epaw,epawdc,enxc,etot,fermie,fermih
+ real(dp) :: eei,epaw,epawdc,bigexc,bigsxc,etot,fermie,fermih
  real(dp) :: gsqcut,gsqcut_eff,gsqcutc_eff
  real(dp) :: rdum,residm,ucvol,vxcavg,el_temp
  character(len=500) :: message
@@ -878,7 +878,7 @@ end if
 
  call xcdata_init(xcdata,dtset=dtset)
  nmxc=(dtset%usepaw==1.and.mod(abs(dtset%usepawu),10)==4)
- call rhotoxc(enxc,kxc,mpi_enreg,nfftf,ngfftf,&
+ call rhotoxc(bigexc,bigsxc,kxc,mpi_enreg,nfftf,ngfftf,&
 & nhat,nhatdim,nhatgr,nhatgrdim,nkxc,nk3xc,nmxc,n3xccc,option,rhor,&
 & rprimd,strsxc,usexcnhat,vxc,vxcavg,xccc3d,xcdata,k3xc=k3xc,vhartr=vhartr)
 

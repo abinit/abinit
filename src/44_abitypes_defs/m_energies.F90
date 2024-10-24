@@ -36,7 +36,7 @@ module m_energies
  private
 
 !public parameter
- integer, public, parameter :: n_energies=38
+ integer, public, parameter :: n_energies=39
 
 !!***
 
@@ -71,13 +71,17 @@ module m_energies
   real(dp) :: e_eigenvalues=zero
    ! Sum of the eigenvalues - Band energy (Hartree)
    ! (valid for double-counting scheme dtset%optene == 1)
-
+  
   real(dp) :: e_entropy=zero
-   ! Entropy energy due to the occupation number smearing (if metal)
-   ! Value is multiplied by dtset%tsmear, see %entropy for the entropy alone.
-   ! (valid for metals, dtset%occopt>=3 .and. dtset%occopt<=8)
-
+  ! Entropy energy due to the occupation number smearing (if metal)
+  ! Value is multiplied by dtset%tsmear, see %entropy for the entropy alone.
+  ! (valid for metals, dtset%occopt>=3 .and. dtset%occopt<=8)
+  
   real(dp) :: entropy=zero
+  
+  real(dp) :: entropy_xc=zero
+   ! Exchange-correlation contribution to the entropy (for finite-temperature xc functionals).
+   ! This quantity is part of the total entropy (see %entropy).
 
   real(dp) :: e_elecfield=zero
    ! Electric enthalpy, by adding both ionic and electronic contributions
@@ -233,6 +237,7 @@ subroutine energies_init(energies)
  energies%e_entropy     = zero
  energies%e_exactX      = zero
  energies%entropy       = zero
+ energies%entropy_xc    = zero
  energies%e_ewald       = zero
  energies%e_extfpmd     = zero
  energies%edc_extfpmd   = zero
@@ -303,6 +308,7 @@ end subroutine energies_init
  energies_out%edc_electronpositron = energies_in%edc_electronpositron
  energies_out%e0_electronpositron  = energies_in%e0_electronpositron
  energies_out%entropy              = energies_in%entropy
+ energies_out%entropy_xc           = energies_in%entropy_xc
  energies_out%e_entropy            = energies_in%e_entropy
  energies_out%e_ewald              = energies_in%e_ewald
  energies_out%e_exactX             = energies_in%e_exactX
@@ -383,34 +389,35 @@ end subroutine energies_copy
    energies_array(8)=energies%edc_electronpositron
    energies_array(9)=energies%e0_electronpositron
    energies_array(10)=energies%entropy
-   energies_array(11)=energies%e_entropy
-   energies_array(12)=energies%e_ewald
-   energies_array(13)=energies%e_exactX
-   energies_array(14)=energies%e_extfpmd
-   energies_array(15)=energies%edc_extfpmd
-   energies_array(16)=energies%e_fermie
-   energies_array(17)=energies%e_fock
-   energies_array(18)=energies%e_fockdc
-   energies_array(19)=energies%e_fock0
-   energies_array(20)=energies%e_hartree
-   energies_array(21)=energies%e_hybcomp_E0
-   energies_array(22)=energies%e_hybcomp_v0
-   energies_array(23)=energies%e_hybcomp_v
-   energies_array(24)=energies%e_kinetic
-   energies_array(25)=energies%e_localpsp
-   energies_array(26)=energies%e_magfield
-   energies_array(27)=energies%e_monopole
-   energies_array(28)=energies%e_nlpsp_vfock
-   energies_array(29)=energies%e_paw
-   energies_array(30)=energies%e_pawdc
-   energies_array(31)=energies%e_sicdc
-   energies_array(32)=energies%e_vdw_dftd
-   energies_array(33)=energies%e_xc
-   energies_array(34)=energies%e_xcdc
-   energies_array(35)=energies%e_xc_vdw
-   energies_array(36)=energies%h0
-   energies_array(37)=energies%e_zeeman
-   energies_array(38)=energies%e_nucdip
+   energies_array(11)=energies%entropy_xc
+   energies_array(12)=energies%e_entropy
+   energies_array(13)=energies%e_ewald
+   energies_array(14)=energies%e_exactX
+   energies_array(15)=energies%e_extfpmd
+   energies_array(16)=energies%edc_extfpmd
+   energies_array(17)=energies%e_fermie
+   energies_array(18)=energies%e_fock
+   energies_array(19)=energies%e_fockdc
+   energies_array(20)=energies%e_fock0
+   energies_array(21)=energies%e_hartree
+   energies_array(22)=energies%e_hybcomp_E0
+   energies_array(23)=energies%e_hybcomp_v0
+   energies_array(24)=energies%e_hybcomp_v
+   energies_array(25)=energies%e_kinetic
+   energies_array(26)=energies%e_localpsp
+   energies_array(27)=energies%e_magfield
+   energies_array(28)=energies%e_monopole
+   energies_array(29)=energies%e_nlpsp_vfock
+   energies_array(30)=energies%e_paw
+   energies_array(31)=energies%e_pawdc
+   energies_array(32)=energies%e_sicdc
+   energies_array(33)=energies%e_vdw_dftd
+   energies_array(34)=energies%e_xc
+   energies_array(35)=energies%e_xcdc
+   energies_array(36)=energies%e_xc_vdw
+   energies_array(37)=energies%h0
+   energies_array(38)=energies%e_zeeman
+   energies_array(39)=energies%e_nucdip
  end if
 
  if (option==-1) then
@@ -424,34 +431,35 @@ end subroutine energies_copy
    energies%edc_electronpositron = energies_array(8)
    energies%e0_electronpositron  = energies_array(9)
    energies%entropy              = energies_array(10)
-   energies%e_entropy            = energies_array(11)
-   energies%e_ewald              = energies_array(12)
-   energies%e_exactX             = energies_array(13)
-   energies%e_extfpmd            = energies_array(14)
-   energies%edc_extfpmd          = energies_array(15)
-   energies%e_fermie             = energies_array(16)
-   energies%e_fock               = energies_array(17)
-   energies%e_fockdc             = energies_array(18)
-   energies%e_fock0              = energies_array(19)
-   energies%e_hartree            = energies_array(20)
-   energies%e_hybcomp_E0         = energies_array(21)
-   energies%e_hybcomp_v0         = energies_array(22)
-   energies%e_hybcomp_v          = energies_array(23)
-   energies%e_kinetic            = energies_array(24)
-   energies%e_localpsp           = energies_array(25)
-   energies%e_magfield           = energies_array(26)
-   energies%e_monopole           = energies_array(27)
-   energies%e_nlpsp_vfock        = energies_array(28)
-   energies%e_paw                = energies_array(29)
-   energies%e_pawdc              = energies_array(30)
-   energies%e_sicdc              = energies_array(31)
-   energies%e_vdw_dftd           = energies_array(32)
-   energies%e_xc                 = energies_array(33)
-   energies%e_xcdc               = energies_array(34)
-   energies%e_xc_vdw             = energies_array(35)
-   energies%h0                   = energies_array(36)
-   energies%e_zeeman             = energies_array(37)
-   energies%e_nucdip             = energies_array(38)
+   energies%entropy_xc           = energies_array(11)
+   energies%e_entropy            = energies_array(12)
+   energies%e_ewald              = energies_array(13)
+   energies%e_exactX             = energies_array(14)
+   energies%e_extfpmd            = energies_array(15)
+   energies%edc_extfpmd          = energies_array(16)
+   energies%e_fermie             = energies_array(17)
+   energies%e_fock               = energies_array(18)
+   energies%e_fockdc             = energies_array(19)
+   energies%e_fock0              = energies_array(20)
+   energies%e_hartree            = energies_array(21)
+   energies%e_hybcomp_E0         = energies_array(22)
+   energies%e_hybcomp_v0         = energies_array(23)
+   energies%e_hybcomp_v          = energies_array(24)
+   energies%e_kinetic            = energies_array(25)
+   energies%e_localpsp           = energies_array(26)
+   energies%e_magfield           = energies_array(27)
+   energies%e_monopole           = energies_array(28)
+   energies%e_nlpsp_vfock        = energies_array(29)
+   energies%e_paw                = energies_array(30)
+   energies%e_pawdc              = energies_array(31)
+   energies%e_sicdc              = energies_array(32)
+   energies%e_vdw_dftd           = energies_array(33)
+   energies%e_xc                 = energies_array(34)
+   energies%e_xcdc               = energies_array(35)
+   energies%e_xc_vdw             = energies_array(36)
+   energies%h0                   = energies_array(37)
+   energies%e_zeeman             = energies_array(38)
+   energies%e_nucdip             = energies_array(39)
  end if
 
 end subroutine energies_to_array
@@ -599,7 +607,7 @@ subroutine energies_ncwrite(enes, ncid)
  ncerr = nctk_defnwrite_dpvars(ncid, [character(len=nctk_slen) :: &
   "e_chempot", "e_constrained_dft", "e_corepsp", "e_corepspdc", "e_eigenvalues", "e_elecfield", &
   "e_electronpositron", "edc_electronpositron", "e0_electronpositron",&
-  "e_entropy", "entropy", "e_ewald", &
+  "e_entropy", "entropy", "entropy_xc", "e_ewald", &
   "e_exactX", "e_extfpmd", "edc_extfpmd", "e_fermie", &
   "e_fock", "e_fockdc", "e_fock0", "e_hartree", "e_hybcomp_E0", "e_hybcomp_v0", "e_hybcomp_v", "e_kinetic",&
   "e_localpsp", "e_magfield", "e_monopole", "e_nlpsp_vfock", "e_nucdip", &
@@ -608,7 +616,7 @@ subroutine energies_ncwrite(enes, ncid)
   "h0", "e_zeeman", "e_fermih"], &
   [enes%e_chempot, enes%e_constrained_dft, enes%e_corepsp, enes%e_corepspdc, enes%e_eigenvalues, enes%e_elecfield, &
    enes%e_electronpositron, enes%edc_electronpositron, enes%e0_electronpositron,&
-   enes%e_entropy, enes%entropy, enes%e_ewald, &
+   enes%e_entropy, enes%entropy, enes%entropy_xc, enes%e_ewald, &
    enes%e_exactX, enes%e_extfpmd, enes%edc_extfpmd, enes%e_fermie, &
    enes%e_fock, enes%e_fockdc, enes%e_fock0, enes%e_hartree, &
    enes%e_hybcomp_E0, enes%e_hybcomp_v0, enes%e_hybcomp_v, enes%e_kinetic,&

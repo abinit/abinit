@@ -237,7 +237,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  logical :: has_full_piezo,has_allddk,is_dfpt=.true.,non_magnetic_xc
  logical :: paral_atom,qeq0,use_nhat_gga,call_pawinit
  real(dp) :: boxcut,compch_fft,compch_sph,cpus,ecore,ecut_eff,ecutdg_eff,ecutf
- real(dp) :: eei,eew,ehart,eii,ek,enl,entropy,enxc
+ real(dp) :: eei,eew,ehart,eii,ek,enl,entropy,bigexc,bigsxc
  real(dp) :: epaw,epawdc,etot,evdw,fermie,fermih,gsqcut,gsqcut_eff,gsqcutc_eff,qphnrm,residm
  real(dp) :: ucvol,vxcavg,el_temp
  character(len=500) :: message
@@ -343,8 +343,8 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 
 !LIKELY TO BE TAKEN AWAY
  initialized=0
- ek=zero ; ehart=zero ; enxc=zero ; eei=zero ; enl=zero
- eii=zero ; eew=zero ; ecore=zero
+ ek=zero ; ehart=zero ; bigexc=zero ; eei=zero ; enl=zero
+ eii=zero ; eew=zero ; ecore=zero ; bigsxc=zero
 
 !Set up for iterations
  call setup1(dtset%acell_orig(1:3,1),bantot,dtset,&
@@ -958,7 +958,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 &    xccc3d,dtset%xc_denpos,comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
  end if
 
- call rhotoxc(enxc,kxc,mpi_enreg,nfftf,ngfftf,&
+ call rhotoxc(bigexc,bigsxc,kxc,mpi_enreg,nfftf,ngfftf,&
 & nhat,nhatdim,nhatgr,nhatgrdim,nkxc,nk3xc,non_magnetic_xc,n3xccc,option,rhor,&
 & rprimd,strsxc,usexcnhat,vxc,vxcavg,xccc3d,xcdata,&
 & taur=taur,vhartr=vhartr,vxctau=vxctau,xcctau3d=xcctau3d)
@@ -1127,7 +1127,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
    call dfpt_eltfrhar(eltfrhar,rprimd,gsqcut,mpi_enreg,nfftf,ngfftf,rhog)
 
 !  Calculate the xc part of the elastic tensor
-   call dfpt_eltfrxc(atindx,dtset,eltfrxc,enxc,gsqcut,kxc,mpi_enreg,mgfftf,&
+   call dfpt_eltfrxc(atindx,dtset,eltfrxc,bigexc,gsqcut,kxc,mpi_enreg,mgfftf,&
 &   nattyp,nfftf,ngfftf,ngfftf,nhat,nkxc,n3xccc,pawtab,ph1df,psps,rhor,rprimd,&
 &   usexcnhat,vxc,xccc3d,xred)
 

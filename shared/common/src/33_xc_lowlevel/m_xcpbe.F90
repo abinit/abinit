@@ -5173,7 +5173,7 @@ end subroutine xcpbe
 !!  nspden=1 for unpolarized, 2 for spin-polarized
 !!  rhor=value of electronic density at each point
 !!  rspts(npt)=Wigner-Seitz radii at each point
-!!  tsmear=electronic temperature (hartree)
+!!  el_temp=electronic temperature (hartree)
 !!
 !! OUTPUT
 !!  dvxcdgr(npts,3)=partial derivative of the exchange-correlation
@@ -5181,23 +5181,24 @@ end subroutine xcpbe
 !!    spin-down (dvxcdgr(:,2)), or total spin (dvxcdgr(:,3)) gradients of the density
 !!    divided by the norm of the gradient (the definition changed in v3.3)
 !!  exci(npts)=exchange-correlation energy density (hartree)
+!!  sxci(npts)=exchange-correlation entropy density
 !!  vxci(npts,nspden)=input xc potential
 !!
 !! SOURCE
-subroutine xckdt16(dvxcdgr,exci,grho2_updn,ixc,npts,nspden,rhor,rspts,tsmear,vxci)
+subroutine xckdt16(dvxcdgr,exci,sxci,grho2_updn,ixc,npts,nspden,rhor,rspts,el_temp,vxci)
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ixc,npts,nspden
 !arrays
  real(dp),intent(in) :: grho2_updn(npts,2*nspden-1)
- real(dp),intent(in) :: rhor(npts),rspts(npts),tsmear
- real(dp),intent(out) :: dvxcdgr(npts,3),exci(npts),vxci(npts,nspden)
+ real(dp),intent(in) :: rhor(npts),rspts(npts),el_temp
+ real(dp),intent(out) :: dvxcdgr(npts,3),exci(npts),sxci(npts),vxci(npts,nspden)
 !Local variables-------------------------------
 !scalars
  integer :: ipt
  real(dp) :: tfac,rs,rho,tempf,tred
  real(dp) :: grho,degauss
- real(dp) :: fxclda,vxclda
+ real(dp) :: fxclda,tsxclda,vxclda
  real(dp) :: fx_lda,einx_lda,tsx_lda,vx_lda
  real(dp) :: fc_lda,einc_lda,tsc_lda,vc_lda
  real(dp) :: fx, v1x, v2x, einx, tsx
@@ -5208,15 +5209,15 @@ subroutine xckdt16(dvxcdgr,exci,grho2_updn,ixc,npts,nspden,rhor,rspts,tsmear,vxc
 !Compute tfac=(3._dp*pi**2)**(2._dp/3._dp)/2._dp, tempFermi=tfac*rho**(2/3)
  tfac=(3._dp*pi**2)**(2._dp/3._dp)/2._dp
 
- !tsmear=1.d-10
- degauss = tsmear*2._dp ! setup temperature (in Ry) in defs_basis module
+ !el_temp=1.d-10
+ degauss = el_temp*2._dp ! setup temperature (in Ry) in defs_basis module
 
 !Loop over grid points
  do ipt=1,npts
    rs=rspts(ipt)
    rho=rhor(ipt) !0.75_dp/pi/(rs**3)
    tempf=tfac*rho**(2._dp/3._dp) !(3._dp*pi**2*rho)**(2._dp/3._dp)/2._dp
-   tred=tsmear/tempf
+   tred=el_temp/tempf
    grho=grho2_updn(ipt,1)*4.d0 ! this array must have grad2_rho_up even in
                                ! the spin-unpolarized case, such that
                                ! grad2_rho=4*grad2_rho_up=4*grad2_rho_dn
@@ -5227,6 +5228,7 @@ subroutine xckdt16(dvxcdgr,exci,grho2_updn,ixc,npts,nspden,rhor,rspts,tsmear,vxc
    call fex_ksdt(rs,fx_lda,einx_lda,tsx_lda,vx_lda,degauss)
    call fec_ksdt(rs,fc_lda,einc_lda,tsc_lda,vc_lda,degauss)
    fxclda=fx_lda+fc_lda
+   tsxclda=tsx_lda+tsc_lda
    vxclda=vx_lda+vc_lda
    if(ixc.eq.60) then
      call fex_kdt16(rho,grho,5,fx,v1x,v2x,einx,tsx,degauss)
@@ -5239,6 +5241,7 @@ subroutine xckdt16(dvxcdgr,exci,grho2_updn,ixc,npts,nspden,rhor,rspts,tsmear,vxc
      call fec_kdt16(rho,grho,11,fc,v1c,v2c,einc,tsc,degauss)
    endif
    exci(ipt)=fxclda+(fx+fc)!/rho
+   sxci(ipt)=(tsxclda+(tsx+tsc))/el_temp ! total exchange-correlation entropy: S_xc[n] = kTS_xc[n]/kT
    vxci(ipt,1)=vxclda+v1x+v1c
    dvxcdgr(ipt,3)=v2x+v2c !d(exc*rho)/d|gradRho|*1/|gradRho|
    dvxcdgr(ipt,1)=zero !dvxcdgr(ipt,3)*4.d0 ! d(exc*rho)/d|gradRho_up|*1/|gradRho_up|

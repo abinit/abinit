@@ -149,7 +149,7 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
  integer :: mpert,my_natom,n1,nkxc,nk3xc,ntypat,n3xccc,nylmgr
  integer :: option,optorth,psp_gencond,rdwrpaw,spaceworld,timrev,tim_mkrho
  integer :: usexcnhat,useylmgr
- real(dp) :: ecore,ecutdg_eff,ecut_eff,enxc,etot,fermie,fermih,gsqcut_eff,gsqcutc_eff,residm
+ real(dp) :: ecore,ecutdg_eff,ecut_eff,bigexc,bigsxc,etot,fermie,fermih,gsqcut_eff,gsqcutc_eff,residm
  real(dp) :: ucvol,vxcavg
  logical :: non_magnetic_xc
  character(len=500) :: msg
@@ -536,10 +536,12 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
 ! ABI_MALLOC(xccc3d,(n3xccc))
  non_magnetic_xc=.false.
 
- enxc=zero; usexcnhat=0
+ bigexc=zero
+ bigsxc=zero
+ usexcnhat=0
 
  call xcdata_init(xcdata,dtset=dtset)
- call rhotoxc(enxc,kxc,mpi_enreg,nfftf,ngfftf,&
+ call rhotoxc(bigexc,bigsxc,kxc,mpi_enreg,nfftf,ngfftf,&
 & nhat,nhatdim,nhatgr,nhatgrdim,nkxc,nk3xc,non_magnetic_xc,n3xccc,option,rhor,&
 & rprimd,strsxc,usexcnhat,vxc,vxcavg,xccc3d,xcdata)
 
