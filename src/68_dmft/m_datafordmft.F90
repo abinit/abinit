@@ -127,7 +127,7 @@ subroutine datafordmft(cg,cprj,cryst_struc,dft_occup,dimcprj,dtset,eigen,mband_c
  integer :: me_band,me_kpt,mkmem,natom,nband_k,nband_k_cprj,nbandf,nbandi,ndim,nkpt
  integer :: nproc_band,nproc_spkpt,nproju,npw,nspinor,nsploop,nsppol,nsppol_mem,opt_renorm
  integer :: option,paral_kgb,pawprtvol,siz_buf,siz_buf_psi,siz_paw,siz_proj,siz_wan,unt
- logical :: t2g,prt_wan,use_full_chipsi,verif,x2my2d
+ logical :: prt_wan,t2g,triqs,use_full_chipsi,verif,x2my2d
  real(dp) :: ima,re,rint
  complex(dpc) :: tmp
  character(len=500) :: message
@@ -560,6 +560,14 @@ subroutine datafordmft(cg,cprj,cryst_struc,dft_occup,dimcprj,dtset,eigen,mband_c
 !if(mpi_enreg%me.eq.0) write(177,*) "end",psichi
 !if(mpi_enreg%me.eq.1) write(178,*) "end",psichi
 !if(mpi_enreg%me.eq.2) write(179,*) "end",psichi
+
+!==========================================================================
+!********* WRITE chipsi in file for reference
+!==========================================================================
+ triqs = (paw_dmft%dmft_solv == 6) .or. (paw_dmft%dmft_solv == 7)
+ if (paw_dmft%myproc == 0 .and. (.not. triqs)) then
+   call chipsi_print(paw_dmft,pawtab(:))
+ end if ! proc=0
 
 !********************* Check normalization and occupations ***************
 ! Only if the complete BZ is sampled (ie paw_dmft%kspectralfunc=0)
