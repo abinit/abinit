@@ -12969,14 +12969,14 @@ Variable(
     abivarname="ntime",
     varset="rlx",
     vartype="integer",
-    topics=['MolecularDynamics_basic', 'GeoOpt_basic'],
+    topics=['MolecularDynamics_basic', 'GeoOpt_basic', 'RTTDDFT_basic'],
     dimensions="scalar",
     defaultval="0 if ionmvov == 0, set to 1000 if ionvmov != 0 and imgmov != 0 and the variable is not specified.",
     mnemonics="Number of TIME steps",
     added_in_version="before_v9",
     text=r"""
-Gives the maximum number of molecular dynamics time steps or structural
-optimization steps to be done if [[ionmov]] is non-zero.
+Gives the maximum number of molecular dynamics or electron dynamics time steps or structural
+optimization steps to be done if [[ionmov]] is non-zero or [[optdriver]] is 9 (real-time TDDFT).
 Starting with Abinit9, ntime is automatically set to 1000 if [[ionmov]] is non-zero,
 [[ntimimage]] is zero and [[ntime]] is not specified in the input file.
 Users are encouraged to pass a **timelimit** to Abinit using the command line and the syntax:
@@ -12986,7 +12986,7 @@ Users are encouraged to pass a **timelimit** to Abinit using the command line an
 so that the code will try to stop smoothly before the timelimit and produce the DEN and the WFK files
 that may be used to restart the calculation.
 
-Note that at the present the option [[ionmov]] = 1 is initialized with four
+Note that at present the option [[ionmov]] = 1 is initialized with four
 Runge-Kutta steps which costs some overhead in the startup. By contrast, the
 initialisation of other [[ionmov]] values is only one SCF call.
 Note that **ntime** is ignored if [[ionmov]] = 0.
