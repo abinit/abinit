@@ -37,4 +37,15 @@ inp_files = [
 "t18.abi", # test LOBPCG (istwfk==2, npband==1, paral_kgb==0)
 "t19.abi", # test LOBPCG (istwfk==1, npband==1, paral_kgb==0)
 "t20.abi", # test LOBPCG (istwfk==2, npband==1, paral_kgb==0)
+#DFPT
+"t21.abi", # test respfn for phonons and electric field, no qpt
+"t22.abi", # prep for t23, t24
+"t23.abi", # test respfn for phonons and electric field, with qpt (GEMM nonlop CPU)
+"t24.abi", # test respfn for phonons and electric field, with qpt
+"t25.abi", # test respfn for stresses, no qpt
+#Fock
+"t26.abi", # Silicium, norm-conserving
+"t27.abi", # Silicium, PAW
+"t28.abi", # Methane, PAW
+"t29.abi", # Helium, single-band, istwfk==2
 ]

@@ -106,11 +106,7 @@ module m_xgTransposer
     integer :: me_g0_fft
     integer :: gpu_option = ABI_GPU_DISABLED
     integer :: gpu_kokkos_nthrd = 1
-#if defined HAVE_GPU && defined HAVE_YAKL
-    real(kind=c_double), ABI_CONTIGUOUS pointer:: buffer(:,:) => null()
-#else
-    double precision, allocatable :: buffer(:,:)
-#endif
+    real(dp), ABI_CONTIGUOUS pointer:: buffer(:,:) => null()
   end type xgTransposer_t
 
   public :: xgTransposer_constructor
@@ -468,28 +464,29 @@ module m_xgTransposer
   subroutine xgTransposer_makeXgBlock(xgTransposer)
 
     type(xgTransposer_t), intent(inout) :: xgTransposer
+#if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD && !defined HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
+    real(dp), ABI_CONTIGUOUS pointer :: xgTransposer__buffer(:,:)
+#endif
     !integer :: cols, rows
 
     select case (xgTransposer%state)
     case (STATE_LINALG)
       ! Assume xgBlock_colsrows is empty and not constructed because user cannot
       ! predict the size
-      if(xgTransposer%gpu_option == ABI_GPU_KOKKOS) then
+      if ( associated(xgTransposer%buffer) ) then
+        if(xgTransposer%gpu_option == ABI_GPU_KOKKOS) then
 #if defined HAVE_GPU && defined HAVE_YAKL
-        if ( associated(xgTransposer%buffer) ) then
           ABI_FREE_MANAGED(xgTransposer%buffer)
-        end if
 #endif
-      else
-!FIXME Settle this
-#if defined HAVE_GPU && defined HAVE_YAKL
-        if ( associated(xgTransposer%buffer) ) then
-#else
-        if ( allocated(xgTransposer%buffer) ) then
-#endif
+        else
           if(xgTransposer%gpu_option == ABI_GPU_OPENMP) then
 #if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
+#ifdef HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
             !$OMP TARGET EXIT DATA MAP(delete:xgTransposer%buffer)
+#else
+            xgTransposer__buffer => xgTransposer%buffer
+            !$OMP TARGET EXIT DATA MAP(delete:xgTransposer__buffer)
+#endif
 #endif
           end if
           ABI_FREE(xgTransposer%buffer)
@@ -508,7 +505,12 @@ module m_xgTransposer
         end if
         if(xgTransposer%gpu_option == ABI_GPU_OPENMP) then
 #if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
+#ifdef HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
           !$OMP TARGET ENTER DATA MAP(alloc:xgTransposer%buffer)
+#else
+          xgTransposer__buffer => xgTransposer%buffer
+          !$OMP TARGET ENTER DATA MAP(alloc:xgTransposer__buffer)
+#endif
 #endif
         end if
         call xgBlock_map(xgTransposer%xgBlock_colsrows,xgTransposer%buffer,space(xgTransposer%xgBlock_linalg),&
@@ -1118,6 +1120,9 @@ module m_xgTransposer
     type(xgTransposer_t), intent(inout) :: xgTransposer
     double precision :: tsec(2)
     integer :: i
+#if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD && !defined HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
+    real(dp), ABI_CONTIGUOUS pointer :: xgTransposer__buffer(:,:)
+#endif
 
     call timab(tim_free,1,tsec)
 #ifdef HAVE_MPI
@@ -1138,22 +1143,20 @@ module m_xgTransposer
       ABI_FREE(xgTransposer%nrowsLinalg)
     end if
 
-    if(xgTransposer%gpu_option == ABI_GPU_KOKKOS) then
+    if ( associated(xgTransposer%buffer) ) then
+      if(xgTransposer%gpu_option == ABI_GPU_KOKKOS) then
 #if defined HAVE_GPU && defined HAVE_YAKL
-      if ( associated(xgTransposer%buffer) ) then
         ABI_FREE_MANAGED(xgTransposer%buffer)
-      end if
 #endif
-    else
-!FIXME Settle this
-#if defined HAVE_GPU && defined HAVE_YAKL
-      if ( associated(xgTransposer%buffer) ) then
-#else
-      if ( allocated(xgTransposer%buffer) ) then
-#endif
+      else
         if(xgTransposer%gpu_option == ABI_GPU_OPENMP) then
 #if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
+#ifdef HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
           !$OMP TARGET EXIT DATA MAP(delete:xgTransposer%buffer)
+#else
+          xgTransposer__buffer => xgTransposer%buffer
+          !$OMP TARGET EXIT DATA MAP(delete:xgTransposer__buffer)
+#endif
 #endif
         end if
         ABI_FREE(xgTransposer%buffer)
