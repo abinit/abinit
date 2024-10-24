@@ -528,7 +528,7 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
                iband_me = iband_me + 1
                do ibandc1=1,nbandc1 ! in case of DMFT
                  ! Check if DMFT and only treat occupied states (check on occ.)
-                 if(paw_dmft%use_sc_dmft /= 1) then
+                 if(paw_dmft%use_sc_dmft == 1 .or. paw_dmft%use_sc_dmft == 10) then
                    iband1 = paw_dmft%include_bands(ibandc1)
                    if(paw_dmft%band_in(iband)) then
                      if(.not. paw_dmft%band_in(iband1))  stop
