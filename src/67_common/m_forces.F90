@@ -205,7 +205,7 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,&
 !scalars
  integer :: coredens_method,coretau_method,fdir,iatom,idir,indx,ipositron,itypat,mu
  integer :: optatm,optdyfr,opteltfr,optgr,option,optn,optn2,optstr,optv,vloc_method
- real(dp) :: eei_dum1,eei_dum2,ucvol,ucvol_local,vol_element
+ real(dp) :: eei_dum1,eei_dum2,ucvol,ucvol_local,vol_element,entropy_dum1
  logical :: calc_epaw3_forces, efield_flag
  logical :: is_hybrid_ncpp
 !arrays
@@ -370,7 +370,7 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,&
      ABI_MALLOC(xccc3d_dum,(n3xccc))
      if (coredens_method==2) then
        if (is_hybrid_ncpp) then
-         call xchybrid_ncpp_cc(dtset,eei_dum1,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,&
+         call xchybrid_ncpp_cc(dtset,eei_dum1,entropy_dum1,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,&
 &         dummy6,eei_dum2,xccc3d_dum,grxc=grxc,xcccrc=psps%xcccrc,xccc1d=psps%xccc1d,xred=xred,n1xccc=n1xccc)
        else
          if (psps%usewvl==0.and.psps%usepaw==0.and.dtset%icoulomb==0) then

@@ -396,7 +396,7 @@ subroutine kxc_alda(dtset,ixc,kxcg,mpi_enreg,nfft,ngfft,nspden,option,rhor,rhocu
  integer :: ifft,ikxc,isp,n3xccc,ncut,nk3xc,nkxc,optionrhoxc,tim_fourdp
  logical :: non_magnetic_xc
  real(dp),parameter :: gsqcut=1._dp
- real(dp) :: el_temp,enxc,rhocuttot,rhomin,vxcavg
+ real(dp) :: el_temp,bigexc,bigsxc,rhocuttot,rhomin,vxcavg
  character(len=500) :: message
  type(xcdata_type) :: xcdata
 !arrays
@@ -487,7 +487,7 @@ subroutine kxc_alda(dtset,ixc,kxcg,mpi_enreg,nfft,ngfft,nspden,option,rhor,rhocu
    optionrhoxc = 2 !See rhotoxc.f
 
    call hartre(1,gsqcut,3,0,mpi_enreg,nfft,ngfft,1,zero,rhog,rprimd,dummyvgeo,vhartree)
-   call rhotoxc(enxc,kxcr,mpi_enreg,nfft,ngfft,dum,0,dum,0,nkxc,nk3xc,non_magnetic_xc,n3xccc,&
+   call rhotoxc(bigexc,bigsxc,kxcr,mpi_enreg,nfft,ngfft,dum,0,dum,0,nkxc,nk3xc,non_magnetic_xc,n3xccc,&
 &   optionrhoxc,rhorcut,rprimd,strsxc,1,vxc,vxcavg,xccc3d,xcdata,vhartr=vhartree)
 
 !  DEBUG
@@ -542,7 +542,7 @@ subroutine kxc_alda(dtset,ixc,kxcg,mpi_enreg,nfft,ngfft,nspden,option,rhor,rhocu
    optionrhoxc = -2 !See rhotoxc.f
 
    call hartre(1,gsqcut,3,0,mpi_enreg,nfft,ngfft,1,zero,rhog,rprimd,dummyvgeo,vhartree)
-   call rhotoxc(enxc,kxcr,mpi_enreg,nfft,ngfft,dum,0,dum,0,nkxc,nk3xc,non_magnetic_xc,n3xccc,&
+   call rhotoxc(bigexc,bigsxc,kxcr,mpi_enreg,nfft,ngfft,dum,0,dum,0,nkxc,nk3xc,non_magnetic_xc,n3xccc,&
 &   optionrhoxc,rhorcut,rprimd,strsxc,1,vxc,vxcavg,xccc3d,xcdata,vhartr=vhartree)
 
    kxcr(:,2) = 0.5_dp*kxcr(:,2)
@@ -557,7 +557,8 @@ subroutine kxc_alda(dtset,ixc,kxcg,mpi_enreg,nfft,ngfft,nspden,option,rhor,rhocu
  end if
 
 !DEBUG
-!write(std_out,*) ' kxc_alda:  Exc  = ',enxc
+!write(std_out,*) ' kxc_alda:  Exc  = ',bigexc
+!write(std_out,*) ' kxc_alda:  Sxc  = ',bigsxc
 !write(std_out,*) ' kxc_alda: <Vxc> = ',vxcavg
 !ENDDEBUG
 
@@ -1000,7 +1001,7 @@ subroutine kxc_driver(Dtset,Cryst,ixc,ngfft,nfft_tot,nspden,rhor,npw,dim_kxcg,kx
  integer :: cplex,i1,i2,i3,ig,igp,iq,ir,n3xccc,ngfft1,ngfft2,izero
  integer :: ngfft3,nkxc,option,ikxc,nk3xc,my_rank,master,unt_dmp
  logical :: non_magnetic_xc
- real(dp) :: el_temp,enxc,expo,gpqx,gpqy,gpqz,gsqcut,vxcavg
+ real(dp) :: el_temp,bigexc,bigsxc,expo,gpqx,gpqy,gpqz,gsqcut,vxcavg
  character(len=500) :: msg,fname
  type(xcdata_type) :: xcdata
  type(MPI_type) :: MPI_enreg_seq
@@ -1083,7 +1084,7 @@ subroutine kxc_driver(Dtset,Cryst,ixc,ngfft,nfft_tot,nspden,rhor,npw,dim_kxcg,kx
  call hartre(1,gsqcut,3,izero,MPI_enreg_seq,nfft_tot,ngfft,1,zero,rhog,Cryst%rprimd,dummyvgeo,vhartr)
 
 !Compute the kernel.
- call rhotoxc(enxc,kxcr,MPI_enreg_seq,nfft_tot,ngfft,&
+ call rhotoxc(bigexc,bigsxc,kxcr,MPI_enreg_seq,nfft_tot,ngfft,&
 & dum,0,dum,0,nkxc,nk3xc,non_magnetic_xc,&
 & n3xccc,option,rhor,Cryst%rprimd,&
 & strsxc,1,vxclda,vxcavg,xccc3d,xcdata,vhartr=vhartr)
@@ -1254,7 +1255,7 @@ subroutine kxc_ADA(Dtset,Cryst,ixc,ngfft,nfft,nspden,rhor,&
  integer :: ngfft3,nkxc,option,ikxc,ierr,nproc
  integer :: nk3xc,igrid,iqbz,my_rank,master,unt_dmp,gmgp_idx
  logical :: non_magnetic_xc
- real(dp) :: el_temp,enxc,gsqcut,ucvol !,rs,Kx,Kc
+ real(dp) :: el_temp,bigexc,bigsxc,gsqcut,ucvol !,rs,Kx,Kc
  real(dp) :: vxcavg,kappa,abs_qpg_sq,abs_qpgp_sq
  real(dp) :: difx,dify,difz,inv_kappa_sq
  character(len=500) :: msg,fname
@@ -1395,7 +1396,7 @@ subroutine kxc_ADA(Dtset,Cryst,ixc,ngfft,nfft,nspden,rhor,&
  end if
 
  call hartre(1,gsqcut,3,izero,MPI_enreg_seq,nfft,ngfft,1,zero,rhog,Cryst%rprimd,dummyvgeo,vhartr)
- call rhotoxc(enxc,kxcr,MPI_enreg_seq,nfft,ngfft,&
+ call rhotoxc(bigexc,bigsxc,kxcr,MPI_enreg_seq,nfft,ngfft,&
 & dum,0,dum,0,nkxc,nk3xc,non_magnetic_xc,&
 & n3xccc,option,my_rhor,Cryst%rprimd,&
 & strsxc,1,vxclda,vxcavg,xccc3d,xcdata,vhartr=vhartr)
