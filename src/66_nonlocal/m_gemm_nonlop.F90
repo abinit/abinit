@@ -274,6 +274,45 @@ contains
     ph3dout_    => ph3dout
   end if
 
+  ! The number of projectors used for computation may vary among
+  ! nonlop calls, from computing on all atoms to a select one for
+  ! some perturbations.
+  ! In such cases, projs arrays must be recomputed
+  nprojs=0
+  do itypat=1,ntypat_
+    nprojs = nprojs + count(indlmn_(3,:,itypat)>0)*nattyp_(itypat)
+  end do
+
+  if(nprojs == 0) then
+    ! TODO check if this is correct
+    if (iatom_only>0) then
+      ABI_FREE(atindx1_)
+      ABI_FREE(nattyp_)
+      ABI_FREE(ph3din_)
+      ABI_FREE(ph3dout_)
+      ABI_FREE(ffnlin_)
+      ABI_FREE(ffnlout_)
+      if(use_enl_ndat) then
+        ABI_FREE(enl_ndat_)
+      else
+        ABI_FREE(enl_)
+      end if
+      ABI_FREE(indlmn_)
+      if (size(sij) > 1) then
+        ABI_FREE(sij_)
+      end if
+    end if
+    if(signs == 1) then
+      enlout=zero
+      return
+    end if
+    if(signs == 2) then
+      vectout = zero
+      if(paw_opt>0) svectout = vectin
+      return
+    end if
+  end if
+
   !Eventually re-compute (k+G) vectors (and related data)
   nkpgin_=0
   if (choice==2.or.choice==54) nkpgin_=3
@@ -300,15 +339,6 @@ contains
     kpgout_ => kpgout
   end if
 
-  ! The number of projectors used for computation may vary among
-  ! nonlop calls, from computing on all atoms to a select one for
-  ! some perturbations.
-  ! In such cases, projs arrays must be recomputed
-  nprojs=0
-  do itypat=1,ntypat_
-    nprojs = nprojs + count(indlmn_(3,:,itypat)>0)*nattyp_(itypat)
-  end do
-
   ! If vectproj is provided, use it for further calculations, use allocated array otherwise
   local_vectproj=.false.
   if(PRESENT(vectproj)) then
@@ -316,19 +346,6 @@ contains
   end if
   if (local_vectproj) projections => vectproj
 
-
-  if(nprojs == 0) then
-    ! TODO check if this is correct
-    if(signs == 1) then
-      enlout=zero
-      return
-    end if
-    if(signs == 2) then
-      vectout = zero
-      if(paw_opt>0) svectout = vectin
-      return
-    end if
-  end if
 
   if(signs == 1) then
     enlout=zero
