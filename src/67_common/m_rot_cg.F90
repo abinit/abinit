@@ -148,11 +148,11 @@ end subroutine diag_occ
 !! TODO add the possibility of using ScaLAPACK to do computation in parallel
 !! TODO Make the computation of the new wf parallel
 
-subroutine rot_cg(occ_nd,cwavef,npw,nband,blocksize,nspinor,first_bandc,nbandc,occ_diag)
+subroutine rot_cg(occ_nd,cwavef,npw,nband,blocksize,nspinor,first_bandc,nbandc,occ_diag,dmft_solv)
 
 !Arguments ------------------------------------
 !scalars
-  integer, intent(in) :: blocksize,first_bandc,nband,nbandc,npw,nspinor
+  integer, intent(in) :: blocksize,dmft_solv,first_bandc,nband,nbandc,npw,nspinor
 !! type(MPI_type),intent(inout) :: mpi_enreg
 !! type(dataset_type),intent(in) :: dtset
 !! type(paw_dmft_type), intent(in)  :: band_in
@@ -163,6 +163,7 @@ subroutine rot_cg(occ_nd,cwavef,npw,nband,blocksize,nspinor,first_bandc,nbandc,o
 !Local variables-------------------------------
 !scalars
   integer :: ispinor,n,np
+  logical :: triqs
   character(len=500) :: message
 !arrays
   real(dp), allocatable :: occ_diag_red(:)
@@ -177,6 +178,8 @@ subroutine rot_cg(occ_nd,cwavef,npw,nband,blocksize,nspinor,first_bandc,nbandc,o
   end if
 
 !! Initialisation
+
+  triqs = (dmft_solv == 6) .or. (dmft_solv == 7)
 
   ABI_MALLOC(mat_tmp,(npw,nbandc))
   ABI_MALLOC(mat_tmp2,(npw,nbandc))
@@ -203,7 +206,7 @@ subroutine rot_cg(occ_nd,cwavef,npw,nband,blocksize,nspinor,first_bandc,nbandc,o
 
 !! Compute the corresponding wave functions if nothing wrong happened
   ! $c^{rot}_{n,k}(g) =  \sum_{n'} [\bar{f_{n',n}} * c_{n',k}(g)]$
-  !occ_nd_cpx(:,:) = conjg(occ_nd_cpx(:,:))  !! TO REMOVE
+  if (triqs) occ_nd_cpx(:,:) = conjg(occ_nd_cpx(:,:)) ! use the correct formula in the case of TRIQS 
   
   do ispinor=1,nspinor
     mat_tmp(:,:) = cmplx(cwavef(1,1:npw,first_bandc:first_bandc+nbandc-1,ispinor), &

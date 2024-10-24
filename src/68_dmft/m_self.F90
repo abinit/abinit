@@ -520,13 +520,14 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
  integer :: natom,natom_read,ncount,ndim,ndim_read,nrecl,nspinor,nspinor_read,nsppol
  integer :: nsppol_read,nw_read,optmaxent,optrw,readimagonly,spacecomm,unitrot
  real(dp) :: fermie_read,x_r,x_i,xtemp
- logical :: lexist,nondiaglevels
+ logical :: lexist,nondiaglevels,triqs
  character(len=30000) :: message ! Big buffer to avoid buffer overflow.
  character(len=fnlen) :: tmpfil,tmpfil2,tmpfilrot,tmpmatrot
  character(len=1) :: tag_is
  character(len=10) :: tag_at,tag_iflavor
  character(len=4) :: chtemp
  character(len=3) :: self_iter
+ character(len=50) :: string_format
  type(oper_type) :: energy_level
  integer, allocatable :: unitselffunc_arr(:),unitselffunc_arr2(:),unitselfrot(:,:,:,:)
  real(dp), allocatable :: s_i(:,:),s_r(:,:) !,fermie_read2(:)
@@ -540,6 +541,8 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
  nsppol  = paw_dmft%nsppol 
  !mbandc = paw_dmft%mbandc
  !nkpt = paw_dmft%nkpt
+
+ triqs = (paw_dmft%dmft_solv == 6) .or. (paw_dmft%dmft_solv == 7)
 
 ! Initialise spaceComm, myproc, and nproc
  istep = 0 
@@ -815,7 +818,7 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
 
              !write(std_out,*) "61",nrecl
          if (prtopt >= 3) then
-           write(message,'(a,a,a,i4)') '    opened file : ',trim(tmpfil),' unit',unitselffunc_arr(iall)
+           write(message,'(3a,i4)') '    opened file : ',trim(tmpfil),' unit',unitselffunc_arr(iall)
            call wrtout(std_out,message,'COLL')
          end if ! prtopt>=3
        end if
@@ -824,9 +827,16 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
 !      ===========================
 !      == Check Header
 !      ===========================
+       
        if (optrw == 2) then
-        ! write(message,'(3a,5i5,2x,es24.16e3)') "# natom,nsppol,nspinor,ndim,nw,fermilevel",ch10,& ! TO REMOVE
-         write(message,'(3a,5i5,2x,e25.17)') "# natom,nsppol,nspinor,ndim,nw,fermilevel",ch10,&
+
+         if (triqs) then
+           string_format = '(3a,5i5,2x,es24.16e3)'
+         else
+           string_format = '(3a,5i5,2x,e25.17)'
+         end if 
+
+         write(message,string_format) "# natom,nsppol,nspinor,ndim,nw,fermilevel",ch10,&
            & "####",natom,nsppol,nspinor,ndim,self%nw,paw_dmft%fermie
          call wrtout(unitselffunc_arr(iall),message,'COLL')
          call wrtout(unitselffunc_arr2(iall),message,'COLL')
@@ -892,19 +902,18 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
                !MGNAG Runtime Error: wrtout_cpp.f90, line 896: Buffer overflow on output
                !Is it possible to rewrite the code below to avoid such a long message
                !What about Netcdf binary files ?
-             !if (nspinor == 1) then
-           !write(message,'(2x,393(es24.16e3,2x))') self%omega(ifreq),& ! TO REMOVE
-           if (nspinor == 1) then
-             write(message,'(2x,393(e25.17,2x))') self%omega(ifreq),&
+           if (triqs) then
+             string_format = '(2x,393(es24.16e3,2x))'
+           else if (nspinor == 1) then
+             string_format = '(2x,393(e25.17,2x))'
+           else 
+             string_format = '(2x,393(e18.10,2x))'
+           end if 
+             
+           write(message,string_format) self%omega(ifreq),&
                & ((((dble(self%oper(ifreq)%matlu(iatom)%mat(im+(ispinor-1)*ndim,im1+(ispinor1-1)*ndim,isppol)),&
                & aimag(self%oper(ifreq)%matlu(iatom)%mat(im+(ispinor-1)*ndim,im1+(ispinor1-1)*ndim,isppol)),&
                & im=1,ndim),im1=1,ndim),ispinor=1,nspinor),ispinor1=1,nspinor)
-           else
-             write(message,'(2x,393(e18.10,2x))') self%omega(ifreq),&
-               & ((((dble(self%oper(ifreq)%matlu(iatom)%mat(im+(ispinor-1)*ndim,im1+(ispinor1-1)*ndim,isppol)),&
-               & aimag(self%oper(ifreq)%matlu(iatom)%mat(im+(ispinor-1)*ndim,im1+(ispinor1-1)*ndim,isppol)),&
-               & im=1,ndim),im1=1,ndim),ispinor=1,nspinor),ispinor1=1,nspinor)
-           end if ! nspinor
            call wrtout(unitselffunc_arr(iall),message,'COLL')
            call wrtout(unitselffunc_arr2(iall),message,'COLL')
 
@@ -997,8 +1006,12 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
        if (optrw == 2) then
 !             write(std_out,'(a,2x,31(e15.8,2x))') &
 !&            "SETEST #dc ",(self%hdc%matlu(iatom)%mat(im,im,isppol,ispinor,ispinor),im=1,ndim)
-         !write(message,'(a,2x,500(es24.16e3,2x))') & ! TO REMOVE
-         write(message,'(a,2x,500(e25.17,2x))') &
+         if (triqs) then
+           string_format = '(a,2x,500(es24.16e3,2x))'
+         else
+           string_format = '(a,2x,500(e25.17,2x))'
+         end if 
+         write(message,string_format) &
           & "#dc ",((((self%hdc%matlu(iatom)%mat(im+(ispinor-1)*ndim,im1+(ispinor1-1)*ndim,isppol),&
             & im=1,ndim),im1=1,ndim),ispinor=1,nspinor),ispinor1=1,nspinor)
          call wrtout(unitselffunc_arr(iall),message,'COLL')
