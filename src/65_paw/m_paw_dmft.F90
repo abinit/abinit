@@ -896,13 +896,12 @@ subroutine init_sc_dmft(dtset,paw_dmft,gprimd,kg,mpi_enreg,npwarr,&
 !=============================
 
  paw_dmft%dmft_use_all_bands = dtset%dmft_use_all_bands == 1
- paw_dmft%nelectval = dtset%nelect
+ paw_dmft%nelectval = dble(dtset%nelect)
  
  if (.not. paw_dmft%dmft_use_all_bands) then
    fac = 1
    if (nsppol == 1 .and. nspinor == 1) fac = 2
-   !paw_dmft%nelectval = dtset%nelect - dble(dmftbandi-1)*nsppol*dble(fac)
-   paw_dmft%nelectval = dtset%nelect - float(dmftbandi-1)*nsppol*fac ! TO REMOVE
+   paw_dmft%nelectval = dble(dtset%nelect-(dmftbandi-1)*nsppol*fac)
  end if ! not use_all_bands
  
  paw_dmft%natpawu              = dtset%natpawu
@@ -1032,8 +1031,7 @@ subroutine init_sc_dmft(dtset,paw_dmft,gprimd,kg,mpi_enreg,npwarr,&
 !==============================
 
  paw_dmft%wtk => dtset%wtk(:)
- !if (dtset%iscf < 0) paw_dmft%wtk(:) = one / dble(nkpt)
- if (dtset%iscf < 0) paw_dmft%wtk(:) = one / float(nkpt) ! TO REMOVE
+ if (dtset%iscf < 0) paw_dmft%wtk(:) = one / dble(nkpt)
  sumwtk = sum(paw_dmft%wtk(1:nkpt))
  if (abs(sumwtk-one) > tol11 .and. dtset%iscf >= 0) then
    write(message,'(a,f15.11)') ' sum of k-point is incorrect',sumwtk
@@ -1145,11 +1143,9 @@ subroutine init_sc_dmft(dtset,paw_dmft,gprimd,kg,mpi_enreg,npwarr,&
    ABI_MALLOC(paw_dmft%omega_r,(2*paw_dmft%dmft_nwr))
    ! Set up real frequencies for spectral function in Hubbard one.
    step = 0.00005_dp
-   !paw_dmft%omega_r(2*paw_dmft%dmft_nwr) = pi * step * (two*dble(paw_dmft%dmft_nwr-1)+one)
-   paw_dmft%omega_r(2*paw_dmft%dmft_nwr) = pi * step * (two*float(paw_dmft%dmft_nwr-1)+one) ! TO REMOVE
+   paw_dmft%omega_r(2*paw_dmft%dmft_nwr) = pi * step * (two*dble(paw_dmft%dmft_nwr-1)+one)
    do ifreq=1,2*paw_dmft%dmft_nwr-1
-     !paw_dmft%omega_r(ifreq) = pi*step*(two*dble(ifreq-1)+one) - paw_dmft%omega_r(2*paw_dmft%dmft_nwr)
-     paw_dmft%omega_r(ifreq) = pi*step*(two*float(ifreq-1)+one) - paw_dmft%omega_r(2*paw_dmft%dmft_nwr) ! TO REMOVE
+     paw_dmft%omega_r(ifreq) = pi*step*(two*dble(ifreq-1)+one) - paw_dmft%omega_r(2*paw_dmft%dmft_nwr)
   !  write(std_out,*) ifreq,paw_dmft%omega_r(ifreq)
    end do ! ifreq
 
@@ -1693,10 +1689,8 @@ subroutine construct_nwlo_dmft(paw_dmft)
 
 !  ------------  LOGARITHMIC MESH
    deltaomega = half 
-   !expfac     = log(omegamaxmin/deltaomega) / (dble(nwlo-nlin-1)*half)
-   expfac = log(omegamaxmin/deltaomega)/(float(nwlo-nlin-1)*half) !! TO REMOVE
-   !prefacexp  = omegamaxmin / (exp(expfac*dble(nwlo-nlin-1))-one)
-   prefacexp = omegamaxmin/(exp(expfac*float(nwlo-nlin-1))-one)  !! TO REMOVE
+   expfac     = log(omegamaxmin/deltaomega) / (dble(nwlo-nlin-1)*half)
+   prefacexp  = omegamaxmin / (exp(expfac*dble(nwlo-nlin-1))-one)
    ABI_MALLOC(select_log,(nwlo))
 
 !  ------------ IMPOSE LINEAR MESH for w < 2*w_n=(2*l-1)pi/beta

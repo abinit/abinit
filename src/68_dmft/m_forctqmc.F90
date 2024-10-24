@@ -650,8 +650,8 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang, &
    
    if (weiss%has_moments == 1) then
      do i=2,weiss%nmoments-1
-       call rotate_matlu(weiss%moments(i)%matlu(:),eigvectmatlu(:),natom,1,&
-         & matlu_out=weiss_for_rot%moments(i)%matlu(:))
+       call copy_matlu(weiss%moments(i)%matlu(:),weiss_for_rot%moments(i)%matlu(:),natom)
+       call rotate_matlu(weiss_for_rot%moments(i)%matlu(:),eigvectmatlu(:),natom,1)
      end do ! i
    end if ! moments
 

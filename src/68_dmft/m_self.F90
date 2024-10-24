@@ -443,8 +443,7 @@ subroutine dc_self(charge_loc,hdc,hu,paw_dmft,pawtab,occ_matlu)
    else
      if (nmdc) then ! Non-magnetic DC
        if (fll) dc = upawu*(ntot-half) - half*jpawu*(ntot-one)
-       !if (amf) dc = upawu*ntot*half + (upawu-jpawu)*ntot*half*dble(2*lpawu)/dble(2*lpawu+1) ! TO REMOVE
-       if (amf) dc = upawu*ntot*half + (upawu-jpawu)*ntot*half*float(2*lpawu)/float(2*lpawu+1)
+       if (amf) dc = upawu*ntot*half + (upawu-jpawu)*ntot*half*dble(2*lpawu)/dble(2*lpawu+1) 
        if (dmft_dc == 7) dc = upawu*(dble(paw_dmft%dmft_nominal(iatom))-half) - &
          & half*jpawu*(dble(paw_dmft%dmft_nominal(iatom))-one)
      end if ! nmdc
@@ -453,8 +452,7 @@ subroutine dc_self(charge_loc,hdc,hu,paw_dmft,pawtab,occ_matlu)
        if (.not. nmdc) then ! Magnetic DC
          if (fll) dc = upawu*(ntot-half) - jpawu*(charge_loc(isppol,iatom)-half)
          if (amf) dc = upawu*charge_loc(min(3-isppol,nsppol),iatom) + &
-            !  & (upawu-jpawu)*charge_loc(isppol,iatom)*dble(2*lpawu)/dble(2*lpawu+1) ! TO REMOVE
-               & (upawu-jpawu)*charge_loc(isppol,iatom)*float(2*lpawu)/float(2*lpawu+1)
+              & (upawu-jpawu)*charge_loc(isppol,iatom)*dble(2*lpawu)/dble(2*lpawu+1) 
        end if ! not nmdc
        do im=1,ndim
          hdc(iatom)%mat(im,im,isppol) = dc
@@ -626,7 +624,7 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
      call init_oper(paw_dmft,selfrotmatlu(ifreq),opt_ksloc=2)
      if (self%distrib%procf(ifreq) /= myproc) cycle
      call copy_matlu(self%oper(ifreq)%matlu(:),selfrotmatlu(ifreq)%matlu(:),natom)
-     call rotate_matlu(self%oper(ifreq)%matlu(:),eigvectmatlu(:),natom,1)
+     call rotate_matlu(selfrotmatlu(ifreq)%matlu(:),eigvectmatlu(:),natom,1)
    end do ! ifreq
    call gather_oper(selfrotmatlu(:),self%distrib,paw_dmft,2,master=master)
    do ifreq=1,3
@@ -897,15 +895,15 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
              !if (nspinor == 1) then
            !write(message,'(2x,393(es24.16e3,2x))') self%omega(ifreq),& ! TO REMOVE
            if (nspinor == 1) then
-           write(message,'(2x,393(e25.17,2x))') self%omega(ifreq),&
-            & ((((dble(self%oper(ifreq)%matlu(iatom)%mat(im+(ispinor-1)*ndim,im1+(ispinor1-1)*ndim,isppol)),&
-            & aimag(self%oper(ifreq)%matlu(iatom)%mat(im+(ispinor-1)*ndim,im1+(ispinor1-1)*ndim,isppol)),&
-            & im=1,ndim),im1=1,ndim),ispinor=1,nspinor),ispinor1=1,nspinor)
+             write(message,'(2x,393(e25.17,2x))') self%omega(ifreq),&
+               & ((((dble(self%oper(ifreq)%matlu(iatom)%mat(im+(ispinor-1)*ndim,im1+(ispinor1-1)*ndim,isppol)),&
+               & aimag(self%oper(ifreq)%matlu(iatom)%mat(im+(ispinor-1)*ndim,im1+(ispinor1-1)*ndim,isppol)),&
+               & im=1,ndim),im1=1,ndim),ispinor=1,nspinor),ispinor1=1,nspinor)
            else
              write(message,'(2x,393(e18.10,2x))') self%omega(ifreq),&
-       &  ((((dble(self%oper(ifreq)%matlu(iatom)%mat(im+(ispinor-1)*ndim,im1+(ispinor1-1)*ndim,isppol)),&
-       &  aimag(self%oper(ifreq)%matlu(iatom)%mat(im+(ispinor-1)*ndim,im1+(ispinor1-1)*ndim,isppol)),&
-            &  im=1,ndim),im1=1,ndim),ispinor=1,nspinor),ispinor1=1,nspinor)
+               & ((((dble(self%oper(ifreq)%matlu(iatom)%mat(im+(ispinor-1)*ndim,im1+(ispinor1-1)*ndim,isppol)),&
+               & aimag(self%oper(ifreq)%matlu(iatom)%mat(im+(ispinor-1)*ndim,im1+(ispinor1-1)*ndim,isppol)),&
+               & im=1,ndim),im1=1,ndim),ispinor=1,nspinor),ispinor1=1,nspinor)
            end if ! nspinor
            call wrtout(unitselffunc_arr(iall),message,'COLL')
            call wrtout(unitselffunc_arr2(iall),message,'COLL')
@@ -1478,8 +1476,7 @@ subroutine new_self(self,self_new,paw_dmft)
    end do ! i 
  end if ! moments
  
- !diff_self = diff_self / dble(icount) ! TO REMOVE
- diff_self = diff_self / icount
+ diff_self = diff_self / dble(icount) 
  
  write(message,'(8x,a,e12.5)') "DMFT Loop: Precision on self-energy is",diff_self
  call wrtout(std_out,message,'COLL')

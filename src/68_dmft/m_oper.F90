@@ -959,7 +959,8 @@ subroutine prod_oper(oper1,oper2,oper3,opt_ksloc,opt_diag)
  
  if (opt_ksloc == 2 .and. oper1%has_opermatlu == 1 .and. &
    & oper2%has_opermatlu == 1 .and. oper3%has_opermatlu == 1) then
-   call prod_matlu(oper1%matlu(:),oper2%matlu(:),oper3%matlu(:),oper1%natom) end if 
+   call prod_matlu(oper1%matlu(:),oper2%matlu(:),oper3%matlu(:),oper1%natom) 
+ end if 
 
  if (opt_ksloc == 1 .and. oper1%has_operks == 1 .and. &
     & oper2%has_operks == 1 .and. oper3%has_operks == 1) then

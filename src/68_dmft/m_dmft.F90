@@ -207,7 +207,7 @@ subroutine dmft_solve(cryst_struc,istep,dft_occup,mpi_enreg,paw_dmft,pawang,pawt
                                                                 ! ought to be  generalized  in the  future
  if (paw_dmft%dmft_solv /= -1) then
    call chipsi_renormalization(paw_dmft,opt=opt_renorm)
-   if (myproc == 0) then
+   if (myproc == 0 .and. triqs) then
      call chipsi_print(paw_dmft,pawtab(:))
    end if 
    if (paw_dmft%dmft_prtwan == 1) then
