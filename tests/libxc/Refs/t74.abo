@@ -14,10 +14,17 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
+<<<<<<< HEAD
 .Starting date : Sun 20 Oct 2024.
 - ( at 09h12 )
   
 - input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_serial/trunk__torrent/tests/TestBot_MPI1/libxc_t74/t74.abi
+=======
+.Starting date : Tue 22 Oct 2024.
+- ( at 14h01 )
+  
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_serial/baguetl_optcell-ecutsm/tests/TestBot_MPI1/libxc_t74/t74.abi
+>>>>>>> remotes/baguetl/optcell-ecutsm
 - output file    -> t74.abo
 - root for input  files -> t74i
 - root for output files -> t74o
@@ -873,8 +880,13 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.02508
 
 --- Pseudopotential description ------------------------------------------------
+<<<<<<< HEAD
 - pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_serial/trunk__torrent/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
 - pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_serial/trunk__torrent/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
+=======
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_serial/baguetl_optcell-ecutsm/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_serial/baguetl_optcell-ecutsm/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
+>>>>>>> remotes/baguetl/optcell-ecutsm
 -  Troullier-Martins psp for element  Al        Thu Oct 27 17:31:05 EDT 1994
 - 13.00000   3.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1037,8 +1049,13 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.02508
 
 --- Pseudopotential description ------------------------------------------------
+<<<<<<< HEAD
 - pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_serial/trunk__torrent/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
 - pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_serial/trunk__torrent/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
+=======
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_serial/baguetl_optcell-ecutsm/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_serial/baguetl_optcell-ecutsm/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
+>>>>>>> remotes/baguetl/optcell-ecutsm
 -  Troullier-Martins psp for element  Al        Thu Oct 27 17:31:05 EDT 1994
 - 13.00000   3.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1198,8 +1215,13 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.02508
 
 --- Pseudopotential description ------------------------------------------------
+<<<<<<< HEAD
 - pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_serial/trunk__torrent/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
 - pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_serial/trunk__torrent/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
+=======
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_serial/baguetl_optcell-ecutsm/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_serial/baguetl_optcell-ecutsm/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
+>>>>>>> remotes/baguetl/optcell-ecutsm
 -  Troullier-Martins psp for element  Al        Thu Oct 27 17:31:05 EDT 1994
 - 13.00000   3.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1692,8 +1714,13 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.02508
 
 --- Pseudopotential description ------------------------------------------------
+<<<<<<< HEAD
 - pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_serial/trunk__torrent/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
 - pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_serial/trunk__torrent/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
+=======
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_serial/baguetl_optcell-ecutsm/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_serial/baguetl_optcell-ecutsm/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
+>>>>>>> remotes/baguetl/optcell-ecutsm
 -  Troullier-Martins psp for element  Al        Thu Oct 27 17:31:05 EDT 1994
 - 13.00000   3.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2030,8 +2057,13 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.02508
 
 --- Pseudopotential description ------------------------------------------------
+<<<<<<< HEAD
 - pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_serial/trunk__torrent/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
 - pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_serial/trunk__torrent/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
+=======
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_serial/baguetl_optcell-ecutsm/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_serial/baguetl_optcell-ecutsm/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
+>>>>>>> remotes/baguetl/optcell-ecutsm
 -  Troullier-Martins psp for element  Al        Thu Oct 27 17:31:05 EDT 1994
 - 13.00000   3.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2208,8 +2240,13 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.02508
 
 --- Pseudopotential description ------------------------------------------------
+<<<<<<< HEAD
 - pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_serial/trunk__torrent/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
 - pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_serial/trunk__torrent/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
+=======
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_serial/baguetl_optcell-ecutsm/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_serial/baguetl_optcell-ecutsm/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
+>>>>>>> remotes/baguetl/optcell-ecutsm
 -  Troullier-Martins psp for element  Al        Thu Oct 27 17:31:05 EDT 1994
 - 13.00000   3.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2389,8 +2426,13 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.02508
 
 --- Pseudopotential description ------------------------------------------------
+<<<<<<< HEAD
 - pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_serial/trunk__torrent/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
 - pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_serial/trunk__torrent/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
+=======
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_serial/baguetl_optcell-ecutsm/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_serial/baguetl_optcell-ecutsm/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
+>>>>>>> remotes/baguetl/optcell-ecutsm
 -  Troullier-Martins psp for element  Al        Thu Oct 27 17:31:05 EDT 1994
 - 13.00000   3.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2567,8 +2609,13 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.02508
 
 --- Pseudopotential description ------------------------------------------------
+<<<<<<< HEAD
 - pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_serial/trunk__torrent/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
 - pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_serial/trunk__torrent/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
+=======
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_serial/baguetl_optcell-ecutsm/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_serial/baguetl_optcell-ecutsm/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
+>>>>>>> remotes/baguetl/optcell-ecutsm
 -  Troullier-Martins psp for element  Al        Thu Oct 27 17:31:05 EDT 1994
 - 13.00000   3.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2745,8 +2792,13 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.02508
 
 --- Pseudopotential description ------------------------------------------------
+<<<<<<< HEAD
 - pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_serial/trunk__torrent/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
 - pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_serial/trunk__torrent/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
+=======
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_serial/baguetl_optcell-ecutsm/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_serial/baguetl_optcell-ecutsm/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
+>>>>>>> remotes/baguetl/optcell-ecutsm
 -  Troullier-Martins psp for element  Al        Thu Oct 27 17:31:05 EDT 1994
 - 13.00000   3.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2924,8 +2976,13 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.02508
 
 --- Pseudopotential description ------------------------------------------------
+<<<<<<< HEAD
 - pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_serial/trunk__torrent/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
 - pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_serial/trunk__torrent/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
+=======
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_serial/baguetl_optcell-ecutsm/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_serial/baguetl_optcell-ecutsm/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
+>>>>>>> remotes/baguetl/optcell-ecutsm
 -  Troullier-Martins psp for element  Al        Thu Oct 27 17:31:05 EDT 1994
 - 13.00000   3.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3125,8 +3182,13 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.02508
 
 --- Pseudopotential description ------------------------------------------------
+<<<<<<< HEAD
 - pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_serial/trunk__torrent/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
 - pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_serial/trunk__torrent/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
+=======
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_serial/baguetl_optcell-ecutsm/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_serial/baguetl_optcell-ecutsm/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
+>>>>>>> remotes/baguetl/optcell-ecutsm
 -  Troullier-Martins psp for element  Al        Thu Oct 27 17:31:05 EDT 1994
 - 13.00000   3.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3790,8 +3852,13 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.02508
 
 --- Pseudopotential description ------------------------------------------------
+<<<<<<< HEAD
 - pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_serial/trunk__torrent/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
 - pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_serial/trunk__torrent/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
+=======
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_serial/baguetl_optcell-ecutsm/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_serial/baguetl_optcell-ecutsm/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
+>>>>>>> remotes/baguetl/optcell-ecutsm
 -  Troullier-Martins psp for element  Al        Thu Oct 27 17:31:05 EDT 1994
 - 13.00000   3.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3971,8 +4038,13 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.02508
 
 --- Pseudopotential description ------------------------------------------------
+<<<<<<< HEAD
 - pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_serial/trunk__torrent/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
 - pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_serial/trunk__torrent/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
+=======
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_serial/baguetl_optcell-ecutsm/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_serial/baguetl_optcell-ecutsm/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
+>>>>>>> remotes/baguetl/optcell-ecutsm
 -  Troullier-Martins psp for element  Al        Thu Oct 27 17:31:05 EDT 1994
 - 13.00000   3.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -4152,8 +4224,13 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.02508
 
 --- Pseudopotential description ------------------------------------------------
+<<<<<<< HEAD
 - pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_serial/trunk__torrent/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
 - pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_serial/trunk__torrent/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
+=======
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_serial/baguetl_optcell-ecutsm/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_serial/baguetl_optcell-ecutsm/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
+>>>>>>> remotes/baguetl/optcell-ecutsm
 -  Troullier-Martins psp for element  Al        Thu Oct 27 17:31:05 EDT 1994
 - 13.00000   3.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -4356,8 +4433,13 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.02508
 
 --- Pseudopotential description ------------------------------------------------
+<<<<<<< HEAD
 - pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_serial/trunk__torrent/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
 - pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_serial/trunk__torrent/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
+=======
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_serial/baguetl_optcell-ecutsm/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_serial/baguetl_optcell-ecutsm/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
+>>>>>>> remotes/baguetl/optcell-ecutsm
 -  Troullier-Martins psp for element  Al        Thu Oct 27 17:31:05 EDT 1994
 - 13.00000   3.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -4528,8 +4610,13 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.02508
 
 --- Pseudopotential description ------------------------------------------------
+<<<<<<< HEAD
 - pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_serial/trunk__torrent/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
 - pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_serial/trunk__torrent/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
+=======
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_serial/baguetl_optcell-ecutsm/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_serial/baguetl_optcell-ecutsm/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
+>>>>>>> remotes/baguetl/optcell-ecutsm
 -  Troullier-Martins psp for element  Al        Thu Oct 27 17:31:05 EDT 1994
 - 13.00000   3.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -4706,8 +4793,13 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.02508
 
 --- Pseudopotential description ------------------------------------------------
+<<<<<<< HEAD
 - pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_serial/trunk__torrent/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
 - pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_serial/trunk__torrent/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
+=======
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_serial/baguetl_optcell-ecutsm/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_serial/baguetl_optcell-ecutsm/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
+>>>>>>> remotes/baguetl/optcell-ecutsm
 -  Troullier-Martins psp for element  Al        Thu Oct 27 17:31:05 EDT 1994
 - 13.00000   3.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -4907,8 +4999,13 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.02508
 
 --- Pseudopotential description ------------------------------------------------
+<<<<<<< HEAD
 - pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_serial/trunk__torrent/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
 - pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_serial/trunk__torrent/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
+=======
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_serial/baguetl_optcell-ecutsm/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_serial/baguetl_optcell-ecutsm/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
+>>>>>>> remotes/baguetl/optcell-ecutsm
 -  Troullier-Martins psp for element  Al        Thu Oct 27 17:31:05 EDT 1994
 - 13.00000   3.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -5082,8 +5179,13 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.02508
 
 --- Pseudopotential description ------------------------------------------------
+<<<<<<< HEAD
 - pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_serial/trunk__torrent/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
 - pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_serial/trunk__torrent/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
+=======
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_serial/baguetl_optcell-ecutsm/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_serial/baguetl_optcell-ecutsm/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
+>>>>>>> remotes/baguetl/optcell-ecutsm
 -  Troullier-Martins psp for element  Al        Thu Oct 27 17:31:05 EDT 1994
 - 13.00000   3.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -5843,13 +5945,19 @@ P           mkmem           6
 
 ================================================================================
 
+<<<<<<< HEAD
 - Total cpu        time (s,m,h):         12.6        0.21      0.003
 - Total wall clock time (s,m,h):         12.6        0.21      0.004
+=======
+- Total cpu        time (s,m,h):         12.5        0.21      0.003
+- Total wall clock time (s,m,h):         12.5        0.21      0.003
+>>>>>>> remotes/baguetl/optcell-ecutsm
 -
 - For major independent code sections, cpu and wall times (sec),
 -  as well as % of the time and number of calls for node 0
 -
 -<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = 0>
+<<<<<<< HEAD
 - cpu_time =           12.6, wall_time =           12.6
 -
 - routine                                    cpu     %          wall   %        number of calls Gflops    Speedup Efficacity
@@ -5874,11 +5982,38 @@ P           mkmem           6
 -<END_TIMER>
 -
 - subtotal                                 11.197  89.0        11.245  89.1                                  1.00       1.00
+=======
+- cpu_time =           12.5, wall_time =           12.5
+-
+- routine                                    cpu     %          wall   %        number of calls Gflops    Speedup Efficacity
+-                                                                                (-1=no count)
+- pspini                                    2.879  23.1         2.879  23.0             25      -1.00        1.00       1.00
+- fock_getghc(/=fourXX,nonlop)              2.078  16.7         2.072  16.6          74550      -1.00        1.00       1.00
+- get_dtsets_pspheads                       1.215   9.7         1.215   9.7              1      -1.00        1.00       1.00
+- fourdp                                    1.159   9.3         1.191   9.5          47460      -1.00        0.97       0.97
+- fourwf%(G->r)                             0.964   7.7         0.937   7.5          30093      -1.00        1.03       1.03
+- fourwf%(pot)                              0.653   5.2         0.685   5.5          24353      -1.00        0.95       0.95
+- xc:pot/=fourdp                            0.650   5.2         0.653   5.2            860      -1.00        0.99       0.99
+- getghc(/=fourXX,nonlop,fock_XX)           0.185   1.5         0.179   1.4             -1      -1.00        1.03       1.03
+- ewald                                     0.147   1.2         0.147   1.2             25      -1.00        1.00       1.00
+- nonlop(apply)                             0.140   1.1         0.142   1.1          24353      -1.00        0.99       0.99
+- stress                                    0.139   1.1         0.138   1.1             25      -1.00        1.01       1.01
+- ewald2 (+vdw_dftd)                        0.130   1.0         0.127   1.0             25      -1.00        1.02       1.02
+- timing timab                              0.114   0.9         0.114   0.9             10      -1.00        1.00       1.00
+- vtowfk(ssdiag)                            0.092   0.7         0.084   0.7             -1      -1.00        1.10       1.10
+- projbd                                    0.088   0.7         0.098   0.8          37006      -1.00        0.90       0.90
+- fock_ACE_getghc                           0.069   0.6         0.079   0.6          23321      -1.00        0.87       0.87
+- others (143)                              0.429   3.4         0.434   3.5             -1      -1.00        0.99       0.99
+-<END_TIMER>
+-
+- subtotal                                 11.131  89.3        11.174  89.3                                  1.00       1.00
+>>>>>>> remotes/baguetl/optcell-ecutsm
 
 - For major independent code sections, cpu and wall times (sec),
 - as well as % of the total time and number of calls 
 
 -<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = world>
+<<<<<<< HEAD
 - cpu_time =          12.6, wall_time =          12.6
 -
 - routine                                    cpu     %          wall   %        number of calls Gflops    Speedup Efficacity
@@ -5903,6 +6038,32 @@ P           mkmem           6
 -<END_TIMER>
 
 - subtotal                                 11.197  89.0        11.245  89.1                                  1.00       1.00
+=======
+- cpu_time =          12.5, wall_time =          12.5
+-
+- routine                                    cpu     %          wall   %        number of calls Gflops    Speedup Efficacity
+-                                                                                (-1=no count)
+- pspini                                    2.879  23.1         2.879  23.0             25      -1.00        1.00       1.00
+- fock_getghc(/=fourXX,nonlop)              2.078  16.7         2.072  16.6          74550      -1.00        1.00       1.00
+- get_dtsets_pspheads                       1.215   9.7         1.215   9.7              1      -1.00        1.00       1.00
+- fourdp                                    1.159   9.3         1.191   9.5          47460      -1.00        0.97       0.97
+- fourwf%(G->r)                             0.964   7.7         0.937   7.5          30093      -1.00        1.03       1.03
+- fourwf%(pot)                              0.653   5.2         0.685   5.5          24353      -1.00        0.95       0.95
+- xc:pot/=fourdp                            0.650   5.2         0.653   5.2            860      -1.00        0.99       0.99
+- getghc(/=fourXX,nonlop,fock_XX)           0.185   1.5         0.179   1.4             -1      -1.00        1.03       1.03
+- ewald                                     0.147   1.2         0.147   1.2             25      -1.00        1.00       1.00
+- nonlop(apply)                             0.140   1.1         0.142   1.1          24353      -1.00        0.99       0.99
+- stress                                    0.139   1.1         0.138   1.1             25      -1.00        1.01       1.01
+- ewald2 (+vdw_dftd)                        0.130   1.0         0.127   1.0             25      -1.00        1.02       1.02
+- timing timab                              0.114   0.9         0.114   0.9             10      -1.00        1.00       1.00
+- vtowfk(ssdiag)                            0.092   0.7         0.084   0.7             -1      -1.00        1.10       1.10
+- projbd                                    0.088   0.7         0.098   0.8          37006      -1.00        0.90       0.90
+- fock_ACE_getghc                           0.069   0.6         0.079   0.6          23321      -1.00        0.87       0.87
+- others (143)                              0.429   3.4         0.434   3.5             -1      -1.00        0.99       0.99
+-<END_TIMER>
+
+- subtotal                                 11.131  89.3        11.174  89.3                                  1.00       1.00
+>>>>>>> remotes/baguetl/optcell-ecutsm
 
 ================================================================================
 
@@ -5992,10 +6153,18 @@ P           mkmem           6
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
+<<<<<<< HEAD
 - Proc.   0 individual time (sec): cpu=         12.6  wall=         12.6
+=======
+- Proc.   0 individual time (sec): cpu=         12.5  wall=         12.5
+>>>>>>> remotes/baguetl/optcell-ecutsm
 
 ================================================================================
 
  Calculation completed.
 .Delivered 498 WARNINGs and 122 COMMENTs to log file.
+<<<<<<< HEAD
 +Overall time at end (sec) : cpu=         12.6  wall=         12.6
+=======
++Overall time at end (sec) : cpu=         12.5  wall=         12.5
+>>>>>>> remotes/baguetl/optcell-ecutsm
