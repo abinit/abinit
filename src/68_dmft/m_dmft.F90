@@ -318,6 +318,10 @@ subroutine dmft_solve(cryst_struc,istep,dft_occup,mpi_enreg,paw_dmft,pawang,pawt
    & ch10,' ================================================================='
  call wrtout(std_out,message,'COLL')
  if (triqs) then
+   ! When using TRIQS, we prefer to print the Green's function occupations after
+   ! the Fermi search, when the Green's function needs to be computed anyway.
+   ! This is a heavy calculation, so we prefer to do it only if necessary.
+   ! When using TRIQS, we usually prefer to be mindful of the users of the code.
    call init_green(green,paw_dmft,opt_moments=opt_moments)
  else
    call icip_green("Green_inputself",green,paw_dmft,pawprtvol,self,opt_self=1)
@@ -334,6 +338,10 @@ subroutine dmft_solve(cryst_struc,istep,dft_occup,mpi_enreg,paw_dmft,pawang,pawt
  call fermi_green(green,paw_dmft,self)
  call compute_green(green,paw_dmft,0,self,opt_self=1,opt_nonxsum=1,opt_log=opt_log,opt_restart_moments=1)
  call integrate_green(green,paw_dmft,prtopt,opt_fill_occnd=opt_fill_occnd)
+
+ if (triqs) then
+   call printocc_green(green,5,paw_dmft,3,chtype="Green_inputself")
+ end if
 
 !== define weiss field only for the local quantities (opt_oper=2)
 !----------------------------------------------------------------------
@@ -485,6 +493,10 @@ subroutine dmft_solve(cryst_struc,istep,dft_occup,mpi_enreg,paw_dmft,pawang,pawt
 
    call compute_green(green,paw_dmft,0,self,opt_self=1,opt_nonxsum=1,opt_log=opt_log,opt_restart_moments=1)
    call integrate_green(green,paw_dmft,prtopt,opt_diff=opt_diff,opt_ksloc=3,opt_fill_occnd=opt_fill_occnd) 
+
+   if (triqs) then
+     call printocc_green(green,5,paw_dmft,3,chtype="DMFT")
+   end if
 
 !  call abi_abort('COLL')
 

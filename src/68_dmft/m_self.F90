@@ -902,6 +902,8 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
                !MGNAG Runtime Error: wrtout_cpp.f90, line 896: Buffer overflow on output
                !Is it possible to rewrite the code below to avoid such a long message
                !What about Netcdf binary files ?
+
+           ! When using TRIQS, we prefer not to lose accuracy when writing the self-energy on file
            if (triqs) then
              string_format = '(2x,393(es24.16e3,2x))'
            else if (nspinor == 1) then
@@ -1155,6 +1157,7 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
      if (myproc == master) then
 
 !      == Send read data to all process
+       paw_dmft%fermie = fermie_read 
        icount = 0
 !      Self energy-----------
        do ifreq=1,self%nw
