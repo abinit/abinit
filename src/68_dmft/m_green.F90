@@ -3135,7 +3135,7 @@ subroutine fermi_green(green,paw_dmft,self)
  !type(MPI_type), intent(in) :: mpi_enreg
  type(self_type), intent(inout) :: self
 !Local variables-------------------------------
- integer :: ierr_hh,max_iter,option
+ integer :: ierr_hh,max_iter
  real(dp) :: f_precision,fermi_old,x_precision
 ! real(dp) :: hx
  character(len=500) :: message
@@ -3147,14 +3147,7 @@ subroutine fermi_green(green,paw_dmft,self)
 !=============
 !headers
 !=============
- option = paw_dmft%dmft_fermi_algo
- if (option == 1) then
-   write(message,'(2a)') ch10,"  |---Newton method to search Fermi level ------------|"
- else if (option == 2) then
-   write(message,'(2a)') ch10,"  |---Halley method to search Fermi level ------------|"
- else
-   ABI_ERROR("Option not recognized for dmft_fermi_algo")
- end if ! dmft_fermi_algo
+ write(message,'(2a)') ch10,"  |---Newton method to search Fermi level ------------|"
  call wrtout(std_out,message,'COLL')
  write(message,'(2a,f13.6)') ch10,"  |--- Initial value for Fermi level",paw_dmft%fermie
  call wrtout(std_out,message,'COLL')
@@ -3191,7 +3184,7 @@ subroutine fermi_green(green,paw_dmft,self)
  write(message,'(a,4x,a,e13.6)') ch10," Precision required :",f_precision
  call wrtout(std_out,message,'COLL')
  if (f_precision < ten) then
-   call newton(green,self,paw_dmft,paw_dmft%fermie,x_precision,max_iter,f_precision,ierr_hh,opt_algo=option)
+   call newton(green,self,paw_dmft,paw_dmft%fermie,x_precision,max_iter,f_precision,ierr_hh)
  end if 
  
 !===========================
@@ -3265,8 +3258,9 @@ end subroutine fermi_green
 !!
 !! INPUTS
 !!  green  <type(green_type)>= green function data
+!!  self <type(self_type)>= variables related to self-energy
 !!  paw_dmft  <type(paw_dmft_type)>= paw+dmft related data
-!!  x_input      : input of x
+!!  x_input      : input value for x
 !!  max_iter     : maximum number of iterations
 !!  f_precision  : required precision on function F
 !!  opt_algo     : 1 for Newton, 2 for Halley
@@ -3282,12 +3276,13 @@ subroutine newton(green,self,paw_dmft,x_input,x_precision,max_iter,&
 
 !Arguments ------------------------------------
  type(green_type), intent(inout) :: green
- type(self_type), intent(in) :: self
+ type(self_type), intent(inout) :: self
  !type(MPI_type), intent(in) :: mpi_enreg
- type(paw_dmft_type), intent(in) :: paw_dmft
+ type(paw_dmft_type), intent(inout) :: paw_dmft
  integer, intent(in) :: max_iter
  integer, intent(out) :: ierr_hh
- real(dp), intent(inout) :: f_precision,x_input,x_precision
+ real(dp), intent(in) :: f_precision
+ real(dp), intent(inout) :: x_input,x_precision
  integer, optional, intent(in) :: opt_algo
 !Local variables-------------------------------
  integer :: iter,option
@@ -3324,6 +3319,7 @@ subroutine newton(green,self,paw_dmft,x_input,x_precision,max_iter,&
  Fxoptimum = one
  x_optimum = zero
 
+ ! When using TRIQS, we prefer to (drastically) optimize the Fermi search.
  triqs = (paw_dmft%dmft_solv == 6) .or. (paw_dmft%dmft_solv == 7)
 
 !========================================
@@ -3339,7 +3335,8 @@ subroutine newton(green,self,paw_dmft,x_input,x_precision,max_iter,&
 !    ==============================================
 !    Compute the function and derivatives for newton
 !    ==============================================
-     call function_and_deriv(green,self,paw_dmft,x_input,Fx,Fxprime,Fxdouble,option)
+     call function_and_deriv(green,self,paw_dmft,x_input,x_precision, &
+                           & f_precision,Fx,Fxprime,Fxdouble,option)
 
 !    Apply stop criterion on Fx
      if (abs(Fx) < f_precision) then
@@ -3367,7 +3364,7 @@ subroutine newton(green,self,paw_dmft,x_input,x_precision,max_iter,&
      x_precision = x_input - xold
 
 !    ==============================================
-!    Newton/Halley's  formula for next iteration
+!    Newton/Halley's formula for next iteration
 !    ==============================================
      xold = x_input
      if (option == 1) then 
@@ -3387,7 +3384,7 @@ subroutine newton(green,self,paw_dmft,x_input,x_precision,max_iter,&
 !    If newton does not work well, use dichotomy.
 !    ==============================================
 
-     if (triqs) then ! update lower and upper bounds before the check
+     if (triqs) then 
        if (Fx < 0) then
          l_minus = .true.
          x_minus = xold
@@ -3399,7 +3396,11 @@ subroutine newton(green,self,paw_dmft,x_input,x_precision,max_iter,&
      end if ! triqs
 
      if ((x_input < x_minus .or. x_input > x_plus) .and. (l_minus .and. l_plus)) then 
-       !call compute_nb_elec(green,paw_dmft,Fx,nb_elec_x,xold)
+       
+       if (.not. triqs) then
+         call compute_nb_elec(green,self,paw_dmft,Fx,nb_elec_x,xold)
+       end if 
+      
        write(message,'(a,3f12.6)') " ---",x_input,Fx+paw_dmft%nelectval,Fx
        call wrtout(std_out,message,'COLL')
        if (.not. triqs) then
@@ -3479,10 +3480,12 @@ subroutine newton(green,self,paw_dmft,x_input,x_precision,max_iter,&
 !!  Compute value of a function and its numerical derivatives
 !!
 !! INPUTS
-!!  x_input      : input of x
-!!  option       : if 1 compute only first derivative
-!!                 if 2 compute the two first derivatives.
-!!  opt_noninter
+!!  green  <type(green_type)>= green function data
+!!  self <type(self_type)>= variables related to self-energy
+!!  paw_dmft  <type(paw_dmft_type)>= paw+dmft related data
+!!  x_input = input value for x
+!!  option = 1 to only compute the first derivative
+!!         = 2 to compute the two first derivatives.
 !!
 !! OUTPUTS
 !!  Fx           : Value of F(x)
@@ -3491,76 +3494,84 @@ subroutine newton(green,self,paw_dmft,x_input,x_precision,max_iter,&
 !!
 !! SOURCE
 
-subroutine function_and_deriv(green,self,paw_dmft,x_input,Fx,Fxprime,Fxdouble,option)
+subroutine function_and_deriv(green,self,paw_dmft,x_input,x_precision, &
+                            & f_precision,Fx,Fxprime,Fxdouble,option)
 
 !Arguments ------------------------------------
-!scalars
- !type(crystal_t),intent(in) :: cryst_struc
  type(green_type), intent(inout) :: green
- type(self_type), intent(in) :: self
+ type(self_type), intent(inout) :: self
  !type(MPI_type), intent(in) :: mpi_enreg
- type(paw_dmft_type), intent(in) :: paw_dmft
- !type(pawang_type),intent(in) :: pawang
- !type(self_type), intent(inout) :: self
+ type(paw_dmft_type), intent(inout) :: paw_dmft
  integer, intent(in) :: option
- real(dp), intent(in) :: x_input ! ,x_precision
+ real(dp), intent(in) :: f_precision,x_input,x_precision
  real(dp), intent(out) :: Fx,Fxprime,Fxdouble
 !Local variables-------------------------------
- real(dp) :: nb_elec_x
+ logical :: triqs
+ real(dp) :: deltax,Fxminus,Fxplus,nb_elec_x,xminus,x0,xplus
  character(len=500) :: message
 ! *********************************************************************
 
-!  choose deltax: for numeric evaluation of derivative
+   triqs = (paw_dmft%dmft_solv == 6) .or. (paw_dmft%dmft_solv == 7)
+
+   if (.not. triqs) then
+
+!  Choose deltax: for numeric evaluation of derivative
    !if(iter==1) then
 !    deltax=0.02
    !end if
 !  deltax=max((x_input-x_old)/10.d0,min(0.00001_dp,x_precision/100_dp))
-   !deltax = min(tol5,x_precision/dble(100))  ! small but efficient
+     deltax = min(tol5,x_precision/dble(100))  ! small but efficient
 !  endif
 !  write(std_out,*) "iter,x_input,deltax",iter,x_input,deltax
-   !x0 = x_input
-   !xminus = x0 - deltax
-   !xplus = x0 + deltax
-   
-   call compute_nb_elec(green,self,paw_dmft,Fx,nb_elec_x,x_input,option=option,Fxprime=Fxprime,Fxdouble=Fxdouble)
+     x0 = x_input
+     xminus = x0 - deltax
+     xplus = x0 + deltax
 
-   write(message,'(a,3f12.6)') "  - ",x_input,nb_elec_x,Fx
-   call wrtout(std_out,message,'COLL')
+     call compute_nb_elec(green,self,paw_dmft,Fx,nb_elec_x,x0)
+
+     write(message,'(a,3f12.6)') "  - ",x0,nb_elec_x,Fx
+     call wrtout(std_out,message,'COLL')
 
 !  write(std_out,*) "Fx", Fx
-   !if (abs(Fx) < f_precision) return
+     if (abs(Fx) < f_precision) return
 
-   !call compute_nb_elec(green,paw_dmft,Fxplus,nb_elec_x,xplus,trace_fermie(:),eig_fermie(:,:,:,:))
+     call compute_nb_elec(green,self,paw_dmft,Fxplus,nb_elec_x,xplus)
 
-   !write(message,'(a,3f12.6)') "  - ",xplus,nb_elec_x,Fxplus
-   !call wrtout(std_out,message,'COLL')
+     write(message,'(a,3f12.6)') "  - ",xplus,nb_elec_x,Fxplus
+     call wrtout(std_out,message,'COLL')
 
-   !if (option == 2) then
-   !  deltax = min(tol5,x_precision/dble(100))  ! small but efficient
-   !  xminus = x0 - deltax
-   !  xplus  = x0 + deltax
-   !  call compute_nb_elec(green,paw_dmft,Fxplus,nb_elec_x,xplus,eig_fermie(:,:,:,:))
-   !  write(message,'(a,3f12.6)') "  - ",xplus,nb_elec_x,Fxplus
-   !  call wrtout(std_out,message,'COLL')
-   !  call compute_nb_elec(green,paw_dmft,Fxminus,nb_elec_x,xminus,eig_fermie(:,:,:,:))
-   !  write(message,'(a,3f12.6)') "  - ",xminus,nb_elec_x,Fxminus
-   !  call wrtout(std_out,message,'COLL')
-   !end if ! option=2
+     if (option == 2) then
+       call compute_nb_elec(green,self,paw_dmft,Fxminus,nb_elec_x,xminus)
 
-   !if (option == 1) then
-   !  call compute_nb_elec(green,paw_dmft,Fxprime,nb_elec_x,x0,eig_fermie(:,:,:,:),opt_deriv=1)
-   !else if (option == 2) then
-   !  Fxprime  = (Fxplus-Fxminus) / (two*deltax)
-   !  Fxdouble = (Fxplus+Fxminus-two*Fx) / (deltax**2)
-   !end if ! option
+       write(message,'(a,3f12.6)') "  - ",xminus,nb_elec_x,Fxminus
+       call wrtout(std_out,message,'COLL')
+     end if ! option=2
+
+     if (option == 1) then
+       Fxprime = (Fxplus-Fx) / deltax
+     else if (option == 2) then
+       Fxprime  = (Fxplus-Fxminus) / (two*deltax)
+       Fxdouble = (Fxplus+Fxminus-two*Fx) / (deltax**2)
+     end if ! option
 !  write(std_out,*) "after computation of Fxprime",myid
+
+   else
+
+     ! When using TRIQS, we prefer to compute the derivative analytically.
+     ! This is more accurate, thus drastically speeding up the root search.
+
+     call compute_nb_elec(green,self,paw_dmft,Fx,nb_elec_x,x_input,Fxprime=Fxprime)
+
+     write(message,'(a,3f12.6)') "  - ",x_input,nb_elec_x,Fx
+     call wrtout(std_out,message,'COLL')
+
+   end if ! triqs
+
    if (Fxprime < zero) then
      write(message,'(a,f12.6)') "  Warning: slope of charge versus fermi level is negative !",Fxprime
      call wrtout(std_out,message,'COLL')
    end if
-   !x_old = x_input
 
-   !return
  end subroutine function_and_deriv
 !!***
 
@@ -3581,7 +3592,7 @@ subroutine function_and_deriv(green,self,paw_dmft,x_input,Fx,Fxprime,Fxdouble,op
 !!
 !! SOURCE
 
-subroutine compute_nb_elec(green,self,paw_dmft,Fx,nb_elec_x,fermie,option,Fxprime,Fxdouble)
+subroutine compute_nb_elec(green,self,paw_dmft,Fx,nb_elec_x,fermie,Fxprime)
 
  use m_abi_linalg, only : abi_xgemm
  use m_hide_lapack, only : xginv
@@ -3590,205 +3601,174 @@ subroutine compute_nb_elec(green,self,paw_dmft,Fx,nb_elec_x,fermie,option,Fxprim
  use m_xmpi, only : xmpi_sum
 
 !Arguments ------------------------------------
-!scalars
- !type(crystal_t),intent(in) :: cryst_struc
  type(green_type), intent(inout) :: green
- type(self_type), intent(in) :: self
+ type(self_type), intent(inout) :: self
  !type(MPI_type), intent(in) :: mpi_enreg
- type(paw_dmft_type), intent(in) :: paw_dmft
- !type(pawang_type),intent(in) :: pawang
- !type(self_type), intent(inout) :: self
+ type(paw_dmft_type), intent(inout) :: paw_dmft
  !integer,intent(in) :: opt_noninter
  real(dp), intent(in) :: fermie
  real(dp), intent(out) :: Fx,nb_elec_x
- real(dp), optional, intent(out) :: Fxdouble,Fxprime
- integer, optional, intent(in) :: option
+ real(dp), optional, intent(out) :: Fxprime
 !Local variables-------------------------------
  integer :: band_index,i,ib,ierr,ifreq,ikpt,isppol,mbandc
- integer :: mkmem,nband_k,nkpt,nmoments,nspinor,nsppol,opt,shift
- real(dp) :: correction,correction_double,correction_prime,eig
- real(dp) :: fac,occ_double,occ_prime,temp,wtk
+ integer :: mkmem,nband_k,nkpt,nmoments,nspinor,nsppol,shift
+ logical :: triqs
+ real(dp) :: correction,correction_prime,eig
+ real(dp) :: fac,occ_prime,temp,wtk
  complex(dpc) :: omega
  type(oper_type) :: oper_tmp
- complex(dpc), allocatable :: mat_tmp(:,:),omega_fac(:),trace_moments(:)
- complex(dpc), allocatable :: trace_moments_double(:),trace_moments_prime(:)
+ complex(dpc), allocatable :: omega_fac(:),trace_moments(:),trace_moments_prime(:)
 ! *********************************************************************
  
-   !paw_dmft%fermie = fermie
-   !call compute_green(cryst_struc,green,paw_dmft,pawang,0,self,opt_self=1,&
-!&   opt_nonxsum=1,opt_nonxsum2=1)
-  ! call integrate_green(cryst_struc,green,paw_dmft,pawang,prtopt=0,&
-!&   opt_ksloc=-1) !,opt_nonxsum=1)
-!  opt_ksloc=-1, compute total charge
+   ! When using TRIQS, we prefer to optimize this routine, especially since it
+   ! is very time-consuming.
+   triqs = (paw_dmft%dmft_solv == 6) .or. (paw_dmft%dmft_solv == 7)
 
-   green%charge_ks = zero
+   if (.not. triqs) then
+
+     paw_dmft%fermie = fermie
+     call compute_green(green,paw_dmft,0,self,opt_self=1,opt_nonxsum=1,opt_nonxsum2=1)
+     call integrate_green(green,paw_dmft,0,opt_ksloc=-1) !,opt_nonxsum=1)
+        !  opt_ksloc=-1, compute total charge
+
+   else
+
+     green%charge_ks = zero
    
-   mkmem = green%distrib%nkpt_mem(green%distrib%me_kpt)
-   shift = green%distrib%shiftk
-   nmoments = 1
-   if (green%has_moments == 1) nmoments = green%nmoments
+     mkmem = green%distrib%nkpt_mem(green%distrib%me_kpt)
+     shift = green%distrib%shiftk
+     nmoments = 1
+     if (green%has_moments == 1) nmoments = green%nmoments
    
-   mbandc  = paw_dmft%mbandc
-   nkpt    = paw_dmft%nkpt
-   nspinor = paw_dmft%nspinor
-   nsppol  = paw_dmft%nsppol
-   temp    = paw_dmft%temp
+     mbandc  = paw_dmft%mbandc
+     nkpt    = paw_dmft%nkpt
+     nspinor = paw_dmft%nspinor
+     nsppol  = paw_dmft%nsppol
+     temp    = paw_dmft%temp
    
-   opt = 0
-   if (present(option)) opt = option
-   
-   ABI_MALLOC(trace_moments,(nmoments))
-   
-   trace_moments(1) = green%trace_fermie(1)
-   
-   if (opt >= 1) then
+     ABI_MALLOC(trace_moments,(nmoments))
      ABI_MALLOC(trace_moments_prime,(nmoments))
+   
+     trace_moments(1) = green%trace_fermie(1)
      trace_moments_prime(:) = czero
      Fxprime = zero
-   end if ! opt
-   if (opt == 2) then
-     ABI_MALLOC(mat_tmp,(mbandc,mbandc))
-     ABI_MALLOC(trace_moments_double,(nmoments))
-     trace_moments_double(:) = czero
-     Fxdouble = zero
-   end if ! opt
          
-   if (green%has_moments == 1) call compute_trace_moments(fermie,green%trace_fermie(:),trace_moments(:),trace_moments_prime(:),trace_moments_double(:),opt)
-   
-   call init_oper(paw_dmft,oper_tmp,nkpt=mkmem,shiftk=shift)
-   
-   ABI_MALLOC(omega_fac,(nmoments))
-   do ifreq=1,green%nw
-     if (green%distrib%proct(ifreq) /= green%distrib%me_freq) cycle
-     omega = cmplx(zero,green%omega(ifreq),kind=dp)
-     fac = two * paw_dmft%wgt_wlo(ifreq) * temp
-     omega_fac(1) = - fac / omega
-     do i=2,nmoments
-       omega_fac(i) = omega_fac(i-1) / omega
-     end do ! i
-     if (nsppol == 1 .and. nspinor == 1) fac = fac * two
-     if (ifreq == green%nw) then
-       omega_fac(1) = omega_fac(1) + half
-       if (green%has_moments == 1) then
-         omega_fac(2) = omega_fac(2) - cone/(four*temp)
-         omega_fac(4) = omega_fac(4) + cone/(dble(48)*(temp**3))
-       end if ! moments
-     end if ! ifreq=green%nw
-     
-     call add_matlu(self%hdc%matlu(:),self%oper(ifreq)%matlu(:),oper_tmp%matlu(:),paw_dmft%natom,-1)
-     call upfold_oper(oper_tmp,paw_dmft)
-     
-     do isppol=1,nsppol
-       do ikpt=1,mkmem
-         wtk = paw_dmft%wtk(ikpt+shift)
-         do ib=1,mbandc
-           oper_tmp%ks(ib,ib,ikpt,isppol) = oper_tmp%ks(ib,ib,ikpt,isppol) + omega + &
-              & fermie - paw_dmft%eigen_dft(ib,ikpt+shift,isppol)
-         end do ! ib
-         call xginv(oper_tmp%ks(:,:,ikpt,isppol),mbandc)
+     if (green%has_moments == 1) then
+       call compute_trace_moments(fermie,green%trace_fermie(:),trace_moments(:),trace_moments_prime(:))
+     end if    
 
-         if (opt == 1) then
-           Fxprime = Fxprime - dble(sum(oper_tmp%ks(:,:,ikpt,isppol)*transpose(oper_tmp%ks(:,:,ikpt,isppol))))*wtk*fac
-         else if (opt == 2) then
-           call abi_xgemm("n","n",mbandc,mbandc,mbandc,cone,oper_tmp%ks(:,:,ikpt,isppol),mbandc,&
-                        & oper_tmp%ks(:,:,ikpt,isppol),mbandc,czero,mat_tmp(:,:),mbandc)
-           Fxdouble = Fxdouble + two*dble(sum(oper_tmp%ks(:,:,ikpt,isppol)*transpose(mat_tmp(:,:))))*wtk*fac
-         end if ! opt
-         do ib=1,mbandc
-           green%charge_ks = green%charge_ks + dble(oper_tmp%ks(ib,ib,ikpt,isppol))*wtk*fac
-           if (opt == 2) Fxprime = Fxprime - dble(mat_tmp(ib,ib))*wtk*fac
-         end do ! ib
-       end do ! ikpt
-     end do ! isppol
+     call init_oper(paw_dmft,oper_tmp,nkpt=mkmem,shiftk=shift)
+   
+     ABI_MALLOC(omega_fac,(nmoments))
+     do ifreq=1,green%nw
+       if (green%distrib%proct(ifreq) /= green%distrib%me_freq) cycle
+       omega = cmplx(zero,green%omega(ifreq),kind=dp)
+       fac = two * paw_dmft%wgt_wlo(ifreq) * temp
+       omega_fac(1) = -fac / omega
+       do i=2,nmoments
+         omega_fac(i) = omega_fac(i-1) / omega
+       end do ! i
+       if (nsppol == 1 .and. nspinor == 1) fac = fac * two
+       if (ifreq == green%nw) then
+         omega_fac(1) = omega_fac(1) + half
+         if (green%has_moments == 1) then
+           omega_fac(2) = omega_fac(2) - cone/(four*temp)
+           omega_fac(4) = omega_fac(4) + cone/(dble(48)*(temp**3))
+         end if ! moments
+       end if ! ifreq=green%nw
      
-     ! DO NOT REPLACE THE LINES BELOW WITH A DOT_PRODUCT: THIS IS NOT EQUIVALENT SINCE THESE ARE COMPLEX QUANTITIES
-     ! AND DOT_PRODUCT(X,Y)=SUM(CONJG(X(:))*Y(:))
-     if (green%distrib%me_kpt == 0) then
-       green%charge_ks = green%charge_ks + dble(sum(trace_moments(1:nmoments)*omega_fac(1:nmoments)))
-       if (opt >= 1) Fxprime = Fxprime + dble(sum(trace_moments_prime(1:nmoments)*omega_fac(1:nmoments)))
-       if (opt == 2) Fxdouble = Fxdouble + dble(sum(trace_moments_double(1:nmoments)*omega_fac(1:nmoments)))
-     end if 
-   end do ! ifreq
+       call add_matlu(self%hdc%matlu(:),self%oper(ifreq)%matlu(:),oper_tmp%matlu(:),paw_dmft%natom,-1)
+       call upfold_oper(oper_tmp,paw_dmft)
+     
+       do isppol=1,nsppol
+         do ikpt=1,mkmem
+           wtk = paw_dmft%wtk(ikpt+shift)
+           do ib=1,mbandc
+             oper_tmp%ks(ib,ib,ikpt,isppol) = oper_tmp%ks(ib,ib,ikpt,isppol) + omega + &
+                & fermie - paw_dmft%eigen_dft(ib,ikpt+shift,isppol)
+           end do ! ib
+           call xginv(oper_tmp%ks(:,:,ikpt,isppol),mbandc)
+
+           if (present(Fxprime)) Fxprime = Fxprime - &
+              & dble(sum(oper_tmp%ks(:,:,ikpt,isppol)*transpose(oper_tmp%ks(:,:,ikpt,isppol))))*wtk*fac
+           do ib=1,mbandc
+             green%charge_ks = green%charge_ks + dble(oper_tmp%ks(ib,ib,ikpt,isppol))*wtk*fac
+           end do ! ib
+         end do ! ikpt
+       end do ! isppol
+     
+       if (green%distrib%me_kpt == 0) then
+         green%charge_ks = green%charge_ks + dble(sum(trace_moments(1:nmoments)*omega_fac(1:nmoments)))
+         if (present(Fxprime)) Fxprime = Fxprime + dble(sum(trace_moments_prime(1:nmoments)*omega_fac(1:nmoments)))
+       end if 
+     end do ! ifreq
    
-   call xmpi_sum(green%charge_ks,paw_dmft%spacecomm,ierr)
-   if (opt >= 1) call xmpi_sum(Fxprime,paw_dmft%spacecomm,ierr)
-   if (opt == 2) call xmpi_sum(Fxdouble,paw_dmft%spacecomm,ierr)
-   
-   if (paw_dmft%dmft_use_all_bands) then
-     band_index = 0
-     correction = zero
-     correction_double = zero
-     correction_prime = zero
-     do isppol=1,nsppol
-       do ikpt=1,nkpt
-         nband_k = paw_dmft%nband(ikpt+(isppol-1)*nkpt)
-         if (green%distrib%procb(ikpt) /= green%distrib%me_kpt) then
+     call xmpi_sum(green%charge_ks,paw_dmft%spacecomm,ierr)
+     if (present(Fxprime)) then
+       call xmpi_sum(Fxprime,paw_dmft%spacecomm,ierr)
+     end if
+
+     ABI_FREE(trace_moments)
+     ABI_FREE(trace_moments_prime)
+     ABI_FREE(omega_fac)
+
+     call destroy_oper(oper_tmp)
+
+     if (paw_dmft%dmft_use_all_bands) then
+       band_index = 0
+       correction = zero
+       correction_prime = zero
+       do isppol=1,nsppol
+         do ikpt=1,nkpt
+           nband_k = paw_dmft%nband(ikpt+(isppol-1)*nkpt)
+           if (green%distrib%procb(ikpt) /= green%distrib%me_kpt) then
+             band_index = band_index + nband_k
+             cycle
+           end if
+           wtk = paw_dmft%wtk(ikpt)
+           do ib=1,nband_k
+             if (paw_dmft%band_in(ib)) cycle
+             eig = paw_dmft%eigen(ib+band_index)
+             correction = correction + occup_fd(eig,fermie,paw_dmft%temp)*wtk
+             if (present(Fxprime)) then
+               if ((eig-fermie) > zero) then
+                 occ_prime = exp(-(eig-fermie)/temp) / (one+exp(-(eig-fermie)/temp))**2 / temp
+               else
+                 occ_prime = exp((eig-fermie)/temp) / (one+exp((eig-fermie)/temp))**2 / temp
+               end if
+               correction_prime = correction_prime + occ_prime*wtk
+             end if ! opt>=1
+           end do ! ib
            band_index = band_index + nband_k
-           cycle
-         end if 
-         wtk = paw_dmft%wtk(ikpt)
-         do ib=1,nband_k
-           if (paw_dmft%band_in(ib)) cycle
-           eig = paw_dmft%eigen(ib+band_index) 
-           correction = correction + & 
-               & occup_fd(eig,fermie,paw_dmft%temp)*wtk
-           if (opt >= 1) then
-             if ((eig-fermie) > zero) then
-               occ_prime = exp(-(eig-fermie)/temp) / (one+exp(-(eig-fermie)/temp))**2 / temp
-               if (opt == 2) occ_double = -occ_prime/temp + two*occ_prime/ &
-                 & (one+exp(-(eig-fermie)/temp))/temp
-             else
-               occ_prime = exp((eig-fermie)/temp) / (one+exp((eig-fermie)/temp))**2 / temp
-               if (opt == 2) occ_double = -occ_prime/temp + two*occ_prime*exp((eig-fermie)/temp)/ &
-                 & (one+exp((eig-fermie)/temp))/temp
-             end if
-             correction_prime = correction_prime + occ_prime*wtk
-             if (opt == 2) correction_double = correction_double + occ_double*wtk
-           end if ! opt>=1
-         end do ! ib
-         band_index = band_index + nband_k
-       end do ! ikpt
-     end do ! isppol
-     call xmpi_sum(correction,green%distrib%comm_kpt,ierr)
-     if (nsppol == 1 .and. nspinor == 1) correction = correction * two
-     green%charge_ks = green%charge_ks + correction
-     if (opt >= 1) then
-       call xmpi_sum(correction_prime,green%distrib%comm_kpt,ierr)
-       if (nsppol == 1 .and. nspinor == 1) correction_prime = correction_prime * two
-       Fxprime = Fxprime + correction_prime
-     end if ! opt>=1
-     if (opt == 2) then
-       call xmpi_sum(correction_double,green%distrib%comm_kpt,ierr)
-       if (nsppol == 1 .and. nspinor == 1) correction_double = correction_double * two
-       Fxdouble = Fxdouble + correction_double
-     end if ! opt=2
-   end if ! use_all_bands
-      
+         end do ! ikpt
+       end do ! isppol
+       call xmpi_sum(correction,green%distrib%comm_kpt,ierr)
+       if (nsppol == 1 .and. nspinor == 1) correction = correction * two
+       green%charge_ks = green%charge_ks + correction
+       if (present(Fxprime)) then
+         call xmpi_sum(correction_prime,green%distrib%comm_kpt,ierr)
+         if (nsppol == 1 .and. nspinor == 1) correction_prime = correction_prime * two
+         Fxprime = Fxprime + correction_prime
+       end if ! Fxprime
+     end if ! use_all_bands
+
+   end if ! triqs 
+   
    nb_elec_x = green%charge_ks
    Fx = green%charge_ks - paw_dmft%nelectval
 
-   ABI_FREE(trace_moments)
-   ABI_FREE(omega_fac)
-   
-   ABI_SFREE(trace_moments_prime)
-   ABI_SFREE(mat_tmp)
-   ABI_SFREE(trace_moments_double)
-   
-   call destroy_oper(oper_tmp)
-   
    !if(opt_noninter==1) then
    !end if
  
  end subroutine compute_nb_elec
 !!***  
       
-subroutine compute_trace_moments(fermie,trace_fermie,trace_moments,trace_moments_prime,trace_moments_double,opt)
+subroutine compute_trace_moments(fermie,trace_fermie,trace_moments,trace_moments_prime)
    
 !Arguments ------------------------------------
- integer, intent(in) :: opt
  real(dp), intent(in) :: fermie
  complex(dpc), intent(in) :: trace_fermie(:)
- complex(dpc), intent(inout) :: trace_moments(:),trace_moments_prime(:),trace_moments_double(:)
+ complex(dpc), intent(inout) :: trace_moments(:),trace_moments_prime(:)
 ! *********************************************
    
   trace_moments(2) = trace_fermie(2) - fermie*trace_fermie(1) 
@@ -3803,24 +3783,15 @@ subroutine compute_trace_moments(fermie,trace_fermie,trace_moments,trace_moments
          & six*(fermie**2)*trace_fermie(4) - four*(fermie**3)*trace_fermie(2) + &
          & (fermie**4)*trace_fermie(1)
    
-  if (opt >= 1) then
-    trace_moments_prime(2) = -trace_fermie(1)
-    trace_moments_prime(3) = two * (fermie*trace_fermie(1)-trace_fermie(2))
-    trace_moments_prime(4) = -two*trace_fermie(3) - three*trace_fermie(4) + &
+  trace_moments_prime(2) = -trace_fermie(1)
+  trace_moments_prime(3) = two * (fermie*trace_fermie(1)-trace_fermie(2))
+  trace_moments_prime(4) = -two*trace_fermie(3) - three*trace_fermie(4) + &
          & six*fermie*trace_fermie(2) - three*(fermie**2)*trace_fermie(1)
-    trace_moments_prime(5) = -two*trace_fermie(5) + three*(-two*trace_fermie(6)+ &
+  trace_moments_prime(5) = -two*trace_fermie(5) + three*(-two*trace_fermie(6)+ &
          & two*fermie*trace_fermie(3)) - four*trace_fermie(7) + &
          & dble(12)*fermie*trace_fermie(4) - dble(12)*(fermie**2)*trace_fermie(2) + &
          & four*(fermie**3)*trace_fermie(1)
-  end if ! opt>=1
      
-  if (opt == 2) then
-    trace_moments_double(3) = two * trace_fermie(1)
-    trace_moments_double(4) = six*trace_fermie(2) - six*fermie*trace_fermie(1)
-    trace_moments_double(5) = six*trace_fermie(3) + dble(12)*trace_fermie(4) - &
-          & dble(24)*fermie*trace_fermie(2) + dble(12)*(fermie**2)*trace_fermie(1)
-  end if ! opt=2
-   
  end subroutine compute_trace_moments
 !!***
  

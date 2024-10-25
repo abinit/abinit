@@ -825,7 +825,7 @@ subroutine compute_dftu_energy(energies_dmft,green,paw_dmft,pawtab,renorm)
  integer :: lpawu,lpawu1,ndim,ndim1,nocc,nsploop,prt_pawuenergy
  real(dp) :: e_dc,e_dc_for_s,e_dcdc,e_dcdc_for_s,e_ee,edftumdc,edftumdc_for_s 
  real(dp) :: edftumdcdc,edftumdcdc_for_s,e_ee_for_s,jpawu,upawu,xe1,xe2
- logical :: t2g,x2my2d 
+ logical :: t2g,triqs,x2my2d 
  character(len=500) :: message
  integer, parameter :: spinor_idxs(2,4) = RESHAPE((/1,1,2,2,1,2,2,1/),(/2,4/))
  integer, parameter :: mt2g(3) = (/1,2,4/)
@@ -846,6 +846,8 @@ subroutine compute_dftu_energy(energies_dmft,green,paw_dmft,pawtab,renorm)
  t2g        = paw_dmft%dmft_t2g == 1
  x2my2d     = paw_dmft%dmft_x2my2d == 1
  
+ triqs = (paw_dmft%dmft_solv == 6) .or. (paw_dmft%dmft_solv == 7)
+
  isppol   = 1
  ispinor  = 1
  ispinor1 = 1
@@ -885,12 +887,13 @@ subroutine compute_dftu_energy(energies_dmft,green,paw_dmft,pawtab,renorm)
      ! TODO: optimize this in the t2g and x2my2d cases
      do im1=1,ndim
        ims1 = im1
-       if (x2my2d) ims1 = 5
-       if (t2g) ims1 = mt2g(im1)
+       ! In t2g and x2my2d, we prefer to use the correct formula when using TRIQS
+       if (x2my2d .and. triqs) ims1 = 5
+       if (t2g .and. triqs) ims1 = mt2g(im1)
        do im=1,ndim
          ims = im
-         if (x2my2d) ims = 5
-         if (t2g) ims = mt2g(im)
+         if (x2my2d .and. triqs) ims = 5
+         if (t2g .and. triqs) ims = mt2g(im)
          ! Here, we take the transpose in order to match pawuenergy's conventions
          noccmmp(1,ims,ims1,idijeff) = &
            & dble(green%occup%matlu(iatom)%mat(im1+(ispinor-1)*ndim,im+(ispinor1-1)*ndim,isppol))

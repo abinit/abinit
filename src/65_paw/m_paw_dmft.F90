@@ -137,10 +137,6 @@ MODULE m_paw_dmft
   ! = 0: do not compute entropy
   ! >= 1: compute entropy with an integration over self-consistent calculations
 
-  integer :: dmft_fermi_algo
-  ! =1 : use Newton's method to compute the Fermi level
-  ! =2 : use Halley's method to compute the Fermi level
-
   integer :: dmft_gaussorder
   ! Only relevant when dmftctqmc_triqs_entropy=1 and dmft_integral=1. 
   ! Order of the Gauss-Legendre quadrature for each interval of the thermodynamic integration.
@@ -918,7 +914,6 @@ subroutine init_sc_dmft(dtset,paw_dmft,gprimd,kg,mpi_enreg,npwarr,&
  paw_dmft%dmft_lcpr            = dtset%dmft_tollc
  paw_dmft%dmft_charge_prec     = dtset%dmft_charge_prec
  paw_dmft%dmft_fermi_prec      = dtset%dmft_charge_prec * ten
- paw_dmft%dmft_fermi_algo      = dtset%dmft_fermi_algo
  paw_dmft%dmft_fermi_step      = dtset%dmft_fermi_step
  paw_dmft%dmft_nlambda         = dtset%dmft_nlambda
  paw_dmft%dmft_gaussorder      = dtset%dmft_gaussorder

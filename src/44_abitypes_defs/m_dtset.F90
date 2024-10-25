@@ -129,7 +129,6 @@ type, public :: dataset_type
  integer :: dmatudiag
  integer :: dmft_dc
  integer :: dmft_entropy
- integer :: dmft_fermi_algo
  integer :: dmft_gaussorder
  integer :: dmft_integral
  integer :: dmft_iter
@@ -1500,7 +1499,6 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%dmft_dc            = dtin%dmft_dc
  dtout%dmft_entropy       = dtin%dmft_entropy
  dtout%dmft_charge_prec   = dtin%dmft_charge_prec
- dtout%dmft_fermi_algo    = dtin%dmft_fermi_algo
  dtout%dmft_fermi_step    = dtin%dmft_fermi_step
  dtout%dmft_gaussorder    = dtin%dmft_gaussorder
  dtout%dmft_integral      = dtin%dmft_integral
@@ -3436,7 +3434,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' dmftctqmc_triqs_seed_a dmftctqmc_triqs_seed_b dmftctqmc_triqs_therm'
  list_vars=trim(list_vars)//' dmftctqmc_triqs_time_invariance dmftctqmc_triqs_use_norm_as_weight dmftcheck'
  list_vars=trim(list_vars)//' dmftqmc_l dmftqmc_n dmftqmc_seed dmftqmc_therm dmft_charge_prec dmft_dc'
- list_vars=trim(list_vars)//' dmft_entropy dmft_fermi_algo dmft_fermi_step dmft_gaussorder dmft_integral'
+ list_vars=trim(list_vars)//' dmft_entropy dmft_fermi_step dmft_gaussorder dmft_integral'
  list_vars=trim(list_vars)//' dmft_iter dmft_kspectralfunc dmft_mxsf dmft_nlambda dmft_nominal dmft_nwli dmft_nwlo'
  list_vars=trim(list_vars)//' dmft_occnd_imag dmft_proj dmft_prt_maxent dmft_prtwan dmft_read_occnd'
  list_vars=trim(list_vars)//' dmft_rslf dmft_shiftself dmft_solv dmft_tolfreq dmft_tollc'

@@ -659,7 +659,6 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
        end if
 
        cond_string(1)='usedmft' ; cond_values(1)=dt%usedmft
-       call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_fermi_algo',dt%dmft_fermi_algo,2,(/1,2/),iout)
        call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_integral',dt%dmft_integral,2,(/0,1/),iout)
        call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_read_occnd',dt%dmft_read_occnd,3,(/0,1,2/),iout)
        call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_occnd_imag',dt%dmft_occnd_imag,2,(/0,1/),iout)
