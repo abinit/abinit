@@ -2528,6 +2528,12 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'use_gemm_nonlop',tread,'INT')
  if(tread==1) dtset%use_gemm_nonlop=intarr(1)
 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'chebfi_oracle',tread,'INT')
+ if(tread==1) dtset%chebfi_oracle=intarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'chebfi_ora_fact',tread,'DPR')
+ if(tread==1) dtset%chebfi_ora_fact = dprarr(1)
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'cprj_in_memory',tread,'INT')
  if(tread==1) dtset%cprj_in_memory=intarr(1)
 

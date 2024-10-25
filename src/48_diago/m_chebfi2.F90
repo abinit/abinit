@@ -88,8 +88,10 @@ module m_chebfi2
    integer :: nline                         ! Number of line to perform
    integer :: nbdbuf                        ! Number of bands in the buffer
    integer :: spacecom                      ! Communicator for MPI
+   integer :: oracle                        ! Option to compute nline from residuals
    real(dp) :: tolerance            ! Tolerance on the residu to stop the minimization
    real(dp) :: ecut                 ! Ecut for Chebfi oracle
+   real(dp) :: oracle_factor                ! factor used to decrease residuals
 
    integer :: paral_kgb                     ! MPI parallelization variables
    integer :: bandpp
@@ -177,8 +179,8 @@ module m_chebfi2
 !! SOURCE
 
 subroutine chebfi_init(chebfi,neigenpairs,spacedim,tolerance,ecut,paral_kgb,bandpp, &
-                       nline,nbdbuf,space,eigenProblem,spacecom,me_g0,me_g0_fft,paw,comm_rows,comm_cols,&
-                       gpu_option,gpu_kokkos_nthrd)
+                       nline,nbdbuf,space,eigenProblem,spacecom,me_g0,me_g0_fft,paw,comm_rows,comm_cols, &
+                       oracle,oracle_factor,gpu_option,gpu_kokkos_nthrd)
 
  implicit none
 
@@ -197,9 +199,11 @@ subroutine chebfi_init(chebfi,neigenpairs,spacedim,tolerance,ecut,paral_kgb,band
  integer       , intent(in   ) :: spacecom
  integer       , intent(in   ) :: spacedim
  integer       , intent(in   ) :: gpu_option
+ integer       , intent(in   ) :: oracle
  logical       , intent(in   ) :: paw
  real(dp)      , intent(in   ) :: ecut
  real(dp)      , intent(in   ) :: tolerance
+ real(dp)      , intent(in   ) :: oracle_factor
  type(chebfi_t), intent(inout) :: chebfi
  integer       , intent(in   ), optional :: gpu_kokkos_nthrd
 
@@ -230,7 +234,9 @@ subroutine chebfi_init(chebfi,neigenpairs,spacedim,tolerance,ecut,paral_kgb,band
  chebfi%me_g0        = me_g0
  chebfi%me_g0_fft    = me_g0_fft
  chebfi%paw          = paw
- chebfi%gpu_option = gpu_option
+ chebfi%gpu_option  = gpu_option
+ chebfi%oracle      = oracle
+ chebfi%oracle_factor = oracle_factor
 
  if (present(gpu_kokkos_nthrd)) then
     chebfi%gpu_kokkos_nthrd = gpu_kokkos_nthrd
@@ -653,11 +659,11 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,pcond,eigen,occ,residu,nspinor)
  ! resid = |X_next|^2
  call xgBlock_colwiseNorm2(chebfi%X_next, residu)
 
+ occ_reshaped = occ
+ call xgBlock_reshape(occ_reshaped,(/ 1, neigenpairs /))
+ call xgBlock_setBlock(occ_reshaped,occBlock,1,bandpp,fcol=1+xmpi_comm_rank(chebfi%spacecom)*bandpp)
+ call xgBlock_reshape(occBlock,(/ bandpp, 1 /))
  if (chebfi%nbdbuf==-101) then
-   occ_reshaped = occ
-   call xgBlock_reshape(occ_reshaped,(/ 1, neigenpairs /))
-   call xgBlock_setBlock(occ_reshaped,occBlock,1,bandpp,fcol=1+xmpi_comm_rank(chebfi%spacecom)*bandpp)
-   call xgBlock_reshape(occBlock,(/ bandpp, 1 /))
    call xgBlock_apply_diag(residu,occBlock,1)
  end if
 

@@ -419,6 +419,13 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      end do
    end if
 
+!  chebfi_oracle : must be 0,1,2
+   call chkint_eq(0,0,cond_string,cond_values,ierr,'chebfi_oracle',dt%chebfi_oracle,3,(/0,1,2/),iout)
+
+!  chebfi_ora_fact : must be > 1e-30 and below 1
+   call chkdpr(0,0,cond_string,cond_values,ierr,'chebfi_ora_fact',dt%chebfi_ora_fact,1,tol30,iout)
+   call chkdpr(0,0,cond_string,cond_values,ierr,'chebfi_ora_fact',dt%chebfi_ora_fact,-1,0.99_dp,iout)
+
 !  chkdilatmx
    call chkint_eq(0,0,cond_string,cond_values,ierr,'chkdilatmx',dt%chkdilatmx,2,(/0,1/),iout)
 

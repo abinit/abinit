@@ -108,6 +108,7 @@ type, public :: dataset_type
  integer :: cd_full_grid
  integer :: cd_frqim_method
  integer :: cd_customnimfrqs
+ integer :: chebfi_oracle
  integer :: chkdilatmx
  integer :: chkexit
  integer :: chneut = 1
@@ -767,6 +768,7 @@ type, public :: dataset_type
  real(dp) :: bxctmindg
  real(dp) :: cd_halfway_freq
  real(dp) :: cd_max_freq
+ real(dp) :: chebfi_ora_fact
  real(dp) :: cpus
  real(dp) :: ddamp
  real(dp) :: dfpt_sciss
@@ -1448,6 +1450,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%cd_frqim_method    = dtin%cd_frqim_method
  dtout%cd_full_grid       = dtin%cd_full_grid
  dtout%chkdilatmx         = dtin%chkdilatmx
+ dtout%chebfi_oracle      = dtin%chebfi_oracle
  dtout%chkexit            = dtin%chkexit
  dtout%chkparal           = dtin%chkparal
  dtout%chkprim            = dtin%chkprim
@@ -2083,7 +2086,6 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%vdw_xc             = dtin%vdw_xc
  dtout%wfinit             = dtin%wfinit
  dtout%wfoptalg           = dtin%wfoptalg
- dtout%wfoptalg           = dtin%wfoptalg
  dtout%write_files        = dtin%write_files
  dtout%wvl_bigdft_comp    = dtin%wvl_bigdft_comp
  dtout%w90iniprj          = dtin%w90iniprj
@@ -2130,6 +2132,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%bxctmindg          = dtin%bxctmindg
  dtout%cd_halfway_freq    = dtin%cd_halfway_freq
  dtout%cd_max_freq        = dtin%cd_max_freq
+ dtout%chebfi_ora_fact    = dtin%chebfi_ora_fact
  dtout%cpus               = dtin%cpus
  dtout%ddamp              = dtin%ddamp
  dtout%diecut             = dtin%diecut
@@ -3337,7 +3340,8 @@ subroutine chkvars(string)
 !C
  list_vars=trim(list_vars)//' cd_customnimfrqs cd_frqim_method cd_full_grid cd_imfrqs'
  list_vars=trim(list_vars)//' cd_halfway_freq cd_max_freq cd_subset_freq'
- list_vars=trim(list_vars)//' cellcharge charge chrgat chempot chkdilatmx chkexit chkparal chkprim'
+ list_vars=trim(list_vars)//' cellcharge charge chrgat chempot chebfi_oracle chebfi_ora_fact'
+ list_vars=trim(list_vars)//' chkdilatmx chkexit chkparal chkprim'
  list_vars=trim(list_vars)//' chksymbreak chksymtnons chneut cineb_start coefficients constraint_kind'
  list_vars=trim(list_vars)//' cprj_in_memory cprj_update_lvl cpus cpum cpuh'
 !D
