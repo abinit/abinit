@@ -3319,7 +3319,6 @@ subroutine newton(green,self,paw_dmft,x_input,x_precision,max_iter,&
  Fxoptimum = one
  x_optimum = zero
 
- ! When using TRIQS, we prefer to (drastically) optimize the Fermi search.
  triqs = (paw_dmft%dmft_solv == 6) .or. (paw_dmft%dmft_solv == 7)
 
 !========================================
@@ -3557,9 +3556,6 @@ subroutine function_and_deriv(green,self,paw_dmft,x_input,x_precision, &
 
    else
 
-     ! When using TRIQS, we prefer to compute the derivative analytically.
-     ! This is more accurate, thus drastically speeding up the root search.
-
      call compute_nb_elec(green,self,paw_dmft,Fx,nb_elec_x,x_input,Fxprime=Fxprime)
 
      write(message,'(a,3f12.6)') "  - ",x_input,nb_elec_x,Fx
@@ -3620,8 +3616,6 @@ subroutine compute_nb_elec(green,self,paw_dmft,Fx,nb_elec_x,fermie,Fxprime)
  complex(dpc), allocatable :: omega_fac(:),trace_moments(:),trace_moments_prime(:)
 ! *********************************************************************
  
-   ! When using TRIQS, we prefer to optimize this routine, especially since it
-   ! is very time-consuming.
    triqs = (paw_dmft%dmft_solv == 6) .or. (paw_dmft%dmft_solv == 7)
 
    if (.not. triqs) then

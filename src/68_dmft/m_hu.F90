@@ -318,8 +318,6 @@ subroutine init_hu(hu,paw_dmft,pawtab)
      end do ! ms1
    end do ! ms
    
-   ! In the t2g case, we prefer to use the correct values for U and J in the
-   ! double counting when using TRIQS.
    if (t2g .and. triqs) then 
      upawu = zero
      jpawu = zero

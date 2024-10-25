@@ -318,10 +318,6 @@ subroutine dmft_solve(cryst_struc,istep,dft_occup,mpi_enreg,paw_dmft,pawang,pawt
    & ch10,' ================================================================='
  call wrtout(std_out,message,'COLL')
  if (triqs) then
-   ! When using TRIQS, we prefer to print the Green's function occupations after
-   ! the Fermi search, when the Green's function needs to be computed anyway.
-   ! This is a heavy calculation, so we prefer to do it only if necessary.
-   ! When using TRIQS, we usually prefer to be mindful of the users of the code.
    call init_green(green,paw_dmft,opt_moments=opt_moments)
  else
    call icip_green("Green_inputself",green,paw_dmft,pawprtvol,self,opt_self=1)
