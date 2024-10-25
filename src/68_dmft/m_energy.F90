@@ -887,7 +887,6 @@ subroutine compute_dftu_energy(energies_dmft,green,paw_dmft,pawtab,renorm)
      ! TODO: optimize this in the t2g and x2my2d cases
      do im1=1,ndim
        ims1 = im1
-       ! In t2g and x2my2d, we prefer to use the correct formula when using TRIQS
        if (x2my2d .and. triqs) ims1 = 5
        if (t2g .and. triqs) ims1 = mt2g(im1)
        do im=1,ndim

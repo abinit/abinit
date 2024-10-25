@@ -564,7 +564,6 @@ subroutine datafordmft(cg,cprj,cryst_struc,dft_occup,dimcprj,dtset,eigen,mband_c
 !==========================================================================
 !********* WRITE chipsi in file for reference
 !==========================================================================
- ! When using TRIQS, we prefer to print chipsi when it is orthonormalized 
  triqs = (paw_dmft%dmft_solv == 6) .or. (paw_dmft%dmft_solv == 7)
  if (paw_dmft%myproc == 0 .and. (.not. triqs)) then
    call chipsi_print(paw_dmft,pawtab(:))
