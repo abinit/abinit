@@ -533,6 +533,7 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,pcond,eigen,occ,residu,nspinor)
  integer,allocatable :: nline_bands(:) !Oracle variable
  real(dp),pointer :: eig(:,:)
  real(dp),pointer :: residu_(:,:),occ_(:,:)
+! character(len=500) :: msg
 
 ! *********************************************************************
 
@@ -541,7 +542,6 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,pcond,eigen,occ,residu,nspinor)
  spacedim = chebfi%spacedim
  neigenpairs = chebfi%neigenpairs
  bandpp = chebfi%bandpp
- nline = chebfi%nline
  chebfi%eigenvalues = eigen
 
  if (chebfi%space==SPACE_C) then
@@ -647,63 +647,78 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,pcond,eigen,occ,residu,nspinor)
 
  call timab(tim_oracle,1,tsec)
  nline_max = cheb_oracle1(mineig_global, lambda_minus, lambda_plus, 1D-16, 40)
+ nline = MIN(nline_max,chebfi%nline)
 
- !Compute residu here for oracle, use X_next as a work space
+ call xgBlock_reverseMap(DivResults%self,eig,rows=1,cols=bandpp)
 
- ! X_next = S|Psi>
- call xgBlock_copy(chebfi%xBXColsRows,chebfi%X_next)
- ! X_next = - eig * S|Psi>
- call xgBlock_ymax(chebfi%X_next,DivResults%self,0,1,nspinor)
- ! X_next = H|Psi> - eig * S|Psi>
- call xgBlock_add(chebfi%X_next,chebfi%xAXColsRows)
- ! resid = |X_next|^2
- call xgBlock_colwiseNorm2(chebfi%X_next, residu)
+ if (chebfi%oracle>0) then
+   !Compute residu here for oracle, use X_next as a work space
+   ! X_next = S|Psi>
+   call xgBlock_copy(chebfi%xBXColsRows,chebfi%X_next)
+   ! X_next = - eig * S|Psi>
+   call xgBlock_ymax(chebfi%X_next,DivResults%self,0,1,nspinor)
+   ! X_next = H|Psi> - eig * S|Psi>
+   call xgBlock_add(chebfi%X_next,chebfi%xAXColsRows)
+   ! resid = |X_next|^2
+   call xgBlock_colwiseNorm2(chebfi%X_next, residu)
 
- occ_reshaped = occ
- call xgBlock_reshape(occ_reshaped,(/ 1, neigenpairs /))
- call xgBlock_setBlock(occ_reshaped,occBlock,1,bandpp,fcol=1+xmpi_comm_rank(chebfi%spacecom)*bandpp)
- call xgBlock_reshape(occBlock,(/ bandpp, 1 /))
- if (chebfi%nbdbuf==-101) then
-   call xgBlock_apply_diag(residu,occBlock,1)
+   occ_reshaped = occ
+   call xgBlock_reshape(occ_reshaped,(/ 1, neigenpairs /))
+   call xgBlock_setBlock(occ_reshaped,occBlock,1,bandpp,fcol=1+xmpi_comm_rank(chebfi%spacecom)*bandpp)
+   call xgBlock_reshape(occBlock,(/ bandpp, 1 /))
+   if (chebfi%nbdbuf==-101) then
+     call xgBlock_apply_diag(residu,occBlock,1)
+   end if
+
+   call xgBlock_reverseMap(residu,residu_,rows=1,cols=bandpp)
+   call xgBlock_reverseMap(occBlock,occ_,rows=1,cols=bandpp)
+   do iband=1, bandpp
+     eig_iband = eig(1,iband)
+     res_iband = residu_(1,iband)
+     occ_iband = occ_(1,iband)
+     if (chebfi%nbdbuf>0) then
+       nbdbuf = chebfi%nbdbuf
+     else if (chebfi%nbdbuf==-101) then
+       nbdbuf = 0
+     end if
+     if (res_iband<tolerance.or.(chebfi%nbdbuf==-101.and.occ_iband<tol4)) then
+       nline_bands(iband) = 0
+     else
+       !nline necessary to converge to tolerance
+       nline_tolwfr = cheb_oracle1(eig_iband, lambda_minus, lambda_plus, tolerance / res_iband, 100)
+       !nline necessary to decrease residual by a constant factor
+       nline_decrease = cheb_oracle1(eig_iband, lambda_minus, lambda_plus, chebfi%oracle_factor, 100)
+       if (iband<=bandpp-chebfi%nbdbuf) then
+         if (chebfi%oracle==1) then
+           nline_bands(iband) = MIN(nline_max, nline_tolwfr, chebfi%nline)
+         else if (chebfi%oracle==2) then
+           nline_bands(iband) = MIN(nline_max, nline_tolwfr, nline_decrease)
+         else
+           ABI_ERROR('Wrong value for chebfi%oracle')
+         end if
+       else
+         nline_bands(iband) = 0
+       end if
+     end if
+   end do
+   nline = MAXVAL(nline_bands)
+   call xmpi_max(nline,nline_all,chebfi%comm_cols,ierr)
+   nline=nline_all
+   !if (chebfi%oracle==1) then
+   !  write(msg,'((a,i4,a,3i4))') ' chebfi_oracle : nline =',nline,' | nline_max,nline_tolwfr,nline_input:',&
+   !    nline_max,nline_tolwfr,chebfi%nline
+   !  call wrtout(std_out,msg,'COLL')
+   !else if (chebfi%oracle==2) then
+   !  write(msg,'((a,i4,a,3i4))') ' chebfi_oracle : nline =',nline,' | nline_max,nline_tolwfr,nline_decrease:',&
+   !    nline_max,nline_tolwfr,nline_decrease
+   !  call wrtout(std_out,msg,'COLL')
+   !end if
  end if
 
- call xgBlock_reverseMap(residu,residu_,rows=1,cols=bandpp)
- call xgBlock_reverseMap(DivResults%self,eig,rows=1,cols=bandpp)
- call xgBlock_reverseMap(occBlock,occ_,rows=1,cols=bandpp)
- do iband=1, bandpp
-   eig_iband = eig(1,iband)
-   res_iband = residu_(1,iband)
-   occ_iband = occ_(1,iband)
-   if (chebfi%nbdbuf>0) then
-     nbdbuf = chebfi%nbdbuf
-   else if (chebfi%nbdbuf==-101) then
-     nbdbuf = 0
-   end if
-   if (res_iband<tolerance.or.(chebfi%nbdbuf==-101.and.occ_iband<tol4)) then
-     nline_bands(iband) = 0
-     write(900,*) 'iband=',iband,'occ=',occ_iband,'eig=',eig_iband,'residu=',res_iband
-   else
-     !nline necessary to converge to tolerance
-     nline_tolwfr = cheb_oracle1(eig_iband, lambda_minus, lambda_plus, tolerance / res_iband, 1000000)
-     !nline necessary to decrease residual by a constant factor
-     nline_decrease = cheb_oracle1(eig_iband, lambda_minus, lambda_plus, 0.01_dp, 1000000)
-     if (iband<=bandpp-chebfi%nbdbuf) then
-       !nline_bands(iband) = MIN(nline_max, nline_tolwfr, chebfi%nline)
-       nline_bands(iband) = MIN(nline_max, nline_tolwfr, nline_decrease)
-       !nline_bands(iband) = MIN(nline_tolwfr, nline_decrease, nline_max, chebfi%nline)
-     else
-       nline_bands(iband) = 0
-     end if
-     write(900,*) 'iband=',iband,'occ=',occ_iband,'eig=',eig_iband,'residu=',res_iband,'|nline_max,nline_tolwfr,nline_decrease:',nline_max,nline_tolwfr,nline_decrease
-   end if
- end do
- write(900,*) 'nline_bands:',nline_bands
- nline = MAXVAL(nline_bands)
- call xmpi_max(nline,nline_all,chebfi%comm_cols,ierr)
- nline=nline_all
- !LTEST
- write(900,*) 'nline = ',nline
- !LTEST
+ !write(msg,'((a,i4,a,2i4))') ' chebfi_oracle : nline =',nline,' | nline_max:',nline_max
+ !call wrtout(std_out,msg,'COLL')
+
+ nline_bands(:) = nline
 
  call timab(tim_oracle,2,tsec)
 
