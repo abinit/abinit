@@ -3609,6 +3609,38 @@ from the tetrahedron method is rapidly varying.
 ),
 
 Variable(
+    abivarname="dtele",
+    varset="rttddft",
+    vartype="real",
+    topics=['RTTDDFT_compulsory'],
+    dimensions="scalar",
+    defaultval=100, #HEREHERE
+    mnemonics="Delta Time for ELECtrons",
+    added_in_version="before_v9",
+    text=r"""
+Used for controlling ion time steps. If [[ionmov]] is set to 1, 6, 7 and 15, then
+molecular dynamics is  used to update atomic positions in response to forces.
+The parameter [[dtion]] is a time step in atomic units of time. (One atomic
+time unit is 2.418884e-17 seconds, which is the value of Planck's constant in
+hartree*sec.) In this case the atomic masses, in amu (given in array " [[amu]]
+"), are used in Newton's equation and the viscosity (for [[ionmov]] =1) and
+number of time steps are provided to the code using input variables "[[vis]]"
+and "[[ntime]]". The code actually converts from masses in amu to masses in
+atomic units (in units of electron masses) but the user enters masses in
+[[amu]]. (The conversion from amu to atomic units (electron masses) is
+1822.88851 electron masses/amu.)
+
+A typical good value for [[dtion]] is about 100. The user must try several
+values for [[dtion]] in order to establish the stable and efficient choice for
+the accompanying amu, atom types and positions, and [[vis]] (viscosity).
+For quenched dynamics ([[ionmov]] = 7), a larger time step might be taken, for
+example 200. No meaning for RF calculations.
+It is also used in geometric relaxation calculation with the FIRE algorithm
+([[ionmov]]=15), where the time is virtual. A small dtion should be set, for example 0.03.
+""",
+),
+
+Variable(
     abivarname="dtion",
     varset="rlx",
     vartype="real",
@@ -13715,7 +13747,8 @@ Variable(
  'BSE_compulsory',
  'DFPT_compulsory',
  'Susceptibility_compulsory',
- 'SelfEnergy_compulsory'],
+ 'SelfEnergy_compulsory',
+ 'RTTDDFT_compulsory'],
     dimensions="scalar",
     defaultval=0,
     mnemonics="OPTions for the DRIVER",
@@ -13734,6 +13767,7 @@ The choice is among:
   * 6 --> GW real space imaginary time driver (GWR), using the [[cite:Liu2016]] algorithm, routine *gwr_driver*, see [[gwr_task]].
   * 7 --> electron-phonon coupling (EPH), see also [[eph_task]] input variable.
   * 8 --> Post-processing of WFK file, routine *wfk_analyze*. See also [[wfk_task]] input variable.
+  * 9 --> Real-time TDDDFT calculation, routine *rttddft_driver*
   * 10 --> longwave response functions (LONGWAVE), routine *longwave*. See also [[lw_flexo]],  [[lw_qdrpl]] or [[lw_natopt]] input variables.
   * 66 --> GW using Lanczos-Sternheimer, see input variables whose name start with `gwls_*`.
   * 99 --> Bethe-Salpeter calculation (BSE), routine *bethe_salpeter*
