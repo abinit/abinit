@@ -760,6 +760,7 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
  rmet = MATMUL(TRANSPOSE(rprimd),rprimd)
 
  if (usexg==1) then
+   call xg_nonlop_update_weight(xg_nonlop,gs_hamk%ucvol)
    if (xg_nonlop%paw) call xg_nonlop_make_Dij(xg_nonlop,paw_ij,nsppol,gs_hamk%atindx)
  end if
 
