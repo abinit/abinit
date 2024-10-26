@@ -663,8 +663,7 @@ subroutine compute_migdal_energy(e_hu_migdal,e_hu_migdal_tot,green,paw_dmft,self
  type(self_type), target, intent(in) :: self
 ! integer :: prtopt
 !Local variables-------------------------------
- integer :: i,iatom,ierr,ifreq,lpawu,myproc
- integer :: natom,nmoments,nspinor,nsppol,nwlo
+ integer :: i,ierr,ifreq,myproc,natom,nmoments,nspinor,nsppol,nwlo
  real(dp) :: beta
  complex(dpc) :: omega
  complex(dpc), allocatable :: correction(:),integral(:),omega_inv(:),trace_moments(:,:)
