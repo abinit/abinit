@@ -99,7 +99,7 @@ subroutine dmft_solve(cryst_struc,istep,dft_occup,mpi_enreg,paw_dmft,pawang,pawt
 !Local variables ------------------------------
  integer :: check,dmft_iter,idmftloop,istep_iter,itypat,myproc
  integer :: natom,ntypat,opt_diff,opt_fill_occnd,opt_log,opt_maxent,opt_moments
- integer :: opt_moments_weiss,opt_renorm,prtopt
+ integer :: opt_renorm,prtopt
  !logical :: etot_var
  logical :: t2g,triqs,x2my2d
  real(dp) :: tsec(2)
@@ -342,9 +342,7 @@ subroutine dmft_solve(cryst_struc,istep,dft_occup,mpi_enreg,paw_dmft,pawang,pawt
 !== define weiss field only for the local quantities (opt_oper=2)
 !----------------------------------------------------------------------
 ! write(std_out,*) "nkpt  befreo init_greenweiss",ifreq,paw_dmft%nkpt
- opt_moments_weiss = opt_moments
- if (paw_dmft%dmftctqmc_triqs_entropy /= 1) opt_moments_weiss = 0
- call init_green(weiss,paw_dmft,opt_oper_ksloc=2,opt_occup_ksloc=2,opt_moments=opt_moments_weiss,opt_moments_ksloc=2)
+ call init_green(weiss,paw_dmft,opt_oper_ksloc=2,opt_moments=opt_moments,opt_moments_ksloc=2,opt_occup_ksloc=2)
 ! do ifreq=1,weiss%nw
 !   write(std_out,*) "nkpt from weiss1",ifreq,weiss%oper(ifreq)%nkpt
 ! enddo
@@ -885,7 +883,6 @@ subroutine dyson(green,paw_dmft,self,weiss,opt_weissself)
 ! type(paw_dmft_type), intent(inout)  :: paw_dmft
 !Local variables ------------------------------
  integer :: ifreq,myproc,natom,nspinor,nsppol,weissinv
- logical :: triqs
  real(dp) :: tsec(2)
  type(matlu_type), allocatable :: greeninv(:)
  character(len=500) :: message
@@ -899,7 +896,6 @@ subroutine dyson(green,paw_dmft,self,weiss,opt_weissself)
  natom    = paw_dmft%natom
  nsppol   = paw_dmft%nsppol
  nspinor  = paw_dmft%nspinor
- triqs    = (paw_dmft%dmft_solv == 6) .or. (paw_dmft%dmft_solv == 7)
  weissinv = 1
  
  if (opt_weissself == 1) then
@@ -927,9 +923,7 @@ subroutine dyson(green,paw_dmft,self,weiss,opt_weissself)
    
 !    warning green is now inversed
      call add_matlu(greeninv(:),self%oper(ifreq)%matlu(:),weiss%oper(ifreq)%matlu(:),natom,1)
-     if (.not. triqs) then
-       call inverse_oper(weiss%oper(ifreq),2)
-     end if 
+     call inverse_oper(weiss%oper(ifreq),2)
      
    else if (opt_weissself == 2) then
 
@@ -947,9 +941,7 @@ subroutine dyson(green,paw_dmft,self,weiss,opt_weissself)
 !    call print_matlu(greeninv%oper(ifreq)%matlu,paw_dmft%natom,1,opt_diag=-1)
 !    If paw_dmft%dmft_solv==2, then inverse of weiss function is
 !    computed in m_hubbard_one.F90
-     if (weissinv /= 0 .and. (.not. triqs)) then
-       call inverse_oper(weiss%oper(ifreq),2)
-     end if 
+     call inverse_oper(weiss%oper(ifreq),2)
 
 !    write(std_out,*) weiss%oper(1)%matlu(ifreq)%mat(1,1,1,1,1),"-",greeninv%oper(ifreq)
      call add_matlu(weiss%oper(ifreq)%matlu(:),greeninv(:),self%oper(ifreq)%matlu(:),natom,-1)
