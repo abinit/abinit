@@ -648,7 +648,7 @@ subroutine rotatevee_hu(hu,paw_dmft,pawprtvol,rot_mat,rot_type,udens_atoms,vee_r
  real(dp) :: f2,jpawu,xsum,xsum2,xsum2new,xsumnew
  character(len=30)  :: basis_vee
  character(len=500) :: message
- complex(dpc), allocatable :: veetemp(:,:,:,:),veeylm(:,:,:,:),veeylm2(:,:,:,:)
+ complex(dpc), allocatable :: veeslm(:,:,:,:),veetemp(:,:,:,:),veeylm(:,:,:,:),veeylm2(:,:,:,:)
 ! *********************************************************************
 
  natom   = paw_dmft%natom 
@@ -713,9 +713,13 @@ subroutine rotatevee_hu(hu,paw_dmft,pawprtvol,rot_mat,rot_type,udens_atoms,vee_r
 
        ABI_MALLOC(veeylm,(ndim,ndim,ndim,ndim))
        ABI_MALLOC(veeylm2,(tndim,tndim,tndim,tndim))
-
+       ABI_MALLOC(veeslm,(ndim,ndim,ndim,ndim))
 !      Change basis from slm to ylm basis
-       call vee_slm2ylm_hu(lpawu,hu(itypat)%vee(:,:,:,:),veeylm(:,:,:,:),1,2)
+       veeslm(:,:,:,:) = cmplx(real(hu(itypat)%vee(:,:,:,:)),zero)  
+
+       call vee_slm2ylm_hu(lpawu,veeslm(:,:,:,:),veeylm(:,:,:,:),1,2)
+
+       ABI_FREE(veeslm)
 
        basis_vee = 'Ylm' 
 

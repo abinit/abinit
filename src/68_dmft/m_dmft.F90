@@ -941,7 +941,9 @@ subroutine dyson(green,paw_dmft,self,weiss,opt_weissself)
 !    call print_matlu(greeninv%oper(ifreq)%matlu,paw_dmft%natom,1,opt_diag=-1)
 !    If paw_dmft%dmft_solv==2, then inverse of weiss function is
 !    computed in m_hubbard_one.F90
-     call inverse_oper(weiss%oper(ifreq),2)
+     if (weissinv /= 0) then
+       call inverse_oper(weiss%oper(ifreq),2)
+     end if 
 
 !    write(std_out,*) weiss%oper(1)%matlu(ifreq)%mat(1,1,1,1,1),"-",greeninv%oper(ifreq)
      call add_matlu(weiss%oper(ifreq)%matlu(:),greeninv(:),self%oper(ifreq)%matlu(:),natom,-1)
