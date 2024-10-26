@@ -702,10 +702,10 @@ subroutine compute_migdal_energy(e_hu_migdal,e_hu_migdal_tot,green,paw_dmft,self
  ABI_MALLOC(integral,(natom))
 
  e_hu_migdal(:) = zero
- trace_moments(:,:) = czero
  integral(:) = czero
  
  if (self%has_moments == 1) then
+   trace_moments(:,:) = czero
    call trace_prod_matlu(self%moments(1)%matlu(:),green%moments(1)%matlu(:),natom,trace_moments(:,1))
    call trace_prod_matlu(self%moments(1)%matlu(:),green%moments(2)%matlu(:),natom,trace_moments(:,2))
    call trace_prod_matlu(self%moments(2)%matlu(:),green%moments(1)%matlu(:),natom,trace_moments(:,2),opt_add=1)
@@ -729,7 +729,7 @@ subroutine compute_migdal_energy(e_hu_migdal,e_hu_migdal_tot,green,paw_dmft,self
    if (self%distrib%procf(ifreq) /= myproc) cycle
  
    omega = cmplx(zero,paw_dmft%omega_lo(ifreq),kind=dp)
-   omega_inv(1) = cone / omega
+   if (self%has_moments == 1) omega_inv(1) = cone / omega
    
    do i=2,nmoments
      omega_inv(i) = omega_inv(i-1) / omega
