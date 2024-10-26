@@ -371,11 +371,11 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  !integer,save :: nwarning=0
  integer :: bdtot_index,counter,cplex,cplex_rhoij,dimffnl,enunit,iband,iband1,ibdkpt
  integer :: ibg,icg,ider,idir,ierr,ifft,ifor,ifor1,ii,ikg,ikpt
- integer :: ikpt_loc,ikpt1,my_ikpt,ikxc,ilm,imagn,index1,iorder_cprj,ipert,iplex
+ integer :: ikpt_loc,ikpt1,my_ikpt,ikxc,ilm,imagn,index1,iorder_cprj,ipert
  integer :: iscf,ispden,isppol,istwf_k,mband_cprj,mbdkpsp,mb2dkpsp
  integer :: mcgq,mcprj_local,mcprj_tmp,me_distrb,mkgq,mpi_comm_sphgrid
  integer :: my_nspinor,n1,n2,n3,n4,n5,n6,nband_eff,nbdbuf_eff !mwarning,
- integer :: nband_k,nband_cprj_k,nbuf,neglect_pawhat,nfftot,nkpg,nkpt1,nnn,nnsclo_now
+ integer :: nband_k,nband_cprj_k,nbuf,neglect_pawhat,nfftot,nkpg,nkpt1,nnsclo_now
  integer :: nproc_distrb,npw_k,nspden_rhoij,option,prtvol,nblk_gemm_nonlop
  integer :: spaceComm_distrb,usecprj_local,usefock_ACE,usetimerev
  logical :: berryflag,computesusmat,fixed_occ,has_vectornd
