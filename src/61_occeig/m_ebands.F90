@@ -61,6 +61,7 @@ module m_ebands
  implicit none
 
  private
+!!***
 
  ! Helper functions
  public :: pack_eneocc             ! Helper function for reshaping (energies|occupancies|derivate of occupancies).
@@ -75,6 +76,7 @@ module m_ebands
 !! ebands_t
 !!
 !! FUNCTION
+!! Electron energies and occupations
 !!
 !! SOURCE
 
@@ -138,7 +140,6 @@ end type ebands_t
 !!***
 
  public :: ebands_prtbltztrp_tau_out       ! Output files for BoltzTraP code,
-!!***
 
 !----------------------------------------------------------------------
 
@@ -384,7 +385,6 @@ end type ebands_t
 !----------------------------------------------------------------------
 
 CONTAINS  !=====================================================================================
-!!***
 
 !----------------------------------------------------------------------
 
