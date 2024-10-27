@@ -12,6 +12,13 @@ Note : the sudden increase of size of tar.gz file in v7.0 is due to the school
 in Bruyeres-le-Chatel, in Nov 2011, whose new files have been included in the
 package at the end of v6.
 
+Note 2 : the above commands are usually issued after */*/makemake and ./configure.
+However, on 20241027, it has been discovered that the statistics change quite largely
+if the second and third commands are issued after a git clone, without */*/makemake and ./configure !
+For example, the number of F90 files is then 802 instead of 944. There are F90 files duplicated by
+the */*/makemake and ./configure. Perhaps the statistics could be reevaluated from v8.10 (where
+there was a bug jump anyhow !).
+
 =====================================================================
 Version  Date       Size         Number        Number        Number 
          released   tar.gz       of F90 files  of F90 lines  of tests
@@ -55,3 +62,4 @@ Version  Date       Size         Number        Number        Number
 9.8      2022 Dec  123.2          894         1165249       1414
 9.10     2023 Jun  127.9          907         1188983       1442
 10.0     2024 Apr  129.5          930         1228281       1480
+10.2     2024 Oct  131.3          944         1255421       1556
