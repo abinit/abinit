@@ -617,6 +617,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
   nucdipmom=dtset%nucdipmom,gpu_option=dtset%gpu_option)
 
  if (dtset%cprj_in_memory==1) then
+   call xg_nonlop_update_weight(xg_nonlop,ucvol) ! ucvol could have changed in mover
    if (xg_nonlop%paw) call xg_nonlop_make_Dij(xg_nonlop,paw_ij,dtset%nsppol,atindx)
  end if
 
