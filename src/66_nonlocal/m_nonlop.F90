@@ -348,7 +348,7 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
  type(gs_hamiltonian_type),intent(in),target :: hamk
 !arrays
  real(dp),intent(in) :: lambda(ndat)
- real(dp),intent(in),target,optional :: enl(:,:,:,:),enl_ndat(:,:,:,:,:)
+ real(dp),ABI_CONTIGUOUS intent(in),target,optional :: enl(:,:,:,:),enl_ndat(:,:,:,:,:)
  real(dp),intent(inout),target :: vectin(:,:)
  real(dp),intent(out),target :: enlout(:),svectout(:,:)
  real(dp),intent(out),optional :: enlout_im(:)
@@ -371,7 +371,7 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
  integer,pointer :: kgin(:,:),kgout(:,:)
  integer, ABI_CONTIGUOUS pointer :: atindx1_(:),indlmn_(:,:,:),nattyp_(:)
  real(dp) :: tsec(2)
- real(dp),pointer :: enl_ptr(:,:,:,:),enl_ndat_ptr(:,:,:,:,:)
+ real(dp), ABI_CONTIGUOUS pointer :: enl_ptr(:,:,:,:),enl_ndat_ptr(:,:,:,:,:)
  real(dp),pointer :: ffnlin(:,:,:,:),ffnlin_(:,:,:,:),ffnlout(:,:,:,:),ffnlout_(:,:,:,:)
  real(dp),pointer :: kpgin(:,:),kpgout(:,:)
  real(dp) :: kptin(3),kptout(3)
@@ -763,15 +763,8 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
    ffnlout_    => ffnlout
    cprjin_     => cprjin
 
-!  XG20241028 This coding confuses the gnu8.5 compiler, wrt to the CONTIGUOUS character of
-!  enl__ with respect to the one of enl_ptr. This compiler issues an error. So, copy the data (not a big size, after all). This is likely not optimal.
-!  Original ---
    enl__        => enl_ptr
-!  New ---
-!  ABI_MALLOC(enl__,(size(enl_ptr,1),size(enl_ptr,2),size(enl_ptr,3),size(enl_ptr,4)))
-!  enl__=enl_ptr
-!  END XG20241028
-!  
+
    if (present(enl_ndat)) then
      if (.not. use_gemm_nonlop) then
        ! An issue with Intel 16 forces to do this conversion
@@ -780,13 +773,7 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
          enl_ndat_(:,:,:,:,idat)=enl_ndat_ptr(:,:,:,idat,:)
        end do
      else
-!  Same as the XG20241028 comment above
-!  Original ---
        enl_ndat_   => enl_ndat_ptr
-!  New ---
-!      ABI_MALLOC(enl_ndat_,(size(enl_ndat_ptr,1),size(enl_ndat_ptr,2),size(enl_ndat_ptr,3),size(enl_ndat_ptr,4),size(enl_ndat_ptr,5)))
-!      enl_ndat_=enl_ndat_ptr
-!  END XG20241028
      end if
    end if
    sij_        => hamk%sij
@@ -990,18 +977,7 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
      ABI_FREE(ph3dout_)
    end if
 
-!  XG20241018 : See above
-!  Original ---
-!  New ---
-!  ABI_FREE(enl__)
-!  END XG20241028
-
-!  XG20241018 : See above
-!  Original ---
    if (present(enl_ndat) .and. .not. use_gemm_nonlop) then
-!  New ---
-!  if (present(enl_ndat)) then
-!  END XG20241028
      ABI_FREE(enl_ndat_)
    end if
 
