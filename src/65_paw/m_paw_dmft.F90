@@ -1270,7 +1270,7 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
             & paw_dmft%phimtphi(1:siz_proj,iproj,itypat),paw_dmft%radgrid(itypat),r_for_intg=rint)
      else
        call simp_gen(paw_dmft%phi_int(iproj,itypat),pawtab(itypat)%proj(1:siz_proj)* &
-                   & pawtab(itypat)%phi(1:siz_paw,indproj),paw_dmft%radgrid(itypat),r_for_intg=rint)
+                   & pawtab(itypat)%phi(1:siz_proj,indproj),paw_dmft%radgrid(itypat),r_for_intg=rint)
      end if ! use_full_chipsi
    end do ! iproj
  end do ! itypat
@@ -1418,7 +1418,7 @@ subroutine init_dmft(cryst_struc,dmatpawu,dtset,fermie_dft,fnamei,fnametmp_app,p
  type(paw_dmft_type), intent(inout) :: paw_dmft
  type(crystal_t), target, intent(in) :: cryst_struc
  character(len=fnlen), intent(in) :: fnamei,fnametmp_app
- real(dp), ABI_CONTIGUOUS target, intent(in) :: dmatpawu(:,:,:,:)
+ real(dp), target, intent(in) :: dmatpawu(:,:,:,:)
 !Local variables ------------------------------------
  integer :: iatom,irot,isym,nflavor,nsym
  character(len=500) :: message

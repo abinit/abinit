@@ -135,6 +135,7 @@ end subroutine diag_occ
 !!   nspinor = number of spinor components
 !!   first_bandc = index of the first correlated band
 !!   nbandc = number of correlated bands
+!!   dmft_test = for backwards compatibility of some tests
 !!
 !! OUTPUT
 !!   occ_diag(nband) = diagonal occupations in the new band space
@@ -148,11 +149,11 @@ end subroutine diag_occ
 !! TODO add the possibility of using ScaLAPACK to do computation in parallel
 !! TODO Make the computation of the new wf parallel
 
-subroutine rot_cg(occ_nd,cwavef,npw,nband,blocksize,nspinor,first_bandc,nbandc,occ_diag,dmft_solv)
+subroutine rot_cg(occ_nd,cwavef,npw,nband,blocksize,nspinor,first_bandc,nbandc,occ_diag,dmft_test)
 
 !Arguments ------------------------------------
 !scalars
-  integer, intent(in) :: blocksize,dmft_solv,first_bandc,nband,nbandc,npw,nspinor
+  integer, intent(in) :: blocksize,dmft_test,first_bandc,nband,nbandc,npw,nspinor
 !! type(MPI_type),intent(inout) :: mpi_enreg
 !! type(dataset_type),intent(in) :: dtset
 !! type(paw_dmft_type), intent(in)  :: band_in
@@ -163,11 +164,11 @@ subroutine rot_cg(occ_nd,cwavef,npw,nband,blocksize,nspinor,first_bandc,nbandc,o
 !Local variables-------------------------------
 !scalars
   integer :: ispinor,n,np
-  logical :: triqs
   character(len=500) :: message
 !arrays
   real(dp), allocatable :: occ_diag_red(:)
   complex(dpc), allocatable :: mat_tmp(:,:),mat_tmp2(:,:),occ_nd_cpx(:,:)
+  !complex(kind=dpc) :: cwavef_rot_g(nbandc, nspinor)
 ! *************************************************************************
 
   DBG_ENTER("COLL")
@@ -177,9 +178,7 @@ subroutine rot_cg(occ_nd,cwavef,npw,nband,blocksize,nspinor,first_bandc,nbandc,o
     ABI_ERROR(message)
   end if
 
-!! Initialisation
-
-  triqs = (dmft_solv == 6) .or. (dmft_solv == 7)
+!! Initialization
 
   ABI_MALLOC(mat_tmp,(npw,nbandc))
   ABI_MALLOC(mat_tmp2,(npw,nbandc))
@@ -207,7 +206,7 @@ subroutine rot_cg(occ_nd,cwavef,npw,nband,blocksize,nspinor,first_bandc,nbandc,o
 !! Compute the corresponding wave functions if nothing wrong happened
   ! $c^{rot}_{n,k}(g) =  \sum_{n'} [\bar{f_{n',n}} * c_{n',k}(g)]$
 
-  if (triqs) occ_nd_cpx(:,:) = conjg(occ_nd_cpx(:,:))  
+  if (dmft_test == 0) occ_nd_cpx(:,:) = conjg(occ_nd_cpx(:,:))  
   
   do ispinor=1,nspinor
     mat_tmp(:,:) = cmplx(cwavef(1,1:npw,first_bandc:first_bandc+nbandc-1,ispinor), &
@@ -217,6 +216,18 @@ subroutine rot_cg(occ_nd,cwavef,npw,nband,blocksize,nspinor,first_bandc,nbandc,o
     cwavef(1,1:npw,first_bandc:first_bandc+nbandc-1,ispinor) = dble(mat_tmp2(:,:))
     cwavef(2,1:npw,first_bandc:first_bandc+nbandc-1,ispinor) = aimag(mat_tmp2(:,:))
   end do ! ispinor 
+
+  !do ig=1,npw
+  !  cwavef_rot_g(:,:) = czero
+  !  do n=1,nbandc
+  !    do np=1,nbandc
+  !      cwavef_rot_g(n,:) = cwavef_rot_g(n,:) + occ_nd_cpx(np, n) * &
+!&                           cmplx(cwavef(1,ig,np+first_bandc-1,:), cwavef(2,ig,np+first_bandc-1,:), kind=dpc)
+ !     end do
+ !   end do
+ !   cwavef(1,ig,first_bandc:first_bandc+nbandc-1,:) = dreal(cwavef_rot_g)
+ !   cwavef(2,ig,first_bandc:first_bandc+nbandc-1,:) = dimag(cwavef_rot_g)
+ ! end do
 
   ABI_FREE(mat_tmp)
   ABI_FREE(mat_tmp2)
