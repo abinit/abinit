@@ -236,8 +236,9 @@ contains
    ' Second-order linear-response tensors ',ch10
    call wrtout([std_out, ab_out], msg)
 
+
    !Convert ddb%val to second-order energies
-   call ddb%to_d2etot(0,kblok,qeq0,qphon,qphnrm,ucvol,omega=omega)
+   call ddb%to_d2etot(ddb%val,0,kblok,qeq0,qphon,qphnrm,ucvol,omega=omega)
 
    rfmagn(:)=0
    rfelfd(:)=0
