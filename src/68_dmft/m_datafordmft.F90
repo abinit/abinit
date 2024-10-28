@@ -127,7 +127,7 @@ subroutine datafordmft(cg,cprj,cryst_struc,dft_occup,dimcprj,dtset,eigen,mband_c
  integer :: me_band,me_kpt,mkmem,natom,nband_k,nband_k_cprj,nbandf,nbandi,ndim,nkpt
  integer :: nproc_band,nproc_spkpt,nproju,npw,nspinor,nsploop,nsppol,nsppol_mem,opt_renorm
  integer :: option,paral_kgb,pawprtvol,siz_buf,siz_buf_psi,siz_paw,siz_proj,siz_wan,unt
- logical :: prt_wan,t2g,triqs,use_full_chipsi,verif,x2my2d
+ logical :: prt_wan,t2g,use_full_chipsi,verif,x2my2d
  real(dp) :: ima,re,rint
  complex(dpc) :: tmp
  character(len=500) :: message
@@ -150,12 +150,12 @@ subroutine datafordmft(cg,cprj,cryst_struc,dft_occup,dimcprj,dtset,eigen,mband_c
  nsppol  = paw_dmft%nsppol
  nsppol_mem = sum(mpi_enreg%my_isppoltab(1:nsppol)) 
  pawprtvol  = dtset%pawprtvol
- prt_wan    = paw_dmft%dmft_prtwan == 1
+ prt_wan    = (paw_dmft%dmft_prtwan == 1)
  
  if (abs(pawprtvol) >= 3) then
    write(message,*) " number of k-points used is nkpt=nkpt ",nkpt
    call wrtout(std_out,message,'COLL')
-   write(message,*) " warning: parallelised version        ",nkpt
+   write(message,*) " warning: parallelized version        ",nkpt
    call wrtout(std_out,message,'COLL')
    write(message,*) " weights k-points used is wtk=wtk"
    call wrtout(std_out,message,'COLL')
@@ -202,9 +202,9 @@ subroutine datafordmft(cg,cprj,cryst_struc,dft_occup,dimcprj,dtset,eigen,mband_c
 
  nbandi = paw_dmft%dmftbandi 
  nbandf = paw_dmft%dmftbandf
- t2g    = paw_dmft%dmft_t2g == 1
- x2my2d = paw_dmft%dmft_x2my2d == 1
- use_full_chipsi = paw_dmft%dmft_use_full_chipsi == 1
+ t2g    = (paw_dmft%dmft_t2g == 1)
+ x2my2d = (paw_dmft%dmft_x2my2d == 1)
+ use_full_chipsi = (paw_dmft%dmft_use_full_chipsi == 1)
 
  if (use_full_chipsi .and. mpi_enreg%nproc_fft > 1) then
    message = "datafordmft not working when nproc_fft > 1 and use_full_chipsi=1"
@@ -381,10 +381,12 @@ subroutine datafordmft(cg,cprj,cryst_struc,dft_occup,dimcprj,dtset,eigen,mband_c
          cycle
        end if  
 
-       if (verif) call pawcprj_get(cryst_struc%atindx1(:),cwaveprj(:,:),cprj(:,:),natom,ib,icprj,ikpt,&
-                                 & iorder_cprj,isppol,mband_cprj,dtset%mkmem,natom,1,nband_k_cprj,&
-                                 & my_nspinor,nsppol,paw_dmft%unpaw,mpicomm=mpi_enreg%comm_kpt,&
-                                 & proc_distrb=mpi_enreg%proc_distrb(:,:,:))
+       if (verif) then
+         call pawcprj_get(cryst_struc%atindx1(:),cwaveprj(:,:),cprj(:,:),natom,ib,icprj,ikpt,&
+                       & iorder_cprj,isppol,mband_cprj,dtset%mkmem,natom,1,nband_k_cprj,&
+                       & my_nspinor,nsppol,paw_dmft%unpaw,mpicomm=mpi_enreg%comm_kpt,&
+                       & proc_distrb=mpi_enreg%proc_distrb(:,:,:))
+       end if 
 
        do ispinor=1,my_nspinor
          do iatom=1,natom
@@ -410,8 +412,7 @@ subroutine datafordmft(cg,cprj,cryst_struc,dft_occup,dimcprj,dtset,eigen,mband_c
                if (x2my2d) then
                  if (im /= 5) cycle
                  im = 1
-               end if 
-               if (t2g) then
+               else if (t2g) then
                  if (im == 3 .or. im == 5) cycle
                  if (im == 4) im = 3
                end if 
@@ -564,8 +565,7 @@ subroutine datafordmft(cg,cprj,cryst_struc,dft_occup,dimcprj,dtset,eigen,mband_c
 !==========================================================================
 !********* WRITE chipsi in file for reference
 !==========================================================================
- triqs = (paw_dmft%dmft_solv == 6) .or. (paw_dmft%dmft_solv == 7)
- if (paw_dmft%myproc == 0 .and. (.not. triqs)) then
+ if (paw_dmft%myproc == 0) then
    call chipsi_print(paw_dmft,pawtab(:))
  end if ! proc=0
 
@@ -781,8 +781,8 @@ subroutine chipsi_print(paw_dmft,pawtab)
  integer, parameter :: mt2g(3) = (/1,2,4/)
 ! *********************************************************************
 
-   t2g = paw_dmft%dmft_t2g == 1
-   x2my2d = paw_dmft%dmft_x2my2d == 1
+   t2g = (paw_dmft%dmft_t2g == 1)
+   x2my2d = (paw_dmft%dmft_x2my2d == 1)
 
    if (open_file('forlb.ovlp',msg,newunit=unt,form='formatted',status='unknown') /= 0) ABI_ERROR(msg)
    rewind(unt)
@@ -1127,6 +1127,8 @@ subroutine normalizechipsi(nkpt,paw_dmft,jkpt)
  complex(dpc), allocatable :: chipsivect(:,:),largeoverlap(:,:),mat_tmp(:,:)
  character(len=500) :: message
 ! real(dp),allocatable :: e0pde(:,:,:),omegame0i(:)
+ !complex(dpc), allocatable :: wan(:,:,:),sqrtmatinv(:,:),wanall(:)
+ !type(coeff2c_type), allocatable :: overlap(:)
 !************************************************************************
 
  mbandc    = paw_dmft%mbandc
@@ -1171,6 +1173,23 @@ subroutine normalizechipsi(nkpt,paw_dmft,jkpt)
 !  ==-------------------------------------
 !  == Start loop over atoms
 
+     !ABI_MALLOC(overlap,(natom))
+     !do iatom=1,natom
+     !  if(paw_dmft%lpawu(iatom).ne.-1) then
+     !    ndim=2*paw_dmft%lpawu(iatom)+1
+     !    tndim=nsppol*nspinor*ndim
+     !    ABI_MALLOC(overlap(iatom)%value,(tndim,tndim))
+     !    overlap(iatom)%value=czero
+     !  end if
+     !end do
+!    ==-------------------------------------
+
+!    built large overlap matrix
+     !write(message,'(2a)') ch10,'  - Overlap (before orthonormalization) -'
+     !call wrtout(std_out,message,'COLL')
+     !call gather_matlu(norm1%matlu,overlap,cryst_struc%natom,option=1,prtopt=1)
+     !call destroy_oper(norm1)
+
    do iatom=1,natom
      lpawu = paw_dmft%lpawu(iatom)
      if (lpawu == -1) cycle
@@ -1188,6 +1207,8 @@ subroutine normalizechipsi(nkpt,paw_dmft,jkpt)
          !stop
          !call wrtout(std_out,message,'COLL')
          !if(diag==0) then
+         !call invsqrt_matrix(overlap(iatom)%value,tndim,dum)
+         !sqrtmatinv=overlap(iatom)%value
      do isppol=1,nsppol
        ! if(diag==0) then
        call invsqrt_matrix(norm1%matlu(iatom)%mat(:,:,isppol),ndim,dum)
@@ -1211,6 +1232,50 @@ subroutine normalizechipsi(nkpt,paw_dmft,jkpt)
          paw_dmft%chipsi(1:ndim,:,ikpt,isppol,iatom) = mat_tmp(:,:)
        end do ! ikpt
      end do ! isppol
+
+     
+       !       ABI_MALLOC(wan,(nsppol,nspinor,ndim))
+!        write(std_out,*) mbandc,nsppol,nspinor,ndim
+!        write(std_out,*)  paw_dmft%psichi(1,1,1,1,1,1)
+        ! do ikpt=1,nkpt
+        !   do ib=1,mbandc
+        !     if(present(jkpt)) then
+        !       ikpt1=jkpt
+        !     else
+        !       ikpt1=ikpt
+        !     end if
+        !     jc=0
+        !     wan=czero
+        !     do isppol=1,nsppol
+        !       do ispinor=1,nspinor
+        !         do im=1,ndim
+!                  write(std_out,*) "psichi", paw_dmft%psichi(isppol,ikpt1,ib,ispinor,iatom,im)
+         !          jc=jc+1
+         !          jc1=0
+         !          do isppol1=1,nsppol
+         !            do ispinor1=1,nspinor
+         !              do im1=1,ndim
+         !                jc1=jc1+1
+         !                wan(isppol,ispinor,im)= wan(isppol,ispinor,im) &
+!&                         + paw_dmft%psichi(isppol1,ikpt1,ib,ispinor1,iatom,im1)*sqrtmatinv(jc,jc1)
+          !             end do ! ispinor1
+          !           end do ! isppol1
+          !         end do ! im1
+          !       end do ! im
+          !     end do ! ispinor
+          !   end do !  isppol
+          !   do isppol=1,nsppol
+          !     do ispinor=1,nspinor
+          !       do im=1,ndim
+          !         paw_dmft%psichi(isppol,ikpt1,ib,ispinor,iatom,im)=wan(isppol,ispinor,im)
+!                  write(std_out,*) "psichi2", paw_dmft%psichi(isppol,ikpt1,ib,ispinor,iatom,im)
+          !       end do ! ispinor
+          !     end do ! isppol
+          !   end do ! im
+          ! end do ! ib
+        ! end do ! ikpt
+        ! ABI_FREE(wan)
+        ! ABI_FREE(sqrtmatinv)
 
      ABI_FREE(mat_tmp)
 
@@ -1296,6 +1361,16 @@ subroutine normalizechipsi(nkpt,paw_dmft,jkpt)
      call abi_xgemm("n","c",dimoverlap,dimoverlap,mbandc,cone,chipsivect(:,:),dimoverlap,&
                   & chipsivect(:,:),dimoverlap,czero,largeoverlap(:,:),dimoverlap)
 
+    !   largeoverlap=czero
+    !   do ib=1,mbandc
+    !     do itot=1,dimoverlap
+    !       do itot1=1,dimoverlap
+    !          largeoverlap(itot,itot1)=largeoverlap(itot,itot1)+ &
+!&              psichivect(ib,itot)*conjg(psichivect(ib,itot1))
+    !       enddo ! itot1
+    !     enddo ! itot
+    !   enddo ! ib
+
 !    Math: orthogonalization of overlap
      write(std_out,*) "jkpt=",jkpt
      do itot=1,dimoverlap
@@ -1313,10 +1388,46 @@ subroutine normalizechipsi(nkpt,paw_dmft,jkpt)
      
      call abi_xgemm("n","n",dimoverlap,mbandc,dimoverlap,cone,largeoverlap(:,:),dimoverlap,&
                   & chipsivect(:,:),dimoverlap,czero,mat_tmp(:,:),dimoverlap)
+
+     !  do ib=1,mbandc
+     !    wanall=czero
+     !    do itot=1,dimoverlap
+     !      do itot1=1,dimoverlap
+     !         wanall(itot)= wanall(itot)+psichivect(ib,itot1)*sqrtmatinv(itot,itot1)
+      !     enddo ! itot1
+     !      write(std_out,'(3i3,2x,i3,2x,2e15.5,2x,2e15.5)') jkpt,isppol,ib,itot,psichivect(ib,itot),wanall(itot)
+      !   enddo ! itot
+      !   iatomcor=0
+      !   do itot=1,dimoverlap
+      !     psichivect(ib,itot)=wanall(itot)
+      !   enddo
+        ! do iatom=1,natom
+        !   if(paw_dmft%lpawu(iatom).ne.-1) then
+        !     ndim=2*paw_dmft%lpawu(iatom)+1
+        !     iatomcor=iatomcor+1
+        !     do im=1,ndim
+        !       do ispinor=1,nspinor
+        !         paw_dmft%psichi(isppol,jkpt,ib,ispinor,iatom,im)=wanall(iatomcor,isppol,ispinor,im)
+        !       end do ! ispinor
+        !     end do ! im
+        !   endif
+        ! enddo ! iatom
+      ! enddo ! ib
+
     
 !    Calculation of overlap (check) 
      call abi_xgemm("n","c",dimoverlap,dimoverlap,mbandc,cone,mat_tmp(:,:),dimoverlap,&
                   & mat_tmp(:,:),dimoverlap,czero,largeoverlap(:,:),dimoverlap)
+
+      ! largeoverlap=czero
+      ! do ib=1,mbandc
+      !   do itot=1,dimoverlap
+      !     do itot1=1,dimoverlap
+      !        largeoverlap(itot,itot1)=largeoverlap(itot,itot1)+ &
+!&              psichivect(ib,itot)*conjg(psichivect(ib,itot1))
+      !     enddo ! itot1
+      !   enddo ! itot
+      ! enddo ! ib
 
      write(std_out,*) "jkpt=",jkpt
      do itot=1,dimoverlap
