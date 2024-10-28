@@ -341,7 +341,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
  real(dp) :: boxcut,compch_fft,compch_sph,deltae,diecut,diffor,ecut
  real(dp) :: ecutf,ecutsus,edum,sdum,elast,etotal,evxc,fermie,fermih,gsqcut,hyb_mixing,hyb_mixing_sr
  real(dp) :: maxfor,res2,residm,ucvol,ucvol_local,val_max
- real(dp) :: val_min,vxcavg,vxcavg_dum,el_temp
+ real(dp) :: val_min,vxcavg,vxcavg_dum,el_temp,entropy_ks=zero
  real(dp) :: zion,wtime_step,now,prev,esum,enonlocalpsp !MRM
  character(len=10) :: tag
  character(len=500) :: MY_NAME = "scfcv_core"
@@ -1451,9 +1451,10 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
      call paw_ij_reset_flags(paw_ij,self_consistent=.true.) ! Force the recomputation of Dij
      option=0;if (dtset%iscf>0.and.dtset%iscf<10.and.nstep>0) option=1
      ABI_NVTX_START_RANGE(NVTX_SCFCV_PAWDENPOT)
-     call pawdenpot(compch_sph,el_temp,energies%e_paw,energies%e_pawdc,ipert,dtset%ixc,my_natom,dtset%natom,&
-&     dtset%nspden,psps%ntypat,dtset%nucdipmom,nzlmopt,option,paw_an,paw_an,paw_ij,pawang,dtset%pawprtvol,pawrad,&
-&     pawrhoij,dtset%pawspnorb,pawtab,dtset%pawxcdev,dtset%spnorbscl,dtset%xclevel,&
+     call pawdenpot(compch_sph,el_temp,energies%e_paw,energies%e_pawdc,energies%entropy_paw,&
+&     ipert,dtset%ixc,my_natom,dtset%natom,dtset%nspden,psps%ntypat,dtset%nucdipmom,nzlmopt,&
+&     option,paw_an,paw_an,paw_ij,pawang,dtset%pawprtvol,pawrad,pawrhoij,dtset%pawspnorb,&
+&     pawtab,dtset%pawxcdev,dtset%spnorbscl,dtset%xclevel,&
 &     dtset%xc_denpos,dtset%xc_taupos,ucvol,psps%znuclpsp,&
 &     comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,&
 &     hyb_mixing=hyb_mixing,hyb_mixing_sr=hyb_mixing_sr,&
@@ -1666,6 +1667,13 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
      end do
    end if
 
+!  In case we use finite-temperature exchange-correlation functional,
+!  we save entropy of the Kohn-Sham states in the buffer entropy_ks
+!  for future use, and we sum all entropy terms.
+   entropy_ks=energies%entropy
+!  if(abs(energies%entropy_xc)>tiny(zero))  energies%entropy=energies%entropy+energies%entropy_xc
+!  if(abs(energies%entropy_paw)>tiny(zero)) energies%entropy=energies%entropy+energies%entropy_paw
+
    call timab(1451,2,tsec)
 
 !  ######################################################################
@@ -1693,7 +1701,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
 !    if the mixing is the ODA mixing, compute energy and new density here
      if (dtset%iscf==22) then
        call odamix(deltae,dtset,&
-&       elast,energies,etotal,gprimd,gsqcut,kxc,mpi_enreg,&
+&       elast,energies,etotal,entropy_ks,gprimd,gsqcut,kxc,mpi_enreg,&
 &       my_natom,nfftf,ngfftf,nhat,nkxc,psps%ntypat,nvresid,n3xccc,optres,&
 &       paw_ij,paw_an,pawang,pawfgrtab,pawrad,pawrhoij,pawtab,&
 &       red_ptot,psps,rhog,rhor,rprimd,strsxc,ucvol,psps%usepaw,&
@@ -1900,8 +1908,8 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
        call paw_an_reset_flags(paw_an) ! Force the recomputation of on-site potentials
        option=2
        ABI_NVTX_START_RANGE(NVTX_SCFCV_PAWDENPOT)
-       call pawdenpot(compch_sph,el_temp,energies%e_paw,energies%e_pawdc,ipert,&
-&       dtset%ixc,my_natom,dtset%natom,dtset%nspden,&
+       call pawdenpot(compch_sph,el_temp,energies%e_paw,energies%e_pawdc,&
+&       energies%entropy_paw,ipert,dtset%ixc,my_natom,dtset%natom,dtset%nspden,&
 &       psps%ntypat,dtset%nucdipmom,nzlmopt,option,paw_an,paw_an,&
 &       paw_ij,pawang,dtset%pawprtvol,pawrad,pawrhoij,dtset%pawspnorb,&
 &       pawtab,dtset%pawxcdev,dtset%spnorbscl,dtset%xclevel,dtset%xc_denpos,dtset%xc_taupos,ucvol,psps%znuclpsp,&

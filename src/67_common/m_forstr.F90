@@ -1445,7 +1445,7 @@ subroutine nres2vres(dtset,gsqcut,izero,kxc,mpi_enreg,my_natom,nfft,ngfft,nhat,&
 !scalars
  integer :: cplex,ider,idir,ipert,ispden,nhatgrdim,nkxc_cur,option,me,nproc,comm,usexcnhat
  logical :: has_nkxc_gga,non_magnetic_xc
- real(dp) :: dum,dum2,energy,m_norm_min,ucvol,vxcavg
+ real(dp) :: dum,energy,m_norm_min,ucvol,vxcavg
  character(len=500) :: message
  type(xcdata_type) :: xcdata
 !arrays

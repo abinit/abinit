@@ -179,7 +179,7 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,pawang,pawra
  logical :: is_dfpt=.true.,nmxc
  real(dp),parameter :: k0(3)=(/zero,zero,zero/)
  real(dp) :: boxcut,compch_fft,compch_sph,ecore,ecut_eff,ecutdg_eff,ecutf
- real(dp) :: eei,epaw,epawdc,bigexc,bigsxc,etot,fermie,fermih
+ real(dp) :: eei,epaw,epawdc,spaw,bigexc,bigsxc,etot,fermie,fermih
  real(dp) :: gsqcut,gsqcut_eff,gsqcutc_eff
  real(dp) :: rdum,residm,ucvol,vxcavg,el_temp
  character(len=500) :: message
@@ -906,12 +906,12 @@ el_temp=merge(dtset%tphysel,dtset%tsmear,dtset%tphysel>tol8.and.dtset%occopt/=3.
    call wrtout(std_out,' nonlinear : ground-state density and potential set up.','COLL')
  end if
 
- epaw = zero ; epawdc = zero
+ epaw = zero ; epawdc = zero ; spaw = zero
 !PAW: compute Dij quantities (psp strengths)
  if (psps%usepaw==1)then
    cplex=1;ipert=0;option=1
    nzlmopt=0;if (dtset%pawnzlm>0) nzlmopt=-1
-   call pawdenpot(compch_sph,el_temp,epaw,epawdc,ipert,dtset%ixc,my_natom,natom,dtset%nspden,&
+   call pawdenpot(compch_sph,el_temp,epaw,epawdc,spaw,ipert,dtset%ixc,my_natom,natom,dtset%nspden,&
 &   ntypat,dtset%nucdipmom,nzlmopt,option,paw_an,paw_an,paw_ij,pawang,dtset%pawprtvol,&
 &   pawrad,pawrhoij,dtset%pawspnorb,pawtab,dtset%pawxcdev,&
 &   dtset%spnorbscl,dtset%xclevel,dtset%xc_denpos,dtset%xc_taupos,ucvol,psps%znuclpsp, &
