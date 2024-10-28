@@ -198,6 +198,9 @@ MODULE m_paw_dmft
   integer :: dmft_t2g
   ! Only use t2g orbitals
 
+  integer :: dmft_test
+  ! Do not use it, this is only here for backwards-compatibility for some tests.
+
   integer :: dmft_use_full_chipsi
   ! =0 Only use the PAW contribution sum_i <pi|Psi_tilde> |Phi> to compute <Chi|Psi>
   ! =1 Use the full formula |Psi_tilde> + sum_i <pi|Psi_tilde> (|Phi> - |Phi_tilde>) to compute <Chi|Psi>
@@ -640,6 +643,7 @@ CONTAINS  !=====================================================================
 !! gprimd(3,3) = dimensional reciprocal space primitive translations
 !! kg(3,mpw*mkmem) = reduced planewave coordinates.
 !! mpi_enreg = information about MPI parallelization
+!! mpsang = highest angular momentum + 1 
 !! npwarr(nkpt) = number of planewaves in basis at this k point
 !! occ = DFT occupations
 !! paw_dmft <type(paw_dmft_type)>= paw+dmft related data
@@ -658,8 +662,8 @@ CONTAINS  !=====================================================================
 !!
 !! SOURCE
 
-subroutine init_sc_dmft(dtset,paw_dmft,gprimd,kg,mpi_enreg,npwarr,&
-                        occ,pawang,pawrad,pawtab,rprimd,ucvol,unpaw,use_sc_dmft,xred,ylm)
+subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,pawang, &
+                      & pawrad,pawtab,rprimd,ucvol,unpaw,use_sc_dmft,xred,ylm)
 
  use m_mpinfo, only : proc_distrb_cycle
  use m_paw_numeric, only : paw_jbessel_4spline
@@ -668,20 +672,22 @@ subroutine init_sc_dmft(dtset,paw_dmft,gprimd,kg,mpi_enreg,npwarr,&
                         
 !Arguments ------------------------------------
 !scalars
+ integer, intent(in) :: mpsang
  integer, optional, intent(in) :: unpaw,use_sc_dmft
  real(dp), optional, intent(in) :: ucvol
 !type
  type(paw_dmft_type), intent(inout) :: paw_dmft
  type(MPI_type), optional, intent(in) :: mpi_enreg
  type(dataset_type), target, intent(in) :: dtset
- type(pawtab_type), optional, intent(in) :: pawtab(:)
+ type(pawtab_type), optional, intent(in) :: pawtab(dtset%ntypat)
  type(pawang_type), optional, intent(in) :: pawang
- type(pawrad_type), target, optional, intent(in) :: pawrad(:)
+ type(pawrad_type), target, optional, intent(in) :: pawrad(dtset%ntypat)
 ! arrays
- real(dp), optional, intent(in) :: occ(:)
- integer, ABI_CONTIGUOUS target, optional, intent(in) :: npwarr(:)
- integer, ABI_CONTIGUOUS optional, intent(in) :: kg(:,:)
- real(dp), ABI_CONTIGUOUS optional, intent(in) :: gprimd(:,:),rprimd(:,:),xred(:,:),ylm(:,:)
+ real(dp), optional, intent(in) :: occ(dtset%mband*dtset%nkpt*dtset%nsppol)
+ integer, target, optional, intent(in) :: npwarr(dtset%nkpt)
+ integer, optional, intent(in) :: kg(3,dtset%mpw*dtset%mkmem)
+ real(dp), optional, intent(in) :: gprimd(3,3),rprimd(3,3),xred(3,dtset%natom)
+ real(dp), optional, intent(in) :: ylm(dtset%mpw*dtset%mkmem,mpsang*mpsang)
 !Local variables ------------------------------------
  integer :: bdtot_index,dmft_solv,dmftbandi,dmftbandf,fac,grid_unt,i
  integer :: iatom,iatom1,iband,icb,ierr,ifreq,ig,ik,ikg,ikpt,im,im1
@@ -720,7 +726,7 @@ subroutine init_sc_dmft(dtset,paw_dmft,gprimd,kg,mpi_enreg,npwarr,&
  if (dtset%nbandkss == 0) paw_dmft%use_sc_dmft = use_sc_dmft
 
  ! Check processors for DMFT
- ! Initialise spaceComm, myproc, and nproc
+ ! Initialize spaceComm, myproc, and nproc
  !spacecomm=mpi_enreg%comm_cell
  !myproc=mpi_enreg%me_cell
  !nproc=mpi_enreg%nproc_cell
@@ -891,7 +897,7 @@ subroutine init_sc_dmft(dtset,paw_dmft,gprimd,kg,mpi_enreg,npwarr,&
 !==  Define integers and reals
 !=============================
 
- paw_dmft%dmft_use_all_bands = dtset%dmft_use_all_bands == 1
+ paw_dmft%dmft_use_all_bands = (dtset%dmft_use_all_bands == 1)
  paw_dmft%nelectval = dble(dtset%nelect)
  
  if (.not. paw_dmft%dmft_use_all_bands) then
@@ -922,6 +928,7 @@ subroutine init_sc_dmft(dtset,paw_dmft,gprimd,kg,mpi_enreg,npwarr,&
  paw_dmft%dmft_prtwan          = dtset%dmft_prtwan
  paw_dmft%dmft_wanrad          = dtset%dmft_wanrad
  paw_dmft%dmft_t2g             = dtset%dmft_t2g
+ paw_dmft%dmft_test            = dtset%dmft_test
  paw_dmft%dmft_x2my2d          = dtset%dmft_x2my2d 
  paw_dmft%dmft_use_full_chipsi = dtset%dmft_use_full_chipsi
  
@@ -1033,11 +1040,11 @@ subroutine init_sc_dmft(dtset,paw_dmft,gprimd,kg,mpi_enreg,npwarr,&
    ABI_ERROR(message)
  end if
  
- t2g = paw_dmft%dmft_t2g == 1
- x2my2d = paw_dmft%dmft_x2my2d == 1
+ t2g = (paw_dmft%dmft_t2g == 1)
+ x2my2d = (paw_dmft%dmft_x2my2d == 1)
  
  if ((t2g .or. x2my2d) .and. paw_dmft%dmft_dc == 8) then
-   message = "dmft_dc=8 is not implemented for the cases t2g and x2my2d"
+   message = "dmft_dc=8 is not implemented for the t2g and x2my2d cases"
    ABI_ERROR(message)
  end if 
  
@@ -1204,7 +1211,7 @@ subroutine init_sc_dmft(dtset,paw_dmft,gprimd,kg,mpi_enreg,npwarr,&
  end if ! prtwan=1
 
  ! Now build radial grid by extending the PAW mesh up to max(rmax,size(proj))
- use_full_chipsi = paw_dmft%dmft_use_full_chipsi == 1 
+ use_full_chipsi = (paw_dmft%dmft_use_full_chipsi == 1) 
  paw_dmft%int_meshsz => pawrad(:)%int_meshsz
 
  if (use_full_chipsi) then
