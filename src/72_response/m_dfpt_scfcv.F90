@@ -1561,7 +1561,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
    call prtdenmagsph(cplex,intgden,dtset%natom,nspden,dtset%ntypat,&
  & ab_out,prtopt,dtset%ratsm,dtset%ratsph,rhomag,dtset%typat)
 
-   call  magmom_to_d2(blkflg,cplex,d2lo,idir,intgden,ipert,mpert,&
+   call magmom_to_d2(blkflg,cplex,d2lo,idir,intgden,ipert,mpert,&
  & dtset%natom,nspden,rhomag)
    
  end if
