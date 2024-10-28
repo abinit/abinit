@@ -660,7 +660,13 @@ subroutine dfpt_accrho(cplex,cwave0,cwave1,cwavef,cwaveprj0,cwaveprj1,&
  ABI_MALLOC(rhoaug,(cplex*gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,gs_hamkq%nvloc))
  n1=gs_hamkq%ngfft(1);n2=gs_hamkq%ngfft(2);n3=gs_hamkq%ngfft(3)
  if (option==2.or.option==3) eloc0_k=zero
- if (option==2.or.option==3) vlocal => gs_hamkq%vlocal
+ if (option==2.or.option==3) then
+!  XG20241028 This coding confuses the gnu 8.5 compiler, wrt the CONTIGUOUS character of the pointer. 
+!  So, make a simple copy. This is not optimal, though...
+!  vlocal => gs_hamkq%vlocal
+   ABI_MALLOC(vlocal, (size(gs_hamkq%vlocal,1),size(gs_hamkq%vlocal,2),size(gs_hamkq%vlocal,3),size(gs_hamkq%vlocal,4)) )
+   vlocal=gs_hamkq%vlocal
+ endif
 
 !Loop on spinorial components
 ! TODO : double loop on spinors for full rhoaug1 matrix if nspden =4
@@ -930,6 +936,11 @@ subroutine dfpt_accrho(cplex,cwave0,cwave1,cwavef,cwaveprj0,cwaveprj1,&
 
  ABI_FREE(rhoaug)
 
+!XG20241028 See above
+ if (option==2.or.option==3) then
+   ABI_FREE(vlocal)
+ endif
+
 !Part devoted to the accumulation of the 1st-order occupation matrix in PAW case
 ! TODO: parse for more nspden 4 dependencies on spinors
 ! EB FR CHECK: to be modified for non-collinear?????
@@ -978,6 +989,7 @@ subroutine dfpt_accrho(cplex,cwave0,cwave1,cwavef,cwaveprj0,cwaveprj1,&
 
  ABI_NVTX_END_RANGE()
  DBG_EXIT("COLL")
+
  contains
 
    !  Compute contribution of bands in ndat to zero-order potential part of the 2nd-order total energy
