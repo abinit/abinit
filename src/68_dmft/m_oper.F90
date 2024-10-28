@@ -1193,9 +1193,9 @@ subroutine gather_oper(oper,distrib,paw_dmft,opt_ksloc,master,opt_diag,opt_commk
    
    siz_buf = siz_buf * (nspinor**2) * nsppol
    if (optcommkpt == 1) then
-     recvcounts(:) = siz_buf * distrib%nw_mem_kptparal(:)
+     recvcounts(1:nproc2) = siz_buf * distrib%nw_mem_kptparal(0:nproc2-1)
    else if (optcommkpt == 0) then
-     recvcounts(:) = siz_buf * distrib%nw_mem(:)
+     recvcounts(1:nproc2) = siz_buf * distrib%nw_mem(0:nproc2-1)
    end if ! optcommkpt
    displs(1) = 0
    do irank=2,nproc2
@@ -1331,7 +1331,7 @@ subroutine gather_oper_ks(oper,distrib,paw_dmft,opt_diag)
  ABI_MALLOC(recvcounts,(nproc))
  ABI_MALLOC(displs,(nproc))
  
- recvcounts(:) = mbandc * distrib%nkpt_mem(:) 
+ recvcounts(1:nproc) = mbandc * distrib%nkpt_mem(0:nproc-1) 
  if (.not. diag) recvcounts(:) = recvcounts(:) * mbandc
  
  displs(1) = 0
