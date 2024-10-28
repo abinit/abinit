@@ -1377,7 +1377,7 @@ subroutine chipsi_gather(paw_dmft)
 !************************************************************************
 
  me_kpt  = paw_dmft%distrib%me_kpt
- mkmem   = paw_dmft%distrib%nkpt_mem(me_kpt)
+ mkmem   = paw_dmft%distrib%nkpt_mem(me_kpt+1)
  mbandc  = paw_dmft%mbandc
  natom   = paw_dmft%natom
  nproc   = paw_dmft%nproc
