@@ -21,14 +21,257 @@ Six tutorials are intermediate level ones, that might be prerequisite for some m
 The following schema should help to understand these dependencies.
 To access the tutorials, see the menu on the left...
 
-<center>
-<img style="height: 540px; width: 720px;" alt="Schema 1" src="index_assets/tutorial_flowchart_v11.png" usemap="#map1"/>
-</center>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
 
-<div style="display:flex; justify-content: center; align-items: center; padding-bottom: 20px; padding-top: 20px">
-  <img src="![drawing.svg](index_assets/drawing.svg)" width="700">
-</div>
-
+<svg
+   width="297mm"
+   height="210mm"
+   viewBox="0 0 1122.5197 793.70081"
+   version="1.1"
+   id="svg5"
+   inkscape:version="1.1.2 (0a00cf5339, 2022-02-04)"
+   sodipodi:docname="drawing.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview7"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:document-units="mm"
+     showgrid="false"
+     inkscape:zoom="0.98525794"
+     inkscape:cx="506.46636"
+     inkscape:cy="317.17583"
+     inkscape:window-width="1850"
+     inkscape:window-height="1016"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer1" />
+  <defs
+     id="defs2">
+    <linearGradient
+       inkscape:collect="always"
+       id="linearGradient75010">
+      <stop
+         style="stop-color:#de8787;stop-opacity:1;"
+         offset="0"
+         id="stop75006" />
+      <stop
+         style="stop-color:#de8787;stop-opacity:0;"
+         offset="1"
+         id="stop75008" />
+    </linearGradient>
+    <linearGradient
+       inkscape:collect="always"
+       id="linearGradient62984">
+      <stop
+         style="stop-color:#ff7f2a;stop-opacity:1;"
+         offset="0"
+         id="stop62980" />
+      <stop
+         style="stop-color:#ff7f2a;stop-opacity:0;"
+         offset="1"
+         id="stop62982" />
+    </linearGradient>
+    <rect
+       x="364.22093"
+       y="328.58623"
+       width="283.90408"
+       height="67.31264"
+       id="rect4707" />
+    <linearGradient
+       inkscape:collect="always"
+       id="linearGradient1050">
+      <stop
+         style="stop-color:#ff7f2a;stop-opacity:1;"
+         offset="0"
+         id="stop1046" />
+      <stop
+         style="stop-color:#ff7f2a;stop-opacity:0;"
+         offset="1"
+         id="stop1048" />
+    </linearGradient>
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient1050"
+       id="linearGradient1052"
+       x1="297.09464"
+       y1="221.33719"
+       x2="297.71313"
+       y2="116.2053"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="translate(229.53619,-12.457081)" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient62984"
+       id="linearGradient62986"
+       x1="736.90649"
+       y1="72.859253"
+       x2="736.75983"
+       y2="52.734447"
+       gradientUnits="userSpaceOnUse" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient75010"
+       id="linearGradient75012"
+       x1="166.63228"
+       y1="259.96524"
+       x2="166.72348"
+       y2="235.45547"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="matrix(1,0,0,1.1247179,0,-167.05548)" />
+  </defs>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <rect
+       style="fill:url(#linearGradient1052);fill-opacity:1;stroke-width:1.75748035;stroke-miterlimit:4;stroke-dasharray:none"
+       id="rect31"
+       width="248.51123"
+       height="111.88377"
+       x="400.61292"
+       y="102.41209"
+       ry="18.773001" />
+    <rect
+       style="fill:url(#linearGradient75012);fill-opacity:1;stroke-width:2.35819;stroke-miterlimit:4;stroke-dasharray:none"
+       id="rect31-0"
+       width="149.90523"
+       height="333.94254"
+       x="89.846001"
+       y="94.96962"
+       ry="56.032288" />
+    <rect
+       style="fill:url(#linearGradient62986);fill-opacity:1;stroke-width:1.00523;stroke-miterlimit:4;stroke-dasharray:none"
+       id="rect31-1"
+       width="176.62332"
+       height="51.501423"
+       x="649.12415"
+       y="50.910667"
+       ry="8.6414347" />
+    <text
+       xml:space="preserve"
+       id="text4705"
+       style="fill:black;fill-opacity:1;line-height:1.25;stroke:none;font-family:sans-serif;font-style:normal;font-weight:normal;font-size:40px;white-space:pre;shape-inside:url(#rect4707)" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:26.6667px;line-height:1.25;font-family:sans-serif;fill:#000000;fill-opacity:1;stroke:none"
+       x="443.79639"
+       y="150.61488"
+       id="text11092"><tspan
+         sodipodi:role="line"
+         id="tspan11090"
+         x="443.79639"
+         y="150.61488"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:26.6667px;font-family:Arial;-inkscape-font-specification:Arial;fill:#5c0000;fill-opacity:1">basic tutorials</tspan></text>
+    <a
+       id="a73271"
+       xlink:href="https://docs.abinit.org/tutorial/abinit_build/">
+      <text
+         xml:space="preserve"
+         style="font-style:normal;font-weight:normal;font-size:26.6667px;line-height:1.25;font-family:sans-serif;fill:#000000;fill-opacity:1;stroke:none"
+         x="660.61365"
+         y="85.208908"
+         id="text11092-5"><tspan
+           sodipodi:role="line"
+           id="tspan11090-9"
+           x="660.61365"
+           y="85.208908"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:26.6667px;font-family:Arial;-inkscape-font-specification:Arial;fill:#5c0000;fill-opacity:1">ABINIT_build</tspan></text>
+    </a>
+    <a
+       id="a48685"
+       xlink:href="https://docs.abinit.org/tutorial/base1/">
+      <text
+         xml:space="preserve"
+         style="font-style:normal;font-weight:normal;font-size:26.6667px;line-height:1.25;font-family:sans-serif;fill:#000000;fill-opacity:1;stroke:none"
+         x="475.39731"
+         y="187.59006"
+         id="text26440"><tspan
+           sodipodi:role="line"
+           id="tspan26438"
+           x="475.39731"
+           y="187.59006"
+           style="font-size:26.6667px;fill:#3e0000;fill-opacity:1">1</tspan></text>
+    </a>
+    <a
+       id="a53687"
+       xlink:href="https://docs.abinit.org/tutorial/base2/">
+      <text
+         xml:space="preserve"
+         style="font-style:normal;font-weight:normal;font-size:26.6667px;line-height:1.25;font-family:sans-serif;fill:#000000;fill-opacity:1;stroke:none"
+         x="499.23798"
+         y="187.94162"
+         id="text26440-4"><tspan
+           sodipodi:role="line"
+           id="tspan26438-8"
+           x="499.23798"
+           y="187.94162"
+           style="font-size:26.6667px;fill:#3e0000;fill-opacity:1">2</tspan></text>
+    </a>
+    <a
+       id="a57177"
+       xlink:href="https://docs.abinit.org/tutorial/base3/">
+      <text
+         xml:space="preserve"
+         style="font-style:normal;font-weight:normal;font-size:26.6667px;line-height:1.25;font-family:sans-serif;fill:#000000;fill-opacity:1;stroke:none"
+         x="527.27234"
+         y="187.9422"
+         id="text26440-7"><tspan
+           sodipodi:role="line"
+           id="tspan26438-1"
+           x="527.27234"
+           y="187.9422"
+           style="font-size:26.6667px;fill:#3e0000;fill-opacity:1">3</tspan></text>
+    </a>
+    <a
+       id="a59143"
+       xlink:href="https://docs.abinit.org/tutorial/base4/">
+      <text
+         xml:space="preserve"
+         style="font-style:normal;font-weight:normal;font-size:26.6667px;line-height:1.25;font-family:sans-serif;fill:#000000;fill-opacity:1;stroke:none"
+         x="552.01605"
+         y="187.59006"
+         id="text26440-72"><tspan
+           sodipodi:role="line"
+           id="tspan26438-7"
+           x="552.01605"
+           y="187.59006"
+           style="font-size:26.6667px;fill:#3e0000;fill-opacity:1">4</tspan></text>
+    </a>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:18.6667px;line-height:1.25;font-family:sans-serif;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.968017"
+       x="171.10028"
+       y="135.10037"
+       id="text11092-9"
+       transform="scale(0.96801691,1.0330398)"><tspan
+         sodipodi:role="line"
+         x="171.10028"
+         y="135.10037"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:18.6667px;font-family:Arial;-inkscape-font-specification:Arial;text-align:center;text-anchor:middle;fill:#fffefe;fill-opacity:1;stroke-width:0.968017"
+         id="tspan75989">6 tutorials on </tspan><tspan
+         sodipodi:role="line"
+         x="171.10028"
+         y="158.73221"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:18.6667px;font-family:Arial;-inkscape-font-specification:Arial;text-align:center;text-anchor:middle;fill:#fffefe;fill-opacity:1;stroke-width:0.968017"
+         id="tspan91533">ABINIT </tspan><tspan
+         sodipodi:role="line"
+         x="171.10028"
+         y="182.36404"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:18.6667px;font-family:Arial;-inkscape-font-specification:Arial;text-align:center;text-anchor:middle;fill:#fffefe;fill-opacity:1;stroke-width:0.968017"
+         id="tspan93899">postprocessors</tspan></text>
+  </g>
+</svg>
 
 The four basic tutorials are presented at the top, in one orange block. There is also an orange block for the ABINIT_build tutorial.
 Each block in brown represents one intermediate-level tutorial. The blocks in red
