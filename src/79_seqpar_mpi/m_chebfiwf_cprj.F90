@@ -144,7 +144,7 @@ subroutine chebfiwf2_cprj(cg,dtset,eig,occ,enl_out,gs_hamk,kinpw,mpi_enreg,&
  double precision :: tsec(2)
 
  ! Important things for NC
- real(dp), allocatable :: pcon(:),kin(:)
+ real(dp), allocatable :: pcon(:),kin(:),occ_tmp(:)
 
 ! *********************************************************************
 
@@ -206,7 +206,14 @@ subroutine chebfiwf2_cprj(cg,dtset,eig,occ,enl_out,gs_hamk,kinpw,mpi_enreg,&
 
  call xgBlock_map_1d(xgenl,enl_out,SPACE_R,nband)
 
- call xgBlock_map_1d(xgocc,occ,SPACE_R,nband)
+ ! Occupancies in chebyshev are used for convergence criteria only
+ if (dtset%nbdbuf==-101.and.nspinor==1.and.dtset%nsppol==1) then
+   ABI_MALLOC(occ_tmp,(nband))
+   occ_tmp(:) = half*occ(:)
+   call xgBlock_map_1d(xgocc,occ_tmp,SPACE_R,nband,gpu_option=dtset%gpu_option)
+ else
+   call xgBlock_map_1d(xgocc,occ,SPACE_R,nband,gpu_option=dtset%gpu_option)
+ end if
 
  !call xg_cprj_copy(cprj_cwavef_bands,cprj_contiguous,space_cprj,nband_cprj,cprj_xgx0,&
  !  & xg_nonlop,l_mpi_enreg%comm_band,CPRJ_ALLOC)
@@ -222,6 +229,9 @@ subroutine chebfiwf2_cprj(cg,dtset,eig,occ,enl_out,gs_hamk,kinpw,mpi_enreg,&
  ! Run chebfi
  call chebfi_run_cprj(chebfi,xgx0,cprj_xgx0%self,xg_getghc,xg_kin,xg_precond,xgeigen,xgocc,xgresidu,xgenl,nspinor)
 
+ if (allocated(occ_tmp)) then
+   ABI_FREE(occ_tmp)
+ end if
  ! Free preconditionning since not needed anymore
  ABI_FREE(pcon)
  ABI_FREE(kin)

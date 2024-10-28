@@ -269,7 +269,7 @@ subroutine chebfiwf2(cg,dtset,eig,occ,enl_out,gs_hamk,kinpw,mpi_enreg,&
  type(xgBlock_t) :: xgx0,xgeigen,xgocc,xgresidu,precond
  ! arrays
  real(dp) :: tsec(2),chebfiMem(2)
- real(dp), allocatable :: l_gvnlxc(:,:)
+ real(dp), allocatable :: l_gvnlxc(:,:),occ_tmp(:)
 
  ! Parameters for nonlop call in NC
  integer,parameter :: choice=1, paw_opt=0, signs=1
@@ -380,7 +380,14 @@ subroutine chebfiwf2(cg,dtset,eig,occ,enl_out,gs_hamk,kinpw,mpi_enreg,&
 
  call xgBlock_map_1d(xgresidu,resid,SPACE_R,nband,gpu_option=dtset%gpu_option)
 
- call xgBlock_map_1d(xgocc,occ,SPACE_R,nband,gpu_option=dtset%gpu_option)
+ ! Occupancies in chebyshev are used for convergence criteria only
+ if (dtset%nbdbuf==-101.and.nspinor==1.and.dtset%nsppol==1) then
+   ABI_MALLOC(occ_tmp,(nband))
+   occ_tmp(:) = half*occ(:)
+   call xgBlock_map_1d(xgocc,occ_tmp,SPACE_R,nband,gpu_option=dtset%gpu_option)
+ else
+   call xgBlock_map_1d(xgocc,occ,SPACE_R,nband,gpu_option=dtset%gpu_option)
+ end if
 
  call timab(tim_chebfiwf2,2,tsec)
 
@@ -399,6 +406,9 @@ subroutine chebfiwf2(cg,dtset,eig,occ,enl_out,gs_hamk,kinpw,mpi_enreg,&
 
  call chebfi_run(chebfi,xgx0,getghc_gsc1,getBm1X,precond,xgeigen,xgocc,xgresidu,nspinor)
 
+ if (allocated(occ_tmp)) then
+   ABI_FREE(occ_tmp)
+ end if
 !Free preconditionning since not needed anymore
  if(dtset%gpu_option==ABI_GPU_KOKKOS) then
 #if defined HAVE_GPU && defined HAVE_YAKL
