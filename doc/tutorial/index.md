@@ -175,7 +175,7 @@ To access the tutorials, see the menu on the left...
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:26.6667px;font-family:Arial;-inkscape-font-specification:Arial;fill:#5c0000;fill-opacity:1">basic tutorials</tspan></text>
     <a
        id="a73271"
-       xlink:href="https://docs.abinit.org/tutorial/abinit_build/">
+       xlink:href="./abinit_build/">
       <text
          xml:space="preserve"
          style="font-style:normal;font-weight:normal;font-size:26.6667px;line-height:1.25;font-family:sans-serif;fill:#000000;fill-opacity:1;stroke:none"
@@ -190,7 +190,7 @@ To access the tutorials, see the menu on the left...
     </a>
     <a
        id="a48685"
-       xlink:href="https://docs.abinit.org/tutorial/base1/">
+       xlink:href="./base1/">
       <text
          xml:space="preserve"
          style="font-style:normal;font-weight:normal;font-size:26.6667px;line-height:1.25;font-family:sans-serif;fill:#000000;fill-opacity:1;stroke:none"
@@ -205,7 +205,7 @@ To access the tutorials, see the menu on the left...
     </a>
     <a
        id="a53687"
-       xlink:href="https://docs.abinit.org/tutorial/base2/">
+       xlink:href="./base2/">
       <text
          xml:space="preserve"
          style="font-style:normal;font-weight:normal;font-size:26.6667px;line-height:1.25;font-family:sans-serif;fill:#000000;fill-opacity:1;stroke:none"
@@ -220,7 +220,7 @@ To access the tutorials, see the menu on the left...
     </a>
     <a
        id="a57177"
-       xlink:href="https://docs.abinit.org/tutorial/base3/">
+       xlink:href="./base3/">
       <text
          xml:space="preserve"
          style="font-style:normal;font-weight:normal;font-size:26.6667px;line-height:1.25;font-family:sans-serif;fill:#000000;fill-opacity:1;stroke:none"
@@ -235,7 +235,7 @@ To access the tutorials, see the menu on the left...
     </a>
     <a
        id="a59143"
-       xlink:href="https://docs.abinit.org/tutorial/base4/">
+       xlink:href="./base4/">
       <text
          xml:space="preserve"
          style="font-style:normal;font-weight:normal;font-size:26.6667px;line-height:1.25;font-family:sans-serif;fill:#000000;fill-opacity:1;stroke:none"
@@ -272,6 +272,7 @@ To access the tutorials, see the menu on the left...
          id="tspan93899">postprocessors</tspan></text>
   </g>
 </svg>
+
 
 The four basic tutorials are presented at the top, in one orange block. There is also an orange block for the ABINIT_build tutorial.
 Each block in brown represents one intermediate-level tutorial. The blocks in red
