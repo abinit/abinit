@@ -715,7 +715,7 @@ subroutine rotatevee_hu(hu,paw_dmft,pawprtvol,rot_mat,rot_type,udens_atoms,vee_r
        ABI_MALLOC(veeylm2,(tndim,tndim,tndim,tndim))
        ABI_MALLOC(veeslm,(ndim,ndim,ndim,ndim))
 !      Change basis from slm to ylm basis
-       veeslm(:,:,:,:) = cmplx(real(hu(itypat)%vee(:,:,:,:)),zero)  
+       veeslm(:,:,:,:) = cmplx(real(hu(itypat)%vee(:,:,:,:)),zero,kind=sp)  
 
        call vee_slm2ylm_hu(lpawu,veeslm(:,:,:,:),veeylm(:,:,:,:),1,2)
 
