@@ -1091,13 +1091,14 @@ subroutine gather_oper(oper,distrib,paw_dmft,opt_ksloc,master,opt_diag,opt_commk
  nw      = distrib%nw   
 
  nproc_kpt  = min(nkpt,nproc)
- nproc_freq = max(1,nproc/nkpt)
  
  optcommkpt = 0
  if (present(opt_commkpt)) optcommkpt = opt_commkpt
  
  if (opt_ksloc == 1) then
-   
+  
+   nproc_freq = max(1,nproc/nkpt)
+
    ABI_MALLOC(recvcounts,(nproc))
    ABI_MALLOC(displs,(nproc))
  
@@ -1172,6 +1173,8 @@ subroutine gather_oper(oper,distrib,paw_dmft,opt_ksloc,master,opt_diag,opt_commk
   
  else if (opt_ksloc == 2) then
  
+   nproc_freq = nproc / nkpt
+
    if (optcommkpt == 1) then
      myproc2 = distrib%me_freq 
      nproc2  = nproc_freq + 1
