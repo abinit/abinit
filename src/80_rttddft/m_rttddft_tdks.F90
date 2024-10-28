@@ -779,7 +779,7 @@ subroutine second_setup(dtset, mpi_enreg, pawang, pawrad, pawtab, psps, psp_genc
  !FB: Needed because paw_dmft is required in mkrho
  !PAW related operations
  !Initialize paw_dmft, even if neither dmft not paw are used
- call init_sc_dmft(dtset,tdks%paw_dmft)
+ call init_sc_dmft(dtset,psps%mpsang,tdks%paw_dmft)
 
 
  !*** Main PAW initialization ***
