@@ -1167,9 +1167,7 @@ subroutine chebfi_set_nline_from_residu(chebfi,lambda_minus,lambda_plus,residu,o
  real(dp),pointer :: residu_(:,:),occ_(:,:)
  real(dp) :: eig_iband,res_iband,occ_iband
  real(dp),pointer :: eig(:,:)
- !LTEST
- character(len=500) :: msg
- !LTEST
+ !character(len=500) :: msg
 
  bandpp = chebfi%bandpp
 
