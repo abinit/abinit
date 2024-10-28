@@ -630,6 +630,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 !  dmftbandi, dmftbandf
    if (dt%usedmft>0) then
      call chkint_eq(0,1,cond_string,cond_values,ierr,'dmftcheck',dt%dmftcheck,4,(/-1,0,1,2/),iout)
+     call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_test',dt%dmft_test,2,(/0,1/),iout)
      if(dt%dmftcheck/=-1) then
 
        cond_string(1)='usedmft' ; cond_values(1)=dt%usedmft
@@ -707,11 +708,9 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
          call chkint_eq(0,1,cond_string,cond_values,ierr,'dmftctqmc_check',dt%dmftctqmc_check,4,(/0,1,2,3/),iout)
          call chkint_ge(0,1,cond_string,cond_values,ierr,'dmftctqmc_gmove',dt%dmftctqmc_gmove,0,iout)
          call chkint_ge(0,1,cond_string,cond_values,ierr,'dmftctqmc_meas',dt%dmftctqmc_meas,1,iout)
-#if defined HAVE_TRIQS
+#if defined HAVE_TRIQS_v2_0 || defined HAVE_TRIQS_v1_4
          if (dt%dmft_solv==9) then
            call chkint_ge(0,1,cond_string,cond_values,ierr,'dmftqmc_l',dt%dmftqmc_l,2*dt%dmft_nwli+1,iout)
-         end if
-         if (dt%dmft_solv==6.or.dt%dmft_solv==7.or.dt%dmft_solv==9) then
            cond_string(1)='usedmft' ; cond_values(1)=dt%usedmft
            call chkint_ge(0,1,cond_string,cond_values,ierr,'dmftctqmc_triqs_nleg',dt%dmftctqmc_triqs_nleg,1,iout)
          end if
@@ -752,7 +751,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      end if
    end if
 
-#if !defined HAVE_TRIQS
+#if !defined HAVE_TRIQS_v3_4
    if(dt%dmft_solv>=6.and.dt%dmft_solv<=7) then
      write(msg,'(3a)') &
       & ' dmft_solv=6, or 7 is only relevant if the TRIQS library is linked',ch10,&
@@ -787,6 +786,10 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
        write(msg,'(a)') 'You need to activate the measurement of the density matrix when dmft_integral=1'
        ABI_ERROR(msg)
      end if
+     if (dt%dmftctqmc_triqs_entropy == 1 .and. dt%dmft_use_all_bands == 0) then
+       write(msg,'(a)') 'You need to activate dmft_use_all_bands in order to activate dmftctqmc_triqs_entropy'
+       ABI_ERROR(msg)
+     end if 
      call chkint_ge(0,1,cond_string,cond_values,ierr,'dmft_nlambda',dt%dmft_nlambda,1,iout)
    end if 
 
