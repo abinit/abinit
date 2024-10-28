@@ -236,6 +236,9 @@ contains
    ' Second-order linear-response tensors ',ch10
    call wrtout([std_out, ab_out], msg)
 
+   !Convert ddb%val to second-order energies
+   call ddb%to_d2etot(0,kblok,qeq0,qphon,qphnrm,ucvol,omega=omega)
+
    rfmagn(:)=0
    rfelfd(:)=0
    rfphon(:)=0
@@ -243,7 +246,7 @@ contains
    !IFCs block
    rfphon(1:2)=1
    call ddb%get_block(iblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, rftyp, omega=omega)
-   if (iblok /= 0 ) then
+   if (iblok /= 0) then
      call mp_ifc(barmagsus,barmmom,barmmom_tr,ddb%val,0,iblok,ifcmat,&
    & ifcmat_fm,invhmat,magsus,magpen,mpert,mpopt,&
    & natom,nblok,ndim,omega(1),omegaflag,prtopt,prtvol,qphon,xred,zfield,zfield_tr)
