@@ -335,7 +335,7 @@ module m_lobpcg2_cprj
     type(xgBlock_t) :: eigenBlock   !
     type(xgBlock_t) :: residuBlock,occBlock
     type(xg_t):: cprj_work_all
-    double precision :: maxResidu, minResidu
+    double precision :: maxResidu, minResidu, dummy
     double precision :: dlamch,tolerance
     integer :: ierr = 0
     integer :: nrestart
@@ -516,8 +516,10 @@ module m_lobpcg2_cprj
             maxResidu = 0.0
           end if
         else if (nbdbuf==-101) then
+          call xgBlock_minmax(residuBlock,minResidu,dummy) ! Get minimum of true residuals
+          ! Compute effective residuals : res_eff = res * occ
           call xgBlock_apply_diag(residuBlock,occBlock,1,Y=residu_eff%self)
-          call xgBlock_minmax(residu_eff%self,minResidu,maxResidu)
+          call xgBlock_minmax(residu_eff%self,dummy,maxResidu) ! Get maximum of effective residuals
         else
           ABI_ERROR('Bad value of nbdbuf')
         end if
@@ -658,8 +660,10 @@ module m_lobpcg2_cprj
             maxResidu = 0.0
           end if
         else if (nbdbuf==-101) then
+          call xgBlock_minmax(residuBlock,minResidu,dummy) ! Get minimum of true residuals
+          ! Compute effective residuals : res_eff = res * occ
           call xgBlock_apply_diag(residuBlock,occBlock,1,Y=residu_eff%self)
-          call xgBlock_minmax(residu_eff%self,minResidu,maxResidu)
+          call xgBlock_minmax(residu_eff%self,dummy,maxResidu) ! Get maximum of effective residuals
         else
           ABI_ERROR('Bad value of nbdbuf')
         end if
