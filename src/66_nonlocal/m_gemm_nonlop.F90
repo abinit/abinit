@@ -600,20 +600,39 @@ contains
 
         do idat = 1,ndat
           if(use_enl_ndat) enl_ => enl_ndat_(:,:,:,idat,:)
-          call opernlc_ylm(atindx1_,cplex,cplex_dgxdt,cplex_d2gxdt,&
-&         cplex_enl,cplex_fac,&
-&         dprojections(:, idbeg:idend, 1+nspinor*(idat-1):nspinor*idat),&
-&         vnl_dprojections(:, idfbeg:idfend, 1+nspinor*(idat-1):nspinor*idat),&
-&         s_dprojections(:, idfbeg:idfend, 1+nspinor*(idat-1):nspinor*idat),&
-&         d2projections(:, id2beg:id2end, 1+nspinor*(idat-1):nspinor*idat),&
-&         d2gxdt_dum_out,d2gxdt_dum_out2,&
-&         dimenl1,dimenl2_,dimekbq,enl_,&
-&         projections(:, ibeg:iend, 1+nspinor*(idat-1):nspinor*idat),&
-&         vnl_projections(:, ibeg:iend,1+nspinor*(idat-1):nspinor*idat),&
-&         s_projections(:, ibeg:iend,1+nspinor*(idat-1):nspinor*idat),&
-&         iatm,indlmn_(:,:,itypat),itypat,lambda(idat),mpi_enreg,natom_,&
-&         ndgxdt,ndgxdtfac,nd2gxdt,nd2gxdtfac,&
-&         nattyp_(itypat),nlmn,nspinor,nspinortot,optder,paw_opt,sij_typ)
+          !FIXME This if exists so compilers won't implicitly copy arrays
+          !      Copies are unavoidable with nspinor==2
+          if(nspinor==1) then
+            call opernlc_ylm(atindx1_,cplex,cplex_dgxdt,cplex_d2gxdt,&
+            &         cplex_enl,cplex_fac,&
+            &         dprojections    (:, idbeg:idend,   idat),&
+            &         vnl_dprojections(:, idfbeg:idfend, idat),&
+            &         s_dprojections  (:, idfbeg:idfend, idat),&
+            &         d2projections   (:, id2beg:id2end, idat),&
+            &         d2gxdt_dum_out,d2gxdt_dum_out2,&
+            &         dimenl1,dimenl2_,dimekbq,enl_,&
+            &         projections    (:, ibeg:iend, idat),&
+            &         vnl_projections(:, ibeg:iend, idat),&
+            &         s_projections  (:, ibeg:iend, idat),&
+            &         iatm,indlmn_(:,:,itypat),itypat,lambda(idat),mpi_enreg,natom_,&
+            &         ndgxdt,ndgxdtfac,nd2gxdt,nd2gxdtfac,&
+            &         nattyp_(itypat),nlmn,nspinor,nspinortot,optder,paw_opt,sij_typ)
+          else
+            call opernlc_ylm(atindx1_,cplex,cplex_dgxdt,cplex_d2gxdt,&
+            &         cplex_enl,cplex_fac,&
+            &         dprojections(:, idbeg:idend, 1+nspinor*(idat-1):nspinor*idat),&
+            &         vnl_dprojections(:, idfbeg:idfend, 1+nspinor*(idat-1):nspinor*idat),&
+            &         s_dprojections(:, idfbeg:idfend, 1+nspinor*(idat-1):nspinor*idat),&
+            &         d2projections(:, id2beg:id2end, 1+nspinor*(idat-1):nspinor*idat),&
+            &         d2gxdt_dum_out,d2gxdt_dum_out2,&
+            &         dimenl1,dimenl2_,dimekbq,enl_,&
+            &         projections(:, ibeg:iend, 1+nspinor*(idat-1):nspinor*idat),&
+            &         vnl_projections(:, ibeg:iend,1+nspinor*(idat-1):nspinor*idat),&
+            &         s_projections(:, ibeg:iend,1+nspinor*(idat-1):nspinor*idat),&
+            &         iatm,indlmn_(:,:,itypat),itypat,lambda(idat),mpi_enreg,natom_,&
+            &         ndgxdt,ndgxdtfac,nd2gxdt,nd2gxdtfac,&
+            &         nattyp_(itypat),nlmn,nspinor,nspinortot,optder,paw_opt,sij_typ)
+          end if
         end do
 
         shift = shift + nattyp_(itypat)*nlmn
