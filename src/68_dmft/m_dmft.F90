@@ -97,11 +97,11 @@ subroutine dmft_solve(cryst_struc,istep,dft_occup,mpi_enreg,paw_dmft,pawang,pawt
  type(pawtab_type), intent(inout) :: pawtab(paw_dmft%ntypat)
  type(oper_type), intent(in) :: dft_occup
 !Local variables ------------------------------
- integer :: check,dmft_iter,idmftloop,istep_iter,itypat,myproc
+ integer :: check,dmft_iter,dmft_test,idmftloop,istep_iter,itypat,myproc
  integer :: natom,ntypat,opt_diff,opt_fill_occnd,opt_log,opt_maxent,opt_moments
  integer :: opt_renorm,prtopt
  !logical :: etot_var
- logical :: t2g,triqs,x2my2d
+ logical :: t2g,x2my2d
  real(dp) :: tsec(2)
  character(len=200) :: char_enddmft
  type(green_type) :: green,greendft,weiss
@@ -117,13 +117,13 @@ subroutine dmft_solve(cryst_struc,istep,dft_occup,mpi_enreg,paw_dmft,pawang,pawt
  DBG_ENTER('COLL')
  myproc = paw_dmft%myproc
  check  = paw_dmft%dmftcheck ! checks enabled
- t2g    = paw_dmft%dmft_t2g == 1
- x2my2d = paw_dmft%dmft_x2my2d == 1
+ t2g    = (paw_dmft%dmft_t2g == 1)
+ x2my2d = (paw_dmft%dmft_x2my2d == 1)
  natom  = paw_dmft%natom
  ntypat = paw_dmft%ntypat
  dmft_iter  = paw_dmft%dmft_iter
  opt_maxent = paw_dmft%dmft_prt_maxent
- triqs = (paw_dmft%dmft_solv == 6) .or. (paw_dmft%dmft_solv == 7)
+ dmft_test  = paw_dmft%dmft_test
  !paw_dmft%dmft_fermi_prec=tol5
  !paw_dmft%dmft_fermi_prec = paw_dmft%dmft_charge_prec * ten
 !paw_dmft%dmft_charge_prec=20_dp ! total number of electron.
@@ -140,15 +140,15 @@ subroutine dmft_solve(cryst_struc,istep,dft_occup,mpi_enreg,paw_dmft,pawang,pawt
  !  part3 = "band"
  !end if
 
- if (triqs) then 
-   opt_moments = 1   
+ opt_moments = 0
+ if (paw_dmft%dmft_solv == 6 .or. paw_dmft%dmft_solv == 7) opt_moments = 1
+ if (dmft_test == 0) then 
    prtopt = 2
    opt_diff = 1
  else
-   opt_moments = 0
    prtopt = 0
    opt_diff = 0
- end if ! triqs
+ end if 
 
  if (check == 1) then
    write(message,'(2a)') ch10,' DMFT Checks are enabled '
@@ -183,8 +183,8 @@ subroutine dmft_solve(cryst_struc,istep,dft_occup,mpi_enreg,paw_dmft,pawang,pawt
 !----------------------------------------------------------------------
  write(message,'(2a)') ch10,'  == Check lda occ. mat. from green with respect to the direct calc =='
  call wrtout(std_out,message,'COLL')
- call diff_oper("Occup from DFT green function","DFT occupations",greendft%occup,&
-              & dft_occup,1,paw_dmft%dmft_tolfreq)
+ call diff_oper("Occup from DFT green function","DFT occupations", & 
+              & greendft%occup,dft_occup,1,paw_dmft%dmft_tolfreq)
 ! write(message,'(2a)') ch10,&
 !& '  ***** => Warning : diff_oper is suppressed for test'
 ! call wrtout(std_out,message,'COLL')
@@ -207,9 +207,6 @@ subroutine dmft_solve(cryst_struc,istep,dft_occup,mpi_enreg,paw_dmft,pawang,pawt
                                                                 ! ought to be  generalized  in the  future
  if (paw_dmft%dmft_solv /= -1) then
    call chipsi_renormalization(paw_dmft,opt=opt_renorm)
-   if (myproc == 0 .and. triqs) then
-     call chipsi_print(paw_dmft,pawtab(:))
-   end if 
    if (paw_dmft%dmft_prtwan == 1) then
      call compute_wannier(paw_dmft,mpi_enreg)
      if (myproc == 0) then
@@ -218,21 +215,19 @@ subroutine dmft_solve(cryst_struc,istep,dft_occup,mpi_enreg,paw_dmft,pawang,pawt
      ABI_FREE(paw_dmft%wannier)
    end if ! dmft_prtwan
 
-   if (triqs) then
-     write(message,'(2a)') ch10,'  == Check downfold(upfold)=identity =='
-     call wrtout(std_out,message,'COLL')
+   write(message,'(2a)') ch10,'  == Check downfold(upfold)=identity =='
+   call wrtout(std_out,message,'COLL')
    
-     ! Check that downfold_oper(upfold_oper)=I
-     call init_oper(paw_dmft,identity_oper,opt_ksloc=2)
-     call init_oper(paw_dmft,oper_tmp,opt_ksloc=2)
-     call identity_matlu(identity_oper%matlu(:),natom)
-     call downfold_oper(oper_tmp,paw_dmft,procb=paw_dmft%distrib%procb(:),iproc=paw_dmft%distrib%me_kpt,option=4)
-     call xmpi_matlu(oper_tmp%matlu(:),natom,paw_dmft%distrib%comm_kpt)
-     call sym_matlu(oper_tmp%matlu(:),paw_dmft)
-     call diff_matlu("Downfold of Upfold","Identity",oper_tmp%matlu(:),identity_oper%matlu(:),natom,0,tol5)
-     call destroy_oper(oper_tmp)
-     call destroy_oper(identity_oper)
-   end if 
+   ! Check that downfold_oper(upfold_oper)=I
+   call init_oper(paw_dmft,identity_oper,opt_ksloc=2)
+   call init_oper(paw_dmft,oper_tmp,opt_ksloc=2)
+   call identity_matlu(identity_oper%matlu(:),natom)
+   call downfold_oper(oper_tmp,paw_dmft,procb=paw_dmft%distrib%procb(:),iproc=paw_dmft%distrib%me_kpt,option=4)
+   call xmpi_matlu(oper_tmp%matlu(:),natom,paw_dmft%distrib%comm_kpt)
+   call sym_matlu(oper_tmp%matlu(:),paw_dmft)
+   call diff_matlu("Downfold of Upfold","Identity",oper_tmp%matlu(:),identity_oper%matlu(:),natom,0,tol5)
+   call destroy_oper(oper_tmp)
+   call destroy_oper(identity_oper)
 
 !  ===========================================================================
 !  ==  re-construct DFT green function with new chipsis
@@ -317,7 +312,7 @@ subroutine dmft_solve(cryst_struc,istep,dft_occup,mpi_enreg,paw_dmft,pawang,pawt
    & ch10,' =====  Green Function Calculation with input self-energy ========', &
    & ch10,' ================================================================='
  call wrtout(std_out,message,'COLL')
- if (triqs) then
+ if (dmft_test == 0) then
    call init_green(green,paw_dmft,opt_moments=opt_moments)
  else
    call icip_green("Green_inputself",green,paw_dmft,pawprtvol,self,opt_self=1)
@@ -335,7 +330,7 @@ subroutine dmft_solve(cryst_struc,istep,dft_occup,mpi_enreg,paw_dmft,pawang,pawt
  call compute_green(green,paw_dmft,0,self,opt_self=1,opt_nonxsum=1,opt_log=opt_log,opt_restart_moments=1)
  call integrate_green(green,paw_dmft,prtopt,opt_fill_occnd=opt_fill_occnd)
 
- if (triqs) then
+ if (dmft_test == 0) then
    call printocc_green(green,5,paw_dmft,3,chtype="Green_inputself")
  end if
 
@@ -386,7 +381,7 @@ subroutine dmft_solve(cryst_struc,istep,dft_occup,mpi_enreg,paw_dmft,pawang,pawt
 !   call abi_abort('COLL')
 
 !  == Printout local "occupations" from weiss field  (useless)
-   if (abs(pawprtvol) > 3 .and. (.not. triqs)) then
+   if (abs(pawprtvol) > 3 .and. opt_moments == 0) then
      call integrate_green(weiss,paw_dmft,2,opt_ksloc=2)
      call printocc_green(weiss,5,paw_dmft,3,opt_weissgreen=1)
    end if
@@ -465,12 +460,12 @@ subroutine dmft_solve(cryst_struc,istep,dft_occup,mpi_enreg,paw_dmft,pawang,pawt
    call destroy_self(self_new)
 
    opt_fill_occnd = 0
-   if (idmftloop == dmft_iter .or. (paw_dmft%dmftctqmc_triqs_entropy == 1 &
-     & .and. idmftloop == dmft_iter-1)) opt_fill_occnd = 1
+   if ((idmftloop == dmft_iter .and. paw_dmft%dmftctqmc_triqs_entropy == 0) &
+     & .or. (paw_dmft%dmftctqmc_triqs_entropy == 1 .and. idmftloop == dmft_iter-1)) opt_fill_occnd = 1
 
 !  ==  Compute green function self -> G(k)
 !  ---------------------------------------------------------------------
-   if (.not. triqs) then
+   if (dmft_test == 1) then
      call compute_green(green,paw_dmft,1,self,opt_self=1,opt_nonxsum=1)
      call integrate_green(green,paw_dmft,3,opt_diff=1) !,opt_nonxsum=1)
 
@@ -479,7 +474,7 @@ subroutine dmft_solve(cryst_struc,istep,dft_occup,mpi_enreg,paw_dmft,pawang,pawt
      if(paw_dmft%lchipsiortho == 1 .and. paw_dmft%dmft_prgn == 1) then
        call local_ks_green(green,paw_dmft,prtopt=1)
      end if
-   end if ! not triqs
+   end if ! dmft_test=1
 
 !  ==  Find fermi level
 !  ---------------------------------------------------------------------
@@ -488,7 +483,7 @@ subroutine dmft_solve(cryst_struc,istep,dft_occup,mpi_enreg,paw_dmft,pawang,pawt
    call compute_green(green,paw_dmft,0,self,opt_self=1,opt_nonxsum=1,opt_log=opt_log,opt_restart_moments=1)
    call integrate_green(green,paw_dmft,prtopt,opt_diff=opt_diff,opt_ksloc=3,opt_fill_occnd=opt_fill_occnd) 
 
-   if (triqs) then
+   if (dmft_test == 0) then
      call printocc_green(green,5,paw_dmft,3,chtype="DMFT")
    end if
 
@@ -523,7 +518,7 @@ subroutine dmft_solve(cryst_struc,istep,dft_occup,mpi_enreg,paw_dmft,pawang,pawt
 
 !== Save self on disk
 !-------------------------------------------------------------------------
- if (.not. triqs) then
+ if (dmft_test == 1) then
    call timab(627,1,tsec(:))
    call rw_self(self,paw_dmft,prtopt=2,opt_rw=2)
    call timab(627,2,tsec(:))
@@ -547,7 +542,7 @@ subroutine dmft_solve(cryst_struc,istep,dft_occup,mpi_enreg,paw_dmft,pawang,pawt
 !--------------------------------------------------------------------------------
 !Do not compute here, because, one want a energy computed after the
 !solver (for Hubbard I and DFT+U).
- if (.not. triqs) then
+ if (dmft_test == 1) then
    call compute_green(green,paw_dmft,1,self,opt_self=1,opt_nonxsum=1)
    call integrate_green(green,paw_dmft,2,opt_fill_occnd=1) !,opt_nonxsum=1)
  end if 

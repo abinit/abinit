@@ -81,6 +81,7 @@ contains
 !!  dtset <type(dataset_type)>=all input variables for this dataset
 !!  eigen(mband*nkpt*nsppol)=array for holding DFT eigenvalues (hartree)
 !!  mband_cprj=number of bands on each process of the band communicator
+!!  mcg=size of wave-functions array (cg) =mpw*nspinor*mband*mkmem*nsppol
 !!  mpi_enreg=information about MPI parallelization
 !!  my_nspinor=number of spinorial components of the wavefunctions (on current proc)
 !!  occ(mband*nkpt*nsppol) = occupancies of KS states.
@@ -101,11 +102,11 @@ contains
 !!
 !! SOURCE
 
-subroutine datafordmft(cg,cprj,cryst_struc,dft_occup,dimcprj,dtset,eigen,mband_cprj,mpi_enreg,&
-                     & my_nspinor,occ,paw_dmft,paw_ij,pawtab,usecprj,nbandkss)
+subroutine datafordmft(cg,cprj,cryst_struc,dft_occup,dimcprj,dtset,eigen,mband_cprj,mcg,&
+                     & mpi_enreg,my_nspinor,occ,paw_dmft,paw_ij,pawtab,usecprj,nbandkss)
   
 !Arguments ------------------------------------
- integer, intent(in) :: mband_cprj,my_nspinor,usecprj
+ integer, intent(in) :: mband_cprj,mcg,my_nspinor,usecprj
  integer, optional, intent(in) :: nbandkss
  type(MPI_type), intent(in) :: mpi_enreg
  type(dataset_type), intent(in) :: dtset
@@ -115,8 +116,8 @@ subroutine datafordmft(cg,cprj,cryst_struc,dft_occup,dimcprj,dtset,eigen,mband_c
  integer, intent(in) :: dimcprj(paw_dmft%natom)
  real(dp), intent(in) :: occ(paw_dmft%mband*paw_dmft%nkpt*paw_dmft%nsppol)
  real(dp), target, intent(in) :: eigen(paw_dmft%mband*paw_dmft%nkpt*paw_dmft%nsppol) 
- real(dp), ABI_CONTIGUOUS intent(in) :: cg(:,:)
- type(paw_ij_type), intent(in) :: paw_ij(:)
+ real(dp), intent(in) :: cg(2,mcg)
+ type(paw_ij_type), intent(in) :: paw_ij(paw_dmft%natom)
 ! type(pawcprj_type) :: cprj(cryst_struc%natom,my_nspinor*mband*mkmem*nsppol)
  type(pawcprj_type), intent(in) :: cprj(paw_dmft%natom,my_nspinor*mband_cprj*dtset%mkmem*paw_dmft%nsppol*usecprj)
  type(pawtab_type), intent(in) :: pawtab(paw_dmft%ntypat)
@@ -136,7 +137,7 @@ subroutine datafordmft(cg,cprj,cryst_struc,dft_occup,dimcprj,dtset,eigen,mband_c
  complex(dpc), allocatable :: buf_chipsi(:),buf_chipsi_tot(:),cwprj(:,:),psi_tmp(:)
  type(pawcprj_type), allocatable :: cwaveprj(:,:)
  type(matlu_type), allocatable :: matlu_temp(:)
- integer,parameter :: spinor_idxs(2,4) = RESHAPE((/1,1,2,2,1,2,2,1/),(/2,4/))
+ integer, parameter :: spinor_idxs(2,4) = RESHAPE((/1,1,2,2,1,2,2,1/),(/2,4/))
 !************************************************************************
 
 !DBG_ENTER("COLL")

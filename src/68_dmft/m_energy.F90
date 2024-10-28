@@ -784,6 +784,80 @@ subroutine compute_migdal_energy(e_hu_migdal,e_hu_migdal_tot,green,paw_dmft,self
  
  ABI_FREE(correction)
 
+ !xmig_1=zero
+ !xmig_2=zero
+ !xmig_3=zero
+
+ !e_hu_migdal_tot = zero
+ !do iatom=1,natom
+ !  shift=czero
+ !  if(paw_dmft%dmft_solv==4) shift=self%qmc_shift(iatom)+self%qmc_xmu(iatom)
+!   write(std_out,*) "shiftttt",shift
+  ! lpawu=paw_dmft%lpawu(iatom)
+  ! if(lpawu/=-1) then
+  !   xmig_1=czero
+  !   xmig_2=czero
+  !   xmig_3=czero
+  !   ndim=2*lpawu+1
+  !   do isppol=1,nsppol
+  !     do ispinor = 1 , nspinor
+  !       do ispinor1 = 1, nspinor
+  !         do im=1,ndim
+  !           do im1=1,ndim
+  !             do ifreq=1,nwlo
+!                write(std_out,*) ifreq,xmig_1,imag(self%oper (ifreq)%matlu(iatom)%mat(im ,im1,isppol,ispinor ,ispinor1)),&
+!&                  green%oper(ifreq)%matlu(iatom)%mat(im1,im ,isppol,ispinor1,ispinor )
+   !              xmig_1=xmig_1 + j_dpc/beta*       &
+!&                aimag(self%oper (ifreq)%matlu(iatom)%mat(im ,im1,isppol,ispinor ,ispinor1))* &
+!&                      green%oper(ifreq)%matlu(iatom)%mat(im1,im ,isppol,ispinor1,ispinor )* &
+!&                      paw_dmft%wgt_wlo(ifreq)
+!                 if(ispinor==ispinor1.and.im==im1) then
+      !             se=(self%oper (ifreq)%matlu(iatom)%mat(im ,im1,isppol,ispinor ,ispinor1)-  &
+!&                      self%oper (nwlo )%matlu(iatom)%mat(im ,im1,isppol,ispinor ,ispinor1))
+!                 else
+!                   se=self%oper (ifreq)%matlu(iatom)%mat(im ,im1,isppol,ispinor ,ispinor1)
+!                 endif
+  !               xmig_2=xmig_2 + one/beta*real(se)* &
+!&                      green%oper(ifreq)%matlu(iatom)%mat(im1,im ,isppol,ispinor1,ispinor )* &
+!&                      paw_dmft%wgt_wlo(ifreq)
+!                 if(ispinor==ispinor1.nd.im==im1.and.ifreq==1) then
+  !               if(ifreq==1) then
+  !                 xmig_3=xmig_3 + &
+!&                   real(self%oper(nwlo )%matlu(iatom)%mat(im ,im1,isppol,ispinor ,ispinor1)+shift)* &
+!&                         green%occup%matlu(iatom)%mat(im1,im ,isppol,ispinor1,ispinor)/two
+!                   write(std_out,*) "xmig_3",xmig_3
+!                   write(std_out,*) "self",self%oper(nwlo )%matlu(iatom)%mat(im ,im1,isppol,ispinor ,ispinor1)
+!                   write(std_out,*) "shift",shift
+!                   write(std_out,*) "occup", green%occup%matlu(iatom)%mat(im1,im ,isppol,ispinor1,ispinor)/two
+  !               endif
+  !             enddo
+!               if(ispinor==ispinor1.and.im==im1) then
+!                 xmig_3=xmig_3 + &
+!&                 real(self%oper(nwlo )%matlu(iatom)%mat(im ,im1,isppol,ispinor ,ispinor1))* &
+!!&                         green%occup%matlu(iatom)%mat(im1,im ,isppol,ispinor1,ispinor)/two
+!               endif
+   !          enddo
+   !        enddo
+   !      enddo
+   !    enddo
+   !  enddo
+   !  if(nsppol==1.and.nspinor==1) then
+   !    e_hu_migdal(iatom)=two*real(xmig_1+xmig_2+xmig_3)
+   !  else
+   !    e_hu_migdal(iatom)=real(xmig_1+xmig_2+xmig_3)
+   !  endif
+   !  e_hu_migdal_tot = e_hu_migdal_tot + e_hu_migdal(iatom)
+   !  if(abs(pawprtvol)>=3) then
+   !    write(message,'(2a,3(a,5x,a,2f12.6))')ch10,&
+!&         "  Interaction energy: Decomposition of Migdal energy",ch10,&
+!&         "xmig_1=",xmig_1,ch10,&
+!&         "xmig_2=",xmig_2,ch10,&
+!&         "xmig_3=",xmig_3
+!       call wrtout(std_out,message,'COLL')
+ !    endif
+ !  endif ! lpawu
+ !enddo
+
 end subroutine compute_migdal_energy
 !!***
 
@@ -820,11 +894,11 @@ subroutine compute_dftu_energy(energies_dmft,green,paw_dmft,pawtab,renorm)
  real(dp), optional, intent(in) :: renorm(:)
 ! integer :: prtopt
 !Local variables-------------------------------
- integer :: iatom,idijeff,im,im1,ims,ims1,ispinor,ispinor1,isppol,itypat
+ integer :: dmft_test,iatom,idijeff,im,im1,ims,ims1,ispinor,ispinor1,isppol,itypat
  integer :: lpawu,lpawu1,ndim,ndim1,nocc,nsploop,prt_pawuenergy
  real(dp) :: e_dc,e_dc_for_s,e_dcdc,e_dcdc_for_s,e_ee,edftumdc,edftumdc_for_s 
  real(dp) :: edftumdcdc,edftumdcdc_for_s,e_ee_for_s,jpawu,upawu,xe1,xe2
- logical :: t2g,triqs,x2my2d 
+ logical :: t2g,x2my2d 
  character(len=500) :: message
  integer, parameter :: spinor_idxs(2,4) = RESHAPE((/1,1,2,2,1,2,2,1/),(/2,4/))
  integer, parameter :: mt2g(3) = (/1,2,4/)
@@ -842,10 +916,10 @@ subroutine compute_dftu_energy(energies_dmft,green,paw_dmft,pawtab,renorm)
  edftumdcdc = zero
  nsploop    = max(paw_dmft%nsppol,paw_dmft%nspinor**2)
  nocc       = nsploop
- t2g        = paw_dmft%dmft_t2g == 1
- x2my2d     = paw_dmft%dmft_x2my2d == 1
+ t2g        = (paw_dmft%dmft_t2g == 1)
+ x2my2d     = (paw_dmft%dmft_x2my2d == 1)
  
- triqs = (paw_dmft%dmft_solv == 6) .or. (paw_dmft%dmft_solv == 7)
+ dmft_test = paw_dmft%dmft_test 
 
  isppol   = 1
  ispinor  = 1
@@ -883,15 +957,14 @@ subroutine compute_dftu_energy(energies_dmft,green,paw_dmft,pawtab,renorm)
        call wrtout(std_out,message,'COLL')
      end if ! nsploop
      ! Initialize noccmmp
-     ! TODO: optimize this in the t2g and x2my2d cases
      do im1=1,ndim
        ims1 = im1
-       if (x2my2d .and. triqs) ims1 = 5
-       if (t2g .and. triqs) ims1 = mt2g(im1)
+       if (x2my2d .and. dmft_test == 0) ims1 = 5
+       if (t2g .and. dmft_test == 0) ims1 = mt2g(im1)
        do im=1,ndim
          ims = im
-         if (x2my2d .and. triqs) ims = 5
-         if (t2g .and. triqs) ims = mt2g(im)
+         if (x2my2d .and. dmft_test == 0) ims = 5
+         if (t2g .and. dmft_test == 0) ims = mt2g(im)
          ! Here, we take the transpose in order to match pawuenergy's conventions
          noccmmp(1,ims,ims1,idijeff) = &
            & dble(green%occup%matlu(iatom)%mat(im1+(ispinor-1)*ndim,im+(ispinor1-1)*ndim,isppol))
