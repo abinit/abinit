@@ -24,9 +24,9 @@
      inkscape:pagecheckerboard="0"
      inkscape:document-units="mm"
      showgrid="false"
-     inkscape:zoom="0.98525794"
-     inkscape:cx="506.46636"
-     inkscape:cy="317.17583"
+     inkscape:zoom="1.2196855"
+     inkscape:cx="580.88745"
+     inkscape:cy="248.83464"
      inkscape:window-width="1850"
      inkscape:window-height="1016"
      inkscape:window-x="0"
@@ -35,6 +35,12 @@
      inkscape:current-layer="layer1" />
   <defs
      id="defs2">
+    <rect
+       x="477.13696"
+       y="411.83131"
+       width="224.43401"
+       height="306.53042"
+       id="rect186382" />
     <linearGradient
        inkscape:collect="always"
        id="linearGradient75010">
@@ -86,7 +92,7 @@
        x2="297.71313"
        y2="116.2053"
        gradientUnits="userSpaceOnUse"
-       gradientTransform="translate(229.53619,-12.457081)" />
+       gradientTransform="translate(209.53619,49.542919)" />
     <linearGradient
        inkscape:collect="always"
        xlink:href="#linearGradient62984"
@@ -95,7 +101,8 @@
        y1="72.859253"
        x2="736.75983"
        y2="52.734447"
-       gradientUnits="userSpaceOnUse" />
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="translate(-20,62)" />
     <linearGradient
        inkscape:collect="always"
        xlink:href="#linearGradient75010"
@@ -105,35 +112,85 @@
        x2="166.72348"
        y2="235.45547"
        gradientUnits="userSpaceOnUse"
-       gradientTransform="matrix(1,0,0,1.1247179,0,-167.05548)" />
+       gradientTransform="matrix(1,0,0,1.0646557,-72,-151.06281)" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient75010"
+       id="linearGradient125886"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="matrix(1,0,0,1.0646557,856.17698,-21.26742)"
+       x1="166.63228"
+       y1="259.96524"
+       x2="166.72348"
+       y2="235.45547" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient75010"
+       id="linearGradient125886-7"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="matrix(1,0,0,1.0033987,696.10544,133.2512)"
+       x1="166.63228"
+       y1="259.96524"
+       x2="166.72348"
+       y2="235.45547" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient75010"
+       id="linearGradient186931"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="matrix(1.3800092,0,0,1.1885073,432.0194,90.12491)"
+       x1="166.63228"
+       y1="259.96524"
+       x2="166.72348"
+       y2="235.45547" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient75010"
+       id="linearGradient211052"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="matrix(1,0,0,1.0033987,298.37153,133.24965)"
+       x1="166.63228"
+       y1="259.96524"
+       x2="166.72348"
+       y2="235.45547" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient75010"
+       id="linearGradient228449"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="matrix(1.3800092,0,0,0.93754745,39.054626,148.59092)"
+       x1="166.63228"
+       y1="259.96524"
+       x2="166.72348"
+       y2="235.45547" />
   </defs>
   <g
      inkscape:label="Layer 1"
      inkscape:groupmode="layer"
      id="layer1">
     <rect
-       style="fill:url(#linearGradient1052);fill-opacity:1;stroke-width:1.75748035;stroke-miterlimit:4;stroke-dasharray:none"
+       style="fill:url(#linearGradient1052);fill-opacity:1;stroke-width:1.75748;stroke-miterlimit:4;stroke-dasharray:none"
        id="rect31"
        width="248.51123"
        height="111.88377"
-       x="400.61292"
-       y="102.41209"
+       x="380.61292"
+       y="164.41209"
        ry="18.773001" />
     <rect
-       style="fill:url(#linearGradient75012);fill-opacity:1;stroke-width:2.35819;stroke-miterlimit:4;stroke-dasharray:none"
+       style="fill:url(#linearGradient75012);fill-opacity:1;stroke-width:2.29436;stroke-miterlimit:4;stroke-dasharray:none"
        id="rect31-0"
        width="149.90523"
-       height="333.94254"
-       x="89.846001"
-       y="94.96962"
-       ry="56.032288" />
+       height="316.10931"
+       x="17.846001"
+       y="96.96962"
+       ry="53.040051" />
     <rect
        style="fill:url(#linearGradient62986);fill-opacity:1;stroke-width:1.00523;stroke-miterlimit:4;stroke-dasharray:none"
        id="rect31-1"
        width="176.62332"
        height="51.501423"
-       x="649.12415"
-       y="50.910667"
+       x="629.12415"
+       y="112.91067"
        ry="8.6414347" />
     <text
        xml:space="preserve"
@@ -142,17 +199,18 @@
     <text
        xml:space="preserve"
        style="font-style:normal;font-weight:normal;font-size:26.6667px;line-height:1.25;font-family:sans-serif;fill:#000000;fill-opacity:1;stroke:none"
-       x="443.79639"
-       y="150.61488"
+       x="423.79639"
+       y="212.61488"
        id="text11092"><tspan
          sodipodi:role="line"
          id="tspan11090"
-         x="443.79639"
-         y="150.61488"
+         x="423.79639"
+         y="212.61488"
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:26.6667px;font-family:Arial;-inkscape-font-specification:Arial;fill:#5c0000;fill-opacity:1">basic tutorials</tspan></text>
     <a
        id="a73271"
-       xlink:href="./abinit_build/">
+       xlink:href="https://docs.abinit.org/tutorial/abinit_build/"
+       transform="translate(-20,62)">
       <text
          xml:space="preserve"
          style="font-style:normal;font-weight:normal;font-size:26.6667px;line-height:1.25;font-family:sans-serif;fill:#000000;fill-opacity:1;stroke:none"
@@ -167,7 +225,8 @@
     </a>
     <a
        id="a48685"
-       xlink:href="./base1/">
+       xlink:href="https://docs.abinit.org/tutorial/base1/"
+       transform="translate(-20,62)">
       <text
          xml:space="preserve"
          style="font-style:normal;font-weight:normal;font-size:26.6667px;line-height:1.25;font-family:sans-serif;fill:#000000;fill-opacity:1;stroke:none"
@@ -182,7 +241,8 @@
     </a>
     <a
        id="a53687"
-       xlink:href="./base2/">
+       xlink:href="https://docs.abinit.org/tutorial/base2/"
+       transform="translate(-20,62)">
       <text
          xml:space="preserve"
          style="font-style:normal;font-weight:normal;font-size:26.6667px;line-height:1.25;font-family:sans-serif;fill:#000000;fill-opacity:1;stroke:none"
@@ -197,7 +257,8 @@
     </a>
     <a
        id="a57177"
-       xlink:href="./base3/">
+       xlink:href="https://docs.abinit.org/tutorial/base3/"
+       transform="translate(-20,62)">
       <text
          xml:space="preserve"
          style="font-style:normal;font-weight:normal;font-size:26.6667px;line-height:1.25;font-family:sans-serif;fill:#000000;fill-opacity:1;stroke:none"
@@ -212,7 +273,8 @@
     </a>
     <a
        id="a59143"
-       xlink:href="./base4/">
+       xlink:href="https://docs.abinit.org/tutorial/base4/"
+       transform="translate(-20,62)">
       <text
          xml:space="preserve"
          style="font-style:normal;font-weight:normal;font-size:26.6667px;line-height:1.25;font-family:sans-serif;fill:#000000;fill-opacity:1;stroke:none"
@@ -228,24 +290,920 @@
     <text
        xml:space="preserve"
        style="font-style:normal;font-weight:normal;font-size:18.6667px;line-height:1.25;font-family:sans-serif;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.968017"
-       x="171.10028"
-       y="135.10037"
+       x="96.721306"
+       y="137.03641"
        id="text11092-9"
        transform="scale(0.96801691,1.0330398)"><tspan
          sodipodi:role="line"
-         x="171.10028"
-         y="135.10037"
+         x="96.721306"
+         y="137.03641"
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:18.6667px;font-family:Arial;-inkscape-font-specification:Arial;text-align:center;text-anchor:middle;fill:#fffefe;fill-opacity:1;stroke-width:0.968017"
          id="tspan75989">6 tutorials on </tspan><tspan
          sodipodi:role="line"
-         x="171.10028"
-         y="158.73221"
+         x="96.721306"
+         y="160.66824"
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:18.6667px;font-family:Arial;-inkscape-font-specification:Arial;text-align:center;text-anchor:middle;fill:#fffefe;fill-opacity:1;stroke-width:0.968017"
          id="tspan91533">ABINIT </tspan><tspan
          sodipodi:role="line"
-         x="171.10028"
-         y="182.36404"
+         x="96.721306"
+         y="184.30008"
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:18.6667px;font-family:Arial;-inkscape-font-specification:Arial;text-align:center;text-anchor:middle;fill:#fffefe;fill-opacity:1;stroke-width:0.968017"
          id="tspan93899">postprocessors</tspan></text>
+    <a
+       id="a125576"
+       xlink:href="https://docs.abinit.org/tutorial/atdep1/"
+       transform="translate(-72,2)">
+      <text
+         xml:space="preserve"
+         style="font-style:normal;font-weight:normal;font-size:18.6667px;line-height:1.25;font-family:sans-serif;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.968017"
+         x="168.55278"
+         y="221.03647"
+         id="text11092-9-7"
+         transform="scale(0.96801691,1.0330398)"><tspan
+           sodipodi:role="line"
+           x="168.55278"
+           y="221.03647"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:18.6667px;font-family:Arial;-inkscape-font-specification:Arial;text-align:center;text-anchor:middle;fill:#fffefe;fill-opacity:1;stroke-width:0.968017"
+           id="tspan93899-5">aTDEP1</tspan></text>
+    </a>
+    <a
+       id="a125584"
+       xlink:href="https://docs.abinit.org/tutorial/fold2bloch/"
+       transform="translate(-72,18)">
+      <text
+         xml:space="preserve"
+         style="font-style:normal;font-weight:normal;font-size:18.6667px;line-height:1.25;font-family:sans-serif;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.968017"
+         x="168.21094"
+         y="270.25446"
+         id="text11092-9-7-9"
+         transform="scale(0.96801691,1.0330398)"><tspan
+           sodipodi:role="line"
+           x="168.21094"
+           y="270.25446"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:18.6667px;font-family:Arial;-inkscape-font-specification:Arial;text-align:center;text-anchor:middle;fill:#fffefe;fill-opacity:1;stroke-width:0.968017"
+           id="tspan93899-5-4">fold2bloch</tspan></text>
+    </a>
+    <a
+       id="a125592"
+       xlink:href="https://docs.abinit.org/tutorial/wannier90/"
+       transform="translate(-74,24)">
+      <text
+         xml:space="preserve"
+         style="font-style:normal;font-weight:normal;font-size:18.6667px;line-height:1.25;font-family:sans-serif;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.968017"
+         x="168.58453"
+         y="326.16983"
+         id="text11092-9-7-9-2"
+         transform="scale(0.96801691,1.0330398)"><tspan
+           sodipodi:role="line"
+           x="168.58453"
+           y="326.16983"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:18.6667px;font-family:Arial;-inkscape-font-specification:Arial;text-align:center;text-anchor:middle;fill:#fffefe;fill-opacity:1;stroke-width:0.968017"
+           id="tspan93899-5-4-9">wannier90</tspan></text>
+    </a>
+    <a
+       id="a125580"
+       xlink:href="https://docs.abinit.org/tutorial/cut3d/"
+       transform="translate(-72,10)">
+      <text
+         xml:space="preserve"
+         style="font-style:normal;font-weight:normal;font-size:18.6667px;line-height:1.25;font-family:sans-serif;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.968017"
+         x="169.1667"
+         y="246.01059"
+         id="text11092-9-7-6"
+         transform="scale(0.96801691,1.0330398)"><tspan
+           sodipodi:role="line"
+           x="169.1667"
+           y="246.01059"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:18.6667px;font-family:Arial;-inkscape-font-specification:Arial;text-align:center;text-anchor:middle;fill:#fffefe;fill-opacity:1;stroke-width:0.968017"
+           id="tspan93899-5-3">cut3d</tspan></text>
+    </a>
+    <a
+       id="a125588"
+       xlink:href="https://docs.abinit.org/tutorial/optic/"
+       transform="translate(-74,24)">
+      <text
+         xml:space="preserve"
+         style="font-style:normal;font-weight:normal;font-size:18.6667px;line-height:1.25;font-family:sans-serif;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.968017"
+         x="168.25484"
+         y="296.74393"
+         id="text11092-9-7-6-8"
+         transform="scale(0.96801691,1.0330398)"><tspan
+           sodipodi:role="line"
+           x="168.25484"
+           y="296.74393"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:18.6667px;font-family:Arial;-inkscape-font-specification:Arial;text-align:center;text-anchor:middle;fill:#fffefe;fill-opacity:1;stroke-width:0.968017"
+           id="tspan93899-5-3-1">optic</tspan></text>
+    </a>
+    <a
+       id="a125596"
+       xlink:href="https://docs.abinit.org/tutorial/z2pack/"
+       transform="translate(-72,24)">
+      <text
+         xml:space="preserve"
+         style="font-style:normal;font-weight:normal;font-size:18.6667px;line-height:1.25;font-family:sans-serif;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.968017"
+         x="166.48769"
+         y="353.72754"
+         id="text11092-9-7-6-8-3"
+         transform="scale(0.96801691,1.0330398)"><tspan
+           sodipodi:role="line"
+           x="166.48769"
+           y="353.72754"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:18.6667px;font-family:Arial;-inkscape-font-specification:Arial;text-align:center;text-anchor:middle;fill:#fffefe;fill-opacity:1;stroke-width:0.968017"
+           id="tspan93899-5-3-1-9">z2pack</tspan></text>
+    </a>
+    <rect
+       style="fill:url(#linearGradient125886);fill-opacity:1;stroke-width:2.29436;stroke-miterlimit:4;stroke-dasharray:none"
+       id="rect31-0-8"
+       width="149.90523"
+       height="316.10931"
+       x="946.02295"
+       y="226.76501"
+       ry="53.040051" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:18.6667px;line-height:1.25;font-family:sans-serif;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.968017"
+       x="1055.5648"
+       y="262.68051"
+       id="text11092-9-5"
+       transform="scale(0.96801691,1.0330398)"><tspan
+         sodipodi:role="line"
+         x="1055.5648"
+         y="262.68051"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:18.6667px;font-family:Arial;-inkscape-font-specification:Arial;text-align:center;text-anchor:middle;fill:#fffefe;fill-opacity:1;stroke-width:0.968017"
+         id="tspan93899-6">6 advanced </tspan><tspan
+         sodipodi:role="line"
+         x="1055.5648"
+         y="286.31235"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:18.6667px;font-family:Arial;-inkscape-font-specification:Arial;text-align:center;text-anchor:middle;fill:#fffefe;fill-opacity:1;stroke-width:0.968017"
+         id="tspan126025">tutorials on</tspan><tspan
+         sodipodi:role="line"
+         x="1055.5648"
+         y="309.94418"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:18.6667px;font-family:Arial;-inkscape-font-specification:Arial;text-align:center;text-anchor:middle;fill:#fffefe;fill-opacity:1;stroke-width:0.968017"
+         id="tspan126027">parallelism</tspan></text>
+    <a
+       id="a125576-3"
+       xlink:href="https://docs.abinit.org/tutorial/atdep1/"
+       transform="translate(856.17698,131.79539)">
+      <a
+         id="a135278"
+         xlink:href="https://docs.abinit.org/tutorial/paral_bandpw/">
+        <text
+           xml:space="preserve"
+           style="font-style:normal;font-weight:normal;font-size:18.6667px;line-height:1.25;font-family:sans-serif;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.968017"
+           x="168.55278"
+           y="221.03647"
+           id="text11092-9-7-8"
+           transform="scale(0.96801691,1.0330398)"><tspan
+             sodipodi:role="line"
+             x="168.55278"
+             y="221.03647"
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:18.6667px;font-family:Arial;-inkscape-font-specification:Arial;text-align:center;text-anchor:middle;fill:#fffefe;fill-opacity:1;stroke-width:0.968017"
+             id="tspan93899-5-5">paral_band_pw</tspan></text>
+      </a>
+    </a>
+    <a
+       id="a125584-6"
+       xlink:href="https://docs.abinit.org/tutorial/fold2bloch/"
+       transform="translate(856.17698,147.79539)">
+      <a
+         id="a140334"
+         xlink:href="https://docs.abinit.org/tutorial/paral_moldyn/">
+        <text
+           xml:space="preserve"
+           style="font-style:normal;font-weight:normal;font-size:18.6667px;line-height:1.25;font-family:sans-serif;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.968017"
+           x="168.21094"
+           y="270.25446"
+           id="text11092-9-7-9-1"
+           transform="scale(0.96801691,1.0330398)"><tspan
+             sodipodi:role="line"
+             x="168.21094"
+             y="270.25446"
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:18.6667px;font-family:Arial;-inkscape-font-specification:Arial;text-align:center;text-anchor:middle;fill:#fffefe;fill-opacity:1;stroke-width:0.968017"
+             id="tspan93899-5-4-1">paral_MD</tspan></text>
+      </a>
+    </a>
+    <a
+       id="a125592-5"
+       xlink:href="https://docs.abinit.org/tutorial/wannier90/"
+       transform="translate(854.17698,153.79539)">
+      <a
+         id="a140342"
+         xlink:href="https://docs.abinit.org/tutorial/paral_dfpt/">
+        <text
+           xml:space="preserve"
+           style="font-style:normal;font-weight:normal;font-size:18.6667px;line-height:1.25;font-family:sans-serif;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.968017"
+           x="168.58453"
+           y="326.16983"
+           id="text11092-9-7-9-2-9"
+           transform="scale(0.96801691,1.0330398)"><tspan
+             sodipodi:role="line"
+             x="168.58453"
+             y="326.16983"
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:18.6667px;font-family:Arial;-inkscape-font-specification:Arial;text-align:center;text-anchor:middle;fill:#fffefe;fill-opacity:1;stroke-width:0.968017"
+             id="tspan93899-5-4-9-8">paral_DFPT</tspan></text>
+      </a>
+    </a>
+    <a
+       id="a125580-4"
+       xlink:href="https://docs.abinit.org/tutorial/cut3d/"
+       transform="translate(856.17698,139.79539)">
+      <a
+         id="a138950"
+         xlink:href="https://docs.abinit.org/tutorial/paral_gswvl/">
+        <text
+           xml:space="preserve"
+           style="font-style:normal;font-weight:normal;font-size:18.6667px;line-height:1.25;font-family:sans-serif;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.968017"
+           x="169.1667"
+           y="246.01059"
+           id="text11092-9-7-6-81"
+           transform="scale(0.96801691,1.0330398)"><tspan
+             sodipodi:role="line"
+             x="169.1667"
+             y="246.01059"
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:18.6667px;font-family:Arial;-inkscape-font-specification:Arial;text-align:center;text-anchor:middle;fill:#fffefe;fill-opacity:1;stroke-width:0.968017"
+             id="tspan93899-5-3-0">paral_wavelets</tspan></text>
+      </a>
+    </a>
+    <a
+       id="a125588-3"
+       xlink:href="https://docs.abinit.org/tutorial/optic/"
+       transform="translate(854.17698,153.79539)">
+      <a
+         id="a140338"
+         xlink:href="https://docs.abinit.org/tutorial/paral_images/">
+        <text
+           xml:space="preserve"
+           style="font-style:normal;font-weight:normal;font-size:18.6667px;line-height:1.25;font-family:sans-serif;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.968017"
+           x="168.25484"
+           y="296.74393"
+           id="text11092-9-7-6-8-0"
+           transform="scale(0.96801691,1.0330398)"><tspan
+             sodipodi:role="line"
+             x="168.25484"
+             y="296.74393"
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:18.6667px;font-family:Arial;-inkscape-font-specification:Arial;text-align:center;text-anchor:middle;fill:#fffefe;fill-opacity:1;stroke-width:0.968017"
+             id="tspan93899-5-3-1-4">paral_images</tspan></text>
+      </a>
+    </a>
+    <a
+       id="a125596-4"
+       xlink:href="https://docs.abinit.org/tutorial/z2pack/"
+       transform="translate(856.17698,153.79539)">
+      <a
+         id="a140368"
+         xlink:href="https://docs.abinit.org/tutorial/paral_mbt/">
+        <text
+           xml:space="preserve"
+           style="font-style:normal;font-weight:normal;font-size:18.6667px;line-height:1.25;font-family:sans-serif;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.968017"
+           x="166.48769"
+           y="353.72754"
+           id="text11092-9-7-6-8-3-4"
+           transform="scale(0.96801691,1.0330398)"><tspan
+             sodipodi:role="line"
+             x="166.48769"
+             y="353.72754"
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:18.6667px;font-family:Arial;-inkscape-font-specification:Arial;text-align:center;text-anchor:middle;fill:#fffefe;fill-opacity:1;stroke-width:0.968017"
+             id="tspan93899-5-3-1-9-4">paral_MBPT</tspan></text>
+      </a>
+    </a>
+    <rect
+       style="fill:url(#linearGradient125886-7);fill-opacity:1;stroke-width:2.22738;stroke-miterlimit:4;stroke-dasharray:none"
+       id="rect31-0-8-4"
+       width="149.90523"
+       height="297.92136"
+       x="785.95142"
+       y="367.0126"
+       ry="49.988289" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:18.6667px;line-height:1.25;font-family:sans-serif;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.968017"
+       x="890.20538"
+       y="398.44257"
+       id="text11092-9-5-3"
+       transform="scale(0.96801691,1.0330398)"><tspan
+         sodipodi:role="line"
+         x="890.20538"
+         y="398.44257"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:18.6667px;font-family:Arial;-inkscape-font-specification:Arial;text-align:center;text-anchor:middle;fill:#fffefe;fill-opacity:1;stroke-width:0.968017"
+         id="tspan126027-0">4 toturials on</tspan><tspan
+         sodipodi:role="line"
+         x="890.20538"
+         y="422.0744"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:18.6667px;font-family:Arial;-inkscape-font-specification:Arial;text-align:center;text-anchor:middle;fill:#fffefe;fill-opacity:1;stroke-width:0.968017"
+         id="tspan169992">multi-scale</tspan><tspan
+         sodipodi:role="line"
+         x="890.20538"
+         y="445.70624"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:18.6667px;font-family:Arial;-inkscape-font-specification:Arial;text-align:center;text-anchor:middle;fill:#fffefe;fill-opacity:1;stroke-width:0.968017"
+         id="tspan169994">calculations </tspan><tspan
+         sodipodi:role="line"
+         x="890.20538"
+         y="469.33807"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:18.6667px;font-family:Arial;-inkscape-font-specification:Arial;text-align:center;text-anchor:middle;fill:#fffefe;fill-opacity:1;stroke-width:0.968017"
+         id="tspan169996">with</tspan><tspan
+         sodipodi:role="line"
+         x="890.20538"
+         y="492.96991"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:18.6667px;font-family:Arial;-inkscape-font-specification:Arial;text-align:center;text-anchor:middle;fill:#fffefe;fill-opacity:1;stroke-width:0.968017"
+         id="tspan169998">MULTIBINT</tspan></text>
+    <a
+       id="a125584-6-0"
+       xlink:href="https://docs.abinit.org/tutorial/fold2bloch/"
+       transform="translate(696.10544,278.04298)">
+      <a
+         id="a140334-5"
+         xlink:href="https://docs.abinit.org/tutorial/paral_moldyn/">
+        <text
+           xml:space="preserve"
+           style="font-style:normal;font-weight:normal;font-size:18.6667px;line-height:1.25;font-family:sans-serif;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.968017"
+           x="168.21094"
+           y="270.25446"
+           id="text11092-9-7-9-1-9"
+           transform="scale(0.96801691,1.0330398)"><tspan
+             sodipodi:role="line"
+             x="168.21094"
+             y="270.25446"
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:18.6667px;font-family:Arial;-inkscape-font-specification:Arial;text-align:center;text-anchor:middle;fill:#fffefe;fill-opacity:1;stroke-width:0.968017"
+             id="tspan93899-5-4-1-4">multibinit</tspan></text>
+      </a>
+    </a>
+    <a
+       id="a125592-5-6"
+       xlink:href="https://docs.abinit.org/tutorial/wannier90/"
+       transform="translate(694.10544,280.04298)">
+      <a
+         id="a140342-9"
+         xlink:href="https://docs.abinit.org/tutorial/paral_dfpt/">
+        <text
+           xml:space="preserve"
+           style="font-style:normal;font-weight:normal;font-size:18.6667px;line-height:1.25;font-family:sans-serif;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.968017"
+           x="168.58453"
+           y="326.16983"
+           id="text11092-9-7-9-2-9-2"
+           transform="scale(0.96801691,1.0330398)"><tspan
+             sodipodi:role="line"
+             x="168.58453"
+             y="326.16983"
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:18.6667px;font-family:Arial;-inkscape-font-specification:Arial;text-align:center;text-anchor:middle;fill:#fffefe;fill-opacity:1;stroke-width:0.968017"
+             id="tspan93899-5-4-9-8-2">spin_model</tspan></text>
+      </a>
+    </a>
+    <a
+       id="a125588-3-4"
+       xlink:href="https://docs.abinit.org/tutorial/optic/"
+       transform="translate(694.10544,282.04298)">
+      <a
+         id="a140338-8"
+         xlink:href="https://docs.abinit.org/tutorial/paral_images/">
+        <text
+           xml:space="preserve"
+           style="font-style:normal;font-weight:normal;font-size:18.6667px;line-height:1.25;font-family:sans-serif;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.968017"
+           x="168.25484"
+           y="296.74393"
+           id="text11092-9-7-6-8-0-1"
+           transform="scale(0.96801691,1.0330398)"><tspan
+             sodipodi:role="line"
+             x="168.25484"
+             y="296.74393"
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:18.6667px;font-family:Arial;-inkscape-font-specification:Arial;text-align:center;text-anchor:middle;fill:#fffefe;fill-opacity:1;stroke-width:0.968017"
+             id="tspan93899-5-3-1-4-2">lattice_model</tspan></text>
+      </a>
+    </a>
+    <a
+       id="a125596-4-8"
+       xlink:href="https://docs.abinit.org/tutorial/z2pack/"
+       transform="translate(696.10544,282.04298)">
+      <a
+         id="a140368-9"
+         xlink:href="https://docs.abinit.org/tutorial/paral_mbt/">
+        <text
+           xml:space="preserve"
+           style="font-style:normal;font-weight:normal;font-size:18.6667px;line-height:1.25;font-family:sans-serif;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.968017"
+           x="166.48769"
+           y="353.72754"
+           id="text11092-9-7-6-8-3-4-3"
+           transform="scale(0.96801691,1.0330398)"><tspan
+             sodipodi:role="line"
+             x="166.48769"
+             y="353.72754"
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:18.6667px;font-family:Arial;-inkscape-font-specification:Arial;text-align:center;text-anchor:middle;fill:#fffefe;fill-opacity:1;stroke-width:0.968017"
+             id="tspan93899-5-3-1-9-4-6">lwf_model</tspan></text>
+      </a>
+    </a>
+    <rect
+       style="fill:url(#linearGradient211052);fill-opacity:1;stroke-width:2.22738;stroke-miterlimit:4;stroke-dasharray:none"
+       id="rect31-0-8-4-61"
+       width="149.90523"
+       height="297.92136"
+       x="388.2175"
+       y="367.01105"
+       ry="49.988289" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:18.6667px;line-height:1.25;font-family:sans-serif;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.968017"
+       x="479.33041"
+       y="398.44107"
+       id="text11092-9-5-3-0"
+       transform="scale(0.96801691,1.0330398)"><tspan
+         sodipodi:role="line"
+         x="479.33041"
+         y="398.44107"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:18.6667px;font-family:Arial;-inkscape-font-specification:Arial;text-align:center;text-anchor:middle;fill:#fffefe;fill-opacity:1;stroke-width:0.968017"
+         id="tspan169998-0">5 tutorials on </tspan><tspan
+         sodipodi:role="line"
+         x="479.33041"
+         y="422.07291"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:18.6667px;font-family:Arial;-inkscape-font-specification:Arial;text-align:center;text-anchor:middle;fill:#fffefe;fill-opacity:1;stroke-width:0.968017"
+         id="tspan211995">Many-Body </tspan><tspan
+         sodipodi:role="line"
+         x="479.33041"
+         y="445.70474"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:18.6667px;font-family:Arial;-inkscape-font-specification:Arial;text-align:center;text-anchor:middle;fill:#fffefe;fill-opacity:1;stroke-width:0.968017"
+         id="tspan211997">Theory and </tspan><tspan
+         sodipodi:role="line"
+         x="479.33041"
+         y="469.33658"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:18.6667px;font-family:Arial;-inkscape-font-specification:Arial;text-align:center;text-anchor:middle;fill:#fffefe;fill-opacity:1;stroke-width:0.968017"
+         id="tspan211999">excitation</tspan></text>
+    <a
+       id="a125584-6-0-5"
+       xlink:href="https://docs.abinit.org/tutorial/fold2bloch/"
+       transform="translate(298.37153,278.04143)">
+      <a
+         id="a140334-5-5"
+         xlink:href="https://docs.abinit.org/tutorial/paral_moldyn/">
+        <text
+           xml:space="preserve"
+           style="font-style:normal;font-weight:normal;font-size:18.6667px;line-height:1.25;font-family:sans-serif;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.968017"
+           x="168.21094"
+           y="270.25446"
+           id="text11092-9-7-9-1-9-29"
+           transform="scale(0.96801691,1.0330398)"><tspan
+             sodipodi:role="line"
+             x="168.21094"
+             y="270.25446"
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:18.6667px;font-family:Arial;-inkscape-font-specification:Arial;text-align:center;text-anchor:middle;fill:#fffefe;fill-opacity:1;stroke-width:0.968017"
+             id="tspan93899-5-4-1-4-0">GW2</tspan></text>
+      </a>
+    </a>
+    <a
+       id="a125584-6-0-5-4"
+       xlink:href="https://docs.abinit.org/tutorial/fold2bloch/"
+       transform="translate(297.41963,249.59914)">
+      <a
+         id="a140334-5-5-9"
+         xlink:href="https://docs.abinit.org/tutorial/paral_moldyn/">
+        <text
+           xml:space="preserve"
+           style="font-style:normal;font-weight:normal;font-size:18.6667px;line-height:1.25;font-family:sans-serif;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.968017"
+           x="168.21094"
+           y="270.25446"
+           id="text11092-9-7-9-1-9-29-9"
+           transform="scale(0.96801691,1.0330398)"><tspan
+             sodipodi:role="line"
+             x="168.21094"
+             y="270.25446"
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:18.6667px;font-family:Arial;-inkscape-font-specification:Arial;text-align:center;text-anchor:middle;fill:#fffefe;fill-opacity:1;stroke-width:0.968017"
+             id="tspan93899-5-4-1-4-0-3">GW1</tspan></text>
+      </a>
+    </a>
+    <a
+       id="a125592-5-6-28"
+       xlink:href="https://docs.abinit.org/tutorial/wannier90/"
+       transform="translate(296.37153,280.04143)">
+      <a
+         id="a140342-9-3"
+         xlink:href="https://docs.abinit.org/tutorial/paral_dfpt/">
+        <text
+           xml:space="preserve"
+           style="font-style:normal;font-weight:normal;font-size:18.6667px;line-height:1.25;font-family:sans-serif;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.968017"
+           x="168.58453"
+           y="326.16983"
+           id="text11092-9-7-9-2-9-2-8"
+           transform="scale(0.96801691,1.0330398)"><tspan
+             sodipodi:role="line"
+             x="168.58453"
+             y="326.16983"
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:18.6667px;font-family:Arial;-inkscape-font-specification:Arial;text-align:center;text-anchor:middle;fill:#fffefe;fill-opacity:1;stroke-width:0.968017"
+             id="tspan93899-5-4-9-8-2-0">DMFT</tspan></text>
+      </a>
+    </a>
+    <a
+       id="a125588-3-4-4"
+       xlink:href="https://docs.abinit.org/tutorial/optic/"
+       transform="translate(296.37153,282.04143)">
+      <a
+         id="a140338-8-0"
+         xlink:href="https://docs.abinit.org/tutorial/paral_images/">
+        <text
+           xml:space="preserve"
+           style="font-style:normal;font-weight:normal;font-size:18.6667px;line-height:1.25;font-family:sans-serif;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.968017"
+           x="168.25484"
+           y="296.74393"
+           id="text11092-9-7-6-8-0-1-9"
+           transform="scale(0.96801691,1.0330398)"><tspan
+             sodipodi:role="line"
+             x="168.25484"
+             y="296.74393"
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:18.6667px;font-family:Arial;-inkscape-font-specification:Arial;text-align:center;text-anchor:middle;fill:#fffefe;fill-opacity:1;stroke-width:0.968017"
+             id="tspan93899-5-3-1-4-2-1">Bethe-Salpeter</tspan></text>
+      </a>
+    </a>
+    <a
+       id="a125596-4-8-9"
+       xlink:href="https://docs.abinit.org/tutorial/z2pack/"
+       transform="translate(298.37153,282.04143)">
+      <a
+         id="a140368-9-6"
+         xlink:href="https://docs.abinit.org/tutorial/paral_mbt/">
+        <text
+           xml:space="preserve"
+           style="font-style:normal;font-weight:normal;font-size:18.6667px;line-height:1.25;font-family:sans-serif;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.968017"
+           x="166.48769"
+           y="353.72754"
+           id="text11092-9-7-6-8-3-4-3-25"
+           transform="scale(0.96801691,1.0330398)"><tspan
+             sodipodi:role="line"
+             x="166.48769"
+             y="353.72754"
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:18.6667px;font-family:Arial;-inkscape-font-specification:Arial;text-align:center;text-anchor:middle;fill:#fffefe;fill-opacity:1;stroke-width:0.968017"
+             id="tspan93899-5-3-1-9-4-6-4">TDDFT</tspan></text>
+      </a>
+    </a>
+    <rect
+       style="fill:url(#linearGradient186931);fill-opacity:1;stroke-width:2.84774;stroke-miterlimit:4;stroke-dasharray:none"
+       id="rect31-0-8-4-6"
+       width="206.87059"
+       height="352.88239"
+       x="556.00763"
+       y="367.01105"
+       ry="59.210209" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:18.6667px;line-height:1.25;font-family:sans-serif;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.968017"
+       x="682.58655"
+       y="400.37903"
+       id="text11092-9-5-3-2"
+       transform="scale(0.96801691,1.0330398)"><tspan
+         sodipodi:role="line"
+         x="682.58655"
+         y="400.37903"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:18.6667px;font-family:Arial;-inkscape-font-specification:Arial;text-align:center;text-anchor:middle;fill:#fffefe;fill-opacity:1;stroke-width:0.968017"
+         id="tspan169998-9">8 advanced </tspan><tspan
+         sodipodi:role="line"
+         x="682.58655"
+         y="424.01086"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:18.6667px;font-family:Arial;-inkscape-font-specification:Arial;text-align:center;text-anchor:middle;fill:#fffefe;fill-opacity:1;stroke-width:0.968017"
+         id="tspan189714">tutorials on DFPT </tspan><tspan
+         sodipodi:role="line"
+         x="682.58655"
+         y="447.6427"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:18.6667px;font-family:Arial;-inkscape-font-specification:Arial;text-align:center;text-anchor:middle;fill:#fffefe;fill-opacity:1;stroke-width:0.968017"
+         id="tspan189716">and Electron-Phonon</tspan></text>
+    <a
+       id="a125584-6-0-8"
+       xlink:href="https://docs.abinit.org/tutorial/fold2bloch/"
+       transform="translate(495.12703,232.04345)">
+      <a
+         id="a140334-5-7"
+         xlink:href="https://docs.abinit.org/tutorial/paral_moldyn/">
+        <text
+           xml:space="preserve"
+           style="font-style:normal;font-weight:normal;font-size:18.6667px;line-height:1.25;font-family:sans-serif;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.968017"
+           x="168.21094"
+           y="270.25446"
+           id="text11092-9-7-9-1-9-2"
+           transform="scale(0.96801691,1.0330398)"><tspan
+             sodipodi:role="line"
+             x="168.21094"
+             y="270.25446"
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:18.6667px;font-family:Arial;-inkscape-font-specification:Arial;text-align:center;text-anchor:middle;fill:#fffefe;fill-opacity:1;stroke-width:0.968017"
+             id="tspan93899-5-4-1-4-8">elastic</tspan></text>
+      </a>
+    </a>
+    <a
+       id="a125592-5-6-2"
+       xlink:href="https://docs.abinit.org/tutorial/wannier90/"
+       transform="translate(493.12703,234.04345)">
+      <a
+         id="a140342-9-9"
+         xlink:href="https://docs.abinit.org/tutorial/paral_dfpt/">
+        <text
+           xml:space="preserve"
+           style="font-style:normal;font-weight:normal;font-size:18.6667px;line-height:1.25;font-family:sans-serif;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.968017"
+           x="168.58453"
+           y="326.16983"
+           id="text11092-9-7-9-2-9-2-9"
+           transform="scale(0.96801691,1.0330398)"><tspan
+             sodipodi:role="line"
+             x="168.58453"
+             y="326.16983"
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:18.6667px;font-family:Arial;-inkscape-font-specification:Arial;text-align:center;text-anchor:middle;fill:#fffefe;fill-opacity:1;stroke-width:0.968017"
+             id="tspan93899-5-4-9-8-2-6">lattice_wannier</tspan></text>
+      </a>
+    </a>
+    <a
+       id="a125588-3-4-0"
+       xlink:href="https://docs.abinit.org/tutorial/optic/"
+       transform="translate(493.12703,236.04345)">
+      <a
+         id="a140338-8-2"
+         xlink:href="https://docs.abinit.org/tutorial/paral_images/">
+        <text
+           xml:space="preserve"
+           style="font-style:normal;font-weight:normal;font-size:18.6667px;line-height:1.25;font-family:sans-serif;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.968017"
+           x="168.25484"
+           y="296.74393"
+           id="text11092-9-7-6-8-0-1-7"
+           transform="scale(0.96801691,1.0330398)"><tspan
+             sodipodi:role="line"
+             x="168.25484"
+             y="296.74393"
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:18.6667px;font-family:Arial;-inkscape-font-specification:Arial;text-align:center;text-anchor:middle;fill:#fffefe;fill-opacity:1;stroke-width:0.968017"
+             id="tspan93899-5-3-1-4-2-6">nonlinear</tspan></text>
+      </a>
+    </a>
+    <a
+       id="a125596-4-8-1"
+       xlink:href="https://docs.abinit.org/tutorial/z2pack/"
+       transform="translate(495.12703,236.04345)">
+      <a
+         id="a140368-9-3"
+         xlink:href="https://docs.abinit.org/tutorial/paral_mbt/">
+        <text
+           xml:space="preserve"
+           style="font-style:normal;font-weight:normal;font-size:18.6667px;line-height:1.25;font-family:sans-serif;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.968017"
+           x="166.48769"
+           y="353.72754"
+           id="text11092-9-7-6-8-3-4-3-2"
+           transform="scale(0.96801691,1.0330398)"><tspan
+             sodipodi:role="line"
+             x="166.48769"
+             y="353.72754"
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:18.6667px;font-family:Arial;-inkscape-font-specification:Arial;text-align:center;text-anchor:middle;fill:#fffefe;fill-opacity:1;stroke-width:0.968017"
+             id="tspan93899-5-3-1-9-4-6-1">eph_intro</tspan></text>
+      </a>
+    </a>
+    <a
+       id="a125596-4-8-1-5"
+       xlink:href="https://docs.abinit.org/tutorial/z2pack/"
+       transform="translate(496.37519,260.26026)">
+      <a
+         id="a140368-9-3-9"
+         xlink:href="https://docs.abinit.org/tutorial/paral_mbt/">
+        <text
+           xml:space="preserve"
+           style="font-style:normal;font-weight:normal;font-size:18.6667px;line-height:1.25;font-family:sans-serif;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.968017"
+           x="166.48769"
+           y="353.72754"
+           id="text11092-9-7-6-8-3-4-3-2-9"
+           transform="scale(0.96801691,1.0330398)"><tspan
+             sodipodi:role="line"
+             x="166.48769"
+             y="353.72754"
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:18.6667px;font-family:Arial;-inkscape-font-specification:Arial;text-align:center;text-anchor:middle;fill:#fffefe;fill-opacity:1;stroke-width:0.968017"
+             id="tspan93899-5-3-1-9-4-6-1-1">eph4mob</tspan></text>
+      </a>
+    </a>
+    <a
+       id="a125596-4-8-1-4"
+       xlink:href="https://docs.abinit.org/tutorial/z2pack/"
+       transform="translate(496.37519,286.26026)">
+      <a
+         id="a140368-9-3-91"
+         xlink:href="https://docs.abinit.org/tutorial/paral_mbt/">
+        <text
+           xml:space="preserve"
+           style="font-style:normal;font-weight:normal;font-size:18.6667px;line-height:1.25;font-family:sans-serif;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.968017"
+           x="166.48769"
+           y="353.72754"
+           id="text11092-9-7-6-8-3-4-3-2-0"
+           transform="scale(0.96801691,1.0330398)"><tspan
+             sodipodi:role="line"
+             x="166.48769"
+             y="353.72754"
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:18.6667px;font-family:Arial;-inkscape-font-specification:Arial;text-align:center;text-anchor:middle;fill:#fffefe;fill-opacity:1;stroke-width:0.968017"
+             id="tspan93899-5-3-1-9-4-6-1-7">eph4zpr</tspan></text>
+      </a>
+    </a>
+    <a
+       id="a125596-4-8-1-4-5"
+       xlink:href="https://docs.abinit.org/tutorial/z2pack/"
+       transform="translate(496.41348,308.53396)">
+      <a
+         id="a140368-9-3-91-8"
+         xlink:href="https://docs.abinit.org/tutorial/paral_mbt/">
+        <text
+           xml:space="preserve"
+           style="font-style:normal;font-weight:normal;font-size:18.6667px;line-height:1.25;font-family:sans-serif;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.968017"
+           x="166.48769"
+           y="353.72754"
+           id="text11092-9-7-6-8-3-4-3-2-0-7"
+           transform="scale(0.96801691,1.0330398)"><tspan
+             sodipodi:role="line"
+             x="166.48769"
+             y="353.72754"
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:18.6667px;font-family:Arial;-inkscape-font-specification:Arial;text-align:center;text-anchor:middle;fill:#fffefe;fill-opacity:1;stroke-width:0.968017"
+             id="tspan93899-5-3-1-9-4-6-1-7-0">eph_legacy</tspan></text>
+      </a>
+    </a>
+    <a
+       id="a125596-4-8-1-4-5-4"
+       xlink:href="https://docs.abinit.org/tutorial/z2pack/"
+       transform="translate(496.41348,334.53396)">
+      <a
+         id="a140368-9-3-91-8-8"
+         xlink:href="https://docs.abinit.org/tutorial/paral_mbt/">
+        <text
+           xml:space="preserve"
+           style="font-style:normal;font-weight:normal;font-size:18.6667px;line-height:1.25;font-family:sans-serif;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.968017"
+           x="166.48769"
+           y="353.72754"
+           id="text11092-9-7-6-8-3-4-3-2-0-7-0"
+           transform="scale(0.96801691,1.0330398)"><tspan
+             sodipodi:role="line"
+             x="166.48769"
+             y="353.72754"
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:18.6667px;font-family:Arial;-inkscape-font-specification:Arial;text-align:center;text-anchor:middle;fill:#fffefe;fill-opacity:1;stroke-width:0.968017"
+             id="tspan93899-5-3-1-9-4-6-1-7-0-4">eph_tdep_legacy</tspan></text>
+      </a>
+    </a>
+    <rect
+       style="fill:url(#linearGradient228449);fill-opacity:1;stroke-width:2.52927;stroke-miterlimit:4;stroke-dasharray:none"
+       id="rect31-0-8-4-6-5"
+       width="206.87059"
+       height="278.36932"
+       x="163.04286"
+       y="367.01105"
+       ry="46.707649" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:18.6667px;line-height:1.25;font-family:sans-serif;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.968017"
+       x="276.63831"
+       y="394.7764"
+       id="text11092-9-5-3-2-0"
+       transform="scale(0.96801691,1.0330398)"><tspan
+         sodipodi:role="line"
+         x="276.63831"
+         y="394.7764"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:18.6667px;font-family:Arial;-inkscape-font-specification:Arial;text-align:center;text-anchor:middle;fill:#fffefe;fill-opacity:1;stroke-width:0.968017"
+         id="tspan189714-9">7 tutorials on DFT </tspan><tspan
+         sodipodi:role="line"
+         x="276.63831"
+         y="418.40823"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:18.6667px;font-family:Arial;-inkscape-font-specification:Arial;text-align:center;text-anchor:middle;fill:#fffefe;fill-opacity:1;stroke-width:0.968017"
+         id="tspan189716-4">beyond basics</tspan></text>
+    <a
+       id="a125584-6-0-8-3"
+       xlink:href="https://docs.abinit.org/tutorial/fold2bloch/"
+       transform="translate(102.16226,192.25571)">
+      <a
+         id="a140334-5-7-5"
+         xlink:href="https://docs.abinit.org/tutorial/paral_moldyn/">
+        <text
+           xml:space="preserve"
+           style="font-style:normal;font-weight:normal;font-size:18.6667px;line-height:1.25;font-family:sans-serif;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.968017"
+           x="168.21094"
+           y="270.25446"
+           id="text11092-9-7-9-1-9-2-1"
+           transform="scale(0.96801691,1.0330398)"><tspan
+             sodipodi:role="line"
+             x="168.21094"
+             y="270.25446"
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:18.6667px;font-family:Arial;-inkscape-font-specification:Arial;text-align:center;text-anchor:middle;fill:#fffefe;fill-opacity:1;stroke-width:0.968017"
+             id="tspan93899-5-4-1-4-8-7">prop_at_nucleus</tspan></text>
+      </a>
+    </a>
+    <a
+       id="a125592-5-6-2-4"
+       xlink:href="https://docs.abinit.org/tutorial/wannier90/"
+       transform="translate(100.16226,194.25571)">
+      <a
+         id="a140342-9-9-3"
+         xlink:href="https://docs.abinit.org/tutorial/paral_dfpt/">
+        <text
+           xml:space="preserve"
+           style="font-style:normal;font-weight:normal;font-size:18.6667px;line-height:1.25;font-family:sans-serif;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.968017"
+           x="168.58453"
+           y="326.16983"
+           id="text11092-9-7-9-2-9-2-9-1"
+           transform="scale(0.96801691,1.0330398)"><tspan
+             sodipodi:role="line"
+             x="168.58453"
+             y="326.16983"
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:18.6667px;font-family:Arial;-inkscape-font-specification:Arial;text-align:center;text-anchor:middle;fill:#fffefe;fill-opacity:1;stroke-width:0.968017"
+             id="tspan93899-5-4-9-8-2-6-4">U_calc_cRPA</tspan></text>
+      </a>
+    </a>
+    <a
+       id="a125588-3-4-0-6"
+       xlink:href="https://docs.abinit.org/tutorial/optic/"
+       transform="translate(100.16226,196.25571)">
+      <a
+         id="a140338-8-2-9"
+         xlink:href="https://docs.abinit.org/tutorial/paral_images/">
+        <text
+           xml:space="preserve"
+           style="font-style:normal;font-weight:normal;font-size:18.6667px;line-height:1.25;font-family:sans-serif;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.968017"
+           x="168.25484"
+           y="296.74393"
+           id="text11092-9-7-6-8-0-1-7-4"
+           transform="scale(0.96801691,1.0330398)"><tspan
+             sodipodi:role="line"
+             x="168.25484"
+             y="296.74393"
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:18.6667px;font-family:Arial;-inkscape-font-specification:Arial;text-align:center;text-anchor:middle;fill:#fffefe;fill-opacity:1;stroke-width:0.968017"
+             id="tspan93899-5-3-1-4-2-6-2">DFT+U</tspan></text>
+      </a>
+    </a>
+    <a
+       id="a125596-4-8-1-2"
+       xlink:href="https://docs.abinit.org/tutorial/z2pack/"
+       transform="translate(102.16226,196.25571)">
+      <a
+         id="a140368-9-3-6"
+         xlink:href="https://docs.abinit.org/tutorial/paral_mbt/">
+        <text
+           xml:space="preserve"
+           style="font-style:normal;font-weight:normal;font-size:18.6667px;line-height:1.25;font-family:sans-serif;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.968017"
+           x="166.48769"
+           y="353.72754"
+           id="text11092-9-7-6-8-3-4-3-2-4"
+           transform="scale(0.96801691,1.0330398)"><tspan
+             sodipodi:role="line"
+             x="166.48769"
+             y="353.72754"
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:18.6667px;font-family:Arial;-inkscape-font-specification:Arial;text-align:center;text-anchor:middle;fill:#fffefe;fill-opacity:1;stroke-width:0.968017"
+             id="tspan93899-5-3-1-9-4-6-1-12">U_calc_LR</tspan></text>
+      </a>
+    </a>
+    <a
+       id="a125596-4-8-1-5-8"
+       xlink:href="https://docs.abinit.org/tutorial/z2pack/"
+       transform="translate(103.41042,220.47252)">
+      <a
+         id="a140368-9-3-9-8"
+         xlink:href="https://docs.abinit.org/tutorial/paral_mbt/">
+        <text
+           xml:space="preserve"
+           style="font-style:normal;font-weight:normal;font-size:18.6667px;line-height:1.25;font-family:sans-serif;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.968017"
+           x="166.48769"
+           y="353.72754"
+           id="text11092-9-7-6-8-3-4-3-2-9-9"
+           transform="scale(0.96801691,1.0330398)"><tspan
+             sodipodi:role="line"
+             x="166.48769"
+             y="353.72754"
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:18.6667px;font-family:Arial;-inkscape-font-specification:Arial;text-align:center;text-anchor:middle;fill:#fffefe;fill-opacity:1;stroke-width:0.968017"
+             id="tspan93899-5-3-1-9-4-6-1-1-2">PAW2</tspan></text>
+      </a>
+    </a>
+    <a
+       id="a125596-4-8-1-4-8"
+       xlink:href="https://docs.abinit.org/tutorial/z2pack/"
+       transform="translate(103.41042,246.47252)">
+      <a
+         id="a140368-9-3-91-88"
+         xlink:href="https://docs.abinit.org/tutorial/paral_mbt/">
+        <text
+           xml:space="preserve"
+           style="font-style:normal;font-weight:normal;font-size:18.6667px;line-height:1.25;font-family:sans-serif;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.968017"
+           x="166.48769"
+           y="353.72754"
+           id="text11092-9-7-6-8-3-4-3-2-0-6"
+           transform="scale(0.96801691,1.0330398)"><tspan
+             sodipodi:role="line"
+             x="166.48769"
+             y="353.72754"
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:18.6667px;font-family:Arial;-inkscape-font-specification:Arial;text-align:center;text-anchor:middle;fill:#fffefe;fill-opacity:1;stroke-width:0.968017"
+             id="tspan93899-5-3-1-9-4-6-1-7-8">PAW3</tspan></text>
+      </a>
+    </a>
+    <a
+       id="a125596-4-8-1-4-5-3"
+       xlink:href="https://docs.abinit.org/tutorial/z2pack/"
+       transform="translate(103.44871,268.74622)">
+      <a
+         id="a140368-9-3-91-8-83"
+         xlink:href="https://docs.abinit.org/tutorial/paral_mbt/">
+        <text
+           xml:space="preserve"
+           style="font-style:normal;font-weight:normal;font-size:18.6667px;line-height:1.25;font-family:sans-serif;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.968017"
+           x="166.48769"
+           y="353.72754"
+           id="text11092-9-7-6-8-3-4-3-2-0-7-3"
+           transform="scale(0.96801691,1.0330398)"><tspan
+             sodipodi:role="line"
+             x="166.48769"
+             y="353.72754"
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:18.6667px;font-family:Arial;-inkscape-font-specification:Arial;text-align:center;text-anchor:middle;fill:#fffefe;fill-opacity:1;stroke-width:0.968017"
+             id="tspan93899-5-3-1-9-4-6-1-7-0-3">positron</tspan></text>
+      </a>
+    </a>
+    <text
+       xml:space="preserve"
+       id="text186380"
+       style="fill:black;fill-opacity:1;line-height:1.25;stroke:none;font-family:sans-serif;font-style:normal;font-weight:normal;font-size:40px;white-space:pre;shape-inside:url(#rect186382)" />
   </g>
 </svg>
