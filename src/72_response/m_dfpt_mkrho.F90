@@ -663,9 +663,12 @@ subroutine dfpt_accrho(cplex,cwave0,cwave1,cwavef,cwaveprj0,cwaveprj1,&
  if (option==2.or.option==3) then
 !  XG20241028 This coding confuses the gnu 8.5 compiler, wrt the CONTIGUOUS character of the pointer. 
 !  So, make a simple copy. This is not optimal, though...
+!  Original ---
 !  vlocal => gs_hamkq%vlocal
+!  New ---
    ABI_MALLOC(vlocal, (size(gs_hamkq%vlocal,1),size(gs_hamkq%vlocal,2),size(gs_hamkq%vlocal,3),size(gs_hamkq%vlocal,4)) )
    vlocal=gs_hamkq%vlocal
+!  END XG20241028
  endif
 
 !Loop on spinorial components
@@ -937,9 +940,11 @@ subroutine dfpt_accrho(cplex,cwave0,cwave1,cwavef,cwaveprj0,cwaveprj1,&
  ABI_FREE(rhoaug)
 
 !XG20241028 See above
+!New ---
  if (option==2.or.option==3) then
    ABI_FREE(vlocal)
  endif
+ !END XG20241028
 
 !Part devoted to the accumulation of the 1st-order occupation matrix in PAW case
 ! TODO: parse for more nspden 4 dependencies on spinors
