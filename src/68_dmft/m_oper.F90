@@ -1068,7 +1068,7 @@ subroutine gather_oper(oper,distrib,paw_dmft,opt_ksloc,master,opt_diag,opt_commk
  
 !Arguments ------------------------------------
  type(oper_type), intent(inout) :: oper(:)
- type(mpi_distrib_dmft_type), intent(in) :: distrib
+ type(mpi_distrib_dmft_type), target, intent(in) :: distrib
  type(paw_dmft_type) :: paw_dmft
  integer, intent(in) :: opt_ksloc
  integer, optional, intent(in) :: master,opt_commkpt,opt_diag
@@ -1078,6 +1078,7 @@ subroutine gather_oper(oper,distrib,paw_dmft,opt_ksloc,master,opt_diag,opt_commk
  logical :: diag
  integer, allocatable :: displs(:),recvcounts(:)
  complex(dpc), allocatable :: buffer(:),buffer_tot(:)
+ integer, pointer :: nw_mem(:) => null()
 ! *********************************************************************
  
  comm    = paw_dmft%spacecomm
@@ -1193,10 +1194,13 @@ subroutine gather_oper(oper,distrib,paw_dmft,opt_ksloc,master,opt_diag,opt_commk
    
    siz_buf = siz_buf * (nspinor**2) * nsppol
    if (optcommkpt == 1) then
-     recvcounts(1:nproc2) = siz_buf * distrib%nw_mem_kptparal(0:nproc2-1)
+     nw_mem => distrib%nw_mem_kptparal(:)
    else if (optcommkpt == 0) then
-     recvcounts(1:nproc2) = siz_buf * distrib%nw_mem(0:nproc2-1)
+     nw_mem => distrib%nw_mem(:)
    end if ! optcommkpt
+   do irank=0,nproc2-1
+     recvcounts(irank+1) = siz_buf * nw_mem(irank)
+   end do ! irank
    displs(1) = 0
    do irank=2,nproc2
      displs(irank) = displs(irank-1) + recvcounts(irank-1)
@@ -1275,6 +1279,7 @@ subroutine gather_oper(oper,distrib,paw_dmft,opt_ksloc,master,opt_diag,opt_commk
  ABI_FREE(displs)
  ABI_FREE(buffer)
  ABI_FREE(buffer_tot)
+ nw_mem => null()
 
 end subroutine gather_oper
 !!***
@@ -1331,7 +1336,10 @@ subroutine gather_oper_ks(oper,distrib,paw_dmft,opt_diag)
  ABI_MALLOC(recvcounts,(nproc))
  ABI_MALLOC(displs,(nproc))
  
- recvcounts(1:nproc) = mbandc * distrib%nkpt_mem(0:nproc-1) 
+ do irank=0,nproc-1
+   recvcounts(irank+1) = mbandc * distrib%nkpt_mem(irank)
+ end do ! irank
+ 
  if (.not. diag) recvcounts(:) = recvcounts(:) * mbandc
  
  displs(1) = 0
