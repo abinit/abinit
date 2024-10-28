@@ -768,7 +768,6 @@ type, public :: dataset_type
  real(dp) :: bxctmindg
  real(dp) :: cd_halfway_freq
  real(dp) :: cd_max_freq
- real(dp) :: chebfi_ora_fact
  real(dp) :: cpus
  real(dp) :: ddamp
  real(dp) :: dfpt_sciss
@@ -843,6 +842,8 @@ type, public :: dataset_type
  real(dp) :: nqfd = zero
  real(dp) :: omegasimax = 50/Ha_eV
  real(dp) :: omegasrdmax = 1.0_dp/Ha_eV  ! = 1eV
+ real(dp) :: oracle_factor
+ real(dp) :: oracle_min_occ
  real(dp) :: pawecutdg
  real(dp) :: pawovlp
  real(dp) :: pawujrad
@@ -2132,7 +2133,6 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%bxctmindg          = dtin%bxctmindg
  dtout%cd_halfway_freq    = dtin%cd_halfway_freq
  dtout%cd_max_freq        = dtin%cd_max_freq
- dtout%chebfi_ora_fact    = dtin%chebfi_ora_fact
  dtout%cpus               = dtin%cpus
  dtout%ddamp              = dtin%ddamp
  dtout%diecut             = dtin%diecut
@@ -2178,6 +2178,8 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%nqfd               = dtin%nqfd
  dtout%omegasimax         = dtin%omegasimax
  dtout%omegasrdmax        = dtin%omegasrdmax
+ dtout%oracle_factor      = dtin%oracle_factor
+ dtout%oracle_min_occ     = dtin%oracle_min_occ
  dtout%pawecutdg          = dtin%pawecutdg
  dtout%pawovlp            = dtin%pawovlp
  dtout%posocc             = dtin%posocc
@@ -3340,7 +3342,7 @@ subroutine chkvars(string)
 !C
  list_vars=trim(list_vars)//' cd_customnimfrqs cd_frqim_method cd_full_grid cd_imfrqs'
  list_vars=trim(list_vars)//' cd_halfway_freq cd_max_freq cd_subset_freq'
- list_vars=trim(list_vars)//' cellcharge charge chrgat chempot chebfi_oracle chebfi_ora_fact'
+ list_vars=trim(list_vars)//' cellcharge charge chrgat chempot chebfi_oracle'
  list_vars=trim(list_vars)//' chkdilatmx chkexit chkparal chkprim'
  list_vars=trim(list_vars)//' chksymbreak chksymtnons chneut cineb_start coefficients constraint_kind'
  list_vars=trim(list_vars)//' cprj_in_memory cprj_update_lvl cpus cpum cpuh'
@@ -3488,7 +3490,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' objaat objbat objaax objbax objan objbn objarf'
  list_vars=trim(list_vars)//' objbrf objaro objbro objatr objbtr occ'
  list_vars=trim(list_vars)//' occopt omegasimax omegasrdmax optcell optdcmagpawu optdriver optforces '
- list_vars=trim(list_vars)//' optnlxccc optstress orbmag ortalg'
+ list_vars=trim(list_vars)//' optnlxccc optstress oracle_factor oracle_min_occ orbmag ortalg'
  list_vars=trim(list_vars)//' opt_effpot opt_ncoeff opt_coeff output_file outdata_prefix'
 !P
  list_vars=trim(list_vars)//' papiopt paral_atom paral_kgb paral_rf pawcpxocc pawcross'

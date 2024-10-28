@@ -106,7 +106,7 @@ module m_chebfiwf_cprj
 !!
 !! SOURCE
 
-subroutine chebfiwf2_cprj(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
+subroutine chebfiwf2_cprj(cg,dtset,eig,occ,enl_out,gs_hamk,kinpw,mpi_enreg,&
 &                   nband,npw,nspinor,prtvol,resid,xg_nonlop)
 
  implicit none
@@ -121,6 +121,7 @@ subroutine chebfiwf2_cprj(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
  real(dp)                 ,target,intent(  out) :: resid(nband)
  real(dp)                        ,intent(  out) :: enl_out(nband)
  real(dp)                 ,target,intent(  out) :: eig(nband)
+ real(dp)                 ,target,intent(in   ) :: occ(nband)
  type(xg_nonlop_t)        ,       intent(in   ) :: xg_nonlop
 
 !Local variables-------------------------------
@@ -128,6 +129,7 @@ subroutine chebfiwf2_cprj(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
  type(xgBlock_t) :: xgx0
  type(xg_t) :: cprj_xgx0
  type(xgBlock_t) :: xgeigen
+ type(xgBlock_t) :: xgocc
  type(xgBlock_t) :: xgresidu
  type(xgBlock_t) :: xgenl
  type(xgBlock_t) :: xg_precond,xg_kin
@@ -204,19 +206,21 @@ subroutine chebfiwf2_cprj(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
 
  call xgBlock_map_1d(xgenl,enl_out,SPACE_R,nband)
 
+ call xgBlock_map_1d(xgocc,occ,SPACE_R,nband)
+
  !call xg_cprj_copy(cprj_cwavef_bands,cprj_contiguous,space_cprj,nband_cprj,cprj_xgx0,&
  !  & xg_nonlop,l_mpi_enreg%comm_band,CPRJ_ALLOC)
  call xg_init(cprj_xgx0,space_cprj,xg_nonlop%cprjdim,nband_cprj*nspinor,comm=l_mpi_enreg%comm_band)
 
  call chebfi_init(chebfi,nband,npw*nspinor,cprjdim,dtset%tolwfr_diago,dtset%ecut, &
-&                 mpi_enreg%bandpp, &
-&                 dtset%nline, space,space_cprj,1, &
+&                 mpi_enreg%bandpp, dtset%nline, dtset%nbdbuf, space,space_cprj,1, &
 &                 l_mpi_enreg%comm_band,me_g0,paw,&
+&                 dtset%chebfi_oracle,dtset%oracle_factor,dtset%oracle_min_occ,&
 &                 xg_nonlop,me_g0_fft)
 
 
  ! Run chebfi
- call chebfi_run_cprj(chebfi,xgx0,cprj_xgx0%self,xg_getghc,xg_kin,xg_precond,xgeigen,xgresidu,xgenl,nspinor)
+ call chebfi_run_cprj(chebfi,xgx0,cprj_xgx0%self,xg_getghc,xg_kin,xg_precond,xgeigen,xgocc,xgresidu,xgenl,nspinor)
 
  ! Free preconditionning since not needed anymore
  ABI_FREE(pcon)
