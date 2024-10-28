@@ -616,6 +616,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 & nucdipmom=dtset%nucdipmom,gpu_option=dtset%gpu_option)
 
  if (dtset%cprj_in_memory==1) then
+   call xg_nonlop_update_weight(xg_nonlop,ucvol) ! ucvol could have changed in mover
    if (xg_nonlop%paw) call xg_nonlop_make_Dij(xg_nonlop,paw_ij,dtset%nsppol,atindx)
  end if
 
@@ -789,7 +790,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
          & dtset%nspden, gs_hamk%nvloc, 3, pawfgr, mpi_enreg, vectornd, vectornd_pac)
        call gs_hamk%load_spin(isppol, vectornd=vectornd_pac)
      end if
-    
+
      call timab(982,2,tsec)
 
 !    BIG FAT k POINT LOOP
@@ -1322,7 +1323,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        call extfpmd%compute_eshift(eigen,eknk,dtset%mband,&
 &       dtset%nband,dtset%nfft,dtset%nkpt,dtset%nsppol,dtset%nspden,dtset%wtk,vtrial)
      end if
-     
+
 !    Compute occupations
      call timab(990,1,tsec)
      call newocc(doccde,eigen,energies%entropy,energies%e_fermie,energies%e_fermih,dtset%ivalence,&
@@ -1619,7 +1620,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
      ABI_NVTX_END_RANGE()
      call timab(992,2,tsec)
-    
+
 !    Treat fixed occupation numbers or non-self-consistent case
    else
 
