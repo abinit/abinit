@@ -909,7 +909,7 @@ end subroutine ddb_set_brav
 !!
 !! SOURCE
 
-subroutine ddb_to_d2etot(ddb,kblok,option,qeq0,qphon,qphnrm,ucvol,omega) 
+subroutine ddb_to_d2etot(ddb,blkval,kblok,option,qeq0,qphon,qphnrm,ucvol,omega) 
 
 !Arguments -------------------------------
 !scalars
@@ -918,17 +918,17 @@ subroutine ddb_to_d2etot(ddb,kblok,option,qeq0,qphon,qphnrm,ucvol,omega)
  real(dp),intent(in) :: ucvol
  logical,intent(in) :: qeq0
 !arrays
+ real(dp),intent(inout) :: blkval(2,3,ddb%mpert,3,ddb%mpert,ddb%nblok)
  real(dp),intent(inout) :: qphnrm(3),qphon(3,3)
  real(dp),optional,intent(in) :: omega(3)
 
 !Local variables -------------------------
 !scalars
- integer :: iblok,nsize,rftyp
- integer :: idir1,idir2,ipert1,ipert2
+ integer :: index,iblok,nsize,rftyp
+ integer :: idir1,idir2,ipert1,ipert2,mpert
 !arrays
  integer :: rfelfd(4),rfmagn(4),rfphon(4),rfstrs(4)
  real(dp) :: val(2)
- real(dp),allocatable :: tmpval(:,:,:,:,:,:)
 
 ! *********************************************************************
 
@@ -936,10 +936,6 @@ subroutine ddb_to_d2etot(ddb,kblok,option,qeq0,qphon,qphnrm,ucvol,omega)
  rfphon(:)=0
  rfstrs(:)  = 0
  rftyp = 1
- ABI_MALLOC(tmpval,(2,3,ddb%mpert,3,ddb%mpert,ddb%nblok))
- nsize=3*ddb%mpert*3*ddb%mpert
- tmpval(1,:,:,:,:,:) = reshape(ddb%val(1,1:nsize,1:ddb%nblok), shape = (/3,ddb%mpert,3,ddb%mpert,ddb%nblok/))
- tmpval(2,:,:,:,:,:) = reshape(ddb%val(2,1:nsize,1:ddb%nblok), shape = (/3,ddb%mpert,3,ddb%mpert,ddb%nblok/))
 
  !IFCs are equal to the d2etot
 
@@ -949,15 +945,15 @@ subroutine ddb_to_d2etot(ddb,kblok,option,qeq0,qphon,qphnrm,ucvol,omega)
    rfphon(1:2)=1
    rfelfd(1:2)=2
    call ddb%get_block(iblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, rftyp, omega=omega)
-   if (iblok/=0) then
+   if (iblok/=0.and.iblok==kblok) then
      ipert1= ddb%natom + 2
      do ipert2= 1, ddb%natom
        do idir2= 1, 3
          do idir1= 1, 3
-           val(:)=tmpval(:,idir1,ipert1,idir2,ipert2,iblok)
-           tmpval(:,idir1,ipert1,idir2,ipert2,iblok)=-val(:)
-           val(:)=tmpval(:,idir2,ipert2,idir1,ipert1,iblok)
-           tmpval(:,idir2,ipert2,idir1,ipert1,iblok)=-val(:)
+           val(:)=blkval(:,idir1,ipert1,idir2,ipert2,kblok)
+           blkval(:,idir1,ipert1,idir2,ipert2,kblok)=-val(:)
+           val(:)=blkval(:,idir2,ipert2,idir1,ipert1,kblok)
+           blkval(:,idir2,ipert2,idir1,ipert1,kblok)=-val(:)
          end do
        end do
      end do
@@ -968,23 +964,23 @@ subroutine ddb_to_d2etot(ddb,kblok,option,qeq0,qphon,qphnrm,ucvol,omega)
    rfphon(:)=0
    rfelfd(1:2)=2
    call ddb%get_block(iblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, rftyp, omega=omega)
-   if (iblok/=0) then
+   if (iblok/=0.and.iblok==kblok) then
      ipert1= ddb%natom + 2
      ipert2= ddb%natom + 2
      do idir2= 1, 3
        do idir1= 1, 3
-         val(:)=tmpval(:,idir1,ipert1,idir2,ipert2,iblok)
+         val(:)=blkval(:,idir1,ipert1,idir2,ipert2,kblok)
          if (option==0) then
            if (idir1==idir2) then
-             tmpval(:,idir1,ipert1,idir2,ipert2,iblok)= (one - val(:))*ucvol/four_pi
+             blkval(:,idir1,ipert1,idir2,ipert2,kblok)= (one - val(:))*ucvol/four_pi
            else
-             tmpval(:,idir1,ipert1,idir2,ipert2,iblok)= -ucvol/four_pi*val(:) 
+             blkval(:,idir1,ipert1,idir2,ipert2,kblok)= -ucvol/four_pi*val(:) 
            end if
          else if (option==1) then
            if (idir1==idir2) then
-             tmpval(:,idir1,ipert1,idir2,ipert2,iblok)= one - four_pi/ucvol*val(:)
+             blkval(:,idir1,ipert1,idir2,ipert2,kblok)= one - four_pi/ucvol*val(:)
            else
-             tmpval(:,idir1,ipert1,idir2,ipert2,iblok)= -four_pi/ucvol*val(:) 
+             blkval(:,idir1,ipert1,idir2,ipert2,kblok)= -four_pi/ucvol*val(:) 
            end if
          end if
        end do
@@ -998,15 +994,15 @@ subroutine ddb_to_d2etot(ddb,kblok,option,qeq0,qphon,qphnrm,ucvol,omega)
    rfmagn(1)=1
    rfmagn(2)=1
    call ddb%get_block(iblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, rftyp, omega=omega)
-   if (iblok/=0) then
+   if (iblok/=0.and.iblok==kblok) then
      ipert1= ddb%natom + 5
      ipert2= ddb%natom + 2
      do idir2= 1, 3
        do idir1= 1, 3
-         val(:)=tmpval(:,idir1,ipert1,idir2,ipert2,iblok)
-         tmpval(:,idir1,ipert1,idir2,ipert2,iblok)=-val(:)
-         val(:)=tmpval(:,idir2,ipert2,idir1,ipert1,iblok)
-         tmpval(:,idir2,ipert2,idir1,ipert1,iblok)=-val(:)
+         val(:)=blkval(:,idir1,ipert1,idir2,ipert2,kblok)
+         blkval(:,idir1,ipert1,idir2,ipert2,kblok)=-val(:)
+         val(:)=blkval(:,idir2,ipert2,idir1,ipert1,kblok)
+         blkval(:,idir2,ipert2,idir1,ipert1,kblok)=-val(:)
        end do
      end do
    end if
@@ -1019,13 +1015,13 @@ subroutine ddb_to_d2etot(ddb,kblok,option,qeq0,qphon,qphnrm,ucvol,omega)
  rfelfd(1:2)=0
  rfmagn(1:2)=1
  call ddb%get_block(iblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, rftyp, omega=omega)
- if (iblok/=0) then
+ if (iblok/=0.and.iblok==kblok) then
    ipert2= ddb%natom + 5
    ipert1= ddb%natom + 5
    do idir2= 1, 3
      do idir1= 1, 3
-       val(:)=tmpval(:,idir1,ipert1,idir2,ipert2,iblok)
-       tmpval(:,idir1,ipert1,idir2,ipert2,iblok)=-val(:)
+       val(:)=blkval(:,idir1,ipert1,idir2,ipert2,kblok)
+       blkval(:,idir1,ipert1,idir2,ipert2,kblok)=-val(:)
      end do
    end do
  end if
@@ -1037,20 +1033,19 @@ subroutine ddb_to_d2etot(ddb,kblok,option,qeq0,qphon,qphnrm,ucvol,omega)
  rfphon(2)=1
  rfmagn(1)=1
  call ddb%get_block(iblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, rftyp, omega=omega)
- if (iblok/=0) then
+ if (iblok/=0.and.iblok==kblok) then
    ipert1= ddb%natom + 5
    do ipert2= 1, ddb%natom
      do idir2= 1, 3
        do idir1= 1, 3
-         val(:)=tmpval(:,idir1,ipert1,idir2,ipert2,iblok)
-         tmpval(:,idir1,ipert1,idir2,ipert2,iblok)=-val(:)
-         val(:)=tmpval(:,idir2,ipert2,idir1,ipert1,iblok)
-         tmpval(:,idir2,ipert2,idir1,ipert1,iblok)=-val(:)
+         val(:)=blkval(:,idir1,ipert1,idir2,ipert2,kblok)
+         blkval(:,idir1,ipert1,idir2,ipert2,kblok)=-val(:)
+         val(:)=blkval(:,idir2,ipert2,idir1,ipert1,kblok)
+         blkval(:,idir2,ipert2,idir1,ipert1,kblok)=-val(:)
        end do
      end do
    end do
  end if
-
 
 end subroutine ddb_to_d2etot
 !!***
