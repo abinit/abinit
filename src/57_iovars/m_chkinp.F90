@@ -426,6 +426,10 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    call chkdpr(0,0,cond_string,cond_values,ierr,'oracle_factor',dt%oracle_factor,1,tol30,iout)
    call chkdpr(0,0,cond_string,cond_values,ierr,'oracle_factor',dt%oracle_factor,-1,0.99_dp,iout)
 
+!  oracle_min_occ : must be > 1e-10 and below 1
+   call chkdpr(0,0,cond_string,cond_values,ierr,'oracle_min_occ',dt%oracle_factor,1,tol10,iout)
+   call chkdpr(0,0,cond_string,cond_values,ierr,'oracle_min_occ',dt%oracle_factor,-1,0.99_dp,iout)
+
 !  chkdilatmx
    call chkint_eq(0,0,cond_string,cond_values,ierr,'chkdilatmx',dt%chkdilatmx,2,(/0,1/),iout)
 
