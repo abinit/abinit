@@ -297,14 +297,14 @@ subroutine rttddft_init_hamiltonian(dtset, energies, gs_hamk, istep, mpi_enreg, 
    !FB: @MT Changed self_consistent to false here. Is this right?
    call paw_ij_reset_flags(tdks%paw_ij,self_consistent=.false.)
    option=0; compch_sph=-1.d5; nzlmopt=0
-   call pawdenpot(compch_sph,el_temp,energies%e_paw,energies%e_pawdc,ipert, &
-                & dtset%ixc,my_natom,dtset%natom,dtset%nspden,psps%ntypat,  &
-                & dtset%nucdipmom,nzlmopt,option,tdks%paw_an,tdks%paw_an,   &
-                & tdks%paw_ij,tdks%pawang,dtset%pawprtvol,tdks%pawrad,      &
-                & tdks%pawrhoij,dtset%pawspnorb,tdks%pawtab,dtset%pawxcdev, &
-                & dtset%spnorbscl,dtset%xclevel,dtset%xc_denpos,            &
-                & dtset%xc_taupos,tdks%ucvol,                               &
-                & psps%znuclpsp,comm_atom=mpi_enreg%comm_atom,              &
+   call pawdenpot(compch_sph,el_temp,energies%e_paw,energies%e_pawdc,       &
+                & energies%entropy_paw,ipert,dtset%ixc,my_natom,dtset%natom,&
+                & dtset%nspden,psps%ntypat,dtset%nucdipmom,nzlmopt,option,  &
+                & tdks%paw_an,tdks%paw_an,tdks%paw_ij,tdks%pawang,          &
+                & dtset%pawprtvol,tdks%pawrad,tdks%pawrhoij,dtset%pawspnorb,&
+                & tdks%pawtab,dtset%pawxcdev,dtset%spnorbscl,dtset%xclevel, &
+                & dtset%xc_denpos,dtset%xc_taupos,tdks%ucvol,psps%znuclpsp, &
+                & comm_atom=mpi_enreg%comm_atom,                            &
                 & mpi_atmtab=mpi_enreg%my_atmtab,vpotzero=vpotzero)
    !Correct the average potential with the calculated constant vpotzero
    !Correct the total energies accordingly

@@ -153,8 +153,7 @@ contains
 !!   |                  on the electric field:  enefield = -ucvol*E*P
 !!   | e_magfield(OUT)=the term of the energy functional that depends explicitely
 !!   |                  on the magnetic field:  enmagfield = -ucvol*B*M
-!!   | e_entropy(OUT)=entropy energy due to the occupation number smearing (if metal)
-!!   |                this value is %entropy * dtset%tsmear (hartree).
+!!  entropy=entropy due to the occupation number smearing (if metal)
 !!  kxc(nfft,nkxc)=exchange-correlation kernel, needed only if nkxc>0
 !!  [vxctau(nfftf,dtset%nspden,4*dtset%usekden)]=derivative of XC energy density with respect to
 !!      kinetic energy density (metaGGA cases) (optional output)
@@ -173,7 +172,7 @@ contains
 !!
 !! SOURCE
 
-subroutine odamix(deltae,dtset,elast,energies,etotal,&
+subroutine odamix(deltae,dtset,elast,energies,entropy,etotal,&
 &          gprimd,gsqcut,kxc,mpi_enreg,my_natom,nfft,ngfft,nhat,&
 &          nkxc,ntypat,nvresid,n3xccc,optres,paw_ij,&
 &          paw_an,pawang,pawfgrtab,pawrad,pawrhoij,pawtab,&
@@ -186,7 +185,7 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
  integer,intent(in) :: my_natom,n3xccc,nfft,nkxc,ntypat,optres
  integer,intent(in) :: usepaw,usexcnhat
  logical,intent(in),optional :: add_tfw
- real(dp),intent(in) :: gsqcut,ucvol
+ real(dp),intent(in) :: gsqcut,ucvol,entropy
  real(dp),intent(inout) :: elast
  real(dp),intent(out) :: deltae,etotal,vxcavg
  type(MPI_type),intent(in) :: mpi_enreg
@@ -220,7 +219,7 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
  integer :: jrhoij,klmn,klmn1,kmix,nfftot,nhatgrdim,nzlmopt,nk3xc,option,optxc
  logical :: nmxc,with_vxctau
  real(dp) :: alphaopt,compch_fft,compch_sph,doti,e1t10,e_ksnm1,e_xcdc_vxctau
- real(dp) :: eenth,fp0,gammp1,ro_dlt,ucvol_local,el_temp
+ real(dp) :: eenth,fp0,gammp1,ro_dlt,ucvol_local,el_temp,e_entropy,e_entropy_ks
  character(len=500) :: message
  type(xcdata_type) :: xcdata
 !arrays
@@ -396,7 +395,7 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
      ABI_MALLOC(paw_ij(iatom)%dijhartree,(pawtab(itypat)%lmn2_size))
      paw_ij(iatom)%has_dijhartree=1
    end do
-   call pawdenpot(compch_sph,el_temp,energies%e_paw,energies%e_pawdc,0,dtset%ixc,my_natom,dtset%natom,dtset%nspden,ntypat,&
+   call pawdenpot(compch_sph,el_temp,energies%e_paw,energies%e_pawdc,energies%entropy_paw,0,dtset%ixc,my_natom,dtset%natom,dtset%nspden,ntypat,&
 &   dtset%nucdipmom,nzlmopt,option,paw_an,paw_an,paw_ij,pawang,dtset%pawprtvol,pawrad,pawrhoij,dtset%pawspnorb,&
 &   pawtab,dtset%pawxcdev,dtset%spnorbscl,dtset%xclevel,dtset%xc_denpos,dtset%xc_taupos,ucvol,psps%znuclpsp,&
 &   comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
@@ -411,10 +410,16 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
 !and gather the two last terms of Eq.8 of the VG paper
 !Warning : might have to be changed for fixed moment calculations
  if(dtset%occopt>=3 .and. dtset%occopt<=8) then
-   energies%e_entropy = - dtset%tsmear * energies%entropy
+   e_entropy_ks=-dtset%tsmear*entropy
  else
-   energies%e_entropy = zero
+   e_entropy_ks=zero
  end if
+
+!We add different entropy terms to total entropy energy
+ e_entropy=e_entropy_ks
+!if(abs(energies%entropy_xc)>tiny(zero))  e_entropy=e_entropy-xcdata%tphysel*energies%entropy_xc
+!if(abs(energies%entropy_paw)>tiny(zero)) e_entropy=e_entropy-el_temp*energies%entropy_paw
+
 !Turn it into an electric enthalpy,refer to Eq.(33) of Suppl. of Nat. Phys. paper (5,304,2009) [[cite:Stengel2009]]
 ! the missing volume is added here
  energies%e_elecfield = zero
@@ -502,11 +507,11 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
 
  etotal = energies%e_kinetic+ energies%e_hartree + energies%e_xc + &
 & energies%e_localpsp + energies%e_nlpsp_vfock - energies%e_fock0 + energies%e_corepsp + &
-& energies%e_entropy + energies%e_elecfield + energies%e_magfield + &
+& e_entropy + energies%e_elecfield + energies%e_magfield + &
 & energies%e_nucdip
 !etotal = energies%e_eigenvalues - energies%e_hartree + energies%e_xc - &
 !& energies%e_xcdc + energies%e_corepsp + &
-!& energies%e_entropy + energies%e_elecfield
+!& e_entropy + energies%e_elecfield
  etotal = etotal + energies%e_ewald + energies%e_chempot + energies%e_vdw_dftd
  if (usepaw==1) then
    etotal = etotal + energies%e_paw
@@ -634,16 +639,13 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
  call dotprod_vn(1,rhor,energies%e_xcdc,doti,nfft,nfftot,dtset%nspden,1,vxc,ucvol_local,&
 & mpi_comm_sphgrid=mpi_enreg%comm_fft)
 
- etotal=energies%h0+energies%e_hartree+energies%e_xc+energies%e_corepsp + &
-& energies%e_entropy + energies%e_elecfield + energies%e_magfield
- etotal = etotal + energies%e_ewald + energies%e_chempot + energies%e_vdw_dftd
  if (usepaw==1) then
    do iatom=1,my_natom
      itypat=paw_ij(iatom)%itypat
      ABI_MALLOC(paw_ij(iatom)%dijhartree,(pawtab(itypat)%lmn2_size))
      paw_ij(iatom)%has_dijhartree=1
    end do
-   call pawdenpot(compch_sph,el_temp,energies%e_paw,energies%e_pawdc,0,dtset%ixc,my_natom,dtset%natom, &
+   call pawdenpot(compch_sph,el_temp,energies%e_paw,energies%e_pawdc,energies%entropy_paw,0,dtset%ixc,my_natom,dtset%natom, &
 &   dtset%nspden,ntypat,dtset%nucdipmom,nzlmopt,option,paw_an,paw_an,paw_ij,pawang, &
 &   dtset%pawprtvol,pawrad,pawrhoij,dtset%pawspnorb,pawtab,dtset%pawxcdev,dtset%spnorbscl,&
 &   dtset%xclevel,dtset%xc_denpos,dtset%xc_taupos,ucvol,psps%znuclpsp,&
@@ -652,8 +654,20 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
      ABI_FREE(paw_ij(iatom)%dijhartree)
      paw_ij(iatom)%has_dijhartree=0
    end do
-   etotal=etotal+energies%e_paw
  end if
+
+!We add different entropy terms to total entropy energy
+ e_entropy=e_entropy_ks
+!if(abs(energies%entropy_xc)>tiny(zero))  e_entropy=e_entropy-xcdata%tphysel*energies%entropy_xc
+!if(abs(energies%entropy_paw)>tiny(zero)) e_entropy=e_entropy-el_temp*energies%entropy_paw
+
+ etotal=energies%h0+energies%e_hartree+energies%e_xc+energies%e_corepsp + &
+ & e_entropy + energies%e_elecfield + energies%e_magfield
+ etotal = etotal + energies%e_ewald + energies%e_chempot + energies%e_vdw_dftd
+ if (usepaw==1) then
+   etotal = etotal + energies%e_paw
+ end if
+
 !Compute energy residual
  deltae=etotal-elast
  elast=etotal

@@ -1734,7 +1734,7 @@ subroutine pawxc(corexc,enxc,enxcdc,snxc,hyb_mixing,ixc,kxc,k3xc,lm_size,lmselec
 !  ----------------------------------------------------------------------
 !  ----- End
 !  ----------------------------------------------------------------------
-!  Add the four*pi factor of the Exc and Excdc angular integration
+!  Add the four*pi factor of the Exc, Sxc and Excdc angular integration
    if (option/=1.and.option/=5) enxc=enxc*four_pi
    if (option/=1.and.option/=5) snxc=snxc*four_pi
    if (option==0.or.option==2) enxcdc=enxcdc*four_pi
