@@ -1423,8 +1423,8 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
          call flush_unit(std_out)
          call timab(620,1,tsec)
         
-         call datafordmft(cg(:,:),cprj(:,:),cryst_struc,dft_occup,gs_hamk%dimcprj(:),dtset,eigen(:),mband_cprj,mpi_enreg,&
-                        & my_nspinor,occ(:),paw_dmft,paw_ij(:),pawtab(:),usecprj_local,dtset%nbandkss)
+         call datafordmft(cg(:,:),cprj(:,:),cryst_struc,dft_occup,gs_hamk%dimcprj(:),dtset,eigen(:),mband_cprj,mcg,&
+                        & mpi_enreg,my_nspinor,occ(:),paw_dmft,paw_ij(:),pawtab(:),usecprj_local,dtset%nbandkss)
 
          call timab(620,2,tsec)
          call flush_unit(std_out)

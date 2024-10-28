@@ -1158,8 +1158,8 @@ if (dtset%prt_lorbmag==1) then
 !    ==  compute psichi
      call init_oper(paw_dmft,dft_occup,opt_ksloc=2)
 
-     call datafordmft(cg(:,:),cprj(:,:),crystal,dft_occup,dimcprj,dtset,eigen(:),dtset%mband,mpi_enreg,&
-                    & dtset%nspinor,occ(:),paw_dmft,paw_ij,pawtab(:),usecprj,dtset%nbandkss)
+     call datafordmft(cg(:,:),cprj(:,:),crystal,dft_occup,dimcprj,dtset,eigen(:),dtset%mband,mcg,&
+                    & mpi_enreg,dtset%nspinor,occ(:),paw_dmft,paw_ij,pawtab(:),usecprj,dtset%nbandkss)
 
      opt_imagonly=0
      if(paw_dmft%dmft_solv>=5) opt_imagonly=1
