@@ -25,6 +25,36 @@ To access the tutorials, see the menu on the left...
 <img style="height: 540px; width: 720px;" alt="Schema 1" src="index_assets/tutorial_flowchart_v11.png" usemap="#map1"/>
 </center>
 
+<map name="tutorial-map">
+  <!-- Basic tutorials -->
+  <area shape="rect" coords="220,50,400,150" href="http://yoururl.com/basic-tutorials" alt="Basic Tutorials">
+
+  <!-- Parallelism -->
+  <area shape="rect" coords="550,50,750,150" href="http://yoururl.com/parallelism" alt="Parallelism">
+
+  <!-- ABINIT postprocessors -->
+  <area shape="rect" coords="50,250,250,350" href="http://yoururl.com/postprocessors" alt="Postprocessors">
+
+  <!-- DFPT1 -->
+  <area shape="rect" coords="400,350,600,450" href="http://yoururl.com/dfpt1" alt="DFPT1">
+
+  <!-- DFPT2 -->
+  <area shape="rect" coords="600,350,800,450" href="http://yoururl.com/dfpt2" alt="DFPT2">
+
+  <!-- PAW1 -->
+  <area shape="rect" coords="220,550,400,650" href="http://yoururl.com/paw1" alt="PAW1">
+
+  <!-- Many-Body Theory -->
+  <area shape="rect" coords="400,550,600,650" href="http://yoururl.com/many-body-theory" alt="Many-Body Theory">
+
+  <!-- DFPT & Electron-Phonon -->
+  <area shape="rect" coords="600,550,800,650" href="http://yoururl.com/electron-phonon" alt="Electron-Phonon">
+
+  <!-- Multibinit -->
+  <area shape="rect" coords="800,550,1000,650" href="http://yoururl.com/multibinit" alt="Multibinit">
+</map>
+
+
 The four basic tutorials are presented at the top, in one orange block. There is also an orange block for the ABINIT_build tutorial.
 Each block in brown represents one intermediate-level tutorial. The blocks in red
 gather by themes -one block per theme- the more advanced tutorials.
