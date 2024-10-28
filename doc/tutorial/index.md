@@ -47,9 +47,9 @@ To access the tutorials, see the menu on the left...
      inkscape:pagecheckerboard="0"
      inkscape:document-units="mm"
      showgrid="false"
-     inkscape:zoom="1.2196855"
-     inkscape:cx="580.88745"
-     inkscape:cy="248.83464"
+     inkscape:zoom="0.85282697"
+     inkscape:cx="512.41344"
+     inkscape:cy="324.21583"
      inkscape:window-width="1850"
      inkscape:window-height="1016"
      inkscape:window-x="0"
@@ -171,7 +171,7 @@ To access the tutorials, see the menu on the left...
        xlink:href="#linearGradient75010"
        id="linearGradient211052"
        gradientUnits="userSpaceOnUse"
-       gradientTransform="matrix(1,0,0,1.0033987,298.37153,133.24965)"
+       gradientTransform="matrix(1,0,0,1.2503636,298.37153,75.71434)"
        x1="166.63228"
        y1="259.96524"
        x2="166.72348"
@@ -232,7 +232,7 @@ To access the tutorials, see the menu on the left...
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:26.6667px;font-family:Arial;-inkscape-font-specification:Arial;fill:#5c0000;fill-opacity:1">basic tutorials</tspan></text>
     <a
        id="a73271"
-       xlink:href="https://docs.abinit.org/tutorial/abinit_build/"
+       xlink:href="./abinit_build/"
        transform="translate(-20,62)">
       <text
          xml:space="preserve"
@@ -248,7 +248,7 @@ To access the tutorials, see the menu on the left...
     </a>
     <a
        id="a48685"
-       xlink:href="https://docs.abinit.org/tutorial/base1/"
+       xlink:href="./base1/"
        transform="translate(-20,62)">
       <text
          xml:space="preserve"
@@ -264,7 +264,7 @@ To access the tutorials, see the menu on the left...
     </a>
     <a
        id="a53687"
-       xlink:href="https://docs.abinit.org/tutorial/base2/"
+       xlink:href="./base2/"
        transform="translate(-20,62)">
       <text
          xml:space="preserve"
@@ -280,7 +280,7 @@ To access the tutorials, see the menu on the left...
     </a>
     <a
        id="a57177"
-       xlink:href="https://docs.abinit.org/tutorial/base3/"
+       xlink:href="./base3/"
        transform="translate(-20,62)">
       <text
          xml:space="preserve"
@@ -296,7 +296,7 @@ To access the tutorials, see the menu on the left...
     </a>
     <a
        id="a59143"
-       xlink:href="https://docs.abinit.org/tutorial/base4/"
+       xlink:href="./base4/"
        transform="translate(-20,62)">
       <text
          xml:space="preserve"
@@ -334,7 +334,7 @@ To access the tutorials, see the menu on the left...
          id="tspan93899">postprocessors</tspan></text>
     <a
        id="a125576"
-       xlink:href="https://docs.abinit.org/tutorial/atdep1/"
+       xlink:href="./atdep1/"
        transform="translate(-72,2)">
       <text
          xml:space="preserve"
@@ -351,7 +351,7 @@ To access the tutorials, see the menu on the left...
     </a>
     <a
        id="a125584"
-       xlink:href="https://docs.abinit.org/tutorial/fold2bloch/"
+       xlink:href="./fold2bloch/"
        transform="translate(-72,18)">
       <text
          xml:space="preserve"
@@ -368,7 +368,7 @@ To access the tutorials, see the menu on the left...
     </a>
     <a
        id="a125592"
-       xlink:href="https://docs.abinit.org/tutorial/wannier90/"
+       xlink:href="./wannier90/"
        transform="translate(-74,24)">
       <text
          xml:space="preserve"
@@ -385,7 +385,7 @@ To access the tutorials, see the menu on the left...
     </a>
     <a
        id="a125580"
-       xlink:href="https://docs.abinit.org/tutorial/cut3d/"
+       xlink:href="./cut3d/"
        transform="translate(-72,10)">
       <text
          xml:space="preserve"
@@ -402,7 +402,7 @@ To access the tutorials, see the menu on the left...
     </a>
     <a
        id="a125588"
-       xlink:href="https://docs.abinit.org/tutorial/optic/"
+       xlink:href="./optic/"
        transform="translate(-74,24)">
       <text
          xml:space="preserve"
@@ -419,7 +419,7 @@ To access the tutorials, see the menu on the left...
     </a>
     <a
        id="a125596"
-       xlink:href="https://docs.abinit.org/tutorial/z2pack/"
+       xlink:href="./z2pack/"
        transform="translate(-72,24)">
       <text
          xml:space="preserve"
@@ -466,11 +466,11 @@ To access the tutorials, see the menu on the left...
          id="tspan126027">parallelism</tspan></text>
     <a
        id="a125576-3"
-       xlink:href="https://docs.abinit.org/tutorial/atdep1/"
+       xlink:href="./paral_bandpw/"
        transform="translate(856.17698,131.79539)">
       <a
          id="a135278"
-         xlink:href="https://docs.abinit.org/tutorial/paral_bandpw/">
+         xlink:href="./paral_bandpw/">
         <text
            xml:space="preserve"
            style="font-style:normal;font-weight:normal;font-size:18.6667px;line-height:1.25;font-family:sans-serif;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.968017"
@@ -487,11 +487,11 @@ To access the tutorials, see the menu on the left...
     </a>
     <a
        id="a125584-6"
-       xlink:href="https://docs.abinit.org/tutorial/fold2bloch/"
+       xlink:href="./paral_moldyn/"
        transform="translate(856.17698,147.79539)">
       <a
          id="a140334"
-         xlink:href="https://docs.abinit.org/tutorial/paral_moldyn/">
+         xlink:href="./paral_moldyn/">
         <text
            xml:space="preserve"
            style="font-style:normal;font-weight:normal;font-size:18.6667px;line-height:1.25;font-family:sans-serif;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.968017"
@@ -508,11 +508,11 @@ To access the tutorials, see the menu on the left...
     </a>
     <a
        id="a125592-5"
-       xlink:href="https://docs.abinit.org/tutorial/wannier90/"
+       xlink:href="./paral_dfpt/"
        transform="translate(854.17698,153.79539)">
       <a
          id="a140342"
-         xlink:href="https://docs.abinit.org/tutorial/paral_dfpt/">
+         xlink:href="./paral_dfpt/">
         <text
            xml:space="preserve"
            style="font-style:normal;font-weight:normal;font-size:18.6667px;line-height:1.25;font-family:sans-serif;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.968017"
@@ -529,11 +529,11 @@ To access the tutorials, see the menu on the left...
     </a>
     <a
        id="a125580-4"
-       xlink:href="https://docs.abinit.org/tutorial/cut3d/"
+       xlink:href="./paral_gswvl/"
        transform="translate(856.17698,139.79539)">
       <a
          id="a138950"
-         xlink:href="https://docs.abinit.org/tutorial/paral_gswvl/">
+         xlink:href="./paral_gswvl/">
         <text
            xml:space="preserve"
            style="font-style:normal;font-weight:normal;font-size:18.6667px;line-height:1.25;font-family:sans-serif;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.968017"
@@ -550,11 +550,11 @@ To access the tutorials, see the menu on the left...
     </a>
     <a
        id="a125588-3"
-       xlink:href="https://docs.abinit.org/tutorial/optic/"
+       xlink:href="./paral_images/"
        transform="translate(854.17698,153.79539)">
       <a
          id="a140338"
-         xlink:href="https://docs.abinit.org/tutorial/paral_images/">
+         xlink:href="./paral_images/">
         <text
            xml:space="preserve"
            style="font-style:normal;font-weight:normal;font-size:18.6667px;line-height:1.25;font-family:sans-serif;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.968017"
@@ -571,11 +571,11 @@ To access the tutorials, see the menu on the left...
     </a>
     <a
        id="a125596-4"
-       xlink:href="https://docs.abinit.org/tutorial/z2pack/"
+       xlink:href="./paral_mbt/"
        transform="translate(856.17698,153.79539)">
       <a
          id="a140368"
-         xlink:href="https://docs.abinit.org/tutorial/paral_mbt/">
+         xlink:href="./paral_mbt/">
         <text
            xml:space="preserve"
            style="font-style:normal;font-weight:normal;font-size:18.6667px;line-height:1.25;font-family:sans-serif;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.968017"
@@ -632,11 +632,11 @@ To access the tutorials, see the menu on the left...
          id="tspan169998">MULTIBINT</tspan></text>
     <a
        id="a125584-6-0"
-       xlink:href="https://docs.abinit.org/tutorial/fold2bloch/"
+       xlink:href="./multibinit/"
        transform="translate(696.10544,278.04298)">
       <a
          id="a140334-5"
-         xlink:href="https://docs.abinit.org/tutorial/paral_moldyn/">
+         xlink:href="./paral_moldyn/">
         <text
            xml:space="preserve"
            style="font-style:normal;font-weight:normal;font-size:18.6667px;line-height:1.25;font-family:sans-serif;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.968017"
@@ -653,11 +653,11 @@ To access the tutorials, see the menu on the left...
     </a>
     <a
        id="a125592-5-6"
-       xlink:href="https://docs.abinit.org/tutorial/wannier90/"
+       xlink:href="./spin_model/"
        transform="translate(694.10544,280.04298)">
       <a
          id="a140342-9"
-         xlink:href="https://docs.abinit.org/tutorial/paral_dfpt/">
+         xlink:href="./paral_dfpt/">
         <text
            xml:space="preserve"
            style="font-style:normal;font-weight:normal;font-size:18.6667px;line-height:1.25;font-family:sans-serif;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.968017"
@@ -674,11 +674,11 @@ To access the tutorials, see the menu on the left...
     </a>
     <a
        id="a125588-3-4"
-       xlink:href="https://docs.abinit.org/tutorial/optic/"
+       xlink:href="./lattice_model/"
        transform="translate(694.10544,282.04298)">
       <a
          id="a140338-8"
-         xlink:href="https://docs.abinit.org/tutorial/paral_images/">
+         xlink:href="./paral_images/">
         <text
            xml:space="preserve"
            style="font-style:normal;font-weight:normal;font-size:18.6667px;line-height:1.25;font-family:sans-serif;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.968017"
@@ -695,11 +695,11 @@ To access the tutorials, see the menu on the left...
     </a>
     <a
        id="a125596-4-8"
-       xlink:href="https://docs.abinit.org/tutorial/z2pack/"
+       xlink:href="./lwf_model/"
        transform="translate(696.10544,282.04298)">
       <a
          id="a140368-9"
-         xlink:href="https://docs.abinit.org/tutorial/paral_mbt/">
+         xlink:href="./paral_mbt/">
         <text
            xml:space="preserve"
            style="font-style:normal;font-weight:normal;font-size:18.6667px;line-height:1.25;font-family:sans-serif;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.968017"
@@ -715,13 +715,13 @@ To access the tutorials, see the menu on the left...
       </a>
     </a>
     <rect
-       style="fill:url(#linearGradient211052);fill-opacity:1;stroke-width:2.22738;stroke-miterlimit:4;stroke-dasharray:none"
+       style="fill:url(#linearGradient211052);fill-opacity:1;stroke-width:2.48643;stroke-miterlimit:4;stroke-dasharray:none"
        id="rect31-0-8-4-61"
        width="149.90523"
-       height="297.92136"
+       height="371.24826"
        x="388.2175"
        y="367.01105"
-       ry="49.988289" />
+       ry="62.291824" />
     <text
        xml:space="preserve"
        style="font-style:normal;font-weight:normal;font-size:18.6667px;line-height:1.25;font-family:sans-serif;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.968017"
@@ -733,7 +733,7 @@ To access the tutorials, see the menu on the left...
          x="479.33041"
          y="398.44107"
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:18.6667px;font-family:Arial;-inkscape-font-specification:Arial;text-align:center;text-anchor:middle;fill:#fffefe;fill-opacity:1;stroke-width:0.968017"
-         id="tspan169998-0">5 tutorials on </tspan><tspan
+         id="tspan169998-0">7 tutorials on </tspan><tspan
          sodipodi:role="line"
          x="479.33041"
          y="422.07291"
@@ -751,11 +751,11 @@ To access the tutorials, see the menu on the left...
          id="tspan211999">excitation</tspan></text>
     <a
        id="a125584-6-0-5"
-       xlink:href="https://docs.abinit.org/tutorial/fold2bloch/"
+       xlink:href="./gw2/"
        transform="translate(298.37153,278.04143)">
       <a
          id="a140334-5-5"
-         xlink:href="https://docs.abinit.org/tutorial/paral_moldyn/">
+         xlink:href="./paral_moldyn/">
         <text
            xml:space="preserve"
            style="font-style:normal;font-weight:normal;font-size:18.6667px;line-height:1.25;font-family:sans-serif;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.968017"
@@ -772,11 +772,11 @@ To access the tutorials, see the menu on the left...
     </a>
     <a
        id="a125584-6-0-5-4"
-       xlink:href="https://docs.abinit.org/tutorial/fold2bloch/"
+       xlink:href="./gw1/"
        transform="translate(297.41963,249.59914)">
       <a
          id="a140334-5-5-9"
-         xlink:href="https://docs.abinit.org/tutorial/paral_moldyn/">
+         xlink:href="./paral_moldyn/">
         <text
            xml:space="preserve"
            style="font-style:normal;font-weight:normal;font-size:18.6667px;line-height:1.25;font-family:sans-serif;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.968017"
@@ -792,12 +792,54 @@ To access the tutorials, see the menu on the left...
       </a>
     </a>
     <a
+       id="a125584-6-0-5-4-3"
+       xlink:href="./gwr_intro/"
+       transform="translate(298.06546,305.72014)">
+      <a
+         id="a140334-5-5-9-6"
+         xlink:href="./paral_moldyn/">
+        <text
+           xml:space="preserve"
+           style="font-style:normal;font-weight:normal;font-size:18.6667px;line-height:1.25;font-family:sans-serif;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.968017"
+           x="168.21094"
+           y="270.25446"
+           id="text11092-9-7-9-1-9-29-9-7"
+           transform="scale(0.96801691,1.0330398)"><tspan
+             sodipodi:role="line"
+             x="168.21094"
+             y="270.25446"
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:18.6667px;font-family:Arial;-inkscape-font-specification:Arial;text-align:center;text-anchor:middle;fill:#fffefe;fill-opacity:1;stroke-width:0.968017"
+             id="tspan93899-5-4-1-4-0-3-5">GWr_intro</tspan></text>
+      </a>
+    </a>
+    <a
+       id="a125584-6-0-5-4-3-3"
+       xlink:href="./gwr1/"
+       transform="translate(299.02085,340.68742)">
+      <a
+         id="a140334-5-5-9-6-5"
+         xlink:href="./paral_moldyn/">
+        <text
+           xml:space="preserve"
+           style="font-style:normal;font-weight:normal;font-size:18.6667px;line-height:1.25;font-family:sans-serif;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.968017"
+           x="168.21094"
+           y="270.25446"
+           id="text11092-9-7-9-1-9-29-9-7-6"
+           transform="scale(0.96801691,1.0330398)"><tspan
+             sodipodi:role="line"
+             x="168.21094"
+             y="270.25446"
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:18.6667px;font-family:Arial;-inkscape-font-specification:Arial;text-align:center;text-anchor:middle;fill:#fffefe;fill-opacity:1;stroke-width:0.968017"
+             id="tspan93899-5-4-1-4-0-3-5-2">GWr1</tspan></text>
+      </a>
+    </a>
+    <a
        id="a125592-5-6-28"
-       xlink:href="https://docs.abinit.org/tutorial/wannier90/"
-       transform="translate(296.37153,280.04143)">
+       xlink:href="./dmft/"
+       transform="translate(296.37153,340.04143)">
       <a
          id="a140342-9-3"
-         xlink:href="https://docs.abinit.org/tutorial/paral_dfpt/">
+         xlink:href="./paral_dfpt/">
         <text
            xml:space="preserve"
            style="font-style:normal;font-weight:normal;font-size:18.6667px;line-height:1.25;font-family:sans-serif;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.968017"
@@ -814,11 +856,11 @@ To access the tutorials, see the menu on the left...
     </a>
     <a
        id="a125588-3-4-4"
-       xlink:href="https://docs.abinit.org/tutorial/optic/"
-       transform="translate(296.37153,282.04143)">
+       xlink:href="./bse/"
+       transform="translate(296.37153,342.04143)">
       <a
          id="a140338-8-0"
-         xlink:href="https://docs.abinit.org/tutorial/paral_images/">
+         xlink:href="./paral_images/">
         <text
            xml:space="preserve"
            style="font-style:normal;font-weight:normal;font-size:18.6667px;line-height:1.25;font-family:sans-serif;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.968017"
@@ -835,11 +877,11 @@ To access the tutorials, see the menu on the left...
     </a>
     <a
        id="a125596-4-8-9"
-       xlink:href="https://docs.abinit.org/tutorial/z2pack/"
-       transform="translate(298.37153,282.04143)">
+       xlink:href="./tddft/"
+       transform="translate(298.37153,342.04143)">
       <a
          id="a140368-9-6"
-         xlink:href="https://docs.abinit.org/tutorial/paral_mbt/">
+         xlink:href="./paral_mbt/">
         <text
            xml:space="preserve"
            style="font-style:normal;font-weight:normal;font-size:18.6667px;line-height:1.25;font-family:sans-serif;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.968017"
@@ -886,11 +928,11 @@ To access the tutorials, see the menu on the left...
          id="tspan189716">and Electron-Phonon</tspan></text>
     <a
        id="a125584-6-0-8"
-       xlink:href="https://docs.abinit.org/tutorial/fold2bloch/"
+       xlink:href="./elastic/"
        transform="translate(495.12703,232.04345)">
       <a
          id="a140334-5-7"
-         xlink:href="https://docs.abinit.org/tutorial/paral_moldyn/">
+         xlink:href="./paral_moldyn/">
         <text
            xml:space="preserve"
            style="font-style:normal;font-weight:normal;font-size:18.6667px;line-height:1.25;font-family:sans-serif;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.968017"
@@ -907,11 +949,11 @@ To access the tutorials, see the menu on the left...
     </a>
     <a
        id="a125592-5-6-2"
-       xlink:href="https://docs.abinit.org/tutorial/wannier90/"
+       xlink:href="./lattice_wannier/"
        transform="translate(493.12703,234.04345)">
       <a
          id="a140342-9-9"
-         xlink:href="https://docs.abinit.org/tutorial/paral_dfpt/">
+         xlink:href="./paral_dfpt/">
         <text
            xml:space="preserve"
            style="font-style:normal;font-weight:normal;font-size:18.6667px;line-height:1.25;font-family:sans-serif;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.968017"
@@ -928,11 +970,11 @@ To access the tutorials, see the menu on the left...
     </a>
     <a
        id="a125588-3-4-0"
-       xlink:href="https://docs.abinit.org/tutorial/optic/"
+       xlink:href="./nlo/"
        transform="translate(493.12703,236.04345)">
       <a
          id="a140338-8-2"
-         xlink:href="https://docs.abinit.org/tutorial/paral_images/">
+         xlink:href="./paral_images/">
         <text
            xml:space="preserve"
            style="font-style:normal;font-weight:normal;font-size:18.6667px;line-height:1.25;font-family:sans-serif;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.968017"
@@ -949,11 +991,11 @@ To access the tutorials, see the menu on the left...
     </a>
     <a
        id="a125596-4-8-1"
-       xlink:href="https://docs.abinit.org/tutorial/z2pack/"
+       xlink:href="./eph_intro/"
        transform="translate(495.12703,236.04345)">
       <a
          id="a140368-9-3"
-         xlink:href="https://docs.abinit.org/tutorial/paral_mbt/">
+         xlink:href="./paral_mbt/">
         <text
            xml:space="preserve"
            style="font-style:normal;font-weight:normal;font-size:18.6667px;line-height:1.25;font-family:sans-serif;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.968017"
@@ -970,11 +1012,11 @@ To access the tutorials, see the menu on the left...
     </a>
     <a
        id="a125596-4-8-1-5"
-       xlink:href="https://docs.abinit.org/tutorial/z2pack/"
+       xlink:href="./eph4mob/"
        transform="translate(496.37519,260.26026)">
       <a
          id="a140368-9-3-9"
-         xlink:href="https://docs.abinit.org/tutorial/paral_mbt/">
+         xlink:href="./paral_mbt/">
         <text
            xml:space="preserve"
            style="font-style:normal;font-weight:normal;font-size:18.6667px;line-height:1.25;font-family:sans-serif;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.968017"
@@ -991,11 +1033,11 @@ To access the tutorials, see the menu on the left...
     </a>
     <a
        id="a125596-4-8-1-4"
-       xlink:href="https://docs.abinit.org/tutorial/z2pack/"
+       xlink:href="./eph4zpr/"
        transform="translate(496.37519,286.26026)">
       <a
          id="a140368-9-3-91"
-         xlink:href="https://docs.abinit.org/tutorial/paral_mbt/">
+         xlink:href="./paral_mbt/">
         <text
            xml:space="preserve"
            style="font-style:normal;font-weight:normal;font-size:18.6667px;line-height:1.25;font-family:sans-serif;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.968017"
@@ -1012,11 +1054,11 @@ To access the tutorials, see the menu on the left...
     </a>
     <a
        id="a125596-4-8-1-4-5"
-       xlink:href="https://docs.abinit.org/tutorial/z2pack/"
+       xlink:href="./eph_legacy/"
        transform="translate(496.41348,308.53396)">
       <a
          id="a140368-9-3-91-8"
-         xlink:href="https://docs.abinit.org/tutorial/paral_mbt/">
+         xlink:href="./paral_mbt/">
         <text
            xml:space="preserve"
            style="font-style:normal;font-weight:normal;font-size:18.6667px;line-height:1.25;font-family:sans-serif;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.968017"
@@ -1033,11 +1075,11 @@ To access the tutorials, see the menu on the left...
     </a>
     <a
        id="a125596-4-8-1-4-5-4"
-       xlink:href="https://docs.abinit.org/tutorial/z2pack/"
+       xlink:href="./eph_tdep_legacy/"
        transform="translate(496.41348,334.53396)">
       <a
          id="a140368-9-3-91-8-8"
-         xlink:href="https://docs.abinit.org/tutorial/paral_mbt/">
+         xlink:href="./paral_mbt/">
         <text
            xml:space="preserve"
            style="font-style:normal;font-weight:normal;font-size:18.6667px;line-height:1.25;font-family:sans-serif;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.968017"
@@ -1079,32 +1121,36 @@ To access the tutorials, see the menu on the left...
          id="tspan189716-4">beyond basics</tspan></text>
     <a
        id="a125584-6-0-8-3"
-       xlink:href="https://docs.abinit.org/tutorial/fold2bloch/"
+       xlink:href="./nuc/"
        transform="translate(102.16226,192.25571)">
       <a
          id="a140334-5-7-5"
-         xlink:href="https://docs.abinit.org/tutorial/paral_moldyn/">
-        <text
-           xml:space="preserve"
-           style="font-style:normal;font-weight:normal;font-size:18.6667px;line-height:1.25;font-family:sans-serif;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.968017"
-           x="168.21094"
-           y="270.25446"
-           id="text11092-9-7-9-1-9-2-1"
-           transform="scale(0.96801691,1.0330398)"><tspan
-             sodipodi:role="line"
+         xlink:href="./paral_moldyn/">
+        <a
+           id="a10637"
+           xlink:href="http://127.0.0.1:8000/tutorial/nuc/">
+          <text
+             xml:space="preserve"
+             style="font-style:normal;font-weight:normal;font-size:18.6667px;line-height:1.25;font-family:sans-serif;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.968017"
              x="168.21094"
              y="270.25446"
-             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:18.6667px;font-family:Arial;-inkscape-font-specification:Arial;text-align:center;text-anchor:middle;fill:#fffefe;fill-opacity:1;stroke-width:0.968017"
-             id="tspan93899-5-4-1-4-8-7">prop_at_nucleus</tspan></text>
+             id="text11092-9-7-9-1-9-2-1"
+             transform="scale(0.96801691,1.0330398)"><tspan
+               sodipodi:role="line"
+               x="168.21094"
+               y="270.25446"
+               style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:18.6667px;font-family:Arial;-inkscape-font-specification:Arial;text-align:center;text-anchor:middle;fill:#fffefe;fill-opacity:1;stroke-width:0.968017"
+               id="tspan93899-5-4-1-4-8-7">prop_at_nucleus</tspan></text>
+        </a>
       </a>
     </a>
     <a
        id="a125592-5-6-2-4"
-       xlink:href="https://docs.abinit.org/tutorial/wannier90/"
+       xlink:href="./ucalc_crpa/"
        transform="translate(100.16226,194.25571)">
       <a
          id="a140342-9-9-3"
-         xlink:href="https://docs.abinit.org/tutorial/paral_dfpt/">
+         xlink:href="./paral_dfpt/">
         <text
            xml:space="preserve"
            style="font-style:normal;font-weight:normal;font-size:18.6667px;line-height:1.25;font-family:sans-serif;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.968017"
@@ -1121,11 +1167,11 @@ To access the tutorials, see the menu on the left...
     </a>
     <a
        id="a125588-3-4-0-6"
-       xlink:href="https://docs.abinit.org/tutorial/optic/"
+       xlink:href="./dftu/"
        transform="translate(100.16226,196.25571)">
       <a
          id="a140338-8-2-9"
-         xlink:href="https://docs.abinit.org/tutorial/paral_images/">
+         xlink:href="./paral_images/">
         <text
            xml:space="preserve"
            style="font-style:normal;font-weight:normal;font-size:18.6667px;line-height:1.25;font-family:sans-serif;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.968017"
@@ -1142,11 +1188,11 @@ To access the tutorials, see the menu on the left...
     </a>
     <a
        id="a125596-4-8-1-2"
-       xlink:href="https://docs.abinit.org/tutorial/z2pack/"
+       xlink:href="./lruj/"
        transform="translate(102.16226,196.25571)">
       <a
          id="a140368-9-3-6"
-         xlink:href="https://docs.abinit.org/tutorial/paral_mbt/">
+         xlink:href="./paral_mbt/">
         <text
            xml:space="preserve"
            style="font-style:normal;font-weight:normal;font-size:18.6667px;line-height:1.25;font-family:sans-serif;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.968017"
@@ -1163,11 +1209,11 @@ To access the tutorials, see the menu on the left...
     </a>
     <a
        id="a125596-4-8-1-5-8"
-       xlink:href="https://docs.abinit.org/tutorial/z2pack/"
+       xlink:href="./paw2/"
        transform="translate(103.41042,220.47252)">
       <a
          id="a140368-9-3-9-8"
-         xlink:href="https://docs.abinit.org/tutorial/paral_mbt/">
+         xlink:href="./paral_mbt/">
         <text
            xml:space="preserve"
            style="font-style:normal;font-weight:normal;font-size:18.6667px;line-height:1.25;font-family:sans-serif;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.968017"
@@ -1184,11 +1230,11 @@ To access the tutorials, see the menu on the left...
     </a>
     <a
        id="a125596-4-8-1-4-8"
-       xlink:href="https://docs.abinit.org/tutorial/z2pack/"
+       xlink:href="./paw3/"
        transform="translate(103.41042,246.47252)">
       <a
          id="a140368-9-3-91-88"
-         xlink:href="https://docs.abinit.org/tutorial/paral_mbt/">
+         xlink:href="./paral_mbt/">
         <text
            xml:space="preserve"
            style="font-style:normal;font-weight:normal;font-size:18.6667px;line-height:1.25;font-family:sans-serif;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.968017"
@@ -1205,11 +1251,11 @@ To access the tutorials, see the menu on the left...
     </a>
     <a
        id="a125596-4-8-1-4-5-3"
-       xlink:href="https://docs.abinit.org/tutorial/z2pack/"
+       xlink:href="./positron/"
        transform="translate(103.44871,268.74622)">
       <a
          id="a140368-9-3-91-8-83"
-         xlink:href="https://docs.abinit.org/tutorial/paral_mbt/">
+         xlink:href="./paral_mbt/">
         <text
            xml:space="preserve"
            style="font-style:normal;font-weight:normal;font-size:18.6667px;line-height:1.25;font-family:sans-serif;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.968017"
