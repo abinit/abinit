@@ -105,7 +105,7 @@ MODULE m_energy
   
   real(dp), allocatable :: e_hu_qmc(:) 
     
-  real(dp), pointer :: e_hu(:) => null()
+  real(dp), ABI_CONTIGUOUS pointer :: e_hu(:) => null()
 
  end type energy_type
 

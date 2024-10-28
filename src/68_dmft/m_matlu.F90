@@ -981,7 +981,7 @@ end subroutine add_matlu
 !Local variables-------------------------------
  integer :: iatom,im,isppol,lpawu,ndim,nspinor,nsppol
  complex(dpc) :: trace_tmp,trace_tmp2
- real(dp), pointer :: traceloc(:,:) => null()
+ real(dp), ABI_CONTIGUOUS pointer :: traceloc(:,:) => null()
  character(len=500) :: message
 ! *********************************************************************
 

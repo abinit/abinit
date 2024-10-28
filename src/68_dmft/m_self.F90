@@ -178,7 +178,7 @@ subroutine alloc_self(self,paw_dmft,opt_oper,wtype,opt_moments)
  if (optmoments == 1) then
    self%nmoments = 4
    shift = self%distrib%shiftk
-   mkmem = self%distrib%nkpt_mem(self%distrib%me_kpt)
+   mkmem = self%distrib%nkpt_mem(self%distrib%me_kpt+1)
    ABI_MALLOC(self%moments,(self%nmoments))
    call init_oper(paw_dmft,self%moments(1),nkpt=mkmem,shiftk=shift,opt_ksloc=2)
    do i=2,self%nmoments

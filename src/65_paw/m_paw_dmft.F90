@@ -2366,7 +2366,7 @@ subroutine init_paral_dmft(paw_dmft,distrib,nfreq)
  distrib%nw = nfreq
  distrib%shiftk = 0
 
- ABI_MALLOC(distrib%nw_mem,(0:nproc-1))
+ ABI_MALLOC(distrib%nw_mem,(nproc))
  ABI_MALLOC(distrib%procb,(nkpt))
  ABI_MALLOC(distrib%procf,(nfreq))
  ABI_MALLOC(distrib%proct,(nfreq))
@@ -2378,12 +2378,12 @@ subroutine init_paral_dmft(paw_dmft,distrib,nfreq)
 
  nproc_freq = min(nfreq,nproc)
 
- if (nproc_freq < nproc) distrib%nw_mem(nproc_freq:nproc-1) = 0
+ if (nproc_freq < nproc) distrib%nw_mem(nproc_freq+1:nproc) = 0
  ifreq = 1
  do irank=0,nproc_freq-1
    nfreq_proc = deltaw
    if (irank < residu) nfreq_proc = nfreq_proc + 1
-   distrib%nw_mem(irank) = nfreq_proc
+   distrib%nw_mem(irank+1) = nfreq_proc
    distrib%procf(ifreq:ifreq+nfreq_proc-1) = irank
    ifreq = ifreq + nfreq_proc
  end do ! irank
@@ -2393,25 +2393,25 @@ subroutine init_paral_dmft(paw_dmft,distrib,nfreq)
  nproc_kpt  = min(nkpt,nproc)
  nproc_freq = nproc / nkpt
 
- ABI_MALLOC(distrib%nkpt_mem,(0:nproc-1))
- ABI_MALLOC(distrib%nw_mem_kptparal,(0:nproc_freq))
+ ABI_MALLOC(distrib%nkpt_mem,(nproc))
+ ABI_MALLOC(distrib%nw_mem_kptparal,(nproc_freq+1))
 
- if (nproc > nproc_kpt) distrib%nkpt_mem(nproc_kpt:nproc-1) = 0
- distrib%nw_mem_kptparal(nproc_freq) = 0
+ if (nproc > nproc_kpt) distrib%nkpt_mem(nproc_kpt+1:nproc) = 0
+ distrib%nw_mem_kptparal(nproc_freq+1) = 0
 
  if (nproc_freq <= 1) then ! parallelization on kpt only
 
    deltakpt = nkpt / nproc
    residu   = nkpt - deltakpt*nproc
 
-   distrib%nw_mem_kptparal(0) = nfreq
+   distrib%nw_mem_kptparal(1) = nfreq
    distrib%proct(:) = 0
 
    ikpt = 1
    do irank=0,nproc_kpt-1
      nkpt_proc = deltakpt
      if (irank < residu) nkpt_proc = nkpt_proc + 1
-     distrib%nkpt_mem(irank) = nkpt_proc
+     distrib%nkpt_mem(irank+1) = nkpt_proc
      distrib%procb(ikpt:ikpt+nkpt_proc-1) = irank
      if (myproc == irank) distrib%shiftk = ikpt - 1
      ikpt = ikpt + nkpt_proc
@@ -2430,7 +2430,7 @@ subroutine init_paral_dmft(paw_dmft,distrib,nfreq)
    deltaw = nfreq / nproc_freq
    residu = nfreq - deltaw*nproc_freq
 
-   distrib%nkpt_mem(0:nkpt-1) = 1
+   distrib%nkpt_mem(1:nkpt) = 1
 
    do ikpt=1,nkpt
      distrib%procb(ikpt) = ikpt - 1
@@ -2442,7 +2442,7 @@ subroutine init_paral_dmft(paw_dmft,distrib,nfreq)
      if (irank < residu) nfreq_proc = nfreq_proc + 1
      if (nfreq_proc > 0) distrib%proct(ifreq:ifreq+nfreq_proc-1) = irank
      ifreq = ifreq + nfreq_proc
-     distrib%nw_mem_kptparal(irank) = nfreq_proc
+     distrib%nw_mem_kptparal(irank+1) = nfreq_proc
    end do ! irank 
   
    distrib%me_kpt  = myproc / nproc_freq
