@@ -29,6 +29,10 @@ To access the tutorials, see the menu on the left...
   <img src="![drawing.svg](index_assets/drawing.svg)" width="700">
 </div>
 
+<center>
+<img style="height: 540px; width: 720px;" alt="Schema 1" src="index_assets/drawing.svg" usemap="#map1"/>
+</center>
+
 
 The four basic tutorials are presented at the top, in one orange block. There is also an orange block for the ABINIT_build tutorial.
 Each block in brown represents one intermediate-level tutorial. The blocks in red
