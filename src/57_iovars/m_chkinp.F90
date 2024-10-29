@@ -897,7 +897,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    !  cond_string(1)='optcell' ; cond_values(1)=dt%optcell
    !  call chkdpr(1,1,cond_string,cond_values,ierr,'ecutsm',dt%ecutsm,1,tol8,iout)
    !end if
-!  At present (v10.2.2), Chebyshev filtering algorithm (wfoptalg=1 or 111) cannot be used with ecutsm=0.
+!  At present (v10.2.2), Chebyshev filtering algorithm (wfoptalg=1 or 111) cannot be used with ecutsm/=0.
 !  So we allow ecutsm=0 but with a warning.
    if(dt%optcell/=0 .and. dt%ecutsm < tol8 .and. dt%wfoptalg/=1 .and. dt%wfoptalg/=111) then
      write(msg, "(2a)") 'For optcell > 0, it is highly recommended to set ecutsm > 0 to have better precision on stress',&
