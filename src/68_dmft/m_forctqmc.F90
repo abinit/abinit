@@ -181,32 +181,21 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang, &
    ABI_MALLOC(udens_atoms_for_s,(natom))
  end if 
  ABI_MALLOC(dmat_diag,(natom))
- !ABI_MALLOC(identity,(natom))
  call init_matlu(natom,nspinor,nsppol,paw_dmft%lpawu(:),dmat_diag(:))
  call init_matlu(natom,nspinor,nsppol,paw_dmft%lpawu(:),eigvectmatlu(:))
  call init_matlu(natom,2,1,paw_dmft%lpawu(:),udens_atoms(:))
  if (paw_dmft%ientropy == 1) then
    call init_matlu(natom,2,1,paw_dmft%lpawu(:),udens_atoms_for_s(:))
  end if 
- !call init_matlu(natom,nspinor,nsppol,paw_dmft%lpawu,identity)
- !call identity_matlu(identity,natom)
  do iatom=1,natom
    lpawu = paw_dmft%lpawu(iatom)
    if (lpawu == -1) cycle
-   !tndim=nspinor*(2*lpawu+1)
-     !do isppol=1,nsppol
-     !  ABI_MALLOC(eigvectmatlu(iatom,isppol)%value,(tndim,tndim))
-     !end do
-     !ABI_MALLOC(udens_atoms(iatom)%value,(2*(2*lpawu+1),2*(2*lpawu+1)))
-     !if (paw_dmft%ientropy == 1) ABI_MALLOC(udens_atoms_for_s(iatom)%value,(2*(2*lpawu+1),2*(2*lpawu+1)))
    ABI_MALLOC(magmom_orb(iatom)%value,(2*(2*lpawu+1),2*(2*lpawu+1)))
    magmom_orb(iatom)%value=czero
    ABI_MALLOC(magmom_spin(iatom)%value,(2*(2*lpawu+1),2*(2*lpawu+1)))
    magmom_spin(iatom)%value=czero
    ABI_MALLOC(magmom_tot(iatom)%value,(2*(2*lpawu+1),2*(2*lpawu+1)))
    magmom_tot(iatom)%value=czero  
-     !dmat_diag(iatom)%mat=czero
-   !end if
  end do ! iatom
 
 ! ___________________________________________________________________________________
@@ -252,7 +241,6 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang, &
    write(std_out,*) " Ylm basis is used (before rotation)"
    rot_type_vee = 4 ! for rotatevee_hu
  end if ! useylm
-
 
 ! if(useylm==1.and.opt_diag/=1) ABI_ERROR("useylm==1 and opt_diag/=0 is not possible")
  if (hu(1)%jpawu_zero .and. nsppol == 2) nsppol_imp = 2 ! J=0 and nsppol=2
@@ -313,10 +301,45 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang, &
    write(std_out,*) "  ==  The correlated occupation matrix is diagonalized"
  end if ! opt_diag
   
+ if (weiss%has_moments == 1) then
+
+   if (useylm == 1) then
+     message = "Computation of the moments is not implemented for the ylm case"
+     ABI_ERROR(message)
+   end if 
+
+   call init_oper(paw_dmft,levels_slm,opt_ksloc=2)
+   call copy_matlu(energy_level%matlu(:),levels_slm%matlu(:),natom)
+
+   ! Compute the moments of the hybridization 
+   call compute_moments_loc(green,self,energy_level,weiss,0)
+
+   ! Remove the spurious 0th order moment of the hybridization
+   do ifreq=1,nwlo
+     if (weiss%distrib%procf(ifreq) /= myproc) cycle
+     do iatom=1,natom
+       lpawu = paw_dmft%lpawu(iatom)
+       if (lpawu == -1) cycle
+       ndim = nspinor * (2*lpawu+1)
+       do isppol=1,nsppol
+         call xginv(weiss%oper(ifreq)%matlu(iatom)%mat(:,:,isppol),ndim)
+         weiss%oper(ifreq)%matlu(iatom)%mat(:,:,isppol) = &
+            & weiss%oper(ifreq)%matlu(iatom)%mat(:,:,isppol) + &
+            & weiss%moments(1)%matlu(iatom)%mat(:,:,isppol)
+         call xginv(weiss%oper(ifreq)%matlu(iatom)%mat(:,:,isppol),ndim)
+       end do ! isppol
+     end do ! iatom
+   end do ! ifreq
+   call gather_oper(weiss%oper(:),weiss%distrib,paw_dmft,opt_ksloc=2)
+   call zero_matlu(weiss%moments(1)%matlu(:),natom)
+   do i=2,weiss%nmoments-1
+     call copy_matlu(weiss%moments(i)%matlu(:),weiss_for_rot%moments(i)%matlu(:),natom)
+   end do ! i
+ end if ! moments 
+
 ! =================================================================
 ! Now, check if diagonalisation is necessary
 ! =================================================================
-
 
 ! =================================================================
 ! First rotate to Ylm basis the atomic levels
@@ -341,32 +364,6 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang, &
  ABI_MALLOC(vee_rotated,(natom))
  call init_vee(paw_dmft,vee_rotated(:))
  
- if (weiss%has_moments == 1) then
-   call init_oper(paw_dmft,levels_slm,opt_ksloc=2)
-   call copy_matlu(energy_level%matlu(:),levels_slm%matlu(:),natom)
-   ! Compute the moments of the hybridization 
-   call compute_moments_loc(green,self,energy_level,weiss,0)
-   ! Remove the spurious 0th order moment
-   do ifreq=1,nwlo
-     if (weiss%distrib%procf(ifreq) /= myproc) cycle
-     do iatom=1,natom
-       lpawu = paw_dmft%lpawu(iatom)
-       if (lpawu == -1) cycle
-       ndim = nspinor * (2*lpawu+1)
-       do isppol=1,nsppol
-         call xginv(weiss%oper(ifreq)%matlu(iatom)%mat(:,:,isppol),ndim)
-         weiss%oper(ifreq)%matlu(iatom)%mat(:,:,isppol) = weiss%oper(ifreq)%matlu(iatom)%mat(:,:,isppol) + &
-            & weiss%moments(1)%matlu(iatom)%mat(:,:,isppol)    
-         call xginv(weiss%oper(ifreq)%matlu(iatom)%mat(:,:,isppol),ndim)
-       end do ! isppol
-     end do ! iatom
-   end do ! ifreq
-   call gather_oper(weiss%oper(:),weiss%distrib,paw_dmft,opt_ksloc=2)
-   do i=2,weiss%nmoments-1
-     call copy_matlu(weiss%moments(i)%matlu(:),weiss_for_rot%moments(i)%matlu(:),natom)
-   end do ! i
- end if ! moments 
- 
 ! ===========================================================================================
 ! Start for diagonalization of levels/density matrix according to opt_diag
 ! ===========================================================================================
@@ -378,8 +375,6 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang, &
 ! =================================================================
 ! Diagonalize atomic levels
 ! =================================================================
-     !ABI_MALLOC(level_diag,(natom))
-     !call init_matlu(natom,nspinor,nsppol,paw_dmft%lpawu(:),level_diag(:))
      call init_oper(paw_dmft,level_diag,opt_ksloc=2)
      
      ! Diagonalise atomic levels (opt_real is necessary, because
@@ -397,14 +392,11 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang, &
 !       call wrtout(std_out,message,'COLL')
 !       call print_matlu(energy_level%matlu,natom,1,compl=1,opt_exp=1)
 
-     !if(opt_rot==1) call copy_matlu(level_diag,energy_level%matlu,natom)
      if (opt_rot == 1) then
        call copy_matlu(level_diag%matlu(:),energy_level%matlu(:),natom)
      end if 
      
      call destroy_oper(level_diag)
-     !call destroy_matlu(level_diag,natom)
-     !ABI_FREE(level_diag)
 
      ! Print diagonalized levels
      ! --------------------------
@@ -418,9 +410,6 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang, &
          & " == Energy levels Diagonalized for Fermi Level=",paw_dmft%fermie
        call wrtout(std_out,message,'COLL')
      end if ! pawprtvol>=3
-
-     call rotatevee_hu(hu(:),paw_dmft,pawprtvol,eigvectmatlu(:), & 
-                     & rot_type_vee,udens_atoms(:),vee_rotated(:))
 
    else if (opt_diag == 0) then
      do iatom=1,natom
@@ -438,6 +427,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang, &
   ! call rotatevee_hu(cryst_struc,hu,nspinor,nsppol,pawprtvol,eigvectmatlu,udens_atoms)
 
  else if (opt_diag == 2) then
+
 ! =================================================================
 ! Diagonalizes density matrix and keep eigenvectors in eigvectmatlu
 ! =================================================================
@@ -475,8 +465,6 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang, &
    !ABI_WARNING("In qmc_prep_ctqmc J/=0 and rotation matrix not rotated")
 !  Rotate interaction.
 !   call rotatevee_hu(cryst_struc,hu,nspinor,nsppol,pawprtvol,eigvectmatlu,udens_atoms)
-    call rotatevee_hu(hu(:),paw_dmft,pawprtvol,eigvectmatlu(:), &
-                    & rot_type_vee,udens_atoms(:),vee_rotated(:))
 
  end if ! opt_diag
 ! ===========================================================================================
@@ -514,17 +502,12 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang, &
 ! In case of degenerate levels, severals rotations are possible. Here we
 ! choose the rotation of proc 0. It is arbitrary.
 ! ===========================================================================================
- !do iatom=1,natom
- !  lpawu=paw_dmft%lpawu(iatom)
- !  if(lpawu/=-1) then
- !    tndim=nspinor*(2*lpawu+1)
- !    do isppol=1,nsppol
- !      call xmpi_bcast(eigvectmatlu(iatom,isppol)%value,0,paw_dmft%spacecomm,ier)
- !    end do
- !  end if
- !end do
  call xmpi_matlu(eigvectmatlu(:),natom,paw_dmft%spacecomm,master=0,option=2)
  
+ if (opt_diag /= 0) then
+   call rotatevee_hu(hu(:),paw_dmft,pawprtvol,eigvectmatlu(:), &
+                   & rot_type_vee,udens_atoms(:),vee_rotated(:))
+ end if 
  
      !unitnb=300000+paw_dmft%myproc
      !call int2char4(paw_dmft%myproc,tag_proc)
@@ -603,7 +586,6 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang, &
 
  call flush_unit(std_out)
 
-
 ! =================================================================
 ! Rotate weiss function according to eigenvectors.
 ! =================================================================
@@ -670,14 +652,14 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang, &
 
    if (myproc == mod(nproc+1,nproc) .and. paw_dmft%lpawu(1) > 0) then
      if (open_file(trim(paw_dmft%filapp)//"_atom_G0w_.dat",message,newunit=unt) /= 0) ABI_ERROR(message)
-     ndim = nspinor * (2*paw_dmft%lpawu(1)+1)
+     ndim = 2*paw_dmft%lpawu(1) + 1
      do ifreq=1,nwlo
        write(unt,'(29f21.14)') paw_dmft%omega_lo(ifreq),&
          & (((weiss_for_rot%oper(ifreq)%matlu(1)%mat(im1+(ispinor-1)*ndim,im1+(ispinor-1)*ndim,isppol),&
          & im1=1,3),ispinor=1,nspinor),isppol=1,nsppol)
      end do ! ifreq
      close(unt)
-   end if ! myproc=0
+   end if ! myproc=master
 
    call flush_unit(std_out)
    if (pawprtvol >= 3) then
@@ -834,7 +816,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang, &
 ! ___________________________________________________________________________________
 !
 ! ===========================================================================================
-! Compute inverse of weiss  and compute hybridization
+! Compute inverse of weiss and compute hybridization
 ! ===========================================================================================
 
 ! Compute inverse of weiss  for each Frequency
@@ -925,20 +907,20 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang, &
 !  & (im,im1,isppol,ispinor,ispinor1)-cmplx(0.d0,paw_dmft%omega_lo(ifreq),kind=dp)),im=1,2*3+1),&
 !&      im1=1,2*3+1),isppol=1,nsppol),ispinor=1,nspinor),ispinor1=1,nspinor)
 
-  ! Compute G_0^-1-iw_n
-  ! --------------------
    if (opt_fk == 1) then
+
+     ! Compute G_0^-1-iw_n
+     ! --------------------
      call shift_matlu(weiss_for_rot%oper(ifreq)%matlu(:),natom,shift(:))
-   end if 
 
-  ! Compute -G_0^-1+iw_n
-  ! --------------------
-   if (opt_fk == 1) then
+     ! Compute -G_0^-1+iw_n
+     ! --------------------
      call fac_matlu(weiss_for_rot%oper(ifreq)%matlu(:),natom,-cone)
+
    end if 
 
-  ! Print -G_0^-1+iw_n
-  ! --------------------
+   ! Print -G_0^-1+iw_n
+   ! --------------------
    if (optdb == 1) then
      call printplot_matlu(weiss_for_rot%oper(ifreq)%matlu(:),natom,& 
       & paw_dmft%omega_lo(ifreq),"G0inv_minus_omega",20000,imre=1)
@@ -1001,9 +983,8 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang, &
        call copy_matlu(matlu1(:),weiss_for_rot%oper(ifreq)%matlu(:),natom)
      end if 
 
-
-      ! Multiply F by frequency
-      ! ------------------------
+     ! Multiply F by frequency
+     ! ------------------------
      call copy_matlu(matlu1(:),matlu2(:),natom)
      call fac_matlu(matlu1(:),natom,cmplx(zero,paw_dmft%omega_lo(ifreq),kind=dp))
      if (ifreq == nwlo .or. ifreq == paw_dmft%dmftqmc_l) then
@@ -1199,9 +1180,9 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang, &
    fw1_nd(:,:,:) = czero
    fw1(:,:) = czero
 
-     ! =================================================================
-     ! Put hybridization in new arrays for CTQMC
-     ! =================================================================
+   ! =================================================================
+   ! Put hybridization in new arrays for CTQMC
+   ! =================================================================
    if (testcode == 0) then
      iflavor1 = 0
      iflavor2 = 0
@@ -1785,7 +1766,7 @@ end if !nspinor
  !  if (opt_diag /= 0) call rotate_matlu(green%oper_tau(itau)%matlu(:),eigvectmatlu(:),natom,3,0)
  !  if (useylm == 1) call slm2ylm_matlu(green%oper_tau(itau)%matlu(:),natom,2,0)
  !end do
- do itau=1,paw_dmft%dmftqmc_l
+ do itau=1,1 !paw_dmft%dmftqmc_l
    if (opt_diag /= 0) then
      call rotate_matlu(green%oper_tau(itau)%matlu(:),eigvectmatlu(:),natom,0)
    end if
@@ -1889,7 +1870,6 @@ end if !nspinor
    call print_matlu(weiss%oper(1)%matlu(:),natom,1)  ! debug
  end if ! pawprtvol>=3
 
-
  ABI_MALLOC(matlu1,(natom))
  call init_matlu(natom,nspinor,nsppol,paw_dmft%lpawu(:),matlu1(:))
  call copy_matlu(green%occup_tau%matlu(:),matlu1(:),natom)
@@ -1911,12 +1891,9 @@ end if !nspinor
 ! Symmetrize green function G(tau) and G(ifreq) to recover symmetry
 ! artificially broken by QMC
 ! =================================================================
- write(message,'(a,2x,a,f13.5)') ch10," == Symetrise green function after QMC "
+ write(message,'(a,2x,a,f13.5)') ch10," == Symmetrize green function after QMC "
  call wrtout(std_out,message,'COLL')
- !do itau=1,paw_dmft%dmftqmc_l
- !  call sym_matlu(green%oper_tau(itau)%matlu(:),paw_dmft)
- !end do
- do itau=1,paw_dmft%dmftqmc_l
+ do itau=1,1 !paw_dmft%dmftqmc_l
    call sym_matlu(green%oper_tau(itau)%matlu(:),paw_dmft)
  end do ! itau
  do ifreq=1,paw_dmft%dmft_nwlo
@@ -1950,8 +1927,6 @@ end if !nspinor
  call destroy_matlu(eigvectmatlu(:),natom)
  call destroy_matlu(udens_atoms(:),natom)
  ABI_FREE(dmat_diag)
- !call destroy_matlu(identity,natom)
- !ABI_FREE(identity)
  do iatom=1,natom
    lpawu = paw_dmft%lpawu(iatom)
    if (lpawu == -1) cycle
