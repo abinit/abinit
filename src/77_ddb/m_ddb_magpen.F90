@@ -138,6 +138,10 @@ contains
  ABI_MALLOC(mmom_tr,((natom+2)*3,ndim))
  ABI_MALLOC(zfield,(ndim,(natom+2)*3))
  ABI_MALLOC(zfield_tr,((natom+2)*3,ndim))
+
+ ABI_MALLOC(ddb%val_fs,(2,ddb%msize,ddb%nblok))
+ if (mpopt==2) ABI_MALLOC(ddb%val_rs,(2,ddb%msize,ddb%nblok))
+
  ABI_MALLOC(ifcmat,(3*natom,3*natom))
  ABI_MALLOC(ifcmat_fm,(3*natom,3*natom))
  ABI_MALLOC(fmzeff,(3,3*natom))
@@ -236,70 +240,81 @@ contains
    ' Second-order linear-response tensors ',ch10
    call wrtout([std_out, ab_out], msg)
 
-
    !Convert ddb%val to second-order energies
-   call ddb%to_d2etot(ddb%val,0,kblok,qeq0,qphon,qphnrm,ucvol,omega=omega)
+   call ddb%to_d2etot(ddb%val,kblok,0,qeq0,qphon,qphnrm,ucvol,omega=omega)
+
+   !Convert second-order derivatives to diferent magnetic boundary conditions
+   call mp_d2etot(barmagsus,barmmom,barmmom_tr,ddb,0,kblok,&
+ & invhmat,magsus,magpen,mpert,mpopt,natom,nblok,ndim,qphon,xred,zfield,zfield_tr)
+
+   !Convert second-order energies to the physical quantities of ddb%val
+   call ddb%to_d2etot(ddb%val,kblok,1,qeq0,qphon,qphnrm,ucvol,omega=omega)
+   call ddb%to_d2etot(ddb%val_fs,kblok,1,qeq0,qphon,qphnrm,ucvol,omega=omega)
+   if (mpopt==2) call ddb%to_d2etot(ddb%val_rs,kblok,1,qeq0,qphon,qphnrm,ucvol,omega=omega)
+
+   !Print the physical quantities in the new magnetic boundary conditions
+   call mp_d2etot_print(ddb,ddb%val_fs,kblok,mpert,natom,nblok,1,omega,prtvol,qeq0,qphnrm,qphon)
 
    rfmagn(:)=0
    rfelfd(:)=0
    rfphon(:)=0
    
-   !IFCs block
-   rfphon(1:2)=1
-   call ddb%get_block(iblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, rftyp, omega=omega)
-   if (iblok /= 0) then
-     call mp_ifc(barmagsus,barmmom,barmmom_tr,ddb%val,0,iblok,ifcmat,&
-   & ifcmat_fm,invhmat,magsus,magpen,mpert,mpopt,&
-   & natom,nblok,ndim,omega(1),omegaflag,prtopt,prtvol,qphon,xred,zfield,zfield_tr)
-     
-     !Apply ASR
-     if (omega(1) < tol12) then
-       call asrw0(delta_asrw0,ifcmat,natom,0) 
-       call asrw0(delta_asrw0_fm,ifcmat_fm,natom,0) 
-     else 
-       call asrw0(delta_asrw0,ifcmat,natom,1) 
-       call asrw0(delta_asrw0_fm,ifcmat_fm,natom,1) 
-     end if
-   end if
-
-   !Born effective charges block
-   jblok=0
-   if (qeq0) then
-     rfphon(1:2)=1
-     rfelfd(1:2)=2
-     call ddb%get_block(jblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, rftyp, omega=omega)
-   end if
-   if (jblok /= 0 ) then
-     call mp_zeff(barmagsus,barmmom,barmmom_tr,ddb%val,&
-   & 0,fmzeff,fmzeff_tr,jblok,invhmat,lm_epsilon,magpen,magsus,mpert,mpopt,&
-   & natom,nblok,ndim,dum_phongreen,prtopt,prtvol,ucvol,zeff,zeff_tr,zfield,zfield_tr)
-   end if
-
-   !Dielectric susceptibility block
-   lblok=0
-   if (qeq0) then
-     rfphon(:)=0
-     rfelfd(1:2)=2
-     call ddb%get_block(lblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, rftyp, omega=omega)
-   end if
-   if (lblok /= 0 ) then
-     call mp_diel(barepsilon,barmagsus,barmmom,barmmom_tr,ddb%val,&
-   & 0,epsilon,lblok,invhmat,magpen,magsus,mpert,mpopt,&
-   & natom,nblok,ndim,prtopt,prtvol,ucvol,zfield,zfield_tr)
-   end if
-
-   !Magnetic susceptibility block
-   iblok=0
-   rfphon(:)=0
-   rfelfd(1:2)=0
-   rfstrs(1:2)=0
-   rfmagn(1:2)=1
-   call ddb%get_block(iblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, rftyp, omega=omega)
-   if (lblok /= 0 ) then
-     call mp_macmagsus(barmagsus,ddb%val,&
-   & 0,iblok,invbarmagsus,invhmat,macmagsus,magpen,magsus,mpatpol,mpdir,mpert,mpopt,&
-   & natom,nblok,ndim,nmdir,prtopt,prtvol,ucvol)
-   end if
+!   !IFCs block
+!   rfphon(1:2)=1
+!   call ddb%get_block(iblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, rftyp, omega=omega)
+!   if (iblok /= 0) then
+!     call mp_ifc(barmagsus,barmmom,barmmom_tr,ddb%val,0,iblok,ifcmat,&
+!   & ifcmat_fm,invhmat,magsus,magpen,mpert,mpopt,&
+!   & natom,nblok,ndim,omega(1),omegaflag,prtopt,prtvol,qphon,xred,zfield,zfield_tr)
+!     
+!     !Apply ASR
+!     if (omega(1) < tol12) then
+!       call asrw0(delta_asrw0,ifcmat,natom,0) 
+!       call asrw0(delta_asrw0_fm,ifcmat_fm,natom,0) 
+!     else 
+!       call asrw0(delta_asrw0,ifcmat,natom,1) 
+!       call asrw0(delta_asrw0_fm,ifcmat_fm,natom,1) 
+!     end if
+!   end if
+!
+!   !Born effective charges block
+!   jblok=0
+!   if (qeq0) then
+!     rfphon(1:2)=1
+!     rfelfd(1:2)=2
+!     call ddb%get_block(jblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, rftyp, omega=omega)
+!   end if
+!   if (jblok /= 0 ) then
+!     call mp_zeff(barmagsus,barmmom,barmmom_tr,ddb%val,&
+!   & 0,fmzeff,fmzeff_tr,jblok,invhmat,lm_epsilon,magpen,magsus,mpert,mpopt,&
+!   & natom,nblok,ndim,dum_phongreen,prtopt,prtvol,ucvol,zeff,zeff_tr,zfield,zfield_tr)
+!   end if
+!
+!   !Dielectric susceptibility block
+!   lblok=0
+!   if (qeq0) then
+!     rfphon(:)=0
+!     rfelfd(1:2)=2
+!     call ddb%get_block(lblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, rftyp, omega=omega)
+!   end if
+!   if (lblok /= 0 ) then
+!     call mp_diel(barepsilon,barmagsus,barmmom,barmmom_tr,ddb%val,&
+!   & 0,epsilon,lblok,invhmat,magpen,magsus,mpert,mpopt,&
+!   & natom,nblok,ndim,prtopt,prtvol,ucvol,zfield,zfield_tr)
+!   end if
+!
+!   !Magnetic susceptibility block
+!   iblok=0
+!   rfphon(:)=0
+!   rfelfd(1:2)=0
+!   rfstrs(1:2)=0
+!   rfmagn(1:2)=1
+!   call ddb%get_block(iblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, rftyp, omega=omega)
+!   if (lblok /= 0 ) then
+!     call mp_macmagsus(barmagsus,ddb%val,&
+!   & 0,iblok,invbarmagsus,invhmat,macmagsus,magpen,magsus,mpatpol,mpdir,mpert,mpopt,&
+!   & natom,nblok,ndim,nmdir,prtopt,prtvol,ucvol)
+!   end if
 
  end do
 
@@ -952,6 +967,249 @@ contains
    end do
  end if
  end subroutine magmom
+!!***
+
+!!****f* m_ddb_magpen/mp_d2etot
+!! NAME
+!! mp_d2etot
+!!
+!! FUNCTION
+!! Calculate the different magnetic flavors (see mpopt below) of the second-
+!! order derivatives of total energy
+!!
+!! INPUTS
+!! barmagsus(ndim,ndim)= Penalized spin-sussceptibility tensor (\bar{\chi})
+!! barmom(ndim,(natom+2)*3)= Penalized first-order magnetic moments
+!! barmom_tr((natom+2)*3,ndim)= Penalized first-order responses to local Zeeman fields
+!! (equal to barmom^{\dagger} in the nondissipative regime)
+!! ddb= the ddb object
+!! dissip= if 0 a nondissipative regime is assumed
+!!         if 1 a dissipative regime is assumed with a finite \eta introduced at the interpolation in omega regime
+!! iblok= index of the IFCs block
+!! invhmat(ndim,ndim)= (I-\alpha\bar{\chi})^-1 matrix
+!! magsus(ndim,ndim)= Spin-sussceptibility tensor
+!! magpen= magnetic penalty amplitude 
+!! mpert =maximum number of ipert
+!! mpopt = 1 calculate the frozen-spin second-order quantities
+!!         2 calculate the relaxed-spin second-order quantities 
+!! natom= number of atoms in unit cell
+!! nblok= number of blocks in the DDB
+!! ndim= number of local magnetic degres of freedom
+!! qphon= momentum wave-vector
+!! xred(3,natom)= reduced atomic coordinates
+!! zfield(ndim,(natom+2)*3)= First-order induced Zeeman fields
+!! zfield_tr(natom+2)*3,ndim)= Linear-responses to external Zeeman fields
+!! (equal to zfield^{\dagger} in the nondissipative regime)
+!!
+!! OUTPUT
+!! ddb%val_fs(2,msize,nblok)= second-order derivatives at fixed spin.
+!! ddb%val_rs(2,msize,nblok)= second-order derivatives at relaxed spin.
+!!
+!! SOURCE
+
+ subroutine mp_d2etot(barmagsus,barmmom,barmmom_tr,ddb,dissip,&
+& iblok,invhmat,magsus,magpen,mpert,mpopt,&
+& natom,nblok,ndim,qphon,xred,zfield,zfield_tr)
+
+!Arguments -------------------------------
+!scalars
+ integer,intent(in) :: iblok,dissip,mpert,mpopt,natom,nblok,ndim
+ real(dp),intent(in) :: magpen
+!arrays
+ type(ddb_type),intent(inout) :: ddb
+ real(dp),intent(in) :: qphon(3),xred(3,natom)
+ complex(dpc),intent(in) :: barmagsus(ndim,ndim)
+ complex(dpc),intent(in) :: barmmom(ndim,(natom+2)*3)
+ complex(dpc),intent(in) :: barmmom_tr((natom+2)*3,ndim)
+ complex(dpc),intent(in) :: invhmat(ndim,ndim)
+ complex(dpc),intent(in) :: magsus(ndim,ndim)
+ complex(dpc),intent(in) :: zfield(ndim,(natom+2)*3)
+ complex(dpc),intent(in) :: zfield_tr((natom+2)*3,ndim)
+!Local variables -------------------------
+!scalars
+ integer :: idir1,idir2,ipert1,ipert2,index,irow,icol
+ complex(dpc) :: val_ps,val_fs, val_rs
+!arrays
+ 
+! *********************************************************************
+
+ index=0
+ do ipert2= 1, natom+5
+   do idir2= 1, 3
+     icol= (ipert2-1)*3 + idir2
+     do ipert1= 1, natom+5
+       do idir1= 1, 3
+         irow= (ipert1-1)*3 + idir1
+         index= index + 1
+
+         !Extract the penalized second-order derivatives 
+         val_ps= cmplx(ddb%val(1,index,iblok),ddb%val(2,index,iblok),16)
+       
+         !Calculate the fixed-spin flavor
+         val_fs= val_ps + &
+       & sum( zfield_tr(irow,:) * matmul( barmagsus,zfield(:,icol) ) ) 
+         ddb%val_fs(1,index,iblok)= real(val_fs)
+         ddb%val_fs(2,index,iblok)= aimag(val_fs)
+
+         if (mpopt==2) then
+           !Calculate the relaxed-spin flavor
+           val_rs= val_fs - &
+         & sum( zfield_tr(irow,:) * matmul( magsus,zfield(:,icol) ) ) 
+           ddb%val_rs(1,index,iblok)= real(val_rs)
+           ddb%val_rs(2,index,iblok)= aimag(val_rs)
+         end if
+
+       end do
+     end do
+   end do
+ end do 
+
+!TODO:
+! !Adopt the same phase convention as for the local Zeeman perturbation
+! do ipert2= 1, natom
+!   do idir2= 1, 3
+!     icol=( ipert2-1)*3 + idir2
+!     do ipert1= 1, natom
+!       do idir1= 1, 3
+!         irow=( ipert1-1)*3 + idir1
+!         fmifc_sf(irow,icol)=fmifc(irow,icol)* &
+!       & exp(two_pi*(0.d0,1.d0)* dot_product(qphon,xred(:,ipert2)-xred(:,ipert1)))
+!       end do
+!     end do
+!   end do
+! end do 
+
+ end subroutine mp_d2etot
+!!***
+
+!!****f* m_ddb_magpen/mp_d2etot_print
+!! NAME
+!! mp_d2etot_print
+!!
+!! FUNCTION
+!! Write on output file the fixed- and relaxed-spin susceptibilities
+!!
+!! INPUTS
+!! blkval= 2nd-order susceptibilities matrix 
+!! kblok= index of the current block
+!! opt= 1 write the frozen-spin second-order quantities
+!!      2 write the relaxed-spin second-order quantities 
+!! omega= frequency of the perturbation
+!! qphon= momentum wave-vector
+!!
+!! OUTPUT
+!!
+!! SOURCE
+
+ subroutine mp_d2etot_print(ddb,blkval,kblok,mpert,natom,nblok,opt,omega,prtvol,qeq0,qphnrm,qphon)
+
+!Arguments -------------------------------
+!scalars
+ class(ddb_type),intent(in) :: ddb
+ integer,intent(in) :: kblok,mpert,natom,nblok,opt,prtvol
+ logical,intent(in) :: qeq0
+!arrays
+ real(dp),intent(in) :: omega(3)
+ real(dp),intent(in) :: blkval(2,3,mpert,3,mpert,nblok)
+ real(dp),intent(inout) :: qphnrm(3),qphon(3,3)
+
+!Local variables -------------------------
+!scalars
+ integer :: iblok,idir1,idir2,ipert1,ipert2,index,irow,icol
+ integer :: rftyp
+ character(len=1000) :: msg
+!arrays
+ integer :: rfelfd(4),rfmagn(4),rfphon(4),rfstrs(4)
+ real(dp) :: val(2)
+ character(len=1) :: cart(3)=(/'x','y','z'/)
+ 
+! *********************************************************************
+
+  rfelfd(:)=0
+  rfphon(:)=0
+  rfstrs(:)=0
+  rfmagn(:)=0
+  rftyp = 1
+
+  if (qeq0) then
+
+   !Born charges 
+   rfphon(1:2)=1
+   rfelfd(1:2)=2
+   call ddb%get_block(iblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, rftyp, omega=omega)
+   if (iblok/=0.and.iblok==kblok) then
+     if (opt==1) then
+       call wrtout([ab_out,std_out], ' Frozen-spin Born effective charges')
+     else if (opt==2) then
+       call wrtout([ab_out,std_out], ' Relaxed-spin Born effective charges')
+     end if
+     call wrtout([ab_out,std_out], ' efld.dir   atom   dir        Real              Imag')
+     ipert1= natom + 2
+     do idir1= 1, 3
+       do ipert2= 1, natom
+         do idir2= 1, 3
+           val(:)=blkval(:,idir1,ipert1,idir2,ipert2,kblok)
+           write(msg,'(3x,a2,7x,i3,4x,a2,2x,2es18.9)') &
+         & cart(idir1), ipert2, cart(idir2), val(1), val(2)
+           call wrtout([ab_out,std_out], msg)
+         end do
+       end do
+     end do
+   end if
+
+!   !Dielectric tensor
+!   iblok=0
+!   rfphon(:)=0
+!   rfelfd(1:2)=2
+!   call ddb%get_block(iblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, rftyp, omega=omega)
+!   if (iblok/=0.and.iblok==kblok) then
+!     ipert1= ddb%natom + 2
+!     ipert2= ddb%natom + 2
+!     do idir2= 1, 3
+!       do idir1= 1, 3
+!         val(:)=blkval(:,idir1,ipert1,idir2,ipert2,kblok)
+!         if (option==0) then
+!           if (idir1==idir2) then
+!             blkval(:,idir1,ipert1,idir2,ipert2,kblok)= (one - val(:))*ucvol/four_pi
+!           else
+!             blkval(:,idir1,ipert1,idir2,ipert2,kblok)= -ucvol/four_pi*val(:)
+!           end if
+!         else if (option==1) then
+!           if (idir1==idir2) then
+!             blkval(:,idir1,ipert1,idir2,ipert2,kblok)= one - four_pi/ucvol*val(:)
+!           else
+!             blkval(:,idir1,ipert1,idir2,ipert2,kblok)= -four_pi/ucvol*val(:)
+!           end if
+!         end if
+!       end do
+!     end do
+!   end if
+!
+!   !Magnetoelectric susceptibility
+!   iblok=0
+!   rfphon(:)=0
+!   rfelfd(:)=0
+!   rfmagn(1)=1
+!   rfmagn(2)=1
+!   call ddb%get_block(iblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, rftyp, omega=omega)
+!   if (iblok/=0.and.iblok==kblok) then
+!     ipert1= ddb%natom + 5
+!     ipert2= ddb%natom + 2
+!     do idir2= 1, 3
+!       do idir1= 1, 3
+!         val(:)=blkval(:,idir1,ipert1,idir2,ipert2,kblok)
+!         blkval(:,idir1,ipert1,idir2,ipert2,kblok)=-val(:)
+!         val(:)=blkval(:,idir2,ipert2,idir1,ipert1,kblok)
+!         blkval(:,idir2,ipert2,idir1,ipert1,kblok)=-val(:)
+!       end do
+!     end do
+!   end if
+
+ end if
+
+ 
+
+ end subroutine mp_d2etot_print
 !!***
 
 !!****f* m_ddb_magpen/mp_ifc

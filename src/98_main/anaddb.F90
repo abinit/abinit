@@ -969,7 +969,7 @@ end if  ! condition on nlflag
  call asrq0%free()
  call ifc%free()
  call crystal%free()
- call ddb%free()
+! call ddb%free()
  call anaddb_dtset_free(inp)
  call thermal_supercell_free(inp%ntemper, thm_scells)
  call ddb_lw%free()
