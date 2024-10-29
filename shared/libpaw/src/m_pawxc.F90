@@ -4151,7 +4151,10 @@ end subroutine pawxcsphpositron
  nsums=2*nspden_updn-1
 
 !Initializations of output arrays
- if (option/=1.and.option/=5) enxc=zero
+ if (option/=1.and.option/=5) then
+   enxc=zero
+   snxc=zero
+ end if
  if (option==0.or.option==2) enxcdc=zero
  if (option/=3.and.option/=4) vxc(:,:,:)=zero
  if (nkxc/=0) kxc(:,:,:)=zero
@@ -4763,7 +4766,9 @@ end subroutine pawxcsphpositron
    ff(1:nrad)=ff(1:nrad)*pawrad%rad(1:nrad)**2
    hh(1:nrad)=hh(1:nrad)*pawrad%rad(1:nrad)**2
    call simp_gen(enxc,ff,pawrad)
-   call simp_gen(snxc,hh,pawrad)
+   ! Set entropy only when using finite-temperature exchange-correlation functionals
+   if(any(sxci/=zero)) call simp_gen(snxc,hh,pawrad)
+   
    LIBPAW_DEALLOCATE(hh)
    LIBPAW_DEALLOCATE(ff)
  end if ! option/=1 and option/=5
