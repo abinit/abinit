@@ -1495,8 +1495,8 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
 
 !Reals (read from psp file)
 !-------------------------------------------------------------------------
-!  beta,dncdq0,d2ncdq0,dnvdq0,dtaucdq0,ex_cc,exccore,lamb_shielding,rpaw,rshp,rcore,rcoretau,shape_sigma
-   nn_dpr=nn_dpr+13
+!  beta,dncdq0,d2ncdq0,dnvdq0,dtaucdq0,ex_cc,exccore,entropyxccore,lamb_shielding,rpaw,rshp,rcore,rcoretau,shape_sigma
+   nn_dpr=nn_dpr+14
 
 !Reals (depending on the parameters of the calculation)
 !-------------------------------------------------------------------------

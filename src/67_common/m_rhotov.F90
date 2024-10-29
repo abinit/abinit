@@ -209,7 +209,7 @@ subroutine rhotov(constrained_dft,dtset,energies,gprimd,grcondft,gsqcut,intgres,
  integer :: mpi_comm_sphgrid,ixc_current
 !integer :: ii,jj,kk,ipt,nx,ny,nz           !SPr: debug
 !real(dp):: rx,ry,rz                        !SPr: debug
- real(dp) :: doti,e_xcdc_vxctau,bigsxc
+ real(dp) :: doti,e_xcdc_vxctau
  logical :: add_tfw_,calc_xcdc,non_magnetic_xc,with_vxctau
  logical :: is_hybrid_ncpp,wvlbigdft=.false.
  type(xcdata_type) :: xcdata
