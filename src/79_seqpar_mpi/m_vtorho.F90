@@ -1413,11 +1413,11 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
           dtset%nspden==2.and.dtset%nsppol==1,remove_inv,hdr%title,&
           dtset%symrel,dtset%tnons,dtset%symafm)
 
-!        ==  allocate paw_dmft%psichi and paw_dmft%eigen_dft
+!        ==  allocate paw_dmft%chipsi and paw_dmft%eigen_dft
          call init_dmft(cryst_struc,dmatpawu(:,:,:,:),dtset,energies%e_fermie,dtfil%filnam_ds(3),dtfil%fnameabo_app,paw_dmft)
          call print_dmft(paw_dmft,dtset%pawprtvol)
 
-!        ==  compute psichi
+!        ==  compute chipsi
          call xmpi_barrier(spaceComm_distrb)
          call init_oper(paw_dmft,dft_occup,opt_ksloc=2)
          call flush_unit(std_out)
@@ -1488,7 +1488,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
         " dtset%nbandkss = ",dtset%nbandkss,ch10,&
         " and dtset%usedmft = ",dtset%usedmft,ch10,&
         " a DFT loop is carried out without DMFT.",ch10,&
-        " Only psichi's will be written at convergence of the DFT loop."
+        " Only chipsi's will be written at convergence of the DFT loop."
        call wrtout(std_out,msg)
      end if
 !    !=========  DMFT call end   ============================================

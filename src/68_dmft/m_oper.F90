@@ -146,7 +146,7 @@ subroutine init_oper(paw_dmft,oper,nkpt,wtk,shiftk,opt_ksloc)
  integer, optional, intent(in) :: nkpt,opt_ksloc,shiftk
  type(paw_dmft_type), intent(in) :: paw_dmft
  type(oper_type), intent(inout) :: oper
- real(dp), ABI_CONTIGUOUS target, optional :: wtk(:)
+ real(dp), target, optional :: wtk(paw_dmft%nkpt)
 !Local variables ------------------------------------
  integer :: optksloc
 !************************************************************************
@@ -836,7 +836,7 @@ subroutine identity_oper(oper,option)
  use m_matlu, only : identity_matlu,zero_matlu
 
 !Arguments ------------------------------------
- integer, intent(in):: option
+ integer, intent(in) :: option
  type(oper_type), intent(inout) :: oper
 !Local variables-------------------------------
  integer :: ib,ikpt,isppol,natom
@@ -1036,7 +1036,7 @@ subroutine prod_oper(oper1,oper2,oper3,opt_ksloc,opt_diag)
  use m_abi_linalg, only : abi_xgemm
 
 !Arguments ------------------------------------
- type(oper_type), intent(in)    :: oper1,oper2
+ type(oper_type), intent(in) :: oper1,oper2
  type(oper_type), intent(inout) :: oper3
  integer, intent(in) :: opt_ksloc
  integer, optional, intent(in) :: opt_diag
@@ -1157,8 +1157,8 @@ subroutine gather_oper(oper,distrib,paw_dmft,opt_ksloc,master,opt_diag,opt_commk
  use m_xmpi, only : xmpi_allgatherv,xmpi_gatherv,xmpi_sum,xmpi_sum_master
  
 !Arguments ------------------------------------
- type(oper_type), intent(inout) :: oper(:)
  type(mpi_distrib_dmft_type), target, intent(in) :: distrib
+ type(oper_type), intent(inout) :: oper(distrib%nw)
  type(paw_dmft_type) :: paw_dmft
  integer, intent(in) :: opt_ksloc
  integer, optional, intent(in) :: master,opt_commkpt,opt_diag

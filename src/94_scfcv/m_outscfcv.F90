@@ -1128,7 +1128,7 @@ if (dtset%prt_lorbmag==1) then
 &   ' == Start computation of Projected Local Orbitals Wannier functions == ',dtset%nbandkss
    call wrtout(units, msg)
 
-!  ==  compute psichi
+!  ==  compute chipsi
 
    call init_plowannier(dtset%plowan_bandf,dtset%plowan_bandi,dtset%plowan_compute,&
 &   dtset%plowan_iatom,dtset%plowan_it,dtset%plowan_lcalc,dtset%plowan_natom,&
@@ -1150,12 +1150,12 @@ if (dtset%prt_lorbmag==1) then
    ! Use DMFT to compute wannier function for cRPA calculation.
    if(dtset%usedmft==1) then
      write(msg,'(2a,i3)') ch10,&
-&     '  Warning: Psichi are renormalized in datafordmft because nbandkss is used',dtset%nbandkss
+&     '  Warning: Chipsi are renormalized in datafordmft because nbandkss is used',dtset%nbandkss
      call wrtout(std_out, msg)
      call init_dmft(crystal,dmatpawu(:,:,:,:),dtset,e_fermie,dtfil%filnam_ds(3),dtfil%fnameabo_app,paw_dmft)
      call print_dmft(paw_dmft,dtset%pawprtvol)
 
-!    ==  compute psichi
+!    ==  compute chipsi
      call init_oper(paw_dmft,dft_occup,opt_ksloc=2)
 
      call datafordmft(cg(:,:),cprj(:,:),crystal,dft_occup,dimcprj,dtset,eigen(:),dtset%mband,mcg,&
@@ -1172,8 +1172,9 @@ if (dtset%prt_lorbmag==1) then
 
        opt_moments = 0
        if (paw_dmft%dmft_solv == 6 .or. paw_dmft%dmft_solv == 7) opt_moments = 1
-      ! Initialize self on  imag axis
-       call initialize_self(self,paw_dmft)
+
+      ! Initialize self on imag axis
+       call initialize_self(self,paw_dmft,opt_moments=opt_moments)
 
       ! Initialize green on real axis
        call init_green(greenr,paw_dmft,opt_oper_ksloc=3,wtype='real')
@@ -1190,7 +1191,7 @@ if (dtset%prt_lorbmag==1) then
 
       ! Read self energy on real axis obtained from Maxent
        call rw_self(selfr,paw_dmft,prtopt=5,opt_rw=1,opt_imagonly=opt_imagonly, &
-     & opt_selflimit=opt_selflimit(:),opt_hdc=self%hdc%matlu(:),opt_maxent=1)
+         & opt_selflimit=opt_selflimit(:),opt_hdc=self%hdc%matlu(:),opt_maxent=1)
 
       ! Check: from self on real axis, recompute self on Imaginary axis.
        call selfreal2imag_self(selfr,self,paw_dmft%filapp,paw_dmft)
@@ -1203,8 +1204,7 @@ if (dtset%prt_lorbmag==1) then
        ! For the DFT BS: use opt_self=0 and fermie=fermie_dft
 
       ! Compute green  function on real axis
-       call compute_green(greenr,paw_dmft,1,selfr,&
-&       opt_self=1,opt_nonxsum=0)
+       call compute_green(greenr,paw_dmft,1,selfr,opt_self=1,opt_nonxsum=0)
 
       !write(6,*) "compute green done"
        if(me==master) then
