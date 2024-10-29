@@ -36,14 +36,15 @@ module m_invoke_python
    public :: invoke_python_run_script
    contains
 
-   subroutine invoke_python_run_script (rank, filapp_in, comm)
+   subroutine invoke_python_run_script(dft_iter, rank, filapp_in, comm)
      use iso_c_binding, only: c_char, c_null_char
    ! subroutine Invoke_python_triqs (rank, filapp_in) bind(c)
+     integer, intent(in)            :: dft_iter
      integer, intent(in)            :: rank
      character(len=500), intent(in) :: filapp_in
      integer, intent(in)            :: comm
 
-     character(len=500) :: msg, triqs_filename, triqs_pythpath
+     character(len=500) :: msg, triqs_filename, triqs_pythpath, dft_iter_filename
      integer :: ierr, mrank, msize
      logical :: exists
      character(kind=c_char, len=255) :: f2c_string
@@ -101,6 +102,11 @@ module m_invoke_python
         write(msg, '(2a)') '   invoke_python_triqs: ERROR cannot find script at ', trim(triqs_filename)
         ABI_ERROR(msg)
      endif
+
+     write(dft_iter_filename, '(2a)') trim(filapp_in), '.dft_iter'
+     open(unit=102, file=dft_iter_filename)
+       write(102, "(i4)") dft_iter
+     close(102)
 
      call mpi_barrier(MPI_COMM_WORLD,ierr)
      write(f2c_string, '(a)') trim(triqs_filename)//c_null_char
