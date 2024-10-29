@@ -323,7 +323,7 @@ subroutine chebfiwf2(cg,dtset,eig,occ,enl_out,gs_hamk,kinpw,mpi_enreg,&
  if (space==SPACE_CR) then
    me_g0 = 0
    me_g0_fft = 0
-   if ( gs_hamk%istwf_k == 2) then
+   if (gs_hamk%istwf_k == 2) then
      if (l_mpi_enreg%me_g0 == 1) me_g0 = 1
      if (l_mpi_enreg%me_g0_fft == 1) me_g0_fft = 1
    end if
@@ -348,7 +348,7 @@ subroutine chebfiwf2(cg,dtset,eig,occ,enl_out,gs_hamk,kinpw,mpi_enreg,&
  end if
 
 #ifdef HAVE_OPENMP_OFFLOAD
- !$OMP TARGET ENTER DATA MAP(to:cg,eig,resid) IF(gs_hamk%gpu_option==ABI_GPU_OPENMP)
+ !$OMP TARGET ENTER DATA MAP(to:cg,eig,resid,occ) IF(gs_hamk%gpu_option==ABI_GPU_OPENMP)
 #endif
 
  call xgBlock_map(xgx0,cg,space,l_npw*l_nspinor,nband,comm=l_mpi_enreg%comm_bandspinorfft,me_g0=me_g0,&
@@ -418,9 +418,7 @@ subroutine chebfiwf2(cg,dtset,eig,occ,enl_out,gs_hamk,kinpw,mpi_enreg,&
    ABI_FREE(pcon)
  end if
 
-!Compute enlout (nonlocal energy for each band if necessary) This is the best
-!  quick and dirty trick to compute this part in NC. gvnlc cannot be part of
-!  chebfi algorithm
+
  if ( .not. l_paw ) then
    call timab(tim_nonlop,1,tsec)
 #ifdef FC_CRAY
@@ -463,10 +461,8 @@ subroutine chebfiwf2(cg,dtset,eig,occ,enl_out,gs_hamk,kinpw,mpi_enreg,&
 
 #ifdef HAVE_OPENMP_OFFLOAD
  !$OMP TARGET UPDATE FROM(cg,eig,resid) IF(gs_hamk%gpu_option==ABI_GPU_OPENMP)
- !$OMP TARGET EXIT DATA MAP(delete:cg,eig,resid) IF(gs_hamk%gpu_option==ABI_GPU_OPENMP)
+ !$OMP TARGET EXIT DATA MAP(delete:cg,eig,resid,occ) IF(gs_hamk%gpu_option==ABI_GPU_OPENMP)
 #endif
-!################    SORRY IT'S ALREADY FINISHED : )  #################
-!######################################################################
 
  call timab(tim_chebfiwf2,2,tsec)
 
