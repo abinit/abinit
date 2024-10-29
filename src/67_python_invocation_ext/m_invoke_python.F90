@@ -58,8 +58,8 @@ module m_invoke_python
      write(msg, '(a, a)') "   invoke_python_triqs: filapp_in: ", trim(filapp_in)
      call wrtout(std_out, msg, 'COLL')
 
-     call mpi_comm_size(MPI_COMM_WORLD, msize, ierr)
-     call mpi_comm_rank(MPI_COMM_WORLD, mrank, ierr)
+     call mpi_comm_size(comm, msize, ierr)
+     call mpi_comm_rank(comm, mrank, ierr)
 
      write(triqs_filename, '(2a)') trim(filapp_in), '_PY_INVOCATION_script.py'
      write(triqs_pythpath, '(3a)') './', trim(filapp_in), '_PY_INVOCATION_python_lib'
