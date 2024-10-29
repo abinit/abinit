@@ -527,17 +527,8 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
  intarr(1,:)=dtsets(:)%chebfi_oracle
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'chebfi_oracle','INT',0)
 
- dprarr(1,:)=dtsets(:)%oracle_factor
- call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'oracle_factor','DPR',0)
-
- dprarr(1,:)=dtsets(:)%oracle_min_occ
- call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'oracle_min_occ','DPR',0)
-
  intarr(1,:)=dtsets(:)%cprj_in_memory
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'cprj_in_memory','INT',0)
-
- intarr(1,:)=dtsets(:)%xg_nonlop_option
- call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'xg_nonlop_option','INT',0)
 
  intarr(1,:)=dtsets(:)%cprj_update_lvl
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'cprj_update_lvl','INT',0)
