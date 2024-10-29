@@ -538,7 +538,7 @@ subroutine downfold_oper(oper,paw_dmft,procb,iproc,option,op_ks_diag)
  type(paw_dmft_type), intent(in) :: paw_dmft
  integer, optional, intent(in) :: iproc,option
  integer, optional, intent(in) :: procb(oper%nkpt)
- real(dp), ABI_CONTIGUOUS optional, intent(in) :: op_ks_diag(:,:,:)
+ real(dp), optional, intent(in) :: op_ks_diag(oper%mbandc,oper%nkpt,oper%nsppol)
 !oper variables-------------------------------
  integer :: iatom,ib,ik,ikpt,isppol,lpawu,mbandc,ndim
  integer :: ndim_max,nspinor,opt,paral,shift
@@ -586,7 +586,7 @@ subroutine downfold_oper(oper,paw_dmft,procb,iproc,option,op_ks_diag)
          if (opt == 1) then     
                             
            call abi_xgemm("n","n",ndim,mbandc,mbandc,cone,paw_dmft%chipsi(:,:,ik,isppol,iatom),&
-                    & ndim_max,oper%ks(:,:,ikpt,isppol),mbandc,czero,mat_temp(:,:),ndim)
+                        & ndim_max,oper%ks(:,:,ikpt,isppol),mbandc,czero,mat_temp(:,:),ndim)
                     
          else if (opt == 3) then
          
@@ -601,20 +601,20 @@ subroutine downfold_oper(oper,paw_dmft,procb,iproc,option,op_ks_diag)
          end if ! opt=1 or 3
                 
          call abi_xgemm("n","c",ndim,ndim,mbandc,cone,mat_temp(:,:),ndim,&
-                  & paw_dmft%chipsi(:,:,ik,isppol,iatom),ndim_max,czero,mat_temp2(:,:),ndim)
+                      & paw_dmft%chipsi(:,:,ik,isppol,iatom),ndim_max,czero,mat_temp2(:,:),ndim)
        
        else if (opt == 2) then
         
          call abi_xgemm("n","c",ndim,ndim,mbandc,cone,paw_dmft%chipsi(:,:,ik,isppol,iatom),&
-                  & ndim_max,paw_dmft%chipsi(:,:,ik,isppol,iatom),ndim_max,czero,mat_temp2(:,:),ndim)
+                      & ndim_max,paw_dmft%chipsi(:,:,ik,isppol,iatom),ndim_max,czero,mat_temp2(:,:),ndim)
                   
        else if (opt == 4) then
        
          call abi_xgemm("n","c",ndim,ndim,mbandc,cone,paw_dmft%chipsi(:,:,ik,isppol,iatom),&
-                  & ndim_max,paw_dmft%chipsi(:,:,ik,isppol,iatom),ndim_max,czero,mat_temp3(:,:),ndim)
+                      & ndim_max,paw_dmft%chipsi(:,:,ik,isppol,iatom),ndim_max,czero,mat_temp3(:,:),ndim)
                   
          call abi_xgemm("n","n",ndim,ndim,ndim,cone,mat_temp3(:,:),ndim,&
-                  & mat_temp3(:,:),ndim,czero,mat_temp2(:,:),ndim)
+                      & mat_temp3(:,:),ndim,czero,mat_temp2(:,:),ndim)
        
        end if ! opt
                    
@@ -626,6 +626,48 @@ subroutine downfold_oper(oper,paw_dmft,procb,iproc,option,op_ks_diag)
    ABI_FREE(mat_temp2)
    ABI_FREE(mat_temp3)
  end do ! iatom
+
+!do isppol=1,nsppol
+ ! do ikpt=1,nkpt
+ !  ikpt1=ikpt
+ !  if(present(jkpt)) ikpt1=jkpt
+ !  lvz=paral==0  !vz_d
+ !  if(present(iproc)) lvz=lvz.or.(paral==1.and.(procb2(ikpt1)==iproc))  !vz_d
+!!  if ((paral==1.and.(procb2(ikpt1)==iproc)).or.(paral==0)) then    !vz_d
+ !  if(lvz) then !vz_d
+ !  do ib=1,mbandc
+ !   do ib1=1,mbandc
+ !    do iatom=1,natom
+ !     if(oper%matlu(iatom)%lpawu.ne.-1) then
+ !     ndim=2*oper%matlu(iatom)%lpawu+1
+ !      do im=1,ndim
+ !       do im1=1,ndim
+ !        do ispinor=1,nspinor
+ !         do ispinor1=1,nspinor
+ !           if (im1 == im .and. im1 == 1 .and. ib1 == ib .and. iatom == 1) then
+
+  !          end if
+  !          oper%matlu(iatom)%mat(im,im1,isppol,ispinor,ispinor1)=     &
+!&            oper%matlu(iatom)%mat(im,im1,isppol,ispinor,ispinor1)+    &
+!&            paw_dmft%psichi(isppol,ikpt1,ib,ispinor,iatom,im)*        &
+!&            conjg(paw_dmft%psichi(isppol,ikpt1,ib1,ispinor1,iatom,im1))* &
+!false&            paw_dmft%psichi(isppol,ikpt1,ib1,ispinor1,iatom,im1)*
+!&
+!false&            conjg(paw_dmft%psichi(isppol,ikpt1,ib,ispinor,iatom,im))* &
+!&            oper%ks(isppol,ikpt,ib,ib1)*oper%wtk(ikpt)
+! one  could suppress wtk here if present(jkpt)
+! ks(ib,ib1)=ks(ib1,ib) -> ib and ib1 can be underchanged !
+!          enddo ! ispinor1
+!         enddo ! ispinor
+!        enddo ! im1
+!       enddo ! im
+!      endif
+!     enddo ! iatom
+ !   enddo ! ib
+ !  enddo ! ib
+ !  endif
+ ! enddo ! ikpt
+ !enddo ! isppol
  
  DBG_EXIT("COLL")
 
@@ -719,8 +761,56 @@ subroutine upfold_oper(oper,paw_dmft,procb,iproc)
  ABI_FREE(mat_temp) 
  ABI_FREE(mat_temp2)
  
+!do isppol=1,nsppol
+ !  do ikpt=1,nkpt
+ !   if ((paral==1.and.(procb2(ikpt)==iproc)).or.(paral==0)) then
+ !    do ib=1,mbandc
+ !      do ib1=1,mbandc
+!               if(ib==1.and.ib1==3) write(std_out,*) "IKPT=",ikpt
+ !       oper%ks(isppol,ikpt,ib,ib1)=czero
+
+  !       do iatom=1,natom
+  !         if(oper%matlu(iatom)%lpawu.ne.-1) then
+  !           ndim=2*oper%matlu(iatom)%lpawu+1
+  !           do im=1,ndim
+  !             do im1=1,ndim
+  !               do ispinor=1,nspinor
+  !                 do ispinor1=1,nspinor
+
+! psichi(isppol,ikpt,ib,ispinor,iatom,im)=<\chi_{m,R,ispinor)|\Psi(s,k,nu)>
+   !                  oper%ks(isppol,ikpt,ib,ib1)= oper%ks(isppol,ikpt,ib,ib1) &
+!&                     + ( paw_dmft%psichi(isppol,ikpt,ib1,ispinor1,iatom,im1)
+!&
+!&                     * oper%matlu(iatom)%mat(im,im1,isppol,ispinor,ispinor1)
+!&
+!&                     *
+!conjg(paw_dmft%psichi(isppol,ikpt,ib,ispinor,iatom,im)))
+              ! if(present(prt).and.(ib==1.and.ib1==1)) then
+              !   write(6,*) "im,im1",im,im1
+              !   write(6,*) "ispinor,ispinor1",ispinor,ispinor1
+              !   write(6,*)
+              !   "psichi",paw_dmft%psichi(isppol,ikpt,ib1,ispinor1,iatom,im1)
+              !   write(6,*) "psichi
+              !   2",paw_dmft%psichi(isppol,ikpt,ib,ispinor,iatom,im1)
+              !   write(6,*) "oper%matlu",
+              !   oper%matlu(iatom)%mat(im,im1,isppol,ispinor,ispinor1)
+              ! endif
+
+   !                enddo ! ispinor1
+   !              enddo ! ispinor
+   !            enddo ! im1
+   !          enddo ! im
+   !        endif
+   !      enddo ! iatom
+
+   !    enddo ! ib
+   !  enddo ! ib
+   ! endif
+   !enddo ! ikpt
+ !enddo ! isppol
+
  DBG_EXIT("COLL")
- 
+
 end subroutine upfold_oper
 !!***
 
@@ -977,7 +1067,7 @@ subroutine prod_oper(oper1,oper2,oper3,opt_ksloc,opt_diag)
          end do ! ib
        else
          call abi_xgemm("n","n",mbandc,mbandc,mbandc,cone,oper1%ks(:,:,ikpt,isppol),mbandc,&
-                   & oper2%ks(:,:,ikpt,isppol),mbandc,czero,oper3%ks(:,:,ikpt,isppol),mbandc) 
+                      & oper2%ks(:,:,ikpt,isppol),mbandc,czero,oper3%ks(:,:,ikpt,isppol),mbandc) 
          end if ! diag
        end do ! ikpt
      end do ! isppol
