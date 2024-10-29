@@ -2417,6 +2417,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    if(tread==1) dtset%dmft_solv=intarr(1)
    if (dtset%dmft_solv==6.or.dtset%dmft_solv==7) then ! change some default values for TRIQS
      dtset%dmft_rslf=1
+     dtset%dmft_test=0
      dtset%dmft_use_all_bands=1
      dtset%dmft_use_full_chipsi=1
    end if 
