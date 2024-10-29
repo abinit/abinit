@@ -2096,7 +2096,7 @@ subroutine multithreaded_getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lamb
 !   call openblas_set_num_threads(1)
 !#endif
 #ifdef HAVE_LINALG_NVPL_THREADS
-   call nvpl_set_num_threads(1)
+   call nvpl_blas_set_num_threads(1)
 #endif
 #ifdef HAVE_FFTW3_THREADS
    fftw3_use_lib_threads_sav=(.not.fftw3_spawn_threads_here(nthreads,nthreads))
@@ -2165,7 +2165,7 @@ subroutine multithreaded_getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lamb
 !   call openblas_set_num_threads(nthreads)
 !#endif
 #ifdef HAVE_LINALG_NVPL_THREADS
-   call nvpl_set_num_threads(nthreads)
+   call nvpl_blas_set_num_threads(nthreads)
 #endif
 #ifdef HAVE_FFTW3_THREADS
    call fftw3_use_lib_threads(fftw3_use_lib_threads_sav)
