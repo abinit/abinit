@@ -1823,8 +1823,6 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 &       dtset%nsppol,dtset%nspinor,dtset%wtk,dtset%nband)
      end if
 
-     write(std_out, *) "paw_dmft%use_sc_dmft = ", paw_dmft%use_sc_dmft
-
      if(paw_dmft%use_dmft==1) then
        energies%e_kinetic = energies%e_kinetic -ekindmft+ekindmft2
        if(abs(dtset%pawprtvol)>=2) then
