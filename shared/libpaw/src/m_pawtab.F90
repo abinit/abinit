@@ -333,7 +333,7 @@ MODULE m_pawtab
   real(dp) :: exccore
    ! Exchange-correlation energy for the core density
 
-  real(dp) :: entropyxccore
+  real(dp) :: entropyxccore=zero
    ! Exchange-correlation entropy for the core density
 
   real(dp) :: exchmix
