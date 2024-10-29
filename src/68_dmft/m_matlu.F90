@@ -696,6 +696,34 @@ end subroutine print_matlu
      call xginv(matlu(iatom)%mat(:,:,isppol),ndim)
    end do ! isppol
  end do ! iatom
+
+ !if(prtopt>0) then
+ !endif
+ !ABI_MALLOC(gathermatlu,(natom))
+ !do iatom=1,natom
+ !  if(matlu(iatom)%lpawu.ne.-1) then
+ !    tndim=nsppol*nspinor*(2*matlu(iatom)%lpawu+1)
+ !    ABI_MALLOC(gathermatlu(iatom)%value,(tndim,tndim))
+ !    gathermatlu(iatom)%value=czero
+ !  endif
+ !enddo
+
+ !call gather_matlu(matlu,gathermatlu,natom,option=1,prtopt=1)
+ !do iatom=1,natom
+ !  if(matlu(iatom)%lpawu.ne.-1) then
+ !    tndim=nsppol*nspinor*(2*matlu(iatom)%lpawu+1)
+     !call matcginv_dpc(gathermatlu(iatom)%value,tndim,tndim)
+ !    call xginv(gathermatlu(iatom)%value,tndim)
+ !  endif
+ !enddo
+ !call gather_matlu(matlu,gathermatlu,natom,option=-1,prtopt=1)
+
+ !do iatom=1,natom
+ !  if(matlu(iatom)%lpawu.ne.-1) then
+ !    ABI_FREE(gathermatlu(iatom)%value)
+ !  endif
+ !enddo
+ !ABI_FREE(gathermatlu)
  
  end subroutine inverse_matlu
 !!***
@@ -1020,7 +1048,7 @@ end subroutine add_matlu
        trace_tmp2 = trace_tmp2 + matlu(iatom)%mat(im,im,isppol)
      end do ! im
      trace_tmp = trace_tmp + trace_tmp2
-     traceloc(isppol,iatom)   = dble(trace_tmp2)
+     traceloc(isppol,iatom) = dble(trace_tmp2)
      traceloc(nsppol+1,iatom) = traceloc(nsppol+1,iatom) + traceloc(isppol,iatom)
    end do ! isppol
    if (nsppol == 1 .and. nspinor == 1) traceloc(nsppol+1,iatom) = traceloc(nsppol+1,iatom) * two
@@ -1311,7 +1339,33 @@ end subroutine add_matlu
    lwork = 2*tndim - 1
    lworkr = tndim * (tndim+2) * 2
    ABI_MALLOC(eig,(tndim))
-   
+  
+! ===========================
+! Define gathermatlu
+! ===========================
+   !ABI_MALLOC(gathermatlu,(natom))
+   !do iatom=1,natom
+   !  if(matlu(iatom)%lpawu.ne.-1) then
+   !    tndim=nspinor*(2*matlu(iatom)%lpawu+1)
+   !    ABI_MALLOC(gathermatlu(iatom)%value,(tndim,tndim))
+   !    gathermatlu(iatom)%value=czero
+   !  endif
+   !enddo
+   !if(nsppol==1.and.nspinor==2) then
+   !  call gather_matlu(matlu,gathermatlu,natom,option=1,prtopt=1)
+   !else if((nsppol==2.or.nsppol==1).and.nspinor==1) then
+   !  do iatom=1,natom
+   !    if(matlu(iatom)%lpawu.ne.-1) then
+   !      tndim=nspinor*(2*matlu(iatom)%lpawu+1)
+   !      do im1=1,tndim
+   !        do im2=1,tndim
+   !          gathermatlu(iatom)%value(im1,im2)=matlu(iatom)%mat(im1,im2,isppol,1,1)
+   !        enddo
+   !      enddo
+   !    endif
+   !  enddo
+   !endif
+ 
    ! ===========================
    ! Diagonalize
    ! ===========================
@@ -1474,6 +1528,19 @@ end subroutine add_matlu
 !         ABI_FREE(valuer4)
 !     endif
 !   enddo
+! ===========================
+! Keep eigenvectors gathermatlu
+! ===========================
+         !if (present(eigvectmatlu)) then
+         !  tndim=nspinor*(2*matlu(iatom)%lpawu+1)
+         !  eigvectmatlu(iatom,isppol)%value(:,:)=gathermatlu(iatom)%value(:,:)
+!           write(std_out,*) "eigvect in diag_matlu"
+!           do im1=1,tndim
+!             write(message,'(12(1x,18(1x,"(",f9.3,",",f9.3,")")))')&
+!&             (gathermatlu(iatom)%value(im1,im2),im2=1,tndim)
+!             call wrtout(std_out,message,'COLL')
+!           end do
+         !endif
 
      if (nsppolimp == 1 .and. nsppol == 2) then
 ! ==================================================================
@@ -1481,6 +1548,17 @@ end subroutine add_matlu
 ! rotation matrix: it has to be checked afterwards that the matrix is
 ! diagonal
 ! ===================================================================
+
+!        input matrix: gathermatlu
+!        rotation matrix: eigvectmatlu
+!        intermediate matrix: temp_mat
+!        result matrix: temp_mat2
+         !do im1=1,tndim
+         !  do im2=1,tndim
+         !    gathermatlu(iatom)%value(im1,im2)=matlu(iatom)%mat(im1,im2,2,1,1)
+         !  enddo
+         !enddo
+
        if (prtopt >= 3) then
          write(message,'(a,i4,a,i4)') "       MATLU for atom",iatom," inside if nsppolimp==1"
          call wrtout(std_out,message,'COLL')
@@ -1634,6 +1712,171 @@ end subroutine add_matlu
    end do ! isppol
    ABI_FREE(temp_mat)
  end do ! iatom
+
+ !do isppol=1,nsppol
+
+! ===========================
+! Define gathermatlu and rot_mat_orig and allocate
+! ===========================
+   !ABI_MALLOC(rot_mat_orig,(natom))
+   !ABI_MALLOC(gathermatlu,(natom))
+   !do iatom=1,natom
+   !  if(matlu(iatom)%lpawu.ne.-1) then
+   !    tndim=nspinor*(2*matlu(iatom)%lpawu+1)
+   !    ABI_MALLOC(gathermatlu(iatom)%value,(tndim,tndim))
+   !    gathermatlu(iatom)%value=czero
+!       ABI_MALLOC(rot_mat_orig(iatom,isppol)%value,(tndim,tndim))
+!       rot_mat_orig(iatom,isppol)%value(:,:)=rot_mat(iatom,isppol)%value(:,:)
+   !    ABI_MALLOC(rot_mat_orig(iatom)%value,(tndim,tndim))
+   !    rot_mat_orig(iatom)%value(:,:)=rot_mat(iatom,isppol)%value(:,:)
+   !  endif
+   !enddo
+   !if(nsppol==1.and.nspinor==2) then
+   !  call gather_matlu(matlu,gathermatlu,natom,option=1,prtopt=1)
+   !else if((nsppol==2.or.nsppol==1).and.nspinor==1) then
+   !  do iatom=1,natom
+   !    if(matlu(iatom)%lpawu.ne.-1) then
+   !      tndim=nspinor*(2*matlu(iatom)%lpawu+1)
+   !      do im1=1,tndim
+   !        do im2=1,tndim
+   !          gathermatlu(iatom)%value(im1,im2)=matlu(iatom)%mat(im1,im2,isppol,1,1)
+   !        enddo
+   !      enddo
+   !    endif
+   !  enddo
+   !endif
+        ! write(std_out,*) "gathermatlu in rotate matlu"
+        ! do im1=1,tndim
+        !   write(message,'(12(1x,18(1x,"(",e17.10,",",e17.10,")")))')&
+        !    (gathermatlu(1)%value(im1,im2),im2=1,tndim)
+        !   call wrtout(std_out,message,'COLL')
+        ! end do
+
+! ===========================
+! If necessary, invert rot_mat
+! ===========================
+   !if(inverse==1) then
+   !  do iatom=1,natom
+   !    if(matlu(iatom)%lpawu.ne.-1) then
+   !      tndim=nspinor*(2*matlu(iatom)%lpawu+1)
+   !        do im1=1,tndim
+   !          do im2=1,tndim
+!               rot_mat(iatom,isppol)%value(im1,im2)=conjg(rot_mat_orig(iatom,isppol)%value(im2,im1))
+   !            rot_mat(iatom,isppol)%value(im1,im2)=conjg(rot_mat_orig(iatom)%value(im2,im1))
+   !          enddo
+   !        enddo
+   !    endif ! lpawu
+   !  enddo ! iatom
+   !endif
+        ! write(std_out,*) "rot_mat_orig "
+        ! do im1=1,tndim
+        !   write(message,'(12(1x,18(1x,"(",e18.10,",",e18.10,")")))')&
+        ! &   (rot_mat_orig(1)%value(im1,im2),im2=1,tndim)
+        !   call wrtout(std_out,message,'COLL')
+        ! end do
+        ! write(std_out,*) "rot_mat "
+        ! do im1=1,tndim
+        !   write(message,'(12(1x,18(1x,"(",e18.10,",",e18.10,")")))')&
+        ! &   (rot_mat(1,1)%value(im1,im2),im2=1,tndim)
+        !   call wrtout(std_out,message,'COLL')
+        ! end do
+
+! ===========================
+! Rotate
+! ===========================
+   !ABI_MALLOC(temp_mat,(tndim,tndim))
+   !do iatom=1,natom
+   !  if(matlu(iatom)%lpawu.ne.-1) then
+   !    tndim=nspinor*(2*matlu(iatom)%lpawu+1)
+   !    temp_mat(:,:)=czero
+!      input matrix: gathermatlu
+!      rotation matrix: rot_mat
+!      intermediate matrix: temp_mat
+!      result matrix: gathermatlu
+       ! temp_mat = gathermatlu * conjg(rot_mat)
+   !    call zgemm('n','c',tndim,tndim,tndim,cone,gathermatlu(iatom)%value
+   !    ,tndim,&
+!&        rot_mat(iatom,isppol)%value,tndim,czero,temp_mat
+!,tndim)
+       ! gathermatlu = rot_mat * temp_mat = rot_mat * gathermatlu *
+       ! conjg(rot_mat)
+   !    call
+   !    zgemm('n','n',tndim,tndim,tndim,cone,rot_mat(iatom,isppol)%value,tndim,&
+!&        temp_mat
+!,tndim,czero,gathermatlu(iatom)%value,tndim)
+  !   endif ! lpawu
+  ! enddo ! iatom
+   !do iatom=1,natom
+   !  if(matlu(iatom)%lpawu.ne.-1) then
+   !    write(std_out,*) "temp_mat in rotate_matlu 2"
+   !    do im1=1,tndim
+   !      write(message,'(12(1x,18(1x,"(",f17.10,",",f17.10,")")))')&
+   !&       (temp_mat(im1,im2),im2=1,tndim)
+   !      call wrtout(std_out,message,'COLL')
+   !    end do
+   !  endif
+   !enddo
+   !do iatom=1,natom
+   !  if(matlu(iatom)%lpawu.ne.-1) then
+   !    write(std_out,*) "gathermatlu in rotate_matlu 2"
+   !    do im1=1,tndim
+   !      write(message,'(12(1x,18(1x,"(",f17.10,",",f17.10,")")))')&
+   !&       (gathermatlu(iatom)%value(im1,im2),im2=1,tndim)
+   !      call wrtout(std_out,message,'COLL')
+   !    end do
+   !  endif
+   !enddo
+  ! ABI_FREE(temp_mat)
+     !ABI_ERROR("Aborting now")
+
+! Choose inverse rotation: reconstruct correct rot_mat from rot_mat_orig
+! ========================================================================
+   !if(inverse==1) then
+   !  do iatom=1,natom
+   !    if(matlu(iatom)%lpawu.ne.-1) then
+   !      tndim=nspinor*(2*matlu(iatom)%lpawu+1)
+   !        do im1=1,tndim
+   !          do im2=1,tndim
+!  !
+!  rot_mat(iatom,isppol)%value(im1,im2)=rot_mat_orig(iatom,isppol)%value(im1,im2)
+   !            rot_mat(iatom,isppol)%value(im1,im2)=rot_mat_orig(iatom)%value(im1,im2)
+   !          enddo
+   !        enddo
+   !    endif ! lpawu
+   !  enddo ! iatom
+   !endif
+
+! ===========================
+! Put data into matlu(iatom)
+! ===========================
+   !if(nsppol==1.and.nspinor==2) then
+   !  call gather_matlu(matlu,gathermatlu,natom,option=-1,prtopt=1)
+   !else if((nsppol==2.or.nsppol==1).and.nspinor==1) then
+   !  do iatom=1,natom
+   !    if(matlu(iatom)%lpawu.ne.-1) then
+   !      tndim=nspinor*(2*matlu(iatom)%lpawu+1)
+   !      do im1=1,tndim
+   !        do im2=1,tndim
+   !          matlu(iatom)%mat(im1,im2,isppol,1,1)=
+   !          gathermatlu(iatom)%value(im1,im2)
+   !        enddo
+   !      enddo
+   !    endif
+   !  enddo
+   !endif ! test nsppol/nspinor
+! ===========================
+! Deallocations
+! ===========================
+   !do iatom=1,natom
+   !  if(matlu(iatom)%lpawu.ne.-1) then
+   !    ABI_FREE(gathermatlu(iatom)%value)
+!       ABI_FREE(rot_mat_orig(iatom,isppol)%value)
+   !    ABI_FREE(rot_mat_orig(iatom)%value)
+   !  endif
+   !enddo
+   !ABI_FREE(gathermatlu)
+   !ABI_FREE(rot_mat_orig)
+ !enddo ! isppol
 
  end subroutine rotate_matlu
 !!***
@@ -1925,9 +2168,34 @@ end subroutine add_matlu
    ndim = nspinor * (2*lpawu+1)
    do isppol=1,nsppol
      call abi_xgemm("n","n",ndim,ndim,ndim,cone,matlu1(iatom)%mat(:,:,isppol),ndim,&
-             &  matlu2(iatom)%mat(:,:,isppol),ndim,czero,matlu3(iatom)%mat(:,:,isppol),ndim)  
+                 &  matlu2(iatom)%mat(:,:,isppol),ndim,czero,matlu3(iatom)%mat(:,:,isppol),ndim)  
    end do ! isppol
  end do ! iatom
+
+  !call zero_matlu(matlu3,natom)
+ !do iatom=1,natom
+ !  lpawu=matlu1(iatom)%lpawu
+ !  if(lpawu.ne.-1) then
+ !    do isppol=1,matlu1(1)%nsppol
+ !      do ispinor1=1,matlu1(1)%nspinor
+ !        do ispinor2=1,matlu1(1)%nspinor
+ !          do ispinor3=1,matlu1(1)%nspinor
+ !            do im1=1,2*lpawu+1
+ !              do im2=1,2*lpawu+1
+ !                do im3=1,2*lpawu+1
+ !                  matlu3(iatom)%mat(im1,im2,isppol,ispinor1,ispinor2)= &
+!&                    matlu3(iatom)%mat(im1,im2,isppol,ispinor1,ispinor2)+ &
+!&                    matlu1(iatom)%mat(im1,im3,isppol,ispinor1,ispinor3)*&
+!&                    matlu2(iatom)%mat(im3,im2,isppol,ispinor3,ispinor2)
+ !                enddo ! im3
+ !              enddo ! im2
+ !            enddo ! im1
+ !          enddo ! ispinor3
+ !        enddo ! ispinor2
+ !      enddo ! ispinor1
+ !    enddo ! isppol
+ !  endif ! lpawu
+ !enddo ! iatom
 
  end subroutine prod_matlu
 !!***

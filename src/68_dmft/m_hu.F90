@@ -332,7 +332,7 @@ subroutine init_hu(hu,paw_dmft,pawtab)
      jpawu = upawu - jpawu/dble(2*lpawu*ndim)
      hu(itypat)%upawu = upawu
      hu(itypat)%jpawu = jpawu
-   end if ! t2g and triqs
+   end if ! t2g and dmft_test=0
    
    xij(tndim,tndim) = 0
    write(message,'(a,5x,a)') ch10,"-------- Interactions in the density matrix representation "
