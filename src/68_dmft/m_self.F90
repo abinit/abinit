@@ -427,8 +427,8 @@ subroutine dc_self(charge_loc,hdc,hu,paw_dmft,pawtab,occ_matlu)
        end do ! ispinor
      end do ! isppol
      if (nsppol == 1 .and. nspinor == 1) occ(:,:) = occ(:,:) * two
-     call compute_exactDC(lpawu,pawtab(itypat),paw_dmft%radgrid(itypat), &
-         & occ(:,:),vdc(:,:),pawtab(itypat)%edc,pawtab(itypat)%edcdc)           
+     call compute_exactDC(lpawu,pawtab(itypat),paw_dmft%radgrid(itypat),occ(:,:), &
+                        & vdc(:,:),pawtab(itypat)%edc,pawtab(itypat)%edcdc)           
      do isppol=1,nsppol
        do ispinor=1,nspinor
          do im1=1,ndim
@@ -461,9 +461,6 @@ subroutine dc_self(charge_loc,hdc,hu,paw_dmft,pawtab,occ_matlu)
    end if ! dc=8
  end do ! iatom
  
- !if(prtopt>0) then
- !endif
-
 end subroutine dc_self
 !!***
 
@@ -515,12 +512,12 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
  type(matlu_type), optional, intent(inout) :: opt_selflimit(paw_dmft%natom)
  type(matlu_type), optional, intent(in) :: opt_hdc(paw_dmft%natom)
 !local variables-------------------------------
- integer :: i,iall,iatom,iatu,icount,ier,iexist2,iexit,iflavor,ifreq,im,im1,ioerr,ispinor
- integer :: ispinor1,isppol,istep,istep_imp,istepiter,iter,iter_imp,lpawu,master,myproc
- integer :: natom,natom_read,ncount,ndim,ndim_read,nrecl,nspinor,nspinor_read,nsppol
- integer :: nsppol_read,nw_read,optmaxent,optrw,readimagonly,spacecomm,unitrot
+ integer :: dmft_test,i,iall,iatom,iatu,icount,ier,iexist2,iexit,iflavor,ifreq,im,im1,ioerr
+ integer :: ispinor,ispinor1,isppol,istep,istep_imp,istepiter,iter,iter_imp,lpawu,master
+ integer :: myproc,natom,natom_read,ncount,ndim,ndim_read,nrecl,nspinor,nspinor_read
+ integer :: nsppol,nsppol_read,nw_read,optmaxent,optrw,readimagonly,spacecomm,unitrot
  real(dp) :: fermie_read,x_r,x_i,xtemp
- logical :: lexist,nondiaglevels,triqs
+ logical :: lexist,nondiaglevels
  character(len=30000) :: message ! Big buffer to avoid buffer overflow.
  character(len=fnlen) :: tmpfil,tmpfil2,tmpfilrot,tmpmatrot
  character(len=1) :: tag_is
@@ -542,7 +539,7 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
  !mbandc = paw_dmft%mbandc
  !nkpt = paw_dmft%nkpt
 
- triqs = (paw_dmft%dmft_solv == 6) .or. (paw_dmft%dmft_solv == 7)
+ dmft_test = paw_dmft%dmft_test
 
 ! Initialise spaceComm, myproc, and nproc
  istep = 0 
@@ -743,7 +740,7 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
        end if ! w_type
        if (optrw == 2) tmpfil2 = trim(tmpfil)//"_"//self_iter
 
-       if (optrw == 1) write(message,'(3a)') ch10,"  == Read  self function and Fermi Level on file ",trim(tmpfil)
+       if (optrw == 1) write(message,'(3a)') ch10,"  == Read self function and Fermi Level on file ",trim(tmpfil)
        if (optrw == 2) write(message,'(3a)') ch10,"  == Write self function and Fermi Level on file ",trim(tmpfil)
        call wrtout(std_out,message,'COLL')
            !unitselffunc_arr(iall)=300+iall-1
@@ -830,7 +827,7 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
        
        if (optrw == 2) then
 
-         if (triqs) then
+         if (dmft_test == 0) then
            string_format = '(3a,5i5,2x,es24.16e3)'
          else
            string_format = '(3a,5i5,2x,e25.17)'
@@ -903,7 +900,7 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
                !Is it possible to rewrite the code below to avoid such a long message
                !What about Netcdf binary files ?
 
-           if (triqs) then
+           if (dmft_test == 0) then
              string_format = '(2x,393(es24.16e3,2x))'
            else if (nspinor == 1) then
              string_format = '(2x,393(e25.17,2x))'
@@ -1007,7 +1004,7 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
        if (optrw == 2) then
 !             write(std_out,'(a,2x,31(e15.8,2x))') &
 !&            "SETEST #dc ",(self%hdc%matlu(iatom)%mat(im,im,isppol,ispinor,ispinor),im=1,ndim)
-         if (triqs) then
+         if (dmft_test == 0) then
            string_format = '(a,2x,500(es24.16e3,2x))'
          else
            string_format = '(a,2x,500(e25.17,2x))'
@@ -1092,7 +1089,7 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
        call wrtout(std_out,message,'COLL')
      end if ! ioerr>0
      !if (paw_dmft%dmft_solv /= 4) then
-     write(message,'(4x,a,a,5i5,2x,e14.7)') "-> Put Self-Energy Equal to double counting term"
+     write(message,'(4x,2a,5i5,2x,e14.7)') "-> Put Self-Energy Equal to double counting term"
      !else if (paw_dmft%dmft_solv == 4) then
      !  write(message,'(4x,a,a,5i5,2x,e14.7)') "-> Put Self-Energy Equal to dc term - shift"
      !  call wrtout(std_out,message,'COLL')
@@ -1403,6 +1400,9 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
    end do ! ifreq
    if (self%has_moments == 1) then
      call copy_matlu(self%oper(1)%matlu(:),self%moments(1)%matlu(:),natom)
+     do i=2,self%nmoments
+       call zero_matlu(self%moments(i)%matlu(:),natom)
+     end do ! i
    end if 
 
  end if ! use_fixed_self
@@ -1711,7 +1711,106 @@ subroutine kramerskronig_self(self,selflimit,selfhdc,paw_dmft,filapp)
    close(67)
    
  end if ! master node
-     
+    
+ !do iatom=1,natom
+ !  lpawu = self%oper(1)%matlu(iatom)%lpawu
+ !  if (lpawu == -1) cycle
+ !  ndim = 2*lpawu + 1
+ !  do isppol=1,nsppol
+ !      do ispinor=1,nspinor
+ !        do ispinor1=1,nspinor
+ !          do im=1,ndim
+ !            do im1=1,ndim
+               !write(6,*)
+               !"realpart",real(selflimit(iatom)%mat(im,im1,isppol,ispinor,ispinor1))
+ !              do ifreq=1,self%nw
+ !                selftemp_re(ifreq)=zero
+ !                selftemp_imag(ifreq)=aimag(self%oper(ifreq)%matlu(iatom)%mat(im,im1,isppol,ispinor,ispinor1))
+  !               do jfreq=1,self%nw-1
+  !                 if(jfreq==ifreq) cycle
+!                   selftemp_re(ifreq)=selftemp_re(ifreq) -   &
+! &
+! aimag(self%oper(jfreq)%matlu(iatom)%mat(im,im1,isppol,ispinor,ispinor1))  &
+! &                   *(self%omega(ifreq)-self%omega(jfreq)) &
+! &                   /((self%omega(ifreq)-self%omega(jfreq))**2+delta**2)&
+! &                   *(self%omega(jfreq+1)-self%omega(jfreq))
+   !                selftemp_re(ifreq)=selftemp_re(ifreq) -   &
+ !&
+ !aimag(self%oper(jfreq)%matlu(iatom)%mat(im,im1,isppol,ispinor,ispinor1))  &
+ !&                   /(self%omega(ifreq)-self%omega(jfreq)) *
+ !(self%omega(jfreq+1)-self%omega(jfreq))
+ !                enddo
+ !                selftemp_re(ifreq)=selftemp_re(ifreq)/pi
+                 !write(671,*)
+                 !self%omega(ifreq),selftemp_re(ifreq),selftemp_imag(ifreq)
+  !             enddo
+!                 TEST*************************
+!               do ifreq=1,self%nw
+!                 selftemp_imag(ifreq)=zero
+!                 do jfreq=1,self%nw-1
+!                   if(jfreq==ifreq) cycle
+!!                   selftemp_re(ifreq)=selftemp_re(ifreq) -   &
+!! &
+!aimag(self%oper(jfreq)%matlu(iatom)%mat(im,im1,isppol,ispinor,ispinor1))  &
+!! &                   *(self%omega(ifreq)-self%omega(jfreq)) &
+!! &                   /((self%omega(ifreq)-self%omega(jfreq))**2+delta**2)&
+!! &                   *(self%omega(jfreq+1)-self%omega(jfreq))
+!                   selftemp_imag(ifreq)=selftemp_imag(ifreq) +    &
+! &                   selftemp_re(jfreq)  &
+! &                   /(self%omega(ifreq)-self%omega(jfreq)) *
+! (self%omega(jfreq+1)-self%omega(jfreq))
+!                 enddo
+!                 selftemp_imag(ifreq)=selftemp_imag(ifreq)/pi
+!                 write(672,*)
+!                 self%omega(ifreq),selftemp_re(ifreq),selftemp_imag(ifreq)
+!               enddo
+!                 TEST*************************
+              ! write(6,*) "TWO FACTOR IS PUT BECAUSE OF MAXENT CODE ??"
+  !             do ifreq=1,self%nw
+!                 write(68,*)
+!                 self%omega(ifreq),selftemp_re(ifreq),selftemp_imag(ifreq)
+ !                selftemp_re(ifreq)=selftemp_re(ifreq)+ &
+ !&                 real(selflimit(iatom)%mat(im,im1,isppol,ispinor,ispinor1)- &
+ !&                 selfhdc(iatom)%mat(im,im1,isppol,ispinor,ispinor1))
+ !                self%oper(ifreq)%matlu(iatom)%mat(im,im1,isppol,ispinor,ispinor1)&
+ ! &
+ ! =cmplx(selftemp_re(ifreq),selftemp_imag(ifreq),kind=dp)/two
+  !&                       =cmplx(0.d0,selftemp_imag(ifreq),kind=dp)/two
+!  &                       =cmplx(selftemp_re(ifreq),0.d0,kind=dp)/two
+  !               self%oper(ifreq)%matlu(iatom)%mat(im,im1,isppol,ispinor,ispinor1)&
+  !&                       =cmplx(selftemp_re(ifreq),0.d0,kind=dp)/two
+  !&                       =cmplx(0.d0,0.d0,kind=dp)/two
+!    The factor two is here to compensate for the factor two in OmegaMaxent..
+!  &                       =cmplx(selftemp_re(ifreq),0.0,kind=dp)
+  !               write(67,*)
+  !               self%omega(ifreq),real(self%oper(ifreq)%matlu(iatom)%mat(im,im1,isppol,ispinor,ispinor1))&
+  !               ,aimag(self%oper(ifreq)%matlu(iatom)%mat(im,im1,isppol,ispinor,ispinor1))
+  !             enddo
+   !            write(67,*)
+               !write(68,*)
+               !!!!!!!!!! Z renormalization
+!               i0=389
+!               slope=(selftemp_re(i0+1)-selftemp_re(i0))/&
+!                     (self%omega(i0+1)-self%omega(i0))
+!               y0= selftemp_re(i0)
+!               do ifreq=1,self%nw
+!                 selftemp_re(ifreq)=slope * (self%omega(ifreq)-self%omega(i0))
+!                 + y0
+!                 selftemp_imag(ifreq)=zero
+!                 self%oper(ifreq)%matlu(iatom)%mat(im,im1,isppol,ispinor,ispinor1)&
+!  &
+!  =cmplx(selftemp_re(ifreq),selftemp_imag(ifreq),kind=dp)/two
+!                 write(6777,*)
+!                 self%omega(ifreq),real(self%oper(ifreq)%matlu(iatom)%mat(im,im1,isppol,ispinor,ispinor1)),aimag(self%oper(ifreq)%matlu(iatom)%mat(im,im1,isppol,ispinor,ispinor1))
+!               enddo
+               !!!!!!!!!!
+!             enddo
+!           enddo
+!         enddo
+!       enddo
+!     enddo ! isppol
+! end do ! iatom
+ 
 end subroutine kramerskronig_self
 !!***
 
