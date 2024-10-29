@@ -2883,7 +2883,7 @@ subroutine ctqmc_calltriqs(paw_dmft,cryst_struc,hu,levels_ctqmc,gtmp_nd,gw_tmp_n
   write(std_out, '(4a)') ch10, "    NETCDF file ", trim(filename), " written; Launching python invocation"
 
   ! Invoking python to execute the script
-  call invoke_python_run_script (paw_dmft%myproc, trim(paw_dmft%filnamei), paw_dmft%spacecomm)
+  call invoke_python_run_script (0, paw_dmft%myproc, trim(paw_dmft%filnamei), paw_dmft%spacecomm)
   ! call Invoke_python_triqs (paw_dmft%myproc, trim(paw_dmft%filnamei)//c_null_char)
   call xmpi_barrier(paw_dmft%spacecomm)
   call flush_unit(std_out)

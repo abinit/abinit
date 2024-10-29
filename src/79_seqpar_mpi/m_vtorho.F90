@@ -1637,12 +1637,14 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
          write(100, "(a, i5)")  "Nkpt", dtset%nkpt
          write(100, "(a, i5)")  "Nband", dtset%mband
          do ikpt=1,dtset%nkpt
-           write(100,'(a,3f8.4,a,i4,a)' ) ' k-point ', dtset%kptns(1:3,ikpt), ' number ',ikpt,' :'
+           write(100,'(a,3f10.4,a,i4,a)' ) ' k-point ', dtset%kptns(1:3,ikpt), ' number ',ikpt,' :'
            do ii=0,(dtset%mband-1)/12
-             write(100,'(12f6.3)') occ(1+ii*12+(ikpt-1)*dtset%mband:min(12+ii*12,dtset%mband)+(ikpt-1)*dtset%mband)
+             write(100,'(12f10.4)') occ(1+ii*12+(ikpt-1)*dtset%mband:min(12+ii*12,dtset%mband)+(ikpt-1)*dtset%mband)
            end do
          end do
         close(100)
+
+        call xmpi_barrier(spaceComm_distrb)
 
         ! Perform DMFT. No need for most of the pipeline in dmft_solve.
         ! We directly call the python_invocation.
@@ -1655,14 +1657,14 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
         ! Invoking python to execute the script
         write(msg, '(a)') trim(dtfil%filnam_ds(3))
-        call invoke_python_run_script (paw_dmft%myproc, msg, mpi_enreg%comm_world)
+        call invoke_python_run_script (istep, paw_dmft%myproc, msg, mpi_enreg%comm_world)
         call xmpi_barrier(paw_dmft%spacecomm)
         call flush_unit(std_out)
 
         ! Need new DMFT occupations
         ! They can be found in the file dtfil%filenam_ds(4)_w90.deltaN
         ! Check if file exists
-        write(filename, '(2a)') trim(dtfil%filnam_ds(4)), '_w90.deltaN'
+        write(filename, '(a, i4.4, 3a)') "dft", istep, "_", trim(dtfil%filnam_ds(4)), '_w90.deltaN'
         inquire(file=filename, exist=exists)
         if (.not.exists) then
             write(msg, '(3a)') "    ERROR: The file ", trim(filename), " does not exist. It means there was a problem with the DMFT. Abort."
