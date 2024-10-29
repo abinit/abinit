@@ -3845,9 +3845,6 @@ subroutine compute_nb_elec(green,self,paw_dmft,Fx,nb_elec_x,fermie,Fxprime)
    nb_elec_x = green%charge_ks
    Fx = green%charge_ks - paw_dmft%nelectval
 
-   !if(opt_noninter==1) then
-   !end if
- 
  end subroutine compute_nb_elec
 !!***  
       

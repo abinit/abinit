@@ -751,7 +751,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      end if
    end if
 
-#if !defined HAVE_TRIQS_v3_4
+#if !defined HAVE_TRIQS
    if(dt%dmft_solv>=6.and.dt%dmft_solv<=7) then
      write(msg,'(3a)') &
       & ' dmft_solv=6, or 7 is only relevant if the TRIQS library is linked',ch10,&
