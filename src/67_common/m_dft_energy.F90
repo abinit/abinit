@@ -279,7 +279,7 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
  integer :: option_rhoij,paw_opt,signs,spaceComm,tim_mkrho,tim_nonlop
  logical :: add_tfw_,paral_atom,use_timerev,use_zeromag,with_vxctau
  logical :: non_magnetic_xc,wvlbigdft=.false.
- real(dp) :: dotr,doti,eeigk,ekk,enlk,evxc,e_xcdc_vxctau,ucvol,ucvol_local,vxcavg,bigsxc
+ real(dp) :: dotr,doti,eeigk,ekk,enlk,evxc,e_xcdc_vxctau,ucvol,ucvol_local,vxcavg
  !character(len=500) :: message
  type(gs_hamiltonian_type) :: gs_hamk
  type(xcdata_type) :: xcdata

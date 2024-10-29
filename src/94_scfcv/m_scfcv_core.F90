@@ -1670,7 +1670,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
 !  In case we have other sources of entropy than kohn-sham states occupation,
 !  we save entropy of the Kohn-Sham states in 'entropy_ks' for future use,
 !  and we sum all entropy terms. %entropy is now total entropy.
-!  Examples of other sources of entropy: finite-temperature xc functionals, extended fpmd, ...
+!  Examples of other sources of entropy: finite-temperature xc functionals, extfpmd, ...
    entropy_ks=energies%entropy
    if(abs(energies%entropy_xc)>tiny(zero))  energies%entropy=energies%entropy+energies%entropy_xc
    if(abs(energies%entropy_paw)>tiny(zero)) energies%entropy=energies%entropy+energies%entropy_paw
