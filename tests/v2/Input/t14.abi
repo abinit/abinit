@@ -16,7 +16,7 @@ t14.ddb.5.0.25.in
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]
-#%% keywords = 
+#%% keywords = MINIMAL
 #%% authors = Unknown
 #%% description = 
 #%%   Generates a DDB for quartz containing the 2DTEs at three 

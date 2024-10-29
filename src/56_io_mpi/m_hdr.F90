@@ -2521,7 +2521,7 @@ subroutine hdr_bcast(hdr, master, me, comm)
  ntypat=hdr%ntypat
 
  if (master/=me) then
-!  Allocate all components of hdr
+   ! Allocate all components of hdr
    call hdr_malloc(hdr, bantot, nkpt, nsppol, npsp, natom, ntypat,&
                    nsym, hdr%nshiftk_orig, hdr%nshiftk)
  end if
@@ -4926,7 +4926,7 @@ subroutine hdr_vs_dtset(hdr, dtset)
 ! *************************************************************************
 
  if (.not. iexp == ifound) then
-   write(msg,'(2a,i0,a,i0)')' Mismatch in '//trim(vname),' Expected = ', iexp, ' Found = ', ifound
+   write(msg,'(2a,i0,a,i0)')' Mismatch in '//trim(vname),': Expected = ', iexp, ' Found = ', ifound
    call wrtout(std_out, msg)
    ! Increase ierr to signal we should stop in the caller.
    ierr = ierr + 1

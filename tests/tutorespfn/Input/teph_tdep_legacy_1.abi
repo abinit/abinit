@@ -59,6 +59,7 @@
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
+#%% test_chain =  teph_tdep_legacy_1.abi, teph_tdep_legacy_5.abi
 #%% [files]
 #%% files_to_test = 
 #%%   teph_tdep_legacy_1.abo,  tolnlines= 20, tolabs=  5.000e-05, tolrel=  5.000e-04, fld_options=-medium
