@@ -14,7 +14,7 @@ t87o_DS4_SUS
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]
-#%% keywords = GW
+#%% keywords = GW, MINIMAL
 #%% authors = R. Shaltaf
 #%% description =
 #%%  Test of mrgscr utility

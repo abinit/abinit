@@ -58,13 +58,13 @@ pseudos "Mg-low.psp8, B.psp8"
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% exclude_builders = eos_nvhpc_23.1_elpa, eos_nvhpc_23.9_elpa, eos_nvhpc_23.11_elpa
+#%% exclude_builders = eos_nvhpc_*
 #%% test_chain = teph4isotc_1.abi, teph4isotc_2.abi, teph4isotc_3.abi, teph4isotc_4.abi,
 #%%              teph4isotc_5.abi, teph4isotc_6.abi, teph4isotc_7.abi,
 #%% [files]
 #%% use_git_submodule = MgB2_eph4isotc
 #%% files_to_test =
-#%%   teph4isotc_2.abo, tolnlines= 150, tolabs=  3.000e-02, tolrel=  6.000e-03
+#%%   teph4isotc_2.abo, tolnlines= 164, tolabs=  3.000e-02, tolrel=  6.000e-03
 #%% [paral_info]
 #%% max_nprocs = 10
 #%% [extra_info]

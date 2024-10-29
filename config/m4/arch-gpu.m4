@@ -12,7 +12,6 @@
 #
 
 
-
 # _ABI_GPU_CHECK_CUDA()
 # ------------------------
 #
@@ -540,6 +539,10 @@ AC_DEFUN([_ABI_GPU_INIT_HIP],[
   AC_SUBST(abi_gpu_hip_libdir)
 
 ]) # _ABI_GPU_INIT_HIP
+
+
+
+                    ########################################
 
 
 

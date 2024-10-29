@@ -26,7 +26,7 @@ static hipStream_t stream_compute;
 
 // Parameters to HIP SYEVJ and SYGVJ (Jacobi-based eigensolver)
 hipsolverSyevjInfo_t syevj_params = nullptr;
-const int    MAX_SWEEPS  = 1;
+const int    MAX_SWEEPS  = 100;
 const double TOLERANCE   = 1.e-5;
 
 //! utility function for compatiblity between hipblas v1/v2 API
