@@ -152,6 +152,14 @@ module m_ddb
   ! val(2,msize,nblok)
   ! Values of the second energy derivatives in each block
 
+  real(dp),allocatable :: val_fs(:,:,:)
+  ! val_fs(2,msize,nblok)
+  ! Values of the second energy derivatives in each block, at fixed-spin magnetic boundary conditions.
+
+  real(dp),allocatable :: val_rs(:,:,:)
+  ! val_rs(2,msize,nblok)
+  ! Values of the second energy derivatives in each block, at relaxed-spin magnetic boundary conditions.
+
   real(dp),allocatable :: kpt(:,:)
   ! kpt(3,nkpt)
   ! k-point vector in reciprocal space for eigenvalues derivatives
@@ -415,8 +423,10 @@ subroutine ddb_free(ddb)
  ABI_SFREE(ddb%qpt)
  ABI_SFREE(ddb%omega)
  ABI_SFREE(ddb%nrm)
- ABI_SFREE(ddb%kpt)
  ABI_SFREE(ddb%val)
+ ABI_SFREE(ddb%val_fs)
+ ABI_SFREE(ddb%val_rs)
+ ABI_SFREE(ddb%kpt)
  ABI_SFREE(ddb%eig2dval)
 
 end subroutine ddb_free
@@ -463,6 +473,8 @@ subroutine ddb_copy(iddb, oddb)
  call alloc_copy(iddb%omega, oddb%omega)
  call alloc_copy(iddb%qpt, oddb%qpt)
  call alloc_copy(iddb%val, oddb%val)
+ call alloc_copy(iddb%val_fs, oddb%val_fs)
+ call alloc_copy(iddb%val_rs, oddb%val_rs)
 
 end subroutine ddb_copy
 !!***
@@ -934,8 +946,9 @@ subroutine ddb_to_d2etot(ddb,blkval,kblok,option,qeq0,qphon,qphnrm,ucvol,omega)
 
  rfelfd(:)=0
  rfphon(:)=0
- rfstrs(:)  = 0
- rftyp = 1
+ rfstrs(:)=0
+ rfmagn(:)=0
+ rftyp=1
 
  !IFCs are equal to the d2etot
 
@@ -1110,6 +1123,8 @@ subroutine ddb_bcast(ddb, master, comm)
  call xmpi_bcast(ddb%omega, master, comm, ierr)
  call xmpi_bcast(ddb%qpt, master, comm, ierr)
  call xmpi_bcast(ddb%val, master, comm, ierr)
+ call xmpi_bcast(ddb%val_fs, master, comm, ierr)
+ call xmpi_bcast(ddb%val_rs, master, comm, ierr)
 
  DBG_EXIT("COLL")
 
