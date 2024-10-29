@@ -7,17 +7,11 @@ Number of F90 files : ls src/*/*.F90 shared/*/src/*/*.F90 shared/*/src/*.F90 | w
 Number of F90 lines : cat src/*/*.F90 shared/*/src/*/*.F90 shared/*/src/*.F90 | wc
 Number of tests     : ls tests/*/Input/t*abi tests/*/Input/t*in | wc
 
+WARNING : the last three should be done BEFORE */*/makemake and ./configure, immediately after git clone.
 
 Note : the sudden increase of size of tar.gz file in v7.0 is due to the school
 in Bruyeres-le-Chatel, in Nov 2011, whose new files have been included in the
 package at the end of v6.
-
-Note 2 : the above commands are usually issued after */*/makemake and ./configure.
-However, on 20241027, it has been discovered that the statistics change quite largely
-if the second and third commands are issued after a git clone, without */*/makemake and ./configure !
-For example, the number of F90 files is then 802 instead of 944. There are F90 files duplicated by
-the */*/makemake and ./configure. Perhaps the statistics could be reevaluated from v8.10 (where
-there was a bug jump anyhow !).
 
 =====================================================================
 Version  Date       Size         Number        Number        Number 
@@ -56,10 +50,10 @@ Version  Date       Size         Number        Number        Number
 8.8      2018 Apr   82.5         1150          879137       1187 
 8.10     2018 Oct   89.0          644          900113       1217
 9.0      2020 Mar   87.4          712          927158       1281
-9.2      2020 Sep   96.5          852         1156302       1318
-9.4      2021 Feb  106.0          857         1164679       1320
-9.6      2021 Oct  106.8          859         1173130       1342
-9.8      2022 Dec  123.2          894         1165249       1414
-9.10     2023 Jun  127.9          907         1188983       1442
-10.0     2024 Apr  129.5          930         1228281       1480
-10.2     2024 Oct  131.3          944         1255421       1556
+9.2      2020 Sep   96.5          716          934287       1318
+9.4      2021 Feb  106.0          720          942330       1320
+9.6      2021 Oct  106.8          724          950532       1342
+9.8      2022 Dec  123.2          758          949068       1414
+9.10     2023 Jun  127.9          770          968108       1442
+10.0     2024 Apr  129.5          788          999302       1480
+10.2     2024 Oct  131.3          802         1026056       1556
