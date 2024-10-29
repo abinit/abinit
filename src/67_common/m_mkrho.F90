@@ -704,7 +704,7 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
              ABI_FREE(occ_diag)
              ! ABI_FREE(occ_nd)
            end if
-           if(paw_dmft%use_sc_dmft/=1) then
+           if(paw_dmft%use_sc_dmft==1.or.paw_dmft%use_sc_dmft==10) then
              ! Allocation of DMFT temporaries arrays
              ABI_MALLOC(cwavef_rot,(2,npw_k,blocksize,dtset%nspinor))
              ABI_MALLOC(occ_diag,(blocksize))
@@ -755,7 +755,7 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
              end if
 
 ! ---------- DMFT
-             if(paw_dmft%use_sc_dmft/=1) then
+             if(paw_dmft%use_sc_dmft==1.or.paw_dmft%use_sc_dmft==10) then
                ! initialisation of DMFT arrays
                cwavef_rot(:,:,:,:) = zero
                occ_diag(:) = zero
