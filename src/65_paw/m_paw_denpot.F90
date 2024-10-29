@@ -1080,8 +1080,12 @@ subroutine pawdenpot(compch_sph,el_temp,epaw,epawdc,spaw,ipert,ixc,&
 
 !In case we have an entropy associated with PAW contribution
 !(e.g. using finite-temperature exchange-correlation functionals),
-!we retrieve exchange-correlation internal energy e_paw using entropy spaw
-!if(abs(spaw)>tiny(zero)) epaw=epaw+el_temp*spaw
+!we retrieve exchange-correlation internal energies e_paw, e_pawdc
+!using entropy spaw.
+ if(abs(spaw)>tiny(zero)) then
+   epaw=epaw+el_temp*spaw
+   epawdc=epawdc+el_temp*spaw
+ end if
 
 !Destroy atom table used for parallelism
  call free_my_atmtab(my_atmtab,my_atmtab_allocated)

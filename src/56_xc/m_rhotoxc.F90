@@ -1357,7 +1357,7 @@ subroutine rhotoxc(bigexc,bigsxc,kxc,mpi_enreg,nfft,ngfft, &
 !In case we have an entropy associated with XC contribution
 !(e.g. using finite-temperature exchange-correlation functionals),
 !we retrieve exchange-correlation internal energy bigexc using entropy bigsxc
-!if(abs(bigsxc)>tiny(zero)) bigexc=bigexc+xcdata%tphysel*bigsxc
+ if(abs(bigsxc)>tiny(zero)) bigexc=bigexc+xcdata%tphysel*bigsxc
 
  call timab(81,2,tsec)
 
