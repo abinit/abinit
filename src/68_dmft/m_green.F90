@@ -283,7 +283,7 @@ subroutine init_green(green,paw_dmft,opt_oper_ksloc,wtype,opt_moments,opt_moment
 
  call init_oper(paw_dmft,green%occup,opt_ksloc=optoccup_ksloc)
 
-!  built simple arrays to distribute the tasks in compute_green.
+!  build simple arrays to distribute the tasks in compute_green.
  !ABI_MALLOC(green%procb,(nw,paw_dmft%nkpt))
  !ABI_MALLOC(green%proct,(nw,0:paw_dmft%nproc-1))
 
@@ -696,8 +696,6 @@ subroutine print_green(char1,green,option,paw_dmft,opt_wt,opt_decim)
  optwt = 1
  if (present(opt_wt)) optwt = opt_wt
 
- !if(pawprtvol>200) then
- !endif
  mbandc  = paw_dmft%mbandc
  natom   = paw_dmft%natom
  nkpt    = paw_dmft%nkpt
@@ -827,7 +825,7 @@ subroutine print_green(char1,green,option,paw_dmft,opt_wt,opt_decim)
              call wrtout(unitgreenloc_arr(iall),message,'COLL')
            end do ! itau
          end if ! optwt
-         if (20*lsub < mbandc) write(message,'(a,a,i5,a,i5)') ch10,"# Same record, Following bands : From ", &
+         if (20*lsub < mbandc) write(message,'(2a,i5,a,i5)') ch10,"# Same record, Following bands : From ", &
            & 20*(lsub),"  to ",min(20*(lsub+1),mbandc)
          call wrtout(unitgreenloc_arr(iall),message,'COLL')
        end do ! lsub
@@ -1099,7 +1097,7 @@ subroutine compute_green(green,paw_dmft,prtopt,self,opt_self,opt_nonxsum,opt_non
  if (green%has_moments == 1) then
    nmoments = green%nmoments
    call compute_moments_ks(green,self,paw_dmft,opt_self=optself,opt_log=optlog, &
-      & opt_quick_restart=opt_quick_restart)
+                         & opt_quick_restart=opt_quick_restart)
    if (paw_dmft%lchipsiortho == 1 .or. optself == 1) then
      call downfold_oper(green%moments(1),paw_dmft,option=2)
      do i=2,green%nmoments
@@ -1182,6 +1180,53 @@ subroutine compute_green(green,paw_dmft,prtopt,self,opt_self,opt_nonxsum,opt_non
        end do ! ib
      end do ! ikpt
    end do ! isppol
+
+    ! do ib1 = 1 , paw_dmft%mbandc
+    !   do ib = 1 , paw_dmft%mbandc
+    !     do ikpt = 1 , paw_dmft%nkpt
+    !       do is = 1 , paw_dmft%nsppol
+    !         if (green%procb(ifreq,ikpt)==myproc) then
+!               green%oper(ifreq)%ks(is,ikpt,ib,ib1)=       &
+    !           green_temp%ks(is,ikpt,ib,ib1)=       &
+!&               ( omega_current     &
+!&               + fermilevel                               &
+!&               - paw_dmft%eigen_dft(is,ikpt,ib)) * Id(ib,ib1) &
+!&               - self_minus_hdc_oper%ks(is,ikpt,ib,ib1)
+          !if(ikpt==2.and.ib==ib1) then
+          !  write(6,*)
+          !  "self",ib1,ib,ikpt,is,ifreq,self_minus_hdc_oper%ks(is,ikpt,ib,ib1)
+          !endif
+!&               -
+!(self%oper(ifreq)%ks(is,ikpt,ib,ib1)-self%hdc%ks(is,ikpt,ib,ib1))
+!               if(prtopt>5) then
+!               if(ikpt==1.and.(ifreq==1.or.ifreq==3).and.ib==16.and.ib1==16)
+!               then
+!                write(std_out,*) 'omega_current
+!                ',omega_current
+!                write(std_out,*) 'fermilevel
+!                ',fermilevel
+!                write(std_out,*) ' paw_dmft%eigen_dft(is,ikpt,ib)       ',
+!                paw_dmft%eigen_dft(is,ikpt,ib),Id(ib,ib1)
+!                write(std_out,*)
+!                'self_minus_hdc_oper%ks(is,ikpt,ib,ib1)',self_minus_hdc_oper%ks(is,ikpt,ib,ib1)
+!                write(std_out,*) 'green
+!                ',green%oper(ifreq)%ks(is,ikpt,ib,ib1)
+!               endif
+!               if(ib==1.and.ib1==3) then
+!                 write(std_out,*) "ff compute",ikpt,ifreq,is,ikpt,ib,ib1
+!                 write(std_out,*) "ff compute",ikpt,ifreq,
+!                 green_temp%ks(is,ikpt,ib,ib1)
+!                 write(std_out,*) "ff details",paw_dmft%eigen_dft(is,ikpt,ib)
+!                 write(std_out,*) "ff details2",fermilevel
+!                 write(std_out,*) "ff details3",Id(ib,ib1)
+!        !        write(std_out,*) "ff
+!        details4",self_minus_hdc_oper%ks(is,ikpt,ib,ib1)
+!               endif
+        !     endif
+        !   enddo ! is
+        ! enddo ! ikpt
+       !enddo ! ib
+     !enddo ! ib1
    
 !     call print_oper(green%oper(ifreq),9,paw_dmft,3)
 !       write(std_out,*) 'after print_oper'
@@ -1231,6 +1276,25 @@ subroutine compute_green(green,paw_dmft,prtopt,self,opt_self,opt_nonxsum,opt_non
      !if(lintegrate) then
 !    accumulate integration
    if (green%w_type /= "real") then     
+
+     !do isppol=1,nsppol
+     !  do ikpt=1,nkpt
+     !    if (green%distrib%procb(ikpt+(isppol-1)*nkpt) /= me_spkpt) cycle
+         
+         !do ib1=1,mbandc
+         !  do ib=1,mbandc
+              ! if (green%procb(ifreq,ikpt)==myproc) then
+          !   call
+          !   add_int_fct(ifreq,green%oper(ifreq)%ks(ib,ib1,ikpt,isppol),ib==ib1,
+          !   &
+          !         & omega_current,2,green%occup%ks(ib,ib1,ikpt,isppol), &
+          !         & paw_dmft%temp,paw_dmft%wgt_wlo(ifreq),paw_dmft%dmft_nwlo)
+             
+               !endif
+         !  end do ! ib
+         !end do ! ib1
+     !  end do ! ikpt
+     !end do ! isppol
    
      do isppol=1,nsppol
        do ikpt=1,mkmem
@@ -1372,7 +1436,7 @@ subroutine compute_green(green,paw_dmft,prtopt,self,opt_self,opt_nonxsum,opt_non
  if (optnonxsum == 0 .and. green%oper(1)%has_operks == 1) then
    call gather_oper(green%oper(:),green%distrib,paw_dmft,opt_ksloc=1,opt_diag=diag)
  else if (optnonxsum == 0 .and. green%oper(1)%has_operks == 0) then
-   message = 'optnonxsum==0 and green%oper(1)%has_operks==0: not compatible'
+   message = 'optnonxsum=0 and green%oper(1)%has_operks=0: not compatible'
    ABI_BUG(message)
  end if ! optnonxsum
 !   endif
@@ -1498,13 +1562,7 @@ subroutine integrate_green(green,paw_dmft,prtopt,opt_ksloc,opt_after_solver,opt_
  option = 1 ! option for downfold_oper
  if (optself == 0) option = 3
  
- !if(present(opt_nonxsum)) then
- !  optnonxsum=opt_nonxsum
- !else
- !  optnonxsum=0
- !endif
-
-! Initialise spaceComm, myproc, and master
+! Initialize spaceComm, myproc, and master
  !spacecomm=paw_dmft%spacecomm
  myproc = paw_dmft%myproc
  !nproc=paw_dmft%nproc
@@ -1561,6 +1619,43 @@ subroutine integrate_green(green,paw_dmft,prtopt,opt_ksloc,opt_after_solver,opt_
 !  - Calculation of frequency sum over positive frequency
      !if (nspinor==1) option=1
      !if (nspinor==2) option=2
+
+    !do atom=1, natom
+    !   ndim=2*green%oper(1)%matlu(iatom)%lpawu+1
+    !   if(green%oper(1)%matlu(iatom)%lpawu.ne.-1) then
+    !         do ispinor1 = 1, nspinor
+    !       do ispinor = 1, nspinor
+    !     do is = 1 , nsppol
+    !           do im=1,ndim
+    !             do im1=1,ndim
+    !               do ifreq=1,green%nw
+    !                 ff(ifreq)= &
+!& green%oper(ifreq)%matlu(iatom)%mat(im,im1,is,ispinor,ispinor1)
+!                     write(std_out,*) green%omega(ifreq),ff(ifreq)," integrate
+!                     green fw_lo"
+   !if(present(iii).and.im==1.and.im1==1) write(std_out_default,*)
+   !ch10,ifreq,ff(ifreq),"#ff"
+ !                  enddo
+!                   call int_fct(ff,(im==im1).and.(ispinor==ispinor1),&
+!&                   option,paw_dmft,integral)
+  !                 call int_fct(ff,(im==im1).and.(ispinor==ispinor1),&
+!&                   2,paw_dmft,integral)  ! test_1
+ !                  green%occup%matlu(iatom)%mat(im,im1,is,ispinor,ispinor1)=integral
+   !if(present(iii).and.im==1.and.im1==1) write(std_out_default,*)
+   !ch10,'integral',im,im1,ifreq,integral
+!                   if(im==2.and.im1==5.and.is==1.and.iatom==1) then
+!                     write(std_out,*) " occup
+!                     %matlu(1)%mat(2,5,1,1,1)",green%occup%matlu(iatom)%mat(im,im1,is,ispinor,ispinor1)
+!                   endif
+           !      enddo
+           !    enddo
+           !  enddo ! ispinor1
+        !   enddo ! ispinor
+        ! enddo ! is
+        ! matlu_temp(iatom)%mat=green%occup%matlu(iatom)%mat
+    !   endif ! lpawu=/-1
+    ! enddo ! iatom
+
      call zero_matlu(green%occup%matlu(:),natom)
      
      ABI_MALLOC(omega_fac,(nmoments))
@@ -1789,7 +1884,7 @@ subroutine integrate_green(green,paw_dmft,prtopt,opt_ksloc,opt_after_solver,opt_
        call print_matlu(green%occup%matlu(:),natom,prtopt=3,opt_diag=-1)
      end if ! abs(prtopt)>2
 
-!  - Symmetrise: continue sum over k-point: Full BZ
+!  - Symmetrize: continue sum over k-point: Full BZ
      call sym_matlu(green%occup%matlu(:),paw_dmft)
      if (abs(prtopt) >= 2) then
 !       write(message,'(a,a,i10,a)') ch10,&
@@ -3285,8 +3380,8 @@ subroutine newton(green,self,paw_dmft,x_input,x_precision,max_iter,&
  real(dp), intent(inout) :: x_input,x_precision
  integer, optional, intent(in) :: opt_algo
 !Local variables-------------------------------
- integer :: iter,option
- logical :: l_minus,l_plus,triqs
+ integer :: dmft_test,iter,option
+ logical :: l_minus,l_plus
  real(dp) :: Fx,Fxdouble,Fxoptimum,Fxprime,nb_elec_x,step
  real(dp) :: x_minus,x_optimum,x_plus,xold
  character(len=500) :: message
@@ -3319,7 +3414,7 @@ subroutine newton(green,self,paw_dmft,x_input,x_precision,max_iter,&
  Fxoptimum = one
  x_optimum = zero
 
- triqs = (paw_dmft%dmft_solv == 6) .or. (paw_dmft%dmft_solv == 7)
+ dmft_test = paw_dmft%dmft_test
 
 !========================================
 ! Start iteration to find fermi level
@@ -3329,7 +3424,7 @@ subroutine newton(green,self,paw_dmft,x_input,x_precision,max_iter,&
 !  ========================================
 !  If zero is located between two values: apply newton method or dichotomy
 !  ========================================
-   if ((l_minus .and. l_plus) .or. triqs) then
+   if ((l_minus .and. l_plus) .or. dmft_test == 0) then
 
 !    ==============================================
 !    Compute the function and derivatives for newton
@@ -3367,7 +3462,7 @@ subroutine newton(green,self,paw_dmft,x_input,x_precision,max_iter,&
 !    ==============================================
      xold = x_input
      if (option == 1) then 
-       if (triqs) then
+       if (dmft_test == 0) then
          if (Fxprime < 0) then
            x_input = x_input - sign(one,Fx)*step
          else
@@ -3375,15 +3470,15 @@ subroutine newton(green,self,paw_dmft,x_input,x_precision,max_iter,&
          end if 
        else
          x_input = x_input - Fx/Fxprime
-       end if 
-     end if 
+       end if ! dmft_test 
+     end if ! option=1
      if (option == 2) x_input = x_input - two*Fx*Fxprime/(two*(Fxprime**2)-Fx*Fxdouble)
 
 !    ==============================================
 !    If newton does not work well, use dichotomy.
 !    ==============================================
 
-     if (triqs) then 
+     if (dmft_test == 0) then 
        if (Fx < 0) then
          l_minus = .true.
          x_minus = xold
@@ -3392,17 +3487,17 @@ subroutine newton(green,self,paw_dmft,x_input,x_precision,max_iter,&
          l_plus = .true.
          x_plus = xold
        end if 
-     end if ! triqs
+     end if ! dmft_test
 
      if ((x_input < x_minus .or. x_input > x_plus) .and. (l_minus .and. l_plus)) then 
        
-       if (.not. triqs) then
+       if (dmft_test == 1) then
          call compute_nb_elec(green,self,paw_dmft,Fx,nb_elec_x,xold)
        end if 
       
        write(message,'(a,3f12.6)') " ---",x_input,Fx+paw_dmft%nelectval,Fx
        call wrtout(std_out,message,'COLL')
-       if (.not. triqs) then
+       if (dmft_test == 1) then
          if (Fx > 0) then
            x_plus = xold
          else if (Fx < 0) then
@@ -3505,14 +3600,14 @@ subroutine function_and_deriv(green,self,paw_dmft,x_input,x_precision, &
  real(dp), intent(in) :: f_precision,x_input,x_precision
  real(dp), intent(out) :: Fx,Fxprime,Fxdouble
 !Local variables-------------------------------
- logical :: triqs
+ integer :: dmft_test
  real(dp) :: deltax,Fxminus,Fxplus,nb_elec_x,xminus,x0,xplus
  character(len=500) :: message
 ! *********************************************************************
 
-   triqs = (paw_dmft%dmft_solv == 6) .or. (paw_dmft%dmft_solv == 7)
+   dmft_test = paw_dmft%dmft_test
 
-   if (.not. triqs) then
+   if (dmft_test == 1) then
 
 !  Choose deltax: for numeric evaluation of derivative
    !if(iter==1) then
@@ -3561,7 +3656,7 @@ subroutine function_and_deriv(green,self,paw_dmft,x_input,x_precision, &
      write(message,'(a,3f12.6)') "  - ",x_input,nb_elec_x,Fx
      call wrtout(std_out,message,'COLL')
 
-   end if ! triqs
+   end if ! dmft_test
 
    if (Fxprime < zero) then
      write(message,'(a,f12.6)') "  Warning: slope of charge versus fermi level is negative !",Fxprime
@@ -3606,9 +3701,8 @@ subroutine compute_nb_elec(green,self,paw_dmft,Fx,nb_elec_x,fermie,Fxprime)
  real(dp), intent(out) :: Fx,nb_elec_x
  real(dp), optional, intent(out) :: Fxprime
 !Local variables-------------------------------
- integer :: band_index,i,ib,ierr,ifreq,ikpt,isppol,mbandc
+ integer :: band_index,dmft_test,i,ib,ierr,ifreq,ikpt,isppol,mbandc
  integer :: mkmem,nband_k,nkpt,nmoments,nspinor,nsppol,shift
- logical :: triqs
  real(dp) :: correction,correction_prime,eig
  real(dp) :: fac,occ_prime,temp,wtk
  complex(dpc) :: omega
@@ -3616,9 +3710,9 @@ subroutine compute_nb_elec(green,self,paw_dmft,Fx,nb_elec_x,fermie,Fxprime)
  complex(dpc), allocatable :: omega_fac(:),trace_moments(:),trace_moments_prime(:)
 ! *********************************************************************
  
-   triqs = (paw_dmft%dmft_solv == 6) .or. (paw_dmft%dmft_solv == 7)
+   dmft_test = paw_dmft%dmft_test
 
-   if (.not. triqs) then
+   if (dmft_test == 1) then
 
      paw_dmft%fermie = fermie
      call compute_green(green,paw_dmft,0,self,opt_self=1,opt_nonxsum=1,opt_nonxsum2=1)
@@ -3746,7 +3840,7 @@ subroutine compute_nb_elec(green,self,paw_dmft,Fx,nb_elec_x,fermie,Fxprime)
        end if ! Fxprime
      end if ! use_all_bands
 
-   end if ! triqs 
+   end if ! dmft_test 
    
    nb_elec_x = green%charge_ks
    Fx = green%charge_ks - paw_dmft%nelectval
