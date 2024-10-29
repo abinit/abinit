@@ -1106,6 +1106,9 @@ subroutine drivexc(ixc,order,npts,nspden,usegradient,uselaplacian,usekden,&
    end if
  end if
 
+!Initialize exchange-correlation entropy to zero
+ sxc(:)=zero
+
 ! =================================================
 ! ==  Intermediate quantities computation        ==
 ! =================================================

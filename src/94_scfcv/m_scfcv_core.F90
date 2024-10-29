@@ -1667,12 +1667,14 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
      end do
    end if
 
-!  In case we use finite-temperature exchange-correlation functional,
-!  we save entropy of the Kohn-Sham states in the buffer entropy_ks
-!  for future use, and we sum all entropy terms.
+!  In case we have other sources of entropy than kohn-sham states occupation,
+!  we save entropy of the Kohn-Sham states in 'entropy_ks' for future use,
+!  and we sum all entropy terms. %entropy is now total entropy.
+!  Examples of other sources of entropy: finite-temperature xc functionals, extended fpmd, ...
    entropy_ks=energies%entropy
-!  if(abs(energies%entropy_xc)>tiny(zero))  energies%entropy=energies%entropy+energies%entropy_xc
-!  if(abs(energies%entropy_paw)>tiny(zero)) energies%entropy=energies%entropy+energies%entropy_paw
+   if(abs(energies%entropy_xc)>tiny(zero))  energies%entropy=energies%entropy+energies%entropy_xc
+   if(abs(energies%entropy_paw)>tiny(zero)) energies%entropy=energies%entropy+energies%entropy_paw
+   if(associated(extfpmd))                  energies%entropy=energies%entropy+extfpmd%entropy
 
    call timab(1451,2,tsec)
 
@@ -2619,11 +2621,6 @@ subroutine etotfor(atindx1,deltae,diffor,dtefield,dtset,&
  ipositron=electronpositron_calctype(electronpositron)
 
  if (optene>-1) then
-
-!  Add the contribution of extfpmd to the entropy
-   if(associated(extfpmd)) then
-     energies%entropy=energies%entropy+extfpmd%entropy
-   end if
 
 !  When the finite-temperature VG broadening scheme is used,
 !  the total entropy contribution "tsmear*entropy" has a meaning,

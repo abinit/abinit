@@ -417,8 +417,8 @@ subroutine odamix(deltae,dtset,elast,energies,entropy,etotal,&
 
 !We add different entropy terms to total entropy energy
  e_entropy=e_entropy_ks
-!if(abs(energies%entropy_xc)>tiny(zero))  e_entropy=e_entropy-xcdata%tphysel*energies%entropy_xc
-!if(abs(energies%entropy_paw)>tiny(zero)) e_entropy=e_entropy-el_temp*energies%entropy_paw
+ if(abs(energies%entropy_xc)>tiny(zero))  e_entropy=e_entropy-xcdata%tphysel*energies%entropy_xc
+ if(abs(energies%entropy_paw)>tiny(zero)) e_entropy=e_entropy-el_temp*energies%entropy_paw
 
 !Turn it into an electric enthalpy,refer to Eq.(33) of Suppl. of Nat. Phys. paper (5,304,2009) [[cite:Stengel2009]]
 ! the missing volume is added here
@@ -658,8 +658,8 @@ subroutine odamix(deltae,dtset,elast,energies,entropy,etotal,&
 
 !We add different entropy terms to total entropy energy
  e_entropy=e_entropy_ks
-!if(abs(energies%entropy_xc)>tiny(zero))  e_entropy=e_entropy-xcdata%tphysel*energies%entropy_xc
-!if(abs(energies%entropy_paw)>tiny(zero)) e_entropy=e_entropy-el_temp*energies%entropy_paw
+ if(abs(energies%entropy_xc)>tiny(zero))  e_entropy=e_entropy-xcdata%tphysel*energies%entropy_xc
+ if(abs(energies%entropy_paw)>tiny(zero)) e_entropy=e_entropy-el_temp*energies%entropy_paw
 
  etotal=energies%h0+energies%e_hartree+energies%e_xc+energies%e_corepsp + &
  & e_entropy + energies%e_elecfield + energies%e_magfield
