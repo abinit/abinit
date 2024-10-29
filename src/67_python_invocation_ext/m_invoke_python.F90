@@ -108,7 +108,7 @@ module m_invoke_python
        write(102, "(i4)") dft_iter
      close(102)
 
-     call mpi_barrier(MPI_COMM_WORLD,ierr)
+     call mpi_barrier(comm, ierr)
      write(f2c_string, '(a)') trim(triqs_filename)//c_null_char
 
      write(msg, '(a)') "   ######################################"
@@ -128,7 +128,7 @@ module m_invoke_python
      write(msg, '(a)') "   ######################################"
      call wrtout(std_out, msg, 'COLL')
 
-     call mpi_barrier(MPI_COMM_WORLD,ierr)
+     call mpi_barrier(comm, ierr)
 
      if (ierr == 1) then
         write(msg, '(a)') '   invoke_python_triqs: ERROR could not execute the python file correctly.'
