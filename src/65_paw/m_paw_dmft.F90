@@ -1762,7 +1762,7 @@ subroutine construct_nwlo_dmft(paw_dmft)
   ABI_MALLOC(omega_li,(nwli))
   call construct_nwli_dmft(paw_dmft,nwli,omega_li(:))
   
-  !Parallelisation over frequencies!
+  !Parallelization over frequencies!
   ! ============= Set up =============
   myproc = paw_dmft%myproc 
   nproc  = paw_dmft%nproc 

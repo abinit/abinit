@@ -69,8 +69,8 @@ CONTAINS  !=====================================================================
 !Arguments ------------------------------------
  integer, intent(in) :: lpawu,meshsz
  real(dp), intent(in) :: lambda,eps
- real(dp), intent(in) :: proj2(:)
- real(dp), intent(inout) :: fk(:)
+ real(dp), intent(in) :: proj2(meshsz)
+ real(dp), intent(inout) :: fk(lpawu+1)
  type(pawrad_type), intent(in) :: pawrad
 !Local variables ------------------------------
  integer :: ir,k,mesh_type
@@ -200,7 +200,7 @@ CONTAINS  !=====================================================================
  integer, intent(in) :: lpawu,meshsz
  real(dp), intent(in) :: upawu,jpawu
  real(dp), intent(out) :: lambda,eps
- real(dp), intent(in) :: proj2(:)
+ real(dp), intent(in) :: proj2(meshsz)
  type(pawrad_type), intent(in) :: pawrad
 !Local variables ------------------------------
  integer  :: i,ierr,info,ldfjac,lr,maxfev,ml,mode,mu,n,nfev,nprint

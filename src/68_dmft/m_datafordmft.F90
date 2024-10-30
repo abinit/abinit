@@ -657,11 +657,11 @@ subroutine datafordmft(cg,cprj,cryst_struc,dft_occup,dimcprj,dtset,eigen,mband_c
        & matlu_temp(:),dft_occup%matlu(:),natom,option,tol3,ierr) !tol1 tol2 tol3
      if (ierr == -1) then
        write(message,'(10a)') ch10,&
-        & '    -> These two quantities should agree if three conditions are fulfilled',ch10,&
+        & '    -> These two quantities should agree if three conditions are fullfilled',ch10,&
         & '         -  input wavefunctions come from the same Hamiltonien (e.g LDA/GGA)',ch10,&
         & '         -  dmatpuopt is equal to 1',ch10,&
         & '         -  all valence states are in the valence',ch10,&
-        & '    (for experts users: it is not compulsary that these conditions are fulfilled)'
+        & '    (for experts users: it is not compulsary that these conditions are fullfilled)'
        call wrtout(std_out,message,'COLL')
      end if
 !    write(message,'(2a)') ch10,&
@@ -1228,8 +1228,8 @@ subroutine normalizechipsi(nkpt,paw_dmft,jkpt)
 !        == Apply O^{-0.5} on chipsi
        do ikpt=1,nkpt
          if (paw_dmft%distrib%procb(ikpt) /= paw_dmft%distrib%me_kpt) cycle
-         call abi_xgemm("n","n",ndim,mbandc,ndim,cone,norm1%matlu(iatom)%mat(:,:,isppol), &
-                  & ndim,paw_dmft%chipsi(:,:,ikpt,isppol,iatom),ndim_max,czero,mat_tmp(:,:),ndim)
+         call abi_xgemm("n","n",ndim,mbandc,ndim,cone,norm1%matlu(iatom)%mat(:,:,isppol),ndim, &
+                      & paw_dmft%chipsi(:,:,ikpt,isppol,iatom),ndim_max,czero,mat_tmp(:,:),ndim)
          paw_dmft%chipsi(1:ndim,:,ikpt,isppol,iatom) = mat_tmp(:,:)
        end do ! ikpt
      end do ! isppol

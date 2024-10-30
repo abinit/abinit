@@ -1257,7 +1257,7 @@ subroutine compute_green(green,paw_dmft,prtopt,self,opt_self,opt_nonxsum,opt_non
            trace_tmp = trace_tmp + trace_tmp2*wtk
          else
            call abi_xgemm("n","c",mbandc,mbandc,mbandc,cone,green%oper(ifreq)%ks(:,:,ikpt+shift_green,isppol), &
-             & mbandc,green%oper(ifreq)%ks(:,:,ikpt+shift_green,isppol),mbandc,czero,mat_tmp(:,:),mbandc)
+                        & mbandc,green%oper(ifreq)%ks(:,:,ikpt+shift_green,isppol),mbandc,czero,mat_tmp(:,:),mbandc)
            call zheev("n","u",mbandc,mat_tmp(:,:),mbandc,eig(:),work(:),lwork,rwork(:),info)
            trace_tmp = trace_tmp + sum(log(eig(:)*omega_current))*wtk*half
          end if ! optself
@@ -2952,7 +2952,7 @@ subroutine occup_green_tau(green)
  complex(dpc), allocatable :: shift(:)
 ! *********************************************************************
 
- natom   = green%oper_tau(1)%natom
+ natom = green%oper_tau(1)%natom
 
  ABI_MALLOC(shift,(natom))
 

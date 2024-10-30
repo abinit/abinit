@@ -548,10 +548,10 @@ end subroutine print_matlu
        do isppol=1,nsppol
        
          call abi_xgemm("n","n",ndim,ndim,ndim,cone,gloc(at_indx)%mat(:,:,isppol),ndim,&
-                  & paw_dmft%zarot(:,1:ndim,irot,lpawu+1),ndim_max,czero,gloc_tmp(:,1:ndim),ndim_max)  
+                      & paw_dmft%zarot(:,1:ndim,irot,lpawu+1),ndim_max,czero,gloc_tmp(:,1:ndim),ndim_max)  
                   
          call abi_xgemm("t","n",ndim,ndim,ndim,cone,paw_dmft%zarot(:,1:ndim,irot,lpawu+1),ndim_max,&
-                  & gloc_tmp(:,1:ndim),ndim_max,czero,gloc_tmp2(:,:),ndim)
+                      & gloc_tmp(:,1:ndim),ndim_max,czero,gloc_tmp2(:,:),ndim)
                 
          glocsym(iatom)%mat(:,:,isppol) = glocsym(iatom)%mat(:,:,isppol) + gloc_tmp2(:,:) 
         
@@ -596,10 +596,10 @@ end subroutine print_matlu
        ! Symmetrize density 
        
        call abi_xgemm("n","n",ndim,ndim,ndim,cone,gloc_nmrep(at_indx)%mat(:,:,1),ndim, &
-                & paw_dmft%zarot(:,1:ndim,irot,lpawu+1),ndim_max,czero,gloc_tmp(:,1:ndim),ndim_max) 
+                    & paw_dmft%zarot(:,1:ndim,irot,lpawu+1),ndim_max,czero,gloc_tmp(:,1:ndim),ndim_max) 
       
        call abi_xgemm("t","n",ndim,ndim,ndim,cone,paw_dmft%zarot(:,1:ndim,irot,lpawu+1),ndim_max,& 
-                & gloc_tmp(:,1:ndim),ndim_max,czero,gloc_tmp2(:,:),ndim)
+                    & gloc_tmp(:,1:ndim),ndim_max,czero,gloc_tmp2(:,:),ndim)
                
        glocsym(iatom)%mat(:,:,1) = glocsym(iatom)%mat(:,:,1) + gloc_tmp2(:,:)
       
@@ -608,10 +608,10 @@ end subroutine print_matlu
        do mu=1,3
       
          call abi_xgemm("n","n",ndim,ndim,ndim,cone,gloc_nmrep(at_indx)%mat(:,:,mu+1),ndim, &
-                  & paw_dmft%zarot(:,1:ndim,irot,lpawu+1),ndim_max,czero,gloc_tmp(:,1:ndim),ndim_max)
+                      & paw_dmft%zarot(:,1:ndim,irot,lpawu+1),ndim_max,czero,gloc_tmp(:,1:ndim),ndim_max)
         
          call abi_xgemm("t","n",ndim,ndim,ndim,cone,paw_dmft%zarot(:,1:ndim,irot,lpawu+1),ndim_max,&
-                  & gloc_tmp(:,1:ndim),ndim_max,czero,gloc_tmp3(:,1:ndim,mu),ndim_max) 
+                      & gloc_tmp(:,1:ndim),ndim_max,czero,gloc_tmp3(:,1:ndim,mu),ndim_max) 
        end do ! mu
       
        do m2=1,ndim
@@ -1571,10 +1571,10 @@ end subroutine add_matlu
        ABI_MALLOC(temp_mat,(tndim,tndim))
      
        call abi_xgemm('n','n',tndim,tndim,tndim,cone,matlu(iatom)%mat(:,:,2),tndim,&
-         & eigvectmatlu(iatom)%mat(:,:,1),tndim,czero,temp_mat(:,:),tndim)
+                    & eigvectmatlu(iatom)%mat(:,:,1),tndim,czero,temp_mat(:,:),tndim)
 
        call abi_xgemm('c','n',tndim,tndim,tndim,cone,eigvectmatlu(iatom)%mat(:,:,1),tndim,&
-         & temp_mat(:,:),tndim,czero,matlu_diag(iatom)%mat(:,:,2),tndim)
+                    & temp_mat(:,:),tndim,czero,matlu_diag(iatom)%mat(:,:,2),tndim)
          
        ABI_FREE(temp_mat)
          
@@ -1706,9 +1706,9 @@ end subroutine add_matlu
    ABI_MALLOC(temp_mat,(tndim,tndim)) 
    do isppol=1,nsppol
      call abi_xgemm('n',c1,tndim,tndim,tndim,cone,matlu_inp(iatom)%mat(:,:,isppol),tndim,&
-              & rot_mat(iatom)%mat(:,:,isppol),tndim,czero,temp_mat(:,:),tndim)
+                  & rot_mat(iatom)%mat(:,:,isppol),tndim,czero,temp_mat(:,:),tndim)
      call abi_xgemm(c2,'n',tndim,tndim,tndim,cone,rot_mat(iatom)%mat(:,:,isppol),tndim,&
-              & temp_mat(:,:),tndim,czero,matlu_inp(iatom)%mat(:,:,isppol),tndim)
+                  & temp_mat(:,:),tndim,czero,matlu_inp(iatom)%mat(:,:,isppol),tndim)
    end do ! isppol
    ABI_FREE(temp_mat)
  end do ! iatom

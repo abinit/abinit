@@ -72,8 +72,8 @@ CONTAINS  !=====================================================================
  integer, intent(in) :: lpawu
  type(pawtab_type), intent(in) :: pawtab
  type(pawrad_type), intent(in) :: pawrad
- complex(dpc), ABI_CONTIGUOUS intent(in) :: occ(:,:)
- complex(dpc), ABI_CONTIGUOUS intent(inout) :: vdc(:,:)
+ complex(dpc), intent(in) :: occ(2*lpawu+1,2*lpawu+1)
+ complex(dpc), intent(inout) :: vdc(2*lpawu+1,2*lpawu+1)
  real(dp), intent(out) :: edc,edcdc
 !Local variables ------------------------------
  integer :: i,ir,j,k,l,ln,m,m1,mm,minusm,meshsz,ndim
@@ -85,7 +85,7 @@ CONTAINS  !=====================================================================
  !************************************************************************
 
  ! VERY IMPORTANT: This routine assumes that we work in the real spherical harmonic case.
- ! If you want to generalize that for the complex case for some reason, the formulas 
+ ! If you want to generalize that to the complex case for some reason, the formulas 
  ! below are not valid, so you would need to add some complex conjugates.
 
  ln = 13  ! Size of angular mesh, same as eDMFT
