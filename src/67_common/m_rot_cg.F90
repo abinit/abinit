@@ -4,7 +4,7 @@
 !!
 !! FUNCTION
 !!  Rotate the cg coefficient with the rotation matrix obtained from the
-!!  diagonalisation of the non-diagonal occupation matrix produced by DMFT.
+!!  diagonalization of the non-diagonal occupation matrix produced by DMFT.
 !!
 !! INPUTS
 !!
@@ -102,12 +102,12 @@ subroutine diag_occ(occ_nd_cpx,nband,occ_diag)
 
   if (info > 0) then
     message = ""
-    write(message,"(a,i5)") " something wrong happened with the diagonalisation of &
+    write(message,"(a,i5)") " something wrong happened with the diagonalization of &
        & the occupation matrix (didn't converge), info=",info
     ABI_ERROR(message)
   else if (info < 0) then
     message = ""
-    write(message,"(a,i5)") " something wrong happened with the diagonalisation of &
+    write(message,"(a,i5)") " something wrong happened with the diagonalization of &
        & the occupation matrix (bad input argument), info=",info
     ABI_ERROR(message)
   end if
@@ -141,7 +141,7 @@ end subroutine diag_occ
 !!   occ_diag(nband) = diagonal occupations in the new band space
 !!
 !! SIDE EFFECT
-!!   cwavef is rotated with the unitary matrix obtained from the diagonalisation
+!!   cwavef is rotated with the unitary matrix obtained from the diagonalization
 !!   of occupations (occ_nd)
 !! SOURCE
 !!

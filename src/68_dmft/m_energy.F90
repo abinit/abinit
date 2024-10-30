@@ -1322,7 +1322,7 @@ subroutine compute_trace_log_loc(green,paw_dmft,trace,opt_inv)
      ABI_MALLOC(mat_temp,(ndim,ndim))
      do isppol=1,nsppol
        call abi_xgemm("n","c",ndim,ndim,ndim,cone,green%oper(ifreq)%matlu(iatom)%mat(:,:,isppol),ndim,&
-             & green%oper(ifreq)%matlu(iatom)%mat(:,:,isppol),ndim,czero,mat_temp(:,:),ndim)
+                    & green%oper(ifreq)%matlu(iatom)%mat(:,:,isppol),ndim,czero,mat_temp(:,:),ndim)
        call zheev('n','u',ndim,mat_temp(:,:),ndim,eig(:),work(:),lwork,rwork(1:3*ndim-2),info)
        if (optinv == 0) then
          trace_tmp = trace_tmp + sum(log(eig(1:ndim)*omega))

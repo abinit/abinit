@@ -747,10 +747,10 @@ subroutine upfold_oper(oper,paw_dmft,procb,iproc)
        ik = ikpt + shift ! true kpt index (needed for chipsi)
      
        call abi_xgemm("c","n",mbandc,ndim,ndim,cone,paw_dmft%chipsi(:,:,ik,isppol,iatom),&
-                & ndim_max,oper%matlu(iatom)%mat(:,:,isppol),ndim,czero,mat_temp(:,1:ndim),mbandc)
+                    & ndim_max,oper%matlu(iatom)%mat(:,:,isppol),ndim,czero,mat_temp(:,1:ndim),mbandc)
                
        call abi_xgemm("n","n",mbandc,mbandc,ndim,cone,mat_temp(:,1:ndim),mbandc,&
-                & paw_dmft%chipsi(:,:,ik,isppol,iatom),ndim_max,czero,mat_temp2(:,:),mbandc)
+                    & paw_dmft%chipsi(:,:,ik,isppol,iatom),ndim_max,czero,mat_temp2(:,:),mbandc)
                 
        oper%ks(:,:,ikpt,isppol) = oper%ks(:,:,ikpt,isppol) + mat_temp2(:,:)
        

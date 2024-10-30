@@ -1060,9 +1060,9 @@ subroutine rotatevee_hu(hu,paw_dmft,pawprtvol,rot_mat,rot_type,udens_atoms,vee_r
    do m1=1,tndim
 
      call abi_xgemm("c","n",tndim,tndim,tndim,cone,rot_mat(:,:),tndim,&
-              & vee(:,:,m1,m2),tndim,czero,mat_tmp(:,:),tndim)
+                  & vee(:,:,m1,m2),tndim,czero,mat_tmp(:,:),tndim)
      call abi_xgemm("n","n",tndim,tndim,tndim,cone,mat_tmp(:,:),tndim,&
-              & rot_mat_conjg(:,:),tndim,czero,vee_rotated(:,:,m1,m2),tndim)
+                  & rot_mat_conjg(:,:),tndim,czero,vee_rotated(:,:,m1,m2),tndim)
 
    end do ! m1
  end do ! m2
@@ -1071,9 +1071,9 @@ subroutine rotatevee_hu(hu,paw_dmft,pawprtvol,rot_mat,rot_type,udens_atoms,vee_r
    do m1=1,tndim
 
      call abi_xgemm("t","n",tndim,tndim,tndim,cone,rot_mat(:,:),tndim,&
-              & vee_rotated(m1,m2,:,:),tndim,czero,mat_tmp(:,:),tndim)
+                  & vee_rotated(m1,m2,:,:),tndim,czero,mat_tmp(:,:),tndim)
      call abi_xgemm("n","n",tndim,tndim,tndim,cone,mat_tmp(:,:),tndim,&
-              & rot_mat(:,:),tndim,czero,vee_rotated(m1,m2,:,:),tndim)
+                  & rot_mat(:,:),tndim,czero,vee_rotated(m1,m2,:,:),tndim)
 
    end do ! m1
  end do ! m2
