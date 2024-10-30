@@ -2062,7 +2062,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ucrpa',tread,'INT')
  if(tread==1) dtset%ucrpa=intarr(1)
 
- if (dtset%ucrpa > 0 .and. dtset%usedmft /= 10) then
+ if (dtset%ucrpa > 0 .and. (dtset%usedmft > 0 .and. dtset%usedmft /= 10)) then
    write(msg, '(9a)' )&
    'usedmft and ucrpa are both activated in the input file ',ch10,&
    'In the following, abinit assume you are doing a ucrpa calculation and ',ch10,&
@@ -2665,7 +2665,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%occ_orig(:,:)=zero
    dtsets(idtset)%optcell=0
    dtsets(idtset)%optforces=2
-   if(dtsets(idtset)%usedmft/=0) dtsets(idtset)%optforces=0
+   if(dtsets(idtset)%usedmft>0 .and. dtsets(idtset)%usedmft/=0) dtsets(idtset)%optforces=0
    dtsets(idtset)%optstress=1
    dtsets(idtset)%optnlxccc=1
    dtsets(idtset)%oracle_factor=0.1_dp

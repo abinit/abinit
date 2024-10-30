@@ -3964,7 +3964,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
    end if
 
 !  usedmft
-   if (dt%usedmft/=0) then
+   if (dt%usedmft>0) then
      cond_string(1)='usedmft' ; cond_values(1)=dt%usedmft
      call chkint_eq(0,1,cond_string,cond_values,ierr,'usedmft',dt%usedmft,3,(/0,1,10/),iout)
      if (dt%paral_kgb>0) then
