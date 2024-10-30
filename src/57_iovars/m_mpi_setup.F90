@@ -479,7 +479,7 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
        end if
      else if(dtsets(idtset)%np_spkpt*dtsets(idtset)%npfft*dtsets(idtset)%npband*dtsets(idtset)%npspinor < nproc)then
        write(msg,'(a,5i6,4a)')&
-       'np_spkpt,npband,npspinor,npfft,nproc=',&
+       'np_spkpt,npfft,npband,npspinor,nproc=',&
 &      dtsets(idtset)%np_spkpt,dtsets(idtset)%npfft,dtsets(idtset)%npband,dtsets(idtset)%npspinor,nproc,ch10,&
        'The number of processors must not be greater than npfft*npband*np_spkpt*npspinor ',ch10,&
        'when npfft or np_spkpt or npband or npspinor are chosen manually in the input file.'
