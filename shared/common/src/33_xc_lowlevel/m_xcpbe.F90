@@ -5249,13 +5249,6 @@ subroutine xckdt16(dvxcdgr,exci,sxci,grho2_updn,ixc,npts,nspden,rhor,rspts,el_te
    dvxcdgr(ipt,3)=v2x+v2c !d(exc*rho)/d|gradRho|*1/|gradRho|
    dvxcdgr(ipt,1)=zero !dvxcdgr(ipt,3)*4.d0 ! d(exc*rho)/d|gradRho_up|*1/|gradRho_up|
    dvxcdgr(ipt,2)=zero !dvxcdgr(ipt,1)      ! d(exc*rho)/d|gradRho_dn|*1/|gradRho_dn|
-   
-   if(dvxcdgr(ipt,1)/=dvxcdgr(ipt,1)) write(0,*) 'dvxcdgr', ipt, 1, dvxcdgr(ipt,1)
-   if(dvxcdgr(ipt,2)/=dvxcdgr(ipt,2)) write(0,*) 'dvxcdgr', ipt, 2, dvxcdgr(ipt,2)
-   if(dvxcdgr(ipt,3)/=dvxcdgr(ipt,3)) write(0,*) 'dvxcdgr', ipt, 3, dvxcdgr(ipt,3)
-   if(exci(ipt)/=exci(ipt)) write(0,*) 'exci', ipt, exci(ipt)
-   if(sxci(ipt)/=sxci(ipt)) write(0,*) 'sxci', ipt, sxci(ipt)
-   if(vxci(ipt,1)/=vxci(ipt,1)) write(0,*) 'vxci', ipt, vxci(ipt,1)
  enddo
 end subroutine xckdt16
 !!***
@@ -5362,6 +5355,7 @@ subroutine fex_kdt16(rho,grho,iflag,fx,v1x,v2x,einx,tsx,degauss)
  v1x = fx + dfxunif*FFx + fxunif*dFFxds2x*ds2xdn ! d/dn(n*fxunif*FFx(s2x) see above
  v2x = fxunif*dFFxds2x*ds2dg*BAx/agrho !d(n*fxunif*Fx(s2x))/d(gn)*1/(gn)=
 !                                     =fxunif*d(Fx(s2x))/d(s2x) *n*ds2/d(gn) *Bx/Ax)*1/(gn)
+ if(v2x/=v2x) v2x=zero ! TEMPORARY TO AVOID NAN
 end subroutine fex_kdt16
 !!***
 
@@ -5612,6 +5606,7 @@ subroutine fec_kdt16(rho,grho,iflag,fc,v1c,v2c,einc,tsc,degauss)
 !tsc = rho*(ga/s1)*ds1da*dadf*tsc_lda - t*rho*(ga/s1)*ds1dqc*dqcdt !17-APR-2016: commented in ABINIT version
  tsc =     (ga/s1)*ds1da*dadf*tsc_lda - t*    (ga/s1)*ds1dqc*dqcdt ! energy per electron, 17-APR-2016: ABINIT version
  einc = fc + tsc
+ if(v2c/=v2c) v2c=zero ! TEMPORARY TO AVOID NAN
 end subroutine fec_kdt16
 !!***
 
