@@ -2149,6 +2149,9 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  if (dtset%optdriver/=RUNL_GSTATE .and. dtset%optdriver/=RUNL_RESPFN) then
    dtset%gpu_option=ABI_GPU_DISABLED  ! GPU only compatible with GS and RESPFN
  end if
+ if (dtset%optdriver==RUNL_RESPFN .and. dtset%gpu_option/=ABI_GPU_OPENMP) then
+   dtset%gpu_option=ABI_GPU_DISABLED  ! RESPFN on GPU only implemented with OpenMP
+ end if
  if (dtset%tfkinfunc/=0) dtset%gpu_option=ABI_GPU_DISABLED  ! Recursion method has its own GPU impl
  if (dtset%nspinor/=1)   dtset%gpu_option=ABI_GPU_DISABLED  ! nspinor=2 not yet GPU compatible
 
