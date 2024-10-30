@@ -4106,7 +4106,7 @@ end subroutine pawxcsphpositron
  character(len=500) :: msg
 !arrays
  real(dp),allocatable :: d1kxc(:,:),d2kxc(:,:),d1vxc(:,:),d2vxc(:,:)
- real(dp),allocatable :: exc_(:),sxc_(:),exci(:),sxci(:),ff(:),gg(:),hh(:)
+ real(dp),allocatable :: exc_(:),sxc_(:),exci(:),sxci(:),ff(:),gg(:)
  real(dp),allocatable :: kxc1(:,:),kxc2(:,:),kxcdn1(:,:),kxcdn2(:,:),kxci(:,:)
  real(dp),allocatable :: m_norm_inv(:),rho_(:,:),rhoinv(:,:),rhosph(:,:)
  real(dp),allocatable :: v1sum(:,:),v2sum(:,:,:)
@@ -4692,15 +4692,12 @@ end subroutine pawxcsphpositron
 !----------------------------------------
  if (option/=1.and.option/=5) then
    LIBPAW_ALLOCATE(ff,(nrad))
-   LIBPAW_ALLOCATE(hh,(nrad))
 
 !  Contribution from spherical part of rho
    if (nspden==1.or.nspden==4) then
      ff(1:nrad)=rho_updn(1:nrad,1,1)*exci(1:nrad)*sqfpi
-     hh(1:nrad)=rho_updn(1:nrad,1,1)*sxci(1:nrad)*sqfpi
    else if (nspden==2) then
      ff(1:nrad)=(rho_updn(1:nrad,1,1)+rho_updn(1:nrad,1,2))*exci(1:nrad)*sqfpi
-     hh(1:nrad)=(rho_updn(1:nrad,1,1)+rho_updn(1:nrad,1,2))*sxci(1:nrad)*sqfpi
    end if
 
 !  Contribution from aspherical part of rho
@@ -4710,11 +4707,8 @@ end subroutine pawxcsphpositron
      if (pawxcdev>=1) then
        if (nspden_updn==1) then
          ff(1:nrad)=ff(1:nrad)+half*v1sum(1:nrad,1)*d1vxc(1:nrad,1)
-         hh(1:nrad)=hh(1:nrad)+half*v1sum(1:nrad,1)*d1vxc(1:nrad,1)
        else if (nspden_updn==2) then
          ff(1:nrad)=ff(1:nrad)+v1sum(1:nrad,2)*d1vxc(1:nrad,2) &
-&         +half*(v1sum(1:nrad,1)*d1vxc(1:nrad,1)+v1sum(1:nrad,3)*d1vxc(1:nrad,3))
-         hh(1:nrad)=hh(1:nrad)+v1sum(1:nrad,2)*d1vxc(1:nrad,2) &
 &         +half*(v1sum(1:nrad,1)*d1vxc(1:nrad,1)+v1sum(1:nrad,3)*d1vxc(1:nrad,3))
        end if
      end if
@@ -4730,7 +4724,6 @@ end subroutine pawxcsphpositron
          end if
        end do
        ff(1:nrad)=ff(1:nrad)+gg(1:nrad)*d2vxc(1:nrad,1)/6._dp
-       hh(1:nrad)=hh(1:nrad)+gg(1:nrad)*d2vxc(1:nrad,1)/6._dp
 
        if (nspden_updn==2) then ! Spin polarized (including non-coll. magn.)
          gg=zero
@@ -4740,7 +4733,6 @@ end subroutine pawxcsphpositron
            end if
          end do
          ff(1:nrad)=ff(1:nrad)+gg(1:nrad)*d2vxc(1:nrad,4)/6._dp
-         hh(1:nrad)=hh(1:nrad)+gg(1:nrad)*d2vxc(1:nrad,4)/6._dp
          gg=zero
          do ilm=2,lm_size
            if (lmselect(ilm)) then
@@ -4748,7 +4740,6 @@ end subroutine pawxcsphpositron
            end if
          end do
          ff(1:nrad)=ff(1:nrad)+half*gg(1:nrad)*d2vxc(1:nrad,2)
-         hh(1:nrad)=hh(1:nrad)+half*gg(1:nrad)*d2vxc(1:nrad,2)
          gg=zero
          do ilm=2,lm_size
            if (lmselect(ilm)) then
@@ -4756,7 +4747,6 @@ end subroutine pawxcsphpositron
            end if
          end do
          ff(1:nrad)=ff(1:nrad)+half*gg(1:nrad)*d2vxc(1:nrad,3)
-         hh(1:nrad)=hh(1:nrad)+half*gg(1:nrad)*d2vxc(1:nrad,3)
        end if
        LIBPAW_DEALLOCATE(gg)
      end if
@@ -4764,12 +4754,77 @@ end subroutine pawxcsphpositron
    end if ! option/=4
 
    ff(1:nrad)=ff(1:nrad)*pawrad%rad(1:nrad)**2
-   hh(1:nrad)=hh(1:nrad)*pawrad%rad(1:nrad)**2
    call simp_gen(enxc,ff,pawrad)
-   ! Set entropy only when using finite-temperature exchange-correlation functionals
-   if(any(sxci/=zero)) call simp_gen(snxc,hh,pawrad)
-   
-   LIBPAW_DEALLOCATE(hh)
+   LIBPAW_DEALLOCATE(ff)
+ end if ! option/=1 and option/=5
+
+!----- Calculate Sxc term (using Exc as a model)
+!----------------------------------------
+ if (any(sxci/=zero).and.option/=1.and.option/=5) then
+   LIBPAW_ALLOCATE(ff,(nrad))
+
+!  Contribution from spherical part of rho
+   if (nspden==1.or.nspden==4) then
+     ff(1:nrad)=rho_updn(1:nrad,1,1)*sxci(1:nrad)*sqfpi
+   else if (nspden==2) then
+     ff(1:nrad)=(rho_updn(1:nrad,1,1)+rho_updn(1:nrad,1,2))*sxci(1:nrad)*sqfpi
+   end if
+
+!  Contribution from aspherical part of rho
+   if (option/=4) then
+
+!    First order development
+     if (pawxcdev>=1) then
+       if (nspden_updn==1) then
+         ff(1:nrad)=ff(1:nrad)+half*v1sum(1:nrad,1)*d1vxc(1:nrad,1)
+       else if (nspden_updn==2) then
+         ff(1:nrad)=ff(1:nrad)+v1sum(1:nrad,2)*d1vxc(1:nrad,2) &
+&         +half*(v1sum(1:nrad,1)*d1vxc(1:nrad,1)+v1sum(1:nrad,3)*d1vxc(1:nrad,3))
+       end if
+     end if
+
+!    Second order development
+     if (pawxcdev>=2) then
+       LIBPAW_ALLOCATE(gg,(nrad))
+
+       gg=zero
+       do ilm=2,lm_size
+         if (lmselect(ilm)) then
+           gg(1:nrad)=gg(1:nrad)+v2sum(1:nrad,ilm,1)*rho_up(1:nrad,ilm)
+         end if
+       end do
+       ff(1:nrad)=ff(1:nrad)+gg(1:nrad)*d2vxc(1:nrad,1)/6._dp
+
+       if (nspden_updn==2) then ! Spin polarized (including non-coll. magn.)
+         gg=zero
+         do ilm=2,lm_size
+           if (lmselect(ilm)) then
+             gg(1:nrad)=gg(1:nrad)+v2sum(1:nrad,ilm,3)*rho_dn(1:nrad,ilm)
+           end if
+         end do
+         ff(1:nrad)=ff(1:nrad)+gg(1:nrad)*d2vxc(1:nrad,4)/6._dp
+         gg=zero
+         do ilm=2,lm_size
+           if (lmselect(ilm)) then
+             gg(1:nrad)=gg(1:nrad)+v2sum(1:nrad,ilm,2)*rho_up(1:nrad,ilm)
+           end if
+         end do
+         ff(1:nrad)=ff(1:nrad)+half*gg(1:nrad)*d2vxc(1:nrad,2)
+         gg=zero
+         do ilm=2,lm_size
+           if (lmselect(ilm)) then
+             gg(1:nrad)=gg(1:nrad)+v2sum(1:nrad,ilm,3)*rho_up(1:nrad,ilm)
+           end if
+         end do
+         ff(1:nrad)=ff(1:nrad)+half*gg(1:nrad)*d2vxc(1:nrad,3)
+       end if
+       LIBPAW_DEALLOCATE(gg)
+     end if
+
+   end if ! option/=4
+
+   ff(1:nrad)=ff(1:nrad)*pawrad%rad(1:nrad)**2
+   call simp_gen(snxc,ff,pawrad)
    LIBPAW_DEALLOCATE(ff)
  end if ! option/=1 and option/=5
 

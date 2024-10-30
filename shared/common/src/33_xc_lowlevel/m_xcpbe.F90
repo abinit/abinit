@@ -5163,6 +5163,9 @@ end subroutine xcpbe
 !! NOTES
 !!  Karasiev-Dufty-Trickey (KDT16) TGGA xc-functional
 !!  V.V. Karasiev, J.W. Dufty, and S.B. Trickey, PRL 120(7), 076401 (2018) [[cite:Karasiev2018]]
+!!  ixc=60 means KDT16 xc (PBE TGGA parametrization)
+!!  ixc=61 means KDT16 xc (PBEsol TGGA parametrization)
+!!  ixc=62 means KDT16 xc (PBEmol TGGA parametrization)
 !!
 !! INPUTS
 !!  grho2_updn(npts,2*nspden-1)=square of the gradient of the spin-up,
@@ -5180,7 +5183,7 @@ end subroutine xcpbe
 !!    energy (exci*$\rho$) with respect to the spin-up (dvxcdgr(:,1)),
 !!    spin-down (dvxcdgr(:,2)), or total spin (dvxcdgr(:,3)) gradients of the density
 !!    divided by the norm of the gradient (the definition changed in v3.3)
-!!  exci(npts)=exchange-correlation energy density (hartree)
+!!  exci(npts)=exchange-correlation free energy density (hartree)
 !!  sxci(npts)=exchange-correlation entropy density
 !!  vxci(npts,nspden)=input xc potential
 !!
@@ -5246,6 +5249,13 @@ subroutine xckdt16(dvxcdgr,exci,sxci,grho2_updn,ixc,npts,nspden,rhor,rspts,el_te
    dvxcdgr(ipt,3)=v2x+v2c !d(exc*rho)/d|gradRho|*1/|gradRho|
    dvxcdgr(ipt,1)=zero !dvxcdgr(ipt,3)*4.d0 ! d(exc*rho)/d|gradRho_up|*1/|gradRho_up|
    dvxcdgr(ipt,2)=zero !dvxcdgr(ipt,1)      ! d(exc*rho)/d|gradRho_dn|*1/|gradRho_dn|
+   
+   if(dvxcdgr(ipt,1)/=dvxcdgr(ipt,1)) write(0,*) 'dvxcdgr', ipt, 1, dvxcdgr(ipt,1)
+   if(dvxcdgr(ipt,2)/=dvxcdgr(ipt,2)) write(0,*) 'dvxcdgr', ipt, 2, dvxcdgr(ipt,2)
+   if(dvxcdgr(ipt,3)/=dvxcdgr(ipt,3)) write(0,*) 'dvxcdgr', ipt, 3, dvxcdgr(ipt,3)
+   if(exci(ipt)/=exci(ipt)) write(0,*) 'exci', ipt, exci(ipt)
+   if(sxci(ipt)/=sxci(ipt)) write(0,*) 'sxci', ipt, sxci(ipt)
+   if(vxci(ipt,1)/=vxci(ipt,1)) write(0,*) 'vxci', ipt, vxci(ipt,1)
  enddo
 end subroutine xckdt16
 !!***

@@ -1457,6 +1457,11 @@ subroutine drivexc(ixc,order,npts,nspden,usegradient,uselaplacian,usekden,&
    ABI_FREE(vxcrho_x)
    ABI_FREE(vxcgrho_x)
 
+!>>>>> Finite-temperature XC functionals.
+!>>>>> exc is the xc free energy density.
+!>>>>> XC energy density 'sxc' is needed to retrieve
+!>>>>> the proper internal energy E_xc
+
 !>>>>> Ichimaru,Iyetomi,Tanaka,  XC at finite temp (e- gaz)
  else if (ixc==50) then
    if (order**2 <= 1) then
@@ -1468,7 +1473,7 @@ subroutine drivexc(ixc,order,npts,nspden,usegradient,uselaplacian,usekden,&
 !>>>>> Karasiev-Sjostrom-Dufty-Trickey TLDA (no spin-pol) (KSDT)
  else if (ixc==51) then
    if (order**2 <= 1) then
-     call xcksdt(exc,npts,order,rhotot,rspts,el_temp,vxcrho(:,1))
+     call xcksdt(exc,sxc,npts,order,rhotot,rspts,el_temp,vxcrho(:,1))
    else
      if(ndvxc /= 1 )then
        write(message,'(3a,i0,a,i0)')&
@@ -1476,7 +1481,7 @@ subroutine drivexc(ixc,order,npts,nspden,usegradient,uselaplacian,usekden,&
 &       'ixc=',ixc,'ndvxc=',ndvxc
        ABI_BUG(message)
      end if
-     call xcksdt(exc,npts,order,rhotot,rspts,el_temp,vxcrho(:,1),dvxc)
+     call xcksdt(exc,sxc,npts,order,rhotot,rspts,el_temp,vxcrho(:,1),dvxc)
    end if
 
 !>>>>> Karasiev-Dufty-Trickey TGGA (KDT16)

@@ -444,6 +444,7 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,&
  else
    gresid(:,:)=zero
  end if
+ write(0,*) gresid(2,1)
 
 !=======================================================================
 !======================= Other contributions ===========================

@@ -487,7 +487,9 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
    else
      resid => nvresid
    end if
-
+   do ifft=1,nfftf
+     if(resid(ifft,1)/=resid(ifft,1)) write(0,*) ifft, resid(ifft,1)
+   end do
    call forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,forold,gred,grchempottn,grcondft,gresid,grewtn,&
 &   grhf,grnl,grvdw,grxc,gsqcut,indsym,maxfor,mgfftf,&
 &   mpi_enreg,psps%n1xccc,n3xccc,nattyp,&
