@@ -527,13 +527,13 @@ subroutine size_dvxc(ixc,order,nspden,&
      if (ixc==1.or.ixc==7.or.ixc==8.or.ixc==9.or.ixc==10.or.ixc==13.or. &
 &        ixc==21.or.ixc==22) then
        ndvxc=min(nspden,2)+1
-     else if ((ixc>=2.and.ixc<=6).or.(ixc>=31.and.ixc<=35).or.ixc==50.or.ixc==51) then
+     else if ((ixc>=2.and.ixc<=6).or.(ixc>=31.and.ixc<=35).or.ixc==50.or.&
+&              ixc==51.or.ixc==60.or.ixc==61.or.ixc==62) then
        ndvxc=1
      else if (ixc==12.or.ixc==24) then
        ndvxc=8
      else if (ixc==11.or.ixc==12.or.ixc==14.or.ixc==15.or. &
-&             ixc==23.or.ixc==41.or.ixc==42.or.ixc==1402000.or. &
-&             ixc==60.or.ixc==61.or.ixc==62) then
+&             ixc==23.or.ixc==41.or.ixc==42.or.ixc==1402000) then
        ndvxc=15
      else if (ixc<0) then
        if (libxc_has_kxc.or.ixc==-406.or.ixc==-427.or.ixc==-428.or.ixc==-456) then
