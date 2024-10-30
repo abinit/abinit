@@ -209,8 +209,12 @@ contains
 !! *Hybrid GGA
 !!   41 means PBE0-1/4                                     xcpbe
 !!   42 means PBE0-1/3                                     xcpbe
-!! *Other
-!!   50 means IIT xc                                       xciit
+!! *Temperature-dependant exchange-correlation functionals
+!!   50 means IIT xc (TLDA functional)                     xciit
+!!   51 means KSDT xc (TLDA functional)                    xcksdt
+!!   60 means KDT16 xc (PBE TGGA functional)               xckdt16
+!!   61 means KDT16 xc (PBEsol TGGA functional)            xckdt16
+!!   62 means KDT16 xc (PBEmol TGGA functional)            xckdt16
 !!
 !! NOTE: please update echo_xc_name.F90 if you add new functional (apart from libxc)
 !!
@@ -229,11 +233,11 @@ contains
 !!   m_norm ---> means norm of magnetization
 !!
 !! In the case where finite-temperature exchange-correlation functionals are used:
-!!   exc ---> means exchange-correlation free energy density per particle
+!!   exc_b ---> means exchange-correlation free energy density per particle
 !!   rhoexc ---> means rho*exc == exchange-correlation free energy density
-!!   bigexc ---> means exchange-correlation free energy F_xc
+!!   bigexc ---> means exchange-correlation internal energy E_xc
 !!   bigsxc ---> means exchange-correlation entropy S_xc
-!!   sxc ---> means exchange-correlation entropy density per particle
+!!   sxc_b ---> means exchange-correlation entropy density per particle
 !!   rhosxc --> means rho*sxc == exchange-correlation entropy density
 !!
 !!   g... --> means gradient of something (e.g. : grho --> means gradient of electron density)
@@ -874,7 +878,7 @@ subroutine rhotoxc(bigexc,bigsxc,kxc,mpi_enreg,nfft,ngfft, &
        dstrsxc=zero
        do ipts=ifft,ifft+npts-1
          indx=ipts-ifft+1
-         rhoexc=rhoexc+rho_b(indx)*exc_b(indx)    ! Will be normalized with respect to the volume later to get bigexc.
+         rhoexc=rhoexc+rho_b(indx)*exc_b(indx) ! Will be normalized with respect to the volume later to get bigexc.
          rhosxc=rhosxc+rho_b(indx)*sxc_b(indx) ! Will be normalized with respect to the volume later to get bigsxc.
          depsxc(ipts,1)=vxcrho_b_updn(indx,1)
          exc_str=exc_b(indx)
