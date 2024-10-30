@@ -29,6 +29,6 @@ tlw_4o_DS5_DDB
 #%% keywords = DFPT, LONGWAVE
 #%% description =  
 #%%   Input file for mrgddb
-#%%   Apparently, there is a (minor) problem with openmp (2 procs), for the echo of pseudopotential data in the tlw_5.ddb.out file 
+#%%   Apparently, there is a (minor, erratic) problem with openmp (2 procs), for the echo of pseudopotential data in the tlw_5.ddb.out file 
 #%% topics = longwave
 #%%<END TEST_INFO>
