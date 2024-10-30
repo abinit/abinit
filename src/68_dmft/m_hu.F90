@@ -325,7 +325,7 @@ subroutine init_hu(hu,paw_dmft,pawtab)
      do ms1=1,ndim
        do ms=1,ndim
          upawu = upawu + dble(hu(itypat)%vee(ms,ms1,ms,ms1))
-         jpawu = upawu + dble(hu(itypat)%vee(ms,ms1,ms,ms1)-hu(itypat)%vee(ms,ms1,ms1,ms))
+         jpawu = jpawu + dble(hu(itypat)%vee(ms,ms1,ms,ms1)-hu(itypat)%vee(ms,ms1,ms1,ms))
        end do ! ms
      end do ! ms1
      upawu = upawu / dble(ndim**2)
