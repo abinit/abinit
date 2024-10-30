@@ -60,7 +60,7 @@ and $\hat{H}_{{\bf k},\gamma}^{\tau_{\kappa\beta}}$ are, respectively, the atomi
 indicates that self-consistent field potentials are included) and its gradient along $\gamma$; $V^{\mathcal{E}_{\delta}}$ is the first-order potential due to an electric field; and $\partial_{\gamma} \hat{Q}_{{\bf k}}$
 is the gradient of the conduction-band projector. In addition, the above equation comprises a set of ground-state ($u_{m{\bf k}}^{(0)}$) and first-order wave functions.
 Among the latter one finds the standard response functions due to an electric field ($u_{m{\bf k}}^{\mathcal{E}_{\delta}}$) and an atomic displacement ($u_{m{\bf k}}^{\tau_{\kappa\beta}}$), along with the response function due to a gradient of a vector potential ($u_{m{\bf k},\gamma}^{A_\delta}$). A discussion on how the latter
-can be calculated from the auxiliary d2_dkdk second-order response functions (see [[rf2_dkdk]]) is provided in [[cite:Zabalo2023]].
+can be calculated from the auxiliary d2_dkdk second-order response functions (see [[rf2_dkdk]]) is provided in [[cite:Zabalo2022]].
 
 
 [TUTORIAL_README]
