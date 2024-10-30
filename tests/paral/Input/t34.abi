@@ -1,41 +1,48 @@
 # Inspired from v9[141]
 # AlP solid
+# paral version of v10[20]
 
-ndtset 6
-#ndtset 3
-#jdtset 2 3 4
+ndtset 7
 
-#npband 4
+npband 4
 
-cprj_in_memory1 0
-cprj_in_memory2 1
-cprj_in_memory3 0
-cprj_in_memory4 1
+wfoptalg 111
 
+nline  8
+tolwfr_diago 1e-15
+
+nbdbuf 4
+
+oracle_min_occ 0.001
+
+chebfi_oracle1 0
+
+chebfi_oracle2  1
+cprj_in_memory3 1
+chebfi_oracle3  1
+
+chebfi_oracle4  2
+oracle_factor4  0.05
 cprj_in_memory5 1
-cprj_in_memory6 1
+chebfi_oracle5  2
+oracle_factor5  0.05
 
-wfoptalg1 114
-wfoptalg2 114
-wfoptalg3 111
-wfoptalg4 111
-
-wfoptalg5 111
-wfoptalg6 111
-
-nblock_lobpcg1 4
-nblock_lobpcg2 4
+chebfi_oracle6  2
+oracle_factor6  0.05
+       nbdbuf6  -101
+cprj_in_memory7 1
+chebfi_oracle7  2
+oracle_factor7  0.05
+       nbdbuf7  -101
 
 # unconverged
 ecut 5
 pawecutdg 10
 
 nstep 15
-nline  8
 
 # bands and spinors
 nband  8
-nbdbuf 3
 
 tolvrs 1.0D-20
 
@@ -50,11 +57,6 @@ istwfk *1
 
 optforces 1
 optstress 1
-
-optforces5 2
-
-optforces6 2
-optstress6 0
 
 prtwf 0
 prteig 0
@@ -90,12 +92,16 @@ pseudos="P.xml, Al.xml"
 #%% exclude_builders = bob_gnu_13.2_openmp
 #%% [files]
 #%% files_to_test = 
-#%%   t10.abo, tolnlines=  0, tolabs=  0, tolrel= 0, fld_options = -ridiculous
+#%%   t34.abo, tolnlines=  0, tolabs=  0, tolrel= 0, fld_options = -ridiculous
 #%% [paral_info]
-#%% max_nprocs = 1
+#%% nprocs_to_test = 4
+#%% max_nprocs = 4
+#%% [NCPU_4]
+#%% files_to_test = 
+#%%   t34_MPI4.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -ridiculous
 #%% [extra_info]
 #%% authors = L. Baguet
 #%% keywords = PAW,CPRJ
-#%% description = Compare cprj_in_memory=1 with cprj_in_memory=0 (lobpcg2 and chebfi2). Should give same results than v10[04]. PAW,istwfk=1
+#%% description = Test oracle and nbdbuf=-101 in chebfi. cprj_in_memory=0 or 1. PAW,istwfk=1. npband=4.
 #%%<END TEST_INFO>
  

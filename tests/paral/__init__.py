@@ -34,6 +34,7 @@ inp_files = [
 "t30.abi",
 "t31.abi",
 "t32.abi",
+"t34.abi", # test chebfi oracle (PAW,istwfk=1)
 "t35.abi", # test xg_nonlop_option=1 (PAW,istwfk=1)
 "t36.abi", # test cprj_in_memory=1 (PAW,istwfk>1,no DFTI)
 "t37.abi", # test cprj_in_memory=1 (NC,istwfk>1,no DFTI)
