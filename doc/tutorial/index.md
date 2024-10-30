@@ -21,6 +21,10 @@ Six tutorials are intermediate level ones, that might be prerequisite for some m
 The following schema should help to understand these dependencies.
 To access the tutorials, click on the name of the tutorial in the schema, or see the menu on the left ...
 
+<!-- edit the svg file ./index_assets/drawing.svg with inkscape, take the svg 
+code and insert it in index.md. Pay attention to the path-to-links in 
+inkspace. -->
+
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!-- Created with Inkscape (http://www.inkscape.org/) -->
 
@@ -1160,7 +1164,6 @@ To access the tutorials, click on the name of the tutorial in the schema, or see
     </a>
   </g>
 </svg>
-
 
 The four basic tutorials are presented at the top, in one orange block. There is also an orange block for the ABINIT_build tutorial.
 Each block in brown represents one intermediate-level tutorial. The blocks in red
