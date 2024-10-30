@@ -616,6 +616,11 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 & comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,mpi_spintab=mpi_enreg%my_isppoltab,&
 & nucdipmom=dtset%nucdipmom,gpu_option=dtset%gpu_option)
 
+ if (dtset%cprj_in_memory==1) then
+   call xg_nonlop_update_weight(xg_nonlop,ucvol) ! ucvol could have changed in mover
+   if (xg_nonlop%paw) call xg_nonlop_make_Dij(xg_nonlop,paw_ij,dtset%nsppol,atindx)
+ end if
+
 !Initializations for PAW (projected wave functions)
  mcprj_local=0 ; mband_cprj=0
  if (psps%usepaw==1) then
@@ -761,9 +766,8 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
      ikg=0
 
      if (dtset%cprj_in_memory==1) then
-       if (xg_nonlop%paw) call xg_nonlop_make_Dij(xg_nonlop,paw_ij,isppol,atindx)
+       if (xg_nonlop%paw) call xg_nonlop_set_Dij_spin(xg_nonlop,isppol)
      end if
-
      ! Set up local potential vlocal on the coarse FFT mesh from vtrial taking into account the spin.
      ! Also, continue to initialize the Hamiltonian.
 
@@ -787,7 +791,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
          & dtset%nspden, gs_hamk%nvloc, 3, pawfgr, mpi_enreg, vectornd, vectornd_pac)
        call gs_hamk%load_spin(isppol, vectornd=vectornd_pac)
      end if
-    
+
      call timab(982,2,tsec)
 
 !    BIG FAT k POINT LOOP
@@ -991,7 +995,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
          end if
        end if
 
-       if(dtset%wfoptalg == 111 .and. istep <= 1) then
+       if(gemm_nonlop_use_gemm .and. dtset%wfoptalg == 111 .and. istep <= 1) then
          gemm_nonlop_nblocks = dtset%gpu_nl_splitsize
          ! Only compute CHEBFI number of blocks if user didn't set it themselves
          if(gemm_nonlop_nblocks==1) then
@@ -1215,15 +1219,16 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        end if
      end if
 
-     if (dtset%cprj_in_memory==1) then
-       if (xg_nonlop%paw) call xg_nonlop_destroy_Dij(xg_nonlop)
-     end if
-
      call timab(986,2,tsec)
 
    end do ! End loop over spins
 
    call timab(988,1,tsec)
+
+   if (dtset%cprj_in_memory==1) then
+     if (xg_nonlop%paw) call xg_nonlop_destroy_Dij(xg_nonlop)
+   end if
+
    if (usefock) then
      if (usefock_ACE==0) then
        call xmpi_sum(energies%e_fock0,mpi_enreg%comm_kpt,ierr)
@@ -1363,7 +1368,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        call extfpmd%compute_eshift(eigen,eknk,dtset%mband,&
 &       dtset%nband,dtset%nfft,dtset%nkpt,dtset%nsppol,dtset%nspden,dtset%wtk,vtrial)
      end if
-     
+
 !    Compute occupations
      call timab(990,1,tsec)
      call newocc(doccde,eigen,energies%entropy,energies%e_fermie,energies%e_fermih,dtset%ivalence,&
@@ -1371,7 +1376,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 &     dtset%nkpt,dtset%nspinor,dtset%nsppol,occ,dtset%occopt,prtvol,dtset%tphysel,&
 &     dtset%tsmear,dtset%wtk,prtstm=dtset%prtstm,stmbias=dtset%stmbias,extfpmd=extfpmd)
      call timab(990,2,tsec)
-     
+
 !    !=========  DMFT call begin ============================================
      dmft_dftocc=0
      if(paw_dmft%use_dmft==1.and.psps%usepaw==1.and.dtset%nbandkss==0) then
@@ -1657,7 +1662,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
      ABI_NVTX_END_RANGE()
      call timab(992,2,tsec)
-    
+
 !    Treat fixed occupation numbers or non-self-consistent case
    else
 

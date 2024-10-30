@@ -711,6 +711,10 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
      end if
    end if
 
+   if (dtset%cprj_in_memory==1.and.psps%usepaw==1) then
+     call xg_nonlop_init_cplex_alldij(xg_nonlop,paw_ij)
+   end if
+
 !  Allocation of projected WF (optional)
    if (usecprj==1) then
      iorder_cprj=0
