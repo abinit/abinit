@@ -826,6 +826,9 @@ CONTAINS  !=====================================================================
        
        ABI_SFREE(pawtab(itypat)%proj)
        ABI_SFREE(pawtab(itypat)%proj2)
+
+       me = xmpi_comm_rank(xmpi_world)
+
        if (dmft_proj(itypat) > 0) then   ! read phi from PAW dataset 
          write(message,'(2a,i1,a)') ch10," Using atomic wavefunction number ",dmft_proj(itypat)," from PAW dataset"
          call wrtout(std_out,message,"COLL")
@@ -836,7 +839,6 @@ CONTAINS  !=====================================================================
          tmpfil = 'proj_'//tag(4-itypat/10:4)
          write(message,*) "Using wavefunction from file",tmpfil
          call wrtout(std_out,message,"COLL")
-         me = xmpi_comm_rank(xmpi_world)
          inquire(file=trim(tmpfil),exist=lexist)
          if (.not. lexist) ABI_ERROR("File "//trim(tmpfil)//" does not exist !")
          if (me == 0) then
