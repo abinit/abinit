@@ -290,7 +290,7 @@ subroutine datafordmft(cg,cprj,cryst_struc,dft_occup,dimcprj,dtset,eigen,mband_c
    end do ! ikpt
  end do ! isppol
 
- if(abs(pawprtvol) >= 3) then
+ if (abs(pawprtvol) >= 3) then
    write(message,'(2a)') ch10,'   datafordmft :  eigenvalues written'
    call wrtout(std_out,message,'COLL')
  end if

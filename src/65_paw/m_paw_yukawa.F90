@@ -205,7 +205,7 @@ CONTAINS  !=====================================================================
 !Local variables ------------------------------
  integer  :: i,ierr,info,ldfjac,lr,maxfev,ml,mode,mu,n,nfev,nprint
  real(dp) :: epsfcn,fac,lmb_temp,upbound,xtol
- real(dp) :: diag(2),fjac(2,2),Fkk(lpawu+1),fvec(2),lmb_eps(2)
+ real(dp) :: diag(2),fjac(2,2),fkk(lpawu+1),fvec(2),lmb_eps(2)
  real(dp) :: r(3),qtf(2),wa1(2),wa2(2),wa3(2),wa4(2)
  character(len=500) :: message
  !************************************************************************
@@ -214,13 +214,13 @@ CONTAINS  !=====================================================================
  upbound = five
  do i=1,10
 
-   call compute_slater(lpawu,pawrad,proj2(:),meshsz,upbound,one,Fkk(:))
-   if (Fkk(1) < upawu) exit
+   call compute_slater(lpawu,pawrad,proj2(:),meshsz,upbound,one,fkk(:))
+   if (fkk(1) < upawu) exit
    upbound = two * upbound
  
  end do ! i
 
- if (Fkk(1) > upawu) ABI_ERROR("Could not find a suitable lambda in get_lambda subroutine")
+ if (fkk(1) > upawu) ABI_ERROR("Could not find a suitable lambda in get_lambda subroutine")
 
  ! First, set epsilon to 1, and find lambda which yields the correct F0=upawu, to have a good starting point
  call brentq(get_coulomb_u,zero,upbound,two*tol12,four*epsilon(one),100,lmb_temp,ierr)
