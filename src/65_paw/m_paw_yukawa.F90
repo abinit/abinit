@@ -74,7 +74,7 @@ CONTAINS  !=====================================================================
  type(pawrad_type), intent(in) :: pawrad
 !Local variables ------------------------------
  integer :: ir,k,mesh_type
- real(dp) :: dum1,dum2,r_for_intg,y0
+ real(dp) :: dum,r_for_intg,y0
  real(dp), allocatable :: u_inside(:),u_outside(:),y1(:),y2(:)
  !************************************************************************
 
@@ -119,9 +119,7 @@ CONTAINS  !=====================================================================
      
      do ir=2,meshsz
      
-       dum1 = zero ! very important
-       
-       call bessel_iv(half+dble(k),lambda*pawrad%rad(ir),dum1,y1(ir),dum2)
+       call bessel_iv(half+dble(k),lambda*pawrad%rad(ir),zero,y1(ir),dum)
        y1(ir) = y1(ir) / sqrt(pawrad%rad(ir))
        
        if (ir == 2) then
@@ -137,8 +135,7 @@ CONTAINS  !=====================================================================
          call simp_gen(u_inside(ir),proj2(1:ir)*y1(1:ir),pawrad,r_for_intg=pawrad%rad(ir))
        end if ! ir
        
-       dum1 = zero ! very important
-       call bessel_kv(half+dble(k),lambda*pawrad%rad(ir),dum1,y2(ir),dum2)
+       call bessel_kv(half+dble(k),lambda*pawrad%rad(ir),zero,y2(ir),dum)
        y2(ir) = y2(ir) / sqrt(pawrad%rad(ir))
      end do ! ir
      
