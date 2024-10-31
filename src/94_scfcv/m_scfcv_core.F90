@@ -341,7 +341,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
  real(dp) :: boxcut,compch_fft,compch_sph,deltae,diecut,diffor,ecut
  real(dp) :: ecutf,ecutsus,edum,sdum,elast,etotal,evxc,fermie,fermih,gsqcut,hyb_mixing,hyb_mixing_sr
  real(dp) :: maxfor,res2,residm,ucvol,ucvol_local,val_max
- real(dp) :: val_min,vxcavg,vxcavg_dum,el_temp,entropy_ks=zero
+ real(dp) :: val_min,vxcavg,vxcavg_dum,el_temp
  real(dp) :: zion,wtime_step,now,prev,esum,enonlocalpsp !MRM
  character(len=10) :: tag
  character(len=500) :: MY_NAME = "scfcv_core"
@@ -1698,7 +1698,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
 !    if the mixing is the ODA mixing, compute energy and new density here
      if (dtset%iscf==22) then
        call odamix(deltae,dtset,&
-&       elast,energies,etotal,entropy_ks,gprimd,gsqcut,kxc,mpi_enreg,&
+&       elast,energies,etotal,gprimd,gsqcut,kxc,mpi_enreg,&
 &       my_natom,nfftf,ngfftf,nhat,nkxc,psps%ntypat,nvresid,n3xccc,optres,&
 &       paw_ij,paw_an,pawang,pawfgrtab,pawrad,pawrhoij,pawtab,&
 &       red_ptot,psps,rhog,rhor,rprimd,strsxc,ucvol,psps%usepaw,&
