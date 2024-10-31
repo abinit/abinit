@@ -97,11 +97,19 @@ subroutine opernla_gemm_distributed(rank,nprocs,npwin,ndat,nspinor,&
    end if
 
    if(modulo(iblock,2)==1) then
-     work_buf => projs_local(1:cplex,1:npwin,1:nprojs_last_blk)
-     recv_buf => projs_recv(1:cplex,1:npwin,1:nprojs_last_blk)
+!    XG20241028 : This coding confused the gnu_8.5 compiler of buda2_gnu_8.5_cuda, wrt the contiguous character of the target. 
+!    It declared an error. Make it simple !
+!    work_buf => projs_local(1:cplex,1:npwin,1:nprojs_last_blk)
+!    recv_buf => projs_recv(1:cplex,1:npwin,1:nprojs_last_blk)
+     work_buf => projs_local
+     recv_buf => projs_recv
+
    else
-     work_buf => projs_recv(1:cplex,1:npwin,1:nprojs_last_blk)
-     recv_buf => projs_local(1:cplex,1:npwin,1:nprojs_last_blk)
+!    XG20241028 : Same than above
+!    work_buf => projs_recv(1:cplex,1:npwin,1:nprojs_last_blk)
+!    recv_buf => projs_local(1:cplex,1:npwin,1:nprojs_last_blk)
+     work_buf => projs_recv
+     recv_buf => projs_local
    end if
 
    if(gpu_option == ABI_GPU_DISABLED) then
