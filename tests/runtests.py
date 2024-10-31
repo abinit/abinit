@@ -295,7 +295,7 @@ def main():
                       help="List the tests in test suite (echo description section in ListOfFile files) and exit")
 
     parser.add_option("--tolerances", default=False, action="store_true",
-                      help="Print tolerances")
+                      help="Write csv files with tolerances of each test.")
 
     parser.add_option("-m", "--make", dest="make", type="int", default=0,
                       help="Find the abinit build tree, and compile to code with 'make -j#NUM' before running the tests.")
@@ -599,11 +599,11 @@ def main():
 
         import pandas as pd
         df = pd.DataFrame(dict_list)
-        print(df)
+        #print(df)
+
         filepath = "tolerances.csv"
-        print("Writing dataframe to:", filepath)
-        df.to_csv(filepath, index=False) #, engine='xlwt')
-        #df.to_excel("tolerances.xls", index=False) #, engine='xlwt')
+        print("Writing dataframe with tolerances to:", filepath)
+        df.to_csv(filepath, index=False)
 
         sys.exit(0)
 
