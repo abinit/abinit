@@ -2586,14 +2586,14 @@ subroutine pawpsp_calc(core_mesh,el_temp,epsatm,ffspl,imainmesh,hyb_mixing,ixc,l
  tmp1 => work1 ; tmp2 => work1
 
  if (pawxcdev/=0) then
-   call pawxcm(ncore,pawtab%exccore,yp1,pawtab%entropyxccore,0,hyb_mixing,ixc,work2,1,tmp_lmselect,work3,0,non_magnetic_xc,core_mesh%mesh_size,&
+   call pawxcm(ncore,pawtab%exccore,yp1,pawtab%sxccore,0,hyb_mixing,ixc,work2,1,tmp_lmselect,work3,0,non_magnetic_xc,core_mesh%mesh_size,&
 &   nspden,4,pawang_tmp,core_mesh,pawxcdev,work1,1,0,tmp1,xclevel,xc_denpos,el_temp)
  else
    if (present(tcoretau)) then
-     call pawxc(ncore,pawtab%exccore,yp1,pawtab%entropyxccore,hyb_mixing,ixc,work2,work1,1,tmp_lmselect,work3,0,0,non_magnetic_xc,core_mesh%mesh_size,&
+     call pawxc(ncore,pawtab%exccore,yp1,pawtab%sxccore,hyb_mixing,ixc,work2,work1,1,tmp_lmselect,work3,0,0,non_magnetic_xc,core_mesh%mesh_size,&
 &     nspden,4,pawang_tmp,core_mesh,tmp1,1,0,tmp2,xclevel,xc_denpos,el_temp,coretau=tcoretau,xc_taupos=my_xc_taupos)
    else
-     call pawxc(ncore,pawtab%exccore,yp1,pawtab%entropyxccore,hyb_mixing,ixc,work2,work1,1,tmp_lmselect,work3,0,0,non_magnetic_xc,core_mesh%mesh_size,&
+     call pawxc(ncore,pawtab%exccore,yp1,pawtab%sxccore,hyb_mixing,ixc,work2,work1,1,tmp_lmselect,work3,0,0,non_magnetic_xc,core_mesh%mesh_size,&
 &     nspden,4,pawang_tmp,core_mesh,tmp1,1,0,tmp2,xclevel,xc_denpos,el_temp)
    end if
  end if

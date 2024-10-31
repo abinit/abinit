@@ -638,7 +638,7 @@ subroutine pawdenpot(compch_sph,el_temp,epaw,epawdc,spaw,ipert,ixc,&
 !  Update core XC contribution to energy
    if (option/=1.and.ipositron/=1) then
      exccore=exccore+pawtab(itypat)%exccore
-     sxccore=sxccore+pawtab(itypat)%entropyxccore
+     sxccore=sxccore+pawtab(itypat)%sxccore
    end if
 
 !  =========== Compute valence-only XC potentials ===========
