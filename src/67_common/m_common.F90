@@ -1474,7 +1474,7 @@ subroutine prtene(dtset,energies,iout,usepaw)
 !scalars
  integer,intent(in) :: iout,usepaw
  type(dataset_type),intent(in) :: dtset
- type(energies_type),intent(in) :: energies
+ type(energies_type),intent(inout) :: energies
 
 !Local variables-------------------------------
 !scalars
@@ -1497,6 +1497,14 @@ subroutine prtene(dtset,energies,iout,usepaw)
  optdc=-1;ipositron=merge(0,2,dtset%positron==0)
  if (abs(energies%e_ewald)<1.e-15_dp.and.abs(energies%e_hartree)<1.e-15_dp) ipositron=1
  call energies_eval_eint(energies,dtset,usepaw,optdc,etotal,etotaldc)
+
+!In case we have other sources of entropy than kohn-sham states occupation,
+!we sum all entropy terms. %entropy is now total entropy.
+!Examples of other sources of entropy: finite-temperature xc functionals, extfpmd, ...
+ energies%entropy=energies%entropy_ks
+ if(abs(energies%entropy_paw)>tiny(zero))     energies%entropy=energies%entropy+energies%entropy_paw
+ if(abs(energies%entropy_xc)>tiny(zero))      energies%entropy=energies%entropy+energies%entropy_xc
+ if(abs(energies%entropy_extfpmd)>tiny(zero)) energies%entropy=energies%entropy+energies%entropy_extfpmd
 
 !Here, treat the case of metals
 !In re-smeared case the free energy is defined with tphysel

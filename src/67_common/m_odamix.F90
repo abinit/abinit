@@ -172,7 +172,7 @@ contains
 !!
 !! SOURCE
 
-subroutine odamix(deltae,dtset,elast,energies,entropy,etotal,&
+subroutine odamix(deltae,dtset,elast,energies,etotal,&
 &          gprimd,gsqcut,kxc,mpi_enreg,my_natom,nfft,ngfft,nhat,&
 &          nkxc,ntypat,nvresid,n3xccc,optres,paw_ij,&
 &          paw_an,pawang,pawfgrtab,pawrad,pawrhoij,pawtab,&
@@ -185,7 +185,7 @@ subroutine odamix(deltae,dtset,elast,energies,entropy,etotal,&
  integer,intent(in) :: my_natom,n3xccc,nfft,nkxc,ntypat,optres
  integer,intent(in) :: usepaw,usexcnhat
  logical,intent(in),optional :: add_tfw
- real(dp),intent(in) :: gsqcut,ucvol,entropy
+ real(dp),intent(in) :: gsqcut,ucvol
  real(dp),intent(inout) :: elast
  real(dp),intent(out) :: deltae,etotal,vxcavg
  type(MPI_type),intent(in) :: mpi_enreg
@@ -219,7 +219,7 @@ subroutine odamix(deltae,dtset,elast,energies,entropy,etotal,&
  integer :: jrhoij,klmn,klmn1,kmix,nfftot,nhatgrdim,nzlmopt,nk3xc,option,optxc
  logical :: nmxc,with_vxctau
  real(dp) :: alphaopt,compch_fft,compch_sph,doti,e1t10,e_ksnm1,e_xcdc_vxctau
- real(dp) :: eenth,fp0,gammp1,ro_dlt,ucvol_local,el_temp,e_entropy,e_entropy_ks
+ real(dp) :: eenth,fp0,gammp1,ro_dlt,ucvol_local,el_temp
  character(len=500) :: message
  type(xcdata_type) :: xcdata
 !arrays
@@ -405,20 +405,27 @@ subroutine odamix(deltae,dtset,elast,energies,entropy,etotal,&
    end do
  end if
 
+!In case we have other sources of entropy than kohn-sham states occupation,
+!we sum all entropy terms. %entropy is now total entropy.
+!Examples of other sources of entropy: finite-temperature xc functionals, extfpmd, ...
+ energies%entropy=energies%entropy_ks
+ if(abs(energies%entropy_paw)>tiny(zero))     energies%entropy=energies%entropy+energies%entropy_paw
+ if(abs(energies%entropy_xc)>tiny(zero))      energies%entropy=energies%entropy+energies%entropy_xc
+ if(abs(energies%entropy_extfpmd)>tiny(zero)) energies%entropy=energies%entropy+energies%entropy_extfpmd
+
 !When the finite-temperature VG broadening scheme is used,
 !the total entropy contribution "tsmear*entropy" has a meaning,
-!and gather the two last terms of Eq.8 of the VG paper
+!and gather the two last terms of Eq.8 of VG paper
 !Warning : might have to be changed for fixed moment calculations
  if(dtset%occopt>=3 .and. dtset%occopt<=8) then
-   e_entropy_ks=-dtset%tsmear*entropy
+   if (abs(dtset%tphysel) < tol10) then
+     energies%e_entropy = - dtset%tsmear * energies%entropy
+   else
+     energies%e_entropy = - dtset%tphysel * energies%entropy
+   end if
  else
-   e_entropy_ks=zero
+   energies%e_entropy = zero
  end if
-
-!We add different entropy terms to total entropy energy
- e_entropy=e_entropy_ks
- if(abs(energies%entropy_xc)>tiny(zero))  e_entropy=e_entropy-xcdata%tphysel*energies%entropy_xc
- if(abs(energies%entropy_paw)>tiny(zero)) e_entropy=e_entropy-el_temp*energies%entropy_paw
 
 !Turn it into an electric enthalpy,refer to Eq.(33) of Suppl. of Nat. Phys. paper (5,304,2009) [[cite:Stengel2009]]
 ! the missing volume is added here
@@ -507,7 +514,7 @@ subroutine odamix(deltae,dtset,elast,energies,entropy,etotal,&
 
  etotal = energies%e_kinetic+ energies%e_hartree + energies%e_xc + &
 & energies%e_localpsp + energies%e_nlpsp_vfock - energies%e_fock0 + energies%e_corepsp + &
-& e_entropy + energies%e_elecfield + energies%e_magfield + &
+& energies%e_entropy + energies%e_elecfield + energies%e_magfield + &
 & energies%e_nucdip
 !etotal = energies%e_eigenvalues - energies%e_hartree + energies%e_xc - &
 !& energies%e_xcdc + energies%e_corepsp + &
@@ -656,13 +663,30 @@ subroutine odamix(deltae,dtset,elast,energies,entropy,etotal,&
    end do
  end if
 
-!We add different entropy terms to total entropy energy
- e_entropy=e_entropy_ks
- if(abs(energies%entropy_xc)>tiny(zero))  e_entropy=e_entropy-xcdata%tphysel*energies%entropy_xc
- if(abs(energies%entropy_paw)>tiny(zero)) e_entropy=e_entropy-el_temp*energies%entropy_paw
+!In case we have other sources of entropy than kohn-sham states occupation,
+!we sum all entropy terms. %entropy is now total entropy.
+!Examples of other sources of entropy: finite-temperature xc functionals, extfpmd, ...
+ energies%entropy=energies%entropy_ks
+ if(abs(energies%entropy_paw)>tiny(zero))     energies%entropy=energies%entropy+energies%entropy_paw
+ if(abs(energies%entropy_xc)>tiny(zero))      energies%entropy=energies%entropy+energies%entropy_xc
+ if(abs(energies%entropy_extfpmd)>tiny(zero)) energies%entropy=energies%entropy+energies%entropy_extfpmd
+
+!When the finite-temperature VG broadening scheme is used,
+!the total entropy contribution "tsmear*entropy" has a meaning,
+!and gather the two last terms of Eq.8 of VG paper
+!Warning : might have to be changed for fixed moment calculations
+ if(dtset%occopt>=3 .and. dtset%occopt<=8) then
+   if (abs(dtset%tphysel) < tol10) then
+     energies%e_entropy = - dtset%tsmear * energies%entropy
+   else
+     energies%e_entropy = - dtset%tphysel * energies%entropy
+   end if
+ else
+   energies%e_entropy = zero
+ end if
 
  etotal=energies%h0+energies%e_hartree+energies%e_xc+energies%e_corepsp + &
- & e_entropy + energies%e_elecfield + energies%e_magfield
+ & energies%e_entropy + energies%e_elecfield + energies%e_magfield
  etotal = etotal + energies%e_ewald + energies%e_chempot + energies%e_vdw_dftd
  if (usepaw==1) then
    etotal = etotal + energies%e_paw
