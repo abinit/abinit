@@ -828,14 +828,16 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
    if (psps%usepaw==1) etotal=etotal + energies%e_pawdc
  end if
  etotal = etotal + energies%e_ewald + energies%e_chempot + energies%e_vdw_dftd
+
 !Add the contribution of extfpmd to the entropy
  if(associated(extfpmd)) then
-   energies%entropy=energies%entropy+extfpmd%entropy
+!  energies%entropy=energies%entropy+extfpmd%entropy ! Already included in total entropy.
    energies%e_extfpmd=extfpmd%e_kinetic
    energies%edc_extfpmd=extfpmd%edc_kinetic
    if(optene==0.or.optene==2) etotal=etotal+energies%e_extfpmd
    if(optene==1.or.optene==3) etotal=etotal+energies%edc_extfpmd
  end if
+
  if(dtset%occopt>=3 .and. dtset%occopt<=8) etotal=etotal-dtset%tsmear*energies%entropy
 
 !Additional stuff for electron-positron
