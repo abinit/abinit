@@ -745,7 +745,7 @@ subroutine entropyDMFT_init(e_t,dt,pawtab,spacecomm,ifilename,ofilename)
 
     if ( e_t%mylambda == 1 ) then
       ! Save entropy and internal energy for U=0
-      e_t%entropy0 = energies%entropy
+      e_t%entropy0 = energies%entropy_ks
       ! 1 is for usepaw that is 1 in DMFT, optdc is to know if the DC scheme is
       ! calculated.
       call energies_eval_eint(energies,dt,1,optdc,e_t%energies(E_DIRECT,E_U0),e_t%energies(E_DC,E_U0))

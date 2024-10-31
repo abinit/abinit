@@ -831,7 +831,6 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
 
 !Add the contribution of extfpmd to the entropy
  if(associated(extfpmd)) then
-!  energies%entropy=energies%entropy+extfpmd%entropy ! Already included in total entropy.
    energies%e_extfpmd=extfpmd%e_kinetic
    energies%edc_extfpmd=extfpmd%edc_kinetic
    if(optene==0.or.optene==2) etotal=etotal+energies%e_extfpmd
