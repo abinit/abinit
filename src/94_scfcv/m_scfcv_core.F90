@@ -1894,6 +1894,15 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
 &     vxc_hybcomp=vxc_hybcomp,add_tfw=tfw_activated,xcctau3d=xcctau3d)
      ABI_NVTX_END_RANGE()
 
+!    In case we have other sources of entropy than kohn-sham states occupation,
+!    we save entropy of the Kohn-Sham states in 'entropy_ks' for future use,
+!    and we sum all entropy terms. %entropy is now total entropy.
+!    Examples of other sources of entropy: finite-temperature xc functionals, extfpmd, ...
+     energies%entropy=entropy_ks
+     if(abs(energies%entropy_xc)>tiny(zero))  energies%entropy=energies%entropy+energies%entropy_xc
+     if(abs(energies%entropy_paw)>tiny(zero)) energies%entropy=energies%entropy+energies%entropy_paw
+     if(associated(extfpmd))                  energies%entropy=energies%entropy+extfpmd%entropy
+
    end if
 
    call timab(1457,2,tsec)
