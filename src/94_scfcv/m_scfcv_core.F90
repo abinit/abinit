@@ -1676,9 +1676,9 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
 !  and we sum all entropy terms. %entropy is now total entropy.
 !  Examples of other sources of entropy: finite-temperature xc functionals, extfpmd, ...
    entropy_ks=energies%entropy
+   if(associated(extfpmd))                  energies%entropy=energies%entropy+extfpmd%entropy
    if(abs(energies%entropy_xc)>tiny(zero))  energies%entropy=energies%entropy+energies%entropy_xc
    if(abs(energies%entropy_paw)>tiny(zero)) energies%entropy=energies%entropy+energies%entropy_paw
-   if(associated(extfpmd))                  energies%entropy=energies%entropy+extfpmd%entropy
 
    call timab(1451,2,tsec)
 
@@ -1893,15 +1893,15 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
 &     electronpositron=electronpositron,taur=taur,vxctau=vxctau,vtauresid=nvtauresid,&
 &     vxc_hybcomp=vxc_hybcomp,add_tfw=tfw_activated,xcctau3d=xcctau3d)
      ABI_NVTX_END_RANGE()
-
+     
 !    In case we have other sources of entropy than kohn-sham states occupation,
 !    we save entropy of the Kohn-Sham states in 'entropy_ks' for future use,
 !    and we sum all entropy terms. %entropy is now total entropy.
 !    Examples of other sources of entropy: finite-temperature xc functionals, extfpmd, ...
      energies%entropy=entropy_ks
+     if(associated(extfpmd))                  energies%entropy=energies%entropy+extfpmd%entropy
      if(abs(energies%entropy_xc)>tiny(zero))  energies%entropy=energies%entropy+energies%entropy_xc
      if(abs(energies%entropy_paw)>tiny(zero)) energies%entropy=energies%entropy+energies%entropy_paw
-     if(associated(extfpmd))                  energies%entropy=energies%entropy+extfpmd%entropy
 
    end if
 
@@ -1932,6 +1932,15 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
 &       electronpositron=electronpositron)
        ABI_NVTX_END_RANGE()
      end if
+
+!    In case we have other sources of entropy than kohn-sham states occupation,
+!    we save entropy of the Kohn-Sham states in 'entropy_ks' for future use,
+!    and we sum all entropy terms. %entropy is now total entropy.
+!    Examples of other sources of entropy: finite-temperature xc functionals, extfpmd, ...
+     energies%entropy=entropy_ks
+     if(associated(extfpmd))                  energies%entropy=energies%entropy+extfpmd%entropy
+     if(abs(energies%entropy_xc)>tiny(zero))  energies%entropy=energies%entropy+energies%entropy_xc
+     if(abs(energies%entropy_paw)>tiny(zero)) energies%entropy=energies%entropy+energies%entropy_paw
 
 !    Add the Fock contribution to E_xc and E_xcdc if required
      if (dtset%usefock==1) energies%e_fockdc=two*energies%e_fock
