@@ -620,7 +620,7 @@ subroutine scfcv_runWEntropyDMFT(this,electronpositron,itimes,rhog,rhor,rprimd,x
  end do !!! End loop for entropy DMFT
 
  ! GATHER DATA HERE OR INSIDE THE NEXT CALL ?
- call entropyDMFT_computeEntropy(this%entropyDMFT,this%results_gs%energies%entropy)
+ call entropyDMFT_computeEntropy(this%entropyDMFT,this%results_gs%energies%entropy_ks)
  !-----------------------------------------------------
  ! This call should be done inside destroy_sc_dmft
  !if ( this%dtset%usedmft /= 0 ) then

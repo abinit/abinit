@@ -1642,7 +1642,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
      ! CP: occopt 9 not available with Thomas Fermi functionals
      ABI_WARNING('THOMAS FERMI')
      call vtorhotf(dtset,energies%e_kinetic,energies%e_nlpsp_vfock,&
-&     energies%entropy,energies%e_fermie,gprimd,grnl,irrzon,mpi_enreg,&
+&     energies%entropy_ks,energies%e_fermie,gprimd,grnl,irrzon,mpi_enreg,&
 &     dtset%natom,nfftf,dtset%nspden,dtset%nsppol,dtset%nsym,phnons,&
 &     rhog,rhor,rprimd,ucvol,vtrial)
 
@@ -1653,7 +1653,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
 !  Recursion method
    if(dtset%userec==1)then
      call vtorhorec(dtset,&
-&     energies%e_kinetic,energies%e_nlpsp_vfock,energies%entropy,energies%e_eigenvalues,&
+&     energies%e_kinetic,energies%e_nlpsp_vfock,energies%entropy_ks,energies%e_eigenvalues,&
 &     energies%e_fermie,grnl,initialized,irrzon,nfftf,phnons,&
 &     rhog,rhor,vtrial,rec_set,istep-nstep,rprimd,gprimd)
      residm=zero
@@ -1670,15 +1670,6 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
        shiftvector(ikpt*(dtset%mband+2))=val_max
      end do
    end if
-
-!  In case we have other sources of entropy than kohn-sham states occupation,
-!  we save entropy of the Kohn-Sham states in 'entropy_ks' for future use,
-!  and we sum all entropy terms. %entropy is now total entropy.
-!  Examples of other sources of entropy: finite-temperature xc functionals, extfpmd, ...
-   entropy_ks=energies%entropy
-   if(associated(extfpmd))                  energies%entropy=energies%entropy+extfpmd%entropy
-   if(abs(energies%entropy_xc)>tiny(zero))  energies%entropy=energies%entropy+energies%entropy_xc
-   if(abs(energies%entropy_paw)>tiny(zero)) energies%entropy=energies%entropy+energies%entropy_paw
 
    call timab(1451,2,tsec)
 
@@ -1893,15 +1884,6 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
 &     electronpositron=electronpositron,taur=taur,vxctau=vxctau,vtauresid=nvtauresid,&
 &     vxc_hybcomp=vxc_hybcomp,add_tfw=tfw_activated,xcctau3d=xcctau3d)
      ABI_NVTX_END_RANGE()
-     
-!    In case we have other sources of entropy than kohn-sham states occupation,
-!    we save entropy of the Kohn-Sham states in 'entropy_ks' for future use,
-!    and we sum all entropy terms. %entropy is now total entropy.
-!    Examples of other sources of entropy: finite-temperature xc functionals, extfpmd, ...
-     energies%entropy=entropy_ks
-     if(associated(extfpmd))                  energies%entropy=energies%entropy+extfpmd%entropy
-     if(abs(energies%entropy_xc)>tiny(zero))  energies%entropy=energies%entropy+energies%entropy_xc
-     if(abs(energies%entropy_paw)>tiny(zero)) energies%entropy=energies%entropy+energies%entropy_paw
 
    end if
 
@@ -1932,15 +1914,6 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
 &       electronpositron=electronpositron)
        ABI_NVTX_END_RANGE()
      end if
-
-!    In case we have other sources of entropy than kohn-sham states occupation,
-!    we save entropy of the Kohn-Sham states in 'entropy_ks' for future use,
-!    and we sum all entropy terms. %entropy is now total entropy.
-!    Examples of other sources of entropy: finite-temperature xc functionals, extfpmd, ...
-     energies%entropy=entropy_ks
-     if(associated(extfpmd))                  energies%entropy=energies%entropy+extfpmd%entropy
-     if(abs(energies%entropy_xc)>tiny(zero))  energies%entropy=energies%entropy+energies%entropy_xc
-     if(abs(energies%entropy_paw)>tiny(zero)) energies%entropy=energies%entropy+energies%entropy_paw
 
 !    Add the Fock contribution to E_xc and E_xcdc if required
      if (dtset%usefock==1) energies%e_fockdc=two*energies%e_fock
@@ -2643,6 +2616,14 @@ subroutine etotfor(atindx1,deltae,diffor,dtefield,dtset,&
  ipositron=electronpositron_calctype(electronpositron)
 
  if (optene>-1) then
+
+!  In case we have other sources of entropy than kohn-sham states occupation,
+!  we sum all entropy terms. %entropy is now total entropy.
+!  Examples of other sources of entropy: finite-temperature xc functionals, extfpmd, ...
+   energies%entropy=energies%entropy_ks
+   if(abs(energies%entropy_paw)>tiny(zero))     energies%entropy=energies%entropy+energies%entropy_paw
+   if(abs(energies%entropy_xc)>tiny(zero))      energies%entropy=energies%entropy+energies%entropy_xc
+   if(abs(energies%entropy_extfpmd)>tiny(zero)) energies%entropy=energies%entropy+energies%entropy_extfpmd
 
 !  When the finite-temperature VG broadening scheme is used,
 !  the total entropy contribution "tsmear*entropy" has a meaning,

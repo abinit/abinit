@@ -1371,7 +1371,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
 !    Compute occupations
      call timab(990,1,tsec)
-     call newocc(doccde,eigen,energies%entropy,energies%e_fermie,energies%e_fermih,dtset%ivalence,&
+     call newocc(doccde,eigen,energies%entropy_ks,energies%e_fermie,energies%e_fermih,dtset%ivalence,&
 &     dtset%spinmagntarget,dtset%mband,dtset%nband,dtset%nelect,dtset%ne_qFD,dtset%nh_qFD,&
 &     dtset%nkpt,dtset%nspinor,dtset%nsppol,occ,dtset%occopt,prtvol,dtset%tphysel,&
 &     dtset%tsmear,dtset%wtk,prtstm=dtset%prtstm,stmbias=dtset%stmbias,extfpmd=extfpmd)
@@ -1383,7 +1383,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        call timab(991,1,tsec)
 
        if (dtset%dmftcheck>=0.and.dtset%usedmft>=1.and.(sum(pawtab(:)%upawu)>=tol8.or.  &
-&       sum(pawtab(:)%jpawu)>tol8).and.dtset%dmft_entropy==0) energies%entropy=zero
+&       sum(pawtab(:)%jpawu)>tol8).and.dtset%dmft_entropy==0) energies%entropy_ks=zero
 
 !      ==  0 to a dmft calculation and do not use lda occupations
 !      ==  1 to a lda calculation with the dmft loop
@@ -1625,7 +1625,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 &       dtset%nspinor,dtset%nsppol,dtset%tsmear,dtset%wtk)
        call extfpmd%compute_e_kinetic(energies%e_fermie,dtset%tsmear,dtset%nkpt,dtset%nspinor,&
 &       dtset%nsppol,dtset%nband,dtset%wtk)
-       call extfpmd%compute_entropy(energies%e_fermie,dtset%tsmear,dtset%nkpt,dtset%nsppol,dtset%nspinor,&
+       call extfpmd%compute_entropy(energies%entropy_extfpmd,energies%e_fermie,dtset%tsmear,dtset%nkpt,dtset%nsppol,dtset%nspinor,&
 &       dtset%wtk,dtset%nband)
      end if
 
@@ -1764,7 +1764,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 &       dtset%nspinor,dtset%nsppol,dtset%tsmear,dtset%wtk)
        call extfpmd%compute_e_kinetic(energies%e_fermie,dtset%tsmear,dtset%nkpt,dtset%nspinor,&
 &       dtset%nsppol,dtset%nband,dtset%wtk)
-       call extfpmd%compute_entropy(energies%e_fermie,dtset%tsmear,dtset%nkpt,dtset%nsppol,dtset%nspinor,&
+       call extfpmd%compute_entropy(energies%entropy_extfpmd,energies%e_fermie,dtset%tsmear,dtset%nkpt,dtset%nsppol,dtset%nspinor,&
 &       dtset%wtk,dtset%nband)
        ! CHECK number of electrons integrating rhor.
        ! write(0,*) sum(rhor(:,:))*extfpmd%ucvol/dtset%nfft
@@ -2359,7 +2359,7 @@ subroutine wvl_occ()
    DBG_ENTER("COLL")
 
 !  Compute the new occupation numbers from eigen
-   call newocc(doccde_,eigen,energies%entropy,energies%e_fermie,energies%e_fermih,dtset%ivalence,dtset%spinmagntarget,&
+   call newocc(doccde_,eigen,energies%entropy_ks,energies%e_fermie,energies%e_fermih,dtset%ivalence,dtset%spinmagntarget,&
 &   dtset%mband,dtset%nband,dtset%nelect,dtset%ne_qFD,dtset%nh_qFD,dtset%nkpt,dtset%nspinor,&
 &   dtset%nsppol,occ,dtset%occopt,prtvol,dtset%tphysel,dtset%tsmear,dtset%wtk,&
 &   prtstm=dtset%prtstm,stmbias=dtset%stmbias)

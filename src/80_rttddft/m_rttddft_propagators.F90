@@ -164,7 +164,7 @@ subroutine rttddft_propagator_er(dtset, ham_k, istep, mpi_enreg, psps, tdks, cal
       lproperties(1) = .true.
       !Init to zero different energies
       call energies_init(energies)
-      energies%entropy=tdks%energies%entropy
+      energies%entropy_ks=tdks%energies%entropy_ks
       energies%e_corepsp=tdks%energies%e_corepsp
       energies%e_ewald=tdks%energies%e_ewald
       !including NL part in NC case?

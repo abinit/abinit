@@ -351,7 +351,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  e_fermie = results_gs%energies%e_fermie
  ebands%fermih  = results_gs%energies%e_fermih
  e_fermih = results_gs%energies%e_fermih
- ebands%entropy = results_gs%energies%entropy
+ ebands%entropy = results_gs%energies%entropy_ks
 
  ! YAML output
  if (me == master) then
