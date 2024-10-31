@@ -827,11 +827,7 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
        
        if (optrw == 2) then
 
-         if (dmft_test == 0) then
-           string_format = '(3a,5i5,2x,es24.16e3)'
-         else
-           string_format = '(3a,5i5,2x,e25.17)'
-         end if 
+         string_format = '(3a,5i5,2x,e25.17)'
 
          write(message,string_format) "# natom,nsppol,nspinor,ndim,nw,fermilevel",ch10,&
            & "####",natom,nsppol,nspinor,ndim,self%nw,paw_dmft%fermie
@@ -900,9 +896,7 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
                !Is it possible to rewrite the code below to avoid such a long message
                !What about Netcdf binary files ?
 
-           if (dmft_test == 0) then
-             string_format = '(2x,393(es24.16e3,2x))'
-           else if (nspinor == 1) then
+           if (nspinor == 1) then
              string_format = '(2x,393(e25.17,2x))'
            else 
              string_format = '(2x,393(e18.10,2x))'
@@ -1004,11 +998,7 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
        if (optrw == 2) then
 !             write(std_out,'(a,2x,31(e15.8,2x))') &
 !&            "SETEST #dc ",(self%hdc%matlu(iatom)%mat(im,im,isppol,ispinor,ispinor),im=1,ndim)
-         if (dmft_test == 0) then
-           string_format = '(a,2x,500(es24.16e3,2x))'
-         else
-           string_format = '(a,2x,500(e25.17,2x))'
-         end if 
+         string_format = '(a,2x,500(e25.17,2x))'
          write(message,string_format) &
           & "#dc ",((((self%hdc%matlu(iatom)%mat(im+(ispinor-1)*ndim,im1+(ispinor1-1)*ndim,isppol),&
             & im=1,ndim),im1=1,ndim),ispinor=1,nspinor),ispinor1=1,nspinor)
