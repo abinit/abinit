@@ -3535,9 +3535,10 @@ subroutine newton(green,self,paw_dmft,x_input,x_precision,max_iter,&
 
    end if ! l_minus and l_plus
 
-   if ((abs(Fx) < abs(Fxoptimum)) .or. (iter == 1)) then
+   if (abs(Fx) < abs(Fxoptimum)) then
      Fxoptimum = Fx
      x_optimum = x_input
+     if (dmft_test == 0) x_optimum = xold
    end if ! abs(Fx)<abs(Fxoptimum)
 
 
