@@ -878,6 +878,7 @@ subroutine chipsi_print(paw_dmft,pawtab)
  logical, optional, intent(out) :: nondiag
 !Local variables ------------------------------
  integer :: iatom,im,isppol,lpawu,natom,ndim
+ character(len=13) :: tag
  character(len=500) :: message
 !************************************************************************
 
@@ -913,7 +914,8 @@ subroutine chipsi_print(paw_dmft,pawtab)
    call checkdiag_matlu(energy_level%matlu(:),natom,tol7,nondiag)
  end if 
 
- write(message,'(a,2x,a,f13.5)') ch10," == Print Energy levels for Fermi Level=",paw_dmft%fermie
+ write(tag,'(f13.5)') paw_dmft%fermie
+ write(message,'(a,2x,2a)') ch10," == Print Energy levels for Fermi Level= ",adjustl(tag)
  call wrtout(std_out,message,'COLL')
 !call print_oper(energy_level,1,paw_dmft,1)
  call print_matlu(energy_level%matlu(:),natom,1)

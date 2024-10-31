@@ -172,9 +172,9 @@ subroutine dmft_solve(cryst_struc,istep,dft_occup,mpi_enreg,paw_dmft,pawang,pawt
 !===========================================================================
 !==  First construct DFT green function (Init, Compute, Integrate, Print)
 !===========================================================================
- write(message,'(6a)') ch10,' =====================================', &
+ write(message,'(6a)') ch10,' ======================================', &
                      & ch10,' =====  DFT Green Function Calculation',&
-                     & ch10,' ====================================='
+                     & ch10,' ======================================'
  call wrtout(std_out,message,'COLL')
  call icip_green("DFT",greendft,paw_dmft,3,self,opt_moments=opt_moments)
  !call print_green('DFT_NOT_renormalized',greendft,1,paw_dmft,pawprtvol=1,opt_wt=1)
@@ -225,7 +225,7 @@ subroutine dmft_solve(cryst_struc,istep,dft_occup,mpi_enreg,paw_dmft,pawang,pawt
    call downfold_oper(oper_tmp,paw_dmft,procb=paw_dmft%distrib%procb(:),iproc=paw_dmft%distrib%me_kpt,option=4)
    call xmpi_matlu(oper_tmp%matlu(:),natom,paw_dmft%distrib%comm_kpt)
    call sym_matlu(oper_tmp%matlu(:),paw_dmft)
-   call diff_matlu("Downfold of Upfold","Identity",oper_tmp%matlu(:),identity_oper%matlu(:),natom,0,tol5)
+   call diff_matlu("Downfold of Upfold","Identity",oper_tmp%matlu(:),identity_oper%matlu(:),natom,0,tol4)
    call destroy_oper(oper_tmp)
    call destroy_oper(identity_oper)
 
@@ -242,7 +242,7 @@ subroutine dmft_solve(cryst_struc,istep,dft_occup,mpi_enreg,paw_dmft,pawang,pawt
  
  opt_log = 0
  if (paw_dmft%dmftctqmc_triqs_entropy == 1) opt_log = 1
- call icip_green("DFT_renormalized",greendft,paw_dmft,pawprtvol,self,opt_moments=opt_moments,opt_log=opt_log)
+ call icip_green("DFT renormalized",greendft,paw_dmft,pawprtvol,self,opt_moments=opt_moments,opt_log=opt_log)
  !call print_green('DFT_renormalized',greendft,1,paw_dmft,pawprtvol=1,opt_wt=1)
 
  ! Need to store idmftloop and set it to zero to avoid useless print_energy in ab_out
@@ -315,7 +315,7 @@ subroutine dmft_solve(cryst_struc,istep,dft_occup,mpi_enreg,paw_dmft,pawang,pawt
  if (dmft_test == 0) then
    call init_green(green,paw_dmft,opt_moments=opt_moments)
  else
-   call icip_green("Green_inputself",green,paw_dmft,pawprtvol,self,opt_self=1)
+   call icip_green("Green with input self-energy",green,paw_dmft,pawprtvol,self,opt_self=1)
    !call print_green('beforefermi_green',green,1,paw_dmft,pawprtvol=1,opt_wt=1)
 !   call abi_abort('COLL')
  end if 

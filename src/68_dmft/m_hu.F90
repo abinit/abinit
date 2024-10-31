@@ -212,6 +212,7 @@ subroutine init_hu(hu,paw_dmft,pawtab)
  real(dp) :: jpawu,upawu,xtemp
  integer, parameter   :: mt2g(3) = (/1,2,4/) 
  integer, allocatable :: xij(:,:)
+ character(len=4) :: tag
  character(len=500) :: message
 !************************************************************************
   
@@ -291,8 +292,9 @@ subroutine init_hu(hu,paw_dmft,pawtab)
      hu(itypat)%fk(2) = hu(itypat)%fk(1) * pawtab(itypat)%f4of2_sla
      hu(itypat)%fk(3) = hu(itypat)%fk(1) * pawtab(itypat)%f6of2_sla
    end if ! lpawu
-     
-   write(message,'(2a,i4)') ch10,'  -------> For Correlated Species',itypat
+    
+   write(tag,'(i4)') itypat 
+   write(message,'(3a)') ch10,'  -------> For Correlated Species ',adjustl(tag)
    call wrtout(std_out,message,'COLL')
       
    ABI_MALLOC(hu(itypat)%uqmc,(ndim*(tndim-1)))

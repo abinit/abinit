@@ -1534,6 +1534,7 @@ subroutine integrate_green(green,paw_dmft,prtopt,opt_ksloc,opt_after_solver,opt_
  integer :: nsppol,optaftsolv,optdiff,optfilloccnd,option,optksloc,optself
  real(dp) :: correction,diff_chloc,fac
  complex(dpc) :: omega
+ character(len=12) :: tag
  character(len=500) :: message
  real(dp) :: tsec(2)
  complex(dpc), allocatable :: omega_fac(:)
@@ -1924,10 +1925,12 @@ subroutine integrate_green(green,paw_dmft,prtopt,opt_ksloc,opt_after_solver,opt_
      green%charge_ks = green%charge_ks + correction
    end if ! use_all_bands
    if (abs(prtopt) > 0) then
-     write(message,'(a,a,f12.6)') ch10,&
-       & "  ==  Total number of electrons from KS green function is :",green%charge_ks
+     write(tag,'(f12.6)') green%charge_ks
+     write(message,'(3a)') ch10,&
+       & "  ==  Total number of electrons from KS green function is : ",adjustl(tag)
      call wrtout(std_out,message,'COLL')
-     write(message,'(8x,a,f12.6,a)') " (should be",paw_dmft%nelectval,")"
+     write(tag,'(f12.6)') paw_dmft%nelectval
+     write(message,'(8x,3a)') " (should be ",trim(adjustl(tag)),")"
      call wrtout(std_out,message,'COLL')
    end if ! abs(prtopt)>0
  end if ! optksloc
@@ -1940,8 +1943,8 @@ subroutine integrate_green(green,paw_dmft,prtopt,opt_ksloc,opt_after_solver,opt_
 !    obtained directly from local green function or, through kohn sham
 !    occupations are the same.
  if ((abs(optksloc) == 3) .and. (paw_dmft%lchipsiortho == 1)) then ! optksloc= 3
-   call diff_matlu("Local_projection_of_kohnsham_occupations ",&
-        & "Integration_of_local_green_function ",&
+   call diff_matlu("Local projection of Kohn-Sham occupations ",&
+        & "Integration of local Green's function ",&
         & green%occup%matlu(:),matlu_temp(:),natom,option,tol4)
    write(message,'(2a)') ch10,&
        & '  ***** => Calculations of Green function in KS and local spaces are coherent ****'
@@ -3233,6 +3236,7 @@ subroutine fermi_green(green,paw_dmft,self)
  integer :: ierr_hh,max_iter
  real(dp) :: f_precision,fermi_old,x_precision
 ! real(dp) :: hx
+ character(len=13) :: tag
  character(len=500) :: message
 !************************************************************************
 !
@@ -3244,7 +3248,8 @@ subroutine fermi_green(green,paw_dmft,self)
 !=============
  write(message,'(2a)') ch10,"  |---Newton method to search Fermi level ------------|"
  call wrtout(std_out,message,'COLL')
- write(message,'(2a,f13.6)') ch10,"  |--- Initial value for Fermi level",paw_dmft%fermie
+ write(tag,'(f13.6)') paw_dmft%fermie
+ write(message,'(3a)') ch10,"  |--- Initial value for Fermi level ",adjustl(tag)
  call wrtout(std_out,message,'COLL')
 
 !========================================
@@ -3300,11 +3305,14 @@ subroutine fermi_green(green,paw_dmft,self)
 !  If fermi level search was successful
 !  =====================================
  else
-   write(message,'(a,4x,a,e13.6)') ch10," Precision achieved on Fermi Level :",x_precision
+   write(tag,'(e13.6)') x_precision
+   write(message,'(a,4x,2a)') ch10," Precision achieved on Fermi Level : ",adjustl(tag)
    call wrtout(std_out,message,'COLL')
-   write(message,'(4x,a,e13.6)') " Precision achieved on number of electrons :",f_precision
+   write(tag,'(e13.6)') f_precision
+   write(message,'(4x,2a)') " Precision achieved on number of electrons : ",adjustl(tag)
    call wrtout(std_out,message,'COLL')
-   write(message,'(2a,f13.6)') ch10,"  |---  Final value for Fermi level",paw_dmft%fermie
+   write(tag,'(f13.6)') paw_dmft%fermie
+   write(message,'(3a)') ch10,"  |---  Final value for Fermi level ",adjustl(tag)
    call wrtout(std_out,message,'COLL')
  end if ! ierr_hh
 
@@ -3320,7 +3328,8 @@ subroutine fermi_green(green,paw_dmft,self)
      call wrtout(std_out,message,'COLL')
      green%ifermie_cv = 1
    else
-     write(message,'(a,8x,a,2f12.5)') ch10,"DMFT Loop: Fermi level is not converged:",paw_dmft%fermie
+     write(tag,'(f12.5)') paw_dmft%fermie
+     write(message,'(a,8x,2a)') ch10,"DMFT Loop: Fermi level is not converged: ",adjustl(tag)
      call wrtout(std_out,message,'COLL')
      green%ifermie_cv = 0
    end if ! convergence of Fermi level
