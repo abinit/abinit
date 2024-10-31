@@ -355,7 +355,7 @@ subroutine print_matlu(matlu,natom,prtopt,opt_diag,opt_ab_out,opt_exp,argout,com
  logical :: testcmplx
  complex(dpc), allocatable :: mat_nmrep(:,:)
  character(len=500) :: message
- character(len=4) :: mode_paral
+ character(len=4) :: mode_paral,tag_at
  character(len=9), parameter :: dspinm(2,2) = RESHAPE((/"n        ","mx       ","my       ","mz       "/),(/2,2/))
 ! *********************************************************************
 
@@ -383,8 +383,9 @@ subroutine print_matlu(matlu,natom,prtopt,opt_diag,opt_ab_out,opt_exp,argout,com
    lpawu = matlu(iatom)%lpawu
    if (lpawu == -1) cycle
    ndim = 2*lpawu + 1
-   
-   write(message,'(2a,i4)') ch10,'   -------> For Correlated Atom',iatom
+  
+   write(tag_at,'(i4)') iatom 
+   write(message,'(3a)') ch10,'   -------> For Correlated Atom ',adjustl(tag_at)
    call wrtout(arg_out,message,mode_paral)
    
    !do isppol=1,nsppol
@@ -400,13 +401,13 @@ subroutine print_matlu(matlu,natom,prtopt,opt_diag,opt_ab_out,opt_exp,argout,com
 
    do isppol=1,nsppol
      if (nspinor == 1) then
-       write(message,'(a,10x,a,i3,i3)') ch10,'-- polarization spin component',isppol
+       write(message,'(a,10x,a,x,i1)') ch10,'-- polarization spin component',isppol
        call wrtout(arg_out,message,mode_paral)
      end if ! nspinor=1
      do ispinor=1,nspinor
        do ispinor1=1,nspinor
          if (nspinor == 2) then
-           write(message,'(a,10x,a,i3,i3)') ch10,'-- spin components',ispinor,ispinor1
+           write(message,'(a,10x,a,i1,x,i1)') ch10,'-- spin components ',ispinor,ispinor1
            call wrtout(arg_out,message,mode_paral)
          end if
          if (optdiag <= 0) then
@@ -461,7 +462,7 @@ subroutine print_matlu(matlu,natom,prtopt,opt_diag,opt_ab_out,opt_exp,argout,com
        end do ! im
        do ispinor=1,nspinor
          do ispinor1=1,nspinor
-           write(message,'(a,10x,a,a)') ch10,'-- spin components',dspinm(ispinor1,ispinor)
+           write(message,'(a,10x,2a)') ch10,'-- spin components',dspinm(ispinor1,ispinor)
            call wrtout(arg_out,message,mode_paral)
            do im1=1,ndim
              write(message,'(5x,14(2f9.5,2x))') ((mat_nmrep(im1+(ispinor1-1)*ndim,im+(ispinor-1)*ndim)),im=1,ndim)
@@ -1010,6 +1011,8 @@ end subroutine add_matlu
  integer :: iatom,im,isppol,lpawu,ndim,nspinor,nsppol
  complex(dpc) :: trace_tmp,trace_tmp2
  real(dp), ABI_CONTIGUOUS pointer :: traceloc(:,:) => null()
+ character(len=4) :: tag
+ character(len=12) :: tag_nb_elec
  character(len=500) :: message
 ! *********************************************************************
 
@@ -1031,7 +1034,8 @@ end subroutine add_matlu
    if (lpawu == -1) cycle
    
    ndim = nspinor * (2*lpawu+1)  
-   write(message,'(2a,i4)') ch10,'   -------> For Correlated Atom',iatom
+   write(tag,'(i4)') iatom
+   write(message,'(3a)') ch10,'   -------> For Correlated Atom ',adjustl(tag)
    if (.not. present(itau)) then
      call wrtout(std_out,message,'COLL')
    end if 
@@ -1052,19 +1056,21 @@ end subroutine add_matlu
      traceloc(nsppol+1,iatom) = traceloc(nsppol+1,iatom) + traceloc(isppol,iatom)
    end do ! isppol
    if (nsppol == 1 .and. nspinor == 1) traceloc(nsppol+1,iatom) = traceloc(nsppol+1,iatom) * two
+   write(tag_nb_elec,'(f12.6)') traceloc(nsppol+1,iatom)
+   tag_nb_elec = adjustl(tag_nb_elec)
    if (.not. present(itau)) then
-     write(message,'(8x,a,f12.6)') 'Nb of Corr. elec. from G(w) is:',traceloc(nsppol+1,iatom)
+     write(message,'(8x,2a)') 'Nb of Corr. elec. from G(w) is: ',tag_nb_elec
      call wrtout(std_out,message,'COLL')
    end if ! not present(itau)
    if (present(itau)) then
      if (itau == 1) then
-       write(message,'(8x,a,f12.6)') 'Nb of Corr. elec. from G(tau) is:',traceloc(nsppol+1,iatom)
+       write(message,'(8x,2a)') 'Nb of Corr. elec. from G(tau) is: ',tag_nb_elec
        call wrtout(std_out,message,'COLL')
      else if (itau == -1) then
-       write(message,'(8x,a,f12.6)') 'Nb: Sum of the values of G0(tau=0-) is:',traceloc(nsppol+1,iatom)
+       write(message,'(8x,2a)') 'Nb: Sum of the values of G0(tau=0-) is: ',tag_nb_elec
        call wrtout(std_out,message,'COLL')
      else if (itau == 4) then
-       write(message,'(8x,a,f12.6)') 'Trace of matlu matrix is:',traceloc(nsppol+1,iatom)
+       write(message,'(8x,2a)') 'Trace of matlu matrix is: ',tag_nb_elec
        call wrtout(std_out,message,'COLL')
      end if ! itau
    end if ! present(itau)
@@ -1082,7 +1088,8 @@ end subroutine add_matlu
      !! MAG
     ! if(nsppol>1.and.present(itau)) then
     !   if(itau==1) then
-     write(message,'(8x,a,f12.6)') 'DMFT Cor. El. Mag: ',traceloc(2,iatom)-traceloc(1,iatom)
+     write(tag_nb_elec,'(f12.6)') traceloc(2,iatom) - traceloc(1,iatom)
+     write(message,'(8x,2a)') 'DMFT Cor. El. Mag: ',adjustl(tag_nb_elec)
      call wrtout(std_out,message,'COLL')
     !   endif
    end do ! iatom
@@ -1260,6 +1267,7 @@ end subroutine add_matlu
  integer :: iatom,im1,im2,info,isppol,lpawu,lwork,lworkr
  integer :: nspinor,nsppol,nsppolimp,optreal,tndim
  logical :: blockdiag,checkstop_in,print_temp_mat2
+ character(len=4) :: tag
  character(len=500) :: message
  real(dp), allocatable :: eig(:),rwork(:),valuer(:,:),work(:)!,valuer2(:,:)
  !real(dp),allocatable :: valuer3(:,:),valuer4(:,:)
@@ -1335,6 +1343,7 @@ end subroutine add_matlu
  
    lpawu = matlu(iatom)%lpawu
    if (lpawu == -1) cycle
+   write(tag,'(i4)') iatom
    tndim = nspinor * (2*lpawu+1)
    lwork = 2*tndim - 1
    lworkr = tndim * (tndim+2) * 2
@@ -1493,7 +1502,7 @@ end subroutine add_matlu
      if (prtopt >= 3) then
        write(message,'(a)') ch10
        call wrtout(std_out,message,'COLL')
-       write(message,'(a,i4,a,i4)') "       EIGENVECTORS for atom",iatom,"  and isppol",isppol
+       write(message,'(3a,i1)') "       EIGENVECTORS for atom ",trim(adjustl(tag))," and isppol ",isppol
        call wrtout(std_out,message,'COLL')
        do im1=1,tndim
          write(message,'(12(1x,18(1x,"(",f9.3,",",f9.3,")")))') (eigvectmatlu(iatom)%mat(im1,im2,isppol),im2=1,tndim)

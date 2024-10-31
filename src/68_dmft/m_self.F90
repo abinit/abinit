@@ -521,9 +521,10 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
  character(len=30000) :: message ! Big buffer to avoid buffer overflow.
  character(len=fnlen) :: tmpfil,tmpfil2,tmpfilrot,tmpmatrot
  character(len=1) :: tag_is
- character(len=10) :: tag_at,tag_iflavor
- character(len=4) :: chtemp
  character(len=3) :: self_iter
+ character(len=4) :: chtemp
+ character(len=10) :: tag_at,tag_iflavor
+ character(len=13) :: tag
  character(len=50) :: string_format
  type(oper_type) :: energy_level
  integer, allocatable :: unitselffunc_arr(:),unitselffunc_arr2(:),unitselfrot(:,:,:,:)
@@ -593,9 +594,9 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
 !   - For the Tentative rotation of the self-energy file (begin init)
  if (optmaxent > 0) then
    if (optrw == 2) then
-     write(message,'(a,2x,a,f13.5)') ch10," == About to print self-energy for MAXENT code "
+     write(message,'(a,2x,a)') ch10," == About to print self-energy for MAXENT code "
    else if (optrw == 1)  then
-     write(message,'(a,2x,a,f13.5)') ch10," == About to read self-energy from MAXENT code "
+     write(message,'(a,2x,a)') ch10," == About to read self-energy from MAXENT code "
    end if
    call wrtout(std_out,message,'COLL')
 
@@ -612,11 +613,12 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
    call init_oper(paw_dmft,energy_level,opt_ksloc=2)
    call init_matlu(natom,nspinor,nsppol,paw_dmft%lpawu(:),level_diag(:))
    call compute_levels(energy_level,self%hdc,paw_dmft,nondiag=nondiaglevels)
-   write(message,'(a,2x,a,f13.5)') ch10," == Print non Diagonalized Self Energy for Fermi Level=",paw_dmft%fermie
+   write(tag,'(f13.5)') paw_dmft%fermie
+   write(message,'(a,2x,2a)') ch10," == Print non Diagonalized Self Energy for Fermi Level= ",adjustl(tag)
    call wrtout(std_out,message,'COLL')
    call print_matlu(self%oper(2)%matlu(:),natom,1,compl=1,opt_exp=1)
    call diag_matlu(energy_level%matlu(:),level_diag(:),natom,prtopt,eigvectmatlu(:),test=paw_dmft%dmft_solv)
-   write(message,'(a,2x,a,f13.5)') ch10," == Print Diagonalized levels for Fermi Level=",paw_dmft%fermie
+   write(message,'(a,2x,2a)') ch10," == Print Diagonalized levels for Fermi Level= ",adjustl(tag)
    call wrtout(std_out,message,'COLL')
    call print_matlu(level_diag(:),natom,1,compl=1,opt_exp=1)
    ! Rotate self

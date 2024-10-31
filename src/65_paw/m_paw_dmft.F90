@@ -855,7 +855,7 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
  end if 
 
  if (mbandc /= dmftbandf-dmftbandi+1) then
-   write(message,'(3a)') ' WARNING init_sc_dmft',ch10,&
+   write(message,'(5a)') ' WARNING init_sc_dmft',ch10,&
     & '  number of bands in dmft is not correctly computed ',ch10, &
     & '  Action : check the code'
    ABI_ERROR(message)
@@ -1125,7 +1125,7 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
      rewind(grid_unt)
      write(message,'(3a)') ch10,"  == Read grid frequency in file ",trim(tmpfil)
      call wrtout(std_out,message,'COLL')
-     write(message,'(3a,i4)') 'opened file : ',trim(tmpfil),' unit',grid_unt
+     write(message,'(3a,i4)') 'opened file : ',trim(tmpfil),' unit ',grid_unt
      call wrtout(std_out,message,'COLL')
      read(grid_unt,*,iostat=ioerr) ngrid
      ABI_MALLOC(paw_dmft%omega_r,(ngrid))
@@ -1252,7 +1252,7 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
      ABI_ERROR(message)
    end if
    if (mesh_size > pawrad(itypat)%int_meshsz .and. (.not. use_full_chipsi)) then
-     message = "You need to activate use_full_chipsi if you use an orbital which extends outside the PAW sphere"
+     message = "You need to activate use_full_chipsi if you use an orbital that extends outside the PAW sphere"
      ABI_ERROR(message)
    end if 
    call pawrad_init(paw_dmft%radgrid(itypat),mesh_size,mesh_type,rstep,lstep)
@@ -1566,8 +1566,8 @@ subroutine construct_nwli_dmft(paw_dmft,nwli,omega_li)
 
 ! if (allocated(omega_li)) then
  if (size(omega_li(:)) /= nwli) then
-   write(message,'(2a,i8,a,i8)') ch10, "Number of linear frequencies asked is", &
-       & nwli, "whereas dimension of array omega_li is",size(omega_li(:))
+   write(message,'(2a,i8,a,i8)') ch10,"Number of linear frequencies asked is", &
+       & nwli,"whereas dimension of array omega_li is",size(omega_li(:))
    ABI_BUG(message)
 !     ABI_FREE(omega_li)
 !     ABI_MALLOC(omega_li,(nwli))

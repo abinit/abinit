@@ -817,11 +817,10 @@ CONTAINS  !=====================================================================
      
      if (use_dmft > 0) then
          
-       call int2char4(itypat,tag)
-       ABI_CHECK((tag(1:1)/='#'),'Bug: string length too short!')
-   
-       write(message,*) &
-         & ch10,' =====  Build DMFT radial orbital for atom type ',tag(4-itypat/10:4),' ========'
+       write(tag,'(i4)') itypat
+ 
+       write(message,'(4a)') &
+         & ch10,' =====  Build DMFT radial orbital for atom type ',trim(adjustl(tag)),' ========'
        call wrtout(std_out,message,"COLL")
        
        ABI_SFREE(pawtab(itypat)%proj)
@@ -829,15 +828,15 @@ CONTAINS  !=====================================================================
 
        me = xmpi_comm_rank(xmpi_world)
 
-       if (dmft_proj(itypat) > 0) then   ! read phi from PAW dataset 
-         write(message,'(2a,i1,a)') ch10," Using atomic wavefunction number ",dmft_proj(itypat)," from PAW dataset"
+       if (dmft_proj(itypat) > 0) then ! use atomic orbital from PAW dataset 
+         write(message,'(2a,i1,a)') ch10," Using atomic orbital number ",dmft_proj(itypat)," from PAW dataset"
          call wrtout(std_out,message,"COLL")
          meshsz = pawrad(itypat)%int_meshsz  
          ABI_MALLOC(pawtab(itypat)%proj,(meshsz))
          pawtab(itypat)%proj(1:meshsz) = pawtab(itypat)%phi(1:meshsz,pawtab(itypat)%lnproju(dmft_proj(itypat)))
-       else   ! read orbital from file
-         tmpfil = 'proj_'//tag(4-itypat/10:4)
-         write(message,*) "Using wavefunction from file",tmpfil
+       else  ! read orbital from file
+         tmpfil = 'proj_'//adjustl(tag)
+         write(message,*) "Using wavefunction from file ",tmpfil
          call wrtout(std_out,message,"COLL")
          inquire(file=trim(tmpfil),exist=lexist)
          if (.not. lexist) ABI_ERROR("File "//trim(tmpfil)//" does not exist !")
@@ -864,6 +863,10 @@ CONTAINS  !=====================================================================
 
        call pawrad_init(pawrad_tmp,meshsz,mesh_type,rstep,lstep)
        call simp_gen(int1,pawtab(itypat)%proj(1:meshsz)**2,pawrad_tmp)
+
+       write(message,*) "Squared norm of the DMFT orbital: ",int1
+       call wrtout(std_out,message,"COLL")
+
        int1 = sqrt(int1)  
        
        if (me == 0) then
@@ -879,14 +882,18 @@ CONTAINS  !=====================================================================
          ABI_MALLOC(pawtab(itypat)%proj2,(meshsz))
 
          pawtab(itypat)%proj2(1:meshsz) = (pawtab(itypat)%proj(1:meshsz)/int1)**2
+
          ! Get correspondence U,J <-> lamb,eps 
          call get_lambda(lcur,pawrad_tmp,pawtab(itypat)%proj2(:),meshsz, &
                        & pawtab(itypat)%upawu,pawtab(itypat)%jpawu,lambda,eps)
+
          pawtab(itypat)%lambda = lambda
          pawtab(itypat)%eps = eps
+
+         ! Recompute Slater integrals
          ABI_MALLOC(fk,(lcur+1))
-         ! Recompute Slater integrals 
          call compute_slater(lcur,pawrad_tmp,pawtab(itypat)%proj2(:),meshsz,lambda,eps,fk(:))
+
          write(message,*) "Yukawa parameters for atom type: ",trim(tag(4-itypat/10:4))
          call wrtout(std_out,message,"COLL")
          write(message,*) "Lambda:",lambda
@@ -1138,7 +1145,6 @@ CONTAINS  !=====================================================================
  real(dp),optional,intent(inout) :: e_ee,e_dc,e_dcdc
  real(dp),optional,intent(in) :: j_dmft,u_dmft
  type(pawtab_type),intent(in) :: pawtab
- 
 !Local variables ---------------------------------------
 !scalars
  integer :: cplex_occ,dmftdc,ispden,jspden,lpawu,m1,m11,m2,m21,m3,m31,m4,m41,nspden
@@ -1150,8 +1156,8 @@ CONTAINS  !=====================================================================
  real(dp) :: n34_ud_re,n34_du_re
  real(dp) :: upawu
  real(dp),allocatable :: n12_sig(:),n34_msig(:),n34_sig(:)
+ character(len=4) :: tag
  character(len=500) :: message
-
 ! *****************************************************
 
  nspden=size(nocctot)
@@ -1409,18 +1415,20 @@ CONTAINS  !=====================================================================
 
 !if(pawtab%usepawu/=10.or.pawprtvol>=3) then
  if(abs(pawprtvol)>=3) then
+   write(tag,'(i4)') iatom
+   tag = trim(adjustl(tag))
    if(pawtab%usepawu<10) then
-     write(message, '(5a,i4)')ch10,'======= DFT+U Energy terms (in Hartree) ====',ch10,&
-&     ch10,' For Atom ',iatom
+     write(message, '(6a)') ch10,'======= DFT+U Energy terms (in Hartree) ====',ch10,&
+&     ch10,' For Atom ',tag
    else if (pawtab%usepawu >= 10) then
-     write(message, '(5a,i4)')ch10,'  ===   DFT+U Energy terms for the DMFT occupation matrix ==',ch10,&
-&     ch10,' For Atom ',iatom
+     write(message, '(6a)') ch10,'  ===   DFT+U Energy terms for the DMFT occupation matrix ==',ch10,&
+&     ch10,' For Atom ',tag
    end if
 
    call wrtout(std_out,message,'COLL')
    write(message, '(a)' )"   Contributions to the direct expression of energy:"
    call wrtout(std_out,  message,'COLL')
-   write(message,fmt=11) "     Double counting  correction   =",edctemp
+   write(message,fmt=11) "     Double counting correction    =",edctemp
    call wrtout(std_out,  message,'COLL')
    write(message,fmt=11) "     Interaction energy            =",edftutemp
    call wrtout(std_out,  message,'COLL')

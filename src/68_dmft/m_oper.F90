@@ -366,10 +366,10 @@ subroutine print_oper(oper,option,paw_dmft,prtopt)
 !     call wrtout(std_out,message,'COLL')
      nkptr = min(nkpt,4)
      do isppol=1,paw_dmft%nsppol
-       write(message,'(a,3x,a,i4)') ch10,"--isppol--",isppol
+       write(message,'(a,3x,a,x,i1)') ch10,"--isppol--",isppol
        call wrtout(std_out,message,'COLL')
        write(message,'(2a)') ch10,&
-         & "   - ( in the following only the value for the first k-points are printed)"
+         & "   - (in the following only the value for the first k-points are printed)"
        call wrtout(std_out,message,'COLL')
        do ikpt=1,nkptr
          if (option < 5) then
@@ -384,10 +384,10 @@ subroutine print_oper(oper,option,paw_dmft,prtopt)
          do ib=1,mbandc
            if (option < 5) then
              if (abs(aimag(oper%ks(ib,ib,ikpt,isppol))) >= tol10) then
-               write(message,'(a,i4,e14.5,3x,e14.5,3x,e21.14)') "   -iband--",ib,&
+               write(message,'(a,i5,e14.5,3x,e14.5,3x,e21.14)') "   -iband--",ib,&
                  & paw_dmft%eigen_dft(ib,ikpt,isppol),oper%ks(ib,ib,ikpt,isppol)
              else
-               write(message,'(a,i4,e14.5,3x,e14.5)') "   -iband--",ib,&
+               write(message,'(a,i5,e14.5,3x,e14.5)') "   -iband--",ib,&
                  & paw_dmft%eigen_dft(ib,ikpt,isppol),dble(oper%ks(ib,ib,ikpt,isppol))
              end if ! imaginary part
              call wrtout(std_out,message,'COLL')
