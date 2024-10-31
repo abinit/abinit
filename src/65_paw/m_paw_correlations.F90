@@ -870,7 +870,7 @@ CONTAINS  !=====================================================================
        int1 = sqrt(int1)  
        
        if (me == 0) then
-         open(unit=505,file="dmft_normalized_orbital_itypat_"//tag(1:4),status="unknown",form="formatted")
+         open(unit=505,file="dmft_normalized_orbital_itypat_"//trim(adjustl(tag)),status="unknown",form="formatted")
          do ir=1,meshsz
            write(505,*) pawrad_tmp%rad(ir),pawtab(itypat)%proj(ir)/int1
          end do
