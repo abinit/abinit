@@ -829,9 +829,7 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
        
        if (optrw == 2) then
 
-         string_format = '(3a,5i5,2x,e25.17)'
-
-         write(message,string_format) "# natom,nsppol,nspinor,ndim,nw,fermilevel",ch10,&
+         write(message,'(3a,5i5,2x,e25.17e3)') "# natom,nsppol,nspinor,ndim,nw,fermilevel",ch10,&
            & "####",natom,nsppol,nspinor,ndim,self%nw,paw_dmft%fermie
          call wrtout(unitselffunc_arr(iall),message,'COLL')
          call wrtout(unitselffunc_arr2(iall),message,'COLL')
@@ -899,9 +897,9 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
                !What about Netcdf binary files ?
 
            if (nspinor == 1) then
-             string_format = '(2x,393(e25.17,2x))'
+             string_format = '(2x,393(e25.17e3,2x))'
            else 
-             string_format = '(2x,393(e18.10,2x))'
+             string_format = '(2x,393(e18.10e3,2x))'
            end if 
              
            write(message,string_format) self%omega(ifreq),&
@@ -1000,8 +998,7 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
        if (optrw == 2) then
 !             write(std_out,'(a,2x,31(e15.8,2x))') &
 !&            "SETEST #dc ",(self%hdc%matlu(iatom)%mat(im,im,isppol,ispinor,ispinor),im=1,ndim)
-         string_format = '(a,2x,500(e25.17,2x))'
-         write(message,string_format) &
+         write(message,'(a,2x,500(e25.17e3,2x))') &
           & "#dc ",((((self%hdc%matlu(iatom)%mat(im+(ispinor-1)*ndim,im1+(ispinor1-1)*ndim,isppol),&
             & im=1,ndim),im1=1,ndim),ispinor=1,nspinor),ispinor1=1,nspinor)
          call wrtout(unitselffunc_arr(iall),message,'COLL')
@@ -1009,7 +1006,7 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
          if (self%has_moments == 1) then
            do i=1,self%nmoments
              write(tag_is,'(i1)') i
-             write(message,'(a,2x,500(es24.16e3,2x))') "#moments_"//trim(tag_is),& 
+             write(message,'(a,2x,500(e25.17e3,2x))') "#moments_"//trim(tag_is),& 
                 & ((self%moments(i)%matlu(iatom)%mat(im,im1,isppol),im=1,nspinor*ndim),im1=1,nspinor*ndim)
              call wrtout(unitselffunc_arr(iall),message,'COLL')
              call wrtout(unitselffunc_arr2(iall),message,'COLL')
