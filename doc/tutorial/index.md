@@ -19,7 +19,7 @@ To start with, four tutorials cover the basics of using ABINIT, and one tutorial
 (as a complement to the easier user guide type documentation).
 Six tutorials are intermediate level ones, that might be prerequisite for some more advanced tutorials.
 The following schema should help to understand these dependencies.
-To access the tutorials, click on the name of the tutorial in the schema, or see the menu on the left ...
+To access the tutorials, see the menu on the left...
 
 <!-- edit the svg file ./index_assets/drawing.svg with inkscape, take the svg 
 code and insert it in index.md. Pay attention to the path-to-links in 
