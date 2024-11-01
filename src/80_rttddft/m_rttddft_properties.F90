@@ -45,6 +45,7 @@ module m_rttddft_properties
  use m_rttddft_tdks,     only: tdks_type
  use m_spacepar,         only: meanvalue_g
  use m_xmpi,             only: xmpi_sum, xmpi_comm_rank
+ use m_dft_energy,       only: entropy
 
  implicit none
 
@@ -234,27 +235,7 @@ subroutine rttddft_calc_etot(dtset, energies, etotal, occ)
  ! Compute electronic entropy
  call rttddft_calc_ent(energies%entropy_ks, dtset, occ)
 
-!In case we have other sources of entropy than kohn-sham states occupation,
-!we sum all entropy terms. entropy is now total entropy.
-!Examples of other sources of entropy: finite-temperature xc functionals, extfpmd, ...
- energies%entropy=energies%entropy_ks
- if(abs(energies%entropy_paw)>tiny(zero))     energies%entropy=energies%entropy+energies%entropy_paw
- if(abs(energies%entropy_xc)>tiny(zero))      energies%entropy=energies%entropy+energies%entropy_xc
- if(abs(energies%entropy_extfpmd)>tiny(zero)) energies%entropy=energies%entropy+energies%entropy_extfpmd
-
-!When the finite-temperature VG broadening scheme is used,
-!the total entropy contribution "tsmear*entropy" has a meaning,
-!and gather the two last terms of Eq.8 of VG paper
-!Warning : might have to be changed for fixed moment calculations
- if(dtset%occopt>=3 .and. dtset%occopt<=8) then
-   if (abs(dtset%tphysel) < tol10) then
-     energies%e_entropy = - dtset%tsmear * energies%entropy
-   else
-     energies%e_entropy = - dtset%tphysel * energies%entropy
-   end if
- else
-   energies%e_entropy = zero
- end if
+ call entropy(dtset,energies)
 
  etotal = energies%e_kinetic     &
       & + energies%e_hartree     &  
