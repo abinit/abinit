@@ -32,6 +32,7 @@ MODULE m_paw_correlations
  
  use m_fstrings, only : int2char4
  use m_io_tools,    only : open_file
+ use m_paw_dmft,    only : paw_dmft_type
  use m_pawang,      only : pawang_type,pawang_init,pawang_free
  use m_pawrad,      only : pawrad_free,pawrad_init,pawrad_type,simp_gen,nderiv_gen,pawrad_ifromr,poisson
  use m_pawtab,      only : pawtab_type,pawtab_nullify,pawtab_free,pawtab_set_flags
@@ -894,7 +895,7 @@ CONTAINS  !=====================================================================
          ABI_MALLOC(fk,(lcur+1))
          call compute_slater(lcur,pawrad_tmp,pawtab(itypat)%proj2(:),meshsz,lambda,eps,fk(:))
 
-         write(message,*) "Yukawa parameters for atom type: ",trim(tag(4-itypat/10:4))
+         write(message,*) "Yukawa parameters for atom type: ",adjustl(tag)
          call wrtout(std_out,message,"COLL")
          write(message,*) "Lambda:",lambda
          call wrtout(std_out,message,"COLL")
@@ -1134,16 +1135,17 @@ CONTAINS  !=====================================================================
 !! SOURCE
 
  subroutine pawuenergy(iatom,edftumdc,edftumdcdc,noccmmp,nocctot,pawprtvol,pawtab,&
- &                     dmft_dc,e_ee,e_dc,e_dcdc,u_dmft,j_dmft,nominal) ! optional arguments (DMFT)
+ &                     dmft_dc,e_ee,e_dc,e_dcdc,u_dmft,j_dmft,paw_dmft) ! optional arguments (DMFT)
 
 !Arguments ---------------------------------------------
 !scalars
  integer,intent(in) :: iatom,pawprtvol
- integer,optional,intent(in) :: dmft_dc,nominal
+ integer,optional,intent(in) :: dmft_dc
  real(dp),intent(in) :: noccmmp(:,:,:,:),nocctot(:)
  real(dp),intent(inout) :: edftumdc,edftumdcdc
  real(dp),optional,intent(inout) :: e_ee,e_dc,e_dcdc
  real(dp),optional,intent(in) :: j_dmft,u_dmft
+ type(paw_dmft_type),optional,intent(in) :: paw_dmft
  type(pawtab_type),intent(in) :: pawtab
 !Local variables ---------------------------------------
 !scalars
@@ -1403,11 +1405,11 @@ CONTAINS  !=====================================================================
      call wrtout(std_out,message,'COLL')
    end if
  else if(dmftdc==7) then
-   edctemp=upawu*(dble(nominal)-half)*n_tot-half*jpawu*(dble(nominal)-one)*n_tot
+   edctemp=upawu*(dble(paw_dmft%dmft_nominal(iatom))-half)*n_tot-half*jpawu*(dble(paw_dmft%dmft_nominal(iatom))-one)*n_tot
    edcdctemp=zero
  else if(dmftdc==8) then
-   edctemp=pawtab%edc 
-   edcdctemp=pawtab%edc-pawtab%edcdc  
+   edctemp=paw_dmft%edc(iatom) 
+   edcdctemp=paw_dmft%edc(iatom)-paw_dmft%edcdc(iatom)
  end if
 
  edftumdc  =edftumdc  +edftutemp-edctemp

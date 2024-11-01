@@ -1014,13 +1014,13 @@ subroutine compute_dftu_energy(energies_dmft,green,paw_dmft,pawtab,renorm)
      prt_pawuenergy = 3
    end if ! present(renorm)
 
-   call pawuenergy(iatom,edftumdc,edftumdcdc,noccmmp(:,:,:,:),nocctot(:),prt_pawuenergy,pawtab(itypat),&
-     & dmft_dc=paw_dmft%dmft_dc,e_ee=e_ee,e_dc=e_dc,e_dcdc=e_dcdc,u_dmft=upawu,j_dmft=jpawu,nominal=paw_dmft%dmft_nominal(iatom))
+   call pawuenergy(iatom,edftumdc,edftumdcdc,noccmmp(:,:,:,:),nocctot(:),prt_pawuenergy,pawtab(itypat),dmft_dc=paw_dmft%dmft_dc,&
+                 & e_ee=e_ee,e_dc=e_dc,e_dcdc=e_dcdc,u_dmft=upawu,j_dmft=jpawu,paw_dmft=paw_dmft)
 
    if (paw_dmft%ientropy == 1) then
      call pawuenergy(iatom,edftumdc_for_s,edftumdcdc_for_s,noccmmp(:,:,:,:),nocctot(:),prt_pawuenergy, &
-       & pawtab(itypat),dmft_dc=paw_dmft%dmft_dc,e_ee=e_ee_for_s,e_dc=e_dc_for_s,e_dcdc=e_dcdc_for_s,&
-       & u_dmft=paw_dmft%u_for_s/Ha_eV,j_dmft=paw_dmft%j_for_s/Ha_eV)
+                   & pawtab(itypat),dmft_dc=paw_dmft%dmft_dc,e_ee=e_ee_for_s,e_dc=e_dc_for_s,e_dcdc=e_dcdc_for_s,&
+                   & u_dmft=paw_dmft%u_for_s/Ha_eV,j_dmft=paw_dmft%j_for_s/Ha_eV)
    end if
    
    energies_dmft%e_dc(iatom) = e_dc - xe1 
@@ -1033,7 +1033,7 @@ subroutine compute_dftu_energy(energies_dmft,green,paw_dmft,pawtab,renorm)
 
 ! - gather results
 ! -----------------------------------------------------------------------
- energies_dmft%e_dc_tot = e_dc ! this is the only quantity used after.
+ energies_dmft%e_dc_tot = e_dc ! this is the only quantity used afterwards.
  energies_dmft%e_hu_dftu_tot = e_ee
  energies_dmft%e_dcdc = e_dcdc
  if (paw_dmft%ientropy == 1) then
