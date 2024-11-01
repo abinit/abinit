@@ -217,11 +217,12 @@ contains
 !!  symrec(3,3,nsym)=symmetry operations in reciprocal space
 !!  ucvol=unit cell volume in bohr**3.
 !!  usecprj=1 if cprj datastructure is stored in memory
+!!  usevxctau=1 if if XC functional depends on kinetic energy density
 !!  wffnew,unit numbers for wf disk files.
 !!  with_vectornd = 1 if vectornd allocated
 !!  vectornd(with_vectornd*nfftf,nspden,3)=nuclear dipole moment vector potential
 !!  vtrial(nfftf,nspden)=INPUT potential Vtrial(r).
-!!  [vxctau(nfftf,nspden,4*usekden)]=(only for meta-GGA): derivative of XC energy density
+!!  [vxctau(nfftf,nspden,4*usevxctau)]=(only for meta-GGA): derivative of XC energy density
 !!    with respect to kinetic energy density (depsxcdtau). The arrays vxctau contains also
 !!    the gradient of vxctau (gvxctau) in vxctau(:,:,2:4)
 !!  xred(3,natom)=reduced dimensionless atomic coordinates
@@ -302,14 +303,14 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 &           phnons,phnonsdiel,ph1d,ph1ddiel,psps,fock,&
 &           pwind,pwind_alloc,pwnsfac,resid,residm,rhog,rhor,&
 &           rmet,rprimd,susmat,symrec,taug,taur,tauresid,&
-&           ucvol,usecprj,wffnew,with_vectornd,vectornd,vtrial,vxctau,wvl,xg_nonlop,xred,&
-&           ylm,ylmgr,ylmdiel, rmm_diis_status)
+&           ucvol,usecprj,usevxctau,wffnew,with_vectornd,vectornd,vtrial,vxctau,wvl,&
+&           xg_nonlop,xred,ylm,ylmgr,ylmdiel, rmm_diis_status)
 
 !Arguments -------------------------------
 !scalars
  integer, intent(in) :: afford,dbl_nnsclo,dielop,dielstrt,istep,istep_mix,lmax_diel,mcg,mcprj,mgfftdiel
  integer, intent(in) :: my_natom,natom,nfftf,nfftdiel,nkxc,npwdiel
- integer, intent(in) :: ntypat,optforces,optres,pwind_alloc,usecprj,with_vectornd
+ integer, intent(in) :: ntypat,optforces,optres,pwind_alloc,usecprj,usevxctau,with_vectornd
  real(dp), intent(in) :: cpus,etotal,gsqcut,ucvol
  real(dp), intent(out) :: compch_fft,nres2,residm
  type(MPI_type), intent(inout) :: mpi_enreg
@@ -358,7 +359,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  real(dp), intent(inout) :: rhog(2,nfftf),rhor(nfftf,dtset%nspden)
  real(dp), intent(inout) :: taug(2,nfftf*dtset%usekden),taur(nfftf,dtset%nspden*dtset%usekden)
  real(dp), intent(inout) :: tauresid(nfftf,dtset%nspden*dtset%usekden)
- real(dp), intent(inout),optional :: vxctau(nfftf,dtset%nspden,4*dtset%usekden)
+ real(dp), intent(inout),optional :: vxctau(nfftf,dtset%nspden,4*usevxctau)
  type(pawcprj_type),pointer,intent(inout) :: cprj(:,:)
  type(paw_ij_type),intent(inout) :: paw_ij(my_natom*psps%usepaw)
  type(pawfgrtab_type),intent(inout) :: pawfgrtab(my_natom*psps%usepaw)
@@ -467,7 +468,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  compch_fft=-1.d5
 
 !Check that usekden is not 0 if want to use vxctau
- with_vxctau = (present(vxctau).and.dtset%usekden/=0)
+ with_vxctau = (present(vxctau).and.dtset%usekden/=0.and.usevxctau/=0)
 
 !Check that fock is present if want to use fock option
  usefock = (dtset%usefock==1 .and. associated(fock))
