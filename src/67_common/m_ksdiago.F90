@@ -959,7 +959,7 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
 !arrays
  integer,intent(in) :: ngfftc(18)
  real(dp),intent(inout) :: vtrial(nfftf,dtset%nspden)
- !real(dp),intent(inout) :: vxctau(nfftf, dtset%nspden, 4*dtset%usekden)
+ !real(dp),intent(inout) :: vxctau(nfftf, dtset%nspden, 4*usevxctau)
  real(dp),allocatable,intent(out) :: eig_k(:)
  type(pawtab_type),intent(in) :: pawtab(psps%ntypat*psps%usepaw)
  type(paw_ij_type),intent(in) :: paw_ij(cryst%natom*psps%usepaw)
@@ -1002,8 +1002,8 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
  nproc = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
 
  ! See sequence of calls in vtorho.
- ! Check that usekden is not 0 if want to use vxctau
- !with_vxctau = (present(vxctau).and.dtset%usekden/=0)
+ ! Check if want to use vxctau
+ !with_vxctau = (present(vxctau).and.usevxctau/=0)
 
  !====================
  !=== Check input ====

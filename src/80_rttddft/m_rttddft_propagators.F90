@@ -193,7 +193,7 @@ subroutine rttddft_propagator_er(dtset, ham_k, istep, mpi_enreg, psps, tdks, cal
  my_nspinor=max(1,dtset%nspinor/mpi_enreg%nproc_spinor)
  n4=dtset%ngfft(4); n5=dtset%ngfft(5); n6=dtset%ngfft(6)
  ABI_MALLOC(vlocal,(n4,n5,n6,ham_k%nvloc))
- with_vxctau=(dtset%usekden/=0)
+ with_vxctau=(size(tdks%vxctau)>0)
  if(with_vxctau) then
    ABI_MALLOC(vxctaulocal,(n4,n5,n6,ham_k%nvloc,4))
  end if
