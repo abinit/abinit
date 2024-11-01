@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_outvar_i_n
 !! NAME
 !!  m_outvar_i_n
@@ -6,14 +5,10 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2019 ABINIT group (DCA, XG, GMR, MM)
+!!  Copyright (C) 1998-2024 ABINIT group (DCA, XG, GMR, MM)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -26,14 +21,14 @@
 module m_outvar_i_n
 
  use defs_basis
- use defs_abitypes
  use m_errors
  use m_abicore
  use m_errors
  use m_results_out
  use m_errors
+ use m_dtset
 
- use m_parser,  only : prttagm, prttagm_images
+ use m_parser,  only : prttagm, prttagm_images, ab_dimensions
 
  implicit none
 
@@ -100,12 +95,6 @@ contains
 !! The lines of code needed to output the defaults are preserved
 !! (see last section of the routine, but are presently disabled)
 !!
-!! PARENTS
-!!      outvars
-!!
-!! CHILDREN
-!!      prttagm,prttagm_images
-!!
 !! SOURCE
 
 subroutine outvar_i_n (dtsets,iout,&
@@ -150,18 +139,19 @@ subroutine outvar_i_n (dtsets,iout,&
 
  DBG_ENTER("COLL")
 
- ABI_ALLOCATE(dprarr,(marr,0:ndtset_alloc))
- ABI_ALLOCATE(dprarr_images,(marr,mxvals%nimage,0:ndtset_alloc))
- ABI_ALLOCATE(intarr,(marr,0:ndtset_alloc))
- ABI_ALLOCATE(narrm,(0:ndtset_alloc))
- ABI_ALLOCATE(nimagem,(0:ndtset_alloc))
- ABI_ALLOCATE(prtimg,(mxvals%nimage,0:ndtset_alloc))
+ ABI_MALLOC(dprarr,(marr,0:ndtset_alloc))
+ ABI_MALLOC(dprarr_images,(marr,mxvals%nimage,0:ndtset_alloc))
+ ABI_MALLOC(intarr,(marr,0:ndtset_alloc))
+ ABI_MALLOC(narrm,(0:ndtset_alloc))
+ ABI_MALLOC(nimagem,(0:ndtset_alloc))
+ ABI_MALLOC(prtimg,(mxvals%nimage,0:ndtset_alloc))
 
  do idtset=0,ndtset_alloc
    nimagem(idtset)=dtsets(idtset)%nimage
  end do
 
- firstchar_gpu=' '; if (maxval(dtsets(1:ndtset_alloc)%use_gpu_cuda)>0) firstchar_gpu='-'
+ firstchar_gpu=' '
+ if (maxval(dtsets(1:ndtset_alloc)%gpu_option)/=ABI_GPU_DISABLED) firstchar_gpu='-'
 
 !if(multivals%natom==0)natom=dtsets(1)%natom
  natom=dtsets(1)%natom
@@ -177,14 +167,14 @@ subroutine outvar_i_n (dtsets,iout,&
 
 !Must treat separately the translation of iatfix from the internal
 !representation to the input/output representation
- ABI_ALLOCATE(natfix_,(0:ndtset_alloc))
- ABI_ALLOCATE(iatfixio_,(mxvals%natom,0:ndtset_alloc))
- ABI_ALLOCATE(natfixx_,(0:ndtset_alloc))
- ABI_ALLOCATE(iatfixx_,(mxvals%natom,0:ndtset_alloc))
- ABI_ALLOCATE(natfixy_,(0:ndtset_alloc))
- ABI_ALLOCATE(iatfixy_,(mxvals%natom,0:ndtset_alloc))
- ABI_ALLOCATE(natfixz_,(0:ndtset_alloc))
- ABI_ALLOCATE(iatfixz_,(mxvals%natom,0:ndtset_alloc))
+ ABI_MALLOC(natfix_,(0:ndtset_alloc))
+ ABI_MALLOC(iatfixio_,(mxvals%natom,0:ndtset_alloc))
+ ABI_MALLOC(natfixx_,(0:ndtset_alloc))
+ ABI_MALLOC(iatfixx_,(mxvals%natom,0:ndtset_alloc))
+ ABI_MALLOC(natfixy_,(0:ndtset_alloc))
+ ABI_MALLOC(iatfixy_,(mxvals%natom,0:ndtset_alloc))
+ ABI_MALLOC(natfixz_,(0:ndtset_alloc))
+ ABI_MALLOC(iatfixz_,(mxvals%natom,0:ndtset_alloc))
  natfix_(0:ndtset_alloc)=0 ; iatfixio_(:,0:ndtset_alloc)=0
  natfixx_(0:ndtset_alloc)=0 ; iatfixx_(:,0:ndtset_alloc)=0
  natfixy_(0:ndtset_alloc)=0 ; iatfixy_(:,0:ndtset_alloc)=0
@@ -274,7 +264,7 @@ subroutine outvar_i_n (dtsets,iout,&
 
 !iatfix
  narr=natfix                    ! default size for all datasets
- do idtset=0,ndtset_alloc       ! especific size for each dataset
+ do idtset=0,ndtset_alloc       ! specific size for each dataset
    narrm(idtset)=natfix_(idtset)
    if(idtset==0)narrm(idtset)=mxvals%natom
    intarr(1:narrm(idtset),idtset)=iatfixio_(1:narrm(idtset),idtset)
@@ -284,7 +274,7 @@ subroutine outvar_i_n (dtsets,iout,&
 
 !iatfixx
  narr=natfixx                   ! default size for all datasets
- do idtset=0,ndtset_alloc       ! especific size for each dataset
+ do idtset=0,ndtset_alloc       ! specific size for each dataset
    narrm(idtset)=natfixx_(idtset)
    if(idtset==0)narrm(idtset)=mxvals%natom
    intarr(1:narrm(idtset),idtset)=iatfixx_(1:narrm(idtset),idtset)
@@ -294,7 +284,7 @@ subroutine outvar_i_n (dtsets,iout,&
 
 !iatfixy
  narr=natfixy                   ! default size for all datasets
- do idtset=0,ndtset_alloc       ! especific size for each dataset
+ do idtset=0,ndtset_alloc       ! specific size for each dataset
    narrm(idtset)=natfixy_(idtset)
    if(idtset==0)narrm(idtset)=mxvals%natom
    intarr(1:narrm(idtset),idtset)=iatfixy_(1:narrm(idtset),idtset)
@@ -304,7 +294,7 @@ subroutine outvar_i_n (dtsets,iout,&
 
 !iatfixz
  narr=natfixz                   ! default size for all datasets
- do idtset=0,ndtset_alloc       ! especific size for each dataset
+ do idtset=0,ndtset_alloc       ! specific size for each dataset
    narrm(idtset)=natfixz_(idtset)
    if(idtset==0)narrm(idtset)=mxvals%natom
    intarr(1:narrm(idtset),idtset)=iatfixz_(1:narrm(idtset),idtset)
@@ -331,8 +321,19 @@ subroutine outvar_i_n (dtsets,iout,&
  if (ndtset_alloc==1.and.sum(narrm(1:ndtset_alloc))==1) multi_atsph=0
 
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,narr,&
-& narrm,ncid,ndtset_alloc,'iatsph','INT',multi_atsph) ! Emulating the case of multiple narr
+              narrm,ncid,ndtset_alloc,'iatsph','INT',multi_atsph) ! Emulating the case of multiple narr
 
+ dprarr(1,:)=dtsets(:)%ibte_abs_tol
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'ibte_abs_tol','DPR',0)
+
+ dprarr(1,:)=dtsets(:)%ibte_alpha_mix
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'ibte_alpha_mix','DPR',0)
+
+ intarr(1,:)=dtsets(:)%ibte_niter
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'ibte_niter','INT',0)
+
+ intarr(1,:)=dtsets(:)%ibte_prep
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'ibte_prep','INT',0)
 
  intarr(1,:)=dtsets(:)%iboxcut
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'iboxcut','INT',0)
@@ -358,6 +359,10 @@ subroutine outvar_i_n (dtsets,iout,&
  intarr(1,:)=dtsets(:)%intxc
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'intxc','INT',0)
 
+ intarr(1,:)=dtsets(:)%invovl_blksliced
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'invovl_blksliced',&
+&             'INT',0,firstchar=firstchar_gpu)
+
  intarr(1,:)=dtsets(:)%ionmov
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'ionmov','INT',0)
 
@@ -379,6 +384,9 @@ subroutine outvar_i_n (dtsets,iout,&
  intarr(1,:)=dtsets(:)%irdbsreso
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'irdbsreso','INT',0)
 
+ intarr(1,:)=dtsets(:)%irdchkprdm
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'irdchkprdm','INT',0)
+
  intarr(1,:)=dtsets(:)%irdddk
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'irdddk','INT',0)
 
@@ -393,6 +401,11 @@ subroutine outvar_i_n (dtsets,iout,&
 
  intarr(1,:)=dtsets(:)%irdhaydock
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'irdhaydock','INT',0)
+
+ if (any(dtsets(:)%usekden==1)) then
+   intarr(1,:)=dtsets(:)%irdkden
+   call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'irdkden','INT',0)
+ end if
 
  intarr(1,:)=dtsets(:)%irdpawden
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'irdpawden','INT',0)
@@ -439,43 +452,48 @@ subroutine outvar_i_n (dtsets,iout,&
  intarr(1,:)=dtsets(:)%istatshft
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'istatshft','INT',0)
 
-!istwfk (must first restore the default istwf=0 for non-allowed k points)
- ABI_ALLOCATE(istwfk_2,(mxvals%nkpt,0:ndtset_alloc))
- istwfk_2=0;allowed_sum=0
- do idtset=1,ndtset_alloc
-   nqpt=dtsets(idtset)%nqpt
-   do ikpt=1,dtsets(idtset)%nkpt
-     allowed=1
-     do ii=1,3
-       kpoint=dtsets(idtset)%kpt(ii,ikpt)/dtsets(idtset)%kptnrm
-       if(nqpt/=0.and.response_(idtset)==0)kpoint=kpoint+dtsets(idtset)%qptn(ii)
-       if(abs(kpoint)>1.d-10.and.abs(kpoint-0.5_dp)>1.e-10_dp )allowed=0
+ if (allocated(dtsets(0)%istwfk)) then
+   ! istwfk (must first restore the default istwf=0 for non-allowed k points)
+   ABI_MALLOC(istwfk_2,(mxvals%nkpt,0:ndtset_alloc))
+   istwfk_2=0;allowed_sum=0
+   do idtset=1,ndtset_alloc
+     nqpt=dtsets(idtset)%nqpt
+     do ikpt=1,dtsets(idtset)%nkpt
+       allowed=1
+       do ii=1,3
+         kpoint=dtsets(idtset)%kpt(ii,ikpt)/dtsets(idtset)%kptnrm
+         if(nqpt/=0.and.response_(idtset)==0)kpoint=kpoint+dtsets(idtset)%qptn(ii)
+         if(abs(kpoint)>1.d-10.and.abs(kpoint-0.5_dp)>1.e-10_dp )allowed=0
+       end do
+       allowed_sum=allowed_sum+allowed
+       if(allowed==1)istwfk_2(ikpt,idtset)=dtsets(idtset)%istwfk(ikpt)
      end do
-     allowed_sum=allowed_sum+allowed
-     if(allowed==1)istwfk_2(ikpt,idtset)=dtsets(idtset)%istwfk(ikpt)
    end do
- end do
 
-!istwfk
- tnkpt=0
- intarr(1:marr,0:ndtset_alloc)=0 ! default value
- do idtset=1,ndtset_alloc
-   nkpt_eff=dtsets(idtset)%nkpt
-   if(prtvol_glob==0 .and. nkpt_eff>nkpt_max)then
-     nkpt_eff=nkpt_max
-     tnkpt=1
-   end if
-   if((multivals%nkpt/=0).and.(sum(istwfk_2(1:nkpt_eff,idtset))==0)) nkpt_eff=0
-   narrm(idtset)=nkpt_eff
-   intarr(1:narrm(idtset),idtset)=istwfk_2(1:narrm(idtset),idtset)
- end do
+   !istwfk
+   tnkpt=0
+   intarr(1:marr,0:ndtset_alloc)=0 ! default value
+   do idtset=1,ndtset_alloc
+     nkpt_eff=dtsets(idtset)%nkpt
+     if(prtvol_glob==0 .and. nkpt_eff>nkpt_max)then
+       nkpt_eff=nkpt_max
+       tnkpt=1
+     end if
+     if((multivals%nkpt/=0).and.(sum(istwfk_2(1:nkpt_eff,idtset))==0)) nkpt_eff=0
+     narrm(idtset)=nkpt_eff
+     intarr(1:narrm(idtset),idtset)=istwfk_2(1:narrm(idtset),idtset)
+   end do
 
- call prttagm(dprarr,intarr,iout,jdtset_,1,marr,nkpt_eff,&
-& narrm,ncid,ndtset_alloc,'istwfk','INT',multivals%nkpt)
+   call prttagm(dprarr,intarr,iout,jdtset_,1,marr,nkpt_eff,narrm,ncid,ndtset_alloc,'istwfk','INT',multivals%nkpt)
 
- if(tnkpt==1 .and. sum(istwfk_2(1:nkpt_eff,1:ndtset_alloc))/=0 ) &
-& write(iout,'(23x,a,i3,a)' ) 'outvar_i_n : Printing only first ',nkpt_max,' k-points.'
- ABI_DEALLOCATE(istwfk_2)
+   if(tnkpt==1 .and. sum(istwfk_2(1:nkpt_eff,1:ndtset_alloc))/=0 ) &
+     write(iout,'(23x,a,i3,a)' ) 'outvar_i_n : Printing only first ',nkpt_max,' k-points.'
+   ABI_FREE(istwfk_2)
+ end if
+
+!ivalence
+ intarr(1,:)=dtsets(:)%ivalence
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'ivalence','INT',0)
 
 !ixc
  intarr(1,:)=dtsets(:)%ixc
@@ -532,70 +550,67 @@ subroutine outvar_i_n (dtsets,iout,&
 
 !kberry
  narr=3*dtsets(1)%nberry ! default size for all datasets
- do idtset=0,ndtset_alloc       ! especific size for each dataset
+ do idtset=0,ndtset_alloc       ! specific size for each dataset
    if(idtset/=0)then
      narrm(idtset)=3*dtsets(idtset)%nberry
      if (narrm(idtset)>0)&
-&     intarr(1:narrm(idtset),idtset)=&
-&     reshape(dtsets(idtset)%kberry(1:3,1:dtsets(idtset)%nberry), [narrm(idtset)] )
+&     intarr(1:narrm(idtset),idtset)= reshape(dtsets(idtset)%kberry(1:3,1:dtsets(idtset)%nberry), [narrm(idtset)] )
    else
      narrm(idtset)=3*mxvals%nberry
      if (narrm(idtset)>0)&
-&     intarr(1:narrm(idtset),idtset)=&
-&     reshape(dtsets(idtset)%kberry(1:3,1:mxvals%nberry), [narrm(idtset)] )
+&     intarr(1:narrm(idtset),idtset)=reshape(dtsets(idtset)%kberry(1:3,1:mxvals%nberry), [narrm(idtset)] )
    end if
  end do
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,narr,narrm,ncid,ndtset_alloc,'kberry','INT',multivals%nberry)
 
-!kpt
- tnkpt=0
- dprarr(:,0)=0
- narr=3*dtsets(1)%nkpt            ! default size for all datasets
- if(prtvol_glob==0 .and. narr>3*nkpt_max)then
-   narr=3*nkpt_max
-   tnkpt=1
- end if
-
- do idtset=1,ndtset_alloc       ! specific size for each dataset
-   narrm(idtset)=3*dtsets(idtset)%nkpt
-   if (narrm(idtset)>0) then
-     dprarr(1:narrm(idtset),idtset)=reshape(&
-&     dtsets(idtset)%kpt(1:3,1:dtsets(idtset)%nkpt), [narrm(idtset)] )
-   end if
-
-   if(prtvol_glob==0 .and. narrm(idtset)>3*nkpt_max)then
-     narrm(idtset)=3*nkpt_max
+ ! kpt
+ if (allocated(dtsets(0)%kpt)) then
+   tnkpt=0
+   dprarr(:,0)=0
+   narr=3*dtsets(1)%nkpt            ! default size for all datasets
+   if(prtvol_glob==0 .and. narr>3*nkpt_max)then
+     narr=3*nkpt_max
      tnkpt=1
    end if
 
- end do
- call prttagm(dprarr,intarr,iout,jdtset_,1,marr,narr, narrm,ncid,ndtset_alloc,'kpt','DPR',multivals%nkpt)
+   do idtset=1,ndtset_alloc       ! specific size for each dataset
+     narrm(idtset)=3*dtsets(idtset)%nkpt
+     if (narrm(idtset)>0) then
+       dprarr(1:narrm(idtset),idtset)=reshape(dtsets(idtset)%kpt(1:3,1:dtsets(idtset)%nkpt), [narrm(idtset)] )
+     end if
 
- if(tnkpt==1) write(iout,'(23x,a,i3,a)' ) 'outvar_i_n : Printing only first ',nkpt_max,' k-points.'
+     if(prtvol_glob==0 .and. narrm(idtset)>3*nkpt_max)then
+       narrm(idtset)=3*nkpt_max
+       tnkpt=1
+     end if
+
+   end do
+   call prttagm(dprarr,intarr,iout,jdtset_,1,marr,narr, narrm,ncid,ndtset_alloc,'kpt','DPR',multivals%nkpt)
+   if(tnkpt==1) write(iout,'(23x,a,i3,a)' ) 'outvar_i_n : Printing only first ',nkpt_max,' k-points.'
+ end if
 
  !intarr(1,:)=dtsets(:)%kptbounds
  !call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'kptbounds','INT',0)
 
 !kptgw
  narr=3*dtsets(1)%nkptgw ! default size for all datasets
+ dprarr(:,0)=zero
  do idtset=0,ndtset_alloc       ! specific size for each dataset
    if(idtset/=0)then
      narrm(idtset)=3*dtsets(idtset)%nkptgw
      if (narrm(idtset)>0)&
-&     dprarr(1:narrm(idtset),idtset)=&
-&     reshape(dtsets(idtset)%kptgw(1:3,1:dtsets(idtset)%nkptgw), [narrm(idtset)])
+&     dprarr(1:narrm(idtset),idtset) = reshape(dtsets(idtset)%kptgw(1:3,1:dtsets(idtset)%nkptgw), [narrm(idtset)])
    else
      narrm(idtset)=mxvals%nkptgw
      if (narrm(idtset)>0)&
-&     dprarr(1:narrm(idtset),idtset)=&
-&     reshape(dtsets(idtset)%kptgw(1:3,1:mxvals%nkptgw), [narrm(idtset)] )
+&     dprarr(1:narrm(idtset),idtset) = reshape(dtsets(idtset)%kptgw(1:3,1:mxvals%nkptgw), [narrm(idtset)] )
    end if
  end do
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,narr,narrm,ncid,ndtset_alloc,'kptgw','DPR',multivals%nkptgw)
 
 
-!kptns_hf
- if(sum(dtsets(1:ndtset_alloc)%usefock)/=0)then
+ ! kptns_hf
+ if (sum(dtsets(1:ndtset_alloc)%usefock) /=0 .and. allocated(dtsets(0)%kptns_hf)) then
    tnkpt=0
    dprarr(:,0)=0
    do idtset=1,ndtset_alloc       ! specific size for each dataset
@@ -603,8 +618,7 @@ subroutine outvar_i_n (dtsets,iout,&
        narrm(idtset)=3*dtsets(idtset)%nkpthf
        narr=narrm(idtset)
        if (narrm(idtset)>0) then
-         dprarr(1:narrm(idtset),idtset)=reshape(&
-&         dtsets(idtset)%kptns_hf(1:3,1:dtsets(idtset)%nkpthf), [narrm(idtset)] )
+         dprarr(1:narrm(idtset),idtset)=reshape(dtsets(idtset)%kptns_hf(1:3,1:dtsets(idtset)%nkpthf), [narrm(idtset)] )
        end if
      else
        narrm(idtset)=0
@@ -629,7 +643,7 @@ subroutine outvar_i_n (dtsets,iout,&
  if(sum((dtsets(1:ndtset_alloc)%kptopt)**2)/=0)then
    ndtset_kptopt=0
    intarr(1:9,0)=reshape( dtsets(0)%kptrlatt, [9] )
-   ABI_ALLOCATE(jdtset_kptopt,(0:ndtset_alloc))
+   ABI_MALLOC(jdtset_kptopt,(0:ndtset_alloc))
 !  Define the set of datasets for which kptopt>0
    do idtset=1,ndtset_alloc
      kptopt=dtsets(idtset)%kptopt
@@ -642,7 +656,7 @@ subroutine outvar_i_n (dtsets,iout,&
    if(ndtset_kptopt>0)then
      call prttagm(dprarr,intarr,iout,jdtset_kptopt,6,marr,9,narrm,ncid,ndtset_kptopt,'kptrlatt','INT',0)
    end if
-   ABI_DEALLOCATE(jdtset_kptopt)
+   ABI_FREE(jdtset_kptopt)
  end if
 
  dprarr(1,:)=dtsets(:)%kptrlen
@@ -657,28 +671,31 @@ subroutine outvar_i_n (dtsets,iout,&
 !### 03. Print all the input variables (L)
 !##
 
+!lambsig
+ do idtset=0, ndtset_alloc
+   do ii = 1, ntypat
+     dprarr(ii,idtset) = dtsets(idtset)%lambsig(ii)
+   end do ! end loop over ntypat
+ end do ! end loop over datasets
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,ntypat,narrm,ncid,ndtset_alloc,'lambsig','DPR',0)
+
 !lexexch
  narr=mxvals%ntypat             ! default size for all datasets
  do idtset=0,ndtset_alloc       ! specific size for each dataset
    narrm(idtset)=dtsets(idtset)%ntypat
    if(idtset==0)narrm(idtset)=mxvals%ntypat
-   if (narrm(idtset)>0) then
-     intarr(1:narrm(idtset),idtset)=dtsets(idtset)%lexexch(1:narrm(idtset))
-   end if
+   if (narrm(idtset)>0) intarr(1:narrm(idtset),idtset)=dtsets(idtset)%lexexch(1:narrm(idtset))
  end do
- call prttagm(dprarr,intarr,iout,jdtset_,2,marr,narr,&
-& narrm,ncid,ndtset_alloc,'lexexch','INT',multivals%ntypat)
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,narr, narrm,ncid,ndtset_alloc,'lexexch','INT',multivals%ntypat)
 
 !ldaminushalf
+ narr=mxvals%ntypat             ! default size for all datasets
  do idtset=0,ndtset_alloc       ! specific size for each dataset
    narrm(idtset)=dtsets(idtset)%ntypat
    if(idtset==0)narrm(idtset)=mxvals%ntypat
-   if (narrm(idtset)>0) then
-     intarr(1:narrm(idtset),idtset)=dtsets(idtset)%ldaminushalf(1:narrm(idtset))
-   end if
+   if (narrm(idtset)>0) intarr(1:narrm(idtset),idtset)=dtsets(idtset)%ldaminushalf(1:narrm(idtset))
  end do
- call prttagm(dprarr,intarr,iout,jdtset_,2,marr,narr,&
-& narrm,ncid,ndtset_alloc,'ldaminushalf','INT',multivals%ntypat)
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,narr,narrm,ncid,ndtset_alloc,'ldaminushalf','INT',multivals%ntypat)
 
 !localrdwf
  intarr(1,:)=dtsets(:)%localrdwf
@@ -689,12 +706,9 @@ subroutine outvar_i_n (dtsets,iout,&
  do idtset=0,ndtset_alloc       ! specific size for each dataset
    narrm(idtset)=dtsets(idtset)%ntypat
    if(idtset==0)narrm(idtset)=mxvals%ntypat
-   if (narrm(idtset)>0) then
-     intarr(1:narrm(idtset),idtset)=dtsets(idtset)%lpawu(1:narrm(idtset))
-   end if
+   if (narrm(idtset)>0) intarr(1:narrm(idtset),idtset)=dtsets(idtset)%lpawu(1:narrm(idtset))
  end do
- call prttagm(dprarr,intarr,iout,jdtset_,2,marr,narr,&
-& narrm,ncid,ndtset_alloc,'lpawu','INT',multivals%ntypat)
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,narr,narrm,ncid,ndtset_alloc,'lpawu','INT',multivals%ntypat)
 
 #if defined HAVE_LOTF
  if (any(dtsets(:)%ionmov==23)) then
@@ -709,6 +723,14 @@ subroutine outvar_i_n (dtsets,iout,&
  end if
 #endif
 
+ intarr(1,:)=dtsets(:)%lw_flexo
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'lw_flexo','INT',0)
+
+ intarr(1,:)=dtsets(:)%lw_qdrpl
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'lw_qdrpl','INT',0)
+
+ intarr(1,:)=dtsets(:)%lw_natopt
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'lw_natopt','INT',0)
 
 !write(ab_out,*)' outvar_i_n : M '
 !call flush(ab_out)
@@ -795,8 +817,7 @@ subroutine outvar_i_n (dtsets,iout,&
    narrm(1:ndtset_alloc)=narr
    dprarr(1:marr,1:ndtset_alloc)=zero
  endif
- call prttagm(dprarr,intarr,iout,jdtset_,1,marr,narr,&
-& narrm,ncid,ndtset_alloc,'mixesimgf','DPR',multival)
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,narr,narrm,ncid,ndtset_alloc,'mixesimgf','DPR',multival)
 
  intarr(1,:)=dtsets(:)%mkmem
  call prttagm(dprarr,intarr,iout,jdtset_,5,marr,1,narrm,ncid,ndtset_alloc,'mkmem','INT',0)
@@ -840,7 +861,7 @@ subroutine outvar_i_n (dtsets,iout,&
 !Need to be printed only if there is some occurence of prtdos==3 or
 !pawfatbnd>0
  narr=1                      ! default size for all datasets
- do idtset=0,ndtset_alloc       ! especific size for each dataset
+ do idtset=0,ndtset_alloc       ! specific size for each dataset
    narrm(idtset)=1
    intarr(1,idtset)=dtsets(idtset)%natsph
 
@@ -851,8 +872,8 @@ subroutine outvar_i_n (dtsets,iout,&
    end if
  end do
  if (ndtset_alloc==1.and.sum(narrm(1:ndtset_alloc))==1) multi_atsph=0
- call prttagm(dprarr,intarr,iout,jdtset_,1,marr,narr,&
-& narrm,ncid,ndtset_alloc,'natsph','INT',multi_atsph) ! Emulating multiple size for narrm
+ ! Emulating multiple size for narrm
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,narr,narrm,ncid,ndtset_alloc,'natsph','INT',multi_atsph)
 
 !natsph_extra
  intarr(1,:)=dtsets(0:ndtset_alloc)%natsph_extra
@@ -863,6 +884,7 @@ subroutine outvar_i_n (dtsets,iout,&
  else
    narr=1
  end if
+
  do idtset=0,ndtset_alloc       ! specific size for each dataset
    if(dtsets(idtset)%occopt==2)then
      narrm(idtset)=dtsets(idtset)%nkpt*dtsets(idtset)%nsppol
@@ -876,7 +898,7 @@ subroutine outvar_i_n (dtsets,iout,&
  end do
 
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,narr,&
-& narrm,ncid,ndtset_alloc,'nband','INT',multivals%nkpt+multivals%nsppol+multi_occopt)
+              narrm,ncid,ndtset_alloc,'nband','INT',multivals%nkpt+multivals%nsppol+multi_occopt)
 
  intarr(1,0:ndtset_alloc)=dtsets(0:ndtset_alloc)%natvshift
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'natvshift','INT',0)
@@ -899,7 +921,7 @@ subroutine outvar_i_n (dtsets,iout,&
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'nberry','INT',0)
 
  intarr(1,:)=dtsets(:)%nc_xccc_gspace
- call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'nc_xccc_gspace','INT',0) !, firstchar="-")
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'nc_xccc_gspace','INT',0)
 
  intarr(1,:)=dtsets(:)%nconeq
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'nconeq','INT',0)
@@ -960,18 +982,14 @@ subroutine outvar_i_n (dtsets,iout,&
 
  if(sum(dtsets(1:ndtset_alloc)%usefock)/=0)then
    intarr(1,:)=dtsets(:)%nkpthf
-!  do idtset=1,ndtset_alloc       ! specific size for each dataset
-!    if(dtsets(idtset)%usefock/=0)then
-!      intarr(1,idtset)=dtsets(idtset)%nkpthf
-!    else
-!      intarr(1,idtset)=0
-!    endif
-!  enddo
    call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'nkpthf','INT',0)
  end if
 
  intarr(1,:)=dtsets(:)%nline
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'nline','INT',0)
+
+ intarr(1,:)=dtsets(:)%nblock_lobpcg
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'nblock_lobpcg','INT',0)
 
  intarr(1,:)=dtsets(:)%nloalg(1)
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'nloc_alg','INT',0)
@@ -1000,6 +1018,9 @@ subroutine outvar_i_n (dtsets,iout,&
  intarr(1,:)=dtsets(:)%nonlinear_info
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'nonlinear_info','INT',0)
 
+ intarr(1,:)=dtsets(:)%nonlop_ylm_count
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'nonlop_ylm_count','INT',0)
+
  dprarr(1,:)=dtsets(:)%noseinert
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'noseinert','DPR',0)
 
@@ -1015,8 +1036,8 @@ subroutine outvar_i_n (dtsets,iout,&
  intarr(1,:)=dtsets(:)%npimage
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'npimage','INT',0,firstchar="-")
 
- intarr(1,:)=dtsets(:)%npkpt
- call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'npkpt','INT',0,firstchar='-')
+ intarr(1,:)=dtsets(:)%np_spkpt
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'np_spkpt','INT',0,firstchar='-')
 
  intarr(1,:)=dtsets(:)%nppert
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'nppert','INT',0,firstchar="-")
@@ -1047,6 +1068,9 @@ subroutine outvar_i_n (dtsets,iout,&
  intarr(1,:)=dtsets(:)%np_slk
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'np_slk','INT',0,firstchar="-")
 
+ dprarr(1,:)=dtsets(:)%nqfd
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'nqfd','DPR',0)
+
  intarr(1,:)=dtsets(:)%nqpt
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'nqpt','INT',0)
 
@@ -1063,7 +1087,7 @@ subroutine outvar_i_n (dtsets,iout,&
  if(sum((dtsets(1:ndtset_alloc)%kptopt)**2)/=0)then
    ndtset_kptopt=0
    intarr(1:1,0)=dtsets(0)%nshiftk
-   ABI_ALLOCATE(jdtset_kptopt,(0:ndtset_alloc))
+   ABI_MALLOC(jdtset_kptopt,(0:ndtset_alloc))
 !  Define the set of datasets for which kptopt>0
    do idtset=1,ndtset_alloc
      kptopt=dtsets(idtset)%kptopt
@@ -1076,7 +1100,7 @@ subroutine outvar_i_n (dtsets,iout,&
    if(ndtset_kptopt>0)then
      call prttagm(dprarr,intarr,iout,jdtset_kptopt,2,marr,1,narrm,ncid,ndtset_kptopt,'nshiftk','INT',0)
    end if
-   ABI_DEALLOCATE(jdtset_kptopt)
+   ABI_FREE(jdtset_kptopt)
  end if
 
  intarr(1,:)=dtsets(:)%nspden
@@ -1112,13 +1136,17 @@ subroutine outvar_i_n (dtsets,iout,&
  do idtset=1,ndtset_alloc       ! specific size for each dataset
    narrm(idtset)=3*dtsets(idtset)%natom
    if (narrm(idtset)>0) then
-     dprarr(1:narrm(idtset),idtset)=&
-&     reshape(dtsets(idtset)%nucdipmom(1:3,1:dtsets(idtset)%natom), [narrm(idtset)])
+     dprarr(1:narrm(idtset),idtset)= reshape(dtsets(idtset)%nucdipmom(1:3,1:dtsets(idtset)%natom), [narrm(idtset)])
    end if
    if(sum(abs( dtsets(idtset)%nucdipmom(1:3,1:dtsets(idtset)%natom))) < tol12 ) narrm(idtset)=0
  end do
- call prttagm(dprarr,intarr,iout,jdtset_,2,marr,narr,&
-& narrm,ncid,ndtset_alloc,'nucdipmom','DPR',multivals%natom)
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,narr,narrm,ncid,ndtset_alloc,'nucdipmom','DPR',multivals%natom)
+
+ intarr(1,:)=dtsets(:)%nucefg
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'nucefg','INT',0)
+
+ intarr(1,:)=dtsets(:)%nucfc
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'nucfc','INT',0)
 
  intarr(1,:)=dtsets(:)%nwfshist
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'nwfshist','INT',0)
@@ -1129,21 +1157,21 @@ subroutine outvar_i_n (dtsets,iout,&
 !###########################################################
 !## Deallocation for generic arrays, and for i-n variables
 
- ABI_DEALLOCATE(dprarr)
- ABI_DEALLOCATE(intarr)
- ABI_DEALLOCATE(narrm)
- ABI_DEALLOCATE(nimagem)
- ABI_DEALLOCATE(dprarr_images)
- ABI_DEALLOCATE(prtimg)
+ ABI_FREE(dprarr)
+ ABI_FREE(intarr)
+ ABI_FREE(narrm)
+ ABI_FREE(nimagem)
+ ABI_FREE(dprarr_images)
+ ABI_FREE(prtimg)
 
- ABI_DEALLOCATE(natfix_)
- ABI_DEALLOCATE(iatfixio_)
- ABI_DEALLOCATE(natfixx_)
- ABI_DEALLOCATE(iatfixx_)
- ABI_DEALLOCATE(natfixy_)
- ABI_DEALLOCATE(iatfixy_)
- ABI_DEALLOCATE(natfixz_)
- ABI_DEALLOCATE(iatfixz_)
+ ABI_FREE(natfix_)
+ ABI_FREE(iatfixio_)
+ ABI_FREE(natfixx_)
+ ABI_FREE(iatfixx_)
+ ABI_FREE(natfixy_)
+ ABI_FREE(iatfixy_)
+ ABI_FREE(natfixz_)
+ ABI_FREE(iatfixz_)
 
  DBG_EXIT("COLL")
 

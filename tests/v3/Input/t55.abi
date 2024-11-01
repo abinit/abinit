@@ -1,0 +1,132 @@
+# N2 system.
+# Excited state computation, using LDA/TDLDA
+# with different XC kernels
+
+ ndtset    4
+
+#DATASET 1  SCF
+  nband1   5
+ prtden1   1
+ getden1   0
+ getwfk1   0
+ tolwfr1   1.0d-15
+
+#DATASET 2 TDDFT
+ getden2   1
+ tolwfr2   1.0d-9
+   iscf2   -1
+ getwfk2   1
+  nband2   12
+
+#DATASET 3  SCF with another ixc
+  nband3   5
+ prtden3   1
+ getwfk3   1
+ tolwfr3   1.0d-15
+    ixc3   7
+
+#DATASET 4 TDDFT
+ getden4   3
+ tolwfr4   1.0d-9
+   iscf4   -1
+ getwfk4   3
+  nband4   12
+    ixc4   7
+
+#Common
+ acell 6  2*5 Angstrom
+ boxcenter 3*0.0d0
+ diemac 1.0d0   diemix 0.5d0
+ ecut 25
+ ixc  1
+
+  kptopt 0
+ natom  2
+ nbdbuf 0
+
+ nstep 25
+ ntypat  1
+ typat  1 1
+ xcart -0.54885  0 0  0.54885 0 0 Angstrom   ! Distance 1.0977 Angstrom
+ znucl  7
+
+
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosHGH_pwteter/7n.5.hgh"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t55.abo, tolnlines = 10, tolabs = 1.000e-02, tolrel = 4.000e-01
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = Unknown
+#%% keywords = 
+#%% description = 
+#%%   N2 molecule non-spin-polarized, in a big box.
+#%%   Compute excitation energies, as well as Cauchy
+#%%   coefficients. The Cauchy (-2) coefficient
+#%%   is the low-frequency optical polarisability.
+#%%   The present test uses a small box (6x5x5 Angstrom),
+#%%   a small energy cut-off (25 Ha), and only
+#%%   12 states. Two different exchange-correlation
+#%%   functionals are treated : ixc=1 (Teter93),
+#%%   and ixc=7 (PW92).
+#%%   Experimental values are taken from Goerling at al,
+#%%   J. Chem. Phys. 110, 2785 (1999)).
+#%%   Experimental values for the singlet excitation
+#%%   energies are :
+#%%   1pi_g 9.31eV  1sig_u- 9.92eV  1del_u 10.27eV
+#%%   The present test gives
+#%%   1pi_g 9.47eV  1sig_u- 9.91eV  1del_u 10.45eV
+#%%   With a larger box (8x7x7) 
+#%%   1pi_g 9.33eV  1sig_u- 9.84eV  1del_u 10.38eV
+#%%   With a larger cutoff (60Ha)
+#%%   1pi_g 9.38eV  1sig_u- 9.77eV  1del_u 10.31eV
+#%%   With a larger number of states (30)
+#%%   1pi_g 9.44eV  1sig_u- 9.91eV  1del_u 10.45eV
+#%%   Experimental values for the Cauchy coefficients are:
+#%%   (These values should be updated, the real ones
+#%%   are smaller by a few percent, because a
+#%%   buffer has been introduced in tddft.f)
+#%%   (-2) 11.74au, (-4) 30.11au, (-6) 101.8au
+#%%   The present test gives
+#%%   (-2) 8.012au, (-4) 27.83au, (-6) 108.4au
+#%%   With a larger box (8x7x7)
+#%%   (-2) 7.112au, (-4) 25.51au, (-6) 102.2au
+#%%   With a larger cutoff (60Ha)
+#%%   (-2) 7.717au, (-4) 26.87au, (-6) 104.6au
+#%%   With a larger number of states (30)
+#%%   (-2) 11.70au, (-4) 34.56au, (-6) 123.3au
+#%%   (The larger number of states is important to give
+#%%   reasonable values ...)
+#%%   Experimental values for the triplet excitation
+#%%   energies are :
+#%%   3pi_g 7.75eV  3sig_u+ 8.04eV  3del_u 8.88eV 3sig_u- 9.67eV 3pi_u 11.19eV
+#%%   The present test gives
+#%%   3pi_g 7.83eV  3sig_u+ 8.11eV  3del_u 9.06eV 3sig_u- 9.91eV 3pi_u 10.91eV
+#%%   With a larger box (8x7x7)
+#%%   3pi_g 7.70eV  3sig_u+ 8.13eV  3del_u 9.04eV 3sig_u- 9.85eV 3pi_u 10.71eV
+#%%   With a larger cutoff (60Ha)
+#%%   3pi_g 7.73eV  3sig_u+ 7.88eV  3del_u 8.88eV 3sig_u- 9.77eV 3pi_u 10.44eV
+#%%   With a larger number of states (30)
+#%%   3pi_g 7.83eV  3sig_u+ 8.04eV  3del_u 9.04eV 3sig_u- 9.91eV 3pi_u 10.90eV
+#%%   Note that the use of the PW92 functional instead of the
+#%%   Teter93 functional does not affect the singlet values,
+#%%   but have some effects on the triplet values:
+#%%   they change from 
+#%%   3pi_g 7.83eV  3sig_u+ 8.11eV  3del_u 9.06eV 3sig_u- 9.91eV 3pi_u 10.91eV
+#%%   to    
+#%%   3pi_g 7.85eV  3sig_u+ 8.16eV  3del_u 9.08eV 3sig_u- 9.91eV 3pi_u 10.93eV
+#%%   In the Goerling paper, still another functional was used,
+#%%   the Vosko-Wilk-Nussair one,
+#%%   whose spin dependence is not very accurate, hence the large
+#%%   differences for the triplet states.
+#%%   When this functional will be coded in ABINIT, it will be 
+#%%   worth to complete the present test.
+#%% topics = TDDFT
+#%%<END TEST_INFO>

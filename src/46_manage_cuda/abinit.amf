@@ -1,0 +1,6 @@
+EXTRA_DIST += \
+  abi_gpu_header.h \
+  gpu_apply_invovl_inner.h \
+  gpu_apply_invovl_inner_kernel.h \
+  gpu_gemm_nonlop.h \
+  gpu_gemm_nonlop_kernel.h

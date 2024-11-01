@@ -1,0 +1,68 @@
+#!/usr/bin/env python3
+
+import os
+import re
+import yaml
+try:
+    from yaml import CDumper as MyDumper
+    from yaml import CLoader as MyLoader
+except ImportError:
+    from yaml import Dumper as MyDumper
+    from yaml import Loader as MyLoader
+
+import numpy as np
+
+
+with open(os.path.join("split", "abinit_cpp_map.yml"), "r") as yaml_file:
+    cpp_data = yaml.load(yaml_file, Loader=MyLoader)
+
+cpp_map = cpp_data["cpp_map"]
+tree_map = cpp_data["tree_map"]
+
+cpp_options = sorted(cpp_map.keys())
+cpp_cats = {}
+for key, val in tree_map.items():
+    for srcdir in val:
+        cpp_cats[srcdir] = key
+
+cpp_by_cats = {}
+cpp_in_cats = {key: [] for key in tree_map.keys()}
+for opt in cpp_options:
+    opt_cats = {key: 0 for key in tree_map.keys()} 
+    for srcdir in cpp_map[opt].keys():
+        opt_cats[cpp_cats[srcdir]] += 1
+        cpp_in_cats[cpp_cats[srcdir]].append(opt)
+    cpp_by_cats[opt] = opt_cats
+
+for key, val in cpp_in_cats.items():
+    cpp_in_cats[key] = sorted(list(set(val)))
+
+cpp_candidates = {key: [] for key in tree_map.keys()}
+cpp_exclusive = {key: [] for key in tree_map.keys()}
+cpp_profiles = []
+for opt, counts in cpp_by_cats.items():
+    scores = sorted(list(counts.items()), key=lambda x: x[1])
+    cpp_profiles.append([item[1] for item in scores])
+    if (scores[0][1] == 0) and (scores[1][1] == 2):
+        print(opt, scores)
+    elif (scores[0][1] == 0) and (scores[1][1] == 1):
+        cpp_candidates[scores[2][0]].append([opt, scores[1][0]])
+    elif (scores[0][1] == 0) and (scores[1][1] == 0):
+        cpp_exclusive[scores[2][0]].append(opt)
+cpp_profiles = np.unique(cpp_profiles, axis=0)
+print(cpp_profiles)
+
+stats_data = {
+        "candidates": cpp_candidates,
+        "counts": cpp_by_cats,
+        "cpp_groups": cpp_in_cats,
+        "exclusive": cpp_exclusive,
+}
+
+with open(os.path.join("split", "abinit_cpp_stats.yml"), "w") as map_file:
+    yaml.dump(stats_data, stream=map_file, Dumper=MyDumper,
+        default_flow_style=False,
+        explicit_start=True,
+        explicit_end=True,
+        version=(1, 1),
+        indent=2)

@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/tools_lotf
 !! NAME
 !! tools_lotf
@@ -7,7 +6,7 @@
 !!  Contains simple functions for LOTF
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2019 ABINIT group (MMancini)
+!! Copyright (C) 2005-2024 ABINIT group (MMancini)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -45,11 +44,6 @@ contains
  !! FUNCTION
  !!
  !! INPUTS
- !! PARENTS
-!!      m_lotf
-!!
- !! CHILDREN
-!!
  !! SOURCE
  subroutine  pinterp(a0,a1,ainterpoled,ndim,nitex,n)
   ! interpolator : a0 for n=0
@@ -69,7 +63,7 @@ contains
   !--Control
   if(nitex < 0) then
     write(message,'(a,i4,a)') '  LOTF: pinterp nitex =',nitex,'smaller than 0'
-    MSG_ERROR(message)
+    ABI_ERROR(message)
 
   elseif(nitex >= 1) then
     ainterpoled = a0 + (n/real(nitex,dp))*(a1-a0) 
@@ -87,10 +81,6 @@ contains
  !! FUNCTION
  !!
  !! INPUTS
- !! PARENTS
-!!
- !! CHILDREN
-!!
  !! SOURCE
  subroutine  pinterp_nolinear(a0,a1,ainterpoled,ndim,nitex,n)
   ! interpolator : a0 for n=0
@@ -121,11 +111,6 @@ contains
  !! FUNCTION
  !!
  !! INPUTS
- !! PARENTS
-!!      m_lotf
-!!
- !! CHILDREN
-!!
  !! SOURCE
  subroutine dlvsum(local_pe,npes,sum_local_pe,ndimve)
   !------------------------------------------------------------
@@ -152,10 +137,6 @@ contains
  !! FUNCTION
  !!
  !! INPUTS
- !! PARENTS
- !!
- !! CHILDREN
- !!
  !! SOURCE
  FUNCTION icf(ix,iy,iz,ic1,ic2,ic3) 
 

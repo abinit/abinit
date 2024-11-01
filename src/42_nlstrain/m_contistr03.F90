@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/contistr03
 !! NAME
 !! contistr03
@@ -12,7 +11,7 @@
 !! tensors.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2019 ABINIT group (DRH)
+!! Copyright (C) 1998-2024 ABINIT group (DRH)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -36,11 +35,6 @@
 !! WEIGHT IS INCLUDED in the output tensor element to simplify later
 !! contractions with other tensors of the same rank and form, i.e. the
 !! next contraction is then simply a dot product over the unique elements.
-!!
-!! PARENTS
-!!      nonlop_pl
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -81,7 +75,7 @@ subroutine contistr03(istr,rank,gm,gprimd,eisnl,aa,bb)
 
 ! *************************************************************************
 
- ABI_ALLOCATE(cm,(3,((rank+1)*(rank+2))/2,((rank+4)*(rank+5))/2))
+ ABI_MALLOC(cm,(3,((rank+1)*(rank+2))/2,((rank+4)*(rank+5))/2))
 
  ka=idx(2*istr-1);kb=idx(2*istr)
 
@@ -2963,7 +2957,7 @@ subroutine contistr03(istr,rank,gm,gprimd,eisnl,aa,bb)
 !factor of 2 multiplied in to drop call to conjugate contraction
 !eisnl(:)=0.5d0*eisnl(:)
 
- ABI_DEALLOCATE(cm)
+ ABI_FREE(cm)
 
 end subroutine contistr03
 !!***

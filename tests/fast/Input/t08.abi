@@ -1,0 +1,74 @@
+#   Si in diamond structure; 2 special points; low ecut.
+
+ acell 3*10.26311
+ diemac 12.0d0
+ ecut 5.8
+ enunit 2  intxc 1     irdwfk  1
+ kptopt 0
+ kpt   1 1 1     1 2 2   kptnrm 4
+ natom  2 nband 4
+ nkpt  2
+ nline 3   nstep 0
+ nsym  24  ntypat  1
+ occ 4*2.0d0 occopt  0   prtden 1 
+ rprim   0 .5 .5  .5 0 .5  .5 .5 0
+ symrel
+  1  0  0   0  1  0   0  0  1
+  0  1 -1   1  0 -1   0  0 -1
+  0 -1  1   0 -1  0   1 -1  0
+ -1  0  0  -1  0  1  -1  1  0
+  0  1  0   0  0  1   1  0  0
+  1  0 -1   0  0 -1   0  1 -1
+  0 -1  0   1 -1  0   0 -1  1
+ -1  0  1  -1  1  0  -1  0  0
+  0  0  1   1  0  0   0  1  0
+  0  0 -1   0  1 -1   1  0 -1
+  1 -1  0   0 -1  1   0 -1  0
+ -1  1  0  -1  0  0  -1  0  1
+  1  0 -1   0  1 -1   0  0 -1
+  0  1  0   1  0  0   0  0  1
+ -1  0  1  -1  0  0  -1  1  0
+  0 -1  0   0 -1  1   1 -1  0
+ -1  1  0  -1  0  1  -1  0  0
+  1 -1  0   0 -1  0   0 -1  1
+  0  0 -1   1  0 -1   0  1 -1
+  0  0  1   0  1  0   1  0  0
+  0 -1  1   1 -1  0   0 -1  0
+ -1  0  0  -1  1  0  -1  0  1
+  1  0  0   0  0  1   0  1  0
+  0  1 -1   0  0 -1   1  0 -1
+ tnons 72*0.0
+ tolwfr 1.0d-12
+ typat  1 1  
+ wtk   1 3
+ xred 3*0.00d0 3*0.25d0
+ znucl 14
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/14si.pspnc"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% input_prefix = t05o
+#%% test_chain = t03.abi, t05.abi, t06.abi, t07.abi, t08.abi, t09.abi, t11.abi, t12.abi, t14.abi, t16.abi
+#%% [files]
+#%% files_to_test = 
+#%%   t08.abo, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
+#%% [shell]
+#%% post_commands = 
+#%%   ww_cp t08o_DEN t09i_DEN;
+#%%   ww_cp t08o_DEN t11i_DEN;
+#%%   ww_cp t08o_DEN t12i_DEN
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = Unknown
+#%% keywords = 
+#%% description = 
+#%%   Run with frozen wf (wf.05 again)--irdwfk=1, nstep=0.  Use same job
+#%%   to produce density file t08o_DEN using prtden=1.  Note that energy
+#%%   and stresses should agree among 05, 06, and 08.  Slightly different
+#%%   result for stress in case 06 shows evidence of the sensitivity of 
+#%%   stress to convergence.
+#%%<END TEST_INFO>

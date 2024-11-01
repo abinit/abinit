@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_entropyDMFT
 !! NAME
 !!  m_entropyDMFT
@@ -7,18 +6,12 @@
 !!  FIXME: add description.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2019 ABINIT group (J. Bieder)
+!!  Copyright (C) 2014-2024 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 
@@ -31,9 +24,11 @@
 module m_entropyDMFT
 
   use defs_basis
-  use defs_abitypes
   use m_errors
+  use m_abicore
   use m_xmpi
+  use m_dtset
+
   use m_energies, only : energies_type, energies_eval_eint
   use m_splines, only : spline_integrate, spline, splint
   use m_pawang, only : pawang_type
@@ -71,7 +66,7 @@ module m_entropyDMFT
 !!  This structured datatype contains the necessary data
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2019 ABINIT group (J. Bieder)
+!!  Copyright (C) 2014-2024 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -123,7 +118,7 @@ contains
 !!  FIXME: add description.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2019 ABINIT group (J. Bieder)
+!!  Copyright (C) 2014-2024 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -137,11 +132,6 @@ contains
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_scfcv
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -183,7 +173,7 @@ subroutine entropyDMFT_init(e_t,dt,pawtab,spacecomm,ifilename,ofilename)
       if ( pawtab(dt%typat(iatom))%lpawu /= -1 ) icatom = icatom + 1
     end do
 
-    if ( icatom /= ncatom ) MSG_ERROR("Inconsistent number of correlated atoms")
+    if ( icatom /= ncatom ) ABI_ERROR("Inconsistent number of correlated atoms")
 
     nctypat = 0
     do itypat=1,dt%ntypat
@@ -199,14 +189,14 @@ subroutine entropyDMFT_init(e_t,dt,pawtab,spacecomm,ifilename,ofilename)
       write(message,'(2a,i4,2a)') "DMFT must have dmft_nlamda >= 3 to compute entropy", &
         "whereas its value is dmft_nlambda = ",dt%dmft_nlambda,ch10,&
         "Action : check you input variable dmft_nlambda"
-      MSG_ERROR(message)
+      ABI_ERROR(message)
     end if
 
     e_t%nlambda = dt%dmft_nlambda
 
     doRestart = .false.
     if ( e_t%nlambda < (e_t%mylambda+1) ) then
-      MSG_ERROR("Restart calculation of DMFT entropy with a value of dmft_entropy greater than dmft_nlambda")
+      ABI_ERROR("Restart calculation of DMFT entropy with a value of dmft_entropy greater than dmft_nlambda")
     else if ( e_t%mylambda > 0 ) then
       doRestart = .true.
     end if
@@ -222,7 +212,7 @@ subroutine entropyDMFT_init(e_t,dt,pawtab,spacecomm,ifilename,ofilename)
 
     ! Save each value of U and J for each correlated type
     ictypat = 1
-    ABI_ALLOCATE(maptypat,(1:dt%ntypat))
+    ABI_MALLOC(maptypat,(1:dt%ntypat))
     do itypat=1,dt%ntypat
       if ( pawtab(itypat)%lpawu /= -1 ) then
         e_t%lpawu(ictypat) = pawtab(itypat)%lpawu
@@ -247,7 +237,7 @@ subroutine entropyDMFT_init(e_t,dt,pawtab,spacecomm,ifilename,ofilename)
         icatom = icatom + 1
       end if
     end do
-    ABI_DEALLOCATE(maptypat)
+    ABI_FREE(maptypat)
 
     write(message,'(a,1x,78a)') ch10,"+",(/ ("-",ilambda=1,76) /), "+"
     call wrtout(std_out,message,"COLL")
@@ -307,7 +297,7 @@ subroutine entropyDMFT_init(e_t,dt,pawtab,spacecomm,ifilename,ofilename)
 !!  FIXME: add description.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2019 ABINIT group (J. Bieder)
+!!  Copyright (C) 2014-2024 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -322,11 +312,6 @@ subroutine entropyDMFT_init(e_t,dt,pawtab,spacecomm,ifilename,ofilename)
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      m_entropyDMFT
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
   subroutine entropyDMFT_allocateAll(e_t)
@@ -334,25 +319,25 @@ subroutine entropyDMFT_init(e_t,dt,pawtab,spacecomm,ifilename,ofilename)
 !Arguments ------------------------------------
     type(entropyDMFT_t), intent(inout) :: e_t
 
-    ABI_ALLOCATE(e_t%index_atom, (1:e_t%natom))
+    ABI_MALLOC(e_t%index_atom, (1:e_t%natom))
     e_t%index_atom = 0
-    ABI_ALLOCATE(e_t%index_typat,(1:e_t%nctypat))
+    ABI_MALLOC(e_t%index_typat,(1:e_t%nctypat))
     e_t%index_atom = 0
-    ABI_ALLOCATE(e_t%typat,      (1:e_t%ncatom))
+    ABI_MALLOC(e_t%typat,      (1:e_t%ncatom))
     e_t%typat      = 0
-    ABI_ALLOCATE(e_t%lpawu,      (1:e_t%nctypat))
+    ABI_MALLOC(e_t%lpawu,      (1:e_t%nctypat))
     e_t%lpawu      = 0
-    ABI_ALLOCATE(e_t%U_input,    (1:e_t%nctypat))
+    ABI_MALLOC(e_t%U_input,    (1:e_t%nctypat))
     e_t%U_input    = zero
-    ABI_ALLOCATE(e_t%J_input,    (1:e_t%nctypat))
+    ABI_MALLOC(e_t%J_input,    (1:e_t%nctypat))
     e_t%J_input    = zero
-    ABI_ALLOCATE(e_t%lambda,     (1:e_t%nlambda))
+    ABI_MALLOC(e_t%lambda,     (1:e_t%nlambda))
     e_t%lambda     = 0
-    ABI_ALLOCATE(e_t%docc,       (1:(14*13)/2,1:e_t%ncatom,1:e_t%nlambda))
+    ABI_MALLOC(e_t%docc,       (1:(14*13)/2,1:e_t%ncatom,1:e_t%nlambda))
     e_t%docc       = zero
-    ABI_ALLOCATE(e_t%e_dc,       (1:e_t%ncatom,1:e_t%nlambda))
+    ABI_MALLOC(e_t%e_dc,       (1:e_t%ncatom,1:e_t%nlambda))
     e_t%e_dc       = zero
-    ABI_ALLOCATE(e_t%uij,        (1:(14*13)/2,1:e_t%nctypat))
+    ABI_MALLOC(e_t%uij,        (1:(14*13)/2,1:e_t%nctypat))
     e_t%uij        = zero
   end subroutine entropyDMFT_allocateAll
 !!***
@@ -365,7 +350,7 @@ subroutine entropyDMFT_init(e_t,dt,pawtab,spacecomm,ifilename,ofilename)
 !!  FIXME: add description.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2019 ABINIT group (J. Bieder)
+!!  Copyright (C) 2014-2024 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -379,11 +364,6 @@ subroutine entropyDMFT_init(e_t,dt,pawtab,spacecomm,ifilename,ofilename)
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_entropyDMFT
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -421,7 +401,7 @@ subroutine entropyDMFT_init(e_t,dt,pawtab,spacecomm,ifilename,ofilename)
       if ( iostate /= 0 ) then
         write(msg,'(5a)') "File ", trim(e_t%filedata), " does not exist or is not accessible", ch10, &
         "-> No restart performed but full calculation."
-        MSG_WARNING(msg)
+        ABI_WARNING(msg)
         e_t%mylambda = 0
       end if
 
@@ -431,7 +411,7 @@ subroutine entropyDMFT_init(e_t,dt,pawtab,spacecomm,ifilename,ofilename)
       if ( hdr /= HDR_NAME .or. iostate /= 1 ) then
         write(msg,'(5a)') "File ", trim(e_t%filedata), " does not contain the proper header", ch10, &
         "-> No restart performed but full calculation."
-        MSG_WARNING(msg)
+        ABI_WARNING(msg)
         e_t%mylambda = 0
       end if
 
@@ -441,7 +421,7 @@ subroutine entropyDMFT_init(e_t,dt,pawtab,spacecomm,ifilename,ofilename)
         if ( ABS(lambda - e_t%lambda(ilambda)) >= tol9 ) then
           write(msg,'(5a,f6.4,a,f6.4)') "File ", trim(e_t%filedata), " is wrong:", ch10, &
           "Lambda values are differente: in file ", lambda, " instead of ", e_t%lambda(ilambda)
-          MSG_WARNING(msg)
+          ABI_WARNING(msg)
           goto 42
         end if
 
@@ -451,7 +431,7 @@ subroutine entropyDMFT_init(e_t,dt,pawtab,spacecomm,ifilename,ofilename)
             write(msg,'(7a,f6.4)') "File ", trim(e_t%filedata), " is wrong:", ch10, &
             "Temperature is different than the value of tsmear", ch10, &
             "-> No restart performed but full calculation."
-            MSG_WARNING(msg)
+            ABI_WARNING(msg)
             goto 42
           end if
           read(e_t%ofile,end=42) e_t%entropy0
@@ -487,7 +467,7 @@ subroutine entropyDMFT_init(e_t,dt,pawtab,spacecomm,ifilename,ofilename)
       goto 43
 42    write(msg,'(5a,f6.4)') "File ", trim(e_t%filedata), " is wrong or incomplete", ch10, &
           "-> Restart calculation will restart at lambda = ",e_t%lambda(tlambda)
-      MSG_WARNING(msg)
+      ABI_WARNING(msg)
       close(e_t%ofile)
       e_t%mylambda = tlambda-1 ! -1 to go to previous lambda
     end if
@@ -512,7 +492,7 @@ subroutine entropyDMFT_init(e_t,dt,pawtab,spacecomm,ifilename,ofilename)
 !!  FIXME: add description.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2019 ABINIT group (J. Bieder)
+!!  Copyright (C) 2014-2024 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -526,11 +506,6 @@ subroutine entropyDMFT_init(e_t,dt,pawtab,spacecomm,ifilename,ofilename)
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_entropyDMFT
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -632,7 +607,7 @@ subroutine entropyDMFT_init(e_t,dt,pawtab,spacecomm,ifilename,ofilename)
 !!  FIXME: add description.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2019 ABINIT group (J. Bieder)
+!!  Copyright (C) 2014-2024 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -646,12 +621,6 @@ subroutine entropyDMFT_init(e_t,dt,pawtab,spacecomm,ifilename,ofilename)
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 
@@ -667,11 +636,12 @@ subroutine entropyDMFT_init(e_t,dt,pawtab,spacecomm,ifilename,ofilename)
     logical :: nextstep
     integer :: itypat
     integer :: mylambda
+    logical :: is_dfpt=.false.
     real(dp),allocatable :: upawu(:),jpawu(:)
     character(len=100) :: message
 
     if ( e_t%isset .eqv. .FALSE. ) &
-      MSG_ERROR("entropyDMFT is not initialized")
+      ABI_ERROR("entropyDMFT is not initialized")
 
     ! go to next lambda
     mylambda = e_t%mylambda + 1
@@ -686,8 +656,8 @@ subroutine entropyDMFT_init(e_t,dt,pawtab,spacecomm,ifilename,ofilename)
       ! We do nothing but return true to perform scfcv a least once
     else if ( e_t%action == AC_ETOT .and. mylambda <= e_t%nlambda ) then ! we iterate over lambda
       nextstep = .TRUE.
-      ABI_ALLOCATE(upawu,(dt%ntypat))
-      ABI_ALLOCATE(jpawu,(dt%ntypat))
+      ABI_MALLOC(upawu,(dt%ntypat))
+      ABI_MALLOC(jpawu,(dt%ntypat))
       do itypat = 1, e_t%nctypat
         upawu(e_t%index_typat(itypat)) = e_t%lambda(mylambda) * e_t%U_input(itypat)
         jpawu(e_t%index_typat(itypat)) = e_t%lambda(mylambda) * e_t%J_input(itypat)
@@ -716,10 +686,10 @@ subroutine entropyDMFT_init(e_t,dt,pawtab,spacecomm,ifilename,ofilename)
       call wrtout(std_out,message,"COLL")
       call wrtout(ab_out,message,"COLL")
       call pawpuxinit(dt%dmatpuopt,dt%exchmix,dt%f4of2_sla,dt%f6of2_sla,&
-&        jpawu,dt%lexexch,dt%lpawu,dt%ntypat,pawang,dt%pawprtvol,&
+&        is_dfpt,jpawu,dt%lexexch,dt%lpawu,dt%nspinor,dt%ntypat,dt%optdcmagpawu,pawang,dt%pawprtvol,&
 &        pawrad,pawtab,upawu,dt%usedmft,dt%useexexch,dt%usepawu)
-      ABI_DEALLOCATE(upawu)
-      ABI_DEALLOCATE(jpawu)
+      ABI_FREE(upawu)
+      ABI_FREE(jpawu)
     end if
 
   end function entropyDMFT_nextLambda
@@ -733,7 +703,7 @@ subroutine entropyDMFT_init(e_t,dt,pawtab,spacecomm,ifilename,ofilename)
 !!  FIXME: add description.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2019 ABINIT group (J. Bieder)
+!!  Copyright (C) 2014-2024 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -747,11 +717,6 @@ subroutine entropyDMFT_init(e_t,dt,pawtab,spacecomm,ifilename,ofilename)
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_scfcv
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -888,7 +853,7 @@ subroutine entropyDMFT_init(e_t,dt,pawtab,spacecomm,ifilename,ofilename)
 !!  FIXME: add description.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2019 ABINIT group (J. Bieder)
+!!  Copyright (C) 2014-2024 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -902,11 +867,6 @@ subroutine entropyDMFT_init(e_t,dt,pawtab,spacecomm,ifilename,ofilename)
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_scfcv
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -934,7 +894,7 @@ subroutine entropyDMFT_init(e_t,dt,pawtab,spacecomm,ifilename,ofilename)
     nlambda = e_t%nlambda
     ncatom  = e_t%ncatom
 
-    ABI_ALLOCATE(integrand,(1:nlambda,1:ncatom))
+    ABI_MALLOC(integrand,(1:nlambda,1:ncatom))
     integrand(1:nlambda,1:ncatom) = zero
 
     if ( e_t%rank == 0 ) then
@@ -975,7 +935,7 @@ subroutine entropyDMFT_init(e_t,dt,pawtab,spacecomm,ifilename,ofilename)
 
     ! Integrate the integrand for all correlated atoms
     call entropyDMFT_integrate(e_t,integrand,integral)
-    ABI_DEALLOCATE(integrand)
+    ABI_FREE(integrand)
 
     write(string,'(a,1x,78a)') ch10,"+",(/ ("-",ilambda=1,76) /), "+"
     call wrtout(std_out,string,"COLL")
@@ -1014,13 +974,13 @@ subroutine entropyDMFT_init(e_t,dt,pawtab,spacecomm,ifilename,ofilename)
     if ( entropy < zero ) then
       write(string,'(3a)') "Entropy is negative !!!!",ch10,&
       "It does not make any sense"
-      MSG_WARNING(string)
+      ABI_WARNING(string)
     end if
 
     if ( abs(entropy-entropyDirect) >= tol3 ) then
       write(string,'(1x,a,1x,f8.3,1x,a,1x,f8.3,2a)') "Difference between Direct and DC entropies is", abs(entropy-entropyDirect), &
         "which is greater than", tol3,ch10,"Action : converge better the DMFT and/or DFT loops"
-      MSG_WARNING(string)
+      ABI_WARNING(string)
     end if
 
 
@@ -1036,7 +996,7 @@ subroutine entropyDMFT_init(e_t,dt,pawtab,spacecomm,ifilename,ofilename)
 !!  FIXME: add description.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2019 ABINIT group (J. Bieder)
+!!  Copyright (C) 2014-2024 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1050,11 +1010,6 @@ subroutine entropyDMFT_init(e_t,dt,pawtab,spacecomm,ifilename,ofilename)
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_entropyDMFT
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1078,9 +1033,9 @@ subroutine entropyDMFT_init(e_t,dt,pawtab,spacecomm,ifilename,ofilename)
 
     Nfit = 1000
 
-    ABI_ALLOCATE(ypp,(1:e_t%nlambda))
-    ABI_ALLOCATE(fitx,(1:Nfit))
-    ABI_ALLOCATE(fity,(1:Nfit))
+    ABI_MALLOC(ypp,(1:e_t%nlambda))
+    ABI_MALLOC(fitx,(1:Nfit))
+    ABI_MALLOC(fity,(1:Nfit))
 
     integral = zero
 
@@ -1110,16 +1065,16 @@ subroutine entropyDMFT_init(e_t,dt,pawtab,spacecomm,ifilename,ofilename)
       !if ( abs(integral2-integral1) >= tol6 ) then
       !  write(msg,'(1x,a,1x,f8.6,1x,a,1x,f8.6,1x,a,i4)') "Difference between two different ways of integration is", abs(integral2-integral1), &
       !    "which is greater than", tol6, "for correlated atom",e_t%index_atom(icatom)
-      !  MSG_WARNING(msg)
+      !  ABI_WARNING(msg)
       !end if
 
       integral = integral+integral1
     end do
     if ( e_t%rank == 0 ) close(unit)
 
-    ABI_DEALLOCATE(ypp)
-    ABI_DEALLOCATE(fitx)
-    ABI_DEALLOCATE(fity)
+    ABI_FREE(ypp)
+    ABI_FREE(fitx)
+    ABI_FREE(fity)
 
   end subroutine entropyDMFT_integrate
 !!***
@@ -1132,7 +1087,7 @@ subroutine entropyDMFT_init(e_t,dt,pawtab,spacecomm,ifilename,ofilename)
 !!  FIXME: add description.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2019 ABINIT group (J. Bieder)
+!!  Copyright (C) 2014-2024 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1147,11 +1102,6 @@ subroutine entropyDMFT_init(e_t,dt,pawtab,spacecomm,ifilename,ofilename)
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      m_scfcv
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
   subroutine entropyDMFT_destroy(e_t)
@@ -1160,34 +1110,34 @@ subroutine entropyDMFT_init(e_t,dt,pawtab,spacecomm,ifilename,ofilename)
     type(entropyDMFT_t), intent(inout) :: e_t
 
     if ( allocated(e_t%index_atom) ) then
-      ABI_DEALLOCATE(e_t%index_atom)
+      ABI_FREE(e_t%index_atom)
     endif
     if ( allocated(e_t%index_typat)) then
-      ABI_DEALLOCATE(e_t%index_typat)
+      ABI_FREE(e_t%index_typat)
     endif
     if ( allocated(e_t%typat     ) ) then
-      ABI_DEALLOCATE(e_t%typat     )
+      ABI_FREE(e_t%typat     )
     endif
     if ( allocated(e_t%lpawu     ) ) then
-      ABI_DEALLOCATE(e_t%lpawu)
+      ABI_FREE(e_t%lpawu)
     endif
     if ( allocated(e_t%U_input   ) ) then
-      ABI_DEALLOCATE(e_t%U_input)
+      ABI_FREE(e_t%U_input)
     endif
     if ( allocated(e_t%J_input   ) ) then
-      ABI_DEALLOCATE(e_t%J_input)
+      ABI_FREE(e_t%J_input)
     endif
     if ( allocated(e_t%lambda    ) ) then
-      ABI_DEALLOCATE(e_t%lambda)
+      ABI_FREE(e_t%lambda)
     endif
     if ( allocated(e_t%docc      ) ) then
-      ABI_DEALLOCATE(e_t%docc)
+      ABI_FREE(e_t%docc)
     endif
     if ( allocated(e_t%e_dc      ) ) then
-      ABI_DEALLOCATE(e_t%e_dc)
+      ABI_FREE(e_t%e_dc)
     endif
     if ( allocated(e_t%uij       ) ) then
-      ABI_DEALLOCATE(e_t%uij)
+      ABI_FREE(e_t%uij)
     endif
     e_t%isset = .FALSE.
   end subroutine entropyDMFT_destroy

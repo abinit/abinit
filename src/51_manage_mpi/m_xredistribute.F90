@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_xredistribute
 !! NAME
 !!  m_xredistribute
@@ -8,7 +7,7 @@
 !!  results on different procs.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2019 ABINIT group (MMANCINI)
+!! Copyright (C) 2008-2024 ABINIT group (MMANCINI)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -16,10 +15,6 @@
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -59,8 +54,6 @@ module m_xredistribute
 CONTAINS  !===========================================================
 !!***
 
-
-
 !!****f* ABINIT/xredistribute_mpi_dp
 !! NAME
 !!  xredistribute_mpi_dp
@@ -83,16 +76,9 @@ CONTAINS  !===========================================================
 !! SIDE EFFECTS
 !!  recvbuf= received buffer
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      mpi_allgatherv,mpi_scatterv
-!!
 !! SOURCE
 subroutine xredistribute_mpi_dp(xval,send_counts,send_displs,recvbuf,&
-  &                              rec_counts,rec_displs,me,nproc,spaceComm,ier)
-
- implicit none
+                                rec_counts,rec_displs,me,nproc,spaceComm,ier)
 
 !Arguments-------------------------
  integer ,intent(in) :: me,nproc
@@ -115,10 +101,10 @@ subroutine xredistribute_mpi_dp(xval,send_counts,send_displs,recvbuf,&
  size = sum(send_counts)
  if(size /=sum(rec_counts))then
    msg = 'the total sizes of sent and receved msg are not equal'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  endif
 
- ABI_ALLOCATE(totbuff,(size))
+ ABI_MALLOC(totbuff,(size))
    !--join all the vector in to a single one
    call MPI_ALLGATHERV(xval,send_counts(me),MPI_DOUBLE_PRECISION,totbuff,&
 &                      send_counts,send_displs,MPI_DOUBLE_PRECISION,spaceComm,ier)
@@ -129,7 +115,7 @@ subroutine xredistribute_mpi_dp(xval,send_counts,send_displs,recvbuf,&
 &                    recvbuf,rec_counts(me),MPI_DOUBLE_PRECISION,&
 &                    0,spaceComm,ier)
 
-   ABI_DEALLOCATE(totbuff)
+   ABI_FREE(totbuff)
  end if
 #endif
 end subroutine xredistribute_mpi_dp
@@ -158,17 +144,9 @@ end subroutine xredistribute_mpi_dp
 !! SIDE EFFECTS
 !!  recvbuf= received buffer
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      mpi_allgatherv,mpi_scatterv
-!!
 !! SOURCE
 subroutine xredistribute_mpi_2d_dp(xval,send_counts,send_displs,recvbuf,&
-  &                              rec_counts,rec_displs,me,nproc,spaceComm,ier)
-
- implicit none
-
+                                   rec_counts,rec_displs,me,nproc,spaceComm,ier)
 
 !Arguments-------------------------
  integer ,intent(in) :: me,nproc
@@ -191,10 +169,10 @@ subroutine xredistribute_mpi_2d_dp(xval,send_counts,send_displs,recvbuf,&
  size = sum(send_counts)
  if(size /=sum(rec_counts))then
    msg = 'the total sizes of sent and receved msg are not equal'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  endif
 
- ABI_ALLOCATE(totbuff,(size))
+ ABI_MALLOC(totbuff,(size))
    !--join all the vector in to a single one
    call MPI_ALLGATHERV(xval,send_counts(me),MPI_DOUBLE_PRECISION,totbuff,&
 &                      send_counts,send_displs,MPI_DOUBLE_PRECISION,spaceComm,ier)
@@ -204,7 +182,7 @@ subroutine xredistribute_mpi_2d_dp(xval,send_counts,send_displs,recvbuf,&
    call MPI_SCATTERV(totbuff,rec_counts,rec_displs,MPI_DOUBLE_PRECISION,&
 &                    recvbuf,rec_counts(me),MPI_DOUBLE_PRECISION,&
 &                    0,spaceComm,ier)
-   ABI_DEALLOCATE(totbuff)
+   ABI_FREE(totbuff)
  end if
 #endif
 end subroutine xredistribute_mpi_2d_dp

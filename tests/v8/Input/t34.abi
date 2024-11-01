@@ -1,0 +1,41 @@
+# Added by runtests.py
+output_file = "t34.abo"
+indata_prefix = "t34i"
+tmpdata_prefix = "t34t"
+# end runtests.py section
+
+# Test for ionmov = 25 - hybrid Monte Carlo sampling
+# with CaTiO3 Multibinit Model 
+
+# Construction of harmonic lattice part
+ngqpt =  2 2 2
+dipdip  = 1 
+ncell = 2 2 2
+
+#Inputs for Hybrid Monte Carlo Sampling with NPT ensemble (strain relaxation enabled)
+
+  dynamics  25       # HMC sampling (NPT ensemble)
+  temperature  300 300  # Starting and final temperature values
+  hmctt   3        # number of steps per MC trial trajectory
+  dtion   50      # md step magnitude in a.u.
+  optcell 2        # no optimization of cell geometry 
+  ntime   4        # number of HMC sweeps
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = multibinit
+#%% exclude_builders = ubu_gnu_9.2_openmpi
+#%% system_xml = t98_model.xml
+#%% [files]
+#%% files_to_test = 
+#%%   t34.abo, tolnlines = 4, tolabs = 0.001, tolrel = 0.001, fld_options = -easy
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = S. PROKHORENKO, M. Schmitt 
+#%% keywords = MD,MC,Monte Carlo
+#%% description = 
+#%%   Hybrid Monte Carlo Sampling for NPT ensemble   
+#%% topics = MolecularDynamics
+#%%<END TEST_INFO>
+

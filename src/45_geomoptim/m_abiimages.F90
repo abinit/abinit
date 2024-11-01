@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_abiimages
 !! NAME
 !! m_abiimages
@@ -24,7 +23,7 @@
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2019 ABINIT group (XG)
+!! Copyright (C) 2001-2024 ABINIT group (XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -111,11 +110,6 @@ contains
 !! OUTPUT
 !!  abiimages <type(abiimages)> = The abiimages to initialize
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      abihist_fin
-!!
 !! SOURCE
 
 subroutine abiimages_ini(images,nimages,natom,nrecord)
@@ -139,7 +133,7 @@ subroutine abiimages_ini(images,nimages,natom,nrecord)
  call abihist_ini(images%img_present,natom,nimages)
 
 !Allocate the past
- ABI_DATATYPE_ALLOCATE(images%img_past,(nimages))
+ ABI_MALLOC(images%img_past,(nimages))
 
  do i=1,nimages
     call abihist_ini(images%img_past(i),natom,nrecord)
@@ -164,11 +158,6 @@ end subroutine abiimages_ini
 !! SIDE EFFECTS
 !!  images <type(abiimages)> = The abiimages to deallocate
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      abihist_fin
-!!
 !! NOTES
 !!
 !! SOURCE
@@ -191,7 +180,7 @@ subroutine abiimages_fin(images)
     call abihist_fin(images%img_past(i))
  end do
 
- ABI_DATATYPE_DEALLOCATE(images%img_past)
+ ABI_FREE(images%img_past)
 
 end subroutine abiimages_fin
 !!***

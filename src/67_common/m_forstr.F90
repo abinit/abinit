@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_forstr
 !! NAME
 !!  m_forstr
@@ -7,14 +6,10 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2019 ABINIT group (DCA, XG, GMR, AF, AR, MB, MT)
+!!  Copyright (C) 1998-2024 ABINIT group (DCA, XG, GMR, AF, AR, MB, MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -24,11 +19,12 @@
 
 #include "abi_common.h"
 
+! nvtx related macro definition
+#include "nvtx_macros.h"
+
 module m_forstr
 
  use defs_basis
- use defs_datatypes
- use defs_abitypes
  use defs_wvltypes
  use m_abicore
  use m_efield
@@ -37,7 +33,14 @@ module m_forstr
  use m_fock
  use m_cgtools
  use m_xcdata
+ use m_dtset
+ use m_extfpmd
+ use m_ompgpu_utils
+ use m_xg
+ use m_xg_nonlop
 
+ use defs_datatypes,     only : pseudopotential_type
+ use defs_abitypes,      only : MPI_type
  use m_time,             only : timab
  use m_geometry,         only : xred2xcart, metric, stresssym
  use m_energies,         only : energies_type
@@ -56,8 +59,7 @@ module m_forstr
  use m_initylmg,         only : initylmg
  use m_xchybrid,         only : xchybrid_ncpp_cc
  use m_kg,               only : mkkpg
- use m_hamiltonian,      only : init_hamiltonian, destroy_hamiltonian, load_spin_hamiltonian,&
-&                               load_k_hamiltonian, gs_hamiltonian_type, load_kprime_hamiltonian!,K_H_KPRIME
+ use m_hamiltonian,      only : init_hamiltonian, gs_hamiltonian_type !,K_H_KPRIME
  use m_electronpositron, only : electronpositron_type, electronpositron_calctype
  use m_bandfft_kpt,      only : bandfft_kpt, bandfft_kpt_type, prep_bandfft_tabs, &
 &                               bandfft_kpt_savetabs, bandfft_kpt_restoretabs
@@ -65,15 +67,27 @@ module m_forstr
  use m_mkffnl,           only : mkffnl
  use m_mpinfo,           only : proc_distrb_cycle
  use m_nonlop,           only : nonlop
+ use m_gemm_nonlop_projectors,  only : gemm_nonlop_use_gemm, &
+&                               gemm_nonlop_ikpt_this_proc_being_treated
  use m_fock_getghc,      only : fock_getghc
  use m_prep_kgb,         only : prep_nonlop
  use m_paw_nhat,         only : pawmknhat
  use m_rhotoxc,          only : rhotoxc
  use m_dfpt_mkvxc,       only : dfpt_mkvxc, dfpt_mkvxc_noncoll
- use m_cgprj,            only : ctocprj
+ use m_cgprj,            only : ctocprj,xg_cprj_copy,CPRJ_TO_XG
  use m_psolver,          only : psolver_hartree
  use m_wvl_psi,          only : wvl_nl_gradient
  use m_fft,              only : fourdp
+ use, intrinsic :: iso_c_binding,      only : c_loc,c_f_pointer,c_double,c_size_t
+
+#if defined(HAVE_GPU_CUDA) && defined(HAVE_YAKL)
+ use gator_mod
+ use m_gpu_toolbox, only : CPU_DEVICE_ID, gpu_device_synchronize, gpu_data_prefetch_async
+#endif
+
+#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
+ use m_nvtx_data
+#endif
 
  implicit none
 
@@ -141,6 +155,7 @@ contains
 !!  eigen(mband*nkpt*nsppol)=array for holding eigenvalues (hartree)
 !!  fock <type(fock_type)>= quantities to calculate Fock exact exchange
 !!  grchempottn(3,natom)=d(E_chemical potential)/d(xred) (hartree)
+!!  grcondft(3,natom)=d(E_constrainedDFT)/d(xred) (hartree)
 !!  grewtn(3,natom)=d(Ewald)/d(xred) (hartree)
 !!  grvdw(3,ngrvdw)=gradients of energy due to Van der Waals DFT-D dispersion (hartree)
 !!  gsqcut=cutoff value on G**2 for (large) sphere inside FFT box.
@@ -184,6 +199,7 @@ contains
 !!  rhog(2,nfftf)=Fourier transform of charge density (bohr^-3)
 !!  rhor(nfftf,nspden)=array for electron density in electrons/bohr**3.
 !!  rprimd(3,3)=dimensional primitive translations in real space (bohr)
+!!  strscondft(6)=cDFT correction to stress
 !!  strsxc(6)=xc correction to stress
 !!  stress_needed=1 if computation of stress tensor is required
 !!  symrec(3,3,nsym)=symmetries in reciprocal space, reduced coordinates
@@ -192,7 +208,10 @@ contains
 !!  vhartr(nfftf)=array for holding Hartree potential
 !!  vpsp(nfftf)=array for holding local psp
 !!  vxc(nfftf,nspden)=exchange-correlation potential (hartree) in real space
+!!  vxctau(nfft,nspden,4*usekden)=(only for meta-GGA): derivative of XC energy density
+!!                                wrt kinetic energy density (depsxcdtau)
 !!  xccc3d(n3xccc)=3D core electron density for XC core correction, bohr^-3
+!!  xcctau3d(n3xccc*usekden)=(only for meta-GGA): 3D core electron kinetic energy density for XC core correction
 !!  xred(3,natom)=reduced dimensionless atomic coordinates
 !!  ylm(mpw*mkmem,mpsang*mpsang*useylm)= real spherical harmonics for each G and k point
 !!  ylmgr(mpw*mkmem,3,mpsang*mpsang*useylm)= gradients of real spherical harmonics
@@ -205,11 +224,11 @@ contains
 !!   fcart(3,natom)=forces in cartesian coordinates (Ha/Bohr)
 !!     at input, previous value of forces,
 !!     at output, new value.
-!!     Note : unlike fred, this array has been corrected by enforcing
+!!     Note : unlike gred, this array has been corrected by enforcing
 !!     the translational symmetry, namely that the sum of force
 !!     on all atoms is zero.
 !!   forold(3,natom)=cartesian forces of previous SCF cycle (hartree/bohr)
-!!   fred(3,natom)=symmetrized grtn = d(etotal)/d(xred)
+!!   gred(3,natom)=symmetrized grtn = d(etotal)/d(xred)
 !!   gresid(3,natom)=forces due to the residual of the density/potential
 !!   grhf(3,natom)=Hellman-Feynman derivatives of the total energy
 !!   grxc(9+3*natom)=d(Exc)/d(xred) if core charges are used
@@ -236,26 +255,16 @@ contains
 !!     the computation of wave functions ; one with nfftf points
 !!     (fine grid) for the computation of total density.
 !!
-!! PARENTS
-!!      afterscfloop,setup_positron
-!!
-!! CHILDREN
-!!      ctocprj,forces,forstrnps,initylmg,metric,nres2vres,pawcprj_alloc
-!!      pawcprj_free,pawcprj_getdim,pawgrnl,stress,timab,wvl_nl_gradient
-!!      xchybrid_ncpp_cc,xred2xcart
-!!
 !! SOURCE
 
 subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,energies,favg,fcart,fock,&
-&                 forold,fred,grchempottn,gresid,grewtn,grhf,grvdw,grxc,gsqcut,indsym,&
+&                 forold,gred,grchempottn,grcondft,gresid,grewtn,grhf,grvdw,grxc,gsqcut,extfpmd,indsym,&
 &                 kg,kxc,maxfor,mcg,mcprj,mgfftf,mpi_enreg,my_natom,n3xccc,nattyp,&
 &                 nfftf,ngfftf,ngrvdw,nhat,nkxc,npwarr,&
 &                 ntypat,nvresid,occ,optfor,optres,paw_ij,pawang,pawfgr,&
 &                 pawfgrtab,pawrad,pawrhoij,pawtab,ph1d,ph1df,psps,rhog,rhor,rprimd,stress_needed,&
-&                 strsxc,strten,symrec,synlgr,ucvol,usecprj,vhartr,vpsp,&
-&                 vxc,wvl,xccc3d,xred,ylm,ylmgr,qvpotzero)
-
- implicit none
+&                 strscondft,strsxc,strten,symrec,synlgr,ucvol,usecprj,vhartr,vpsp,&
+&                 vxc,vxctau,wvl,xccc3d,xcctau3d,xred,ylm,ylmgr,qvpotzero,xg_nonlop)
 
 !Arguments ------------------------------------
 !scalars
@@ -268,31 +277,34 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
  type(efield_type),intent(in) :: dtefield
  type(dataset_type),intent(in) :: dtset
  type(energies_type),intent(in) :: energies
+ type(extfpmd_type),pointer,intent(inout) :: extfpmd
  type(pawang_type),intent(in) :: pawang
  type(pawfgr_type),intent(in) :: pawfgr
  type(pseudopotential_type),intent(in) :: psps
  type(wvl_data),intent(inout) :: wvl
  type(fock_type),pointer, intent(inout) :: fock
+ type(xg_nonlop_t), intent(inout) :: xg_nonlop
 !arrays
  integer,intent(in) :: atindx1(dtset%natom),indsym(4,dtset%nsym,dtset%natom)
  integer,intent(in) :: kg(3,dtset%mpw*dtset%mkmem),nattyp(ntypat),ngfftf(18)
  integer,intent(in) :: npwarr(dtset%nkpt),symrec(3,3,dtset%nsym)
  real(dp),intent(in) :: cg(2,mcg)
  real(dp),intent(in) :: eigen(dtset%mband*dtset%nkpt*dtset%nsppol)
- real(dp),intent(in) :: grchempottn(3,dtset%natom),grewtn(3,dtset%natom),grvdw(3,ngrvdw),kxc(dtset%nfft,nkxc)
+ real(dp),intent(in) :: grchempottn(3,dtset%natom),grcondft(3,dtset%natom),grewtn(3,dtset%natom)
+ real(dp),intent(in) :: grvdw(3,ngrvdw),kxc(dtset%nfft,nkxc)
  real(dp),intent(in) :: occ(dtset%mband*dtset%nkpt*dtset%nsppol)
  real(dp),intent(in) :: ph1d(2,3*(2*dtset%mgfft+1)*dtset%natom)
  real(dp),intent(in) :: ph1df(2,3*(2*mgfftf+1)*dtset%natom)
- real(dp),intent(in) :: rhog(2,nfftf),rprimd(3,3),strsxc(6),vhartr(nfftf)
- real(dp),intent(in) :: vpsp(nfftf),vxc(nfftf,dtset%nspden)
+ real(dp),intent(in) :: rhog(2,nfftf),strscondft(6),strsxc(6),vhartr(nfftf)
+ real(dp),intent(in) :: vpsp(nfftf),vxc(nfftf,dtset%nspden),vxctau(nfftf,dtset%nspden,4*dtset%usekden)
  real(dp),intent(in) :: ylm(dtset%mpw*dtset%mkmem,psps%mpsang*psps%mpsang*psps%useylm)
  real(dp),intent(in) :: ylmgr(dtset%mpw*dtset%mkmem,3,psps%mpsang*psps%mpsang*psps%useylm)
  real(dp),intent(inout) :: forold(3,dtset%natom)
- real(dp),intent(inout) :: nhat(nfftf,dtset%nspden*psps%usepaw),rhor(nfftf,dtset%nspden)
- real(dp),intent(inout) :: xccc3d(n3xccc),xred(3,dtset%natom)
+ real(dp),intent(inout) :: nhat(nfftf,dtset%nspden*psps%usepaw),rhor(nfftf,dtset%nspden),rprimd(3,3)
+ real(dp),intent(inout) :: xccc3d(n3xccc),xcctau3d(n3xccc*dtset%usekden),xred(3,dtset%natom)
  real(dp),intent(inout),target :: nvresid(nfftf,dtset%nspden)
  real(dp),intent(out) :: favg(3)
- real(dp),intent(inout) :: fcart(3,dtset%natom),fred(3,dtset%natom)
+ real(dp),intent(inout) :: fcart(3,dtset%natom),gred(3,dtset%natom)
  real(dp),intent(inout) :: gresid(3,dtset%natom),grhf(3,dtset%natom)
  real(dp),intent(inout) :: grxc(3,dtset%natom),strten(6),synlgr(3,dtset%natom)
  type(pawcprj_type),intent(inout) :: cprj(dtset%natom,mcprj*usecprj)
@@ -304,9 +316,8 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
 
 !Local variables-------------------------------
 !scalars
-
  integer :: comm_grid,ifft,ispden,ncpgr,occopt_,optgr,optgr2,option,optnc,optstr,optstr2,iorder_cprj,ctocprj_choice
- integer :: idir,iatom,unpaw,mcgbz
+ integer :: idir,iatom,unpaw,mcgbz,usexg
  integer,allocatable :: dimcprj(:)
  real(dp) ::dum,dum1,ucvol_
  logical :: apply_residual
@@ -316,7 +327,6 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
  real(dp) :: dummy(0)
  real(dp),allocatable :: grnl(:),vlocal(:,:),vxc_hf(:,:),xcart(:,:),ylmbz(:,:),ylmgrbz(:,:,:)
  real(dp), ABI_CONTIGUOUS pointer :: resid(:,:)
-
 
 ! *************************************************************************
 
@@ -329,10 +339,10 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
 !Test size of FFT grids (1 grid in norm-conserving, 2 grids in PAW)
  if (dtset%usewvl==0) then
    if ((psps%usepaw==1.and.pawfgr%nfft/=nfftf).or.(psps%usepaw==0.and.dtset%nfft/=nfftf)) then
-     MSG_BUG(' wrong values for nfft, nfftf !')
+     ABI_BUG(' wrong values for nfft, nfftf !')
    end if
    if ((psps%usepaw==1.and.pawfgr%mgfft/=mgfftf).or.(psps%usepaw==0.and.dtset%mgfft/=mgfftf)) then
-     MSG_BUG('wrong values for mgfft, mgfftf!')
+     ABI_BUG('wrong values for mgfft, mgfftf!')
    end if
  end if
 
@@ -341,7 +351,7 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
 !==========================================================================
 
  !output only if (optfor==1) but we have to allocate it
- ABI_ALLOCATE(grnl,(3*dtset%natom*optfor))
+ ABI_MALLOC(grnl,(3*dtset%natom*optfor))
  grnl(:)=zero
 
 !Compute nonlocal psp + potential Fock ACE parts of forces and stress tensor
@@ -364,18 +374,18 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
        end if
        if (allocated(fock%fock_BZ%cwaveocc_prj)) then
          call pawcprj_free(fock%fock_BZ%cwaveocc_prj)
-         ABI_DATATYPE_DEALLOCATE(fock%fock_BZ%cwaveocc_prj)
-         ABI_DATATYPE_ALLOCATE(fock%fock_BZ%cwaveocc_prj,(dtset%natom,fock%fock_BZ%mcprj))
-         ABI_ALLOCATE(dimcprj,(dtset%natom))
+         ABI_FREE(fock%fock_BZ%cwaveocc_prj)
+         ABI_MALLOC(fock%fock_BZ%cwaveocc_prj,(dtset%natom,fock%fock_BZ%mcprj))
+         ABI_MALLOC(dimcprj,(dtset%natom))
          call pawcprj_getdim(dimcprj,dtset%natom,nattyp,dtset%ntypat,dtset%typat,pawtab,'O')
          call pawcprj_alloc(fock%fock_BZ%cwaveocc_prj,ncpgr,dimcprj)
-         ABI_DEALLOCATE(dimcprj)
+         ABI_FREE(dimcprj)
        end if
        iatom=-1;idir=0;iorder_cprj=0;unpaw=26
        call metric(gmet,gprimd,-1,rmet,rprimd,dum)
        if (fock%fock_BZ%mkpt/=dtset%mkmem.or.(fock%fock_BZ%mpi_enreg%paral_hf ==1)) then
-         ABI_ALLOCATE(ylmbz,(dtset%mpw*fock%fock_BZ%mkpt,psps%mpsang*psps%mpsang*psps%useylm))
-         ABI_ALLOCATE(ylmgrbz,(dtset%mpw*fock%fock_BZ%mkpt,3,psps%mpsang*psps%mpsang*psps%useylm))
+         ABI_MALLOC(ylmbz,(dtset%mpw*fock%fock_BZ%mkpt,psps%mpsang*psps%mpsang*psps%useylm))
+         ABI_MALLOC(ylmgrbz,(dtset%mpw*fock%fock_BZ%mkpt,3,psps%mpsang*psps%mpsang*psps%useylm))
          option=1; mcgbz=dtset%mpw*fock%fock_BZ%mkptband*fock%fock_common%my_nsppol
          call initylmg(gprimd,fock%fock_BZ%kg_bz,fock%fock_BZ%kptns_bz,fock%fock_BZ%mkpt,fock%fock_BZ%mpi_enreg,&
 &         psps%mpsang,dtset%mpw,fock%fock_BZ%nbandocc_bz,fock%fock_BZ%mkpt,&
@@ -385,32 +395,37 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
 &         fock%fock_BZ%mcprj,dtset%mgfft,fock%fock_BZ%mkpt,fock%fock_BZ%mpi_enreg,psps%mpsang,&
 &         dtset%mpw,dtset%natom,nattyp,fock%fock_BZ%nbandocc_bz,dtset%natom,dtset%ngfft,fock%fock_BZ%mkpt,&
 &         dtset%nloalg,fock%fock_BZ%npwarr,dtset%nspinor,&
-&         dtset%nsppol,dtset%ntypat,dtset%paral_kgb,ph1d,psps,rmet,dtset%typat,ucvol,unpaw,&
+&         dtset%nsppol,fock%fock_common%my_nsppol,dtset%ntypat,dtset%paral_kgb,ph1d,psps,rmet,dtset%typat,ucvol,unpaw,&
 &         xred,ylmbz,ylmgrbz)
-         ABI_DEALLOCATE(ylmbz)
-         ABI_DEALLOCATE(ylmgrbz)
+         ABI_FREE(ylmbz)
+         ABI_FREE(ylmgrbz)
        else
          call ctocprj(fock%fock_common%atindx,fock%fock_BZ%cgocc,ctocprj_choice,fock%fock_BZ%cwaveocc_prj,gmet,gprimd,iatom,idir,&
 &         iorder_cprj,fock%fock_BZ%istwfk_bz,fock%fock_BZ%kg_bz,fock%fock_BZ%kptns_bz,mcg,&
 &         fock%fock_BZ%mcprj,dtset%mgfft,fock%fock_BZ%mkpt,mpi_enreg,psps%mpsang,&
 &         dtset%mpw,dtset%natom,nattyp,fock%fock_BZ%nbandocc_bz,dtset%natom,dtset%ngfft,fock%fock_BZ%mkpt,&
 &         dtset%nloalg,fock%fock_BZ%npwarr,dtset%nspinor,&
-&         dtset%nsppol,dtset%ntypat,dtset%paral_kgb,ph1d,psps,rmet,dtset%typat,ucvol,unpaw,&
+&         dtset%nsppol,fock%fock_common%my_nsppol,dtset%ntypat,dtset%paral_kgb,ph1d,psps,rmet,dtset%typat,ucvol,unpaw,&
 &         xred,ylm,ylmgr)
        end if
      end if
    end if
+   usexg = 0
+   if (dtset%cprj_in_memory==1) usexg = 1
    call forstrnps(cg,cprj,dtset%ecut,dtset%ecutsm,dtset%effmass_free,eigen,electronpositron,fock,grnl,&
 &   dtset%istwfk,kg,kinstr,nlstr,dtset%kptns,dtset%mband,mcg,mcprj,dtset%mgfft,dtset%mkmem,&
 &   mpi_enreg,psps%mpsang,dtset%mpw,my_natom,dtset%natom,dtset%nband,dtset%nfft,dtset%ngfft,&
 &   dtset%nkpt,dtset%nloalg,npwarr,dtset%nspden,dtset%nspinor,dtset%nsppol,dtset%nsym,ntypat,&
 &   dtset%nucdipmom,occ,optfor,paw_ij,pawtab,ph1d,psps,rprimd,stress_needed,symrec,dtset%typat,&
-&   usecprj,dtset%usefock,dtset%use_gpu_cuda,dtset%wtk,xred,ylm,ylmgr)
+&   usecprj,dtset%usefock,usexg,dtset%gpu_option,dtset%wtk,xred,ylm,ylmgr,xg_nonlop)
+!DEBUG
+!   write(6,*)' after forstrnps, nlstr=',nlstr(1:6)
+!ENDDEBUG
  else if (optfor>0) then !WVL
-   ABI_ALLOCATE(xcart,(3, dtset%natom))
+   ABI_MALLOC(xcart,(3, dtset%natom))
    call xred2xcart(dtset%natom, rprimd, xcart, xred)
    call wvl_nl_gradient(grnl, mpi_enreg, dtset%natom, rprimd, wvl, xcart)
-   ABI_DEALLOCATE(xcart)
+   ABI_FREE(xcart)
  end if
 
  call timab(911,2,tsec)
@@ -418,7 +433,7 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
 
 !PAW: add gradients due to Dij derivatives to non-local term
  if (psps%usepaw==1) then
-   ABI_ALLOCATE(vlocal,(nfftf,dtset%nspden))
+   ABI_MALLOC(vlocal,(nfftf,dtset%nspden))
 
 !$OMP PARALLEL DO COLLAPSE(2)
    do ispden=1,min(dtset%nspden,2)
@@ -444,7 +459,10 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
 &   nattyp,nfftf,ngfftf,nhat,nlstr,dtset%nspden,dtset%nsym,ntypat,optgr,optgr2,optstr,optstr2,&
 &   pawang,pawfgrtab,pawrhoij,pawtab,ph1df,psps,k0,rprimd,symrec,dtset%typat,ucvol_,vlocal,vxc,xred,&
 &   mpi_atmtab=mpi_enreg%my_atmtab, comm_atom=mpi_enreg%comm_atom,mpi_comm_grid=comm_grid)
-   ABI_DEALLOCATE(vlocal)
+!DEBUG
+!   write(6,*)' after pawgrnl, nlstr=',nlstr(1:6)
+!ENDDEBUG
+   ABI_FREE(vlocal)
 
  end if
  call timab(912,2,tsec)
@@ -460,25 +478,25 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
 !  If residual is a density residual (and forces from residual asked),
 !  has to convert it into a potential residual before calling forces routine
    if (apply_residual) then
-     ABI_ALLOCATE(resid,(nfftf,dtset%nspden))
+     ABI_MALLOC(resid,(nfftf,dtset%nspden))
      option=0; if (dtset%densfor_pred<0) option=1
      optnc=1;if (dtset%nspden==4.and.(abs(dtset%densfor_pred)==4.or.abs(dtset%densfor_pred)==6)) optnc=2
      call nres2vres(dtset,gsqcut,psps%usepaw,kxc,mpi_enreg,my_natom,nfftf,ngfftf,nhat,&
 &     nkxc,nvresid,n3xccc,optnc,option,pawang,pawfgrtab,pawrhoij,pawtab,&
-&     rhor,rprimd,psps%usepaw,resid,xccc3d,xred,vxc)
+&     rhor,rprimd,psps%usepaw,resid,xccc3d,xred,vxc,xcctau3d)
    else
      resid => nvresid
    end if
 
-   call forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,forold,fred,grchempottn,gresid,grewtn,&
+   call forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,forold,gred,grchempottn,grcondft,gresid,grewtn,&
 &   grhf,grnl,grvdw,grxc,gsqcut,indsym,maxfor,mgfftf,&
 &   mpi_enreg,psps%n1xccc,n3xccc,nattyp,&
 &   nfftf,ngfftf,ngrvdw,ntypat,pawrad,pawtab,ph1df,psps,rhog,&
-&   rhor,rprimd,symrec,synlgr,dtset%usefock,resid,vxc,wvl%descr,wvl%den,xred,&
+&   rhor,rprimd,symrec,synlgr,dtset%usefock,resid,vxc,vxctau,wvl%descr,wvl%den,xred,&
 &   electronpositron=electronpositron)
 
    if (apply_residual) then
-     ABI_DEALLOCATE(resid)
+     ABI_FREE(resid)
    end if
  end if
 
@@ -491,30 +509,32 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
 
  if (stress_needed==1.and.dtset%usewvl==0) then
 !   if (dtset%usefock==1 .and. associated(fock).and.fock%fock_common%optstr.and.psps%usepaw==0) then
-   if (dtset%usefock==1 .and. associated(fock).and.fock%fock_common%optstr) then
-     fock%fock_common%stress(1:3)=fock%fock_common%stress(1:3)-(two*energies%e_fock-energies%e_fock0)/ucvol
-     if (n3xccc>0.and.psps%usepaw==0 .and. &
-&     (dtset%ixc==41.or.dtset%ixc==42.or.libxc_functionals_is_hybrid())) then
-       ABI_ALLOCATE(vxc_hf,(nfftf,dtset%nspden))
+   if (dtset%usefock==1 .and. associated(fock)) then
+     if (fock%fock_common%optstr) then
+       fock%fock_common%stress(1:3)=fock%fock_common%stress(1:3)-(two*energies%e_fock-energies%e_fock0)/ucvol
+       if (n3xccc>0.and.psps%usepaw==0 .and. &
+&        (dtset%ixc==41.or.dtset%ixc==42.or.libxc_functionals_is_hybrid())) then
+         ABI_MALLOC(vxc_hf,(nfftf,dtset%nspden))
 !compute Vxc^GGA(rho_val)
-       call xchybrid_ncpp_cc(dtset,dum,mpi_enreg,nfftf,ngfftf,n3xccc,rhor,rprimd,strdum,dum1,xccc3d,vxc=vxc_hf,optstr=1)
+         call xchybrid_ncpp_cc(dtset,dum,mpi_enreg,nfftf,ngfftf,n3xccc,rhor,rprimd,strdum,dum1,xccc3d,vxc=vxc_hf,optstr=1)
+       end if
      end if
    end if
    call stress(atindx1,dtset%berryopt,dtefield,energies%e_localpsp,dtset%efield,&
-&   energies%e_hartree,energies%e_corepsp,fock,gsqcut,dtset%ixc,kinstr,mgfftf,&
+&   energies%e_hartree,energies%e_corepsp,fock,gsqcut,extfpmd,dtset%ixc,kinstr,mgfftf,&
 &   mpi_enreg,psps%mqgrid_vl,psps%n1xccc,n3xccc,dtset%natom,nattyp,&
-&   nfftf,ngfftf,nlstr,dtset%nspden,dtset%nsym,ntypat,dtset%paral_kgb,psps,pawrad,pawtab,ph1df,&
-&   dtset%prtvol,psps%qgrid_vl,dtset%red_efieldbar,rhog,rprimd,strten,strsxc,symrec,&
-&   dtset%typat,dtset%usefock,psps%usepaw,&
-&   dtset%vdw_tol,dtset%vdw_tol_3bt,dtset%vdw_xc,psps%vlspl,vxc,vxc_hf,psps%xccc1d,xccc3d,psps%xcccrc,xred,&
-&   psps%ziontypat,psps%znucltypat,qvpotzero,&
+&   nfftf,ngfftf,nlstr,dtset%nspden,dtset%nsym,ntypat,psps,pawrad,pawtab,ph1df,&
+&   dtset%prtvol,psps%qgrid_vl,dtset%red_efieldbar,rhog,rprimd,strten,strscondft,strsxc,symrec,&
+&   dtset%typat,dtset%usefock,dtset%usekden,psps%usepaw,&
+&   dtset%vdw_tol,dtset%vdw_tol_3bt,dtset%vdw_xc,psps%vlspl,vxc,vxctau,vxc_hf,&
+&   psps%xccc1d,xccc3d,xcctau3d,psps%xcccrc,xred,psps%ziontypat,psps%znucltypat,qvpotzero,&
 &   electronpositron=electronpositron)
  end if
 
 !Memory deallocation
- ABI_DEALLOCATE(grnl)
+ ABI_FREE(grnl)
  if (allocated(vxc_hf)) then
-   ABI_DEALLOCATE(vxc_hf)
+   ABI_FREE(vxc_hf)
  end if
 
 
@@ -549,7 +569,7 @@ end subroutine forstr
 !!  mcprj=size of projected wave-functions array (cprj) =nspinor*mband*mkmem*nsppol
 !!  mgfft=maximum size of 1D FFTs
 !!  mkmem=number of k points treated by this node.
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  mpsang= 1+maximum angular momentum for nonlocal pseudopotentials
 !!  mpw= maximum number of plane waves
 !!  my_natom=number of atoms treated by current processor
@@ -577,7 +597,7 @@ end subroutine forstr
 !!  symrec(3,3,nsym)=symmetries in reciprocal space (dimensionless)
 !!  typat(natom)=type of each atom
 !!  usecprj=1 if cprj datastructure has been allocated
-!!  use_gpu_cuda= 0 or 1 to know if we use cuda for nonlop call
+!!  gpu_option= GPU implementation to use, i.e. cuda, openMP, ... (0=not using GPU)
 !!  wtk(nkpt)=weight associated with each k point
 !!  xred(3,natom)=reduced dimensionless atomic coordinates
 !!  ylm(mpw*mkmem,mpsang*mpsang*useylm)= real spherical harmonics for each G and k point
@@ -593,34 +613,24 @@ end subroutine forstr
 !!   npsstr(6)=nonlocal pseudopotential energy part of stress tensor
 !!    (hartree/bohr^3)
 !!
-!! PARENTS
-!!      forstr
-!!
-!! CHILDREN
-!!      bandfft_kpt_restoretabs,bandfft_kpt_savetabs,destroy_hamiltonian
-!!      fock_getghc,init_hamiltonian,load_k_hamiltonian,load_spin_hamiltonian
-!!      meanvalue_g,mkffnl,mkkpg,nonlop,pawcprj_alloc,pawcprj_free,pawcprj_get
-!!      pawcprj_reorder,prep_bandfft_tabs,prep_nonlop,stresssym,timab,xmpi_sum
-!!
 !! SOURCE
 
 subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,fock,&
 &  grnl,istwfk,kg,kinstr,npsstr,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_enreg,mpsang,&
 &  mpw,my_natom,natom,nband,nfft,ngfft,nkpt,nloalg,npwarr,nspden,nspinor,nsppol,nsym,&
 &  ntypat,nucdipmom,occ,optfor,paw_ij,pawtab,ph1d,psps,rprimd,&
-&  stress_needed,symrec,typat,usecprj,usefock,use_gpu_cuda,wtk,xred,ylm,ylmgr)
-
- implicit none
+&  stress_needed,symrec,typat,usecprj,usefock,usexg,gpu_option,wtk,xred,ylm,ylmgr,xg_nonlop)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: mband,mcg,mcprj,mgfft,mkmem,mpsang,mpw,my_natom,natom,nfft,nkpt
  integer,intent(in) :: nspden,nsppol,nspinor,nsym,ntypat,optfor,stress_needed
- integer,intent(in) :: usecprj,usefock,use_gpu_cuda
+ integer,intent(in) :: usecprj,usefock,usexg,gpu_option
  real(dp),intent(in) :: ecut,ecutsm,effmass_free
  type(electronpositron_type),pointer :: electronpositron
  type(MPI_type),intent(inout) :: mpi_enreg
  type(pseudopotential_type),intent(in) :: psps
+ type(xg_nonlop_t),intent(inout) :: xg_nonlop
 !arrays
  integer,intent(in) :: istwfk(nkpt),kg(3,mpw*mkmem),nband(nkpt*nsppol)
  integer,intent(in) :: ngfft(18),nloalg(3),npwarr(nkpt)
@@ -645,6 +655,7 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
  integer :: nnlout,npw_k,paw_opt,signs,spaceComm
  integer :: tim_nonlop,tim_nonlop_prep,usecprj_local,use_ACE_old
  integer :: blocksize,iblock,iblocksize,ibs,nblockbd
+ integer :: space,me_g0,ncols_cprj
  real(dp) :: ar,renorm_factor,dfsm,ecutsm_inv,fact_kin,fsm,htpisq,kgc1
  real(dp) :: kgc2,kgc3,kin,xx
  type(gs_hamiltonian_type) :: gs_hamk
@@ -654,7 +665,12 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
 !arrays
  integer,allocatable :: kg_k(:,:)
  real(dp) :: kpoint(3),nonlop_dum(1,1),rmet(3,3),tsec(2)
- real(dp),allocatable :: cwavef(:,:),enlout(:),ffnl_sav(:,:,:,:),ffnl_str(:,:,:,:)
+#if defined HAVE_GPU && defined HAVE_YAKL
+ real(c_double), ABI_CONTIGUOUS pointer :: cwavef(:,:) => null()
+#else
+ real(dp),allocatable :: cwavef(:,:)
+#endif
+ real(dp),allocatable :: enlout(:),ffnl_sav(:,:,:,:),ffnl_str(:,:,:,:)
  real(dp),allocatable :: ghc_dum(:,:),gprimd(:,:),kpg_k(:,:),kpg_k_sav(:,:)
  real(dp),allocatable :: kstr1(:),kstr2(:),kstr3(:),kstr4(:),kstr5(:),kstr6(:)
  real(dp),allocatable :: lambda(:),occblock(:),ph3d(:,:,:),ph3d_sav(:,:,:)
@@ -663,12 +679,14 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
  type(bandfft_kpt_type),pointer :: my_bandfft_kpt => null()
  type(pawcprj_type),target,allocatable :: cwaveprj(:,:)
  type(pawcprj_type),pointer :: cwaveprj_idat(:,:)
-
+ type(xgBlock_t) :: xgx0,xgeigen,xgforces,xgstress
+ type(xg_t) :: cprj_xgx0,cprj_work
+ real(dp),allocatable :: enlout_2d(:,:),enlout_2d_stress(:,:)
 
 !*************************************************************************
 
- call timab(920,1,tsec)
- call timab(921,1,tsec)
+ ABI_NVTX_START_RANGE(NVTX_FORSTRNPS)
+ call timab(920,1,tsec) ; call timab(921,-1,tsec)
 
 !Init mpicomm and me
  if(mpi_enreg%paral_kgb==1)then
@@ -722,10 +740,10 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
    if(optfor==1)then
      fockcommon%optfor=.true.
      if (.not.allocated(fockcommon%forces_ikpt)) then
-       ABI_ALLOCATE(fockcommon%forces_ikpt,(3,natom,mband))
+       ABI_MALLOC(fockcommon%forces_ikpt,(3,natom,mband))
      end if
      if (.not.allocated(fockcommon%forces)) then
-       ABI_ALLOCATE(fockcommon%forces,(3,natom))
+       ABI_MALLOC(fockcommon%forces,(3,natom))
      end if
      fockcommon%forces=zero
      compute_gbound=.true.
@@ -738,9 +756,13 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
 & typat,xred,nfft,mgfft,ngfft,rprimd,nloalg,usecprj=usecprj_local,&
 & comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,mpi_spintab=mpi_enreg%my_isppoltab,&
 & paw_ij=paw_ij,ph1d=ph1d,electronpositron=electronpositron,fock=fock,&
-& nucdipmom=nucdipmom,use_gpu_cuda=use_gpu_cuda)
+& nucdipmom=nucdipmom,gpu_option=gpu_option)
  rmet = MATMUL(TRANSPOSE(rprimd),rprimd)
- call timab(921,2,tsec)
+
+ if (usexg==1) then
+   call xg_nonlop_update_weight(xg_nonlop,gs_hamk%ucvol)
+   if (xg_nonlop%paw) call xg_nonlop_make_Dij(xg_nonlop,paw_ij,nsppol,gs_hamk%atindx)
+ end if
 
 !need to reorder cprj=<p_lmn|Cnk> (from unsorted to atom-sorted)
  if (psps%usepaw==1.and.usecprj_local==1) then
@@ -765,8 +787,12 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
  do isppol=1,nsppol
 
 !  Continue to initialize the Hamiltonian (PAW DIJ coefficients)
-   call load_spin_hamiltonian(gs_hamk,isppol,with_nonlocal=.true.)
+   call gs_hamk%load_spin(isppol,with_nonlocal=.true.)
    if (usefock_loc) fockcommon%isppol=isppol
+
+   if (usexg==1) then
+     if (xg_nonlop%paw) call xg_nonlop_set_Dij_spin(xg_nonlop,isppol)
+   end if
 
 !  Loop over k points
    ikg=0
@@ -799,34 +825,41 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
      mband_cprj=mband/mpi_enreg%nproc_band
      nband_cprj_k=nband_k/mpi_enreg%nproc_band
 
-     ABI_ALLOCATE(cwavef,(2,npw_k*my_nspinor*blocksize))
+     if(gpu_option == ABI_GPU_KOKKOS) then
+#if defined HAVE_GPU && defined HAVE_YAKL
+       ABI_MALLOC_MANAGED(cwavef,(/2,npw_k*my_nspinor*blocksize/))
+#endif
+     else
+       ABI_MALLOC(cwavef,(2,npw_k*my_nspinor*blocksize))
+     end if
+
      if (psps%usepaw==1.and.usecprj_local==1) then
-       ABI_DATATYPE_ALLOCATE(cwaveprj,(natom,my_nspinor*bandpp))
+       ABI_MALLOC(cwaveprj,(natom,my_nspinor*bandpp))
        call pawcprj_alloc(cwaveprj,0,gs_hamk%dimcprj)
      else
-       ABI_DATATYPE_ALLOCATE(cwaveprj,(0,0))
+       ABI_MALLOC(cwaveprj,(0,0))
      end if
 
      if (stress_needed==1) then
-       ABI_ALLOCATE(kstr1,(npw_k))
-       ABI_ALLOCATE(kstr2,(npw_k))
-       ABI_ALLOCATE(kstr3,(npw_k))
-       ABI_ALLOCATE(kstr4,(npw_k))
-       ABI_ALLOCATE(kstr5,(npw_k))
-       ABI_ALLOCATE(kstr6,(npw_k))
+       ABI_MALLOC(kstr1,(npw_k))
+       ABI_MALLOC(kstr2,(npw_k))
+       ABI_MALLOC(kstr3,(npw_k))
+       ABI_MALLOC(kstr4,(npw_k))
+       ABI_MALLOC(kstr5,(npw_k))
+       ABI_MALLOC(kstr6,(npw_k))
      end if
 
-     ABI_ALLOCATE(kg_k,(3,mpw))
+     ABI_MALLOC(kg_k,(3,mpw))
 !$OMP PARALLEL DO
      do ipw=1,npw_k
        kg_k(:,ipw)=kg(:,ipw+ikg)
      end do
 
-     ABI_ALLOCATE(ylm_k,(npw_k,mpsang*mpsang*psps%useylm))
+     ABI_MALLOC(ylm_k,(npw_k,mpsang*mpsang*psps%useylm))
      if (stress_needed==1) then
-       ABI_ALLOCATE(ylmgr_k,(npw_k,3,mpsang*mpsang*psps%useylm))
+       ABI_MALLOC(ylmgr_k,(npw_k,3,mpsang*mpsang*psps%useylm))
      else
-       ABI_ALLOCATE(ylmgr_k,(0,0,0))
+       ABI_MALLOC(ylmgr_k,(0,0,0))
      end if
      if (psps%useylm==1) then
 !$OMP PARALLEL DO COLLAPSE(2)
@@ -850,7 +883,7 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
 !    Prepare kinetic contribution to stress tensor (Warning : the symmetry
 !    has not been broken, like in mkkin.f or kpg3.f . It should be, in order to be coherent).
      if (stress_needed==1) then
-       ABI_ALLOCATE(gprimd,(3,3))
+       ABI_MALLOC(gprimd,(3,3))
        gprimd=gs_hamk%gprimd
 !$OMP PARALLEL DO PRIVATE(fact_kin,ipw,kgc1,kgc2,kgc3,kin,xx,fsm,dfsm) &
 !$OMP&SHARED(ecut,ecutsm,ecutsm_inv,gs_hamk,htpisq,kg_k,kpoint,kstr1,kstr2,kstr3,kstr4,kstr5,kstr6,npw_k)
@@ -890,13 +923,17 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
          kstr5(ipw)=fact_kin*kgc3*kgc1
          kstr6(ipw)=fact_kin*kgc2*kgc1
        end do ! ipw
-       ABI_DEALLOCATE(gprimd)
+       ABI_FREE(gprimd)
      end if
 
-!    Compute (k+G) vectors
-     nkpg=3*nloalg(3)
-     ABI_ALLOCATE(kpg_k,(npw_k,nkpg))
-     if (nkpg>0) then
+!    Compute (k+G) vectors (only if useylm=1)
+     if (usexg/=1) then
+       nkpg=3*nloalg(3)
+       ABI_MALLOC(kpg_k,(npw_k,nkpg))
+       if (nkpg>0) call mkkpg(kg_k,kpg_k,kpoint,nkpg,npw_k)
+     else ! cprj_in_memory = 1
+       nkpg=3
+       ABI_MALLOC(kpg_k,(npw_k,nkpg))
        call mkkpg(kg_k,kpg_k,kpoint,nkpg,npw_k)
      end if
 
@@ -905,51 +942,81 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
      if (stress_needed==1) then
        ider=1;dimffnl=2+2*psps%useylm
      end if
-     ABI_ALLOCATE(ffnl,(npw_k,dimffnl,psps%lmnmax,ntypat))
+     ABI_MALLOC(ffnl,(npw_k,dimffnl,psps%lmnmax,ntypat))
      call mkffnl(psps%dimekb,dimffnl,psps%ekb,ffnl,psps%ffspl,gs_hamk%gmet,gs_hamk%gprimd,&
 &     ider,idir,psps%indlmn,kg_k,kpg_k,kpoint,psps%lmnmax,psps%lnmax,psps%mpsang,psps%mqgrid_ff,&
 &     nkpg,npw_k,ntypat,psps%pspso,psps%qgrid_ff,rmet,psps%usepaw,psps%useylm,ylm_k,ylmgr_k)
+#ifdef HAVE_OPENMP_OFFLOAD
+     !$OMP TARGET ENTER DATA MAP(to:ffnl) IF(gpu_option==ABI_GPU_OPENMP)
+#endif
      if ((stress_needed==1).and.(usefock_loc).and.(psps%usepaw==1))then
        ider_str=1; dimffnl_str=7;idir_str=-7
-       ABI_ALLOCATE(ffnl_str,(npw_k,dimffnl_str,psps%lmnmax,ntypat))
+       ABI_MALLOC(ffnl_str,(npw_k,dimffnl_str,psps%lmnmax,ntypat))
        call mkffnl(psps%dimekb,dimffnl_str,psps%ekb,ffnl_str,psps%ffspl,gs_hamk%gmet,gs_hamk%gprimd,&
 &       ider_str,idir_str,psps%indlmn,kg_k,kpg_k,kpoint,psps%lmnmax,psps%lnmax,psps%mpsang,psps%mqgrid_ff,&
 &       nkpg,npw_k,ntypat,psps%pspso,psps%qgrid_ff,rmet,psps%usepaw,psps%useylm,ylm_k,ylmgr_k)
+#ifdef HAVE_OPENMP_OFFLOAD
+       !$OMP TARGET ENTER DATA MAP(to:ffnl_str) IF(gpu_option==ABI_GPU_OPENMP)
+#endif
      end if
 
 !    Load k-dependent part in the Hamiltonian datastructure
 !     - Compute 3D phase factors
 !     - Prepare various tabs in case of band-FFT parallelism
 !     - Load k-dependent quantities in the Hamiltonian
-     ABI_ALLOCATE(ph3d,(2,npw_k,gs_hamk%matblk))
-     call load_k_hamiltonian(gs_hamk,kpt_k=kpoint,istwf_k=istwf_k,npw_k=npw_k,&
+     ABI_MALLOC(ph3d,(2,npw_k,gs_hamk%matblk))
+     call gs_hamk%load_k(kpt_k=kpoint,istwf_k=istwf_k,npw_k=npw_k,&
 &     kg_k=kg_k,kpg_k=kpg_k,ffnl_k=ffnl,ph3d_k=ph3d,compute_gbound=compute_gbound,compute_ph3d=.true.)
 
 !    Load band-FFT tabs (transposed k-dependent arrays)
-     if (mpi_enreg%paral_kgb==1) then
+     if (mpi_enreg%paral_kgb==1.and.usexg/=1) then
        call bandfft_kpt_savetabs(my_bandfft_kpt,ffnl=ffnl_sav,ph3d=ph3d_sav,kpg=kpg_k_sav)
        call prep_bandfft_tabs(gs_hamk,ikpt,mkmem,mpi_enreg)
-       call load_k_hamiltonian(gs_hamk,npw_fft_k=my_bandfft_kpt%ndatarecv, &
+       call gs_hamk%load_k(npw_fft_k=my_bandfft_kpt%ndatarecv, &
 &       kg_k     =my_bandfft_kpt%kg_k_gather, &
 &       kpg_k    =my_bandfft_kpt%kpg_k_gather, &
-       ffnl_k   =my_bandfft_kpt%ffnl_gather, &
-       ph3d_k   =my_bandfft_kpt%ph3d_gather,compute_gbound=compute_gbound)
+&       ffnl_k   =my_bandfft_kpt%ffnl_gather, &
+&       ph3d_k   =my_bandfft_kpt%ph3d_gather,compute_gbound=compute_gbound)
      end if
 
-     call timab(922,2,tsec)
+!    If OpenMP GPU, load "hamiltonian" on GPU device
+     if (gpu_option == ABI_GPU_OPENMP) then
+       if(mpi_enreg%paral_kgb==0) then
+         call ompgpu_load_hamilt_buffers(gs_hamk%kg_k,gs_hamk%kg_kp,gs_hamk%ffnl_k,gs_hamk%ph3d_k)
+       else if(gs_hamk%istwf_k==1) then
+         call ompgpu_load_hamilt_buffers(gs_hamk%kg_k,gs_hamk%kg_kp,gs_hamk%ffnl_k,gs_hamk%ph3d_k,kg_k_gather=my_bandfft_kpt%kg_k_gather)
+       else
+         call ompgpu_load_hamilt_buffers(gs_hamk%kg_k,gs_hamk%kg_kp,gs_hamk%ffnl_k,gs_hamk%ph3d_k,kg_k_gather=my_bandfft_kpt%kg_k_gather_sym)
+       end if
+     end if
+
+!    Setup gemm_nonlop
+     if (gemm_nonlop_use_gemm) then
+       gemm_nonlop_ikpt_this_proc_being_treated = my_ikpt
+     end if
+
+     if (usexg==1) then
+       call xg_nonlop_make_k(xg_nonlop,my_ikpt,istwf_k,mpi_enreg%me_g0,mpi_enreg%me_g0_fft,npw_k,ffnl,ph3d,kpg_k,.true.)
+     end if
 
 !    Loop over (blocks of) bands; accumulate forces and/or stresses
 !    The following is now wrong. In sequential, nblockbd=nband_k/bandpp
 !    blocksize= bandpp (JB 2016/04/16)
 !    Note that in sequential mode iblock=iband, nblockbd=nband_k and blocksize=1
-     ABI_ALLOCATE(lambda,(blocksize))
-     ABI_ALLOCATE(occblock,(blocksize))
-     ABI_ALLOCATE(weight,(blocksize))
-     ABI_ALLOCATE(enlout,(nnlout*blocksize))
+     ABI_MALLOC(lambda,(blocksize))
+     ABI_MALLOC(occblock,(blocksize))
+     ABI_MALLOC(weight,(blocksize))
+     ABI_MALLOC(enlout,(nnlout*blocksize))
+     if (usexg==1) then
+       ABI_MALLOC(enlout_2d,(3*natom,blocksize*optfor))
+       ABI_MALLOC(enlout_2d_stress,(6,blocksize*stress_needed))
+       if (optfor==1) enlout_2d=zero
+       if (stress_needed==1) enlout_2d_stress=zero
+     end if
      occblock=zero;weight=zero;enlout(:)=zero
      if (usefock_loc) then
        if (fockcommon%optstr) then
-         ABI_ALLOCATE(fockcommon%stress_ikpt,(6,nband_k))
+         ABI_MALLOC(fockcommon%stress_ikpt,(6,nband_k))
          fockcommon%stress_ikpt=zero
        end if
      end if
@@ -957,6 +1024,14 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
        if (fockcommon%optfor) then
          fockcommon%forces_ikpt=zero
        end if
+     end if
+
+     call timab(922,2,tsec)
+
+     if (usexg==1) then
+       ncols_cprj = bandpp*my_nspinor
+       call xg_init(cprj_xgx0,xg_nonlop%space_cprj,xg_nonlop%cprjdim,ncols_cprj,comm=xg_nonlop%comm_band)
+       call xg_init(cprj_work,xg_nonlop%space_cprj,xg_nonlop%cprjdim,ncols_cprj,comm=xg_nonlop%comm_band)
      end if
 
      do iblock=1,nblockbd
@@ -973,7 +1048,7 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
 
 !        gs_hamk%ffnl_k is changed in fock_getghc, so that it is necessary to restore it when stresses are to be calculated.
          if ((stress_needed==1).and.(usefock_loc).and.(psps%usepaw==1))then
-           call load_k_hamiltonian(gs_hamk,ffnl_k=ffnl)
+           call gs_hamk%load_k(ffnl_k=ffnl)
          end if
 
 !        Load contribution from n,k
@@ -986,38 +1061,105 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
          end if
 
          call timab(923,2,tsec)
-         call timab(926,1,tsec)
+         call timab(924,-1,tsec)
 
          lambda(1:blocksize)= eigen(1+(iblock-1)*blocksize+bdtot_index:iblock*blocksize+bdtot_index)
-         if (mpi_enreg%paral_kgb/=1) then
+         ABI_NVTX_START_RANGE(NVTX_FORSTR_NONLOP)
+         if (mpi_enreg%paral_kgb/=1.and.usexg/=1) then
            call nonlop(choice,cpopt,cwaveprj,enlout,gs_hamk,idir,lambda,mpi_enreg,blocksize,nnlout,&
 &           paw_opt,signs,nonlop_dum,tim_nonlop,cwavef,cwavef)
-         else
+         else if (usexg/=1) then
+           ! here we MUST pass option gpu_option=ABI_GPU_DISABLED, as cwavef here is a host memory buffer
            call prep_nonlop(choice,cpopt,cwaveprj,enlout,gs_hamk,idir,lambda,blocksize,&
-&           mpi_enreg,nnlout,paw_opt,signs,nonlop_dum,tim_nonlop_prep,cwavef,cwavef)
-         end if
+&           mpi_enreg,nnlout,paw_opt,signs,nonlop_dum,tim_nonlop_prep,cwavef,cwavef,&
+&           already_transposed=.False.,gpu_option=ABI_GPU_DISABLED)
+         else ! usexg==1
+
+           if ( istwf_k > 1 ) then ! Real only
+             space = SPACE_CR
+           else ! complex
+             space = SPACE_C
+           end if
+           me_g0 = -1
+           if (space==SPACE_CR) then
+             me_g0 = 0
+             if (istwf_k == 2) then
+               if (mpi_enreg%me_g0 == 1) me_g0 = 1
+             end if
+           end if
+           call xgBlock_map(xgx0,cwavef,space,npw_k*my_nspinor,blocksize,comm=mpi_enreg%comm_band,me_g0=me_g0,&
+ &         gpu_option=gpu_option)
+           call xgBlock_map_1d(xgeigen,lambda,SPACE_R,blocksize)
+
+           if (psps%usepaw==1.and.usecprj_local==1) then
+             call xg_cprj_copy(cwaveprj,cprj_xgx0%self,xg_nonlop,CPRJ_TO_XG)
+           else
+             call xg_nonlop_getcprj(xg_nonlop,xgx0,cprj_xgx0%self,cprj_work%self)
+           end if
+
+           if (optfor==1) call xgBlock_map(xgforces,enlout_2d,SPACE_R,3*natom,blocksize)
+           if (stress_needed==1) call xgBlock_map(xgstress,enlout_2d_stress,SPACE_R,6,blocksize)
+
+           if (optfor==1.and.stress_needed==0) then
+             call xg_nonlop_forces_stress(xg_nonlop,xgx0,cprj_xgx0%self,cprj_work%self,xgeigen,&
+               forces=xgforces)
+           end if
+           if (optfor==0.and.stress_needed==1) then
+             call xg_nonlop_forces_stress(xg_nonlop,xgx0,cprj_xgx0%self,cprj_work%self,xgeigen,&
+               stress=xgstress,gprimd=gs_hamk%gprimd)
+           end if
+           if (optfor==1.and.stress_needed==1) then
+             call xg_nonlop_forces_stress(xg_nonlop,xgx0,cprj_xgx0%self,cprj_work%self,xgeigen,&
+               forces=xgforces,stress=xgstress,gprimd=gs_hamk%gprimd)
+           end if
+
+         end if ! end usexg==1
+         ABI_NVTX_END_RANGE()
+
          if ((stress_needed==1).and.(usefock_loc).and.(psps%usepaw==1))then
-           call load_k_hamiltonian(gs_hamk,ffnl_k=ffnl_str)
+           call gs_hamk%load_k(ffnl_k=ffnl_str)
          end if
-         call timab(926,2,tsec)
 
 !        Accumulate non-local contributions from n,k
-         if (optfor==1) then
-           do iblocksize=1,blocksize
-             ibs=nnlout*(iblocksize-1)
-             grnl(1:3*natom)=grnl(1:3*natom)+weight(iblocksize)*enlout(ibs+1+ishift:ibs+3*natom+ishift)
-           end do
+         if (usexg/=1) then
+           if (optfor==1) then
+             do iblocksize=1,blocksize
+               ibs=nnlout*(iblocksize-1)
+               grnl(1:3*natom)=grnl(1:3*natom)+weight(iblocksize)*enlout(ibs+1+ishift:ibs+3*natom+ishift)
+             end do
+           end if
+           if (stress_needed==1) then
+             do iblocksize=1,blocksize
+               ibs=nnlout*(iblocksize-1)
+               npsstr(1:6)=npsstr(1:6) + weight(iblocksize)*enlout(ibs+1:ibs+6)
+             end do
+           end if
+         else
+           if (optfor==1) then
+             do iblocksize=1,blocksize
+               grnl(1:3*natom)=grnl(1:3*natom)+weight(iblocksize)*enlout_2d(1:3*natom,iblocksize)
+             end do
+           end if
+           if (stress_needed==1) then
+             do iblocksize=1,blocksize
+               npsstr(1:6) = npsstr(1:6) + weight(iblocksize)*enlout_2d_stress(1:6,iblocksize)
+             end do
+           end if
          end if
-         if (stress_needed==1) then
-           do iblocksize=1,blocksize
-             ibs=nnlout*(iblocksize-1)
-             npsstr(1:6)=npsstr(1:6) + weight(iblocksize)*enlout(ibs+1:ibs+6)
-           end do
+
+         call timab(924,2,tsec)
+
+#if defined HAVE_GPU && defined HAVE_YAKL
+         if(gpu_option==ABI_GPU_KOKKOS) then
+           ! the following is done on CPU, so prefetch wave functions from device to host (for efficiency)
+           call gpu_data_prefetch_async(C_LOC(cwavef), INT(2, c_size_t)*npw_k*my_nspinor*blocksize, CPU_DEVICE_ID)
+           call gpu_device_synchronize()
          end if
+#endif
 
 !        Accumulate stress tensor kinetic contributions
          if (stress_needed==1) then
-           call timab(924,1,tsec)
+           call timab(925,1,tsec)
            do iblocksize=1,blocksize
              call meanvalue_g(ar,kstr1,0,istwf_k,mpi_enreg,npw_k,my_nspinor,&
 &             cwavef(:,1+(iblocksize-1)*npw_k*my_nspinor:iblocksize*npw_k*my_nspinor),&
@@ -1044,40 +1186,52 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
 &             cwavef(:,1+(iblocksize-1)*npw_k*my_nspinor:iblocksize*npw_k*my_nspinor),0)
              kinstr(6)=kinstr(6)+weight(iblocksize)*ar
            end do
-           call timab(924,2,tsec)
+           call timab(925,2,tsec)
          end if
 
 !        Accumulate stress tensor and forces for the Fock part
          if (usefock_loc) then
            if(fockcommon%optstr.or.fockcommon%optfor) then
+             call timab(926,1,tsec)
              if (mpi_enreg%paral_kgb==1) then
                msg='forsrtnps: Paral_kgb is not yet implemented for fock stresses'
-               MSG_BUG(msg)
+               ABI_BUG(msg)
              end if
              ndat=mpi_enreg%bandpp
              if (gs_hamk%usepaw==0) cwaveprj_idat => cwaveprj
-             ABI_ALLOCATE(ghc_dum,(0,0))
+             ABI_MALLOC(ghc_dum,(0,0))
+             fockcommon%ieigen=(iblock-1)*blocksize+1
+             fockcommon%iband=(iblock-1)*blocksize+1
+             if (gs_hamk%usepaw==1) then
+               cwaveprj_idat => cwaveprj(:,1+blocksize*(my_nspinor-1):blocksize*my_nspinor)
+             end if
+             call fock_getghc(cwavef(:,1+blocksize*npw_k*(my_nspinor-1):blocksize*npw_k*my_nspinor),cwaveprj_idat,&
+&             ghc_dum,gs_hamk,mpi_enreg,blocksize)
              do iblocksize=1,blocksize
-               fockcommon%ieigen=(iblock-1)*blocksize+iblocksize
-               fockcommon%iband=(iblock-1)*blocksize+iblocksize
-               if (gs_hamk%usepaw==1) then
-                 cwaveprj_idat => cwaveprj(:,(iblocksize-1)*my_nspinor+1:iblocksize*my_nspinor)
-               end if
-               call fock_getghc(cwavef(:,1+(iblocksize-1)*npw_k*my_nspinor:iblocksize*npw_k*my_nspinor),cwaveprj_idat,&
-&               ghc_dum,gs_hamk,mpi_enreg)
                if (fockcommon%optstr) then
-                 fockcommon%stress(:)=fockcommon%stress(:)+weight(iblocksize)*fockcommon%stress_ikpt(:,fockcommon%ieigen)
+                 fockcommon%stress(:)=fockcommon%stress(:)+weight(iblocksize)*fockcommon%stress_ikpt(:,fockcommon%ieigen+iblocksize-1)
                end if
                if (fockcommon%optfor) then
-                 fockcommon%forces(:,:)=fockcommon%forces(:,:)+weight(iblocksize)*fockcommon%forces_ikpt(:,:,fockcommon%ieigen)
+                 fockcommon%forces(:,:)=fockcommon%forces(:,:)+weight(iblocksize)*fockcommon%forces_ikpt(:,:,fockcommon%ieigen+iblocksize-1)
                end if
              end do
-             ABI_DEALLOCATE(ghc_dum)
+             ABI_FREE(ghc_dum)
+             call timab(926,2,tsec)
            end if
-         end if
+         end if ! usefock_loc
+       end if
+       if ( gpu_option == ABI_GPU_OPENMP) then
+         call ompgpu_free_hamilt_buffers()
        end if
 
      end do ! End of loop on block of bands
+
+     if (usexg==1) then
+       call xg_free(cprj_xgx0)
+       call xg_free(cprj_work)
+     end if
+
+     call timab(927,1,tsec)
 
 !    Restore the bandfft tabs
      if (mpi_enreg%paral_kgb==1) then
@@ -1094,40 +1248,66 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
 
      if (usefock_loc) then
        if (fockcommon%optstr) then
-         ABI_DEALLOCATE(fockcommon%stress_ikpt)
+         ABI_FREE(fockcommon%stress_ikpt)
        end if
      end if
 
      if (psps%usepaw==1) then
        call pawcprj_free(cwaveprj)
      end if
-     ABI_DATATYPE_DEALLOCATE(cwaveprj)
-     ABI_DEALLOCATE(cwavef)
+     ABI_FREE(cwaveprj)
 
-     ABI_DEALLOCATE(lambda)
-     ABI_DEALLOCATE(occblock)
-     ABI_DEALLOCATE(weight)
-     ABI_DEALLOCATE(enlout)
-     ABI_DEALLOCATE(ffnl)
-     ABI_DEALLOCATE(kg_k)
-     ABI_DEALLOCATE(kpg_k)
-     ABI_DEALLOCATE(ylm_k)
-     ABI_DEALLOCATE(ylmgr_k)
-     ABI_DEALLOCATE(ph3d)
+     if(gpu_option == ABI_GPU_KOKKOS) then
+#if defined HAVE_GPU && defined HAVE_YAKL
+       ABI_FREE_MANAGED(cwavef)
+#endif
+     else
+       ABI_FREE(cwavef)
+     end if
+
+     ABI_FREE(lambda)
+     ABI_FREE(occblock)
+     ABI_FREE(weight)
+     ABI_FREE(enlout)
+     if (usexg==1) then
+       ABI_FREE(enlout_2d)
+       ABI_FREE(enlout_2d_stress)
+     end if
+#ifdef HAVE_OPENMP_OFFLOAD
+     !$OMP TARGET EXIT DATA MAP(delete:ffnl) IF(gpu_option==ABI_GPU_OPENMP)
+#endif
+     ABI_FREE(ffnl)
+     ABI_FREE(kg_k)
+     ABI_FREE(kpg_k)
+     ABI_FREE(ylm_k)
+     ABI_FREE(ylmgr_k)
+     ABI_FREE(ph3d)
      if (stress_needed==1) then
-       ABI_DEALLOCATE(kstr1)
-       ABI_DEALLOCATE(kstr2)
-       ABI_DEALLOCATE(kstr3)
-       ABI_DEALLOCATE(kstr4)
-       ABI_DEALLOCATE(kstr5)
-       ABI_DEALLOCATE(kstr6)
+       ABI_FREE(kstr1)
+       ABI_FREE(kstr2)
+       ABI_FREE(kstr3)
+       ABI_FREE(kstr4)
+       ABI_FREE(kstr5)
+       ABI_FREE(kstr6)
      end if
      if ((stress_needed==1).and.(usefock_loc).and.(psps%usepaw==1))then
-       ABI_DEALLOCATE(ffnl_str)
+#ifdef HAVE_OPENMP_OFFLOAD
+       !$OMP TARGET EXIT DATA MAP(delete:ffnl_str) IF(gpu_option==ABI_GPU_OPENMP)
+#endif
+       ABI_FREE(ffnl_str)
      end if
 
+     call timab(927,2,tsec)
+
    end do ! End k point loop
+
  end do ! End loop over spins
+
+ call timab(928,1,tsec)
+
+ if (usexg==1) then
+   if (xg_nonlop%paw) call xg_nonlop_destroy_Dij(xg_nonlop)
+ end if
 
 !Stress is equal to dE/d_strain * (1/ucvol)
  npsstr(:)=npsstr(:)/gs_hamk%ucvol
@@ -1148,14 +1328,14 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
      call timab(65,1,tsec)
      call xmpi_sum(kinstr,spaceComm,ierr)
      call xmpi_sum(npsstr,spaceComm,ierr)
-     if ((usefock_loc).and.(fockcommon%optstr)) then
-       call xmpi_sum(fockcommon%stress,spaceComm,ierr)
+     if (usefock_loc) then
+       if (fockcommon%optstr) then
+         call xmpi_sum(fockcommon%stress,spaceComm,ierr)
+       end if
      end if
      call timab(65,2,tsec)
    end if
  end if
-
- call timab(925,1,tsec)
 
 !Do final normalizations and symmetrizations of stress tensor contributions
  if (stress_needed==1) then
@@ -1164,8 +1344,10 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
    if (nsym>1) then
      call stresssym(gs_hamk%gprimd,nsym,kinstr,symrec)
      call stresssym(gs_hamk%gprimd,nsym,npsstr,symrec)
-     if ((usefock_loc).and.(fockcommon%optstr)) then
-       call stresssym(gs_hamk%gprimd,nsym,fockcommon%stress,symrec)
+     if (usefock_loc) then
+       if (fockcommon%optstr) then
+         call stresssym(gs_hamk%gprimd,nsym,fockcommon%stress,symrec)
+       end if
      end if
    end if
  end if
@@ -1176,12 +1358,12 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
  end if
 
 !Deallocate temporary space
- call destroy_hamiltonian(gs_hamk)
+ call gs_hamk%free()
  if (usefock_loc) then
    fockcommon%use_ACE=use_ACE_old
  end if
- call timab(925,2,tsec)
- call timab(920,2,tsec)
+ call timab(928,2,tsec) ; call timab(920,-2,tsec)
+ ABI_NVTX_END_RANGE()
 
 end subroutine forstrnps
 !!***
@@ -1229,6 +1411,7 @@ end subroutine forstrnps
 !! rprimd(3,3)=dimensional primitive translation vectors (bohr)
 !! usepaw= 0 for non paw calculation; =1 for paw calculation
 !! xccc3d(n3xccc)=3D core electron density for XC core correction (bohr^-3)
+!! xcctau3d(n3xccc)=3D core electron kinetic energy density for XC core correction (bohr^-3)
 !! xred(3,natom)=reduced dimensionless atomic coordinates
 !!
 !! === optional inputs ===
@@ -1237,20 +1420,12 @@ end subroutine forstrnps
 !! OUTPUT
 !! vresid(nfft,nspden)= the output potential residual
 !!
-!! PARENTS
-!!      etotfor,forstr
-!!
-!! CHILDREN
-!!      dfpt_mkvxc,dfpt_mkvxc_noncoll,fourdp,hartre,metric,pawmknhat
-!!      psolver_hartree,rhotoxc,xcdata_init
-!!
 !! SOURCE
 
 subroutine nres2vres(dtset,gsqcut,izero,kxc,mpi_enreg,my_natom,nfft,ngfft,nhat,&
 &                 nkxc,nresid,n3xccc,optnc,optxc,pawang,pawfgrtab,pawrhoij,pawtab,&
-&                 rhor,rprimd,usepaw,vresid,xccc3d,xred,vxc)
-
- implicit none
+&                 rhor,rprimd,usepaw,vresid,xccc3d,xred,&
+&                 vxc, xcctau3d)
 
 !Arguments ------------------------------------
 !scalars
@@ -1263,6 +1438,7 @@ subroutine nres2vres(dtset,gsqcut,izero,kxc,mpi_enreg,my_natom,nfft,ngfft,nhat,&
  integer,intent(in) :: ngfft(18)
  real(dp),intent(in) :: kxc(nfft,nkxc),nresid(nfft,dtset%nspden)
  real(dp),intent(in) :: rhor(nfft,dtset%nspden),rprimd(3,3),xccc3d(n3xccc),xred(3,dtset%natom)
+ real(dp),intent(in),optional :: xcctau3d(n3xccc*dtset%usekden)
  real(dp),intent(inout) :: nhat(nfft,dtset%nspden*usepaw)
  real(dp),intent(out) :: vresid(nfft,dtset%nspden)
  type(pawfgrtab_type),intent(inout) :: pawfgrtab(my_natom*usepaw)
@@ -1273,8 +1449,7 @@ subroutine nres2vres(dtset,gsqcut,izero,kxc,mpi_enreg,my_natom,nfft,ngfft,nhat,&
 !Local variables-------------------------------
 !scalars
  integer :: cplex,ider,idir,ipert,ispden,nhatgrdim,nkxc_cur,option,me,nproc,comm,usexcnhat
- logical :: has_nkxc_gga
- logical :: non_magnetic_xc
+ logical :: has_nkxc_gga,non_magnetic_xc
  real(dp) :: dum,energy,m_norm_min,ucvol,vxcavg
  character(len=500) :: message
  type(xcdata_type) :: xcdata
@@ -1289,46 +1464,44 @@ subroutine nres2vres(dtset,gsqcut,izero,kxc,mpi_enreg,my_natom,nfft,ngfft,nhat,&
 !Compatibility tests:
  has_nkxc_gga=(nkxc==7.or.nkxc==19)
 
-! Initialise non_magnetic_xc for rhohxc
- non_magnetic_xc=(dtset%usepawu==4).or.(dtset%usepawu==14)
-
  if(optxc<-1.or.optxc>1)then
    write(message,'(a,i0)')' Wrong value for optxc ',optxc
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
  if((optnc/=1.and.optnc/=2).or.(dtset%nspden/=4.and.optnc/=1))then
    write(message,'(a,i0)')' Wrong value for optnc ',optnc
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
  if(dtset%icoulomb==1.and.optxc/=-1)then
    write(message,'(a)')' This routine is not compatible with icoulomb==1 and optxc/=-1 !'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
  if(dtset%nspden==4.and.dtset%xclevel==2.and.optxc==1.and.(.not.has_nkxc_gga))then
-   MSG_ERROR(' Wrong values for optxc and nkxc !')
+   ABI_ERROR(' Wrong values for optxc and nkxc !')
  end if
 
  qq=zero
  nkxc_cur=0
  m_norm_min=EPSILON(0.0_dp)**2
  usexcnhat=0;if (usepaw==1) usexcnhat=maxval(pawtab(1:dtset%ntypat)%usexcnhat)
+ non_magnetic_xc=(dtset%usepaw==1.and.mod(abs(dtset%usepawu),10)==4)
  if (dtset%xclevel==1.or.optxc==0) nkxc_cur= 2*min(dtset%nspden,2)-1 ! LDA: nkxc=1,3
  if (dtset%xclevel==2.and.optxc==1)nkxc_cur=12*min(dtset%nspden,2)-5 ! GGA: nkxc=7,19
- ABI_ALLOCATE(vhres,(nfft))
+ ABI_MALLOC(vhres,(nfft))
 
 !Compute different geometric tensor, as well as ucvol, from rprimd
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
 
 !Compute density residual in reciprocal space
  if (dtset%icoulomb==0) then
-   ABI_ALLOCATE(nresg,(2,nfft))
-   ABI_ALLOCATE(dummy,(nfft))
+   ABI_MALLOC(nresg,(2,nfft))
+   ABI_MALLOC(dummy,(nfft))
    dummy(:)=nresid(:,1)
    call fourdp(1,nresg,dummy,-1,mpi_enreg,nfft,1,ngfft,0)
-   ABI_DEALLOCATE(dummy)
+   ABI_FREE(dummy)
  end if
 
 !For GGA, has to recompute gradients of nhat
@@ -1337,7 +1510,7 @@ subroutine nres2vres(dtset,gsqcut,izero,kxc,mpi_enreg,my_natom,nfft,ngfft,nhat,&
 & (optxc/=-1.and.nkxc/=nkxc_cur)) then
    if (usepaw==1.and.dtset%xclevel==2.and.usexcnhat>0.and.dtset%pawnhatxc>0) then
      nhatgrdim=1
-     ABI_ALLOCATE(nhatgr,(nfft,dtset%nspden,3))
+     ABI_MALLOC(nhatgr,(nfft,dtset%nspden,3))
      ider=1;cplex=1;ipert=0;idir=0
      call pawmknhat(dum,cplex,ider,idir,ipert,izero,gprimd,my_natom,dtset%natom,&
 &     nfft,ngfft,nhatgrdim,dtset%nspden,dtset%ntypat,pawang,pawfgrtab,&
@@ -1346,20 +1519,21 @@ subroutine nres2vres(dtset,gsqcut,izero,kxc,mpi_enreg,my_natom,nfft,ngfft,nhat,&
 &     comm_fft=mpi_enreg%comm_fft,paral_kgb=dtset%paral_kgb,me_g0=mpi_enreg%me_g0,&
 &     distribfft=mpi_enreg%distribfft,mpi_comm_wvl=mpi_enreg%comm_wvl)
    else
-     ABI_ALLOCATE(nhatgr,(0,0,0))
+     ABI_MALLOC(nhatgr,(0,0,0))
    end if
  else
-   ABI_ALLOCATE(nhatgr,(0,0,0))
+   ABI_MALLOC(nhatgr,(0,0,0))
  end if
 
- ABI_ALLOCATE(dummy,(0))
+ ABI_MALLOC(dummy,(0))
 !First case: Kxc has already been computed
 !-----------------------------------------
  if (nkxc==nkxc_cur.or.optxc==-1) then
 
 !  Compute VH(n^res)(r)
    if (dtset%icoulomb == 0) then
-     call hartre(1,gsqcut,izero,mpi_enreg,nfft,ngfft,dtset%paral_kgb,nresg,rprimd,vhres)
+     call hartre(1,gsqcut,dtset%icutcoul,izero,mpi_enreg,nfft,ngfft,&
+                 &dtset%nkpt,dtset%rcut,nresg,rprimd,dtset%vcutgeo,vhres)
    else
      comm=mpi_enreg%comm_cell
      nproc=xmpi_comm_size(comm)
@@ -1377,15 +1551,15 @@ subroutine nres2vres(dtset,gsqcut,izero,kxc,mpi_enreg,my_natom,nfft,ngfft,nhat,&
      if (dtset%nspden/=4) then
        !Note: imposing usexcnhat=1 avoid nhat to be substracted
        call dfpt_mkvxc(1,dtset%ixc,kxc,mpi_enreg,nfft,ngfft,nhat,usepaw,nhatgr,nhatgrdim,&
-&       nkxc,dtset%nspden,0,2,dtset%paral_kgb,qq,nresid,rprimd,1,vresid,dummy)
+&       nkxc,non_magnetic_xc,dtset%nspden,0,2,qq,nresid,rprimd,1,vresid,dummy)
      else
 !FR    call routine for Non-collinear magnetism
-       ABI_ALLOCATE(rhor0,(nfft,dtset%nspden))
+       ABI_MALLOC(rhor0,(nfft,dtset%nspden))
        rhor0(:,:)=rhor(:,:)-nresid(:,:)
        !Note: imposing usexcnhat=1 avoid nhat to be substracted
        call dfpt_mkvxc_noncoll(1,dtset%ixc,kxc,mpi_enreg,nfft,ngfft,nhat,usepaw,nhat,usepaw,nhatgr,nhatgrdim,&
-&       nkxc,dtset%nspden,0,2,2,dtset%paral_kgb,qq,rhor0,nresid,rprimd,1,vxc,vresid,xccc3d)
-       ABI_DEALLOCATE(rhor0)
+&       nkxc,non_magnetic_xc,dtset%nspden,0,2,2,qq,rhor0,nresid,rprimd,1,vxc,vresid,xccc3d)
+       ABI_FREE(rhor0)
      end if
 
    else
@@ -1399,46 +1573,48 @@ subroutine nres2vres(dtset,gsqcut,izero,kxc,mpi_enreg,my_natom,nfft,ngfft,nhat,&
  if (nkxc/=nkxc_cur.and.optxc/=-1) then
 
 !  Has to use the "initial" density to compute Kxc
-   ABI_ALLOCATE(rhor0,(nfft,dtset%nspden))
+   ABI_MALLOC(rhor0,(nfft,dtset%nspden))
    rhor0(:,:)=rhor(:,:)-nresid(:,:)
 
 !  Compute VH(n^res) and XC kernel (Kxc) together
-   ABI_ALLOCATE(kxc_cur,(nfft,nkxc_cur))
+   ABI_MALLOC(kxc_cur,(nfft,nkxc_cur))
 
    option=2;if (dtset%xclevel==2.and.optxc==0) option=12
 
-   call hartre(1,gsqcut,izero,mpi_enreg,nfft,ngfft,dtset%paral_kgb,nresg,rprimd,vhres)
+   call hartre(1,gsqcut,dtset%icutcoul,izero,mpi_enreg,nfft,ngfft,&
+               &dtset%nkpt,dtset%rcut,nresg,rprimd,dtset%vcutgeo,vhres)
    call xcdata_init(xcdata,dtset=dtset)
 
 !  To be adjusted for the call to rhotoxc
    nk3xc=1
    call rhotoxc(energy,kxc_cur,mpi_enreg,nfft,ngfft,&
-&   nhat,usepaw,nhatgr,nhatgrdim,nkxc_cur,nk3xc,non_magnetic_xc,n3xccc,option,dtset%paral_kgb,&
-&   rhor0,rprimd,dummy6,usexcnhat,vresid,vxcavg,xccc3d,xcdata,vhartr=vhres)  !vresid=work space
+&   nhat,usepaw,nhatgr,nhatgrdim,nkxc_cur,nk3xc,non_magnetic_xc,n3xccc,option,&
+&   rhor0,rprimd,dummy6,usexcnhat,vresid,vxcavg,xccc3d,xcdata,vhartr=vhres,&
+&   xcctau3d=xcctau3d)  !vresid=work space
    if (dtset%nspden/=4)  then
-     ABI_DEALLOCATE(rhor0)
+     ABI_FREE(rhor0)
    end if
 
 !  Compute Kxc(r).n^res(r)
 
-!  Collinear magnetism or non-polarized
    if (dtset%nspden/=4) then
+!    Collinear magnetism or non-polarized
      call dfpt_mkvxc(1,dtset%ixc,kxc_cur,mpi_enreg,nfft,ngfft,nhat,usepaw,nhatgr,nhatgrdim,&
-&     nkxc_cur,dtset%nspden,0,2,dtset%paral_kgb,qq,nresid,rprimd,1,vresid,dummy)
+&     nkxc_cur,non_magnetic_xc,dtset%nspden,0,2,qq,nresid,rprimd,1,vresid,dummy)
    else
-!FR      call routine for Non-collinear magnetism
-     ABI_ALLOCATE(rhor0,(nfft,dtset%nspden))
+!    Non-collinear magnetism
+     ABI_MALLOC(rhor0,(nfft,dtset%nspden))
      rhor0(:,:)=rhor(:,:)-nresid(:,:)
      call dfpt_mkvxc_noncoll(1,dtset%ixc,kxc_cur,mpi_enreg,nfft,ngfft,nhat,usepaw,nhat,usepaw,nhatgr,nhatgrdim,&
-&     nkxc,dtset%nspden,0,2,2,dtset%paral_kgb,qq,rhor0,nresid,rprimd,1,vxc,vresid,xccc3d)
-     ABI_DEALLOCATE(rhor0)
+&     nkxc,non_magnetic_xc,dtset%nspden,0,2,2,qq,rhor0,nresid,rprimd,1,vxc,vresid,xccc3d)
+     ABI_FREE(rhor0)
    end if
 
-   ABI_DEALLOCATE(kxc_cur)
+   ABI_FREE(kxc_cur)
  end if
 
  !if (nhatgrdim>0)  then
- ABI_DEALLOCATE(nhatgr)
+ ABI_FREE(nhatgr)
  !end if
 
 !Assemble potential residual: V^res(r)=VH(n^res)(r) + Kxc(r).n^res(r)
@@ -1448,10 +1624,10 @@ subroutine nres2vres(dtset,gsqcut,izero,kxc,mpi_enreg,my_natom,nfft,ngfft,nhat,&
  end do
 
  if (dtset%icoulomb==0)  then
-   ABI_DEALLOCATE(nresg)
+   ABI_FREE(nresg)
  end if
- ABI_DEALLOCATE(vhres)
- ABI_DEALLOCATE(dummy)
+ ABI_FREE(vhres)
+ ABI_FREE(dummy)
 
 end subroutine nres2vres
 !!***

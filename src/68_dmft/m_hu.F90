@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_hu
 !! NAME
 !!  m_hu
@@ -6,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2019 ABINIT group (BAmadon)
+!! Copyright (C) 2006-2024 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -14,10 +13,6 @@
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -40,6 +35,7 @@ MODULE m_hu
  private
 
  public :: init_hu
+ public :: copy_hu
  public :: destroy_hu
 ! public :: qmc_hu
  public :: print_hu
@@ -112,15 +108,9 @@ CONTAINS  !=====================================================================
 !! OUTPUTS
 !!  hu <type(hu_type)>= U interaction
 !!
-!! PARENTS
-!!      m_dmft
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
-subroutine init_hu(cryst_struc,pawtab,hu,t2g)
+subroutine init_hu(cryst_struc,pawtab,hu,t2g,x2my2d)
 
  use defs_basis
  use m_crystal, only : crystal_t
@@ -131,7 +121,7 @@ subroutine init_hu(cryst_struc,pawtab,hu,t2g)
  type(crystal_t),intent(in) :: cryst_struc
  type(pawtab_type), target, intent(in)  :: pawtab(cryst_struc%ntypat)
  type(hu_type), intent(inout) :: hu(cryst_struc%ntypat)
- integer, intent(in) :: t2g
+ integer, intent(in) :: t2g,x2my2d
 !Local variables ------------------------------------
  integer :: itypat,i,ij,ij1,ij2,j,lpawu,ms,ms1,m,m1,ndim
  integer :: ns,ns1,n,n1
@@ -152,6 +142,7 @@ subroutine init_hu(cryst_struc,pawtab,hu,t2g)
    hu(itypat)%lpawu=pawtab(itypat)%lpawu
    hu(itypat)%jmjbasis=.false.
    if(t2g==1.and.hu(itypat)%lpawu==2) hu(itypat)%lpawu=1
+   if(x2my2d==1.and.hu(itypat)%lpawu==2) hu(itypat)%lpawu=0
    lpawu=hu(itypat)%lpawu
    if(lpawu.ne.-1) then
      hu(itypat)%upawu=pawtab(itypat)%upawu
@@ -192,14 +183,14 @@ subroutine init_hu(cryst_struc,pawtab,hu,t2g)
      write(message,'(2a,i4)')  ch10,'  -------> For Correlated Species', itypat
      call wrtout(std_out,  message,'COLL')
 !     allocate(hu(itypat)%vee(ndim,ndim,ndim,ndim))
-     ABI_ALLOCATE(hu(itypat)%uqmc,(ndim*(2*ndim-1)))
-     ABI_ALLOCATE(hu(itypat)%udens,(2*ndim,2*ndim))
-     ABI_ALLOCATE(xij,(2*ndim,2*ndim))
-     if(t2g==0) then
+     ABI_MALLOC(hu(itypat)%uqmc,(ndim*(2*ndim-1)))
+     ABI_MALLOC(hu(itypat)%udens,(2*ndim,2*ndim))
+     ABI_MALLOC(xij,(2*ndim,2*ndim))
+     if(t2g==0.and.x2my2d==0) then
        hu(itypat)%vee => pawtab(itypat)%vee
 !   t2g case begin
      else if(t2g==1.and.hu(itypat)%lpawu==1) then
-       ABI_ALLOCATE(hu(itypat)%vee,(ndim,ndim,ndim,ndim))
+       ABI_MALLOC(hu(itypat)%vee,(ndim,ndim,ndim,ndim))
        n=0
        do m=1,5
          if((m/=1.and.m/=2.and.m/=4)) cycle
@@ -222,7 +213,12 @@ subroutine init_hu(cryst_struc,pawtab,hu,t2g)
          enddo
        enddo
 !   t2g case end
+!   x2my2d case begin
+     else if(x2my2d==1.and.hu(itypat)%lpawu==0) then
+       ABI_MALLOC(hu(itypat)%vee,(ndim,ndim,ndim,ndim))
+       hu(itypat)%vee(1,1,1,1)=pawtab(itypat)%upawu
      endif
+!   x2my2d case end
 
      hu(itypat)%udens=zero
      ij=0
@@ -287,7 +283,7 @@ subroutine init_hu(cryst_struc,pawtab,hu,t2g)
      enddo
        write(message,'(5x,a)') "--------------------------------------------------------"
        call wrtout(std_out,  message,'COLL')
-     ABI_DEALLOCATE(xij)
+     ABI_FREE(xij)
    else
      hu(itypat)%upawu=zero
      hu(itypat)%jpawu=zero
@@ -296,6 +292,56 @@ subroutine init_hu(cryst_struc,pawtab,hu,t2g)
  enddo ! itypat
 
 end subroutine init_hu
+!!***
+
+!!****f* m_hu/copy_hu
+!! NAME
+!! copy_hu
+!!
+!! FUNCTION
+!!  Allocate variables used in type hu_type.
+!!
+!! INPUTS
+!!  hu <type(hu_type)>= U interaction
+!!
+!! OUTPUTS
+!!  hu_new <type(hu_type)>= U interaction
+!!
+!! SOURCE
+
+subroutine copy_hu(ntypat,hu,hu_new)
+
+ use defs_basis
+ implicit none
+
+!Arguments ------------------------------------
+!type
+ integer, intent(in) :: ntypat
+ type(hu_type), intent(in) :: hu(ntypat)
+ type(hu_type), intent(out) :: hu_new(ntypat)
+!Local variables ------------------------------------
+ integer :: itypat,ndim
+!************************************************************************
+
+ do itypat=1,ntypat
+   hu_new(itypat)%lpawu      = hu(itypat)%lpawu
+   hu_new(itypat)%jmjbasis   = hu(itypat)%jmjbasis
+   hu_new(itypat)%upawu      = hu(itypat)%upawu
+   hu_new(itypat)%jpawu      = hu(itypat)%jpawu
+   hu_new(itypat)%f2_sla     = hu(itypat)%f2_sla
+   hu_new(itypat)%f4of2_sla  = hu(itypat)%f4of2_sla
+   hu_new(itypat)%f6of2_sla  = hu(itypat)%f6of2_sla
+   hu_new(itypat)%jpawu_zero = hu(itypat)%jpawu_zero
+   ndim=2*hu_new(itypat)%lpawu+1
+   ABI_MALLOC(hu_new(itypat)%uqmc,(ndim*(2*ndim-1)))
+   ABI_MALLOC(hu_new(itypat)%udens,(2*ndim,2*ndim))
+   ABI_MALLOC(hu_new(itypat)%vee,(ndim,ndim,ndim,ndim))
+   hu_new(itypat)%vee        = hu(itypat)%vee
+   hu_new(itypat)%udens      = hu(itypat)%udens
+   hu_new(itypat)%uqmc       = hu(itypat)%uqmc
+ enddo ! itypat
+
+end subroutine copy_hu
 !!***
 
 !!****f* m_hu/destroy_hu
@@ -311,15 +357,9 @@ end subroutine init_hu
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_dmft
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
-subroutine destroy_hu(hu,ntypat,t2g)
+subroutine destroy_hu(hu,ntypat,t2g,x2my2d)
 
  use defs_basis
  use m_crystal, only : crystal_t
@@ -329,7 +369,7 @@ subroutine destroy_hu(hu,ntypat,t2g)
 !scalars
  integer, intent(in) :: ntypat
  type(hu_type),intent(inout) :: hu(ntypat)
- integer, intent(in) :: t2g
+ integer, intent(in) :: t2g,x2my2d
 
 !Local variables-------------------------------
  integer :: itypat
@@ -339,13 +379,15 @@ subroutine destroy_hu(hu,ntypat,t2g)
  do itypat=1,ntypat
 !  if ( allocated(hu(itypat)%vee) )  deallocate(hu(itypat)%vee)
   if ( allocated(hu(itypat)%uqmc) )   then
-    ABI_DEALLOCATE(hu(itypat)%uqmc)
+    ABI_FREE(hu(itypat)%uqmc)
   end if
   if ( allocated(hu(itypat)%udens) )   then
-    ABI_DEALLOCATE(hu(itypat)%udens)
+    ABI_FREE(hu(itypat)%udens)
   end if
   if(t2g==1.and.hu(itypat)%lpawu==1) then
-    ABI_DEALLOCATE(hu(itypat)%vee)
+    ABI_FREE(hu(itypat)%vee)
+  else if(x2my2d==1.and.hu(itypat)%lpawu==0) then
+    ABI_FREE(hu(itypat)%vee)
   else
     hu(itypat)%vee => null()
   endif
@@ -367,12 +409,6 @@ end subroutine destroy_hu
 !!  hu <type(hu_type)> = data for the interaction in DMFT.
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_hu
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -441,11 +477,6 @@ end subroutine print_hu
 !!
 !! SIDE EFFECT
 !!  hu <type(hu_type)> = data for the interaction in DMFT.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -530,12 +561,6 @@ end subroutine vee2udens_hu
 !!
 !! SIDE EFFECT
 !!  hu <type(hu_type)> = data for the interaction in DMFT.
-!!
-!! PARENTS
-!!      hubbard_one,qmc_prep_ctqmc
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -623,16 +648,16 @@ subroutine rotatevee_hu(cryst_struc,hu,nspinor,nsppol,pawprtvol,rot_mat,udens_at
        write(message,'(2a,i4)')  ch10,'  -------> For Correlated atom', iatom
        call wrtout(std_out,  message,'COLL')
        tndim=nspinor*ndim
-       ABI_ALLOCATE(veejmj,(tndim,tndim,tndim,tndim))
-       ABI_ALLOCATE(veeslm,(ndim,ndim,ndim,ndim))
-       ABI_ALLOCATE(veetmp_slm,(ndim,ndim,4))
-       ABI_ALLOCATE(veetmp_ylm,(ndim,ndim,4))
-       ABI_ALLOCATE(veetmp,(ndim,ndim,4))
-       ABI_ALLOCATE(veeslm2,(tndim,tndim,tndim,tndim))
-       ABI_ALLOCATE(veeylm,(ndim,ndim,ndim,ndim))
-       ABI_ALLOCATE(veeylm2,(tndim,tndim,tndim,tndim))
-       ABI_ALLOCATE(veerotated,(tndim,tndim,tndim,tndim))
-       ABI_ALLOCATE(fk,(0:lpawu))
+       ABI_MALLOC(veejmj,(tndim,tndim,tndim,tndim))
+       ABI_MALLOC(veeslm,(ndim,ndim,ndim,ndim))
+       ABI_MALLOC(veetmp_slm,(ndim,ndim,4))
+       ABI_MALLOC(veetmp_ylm,(ndim,ndim,4))
+       ABI_MALLOC(veetmp,(ndim,ndim,4))
+       ABI_MALLOC(veeslm2,(tndim,tndim,tndim,tndim))
+       ABI_MALLOC(veeylm,(ndim,ndim,ndim,ndim))
+       ABI_MALLOC(veeylm2,(tndim,tndim,tndim,tndim))
+       ABI_MALLOC(veerotated,(tndim,tndim,tndim,tndim))
+       ABI_MALLOC(fk,(0:lpawu))
        fk(0)=hu(itypat)%upawu
        if (lpawu==1) then
          fk(1)=hu(itypat)%jpawu*5
@@ -657,16 +682,22 @@ subroutine rotatevee_hu(cryst_struc,hu,nspinor,nsppol,pawprtvol,rot_mat,udens_at
        call vee_ndim2tndim_hu(lpawu,hu(itypat)%vee,veeslm2,1)
 
 !!     veeslm(m1,m2,m3,m4)=cmplx(vee(m1,m2,m3,m4),zero)
+     !  ABI_FREE(veeslm)
        veeslm(:,:,:,:)=cmplx(hu(itypat)%vee(:,:,:,:),zero)
+       !ABI_FREE(veeslm)! ici cela plante
 
 !!     build udens in the Slm basis and print it
        call vee2udensatom_hu(ndim,nspinor,udens_atoms(iatom)%value,real(veeslm),"slm")
+       !ABI_FREE(veeslm) ! ici cela plante
 
        dim_vee=ndim
        basis_vee='Slm'
 !     first print veeslm
        !call printvee_hu(ndim,real(veeslm),1,basis_vee)
        call printvee_hu(tndim,real(veeslm2),1,basis_vee)
+
+      ! ABI_FREE(veeslm)
+
 !      ==================================
 !      Then compute veerotated
 !      ==================================
@@ -783,7 +814,7 @@ subroutine rotatevee_hu(cryst_struc,hu,nspinor,nsppol,pawprtvol,rot_mat,udens_at
 
          endif
        endif
-       ABI_ALLOCATE(veenew,(dim_vee,dim_vee,dim_vee,dim_vee))
+       ABI_MALLOC(veenew,(dim_vee,dim_vee,dim_vee,dim_vee))
        if(rot_type==0) then   ; veenew=veeslm
        else if(rot_type==1) then  ; veenew=veerotated
        else if(rot_type==2) then  ; veenew=veeylm
@@ -801,25 +832,24 @@ subroutine rotatevee_hu(cryst_struc,hu,nspinor,nsppol,pawprtvol,rot_mat,udens_at
            uaver=uaver+udens_atoms(iatom)%value(ms,ms1)
          enddo
        enddo
-       !write(6,*) "u average",uaver/float(4*ndim*ndim)
 
        call vee2udensatom_hu(ndim,nspinor,udens_atoms(iatom)%value,real(veenew),"basis_vee",prtonly=1)
 
 
-       ABI_DEALLOCATE(veenew)
-       ABI_DEALLOCATE(veeslm)
-       ABI_DEALLOCATE(veeslm2)
-       ABI_DEALLOCATE(veeylm)
-       ABI_DEALLOCATE(veeylm2)
-       ABI_DEALLOCATE(veejmj)
-       ABI_DEALLOCATE(veerotated)
-       ABI_DEALLOCATE(veetmp_slm)
-       ABI_DEALLOCATE(veetmp)
-       ABI_DEALLOCATE(veetmp_ylm)
-       ABI_DEALLOCATE(fk)
+       ABI_FREE(veenew)
+       ABI_FREE(veeslm)
+       ABI_FREE(veeslm2)
+       ABI_FREE(veeylm)
+       ABI_FREE(veeylm2)
+       ABI_FREE(veejmj)
+       ABI_FREE(veerotated)
+       ABI_FREE(veetmp_slm)
+       ABI_FREE(veetmp)
+       ABI_FREE(veetmp_ylm)
+       ABI_FREE(fk)
      endif
    enddo
-   !MSG_ERROR("Aborting now!")
+   !ABI_ERROR("Aborting now!")
 
 !================================================
 !  NSPINOR = 1
@@ -835,7 +865,7 @@ subroutine rotatevee_hu(cryst_struc,hu,nspinor,nsppol,pawprtvol,rot_mat,udens_at
        if(nat_correl>1.and.(hu(itypat)%jpawu>tol4)) then
           write(message,'(3a)')  ch10,'  -------> Warning: several atoms: '&
 &         ,' not extensively tested '
-          MSG_WARNING(message)
+          ABI_WARNING(message)
        endif
 
 !  ! ================================================================
@@ -857,9 +887,9 @@ subroutine rotatevee_hu(cryst_struc,hu,nspinor,nsppol,pawprtvol,rot_mat,udens_at
            endif
          end do
        end do
-       ABI_ALLOCATE(temp_mat,(ndim,ndim))
-       ABI_ALLOCATE(temp_mat2,(ndim,ndim))
-       ABI_ALLOCATE(veetemp,(ndim,ndim,ndim,ndim))
+       ABI_MALLOC(temp_mat,(ndim,ndim))
+       ABI_MALLOC(temp_mat2,(ndim,ndim))
+       ABI_MALLOC(veetemp,(ndim,ndim,ndim,ndim))
        temp_mat(:,:)=czero
        temp_mat2(:,:)=czero
 
@@ -911,8 +941,8 @@ subroutine rotatevee_hu(cryst_struc,hu,nspinor,nsppol,pawprtvol,rot_mat,udens_at
            enddo
          enddo
        enddo
-       ABI_DEALLOCATE(temp_mat)
-       ABI_DEALLOCATE(temp_mat2)
+       ABI_FREE(temp_mat)
+       ABI_FREE(temp_mat2)
        xsum=zero
        xsum2=zero
        xsumnew=zero
@@ -985,7 +1015,7 @@ subroutine rotatevee_hu(cryst_struc,hu,nspinor,nsppol,pawprtvol,rot_mat,udens_at
 !       enddo
 !       write(message,'(5x,a)') "--------------------------------------------------------"
 !       call wrtout(std_out,  message,'COLL')
-       ABI_DEALLOCATE(veetemp)
+       ABI_FREE(veetemp)
      endif ! lpawu/=1
 !   call print_hu(hu,cryst_struc%ntypat,1)
 
@@ -1010,12 +1040,6 @@ end subroutine rotatevee_hu
 !!  lpawu = value of l
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_hu
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -1268,13 +1292,13 @@ subroutine printvee_hu(ndim,vee,prtopt,basis,upawu,f2)
    endif
 
    if (present(upawu)) then
-     ABI_ALLOCATE(a2pp,(ndim,ndim))
-     ABI_ALLOCATE(b2pp,(ndim,ndim))
-     ABI_ALLOCATE(b0,(ndim,ndim))
+     ABI_MALLOC(a2pp,(ndim,ndim))
+     ABI_MALLOC(b2pp,(ndim,ndim))
+     ABI_MALLOC(b0,(ndim,ndim))
 
 !     write(message,'(2x,a,3x,14f10.4)') "For check with respect to Slater's paper"
 !     call wrtout(std_out,  message,'COLL')
-!     ABI_ALLOCATE(f0,(ndim,ndim,ndim,ndim))
+!     ABI_MALLOC(f0,(ndim,ndim,ndim,ndim))
 !     write(message,'(2x,a,3x,14f10.4)') "Vee(m1,m2,m1,m2)-F0*ao(m1,m2)"
 !     call wrtout(std_out,  message,'COLL')
 !     write(message,'(2x,4x,14(2x,i8))') (m1,m1=1,ndim)
@@ -1299,7 +1323,7 @@ subroutine printvee_hu(ndim,vee,prtopt,basis,upawu,f2)
 !       write(message,'(2x,i4,3x,14f10.4)') m1,(vee(m1,m2,m2,m1)-f0(m1,m2,m2,m1),m2=1,ndim)
 !       call wrtout(std_out,  message,'COLL')
 !     enddo
-!     ABI_DEALLOCATE(f0)
+!     ABI_FREE(f0)
 
 
      b0=zero
@@ -1314,8 +1338,8 @@ subroutine printvee_hu(ndim,vee,prtopt,basis,upawu,f2)
        b2pp=b2pp/25*f2+b0
        abcomp=1
      else if(ndim==6.and.present(f2).and.(trim(basis)=='jmj')) then
-       ABI_ALLOCATE(a2pp,(6,6))
-       ABI_ALLOCATE(b2pp,(6,6))
+       ABI_MALLOC(a2pp,(6,6))
+       ABI_MALLOC(b2pp,(6,6))
        a2pp(:,:)=RESHAPE((/0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,-1,-1,1,0,&
 &       0,-1,1,1,-1,0,0,-1,1,1,-1,0,0,1,-1,-1,1/),(/6,6/))
        a2pp=a2pp/25*f2+upawu
@@ -1340,9 +1364,9 @@ subroutine printvee_hu(ndim,vee,prtopt,basis,upawu,f2)
        enddo
        write(message,'(a)') ch10;  call wrtout(std_out,  message,'COLL')
      endif
-     ABI_DEALLOCATE(a2pp)
-     ABI_DEALLOCATE(b2pp)
-     ABI_DEALLOCATE(b0)
+     ABI_FREE(a2pp)
+     ABI_FREE(b2pp)
+     ABI_FREE(b0)
    endif
 
  endif
@@ -1362,12 +1386,6 @@ end subroutine printvee_hu
 !!  hu <type(hu_type)> = data for the interaction in DMFT.
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_hu
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -1459,10 +1477,6 @@ end subroutine vee2udensatom_hu
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 function reddd(mi,ndim)
@@ -1491,7 +1505,7 @@ end function reddd
 !! from the Slm to the Ylm basis if option==1 or from Ylm to Slm if !option==2
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2019 ABINIT group (BA)
+!! Copyright (C) 1998-2024 ABINIT group (BA)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1510,12 +1524,6 @@ end function reddd
 !!  mat_inp_c= Output matrix in Ylm or Slm basis according to option
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_hu
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -1548,7 +1556,7 @@ subroutine vee_slm2ylm_hu(lcor,mat_inp_c,mat_out_c,option,prtvol)
 
  if (option/=1.and.option/=2) then
    message=' option=/1 or 2 !'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
  if(abs(prtvol)>2) then
@@ -1567,7 +1575,7 @@ subroutine vee_slm2ylm_hu(lcor,mat_inp_c,mat_out_c,option,prtvol)
  end if
 
  ll=lcor
- ABI_ALLOCATE(slm2ylm,(2*ll+1,2*ll+1))
+ ABI_MALLOC(slm2ylm,(2*ll+1,2*ll+1))
  slm2ylm=czero
  mat_out_c=czero
 
@@ -1630,7 +1638,7 @@ subroutine vee_slm2ylm_hu(lcor,mat_inp_c,mat_out_c,option,prtvol)
    end do
  end do
 
- ABI_DEALLOCATE(slm2ylm)
+ ABI_FREE(slm2ylm)
 
 end subroutine vee_slm2ylm_hu
 !!***
@@ -1644,7 +1652,7 @@ end subroutine vee_slm2ylm_hu
 !! into a full spin and orbital interaction matrix of dimension [2*(2l+1)]**4
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2019 ABINIT group (BA)
+!! Copyright (C) 1998-2024 ABINIT group (BA)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1661,12 +1669,6 @@ end subroutine vee_slm2ylm_hu
 !!  mat_out_c= real output matrix
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      qmc_prep_ctqmc
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -1727,7 +1729,7 @@ end subroutine vee_ndim2tndim_hu_r
 !! into a full spin and orbital interaction matrix of dimension [2*(2l+1)]**4
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2019 ABINIT group (BA)
+!! Copyright (C) 1998-2024 ABINIT group (BA)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1744,12 +1746,6 @@ end subroutine vee_ndim2tndim_hu_r
 !!  mat_out_c= Complex output matrix
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_hu
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -1809,7 +1805,7 @@ end subroutine vee_ndim2tndim_hu
 !! from the Ylm basis to the J,M_J basis if option==1
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2019 ABINIT group (BA)
+!! Copyright (C) 1998-2024 ABINIT group (BA)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1826,12 +1822,6 @@ end subroutine vee_ndim2tndim_hu
 !!
 !! NOTES
 !!  usefull only in ndij==4
-!!
-!! PARENTS
-!!      m_hu
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -1864,7 +1854,7 @@ subroutine vee_ylm2jmj_hu(lcor,mat_inp_c,mat_out_c,option)
 
  if (option/=1.and.option/=2) then
    message=' option=/1 and =/2 !'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
  if(option==1) then
@@ -1879,9 +1869,9 @@ subroutine vee_ylm2jmj_hu(lcor,mat_inp_c,mat_out_c,option)
 
 !--------------- Built indices + allocations
  ll=lcor
- ABI_ALLOCATE(mlms2jmj,(2*(2*ll+1),2*(2*ll+1)))
+ ABI_MALLOC(mlms2jmj,(2*(2*ll+1),2*(2*ll+1)))
  mlms2jmj=czero
- ABI_ALLOCATE(ind_msml,(2,-ll:ll))
+ ABI_MALLOC(ind_msml,(2,-ll:ll))
  mlms2jmj=czero
  jc1=0
  do ms1=1,2
@@ -1896,7 +1886,7 @@ subroutine vee_ylm2jmj_hu(lcor,mat_inp_c,mat_out_c,option)
 !xj(jj)=jj-0.5
  if(ll==0)then
    message=' ll should not be equal to zero !'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
  jc1=0
  invsqrt2lp1=one/sqrt(float(2*lcor+1))
@@ -1956,8 +1946,8 @@ subroutine vee_ylm2jmj_hu(lcor,mat_inp_c,mat_out_c,option)
      end do
    end do
  end do
- ABI_DEALLOCATE(mlms2jmj)
- ABI_DEALLOCATE(ind_msml)
+ ABI_FREE(mlms2jmj)
+ ABI_FREE(ind_msml)
 
  end subroutine vee_ylm2jmj_hu
 !!***
@@ -1972,7 +1962,7 @@ subroutine vee_ylm2jmj_hu(lcor,mat_inp_c,mat_out_c,option)
 !! Condon tables
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2019 ABINIT group (BA)
+!! Copyright (C) 1998-2024 ABINIT group (BA)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1985,12 +1975,6 @@ subroutine vee_ylm2jmj_hu(lcor,mat_inp_c,mat_out_c,option)
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_hu
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -2017,10 +2001,10 @@ subroutine udens_slatercondon_hu(fk,lcor)
  real(dp), allocatable :: jdens(:,:)
 
 !*********************************************************************
- ABI_ALLOCATE(aklmlmp,(0:lcor,-lcor:lcor,-lcor:lcor)) ! k,m,m'
- ABI_ALLOCATE(bklmlmp,(0:lcor,-lcor:lcor,-lcor:lcor)) ! k,m,m'
- ABI_ALLOCATE(udens,(-lcor:lcor,-lcor:lcor)) ! m,m'
- ABI_ALLOCATE(jdens,(-lcor:lcor,-lcor:lcor)) ! m,m'
+ ABI_MALLOC(aklmlmp,(0:lcor,-lcor:lcor,-lcor:lcor)) ! k,m,m'
+ ABI_MALLOC(bklmlmp,(0:lcor,-lcor:lcor,-lcor:lcor)) ! k,m,m'
+ ABI_MALLOC(udens,(-lcor:lcor,-lcor:lcor)) ! m,m'
+ ABI_MALLOC(jdens,(-lcor:lcor,-lcor:lcor)) ! m,m'
 ! k=2*(lcor)
  aklmlmp=zero
  bklmlmp=zero
@@ -2229,10 +2213,10 @@ subroutine udens_slatercondon_hu(fk,lcor)
    call wrtout(std_out,  message,'COLL')
  enddo
 
- ABI_DEALLOCATE(jdens)
- ABI_DEALLOCATE(udens)
- ABI_DEALLOCATE(aklmlmp)
- ABI_DEALLOCATE(bklmlmp)
+ ABI_FREE(jdens)
+ ABI_FREE(udens)
+ ABI_FREE(aklmlmp)
+ ABI_FREE(bklmlmp)
 
  end subroutine udens_slatercondon_hu
 !!***
@@ -2247,7 +2231,7 @@ subroutine udens_slatercondon_hu(fk,lcor)
 !! in JMJ Basis
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2019 ABINIT group (BA)
+!! Copyright (C) 1998-2024 ABINIT group (BA)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2260,12 +2244,6 @@ subroutine udens_slatercondon_hu(fk,lcor)
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_hu
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -2295,13 +2273,13 @@ subroutine udens_inglis_hu(fk,lcor)
 
 !*********************************************************************
  tndim=2*(2*lcor+1)
- ABI_ALLOCATE(app,(0:lcor,tndim,tndim))
- ABI_ALLOCATE(bpp,(0:lcor,tndim,tndim))
- ABI_ALLOCATE(a2pp,(tndim,tndim))
- ABI_ALLOCATE(b2pp,(tndim,tndim))
+ ABI_MALLOC(app,(0:lcor,tndim,tndim))
+ ABI_MALLOC(bpp,(0:lcor,tndim,tndim))
+ ABI_MALLOC(a2pp,(tndim,tndim))
+ ABI_MALLOC(b2pp,(tndim,tndim))
 
- ABI_ALLOCATE(udens,(tndim,tndim))
- ABI_ALLOCATE(jdens,(tndim,tndim))
+ ABI_MALLOC(udens,(tndim,tndim))
+ ABI_MALLOC(jdens,(tndim,tndim))
  udens=zero
  jdens=zero
  a2pp=zero
@@ -2474,12 +2452,12 @@ subroutine udens_inglis_hu(fk,lcor)
  enddo
 
 
- ABI_DEALLOCATE(jdens)
- ABI_DEALLOCATE(udens)
- ABI_DEALLOCATE(app)
- ABI_DEALLOCATE(bpp)
- ABI_DEALLOCATE(a2pp)
- ABI_DEALLOCATE(b2pp)
+ ABI_FREE(jdens)
+ ABI_FREE(udens)
+ ABI_FREE(app)
+ ABI_FREE(bpp)
+ ABI_FREE(a2pp)
+ ABI_FREE(b2pp)
 
  end subroutine udens_inglis_hu
 !!***

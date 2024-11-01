@@ -1,0 +1,65 @@
+#Test linear chain of atoms
+#Two different psps (Si+Ge), differ from those of
+#preceeding test
+
+ npsp        2            # Two pseudopotentials to be read
+ znucl       14.0  32.0   # znucl(npsp) : Silicon then Germanium
+
+   ntypat    1            # Only one type of pseudo-atom
+ ntypalch    1            # This pseudo-atom is alchemical
+  mixalch    0.5   0.5
+    typat    1 1
+
+#Ground state
+ nqpt 0
+
+#Common data
+ acell   3*10.00
+ amu 1.0d0
+ densty  1.1    ! This is needed to have exactly the same initialisation as previous tests
+ diemac 1.5
+ ecut  1.20
+ ixc 3
+  kptopt 0
+ kpt
+   0.00000   0.00000  -0.37500
+   0.00000   0.00000  -0.12500
+   0.00000   0.00000   0.12500
+   0.00000   0.00000   0.37500
+ natom  2 nband 4
+ ngfft  3*16  nkpt  4
+ nstep 30
+ nsym   1
+ occopt 1
+ rprim   1.0  0.0  0.0
+         0.0  1.0  0.0
+         0.0  0.0  1.0
+ symrel  1  0  0   0  1  0   0  0  1
+ xred    0.0  0.0 -0.15
+         0.0  0.0  0.15
+ tnons 3*0.0
+ toldfe  1.e-12
+ wtk 4*0.25
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosGTH_pwteter/14si.pspgth, 32ge_lda.fhi"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t96.abo, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
+#%% [paral_info]
+#%% max_nprocs = 4
+#%% [extra_info]
+#%% authors = Unknown
+#%% keywords = 
+#%% description = 
+#%%   Linear chain of X2 molecules (2 atoms per unit cell),
+#%%   using alchemical atoms, GS only. 
+#%%   The first psp is Si, the second one is Ge, the
+#%%   mixing coefficients are 0.5 and 0.5 . The 
+#%%   pseudopotentials differ from the ones of test #93 .
+#%% topics = AtomTypes
+#%%<END TEST_INFO>

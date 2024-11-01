@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_contract
 !! NAME
 !!  m_contract
@@ -7,14 +6,10 @@
 !! Low-level procedeures used in nonlop_pl to contract tensors
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2019 ABINIT group (DCA, XG, MT, GZ)
+!! Copyright (C) 1998-2024 ABINIT group (DCA, XG, MT, GZ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -77,16 +72,9 @@ contains
 !! In typical usage the input rank1 tensor is actually
 !! $rank1(i)=gmet(i,j) gxa(j)$
 !!
-!! PARENTS
-!!      nonlop_pl
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine cont13(rank1,rank3,rank2)
-
- implicit none
 
 !Arguments ------------------------------------
 !arrays
@@ -162,16 +150,9 @@ end subroutine cont13
 !! Want $2 Re[contraction]$.
 !! $rank2(a,b)=2 Re[gxa(i,a)^"*" gmet(i,j) gxa(j,b)]$.
 !!
-!! PARENTS
-!!      nonlop_pl
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine cont22(gxa,gmet,rank2)
-
- implicit none
 
 !Arguments ------------------------------------
 !arrays
@@ -287,16 +268,9 @@ end subroutine cont22
 !! rank2c(a,b)=3 conjg(gxa1(i,a)) gmet(i,j) gxa2(j,b)
 !!\end{equation} }}
 !!
-!! PARENTS
-!!      nonlop_pl
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine cont22cso(gxa1,gxa2,gmet,rank2c)
-
- implicit none
 
 !Arguments ------------------------------------
 !arrays
@@ -401,16 +375,9 @@ end subroutine cont22cso
 !!
 !! Note that, since amet is antisymmetric, amet(i,i)=0
 !!
-!! PARENTS
-!!      nonlop_pl
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine cont22so(gxa1,gxa2,amet,rank2)
-
- implicit none
 
 !Arguments ------------------------------------
 !arrays
@@ -550,16 +517,9 @@ end subroutine cont22so
 !! Components 4, 5, and 6 of gxa have already been multiplied by 2
 !! so the expressions below do not carry the 2.
 !!
-!! PARENTS
-!!      nonlop_pl
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine cont24(gxa,rank4,rank2)
-
- implicit none
 
 !Arguments ------------------------------------
 !arrays
@@ -658,16 +618,9 @@ end subroutine cont24
 !!  where $r3(a,i,j)=gmet(j,k) gxa(a,i,k)$ and $r1(a)=gmet(i,j) gxa(i,j,a)$.
 !!  rank2 is stored in the compressed form 11 22 33 32 31 21.
 !!
-!! PARENTS
-!!      nonlop_pl
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine cont3(gxa,gmet,rank2)
-
- implicit none
 
 !Arguments ------------------------------------
 !arrays
@@ -894,16 +847,9 @@ end subroutine cont3
 !! r_{12}(b)  & = & gxa2(b,l,m) gmet(l,m)
 !! \end{eqnarray} }}
 !!
-!! PARENTS
-!!      nonlop_pl
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine cont33cso(gxa1,gxa2,gmet,rank2c)
-
- implicit none
 
 !Arguments ------------------------------------
 !arrays
@@ -1113,16 +1059,9 @@ end subroutine cont33cso
 !!   r_{3G}(i,j,k) & = & gxa2(p,i,j) gmet(p,k)
 !! \end{eqnarray} }}
 !!
-!! PARENTS
-!!      nonlop_pl
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine cont33so(gxa1,gxa2,gmet,amet,rank2)
-
- implicit none
 
 !Arguments ------------------------------------
 !arrays
@@ -1383,16 +1322,9 @@ end subroutine cont33so
 !! where the subroutine "metcon" already includes weights in the definition
 !! of gxa for off-diagonal elements.
 !!
-!! PARENTS
-!!      nonlop_pl
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine cont35(gxa,rank5,rank2)
-
- implicit none
 
 !Arguments ------------------------------------
 !arrays
@@ -1544,16 +1476,9 @@ end subroutine cont35
 !! rank=3 111->1 221->2 331->3 321->4 311->5 211->6 222->7 332->8 322->9 333->10
 !!  weights    1      3      3      6      3      3      1      3      3       1
 !!
-!! PARENTS
-!!      nonlop_pl
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine metcon(rank,gmet,aa,bb)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1755,7 +1680,7 @@ subroutine metcon(rank,gmet,aa,bb)
    write(message, '(a,i0,a,a,a)' )&
 &   'Input rank=',rank,' not allowed.',ch10,&
 &   'Possible values are 0,1,2,3 only.'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
  contains
@@ -1859,16 +1784,9 @@ end subroutine metcon
 !! rank=3 111->1 221->2 331->3 321->4 311->5 211->6 222->7 332->8 322->9 333->10
 !!  weights    1      3      3      6      3      3      1      3      3       1
 !!
-!! PARENTS
-!!      nonlop_pl
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine metcon_so(rank,gmet,amet,aa,bb)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2038,7 +1956,7 @@ subroutine metcon_so(rank,gmet,amet,aa,bb)
    write(message, '(a,i0,a,a,a)' )&
 &   'Input rank=',rank,' not allowed.',ch10,&
 &   'Possible values are 0,1,2,3 only.'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
  contains
@@ -2133,16 +2051,9 @@ end subroutine metcon_so
 !! a,b:         strain indices (1..3)
 !! Amet and Pauli are complex
 !!
-!! PARENTS
-!!      nonlop_pl
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine metric_so(amet,gprimd,pauli)
-
- implicit none
 
 !Arguments ------------------------------------
 !arrays

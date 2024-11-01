@@ -1,0 +1,162 @@
+# Input for PARAL_GSWVL tutorial
+# 65-atom alkane chain of 65 atoms, parallel calculation
+
+#-------------------------------------------------------------------------------
+#Definition of variables specific to a wavelet calculation
+
+usewvl       1    # Activation of the "wavelet" basis set
+
+wvl_hgrid 0.30    # Wavelet H step grid
+wvl_crmult   7    # Wavelet coarse grid radius multiplier
+wvl_frmult   8    # Wavelet fine grid radius multiplier
+
+icoulomb     1    # Activate the free boundary conditions for the
+                  # Hartree potential computation, done in real space.
+                  # This is the value to choose for molecules in the wavelet formalism.
+
+iscf         2    # Activation of the simple mixing scheme for the density.
+                  
+nwfshist     6    # Activation of DIIS algoithm for the calculation of wavefunctions
+                  #   (Direct minimization scheme)
+                  #   with 6 wavefunctions stored in history
+
+timopt      10    # This will create a YAML file with the timings of the WVL routines
+
+#-------------------------------------------------------------------------------
+
+#Definition of the unit cell
+acell 3*100       # Lengths of the primitive vectors (big box to isolate the molecule)
+                  # Primitive vectors are not given here  (rprim)
+                  #   because "cubic" is the default value
+nsym 1            # Do not use symmetries (not relevant here)
+
+#Definition of the atom types and pseudopotentials
+ntypat 2          # There is only one type of atom
+znucl 6 1         # Atomic number of the possible type(s) of atom. Here boron, hydrogen.
+pp_dirpath "$ABI_PSPDIR"    # Path to the directory were
+                            #   pseudopotentials for tests are stored
+pseudos "C-q4, H-q1"        # Name and location of the pseudopotentials
+                         
+#Definition of the atoms
+natom 65          # There are 65 atoms
+typat 21*1 44*2   # 21 are of type 1 (carbon), 44 are of type 2 (hydrogen)
+xcart             # Location of the atoms, given in cartesian coordinates (angstrom):
+  0.00000    0.00000    0.00000
+  0.00000    0.88250    1.24804
+  0.00000    0.00000    2.49609
+  0.00000    0.88250    3.74413
+  0.00000    0.00000    4.99217
+  0.00000    0.88250    6.24022
+  0.00000    0.00000    7.48826
+  0.00000    0.88250    8.73630
+  0.00000    0.00000    9.98435
+  0.00000    0.88250   11.23239
+  0.00000    0.00000   12.48043
+  0.00000    0.88250   13.72848
+  0.00000    0.00000   14.97652
+  0.00000    0.88250   16.22457
+  0.00000    0.00000   17.47261
+  0.00000    0.88250   18.72065
+  0.00000    0.00000   19.96870
+  0.00000    0.88250   21.21674
+  0.00000    0.00000   22.46478
+  0.00000    0.88250   23.71283
+  0.00000    0.00000   24.96087
+  0.00000    0.61775   -0.87363
+  0.87363   -0.61775    0.00000
+ -0.87363   -0.61775    0.00000
+  0.87363    1.50025    1.24804
+ -0.87363    1.50025    1.24804
+  0.87363   -0.61775    2.49609
+ -0.87363   -0.61775    2.49609
+  0.87363    1.50025    3.74413
+ -0.87363    1.50025    3.74413
+  0.87363   -0.61775    4.99217
+ -0.87363   -0.61775    4.99217
+  0.87363    1.50025    6.24022
+ -0.87363    1.50025    6.24022
+  0.87363   -0.61775    7.48826
+ -0.87363   -0.61775    7.48826
+  0.87363    1.50025    8.73630
+ -0.87363    1.50025    8.73630
+  0.87363   -0.61775    9.98435
+ -0.87363   -0.61775    9.98435
+  0.87363    1.50025   11.23239
+ -0.87363    1.50025   11.23239
+  0.87363   -0.61775   12.48043
+ -0.87363   -0.61775   12.48043
+  0.87363    1.50025   13.72848
+ -0.87363    1.50025   13.72848
+  0.87363   -0.61775   14.97652
+ -0.87363   -0.61775   14.97652
+  0.87363    1.50025   16.22457
+ -0.87363    1.50025   16.22457
+  0.87363   -0.61775   17.47261
+ -0.87363   -0.61775   17.47261
+  0.87363    1.50025   18.72065
+ -0.87363    1.50025   18.72065
+  0.87363   -0.61775   19.96870
+ -0.87363   -0.61775   19.96870
+  0.87363    1.50025   21.21674
+ -0.87363    1.50025   21.21674
+  0.87363   -0.61775   22.46478
+ -0.87363   -0.61775   22.46478
+  0.87363    1.50025   23.71283
+ -0.87363    1.50025   23.71283
+  0.87363   -0.61775   24.96087
+ -0.87363   -0.61775   24.96087
+  0.00000    0.61775   25.83450
+  Angstrom
+
+#k point grid definition
+#  We set the grid manually to impose a computation at Gamma point
+#  (only available value for a molecule)
+kptopt  0         # Option for manual setting of k-points
+istwfk *1         # No time-reversal symmetry optimization (not compatible with WVL)
+nkpt    1         # Number of k-points (here only gamma)
+kpt  3*0.         # - K-point coordinates in reciprocal space
+
+#Parameters for the SCF procedure
+nstep 20          # Maximal number of SCF cycles
+tolwfr 1.0d-4     # Will stop when, twice in a row, the difference 
+                  # between two consecutive evaluations of wavefunction residual 
+                  # differ by less than tolwfr
+                  # This convergence criterion is adapted to direct minimization
+                  #   algorithm (iscf=0)
+
+#Miscelaneous parameters
+prtwf 0           # Do not print wavefunctions
+prtden 0          # Do not print density
+prteig 0          # Do not print eigenvalues
+optstress 0       # Stress tensor computation is not relevant here
+
+
+##############################################################
+# This section is used only for regression testing of ABINIT #
+##############################################################
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% exclude_builders = scope_gnu_10.2_paral
+#%% need_cpp_vars = HAVE_BIGDFT
+#%% [files]
+#%% files_to_test =
+#%% [paral_info]
+#%% max_nprocs = 64
+#%% nprocs_to_test = 24, 32, 48
+#%% [NCPU_24]
+#%% files_to_test = tgswvl_2_MPI24.abo, tolnlines =   0, tolabs =  0.0, tolrel= 0.0
+#%% [NCPU_32]
+#%% files_to_test = tgswvl_2_MPI32.abo, tolnlines =   0, tolabs =  0.0, tolrel= 0.0
+#%% [NCPU_48]
+#%% files_to_test = tgswvl_2_MPI48.abo, tolnlines =   0, tolabs =  0.0, tolrel= 0.0
+#%% [extra_info]
+#%% authors = D. Caliste
+#%% keywords = NC,WVL
+#%% description =
+#%%   Input for PARAL_GSWVL tutorial
+#%%   65-atom alkane chain of 65 atoms, parallel calculation
+#%%   WARNING : This test might not be functional anymore.
+#%%   It has not been tested since the final v10.3.0 of ABINIT due to unexplained failure 
+#%%   at the merge between v10.2.2 and previous commits in v10.3.0, both working.
+#%%<END TEST_INFO>

@@ -1,0 +1,71 @@
+ndtset 3
+
+kptopt1 1
+tolvrs1 1.0D-20
+nqpt1 0
+prtwf1 1
+getwfk1 0
+
+rfddk2 1
+iscf2 -3
+
+rfelfd3 2
+iscf3 -3
+
+kptopt 3
+nqpt 1
+qpt 3*0
+tolwfr 1.0D-20
+getwfk 1
+rfdir 1 0 0
+
+prtwf 0
+prtden 0
+prteig 0
+
+ecut 5
+pawecutdg 20
+nband 4
+
+nstep 5
+
+ngkpt 2 2 2
+nshiftk 4
+shiftk 3*1/2
+       1/2 0 0
+       0  1/2 0
+       0 0 1/2
+
+acell 3*5.43 angstrom
+rprim 0.0 0.5 0.5
+      0.5 0.0 0.5
+      0.5 0.5 0.0
+
+znucl 14
+ntypat 1
+typat 1 1
+occopt 1
+natom 2
+xred 3*0 3*1/4
+
+diemac 12.0
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "si_ps.736.lda"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t30.abo, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00, fld_options = -easy
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = J. Zwanziger
+#%% keywords = PAW, DFPT, DDK
+#%% description = 
+#%%   Compute DDK response in PAW formalism for two different but equivalent input
+#%%   variables: rfddk 1, rfelfd 2
+#%% topics = DFPT
+#%%<END TEST_INFO>

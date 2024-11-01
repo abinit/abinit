@@ -1,0 +1,92 @@
+ndtset      1
+
+############
+# Dataset 1
+############
+# Calculation of the Self-Energy matrix elements (GW corrections)
+optdriver      4       # Self-Energy calculation
+gw1rdm         2       # Update 1-RDM with GW and use it to print DEN and WFK files, and for new FOCK matrix elements
+x1rdm          1       # Use only exchange correction x1rdm=1 OR use also Sigma_c x1rdm=0
+symsigma       0       # Sym. switched off for sigma
+gwcalctyp     21       # Compute the linearized density as when doing self-consistent AC_GW
+nband          8       # Bands to be used in the Self-Energy calculation
+ecutsigx     8.0
+nomegasi      40       # Number of freqs (w) in Imag axis used for Sigma_c(iw) 
+
+nkptgw         6       # number of k-point where to calculate the GW correction
+kptgw                  # k-points in reduced coordinates (1-6), read from output
+    -2.50000000E-01 -2.50000000E-01  0.00000000E+00 
+    -2.50000000E-01  2.50000000E-01  0.00000000E+00 
+     5.00000000E-01  5.00000000E-01  0.00000000E+00 
+    -2.50000000E-01  5.00000000E-01  2.50000000E-01 
+     5.00000000E-01  0.00000000E+00  0.00000000E+00 
+     0.00000000E+00  0.00000000E+00  0.00000000E+00 
+
+bdgw       
+            1  8     # calculate GW corrections for bands from 1 to 8
+            1  8     
+            1  8    
+            1  8    
+            1  8     
+            1  8     
+# Data common to the three different datasets
+
+# Definition of the unit cell: fcc
+acell  3*5.000         # This is equivalent to    5.000  5.000  5.000
+rprim  0.0  0.5  0.5   # FCC primitive vectors (to be scaled by acell)
+       0.5  0.0  0.5   
+       0.5  0.5  0.0
+
+# Definition of the atom types
+ntypat  1         # There is only one type of atom
+znucl   2         # The keyword "znucl" refers to the atomic number of the 
+                  # possible type(s) of atom. The pseudopotential(s) 
+                  # mentioned in the "files" file must correspond
+                  # to the type(s) of atom. Here, the only type is Helium.
+                         
+# Definition of the atoms
+natom  1          # There is one atom
+typat  1          # of type 1, that is, Helium.
+xred              # Reduced coordinate of atoms
+      0.50 0.50 0.50
+
+# Definition of the k-point grid
+ngkpt   2 2 2  
+nshiftk 4
+shiftk  0.0 0.0 0.0  # These shifts will be the same for all grids
+        0.0 0.5 0.5
+        0.5 0.0 0.5
+        0.5 0.5 0.0
+istwfk  *1           # This is mandatory in all the GW steps.
+
+# Definition of the planewave basis set (at convergence 16 Rydberg 8 Hartree)
+ecut        8.0      # Maximal kinetic energy cut-off, in Hartree
+ixc          11
+ixc_sigma    11
+# Definition of the SCF procedure
+nstep   20        # Maximal number of SCF cycles
+toldfe  1.0d-6    # Will stop when this tolerance is achieved on total energy
+diemac  12.0      # Although this is not mandatory, it is worth to
+                  # precondition the SCF cycle. The model dielectric
+                  # function used as the standard preconditioner
+                  # is described in the "dielng" input variable section.
+                  # Here, we follow the prescription for bulk silicon.
+                  #
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "He-GGA.psp8"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% test_chain = t33.abi, t34.abi, t35.abi
+#%% [files]
+#%% files_to_test =
+#%%  t35.abo, tolnlines = 15, tolabs = 1.100e-03, tolrel = 3.000e-01
+#%% [paral_info]
+#%% max_nprocs = 8
+#%% [extra_info]
+#%% authors = M. Rodriguez-Mayorga
+#%% keywords = NC, GW
+#%% description = 
+#%%  GW 1RDM update BUT using only Sigma_X (not including Sigma_c term).
+#%%<END TEST_INFO>

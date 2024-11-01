@@ -1,0 +1,117 @@
+# Fake H crystal.
+# Test tetragonal spacegroups
+
+ndtset 72
+
+spgroup1   99   spgroupma1   165
+spgroup2   99   spgroupma2   166
+spgroup3   99   spgroupma3   167
+spgroup4   100   spgroupma4   173
+spgroup5   100   spgroupma5   174
+spgroup6   100   spgroupma6   175
+spgroup7   101   spgroupma7   181
+spgroup8   101   spgroupma8   182
+spgroup9   101   spgroupma9   183
+spgroup10   102   spgroupma10   189
+spgroup11   102   spgroupma11   190
+spgroup12   102   spgroupma12   191
+spgroup13   103   spgroupma13   197
+spgroup14   103   spgroupma14   198
+spgroup15   103   spgroupma15   199
+spgroup16   104   spgroupma16   205
+spgroup17   104   spgroupma17   206
+spgroup18   104   spgroupma18   207
+spgroup19   105   spgroupma19   213
+spgroup20   105   spgroupma20   214
+spgroup21   105   spgroupma21   215
+spgroup22   106   spgroupma22   221
+spgroup23   106   spgroupma23   222
+spgroup24   106   spgroupma24   223
+spgroup25   107   spgroupma25   229
+spgroup26   107   spgroupma26   230
+spgroup27   107   spgroupma27   231
+spgroup28   108   spgroupma28   235
+spgroup29   108   spgroupma29   236
+spgroup30   108   spgroupma30   237
+spgroup31   109   spgroupma31   241
+spgroup32   109   spgroupma32   242
+spgroup33   109   spgroupma33   243
+spgroup34   110   spgroupma34   247
+spgroup35   110   spgroupma35   248
+spgroup36   110   spgroupma36   249
+spgroup37   111   spgroupma37   253
+spgroup38   111   spgroupma38   254
+spgroup39   111   spgroupma39   255
+spgroup40   112   spgroupma40   261
+spgroup41   112   spgroupma41   262
+spgroup42   112   spgroupma42   263
+spgroup43   113   spgroupma43   269
+spgroup44   113   spgroupma44   270
+spgroup45   113   spgroupma45   271
+spgroup46   114   spgroupma46   277
+spgroup47   114   spgroupma47   278
+spgroup48   114   spgroupma48   279
+spgroup49   115   spgroupma49   285
+spgroup50   115   spgroupma50   286
+spgroup51   115   spgroupma51   287
+spgroup52   116   spgroupma52   293
+spgroup53   116   spgroupma53   294
+spgroup54   116   spgroupma54   295
+spgroup55   117   spgroupma55   301
+spgroup56   117   spgroupma56   302
+spgroup57   117   spgroupma57   303
+spgroup58   118   spgroupma58   309
+spgroup59   118   spgroupma59   310
+spgroup60   118   spgroupma60   311
+spgroup61   119   spgroupma61   317
+spgroup62   119   spgroupma62   318
+spgroup63   119   spgroupma63   319
+spgroup64   120   spgroupma64   323
+spgroup65   120   spgroupma65   324
+spgroup66   120   spgroupma66   325
+spgroup67   121   spgroupma67   329
+spgroup68   121   spgroupma68   330
+spgroup69   121   spgroupma69   331
+spgroup70   122   spgroupma70   335
+spgroup71   122   spgroupma71   336
+spgroup72   122   spgroupma72   337
+
+# Common data
+prtvol -1          # stop in abinit (main program), before call driver.
+brvltt -1          # important to reduce the conventional cell to primitive,
+                   # and allow the recognition of space group
+acell 7 7 9
+angdeg  90 90 90
+ntypat 1
+znucl 1
+natrd 1
+natom 8
+xred 0.17 0.15 0.11
+spinat 0.0 0.0 1.0
+typat 1
+ecut 1
+  kptopt 0
+nkpt 1
+nline 1
+nstep 1
+toldfe 1.0d-6
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "01h.bare"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t25.abo, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = Unknown
+#%% keywords = 
+#%% description = 
+#%%   H based fake crystals : magnetic groups, Shubnikov type III
+#%%   Test the generation and recognition of the
+#%%   tetragonal space groups (part II : spgroup 99 to 122)
+#%%<END TEST_INFO>

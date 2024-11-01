@@ -1,0 +1,54 @@
+# print out crystallographic information file (CIF) from abinit data.
+prtcif 1
+
+# very low tolerance - we are only interested in geometry output for CIF
+tolwfr 1.0d-4
+prtwf 0
+
+# underconverged k-point grid
+ngkpt 2 2 2
+kptopt 1
+
+#  as is the kinetic energy cutoff
+ecut 4.0
+
+#  use a shifted grid for the kpoints
+nshiftk 1
+shiftk 0.0 0.0 0.5
+
+# experimental cell parameters
+acell 2*2.9508 4.6855  Angstr
+angdeg 90 90 120  # hexagonal cell
+nband 10
+nbdbuf 2
+nline 8
+
+#  include metallic occupation function with a small smearing
+occopt 7
+tsmear 0.001
+
+natom 2
+typat 1 1
+xred
+0.00 0.00 0.00
+1/3 2/3 1/2
+ntypat 1
+znucl 22  # Titanium
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/22ti.pspnc"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t08.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -medium
+#%% [paral_info]
+#%% max_nprocs = 2
+#%% [extra_info]
+#%% authors = M. Verstraete
+#%% keywords = CIF 
+#%% description = 
+#%%   Print out CIF file for titanium bulk crystal prtcif variable. Hexagonal close packed Ti unit cell
+#%%<END TEST_INFO>

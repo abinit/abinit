@@ -1,0 +1,90 @@
+# ===========================================
+# Makefile
+# Use it to build a standalone LIBPAW library
+#                    M.T. jan 15 - rev oct 18
+# ===========================================
+
+# Define main directories
+SRC_DIR=$(PWD)/src
+CONFIG_DIR=$(PWD)/config
+
+# Define install directories
+INSTALL_DIR=$(PWD)/install
+INSTALL_LIB_DIR=$(INSTALL_DIR)/lib
+INSTALL_INC_DIR=$(INSTALL_DIR)/include
+
+# Define build directories
+BUILD_DIR=$(PWD)/build
+SRC_BUILD_DIR=$(BUILD_DIR)/src
+
+#Useful commands
+GREP ?= grep
+ECHO ?= echo
+TEST ?= test
+SED ?= sed
+MKDIR ?= mkdir
+RM ?= rm
+CP ?= cp
+CD ?= cd
+LS ?= ls
+AR ?= ar
+TAR ?= tar
+ZIP ?= gzip
+
+# Retrieve compilation options
+include makefile.in
+
+# Define src and obj files
+include $(CONFIG_DIR)/libpaw.src
+LIBPAW_SRC=$(foreach FF,$(LIBPAW_SRC_FILES:%.h=),$(SRC_DIR)/$(FF))
+LIBPAW_OBJ=$(patsubst %.F90,%.o,$(patsubst %.c,%.o,$(LIBPAW_SRC)))
+
+#Define object files to include in final library file
+LIBPAW_CONTENT=$(shell $(LS) $(SRC_BUILD_DIR)/*.o | $(SED) -e "s/.*\/interfaces_.*\.o//g")
+
+all: libpaw
+
+default: libpaw
+
+clean:
+	@$(RM) -rf build install
+
+libpaw: libpaw-install
+
+libpaw-mkbuilddir:
+	@$(ECHO) -n "Creating directories..."
+	@if ! $(TEST) -d $(BUILD_DIR); then $(MKDIR) $(BUILD_DIR);fi
+	@if ! $(TEST) -d $(INSTALL_DIR); then $(MKDIR) $(INSTALL_DIR);fi
+	@$(RM) -rf $(BUILD_DIR)/*
+	@if ! $(TEST) -d $(SRC_BUILD_DIR); then $(MKDIR) $(SRC_BUILD_DIR);fi
+	@$(CP) $(CONFIG_DIR)/Makefile.src $(SRC_BUILD_DIR)/Makefile
+	@$(CP) $(CONFIG_DIR)/libpaw.src $(SRC_BUILD_DIR)
+	@$(ECHO) " done!."
+
+libpaw-mklib: libpaw-objs
+	@$(ECHO)
+	@$(AR) rvs $(BUILD_DIR)/libpaw.a $(LIBPAW_CONTENT) 2>&1
+
+libpaw-install: libpaw-mklib | libpaw-mkbuilddir
+	@$(ECHO) -n "Installing library and modules in "$(INSTALL_DIR)
+	@if ! $(TEST) -d $(INSTALL_LIB_DIR); then $(MKDIR) $(INSTALL_LIB_DIR);fi
+	@$(RM) -rf $(INSTALL_LIB_DIR)/*
+	@$(CP) -rf $(BUILD_DIR)/libpaw.a $(INSTALL_LIB_DIR)
+	@if ! $(TEST) -d $(INSTALL_INC_DIR); then $(MKDIR) $(INSTALL_INC_DIR);fi
+	@$(RM) -rf $(INSTALL_INC_DIR)/*
+	@$(CP) $(SRC_BUILD_DIR)/*.mod $(INSTALL_INC_DIR)
+	@$(RM) -rf $(INSTALL_INC_DIR)/interfaces_??_libpaw.mod
+	@$(ECHO) " done!"
+
+libpaw-objs: libpaw-mkbuilddir
+	@$(CD) $(SRC_BUILD_DIR); \
+	$(MAKE) $(LIBPAW_OBJ) INCS=-I$(SRC_DIR)
+
+#Generic rules
+%.o: %.F90
+	$(FC) $(FCFLAGS) -o $(@F) -c $<
+%.o: %.c
+	$(CC) $(CFLAGS) -o $(@F) -c $<
+
+#Force sequential compilation (this should be corrected)
+.NOTPARALLEL:

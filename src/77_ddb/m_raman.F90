@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_raman
 !! NAME
 !!  m_raman
@@ -7,14 +6,10 @@
 !!  Raman susceptibilities of zone-center phonons and electroo tensor.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1999-2019 ABINIT group (MVeithen)
+!!  Copyright (C) 1999-2024 ABINIT group (MVeithen)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -72,16 +67,9 @@ contains
 !!     zero, no non-analytical contribution is included.
 !!  rsus
 !!
-!! PARENTS
-!!      anaddb
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine ramansus(d2cart,dchide,dchidt,displ,mpert,natom,phfrq,qphon,qphnrm,rsus,ucvol)
-
- implicit none
 
 !Arguments -----------------------------------
 !scalars
@@ -109,7 +97,7 @@ subroutine ramansus(d2cart,dchide,dchidt,displ,mpert,natom,phfrq,qphon,qphnrm,rs
 
  iwrite = ab_out > 0
 
- ABI_ALLOCATE(zeff,(3,natom))
+ ABI_MALLOC(zeff,(3,natom))
 
  rsus(:,:,:) = zero
  epsq        = zero
@@ -141,7 +129,7 @@ subroutine ramansus(d2cart,dchide,dchidt,displ,mpert,natom,phfrq,qphon,qphnrm,rs
 !  Check if epsq > 0
    if (epsq < tol8) then
      write(message,'(a,es14.6)')'  The value of epsq must be > 0 while it is found to be',epsq
-     MSG_BUG(message)
+     ABI_BUG(message)
    end if
 
 !  Get the effective charges for the limiting direction
@@ -214,7 +202,7 @@ subroutine ramansus(d2cart,dchide,dchidt,displ,mpert,natom,phfrq,qphon,qphnrm,rs
 !Examine the degeneracy of each mode. The portability of the echo of the Raman susceptibility
 !for each degenerate mode is very hard to guarantee. On the contrary,
 !the scalar reductions of these quantities are OK.
- ABI_ALLOCATE(metacharacter,(3*natom))
+ ABI_MALLOC(metacharacter,(3*natom))
  do imode=1,3*natom
 !  The degenerate modes are not portable
    t_degenerate=.false.
@@ -253,8 +241,8 @@ subroutine ramansus(d2cart,dchide,dchidt,displ,mpert,natom,phfrq,qphon,qphnrm,rs
    end if
  end do
 
- ABI_DEALLOCATE(metacharacter)
- ABI_DEALLOCATE(zeff)
+ ABI_FREE(metacharacter)
+ ABI_FREE(zeff)
 
 end subroutine ramansus
 !!***
@@ -295,17 +283,9 @@ end subroutine ramansus
 !! mode effective charges for the different eigenmodes,
 !! for different direction of the electric field
 !!
-!! PARENTS
-!!      anaddb
-!!
-!! CHILDREN
-!!      matr3inv
-!!
 !! SOURCE
 
 subroutine electrooptic(dchide,dieflag,epsinf,fact_oscstr,natom,phfrq,prtmbm,rsus,ucvol)
-
- implicit none
 
 !Arguments -------------------------------
 !scalars
@@ -339,8 +319,8 @@ subroutine electrooptic(dchide,dieflag,epsinf,fact_oscstr,natom,phfrq,prtmbm,rsu
  voigtindex(5,1) = 1 ; voigtindex(5,2) = 3
  voigtindex(6,1) = 1 ; voigtindex(6,2) = 2
 
- ABI_ALLOCATE(rijk,(3*natom+1,3,3,3))
- ABI_ALLOCATE(rijk_tot,(3,3,3))
+ ABI_MALLOC(rijk,(3*natom+1,3,3,3))
+ ABI_MALLOC(rijk_tot,(3,3,3))
  rijk(:,:,:,:) = 0._dp
  rijk_tot(:,:,:) = 0._dp
 
@@ -357,7 +337,7 @@ subroutine electrooptic(dchide,dieflag,epsinf,fact_oscstr,natom,phfrq,prtmbm,rsu
 &   'The lowest mode appears to be a "true" negative mode,',ch10,&
 &   'and not an acoustic mode. This precludes the computation',ch10,&
 &   'of the EO tensor.',ch10
-   MSG_WARNING(message)
+   ABI_WARNING(message)
  end if
 
  dtm = epsinf(1,1)*epsinf(2,2)*epsinf(3,3) + &
@@ -374,7 +354,7 @@ subroutine electrooptic(dchide,dieflag,epsinf,fact_oscstr,natom,phfrq,prtmbm,rsu
 &   'This preludes the computation fo the EO tensor since',ch10,&
 &   'this quantity requires the inverse of epsilon.',ch10,&
 &   'Action : check you database and the value of dieflag in the input file.',ch10
-   MSG_WARNING(message)
+   ABI_WARNING(message)
  end if
 
 !dieflag is required to be one since the EO tensor
@@ -506,8 +486,8 @@ subroutine electrooptic(dchide,dieflag,epsinf,fact_oscstr,natom,phfrq,prtmbm,rsu
 
  end if  ! flag
 
- ABI_DEALLOCATE(rijk)
- ABI_DEALLOCATE(rijk_tot)
+ ABI_FREE(rijk)
+ ABI_FREE(rijk_tot)
 
 end subroutine electrooptic
 !!***

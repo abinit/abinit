@@ -1,6 +1,6 @@
 # -*- Python -*-
 #
-# Copyright (C) 2005-2019 ABINIT Group (Yann Pouillon)
+# Copyright (C) 2005-2024 ABINIT Group (Yann Pouillon)
 #
 # This file is part of the ABINIT software package. For license information,
 # please see the COPYING file in the top-level directory of the ABINIT source
@@ -25,13 +25,13 @@ sources = [
  "m_invars2.F90",
  "m_memeval.F90",
  "m_mpi_setup.F90",
- "m_intagm_img.F90",
  "m_outvars.F90",
  "m_outvar_a_h.F90",
  "m_outvar_i_n.F90",
  "m_outvar_o_z.F90",
  "m_outxml.F90",
  "m_out_acknowl.F90",
+ "m_out_spg_anal.F90",
 ]
 # IMPORTANT : please use the alphabetic order in the previous list. Do NOT add the new routine names at the end of the list.
 # This is important to avoid numerous conflicts at merge time. Thank you very much. Xavier.

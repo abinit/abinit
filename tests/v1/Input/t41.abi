@@ -1,0 +1,74 @@
+#   Mo surface 5 layers of 2 atoms + 3 of vacuum ; surface cell is two primitive
+#   surface cells ; 1 special points.
+
+ acell 2*8.52    24.16
+ diemac 1.0d0
+ diemix 0.125d0
+ ecut 5.5
+ enunit 2
+ ionmov 0
+ kptopt 0
+
+ nkpt        1
+ kpt   1 1 1
+ kptnrm     4
+ natom 10  nband 36
+ nline 3  nstep 2
+ nsym  16  ntypat  1
+ occopt  4
+ ortalg -2
+ prtvol 10
+ rprim   1.0 0.0 0.0   0.0 1.0 0.0   0.0 0.0 1.0
+ symrel
+       1  0  0    0  1  0    0  0  1
+       0  1  0    1  0  0    0  0  1
+       1  0  0    0  1  0    0  0 -1
+       0  1  0    1  0  0    0  0 -1
+       1  0  0    0 -1  0    0  0  1
+       0  1  0   -1  0  0    0  0  1
+       1  0  0    0 -1  0    0  0 -1
+       0  1  0   -1  0  0    0  0 -1
+      -1  0  0    0  1  0    0  0  1
+       0 -1  0    1  0  0    0  0  1
+      -1  0  0    0  1  0    0  0 -1
+       0 -1  0    1  0  0    0  0 -1
+      -1  0  0    0 -1  0    0  0  1
+       0 -1  0   -1  0  0    0  0  1
+      -1  0  0    0 -1  0    0  0 -1
+       0 -1  0   -1  0  0    0  0 -1
+ xred  0.0 0.0  0.0        0.5 0.5  0.0
+
+       0.5 0.0  0.125      0.0 0.5  0.125
+       0.0 0.0  0.25       0.5 0.5  0.25
+
+       0.5 0.0 -0.125      0.0 0.5 -0.125
+       0.0 0.0 -0.25       0.5 0.5 -0.25
+
+ tnons  48*0.0d0
+ tolmxf  5.0d-5
+ toldff  1.0d-5
+ tsmear 0.040
+ typat  10*1
+ wtk  1.0
+ znucl 42.0
+
+
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/42mo.pspnc"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t41.abo,  tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00;
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% keywords = NC, CML
+#%% authors = Unknown
+#%% description = 
+#%%   Mo surface, with 10 atom per cell. Not very large, but the
+#%%   number of bands make it a medium-size problem : 36 bands.
+#%%<END TEST_INFO>

@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_skw
 !! NAME
 !!  m_skw
@@ -7,14 +6,10 @@
 !!  Shankland-Koelling-Wood Fourier interpolation scheme.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2019 ABINIT group (MG)
+!! Copyright (C) 2008-2024 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -166,11 +161,6 @@ CONTAINS  !=====================================================================
 !!    This is a global variable i.e. all MPI procs MUST call the routine with the same value.
 !!  comm=MPI communicator
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      sort_dp
-!!
 !! SOURCE
 
 type(skw_t) function skw_new(cryst, params, cplex, nband, nkpt, nsppol, kpts, eig, band_block, comm) result(new)
@@ -220,7 +210,7 @@ type(skw_t) function skw_new(cryst, params, cplex, nband, nkpt, nsppol, kpts, ei
  ! -----------------------
  ! Find nrwant star points
  ! -----------------------
- lpratio = abs(params(1))
+ lpratio = int(abs(params(1)))
  ABI_CHECK(lpratio > 0, "lpratio must be > 0")
  rmax = nint((one + (lpratio * new%nkpt * new%ptg_nsym) / two) ** third)
  if (new%has_inversion) then
@@ -392,7 +382,7 @@ type(skw_t) function skw_new(cryst, params, cplex, nband, nkpt, nsppol, kpts, ei
    write(msg,"(2a,2(a,es12.4),a)") &
      "Large error in SKW interpolation!",ch10," MARE: ",mare, ", MAE: ", mae_meV, " (meV)"
    call wrtout(ab_out, msg)
-   MSG_WARNING(msg)
+   ABI_WARNING(msg)
  end if
 
  call cwtime_report(" skw_new", cpu_tot, wall_tot, gflops_tot, end_str=ch10)
@@ -414,12 +404,6 @@ end function skw_new
 !!
 !! OUTPUT
 !!  only writing
-!!
-!! PARENTS
-!!      m_skw
-!!
-!! CHILDREN
-!!      get_irredg,sort_dp,xmpi_allgatherv,xmpi_split_work2_i4b,xmpi_sum
 !!
 !! SOURCE
 
@@ -458,10 +442,6 @@ end subroutine skw_print
 !!
 !! OUTPUT
 !!  Only writing
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -540,12 +520,6 @@ end function skw_ncwrite
 !!  [oder1(3)]=First-order derivatives wrt k in reduced coordinates.
 !!  [oder2(3,3)]=Second-order derivatives wrt k in reduced coordinates.
 !!
-!! PARENTS
-!!      m_ebands,m_ifc,m_skw
-!!
-!! CHILDREN
-!!      get_irredg,sort_dp,xmpi_allgatherv,xmpi_split_work2_i4b,xmpi_sum
-!!
 !! SOURCE
 
 subroutine skw_eval_bks(skw, band, kpt, spin, oeig, oder1, oder2)
@@ -609,146 +583,12 @@ end subroutine skw_eval_bks
 
 !----------------------------------------------------------------------
 
-!!****f* m_skw/skw_eval_fft
-!! NAME
-!!  skw_eval_fft
-!!
-!! FUNCTION
-!!  Interpolate the energies for an arbitrary k-point and spin with slow FT.
-!!
-!! INPUTS
-!!  cryst<crystal_t>=Crystalline structure.
-!!  nfft=Number of points in FFT mesh.
-!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
-!!  band=Band index.
-!!  spin=Spin index.
-!!
-!! OUTPUT
-!!  oeig_mesh(nfft)=interpolated eigenvalues
-!!    Note that oeig is not necessarily sorted in ascending order.
-!!    The routine does not reorder the interpolated eigenvalues
-!!    to be consistent with the interpolation of the derivatives.
-!!  [oder1_mesh(3,nfft))]=First-order derivatives wrt k in reduced coordinates.
-!!  [oder2_mesh(3,3,nfft)]=Second-order derivatives wrt k in reduced coordinates.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      get_irredg,sort_dp,xmpi_allgatherv,xmpi_split_work2_i4b,xmpi_sum
-!!
-!! SOURCE
-
-subroutine skw_eval_fft(skw, ngfft, nfft, band, spin, oeig_mesh, oder1_mesh, oder2_mesh)
-
-!Arguments ------------------------------------
-!scalars
- integer,intent(in) :: nfft,band,spin
- type(skw_t),intent(in) :: skw
-!arrays
- integer,intent(in) :: ngfft(18)
- real(dp),intent(out) :: oeig_mesh(nfft)
- real(dp),optional,intent(out) :: oder1_mesh(3,nfft)
- real(dp),optional,intent(out) :: oder2_mesh(3,3,nfft)
-
-!Local variables-------------------------------
-!scalars
- integer,parameter :: tim_fourdp0=0,paral_kgb0=0
- integer :: cplex,ix,iy,iz,nx,ny,nz,ldx,ldy,ldz,ifft,ir,ii,jj
-!arrays
- real(dp),allocatable :: fofg(:,:),fofr(:),workg(:,:)
-! *********************************************************************
-
- ! Internal MPI_type needed for calling fourdp!
- !call initmpi_seq(skw%mpi_enreg)
- ! Initialize tables to call fourdp in sequential
- !call init_distribfft_seq(skw%mpi_enreg%distribfft,'c',ngfft(2),ngfft(3),'all')
- !call init_distribfft_seq(skw%mpi_enreg%distribfft,'f',ngfft(2),ngfft(3),'all')
-
- ! Transfer data from the G-sphere to the FFT box.
- ! Use the following indexing (N means ngfft of the adequate direction)
- ! 0 1 2 3 ... N/2    -(N-1)/2 ... -1    <= gc
- ! 1 2 3 4 ....N/2+1  N/2+2    ...  N    <= index ig
- nx = ngfft(1); ny = ngfft(2); nz = ngfft(3)
- ldx = ngfft(4); ldy = ngfft(5); ldz = ngfft(6)
-
- cplex = 2
- ABI_MALLOC(fofr, (cplex*nfft))
- ABI_MALLOC(fofg, (2,nfft))
-
- ! TODO: Complete Derivatives
- ! Decide between fourdp and fftbox API
- fofg = zero
- do ir=1,skw%nr
-   ix = skw%rpts(1,ir); if (ix<0) ix=ix+nx; ix=ix+1
-   iy = skw%rpts(2,ir); if (iy<0) iy=iy+ny; iy=iy+1
-   iz = skw%rpts(3,ir); if (iz<0) iz=iz+nz; iz=iz+1
-   ifft = ix + (iy-1)*ldx + (iz-1)*ldx*ldy
-   !band = ib + bstart - 1
-   fofg(1,ifft) = real(skw%coefs(ir, band, spin))
-   fofg(2,ifft) = aimag(skw%coefs(ir, band, spin))
- end do
-
- !call fourdp(cplex, fofg, fofr, +1, skw%mpi_enreg, nfft, ngfft, paral_kgb0, tim_fourdp0)
- !fofr = fofr / skw%ptg_nsym
- if (cplex == 1) oeig_mesh = fofr
- if (cplex == 2) oeig_mesh = fofr(1::2)
-
- if (present(oder1_mesh)) then
-   ! Compute first-order derivatives.
-   ABI_MALLOC(workg, (2,nfft))
-   do ii=1,3
-      workg = zero
-      do ir=1,skw%nr
-        !ifft
-        workg(1,ifft) = -fofg(2,ifft) * skw%rpts(ii,ir)
-        workg(2,ifft) =  fofg(1,ifft) * skw%rpts(ii,ir)
-      end do
-      !call fourdp(cplex, workg, fofr, +1, skw%mpi_enreg, nfft, ngfft, paral_kgb0, tim_fourdp0)
-      if (cplex == 1) oder1_mesh(ii,:) = fofr
-      if (cplex == 2) oder1_mesh(ii,:) = fofr(1::2)
-   end do
-   ABI_FREE(workg)
- end if
-
- if (present(oder2_mesh)) then
-   ! Compute second-order derivatives.
-   ABI_MALLOC(workg, (2,nfft))
-   do jj=1,3
-     do ii=1,jj
-       workg = zero
-       do ir=1,skw%nr
-         !ifft
-         workg(:,ifft) = -fofg(:,ifft) * skw%rpts(ii,ir) * skw%rpts(jj,ir)
-       end do
-       !call fourdp(cplex, workg, fofr, +1, skw%mpi_enreg, nfft, ngfft, paral_kgb0, tim_fourdp0)
-       if (cplex == 1) oder2_mesh(ii,jj,:) = fofr
-       if (cplex == 2) oder2_mesh(ii,jj,:) = fofr(1::2)
-       if (ii /= jj) oder2_mesh(jj, ii,:) = oder2_mesh(ii, jj,:)
-     end do
-   end do
-   ABI_FREE(workg)
- end if
-
- ABI_FREE(fofg)
- ABI_FREE(fofr)
-
-end subroutine skw_eval_fft
-!!***
-
-!----------------------------------------------------------------------
-
 !!****f* m_skw/skw_free
 !! NAME
 !!  skw_free
 !!
 !! FUNCTION
 !!  Free memory
-!!
-!! PARENTS
-!!      m_ebands,m_ifc
-!!
-!! CHILDREN
-!!      get_irredg,sort_dp,xmpi_allgatherv,xmpi_split_work2_i4b,xmpi_sum
 !!
 !! SOURCE
 
@@ -789,12 +629,6 @@ end subroutine skw_free
 !!
 !! OUTPUT
 !!  srk(%nr)=Star function for this k-point.
-!!
-!! PARENTS
-!!      m_skw
-!!
-!! CHILDREN
-!!      get_irredg,sort_dp,xmpi_allgatherv,xmpi_split_work2_i4b,xmpi_sum
 !!
 !! SOURCE
 
@@ -841,12 +675,6 @@ end subroutine mkstar
 !!
 !! OUTPUT
 !!  srk_dk1(%nr,3)=Derivative of the star function wrt k in reduced coordinates.
-!!
-!! PARENTS
-!!      m_skw
-!!
-!! CHILDREN
-!!      get_irredg,sort_dp,xmpi_allgatherv,xmpi_split_work2_i4b,xmpi_sum
 !!
 !! SOURCE
 
@@ -896,12 +724,6 @@ end subroutine mkstar_dk1
 !!
 !! OUTPUT
 !!  srk_dk2(%nr,3,3)=2nd derivatives of the star function wrt k in reduced coordinates.
-!!
-!! PARENTS
-!!      m_skw
-!!
-!! CHILDREN
-!!      get_irredg,sort_dp,xmpi_allgatherv,xmpi_split_work2_i4b,xmpi_sum
 !!
 !! SOURCE
 
@@ -969,12 +791,6 @@ end subroutine mkstar_dk2
 !! OUTPUT
 !!  or2vals(skw%nr)=||R||**2
 !!
-!! PARENTS
-!!      m_skw
-!!
-!! CHILDREN
-!!      get_irredg,sort_dp,xmpi_allgatherv,xmpi_split_work2_i4b,xmpi_sum
-!!
 !! SOURCE
 
 subroutine find_rstar_gen(skw, cryst, nrwant, rmax, or2vals, comm)
@@ -992,7 +808,7 @@ subroutine find_rstar_gen(skw, cryst, nrwant, rmax, or2vals, comm)
 !scalars
  integer :: cnt,nstars,i1,i2,i3,msize,ir,nsh,ish,ss,ee,nst,ierr,nprocs,my_rank,ii
  real(dp) :: r2_prev
- character(len=500) :: msg
+ !character(len=500) :: msg
 !arrays
  integer,allocatable :: iperm(:),rtmp(:,:),rgen(:,:),r2sh(:),shlim(:),sh_start(:),sh_stop(:)
  integer,allocatable :: recvcounts(:),displs(:),recvbuf(:,:)
@@ -1051,7 +867,7 @@ subroutine find_rstar_gen(skw, cryst, nrwant, rmax, or2vals, comm)
  ! Each proc works on a contigous block of shells, then we have to gather the results.
  ABI_MALLOC(sh_start, (0:nprocs-1))
  ABI_MALLOC(sh_stop, (0:nprocs-1))
- call xmpi_split_work2_i4b(nsh, nprocs, sh_start, sh_stop, msg, ierr)
+ call xmpi_split_work2_i4b(nsh, nprocs, sh_start, sh_stop)
 
  ABI_MALLOC(cnorm, (msize))
  nstars = 0

@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_rf2_init
 !! NAME
 !!  m_rf2_init
@@ -7,14 +6,10 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2019 ABINIT group ()
+!!  Copyright (C) 2015-2024 ABINIT group (LB,MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! TODO
 !!  Can be merged with m_rf2
@@ -30,8 +25,20 @@
 module m_rf2_init
 
  use defs_basis
+ use m_xmpi
  use m_errors
+ use m_wfk
+ use m_hamiltonian
+ use m_cgtools
+ use m_rf2
  use m_abicore
+ use m_dtset
+ use m_dtfil
+
+ use m_time   , only : timab
+ use defs_abitypes, only : MPI_type
+ use m_pawcprj, only : pawcprj_type,pawcprj_alloc,pawcprj_copy,pawcprj_get,pawcprj_free,pawcprj_output
+ use m_cgprj,   only : getcprj
 
  implicit none
 
@@ -52,13 +59,6 @@ contains
 !! FUNCTION
 !! Compute terms needed for the 2nd order Sternheimer equation.
 !! All terms are stored in a rf2_t object.
-!!
-!! COPYRIGHT
-!! Copyright (C) 2015-2019 ABINIT group (LB,MT)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
 !!  cg(2,mpw*nspinor*mband*nsppol)=planewave coefficients of wavefunctions at k
@@ -97,37 +97,14 @@ contains
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      dfpt_vtowfk
-!!
-!! CHILDREN
-!!      cg_zaxpy,dotprod_g,getcprj,pawcprj_alloc,pawcprj_free,pawcprj_get
-!!      rf2_accumulate_bands,rf2_apply_hamiltonian,rf2_getidirs,sqnorm_g
-!!      wfk_read_bks,wrtout,xmpi_allgather,xmpi_barrier
-!!
 !! SOURCE
 
 subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,ffnl1,ffnl1_test,gs_hamkq,ibg,icg,idir,ikpt,ipert,isppol,mkmem,&
                      mpi_enreg,mpw,nband_k,nsppol,rf_hamkq,rf_hamk_dir2,occ_k,rocceig,ddk_f)
 
- use defs_basis
- use defs_datatypes
- use defs_abitypes
- use m_xmpi
- use m_errors
- use m_wfk
- use m_hamiltonian
- use m_cgtools
- use m_rf2
- use m_time   , only : timab
- use m_pawcprj, only : pawcprj_type,pawcprj_alloc,pawcprj_copy,pawcprj_get,pawcprj_free,pawcprj_output
- use m_cgprj,   only : getcprj
- implicit none
-
 ! *************************************************************************
 !Arguments -------------------------------
 !scalars
-
  integer,intent(in) :: ibg,icg,idir,ipert,isppol,ikpt
  integer,intent(in) :: mkmem,mpw,nband_k,nsppol
  type(datafiles_type),intent(in) :: dtfil
@@ -155,7 +132,9 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,ffnl1,ffnl1_test,gs_ha
  integer :: size_cprj,size_wf,shift_band1,shift_band2,shift_cprj_band1,shift_cprj_dir1,shift_proc
  integer :: shift_dir1_lambda,shift_dir2_lambda,shift_dir1,shift_dir1_loc,shift_dir2,shift_jband_lambda
  logical :: has_cprj_jband,has_dudkprj
- real(dp) :: doti,dotr,dot2i,dot2r,invocc,tol_final,factor
+ real(dp) :: doti,dotr,dot2i,dot2r,invocc,tol_final
+ real(dp) :: factor,factor_in
+ logical :: symmetric,antisymmetric,total
  character(len=500) :: msg
 !arrays
  integer :: file_index(2)
@@ -172,6 +151,7 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,ffnl1,ffnl1_test,gs_ha
 
 ! *********************************************************************
 
+ 
  DBG_ENTER("COLL")
 
  call timab(514,1,tsec)
@@ -192,7 +172,7 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,ffnl1,ffnl1_test,gs_ha
 
  if(ipert<natom+10.or.ipert>natom+11) then
    write(msg,'(a)') 'ipert must be equal to natom+10 or natom+11 for rf2 calculations.'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
 !Define perturbations and idirs
@@ -210,34 +190,49 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,ffnl1,ffnl1_test,gs_ha
    rf2%idirs(2)=idir2
  end if
 
+!Choose dkdk option
+ symmetric = .false.
+ antisymmetric = .false.
+ total = .false.
+
+ ! even if rf2_dkdk is 5 (nonesense),
+ ! as long as rf2_dkdk /= 0, symmetric = .true.
+ if (dtset%rf2_dkdk==2) then
+   antisymmetric = .true.
+ else if (dtset%rf2_dkdk==3) then
+   total = .true.
+ else
+   symmetric = .true.
+ endif
+
+
 ! **************************************************************************************************
 ! Get info from ddk files
 ! **************************************************************************************************
 
 !Allocate work spaces
- ABI_ALLOCATE(eig1_read,(2*nband_k))
- ABI_ALLOCATE(ddk_read,(2,size_wf))
+ ABI_MALLOC(eig1_read,(2*nband_k))
+ ABI_MALLOC(ddk_read,(2,size_wf))
  eig1_read(:)=zero
  ddk_read(:,:)=zero
 
 ! "eig1_k_stored" contains dLambda_{nm}/dpert every bands n and m and ndir (=1 or 2) directions
 ! pert = k_dir (wavevector) or E_dir (electric field)
- ABI_ALLOCATE(eig1_k_stored,(2*rf2%ndir*nband_k**2))
+ ABI_MALLOC(eig1_k_stored,(2*rf2%ndir*nband_k**2))
  eig1_k_stored=zero
 
 ! "dudk" contains du/dpert1 for every bands and ndir (=1 or 2) directions
- ABI_STAT_ALLOCATE(dudk,(2,rf2%ndir*nband_k*size_wf), ierr)
- ABI_CHECK(ierr==0, "out of memory in m_rf2 : dudk")
+ ABI_MALLOC_OR_DIE(dudk,(2,rf2%ndir*nband_k*size_wf), ierr)
  dudk=zero
  has_dudkprj=.false.
  if (gs_hamkq%usepaw==1.and.gs_hamkq%usecprj==1) then
-   ABI_DATATYPE_ALLOCATE(dudkprj,(natom,rf2%ndir*nband_k*size_cprj))
+   ABI_MALLOC(dudkprj,(natom,rf2%ndir*nband_k*size_cprj))
    ncpgr_loc=1;if(ipert==natom+10.or.ipert==natom+11) ncpgr_loc=3
    call pawcprj_alloc(dudkprj,ncpgr_loc,gs_hamkq%dimcprj)
    choice_cprj=5 ; cpopt_cprj=0
    has_dudkprj=.true.
  else
-   ABI_DATATYPE_ALLOCATE(dudkprj,(natom,0))
+   ABI_MALLOC(dudkprj,(natom,0))
  end if
 
  if (debug_mode/=0) then
@@ -257,7 +252,7 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,ffnl1,ffnl1_test,gs_ha
    idir1=rf2%idirs(kdir1)
    ipert1=rf2%iperts(kdir1)
    do iband=1,nband_k
-     call wfk_read_bks(ddk_f(file_index(kdir1)),iband,ikpt,isppol,xmpio_single,cg_bks=ddk_read,eig1_bks=eig1_read)
+     call ddk_f(file_index(kdir1))%read_bks(iband,ikpt,isppol,xmpio_single,cg_bks=ddk_read,eig1_bks=eig1_read)
 !    Copy ddk_read in "dudk"
      shift_band1=(iband-1)*size_wf
      shift_dir1=(kdir1-1)*nband_k*size_wf
@@ -275,26 +270,26 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,ffnl1,ffnl1_test,gs_ha
        idir_cprj=0;if (dudkprj(1,1)%ncpgr/=3) idir_cprj=idir1
        call getcprj(choice_cprj,cpopt_cprj,ddk_read,cprj_dudk,gs_hamkq%ffnl_k,idir_cprj,&
 &       gs_hamkq%indlmn,gs_hamkq%istwf_k,gs_hamkq%kg_k,gs_hamkq%kpg_k,gs_hamkq%kpt_k,&
-&       gs_hamkq%lmnmax,gs_hamkq%mgfft,mpi_enreg,gs_hamkq%natom,gs_hamkq%nattyp,gs_hamkq%ngfft,&
+&       gs_hamkq%lmnmax,gs_hamkq%mgfft,mpi_enreg,1,gs_hamkq%natom,gs_hamkq%nattyp,gs_hamkq%ngfft,&
 &       gs_hamkq%nloalg,gs_hamkq%npw_k,gs_hamkq%nspinor,gs_hamkq%ntypat,gs_hamkq%phkxred,&
 &       gs_hamkq%ph1d,gs_hamkq%ph3d_k,gs_hamkq%ucvol,gs_hamkq%useylm)
      end if
    end do
  end do
 
- ABI_ALLOCATE(dudkdk,(2,0))
- ABI_ALLOCATE(dudk_dir2,(2,0))
+ ABI_MALLOC(dudkdk,(2,0))
+ ABI_MALLOC(dudk_dir2,(2,0))
 
 !Get dudkdk for ipert==natom+11
  if(ipert==natom+11) then
-   ABI_DEALLOCATE(dudkdk)
-   ABI_ALLOCATE(dudkdk,(2,nband_k*size_wf))
+   ABI_FREE(dudkdk)
+   ABI_MALLOC(dudkdk,(2,nband_k*size_wf))
    if (idir>3) then
-     ABI_DEALLOCATE(dudk_dir2)
-     ABI_ALLOCATE(dudk_dir2,(2,nband_k*size_wf))
+     ABI_FREE(dudk_dir2)
+     ABI_MALLOC(dudk_dir2,(2,nband_k*size_wf))
    end if
    do iband=1,nband_k
-     call wfk_read_bks(ddk_f(1),iband,ikpt,isppol,xmpio_single,cg_bks=ddk_read,eig1_bks=eig1_read)
+     call ddk_f(1)%read_bks(iband,ikpt,isppol,xmpio_single,cg_bks=ddk_read,eig1_bks=eig1_read)
      shift_band1=(iband-1)*size_wf
      dudkdk(:,1+shift_band1:size_wf+shift_band1)=ddk_read(:,:)
 !    Check that < u^(0) | u^(2) > = - Re[< u^(1) | u^(1) >]
@@ -323,42 +318,41 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,ffnl1,ffnl1_test,gs_ha
      end if ! debug_mode
 !    Read ddk for idir2
      if (idir>3) then
-       call wfk_read_bks(ddk_f(4),iband,ikpt,isppol,xmpio_single,cg_bks=ddk_read,eig1_bks=eig1_read)
+       call ddk_f(4)%read_bks(iband,ikpt,isppol,xmpio_single,cg_bks=ddk_read,eig1_bks=eig1_read)
        dudk_dir2(:,1+shift_band1:size_wf+shift_band1)=ddk_read(:,:)
      end if
    end do !iband
  end if ! ipert=natom+11
 
- ABI_DEALLOCATE(ddk_read)
- ABI_DEALLOCATE(eig1_read)
+ ABI_FREE(ddk_read)
+ ABI_FREE(eig1_read)
 
 ! **************************************************************************************************
 ! COMPUTATION OF "dsusdu", A PART OF "A_mn" AND A PART OF "Lambda_mn" (see defs in m_rf2)
 ! **************************************************************************************************
 
 !Allocate work spaces for one band
- ABI_ALLOCATE(h_cwave,(2,size_wf))
- ABI_ALLOCATE(s_cwave,(2,size_wf))
- ABI_ALLOCATE(gvnlx1,(2,size_wf))
+ ABI_MALLOC(h_cwave,(2,size_wf))
+ ABI_MALLOC(s_cwave,(2,size_wf))
+ ABI_MALLOC(gvnlx1,(2,size_wf))
  h_cwave(:,:) = zero
  s_cwave(:,:) = zero
  gvnlx1(:,:) = zero
 
 ! "dsusdu" contains dS/dpert_dir |u_band> + S|du_band/dpert1> for every bands and ndir (=1 or 2) directions
- ABI_STAT_ALLOCATE(dsusdu,(2,rf2%ndir*nband_k*size_wf), ierr)
- ABI_CHECK(ierr==0, "out of memory in rf2_init : dsusdu")
+ ABI_MALLOC_OR_DIE(dsusdu,(2,rf2%ndir*nband_k*size_wf), ierr)
  dsusdu=zero
 
- ABI_ALLOCATE(rf2%amn,(2,nband_k**2))
+ ABI_MALLOC(rf2%amn,(2,nband_k**2))
  rf2%amn=zero
 
- ABI_ALLOCATE(rf2%lambda_mn,(2,nband_k**2))
+ ABI_MALLOC(rf2%lambda_mn,(2,nband_k**2))
  rf2%lambda_mn(:,:)=zero
 
 !Allocate work spaces when debug_mode is activated
  has_cprj_jband=.false.
  if (debug_mode/=0) then ! Only for test purposes
-   ABI_ALLOCATE(cg_jband,(2,size_wf*nband_k,2))
+   ABI_MALLOC(cg_jband,(2,size_wf*nband_k,2))
    cg_jband(:,:,1) = cg(:,1+icg:size_wf*nband_k+icg)
    if (ipert==natom+11) then ! Note the multiplication by "i"
      if (idir<=3) then
@@ -370,18 +364,19 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,ffnl1,ffnl1_test,gs_ha
      end if
    end if
    if (gs_hamkq%usepaw==1.and.gs_hamkq%usecprj==1) then
-     ABI_DATATYPE_ALLOCATE(cprj_jband,(natom,size_cprj*nband_k))
+     ABI_MALLOC(cprj_jband,(natom,size_cprj*nband_k))
      has_cprj_jband=.true.
    else
-     ABI_DATATYPE_ALLOCATE(cprj_jband,(natom,0))
+     ABI_MALLOC(cprj_jband,(natom,0))
    end if
  else
-   ABI_ALLOCATE(cg_jband,(2,0,2))
-   ABI_DATATYPE_ALLOCATE(cprj_jband,(natom,0))
+   ABI_MALLOC(cg_jband,(2,0,2))
+   ABI_MALLOC(cprj_jband,(natom,0))
  end if
 
- factor=one
- if(ipert==natom+10 .and. idir<=3) factor=two ! in order to not compute same terms twice
+ ! define dkdk factor
+ factor = one
+ if(ipert==natom+10 .and. idir<=3 .and. symmetric) factor=two ! in order to not compute same terms twice
 
  do kdir1=1,rf2%ndir
 !  First iteration (kdir1=1) :
@@ -407,6 +402,17 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,ffnl1,ffnl1_test,gs_ha
      if (kdir1==1) rf_hamk_idir => rf_hamkq
      if (kdir1==2) rf_hamk_idir => rf_hamk_dir2
    end if
+
+   ! define zero factor instead of exiting the loop: we need to compute dsusdu
+   if (antisymmetric .and. rf2%ndir==1) factor = zero
+   if (total .and. rf2%ndir==2 .and. kdir1==2) factor = zero
+
+   ! define factor for antisymmetric dkdk case
+   if (rf2%ndir==2 .and. kdir1==2 .and. antisymmetric) factor = -one
+
+   ! define factor_in for accumulate_bands
+   factor_in = factor
+   if ((gs_hamkq%usepaw==1 .or. ipert/=natom+10) .and. rf2%ndir==1) factor_in = two
 
 !  Load projected WF according to ipert1 and idir1
    cprj_j => cprj_empty ; cprj_dudk => cprj_empty
@@ -461,7 +467,7 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,ffnl1,ffnl1_test,gs_ha
            shift_band2=(iband-1)*size_wf
            cwave_dudk => dudk(:,1+shift_band2+shift_dir2:size_wf+shift_band2+shift_dir2)
            call rf2_accumulate_bands(rf2,1,gs_hamkq,mpi_enreg,iband,idir1,idir2,ipert1,ipert2,&
-           jband,debug_mode,cwave_dudk,h_cwave,s_cwave)
+           jband,debug_mode,cwave_dudk,h_cwave,s_cwave,factor_in)
          end if
        end do
 
@@ -504,7 +510,7 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,ffnl1,ffnl1_test,gs_ha
            shift_band2=(iband-1)*size_wf
            cwave_dudk => dudk(:,1+shift_band2+shift_dir2:size_wf+shift_band2+shift_dir2)
            call rf2_accumulate_bands(rf2,2,gs_hamkq,mpi_enreg,iband,idir1,idir2,ipert1,ipert2,&
-           jband,debug_mode,cwave_dudk,h_cwave,s_cwave)
+           jband,debug_mode,cwave_dudk,h_cwave,s_cwave,factor_in)
          end if
        end do
 
@@ -517,8 +523,8 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,ffnl1,ffnl1_test,gs_ha
  if (nproc_band>1) then
 
    my_nband = nband_k/nproc_band;if (mod(nband_k,nproc_band)/=0) my_nband=my_nband+1
-   ABI_ALLOCATE(dsusdu_loc,(2,size_wf*my_nband*rf2%ndir))
-   ABI_ALLOCATE(dsusdu_gather,(2,size_wf*my_nband*rf2%ndir*nproc_band))
+   ABI_MALLOC(dsusdu_loc,(2,size_wf*my_nband*rf2%ndir))
+   ABI_MALLOC(dsusdu_gather,(2,size_wf*my_nband*rf2%ndir*nproc_band))
    dsusdu_loc(:,:) = zero
    dsusdu_gather(:,:) = zero
 
@@ -556,8 +562,8 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,ffnl1,ffnl1_test,gs_ha
        end do
      end do
    end do
-   ABI_DEALLOCATE(dsusdu_loc)
-   ABI_DEALLOCATE(dsusdu_gather)
+   ABI_FREE(dsusdu_loc)
+   ABI_FREE(dsusdu_gather)
 
  end if
 
@@ -565,12 +571,16 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,ffnl1,ffnl1_test,gs_ha
 ! COMPUTATION OF "RHS_Stern", THE LAST PART OF "A_mn" AND A PART OF "Lambda_mn"
 ! **************************************************************************************************
 
- ABI_STAT_ALLOCATE(rf2%RHS_Stern,(2,nband_k*size_wf), ierr)
- ABI_CHECK(ierr==0, "out of memory in m_rf2 : RHS_Stern")
+ ABI_MALLOC_OR_DIE(rf2%RHS_Stern,(2,nband_k*size_wf), ierr)
  rf2%RHS_Stern(:,:)=zero
+
+ ! Define prefactor for the H^{(2)} term
+ factor = one
+ if (total) factor = half
 
 !Computation of terms containing H^(2)
  if (ipert/=natom+11 .or. gs_hamkq%usepaw==1) then ! Otherwise H^(2) = 0
+   if (.not. antisymmetric) then  ! check antisymmetric dkdk
 
 !Load projected WF according to ipert and idir
    cprj_j => cprj_empty
@@ -646,18 +656,23 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,ffnl1,ffnl1_test,gs_ha
            end if
            call rf2_getidirs(idir,idir1,idir2)
            call rf2_accumulate_bands(rf2,3,gs_hamkq,mpi_enreg,iband,idir1,idir2,ipert1,ipert2,&
-           jband,debug_mode,cwave_i,h_cwave,s_cwave)
+           jband,debug_mode,cwave_i,h_cwave,s_cwave,factor)
          end if
        end do
 
 !      Add d^2H/(dk_dir1 dk_dir2)|u^(0)> to RHS_Stern :
        if (gs_hamkq%usepaw==1) h_cwave(:,:)=h_cwave(:,:)-eig0_k(jband)*s_cwave(:,:) ! if PAW : we add H^(2)-eps^(0) S^(2)
        rhs_j => rf2%RHS_Stern(:,1+shift_band1:size_wf+shift_band1)
-       call cg_zaxpy(size_wf,(/one,zero/),h_cwave,rhs_j)
+       call cg_zaxpy(size_wf,(/factor,zero/),h_cwave,rhs_j)
 
      end if ! empty band test
    end do ! jband
+   endif ! check antisymmetric dkdk
  end if ! H^(2) exists
+
+ ! define dkdk factor
+ factor = one
+ if(ipert==natom+10 .and. idir<=3 .and. symmetric) factor=two ! in order to not compute same terms twice
 
 !Computation of terms containing H^(1)
  do kdir1=1,rf2%ndir
@@ -686,6 +701,17 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,ffnl1,ffnl1_test,gs_ha
      if (kdir1==1) rf_hamk_idir => rf_hamk_dir2 ! dir2
      if (kdir1==2) rf_hamk_idir => rf_hamkq ! dir1
    end if
+
+   ! determine when we need to compute terms according to dkdk option
+   if (antisymmetric .and. rf2%ndir==1) exit
+   if (total .and. rf2%ndir==2 .and. kdir1==2) cycle
+
+   ! define factor for antisymmetric dkdk case
+   if (rf2%ndir==2 .and. kdir1==2 .and. antisymmetric) factor = -one
+
+   ! define factor_in for accumulate_bands
+   factor_in = factor
+   if ((gs_hamkq%usepaw==1 .or. ipert/=natom+10) .and. rf2%ndir==1) factor_in = two
 
 !  Load projected WF according to ipert2 and idir2
    cprj_j => cprj_empty ;  ; cprj_dudk => cprj_empty
@@ -738,14 +764,14 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,ffnl1,ffnl1_test,gs_ha
            shift_band2=(iband-1)*size_wf
            cwave_i => cg(:,1+shift_band2+icg:size_wf+shift_band2+icg)
            call rf2_accumulate_bands(rf2,4,gs_hamkq,mpi_enreg,iband,idir1,idir2,ipert1,ipert2,&
-           jband,debug_mode,cwave_i,h_cwave,s_cwave)
+           jband,debug_mode,cwave_i,h_cwave,s_cwave,factor_in)
          end if
        end do
 
 !      Add dH/dpert2 | du/dpert1 > to RHS_Stern :
        if (gs_hamkq%usepaw==1) h_cwave(:,:)=h_cwave(:,:)-eig0_k(jband)*s_cwave(:,:) ! if PAW : we add H^(1)-eps^(0) S^(1)
        rhs_j => rf2%RHS_Stern(:,1+shift_band1:size_wf+shift_band1)
-       call cg_zaxpy(size_wf,(/factor*one,zero/),h_cwave,rhs_j)
+       call cg_zaxpy(size_wf,(/factor,zero/),h_cwave,rhs_j)
 
 !      Compute : -factor * sum_iband ( dLambda/dpert1_{iband,jband} * dsusdu_{iband} )
        do iband=1,nband_k
@@ -761,7 +787,8 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,ffnl1,ffnl1_test,gs_ha
 
 !          Compute Lambda_{iband,jband} * dsusdu_{iband} and add it to RHS_Stern
            rhs_j => rf2%RHS_Stern(:,1+shift_band1:size_wf+shift_band1)
-           call cg_zaxpy(size_wf,(/-factor*lambda_ij(1),-factor*lambda_ij(2)/),cwave_i,rhs_j) !do not forget the minus sign!
+           call cg_zaxpy(size_wf,(/-factor*lambda_ij(1), &
+                                 & -factor*lambda_ij(2)/),cwave_i,rhs_j) !do not forget the minus sign!
 
          end if ! empty iband test
        end do ! iband
@@ -771,19 +798,19 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,ffnl1,ffnl1_test,gs_ha
 
  end do ! kdir1
 
- ABI_DEALLOCATE(gvnlx1)
- ABI_DEALLOCATE(h_cwave)
- ABI_DEALLOCATE(s_cwave)
- ABI_DEALLOCATE(cg_jband)
- ABI_DEALLOCATE(dudk)
- ABI_DEALLOCATE(dudkdk)
- ABI_DEALLOCATE(dudk_dir2)
- ABI_DEALLOCATE(dsusdu)
- ABI_DEALLOCATE(eig1_k_stored)
+ ABI_FREE(gvnlx1)
+ ABI_FREE(h_cwave)
+ ABI_FREE(s_cwave)
+ ABI_FREE(cg_jband)
+ ABI_FREE(dudk)
+ ABI_FREE(dudkdk)
+ ABI_FREE(dudk_dir2)
+ ABI_FREE(dsusdu)
+ ABI_FREE(eig1_k_stored)
  if (has_cprj_jband) call pawcprj_free(cprj_jband)
- ABI_DATATYPE_DEALLOCATE(cprj_jband)
+ ABI_FREE(cprj_jband)
  if (has_dudkprj) call pawcprj_free(dudkprj)
- ABI_DATATYPE_DEALLOCATE(dudkprj)
+ ABI_FREE(dudkprj)
 
 ! Compute the part of 2nd order wavefunction that belongs to the space of empty bands
  do jband=1,nband_k
@@ -846,8 +873,7 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,ffnl1,ffnl1_test,gs_ha
 !  COMPUTATION OF "dcwavef" AND "Lambda_mn" FROM "A_mn"
 ! **************************************************************************************************
 
- ABI_STAT_ALLOCATE(rf2%dcwavef,(2,nband_k*size_wf), ierr)
- ABI_CHECK(ierr==0, "out of memory in m_rf2 : dcwavef")
+ ABI_MALLOC_OR_DIE(rf2%dcwavef,(2,nband_k*size_wf), ierr)
  rf2%dcwavef=zero
 
  do jband=1,nband_k
@@ -929,7 +955,7 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,ffnl1,ffnl1_test,gs_ha
 
 ! Deallocations of arrays
  if (debug_mode==0) then
-   ABI_DEALLOCATE(rf2%amn)
+   ABI_FREE(rf2%amn)
  end if
 
  call timab(514,2,tsec)

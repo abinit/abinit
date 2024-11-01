@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_frskerker2
 !! NAME
 !! m_frskerker2
@@ -9,7 +8,7 @@
 !! with some residuals and a real space dielectric function
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2019 ABINIT group (DCA, XG, MT)
+!! Copyright (C) 1998-2024 ABINIT group (DCA, XG, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~ABINIT/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -18,10 +17,6 @@
 !! NOTES
 !! this is neither a function nor a subroutine. This is a module
 !! It is made of two functions and one init subroutine
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -34,9 +29,10 @@
 module m_frskerker2
 
   use defs_basis
-  use defs_abitypes
   use m_abicore
+  use m_dtset
 
+  use defs_abitypes, only : MPI_type
   use m_spacepar, only : laplacian
   use m_numeric_tools, only : dotproduct
 
@@ -68,17 +64,9 @@ contains
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      prcrskerker2
-!!
-!! CHILDREN
-!!      laplacian
-!!
 !! SOURCE
 
 subroutine frskerker2__init(dtset_in,mpi_enreg_in,nfft_in,ngfft_in,nspden_in,rdielng_in,deltaW_in,gprimd_in,mat_in )
-
- implicit none
 
 !Arguments ------------------------------------
  type(dataset_type),target,intent(in) :: dtset_in
@@ -98,9 +86,9 @@ subroutine frskerker2__init(dtset_in,mpi_enreg_in,nfft_in,ngfft_in,nspden_in,rdi
    nspden=nspden_in
    ngfft=ngfft_in
    nfft=nfft_in
-   ABI_ALLOCATE(deltaW,(size(deltaW_in,1),size(deltaW_in,2)))
-   ABI_ALLOCATE(mat,(size(mat_in,1),size(mat_in,2)))
-   ABI_ALLOCATE(rdielng,(size(rdielng_in)))
+   ABI_MALLOC(deltaW,(size(deltaW_in,1),size(deltaW_in,2)))
+   ABI_MALLOC(mat,(size(mat_in,1),size(mat_in,2)))
+   ABI_MALLOC(rdielng,(size(rdielng_in)))
    deltaW=deltaW_in
    rdielng=rdielng_in
    mat=mat_in
@@ -123,26 +111,18 @@ subroutine frskerker2__init(dtset_in,mpi_enreg_in,nfft_in,ngfft_in,nspden_in,rdi
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      prcrskerker2
-!!
-!! CHILDREN
-!!      laplacian
-!!
 !! SOURCE
 
   subroutine frskerker2__end()
-
- implicit none
 
 ! *************************************************************************
   if(ok) then
 !  ! set ok to false which prevent using the pf and dpf
    ok = .false.
 !  ! free memory
-   ABI_DEALLOCATE(deltaW)
-   ABI_DEALLOCATE(mat)
-   ABI_DEALLOCATE(rdielng)
+   ABI_FREE(deltaW)
+   ABI_FREE(mat)
+   ABI_FREE(rdielng)
   end if
 
  end subroutine frskerker2__end
@@ -161,16 +141,9 @@ subroutine frskerker2__init(dtset_in,mpi_enreg_in,nfft_in,ngfft_in,nspden_in,rdi
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      laplacian
-!!
 !! SOURCE
 
 subroutine frskerker2__newvres2(nv1,nv2,x, grad, vrespc)
-
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in)    :: nv1,nv2
@@ -196,15 +169,9 @@ subroutine frskerker2__newvres2(nv1,nv2,x, grad, vrespc)
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
   function frskerker2__pf(nv1,nv2,vrespc)
-
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in)    :: nv1,nv2
@@ -218,7 +185,7 @@ subroutine frskerker2__newvres2(nv1,nv2,x, grad, vrespc)
 
   if(ok) then
    buffer1=vrespc
-   call laplacian(gprimd,mpi_enreg_ptr,nfft,nspden,ngfft,dtset_ptr%paral_kgb,rdfuncr=buffer1,laplacerdfuncr=buffer2)
+   call laplacian(gprimd,mpi_enreg_ptr,nfft,nspden,ngfft,rdfuncr=buffer1,laplacerdfuncr=buffer2)
    do ispden=1,nspden
     buffer2(:,ispden)=(vrespc(:,ispden)-((rdielng(:))**2)*buffer2(:,ispden))  &
 &    *half  -  deltaW(:,ispden)
@@ -248,15 +215,9 @@ subroutine frskerker2__newvres2(nv1,nv2,x, grad, vrespc)
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 function frskerker2__dpf(nv1,nv2,vrespc)
-
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: nv1,nv2
@@ -271,7 +232,7 @@ function frskerker2__dpf(nv1,nv2,vrespc)
 
   if(ok) then
    buffer1=vrespc
-   call laplacian(gprimd,mpi_enreg_ptr,nfft,nspden,ngfft,dtset_ptr%paral_kgb,rdfuncr=buffer1,laplacerdfuncr=buffer2)
+   call laplacian(gprimd,mpi_enreg_ptr,nfft,nspden,ngfft,rdfuncr=buffer1,laplacerdfuncr=buffer2)
    do ispden=1,nspden
     frskerker2__dpf(:,ispden)= vrespc(:,ispden)-deltaW(:,ispden)-((rdielng(:))**2)*buffer2(:,ispden)
    end do

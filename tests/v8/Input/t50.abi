@@ -1,0 +1,34 @@
+# General informations
+#**********************
+   rfmeth  1
+   enunit  0
+   eivec   0
+   chneut  0
+   selectz  0
+
+# Flags
+#*******
+   dieflag  2
+   ifcflag  0
+   thmflag  0
+    nlflag  3
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = anaddb
+#%% input_ddb = t48.ddb.out
+#%% test_chain = t47.abi, t48.abi, t49.abi, t50.abi
+#%% [files]
+#%% files_to_test =
+#%%   t50.abo, tolnlines = 4, tolabs = 2.000e-08, tolrel = 4.000e-10
+#%% [paral_info]
+#%% max_nprocs = 4
+#%% [extra_info]
+#%% authors =  F. Naccarato
+#%% keywords =
+#%% description =
+#%%   AlAs, zinc-blende structure. Code anaddb
+#%%   Analyse the DDB from test 48, for the generation of
+#%%   the nonlinear coefficients only.
+#%% topics = nonlinear
+#%%<END TEST_INFO>

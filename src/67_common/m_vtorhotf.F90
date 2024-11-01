@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_vtorhotf
 !! NAME
 !!  m_vtorhotf
@@ -7,14 +6,10 @@
 !! Computes the new density from a fixed potential (vtrial) using the Thomas-Fermi functional
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2019 ABINIT group (DCA, XG, GMR, MF, AR, MM)
+!!  Copyright (C) 1998-2024 ABINIT group (DCA, XG, GMR, MF, AR, MM)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -27,11 +22,12 @@
 module m_vtorhotf
 
  use defs_basis
- use defs_abitypes
  use m_abicore
  use m_errors
  use m_xmpi
+ use m_dtset
 
+ use defs_abitypes, only : MPI_type
  use m_time,     only : timab
  use m_spacepar,  only : symrhg
 
@@ -55,7 +51,6 @@ contains
 !! using the Thomas-Fermi functional
 !!
 !! INPUTS
-!!  dtfil <type(datafiles_type)>=variables related to files
 !!  dtset <type(dataset_type)>=all input variables for this dataset
 !!  gprimd(3,3)=dimensional reciprocal space primitive translations
 !!  irrzon(nfft**(1-1/nsym),2,(nspden/nsppol)-3*(nspden/4))=irreducible zone data
@@ -82,17 +77,10 @@ contains
 !!  rhog(2,nfft)=array for Fourier transform of electron density
 !!  rhor(nfft,nspden)=array for electron density in electrons/bohr**3.
 !!
-!! PARENTS
-!!      scfcv
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
-subroutine vtorhotf(dtfil,dtset,ek,enlx,entropy,fermie,gprimd,grnl,&
+subroutine vtorhotf(dtset,ek,enlx,entropy,fermie,gprimd,grnl,&
 &  irrzon,mpi_enreg,natom,nfft,nspden,nsppol,nsym,phnons,rhog,rhor,rprimd,ucvol,vtrial)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -100,7 +88,6 @@ subroutine vtorhotf(dtfil,dtset,ek,enlx,entropy,fermie,gprimd,grnl,&
  real(dp),intent(in) :: ucvol
  real(dp),intent(out) :: ek,enlx,entropy,fermie
  type(MPI_type),intent(in) :: mpi_enreg
- type(datafiles_type),intent(in) :: dtfil
  type(dataset_type),intent(in) :: dtset
 !arrays
  integer,intent(in) :: irrzon((dtset%ngfft(1)*dtset%ngfft(1)*dtset%ngfft(1))**(1-1/nsym),2,(nspden/nsppol)-3*(nspden/4))
@@ -113,7 +100,7 @@ subroutine vtorhotf(dtfil,dtset,ek,enlx,entropy,fermie,gprimd,grnl,&
 !Local variables-------------------------------
 !scalars
  integer,parameter :: jdichomax=20,level=111
- integer :: i1,i2,i3,ierr,iexit,ifft,ii,ir,iscf,jdicho
+ integer :: i1,i2,i3,ierr,ifft,ii,ir,iscf,jdicho
  integer :: me_fft,n1,n2,n3,nfftot,nproc_fft,prtvol
  real(dp),save :: cktf,fermie_tol,nelect_mid
  real(dp) :: dnelect_mid_dx,dxrtnewt,eektemp,eektf,feektemp,feektf
@@ -124,7 +111,6 @@ subroutine vtorhotf(dtfil,dtset,ek,enlx,entropy,fermie,gprimd,grnl,&
 !arrays
  real(dp) :: tsec(2)
  real(dp),allocatable :: betamumoinsV(:),rhor_mid(:),rhor_middx(:)
-!no_abirules
 
 ! *************************************************************************
 
@@ -188,20 +174,13 @@ subroutine vtorhotf(dtfil,dtset,ek,enlx,entropy,fermie,gprimd,grnl,&
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      vtorhotf
-!!
-!! CHILDREN
-!!
 !! SOURCE
   subroutine tf()
 
-  implicit none
-
 ! *************************************************************************
 
-   ABI_ALLOCATE(rhor_mid,(nfft))
-   ABI_ALLOCATE(rhor_middx,(nfft))
+   ABI_MALLOC(rhor_mid,(nfft))
+   ABI_MALLOC(rhor_middx,(nfft))
    fermie_tol=1.e-10_dp
    cktf=one/two/pi**2*(two*dtset%tphysel)**1.5_dp
 
@@ -235,13 +214,13 @@ subroutine vtorhotf(dtfil,dtset,ek,enlx,entropy,fermie,gprimd,grnl,&
        lnewtonraphson=.true.
      end if
      if (jdicho > jdichomax) then
-       MSG_ERROR('NEWTON RAPHSON NOT CONVERGED')
+       ABI_ERROR('NEWTON RAPHSON NOT CONVERGED')
      end if
    end do
    fermie=rtnewt
    rhor(:,1)=rhor_mid(:)
-   ABI_DEALLOCATE(rhor_mid)
-   ABI_DEALLOCATE(rhor_middx)
+   ABI_FREE(rhor_mid)
+   ABI_FREE(rhor_middx)
 
 !  DEBUG
 !  write(std_out,*)'fmid,nmid,jdicho',fermie,nelect_mid,jdicho
@@ -251,8 +230,8 @@ subroutine vtorhotf(dtfil,dtset,ek,enlx,entropy,fermie,gprimd,grnl,&
    call timab(70,1,tsec)
 
    nfftot=dtset%ngfft(1)*dtset%ngfft(2)*dtset%ngfft(3)
-   call symrhg(1,gprimd,irrzon,mpi_enreg,nfft,nfftot,dtset%ngfft,nspden,nsppol,nsym,dtset%paral_kgb,phnons,&
-&   rhog,rhor,rprimd,dtset%symafm,dtset%symrel)
+   call symrhg(1,gprimd,irrzon,mpi_enreg,nfft,nfftot,dtset%ngfft,nspden,nsppol,nsym,phnons,&
+&   rhog,rhor,rprimd,dtset%symafm,dtset%symrel,dtset%tnons)
 
 !  We now have both rho(r) and rho(G), symmetrized, and if nsppol=2
 !  we also have the spin-up density, symmetrized, in rhor(:,2).
@@ -274,20 +253,13 @@ end subroutine tf
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      vtorhotf
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
   subroutine tfek()
 
-  implicit none
-
 ! *************************************************************************
 
-   ABI_ALLOCATE(betamumoinsV,(nfft))
+   ABI_MALLOC(betamumoinsV,(nfft))
    cktf=one/two/pi**2*(two*dtset%tphysel)**1.5_dp
    eektf=zero
    feektf=zero
@@ -316,7 +288,7 @@ end subroutine tf
 !  ENDDEBUG
    ek=eektf
    entropy=(eektf-feektf)/dtset%tphysel
-   ABI_DEALLOCATE(betamumoinsV)
+   ABI_FREE(betamumoinsV)
  end subroutine tfek
 !!***
 
@@ -348,15 +320,9 @@ end subroutine tf
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
  function zfermim12(xx)
-
- implicit none
 
 !Arguments -------------------------------
  real(dp), intent(in) :: xx
@@ -428,10 +394,6 @@ end function zfermim12
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
  function zfermi12(xx)
@@ -441,7 +403,6 @@ end function zfermim12
 !..reference: antia apjs 84,101 1993
 !..
 !..declare
- implicit none
 
 !Arguments -------------------------------
  real(dp), intent(in) :: xx
@@ -514,10 +475,6 @@ end function zfermi12
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
  function zfermi1(xx)
@@ -527,7 +484,6 @@ end function zfermi12
 !..reference: antia  priv comm. 11sep94
 !..
 !..declare
- implicit none
 
 !Arguments -------------------------------
  real(dp), intent(in) :: xx
@@ -597,15 +553,9 @@ end function zfermi1
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
  function zfermi32(xx)
-
- implicit none
 
 !Arguments -------------------------------
  real(dp), intent(in) :: xx
@@ -681,15 +631,9 @@ end function zfermi32
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
  function zfermi2(xx)
-
- implicit none
 
 !Arguments -------------------------------
  real(dp), intent(in) :: xx
@@ -759,15 +703,9 @@ end function zfermi2
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
  function zfermi52(xx)
-
- implicit none
 
 !Arguments -------------------------------
  real(dp), intent(in) :: xx
@@ -842,15 +780,9 @@ end function zfermi52
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
  function zfermi3(xx)
-
- implicit none
 
 !Arguments -------------------------------
  real(dp), intent(in) :: xx
@@ -921,15 +853,9 @@ end function zfermi3
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
  function ifermim12(ff)
-
- implicit none
 
 !Arguments -------------------------------
  real(dp), intent(in) :: ff
@@ -998,15 +924,9 @@ end function ifermim12
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
  function ifermi12(ff)
-
- implicit none
 
 !Arguments -------------------------------
  real(dp), intent(in) :: ff
@@ -1072,15 +992,9 @@ end function ifermi12
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
  function ifermi32(ff)
-
- implicit none
 
 !Arguments -------------------------------
  real(dp), intent(in) :: ff
@@ -1146,15 +1060,9 @@ end function ifermi32
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
  function ifermi52(ff)
-
- implicit none
 
 !Arguments -------------------------------
  real(dp), intent(in) :: ff
@@ -1218,15 +1126,9 @@ end function ifermi52
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
  function fp12a1 (x)
-
- implicit none
 
 ! Arguments -------------------------------
  real(dp),intent(in) :: x
@@ -1269,15 +1171,9 @@ end function ifermi52
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
  function fp32a1 (x)
-
- implicit none
 
 !Arguments -------------------------------
  real(dp),intent(in) :: x
@@ -1321,15 +1217,9 @@ end function ifermi52
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
  function xp12a1 (y)
-
- implicit none
 
 !Arguments -------------------------------
  real(dp) :: xp12a1
@@ -1374,15 +1264,9 @@ end function ifermi52
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
  function fm12a1 (x)
-
- implicit none
 
 !Arguments -------------------------------
  real(dp),intent(in) :: x
@@ -1425,16 +1309,9 @@ end function ifermi52
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      vtorhotf
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
  subroutine fm12a1t (cktf,rtnewt,tphysel,vtrial,rhor_middx,rhor_mid,nfft)
-
- implicit none
 
  integer,intent(in) :: nfft
  real(dp),intent(in) :: tphysel,rtnewt,cktf

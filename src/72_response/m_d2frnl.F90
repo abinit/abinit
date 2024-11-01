@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_d2frnl
 !! NAME
 !!  m_d2frnl
@@ -7,14 +6,10 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2019 ABINIT group (DCA, XG, GM, AR, MB, MT, AM)
+!!  Copyright (C) 1998-2024 ABINIT group (DCA, XG, GM, AR, MB, MT, AM)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -24,7 +19,51 @@
 
 #include "abi_common.h"
 
+! nvtx related macro definition
+#include "nvtx_macros.h"
+
 module m_d2frnl
+
+ use defs_basis
+ use m_abicore
+ use m_xmpi
+ use m_mpinfo
+ use m_errors
+ use m_cgtools
+ use m_nctk
+ use m_hamiltonian
+ use m_efmas_defs
+ use m_wfk
+ use m_dtset
+ use m_dtfil
+ use m_gemm_nonlop_projectors
+
+
+ use defs_datatypes, only : pseudopotential_type
+ use defs_abitypes, only : MPI_type
+ use m_time,     only : timab
+ use m_geometry, only : metric, strconv
+ use m_efmas,    only : check_degeneracies
+ use m_io_tools, only : file_exists
+ use m_hdr,      only : hdr_skip
+ use m_pawang,   only : pawang_type
+ use m_pawrad,   only : pawrad_type
+ use m_pawtab,   only : pawtab_type,pawtab_get_lsize
+ use m_pawfgrtab,only : pawfgrtab_type, pawfgrtab_init, pawfgrtab_free
+ use m_paw_ij,   only : paw_ij_type, paw_ij_init, paw_ij_free, paw_ij_nullify, paw_ij_reset_flags
+ use m_pawrhoij, only : pawrhoij_type, pawrhoij_copy, pawrhoij_free, pawrhoij_gather, &
+                        pawrhoij_nullify, pawrhoij_symrhoij
+ use m_pawcprj,  only : pawcprj_type, pawcprj_alloc, pawcprj_get, pawcprj_copy, pawcprj_free
+ use m_pawdij,   only : pawdijfr
+ use m_paw_dfpt, only : pawgrnl
+ use m_kg,       only : mkkin, mkkpg
+ use m_mkffnl,   only : mkffnl
+ use m_nonlop,   only : nonlop
+ use m_paw_occupancies, only : pawaccrhoij
+
+#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
+ use m_nvtx_data
+#endif
 
  implicit none
 
@@ -109,63 +148,18 @@ contains
 !!  pawrhoij(my_natom) <type(pawrhoij_type)>= paw rhoij occupancies and related data
 !!    (gradients of rhoij for each atom with respect to atomic positions are computed here)
 !!
-!! PARENTS
-!!      respfn
-!!
-!! CHILDREN
-!!      appdig,check_degeneracies,destroy_hamiltonian,dotprod_g
-!!      init_hamiltonian,load_k_hamiltonian,load_spin_hamiltonian,metric,mkffnl
-!!      mkkin,mkkpg,nonlop,paw_ij_free,paw_ij_init,paw_ij_nullify
-!!      paw_ij_reset_flags,pawaccrhoij,pawcprj_alloc,pawcprj_free,pawdij2e1kb
-!!      pawdijfr,pawfgrtab_free,pawfgrtab_init,pawgrnl,pawrhoij_free
-!!      pawrhoij_gather,pawrhoij_nullify,pawtab_get_lsize,strconv,pawrhoij_symrhoij
-!!      timab,wfk_close,wfk_open_read,wfk_read_bks,wrtout,xmpi_sum
-!!
 !! SOURCE
 
 subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg,efmasval,eigen,eltfrnl,&
-&          gsqcut,has_allddk,indsym,kg,mgfftf,mpi_enreg,mpsang,my_natom,natom,nfftf,ngfft,ngfftf,npwarr,&
+&          gsqcut,has_allddk,indsym,kg,mband_mem_rbz,mkmem_rbz,mgfftf,mpi_enreg,mpsang,my_natom,natom,nfftf,ngfft,ngfftf,npwarr,&
 &          occ,paw_ij,pawang,pawbec,pawfgrtab,pawpiezo,pawrad,pawrhoij,pawtab,ph1d,ph1df,piezofrnl,psps,&
 &          rprimd,rfphon,rfstrs,symrec,vtrial,vxc,xred,ylm,ylmgr)
-
- use defs_basis
- use defs_datatypes
- use defs_abitypes
- use m_abicore
- use m_xmpi
- use m_errors
- use m_cgtools
- use m_nctk
- use m_hamiltonian
- use m_efmas_defs
- use m_wfk
-
- use m_time,     only : timab
- use m_geometry, only : metric, strconv
- use m_efmas,    only : check_degeneracies
- use m_io_tools, only : file_exists
- use m_hdr,      only : hdr_skip
- use m_pawang,   only : pawang_type
- use m_pawrad,   only : pawrad_type
- use m_pawtab,   only : pawtab_type,pawtab_get_lsize
- use m_pawfgrtab,only : pawfgrtab_type, pawfgrtab_init, pawfgrtab_free
- use m_paw_ij,   only : paw_ij_type, paw_ij_init, paw_ij_free, paw_ij_nullify, paw_ij_reset_flags
- use m_pawrhoij, only : pawrhoij_type, pawrhoij_copy, pawrhoij_free, pawrhoij_gather, &
-&                       pawrhoij_nullify, pawrhoij_symrhoij
- use m_pawcprj,  only : pawcprj_type, pawcprj_alloc, pawcprj_get, pawcprj_copy, pawcprj_free
- use m_pawdij,   only : pawdijfr
- use m_paw_dfpt, only : pawgrnl
- use m_kg,       only : mkkin, mkkpg
- use m_mkffnl,   only : mkffnl
- use m_mpinfo,   only : proc_distrb_cycle
- use m_nonlop,   only : nonlop
- use m_paw_occupancies, only : pawaccrhoij
- implicit none
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: dyfr_cplex,dyfr_nondiag,mgfftf,mpsang,my_natom,natom
  integer,intent(in) :: nfftf,pawbec,pawpiezo,rfphon,rfstrs
+ integer,intent(in) :: mkmem_rbz,mband_mem_rbz
  real(dp),intent(in) :: gsqcut
  type(MPI_type),intent(in) :: mpi_enreg
  type(datafiles_type),intent(in) :: dtfil
@@ -173,17 +167,17 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
  type(pawang_type),intent(in) :: pawang
  type(pseudopotential_type),intent(in) :: psps
 !arrays
- integer,intent(in) :: indsym(4,dtset%nsym,natom),kg(3,dtset%mpw*dtset%mkmem)
+ integer,intent(in) :: indsym(4,dtset%nsym,natom),kg(3,dtset%mpw*mkmem_rbz)
  integer,intent(in) :: ngfft(18),ngfftf(18),npwarr(dtset%nkpt)
  integer,intent(in) :: symrec(3,3,dtset%nsym)
- real(dp),intent(in) :: cg(2,dtset%mpw*dtset%nspinor*dtset%mband*dtset%mkmem*dtset%nsppol)
+ real(dp),intent(in) :: cg(2,dtset%mpw*dtset%nspinor*mband_mem_rbz*mkmem_rbz*dtset%nsppol)
  real(dp),intent(in) :: eigen(dtset%mband*dtset%nkpt*dtset%nsppol)
  real(dp),intent(in) :: occ(dtset%mband*dtset%nkpt*dtset%nsppol)
  real(dp),intent(in) :: ph1d(2,3*(2*dtset%mgfft+1)*natom)
  real(dp),intent(in) :: ph1df(2,3*(2*mgfftf+1)*natom),rprimd(3,3)
  real(dp),intent(in) :: vxc(nfftf,dtset%nspden),xred(3,natom)
- real(dp),intent(in) :: ylm(dtset%mpw*dtset%mkmem,mpsang*mpsang*psps%useylm)
- real(dp),intent(in) :: ylmgr(dtset%mpw*dtset%mkmem,9,mpsang*mpsang*psps%useylm)
+ real(dp),intent(in) :: ylm(dtset%mpw*mkmem_rbz,mpsang*mpsang*psps%useylm)
+ real(dp),intent(in) :: ylmgr(dtset%mpw*mkmem_rbz,9,mpsang*mpsang*psps%useylm)
  real(dp),intent(in),target :: vtrial(nfftf,dtset%nspden)
  real(dp),intent(out) :: becfrnl(3,natom,3*pawbec),piezofrnl(6,3*pawpiezo)
  real(dp),intent(out) :: dyfrnl(dyfr_cplex,3,3,natom,1+(natom-1)*dyfr_nondiag)
@@ -210,18 +204,24 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
  integer :: nnlout_piez1,nnlout_piez2,nnlout_phon,nnlout_strs,npw_,npw_k,nsp,nsploop,nu
  integer :: optgr,optgr2,option,option_rhoij,optstr,optstr2,paw_opt,paw_opt_1,paw_opt_3,paw_opt_efmas
  integer :: shift_rhoij,signs,signs_field,spaceworld,sz2,sz3,tim_nonlop
- real(dp) :: arg,eig_k,enl,enlk,occ_k,ucvol,wtk_k
- logical :: has_ddk_file,need_becfr,need_efmas,need_piezofr,paral_atom,t_test,usetimerev
+ integer :: iband_, iband_me, jband_me, nband_me
+ real(dp) :: arg,enl,enlk,ucvol,wtk_k
+ logical :: has_ddk_file,need_becfr,need_efmas,need_piezofr,paral_atom,t_test
+ logical :: use_timerev,use_zeromag
  character(len=500) :: msg
  type(gs_hamiltonian_type) :: gs_ham
 !arrays
  integer :: ik_ddk(3),ddkfil(3)
+ integer :: bands_treated_now(dtset%mband), band_procs(dtset%mband)
+ integer :: ndat,idat
  integer,allocatable :: dimlmn(:),kg_k(:,:),l_size_atm(:)
  integer,pointer :: my_atmtab(:)
  real(dp) :: dotprod(2),dummy(0),gmet(3,3),gprimd(3,3),grhoij(3),kpoint(3),nonlop_dum(1,1)
  real(dp) :: rmet(3,3),tsec(2)
+ complex(dp), allocatable :: ch2c_tmp(:)
  real(dp),allocatable :: becfrnl_tmp(:,:,:),becfrnlk(:,:,:),becij(:,:,:,:,:),cg_left(:,:)
- real(dp),allocatable :: cwavef(:,:),ddk(:,:),ddkinpw(:,:,:),dyfrnlk(:,:)
+ real(dp),allocatable :: occ_k(:),eig_k(:)
+ real(dp),allocatable :: cwavef(:,:),ddk(:,:,:),ddkinpw(:,:,:),dyfrnlk(:,:)
  real(dp),allocatable :: elt_work(:,:),eltfrnlk(:,:),enlout_bec1(:),enlout_bec2(:),enlout_efmas(:)
  real(dp),allocatable :: enlout_piez1(:),enlout_piez2(:),enlout_phon(:),enlout_strs(:)
  real(dp),allocatable :: gh2c(:,:),gs2c(:,:)
@@ -240,6 +240,7 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
  DBG_ENTER("COLL")
 
  call timab(159,1,tsec)
+ ABI_NVTX_START_RANGE(NVTX_D2FRNL)
 
  write(msg,'(3a)')ch10,' ==> Calculation of the frozen part of the second order derivatives, this can take some time...',ch10
  call wrtout(std_out,msg,'COLL')
@@ -251,6 +252,9 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
  paral_atom=(my_natom/=natom)
  my_comm_atom=mpi_enreg%comm_atom
  my_atmtab=>mpi_enreg%my_atmtab
+ ndat = dtset%bandpp
+
+
 
 !Compute gmet, gprimd and ucvol from rprimd
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
@@ -297,27 +301,30 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
 !Initialization of frozen non local array
  if(rfphon==1) then
    dyfrnl(:,:,:,:,:)=zero
-   ABI_ALLOCATE(dyfrnlk,(6,natom))
+   ABI_MALLOC(dyfrnlk,(6,natom))
  end if
  if(rfstrs/=0)then
    eltfrnl(:,:)=zero;enl=zero
-   ABI_ALLOCATE(eltfrnlk,(6+3*natom,6))
+   ABI_MALLOC(eltfrnlk,(6+3*natom,6))
  end if
  if (need_becfr) then
    becfrnl(:,:,:)=zero
-   ABI_ALLOCATE(becfrnlk,(3,natom,3))
+   ABI_MALLOC(becfrnlk,(3,natom,3))
  end if
  if (need_piezofr) then
    piezofrnl(:,:)=zero
-   ABI_ALLOCATE(piezofrnlk,(6,3))
+   ABI_MALLOC(piezofrnlk,(6,3))
  end if
  need_efmas=dtset%efmas>0
  if(need_efmas.and.(rfphon==1.or.rfstrs/=0.or.need_becfr.or.need_piezofr)) then
    write(msg,'(5a)')ch10,&
 &   ' ERROR: Efmas calculation is incompatible with phonons, elastic tensor, Born effective charges,',ch10,&
 &   ' and piezoelectric tensor calculations. Please revise your input.',ch10
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
+
+ ABI_MALLOC(eig_k,(ndat))
+ ABI_MALLOC(occ_k,(ndat))
 
 !Common initialization
  bdtot_index=0;ibg=0;icg=0
@@ -336,13 +343,13 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
    shift_rhoij=0
    choice_phon=4
    nnlout_phon=max(1,6*natom)
-   ABI_ALLOCATE(enlout_phon,(nnlout_phon))
+   ABI_MALLOC(enlout_phon,(nnlout_phon*ndat))
  end if
  if(rfstrs/=0)then
    shift_rhoij=6
    choice_strs=6
    nnlout_strs=6*(3*natom+6)
-   ABI_ALLOCATE(enlout_strs,(nnlout_strs))
+   ABI_MALLOC(enlout_strs,(nnlout_strs*ndat))
  end if
  if (psps%usepaw==0) then
    paw_opt=0 ; cpopt=-1
@@ -356,30 +363,30 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
    nnlout_piez2  = 36
    paw_opt_1     = 1
    paw_opt_3     = 3
-   ABI_ALLOCATE(enlout_piez1,(nnlout_piez1))
-   ABI_ALLOCATE(enlout_piez2,(nnlout_piez2))
+   ABI_MALLOC(enlout_piez1,(nnlout_piez1*ndat))
+   ABI_MALLOC(enlout_piez2,(nnlout_piez2*ndat))
  end if
  if (need_becfr) then
    choice_bec2=2 ; choice_bec54=54
    nnlout_bec1=max(1,3*natom) ; nnlout_bec2=max(1,18*natom);
    paw_opt_1=1 ; paw_opt_3=3 ; cpopt_bec=-1
-   ABI_ALLOCATE(enlout_bec1,(nnlout_bec1))
-   ABI_ALLOCATE(enlout_bec2,(nnlout_bec2))
+   ABI_MALLOC(enlout_bec1,(nnlout_bec1*ndat))
+   ABI_MALLOC(enlout_bec2,(nnlout_bec2*ndat))
  else
    choice_bec2=0 ; choice_bec54=0
    nnlout_bec1=0
  end if
  if(need_efmas) then
    ABI_MALLOC(enlout_efmas,(0))
-   ABI_DATATYPE_ALLOCATE(efmasdeg,(dtset%nkpt))
-   ABI_DATATYPE_ALLOCATE(efmasval,(dtset%mband,dtset%nkpt))
+   ABI_MALLOC(efmasdeg,(dtset%nkpt))
+   ABI_MALLOC(efmasval,(dtset%mband,dtset%nkpt))
  end if
 
 !Initialize Hamiltonian (k-independent terms)
  call init_hamiltonian(gs_ham,psps,pawtab,dtset%nspinor,dtset%nsppol,dtset%nspden,natom,&
 & dtset%typat,xred,dtset%nfft,dtset%mgfft,dtset%ngfft,rprimd,dtset%nloalg,&
 & paw_ij=paw_ij,comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,mpi_spintab=mpi_enreg%my_isppoltab,&
-& usecprj=usecprj,ph1d=ph1d,nucdipmom=dtset%nucdipmom)
+& usecprj=usecprj,ph1d=ph1d,nucdipmom=dtset%nucdipmom,gpu_option=dtset%gpu_option)
 
 !===== PAW specific section
  if (psps%usepaw==1) then
@@ -403,10 +410,10 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
 !  For each atom and for electric field direction k:
 !  becij(k)=<Phi_i|r_k-R_k|Phi_j>-<tPhi_i|r_k-R_k|tPhi_j> + sij.R_k
    if (need_becfr.or.need_piezofr) then
-     ABI_ALLOCATE(becij,(gs_ham%dimekb1,gs_ham%dimekb2,dtset%nspinor**2,1,3))
+     ABI_MALLOC(becij,(gs_ham%dimekb1,gs_ham%dimekb2,dtset%nspinor**2,1,3))
      becij=zero
-     ABI_DATATYPE_ALLOCATE(paw_ij_tmp,(my_natom))
-     ABI_DATATYPE_ALLOCATE(pawfgrtab_tmp,(my_natom))
+     ABI_MALLOC(paw_ij_tmp,(my_natom))
+     ABI_MALLOC(pawfgrtab_tmp,(my_natom))
      call paw_ij_nullify(paw_ij_tmp)
      cplex=1;nsp=1 ! Force nsppol/nspden to 1 because Dij^(1) due to electric field is spin-independent
      call paw_ij_init(paw_ij_tmp,cplex,dtset%nspinor,nsp,nsp,dtset%pawspnorb,natom,psps%ntypat,&
@@ -414,7 +421,7 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
      call pawtab_get_lsize(pawtab,l_size_atm,my_natom,dtset%typat,mpi_atmtab=my_atmtab)
      call pawfgrtab_init(pawfgrtab_tmp,1,l_size_atm,dtset%nspden,dtset%typat,&
 &     mpi_atmtab=my_atmtab,comm_atom=my_comm_atom)
-     ABI_DEALLOCATE(l_size_atm)
+     ABI_FREE(l_size_atm)
      do ii=1,3 ! Loop over direction of electric field
        call paw_ij_reset_flags(paw_ij_tmp,all=.True.)
        call pawdijfr(gprimd,ii,natom+2,my_natom,natom,nfftf,ngfftf,nsp,nsp,psps%ntypat,&
@@ -427,13 +434,13 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
      end do
      call paw_ij_free(paw_ij_tmp)
      call pawfgrtab_free(pawfgrtab_tmp)
-     ABI_DATATYPE_DEALLOCATE(paw_ij_tmp)
-     ABI_DATATYPE_DEALLOCATE(pawfgrtab_tmp)
+     ABI_FREE(paw_ij_tmp)
+     ABI_FREE(pawfgrtab_tmp)
    end if
 
 !  PAW occupancies: need to communicate when paral atom is activated
    if (paral_atom) then
-     ABI_DATATYPE_ALLOCATE(pawrhoij_tot,(natom))
+     ABI_MALLOC(pawrhoij_tot,(natom))
      call pawrhoij_nullify(pawrhoij_tot)
      call pawrhoij_gather(pawrhoij,pawrhoij_tot,-1,my_comm_atom)
    else
@@ -441,30 +448,30 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
    end if
 
 !  Projected WF (cprj) and PAW occupancies (& gradients)
-   ABI_DATATYPE_ALLOCATE(cwaveprj,(natom,dtset%nspinor))
+   ABI_MALLOC(cwaveprj,(natom,dtset%nspinor*ndat))
    call pawcprj_alloc(cwaveprj,ncpgr,gs_ham%dimcprj)
    do iatom=1,natom
      sz2=pawrhoij_tot(iatom)%cplex_rhoij*pawrhoij_tot(iatom)%qphase*pawrhoij_tot(iatom)%lmn2_size
      sz3=pawrhoij_tot(iatom)%nspden
-     ABI_ALLOCATE(pawrhoij_tot(iatom)%grhoij,(ngrhoij,sz2,sz3))
+     ABI_MALLOC(pawrhoij_tot(iatom)%grhoij,(ngrhoij,sz2,sz3))
      pawrhoij_tot(iatom)%ngrhoij=ngrhoij
      pawrhoij_tot(iatom)%grhoij=zero
    end do
-   usetimerev=(dtset%kptopt>0.and.dtset%kptopt<3)
+   use_timerev=(dtset%kptopt>0.and.dtset%kptopt<3)
+   use_zeromag=(pawrhoij_tot(1)%nspden==4.and.dtset%nspden==1)
 
  else
-   ABI_DATATYPE_ALLOCATE(cwaveprj,(0,0))
+   ABI_MALLOC(cwaveprj,(0,0))
  end if !PAW
 
 !If needed, manage ddk files
-!Open ddk WF file(s)
+!Open ddk WF file(s) in sequential mode
  if (need_becfr.or.need_piezofr) then
    do ii=1,3 ! Loop over elect. field directions
      if (ddkfil(ii)/=0) then
        write(msg, '(a,a)') '-open ddk wf file :',trim(fiwfddk(ii))
-       call wrtout(std_out,msg,'COLL')
-       call wrtout(ab_out,msg,'COLL')
-       call wfk_open_read(ddkfiles(ii),fiwfddk(ii),formeig1,dtset%iomode,ddkfil(ii),spaceworld)
+       call wrtout([std_out, ab_out], msg)
+       call wfk_open_read(ddkfiles(ii),fiwfddk(ii),formeig1,dtset%iomode,ddkfil(ii), xmpi_comm_self)
      end if
    end do
  end if
@@ -473,7 +480,7 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
  do isppol=1,dtset%nsppol
 
 !  Continue to initialize the Hamiltonian (PAW DIJ coefficients)
-   call load_spin_hamiltonian(gs_ham,isppol,with_nonlocal=.true.)
+   call gs_ham%load_spin(isppol,with_nonlocal=.true.)
 
 !  Rewind (k+G) data if needed
    ikg=0
@@ -481,6 +488,10 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
 !  Loop over k points
    do ikpt=1,dtset%nkpt
      nband_k=dtset%nband(ikpt+(isppol-1)*dtset%nkpt)
+     nband_me = proc_distrb_nband(mpi_enreg%proc_distrb,ikpt,nband_k,isppol,me)
+     call proc_distrb_band(band_procs,mpi_enreg%proc_distrb,ikpt,isppol,dtset%mband,&
+&      mpi_enreg%me_band,mpi_enreg%me_kpt,mpi_enreg%comm_band)
+
      istwf_k=dtset%istwfk(ikpt)
      npw_k=npwarr(ikpt)
      wtk_k=dtset%wtk(ikpt)
@@ -491,30 +502,31 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
        bdtot_index=bdtot_index+nband_k
        cycle
      end if
+     ABI_NVTX_START_RANGE(NVTX_D2FRNL_KPT)
 
 !    If needed, manage ddk files
      if (need_becfr.or.need_piezofr) then
        do ii=1,3 ! Loop over elect. field directions
          if (ddkfil(ii)/=0)then
 !        Number of k points to skip in the full set of k pointsp
-           ik_ddk(ii) = wfk_findk(ddkfiles(ii), kpoint)
+           ik_ddk(ii) = ddkfiles(ii)%findk(kpoint)
            ABI_CHECK(ik_ddk(ii) /= -1, "Cannot find k-point in DDK")
            npw_ = ddkfiles(ii)%hdr%npwarr(ik_ddk(ii))
            if (npw_/=npw_k) then
-             write(unit=msg,fmt='(a,i3,a,i5,a,i3,a,a,i5,a,a,i5)')&
-&             'For isppol = ',isppol,', ikpt = ',ikpt,' and idir = ',ii,ch10,&
-&             'the number of plane waves in the ddk file is equal to', npw_,ch10,&
-&             'while it should be ',npw_k
-             MSG_ERROR(msg)
+             write(msg, '(a,i0,a,i0,a,i0,a,a,i0,a,a,i0)')&
+             'For isppol = ',isppol,', ikpt = ',ikpt,' and idir = ',ii,ch10,&
+             'the number of plane waves in the ddk file is equal to', npw_,ch10,&
+             'while it should be ',npw_k
+             ABI_ERROR(msg)
            end if
 
          end if
        end do
      end if
 
-     ABI_ALLOCATE(cwavef,(2,npw_k*dtset%nspinor))
+     ABI_MALLOC(cwavef,(2,npw_k*dtset%nspinor*ndat))
      if (need_becfr.or.need_piezofr) then
-       ABI_ALLOCATE(svectout,(2,npw_k*dtset%nspinor))
+       ABI_MALLOC(svectout,(2,npw_k*dtset%nspinor*ndat))
      end if
      if (need_efmas) then
        ABI_MALLOC(cg_left,(2,npw_k*dtset%nspinor))
@@ -522,14 +534,14 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
        ABI_MALLOC(gs2c,(2,npw_k*dtset%nspinor))
      end if
 
-     ABI_ALLOCATE(ylm_k,(npw_k,mpsang*mpsang*psps%useylm))
+     ABI_MALLOC(ylm_k,(npw_k,mpsang*mpsang*psps%useylm))
      if(rfstrs/=0.or.need_becfr.or.need_piezofr.or.need_efmas)then
-       ABI_ALLOCATE(ylmgr_k,(npw_k,9,mpsang*mpsang*psps%useylm))
+       ABI_MALLOC(ylmgr_k,(npw_k,9,mpsang*mpsang*psps%useylm))
      else
-       ABI_ALLOCATE(ylmgr_k,(0,0,0))
+       ABI_MALLOC(ylmgr_k,(0,0,0))
      end if
 
-     ABI_ALLOCATE(kg_k,(3,npw_k))
+     ABI_MALLOC(kg_k,(3,npw_k))
      kg_k(:,:) = 0
 !$OMP PARALLEL DO
      do ipw=1,npw_k
@@ -561,14 +573,14 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
 !    Compute (k+G) vectors (only if useylm=1)
      nkpg=0
      if (rfstrs/=0.or.need_efmas.or.pawpiezo==1) nkpg=3*dtset%nloalg(3)
-     ABI_ALLOCATE(kpg_k,(npw_k,nkpg))
+     ABI_MALLOC(kpg_k,(npw_k,nkpg))
      if (nkpg>0) then
        call mkkpg(kg_k,kpg_k,kpoint,nkpg,npw_k)
      end if
 
      !EFMAS: Compute second order derivatives w/r to k for all direction for this k-point.
      if (need_efmas) then
-       ABI_ALLOCATE(ddkinpw,(npw_k,3,3))
+       ABI_MALLOC(ddkinpw,(npw_k,3,3))
        do mu=1,3
          do nu=1,3
 !           call d2kpg(ddkinpw(:,mu,nu),dtset%ecut,dtset%ecutsm,dtset%effmass_free,gmet,mu,nu,kg_k,kpoint,npw_k)
@@ -585,16 +597,19 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
      if(rfstrs/=0.or.need_piezofr.or.need_efmas)then
        ider=2;dimffnl=3+7*psps%useylm
      end if
-     ABI_ALLOCATE(ffnl,(npw_k,dimffnl,psps%lmnmax,psps%ntypat))
+     ABI_MALLOC(ffnl,(npw_k,dimffnl,psps%lmnmax,psps%ntypat))
      call mkffnl(psps%dimekb,dimffnl,psps%ekb,ffnl,psps%ffspl,&
 &     gmet,gprimd,ider,idir_ffnl,psps%indlmn,kg_k,kpg_k,kpoint,psps%lmnmax,&
 &     psps%lnmax,psps%mpsang,psps%mqgrid_ff,nkpg,npw_k,&
 &     psps%ntypat,psps%pspso,psps%qgrid_ff,rmet,psps%usepaw,psps%useylm,ylm_k,ylmgr_k)
+#ifdef HAVE_OPENMP_OFFLOAD
+     !$OMP TARGET ENTER DATA MAP(to:ffnl) IF(dtset%gpu_option==ABI_GPU_OPENMP)
+#endif
 
 !    For piezoelectric tensor need additional ffnl derivatives
      if(need_piezofr)then
        ider_str=1 ; dimffnl_str=2
-       ABI_ALLOCATE(ffnl_str,(npw_k,dimffnl_str,psps%lmnmax,psps%ntypat,6))
+       ABI_MALLOC(ffnl_str,(npw_k,dimffnl_str,psps%lmnmax,psps%ntypat,6))
        do mu=1,6 !loop over strain
          idir_str=-mu
          call mkffnl(psps%dimekb,dimffnl_str,psps%ekb,ffnl_str(:,:,:,:,mu),&
@@ -602,12 +617,27 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
 &         kpoint,psps%lmnmax,psps%lnmax,psps%mpsang,psps%mqgrid_ff,nkpg,npw_k,&
 &         psps%ntypat,psps%pspso,psps%qgrid_ff,rmet,psps%usepaw,psps%useylm,ylm_k,ylmgr_k)
        end do
+#ifdef HAVE_OPENMP_OFFLOAD
+       !$OMP TARGET ENTER DATA MAP(to:ffnl_str) IF(dtset%gpu_option==ABI_GPU_OPENMP)
+#endif
      end if
 
 !    Load k-dependent part in the Hamiltonian datastructure
-     ABI_ALLOCATE(ph3d,(2,npw_k,gs_ham%matblk))
-     call load_k_hamiltonian(gs_ham,kpt_k=kpoint,npw_k=npw_k,istwf_k=istwf_k,&
+     ABI_MALLOC(ph3d,(2,npw_k,gs_ham%matblk))
+     call gs_ham%load_k(kpt_k=kpoint,npw_k=npw_k,istwf_k=istwf_k,&
 &     kg_k=kg_k,kpg_k=kpg_k,ffnl_k=ffnl,ph3d_k=ph3d,compute_ph3d=.true.)
+#ifdef HAVE_OPENMP_OFFLOAD
+     !$OMP TARGET ENTER DATA MAP(to:ph3d) IF(dtset%gpu_option==ABI_GPU_OPENMP)
+#endif
+
+
+     ! Setup gemm_nonlop
+     if (gemm_nonlop_use_gemm) then
+       !set the global variable indicating to gemm_nonlop where to get its data from
+       gemm_nonlop_ikpt_this_proc_being_treated = ikpt
+     end if ! gemm_nonlop_use_gemm
+
+
 
 !    Initialize contributions from current k point
      if(rfphon==1) dyfrnlk(:,:)=zero
@@ -634,56 +664,71 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
      end if
 
 !    Loop over bands
-     do iband=1,nband_k
+     iband_me = 0
+     do iband=1,nband_k,ndat
 
-       if (proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,iband,iband,isppol,me)) then
-         cycle
-       end if
+       if (proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,iband,iband,isppol,me)) cycle
+       iband_me = iband_me + ndat
 
-       occ_k=occ(iband+bdtot_index)
-       cwavef(:,1:npw_k*dtset%nspinor) = cg(:,1+(iband-1)*npw_k*dtset%nspinor+icg:iband*npw_k*dtset%nspinor+icg)
+       occ_k(1:ndat)=occ(iband+bdtot_index:iband+bdtot_index+ndat-1)
+       cwavef(:,1:npw_k*dtset%nspinor*ndat) = cg(:,1+(iband_me-ndat)*npw_k*dtset%nspinor+icg: &
+&                                                iband_me   *npw_k*dtset%nspinor+icg)
 
 !      Compute non-local contributions from n,k
-       if (psps%usepaw==1) eig_k=eigen(iband+bdtot_index)
+       if (psps%usepaw==1) eig_k(1:ndat)=eigen(iband+bdtot_index:iband+bdtot_index+ndat-1)
 
 !      === Dynamical matrix
        if(rfphon==1) then
-         call nonlop(choice_phon,cpopt,cwaveprj,enlout_phon,gs_ham,idir,(/eig_k/),mpi_enreg,1,&
+         call nonlop(choice_phon,cpopt,cwaveprj,enlout_phon,gs_ham,idir,eig_k,mpi_enreg,ndat,&
 &         nnlout_phon,paw_opt,signs,nonlop_dum,tim_nonlop,cwavef,cwavef)
 !        Accumulate non-local contributions from n,k
-         dyfrnlk(:,:)=dyfrnlk(:,:)+occ_k*reshape(enlout_phon(:),(/6,natom/))
+         do idat=1,ndat
+           dyfrnlk(:,:) = dyfrnlk(:,:) &
+&             + occ_k(idat) * reshape(enlout_phon(1+(idat-1)*nnlout_phon:idat*nnlout_phon),(/6,natom/))
+         end do
        end if
 
 !      === Elastic tensor
        if(rfstrs/=0) then
-         call nonlop(choice_strs,cpopt,cwaveprj,enlout_strs,gs_ham,idir,(/eig_k/),mpi_enreg,1,&
-&         nnlout_strs,paw_opt,signs,nonlop_dum,tim_nonlop,cwavef,cwavef)
+         call nonlop(choice_strs,cpopt,cwaveprj,enlout_strs,gs_ham,idir,(/eig_k/),mpi_enreg,ndat,&
+&           nnlout_strs,paw_opt,signs,nonlop_dum,tim_nonlop,cwavef,cwavef)
 !        Accumulate non-local contribut ions from n,k
-         eltfrnlk(:,:)=eltfrnlk(:,:)+occ_k*reshape(enlout_strs(:),(/3*natom+6,6/))
+         do idat=1,ndat
+           eltfrnlk(:,:) = eltfrnlk(:,:) &
+&             + occ_k(idat) * reshape(enlout_strs(1+(idat-1)*nnlout_strs:idat*nnlout_strs),(/3*natom+6,6/))
+         end do
        end if !endo if strs
 
 !      PAW: accumulate gradients of rhoij
        !EFMAS: Bug with efmas currently; to be looked into...
        if (psps%usepaw==1.and.(.not.need_efmas)) then
-         call pawaccrhoij(gs_ham%atindx,cplex,cwaveprj,cwaveprj,0,isppol,natom,&
-&         natom,dtset%nspinor,occ_k,3,pawrhoij_tot,usetimerev,wtk_k)
+         do idat=1,ndat
+           call pawaccrhoij(gs_ham%atindx,cplex,cwaveprj(:,1+(idat-1)*dtset%nspinor:idat*dtset%nspinor),cwaveprj(:,1+(idat-1)*dtset%nspinor:idat*dtset%nspinor),0,isppol,natom,&
+&           natom,dtset%nspinor,occ_k(idat),3,pawrhoij_tot,use_timerev,use_zeromag,wtk_k)
+         end do
        end if
 
 !      PAW: Compute frozen contribution to piezo electric tensor
        if (need_piezofr) then
          do ii=1,3 ! Loop over elect. field directions
-           call nonlop(choice_piez3,cpopt,cwaveprj,enlout_piez1,gs_ham,0,(/zero/),mpi_enreg,1,&
-&           nnlout_piez1,paw_opt_1,signs,nonlop_dum,tim_nonlop,cwavef,cwavef,enl=becij(:,:,:,:,ii))
-           piezofrnlk(:,ii)=piezofrnlk(:,ii)+occ_k*enlout_piez1(:)
+           call nonlop(choice_piez3,cpopt,cwaveprj,enlout_piez1,gs_ham,0,(/zero/),mpi_enreg,ndat,&
+&              nnlout_piez1,paw_opt_1,signs,nonlop_dum,tim_nonlop,cwavef,cwavef,enl=becij(:,:,:,:,ii))
+           do idat=1,ndat
+             piezofrnlk(:,ii) = piezofrnlk(:,ii) &
+&               + occ_k(idat) * enlout_piez1(1+(idat-1)*nnlout_piez1:idat*nnlout_piez1)
+           end do
          end do !end do ii
        end if
 
 !      PAW: Compute frozen contribution to Born Effective Charges
        if (need_becfr) then
          do ii=1,3 ! Loop over elect. field directions
-           call nonlop(choice_bec2,cpopt,cwaveprj,enlout_bec1,gs_ham,0,(/zero/),mpi_enreg,1,&
-&           nnlout_bec1,paw_opt_1,signs,nonlop_dum,tim_nonlop,cwavef,cwavef,enl=becij(:,:,:,:,ii))
-           becfrnlk(:,:,ii)=becfrnlk(:,:,ii)+occ_k*reshape(enlout_bec1(:),(/3,natom/))
+           call nonlop(choice_bec2,cpopt,cwaveprj,enlout_bec1,gs_ham,0,(/zero/),mpi_enreg,ndat,&
+&              nnlout_bec1,paw_opt_1,signs,nonlop_dum,tim_nonlop,cwavef,cwavef,enl=becij(:,:,:,:,ii))
+           do idat=1,ndat
+             becfrnlk(:,:,ii) = becfrnlk(:,:,ii) &
+&                 + occ_k(idat) * reshape(enlout_bec1(1+(idat-1)*nnlout_bec1:idat*nnlout_bec1),(/3,natom/))
+           end do
          end do !end do ii
        end if
 
@@ -692,74 +737,86 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
 !          Not able to compute if ipert=(Elect. field) and no ddk WF file
            if (ddkfil(ii)==0) cycle
 !            Read ddk wave function
-           ABI_ALLOCATE(ddk,(2,npw_k*dtset%nspinor))
+           ABI_MALLOC(ddk,(2,npw_k*dtset%nspinor,ndat))
            if (ddkfil(ii)/=0) then
-             call wfk_read_bks(ddkfiles(ii), iband, ik_ddk(ii), isppol, xmpio_single, cg_bks=ddk)
-!            Multiply ddk by +i
-             do jj=1,npw_k*dtset%nspinor
-               arg=ddk(1,jj)
-               ddk(1,jj)=-ddk(2,jj);ddk(2,jj)=arg
+             do idat=1,ndat
+               call ddkfiles(ii)%read_bks(iband+(idat-1), ik_ddk(ii), isppol, xmpio_single, cg_bks=ddk(:,:,idat))
+  !            Multiply ddk by +i
+               do jj=1,npw_k*dtset%nspinor
+                 arg=ddk(1,jj,idat)
+                 ddk(1,jj,idat)=-ddk(2,jj,idat);ddk(2,jj,idat)=arg
+               end do
              end do
            else
              ddk=zero
            end if
 
            if(need_becfr)then
-             do iatom=1,natom !Loop over atom
-               ia=gs_ham%atindx(iatom)
-               do mu=1,3 !loop over atom direction
+             do mu=1,3 !loop over atom direction
+               do iatom=1,natom !Loop over atom
+                 ia=gs_ham%atindx(iatom)
                  call nonlop(choice_bec2,cpopt_bec,cwaveprj,enlout_bec1,gs_ham,mu,(/zero/),&
-&                 mpi_enreg,1,nnlout_bec1,paw_opt_3,signs_field,svectout,tim_nonlop,&
-&                 cwavef,cwavef,iatom_only=iatom)
-                 call dotprod_g(dotprod(1),dotprod(2),istwf_k,npw_k*dtset%nspinor,2,svectout,ddk,&
-&                 mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
-                 becfrnlk(mu,ia,ii)=becfrnlk(mu,ia,ii)+occ_k*dotprod(1)
+&                    mpi_enreg,ndat,nnlout_bec1,paw_opt_3,signs_field,svectout,tim_nonlop,&
+&                    cwavef,cwavef,iatom_only=iatom)
+                 do idat=1,ndat
+                   call dotprod_g(dotprod(1),dotprod(2),istwf_k,npw_k*dtset%nspinor,2,&
+&                      svectout(:,1+(idat-1)*npw_k*dtset%nspinor:idat*npw_k*dtset%nspinor),ddk(:,:,idat),&
+&                      mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
+                   becfrnlk(mu,ia,ii)=becfrnlk(mu,ia,ii)+occ_k(idat)*dotprod(1)
+                 end do
                end do
              end do
            end if
 
            if(need_piezofr)then
              do mu=1,6 !loop over strain
-               call load_k_hamiltonian(gs_ham,ffnl_k=ffnl_str(:,:,:,:,mu))
-               call nonlop(choice_piez3,cpopt,cwaveprj,enlout_piez1,gs_ham,mu,(/zero/),mpi_enreg,1,&
-&               nnlout_piez1,paw_opt_3,signs_field,svectout,tim_nonlop,cwavef,svectout)
-               call dotprod_g(dotprod(1),dotprod(2),istwf_k,npw_k*dtset%nspinor,2,svectout,ddk,&
-&               mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
-               piezofrnlk(mu,ii)=piezofrnlk(mu,ii)+occ_k*dotprod(1)
+               call gs_ham%load_k(ffnl_k=ffnl_str(:,:,:,:,mu))
+               call nonlop(choice_piez3,cpopt,cwaveprj,enlout_piez1,gs_ham,mu,(/zero/),mpi_enreg,ndat,&
+&                  nnlout_piez1,paw_opt_3,signs_field,svectout,tim_nonlop,cwavef,svectout)
+               do idat=1,ndat
+                 call dotprod_g(dotprod(1),dotprod(2),istwf_k,npw_k*dtset%nspinor,2,&
+&                    svectout(:,1+(idat-1)*npw_k*dtset%nspinor:idat*npw_k*dtset%nspinor),ddk(:,:,idat),&
+&                    mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
+                 piezofrnlk(mu,ii)=piezofrnlk(mu,ii)+occ_k(idat)*dotprod(1)
+               end do
              end do
-             call load_k_hamiltonian(gs_ham,ffnl_k=ffnl)
+             call gs_ham%load_k(ffnl_k=ffnl)
            end if
 
-           ABI_DEALLOCATE(ddk)
+           ABI_FREE(ddk)
          end do ! End loop ddk file
        end if
 
        if(need_piezofr)then
          enlout_piez2 = zero
-         call nonlop(choice_piez55,cpopt,cwaveprj,enlout_piez2,gs_ham,0,(/zero/),mpi_enreg,1,&
+         call nonlop(choice_piez55,cpopt,cwaveprj,enlout_piez2,gs_ham,0,(/zero/),mpi_enreg,ndat,&
 &         nnlout_piez2,paw_opt_3,signs,nonlop_dum,tim_nonlop,cwavef,cwavef)
 !         Multiply enlout by +i
          iashift = 1
-         do mu=1,6     ! strain
-           do nu=1,3   ! k
-             piezofrnlk(mu,nu)=piezofrnlk(mu,nu)-occ_k*(enlout_piez2(iashift+1)) ! Real part
-!            piezofrnlk(mu,nu)=piezofrnlk(mu,nu)+occ_k*(enlout_piez2(iashift  ))! Imaginary part
-             iashift = iashift + 2
+         do idat=1,ndat
+           do mu=1,6     ! strain
+             do nu=1,3   ! k
+               piezofrnlk(mu,nu)=piezofrnlk(mu,nu)-occ_k(idat)*(enlout_piez2(iashift+1)) ! Real part
+  !            piezofrnlk(mu,nu)=piezofrnlk(mu,nu)+occ_k(idat)*(enlout_piez2(iashift  ))! Imaginary part
+               iashift = iashift + 2
+             end do
            end do
          end do
        end if
 
        if(need_becfr)then
-         call nonlop(choice_bec54,cpopt,cwaveprj,enlout_bec2,gs_ham,0,(/zero/),mpi_enreg,1,&
+         call nonlop(choice_bec54,cpopt,cwaveprj,enlout_bec2,gs_ham,0,(/zero/),mpi_enreg,ndat,&
 &         nnlout_bec2,paw_opt_3,signs,nonlop_dum,tim_nonlop,cwavef,cwavef)
 !        Multiply enlout by +i
          iashift = 1
-         do iatom=1,natom ! atm
-           do mu=1,3     ! atm pos.
-             do nu=1,3   ! k
-               becfrnlk(mu,iatom,nu)=becfrnlk(mu,iatom,nu)-occ_k*(enlout_bec2(iashift+1)) ! Real part
-!               becfrnlk(mu,iatom,nu)=becfrnlk(mu,iatom,nu)+occ_k*(enlout_bec2(iashift  ))! Imaginary part
-               iashift = iashift + 2
+         do idat=1,ndat
+           do iatom=1,natom ! atm
+             do mu=1,3     ! atm pos.
+               do nu=1,3   ! k
+                 becfrnlk(mu,iatom,nu)=becfrnlk(mu,iatom,nu)-occ_k(idat)*(enlout_bec2(iashift+1)) ! Real part
+!                 becfrnlk(mu,iatom,nu)=becfrnlk(mu,iatom,nu)+occ_k(idat)*(enlout_bec2(iashift  ))! Imaginary part
+                 iashift = iashift + 2
+               end do
              end do
            end do
          end do
@@ -768,39 +825,78 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
        if(need_efmas) then
          bandmin=efmasdeg(ikpt)%degs_bounds(1, efmasdeg(ikpt)%deg_range(1) )
          bandmax=efmasdeg(ikpt)%degs_bounds(2, efmasdeg(ikpt)%deg_range(2) )
-         if ( iband>=bandmin .and. iband<=bandmax ) then
-           choice_efmas=8; signs=2
-           cpopt=-1  !To prevent re-use of stored dgxdt, which are not for all direction required for EFMAS.
-           paw_opt_efmas=0; if(psps%usepaw/=0) paw_opt_efmas=4 !To get both gh2c and gs2c
-           nnlout_efmas=0; tim_nonlop=0 ! No tim_nonlop for efmas, currently.
-           do mu=1,3
-             do nu=1,3
-               idir=3*(mu-1)+nu !xx=1, xy=2, xz=3, yx=4, yy=5, yz=6, zx=7, zy=8, zz=9, (xyz,xyz)=(mu,nu)
-               gh2c=zero; gs2c=zero
-               call nonlop(choice_efmas,cpopt,cwaveprj,enlout_efmas,gs_ham,idir,(/eig_k/),mpi_enreg,&
-               1,nnlout_efmas,paw_opt_efmas,signs,gs2c,tim_nonlop,cwavef,gh2c)
-               do ispinor=1,dtset%nspinor
-                 ii = 1+(ispinor-1)*npw_k
-                 do icplx=1,2
-                   gh2c(icplx,ii:ispinor*npw_k) = gh2c(icplx,ii:ispinor*npw_k) +  &
-&                   ddkinpw(1:npw_k,mu,nu)*cwavef(icplx,ii:ispinor*npw_k)
-                 end do
-               end do
-               gh2c = gh2c - eig_k*gs2c
-               ideg = efmasdeg(ikpt)%ideg(iband)
-               do jband=efmasdeg(ikpt)%degs_bounds(1,ideg),efmasdeg(ikpt)%degs_bounds(2,ideg)
-                 cg_left(:,1:npw_k*dtset%nspinor) = cg(:,1+(jband-1)*npw_k*dtset%nspinor+icg:jband*npw_k*dtset%nspinor+icg)
-                 dotprod=0
-                 call dotprod_g(dotprod(1),dotprod(2),istwf_k,npw_k*dtset%nspinor,2,cg_left,gh2c,mpi_enreg%me_g0,&
-&                 mpi_enreg%comm_spinorfft)
-                 isub = iband-efmasdeg(ikpt)%degs_bounds(1,ideg)+1
-                 jsub = jband-efmasdeg(ikpt)%degs_bounds(1,ideg)+1
-                 efmasval(ideg,ikpt)%ch2c(mu,nu,jsub,isub)=cmplx(dotprod(1),dotprod(2),kind=dpc)
-               end do
-             end do
-           end do
-         end if
-       end if
+
+         choice_efmas=8; signs=2
+         cpopt=-1  !To prevent re-use of stored dgxdt, which are not for all direction required for EFMAS.
+         paw_opt_efmas=0; if(psps%usepaw/=0) paw_opt_efmas=4 !To get both gh2c and gs2c
+         nnlout_efmas=0; tim_nonlop=0 ! No tim_nonlop for efmas, currently.
+
+         do idat=1,ndat
+! find list of iband which are running now:
+           bands_treated_now = 0
+           bands_treated_now(iband+idat-1) = 1
+           call xmpi_sum(bands_treated_now,mpi_enreg%comm_band,ierr)
+
+! for all iband running right now
+           do iband_ = bandmin, bandmax
+             if (bands_treated_now(iband_) == 0) cycle
+
+             do mu=1,3
+               do nu=1,3
+! if I have iband_ prepare things
+                 if (iband_ == iband+idat-1) then
+                   idir=3*(mu-1)+nu !xx=1, xy=2, xz=3, yx=4, yy=5, yz=6, zx=7, zy=8, zz=9, (xyz,xyz)=(mu,nu)
+                   gh2c=zero; gs2c=zero
+                   call nonlop(choice_efmas,cpopt,cwaveprj,enlout_efmas,gs_ham,idir,(/eig_k/),mpi_enreg,&
+                   1,nnlout_efmas,paw_opt_efmas,signs,gs2c,tim_nonlop,cwavef(:,1+(idat-1)*npw_k*dtset%nspinor:idat*npw_k*dtset%nspinor),gh2c)
+!DEBUG
+!                  gh2c=zero; gs2c=zero
+!ENDDEBUG
+                   do ispinor=1,dtset%nspinor
+                     ii = 1+(ispinor-1)*npw_k
+                     do icplx=1,2
+                       gh2c(icplx,ii:ispinor*npw_k) = gh2c(icplx,ii:ispinor*npw_k) +  &
+&                       ddkinpw(1:npw_k,mu,nu)*cwavef(icplx,ii+(idat-1)*npw_k:ispinor*npw_k+(idat-1)*npw_k)
+                     end do
+                   end do
+                   gh2c = gh2c - eig_k(idat)*gs2c
+!DEBUG
+!                  gh2c=zero; gs2c=zero
+!ENDDEBUG
+                 end if
+                 ideg = efmasdeg(ikpt)%ideg(iband+idat-1)
+                 ABI_MALLOC( ch2c_tmp, (size(efmasval(ideg,ikpt)%ch2c, dim=3)) )
+
+! share gh2c
+                 call xmpi_bcast(gh2c, band_procs(iband+idat-1), mpi_enreg%comm_band,ierr)
+
+                 jband_me = 0
+                 do jband=1,efmasdeg(ikpt)%degs_bounds(2,ideg)
+! jband treated on current proc?
+                   if (proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,jband,jband,isppol,me)) cycle
+! if so, indexing of the bands in my cg array
+                   jband_me = jband_me + 1
+! if we do not need to treat it for efmas, skip
+                   if (jband < efmasdeg(ikpt)%degs_bounds(1,ideg)) cycle
+
+                   cg_left(:,1:npw_k*dtset%nspinor) = cg(:,1+(jband_me-1)*npw_k*dtset%nspinor+icg:jband_me*npw_k*dtset%nspinor+icg)
+                   dotprod=0
+                   call dotprod_g(dotprod(1),dotprod(2),istwf_k,npw_k*dtset%nspinor,2,cg_left,gh2c,mpi_enreg%me_g0,&
+  &                 mpi_enreg%comm_spinorfft)
+                   isub = iband-efmasdeg(ikpt)%degs_bounds(1,ideg)+1
+                   jsub = jband-efmasdeg(ikpt)%degs_bounds(1,ideg)+1
+
+                   ch2c_tmp(jsub)=cmplx(dotprod(1),dotprod(2),kind=dpc)
+                 end do ! jband
+                 !mpi_sum ch2c_tmp to get all jband contribs
+                 call xmpi_sum(ch2c_tmp,mpi_enreg%comm_band,ierr)
+                 efmasval(ideg,ikpt)%ch2c(mu,nu,:,isub)=ch2c_tmp(:)
+                 ABI_FREE( ch2c_tmp )
+               end do ! nu
+             end do ! mu
+           end do ! iband_
+         end do ! idat
+       end if ! need_efmas
 
      end do ! End of loop on bands
 
@@ -826,62 +922,69 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
      end if
 !    Increment indexes
      bdtot_index=bdtot_index+nband_k
-     if (dtset%mkmem/=0) then
+     if (mkmem_rbz/=0) then
        ibg=ibg+nband_k*dtset%nspinor
-       icg=icg+npw_k*dtset%nspinor*nband_k
+       icg=icg+npw_k*dtset%nspinor*nband_me
        ikg=ikg+npw_k
      end if
 
-     ABI_DEALLOCATE(ffnl)
-     ABI_DEALLOCATE(kpg_k)
-     ABI_DEALLOCATE(ph3d)
-     ABI_DEALLOCATE(ylm_k)
-     ABI_DEALLOCATE(ylmgr_k)
-     ABI_DEALLOCATE(cwavef)
-     ABI_DEALLOCATE(kg_k)
+#ifdef HAVE_OPENMP_OFFLOAD
+     !$OMP TARGET EXIT DATA MAP(delete:ffnl,ph3d) IF(dtset%gpu_option==ABI_GPU_OPENMP)
+#endif
+     ABI_FREE(ffnl)
+     ABI_FREE(kpg_k)
+     ABI_FREE(ph3d)
+     ABI_FREE(ylm_k)
+     ABI_FREE(ylmgr_k)
+     ABI_FREE(cwavef)
+     ABI_FREE(kg_k)
      if (need_becfr.or.need_piezofr) then
-       ABI_DEALLOCATE(svectout)
+       ABI_FREE(svectout)
      end if
      if (need_piezofr) then
-       ABI_DEALLOCATE(ffnl_str)
+#ifdef HAVE_OPENMP_OFFLOAD
+       !$OMP TARGET EXIT DATA MAP(delete:ffnl_str) IF(dtset%gpu_option==ABI_GPU_OPENMP)
+#endif
+       ABI_FREE(ffnl_str)
      end if
      if (need_efmas) then
-       ABI_DEALLOCATE(ddkinpw)
-       ABI_DEALLOCATE(cg_left)
-       ABI_DEALLOCATE(gh2c)
-       ABI_DEALLOCATE(gs2c)
+       ABI_FREE(ddkinpw)
+       ABI_FREE(cg_left)
+       ABI_FREE(gh2c)
+       ABI_FREE(gs2c)
      end if
 
+     ABI_NVTX_END_RANGE()
    end do ! End loops on isppol and ikpt
  end do
  if(rfphon==1) then
-   ABI_DEALLOCATE(dyfrnlk)
-   ABI_DEALLOCATE(enlout_phon)
+   ABI_FREE(dyfrnlk)
+   ABI_FREE(enlout_phon)
  end if
  if(rfstrs/=0) then
-   ABI_DEALLOCATE(eltfrnlk)
-   ABI_DEALLOCATE(enlout_strs)
+   ABI_FREE(eltfrnlk)
+   ABI_FREE(enlout_strs)
  end if
  if (need_becfr)  then
-   ABI_DEALLOCATE(becfrnlk)
-   ABI_DEALLOCATE(enlout_bec1)
-   ABI_DEALLOCATE(enlout_bec2)
+   ABI_FREE(becfrnlk)
+   ABI_FREE(enlout_bec1)
+   ABI_FREE(enlout_bec2)
  end if
  if(need_piezofr)then
-   ABI_DEALLOCATE(enlout_piez1)
-   ABI_DEALLOCATE(enlout_piez2)
-   ABI_DEALLOCATE(piezofrnlk)
+   ABI_FREE(enlout_piez1)
+   ABI_FREE(enlout_piez2)
+   ABI_FREE(piezofrnlk)
  end if
  if(need_efmas) then
-   ABI_DEALLOCATE(enlout_efmas)
+   ABI_FREE(enlout_efmas)
  end if
  if (psps%usepaw==1) then
    if (need_becfr.or.need_piezofr)  then
-     ABI_DEALLOCATE(becij)
+     ABI_FREE(becij)
    end if
    call pawcprj_free(cwaveprj)
  end if
- ABI_DATATYPE_DEALLOCATE(cwaveprj)
+ ABI_FREE(cwaveprj)
 
 !Fill in lower triangle of matrixes
  if (rfphon==1) then
@@ -922,10 +1025,10 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
 
 !  PAW: accumulate gradients of rhoij
    if (psps%usepaw==1) then
-     ABI_ALLOCATE(dimlmn,(natom))
+     ABI_MALLOC(dimlmn,(natom))
      dimlmn(1:natom)=pawrhoij_tot(1:natom)%cplex_rhoij*pawrhoij_tot(1:natom)%qphase*pawrhoij_tot(1:natom)%lmn2_size
      bufdim=ncpgr*sum(dimlmn)*nsploop
-     ABI_ALLOCATE(mpibuf,(bufdim))
+     ABI_MALLOC(mpibuf,(bufdim))
      ii=0;mpibuf=zero
      do iatom=1,natom
        do isppol=1,nsploop
@@ -945,8 +1048,8 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
          end do
        end do
      end do
-     ABI_DEALLOCATE(mpibuf)
-     ABI_DEALLOCATE(dimlmn)
+     ABI_FREE(mpibuf)
+     ABI_FREE(dimlmn)
    end if
    call timab(48,2,tsec)
  end if
@@ -1019,17 +1122,17 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
    dimnhat=0;optgr=0;optgr2=0;optstr=0;optstr2=0
    if (rfphon==1) optgr2=1
    if (rfstrs/=0) optstr2=1
-   ABI_ALLOCATE(nhat_dum,(1,0))
+   ABI_MALLOC(nhat_dum,(1,0))
    call pawgrnl(gs_ham%atindx1,dimnhat,dyfrnl,dyfr_cplex,eltfrnl,dummy,gsqcut,mgfftf,my_natom,natom,&
 &   gs_ham%nattyp,nfftf,ngfftf,nhat_dum,dummy,dtset%nspden,dtset%nsym,psps%ntypat,optgr,optgr2,optstr,optstr2,&
 &   pawang,pawfgrtab,pawrhoij_tot,pawtab,ph1df,psps,dtset%qptn,rprimd,symrec,dtset%typat,ucvol,vtrial,vxc,xred,&
 &   mpi_atmtab=my_atmtab,comm_atom=my_comm_atom)
-   ABI_DEALLOCATE(nhat_dum)
+   ABI_FREE(nhat_dum)
  end if !PAW
 
 !The indexing array atindx is used to reestablish the correct order of atoms
  if (rfstrs/=0)then
-   ABI_ALLOCATE(elt_work,(6+3*natom,6))
+   ABI_MALLOC(elt_work,(6+3*natom,6))
    elt_work(1:6,1:6)=eltfrnl(1:6,1:6)
    do ia=1,natom
      ielt=7+3*(ia-1)
@@ -1037,7 +1140,7 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
      elt_work(ielt:ielt+2,1:6)=eltfrnl(ieltx:ieltx+2,1:6)
    end do
    eltfrnl(:,:)=elt_work(:,:)
-   ABI_DEALLOCATE(elt_work)
+   ABI_FREE(elt_work)
  end if
 
 !Born Effective Charges and PAW:
@@ -1045,7 +1148,7 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
 !3-Multiply by -1 because that the effective charges
  !  are minus the second derivatives of the energy
  if (need_becfr) then
-   ABI_ALLOCATE(becfrnl_tmp,(3,natom,3))
+   ABI_MALLOC(becfrnl_tmp,(3,natom,3))
    becfrnl_tmp=-becfrnl
    do ia=1,natom         ! Atom (sorted by type)
      iatom=gs_ham%atindx1(ia)   ! Atom (not sorted)
@@ -1056,7 +1159,7 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
        end do
      end do
    end do
-   ABI_DEALLOCATE(becfrnl_tmp)
+   ABI_FREE(becfrnl_tmp)
  end if
 
 !Piezoelectric Tensor
@@ -1066,23 +1169,28 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
    piezofrnl=-piezofrnl
  end if
 
+ ABI_FREE(eig_k)
+ ABI_FREE(occ_k)
+
 !Close the ddk files
  do ii=1,3
-   call wfk_close(ddkfiles(ii))
+   call ddkfiles(ii)%close()
  end do
 
 !Release now useless memory
  if (psps%usepaw==1) then
    do iatom=1,natom
-     ABI_DEALLOCATE(pawrhoij_tot(iatom)%grhoij)
+     ABI_FREE(pawrhoij_tot(iatom)%grhoij)
      pawrhoij_tot(iatom)%ngrhoij=0
    end do
    if (paral_atom) then
      call pawrhoij_free(pawrhoij_tot)
-     ABI_DATATYPE_DEALLOCATE(pawrhoij_tot)
+     ABI_FREE(pawrhoij_tot)
    end if
  end if
- call destroy_hamiltonian(gs_ham)
+ call gs_ham%free()
+
+ ABI_NVTX_END_RANGE()
  call timab(159,2,tsec)
 
  write(msg,'(3a)')ch10,' ==> Calculation of the frozen part of the second order derivative done',ch10

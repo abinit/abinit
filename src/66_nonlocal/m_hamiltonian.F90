@@ -1,25 +1,23 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_hamiltonian
 !! NAME
 !! m_hamiltonian
 !!
 !! FUNCTION
-!!  This module provides the definition of the gs_hamiltonian_type and rf_hamiltonian_type
+!!  This module provides the definition of the gs_hamiltonian_type and of the rf_hamiltonian_type
 !!  datastructures used in the "getghc" and "getgh1c" routines to apply the Hamiltonian (or
 !!  its derivative) on a wavefunction.
 !!  Methods to initialize or destroy the objects are defined here.
-!!  It also defines the ddiago_ctl_type structures datatype used to control the algorithm
-!!  used in ks_ddiago for performing the direct diagonalization of the KS Hamiltonian.
+!!
+!! TODO
+!!  All array pointers in H datatypes should be declared as contiguous for efficient reasons
+!!  (well, here performance is critical)
+!!  Client code should make sure they always point contiguous targets.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2019 ABINIT group (MG, MT)
+!! Copyright (C) 2009-2024 ABINIT group (MG, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -31,17 +29,22 @@
 
 module m_hamiltonian
 
+ use iso_fortran_env, only : int32,int64,real32,real64
+
  use defs_basis
- use defs_datatypes
- use defs_abitypes
  use m_abicore
  use m_errors
  use m_xmpi
 
+ use defs_datatypes,      only : pseudopotential_type
+ use defs_abitypes,       only : MPI_type
  use m_copy,              only : addr_copy
  use m_geometry,          only : metric
  use m_pawtab,            only : pawtab_type
+ use m_pawfgr,            only : pawfgr_type
  use m_fftcore,           only : sphereboundary
+ use m_fft,               only : fftpac
+ use m_fourier_interpol,  only : transgrid
  use m_pawcprj,           only : pawcprj_getdim
  use m_paw_ij,            only : paw_ij_type
  use m_paral_atom,        only : get_my_atmtab, free_my_atmtab
@@ -49,18 +52,27 @@ module m_hamiltonian
  use m_kg,                only : ph1d3d, getph
  use m_fock,              only : fock_common_type, fock_BZ_type, fock_ACE_type, fock_type
 
+#if defined HAVE_GPU_CUDA
+ use m_manage_cuda
+#endif
+
 #if defined HAVE_FC_ISO_C_BINDING
- use iso_c_binding, only : c_ptr,c_loc,c_f_pointer
+ use, intrinsic :: iso_c_binding, only : c_ptr,c_loc,c_f_pointer,c_int32_t,c_int64_t,c_size_t
+#endif
+
+#if defined HAVE_GPU && defined HAVE_YAKL
+ use gator_mod
 #endif
 
  implicit none
 
  private
 
- public ::  pawdij2ekb
- public ::  pawdij2e1kb
+ public :: pawdij2ekb
+ public :: pawdij2e1kb
+ public :: gspot_transgrid_and_pack  ! Set up local potential vlocal on the coarse FFT mesh from vtrial on the fine mesh.
 
-!These constants select how H is applied in reciprocal space
+ ! These constants select how H is applied in reciprocal space
  integer,parameter,public :: KPRIME_H_K=1, K_H_KPRIME=2, K_H_K=3, KPRIME_H_KPRIME=4
 !!***
 
@@ -175,8 +187,10 @@ module m_hamiltonian
   integer :: n4,n5,n6
    ! same as ngfft(4:6)
 
-  integer :: use_gpu_cuda
-  ! governs wheter we do the hamiltonian calculation on gpu or not
+  integer :: gpu_option
+  ! Governs the choice of the GPU implementation:
+  !        = 0 ==> do not use GPU
+  !        > 0 ==> see defs_basis.F90 to have the list of possible GPU implementations
 
   integer :: usecprj
    ! usecprj= 1 if cprj projected WF are stored in memory
@@ -192,11 +206,19 @@ module m_hamiltonian
 
 ! ===== Integer arrays
 
+#if defined HAVE_GPU && defined HAVE_YAKL
+  integer(c_int32_t), ABI_CONTIGUOUS pointer :: atindx(:) => null()
+#else
   integer, allocatable :: atindx(:)
+#endif
    ! atindx(natom)
    ! index table for atoms (see gstate.f)
 
+#if defined HAVE_GPU && defined HAVE_YAKL
+  integer(c_int32_t), ABI_CONTIGUOUS pointer :: atindx1(:) => null()
+#else
   integer, allocatable :: atindx1(:)
+#endif
    ! atindx1(natom)
    ! index table for atoms, inverse of atindx (see gstate.f)
 
@@ -209,13 +231,21 @@ module m_hamiltonian
    ! gbound_k(2*mgfft+8,2)
    ! G sphere boundary, for each plane wave at k
 
-  integer, allocatable :: indlmn(:,:,:)
+#if defined HAVE_GPU && defined HAVE_YAKL
+  integer(c_int32_t), ABI_CONTIGUOUS pointer :: indlmn(:,:,:) => null()
+#else
+  integer(c_int32_t), allocatable :: indlmn(:,:,:)
+#endif
    ! indlmn(6,lmnmax,ntypat)
    ! For each type of psp,
    ! array giving l,m,n,lm,ln,spin for i=ln  (if useylm=0)
    !                                or i=lmn (if useylm=1)
 
+#if defined HAVE_GPU && defined HAVE_YAKL
+  integer(c_int32_t), ABI_CONTIGUOUS pointer :: nattyp(:) => null()
+#else
   integer, allocatable :: nattyp(:)
+#endif
    ! nattyp(ntypat)
    ! # of atoms of each type
 
@@ -234,11 +264,15 @@ module m_hamiltonian
    ! into account, 2 if a spin-orbit component is used
    ! Revelant for NC-psps and PAW
 
+#if defined HAVE_GPU && defined HAVE_YAKL
+  integer(c_int32_t), ABI_CONTIGUOUS pointer :: typat(:) => null()
+#else
   integer, allocatable :: typat(:)
+#endif
    ! typat(natom)
    ! type of each atom
 
-! integer, allocatable :: indpw_k(:,:)
+  ! integer, allocatable :: indpw_k(:,:)
    ! indpw_k(4,npw_fft_k)
    ! array which gives fft box index for given basis sphere
 
@@ -248,7 +282,11 @@ module m_hamiltonian
    ! gbound_kp(2*mgfft+8,2)
    ! G sphere boundary, for each plane wave at k^prime
 
+#if defined HAVE_GPU && defined HAVE_YAKL
+  integer(int32), ABI_CONTIGUOUS pointer :: kg_k(:,:) => null()
+#else
   integer, pointer :: kg_k(:,:) => null()
+#endif
    ! kg_k(3,npw_fft_k)
    ! G vector coordinates with respect to reciprocal lattice translations
    ! at k
@@ -289,20 +327,17 @@ module m_hamiltonian
    ! nucdipmom(3,natom)
    ! nuclear dipole moments at each atomic position
 
+#if defined HAVE_GPU && defined HAVE_YAKL
+  real(c_double), ABI_CONTIGUOUS pointer :: ph1d(:,:) => null()
+#else
   real(dp), allocatable :: ph1d(:,:)
+#endif
    ! ph1d(2,3*(2*mgfft+1)*natom)
    ! 1-dim phase arrays for structure factor (see getph.f).
 
   real(dp), allocatable :: phkxred(:,:)
    ! phkxred(2,natom)
    ! phase factors exp(2 pi k.xred) at k
-
-! ===== Complex arrays
-
-  complex(dpc), allocatable :: nucdipmom_k(:)
-   ! nucdipmom_k(npw_k*(npw_k+1)/2)
-   ! nuclear dipole moment Hamiltonian in reciprocal space, stored as
-   ! lower triangular part of Hermitian matrix
 
 ! ===== Real pointers
 
@@ -336,6 +371,7 @@ module m_hamiltonian
   real(dp), pointer :: kinpw_k(:) => null()
    ! kinpw_k(npw_fft_k)
    ! (modified) kinetic energy for each plane wave at k
+   ! CAVEAT: In band mode, this array is NOT EQUIVALENT to kinpw(npw_k)
 
   real(dp), pointer :: kinpw_kp(:) => null()
    ! kinpw_kp(npw_fft_kp)
@@ -361,6 +397,11 @@ module m_hamiltonian
    ! ph3d_kp(2,npw_fft_kp,matblk)
    ! 3-dim structure factors, for each atom and plane wave at k^prime
 
+  real(dp), pointer :: vectornd(:,:,:,:,:) => null()
+   ! vectornd(n4,n5,n6,nvloc,3)
+   ! vector potential of nuclear magnetic dipoles
+   ! in real space, on the augmented fft grid
+
   real(dp), pointer :: vlocal(:,:,:,:) => null()
    ! vlocal(n4,n5,n6,nvloc)
    ! local potential in real space, on the augmented fft grid
@@ -377,25 +418,32 @@ module m_hamiltonian
 ! ===== Structured datatype pointers
 
   type(fock_common_type), pointer :: fockcommon => null()
-   ! fock
    ! common quantities needed to calculate Fock exact exchange
 
   type(fock_BZ_type), pointer :: fockbz => null()
-   ! fock
    ! total brillouin zone quantities needed to calculate Fock exact exchange
 
   type(fock_ACE_type), pointer :: fockACE_k => null()
-   ! fock
    ! ACE quantities needed to calculate Fock exact exchange in the ACE context
+
+ contains
+   procedure :: free => destroy_hamiltonian
+    ! Free the memory in the GS Hamiltonian
+
+   procedure :: load_spin => load_spin_hamiltonian
+    ! Setup of the spin-dependent part of the GS Hamiltonian
+
+   procedure :: load_k => load_k_hamiltonian
+    ! Setup of the k-dependent part of the GS Hamiltonian
+
+   procedure :: load_kprime => load_kprime_hamiltonian
+    ! Setup of the k^prime-dependent part of the GS Hamiltonian
+
+   !procedure :: copy => copy_hamiltonian
 
  end type gs_hamiltonian_type
 
-
  public :: init_hamiltonian         ! Initialize the GS Hamiltonian
- public :: destroy_hamiltonian      ! Free the memory in the GS Hamiltonian
- public :: load_spin_hamiltonian    ! Setup of the spin-dependent part of the GS Hamiltonian
- public :: load_k_hamiltonian       ! Setup of the k-dependent part of the GS Hamiltonian
- public :: load_kprime_hamiltonian  ! Setup of the k^prime-dependent part of the GS Hamiltonian
  public :: copy_hamiltonian         ! Copy the object
 !!***
 
@@ -487,16 +535,34 @@ module m_hamiltonian
    ! e1kbsc(dime1kb1,dime1kb2,nspinor**2,cplex)
    ! For each spin component, e1kbfr points to e1kbfr_spin(:,:,:,:,my_isppol)
 
+  real(dp), pointer :: vectornd(:,:,:,:) => null()
+   ! vectornd(n4,n5,n6,nvloc)
+   ! vector potential of nuclear magnetic dipoles
+   ! in real space, on the augmented fft grid, in direction idir
+   ! (the ddk pert direction)
+
   real(dp), pointer :: vlocal1(:,:,:,:) => null()
    ! vlocal1(cplex*n4,n5,n6,nvloc)
    ! 1st-order local potential in real space, on the augmented fft grid
 
+  real(dp), pointer :: vxctaulocal(:,:,:,:,:) => null()
+   ! vxctaulocal(n4,n5,n6,nvloc,4)
+   ! derivative of XC energy density with respect to kinetic energy density,
+   ! in real space, on the augmented fft grid
+
+ contains
+   procedure :: free => destroy_rf_hamiltonian
+    ! Free the memory in the RF Hamiltonian
+
+   procedure :: load_spin => load_spin_rf_hamiltonian
+    ! Setup of the spin-dependent part of the RF Hamiltonian.
+
+   procedure :: load_k => load_k_rf_hamiltonian
+    ! Setup of the k-dependent part of the RF Hamiltonian
+
  end type rf_hamiltonian_type
 
  public :: init_rf_hamiltonian      ! Initialize the RF Hamiltonian
- public :: destroy_rf_hamiltonian   ! Free the memory in the RF Hamiltonian
- public :: load_spin_rf_hamiltonian ! Setup of the spin-dependent part of the RF Hamiltonian.
- public :: load_k_rf_hamiltonian    ! Setup of the k-dependent part of the RF Hamiltonian
 !!***
 
 CONTAINS  !===========================================================
@@ -513,21 +579,13 @@ CONTAINS  !===========================================================
 !! SIDE EFFECTS
 !!  Ham<gs_hamiltonian_type>=All dynamic memory defined in the structure is deallocated.
 !!
-!! PARENTS
-!!      d2frnl,dfpt_nselt,dfpt_nstdy,dfpt_nstpaw,dfpt_rhofermi,dfpt_vtorho
-!!      dfptnl_resp,energy,fock2ACE,forstrnps,gwls_hamiltonian,ks_ddiago,m_gkk
-!!      m_io_kss,m_phgamma,m_phpi,m_shirley,m_sigmaph,nonlop_test,vtorho
-!!
-!! CHILDREN
-!!      destroy_mpi_enreg,initmpi_seq,kpgsph,wrtout
-!!
 !! SOURCE
 
 subroutine destroy_hamiltonian(Ham)
 
 !Arguments ------------------------------------
 !scalars
- type(gs_hamiltonian_type),intent(inout),target :: Ham
+ class(gs_hamiltonian_type),intent(inout),target :: Ham
 
 ! *************************************************************************
 
@@ -536,48 +594,42 @@ subroutine destroy_hamiltonian(Ham)
 !@gs_hamiltonian_type
 
 ! Integer Pointers
- if (associated(Ham%gbound_kp,Ham%gbound_k))   then
+ if (associated(Ham%gbound_kp,Ham%gbound_k)) then
    nullify(Ham%gbound_kp)
  else if (associated(Ham%gbound_kp)) then
-   ABI_DEALLOCATE(Ham%gbound_kp)
+   ABI_FREE(Ham%gbound_kp)
  end if
 
-! Integer arrays
- if (allocated(Ham%atindx))  then
-   ABI_DEALLOCATE(Ham%atindx)
+ ! Integer arrays
+ if(Ham%gpu_option == ABI_GPU_KOKKOS) then
+#if defined HAVE_GPU && defined HAVE_YAKL
+   ABI_SFREE_MANAGED(Ham%atindx)
+   ABI_SFREE_MANAGED(Ham%atindx1)
+   ABI_SFREE_MANAGED(Ham%typat)
+   ABI_SFREE_MANAGED(Ham%indlmn)
+   ABI_SFREE_MANAGED(Ham%nattyp)
+#endif
+ else
+   ABI_FREE(Ham%atindx)
+   ABI_FREE(Ham%atindx1)
+   ABI_FREE(Ham%typat)
+   ABI_FREE(Ham%indlmn)
+   ABI_FREE(Ham%nattyp)
  end if
- if (allocated(Ham%atindx1))  then
-   ABI_DEALLOCATE(Ham%atindx1)
- end if
- if (allocated(Ham%dimcprj))  then
-   ABI_DEALLOCATE(Ham%dimcprj)
- end if
- if (allocated(Ham%gbound_k))  then
-   ABI_DEALLOCATE(Ham%gbound_k)
- end if
- if (allocated(Ham%indlmn ))  then
-   ABI_DEALLOCATE(Ham%indlmn)
- end if
- if (allocated(Ham%nattyp))  then
-   ABI_DEALLOCATE(Ham%nattyp)
- end if
- if (allocated(Ham%pspso))  then
-   ABI_DEALLOCATE(Ham%pspso)
- end if
- if (allocated(Ham%typat))  then
-   ABI_DEALLOCATE(Ham%typat)
- end if
+ ABI_SFREE(Ham%gbound_k)
+ ABI_SFREE(Ham%pspso)
+
+ ABI_SFREE(Ham%dimcprj)
 
 ! Real Pointers
- if (associated(Ham%phkpxred,Ham%phkxred))   then
+ if (associated(Ham%phkpxred,Ham%phkxred)) then
    nullify(Ham%phkpxred)
  else if (associated(Ham%phkpxred)) then
-   ABI_DEALLOCATE(Ham%phkpxred)
+   ABI_FREE(Ham%phkpxred)
  end if
- if (allocated(Ham%phkxred))   then
-   ABI_DEALLOCATE(Ham%phkxred)
- end if
+ ABI_SFREE(Ham%phkxred)
  if (associated(Ham%ekb)) nullify(Ham%ekb)
+ if (associated(Ham%vectornd)) nullify(Ham%vectornd)
  if (associated(Ham%vlocal)) nullify(Ham%vlocal)
  if (associated(Ham%vxctaulocal)) nullify(Ham%vxctaulocal)
  if (associated(Ham%xred)) nullify(Ham%xred)
@@ -593,22 +645,15 @@ subroutine destroy_hamiltonian(Ham)
  if (associated(Ham%ph3d_kp)) nullify(Ham%ph3d_kp)
 
 ! Real arrays
- if (allocated(Ham%ekb_spin))   then
-   ABI_DEALLOCATE(Ham%ekb_spin)
- end if
- if (allocated(Ham%sij))   then
-   ABI_DEALLOCATE(Ham%sij)
- end if
- if (allocated(Ham%nucdipmom)) then
-   ABI_DEALLOCATE(Ham%nucdipmom)
- end if
- if (allocated(Ham%ph1d))   then
-   ABI_DEALLOCATE(Ham%ph1d)
- end if
-
-! Complex arrays
- if(allocated(Ham%nucdipmom_k)) then
-   ABI_DEALLOCATE(Ham%nucdipmom_k)
+ ABI_SFREE(Ham%ekb_spin)
+ ABI_SFREE(Ham%sij)
+ ABI_SFREE(Ham%nucdipmom)
+ if(Ham%gpu_option == ABI_GPU_KOKKOS) then
+#if defined HAVE_GPU && defined HAVE_YAKL
+   ABI_SFREE_MANAGED(Ham%ph1d)
+#endif
+ else
+   ABI_FREE(Ham%ph1d)
  end if
 
 ! Structured datatype pointers
@@ -616,7 +661,7 @@ subroutine destroy_hamiltonian(Ham)
  if (associated(Ham%fockACE_k)) nullify(Ham%fockACE_k)
  if (associated(Ham%fockbz)) nullify(Ham%fockbz)
 #if defined HAVE_GPU_CUDA
- if(Ham%use_gpu_cuda==1) then
+ if(Ham%gpu_option==ABI_GPU_LEGACY .or. Ham%gpu_option==ABI_GPU_KOKKOS) then
    call gpu_finalize_ham_data()
  end if
 #endif
@@ -638,8 +683,7 @@ end subroutine destroy_hamiltonian
 !!
 !! INPUTS
 !!  [comm_atom]=optional, MPI communicator over atoms
-!!  [fockcommon <type(fock_common_type)>]= common quantities to calculate Fock exact exchange
-!!  [fockbz <type(fock_BZ_type)>]= quantities to calculate Fock exact exchange in the total BZ
+!!  [fock <type(fock_type)>]= common quantities to calculate Fock exact exchange
 !!  natom=Number of atoms in the unit cell.
 !!  nfft=Number of FFT grid points (for this processors).
 !!  nspinor=Number of spinorial components
@@ -661,6 +705,7 @@ end subroutine destroy_hamiltonian
 !!  rprimd(3,3)=Direct lattice vectors in Bohr.
 !!  typat(natom)=Type of each atom.
 !!  [usecprj]=flag use only for PAW; 1 if cprj datastructure is allocated
+!!  [gpu_option] = GPU implementation to use, i.e. cuda, openMP, ... (0=not using GPU)
 !!  xred(3,natom)=Reduced coordinates of the atoms.
 !!  pawtab(ntypat*psps%usepaw)<pawtab_type>=PAW TABulated data initialized at start.
 !!  [paw_ij(:) <type(paw_ij_type)>]=optional, paw arrays given on (i,j) channels
@@ -671,26 +716,18 @@ end subroutine destroy_hamiltonian
 !!   * All pointers are allocated with correct dimensions.
 !!   * Quantities that do not depend on the k-point or spin are initialized.
 !!
-!! PARENTS
-!!      d2frnl,dfpt_nselt,dfpt_nstdy,dfpt_nstpaw,dfpt_rhofermi,dfpt_vtorho
-!!      dfptnl_resp,energy,fock2ACE,forstrnps,ks_ddiago,m_gkk,m_io_kss
-!!      m_phgamma,m_phpi,m_shirley,m_sigmaph,nonlop_test,vtorho
-!!
-!! CHILDREN
-!!      destroy_mpi_enreg,initmpi_seq,kpgsph,wrtout
-!!
 !! SOURCE
 
 subroutine init_hamiltonian(ham,Psps,pawtab,nspinor,nsppol,nspden,natom,typat,&
 &                           xred,nfft,mgfft,ngfft,rprimd,nloalg,&
 &                           ph1d,usecprj,comm_atom,mpi_atmtab,mpi_spintab,paw_ij,&  ! optional
-&                           electronpositron,fock,nucdipmom,use_gpu_cuda)           ! optional
+&                           electronpositron,fock,nucdipmom,gpu_option)         ! optional
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nfft,natom,nspinor,nsppol,nspden,mgfft
- integer,optional,intent(in) :: comm_atom,usecprj,use_gpu_cuda
- type(gs_hamiltonian_type),intent(inout),target :: ham
+ integer,optional,intent(in) :: comm_atom,usecprj,gpu_option
+ class(gs_hamiltonian_type),intent(inout),target :: ham
  type(electronpositron_type),optional,pointer :: electronpositron
  type(fock_type),optional,pointer :: fock
  type(pseudopotential_type),intent(in) :: psps
@@ -705,7 +742,7 @@ subroutine init_hamiltonian(ham,Psps,pawtab,nspinor,nsppol,nspden,natom,typat,&
 
 !Local variables-------------------------------
 !scalars
- integer :: my_comm_atom,my_nsppol,itypat,iat,ilmn,indx,isp,cplex,cplex_dij,jsp
+ integer :: my_comm_atom,my_nsppol,itypat,iat,ilmn,indx,isp,cplex_dij,jsp,l_gpu_option
  real(dp) :: ucvol
 !arrays
  integer :: my_spintab(2)
@@ -722,20 +759,33 @@ subroutine init_hamiltonian(ham,Psps,pawtab,nspinor,nsppol,nspden,natom,typat,&
  my_comm_atom=xmpi_comm_self;if (present(comm_atom)) my_comm_atom=comm_atom
  my_spintab=0;my_spintab(1:nsppol)=1;if (present(mpi_spintab)) my_spintab(1:2)=mpi_spintab(1:2)
  my_nsppol=count(my_spintab==1)
+ l_gpu_option=ABI_GPU_DISABLED; if(present(gpu_option)) l_gpu_option=gpu_option
 
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
 
  ABI_CHECK(mgfft==MAXVAL(ngfft(1:3)),"Wrong mgfft")
 
 !Allocate the arrays of the Hamiltonian whose dimensions do not depend on k
- ABI_ALLOCATE(ham%atindx,(natom))
- ABI_ALLOCATE(ham%atindx1,(natom))
- ABI_ALLOCATE(ham%typat,(natom))
- ABI_ALLOCATE(ham%indlmn,(6,psps%lmnmax,psps%ntypat))
- ABI_ALLOCATE(ham%nattyp,(psps%ntypat))
- ABI_ALLOCATE(ham%nucdipmom,(3,natom))
- ABI_ALLOCATE(ham%ph1d,(2,3*(2*mgfft+1)*natom))
- ABI_ALLOCATE(ham%pspso,(psps%ntypat))
+ if(l_gpu_option == ABI_GPU_KOKKOS) then
+#if defined HAVE_GPU && defined HAVE_YAKL
+   ABI_MALLOC_MANAGED(ham%atindx,(/natom/))
+   ABI_MALLOC_MANAGED(ham%atindx1,(/natom/))
+   ABI_MALLOC_MANAGED(ham%typat,(/natom/))
+   ABI_MALLOC_MANAGED(ham%indlmn,(/6,psps%lmnmax,psps%ntypat/))
+   ABI_MALLOC_MANAGED(ham%nattyp,(/psps%ntypat/))
+   ABI_MALLOC_MANAGED(ham%ph1d,(/2,3*(2*mgfft+1)*natom/))
+#endif
+ else
+   ABI_MALLOC(ham%atindx,(natom))
+   ABI_MALLOC(ham%atindx1,(natom))
+   ABI_MALLOC(ham%typat,(natom))
+   ABI_MALLOC(ham%indlmn,(6,psps%lmnmax,psps%ntypat))
+   ABI_MALLOC(ham%nattyp,(psps%ntypat))
+   ABI_MALLOC(ham%ph1d,(2,3*(2*mgfft+1)*natom))
+ end if
+
+ ABI_MALLOC(ham%pspso,(psps%ntypat))
+ ABI_MALLOC(ham%nucdipmom,(3,natom))
 
 !Initialize most of the Hamiltonian
  indx=1
@@ -774,7 +824,7 @@ subroutine init_hamiltonian(ham,Psps,pawtab,nspinor,nsppol,nspden,natom,typat,&
  ham%usepaw     =psps%usepaw
  ham%ucvol      =ucvol
  ham%useylm     =psps%useylm
- ham%use_gpu_cuda=0 ; if(PRESENT(use_gpu_cuda)) ham%use_gpu_cuda=use_gpu_cuda
+ ham%gpu_option=ABI_GPU_DISABLED ; if(PRESENT(gpu_option)) ham%gpu_option=gpu_option
 
  ham%pspso(:)   =psps%pspso(1:psps%ntypat)
  if (psps%usepaw==1) then
@@ -806,12 +856,12 @@ subroutine init_hamiltonian(ham,Psps,pawtab,nspinor,nsppol,nspden,natom,typat,&
 
  if (ham%usepaw==1) then
    ham%usecprj=0;if (present(usecprj)) ham%usecprj=usecprj
-   ABI_ALLOCATE(ham%dimcprj,(natom))
+   ABI_MALLOC(ham%dimcprj,(natom))
    !Be carefull cprj are ordered by atom type (used in non-local operator)
    call pawcprj_getdim(ham%dimcprj,natom,ham%nattyp,ham%ntypat,ham%typat,pawtab,'O')
  else
    ham%usecprj=0
-   ABI_ALLOCATE(ham%dimcprj,(0))
+   ABI_MALLOC(ham%dimcprj,(0))
  end if
 
 ! ===========================
@@ -823,9 +873,9 @@ subroutine init_hamiltonian(ham,Psps,pawtab,nspinor,nsppol,nspden,natom,typat,&
    ham%dimekb1=psps%dimekb
    ham%dimekb2=psps%ntypat
    ham%dimekbq=1
-   ABI_ALLOCATE(ham%ekb_spin,(psps%dimekb,psps%ntypat,nspinor**2,1,1))
+   ABI_MALLOC(ham%ekb_spin,(psps%dimekb,psps%ntypat,nspinor**2,1,1))
    ham%ekb => ham%ekb_spin(:,:,:,:,1)
-   ABI_ALLOCATE(ham%sij,(0,0))
+   ABI_MALLOC(ham%sij,(0,0))
    ham%ekb(:,:,1,1)=psps%ekb(:,:)
    if (nspinor==2) then
      ham%ekb(:,:,2,1)=psps%ekb(:,:)
@@ -837,8 +887,11 @@ subroutine init_hamiltonian(ham,Psps,pawtab,nspinor,nsppol,nspden,natom,typat,&
 
 !  Update enl on GPU (will do it later for PAW)
 #if defined HAVE_GPU_CUDA
-   if (ham%use_gpu_cuda==1) then
-     call gpu_update_ham_data(ham%ekb(:,:,:,1),size(ham%ekb),ham%sij,size(ham%sij),ham%gprimd,size(ham%gprimd))
+   if (ham%gpu_option==ABI_GPU_LEGACY .or. ham%gpu_option==ABI_GPU_KOKKOS) then
+     call gpu_update_ham_data(&
+       & ham%ekb(:,:,:,1), INT(size(ham%ekb),   c_int64_t), &
+       & ham%sij,          INT(size(ham%sij),   c_int64_t), &
+       & ham%gprimd,       INT(size(ham%gprimd),c_int64_t))
    end if
 #endif
 
@@ -854,7 +907,7 @@ subroutine init_hamiltonian(ham,Psps,pawtab,nspinor,nsppol,nspden,natom,typat,&
    if (present(paw_ij)) then
      if (size(paw_ij)>0) ham%dimekbq=paw_ij(1)%qphase
    end if
-   ABI_ALLOCATE(ham%sij,(ham%dimekb1,psps%ntypat))
+   ABI_MALLOC(ham%sij,(ham%dimekb1,psps%ntypat))
    do itypat=1,psps%ntypat
      if (cplex_dij==1) then
        ham%sij(1:pawtab(itypat)%lmn2_size,itypat)=pawtab(itypat)%sij(:)
@@ -870,11 +923,11 @@ subroutine init_hamiltonian(ham,Psps,pawtab,nspinor,nsppol,nspden,natom,typat,&
    end do
    !We preload here PAW non-local factors in order to avoid a communication over atoms
    ! inside the loop over spins.
-   ABI_ALLOCATE(ham%ekb_spin,(ham%dimekb1,ham%dimekb2,nspinor**2,ham%dimekbq,my_nsppol))
+   ABI_MALLOC(ham%ekb_spin,(ham%dimekb1,ham%dimekb2,nspinor**2,ham%dimekbq,my_nsppol))
    ham%ekb_spin=zero
    if (present(paw_ij)) then
      if (my_nsppol<ham%nsppol) then
-       ABI_ALLOCATE(ekb_tmp,(ham%dimekb1,ham%dimekb2,nspinor**2,ham%dimekbq))
+       ABI_MALLOC(ekb_tmp,(ham%dimekb1,ham%dimekb2,nspinor**2,ham%dimekbq))
      end if
      jsp=0
      do isp=1,ham%nsppol
@@ -890,7 +943,7 @@ subroutine init_hamiltonian(ham,Psps,pawtab,nspinor,nsppol,nspden,natom,typat,&
        end if
      end do
      if (my_nsppol<ham%nsppol) then
-       ABI_DEALLOCATE(ekb_tmp)
+       ABI_FREE(ekb_tmp)
      end if
    end if
    nullify(ham%ekb)
@@ -932,30 +985,21 @@ end subroutine init_hamiltonian
 !!    [ham%gbound_k]=G sphere boundary, for each plane wave
 !!    [ham%ph3d_k]=3-dim structure factors, for each atom and plane wave
 !!
-!! PARENTS
-!!      d2frnl,dfpt_nsteltwf,dfpt_nstpaw,dfpt_nstwf,dfpt_rhofermi,dfptnl_resp
-!!      energy,fock2ACE,forstrnps,getgh1c,gwls_hamiltonian,ks_ddiago,m_io_kss
-!!      m_shirley,nonlop_test,vtorho,wfd_vnlpsi
-!!
-!! CHILDREN
-!!      destroy_mpi_enreg,initmpi_seq,kpgsph,wrtout
-!!
 !! SOURCE
 
 subroutine load_k_hamiltonian(ham,ffnl_k,fockACE_k,gbound_k,istwf_k,kinpw_k,&
-&                             kg_k,kpg_k,kpt_k,nucdipmom_k,npw_k,npw_fft_k,ph3d_k,&
-&                             compute_gbound,compute_ph3d)
+                              kg_k,kpg_k,kpt_k,npw_k,npw_fft_k,ph3d_k,&
+                              compute_gbound,compute_ph3d)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in),optional :: npw_k,npw_fft_k,istwf_k
  logical,intent(in),optional :: compute_gbound,compute_ph3d
- type(gs_hamiltonian_type),intent(inout),target :: ham
+ class(gs_hamiltonian_type),intent(inout),target :: ham
 !arrays
  integer,intent(in),optional,target :: gbound_k(:,:),kg_k(:,:)
  real(dp),intent(in),optional :: kpt_k(3)
  real(dp),intent(in),optional,target :: ffnl_k(:,:,:,:),kinpw_k(:),kpg_k(:,:),ph3d_k(:,:,:)
- complex(dpc),intent(in),optional :: nucdipmom_k(:)
  type(fock_ACE_type),intent(in),optional,target :: fockACE_k
 
 !Local variables-------------------------------
@@ -992,11 +1036,6 @@ subroutine load_k_hamiltonian(ham,ffnl_k,fockACE_k,gbound_k,istwf_k,kinpw_k,&
    ham%npw_fft_kp = npw_k
  end if
 
- ! k-dependend complex quantities
-  if (present(nucdipmom_k)) then
-   ham%nucdipmom_k(:) = nucdipmom_k(:)
-  end if
-
 !Pointers to k-dependent quantitites
  if (present(kinpw_k)) then
    ham%kinpw_k  => kinpw_k
@@ -1024,12 +1063,10 @@ subroutine load_k_hamiltonian(ham,ffnl_k,fockACE_k,gbound_k,istwf_k,kinpw_k,&
 !Compute exp(i.k.R) for each atom
  if (present(kpt_k)) then
    if (associated(Ham%phkpxred).and.(.not.associated(Ham%phkpxred,Ham%phkxred))) then
-     ABI_DEALLOCATE(Ham%phkpxred)
+     ABI_FREE(Ham%phkpxred)
    end if
-   if (allocated(ham%phkxred)) then
-     ABI_DEALLOCATE(ham%phkxred)
-   end if
-   ABI_ALLOCATE(ham%phkxred,(2,ham%natom))
+   ABI_SFREE(ham%phkxred)
+   ABI_MALLOC(ham%phkxred,(2,ham%natom))
    do iat=1,ham%natom
      iatom=ham%atindx(iat)
      arg=two_pi*DOT_PRODUCT(kpt_k,ham%xred(:,iat))
@@ -1046,14 +1083,12 @@ subroutine load_k_hamiltonian(ham,ffnl_k,fockACE_k,gbound_k,istwf_k,kinpw_k,&
    if (associated(Ham%gbound_kp,Ham%gbound_k)) then
      nullify(Ham%gbound_kp)
    else if (associated(Ham%gbound_kp)) then
-     ABI_DEALLOCATE(Ham%gbound_kp)
+     ABI_FREE(Ham%gbound_kp)
    end if
-   if (allocated(ham%gbound_k)) then
-     ABI_DEALLOCATE(ham%gbound_k)
-   end if
+   ABI_SFREE(ham%gbound_k)
  end if
  if (.not.allocated(ham%gbound_k)) then
-   ABI_ALLOCATE(ham%gbound_k,(2*ham%mgfft+8,2))
+   ABI_MALLOC(ham%gbound_k,(2*ham%mgfft+8,2))
    ham%gbound_k(:,:)=0
    ham%gbound_kp => ham%gbound_k
  end if
@@ -1062,7 +1097,7 @@ subroutine load_k_hamiltonian(ham,ffnl_k,fockACE_k,gbound_k,istwf_k,kinpw_k,&
      ham%gbound_k(:,:)=gbound_k(:,:)
    else
      if (.not.associated(ham%kg_k)) then
-       MSG_BUG('Something is missing for gbound_k computation!')
+       ABI_BUG('Something is missing for gbound_k computation!')
      end if
      !write(std_out,*)"About to call sphereboundary"
      !write(std_out,*)"size(kg_k), npw_k, mgfft",size(ham%kg_k, dim=2), ham%npw_k, ham%mgfft
@@ -1075,11 +1110,11 @@ subroutine load_k_hamiltonian(ham,ffnl_k,fockACE_k,gbound_k,istwf_k,kinpw_k,&
  if (present(compute_ph3d).and.present(ph3d_k)) then
    if (compute_ph3d.and.ham%nloalg(2)>0) then
      if ((.not.allocated(ham%phkxred)).or.(.not.associated(ham%kg_k)).or.&
-&        (.not.associated(ham%ph3d_k))) then
-       MSG_BUG('Something is missing for ph3d_k computation!')
+         (.not.associated(ham%ph3d_k))) then
+       ABI_BUG('Something is missing for ph3d_k computation!')
      end if
      call ph1d3d(1,ham%natom,ham%kg_k,ham%matblk,ham%natom,ham%npw_k,ham%ngfft(1),&
-&                ham%ngfft(2),ham%ngfft(3),ham%phkxred,ham%ph1d,ham%ph3d_k)
+                 ham%ngfft(2),ham%ngfft(3),ham%phkxred,ham%ph1d,ham%ph3d_k)
    end if
  end if
 
@@ -1118,23 +1153,17 @@ end subroutine load_k_hamiltonian
 !!    [ham%gbound_kp]=G sphere boundary, for each plane wave
 !!    [ham%ph3d_kp]=3-dim structure factors at k^prime at k, for each atom and plane wave
 !!
-!! PARENTS
-!!      dfpt_nstpaw,dfpt_nstwf,dfpt_rhofermi,fock_getghc,getgh1c
-!!
-!! CHILDREN
-!!      destroy_mpi_enreg,initmpi_seq,kpgsph,wrtout
-!!
 !! SOURCE
 
 subroutine load_kprime_hamiltonian(ham,ffnl_kp,gbound_kp,istwf_kp,kinpw_kp,&
-&                                  kg_kp,kpg_kp,kpt_kp,npw_kp,npw_fft_kp,&
-&                                  ph3d_kp,compute_gbound,compute_ph3d)
+                                   kg_kp,kpg_kp,kpt_kp,npw_kp,npw_fft_kp,&
+                                   ph3d_kp,compute_gbound,compute_ph3d)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in),optional :: npw_kp,npw_fft_kp,istwf_kp
  logical,intent(in),optional :: compute_gbound,compute_ph3d
- type(gs_hamiltonian_type),intent(inout),target :: ham
+ class(gs_hamiltonian_type),intent(inout),target :: ham
 !arrays
  integer,intent(in),optional,target :: gbound_kp(:,:),kg_kp(:,:)
  real(dp),intent(in),optional :: kpt_kp(3)
@@ -1145,7 +1174,7 @@ subroutine load_kprime_hamiltonian(ham,ffnl_kp,gbound_kp,istwf_kp,kinpw_kp,&
  integer :: iat,iatom
  logical :: compute_gbound_
  real(dp) :: arg
- character(len=100) :: msg
+ !character(len=500) :: msg
 
 ! *************************************************************************
 
@@ -1175,9 +1204,9 @@ subroutine load_kprime_hamiltonian(ham,ffnl_kp,gbound_kp,istwf_kp,kinpw_kp,&
    if (associated(ham%phkpxred,ham%phkxred)) then
      nullify(ham%phkpxred)
    else if (associated(ham%phkpxred)) then
-     ABI_DEALLOCATE(ham%phkpxred)
+     ABI_FREE(ham%phkpxred)
    end if
-   ABI_ALLOCATE(ham%phkpxred,(2,ham%natom))
+   ABI_MALLOC(ham%phkpxred,(2,ham%natom))
    do iat=1,ham%natom
      iatom=ham%atindx(iat)
      arg=two_pi*DOT_PRODUCT(kpt_kp,ham%xred(:,iat))
@@ -1194,16 +1223,15 @@ subroutine load_kprime_hamiltonian(ham,ffnl_kp,gbound_kp,istwf_kp,kinpw_kp,&
    if (associated(ham%gbound_kp,ham%gbound_k)) then
      nullify(ham%gbound_kp)
    else if (associated(ham%gbound_kp)) then
-     ABI_DEALLOCATE(ham%gbound_kp)
+     ABI_FREE(ham%gbound_kp)
    end if
    if (present(gbound_kp)) then
      ham%gbound_kp(:,:)=gbound_kp(:,:)
    else
      if (.not.associated(ham%kg_kp)) then
-       msg='Something is missing for gbound_kp computation!'
-       MSG_BUG(msg)
+       ABI_BUG('Something is missing for gbound_kp computation!')
      end if
-     ABI_ALLOCATE(ham%gbound_kp,(2*ham%mgfft+8,2))
+     ABI_MALLOC(ham%gbound_kp,(2*ham%mgfft+8,2))
      call sphereboundary(ham%gbound_kp,ham%istwf_kp,ham%kg_kp,ham%mgfft,ham%npw_kp)
    end if
  end if
@@ -1213,8 +1241,7 @@ subroutine load_kprime_hamiltonian(ham,ffnl_kp,gbound_kp,istwf_kp,kinpw_kp,&
    if (compute_ph3d.and.ham%nloalg(2)>0) then
      if ((.not.associated(ham%phkpxred)).or.(.not.associated(ham%kg_kp)).or.&
 &        (.not.associated(ham%ph3d_kp))) then
-       msg='Something is missing for ph3d_kp computation!'
-       MSG_BUG(msg)
+       ABI_BUG('Something is missing for ph3d_kp computation!')
      end if
      call ph1d3d(1,ham%natom,ham%kg_kp,ham%matblk,ham%natom,ham%npw_kp,ham%ngfft(1),&
 &                ham%ngfft(2),ham%ngfft(3),ham%phkpxred,ham%ph1d,ham%ph3d_kp)
@@ -1251,12 +1278,6 @@ end subroutine load_kprime_hamiltonian
 !! OUTPUT
 !!  gs_hamk_out<gs_hamiltonian_type>=Structured datatype containing separate
 !!                                   copies of all data of gs_hamk_in upon exit.
-!!
-!! PARENTS
-!!      gwls_hamiltonian
-!!
-!! CHILDREN
-!!      destroy_mpi_enreg,initmpi_seq,kpgsph,wrtout
 !!
 !! SOURCE
 
@@ -1301,7 +1322,7 @@ subroutine copy_hamiltonian(gs_hamk_out,gs_hamk_in)
  gs_hamk_out%n4 = gs_hamk_in%n4
  gs_hamk_out%n5 = gs_hamk_in%n5
  gs_hamk_out%n6 = gs_hamk_in%n6
- gs_hamk_out%use_gpu_cuda = gs_hamk_in%use_gpu_cuda
+ gs_hamk_out%gpu_option = gs_hamk_in%gpu_option
  gs_hamk_out%usecprj = gs_hamk_in%usecprj
  gs_hamk_out%usepaw = gs_hamk_in%usepaw
  gs_hamk_out%useylm = gs_hamk_in%useylm
@@ -1313,50 +1334,51 @@ subroutine copy_hamiltonian(gs_hamk_out,gs_hamk_in)
  gs_hamk_out%kpt_k = gs_hamk_in%kpt_k
  gs_hamk_out%kpt_kp = gs_hamk_in%kpt_kp
 
- ABI_ALLOCATE(gs_hamk_out%atindx,(gs_hamk_out%natom))
+ ABI_MALLOC(gs_hamk_out%atindx,(gs_hamk_out%natom))
  gs_hamk_out%atindx = gs_hamk_in%atindx
- ABI_ALLOCATE(gs_hamk_out%atindx1,(gs_hamk_out%natom))
+ ABI_MALLOC(gs_hamk_out%atindx1,(gs_hamk_out%natom))
  gs_hamk_out%atindx1 = gs_hamk_in%atindx1
- ABI_ALLOCATE(gs_hamk_out%dimcprj,(gs_hamk_out%natom*gs_hamk_out%usepaw))
+ ABI_MALLOC(gs_hamk_out%dimcprj,(gs_hamk_out%natom*gs_hamk_out%usepaw))
  if (gs_hamk_out%usepaw==1) gs_hamk_out%dimcprj = gs_hamk_in%dimcprj
- ABI_ALLOCATE(gs_hamk_out%typat,(gs_hamk_out%natom))
+ ABI_MALLOC(gs_hamk_out%typat,(gs_hamk_out%natom))
  gs_hamk_out%typat = gs_hamk_in%typat
- ABI_ALLOCATE(gs_hamk_out%gbound_k,(2*gs_hamk_out%mgfft+8,2))
+ ABI_MALLOC(gs_hamk_out%gbound_k,(2*gs_hamk_out%mgfft+8,2))
  gs_hamk_out%gbound_k = gs_hamk_in%gbound_k
- ABI_ALLOCATE(gs_hamk_out%indlmn,(6,gs_hamk_out%lmnmax,gs_hamk_out%ntypat))
+ ABI_MALLOC(gs_hamk_out%indlmn,(6,gs_hamk_out%lmnmax,gs_hamk_out%ntypat))
  gs_hamk_out%indlmn = gs_hamk_in%indlmn
- ABI_ALLOCATE(gs_hamk_out%nattyp,(gs_hamk_out%ntypat))
+ ABI_MALLOC(gs_hamk_out%nattyp,(gs_hamk_out%ntypat))
  gs_hamk_out%nattyp = gs_hamk_in%nattyp
- ABI_ALLOCATE(gs_hamk_out%nucdipmom,(3,gs_hamk_out%natom))
+ ABI_MALLOC(gs_hamk_out%nucdipmom,(3,gs_hamk_out%natom))
  gs_hamk_out%nucdipmom = gs_hamk_in%nucdipmom
- ABI_ALLOCATE(gs_hamk_out%phkxred,(2,gs_hamk_out%natom))
+ ABI_MALLOC(gs_hamk_out%phkxred,(2,gs_hamk_out%natom))
  gs_hamk_out%phkxred = gs_hamk_in%phkxred
- ABI_ALLOCATE(gs_hamk_out%ph1d,(2,3*(2*gs_hamk_out%mgfft+1)*gs_hamk_out%natom))
+ ABI_MALLOC(gs_hamk_out%ph1d,(2,3*(2*gs_hamk_out%mgfft+1)*gs_hamk_out%natom))
  gs_hamk_out%ph1d = gs_hamk_in%ph1d
- ABI_ALLOCATE(gs_hamk_out%pspso,(gs_hamk_out%ntypat))
+ ABI_MALLOC(gs_hamk_out%pspso,(gs_hamk_out%ntypat))
  gs_hamk_out%pspso = gs_hamk_in%pspso
  tmp2i(1:5)=shape(gs_hamk_in%ekb_spin)
- ABI_ALLOCATE(gs_hamk_out%ekb_spin,(tmp2i(1),tmp2i(2),tmp2i(3),tmp2i(4),tmp2i(5)))
+ ABI_MALLOC(gs_hamk_out%ekb_spin,(tmp2i(1),tmp2i(2),tmp2i(3),tmp2i(4),tmp2i(5)))
  gs_hamk_out%ekb_spin = gs_hamk_in%ekb_spin
  gs_hamk_out%ekb => gs_hamk_out%ekb_spin(:,:,:,:,1)
  tmp2i(1:2)=shape(gs_hamk_in%sij)
- ABI_ALLOCATE(gs_hamk_out%sij,(tmp2i(1),tmp2i(2)))
+ ABI_MALLOC(gs_hamk_out%sij,(tmp2i(1),tmp2i(2)))
  gs_hamk_out%sij = gs_hamk_in%sij
 
  if (associated(gs_hamk_in%gbound_kp,gs_hamk_in%gbound_k)) then
    gs_hamk_out%gbound_kp => gs_hamk_out%gbound_k
  else
-   ABI_ALLOCATE(gs_hamk_out%gbound_kp,(2,gs_hamk_out%natom))
+   ABI_MALLOC(gs_hamk_out%gbound_kp,(2,gs_hamk_out%natom))
    gs_hamk_out%gbound_kp = gs_hamk_in%gbound_kp
  end if
  if (associated(gs_hamk_in%phkpxred,gs_hamk_in%phkxred)) then
    gs_hamk_out%phkpxred => gs_hamk_out%phkxred
  else
-   ABI_ALLOCATE(gs_hamk_out%phkpxred,(2,gs_hamk_out%natom))
+   ABI_MALLOC(gs_hamk_out%phkpxred,(2,gs_hamk_out%natom))
    gs_hamk_out%phkpxred = gs_hamk_in%phkpxred
  end if
 
  call addr_copy(gs_hamk_in%xred,gs_hamk_out%xred)
+ call addr_copy(gs_hamk_in%vectornd,gs_hamk_out%vectornd)
  call addr_copy(gs_hamk_in%vlocal,gs_hamk_out%vlocal)
  call addr_copy(gs_hamk_in%vxctaulocal,gs_hamk_out%vxctaulocal)
  call addr_copy(gs_hamk_in%kinpw_k,gs_hamk_out%kinpw_k)
@@ -1416,6 +1438,7 @@ end subroutine copy_hamiltonian
 !!
 !! INPUTS
 !!  isppol=index of current spin
+!!  [vectornd(n4,n5,n6,nvloc,3)]=optional, vector potential of nuclear magnetic dipoles in real space
 !!  [vlocal(n4,n5,n6,nvloc)]=optional, local potential in real space
 !!  [vxctaulocal(n4,n5,n6,nvloc,4)]=optional, derivative of XC energy density with respect
 !!                                  to kinetic energy density in real space
@@ -1428,24 +1451,17 @@ end subroutine copy_hamiltonian
 !!  Ham<gs_hamiltonian_type>=Structured datatype initialization phase:
 !!   * Quantities that depend spin are initialized.
 !!
-!! PARENTS
-!!      d2frnl,dfpt_nstdy,dfpt_nstpaw,dfpt_rhofermi,dfpt_vtorho,energy,fock2ACE
-!!      forstrnps,ks_ddiago,m_gkk,m_io_kss,m_phgamma,m_phpi,m_shirley,m_sigmaph
-!!      nonlop_test,vtorho
-!!
-!! CHILDREN
-!!      destroy_mpi_enreg,initmpi_seq,kpgsph,wrtout
-!!
 !! SOURCE
 
-subroutine load_spin_hamiltonian(Ham,isppol,vlocal,vxctaulocal,with_nonlocal)
+subroutine load_spin_hamiltonian(Ham,isppol,vectornd,vlocal,vxctaulocal,with_nonlocal)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: isppol
  logical,optional,intent(in) :: with_nonlocal
- type(gs_hamiltonian_type),intent(inout),target :: Ham
+ class(gs_hamiltonian_type),intent(inout),target :: Ham
 !arrays
+ real(dp),optional,intent(in),target :: vectornd(:,:,:,:,:)
  real(dp),optional,intent(in),target :: vlocal(:,:,:,:),vxctaulocal(:,:,:,:,:)
 
 !Local variables-------------------------------
@@ -1456,18 +1472,21 @@ subroutine load_spin_hamiltonian(Ham,isppol,vlocal,vxctaulocal,with_nonlocal)
 
  DBG_ENTER("COLL")
 
-!@gs_hamiltonian_type
-
+ !@gs_hamiltonian_type
  if (present(vlocal)) then
-   ABI_CHECK(size(vlocal)==Ham%n4*Ham%n5*Ham%n6*Ham%nvloc,"Wrong vlocal")
+   ABI_CHECK(size(vlocal)==Ham%n4*Ham%n5*Ham%n6*Ham%nvloc, "Wrong vlocal")
    Ham%vlocal => vlocal
  end if
  if (present(vxctaulocal)) then
-   ABI_CHECK(size(vxctaulocal)==Ham%n4*Ham%n5*Ham%n6*Ham%nvloc*4,"Wrong vxctaulocal")
+   ABI_CHECK(size(vxctaulocal)==Ham%n4*Ham%n5*Ham%n6*Ham%nvloc*4, "Wrong vxctaulocal")
    Ham%vxctaulocal => vxctaulocal
  end if
+ if (present(vectornd)) then
+   ABI_CHECK(size(vectornd)==Ham%n4*Ham%n5*Ham%n6*Ham%nvloc*3, "Wrong vectornd")
+   Ham%vectornd => vectornd
+ end if
 
-!Retrieve non-local factors for this spin component
+ ! Retrieve non-local factors for this spin component
  if (present(with_nonlocal)) then
    if (with_nonlocal) then
      jsppol=min(isppol,size(Ham%ekb_spin,5))
@@ -1475,10 +1494,13 @@ subroutine load_spin_hamiltonian(Ham,isppol,vlocal,vxctaulocal,with_nonlocal)
    end if
  end if
 
-!Update enl and sij on GPU
+ ! Update enl and sij on GPU
 #if defined HAVE_GPU_CUDA
- if (Ham%use_gpu_cuda==1) then
-   call gpu_update_ham_data(Ham%ekb(:,:,:,1),size(Ham%ekb),Ham%sij,size(Ham%sij),Ham%gprimd,size(Ham%gprimd))
+ if (Ham%gpu_option==ABI_GPU_LEGACY .or. Ham%gpu_option==ABI_GPU_KOKKOS) then
+   call gpu_update_ham_data(&
+     & Ham%ekb(:,:,:,1), INT(size(Ham%ekb),   c_int64_t), &
+     & Ham%sij,          INT(size(Ham%sij),   c_int64_t), &
+     & Ham%gprimd,       INT(size(Ham%gprimd),c_int64_t))
  end if
 #endif
 
@@ -1499,20 +1521,13 @@ end subroutine load_spin_hamiltonian
 !! SIDE EFFECTS
 !!  rf_Ham<rf_hamiltonian_type>=All dynamic memory defined in the structure is deallocated.
 !!
-!! PARENTS
-!!      dfpt_nstpaw,dfpt_nstwf,dfpt_rhofermi,dfpt_vtorho,m_gkk,m_phgamma,m_phpi
-!!      m_sigmaph
-!!
-!! CHILDREN
-!!      destroy_mpi_enreg,initmpi_seq,kpgsph,wrtout
-!!
 !! SOURCE
 
 subroutine destroy_rf_hamiltonian(rf_Ham)
 
 !Arguments ------------------------------------
 !scalars
- type(rf_hamiltonian_type),intent(inout) :: rf_Ham
+ class(rf_hamiltonian_type),intent(inout) :: rf_Ham
 
 ! *************************************************************************
 
@@ -1521,19 +1536,17 @@ subroutine destroy_rf_hamiltonian(rf_Ham)
 !@rf_hamiltonian_type
 
 ! Real arrays
- if (allocated(rf_Ham%e1kbfr_spin))   then
-   ABI_DEALLOCATE(rf_Ham%e1kbfr_spin)
- end if
- if (allocated(rf_Ham%e1kbsc_spin))   then
-   ABI_DEALLOCATE(rf_Ham%e1kbsc_spin)
- end if
+ ABI_SFREE(rf_Ham%e1kbfr_spin)
+ ABI_SFREE(rf_Ham%e1kbsc_spin)
 
 ! Real pointers
  if (associated(rf_Ham%dkinpw_k)) nullify(rf_Ham%dkinpw_k)
  if (associated(rf_Ham%dkinpw_kp)) nullify(rf_Ham%dkinpw_kp)
  if (associated(rf_Ham%ddkinpw_k)) nullify(rf_Ham%ddkinpw_k)
  if (associated(rf_Ham%ddkinpw_kp)) nullify(rf_Ham%ddkinpw_kp)
+ if (associated(rf_Ham%vectornd)) nullify(rf_Ham%vectornd)
  if (associated(rf_Ham%vlocal1)) nullify(rf_Ham%vlocal1)
+ if (associated(rf_Ham%vxctaulocal)) nullify(rf_Ham%vxctaulocal)
  if (associated(rf_Ham%e1kbfr)) nullify(rf_Ham%e1kbfr)
  if (associated(rf_Ham%e1kbsc)) nullify(rf_Ham%e1kbsc)
 
@@ -1572,13 +1585,6 @@ end subroutine destroy_rf_hamiltonian
 !!   * All pointers are allocated with correct dimensions.
 !!   * Quantities that do not depend on the k-point or spin are initialized.
 !!
-!! PARENTS
-!!      dfpt_nstpaw,dfpt_nstwf,dfpt_rhofermi,dfpt_vtorho,m_gkk,m_phgamma,m_phpi
-!!      m_sigmaph
-!!
-!! CHILDREN
-!!      destroy_mpi_enreg,initmpi_seq,kpgsph,wrtout
-!!
 !! SOURCE
 
 subroutine init_rf_hamiltonian(cplex,gs_Ham,ipert,rf_Ham,&
@@ -1616,7 +1622,6 @@ subroutine init_rf_hamiltonian(cplex,gs_Ham,ipert,rf_Ham,&
  my_nsppol=count(my_spintab==1)
 
  rf_Ham%cplex    =cplex
-
  rf_Ham%n4       =gs_Ham%n4
  rf_Ham%n5       =gs_Ham%n5
  rf_Ham%n6       =gs_Ham%n6
@@ -1631,24 +1636,24 @@ subroutine init_rf_hamiltonian(cplex,gs_Ham,ipert,rf_Ham,&
    rf_Ham%dime1kb1=cplex_dij1*(gs_Ham%lmnmax*(gs_Ham%lmnmax+1))/2
  end if
 
-!Allocate the arrays of the 1st-order Hamiltonian
-!  We preload here 1st-order non-local factors in order to avoid
-!  a communication over atoms inside the loop over spins.
+  ! Allocate the arrays of the 1st-order Hamiltonian
+  ! We preload here 1st-order non-local factors in order to avoid
+  ! a communication over atoms inside the loop over spins.
  if (gs_Ham%usepaw==1.and.rf_Ham%dime1kb1>0) then
    if ((ipert>=1.and.ipert<=gs_Ham%natom).or.ipert==gs_Ham%natom+2.or.&
-&    ipert==gs_Ham%natom+3.or.ipert==gs_Ham%natom+4.or.ipert==gs_Ham%natom+11) then
+        ipert==gs_Ham%natom+3.or.ipert==gs_Ham%natom+4.or.ipert==gs_Ham%natom+11) then
 
-     ABI_ALLOCATE(rf_Ham%e1kbfr_spin,(rf_Ham%dime1kb1,rf_Ham%dime1kb2,rf_Ham%nspinor**2,cplex,my_nsppol))
+     ABI_MALLOC(rf_Ham%e1kbfr_spin,(rf_Ham%dime1kb1,rf_Ham%dime1kb2,rf_Ham%nspinor**2,cplex,my_nsppol))
      rf_Ham%e1kbfr_spin=zero
      if (has_e1kbsc_) then
-       ABI_ALLOCATE(rf_Ham%e1kbsc_spin,(rf_Ham%dime1kb1,rf_Ham%dime1kb2,rf_Ham%nspinor**2,cplex,my_nsppol))
+       ABI_MALLOC(rf_Ham%e1kbsc_spin,(rf_Ham%dime1kb1,rf_Ham%dime1kb2,rf_Ham%nspinor**2,cplex,my_nsppol))
        rf_Ham%e1kbsc_spin=zero
      end if
 
      if (present(paw_ij1)) then
 
        if (my_nsppol<rf_Ham%nsppol) then
-         ABI_ALLOCATE(e1kb_tmp,(rf_Ham%dime1kb1,rf_Ham%dime1kb2,rf_Ham%nspinor**2,cplex))
+         ABI_MALLOC(e1kb_tmp,(rf_Ham%dime1kb1,rf_Ham%dime1kb2,rf_Ham%nspinor**2,cplex))
        end if
 
 !      === Frozen term
@@ -1684,7 +1689,7 @@ subroutine init_rf_hamiltonian(cplex,gs_Ham,ipert,rf_Ham,&
        end if
 
        if (my_nsppol<rf_Ham%nsppol) then
-         ABI_DEALLOCATE(e1kb_tmp)
+         ABI_FREE(e1kb_tmp)
        end if
 
      end if
@@ -1692,10 +1697,10 @@ subroutine init_rf_hamiltonian(cplex,gs_Ham,ipert,rf_Ham,&
  end if
 
  if (.not.allocated(rf_Ham%e1kbfr_spin)) then
-   ABI_ALLOCATE(rf_Ham%e1kbfr_spin,(0,0,0,0,0))
+   ABI_MALLOC(rf_Ham%e1kbfr_spin,(0,0,0,0,0))
  end if
  if (.not.allocated(rf_Ham%e1kbsc_spin)) then
-   ABI_ALLOCATE(rf_Ham%e1kbsc_spin,(0,0,0,0,0))
+   ABI_MALLOC(rf_Ham%e1kbsc_spin,(0,0,0,0,0))
  end if
  nullify(rf_Ham%e1kbfr)
  nullify(rf_Ham%e1kbsc)
@@ -1716,30 +1721,29 @@ end subroutine init_rf_hamiltonian
 !!
 !! INPUTS
 !!  isppol=index of current spin
+!!  [vectornd(n4,n5,n6,nvloc)]=optional, vector potential of nuclear magnetic dipoles in real space in
+!!   ddk direction idir
 !!  [vlocal1(cplex*n4,n5,n6,nvloc)]=optional, 1st-order local potential in real space
+!!  [vxctaulocal(n4,n5,n6,nvloc,4)]=optional, deriv of e_XC wrt kin energy, for mGGA
 !!  [with_nonlocal]=optional, true if non-local factors have to be loaded
 !!
 !! SIDE EFFECTS
 !!  rf_Ham<rf_hamiltonian_type>=Structured datatype initialization phase:
 !!   * Quantities that depend on spin are initialized.
 !!
-!! PARENTS
-!!      dfpt_rhofermi,dfpt_vtorho,m_gkk,m_phgamma,m_phpi,m_sigmaph
-!!
-!! CHILDREN
-!!      destroy_mpi_enreg,initmpi_seq,kpgsph,wrtout
-!!
 !! SOURCE
 
-subroutine load_spin_rf_hamiltonian(rf_Ham,isppol,vlocal1,with_nonlocal)
+subroutine load_spin_rf_hamiltonian(rf_Ham,isppol,vectornd,vlocal1,vxctaulocal,with_nonlocal)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: isppol
  logical,optional,intent(in) :: with_nonlocal
- type(rf_hamiltonian_type),intent(inout),target :: rf_Ham
+ class(rf_hamiltonian_type),intent(inout),target :: rf_Ham
 !arrays
  real(dp),optional,target,intent(in) :: vlocal1(:,:,:,:)
+ real(dp),optional,target,intent(in) :: vectornd(:,:,:,:)
+ real(dp),optional,target,intent(in) :: vxctaulocal(:,:,:,:,:)
 
 !Local variables-------------------------------
 !scalars
@@ -1756,7 +1760,17 @@ subroutine load_spin_rf_hamiltonian(rf_Ham,isppol,vlocal1,with_nonlocal)
    rf_Ham%vlocal1 => vlocal1
  end if
 
-!Retrieve non-local factors for this spin component
+ if (present(vectornd)) then
+   ABI_CHECK(size(vectornd)==rf_Ham%cplex*rf_Ham%n4*rf_Ham%n5*rf_Ham%n6*rf_Ham%nvloc,"Wrong vectornd")
+   rf_Ham%vectornd => vectornd
+ end if
+
+ if (present(vxctaulocal)) then
+    ABI_CHECK(size(vxctaulocal)==rf_Ham%n4*rf_Ham%n5*rf_Ham%n6*rf_Ham%nvloc*4,"Wrong vxctaulocal")
+    rf_Ham%vxctaulocal => vxctaulocal
+ end if
+
+ ! Retrieve non-local factors for this spin component
  if (present(with_nonlocal)) then
    if (with_nonlocal) then
      if (size(rf_Ham%e1kbfr_spin)>0) then
@@ -1793,12 +1807,6 @@ end subroutine load_spin_rf_hamiltonian
 !!  rf_Ham<rf_hamiltonian_type>=structured datatype completed with k-dependent quantitites.
 !!          Quantities at k^prime are set equal to quantities at k.
 !!
-!! PARENTS
-!!      dfpt_nstpaw,dfpt_nstwf,dfpt_rhofermi,getgh1c
-!!
-!! CHILDREN
-!!      destroy_mpi_enreg,initmpi_seq,kpgsph,wrtout
-!!
 !! SOURCE
 
 subroutine load_k_rf_hamiltonian(rf_Ham,dkinpw_k,ddkinpw_k,npw_k)
@@ -1806,7 +1814,7 @@ subroutine load_k_rf_hamiltonian(rf_Ham,dkinpw_k,ddkinpw_k,npw_k)
 !Arguments ------------------------------------
 !scalars
  integer,intent(in),optional :: npw_k
- type(rf_hamiltonian_type),intent(inout),target :: rf_Ham
+ class(rf_hamiltonian_type),intent(inout),target :: rf_Ham
 !arrays
  real(dp),intent(in),optional,target :: dkinpw_k(:),ddkinpw_k(:)
 
@@ -1852,12 +1860,6 @@ end subroutine load_k_rf_hamiltonian
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_hamiltonian
-!!
-!! CHILDREN
-!!      destroy_mpi_enreg,initmpi_seq,kpgsph,wrtout
 !!
 !! SOURCE
 
@@ -1937,12 +1939,6 @@ end subroutine pawdij2ekb
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      d2frnl,dfpt_nstpaw,m_hamiltonian
-!!
-!! CHILDREN
-!!      destroy_mpi_enreg,initmpi_seq,kpgsph,wrtout
-!!
 !! SOURCE
 
 subroutine pawdij2e1kb(paw_ij1,isppol,comm_atom,mpi_atmtab,e1kbfr,e1kbsc)
@@ -2020,14 +2016,10 @@ subroutine pawdij2e1kb(paw_ij1,isppol,comm_atom,mpi_atmtab,e1kbfr,e1kbsc)
    end if
  end if
 
-!Communication in case of distribution over atomic sites
+ ! Communication in case of distribution over atomic sites
  if (paral_atom) then
-   if (present(e1kbfr)) then
-     call xmpi_sum(e1kbfr,comm_atom,ierr)
-   end if
-   if (present(e1kbsc)) then
-     call xmpi_sum(e1kbsc,comm_atom,ierr)
-   end if
+   if (present(e1kbfr)) call xmpi_sum(e1kbfr,comm_atom,ierr)
+   if (present(e1kbsc)) call xmpi_sum(e1kbsc,comm_atom,ierr)
  end if
 
 !Destroy atom table used for parallelism
@@ -2038,5 +2030,107 @@ subroutine pawdij2e1kb(paw_ij1,isppol,comm_atom,mpi_atmtab,e1kbfr,e1kbsc)
 end subroutine pawdij2e1kb
 !!***
 
-END MODULE m_hamiltonian
+!!****f* ABINIT/gspot_transgrid_and_pack
+!! NAME
+!! gspot_transgrid_and_pack
+!!
+!! FUNCTION
+!!  Set up local potential vlocal on the coarse FFT mesh with proper dimensioning from vtrial given on the fine mesh.
+!!  Also take into account the spin.
+!!
+!! INPUTS
+!!  isppol=Spin polarization.
+!!  usepaw=1 if PAW
+!!  paral_kgb: 1 if paral_kgb
+!!  nfft=(effective) number of FFT grid points on the coarse mesh (for this processor)
+!!  ngfft(18)contain all needed information about 3D FFT, for the coarse FFT mesh. see ~abinit/doc/variables/vargs.htm#ngfft
+!!  nfftf=(effective) number of FFT grid points on the fine mesh (for this processor)
+!!  nvloc==1 if nspden <=2, nvloc==4 for nspden==4,
+!!  nspden=Number of spin density components.
+!!  ncomp=Number of extra components in vtrial and vlocal (e.g. 1 if LDA/GGA pot, 4 for Meta-GGA, etc).
+!!  pawfgr <type(pawfgr_type)>=fine grid parameters and related data
+!!  vtrial(nfftf,nspden)=INPUT potential Vtrial(r).
+!!  mpi_enreg=information about MPI parallelization
+!!
+!! OUTPUT
+!!  vlocal(n4,n5,n6,nvloc,ncomp): Potential on the coarse grid.
+!!
+!! SIDE EFFECTS
+!!
+!! SOURCE
+
+subroutine gspot_transgrid_and_pack(isppol, usepaw, paral_kgb,  nfft, ngfft, nfftf, &
+                                    nspden, nvloc, ncomp, pawfgr, mpi_enreg, vtrial, vlocal)
+
+!Arguments -------------------------------
+ integer,intent(in) :: isppol, nspden, ncomp, usepaw, paral_kgb, nfft, nfftf, nvloc
+ type(pawfgr_type), intent(in) :: pawfgr
+ type(MPI_type), intent(in) :: mpi_enreg
+!arrays
+ integer,intent(in) :: ngfft(18)
+ real(dp),intent(inout) :: vtrial(nfftf, nspden, ncomp)
+ real(dp),intent(out) :: vlocal(ngfft(4), ngfft(5), ngfft(6), nvloc, ncomp)
+
+
+!Local variables-------------------------------
+!scalars
+ integer :: n1,n2,n3,n4,n5,n6,ispden,ic
+ real(dp) :: rhodum(1)
+ real(dp),allocatable :: cgrvtrial(:,:), vlocal_tmp(:,:,:)
+
+! *************************************************************************
+
+ ! Coarse mesh.
+ n1=ngfft(1); n2=ngfft(2); n3=ngfft(3)
+ n4=ngfft(4); n5=ngfft(5); n6=ngfft(6)
+
+ ! Set up local potential vlocal with proper dimensioning, from vtrial
+ ! Also take into account the spin.
+ if (nspden /= 4) then
+   if (usepaw == 0 .or. pawfgr%usefinegrid == 0) then
+     ! Fine mesh == Coarse mesh.
+     do ic=1,ncomp
+       call fftpac(isppol,mpi_enreg,nspden,n1,n2,n3,n4,n5,n6,ngfft,vtrial(:,:,ic),vlocal(:,:,:,:,ic),2)
+     end do
+   else
+     ! Transfer from fine mesh to coarse and then pack data
+     ABI_MALLOC(cgrvtrial,(nfft,nspden))
+     do ic=1,ncomp
+       call transgrid(1,mpi_enreg,nspden,-1,0,0,paral_kgb,pawfgr,&
+                      rhodum,rhodum,cgrvtrial,vtrial(:,:,ic))
+       call fftpac(isppol,mpi_enreg,nspden,n1,n2,n3,n4,n5,n6,ngfft,&
+                   cgrvtrial,vlocal(:,:,:,:,ic),2)
+     end do
+     ABI_FREE(cgrvtrial)
+   end if
+ else
+   ! nspden == 4. replace isppol by loop over ispden.
+   ABI_MALLOC(vlocal_tmp, (n4,n5,n6))
+   if (usepaw == 0 .or. pawfgr%usefinegrid == 0) then
+     ! Fine mesh == Coarse mesh.
+     do ic=1,ncomp
+       do ispden=1,nspden
+         call fftpac(ispden,mpi_enreg,nspden,n1,n2,n3,n4,n5,n6,ngfft,vtrial(:,:,ic),vlocal_tmp,2)
+         vlocal(:,:,:,ispden,ic) = vlocal_tmp(:,:,:)
+       end do
+     end do
+   else
+     ! Transfer from fine mesh to coarse and then pack data
+     ABI_MALLOC(cgrvtrial,(nfft,nspden))
+     do ic=1,ncomp
+       call transgrid(1,mpi_enreg,nspden,-1,0,0,paral_kgb,pawfgr,rhodum,rhodum,cgrvtrial,vtrial(:,:,ic))
+       do ispden=1,nspden
+         call fftpac(ispden,mpi_enreg,nspden,n1,n2,n3,n4,n5,n6,ngfft,cgrvtrial,vlocal_tmp,2)
+         vlocal(:,:,:,ispden,ic) = vlocal_tmp(:,:,:)
+       end do
+     end do
+     ABI_FREE(cgrvtrial)
+   end if
+   ABI_FREE(vlocal_tmp)
+ end if ! nspden
+
+end subroutine gspot_transgrid_and_pack
+!!***
+
+end module m_hamiltonian
 !!***

@@ -1,0 +1,63 @@
+#
+#  H2O molecule in a big box. Try to use Damiens Poisson cutoff
+#
+
+acell 3*10 # not that big a box
+natom 3
+ntypat 2
+znucl 1 8
+typat 1 1 2
+# eventually add 1/2 box size to center molecule
+xcart
+0.610145  0.730174 0.
+0.610145 -0.730174 0.
+0. 0. 0.                Angstrom
+
+nstep 100
+#tolwfr 1.0e-20
+tolrff 1.e-3
+nband 30
+nbdbuf 5
+ecut 40.
+ngkpt 1 1 1
+nshiftk 1
+shiftk 0 0 0
+
+# molecule relaxation
+#ntime 10
+#ionmov 2
+#optcell 0
+#tolmxf 1.0e-7
+
+# poisson solver set for 0 boundary conditions (isolated system!)
+icoulomb 1
+
+# etsfio stuff
+#prtvxc 1
+#iomode 3
+istwfk 1
+
+# Avoid print densities, wavefunctions and eigenvalues
+ prteig 0
+ prtden 0
+ prtwf  0
+
+ pp_dirpath "$ABI_PSPDIR/PseudosHGH_pwteter"
+ pseudos "1h.1.hgh, 8o.6.hgh"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t22.abo, tolnlines = 1, tolabs = 1.000e-04, tolrel = 7.600e-05
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = D. Caliste
+#%% keywords = 
+#%% description = 
+#%%   H2O in isolated boundary conditions (plane waves, NC), try tu use Damiens Poisson cutoff.
+#%%   Water molecule with HGH pseudo-potentials. This checks that a negative
+#%%   value in rhor will not make the Poisson solver crashes on XC computation.
+#%%<END TEST_INFO>

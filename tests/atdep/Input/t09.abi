@@ -1,0 +1,42 @@
+NormalMode
+#DEFINE_UNITCELL
+brav 7 -3
+natom_unitcell 2
+xred_unitcell 0.0 0.0 0.0 0.25 0.25 0.25
+typat_unitcell 1 1
+ntypat 1
+amu 2.80855000E+01
+#DEFINE_SUPERCELL
+rprimd  30.6135754 0.0000000 0.0000000 0.0000000 30.6135754 0.0000000 0.0000000 0.0000000 30.6135754
+multiplicity -3 3 3 3 -3 3 3 3 -3
+natom  216
+typat 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
+temperature  1.00000000E+03
+#DEFINE_COMPUTATIONAL_DETAILS
+nstep_max 20
+nstep_min 1
+rcut 15.3
+#OPTIONAL_INPUT_VARIABLES
+use_ideal_positions 1
+enunit 1
+TheEnd
+ 
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = atdep
+#%% md_hist = t09
+#%% [files]
+#%% files_to_test = 
+#%%   t09.abo, tolnlines = 1, tolabs = 2.e-3, tolrel = 1.e-4, fld_options = -medium;
+#%%   t09omega.dat, tolnlines = 5, tolabs = 2.e-3, tolrel = 1.e-4, fld_options = -medium;
+#%%   t09thermo.dat, tolnlines = 5, tolabs = 2.e-3, tolrel = 1.e-4, fld_options = -medium;
+#%% [paral_info]
+#%% max_nprocs = 10
+#%% [extra_info]
+#%% authors = F. Bottin & J. Bouchet
+#%% keywords = atdep
+#%% description = 
+#%%   test aTDEP (2nd order)
+#%%   Silicon (diamond) with 216 atoms at T = 1000 K.
+#%% topics = aTDEP
+#%%<END TEST_INFO>

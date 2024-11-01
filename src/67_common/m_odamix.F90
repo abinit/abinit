@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_odamix
 !! NAME
 !!  m_odamix
@@ -7,14 +6,10 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2019 ABINIT group (FJ, MT)
+!!  Copyright (C) 1998-2024 ABINIT group (FJ, MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -27,13 +22,15 @@
 module m_odamix
 
  use defs_basis
- use defs_datatypes
- use defs_abitypes
  use m_abicore
  use m_errors
  use m_xmpi
  use m_xcdata
+ use m_dtset
 
+
+ use defs_datatypes, only : pseudopotential_type
+ use defs_abitypes,  only : MPI_type
  use m_time,       only : timab
  use m_geometry,   only : metric
  use m_cgtools,    only : dotprod_vn
@@ -50,6 +47,7 @@ module m_odamix
  use m_spacepar,   only : hartre
  use m_rhotoxc,    only : rhotoxc
  use m_fft,        only : fourdp
+ use m_xc_tb09,    only : xc_tb09_update_c
 
  implicit none
 
@@ -118,7 +116,6 @@ contains
 !!  rhog(2,nfft)=array for Fourier transform of electron density
 !!  rhor(nfft,nspden)=array for electron density in electrons/bohr**3
 !!  rprimd(3,3)=dimensional primitive translations in real space (bohr)
-!!  [taug(2,nfftf*dtset%usekden)]=array for Fourier transform of kinetic energy density
 !!  [taur(nfftf,nspden*dtset%usekden)]=array for kinetic energy density
 !!  ucvol = unit cell volume (Bohr**3)
 !!  usepaw= 0 for non paw calculation; =1 for paw calculation
@@ -146,6 +143,7 @@ contains
 !!   | e_hartree(IN)=Hartree part of total energy (hartree units)
 !!   | e_corepsp(IN)=psp core-core energy
 !!   | e_kinetic(IN)=kinetic energy part of total energy.
+!!   | e_nucdip(IN)=energy of nuclear dipole array
 !!   | e_nlpsp_vfock(IN)=nonlocal psp + potential Fock ACE part of total energy.
 !!   | e_xc(IN)=exchange-correlation energy (hartree)
 !!   | e_xcdc(IN)=exchange-correlation double-counting energy (hartree)
@@ -173,13 +171,6 @@ contains
 !!      they have to be stored on the fine FFT grid.
 !!  In case of norm-conserving calculations the FFT grid is the usual FFT grid.
 !!
-!! PARENTS
-!!      scfcv
-!!
-!! CHILDREN
-!!      dotprod_vn,fourdp,hartre,metric,pawdenpot,pawmknhat,rhotoxc,timab
-!!      xcdata_init,xmpi_sum
-!!
 !! SOURCE
 
 subroutine odamix(deltae,dtset,elast,energies,etotal,&
@@ -188,9 +179,7 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
 &          paw_an,pawang,pawfgrtab,pawrad,pawrhoij,pawtab,&
 &          red_ptot,psps,rhog,rhor,rprimd,strsxc,ucvol,usepaw,&
 &          usexcnhat,vhartr,vpsp,vtrial,vxc,vxcavg,xccc3d,xred,&
-&          taug,taur,vxctau,add_tfw) ! optional arguments
-
- implicit none
+&          taur,vxctau,add_tfw) ! optional arguments
 
 !Arguments ------------------------------------
 !scalars
@@ -210,7 +199,7 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
  logical :: add_tfw_
  real(dp),intent(in) :: gprimd(3,3)
  real(dp),intent(in) :: red_ptot(3),rprimd(3,3),vpsp(nfft),xred(3,dtset%natom)
- real(dp),intent(in),optional :: taug(2,nfft*dtset%usekden),taur(nfft,dtset%nspden*dtset%usekden)
+ real(dp),intent(in),optional :: taur(nfft,dtset%nspden*dtset%usekden)
  real(dp),intent(inout) :: kxc(nfft,nkxc),nhat(nfft,dtset%nspden*usepaw)
  real(dp),intent(inout) :: nvresid(nfft,dtset%nspden),rhog(2,nfft)
  real(dp),intent(inout) :: rhor(nfft,dtset%nspden),vhartr(nfft)
@@ -229,8 +218,7 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
 !scalars
  integer :: cplex,iatom,ider,idir,ierr,ifft,ipert,irhoij,ispden,itypat,izero,iir,jjr,kkr
  integer :: jrhoij,klmn,klmn1,kmix,nfftot,nhatgrdim,nzlmopt,nk3xc,option,optxc
- logical :: with_vxctau
- logical :: non_magnetic_xc
+ logical :: nmxc,with_vxctau
  real(dp) :: alphaopt,compch_fft,compch_sph,doti,e1t10,e_ksnm1,e_xcdc_vxctau
  real(dp) :: eenth,fp0,gammp1,ro_dlt,ucvol_local
  character(len=500) :: message
@@ -248,40 +236,37 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
 
  call timab(80,1,tsec)
 
-! Initialise non_magnetic_xc for rhohxc
- non_magnetic_xc=(dtset%usepawu==4).or.(dtset%usepawu==14)
-
 !Check that usekden is not 0 if want to use vxctau
  with_vxctau = (present(vxctau).and.present(taur).and.(dtset%usekden/=0))
 
 !To be adjusted for the call to rhotoxc
  add_tfw_=.false.;if (present(add_tfw)) add_tfw_=add_tfw
- nk3xc=1
+ nk3xc=1;nmxc=(dtset%usepaw==1.and.mod(abs(dtset%usepawu),10)==4)
 
 !faire un test sur optres=1, usewvl=0, nspden=1,nhatgrdim
  if(optres/=1)then
    write(message,'(a,i0,a)')' optres=',optres,', not allowed in oda => stop '
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  if(dtset%usewvl/=0)then
    write(message,'(a,i0,a)')' usewvl=',dtset%usewvl,', not allowed in oda => stop '
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  if(dtset%nspden/=1)then
    write(message,'(a,i0,a)')'  nspden=',dtset%nspden,', not allowed in oda => stop '
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  if (my_natom>0) then
    if(paw_ij(1)%has_dijhat==0)then
      message = ' dijhat variable must be allocated in odamix ! '
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
    if(paw_ij(1)%cplex_dij==2.or.paw_ij(1)%qphase==2)then
      message = ' complex dij not allowed in odamix! '
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
  end if
 
@@ -343,7 +328,7 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
    if (dtset%xclevel==2.and.usexcnhat==1) ider=ider+2
    if (ider>0) then
      nhatgrdim=1
-     ABI_ALLOCATE(nhatgr,(nfft,dtset%nspden,3))
+     ABI_MALLOC(nhatgr,(nfft,dtset%nspden,3))
    end if
    if (ider>=0) then
      ider=0;izero=0;cplex=1;ipert=0;idir=0;qpt(:)=zero
@@ -359,15 +344,25 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
 !------Compute Hartree and xc potentials----------------------------------
  nfftot=PRODUCT(ngfft(1:3))
 
- call hartre(1,gsqcut,usepaw,mpi_enreg,nfft,ngfft,dtset%paral_kgb,rhog,rprimd,vhartr)
+ call hartre(1,gsqcut,dtset%icutcoul,usepaw,mpi_enreg,nfft,ngfft,&
+             &dtset%nkpt,dtset%rcut,rhog,rprimd,dtset%vcutgeo,vhartr)
 
  call xcdata_init(xcdata,dtset=dtset)
+
+!If we use the XC Tran-Blaha 2009 (modified BJ) functional, update the c value
+ if (dtset%xc_tb09_c>99._dp) then
+   call xc_tb09_update_c(dtset%intxc,dtset%ixc,mpi_enreg,dtset%natom, &
+&    nfft,ngfft,nhat,usepaw,nhatgr,nhatgrdim,dtset%nspden,dtset%ntypat,n3xccc, &
+&    pawang,pawrad,pawrhoij,pawtab,dtset%pawxcdev,rhor,rprimd,usepaw, &
+&    xccc3d,dtset%xc_denpos,comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab, &
+&    computation_type='all')
+ end if
 
 !Compute xc potential (separate up and down if spin-polarized)
  optxc=1
  call rhotoxc(energies%e_xc,kxc,mpi_enreg,nfft,ngfft,&
-& nhat,usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,non_magnetic_xc,n3xccc,optxc,dtset%paral_kgb,rhor,rprimd,strsxc,&
-& usexcnhat,vxc,vxcavg,xccc3d,xcdata,taug=taug,taur=taur,vhartr=vhartr,vxctau=vxctau,add_tfw=add_tfw_)
+& nhat,usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,nmxc,n3xccc,optxc,rhor,rprimd,strsxc,&
+& usexcnhat,vxc,vxcavg,xccc3d,xcdata,taur=taur,vhartr=vhartr,vxctau=vxctau,add_tfw=add_tfw_)
 
 !------Compute parts of total energy depending on potentials--------
 
@@ -396,19 +391,18 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
    nzlmopt=dtset%pawnzlm; option=2
    do iatom=1,my_natom
      itypat=paw_ij(iatom)%itypat
-     ABI_ALLOCATE(paw_ij(iatom)%dijhartree,(pawtab(itypat)%lmn2_size))
+     ABI_MALLOC(paw_ij(iatom)%dijhartree,(pawtab(itypat)%lmn2_size))
      paw_ij(iatom)%has_dijhartree=1
    end do
    call pawdenpot(compch_sph,energies%e_paw,energies%e_pawdc,0,dtset%ixc,my_natom,dtset%natom,dtset%nspden,ntypat,&
 &   dtset%nucdipmom,nzlmopt,option,paw_an,paw_an,paw_ij,pawang,dtset%pawprtvol,pawrad,pawrhoij,dtset%pawspnorb,&
-&   pawtab,dtset%pawxcdev,dtset%spnorbscl,dtset%xclevel,dtset%xc_denpos,ucvol,psps%znuclpsp,&
+&   pawtab,dtset%pawxcdev,dtset%spnorbscl,dtset%xclevel,dtset%xc_denpos,dtset%xc_taupos,ucvol,psps%znuclpsp,&
 &   comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
    do iatom=1,my_natom
-     ABI_DEALLOCATE(paw_ij(iatom)%dijhartree)
+     ABI_FREE(paw_ij(iatom)%dijhartree)
      paw_ij(iatom)%has_dijhartree=0
    end do
  end if
-
 
 !When the finite-temperature VG broadening scheme is used,
 !the total entropy contribution "tsmear*entropy" has a meaning,
@@ -444,7 +438,7 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
 !energies%e_magfield = emag
 !end if
 
-!HONG  Turn it into an internal enthalpy, refer to Eq.(36) of Suppl. of Nat. Phys. paper (5,304,2009) [[cite:Stengel2009]], 
+!HONG  Turn it into an internal enthalpy, refer to Eq.(36) of Suppl. of Nat. Phys. paper (5,304,2009) [[cite:Stengel2009]],
 !but a little different: U=E_ks + (vol/8*pi) *  g^{-1})_ij ebar_i ebar_j
  if (dtset%berryopt == 6 .or. dtset%berryopt == 16 )  then
    energies%e_elecfield=zero
@@ -504,13 +498,10 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
 
  end if   ! berryopt==17
 
-
-
-
-
  etotal = energies%e_kinetic+ energies%e_hartree + energies%e_xc + &
 & energies%e_localpsp + energies%e_nlpsp_vfock - energies%e_fock0 + energies%e_corepsp + &
-& energies%e_entropy + energies%e_elecfield + energies%e_magfield
+& energies%e_entropy + energies%e_elecfield + energies%e_magfield + &
+& energies%e_nucdip
 !etotal = energies%e_eigenvalues - energies%e_hartree + energies%e_xc - &
 !& energies%e_xcdc + energies%e_corepsp + &
 !& energies%e_entropy + energies%e_elecfield
@@ -542,7 +533,7 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
 
  if (usepaw==1) then
    if (my_natom>0) then
-     ABI_ALLOCATE(rhoijtmp,(pawrhoij(1)%cplex_rhoij*pawrhoij(1)%lmn2_size,pawrhoij(1)%nspden))
+     ABI_MALLOC(rhoijtmp,(pawrhoij(1)%cplex_rhoij*pawrhoij(1)%lmn2_size,pawrhoij(1)%nspden))
    end if
    do iatom=1,my_natom
      rhoijtmp=zero
@@ -585,7 +576,7 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
 &                         pawrhoij(iatom)%nspden,rhoij_input=rhoijtmp)
    end do ! iatom
    if (allocated(rhoijtmp)) then
-     ABI_DEALLOCATE(rhoijtmp)
+     ABI_FREE(rhoijtmp)
    end if
  end if ! usepaw
 
@@ -606,16 +597,26 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
 
 !------Compute Hartree and xc potentials----------------------------------
 
- call hartre(1,gsqcut,usepaw,mpi_enreg,nfft,ngfft,dtset%paral_kgb,rhog,rprimd,vhartr)
+ call hartre(1,gsqcut,dtset%icutcoul,usepaw,mpi_enreg,nfft,ngfft,&
+             &dtset%nkpt,dtset%rcut,rhog,rprimd,dtset%vcutgeo,vhartr)
+
+!If we use the XC Tran-Blaha 2009 (modified BJ) functional, update the c value
+ if (dtset%xc_tb09_c>99._dp) then
+   call xc_tb09_update_c(dtset%intxc,dtset%ixc,mpi_enreg,dtset%natom, &
+&    nfft,ngfft,nhat,usepaw,nhatgr,nhatgrdim,dtset%nspden,dtset%ntypat,n3xccc, &
+&    pawang,pawrad,pawrhoij,pawtab,dtset%pawxcdev,rhor,rprimd,usepaw, &
+&    xccc3d,dtset%xc_denpos,comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab, &
+&    computation_type='all')
+ end if
 
 !Compute xc potential (separate up and down if spin-polarized)
  optxc=1;if (nkxc>0) optxc=2
  call rhotoxc(energies%e_xc,kxc,mpi_enreg,nfft,ngfft,&
-& nhat,usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,non_magnetic_xc,n3xccc,optxc,dtset%paral_kgb,rhor,rprimd,strsxc,&
-& usexcnhat,vxc,vxcavg,xccc3d,xcdata,taug=taug,taur=taur,vhartr=vhartr,vxctau=vxctau,add_tfw=add_tfw_)
+& nhat,usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,nmxc,n3xccc,optxc,rhor,rprimd,strsxc,&
+& usexcnhat,vxc,vxcavg,xccc3d,xcdata,taur=taur,vhartr=vhartr,vxctau=vxctau,add_tfw=add_tfw_)
 
  if (nhatgrdim>0)  then
-   ABI_DEALLOCATE(nhatgr)
+   ABI_FREE(nhatgr)
  end if
 
 !------Compute parts of total energy depending on potentials--------
@@ -637,16 +638,16 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
  if (usepaw==1) then
    do iatom=1,my_natom
      itypat=paw_ij(iatom)%itypat
-     ABI_ALLOCATE(paw_ij(iatom)%dijhartree,(pawtab(itypat)%lmn2_size))
+     ABI_MALLOC(paw_ij(iatom)%dijhartree,(pawtab(itypat)%lmn2_size))
      paw_ij(iatom)%has_dijhartree=1
    end do
    call pawdenpot(compch_sph,energies%e_paw,energies%e_pawdc,0,dtset%ixc,my_natom,dtset%natom, &
 &   dtset%nspden,ntypat,dtset%nucdipmom,nzlmopt,option,paw_an,paw_an,paw_ij,pawang, &
 &   dtset%pawprtvol,pawrad,pawrhoij,dtset%pawspnorb,pawtab,dtset%pawxcdev,dtset%spnorbscl,&
-&   dtset%xclevel,dtset%xc_denpos,ucvol,psps%znuclpsp,&
+&   dtset%xclevel,dtset%xc_denpos,dtset%xc_taupos,ucvol,psps%znuclpsp,&
 &   comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
    do iatom=1,my_natom
-     ABI_DEALLOCATE(paw_ij(iatom)%dijhartree)
+     ABI_FREE(paw_ij(iatom)%dijhartree)
      paw_ij(iatom)%has_dijhartree=0
    end do
    etotal=etotal+energies%e_paw

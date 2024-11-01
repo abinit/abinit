@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_io_kss
 !! NAME
 !!  m_io_kss
@@ -7,15 +6,11 @@
 !!  This module contains procedured dealing with the IO of the KSS file.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2019 ABINIT group (MG, MT, VO, AR, LR, RWG, MM, XG, RShaltaf)
+!! Copyright (C) 1999-2024 ABINIT group (MG, MT, VO, AR, LR, RWG, MM, XG, RShaltaf)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -28,8 +23,6 @@
 MODULE m_io_kss
 
  use defs_basis
- use defs_datatypes
- use defs_abitypes
  use m_abicore
  use m_xmpi
  use m_errors
@@ -46,13 +39,16 @@ MODULE m_io_kss
  use m_paw_ij
  use m_pawcprj
  use m_pawfgr
+ use m_dtfil
+ use m_dtset
 
+ use defs_datatypes,     only : pseudopotential_type
+ use defs_abitypes,      only : MPI_type
  use m_time,             only : timab
  use m_io_tools,         only : open_file
  use m_fstrings,         only : sjoin, itoa, strcat
- use m_hide_lapack,      only : xheevx, xhegvx
+ use m_hide_lapack,      only : xheevx_cplex, xhegvx_cplex
  use m_geometry,         only : metric, remove_inversion
- use m_dtset,            only : dtset_copy, dtset_free
  use m_mpinfo,           only : destroy_mpi_enreg, proc_distrb_cycle
  use m_fftcore,          only : get_kg, sphere
  use m_fft,              only : fftpac
@@ -73,7 +69,6 @@ MODULE m_io_kss
  public :: write_kss_wfgk      ! Write the Gamma-centered wavefunctions and energies on the KSS file for a single k-point.
  public :: k2gamma_centered    ! Convert a set of wavefunctions from the k-centered to the gamma-centered basis set.
  public :: make_gvec_kss       ! Build the list of G-vectors for the KSS file.
- public :: gshgg_mkncwrite     ! Debugging tool used to build <G|H|G'> and dump data in netcdf format.
  public :: outkss              ! Generate KSS file
 
 CONTAINS  !===========================================================
@@ -111,18 +106,10 @@ CONTAINS  !===========================================================
 !! SIDE EFFECTS
 !!  The KSS Header is written on file.
 !!
-!! PARENTS
-!!      outkss
-!!
-!! CHILDREN
-!!      metric,mkffnl,mkkin
-!!
 !! SOURCE
 
 subroutine write_kss_header(filekss,kss_npw,ishm,nbandksseff,mband,nsym2,symrel2,tnons2,occ,gbig,shlim,&
-&  crystal,Dtset,Hdr,Psps,iomode,kss_unt)
-
- implicit none
+                            crystal,Dtset,Hdr,Psps,iomode,kss_unt)
 
 !Arguments ------------------------------------
 !scalars
@@ -199,8 +186,8 @@ subroutine write_kss_header(filekss,kss_npw,ishm,nbandksseff,mband,nsym2,symrel2
 !Copy the occ number in the new header with correct dimensions
 !fill with zero the rest since mband can be < nbandksseff
  !write(std_out,*)associated(my_Hdr%occ)
- ABI_DEALLOCATE(my_Hdr%occ)
- ABI_ALLOCATE(my_Hdr%occ,(my_Hdr%bantot))
+ ABI_FREE(my_Hdr%occ)
+ ABI_MALLOC(my_Hdr%occ,(my_Hdr%bantot))
  !mband = MAXVAL(Hdr%nband)
 
  my_Hdr%occ=zero; nb=MIN(mband,nbandksseff)
@@ -213,7 +200,7 @@ subroutine write_kss_header(filekss,kss_npw,ishm,nbandksseff,mband,nsym2,symrel2
  end do
 
 !Change dimension in the local Dtset_cpy as well.
- call dtset_copy(Dtset_cpy, Dtset)
+ dtset_cpy = Dtset%copy()
  Dtset_cpy%mpw   = kss_npw
  Dtset_cpy%mband = nbandksseff
 
@@ -224,10 +211,10 @@ subroutine write_kss_header(filekss,kss_npw,ishm,nbandksseff,mband,nsym2,symrel2
  CASE (IO_MODE_FORTRAN)
 
    if (open_file(filekss, msg, newunit=kss_unt, form="unformatted") /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
-   call hdr_fort_write(my_hdr, kss_unt, fform, ierr)
+   call my_hdr%fort_write(kss_unt, fform, ierr)
    ABI_CHECK(ierr == 0, "hdr_Fort_write returned ierr != 0")
 
    title='Results from ABINIT code';          write(kss_unt) title(1:80)
@@ -244,7 +231,7 @@ subroutine write_kss_header(filekss,kss_npw,ishm,nbandksseff,mband,nsym2,symrel2
    ! Moreover the allocation is done in the wrong order for dimensions...
    ! but if I change this code, compatibility with external codes is broken.
    if (Psps%usepaw==0) then
-     ABI_ALLOCATE(vkbsign,(Psps%ntypat,Psps%mpsang))
+     ABI_MALLOC(vkbsign,(Psps%ntypat,Psps%mpsang))
      vkbsign(:,:)=zero
      do itypat=1,Psps%ntypat
        il0=0
@@ -258,7 +245,7 @@ subroutine write_kss_header(filekss,kss_npw,ishm,nbandksseff,mband,nsym2,symrel2
        end do
      end do
      write(kss_unt) ((vkbsign(itypat,il),il=1,Psps%mpsang),itypat=1,Psps%ntypat)
-     ABI_DEALLOCATE(vkbsign)
+     ABI_FREE(vkbsign)
    end if
 
 #ifdef HAVE_NETCDF
@@ -268,7 +255,7 @@ subroutine write_kss_header(filekss,kss_npw,ishm,nbandksseff,mband,nsym2,symrel2
    NCF_CHECK(nctk_open_create(kss_unt, nctk_ncify(filekss), xmpi_comm_self))
 
    ! Add additional info from abinit header.
-   NCF_CHECK(hdr_ncwrite(my_hdr, kss_unt, fform, nc_define=.True.))
+   NCF_CHECK(my_hdr%ncwrite(kss_unt, fform, nc_define=.True.))
 
    ! Add info on crystalline structure
    ! FIXME: Check symmorphi trick and crystal%symrel!
@@ -303,7 +290,7 @@ subroutine write_kss_header(filekss,kss_npw,ishm,nbandksseff,mband,nsym2,symrel2
      ])
      NCF_CHECK(ncerr)
 
-     ABI_ALLOCATE(vkbsign_int, (psps%mproj, Psps%mpsang, Psps%ntypat))
+     ABI_MALLOC(vkbsign_int, (psps%mproj, Psps%mpsang, Psps%ntypat))
      vkbsign_int=0
      do itypat=1,Psps%ntypat
        do ilmn=1,Psps%lmnmax
@@ -317,18 +304,18 @@ subroutine write_kss_header(filekss,kss_npw,ishm,nbandksseff,mband,nsym2,symrel2
 
      ! Write KB sign here
      NCF_CHECK(nf90_put_var(kss_unt, nctk_idname(kss_unt, "kb_formfactor_sign"), vkbsign_int))
-     ABI_DEALLOCATE(vkbsign_int)
+     ABI_FREE(vkbsign_int)
    end if
 
    NCF_CHECK(nctk_set_datamode(kss_unt))
 #endif
 
  CASE DEFAULT
-   MSG_ERROR(sjoin("Unsupported value for iomode:", itoa(iomode)))
+   ABI_ERROR(sjoin("Unsupported value for iomode:", itoa(iomode)))
  END SELECT
 
- call dtset_free(Dtset_cpy)
- call hdr_free(my_Hdr)
+ call Dtset_cpy%free()
+ call my_Hdr%free()
 
  DBG_EXIT("COLL")
 
@@ -360,17 +347,9 @@ end subroutine write_kss_header
 !! OUTPUT
 !!  Only writing.
 !!
-!! PARENTS
-!!      m_io_kss
-!!
-!! CHILDREN
-!!      metric,mkffnl,mkkin
-!!
 !! SOURCE
 
 subroutine write_vkb(kss_unt,ikpt,kpoint,kss_npw,gbig,rprimd,Psps,iomode)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -395,12 +374,12 @@ subroutine write_vkb(kss_unt,ikpt,kpoint,kss_npw,gbig,rprimd,Psps,iomode)
 
  mpsang = Psps%mpsang; ntypat = Psps%ntypat
 
- ABI_ALLOCATE(vkb ,(kss_npw,ntypat,mpsang))
- ABI_ALLOCATE(vkbd,(kss_npw,ntypat,mpsang))
- ABI_ALLOCATE(dum_vkbsign,(ntypat,mpsang))
+ ABI_MALLOC(vkb ,(kss_npw,ntypat,mpsang))
+ ABI_MALLOC(vkbd,(kss_npw,ntypat,mpsang))
+ ABI_MALLOC(dum_vkbsign,(ntypat,mpsang))
 
  call kss_calc_vkb(Psps,kpoint,kss_npw,gbig,rprimd,dum_vkbsign,vkb,vkbd)
- ABI_DEALLOCATE(dum_vkbsign)
+ ABI_FREE(dum_vkbsign)
 
  SELECT CASE (iomode)
 
@@ -414,8 +393,8 @@ subroutine write_vkb(kss_unt,ikpt,kpoint,kss_npw,gbig,rprimd,Psps,iomode)
 
 #ifdef HAVE_NETCDF
  CASE (IO_MODE_ETSF)
-   ABI_ALLOCATE(vkb_tgt ,(kss_npw,1,mpsang,ntypat))
-   ABI_ALLOCATE(vkbd_tgt,(kss_npw,1,mpsang,ntypat))
+   ABI_MALLOC(vkb_tgt ,(kss_npw,1,mpsang,ntypat))
+   ABI_MALLOC(vkbd_tgt,(kss_npw,1,mpsang,ntypat))
    do itypat=1,ntypat
      do il=1,mpsang
        do ig=1,kss_npw
@@ -426,8 +405,6 @@ subroutine write_vkb(kss_unt,ikpt,kpoint,kss_npw,gbig,rprimd,Psps,iomode)
    end do
 
    ! FIXME: Multiple projectors
-   !ABI_MALLOC(vkbsign, (psps%lnmax, cryst%ntypat))
-   !ABI_MALLOC(vkb, (npw, psps%lnmax, cryst%ntypat))
    !ABI_MALLOC(vkbd, (npw, psps%lnmax, cryst%ntypat))
    !call calc_vkb(cryst,psps,kpoint,npw,npw,gvec,vkbsign,vkb,vkbd)
    !ABI_FREE(vkbsign)
@@ -445,16 +422,16 @@ subroutine write_vkb(kss_unt,ikpt,kpoint,kss_npw,gbig,rprimd,Psps,iomode)
    ncerr = nf90_put_var(kss_unt, varid, vkbd_tgt, start=[1,ikpt,1,1,1], count=[kss_npw,1,1,mpsang,ntypat])
    NCF_CHECK(ncerr)
 
-   ABI_DEALLOCATE(vkb_tgt)
-   ABI_DEALLOCATE(vkbd_tgt)
+   ABI_FREE(vkb_tgt)
+   ABI_FREE(vkbd_tgt)
 #endif
 
  CASE DEFAULT
-   MSG_ERROR(sjoin("Unsupported value for iomode:", itoa(iomode)))
+   ABI_ERROR(sjoin("Unsupported value for iomode:", itoa(iomode)))
  END SELECT
 
- ABI_DEALLOCATE(vkb)
- ABI_DEALLOCATE(vkbd)
+ ABI_FREE(vkb)
+ ABI_FREE(vkbd)
 
 end subroutine write_vkb
 !!***
@@ -490,18 +467,10 @@ end subroutine write_vkb
 !! OUTPUT
 !!  Only writing.
 !!
-!! PARENTS
-!!      outkss
-!!
-!! CHILDREN
-!!      metric,mkffnl,mkkin
-!!
 !! SOURCE
 
 subroutine write_kss_wfgk(kss_unt,ikpt,isppol,kpoint,nspinor,kss_npw,&
 &          nbandksseff,natom,Psps,ene_k,occ_k,rprimd,gbig,wfg,Cprjnk_k,iomode)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -555,7 +524,7 @@ subroutine write_kss_wfgk(kss_unt,ikpt,isppol,kpoint,nspinor,kss_npw,&
 #ifdef HAVE_NETCDF
  CASE (IO_MODE_ETSF)
    if (Psps%usepaw==1) then
-     MSG_WARNING("PAW output with ETSF-IO netcdf: cprj won't be written")
+     ABI_WARNING("PAW output with ETSF-IO netcdf: cprj won't be written")
    end if
 
    ! Write G-vectors (gbig because it's not k-dependent)
@@ -581,7 +550,7 @@ subroutine write_kss_wfgk(kss_unt,ikpt,isppol,kpoint,nspinor,kss_npw,&
 #endif
 
  CASE DEFAULT
-   MSG_ERROR(sjoin("Unsupported iomode:", itoa(iomode)))
+   ABI_ERROR(sjoin("Unsupported iomode:", itoa(iomode)))
  END SELECT
 
 end subroutine write_kss_wfgk
@@ -621,18 +590,10 @@ end subroutine write_kss_wfgk
 !!  1) icg is used only if cg is present.
 !!  2) cg and eig_vec are mutually exclusive. One and only one can be passed to the routine.
 !!
-!! PARENTS
-!!      outkss
-!!
-!! CHILDREN
-!!      metric,mkffnl,mkkin
-!!
 !! SOURCE
 
 subroutine k2gamma_centered(kpoint,npw_k,istwf_k,ecut,kg_k,kss_npw,nspinor,nbandksseff,ngfft,gmet,&
 &  MPI_enreg,gbig,ug,icg,cg,eig_vec)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -665,12 +626,12 @@ subroutine k2gamma_centered(kpoint,npw_k,istwf_k,ecut,kg_k,kss_npw,nspinor,nband
 ! *********************************************************************
 
  if (PRESENT(cg).and.PRESENT(eig_vec)) then
-   MSG_ERROR("Both cg and eig_vec are present!")
+   ABI_ERROR("Both cg and eig_vec are present!")
  end if
 
 ! Mapping between the gamma-centered basis set and the k-centered one.
 ! trsl(ig)=npw_k+1 if vector ig is not inside the k-centered G-sphere.
- ABI_ALLOCATE(trsl,(kss_npw))
+ ABI_MALLOC(trsl,(kss_npw))
 
  n1=ngfft(1); n2=ngfft(2); n3=ngfft(3)
  n4=ngfft(4); n5=ngfft(5); n6=ngfft(6)
@@ -678,7 +639,7 @@ subroutine k2gamma_centered(kpoint,npw_k,istwf_k,ecut,kg_k,kss_npw,nspinor,nband
  if (istwf_k==1) then ! Full k-centered G-sphere.
    call table_gbig2kg(npw_k,kg_k,kss_npw,gbig,trsl,ierr)
    if (ierr/=0.and.(kss_npw>=npw_k)) then
-     MSG_ERROR(' The set of G vectors is inconsistent')
+     ABI_ERROR(' The set of G vectors is inconsistent')
    end if
 
  else  ! Calculate full kg with istwf_k=1 then do the mapping.
@@ -686,7 +647,7 @@ subroutine k2gamma_centered(kpoint,npw_k,istwf_k,ecut,kg_k,kss_npw,nspinor,nband
 
    call table_gbig2kg(full_npw_k,full_kg_k,kss_npw,gbig,trsl,ierr)
    if (ierr/=0.and.(kss_npw>=npw_k)) then
-     MSG_ERROR(' The set of G vectors is inconsistent')
+     ABI_ERROR(' The set of G vectors is inconsistent')
    end if
  end if
  !
@@ -717,9 +678,9 @@ subroutine k2gamma_centered(kpoint,npw_k,istwf_k,ecut,kg_k,kss_npw,nspinor,nband
      !
      ! Convert input wfs from reduced to full G-sphere.
      ndat=1
-     ABI_ALLOCATE(cfft,(2,n4,n5,n6*ndat))
-     ABI_ALLOCATE(full_cg,(2,full_npw_k*ndat))
-     ABI_ALLOCATE(tmp_cg,(2,npw_k*ndat))
+     ABI_MALLOC(cfft,(2,n4,n5,n6*ndat))
+     ABI_MALLOC(full_cg,(2,full_npw_k*ndat))
+     ABI_MALLOC(tmp_cg,(2,npw_k*ndat))
 
      !write(std_out,*)"npw_k, full_kg_k",npw_k,full_npw_k
 
@@ -742,12 +703,12 @@ subroutine k2gamma_centered(kpoint,npw_k,istwf_k,ecut,kg_k,kss_npw,nspinor,nband
        end do
      end do !band
 
-     ABI_DEALLOCATE(cfft)
-     ABI_DEALLOCATE(tmp_cg)
-     ABI_DEALLOCATE(full_cg)
+     ABI_FREE(cfft)
+     ABI_FREE(tmp_cg)
+     ABI_FREE(full_cg)
 
    CASE DEFAULT
-     MSG_BUG("Wrong istwf_k")
+     ABI_BUG("Wrong istwf_k")
    END SELECT
 
  else if (PRESENT(eig_vec)) then
@@ -771,16 +732,16 @@ subroutine k2gamma_centered(kpoint,npw_k,istwf_k,ecut,kg_k,kss_npw,nspinor,nband
 
    CASE DEFAULT
      write(msg,'(a,i0)')" Unsupported value for istwf_k: ",istwf_k
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    END SELECT
 
  else
-   MSG_ERROR("neither cg not eig_vec are in input")
+   ABI_ERROR("neither cg not eig_vec are in input")
  end if
 
- ABI_DEALLOCATE(trsl)
+ ABI_FREE(trsl)
  if (allocated(full_kg_k))  then
-   ABI_DEALLOCATE(full_kg_k)
+   ABI_FREE(full_kg_k)
  end if
 
 end subroutine k2gamma_centered
@@ -814,17 +775,9 @@ end subroutine k2gamma_centered
 !!  gvec_kss(:,:) = Input: null pointer. Output: gvec_kss(3,npwkss), list of G-vectors (closed shells)
 !!  ierr=Status error
 !!
-!! PARENTS
-!!      gwls_hamiltonian,setup_screening,setup_sigma
-!!
-!! CHILDREN
-!!      metric,mkffnl,mkkin
-!!
 !! SOURCE
 
 subroutine make_gvec_kss(nkpt,kptns,ecut_eff,symmorphi,nsym,symrel,tnons,gprimd,prtvol,npwkss,gvec_kss,ierr)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -867,7 +820,7 @@ subroutine make_gvec_kss(nkpt,kptns,ecut_eff,symmorphi,nsym,symrel,tnons,gprimd,
      write(msg,'(3a)')&
 &     ' Non-symmorphic operations still remain in the symmetries list ',ch10,&
 &     ' Program does not stop but _KSS file will not be created...'
-     MSG_WARNING(msg)
+     ABI_WARNING(msg)
      ierr=ierr+1 ; RETURN
    end if
  else if (symmorphi==1) then
@@ -882,7 +835,7 @@ subroutine make_gvec_kss(nkpt,kptns,ecut_eff,symmorphi,nsym,symrel,tnons,gprimd,
    write(msg,'(a,i4,3a)')&
 &   ' symmorphi = ',symmorphi,' while it must be 0 or 1',ch10,&
 &   ' Program does not stop but KSS file will not be created...'
-   MSG_WARNING(msg)
+   ABI_WARNING(msg)
    ierr=ierr+1 ; RETURN
  end if
  !
@@ -944,442 +897,6 @@ subroutine make_gvec_kss(nkpt,kptns,ecut_eff,symmorphi,nsym,symrel,tnons,gprimd,
 end subroutine make_gvec_kss
 !!***
 
-!!****f* m_io_kss/gshgg_mkncwrite
-!! NAME
-!! gshgg_mkncwrite
-!!
-!! FUNCTION
-!!  This routine builds <G|H|G'> matrix elements for all (G, G').
-!!  starting from the knowledge of the local potential on the real-space FFT mesh.
-!!  It can also perform the direct diagonalization of the Kohn-Sham Hamiltonian
-!!  for a given k-point and spin. This a debugging tool
-!!
-!! INPUTS
-!!  kg(3,mpw*mkmem)=reduced planewave coordinates.
-!!  ylm(mpw*mkmem,mpsang*mpsang*useylm)= real spherical harmonics for each G and k point
-!!  kpoint(3)
-!!  natom=number of atoms in cell.
-!!  nfftf=(effective) number of FFT grid points in the dense FFT mesh (for this processor)
-!!         (nfftf=nfft for norm-conserving potential runs)
-!!  nspinor=number of spinorial components of the wavefunctions
-!!  ntypat=number of types of atoms in unit cell.
-!!  pawtab(psps%ntypat*psps%usepaw) <type(pawtab_type)>=paw tabulated starting data
-!!  pawfgr<pawfgr_type>=fine grid parameters and related data
-!!  Paw_ij(natom) <type(paw_ij_type)>=paw arrays given on (i,j) channels
-!!  psps <type(pseudopotential_type)>=variables related to pseudopotentials
-!!  rprimd(3,3)=dimensional primitive translations for real space (bohr)
-!!  vtrial(nfftf,nspden)=the trial potential
-!!  xred(3,natom)=reduced dimensionless atomic coordinates
-!!  eigen(mband,nkpt,nsppol)=array for holding eigenvalues (hartree)
-!!  ngfftc(18)=Info about 3D FFT for the coarse mesh, see ~abinit/doc/variables/vargs.htm#ngfft
-!!  [Electronpositron] <electronpositron_type>=quantities for the electron-positron annihilation.
-!!
-!! PARENTS
-!!      scfcv
-!!
-!! CHILDREN
-!!      metric,mkffnl,mkkin
-!!
-!! SOURCE
-
-subroutine gshgg_mkncwrite(istep, dtset, dtfil, psps, hdr, pawtab, pawfgr, paw_ij, mpi_enreg, &
-  rprimd, xred, eigen, npwarr, kg, ylm, ngfftc, nfftc, ngfftf, nfftf, vtrial,&
-  electronpositron) ! Optional arguments
-
- implicit none
-
-!Arguments ------------------------------------
-!scalars
- integer,intent(in) :: istep,nfftc,nfftf
- type(dataset_type),intent(in) :: dtset
- type(datafiles_type),intent(in) :: dtfil
- type(pseudopotential_type),intent(in) :: psps
- type(pawfgr_type),intent(in) :: pawfgr
- type(hdr_type),intent(in) :: hdr
- type(MPI_type),intent(inout) :: mpi_enreg
-!arrays
- integer,intent(in) :: ngfftc(18),ngfftf(18)
- integer, intent(in) :: kg(3,dtset%mpw*dtset%mkmem),npwarr(dtset%nkpt)
- real(dp),intent(in) :: rprimd(3,3)
- real(dp),intent(in) :: eigen(dtset%mband,dtset%nkpt,dtset%nsppol)
- real(dp),intent(inout) :: vtrial(nfftf,dtset%nspden)
- real(dp),intent(in) :: xred(3,dtset%natom)
- real(dp), intent(in) :: ylm(dtset%mpw*dtset%mkmem,psps%mpsang*psps%mpsang*psps%useylm)
- type(pawtab_type),intent(in) :: pawtab(psps%ntypat*psps%usepaw)
- type(paw_ij_type),intent(in) :: Paw_ij(dtset%natom*psps%usepaw)
- type(electronpositron_type),optional,pointer :: electronpositron
-
-!Local variables-------------------------------
-!scalars
- integer,parameter :: tim_getghc=4,master=0,fform=102
- integer :: comm,cpopt,dimffnl,ib,ider,idir,isppol,npw_k,npws,ierr
- integer :: ikg,istwf_k,ntypat,paral_kgb,ikpt,ilm,natom,nband_k,ncerr
- integer :: jj,n1,n2,n3,n4,n5,n6,negv,nkpg,nprocs,nspden,nspinor,mgfftc,ncid
- integer :: my_rank,ispden,ndat,type_calc,sij_opt,igsp2,cplex_ghg
- integer :: kg_varid,ghg_varid,pawgtg_varid,eighist_varid,eigdiago_varid
- real(dp) :: cfact,ucvol,lambda,size_mat
- character(len=50) :: jobz,range
- character(len=80) :: frmt1,frmt2
- character(len=10) :: stag(2)
- character(len=500) :: msg
- character(len=fnlen) :: path
- type(gs_hamiltonian_type) :: gs_hamk
-!arrays
- integer,allocatable :: kg_k(:,:)
- real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3),rhodum(1),kpoint(3),ylmgr_dum(1,1,1)
- real(dp),allocatable :: eig_ene(:),eig_vec(:,:,:),ph3d(:,:,:),pwave(:,:)
- real(dp),allocatable :: ffnl(:,:,:,:),kinpw(:),kpg_k(:,:)
- real(dp),allocatable :: vlocal(:,:,:,:),ylm_k(:,:),vlocal_tmp(:,:,:)
- real(dp),allocatable :: ghc(:,:),gvnlxc(:,:),gsc(:,:),ghg_mat(:,:,:),gtg_mat(:,:,:),cgrvtrial(:,:)
- type(pawcprj_type),allocatable :: cwaveprj(:,:)
-
-! *********************************************************************
-
- DBG_ENTER("COLL")
- ABI_UNUSED(ngfftf(1))
-
- call wrtout(std_out, "Constructing H_{GG')(k,spin) and dumping matrices to file")
-
- comm = mpi_enreg%comm_cell; nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
- paral_kgb = mpi_enreg%paral_kgb
- ABI_CHECK(paral_kgb == 0 ,"paral_kgb == 1 not coded")
- ABI_CHECK(all(dtset%nband == dtset%mband) ,"nband must be constant")
-
- natom = dtset%natom; ntypat = dtset%ntypat
- nspden = dtset%nspden; nspinor = dtset%nspinor
- if (dtset%nsppol==1) stag=['          ','          ']
- if (dtset%nsppol==2) stag=['SPIN UP:  ','SPIN DOWN:']
-
- if (nprocs > 1 .and. .not. nctk_has_mpiio) then
-   MSG_ERROR("Netcdf without MPI-IO support. Cannot produce HGG.nc file with nprocs > 1")
- end if
-
- path = strcat(dtfil%filnam_ds(4), "_HGG.nc")
-#ifdef HAVE_NETCDF
- if (istep == 1) then
-   ! Open netcdf file, define dims and variables.
-   NCF_CHECK(nctk_open_create(ncid, path, comm))
-
-   ncerr = nctk_def_dims(ncid, [&
-     nctkdim_t("complex", 2), nctkdim_t("max_number_of_coefficients", dtset%mpw),&
-     nctkdim_t("max_number_of_states", dtset%mband),&
-     nctkdim_t("number_of_kpoints", dtset%nkpt), nctkdim_t("number_of_spins", dtset%nsppol), &
-     nctkdim_t("nstep", dtset%nstep) ])
-   NCF_CHECK(ncerr)
-
-   call wfk_ncdef_dims_vars(ncid, hdr, fform)
-
-   NCF_CHECK(nctk_def_iscalars(ncid, ["last_step"]))
-
-   ncerr = nctk_def_arrays(ncid, nctkarr_t('eigenvalues_history', "dp", &
-     "max_number_of_states, number_of_kpoints, number_of_spins, nstep"))
-   NCF_CHECK(ncerr)
-
-   ncerr = nctk_def_arrays(ncid, nctkarr_t('eigenvalues_diago', "dp", &
-     "max_number_of_states, number_of_kpoints, number_of_spins, nstep"))
-   NCF_CHECK(ncerr)
-
-   ncerr = nctk_def_arrays(ncid, nctkarr_t('ghg', "dp", &
-     "complex, max_number_of_coefficients, max_number_of_coefficients, number_of_kpoints, number_of_spins, nstep"))
-   NCF_CHECK(ncerr)
-
-   if (psps%usepaw == 1) then
-     ncerr = nctk_def_arrays(ncid, nctkarr_t('paw_gtg', "dp", &
-       "complex, max_number_of_coefficients, max_number_of_coefficients, number_of_kpoints, number_of_spins, nstep"))
-     NCF_CHECK(ncerr)
-   end if
- else
-   NCF_CHECK(nctk_open_modify(ncid, path, comm))
- end if
-
- ! Use individual IO (default) for the G-vectors [3, mpw, nkpt]
- NCF_CHECK(nctk_set_datamode(ncid))
- NCF_CHECK(nf90_inq_varid(ncid, "reduced_coordinates_of_plane_waves", kg_varid))
- NCF_CHECK(nf90_inq_varid(ncid, "eigenvalues_diago", eigdiago_varid))
- NCF_CHECK(nf90_inq_varid(ncid, "eigenvalues_history", eighist_varid))
- NCF_CHECK(nf90_inq_varid(ncid, "ghg", ghg_varid))
- if (psps%usepaw == 1) then
-   NCF_CHECK(nf90_inq_varid(ncid, "paw_gtg", pawgtg_varid))
- end if
-
- NCF_CHECK(nctk_write_iscalars(ncid, ["last_step"], [istep]))
-#endif
-
- call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
-
- ! The coarse FFT mesh.
- mgfftc = maxval(ngfftc(:3))
- n1=ngfftc(1); n2=ngfftc(2); n3=ngfftc(3)
- n4=ngfftc(4); n5=ngfftc(5); n6=ngfftc(6)
-
-!============================================
-!==== Initialize most of the Hamiltonian ====
-!============================================
-!1) Allocate all arrays and initialize quantities that do not depend on k and spin.
-!2) Perform the setup needed for the non-local factors:
-!* Norm-conserving: Constant kleimann-Bylander energies are copied from psps to gs_hamk.
-!* PAW: Initialize the overlap coefficients and allocate the Dij coefficients.
-
- if (PRESENT(Electronpositron)) then
-   call init_hamiltonian(gs_hamk,psps,pawtab,nspinor,dtset%nsppol,nspden,natom,dtset%typat,xred,nfftc,&
-&   mgfftc,ngfftc,rprimd,dtset%nloalg,paw_ij=paw_ij,usecprj=0,electronpositron=electronpositron,&
-&   comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,mpi_spintab=mpi_enreg%my_isppoltab)
- else
-   call init_hamiltonian(gs_hamk,psps,pawtab,nspinor,dtset%nsppol,nspden,natom,dtset%typat,xred,nfftc,&
-&   mgfftc,ngfftc,rprimd,dtset%nloalg,paw_ij=paw_ij,usecprj=0,&
-&   comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,mpi_spintab=mpi_enreg%my_isppoltab)
- end if
-
- ! Set up local potential vlocal with proper dimensioning, from vtrial.
- ! Select spin component of interest if nspden<=2 as nvloc==1, for nspden==4, nvloc==4
- ! option=2: vtrial(n1*n2*n3,ispden) --> vlocal(nd1,nd2,nd3) real case
- ABI_MALLOC(vlocal,(n4,n5,n6,gs_hamk%nvloc))
- ABI_MALLOC(kg_k,(3,dtset%mpw))
-
- do isppol=1,dtset%nsppol
-   ikg = 0
-
-   ! Set up local potential vlocal with proper dimensioning, from vtrial
-   ! Also take into account the spin.
-   if (nspden/=4)then
-     if (psps%usepaw==0 .or. pawfgr%usefinegrid==0) then
-       call fftpac(isppol,mpi_enreg,nspden,n1,n2,n3,n4,n5,n6,ngfftc,vtrial,vlocal,2)
-     else
-       ! Move from fine to coarse FFT mesh (PAW)
-       ABI_MALLOC(cgrvtrial,(nfftc,nspden))
-       call transgrid(1,mpi_enreg,nspden,-1,0,0,paral_kgb,pawfgr,rhodum,rhodum,cgrvtrial,vtrial)
-       call fftpac(isppol,mpi_enreg,nspden,n1,n2,n3,n4,n5,n6,ngfftc,cgrvtrial,vlocal,2)
-       ABI_FREE(cgrvtrial)
-     end if
-   else
-     ABI_MALLOC(vlocal_tmp,(n4,n5,n6))
-     if (psps%usepaw==0 .or. pawfgr%usefinegrid==0) then
-       do ispden=1,nspden
-         call fftpac(ispden,mpi_enreg,nspden,n1,n2,n3,n4,n5,n6,ngfftc,vtrial,vlocal_tmp,2)
-         vlocal(:,:,:,ispden)=vlocal_tmp(:,:,:)
-       end do
-     else
-       ! Move from fine to coarse FFT mesh (PAW)
-       ABI_MALLOC(cgrvtrial,(nfftc,nspden))
-       call transgrid(1,mpi_enreg,nspden,-1,0,0,paral_kgb,pawfgr,rhodum,rhodum,cgrvtrial,vtrial)
-       do ispden=1,nspden
-         call fftpac(ispden,mpi_enreg,nspden,n1,n2,n3,n4,n5,n6,ngfftc,cgrvtrial,vlocal_tmp,2)
-         vlocal(:,:,:,ispden)=vlocal_tmp(:,:,:)
-       end do
-       ABI_FREE(cgrvtrial)
-     end if
-     ABI_FREE(vlocal_tmp)
-   end if
-
-   !Continue to initialize the Hamiltonian
-   call load_spin_hamiltonian(gs_hamk,isppol,vlocal=vlocal,with_nonlocal=.true.)
-
-   do ikpt=1,dtset%nkpt
-     nband_k = dtset%nband(ikpt+(isppol-1)*dtset%nkpt)
-     istwf_k = dtset%istwfk(ikpt)
-     npw_k = npwarr(ikpt)
-     kpoint = dtset%kptns(:,ikpt)
-
-     ! Skip the rest of the k-point loop
-     if (proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,isppol,my_rank)) cycle
-
-     ABI_MALLOC(ylm_k, (npw_k,psps%mpsang**2*psps%useylm))
-
-     kg_k(:,1:npw_k) = kg(:,1+ikg:npw_k+ikg)
-
-     if (psps%useylm==1) then
-       do ilm=1,psps%mpsang**2
-         ylm_k(1:npw_k,ilm) = ylm(1+ikg:npw_k+ikg,ilm)
-       end do
-     end if
-
-     ! Set up remaining of the Hamiltonian
-     ! Compute (1/2) (2 Pi)**2 (k+G)**2:
-     ABI_ALLOCATE(kinpw,(npw_k))
-     call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass_free,gmet,kg_k,kinpw,kpoint,npw_k,0,0)
-
-     ! Compute (k+G) vectors (only if useylm=1)
-     nkpg=3*dtset%nloalg(3)
-     ABI_ALLOCATE(kpg_k,(npw_k,nkpg))
-     if (nkpg>0) then
-       call mkkpg(kg_k,kpg_k,kpoint,nkpg,npw_k)
-     end if
-
-     ! Compute nonlocal form factors ffnl at all (k+G):
-     ider=0; idir=0; dimffnl=1
-     ABI_ALLOCATE(ffnl, (npw_k,dimffnl,psps%lmnmax,ntypat))
-
-     call mkffnl(psps%dimekb,dimffnl,psps%ekb,ffnl,psps%ffspl,&
-       gmet,gprimd,ider,idir,psps%indlmn,kg_k,kpg_k,kpoint,psps%lmnmax,&
-       psps%lnmax,psps%mpsang,psps%mqgrid_ff,nkpg,&
-       npw_k,ntypat,psps%pspso,psps%qgrid_ff,rmet,&
-       psps%usepaw,psps%useylm,ylm_k,ylmgr_dum)
-
-     ABI_FREE(kpg_k)
-     ABI_FREE(ylm_k)
-
-!    Load k-dependent part in the Hamiltonian datastructure
-     ABI_ALLOCATE(ph3d,(2,npw_k,gs_hamk%matblk))
-     call load_k_hamiltonian(gs_hamk,kpt_k=dtset%kptns(:,ikpt),npw_k=npw_k,istwf_k=istwf_k,&
-&                            kinpw_k=kinpw,kg_k=kg_k,ffnl_k=ffnl,ph3d_k=ph3d,&
-&                            compute_ph3d=.true.,compute_gbound=.true.)
-
-     ! Prepare the call to getghc.
-     ndat=1; lambda=zero; type_calc=0         ! For applying the whole Hamiltonian
-     sij_opt=0; if (psps%usepaw==1) sij_opt=1 ! For PAW, <k+G|1+S|k+G"> is also needed.
-     cpopt=-1                                 ! <p_lmn|in> (and derivatives) are computed here (and not saved)
-
-     cplex_ghg=2; size_mat = cplex_ghg*(npw_k*nspinor)**2*dp*b2Mb
-     ABI_STAT_MALLOC(ghg_mat,(cplex_ghg,npw_k*nspinor,npw_k*nspinor), ierr)
-     write(msg,'(a,f0.3,a)')" Out-of-memory in ghg_mat. Memory required by the Hamiltonian matrix: ",size_mat," [Mb]."
-     ABI_CHECK(ierr==0, msg)
-     ghg_mat = huge(one)
-
-     ABI_STAT_MALLOC(gtg_mat,(cplex_ghg,npw_k*nspinor,npw_k*nspinor*psps%usepaw), ierr)
-     write(msg,'(a,f0.3,a)')" Out-of-memory in gtg_mat. Memory required by the PAW overlap operator: ",size_mat," [Mb]."
-     ABI_CHECK(ierr==0, msg)
-
-     ABI_DT_MALLOC(cwaveprj,(natom,nspinor*(1+cpopt)*gs_hamk%usepaw))
-     if (cpopt==0) then
-       call pawcprj_alloc(cwaveprj,0,gs_hamk%dimcprj)
-     end if
-
-     ABI_MALLOC(pwave,(2,npw_k*nspinor))
-     pwave=zero ! Initialize plane-wave array:
-
-     ABI_MALLOC(ghc  ,(2,npw_k*nspinor*ndat))
-     ABI_MALLOC(gvnlxc,(2,npw_k*nspinor*ndat))
-     ABI_MALLOC(gsc  ,(2,npw_k*nspinor*ndat*(sij_opt+1)/2))
-
-     if (dtset%prtvol > 0) call wrtout(std_out,' Calculating <G|H|G''> elements','PERS')
-
-     ! Loop over the |beta,G''> component.
-     ! Get <:|H|beta,G''> and <:|T_{PAW}|beta,G''>
-     do igsp2=1,npw_k*nspinor
-       ghc = zero
-       pwave = zero
-       pwave(1,igsp2)=one
-
-       call getghc(cpopt,pwave,cwaveprj,ghc,gsc,gs_hamk,gvnlxc,lambda,mpi_enreg,ndat,&
-&                  dtset%prtvol,sij_opt,tim_getghc,type_calc)
-
-       ! Fill the upper triangle.
-       ghg_mat(:,1:igsp2,igsp2) = ghc(:,1:igsp2)
-       if (psps%usepaw==1) gtg_mat(:,1:igsp2,igsp2) = gsc(:,1:igsp2)
-
-       pwave(1,igsp2)=zero ! Reset the |G,beta> component that has been treated.
-     end do
-
-     ABI_FREE(kinpw)
-     ABI_FREE(ffnl)
-     ABI_FREE(ph3d)
-     ABI_FREE(pwave)
-     ABI_FREE(ghc)
-     ABI_FREE(gvnlxc)
-     ABI_FREE(gsc)
-
-     if (psps%usepaw==1.and.cpopt==0) call pawcprj_free(cwaveprj)
-     ABI_DT_FREE(cwaveprj)
-
-     if (dtset%prtvol > 0) then
-       !===========================================
-       !=== Diagonalization of <G|H|G''> matrix ===
-       !===========================================
-       ABI_MALLOC(eig_ene,(nband_k))
-       ABI_MALLOC(eig_vec,(cplex_ghg,npw_k*nspinor,nband_k))
-
-       ! * Partial diagonalization
-       write(msg,'(2a,3es16.8,3a,i5,a,i0)')ch10,&
-       ' Begin partial diagonalization for kpt= ',kpoint,stag(isppol),ch10,&
-       ' - Size of mat.=',npw_k*nspinor,' - # nband_k=',nband_k
-       if (dtset%prtvol>0) call wrtout(std_out,msg,'PERS')
-
-       jobz = "V"  ! Compute eigenvalues and eigenvectors.
-       range = "I" ! the IL-th through IU-th eigenvalues will be found.
-
-       if (psps%usepaw==0) then
-         call xheevx(jobz,range,"Upper",cplex_ghg,npw_k*nspinor,ghg_mat,zero,zero,&
-         1,nband_k,-tol8,negv,eig_ene,eig_vec,npw_k*nspinor)
-       else
-         call xhegvx(1,jobz,range,"Upper",cplex_ghg,npw_k*nspinor,ghg_mat,gtg_mat,zero,zero,&
-         1,nband_k,-tol8,negv,eig_ene,eig_vec,npw_k*nspinor)
-       end if
-
-       ! Write eigenvalues.
-       cfact=one !cfact=Ha_eV
-       frmt1='(2x,8(1x,es9.2))' ; frmt2='(2x,8(1x,es9.2))'
-       write(msg,'(a,3es16.8,3x,a)')' Eigenvalues in Ha for kpt= ',kpoint,stag(isppol)
-       call wrtout(std_out,msg,'COLL')
-
-       write(msg,frmt1)(eig_ene(ib)*cfact,ib=1,MIN(8,nband_k))
-       call wrtout(std_out,msg,'COLL')
-       if (nband_k>8) then
-         do jj=9,nband_k,8
-           write(msg,frmt2) (eig_ene(ib)*cfact,ib=jj,MIN(jj+7,nband_k))
-           call wrtout(std_out,msg,'COLL')
-         end do
-       end if
-
-#ifdef HAVE_NETCDF
-       ncerr = nf90_put_var(ncid, eigdiago_varid, eig_ene, start=[1,ikpt,isppol,istep], count=[nband_k,1,1,1])
-       NCF_CHECK(ncerr)
-#endif
-
-       ABI_FREE(eig_ene)
-       ABI_FREE(eig_vec)
-     end if
-
-#ifdef HAVE_NETCDF
-     !write(std_out,*)"Writing H_GG slice for ikpt",ikpt
-     if (isppol == 1) then
-       ncerr = nf90_put_var(ncid, kg_varid, kg_k, start=[1,1,ikpt], count=[3,npw_k,1])
-       NCF_CHECK(ncerr)
-     end if
-
-     ncerr = nf90_put_var(ncid, eighist_varid, eigen(:,ikpt,isppol), &
-       start=[1,ikpt,isppol,istep], count=[nband_k,1,1,1])
-     NCF_CHECK(ncerr)
-
-     npws = nspinor * npw_k
-     ncerr = nf90_put_var(ncid, ghg_varid, ghg_mat, start=[1,1,1,ikpt,isppol,istep], &
-       count=[2,npws,npws,1,1,1])
-     NCF_CHECK(ncerr)
-
-     if (psps%usepaw == 1) then
-       ncerr = nf90_put_var(ncid, pawgtg_varid, gtg_mat, start=[1,1,1,ikpt,isppol,istep], &
-         count=[2,npws,npws,1,1,1])
-       NCF_CHECK(ncerr)
-     end if
-
-     !write(666,*)"{istep: ",istep,", ikpt: ", ikpt, ", isppol: ", isppol, ", npws: ",npws,"}"
-     !do jj=1,9
-     !  write(666, "(18(es11.3))")ghg_mat(:,jj,:9)
-     !  write(666, *)
-     !end do
-     !write(666, *) ghg_mat
-#endif
-
-     ABI_FREE(ghg_mat)
-     ABI_FREE(gtg_mat)
-
-     ikg = ikg + npw_k
-   end do ! ikpt
- end do ! isppol
-
- ABI_FREE(kg_k)
- ABI_FREE(vlocal)
-
- call destroy_hamiltonian(gs_hamk)
-
-#ifdef HAVE_NETCDF
- NCF_CHECK(nf90_close(ncid))
-#endif
-
- DBG_EXIT("COLL")
-
-end subroutine gshgg_mkncwrite
-!!***
-
 !----------------------------------------------------------------------
 
 !!****f* m_io_kss/kss_calc_vkb
@@ -1412,17 +929,9 @@ end subroutine gshgg_mkncwrite
 !! TODO
 !!  *) Spinorial case is not implemented.
 !!
-!! PARENTS
-!!      m_io_kss
-!!
-!! CHILDREN
-!!      metric,mkffnl,mkkin
-!!
 !! SOURCE
 
 subroutine kss_calc_vkb(Psps,kpoint,npw_k,kg_k,rprimd,vkbsign,vkb,vkbd)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1649,12 +1158,6 @@ end subroutine kss_calc_vkb
 !! TESTS
 !! * ETSF_IO output is tested in tests/etsf_io/t02.
 !!
-!! PARENTS
-!!      outscfcv
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
 subroutine outkss(crystal,Dtfil,Dtset,ecut,gmet,gprimd,Hdr,&
@@ -1663,7 +1166,6 @@ subroutine outkss(crystal,Dtfil,Dtset,ecut,gmet,gprimd,Hdr,&
 & prtvol,Psps,rprimd,vtrial,xred,cg,usecprj,Cprj,eigen,ierr)
 
  use m_linalg_interfaces
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1697,7 +1199,7 @@ subroutine outkss(crystal,Dtfil,Dtset,ecut,gmet,gprimd,Hdr,&
  integer :: ibsp,ibsp1,ibsp2,ibg,ig,ii,ikpt
  integer :: master,receiver,sender,spinor_shift1,shift
  integer :: ishm,ispinor,isppol,istwf_k,my_rank,j
- integer :: k_index,maxpw,mproj,n1,n2,n2dim,n3,n4,n5,n6,nband_k
+ integer :: k_index,maxpw,mproj,mtag,n1,n2,n2dim,n3,n4,n5,n6,nband_k
  integer :: nbandkss_k,nbandksseff,nbase,nprocs,npw_k,onpw_k,npwkss
  integer :: nrst1,nrst2,nsym2,ntemp,pinv,sizepw,spaceComm,comm_self
  integer :: pad1,pad2
@@ -1764,7 +1266,7 @@ subroutine outkss(crystal,Dtfil,Dtset,ecut,gmet,gprimd,Hdr,&
  if (nprocs==1) then
    ltest=allocated(MPI_enreg%proc_distrb)
    if (.not.ltest) then
-     ABI_ALLOCATE(MPI_enreg%proc_distrb,(nkpt,mband,nsppol))
+     ABI_MALLOC(MPI_enreg%proc_distrb,(nkpt,mband,nsppol))
      MPI_enreg%proc_distrb=my_rank
      lhack=.TRUE.
    end if
@@ -1782,7 +1284,7 @@ subroutine outkss(crystal,Dtfil,Dtset,ecut,gmet,gprimd,Hdr,&
 &   'when iomode==3 in outkss, support for netcdf ',ch10,&
 &   'must be compiled. Use --enable-netcdf when configuring '
 #ifndef HAVE_NETCDF
-   MSG_WARNING(msg)
+   ABI_WARNING(msg)
    ierr = ierr + 1
 #endif
  end if
@@ -1811,7 +1313,7 @@ subroutine outkss(crystal,Dtfil,Dtset,ecut,gmet,gprimd,Hdr,&
 &   ' but nband(1)=',Dtset%nband(1),' is different of nband(',&
 &   ikpt+(isppol-1)*nkpt,')=',Dtset%nband(ikpt+(isppol-1)*nkpt),'.',ch10,&
 &   '  Program does not stop but _KSS file will not be created...'
-   MSG_WARNING(msg)
+   ABI_WARNING(msg)
    ierr=ierr+1
  end if
 !* istwfk must be 1 for each k-point
@@ -1821,7 +1323,7 @@ subroutine outkss(crystal,Dtfil,Dtset,ecut,gmet,gprimd,Hdr,&
 &   ' States output not programmed for time-reversal symmetry.',ch10,&
 &   ' Action : change istwfk in input file (put it to 1 for all kpt).',ch10,&
 &   ' Program does not stop but _KSS file will not be created...'
-   MSG_WARNING(msg)
+   ABI_WARNING(msg)
    ierr=ierr+1
  end if
 !* Check spin-orbit
@@ -1829,7 +1331,7 @@ subroutine outkss(crystal,Dtfil,Dtset,ecut,gmet,gprimd,Hdr,&
    write(msg,'(3a)')&
 &   ' Variable mpspso should be 1 !',ch10,&
 &   ' Program does not stop but _KSS file will not be created...'
-   MSG_WARNING(msg)
+   ABI_WARNING(msg)
    ierr=ierr+1
  end if
 !* Check mproj
@@ -1848,7 +1350,7 @@ subroutine outkss(crystal,Dtfil,Dtset,ecut,gmet,gprimd,Hdr,&
    write(msg,'(3a)')&
 &   ' Pseudopotentials with f-projectors not implemented',ch10,&
 &   ' Program does not stop but _KSS file will not be created...'
-   MSG_WARNING(msg)
+   ABI_WARNING(msg)
    ierr=ierr+1
  end if
 !* Check useylm
@@ -1856,7 +1358,7 @@ subroutine outkss(crystal,Dtfil,Dtset,ecut,gmet,gprimd,Hdr,&
    write(msg,'(3a)')&
 &   ' The present version of outkss does not work with useylm/=0 !',ch10,&
 &   ' Program does not stop but _KSS file will not be created...'
-   MSG_WARNING(msg)
+   ABI_WARNING(msg)
    ierr=ierr+1
  end if
 !* Check PAW and kssform value
@@ -1865,14 +1367,14 @@ subroutine outkss(crystal,Dtfil,Dtset,ecut,gmet,gprimd,Hdr,&
      write(msg,'(3a)')&
 &     ' Parallel PAW with kssform=1, not yet allowed',ch10,&
 &     ' Program does not stop but _KSS file will not be created...'
-     MSG_WARNING(msg)
+     ABI_WARNING(msg)
      ierr=ierr+1
    end if
    if (kssform==3.and.usecprj/=1) then
      write(msg,'(3a)')&
 &     ' If PAW and kssform=3, usecprj must be 1',ch10,&
 &     ' Program does not stop but _KSS file will not be created...'
-     MSG_WARNING(msg)
+     ABI_WARNING(msg)
      ierr=ierr+1
    end if
  end if
@@ -1881,14 +1383,14 @@ subroutine outkss(crystal,Dtfil,Dtset,ecut,gmet,gprimd,Hdr,&
    write(msg,'(3a)')&
 &   ' outkss cannot be used with parallelization on bands (paralbd/=0) !',ch10,&
 &   ' Program does not stop but _KSS file will not be created...'
-   MSG_WARNING(msg)
+   ABI_WARNING(msg)
    ierr=ierr+1
  end if
  if (MPI_enreg%paral_spinor/=0) then
    write(msg,'(3a)')&
 &   ' outkss cannot be used yet with parallelization on nspinors !',ch10,&
 &   ' Program does not stop but _KSS file will not be created...'
-   MSG_WARNING(msg)
+   ABI_WARNING(msg)
    ierr=ierr+1
 
  endif
@@ -1916,7 +1418,7 @@ subroutine outkss(crystal,Dtfil,Dtset,ecut,gmet,gprimd,Hdr,&
  ecut_eff = ecut * Dtset%dilatmx**2  ! Use ecut_eff instead of ecut_eff since otherwise
 !one cannot restart from a previous density file
  sizepw=2*mpw ; do_diago=(kssform/=3)
- ABI_ALLOCATE(dimlmn,(natom*Psps%usepaw))
+ ABI_MALLOC(dimlmn,(natom*Psps%usepaw))
  if (Psps%usepaw==1) then
    call pawcprj_getdim(dimlmn,natom,nattyp_dum,ntypat,Dtset%typat,pawtab,'R')
  end if
@@ -1935,22 +1437,22 @@ subroutine outkss(crystal,Dtfil,Dtset,ecut,gmet,gprimd,Hdr,&
      write(msg,'(3a)')&
 &     ' Non-symmorphic operations still remain in the symmetries list ',ch10,&
 &     ' Program does not stop but _KSS file will not be created...'
-     MSG_WARNING(msg)
+     ABI_WARNING(msg)
      ierr=ierr+1 ; RETURN
    end if
  else if (Dtset%symmorphi==1) then
 !  If in the input file symmorphi==1 all the symmetry operations are retained:
 !  both identity and inversion (if any) as well as non-symmorphic operations.
    nsym2=nsym ; pinv=1
-   ABI_ALLOCATE(symrel2,(3,3,nsym))
-   ABI_ALLOCATE(tnons2,(3,nsym))
+   ABI_MALLOC(symrel2,(3,3,nsym))
+   ABI_MALLOC(tnons2,(3,nsym))
    symrel2(:,:,:)=Dtset%symrel(:,:,1:nsym)
    tnons2(:,:)   =Dtset%tnons(:,1:nsym)
  else
    write(msg,'(a,i4,3a)')&
 &   ' symmorphi = ',Dtset%symmorphi,' while it must be 0 or 1',ch10,&
 &   ' Program does not stop but KSS file will not be created...'
-   MSG_WARNING(msg)
+   ABI_WARNING(msg)
    ierr=ierr+1 ; RETURN
  end if
 !
@@ -2024,7 +1526,7 @@ subroutine outkss(crystal,Dtfil,Dtset,ecut,gmet,gprimd,Hdr,&
 &       ' The value choosen for the number of bands in file',ch10,&
 &       ' (nbandkss) was greater than at least one number of plane waves ',ch10,&
 &       ' for a given k-point (npw_k).',ch10,' It has been modified consequently.'
-       MSG_WARNING(msg)
+       ABI_WARNING(msg)
      end if
    end if
    found=.FALSE.
@@ -2039,7 +1541,7 @@ subroutine outkss(crystal,Dtfil,Dtset,ecut,gmet,gprimd,Hdr,&
 &     ' The number of bands to be computed (for one k) was',ch10,&
 &     ' greater than the number of g-vectors to be written.',ch10,&
 &     ' It has been modified consequently.'
-     MSG_WARNING(msg)
+     ABI_WARNING(msg)
    end if
    nbandksseff=MINVAL(nbandkssk)
 
@@ -2054,7 +1556,7 @@ subroutine outkss(crystal,Dtfil,Dtset,ecut,gmet,gprimd,Hdr,&
      write(msg,'(a,i5,a,i5,2a)')&
 &     ' Number of bands calculated=',nbandksseff,', greater than nbandkss=',Dtset%nbandkss,ch10,&
 &     ' will write nbandkss bands on the KSS file'
-     MSG_COMMENT(msg)
+     ABI_COMMENT(msg)
      nbandksseff=Dtset%nbandkss
    end if
  end if
@@ -2091,7 +1593,7 @@ subroutine outkss(crystal,Dtfil,Dtset,ecut,gmet,gprimd,Hdr,&
 &   crystal,Dtset,Hdr,Psps,iomode,untkss)
  end if
 
- ABI_DEALLOCATE(shlim)
+ ABI_FREE(shlim)
 
  if (     do_diago) msg = ' Diagonalized eigenvalues'
  if (.not.do_diago) msg = ' Conjugate gradient eigenvalues'
@@ -2106,7 +1608,7 @@ subroutine outkss(crystal,Dtfil,Dtset,ecut,gmet,gprimd,Hdr,&
 !
 !=== In case of PAW distributed atomic sites, need to retrieve the full paw_ij%dij ===
  if (do_diago.and.Psps%usepaw==1.and.MPI_enreg%nproc_atom>1) then
-   ABI_DATATYPE_ALLOCATE(Paw_ij_all,(dtset%natom))
+   ABI_MALLOC(Paw_ij_all,(dtset%natom))
    call paw_ij_gather(Paw_ij,Paw_ij_all,-1,MPI_enreg%comm_atom)
  else
    paw_ij_all => paw_ij
@@ -2128,6 +1630,8 @@ subroutine outkss(crystal,Dtfil,Dtset,ecut,gmet,gprimd,Hdr,&
      istwf_k   =Dtset%istwfk(ikpt)
      kpoint    =Dtset%kptns(:,ikpt)
      nbandkss_k=nbandkssk(ikpt)
+     mtag      =5*(ikpt+(isppol-1)*nkpt)
+
 
      ! Get G-vectors, for this k-point.
      call get_kg(kpoint,istwf_k,ecut_eff,gmet,onpw_k,kg_k)
@@ -2139,25 +1643,22 @@ subroutine outkss(crystal,Dtfil,Dtset,ecut,gmet,gprimd,Hdr,&
      if (MPI_enreg%proc_distrb(ikpt,1,isppol)==my_rank) then
 
        write(msg,'(2a,i3,3x,a)')ch10,' k-point ',ikpt,stag(isppol)
-       call wrtout(std_out,msg,'PERS')
+       call wrtout(std_out, msg)
 
-       if (do_diago) then ! Direct diagonalization of the KS Hamiltonian.
-         if (associated(eig_ene))  then
-           ABI_DEALLOCATE(eig_ene)
-         end if
-         if (associated(eig_vec))  then
-           ABI_DEALLOCATE(eig_vec)
-         end if
+       if (do_diago) then
+         ! Direct diagonalization of the KS Hamiltonian.
+         ABI_SFREE_PTR(eig_ene)
+         ABI_SFREE_PTR(eig_vec)
          comm_self = xmpi_comm_self
 
          call timab(936,1,tsec)
 
          call init_ddiago_ctl(Diago_ctl,"Vectors",isppol,dtset%nspinor,ecut_eff,Dtset%kptns(:,ikpt),Dtset%nloalg,gmet,&
-&         nband_k=nbandkssk(ikpt),effmass_free=Dtset%effmass_free,istwf_k=Dtset%istwfk(ikpt),prtvol=Dtset%prtvol)
+           nband_k=nbandkssk(ikpt),effmass_free=Dtset%effmass_free,istwf_k=Dtset%istwfk(ikpt),prtvol=Dtset%prtvol)
 
          call ksdiago(Diago_ctl,nbandkssk(ikpt),Dtset%nfft,mgfft,Dtset%ngfft,natom,&
-&         Dtset%typat,nfft,dtset%nspinor,nspden,nsppol,Pawtab,Pawfgr,Paw_ij_all,&
-&         Psps,rprimd,vtrial,xred,onband_diago,eig_ene,eig_vec,Cprj_diago_k,comm_self,ierr)
+           Dtset%typat,nfft,dtset%nspinor,nspden,nsppol,Pawtab,Pawfgr,Paw_ij_all,&
+           Psps,rprimd,vtrial,xred,onband_diago,eig_ene,eig_vec,Cprj_diago_k,comm_self,ierr)
 
          call timab(936,2,tsec)
        end if
@@ -2168,24 +1669,25 @@ subroutine outkss(crystal,Dtfil,Dtset,ecut,gmet,gprimd,Hdr,&
 !    ==== Transfer data between master and the working proc ====
 !    ===========================================================
      call timab(937,1,tsec) !outkss(MPI_exch)
-     ABI_DATATYPE_ALLOCATE(Cprjnk_k,(0,0))
+     ABI_MALLOC(Cprjnk_k,(0,0))
      if (nprocs==1) then
 
        if (Psps%usepaw==1) then ! Copy projectors for this k-point
          n2dim=min(nbandksseff*dtset%nspinor,onband_diago)
          if (kssform==3) n2dim=nband_k*dtset%nspinor
-         ABI_DATATYPE_DEALLOCATE(Cprjnk_k)
-         ABI_DATATYPE_ALLOCATE(Cprjnk_k,(natom,n2dim))
+         ABI_FREE(Cprjnk_k)
+         ABI_MALLOC(Cprjnk_k,(natom,n2dim))
          call pawcprj_alloc(Cprjnk_k,0,dimlmn)
          if (kssform==3) then
            call pawcprj_copy(Cprj(:,ibg+1:ibg+dtset%nspinor*nband_k),Cprjnk_k)
          else
-          !MSG_WARNING("Here I have to use onband_diago") !FIXME
+           !ABI_WARNING("Here I have to use onband_diago") !FIXME
            call pawcprj_copy(Cprj_diago_k(:,1:n2dim),Cprjnk_k)
          end if
        end if
 
-     else !parallel case
+     else
+       !parallel case
 
        receiver=master; sender=MPI_enreg%proc_distrb(ikpt,1,isppol)
 
@@ -2194,13 +1696,13 @@ subroutine outkss(crystal,Dtfil,Dtset,ecut,gmet,gprimd,Hdr,&
        if (my_rank==receiver.or.my_rank==sender) then
 
          if (do_diago.and.(my_rank==receiver.and.my_rank/=sender)) then ! Alloc arrays if not done yet.
-           ABI_ALLOCATE(eig_ene,(npw_k*dtset%nspinor))
-           ABI_ALLOCATE(eig_vec,(2,npw_k*dtset%nspinor,nbandkssk(ikpt)))
+           ABI_MALLOC(eig_ene,(npw_k*dtset%nspinor))
+           ABI_MALLOC(eig_vec,(2,npw_k*dtset%nspinor,nbandkssk(ikpt)))
          end if
 
          if (.not.do_diago) then
 
-           ABI_ALLOCATE(eig_vec,(2,npw_k*dtset%nspinor,nbandkssk(ikpt)))
+           ABI_MALLOC(eig_vec,(2,npw_k*dtset%nspinor,nbandkssk(ikpt)))
 
            if (my_rank==sender) then
              do ib=1,nbandksseff
@@ -2215,36 +1717,36 @@ subroutine outkss(crystal,Dtfil,Dtset,ecut,gmet,gprimd,Hdr,&
            if (Psps%usepaw==1) then
              n2dim=min(nbandksseff*dtset%nspinor,onband_diago)
              if (kssform==3) n2dim=nband_k*dtset%nspinor
-             ABI_DATATYPE_DEALLOCATE(Cprjnk_k)
-             ABI_DATATYPE_ALLOCATE(Cprjnk_k,(natom,n2dim))
+             ABI_FREE(Cprjnk_k)
+             ABI_MALLOC(Cprjnk_k,(natom,n2dim))
              call pawcprj_alloc(Cprjnk_k,0,dimlmn)
              if (my_rank==sender) then
                if (kssform==3) then
                  call pawcprj_copy(Cprj(:,ibg+1:ibg+dtset%nspinor*nband_k),Cprjnk_k)
                else
-                !MSG_WARNING("Here I have to use onband_diago") !FIXME
+                !ABI_WARNING("Here I have to use onband_diago") !FIXME
                  call pawcprj_copy(Cprj_diago_k(:,1:n2dim),Cprjnk_k)
                end if
              end if
              if (sender/=receiver) then
-               call pawcprj_mpi_exch(natom,n2dim,dimlmn,0,Cprjnk_k,Cprjnk_k,sender,receiver,spaceComm,ierr)
+               call pawcprj_mpi_exch(natom,n2dim,dimlmn,0,Cprjnk_k,Cprjnk_k,sender,receiver,spaceComm,mtag+4,ierr)
              end if
            end if ! usepaw
 
          else ! do_diago
-           call xmpi_exch(eig_ene,nbandksseff,sender,eig_ene,receiver,spaceComm,ierr)
+           call xmpi_exch(eig_ene,nbandksseff,sender,eig_ene,receiver,spaceComm,mtag+1,ierr)
          end if
 
 !        Exchange eigenvectors.
          if (bufsz>0) then
            do i=0,bufnb-1
              call xmpi_exch(eig_vec(:,:,i*bufsz+1:(i+1)*bufsz),2*npw_k*dtset%nspinor*bufsz,&
-&             sender,eig_vec(:,:,i*bufsz+1:(i+1)*bufsz),receiver,spaceComm,ierr)
+&             sender,eig_vec(:,:,i*bufsz+1:(i+1)*bufsz),receiver,spaceComm,mtag+2,ierr)
            end do
          end if
          if (bufrt>0) then
            call xmpi_exch(eig_vec(:,:,bufnb*bufsz+1:bufnb*bufsz+bufrt),2*npw_k*dtset%nspinor*bufrt,&
-&           sender,eig_vec(:,:,bufnb*bufsz+1:bufnb*bufsz+bufrt),receiver,spaceComm,ierr)
+&           sender,eig_vec(:,:,bufnb*bufsz+1:bufnb*bufsz+bufrt),receiver,spaceComm,mtag+3,ierr)
          end if
 
        end if
@@ -2254,8 +1756,8 @@ subroutine outkss(crystal,Dtfil,Dtset,ecut,gmet,gprimd,Hdr,&
      call timab(938,1,tsec) !outkss(write)
 
      if (my_rank==master) then ! Prepare data for writing on disk.
-       ABI_ALLOCATE(ene,(nbandksseff))
-       ABI_ALLOCATE(wfg,(2,npwkss*dtset%nspinor,nbandksseff))
+       ABI_MALLOC(ene,(nbandksseff))
+       ABI_MALLOC(wfg,(2,npwkss*dtset%nspinor,nbandksseff))
        ene=zero; wfg=zero
 
        if (.not.do_diago) then
@@ -2282,7 +1784,7 @@ subroutine outkss(crystal,Dtfil,Dtset,ecut,gmet,gprimd,Hdr,&
            write(msg,'(3a)')&
 &           ' The diagonalized eigenvalues differ by more than 10^-3 Hartree',ch10,&
 &           ' with respect to the conjugated gradient values.'
-           MSG_WARNING(msg)
+           ABI_WARNING(msg)
          end if
        end if
 !
@@ -2366,7 +1868,7 @@ subroutine outkss(crystal,Dtfil,Dtset,ecut,gmet,gprimd,Hdr,&
        call wrtout(std_out,msg,'COLL')
 !
 !      * Write occupation numbers on std_out.
-       ABI_ALLOCATE(occ_k,(MAX(nband_k,nbandksseff)))
+       ABI_MALLOC(occ_k,(MAX(nband_k,nbandksseff)))
        occ_k(1:nband_k)=occ(1+bdtot_index:nband_k+bdtot_index)
        if (nband_k < nbandksseff) occ_k(nband_k+1:nbandksseff)=zero
 
@@ -2385,32 +1887,22 @@ subroutine outkss(crystal,Dtfil,Dtset,ecut,gmet,gprimd,Hdr,&
 !      ==== Write wavefunctions, KB and PAW matrix elements on disk ====
 !      =================================================================
        call write_kss_wfgk(untkss,ikpt,isppol,kpoint,dtset%nspinor,npwkss,&
-&           nbandksseff,natom,Psps,ene,occ_k,rprimd,gbig,wfg,Cprjnk_k,iomode)
+             nbandksseff,natom,Psps,ene,occ_k,rprimd,gbig,wfg,Cprjnk_k,iomode)
 
-       ABI_DEALLOCATE(occ_k)
-       ABI_DEALLOCATE(ene)
-       ABI_DEALLOCATE(wfg)
+       ABI_FREE(occ_k)
+       ABI_FREE(ene)
+       ABI_FREE(wfg)
 
      end if ! my_rank==master
      call timab(938,2,tsec) !outkss(write)
 
      if (my_rank==master.or.my_rank==MPI_enreg%proc_distrb(ikpt,1,isppol)) then
-       if (associated(eig_ene))  then
-         ABI_DEALLOCATE(eig_ene)
-       end if
-       if (associated(eig_vec))  then
-         ABI_DEALLOCATE(eig_vec)
-       end if
-
-       if (Psps%usepaw==1) then
-         call pawcprj_free(Cprjnk_k)
-       end if
+       ABI_SFREE_PTR(eig_ene)
+       ABI_SFREE_PTR(eig_vec)
+       if (Psps%usepaw==1) call pawcprj_free(Cprjnk_k)
      end if
-     ABI_DATATYPE_DEALLOCATE(Cprjnk_k)
-
-     if (allocated(kg_k))  then
-       ABI_DEALLOCATE(kg_k)
-     end if
+     ABI_FREE(Cprjnk_k)
+     ABI_SFREE(kg_k)
 
 !    if (MPI_enreg%paral_compil_kpt==1) then !cannot be used in seq run!
      if (.not.(proc_distrb_cycle(MPI_enreg%proc_distrb,ikpt,1,nband_k,isppol,my_rank))) then
@@ -2435,13 +1927,13 @@ subroutine outkss(crystal,Dtfil,Dtset,ecut,gmet,gprimd,Hdr,&
  call wrtout(std_out,msg,'COLL')
  call wrtout(ab_out,msg,'COLL')
 
- ABI_DEALLOCATE(gbig)
- ABI_DEALLOCATE(symrel2)
- ABI_DEALLOCATE(tnons2)
+ ABI_FREE(gbig)
+ ABI_FREE(symrel2)
+ ABI_FREE(tnons2)
  if (Psps%usepaw==1)  then
-   ABI_DEALLOCATE(dimlmn)
+   ABI_FREE(dimlmn)
    if (do_diago.and.MPI_enreg%nproc_atom>1) then
-     ABI_DATATYPE_DEALLOCATE(Paw_ij_all)
+     ABI_FREE(Paw_ij_all)
    end if
  end if
 !
@@ -2457,11 +1949,11 @@ subroutine outkss(crystal,Dtfil,Dtset,ecut,gmet,gprimd,Hdr,&
 
  if (associated(Cprj_diago_k)) then
    call pawcprj_free(Cprj_diago_k)
-   ABI_DATATYPE_DEALLOCATE(Cprj_diago_k)
+   ABI_FREE(Cprj_diago_k)
  end if
 
  if (lhack)  then
-   ABI_DEALLOCATE(MPI_enreg%proc_distrb)
+   ABI_FREE(MPI_enreg%proc_distrb)
  end if
 
  call wrtout(std_out, "outkss done", "COLL")
@@ -2498,17 +1990,9 @@ contains
 !! NOTES
 !! This routine is not available for paw calculations
 !!
-!! PARENTS
-!!      outkss
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
 subroutine memkss(mband,mgfft,mproj,mpsang,mpw,natom,ngfft,nkpt,nspinor,nsym,ntypat)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2629,17 +2113,9 @@ end subroutine memkss
 !! OUTPUT
 !!  Writes on standard output
 !!
-!! PARENTS
-!!      outkss
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
 subroutine dsksta(ishm,usepaw,nbandkss,mpsang,natom,ntypat,npwkss,nkpt,nspinor,nsppol,nsym2,dimlmn)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

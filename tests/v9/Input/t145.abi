@@ -1,0 +1,111 @@
+# Dynamic quadrupoles calculation for AlAs
+# (conflictive Al PSP for useylm=1 due to all KB energies being negative)
+# (M. Royo, 22.11.2021)
+
+ndtset 5
+
+#Set 1 : ground state self-consistency
+#*************************************
+getwfk1   0
+kptopt1   1
+nqpt1   0
+tolvrs1   1.0d-4
+
+
+#Set 2: Response function calculation of d/dk wave function
+#**********************************************************
+iscf2    -3
+rfelfd2   2
+tolwfr2   1.0d-4
+rfdir2   1 1 1 
+
+#Set 3: Response function calculation of d2/dkdk wave function
+#*************************************************************
+getddk3   2
+iscf3    -3
+rf2_dkdk3 3
+tolwfr3   1.0d-4
+
+#Set 4 : Response function calculation of Q=0 phonons and electric field
+#***********************************************************************
+getddk4   2
+rfelfd4   3
+rfphon4   1
+rfatpol4  1 2
+rfdir4   1 1 1
+tolvrs4   1.0d-3
+prepalw4  2
+
+#Set 5 : Dynamic Quadrupoles calculation
+#***************************************
+optdriver5 10
+get1wf5   4
+get1den5  4
+getddk5   2
+getdkdk5  3
+lw_qdrpl5 1
+
+#######################################################################
+#Common input variables
+
+getwfk  1
+useylm  1
+kptopt 2
+
+#Definition of the unit cell
+acell 3*10.61
+rprim  0.0  0.5  0.5
+       0.5  0.0  0.5
+       0.5  0.5  0.0
+
+#Definition of the atom types
+ntypat 2
+znucl 13 33
+
+#Definition of the atoms
+natom 2
+typat 1 2
+xred
+
+   0.0  0.0  0.0
+   0.25 0.25 0.25
+
+#Gives the number of bands
+nband  4
+
+#Definition of the planewave basis set
+ecut    5.0           # Maximal kinetic energy cut-off, in Hartree
+
+#Definition of the k-point grid
+ngkpt 2 2 2
+nshiftk 4
+shiftk 0.5 0.5 0.5
+       0.5 0.0 0.0
+       0.0 0.5 0.0
+       0.0 0.0 0.5
+
+#Definition of the SCF procedure
+nstep 30
+diemac 9.0
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "13al.981214.fhi, As.fhi"
+
+##############################################################
+# This section is used only for regression testing of ABINIT #
+##############################################################
+## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t145.abo, tolnlines= 12, tolabs=  3.e-04, tolrel=  5.00e-04, fld_options= -easy
+#%% [paral_info]
+#%% max_nprocs = 4
+#%% [extra_info]
+#%% authors = M. Royo
+#%% keywords = DFPT, LONGWAVE, MINIMAL
+#%% description = Dynamic Quadrupoles Calculation for AlAs
+#%% topics = longwave
+#%%<END TEST_INFO>

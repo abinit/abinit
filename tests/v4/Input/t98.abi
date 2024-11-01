@@ -1,0 +1,46 @@
+# Fake H crystal.
+# Test a very symmetric unit cell with low symmetry atomic positions
+# Space group is Cm, but ABINIT find Pm : ABINIT should be corrected !!
+# From N. Choudhury
+
+prtvol -1          # stop in abinit (main program), before call driver.
+
+acell 3*7.0
+rprim -1  1  0
+       1  0 -1
+      -1 -1 -1
+ntypat 1
+znucl 1
+xred  -0.01 -0.02 0.00
+       0.30  0.60 0.30
+       0.56  0.12 0.70
+typat 3*1
+natom 3
+ecut 1
+  kptopt 0
+nkpt 1
+nline 1
+nstep 1
+toldfe 1.0d-6
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "01h.bare"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t98.abo, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = N. Choudhury 
+#%% keywords = 
+#%% description = 
+#%%   Test a fake H system, with Cm symmetry, that ABINIT
+#%%   is unable to recognize as such (it finds Pm).
+#%%   The problem comes from the very high symmetry of the cell,
+#%%   coupled with the very low symmetry of the atomic positions.
+#%%   Contributed by N. Choudhury (see the mail of 7 Jan 2005).
+#%%<END TEST_INFO>

@@ -16,24 +16,27 @@ logger = logging.getLogger(__name__)
 # avoid possible conflicts with the packages in PYTHONPATH
 pack_dir, x = os.path.split(os.path.abspath(__file__))
 pack_dir, x = os.path.split(pack_dir)
-sys.path.insert(0,pack_dir)
+sys.path.insert(0, pack_dir)
 pack_dir, x = os.path.split(pack_dir)
-sys.path.insert(0,pack_dir)
+sys.path.insert(0, pack_dir)
 
 import tests.pymods.etsf_specs as etsf
 
 def validate(options, paths):
+    """Validate etsf file(s)."""
     retcode = 0
     for path in paths:
         errors = etsf.validate_ncfile(path)
         retcode += len(errors)
-
         #title = "=== GROUPS IN FILE %s ===" % os.path.relpath(path)
         #bar =  "=" * len(title)
         #print(bar); print(title); print(bar)
+    print("OK" if retcode == 0 else "FAILED")
     return retcode
 
+
 def groups(options, paths):
+    """Show etsf groups present in file(s)."""
     retcode = 0
     for path in paths:
         groups = etsf.find_groups(path)
@@ -44,7 +47,11 @@ def groups(options, paths):
 
     return 0
 
-def vars(options, paths):
+
+def ncvars(options, paths):
+    """
+    Validate etsf variables present in file(s).
+    """
     all_errors = []
     for path in paths:
         errors = etsf.validate_vars(path)
@@ -83,13 +90,14 @@ def get_paths(options):
 def main():
     def str_examples():
         return """\
-usage example:
-    abimem.py summary [FILES]     => Find possible memory leaks in FILE(s)
+Usage example:
 
-    FILES could be either a list of files or a single directory.
+    ncheck.py validate [FILES]     => Validate list of nc files.
+    ncheck.py groups [FILES]       => Show groups in list of nc files.
+
+    FILES could be either a single file or a list of files.
  
-    TIP: To profile the python code add `prof` before the command e.g.
-         abimem.py prof leaks [FILES]
+    TIP: To profile the python code add `prof` before the command.
 """
         return examples
 
@@ -113,9 +121,11 @@ usage example:
     subparsers = parser.add_subparsers(dest='command', help='sub-command help', description="Valid subcommands")
 
     # Build Subparsers for commands
-    p_validate = subparsers.add_parser('validate', parents=[paths_selector_parser], help="Validate etsf file(s).")
-    p_vars = subparsers.add_parser('vars', parents=[paths_selector_parser], help="Validate etsf variables present in file(s).")
-    p_groups = subparsers.add_parser('groups', parents=[paths_selector_parser], help="Show etsf groups present in file(s).")
+    p_validate = subparsers.add_parser('validate', parents=[paths_selector_parser], help=validate.__doc__)
+
+    p_vars = subparsers.add_parser('ncvars', parents=[paths_selector_parser], help=ncvars.__doc__)
+
+    p_groups = subparsers.add_parser('groups', parents=[paths_selector_parser], help=groups.__doc__)
 
     # Parse command line.
     try:

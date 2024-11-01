@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_double_grid
 !! NAME
 !!  m_double_grid
@@ -9,12 +8,10 @@
 !! and contains the mapping between the two meshes.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2019 ABINIT group (YG, SP, MJV)
+!! Copyright (C) 2008-2024 ABINIT group (YG, SP, MJV)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
 !!
 !! SOURCE
 
@@ -31,7 +28,7 @@ MODULE m_double_grid
  use m_abicore
  use m_hide_blas
  use m_bz_mesh
- use m_kptrank
+ use m_krank
 
  use m_numeric_tools,  only : wrap2_zero_one, interpol3d_indices
  use m_symtk,          only : matr3inv
@@ -167,16 +164,9 @@ CONTAINS  !=====================================================================
 !! OUTPUT
 !!  grid = double_grid to be created
 !!
-!! PARENTS
-!!      setup_bse_interp
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine double_grid_init(Kmesh_coarse,Kmesh_dense,kptrlatt_coarse,kmult,grid)
-
- implicit none
 
 !Argument ------------------------------------
 !scalars
@@ -202,8 +192,8 @@ subroutine double_grid_init(Kmesh_coarse,Kmesh_dense,kptrlatt_coarse,kmult,grid)
 
  grid%nbz_coarse = Kmesh_coarse%nbz
 
- ABI_ALLOCATE(grid%shiftk_coarse,(3,grid%nshiftk_coarse))
- ABI_ALLOCATE(grid%shiftk_dense,(3,grid%nshiftk_dense))
+ ABI_MALLOC(grid%shiftk_coarse,(3,grid%nshiftk_coarse))
+ ABI_MALLOC(grid%shiftk_dense,(3,grid%nshiftk_dense))
 
  grid%shiftk_coarse(:,:) = Kmesh_coarse%shift(:,:)
  grid%shiftk_dense(:,:) = Kmesh_dense%shift(:,:)
@@ -219,10 +209,10 @@ subroutine double_grid_init(Kmesh_coarse,Kmesh_dense,kptrlatt_coarse,kmult,grid)
  grid%kmult(:) = kmult(:)
  grid%ndiv = kmult(1)*kmult(2)*kmult(3)
 
- ABI_ALLOCATE(grid%indices_dense,(6,Kmesh_dense%nbz))
- ABI_ALLOCATE(grid%g0_dense,(3,Kmesh_dense%nbz))
- ABI_ALLOCATE(grid%iktoint_dense,(Kmesh_dense%nbz))
- ABI_ALLOCATE(grid%inttoik_dense,(Kmesh_dense%nbz))
+ ABI_MALLOC(grid%indices_dense,(6,Kmesh_dense%nbz))
+ ABI_MALLOC(grid%g0_dense,(3,Kmesh_dense%nbz))
+ ABI_MALLOC(grid%iktoint_dense,(Kmesh_dense%nbz))
+ ABI_MALLOC(grid%inttoik_dense,(Kmesh_dense%nbz))
 
  grid%maxcomp_coarse(:) = -1
 
@@ -238,10 +228,10 @@ subroutine double_grid_init(Kmesh_coarse,Kmesh_dense,kptrlatt_coarse,kmult,grid)
    grid%nbz_closedcoarse = grid%nbz_closedcoarse*(grid%maxcomp_coarse(ii)+1)
  end do
 
- ABI_ALLOCATE(grid%indices_coarse,(3,grid%nbz_closedcoarse))
- ABI_ALLOCATE(grid%g0_coarse,(3,grid%nbz_closedcoarse))
- ABI_ALLOCATE(grid%iktoint_coarse,(Kmesh_coarse%nbz))
- ABI_ALLOCATE(grid%inttoik_coarse,(grid%nbz_closedcoarse))
+ ABI_MALLOC(grid%indices_coarse,(3,grid%nbz_closedcoarse))
+ ABI_MALLOC(grid%g0_coarse,(3,grid%nbz_closedcoarse))
+ ABI_MALLOC(grid%iktoint_coarse,(Kmesh_coarse%nbz))
+ ABI_MALLOC(grid%inttoik_coarse,(grid%nbz_closedcoarse))
 
  ! We should pass 'grid' at this stage !
 
@@ -253,8 +243,8 @@ subroutine double_grid_init(Kmesh_coarse,Kmesh_dense,kptrlatt_coarse,kmult,grid)
 &    grid%nshiftk_dense, grid%shiftk_dense, grid%kmult, grid%indices_dense, grid%g0_dense, grid%iktoint_dense, &
 &    grid%inttoik_dense)
 
- ABI_ALLOCATE(grid%dense_to_coarse,(Kmesh_dense%nbz))
- ABI_ALLOCATE(grid%coarse_to_dense,(Kmesh_coarse%nbz,grid%ndiv))
+ ABI_MALLOC(grid%dense_to_coarse,(Kmesh_dense%nbz))
+ ABI_MALLOC(grid%coarse_to_dense,(Kmesh_coarse%nbz,grid%ndiv))
 
  call compute_neighbours(grid%nbz_dense, grid%iktoint_dense, grid%indices_dense, &
 & grid%maxcomp_coarse, grid%inttoik_coarse, grid%g0_coarse, grid%nbz_closedcoarse, grid%nbz_coarse,&
@@ -287,16 +277,9 @@ end subroutine double_grid_init
 !!  iktoint(nbz) = mapping between k-points in the bz and int indices
 !!  inttoik(nbz_closed) = mapping between int indices and k-points in the bz
 !!
-!! PARENTS
-!!      m_double_grid
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine create_indices_coarse(bz, nbz, klatt, nshiftk, shiftk, maxcomp, nbz_closed, indices, g0, iktoint, inttoik)
-
- implicit none
 
 !Argument ------------------------------------
 !scalars
@@ -342,7 +325,7 @@ subroutine create_indices_coarse(bz, nbz, klatt, nshiftk, shiftk, maxcomp, nbz_c
        if (.not. found) then
          write(std_out,*) "curk1 = ",curk1
          write(std_out,*) bz
-         MSG_ERROR("A k-point generated from kptrlatt cannot be found in the BZ")
+         ABI_ERROR("A k-point generated from kptrlatt cannot be found in the BZ")
        end if
      end do
    end do
@@ -371,16 +354,9 @@ end subroutine create_indices_coarse
 !!  ikpt = index of k-point we search
 !!  g0(3) = g-vector obtained
 !!
-!! PARENTS
-!!      m_bseinterp,m_double_grid
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine get_kpt_from_indices_coarse(indices,maxcomp,inttoik,allg0,nkpt,ikpt,g0)
-!subroutine get_kpt_from_indices_coarse(double_grid,indices,ikpt,g0)
- implicit none
 
 !Argument ------------------------------------
 !scalars
@@ -430,17 +406,10 @@ end subroutine get_kpt_from_indices_coarse
 !!  iktoint(nbz_dense) = mapping between k-points in the bz and int indices
 !!  inttoik(nbz_dense) = mapping between int indices and k-points in the bz
 !!
-!! PARENTS
-!!      m_double_grid
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine create_indices_dense(klatt_coarse, maxcomp, &
 & bz_dense, nbz_dense, nshiftk, shiftk, kmult, indices, g0, inttoik, iktoint)
-
- implicit none
 
 !Argument ------------------------------------
 !scalars
@@ -497,7 +466,7 @@ subroutine create_indices_dense(klatt_coarse, maxcomp, &
              if(.not. found) then
                write(std_out,*) "curk1 = ",curk1
                write(std_out,*) bz_dense
-               MSG_ERROR("Problem when creating indices")
+               ABI_ERROR("Problem when creating indices")
              end if
            end do
          end do
@@ -531,13 +500,9 @@ end subroutine create_indices_dense
 !!  ikpt = index of k-point we search
 !!  g0(3) = g-vector obtained
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 subroutine get_kpt_from_indices_dense(indices,maxcomp,kmult,inttoik,allg0,nkpt,ikpt,g0)
-!subroutine get_kpt_from_indices_dense(double_grid,indices,ikpt,g0)
- implicit none
 
 !Argument ------------------------------------
 !scalars
@@ -585,17 +550,10 @@ end subroutine get_kpt_from_indices_dense
 !!  dense_to_coarse(nbz_dense)
 !!  coarse_to_dense(nbz_coarse,ndiv)
 !!
-!! PARENTS
-!!      m_double_grid
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine compute_neighbours(nbz_dense, iktoint_dense, indices_dense, maxcomp_coarse, &
 &  inttoik_coarse, g0_coarse, nbz_closedcoarse, nbz_coarse, ndiv, dense_to_coarse, coarse_to_dense)
-
- implicit none
 
 !Argument ------------------------------------
 !scalars
@@ -665,16 +623,9 @@ end subroutine compute_neighbours
 !! kdense2div(double_grid%nbz_dense)
 !! k_dense -> idiv
 !!
-!! PARENTS
-!!      m_hexc
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine compute_corresp(double_grid, div2kdense, kdense2div)
-
- implicit none
 
 !Argument ------------------------------------
 !scalars
@@ -731,68 +682,30 @@ end subroutine compute_corresp
 !! SIDE EFFECTS
 !! All allocated memory is released.
 !!
-!! PARENTS
-!!      bethe_salpeter
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine double_grid_free(grid)
-
- implicit none
 
 !Arguments ------------------------------------
  type(double_grid_t),intent(inout) :: grid
 
 ! *********************************************************************
 
- DBG_ENTER("COLL")
-
- !@double_grid
-
 !integer
- if (allocated(grid%inttoik_coarse))  then
-   ABI_DEALLOCATE(grid%inttoik_coarse)
- end if
- if (allocated(grid%inttoik_dense))  then
-   ABI_DEALLOCATE(grid%inttoik_dense)
- end if
- if (allocated(grid%iktoint_coarse))  then
-   ABI_DEALLOCATE(grid%iktoint_coarse)
- end if
- if (allocated(grid%iktoint_dense))  then
-   ABI_DEALLOCATE(grid%iktoint_dense)
- end if
- if (allocated(grid%indices_coarse))  then
-   ABI_DEALLOCATE(grid%indices_coarse)
- end if
- if (allocated(grid%indices_dense))  then
-   ABI_DEALLOCATE(grid%indices_dense)
- end if
- if (allocated(grid%g0_coarse))  then
-   ABI_DEALLOCATE(grid%g0_coarse)
- end if
- if (allocated(grid%g0_dense))  then
-   ABI_DEALLOCATE(grid%g0_dense)
- end if
- if (allocated(grid%dense_to_coarse)) then
-   ABI_DEALLOCATE(grid%dense_to_coarse)
- end if
- if (allocated(grid%coarse_to_dense)) then
-   ABI_DEALLOCATE(grid%coarse_to_dense)
- end if
+ ABI_SFREE(grid%inttoik_coarse)
+ ABI_SFREE(grid%inttoik_dense)
+ ABI_SFREE(grid%iktoint_coarse)
+ ABI_SFREE(grid%iktoint_dense)
+ ABI_SFREE(grid%indices_coarse)
+ ABI_SFREE(grid%indices_dense)
+ ABI_SFREE(grid%g0_coarse)
+ ABI_SFREE(grid%g0_dense)
+ ABI_SFREE(grid%dense_to_coarse)
+ ABI_SFREE(grid%coarse_to_dense)
 
 !real
- if (allocated(grid%shiftk_dense)) then
-   ABI_DEALLOCATE(grid%shiftk_dense)
- end if
-
- if (allocated(grid%shiftk_coarse)) then
-   ABI_DEALLOCATE(grid%shiftk_coarse)
- end if
-
- DBG_EXIT("COLL")
+ ABI_SFREE(grid%shiftk_dense)
+ ABI_SFREE(grid%shiftk_coarse)
 
 end subroutine double_grid_free
 !!***
@@ -822,16 +735,9 @@ end subroutine double_grid_free
 !!  nkpt_sub = number of k-points of the fine grid that are around center(3)
 !!  wgt_sub(nkpt_sub) = weight of the k-points of the fine grid that are around center(3).
 !!
-!! PARENTS
-!!      eig2stern,eig2tot
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine kptfine_av(center,qptrlatt,kpt_fine,nkpt_fine,kpt_fine_sub,nkpt_sub,wgt_sub)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -858,8 +764,8 @@ subroutine kptfine_av(center,qptrlatt,kpt_fine,nkpt_fine,kpt_fine_sub,nkpt_sub,w
 
 ! *************************************************************************
 
- ABI_ALLOCATE(kpt_fine_sub_tmp,(nkpt_fine))
- ABI_ALLOCATE(wgt_sub_tmp,(nkpt_fine))
+ ABI_MALLOC(kpt_fine_sub_tmp,(nkpt_fine))
+ ABI_MALLOC(wgt_sub_tmp,(nkpt_fine))
 
 !It is easier to work in real space using the qptrlatt matrices because in this
 !referential any k-points sampling will be cast into an orthorhombic shape.
@@ -899,8 +805,8 @@ subroutine kptfine_av(center,qptrlatt,kpt_fine,nkpt_fine,kpt_fine_sub,nkpt_sub,w
  end do
 
  nkpt_sub = ii-1
- ABI_ALLOCATE(kpt_fine_sub,(nkpt_sub))
- ABI_ALLOCATE(wgt_sub,(nkpt_sub))
+ ABI_MALLOC(kpt_fine_sub,(nkpt_sub))
+ ABI_MALLOC(wgt_sub,(nkpt_sub))
 
  do jj=1,nkpt_sub
    kpt_fine_sub(jj) = kpt_fine_sub_tmp(jj)
@@ -950,8 +856,8 @@ subroutine kptfine_av(center,qptrlatt,kpt_fine,nkpt_fine,kpt_fine_sub,nkpt_sub,w
    end do
  end do
 
- ABI_DEALLOCATE(kpt_fine_sub_tmp)
- ABI_DEALLOCATE(wgt_sub_tmp)
+ ABI_FREE(kpt_fine_sub_tmp)
+ ABI_FREE(wgt_sub_tmp)
 
 end subroutine kptfine_av
 !!***
@@ -977,21 +883,14 @@ end subroutine kptfine_av
 !! TODO
 !!  This routine is not used anymore. Deprecate or Remove?
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      get_rank_1kpt,interpol3d_indices,wrap2_zero_one
-!!
 !! SOURCE
 
-subroutine k_neighbors (kpt, kptrlatt,kptrank_t, rel_kpt, kpt_phon_indices)
-
- implicit none
+subroutine k_neighbors (kpt, kptrlatt,krank, rel_kpt, kpt_phon_indices)
 
 ! inputs
  real(dp), intent(in) :: kpt(3)
  integer, intent(in) :: kptrlatt(3,3)
- type(kptrank_type), intent(in) :: kptrank_t
+ type(krank_t), intent(in) :: krank
 
 ! outputs
  real(dp), intent(out) :: rel_kpt(3)
@@ -1016,36 +915,36 @@ subroutine k_neighbors (kpt, kptrlatt,kptrank_t, rel_kpt, kpt_phon_indices)
 !order of kpt_phons:
 !ir1 ir2 ir3
  cornerkpt = (/real(ir1-1)/kptrlatt(1,1),real(ir2-1)/kptrlatt(2,2), real(ir3-1)/kptrlatt(3,3)/)
- call get_rank_1kpt (cornerkpt,symrankkpt,kptrank_t)
- kpt_phon_indices(1) = kptrank_t%invrank(symrankkpt)
+ symrankkpt = krank%get_rank(cornerkpt)
+ kpt_phon_indices(1) = krank%invrank(symrankkpt)
 !pr1 ir2 ir3
  cornerkpt = (/real(pr1-1)/kptrlatt(1,1),real(ir2-1)/kptrlatt(2,2), real(ir3-1)/kptrlatt(3,3)/)
- call get_rank_1kpt (cornerkpt,symrankkpt,kptrank_t)
- kpt_phon_indices(2) = kptrank_t%invrank(symrankkpt)
+ symrankkpt = krank%get_rank (cornerkpt)
+ kpt_phon_indices(2) = krank%invrank(symrankkpt)
 !ir1 pr2 ir3
  cornerkpt = (/real(ir1-1)/kptrlatt(1,1),real(pr2-1)/kptrlatt(2,2), real(ir3-1)/kptrlatt(3,3)/)
- call get_rank_1kpt (cornerkpt,symrankkpt,kptrank_t)
- kpt_phon_indices(3) = kptrank_t%invrank(symrankkpt)
+ symrankkpt = krank%get_rank (cornerkpt)
+ kpt_phon_indices(3) = krank%invrank(symrankkpt)
 !pr1 pr2 ir3
  cornerkpt = (/real(pr1-1)/kptrlatt(1,1),real(pr2-1)/kptrlatt(2,2), real(ir3-1)/kptrlatt(3,3)/)
- call get_rank_1kpt (cornerkpt,symrankkpt,kptrank_t)
- kpt_phon_indices(4) = kptrank_t%invrank(symrankkpt)
+ symrankkpt = krank%get_rank (cornerkpt)
+ kpt_phon_indices(4) = krank%invrank(symrankkpt)
 !ir1 ir2 pr3
  cornerkpt = (/real(ir1-1)/kptrlatt(1,1),real(ir2-1)/kptrlatt(2,2), real(pr3-1)/kptrlatt(3,3)/)
- call get_rank_1kpt (cornerkpt,symrankkpt,kptrank_t)
- kpt_phon_indices(5) = kptrank_t%invrank(symrankkpt)
+ symrankkpt = krank%get_rank (cornerkpt)
+ kpt_phon_indices(5) = krank%invrank(symrankkpt)
 !pr1 ir2 pr3
  cornerkpt = (/real(pr1-1)/kptrlatt(1,1),real(ir2-1)/kptrlatt(2,2), real(pr3-1)/kptrlatt(3,3)/)
- call get_rank_1kpt (cornerkpt,symrankkpt,kptrank_t)
- kpt_phon_indices(6) = kptrank_t%invrank(symrankkpt)
+ symrankkpt = krank%get_rank (cornerkpt)
+ kpt_phon_indices(6) = krank%invrank(symrankkpt)
 !ir1 pr2 pr3
  cornerkpt = (/real(ir1-1)/kptrlatt(1,1),real(pr2-1)/kptrlatt(2,2), real(pr3-1)/kptrlatt(3,3)/)
- call get_rank_1kpt (cornerkpt,symrankkpt,kptrank_t)
- kpt_phon_indices(7) = kptrank_t%invrank(symrankkpt)
+ symrankkpt = krank%get_rank (cornerkpt)
+ kpt_phon_indices(7) = krank%invrank(symrankkpt)
 !pr1 pr2 pr3
  cornerkpt = (/real(pr1-1)/kptrlatt(1,1),real(pr2-1)/kptrlatt(2,2), real(pr3-1)/kptrlatt(3,3)/)
- call get_rank_1kpt (cornerkpt,symrankkpt,kptrank_t)
- kpt_phon_indices(8) = kptrank_t%invrank(symrankkpt)
+ symrankkpt = krank%get_rank (cornerkpt)
+ kpt_phon_indices(8) = krank%invrank(symrankkpt)
 
 !retrieve the gkq matrix for all q, at the neighbor k vectors
  rel_kpt(1) = redkpt(1)*kptrlatt(1,1)-real(ir1-1)

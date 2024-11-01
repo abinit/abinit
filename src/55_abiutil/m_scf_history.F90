@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_scf_history
 !! NAME
 !!  m_scf_history
@@ -9,7 +8,7 @@
 !!  as needed by the specific SCF algorithm.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2011-2019 ABINIT group (MT)
+!! Copyright (C) 2011-2024 ABINIT group (MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -17,10 +16,6 @@
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -33,10 +28,11 @@
 MODULE m_scf_history
 
  use defs_basis
- use defs_abitypes
  use m_abicore
+ use m_dtset
  use m_errors
 
+ use defs_abitypes, only : MPI_type
  use m_pawcprj,  only : pawcprj_type, pawcprj_free
  use m_pawrhoij, only : pawrhoij_type, pawrhoij_nullify, pawrhoij_free
 
@@ -117,7 +113,7 @@ MODULE m_scf_history
   integer,allocatable :: hindex(:)
    ! Indexes of SCF cycles in the history
    !
-   ! For the density-based schemes (with or without wavefunctions) : 
+   ! For the density-based schemes (with or without wavefunctions) :
    ! hindex(history_size)
    ! hindex(1) is the newest SCF cycle
    ! hindex(history_size) is the oldest SCF cycle
@@ -125,8 +121,8 @@ MODULE m_scf_history
    ! For wavefunction-based schemes (outer loop of a double loop SCF):
    ! hindex(2*history_size+1)
    ! The odd indices refer to the out wavefunction,
-   ! the even indices refer to the in wavefunction (not all such wavefunctions being stored, though). 
-   ! hindex(1:2) is the newest SCF cycle, hindex(3:4) is the SCF cycle before the newest one ... In case of an 
+   ! the even indices refer to the in wavefunction (not all such wavefunctions being stored, though).
+   ! hindex(1:2) is the newest SCF cycle, hindex(3:4) is the SCF cycle before the newest one ... In case of an
    ! algorithm based on a biorthogonal ensemble of wavefunctions, the reference is stored in hindex(2*history_size+1)
    ! When the index points to a location beyond history_size, the corresponding wavefunction set must be reconstructed
    ! from the existing wavefunctions sets (to be implemented)
@@ -204,27 +200,20 @@ CONTAINS !===========================================================
 !! INPUTS
 !!  dtset <type(dataset_type)>=all input variables in this dataset
 !!  mpi_enreg=MPI-parallelisation information
-!!  usecg= if ==0 => no handling of wfs (and eigenvalues), 
-!!         if==1 => handling of density/potential AND wfs and eigen, 
+!!  usecg= if ==0 => no handling of wfs (and eigenvalues),
+!!         if==1 => handling of density/potential AND wfs and eigen,
 !!         if==2 => ONLY handling of wfs and eigen
 !!
 !! SIDE EFFECTS
 !!  scf_history=<type(scf_history_type)>=scf_history datastructure
 !!    hindex is always allocated
-!!    The density/potential arrays that are possibly allocated are : atmrho_last, deltarhor, 
+!!    The density/potential arrays that are possibly allocated are : atmrho_last, deltarhor,
 !!      pawrhoij, pawrhoij_last, rhor_last, taur_last, xreddiff, xred_last.
 !!    The wfs arrays that are possibly allocated are : cg, cprj and eigen
-!!
-!! PARENTS
-!!      gstate,scfcv
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
 subroutine scf_history_init(dtset,mpi_enreg,usecg,scf_history)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -255,10 +244,10 @@ subroutine scf_history_init(dtset,mpi_enreg,usecg,scf_history)
    my_natom=mpi_enreg%my_natom
 
    if (scf_history%history_size>=0 .and. usecg<2) then
-     ABI_ALLOCATE(scf_history%rhor_last,(nfft,dtset%nspden))
-     ABI_ALLOCATE(scf_history%taur_last,(nfft,dtset%nspden*dtset%usekden))
-     ABI_ALLOCATE(scf_history%xred_last,(3,dtset%natom))
-     ABI_DATATYPE_ALLOCATE(scf_history%pawrhoij_last,(my_natom*dtset%usepaw))
+     ABI_MALLOC(scf_history%rhor_last,(nfft,dtset%nspden))
+     ABI_MALLOC(scf_history%taur_last,(nfft,dtset%nspden*dtset%usekden))
+     ABI_MALLOC(scf_history%xred_last,(3,dtset%natom))
+     ABI_MALLOC(scf_history%pawrhoij_last,(my_natom*dtset%usepaw))
      if (dtset%usepaw==1) then
        call pawrhoij_nullify(scf_history%pawrhoij_last)
      end if
@@ -292,20 +281,20 @@ subroutine scf_history_init(dtset,mpi_enreg,usecg,scf_history)
      end if
 
      if (usecg<2) then
-       ABI_ALLOCATE(scf_history%hindex,(scf_history%history_size))
+       ABI_MALLOC(scf_history%hindex,(scf_history%history_size))
        scf_history%alpha=zero
      else
-       ABI_ALLOCATE(scf_history%hindex,(2*scf_history%history_size+1))
+       ABI_MALLOC(scf_history%hindex,(2*scf_history%history_size+1))
        scf_history%alpha=dtset%wfmix
      endif
      scf_history%hindex(:)=0
 
-     if (usecg<2) then 
-       ABI_ALLOCATE(scf_history%deltarhor,(nfft,dtset%nspden,scf_history%history_size))
-       ABI_ALLOCATE(scf_history%xreddiff,(3,dtset%natom,scf_history%history_size))
-       ABI_ALLOCATE(scf_history%atmrho_last,(nfft))
+     if (usecg<2) then
+       ABI_MALLOC(scf_history%deltarhor,(nfft,dtset%nspden,scf_history%history_size))
+       ABI_MALLOC(scf_history%xreddiff,(3,dtset%natom,scf_history%history_size))
+       ABI_MALLOC(scf_history%atmrho_last,(nfft))
        if (dtset%usepaw==1) then
-         ABI_DATATYPE_ALLOCATE(scf_history%pawrhoij,(my_natom,scf_history%history_size))
+         ABI_MALLOC(scf_history%pawrhoij,(my_natom,scf_history%history_size))
          do jj=1,scf_history%history_size
            call pawrhoij_nullify(scf_history%pawrhoij(:,jj))
          end do
@@ -313,15 +302,15 @@ subroutine scf_history_init(dtset,mpi_enreg,usecg,scf_history)
      end if
 
      if (scf_history%usecg>0) then
-       ABI_ALLOCATE(scf_history%cg,(2,scf_history%mcg,scf_history%history_size))
-       ABI_ALLOCATE(scf_history%eigen,(scf_history%meigen,scf_history%history_size))
+       ABI_MALLOC(scf_history%cg,(2,scf_history%mcg,scf_history%history_size))
+       ABI_MALLOC(scf_history%eigen,(scf_history%meigen,scf_history%history_size))
 !      Note that the allocation is made even when usepaw==0. Still, scf_history%mcprj=0 ...
-       ABI_DATATYPE_ALLOCATE(scf_history%cprj,(dtset%natom,scf_history%mcprj,scf_history%history_size))
+       ABI_MALLOC(scf_history%cprj,(dtset%natom,scf_history%mcprj,scf_history%history_size))
      end if
 
      if (scf_history%usecg==2)then
 !      This relatively small matrix is always allocated when usecg==1, even if not used
-       ABI_ALLOCATE(scf_history%dotprod_sumdiag_cgcprj_ij,(2,scf_history%history_size,scf_history%history_size))
+       ABI_MALLOC(scf_history%dotprod_sumdiag_cgcprj_ij,(2,scf_history%history_size,scf_history%history_size))
      endif
 
    end if
@@ -342,16 +331,9 @@ end subroutine scf_history_init
 !! SIDE EFFECTS
 !!  scf_history(:)=<type(scf_history_type)>=scf_history datastructure
 !!
-!! PARENTS
-!!      gstateimg,scfcv
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine scf_history_free(scf_history)
-
- implicit none
 
 !Arguments ------------------------------------
 !arrays
@@ -367,50 +349,50 @@ subroutine scf_history_free(scf_history)
 
  if (allocated(scf_history%pawrhoij_last)) then
    call pawrhoij_free(scf_history%pawrhoij_last)
-   ABI_DATATYPE_DEALLOCATE(scf_history%pawrhoij_last)
+   ABI_FREE(scf_history%pawrhoij_last)
  end if
  if (allocated(scf_history%pawrhoij)) then
    do jj=1,size(scf_history%pawrhoij,2)
      call pawrhoij_free(scf_history%pawrhoij(:,jj))
    end do
-   ABI_DATATYPE_DEALLOCATE(scf_history%pawrhoij)
+   ABI_FREE(scf_history%pawrhoij)
  end if
  if (allocated(scf_history%cprj)) then
    do jj=1,size(scf_history%cprj,3)
      call pawcprj_free(scf_history%cprj(:,:,jj))
    end do
-   ABI_DATATYPE_DEALLOCATE(scf_history%cprj)
+   ABI_FREE(scf_history%cprj)
  end if
 
  if (allocated(scf_history%hindex))       then
-   ABI_DEALLOCATE(scf_history%hindex)
+   ABI_FREE(scf_history%hindex)
  end if
  if (allocated(scf_history%deltarhor))    then
-   ABI_DEALLOCATE(scf_history%deltarhor)
+   ABI_FREE(scf_history%deltarhor)
  end if
  if (allocated(scf_history%xreddiff))     then
-   ABI_DEALLOCATE(scf_history%xreddiff)
+   ABI_FREE(scf_history%xreddiff)
  end if
  if (allocated(scf_history%atmrho_last))  then
-   ABI_DEALLOCATE(scf_history%atmrho_last)
+   ABI_FREE(scf_history%atmrho_last)
  end if
  if (allocated(scf_history%xred_last))    then
-   ABI_DEALLOCATE(scf_history%xred_last)
+   ABI_FREE(scf_history%xred_last)
  end if
  if (allocated(scf_history%rhor_last))    then
-   ABI_DEALLOCATE(scf_history%rhor_last)
+   ABI_FREE(scf_history%rhor_last)
  end if
  if (allocated(scf_history%taur_last))    then
-   ABI_DEALLOCATE(scf_history%taur_last)
+   ABI_FREE(scf_history%taur_last)
  end if
  if (allocated(scf_history%cg))           then
-   ABI_DEALLOCATE(scf_history%cg)
+   ABI_FREE(scf_history%cg)
  end if
  if (allocated(scf_history%eigen))           then
-   ABI_DEALLOCATE(scf_history%eigen)
+   ABI_FREE(scf_history%eigen)
  end if
  if (allocated(scf_history%dotprod_sumdiag_cgcprj_ij))           then
-   ABI_DEALLOCATE(scf_history%dotprod_sumdiag_cgcprj_ij)
+   ABI_FREE(scf_history%dotprod_sumdiag_cgcprj_ij)
  end if
 
  scf_history%history_size=-1
@@ -435,16 +417,9 @@ end subroutine scf_history_free
 !! SIDE EFFECTS
 !!  scf_history(:)=<type(scf_history_type)>=scf_history datastructure
 !!
-!! PARENTS
-!!      gstateimg,m_scf_history
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine scf_history_nullify(scf_history)
-
- implicit none
 
 !Arguments ------------------------------------
 !arrays

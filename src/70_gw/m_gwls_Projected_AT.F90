@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_gwls_Projected_AT
 !! NAME
 !! m_gwls_Projected_AT
@@ -7,14 +6,10 @@
 !!  .
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2019 ABINIT group (JLJ, BR, MC)
+!! Copyright (C) 2009-2024 ABINIT group (JLJ, BR, MC)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -72,14 +67,6 @@ contains
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      gwls_ComputeCorrelationEnergy
-!!
-!! CHILDREN
-!!      cleanup_lanczosresolvents,compute_resolvent_column_shift_lanczos
-!!      get_projection_band_indices,pc_k_valence_kernel,setup_lanczosresolvents
-!!      wf_block_distribute,xmpi_sum
 !!
 !! SOURCE
 
@@ -242,7 +229,7 @@ if (mpi_enreg%me == 0 ) then
 end if
 
 
-ABI_ALLOCATE(frequency_indices_array, (2,number_of_frequency_blocks))
+ABI_MALLOC(frequency_indices_array, (2,number_of_frequency_blocks))
 frequency_indices_array = 0
 
 iw_ext_min = 1
@@ -319,14 +306,14 @@ call setup_LanczosResolvents(kmax_analytic, prec)
 !=================================================
 nvec = 1
 
-ABI_ALLOCATE(list_left_vectors, (npw_g,nvec))
-ABI_ALLOCATE(seed_vector, (npw_g))
+ABI_MALLOC(list_left_vectors, (npw_g,nvec))
+ABI_MALLOC(seed_vector, (npw_g))
 
-ABI_ALLOCATE(psik_wrk,  (2,npw_k))
-ABI_ALLOCATE(psikb_wrk, (2,npw_kb))
+ABI_MALLOC(psik_wrk,  (2,npw_k))
+ABI_MALLOC(psikb_wrk, (2,npw_kb))
 
-ABI_ALLOCATE(psikg_wrk, (2,npw_g))
-ABI_ALLOCATE(psikg,     (2,npw_g))
+ABI_MALLOC(psikg_wrk, (2,npw_g))
+ABI_MALLOC(psikg,     (2,npw_g))
 
 list_AT_Lanczos(:,:) = cmplx_0
 
@@ -346,9 +333,9 @@ iw_ext_max = frequency_indices_array(2,ifreq_block)
 
 nz = iw_ext_max -iw_ext_min + 1
 
-ABI_ALLOCATE( list_z_P, (nz))
-ABI_ALLOCATE( list_z_Q, (nz))
-ABI_ALLOCATE(matrix_elements_resolvent, (nz,nvec))
+ABI_MALLOC( list_z_P, (nz))
+ABI_MALLOC( list_z_Q, (nz))
+ABI_MALLOC(matrix_elements_resolvent, (nz,nvec))
 
 
 external_omega = list_external_omega(iw_ext_min)
@@ -450,9 +437,9 @@ end if
 
 end do
 
-ABI_DEALLOCATE( list_z_P)
-ABI_DEALLOCATE( list_z_Q)
-ABI_DEALLOCATE(matrix_elements_resolvent)
+ABI_FREE( list_z_P)
+ABI_FREE( list_z_Q)
+ABI_FREE(matrix_elements_resolvent)
 
 end do
 
@@ -465,16 +452,16 @@ if (mpi_enreg%me == 0 ) then
   close(io_unit)
 end if 
 
-ABI_DEALLOCATE(list_left_vectors)
-ABI_DEALLOCATE(seed_vector)
-ABI_DEALLOCATE(frequency_indices_array)
+ABI_FREE(list_left_vectors)
+ABI_FREE(seed_vector)
+ABI_FREE(frequency_indices_array)
 
 
-ABI_DEALLOCATE(psik_wrk)
-ABI_DEALLOCATE(psikb_wrk)
+ABI_FREE(psik_wrk)
+ABI_FREE(psikb_wrk)
 
-ABI_DEALLOCATE(psikg_wrk)
-ABI_DEALLOCATE(psikg)
+ABI_FREE(psikg_wrk)
+ABI_FREE(psikg)
 
 
 

@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_gwls_polarisability
 !! NAME
 !! m_gwls_polarisability
@@ -7,14 +6,10 @@
 !!  .
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2019 ABINIT group (JLJ, BR, MC)
+!! Copyright (C) 2009-2024 ABINIT group (JLJ, BR, MC)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -50,9 +45,10 @@ real(dp),public :: matrix_function_omega(2)
 
 
 ! Some timing variables
-integer,  public :: counter_fft, counter_sqmr, counter_rprod, counter_proj, counter_H
+integer,  public :: counter_fft = 0, counter_sqmr = 0, counter_rprod = 0 , counter_proj = 0, counter_H = 0
 
-real(dp), public :: time1, time2, time_fft, time_sqmr, time_rprod,time_proj,time_H
+real(dp), public :: time1 = zero, time2 = zero, time_fft = zero 
+real(dp), public :: time_sqmr = zero, time_rprod = zero, time_proj = zero, time_H = zero
 
 real(dp), allocatable, public :: Sternheimer_solutions_zero(:,:,:,:)
 integer, public :: index_solution=0
@@ -79,12 +75,6 @@ contains
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      gwls_polarisability
-!!
-!! CHILDREN
-!!      epsilon_k
 !!
 !! SOURCE
 
@@ -132,7 +122,7 @@ real(dp) ::  list_QMR_frequencies(2,2)
 
 
 integer,  save ::  icounter = 0
-real(dp), save ::  total_time1, total_time2, total_time
+real(dp), save ::  total_time1 = zero, total_time2 = zero, total_time = zero
 
 
 integer :: num_op_v, i_op_v, case_op_v
@@ -170,14 +160,14 @@ cplex  = 2 ! complex potential
 
 mpi_band_rank    = mpi_enreg%me_band
 
-ABI_ALLOCATE(psik,                (2,npw_kb))
-ABI_ALLOCATE(psik_alltoall,       (2,npw_g))
-ABI_ALLOCATE(psik_wrk_alltoall,   (2,npw_g))
-ABI_ALLOCATE(psik_tmp_alltoall,   (2,npw_g))
-ABI_ALLOCATE(psik_in_alltoall,    (2,npw_g))
+ABI_MALLOC(psik,                (2,npw_kb))
+ABI_MALLOC(psik_alltoall,       (2,npw_g))
+ABI_MALLOC(psik_wrk_alltoall,   (2,npw_g))
+ABI_MALLOC(psik_tmp_alltoall,   (2,npw_g))
+ABI_MALLOC(psik_in_alltoall,    (2,npw_g))
 
-ABI_ALLOCATE(psir,    (2,n4,n5,n6))
-ABI_ALLOCATE(psir_ext,(2,n4,n5,n6))
+ABI_MALLOC(psir,    (2,n4,n5,n6))
+ABI_MALLOC(psir_ext,(2,n4,n5,n6))
 
 
 OPTION_TIMAB = 2
@@ -228,7 +218,7 @@ else
   write(message,"(a,es16.8,3a)")&
     "omega=",omega,",",ch10,&
     "but either it's real or imaginary part need to be 0 for the polarisability routine to work."
-  MSG_ERROR(message)
+  ABI_ERROR(message)
 end if
 
 
@@ -288,8 +278,8 @@ OPTION_TIMAB = 1
 call timab(GWLS_TIMAB,OPTION_TIMAB,tsec)
 
 
-ABI_ALLOCATE(psik_ext,(2,npw_kb))
-ABI_ALLOCATE(psik_ext_alltoall,(2,npw_g))
+ABI_MALLOC(psik_ext,(2,npw_kb))
+ABI_MALLOC(psik_ext_alltoall,(2,npw_g))
 
 ! fill the array psik_ext with copies of the external state
 do mb = 1, blocksize
@@ -308,8 +298,8 @@ psir_ext(2,:,:,:) = -psir_ext(2,:,:,:)
 
 
 ! Don't need these arrays anymore...
-ABI_DEALLOCATE(psik_ext)
-ABI_DEALLOCATE(psik_ext_alltoall)
+ABI_FREE(psik_ext)
+ABI_FREE(psik_ext_alltoall)
 
 OPTION_TIMAB = 2
 call timab(GWLS_TIMAB,OPTION_TIMAB,tsec)
@@ -621,14 +611,14 @@ OPTION_TIMAB = 1
 call timab(GWLS_TIMAB,OPTION_TIMAB,tsec)
 
 
-ABI_DEALLOCATE(psik)
-ABI_DEALLOCATE(psik_alltoall)
-ABI_DEALLOCATE(psik_wrk_alltoall)
-ABI_DEALLOCATE(psik_tmp_alltoall)
-ABI_DEALLOCATE(psik_in_alltoall)
+ABI_FREE(psik)
+ABI_FREE(psik_alltoall)
+ABI_FREE(psik_wrk_alltoall)
+ABI_FREE(psik_tmp_alltoall)
+ABI_FREE(psik_in_alltoall)
 
-ABI_DEALLOCATE(psir)
-ABI_DEALLOCATE(psir_ext)
+ABI_FREE(psir)
+ABI_FREE(psir_ext)
 
 OPTION_TIMAB = 2
 call timab(GWLS_TIMAB,OPTION_TIMAB,tsec)
@@ -661,12 +651,6 @@ end subroutine Pk
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      gwls_polarisability
-!!
-!! CHILDREN
-!!      epsilon_k
-!!
 !! SOURCE
 
 subroutine epsilon_k(psi_out,psi_in,omega)
@@ -698,12 +682,6 @@ end subroutine epsilon_k
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      gwls_ComputeCorrelationEnergy,gwls_ComputePoles,gwls_GenerateEpsilon
-!!
-!! CHILDREN
-!!      epsilon_k
-!!
 !! SOURCE
 
 subroutine set_dielectric_function_frequency(omega)
@@ -730,11 +708,6 @@ end subroutine set_dielectric_function_frequency
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      epsilon_k
 !!
 !! SOURCE
 

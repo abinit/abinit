@@ -1,0 +1,51 @@
+#
+#  compare two pseudopotentials, generated from APE with the same input
+#   but kept in fhi (pspcod 6) and UPF (pspcod 11) formats.
+#
+#  Only about 4-5 significant digits are reproduced between the 2 datasets
+#
+ndtset 2
+typat1 1 1
+typat2 2 2
+
+optnlxccc 2
+prtvol 10
+acell 3*10.2
+rprim
+0 0.5 0.5
+0.5 0. 0.5
+0.5 0.5 0
+ecut 8
+ngkpt 4 4 4
+nshiftk 4
+shiftk
+0.5 0.5 0.5
+0.5 0   0
+0   0.5 0
+0   0   0.5
+toldfe 1.e-10
+nstep 20
+natom 2
+xred
+0 0 0
+0.25 0.25 0.25
+ntypat 2
+znucl 14 14
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "14-Si.nlcc.fhi, 14-Si.nlcc.UPF"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t45.abo, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00, fld_options = -medium
+#%% [paral_info]
+#%% max_nprocs = 10
+#%% [extra_info]
+#%% authors = M. Verstraete
+#%% keywords = 
+#%% description = 
+#%%   diamond Si. Compare 2 pseudopotentials made with the APE code, in fhi and UPF formats.
+#%%<END TEST_INFO>

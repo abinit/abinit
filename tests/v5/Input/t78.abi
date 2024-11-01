@@ -1,0 +1,67 @@
+# Iron carbonate
+# Test the recognition of really inaccurate atomic coordinates using tolsym.
+
+ndtset 3
+
+ntypat 3
+znucl 26 6 8
+typat 1 1 2 2 6*3
+
+natom 10
+
+#Atomic coordinates for dtset 1 and 2 : they are very inaccurate, and break the wanted symmetry, see xred3
+xred
+      0.000000000  -0.000000000   0.000000000
+      0.500000000   0.500000000   0.500000000
+      0.249919131   0.249919131   0.249919131
+      0.750080869   0.750080869   0.750080869
+     -0.019563280   0.519848977   0.249446873
+      0.519848977   0.249446873  -0.019563280
+      0.249446873  -0.019563280   0.519848977
+      0.019563280   0.480151023   0.750553127
+      0.480151023   0.750553127   0.019563280
+      0.750553127   0.019563280   0.480151023
+
+#For dtset 2, test the recognition using a very large tolerance
+tolsym2  0.010
+
+#Atomic coordinates for dtset 3
+xred3
+ 0.0         0.0         0.0
+ 0.5         0.5         0.5
+ 0.25        0.25        0.25
+-0.25       -0.25       -0.25
+ 0.5274     -0.0274      0.25
+ 0.25        0.5274     -0.0274
+-0.0274      0.25        0.5274
+-0.5274      0.0274     -0.25
+-0.25       -0.5274      0.0274
+ 0.0274     -0.25       -0.5274
+
+#This is largely irrelevant ...
+acell 3*12
+ecut 2
+nline 1
+nstep 2
+tolwfr 1.e-8
+
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/26fe.pspnc, PseudosTM_pwteter/6c.pspnc, PseudosTM_pwteter/8o.pspnc"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t78.abo, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
+#%% [paral_info]
+#%% max_nprocs = 6
+#%% [extra_info]
+#%% authors = Unknown
+#%% keywords = 
+#%% description = 
+#%%   FeCO3, rhombohedral.
+#%%   This test checks the capability of ABINIT to identify a numerically broken symmetry,
+#%%   using the tolsym input variables.
+#%%<END TEST_INFO>

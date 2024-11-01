@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_eliashberg_1d
 !! NAME
 !!  m_eliashberg_1d
@@ -7,14 +6,10 @@
 !!  Solve the Eliashberg equations in the isotropic case
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2019 ABINIT group (MVer)
+!!  Copyright (C) 2008-2024 ABINIT group (MVer)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -64,19 +59,12 @@ contains
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      elphon
-!!
-!! CHILDREN
-!!
 !! NOTES
 !!  na2f = number of frequency points for alpha^2F function
 !!
 !! SOURCE
 
 subroutine eliashberg_1d(a2f_1d,elph_ds,mustar)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -114,10 +102,10 @@ subroutine eliashberg_1d(a2f_1d,elph_ds,mustar)
  nmatsu = 50
 !write(std_out,*) ' eliashberg_1d : nmatsu = ', nmatsu
 
- ABI_ALLOCATE(lambda_1d,(-nmatsu:nmatsu))
- ABI_ALLOCATE(z_1d,(-nmatsu:nmatsu))
- ABI_ALLOCATE(delta_1d,(-nmatsu:nmatsu))
- ABI_ALLOCATE(mm_1d,(-nmatsu:nmatsu,-nmatsu:nmatsu))
+ ABI_MALLOC(lambda_1d,(-nmatsu:nmatsu))
+ ABI_MALLOC(z_1d,(-nmatsu:nmatsu))
+ ABI_MALLOC(delta_1d,(-nmatsu:nmatsu))
+ ABI_MALLOC(mm_1d,(-nmatsu:nmatsu,-nmatsu:nmatsu))
 
  unit_lam=get_unit()
  fname=trim(elph_ds%elph_base_name) // "_LAM"
@@ -223,10 +211,10 @@ subroutine eliashberg_1d(a2f_1d,elph_ds,mustar)
    write(std_out,*) 'Eliashberg Tc nonetheless = ', tc, ' (Ha) = ', tc/kb_HaK, ' (K)'
  end if
 
- ABI_DEALLOCATE(lambda_1d)
- ABI_DEALLOCATE(z_1d)
- ABI_DEALLOCATE(delta_1d)
- ABI_DEALLOCATE(mm_1d)
+ ABI_FREE(lambda_1d)
+ ABI_FREE(z_1d)
+ ABI_FREE(delta_1d)
+ ABI_FREE(mm_1d)
 
  close (UNIT=unit_z)
  close (UNIT=unit_lam)
@@ -254,17 +242,10 @@ end subroutine eliashberg_1d
 !! SIDE EFFECTS
 !!   delta_1d = imaginary gap function as a function of frequency changed
 !!
-!! PARENTS
-!!      eliashberg_1d
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 
 subroutine eli_app_m_1d (delta_1d,lambda_1d,nmatsu,z_1d)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -373,17 +354,11 @@ end subroutine eli_app_m_1d
 !! SIDE EFFECTS
 !!   delta_1d = imaginary gap function as a function of frequency
 !!
-!! PARENTS
-!!      eliashberg_1d
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine eli_diag_m_1d (delta_1d,lambda_1d,maxeigval,mustar,nmatsu,tc,z_1d)
 
  use m_linalg_interfaces
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -478,11 +453,6 @@ end subroutine eli_diag_m_1d
 !! OUTPUT
 !!   lambda_1d = coupling constant as a function of frequency
 !!
-!! PARENTS
-!!      eliashberg_1d
-!!
-!! CHILDREN
-!!
 !! NOTES
 !!  lambda is used at points which are differences of Matsubara freqs,
 !!  and hence is tabulated on points going through 0.
@@ -490,8 +460,6 @@ end subroutine eli_diag_m_1d
 !! SOURCE
 
 subroutine eli_lambda_1d (a2f_1d,elph_ds,lambda_1d,nmatsu,tc)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -553,16 +521,9 @@ end subroutine eli_lambda_1d
 !! SIDE EFFECTS
 !!   delta_1d = imaginary gap function as a function of frequency
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      eli_app_m_1d
-!!
 !! SOURCE
 
 subroutine eli_m_iter_1d (delta_1d,lambda_1d,maxeigval,nmatsu,z_1d)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -684,11 +645,6 @@ end subroutine eli_m_iter_1d
 !! OUTPUT
 !!   z_1d = renormalizing Z as a function of frequency
 !!
-!! PARENTS
-!!      eliashberg_1d
-!!
-!! CHILDREN
-!!
 !! NOTES
 !!  Because Z only depends on lambda(n-n'), and lambda(omega)
 !!   is an even function, Z is symmetrical in n and -n
@@ -697,8 +653,6 @@ end subroutine eli_m_iter_1d
 !! SOURCE
 
 subroutine eli_z_1d (lambda_1d,nmatsu,z_1d)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

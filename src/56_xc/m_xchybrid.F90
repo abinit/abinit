@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_xchybrid
 !! NAME
 !!  m_xchybrid
@@ -6,14 +5,10 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2015-2019 ABINIT group (FA,MT,FJ)
+!!  Copyright (C) 2015-2024 ABINIT group (FA,MT,FJ)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -30,10 +25,10 @@ module m_xchybrid
  use m_errors
  use m_xcdata
  use libxc_functionals
+ use m_dtset
 
  use m_geometry,    only : metric
- use defs_abitypes, only : MPI_type, dataset_type
- use m_dtset,       only : dtset_copy, dtset_free
+ use defs_abitypes, only : MPI_type
  use m_rhotoxc,     only : rhotoxc
  use m_mkcore,      only : mkcore
 
@@ -93,19 +88,10 @@ contains
 !!   Vxc=Vx_libXC[rho_val] + Vxc_gga[rho_core+rho_val] - Vx_gga[rho_val]
 !!  but needs one less call to libxc
 !!
-!! PARENTS
-!!      forces,forstr,rhotov,setvtr
-!!
-!! CHILDREN
-!!      libxc_functionals_end,libxc_functionals_init,metric,mkcore,rhotoxc
-!!      xcdata_init
-!!
 !! SOURCE
 
 subroutine xchybrid_ncpp_cc(dtset,enxc,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,strsxc,vxcavg,xccc3d,vxc,grxc,xcccrc,xccc1d,&
 &                           xred,n1xccc,optstr)
-
- implicit none
 
 !Arguments -------------------------------------------------------------
 !scalars
@@ -138,9 +124,6 @@ subroutine xchybrid_ncpp_cc(dtset,enxc,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,s
 
  DBG_ENTER("COLL")
 
-
- nmxc=(dtset%usepawu==4).or.(dtset%usepawu==14)
-
 !Not relevant for PAW
  if (dtset%usepaw==1) return
  if(n3xccc==0) return
@@ -150,7 +133,7 @@ subroutine xchybrid_ncpp_cc(dtset,enxc,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,s
 !Not applicable for electron-positron
  if (dtset%positron>0) then
    msg='NCPP+Hybrid functionals not applicable for electron-positron calculations!'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
 !Select the GGA on which the hybrid functional is based on
@@ -170,19 +153,19 @@ subroutine xchybrid_ncpp_cc(dtset,enxc,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,s
 !Define xcdata_hybrid as well as xcdata_gga
  call xcdata_init(xcdata_hybrid,dtset=dtset)
  call xcdata_init(xcdata_gga,dtset=dtset,auxc_ixc=0,ixc=ixc_gga)
- libxc_gga_initialized=0
+ libxc_gga_initialized=0 ; nmxc=.false.
 
  nkxc=0;ndim=0;usexcnhat=0;n3xccc_null=0
- ABI_ALLOCATE(kxc_dum,(nfft,nkxc))
- ABI_ALLOCATE(vxc_corr,(nfft,dtset%nspden))
+ ABI_MALLOC(kxc_dum,(nfft,nkxc))
+ ABI_MALLOC(vxc_corr,(nfft,dtset%nspden))
 
  if (present(vxc).and.optstr_loc==0) then
 !Initialize args for rhotoxc
    option=0 ! XC only
-   ABI_ALLOCATE(xccc3d_null,(n3xccc_null))
+   ABI_MALLOC(xccc3d_null,(n3xccc_null))
 !  Compute Vxc^Hybrid(rho_val)
    call rhotoxc(enxc,kxc_dum,mpi_enreg,nfft,ngfft,nhat,ndim,nhatgr,ndim,nkxc,nkxc,nmxc,&
-&   n3xccc_null,option,dtset%paral_kgb,rhor,rprimd,&
+&   n3xccc_null,option,rhor,rprimd,&
 &   strsxc,usexcnhat,vxc,vxcavg,xccc3d_null,xcdata_hybrid)
 
 !  Initialize GGA functional
@@ -194,11 +177,11 @@ subroutine xchybrid_ncpp_cc(dtset,enxc,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,s
 !Add Vxc^GGA(rho_core+rho_val)
    if (ixc_gga<0) then
      call rhotoxc(enxc_corr,kxc_dum,mpi_enreg,nfft,ngfft,nhat,ndim,nhatgr,ndim,nkxc,nkxc,nmxc,&
-&     n3xccc,option,dtset%paral_kgb,rhor,rprimd,&
+&     n3xccc,option,rhor,rprimd,&
 &     strsxc_corr,usexcnhat,vxc_corr,vxcavg_corr,xccc3d,xcdata_gga,xc_funcs=xc_funcs_gga)
    else
      call rhotoxc(enxc_corr,kxc_dum,mpi_enreg,nfft,ngfft,nhat,ndim,nhatgr,ndim,nkxc,nkxc,nmxc,&
-&     n3xccc,option,dtset%paral_kgb,rhor,rprimd,&
+&     n3xccc,option,rhor,rprimd,&
 &     strsxc_corr,usexcnhat,vxc_corr,vxcavg_corr,xccc3d,xcdata_gga)
    end if
    enxc=enxc+enxc_corr
@@ -209,11 +192,11 @@ subroutine xchybrid_ncpp_cc(dtset,enxc,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,s
 !Substract Vxc^GGA(rho_val)
    if (ixc_gga<0) then
      call rhotoxc(enxc_corr,kxc_dum,mpi_enreg,nfft,ngfft,nhat,ndim,nhatgr,ndim,nkxc,nkxc,nmxc,&
-&     n3xccc_null,option,dtset%paral_kgb,rhor,rprimd,strsxc_corr,usexcnhat,&
+&     n3xccc_null,option,rhor,rprimd,strsxc_corr,usexcnhat,&
 &     vxc_corr,vxcavg_corr,xccc3d_null,xcdata_gga,xc_funcs=xc_funcs_gga)
    else
      call rhotoxc(enxc_corr,kxc_dum,mpi_enreg,nfft,ngfft,nhat,ndim,nhatgr,ndim,nkxc,nkxc,nmxc,&
-&     n3xccc_null,option,dtset%paral_kgb,rhor,rprimd,strsxc_corr,usexcnhat,&
+&     n3xccc_null,option,rhor,rprimd,strsxc_corr,usexcnhat,&
 &     vxc_corr,vxcavg_corr,xccc3d_null,xcdata_gga)
    end if
    enxc=enxc-enxc_corr
@@ -222,7 +205,7 @@ subroutine xchybrid_ncpp_cc(dtset,enxc,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,s
    strsxc(:)=strsxc(:)-strsxc_corr(:)
 
 !Release memory
-   ABI_DEALLOCATE(xccc3d_null)
+   ABI_FREE(xccc3d_null)
  end if
 
  if (calcgrxc) then
@@ -233,8 +216,8 @@ subroutine xchybrid_ncpp_cc(dtset,enxc,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,s
      call libxc_functionals_init(ixc_gga,dtset%nspden,xc_functionals=xc_funcs_gga)
      libxc_gga_initialized=1
    end if
-   ABI_ALLOCATE(dyfrx2_dum,(3,3,dtset%natom))
-   ABI_ALLOCATE(xccc3d_null,(n3xccc))
+   ABI_MALLOC(dyfrx2_dum,(3,3,dtset%natom))
+   ABI_MALLOC(xccc3d_null,(n3xccc))
    option=1
 ! calculate xccc3d in this case
    call mkcore(strsxc_corr,dyfrx2_dum,grxc,mpi_enreg,dtset%natom,nfft,dtset%nspden,dtset%ntypat,ngfft(1),n1xccc,ngfft(2),&
@@ -242,18 +225,18 @@ subroutine xchybrid_ncpp_cc(dtset,enxc,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,s
 !Add Vxc^GGA(rho_core+rho_val)
    if (ixc_gga<0) then
      call rhotoxc(enxc_corr,kxc_dum,mpi_enreg,nfft,ngfft,nhat,ndim,nhatgr,ndim,nkxc,nkxc,nmxc,&
-&     n3xccc,option,dtset%paral_kgb,&
+&     n3xccc,option,&
 &     rhor,rprimd,strsxc_corr,usexcnhat,vxc_corr,vxcavg_corr,xccc3d_null,xcdata_gga,xc_funcs=xc_funcs_gga)
    else
      call rhotoxc(enxc_corr,kxc_dum,mpi_enreg,nfft,ngfft,nhat,ndim,nhatgr,ndim,nkxc,nkxc,nmxc,&
-&     n3xccc,option,dtset%paral_kgb,&
+&     n3xccc,option,&
 &     rhor,rprimd,strsxc_corr,usexcnhat,vxc_corr,vxcavg_corr,xccc3d_null,xcdata_gga)
    end if
    option=2
    call mkcore(strsxc_corr,dyfrx2_dum,grxc,mpi_enreg,dtset%natom,nfft,dtset%nspden,dtset%ntypat,ngfft(1),n1xccc,ngfft(2),&
 &   ngfft(3),option,rprimd,dtset%typat,ucvol,vxc_corr,xcccrc,xccc1d,xccc3d_null,xred)
-   ABI_DEALLOCATE(dyfrx2_dum)
-   ABI_DEALLOCATE(xccc3d_null)
+   ABI_FREE(dyfrx2_dum)
+   ABI_FREE(xccc3d_null)
  end if
 
  if(optstr_loc==1) then
@@ -266,11 +249,11 @@ subroutine xchybrid_ncpp_cc(dtset,enxc,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,s
    option=0
    if (ixc_gga<0) then
      call rhotoxc(enxc_corr,kxc_dum,mpi_enreg,nfft,ngfft,nhat,ndim,nhatgr,ndim,nkxc,nkxc,nmxc,&
-&     n3xccc,option,dtset%paral_kgb,rhor,rprimd,&
+&     n3xccc,option,rhor,rprimd,&
 &     strsxc_corr,usexcnhat,vxc,vxcavg_corr,xccc3d,xcdata_gga,xc_funcs=xc_funcs_gga)
    else
      call rhotoxc(enxc_corr,kxc_dum,mpi_enreg,nfft,ngfft,nhat,ndim,nhatgr,ndim,nkxc,nkxc,nmxc,&
-&     n3xccc,option,dtset%paral_kgb,rhor,rprimd,&
+&     n3xccc,option,rhor,rprimd,&
 &     strsxc_corr,usexcnhat,vxc,vxcavg_corr,xccc3d,xcdata_gga)
    end if
  end if
@@ -279,8 +262,8 @@ subroutine xchybrid_ncpp_cc(dtset,enxc,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,s
  if(libxc_gga_initialized==1) then
    call libxc_functionals_end(xc_functionals=xc_funcs_gga)
  end if
- ABI_DEALLOCATE(vxc_corr)
- ABI_DEALLOCATE(kxc_dum)
+ ABI_FREE(vxc_corr)
+ ABI_FREE(kxc_dum)
 
  DBG_EXIT("COLL")
 
@@ -320,17 +303,9 @@ end subroutine xchybrid_ncpp_cc
 !! Current restrictions are:
 !!  a - Spin-polarized case not tested.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      dtset_copy,dtset_free,libxc_functionals_end,libxc_functionals_init
-!!      rhohxc
-!!
 !! SOURCE
 
 subroutine hybrid_corr(dtset,ixc,nkxc,mpi_enreg,nfft,ngfft,nspden,rhor,rprimd,hybrid_mixing,vxc,enxc)
-
- implicit none
 
 !Arguments -------------------------------------------------------------
 !scalars
@@ -352,6 +327,7 @@ subroutine hybrid_corr(dtset,ixc,nkxc,mpi_enreg,nfft,ngfft,nspden,rhor,rprimd,hy
 !integer :: i1,i2,i3,k1,n1,n2,n3
 !real(dp) :: kx,rho,rhomax,ftest
 !scalars
+ logical :: nmxc
  character(len=500) :: message
  type(dataset_type) :: dtLocal
 !arrays
@@ -371,7 +347,7 @@ subroutine hybrid_corr(dtset,ixc,nkxc,mpi_enreg,nfft,ngfft,nspden,rhor,rprimd,hy
 
  if (nspden > 2) then
    message = ' kxc_alda does not work yet for nspden > 2.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 !Copy the input variables from the current dataset to a temporary one
@@ -379,6 +355,7 @@ subroutine hybrid_corr(dtset,ixc,nkxc,mpi_enreg,nfft,ngfft,nspden,rhor,rprimd,hy
  call dtset_copy(dtLocal, dtset)
  dtLocal%intxc = 0
  dtLocal%ixc   = -101
+ nmxc=(dtset%usepaw==1.and.mod(abs(dtset%usepawu),10)==4)
 
  ! Reinitialize the libxc module with the overriden values
  if (dtset%ixc<0) then
@@ -389,15 +366,13 @@ subroutine hybrid_corr(dtset,ixc,nkxc,mpi_enreg,nfft,ngfft,nspden,rhor,rprimd,hy
  end if
 
  call rhohxc(dtLocal,enxc_corr,dum,0,kxcr,mpi_enreg,nfft,dum,dum,0,dum,0,nkxc,0,&
-& dtset%usepawu==4.or.dtset%usepawu==14,nspden,n3xccc,&
-& 0,dum,rhor,rprimd,strsxc,1,dum,vxc_corr,dum,xccc3d)
+& nmxc,nspden,n3xccc,0,dum,rhor,rprimd,strsxc,1,dum,vxc_corr,dum,xccc3d)
 
  vxc(:,:) = vxc(:,:) + hybrid_mixing*vxc_corr(:,:)
  enxc = enxc + hybrid_mixing*enxc_corr
 
  call rhohxc(dtLocal,enxc_corr,dum,0,kxcr,mpi_enreg,dum,dum,dum,0,dum,0,nkxc,0,&
-& dtset%usepawu==4.or.dtset%usepawu==14,nspden,0,&
-& 0,dum,rhor,rprimd,strsxc,1,dum,vxc_corr,vxcavg,0)
+& nmxc,nspden,0,0,dum,rhor,rprimd,strsxc,1,dum,vxc_corr,vxcavg,0)
 
  vxc(:,:) = vxc(:,:) - hybrid_mixing*vxc_corr(:,:)
  enxc = enxc - hybrid_mixing*enxc_corr

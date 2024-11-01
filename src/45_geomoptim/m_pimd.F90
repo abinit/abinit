@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_pimd
 !! NAME
 !!  m_pimd
@@ -8,14 +7,10 @@
 !!  Path-Integral Molecular Dynamics (PIMD) implementation.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2010-2019 ABINIT group (GG,MT)
+!! Copyright (C) 2010-2024 ABINIT group (GG,MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -28,8 +23,8 @@
 MODULE m_pimd
 
  use defs_basis
- use defs_abitypes
  use m_abicore
+ use m_dtset
  use m_errors
  use m_io_tools
  use m_random_zbq
@@ -135,11 +130,6 @@ CONTAINS !===========================================================
 !!  pimd_param=datastructure of type pimd_type.
 !!             several parameters for Path-Integral MD.
 !!
-!! PARENTS
-!!      gstateimg
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine pimd_init(dtset,pimd_param,is_master)
@@ -187,10 +177,10 @@ subroutine pimd_init(dtset,pimd_param,is_master)
      end if
    end if
    if(dtset%imgmov==13)then
-     ABI_ALLOCATE(pimd_param%zeta_prev,(3,dtset%natom,dtset%nimage,dtset%nnos))
-     ABI_ALLOCATE(pimd_param%zeta     ,(3,dtset%natom,dtset%nimage,dtset%nnos))
-     ABI_ALLOCATE(pimd_param%zeta_next,(3,dtset%natom,dtset%nimage,dtset%nnos))
-     ABI_ALLOCATE(pimd_param%dzeta    ,(3,dtset%natom,dtset%nimage,dtset%nnos))
+     ABI_MALLOC(pimd_param%zeta_prev,(3,dtset%natom,dtset%nimage,dtset%nnos))
+     ABI_MALLOC(pimd_param%zeta     ,(3,dtset%natom,dtset%nimage,dtset%nnos))
+     ABI_MALLOC(pimd_param%zeta_next,(3,dtset%natom,dtset%nimage,dtset%nnos))
+     ABI_MALLOC(pimd_param%dzeta    ,(3,dtset%natom,dtset%nimage,dtset%nnos))
      pimd_param%zeta_prev=zero
      pimd_param%zeta     =zero
      pimd_param%zeta_next=zero
@@ -199,7 +189,7 @@ subroutine pimd_init(dtset,pimd_param,is_master)
    if(dtset%useria==37)then
      ierr=open_file('pimd_traj.dat',msg,newunit=pimd_param%traj_unit,form='unformatted')
      if (ierr/=0) then
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
    end if
  end if
@@ -223,11 +213,6 @@ end subroutine pimd_init
 !! SIDE EFFECTS
 !!  pimd_param=datastructure of type pimd_type.
 !!             several parameters for Path-Integral MD.
-!!
-!! PARENTS
-!!      m_pimd
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -285,11 +270,6 @@ end subroutine pimd_nullify
 !!  pimd_param=datastructure of type pimd_type.
 !!            several parameters for PIMD.
 !!
-!! PARENTS
-!!      gstateimg
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine pimd_destroy(pimd_param)
@@ -308,18 +288,10 @@ subroutine pimd_destroy(pimd_param)
 
 !************************************************************************
 
- if (allocated(pimd_param%zeta_prev)) then
-   ABI_DEALLOCATE(pimd_param%zeta_prev)
- end if
- if (allocated(pimd_param%zeta)) then
-   ABI_DEALLOCATE(pimd_param%zeta)
- end if
- if (allocated(pimd_param%zeta_next)) then
-   ABI_DEALLOCATE(pimd_param%zeta_next)
- end if
- if (allocated(pimd_param%dzeta)) then
-   ABI_DEALLOCATE(pimd_param%dzeta)
- end if
+ ABI_SFREE(pimd_param%zeta_prev)
+ ABI_SFREE(pimd_param%zeta)
+ ABI_SFREE(pimd_param%zeta_next)
+ ABI_SFREE(pimd_param%dzeta)
 
  if (pimd_param%qtb_file_unit>0) then
    if (is_open(pimd_param%qtb_file_unit)) then
@@ -355,11 +327,6 @@ end subroutine pimd_destroy
 !! OUTPUT
 !!  qtb_file_unit=if a PIQTB_force file exists, return its file unit.
 !!
-!! PARENTS
-!!      m_pimd
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine pimd_init_qtb(dtset,qtb_file_unit)
@@ -388,23 +355,23 @@ subroutine pimd_init_qtb(dtset,qtb_file_unit)
 !Check consistency of the read parameters with ABINIT input file
  if (abs(dtion_qtb-dtset%dtion)>tol6) then
    msg='dtion read from piqtb_force file different from dtion in input file!'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
  if (abs(mdtemp_qtb-dtset%mdtemp(2))>tol6) then
    msg='mdtemp read from piqtb_force file different from mdtemp(2) in input file!'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
  if (ntimimage_qtb<dtset%ntimimage) then
    msg='ntimimage read from piqtb_force file smaller than ntimimage in input file!'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
  if (nimage_qtb/=dtset%nimage) then
    msg='nimage read from piqtb_force file different from nimage in input file!'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
  if (ndof_qtb/=3*dtset%natom*dtset%nimage) then
    msg='Nb of degrees of freedom read from piqtb_force not consistent with input file!'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
 end subroutine pimd_init_qtb
@@ -426,16 +393,9 @@ end subroutine pimd_init_qtb
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      gstateimg
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine pimd_skip_qtb(pimd_param)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -452,7 +412,7 @@ subroutine pimd_skip_qtb(pimd_param)
 
  if (pimd_param%qtb_file_unit<0) then
    msg='QTB forces file unit should be positive!'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
 !Skip one line QTB random forces file
@@ -480,22 +440,16 @@ end subroutine pimd_skip_qtb
 !!
 !! SIDE EFFECTS
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 function pimd_is_restart(mass,vel,vel_cell)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
  integer :: pimd_is_restart
 !arrays
  real(dp),intent(in) :: mass(:,:),vel(:,:,:)
- real(dp),intent(in),optional :: vel_cell(:,:,:)
+ real(dp),intent(in),optional :: vel_cell(:,:)
 !Local variables-------------------------------
 !scalars
  real(dp),parameter :: zero_temp=tol7
@@ -530,15 +484,9 @@ end function pimd_is_restart
 !!
 !! SIDE EFFECTS
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 function pimd_temperature(mass,vel)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -558,11 +506,11 @@ function pimd_temperature(mass,vel)
  natom_mass=size(mass,1);nmass=size(mass,2)
  if (ndir/=3.or.natom<=0.or.nimage<=0) then
    msg='Wrong sizes for vel array !'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
  if (natom/=natom_mass.or.(nmass/=1.and.nmass/=nimage)) then
    msg='Wrong dimensions for array mass !'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
  v2=zero
@@ -619,20 +567,12 @@ end function pimd_temperature
 !!
 !! SIDE EFFECTS
 !!
-!! PARENTS
-!!      pimd_langevin_npt,pimd_langevin_nvt,pimd_nosehoover_npt
-!!      pimd_nosehoover_nvt
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine pimd_print(constraint,constraint_output,eharm,eharm_virial,epot,&
 &          forces,inertmass,irestart,itimimage,kt,natom,optcell,prtstress,&
 &          prtvolimg,rprimd,stress,temperature1,temperature2,traj_unit,&
 &          trotter,vel,vel_cell,xcart,xred)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -650,16 +590,17 @@ subroutine pimd_print(constraint,constraint_output,eharm,eharm_virial,epot,&
  real(dp) :: mtot
  character(len=500) :: msg
 !arrays
- real(dp) :: acell(3),cdm(3),forcetot(3),rprim(3,3)
+ real(dp) :: acell(3),cdm_cart(3),cdm_red(3),forcetot(3),rprim(3,3)
  real(dp),allocatable :: centroid(:,:),qudeloc(:)
 
 !************************************************************************
 
 !Temperature
- if(itimimage==1)then
-   if(irestart==0) then
+if(itimimage==1)then
+   msg=ch10
+   if(mod(irestart,10)==0) then
      write(msg,'(2a)') ch10,' This is a PIMD calculation from scratch'
-   else if (irestart==1) then
+   else if (mod(irestart,10)==1) then
      write(msg,'(2a)') ch10,' This is a RESTART calculation'
    end if
    call wrtout(ab_out,msg,'COLL')
@@ -725,15 +666,19 @@ subroutine pimd_print(constraint,constraint_output,eharm,eharm_virial,epot,&
 
 !position of mass center
  if (prtvolimg<=1) then
-   mtot=zero;cdm=zero
+   mtot=zero;cdm_cart=zero;cdm_red=zero
    do iimage=1,trotter
      do iatom=1,natom
-       cdm(:)=cdm(:)+inertmass(iatom)*xcart(:,iatom,iimage)
+       cdm_cart(:)=cdm_cart(:)+inertmass(iatom)*xcart(:,iatom,iimage)
+       cdm_red (:)=cdm_red (:)+inertmass(iatom)*xred (:,iatom,iimage)
        mtot=mtot+inertmass(iatom)
      end do
    end do
-   cdm=cdm/mtot
-   write(msg,'(3a,3f18.10)') ch10,' Center of mass:',ch10,cdm(:)
+   cdm_cart=cdm_cart/mtot
+   cdm_red =cdm_red /mtot
+   write(msg,'(3a,3x,3f18.10,3a,3x,3f18.10)') ch10,&
+&    ' Center of mass, in cartes. coordinates :',ch10,cdm_cart(:),ch10,&
+&    ' Center of mass, in reduced coordinates :',ch10,cdm_red(:)
    call wrtout(std_out,msg,'COLL')
    call wrtout(ab_out,msg,'COLL')
  end if
@@ -828,8 +773,8 @@ subroutine pimd_print(constraint,constraint_output,eharm,eharm_virial,epot,&
  end if
 
 !Centroids and wave-packet spatial spreads
- ABI_ALLOCATE(centroid,(3,natom))
- ABI_ALLOCATE(qudeloc,(natom))
+ ABI_MALLOC(centroid,(3,natom))
+ ABI_MALLOC(qudeloc,(natom))
  centroid=zero;qudeloc=zero
  do iimage=1,trotter
    do iatom=1,natom
@@ -854,8 +799,8 @@ subroutine pimd_print(constraint,constraint_output,eharm,eharm_virial,epot,&
    write(msg,'(i4,4f18.10)') iatom,centroid(1:3,iatom),qudeloc(iatom)
    call wrtout(std_out,msg,'COLL')
  end do
- ABI_DEALLOCATE(centroid)
- ABI_DEALLOCATE(qudeloc)
+ ABI_FREE(centroid)
+ ABI_FREE(qudeloc)
 
 !Fake statement
  return;ii=prtvolimg
@@ -888,17 +833,9 @@ end subroutine pimd_print
 !! SIDE EFFECTS
 !!  iseed=seed for random number generator
 !!
-!! PARENTS
-!!      pimd_langevin_npt,pimd_langevin_nvt,pimd_nosehoover_npt
-!!      pimd_nosehoover_nvt
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine pimd_initvel(iseed,mass,natom,temperature,trotter,vel,constraint,wtatcon)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -921,7 +858,7 @@ subroutine pimd_initvel(iseed,mass,natom,temperature,trotter,vel,constraint,wtat
  natom_mass=size(mass,1);nmass=size(mass,2)
  if (natom/=natom_mass.or.(nmass/=1.and.nmass/=trotter)) then
    msg='Wrong dimensions for array mass !'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
 !Compute total mass (of non-constrained atoms)
@@ -1014,16 +951,9 @@ end subroutine pimd_initvel
 !! SIDE EFFECTS
 !!  iseed=seed for random number generator (used only if irandom=1)
 !!
-!! PARENTS
-!!      pimd_langevin_npt,pimd_langevin_nvt
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine pimd_langevin_random(alea,irandom,iseed,langev,mass,natom,trotter,zeroforce)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1045,7 +975,7 @@ subroutine pimd_langevin_random(alea,irandom,iseed,langev,mass,natom,trotter,zer
  natom_mass=size(mass,1);nmass=size(mass,2)
  if (natom/=natom_mass.or.(nmass/=1.and.nmass/=trotter)) then
    msg='Wrong dimensions for array mass !'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
  mtot=sum(mass(1:natom,1:nmass))
@@ -1124,16 +1054,9 @@ end subroutine pimd_langevin_random
 !! OUTPUT
 !!  alea(3,natom,trotter)=set of random forces
 !!
-!! PARENTS
-!!      pimd_langevin_nvt
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine pimd_langevin_random_qtb(alea,langev,mass,natom,qtb_file_unit,trotter,zeroforce)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1154,12 +1077,12 @@ subroutine pimd_langevin_random_qtb(alea,langev,mass,natom,qtb_file_unit,trotter
 
  if (qtb_file_unit<0) then
    msg='QTB forces file unit should be positive!'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
  natom_mass=size(mass,1);nmass=size(mass,2)
  if (natom/=natom_mass.or.(nmass/=1.and.nmass/=trotter)) then
    msg='Wrong dimensions for array mass !'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
 !Read QTB random forces
@@ -1220,16 +1143,9 @@ end subroutine pimd_langevin_random_qtb
 !! SIDE EFFECTS
 !!  iseed=seed for random number generator (used only if irandom=1)
 !!
-!! PARENTS
-!!      pimd_langevin_npt
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine pimd_langevin_random_bar(alea_bar,irandom,iseed)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1294,16 +1210,9 @@ end subroutine pimd_langevin_random_bar
 !! SIDE EFFECTS
 !!  iseed=seed for random number generator (used only if irandom=1)
 !!
-!! PARENTS
-!!      pimd_langevin_npt,pimd_langevin_nvt
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine pimd_langevin_random_init(irandom,iseed)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1346,17 +1255,9 @@ end subroutine pimd_langevin_random_init
 !!
 !! SIDE EFFECTS
 !!
-!! PARENTS
-!!      pimd_langevin_npt,pimd_langevin_nvt,pimd_nosehoover_npt
-!!      pimd_nosehoover_nvt
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine pimd_energies(eharm,eharm_virial,epot,etotal_img,forces,natom,spring,trotter,xcart)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1375,7 +1276,7 @@ subroutine pimd_energies(eharm,eharm_virial,epot,etotal_img,forces,natom,spring,
 !************************************************************************
 
 !Compute the centroid
- ABI_ALLOCATE(centroid,(3,natom))
+ ABI_MALLOC(centroid,(3,natom))
  centroid=zero
  do iimage=1,trotter
    do iatom=1,natom
@@ -1412,7 +1313,7 @@ subroutine pimd_energies(eharm,eharm_virial,epot,etotal_img,forces,natom,spring,
  end do
  eharm_virial=eharm_virial/dble(two*trotter)
 
- ABI_DEALLOCATE(centroid)
+ ABI_FREE(centroid)
 
 end subroutine pimd_energies
 !!***
@@ -1443,16 +1344,9 @@ end subroutine pimd_energies
 !!    at input:  forces from electronic calculation
 !!    at output: forces from electronic calculation + quantum spring contribution
 !!
-!! PARENTS
-!!      pimd_langevin_npt,pimd_langevin_nvt,pimd_nosehoover_nvt
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine pimd_forces(forces,natom,spring,transform,trotter,xcart)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1472,7 +1366,7 @@ subroutine pimd_forces(forces,natom,spring,transform,trotter,xcart)
  natom_spring=size(spring,1);nspring=size(spring,2)
  if (natom/=natom_spring.or.(nspring/=1.and.nspring/=trotter)) then
    msg='Wrong dimensions for array spring !'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
  if (transform==0) then
@@ -1532,17 +1426,10 @@ end subroutine pimd_forces
 !!
 !! SIDE EFFECTS
 !!
-!! PARENTS
-!!      pimd_langevin_npt,pimd_langevin_nvt
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine pimd_langevin_forces(alea,forces,forces_langevin,friction,&
 &                               langev,mass,natom,trotter,vel)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1563,7 +1450,7 @@ subroutine pimd_langevin_forces(alea,forces,forces_langevin,friction,&
  natom_mass=size(mass,1);nmass=size(mass,2)
  if (natom/=natom_mass.or.(nmass/=1.and.nmass/=trotter)) then
    msg='Wrong dimensions for array mass !'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
  do iimage=1,trotter
@@ -1605,17 +1492,10 @@ end subroutine pimd_langevin_forces
 !!
 !! SIDE EFFECTS
 !!
-!! PARENTS
-!!      pimd_nosehoover_nvt
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine pimd_nosehoover_forces(dzeta,forces,forces_nosehoover,mass,natom,&
 &                                 nnos,trotter,vel)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1636,7 +1516,7 @@ subroutine pimd_nosehoover_forces(dzeta,forces,forces_nosehoover,mass,natom,&
  natom_mass=size(mass,1);nmass=size(mass,2)
  if (natom/=natom_mass.or.(nmass/=1.and.nmass/=trotter)) then
    msg='Wrong dimensions for array mass !'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
   do iimage=1,trotter
@@ -1680,18 +1560,10 @@ end subroutine pimd_nosehoover_forces
 !!
 !! SIDE EFFECTS
 !!
-!! PARENTS
-!!      pimd_langevin_npt,pimd_langevin_nvt,pimd_nosehoover_npt
-!!      pimd_nosehoover_nvt
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine pimd_stresses(mass,natom,quantummass,stress_pimd,stressin,&
 &                        temperature,temperature_therm,trotter,vel,volume,xcart)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1712,7 +1584,7 @@ subroutine pimd_stresses(mass,natom,quantummass,stress_pimd,stressin,&
  natom_mass=size(mass,1);nmass=size(mass,2)
  if (natom/=natom_mass.or.(nmass/=1.and.nmass/=trotter)) then
    msg='Wrong dimensions for array mass !'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
  kt=temperature*kb_HaK
@@ -1819,15 +1691,9 @@ end subroutine pimd_stresses
 !!
 !! SIDE EFFECTS
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 function pimd_diff_stress(stress_pimd,stress_target)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1886,16 +1752,9 @@ end function pimd_diff_stress
 !!
 !! SIDE EFFECTS
 !!
-!! PARENTS
-!!      pimd_langevin_nvt,pimd_nosehoover_nvt
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine pimd_predict_taylor(dtion,forces,mass,natom,trotter,vel,xcart,xcart_next)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1916,7 +1775,7 @@ subroutine pimd_predict_taylor(dtion,forces,mass,natom,trotter,vel,xcart,xcart_n
  natom_mass=size(mass,1);nmass=size(mass,2)
  if (natom/=natom_mass.or.(nmass/=1.and.nmass/=trotter)) then
    msg='Wrong dimensions for array mass !'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
  do iimage=1,trotter
@@ -1956,16 +1815,9 @@ end subroutine pimd_predict_taylor
 !!
 !! SIDE EFFECTS
 !!
-!! PARENTS
-!!      pimd_langevin_nvt,pimd_nosehoover_nvt
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine pimd_predict_verlet(dtion,forces,mass,natom,trotter,xcart,xcart_next,xcart_prev)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1987,7 +1839,7 @@ subroutine pimd_predict_verlet(dtion,forces,mass,natom,trotter,xcart,xcart_next,
  natom_mass=size(mass,1);nmass=size(mass,2)
  if (natom/=natom_mass.or.(nmass/=1.and.nmass/=trotter)) then
    msg='Wrong dimensions for array mass !'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
  do iimage=1,trotter
@@ -2039,17 +1891,10 @@ end subroutine pimd_predict_verlet
 !!
 !! SIDE EFFECTS
 !!
-!! PARENTS
-!!      pimd_nosehoover_nvt
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine pimd_nosehoover_propagate(dtion,dzeta,mass,natom,nnos,qmass,temperature,&
 &                                    trotter,vel,zeta,zeta_next,zeta_prev,itimimage,transform)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2074,15 +1919,15 @@ subroutine pimd_nosehoover_propagate(dtion,dzeta,mass,natom,nnos,qmass,temperatu
  natom_mass=size(mass,1);nmass=size(mass,2)
  if (natom/=natom_mass.or.(nmass/=1.and.nmass/=trotter)) then
    msg='Wrong dimensions for array mass !'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
  if (nnos<3) then
    msg='Not available for nnos<3 !'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
  kt=temperature*kb_HaK
- ABI_ALLOCATE(thermforces,(3,natom,trotter,nnos))
+ ABI_MALLOC(thermforces,(3,natom,trotter,nnos))
 
 !forces on the thermostats
  do inos=1,nnos
@@ -2179,7 +2024,7 @@ subroutine pimd_nosehoover_propagate(dtion,dzeta,mass,natom,nnos,qmass,temperatu
 
  end select
 
- ABI_DEALLOCATE(thermforces)
+ ABI_FREE(thermforces)
 
 end subroutine pimd_nosehoover_propagate
 !!***
@@ -2214,16 +2059,9 @@ end subroutine pimd_nosehoover_propagate
 !! SIDE EFFECTS
 !!  array(3,natom,trotter)=array to be transformed
 !!
-!! PARENTS
-!!      pimd_langevin_nvt,pimd_nosehoover_nvt
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine pimd_coord_transform(array,ioption,natom,transform,trotter)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2249,7 +2087,7 @@ subroutine pimd_coord_transform(array,ioption,natom,transform,trotter)
 
 !  ---------------- From primitive to transformed coordinates ------------
    if (ioption==+1) then
-     ABI_ALLOCATE(array_temp,(3,natom,trotter))
+     ABI_MALLOC(array_temp,(3,natom,trotter))
 
      array_temp(:,:,1)=zero
      do iimage=1,trotter
@@ -2275,13 +2113,13 @@ subroutine pimd_coord_transform(array,ioption,natom,transform,trotter)
 
      array=array_temp/dble(trotter)
 
-     ABI_DEALLOCATE(array_temp)
+     ABI_FREE(array_temp)
 
 !  ---------------- From transformed to primitive coordinates ------------
    else if (ioption==-1) then
 
-    ABI_ALLOCATE(array_temp,(3,natom,trotter))  !real part
-    ABI_ALLOCATE(nrm,(trotter,trotter))  !real part
+    ABI_MALLOC(array_temp,(3,natom,trotter))  !real part
+    ABI_MALLOC(nrm,(trotter,trotter))  !real part
 
    do iimage=1,trotter
      nrm(iimage,1)=one
@@ -2305,8 +2143,8 @@ subroutine pimd_coord_transform(array,ioption,natom,transform,trotter)
     end do
     array=array_temp
 
-    ABI_DEALLOCATE(array_temp)
-    ABI_DEALLOCATE(nrm)
+    ABI_FREE(array_temp)
+    ABI_FREE(nrm)
 
    end if ! ioption
 
@@ -2316,7 +2154,7 @@ subroutine pimd_coord_transform(array,ioption,natom,transform,trotter)
 !  ---------------- From primitive to transformed coordinates ------------
    if (ioption==+1) then
 
-     ABI_ALLOCATE(array_temp,(3,natom,trotter))
+     ABI_MALLOC(array_temp,(3,natom,trotter))
      array_temp=zero
      do iimage=1,trotter
        iimagep=iimage+1;if(iimage==trotter) iimagep=1
@@ -2336,12 +2174,12 @@ subroutine pimd_coord_transform(array,ioption,natom,transform,trotter)
          end do
        end do
      end if
-     ABI_DEALLOCATE(array_temp)
+     ABI_FREE(array_temp)
 
 !  ---------------- From transformed to primitive coordinates ------------
    else if (ioption==-1) then
 
-     ABI_ALLOCATE(array_temp,(3,natom,trotter))
+     ABI_MALLOC(array_temp,(3,natom,trotter))
      array_temp=zero
      do iimage=1,trotter
        do iatom=1,natom
@@ -2363,7 +2201,7 @@ subroutine pimd_coord_transform(array,ioption,natom,transform,trotter)
        end do
      end if
      array(:,:,:)=array_temp(:,:,:)
-     ABI_DEALLOCATE(array_temp)
+     ABI_FREE(array_temp)
 
    end if ! ioption
 
@@ -2404,16 +2242,9 @@ end subroutine pimd_coord_transform
 !! NOTES
 !!  Back transformation (ioption=-1) not implemented !
 !!
-!! PARENTS
-!!      pimd_langevin_nvt,pimd_nosehoover_nvt
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine pimd_force_transform(forces,ioption,natom,transform,trotter)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2431,7 +2262,7 @@ subroutine pimd_force_transform(forces,ioption,natom,transform,trotter)
 
  if (ioption==-1) then
    msg='Back transformation not implemented !'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
 !=== No transformation ===================================================
@@ -2443,8 +2274,8 @@ subroutine pimd_force_transform(forces,ioption,natom,transform,trotter)
  else if (transform==1) then
 
    !normal mode forces
-   ABI_ALLOCATE(forces_temp,(3,natom,trotter))
-   ABI_ALLOCATE(nrm,(trotter,trotter))
+   ABI_MALLOC(forces_temp,(3,natom,trotter))
+   ABI_MALLOC(nrm,(trotter,trotter))
 
    do iimage=1,trotter
      nrm(iimage,1)=one
@@ -2469,14 +2300,14 @@ subroutine pimd_force_transform(forces,ioption,natom,transform,trotter)
 
    forces=forces_temp
 
-   ABI_DEALLOCATE(forces_temp)
-   ABI_DEALLOCATE(nrm)
+   ABI_FREE(forces_temp)
+   ABI_FREE(nrm)
 
 !=== Staging transformation ==============================================
  else if (transform==2) then
 
    !staging forces
-   ABI_ALLOCATE(forces_temp,(3,natom,trotter))
+   ABI_MALLOC(forces_temp,(3,natom,trotter))
    forces_temp=zero
    do iimage=1,trotter
      do iatom=1,natom
@@ -2496,7 +2327,7 @@ subroutine pimd_force_transform(forces,ioption,natom,transform,trotter)
      end do
    end if
    forces=forces_temp
-   ABI_DEALLOCATE(forces_temp)
+   ABI_FREE(forces_temp)
 
  end if ! transform
 
@@ -2531,17 +2362,10 @@ end subroutine pimd_force_transform
 !! SIDE EFFECTS
 !!  forces(3,natom,trotter)=array containing forces
 !!
-!! PARENTS
-!!      pimd_langevin_npt,pimd_langevin_nvt,pimd_nosehoover_nvt
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine pimd_apply_constraint(constraint,constraint_output,forces,mass,natom,&
 &                                trotter,wtatcon,xcart)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2664,16 +2488,9 @@ end subroutine pimd_apply_constraint
 !! NOTES
 !!  Back transformation (ioption=-1) not implemented !
 !!
-!! PARENTS
-!!      pimd_langevin_npt,pimd_langevin_nvt,pimd_nosehoover_nvt
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine pimd_mass_spring(inertmass,kt,mass,natom,quantummass,spring,transform,trotter)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2696,11 +2513,11 @@ subroutine pimd_mass_spring(inertmass,kt,mass,natom,quantummass,spring,transform
  natom_spring=size(spring,1);nspring=size(spring,2)
  if (natom/=natom_mass.or.(nmass/=1.and.nmass/=trotter)) then
    msg='Wrong dimensions for array mass !'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
  if (natom/=natom_spring.or.(nspring/=1.and.nspring/=trotter)) then
    msg='Wrong dimensions for array spring !'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
 !=== No transformation ===================================================
@@ -2712,7 +2529,7 @@ subroutine pimd_mass_spring(inertmass,kt,mass,natom,quantummass,spring,transform
 !=== Normal mode transformation ==========================================
  else if (transform==1) then
 
-   ABI_ALLOCATE(lambda,(trotter))
+   ABI_MALLOC(lambda,(trotter))
    lambda(1)=zero; lambda(trotter)=four*dble(trotter)
    do kk=2,trotter/2
      lambda(2*kk-2)=four*dble(trotter)* &
@@ -2740,7 +2557,7 @@ subroutine pimd_mass_spring(inertmass,kt,mass,natom,quantummass,spring,transform
      mass(:,iimage)=mass(:,iimage)/gammasquare
    end do
 
-   ABI_DEALLOCATE(lambda)
+   ABI_FREE(lambda)
 
 !=== Staging transformation ==============================================
  else if (transform==2) then
@@ -2754,7 +2571,7 @@ subroutine pimd_mass_spring(inertmass,kt,mass,natom,quantummass,spring,transform
    end if
 
    !Staging masses (mass_temp)
-   ABI_ALLOCATE(mass_temp,(natom,trotter))
+   ABI_MALLOC(mass_temp,(natom,trotter))
    mass_temp(1:natom,1)=zero
    if (nmass>1) then
      do iimage=2,trotter
@@ -2768,7 +2585,7 @@ subroutine pimd_mass_spring(inertmass,kt,mass,natom,quantummass,spring,transform
        spring(1:natom,iimage)=mass_temp(1:natom,iimage)*dble(trotter)*kt*kt
      end do
    end if
-   ABI_DEALLOCATE(mass_temp)
+   ABI_FREE(mass_temp)
 
  end if
 

@@ -1,0 +1,73 @@
+# Computation of optimal crystal structure by using a Genetic Algorithm
+
+# Number of GA steps
+
+ntimimage 5
+
+# Optimize inner coordinates
+
+optcell 0
+dilatmx 2.0
+chkdilatmx 0
+
+# number of population elements
+
+nimage 10
+
+# do not use symmetry
+
+chksymbreak 0
+
+#Generate random atomic positions but no closer than covalent radius
+
+random_atpos 2
+
+# choose Genetic Algorithm
+
+imgmov 4
+
+# variables for GA
+
+ga_fitness 1
+ga_opt_percent 0.25
+ga_n_rules 4
+ga_rules 1 2 3 4
+
+acell 3*5.0d0
+ecut 2.0d0
+ecutsm 0.5d0
+
+natom 8 
+ntime 5
+nstep 10
+ntypat  1
+toldff  2.0d-4
+typat  8*1
+znucl 1 
+
+# Kpoint grid
+
+kptopt 1
+ngkpt 1 1 1
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosGTH_pwteter/01h.pspgth"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t27.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy
+#%% [paral_info]
+#%% max_nprocs = 10
+#%% [extra_info]
+#%% authors = Unknown
+#%% keywords = STRING
+#%% description = 
+#%%   Genetic algorithm structure random search.
+#%%   Hydrogen has been used as an example. No physical meaning.
+#%%   Number of images is only 10 but experience shows that at
+#%%   least 20 are fine.
+#%% topics = GeoOpt
+#%%<END TEST_INFO>

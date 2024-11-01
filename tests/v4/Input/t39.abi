@@ -1,0 +1,90 @@
+t38o_DS2_WFK
+1      ! kpoint
+1      ! band
+0      ! Do not analyze a GW wavefunction from a QPS file
+2.6    ! radius of the sphere
+0      ! exit
+1      ! continue
+1      ! kpoint
+1      ! band
+0      ! Do not analyze a GW wavefunction from a QPS file
+2.8    ! radius of the sphere
+0      ! exit
+1      ! continue
+1      ! kpoint
+1      ! band
+0      ! Do not analyze a GW wavefunction from a QPS file
+3.0    ! radius of the sphere
+0      ! exit
+1      ! continue
+1      ! kpoint
+2      ! band
+0      ! Do not analyze a GW wavefunction from a QPS file
+2.8    ! radius of the sphere
+0      ! exit
+1      ! continue
+1      ! kpoint
+3      ! band
+0      ! Do not analyze a GW wavefunction from a QPS file
+2.8    ! radius of the sphere
+0      ! exit
+1      ! continue
+1      ! kpoint
+4      ! band
+0      ! Do not analyze a GW wavefunction from a QPS file
+2.8    ! radius of the sphere
+0      ! exit
+1      ! continue
+1      ! kpoint
+5      ! band
+0      ! Do not analyze a GW wavefunction from a QPS file
+2.8    ! radius of the sphere
+0      ! exit
+1      ! continue
+1      ! kpoint
+6      ! band
+0      ! Do not analyze a GW wavefunction from a QPS file
+2.8    ! radius of the sphere
+0      ! exit
+1      ! continue
+2      ! kpoint
+4      ! band
+0      ! Do not analyze a GW wavefunction from a QPS file
+2.8    ! radius of the sphere
+0      ! exit
+1      ! continue
+2      ! kpoint
+5      ! band
+0      ! Do not analyze a GW wavefunction from a QPS file
+2.8    ! radius of the sphere
+0      ! exit
+1      ! continue
+3      ! kpoint
+4      ! band
+0      ! Do not analyze a GW wavefunction from a QPS file
+2.8    ! radius of the sphere
+0      ! exit
+1      ! continue
+3      ! kpoint
+5      ! band
+0      ! Do not analyze a GW wavefunction from a QPS file
+2.8    ! radius of the sphere
+0      ! exit
+0      ! final exit
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = cut3d
+#%% test_chain = t38.abi, t39.abi
+#%% [files]
+#%% files_to_test = 
+#%%   t39.stdout, tolnlines = 4, tolabs = 1.100e-03, tolrel = 2.0e-02, fld_options = -easy
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = Unknown
+#%% keywords =  
+#%% description = 
+#%%   Analysis of the angular momentum content of the wavefunctions
+#%%   of the previous test (Silicon), at Gamma, X and L, using cut3d .
+#%%<END TEST_INFO>

@@ -1,5 +1,5 @@
 This directory, v5, contains tests which
-are related to the development of the various development in
+are related to various developments in
 version 5.x.x of Abinit
 
 Please, see the README file in the tests directory (above this one) to get help.
@@ -14,7 +14,7 @@ Please, see the README file in the tests directory (above this one) to get help.
 
 * Tests 21-29 concern response functions
 
-* Tests 31-40 are related to PAW
+* Tests 31-37 are related to PAW
 
 * Tests 41-60 concern ground state
 

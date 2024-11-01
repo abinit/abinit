@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_oper
 !! NAME
 !!  m_oper
@@ -6,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2019 ABINIT group (BAmadon)
+!! Copyright (C) 2006-2024 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -14,10 +13,6 @@
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -88,7 +83,7 @@ MODULE m_oper
   integer :: has_opermatlu
 
   character(len=12) :: whichoper
-  ! describe the type of operator computed (LDA, DMFT, KS..)
+  ! describe the type of operator computed (DFT, DMFT, KS..)
 
 !  ! Polarisation
   type(matlu_type), allocatable :: matlu(:)
@@ -120,13 +115,6 @@ CONTAINS  !=====================================================================
 !! OUTPUTS
 !! oper  = operator of type oper_type
 !!
-!! PARENTS
-!!      hubbard_one,hybridization_asymptotic_coefficient,m_green,m_self
-!!      outscfcv,psichi_renormalization,qmc_prep_ctqmc,vtorho
-!!
-!! CHILDREN
-!!      prod_matlu
-!!
 !! SOURCE
 
 subroutine init_oper(paw_dmft,oper,nkpt,wtk,opt_ksloc)
@@ -135,7 +123,6 @@ subroutine init_oper(paw_dmft,oper,nkpt,wtk,opt_ksloc)
  use m_matlu, only : init_matlu
  use m_paw_dmft, only : paw_dmft_type
  use m_errors
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -186,7 +173,7 @@ subroutine init_oper(paw_dmft,oper,nkpt,wtk,opt_ksloc)
    else
      oper%wtk=>wtk
    endif
-   ABI_ALLOCATE(oper%ks,(paw_dmft%nsppol,oper%nkpt,paw_dmft%mbandc,paw_dmft%mbandc))
+   ABI_MALLOC(oper%ks,(paw_dmft%nsppol,oper%nkpt,paw_dmft%mbandc,paw_dmft%mbandc))
    oper%has_operks=1
    oper%ks=czero
  endif
@@ -196,7 +183,7 @@ subroutine init_oper(paw_dmft,oper,nkpt,wtk,opt_ksloc)
 ! ===================
  if(optksloc==2.or.optksloc==3) then
    oper%has_opermatlu=0
-   ABI_DATATYPE_ALLOCATE(oper%matlu,(oper%natom))
+   ABI_MALLOC(oper%matlu,(oper%natom))
    oper%has_opermatlu=1
    call init_matlu(oper%natom,paw_dmft%nspinor,paw_dmft%nsppol,paw_dmft%lpawu,oper%matlu)
    do iatom=1,oper%natom
@@ -221,13 +208,6 @@ end subroutine init_oper
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      hubbard_one,hybridization_asymptotic_coefficient,m_green,m_self
-!!      outscfcv,psichi_renormalization,qmc_prep_ctqmc,vtorho
-!!
-!! CHILDREN
-!!      prod_matlu
-!!
 !! SOURCE
 
 subroutine destroy_oper(oper)
@@ -236,7 +216,6 @@ subroutine destroy_oper(oper)
  use m_crystal, only : crystal_t
  use m_matlu, only : destroy_matlu
  use m_errors
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -250,14 +229,14 @@ subroutine destroy_oper(oper)
    call destroy_matlu(oper%matlu,oper%natom)
  else
    message = " Operator is not defined to be used in destroy_oper"
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  endif
  if ( allocated(oper%matlu))  then
-   ABI_DATATYPE_DEALLOCATE(oper%matlu)
+   ABI_FREE(oper%matlu)
    oper%has_opermatlu=0
  endif
  if ( allocated(oper%ks)) then
-   ABI_DEALLOCATE(oper%ks)
+   ABI_FREE(oper%ks)
    oper%has_operks=0
  endif
  oper%wtk => null()
@@ -277,12 +256,6 @@ end subroutine destroy_oper
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      hybridization_asymptotic_coefficient,m_green
-!!
-!! CHILDREN
-!!      prod_matlu
-!!
 !! SOURCE
 
 subroutine copy_oper(oper1,oper2)
@@ -290,7 +263,6 @@ subroutine copy_oper(oper1,oper2)
  use defs_basis
  use m_matlu, only : copy_matlu
  use m_errors
- implicit none
 
 !Arguments ------------------------------------
 !type
@@ -341,12 +313,6 @@ end subroutine copy_oper
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_green,m_self
-!!
-!! CHILDREN
-!!      prod_matlu
-!!
 !! SOURCE
 
 subroutine print_oper(oper,option,paw_dmft,prtopt)
@@ -355,7 +321,6 @@ subroutine print_oper(oper,option,paw_dmft,prtopt)
  use m_matlu, only : print_matlu
  use m_paw_dmft, only : paw_dmft_type
  use m_errors
- implicit none
 
 !Arguments ------------------------------------
 !type
@@ -385,8 +350,8 @@ subroutine print_oper(oper,option,paw_dmft,prtopt)
    iband1=1
    iband2=oper%mbandc
 !   do ib=1,oper%mbandc
-!     if(-(paw_dmft%eigen_lda(1,1,ib)+paw_dmft%fermie).ge.0.3) iband1=ib
-!     if( (paw_dmft%eigen_lda(1,1,ib)-paw_dmft%fermie).le.0.3) iband2=ib
+!     if(-(paw_dmft%eigen_dft(1,1,ib)+paw_dmft%fermie).ge.0.3) iband1=ib
+!     if( (paw_dmft%eigen_dft(1,1,ib)-paw_dmft%fermie).le.0.3) iband2=ib
 !   enddo
 
    ximag=.false.
@@ -416,11 +381,11 @@ subroutine print_oper(oper,option,paw_dmft,prtopt)
            if(option<5) then
              if(abs(aimag(oper%ks(isppol,ikpt,ib,ib))).ge.tol10) then
                write(message, '(a,i4,e14.5,3x,e14.5,3x,e21.14)') "   -iband--",ib,&
-&               paw_dmft%eigen_lda(isppol,ikpt,ib),oper%ks(isppol,ikpt,ib,ib)
+&               paw_dmft%eigen_dft(isppol,ikpt,ib),oper%ks(isppol,ikpt,ib,ib)
                call wrtout(std_out,message,'COLL')
              else
                write(message, '(a,i4,e14.5,3x,e14.5)') "   -iband--",ib,&
-&               paw_dmft%eigen_lda(isppol,ikpt,ib),real(oper%ks(isppol,ikpt,ib,ib))
+&               paw_dmft%eigen_dft(isppol,ikpt,ib),real(oper%ks(isppol,ikpt,ib,ib))
                call wrtout(std_out,message,'COLL')
              endif
            endif
@@ -455,7 +420,7 @@ subroutine print_oper(oper,option,paw_dmft,prtopt)
    if(ximag) then
      write(message, '(3a,e12.4,a)')"Occupations are imaginary !",ch10, &
 &    "  Maximal value is ", maximag(1), ch10
-     MSG_WARNING(message)
+     ABI_WARNING(message)
    endif
  else if(abs(prtopt)>=3.and.((option<5).or.(option>8))) then
    write(message, '(2a)') ch10," Prb with options and has_operks in print_oper"
@@ -485,12 +450,6 @@ end subroutine print_oper
 !! OUTPUT
 !!  oper <type(oper_type)>= operator inverted
 !!
-!! PARENTS
-!!      dyson,m_green,qmc_prep_ctqmc
-!!
-!! CHILDREN
-!!      prod_matlu
-!!
 !! SOURCE
 
 subroutine inverse_oper(oper,option,prtopt,procb,iproc)
@@ -500,7 +459,6 @@ subroutine inverse_oper(oper,option,prtopt,procb,iproc)
  use m_paw_dmft, only : paw_dmft_type
  use m_matlu, only : inverse_matlu
  use m_errors
- implicit none
 
 !Arguments ------------------------------------
 !type
@@ -519,7 +477,7 @@ subroutine inverse_oper(oper,option,prtopt,procb,iproc)
 ! *********************************************************************
  DBG_ENTER("COLL")
  if(option==2.or.option==3) then
-   ABI_ALLOCATE(procb2,(oper%nkpt))
+   ABI_MALLOC(procb2,(oper%nkpt))
  endif
 !  if option=1 do inversion in local space
 !  if option=2 do inversion in KS band space
@@ -534,13 +492,13 @@ subroutine inverse_oper(oper,option,prtopt,procb,iproc)
  if(((option==1.or.option==3).and.(oper%has_opermatlu==0)).or.&
 &   ((option==2.or.option==3).and.(oper%has_operks==0))) then
    message = " Options are not coherent with definitions of this operator"
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  endif
 
  if(option==1.or.option==3) then
    call inverse_matlu(oper%matlu,oper%natom,prtopt)
  else if(option==2.or.option==3) then
-   ABI_ALLOCATE(matrix,(oper%mbandc,oper%mbandc))
+   ABI_MALLOC(matrix,(oper%mbandc,oper%mbandc))
      do isppol=1,oper%nsppol
        do ikpt=1,oper%nkpt
         if ((paral==1.and.(procb2(ikpt)==iproc)).or.(paral==0)) then
@@ -553,11 +511,11 @@ subroutine inverse_oper(oper,option,prtopt,procb,iproc)
         endif
        enddo ! ikpt
      enddo ! isppol
-   ABI_DEALLOCATE(matrix)
+   ABI_FREE(matrix)
  endif
 
  if(option==2.or.option==3) then
-   ABI_DEALLOCATE(procb2)
+   ABI_FREE(procb2)
  endif
  DBG_EXIT("COLL")
 end subroutine inverse_oper
@@ -573,13 +531,6 @@ end subroutine inverse_oper
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      compute_levels,hybridization_asymptotic_coefficient,m_green
-!!      psichi_renormalization
-!!
-!! CHILDREN
-!!      prod_matlu
-!!
 !! SOURCE
 
 subroutine loc_oper(oper,paw_dmft,option,jkpt,procb,iproc)
@@ -587,7 +538,6 @@ subroutine loc_oper(oper,paw_dmft,option,jkpt,procb,iproc)
  use defs_basis
  use m_paw_dmft, only : paw_dmft_type
  use m_errors
- implicit none
 
 !Arguments ------------------------------------
 !type
@@ -605,10 +555,10 @@ subroutine loc_oper(oper,paw_dmft,option,jkpt,procb,iproc)
  logical lvz  !vz_d
 ! *********************************************************************
  DBG_ENTER("COLL")
- ABI_ALLOCATE(procb2,(oper%nkpt))
+ ABI_MALLOC(procb2,(oper%nkpt))
  if((oper%has_opermatlu==0).or.(oper%has_operks==0)) then
    message = " Operator is not defined to be used in loc_oper"
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  endif
  if(present(procb).and.present(iproc)) then
    paral=1
@@ -625,10 +575,10 @@ subroutine loc_oper(oper,paw_dmft,option,jkpt,procb,iproc)
  mbandc=oper%mbandc
  nspinor=oper%nspinor
 
-
  do iatom=1,natom
    oper%matlu(iatom)%mat=czero
  enddo
+
  do isppol=1,nsppol
   do ikpt=1,nkpt
    ikpt1=ikpt
@@ -669,7 +619,7 @@ subroutine loc_oper(oper,paw_dmft,option,jkpt,procb,iproc)
    endif
   enddo ! ikpt
  enddo ! isppol
- ABI_DEALLOCATE(procb2)
+ ABI_FREE(procb2)
 
 
 
@@ -689,20 +639,13 @@ end subroutine loc_oper
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_green
-!!
-!! CHILDREN
-!!      prod_matlu
-!!
 !! SOURCE
 
-subroutine upfold_oper(oper,paw_dmft,option,procb,iproc)
+subroutine upfold_oper(oper,paw_dmft,option,procb,iproc,prt)
 
  use defs_basis
  use m_paw_dmft, only : paw_dmft_type
  use m_errors
- implicit none
 
 !Arguments ------------------------------------
 !type
@@ -711,13 +654,16 @@ subroutine upfold_oper(oper,paw_dmft,option,procb,iproc)
  type(paw_dmft_type), intent(in) :: paw_dmft
  integer, optional, intent(in) :: iproc
  integer, optional, intent(in) :: procb(oper%nkpt)
+ integer, optional, intent(in) :: prt
 !oper variables-------------------------------
  integer :: iatom,ib,ib1,ikpt,ispinor,ispinor1,isppol,im1,im
  integer :: natom,mbandc,ndim,nkpt,nspinor,nsppol,paral
  integer, allocatable :: procb2(:)
  character(len=500) :: message
 ! *********************************************************************
- ABI_ALLOCATE(procb2,(oper%nkpt))
+
+ ABI_UNUSED(prt)
+ ABI_MALLOC(procb2,(oper%nkpt))
  if(present(procb).and.present(iproc)) then
    paral=1
    procb2=procb
@@ -735,7 +681,7 @@ subroutine upfold_oper(oper,paw_dmft,option,procb,iproc)
  DBG_ENTER("COLL")
  if((oper%has_opermatlu==0).or.(oper%has_operks==0)) then
    message = " Operator is not defined to be used in upfold_oper"
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  endif
  if(option<0) then
  endif
@@ -766,13 +712,13 @@ subroutine upfold_oper(oper,paw_dmft,option,procb,iproc)
 &                     + ( paw_dmft%psichi(isppol,ikpt,ib1,ispinor1,iatom,im1)        &
 &                     * oper%matlu(iatom)%mat(im,im1,isppol,ispinor,ispinor1)    &
 &                     * conjg(paw_dmft%psichi(isppol,ikpt,ib,ispinor,iatom,im)))
-!               if(ib==1.and.ib1==3) then
-!                 write(std_out,*) "im,im1",im,im1
-!                 write(std_out,*) "ispinor,ispinor1",ispinor,ispinor1
-!                 write(std_out,*) "psichi",paw_dmft%psichi(isppol,ikpt,ib1,ispinor1,iatom,im1)
-!                 write(std_out,*) "psichi 2",paw_dmft%psichi(isppol,ikpt,ib,ispinor,iatom,im1)
-!                 write(std_out,*) "oper%matlu", oper%matlu(iatom)%mat(im,im1,isppol,ispinor,ispinor1)
-!               endif
+              ! if(present(prt).and.(ib==1.and.ib1==1)) then
+              !   write(6,*) "im,im1",im,im1
+              !   write(6,*) "ispinor,ispinor1",ispinor,ispinor1
+              !   write(6,*) "psichi",paw_dmft%psichi(isppol,ikpt,ib1,ispinor1,iatom,im1)
+              !   write(6,*) "psichi 2",paw_dmft%psichi(isppol,ikpt,ib,ispinor,iatom,im1)
+              !   write(6,*) "oper%matlu", oper%matlu(iatom)%mat(im,im1,isppol,ispinor,ispinor1)
+              ! endif
 
                    enddo ! ispinor1
                  enddo ! ispinor
@@ -786,7 +732,7 @@ subroutine upfold_oper(oper,paw_dmft,option,procb,iproc)
     endif
    enddo ! ikpt
  enddo ! isppol
- ABI_DEALLOCATE(procb2)
+ ABI_FREE(procb2)
 
  DBG_EXIT("COLL")
 end subroutine upfold_oper
@@ -802,12 +748,6 @@ end subroutine upfold_oper
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      psichi_renormalization
-!!
-!! CHILDREN
-!!      prod_matlu
-!!
 !! SOURCE
 
 subroutine identity_oper(oper,option)
@@ -816,7 +756,6 @@ subroutine identity_oper(oper,option)
  use m_crystal, only : crystal_t
  use m_paw_dmft, only : paw_dmft_type
  use m_errors
- implicit none
 
 !Arguments ------------------------------------
 !type
@@ -833,7 +772,7 @@ subroutine identity_oper(oper,option)
  if(((option==1.or.option==3).and.(oper%has_opermatlu==0)).or.&
 &   ((option==2.or.option==3).and.(oper%has_operks==0))) then
    message = " Options in identity_oper are not coherent with definitions of this operator"
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  endif
  nkpt=oper%nkpt
  nsppol=oper%nsppol
@@ -889,12 +828,6 @@ end subroutine identity_oper
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_dmft,psichi_renormalization
-!!
-!! CHILDREN
-!!      prod_matlu
-!!
 !! SOURCE
 
 subroutine diff_oper(char1,char2,occup1,occup2,option,toldiff)
@@ -904,7 +837,6 @@ subroutine diff_oper(char1,char2,occup1,occup2,option,toldiff)
  use m_crystal, only : crystal_t
  use m_matlu, only : diff_matlu
  use m_errors
- implicit none
 
 !Arguments ------------------------------------
 !type
@@ -920,13 +852,13 @@ subroutine diff_oper(char1,char2,occup1,occup2,option,toldiff)
  DBG_ENTER("COLL")
  if(occup1%has_opermatlu==0.or.occup2%has_opermatlu==0) then
    message = " Operators are not defined to be used in diff_oper"
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  endif
  mbandc   = occup1%mbandc
  nkpt    = occup1%nkpt
  if(occup1%nkpt/=occup2%nkpt) then
   write(message,'(a,2x,2i9)')' Operators are not equals',occup1%nkpt,occup2%nkpt
-  MSG_ERROR(message)
+  ABI_ERROR(message)
  endif
 
  call diff_matlu(char1,char2,occup1%matlu,&
@@ -962,12 +894,6 @@ end subroutine diff_oper
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      impurity_solve,m_green
-!!
-!! CHILDREN
-!!      prod_matlu
-!!
 !! SOURCE
 
 subroutine trace_oper(oper,trace_ks,trace_loc,opt_ksloc)
@@ -975,7 +901,6 @@ subroutine trace_oper(oper,trace_ks,trace_loc,opt_ksloc)
  use defs_basis
  use m_matlu, only : trace_matlu
  use m_errors
- implicit none
 
 !Arguments ------------------------------------
 !type
@@ -994,7 +919,7 @@ subroutine trace_oper(oper,trace_ks,trace_loc,opt_ksloc)
  if(((opt_ksloc==1.or.opt_ksloc==3).and.(oper%has_opermatlu==0)).or.&
 &   ((opt_ksloc==2.or.opt_ksloc==3).and.(oper%has_operks==0))) then
    message = " Options in trace_oper are not coherent with definitions of this operator"
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  endif
 
  if(opt_ksloc==1.or.opt_ksloc==3) then
@@ -1030,12 +955,6 @@ end subroutine trace_oper
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      hybridization_asymptotic_coefficient
-!!
-!! CHILDREN
-!!      prod_matlu
-!!
 !! SOURCE
 
 subroutine prod_oper(oper1,oper2,oper3,opt_ksloc)
@@ -1043,7 +962,6 @@ subroutine prod_oper(oper1,oper2,oper3,opt_ksloc)
  use defs_basis
  use m_errors
  use m_matlu, only : prod_matlu
- implicit none
 
 !Arguments ------------------------------------
 !type

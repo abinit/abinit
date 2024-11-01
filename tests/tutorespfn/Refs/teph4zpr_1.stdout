@@ -1,0 +1,648 @@
+
+.Version 9.11.0 of MRGDDB 
+.(MPI version, prepared for a x86_64_linux_intel19.1 computer) 
+
+.Copyright (C) 1998-2024 ABINIT group . 
+ MRGDDB comes with ABSOLUTELY NO WARRANTY.
+ It is free software, and you are welcome to redistribute it
+ under certain conditions (GNU General Public License,
+ see ~abinit/COPYING or http://www.gnu.org/copyleft/gpl.txt).
+
+ ABINIT is a project of the Universite Catholique de Louvain,
+ Corning Inc. and other collaborators, see ~abinit/doc/developers/contributors.txt .
+ Please read https://docs.abinit.org/theory/acknowledgments for suggested
+ acknowledgments of the ABINIT effort.
+ For more information, see https://www.abinit.org .
+
+.Starting date : Wed 31 May 2023.
+- ( at 05h25 )
+  
+  Give name for output derivative database : 
+ teph4zpr_1_DDB
+  Give short description of the derivative database :
+ MgO phonons on 4x4x4 q-mesh
+  Give number of input ddbs
+          28
+  Give name for derivative database number           1  : 
+ MgO_eph_zpr/flow_zpr_mgo/w1/t3/outdata/out_DDB
+  Give name for derivative database number           2  : 
+ MgO_eph_zpr/flow_zpr_mgo/w1/t4/outdata/out_DDB
+  Give name for derivative database number           3  : 
+ MgO_eph_zpr/flow_zpr_mgo/w1/t5/outdata/out_DDB
+  Give name for derivative database number           4  : 
+ MgO_eph_zpr/flow_zpr_mgo/w1/t6/outdata/out_DDB
+  Give name for derivative database number           5  : 
+ MgO_eph_zpr/flow_zpr_mgo/w1/t7/outdata/out_DDB
+  Give name for derivative database number           6  : 
+ MgO_eph_zpr/flow_zpr_mgo/w1/t8/outdata/out_DDB
+  Give name for derivative database number           7  : 
+ MgO_eph_zpr/flow_zpr_mgo/w1/t9/outdata/out_DDB
+  Give name for derivative database number           8  : 
+ MgO_eph_zpr/flow_zpr_mgo/w1/t10/outdata/out_DDB
+  Give name for derivative database number           9  : 
+ MgO_eph_zpr/flow_zpr_mgo/w1/t11/outdata/out_DDB
+  Give name for derivative database number          10  : 
+ MgO_eph_zpr/flow_zpr_mgo/w1/t12/outdata/out_DDB
+  Give name for derivative database number          11  : 
+ MgO_eph_zpr/flow_zpr_mgo/w1/t13/outdata/out_DDB
+  Give name for derivative database number          12  : 
+ MgO_eph_zpr/flow_zpr_mgo/w1/t14/outdata/out_DDB
+  Give name for derivative database number          13  : 
+ MgO_eph_zpr/flow_zpr_mgo/w1/t15/outdata/out_DDB
+  Give name for derivative database number          14  : 
+ MgO_eph_zpr/flow_zpr_mgo/w1/t16/outdata/out_DDB
+  Give name for derivative database number          15  : 
+ MgO_eph_zpr/flow_zpr_mgo/w1/t17/outdata/out_DDB
+  Give name for derivative database number          16  : 
+ MgO_eph_zpr/flow_zpr_mgo/w1/t18/outdata/out_DDB
+  Give name for derivative database number          17  : 
+ MgO_eph_zpr/flow_zpr_mgo/w1/t19/outdata/out_DDB
+  Give name for derivative database number          18  : 
+ MgO_eph_zpr/flow_zpr_mgo/w1/t20/outdata/out_DDB
+  Give name for derivative database number          19  : 
+ MgO_eph_zpr/flow_zpr_mgo/w1/t21/outdata/out_DDB
+  Give name for derivative database number          20  : 
+ MgO_eph_zpr/flow_zpr_mgo/w1/t22/outdata/out_DDB
+  Give name for derivative database number          21  : 
+ MgO_eph_zpr/flow_zpr_mgo/w1/t23/outdata/out_DDB
+  Give name for derivative database number          22  : 
+ MgO_eph_zpr/flow_zpr_mgo/w1/t24/outdata/out_DDB
+  Give name for derivative database number          23  : 
+ MgO_eph_zpr/flow_zpr_mgo/w1/t25/outdata/out_DDB
+  Give name for derivative database number          24  : 
+ MgO_eph_zpr/flow_zpr_mgo/w1/t26/outdata/out_DDB
+  Give name for derivative database number          25  : 
+ MgO_eph_zpr/flow_zpr_mgo/w1/t27/outdata/out_DDB
+  Give name for derivative database number          26  : 
+ MgO_eph_zpr/flow_zpr_mgo/w1/t28/outdata/out_DDB
+  Give name for derivative database number          27  : 
+ MgO_eph_zpr/flow_zpr_mgo/w1/t29/outdata/out_DDB
+  Give name for derivative database number          28  : 
+ MgO_eph_zpr/flow_zpr_mgo/w1/t30/outdata/out_DDB
+ 
+  merge_ddb: Reading all headers.
+ Opening DDB file: MgO_eph_zpr/flow_zpr_mgo/w1/t3/outdata/out_DDB
+ Opening DDB file: MgO_eph_zpr/flow_zpr_mgo/w1/t4/outdata/out_DDB
+ Opening DDB file: MgO_eph_zpr/flow_zpr_mgo/w1/t5/outdata/out_DDB
+ Opening DDB file: MgO_eph_zpr/flow_zpr_mgo/w1/t6/outdata/out_DDB
+ Opening DDB file: MgO_eph_zpr/flow_zpr_mgo/w1/t7/outdata/out_DDB
+ Opening DDB file: MgO_eph_zpr/flow_zpr_mgo/w1/t8/outdata/out_DDB
+ Opening DDB file: MgO_eph_zpr/flow_zpr_mgo/w1/t9/outdata/out_DDB
+ Opening DDB file: MgO_eph_zpr/flow_zpr_mgo/w1/t10/outdata/out_DDB
+ Opening DDB file: MgO_eph_zpr/flow_zpr_mgo/w1/t11/outdata/out_DDB
+ Opening DDB file: MgO_eph_zpr/flow_zpr_mgo/w1/t12/outdata/out_DDB
+ Opening DDB file: MgO_eph_zpr/flow_zpr_mgo/w1/t13/outdata/out_DDB
+ Opening DDB file: MgO_eph_zpr/flow_zpr_mgo/w1/t14/outdata/out_DDB
+ Opening DDB file: MgO_eph_zpr/flow_zpr_mgo/w1/t15/outdata/out_DDB
+ Opening DDB file: MgO_eph_zpr/flow_zpr_mgo/w1/t16/outdata/out_DDB
+ Opening DDB file: MgO_eph_zpr/flow_zpr_mgo/w1/t17/outdata/out_DDB
+ Opening DDB file: MgO_eph_zpr/flow_zpr_mgo/w1/t18/outdata/out_DDB
+ Opening DDB file: MgO_eph_zpr/flow_zpr_mgo/w1/t19/outdata/out_DDB
+ Opening DDB file: MgO_eph_zpr/flow_zpr_mgo/w1/t20/outdata/out_DDB
+ Opening DDB file: MgO_eph_zpr/flow_zpr_mgo/w1/t21/outdata/out_DDB
+ Opening DDB file: MgO_eph_zpr/flow_zpr_mgo/w1/t22/outdata/out_DDB
+ Opening DDB file: MgO_eph_zpr/flow_zpr_mgo/w1/t23/outdata/out_DDB
+ Opening DDB file: MgO_eph_zpr/flow_zpr_mgo/w1/t24/outdata/out_DDB
+ Opening DDB file: MgO_eph_zpr/flow_zpr_mgo/w1/t25/outdata/out_DDB
+ Opening DDB file: MgO_eph_zpr/flow_zpr_mgo/w1/t26/outdata/out_DDB
+ Opening DDB file: MgO_eph_zpr/flow_zpr_mgo/w1/t27/outdata/out_DDB
+ Opening DDB file: MgO_eph_zpr/flow_zpr_mgo/w1/t28/outdata/out_DDB
+ Opening DDB file: MgO_eph_zpr/flow_zpr_mgo/w1/t29/outdata/out_DDB
+ Opening DDB file: MgO_eph_zpr/flow_zpr_mgo/w1/t30/outdata/out_DDB
+ Opening DDB file: MgO_eph_zpr/flow_zpr_mgo/w1/t3/outdata/out_DDB
+ 
+ read the input derivative database number     1
+ Opening DDB file: MgO_eph_zpr/flow_zpr_mgo/w1/t3/outdata/out_DDB
+ compare the current and input DDB information
+ 
+  ==== Info on the Cryst% object ====
+ Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
+ R(1)=  0.0000000  4.0182362  4.0182362  G(1)= -0.1244327  0.1244327  0.1244327
+ R(2)=  4.0182362  0.0000000  4.0182362  G(2)=  0.1244327 -0.1244327  0.1244327
+ R(3)=  4.0182362  4.0182362  0.0000000  G(3)=  0.1244327  0.1244327 -0.1244327
+ Unit cell volume ucvol=  1.2975866E+02 bohr^3
+ Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
+ Time-reversal symmetry is present
+ Reduced atomic positions [iatom, xred, symbol]:
+    1)    0.0000000  0.0000000  0.0000000  Mg
+    2)    0.5000000  0.5000000  0.5000000   O
+ 
+ DDB file with 1 blocks has been read.
+ add block #    1 from file MgO_eph_zpr/flow_zpr_mgo/w1/t3/outdata/out_DDB
+ 
+ read the input derivative database number     2
+ Opening DDB file: MgO_eph_zpr/flow_zpr_mgo/w1/t4/outdata/out_DDB
+ compare the current and input DDB information
+ 
+  ==== Info on the Cryst% object ====
+ Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
+ R(1)=  0.0000000  4.0182362  4.0182362  G(1)= -0.1244327  0.1244327  0.1244327
+ R(2)=  4.0182362  0.0000000  4.0182362  G(2)=  0.1244327 -0.1244327  0.1244327
+ R(3)=  4.0182362  4.0182362  0.0000000  G(3)=  0.1244327  0.1244327 -0.1244327
+ Unit cell volume ucvol=  1.2975866E+02 bohr^3
+ Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
+ Time-reversal symmetry is present
+ Reduced atomic positions [iatom, xred, symbol]:
+    1)    0.0000000  0.0000000  0.0000000  Mg
+    2)    0.5000000  0.5000000  0.5000000   O
+ 
+ DDB file with 1 blocks has been read.
+ merge block #    1 from file MgO_eph_zpr/flow_zpr_mgo/w1/t4/outdata/out_DDB
+ 
+ read the input derivative database number     3
+ Opening DDB file: MgO_eph_zpr/flow_zpr_mgo/w1/t5/outdata/out_DDB
+ compare the current and input DDB information
+ 
+  ==== Info on the Cryst% object ====
+ Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
+ R(1)=  0.0000000  4.0182362  4.0182362  G(1)= -0.1244327  0.1244327  0.1244327
+ R(2)=  4.0182362  0.0000000  4.0182362  G(2)=  0.1244327 -0.1244327  0.1244327
+ R(3)=  4.0182362  4.0182362  0.0000000  G(3)=  0.1244327  0.1244327 -0.1244327
+ Unit cell volume ucvol=  1.2975866E+02 bohr^3
+ Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
+ Time-reversal symmetry is present
+ Reduced atomic positions [iatom, xred, symbol]:
+    1)    0.0000000  0.0000000  0.0000000  Mg
+    2)    0.5000000  0.5000000  0.5000000   O
+ 
+ DDB file with 1 blocks has been read.
+ add block #    1 from file MgO_eph_zpr/flow_zpr_mgo/w1/t5/outdata/out_DDB
+ 
+ read the input derivative database number     4
+ Opening DDB file: MgO_eph_zpr/flow_zpr_mgo/w1/t6/outdata/out_DDB
+ compare the current and input DDB information
+ 
+  ==== Info on the Cryst% object ====
+ Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
+ R(1)=  0.0000000  4.0182362  4.0182362  G(1)= -0.1244327  0.1244327  0.1244327
+ R(2)=  4.0182362  0.0000000  4.0182362  G(2)=  0.1244327 -0.1244327  0.1244327
+ R(3)=  4.0182362  4.0182362  0.0000000  G(3)=  0.1244327  0.1244327 -0.1244327
+ Unit cell volume ucvol=  1.2975866E+02 bohr^3
+ Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
+ Time-reversal symmetry is present
+ Reduced atomic positions [iatom, xred, symbol]:
+    1)    0.0000000  0.0000000  0.0000000  Mg
+    2)    0.5000000  0.5000000  0.5000000   O
+ 
+ DDB file with 1 blocks has been read.
+ merge block #    1 from file MgO_eph_zpr/flow_zpr_mgo/w1/t6/outdata/out_DDB
+ 
+ read the input derivative database number     5
+ Opening DDB file: MgO_eph_zpr/flow_zpr_mgo/w1/t7/outdata/out_DDB
+ compare the current and input DDB information
+ 
+  ==== Info on the Cryst% object ====
+ Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
+ R(1)=  0.0000000  4.0182362  4.0182362  G(1)= -0.1244327  0.1244327  0.1244327
+ R(2)=  4.0182362  0.0000000  4.0182362  G(2)=  0.1244327 -0.1244327  0.1244327
+ R(3)=  4.0182362  4.0182362  0.0000000  G(3)=  0.1244327  0.1244327 -0.1244327
+ Unit cell volume ucvol=  1.2975866E+02 bohr^3
+ Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
+ Time-reversal symmetry is present
+ Reduced atomic positions [iatom, xred, symbol]:
+    1)    0.0000000  0.0000000  0.0000000  Mg
+    2)    0.5000000  0.5000000  0.5000000   O
+ 
+ DDB file with 1 blocks has been read.
+ merge block #    1 from file MgO_eph_zpr/flow_zpr_mgo/w1/t7/outdata/out_DDB
+ 
+ read the input derivative database number     6
+ Opening DDB file: MgO_eph_zpr/flow_zpr_mgo/w1/t8/outdata/out_DDB
+ compare the current and input DDB information
+ 
+  ==== Info on the Cryst% object ====
+ Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
+ R(1)=  0.0000000  4.0182362  4.0182362  G(1)= -0.1244327  0.1244327  0.1244327
+ R(2)=  4.0182362  0.0000000  4.0182362  G(2)=  0.1244327 -0.1244327  0.1244327
+ R(3)=  4.0182362  4.0182362  0.0000000  G(3)=  0.1244327  0.1244327 -0.1244327
+ Unit cell volume ucvol=  1.2975866E+02 bohr^3
+ Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
+ Time-reversal symmetry is present
+ Reduced atomic positions [iatom, xred, symbol]:
+    1)    0.0000000  0.0000000  0.0000000  Mg
+    2)    0.5000000  0.5000000  0.5000000   O
+ 
+ DDB file with 1 blocks has been read.
+ merge block #    1 from file MgO_eph_zpr/flow_zpr_mgo/w1/t8/outdata/out_DDB
+ 
+ read the input derivative database number     7
+ Opening DDB file: MgO_eph_zpr/flow_zpr_mgo/w1/t9/outdata/out_DDB
+ compare the current and input DDB information
+ 
+  ==== Info on the Cryst% object ====
+ Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
+ R(1)=  0.0000000  4.0182362  4.0182362  G(1)= -0.1244327  0.1244327  0.1244327
+ R(2)=  4.0182362  0.0000000  4.0182362  G(2)=  0.1244327 -0.1244327  0.1244327
+ R(3)=  4.0182362  4.0182362  0.0000000  G(3)=  0.1244327  0.1244327 -0.1244327
+ Unit cell volume ucvol=  1.2975866E+02 bohr^3
+ Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
+ Time-reversal symmetry is present
+ Reduced atomic positions [iatom, xred, symbol]:
+    1)    0.0000000  0.0000000  0.0000000  Mg
+    2)    0.5000000  0.5000000  0.5000000   O
+ 
+ DDB file with 1 blocks has been read.
+ add block #    1 from file MgO_eph_zpr/flow_zpr_mgo/w1/t9/outdata/out_DDB
+ 
+ read the input derivative database number     8
+ Opening DDB file: MgO_eph_zpr/flow_zpr_mgo/w1/t10/outdata/out_DDB
+ compare the current and input DDB information
+ 
+  ==== Info on the Cryst% object ====
+ Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
+ R(1)=  0.0000000  4.0182362  4.0182362  G(1)= -0.1244327  0.1244327  0.1244327
+ R(2)=  4.0182362  0.0000000  4.0182362  G(2)=  0.1244327 -0.1244327  0.1244327
+ R(3)=  4.0182362  4.0182362  0.0000000  G(3)=  0.1244327  0.1244327 -0.1244327
+ Unit cell volume ucvol=  1.2975866E+02 bohr^3
+ Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
+ Time-reversal symmetry is present
+ Reduced atomic positions [iatom, xred, symbol]:
+    1)    0.0000000  0.0000000  0.0000000  Mg
+    2)    0.5000000  0.5000000  0.5000000   O
+ 
+ DDB file with 1 blocks has been read.
+ merge block #    1 from file MgO_eph_zpr/flow_zpr_mgo/w1/t10/outdata/out_DDB
+ 
+ read the input derivative database number     9
+ Opening DDB file: MgO_eph_zpr/flow_zpr_mgo/w1/t11/outdata/out_DDB
+ compare the current and input DDB information
+ 
+  ==== Info on the Cryst% object ====
+ Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
+ R(1)=  0.0000000  4.0182362  4.0182362  G(1)= -0.1244327  0.1244327  0.1244327
+ R(2)=  4.0182362  0.0000000  4.0182362  G(2)=  0.1244327 -0.1244327  0.1244327
+ R(3)=  4.0182362  4.0182362  0.0000000  G(3)=  0.1244327  0.1244327 -0.1244327
+ Unit cell volume ucvol=  1.2975866E+02 bohr^3
+ Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
+ Time-reversal symmetry is present
+ Reduced atomic positions [iatom, xred, symbol]:
+    1)    0.0000000  0.0000000  0.0000000  Mg
+    2)    0.5000000  0.5000000  0.5000000   O
+ 
+ DDB file with 1 blocks has been read.
+ merge block #    1 from file MgO_eph_zpr/flow_zpr_mgo/w1/t11/outdata/out_DDB
+ 
+ read the input derivative database number    10
+ Opening DDB file: MgO_eph_zpr/flow_zpr_mgo/w1/t12/outdata/out_DDB
+ compare the current and input DDB information
+ 
+  ==== Info on the Cryst% object ====
+ Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
+ R(1)=  0.0000000  4.0182362  4.0182362  G(1)= -0.1244327  0.1244327  0.1244327
+ R(2)=  4.0182362  0.0000000  4.0182362  G(2)=  0.1244327 -0.1244327  0.1244327
+ R(3)=  4.0182362  4.0182362  0.0000000  G(3)=  0.1244327  0.1244327 -0.1244327
+ Unit cell volume ucvol=  1.2975866E+02 bohr^3
+ Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
+ Time-reversal symmetry is present
+ Reduced atomic positions [iatom, xred, symbol]:
+    1)    0.0000000  0.0000000  0.0000000  Mg
+    2)    0.5000000  0.5000000  0.5000000   O
+ 
+ DDB file with 1 blocks has been read.
+ merge block #    1 from file MgO_eph_zpr/flow_zpr_mgo/w1/t12/outdata/out_DDB
+ 
+ read the input derivative database number    11
+ Opening DDB file: MgO_eph_zpr/flow_zpr_mgo/w1/t13/outdata/out_DDB
+ compare the current and input DDB information
+ 
+  ==== Info on the Cryst% object ====
+ Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
+ R(1)=  0.0000000  4.0182362  4.0182362  G(1)= -0.1244327  0.1244327  0.1244327
+ R(2)=  4.0182362  0.0000000  4.0182362  G(2)=  0.1244327 -0.1244327  0.1244327
+ R(3)=  4.0182362  4.0182362  0.0000000  G(3)=  0.1244327  0.1244327 -0.1244327
+ Unit cell volume ucvol=  1.2975866E+02 bohr^3
+ Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
+ Time-reversal symmetry is present
+ Reduced atomic positions [iatom, xred, symbol]:
+    1)    0.0000000  0.0000000  0.0000000  Mg
+    2)    0.5000000  0.5000000  0.5000000   O
+ 
+ DDB file with 1 blocks has been read.
+ add block #    1 from file MgO_eph_zpr/flow_zpr_mgo/w1/t13/outdata/out_DDB
+ 
+ read the input derivative database number    12
+ Opening DDB file: MgO_eph_zpr/flow_zpr_mgo/w1/t14/outdata/out_DDB
+ compare the current and input DDB information
+ 
+  ==== Info on the Cryst% object ====
+ Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
+ R(1)=  0.0000000  4.0182362  4.0182362  G(1)= -0.1244327  0.1244327  0.1244327
+ R(2)=  4.0182362  0.0000000  4.0182362  G(2)=  0.1244327 -0.1244327  0.1244327
+ R(3)=  4.0182362  4.0182362  0.0000000  G(3)=  0.1244327  0.1244327 -0.1244327
+ Unit cell volume ucvol=  1.2975866E+02 bohr^3
+ Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
+ Time-reversal symmetry is present
+ Reduced atomic positions [iatom, xred, symbol]:
+    1)    0.0000000  0.0000000  0.0000000  Mg
+    2)    0.5000000  0.5000000  0.5000000   O
+ 
+ DDB file with 1 blocks has been read.
+ merge block #    1 from file MgO_eph_zpr/flow_zpr_mgo/w1/t14/outdata/out_DDB
+ 
+ read the input derivative database number    13
+ Opening DDB file: MgO_eph_zpr/flow_zpr_mgo/w1/t15/outdata/out_DDB
+ compare the current and input DDB information
+ 
+  ==== Info on the Cryst% object ====
+ Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
+ R(1)=  0.0000000  4.0182362  4.0182362  G(1)= -0.1244327  0.1244327  0.1244327
+ R(2)=  4.0182362  0.0000000  4.0182362  G(2)=  0.1244327 -0.1244327  0.1244327
+ R(3)=  4.0182362  4.0182362  0.0000000  G(3)=  0.1244327  0.1244327 -0.1244327
+ Unit cell volume ucvol=  1.2975866E+02 bohr^3
+ Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
+ Time-reversal symmetry is present
+ Reduced atomic positions [iatom, xred, symbol]:
+    1)    0.0000000  0.0000000  0.0000000  Mg
+    2)    0.5000000  0.5000000  0.5000000   O
+ 
+ DDB file with 1 blocks has been read.
+ add block #    1 from file MgO_eph_zpr/flow_zpr_mgo/w1/t15/outdata/out_DDB
+ 
+ read the input derivative database number    14
+ Opening DDB file: MgO_eph_zpr/flow_zpr_mgo/w1/t16/outdata/out_DDB
+ compare the current and input DDB information
+ 
+  ==== Info on the Cryst% object ====
+ Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
+ R(1)=  0.0000000  4.0182362  4.0182362  G(1)= -0.1244327  0.1244327  0.1244327
+ R(2)=  4.0182362  0.0000000  4.0182362  G(2)=  0.1244327 -0.1244327  0.1244327
+ R(3)=  4.0182362  4.0182362  0.0000000  G(3)=  0.1244327  0.1244327 -0.1244327
+ Unit cell volume ucvol=  1.2975866E+02 bohr^3
+ Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
+ Time-reversal symmetry is present
+ Reduced atomic positions [iatom, xred, symbol]:
+    1)    0.0000000  0.0000000  0.0000000  Mg
+    2)    0.5000000  0.5000000  0.5000000   O
+ 
+ DDB file with 1 blocks has been read.
+ merge block #    1 from file MgO_eph_zpr/flow_zpr_mgo/w1/t16/outdata/out_DDB
+ 
+ read the input derivative database number    15
+ Opening DDB file: MgO_eph_zpr/flow_zpr_mgo/w1/t17/outdata/out_DDB
+ compare the current and input DDB information
+ 
+  ==== Info on the Cryst% object ====
+ Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
+ R(1)=  0.0000000  4.0182362  4.0182362  G(1)= -0.1244327  0.1244327  0.1244327
+ R(2)=  4.0182362  0.0000000  4.0182362  G(2)=  0.1244327 -0.1244327  0.1244327
+ R(3)=  4.0182362  4.0182362  0.0000000  G(3)=  0.1244327  0.1244327 -0.1244327
+ Unit cell volume ucvol=  1.2975866E+02 bohr^3
+ Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
+ Time-reversal symmetry is present
+ Reduced atomic positions [iatom, xred, symbol]:
+    1)    0.0000000  0.0000000  0.0000000  Mg
+    2)    0.5000000  0.5000000  0.5000000   O
+ 
+ DDB file with 1 blocks has been read.
+ merge block #    1 from file MgO_eph_zpr/flow_zpr_mgo/w1/t17/outdata/out_DDB
+ 
+ read the input derivative database number    16
+ Opening DDB file: MgO_eph_zpr/flow_zpr_mgo/w1/t18/outdata/out_DDB
+ compare the current and input DDB information
+ 
+  ==== Info on the Cryst% object ====
+ Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
+ R(1)=  0.0000000  4.0182362  4.0182362  G(1)= -0.1244327  0.1244327  0.1244327
+ R(2)=  4.0182362  0.0000000  4.0182362  G(2)=  0.1244327 -0.1244327  0.1244327
+ R(3)=  4.0182362  4.0182362  0.0000000  G(3)=  0.1244327  0.1244327 -0.1244327
+ Unit cell volume ucvol=  1.2975866E+02 bohr^3
+ Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
+ Time-reversal symmetry is present
+ Reduced atomic positions [iatom, xred, symbol]:
+    1)    0.0000000  0.0000000  0.0000000  Mg
+    2)    0.5000000  0.5000000  0.5000000   O
+ 
+ DDB file with 1 blocks has been read.
+ merge block #    1 from file MgO_eph_zpr/flow_zpr_mgo/w1/t18/outdata/out_DDB
+ 
+ read the input derivative database number    17
+ Opening DDB file: MgO_eph_zpr/flow_zpr_mgo/w1/t19/outdata/out_DDB
+ compare the current and input DDB information
+ 
+  ==== Info on the Cryst% object ====
+ Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
+ R(1)=  0.0000000  4.0182362  4.0182362  G(1)= -0.1244327  0.1244327  0.1244327
+ R(2)=  4.0182362  0.0000000  4.0182362  G(2)=  0.1244327 -0.1244327  0.1244327
+ R(3)=  4.0182362  4.0182362  0.0000000  G(3)=  0.1244327  0.1244327 -0.1244327
+ Unit cell volume ucvol=  1.2975866E+02 bohr^3
+ Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
+ Time-reversal symmetry is present
+ Reduced atomic positions [iatom, xred, symbol]:
+    1)    0.0000000  0.0000000  0.0000000  Mg
+    2)    0.5000000  0.5000000  0.5000000   O
+ 
+ DDB file with 1 blocks has been read.
+ merge block #    1 from file MgO_eph_zpr/flow_zpr_mgo/w1/t19/outdata/out_DDB
+ 
+ read the input derivative database number    18
+ Opening DDB file: MgO_eph_zpr/flow_zpr_mgo/w1/t20/outdata/out_DDB
+ compare the current and input DDB information
+ 
+  ==== Info on the Cryst% object ====
+ Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
+ R(1)=  0.0000000  4.0182362  4.0182362  G(1)= -0.1244327  0.1244327  0.1244327
+ R(2)=  4.0182362  0.0000000  4.0182362  G(2)=  0.1244327 -0.1244327  0.1244327
+ R(3)=  4.0182362  4.0182362  0.0000000  G(3)=  0.1244327  0.1244327 -0.1244327
+ Unit cell volume ucvol=  1.2975866E+02 bohr^3
+ Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
+ Time-reversal symmetry is present
+ Reduced atomic positions [iatom, xred, symbol]:
+    1)    0.0000000  0.0000000  0.0000000  Mg
+    2)    0.5000000  0.5000000  0.5000000   O
+ 
+ DDB file with 1 blocks has been read.
+ merge block #    1 from file MgO_eph_zpr/flow_zpr_mgo/w1/t20/outdata/out_DDB
+ 
+ read the input derivative database number    19
+ Opening DDB file: MgO_eph_zpr/flow_zpr_mgo/w1/t21/outdata/out_DDB
+ compare the current and input DDB information
+ 
+  ==== Info on the Cryst% object ====
+ Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
+ R(1)=  0.0000000  4.0182362  4.0182362  G(1)= -0.1244327  0.1244327  0.1244327
+ R(2)=  4.0182362  0.0000000  4.0182362  G(2)=  0.1244327 -0.1244327  0.1244327
+ R(3)=  4.0182362  4.0182362  0.0000000  G(3)=  0.1244327  0.1244327 -0.1244327
+ Unit cell volume ucvol=  1.2975866E+02 bohr^3
+ Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
+ Time-reversal symmetry is present
+ Reduced atomic positions [iatom, xred, symbol]:
+    1)    0.0000000  0.0000000  0.0000000  Mg
+    2)    0.5000000  0.5000000  0.5000000   O
+ 
+ DDB file with 1 blocks has been read.
+ add block #    1 from file MgO_eph_zpr/flow_zpr_mgo/w1/t21/outdata/out_DDB
+ 
+ read the input derivative database number    20
+ Opening DDB file: MgO_eph_zpr/flow_zpr_mgo/w1/t22/outdata/out_DDB
+ compare the current and input DDB information
+ 
+  ==== Info on the Cryst% object ====
+ Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
+ R(1)=  0.0000000  4.0182362  4.0182362  G(1)= -0.1244327  0.1244327  0.1244327
+ R(2)=  4.0182362  0.0000000  4.0182362  G(2)=  0.1244327 -0.1244327  0.1244327
+ R(3)=  4.0182362  4.0182362  0.0000000  G(3)=  0.1244327  0.1244327 -0.1244327
+ Unit cell volume ucvol=  1.2975866E+02 bohr^3
+ Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
+ Time-reversal symmetry is present
+ Reduced atomic positions [iatom, xred, symbol]:
+    1)    0.0000000  0.0000000  0.0000000  Mg
+    2)    0.5000000  0.5000000  0.5000000   O
+ 
+ DDB file with 1 blocks has been read.
+ merge block #    1 from file MgO_eph_zpr/flow_zpr_mgo/w1/t22/outdata/out_DDB
+ 
+ read the input derivative database number    21
+ Opening DDB file: MgO_eph_zpr/flow_zpr_mgo/w1/t23/outdata/out_DDB
+ compare the current and input DDB information
+ 
+  ==== Info on the Cryst% object ====
+ Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
+ R(1)=  0.0000000  4.0182362  4.0182362  G(1)= -0.1244327  0.1244327  0.1244327
+ R(2)=  4.0182362  0.0000000  4.0182362  G(2)=  0.1244327 -0.1244327  0.1244327
+ R(3)=  4.0182362  4.0182362  0.0000000  G(3)=  0.1244327  0.1244327 -0.1244327
+ Unit cell volume ucvol=  1.2975866E+02 bohr^3
+ Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
+ Time-reversal symmetry is present
+ Reduced atomic positions [iatom, xred, symbol]:
+    1)    0.0000000  0.0000000  0.0000000  Mg
+    2)    0.5000000  0.5000000  0.5000000   O
+ 
+ DDB file with 1 blocks has been read.
+ merge block #    1 from file MgO_eph_zpr/flow_zpr_mgo/w1/t23/outdata/out_DDB
+ 
+ read the input derivative database number    22
+ Opening DDB file: MgO_eph_zpr/flow_zpr_mgo/w1/t24/outdata/out_DDB
+ compare the current and input DDB information
+ 
+  ==== Info on the Cryst% object ====
+ Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
+ R(1)=  0.0000000  4.0182362  4.0182362  G(1)= -0.1244327  0.1244327  0.1244327
+ R(2)=  4.0182362  0.0000000  4.0182362  G(2)=  0.1244327 -0.1244327  0.1244327
+ R(3)=  4.0182362  4.0182362  0.0000000  G(3)=  0.1244327  0.1244327 -0.1244327
+ Unit cell volume ucvol=  1.2975866E+02 bohr^3
+ Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
+ Time-reversal symmetry is present
+ Reduced atomic positions [iatom, xred, symbol]:
+    1)    0.0000000  0.0000000  0.0000000  Mg
+    2)    0.5000000  0.5000000  0.5000000   O
+ 
+ DDB file with 1 blocks has been read.
+ merge block #    1 from file MgO_eph_zpr/flow_zpr_mgo/w1/t24/outdata/out_DDB
+ 
+ read the input derivative database number    23
+ Opening DDB file: MgO_eph_zpr/flow_zpr_mgo/w1/t25/outdata/out_DDB
+ compare the current and input DDB information
+ 
+  ==== Info on the Cryst% object ====
+ Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
+ R(1)=  0.0000000  4.0182362  4.0182362  G(1)= -0.1244327  0.1244327  0.1244327
+ R(2)=  4.0182362  0.0000000  4.0182362  G(2)=  0.1244327 -0.1244327  0.1244327
+ R(3)=  4.0182362  4.0182362  0.0000000  G(3)=  0.1244327  0.1244327 -0.1244327
+ Unit cell volume ucvol=  1.2975866E+02 bohr^3
+ Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
+ Time-reversal symmetry is present
+ Reduced atomic positions [iatom, xred, symbol]:
+    1)    0.0000000  0.0000000  0.0000000  Mg
+    2)    0.5000000  0.5000000  0.5000000   O
+ 
+ DDB file with 1 blocks has been read.
+ add block #    1 from file MgO_eph_zpr/flow_zpr_mgo/w1/t25/outdata/out_DDB
+ 
+ read the input derivative database number    24
+ Opening DDB file: MgO_eph_zpr/flow_zpr_mgo/w1/t26/outdata/out_DDB
+ compare the current and input DDB information
+ 
+  ==== Info on the Cryst% object ====
+ Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
+ R(1)=  0.0000000  4.0182362  4.0182362  G(1)= -0.1244327  0.1244327  0.1244327
+ R(2)=  4.0182362  0.0000000  4.0182362  G(2)=  0.1244327 -0.1244327  0.1244327
+ R(3)=  4.0182362  4.0182362  0.0000000  G(3)=  0.1244327  0.1244327 -0.1244327
+ Unit cell volume ucvol=  1.2975866E+02 bohr^3
+ Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
+ Time-reversal symmetry is present
+ Reduced atomic positions [iatom, xred, symbol]:
+    1)    0.0000000  0.0000000  0.0000000  Mg
+    2)    0.5000000  0.5000000  0.5000000   O
+ 
+ DDB file with 1 blocks has been read.
+ merge block #    1 from file MgO_eph_zpr/flow_zpr_mgo/w1/t26/outdata/out_DDB
+ 
+ read the input derivative database number    25
+ Opening DDB file: MgO_eph_zpr/flow_zpr_mgo/w1/t27/outdata/out_DDB
+ compare the current and input DDB information
+ 
+  ==== Info on the Cryst% object ====
+ Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
+ R(1)=  0.0000000  4.0182362  4.0182362  G(1)= -0.1244327  0.1244327  0.1244327
+ R(2)=  4.0182362  0.0000000  4.0182362  G(2)=  0.1244327 -0.1244327  0.1244327
+ R(3)=  4.0182362  4.0182362  0.0000000  G(3)=  0.1244327  0.1244327 -0.1244327
+ Unit cell volume ucvol=  1.2975866E+02 bohr^3
+ Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
+ Time-reversal symmetry is present
+ Reduced atomic positions [iatom, xred, symbol]:
+    1)    0.0000000  0.0000000  0.0000000  Mg
+    2)    0.5000000  0.5000000  0.5000000   O
+ 
+ DDB file with 1 blocks has been read.
+ add block #    1 from file MgO_eph_zpr/flow_zpr_mgo/w1/t27/outdata/out_DDB
+ 
+ read the input derivative database number    26
+ Opening DDB file: MgO_eph_zpr/flow_zpr_mgo/w1/t28/outdata/out_DDB
+ compare the current and input DDB information
+ 
+  ==== Info on the Cryst% object ====
+ Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
+ R(1)=  0.0000000  4.0182362  4.0182362  G(1)= -0.1244327  0.1244327  0.1244327
+ R(2)=  4.0182362  0.0000000  4.0182362  G(2)=  0.1244327 -0.1244327  0.1244327
+ R(3)=  4.0182362  4.0182362  0.0000000  G(3)=  0.1244327  0.1244327 -0.1244327
+ Unit cell volume ucvol=  1.2975866E+02 bohr^3
+ Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
+ Time-reversal symmetry is present
+ Reduced atomic positions [iatom, xred, symbol]:
+    1)    0.0000000  0.0000000  0.0000000  Mg
+    2)    0.5000000  0.5000000  0.5000000   O
+ 
+ DDB file with 1 blocks has been read.
+ merge block #    1 from file MgO_eph_zpr/flow_zpr_mgo/w1/t28/outdata/out_DDB
+ 
+ read the input derivative database number    27
+ Opening DDB file: MgO_eph_zpr/flow_zpr_mgo/w1/t29/outdata/out_DDB
+ compare the current and input DDB information
+ 
+  ==== Info on the Cryst% object ====
+ Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
+ R(1)=  0.0000000  4.0182362  4.0182362  G(1)= -0.1244327  0.1244327  0.1244327
+ R(2)=  4.0182362  0.0000000  4.0182362  G(2)=  0.1244327 -0.1244327  0.1244327
+ R(3)=  4.0182362  4.0182362  0.0000000  G(3)=  0.1244327  0.1244327 -0.1244327
+ Unit cell volume ucvol=  1.2975866E+02 bohr^3
+ Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
+ Time-reversal symmetry is present
+ Reduced atomic positions [iatom, xred, symbol]:
+    1)    0.0000000  0.0000000  0.0000000  Mg
+    2)    0.5000000  0.5000000  0.5000000   O
+ 
+ DDB file with 1 blocks has been read.
+ merge block #    1 from file MgO_eph_zpr/flow_zpr_mgo/w1/t29/outdata/out_DDB
+ 
+ read the input derivative database number    28
+ Opening DDB file: MgO_eph_zpr/flow_zpr_mgo/w1/t30/outdata/out_DDB
+ compare the current and input DDB information
+ 
+  ==== Info on the Cryst% object ====
+ Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
+ R(1)=  0.0000000  4.0182362  4.0182362  G(1)= -0.1244327  0.1244327  0.1244327
+ R(2)=  4.0182362  0.0000000  4.0182362  G(2)=  0.1244327 -0.1244327  0.1244327
+ R(3)=  4.0182362  4.0182362  0.0000000  G(3)=  0.1244327  0.1244327 -0.1244327
+ Unit cell volume ucvol=  1.2975866E+02 bohr^3
+ Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
+ Time-reversal symmetry is present
+ Reduced atomic positions [iatom, xred, symbol]:
+    1)    0.0000000  0.0000000  0.0000000  Mg
+    2)    0.5000000  0.5000000  0.5000000   O
+ 
+ DDB file with 1 blocks has been read.
+ merge block #    1 from file MgO_eph_zpr/flow_zpr_mgo/w1/t30/outdata/out_DDB
+ Final DDB has      8 blocks.
+-
+- Proc.   0 individual time (sec): cpu=          0.0  wall=          0.3
++mrgddb : the run completed successfully

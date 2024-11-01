@@ -1,0 +1,72 @@
+# ================================================================
+# NiO: 2 Ni and 2 O atoms in a fcc supercell
+#
+# Test for Abinit: PAW + U + non-collinear magnetism
+# Low cut-off for test; too few k-points
+# ================================================================
+
+nsppol 1  nspden 1  nspinor 2
+
+# === Structure and cell
+natom 4 ntypat 2 typat 1 1 2 2
+spinat 0 0 1   0 0 -1   0 0 0   0 0 0
+znucl  28.0 8.0
+xred 0 0 0.1 # to test non-zero forces
+    0.0 0.0 0.5
+    0.5 0.5 0.25
+    0.5 0.5 0.75
+acell   3*7.92
+rprim 0.0 1/2 1/2
+      1/2 0.0 1/2
+      1.0 1.0 0.0
+nband 50
+occopt 7  tsmear 0.015
+
+# === SCF cycle options
+nstep 6  tolvrs 1.d-7
+ecut 8. pawecutdg 10.
+diemix 0.5
+
+# === K-points and syms
+# The following kptopt values are actually default values for the different nspden cases.
+kptopt 4
+kptrlatt 2 0 0 0 2 0 0 0 2
+chksymbreak 0
+
+ndtset 2
+# === DFT+U options
+usepawu1  1
+usepawu2 -1
+
+spnorbscl 1000 # To enhance spin-orbit coupling, non physical
+
+lpawu   2 -1        # Applied on d electrons of Nickel
+upawu  0.30   0.0   # Value of U parameter
+jpawu  0.0350 0.0   # Value of J parameter
+
+# === Other options
+prtden 0  prteig 0  prtwf 0
+optforces 1
+pawprtvol 3
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "28ni.paw, 8o.2.paw"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test =
+#%%   t79.abo, tolnlines = 28, tolabs = 1.e-05, tolrel = 6.5e-05, fld_options = -medium
+#%% [paral_info]
+#%% max_nprocs = 4
+#%% [extra_info]
+#%% authors = L. Baguet
+#%% keywords = PAW, DFTU
+#%% description =
+#%%   NiO: 2 Ni and 2 O atoms in an fcc supercell.
+#%%   Different versions of PAW+U formalism are tested.
+#%%   Negative values of usepawu should give exactly the same results as with positive values.
+#%%   Cut-off and k-points are unrealistic.
+#%% topics = DFT+U, spinpolarisation
+#%%<END TEST_INFO>

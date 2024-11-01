@@ -1,0 +1,108 @@
+#######################################
+#       INPUT FILE FOR ABINIT         #
+#                                     #
+#  Hydronium ion + NH3 molecule       #
+#  String method                      #
+#  Moving the proton from H2O to NH3  #
+#  keeping O and H atoms fixed        #
+#######################################
+
+# Definition of the unit cell
+# ===========================
+natom         8
+
+ntypat        3
+
+# Species     
+#             O   N   H   
+znucl         
+              8   7   1   
+
+typat         
+              1   3   3   2   3   3   3   3   
+
+acell         1.90000000000000e+01   9.45000000000000e+00   9.45000000000000e+00
+
+natfix        2
+iatfix        1 4
+
+pp_dirpath "$ABI_PSPDIR/"
+pseudos "8o_hard.paw, 7n.paw, 1h.paw"
+
+# Electronic configuration
+# ========================
+nband         10       # Number of bands to compute
+kptopt        0        # No autogeneration of kpts so only use Gamma (0,0,0)
+cellcharge    1.0      # Charge of the simulation cell
+
+# Convergence parameters
+# ======================
+ecut          20
+pawecutdg     40
+
+# Control of the SCF cycle
+# ========================
+# In order to obtain portability of the test, a much too stringent value for toldff is asked, and the limitation of the number of steps
+# is governed by a relatively low nstep. In real production conditions, the commented values would be better.
+toldff        1.0d-9 # 5.0d-7   # Stopping criterion of SCF cycle
+nstep         12     #   50       # Maximal number of SCF steps
+
+# Parallelization
+# ===============
+paral_kgb     1        # Force use of lobpcg WITH parallelism on 1 CPU
+bandpp        10
+npimage       10       # Use 10 CPUs for the image parallelization
+
+# Definition of the path
+# ======================
+xcart
+              0.00000000000000e+00   0.00000000000000e+00   0.00000000000000e+00
+             -7.11193309720352e-01  -5.39542527497972e-01   1.64610788936525e+00
+             -7.27063671207315e-01   1.63955592306938e+00  -5.38641863769265e-01
+              7.55890453154257e+00   0.00000000000000e+00   0.00000000000000e+00
+              8.21347479352361e+00  -1.88733372964621e-01  -1.80400454958594e+00
+              8.16212513700922e+00  -1.48685156144099e+00   1.07110274118997e+00
+              8.20460466973224e+00   1.65135345075879e+00   7.59565622295564e-01
+              1.94291127433874e+00   4.23039089066905e-02   2.90003186750848e-02
+
+
+xcart_lastimg
+              0.00000000000000e+00   0.00000000000000e+00   0.00000000000000e+00
+             -5.89914827008103e-01  -3.69484303034365e-01   1.70993308126728e+00
+             -6.31462177443216e-01   1.69647064450604e+00  -3.63402648099217e-01
+              7.55890453154257e+00   0.00000000000000e+00   0.00000000000000e+00
+              8.47755158608181e+00  -2.92869889937304e-01  -1.69495641512467e+00
+              7.95559134567592e+00  -1.48518446265367e+00   1.19746604398273e+00
+              8.22948557282829e+00   1.64540409916636e+00   8.00487248896275e-01
+              5.58796603232530e+00   1.14380617889722e-01  -2.55240071529671e-01
+
+
+# String controls
+# ===============
+nimage        12         # Number of points along the string
+imgmov        2          # Selection of "String Method" algo
+ntimimage     50         # Max. number of relaxation steps of the string
+tolimg        0.0001     # Tol. criterion (will stop when average energy of cells < tolimg)
+dynimage      0 10*1 0   # Keep first and last images fixed
+
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% exclude_builders = scope_gnu_12.2_mpich
+#%% [files]
+#%% [NCPU_10]
+#%% files_to_test = 
+#%%   timages_04_MPI10.abo, tolnlines = 55, tolabs = 5.5e-3, tolrel = 9.3e-1, fld_options = -easy;
+#%% [paral_info]
+#%% nprocs_to_test = 10
+#%% max_nprocs = 10
+#%% [extra_info]
+#%% authors = 
+#%% keywords = 
+#%% description = 
+#%%   Hydronium ion + NH3 molecule      
+#%%   String method                    
+#%%   Moving the proton from H2O to NH3
+#%%   keeping O and H atoms fixed      
+#%%<END TEST_INFO>

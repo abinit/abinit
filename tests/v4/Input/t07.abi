@@ -1,0 +1,87 @@
+#   ----------------------------------------------
+#   -     Input file for Abinit                  -
+#   - O fcc, 1 special k-pt, low ecut            -
+#   -                Testing GS paw energy with  -
+#   -            different values of 'iscf  '    -
+#   -            different values of 'pawmixdg'  -
+#   -            different values of 'pawoptmix' -
+#   ----------------------------------------------
+
+# 1-PAW options:
+# ---------------------
+  pawecutdg 15.
+
+# 2-Datasets: changing the value of mixing keywords:
+# --------------------------------------------------
+  ndtset 12
+  iscf1 7   diemix1  0.8 pawoptmix1  0 pawmixdg1  1 npulayit1 8
+  iscf2 4   diemix2  0.8 pawoptmix2  0 pawmixdg2  1
+  iscf3 3   diemix3  0.8 pawoptmix3  0 pawmixdg3  1
+  iscf4 2   diemix4  0.5 pawoptmix4  0 pawmixdg4  1
+  iscf5 17  diemix5  0.8 pawoptmix5  0 pawmixdg5  1 npulayit5 8
+  iscf6 14  diemix6  0.8 pawoptmix6  0 pawmixdg6  1
+  iscf7 13  diemix7  0.8 pawoptmix7  0 pawmixdg7  1
+  iscf8 12  diemix8  0.5 pawoptmix8  0 pawmixdg8  1
+  iscf9 7   diemix9  0.8 pawoptmix9  1 pawmixdg9  1 npulayit9 8
+  iscf10 7  diemix10 0.8 pawoptmix10 0 pawmixdg10 0 npulayit10 8
+  iscf11 17 diemix11 0.8 pawoptmix11 1 pawmixdg11 1 npulayit11 8
+  iscf12 17 diemix12 0.8 pawoptmix12 0 pawmixdg12 0 npulayit12 8
+
+# 3-Options for output:
+# ---------------------
+  prtdos 0 prtwf 0
+
+# 4-Parameters governing the convergence:
+# ---------------------------------------
+  ecut 4.  nband 6  nline 5  ntime 5  nstep 30
+  toldfe 1.d-10
+
+# 5-Options for the choice of calculation:
+# ----------------------------------------
+  occopt 7  tsmear 0.02
+  optcell 0  ionmov 0
+
+# 6-Definition of the unit cell:
+# ------------------------------
+  acell 6.0 5.5 6.5
+  rprim 0.0 1/2 1/2
+        1/2 0.0 1/2
+        1/2 1/2 0.0
+  natom 1  ntypat 1
+  typat 1  znucl 8.
+  xred 0.00 0.00 0.00
+  nsym 0
+
+# 7-Definition of K-points :
+# --------------------------
+  kptopt 0
+  nkpt 1  kptnrm 1  istwfk 1
+  kpt 0 0 0
+  wtk 1
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "8o.paw"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t07.abo ,tolnlines = 4, tolabs = 1.010e-02, tolrel = 3.000e-03, fld_options = -easy
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = Unknown
+#%% keywords = PAW
+#%% description = 
+#%%     O in arbitrary structure. 1 k point, low ecut. Experimental PAW pseudopotential.
+#%%     The aim of this test is to test the differents mixing scheme in PAW formalism.
+#%%     Different values of iscf, pawmixdg and pawoptmix are choosen.
+#%%     Features tested:
+#%%     - mixing on density or potential (mod(iscf,10))
+#%%     - different mixing schemes (iscf)
+#%%     - inclusion of spherical part in residual (pawoptmix)
+#%%     - mixing on coarse or fine grid (pawmixdg)
+#%%     - mixing factor for spherical part (pawsphmix)
+#%%     All mixing schemes give the same total energy.
+#%%<END TEST_INFO>

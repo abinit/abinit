@@ -1,0 +1,103 @@
+#   Si in diamond structure; 2 special points
+#   Test the conversion of k , and spin.
+#   Note that the correctness of the k point conversion is presently (v3.0)
+#   seen only in the log file.
+
+ ndtset 6
+
+    kpt1   1 1 1     1 2 2
+ kptnrm1   4
+   nkpt1   2
+    wtk1   1 3
+ prtden1   1
+
+   iscf2  -2
+ getden2   1
+   nkpt2   3
+    kpt2   0.02 0.04 0.08
+           0.0  0.0  0.5
+          -0.5 -0.5  0.0
+
+   iscf3  -2
+ getden3   1
+ getwfk3   2
+   nkpt3  17
+    kpt3   0.02 0.04 0.08
+           0.02 0.08 0.04
+           0.04 0.02 0.08
+           0.04 0.08 0.02
+          -0.02 -0.04 -0.08
+          -0.04 -0.08 -0.02
+          -0.02 -0.08 -0.04
+           0.02 -0.06 -0.02
+          -0.02 -0.06  0.02
+          -0.04 -0.06 -0.08
+           0.04  0.06  0.08
+           0.08  0.06  0.04
+           0.02 -0.06  0.98
+           0.0   0.0  -0.5
+           0.0   0.5   0.0
+           0.5   0.5   0.0
+           0.5   0.0   0.5
+
+!Make spin-polarized calculation, starting from spin-unpolarized
+ nsppol4   2    spinmagntarget 0.0d0
+    kpt4   1 1 1     1 2 2
+ kptnrm4   4
+   nkpt4   2
+    wtk4   1 3
+ getwfk4   1
+ prtden4   1
+
+!Make spin-unpolarized calculation, starting from spin-polarized
+    kpt5   1 1 1     1 2 2
+ kptnrm5   4
+   nkpt5   2
+    wtk5   1 3
+ getwfk5   4
+
+!Make spinor wfs, starting from scalar wfs
+    kpt6   1 1 1     1 2 2
+ kptnrm6   4
+   nkpt6   2
+    wtk6   1 3
+ getwfk6   1
+ nspinor6  2
+   nband6  8
+
+ acell 3*10.26311
+ ecut 5.8
+ kptopt 0
+
+ natom  2 nband 4  nbdbuf 0
+ nstep 10
+ ntypat  1
+ rprim   0 .5 .5  .5 0 .5  .5 .5 0
+ so_psp 0
+ tolwfr 1.0d-14
+ typat  1 1
+ xred 3*0.00d0 3*0.25d0
+ znucl 14
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/14si.pspnc"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% test_chain = t76.abi, t77.abi
+#%% [files]
+#%% files_to_test = 
+#%%   t76.abo, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
+#%% [paral_info]
+#%% max_nprocs = 2
+#%% [extra_info]
+#%% keywords = 
+#%% authors = Unknown
+#%% description = 
+#%%   Silicon, diamond structure.
+#%%   Test the ability to read an input wavefunction and to generate
+#%%   from it any other wavefunction, changing different parameters.
+#%%   One of the _DEN file is also used as starting point of
+#%%   the cut3D tests.
+#%%<END TEST_INFO>

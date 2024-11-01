@@ -1,0 +1,77 @@
+# Fe normal bcc structure for test of ferromagnetic metal strain perturbation
+
+ ndtset   3
+
+# Set 1 : initial self-consistency
+
+ kptopt1   1
+ prtden1   1
+ spinat1   0.0 0.0 4.0
+ tolvrs1   1.0d-10
+
+# Set 2 : wavefunction convergence
+
+ getden2   -1
+ getwfk2   -1
+   iscf2   -2
+ kptopt2   1
+ tolwfr2   1.0d-8
+
+# Set 3 : response-function strain calculation
+
+getwfk3   -1
+kptopt3   2
+  nqpt3   1
+   qpt3   0  0  0
+ rfdir3   1  0  0
+rfstrs3   3
+tolvrs3   1.0d-8
+
+# common input data
+
+  acell   3*5.42
+dilatmx   1.1
+   ecut   18.0
+ ecutsm   0.0
+  natom   1
+  nband   8
+  ngkpt   2 2 2
+nshiftk   1
+ nsppol   2
+  nstep   50
+ ntypat   1
+ occopt   3
+  rprim   -0.5  0.5  0.5
+           0.5 -0.5  0.5
+           0.5  0.5 -0.5
+ shiftk   0.5 0.5 0.5
+ tsmear   0.01
+  typat   1
+   xred   0.0  0.0  0.0
+  znucl   26
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/26fe.pspnc"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t79.abo, tolnlines = 8, tolabs = 1.100e+00, tolrel = 7.0e-01, fld_options = -easy
+#%% [paral_info]
+#%% max_nprocs = 4
+#%% [extra_info]
+#%% authors = D. R. Hamann
+#%% keywords = NC, DFPT
+#%% description = 
+#%%   Test of the strain perturbation with spin polarization and metallic
+#%%   occupation of states 
+#%%   Fe in the bcc structure.  This tests both the introduction of spin
+#%%   polarization into strain response function calculations and an
+#%%   improved treatment of the first-order fermi energy for Q=0 metallic
+#%%   calculations.  Similar data (with much larger cutoffs, tighter
+#%%   convergence tolerances, and larger k sample) was used test the
+#%%   elastic tensor in comparison with numerical derivatives of the
+#%%   stress from GS calculations.
+#%%<END TEST_INFO>

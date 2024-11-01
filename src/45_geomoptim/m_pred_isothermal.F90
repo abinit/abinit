@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_pred_isothermal
 !! NAME
 !!  m_pred_isothermal
@@ -11,14 +10,10 @@
 !! Mol. Phys., 1996, Vol. 87, pp. 1117-1157 [[cite:Martyna1996]]
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2019 ABINIT group (DCA, XG, GMR, JCC, JYR, SE)
+!! Copyright (C) 1998-2024 ABINIT group (DCA, XG, GMR, JCC, JYR, SE)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -84,13 +79,6 @@ contains
 !! hist <type(abihist)> : History of positions,forces
 !!                               acell, rprimd, stresses
 !!
-!! PARENTS
-!!      mover
-!!
-!! CHILDREN
-!!      dsyev,hist2var,isopress,isostress,isotemp,metric,mkrdim,var2hist,wrtout
-!!      xcart2xred,xred2xcart
-!!
 !! SOURCE
 
 subroutine pred_isothermal(ab_mover,hist,itime,mttk_vars,ntime,zDEBUG,iexit)
@@ -130,7 +118,6 @@ subroutine pred_isothermal(ab_mover,hist,itime,mttk_vars,ntime,zDEBUG,iexit)
  real(dp) :: gmet(3,3)
  real(dp) :: rmet(3,3)
  real(dp) :: fcart(3,ab_mover%natom)
-!real(dp) :: fred_corrected(3,ab_mover%natom)
  real(dp) :: xcart(3,ab_mover%natom),xcart_next(3,ab_mover%natom)
  real(dp) :: xred(3,ab_mover%natom),xred_next(3,ab_mover%natom)
  real(dp) :: vel(3,ab_mover%natom)
@@ -142,10 +129,10 @@ subroutine pred_isothermal(ab_mover,hist,itime,mttk_vars,ntime,zDEBUG,iexit)
 
  if(iexit/=0)then
    if (allocated(fcart_m))       then
-     ABI_DEALLOCATE(fcart_m)
+     ABI_FREE(fcart_m)
    end if
    if (allocated(vel_nexthalf))  then
-     ABI_DEALLOCATE(vel_nexthalf)
+     ABI_FREE(vel_nexthalf)
    end if
    return
  end if
@@ -169,18 +156,18 @@ subroutine pred_isothermal(ab_mover,hist,itime,mttk_vars,ntime,zDEBUG,iexit)
 
  if(itime==1)then
    if (allocated(fcart_m))       then
-     ABI_DEALLOCATE(fcart_m)
+     ABI_FREE(fcart_m)
    end if
    if (allocated(vel_nexthalf))  then
-     ABI_DEALLOCATE(vel_nexthalf)
+     ABI_FREE(vel_nexthalf)
    end if
  end if
 
  if (.not.allocated(fcart_m))       then
-   ABI_ALLOCATE(fcart_m,(3,ab_mover%natom))
+   ABI_MALLOC(fcart_m,(3,ab_mover%natom))
  end if
  if (.not.allocated(vel_nexthalf))  then
-   ABI_ALLOCATE(vel_nexthalf,(3,ab_mover%natom))
+   ABI_MALLOC(vel_nexthalf,(3,ab_mover%natom))
  end if
 
 !write(std_out,*) 'isothermal 02'
@@ -220,19 +207,6 @@ subroutine pred_isothermal(ab_mover,hist,itime,mttk_vars,ntime,zDEBUG,iexit)
  acell0(:)=acell(:)
  rprimd0(:,:)=rprimd(:,:)
  ucvol0=ucvol
-
-!Get rid of mean force on whole unit cell, but only if no
-!generalized constraints are in effect
-!  call fcart2fred(hist%fcart(:,:,hist%ihist),fred_corrected,rprimd,ab_mover%natom)
-!  if(ab_mover%nconeq==0)then
-!    amass_tot=sum(ab_mover%amass(:))
-!    do ii=1,3
-!      if (ii/=3.or.ab_mover%jellslab==0) then
-!        favg=sum(fred_corrected(ii,:))/dble(ab_mover%natom)
-!        fred_corrected(ii,:)=fred_corrected(ii,:)-favg*ab_mover%amass(:)/amass_tot
-!      end if
-!    end do
-!  end if
 
 !write(std_out,*) 'isothermal 03'
 !##########################################################
@@ -305,6 +279,7 @@ subroutine pred_isothermal(ab_mover,hist,itime,mttk_vars,ntime,zDEBUG,iexit)
    write(std_out,*) 'Initial temp (mdtemp(1)):',ab_mover%mdtemp(1)
    write(std_out,*) 'Final temp (mdtemp(2)):',ab_mover%mdtemp(2)
    write(std_out,*) 'Delay for atom permutation (delayperm)',ab_mover%delayperm
+   write(std_out,*) 'dtion',ab_mover%dtion
    write(std_out,*) 'nnos:', ab_mover%nnos
    write(std_out,*) 'qmass', ab_mover%qmass(:)
    write(std_out,*) 'bmass',ab_mover%bmass
@@ -463,7 +438,7 @@ subroutine pred_isothermal(ab_mover,hist,itime,mttk_vars,ntime,zDEBUG,iexit)
 !  Convert back to xred (reduced coordinates)
    call xcart2xred(ab_mover%natom,rprimd_next,xcart_next,xred_next)
 !  Computation of the forces for the new positions
-!  Compute LDA forces (big loop)
+!  Compute DFT forces (big loop)
 
 !  COMMENTED
 !  This should be in mover.F90
@@ -546,7 +521,7 @@ subroutine pred_isothermal(ab_mover,hist,itime,mttk_vars,ntime,zDEBUG,iexit)
    write(message, '(a,i12,a,a)' )&
 &   '  Disallowed value for optcell=',ab_mover%optcell,ch10,&
 &   '  Allowed values with ionmov==13 : 0 to 2.'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
 !write(std_out,*) 'OLD PARAMETERS'
@@ -633,12 +608,6 @@ end subroutine pred_isothermal
 !!  isotemp_data: updates the thermostat parameters
 !!  vel=update the velocities
 !!
-!! PARENTS
-!!      pred_isothermal
-!!
-!! CHILDREN
-!!      dsyev
-!!
 !! SOURCE
 
 subroutine isotemp(amass,dtion,ekin,iatfix,ktemp,mttk_vars,natom,nnos,qmass,vel)
@@ -670,9 +639,9 @@ subroutine isotemp(amass,dtion,ekin,iatfix,ktemp,mttk_vars,natom,nnos,qmass,vel)
 !Beginning of executable session
 !***************************************************************************
 
- ABI_ALLOCATE(glogs,(nnos))
- ABI_ALLOCATE(vlogs,(nnos))
- ABI_ALLOCATE(xlogs,(nnos))
+ ABI_MALLOC(glogs,(nnos))
+ ABI_MALLOC(vlogs,(nnos))
+ ABI_MALLOC(xlogs,(nnos))
  glogs(:)=mttk_vars%glogs(:)
  vlogs(:)=mttk_vars%vlogs(:)
  xlogs(:)=mttk_vars%xlogs(:)
@@ -736,9 +705,9 @@ subroutine isotemp(amass,dtion,ekin,iatfix,ktemp,mttk_vars,natom,nnos,qmass,vel)
  mttk_vars%glogs(:)=glogs(:)
  mttk_vars%vlogs(:)=vlogs(:)
  mttk_vars%xlogs(:)=xlogs(:)
- ABI_DEALLOCATE(glogs)
- ABI_DEALLOCATE(vlogs)
- ABI_DEALLOCATE(xlogs)
+ ABI_FREE(glogs)
+ ABI_FREE(vlogs)
+ ABI_FREE(xlogs)
 !DEBUG
 !write(std_out,*)'ekin added',half*qmass(1)*vlogs(1)**2,xlogs(1)*(nfree)*ktemp
 !ENDEBUG
@@ -771,12 +740,6 @@ end subroutine isotemp
 !! SIDE EFFECTS
 !!  isotemp_data: updates the thermostat parameters (saved variables: bouh !)
 !!  vel=update the velocities
-!!
-!! PARENTS
-!!      pred_isothermal
-!!
-!! CHILDREN
-!!      dsyev
 !!
 !! SOURCE
 
@@ -824,9 +787,9 @@ end subroutine isotemp
    write(std_out,*)' ucvol=',ucvol
  end if
 
- ABI_ALLOCATE(glogs,(nnos))
- ABI_ALLOCATE(vlogs,(nnos))
- ABI_ALLOCATE(xlogs,(nnos))
+ ABI_MALLOC(glogs,(nnos))
+ ABI_MALLOC(vlogs,(nnos))
+ ABI_MALLOC(xlogs,(nnos))
  glogs(:)=mttk_vars%glogs(:)
  vlogs(:)=mttk_vars%vlogs(:)
  xlogs(:)=mttk_vars%xlogs(:)
@@ -906,9 +869,9 @@ end subroutine isotemp
  end do
 !Barostat
  ekin=ekin+half*bmass*vlogv**2+prtarget*ucvol
- ABI_DEALLOCATE(glogs)
- ABI_DEALLOCATE(vlogs)
- ABI_DEALLOCATE(xlogs)
+ ABI_FREE(glogs)
+ ABI_FREE(vlogs)
+ ABI_FREE(xlogs)
 
 !DEBUG
 !write(std_out,*) 'EKIN',ekin
@@ -945,12 +908,6 @@ end subroutine isopress
 !! SIDE EFFECTS
 !!  isotemp_data: updates the thermostat parameters (saved variables: bouh !)
 !!  vel=update the velocities
-!!
-!! PARENTS
-!!      pred_isothermal
-!!
-!! CHILDREN
-!!      dsyev
 !!
 !! SOURCE
 
@@ -1001,9 +958,9 @@ end subroutine isopress
    write(std_out,*)' ucvol=',ucvol
  end if
 
- ABI_ALLOCATE(glogs,(nnos))
- ABI_ALLOCATE(vlogs,(nnos))
- ABI_ALLOCATE(xlogs,(nnos))
+ ABI_MALLOC(glogs,(nnos))
+ ABI_MALLOC(vlogs,(nnos))
+ ABI_MALLOC(xlogs,(nnos))
  glogs(:)=mttk_vars%glogs(:)
  vlogs(:)=mttk_vars%vlogs(:)
  xlogs(:)=mttk_vars%xlogs(:)
@@ -1099,9 +1056,9 @@ end subroutine isopress
  expdiag(1)=exp(-veig(1)*dtion/two)
  expdiag(2)=exp(-veig(2)*dtion/two)
  expdiag(3)=exp(-veig(3)*dtion/two)
- if(DEBUG) then
-   write(std_out,*)' isostress : expdiag(:)=',expdiag(:)  ! Do not remove this line : seems to be needed for g95 compilo
- end if
+ !if(DEBUG) then
+ !  write(std_out,*)' isostress : expdiag(:)=',expdiag(:)  ! Do not remove this line : seems to be needed for g95 compilo
+ !end if
  do iatom=1,natom
    uv(:)=matmul(tvtemp,vel(:,iatom))
    uv(:)=uv(:)*expdiag(:)
@@ -1188,9 +1145,9 @@ end subroutine isopress
  mttk_vars%glogs(:)=glogs(:)
  mttk_vars%vlogs(:)=vlogs(:)
  mttk_vars%xlogs(:)=xlogs(:)
- ABI_DEALLOCATE(glogs)
- ABI_DEALLOCATE(vlogs)
- ABI_DEALLOCATE(xlogs)
+ ABI_FREE(glogs)
+ ABI_FREE(vlogs)
+ ABI_FREE(xlogs)
 
  if(DEBUG) then
 !  write(std_out,*)'ekin added T',half*qmass(:)*vlogs(:)**2,xlogs(:)*(nfree)*ktemp

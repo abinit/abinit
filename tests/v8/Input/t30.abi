@@ -1,0 +1,93 @@
+# LiH molecule. Use spatial chemical potential to orient the molecule.
+#
+
+ndtset 12
+udtset 2 6
+prtvol 10 # This is to print the components of the gradients of the energy with respect to reduced coords
+
+#Test the following chemical potential : in the relevant zone, the potential in linear,
+# pulling the Li towards -z, and pushing the H towards +z.
+chempot   -0.2 -0.01 0.05  #This is for the Li atom, defines the chemical potential at zred=-0.2
+           0.2  0.01 0.05  #This is for the Li atom, defines the chemical potential at zred= 0.2
+
+#         -0.2  0.01 -0.05  #This is for the H atom, defines the chemical potential at zred=-0.2
+#          0.2 -0.01 -0.05  #This is for the H atom, defines the chemical potential at zred= 0.2
+
+          *0.0
+
+
+#For the dataset 11 to 16, no chemical potential. Consider the molecule aligned with x.
+nzchempot1?      0
+nzchempot2?      2
+
+#For the other data sets, turn on the chemical potential. Start with molecule aligned with z,
+# the molecule is slightly stretched.
+
+xcart?1   -1.5 0.0 0.0
+           1.5 0.0 0.0
+
+xcart?2   -1.5 0.0 1.0
+           1.5 0.0 1.0
+
+xcart?3   -1.5 0.0 2.0
+           1.5 0.0 2.0
+
+xcart?4   -1.5 0.0 3.0
+           1.5 0.0 3.0
+
+xcart?5   -1.5 0.0 4.0
+           1.5 0.0 4.0
+
+xcart?6   -1.5 0.0 5.0
+           1.5 0.0 5.0
+ chksymtnons 0
+
+
+# Common data
+nband   2
+
+acell  10 10 10
+
+ecut      10.0 
+
+natom     2
+znucl     3 1  
+ntypat    2
+typat     1 2
+
+ngkpt     1 1 1
+
+ionmov  0
+ntime   5
+tolrff  1.d-2
+
+diemac    1.0    diemix 0.5d0
+nstep 10
+
+
+ pp_dirpath "$ABI_PSPDIR/PseudosHGH_pwteter"
+ pseudos "3li.1.hgh, 1h.1.hgh"
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t30.abo, tolnlines=   0,   tolabs=  0.0,      tolrel= 0.0, fld_options = -easy
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = X. Gonze 
+#%% description = 
+#%%    LiH molecule
+#%%    test the use of spatial chemical potential. The molecule starts aligned along the x direction,
+#%%    while the Li chemical potential pulls the Li nucleus.
+#%%    The z coordinate of the molecule is changed from 0 to 5 Bohr.
+#%%    There is a linear part to the chemical potential. 
+#%%    The energy and force should be the same in datasets 11 to 15 (without chemical potentiel).
+#%%    One sees that this is not completely the case.
+#%%    The force along z vanishes in these cases, because the translational invariance is imposed by ABINIT.
+#%%    In datasets 21 to 23, the energy should increase linearly, and the force along z should be non-zero and constant.
+#%%    Small fluctuations are observed.
+#%%    Dataset 24 and 25 corresponds to the cubic part of the chemical potential.
+#%%    Dataset 26 places the molecule at a symmetric value of z. The total energy should be the same as with dataset 11, 16, or 21.
+#%%<END TEST_INFO>

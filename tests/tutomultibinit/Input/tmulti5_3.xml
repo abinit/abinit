@@ -1,0 +1,65 @@
+<?xml version="1.0"?>
+<System_definition>
+	<unit_cell units="bohrradius">3.77945e+00	0.00000e+00	0.00000e+00	
+		0.00000e+00	1.88973e+00	0.00000e+00
+		0.00000e+00	0.00000e+00	1.88973e+00</unit_cell>
+  <atom damping_factor="1.00000e+00" gyroratio="1.00000e+00" index_spin="1" mass="1.00800e+00" massunits="atomicmassunit">
+    <position units="bohrradius">0.00000e+00	0.00000e+00	0.00000e+00</position>
+    <spinat>0.00000e+00	1.00000e+00	0.00000e+00</spinat>
+  </atom>
+  <atom damping_factor="1.00000e+00" gyroratio="1.00000e+00" index_spin="2" mass="1.00800e+00" massunits="atomicmassunit">
+    <position units="bohrradius">1.88973e+00	0.00000e+00	0.00000e+00</position>
+    <spinat>0.00000e+00	1.00000e+00	0.00000e+00</spinat>
+  </atom>
+  <spin_exchange_list units="eV">
+    <nterms>4</nterms>
+    <spin_exchange_term units="eV">
+      <ijR>1 2 0 0 0</ijR>
+      <data>-5.00000e-03 	 -5.00000e-03 	 -5.00000e-03</data>
+    </spin_exchange_term>
+    <spin_exchange_term units="eV">
+      <ijR>1 2 -1 0 0</ijR>
+      <data>-5.00000e-03 	 -5.00000e-03 	 -5.00000e-03</data>
+    </spin_exchange_term>
+    <spin_exchange_term units="eV">
+      <ijR>2 1 1 0 0</ijR>
+      <data>-5.00000e-03 	 -5.00000e-03 	 -5.00000e-03</data>
+    </spin_exchange_term>
+    <spin_exchange_term units="eV">
+      <ijR>2 1 0 0 0</ijR>
+      <data>-5.00000e-03 	 -5.00000e-03 	 -5.00000e-03</data>
+    </spin_exchange_term>
+  </spin_exchange_list>
+  <spin_DMI_list units="eV">
+    <nterms>4</nterms>
+    <spin_DMI_term>
+      <ijR>1 2 0 0 0</ijR>
+      <data>0.00000e+00 	 0.00000e+00 	 2.00000e-03</data>
+    </spin_DMI_term>
+    <spin_DMI_term>
+      <ijR>2 1 0 0 0</ijR>
+      <data>-0.00000e+00 	 -0.00000e+00 	 -2.00000e-03</data>
+    </spin_DMI_term>
+    <spin_DMI_term>
+      <ijR>1 2 -1 0 0</ijR>
+      <data>0.00000e+00 	 -0.00000e+00 	 2.00000e-03</data>
+    </spin_DMI_term>
+    <spin_DMI_term>
+      <ijR>2 1 1 0 0</ijR>
+      <data>-0.00000e+00 	 0.00000e+00 	 -2.00000e-03</data>
+    </spin_DMI_term>
+  </spin_DMI_list>
+  <spin_uniaxial_SIA_list units="eV">
+    <nterms>2</nterms>
+    <spin_uniaxial_SIA_term>
+      <i>1 </i>
+      <amplitude>0.00000e+00</amplitude>
+      <direction>0.00000e+00 	 0.00000e+00 	 1.00000e+00 </direction>
+    </spin_uniaxial_SIA_term>
+    <spin_uniaxial_SIA_term>
+      <i>2 </i>
+      <amplitude>0.00000e+00</amplitude>
+      <direction>0.00000e+00 	 0.00000e+00 	 1.00000e+00 </direction>
+    </spin_uniaxial_SIA_term>
+  </spin_uniaxial_SIA_list>
+</System_definition>

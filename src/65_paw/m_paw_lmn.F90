@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_paw_lmn
 !! NAME
 !!  m_paw_lmn
@@ -8,7 +7,7 @@
 !!  over the the (l,m,n) channels of the PAW partial waves.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2019 ABINIT group (MG)
+!! Copyright (C) 2008-2024 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -61,10 +60,6 @@ CONTAINS  !=====================================================================
 !!  ll=The angular momentun defined in [0,1,2,3,4].
 !!  mm=The magnetic number in the interval [-l,....+l].
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine ilm2lm(ilm,ll,mm)
@@ -81,7 +76,7 @@ subroutine ilm2lm(ilm,ll,mm)
 ! *********************************************************************
 
  if (ilm<1) then 
-   MSG_ERROR("Wrong ilm")
+   ABI_ERROR("Wrong ilm")
  end if
 
  ll = -1
@@ -95,7 +90,7 @@ subroutine ilm2lm(ilm,ll,mm)
  mm = ilm - ll**2 -ll-1
 
  if (ll==-1) then
-   MSG_ERROR("l>100 not programmed!")
+   ABI_ERROR("l>100 not programmed!")
  end if
 
 end subroutine ilm2lm
@@ -118,11 +113,6 @@ end subroutine ilm2lm
 !! OUTPUT
 !!  indlmn(6,lmn_size)=array giving l,m,n,lm,ln,s for i=lmn
 !!
-!! PARENTS
-!!      m_atom
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine make_indlmn(ln_size,lmn_size,orbitals,indlmn)
@@ -144,7 +134,7 @@ subroutine make_indlmn(ln_size,lmn_size,orbitals,indlmn)
 
 !************************************************************************
 
- ABI_ALLOCATE(nprj,(0:MAXVAL(orbitals)))
+ ABI_MALLOC(nprj,(0:MAXVAL(orbitals)))
 
  ilmn=0; iln=0; nprj=0
  do ib=1,ln_size
@@ -162,7 +152,7 @@ subroutine make_indlmn(ln_size,lmn_size,orbitals,indlmn)
    ilmn=ilmn+2*il+1
  end do
 
- ABI_DEALLOCATE(nprj)
+ ABI_FREE(nprj)
 
 end subroutine make_indlmn
 !!***
@@ -188,11 +178,6 @@ end subroutine make_indlmn
 !!  indklmn(6,lmn2_size)=Array giving klm, kln, abs(il-jl), (il+jl), ilm and jlm, ilmn and jlmn
 !!    for each klmn=(ilmn,jlmn). Note: ilmn=(il,im,in) and ilmn<=jlmn
 !!  klm_diag(lmn2_size)=1 il==jl and im==jm, 0 otherwise.
-!!
-!! PARENTS
-!!      m_atom
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -277,11 +262,6 @@ end subroutine make_indklmn
 !!  kln2ln(6,ln2_size)=Table giving il, jl ,in, jn, iln, jln for each kln=(iln,jln)
 !!  where iln=(il,in) and iln<=jln. NB: kln2ln is an application and not a bijection
 !!
-!! PARENTS
-!!      m_atom,m_paw_slater
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine make_kln2ln(lmn_size,lmn2_size,ln2_size,indlmn,indklmn,kln2ln)
@@ -362,11 +342,6 @@ end subroutine make_kln2ln
 !!  used in most of the PAW datasets. This routines, howevever, works
 !!  works also in the unlikely case in with (l,m) are not ordered.
 !!
-!! PARENTS
-!!      m_paw_slater
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine make_klm2lm(lmn_size,lmn2_size,lm2_size,indlmn,indklmn,klm2lm)
@@ -414,7 +389,7 @@ subroutine make_klm2lm(lmn_size,lmn2_size,lm2_size,indlmn,indklmn,klm2lm)
  end do !klmn
 
  if (ANY(klm2lm==0)) then
-   MSG_BUG("check klm2lm")
+   ABI_BUG("check klm2lm")
  end if
 
 !DEBUG
@@ -450,11 +425,6 @@ end subroutine make_klm2lm
 !! OUTPUT
 !!  jlmn, ilmn=The two symmetrix indices corresponding to klmn. NB: jlmn >= ilmn
 !!
-!! PARENTS
-!!      m_paw_lmn,m_paw_slater
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine klmn2ijlmn(klmn,lmn_size,ilmn,jlmn)
@@ -483,7 +453,7 @@ subroutine klmn2ijlmn(klmn,lmn_size,ilmn,jlmn)
    end do
  end do
 
- MSG_BUG("Not able to found ilmn and jlmn")
+ ABI_BUG("Not able to found ilmn and jlmn")
 
 end subroutine klmn2ijlmn
 !!***
@@ -505,11 +475,6 @@ end subroutine klmn2ijlmn
 !!
 !! OUTPUT
 !!  indln(2,ln_size)=Array giving l and n for i=ln
-!!
-!! PARENTS
-!!      m_paw_slater
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -560,8 +525,6 @@ end subroutine make_indln
 !! INPUTS
 !!  ii=Row index
 !!  jj=column index
-!!
-!! PARENTS
 !!
 !! SOURCE
 

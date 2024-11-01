@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_bse_io
 !! NAME
 !! m_bse_io
@@ -7,14 +6,10 @@
 !!  This module provides routines to read the Bethe-Salpeter Hamiltonian from file
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2019 ABINIT group (MG)
+!!  Copyright (C) 2008-2024 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -33,19 +28,16 @@ MODULE m_bse_io
 #if defined HAVE_MPI2
  use mpi
 #endif
-#if defined HAVE_NETCDF
  use netcdf
-#endif
  use m_nctk
- use iso_c_binding
+ use, intrinsic :: iso_c_binding
  use m_hdr
 
- use defs_abitypes,    only : Hdr_type
  use m_time,           only : cwtime
  use m_fstrings,       only : toupper
  use m_io_tools,       only : open_file
  use m_numeric_tools,  only : arth
- use m_special_funcs,  only : dirac_delta
+ use m_special_funcs,  only : gaussian
  use m_bs_defs,        only : excparam
  use m_bz_mesh,        only : kmesh_t
 
@@ -93,12 +85,6 @@ CONTAINS  !====================================================================
 !! OUTPUT
 !!  Only writing
 !!
-!! PARENTS
-!!      exc_build_block
-!!
-!! CHILDREN
-!!      c_f_pointer
-!!
 !! SOURCE
 
 subroutine exc_write_bshdr(funt,Bsp,Hdr)
@@ -115,7 +101,7 @@ subroutine exc_write_bshdr(funt,Bsp,Hdr)
  character(len=500) :: errmsg
  ! *************************************************************************
 
- call hdr_fort_write(Hdr, funt, fform_1002, ierr)
+ call hdr%fort_write(funt, fform_1002, ierr)
  ABI_CHECK(ierr == 0, "hdr_fort_write returned ierr != 0")
  write(funt, err=10, iomsg=errmsg) BSp%nreh,BSp%nkbz
 
@@ -123,7 +109,7 @@ subroutine exc_write_bshdr(funt,Bsp,Hdr)
 
 ! Handle IO Error
 10 continue
- MSG_ERROR(errmsg)
+ ABI_ERROR(errmsg)
 
 end subroutine exc_write_bshdr
 !!***
@@ -146,12 +132,6 @@ end subroutine exc_write_bshdr
 !! OUTPUT
 !!  fform=Integer defining the file format.
 !!  ierr=Status error.
-!!
-!! PARENTS
-!!      m_bse_io,m_exc_diago
-!!
-!! CHILDREN
-!!      c_f_pointer
 !!
 !! SOURCE
 
@@ -180,7 +160,7 @@ subroutine exc_read_bshdr(funt,Bsp,fform,ierr)
 
  read(funt, err=10, iomsg=errmsg) nreh_read, nkbz_read
 
- call hdr_free(Hdr)
+ call Hdr%free()
 
  if (ANY(nreh_read/=BSp%nreh)) then
    call wrtout(std_out,"Wrong number of e-h transitions","COLL")
@@ -190,7 +170,7 @@ subroutine exc_read_bshdr(funt,Bsp,fform,ierr)
  return
 
 10 ierr = 1
- MSG_WARNING(errmsg)
+ ABI_WARNING(errmsg)
 
 end subroutine exc_read_bshdr
 !!***
@@ -213,12 +193,6 @@ end subroutine exc_read_bshdr
 !! SIDE EFFECTS
 !!  Skip the header.
 !!
-!! PARENTS
-!!      exc_build_block
-!!
-!! CHILDREN
-!!      c_f_pointer
-!!
 !! SOURCE
 
 subroutine exc_skip_bshdr(funt,ierr)
@@ -240,7 +214,7 @@ subroutine exc_skip_bshdr(funt,ierr)
 ! Handle IO Error
 10 continue
  ierr = 0
- MSG_WARNING(errmsg)
+ ABI_WARNING(errmsg)
 
 end subroutine exc_skip_bshdr
 !!***
@@ -260,12 +234,6 @@ end subroutine exc_skip_bshdr
 !!
 !! SIDE EFFECTS
 !!  ehdr_offset
-!!
-!! PARENTS
-!!      exc_build_block,m_bse_io,m_exc_diago
-!!
-!! CHILDREN
-!!      c_f_pointer
 !!
 !! SOURCE
 
@@ -290,7 +258,7 @@ subroutine exc_skip_bshdr_mpio(mpifh,at_option,ehdr_offset)
  call xmpio_read_frm(mpifh,ehdr_offset,at_option,fmarker,ierr)
  !write(std_out,*)"fmarker last record ",fmarker
 #else
- MSG_ERROR("You should not be here")
+ ABI_ERROR("You should not be here")
 #endif
 
 end subroutine exc_skip_bshdr_mpio
@@ -309,7 +277,7 @@ end subroutine exc_skip_bshdr_mpio
 !!  eig_fname=The name of the file storing the excitonic eigenvectors.
 !!  hsize=Size of the Hamiltonian.
 !!  nvec=Number of excitonic states to analyze.
-!!  vec_idx(nvec)=List with the indeces of the excitonic states sorted in ascending order.
+!!  vec_idx(nvec)=List with the indices of the excitonic states sorted in ascending order.
 !!  [Bsp]<excparam>=Structure storing the parameters of the run. If present the
 !!    routine will perform additional consistency checks to make sure that
 !!    the content of the file is consistent with the present run.
@@ -317,12 +285,6 @@ end subroutine exc_skip_bshdr_mpio
 !! OUTPUT
 !!  [ene_list(nvec)]=Excitonic energies
 !!  vec_list(hsize,nvec)=Excitonic eigenvectors.
-!!
-!! PARENTS
-!!      exc_plot,m_bse_io
-!!
-!! CHILDREN
-!!      c_f_pointer
 !!
 !! SOURCE
 
@@ -351,7 +313,7 @@ subroutine exc_read_eigen(eig_fname,hsize,nvec,vec_idx,vec_list,ene_list,Bsp)
  ABI_UNUSED(BSp%nline)
 
  if (open_file(eig_fname,msg,newunit=eig_unt,form="unformatted",status="old",action="read") /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  read(eig_unt, err=10, iomsg=errmsg)hsize_read,neig_read
@@ -359,7 +321,7 @@ subroutine exc_read_eigen(eig_fname,hsize,nvec,vec_idx,vec_list,ene_list,Bsp)
 
  if (hsize_read/=hsize) then
    write(msg,'(a,2(1x,i0))')" hsize_read/=hsize: ",hsize_read,hsize
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  ! Read eigenvalues, ignore possibly small imaginary part.
@@ -389,14 +351,14 @@ subroutine exc_read_eigen(eig_fname,hsize,nvec,vec_idx,vec_list,ene_list,Bsp)
 
  if (vec/=nvec) then
    write(msg,'(a,2(1x,i0))')" vec_idx is wrong, vec/=nvec ",vec,nvec+1
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  return
 
  ! Handle IO-error
 10 continue
- MSG_ERROR(errmsg)
+ ABI_ERROR(errmsg)
 
 end subroutine exc_read_eigen
 !!***
@@ -426,12 +388,6 @@ end subroutine exc_read_eigen
 !!
 !! TODO
 !! Remove Bsp
-!!
-!! PARENTS
-!!      m_exc_itdiago,m_hexc
-!!
-!! CHILDREN
-!!      c_f_pointer
 !!
 !! SOURCE
 
@@ -482,7 +438,7 @@ subroutine exc_read_rcblock(fname,Bsp,is_resonant,diago_is_real,nsppol,nreh,hsiz
  ABI_CHECK(hsize==size_exp,"Wrong hsize")
  if (neh1/=neh2) then
    msg = "BSE code does not support different number of transitions for the two spin channels"
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  my_nt = my_t2-my_t1+1
@@ -500,7 +456,7 @@ subroutine exc_read_rcblock(fname,Bsp,is_resonant,diago_is_real,nsppol,nreh,hsiz
    end if
 
    if (open_file(fname,msg,newunit=funit,form="unformatted",status="old",action="read") /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
    !
    ! Read the header and perform consistency checks.
@@ -552,7 +508,7 @@ subroutine exc_read_rcblock(fname,Bsp,is_resonant,diago_is_real,nsppol,nreh,hsiz
      ! A) Construct resonant blocks from the upper triangles stored on file.
      ! FIXME this part wont work if we have a different number of e-h pairs
      if (.not.is_resonant) then
-       MSG_ERROR("exc_read_rcblock does not support coupling.")
+       ABI_ERROR("exc_read_rcblock does not support coupling.")
      end if
      ! It should be checked.
      spin_dim=neh1
@@ -646,7 +602,7 @@ subroutine exc_read_rcblock(fname,Bsp,is_resonant,diago_is_real,nsppol,nreh,hsiz
    if (nsppol==1) then
      call xmpio_create_coldistr_from_fpacked(glob_sizes,my_cols,old_type,ham_type,my_offpad,offset_err)
    else
-     MSG_WARNING("nsppol==2 => calling fp3blocks")
+     ABI_WARNING("nsppol==2 => calling fp3blocks")
      write(std_out,*)"neh, hsize",neh1,neh2,hsize
 
 #if 1
@@ -658,14 +614,14 @@ subroutine exc_read_rcblock(fname,Bsp,is_resonant,diago_is_real,nsppol,nreh,hsiz
      call xmpio_check_frmarkers(mpifh,ehdr_offset,xmpio_collective,nrec,bsize_frecord,ierr)
      ABI_CHECK(ierr==0,"Error in Fortran markers")
      ABI_FREE(bsize_frecord)
-     MSG_COMMENT("Marker check ok")
+     ABI_COMMENT("Marker check ok")
      call xmpi_barrier(comm)
 #endif
 
      block_sizes(:,1) = (/neh1,neh1/)
      block_sizes(:,2) = (/neh2,neh2/)
      block_sizes(:,3) = (/neh1,neh2/)
-     MSG_ERROR("fp3blocks is buggy")
+     ABI_ERROR("fp3blocks is buggy")
      call xmpio_create_coldistr_from_fp3blocks(glob_sizes,block_sizes,my_cols,old_type,ham_type,my_offpad,offset_err)
    end if
 
@@ -673,7 +629,7 @@ subroutine exc_read_rcblock(fname,Bsp,is_resonant,diago_is_real,nsppol,nreh,hsiz
      write(msg,"(3a)")&
 &      "Global position index cannot be stored in a standard Fortran integer ",ch10,&
 &      "Excitonic matrix cannot be read with a single MPI-IO call."
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
    !
    ! The offset used for reading.
@@ -711,14 +667,14 @@ subroutine exc_read_rcblock(fname,Bsp,is_resonant,diago_is_real,nsppol,nreh,hsiz
 
    call xmpi_barrier(comm)
 #else
-   MSG_ERROR("MPI-IO support not enabled")
+   ABI_ERROR("MPI-IO support not enabled")
 #endif
  end if
 
 !BEGINDEBUG
 !  if ( ANY(hmat==HUGE(zero)) ) then
 !    write(std_out,*)"COUNT",COUNT(hmat==HUGE(zero))," hsize= ",hsize
-!    MSG_ERROR("Something wrong in the reading")
+!    ABI_ERROR("Something wrong in the reading")
 !  end if
 !ENDDEBUG
 
@@ -728,7 +684,7 @@ subroutine exc_read_rcblock(fname,Bsp,is_resonant,diago_is_real,nsppol,nreh,hsiz
 
 ! Handle IO Error
 10 continue
- MSG_ERROR(errmsg)
+ ABI_ERROR(errmsg)
 
 end subroutine exc_read_rcblock
 !!***
@@ -764,12 +720,6 @@ end subroutine exc_read_rcblock
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      m_exc_diago
-!!
-!! CHILDREN
-!!      c_f_pointer
-!!
 !! SOURCE
 
 subroutine exc_fullh_from_blocks(funt,block_type,nsppol,row_sign,diago_is_real,nreh,exc_size,exc_ham)
@@ -798,14 +748,13 @@ subroutine exc_fullh_from_blocks(funt,block_type,nsppol,row_sign,diago_is_real,n
  neh = nreh(1)
 
  if (nsppol==2) then
-   MSG_WARNING("nsppol==2 is very experimental")
+   ABI_WARNING("nsppol==2 is very experimental")
  end if
  if (ANY(nreh(1)/=nreh)) then
-   MSG_ERROR(" different nreh are not supported")
+   ABI_ERROR(" different nreh are not supported")
  end if
 
- ABI_STAT_MALLOC(cbuff_dpc,(exc_size), ierr)
- ABI_CHECK(ierr==0, "out of memory in cbuff_dpc")
+ ABI_MALLOC_OR_DIE(cbuff_dpc,(exc_size), ierr)
  !
  ! The two cases nsppol==1,2 can be merged but we keep them
  ! separated to keep to code readable.
@@ -992,7 +941,7 @@ subroutine exc_fullh_from_blocks(funt,block_type,nsppol,row_sign,diago_is_real,n
    end if
 
  CASE DEFAULT
-   MSG_ERROR("Unknown block_type: "//TRIM(block_type))
+   ABI_ERROR("Unknown block_type: "//TRIM(block_type))
  END SELECT
 
  ABI_FREE(cbuff_dpc)
@@ -1001,7 +950,7 @@ subroutine exc_fullh_from_blocks(funt,block_type,nsppol,row_sign,diago_is_real,n
 
 ! Handle IO Error
 10 continue
- MSG_ERROR(errmsg)
+ ABI_ERROR(errmsg)
 
 end subroutine exc_fullh_from_blocks
 !!***
@@ -1018,8 +967,6 @@ end subroutine exc_fullh_from_blocks
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
 !!
 !! SOURCE
 
@@ -1062,8 +1009,6 @@ end function rrs_of_glob
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
 !!
 !! SOURCE
 
@@ -1110,8 +1055,6 @@ end function ccs_of_glob
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 function offset_in_file(row_glob,col_glob,size_glob,nsblocks,sub_block,bsize_elm,bsize_frm)
@@ -1133,7 +1076,7 @@ function offset_in_file(row_glob,col_glob,size_glob,nsblocks,sub_block,bsize_elm
    jj = col_glob
    if (ii>size_glob(1)/2) ii = ii - size_glob(1)/2 ! Wrap the index.
    if (jj>size_glob(2)/2) jj = jj - size_glob(2)/2
-   if (jj<ii) then ! Exchange the indeces since the symmetric element is read.
+   if (jj<ii) then ! Exchange the indices since the symmetric element is read.
      swap = jj
      jj   = ii
      ii   = swap
@@ -1142,7 +1085,7 @@ function offset_in_file(row_glob,col_glob,size_glob,nsblocks,sub_block,bsize_elm
    my_offset = (ijp_glob-1)*bsize_elm + (jj-1)*2*bsize_frm
  else
    ABI_UNUSED(sub_block(1,1,1))
-   MSG_ERROR("nsppol==2 not coded")
+   ABI_ERROR("nsppol==2 not coded")
  end if
 
  offset_in_file = my_offset
@@ -1169,12 +1112,6 @@ end function offset_in_file
 !! OUTPUT
 !!  ierr=Status error
 !!  exc_mat(exc_size,exc_size)=The resonant block.
-!!
-!! PARENTS
-!!      m_exc_diago
-!!
-!! CHILDREN
-!!      c_f_pointer
 !!
 !! SOURCE
 
@@ -1266,7 +1203,7 @@ subroutine exc_read_rblock_fio(funt,diago_is_real,nsppol,nreh,exc_size,exc_mat,i
  ! Raise the error.
 10 continue
  ierr = 1
- MSG_WARNING(errmsg)
+ ABI_WARNING(errmsg)
 
 end subroutine exc_read_rblock_fio
 !!***
@@ -1286,16 +1223,11 @@ end subroutine exc_read_rblock_fio
 !!  Bsp<excparam>=Structure storing the parameters of the run.
 !!  eig_fname=The name of the file storing the excitonic eigenvectors.
 !!  nvec=Number of excitonic states to analyze.
-!!  vec_idx(nvec)=List with the indeces of the excitonic states sorted in ascending order.
+!!  vec_idx(nvec)=List with the indices of the excitonic states sorted in ascending order.
 !!  out_fname=The name of the file where the results are written.
 !!
 !! OUTPUT
 !!  Only writing.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      c_f_pointer
 !!
 !! SOURCE
 
@@ -1350,15 +1282,14 @@ subroutine exc_amplitude(Bsp,eig_fname,nvec,vec_idx,out_fname)
  hsize = SUM(Bsp%nreh); if (Bsp%use_coupling>0) hsize=2*hsize
 
  ABI_MALLOC(ene_list,(nvec))
- ABI_STAT_MALLOC(vec_list,(hsize,nvec), ierr)
- ABI_CHECK(ierr==0, "out of memory in vec_list")
+ ABI_MALLOC_OR_DIE(vec_list,(hsize,nvec), ierr)
 
  call exc_read_eigen(eig_fname,hsize,nvec,vec_idx,vec_list,ene_list,Bsp=Bsp)
 
  ABI_FREE(ene_list)
 
  if (open_file(out_fname,msg,newunit=out_unt,form="formatted",action="write") /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  write(out_unt,*)"# Amplitude functions F(w) = \sum_t |<t|exc_vec>|^2 \delta(ww- ene_t), w is given in eV. "
@@ -1383,10 +1314,10 @@ subroutine exc_amplitude(Bsp,eig_fname,nvec,vec_idx,out_fname)
       !
       do iw=1,nw ! Accumulate
         xx = wmesh(iw) - ene_rt
-        amplitude(iw) = amplitude(iw) + ampl_eh * dirac_delta(xx,stdev)
+        amplitude(iw) = amplitude(iw) + ampl_eh * gaussian(xx, stdev)
         if (Bsp%use_coupling>0) then
           xx = wmesh(iw) + ene_rt
-          amplitude(iw) = amplitude(iw) + ampl_he * dirac_delta(xx,stdev)
+          amplitude(iw) = amplitude(iw) + ampl_he * gaussian(xx, stdev)
         end if
       end do
       !
@@ -1434,11 +1365,6 @@ end subroutine exc_amplitude
 !!      => -1 if NetCDF is not available
 !!      => 1 if NetCDF is available
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      c_f_pointer
-!!
 !! SOURCE
 
 subroutine exc_write_optme(filname,minb,maxb,nkbz,nsppol,nq,opt_cvk,ierr)
@@ -1451,19 +1377,16 @@ subroutine exc_write_optme(filname,minb,maxb,nkbz,nsppol,nq,opt_cvk,ierr)
 
 !Local variables ------------------------------
 !scalars
- integer :: ncid,ncerr,cmplx_id,nband_id,nkbz_id,nsppol_id,nq_id,xyz_id
+ integer :: ncid,cmplx_id,nband_id,nkbz_id,nsppol_id,nq_id,xyz_id
  integer :: minb_id,maxb_id,ome_id,iq,is,ik,ib,jb
  integer :: dimOME(6),dimKPT(2),dimQPT(2),dimSCA(0),start6(6),count6(6)
  real(dp) :: complex2(2)
  ! *************************************************************************
 
-#ifdef HAVE_NETCDF
  ierr = 1
 
 !1. Create netCDF file
- ncerr = nctk_open_create(ncid, filname, xmpi_comm_self)
- !MT aug 2013: keep the following on THREE lines in order to help abilint script
- NCF_CHECK_MSG(ncerr," create netcdf OME file")
+ NCF_CHECK_MSG(nctk_open_create(ncid, filname, xmpi_comm_self), " create netcdf OME file")
 
 !2. Define dimensions
  NCF_CHECK(nf90_def_dim(ncid,"xyz",3,xyz_id))
@@ -1483,13 +1406,13 @@ subroutine exc_write_optme(filname,minb,maxb,nkbz,nsppol,nq,opt_cvk,ierr)
 !3. Define variables
 
  call ab_define_var(ncid, dimOME, ome_id, NF90_DOUBLE,&
-& "OME", "Values of optical matrix elements","Tobedone")
+ "OME", "Values of optical matrix elements","Tobedone")
 
  call ab_define_var(ncid, dimSCA, minb_id, NF90_INT,"minb",&
-& "Minimum band index for the optical matrix elements", "Dimensionless")
+ "Minimum band index for the optical matrix elements", "Dimensionless")
 
  call ab_define_var(ncid, dimSCA, maxb_id, NF90_INT,"maxb",&
-& "Maximum band index for the optical matrix elements", "Dimensionless")
+ "Maximum band index for the optical matrix elements", "Dimensionless")
 
 !4. End define mode
  NCF_CHECK(nf90_enddef(ncid))
@@ -1509,22 +1432,16 @@ subroutine exc_write_optme(filname,minb,maxb,nkbz,nsppol,nq,opt_cvk,ierr)
            start6 = (/ 1, ib-minb+1, jb-minb+1, ik, is, iq /)
            count6 = (/ 2, 1, 1, 1, 1, 1 /)
            complex2 = (/ REAL(opt_cvk(ib,jb,ik,is,iq)),AIMAG(opt_cvk(ib,jb,ik,is,iq)) /)
-           ncerr = nf90_put_var(ncid, ome_id, complex2, start = start6, count = count6)
-           NCF_CHECK_MSG(ncerr," write variable OME")
+           NCF_CHECK(nf90_put_var(ncid, ome_id, complex2, start = start6, count = count6))
        end do
        end do
      end do
    end do
  end do
 
-!7 Close file
-
+ !7 Close file
  NCF_CHECK(nf90_close(ncid))
  ierr = 0
-
-#else
- ierr = -1
-#endif
 
 end subroutine exc_write_optme
 !!***
@@ -1544,12 +1461,6 @@ end subroutine exc_write_optme
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_hexc
-!!
-!! CHILDREN
-!!      c_f_pointer
-!!
 !! SOURCE
 
 subroutine exc_ham_ncwrite(ncid,Kmesh,BSp,hsize,nreh,vcks2t,hreso,diag)
@@ -1566,7 +1477,6 @@ subroutine exc_ham_ncwrite(ncid,Kmesh,BSp,hsize,nreh,vcks2t,hreso,diag)
  complex(dpc),target,intent(in) :: diag(hsize)
 
 !Local variables-------------------------------
-#ifdef HAVE_NETCDF
  integer :: ncerr
  integer :: max_nreh, sum_nreh
  real(dp), ABI_CONTIGUOUS pointer :: r2vals(:,:),r3vals(:,:,:)
@@ -1616,10 +1526,6 @@ subroutine exc_ham_ncwrite(ncid,Kmesh,BSp,hsize,nreh,vcks2t,hreso,diag)
  NCF_CHECK(nf90_put_var(ncid, vid("reduced_coordinates_of_kpoints"), kmesh%bz))
  NCF_CHECK(nf90_put_var(ncid, vid("kpoint_weights"), kmesh%wt))
  NCF_CHECK(ncerr)
-
-#else
- MSG_ERROR("netcdf support is not activated. ")
-#endif
 
 contains
  integer function vid(vname)

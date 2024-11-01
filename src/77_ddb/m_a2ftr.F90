@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_a2ftr
 !! NAME
 !! m_a2ftr
@@ -7,14 +6,10 @@
 !!
 !!
 !! COPYRIGHT
-!!   Copyright (C) 2004-2019 ABINIT group (JPC, MJV, BXU)
+!!   Copyright (C) 2004-2024 ABINIT group (JPC, MJV, BXU)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -27,24 +22,22 @@
 module m_a2ftr
 
  use defs_basis
- use defs_datatypes
  use defs_elphon
  use m_errors
  use m_abicore
  use m_xmpi
- use m_kptrank
  use m_splines
  use m_ebands
 
+ use defs_datatypes,    only : ebands_t
  use m_io_tools,        only : open_file
  use m_numeric_tools,   only : simpson_int
  use m_hide_lapack,     only : matrginv
  use m_geometry,        only : phdispl_cart2red
  use m_crystal,         only : crystal_t
- use m_ifc,             only : ifc_type, ifc_fourq
+ use m_ifc,             only : ifc_type
  use m_dynmat,          only : ftgam_init, ftgam
  use m_epweights,       only : d2c_wtq, ep_ph_weights, ep_el_weights, ep_ph_weights
- use m_fstab,           only : mkqptequiv
 
  implicit none
 
@@ -94,21 +87,12 @@ contains
 !! OUTPUT
 !!  elph_ds
 !!
-!! PARENTS
-!!      elphon
-!!
-!! CHILDREN
-!!      d2c_wtq,dgemm,ep_ph_weights,ftgam,ftgam_init,gam_mult_displ,ifc_fourq
-!!      matrginv,simpson_int,wrtout,xmpi_sum,zgemm
-!!
 !! NOTES
 !!   copied from ftiaf9.f
 !!
 !! SOURCE
 
 subroutine mka2f_tr(crystal,ifc,elph_ds,ntemper,tempermin,temperinc,pair2red,elph_tr_ds)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -153,7 +137,7 @@ subroutine mka2f_tr(crystal,ifc,elph_ds,ntemper,tempermin,temperinc,pair2red,elp
  character(len=500) :: message
  character(len=fnlen) :: fname
 !arrays
- real(dp),parameter :: c0(2)=(/0.d0,0.d0/),c1(2)=(/1.d0,0.d0/)
+ complex(dpc),parameter :: c0=dcmplx(0.d0,0.d0),c1=dcmplx(1.d0,0.d0)
  real(dp) ::  gprimd(3,3)
  real(dp) :: eigval(elph_ds%nbranch)
  real(dp) :: displ_red(2,elph_ds%nbranch,elph_ds%nbranch)
@@ -173,7 +157,8 @@ subroutine mka2f_tr(crystal,ifc,elph_ds,ntemper,tempermin,temperinc,pair2red,elp
  real(dp),allocatable :: q00(:,:,:,:), q01(:,:,:,:),q11(:,:,:,:)
  real(dp),allocatable :: seebeck(:,:,:,:)!, rho_nm(:,:,:,:)
  real(dp),allocatable :: rho_T(:)
- real(dp),allocatable :: coskr(:,:), sinkr(:,:)
+ real(dp),allocatable :: coskr(:,:), sinkr(:,:), coskr_tmp(:), sinkr_tmp(:)
+ real(dp),allocatable :: gam_rpt(:,:,:)
 
 ! *********************************************************************
 !calculate a2f_tr for frequencies between 0 and omega_max
@@ -206,7 +191,7 @@ subroutine mka2f_tr(crystal,ifc,elph_ds,ntemper,tempermin,temperinc,pair2red,elp
 !tempermin=zero
 !temperinc=one
 
- ABI_ALLOCATE(rho_T,(ntemper))
+ ABI_MALLOC(rho_T,(ntemper))
 
 
  gaussprefactor = sqrt(piinv) / elph_ds%a2fsmear
@@ -223,16 +208,16 @@ subroutine mka2f_tr(crystal,ifc,elph_ds,ntemper,tempermin,temperinc,pair2red,elp
  maxerr=0.
  nerr=0
 
- ABI_ALLOCATE(tmp_wtq,(elph_ds%nbranch, elph_ds%k_fine%nkpt, elph_ds%na2f+1))
- ABI_ALLOCATE(elph_ds%k_fine%wtq,(elph_ds%nbranch, elph_ds%k_fine%nkpt, elph_ds%na2f))
- ABI_ALLOCATE(elph_ds%k_phon%wtq,(elph_ds%nbranch, elph_ds%k_phon%nkpt, elph_ds%na2f))
+ ABI_MALLOC(tmp_wtq,(elph_ds%nbranch, elph_ds%k_fine%nkpt, elph_ds%na2f+1))
+ ABI_MALLOC(elph_ds%k_fine%wtq,(elph_ds%nbranch, elph_ds%k_fine%nkpt, elph_ds%na2f))
+ ABI_MALLOC(elph_ds%k_phon%wtq,(elph_ds%nbranch, elph_ds%k_phon%nkpt, elph_ds%na2f))
 
- ABI_ALLOCATE(phfrq,(elph_ds%nbranch, elph_ds%k_fine%nkpt))
- ABI_ALLOCATE(displ,(2, elph_ds%nbranch, elph_ds%nbranch, elph_ds%k_fine%nkpt))
- ABI_ALLOCATE(pheigvec,(2*elph_ds%nbranch*elph_ds%nbranch, elph_ds%k_fine%nkpt))
+ ABI_MALLOC(phfrq,(elph_ds%nbranch, elph_ds%k_fine%nkpt))
+ ABI_MALLOC(displ,(2, elph_ds%nbranch, elph_ds%nbranch, elph_ds%k_fine%nkpt))
+ ABI_MALLOC(pheigvec,(2*elph_ds%nbranch*elph_ds%nbranch, elph_ds%k_fine%nkpt))
 
  do iFSqpt=1,elph_ds%k_fine%nkpt
-   call ifc_fourq(ifc,crystal,elph_ds%k_fine%kpt(:,iFSqpt),phfrq(:,iFSqpt),displ(:,:,:,iFSqpt),out_eigvec=pheigvec(:,iFSqpt))
+   call ifc%fourq(crystal,elph_ds%k_fine%kpt(:,iFSqpt),phfrq(:,iFSqpt),displ(:,:,:,iFSqpt),out_eigvec=pheigvec(:,iFSqpt))
  end do
  omega_min = omega_min - domega
 
@@ -246,36 +231,39 @@ subroutine mka2f_tr(crystal,ifc,elph_ds,ntemper,tempermin,temperinc,pair2red,elp
  do iomega = 1, elph_ds%na2f
    elph_ds%k_fine%wtq(:,:,iomega) = tmp_wtq(:,:,iomega+1)
  end do
- ABI_DEALLOCATE(tmp_wtq)
+ ABI_FREE(tmp_wtq)
 
  if (elph_ds%use_k_fine == 1) then
    call d2c_wtq(elph_ds)
  end if
 
- ABI_DEALLOCATE(phfrq)
- ABI_DEALLOCATE(displ)
- ABI_DEALLOCATE(pheigvec)
+ ABI_FREE(phfrq)
+ ABI_FREE(displ)
+ ABI_FREE(pheigvec)
 
 !reduce the dimension from fine to phon for phfrq and pheigvec
- ABI_ALLOCATE(phfrq,(elph_ds%nbranch, elph_ds%k_phon%nkpt))
- ABI_ALLOCATE(displ,(2, elph_ds%nbranch, elph_ds%nbranch, elph_ds%k_phon%nkpt))
- ABI_ALLOCATE(pheigvec,(2*elph_ds%nbranch*elph_ds%nbranch, elph_ds%k_phon%nkpt))
+ ABI_MALLOC(phfrq,(elph_ds%nbranch, elph_ds%k_phon%nkpt))
+ ABI_MALLOC(displ,(2, elph_ds%nbranch, elph_ds%nbranch, elph_ds%k_phon%nkpt))
+ ABI_MALLOC(pheigvec,(2*elph_ds%nbranch*elph_ds%nbranch, elph_ds%k_phon%nkpt))
 
  do iFSqpt=1,elph_ds%k_phon%nkpt
-   call ifc_fourq(ifc,crystal,elph_ds%k_phon%kpt(:,iFSqpt),phfrq(:,iFSqpt),displ(:,:,:,iFSqpt),out_eigvec=pheigvec(:,iFSqpt))
+   call ifc%fourq(crystal,elph_ds%k_phon%kpt(:,iFSqpt),phfrq(:,iFSqpt),displ(:,:,:,iFSqpt),out_eigvec=pheigvec(:,iFSqpt))
  end do
 
- ABI_ALLOCATE(elph_tr_ds%a2f_1d_tr,(elph_ds%na2f,9,elph_ds%nsppol,4,tmp_nenergy**2,ntemper))
- ABI_ALLOCATE(tmp_a2f_1d_tr,(elph_ds%na2f,9,elph_ds%nsppol,4,tmp_nenergy**2))
+ ABI_MALLOC(elph_tr_ds%a2f_1d_tr,(elph_ds%na2f,9,elph_ds%nsppol,4,tmp_nenergy**2,ntemper))
+ ABI_MALLOC(tmp_a2f_1d_tr,(elph_ds%na2f,9,elph_ds%nsppol,4,tmp_nenergy**2))
 
 ! prepare phase factors
- ABI_ALLOCATE(coskr, (elph_ds%k_phon%nkpt, nrpt))
- ABI_ALLOCATE(sinkr, (elph_ds%k_phon%nkpt, nrpt))
+ ABI_MALLOC(coskr, (elph_ds%k_phon%nkpt, nrpt))
+ ABI_MALLOC(sinkr, (elph_ds%k_phon%nkpt, nrpt))
  call ftgam_init(ifc%gprim, elph_ds%k_phon%nkpt, nrpt, elph_ds%k_phon%kpt, ifc%rpt, coskr, sinkr)
 
  elph_tr_ds%a2f_1d_tr = zero
  tmp_a2f_1d_tr = zero
 
+ ABI_MALLOC(gam_rpt,(2,3*natom*3*natom,nrpt))
+ ABI_MALLOC(coskr_tmp,(nrpt))
+ ABI_MALLOC(sinkr_tmp,(nrpt))
 
  do ie = 1, elph_ds%n_pair
    do ssp = 1,4
@@ -293,8 +281,10 @@ subroutine mka2f_tr(crystal,ifc,elph_ds,ntemper,tempermin,temperinc,pair2red,elp
              gam_now(:,:) = elph_tr_ds%gamma_qpt_tr(:,itrtensor,:,isppol,iFSqpt)
            else
 !            Do FT from real-space gamma grid to 1 qpt.
-             call ftgam(ifc%wghatm,gam_now,elph_tr_ds%gamma_rpt_tr(:,itrtensor,:,isppol,:,ssp,ie),natom,1,nrpt,0,&
-&             coskr(iFSqpt,:), sinkr(iFSqpt,:))
+             gam_rpt(:,:,:)=elph_tr_ds%gamma_rpt_tr(:,itrtensor,:,isppol,:,ssp,ie)
+             coskr_tmp(:)=coskr(iFSqpt,:)
+             sinkr_tmp(:)=sinkr(iFSqpt,:)
+             call ftgam(ifc%wghatm,gam_now,gam_rpt,natom,1,nrpt,0,coskr_tmp, sinkr_tmp)
            end if
 
 !          Diagonalize gamma matrix at this qpoint (complex matrix).
@@ -396,8 +386,11 @@ subroutine mka2f_tr(crystal,ifc,elph_ds,ntemper,tempermin,temperinc,pair2red,elp
  ! Likely this routine is never executed in parallel
  call xmpi_sum (tmp_a2f_1d_tr, xmpi_world, ierr)
 
- ABI_DEALLOCATE(coskr)
- ABI_DEALLOCATE(sinkr)
+ ABI_FREE(gam_rpt)
+ ABI_FREE(coskr_tmp)
+ ABI_FREE(sinkr_tmp)
+ ABI_FREE(coskr)
+ ABI_FREE(sinkr)
 
  do itemp=1,ntemper  ! runs over termperature in K
    do isppol=1,elph_ds%nsppol
@@ -409,7 +402,7 @@ subroutine mka2f_tr(crystal,ifc,elph_ds,ntemper,tempermin,temperinc,pair2red,elp
    end do
  end do
 
- ABI_DEALLOCATE(tmp_a2f_1d_tr)
+ ABI_FREE(tmp_a2f_1d_tr)
 
 !second 1 / elph_ds%k_phon%nkpt factor for the integration weights
  elph_tr_ds%a2f_1d_tr  = elph_tr_ds%a2f_1d_tr  / elph_ds%k_phon%nkpt
@@ -421,7 +414,7 @@ subroutine mka2f_tr(crystal,ifc,elph_ds,ntemper,tempermin,temperinc,pair2red,elp
 !output the elph_tr_ds%a2f_1d_tr
  fname = trim(elph_ds%elph_base_name) // '_A2F_TR'
  if (open_file(fname,message,newunit=unit_a2f_tr,status='unknown') /= 0) then
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  write (unit_a2f_tr,'(a)')       '#'
@@ -450,20 +443,20 @@ subroutine mka2f_tr(crystal,ifc,elph_ds,ntemper,tempermin,temperinc,pair2red,elp
  close (unit=unit_a2f_tr)
 
 !calculation of transport properties
- ABI_ALLOCATE(integrho,(elph_ds%na2f))
- ABI_ALLOCATE(tointegrho,(elph_ds%na2f))
- ABI_ALLOCATE(integrand_q00,(elph_ds%na2f))
- ABI_ALLOCATE(integrand_q01,(elph_ds%na2f))
- ABI_ALLOCATE(integrand_q11,(elph_ds%na2f))
- ABI_ALLOCATE(q00,(ntemper,3,3,elph_ds%nsppol))
- ABI_ALLOCATE(q01,(ntemper,3,3,elph_ds%nsppol))
- ABI_ALLOCATE(q11,(ntemper,3,3,elph_ds%nsppol))
- ABI_ALLOCATE(seebeck,(elph_ds%nsppol,ntemper,3,3))
-!ABI_ALLOCATE(rho_nm,(elph_ds%nsppol,ntemper,3,3))
+ ABI_MALLOC(integrho,(elph_ds%na2f))
+ ABI_MALLOC(tointegrho,(elph_ds%na2f))
+ ABI_MALLOC(integrand_q00,(elph_ds%na2f))
+ ABI_MALLOC(integrand_q01,(elph_ds%na2f))
+ ABI_MALLOC(integrand_q11,(elph_ds%na2f))
+ ABI_MALLOC(q00,(ntemper,3,3,elph_ds%nsppol))
+ ABI_MALLOC(q01,(ntemper,3,3,elph_ds%nsppol))
+ ABI_MALLOC(q11,(ntemper,3,3,elph_ds%nsppol))
+ ABI_MALLOC(seebeck,(elph_ds%nsppol,ntemper,3,3))
+!ABI_MALLOC(rho_nm,(elph_ds%nsppol,ntemper,3,3))
 
  fname = trim(elph_ds%elph_base_name) // '_RHO'
  if (open_file(fname,message,newunit=unit_rho,status='unknown') /= 0) then
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 !print header to resistivity file
  write (unit_rho,*) '# Resistivity as a function of temperature.'
@@ -475,7 +468,7 @@ subroutine mka2f_tr(crystal,ifc,elph_ds,ntemper,tempermin,temperinc,pair2red,elp
 
  fname = trim(elph_ds%elph_base_name) // '_TAU'
  if (open_file(fname,message,newunit=unit_tau,status='unknown') /= 0) then
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 !print header to relaxation time file
  write (unit_tau,*) '# Relaxation time as a function of temperature.'
@@ -487,7 +480,7 @@ subroutine mka2f_tr(crystal,ifc,elph_ds,ntemper,tempermin,temperinc,pair2red,elp
 
  fname = trim(elph_ds%elph_base_name) // '_SBK'
  if (open_file(fname,message,newunit=unit_sbk,status='unknown') /= 0) then
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 !print header to relaxation time file
  write (unit_sbk,*) '# Seebeck Coefficint as a function of temperature.'
@@ -499,7 +492,7 @@ subroutine mka2f_tr(crystal,ifc,elph_ds,ntemper,tempermin,temperinc,pair2red,elp
 
  fname = trim(elph_ds%elph_base_name) // '_WTH'
  if (open_file(fname,message,newunit=unit_therm,status='unknown') /= 0) then
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 !print header to thermal conductivity file
@@ -512,7 +505,7 @@ subroutine mka2f_tr(crystal,ifc,elph_ds,ntemper,tempermin,temperinc,pair2red,elp
 
  fname = trim(elph_ds%elph_base_name) // '_LOR'
  if (open_file(fname,message,newunit=unit_lor,status='unknown') /= 0) then
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 !print header to lorentz file
@@ -663,7 +656,7 @@ subroutine mka2f_tr(crystal,ifc,elph_ds,ntemper,tempermin,temperinc,pair2red,elp
              ie_1 = pair2red(ie1,ie2)
              ie_2 = pair2red(ie2,ie1)
              if (ie_1 .eq. 0 .or. ie_2 .eq. 0) then
-               MSG_BUG('CHECK pair2red!')
+               ABI_BUG('CHECK pair2red!')
              end if
 
              do ssp=1,4  ! (s,s'=+/-1, condense the indices)
@@ -987,19 +980,19 @@ subroutine mka2f_tr(crystal,ifc,elph_ds,ntemper,tempermin,temperinc,pair2red,elp
  end do ! isppol
 
 
- ABI_DEALLOCATE(phfrq)
- ABI_DEALLOCATE(displ)
- ABI_DEALLOCATE(pheigvec)
- ABI_DEALLOCATE(integrand_q00)
- ABI_DEALLOCATE(integrand_q01)
- ABI_DEALLOCATE(integrand_q11)
- ABI_DEALLOCATE(q00)
- ABI_DEALLOCATE(q01)
- ABI_DEALLOCATE(q11)
- ABI_DEALLOCATE(seebeck)
- ABI_DEALLOCATE(rho_T)
- ABI_DEALLOCATE(integrho)
- ABI_DEALLOCATE(tointegrho)
+ ABI_FREE(phfrq)
+ ABI_FREE(displ)
+ ABI_FREE(pheigvec)
+ ABI_FREE(integrand_q00)
+ ABI_FREE(integrand_q01)
+ ABI_FREE(integrand_q11)
+ ABI_FREE(q00)
+ ABI_FREE(q01)
+ ABI_FREE(q11)
+ ABI_FREE(seebeck)
+ ABI_FREE(rho_T)
+ ABI_FREE(integrho)
+ ABI_FREE(tointegrho)
 
  close (unit=unit_lor)
  close (unit=unit_rho)
@@ -1007,13 +1000,13 @@ subroutine mka2f_tr(crystal,ifc,elph_ds,ntemper,tempermin,temperinc,pair2red,elp
  close (unit=unit_sbk)
  close (unit=unit_therm)
 
- ABI_DEALLOCATE(elph_ds%k_fine%wtq)
- ABI_DEALLOCATE(elph_ds%k_phon%wtq)
+ ABI_FREE(elph_ds%k_fine%wtq)
+ ABI_FREE(elph_ds%k_phon%wtq)
 
- ABI_DEALLOCATE(elph_tr_ds%a2f_1d_tr)
+ ABI_FREE(elph_tr_ds%a2f_1d_tr)
 
- ABI_DEALLOCATE(elph_tr_ds%gamma_qpt_tr)
- ABI_DEALLOCATE(elph_tr_ds%gamma_rpt_tr)
+ ABI_FREE(elph_tr_ds%gamma_qpt_tr)
+ ABI_FREE(elph_tr_ds%gamma_rpt_tr)
  write(std_out,*) ' mka2f_tr : end '
 
 end subroutine mka2f_tr
@@ -1050,20 +1043,12 @@ end subroutine mka2f_tr
 !! OUTPUT
 !!  elph_ds
 !!
-!! PARENTS
-!!      elphon
-!!
-!! CHILDREN
-!!      ftgam,ftgam_init,gam_mult_displ,ifc_fourq,simpson_int,wrtout,zgemm
-!!
 !! NOTES
 !!   copied from ftiaf9.f
 !!
 !! SOURCE
 
 subroutine mka2f_tr_lova(crystal,ifc,elph_ds,ntemper,tempermin,temperinc,elph_tr_ds)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1091,7 +1076,7 @@ subroutine mka2f_tr_lova(crystal,ifc,elph_ds,ntemper,tempermin,temperinc,elph_tr
  character(len=500) :: message
  character(len=fnlen) :: fname
 !arrays
- real(dp),parameter :: c0(2)=(/0.d0,0.d0/),c1(2)=(/1.d0,0.d0/)
+ complex(dpc),parameter :: c0=dcmplx(0.d0,0.d0),c1=dcmplx(1.d0,0.d0)
  real(dp) :: gprimd(3,3)
  real(dp) :: eigval_in(elph_ds%nbranch)
  real(dp) :: eigval_out(elph_ds%nbranch)
@@ -1109,6 +1094,7 @@ subroutine mka2f_tr_lova(crystal,ifc,elph_ds,ntemper,tempermin,temperinc,elph_tr
  real(dp),allocatable :: rho_T(:),tau_T(:)
  real(dp),allocatable :: coskr(:,:)
  real(dp),allocatable :: sinkr(:,:)
+!real(dp),allocatable :: gam_rpt(:,:,:)
 
 ! *********************************************************************
 
@@ -1125,16 +1111,16 @@ subroutine mka2f_tr_lova(crystal,ifc,elph_ds,ntemper,tempermin,temperinc,elph_tr
  natom = crystal%natom
  gprimd = crystal%gprimd
 
- ABI_ALLOCATE(elph_tr_ds%a2f_1d_tr,(elph_ds%na2f,9,elph_ds%nsppol,1,1,1))
- ABI_ALLOCATE(elph_tr_ds%a2f_1d_trin,(elph_ds%na2f,9,elph_ds%nsppol))
- ABI_ALLOCATE(elph_tr_ds%a2f_1d_trout,(elph_ds%na2f,9,elph_ds%nsppol))
+ ABI_MALLOC(elph_tr_ds%a2f_1d_tr,(elph_ds%na2f,9,elph_ds%nsppol,1,1,1))
+ ABI_MALLOC(elph_tr_ds%a2f_1d_trin,(elph_ds%na2f,9,elph_ds%nsppol))
+ ABI_MALLOC(elph_tr_ds%a2f_1d_trout,(elph_ds%na2f,9,elph_ds%nsppol))
 
 !! defaults for number of temperature steps and max T (all in Kelvin...)
 !ntemper=1000
 !tempermin=zero
 !temperinc=one
- ABI_ALLOCATE(rho_T,(ntemper))
- ABI_ALLOCATE(tau_T,(ntemper))
+ ABI_MALLOC(rho_T,(ntemper))
+ ABI_MALLOC(tau_T,(ntemper))
 
 
 !tolerance on gaussian being = 0
@@ -1162,19 +1148,19 @@ subroutine mka2f_tr_lova(crystal,ifc,elph_ds,ntemper,tempermin,temperinc,elph_tr
  maxerr=0.
  nerr=0
 
- ABI_ALLOCATE(phfrq,(elph_ds%nbranch, elph_ds%k_fine%nkpt))
- ABI_ALLOCATE(displ,(2, elph_ds%nbranch, elph_ds%nbranch, elph_ds%k_fine%nkpt))
- ABI_ALLOCATE(pheigvec,(2*elph_ds%nbranch*elph_ds%nbranch, elph_ds%k_fine%nkpt))
+ ABI_MALLOC(phfrq,(elph_ds%nbranch, elph_ds%k_fine%nkpt))
+ ABI_MALLOC(displ,(2, elph_ds%nbranch, elph_ds%nbranch, elph_ds%k_fine%nkpt))
+ ABI_MALLOC(pheigvec,(2*elph_ds%nbranch*elph_ds%nbranch, elph_ds%k_fine%nkpt))
 
  do iFSqpt=1,elph_ds%k_fine%nkpt
-   call ifc_fourq(ifc,crystal,elph_ds%k_fine%kpt(:,iFSqpt),phfrq(:,iFSqpt),displ(:,:,:,iFSqpt),out_eigvec=pheigvec(:,iFSqpt))
+   call ifc%fourq(crystal,elph_ds%k_fine%kpt(:,iFSqpt),phfrq(:,iFSqpt),displ(:,:,:,iFSqpt),out_eigvec=pheigvec(:,iFSqpt))
  end do
 
  omega_min = minval(phfrq)
  omega_max = maxval(phfrq)
 
- ABI_ALLOCATE(coskr, (elph_ds%k_fine%nkpt,nrpt))
- ABI_ALLOCATE(sinkr, (elph_ds%k_fine%nkpt,nrpt))
+ ABI_MALLOC(coskr, (elph_ds%k_fine%nkpt,nrpt))
+ ABI_MALLOC(sinkr, (elph_ds%k_fine%nkpt,nrpt))
  call ftgam_init(Ifc%gprim, elph_ds%k_fine%nkpt, nrpt, elph_ds%k_fine%kpt, Ifc%rpt, coskr, sinkr)
 
  do isppol=1,elph_ds%nsppol
@@ -1315,8 +1301,8 @@ subroutine mka2f_tr_lova(crystal,ifc,elph_ds,ntemper,tempermin,temperinc,elph_tr
    end do ! end iFSqpt do
  end do ! end isppol
 
- ABI_DEALLOCATE(coskr)
- ABI_DEALLOCATE(sinkr)
+ ABI_FREE(coskr)
+ ABI_FREE(sinkr)
 
 !second 1 / elph_ds%k_fine%nkpt factor for the integration weights
  elph_tr_ds%a2f_1d_trin  = elph_tr_ds%a2f_1d_trin  / elph_ds%k_fine%nkpt
@@ -1331,17 +1317,17 @@ subroutine mka2f_tr_lova(crystal,ifc,elph_ds,ntemper,tempermin,temperinc,elph_tr
 !output the elph_tr_ds%a2f_1d_tr
  fname = trim(elph_ds%elph_base_name) // '_A2F_TR'
  if (open_file (fname,message,newunit=unit_a2f_tr,status='unknown') /= 0) then
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  fname = trim(elph_ds%elph_base_name) // '_A2F_TRIN'
  if (open_file(fname,message,newunit=unit_a2f_trin,status='unknown') /= 0) then
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  fname = trim(elph_ds%elph_base_name) // '_A2F_TROUT'
  if (open_file (fname,message,newunit=unit_a2f_trout,status='unknown') /=0) then
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  write (unit_a2f_tr,'(a)')       '#'
@@ -1397,15 +1383,15 @@ subroutine mka2f_tr_lova(crystal,ifc,elph_ds,ntemper,tempermin,temperinc,elph_tr
  close (unit=unit_a2f_trout)
 
 !calculation of transport properties
- ABI_ALLOCATE(integrho,(elph_ds%na2f))
- ABI_ALLOCATE(tointegrho,(elph_ds%na2f))
- ABI_ALLOCATE(tointega2f,(elph_ds%na2f))
- ABI_ALLOCATE(integtau,(elph_ds%na2f))
- ABI_ALLOCATE(tointegtau,(elph_ds%na2f))
+ ABI_MALLOC(integrho,(elph_ds%na2f))
+ ABI_MALLOC(tointegrho,(elph_ds%na2f))
+ ABI_MALLOC(tointega2f,(elph_ds%na2f))
+ ABI_MALLOC(integtau,(elph_ds%na2f))
+ ABI_MALLOC(tointegtau,(elph_ds%na2f))
 
  fname = trim(elph_ds%elph_base_name) // '_RHO'
  if (open_file(fname,message,newunit=unit_rho,status='unknown') /= 0) then
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 !print header to resistivity file
@@ -1418,7 +1404,7 @@ subroutine mka2f_tr_lova(crystal,ifc,elph_ds,ntemper,tempermin,temperinc,elph_tr
 
  fname = trim(elph_ds%elph_base_name) // '_TAU'
  if (open_file(fname,message,newunit=unit_tau,status='unknown') /= 0) then
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 !print header to relaxation time file
@@ -1431,7 +1417,7 @@ subroutine mka2f_tr_lova(crystal,ifc,elph_ds,ntemper,tempermin,temperinc,elph_tr
 
  fname = trim(elph_ds%elph_base_name) // '_WTH'
  if (open_file(fname,message,newunit=unit_therm,status='unknown') /= 0) then
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 !print header to thermal conductivity file
@@ -1444,7 +1430,7 @@ subroutine mka2f_tr_lova(crystal,ifc,elph_ds,ntemper,tempermin,temperinc,elph_tr
 
  fname = trim(elph_ds%elph_base_name) // '_LOR'
  if (open_file(fname,message,newunit=unit_lor,status='unknown') /= 0) then
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 !print header to lorentz file
@@ -1541,7 +1527,7 @@ subroutine mka2f_tr_lova(crystal,ifc,elph_ds,ntemper,tempermin,temperinc,elph_tr
          tau=1.0d99
          if(dabs(integtau(elph_ds%na2f)) < tol7) then
            write(message,'(a)') ' Cannot get a physical relaxation time '
-           MSG_WARNING(message)
+           ABI_WARNING(message)
          else
            tau=1.0d0/integtau(elph_ds%na2f)
          end if
@@ -1620,30 +1606,30 @@ subroutine mka2f_tr_lova(crystal,ifc,elph_ds,ntemper,tempermin,temperinc,elph_tr
  end do !end isppol do
 
 
- ABI_DEALLOCATE(phfrq)
- ABI_DEALLOCATE(displ)
- ABI_DEALLOCATE(pheigvec)
- ABI_DEALLOCATE(rho_T)
- ABI_DEALLOCATE(tau_T)
+ ABI_FREE(phfrq)
+ ABI_FREE(displ)
+ ABI_FREE(pheigvec)
+ ABI_FREE(rho_T)
+ ABI_FREE(tau_T)
 
  close (unit=unit_lor)
  close (unit=unit_rho)
  close (unit=unit_tau)
  close (unit=unit_therm)
 
- ABI_DEALLOCATE(integrho)
- ABI_DEALLOCATE(integtau)
- ABI_DEALLOCATE(tointega2f)
- ABI_DEALLOCATE(tointegrho)
- ABI_DEALLOCATE(tointegtau)
- ABI_DEALLOCATE(elph_tr_ds%a2f_1d_tr)
- ABI_DEALLOCATE(elph_tr_ds%a2f_1d_trin)
- ABI_DEALLOCATE(elph_tr_ds%a2f_1d_trout)
+ ABI_FREE(integrho)
+ ABI_FREE(integtau)
+ ABI_FREE(tointega2f)
+ ABI_FREE(tointegrho)
+ ABI_FREE(tointegtau)
+ ABI_FREE(elph_tr_ds%a2f_1d_tr)
+ ABI_FREE(elph_tr_ds%a2f_1d_trin)
+ ABI_FREE(elph_tr_ds%a2f_1d_trout)
 
- ABI_DEALLOCATE(elph_tr_ds%gamma_qpt_trin)
- ABI_DEALLOCATE(elph_tr_ds%gamma_qpt_trout)
- ABI_DEALLOCATE(elph_tr_ds%gamma_rpt_trin)
- ABI_DEALLOCATE(elph_tr_ds%gamma_rpt_trout)
+ ABI_FREE(elph_tr_ds%gamma_qpt_trin)
+ ABI_FREE(elph_tr_ds%gamma_qpt_trout)
+ ABI_FREE(elph_tr_ds%gamma_rpt_trin)
+ ABI_FREE(elph_tr_ds%gamma_rpt_trout)
 
 !DEBUG
  write(std_out,*) ' mka2f_tr_lova : end '
@@ -1658,7 +1644,7 @@ end subroutine mka2f_tr_lova
 !!
 !! FUNCTION
 !!  Calculate the k-dependent relaxation time due to EPC. Impelementation based
-!!  on derivation from Grmvall's book or 
+!!  on derivation from Grmvall's book or
 !!  OD Restrepo's paper (PRB 94 212103 (2009) [[cite:Restrepo2009]])
 !!
 !! INPUTS
@@ -1672,19 +1658,9 @@ end subroutine mka2f_tr_lova
 !!  tau_k(nsppol,nkptirr,nband)=mode relaxation time due to electron phonono coupling
 !!  rate_e(nene)= scattering rate due to electron phonono coupling vs. energy
 !!
-!! PARENTS
-!!      elphon
-!!
-!! CHILDREN
-!!      dgemm,ebands_prtbltztrp_tau_out,ebands_update_occ,ep_el_weights
-!!      ep_ph_weights,ftgam,ftgam_init,gam_mult_displ,ifc_fourq,matrginv
-!!      mkqptequiv,phdispl_cart2red,spline,splint,wrtout,xmpi_sum,zgemm
-!!
 !! SOURCE
 
 subroutine get_tau_k(Cryst,ifc,Bst,elph_ds,elph_tr_ds,eigenGS,max_occ)
-
- implicit none
 
 !Arguments ------------------------------------
  type(crystal_t),intent(in) :: Cryst
@@ -1769,17 +1745,17 @@ subroutine get_tau_k(Cryst,ifc,Bst,elph_ds,elph_tr_ds,eigenGS,max_occ)
 
  tol_wtk = tol7/nkptirr/nband
 
- ABI_ALLOCATE(fermie ,(ntemper))
- ABI_ALLOCATE(tmp_gkk_qpt ,(2,nbranch**2,nqpt))
- ABI_ALLOCATE(tmp_gkk_rpt ,(2,nbranch**2,nrpt))
- ABI_ALLOCATE(tmp_gkk_kpt ,(2,nbranch**2))
- ABI_ALLOCATE(tmp_gkk_kpt2 ,(2,nbranch,nbranch))
- ABI_ALLOCATE(gkk_kpt ,(2,nbranch,nbranch))
- ABI_ALLOCATE(a2f_2d, (nene))
- ABI_ALLOCATE(a2f_2d2, (nene))
- ABI_ALLOCATE(inv_tau_k, (ntemper,nsppol,nkpt,nband))
- ABI_ALLOCATE(tau_k, (ntemper,nsppol,nkpt,nband))
- ABI_ALLOCATE(tmp_tau_k ,(ntemper,nsppol,new_nkptirr,nband))
+ ABI_MALLOC(fermie ,(ntemper))
+ ABI_MALLOC(tmp_gkk_qpt ,(2,nbranch**2,nqpt))
+ ABI_MALLOC(tmp_gkk_rpt ,(2,nbranch**2,nrpt))
+ ABI_MALLOC(tmp_gkk_kpt ,(2,nbranch**2))
+ ABI_MALLOC(tmp_gkk_kpt2 ,(2,nbranch,nbranch))
+ ABI_MALLOC(gkk_kpt ,(2,nbranch,nbranch))
+ ABI_MALLOC(a2f_2d, (nene))
+ ABI_MALLOC(a2f_2d2, (nene))
+ ABI_MALLOC(inv_tau_k, (ntemper,nsppol,nkpt,nband))
+ ABI_MALLOC(tau_k, (ntemper,nsppol,nkpt,nband))
+ ABI_MALLOC(tmp_tau_k ,(ntemper,nsppol,new_nkptirr,nband))
 
  if (elph_ds%gkqwrite == 0) then
    call wrtout(std_out,' get_tau_k : keeping gkq matrices in memory','COLL')
@@ -1789,7 +1765,7 @@ subroutine get_tau_k(Cryst,ifc,Bst,elph_ds,elph_tr_ds,eigenGS,max_occ)
    call wrtout(std_out,message,'COLL')
  else
    write (message,'(a,i0)')' Wrong value for gkqwrite = ',elph_ds%gkqwrite
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
 !=========================================================
@@ -1800,11 +1776,11 @@ subroutine get_tau_k(Cryst,ifc,Bst,elph_ds,elph_tr_ds,eigenGS,max_occ)
 
 !mapping of k + q onto k' for k and k' in full BZ
 !for dense k grid
- ABI_ALLOCATE(FSfullpktofull,(nkpt,nkpt))
- ABI_ALLOCATE(mqtofull,(nkpt))
+ ABI_MALLOC(FSfullpktofull,(nkpt,nkpt))
+ ABI_MALLOC(mqtofull,(nkpt))
 
 !kpttokpt(itim,isym,iqpt) = kpoint index which transforms to ikpt under isym and with time reversal itim.
- ABI_ALLOCATE(kpttokpt,(2,Cryst%nsym,nkpt))
+ ABI_MALLOC(kpttokpt,(2,Cryst%nsym,nkpt))
 
  call wrtout(std_out,'get_tau_k: calling mkqptequiv to set up the FS kpoint set',"COLL")
 
@@ -1839,14 +1815,14 @@ subroutine get_tau_k(Cryst,ifc,Bst,elph_ds,elph_tr_ds,eigenGS,max_occ)
  write(std_out,*) 'delta_omega= ',domega
  write(std_out,*) 'number of bands= ', elph_ds%nband, nband
 
- ABI_ALLOCATE(tmp_wtk,(nband,nkpt,nsppol,nene_all))
- ABI_ALLOCATE(tmp2_wtk,(nene_all))
- ABI_ALLOCATE(ff2,(nene_all))
- ABI_ALLOCATE(ene_pt,(nene_all))
- ABI_ALLOCATE(ene_ptfine,(nene_all*nspline))
- ABI_ALLOCATE(tmp_wtk1,(nene_all*nspline))
- ABI_ALLOCATE(tmp_wtk2,(nene_all*nspline))
- ABI_ALLOCATE(dos_e,(nsppol,nene_all))
+ ABI_MALLOC(tmp_wtk,(nband,nkpt,nsppol,nene_all))
+ ABI_MALLOC(tmp2_wtk,(nene_all))
+ ABI_MALLOC(ff2,(nene_all))
+ ABI_MALLOC(ene_pt,(nene_all))
+ ABI_MALLOC(ene_ptfine,(nene_all*nspline))
+ ABI_MALLOC(tmp_wtk1,(nene_all*nspline))
+ ABI_MALLOC(tmp_wtk2,(nene_all*nspline))
+ ABI_MALLOC(dos_e,(nsppol,nene_all))
 
 !Get energy points for spline interpolation
  do iene = 1, nene_all
@@ -1857,17 +1833,17 @@ subroutine get_tau_k(Cryst,ifc,Bst,elph_ds,elph_tr_ds,eigenGS,max_occ)
    ene_ptfine(iene) = enemin + (iene-1)*deltaene
  end do
 
- ABI_ALLOCATE(tmp_wtq,(elph_ds%nbranch, elph_ds%k_phon%nkpt, elph_ds%na2f+1))
- ABI_ALLOCATE(wtq,(elph_ds%nbranch, elph_ds%k_phon%nkpt, elph_ds%na2f))
- ABI_ALLOCATE(tmp2_wtq,(elph_ds%nbranch, elph_ds%na2f))
+ ABI_MALLOC(tmp_wtq,(elph_ds%nbranch, elph_ds%k_phon%nkpt, elph_ds%na2f+1))
+ ABI_MALLOC(wtq,(elph_ds%nbranch, elph_ds%k_phon%nkpt, elph_ds%na2f))
+ ABI_MALLOC(tmp2_wtq,(elph_ds%nbranch, elph_ds%na2f))
 
 !phonon
- ABI_ALLOCATE(phfrq,(nbranch, nkptirr))
- ABI_ALLOCATE(displ,(2, nbranch, nbranch, nkptirr))
- ABI_ALLOCATE(pheigvec,(2*nbranch*nbranch, nkptirr))
+ ABI_MALLOC(phfrq,(nbranch, nkptirr))
+ ABI_MALLOC(displ,(2, nbranch, nbranch, nkptirr))
+ ABI_MALLOC(pheigvec,(2*nbranch*nbranch, nkptirr))
 
  do iFSqpt = 1, nkptirr
-   call ifc_fourq(ifc,cryst,elph_ds%k_phon%kptirr(:,iFSqpt),phfrq(:,iFSqpt),displ(:,:,:,iFSqpt),out_eigvec=pheigvec(:,iFSqpt))
+   call ifc%fourq(cryst,elph_ds%k_phon%kptirr(:,iFSqpt),phfrq(:,iFSqpt),displ(:,:,:,iFSqpt),out_eigvec=pheigvec(:,iFSqpt))
  end do
 
  omega_min = omega_min - domega
@@ -1881,7 +1857,7 @@ subroutine get_tau_k(Cryst,ifc,Bst,elph_ds,elph_tr_ds,eigenGS,max_occ)
    wtq(:,:,iomega) = tmp_wtq(:,:,iomega+1)
    !write(1005,*) omega_min+(iomega-1)*domega, sum(tmp_wtq(:,:,iomega+1))/nkpt
  end do
- ABI_DEALLOCATE(tmp_wtq)
+ ABI_FREE(tmp_wtq)
 
 ! electron
  tmp_wtk =zero
@@ -1898,11 +1874,11 @@ subroutine get_tau_k(Cryst,ifc,Bst,elph_ds,elph_tr_ds,eigenGS,max_occ)
    end do
  end do
 
- ABI_ALLOCATE(coskr1, (nqpt,nrpt))
- ABI_ALLOCATE(sinkr1, (nqpt,nrpt))
+ ABI_MALLOC(coskr1, (nqpt,nrpt))
+ ABI_MALLOC(sinkr1, (nqpt,nrpt))
  call ftgam_init(ifc%gprim, nqpt, nrpt, elph_ds%k_phon%kpt, Ifc%rpt, coskr1, sinkr1)
- ABI_ALLOCATE(coskr2, (nkptirr,nrpt))
- ABI_ALLOCATE(sinkr2, (nkptirr,nrpt))
+ ABI_MALLOC(coskr2, (nkptirr,nrpt))
+ ABI_MALLOC(sinkr2, (nkptirr,nrpt))
  call ftgam_init(ifc%gprim, nkptirr, nrpt, elph_ds%k_phon%kpt, Ifc%rpt, coskr2, sinkr2)
 
 !get fermie for itemp
@@ -1981,9 +1957,9 @@ subroutine get_tau_k(Cryst,ifc,Bst,elph_ds,elph_tr_ds,eigenGS,max_occ)
 
                if (abs(imeigval(jbranch)) > tol10) then
                  write (message,'(a,i0,a,es16.8)')" real values  branch = ",jbranch,' eigval = ',eigval(jbranch)
-                 MSG_WARNING(message)
+                 ABI_WARNING(message)
                  write (message,'(a,i0,a,es16.8)')" imaginary values  branch = ",jbranch,' imeigval = ',imeigval(jbranch)
-                 MSG_WARNING(message)
+                 ABI_WARNING(message)
                end if
 
              end do
@@ -2011,12 +1987,12 @@ subroutine get_tau_k(Cryst,ifc,Bst,elph_ds,elph_tr_ds,eigenGS,max_occ)
 
              if (diagerr > tol12) then
                write(message,'(a,es15.8)') 'get_tau_k: residual in diagonalization of gamma with phon eigenvectors: ', diagerr
-               MSG_WARNING(message)
+               ABI_WARNING(message)
              end if
 
            else
              write (message,'(a,i0)')' Wrong value for ep_scalprod = ',elph_ds%ep_scalprod
-             MSG_BUG(message)
+             ABI_BUG(message)
            end if ! end ep_scalprod if
 
 !For k'=k-q
@@ -2038,9 +2014,9 @@ subroutine get_tau_k(Cryst,ifc,Bst,elph_ds,elph_tr_ds,eigenGS,max_occ)
 
                if (abs(imeigval(jbranch)) > tol10) then
                  write (message,'(a,i0,a,es16.8)')" real values  branch = ",jbranch,' eigval = ',eigval2(jbranch)
-                 MSG_WARNING(message)
+                 ABI_WARNING(message)
                  write (message,'(a,i0,a,es16.8)')" imaginary values  branch = ",jbranch,' imeigval = ',imeigval(jbranch)
-                 MSG_WARNING(message)
+                 ABI_WARNING(message)
                end if
 
              end do
@@ -2068,12 +2044,12 @@ subroutine get_tau_k(Cryst,ifc,Bst,elph_ds,elph_tr_ds,eigenGS,max_occ)
 
              if (diagerr > tol12) then
                write(message,'(a,es15.8)') 'get_tau_k: residual in diagonalization of gamma with phon eigenvectors: ', diagerr
-               MSG_WARNING(message)
+               ABI_WARNING(message)
              end if
 
            else
              write (message,'(a,i0)')' Wrong value for ep_scalprod = ',elph_ds%ep_scalprod
-             MSG_BUG(message)
+             ABI_BUG(message)
            end if ! end ep_scalprod if
 
            tmp2_wtk(:) = tmp_wtk(jpband,ikpt_kpq,isppol,:)
@@ -2174,36 +2150,36 @@ subroutine get_tau_k(Cryst,ifc,Bst,elph_ds,elph_tr_ds,eigenGS,max_occ)
 !write (300+mpi_enreg%me,*) inv_tau_k
  call xmpi_sum (inv_tau_k, xmpi_world, ierr)
 
- ABI_DEALLOCATE(phfrq)
- ABI_DEALLOCATE(displ)
- ABI_DEALLOCATE(pheigvec)
- ABI_DEALLOCATE(tmp2_wtk)
- ABI_DEALLOCATE(ff2)
- ABI_DEALLOCATE(ene_pt)
- ABI_DEALLOCATE(ene_ptfine)
- ABI_DEALLOCATE(tmp_wtk1)
- ABI_DEALLOCATE(tmp_wtk2)
- ABI_DEALLOCATE(tmp2_wtq)
- ABI_DEALLOCATE(wtq)
- ABI_DEALLOCATE(coskr1)
- ABI_DEALLOCATE(sinkr1)
- ABI_DEALLOCATE(coskr2)
- ABI_DEALLOCATE(sinkr2)
- ABI_DEALLOCATE(kpttokpt)
- ABI_DEALLOCATE(FSfullpktofull)
- ABI_DEALLOCATE(mqtofull)
- ABI_DEALLOCATE(tmp_gkk_qpt)
- ABI_DEALLOCATE(tmp_gkk_rpt)
- ABI_DEALLOCATE(tmp_gkk_kpt)
- ABI_DEALLOCATE(tmp_gkk_kpt2)
- ABI_DEALLOCATE(gkk_kpt)
- ABI_DEALLOCATE(a2f_2d)
- ABI_DEALLOCATE(a2f_2d2)
+ ABI_FREE(phfrq)
+ ABI_FREE(displ)
+ ABI_FREE(pheigvec)
+ ABI_FREE(tmp2_wtk)
+ ABI_FREE(ff2)
+ ABI_FREE(ene_pt)
+ ABI_FREE(ene_ptfine)
+ ABI_FREE(tmp_wtk1)
+ ABI_FREE(tmp_wtk2)
+ ABI_FREE(tmp2_wtq)
+ ABI_FREE(wtq)
+ ABI_FREE(coskr1)
+ ABI_FREE(sinkr1)
+ ABI_FREE(coskr2)
+ ABI_FREE(sinkr2)
+ ABI_FREE(kpttokpt)
+ ABI_FREE(FSfullpktofull)
+ ABI_FREE(mqtofull)
+ ABI_FREE(tmp_gkk_qpt)
+ ABI_FREE(tmp_gkk_rpt)
+ ABI_FREE(tmp_gkk_kpt)
+ ABI_FREE(tmp_gkk_kpt2)
+ ABI_FREE(gkk_kpt)
+ ABI_FREE(a2f_2d)
+ ABI_FREE(a2f_2d2)
 
 !output inv_tau_k and tau_k
  fname = trim(elph_ds%elph_base_name) // '_INVTAUK'
  if (open_file(fname,message,newunit=unit_invtau,status='unknown') /= 0) then
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 !print header to relaxation time file
@@ -2215,7 +2191,7 @@ subroutine get_tau_k(Cryst,ifc,Bst,elph_ds,elph_tr_ds,eigenGS,max_occ)
 
  fname = trim(elph_ds%elph_base_name) // '_TAUK'
  if (open_file(fname,message,newunit=unit_tau,status='unknown') /= 0) then
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 !print header to relaxation time file
@@ -2262,7 +2238,7 @@ subroutine get_tau_k(Cryst,ifc,Bst,elph_ds,elph_tr_ds,eigenGS,max_occ)
  end do ! ntemper
 
 ! Only use the irred k for eigenGS and tau_k
- ABI_ALLOCATE(tmp_eigenGS,(elph_ds%nband,elph_ds%k_phon%new_nkptirr,elph_ds%nsppol))
+ ABI_MALLOC(tmp_eigenGS,(elph_ds%nband,elph_ds%k_phon%new_nkptirr,elph_ds%nsppol))
 
  do ikpt_irr = 1, new_nkptirr
    tmp_eigenGS(:,ikpt_irr,:) = eigenGS(:,elph_ds%k_phon%new_irredtoGS(ikpt_irr),:)
@@ -2271,20 +2247,24 @@ subroutine get_tau_k(Cryst,ifc,Bst,elph_ds,elph_tr_ds,eigenGS,max_occ)
 
 !BoltzTraP output files in SIESTA format
  if (elph_ds%prtbltztrp == 1) then
+    !Prevent use in case occopt = 9
+    if (Bst%occopt==9) then
+       ABI_ERROR("Boltztrap outputting not possible with occopt = 9 at the moment")
+    end if
    call ebands_prtbltztrp_tau_out (tmp_eigenGS(elph_ds%minFSband:elph_ds%maxFSband,:,:),&
 &   elph_ds%tempermin,elph_ds%temperinc,ntemper,fermie, &
-&   elph_ds%elph_base_name,elph_ds%k_phon%new_kptirr,natom,nband,elph_ds%nelect,new_nkptirr, &
+&   elph_ds%elph_base_name,elph_ds%k_phon%new_kptirr,nband,elph_ds%nelect,new_nkptirr, &
 &   elph_ds%nspinor,nsppol,Cryst%nsym,Cryst%rprimd,Cryst%symrel,tmp_tau_k)
  end if !prtbltztrp
- ABI_DEALLOCATE(tmp_eigenGS)
- ABI_DEALLOCATE(tmp_tau_k)
+ ABI_FREE(tmp_eigenGS)
+ ABI_FREE(tmp_tau_k)
 
 !Get the energy dependence of tau.
 !Eq. (6) in  Restrepo et al. Appl. Phys. Lett. 94, 212103 (2009) [[cite:Restrepo2009]]
 
  fname = trim(elph_ds%elph_base_name) // '_TAUE'
  if (open_file(fname,message,newunit=unit_taue,status='unknown') /= 0) then
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 !print header to relaxation time file
@@ -2295,7 +2275,7 @@ subroutine get_tau_k(Cryst,ifc,Bst,elph_ds,elph_tr_ds,eigenGS,max_occ)
 
  fname = trim(elph_ds%elph_base_name) // '_MFP'
  if (open_file(fname,message,newunit=unit_mfp,status='unknown') /= 0) then
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  write (unit_mfp,*) '# Energy-dep mean free path as a function of temperature.'
@@ -2359,7 +2339,7 @@ subroutine get_tau_k(Cryst,ifc,Bst,elph_ds,elph_tr_ds,eigenGS,max_occ)
    write(unit_mfp,*) ' '
  end do ! ntemperature
 
- ABI_ALLOCATE(cond_e ,(ntemper,nsppol,nene_all,9))
+ ABI_MALLOC(cond_e ,(ntemper,nsppol,nene_all,9))
 
 !get cond_e
  cond_e = zero
@@ -2395,7 +2375,7 @@ subroutine get_tau_k(Cryst,ifc,Bst,elph_ds,elph_tr_ds,eigenGS,max_occ)
 
  fname = trim(elph_ds%elph_base_name) // '_COND'
  if (open_file(fname,message,newunit=unit_cond,status='unknown') /= 0) then
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 !print header to conductivity file
@@ -2408,7 +2388,7 @@ subroutine get_tau_k(Cryst,ifc,Bst,elph_ds,elph_tr_ds,eigenGS,max_occ)
 
  fname = trim(elph_ds%elph_base_name) // '_CTH'
  if (open_file(fname,message,newunit=unit_therm,status='unknown') /= 0) then
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 !print header to thermal conductivity file
@@ -2421,7 +2401,7 @@ subroutine get_tau_k(Cryst,ifc,Bst,elph_ds,elph_tr_ds,eigenGS,max_occ)
 
  fname = trim(elph_ds%elph_base_name) // '_SBK'
  if (open_file(fname,message,newunit=unit_sbk,status='unknown') /=0) then
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 !print header to relaxation time file
@@ -2432,10 +2412,10 @@ subroutine get_tau_k(Cryst,ifc,Bst,elph_ds,elph_tr_ds,eigenGS,max_occ)
  write (unit_sbk,*) '#  temperature[K]   S [au]   S [SI]     '
  write (unit_sbk,*) '#  '
 
- ABI_ALLOCATE(cond ,(ntemper,nsppol,3,3))
- ABI_ALLOCATE(cth ,(ntemper,nsppol,3,3))
- ABI_ALLOCATE(sbk ,(ntemper,nsppol,3,3))
- ABI_ALLOCATE(seebeck ,(ntemper,nsppol,3,3))
+ ABI_MALLOC(cond ,(ntemper,nsppol,3,3))
+ ABI_MALLOC(cth ,(ntemper,nsppol,3,3))
+ ABI_MALLOC(sbk ,(ntemper,nsppol,3,3))
+ ABI_MALLOC(seebeck ,(ntemper,nsppol,3,3))
 
  cond = zero
  cth = zero
@@ -2502,16 +2482,16 @@ subroutine get_tau_k(Cryst,ifc,Bst,elph_ds,elph_tr_ds,eigenGS,max_occ)
  end do !end isppol
 
 
- ABI_DEALLOCATE(inv_tau_k)
- ABI_DEALLOCATE(tau_k)
- ABI_DEALLOCATE(tmp_wtk)
- ABI_DEALLOCATE(dos_e)
- ABI_DEALLOCATE(cond_e)
- ABI_DEALLOCATE(fermie)
- ABI_DEALLOCATE(cond)
- ABI_DEALLOCATE(sbk)
- ABI_DEALLOCATE(cth)
- ABI_DEALLOCATE(seebeck)
+ ABI_FREE(inv_tau_k)
+ ABI_FREE(tau_k)
+ ABI_FREE(tmp_wtk)
+ ABI_FREE(dos_e)
+ ABI_FREE(cond_e)
+ ABI_FREE(fermie)
+ ABI_FREE(cond)
+ ABI_FREE(sbk)
+ ABI_FREE(cth)
+ ABI_FREE(seebeck)
 
  close (unit=unit_tau)
  close (unit=unit_taue)

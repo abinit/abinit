@@ -1,0 +1,79 @@
+# Nitrogen atom, determination of an optimal densty parameter
+# Try to use defaults valid for other systems as well.
+
+#the adequate ecut and acell will depend on the system, and pseudopotential
+ acell  7 7 7
+ ecut 20
+#znucl also depends on the system
+ znucl  7.0
+
+
+#Here, the different trial densty
+ ndtset 8
+
+ densty1 0.40
+ densty2 0.55
+ densty3 0.60
+ densty4 0.61
+ densty5 0.65
+ densty6 0.80
+ densty7 1.00
+ densty8 1.20
+
+#The values here are standard ones
+ diemac 1.0d0
+ diemix 0.5d0
+ enunit 2
+ intxc 1
+ kpt   3*0.25d0
+ kptopt 0
+
+ natom  1
+ nkpt 1
+#Only one step is needed : one should get the lowest energy
+#in the fixed input potential
+ nstep 1
+#nstep 20
+#
+ nline 5
+
+ nsym 8
+ symrel
+       1  0  0    0  1  0    0  0  1
+      -1  0  0    0  1  0    0  0  1
+       1  0  0    0 -1  0    0  0  1
+       1  0  0    0  1  0    0  0 -1
+      -1  0  0    0 -1  0    0  0  1
+      -1  0  0    0  1  0    0  0 -1
+       1  0  0    0 -1  0    0  0 -1
+      -1  0  0    0 -1  0    0  0 -1
+
+ ntypat  1
+#Use metallic occupations, and takes the default nband
+ occopt 4
+ rprim 1 0 0  0 1 0  0 0 1
+ toldfe 1.d-6
+#tsmear is relatively small
+ tsmear 0.02
+ typat  1
+ wtk  1
+ xred   0.0 0.0 0.0
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/7n.pspnc"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t67.abo, tolnlines = 4, tolabs = 2.000e-09, tolrel = 6.000e-10
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% keywords = NC
+#%% authors = Unknown
+#%% description = 
+#%%   Compute an optimal densty parameter for N. Atomic computation,
+#%%   using multi-dataset mode.
+#%%<END TEST_INFO>

@@ -1,0 +1,88 @@
+ndtset 9
+udtset 3 3
+
+berryopt 4
+berryopt?1 -1
+rfdir 1 1 1
+
+efield?1 3*0.00000
+efield?2 3*0.00005
+efield?3 3*0.00010
+
+nband1? 4
+nband2? 8
+nband3? 8
+
+nspinor1? 1
+nspinor2? 2
+nspinor3? 2
+
+# extra-tight convergence to force
+# reproducible number of scf steps across
+# different platforms
+tolvrs 1.0D-20
+
+so_psp1? 0 0
+so_psp2? 0 0
+so_psp3? 1 1
+
+kptopt 4
+
+prtwf 1
+prtden 0
+getwfk -1
+getwfk?1 0
+
+# use ecut 25 for convergence
+ecut 5
+
+
+# define kpt mesh
+kptrlatt 2 2 -2
+        -2 2 -2
+        -2 2  2
+
+# define planewaves
+diemac 8.0
+
+#define bands and convergence
+nstep 8
+
+#definition of the elementary cell
+natom 2
+ntypat 2
+znucl 31 33
+typat 1 2
+
+acell 3*5.6533 angstrom # expt value
+
+rprim 0   1/2 1/2
+      1/2 0   1/2
+      1/2 1/2 0
+
+xred 3*0 3*1/4
+
+
+
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosHGH_pwteter/31ga.3.hgh, PseudosHGH_pwteter/33as.5.hgh"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t03.abo, tolnlines = 10, tolabs = 0.0002, tolrel = 6.0e-1, fld_options =  -easy
+#%% [paral_info]
+#%% max_nprocs = 4
+#%% [extra_info]
+#%% authors = J. Zwanziger
+#%% keywords = NC
+#%% description = 
+#%%   Test berryopt -1 and berryopt 4, with NCPP, with spinors and spin-orbit coupling. This
+#%%   test computes the polarization of GaAs in zero and finite electric field, in three
+#%%   cases: nspinor 1, nspinor 2, and nspinor 2 with spin-orbit coupling (so_psp). HGH
+#%%   norm-conserving pseudopotentials are used. 
+#%% topics = Berry
+#%%<END TEST_INFO>

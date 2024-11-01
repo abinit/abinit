@@ -1,16 +1,13 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_ab7_kpoints
 !! NAME
 !!
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2019 ABINIT group (DC)
+!!  Copyright (C) 2008-2024 ABINIT group (DC)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
 !!
 !! SOURCE
 
@@ -63,11 +60,6 @@ contains
 !!
 !! NOTES
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      kpoints_binding_auto_k_1,kpoints_binding_auto_k_2
-!!
 !! SOURCE
 
   subroutine kpoints_get_irreductible_zone(irrzon, phnons, &
@@ -111,12 +103,6 @@ contains
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_ab7_kpoints
-!!
-!! CHILDREN
-!!      kpoints_binding_auto_k_1,kpoints_binding_auto_k_2
 !!
 !! SOURCE
 
@@ -170,12 +156,6 @@ contains
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      m_ab7_kpoints
-!!
-!! CHILDREN
-!!      kpoints_binding_auto_k_1,kpoints_binding_auto_k_2
-!!
 !! SOURCE
   subroutine kpoints_binding_mp_k_2(symid, nkpt, kpt, wkpt, &
        & kptrlatt, kptrlen, nshiftk, shiftk, errno)
@@ -221,11 +201,6 @@ contains
 !!
 !! NOTES
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      kpoints_binding_auto_k_1,kpoints_binding_auto_k_2
-!!
 !! SOURCE
   subroutine kpoints_get_mp_k_grid(symid, nkpt, kpt, wkpt, &
        & ngkpt, nshiftk, shiftk, errno)
@@ -251,8 +226,8 @@ contains
     call kpoints_binding_mp_k_1(symid, nkpt, ngkpt, kptrlatt, kptrlen, &
          & nshiftk_, shiftk_, errno)
     if (errno /= AB7_NO_ERROR) return
-    ABI_ALLOCATE(kpt,(3, nkpt))
-    ABI_ALLOCATE(wkpt,(nkpt))
+    ABI_MALLOC(kpt,(3, nkpt))
+    ABI_MALLOC(wkpt,(nkpt))
     call kpoints_binding_mp_k_2(symid, nkpt, kpt, wkpt, &
        & kptrlatt, kptrlen, nshiftk_, shiftk_, errno)
   end subroutine kpoints_get_mp_k_grid
@@ -272,12 +247,6 @@ contains
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_ab7_kpoints
-!!
-!! CHILDREN
-!!      kpoints_binding_auto_k_1,kpoints_binding_auto_k_2
 !!
 !! SOURCE
   subroutine kpoints_binding_auto_k_1(symid, nkpt, kptrlatt, kptrlen, &
@@ -308,8 +277,8 @@ contains
     if (AB_DBG) write(std_err,*) "AB symmetry: testkgrid -> kptrlatt=", kptrlatt
 
     nkpt=0
-    ABI_ALLOCATE(kpt,(3, nkpt))
-    ABI_ALLOCATE(wkpt,(nkpt))
+    ABI_MALLOC(kpt,(3, nkpt))
+    ABI_MALLOC(wkpt,(nkpt))
 
     call getkgrid(0, 0, 1, kpt, 1, kptrlatt, kptrlen, &
          & AB7_MAX_SYMMETRIES, 0, nkpt, nshiftk, sym%nSym, &
@@ -317,8 +286,8 @@ contains
          & sym%vacuum, wkpt)
     if (AB_DBG) write(std_err,*) "AB symmetry: getkgrid -> nkpt=", nkpt
 
-    ABI_DEALLOCATE(kpt)
-    ABI_DEALLOCATE(wkpt)
+    ABI_FREE(kpt)
+    ABI_FREE(wkpt)
 
   end subroutine kpoints_binding_auto_k_1
 !!***
@@ -336,12 +305,6 @@ contains
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_ab7_kpoints
-!!
-!! CHILDREN
-!!      kpoints_binding_auto_k_1,kpoints_binding_auto_k_2
 !!
 !! SOURCE
 
@@ -389,11 +352,6 @@ contains
 !!
 !! NOTES
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      kpoints_binding_auto_k_1,kpoints_binding_auto_k_2
-!!
 !! SOURCE
   subroutine kpoints_get_auto_k_grid(symid, nkpt, kpt, wkpt, &
        & kptrlen, errno)
@@ -415,8 +373,8 @@ contains
     call kpoints_binding_auto_k_1(symid, nkpt, kptrlatt, kptrlen_, &
        & nshiftk, shiftk, errno)
     if (errno /= AB7_NO_ERROR) return
-    ABI_ALLOCATE(kpt,(3, nkpt))
-    ABI_ALLOCATE(wkpt,(nkpt))
+    ABI_MALLOC(kpt,(3, nkpt))
+    ABI_MALLOC(wkpt,(nkpt))
     call kpoints_binding_auto_k_2(symid, nkpt, kpt, wkpt, kptrlatt, kptrlen_, &
        & nshiftk, shiftk, errno)
   end subroutine kpoints_get_auto_k_grid

@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_wffile
 !! NAME
 !!  m_wffile
@@ -8,18 +7,14 @@
 !!  As the type contains MPI-dependent fields, it has to be declared in a MPI-managed directory.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2019 ABINIT group (MT,MB,MVer,ZL,MD)
+!! Copyright (C) 2009-2024 ABINIT group (MT,MB,MVer,ZL,MD)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! NOTES
-!! wffile_type : a handler for dealing with the IO of a wavefunction file
+!! wffile_type: a handler for dealing with the IO of a wavefunction file
 !!
 !! SOURCE
 
@@ -32,7 +27,6 @@
 MODULE m_wffile
 
  use defs_basis
- use defs_abitypes
  use m_errors
  use m_abicore
  use m_xmpi
@@ -44,8 +38,10 @@ MODULE m_wffile
  use netcdf
 #endif
 
+ use defs_abitypes, only : MPI_Type
  use m_io_tools,   only : mvrecord, open_file
  use m_fstrings,   only : toupper, endswith, sjoin
+ use iso_c_binding
 
  implicit none
 
@@ -241,16 +237,9 @@ CONTAINS
 !!  wff=<type(wffile_type)>=structured info for reading/writing the wavefunctions
 !!      only%nbOct_recMarker is changed
 !!
-!! PARENTS
-!!      m_hdr
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine getRecordMarkerLength_wffile(wff)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -259,11 +248,12 @@ subroutine getRecordMarkerLength_wffile(wff)
 !Local variables-------------------------------
 #if defined HAVE_MPI_IO
 !scalars
- integer :: headform,ierr,ii,iimax
+ integer :: ierr,ii,iimax
  integer(kind=MPI_OFFSET_KIND)  :: posit,rml
  character(len=500) :: msg
 !arrays
- integer :: statux(MPI_STATUS_SIZE)
+ integer :: headform(1),statux(MPI_STATUS_SIZE)
+ integer(kind=MPI_OFFSET_KIND)  :: off(1)
 #endif
 
 !************************************************************************
@@ -303,12 +293,12 @@ subroutine getRecordMarkerLength_wffile(wff)
      posit=rml+6*wff%nbOct_ch
      call MPI_FILE_READ_AT(wff%fhwff,posit,headform,1,MPI_INTEGER,statux,ierr)
      if (ierr==MPI_SUCCESS) then
-       if (headform==wff%headform) wff%nbOct_recMarker=rml
+       if (headform(1)==wff%headform) wff%nbOct_recMarker=rml
      end if
     end do
 
     if (ierr/=MPI_SUCCESS) then
-     MSG_BUG("Header problem")
+     ABI_BUG("Header problem")
     end if
 
    if (ii==iimax.and.wff%nbOct_recMarker<=0) then
@@ -329,18 +319,20 @@ subroutine getRecordMarkerLength_wffile(wff)
 &      '  - Quota limit exceeded,',ch10,&
 &      '  - R/W incorrect permissions,',ch10,&
 &      '  - WFK file requested as input (irdwfk=1/getwfk=1) but not existing ...'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    else
      write(msg,'(a,i0)') &
 &     '  MPI/IO accessing FORTRAN file header: detected record mark length=',wff%nbOct_recMarker
-     MSG_COMMENT(msg)
+     ABI_COMMENT(msg)
    end if
 
  end if  ! me=master
 
 !Broadcast record marker length
  if (wff%spaceComm/=MPI_COMM_SELF) then
-   call MPI_BCAST(wff%nbOct_recMarker,1,wff%offset_mpi_type,wff%master,wff%spaceComm,ierr)
+   off(1)=wff%nbOct_recMarker
+   call MPI_BCAST(off,1,wff%offset_mpi_type,wff%master,wff%spaceComm,ierr)
+   wff%nbOct_recMarker=off(1)
  end if
 
 !Select MPI datatype for markers
@@ -393,18 +385,11 @@ end subroutine getRecordMarkerLength_wffile
 !!         updated after the reading (with the length of the record)
 !!  recordmarker= content of the record marker
 !!
-!! PARENTS
-!!      m_hdr,m_wffile
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_MPI_IO
 
 subroutine rwRecordMarker(option,posit,recordmarker,wff,ierr)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -431,10 +416,10 @@ subroutine rwRecordMarker(option,posit,recordmarker,wff,ierr)
 
  if (option==1) then
    if (wff%nbOct_recMarker==4) then
-     call MPI_FILE_READ_AT(wff%fhwff,posit,delim_record4 ,1,wff%marker_mpi_type,statux,ierr)
+     call MPI_FILE_READ_AT(wff%fhwff,posit,delim_record4,1,wff%marker_mpi_type,statux,ierr)
      recordmarker = delim_record4(1)
    else if (wff%nbOct_recMarker==8) then
-     call MPI_FILE_READ_AT(wff%fhwff,posit,delim_record8 ,1,wff%marker_mpi_type,statux,ierr)
+     call MPI_FILE_READ_AT(wff%fhwff,posit,delim_record8,1,wff%marker_mpi_type,statux,ierr)
      recordmarker = delim_record8(1)
 #if defined HAVE_FC_INT_QUAD
    else if (wff%nbOct_recMarker==16) then
@@ -442,37 +427,37 @@ subroutine rwRecordMarker(option,posit,recordmarker,wff,ierr)
      recordmarker = delim_record16(1)
 #endif
    else if (wff%nbOct_recMarker==2) then
-     call MPI_FILE_READ_AT(wff%fhwff,posit,delim_record2 ,1,wff%marker_mpi_type,statux,ierr)
+     call MPI_FILE_READ_AT(wff%fhwff,posit,delim_record2,1,wff%marker_mpi_type,statux,ierr)
      recordmarker = delim_record2(1)
    else
-     MSG_BUG('Wrong record marker length!')
+     ABI_BUG('Wrong record marker length!')
    end if
 
  else if (option==2) then
    if (wff%nbOct_recMarker==4) then
-     delim_record4 = recordmarker
-     call MPI_FILE_WRITE_AT(wff%fhwff,posit,delim_record4 ,1,wff%marker_mpi_type,statux,ierr)
+     delim_record4(1) = recordmarker
+     call MPI_FILE_WRITE_AT(wff%fhwff,posit,delim_record4,1,wff%marker_mpi_type,statux,ierr)
    else if (wff%nbOct_recMarker==8) then
-     delim_record8 = recordmarker
-     call MPI_FILE_WRITE_AT(wff%fhwff,posit,delim_record8 ,1,wff%marker_mpi_type,statux,ierr)
+     delim_record8(1) = recordmarker
+     call MPI_FILE_WRITE_AT(wff%fhwff,posit,delim_record8,1,wff%marker_mpi_type,statux,ierr)
 #if defined HAVE_FC_INT_QUAD
    else if (wff%nbOct_recMarker==16) then
-     delim_record16 = recordmarker
+     delim_record16(1) = recordmarker
      call MPI_FILE_WRITE_AT(wff%fhwff,posit,delim_record16,1,wff%marker_mpi_type,statux,ierr)
 #endif
    else if (wff%nbOct_recMarker==2) then
-     delim_record2 = recordmarker
-     call MPI_FILE_WRITE_AT(wff%fhwff,posit,delim_record2 ,1,wff%marker_mpi_type,statux,ierr)
+     delim_record2(1) = recordmarker
+     call MPI_FILE_WRITE_AT(wff%fhwff,posit,delim_record2,1,wff%marker_mpi_type,statux,ierr)
    else
-     MSG_BUG('Wrong record marker length!')
+     ABI_BUG('Wrong record marker length!')
    end if
 
  else if (option==3) then
    if (wff%nbOct_recMarker==4) then
-     call MPI_FILE_READ_AT_ALL(wff%fhwff,posit,delim_record4 ,1,wff%marker_mpi_type,statux,ierr)
+     call MPI_FILE_READ_AT_ALL(wff%fhwff,posit,delim_record4,1,wff%marker_mpi_type,statux,ierr)
      recordmarker = delim_record4(1)
    else if (wff%nbOct_recMarker==8) then
-     call MPI_FILE_READ_AT_ALL(wff%fhwff,posit,delim_record8 ,1,wff%marker_mpi_type,statux,ierr)
+     call MPI_FILE_READ_AT_ALL(wff%fhwff,posit,delim_record8,1,wff%marker_mpi_type,statux,ierr)
      recordmarker = delim_record8(1)
 #if defined HAVE_FC_INT_QUAD
    else if (wff%nbOct_recMarker==16) then
@@ -480,33 +465,33 @@ subroutine rwRecordMarker(option,posit,recordmarker,wff,ierr)
      recordmarker = delim_record16(1)
 #endif
    else if (wff%nbOct_recMarker==2) then
-     call MPI_FILE_READ_AT_ALL(wff%fhwff,posit,delim_record2 ,1,wff%marker_mpi_type,statux,ierr)
+     call MPI_FILE_READ_AT_ALL(wff%fhwff,posit,delim_record2,1,wff%marker_mpi_type,statux,ierr)
      recordmarker = delim_record2(1)
    else
-     MSG_BUG('Wrong record marker length !')
+     ABI_BUG('Wrong record marker length !')
    end if
 
  else if (option==4) then
    if (wff%nbOct_recMarker==4) then
-     delim_record4 = recordmarker
-     call MPI_FILE_WRITE_AT_ALL(wff%fhwff,posit,delim_record4 ,1,wff%marker_mpi_type,statux,ierr)
+     delim_record4(1) = recordmarker
+     call MPI_FILE_WRITE_AT_ALL(wff%fhwff,posit,delim_record4,1,wff%marker_mpi_type,statux,ierr)
    else if (wff%nbOct_recMarker==8) then
-     delim_record8 = recordmarker
-     call MPI_FILE_WRITE_AT_ALL(wff%fhwff,posit,delim_record8 ,1,wff%marker_mpi_type,statux,ierr)
+     delim_record8(1) = recordmarker
+     call MPI_FILE_WRITE_AT_ALL(wff%fhwff,posit,delim_record8,1,wff%marker_mpi_type,statux,ierr)
 #if defined HAVE_FC_INT_QUAD
    else if (wff%nbOct_recMarker==16) then
-     delim_record16 = recordmarker
+     delim_record16(1) = recordmarker
      call MPI_FILE_WRITE_AT_ALL(wff%fhwff,posit,delim_record16,1,wff%marker_mpi_type,statux,ierr)
 #endif
    else if (wff%nbOct_recMarker==2) then
-     delim_record2 = recordmarker
-     call MPI_FILE_WRITE_AT_ALL(wff%fhwff,posit,delim_record2 ,1,wff%marker_mpi_type,statux,ierr)
+     delim_record2(1) = recordmarker
+     call MPI_FILE_WRITE_AT_ALL(wff%fhwff,posit,delim_record2,1,wff%marker_mpi_type,statux,ierr)
    else
-     MSG_BUG('Wrong record marker length!')
+     ABI_BUG('Wrong record marker length!')
    end if
 
  else
-   MSG_BUG('Wrong value for option!')
+   ABI_BUG('Wrong value for option!')
  end if
 
  posit = posit + recordmarker + 2*wff%nbOct_recMarker
@@ -531,16 +516,9 @@ end subroutine rwRecordMarker
 !! SIDE EFFECTS
 !!  wff=<type(wffile_type)>=structured info for reading/writing
 !!
-!! PARENTS
-!!      m_wffile
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine xnullifyOff(wff)
-
- implicit none
 
 !Arguments ------------------------------------
  type(wffile_type),intent(inout) :: wff
@@ -579,16 +557,9 @@ end subroutine xnullifyOff
 !! SIDE EFFECTS
 !!  wff=<type(wffile_type)>=structured info for reading/writing
 !!
-!! PARENTS
-!!      posdoppler
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine xmoveOff(wff,n_int,n_dp,n_ch,n_mark)
-
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in),optional :: n_int,n_dp,n_ch,n_mark
@@ -630,11 +601,6 @@ end subroutine xmoveOff
 !! SIDE EFFECTS
 !!  wff= structured info for reading/writing the wavefunctions
 !!
-!! PARENTS
-!!      m_ioarr,m_wffile,outxfhist,posdoppler,rwwf
-!!
-!! CHILDREN
-!!
 !! NOTES
 !!  We assume that:
 !!    wff%offwff contains the position of the end of the record
@@ -643,8 +609,6 @@ end subroutine xmoveOff
 !! SOURCE
 
 subroutine xderiveWRecEnd(wff,ierr,me_proc)
-
- implicit none
 
 !Arguments ------------------------------------
  type(wffile_type),intent(inout) :: wff
@@ -706,11 +670,6 @@ end subroutine xderiveWRecEnd
 !! SIDE EFFECTS
 !!  wff= structured info for reading/writing the wavefunctions
 !!
-!! PARENTS
-!!      m_ioarr,m_wffile,outxfhist,posdoppler,rwwf
-!!
-!! CHILDREN
-!!
 !! NOTES
 !!  We assume that:
 !!    wff%offwff contains the position of the beginning of the record
@@ -718,8 +677,6 @@ end subroutine xderiveWRecEnd
 !! SOURCE
 
 subroutine xderiveWRecInit(wff,ierr,me_proc)
-
- implicit none
 
 !Arguments ------------------------------------
  type(wffile_type),intent(inout) :: wff
@@ -776,11 +733,6 @@ end subroutine xderiveWRecInit
 !! SIDE EFFECTS
 !!  wff= structured info for reading/writing the wavefunctions
 !!
-!! PARENTS
-!!      m_ioarr,m_wffile,outxfhist,rwwf
-!!
-!! CHILDREN
-!!
 !! NOTES
 !!  We assume that:
 !!    wff%off_recs contains the position of the beginning of the record
@@ -825,11 +777,6 @@ end subroutine xderiveRRecEnd
 !! SIDE EFFECTS
 !!  wff= structured info for reading/writing the wavefunctions
 !!
-!! PARENTS
-!!      m_ioarr,m_wffile,outxfhist,rwwf
-!!
-!! CHILDREN
-!!
 !! NOTES
 !!  We assume that:
 !!    wff%offwff contains the position of the beginning of the record
@@ -837,8 +784,6 @@ end subroutine xderiveRRecEnd
 !! SOURCE
 
 subroutine xderiveRRecInit(wff,ierr)
-
- implicit none
 
 !Arguments ------------------------------------
  type(wffile_type),intent(inout) :: wff
@@ -885,15 +830,9 @@ end subroutine xderiveRRecInit
 !!
 !! SIDE EFFECTS
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine clsopn(wff)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -924,11 +863,10 @@ subroutine clsopn(wff)
 &     '  May be due to temporary problem with file, disks or network.',&
 &     '  Action: check whether there might be some external problem,',&
 &     '  then resubmit.'
-     MSG_ERROR(message)
+     ABI_ERROR(message)
 
 !    od is a logical variable which is set to true if the specified
 !    unit is connected to a file; otherwise it is set to false.
-#if !defined FC_HITACHI
    else if (.not.od) then
      write(message, '(/,a,/,a,i8,/,a,/,a,/,a,/,a)' ) &
 &     ' clsopn : ERROR -',&
@@ -937,8 +875,7 @@ subroutine clsopn(wff)
 &     '  May be due to temporary problem with file, disks or network.',&
 &     '  Action: check whether there might be some external problem,',&
 &     '  then resubmit.'
-     MSG_ERROR(message)
-#endif
+     ABI_ERROR(message)
 
 !    nmd is a logical variable assigned the value true if the file
 !    has a name; otherwise false.  A scratch file is not named.
@@ -950,17 +887,6 @@ subroutine clsopn(wff)
 
 !    May now close the file and then reopen it
 !    (file is already opened according to above checks)
-
-#if defined FC_HITACHI
-     if (.not.od) then
-       write(message, '(a,i0,/,a,/,a,/,a)' ) &
-&       '  Tried to inquire about unit',unit,&
-&       '  and found it not connected to a file.',&
-&       '  May be due to temporary problem with file, disks or network.',&
-&       '  Action: disregard this error and continue the process anyway.'
-       MSG_WARNING(message)
-     end if
-#endif
      close (unit=unit)
      open (unit=unit,file=filnam,form=fm,status='old') !VALGRIND complains filnam is just a few thousand bytes inside a block of 8300
 
@@ -986,15 +912,9 @@ end subroutine clsopn
 !!
 !! INPUTS
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 function wff_usef90(wff)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1020,15 +940,9 @@ end function wff_usef90
 !!
 !! INPUTS
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 function wff_ireadf90(wff)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1071,19 +985,10 @@ end function wff_ireadf90
 !! ier=error code
 !! wff= structured info about the wavefunction file
 !!
-!! PARENTS
-!!      conducti_paw,conducti_paw_core,emispec_paw,inwffil,linear_optics_paw
-!!      m_ioarr,m_iowf,m_wfk,optics_paw,optics_paw_core,optics_vloc,posdoppler
-!!      uderiv
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine WffOpen(iomode,spaceComm,filename,ier,wff,master,me,unwff,&
 &                  spaceComm_mpiio) ! optional argument
-
- implicit none
 
 !Arguments ------------------------------------
  integer, intent(in)  :: iomode,spaceComm,master,me,unwff
@@ -1134,14 +1039,14 @@ subroutine WffOpen(iomode,spaceComm,filename,ier,wff,master,me,unwff,&
  ier=0
  if (wff%iomode==IO_MODE_FORTRAN) then !  All processors see a local file
    if (open_file(filename, message, unit=unwff, form="unformatted") /= 0) then
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
    rewind(unwff)
 
  else if (wff%iomode==IO_MODE_FORTRAN_MASTER) then !  Only the master processor see a local file
    if(master==me)then
      if (open_file(filename, message, unit=unwff, form="unformatted") /= 0) then
-       MSG_ERROR(message)
+       ABI_ERROR(message)
      end if
      rewind(unwff)
    end if
@@ -1150,7 +1055,7 @@ subroutine WffOpen(iomode,spaceComm,filename,ier,wff,master,me,unwff,&
  else if (wff%iomode==IO_MODE_MPI)then ! In the parallel case, only the master open filename file
    if(master==me)then
      if (open_file(filename, message, unit=unwff, form="unformatted") /= 0) then
-       MSG_ERROR(message)
+       ABI_ERROR(message)
      end if
      rewind(unwff)
    end if
@@ -1205,7 +1110,7 @@ subroutine WffOpen(iomode,spaceComm,filename,ier,wff,master,me,unwff,&
 &   'or 3 (only sequential, and if the NetCDF and ETSF_IO libraries have been enabled).',ch10,&
 &   'Its value is iomode= ',wff%iomode,'.',ch10,&
 &   'Action: change iomode or use ABINIT in parallel or enable NetCDF and/or ETSF_IO.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 end subroutine WffOpen
@@ -1226,24 +1131,13 @@ end subroutine WffOpen
 !! OUTPUT
 !! ierr=error code
 !!
-!! PARENTS
-!!      conducti_paw,conducti_paw_core,dfpt_looppert,dfptnl_loop,emispec_paw
-!!      gstate,m_ioarr,m_iowf,m_wfk,nonlinear,optics_paw,optics_paw_core
-!!      optics_vloc,posdoppler,respfn,uderiv
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine WffClose(wff,ier)
 
- implicit none
-
 !Arguments ------------------------------------
  type(wffile_type), intent(inout) :: wff
  integer, intent(out) :: ier
-
-!Local ------------------------------------
 
 ! *************************************************************************
 
@@ -1288,21 +1182,13 @@ end subroutine WffClose
 !! OUTPUT
 !! ierr=error code
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine WffDelete(wff,ier)
 
- implicit none
-
 !Arguments ------------------------------------
  type(wffile_type),intent(inout) :: wff
  integer, intent(out) :: ier
-
-!Local variables-------------------------------
 
 ! *************************************************************************
 
@@ -1347,16 +1233,9 @@ end subroutine WffDelete
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_iowf,m_wfk
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine WffKg(wff,optkg)
-
- implicit none
 
 !Arguments ------------------------------------
  type(wffile_type),intent(inout) :: wff
@@ -1391,16 +1270,9 @@ end subroutine WffKg
 !! OUTPUT
 !!  ier = error code returned by the MPI call
 !!
-!! PARENTS
-!!      m_iowf
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine WffOffset(wff,sender,spaceComm,ier)
-
- implicit none
 
 !Arguments ------------------------------------
  type(wffile_type),intent(inout) :: wff
@@ -1411,7 +1283,7 @@ subroutine WffOffset(wff,sender,spaceComm,ier)
 !Local variables ------------------------------
 #if defined HAVE_MPI_IO
  integer :: icom
- integer(kind=MPI_OFFSET_KIND) :: ima
+ integer(kind=MPI_OFFSET_KIND)  :: off(1)
 #endif
 
 ! *********************************************************************
@@ -1420,9 +1292,9 @@ subroutine WffOffset(wff,sender,spaceComm,ier)
  if (wff%iomode == IO_MODE_MPI) then
    call xmpi_max(sender,icom,spaceComm,ier)
    if (icom>=0)then
-     ima=wff%offwff
-     call MPI_BCAST(ima,1,wff%offset_mpi_type,icom,spaceComm,ier)
-     wff%offwff=ima
+     off(1)=wff%offwff
+     call MPI_BCAST(off,1,wff%offset_mpi_type,icom,spaceComm,ier)
+     wff%offwff=off(1)
    end if
  end if ! iomode
 #else
@@ -1453,15 +1325,9 @@ end subroutine WffOffset
 !!
 !! SIDE EFFECTS
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine WffReadDataRec_dp1d(dparray,ierr,ndp,wff)
-
- implicit none
 
 !Arguments ------------------------------------
  type(wffile_type),intent(inout) :: wff
@@ -1486,7 +1352,7 @@ subroutine WffReadDataRec_dp1d(dparray,ierr,ndp,wff)
 #endif
  else
    write(msg,'(a,i0)')"Wrong iomode: ",wff%iomode
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
 end subroutine WffReadDataRec_dp1d
@@ -1513,15 +1379,9 @@ end subroutine WffReadDataRec_dp1d
 !!
 !! SIDE EFFECTS
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine WffReadDataRec_dp2d(dparray,ierr,n1,n2,wff)
-
- implicit none
 
 !Arguments ------------------------------------
  type(wffile_type),intent(inout) :: wff
@@ -1546,7 +1406,7 @@ subroutine WffReadDataRec_dp2d(dparray,ierr,n1,n2,wff)
 #endif
  else
    write(msg,'(a,i0)')"Wrong iomode: ",wff%iomode
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
 end subroutine WffReadDataRec_dp2d
@@ -1582,16 +1442,9 @@ end subroutine WffReadDataRec_dp2d
 !!
 !! SIDE EFFECTS
 !!
-!! PARENTS
-!!      rwwf
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine WffReadNpwRec(ierr,ikpt,isppol,nband_disk,npw,nspinor,wff)
-
- implicit none
 
 !Arguments ------------------------------------
  type(wffile_type),intent(inout) :: wff
@@ -1639,7 +1492,7 @@ subroutine WffReadNpwRec(ierr,ikpt,isppol,nband_disk,npw,nspinor,wff)
    !
    !      if (rank==master) call mpifoo_seq()
 
-   MSG_WARNING("Skipping read in WffReadNpwRec. Keep fingers crossed")
+   ABI_WARNING("Skipping read in WffReadNpwRec. Keep fingers crossed")
    ! MG: Must initialze these values somehow to avoid overflows.
    npw = 0; nspinor = 0; nband_disk = 0
  end if
@@ -1669,17 +1522,10 @@ end subroutine WffReadNpwRec
 !! TODO
 !! For the future : one should treat the possible errors of backspace
 !!
-!! PARENTS
-!!      gstate,randac,rwwf
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 
 subroutine WffReadSkipRec(ierr,nrec,wff)
-
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in)  :: nrec
@@ -1762,16 +1608,9 @@ end subroutine WffReadSkipRec
 !!
 !!  For MPI-IO library the performance is improved by the use a "view" of the file for each proc.
 
-!! PARENTS
-!!      rwwf
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine WffReadWrite_mpio(wff,rdwr,cg,mcg,icg,nband_disk,npwso,npwsotot,depl_mpi_to_seq,ierr)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1823,7 +1662,7 @@ subroutine WffReadWrite_mpio(wff,rdwr,cg,mcg,icg,nband_disk,npwso,npwsotot,depl_
  offset=wff%offwff+nband_disk*totsize1bandByte
  if (offset>Huge(offset)) then
    msg='File is too large for MPI-IO specifications !'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
 !Open file
@@ -1845,17 +1684,15 @@ subroutine WffReadWrite_mpio(wff,rdwr,cg,mcg,icg,nband_disk,npwso,npwsotot,depl_
 !  ----------------------------------------------
 
 !  Build map; for better performance, map must be in increasing order
-   ABI_STAT_ALLOCATE(map,(2*npwso*nband_block), ierr)
-   ABI_CHECK(ierr==0, "out of memory in map")
+   ABI_MALLOC_OR_DIE(map,(2*npwso*nband_block), ierr)
 
-   ABI_STAT_ALLOCATE(buf,(2*npwso*nband_block), ierr)
-   msg = "out of memory in wavefunction buffer. Try to decrease MAXBAND in WffReadWrite_mpio"
-   ABI_CHECK(ierr==0, msg)
+   ABI_STAT_MALLOC(buf,(2*npwso*nband_block), ierr)
+   ABI_CHECK(ierr==0, "out of memory in wavefunction buffer. Try to decrease MAXBAND in WffReadWrite_mpio")
 
    if (rdwr==1) then
 !    If reading, only build map
      nb=0;loc_depl_band=0
-     ABI_ALLOCATE(tempo_map,(2*npwso))
+     ABI_MALLOC(tempo_map,(2*npwso))
      do iband=ibandmin,ibandmax
        tempo_map(1:2*npwso)=-1
        jj=1;ipw=(iband-1)*npwso+icg
@@ -1876,8 +1713,8 @@ subroutine WffReadWrite_mpio(wff,rdwr,cg,mcg,icg,nband_disk,npwso,npwsotot,depl_
    else if (rdwr==2) then
 !    If writing, build map and store cg in a buffer
      nb=0;loc_depl_band=0
-     ABI_ALLOCATE(tempo_map,(2*npwso))
-     ABI_ALLOCATE(tempo_buf,(2*npwso))
+     ABI_MALLOC(tempo_map,(2*npwso))
+     ABI_MALLOC(tempo_buf,(2*npwso))
      do iband=ibandmin,ibandmax
        tempo_map(1:2*npwso)=-1
        jj=1;ipw=(iband-1)*npwso+icg
@@ -1897,14 +1734,14 @@ subroutine WffReadWrite_mpio(wff,rdwr,cg,mcg,icg,nband_disk,npwso,npwsotot,depl_
        end do
        loc_depl_band=loc_depl_band+totsize1bandByte ! Location in bytes
      end do
-     ABI_DEALLOCATE(tempo_map)
-     ABI_DEALLOCATE(tempo_buf)
+     ABI_FREE(tempo_map)
+     ABI_FREE(tempo_buf)
    end if  ! rdwr
 
 !  Build and commit MPI datatype
-   ABI_ALLOCATE(BlockLength,(nb+2))
-   ABI_ALLOCATE(BlockDepl,(nb+2))
-   ABI_ALLOCATE(BlockType,(nb+2))
+   ABI_MALLOC(BlockLength,(nb+2))
+   ABI_MALLOC(BlockDepl,(nb+2))
+   ABI_MALLOC(BlockType,(nb+2))
    BlockLength(1)=1;BlockDepl(1)=0;BlockType(1)=MPI_LB
    do ii=2,nb+1
      BlockLength(ii)=1
@@ -1914,9 +1751,9 @@ subroutine WffReadWrite_mpio(wff,rdwr,cg,mcg,icg,nband_disk,npwso,npwsotot,depl_
    BlockLength(nb+2)=1;BlockDepl(nb+2)=totsize1bandByte*nband_block;BlockType(nb+2)=MPI_UB
    call xmpio_type_struct(nb+2,BlockLength,BlockDepl,BlockType,filetype,ierr)
    call MPI_TYPE_COMMIT(filetype,ierr)
-   ABI_DEALLOCATE(BlockLength)
-   ABI_DEALLOCATE(BlockDepl)
-   ABI_DEALLOCATE(BlockType)
+   ABI_FREE(BlockLength)
+   ABI_FREE(BlockDepl)
+   ABI_FREE(BlockType)
 
 !  Read/Write data on disk
    call MPI_FILE_SET_VIEW(wfftempo,offset,MPI_BYTE,filetype,"native",MPI_INFO_NULL,ierr)
@@ -1929,7 +1766,7 @@ subroutine WffReadWrite_mpio(wff,rdwr,cg,mcg,icg,nband_disk,npwso,npwsotot,depl_
 !  In case of reading, retrieve cg
    if (rdwr==1) then
      nb=0;loc_depl_band=0
-     ABI_ALLOCATE(tempo_buf,(2*npwso))
+     ABI_MALLOC(tempo_buf,(2*npwso))
      do iband=ibandmin,ibandmax
        do ii=1,2*npwso ! Now, elimate holes
          if (tempo_map(ii)/=-1) then
@@ -1944,13 +1781,13 @@ subroutine WffReadWrite_mpio(wff,rdwr,cg,mcg,icg,nband_disk,npwso,npwsotot,depl_
        end do
        loc_depl_band=loc_depl_band+totsize1bandByte ! Location in bytes
      end do
-     ABI_DEALLOCATE(tempo_map)
-     ABI_DEALLOCATE(tempo_buf)
+     ABI_FREE(tempo_map)
+     ABI_FREE(tempo_buf)
    end if ! rdwr
 
 !  Free memory
-   ABI_DEALLOCATE(map)
-   ABI_DEALLOCATE(buf)
+   ABI_FREE(map)
+   ABI_FREE(buf)
    call MPI_TYPE_FREE(filetype,ierr)
 
 !  ----------------------------------------------
@@ -1960,9 +1797,9 @@ subroutine WffReadWrite_mpio(wff,rdwr,cg,mcg,icg,nband_disk,npwso,npwsotot,depl_
 
 !    Define view for the file
      nb=2*nband_block
-     ABI_ALLOCATE(BlockLength,(nb+2))
-     ABI_ALLOCATE(BlockDepl,(nb+2))
-     ABI_ALLOCATE(BlockType,(nb+2))
+     ABI_MALLOC(BlockLength,(nb+2))
+     ABI_MALLOC(BlockDepl,(nb+2))
+     ABI_MALLOC(BlockType,(nb+2))
      BlockLength(1)=1;BlockDepl(1)=0;BlockType(1)=MPI_LB
      jj=2
      do ii=1,nband_block
@@ -1976,15 +1813,15 @@ subroutine WffReadWrite_mpio(wff,rdwr,cg,mcg,icg,nband_disk,npwso,npwsotot,depl_
      call xmpio_type_struct(nb+2,BlockLength,BlockDepl,BlockType,filetype,ierr)
      call MPI_TYPE_COMMIT(filetype,ierr)
      call MPI_FILE_SET_VIEW(wfftempo,offset,MPI_BYTE,filetype,"native",MPI_INFO_NULL,ierr)
-     ABI_DEALLOCATE(BlockLength)
-     ABI_DEALLOCATE(BlockDepl)
-     ABI_DEALLOCATE(BlockType)
+     ABI_FREE(BlockLength)
+     ABI_FREE(BlockDepl)
+     ABI_FREE(BlockType)
 
 !    Read/Write all markers (depend on Fortran marker MPI type)
      if (wff%me_mpiio==0) then
        jerr=0;delim_record=totsize1bandByte-2*wff%nbOct_recMarker
        if (wff%nbOct_recMarker==4) then
-         ABI_ALLOCATE(bufdelim4,(nb))
+         ABI_MALLOC(bufdelim4,(nb))
          if (rdwr==2) bufdelim4(:)=delim_record
          if (rdwr==1) then
            call MPI_FILE_READ (wfftempo,bufdelim4,2*nband_block,wff%marker_mpi_type,MPI_STATUS_IGNORE,ierr)
@@ -1992,9 +1829,9 @@ subroutine WffReadWrite_mpio(wff,rdwr,cg,mcg,icg,nband_disk,npwso,npwsotot,depl_
          else
            call MPI_FILE_WRITE(wfftempo,bufdelim4,2*nband_block,wff%marker_mpi_type,MPI_STATUS_IGNORE,ierr)
          end if
-         ABI_DEALLOCATE(bufdelim4)
+         ABI_FREE(bufdelim4)
        else if (wff%nbOct_recMarker==8) then
-         ABI_ALLOCATE(bufdelim8,(nb))
+         ABI_MALLOC(bufdelim8,(nb))
          if (rdwr==2) bufdelim8(:)=delim_record
          if (rdwr==1) then
            call MPI_FILE_READ (wfftempo,bufdelim8,2*nband_block,wff%marker_mpi_type,MPI_STATUS_IGNORE,ierr)
@@ -2002,10 +1839,10 @@ subroutine WffReadWrite_mpio(wff,rdwr,cg,mcg,icg,nband_disk,npwso,npwsotot,depl_
          else
            call MPI_FILE_WRITE(wfftempo,bufdelim8,2*nband_block,wff%marker_mpi_type,MPI_STATUS_IGNORE,ierr)
          end if
-         ABI_DEALLOCATE(bufdelim8)
+         ABI_FREE(bufdelim8)
 #if defined HAVE_FC_INT_QUAD
        else if (wff%nbOct_recMarker==16) then
-         ABI_ALLOCATE(bufdelim16,(nb))
+         ABI_MALLOC(bufdelim16,(nb))
          if (rdwr==2) bufdelim16(:)=delim_record
          if (rdwr==1) then
            call MPI_FILE_READ (wfftempo,bufdelim16,2*nband_block,wff%marker_mpi_type,MPI_STATUS_IGNORE,ierr)
@@ -2013,10 +1850,10 @@ subroutine WffReadWrite_mpio(wff,rdwr,cg,mcg,icg,nband_disk,npwso,npwsotot,depl_
          else
            call MPI_FILE_WRITE(wfftempo,bufdelim16,2*nband_block,wff%marker_mpi_type,MPI_STATUS_IGNORE,ierr)
          end if
-         ABI_DEALLOCATE(bufdelim16)
+         ABI_FREE(bufdelim16)
 #endif
        else if (wff%nbOct_recMarker==2) then
-         ABI_ALLOCATE(bufdelim2,(nb))
+         ABI_MALLOC(bufdelim2,(nb))
          if (rdwr==2) bufdelim2(:)=delim_record
          if (rdwr==1) then
            call MPI_FILE_READ (wfftempo,bufdelim2,2*nband_block,wff%marker_mpi_type,MPI_STATUS_IGNORE,ierr)
@@ -2024,11 +1861,11 @@ subroutine WffReadWrite_mpio(wff,rdwr,cg,mcg,icg,nband_disk,npwso,npwsotot,depl_
          else
            call MPI_FILE_WRITE(wfftempo,bufdelim2,2*nband_block,wff%marker_mpi_type,MPI_STATUS_IGNORE,ierr)
          end if
-         ABI_DEALLOCATE(bufdelim2)
+         ABI_FREE(bufdelim2)
        end if
        if (rdwr==1.and.jerr==1) then
          write(unit=msg,fmt='(2a)') 'Error when reading record markers of file ',trim(wff%fname)
-         MSG_ERROR(msg)
+         ABI_ERROR(msg)
        end if
      end if  ! me_mpiio=0
 
@@ -2082,15 +1919,9 @@ end subroutine WffReadWrite_mpio
 !!
 !! SIDE EFFECTS
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine WffWriteDataRec_int2d(intarray,ierr,n1,n2,wff)
-
- implicit none
 
 !Arguments ------------------------------------
  type(wffile_type),intent(inout) :: wff
@@ -2115,7 +1946,7 @@ subroutine WffWriteDataRec_int2d(intarray,ierr,n1,n2,wff)
 #endif
  else
    write(msg,'(a,i0,a)')' The value of wff%iomode=',wff%iomode,' is not allowed.'
-   MSG_WARNING(msg)
+   ABI_WARNING(msg)
  end if
 
 end subroutine WffWriteDataRec_int2d
@@ -2142,15 +1973,9 @@ end subroutine WffWriteDataRec_int2d
 !!
 !! SIDE EFFECTS
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine WffWriteDataRec_dp1d(dparray,ierr,ndp,wff)
-
- implicit none
 
 !Arguments ------------------------------------
  type(wffile_type),intent(inout) :: wff
@@ -2175,7 +2000,7 @@ subroutine WffWriteDataRec_dp1d(dparray,ierr,ndp,wff)
 #endif
  else
    write(msg,'(a,i0,a)')' The value of wff%iomode=',wff%iomode,' is not allowed.'
-   MSG_WARNING(msg)
+   ABI_WARNING(msg)
  end if
 
 end subroutine WffWriteDataRec_dp1d
@@ -2202,16 +2027,10 @@ end subroutine WffWriteDataRec_dp1d
 !!
 !! SIDE EFFECTS
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 
 subroutine WffWriteDataRec_dp2d(dparray,ierr,n1,n2,wff)
-
- implicit none
 
 !Arguments ------------------------------------
  type(wffile_type),intent(inout) :: wff
@@ -2236,7 +2055,7 @@ subroutine WffWriteDataRec_dp2d(dparray,ierr,n1,n2,wff)
 #endif
  else
    write(msg,'(a,i0,a)')' The value of wff%iomode=',wff%iomode,' is not allowed.'
-   MSG_WARNING(msg)
+   ABI_WARNING(msg)
  end if
 
 end subroutine WffWriteDataRec_dp2d
@@ -2266,18 +2085,11 @@ end subroutine WffWriteDataRec_dp2d
 !!
 !! SIDE EFFECTS
 !!
-!! PARENTS
-!!      rwwf
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 
 subroutine WffWriteNpwRec(ierr,nband_disk,npw,nspinor,wff,&
 &                         opt_paral) ! optional argument
-
- implicit none
 
 !Arguments ------------------------------------
  type(wffile_type),intent(inout) :: wff
@@ -2287,10 +2099,11 @@ subroutine WffWriteNpwRec(ierr,nband_disk,npw,nspinor,wff,&
 
 !Local variables-------------------------------
  integer :: opt_paral_
+ character(len=500) :: msg
 #if defined HAVE_MPI_IO
  integer :: me
+ integer(kind=MPI_OFFSET_KIND)  :: off(1)
 #endif
- character(len=500) :: msg
 
 ! *************************************************************************
 
@@ -2312,12 +2125,14 @@ subroutine WffWriteNpwRec(ierr,nband_disk,npw,nspinor,wff,&
    end if
    if (opt_paral_==2.and.wff%spaceComm_mpiio/=MPI_COMM_SELF) then
      call xmpi_barrier(wff%spaceComm_mpiio)
-     call MPI_BCAST(wff%offwff,1,wff%offset_mpi_type,0,wff%spaceComm_mpiio,ierr)
+     off(1)=wff%offwff
+     call MPI_BCAST(off,1,wff%offset_mpi_type,0,wff%spaceComm_mpiio,ierr)
+     wff%offwff=off(1)
    end if
 #endif
  else
    write(msg,'(a,i0,a)')' The value of wff%iomode=',wff%iomode,' is not allowed.'
-   MSG_WARNING(msg)
+   ABI_WARNING(msg)
  end if
 
 end subroutine WffWriteNpwRec
@@ -2341,15 +2156,9 @@ end subroutine WffWriteNpwRec
 !! SIDE EFFECTS
 !!  wff= structured info for reading/writing the wavefunctions
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine xderiveRead_int(wff,xval,ierr)
-
- implicit none
 
 !Arguments ------------------------------------
  type(wffile_type),intent(inout) :: wff
@@ -2358,8 +2167,7 @@ subroutine xderiveRead_int(wff,xval,ierr)
 
 !Local variables-------------------------------
 #if defined HAVE_MPI_IO
- integer :: statux(MPI_STATUS_SIZE)
- integer :: tmparr(1)
+ integer :: arr_xval(1),statux(MPI_STATUS_SIZE)
 #endif
  character(len=500) :: msg
 
@@ -2368,8 +2176,8 @@ subroutine xderiveRead_int(wff,xval,ierr)
  xval=0; ierr=0
 
 #if defined HAVE_MPI_IO
- call MPI_FILE_READ_AT(wff%fhwff,wff%offwff,tmparr,1,MPI_INTEGER,statux,ierr)
- xval = tmparr(1)
+ call MPI_FILE_READ_AT(wff%fhwff,wff%offwff,arr_xval,1,MPI_INTEGER,statux,ierr)
+ xval=arr_xval(1)
  wff%offwff = wff%offwff + wff%nbOct_int
  RETURN
 #endif
@@ -2377,7 +2185,7 @@ subroutine xderiveRead_int(wff,xval,ierr)
  ABI_UNUSED(wff%me)
 
  write(msg,'(a,i0,a)')' The value of wff%iomode=',wff%iomode,' is not allowed.'
- MSG_WARNING(msg)
+ ABI_WARNING(msg)
 
 end subroutine xderiveRead_int
 !!***
@@ -2404,15 +2212,9 @@ end subroutine xderiveRead_int
 !! SIDE EFFECTS
 !!  wff= structured info for reading/writing the wavefunctions
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine xderiveRead_int1d(wff,xval,n1,spaceComm,ierr)
-
- implicit none
 
 !Arguments ------------------------------------
  type(wffile_type),intent(inout) :: wff
@@ -2422,7 +2224,7 @@ subroutine xderiveRead_int1d(wff,xval,n1,spaceComm,ierr)
 
 !Local variables-------------------------------
 #if defined HAVE_MPI_IO
- integer(kind=MPI_OFFSET_KIND) :: delim_record,posit,nboct,dispoct,totoct
+ integer(kind=MPI_OFFSET_KIND) :: delim_record,nboct,dispoct(1),posit,totoct
  integer :: statux(MPI_STATUS_SIZE)
 #endif
  character(len=500) :: msg
@@ -2441,21 +2243,21 @@ subroutine xderiveRead_int1d(wff,xval,n1,spaceComm,ierr)
 !  Compute offset for local part
 !  dispoct = sum (nboct, rank=0..me)
    if (spaceComm/=MPI_COMM_SELF) then
-     call MPI_SCAN(nboct,dispoct,1,wff%offset_mpi_type,MPI_SUM,spaceComm,ierr)
-     posit = posit+dispoct-nboct
+     call MPI_SCAN([nboct],dispoct,1,wff%offset_mpi_type,MPI_SUM,spaceComm,ierr)
+     posit = posit + dispoct(1) - nboct
    end if
    call MPI_FILE_READ_AT(wff%fhwff,posit,xval,n1,MPI_INTEGER,statux,ierr)
 
 !  get the total number of bits wrote by processors
    if (spaceComm/=MPI_COMM_SELF) then
-     call xmpi_max(dispoct,totoct,spaceComm,ierr)
+     call xmpi_max(dispoct(1),totoct,spaceComm,ierr)
      !call MPI_ALLREDUCE(dispoct,totoct,1,wff%offset_mpi_type,MPI_MAX,spaceComm,ierr)
    else
      totoct=nboct
    end if
  else
    ierr = 1
-   nboct =0
+   nboct = 0
    totoct = 0
  end if
 
@@ -2465,7 +2267,7 @@ subroutine xderiveRead_int1d(wff,xval,n1,spaceComm,ierr)
 #endif
 
  write(msg,'(a,i0,a)')' The value of wff%iomode=',wff%iomode,' is not allowed.'
- MSG_WARNING(msg)
+ ABI_WARNING(msg)
 
 end subroutine xderiveRead_int1d
 !!***
@@ -2493,15 +2295,9 @@ end subroutine xderiveRead_int1d
 !! SIDE EFFECTS
 !!  wff= structured info for reading/writing the wavefunctions
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine xderiveRead_int2d(wff,xval,n1,n2,spaceComm,ierr)
-
- implicit none
 
 !Arguments ------------------------------------
  type(wffile_type),intent(inout) :: wff
@@ -2511,7 +2307,7 @@ subroutine xderiveRead_int2d(wff,xval,n1,n2,spaceComm,ierr)
 
 !Local variables-------------------------------
 #if defined HAVE_MPI_IO
- integer(kind=MPI_OFFSET_KIND) :: delim_record,dispoct,nboct,posit,totoct
+ integer(kind=MPI_OFFSET_KIND) :: delim_record,nboct,dispoct(1),posit,totoct
  integer :: statux(MPI_STATUS_SIZE)
 #endif
  character(len=500) :: msg
@@ -2530,21 +2326,21 @@ subroutine xderiveRead_int2d(wff,xval,n1,n2,spaceComm,ierr)
 !  Compute offset for local part
 !  dispoct = sum (nboct, rank=0..me)
    if (spaceComm/=MPI_COMM_SELF) then
-     call MPI_SCAN(nboct,dispoct,1,wff%offset_mpi_type,MPI_SUM,spaceComm,ierr)
-     posit = posit + dispoct - nboct
+     call MPI_SCAN([nboct],dispoct,1,wff%offset_mpi_type,MPI_SUM,spaceComm,ierr)
+     posit = posit + dispoct(1) - nboct
    end if
    call MPI_FILE_READ_AT(wff%fhwff,posit,xval,n1*n2,MPI_INTEGER,statux,ierr)
 
 !  get the total number of bits wrote by processors
    if (spaceComm/=MPI_COMM_SELF) then
-     call xmpi_max(dispoct,totoct,spaceComm,ierr)
+     call xmpi_max(dispoct(1),totoct,spaceComm,ierr)
      !call MPI_ALLREDUCE(dispoct,totoct,1,wff%offset_mpi_type,MPI_MAX,spaceComm,ierr)
    else
      totoct=nboct
    end if
  else
    ierr = 1
-   nboct =0
+   nboct = 0
    totoct = 0
  end if
 
@@ -2554,7 +2350,7 @@ subroutine xderiveRead_int2d(wff,xval,n1,n2,spaceComm,ierr)
 #endif
 
  write(msg,'(a,i0,a)')' The value of wff%iomode=',wff%iomode,' is not allowed.'
- MSG_WARNING(msg)
+ ABI_WARNING(msg)
 
 end subroutine xderiveRead_int2d
 !!***
@@ -2580,15 +2376,9 @@ end subroutine xderiveRead_int2d
 !! SIDE EFFECTS
 !!  wff= structured info for reading/writing the wavefunctions
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine xderiveRead_dp(wff,xval,ierr)
-
- implicit none
 
 !Arguments ------------------------------------
  type(wffile_type),intent(inout) :: wff
@@ -2598,7 +2388,7 @@ subroutine xderiveRead_dp(wff,xval,ierr)
 !Local variables-------------------------------
 #if defined HAVE_MPI_IO
  integer :: statux(MPI_STATUS_SIZE)
- real(dp) :: tmparr(1)
+ real(dp) :: arr_xval(1)
 #endif
  character(len=500) :: msg
 
@@ -2607,14 +2397,14 @@ subroutine xderiveRead_dp(wff,xval,ierr)
  xval=zero ; ierr=0
  if(.false.)write(std_out,*)wff%me
 #if defined HAVE_MPI_IO
- call MPI_FILE_READ_AT(wff%fhwff,wff%offwff,tmparr,1,MPI_DOUBLE_PRECISION,statux,ierr)
- xval = tmparr(1)
+ call MPI_FILE_READ_AT(wff%fhwff,wff%offwff,arr_xval,1,MPI_DOUBLE_PRECISION,statux,ierr)
+ xval=arr_xval(1)
  wff%offwff = wff%offwff + wff%nbOct_dp
  return
 #endif
 
  write(msg,'(a,i0,a)')' The value of wff%iomode=',wff%iomode,' is not allowed.'
- MSG_WARNING(msg)
+ ABI_WARNING(msg)
 
 end subroutine xderiveRead_dp
 !!***
@@ -2641,15 +2431,9 @@ end subroutine xderiveRead_dp
 !! SIDE EFFECTS
 !!  wff= structured info for reading/writing the wavefunctions
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
  subroutine xderiveRead_dp1d(wff,xval,n1,spaceComm,ierr)
-
- implicit none
 
 !Arguments ------------------------------------
  type(wffile_type),intent(inout) :: wff
@@ -2659,7 +2443,7 @@ end subroutine xderiveRead_dp
 
 !Local variables-------------------------------
 #if defined HAVE_MPI_IO
- integer(kind=MPI_OFFSET_KIND) :: delim_record,posit,nboct,dispoct,totoct
+ integer(kind=MPI_OFFSET_KIND) :: delim_record,nboct,dispoct(1),posit,totoct
  integer :: statux(MPI_STATUS_SIZE)
 #endif
  character(len=500) :: msg
@@ -2678,22 +2462,22 @@ end subroutine xderiveRead_dp
 !  Compute offset for local part
 !  dispoct = sum (nboct, rank=0..me)
    if (spaceComm/=MPI_COMM_SELF) then
-     call MPI_SCAN(nboct,dispoct,1,wff%offset_mpi_type,MPI_SUM,spaceComm,ierr)
-     posit = posit + dispoct - nboct
+     call MPI_SCAN([nboct],dispoct,1,wff%offset_mpi_type,MPI_SUM,spaceComm,ierr)
+     posit = posit + dispoct(1) - nboct
    end if
 
    call MPI_FILE_READ_AT(wff%fhwff,posit,xval,n1,MPI_DOUBLE_PRECISION,statux,ierr)
 
 !  get the total number of bits wrote by processors
    if (spaceComm/=MPI_COMM_SELF) then
-     call xmpi_max(dispoct,totoct,spaceComm,ierr)
+     call xmpi_max(dispoct(1),totoct,spaceComm,ierr)
      !call MPI_ALLREDUCE(dispoct,totoct,1,wff%offset_mpi_type,MPI_MAX,spaceComm,ierr)
    else
      totoct=nboct
    end if
  else
    ierr = 1
-   nboct =0
+   nboct = 0
    totoct = 0
  end if
 
@@ -2703,7 +2487,7 @@ end subroutine xderiveRead_dp
 #endif
 
  write(msg,'(a,i0,a)')' The value of wff%iomode=',wff%iomode,' is not allowed.'
- MSG_WARNING(msg)
+ ABI_WARNING(msg)
 
 end subroutine xderiveRead_dp1d
 !!***
@@ -2730,15 +2514,9 @@ end subroutine xderiveRead_dp1d
 !! SIDE EFFECTS
 !!  wff= structured info for reading/writing the wavefunctions
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine xderiveRead_dp2d(wff,xval,n1,n2,spaceComm,ierr)
-
- implicit none
 
 !Arguments ------------------------------------
  type(wffile_type),intent(inout) :: wff
@@ -2748,7 +2526,7 @@ subroutine xderiveRead_dp2d(wff,xval,n1,n2,spaceComm,ierr)
 
 !Local variables-------------------------------
 #if defined HAVE_MPI_IO
- integer(kind=MPI_OFFSET_KIND) :: delim_record,dispoct,nboct,posit,totoct
+ integer(kind=MPI_OFFSET_KIND) :: delim_record,nboct,dispoct(1),posit,totoct
  integer :: statux(MPI_STATUS_SIZE)
 #endif
  character(len=500) :: msg
@@ -2767,21 +2545,21 @@ subroutine xderiveRead_dp2d(wff,xval,n1,n2,spaceComm,ierr)
 !  Compute offset for local part
 !  dispoct = sum (nboct, rank=0..me)
    if (spaceComm/=MPI_COMM_SELF) then
-     call MPI_SCAN(nboct,dispoct,1,wff%offset_mpi_type,MPI_SUM,spaceComm,ierr)
-     posit = posit + dispoct - nboct
+     call MPI_SCAN([nboct],dispoct,1,wff%offset_mpi_type,MPI_SUM,spaceComm,ierr)
+     posit = posit + dispoct(1) - nboct
    end if
    call MPI_FILE_READ_AT(wff%fhwff,posit,xval,n1*n2,MPI_DOUBLE_PRECISION,statux,ierr)
 
 !  get the total number of bits wrote by processors
    if (spaceComm/=MPI_COMM_SELF) then
-     call xmpi_max(dispoct,totoct,spaceComm,ierr)
+     call xmpi_max(dispoct(1),totoct,spaceComm,ierr)
      !call MPI_ALLREDUCE(dispoct,totoct,1,wff%offset_mpi_type,MPI_MAX,spaceComm,ierr)
    else
      totoct=nboct
    end if
  else
    ierr = 1
-   nboct =0
+   nboct = 0
    totoct = 0
  end if
 
@@ -2791,7 +2569,7 @@ subroutine xderiveRead_dp2d(wff,xval,n1,n2,spaceComm,ierr)
 #endif
 
  write(msg,'(a,i0,a)')' The value of wff%iomode=',wff%iomode,' is not allowed.'
- MSG_WARNING(msg)
+ ABI_WARNING(msg)
 
 end subroutine xderiveRead_dp2d
 !!***
@@ -2820,15 +2598,9 @@ end subroutine xderiveRead_dp2d
 !! SIDE EFFECTS
 !!  wff= structured info for reading/writing the wavefunctions
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine xderiveRead_int2d_displ(wff,xval,n1,n2,spaceComm,displace,ierr)
-
-  implicit none
 
 !Arguments ------------------------------------
  type(wffile_type),intent(inout) :: wff
@@ -2856,10 +2628,10 @@ subroutine xderiveRead_int2d_displ(wff,xval,n1,n2,spaceComm,displace,ierr)
 #if defined HAVE_MPI_IO
  nb=n1*n2
  call xmpi_sum(nb,totsize,spaceComm,ierr)
- ABI_ALLOCATE(depl_val,(0:totsize-1))
- ABI_ALLOCATE(depl,(nb))
- ABI_ALLOCATE(buf_val,(0:totsize-1))
- ABI_ALLOCATE(val,(nb))
+ ABI_MALLOC(depl_val,(0:totsize-1))
+ ABI_MALLOC(depl,(nb))
+ ABI_MALLOC(buf_val,(0:totsize-1))
+ ABI_MALLOC(val,(nb))
 
 !Map displacements
  depl_val(0:totsize-1)=-1
@@ -2869,7 +2641,7 @@ subroutine xderiveRead_int2d_displ(wff,xval,n1,n2,spaceComm,displace,ierr)
      depl_val(ipos)=ipos
    end do
  end do
-!To save time, the location describe by array map must be in increasing order
+!To save time, the location described by array map must be in increasing order
  nbval=0
  do i1=0,totsize-1
    if (depl_val(i1)/=-1) then
@@ -2879,9 +2651,9 @@ subroutine xderiveRead_int2d_displ(wff,xval,n1,n2,spaceComm,displace,ierr)
  end do
 
 !Build MPI datatype for view
- ABI_ALLOCATE(length1,(nbval+2))
- ABI_ALLOCATE(depl1,(nbval+2))
- ABI_ALLOCATE(type1,(nbval+2))
+ ABI_MALLOC(length1,(nbval+2))
+ ABI_MALLOC(depl1,(nbval+2))
+ ABI_MALLOC(type1,(nbval+2))
  length1(1)=1;depl1(1)=0;type1(1)=MPI_LB
  do i1=2,nbval+1
    length1(i1) = 1
@@ -2891,9 +2663,9 @@ subroutine xderiveRead_int2d_displ(wff,xval,n1,n2,spaceComm,displace,ierr)
  length1(nbval+2)=1;depl1(nbval+2)=totsize*wff%nbOct_int;type1(nbval+2)=MPI_UB
  call xmpio_type_struct(nbval+2,length1,depl1,type1,filetype,ierr)
  call MPI_TYPE_COMMIT(filetype,ierr)
- ABI_DEALLOCATE(length1)
- ABI_DEALLOCATE(depl1)
- ABI_DEALLOCATE(type1)
+ ABI_FREE(length1)
+ ABI_FREE(depl1)
+ ABI_FREE(type1)
 
 !Write data
  call MPI_FILE_OPEN(spaceComm,wff%fname,MPI_MODE_RDWR,MPI_INFO_NULL,wfftempo,ierr)
@@ -2922,15 +2694,15 @@ subroutine xderiveRead_int2d_displ(wff,xval,n1,n2,spaceComm,displace,ierr)
 
 !Free memory
  call MPI_TYPE_FREE(filetype,ierr)
- ABI_DEALLOCATE(depl)
- ABI_DEALLOCATE(depl_val)
- ABI_DEALLOCATE(buf_val)
- ABI_DEALLOCATE(val)
+ ABI_FREE(depl)
+ ABI_FREE(depl_val)
+ ABI_FREE(buf_val)
+ ABI_FREE(val)
  return
 #endif
 
  write(msg,'(a,i0,a)')' The value of wff%iomode=',wff%iomode,' is not allowed.'
- MSG_WARNING(msg)
+ ABI_WARNING(msg)
 
 
 end subroutine xderiveRead_int2d_displ
@@ -2959,15 +2731,9 @@ end subroutine xderiveRead_int2d_displ
 !! SIDE EFFECTS
 !!  wff= structured info for reading/writing the wavefunctions
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine xderiveRead_dp2d_displ(wff,xval,n1,n2,spaceComm,displace,ierr)
-
-  implicit none
 
 !Arguments ------------------------------------
  type(wffile_type),intent(inout) :: wff
@@ -2995,10 +2761,10 @@ subroutine xderiveRead_dp2d_displ(wff,xval,n1,n2,spaceComm,displace,ierr)
 #if defined HAVE_MPI_IO
  nb=n1*n2
  call xmpi_sum(nb,totsize,spaceComm,ierr)
- ABI_ALLOCATE(depl_val,(0:totsize-1))
- ABI_ALLOCATE(depl,(nb))
- ABI_ALLOCATE(buf_val,(0:totsize-1))
- ABI_ALLOCATE(val,(nb))
+ ABI_MALLOC(depl_val,(0:totsize-1))
+ ABI_MALLOC(depl,(nb))
+ ABI_MALLOC(buf_val,(0:totsize-1))
+ ABI_MALLOC(val,(nb))
 
 !Map displacements
  depl_val(0:totsize-1)=-1
@@ -3018,9 +2784,9 @@ subroutine xderiveRead_dp2d_displ(wff,xval,n1,n2,spaceComm,displace,ierr)
  end do
 
 !Build MPI datatype for view
- ABI_ALLOCATE(length1,(nbval+2))
- ABI_ALLOCATE(depl1,(nbval+2))
- ABI_ALLOCATE(type1,(nbval+2))
+ ABI_MALLOC(length1,(nbval+2))
+ ABI_MALLOC(depl1,(nbval+2))
+ ABI_MALLOC(type1,(nbval+2))
  length1(1)=1;depl1(1)=0;type1(1)=MPI_LB
  do i1=2,nbval+1
    length1(i1) = 1
@@ -3030,9 +2796,9 @@ subroutine xderiveRead_dp2d_displ(wff,xval,n1,n2,spaceComm,displace,ierr)
  length1(nbval+2)=1;depl1(nbval+2)=totsize*wff%nbOct_dp;type1(nbval+2)=MPI_UB
  call xmpio_type_struct(nbval+2,length1,depl1,type1,filetype,ierr)
  call MPI_TYPE_COMMIT(filetype,ierr)
- ABI_DEALLOCATE(length1)
- ABI_DEALLOCATE(depl1)
- ABI_DEALLOCATE(type1)
+ ABI_FREE(length1)
+ ABI_FREE(depl1)
+ ABI_FREE(type1)
 
 !Write data
  call MPI_FILE_OPEN(spaceComm,wff%fname,MPI_MODE_RDWR,MPI_INFO_NULL,wfftempo,ierr)
@@ -3061,10 +2827,10 @@ subroutine xderiveRead_dp2d_displ(wff,xval,n1,n2,spaceComm,displace,ierr)
 
 !Free memory
  call MPI_TYPE_FREE(filetype,ierr)
- ABI_DEALLOCATE(depl)
- ABI_DEALLOCATE(depl_val)
- ABI_DEALLOCATE(buf_val)
- ABI_DEALLOCATE(val)
+ ABI_FREE(depl)
+ ABI_FREE(depl_val)
+ ABI_FREE(buf_val)
+ ABI_FREE(val)
 #endif
 
 end subroutine xderiveRead_dp2d_displ
@@ -3090,26 +2856,21 @@ end subroutine xderiveRead_dp2d_displ
 !! SIDE EFFECTS
 !!  wff= structured info for reading/writing the wavefunctions
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine xderiveReadVal_char(wff,xval,n,ierr)
-
- implicit none
 
 !Arguments ------------------------------------
  type(wffile_type),intent(inout) :: wff
  integer,intent(in) :: n
  integer,intent(out) :: ierr
- character(len=*),intent(out) :: xval
+ character(len=*),intent(out),target :: xval
 
 !Local variables-------------------------------
 #if defined HAVE_MPI_IO
  integer :: statux(MPI_STATUS_SIZE)
- character(len=len(xval)) :: tmparr(1)
+ character,pointer :: arr_xval(:)
+ type(c_ptr) :: cptr
 #endif
 
 ! *********************************************************************
@@ -3118,8 +2879,8 @@ subroutine xderiveReadVal_char(wff,xval,n,ierr)
  if(.false.)write(std_out,*)wff%me,n
 
 #if defined HAVE_MPI_IO
- call MPI_FILE_READ_AT(wff%fhwff,wff%offwff,tmparr,n,MPI_CHARACTER,statux,ierr)
- xval = tmparr(1)
+ cptr=c_loc(xval) ; call c_f_pointer(cptr,arr_xval,[n])
+ call MPI_FILE_READ_AT(wff%fhwff,wff%offwff,arr_xval,n,MPI_CHARACTER,statux,ierr)
  wff%offwff = wff%offwff + wff%nbOct_ch * n
 #endif
 
@@ -3149,16 +2910,9 @@ end subroutine xderiveReadVal_char
 !! SIDE EFFECTS
 !!  wff= structured info for reading/writing the wavefunctions
 !!
-!! PARENTS
-!!      rwwf
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine xmpi_read_int2d(wff,xval,spaceComm,sc_mode,ierr)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -3199,13 +2953,13 @@ subroutine xmpi_read_int2d(wff,xval,spaceComm,sc_mode,ierr)
 
      case default
        write(msg,('(a,i0)'))" Wrong value for sc_mode: ",sc_mode
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
    end select
 
    totoct=nboct
  else
    write(msg,('(a,2(i0,1x))'))" delim_record < nboct: ",delim_record,nboct
-   MSG_WARNING(msg)
+   ABI_WARNING(msg)
    ierr=MPI_ERR_UNKNOWN
    totoct=0
  end if
@@ -3240,15 +2994,9 @@ end subroutine xmpi_read_int2d
 !! SIDE EFFECTS
 !!  wff= structured info for reading/writing the wavefunctions
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine xderiveWrite_int(wff,xval,ierr)
-
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(out) :: ierr
@@ -3257,7 +3005,6 @@ subroutine xderiveWrite_int(wff,xval,ierr)
 
 !Local variables-------------------------------
 #if defined HAVE_MPI_IO
- integer :: tmparr(1)
  integer :: statux(MPI_STATUS_SIZE)
 #endif
 ! *********************************************************************
@@ -3265,8 +3012,7 @@ subroutine xderiveWrite_int(wff,xval,ierr)
  ierr=0
  if(.false.)write(std_out,*)wff%me,xval
 #if defined HAVE_MPI_IO
- tmparr(1) = xval
- call MPI_FILE_WRITE_AT(wff%fhwff,wff%offwff,tmparr,1,MPI_INTEGER,statux,ierr)
+ call MPI_FILE_WRITE_AT(wff%fhwff,wff%offwff,[xval],1,MPI_INTEGER,statux,ierr)
  wff%offwff = wff%offwff+wff%nbOct_int
 #endif
 
@@ -3295,15 +3041,9 @@ end subroutine xderiveWrite_int
 !! SIDE EFFECTS
 !!  wff= structured info for reading/writing the wavefunctions
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine xderiveWrite_int1d(wff,xval,n1,spaceComm,ierr)
-
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: n1,spaceComm
@@ -3313,7 +3053,7 @@ subroutine xderiveWrite_int1d(wff,xval,n1,spaceComm,ierr)
 
 !Local variables-------------------------------
 #if defined HAVE_MPI_IO
- integer(kind=MPI_OFFSET_KIND) :: dispoct,nboct,posit,totoct
+ integer(kind=MPI_OFFSET_KIND) :: nboct,dispoct(1),posit,totoct
  integer :: statux(MPI_STATUS_SIZE)
 #endif
 ! *********************************************************************
@@ -3326,19 +3066,19 @@ subroutine xderiveWrite_int1d(wff,xval,n1,spaceComm,ierr)
 
 !dispoct = sum (nboct, rank=0..me)
  if (spaceComm/=MPI_COMM_SELF) then
-   call MPI_SCAN(nboct,dispoct,1,wff%offset_mpi_type,MPI_SUM,spaceComm,ierr)
-   posit = posit+dispoct-nboct
+   call MPI_SCAN([nboct],dispoct,1,wff%offset_mpi_type,MPI_SUM,spaceComm,ierr)
+   posit = posit + dispoct(1) - nboct
  end if
  call MPI_FILE_WRITE_AT(wff%fhwff,posit,xval,n1,MPI_INTEGER,statux,ierr)
 !gather the bigest offset
 
  if (spaceComm/=MPI_COMM_SELF) then
-   call xmpi_max(dispoct,totoct,spaceComm,ierr)
+   call xmpi_max(dispoct(1),totoct,spaceComm,ierr)
    !call MPI_ALLREDUCE(dispoct,totoct,1,wff%offset_mpi_type,MPI_MAX,spaceComm,ierr)
  else
    totoct=nboct
  end if
- wff%offwff = wff%offwff+totoct
+ wff%offwff = wff%offwff + totoct
 
 !Disable old code
 #endif
@@ -3368,15 +3108,9 @@ end subroutine xderiveWrite_int1d
 !! SIDE EFFECTS
 !!  wff= structured info for reading/writing the wavefunctions
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine xderiveWrite_int2d(wff,xval,n1,n2,spaceComm,ierr)
-
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: n1,n2,spaceComm
@@ -3386,7 +3120,7 @@ subroutine xderiveWrite_int2d(wff,xval,n1,n2,spaceComm,ierr)
 
 !Local variables-------------------------------
 #if defined HAVE_MPI_IO
- integer(kind=MPI_OFFSET_KIND) :: dispoct,nboct,posit,totoct
+ integer(kind=MPI_OFFSET_KIND) :: nboct,dispoct(1),posit,totoct
  integer  :: statux(MPI_STATUS_SIZE)
 #endif
 
@@ -3400,13 +3134,13 @@ subroutine xderiveWrite_int2d(wff,xval,n1,n2,spaceComm,ierr)
 
 !dispoct = sum(nboct, rank=0..me)
  if (spaceComm/=MPI_COMM_SELF) then
-   call MPI_SCAN(nboct,dispoct,1,wff%offset_mpi_type,MPI_SUM,spaceComm,ierr)
-   posit = posit + dispoct-nboct
+   call MPI_SCAN([nboct],dispoct,1,wff%offset_mpi_type,MPI_SUM,spaceComm,ierr)
+   posit = posit + dispoct(1) - nboct
  end if
  call MPI_FILE_WRITE_AT(wff%fhwff,posit,xval,n1*n2,MPI_INTEGER,statux,ierr)
 !gather the biggest offset
  if (spaceComm/=MPI_COMM_SELF) then
-   call xmpi_max(dispoct,totoct,spaceComm,ierr)
+   call xmpi_max(dispoct(1),totoct,spaceComm,ierr)
    !call MPI_ALLREDUCE(dispoct,totoct,1,wff%offset_mpi_type,MPI_MAX,spaceComm,ierr)
  else
    totoct=nboct
@@ -3437,15 +3171,9 @@ end subroutine xderiveWrite_int2d
 !! SIDE EFFECTS
 !!  wff= structured info for reading/writing the wavefunctions
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine xderiveWrite_dp(wff,xval,ierr)
-
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(out) :: ierr
@@ -3455,15 +3183,13 @@ subroutine xderiveWrite_dp(wff,xval,ierr)
 !Local variables-------------------------------
 #if defined HAVE_MPI_IO
  integer :: statux(MPI_STATUS_SIZE)
- real(dp) :: tmparr(1)
 #endif
 ! *********************************************************************
 
  ierr=0
  if(.false.)write(std_out,*)wff%me,xval
 #if defined HAVE_MPI_IO
- tmparr(1) = xval
- call MPI_FILE_WRITE_AT(wff%fhwff,wff%offwff,tmparr,1,MPI_DOUBLE_PRECISION,statux,ierr)
+ call MPI_FILE_WRITE_AT(wff%fhwff,wff%offwff,[xval],1,MPI_DOUBLE_PRECISION,statux,ierr)
  wff%offwff = wff%offwff+wff%nbOct_dp
 #endif
 
@@ -3492,15 +3218,9 @@ end subroutine xderiveWrite_dp
 !! SIDE EFFECTS
 !!  wff= structured info for reading/writing the wavefunctions
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine xderiveWrite_dp1d(wff,xval,n1,spaceComm,ierr)
-
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: n1,spaceComm
@@ -3510,7 +3230,7 @@ subroutine xderiveWrite_dp1d(wff,xval,n1,spaceComm,ierr)
 
 !Local variables-------------------------------
 #if defined HAVE_MPI_IO
- integer(kind=MPI_OFFSET_KIND) :: nboct,dispoct,totoct,posit
+ integer(kind=MPI_OFFSET_KIND) :: nboct,dispoct(1),posit,totoct
  integer  :: statux(MPI_STATUS_SIZE)
 #endif
 
@@ -3523,13 +3243,13 @@ subroutine xderiveWrite_dp1d(wff,xval,n1,spaceComm,ierr)
  posit = wff%offwff
 !dispoct = sum (nboct, rank = 0..me)
  if (spaceComm/=MPI_COMM_SELF) then
-   call MPI_SCAN(nboct,dispoct,1,wff%offset_mpi_type,MPI_SUM,spaceComm,ierr)
-   posit = posit + dispoct - nboct
+   call MPI_SCAN([nboct],dispoct,1,wff%offset_mpi_type,MPI_SUM,spaceComm,ierr)
+   posit = posit + dispoct(1) - nboct
  end if
  call MPI_FILE_WRITE_AT(wff%fhwff,posit,xval,n1,MPI_DOUBLE_PRECISION,statux,ierr)
 !Gather the biggest offset
  if (spaceComm/=MPI_COMM_SELF) then
-   call xmpi_max(dispoct,totoct,spaceComm,ierr)
+   call xmpi_max(dispoct(1),totoct,spaceComm,ierr)
    !call MPI_ALLREDUCE(dispoct,totoct,1,wff%offset_mpi_type,MPI_MAX,spaceComm,ierr)
  else
    totoct=nboct
@@ -3562,15 +3282,9 @@ end subroutine xderiveWrite_dp1d
 !! SIDE EFFECTS
 !!  wff= structured info for reading/writing the wavefunctions
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine xderiveWrite_dp2d(wff,xval,n1,n2,spaceComm,ierr)
-
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: n1,n2,spaceComm
@@ -3580,7 +3294,7 @@ subroutine xderiveWrite_dp2d(wff,xval,n1,n2,spaceComm,ierr)
 
 !Local variables-------------------------------
 #if defined HAVE_MPI_IO
- integer(kind=MPI_OFFSET_KIND) :: nboct,dispoct,totoct,posit
+ integer(kind=MPI_OFFSET_KIND) :: nboct,dispoct(1),posit,totoct
  integer :: statux(MPI_STATUS_SIZE)
 #endif
 
@@ -3594,19 +3308,19 @@ subroutine xderiveWrite_dp2d(wff,xval,n1,n2,spaceComm,ierr)
  posit = wff%offwff
 !dispoct = sum(nboct, rank=0..me)
  if (spaceComm/=MPI_COMM_SELF) then
-   call MPI_SCAN(nboct,dispoct,1,wff%offset_mpi_type,MPI_SUM,spaceComm,ierr)
-   posit = posit+dispoct-nboct
+   call MPI_SCAN([nboct],dispoct,1,wff%offset_mpi_type,MPI_SUM,spaceComm,ierr)
+   posit = posit + dispoct(1) - nboct
  end if
  call MPI_FILE_WRITE_AT(wff%fhwff,posit,xval,n1*n2,MPI_DOUBLE_PRECISION,statux,ierr)
- posit = posit+nboct
+ posit = posit + nboct
 !gather the biggest offset
  if (spaceComm/=MPI_COMM_SELF) then
-   call xmpi_max(dispoct,totoct,spaceComm,ierr)
+   call xmpi_max(dispoct(1),totoct,spaceComm,ierr)
    !call MPI_ALLREDUCE(dispoct,totoct,1,wff%offset_mpi_type,MPI_MAX,spaceComm,ierr)
  else
    totoct=nboct
  end if
- wff%offwff = wff%offwff+totoct
+ wff%offwff = wff%offwff + totoct
 #endif
 
 end subroutine xderiveWrite_dp2d
@@ -3631,15 +3345,9 @@ end subroutine xderiveWrite_dp2d
 !! SIDE EFFECTS
 !!  wff= structured info for reading/writing the wavefunctions
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine xderiveWrite_dp2d_seq(wff,xval,ierr)
-
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(out) :: ierr
@@ -3688,15 +3396,9 @@ end subroutine xderiveWrite_dp2d_seq
 !! SIDE EFFECTS
 !!  wff= structured info for reading/writing the wavefunctions
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine xderiveWrite_int2d_displ(wff,xval,n1,n2,spaceComm,displace,ierr)
-
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: n1,n2,spaceComm
@@ -3722,10 +3424,10 @@ subroutine xderiveWrite_int2d_displ(wff,xval,n1,n2,spaceComm,displace,ierr)
 #if defined HAVE_MPI_IO
  nb = n1*n2
  call xmpi_sum(nb,totsize,spaceComm,ierr)
- ABI_ALLOCATE(depl_val,(0:totsize-1))
- ABI_ALLOCATE(depl,(nb))
- ABI_ALLOCATE(buf_val,(0:totsize-1))
- ABI_ALLOCATE(val,(nb))
+ ABI_MALLOC(depl_val,(0:totsize-1))
+ ABI_MALLOC(depl,(nb))
+ ABI_MALLOC(buf_val,(0:totsize-1))
+ ABI_MALLOC(val,(nb))
 
 !Map displacements
 !Put xval in a buffer at its position
@@ -3749,9 +3451,9 @@ subroutine xderiveWrite_int2d_displ(wff,xval,n1,n2,spaceComm,displace,ierr)
  end do
 
 !Build MPI datatype for view
- ABI_ALLOCATE(length1,(nbval+2))
- ABI_ALLOCATE(depl1,(nbval+2))
- ABI_ALLOCATE(type1,(nbval+2))
+ ABI_MALLOC(length1,(nbval+2))
+ ABI_MALLOC(depl1,(nbval+2))
+ ABI_MALLOC(type1,(nbval+2))
  length1(1)=1;depl1(1)=0;type1(1)=MPI_LB
  do i1=2,nbval+1
    length1(i1) = 1
@@ -3761,9 +3463,9 @@ subroutine xderiveWrite_int2d_displ(wff,xval,n1,n2,spaceComm,displace,ierr)
  length1(nbval+2)=1;depl1(nbval+2)=totsize*wff%nbOct_int;type1(nbval+2)=MPI_UB
  call xmpio_type_struct(nbval+2,length1,depl1,type1,filetype,ierr)
  call MPI_TYPE_COMMIT(filetype,ierr)
- ABI_DEALLOCATE(length1)
- ABI_DEALLOCATE(depl1)
- ABI_DEALLOCATE(type1)
+ ABI_FREE(length1)
+ ABI_FREE(depl1)
+ ABI_FREE(type1)
 
 !Write data
  call MPI_FILE_OPEN(spaceComm,wff%fname,MPI_MODE_RDWR,MPI_INFO_NULL,wfftempo,ierr)
@@ -3777,10 +3479,10 @@ subroutine xderiveWrite_int2d_displ(wff,xval,n1,n2,spaceComm,displace,ierr)
 
 !Free memory
  call MPI_TYPE_FREE(filetype,ierr)
- ABI_DEALLOCATE(depl)
- ABI_DEALLOCATE(depl_val)
- ABI_DEALLOCATE(buf_val)
- ABI_DEALLOCATE(val)
+ ABI_FREE(depl)
+ ABI_FREE(depl_val)
+ ABI_FREE(buf_val)
+ ABI_FREE(val)
 #endif
 
 end subroutine xderiveWrite_int2d_displ
@@ -3809,15 +3511,9 @@ end subroutine xderiveWrite_int2d_displ
 !! SIDE EFFECTS
 !!  wff= structured info for reading/writing the wavefunctions
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine xderiveWrite_dp2d_displ(wff,xval,n1,n2,spaceComm,displace,ierr)
-
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: n1,n2,spaceComm
@@ -3833,7 +3529,7 @@ subroutine xderiveWrite_dp2d_displ(wff,xval,n1,n2,spaceComm,displace,ierr)
 !arrays
  integer :: statux(MPI_STATUS_SIZE)
  integer, allocatable :: length1(:),type1(:)
- integer(kind=MPI_OFFSET_KIND),allocatable :: depl(:),depl1(:),depl_val(:)
+ integer(kind=XMPI_ADDRESS_KIND),allocatable :: depl(:),depl1(:),depl_val(:)
  real(dp),allocatable :: buf_val(:),val(:)
 #endif
 
@@ -3845,10 +3541,10 @@ subroutine xderiveWrite_dp2d_displ(wff,xval,n1,n2,spaceComm,displace,ierr)
 #if defined HAVE_MPI_IO
  nb = n1*n2
  call xmpi_sum(nb,totsize,spaceComm,ierr)
- ABI_ALLOCATE(depl_val,(0:totsize-1))
- ABI_ALLOCATE(depl,(nb))
- ABI_ALLOCATE(buf_val,(0:totsize-1))
- ABI_ALLOCATE(val,(nb))
+ ABI_MALLOC(depl_val,(0:totsize-1))
+ ABI_MALLOC(depl,(nb))
+ ABI_MALLOC(buf_val,(0:totsize-1))
+ ABI_MALLOC(val,(nb))
 
 !Map displacements
 !Put xval in a buffer at its position
@@ -3872,9 +3568,9 @@ subroutine xderiveWrite_dp2d_displ(wff,xval,n1,n2,spaceComm,displace,ierr)
  end do
 
 !Build MPI datatype for view
- ABI_ALLOCATE(length1,(nbval+2))
- ABI_ALLOCATE(depl1,(nbval+2))
- ABI_ALLOCATE(type1,(nbval+2))
+ ABI_MALLOC(length1,(nbval+2))
+ ABI_MALLOC(depl1,(nbval+2))
+ ABI_MALLOC(type1,(nbval+2))
  length1(1)=1;depl1(1)=0;type1(1)=MPI_LB
  do i1=2,nbval+1
    length1(i1) = 1
@@ -3884,9 +3580,9 @@ subroutine xderiveWrite_dp2d_displ(wff,xval,n1,n2,spaceComm,displace,ierr)
  length1(nbval+2)=1;depl1(nbval+2)=totsize*wff%nbOct_dp;type1(nbval+2)=MPI_UB
  call xmpio_type_struct(nbval+2,length1,depl1,type1,filetype,ierr)
  call MPI_TYPE_COMMIT(filetype,ierr)
- ABI_DEALLOCATE(length1)
- ABI_DEALLOCATE(depl1)
- ABI_DEALLOCATE(type1)
+ ABI_FREE(length1)
+ ABI_FREE(depl1)
+ ABI_FREE(type1)
 
 !Write data
  call MPI_FILE_OPEN(spaceComm,wff%fname,MPI_MODE_RDWR,MPI_INFO_NULL,wfftempo,ierr)
@@ -3899,10 +3595,10 @@ subroutine xderiveWrite_dp2d_displ(wff,xval,n1,n2,spaceComm,displace,ierr)
 
 !Free memory
  call MPI_TYPE_FREE(filetype,ierr)
- ABI_DEALLOCATE(depl)
- ABI_DEALLOCATE(depl_val)
- ABI_DEALLOCATE(buf_val)
- ABI_DEALLOCATE(val)
+ ABI_FREE(depl)
+ ABI_FREE(depl_val)
+ ABI_FREE(buf_val)
+ ABI_FREE(val)
 #endif
 
 end subroutine xderiveWrite_dp2d_displ
@@ -3929,25 +3625,21 @@ end subroutine xderiveWrite_dp2d_displ
 !! SIDE EFFECTS
 !!  wff= structured info for reading/writing the wavefunctions
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine xderiveWrite_char(wff,xval,n,ierr)
-
- implicit none
 
 !Arguments ------------------------------------
  type(wffile_type),intent(inout) :: wff
  integer,intent(in) :: n
  integer,intent(out) :: ierr
- character(len=*),intent(in) :: xval
+ character(len=*),intent(in),target :: xval
 
 !Local variables-------------------------------
 #if defined HAVE_MPI_IO
  integer :: statux(MPI_STATUS_SIZE)
+ character,pointer :: buf(:)
+ type(c_ptr) :: cptr
 #endif
 ! *********************************************************************
 
@@ -3955,7 +3647,8 @@ subroutine xderiveWrite_char(wff,xval,n,ierr)
  if(.false.)write(std_out,*)wff%me,xval,n
 
 #if defined HAVE_MPI_IO
- call MPI_FILE_WRITE_AT(wff%fhwff,wff%offwff,xval,n,MPI_CHARACTER,statux,ierr)
+   cptr=c_loc(xval) ; call c_f_pointer(cptr,buf,[n])
+ call MPI_FILE_WRITE_AT(wff%fhwff,wff%offwff,buf,n,MPI_CHARACTER,statux,ierr)
  wff%offwff = wff%offwff + wff%nbOct_ch * n
 #endif
 
@@ -3988,16 +3681,9 @@ end subroutine xderiveWrite_char
 !! SIDE EFFECTS
 !!  wff <type(wffile_type)> =
 !!
-!! PARENTS
-!!      uderiv
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine xdefineOff(formeig,wff,mpi_enreg,nband,npwarr,nspinor,nsppol,nkpt)
-
- implicit none
 
 !Arguments ------------------------------------
  integer, intent(in) ::  nsppol,nkpt,nspinor,formeig
@@ -4032,7 +3718,7 @@ subroutine xdefineOff(formeig,wff,mpi_enreg,nband,npwarr,nspinor,nsppol,nkpt)
    nproc=xmpi_comm_size(comm)
    pos_start=wff%offwff
 
-   ABI_ALLOCATE(offproc,(0:nproc))
+   ABI_MALLOC(offproc,(0:nproc))
    offproc = 0
    nbrec =2
    nrecnpw=3+nbrec
@@ -4100,7 +3786,7 @@ subroutine xdefineOff(formeig,wff,mpi_enreg,nband,npwarr,nspinor,nsppol,nkpt)
        wff%offwff=wff%offwff+offproc(iproc)
      end do
    end if
-   ABI_DEALLOCATE(offproc)
+   ABI_FREE(offproc)
 
  end if ! iomode
 #endif

@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_dfpt_rhotov
 !! NAME
 !!  m_dfpt_rhotov
@@ -7,14 +6,10 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1999-2019 ABINIT group (XG, DRH, MT, SPr)
+!!  Copyright (C) 1999-2024 ABINIT group (XG, DRH, MT, SPr)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -27,11 +22,11 @@
 module m_dfpt_rhotov
 
  use defs_basis
- use defs_abitypes
  use m_abicore
  use m_errors
  use m_cgtools
 
+ use defs_abitypes, only : MPI_type
  use m_time,        only : timab
  use m_spacepar,    only : hartrestr, hartre
  use m_dfpt_mkvxc,    only : dfpt_mkvxc, dfpt_mkvxc_noncoll
@@ -73,13 +68,13 @@ contains
 !!  nhat1gr(cplex*nfft,nspden,3*nhat1grdim)= -PAW only- gradients of 1st-order compensation density
 !!  nhat1grdim= -PAW only- 1 if nhat1gr array is used ; 0 otherwise
 !!  nkxc=second dimension of the array kxc, see rhotoxc.f for a description
+!!  non_magnetic_xc= if true, handle density/potential as non-magnetic (even if it is)
 !!  nspden=number of spin-density components
 !!  n3xccc=dimension of xccc3d1 ; 0 if no XC core correction is used
 !!  optene=0: the contributions to the 2nd order energy are not computed
 !!         1: the contributions to the 2nd order energy are computed
 !!  optres=0: the trial potential residual is computed ; the input potential value is kept
 !!         1: the new value of the trial potential is computed in place of the input value
-!!  paral_kgb=flag controlling (k,g,bands) parallelization
 !!  qphon(3)=reduced coordinates for the phonon wavelength
 !!  rhog(2,nfft)=array for Fourier transform of GS electron density
 !!  rhog1(2,nfft)=RF electron density in reciprocal space
@@ -108,28 +103,20 @@ contains
 !!  ==== if optres==1
 !!    vtrial1(cplex*nfft,nspden)= new value of 1st-order trial potential
 !!
-!! PARENTS
-!!      dfpt_scfcv
-!!
-!! CHILDREN
-!!      dfpt_mkvxc,dfpt_mkvxc_noncoll,dfpt_mkvxcstr,dfpt_v1zeeman,dotprod_vn
-!!      hartre,hartrestr,sqnorm_v,timab
-!!
 !! SOURCE
 
  subroutine dfpt_rhotov(cplex,ehart01,ehart1,elpsp1,exc1,elmag1,gsqcut,idir,ipert,&
 &           ixc,kxc,mpi_enreg,natom,nfft,ngfft,nhat,nhat1,nhat1gr,nhat1grdim,nkxc,nspden,n3xccc,&
-&           optene,optres,paral_kgb,qphon,rhog,rhog1,rhor,rhor1,rprimd,ucvol,&
+&           non_magnetic_xc,optene,optres,qphon,rhog,rhog1,rhor,rhor1,rprimd,ucvol,&
 &           usepaw,usexcnhat,vhartr1,vpsp1,vresid1,vres2,vtrial1,vxc,vxc1,xccc3d1,ixcrot)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: cplex,idir,ipert,ixc,n3xccc,natom,nfft,nhat1grdim,nkxc,nspden
- integer,intent(in) :: optene,optres,paral_kgb,usepaw,usexcnhat,ixcrot
+ integer,intent(in) :: optene,optres,usepaw,usexcnhat,ixcrot
+ logical,intent(in) :: non_magnetic_xc
  real(dp),intent(in) :: gsqcut,ucvol
- real(dp),intent(inout) :: ehart01 !vz_i
+ real(dp),intent(inout) :: ehart01
  real(dp),intent(out) :: vres2
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
@@ -156,6 +143,7 @@ contains
 !arrays
  integer,intent(in)   :: ngfft(18)
  real(dp)             :: tsec(20)
+ real(dp),parameter   :: dummyvgeo(3)=zero
  real(dp),allocatable :: rhor1_nohat(:,:),vhartr01(:),vxc1val(:,:)
  real(dp),pointer     :: rhor1_(:,:),vhartr1_(:),vxc1_(:,:),v1zeeman(:,:)
 
@@ -166,7 +154,7 @@ contains
  !FR EB SPr
  if (nspden==4) then
    if(usepaw==1) then
-     MSG_ERROR('DFPT with nspden=4 works only for norm-conserving psp!')
+     ABI_ERROR('DFPT with nspden=4 works only for norm-conserving psp!')
    end if
  end if
 
@@ -178,18 +166,18 @@ contains
  if (vhartr1_allocated) then
    vhartr1_ => vhartr1
  else
-   ABI_ALLOCATE(vhartr1_,(cplex*nfft))
+   ABI_MALLOC(vhartr1_,(cplex*nfft))
  end if
  vxc1_allocated=(size(vxc1)>0)
  if (vxc1_allocated) then
    vxc1_ => vxc1
  else
-   ABI_ALLOCATE(vxc1_,(cplex*nfft,nspden))
+   ABI_MALLOC(vxc1_,(cplex*nfft,nspden))
  end if
 
 !If needed, store pseudo density without charge compensation
  if (usepaw==1.and.usexcnhat==0) then
-   ABI_ALLOCATE(rhor1_,(cplex*nfft,nspden))
+   ABI_MALLOC(rhor1_,(cplex*nfft,nspden))
    rhor1_(:,:)=rhor1(:,:)-nhat1(:,:)
  else
    rhor1_ => rhor1
@@ -197,13 +185,13 @@ contains
 
 
  if(ipert==natom+5)then
-   ABI_ALLOCATE(v1zeeman,(cplex*nfft,nspden))
+   ABI_MALLOC(v1zeeman,(cplex*nfft,nspden))
    call dfpt_v1zeeman(nspden,nfft,cplex,idir,v1zeeman)
  end if
 
 !------ Compute 1st-order Hartree potential (and energy) ----------------------
 
- call hartre(cplex,gsqcut,0,mpi_enreg,nfft,ngfft,paral_kgb,rhog1,rprimd,vhartr1_,qpt=qphon)
+ call hartre(cplex,gsqcut,3,0,mpi_enreg,nfft,ngfft,1,zero,rhog1,rprimd,dummyvgeo,vhartr1_,qpt=qphon)
 
  if (optene>0) then
    call dotprod_vn(cplex,rhor1,ehart1,doti,nfft,nfftot,1,1,vhartr1_,ucvol)
@@ -211,8 +199,8 @@ contains
 
  if (optene>0) ehart01=zero
  if(ipert==natom+3 .or. ipert==natom+4) then
-   ABI_ALLOCATE(vhartr01,(cplex*nfft))
-   call hartrestr(gsqcut,idir,ipert,mpi_enreg,natom,nfft,ngfft,paral_kgb,rhog,rprimd,vhartr01)
+   ABI_MALLOC(vhartr01,(cplex*nfft))
+   call hartrestr(gsqcut,idir,ipert,mpi_enreg,natom,nfft,ngfft,rhog,rprimd,vhartr01)
    if (optene>0) then
      call dotprod_vn(cplex,rhor1,ehart01,doti,nfft,nfftot,1,1,vhartr01,ucvol)
      ehart01=two*ehart01
@@ -221,7 +209,7 @@ contains
 !  Note that there is a factor 2.0_dp difference with the similar GS formula
    vhartr1_(:)=vhartr1_(:)+vhartr01(:)
 
-   ABI_DEALLOCATE(vhartr01)
+   ABI_FREE(vhartr01)
  end if
 
 !------ Compute 1st-order XC potential (and energy) ----------------------
@@ -231,7 +219,7 @@ contains
  option=0;if (optene==0) option=1
  if(ipert==natom+3.or.ipert==natom+4) then
    call dfpt_mkvxcstr(cplex,idir,ipert,kxc,mpi_enreg,natom,nfft,ngfft,nhat,&
-&   nhat1,nkxc,nspden,n3xccc,option,paral_kgb,qphon,rhor,rhor1,rprimd,&
+&   nhat1,nkxc,non_magnetic_xc,nspden,n3xccc,option,qphon,rhor,rhor1,rprimd,&
 &   usepaw,usexcnhat,vxc1_,xccc3d1)
  else
 ! FR EB non-collinear magnetism
@@ -241,11 +229,11 @@ contains
      nkxc_cur=nkxc ! TODO: remove nkxc_cur?
 
      call dfpt_mkvxc_noncoll(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat,usepaw,nhat1,usepaw,nhat1gr,nhat1grdim,nkxc,&
-&     nspden,n3xccc,optnc,option,paral_kgb,qphon,rhor,rhor1,rprimd,usexcnhat,vxc,vxc1_,xccc3d1,ixcrot=ixcrot)
+&     non_magnetic_xc,nspden,n3xccc,optnc,option,qphon,rhor,rhor1,rprimd,usexcnhat,vxc,vxc1_,xccc3d1,ixcrot=ixcrot)
 
    else
      call dfpt_mkvxc(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat1,usepaw,nhat1gr,nhat1grdim,nkxc,&
-&     nspden,n3xccc,option,paral_kgb,qphon,rhor1,rprimd,usexcnhat,vxc1_,xccc3d1)
+&     non_magnetic_xc,nspden,n3xccc,option,qphon,rhor1,rprimd,usexcnhat,vxc1_,xccc3d1)
    end if !nspden==4
  end if
 
@@ -259,11 +247,11 @@ contains
      end if
    else
      if (usexcnhat/=0) then
-       ABI_ALLOCATE(rhor1_nohat,(cplex*nfft,1))
+       ABI_MALLOC(rhor1_nohat,(cplex*nfft,1))
        rhor1_nohat(:,1)=rhor1(:,1)-nhat1(:,1)
        call dotprod_vn(cplex,rhor1      ,elpsp10,doti,nfft,nfftot,nspden,1,vxc1_,ucvol)
        call dotprod_vn(cplex,rhor1_nohat,elpsp1 ,doti,nfft,nfftot,1     ,1,vpsp1,ucvol)
-       ABI_DEALLOCATE(rhor1_nohat)
+       ABI_FREE(rhor1_nohat)
      else
        call dotprod_vn(cplex,rhor1_,elpsp10,doti,nfft,nfftot,nspden,1,vxc1_,ucvol)
        call dotprod_vn(cplex,rhor1_,elpsp1 ,doti,nfft,nfftot,1     ,1,vpsp1,ucvol)
@@ -277,7 +265,7 @@ contains
 
 !Compute XC valence contribution exc1 and complete eventually Vxc^(1)
  if (optene>0) then
-   ABI_ALLOCATE(vxc1val,(cplex*nfft,nspden))
+   ABI_MALLOC(vxc1val,(cplex*nfft,nspden))
    vxc1val=zero
    option=2
 !FR SPr EB non-collinear magnetism
@@ -285,18 +273,18 @@ contains
      optnc=1
      nkxc_cur=nkxc
      call dfpt_mkvxc_noncoll(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat,usepaw,nhat1,usepaw,nhat1gr,nhat1grdim,nkxc,&
-&     nspden,n3xccc,optnc,option,paral_kgb,qphon,rhor,rhor1,rprimd,usexcnhat,vxc,vxc1val,xccc3d1,ixcrot=ixcrot)
+&     non_magnetic_xc,nspden,n3xccc,optnc,option,qphon,rhor,rhor1,rprimd,usexcnhat,vxc,vxc1val,xccc3d1,ixcrot=ixcrot)
    else
      call dfpt_mkvxc(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat1,usepaw,nhat1gr,nhat1grdim,nkxc,&
-&     nspden,n3xccc,option,paral_kgb,qphon,rhor1,rprimd,usexcnhat,vxc1val,xccc3d1)
+&     non_magnetic_xc,nspden,n3xccc,option,qphon,rhor1,rprimd,usexcnhat,vxc1val,xccc3d1)
    end if !nspden==4
    vxc1_(:,:)=vxc1_(:,:)+vxc1val(:,:)
    call dotprod_vn(cplex,rhor1_,exc1,doti,nfft,nfftot,nspden,1,vxc1val,ucvol)
-   ABI_DEALLOCATE(vxc1val)
+   ABI_FREE(vxc1val)
  end if
 
  if (usepaw==1.and.usexcnhat==0) then
-   ABI_DEALLOCATE(rhor1_)
+   ABI_FREE(rhor1_)
  end if
 
 !DEBUG (do not take away)
@@ -368,14 +356,14 @@ contains
 
 !Release temporary memory space
  if (.not.vhartr1_allocated) then
-   ABI_DEALLOCATE(vhartr1_)
+   ABI_FREE(vhartr1_)
  end if
  if (.not.vxc1_allocated) then
-   ABI_DEALLOCATE(vxc1_)
+   ABI_FREE(vxc1_)
  end if
 
  if (ipert==natom+5) then
-   ABI_DEALLOCATE(v1zeeman)
+   ABI_FREE(v1zeeman)
  end if
 
  call timab(157,2,tsec)
@@ -413,16 +401,9 @@ end subroutine dfpt_rhotov
 !!  For cplex=1, the potential is defined as (V_upup,V_dndn,Re[V_updn],Im[V_updn])
 !!  For cplex=2, the definition is (V_upup,V_dndn,V_updn,i.V_updn)
 !!
-!! PARENTS
-!!      dfpt_rhotov
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine dfpt_v1zeeman(nspden,nfft,cplex,idir,v1zeeman)
-
- implicit none
 
 !Arguments ------------------------------------
  integer , intent(in)    :: idir,nfft,cplex,nspden
@@ -440,14 +421,14 @@ subroutine dfpt_v1zeeman(nspden,nfft,cplex,idir,v1zeeman)
 !   write(msg,'(3a,i0)')&
 !&   'The argument option should be 1 or 2,',ch10,&
 !&   'however, option=',option
-!   MSG_BUG(msg)
+!   ABI_BUG(msg)
 ! end if
 !
 ! if (sizein<1) then
 !   write(msg,'(3a,i0)')&
 !&   'The argument sizein should be a positive number,',ch10,&
 !&   'however, sizein=',sizein
-!   MSG_ERROR(msg)
+!   ABI_ERROR(msg)
 ! end if
 
  DBG_EXIT("COLL")

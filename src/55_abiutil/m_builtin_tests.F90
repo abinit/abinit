@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_builtin_tests
 !! NAME
 !!  m_builtin_tests
@@ -7,14 +6,10 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2019 ABINIT group (DCA,XG,GMR)
+!!  Copyright (C) 1998-2024 ABINIT group (DCA,XG,GMR)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -58,7 +53,7 @@ contains
 !!  builtintest=number of the builtintest, from the input file.
 !!  etotal=total energy (sum of 7 contributions) (hartree)
 !!  filstat=name of the status file
-!!  fred(3,natom)=symmetrized gradient of etotal with respect to tn
+!!  gred(3,natom)=symmetrized gradient of etotal with respect to tn
 !!  natom=number of atoms in cell.
 !!  strten(6)=components of the stress tensor (hartree/bohr^3)
 !!  xred(3,natom)=reduced atomic coordinates
@@ -66,16 +61,9 @@ contains
 !! OUTPUT
 !!  (only writing)
 !!
-!! PARENTS
-!!      abinit
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
-subroutine testfi(builtintest,etotal,filstat,fred,natom,strten,xred)
-
- implicit none
+subroutine testfi(builtintest,etotal,filstat,gred,natom,strten,xred)
 
 !Arguments ------------------------------------
 !scalars
@@ -83,7 +71,7 @@ subroutine testfi(builtintest,etotal,filstat,fred,natom,strten,xred)
  real(dp),intent(in) :: etotal
  character(len=fnlen),intent(in) :: filstat
 !arrays
- real(dp),intent(in) :: fred(3,natom),strten(6),xred(3,natom)
+ real(dp),intent(in) :: gred(3,natom),strten(6),xred(3,natom)
 
 !Local variables-------------------------------
  character(len=fnlen) :: testname(7)='         '
@@ -92,10 +80,10 @@ subroutine testfi(builtintest,etotal,filstat,fred,natom,strten,xred)
 !scalars
  integer,parameter :: mtest=7
  integer :: iatom,ii,problem,tok,temp_unit
- real(dp) :: etot_mxdev,etot_ref,fred_mxdev,strten_mxdev,xred_mxdev
+ real(dp) :: etot_mxdev,etot_ref,gred_mxdev,strten_mxdev,xred_mxdev
 !arrays
  integer,parameter :: natom_test(mtest)=(/2,1,2,1,1,1,2/)
- real(dp) :: fred_ref(3,2),strten_ref(6),xred_ref(3,2)
+ real(dp) :: gred_ref(3,2),strten_ref(6),xred_ref(3,2)
 
 ! ***********************************************************************
 
@@ -111,7 +99,7 @@ subroutine testfi(builtintest,etotal,filstat,fred,natom,strten,xred)
 
 !Now, open the status file, and either delete it, or produce a report
  if (open_file(filstat,msg,newunit=temp_unit,form='formatted',status='unknown') /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  if(builtintest==0)then
@@ -134,9 +122,9 @@ subroutine testfi(builtintest,etotal,filstat,fred,natom,strten,xred)
      xred_ref(1:3,2)=(/  0.65048430042634D-01 , 0.0_dp , 0.0_dp /)
 !    xred(*,*) are reduced coordinates
      xred_mxdev=1.0d-6
-     fred_ref(1:3,1:2)= 0.0_dp
-!    fred(*,*) are gradients with respect to reduced coordinates
-     fred_mxdev=5.0d-4
+     gred_ref(1:3,1:2)= 0.0_dp
+!    gred(*,*) are gradients with respect to reduced coordinates
+     gred_mxdev=5.0d-4
      strten_ref(1:6)=(/ 0.149D-04  , 0.560D-04 , 0.560D-04 ,&
 &     0.0_dp , 0.0_dp , 0.0_dp /)
      strten_mxdev=1.0d-5
@@ -149,8 +137,8 @@ subroutine testfi(builtintest,etotal,filstat,fred,natom,strten,xred)
      etot_mxdev=3.0d-7
      xred_ref(1:3,1)=(/ 0.0_dp , 0.0_dp , 0.0_dp /)
      xred_mxdev=1.0d-12
-     fred_ref(1:3,1)=(/ 0.0_dp , 0.0_dp , 0.0_dp /)
-     fred_mxdev=1.0d-12
+     gred_ref(1:3,1)=(/ 0.0_dp , 0.0_dp , 0.0_dp /)
+     gred_mxdev=1.0d-12
 !    This value of strten is accurate to at least 1.0d-8
      strten_ref(1:3)= 5.09324870E-03
      strten_ref(4:6)= 0.0_dp
@@ -163,9 +151,9 @@ subroutine testfi(builtintest,etotal,filstat,fred,natom,strten,xred)
      xred_ref(1:3,1)=(/ -0.125_dp , 0.0_dp , 0.0_dp /)
      xred_ref(1:3,2)=(/  0.125_dp , 0.0_dp , 0.0_dp /)
      xred_mxdev=1.0d-12
-     fred_ref(1:3,1)=(/ -.140263620278D+00 , 0.0_dp , 0.0_dp /)
-     fred_ref(1:3,2)=(/  .140013483725D+00 , 0.0_dp , 0.0_dp /)
-     fred_mxdev=1.0d-3
+     gred_ref(1:3,1)=(/ -.140263620278D+00 , 0.0_dp , 0.0_dp /)
+     gred_ref(1:3,2)=(/  .140013483725D+00 , 0.0_dp , 0.0_dp /)
+     gred_mxdev=1.0d-3
      strten_ref(1:6)=(/  1.3949d-3 ,  1.3643d-3 , 1.3643d-3 ,.0_dp ,  .0_dp  ,  .0_dp    /)
      strten_mxdev=1.0d-5
 
@@ -178,8 +166,8 @@ subroutine testfi(builtintest,etotal,filstat,fred,natom,strten,xred)
      etot_mxdev=3.0d-7
      xred_ref(1:3,1)=(/ 0.5_dp , 0.5_dp , 0.5_dp /)
      xred_mxdev=1.0d-12
-     fred_ref(1:3,1)=(/ 0.0_dp , 0.0_dp , 0.0_dp /)
-     fred_mxdev=1.0d-12
+     gred_ref(1:3,1)=(/ 0.0_dp , 0.0_dp , 0.0_dp /)
+     gred_mxdev=1.0d-12
      strten_ref(1)=-0.22537238382D-01
      strten_ref(2)=-0.22536232141D-01
      strten_ref(3)=-0.22529038043D-01
@@ -197,8 +185,8 @@ subroutine testfi(builtintest,etotal,filstat,fred,natom,strten,xred)
      etot_mxdev=3.0d-7
      xred_ref(1:3,1)=(/ 0.0_dp , 0.0_dp , 0.0_dp /)
      xred_mxdev=1.0d-12
-     fred_ref(1:3,1)=(/ 0.0_dp , -0.000000120877_dp , -0.000000164287_dp /)
-     fred_mxdev=1.0d-7
+     gred_ref(1:3,1)=(/ 0.0_dp , -0.000000120877_dp , -0.000000164287_dp /)
+     gred_mxdev=1.0d-7
 !    This value of strten is accurate to at least 1.0d-8
      strten_ref(1)= 0.13569940015175D-01
      strten_ref(2)= 0.33822108610352D-01
@@ -213,8 +201,8 @@ subroutine testfi(builtintest,etotal,filstat,fred,natom,strten,xred)
      etot_mxdev=5.0d-7
      xred_ref(1:3,1)=(/ 0.0_dp , 0.0_dp , 0.0_dp /)
      xred_mxdev=1.0d-12
-     fred_ref(1:3,1)=(/ 0.0_dp , 0.0_dp , 0.0_dp /)
-     fred_mxdev=1.0d-12
+     gred_ref(1:3,1)=(/ 0.0_dp , 0.0_dp , 0.0_dp /)
+     gred_mxdev=1.0d-12
      strten_ref(1:3)= 0.13246699375127D-04
      strten_ref(4:6)= 0.0_dp
      strten_mxdev=1.0d-8
@@ -229,9 +217,9 @@ subroutine testfi(builtintest,etotal,filstat,fred,natom,strten,xred)
      xred_ref(1:3,1)=(/ 0.0_dp , 0.0_dp , 0.0_dp /)
      xred_ref(1:3,2)=(/ 0.25_dp , 0.25_dp , 0.25_dp /)
      xred_mxdev=1.0d-12
-     fred_ref(1:3,1)=(/ 0.0_dp , 0.0_dp , 0.0_dp /)
-     fred_ref(1:3,2)=(/ 0.0_dp , 0.0_dp , 0.0_dp /)
-     fred_mxdev=1.0d-12
+     gred_ref(1:3,1)=(/ 0.0_dp , 0.0_dp , 0.0_dp /)
+     gred_ref(1:3,2)=(/ 0.0_dp , 0.0_dp , 0.0_dp /)
+     gred_mxdev=1.0d-12
 !    This value of strten is accurate to at least 1.0d-8
      strten_ref(1:3)=0.31413922197317D-03
      strten_ref(4:6)= 0.0_dp
@@ -271,13 +259,13 @@ subroutine testfi(builtintest,etotal,filstat,fred,natom,strten,xred)
    tok=1
    do iatom=1,natom
      do ii=1,3
-       if(abs(fred_ref(ii,iatom)-fred(ii,iatom))&
-&       >fred_mxdev)then
+       if(abs(gred_ref(ii,iatom)-gred(ii,iatom))&
+&       >gred_mxdev)then
          tok=0
-         write(temp_unit, '(a,i1,a,i1,a)' )' Error for force fred(',ii,',',iatom,')'
-         write(temp_unit,format01000)'        expected ',fred_ref(ii,iatom),'  with maximum   deviation',fred_mxdev
-         write(temp_unit,format01000)'        computed ',fred(ii,iatom),'  with effective deviation',&
-&         abs( fred(ii,iatom)-fred_ref(ii,iatom) )
+         write(temp_unit, '(a,i1,a,i1,a)' )' Error for gradients gred(',ii,',',iatom,')'
+         write(temp_unit,format01000)'        expected ',gred_ref(ii,iatom),'  with maximum   deviation',gred_mxdev
+         write(temp_unit,format01000)'        computed ',gred(ii,iatom),'  with effective deviation',&
+&         abs( gred(ii,iatom)-gred_ref(ii,iatom) )
        end if
      end do
    end do

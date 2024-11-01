@@ -1,3 +1,11 @@
+Most of the source code and documents available in the ABINIT package
+are available under the GNU GENERAL PUBLIC LICENSE, Version 3, reproduced below.
+A small number of routines (e.g. those related to the NOMAD CoE project - Low-scaling GW and RPA -)
+are made available under a more liberal licence, APACHE v2.0, compatible with GPL.
+For the text of the APACHE v2.0 licence, see https://www.apache.org/licenses/LICENSE-2.0 .
+When interfacing routines from ABINIT package and non-GPL code, the developer should check
+compatibility of licencing schemes.
+
 
 		    GNU GENERAL PUBLIC LICENSE
 		       Version 3, 29 June 2007

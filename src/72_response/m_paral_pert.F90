@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_paral_pert
 !! NAME
 !!  m_paral_pert
@@ -8,15 +7,11 @@
 !!  over perturbations
 !!
 !! COPYRIGHT
-!! Copyright (C) 2013-2019 ABINIT group (MT,FJ,MD)
+!! Copyright (C) 2013-2024 ABINIT group (MT,FJ,MD)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -29,11 +24,12 @@
 MODULE m_paral_pert
 
  use defs_basis
- use defs_abitypes
  use m_abicore
  use m_errors
  use m_xmpi
+ use m_dtset
 
+ use defs_abitypes, only : MPI_type
  use m_time,      only : timab
  use m_copy,      only : deep_copy
  use m_paw_an,    only : paw_an_type, paw_an_free, paw_an_redistribute
@@ -76,17 +72,9 @@ CONTAINS
 !! SIDE EFFECTS
 !!  mpi_enreg=information about MPI parallelization
 !!
-!! PARENTS
-!!      dfpt_looppert
-!!
-!! CHILDREN
-!!      get_atm_proc,xmpi_bcast,xmpi_comm_translate_ranks
-!!
 !! SOURCE
 
 subroutine set_pert_comm(mpi_enreg,nppert)
-
- implicit none
 
 !Arguments ---------------------------------------------
 !scalars
@@ -123,17 +111,9 @@ end subroutine set_pert_comm
 !! SIDE EFFECTS
 !!  mpi_enreg=information about MPI parallelization
 !!
-!! PARENTS
-!!      dfpt_looppert
-!!
-!! CHILDREN
-!!      get_atm_proc,xmpi_bcast,xmpi_comm_translate_ranks
-!!
 !! SOURCE
 
 subroutine unset_pert_comm(mpi_enreg)
-
- implicit none
 
 !Arguments ---------------------------------------------
 !scalars
@@ -195,19 +175,11 @@ end  subroutine unset_pert_comm
 !!  pawfgrtab(my_natom)<type(pawfgrtab_type)>=PAW atomic data given on fine grid
 !!  pawrhoij(my_natom)<type(pawrhoij_type)>=PAW rhoij occupancies
 !!
-!! PARENTS
-!!      dfpt_looppert
-!!
-!! CHILDREN
-!!      get_atm_proc,xmpi_bcast,xmpi_comm_translate_ranks
-!!
 !! SOURCE
 
 subroutine set_pert_paw(dtset,mpi_enreg,my_natom,old_atmtab,old_comm_atom,&
 &                       paw_an,paw_ij,pawfgrtab,pawrhoij,&
 &                       paw_an_out,paw_ij_out,pawfgrtab_out,pawrhoij_out)
-
- implicit none
 
 !Arguments ---------------------------------------------
 !scalars
@@ -393,10 +365,10 @@ subroutine set_pert_paw(dtset,mpi_enreg,my_natom,old_atmtab,old_comm_atom,&
  call timab(598,2,tsec)
 
  if (algo_option==2) then
-   ABI_DEALLOCATE(SendAtomProc)
-   ABI_DEALLOCATE(SendAtomList)
-   ABI_DEALLOCATE(RecvAtomProc)
-   ABI_DEALLOCATE(RecvAtomList)
+   ABI_FREE(SendAtomProc)
+   ABI_FREE(SendAtomList)
+   ABI_FREE(RecvAtomProc)
+   ABI_FREE(RecvAtomList)
  end if
 
  call timab(593,2,tsec)
@@ -446,19 +418,11 @@ end  subroutine set_pert_paw
 !!  pawfgrtab(my_natom)<type(pawfgrtab_type)>=PAW atomic data given on fine grid
 !!  pawrhoij(my_natom)<type(pawrhoij_type)>=PAW rhoij occupancies
 !!
-!! PARENTS
-!!      dfpt_looppert
-!!
-!! CHILDREN
-!!      get_atm_proc,xmpi_bcast,xmpi_comm_translate_ranks
-!!
 !! SOURCE
 
 subroutine unset_pert_paw(dtset,mpi_enreg,my_natom,old_atmtab,old_comm_atom,&
 &                       paw_an,paw_ij,pawfgrtab,pawrhoij,&
 &                       paw_an_out,paw_ij_out,pawfgrtab_out,pawrhoij_out)
-
- implicit none
 
 !Arguments ---------------------------------------------
 !scalars
@@ -517,7 +481,7 @@ integer :: my_natom_old
  call timab(595,1,tsec)
  if (present(pawrhoij_out)) then
    call pawrhoij_free(pawrhoij_out)
-   ABI_DATATYPE_DEALLOCATE(pawrhoij_out)
+   ABI_FREE(pawrhoij_out)
  else
    if (algo_option==1) then
      call pawrhoij_redistribute(pawrhoij,mpi_enreg%comm_atom,old_comm_atom,&
@@ -537,7 +501,7 @@ integer :: my_natom_old
  call timab(596,1,tsec)
  if (present(paw_ij_out)) then
    call paw_ij_free(paw_ij_out)
-   ABI_DATATYPE_DEALLOCATE(paw_ij_out)
+   ABI_FREE(paw_ij_out)
  else
    if (algo_option==1) then
      call paw_ij_redistribute(paw_ij,mpi_enreg%comm_atom,old_comm_atom,&
@@ -557,7 +521,7 @@ integer :: my_natom_old
  call timab(597,1,tsec)
  if (present(paw_an_out)) then
    call paw_an_free(paw_an_out)
-   ABI_DATATYPE_DEALLOCATE(paw_an_out)
+   ABI_FREE(paw_an_out)
  else
    if (algo_option==1) then
      call paw_an_redistribute(paw_an,mpi_enreg%comm_atom,old_comm_atom,&
@@ -577,7 +541,7 @@ integer :: my_natom_old
  call timab(598,1,tsec)
  if (present(pawfgrtab_out)) then
    call pawfgrtab_free(pawfgrtab_out)
-   ABI_DATATYPE_DEALLOCATE(pawfgrtab_out)
+   ABI_FREE(pawfgrtab_out)
  else
    if (algo_option==1) then
      call pawfgrtab_redistribute(pawfgrtab,mpi_enreg%comm_atom,old_comm_atom,&
@@ -595,14 +559,14 @@ integer :: my_natom_old
 
 !Release some memory
  if (algo_option==2.and.exchange) then
-   ABI_DEALLOCATE(SendAtomProc)
-   ABI_DEALLOCATE(SendAtomList)
-   ABI_DEALLOCATE(RecvAtomProc)
-   ABI_DEALLOCATE(RecvAtomList)
+   ABI_FREE(SendAtomProc)
+   ABI_FREE(SendAtomList)
+   ABI_FREE(RecvAtomProc)
+   ABI_FREE(RecvAtomList)
  end if
 
 !Restore communicator for atoms
- ABI_DEALLOCATE(old_atmtab)
+ ABI_FREE(old_atmtab)
  old_comm_atom=mpi_enreg%comm_atom
  call deep_copy(mpi_enreg%my_atmtab,old_atmtab)
  call initmpi_atom(dtset,mpi_enreg)
@@ -639,19 +603,11 @@ end  subroutine unset_pert_paw
 !! SendAtomList(:)= indexes of atoms to be sent by me
 !!   SendAtomList(isend) are the atoms sent to SendAtomProc(isend)
 !!
-!! PARENTS
-!!      m_paral_pert
-!!
-!! CHILDREN
-!!      get_atm_proc,xmpi_bcast,xmpi_comm_translate_ranks
-!!
 !! SOURCE
 
 
  subroutine get_exchatom_list(mpicomm_in,mpicomm_out,my_atmtab_in,my_atmtab_out,natom, &
 &                             SendAtomProc,SendAtomList,RecvAtomProc,RecvAtomList)
-
- implicit none
 
 !Arguments ---------------------------------------------
 !scalars
@@ -683,13 +639,13 @@ end  subroutine unset_pert_paw
  call xmpi_comm_translate_ranks(mpicomm_out,1,rank0(1),mpicomm_in,ranks0_out_in(1))
  me_out0_in=ranks0_out_in(1)
 
- ABI_ALLOCATE(ranks,(1:nproc_in))
- ABI_ALLOCATE(sizecomm,(1:nproc_in))
- ABI_ALLOCATE(master_commout,(1:nproc_in))
- ABI_ALLOCATE(group,(0:nproc_in-1))
+ ABI_MALLOC(ranks,(1:nproc_in))
+ ABI_MALLOC(sizecomm,(1:nproc_in))
+ ABI_MALLOC(master_commout,(1:nproc_in))
+ ABI_MALLOC(group,(0:nproc_in-1))
  buf_int(1)=me_out; buf_int(2)=me_out0_in; buf_int(3)=nproc_out;
 
- ABI_ALLOCATE(buf_int_all,(3*nproc_in))
+ ABI_MALLOC(buf_int_all,(3*nproc_in))
  call xmpi_allgather(buf_int,3,buf_int_all,mpicomm_in,ierr)
  nbgroup=0;
  nproc_max=0
@@ -707,10 +663,10 @@ end  subroutine unset_pert_paw
    end if
 
  enddo
- ABI_DEALLOCATE(buf_int_all)
+ ABI_FREE(buf_int_all)
 
 
- ABI_ALLOCATE(ranks1,(nbgroup,0:nproc_max-1))
+ ABI_MALLOC(ranks1,(nbgroup,0:nproc_max-1))
  ranks1(:,:)=-1
  do ii=1,nproc_in
    me_in_out=ranks(ii)
@@ -721,9 +677,9 @@ end  subroutine unset_pert_paw
 !Send
  nbsend=0
  if (my_natom_in>0) then
-   ABI_ALLOCATE(SendAtomList,(my_natom_in*nbgroup))
-   ABI_ALLOCATE(SendAtomProc,(my_natom_in*nbgroup))
-   ABI_ALLOCATE(procs,(my_natom_in))
+   ABI_MALLOC(SendAtomList,(my_natom_in*nbgroup))
+   ABI_MALLOC(SendAtomProc,(my_natom_in*nbgroup))
+   ABI_MALLOC(procs,(my_natom_in))
    do igroup=1,nbgroup
      call get_atm_proc(my_atmtab_in,natom,sizecomm(igroup),procs)
      do i1=1,my_natom_in
@@ -732,29 +688,29 @@ end  subroutine unset_pert_paw
        SendAtomList(nbsend)=my_atmtab_in(i1)
      end do
    end do
-   ABI_DEALLOCATE(procs)
+   ABI_FREE(procs)
  else
-  ABI_ALLOCATE(SendAtomList,(0))
-  ABI_ALLOCATE(SendAtomProc,(0))
+  ABI_MALLOC(SendAtomList,(0))
+  ABI_MALLOC(SendAtomProc,(0))
 end if
 
 !recv
  if (my_natom_out>0) then !no return before because of xmpi_allgather and of the sending operation
-   ABI_ALLOCATE(RecvAtomProc,(my_natom_out))
-   ABI_ALLOCATE(RecvAtomList,(my_natom_out))
+   ABI_MALLOC(RecvAtomProc,(my_natom_out))
+   ABI_MALLOC(RecvAtomList,(my_natom_out))
    RecvAtomList(:)=my_atmtab_out(:)
 !the atoms are put in increasing order,see get_my_atmtab so the procs are sorted by growing process
    call get_atm_proc(RecvAtomList,natom,nproc_in,RecvAtomProc)
  else
-   ABI_ALLOCATE(RecvAtomList,(0))
-   ABI_ALLOCATE(RecvAtomProc,(0))
+   ABI_MALLOC(RecvAtomList,(0))
+   ABI_MALLOC(RecvAtomProc,(0))
  end if
 
- ABI_DEALLOCATE(master_commout)
- ABI_DEALLOCATE(ranks1)
- ABI_DEALLOCATE(group)
- ABI_DEALLOCATE(ranks)
- ABI_DEALLOCATE(sizecomm)
+ ABI_FREE(master_commout)
+ ABI_FREE(ranks1)
+ ABI_FREE(group)
+ ABI_FREE(ranks)
+ ABI_FREE(sizecomm)
 
 end subroutine get_exchatom_list
 !!***
@@ -791,18 +747,10 @@ end subroutine get_exchatom_list
 !! because all structures of atoms we have to exchange have the same value in each mpicomm_in.
 !! The mpicomm_in we choose is the one in which the processor 0 of mpicomm_out belong
 !!
-!! PARENTS
-!!      m_paral_pert
-!!
-!! CHILDREN
-!!      get_atm_proc,xmpi_bcast,xmpi_comm_translate_ranks
-!!
 !! SOURCE
 
 subroutine get_exchatom_list1(mpicomm_in,mpicomm_out,my_atmtab_in,my_atmtab_out,natom, &
 &                             SendAtomProc,SendAtomList,RecvAtomProc,RecvAtomList)
-
- implicit none
 
 !Arguments ---------------------------------------------
 !scalars
@@ -828,7 +776,7 @@ subroutine get_exchatom_list1(mpicomm_in,mpicomm_out,my_atmtab_in,my_atmtab_out,
  nproc_in=xmpi_comm_size(mpicomm_in)
 
  call xmpi_bcast(nproc_in,0,mpicomm_out,ier)
- ABI_ALLOCATE(ranks_in_out,(0:nproc_in-1))
+ ABI_MALLOC(ranks_in_out,(0:nproc_in-1))
 
 !All atoms are distributed among each mpicomm_in
 !redistribute the atoms of one mpicomm_in among mpicomm_out
@@ -836,10 +784,10 @@ subroutine get_exchatom_list1(mpicomm_in,mpicomm_out,my_atmtab_in,my_atmtab_out,
 !Look for the communicator mpicomm_in from which me_out=0 belong
 !Get ranks of all processors of mpicomm_in expressed in mpicomm_out
  if (me_out==0) then
-   ABI_ALLOCATE(ranks_in,(0:nproc_in-1))
+   ABI_MALLOC(ranks_in,(0:nproc_in-1))
    ranks_in=(/ (i1,i1=0,nproc_in-1 )/)
    call xmpi_comm_translate_ranks(mpicomm_in,nproc_in,ranks_in,mpicomm_out,ranks_in_out)
-   ABI_DEALLOCATE(ranks_in)
+   ABI_FREE(ranks_in)
  end if
  call xmpi_bcast(ranks_in_out,0,mpicomm_out,ier)
 
@@ -855,32 +803,32 @@ subroutine get_exchatom_list1(mpicomm_in,mpicomm_out,my_atmtab_in,my_atmtab_out,
 
 !Send
  if (my_natom_in>0.and.sender) then
-   ABI_ALLOCATE(SendAtomList,(my_natom_in))
-   ABI_ALLOCATE(SendAtomProc,(my_natom_in))
+   ABI_MALLOC(SendAtomList,(my_natom_in))
+   ABI_MALLOC(SendAtomProc,(my_natom_in))
    SendAtomList(:)=my_atmtab_in(:)
 !  The atoms are put in increasing order,see get_my_atmtab
 !  so the procs are sorted by growing process
    call get_atm_proc(SendAtomList,natom,nproc_out,SendAtomProc)
  else
-   ABI_ALLOCATE(SendAtomList,(0))
-   ABI_ALLOCATE(SendAtomProc,(0))
+   ABI_MALLOC(SendAtomList,(0))
+   ABI_MALLOC(SendAtomProc,(0))
  end if
 
 !Recv
  if (my_natom_out>0) then
-   ABI_ALLOCATE(RecvAtomProc,(my_natom_out))
-   ABI_ALLOCATE(RecvAtomList,(my_natom_out))
+   ABI_MALLOC(RecvAtomProc,(my_natom_out))
+   ABI_MALLOC(RecvAtomList,(my_natom_out))
    RecvAtomList(:)=my_atmtab_out(:)
 !  The atoms are put in increasing order,see get_my_atmtab
 !  so the procs are sorted by growing process
    call get_atm_proc(RecvAtomList,natom,nproc_in,RecvAtomProc)
    RecvAtomProc(:)=ranks_in_out(RecvAtomProc(:))
  else
-   ABI_ALLOCATE(RecvAtomList,(0))
-   ABI_ALLOCATE(RecvAtomProc,(0))
+   ABI_MALLOC(RecvAtomList,(0))
+   ABI_MALLOC(RecvAtomProc,(0))
  end if
 
- ABI_DEALLOCATE(ranks_in_out)
+ ABI_FREE(ranks_in_out)
 
 end subroutine get_exchatom_list1
 !!***

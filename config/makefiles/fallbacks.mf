@@ -1,0 +1,2 @@
+all all_targets check clean default dist distcheck distclean distcleancheck install installcheck multi uninstall:
+	@echo "FIXME: Update the configuration of the test farm"

@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_spacepar
 !! NAME
 !! m_spacepar
@@ -8,14 +7,10 @@
 !!  Unlike the procedures in m_cgtools, the routines declared in this module can use mpi_type.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2019 ABINIT group (XG, BA, MT, DRH, DCA, GMR, MJV)
+!!  Copyright (C) 2008-2024 ABINIT group (XG, BA, MT, DRH, DCA, GMR, MJV, JWZ)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -35,8 +30,9 @@ module m_spacepar
 
  use m_time,            only : timab
  use defs_abitypes,     only : MPI_type
- use m_symtk,           only : mati3inv, chkgrp, symdet, symatm, matr3inv
- use m_geometry,        only : metric, symredcart
+ use m_symtk,           only : mati3inv, sg_multable, symdet, symatm, matr3inv
+ use m_geometry,        only : metric, normv, symredcart,wedge_basis,wedge_product
+ use m_gtermcutoff,     only : termcutoff
  use m_mpinfo,          only : ptabs_fourdp
  use m_fft,             only : zerosym, fourdp
 
@@ -46,6 +42,9 @@ module m_spacepar
 !!***
 
 public :: hartre            ! Given rho(G), compute Hartree potential (=FFT of rho(G)/pi/(G+q)**2)
+public :: mkunitpawspherepot  ! compute effective potential due to PAW sphere of strength 1, useful for testing
+                              ! paw projector completeness
+public :: make_vectornd     ! compute vector potential due to nuclear magnetic dipoles, in real space
 public :: meanvalue_g       ! Compute <wf|op|wf> where op is real and diagonal in G-space.
 public :: laplacian         ! Compute the laplacian of a function defined in real space
 public :: redgr             ! Compute reduced gradients of a real function on the usual unshifted FFT grid.
@@ -53,6 +52,7 @@ public :: hartrestr         ! FFT of (rho(G)/pi)*[d(1/G**2)/d(strain) - delta(di
 public :: symrhg            ! Symmetrize rhor(r)
 public :: irrzg             ! Find the irreducible zone in reciprocal space (used by symrhg)
 public :: setsym            ! Set up irreducible zone in  G space by direct calculation.
+public :: hartredq          ! Compute the q-gradient of the Hartree potential (=FFT of -rho(G)*G_qdir/pi**2/|G|**4 )
 
 ! MG FIXME This routine is deprecated. Now the symmetrization of the **potentials** is done in the m_dvdb
 public :: rotate_rho
@@ -60,6 +60,455 @@ public :: rotate_rho
 
 contains
 !!***
+
+!!****f* m_spacepar/make_vectornd
+!! NAME
+!! make_vectornd
+!!
+!! FUNCTION
+!! For nuclear dipole moments m, compute vector potential A(r) = (m x (r-R))/|r-R|^3
+!! in r space. This is done by computing A(G) followed by FFT.
+!!
+!! NOTES
+!! This code is copied and modified from m_spacepar/hartre where a very similar loop
+!! over G is done followed by FFT to real space
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!  vectornd(3,nfft)=Vector potential in real space, along Cartesian directions
+!!
+!! SOURCE
+
+subroutine make_vectornd(cplex,gsqcut,izero,mpi_enreg,natom,nfft,ngfft,nspden,nucdipmom,&
+     & rprimd,vectornd,xred)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: cplex,izero,natom,nfft,nspden
+ real(dp),intent(in) :: gsqcut
+ type(MPI_type),intent(in) :: mpi_enreg
+!arrays
+ integer,intent(in) :: ngfft(18)
+ real(dp),intent(in) :: nucdipmom(3,natom),rprimd(3,3),xred(3,natom)
+ real(dp),intent(out) :: vectornd(nfft,nspden,3)
+
+!Local variables-------------------------------
+ !scalars
+ integer,parameter :: im=2,re=1
+ integer :: i1,i2,i2_local,i23,i3,iatom,id1,id2,id3,ig,ig1,ig2,ig3,ig1max,ig2max,ig3max
+ integer :: ig1min,ig2min,ig3min
+ integer :: ii,ii1,ing,me_fft,n1,n2,n3,nd_atom,nd_atom_tot,nproc_fft
+ real(dp),parameter :: tolfix=1.000000001e0_dp
+ real(dp) :: cutoff,gqgm12,gqg2p3,gqgm23,gqgm13,gs2,gs3,gs,phase,ucvol
+ complex(dpc) :: prefac,cgr
+ !arrays
+ integer :: id(3)
+ integer,allocatable :: nd_list(:)
+ integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:),ffti2_local(:)
+ integer, ABI_CONTIGUOUS pointer :: fftn3_distrib(:),ffti3_local(:)
+ real(dp) :: gmet(3,3),gprimd(3,3),gqred(3),mcgc(3),rmet(3,3)
+ real(dp) :: rgbasis(3,3,3)
+ real(dp),allocatable :: gq(:,:),nd_m(:,:),ndvecr(:),work1(:,:),work2(:,:),work3(:,:)
+
+
+! *************************************************************************
+
+ call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
+
+ ! make list of atoms with nonzero nuclear dipole moments
+ ! in typical applications only 0 or 1 atoms have nonzero dipoles. This
+ ! code shouldn't even be called if all dipoles are zero.
+ nd_atom_tot = 0
+ do iatom = 1, natom
+    if (any(abs(nucdipmom(:,iatom))>tol8)) then
+       nd_atom_tot = nd_atom_tot + 1
+    end if
+ end do
+
+ ! construct the basis vectors of the generalized cross product
+ ! real space a, b, c (contained in rprimd)
+ ! reciprocal space a*, b*, c* (contained in gprimd)
+ ! for m x G will need a x a*, a x b* etc (9 a^b type basis vectors)
+ call wedge_basis(gprimd,rprimd,rgbasis)
+
+ ! note that nucdipmom is input as vectors in atomic units referenced
+ ! to cartesian coordinates
+ ABI_MALLOC(nd_list,(nd_atom_tot))
+ ABI_MALLOC(nd_m,(3,nd_atom_tot))
+ nd_atom_tot = 0
+ do iatom = 1, natom
+    if (any(abs(nucdipmom(:,iatom))>tol8)) then
+       nd_atom_tot = nd_atom_tot + 1
+       nd_list(nd_atom_tot) = iatom
+       ! the following expresses the dipole moment components in units of rprimd translations
+       nd_m(:,nd_atom_tot) = MATMUL(TRANSPOSE(gprimd),nucdipmom(:,iatom))
+    end if
+ end do
+
+ n1=ngfft(1); n2=ngfft(2); n3=ngfft(3)
+ nproc_fft = mpi_enreg%nproc_fft; me_fft = mpi_enreg%me_fft
+
+ prefac = -four_pi*j_dpc/(ucvol*two_pi)
+
+ ! Get the distrib associated with this fft_grid
+ call ptabs_fourdp(mpi_enreg,n2,n3,fftn2_distrib,ffti2_local,fftn3_distrib,ffti3_local)
+
+ ! Initialize a few quantities
+ cutoff=gsqcut*tolfix
+
+ ! In order to speed the routine, precompute the components of g+q
+ ! Also check if the booked space was large enough...
+ ABI_MALLOC(gq,(3,max(n1,n2,n3)))
+ do ii=1,3
+   id(ii)=ngfft(ii)/2+2
+   do ing=1,ngfft(ii)
+     ig=ing-(ing/id(ii))*ngfft(ii)-1
+     gq(ii,ing)=ig
+   end do
+ end do
+ ig1max=-1;ig2max=-1;ig3max=-1
+ ig1min=n1;ig2min=n2;ig3min=n3
+
+ ABI_MALLOC(work1,(2,nfft))
+ ABI_MALLOC(work2,(2,nfft))
+ ABI_MALLOC(work3,(2,nfft))
+ work1=zero; work2=zero; work3=zero
+ id1=n1/2+2;id2=n2/2+2;id3=n3/2+2
+
+ ! Triple loop on each dimension
+ do i3=1,n3
+   ig3=i3-(i3/id3)*n3-1
+   ! Precompute some products that do not depend on i2 and i1
+   gs3=gq(3,i3)*gq(3,i3)*gmet(3,3)
+   gqgm23=gq(3,i3)*gmet(2,3)*2
+   gqgm13=gq(3,i3)*gmet(1,3)*2
+
+   do i2=1,n2
+     ig2=i2-(i2/id2)*n2-1
+     if (fftn2_distrib(i2) == me_fft) then
+       gs2=gs3+ gq(2,i2)*(gq(2,i2)*gmet(2,2)+gqgm23)
+       gqgm12=gq(2,i2)*gmet(1,2)*2
+       gqg2p3=gqgm13+gqgm12
+
+       i2_local = ffti2_local(i2)
+       i23=n1*(i2_local-1 +(n2/nproc_fft)*(i3-1))
+       ! Do the test that eliminates the Gamma point outside of the inner loop
+       ii1=1
+       !if(i23==0 .and. ig2==0 .and. ig3==0)then
+       !  ii1=2
+       !  work1(re,1+i23)=zero
+       !  work1(im,1+i23)=zero
+       !end if
+
+       ! Final inner loop on the first dimension (note the lower limit)
+       do i1=ii1,n1
+          gs=gs2+ gq(1,i1)*(gq(1,i1)*gmet(1,1)+gqg2p3)
+          ig1 = i1 - (i1/id1)*n1 -1
+          ii=i1+i23
+
+          gqred(1) = gq(1,i1); gqred(2) = gq(2,i2); gqred(3) = gq(3,i3)
+
+          if( (gs .LE. cutoff) .AND. (gs .gt. tol8) )then
+
+             do iatom = 1, nd_atom_tot
+                nd_atom = nd_list(iatom)
+                phase = -two_pi*DOT_PRODUCT(xred(:,nd_atom),gqred(:))
+                cgr = cmplx(cos(phase),sin(phase))
+
+                ! cross product m x G
+                call wedge_product(mcgc,nd_m(:,iatom),gqred,rgbasis)
+
+                ! express mcgc relative to rprimd translations. This is done because
+                ! we wish ultimately to apply A.p to |cwavef>; in getghc_nucdip, the
+                ! p|cwavef> is done in reduced coordinates so do that here too, because
+                ! r.G has no need of the metric if both terms are in reduced coords
+                mcgc = MATMUL(TRANSPOSE(gprimd),mcgc)
+
+                work1(re,ii) = work1(re,ii) + real(prefac*cgr*mcgc(1)/gs)
+                work2(re,ii) = work2(re,ii) + real(prefac*cgr*mcgc(2)/gs)
+                work3(re,ii) = work3(re,ii) + real(prefac*cgr*mcgc(3)/gs)
+
+                work1(im,ii) = work1(im,ii) + aimag(prefac*cgr*mcgc(1)/gs)
+                work2(im,ii) = work2(im,ii) + aimag(prefac*cgr*mcgc(2)/gs)
+                work3(im,ii) = work3(im,ii) + aimag(prefac*cgr*mcgc(3)/gs)
+
+             end do
+          else
+             ! gs>cutoff
+             work1(re,ii)=zero
+             work1(im,ii)=zero
+             work2(re,ii)=zero
+             work2(im,ii)=zero
+             work3(re,ii)=zero
+             work3(im,ii)=zero
+          end if
+
+       end do ! End loop on i1
+     end if
+   end do ! End loop on i2
+ end do ! End loop on i3
+
+ ABI_FREE(gq)
+ ABI_FREE(nd_list)
+ ABI_FREE(nd_m)
+
+ if ( izero .EQ. 1 ) then
+   ! Set contribution of unbalanced components to zero
+
+    call zerosym(work1,2,n1,n2,n3,comm_fft=mpi_enreg%comm_fft,distribfft=mpi_enreg%distribfft)
+    call zerosym(work2,2,n1,n2,n3,comm_fft=mpi_enreg%comm_fft,distribfft=mpi_enreg%distribfft)
+    call zerosym(work3,2,n1,n2,n3,comm_fft=mpi_enreg%comm_fft,distribfft=mpi_enreg%distribfft)
+
+ end if
+
+ !note nspden effect--the nuclear vector potential conains no electron spin flip operator,
+ ! so vectornd(:,2,:) = vectornd(:,1,:) and vectornd(:,3:4,:) = zero
+ vectornd = zero
+ ! Fourier Transform
+ ABI_MALLOC(ndvecr,(cplex*nfft))
+ ndvecr=zero
+ call fourdp(cplex,work1,ndvecr,1,mpi_enreg,nfft,1,ngfft,0)
+ vectornd(:,1,1)=ndvecr(:)
+ if (nspden .GE. 2) vectornd(:,2,1) = ndvecr(:)
+ ABI_FREE(work1)
+
+ ndvecr=zero
+ call fourdp(cplex,work2,ndvecr,1,mpi_enreg,nfft,1,ngfft,0)
+ vectornd(:,1,2) = ndvecr(:)
+ if (nspden .GE. 2) vectornd(:,2,2) = ndvecr(:)
+ ABI_FREE(work2)
+
+ ndvecr=zero
+ call fourdp(cplex,work3,ndvecr,1,mpi_enreg,nfft,1,ngfft,0)
+ vectornd(:,1,3) = ndvecr(:)
+ if (nspden .GE. 2) vectornd(:,2,3) = ndvecr(:)
+ ABI_FREE(work3)
+ ABI_FREE(ndvecr)
+
+end subroutine make_vectornd
+!!***
+
+!!****f* m_spacepar/mkunitpawspherepot
+!! NAME
+!! mkunitpawspherepot
+!!
+!! FUNCTION
+!! Compute "potential" due to a sphere of radius r_paw at one of the ions, of
+!! strength 1. This is done for testing the completeness of the PAW projectors.
+!!
+!! NOTES
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!  vunitpawspherepot(cplex*nfft)=Hartree potential in real space, either REAL or COMPLEX
+!!
+!! SOURCE
+
+subroutine mkunitpawspherepot(cplex,gsqcut,izero,mpi_enreg,natom,nfft,ngfft,&
+     & rpaw,rprimd,vunitpawspherepot,xred,&
+                 the_atom) ! Optional arguments
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: cplex,izero,natom,nfft
+ integer,intent(in),optional :: the_atom
+ real(dp),intent(in) :: gsqcut,rpaw
+ type(MPI_type),intent(in) :: mpi_enreg
+!arrays
+ integer,intent(in) :: ngfft(18)
+ real(dp),intent(in) :: rprimd(3,3),xred(3,natom)
+ real(dp),intent(out) :: vunitpawspherepot(cplex*nfft)
+
+!Local variables-------------------------------
+!scalars
+ integer,parameter :: im=2,re=1
+ integer :: i1,i2,i2_local,i23,i3,iatom,id1,id2,id3,ig,ig1,ig2,ig3,ig1max,ig2max,ig3max
+ integer :: ig1min,ig2min,ig3min
+ integer :: ii,ii1,ing,me_fft,n1,n2,n3,nproc_fft,qeq0,qeq05
+ real(dp),parameter :: tolfix=1.000000001e0_dp
+ real(dp) :: cutoff,gqgm12,gqg2p3,gqgm23,gqgm13,gs2,gs3,gs,ogg0,ogr,ogrpre,phgr,phpaw,ucvol
+ character(len=500) :: message
+!arrays
+ integer :: id(3)
+ integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:),ffti2_local(:)
+ integer, ABI_CONTIGUOUS pointer :: fftn3_distrib(:),ffti3_local(:)
+ real(dp) :: gmet(3,3),gprimd(3,3),gqred(3),qpt_(3),rmet(3,3)
+ real(dp),allocatable :: gq(:,:),work1(:,:)
+
+
+! *************************************************************************
+
+ ! Check that cplex has an allowed value
+ if(cplex/=1 .and. cplex/=2)then
+   write(message, '(a,i0,a,a)' )&
+   'From the calling routine, cplex=',cplex,ch10,&
+   'but the only value allowed are 1 and 2.'
+   ABI_BUG(message)
+ end if
+
+ call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
+
+ ogrpre = four_pi/(ucvol*(two_pi**3))
+ ogg0 = four_pi*(rpaw**3)/(three*ucvol)
+
+ n1=ngfft(1); n2=ngfft(2); n3=ngfft(3)
+ nproc_fft = mpi_enreg%nproc_fft; me_fft = mpi_enreg%me_fft
+
+ ! Get the distrib associated with this fft_grid
+ call ptabs_fourdp(mpi_enreg,n2,n3,fftn2_distrib,ffti2_local,fftn3_distrib,ffti3_local)
+
+ ! Initialize a few quantities
+ cutoff=gsqcut*tolfix
+ !carrying code over from hartre with minimal changes, in present case qpt always zero
+ qpt_=zero
+ qeq0=0
+ if(qpt_(1)**2+qpt_(2)**2+qpt_(3)**2<1.d-15) qeq0=1
+ qeq05=0
+ if (qeq0==0) then
+   if (abs(abs(qpt_(1))-half)<tol12.or.abs(abs(qpt_(2))-half)<tol12.or.abs(abs(qpt_(3))-half)<tol12) qeq05=1
+ end if
+
+ if (present(the_atom)) then
+   iatom = the_atom
+ else
+   iatom = 1
+ end if
+
+ ! If cplex=1 then qpt_ should be 0 0 0
+ if (cplex==1.and. qeq0/=1) then
+   write(message,'(a,3e12.4,a,a)')&
+   'cplex=1 but qpt=',qpt_,ch10,&
+   'qpt should be 0 0 0.'
+   ABI_BUG(message)
+ end if
+
+ ! If FFT parallelism then qpt should not be 1/2
+ if (nproc_fft>1.and.qeq05==1) then
+   write(message, '(a,3e12.4,a,a)' )&
+   'FFT parallelism selected but qpt',qpt_,ch10,&
+   'qpt(i) should not be 1/2...'
+   ABI_ERROR(message)
+ end if
+
+ ! In order to speed the routine, precompute the components of g+q
+ ! Also check if the booked space was large enough...
+ ABI_MALLOC(gq,(3,max(n1,n2,n3)))
+ do ii=1,3
+   id(ii)=ngfft(ii)/2+2
+   do ing=1,ngfft(ii)
+     ig=ing-(ing/id(ii))*ngfft(ii)-1
+     gq(ii,ing)=ig+qpt_(ii)
+   end do
+ end do
+ ig1max=-1;ig2max=-1;ig3max=-1
+ ig1min=n1;ig2min=n2;ig3min=n3
+
+ ABI_MALLOC(work1,(2,nfft))
+ work1=zero
+ id1=n1/2+2;id2=n2/2+2;id3=n3/2+2
+
+ ! Triple loop on each dimension
+ do i3=1,n3
+   ig3=i3-(i3/id3)*n3-1
+   ! Precompute some products that do not depend on i2 and i1
+   gs3=gq(3,i3)*gq(3,i3)*gmet(3,3)
+   gqgm23=gq(3,i3)*gmet(2,3)*2
+   gqgm13=gq(3,i3)*gmet(1,3)*2
+
+   do i2=1,n2
+     ig2=i2-(i2/id2)*n2-1
+     if (fftn2_distrib(i2) == me_fft) then
+       gs2=gs3+ gq(2,i2)*(gq(2,i2)*gmet(2,2)+gqgm23)
+       gqgm12=gq(2,i2)*gmet(1,2)*2
+       gqg2p3=gqgm13+gqgm12
+
+       i2_local = ffti2_local(i2)
+       i23=n1*(i2_local-1 +(n2/nproc_fft)*(i3-1))
+       ! Do the test that eliminates the Gamma point outside of the inner loop
+       ii1=1
+       if(i23==0 .and. qeq0==1  .and. ig2==0 .and. ig3==0)then
+         ii1=2
+         work1(re,1+i23)=ogg0
+         work1(im,1+i23)=zero
+       end if
+
+       ! Final inner loop on the first dimension (note the lower limit)
+       do i1=ii1,n1
+         gs=gs2+ gq(1,i1)*(gq(1,i1)*gmet(1,1)+gqg2p3)
+         ii=i1+i23
+
+         gqred(1) = gq(1,i1); gqred(2) = gq(2,i2); gqred(3) = gq(3,i3)
+
+         if(gs<=cutoff)then
+
+
+           ! Identify min/max indexes (to cancel unbalanced contributions later)
+           ! Count (q+g)-vectors with similar norm
+           if ((qeq05==1).and.(izero==1)) then
+             ig1=i1-(i1/id1)*n1-1
+             ig1max=max(ig1max,ig1); ig1min=min(ig1min,ig1)
+             ig2max=max(ig2max,ig2); ig2min=min(ig2min,ig2)
+             ig3max=max(ig3max,ig3); ig3min=min(ig3min,ig3)
+           end if
+
+           phpaw=two_pi*rpaw*gs
+           ogr=ogrpre*(sin(phpaw)-phpaw*cos(phpaw))/(gs**3)
+
+           phgr = -two_pi*DOT_PRODUCT(xred(:,iatom),gqred(:))
+
+           work1(re,ii)=cos(phgr)*ogr
+           work1(im,ii)=sin(phgr)*ogr
+         else
+           ! gs>cutoff
+           work1(re,ii)=zero
+           work1(im,ii)=zero
+         end if
+
+       end do ! End loop on i1
+     end if
+   end do ! End loop on i2
+ end do ! End loop on i3
+
+ ABI_FREE(gq)
+
+ if (izero==1) then
+   ! Set contribution of unbalanced components to zero
+
+   if (qeq0==1) then !q=0
+     call zerosym(work1,2,n1,n2,n3,comm_fft=mpi_enreg%comm_fft,distribfft=mpi_enreg%distribfft)
+
+   else if (qeq05==1) then
+     !q=1/2; this doesn't work in parallel
+     ig1=-1;if (mod(n1,2)==0) ig1=1+n1/2
+     ig2=-1;if (mod(n2,2)==0) ig2=1+n2/2
+     ig3=-1;if (mod(n3,2)==0) ig3=1+n3/2
+     if (abs(abs(qpt_(1))-half)<tol12) then
+       if (abs(ig1min)<abs(ig1max)) ig1=abs(ig1max)
+       if (abs(ig1min)>abs(ig1max)) ig1=n1-abs(ig1min)
+     end if
+     if (abs(abs(qpt_(2))-half)<tol12) then
+       if (abs(ig2min)<abs(ig2max)) ig2=abs(ig2max)
+       if (abs(ig2min)>abs(ig2max)) ig2=n2-abs(ig2min)
+     end if
+     if (abs(abs(qpt_(3))-half)<tol12) then
+       if (abs(ig3min)<abs(ig3max)) ig3=abs(ig3max)
+       if (abs(ig3min)>abs(ig3max)) ig3=n3-abs(ig3min)
+     end if
+     call zerosym(work1,2,n1,n2,n3,ig1=ig1,ig2=ig2,ig3=ig3,&
+       comm_fft=mpi_enreg%comm_fft,distribfft=mpi_enreg%distribfft)
+   end if
+ end if
+
+ ! Fourier Transform
+ call fourdp(cplex,work1,vunitpawspherepot,1,mpi_enreg,nfft,1,ngfft,0)
+
+ ABI_FREE(work1)
+
+end subroutine mkunitpawspherepot
+!!***
+
 
 !!****f* m_spacepar/hartre
 !! NAME
@@ -89,32 +538,24 @@ contains
 !!  [qpt(3)=reduced coordinates for a wavevector to be combined with the G vectors (needed if cplex==2).]
 !!  rhog(2,nfft)=electron density in G space
 !!  rprimd(3,3)=dimensional primitive translations in real space (bohr)
-!!  divgq0= [optional argument] value of the integration of the Coulomb singularity 4pi\int_BZ 1/q^2 dq
 !!
 !! OUTPUT
 !!  vhartr(cplex*nfft)=Hartree potential in real space, either REAL or COMPLEX
 !!
-!! PARENTS
-!!      dfpt_rhotov,dfptnl_loop,energy,fock_getghc,m_kxc,nonlinear,nres2vres
-!!      odamix,prcref,prcref_PMA,respfn,rhotov,setup_positron,setvtr,tddft
-!!
-!! CHILDREN
-!!      fourdp,metric,ptabs_fourdp,timab,zerosym
-!!
 !! SOURCE
 
-subroutine hartre(cplex,gsqcut,izero,mpi_enreg,nfft,ngfft,paral_kgb,rhog,rprimd,vhartr,&
-&  divgq0,qpt) ! Optional argument
+subroutine hartre(cplex,gsqcut,icutcoul,izero,mpi_enreg,nfft,ngfft,nkpt,&
+                  rcut,rhog,rprimd,vcutgeo,vhartr,&
+                  qpt) ! Optional arguments
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: cplex,izero,nfft,paral_kgb
- real(dp),intent(in) :: gsqcut
+ integer,intent(in) :: cplex,icutcoul,izero,nfft,nkpt
+ real(dp),intent(in) :: gsqcut,rcut
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: ngfft(18)
- real(dp),intent(in) :: rprimd(3,3),rhog(2,nfft)
- real(dp),intent(in),optional :: divgq0
+ real(dp),intent(in) :: rprimd(3,3),rhog(2,nfft),vcutgeo(3)
  real(dp),intent(in),optional :: qpt(3)
  real(dp),intent(out) :: vhartr(cplex*nfft)
 
@@ -132,6 +573,7 @@ subroutine hartre(cplex,gsqcut,izero,mpi_enreg,nfft,ngfft,paral_kgb,rhog,rprimd,
  integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:),ffti2_local(:)
  integer, ABI_CONTIGUOUS pointer :: fftn3_distrib(:),ffti3_local(:)
  real(dp) :: gmet(3,3),gprimd(3,3),qpt_(3),rmet(3,3),tsec(2)
+ real(dp),allocatable :: gcutoff(:)
  real(dp),allocatable :: gq(:,:),work1(:,:)
 
 ! *************************************************************************
@@ -142,9 +584,9 @@ subroutine hartre(cplex,gsqcut,izero,mpi_enreg,nfft,ngfft,paral_kgb,rhog,rprimd,
  ! Check that cplex has an allowed value
  if(cplex/=1 .and. cplex/=2)then
    write(message, '(a,i0,a,a)' )&
-&   'From the calling routine, cplex=',cplex,ch10,&
-&   'but the only value allowed are 1 and 2.'
-   MSG_BUG(message)
+   'From the calling routine, cplex=',cplex,ch10,&
+   'but the only value allowed are 1 and 2.'
+   ABI_BUG(message)
  end if
 
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
@@ -166,29 +608,32 @@ subroutine hartre(cplex,gsqcut,izero,mpi_enreg,nfft,ngfft,paral_kgb,rhog,rprimd,
  if(qpt_(1)**2+qpt_(2)**2+qpt_(3)**2<1.d-15) qeq0=1
  qeq05=0
  if (qeq0==0) then
-   if (abs(abs(qpt_(1))-half)<tol12.or.abs(abs(qpt_(2))-half)<tol12.or. &
-&   abs(abs(qpt_(3))-half)<tol12) qeq05=1
+   if (abs(abs(qpt_(1))-half)<tol12.or.abs(abs(qpt_(2))-half)<tol12.or.abs(abs(qpt_(3))-half)<tol12) qeq05=1
  end if
 
  ! If cplex=1 then qpt_ should be 0 0 0
  if (cplex==1.and. qeq0/=1) then
    write(message,'(a,3e12.4,a,a)')&
-&   'cplex=1 but qpt=',qpt_,ch10,&
-&   'qpt should be 0 0 0.'
-   MSG_BUG(message)
+   'cplex=1 but qpt=',qpt_,ch10,&
+   'qpt should be 0 0 0.'
+   ABI_BUG(message)
  end if
 
  ! If FFT parallelism then qpt should not be 1/2
  if (nproc_fft>1.and.qeq05==1) then
    write(message, '(a,3e12.4,a,a)' )&
-&   'FFT parallelism selected but qpt',qpt_,ch10,&
-&   'qpt(i) should not be 1/2...'
-   MSG_ERROR(message)
+   'FFT parallelism selected but qpt',qpt_,ch10,&
+   'qpt(i) should not be 1/2...'
+   ABI_ERROR(message)
  end if
+
+ !Initialize Gcut-off array from m_gtermcutoff
+ !ABI_MALLOC(gcutoff,(ngfft(1)*ngfft(2)*ngfft(3)))
+ call termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
 
  ! In order to speed the routine, precompute the components of g+q
  ! Also check if the booked space was large enough...
- ABI_ALLOCATE(gq,(3,max(n1,n2,n3)))
+ ABI_MALLOC(gq,(3,max(n1,n2,n3)))
  do ii=1,3
    id(ii)=ngfft(ii)/2+2
    do ing=1,ngfft(ii)
@@ -199,7 +644,7 @@ subroutine hartre(cplex,gsqcut,izero,mpi_enreg,nfft,ngfft,paral_kgb,rhog,rprimd,
  ig1max=-1;ig2max=-1;ig3max=-1
  ig1min=n1;ig2min=n2;ig3min=n3
 
- ABI_ALLOCATE(work1,(2,nfft))
+ ABI_MALLOC(work1,(2,nfft))
  id1=n1/2+2;id2=n2/2+2;id3=n3/2+2
 
  ! Triple loop on each dimension
@@ -225,11 +670,6 @@ subroutine hartre(cplex,gsqcut,izero,mpi_enreg,nfft,ngfft,paral_kgb,rhog,rprimd,
          ii1=2
          work1(re,1+i23)=zero
          work1(im,1+i23)=zero
-         ! If the value of the integration of the Coulomb singularity 4pi\int_BZ 1/q^2 dq is given, use it
-         if (PRESENT(divgq0)) then
-           work1(re,1+i23)=rhog(re,1+i23)*divgq0*piinv
-           work1(im,1+i23)=rhog(im,1+i23)*divgq0*piinv
-         end if
        end if
 
        ! Final inner loop on the first dimension (note the lower limit)
@@ -247,7 +687,7 @@ subroutine hartre(cplex,gsqcut,izero,mpi_enreg,nfft,ngfft,paral_kgb,rhog,rprimd,
              ig3max=max(ig3max,ig3); ig3min=min(ig3min,ig3)
            end if
 
-           den=piinv/gs
+           den=piinv/gs*gcutoff(ii)
            work1(re,ii)=rhog(re,ii)*den
            work1(im,ii)=rhog(im,ii)*den
          else
@@ -261,7 +701,7 @@ subroutine hartre(cplex,gsqcut,izero,mpi_enreg,nfft,ngfft,paral_kgb,rhog,rprimd,
    end do ! End loop on i2
  end do ! End loop on i3
 
- ABI_DEALLOCATE(gq)
+ ABI_FREE(gq)
 
  if (izero==1) then
    ! Set contribution of unbalanced components to zero
@@ -287,14 +727,15 @@ subroutine hartre(cplex,gsqcut,izero,mpi_enreg,nfft,ngfft,paral_kgb,rhog,rprimd,
        if (abs(ig3min)>abs(ig3max)) ig3=n3-abs(ig3min)
      end if
      call zerosym(work1,2,n1,n2,n3,ig1=ig1,ig2=ig2,ig3=ig3,&
-&     comm_fft=mpi_enreg%comm_fft,distribfft=mpi_enreg%distribfft)
+       comm_fft=mpi_enreg%comm_fft,distribfft=mpi_enreg%distribfft)
    end if
  end if
 
  ! Fourier Transform Vhartree. Vh in reciprocal space was stored in work1
  call fourdp(cplex,work1,vhartr,1,mpi_enreg,nfft,1,ngfft,0)
 
- ABI_DEALLOCATE(work1)
+ ABI_FREE(gcutoff)
+ ABI_FREE(work1)
 
  call timab(10,2,tsec)
 
@@ -312,7 +753,7 @@ end subroutine hartre
 !!
 !! INPUTS
 !!  diag(npw)=diagonal operator (real, spin-independent!)
-!!  filter= if 1, need to filter on the value of diag, that must be less than huge(0.0d0)*1.d-11
+!!  filter= if 1, need to filter on the value of diag, that must be less than huge(zero)*1.d-11
 !!          otherwise, should be 0
 !!  istwf_k=storage mode of the vectors
 !!  npw=number of planewaves of the vector
@@ -323,12 +764,6 @@ end subroutine hartre
 !!
 !! OUTPUT
 !!  ar=mean value
-!!
-!! PARENTS
-!!      dfpt_vtowfk,energy,forstrnps,vtowfk
-!!
-!! CHILDREN
-!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -361,11 +796,11 @@ subroutine meanvalue_g(ar,diag,filter,istwf_k,mpi_enreg,npw,nspinor,vect,vect1,u
    write(message,'(a,a,a,i6,a,i6)')&
 &   'When istwf_k/=1, nspinor must be 1,',ch10,&
 &   'however, nspinor=',nspinor,', and istwf_k=',istwf_k
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
  if(use_ndo==1 .and. (istwf_k==2 .and.me_g0==1)) then
-   MSG_BUG('use_ndo==1, not tested')
+   ABI_BUG('use_ndo==1, not tested, use istwfk=1')
  end if
 
  ar=zero
@@ -417,7 +852,7 @@ subroutine meanvalue_g(ar,diag,filter,istwf_k,mpi_enreg,npw,nspinor,vect,vect1,u
 
 !$OMP PARALLEL DO REDUCTION(+:ar)
      do ipw=1,npw
-       if(diag(ipw)<huge(0.0d0)*1.d-11)then
+       if(diag(ipw)<huge(zero)*1.d-11)then
          ar=ar+diag(ipw)*(vect(1,ipw)*vect1(1,ipw)+vect(2,ipw)*vect1(2,ipw))
        end if
      end do
@@ -425,18 +860,18 @@ subroutine meanvalue_g(ar,diag,filter,istwf_k,mpi_enreg,npw,nspinor,vect,vect1,u
 !$OMP PARALLEL DO REDUCTION(+:ar) PRIVATE(jpw)
        do ipw=1+npw,2*npw
          jpw=ipw-npw
-         if(diag(jpw)<huge(0.0d0)*1.d-11)then
+         if(diag(jpw)<huge(zero)*1.d-11)then
            ar=ar+diag(jpw)*(vect(1,ipw)*vect1(1,ipw)+vect(2,ipw)*vect1(2,ipw))
          end if
        end do
      end if
      if(use_ndo==1)then
        if(.not.present(ar_im)) then
-         MSG_BUG("use_ndo true and ar_im not present")
+         ABI_BUG("use_ndo true and ar_im not present")
        end if
 !$OMP PARALLEL DO REDUCTION(+:ar_im)
        do ipw=1,npw
-         if(diag(ipw)<huge(0.0d0)*1.d-11)then
+         if(diag(ipw)<huge(zero)*1.d-11)then
            ar_im=ar_im+diag(ipw)*(vect1(1,ipw)*vect(2,ipw)-vect1(2,ipw)*vect(1,ipw))
          end if
        end do
@@ -444,7 +879,7 @@ subroutine meanvalue_g(ar,diag,filter,istwf_k,mpi_enreg,npw,nspinor,vect,vect1,u
 !$OMP PARALLEL DO REDUCTION(+:ar_im) PRIVATE(jpw)
          do ipw=1+npw,2*npw
            jpw=ipw-npw
-           if(diag(jpw)<huge(0.0d0)*1.d-11)then
+           if(diag(jpw)<huge(zero)*1.d-11)then
              ar_im=ar_im+diag(jpw)*(vect1(1,ipw)*vect(2,ipw)-vect1(2,ipw)*vect(1,ipw))
            end if
          end do
@@ -454,7 +889,7 @@ subroutine meanvalue_g(ar,diag,filter,istwf_k,mpi_enreg,npw,nspinor,vect,vect1,u
 
 !    !$OMP PARALLEL DO PRIVATE(ipw) REDUCTION(+:ar,ar_im)
 !    do ipw=1,npw
-!    if(diag(ipw)<huge(0.0d0)*1.d-11)then
+!    if(diag(ipw)<huge(zero)*1.d-11)then
 !    ar=ar+diag(ipw)*(vect(1,ipw)*vect1(1,ipw)+vect(2,ipw)*vect1(2,ipw))
 !    if(use_ndo==1.and.nspinor==2) ar_im=ar_im+diag(ipw)*(vect1(1,ipw)*vect(2,ipw)-vect1(2,ipw)*vect(1,ipw))
 !    end if
@@ -462,7 +897,7 @@ subroutine meanvalue_g(ar,diag,filter,istwf_k,mpi_enreg,npw,nspinor,vect,vect1,u
 !    if(nspinor==2)then
 !    !$OMP PARALLEL DO PRIVATE(ipw) REDUCTION(+:ar,ar_im)
 !    do ipw=1+npw,2*npw
-!    if(diag(ipw-npw)<huge(0.0d0)*1.d-11)then
+!    if(diag(ipw-npw)<huge(zero)*1.d-11)then
 !    ar=ar+diag(ipw-npw)*(vect(1,ipw)*vect1(1,ipw)+vect(2,ipw)*vect1(2,ipw))
 !    if(use_ndo==1.and.nspinor==2) ar_im=ar_im+diag(ipw-npw)*(vect1(1,ipw)*vect(2,ipw)-vect1(2,ipw)*vect(1,ipw))
 !    end if
@@ -487,14 +922,14 @@ subroutine meanvalue_g(ar,diag,filter,istwf_k,mpi_enreg,npw,nspinor,vect,vect1,u
    else ! filter/=0
      i1=1
      if(istwf_k==2 .and. me_g0==1)then
-       if(diag(1)<huge(0.0d0)*1.d-11)then
+       if(diag(1)<huge(zero)*1.d-11)then
          ar=half*diag(1)*vect(1,1)*vect1(1,1) ; i1=2
        end if
      end if
 
 !$OMP PARALLEL DO REDUCTION(+:ar)
      do ipw=i1,npw
-       if(diag(ipw)<huge(0.0d0)*1.d-11)then
+       if(diag(ipw)<huge(zero)*1.d-11)then
          ar=ar+diag(ipw)*(vect(1,ipw)*vect1(1,ipw)+vect(2,ipw)*vect1(2,ipw))
        end if
      end do
@@ -529,7 +964,6 @@ end subroutine meanvalue_g
 !!  nfft=number of points of the fft grid
 !!  nfunc=number of functions on the grid for which the laplacian is to be calculated
 !!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
-!!  paral_kgb=flag controlling (k,g,bands) parallelization
 !!  (optional) rdfuncr(nfft,nfunc)=real(dp) discretized functions in real space
 !!  rdfuncg_in TO BE DESCRIBED SB 090901
 !!  laplacerdfuncg_in TO BE DESCRIBED SB 090901
@@ -543,20 +977,14 @@ end subroutine meanvalue_g
 !!  rdfuncg_out TO BE DESCRIBED SB 090901
 !!  laplacerdfuncg_out TO BE DESCRIBED SB 090901
 !!
-!! PARENTS
-!!      frskerker1,frskerker2,moddiel_csrb,prcrskerker1,prcrskerker2
-!!
-!! CHILDREN
-!!      fourdp,ptabs_fourdp
-!!
 !! SOURCE
 
-subroutine laplacian(gprimd,mpi_enreg,nfft,nfunc,ngfft,paral_kgb,rdfuncr,&
+subroutine laplacian(gprimd,mpi_enreg,nfft,nfunc,ngfft,rdfuncr,&
 &  laplacerdfuncr,rdfuncg_out,laplacerdfuncg_out,g2cart_out,rdfuncg_in,g2cart_in)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: nfft,nfunc,paral_kgb
+ integer,intent(in) :: nfft,nfunc
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: ngfft(18)
@@ -589,7 +1017,7 @@ subroutine laplacian(gprimd,mpi_enreg,nfft,nfunc,ngfft,paral_kgb,rdfuncr,&
  if(present(laplacerdfuncg_out)) then
    laplacerdfuncg => laplacerdfuncg_out
  else
-   ABI_ALLOCATE(laplacerdfuncg,(2,nfft,nfunc))
+   ABI_MALLOC(laplacerdfuncg,(2,nfft,nfunc))
  end if
 
  ! Get the distrib associated with this fft_grid
@@ -601,7 +1029,7 @@ subroutine laplacian(gprimd,mpi_enreg,nfft,nfunc,ngfft,paral_kgb,rdfuncr,&
    if(present(rdfuncg_out)) then
      rdfuncg => rdfuncg_out
    else
-     ABI_ALLOCATE(rdfuncg,(2,nfft,nfunc))
+     ABI_MALLOC(rdfuncg,(2,nfft,nfunc))
    end if
    if(present(rdfuncr)) then
      do ifunc=1,nfunc
@@ -621,7 +1049,7 @@ subroutine laplacian(gprimd,mpi_enreg,nfft,nfunc,ngfft,paral_kgb,rdfuncr,&
    if(present(g2cart_out)) then
      g2cart => g2cart_out
    else
-     ABI_ALLOCATE(g2cart,(nfft))
+     ABI_MALLOC(g2cart,(nfft))
    end if
    id1=int(n1/2)+2
    id2=int(n2/2)+2
@@ -664,7 +1092,7 @@ subroutine laplacian(gprimd,mpi_enreg,nfft,nfunc,ngfft,paral_kgb,rdfuncr,&
      end do
    end do
    if(.not.present(g2cart_out))  then
-     ABI_DEALLOCATE(g2cart)
+     ABI_FREE(g2cart)
    end if
  else
    g2cart => g2cart_in
@@ -686,10 +1114,10 @@ subroutine laplacian(gprimd,mpi_enreg,nfft,nfunc,ngfft,paral_kgb,rdfuncr,&
 
 !deallocate pointers
  if((.not.present(rdfuncg_in)).and.(.not.present(rdfuncg_in)))  then
-   ABI_DEALLOCATE(rdfuncg)
+   ABI_FREE(rdfuncg)
  end if
  if(.not.present(laplacerdfuncg_out))  then
-   ABI_DEALLOCATE(laplacerdfuncg)
+   ABI_FREE(laplacerdfuncg)
  end if
 
 end subroutine laplacian
@@ -721,19 +1149,13 @@ end subroutine laplacian
 !! OUTPUT
 !!  frredgr(nfft,3)= reduced gradient of input function (same units as frin)
 !!
-!! PARENTS
-!!      dfpt_eltfrxc
-!!
-!! CHILDREN
-!!      fourdp
-!!
 !! SOURCE
 
-subroutine redgr (frin,frredgr,mpi_enreg,nfft,ngfft,paral_kgb)
+subroutine redgr(frin,frredgr,mpi_enreg,nfft,ngfft)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: nfft,paral_kgb
+ integer,intent(in) :: nfft
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: ngfft(18)
@@ -755,7 +1177,7 @@ subroutine redgr (frin,frredgr,mpi_enreg,nfft,ngfft,paral_kgb)
  n1=ngfft(1) ; n2=ngfft(2) ; n3=ngfft(3)
 
 !In order to speed the routine, precompute the components of g, including 2pi factor
- ABI_ALLOCATE(gg,(max(n1,n2,n3),3))
+ ABI_MALLOC(gg,(max(n1,n2,n3),3))
  do ii=1,3
    id=ngfft(ii)/2+2
    do ing=1,ngfft(ii)
@@ -766,9 +1188,9 @@ subroutine redgr (frin,frredgr,mpi_enreg,nfft,ngfft,paral_kgb)
    if(mod(ngfft(ii),2)==0)gg(ngfft(ii)/2+1,ii)=zero
  end do
 
- ABI_ALLOCATE(wkcmpx,(2,nfft))
- ABI_ALLOCATE(work,(nfft))
- ABI_ALLOCATE(workgr,(2,nfft))
+ ABI_MALLOC(wkcmpx,(2,nfft))
+ ABI_MALLOC(work,(nfft))
+ ABI_MALLOC(workgr,(2,nfft))
 
 !Obtain rho(G) in wkcmpx from input rho(r)
  work(:)=frin(:)
@@ -828,10 +1250,10 @@ subroutine redgr (frin,frredgr,mpi_enreg,nfft,ngfft,paral_kgb)
 
  end do !idir
 
- ABI_DEALLOCATE(gg)
- ABI_DEALLOCATE(wkcmpx)
- ABI_DEALLOCATE(work)
- ABI_DEALLOCATE(workgr)
+ ABI_FREE(gg)
+ ABI_FREE(wkcmpx)
+ ABI_FREE(work)
+ ABI_FREE(workgr)
 
 end subroutine redgr
 !!***
@@ -871,20 +1293,13 @@ end subroutine redgr
 !!  vhartr1(nfft)=Inhomogeneous term in strain-perturbation-induced Hartree
 !!   potential in real space,
 !!
-!! PARENTS
-!!      dfpt_nselt,dfpt_nstpaw,dfpt_rhotov
-!!
-!! CHILDREN
-!!      fourdp,metric,ptabs_fourdp
-!!
 !! SOURCE
 
-subroutine hartrestr(gsqcut,idir,ipert,mpi_enreg,natom,nfft,ngfft,&
-&  paral_kgb,rhog,rprimd,vhartr1)
+subroutine hartrestr(gsqcut,idir,ipert,mpi_enreg,natom,nfft,ngfft,rhog,rprimd,vhartr1)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: idir,ipert,natom,nfft,paral_kgb
+ integer,intent(in) :: idir,ipert,natom,nfft
  real(dp),intent(in) :: gsqcut
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
@@ -914,7 +1329,7 @@ subroutine hartrestr(gsqcut,idir,ipert,mpi_enreg,natom,nfft,ngfft,&
    write(message, '(a,i0,a,a)' )&
 &   'From the calling routine, ipert=',ipert,ch10,&
 &   'so this routine for the strain perturbation should not be called.'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
@@ -933,7 +1348,7 @@ subroutine hartrestr(gsqcut,idir,ipert,mpi_enreg,natom,nfft,ngfft,&
    write(message, '(a,i10,a,a,a)' )&
 &   'Input dir gives istr=',istr,' not allowed.',ch10,&
 &   'Possible values are 1,2,3,4,5,6 only.'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
  ka=idx(2*istr-1);kb=idx(2*istr)
@@ -945,7 +1360,7 @@ subroutine hartrestr(gsqcut,idir,ipert,mpi_enreg,natom,nfft,ngfft,&
 
 !In order to speed the routine, precompute the components of g+q
 !Also check if the booked space was large enough...
- ABI_ALLOCATE(gq,(3,max(n1,n2,n3)))
+ ABI_MALLOC(gq,(3,max(n1,n2,n3)))
  do ii=1,3
    id(ii)=ngfft(ii)/2+2
    do ing=1,ngfft(ii)
@@ -954,7 +1369,7 @@ subroutine hartrestr(gsqcut,idir,ipert,mpi_enreg,natom,nfft,ngfft,&
    end do
  end do
 
- ABI_ALLOCATE(work1,(2,nfft))
+ ABI_MALLOC(work1,(2,nfft))
  id2=n2/2+2
  id3=n3/2+2
 !Triple loop on each dimension
@@ -1014,13 +1429,13 @@ subroutine hartrestr(gsqcut,idir,ipert,mpi_enreg,natom,nfft,ngfft,&
    end do ! End loop on i2
  end do !  End loop on i3
 
- ABI_DEALLOCATE(gq)
+ ABI_FREE(gq)
 
 !Fourier Transform Vhartree.
 !Vh in reciprocal space was stored in work1
  call fourdp(1,work1,vhartr1,1,mpi_enreg,nfft,1,ngfft,0)
 
- ABI_DEALLOCATE(work1)
+ ABI_FREE(work1)
 
 end subroutine hartrestr
 !!***
@@ -1047,6 +1462,7 @@ end subroutine hartrestr
 !! rprimd(3,3)=dimensional real space primitive translations
 !! symafm(nsym)=(anti)ferromagnetic part of symmetry operations
 !! symrel(3,3,nsym)=symmetry matrices in real space (integers)
+!! tnons(3,nsym)=reduced nonsymmorphic translations
 !!
 !! OUTPUT
 !! rhog(2,nfft)=symmetrized rho(G) (total) electron density in G space
@@ -1062,25 +1478,18 @@ end subroutine hartrestr
 !! put total density in first half of rhor array and spin up in second half
 !! If (nspden=2 and nsppol=2) the density is transformed as  (up,down) => (up+down,up)
 !! If (nspden=2 and nsppol=1) anti-ferromagnetic symmetry operations
-!!  must be used, such as to transform (2*up) => (up+down,up)
+!! must be used, such as to transform (2*up) => (up+down,up)
 !! In spin-polarized, and if there is no symmetry to be
 !! applied on the system, only the total density is generated in G space
 !!
-!! PARENTS
-!!      dfpt_mkrho,dfpt_nstpaw,dfpt_rhofermi,dfpt_vtorho,m_dvdb,mkrho
-!!      suscep_stat,vtorho,vtorhorec,vtorhotf,wfd_mkrho
-!!
-!! CHILDREN
-!!      fourdp,matr3inv,ptabs_fourdp,symredcart,timab,xmpi_sum
-!!
 !! SOURCE
 
-subroutine symrhg(cplex,gprimd,irrzon,mpi_enreg,nfft,nfftot,ngfft,nspden,nsppol,nsym,paral_kgb,&
-&                 phnons,rhog,rhor,rprimd,symafm,symrel)
+subroutine symrhg(cplex,gprimd,irrzon,mpi_enreg,nfft,nfftot,ngfft,nspden,nsppol,nsym,&
+&                 phnons,rhog,rhor,rprimd,symafm,symrel,tnons)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: cplex,nfft,nfftot,nspden,nsppol,nsym,paral_kgb
+ integer,intent(in) :: cplex,nfft,nfftot,nspden,nsppol,nsym
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: irrzon(nfftot**(1-1/nsym),2,(nspden/nsppol)-3*(nspden/4)),ngfft(18)
@@ -1088,14 +1497,16 @@ subroutine symrhg(cplex,gprimd,irrzon,mpi_enreg,nfft,nfftot,ngfft,nspden,nsppol,
  real(dp),intent(in) :: gprimd(3,3),phnons(2,nfftot**(1-1/nsym),(nspden/nsppol)-3*(nspden/4)),rprimd(3,3)
  real(dp),intent(inout) :: rhor(cplex*nfft,nspden)
  real(dp),intent(out) :: rhog(2,nfft)
+ real(dp),intent(in) :: tnons(3,nsym)
 
 !Local variables-------------------------------
 !scalars
- integer :: ier,imagn,ind,ind2,indsy,ispden,isym,iup,izone,izone_max,j,j1,j2,j3,jsym
+ integer :: id1,id2,id3,ier,imagn,ind,ind2,indsy,ispden,isym,iup,izone,izone_max,j,j1,j2,j3,jsym
  integer :: k1,k2,k3,l1,l2,l3,me_fft
  integer :: n1,n2,n3,nd2,nproc_fft,nspden_eff,nsym_used,numpt,nup
  integer :: r2,rep,spaceComm
  logical,parameter :: afm_noncoll=.true.  ! TRUE if antiferro symmetries are used in non-collinear magnetism
+ real(dp) :: arg,tau1,tau2,tau3
  real(dp) :: magxsu1,magxsu2,magysu1,magysu2,magzsu1,magzsu2,mxi,mxr,myi,myr,mzi,mzr,phi,phr,rhosu1,rhosu2
  !character(len=500) :: message
 !arrays
@@ -1105,13 +1516,13 @@ subroutine symrhg(cplex,gprimd,irrzon,mpi_enreg,nfft,nfftot,ngfft,nspden,nsppol,
  real(dp) :: tsec(2)
  real(dp),allocatable :: magngx(:,:),magngy(:,:),magngz(:,:)
  real(dp),allocatable :: rhosu1_arr(:),rhosu2_arr(:),work(:)
- real(dp),allocatable :: symafm_used(:),symrec_cart(:,:,:),symrel_cart(:,:,:)
+ real(dp),allocatable :: symafm_used(:),symrec_cart(:,:,:),symrel_cart(:,:,:),tnons_used(:,:)
 
 !*************************************************************************
 !
 !Note the timing channel 17 excludes the different Fourier transforms
 
- ABI_ALLOCATE(work,(cplex*nfft))
+ ABI_MALLOC(work,(cplex*nfft))
 
 !Special treatment for spin-polarized case
  if(nspden==2 .and. nsppol==2) then
@@ -1150,7 +1561,7 @@ subroutine symrhg(cplex,gprimd,irrzon,mpi_enreg,nfft,nfftot,ngfft,nspden,nsppol,
  if(nsym==1)then
 
    if(nspden==2 .and. nsppol==1) then ! There must be at least one anti-ferromagnetic operation
-     MSG_BUG('In the antiferromagnetic case, nsym cannot be 1')
+     ABI_BUG('In the antiferromagnetic case, nsym cannot be 1')
    end if
 
 !  If not using symmetry, still want total density in G space rho(G).
@@ -1190,9 +1601,9 @@ subroutine symrhg(cplex,gprimd,irrzon,mpi_enreg,nfft,nfftot,ngfft,nspden,nsppol,
      work(:)=rhor(:,ispden)
      call fourdp(cplex,rhog,work,-1,mpi_enreg,nfft,1,ngfft,0)
      if (nspden==4) then
-       ABI_ALLOCATE(magngx,(2,nfft))
-       ABI_ALLOCATE(magngy,(2,nfft))
-       ABI_ALLOCATE(magngz,(2,nfft))
+       ABI_MALLOC(magngx,(2,nfft))
+       ABI_MALLOC(magngy,(2,nfft))
+       ABI_MALLOC(magngz,(2,nfft))
        work(:)=rhor(:,2)
        call fourdp(cplex,magngx,work,-1,mpi_enreg,nfft,1,ngfft,0)
        work(:)=rhor(:,3)
@@ -1214,8 +1625,8 @@ subroutine symrhg(cplex,gprimd,irrzon,mpi_enreg,nfft,nfftot,ngfft,nspden,nsppol,
 
 !    Get maxvalue of izone
      izone_max=count(irrzon(:,2,imagn)>0)
-     ABI_ALLOCATE(rhosu1_arr,(izone_max))
-     ABI_ALLOCATE(rhosu2_arr,(izone_max))
+     ABI_MALLOC(rhosu1_arr,(izone_max))
+     ABI_MALLOC(rhosu2_arr,(izone_max))
 
      numpt=0
      do izone=1,nfftot
@@ -1291,32 +1702,38 @@ subroutine symrhg(cplex,gprimd,irrzon,mpi_enreg,nfft,nfftot,ngfft,nspden,nsppol,
 
      end do ! End loop over izone
 
-     ABI_DEALLOCATE(rhosu1_arr)
-     ABI_DEALLOCATE(rhosu2_arr)
+     ABI_FREE(rhosu1_arr)
+     ABI_FREE(rhosu2_arr)
 
 !    The following is only valid for magnetization
 !    ---------------------------------------------
      if (nspden==4) then
 
+       id1=n1/2+2
+       id2=n2/2+2
+       id3=n3/2+2
+
 !      Transfer symmetries in cartesian coordinates
 !      Compute symmetries in reciprocal space in cartesian coordinates
-       ABI_ALLOCATE(symrec_cart,(3,3,nsym_used))
-       ABI_ALLOCATE(symrel_cart,(3,3,nsym_used))
-       ABI_ALLOCATE(symafm_used,(nsym_used))
+       ABI_MALLOC(symrec_cart,(3,3,nsym_used))
+       ABI_MALLOC(symrel_cart,(3,3,nsym_used))
+       ABI_MALLOC(symafm_used,(nsym_used))
+       ABI_MALLOC(tnons_used,(3,nsym_used))
        jsym=0
        do isym=1,nsym
          if (symafm(isym)/=1.and.(.not.afm_noncoll)) cycle
          jsym=jsym+1
+         tnons_used(:,jsym)=tnons(:,isym)
          symafm_used(jsym)=dble(symafm(isym))
          call symredcart(rprimd,gprimd,symrel_cart(:,:,jsym),symrel(:,:,isym))
          call matr3inv(symrel_cart(:,:,jsym),symrec_cart(:,:,jsym))
        end do
 
        numpt=count(irrzon(:,1,imagn)>0)
-       ABI_ALLOCATE(isymg,(numpt))
+       ABI_MALLOC(isymg,(numpt))
        isymg=0
-       ABI_ALLOCATE(rhosu1_arr,(3*izone_max))
-       ABI_ALLOCATE(rhosu2_arr,(3*izone_max))
+       ABI_MALLOC(rhosu1_arr,(3*izone_max))
+       ABI_MALLOC(rhosu2_arr,(3*izone_max))
 
 !      Accumulate magnetization over equivalent points
 !      Use all symmetries (not only those linking different g points)
@@ -1329,11 +1746,20 @@ subroutine symrhg(cplex,gprimd,irrzon,mpi_enreg,nfft,nfftot,ngfft,nspden,nsppol,
          ind=irrzon(1+numpt,1,1)
          rep=irrzon(izone,2,1)
          nup=nsym_used/rep
+!        Get coordinates in the range [0,n-1]
          j=ind-1;l1=modulo(j,n1);l2=modulo(j/n1,n2);l3=j/(n1*n2)
+!        Get location of G vector (grid point) centered at 0 0 0
+!TO BE UNCOMMENTED
+         l3=l3-(l3/id3)*n3
+         l2=l2-(l2/id2)*n2
+         l1=l1-(l1/id1)*n1
+
          jsym=0
          do isym=1,nsym
            if (symafm(isym)/=1.and.(.not.afm_noncoll)) cycle
            jsym=jsym+1
+!          The G vectors should transform as vectors in reciprocal space
+!          However, one acts with the INVERSE of the symmetry operation => Inverse[symrec]=Transpose[symrel]
            j1=symrel(1,1,isym)*l1+symrel(2,1,isym)*l2+symrel(3,1,isym)*l3
            j2=symrel(1,2,isym)*l1+symrel(2,2,isym)*l2+symrel(3,2,isym)*l3
            j3=symrel(1,3,isym)*l1+symrel(2,3,isym)*l2+symrel(3,3,isym)*l3
@@ -1344,19 +1770,48 @@ subroutine symrhg(cplex,gprimd,irrzon,mpi_enreg,nfft,nfftot,ngfft,nspden,nsppol,
              iup=iup+1;ind2=irrzon(iup,1,1)
            end do
            if (ind2/=indsy) then
-             MSG_ERROR("ind2/=indsy in symrhg !")
+             ABI_ERROR("ind2/=indsy in symrhg !")
            end if
            if (isymg(iup)==0) isymg(iup)=jsym
            if(fftn2_distrib(modulo((indsy-1)/n1,n2) + 1) == me_fft ) then  ! this is indsy is to be treated by me_fft
              indsy=n1*(nd2*k3+ ffti2_local(k2+1) -1)+k1+1        ! this is indsy in the current proc
-             phr=phnons(1,iup,imagn);if (rep==1) phr=phr*symafm_used(jsym) !if rep==2, symafm is already included in phnons
-             phi=phnons(2,iup,imagn);if (rep==1) phi=phi*symafm_used(jsym) !(see irrzg.F90)
+
+!            Working on this: the present coding will be detrimental for speed ! cos and sin are recomputed many times !
+             tau1=tnons_used(1,jsym)
+             tau2=tnons_used(2,jsym)
+             tau3=tnons_used(3,jsym)
+             if (abs(tau1)>tol12.or.abs(tau2)>tol12.or.abs(tau3)>tol12) then
+!              Compute exp(-2*Pi*I*G dot tau) using original G (equivalent of phnons in the collinear case)
+               arg=two_pi*(dble(l1)*tau1+dble(l2)*tau2+dble(l3)*tau3)
+               phr=cos(arg)
+               phi=-sin(arg)
+             else
+               phr=one
+               phi=zero
+             end if
+             phr=phr*symafm_used(jsym)
+             phi=phi*symafm_used(jsym)
+!TO BE COMMENTED
+!            phr=phnons(1,iup,imagn);if (rep==1) phr=phr*symafm_used(jsym) !if rep==2, symafm is already included in phnons
+!            phi=phnons(2,iup,imagn);if (rep==1) phi=phi*symafm_used(jsym) !(see irrzg.F90)
+
+!            The magnetization should transform as a vector in real space
+!            However, one acts with the INVERSE of the symmetry operation.
+!            => Inverse[symrel_cart] = Transpose[symrel_cart] because symrel_cart is unitary   ?!?!?
              mxr=symrel_cart(1,1,jsym)*magngx(1,indsy)+symrel_cart(1,2,jsym)*magngy(1,indsy)+symrel_cart(1,3,jsym)*magngz(1,indsy)
              mxi=symrel_cart(1,1,jsym)*magngx(2,indsy)+symrel_cart(1,2,jsym)*magngy(2,indsy)+symrel_cart(1,3,jsym)*magngz(2,indsy)
              myr=symrel_cart(2,1,jsym)*magngx(1,indsy)+symrel_cart(2,2,jsym)*magngy(1,indsy)+symrel_cart(2,3,jsym)*magngz(1,indsy)
              myi=symrel_cart(2,1,jsym)*magngx(2,indsy)+symrel_cart(2,2,jsym)*magngy(2,indsy)+symrel_cart(2,3,jsym)*magngz(2,indsy)
              mzr=symrel_cart(3,1,jsym)*magngx(1,indsy)+symrel_cart(3,2,jsym)*magngy(1,indsy)+symrel_cart(3,3,jsym)*magngz(1,indsy)
              mzi=symrel_cart(3,1,jsym)*magngx(2,indsy)+symrel_cart(3,2,jsym)*magngy(2,indsy)+symrel_cart(3,3,jsym)*magngz(2,indsy)
+
+!            mxr=symrel_cart(1,1,jsym)*magngx(1,indsy)+symrel_cart(2,1,jsym)*magngy(1,indsy)+symrel_cart(3,1,jsym)*magngz(1,indsy)
+!            mxi=symrel_cart(1,1,jsym)*magngx(2,indsy)+symrel_cart(2,1,jsym)*magngy(2,indsy)+symrel_cart(3,1,jsym)*magngz(2,indsy)
+!            myr=symrel_cart(1,2,jsym)*magngx(1,indsy)+symrel_cart(2,2,jsym)*magngy(1,indsy)+symrel_cart(3,2,jsym)*magngz(1,indsy)
+!            myi=symrel_cart(1,2,jsym)*magngx(2,indsy)+symrel_cart(2,2,jsym)*magngy(2,indsy)+symrel_cart(3,2,jsym)*magngz(2,indsy)
+!            mzr=symrel_cart(1,3,jsym)*magngx(1,indsy)+symrel_cart(2,3,jsym)*magngy(1,indsy)+symrel_cart(3,3,jsym)*magngz(1,indsy)
+!            mzi=symrel_cart(1,3,jsym)*magngx(2,indsy)+symrel_cart(2,3,jsym)*magngy(2,indsy)+symrel_cart(3,3,jsym)*magngz(2,indsy)
+
              magxsu1=magxsu1+mxr*phr-mxi*phi;magxsu2=magxsu2+mxi*phr+mxr*phi
              magysu1=magysu1+myr*phr-myi*phi;magysu2=magysu2+myi*phr+myr*phi
              magzsu1=magzsu1+mzr*phr-mzi*phi;magzsu2=magzsu2+mzi*phr+mzr*phi
@@ -1386,41 +1841,72 @@ subroutine symrhg(cplex,gprimd,irrzon,mpi_enreg,nfft,nfftot,ngfft,nspden,nsppol,
          nup=nsym_used/rep
          do iup=1,nup
            ind=irrzon(iup+numpt,1,imagn)
+!          Get coordinates in the range [0,n-1]
            j=ind-1;j1=modulo(j,n1);j2=modulo(j/n1,n2);j3=j/(n1*n2)
+!TO BE UNCOMMENTED
+!          Get location of G vector (grid point) centered at 0 0 0
+           l3=j3-(j3/id3)*n3
+           l2=j2-(j2/id2)*n2
+           l1=j1-(j1/id1)*n1
            if(fftn2_distrib(j2+1)==me_fft)  then ! this ind is to be treated by me_fft
              r2=ffti2_local(j2+1) - 1
              ind=n1*(nd2*j3+r2)+j1+1  ! this is ind in the current proc
              jsym=isymg(iup+numpt)
              if (jsym==0) then
-               MSG_ERROR("jsym=0 in symrhg !")
+               ABI_ERROR("jsym=0 in symrhg !")
              end if
              magxsu1=rhosu1_arr(3*izone-2);magxsu2=rhosu2_arr(3*izone-2)
              magysu1=rhosu1_arr(3*izone-1);magysu2=rhosu2_arr(3*izone-1)
              magzsu1=rhosu1_arr(3*izone  );magzsu2=rhosu2_arr(3*izone  )
-             phr=phnons(1,iup,imagn);if (rep==1) phr=phr*symafm_used(jsym) !if rep==2, symafm is already included in phnons
-             phi=phnons(2,iup,imagn);if (rep==1) phi=phi*symafm_used(jsym) !(see irrzg.F90)
+!            Working on this: the present coding will be detrimental for speed ! cos and sin are recomputed many times !
+             tau1=tnons_used(1,jsym)
+             tau2=tnons_used(2,jsym)
+             tau3=tnons_used(3,jsym)
+             if (abs(tau1)>tol12.or.abs(tau2)>tol12.or.abs(tau3)>tol12) then
+!              Compute exp(-2*Pi*I*G dot tau) using original G   (equivalent of phnons in the collinear case)
+               arg=two_pi*(dble(l1)*tau1+dble(l2)*tau2+dble(l3)*tau3)
+               phr=cos(arg)
+               phi=-sin(arg)
+             else
+               phr=one
+               phi=zero
+             end if
+             phr=phr*symafm_used(jsym)
+             phi=phi*symafm_used(jsym)
+!TO BE COMMENTED
+!            phr=phnons(1,iup,imagn);if (rep==1) phr=phr*symafm_used(jsym) !if rep==2, symafm is already included in phnons
+!            phi=phnons(2,iup,imagn);if (rep==1) phi=phi*symafm_used(jsym) !(see irrzg.F90)
+!            The magnetization should transform as a vector in real space
+!            => symrel_cart  ?!?
              mxr=symrec_cart(1,1,jsym)*magxsu1+symrec_cart(2,1,jsym)*magysu1+symrec_cart(3,1,jsym)*magzsu1
              mxi=symrec_cart(1,1,jsym)*magxsu2+symrec_cart(2,1,jsym)*magysu2+symrec_cart(3,1,jsym)*magzsu2
              myr=symrec_cart(1,2,jsym)*magxsu1+symrec_cart(2,2,jsym)*magysu1+symrec_cart(3,2,jsym)*magzsu1
              myi=symrec_cart(1,2,jsym)*magxsu2+symrec_cart(2,2,jsym)*magysu2+symrec_cart(3,2,jsym)*magzsu2
              mzr=symrec_cart(1,3,jsym)*magxsu1+symrec_cart(2,3,jsym)*magysu1+symrec_cart(3,3,jsym)*magzsu1
              mzi=symrec_cart(1,3,jsym)*magxsu2+symrec_cart(2,3,jsym)*magysu2+symrec_cart(3,3,jsym)*magzsu2
-             magngx(1,ind)=mxr*phr+mxi*phi
-             magngx(2,ind)=mxi*phr-mxr*phi
-             magngy(1,ind)=myr*phr+myi*phi
-             magngy(2,ind)=myi*phr-myr*phi
-             magngz(1,ind)=mzr*phr+mzi*phi
-             magngz(2,ind)=mzi*phr-mzr*phi
+!            mxr=symrel_cart(1,1,jsym)*magxsu1+symrel_cart(1,2,jsym)*magysu1+symrel_cart(1,3,jsym)*magzsu1
+!            mxi=symrel_cart(1,1,jsym)*magxsu2+symrel_cart(1,2,jsym)*magysu2+symrel_cart(1,3,jsym)*magzsu2
+!            myr=symrel_cart(2,1,jsym)*magxsu1+symrel_cart(2,2,jsym)*magysu1+symrel_cart(2,3,jsym)*magzsu1
+!            myi=symrel_cart(2,1,jsym)*magxsu2+symrel_cart(2,2,jsym)*magysu2+symrel_cart(2,3,jsym)*magzsu2
+!            mzr=symrel_cart(3,1,jsym)*magxsu1+symrel_cart(3,2,jsym)*magysu1+symrel_cart(3,3,jsym)*magzsu1
+!            mzi=symrel_cart(3,1,jsym)*magxsu2+symrel_cart(3,2,jsym)*magysu2+symrel_cart(3,3,jsym)*magzsu2
+             magngx(1,ind)=mxr*phr-mxi*phi
+             magngx(2,ind)=mxi*phr+mxr*phi
+             magngy(1,ind)=myr*phr-myi*phi
+             magngy(2,ind)=myi*phr+myr*phi
+             magngz(1,ind)=mzr*phr-mzi*phi
+             magngz(2,ind)=mzi*phr+mzr*phi
            end if
          end do
          numpt=numpt+nup
        end do
-       ABI_DEALLOCATE(isymg)
-       ABI_DEALLOCATE(rhosu1_arr)
-       ABI_DEALLOCATE(rhosu2_arr)
-       ABI_DEALLOCATE(symrec_cart)
-       ABI_DEALLOCATE(symrel_cart)
-       ABI_DEALLOCATE(symafm_used)
+       ABI_FREE(isymg)
+       ABI_FREE(rhosu1_arr)
+       ABI_FREE(rhosu2_arr)
+       ABI_FREE(symrec_cart)
+       ABI_FREE(symrel_cart)
+       ABI_FREE(symafm_used)
+       ABI_FREE(tnons_used)
 
      end if ! nspden==4
 
@@ -1436,16 +1922,16 @@ subroutine symrhg(cplex,gprimd,irrzon,mpi_enreg,nfft,nfftot,ngfft,nspden,nsppol,
        rhor(:,3)=work(:)
        call fourdp(cplex,magngz,work,1,mpi_enreg,nfft,1,ngfft,0)
        rhor(:,4)=work(:)
-       ABI_DEALLOCATE(magngx)
-       ABI_DEALLOCATE(magngy)
-       ABI_DEALLOCATE(magngz)
+       ABI_FREE(magngx)
+       ABI_FREE(magngy)
+       ABI_FREE(magngz)
      end if
 
    end do ! ispden
 
  end if !  End on the condition nsym==1
 
- ABI_DEALLOCATE(work)
+ ABI_FREE(work)
 
  contains
 
@@ -1453,6 +1939,7 @@ subroutine symrhg(cplex,gprimd,irrzon,mpi_enreg,nfft,nfftot,ngfft,nspden,nsppol,
 
    integer :: map_symrhg
    integer,intent(in) :: j1,n1
+!  Map into [0,n-1]
    map_symrhg=mod(n1+mod(j1,n1),n1)
  end function map_symrhg
 
@@ -1510,12 +1997,6 @@ end subroutine symrhg
 !!   grid points and the repetition number for each symmetry class.
 !!  phnons(2,n1*n2*n3,(nspden/nsppol)-3*(nspden/4))=phases associated with nonsymmorphic translations
 !!
-!! PARENTS
-!!      m_ab7_kpoints,setsym,wfd_mkrho
-!!
-!! CHILDREN
-!!      sort_int,wrtout
-!!
 !! SOURCE
 
 subroutine irrzg(irrzon,nspden,nsppol,nsym,n1,n2,n3,phnons,symafm,symrel,tnons)
@@ -1544,10 +2025,10 @@ subroutine irrzg(irrzon,nspden,nsppol,nsym,n1,n2,n3,phnons,symafm,symrel,tnons)
 
 ! *************************************************************************
 
- ABI_ALLOCATE(class,(nsym))
- ABI_ALLOCATE(iperm,(nsym))
- ABI_ALLOCATE(work1,(n1*n2*n3))
- ABI_ALLOCATE(work2,(2,n1*n2*n3))
+ ABI_MALLOC(class,(nsym))
+ ABI_MALLOC(iperm,(nsym))
+ ABI_MALLOC(work1,(n1*n2*n3))
+ ABI_MALLOC(work2,(2,n1*n2*n3))
 
  nfftot=n1*n2*n3
 
@@ -1573,12 +2054,12 @@ subroutine irrzg(irrzon,nspden,nsppol,nsym,n1,n2,n3,phnons,symafm,symrel,tnons)
 &     '  The number of ferromagnetic symmetry operations must be',ch10,&
 &     '  half the total number of operations, while it is observed that',ch10,&
 &     '  nsym=',nsym,' and nsym_magn=',nsym_used
-     MSG_BUG(message)
+     ABI_BUG(message)
    end if
 
-   ABI_ALLOCATE(symafm_used,(nsym_used))
-   ABI_ALLOCATE(symrel_used,(3,3,nsym_used))
-   ABI_ALLOCATE(tnons_used,(3,nsym_used))
+   ABI_MALLOC(symafm_used,(nsym_used))
+   ABI_MALLOC(symrel_used,(3,3,nsym_used))
+   ABI_MALLOC(tnons_used,(3,nsym_used))
 
    nsym_used=0
    do isym=1,nsym
@@ -1645,16 +2126,13 @@ subroutine irrzg(irrzon,nspden,nsppol,nsym,n1,n2,n3,phnons,symafm,symrel,tnons)
              j3=symrel_used(1,3,isym)*l1+&
 &             symrel_used(2,3,isym)*l2+symrel_used(3,3,isym)*l3
 
-!            Map into [0,n-1] and then add 1 for array index in [1,n]
-             k1=1+mod(n1+mod(j1,n1),n1)
-             k2=1+mod(n2+mod(j2,n2),n2)
-             k3=1+mod(n3+mod(j3,n3),n3)
-!            k1=1+map(j1,n1)
-!            k2=1+map(j2,n2)
-!            k3=1+map(j3,n3)
+!            Map into [0,n-1]
+             k1=mod(n1+mod(j1,n1),n1)
+             k2=mod(n2+mod(j2,n2),n2)
+             k3=mod(n3+mod(j3,n3),n3)
 
 !            Get linear index of rotated point Gj
-             ind2=k1+n1*((k2-1)+n2*(k3-1))
+             ind2=1+k1+n1*(k2+n2*k3)
 
 !            Store info for new class:
              class(isym)=ind2
@@ -1690,7 +2168,7 @@ subroutine irrzg(irrzon,nspden,nsppol,nsym,n1,n2,n3,phnons,symafm,symrel,tnons)
 &             ' the input symmetries do not form a group.',ch10,&
 &             ' Action : check the input symmetries carefully do they',&
 &             ' form a group ? If they do, there is a code bug.'
-             MSG_ERROR(message)
+             ABI_ERROR(message)
            end if
 
 !          Compute phases for any nonsymmorphic symmetries
@@ -1806,15 +2284,9 @@ subroutine irrzg(irrzon,nspden,nsppol,nsym,n1,n2,n3,phnons,symafm,symrel,tnons)
      end do
    end do
 
-   if (allocated(symafm_used))  then
-     ABI_DEALLOCATE(symafm_used)
-   end if
-   if (allocated(symrel_used))  then
-     ABI_DEALLOCATE(symrel_used)
-   end if
-   if (allocated(tnons_used))  then
-     ABI_DEALLOCATE(tnons_used)
-   end if
+   ABI_SFREE(symafm_used)
+   ABI_SFREE(symrel_used)
+   ABI_SFREE(tnons_used)
 
  end do ! imagn
 
@@ -1832,7 +2304,7 @@ subroutine irrzg(irrzon,nspden,nsppol,nsym,n1,n2,n3,phnons,symafm,symrel,tnons)
    write(message,'(3a)') &
 &   ' This may mean that the input symmetries do not form a group',ch10,&
 &   ' Action : check input symmetries carefully for errors.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 !Perform some checks
@@ -1843,7 +2315,7 @@ subroutine irrzg(irrzon,nspden,nsppol,nsym,n1,n2,n3,phnons,symafm,symrel,tnons)
        write(message,'(a,4i0,a,a)')&
 &       '  ifft,irrzon(ifft,1,imagn),nfftot,imagn=',ifft,irrzon(ifft,1,imagn),nfftot,imagn,ch10,&
 &       '  =>irrzon goes outside acceptable bounds.'
-       MSG_BUG(message)
+       ABI_BUG(message)
      end if
    end do
 
@@ -1854,7 +2326,7 @@ subroutine irrzg(irrzon,nspden,nsppol,nsym,n1,n2,n3,phnons,symafm,symrel,tnons)
        write(message, '(a,5i7,a,a)' )&
 &       ' izone,nzone,irrzon(izone,2,imagn),nsym,imagn =',izone,nzone,irrzon(izone,2,imagn),nsym,imagn,ch10,&
 &       '  =>irrzon goes outside acceptable bounds.'
-       MSG_BUG(message)
+       ABI_BUG(message)
      end if
 !    Second index only goes up to nzone
      if(izonemax==0)then
@@ -1863,17 +2335,17 @@ subroutine irrzg(irrzon,nspden,nsppol,nsym,n1,n2,n3,phnons,symafm,symrel,tnons)
      if(izonemax/=0)then
        if (irrzon(izone,2,imagn)/=0) then
          message = ' beyond izonemax, irrzon(izone,2,imagn) should be zero'
-         MSG_BUG(message)
+         ABI_BUG(message)
        end if
      end if
    end do
 
  end do ! imagn
 
- ABI_DEALLOCATE(class)
- ABI_DEALLOCATE(iperm)
- ABI_DEALLOCATE(work1)
- ABI_DEALLOCATE(work2)
+ ABI_FREE(class)
+ ABI_FREE(iperm)
+ ABI_FREE(work1)
+ ABI_FREE(work2)
 
 end subroutine irrzg
 !!***
@@ -1887,7 +2359,7 @@ end subroutine irrzg
 !!
 !! INPUTS
 !!  cplex: if 1, real space 1-order functions on FFT grid are REAL, if 2, COMPLEX
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  nfft=(effective) number of FFT grid points (for this proc) for the "fine" grid (see NOTES in respfn.F90)
 !!  ngfft=array of dimensions for different FFT grids
 !!  nspden=number of spin-density components
@@ -1900,16 +2372,6 @@ end subroutine irrzg
 !! OUTPUT
 !!  rhog1_eq(2,nfft)= symmetric density in reciprocal space for equivalent perturbation
 !!  rhor1_eq(cplex*nfft,nspden) = symmetric density in real space for equivalent perturbation
-!!
-!! PARENTS
-!!      dfpt_looppert
-!!
-!! CHILDREN
-!!      fourdp
-!!
-!! TODO
-!!  This routine is deprecated. Now the symmetrization of the **potentials** is done in the m_dvdb
-!!  Moreover one should take linear combinations of symmetrical components
 !!
 !! SOURCE
 
@@ -1967,8 +2429,8 @@ subroutine rotate_rho(cplex, itirev, mpi_enreg, nfft, ngfft, nspden, &
 ! eventually, for FFT parallelization
 ! call ptabs_fourdp(mpi_enreg,n2,n3,fftn2_distrib,ffti2_local,fftn3_distrib,ffti3_local)
 
- ABI_ALLOCATE(workg,(2,nfft))
- ABI_ALLOCATE(workg_eq,(2,nfft))
+ ABI_MALLOC(workg,(2,nfft))
+ ABI_MALLOC(workg_eq,(2,nfft))
  do ispden = 1, nspden
 
 ! fft input rhor1 to reciprocal space: uses work* as a buffer
@@ -2042,8 +2504,8 @@ subroutine rotate_rho(cplex, itirev, mpi_enreg, nfft, ngfft, nspden, &
 
  end do !nspden
 
- ABI_DEALLOCATE(workg)
- ABI_DEALLOCATE(workg_eq)
+ ABI_FREE(workg)
+ ABI_FREE(workg_eq)
 
 end subroutine rotate_rho
 !!***
@@ -2085,12 +2547,6 @@ end subroutine rotate_rho
 !! NOTES
 !! nsppol and nspden are needed in case of (anti)ferromagnetic symmetry operations
 !!
-!! PARENTS
-!!      dfpt_looppert,gstate,m_dvdb,nonlinear,respfn,scfcv
-!!
-!! CHILDREN
-!!      chkgrp,irrzg,mati3inv,symatm,symdet,timab
-!!
 !! SOURCE
 
 subroutine setsym(indsym,irrzon,iscf,natom,nfft,ngfft,nspden,nsppol,nsym,phnons,&
@@ -2117,12 +2573,16 @@ subroutine setsym(indsym,irrzon,iscf,natom,nfft,ngfft,nspden,nsppol,nsym,phnons,
 
 ! *************************************************************************
 
+!DEBUG
+!write(std_out,*)' m_spacepar%setsym : enter '
+!ENDDEBUG
+
  call timab(6,1,tsec)
 
 !Check that symmetries have unity determinant
- ABI_ALLOCATE(determinant,(nsym))
+ ABI_MALLOC(determinant,(nsym))
  call symdet(determinant,nsym,symrel)
- ABI_DEALLOCATE(determinant)
+ ABI_FREE(determinant)
 
 
 !Get the symmetry matrices in terms of reciprocal basis
@@ -2131,15 +2591,15 @@ subroutine setsym(indsym,irrzon,iscf,natom,nfft,ngfft,nspden,nsppol,nsym,phnons,
  end do
 
 !Check for group closure
- call chkgrp(nsym,symafm,symrel,ierr)
+ call sg_multable(nsym,symafm,symrel,ierr,tnons=tnons,tnons_tol=tol5)
  ABI_CHECK(ierr==0,"Error in group closure")
 
- call chkgrp(nsym,symafm,symrec,ierr)
+ call sg_multable(nsym,symafm,symrec,ierr)
  ABI_CHECK(ierr==0,"Error in group closure")
 
 !Obtain a list of rotated atom labels:
  tolsym8=tol8
- call symatm(indsym,natom,nsym,symrec,tnons,tolsym8,typat,xred)
+ call symatm(indsym,natom,nsym,symrec,tnons,tolsym8,typat,xred,print_indsym=10)
 
 !If non-SCF calculation, or nsym==1, do not need IBZ data
  if ( (iscf>0 .or. iscf==-3) .and. nsym>1 ) then
@@ -2149,7 +2609,142 @@ subroutine setsym(indsym,irrzon,iscf,natom,nfft,ngfft,nspden,nsppol,nsym,phnons,
 
  call timab(6,2,tsec)
 
+!DEBUG
+!write(std_out,*)' m_spacepar%setsym : exit '
+!ENDDEBUG
+
 end subroutine setsym
+!!***
+
+!!****f* ABINIT/hartredq.F90
+!! NAME
+!!  hartredq.F90
+!!
+!! FUNCTION
+!!  Given rho(G), compute the q-gradient of the Hartree potential at q=0
+!!  (=FFT of -rho(G)*G_qdir/pi**2/|G|**4 ) -> Cartesian coordinates
+!!  The calculation is performed in reduced reciprocal space coordinates.
+!!
+!! COPYRIGHT
+!!  Copyright (C) 2021-2024 ABINIT group (FIXME: add author)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! INPUTS
+!!  cplex= if 1, vqgradhartr is REAL, if 2, vqgradhartr is COMPLEX
+!!  gmet(3,3)=metrix tensor in G space in Bohr**-2.
+!!  gprimd(3,3)=reciprocal space dimensional primitive translations
+!!  gsqcut=cutoff value on G**2 for sphere inside fft box.
+!!         (gsqcut=(boxcut**2)*ecut/(2.d0*(Pi**2))
+!!  mpi_enreg=information about MPI parallelization
+!!  nfft=(effective) number of FFT grid points (for this processor)
+!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!  qdir= indicates the direction of the q-gradient (1,2 or 3)
+!!  rhog(2,nfft)=electron density in G space
+!!
+!! OUTPUT
+!!  vqgradhart(cplex*nfft)=q-gradient of the Hartree potential at q=0in real space, either REAL or COMPLEX
+!!
+!! SIDE EFFECTS
+!!
+!! NOTES
+!!
+!! SOURCE
+
+subroutine hartredq(cplex,gmet,gsqcut,mpi_enreg,nfft,ngfft,qdir,rhog,vqgradhart)
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: cplex,nfft,qdir
+ real(dp),intent(in) :: gsqcut
+ type(MPI_type),intent(in) :: mpi_enreg
+!arrays
+ integer,intent(in) :: ngfft(18)
+ real(dp),intent(in) :: gmet(3,3),rhog(2,nfft)
+ real(dp),intent(out) :: vqgradhart(cplex*nfft)
+
+!Local variables-------------------------------
+!scalars
+ integer,parameter :: im=2,re=1
+ integer :: i1,i2,i23,i2_local,i3
+ integer :: id1,id2,id3,ig1,ig2,ig3,ii,ii1,me_fft,n1,n2,n3,nproc_fft
+ real(dp) :: cutoff,gfact,gnorm,num
+ real(dp), parameter :: piinv2= piinv*two
+ real(dp),parameter :: tolfix=1.000000001e0_dp
+!arrays
+ integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:),ffti2_local(:)
+ integer, ABI_CONTIGUOUS pointer :: fftn3_distrib(:),ffti3_local(:)
+ real(dp),allocatable :: work1(:,:)
+ real(dp) :: gvec(3)
+
+! *************************************************************************
+
+ DBG_ENTER("COLL")
+
+ n1=ngfft(1); n2=ngfft(2); n3=ngfft(3)
+ nproc_fft = mpi_enreg%nproc_fft; me_fft = mpi_enreg%me_fft
+
+!Get the distrib associated with this fft_grid
+ call ptabs_fourdp(mpi_enreg,n2,n3,fftn2_distrib,ffti2_local,fftn3_distrib,ffti3_local)
+
+!Initialize a few quantities
+ cutoff=gsqcut*tolfix
+ ABI_MALLOC(work1,(2,nfft))
+ id1=n1/2+2;id2=n2/2+2;id3=n3/2+2
+
+!Triple loop on each dimension
+ do i3=1,n3
+   ig3=i3-(i3/id3)*n3-1
+
+   do i2=1,n2
+     ig2=i2-(i2/id2)*n2-1
+
+     if (fftn2_distrib(i2) == me_fft) then
+       i2_local = ffti2_local(i2)
+       i23=n1*(i2_local-1 +(n2/nproc_fft)*(i3-1))
+       !Do the test that eliminates the Gamma point outside of the inner loop
+       ii1=1
+       if(i23==0 .and. ig2==0 .and. ig3==0)then
+         ii1=2
+         work1(re,1+i23)=zero
+         work1(im,1+i23)=zero
+       end if
+
+       ! Final inner loop on the first dimension (note the lower limit)
+       do i1=ii1,n1
+         ig1=i1-(i1/id1)*n1-1
+         ii=i1+i23
+
+         gvec=(/ig1,ig2,ig3/)
+         gnorm=normv(gvec,gmet,'r') !'r' is to avoid the 2pi scalling
+
+         if (gnorm**2<=cutoff) then
+           num=dot_product(gmet(qdir,:),gvec(:))
+           gfact=piinv2*num/gnorm**4
+           work1(re,ii)=-rhog(re,ii)*gfact
+           work1(im,ii)=-rhog(im,ii)*gfact
+         else
+           work1(re,ii)=zero
+           work1(im,ii)=zero
+         end if
+
+       end do ! End loop on i1
+     end if
+
+   end do ! End loop on i2
+ end do ! End loop on i3
+
+ ! Fourier Transform the q-gradient of the hartree potential, in reciprocal space it was stored in work1
+ call fourdp(cplex,work1,vqgradhart,1,mpi_enreg,nfft,1,ngfft,0)
+
+ ABI_FREE(work1)
+
+ DBG_EXIT("COLL")
+
+end subroutine hartredq
 !!***
 
 end module m_spacepar

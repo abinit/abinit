@@ -1,16 +1,13 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_sorth_ph
 !! NAME
 !!
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2019 ABINIT group (MVer, FDortu, MVeithen)
+!!  Copyright (C) 2008-2024 ABINIT group (MVer, FDortu, MVeithen)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
 !!
 !! SOURCE
 
@@ -57,16 +54,11 @@ contains
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      harmonic_thermo,m_phonons
-!!
-!! CHILDREN
-!!
 !! SOURCE
 subroutine end_sortph()
 
  if (allocated(eigvecLast))  then
-   ABI_DEALLOCATE(eigvecLast)
+   ABI_FREE(eigvecLast)
  end if
 
  if (ufreq /= -1) then
@@ -109,16 +101,9 @@ end subroutine end_sortph
 !! NOTES
 !! Called by one processor only
 !!
-!! PARENTS
-!!      harmonic_thermo,m_phonons
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine sortph(eigvec,displ,filnam, natom,phfrq)
-
-implicit none
 
 !Arguments -----------------------------------
 !scalars
@@ -163,14 +148,14 @@ end do
    file_freq  = trim(filnam)//".freq" !---------------------------------------------------
    write(std_out,'(a,a)' )' sortph : opening file ',trim(file_freq)
    if (open_file(file_freq,msg,newunit=ufreq,STATUS='replace',ACTION='write') /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
    file_displ = trim(filnam)//".displ" !--------------------------------------------------
    write(std_out,'(a,a)' )' sortph : opening file ',trim(file_displ)
    if (open_file(file_displ,msg,newunit=udispl,STATUS='replace',ACTION='write') /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
-   ABI_ALLOCATE(eigvecLast,(3*natom,3*natom))
+   ABI_MALLOC(eigvecLast,(3*natom,3*natom))
    phfrqNew(:)   =  phfrq(:)
    displNew(:,:) =  displIn(:,:)
    eigvecNew(:,:) = eigvecIn(:,:)

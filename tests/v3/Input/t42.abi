@@ -1,0 +1,89 @@
+#   HCP Mg; optimization of the two cell parameters.
+
+ ndtset 7
+
+#First dataset : optimisation of volume only
+ optcell1 1
+
+#Second dataset : full optimisation
+ optcell2 2
+
+#Third dataset : constant-volume optimisation
+ optcell3 3
+
+#Fourth dataset : optimize c
+ optcell4 6
+
+#Fifth dataset : optimize a
+ optcell5 9
+
+#Sixth dataset : full optimisation, insufficient dilatmx, but use chkdilatmx=0  => will perform the optimization
+ optcell6 2
+ dilatmx6 1.01
+ chkdilatmx6 0
+
+#Seventh dataset : full optimisation, but insufficient dilatmx => will stop
+ optcell7 2
+ dilatmx7 1.01
+#Actually, stop before the dilatmx condition is violated three times.
+ ntime7 4
+
+
+#Common data
+ acell  2*5.8d0 9.4d0
+ rprim  1        0        0
+       -0.5   sqrt(0.75)  0    # This is to test the use of sqrt
+        0        0        1
+
+ dilatmx 1.10
+ ecut 3
+ ecutsm 1.0
+ ionmov 2
+
+ natom  2
+
+ kptopt 1
+ ngkpt 4 4 2
+ shiftk 0 0 0.5
+
+ nstep 8
+ ntime 15
+ ntypat  1
+ occopt  4
+
+ toldfe  1.0d-10
+ tolmxf 5.d-6
+ typat  2*1
+ xred  1/3
+       2/3
+       0.25
+
+       2/3
+       1/3
+       0.75
+
+ znucl 12.0
+
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/12mg.pspnc"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t42.abo, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
+#%% [paral_info]
+#%% max_nprocs = 4
+#%% [extra_info]
+#%% authors = Unknown
+#%% keywords = 
+#%% description = 
+#%%   Magnesium HCP. Optimize the cell volume and shape using different constraints.
+#%%   Checks whether the stresses are symmetric, and whether the optimisation algorithm does
+#%%   not break the symmetry.
+#%%   Also checks the possibility to disable the stop after violation of the condition related to dilatmx.
+#%%   This is done in dataset 6. The optimization delivers acell values slightly different from those of dataset 2.
+#%% topics = GeoOpt
+#%%<END TEST_INFO>

@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_haydock
 !! NAME
 !! m_haydock
@@ -6,14 +5,10 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2019 ABINIT group (M.Giantomassi, Y. Gillet, L.Reining, V.Olevano, F.Sottile, S.Albrecht, G.Onida)
+!!  Copyright (C) 2008-2024 ABINIT group (M.Giantomassi, Y. Gillet, L.Reining, V.Olevano, F.Sottile, S.Albrecht, G.Onida)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -34,14 +29,12 @@ MODULE m_haydock
  use m_haydock_io
  use m_linalg_interfaces
  use m_ebands
-#ifdef HAVE_NETCDF
+ use m_hdr
  use netcdf
-#endif
 
  use m_time,              only : timab
  use m_fstrings,          only : strcat, sjoin, itoa, int2char4
  use m_io_tools,          only : file_exists, open_file
- use defs_abitypes,       only : Hdr_type
  use defs_datatypes,      only : ebands_t, pseudopotential_type
  use m_geometry,          only : normv
  use m_hide_blas,         only : xdotc, xgemv
@@ -49,10 +42,10 @@ MODULE m_haydock
  use m_numeric_tools,     only : print_arr, symmetrize, hermitianize, continued_fract, wrap2_pmhalf, iseven
  use m_kpts,              only : listkk
  use m_crystal,           only : crystal_t
- use m_bz_mesh,           only : kmesh_t, findqg0, get_bz_item
+ use m_bz_mesh,           only : kmesh_t, findqg0
  use m_double_grid,       only : double_grid_t, get_kpt_from_indices_coarse, compute_corresp
  use m_paw_hr,            only : pawhur_t
- use m_wfd,               only : wfd_t
+ use m_wfd,               only : wfdgw_t
  use m_bse_io,            only : exc_write_optme
  use m_pawtab,            only : pawtab_type
  use m_vcoul,             only : vcoul_t
@@ -88,23 +81,18 @@ CONTAINS  !=====================================================================
 !! Hdr_bse
 !! KS_BSt=The KS energies.
 !! QP_BSt=The QP energies.
-!! Wfd<wfd_t>=Wavefunction descriptor (input k-mesh)
+!! Wfd<wfdgw_t>=Wavefunction descriptor (input k-mesh)
 !! Psps <type(pseudopotential_type)>=variables related to pseudopotentials.
 !! Pawtab(Cryst%ntypat*usepaw)<pawtab_type>=PAW tabulated starting data.
-!! Hur(Cryst%natom*usepaw)<type(pawhur_t)>=Only for PAW and LDA+U, quantities used to evaluate the commutator [H_u,r].
+!! Hur(Cryst%natom*usepaw)<type(pawhur_t)>=Only for PAW and DFT+U, quantities used to evaluate the commutator [H_u,r].
 !!
 !! OUTPUT
 !!  The imaginary part of the macroscopic dielectric function is written on the external file _EXC_MDF
 !!
-!! PARENTS
-!!      bethe_salpeter
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
-subroutine exc_haydock_driver(BSp,BS_files,Cryst,Kmesh,Hdr_bse,KS_BSt,QP_Bst,Wfd,Psps,Pawtab,Hur,Epren,&
-& Kmesh_dense, KS_BSt_dense, QP_BSt_dense, Wfd_dense, Vcp_dense, grid)
+subroutine exc_haydock_driver(BSp,BS_files,Cryst,Kmesh,Hdr_bse,KS_BSt,QP_Bst,Wfd,Psps,Pawtab,Hur,Epren, &
+ Kmesh_dense, KS_BSt_dense, QP_BSt_dense, Wfd_dense, Vcp_dense, grid) ! Optional args
 
 !Arguments ------------------------------------
 !scalars
@@ -113,12 +101,12 @@ subroutine exc_haydock_driver(BSp,BS_files,Cryst,Kmesh,Hdr_bse,KS_BSt,QP_Bst,Wfd
  type(kmesh_t),intent(in) :: Kmesh
  type(crystal_t),intent(in) :: Cryst
  type(Hdr_type),intent(in) :: Hdr_bse
- type(wfd_t),intent(inout) :: Wfd
+ type(wfdgw_t),intent(inout) :: Wfd
  type(pseudopotential_type),intent(in) :: Psps
  type(ebands_t),intent(in) :: KS_BSt,QP_Bst
  type(double_grid_t),intent(in),optional :: grid
  type(kmesh_t),intent(in),optional :: Kmesh_dense
- type(wfd_t),intent(inout),optional :: Wfd_dense
+ type(wfdgw_t),intent(inout),optional :: Wfd_dense
  type(ebands_t),intent(in),optional :: KS_BSt_dense, QP_Bst_dense
  type(vcoul_t),intent(in),optional :: Vcp_dense
  type(eprenorms_t),intent(in) :: Epren
@@ -167,7 +155,7 @@ subroutine exc_haydock_driver(BSp,BS_files,Cryst,Kmesh,Hdr_bse,KS_BSt,QP_Bst,Wfd
  call timab(691,1,tsec) ! exc_haydock_driver(read)
 
  if (BSp%have_complex_ene) then
-   MSG_ERROR("Complex energies are not supported yet")
+   ABI_ERROR("Complex energies are not supported yet")
  end if
 
  my_rank = Wfd%my_rank
@@ -211,29 +199,27 @@ subroutine exc_haydock_driver(BSp,BS_files,Cryst,Kmesh,Hdr_bse,KS_BSt,QP_Bst,Wfd
  if (prtdos) then
    nkets=nkets+1
    if (Bsp%use_coupling>0) then
-     MSG_ERROR("DOS with coupling not coded")
+     ABI_ERROR("DOS with coupling not coded")
      nkets=nkets+1
    end if
  end if
 
  !YG2014
- ABI_STAT_MALLOC(kets,(hexc%hsize,nkets), ierr)
- ABI_CHECK(ierr==0, "out of memory in kets")
+ ABI_MALLOC_OR_DIE(kets,(hexc%hsize,nkets), ierr)
  kets=czero
  !
  ! Prepare the kets for the macroscopic dielectric function.
  lomo_min=Bsp%lomo_min; max_band=Bsp%nbnds
 
  !YG2014
- ABI_STAT_MALLOC(opt_cvk,(lomo_min:max_band,lomo_min:max_band,hexc%nbz,Wfd%nsppol,BSp%nq), ierr)
- ABI_CHECK(ierr==0, "out of memory in opt_cvk")
+ ABI_MALLOC_OR_DIE(opt_cvk,(lomo_min:max_band,lomo_min:max_band,hexc%nbz,Wfd%nsppol,BSp%nq), ierr)
 
  do iq=1,Bsp%nq
  ! Note KS_BSt is used here to calculate the commutator.
    call calc_optical_mels(hexc%Wfd,hexc%Kmesh,hexc%KS_BSt,Cryst,Psps,Pawtab,Hur, &
 &     BSp%inclvkb,BSp%lomo_spin,lomo_min,max_band,hexc%nbz,BSp%q(:,iq),opt_cvk(:,:,:,:,iq))
 
- ! Fill ket0 using the same ordering for the indeces as the one used for the excitonic Hamiltonian.
+ ! Fill ket0 using the same ordering for the indices as the one used for the excitonic Hamiltonian.
  ! Note that only the resonant part is used here.
    do spin=1,nsppol
 
@@ -292,7 +278,7 @@ subroutine exc_haydock_driver(BSp,BS_files,Cryst,Kmesh,Hdr_bse,KS_BSt,QP_Bst,Wfd
 
  if(BSp%do_ep_renorm) then
    if (BSp%nsppol == 2) then
-     MSG_ERROR('Elphon renorm with nsppol == 2 not yet coded !')
+     ABI_ERROR('Elphon renorm with nsppol == 2 not yet coded !')
    end if
    do_ep_renorm = .TRUE.
    ntemp = Epren%ntemp
@@ -347,7 +333,7 @@ subroutine exc_haydock_driver(BSp,BS_files,Cryst,Kmesh,Hdr_bse,KS_BSt,QP_Bst,Wfd
 
          !TODO support multiple spins !
          if(ABS(en - (Epren%eigens(ic,ep_ik,isppol)-Epren%eigens(iv,ep_ik,isppol)+BSp%mbpt_sciss)) > tol3) then
-           MSG_ERROR("Eigen from the transition does not correspond to the EP file !")
+           ABI_ERROR("Eigen from the transition does not correspond to the EP file !")
          end if
          ep_renorms(ireh) = (Epren%renorms(1,ic,ik,isppol,itemp) - Epren%renorms(1,iv,ik,isppol,itemp))
 
@@ -402,7 +388,7 @@ subroutine exc_haydock_driver(BSp,BS_files,Cryst,Kmesh,Hdr_bse,KS_BSt,QP_Bst,Wfd
         write(msg,'(3a)')&
 &         'The RPA_NLF dielectric complex tensor cannot be computed',ch10,&
 &         'There must be 6 different q-points in long wavelength limit (see gw_nqlwl)'
-        MSG_COMMENT(msg)
+        ABI_COMMENT(msg)
      end if
 
      ABI_FREE(tensor_cart_rpanlf)
@@ -424,7 +410,7 @@ subroutine exc_haydock_driver(BSp,BS_files,Cryst,Kmesh,Hdr_bse,KS_BSt,QP_Bst,Wfd
         write(msg,'(3a)')&
 &         'The GW_NLF dielectric complex tensor cannot be computed',ch10,&
 &         'There must be 6 different q-points in long wavelength limit (see gw_nqlwl)'
-        MSG_COMMENT(msg)
+        ABI_COMMENT(msg)
      end if
 
      ABI_FREE(tensor_cart_gwnlf)
@@ -442,7 +428,7 @@ subroutine exc_haydock_driver(BSp,BS_files,Cryst,Kmesh,Hdr_bse,KS_BSt,QP_Bst,Wfd
      !call wrtout(std_out," Checking f-sum rule on Excitonic Macroscopic Epsilon","COLL")
 
      !if (BSp%exchange_term>0) then
-     !  MSG_COMMENT(' f-sum rule should be checked without LF')
+     !  ABI_COMMENT(' f-sum rule should be checked without LF')
      !end if
      !call check_fsumrule(BSp%nomega,REAL(BSp%omega),AIMAG(eps_exc(:,1)),drude_plsmf)
 
@@ -457,7 +443,7 @@ subroutine exc_haydock_driver(BSp,BS_files,Cryst,Kmesh,Hdr_bse,KS_BSt,QP_Bst,Wfd
    !
    ! The ket for the approximated DOS.
    if (prtdos) then
-     MSG_WARNING("Calculating DOS with Haydock method")
+     ABI_WARNING("Calculating DOS with Haydock method")
      ABI_CHECK(BSp%use_coupling==0,"DOS with coupling not coded")
      iq = BSp%nq + 1
      if (my_rank==master) then
@@ -486,7 +472,7 @@ subroutine exc_haydock_driver(BSp,BS_files,Cryst,Kmesh,Hdr_bse,KS_BSt,QP_Bst,Wfd
      end if
    else
      if (BSp%use_interp) then
-       MSG_ERROR("BSE Interpolation with coupling is not supported")
+       ABI_ERROR("BSE Interpolation with coupling is not supported")
      else
        call haydock_psherm(BSp,BS_files,Cryst,Hdr_bse,hexc,hexc_i,hsize,my_t1,my_t2,nkets,kets,green,comm)
      end if
@@ -525,7 +511,7 @@ subroutine exc_haydock_driver(BSp,BS_files,Cryst,Kmesh,Hdr_bse,KS_BSt,QP_Bst,Wfd
          write(msg,'(3a)')&
 &          'The EXC dielectric complex tensor cannot be computed',ch10,&
 &          'There must be 6 different q-points in long wavelength limit (see gw_nqlwl)'
-         MSG_COMMENT(msg)
+         ABI_COMMENT(msg)
      end if
 
      ABI_FREE(tensor_cart)
@@ -546,16 +532,12 @@ subroutine exc_haydock_driver(BSp,BS_files,Cryst,Kmesh,Hdr_bse,KS_BSt,QP_Bst,Wfd
 
      ! Write MDF file with the final results.
      ! FIXME: It won't work if prtdos == True
-#ifdef HAVE_NETCDF
      path = strcat(BS_files%out_basename,strcat(prefix,"_MDF.nc"))
      NCF_CHECK(nctk_open_create(ncid, path, xmpi_comm_self))
      NCF_CHECK(cryst%ncwrite(ncid))
      NCF_CHECK(ebands_ncwrite(QP_bst, ncid))
      call mdfs_ncwrite(ncid, Bsp, green, eps_rpanlf, eps_gwnlf)
      NCF_CHECK(nf90_close(ncid))
-#else
-     ABI_UNUSED(ncid)
-#endif
    end if
 
    ABI_FREE(green)
@@ -615,11 +597,6 @@ end subroutine exc_haydock_driver
 !! OUTPUT
 !!  green(BSp%nomega,nkets)=
 !!
-!! PARENTS
-!!      m_haydock
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine haydock_herm(BSp,BS_files,Cryst,Hdr_bse,my_t1,my_t2,&
@@ -667,7 +644,7 @@ subroutine haydock_herm(BSp,BS_files,Cryst,Hdr_bse,my_t1,my_t2,&
  nsppol = Hdr_bse%nsppol
 
  if (BSp%use_interp) then
-   MSG_COMMENT("No parallelization in Interpolation")
+   ABI_COMMENT("No parallelization in Interpolation")
    my_nt = SUM(Bsp%nreh_interp)
  else
    my_nt = my_t2-my_t1+1
@@ -895,11 +872,6 @@ end subroutine haydock_herm
 !!    if niter_done>0: aa(1:niter_done), bb(1:niter_done) store the coefficients of the previous run.
 !!    when the routine returns aa(1:inn) and bb(1:inn) contain the matrix elements of the tridiagonal form.
 !!
-!! PARENTS
-!!      m_haydock
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine haydock_herm_algo(niter_done,niter_max,nomega,omega,tol_iter,check,&
@@ -952,8 +924,7 @@ subroutine haydock_herm_algo(niter_done,niter_max,nomega,omega,tol_iter,check,&
  !
  my_nt = my_t2-my_t1+1
 
- ABI_STAT_MALLOC(hphi_n,(hexc%hsize), ierr)
- ABI_CHECK(ierr==0, "out-of-memory hphi_n")
+ ABI_MALLOC_OR_DIE(hphi_n,(hexc%hsize), ierr)
 
  ABI_MALLOC(phi_np1,(my_nt))
 
@@ -1004,7 +975,6 @@ subroutine haydock_herm_algo(niter_done,niter_max,nomega,omega,tol_iter,check,&
        ! Test on the L1 norm.
        if (check(1)) test(1) = SUM(abs_err(:,1)) < tol_iter*SUM(ABS(DBLE (newg)))
        if (check(2)) test(2) = SUM(abs_err(:,2)) < tol_iter*SUM(ABS(AIMAG(newg)))
-
      else
        ! Stringent test for each point.
        if (check(1)) test(1) = ALL( abs_err(:,1) < -tol_iter*ABS(DBLE (newg)))
@@ -1017,8 +987,13 @@ subroutine haydock_herm_algo(niter_done,niter_max,nomega,omega,tol_iter,check,&
        nconv = 0
      end if
      if (nconv==2) then
-       write(msg,'(a,es10.2,a,i0,a)')&
-&        " >>> Haydock algorithm converged twice within haydock_tol= ",tol_iter," after ",inn," iterations."
+       if(inn<100)then
+         write(msg,'(a,es10.2,a)')&
+&          " >>> Haydock algorithm converged twice within haydock_tol= ",tol_iter," after less than 100 iterations."
+       else
+         write(msg,'(a,es10.2,a,i0,a)')&
+&          " >>> Haydock algorithm converged twice within haydock_tol= ",tol_iter," after ",inn," iterations."
+       endif
        call wrtout(std_out,msg,'COLL')
        call wrtout(ab_out,msg,'COLL')
        EXIT
@@ -1072,11 +1047,6 @@ end subroutine haydock_herm_algo
 !!  phi_n_file(:)
 !!  phi_nm1_file(:)
 !!
-!! PARENTS
-!!      m_haydock
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine haydock_restart(BSp,restart_file,ftype,iq_search,hsize,niter_file,aa_file,bb_file,phi_nm1_file,phi_n_file,comm)
@@ -1111,19 +1081,19 @@ subroutine haydock_restart(BSp,restart_file,ftype,iq_search,hsize,niter_file,aa_
 
    if (haydock_file%op/=ftype) then
      write(msg,"(2(a,i0))")" Expecting restart file with filetype: ",ftype," but found ",op_file
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
    if (haydock_file%hsize/=hsize) then
      write(msg,"(2(a,i0))")&
 &      " Rank of H_exc read from file: ",hsize_file," differs from the one used in this run: ",hsize
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
    if (haydock_file%use_coupling /= BSp%use_coupling) then
      write(msg,'(2(a,i0))')&
 &      " use_coupling_file: ",use_coupling_file," differs from input file value: ",BSp%use_coupling
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
    call read_haydock(haydock_file, Bsp%q(:,iq_search), aa_file, bb_file, &
@@ -1133,7 +1103,7 @@ subroutine haydock_restart(BSp,restart_file,ftype,iq_search,hsize,niter_file,aa_
      write(msg,"(a,3f8.4,3a)")&
 &      " Could not find q-point: ",BSp%q(:,iq_search)," in file ",TRIM(restart_file),&
 &      " Cannot restart Haydock iterations for this q-point"
-     MSG_COMMENT(msg)
+     ABI_COMMENT(msg)
    else
      write(msg,'(a,i0)')" Number of iterations already performed: ",niter_file
      call wrtout(std_out,msg,"COLL")
@@ -1143,7 +1113,7 @@ subroutine haydock_restart(BSp,restart_file,ftype,iq_search,hsize,niter_file,aa_
        write(msg,'(2a,2(a,f8.4),a)')&
 &        " Restart file has been produced with a different Lorentzian broadening: ",ch10,&
 &        " broad_file: ",haydock_file%broad," input broadening: ",BSp%broad," Continuing anyway. "
-       MSG_WARNING(msg)
+       ABI_WARNING(msg)
      end if
 
      call close_haydock(haydock_file)
@@ -1188,11 +1158,6 @@ end subroutine haydock_restart
 !!  tensor_red(BSp%nomega, 6) = idem in reduced coordinated
 !!  ierr = 0 if the tensors have been successfully computed
 !!      \= 0 if the system is ill-posed in terms of q-points (not enough or not independent q-points)
-!!
-!! PARENTS
-!!      m_haydock
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1314,11 +1279,6 @@ end subroutine haydock_mdf_to_tensor
 !! OUTPUT
 !!  green(BSp%nomega)=The imaginary part of the macroscopic dielectric function.
 !!
-!! PARENTS
-!!      m_haydock
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine haydock_psherm(BSp,BS_files,Cryst,Hdr_bse,hexc,hexc_i,hsize,my_t1,my_t2,nkets,kets,green,comm)
@@ -1357,10 +1317,10 @@ subroutine haydock_psherm(BSp,BS_files,Cryst,Hdr_bse,hexc,hexc_i,hsize,my_t1,my_
 
 !************************************************************************
 
- MSG_WARNING("Haydock + coupling is still under development")
+ ABI_WARNING("Haydock + coupling is still under development")
 
  if(BSp%use_interp) then
-   MSG_ERROR("Coupling is not yet implemented with interpolation")
+   ABI_ERROR("Coupling is not yet implemented with interpolation")
  end if
 
  nproc  = xmpi_comm_size(comm)
@@ -1390,10 +1350,10 @@ subroutine haydock_psherm(BSp,BS_files,Cryst,Hdr_bse,hexc,hexc_i,hsize,my_t1,my_
      msg = strcat(" Restarting Haydock calculation from file: ",restart_file)
      call wrtout(std_out,msg,"COLL")
      call wrtout(ab_out,msg,"COLL")
-     MSG_ERROR("Restart is not tested")
+     ABI_ERROR("Restart is not tested")
    else
      can_restart=.FALSE.
-     MSG_WARNING(strcat("Cannot find restart file: ",restart_file))
+     ABI_WARNING(strcat("Cannot find restart file: ",restart_file))
    end if
  end if
  !
@@ -1401,7 +1361,7 @@ subroutine haydock_psherm(BSp,BS_files,Cryst,Hdr_bse,hexc,hexc_i,hsize,my_t1,my_
  if (my_rank==master) then
    out_file = TRIM(BS_files%out_basename)//TRIM(tag_file)
    if (open_file(out_file,msg,newunit=out_unt,form="unformatted") /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
    ! write header TODO: standardize this part.
    write(out_unt)hsize,Bsp%use_coupling,BSE_HAYD_IMEPS,nkets,Bsp%broad
@@ -1453,7 +1413,7 @@ subroutine haydock_psherm(BSp,BS_files,Cryst,Hdr_bse,hexc,hexc_i,hsize,my_t1,my_
 
    else ! Use the previously calculates a and b.
      niter_done=niter_file
-     MSG_ERROR("Restart not coded")
+     ABI_ERROR("Restart not coded")
      !aa(1:niter_done) = aa_file
      !bb(1:niter_done) = bb_file
      !phi_np1=phi_np1_file(my_t1:my_t2)   ! Select the slice treated by this node.
@@ -1568,11 +1528,6 @@ end subroutine haydock_psherm
 !!    when the routine returns aa(1:inn) and bb(1:inn) contain the matrix elements of the tridiagonal form.
 !!  cc(niter_tot+1)
 !!
-!! PARENTS
-!!      m_haydock
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine haydock_psherm_optalgo(niter_done,niter_tot,nomega,omega,tol_iter,check,hexc,hexc_i,hsize,my_t1,my_t2,&
@@ -1628,8 +1583,7 @@ subroutine haydock_psherm_optalgo(niter_done,niter_tot,nomega,omega,tol_iter,che
 
  keep_vectors = (keep_vectors.and.xmpi_comm_size(comm)==1)
  if (keep_vectors) then
-   ABI_STAT_MALLOC(save_phi,(my_t2-my_t1+1,niter_tot), ierr)
-   ABI_CHECK(ierr==0, "out of memory in save_phi")
+   ABI_MALLOC_OR_DIE(save_phi,(my_t2-my_t1+1,niter_tot), ierr)
    save_phi=czero
  end if
 
@@ -1725,8 +1679,13 @@ subroutine haydock_psherm_optalgo(niter_done,niter_tot,nomega,omega,tol_iter,che
        nconv = 0
      end if
      if (nconv==2) then
-       write(msg,'(a,es10.2,a,i0,a)')&
-&        " >>> Haydock algorithm converged twice within haydock_tol= ",tol_iter," after ",inn," iterations."
+       if(inn<100)then
+         write(msg,'(a,es10.2,a)')&
+&          " >>> Haydock algorithm converged twice within haydock_tol= ",tol_iter," after less than 100 iterations."
+       else
+         write(msg,'(a,es10.2,a,i0,a)')&
+&          " >>> Haydock algorithm converged twice within haydock_tol= ",tol_iter," after ",inn," iterations."
+       endif
        call wrtout(std_out,msg,'COLL')
        call wrtout(ab_out,msg,'COLL')
        EXIT
@@ -1863,11 +1822,6 @@ end subroutine haydock_psherm_optalgo
 !! OUTPUT
 !!  green(BSp%nomega)=The imaginary part of the macroscopic dielectric function.
 !!
-!! PARENTS
-!!      m_haydock
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine haydock_bilanczos(BSp,BS_files,Cryst,Hdr_bse,hexc,hexc_i,hsize,my_t1,my_t2,nkets,kets,ep_renorms,green,comm)
@@ -1910,10 +1864,10 @@ subroutine haydock_bilanczos(BSp,BS_files,Cryst,Hdr_bse,hexc,hexc_i,hsize,my_t1,
 
 !************************************************************************
 
- MSG_WARNING("Haydock with Bilanczos is still under development")
+ ABI_WARNING("Haydock with Bilanczos is still under development")
 
  if(BSp%use_interp) then
-   MSG_ERROR("Bilanczos is not yet implemented with interpolation")
+   ABI_ERROR("Bilanczos is not yet implemented with interpolation")
  end if
 
  nproc  = xmpi_comm_size(comm)
@@ -1943,10 +1897,10 @@ subroutine haydock_bilanczos(BSp,BS_files,Cryst,Hdr_bse,hexc,hexc_i,hsize,my_t1,
      msg = strcat(" Restarting Haydock calculation from file: ",restart_file)
      call wrtout(std_out,msg,"COLL")
      call wrtout(ab_out,msg,"COLL")
-     MSG_ERROR("Restart is not implemented")
+     ABI_ERROR("Restart is not implemented")
    else
      can_restart=.FALSE.
-     MSG_WARNING(strcat("Cannot find restart file: ",restart_file))
+     ABI_WARNING(strcat("Cannot find restart file: ",restart_file))
    end if
  end if
  !
@@ -1954,7 +1908,7 @@ subroutine haydock_bilanczos(BSp,BS_files,Cryst,Hdr_bse,hexc,hexc_i,hsize,my_t1,
  if (my_rank==master) then
    out_file = TRIM(BS_files%out_basename)//TRIM(tag_file)
    if (open_file(out_file,msg,newunit=out_unt,form="unformatted") /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
    ! write header TODO: standardize this part.
    write(out_unt)hsize,Bsp%use_coupling,BSE_HAYD_IMEPS,nkets,Bsp%broad
@@ -2024,7 +1978,7 @@ subroutine haydock_bilanczos(BSp,BS_files,Cryst,Hdr_bse,hexc,hexc_i,hsize,my_t1,
 
    else ! Use the previously calculates a and b.
      niter_done=niter_file
-     MSG_ERROR("Restart not coded")
+     ABI_ERROR("Restart not coded")
      !aa(1:niter_done) = aa_file
      !bb(1:niter_done) = bb_file
      !phi_np1=phi_np1_file(my_t1:my_t2)   ! Select the slice treated by this node.
@@ -2169,11 +2123,6 @@ end subroutine haydock_bilanczos
 !!    when the routine returns aa(1:inn) and bb(1:inn) contain the matrix elements of the tridiagonal form.
 !!  cc(niter_tot+1)
 !!
-!! PARENTS
-!!      m_haydock
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine haydock_bilanczos_optalgo(niter_done,niter_tot,nomega,omega,tol_iter,check,hexc,hexc_i,hsize,my_t1,my_t2,&
@@ -2220,6 +2169,7 @@ subroutine haydock_bilanczos_optalgo(niter_done,niter_tot,nomega,omega,tol_iter,
 !************************************************************************
 
  ABI_UNUSED(ket0_hbar_norm)
+ ABI_UNUSED(ket0(1))
  ABI_UNUSED(hexc_i%hsize_dense)
 
  my_nt = my_t2-my_t1+1
@@ -2233,16 +2183,13 @@ subroutine haydock_bilanczos_optalgo(niter_done,niter_tot,nomega,omega,tol_iter,
  keep_vectors = (keep_vectors.and.xmpi_comm_size(comm)==1)
  if (keep_vectors) then
    ABI_MALLOC(save_phi,(my_t2-my_t1+1,niter_tot))
-   ABI_STAT_MALLOC(save_phit,(my_t2-my_t1+1,niter_tot),ierr)
-   ABI_CHECK(ierr==0,"out of memory in save_phi")
+   ABI_MALLOC_OR_DIE(save_phit,(my_t2-my_t1+1,niter_tot),ierr)
    save_phi=czero
    save_phit=czero
  end if
 
- ABI_STAT_MALLOC(hphi_np1,(hexc%hsize),ierr)
- ABI_CHECK(ierr==0,"out-of-memory hphi_np1")
- ABI_STAT_MALLOC(hphit_np1,(hexc%hsize),ierr)
- ABI_CHECK(ierr==0,"out-of-memory hphit_np1")
+ ABI_MALLOC_OR_DIE(hphi_np1,(hexc%hsize),ierr)
+ ABI_MALLOC_OR_DIE(hphit_np1,(hexc%hsize),ierr)
 
  do inn=niter_done+1,niter_tot
 
@@ -2310,8 +2257,13 @@ subroutine haydock_bilanczos_optalgo(niter_done,niter_tot,nomega,omega,tol_iter,
        nconv = 0
      end if
      if (nconv==2) then
-       write(msg,'(a,es10.2,a,i0,a)')&
-&        " >>> Haydock algorithm converged twice within haydock_tol= ",tol_iter," after ",inn," iterations."
+       if(inn<100)then
+         write(msg,'(a,es10.2,a)')&
+&          " >>> Haydock algorithm converged twice within haydock_tol= ",tol_iter," after less than 100 iterations."
+       else
+         write(msg,'(a,es10.2,a,i0,a)')&
+&          " >>> Haydock algorithm converged twice within haydock_tol= ",tol_iter," after ",inn," iterations."
+       endif
        call wrtout(std_out,msg,'COLL')
        call wrtout(ab_out,msg,'COLL')
        EXIT
@@ -2462,11 +2414,6 @@ end subroutine haydock_bilanczos_optalgo
 !! OUTPUT
 !!  spectrum(nz)=Contains f(z) on the input mesh.
 !!
-!! PARENTS
-!!      bsepostproc,m_haydock
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine continued_fract_general(nlev,term_type,aa,bb,cc,nz,zpts,spectrum)
@@ -2499,7 +2446,7 @@ subroutine continued_fract_general(nlev,term_type,aa,bb,cc,nz,zpts,spectrum)
  case (0) ! No terminator.
    div=czero
  case (-1,1)
-   MSG_ERROR("Not yet implemented")
+   ABI_ERROR("Not yet implemented")
    if (term_type==-1) then
      bb_inf=bb(nlev)
      aa_inf=aa(nlev)
@@ -2510,7 +2457,7 @@ subroutine continued_fract_general(nlev,term_type,aa,bb,cc,nz,zpts,spectrum)
    ! Be careful with the sign of the SQRT.
    div(:) = half*(bb(nlev)/(bb_inf))**2 * ( zpts-aa_inf - SQRT((zpts-aa_inf)**2 - four*bb_inf**2) )
  case (2)
-   MSG_ERROR("Not yet implemented")
+   ABI_ERROR("Not yet implemented")
    div = zero
    if (nlev>4) then
      bg=zero; bu=zero
@@ -2536,7 +2483,7 @@ subroutine continued_fract_general(nlev,term_type,aa,bb,cc,nz,zpts,spectrum)
 
  case default
    write(msg,'(a,i0)')" Wrong value for term_type : ",term_type
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end select
 
  do it=nlev,2,-1

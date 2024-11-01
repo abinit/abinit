@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_ddb_elast
 !! NAME
 !!  m_ddb_elast
@@ -7,14 +6,10 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1999-2019 ABINIT group (XW, DW)
+!!  Copyright (C) 1999-2024 ABINIT group (XW, DW)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -88,12 +83,6 @@ contains
 !! The elastic (compliance) tensors calculated here are under boundary conditions of
 !! fixed Electric Field, different from those in ddb_piezo.F90 which are under fixed
 !! Displacement Field and incorporate piezoelectric corrections.
-!!
-!! PARENTS
-!!      anaddb
-!!
-!! CHILDREN
-!!      asria_corr,matrginv,wrtout,zhpev
 !!
 !! SOURCE
 
@@ -319,7 +308,7 @@ subroutine ddb_elast(inp,crystal,blkval,compl,compl_clamped,compl_stress,d2asr,&
 &     '  increase cutoff energy or k-points sampling.',ch10,&
 &     '  The three eigenvalues are:',Apmatr(3*natom-2,3*natom-2),&
 &     Apmatr(3*natom-1,natom-1),Apmatr(3*natom,3*natom)
-     MSG_WARNING(message)
+     ABI_WARNING(message)
      call wrtout(iout,message,'COLL')
    end if
 !  then give the value of reduced matrix form Apmatr to Amatr
@@ -348,7 +337,7 @@ subroutine ddb_elast(inp,crystal,blkval,compl,compl_clamped,compl_stress,d2asr,&
      write(message,'(a,a,a,a)') ch10,&
 &     'Unstable eigenvalue detected in force constant matrix at Gamma point.',ch10,&
 &     'The system under calculation is physically unstable.'
-     MSG_WARNING(message)
+     ABI_WARNING(message)
      call wrtout(iout,message,'COLL')
    end if
 
@@ -497,7 +486,7 @@ subroutine ddb_elast(inp,crystal,blkval,compl,compl_clamped,compl_stress,d2asr,&
 &     'one needs information about internal strain ',ch10,&
 &     'one should set  instrflag==1;',ch10,&
 &     'otherwise the program will continue but give wrong values.'
-     MSG_WARNING(message)
+     ABI_WARNING(message)
      call wrtout(iout,message,'COLL')
    end if
 
@@ -563,7 +552,7 @@ subroutine ddb_elast(inp,crystal,blkval,compl,compl_clamped,compl_stress,d2asr,&
 &     'one needs information about internal strain ',ch10,&
 &     'one should set  instrflag==1;',ch10,&
 &     'otherwise the program will continue but give wrong values.'
-     MSG_WARNING(message)
+     ABI_WARNING(message)
      call wrtout(iout,message,'COLL')
    end if
    write(message,'(5a)')ch10,&
@@ -640,7 +629,7 @@ subroutine ddb_elast(inp,crystal,blkval,compl,compl_clamped,compl_stress,d2asr,&
 &     'one needs information about internal strain ',ch10,&
 &     'one should set  instrflag==1;',ch10,&
 &     'otherwise the program will continue but give wrong values.'
-     MSG_WARNING(message)
+     ABI_WARNING(message)
      call wrtout(iout,message,'COLL')
    end if
    write(message,'(5a)')ch10,&
@@ -732,7 +721,7 @@ subroutine ddb_elast(inp,crystal,blkval,compl,compl_clamped,compl_stress,d2asr,&
    NCF_CHECK(nf90_put_var(ncid, vid('elastic_constants_relaxed_ion_stress_corrected'), elast_stress))
 
 #else
-   MSG_ERROR("Netcdf support not enabled")
+   ABI_ERROR("Netcdf support not enabled")
 #endif
  end if
 

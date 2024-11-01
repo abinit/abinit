@@ -1,13 +1,12 @@
-!{\src2tex{textfont=tt}}
 !!****p* ABINIT/ioprof
 !! NAME
 !! ioprof
 !!
 !! FUNCTION
-!! Tool for frofiling and and testing the IO routines used in abinit
+!! Tool for profiling and and testing the IO routines used in abinit
 !!
 !! COPYRIGHT
-!! Copyright (C) 2004-2019 ABINIT group (MG)
+!! Copyright (C) 2004-2024 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -16,14 +15,6 @@
 !!  (main program)
 !!
 !! NOTES
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      abi_io_redirect,abimem_init,abinit_doctor,delete_file
-!!      get_command_argument,hdr_echo,hdr_free,hdr_read_from_fname,herald
-!!      wfk_check_wfkfile,wfk_close,wfk_create_wfkfile,wfk_nc2fort
-!!      wfk_open_read,wfk_print,wfk_prof,wrtout,xmpi_init
 !!
 !! SOURCE
 
@@ -36,20 +27,18 @@
 program ioprof
 
  use defs_basis
- use m_build_info
  use m_errors
  use m_xmpi
  use m_wfk
  use m_abicore
  use m_hdr
-#ifdef HAVE_NETCDF
  use netcdf
-#endif
 
- use defs_abitypes,    only : hdr_type
+ use m_build_info,     only : abinit_version
  use m_specialmsg,     only : specialmsg_getcount, herald
  use m_fstrings,       only : lower, sjoin, itoa
  use m_io_tools,       only : delete_file, file_exists, iomode_from_fname, get_unit
+ use m_argparse,       only : get_arg !, get_arg_list, get_start_step_num
 
  implicit none
 
@@ -57,8 +46,9 @@ program ioprof
 !scalars
  integer,parameter :: master=0,MAX_NFILES=50
  integer :: comm,my_rank,nprocs,iomode,formeig,ierr,fform
- integer :: ii,io,check_iomode,method,feg,ount,nband2read,nargs
+ integer :: ii,io,check_iomode,method,feg,ount,nband2read,nargs, abimem_level
  logical :: verbose=.FALSE.
+ real(dp) :: abimem_limit_mb
  character(len=24) :: codename
  character(len=500) :: msg,command,arg
  character(len=fnlen) :: new_fname,wfk_source,wfk_dest,wfk_path
@@ -84,21 +74,23 @@ program ioprof
  call xmpi_init()
  comm = xmpi_world; my_rank = xmpi_comm_rank(comm); nprocs  = xmpi_comm_size(comm)
 
-!Initialize memory profiling if it is activated
-!if a full abimem.mocc report is desired, set the argument of abimem_init to "2" instead of "0"
-!note that abimem.mocc files can easily be multiple GB in size so don't use this option normally
+ ! Initialize memory profiling if it is activated
+ ! if a full abimem.mocc report is desired, set the argument of abimem_init to "2" instead of "0"
+ ! note that abimem.mocc files can easily be multiple GB in size so don't use this option normally
+ ABI_CHECK(get_arg("abimem-level", abimem_level, msg, default=0) == 0, msg)
+ ABI_CHECK(get_arg("abimem-limit-mb", abimem_limit_mb, msg, default=20.0_dp) == 0, msg)
 #ifdef HAVE_MEM_PROFILING
- call abimem_init(0)
+ call abimem_init(abimem_level, limit_mb=abimem_limit_mb)
 #endif
 
- codename='ABIWFK'//REPEAT(' ',17)
+ codename='IOPROF'//REPEAT(' ',17)
  call herald(codename,abinit_version,std_out)
 
  !verbose = .TRUE.
  ount = dev_null; if (verbose) ount = std_out
 
  if (nprocs>1) then
-   MSG_ERROR("not programmed for parallel execution, Run it in sequential")
+   ABI_ERROR("not programmed for parallel execution, Run it in sequential")
  end if
 
  nargs = command_argument_count()
@@ -130,8 +122,8 @@ program ioprof
    if (my_rank == master) then
      formeig = 0
      call wfk_open_read(wfk, wfk_path, formeig, iomode_from_fname(wfk_path), get_unit(), xmpi_comm_self)
-     call wfk_print(wfk)
-     call wfk_close(wfk)
+     call wfk%print()
+     call wfk%close()
    end if
 
  case ("nc2fort")
@@ -141,7 +133,7 @@ program ioprof
    call get_command_argument(3, wfk_dest)
 
    if (file_exists(wfk_dest)) then
-     MSG_ERROR(sjoin("Cannot overwrite:", wfk_dest, ". Remove file and rerun"))
+     ABI_ERROR(sjoin("Cannot overwrite:", wfk_dest, ". Remove file and rerun"))
    end if
 
    if (my_rank == master) call wfk_nc2fort(wfk_source, wfk_dest)
@@ -167,7 +159,7 @@ program ioprof
      call hdr_read_from_fname(hdr,hdr_fnames(ii),fform,comm)
      ABI_CHECK(fform/=0,"fform==0")
 
-     call hdr_echo(hdr,fform,4,unit=std_out)
+     call hdr%echo(fform,4,unit=std_out)
 
      do feg=1,size(formeigs)
        formeig = formeigs(feg)
@@ -183,11 +175,11 @@ program ioprof
 
          ! TODO
          if (formeig==1 .and. iomode==IO_MODE_ETSF) then
-           MSG_WARNING("iomode==1 with ETSF_IO not coded yet")
+           ABI_WARNING("iomode==1 with ETSF_IO not coded yet")
            CYCLE
          end if
 
-         ABI_DT_MALLOC(Kvars, (hdr%nkpt))
+         ABI_MALLOC(Kvars, (hdr%nkpt))
 
          if (my_rank == master) then
            call wrtout(ount,"Calling wfk_create_wfkfile","COLL")
@@ -197,7 +189,7 @@ program ioprof
          end if
 
          if (nprocs > 1) then
-           MSG_ERROR("Not coded")
+           ABI_ERROR("Not coded")
            !call kvars_mpicast(Kvars,master,comm)
          end if
 
@@ -211,7 +203,7 @@ program ioprof
          call wrtout(ount,msg,"COLL")
 
          if (ierr/=0) then
-           MSG_ERROR(sjoin("wfk_check_wfkfile returned ierr ",itoa(ierr)))
+           ABI_ERROR(sjoin("wfk_check_wfkfile returned ierr ",itoa(ierr)))
          end if
 
          ! If not netcdf file, try to read the file with the other mode that is compatible with it.
@@ -229,25 +221,25 @@ program ioprof
            call wrtout(ount,msg,"COLL")
 
            if (ierr/=0) then
-             MSG_ERROR(sjoin("wfk_check_wfkfile returned ierr ",itoa(ierr)))
+             ABI_ERROR(sjoin("wfk_check_wfkfile returned ierr ",itoa(ierr)))
            end if
          end if
 
-         ABI_DT_FREE(Kvars)
+         ABI_FREE(Kvars)
        end do ! iomode
      end do ! formeig
 
-     call hdr_free(hdr)
+     call hdr%free()
    end do
 
  case default
-   MSG_ERROR(sjoin("Unknown command:", command))
+   ABI_ERROR(sjoin("Unknown command:", command))
  end select
 
  !call wrtout(std_out,ch10//" Analysis completed.","COLL")
 
 !Writes information on file about the memory before ending mpi module, if memory profiling is enabled
- !ABI_ALLOCATE(nband, (2))
+ !ABI_MALLOC(nband, (2))
  call abinit_doctor("__ioprof")
 
  100 call xmpi_end()

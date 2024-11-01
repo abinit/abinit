@@ -1,3 +1,4 @@
+configure~
 config.h.in~
 .gitignore~
 .DS_Store
@@ -5,8 +6,11 @@ config.h.in~
 .directory
 .tox
 .idea
-.*.sw[op]
+.cache
+*.sw[op]
 __pycache__
+.ipynb_checkpoints
+.version
 *.egg
 *.egg-info
 Makefile.am
@@ -18,6 +22,9 @@ abinit.dir
 build_g95
 build_gfortran
 build_ifort
+build.*
+debian.ac
+debian.ac9
 config.optim
 logfile
 make.log
@@ -33,8 +40,9 @@ abiref.ac
 rafael.ac
 tmp
 tmp2
+ubuntu.ac
+ubuntu.ac9
 auto-*.m4
-interfaces_*.F90
 *.srcc
 tmp-*
 tmp_*
@@ -56,15 +64,25 @@ topology.so
 *.tmp
 *.pyc
 *.[ao]
+*.stderr
+*.stdout
+*.cmod
+*.stb
+*.ilm
+*.cmdx
 buildbot.ac
+CMakeFiles
+CMakeCache.txt
+install_manifest.txt
+cmake_install.cmake
 tests/TestBot_MPI*/*
 /.abilint
 /abilint.log
 /abilint.out
 /aclocal.m4
 /autom4te.cache
-/build
 /_build*
+/build
 /configure
 /config.dump
 /config.dump.in
@@ -75,6 +93,7 @@ tests/TestBot_MPI*/*
 /config.pc
 /config.sh
 /config.status
+/configure~
 /directories.dot
 /dump_fb_version.py
 /stamp-h1
@@ -111,12 +130,14 @@ tests/TestBot_MPI*/*
 /config/gnu/missing
 /config/gnu/mkinstalldirs
 /config/local/*
+/config/split
 /config/wrappers/wrap-fc
 /config/wrappers/wrap-mpicc
 /config/wrappers/wrap-mpicxx
 /config/wrappers/wrap-mpifc
 
 # Documentation
+mkdocs.yml
 mkdocs_plugins/dist
 /site/
 /doc/developers/statistics.json
@@ -128,8 +149,7 @@ mkdocs_plugins/dist
 /doc/config.status
 /doc/build/build-howto.html
 /doc/build/build-system-guide.pdf
-/doc/build/config-examples/*.ac
-/doc/build/config-examples/uncertified/*.ac
+/doc/build/config-examples
 /doc/build/connectors.pdf
 /doc/config/gnu/config.guess
 /doc/config/gnu/config.sub
@@ -172,6 +192,7 @@ mkdocs_plugins/dist
 /doc/*/*.log
 /doc/*/*.toc
 /doc/*/*/*~
+/doc/*/*.el
 
 # fallbacks
 /fallbacks/aclocal.m4
@@ -196,42 +217,43 @@ mkdocs_plugins/dist
 /scripts/post_processing/appa/birch/benf
 /scripts/post_processing/appa/birch/fit.dat
 /scripts/post_processing/appa/birch/fit.res
+/shared/common/src/02_clib/.deps
+/shared/common/src/14_hidewrite/m_build_info.F90
+/shared/common/src/14_hidewrite/m_cppopts_dumper.F90
+/shared/common/src/14_hidewrite/m_optim_dumper.F90
+/shared/common/src/18_timing/.deps
+/shared/common/src/*/*.lst
+/shared/libpaw/src/*.lst
 /src/.abilint
 /src/*/*~
+/src/*/*.lst
 /src/abilint.log
 /src/abirules.log
 /src/error_make_abiauty
-/src/01_gsl_ext/.deps
-/src/02_clib/.deps
-/src/10_dumpinfo/m_build_info.F90
-/src/10_dumpinfo/m_cppopts_dumper.F90
-/src/10_dumpinfo/m_optim_dumper.F90
-/src/18_timing/.deps
 /src/52_manage_cuda/.deps
 /src/56_xc/.deps
 /src/98_main/abinit
 /src/98_main/aim
 /src/98_main/anaddb
+/src/98_main/atdep
 /src/98_main/band2eps
-/src/98_main/bsepostproc
+/src/98_main/abitk
 /src/98_main/conducti
 /src/98_main/cut3d
 /src/98_main/fftprof
 /src/98_main/ioprof
-/src/98_main/kss2wfk
 /src/98_main/lapackprof
-/src/98_main/lwf
 /src/98_main/macroave
 /src/98_main/mrgddb
 /src/98_main/mrgdv
 /src/98_main/mrggkk
 /src/98_main/mrgscr
 /src/98_main/multibinit
-src/98_main/tdep
-src/98_main/dummy_tests
-/src/98_main/newsp
+/src/98_main/testtransposer
+/src/98_main/tdep
+/src/98_main/dummy_tests
 /src/98_main/optic
-src/98_main/tdep
+/src/98_main/lruj
 /src/98_main/ujdet
 /src/98_main/fold2Bloch
 /src/98_main/vdw_kernelgen
@@ -289,7 +311,6 @@ tests/tests.env
 tests/Timeout/timeout
 special/special.env
 special.env
-doc/input_variables/YML_vars_test
 scripts/*/*/build
 scripts/*/*/dist
 /tests/built-in/Input/*_o_*
@@ -315,8 +336,6 @@ src/*/test_*
 !tests_*F90
 abichecks/special.py
 abienv.txt
-fallbacks/make.stderr
-make.stderr
 makefile.sed
 tests/testcfg.py
 CheckFB.py
@@ -324,3 +343,18 @@ tests/built-in/Input/abinit
 tests/built-in/Input/fort.98
 tests/built-in/Input/testin_wannier90o_EBANDS.agr
 doc/input-web/*~
+mac-1P0-225.ac
+doc/topics/ConstrainedDFT.md
+doxygen_docs
+doxygen.err
+
+# Pycharm
+.idea/
+
+# VSC
+.vscode/
+
+/home/users/lmacenul/abinit/build
+# R language
+.Rhistory
+

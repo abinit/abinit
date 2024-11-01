@@ -1,0 +1,55 @@
+# Test cutoff of IFCs with nsphere - 1.
+ifcflag 1
+ngqpt 11 7 7 
+nsphere -1
+dipdip 1
+asr 2
+
+# make thermally occupied supercell of size 2x2x2 
+thermal_supercell 2 0 0   0 2 0   0 0 2
+
+#prtdos 2
+#ng2qpt 40 40 40
+
+prtphbands 2
+nqpath 0
+ndivsm 20
+qpath 
+0.   0.   0. 
+0.5  0.   0. 
+0.5  0.5  0. 
+0.   0.5  0. 
+0.   0.   0. 
+0.   0.   0.5
+0.5  0.   0.5
+0.5  0.5  0.5
+0.   0.5  0.5
+0.   0.   0.5
+0.   0.5  0. 
+0.   0.5  0.5
+0.5  0.   0.5
+0.5  0.   0. 
+0.5  0.5  0. 
+0.5  0.5  0.5
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = anaddb
+#%% input_ddb = t46_Ca2Br4_q11117_DDB
+#%% [shell]
+#%% pre_commands = 
+#%%   iw_cp t46_Ca2Br4_q11117_DDB t46_Ca2Br4_q11117_DDB;
+#%% [files]
+#%% files_to_test = 
+#%%   t46.abo, tolnlines = 0, tolabs = 0.01, tolrel = 1.0e-2;
+#%% [paral_info]
+#%% max_nprocs = 8
+#%% [extra_info]
+#%% authors = M. Giantomassi
+#%% keywords = 
+#%% description = 
+#%%   Test cutoff of IFCs with nsphere - 1. The vibrational spectrum obtained without cutoff
+#%%   shows instabilities around Gamma and unphysical oscillation due to the long-range behavior.
+#%%   A cutoff is needed in order to recover the linear dispersion of the acoustic modes and 
+#%%   nsphere -1 gives the first value of nsphere that does not lead to vibrational instabilites.
+#%%<END TEST_INFO>

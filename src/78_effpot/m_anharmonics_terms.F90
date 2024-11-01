@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/m_anharmonics_terms
 !!
 !! NAME
@@ -8,7 +7,7 @@
 !! Module with datatype and tools for the anharmonics terms
 !!
 !! COPYRIGHT
-!! Copyright (C) 2010-2019 ABINIT group (AM)
+!! Copyright (C) 2010-2024 ABINIT group (AM)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -29,7 +28,7 @@ module m_anharmonics_terms
  use m_errors
  use m_abicore
  use m_polynomial_coeff
- use m_ifc, only : ifc_type,ifc_free
+ use m_ifc, only : ifc_type
 
  implicit none
 
@@ -120,19 +119,11 @@ CONTAINS  !=====================================================================
 !! OUTPUT
 !! anharmonics_terms<type(anharmonics_terms_type)> = anharmonics_terms datatype to be initialized
 !!
-!! PARENTS
-!!      m_effective_potential
-!!
-!! CHILDREN
-!!      getpbcindexes_supercell,xmpi_sum
-!!
 !! SOURCE
 
 subroutine anharmonics_terms_init(anharmonics_terms,natom,ncoeff,&
 &                                 bounded,elastic3rd,elastic4th,elastic_displacement,&
 &                                 phonon_strain,coeffs)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -158,7 +149,7 @@ subroutine anharmonics_terms_init(anharmonics_terms,natom,ncoeff,&
    write(msg, '(a,a,a,i10,a)' )&
 &   'The cell must have at least one atom.',ch10,&
 &   'The number of atom is  ',natom,'.'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
 !Allocation of phonon strain coupling array (3rd order)
@@ -168,12 +159,14 @@ subroutine anharmonics_terms_init(anharmonics_terms,natom,ncoeff,&
 
 !Set the 3rd order elastic tensor
  anharmonics_terms%elastic3rd = zero
+ anharmonics_terms%has_elastic3rd = .FALSE.
  if(present(elastic3rd))then
    call anharmonics_terms_setElastic3rd(anharmonics_terms,elastic3rd)
  end if
 
 !Set the 3rd order elastic tensor
  anharmonics_terms%elastic4th = zero
+ anharmonics_terms%has_elastic4th = .FALSE.
  if(present(elastic4th))then
    call anharmonics_terms_setElastic4th(anharmonics_terms,elastic4th)
  end if
@@ -190,7 +183,7 @@ subroutine anharmonics_terms_init(anharmonics_terms,natom,ncoeff,&
    if(ncoeff /= size(coeffs))then
      write(msg, '(a)' )&
 &        ' ncoeff has not the same size than coeffs array, '
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
    call anharmonics_terms_setCoeffs(coeffs,anharmonics_terms,ncoeff)
  end if
@@ -219,17 +212,9 @@ end subroutine anharmonics_terms_init
 !! OUTPUT
 !! anharmonics_terms<type(anharmonics_terms_type)> = anharmonics_terms datatype to be free
 !!
-!! PARENTS
-!!      m_anharmonics_terms,m_effective_potential
-!!
-!! CHILDREN
-!!      getpbcindexes_supercell,xmpi_sum
-!!
 !! SOURCE
 
 subroutine anharmonics_terms_free(anharmonics_terms)
-
-  implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -250,14 +235,14 @@ subroutine anharmonics_terms_free(anharmonics_terms)
 
   if(allocated(anharmonics_terms%elastic_displacement)) then
     anharmonics_terms%elastic_displacement=zero
-    ABI_DEALLOCATE(anharmonics_terms%elastic_displacement)
+    ABI_FREE(anharmonics_terms%elastic_displacement)
   end if
 
   if(allocated(anharmonics_terms%phonon_strain))then
     do ii = 1,6
-       call ifc_free(anharmonics_terms%phonon_strain(ii))
+       call anharmonics_terms%phonon_strain(ii)%free()
     end do
-    ABI_DATATYPE_DEALLOCATE(anharmonics_terms%phonon_strain)
+    ABI_FREE(anharmonics_terms%phonon_strain)
   end if
 
   call anharmonics_terms_freeCoeffs(anharmonics_terms)
@@ -284,17 +269,9 @@ end subroutine anharmonics_terms_free
 !! anharmonics_terms<type(anharmonics_terms_type)> = anharmonics_terms datatype to be free
 !!
 !!
-!! PARENTS
-!!      m_anharmonics_terms,m_effective_potential
-!!
-!! CHILDREN
-!!      getpbcindexes_supercell,xmpi_sum
-!!
 !! SOURCE
 
 subroutine anharmonics_terms_freeCoeffs(anharmonics_terms)
-
-  implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -311,7 +288,7 @@ subroutine anharmonics_terms_freeCoeffs(anharmonics_terms)
     do ii=1,anharmonics_terms%ncoeff
       call polynomial_coeff_free(anharmonics_terms%coefficients(ii))
     end do
-    ABI_DATATYPE_DEALLOCATE(anharmonics_terms%coefficients)
+    ABI_FREE(anharmonics_terms%coefficients)
   end if
 
   anharmonics_terms%ncoeff = 0
@@ -335,18 +312,11 @@ end subroutine anharmonics_terms_freeCoeffs
 !! anharmonics_terms<type(anharmonics_terms_type)> = anharmonics_terms datatype
 !!
 !!
-!! PARENTS
-!!      m_anharmonics_terms,m_effective_potential
-!!
-!! CHILDREN
-!!      getpbcindexes_supercell,xmpi_sum
-!!
 !! SOURCE
 
 subroutine anharmonics_terms_setCoeffs(coeffs,anharmonics_terms,ncoeff)
 
  use m_polynomial_coeff
-  implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -364,7 +334,7 @@ subroutine anharmonics_terms_setCoeffs(coeffs,anharmonics_terms,ncoeff)
   if(ncoeff /= size(coeffs))then
     write(msg, '(a)' )&
 &        ' ncoeff has not the same size than coeffs array, '
-    MSG_BUG(msg)
+    ABI_BUG(msg)
   end if
 
 ! 1-deallocation of the previous value
@@ -372,12 +342,12 @@ subroutine anharmonics_terms_setCoeffs(coeffs,anharmonics_terms,ncoeff)
     do ii=1,anharmonics_terms%ncoeff
       call polynomial_coeff_free(anharmonics_terms%coefficients(ii))
     end do
-    ABI_DATATYPE_DEALLOCATE(anharmonics_terms%coefficients)
+    ABI_FREE(anharmonics_terms%coefficients)
   end if
 
 ! Allocation of the new array
   anharmonics_terms%ncoeff = ncoeff
-  ABI_DATATYPE_ALLOCATE(anharmonics_terms%coefficients,(ncoeff))
+  ABI_MALLOC(anharmonics_terms%coefficients,(ncoeff))
   do ii=1,anharmonics_terms%ncoeff
     call polynomial_coeff_init(coeffs(ii)%coefficient,coeffs(ii)%nterm,&
 &                              anharmonics_terms%coefficients(ii),&
@@ -401,17 +371,9 @@ end subroutine anharmonics_terms_setCoeffs
 !! OUTPUT
 !! anharmonics_terms<type(anharmonics_terms_type)> = anharmonics_terms datatype
 !!
-!! PARENTS
-!!      m_anharmonics_terms,m_effective_potential
-!!
-!! CHILDREN
-!!      getpbcindexes_supercell,xmpi_sum
-!!
 !! SOURCE
 
 subroutine anharmonics_terms_setElastic3rd(anharmonics_terms,elastics)
-
-  implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -453,17 +415,9 @@ end subroutine anharmonics_terms_setElastic3rd
 !! anharmonics_terms<type(anharmonics_terms_type)> = anharmonics_terms datatype
 !!
 !!
-!! PARENTS
-!!      m_anharmonics_terms,m_effective_potential
-!!
-!! CHILDREN
-!!      getpbcindexes_supercell,xmpi_sum
-!!
 !! SOURCE
 
 subroutine anharmonics_terms_setElastic4th(anharmonics_terms,elastics)
-
-  implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -506,17 +460,9 @@ end subroutine anharmonics_terms_setElastic4th
 !! OUTPUT
 !! anharmonics_terms<type(anharmonics_terms_type)> = anharmonics_terms datatype
 !!
-!! PARENTS
-!!      m_anharmonics_terms,m_effective_potential
-!!
-!! CHILDREN
-!!      getpbcindexes_supercell,xmpi_sum
-!!
 !! SOURCE
 
 subroutine anharmonics_terms_setStrainPhononCoupling(anharmonics_terms,natom,phonon_strain)
-
-  implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -533,11 +479,14 @@ subroutine anharmonics_terms_setStrainPhononCoupling(anharmonics_terms,natom,pho
 
 ! 1-Do some check
   do ii=1,6
-    if(natom /= size(phonon_strain(ii)%atmfrc,2).or.&
+!PROBLEM eos_gnu_13.2_openmpi
+!   if(natom /= size(phonon_strain(ii)%atmfrc,2).or.&
+    if( &
+!ENDPROBLEM
 &      phonon_strain(ii)%nrpt < 0)then
       write(msg, '(a)' )&
 &        ' natom or/and nrpt have not the same size than phonon_strain array. '
-      MSG_BUG(msg)
+      ABI_BUG(msg)
     end if
   end do
 
@@ -545,17 +494,17 @@ subroutine anharmonics_terms_setStrainPhononCoupling(anharmonics_terms,natom,pho
   anharmonics_terms%has_strain_coupling  = .FALSE.
   if(allocated(anharmonics_terms%phonon_strain))then
     do ii = 1,6
-       call ifc_free(anharmonics_terms%phonon_strain(ii))
+       call anharmonics_terms%phonon_strain(ii)%free()
     end do
-    ABI_DATATYPE_DEALLOCATE(anharmonics_terms%phonon_strain)
+    ABI_FREE(anharmonics_terms%phonon_strain)
   end if
 
 ! 2-Allocation of the new array and filling
- ABI_DATATYPE_ALLOCATE(anharmonics_terms%phonon_strain,(6))
+ ABI_MALLOC(anharmonics_terms%phonon_strain,(6))
  do ii = 1,6
    nrpt = phonon_strain(ii)%nrpt
-   ABI_ALLOCATE(anharmonics_terms%phonon_strain(ii)%atmfrc,(3,natom,3,natom,nrpt))
-   ABI_ALLOCATE(anharmonics_terms%phonon_strain(ii)%cell,(3,nrpt))
+   ABI_MALLOC(anharmonics_terms%phonon_strain(ii)%atmfrc,(3,natom,3,natom,nrpt))
+   ABI_MALLOC(anharmonics_terms%phonon_strain(ii)%cell,(3,nrpt))
    anharmonics_terms%phonon_strain(ii)%nrpt   = phonon_strain(ii)%nrpt
    anharmonics_terms%phonon_strain(ii)%atmfrc(:,:,:,:,:) = phonon_strain(ii)%atmfrc(:,:,:,:,:)
    anharmonics_terms%phonon_strain(ii)%cell(:,:)   = phonon_strain(ii)%cell(:,:)
@@ -566,8 +515,8 @@ subroutine anharmonics_terms_setStrainPhononCoupling(anharmonics_terms,natom,pho
 !  If there is no value inside the array,
 !  We don't need to store it
    else
-     ABI_DEALLOCATE(anharmonics_terms%phonon_strain(ii)%atmfrc)
-     ABI_DEALLOCATE(anharmonics_terms%phonon_strain(ii)%cell)
+     ABI_FREE(anharmonics_terms%phonon_strain(ii)%atmfrc)
+     ABI_FREE(anharmonics_terms%phonon_strain(ii)%cell)
      anharmonics_terms%phonon_strain(ii)%nrpt = 0
    end if
  end do
@@ -591,17 +540,9 @@ end subroutine anharmonics_terms_setStrainPhononCoupling
 !! anharmonics_terms<type(anharmonics_terms_type)> = anharmonics_terms datatype
 !!
 !!
-!! PARENTS
-!!      m_anharmonics_terms,m_effective_potential
-!!
-!! CHILDREN
-!!      getpbcindexes_supercell,xmpi_sum
-!!
 !! SOURCE
 
 subroutine anharmonics_terms_setElasticDispCoupling(anharmonics_terms,natom,elastic_displacement)
-
-  implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -619,17 +560,17 @@ subroutine anharmonics_terms_setElasticDispCoupling(anharmonics_terms,natom,elas
   if(natom /= size(elastic_displacement,4)) then
     write(msg, '(a)' )&
 &        ' natom has not the same size elastic_displacement array. '
-    MSG_BUG(msg)
+    ABI_BUG(msg)
   end if
 
 ! 1-reinitialise the previous value
   anharmonics_terms%has_elastic_displ = .FALSE.
   if(allocated(anharmonics_terms%elastic_displacement))then
-    ABI_DATATYPE_DEALLOCATE(anharmonics_terms%elastic_displacement)
+    ABI_FREE(anharmonics_terms%elastic_displacement)
   end if
 
 ! 2-Allocation of the new array and filling
-  ABI_ALLOCATE(anharmonics_terms%elastic_displacement,(6,6,3,natom))
+  ABI_MALLOC(anharmonics_terms%elastic_displacement,(6,6,3,natom))
   anharmonics_terms%elastic_displacement(:,:,:,:) = elastic_displacement(:,:,:,:)
 
 ! 3-Set the flag
@@ -638,7 +579,7 @@ subroutine anharmonics_terms_setElasticDispCoupling(anharmonics_terms,natom,elas
   else
 !   If there is no value inside the array,
 !   We don't need to store it
-    ABI_DEALLOCATE(anharmonics_terms%elastic_displacement)
+    ABI_FREE(anharmonics_terms%elastic_displacement)
   end if
 
 end subroutine anharmonics_terms_setElasticDispCoupling
@@ -665,12 +606,6 @@ end subroutine anharmonics_terms_setElasticDispCoupling
 !!   energy = contribution of the ifc to the energy
 !!   fcart(3,natom) = contribution of the ifc to the forces
 !!   strten(6) = contribution to the stress tensor
-!!
-!! PARENTS
-!!      m_effective_potential
-!!
-!! CHILDREN
-!!      getpbcindexes_supercell,xmpi_sum
 !!
 !! SOURCE
 !!
@@ -786,19 +721,11 @@ end subroutine anharmonics_terms_evaluateElastic
 !! PARENT
 !!   effective_potential_evaluate
 !!
-!! PARENTS
-!!      m_effective_potential
-!!
-!! CHILDREN
-!!      getpbcindexes_supercell,xmpi_sum
-!!
 !! SOURCE
 
 subroutine anharmonics_terms_evaluateIFCStrainCoupling(phonon_strain,disp,energy,fcart,natom,natom_uc,&
 &                                                      sc_size,strain,strten,cells,ncell,&
 &                                                      index_cells,comm)
-
- implicit none
 
 !Arguments -------------------------------
 ! scalars
@@ -828,7 +755,7 @@ subroutine anharmonics_terms_evaluateIFCStrainCoupling(phonon_strain,disp,energy
 
   if (any(sc_size <= 0)) then
     write(msg,'(a,a)')' sc_size can not be inferior or equal to zero'
-    MSG_ERROR(msg)
+    ABI_ERROR(msg)
   end if
 
 ! Initialisation of variables

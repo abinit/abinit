@@ -1,0 +1,30 @@
+trf2_3.ddb.abo
+AlAs phonons on 4 4 4 mesh
+8
+trf2_2o_DS1_DDB
+trf2_2o_DS2_DDB
+trf2_2o_DS3_DDB
+trf2_2o_DS4_DDB
+trf2_2o_DS5_DDB
+trf2_2o_DS6_DDB
+trf2_2o_DS7_DDB
+trf2_2o_DS8_DDB
+
+##############################################################
+# This section is used only for regression testing of ABINIT #
+##############################################################
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = mrgddb
+#%% exclude_builders = eos_gnu_13.2_serial
+#%% test_chain = trf2_1.abi, trf2_2.abi, trf2_3.abi, trf2_4.abi, trf2_5.abi, trf2_6.abi, trf2_7.abi
+#%% [files]
+#%% files_to_test = 
+#%%   trf2_3.ddb.abo, tolnlines=  43, tolabs=  4.1e-9, tolrel=  3.0e-4
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = X. Gonze, J. Zwanziger
+#%% keywords = 
+#%% description = Input file for anaddb 
+#%%<END TEST_INFO>

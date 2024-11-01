@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****p* ABINIT/aim
 !! NAME
 !! aim
@@ -7,7 +6,7 @@
 !! Main routine for Bader Atom-In-Molecule analysis.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2002-2019 ABINIT group (PCasek,FF,XG)
+!! Copyright (C) 2002-2024 ABINIT group (PCasek,FF,XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -22,12 +21,6 @@
 !! WARNING
 !! ABINIT rules are not yet followed in the present routine.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      abi_io_redirect,abimem_init,adini,aim_shutdown,defad,drvaim,herald
-!!      inpar,int2char4,timein,xmpi_bcast,xmpi_end,xmpi_init
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -39,21 +32,21 @@
 program aim
 
  use defs_basis
- use defs_abitypes
  use m_abicore
  use m_xmpi
- use m_build_info
  use m_errors
  use m_nctk
 #ifdef HAVE_NETCDF
  use netcdf
 #endif
 
- use m_time,     only : timein
- use m_io_tools, only : open_file, file_exists
- use m_specialmsg,  only : specialmsg_getcount, herald
- use m_fstrings, only : int2char4
- use m_bader !,    only : adini, drvaim, inpar, defad, aim_shutdown
+ use m_build_info,   only : abinit_version
+ use m_time,         only : timein
+ use m_io_tools,     only : open_file, file_exists
+ use m_specialmsg,   only : specialmsg_getcount, herald
+ use m_fstrings,     only : int2char4
+ use m_bader !,      only : adini, drvaim, inpar, defad, aim_shutdown
+
  implicit none
 
 !Arguments -----------------------------------
@@ -132,7 +125,7 @@ program aim
 
    hname(fin+2:fin+4)='out'
    if (open_file(hname(1:fin+4),msg,unit=untout,status='unknown',form='formatted') /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
    rewind (unit=untout)
    call herald(codename,abinit_version,untout)
@@ -145,7 +138,7 @@ program aim
    tmpfilename = hname(1:fin) // "_LOG_P" // trim(procstr)
    !close(std_out)
    if (open_file(tmpfilename, msg, newunit=std_out, status='unknown',form='formatted') /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
    rewind (unit=std_out)
    call herald(codename,abinit_version,std_out)
@@ -170,12 +163,12 @@ program aim
  aim_iomode = IO_MODE_FORTRAN
  if(me==master)then
    if (open_file(infile,msg,unit=unt0,status='old',form='formatted') /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
    if (file_exists(dnfile)) then
      if (open_file(dnfile,msg,unit=untad,status='old',form='unformatted') /=0) then
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
    else
      if (file_exists(nctk_ncify(dnfile))) then
@@ -186,17 +179,17 @@ program aim
 #ifdef HAVE_NETCDF
        NCF_CHECK(nctk_open_read(untad, dnfile, xmpi_comm_self))
 #else
-       MSG_ERROR("Cannot read netcdf file because netcdf support in Abinit is missing.")
+       ABI_ERROR("Cannot read netcdf file because netcdf support in Abinit is missing.")
 #endif
      else
-       MSG_ERROR('Missing data file: '//TRIM(dnfile))
+       ABI_ERROR('Missing data file: '//TRIM(dnfile))
      end if
    end if
 
    do ii=1,nfcfile
      iunt=unt+ii
      if (open_file(fcfile(ii),msg,unit=iunt,status='old',form='formatted') /= 0) then
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
    end do
  end if
@@ -230,7 +223,7 @@ program aim
      ierr = open_file(hname(1:fin+5),msg,unit=unts,status='old',action='read',form='formatted')
    end if
    if (ierr /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
    if (aim_dtset%crit/=0) hname(fin+2:fin+5)='crit'
@@ -241,7 +234,7 @@ program aim
      ierr = open_file(hname(1:fin+5),msg,unit=untc,status='old',action='read',form='formatted')
    end if
    if (ierr /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
    if (aim_dtset%denout==1) then
@@ -259,7 +252,7 @@ program aim
    end if
 
    if (ierr /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
    if (aim_dtset%lapout==1) then
@@ -277,20 +270,20 @@ program aim
    end if
 
    if (ierr /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
    if (aim_dtset%gpsurf==1) then
      hname(fin+2:fin+3)='gp'
      if (open_file(hname(1:fin+3),msg,unit=untg,status='unknown',form='formatted') /= 0) then
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
    end if
 
    if (aim_dtset%plden==1) then
      hname(fin+2:fin+4)='pld'
      if (open_file(hname(1:fin+5),msg,unit=untp,status='unknown',form='formatted') /= 0) then
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
    end if
 

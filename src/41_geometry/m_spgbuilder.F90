@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_spgbuilder
 !! NAME
 !! m_spgbuilder
@@ -7,14 +6,10 @@
 !!  Spacegroup builder.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2019 ABINIT group (RC, XG)
+!!  Copyright (C) 2008-2024 ABINIT group (RC, XG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -30,7 +25,7 @@ module m_spgbuilder
  use m_errors
  use m_abicore
 
- use m_symtk,   only : chkgrp, print_symmetries
+ use m_symtk,   only : sg_multable, print_symmetries
  use m_symsg,   only : symsgcube, symsghexa, symsgmono, symsgortho, symsgtetra
 
  implicit none
@@ -80,18 +75,9 @@ contains
 !! SIDE EFFECTS
 !! brvltt = input variable giving Bravais lattice
 !!
-!! PARENTS
-!!      ingeo
-!!
-!! CHILDREN
-!!      chkgrp,print_symmetries,symsgcube,symsghexa,symsgmono,symsgortho
-!!      symsgtetra
-!!
 !! SOURCE
 
 subroutine gensymspgr(brvltt,msym,nsym,shubnikov,spgaxor,spgorig,spgroup,spgroupma,symafm,symrel,tnons)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -133,7 +119,7 @@ subroutine gensymspgr(brvltt,msym,nsym,shubnikov,spgaxor,spgorig,spgroup,spgroup
 &   'spgroup must be between 1 to 230, but is ',spgroup,ch10,&
 &   'This is not allowed.  ',ch10,&
 &   'Action: modify spgroup in the input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 !Checks the orientation
@@ -142,7 +128,7 @@ subroutine gensymspgr(brvltt,msym,nsym,shubnikov,spgaxor,spgorig,spgroup,spgroup
 &   'spgaxor must be from 1 to 9, but is',spgaxor,ch10,&
 &   'This is not allowed.  ',ch10,&
 &   'Action: modify spgaxor in the input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 !Checks the consistency between the origin and space group
@@ -153,7 +139,7 @@ subroutine gensymspgr(brvltt,msym,nsym,shubnikov,spgaxor,spgorig,spgroup,spgroup
 &   'while it should be 0 or 1',ch10,&
 &   'This is not allowed.  ',ch10,&
 &   'Action: modify spgorig in the input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  if (spgorig>1) then
@@ -165,7 +151,7 @@ subroutine gensymspgr(brvltt,msym,nsym,shubnikov,spgaxor,spgorig,spgroup,spgroup
 &     'spgroup does not accept several origin choices',ch10,&
 &     'This is not allowed.  ',ch10,&
 &     'Action: modify spgorig in the input file.'
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end select
  end if
 
@@ -178,7 +164,7 @@ subroutine gensymspgr(brvltt,msym,nsym,shubnikov,spgaxor,spgorig,spgroup,spgroup
 &     'spgroup does not accept several orientations',ch10,&
 &     'This is not allowed.  ',ch10,&
 &     'Action: modify spgaxor or spgroup in the input file.'
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end select
  end if
 
@@ -188,7 +174,7 @@ subroutine gensymspgr(brvltt,msym,nsym,shubnikov,spgaxor,spgorig,spgroup,spgroup
 &   'and it should be an integer from -1 to 7',ch10,&
 &   'This is not allowed.  ',ch10,&
 &   'Action: modify brvltt  in the input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 !Assign nsym for each group according first to the order of the group
@@ -362,7 +348,7 @@ subroutine gensymspgr(brvltt,msym,nsym,shubnikov,spgaxor,spgorig,spgroup,spgroup
 &     'The assigned brvltt ',brvltt,' is not equal',ch10,&
 &     'to the input value ',bckbrvltt,ch10,&
 &     'Assume experienced user. Execution will continue.'
-     MSG_WARNING(message)
+     ABI_WARNING(message)
    end if
  end if
 
@@ -407,8 +393,7 @@ subroutine gensymspgr(brvltt,msym,nsym,shubnikov,spgaxor,spgorig,spgroup,spgroup
  case (3)
 !    For space groups containing d elements, all the symmetry operations
 !    have already been obtained
-   if(spgroup/=43 .and. spgroup/=203 .and. spgroup/=227 .and. &
-&   spgroup/=228)then
+    if(spgroup/=43 .and. spgroup/=227 .and. spgroup/=228)then  
      do ii=1,nsym
 !        First translation: a/2+b/2
        tnons(1,nsym+ii)=tnons(1,ii)+0.5
@@ -557,7 +542,7 @@ subroutine gensymspgr(brvltt,msym,nsym,shubnikov,spgaxor,spgorig,spgroup,spgroup
 !write(std_out,*)' gensymspgr  : out of the Bravais lattice, nsym is',nsym
 !ENDDEBUG
 
- call chkgrp(nsym,symafm,symrel,ierr)
+ call sg_multable(nsym,symafm,symrel,ierr,tnons=tnons,tnons_tol=tol5)
  if (ierr/=0) then
    call print_symmetries(nsym,symrel,tnons,symafm)
  end if
@@ -590,16 +575,9 @@ end subroutine gensymspgr
 !!  anti-ferromagnetic symmetry operations
 !! shubnikov = type of the shubnikov group
 !!
-!! PARENTS
-!!      ingeo
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine gensymshub(genafm,spgroup,spgroupma,shubnikov)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1092,7 +1070,7 @@ subroutine gensymshub(genafm,spgroup,spgroupma,shubnikov)
 &   'while the magnetic space group is specified, spgroupma= ',spgroupma,ch10,&
 &   'This is not allowed.  ',ch10,&
 &   'Action: specify spgroup in the input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end select
 
  if (spgrmatch==0) then
@@ -1101,7 +1079,7 @@ subroutine gensymshub(genafm,spgroup,spgroupma,shubnikov)
 &   'and the magnetic space group ',spgroupma,ch10,&
 &   'This is not allowed.  ',ch10,&
 &   'Action: modify spgroup or spgroupma in the input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 !DEBUG
@@ -1229,7 +1207,8 @@ subroutine gensymshub(genafm,spgroup,spgroupma,shubnikov)
    case(3,6,9,16,24,28,32,36,40,44,52,56,60,64,78,84,&
 &     90,96,112,116,120,124,128,132,136,142,148,154,160,166,172,&
 &     178,184,190,196,202,208,214,220,226,232,242,252,262,272)
-     brvlttbw=6     !C
+!    brvlttbw=6     !C    XG230719 This is likely erroneous   
+     brvlttbw=3     !c
    case(12,20,48,68,72,102,108)
      brvlttbw=7     !I
    end select
@@ -1264,6 +1243,8 @@ subroutine gensymshub(genafm,spgroup,spgroupma,shubnikov)
 
 !DEBUG
 !write(std_out,*) 'gensymshub : end '
+!write(std_out,*) 'gensymshub : brvlttbw=',brvlttbw
+!write(std_out,*) 'gensymshub : genafm=',genafm
 !write(std_out,*) 'gensymshub, shubnikov =',shubnikov
 !ENDDEBUG
 
@@ -1298,16 +1279,9 @@ end subroutine gensymshub
 !!  without magnetic operations at input,
 !!  and with magnetic operations at output
 !!
-!! PARENTS
-!!      ingeo
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine gensymshub4(genafm,msym,nsym,symafm,symrel,tnons)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1329,7 +1303,7 @@ subroutine gensymshub4(genafm,msym,nsym,symafm,symrel,tnons)
    write(message, '(3a)' )&
 &   'The number of symmetries in the Shubnikov type IV space group',ch10,&
 &   'is larger than the maximal allowed number of symmetries.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  do ii=1,nsym

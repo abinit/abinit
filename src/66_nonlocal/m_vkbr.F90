@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_vkbr
 !! NAME
 !!  m_vkbr
@@ -8,8 +7,11 @@
 !!  of the commutator [H,r] needed for the correct treatment of the optical limit q-->0
 !!  in the matrix elements <k-q,b1|e^{-iqr}|k,b2> when non-local pseudopotentials are used.
 !!
+!! NOTES
+!!  This module is deprecated. Use ddkop_t in m_ddk.F90
+!!
 !! COPYRIGHT
-!! Copyright (C) 2008-2019 ABINIT group (MG, FB)
+!! Copyright (C) 2008-2024 ABINIT group (MG, FB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -25,11 +27,11 @@
 MODULE m_vkbr
 
  use defs_basis
- use defs_datatypes
  use m_hide_blas
  use m_errors
  use m_abicore
 
+ use defs_datatypes,  only : pseudopotential_type
  use m_gwdefs,        only : czero_gw
  use m_fstrings,      only : sjoin, itoa
  use m_paw_sphharm,   only : ylmc, ylmcd
@@ -123,12 +125,6 @@ CONTAINS  !=====================================================================
 !!  vkbr<vkbr_t>=Structure containing arrays needed for calculating <\psi_1|[Vnl,r]\psi_2>.
 !!    Completely initialized in output.
 !!
-!! PARENTS
-!!      calc_optical_mels,cchi0q0,cchi0q0_intraband
-!!
-!! CHILDREN
-!!      ylmcd
-!!
 !! SOURCE
 
 subroutine vkbr_init(vkbr,cryst,psps,inclvkb,istwfk,npw,kpoint,gvec)
@@ -187,7 +183,7 @@ subroutine vkbr_init(vkbr,cryst,psps,inclvkb,istwfk,npw,kpoint,gvec)
    call ccgradvnl_ylm(cryst,psps,npw,gvec,kpoint,vkbsign,vkb,vkbd,vkbr%fnl,vkbr%fnld)
 
  case default
-   MSG_ERROR(sjoin("Wrong inclvkb= ",itoa(inclvkb)))
+   ABI_ERROR(sjoin("Wrong inclvkb= ",itoa(inclvkb)))
  end select
 
  ABI_FREE(vkbsign)
@@ -205,12 +201,6 @@ end subroutine vkbr_init
 !!
 !! FUNCTION
 !!  Free all memory allocated in a structure of type vkbr_t
-!!
-!! PARENTS
-!!      m_vkbr
-!!
-!! CHILDREN
-!!      ylmcd
 !!
 !! SOURCE
 
@@ -237,11 +227,6 @@ end subroutine vkbr_free_0D
 !!
 !! FUNCTION
 !!  Free all memory allocated in a structure of type vkbr_t
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      ylmcd
 !!
 !! SOURCE
 
@@ -299,12 +284,6 @@ end subroutine vkbr_free_1D
 !! TODO
 !!  *) Spinorial case is not implemented.
 !!
-!! PARENTS
-!!      m_vkbr
-!!
-!! CHILDREN
-!!      ylmcd
-!!
 !! SOURCE
 
 subroutine add_vnlr_commutator(vkbr,cryst,psps,npw,nspinor,ug1,ug2,rhotwx)
@@ -328,7 +307,7 @@ subroutine add_vnlr_commutator(vkbr,cryst,psps,npw,nspinor,ug1,ug2,rhotwx)
 
 !************************************************************************
 
- ABI_CHECK(nspinor == 1, "nspinor/=1 not coded")
+ ABI_CHECK(nspinor == 1, "inclvkb > 0 with nspinor == 2 is not coded")
 
  ! Adding term i <c,k|[Vnl,r]|v,k> ===
  select case (vkbr%inclvkb)
@@ -373,7 +352,7 @@ subroutine add_vnlr_commutator(vkbr,cryst,psps,npw,nspinor,ug1,ug2,rhotwx)
   rhotwx(:,1) = rhotwx(:,1) + dum(:)
 
  case default
-   MSG_ERROR(sjoin("Wrong inclvkb:", itoa(vkbr%inclvkb)))
+   ABI_ERROR(sjoin("Wrong inclvkb:", itoa(vkbr%inclvkb)))
  end select
 
 end subroutine add_vnlr_commutator
@@ -404,12 +383,6 @@ end subroutine add_vnlr_commutator
 !!
 !! TODO
 !!  SOC not implemented.
-!!
-!! PARENTS
-!!      m_vkbr
-!!
-!! CHILDREN
-!!      ylmcd
 !!
 !! SOURCE
 
@@ -530,11 +503,11 @@ end subroutine calc_vkb
 
 !!****f* m_vkbr/nc_ihr_comm
 !! NAME
-!!  nc_pwihr_comm
+!!  nc_ihr_comm
 !!
 !! FUNCTION
 !!  Calculate the matrix elements of the commutator i[H,r]
-!!  For norm conserving potentials the commutator i[Vnl,r] is included depending on inclvkb.
+!!  For NC pseudppotentials, the commutator i[Vnl,r] is included depending on inclvkb.
 !!
 !! INPUTS
 !!  vkbr<vkbr_t>
@@ -559,10 +532,6 @@ end subroutine calc_vkb
 !!
 !! TODO
 !!  *) Spinorial case is not implemented.
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -591,7 +560,7 @@ function nc_ihr_comm(vkbr,cryst,psps,npw,nspinor,istwfk,inclvkb,kpoint,ug1,ug2,g
 
  ! [H, r] = -\nabla + [V_{nl}, r]
  ! V_nl is present only in the case of NC pseudos but
- ! not in PAW unless even the AE Hamiltonian in non-local e.g. LDA+U or LEXX.
+ ! not in PAW unless even the AE Hamiltonian in non-local e.g. DFT+U or LEXX.
 
  ! -i <c,k|\nabla_r|v,k> in reduced coordinates is always included.
  ! -i <c,k|\nabla_r|v,k> = \sum_G u_{ck}^*(G) [k+G] u_{vk}(G)
@@ -613,7 +582,7 @@ function nc_ihr_comm(vkbr,cryst,psps,npw,nspinor,istwfk,inclvkb,kpoint,ug1,ug2,g
      end do
    end do
  else
-   ! Symmetrized expression: \sum_G  (k+G) 2i Im [ u_a^*(G) u_b(G) ]. (k0,G0) term is null.
+   ! Symmetrized expression: \sum_G  (k+G) 2i Im [ u_a^*(G) u_b(G) ]. (k0, G0) term is null.
    ABI_CHECK(nspinor == 1, "nspinor != 1")
    do ig=1,npw
      c_tmp = GWPC_CONJG(ug1(ig)) * ug2(ig)
@@ -660,12 +629,6 @@ end function nc_ihr_comm
 !!  All the calculations are done in double precision, but the output arrays fnl and fnld
 !!  are in single precision, should use double precision after modification of the other subroutines
 !!
-!! PARENTS
-!!      m_vkbr
-!!
-!! CHILDREN
-!!      ylmcd
-!!
 !! SOURCE
 
 subroutine ccgradvnl_ylm(cryst,psps,npw,gvec,kpoint,vkbsign,vkb,vkbd,fnl,fnld)
@@ -687,7 +650,7 @@ subroutine ccgradvnl_ylm(cryst,psps,npw,gvec,kpoint,vkbsign,vkb,vkbd,fnl,fnld)
 !Local variables-------------------------------
 !scalars
  integer :: ii,iat,ig,il,im,ilm,itypat,nlmn,iln0,iln,ilmn,in
- real(dp),parameter :: ppad=tol8
+ real(dp),parameter :: ppad=tol6
  real(dp) :: cosphi,costh,factor,mkg,mkg2,sinphi,sinth,sq,xdotg
  complex(dpc) :: dphi,dth,sfac
  character(len=500) :: msg
@@ -703,7 +666,7 @@ subroutine ccgradvnl_ylm(cryst,psps,npw,gvec,kpoint,vkbsign,vkb,vkbd,fnl,fnld)
    write(msg,'(3a)')&
     'Number of angular momentum components bigger than programmed.',ch10,&
     'Taking into account only s p d f '
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  a1=cryst%rprimd(:,1); b1=two_pi*Cryst%gprimd(:,1)

@@ -60,8 +60,6 @@ lib_fft_libs="@lib_fft_libs@"
 # Feature triggers use flags
 lib_bigdft_incs="@lib_bigdft_incs@"
 lib_bigdft_libs="@lib_bigdft_libs@"
-lib_gsl_incs="@lib_gsl_incs@"
-lib_gsl_libs="@lib_gsl_libs@"
 lib_levmar_incs="@lib_levmar_incs@"
 lib_levmar_libs="@lib_levmar_libs@"
 lib_libxc_incs="@lib_libxc_incs@"

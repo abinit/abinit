@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_mkffkg
 !! NAME
 !!  m_mkffkg
@@ -7,14 +6,10 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2019 ABINIT group (DCA, XG, MT, DRH)
+!!  Copyright (C) 1998-2024 ABINIT group (DCA, XG, MT, DRH)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -85,18 +80,11 @@ contains
 !!  This routine must be thread-safe as it is called inside loops that are OpenMP parallelized.
 !!  Please, do not add variables with the save attribute or SIDE EFFECTS.
 !!
-!! PARENTS
-!!      opernl3,opernl4a,opernl4b
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine dfpt_mkffkg(choice,ffkg,ffnl,gmet,idir,indlmn,ipw1,ispinor,itypat,&
 &                  kg_k,kpg_k,kpgx,kpt,lmnmax,mblkpw,ndgxdt,nffkg,nffnl,nincpw,nkpg,nlang,&
 &                  npw,ntens,ntypat,parity)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -653,18 +641,11 @@ end subroutine dfpt_mkffkg
 !!  This routine must be thread-safe as it is called inside loops that are OpenMP parallelized.
 !!  Please, do not add variables with the save attribute or SIDE EFFECTS.
 !!
-!! PARENTS
-!!      opernl2
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine mkffkg(choice,ffkg,ffnl,gmet,idir,indlmn,ipw1,ispinor,itypat,&
 &                  kg_k,kpg_k,kpgx,kpt,lmnmax,mblkpw,ndgxdt,nffkg,nffnl,nincpw,nkpg,nlang,&
 &                  npw,ntens,ntypat,parity)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

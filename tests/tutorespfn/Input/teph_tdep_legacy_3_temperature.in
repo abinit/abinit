@@ -1,0 +1,42 @@
+1
+2
+temperature_3
+0.1
+0.1
+0 0.5
+0 1000 50
+8
+0.01563 0.12500 0.06250 0.09375 0.37500 0.18750 0.04688 0.09375
+teph_tdep_legacy_3o_DS13_DDB
+teph_tdep_legacy_3o_DS23_DDB
+teph_tdep_legacy_3o_DS33_DDB
+teph_tdep_legacy_3o_DS43_DDB
+teph_tdep_legacy_3o_DS53_DDB
+teph_tdep_legacy_3o_DS63_DDB
+teph_tdep_legacy_3o_DS73_DDB
+teph_tdep_legacy_3o_DS83_DDB
+teph_tdep_legacy_3o_DS12_EIG.nc
+teph_tdep_legacy_3o_DS22_EIG.nc
+teph_tdep_legacy_3o_DS32_EIG.nc
+teph_tdep_legacy_3o_DS42_EIG.nc
+teph_tdep_legacy_3o_DS52_EIG.nc
+teph_tdep_legacy_3o_DS62_EIG.nc
+teph_tdep_legacy_3o_DS72_EIG.nc
+teph_tdep_legacy_3o_DS82_EIG.nc
+teph_tdep_legacy_3o_DS13_EIGR2D.nc
+teph_tdep_legacy_3o_DS23_EIGR2D.nc
+teph_tdep_legacy_3o_DS33_EIGR2D.nc
+teph_tdep_legacy_3o_DS43_EIGR2D.nc
+teph_tdep_legacy_3o_DS53_EIGR2D.nc
+teph_tdep_legacy_3o_DS63_EIGR2D.nc
+teph_tdep_legacy_3o_DS73_EIGR2D.nc
+teph_tdep_legacy_3o_DS83_EIGR2D.nc
+teph_tdep_legacy_3o_DS13_GKK.nc
+teph_tdep_legacy_3o_DS23_GKK.nc
+teph_tdep_legacy_3o_DS33_GKK.nc
+teph_tdep_legacy_3o_DS43_GKK.nc
+teph_tdep_legacy_3o_DS53_GKK.nc
+teph_tdep_legacy_3o_DS63_GKK.nc
+teph_tdep_legacy_3o_DS73_GKK.nc
+teph_tdep_legacy_3o_DS83_GKK.nc
+teph_tdep_legacy_3o_DS11_EIG.nc

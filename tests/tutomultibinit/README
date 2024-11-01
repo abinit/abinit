@@ -1,0 +1,17 @@
+This directory, tutomultibinit, contains tests which
+are related to the development of the MULTIBINIT
+
+Please, see the README file in the tests directory (above this one) to get help.
+
+
+------------------------------------------------------------------
+
+* Tests tmulti1_* concern lattice model.
+
+
+* Tests tmulti5_* concern spin model.
+
+
+* Tests tmulti6_* concern lattice Wannier function (LWF) model.
+
+------------------------------------------------------------------

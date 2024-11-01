@@ -1,0 +1,147 @@
+# -----------------------------------------------------------------
+# Orbital interaction in Copper
+# -----------------------------------------------------------------
+
+ndtset 4
+jdtset 1 2 3 4
+#jdtset 1 2 3 4
+pawprtvol 3
+paral_kgb 0
+
+# -----------------------------------------------------------------
+# Parameters common to all datasets
+# -----------------------------------------------------------------
+
+# Convergence parameters
+nstep     20
+nline     5
+nnsclo    2
+ecut      8.0
+pawecutdg 12.0
+#tolvrs    1.0d-15
+tolwfr    1.0d-10
+
+occopt    3
+tsmear    0.0036749
+ 
+# Physical parameters
+natom     1
+ntypat    1
+typat     1 
+znucl     29.0 
+
+xred      0.00 0.00 0.00
+#          0.25 0.25 0.25
+
+chkprim   0
+
+acell     3*6.822
+
+rprim     0.5 0.5 0.0
+          0.0 0.5 0.5
+          0.5 0.0 0.5
+          
+
+ngkpt     3 3 3
+nshiftk   1
+shiftk    0 0 0
+istwfk    *1
+
+nsym      1
+nband     30
+
+pawovlp    -1
+# -----------------------------------------------------------------
+#   First dataset
+# -----------------------------------------------------------------
+nsym1     0
+
+
+# -----------------------------------------------------------------
+#   Second dataset
+# -----------------------------------------------------------------
+getden2  -1
+nstep2    20
+nnsclo2   3
+nline2    3 
+
+
+# -----------------------------------------------------------------
+#   Third dataset
+# -----------------------------------------------------------------
+
+getwfk3   2
+getden3   2
+nbandkss3 2
+kssform3   3
+prtdos3    3
+
+plowan_compute3 1
+plowan_bandi3  5
+plowan_bandf3 10
+plowan_natom3  1
+plowan_iatom3   1 
+plowan_nbl3     1
+plowan_lcalc3   2
+plowan_projcalc3  5
+
+plowan_realspace3  1
+plowan_nt3  2
+plowan_it3  0 0 0 1 0 0
+
+# -----------------------------------------------------------------
+#   Fourth dataset, to print the band structure along critical lines
+# -----------------------------------------------------------------
+
+getden4  2
+nbandkss4 2
+kssform4   3
+pawfatbnd4 1
+
+plowan_compute4 1
+plowan_bandi4  5
+plowan_bandf4 10
+plowan_natom4  1
+plowan_iatom4   1 
+plowan_nbl4     1
+plowan_lcalc4   2
+plowan_projcalc4  5
+
+
+
+
+
+
+#Parameters (to uncomment) for bands structure 
+iscf4      -2                                    
+kptopt4     -5               
+ndivk4      10 5 7 7 11
+kptbounds4  0.0 0.0 0.0 #Gamma
+            0.0 1/2 1/2 #X
+            1/4 1/2 3/4 #W
+            1/2 1/2 1/2 #L
+            0.0 0.0 0.0 #Gamma
+            3/8 3/8 3/4 #K
+
+
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "Cu_LDA_abinit"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% need_cpp_vars = !HAVE_MPI_IO_DEFAULT, !HAVE_NETCDF_DEFAULT
+#%% [files]
+#%% files_to_test = 
+#%%   t76.abo, tolnlines = 5, tolabs = 1.0E-15, tolrel = 1.0E-20, fld_options = 
+#%% [paral_info]
+#%% max_nprocs = 2
+#%% [extra_info]
+#%% authors = A. Gerossier, B. Amadon
+#%% keywords = PAW, Projected_Wannier 
+#%% description = 
+#%%    Calculation of Projected Wannier functions and compute band structure 
+#%%    in the d orbital Wannier basis
+#%% topics = Wannier, ElecBandStructure
+#%%<END TEST_INFO>

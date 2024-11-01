@@ -1,18 +1,13 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_predict_steepest
 !! NAME
 !!
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2009-2019 ABINIT group (XG)
+!!  Copyright (C) 2009-2024 ABINIT group (XG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -83,12 +78,6 @@ contains
 !!    at input, history of the values of xred for all images
 !!    at output, the predicted values of xred for all images
 !!
-!! PARENTS
-!!      predictimg
-!!
-!! CHILDREN
-!!      get_geometry_img,mep_steepest
-!!
 !! SOURCE
 
 subroutine predict_steepest(itimimage,itimimage_eff,list_dynimage,mep_param,natom,&
@@ -114,11 +103,11 @@ subroutine predict_steepest(itimimage,itimimage_eff,list_dynimage,mep_param,nato
 ! *************************************************************************
 
 !Retrieve positions and forces
- ABI_ALLOCATE(etotal,(nimage))
- ABI_ALLOCATE(xred,(3,natom,nimage))
- ABI_ALLOCATE(xcart,(3,natom,nimage))
- ABI_ALLOCATE(fcart,(3,natom,nimage))
- ABI_ALLOCATE(rprimd,(3,3,nimage))
+ ABI_MALLOC(etotal,(nimage))
+ ABI_MALLOC(xred,(3,natom,nimage))
+ ABI_MALLOC(xcart,(3,natom,nimage))
+ ABI_MALLOC(fcart,(3,natom,nimage))
+ ABI_MALLOC(rprimd,(3,3,nimage))
  call get_geometry_img(etotal,natom,nimage,results_img(:,itimimage_eff),&
 & fcart,rprimd,xcart,xred)
 
@@ -136,11 +125,11 @@ subroutine predict_steepest(itimimage,itimimage_eff,list_dynimage,mep_param,nato
    results_img(iimage,next_itimimage)%vel_cell(:,:)=results_img(iimage,itimimage_eff)%vel_cell(:,:)
  end do
 
- ABI_DEALLOCATE(etotal)
- ABI_DEALLOCATE(xred)
- ABI_DEALLOCATE(xcart)
- ABI_DEALLOCATE(fcart)
- ABI_DEALLOCATE(rprimd)
+ ABI_FREE(etotal)
+ ABI_FREE(xred)
+ ABI_FREE(xcart)
+ ABI_FREE(fcart)
+ ABI_FREE(rprimd)
 
 end subroutine predict_steepest
 !!***

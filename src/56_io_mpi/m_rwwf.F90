@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_rwwf
 !! NAME
 !!  m_rwwf
@@ -7,14 +6,10 @@
 !!   Read/Write wavefunctions.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2019 ABINIT group (DCA,XG,GMR,MVer,MB,MT)
+!!  Copyright (C) 1998-2024 ABINIT group (DCA,XG,GMR,MVer,MB,MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -27,7 +22,6 @@
 module m_rwwf
 
  use defs_basis
- use defs_abitypes
  use m_errors
  use m_wffile
  use m_abicore
@@ -40,6 +34,7 @@ module m_rwwf
  use netcdf
 #endif
 
+ use defs_abitypes, only : mpi_type
  use m_time,   only : timab
 
  implicit none
@@ -127,13 +122,6 @@ contains
 !!  Some arguments are contained in the wff datastructure, and should be eliminated.
 !!  option 3 should be called -3 (reading -> negative option) and others (-1,1) re-shuffled.
 !!
-!! PARENTS
-!!      WffReadEigK,WffReadSkipK,initwf,m_iowf,m_wfk,newkpt,uderiv
-!!
-!! CHILDREN
-!!      mpi_bcast,wffreadwrite_mpio,wffwritenpwrec,xderivewrecend
-!!      xderivewrecinit,xderivewrite,xmpi_sum
-!!
 !! SOURCE
 
 subroutine rwwf(cg,eigen,formeig,headform,icg,ikpt,isppol,kg_k,mband,mcg,mpi_enreg,&
@@ -163,19 +151,19 @@ subroutine rwwf(cg,eigen,formeig,headform,icg,ikpt,isppol,kg_k,mband,mcg,mpi_enr
 !Check that nband is smaller than mband, if one will not skip the records.
  if (nband>mband .and. option/=-1)then
    write(msg,'(a,i0,a,i0,a)')' One should have nband<=mband. However, nband=',nband,', and mband=',mband,'.'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
 !Check that formeig is 0 or 1.
  if ( ALL(formeig/=(/0,1/)) ) then
    write(msg,'(a,i0,a)')' The argument formeig should be 0 or 1. However, formeig=',formeig,'.'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
 !Check the value of option
  if ( ALL( option /= (/1,2,3,4,5,-1,-2,-4/) )) then
    write(msg,'(a,i0,a)')' The argument option should be between 1 and 5, or -1, -2, -4. However, option=',option,'.'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
  if (option/=2.and.option/=4 .and. option/=5 ) then ! read
@@ -217,12 +205,6 @@ end subroutine rwwf
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      initwf,newkpt,wfsinp
-!!
-!! CHILDREN
-!!      rwwf
-!!
 !! SOURCE
 
 subroutine WffReadSkipK(formeig,headform,ikpt,isppol,mpi_enreg,wff)
@@ -249,14 +231,14 @@ subroutine WffReadSkipK(formeig,headform,ikpt,isppol,mpi_enreg,wff)
 
  option=-1
  tim_rwwf=0 ; mcg=1 ; mband=1 ; icg=0 ; optkg=0 ; nband=0
- ABI_ALLOCATE(eig_dum,(2**formeig))
- ABI_ALLOCATE(kg_dum,(3,optkg*npw1))
+ ABI_MALLOC(eig_dum,(2**formeig))
+ ABI_MALLOC(kg_dum,(3,optkg*npw1))
 
  call rwwf(cg_dum,eig_dum,formeig,headform,icg,ikpt,isppol,kg_dum,mband,mcg,mpi_enreg,nband,&
 & nband_disk,npw1,nspinor1,occ_dum,option,optkg,tim_rwwf,wff)
 
- ABI_DEALLOCATE(eig_dum)
- ABI_DEALLOCATE(kg_dum)
+ ABI_FREE(eig_dum)
+ ABI_FREE(kg_dum)
 
 end subroutine WffReadSkipK
 !!***
@@ -305,13 +287,6 @@ end subroutine WffReadSkipK
 !!  WARNING : skipping k-blocks is also done in the randac subroutine
 !!  WARNING : reading the two first records is also done in the rdnpw routine
 !!
-!! PARENTS
-!!      rwwf
-!!
-!! CHILDREN
-!!      mpi_bcast,wffreadwrite_mpio,wffwritenpwrec,xderivewrecend
-!!      xderivewrecinit,xderivewrite,xmpi_sum
-!!
 !! SOURCE
 
 subroutine readwf(cg,eigen,formeig,headform,icg,ikpt,isppol,kg_k,mband,mcg,mpi_enreg,&
@@ -347,7 +322,7 @@ subroutine readwf(cg,eigen,formeig,headform,icg,ikpt,isppol,kg_k,mband,mcg,mpi_e
 !Check the options
  if ( ALL(option /= [1,3,-1,-2,-4])) then
    write(msg,'(a,i0,a)')'The argument option should be -4, -2, -1, 1 or 3.  However, option=',option,'.'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
  npwtot=npw; npwso=npw*nspinor
@@ -366,11 +341,11 @@ subroutine readwf(cg,eigen,formeig,headform,icg,ikpt,isppol,kg_k,mband,mcg,mpi_e
    if (any(wff%iomode==[IO_MODE_MPI, IO_MODE_ETSF]).and.nband>0) then
      call xmpi_sum(npwsotot,wff%spaceComm_mpiio,ios)
      npwtot=npwsotot/nspinortot
-     ABI_ALLOCATE(ind_cg_mpi_to_seq,(npwso))
+     ABI_MALLOC(ind_cg_mpi_to_seq,(npwso))
      if (allocated(mpi_enreg%my_kgtab)) then
        ikpt_this_proc=mpi_enreg%my_kpttab(ikpt)
        if ( ikpt_this_proc <= 0  ) then
-         MSG_BUG("rwwf: ikpt_this_proc <= 0")
+         ABI_BUG("rwwf: ikpt_this_proc <= 0")
        end if
        do ispinor=1,nspinor
          ispinor_index=ispinor
@@ -398,7 +373,7 @@ subroutine readwf(cg,eigen,formeig,headform,icg,ikpt,isppol,kg_k,mband,mcg,mpi_e
 &     'the (npw,nspinor,nband) record of a wf file, unit=',unitwf,ch10,&
 &     'gave iostat=',ios,'. Your file is likely not correct.',ch10,&
 &     'Action: check your input wf file:',trim(fname)
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
  else
@@ -418,7 +393,7 @@ subroutine readwf(cg,eigen,formeig,headform,icg,ikpt,isppol,kg_k,mband,mcg,mpi_e
 &     'the (npw,nband) record of a wf file with headform <40 , unit=',unitwf,ch10,&
 &     'gave iostat=',ios,'. Your file is likely not correct.',ch10,&
 &     'Action: check your input wf file:',trim(fname)
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
  end if ! headform
 
@@ -429,20 +404,20 @@ subroutine readwf(cg,eigen,formeig,headform,icg,ikpt,isppol,kg_k,mband,mcg,mpi_e
        write(msg,'(3a,i0,a,i0,a)') &
 &       'Reading option of rwwf. One should have npwtot=npw1',ch10,&
 &       'However, npwtot= ',npwtot,', and npw1= ',npw1,'.'
-       MSG_BUG(msg)
+       ABI_BUG(msg)
      end if
      if(nspinortot/=nspinor1)then
        write(msg,'(3a,i0,a,i0,a)') &
 &       'Reading option of rwwf. One should have nspinor=nspinor1',ch10,&
 &       'However, nspinortot= ',nspinortot,', and nspinor1= ',nspinor1,'.'
-       MSG_BUG(msg)
+       ABI_BUG(msg)
      end if
    else ! Treat the Old format.
      if(npwsotot/=npwso1)then
        write(msg,'(3a,i0,a,i0,a)') &
 &       'Reading option of rwwf. One should have npwso=npwso1',ch10,&
 &       'However, npwsotot= ',npwsotot,', and npwso1= ',npwso1,'.'
-       MSG_BUG(msg)
+       ABI_BUG(msg)
      end if
    end if ! headform
 !
@@ -504,7 +479,7 @@ subroutine readwf(cg,eigen,formeig,headform,icg,ikpt,isppol,kg_k,mband,mcg,mpi_e
 &     'the k+g record of a wf file, unit=',unitwf,ch10,&
 &     'gave iostat=',ios,'. Your file is likely not correct.',ch10,&
 &     'Action: check your input wf file:',trim(fname)
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
  end if ! headform
 
@@ -538,7 +513,7 @@ subroutine readwf(cg,eigen,formeig,headform,icg,ikpt,isppol,kg_k,mband,mcg,mpi_e
 &     'an eigenvalue record of a wf file, unit=',unitwf,ch10,&
 &     'gave iostat=',ios,'. Your file is likely not correct.',ch10,&
 &     'Action: check your input wf file.',trim(fname)
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
 #ifdef HAVE_NETCDF
@@ -595,7 +570,7 @@ subroutine readwf(cg,eigen,formeig,headform,icg,ikpt,isppol,kg_k,mband,mcg,mpi_e
 &       'a RF wf record of a wf file, unit=',unitwf,ch10,&
 &       'gave iostat=',ios,'. Your file is likely not correct.',ch10,&
 &       'Action: check your input wf file.',trim(fname)
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
 
 #ifdef HAVE_NETCDF
@@ -608,8 +583,7 @@ subroutine readwf(cg,eigen,formeig,headform,icg,ikpt,isppol,kg_k,mband,mcg,mpi_e
          NCF_CHECK_MSG(ncerr, "getting cg_k")
        else
          write(std_out,*)"ETSF Reading distributed cg"
-         ABI_STAT_MALLOC(cg_all, (2, npw1*nspinor, nband1), ierr)
-         ABI_CHECK(ierr==0, "oom cg_all")
+         ABI_MALLOC_OR_DIE(cg_all, (2, npw1*nspinor, nband1), ierr)
          ncerr = nf90_get_var(wff%unwff, cg_varid, cg_all, start=[1,1,1,1,ikpt,isppol], &
          count=[2,npw1,nspinor,nband1,1,1])
          NCF_CHECK_MSG(ncerr, "getting cg_k")
@@ -655,7 +629,7 @@ subroutine readwf(cg,eigen,formeig,headform,icg,ikpt,isppol,kg_k,mband,mcg,mpi_e
 &           'a RF eigenvalue record of a wf file, unit=',unitwf,ch10,&
 &           'gave iostat=',ios,'. Your file is likely not correct.',ch10,&
 &           'Action: check your input wf file.',trim(fname)
-           MSG_ERROR(msg)
+           ABI_ERROR(msg)
          end if
 
          if(option==1.or.option==-2)then
@@ -680,7 +654,7 @@ subroutine readwf(cg,eigen,formeig,headform,icg,ikpt,isppol,kg_k,mband,mcg,mpi_e
 &           'a RF wf record of a wf file, unit=',unitwf,ch10,&
 &           'gave iostat=',ios,'. Your file is likely not correct.',ch10,&
 &           'Action: check your input wf file.',trim(fname)
-           MSG_ERROR(msg)
+           ABI_ERROR(msg)
          end if
        end do ! iband
 
@@ -737,7 +711,7 @@ subroutine readwf(cg,eigen,formeig,headform,icg,ikpt,isppol,kg_k,mband,mcg,mpi_e
 ! Free memory
 !---------------------------------------------------------------------------
  if (allocated(ind_cg_mpi_to_seq)) then
-   ABI_DEALLOCATE(ind_cg_mpi_to_seq)
+   ABI_FREE(ind_cg_mpi_to_seq)
  end if
 
 end subroutine readwf
@@ -788,13 +762,6 @@ end subroutine readwf
 !!  WARNING : skipping k-blocks is also done in the randac subroutine
 !!  WARNING : writing the two first records is also done in the dfpt_vtowfk routine
 !!
-!! PARENTS
-!!      rwwf
-!!
-!! CHILDREN
-!!      mpi_bcast,wffreadwrite_mpio,wffwritenpwrec,xderivewrecend
-!!      xderivewrecinit,xderivewrite,xmpi_sum
-!!
 !! SOURCE
 
 subroutine writewf(cg,eigen,formeig,icg,ikpt,isppol,kg_k,mband,mcg,mpi_enreg,&
@@ -818,25 +785,28 @@ subroutine writewf(cg,eigen,formeig,icg,ikpt,isppol,kg_k,mband,mcg,mpi_enreg,&
  integer :: kg_varid,eig_varid,occ_varid,cg_varid,ncerr
  character(len=nctk_slen) :: kdep
 #endif
+#ifdef HAVE_MPI
+ integer(kind=MPI_OFFSET_KIND) :: off(1)
+#endif
 
 ! *********************************************************************
 
 !Check the options
  if ( ALL(option /= (/2,4,5/)) ) then
    write(msg,'(a,i0)')' The argument option should be 2, 4 or 5. However, option=',option
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
  if(wff%iomode==IO_MODE_MPI)then
    if(option==5)then
      write(msg,'(a,i0)')' With MPI-IO activated, the argument option should be 2 or 4. However, option=',option
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
  end if
 
  if (wff%iomode==IO_MODE_ETSF) then
    ! outkss still calls this routine!
-   MSG_WARNING("You should use outwff or ncwrite_cg to write data in netcdf format!")
+   ABI_WARNING("You should use outwff or ncwrite_cg to write data in netcdf format!")
  end if
 
 !Check that nband_disk is not larger than nband (only for writing)
@@ -844,7 +814,7 @@ subroutine writewf(cg,eigen,formeig,icg,ikpt,isppol,kg_k,mband,mcg,mpi_enreg,&
    write(msg,'(3a,i5,a,i5,a)') &
 &   'Writing option of rwwf. One should have nband<=nband_disk',ch10,&
 &   'However, nband= ',nband,', and nband_disk= ',nband_disk,'.'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
  npwtot=npw; npwso=npw*nspinor
@@ -861,7 +831,7 @@ subroutine writewf(cg,eigen,formeig,icg,ikpt,isppol,kg_k,mband,mcg,mpi_enreg,&
    npwtot=npwsotot/nspinortot
 
    if (option/=4) then
-     ABI_ALLOCATE(ind_cg_mpi_to_seq,(npwso))
+     ABI_MALLOC(ind_cg_mpi_to_seq,(npwso))
      if (allocated(mpi_enreg%my_kgtab)) then
        ikpt_this_proc=mpi_enreg%my_kpttab(ikpt)
        do ispinor=1,nspinor
@@ -949,7 +919,9 @@ subroutine writewf(cg,eigen,formeig,icg,ikpt,isppol,kg_k,mband,mcg,mpi_enreg,&
        call xderiveWRecEnd(wff,ios)
      end if
 #ifdef HAVE_MPI
-     call MPI_BCAST(wff%offwff,1,wff%offset_mpi_type,0,wff%spaceComm_mpiio,ios)
+     off(1)=wff%offwff
+     call MPI_BCAST(off,1,wff%offset_mpi_type,0,wff%spaceComm_mpiio,ios)
+     wff%offwff=off(1)
 #endif
 #ifdef HAVE_NETCDF
    else if (wff%iomode == IO_MODE_ETSF) then
@@ -1046,7 +1018,7 @@ subroutine writewf(cg,eigen,formeig,icg,ikpt,isppol,kg_k,mband,mcg,mpi_enreg,&
 !---------------------------------------------------------------------------
 
  if (allocated(ind_cg_mpi_to_seq)) then
-   ABI_DEALLOCATE(ind_cg_mpi_to_seq)
+   ABI_FREE(ind_cg_mpi_to_seq)
  end if
 
  RETURN

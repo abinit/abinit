@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_exit
 !! NAME
 !! m_exit
@@ -6,12 +5,10 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2019 ABINIT group (MG, DCA, XG, GMR)
+!!  Copyright (C) 2008-2024 ABINIT group (MG, DCA, XG, GMR)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
 !!
 !! SOURCE
 
@@ -77,17 +74,9 @@ CONTAINS
 !!
 !! INPUTS
 !!
-!! PARENTS
-!!      m_argparse
-!!
-!! CHILDREN
-!!      inupper,timein,wrtout,xmpi_bcast
-!!
 !! SOURCE
 
 subroutine exit_init(time_limit)
-
- implicit none
 
 !Arguments ------------------------------------
  real(dp),intent(in) :: time_limit
@@ -111,17 +100,9 @@ end subroutine exit_init
 !!  routine that is not able to handle time limit events and wants to prevent
 !!  its children from installing their handlers.
 !!
-!! PARENTS
-!!      dfpt_looppert
-!!
-!! CHILDREN
-!!      inupper,timein,wrtout,xmpi_bcast
-!!
 !! SOURCE
 
 subroutine disable_timelimit()
-
- implicit none
 
 !Local variables-------------------------------
 !scalars
@@ -133,8 +114,8 @@ subroutine disable_timelimit()
 
  if (TIMELIMIT_INABIFUNC /= "__None__") then
    msg = "Timelimit is already activated in function: "//trim(TIMELIMIT_INABIFUNC)
-   MSG_WARNING(msg)
-   !MSG_ERROR(msg)
+   ABI_WARNING(msg)
+   !ABI_ERROR(msg)
  end if
 
 end subroutine disable_timelimit
@@ -149,13 +130,9 @@ end subroutine disable_timelimit
 !! FUNCTION
 !!  Return .True. if timelimit is enabled in this caller
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 logical pure function have_timelimit_in(abifunc) result(ans)
-
- implicit none
 
 !Arguments -----------------------------------
  character(len=*),intent(in) :: abifunc
@@ -183,13 +160,9 @@ end function have_timelimit_in
 !!      write(std_out,*)"Enabling timelimit check in function: ",trim(FUNC_NAME)," with timelimit: ",trim(sec2str(get_timelimit()))
 !!    end if
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 function enable_timelimit_in(abifunc) result(prev_func)
-
- implicit none
 
 !Arguments -----------------------------------
  character(len=*),intent(in) :: abifunc
@@ -212,13 +185,9 @@ end function enable_timelimit_in
 !! FUNCTION
 !!  Return the time limit in seconds
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 real(dp) pure function get_timelimit()
-
- implicit none
 
  get_timelimit = WTIME_LIMIT
 
@@ -234,13 +203,9 @@ end function get_timelimit
 !! FUNCTION
 !!  Return the time limit in string form.
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 pure function get_timelimit_string() result(string)
-
- implicit none
 
 !Local variables-------------------------------
 !scalars
@@ -266,8 +231,6 @@ end function get_timelimit_string
 !!
 !! FUNCTION
 !!  Return the origin of execution time in seconds
-!!
-!! PARENTS
 !!
 !! SOURCE
 
@@ -304,17 +267,9 @@ end function get_start_time
 !!      or -1 if the exit was ordered through the existence of the "exit" file
 !!      or -2 if the exit was ordered through the CPU time limit.
 !!
-!! PARENTS
-!!      dfpt_looppert,driver,gstate,respfn,scprqt
-!!
-!! CHILDREN
-!!      inupper,timein,wrtout,xmpi_bcast
-!!
 !! SOURCE
 
 subroutine exit_check(cpus,filename,iexit,iout,comm,openexit)
-
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: comm
@@ -346,6 +301,7 @@ subroutine exit_check(cpus,filename,iexit,iout,comm,openexit)
      iexit=0
 
      ! Is it worth to test the cpu time ?
+     tsec = zero
      if (abs(cpus)>1.0d-5 .or. openexit==1) then
        call timein(tsec(1),tsec(2))
      end if
@@ -361,7 +317,7 @@ subroutine exit_check(cpus,filename,iexit,iout,comm,openexit)
        tcpu_last=tsec(1)
        ! Open file and read first line as character string
        if (open_file(filename,message,newunit=temp_unit,form='formatted',status='old') /= 0) then
-         MSG_ERROR(message)
+         ABI_ERROR(message)
        end if
        rewind (unit=temp_unit)
        read (unit=temp_unit,fmt='(a)',iostat=ierr) line
@@ -369,7 +325,7 @@ subroutine exit_check(cpus,filename,iexit,iout,comm,openexit)
          write(message, '(a,a,a,i5,a,a)' )&
 &         'Problem when reading file=',TRIM(filename),'iostat =',ierr,ch10,&
 &         'Action: check whether this file is OK.'
-         MSG_ERROR(message)
+         ABI_ERROR(message)
        end if
        ! Make a local copy of matching string of length equal to nonblank length of input string
        ! Map to upper case

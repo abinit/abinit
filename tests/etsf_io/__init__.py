@@ -12,14 +12,14 @@ keywords = [
 
 #: List of input files
 inp_files = [
-"t00.in",
-"t01.in",
-"t02.in",
-"t03.in",
-"t04.in",
-"t09.in",
-"-t10.in", # Disabled
-"t21.in",
-"t22.in",
-"t30.in",
+"t00.abi",
+"t01.abi",
+"t02.abi",
+"t03.abi",
+"t04.abi",
+"t09.abi",
+"-t10.abi", # Disabled
+"t21.abi",
+"t22.abi",
+"t30.abi",
 ]

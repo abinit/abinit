@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_wvl_projectors
 !! NAME
 !!  m_wvl_projectors
@@ -7,14 +6,10 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2019 ABINIT group (DC)
+!!  Copyright (C) 2008-2024 ABINIT group (DC)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -27,12 +22,12 @@
 module m_wvl_projectors
 
  use defs_basis
- use defs_datatypes
  use defs_wvltypes
  use m_errors
  use m_abicore
  use m_atomdata
 
+ use defs_datatypes, only : pseudopotential_type
  use m_geometry,     only : xred2xcart
 
  implicit none
@@ -61,22 +56,16 @@ contains
 !!  dtset <type(dataset_type)>=internal variables used by wavelets, describing
 !!   | wvl_internal=desciption of the wavelet box.
 !!   | natom=number of atoms.
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  psps <type(pseudopotential_type)>=variables related to pseudopotentials
 !!  rprimd(3,3)=dimensional primitive translations in real space (bohr)
 !!  xred(3,natom)=reduced dimensionless atomic coordinates
 !!
 !! OUTPUT
-!!  proj <type(wvl_projector_type)>=projectors informations for wavelets.
+!!  proj <type(wvl_projector_type)>=projectors information for wavelets.
 !!   | keys=its access keys for compact storage.
 !!
 !! SIDE EFFECTS
-!!
-!! PARENTS
-!!      gstate,wvl_wfsinp_reformat
-!!
-!! CHILDREN
-!!      createprojectorsarrays,wrtout,wvl_timing,xred2xcart
 !!
 !! SOURCE
 
@@ -111,21 +100,21 @@ subroutine wvl_projectors_set(me, natom, proj, psps, rprimd, wfs, wvl, wvl_frmul
 ! *********************************************************************
 
 #if defined HAVE_BIGDFT
-!Consistency checks, are all pseudo true GTH pseudo with geometric informations?
+!Consistency checks, are all pseudo true GTH pseudo with geometric information?
  do idata = 1, psps%npsp, 1
    if (.not. psps%gth_params%set(idata)) then
      write(message, '(a,a,a,a,I0,a,a,a)' ) ch10,&
 &     ' wvl_projectors_set :  consistency checks failed,', ch10, &
 &     '  no GTH parameters found for type number ', idata, '.', ch10, &
 &     '  Check your input pseudo files.'
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
    if (.not. psps%gth_params%hasGeometry(idata)) then
      write(message, '(a,a,a,a,a,a)' ) ch10,&
 &     ' wvl_projectors_set :  consistency checks failed,', ch10, &
-&     '  the given GTH parameters has no geometry informations.', ch10, &
+&     '  the given GTH parameters has no geometry information.', ch10, &
 &     '  Upgrade your input pseudo files to GTH with geometric informatoins.'
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
  end do
 
@@ -134,7 +123,7 @@ subroutine wvl_projectors_set(me, natom, proj, psps, rprimd, wfs, wvl, wvl_frmul
  end if
 
 !Store xcart for each atom
- ABI_ALLOCATE(xcart,(3, natom))
+ ABI_MALLOC(xcart,(3, natom))
  call xred2xcart(natom, rprimd, xcart, xred)
  call createProjectorsArrays(wfs%ks%Lzd%Glr,xcart,wvl%atoms,wfs%ks%orbs,&
  psps%gth_params%radii_cf,wvl_frmult,wvl_frmult,wvl%h(1),wvl%h(2),&
@@ -145,7 +134,7 @@ subroutine wvl_projectors_set(me, natom, proj, psps, rprimd, wfs, wvl, wvl_frmul
  call wrtout(std_out,message,'COLL')
 
 !Deallocations
- ABI_DEALLOCATE(xcart)
+ ABI_FREE(xcart)
 
  if (wvl_debug) then
    call wvl_timing(me,'CrtProjectors ','OF')
@@ -173,13 +162,7 @@ end subroutine wvl_projectors_set
 !! OUTPUT
 !!
 !! SIDE EFFECTS
-!!  proj <type(wvl_projectors_type)>=projectors informations in a wavelet basis.
-!!
-!! PARENTS
-!!      gstate,wvl_wfsinp_reformat
-!!
-!! CHILDREN
-!!      free_dft_psp_projectors
+!!  proj <type(wvl_projectors_type)>=projectors information in a wavelet basis.
 !!
 !! SOURCE
 
@@ -212,22 +195,22 @@ subroutine wvl_projectors_free(proj)
 !    without f_malloc (without memory profiling).
 !    call deallocate_gwf(proj%G(ii))
      if (associated(proj%G(ii)%ndoc)) then
-       ABI_DEALLOCATE(proj%G(ii)%ndoc)
+       ABI_FREE(proj%G(ii)%ndoc)
      end if
      if (associated(proj%G(ii)%nam)) then
-       ABI_DEALLOCATE(proj%G(ii)%nam)
+       ABI_FREE(proj%G(ii)%nam)
      end if
      if (associated(proj%G(ii)%nshell)) then
-       ABI_DEALLOCATE(proj%G(ii)%nshell)
+       ABI_FREE(proj%G(ii)%nshell)
      end if
      if (associated(proj%G(ii)%psiat)) then
-       ABI_DEALLOCATE(proj%G(ii)%psiat)
+       ABI_FREE(proj%G(ii)%psiat)
      end if
      if (associated(proj%G(ii)%xp)) then
-       ABI_DEALLOCATE(proj%G(ii)%xp)
+       ABI_FREE(proj%G(ii)%xp)
      end if
    end do
-   ABI_DATATYPE_DEALLOCATE(proj%G)
+   ABI_FREE(proj%G)
  end if
 
 #else

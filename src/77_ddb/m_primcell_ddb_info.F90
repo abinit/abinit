@@ -1,15 +1,14 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_primcell_ddb_info
 !!
 !! NAME
 !! m_primcell_ddb_info
 !!
 !! FUNCTION
-!! Module for container object passing cell information to SC phonon calculation in abinit 
+!! Module for container object passing cell information to SC phonon calculation in abinit
 !! Container type is defined, and destruction
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2019 ABINIT group (MJV)
+!! Copyright (C) 1999-2024 ABINIT group (MJV)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -77,7 +76,7 @@ contains
 !!  init and fill primcell_ddb_info
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2019 ABINIT group (MJV)
+!! Copyright (C) 1999-2024 ABINIT group (MJV)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -90,17 +89,12 @@ contains
 !!
 !! NOTES
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 subroutine init_primcell_ddb_info (pcell,brav,dipdip,mpert,msym,natom,nrpt,nsym,ntypat,ucvol,&
 &    indsym,symrec,symrel,typat,&
 &    acell,amu,dielt,dyewq0,gmet,gprim,rcan,rmet,rprim,rpt,trans,wghatm,xred,zeff)
- 
+
  use defs_basis
- implicit none
 
 !Arguments ------------------------------------
  type(primcell_ddb_info), intent(inout) :: pcell
@@ -145,26 +139,26 @@ subroutine init_primcell_ddb_info (pcell,brav,dipdip,mpert,msym,natom,nrpt,nsym,
   pcell%ucvol = ucvol
 
 ! allocate int
-  ABI_ALLOCATE(pcell%indsym,(4,nsym,natom))
-  ABI_ALLOCATE(pcell%symrec,(3,3,nsym))
-  ABI_ALLOCATE(pcell%symrel,(3,3,nsym))
-  ABI_ALLOCATE(pcell%typat,(natom))
+  ABI_MALLOC(pcell%indsym,(4,nsym,natom))
+  ABI_MALLOC(pcell%symrec,(3,3,nsym))
+  ABI_MALLOC(pcell%symrel,(3,3,nsym))
+  ABI_MALLOC(pcell%typat,(natom))
 
 ! allocate real
-  ABI_ALLOCATE(pcell%acell,(3))
-  ABI_ALLOCATE(pcell%amu,(ntypat))
-  ABI_ALLOCATE(pcell%dielt,(3,3))
-  ABI_ALLOCATE(pcell%dyewq0,(3,3,natom))
-  ABI_ALLOCATE(pcell%gmet,(3,3))
-  ABI_ALLOCATE(pcell%gprim,(3,3))
-  ABI_ALLOCATE(pcell%rcan,(3,natom))
-  ABI_ALLOCATE(pcell%rmet,(3,3))
-  ABI_ALLOCATE(pcell%rprim,(3,3))
-  ABI_ALLOCATE(pcell%rpt,(3,nrpt))
-  ABI_ALLOCATE(pcell%trans,(3,natom))
-  ABI_ALLOCATE(pcell%wghatm,(natom,natom,nrpt))
-  ABI_ALLOCATE(pcell%xred,(3,natom))
-  ABI_ALLOCATE(pcell%zeff,(3,3,natom))
+  ABI_MALLOC(pcell%acell,(3))
+  ABI_MALLOC(pcell%amu,(ntypat))
+  ABI_MALLOC(pcell%dielt,(3,3))
+  ABI_MALLOC(pcell%dyewq0,(3,3,natom))
+  ABI_MALLOC(pcell%gmet,(3,3))
+  ABI_MALLOC(pcell%gprim,(3,3))
+  ABI_MALLOC(pcell%rcan,(3,natom))
+  ABI_MALLOC(pcell%rmet,(3,3))
+  ABI_MALLOC(pcell%rprim,(3,3))
+  ABI_MALLOC(pcell%rpt,(3,nrpt))
+  ABI_MALLOC(pcell%trans,(3,natom))
+  ABI_MALLOC(pcell%wghatm,(natom,natom,nrpt))
+  ABI_MALLOC(pcell%xred,(3,natom))
+  ABI_MALLOC(pcell%zeff,(3,3,natom))
 
 ! init int
   pcell%indsym = indsym
@@ -188,7 +182,7 @@ subroutine init_primcell_ddb_info (pcell,brav,dipdip,mpert,msym,natom,nrpt,nsym,
   pcell%wghatm = wghatm
   pcell%xred = xred
   pcell%zeff = zeff
-  
+
  end subroutine init_primcell_ddb_info
 !!***
 
@@ -201,7 +195,7 @@ subroutine init_primcell_ddb_info (pcell,brav,dipdip,mpert,msym,natom,nrpt,nsym,
 !!  read in and fill primcell_ddb_info from the file name given in input
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2019 ABINIT group (MJV)
+!! Copyright (C) 1999-2024 ABINIT group (MJV)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -215,15 +209,10 @@ subroutine init_primcell_ddb_info (pcell,brav,dipdip,mpert,msym,natom,nrpt,nsym,
 !!
 !! NOTES
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 subroutine read_primcell_ddb_info (filename,pcell)
- 
+
  use defs_basis
- implicit none
 
 !Arguments ------------------------------------
  character(len=*), intent(in) :: filename
@@ -233,11 +222,11 @@ subroutine read_primcell_ddb_info (filename,pcell)
  integer :: unit
  character(len=500) :: msg
  character(len=13):: buffer
- 
+
 ! *************************************************************************
 
   if (open_file(filename,msg,newunit=unit) /= 0) then
-    MSG_ERROR(msg)
+    ABI_ERROR(msg)
   end if
 
 ! read in dimensions
@@ -254,26 +243,26 @@ subroutine read_primcell_ddb_info (filename,pcell)
   read(unit,'(a,E20.10)') buffer, pcell%ucvol
 
 ! allocate int
-  ABI_ALLOCATE(pcell%indsym,(4,pcell%nsym,pcell%natom))
-  ABI_ALLOCATE(pcell%symrec,(3,3,pcell%nsym))
-  ABI_ALLOCATE(pcell%symrel,(3,3,pcell%nsym))
-  ABI_ALLOCATE(pcell%typat,(pcell%natom))
+  ABI_MALLOC(pcell%indsym,(4,pcell%nsym,pcell%natom))
+  ABI_MALLOC(pcell%symrec,(3,3,pcell%nsym))
+  ABI_MALLOC(pcell%symrel,(3,3,pcell%nsym))
+  ABI_MALLOC(pcell%typat,(pcell%natom))
 
 ! allocate real
-  ABI_ALLOCATE(pcell%acell,(3))
-  ABI_ALLOCATE(pcell%amu,(pcell%ntypat))
-  ABI_ALLOCATE(pcell%dielt,(3,3))
-  ABI_ALLOCATE(pcell%dyewq0,(3,3,pcell%natom))
-  ABI_ALLOCATE(pcell%gmet,(3,3))
-  ABI_ALLOCATE(pcell%gprim,(3,3))
-  ABI_ALLOCATE(pcell%rcan,(3,pcell%natom))
-  ABI_ALLOCATE(pcell%rmet,(3,3))
-  ABI_ALLOCATE(pcell%rprim,(3,3))
-  ABI_ALLOCATE(pcell%rpt,(3,pcell%nrpt))
-  ABI_ALLOCATE(pcell%trans,(3,pcell%natom))
-  ABI_ALLOCATE(pcell%wghatm,(pcell%natom,pcell%natom,pcell%nrpt))
-  ABI_ALLOCATE(pcell%xred,(3,pcell%natom))
-  ABI_ALLOCATE(pcell%zeff,(3,3,pcell%natom))
+  ABI_MALLOC(pcell%acell,(3))
+  ABI_MALLOC(pcell%amu,(pcell%ntypat))
+  ABI_MALLOC(pcell%dielt,(3,3))
+  ABI_MALLOC(pcell%dyewq0,(3,3,pcell%natom))
+  ABI_MALLOC(pcell%gmet,(3,3))
+  ABI_MALLOC(pcell%gprim,(3,3))
+  ABI_MALLOC(pcell%rcan,(3,pcell%natom))
+  ABI_MALLOC(pcell%rmet,(3,3))
+  ABI_MALLOC(pcell%rprim,(3,3))
+  ABI_MALLOC(pcell%rpt,(3,pcell%nrpt))
+  ABI_MALLOC(pcell%trans,(3,pcell%natom))
+  ABI_MALLOC(pcell%wghatm,(pcell%natom,pcell%natom,pcell%nrpt))
+  ABI_MALLOC(pcell%xred,(3,pcell%natom))
+  ABI_MALLOC(pcell%zeff,(3,3,pcell%natom))
 
 ! read in int
   read(unit,'(a)')
@@ -316,7 +305,7 @@ subroutine read_primcell_ddb_info (filename,pcell)
   read(unit,'(3E20.10)') pcell%zeff
 
   close(unit)
-  
+
  end subroutine read_primcell_ddb_info
 !!***
 
@@ -330,7 +319,7 @@ subroutine read_primcell_ddb_info (filename,pcell)
 !!  write out primcell_ddb_info to the file name given in input
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2019 ABINIT group (MJV)
+!! Copyright (C) 1999-2024 ABINIT group (MJV)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -345,15 +334,10 @@ subroutine read_primcell_ddb_info (filename,pcell)
 !!
 !! NOTES
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 subroutine write_primcell_ddb_info (filename,pcell)
- 
+
  use defs_basis
- implicit none
 
 !Arguments ------------------------------------
 
@@ -367,7 +351,7 @@ subroutine write_primcell_ddb_info (filename,pcell)
 ! *************************************************************************
 
   if (open_file(filename,msg,newunit=unit, form="formatted",status="unknown") /= 0) then
-    MSG_ERROR(msg)
+    ABI_ERROR(msg)
   end if
 
 ! read out dimensions
@@ -424,7 +408,7 @@ subroutine write_primcell_ddb_info (filename,pcell)
   write(unit,'(3E20.10)') pcell%zeff
 
   close(unit)
-  
+
  end subroutine write_primcell_ddb_info
 !!***
 
@@ -437,7 +421,7 @@ subroutine write_primcell_ddb_info (filename,pcell)
 !!  deallocate stuoff in primcell_ddb_info
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2019 ABINIT group (MJV)
+!! Copyright (C) 1999-2024 ABINIT group (MJV)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -449,73 +433,68 @@ subroutine write_primcell_ddb_info (filename,pcell)
 !!
 !! NOTES
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 subroutine destroy_primcell_ddb_info (pcell)
- 
+
  use defs_basis
- implicit none
 
 !Arguments ------------------------------------
  type(primcell_ddb_info), intent(inout) :: pcell
 
 ! *************************************************************************
   if (allocated(pcell%indsym))  then
-    ABI_DEALLOCATE(pcell%indsym)
+    ABI_FREE(pcell%indsym)
   end if
   if (allocated(pcell%symrec))  then
-    ABI_DEALLOCATE(pcell%symrec)
+    ABI_FREE(pcell%symrec)
   end if
   if (allocated(pcell%symrel))  then
-    ABI_DEALLOCATE(pcell%symrel)
+    ABI_FREE(pcell%symrel)
   end if
   if (allocated(pcell%typat ))  then
-    ABI_DEALLOCATE(pcell%typat)
+    ABI_FREE(pcell%typat)
   end if
   if (allocated(pcell%acell ))  then
-    ABI_DEALLOCATE(pcell%acell)
+    ABI_FREE(pcell%acell)
   end if
   if (allocated(pcell%amu   ))  then
-    ABI_DEALLOCATE(pcell%amu)
+    ABI_FREE(pcell%amu)
   end if
   if (allocated(pcell%dielt ))  then
-    ABI_DEALLOCATE(pcell%dielt)
+    ABI_FREE(pcell%dielt)
   end if
   if (allocated(pcell%dyewq0))  then
-    ABI_DEALLOCATE(pcell%dyewq0)
+    ABI_FREE(pcell%dyewq0)
   end if
   if (allocated(pcell%gmet  ))  then
-    ABI_DEALLOCATE(pcell%gmet)
+    ABI_FREE(pcell%gmet)
   end if
   if (allocated(pcell%gprim ))  then
-    ABI_DEALLOCATE(pcell%gprim)
+    ABI_FREE(pcell%gprim)
   end if
   if (allocated(pcell%rcan  ))  then
-    ABI_DEALLOCATE(pcell%rcan)
+    ABI_FREE(pcell%rcan)
   end if
   if (allocated(pcell%rmet  ))  then
-    ABI_DEALLOCATE(pcell%rmet)
+    ABI_FREE(pcell%rmet)
   end if
   if (allocated(pcell%rprim ))  then
-    ABI_DEALLOCATE(pcell%rprim)
+    ABI_FREE(pcell%rprim)
   end if
   if (allocated(pcell%rpt   ))  then
-    ABI_DEALLOCATE(pcell%rpt)
+    ABI_FREE(pcell%rpt)
   end if
   if (allocated(pcell%trans ))  then
-    ABI_DEALLOCATE(pcell%trans)
+    ABI_FREE(pcell%trans)
   end if
   if (allocated(pcell%wghatm))  then
-    ABI_DEALLOCATE(pcell%wghatm)
+    ABI_FREE(pcell%wghatm)
   end if
   if (allocated(pcell%xred  ))  then
-    ABI_DEALLOCATE(pcell%xred)
+    ABI_FREE(pcell%xred)
   end if
   if (allocated(pcell%zeff  ))  then
-    ABI_DEALLOCATE(pcell%zeff)
+    ABI_FREE(pcell%zeff)
   end if
 
  end subroutine destroy_primcell_ddb_info

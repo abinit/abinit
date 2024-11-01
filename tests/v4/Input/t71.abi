@@ -1,0 +1,87 @@
+# General informations
+#**********************
+   rfmeth  1
+   enunit  0
+   eivec   1
+   chneut  2
+  selectz  0
+
+# Flags
+#*******
+   dieflag  2
+   ifcflag  0
+   thmflag  0
+
+polflag 1
+relaxat 1
+relaxstr 1
+nstrfix 2
+istrfix 1 2
+targetpol 0.0 0.0 0.45
+
+
+# Frequence information
+#***********************
+   nfreq   100
+   frmin   0
+   frmax   2E-3
+
+# Interatomic force constant information
+#****************************************
+   dipdip  1
+   nsphere 0
+   ifcout  0
+   ifcana  0
+   natifc  2
+   atifc   1 2
+
+# Thermal information  (needed if thmflg is 1)
+#**********************************************
+   nchan       500
+   nwchan      10
+   dostol      0.1
+   thmtol      0.05
+! Use standard set of temperatures (default for ntemper, tempermin, temperinc)
+
+# Wavevector grid number 1
+#**************************
+   brav  1
+   ngqpt 4 4 4
+   nqshft 1
+   q1shft 0 0 0
+
+# Wavevector grid number 2
+#**************************
+   ngrids 12
+   ng2qpt 24 24 24
+
+
+# Wavevector list number 1
+#**************************
+   nph1l 1
+   qph1l 0 0 0 1
+
+# Wavevector list number 2 (Gamma point only, with limiting direction
+#           in cartesian coordinates. )
+#*********************************************************************
+   nph2l 3
+   qph2l 1.0  0.0  0.0  0
+         0.0  1.0  0.0  0
+         0.0  0.0  1.0  0
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = anaddb
+#%% [files]
+#%% files_to_test = 
+#%%   t71.abo, tolnlines = 10, tolabs = 6.0e-10, tolrel = 2.000e-07
+#%% extra_inputs =t71.ddb.in.gz
+#%% [paral_info]
+#%% max_nprocs = 4
+#%% [extra_info]
+#%% authors = M. Veithen
+#%% keywords = 
+#%% description = 
+#%%   Tetragonal PbTiO3. Use ANADDB to impose a polarization with fixed in-plane lattice constant
+#%% topics = ConstrainedPol
+#%%<END TEST_INFO>

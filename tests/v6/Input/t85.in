@@ -6,9 +6,6 @@
  ifcflag   1
  prtsrlr   1
 
-!Effective charges
-  chneut   1     ! Charge neutrality requirement for effective charges.
-
  eivec 0
 
 !Wavevector grid number 1 (coarse grid, from DDB)

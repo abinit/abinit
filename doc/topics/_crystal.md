@@ -1,17 +1,17 @@
 ---
-description: How to to specify a crystal, with atomic positions and symmetries
+description: How to specify a crystal, with atomic positions and symmetries
 authors: FJ
 ---
 <!--- This is the source file for this topics. Can be edited. -->
 
-This page gives hints on how to to specify a crystal, with atomic positions and symmetries with the ABINIT package.
+This page gives hints on how to specify a crystal, with atomic positions and symmetries with the ABINIT package.
 
 ## Introduction
 
 In addition to the [[topic:UnitCell|Specification of the unit cell]] and
 [[topic:AtomTypes|Atom types]], ABINIT must know the number of atoms inside
 the cell, their type, and position. This is described by [[natom]], [[typat]]
-and one of [[xred]], [[xcart]] and [[xangst]].
+and one of [[xred]] or [[xcart]].
 
 ABINIT can automatically detect the Bravais lattice and space group, and
 generate symmetries (e.g. [[nsym]], [[symrel]], [[tnons]]), from the primitive
@@ -55,8 +55,7 @@ Details about the way the crystal structure is defined in ABINIT can be found [[
 
 ## Tutorials
 
-* [[tutorial:base1|The tutorial 1]] deals with the H2 molecule : get the total energy, the electronic energies, the charge density, the bond length, the atomisation energy 
-* [[tutorial:base2|The tutorial 2]] deals again with the H2 molecule: convergence studies, LDA versus GGA 
+* [[tutorial:base1|The tutorial 1]] deals with the H2 molecule : get the total energy, the electronic energies, the charge density, the bond length, the atomisation energy
+* [[tutorial:base2|The tutorial 2]] deals again with the H2 molecule: convergence studies, LDA versus GGA
 * [[tutorial:base3|The tutorial 3]] deals with crystalline silicon (an insulator): the definition of a k-point grid, the smearing of the cut-off energy, the computation of a band structure, and again, convergence studies ...
 * [[tutorial:base4|The tutorial 4]] deals with crystalline aluminum (a metal), and its surface: occupation numbers, smearing the Fermi-Dirac distribution, the surface energy, and again, convergence studies ...
-

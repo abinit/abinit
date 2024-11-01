@@ -1,0 +1,140 @@
+# Test for the calculation of Frohlich ZPR in hexagonal ZrS2 - mp - 1186. Really underconverged calculation, for testing purposes.
+  
+  ndtset 6
+  
+    kptopt   1
+    ngkpt    2 2 1   # for testing purposes
+    nshiftk  1
+    shiftk   0. 0. 0.
+    tolvrs   1.0d-10
+      nqpt   1
+       qpt   3*0.0
+#   chksymbreak 0
+  
+  # Ground state calculation
+    #Restore the default parameters for the ground state part,
+    #i.e. override the common parameters defined for the effective mass datasets.
+    tolwfr1   0.0d0
+      nqpt1   0
+     nband1   12
+     nbdbuf1   0
+
+  # RF calculation of ddk
+    rfelfd2  2
+    kptopt2  2
+    tolwfr2  1.0d-8
+    getwfk2  -1
+      iscf2  -3
+     nband2   12
+     nbdbuf2   0
+
+  # RF calculation of phonons and electric field perturbation
+    rfphon3  1
+    rfelfd3  3
+   rfatpol3  1 2   # One might have left the default, since the atom 3 is symmetric of atom 2
+    kptopt3  2
+    tolvrs3  1.0d-10
+    getwfk3  1
+    getddk3  2
+     nband3   12
+    nbdbuf3   0
+  
+  # Non-SCF at the specific points where we want to have the effective mass, including the conduction bands
+    iscf4    -2
+    getden4   1
+    kptopt4   0        # K-points can be specified in any way one want, they just need to be present in the
+    nkpt4     2        # ground state calc. too.
+    kpt4      0.00 0.00 0.00   # Gamma
+              0.50 0.00 0.50   # L
+    tolwfr4   1.0d-8  # Must use tolwfr for non-self-consistent calculations.
+      nqpt4   0
+                                                                                                          
+  # Response Function calculation : d/dk  at the specific points, with added bands.
+    rfelfd5   2         # Activate the calculation of the d/dk perturbation (required for effective mass calc.)
+    iscf5    -2
+    nstep5    10
+  
+    getden5   1
+    getwfk5   4
+    get1wf5   2
+  
+    kptopt5   0        # Here one perform a GS calculation for the K-points for which the effective mass is sought.
+    nkpt5     2        
+    kpt5      0.00 0.00 0.00   # Gamma                                                                                    
+              0.50 0.50 0.50   # L
+                                                                                                          
+    tolwfr5   1.0d-8  # Must use tolwfr for non-self-consistent calculations.
+  
+    efmas5       1     # Triggers the calculation of effective mass tensors for the specified k-points.
+    efmas_bands5 6 9   # The range of bands for which the effective mass tensors will be computed, for each k-point.
+                 7 9   
+    efmas_calc_dirs5 1
+    efmas_n_dirs5 7
+    efmas_ntheta5 100
+    efmas_dirs5 
+              1 0 0
+              0 1 0
+              0 0 1
+              1 1 1
+              0 1 1
+              1 0 1
+              1 1 0
+    prtefmas5     1
+
+  # Frohlich model calculation
+    iscf6          -2
+    optdriver6      7
+    getddb6         3
+    getwfk6         4
+    getefmas6       5
+    efmas_ntheta6   100
+#   efmas_ntheta6   4
+    eph_frohlichm6  1
+    eph_task6       6
+    kptopt6         0        # K-points can be specified in any way one want, they just need to be present in the
+    nkpt6     2        # ground state calc. too.
+    kpt6      0.00 0.00 0.00   # Gamma
+              0.50 0.00 0.50   # X
+
+    ddb_ngqpt6 1 1 1
+    prtphdos6 0
+    chneut6   0  # Don't enforce ASR on BECS (not a good idea, just for testing purposes)
+
+#######################################################################   
+acell  2*6.9749786238 12.49297851
+angdeg 90 90 120
+xred
+ 0.00000000  0.00000000  0.00000000 
+ 0.66666667  0.33333333  0.77960800 
+ 0.33333333  0.66666667  0.22039200 
+
+typat  1 2*2
+natom  3
+ntypat 2
+znucl  40 16
+nband  12
+#nbdbuf 2
+diemac 6
+#ecut  30               # Underconverged ecut. 
+ecut   6
+nstep  20
+
+ pp_dirpath "$ABI_PSPDIR/Pseudodojo_nc_sr_04_pbe_standard_psp8/"
+ pseudos "Zr.psp8, S.psp8"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test =
+#%%   t60.abo, tolnlines = 30, tolabs = 1.1e-2, tolrel = 5.0e-3, fld_options=-medium;
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = B.Guster taken after v8/t57
+#%% keywords = DFPT, EPH
+#%% description =
+#%%  ZrS2 effective mass tensor at \Gamma. Also compute the Frohlich average of the effective mass 
+#%%  and also the Frohlich ZPR from the general formula.
+#%% topics = EffectiveMass
+#%%<END TEST_INFO>

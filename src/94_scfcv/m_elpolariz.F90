@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_elpolariz
 !! NAME
 !! m_elpolariz
@@ -7,14 +6,10 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2005-2019 ABINIT group (XG, NSAI, MKV)
+!!  Copyright (C) 2005-2024 ABINIT group (XG, NSAI, MKV)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -27,15 +22,17 @@
 module m_elpolariz
 
  use defs_basis
- use defs_datatypes
- use defs_abitypes
  use m_abicore
  use m_errors
  use m_efield
  use m_xmpi
  use m_wffile
  use m_hdr
+ use m_dtset
+ use m_dtfil
 
+ use defs_datatypes, only : pseudopotential_type
+ use defs_abitypes, only : MPI_type
  use m_geometry, only : metric
  use m_symtk,    only : matr3inv
  use m_hide_lapack,  only : dzgedi, dzgefa
@@ -120,12 +117,6 @@ contains
 !! pel(3) = reduced coordinates of the electronic polarization (a. u.)
 !! pion(3)= reduced coordinates of the ionic polarization (a. u.)
 !!
-!! PARENTS
-!!      afterscfloop
-!!
-!! CHILDREN
-!!      berryphase,berryphase_new,metric,uderiv,wrtout
-!!
 !! SOURCE
 
 subroutine elpolariz(atindx1,cg,cprj,dtefield,dtfil,dtset,etotal,enefield,gprimd,hdr,&
@@ -133,8 +124,6 @@ subroutine elpolariz(atindx1,cg,cprj,dtefield,dtfil,dtset,etotal,enefield,gprimd
 & npwarr,nsppol,ntypat,pawrhoij,pawtab,&
 & pel,pel_cg,pelev,pion,psps,pwind,pwind_alloc,&
 & pwnsfac,rprimd,ucvol,usecprj,xred)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -160,14 +149,16 @@ subroutine elpolariz(atindx1,cg,cprj,dtefield,dtfil,dtset,etotal,enefield,gprimd
 
 !Local variables-------------------------------
 !scalars
- integer :: my_nspinor,option,unit_out,iir,jjr,kkr
+ integer :: mcg1_3,my_nspinor,option,unit_out,iir,jjr,kkr
  real(dp) :: pdif_mod,eenth,ucvol_local
+ logical :: save_cg1_3
  character(len=500) :: message
 !arrays
  real(dp) :: gmet(3,3),gprimdlc(3,3),pdif(3),ptot(3),red_ptot(3),rmet(3,3)
 !! ptot(3) = total polarization (not reduced) REC
 !! red_ptot(3) = internal reduced total polarization REC
  real(dp) ::  A(3,3),A1(3,3),A_new(3,3),efield_new(3)
+ real(dp),allocatable :: cg1_3(:,:,:)
 
 ! *************************************************************************
 
@@ -177,7 +168,7 @@ subroutine elpolariz(atindx1,cg,cprj,dtefield,dtfil,dtset,etotal,enefield,gprimd
    write (message,'(3a)')&
 &   'cprj datastructure must be allocated !',ch10,&
 &   'Action: change pawusecp input keyword.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  my_nspinor=max(1,dtset%nspinor/mpi_enreg%nproc_spinor)
@@ -240,13 +231,22 @@ subroutine elpolariz(atindx1,cg,cprj,dtefield,dtfil,dtset,etotal,enefield,gprimd
    end select
 
    unit_out = ab_out
-   call berryphase_new(atindx1,cg,cprj,dtefield,dtfil,dtset,psps,&
+
+   ! by default berryphase_new writes ddk wavefunctions to disk
+   ! with save_cg1_3 set to true it can return them in memory
+   ! this feature is used at present when orbmag is also called,
+   ! as in afterscfloop
+   save_cg1_3 = .FALSE.
+   mcg1_3 = 0
+   ABI_MALLOC(cg1_3,(2,mcg1_3,3))
+   call berryphase_new(atindx1,cg,cg1_3,cprj,dtefield,dtfil,dtset,psps,&
 &   gprimd,hdr,psps%indlmn,kg,&
-&   psps%lmnmax,mband,mcg,mcprj,mkmem,mpi_enreg,mpw,my_natom,natom,npwarr,&
+&   psps%lmnmax,mband,mcg,mcg1_3,mcprj,mkmem,mpi_enreg,mpw,my_natom,natom,npwarr,&
 &   nsppol,psps%ntypat,nkpt,option,pawrhoij,&
 &   pawtab,pel,pelev,pion,ptot,red_ptot,pwind,&                            !!REC
-&  pwind_alloc,pwnsfac,rprimd,dtset%typat,ucvol,&
+&  pwind_alloc,pwnsfac,rprimd,save_cg1_3,dtset%typat,ucvol,&
 &   unit_out,usecprj,psps%usepaw,xred,psps%ziontypat)
+   ABI_FREE(cg1_3)
 
    dtefield%red_ptot1(:)=red_ptot(:)
 
@@ -280,7 +280,7 @@ subroutine elpolariz(atindx1,cg,cprj,dtefield,dtfil,dtset,etotal,enefield,gprimd
 &       'pel(1) = ',pel(1),ch10,&
 &       'pel(2) = ',pel(2),ch10,&
 &       'pel(3) = ',pel(3),ch10
-       MSG_ERROR(message)
+       ABI_ERROR(message)
      end if
 
 !    Use this (more accurate) value of P to recompute enefield
@@ -474,20 +474,11 @@ end subroutine elpolariz
 !!                              G to -G
 !!                     $c_g$ to $c_g^*$ when time-reversal symetrie is used
 !!
-!! PARENTS
-!!      elpolariz
-!!
-!! CHILDREN
-!!      appdig,dzgedi,dzgefa,hdr_io,matr3inv,rwwf,waveformat,wffclose,wffopen
-!!      wrtout,xdefineoff
-!!
 !! SOURCE
 
 subroutine uderiv(bdberry,cg,gprimd,hdr,istwfk,kberry,kg,kpt_,kptopt,kptrlatt,&
 & mband,mcg,mkmem,mpi_enreg,mpw,natom,nband,nberry,npwarr,nspinor,nsppol,nkpt_,&
 & unddk,fnameabo_1wf)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -530,23 +521,23 @@ subroutine uderiv(bdberry,cg,gprimd,hdr,istwfk,kberry,kg,kpt_,kptopt,kptrlatt,&
 ! *************************************************************************
 
  if(min(2,(1+mpi_enreg%paral_spinor)*nspinor)==2)then
-   MSG_ERROR('uderiv: does not yet work for nspinor=2')
+   ABI_ERROR('uderiv: does not yet work for nspinor=2')
  end if
 
  if(maxval(istwfk(:))/=1)then
    write(message,'(3a)')&
 &   'Sorry, this routine does not work yet with istwfk/=1.',ch10,&
 &   'This should have been tested previously ...'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
  if (kptopt==3) then
    nkpt = nkpt_
-   ABI_ALLOCATE(kpt,(3,nkpt))
+   ABI_MALLOC(kpt,(3,nkpt))
    kpt(:,:)=kpt_(:,:)
  else if (kptopt==2) then
    nkpt = nkpt_*2
-   ABI_ALLOCATE(kpt,(3,nkpt))
+   ABI_MALLOC(kpt,(3,nkpt))
    do ikpt = 1,nkpt/2
      kpt_flag(ikpt) = 0
      kpt(:,ikpt)=kpt_(:,ikpt)
@@ -581,7 +572,7 @@ subroutine uderiv(bdberry,cg,gprimd,hdr,istwfk,kberry,kg,kpt_,kptopt,kptrlatt,&
 !end do
 !ENDDEBUG
 
- ABI_ALLOCATE(shift_g_2,(nkpt,nkpt))
+ ABI_MALLOC(shift_g_2,(nkpt,nkpt))
 
 !Compute primitive vectors of the k point lattice
 !Copy to real(dp)
@@ -640,7 +631,7 @@ subroutine uderiv(bdberry,cg,gprimd,hdr,istwfk,kberry,kg,kpt_,kptopt,kptrlatt,&
 
 !  For each k point, find k_prim such that k_prim= k + dk mod(G)
 !  where G is a vector of the reciprocal lattice
-   ABI_ALLOCATE(ikpt_dk,(2,nkpt))
+   ABI_MALLOC(ikpt_dk,(2,nkpt))
    ikpt_dk(1:2,1:nkpt)=0
    shift_g_2(:,:)= .false.
 
@@ -679,9 +670,9 @@ subroutine uderiv(bdberry,cg,gprimd,hdr,istwfk,kberry,kg,kpt_,kptopt,kptrlatt,&
    call wrtout(std_out,message,'COLL')
 
 !  *****************************************************************************
-   ABI_ALLOCATE(dudk,(2,mpw*nspinor*mband*nsppol))
-   ABI_ALLOCATE(eig_dum_2,((2*mband)**formeig*mband))
-   ABI_ALLOCATE(occ_dum_2,((2*mband)**formeig*mband))
+   ABI_MALLOC(dudk,(2,mpw*nspinor*mband*nsppol))
+   ABI_MALLOC(eig_dum_2,((2*mband)**formeig*mband))
+   ABI_MALLOC(occ_dum_2,((2*mband)**formeig*mband))
    dudk(1:2,:)=0.0_dp
    eig_dum_2=0.0_dp
    occ_dum_2=0.0_dp
@@ -690,7 +681,7 @@ subroutine uderiv(bdberry,cg,gprimd,hdr,istwfk,kberry,kg,kpt_,kptopt,kptrlatt,&
 
 !    Find the location of each wavefunction
 
-     ABI_ALLOCATE(cg_index,(mband,nkpt_,nsppol))
+     ABI_MALLOC(cg_index,(mband,nkpt_,nsppol))
      icg = 0
      do isppol=1,nsppol
        do ikpt=1,nkpt_
@@ -705,7 +696,7 @@ subroutine uderiv(bdberry,cg,gprimd,hdr,istwfk,kberry,kg,kpt_,kptopt,kptrlatt,&
 
 !    Find the planewave vectors for each k point
 !    SHOULD BE REMOVED WHEN ANOTHER INDEXING TECHNIQUE WILL BE USED FOR kg
-     ABI_ALLOCATE(kg_kpt,(3,mpw*nspinor,nkpt_))
+     ABI_MALLOC(kg_kpt,(3,mpw*nspinor,nkpt_))
      kg_kpt(:,:,:) = 0
      index1 = 0
      do ikpt=1,nkpt_
@@ -726,17 +717,17 @@ subroutine uderiv(bdberry,cg,gprimd,hdr,istwfk,kberry,kg,kpt_,kptopt,kptrlatt,&
 
      if(minband<1)then
        write(message,'(a,i0,a)')'  The band limit minband= ',minband,', is lower than 0.'
-       MSG_BUG(message)
+       ABI_BUG(message)
      end if
 
      if(maxband<1)then
        write(message,'(a,i0,a)')' The band limit maxband= ',maxband,', is lower than 0.'
-       MSG_BUG(message)
+       ABI_BUG(message)
      end if
 
      if(maxband<minband)then
        write(message,'(a,i0,a,i0)')' maxband= ',maxband,', is lower than minband= ',minband
-       MSG_BUG(message)
+       ABI_BUG(message)
      end if
 
 !    Loop over k points
@@ -765,12 +756,12 @@ subroutine uderiv(bdberry,cg,gprimd,hdr,istwfk,kberry,kg,kpt_,kptopt,kptrlatt,&
 
        if(nband_k<maxband)then
          write(message,'(a,i0,a,i0)')'  maxband=',maxband,', is larger than nband(i,isppol)=',nband_k
-         MSG_BUG(message)
+         ABI_BUG(message)
        end if
 
        npw_k=npwarr(ikpt)
 
-       ABI_ALLOCATE(u_tilde,(2,npw_k,maxband,2))
+       ABI_MALLOC(u_tilde,(2,npw_k,maxband,2))
        u_tilde(1:2,1:npw_k,1:maxband,1:2)=0.0_dp
 
 !      ifor = 1,2 represents forward and backward neighbouring k points of ikpt
@@ -778,8 +769,8 @@ subroutine uderiv(bdberry,cg,gprimd,hdr,istwfk,kberry,kg,kpt_,kptopt,kptrlatt,&
 
        do ifor=1,2
 
-         ABI_ALLOCATE(phi,(2,mpw,mband))
-         ABI_ALLOCATE(cmatrix,(2,maxband,maxband))
+         ABI_MALLOC(phi,(2,mpw,mband))
+         ABI_MALLOC(cmatrix,(2,maxband,maxband))
          phi(1:2,1:mpw,1:mband)=0.0_dp; cmatrix(1:2,1:maxband,1:maxband)=0.0_dp
 
          isgn=(-1)**ifor
@@ -832,15 +823,15 @@ subroutine uderiv(bdberry,cg,gprimd,hdr,istwfk,kberry,kg,kpt_,kptopt,kptrlatt,&
 !        Compute the inverse of cmatrix(1:2,minband:maxband, minband:maxband)
 
          band_in = maxband - minband + 1
-         ABI_ALLOCATE(ipvt,(maxband))
-         ABI_ALLOCATE(zgwork,(2,1:maxband))
+         ABI_MALLOC(ipvt,(maxband))
+         ABI_MALLOC(zgwork,(2,1:maxband))
 
 !        Last argument of zgedi means calculate inverse only
          call dzgefa(cmatrix(1,minband,minband),maxband, band_in,ipvt,info)
          call dzgedi(cmatrix(1,minband,minband),maxband, band_in,ipvt,det,zgwork,01)
 
-         ABI_DEALLOCATE(zgwork)
-         ABI_DEALLOCATE(ipvt)
+         ABI_FREE(zgwork)
+         ABI_FREE(ipvt)
 
 !        Compute the product of Inverse overlap matrix with the wavefunction
 
@@ -858,8 +849,8 @@ subroutine uderiv(bdberry,cg,gprimd,hdr,istwfk,kberry,kg,kpt_,kptopt,kptrlatt,&
 &             phi(1,ipw,minband:maxband))
            end do
          end do
-         ABI_DEALLOCATE(cmatrix)
-         ABI_DEALLOCATE(phi)
+         ABI_FREE(cmatrix)
+         ABI_FREE(phi)
 
        end do !ifor
 
@@ -889,26 +880,26 @@ subroutine uderiv(bdberry,cg,gprimd,hdr,istwfk,kberry,kg,kpt_,kptopt,kptrlatt,&
        !call wfk_read_band_block(wfk, band_block, ikpt, isppol, sc_mode,
        !  kg_k=kg_kpt(:,:,ikpt), cg_k=dudk, eig_k=eig_dum, occ_k=occ_dum)
 
-       ABI_DEALLOCATE(u_tilde)
+       ABI_FREE(u_tilde)
 
      end do !ikpt
    end do  !isppol
 
-   ABI_DEALLOCATE(eig_dum_2)
-   ABI_DEALLOCATE(occ_dum_2)
-   ABI_DEALLOCATE(dudk)
+   ABI_FREE(eig_dum_2)
+   ABI_FREE(occ_dum_2)
+   ABI_FREE(dudk)
 
    call WffClose(wffddk,ierr)
    !call wfk_close(wfk)
 
-   ABI_DEALLOCATE(kg_kpt)
-   ABI_DEALLOCATE(cg_index)
-   ABI_DEALLOCATE(ikpt_dk)
+   ABI_FREE(kg_kpt)
+   ABI_FREE(cg_index)
+   ABI_FREE(ikpt_dk)
 
  end do ! iberry
 
- ABI_DEALLOCATE(shift_g_2)
- ABI_DEALLOCATE(kpt)
+ ABI_FREE(shift_g_2)
+ ABI_FREE(kpt)
 
  write(std_out,*) 'uderiv:  exit '
 
@@ -967,18 +958,11 @@ end subroutine uderiv
 !!
 !! SIDE EFFECTS
 !!
-!! PARENTS
-!!      uderiv
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine waveformat(cg,cg_disk,cg_index,cg_new,dk,ii,ikpt,&
 & ikpt_,isgn,isppol,jj,jkpt,jkpt_,kg_kpt,kpt,kg_jl,maxband,mband,mcg,mcg_disk,&
 & minband,mkmem,mpw,nkpt,nkpt_,npwarr,nsppol,nspinor,shift_g_2,tr)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

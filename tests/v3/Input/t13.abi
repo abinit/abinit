@@ -1,0 +1,100 @@
+# Rhombohedral Bi treated as a semiconductor
+# Test the conversion of wavefunctions, in the
+# spinor case.
+
+ ndtset 5
+
+#Dataset 1 : GS with spin-orbit
+ getden1  0
+ getwfk1  0
+ tolvrs1  1.0d-16
+ prtden1  1
+ kptopt1  1
+ nstep1   20
+
+#Read one wavefunction, check that it is converged
+ iscf2    -2
+ getwfk2  1
+ nkpt2    1
+ kpt2     0.25d0  0.25d0  -0.25d0
+ nstep2   20
+
+#Generate different wavefunctions from
+#the wf of dataset 2
+ iscf3   -2
+ nkpt3    6
+ kpt3     0.25d0   0.25d0  -0.25d0
+          0.25d0  -0.25d0   0.25d0
+         -0.25d0   0.25d0   0.25d0
+          0.25d0  -0.25d0  -0.25d0
+         -0.25d0   0.25d0  -0.25d0
+         -0.25d0  -0.25d0   0.25d0
+
+#Restrict the number of symmetry operations,
+#and use them to get a restrcted set of k points
+ iscf4   -2
+ nsym4    1
+ symrel4  1 0 0   0 1 0   0 0 1
+ nkpt4    1
+ kpt4    -0.25d0  -0.25d0   0.25d0 ! Use time-reversal symmetry
+
+#Restrict the number of symmetry operations,
+#to the trigonal group, and get the 6 k points
+ iscf5   -2
+ nsym5    3
+ symrel5  1 0 0   0 1 0   0 0 1
+          0 1 0   0 0 1   1 0 0
+          0 0 1   1 0 0   0 1 0
+ nkpt5    6
+ kpt5     0.25d0   0.25d0  -0.25d0
+          0.25d0  -0.25d0   0.25d0
+         -0.25d0   0.25d0   0.25d0
+          0.25d0  -0.25d0  -0.25d0
+         -0.25d0   0.25d0  -0.25d0
+         -0.25d0  -0.25d0   0.25d0
+
+#Common data
+ acell 3*9.0d0
+ angdeg 3*57.25d0
+ ecut  2.0d0
+ getden 1
+ getwfk 2
+  kptopt 0
+ natom  2
+ nband  10
+ ngkpt 2 2 2
+ nspinor  2
+ nstep  1
+ ntypat  1
+ tolwfr 1.0d-16
+ typat  1 1
+ xred      3*0.231d0
+           3*-0.231d0
+ znucl 83.d0
+
+
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosHGH_pwteter/83bi.5.hgh"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t13.abo, tolnlines = 3, tolabs = 1.001e-08, tolrel = 2.400e-04
+#%% [paral_info]
+#%% max_nprocs = 2
+#%% [extra_info]
+#%% authors = Unknown
+#%% keywords = 
+#%% description = 
+#%%     Bi A7 structure (2 atoms per unit cell),
+#%%     using the HGH pseudopotential, within LDA.
+#%%     Fixed cell dimensions. Treated as a semi-conductor
+#%%     First dataset : compute the density
+#%%     Second dataset : compute the spinor wfs at one k point, 
+#%%     non-self consistently 
+#%%     Third dataset : use the spinor wfs of the previous dataset 
+#%%     to restart computations at symmetric k points.
+#%%<END TEST_INFO>

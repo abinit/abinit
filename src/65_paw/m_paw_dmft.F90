@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_paw_dmft
 !! NAME
 !!  m_paw_dmft
@@ -6,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2019 ABINIT group (BAmadon)
+!! Copyright (C) 2006-2024 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -14,10 +13,6 @@
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -30,14 +25,15 @@
 MODULE m_paw_dmft
 
  use defs_basis
- use defs_datatypes
- use defs_abitypes
  use m_CtqmcInterface
  use m_errors
  use m_abicore
  use m_xmpi
  use m_data4entropyDMFT
+ use m_dtset
 
+ use defs_datatypes, only : pseudopotential_type
+ use defs_abitypes, only : MPI_type
  use m_io_tools,  only : open_file
  use m_pawtab,    only : pawtab_type
 
@@ -81,11 +77,19 @@ MODULE m_paw_dmft
   integer :: dmft_iter
   ! Nb of iterations for dmft
 
+  integer :: dmft_kspectralfunc
+  ! =0 Default
+  ! =1 Activate calculation of k-resolved spectral function
+
   integer :: dmft_solv
   ! choice of solver for DMFT
 
   integer :: dmftcheck
   ! Check various part of the implementation
+
+  integer :: dmft_entropy
+  ! = 0: do not compute entropy
+  ! = 1: compute entropy
 
   integer :: dmft_log_freq
   ! = 0: do not use log frequencies
@@ -138,6 +142,10 @@ MODULE m_paw_dmft
   ! CTQMC: compute green function noise for each imaginary time
   ! 0 : nothing, 1 : activated
 
+  integer :: dmftctqmc_config
+  ! CTQMC: Enables histogram of occupations.
+  ! 0 : nothing, 1 enabled
+
   integer :: dmftctqmc_meas
   ! CTQMC: every each dmftctqmc_meas step energy is measured
   ! Speed up caltion about 10% for dmftctqmc_meas = 2
@@ -159,12 +167,14 @@ MODULE m_paw_dmft
   integer :: dmftctqmc_triqs_nleg
   ! CTQMC of TRIQS: Nb of Legendre polynomial used to compute the
   ! Green's function (Phys. Rev. B 84, 075145) [[cite:Boehnke2011]]. Default is 30.
-  
+
   ! 0 : nothing, >=1 max order evaluated in Perturbation.dat
 
   real(dp) :: dmftqmc_n
   ! qmc number of sweeps
 
+  integer :: dmftqmc_x2my2d
+  ! for doing qmc with x2my2d only (for testing purposes)
 
   integer :: dmftqmc_t2g
   ! for doing qmc with t2g only (for testing purposes)
@@ -185,6 +195,10 @@ MODULE m_paw_dmft
   ! Precise the way of printing the green function.
   !  =1   print green
   !  =2   print self
+
+  integer :: dmft_wanorthnorm
+  !  1 orthonormalisation of Wannier functions k-point after k-point
+  !  2 orthonormalisation over the sum over k-points.
 
   integer :: idmftloop
   ! current iteration in the dmft loop
@@ -220,6 +234,9 @@ MODULE m_paw_dmft
 
   integer  :: use_fixed_self
 
+  integer :: ientropy
+  ! activate evaluation of terms for alternative calculation of entropy in DMFT
+
   real(dp) :: edmft
 
   real(dp) :: dmft_charge_prec
@@ -242,11 +259,22 @@ MODULE m_paw_dmft
 
   real(dp) :: fermie
 
-  real(dp) :: fermie_lda
+  real(dp) :: u_for_s
+  ! Variable for evaluation of correlation energy for U=0 in the entropic
+  ! calculation
+
+  real(dp) :: j_for_s
+  ! Variable for evaluation of correlation energy for U=0 in the entropic
+  ! calculation
+
+
+  real(dp) :: fermie_dft
 
   real(dp) :: nelectval
 
   character(len=fnlen) :: filapp
+
+  character(len=fnlen) :: filnamei
 
   real(dp) :: temp
 
@@ -284,7 +312,7 @@ MODULE m_paw_dmft
 
   complex(dpc), allocatable :: psichi(:,:,:,:,:,:)
 
-  real(dp), allocatable :: eigen_lda(:,:,:)
+  real(dp), allocatable :: eigen_dft(:,:,:)
 
   real(dp), pointer :: wtk(:) => null()
   real(dp), pointer :: fixed_self(:,:,:,:) => null()
@@ -329,19 +357,10 @@ CONTAINS  !=====================================================================
 !! OUTPUTS
 !! paw_dmft  = structure of data for dmft
 !!
-!! PARENTS
-!!      gstate
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
 subroutine init_sc_dmft(bandkss,dmftbandi,dmftbandf,dmft_read_occnd,mband,nband,nkpt,nspden,&
 &nspinor,nsppol,occ,usedmft,paw_dmft,use_sc_dmft,dmft_solv,mpi_enreg)
-
- implicit none
-
 
 !Arguments ------------------------------------
 !scalars
@@ -379,7 +398,7 @@ subroutine init_sc_dmft(bandkss,dmftbandi,dmftbandf,dmft_read_occnd,mband,nband,
 
  ! Do not comment these lines: it guarantees the parallelism in DMFT/HI or QMC will work.
  if ((use_dmft/=0).and.(xmpi_comm_size(xmpi_world) /= xmpi_comm_size(mpi_enreg%comm_world))) then
-   MSG_ERROR("Someone changed the k-point parallelism again")
+   ABI_ERROR("Someone changed the k-point parallelism again")
  end if
 
  if(use_dmft/=0) then
@@ -398,7 +417,7 @@ subroutine init_sc_dmft(bandkss,dmftbandi,dmftbandf,dmft_read_occnd,mband,nband,
 ! write(6,*) "nprocs,nb_procs",nproc,nb_procs
 ! if(nb_procs/=nproc)  then
 !   message = ' Number of procs used in DMFT is erroneously computed '
-!   MSG_ERROR(message)
+!   ABI_ERROR(message)
 ! endif
 !#endif
 
@@ -413,12 +432,12 @@ subroutine init_sc_dmft(bandkss,dmftbandi,dmftbandf,dmft_read_occnd,mband,nband,
  paw_dmft%nspden      = nspden
  if(nspinor==2.and.nspden==1.and.use_dmft/=0) then
    message = ' nspinor==2 and nspden =1 and usedmft=1 is not implemented'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  endif
 
 ! if(nspinor==1.and.nspden==1.and.use_dmft/=0) then
 !   message = ' nspinor==1 and nspden =1 and usedmft=1 is not implemented'
-!   MSG_ERROR(message)
+!   ABI_ERROR(message)
 ! endif
 
  paw_dmft%use_dmft    = use_dmft
@@ -430,10 +449,10 @@ subroutine init_sc_dmft(bandkss,dmftbandi,dmftbandf,dmft_read_occnd,mband,nband,
  paw_dmft%dmft_read_occnd = dmft_read_occnd
  paw_dmft%idmftloop=0
  paw_dmft%mbandc  = 0
- ABI_ALLOCATE(paw_dmft%occnd,(2,mband,mband,nkpt,nsppol*use_dmft))
- ABI_ALLOCATE(paw_dmft%band_in,(mband*use_dmft))
- ABI_ALLOCATE(paw_dmft%include_bands,((dmftbandf-dmftbandi+1)*use_dmft))
- ABI_ALLOCATE(paw_dmft%exclude_bands,(mband*use_dmft))
+ ABI_MALLOC(paw_dmft%occnd,(2,mband,mband,nkpt,nsppol*use_dmft))
+ ABI_MALLOC(paw_dmft%band_in,(mband*use_dmft))
+ ABI_MALLOC(paw_dmft%include_bands,((dmftbandf-dmftbandi+1)*use_dmft))
+ ABI_MALLOC(paw_dmft%exclude_bands,(mband*use_dmft))
 ! allocate(paw_dmft%ph0phiiint()
  paw_dmft%band_in(:)=.false.
  paw_dmft%occnd=zero
@@ -462,7 +481,7 @@ subroutine init_sc_dmft(bandkss,dmftbandi,dmftbandf,dmft_read_occnd,mband,nband,
  else
   paw_dmft%mbandc = 0
  endif
-  
+
  if(paw_dmft%use_sc_dmft /= 0 .and. mpi_enreg%paral_kgb/=0) then
    call init_sc_dmft_paralkgb(paw_dmft, mpi_enreg)
  end if
@@ -472,7 +491,7 @@ subroutine init_sc_dmft(bandkss,dmftbandi,dmftbandf,dmft_read_occnd,mband,nband,
 &  ' WARNING init_sc_dmft',ch10,&
 &  '  number of bands in dmft is not correctly computed ',ch10, &
 &  '  Action : check the code'
-  MSG_WARNING(message)
+  ABI_WARNING(message)
  endif
  if(use_dmft>=1) then
    write(message, '(7a)' ) ch10,ch10," ******************************************", &
@@ -488,7 +507,7 @@ subroutine init_sc_dmft(bandkss,dmftbandi,dmftbandf,dmft_read_occnd,mband,nband,
    else if(dmft_solv==1) then
      write(message, '(a,a)') ch10,' DMFT check: static solver'
    else if(dmft_solv==-1) then
-     write(message, '(a,a)') ch10,' DMFT check: static solver without renormalization of projectors: should recover LDA+U'
+     write(message, '(a,a)') ch10,' DMFT check: static solver without renormalization of projectors: should recover DFT+U'
    else if(dmft_solv==2) then
      write(message, '(a,a)') ch10,' DMFT uses the Hubbard one solver'
    else if(dmft_solv==4) then
@@ -501,6 +520,9 @@ subroutine init_sc_dmft(bandkss,dmftbandi,dmftbandf,dmft_read_occnd,mband,nband,
    else if(dmft_solv==7) then
      write(message, '(a,a)') ch10,' DMFT uses the Continuous Time Quantum Monte Carlo solver of TRIQS&
      & (with rotationaly invariant interaction)'
+   else if(dmft_solv==9) then
+     write(message, '(a,a)') ch10,' DMFT uses the python invocation of TRIQS, for which you need to &
+     &give your personal script'
   endif
   call wrtout(std_out,message,'COLL')
   call wrtout(ab_out,message,'COLL')
@@ -514,24 +536,18 @@ end subroutine init_sc_dmft
 !! init_dmft
 !!
 !! FUNCTION
-!!  Allocate variables and setup lda hamiltonian and related data
+!!  Allocate variables and setup DFT hamiltonian and related data
 !!  (init_sc_dmft has to been called before)
 !!
 !! INPUTS
 !!  dmatpawu   = fixed occupation matrix of correlated orbitals
-!!  eigen      = LDA eigenvalues
-!!  fermie_lda = LDA Fermi level
+!!  eigen      = DFT eigenvalues
+!!  fermie_dft = DFT Fermi level
 !!  psichi     = <chi|Psi> projection of KS states over atomic !wavefunction
 !!  nkpt       = number of k-points
 !!  nsppol     = number of spin polarisation
 !!  nspinor    = number of spinorial component
 !!
-!!
-!! PARENTS
-!!      outscfcv,vtorho
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 !!
@@ -544,32 +560,33 @@ end subroutine init_sc_dmft
 !! G.Kotliar,  S.Y.Savrasov, K.Haule, V.S.Oudovenko, O.Parcollet, C.A.Marianetti.
 !!
 
-subroutine init_dmft(dmatpawu, dtset, fermie_lda, fnametmp_app, nspinor, paw_dmft, pawtab, psps, typat)
+subroutine init_dmft(dmatpawu, dtset, fermie_dft, fnametmp_app, fnamei, nspinor, paw_dmft, pawtab, psps, typat)
 
- use defs_abitypes
  use m_splines
  !use m_CtqmcInterface
- implicit none
 
 !Arguments ------------------------------------
 !scalars
  integer, intent(in)  :: nspinor
- real(dp), intent(in) :: fermie_lda
+ real(dp), intent(in) :: fermie_dft
 !type
  type(pseudopotential_type), intent(in) :: psps
  type(dataset_type),target,intent(in) :: dtset
  type(pawtab_type),intent(in)  :: pawtab(psps%ntypat*psps%usepaw)
  type(paw_dmft_type),intent(inout) :: paw_dmft
  character(len=fnlen), intent(in) :: fnametmp_app
+ character(len=fnlen), intent(in) :: fnamei
 !arrays
  integer,intent(in) :: typat(dtset%natom)
  real(dp),intent(in),target :: dmatpawu(:,:,:,:)
 !Local variables ------------------------------------
- integer :: ikpt,isym,itypat,nsppol,mbandc,maxlpawu, iatom, ifreq
- integer :: nflavor
+ integer :: grid_unt,ikpt,isym,itypat,nsppol,mbandc,maxlpawu, iatom, ifreq, ioerr
+ integer :: nflavor,ngrid,iexist2
+ character(len=fnlen) :: tmpfil
  real(dp) :: sumwtk
  character(len=500) :: message
  real(dp) :: unit_e,step
+ logical :: lexist
 ! *********************************************************************
 
  nsppol = dtset%nsppol
@@ -591,7 +608,7 @@ subroutine init_dmft(dmatpawu, dtset, fermie_lda, fnametmp_app, nspinor, paw_dmf
  do isym=1,dtset%nsym
    if(dtset%symafm(isym)<0) then
      message = 'symafm negative is not implemented in DMFT '
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    endif
  enddo
 
@@ -605,8 +622,8 @@ subroutine init_dmft(dmatpawu, dtset, fermie_lda, fnametmp_app, nspinor, paw_dmf
 !=======================
 !==  Define integers and reals
 !=======================
- paw_dmft%fermie_lda=fermie_lda ! in Ha
- paw_dmft%fermie= fermie_lda
+ paw_dmft%fermie_dft=fermie_dft ! in Ha
+ paw_dmft%fermie= fermie_dft
  if(nspinor==1) then
    if(paw_dmft%nsppol==2) then
      paw_dmft%nelectval= dtset%nelect-float(paw_dmft%dmftbandi-1)*paw_dmft%nsppol
@@ -617,17 +634,26 @@ subroutine init_dmft(dmatpawu, dtset, fermie_lda, fnametmp_app, nspinor, paw_dmf
    paw_dmft%nelectval= dtset%nelect-float(paw_dmft%dmftbandi-1)*paw_dmft%nsppol
  endif
  paw_dmft%filapp= fnametmp_app
+ paw_dmft%filnamei= fnamei
  paw_dmft%natpawu=dtset%natpawu
  paw_dmft%natom=dtset%natom
  paw_dmft%temp=dtset%tsmear!*unit_e
  paw_dmft%dmft_iter=dtset%dmft_iter
+ paw_dmft%dmft_entropy=dtset%dmft_entropy
+ paw_dmft%dmft_kspectralfunc=dtset%dmft_kspectralfunc
  paw_dmft%dmft_dc=dtset%dmft_dc
+ paw_dmft%dmft_wanorthnorm=dtset%dmft_wanorthnorm
  !paw_dmft%idmftloop=0
  paw_dmft%prtvol = dtset%prtvol
  paw_dmft%prtdos = dtset%prtdos
  paw_dmft%dmft_tolfreq = dtset%dmft_tolfreq
  paw_dmft%dmft_lcpr = dtset%dmft_tollc
  paw_dmft%dmft_charge_prec = dtset%dmft_charge_prec
+
+! for entropy (alternate external calculation)
+ paw_dmft%ientropy  =  0
+ paw_dmft%u_for_s   =  4.1_dp
+ paw_dmft%j_for_s   =  0.5_dp
 
 !=======================
 !==  Fixed self for input
@@ -645,9 +671,9 @@ subroutine init_dmft(dmatpawu, dtset, fermie_lda, fnametmp_app, nspinor, paw_dmf
    paw_dmft%dmft_solv=2
    paw_dmft%dmft_blockdiag=1
  endif
-!  0: LDA, no solver
-!  1: LDA+U
-! -1: LDA+U but LDA values are not renormalized !
+!  0: DFT, no solver
+!  1: DFT+U
+! -1: DFT+U but DFT values are not renormalized !
 ! if((paw_dmft%dmft_solv==0.and.paw_dmft%prtvol>4).or.&
 !&   (paw_dmft%dmft_solv>=-1.and.paw_dmft%dmft_solv<=2)) then
 !   call wrtout(std_out,message,'COLL')
@@ -661,7 +687,7 @@ subroutine init_dmft(dmatpawu, dtset, fermie_lda, fnametmp_app, nspinor, paw_dmf
           write(message, '(2a,i5,2a,2e15.6)' )ch10,&
 &          ' option dmft_solv=0 requires upaw=jpaw=0 for species',itypat,ch10,&
 &          ' Value of upawu and jpawu are here',pawtab(itypat)%upawu,pawtab(itypat)%jpawu
-          MSG_ERROR(message)
+          ABI_ERROR(message)
         endif
      endif
    enddo
@@ -672,17 +698,17 @@ subroutine init_dmft(dmatpawu, dtset, fermie_lda, fnametmp_app, nspinor, paw_dmf
 !& (maxval(abs(pawtab(:)%upawu))>tol5.or.maxval(abs(pawtab(:)%jpawu))>tol5)) then
 !   write(message, '(a,a,2f12.3)' )ch10,&
 !&   ' option dmft_solv=0 requires upaw=jpaw=0',maxval(abs(pawtab(:)%upawu)),maxval(abs(pawtab(:)%jpawu))
-!    MSG_WARNING(message)
+!    ABI_WARNING(message)
 ! endif
 
  paw_dmft%dmftcheck=dtset%dmftcheck
 
  if(paw_dmft%dmftcheck==-1) then
    message = ' init_dmft: dmftcheck=-1 should not happend here'
-   MSG_BUG(message)
+   ABI_BUG(message)
  endif
  paw_dmft%dmft_log_freq=1 ! use logarithmic frequencies.
- if(paw_dmft%dmft_solv==6.or.paw_dmft%dmft_solv==7) then
+ if(paw_dmft%dmft_solv==6.or.paw_dmft%dmft_solv==7.or.paw_dmft%dmft_solv==9) then
    paw_dmft%dmft_log_freq=0 ! do not use logarithmic frequencies.
  endif
  paw_dmft%dmft_nwli=dtset%dmft_nwli
@@ -691,7 +717,7 @@ subroutine init_dmft(dmatpawu, dtset, fermie_lda, fnametmp_app, nspinor, paw_dmf
  else
    paw_dmft%dmft_nwlo=dtset%dmft_nwli
  endif
- paw_dmft%dmft_nwr=32
+ paw_dmft%dmft_nwr=800
  paw_dmft%dmft_rslf=dtset%dmft_rslf
  paw_dmft%dmft_mxsf=dtset%dmft_mxsf
  paw_dmft%dmftqmc_l=dtset%dmftqmc_l
@@ -699,6 +725,10 @@ subroutine init_dmft(dmatpawu, dtset, fermie_lda, fnametmp_app, nspinor, paw_dmf
  paw_dmft%dmftqmc_seed=dtset%dmftqmc_seed
  paw_dmft%dmftqmc_therm=dtset%dmftqmc_therm
  paw_dmft%dmftqmc_t2g=dtset%dmft_t2g
+
+!paw_dmft%dmftqmc_x2my2d=dtset%dmft_x2my2d
+ paw_dmft%dmftqmc_x2my2d=0
+
  paw_dmft%dmftctqmc_basis =dtset%dmftctqmc_basis
  paw_dmft%dmftctqmc_check =dtset%dmftctqmc_check
  paw_dmft%dmftctqmc_correl=dtset%dmftctqmc_correl
@@ -708,6 +738,7 @@ subroutine init_dmft(dmatpawu, dtset, fermie_lda, fnametmp_app, nspinor, paw_dmf
  paw_dmft%dmftctqmc_mrka  =dtset%dmftctqmc_mrka
  paw_dmft%dmftctqmc_mov   =dtset%dmftctqmc_mov
  paw_dmft%dmftctqmc_order =dtset%dmftctqmc_order
+ paw_dmft%dmftctqmc_config =dtset%dmftctqmc_config
  paw_dmft%dmftctqmc_triqs_nleg =dtset%dmftctqmc_triqs_nleg
 
  if ( paw_dmft%dmft_solv >= 4 ) then
@@ -723,31 +754,32 @@ subroutine init_dmft(dmatpawu, dtset, fermie_lda, fnametmp_app, nspinor, paw_dmf
 
  mbandc = paw_dmft%mbandc
 
- ABI_ALLOCATE(paw_dmft%eigen_lda,(paw_dmft%nsppol,paw_dmft%nkpt,paw_dmft%mbandc))
- paw_dmft%eigen_lda=zero
+ ABI_MALLOC(paw_dmft%eigen_dft,(paw_dmft%nsppol,paw_dmft%nkpt,paw_dmft%mbandc))
+ paw_dmft%eigen_dft=zero
 
 ! allocate(paw_dmft%wtk(paw_dmft%nkpt))
  paw_dmft%wtk=>dtset%wtk
  if(dtset%iscf<0) then
- paw_dmft%wtk=one/float(dtset%nkpt)
+   paw_dmft%wtk=one/float(dtset%nkpt)
  endif
  sumwtk=0
  do ikpt=1,paw_dmft%nkpt
    sumwtk=sumwtk+paw_dmft%wtk(ikpt)
  enddo
- if(abs(sumwtk-1_dp)>tol13.and.dtset%iscf>=0) then
-   write(message, '(a,f15.10)' )' sum of k-point is incorrect',sumwtk
-   MSG_ERROR(message)
+ if(abs(sumwtk-1_dp)>tol11.and.dtset%iscf>=0) then
+   write(message, '(a,f15.11)' )' sum of k-point is incorrect',sumwtk
+   ABI_ERROR(message)
  endif
- ABI_ALLOCATE(paw_dmft%lpawu,(paw_dmft%natom))
+ ABI_MALLOC(paw_dmft%lpawu,(paw_dmft%natom))
  do iatom=1,paw_dmft%natom
    paw_dmft%lpawu(iatom)=pawtab(typat(iatom))%lpawu
    if(paw_dmft%dmftqmc_t2g==1.and.paw_dmft%lpawu(iatom)==2) paw_dmft%lpawu(iatom)=1
+   if(paw_dmft%dmftqmc_x2my2d==1.and.paw_dmft%lpawu(iatom)==2) paw_dmft%lpawu(iatom)=0
  enddo
  paw_dmft%maxlpawu=maxval(paw_dmft%lpawu(:))
  maxlpawu = paw_dmft%maxlpawu
 
- ABI_ALLOCATE(paw_dmft%psichi,(nsppol,dtset%nkpt,mbandc,nspinor,dtset%natom,(2*maxlpawu+1)))
+ ABI_MALLOC(paw_dmft%psichi,(nsppol,dtset%nkpt,mbandc,nspinor,dtset%natom,(2*maxlpawu+1)))
 
  paw_dmft%psichi=cmplx(zero,zero,kind=dp)
  paw_dmft%lpsichiortho=0
@@ -756,23 +788,67 @@ subroutine init_dmft(dmatpawu, dtset, fermie_lda, fnametmp_app, nspinor, paw_dmf
 !=======================
 ! Real      frequencies
 !=======================
- ABI_ALLOCATE(paw_dmft%omega_r,(2*paw_dmft%dmft_nwr))
 
-! Set up real frequencies for spectral function in Hubbard one.
- step=0.0015_dp
- paw_dmft%omega_r(2*paw_dmft%dmft_nwr)=pi*step*(two*float(paw_dmft%dmft_nwr-1)+one)
- do ifreq=1,2*paw_dmft%dmft_nwr-1
-  paw_dmft%omega_r(ifreq)=pi*step*(two*float(ifreq-1)+one)-paw_dmft%omega_r(2*paw_dmft%dmft_nwr)
-!  write(std_out,*) ifreq,paw_dmft%omega_r(ifreq)
- enddo
+ iexist2=1
+ if(dtset%iscf<0.and.(paw_dmft%dmft_solv==5.or.paw_dmft%dmft_solv==8)) then
+     tmpfil = trim(paw_dmft%filapp)//'_spectralfunction_realfrequencygrid'
+     inquire(file=trim(tmpfil),exist=lexist)!,recl=nrecl)
+   !  write(6,*) "inquire",lexist
+   grid_unt=2000
+     if((.not.lexist)) then
+       iexist2=0
+       write(message,'(4x,a,i5,3a)') "File number",grid_unt,&
+&       " called ",trim(tmpfil)," does not exist"
+       call wrtout(std_out,message,'COLL')
+       message = "Cannot continue: the missing file coming from Maxent code is needed"
+       ABI_WARNING(message)
+     endif
 
+     if(iexist2==1) then
+#ifdef FC_NAG
+       open (unit=grid_unt,file=trim(tmpfil),status='unknown',form='formatted',recl=ABI_RECL)
+#else
+       open (unit=grid_unt,file=trim(tmpfil),status='unknown',form='formatted')
+#endif
+       rewind(grid_unt)
+      ! if (open_file(tmpfil, message, newunit=grid_unt, status='unknown', form='formatted') /= 0) then
+      !   ABI_ERROR(message)
+      ! end if
+       write(message,'(3a)') ch10,"  == Read  grid frequency in file ",trim(tmpfil)
+       call wrtout(std_out,message,'COLL')
+       write(message,'(a,a,a,i4)') 'opened file : ', trim(tmpfil), ' unit', grid_unt
+       call wrtout(std_out,message,'COLL')
+       read(grid_unt,*) ngrid
+       ABI_MALLOC(paw_dmft%omega_r,(ngrid))
+       if(ioerr<0) then
+         message = "Error reading grid file"
+         ABI_ERROR(message)
+       endif
+       do ifreq=1,ngrid
+         read(grid_unt,*) paw_dmft%omega_r(ifreq)
+         paw_dmft%omega_r(ifreq)=paw_dmft%omega_r(ifreq)
+       enddo
+       if(ioerr<0) then
+         message = "Error reading grid file"
+         ABI_ERROR(message)
+       endif
+     endif
+ else
+  ABI_MALLOC(paw_dmft%omega_r,(2*paw_dmft%dmft_nwr))
+  ! Set up real frequencies for spectral function in Hubbard one.
+   step=0.00005_dp
+   paw_dmft%omega_r(2*paw_dmft%dmft_nwr)=pi*step*(two*float(paw_dmft%dmft_nwr-1)+one)
+   do ifreq=1,2*paw_dmft%dmft_nwr-1
+    paw_dmft%omega_r(ifreq)=pi*step*(two*float(ifreq-1)+one)-paw_dmft%omega_r(2*paw_dmft%dmft_nwr)
+  !  write(std_out,*) ifreq,paw_dmft%omega_r(ifreq)
+   enddo
 
+ endif
 !=======================
 ! Imaginary frequencies
 !=======================
 ! Set up log frequencies
  if(dtset%ucrpa==0) call construct_nwlo_dmft(paw_dmft)
-
 
 !=========================================================
 !== if we use ctqmc impurity solver
@@ -787,22 +863,23 @@ subroutine init_dmft(dmatpawu, dtset, fermie_lda, fnametmp_app, nspinor, paw_dmf
 &  " == Initializing CTQMC"
 !   call wrtout(std_out,message,'COLL')
 
-   ABI_DATATYPE_ALLOCATE(paw_dmft%hybrid,(paw_dmft%natom))
+   ABI_MALLOC(paw_dmft%hybrid,(paw_dmft%natom))
    do iatom=1,paw_dmft%natom
      if(paw_dmft%lpawu(iatom)/=-1) then
        nflavor=2*(2*paw_dmft%lpawu(iatom)+1)
 #ifdef HAVE_MPI
        call CtqmcInterface_init(paw_dmft%hybrid(iatom),paw_dmft%dmftqmc_seed,paw_dmft%dmftqmc_n, &
 &       paw_dmft%dmftqmc_therm, paw_dmft%dmftctqmc_meas,nflavor,paw_dmft%dmftqmc_l,one/paw_dmft%temp,zero,&
-&       std_out,paw_dmft%spacecomm)
+&       std_out,paw_dmft%spacecomm,nspinor=paw_dmft%nspinor)
 #else
        call CtqmcInterface_init(paw_dmft%hybrid(iatom),paw_dmft%dmftqmc_seed,paw_dmft%dmftqmc_n, &
 &       paw_dmft%dmftqmc_therm, paw_dmft%dmftctqmc_meas,nflavor,paw_dmft%dmftqmc_l,one/paw_dmft%temp,zero,&
-&       std_out)
+&       std_out,nspinor=paw_dmft%nspinor)
 #endif
        call CtqmcInterface_setOpts(paw_dmft%hybrid(iatom),&
                                    opt_Fk      =1,&
 &                                  opt_order   =paw_dmft%dmftctqmc_order ,&
+&                                  opt_histo   =paw_dmft%dmftctqmc_config ,&
 &                                  opt_movie   =paw_dmft%dmftctqmc_mov   ,&
 &                                  opt_analysis=paw_dmft%dmftctqmc_correl,&
 &                                  opt_check   =paw_dmft%dmftctqmc_check ,&
@@ -838,18 +915,10 @@ end subroutine init_dmft
 !! OUTPUTS
 !!  omegali(1:nwli)=computed frequencies
 !!
-!! PARENTS
-!!      m_green,m_paw_dmft
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 !!
 
 subroutine construct_nwli_dmft(paw_dmft,nwli,omega_li)
-
- implicit none
 
  type(paw_dmft_type), intent(in) :: paw_dmft
  integer, intent(in) :: nwli
@@ -864,9 +933,9 @@ subroutine construct_nwli_dmft(paw_dmft,nwli,omega_li)
    if (size(omega_li) .ne. nwli) then
      write(message,'(2a,i8,a,i8)') ch10, "Number of linear frequencies asked is", &
        &    nwli, "whereas dimension of array omega_li is", size(omega_li)
-     MSG_BUG(message)
-!     ABI_DEALLOCATE(omega_li)
-!     ABI_ALLOCATE(omega_li,(nwli))
+     ABI_BUG(message)
+!     ABI_FREE(omega_li)
+!     ABI_MALLOC(omega_li,(nwli))
 !     write(*,*) "RESIZE"
 !     call flush(6)
    endif
@@ -875,7 +944,7 @@ subroutine construct_nwli_dmft(paw_dmft,nwli,omega_li)
 ! else
 !     write(*,*) "ALLOCATE"
 !     call flush(6)
-!   ABI_ALLOCATE(omega_li,(nwli))
+!   ABI_MALLOC(omega_li,(nwli))
 ! endif
 
 ! Set up linear frequencies
@@ -898,12 +967,6 @@ end subroutine construct_nwli_dmft
 !!  paw_dmft=structure for dmft calculation
 !!
 !!
-!! PARENTS
-!!      m_paw_dmft
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 !!
 !! NOTE
@@ -917,7 +980,6 @@ end subroutine construct_nwli_dmft
 
 subroutine construct_nwlo_dmft(paw_dmft)
  use m_splines
- implicit none
 
  type(paw_dmft_type), intent(inout) :: paw_dmft
  integer :: cubic_freq
@@ -936,8 +998,8 @@ subroutine construct_nwlo_dmft(paw_dmft)
  real(dp), allocatable :: wgt_wlo(:)
  complex(dpc), allocatable :: tospline_lo(:), splined_li(:),ysplin2_lo(:)
 
- ABI_ALLOCATE(omega_lo_tmp,(paw_dmft%dmft_nwlo))
- ABI_ALLOCATE(wgt_wlo,(paw_dmft%dmft_nwlo))
+ ABI_MALLOC(omega_lo_tmp,(paw_dmft%dmft_nwlo))
+ ABI_MALLOC(wgt_wlo,(paw_dmft%dmft_nwlo))
 
 !==  Variables for DMFT related to frequencies
 ! the part of the code which deals
@@ -959,7 +1021,7 @@ subroutine construct_nwlo_dmft(paw_dmft)
 
      if (paw_dmft%dmft_solv .eq. 5 ) then
        write(message, '(2a)') ch10, "Warning : Cubish Mesh not tested with CT-QMC"
-       MSG_WARNING(message)
+       ABI_WARNING(message)
      end if
 !  ------------  CUBIC MESH MESH
 !    useless
@@ -989,15 +1051,15 @@ subroutine construct_nwlo_dmft(paw_dmft)
      deltaomega=0.5_dp
      expfac=log(omegamaxmin/deltaomega)/(float(paw_dmft%dmft_nwlo-paw_dmft%dmftqmc_l-1)/two)
      prefacexp=omegamaxmin/(exp(expfac*float(paw_dmft%dmft_nwlo-paw_dmft%dmftqmc_l-1))-one)
-     ABI_ALLOCATE(select_log,(paw_dmft%dmft_nwlo))
+     ABI_MALLOC(select_log,(paw_dmft%dmft_nwlo))
      select_log=0
 
 !   ------------ IMPOSE LINEAR MESH for w < 2*w_n=(2*l-1)pi/beta
 !         Check variables (Already done in chkinp if dmft_solv==5)
      if (paw_dmft%dmftqmc_l .gt. paw_dmft%dmft_nwlo) then
        write(message, '(a,a,i6)' )ch10,&
-&       ' ERROR: dmft_nwlo has to be at leat equal to 2xdmftqmc_l :',2*paw_dmft%dmftqmc_l
-       MSG_ERROR(message)
+&       ' ERROR: dmft_nwlo has to be at least equal to 2xdmftqmc_l :',2*paw_dmft%dmftqmc_l
+       ABI_ERROR(message)
      end if
 !         End Check
 
@@ -1026,7 +1088,7 @@ subroutine construct_nwlo_dmft(paw_dmft)
            write(message, '(a,a,i8)' )ch10,&
 &          ' BUG: init_dmft,   dimension  of array select_log is about to be overflown',&
 &          (ifreq2+1)
-           MSG_BUG(message)
+           ABI_BUG(message)
          endif
          select_log(paw_dmft%dmftqmc_l+ifreq)=ifreq2+1
        endif
@@ -1049,106 +1111,106 @@ subroutine construct_nwlo_dmft(paw_dmft)
 
      omega_lo_tmp(1)=paw_dmft%temp*pi
      omega_lo_tmp(paw_dmft%dmft_nwlo)=paw_dmft%temp*pi*real(2*paw_dmft%dmft_nwli-1,kind=dp)
-  endif
+   endif
 
 !=======================
 !== construct weight for log. freq.
 !=======================
-  ABI_ALLOCATE(tospline_lo,(paw_dmft%dmft_nwlo))
-  ABI_ALLOCATE(splined_li,(paw_dmft%dmft_nwli))
-  ABI_ALLOCATE(ysplin2_lo,(paw_dmft%dmft_nwlo))
-  if (allocated(omega_li)) then
-    ABI_DEALLOCATE(omega_li)
-  endif
-  ABI_ALLOCATE(omega_li,(1:paw_dmft%dmft_nwli))
-  call construct_nwli_dmft(paw_dmft,paw_dmft%dmft_nwli,omega_li)
-
-  !Parallelisation over frequencies!
-  ! ============= Set up =============
-  myproc = paw_dmft%myproc
-  nproc = paw_dmft%nproc
-  spacecomm = paw_dmft%spacecomm
-  deltaw = paw_dmft%dmft_nwlo / nproc
-  residu = paw_dmft%dmft_nwlo - nproc*deltaw
-  if ( myproc .LT. nproc - residu ) then
-    omegaBegin = 1 + myproc*deltaw
-    omegaEnd   = (myproc + 1)*deltaw
-  else
-    omegaBegin = 1 + myproc*(deltaw + 1) -nproc + residu
-    omegaEnd = omegaBegin + deltaw
-  end if
-  wgt_wlo(:)=zero
-  ! ============= END Set up =============
-  do ifreq=omegaBegin,omegaEnd
-    tospline_lo=cmplx(0_dp,0_dp,kind=dp)
+   ABI_MALLOC(tospline_lo,(paw_dmft%dmft_nwlo))
+   ABI_MALLOC(splined_li,(paw_dmft%dmft_nwli))
+   ABI_MALLOC(ysplin2_lo,(paw_dmft%dmft_nwlo))
+   if (allocated(omega_li)) then
+     ABI_FREE(omega_li)
+   endif
+   ABI_MALLOC(omega_li,(1:paw_dmft%dmft_nwli))
+   call construct_nwli_dmft(paw_dmft,paw_dmft%dmft_nwli,omega_li)
+  
+   !Parallelisation over frequencies!
+   ! ============= Set up =============
+   myproc = paw_dmft%myproc
+   nproc = paw_dmft%nproc
+   spacecomm = paw_dmft%spacecomm
+   deltaw = paw_dmft%dmft_nwlo / nproc
+   residu = paw_dmft%dmft_nwlo - nproc*deltaw
+   if ( myproc .LT. nproc - residu ) then
+     omegaBegin = 1 + myproc*deltaw
+     omegaEnd   = (myproc + 1)*deltaw
+   else
+     omegaBegin = 1 + myproc*(deltaw + 1) -nproc + residu
+     omegaEnd = omegaBegin + deltaw
+   end if
+   wgt_wlo(:)=zero
+   ! ============= END Set up =============
+   do ifreq=omegaBegin,omegaEnd
+     tospline_lo=cmplx(0_dp,0_dp,kind=dp)
 !    do ifreq1=1,paw_dmft%dmft_nwlo
-    tospline_lo(ifreq)=cmplx(1_dp,0_dp,kind=dp)
+     tospline_lo(ifreq)=cmplx(1_dp,0_dp,kind=dp)
 !    tospline_lo(ifreq1)=ifreq1**2-ifreq1
 !    enddo
-    splined_li=cmplx(0_dp,0_dp,kind=dp)
+     splined_li=cmplx(0_dp,0_dp,kind=dp)
 !    ybcbeg=cmplx(one/tol16**2,zero)
 !    ybcend=cmplx(one/tol16**2,zero)
-    ybcbeg=czero
-    ybcend=czero
+     ybcbeg=czero
+     ybcend=czero
 
 
 !==         spline delta function
-    call spline_complex( omega_lo_tmp, tospline_lo, paw_dmft%dmft_nwlo, &
-   & ybcbeg, ybcend, ysplin2_lo)
+     call spline_complex( omega_lo_tmp, tospline_lo, paw_dmft%dmft_nwlo, &
+     & ybcbeg, ybcend, ysplin2_lo)
 !   do ifreq1=1,paw_dmft%dmft_nwlo
 !    write(6588,*) paw_dmft%omega_lo(ifreq1),ysplin2_lo(ifreq1)
 !   enddo
 
-    call splint_complex( paw_dmft%dmft_nwlo, omega_lo_tmp, tospline_lo,&
-   & ysplin2_lo, paw_dmft%dmft_nwli, omega_li, splined_li)
+     call splint_complex( paw_dmft%dmft_nwlo, omega_lo_tmp, tospline_lo,&
+     & ysplin2_lo, paw_dmft%dmft_nwli, omega_li, splined_li)
 
 !==         accumulate weights
-    wgt_wlo(ifreq)=zero
-    do ifreq2=1,paw_dmft%dmft_nwli
-      wgt_wlo(ifreq)=wgt_wlo(ifreq)+real(splined_li(ifreq2),kind=dp)
-    enddo
+     wgt_wlo(ifreq)=zero
+     do ifreq2=1,paw_dmft%dmft_nwli
+       wgt_wlo(ifreq)=wgt_wlo(ifreq)+real(splined_li(ifreq2),kind=dp)
+     enddo
 ! do ifreq1=1,paw_dmft%dmft_nwlo
 !  write(6688,*) paw_dmft%omega_lo(ifreq1),tospline_lo(ifreq1)
 ! enddo
 ! do ifreq1=1,paw_dmft%dmft_nwli
 !  write(6788,*) paw_dmft%omega_li(ifreq1),splined_li(ifreq1)
-  enddo
+   enddo
   ! ============= Gatherall  =============
-  call xmpi_sum(wgt_wlo, spacecomm, residu)
+   call xmpi_sum(wgt_wlo, spacecomm, residu)
   ! ============= END Gatherall ==========
   ! end parallelisation over frequencies
 
-  ABI_DEALLOCATE(tospline_lo)
-  ABI_DEALLOCATE(splined_li)
-  ABI_DEALLOCATE(ysplin2_lo)
+   ABI_FREE(tospline_lo)
+   ABI_FREE(splined_li)
+   ABI_FREE(ysplin2_lo)
 ! if(abs(dtset%pawprtvol)>=3) then
-    write(message, '(a,18x,2(2x,a21))') ch10,"Log. Freq","weight"
-    call wrtout(std_out,message,'COLL')
-    do ifreq=1,paw_dmft%dmft_nwlo
-      write(message, '(3x,a9,i6,2(2x,e21.14))') "--ifreq--",ifreq,omega_lo_tmp(ifreq),wgt_wlo(ifreq)
-      call wrtout(std_out,message,'COLL')
-    enddo
-    write(message, '(3x,a,i6)') "  Total number of log frequencies is", paw_dmft%dmft_nwlo
-    call wrtout(std_out,message,'COLL')
-    ifreq2 = 1
-    do ifreq=1,min(30,paw_dmft%dmft_nwlo)
-      write(message, '(3x,a9,i6,2(2x,e21.14))') "--ifreq--",ifreq,omega_li(ifreq)
-      call wrtout(std_out,message,'COLL')
-      if ( select_log(ifreq2) .eq. ifreq ) then
-        write(message, '(3x,a,i4,2(2x,i5))') "--sel_log",1
-        ifreq2 = ifreq+1
-      else
-        write(message, '(3x,a,i4,2(2x,i5))') "--sel_log",0
-      end if
-      call wrtout(std_out,message,'COLL')
-    enddo
-    write(message, '(3x,2a)') "--ifreq--","..."
-    call wrtout(std_out,message,'COLL')
-    write(message, '(3x,a,i6,2(2x,e13.5))') "--ifreq--",paw_dmft%dmft_nwli,omega_li(paw_dmft%dmft_nwli)
-    call wrtout(std_out,message,'COLL')
+   write(message, '(a,18x,2(2x,a21))') ch10,"Log. Freq","weight"
+   call wrtout(std_out,message,'COLL')
+   do ifreq=1,paw_dmft%dmft_nwlo
+     write(message, '(3x,a9,i6,2(2x,e21.14))') "--ifreq--",ifreq,omega_lo_tmp(ifreq),wgt_wlo(ifreq)
+     call wrtout(std_out,message,'COLL')
+   enddo
+   write(message, '(3x,a,i6)') "  Total number of log frequencies is", paw_dmft%dmft_nwlo
+   call wrtout(std_out,message,'COLL')
+   ifreq2 = 1
+   do ifreq=1,min(30,paw_dmft%dmft_nwlo)
+     write(message, '(3x,a9,i6,2(2x,e21.14))') "--ifreq--",ifreq,omega_li(ifreq)
+     call wrtout(std_out,message,'COLL')
+     if ( select_log(ifreq2) .eq. ifreq ) then
+       write(message, '(3x,a,i4,2(2x,i5))') "--sel_log",1
+       ifreq2 = ifreq+1
+     else
+       write(message, '(3x,a,i4,2(2x,i5))') "--sel_log",0
+     end if
+     call wrtout(std_out,message,'COLL')
+   enddo
+   write(message, '(3x,2a)') "--ifreq--","..."
+   call wrtout(std_out,message,'COLL')
+   write(message, '(3x,a,i6,2(2x,e13.5))') "--ifreq--",paw_dmft%dmft_nwli,omega_li(paw_dmft%dmft_nwli)
+   call wrtout(std_out,message,'COLL')
 !   endif
-   ABI_DEALLOCATE(select_log)
-   ABI_DEALLOCATE(omega_li)
+   ABI_FREE(select_log)
+   ABI_FREE(omega_li)
 
 !=========================================================
 !== do not construct log. freq. and use linear frequencies
@@ -1163,17 +1225,17 @@ subroutine construct_nwlo_dmft(paw_dmft)
  ! Should be check but since type definition does not initialize pointer with
  ! =>null() (fortran95 and later) it produces conditional jump in valgrind
  !if ( associated(paw_dmft%omega_lo) ) then
- !  ABI_DEALLOCATE(paw_dmft%omega_lo)
+ !  ABI_FREE(paw_dmft%omega_lo)
  !endif
  !if ( associated(paw_dmft%wgt_wlo) ) then
- !  ABI_DEALLOCATE(paw_dmft%wgt_wlo)
+ !  ABI_FREE(paw_dmft%wgt_wlo)
  !endif
- ABI_ALLOCATE(paw_dmft%omega_lo,(paw_dmft%dmft_nwlo))
- ABI_ALLOCATE(paw_dmft%wgt_wlo,(paw_dmft%dmft_nwlo))
+ ABI_MALLOC(paw_dmft%omega_lo,(paw_dmft%dmft_nwlo))
+ ABI_MALLOC(paw_dmft%wgt_wlo,(paw_dmft%dmft_nwlo))
  paw_dmft%omega_lo(1:paw_dmft%dmft_nwlo) = omega_lo_tmp(1:paw_dmft%dmft_nwlo)
  paw_dmft%wgt_wlo(1:paw_dmft%dmft_nwlo) = wgt_wlo(1:paw_dmft%dmft_nwlo)
- ABI_DEALLOCATE(omega_lo_tmp)
- ABI_DEALLOCATE(wgt_wlo)
+ ABI_FREE(omega_lo_tmp)
+ ABI_FREE(wgt_wlo)
 end subroutine construct_nwlo_dmft
 !!***
 
@@ -1189,17 +1251,9 @@ end subroutine construct_nwlo_dmft
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      outscfcv,vtorho
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
 subroutine destroy_dmft(paw_dmft)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1216,29 +1270,29 @@ subroutine destroy_dmft(paw_dmft)
          call ctqmcinterface_finalize(paw_dmft%hybrid(iatom))
        !endif
      enddo
-     ABI_DATATYPE_DEALLOCATE(paw_dmft%hybrid)
+     ABI_FREE(paw_dmft%hybrid)
    endif
    if (allocated(paw_dmft%psichi))  then
-     ABI_DEALLOCATE(paw_dmft%psichi)
+     ABI_FREE(paw_dmft%psichi)
    end if
 !   paw_dmft%wtk is only an explicit pointer =>dtset%wtk
 !   if (associated(paw_dmft%wtk)) deallocate(paw_dmft%wtk)
    paw_dmft%wtk => null()
    paw_dmft%fixed_self => null()
-   if (allocated(paw_dmft%eigen_lda))  then
-     ABI_DEALLOCATE(paw_dmft%eigen_lda)
+   if (allocated(paw_dmft%eigen_dft))  then
+     ABI_FREE(paw_dmft%eigen_dft)
    endif
    if (associated(paw_dmft%omega_lo))  then
-     ABI_DEALLOCATE(paw_dmft%omega_lo)
+     ABI_FREE(paw_dmft%omega_lo)
    end if
    if (associated(paw_dmft%omega_r))  then
-     ABI_DEALLOCATE(paw_dmft%omega_r)
+     ABI_FREE(paw_dmft%omega_r)
    end if
    if (associated(paw_dmft%wgt_wlo))  then
-     ABI_DEALLOCATE(paw_dmft%wgt_wlo)
+     ABI_FREE(paw_dmft%wgt_wlo)
    end if
    if (allocated(paw_dmft%lpawu))  then
-     ABI_DEALLOCATE(paw_dmft%lpawu)
+     ABI_FREE(paw_dmft%lpawu)
    end if
 
 end subroutine destroy_dmft
@@ -1256,17 +1310,9 @@ end subroutine destroy_dmft
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      gstate
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
 subroutine destroy_sc_dmft(paw_dmft)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1283,19 +1329,19 @@ subroutine destroy_sc_dmft(paw_dmft)
   write(message, '(a,a,a)' )&
 &  '  an array is not allocated and is not deallocated with use_dmft==1 ',ch10, &
 &  '  Action : check the code'
-  MSG_WARNING(message)
+  ABI_WARNING(message)
  endif
  if ( allocated(paw_dmft%occnd) )          then
-   ABI_DEALLOCATE(paw_dmft%occnd)
+   ABI_FREE(paw_dmft%occnd)
  end if
  if ( allocated(paw_dmft%band_in) )        then
-   ABI_DEALLOCATE(paw_dmft%band_in)
+   ABI_FREE(paw_dmft%band_in)
  end if
  if ( allocated(paw_dmft%include_bands) )  then
-   ABI_DEALLOCATE(paw_dmft%include_bands)
+   ABI_FREE(paw_dmft%include_bands)
  end if
  if ( allocated(paw_dmft%exclude_bands) )  then
-   ABI_DEALLOCATE(paw_dmft%exclude_bands)
+   ABI_FREE(paw_dmft%exclude_bands)
  end if
 
  call destroy_sc_dmft_paralkgb(paw_dmft)
@@ -1313,17 +1359,9 @@ end subroutine destroy_sc_dmft
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      outscfcv,vtorho
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
 subroutine print_dmft(paw_dmft,pawprtvol)
-
- implicit none
 
 !Arguments ------------------------------------
 !type
@@ -1340,7 +1378,7 @@ subroutine print_dmft(paw_dmft,pawprtvol)
 &   "  -------------------------------------------------",ch10,&
 &   "  --- Data for DMFT ",ch10,&
 &   "  --- paw_dmft%fermie     = ",paw_dmft%fermie    ,ch10,&
-&   "  --- paw_dmft%fermie_lda = ",paw_dmft%fermie_lda,ch10,&
+&   "  --- paw_dmft%fermie_dft = ",paw_dmft%fermie_dft,ch10,&
 &   "  --- paw_dmft%temp       = ",paw_dmft%temp      ,ch10
   call wrtout(std_out,message,'COLL')
   write(message,'(7(a,15x,i8,a),a,2x,e21.14,2a)') &
@@ -1358,7 +1396,7 @@ subroutine print_dmft(paw_dmft,pawprtvol)
 !  write(message,'(4a,3(a,2x,f8.3,a),8(a,2x,i8,a),a)') "-----------------------------------------------",ch10,&
 !&   "--- Data for DMFT ",ch10,&
 !&   "--- paw_dmft%fermie     = ",paw_dmft%fermie    ,ch10,&
-!&   "--- paw_dmft%fermie_lda = ",paw_dmft%fermie_lda,ch10,&
+!&   "--- paw_dmft%fermie_dft = ",paw_dmft%fermie_dft,ch10,&
 !&   "--- paw_dmft%temp       = ",paw_dmft%temp      ,ch10,&
 !&   "--- paw_dmft%natpawu    = ",paw_dmft%natpawu   ,ch10,&
 !&   "--- paw_dmft%dmft_iter  = ",paw_dmft%dmft_iter ,ch10,&
@@ -1371,7 +1409,7 @@ subroutine print_dmft(paw_dmft,pawprtvol)
 !&   "-----------------------------------------------"
   if(abs(pawprtvol)>10) then
    call wrtout(std_out,message,'COLL')
-   write(message, '(a)') " LDA Eigenvalues "
+   write(message, '(a)') " DFT Eigenvalues "
    do isppol=1,paw_dmft%nsppol
     write(message, '(a,i4)') "--isppol--",isppol
     call wrtout(std_out,message,'COLL')
@@ -1380,7 +1418,7 @@ subroutine print_dmft(paw_dmft,pawprtvol)
 
      call wrtout(std_out,message,'COLL')
      do iband=1,paw_dmft%mbandc
-      write(message, '(a,i4,f10.5)') "   -iband--",iband,paw_dmft%eigen_lda(isppol,ikpt,iband)
+      write(message, '(a,i4,f10.5)') "   -iband--",iband,paw_dmft%eigen_dft(isppol,ikpt,iband)
       call wrtout(std_out,message,'COLL')
      enddo
     enddo
@@ -1407,17 +1445,9 @@ end subroutine print_dmft
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      gstate
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
 subroutine print_sc_dmft(paw_dmft,pawprtvol)
-
- implicit none
 
 !Arguments ------------------------------------
 !type
@@ -1475,17 +1505,9 @@ end subroutine print_sc_dmft
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      vtorho
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
 subroutine saveocc_dmft(paw_dmft)
-
- implicit none
 
 !Arguments ------------------------------------
  type(paw_dmft_type),intent(inout) :: paw_dmft
@@ -1498,7 +1520,7 @@ subroutine saveocc_dmft(paw_dmft)
 ! *********************************************************************
  tmpfil = trim(paw_dmft%filapp)//'_DMFTOCCND'
  if (open_file(tmpfil,message,newunit=unitsaveocc,status='unknown',form='formatted') /= 0) then
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  rewind(unitsaveocc)
@@ -1540,17 +1562,9 @@ end subroutine saveocc_dmft
 !! OUTPUT
 !!  paw_dmft: occnd
 !!
-!! PARENTS
-!!      gstate
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
 subroutine readocc_dmft(paw_dmft,filnam_ds3,filnam_ds4)
-
- implicit none
 
 !Arguments ------------------------------------
  type(paw_dmft_type),intent(inout) :: paw_dmft
@@ -1572,7 +1586,7 @@ subroutine readocc_dmft(paw_dmft,filnam_ds3,filnam_ds4)
  unitsaveocc=679
  if (lexist) then
    if (open_file(tmpfil,message,unit=unitsaveocc,status='unknown',form='formatted') /= 0) then
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
    rewind(unitsaveocc)
    write(message,'(3a)') ch10,"  == Read DMFT non diagonal occupations on disk"
@@ -1620,20 +1634,13 @@ end subroutine readocc_dmft
 !!
 !! INPUTS
 !!  paw_dmft   = data structure
-!!  
+!!
 !! OUTPUT
 !!  paw_dmft: bandc_proc, use_bandc
-!!
-!! PARENTS
-!!      init_sc_dmft
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
 subroutine init_sc_dmft_paralkgb(paw_dmft,mpi_enreg)
-
- implicit none
 
 !Arguments ------------------------------------
  type(paw_dmft_type),intent(inout) :: paw_dmft
@@ -1646,11 +1653,11 @@ subroutine init_sc_dmft_paralkgb(paw_dmft,mpi_enreg)
 ! *********************************************************************
  nproc = mpi_enreg%nproc_band
 
- ABI_ALLOCATE(paw_dmft%bandc_proc,(paw_dmft%mbandc))
- ABI_ALLOCATE(paw_dmft%use_bandc,(nproc))
+ ABI_MALLOC(paw_dmft%bandc_proc,(paw_dmft%mbandc))
+ ABI_MALLOC(paw_dmft%use_bandc,(nproc))
  paw_dmft%bandc_proc = 0
  paw_dmft%use_bandc = .false.
- 
+
  do ibc=1,paw_dmft%mbandc
    ib = paw_dmft%include_bands(ibc)
    proc = mod((ib-1)/mpi_enreg%bandpp,nproc)
@@ -1672,30 +1679,23 @@ end subroutine init_sc_dmft_paralkgb
 !!
 !! INPUTS
 !!  paw_dmft   = data structure
-!!  
+!!
 !! OUTPUT
-!!
-!! PARENTS
-!!      destroy_sc_dmft
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
 subroutine destroy_sc_dmft_paralkgb(paw_dmft)
-
- implicit none
 
 !Arguments ------------------------------------
  type(paw_dmft_type),intent(inout) :: paw_dmft
 ! *********************************************************************
 
  if ( allocated(paw_dmft%bandc_proc) )  then
-   ABI_DEALLOCATE(paw_dmft%bandc_proc)
+   ABI_FREE(paw_dmft%bandc_proc)
  end if
 
  if ( allocated(paw_dmft%use_bandc) )  then
-   ABI_DEALLOCATE(paw_dmft%use_bandc)
+   ABI_FREE(paw_dmft%use_bandc)
  end if
 
 end subroutine destroy_sc_dmft_paralkgb

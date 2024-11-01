@@ -1,0 +1,80 @@
+# test DDK and orbital magnetism response with nuclear dipole moment
+# Neon atom in a box
+
+ndtset 2
+
+#nuclear magnetic dipole moment, 
+#size 1 in a.u. along x axis
+nucdipmom 1.0 0.0 0.0
+
+# ground state convergence
+tolvrs1 1.0D-18
+
+# ddk convergence
+tolwfr2 1.0D-20
+rfddk2 1
+rfdir2 1 1 1
+iscf2 -3
+getwfk2 -1
+orbmag2 2
+lambsig2 341.86D-6
+
+kptopt 0
+nkpt 1
+kpt 3*0.0
+nsym 1
+symrel 1 0 0 0 1 0 0 0 1
+symmorphi 0
+istwfk *1
+enunit 2
+
+nstep 500
+ecut  5 # much too small for real studies
+pawecutdg 6 # much too small for real studies
+# ecut 30 # these values give converged orbital magnetism value
+# pawecutdg 60
+
+nband 4
+
+# nuclear dipole requires the following settings
+optforces 0
+optstress 0
+pawcpxocc 2
+usexcnhat 0
+
+paral_atom 0
+paral_kgb 0
+
+
+# Structural parameters
+acell    3*20.0
+       
+natom    1
+ntypat   1
+typat    1
+znucl    10
+
+# Ne atom at center of box
+xred
+3*1/2 
+
+pp_dirpath="$ABI_PSPDIR/Pseudodojo_paw_pbe_standard/"
+pseudos="Ne.xml"
+
+##############################################################
+# This section is used only for regression testing of ABINIT #
+##############################################################
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t44.abo, tolnlines=  19, tolabs=  1.0e-7, tolrel= 1.8E-3
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = J. Zwanziger
+#%% keywords = PAW
+#%% description = Calculate chemical shielding for isolated neon atom	
+#%% topics = NMR, MagField
+#%%<END TEST_INFO>

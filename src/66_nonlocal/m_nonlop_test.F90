@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_nonlop_test
 !! NAME
 !!  m_nonlop_test
@@ -6,14 +5,10 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2017-2019 ABINIT group (MT)
+!!  Copyright (C) 2017-2024 ABINIT group (MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -59,7 +54,7 @@ contains
 !!  mcg=size of wave-functions array (cg) =mpw*nspinor*mband*mkmem*nsppol
 !!  mgfft=maximum size of 1D FFTs
 !!  mkmem=number of k points treated by this node.
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  mpw= maximum number of plane waves
 !!  my_natom=number of atoms treated by current processor
 !!  natom=number of atoms in cell.
@@ -83,13 +78,6 @@ contains
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      afterscfloop
-!!
-!! CHILDREN
-!!      destroy_hamiltonian,dotprod_g,init_hamiltonian,initylmg
-!!      load_k_hamiltonian,load_spin_hamiltonian,mkffnl,mkkpg,nonlop
-!!
 !! SOURCE
 
 subroutine nonlop_test(cg,eigen,istwfk,kg,kpt,mband,mcg,mgfft,mkmem,mpi_enreg,mpw,my_natom,natom,&
@@ -97,8 +85,6 @@ subroutine nonlop_test(cg,eigen,istwfk,kg,kpt,mband,mcg,mgfft,mkmem,mpi_enreg,mp
 &                       paw_ij,pawtab,ph1d,psps,rprimd,typat,xred)
 
  use defs_basis
- use defs_datatypes
- use defs_abitypes
  use m_abicore
  use m_xmpi
  use m_errors
@@ -108,12 +94,14 @@ subroutine nonlop_test(cg,eigen,istwfk,kg,kpt,mband,mcg,mgfft,mkmem,mpi_enreg,mp
  use m_pawcprj
  use m_cgtools
 
+
+ use defs_datatypes,   only : pseudopotential_type
+ use defs_abitypes,    only : MPI_type
  use m_kg,             only : mkkpg
  use m_initylmg,       only : initylmg
  use m_mkffnl,         only : mkffnl
  use m_mpinfo,         only : proc_distrb_cycle
  use m_nonlop,         only : nonlop
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -292,8 +280,8 @@ subroutine nonlop_test(cg,eigen,istwfk,kg,kpt,mband,mcg,mgfft,mkmem,mpi_enreg,mp
 & ", nnlout=",nnlout,", inlout=",inlout
 
 !Compute all spherical harmonics and gradients
- ABI_ALLOCATE(ylm,(mpw*mkmem,psps%mpsang*psps%mpsang*psps%useylm))
- ABI_ALLOCATE(ylmgr,(mpw*mkmem,9,psps%mpsang*psps%mpsang*psps%useylm))
+ ABI_MALLOC(ylm,(mpw*mkmem,psps%mpsang*psps%mpsang*psps%useylm))
+ ABI_MALLOC(ylmgr,(mpw*mkmem,9,psps%mpsang*psps%mpsang*psps%useylm))
  if (psps%useylm==1) then
    call initylmg(gs_hamk%gprimd,kg,kpt,mkmem,mpi_enreg,psps%mpsang,mpw,nband,nkpt,&
 &   npwarr,nsppol,2,rprimd,ylm,ylmgr)
@@ -305,7 +293,7 @@ subroutine nonlop_test(cg,eigen,istwfk,kg,kpt,mband,mcg,mgfft,mkmem,mpi_enreg,mp
  bdtot_index=0 ; icg=0 ; isppol=1
 
 !Continue to initialize the Hamiltonian (PAW DIJ coefficients)
- call load_spin_hamiltonian(gs_hamk,isppol,with_nonlocal=.true.)
+ call gs_hamk%load_spin(isppol,with_nonlocal=.true.)
 
 !No loop over k points; only do the first one
  ikg=0 ; ikpt=1
@@ -324,25 +312,25 @@ subroutine nonlop_test(cg,eigen,istwfk,kg,kpt,mband,mcg,mgfft,mkmem,mpi_enreg,mp
    blocksize=nband_k/nblockbd
 
 !  Several allocations
-   ABI_ALLOCATE(lambda,(blocksize))
-   ABI_ALLOCATE(enlout,(nnlout*blocksize))
-   ABI_ALLOCATE(cwavef,(2,npw_k*my_nspinor*blocksize))
-   ABI_ALLOCATE(cwavef_out,(2,npw_k))
+   ABI_MALLOC(lambda,(blocksize))
+   ABI_MALLOC(enlout,(nnlout*blocksize))
+   ABI_MALLOC(cwavef,(2,npw_k*my_nspinor*blocksize))
+   ABI_MALLOC(cwavef_out,(2,npw_k))
    if (paw_opt>=3) then
-     ABI_ALLOCATE(scwavef_out,(2,npw_k))
-     ABI_ALLOCATE(enl,(0,0,0,0))
+     ABI_MALLOC(scwavef_out,(2,npw_k))
+     ABI_MALLOC(enl,(0,0,0,0))
    else
-     ABI_ALLOCATE(scwavef_out,(0,0))
-     ABI_ALLOCATE(enl,(gs_hamk%dimekb1,gs_hamk%dimekb2,gs_hamk%nspinor**2,1))
+     ABI_MALLOC(scwavef_out,(0,0))
+     ABI_MALLOC(enl,(gs_hamk%dimekb1,gs_hamk%dimekb2,gs_hamk%nspinor**2,1))
      enl(:,:,:,:)=one
    end if
 
 !  Compute (k+G) vectors and associated spherical harmonics
    nkpg=3*nloalg(3)
-   ABI_ALLOCATE(kg_k,(3,mpw))
-   ABI_ALLOCATE(kpg_k,(npw_k,nkpg))
-   ABI_ALLOCATE(ylm_k,(npw_k,psps%mpsang*psps%mpsang*psps%useylm))
-   ABI_ALLOCATE(ylmgr_k,(npw_k,9,psps%mpsang*psps%mpsang*psps%useylm))
+   ABI_MALLOC(kg_k,(3,mpw))
+   ABI_MALLOC(kpg_k,(npw_k,nkpg))
+   ABI_MALLOC(ylm_k,(npw_k,psps%mpsang*psps%mpsang*psps%useylm))
+   ABI_MALLOC(ylmgr_k,(npw_k,9,psps%mpsang*psps%mpsang*psps%useylm))
    kg_k(:,1:npw_k)=kg(:,1+ikg:npw_k+ikg)
    if (nkpg>0) then
      call mkkpg(kg_k,kpg_k,kpoint,nkpg,npw_k)
@@ -361,7 +349,7 @@ subroutine nonlop_test(cg,eigen,istwfk,kg,kpt,mband,mcg,mgfft,mkmem,mpi_enreg,mp
    end if
 
 !  Compute non-local form factors
-   ABI_ALLOCATE(ffnl,(npw_k,dimffnl,psps%lmnmax,ntypat))
+   ABI_MALLOC(ffnl,(npw_k,dimffnl,psps%lmnmax,ntypat))
    call mkffnl(psps%dimekb,dimffnl,psps%ekb,ffnl,psps%ffspl,&
 &   gs_hamk%gmet,gs_hamk%gprimd,ider_ffnl,idir_ffnl,psps%indlmn,kg_k,kpg_k,&
 &   gs_hamk%kpt_k,psps%lmnmax,psps%lnmax,psps%mpsang,psps%mqgrid_ff,nkpg,&
@@ -369,8 +357,8 @@ subroutine nonlop_test(cg,eigen,istwfk,kg,kpt,mband,mcg,mgfft,mkmem,mpi_enreg,mp
 &   psps%usepaw,psps%useylm,ylm_k,ylmgr_k)
 
 !  Load k-dependent part in the Hamiltonian datastructure
-   ABI_ALLOCATE(ph3d,(2,npw_k,gs_hamk%matblk))
-   call load_k_hamiltonian(gs_hamk,kpt_k=kpoint,istwf_k=istwf_k,npw_k=npw_k,&
+   ABI_MALLOC(ph3d,(2,npw_k,gs_hamk%matblk))
+   call gs_hamk%load_k(kpt_k=kpoint,istwf_k=istwf_k,npw_k=npw_k,&
 &   kg_k=kg_k,kpg_k=kpg_k,ffnl_k=ffnl,ph3d_k=ph3d,compute_ph3d=.true.)
 
    do iblock=1,nblockbd
@@ -434,21 +422,21 @@ subroutine nonlop_test(cg,eigen,istwfk,kg,kpt,mband,mcg,mgfft,mkmem,mpi_enreg,mp
  bdtot_index=bdtot_index+nband_k
 
 !Memory deallocations
- ABI_DEALLOCATE(enl)
- ABI_DEALLOCATE(enlout)
- ABI_DEALLOCATE(lambda)
- ABI_DEALLOCATE(ph3d)
- ABI_DEALLOCATE(ffnl)
- ABI_DEALLOCATE(cwavef)
- ABI_DEALLOCATE(cwavef_out)
- ABI_DEALLOCATE(scwavef_out)
- ABI_DEALLOCATE(kg_k)
- ABI_DEALLOCATE(kpg_k)
- ABI_DEALLOCATE(ylm_k)
- ABI_DEALLOCATE(ylmgr_k)
- ABI_DEALLOCATE(ylm)
- ABI_DEALLOCATE(ylmgr)
- call destroy_hamiltonian(gs_hamk)
+ ABI_FREE(enl)
+ ABI_FREE(enlout)
+ ABI_FREE(lambda)
+ ABI_FREE(ph3d)
+ ABI_FREE(ffnl)
+ ABI_FREE(cwavef)
+ ABI_FREE(cwavef_out)
+ ABI_FREE(scwavef_out)
+ ABI_FREE(kg_k)
+ ABI_FREE(kpg_k)
+ ABI_FREE(ylm_k)
+ ABI_FREE(ylmgr_k)
+ ABI_FREE(ylm)
+ ABI_FREE(ylmgr)
+ call gs_hamk%free()
 
 end subroutine nonlop_test
 !!***

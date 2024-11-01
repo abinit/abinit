@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_wvl_denspot
 !! NAME
 !!  m_wvl_denspot
@@ -7,14 +6,10 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2019 ABINIT group (DC)
+!!  Copyright (C) 2008-2024 ABINIT group (DC)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -31,6 +26,7 @@ module m_wvl_denspot
  use m_abicore
  use m_xmpi
 
+ use defs_datatypes, only : pseudopotential_gth_type
  use m_geometry,   only : xred2xcart
 
  implicit none
@@ -63,19 +59,11 @@ contains
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      gstate,wvl_wfsinp_reformat
-!!
-!! CHILDREN
-!!      allocaterhopot,density_descriptors,dpbox_set
-!!      initialize_dft_local_fields,wrtout,xred2xcart
-!!
 !! SOURCE
 
 subroutine wvl_denspot_set(den,gth_params,ixc,natom,nsppol,rprimd,wvl,&
 &                          wvl_crmult,wvl_frmult,wvl_mpi_comm,xred)
 
- use defs_datatypes
  use defs_wvltypes
 
 #if defined HAVE_BIGDFT
@@ -120,7 +108,7 @@ subroutine wvl_denspot_set(den,gth_params,ixc,natom,nsppol,rprimd,wvl,&
  groupsize=0
 
 !Store xcart for each atom
- ABI_ALLOCATE(xcart,(3, natom))
+ ABI_MALLOC(xcart,(3, natom))
  call xred2xcart(natom, rprimd, xcart, xred)
 
  call initialize_DFT_local_fields(den%denspot, ixc, nsppol)
@@ -149,10 +137,10 @@ subroutine wvl_denspot_set(den,gth_params,ixc,natom,nsppol,rprimd,wvl,&
 !Note: change allocateRhoPot
  call allocateRhoPot(wvl%Glr,nsppol,wvl%atoms,xcart,den%denspot)
 
-!Aditional informations.
+!Aditional information.
  den%symObj = wvl%atoms%astruct%sym%symObj
 
- ABI_DEALLOCATE(xcart)
+ ABI_FREE(xcart)
 
 #else
  BIGDFT_NOTENABLED_ERROR()
@@ -176,13 +164,6 @@ end subroutine wvl_denspot_set
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      gstate,wvl_wfsinp_reformat
-!!
-!! CHILDREN
-!!      deallocate_denspot_distribution,deallocate_rho_descriptors
-!!      denspot_free_history,f_free_ptr
 !!
 !! SOURCE
 

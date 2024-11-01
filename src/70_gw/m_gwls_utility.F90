@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_gwls_utility
 !! NAME
 !! m_gwls_utility
@@ -7,14 +6,10 @@
 !!  .
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2019 ABINIT group (JLJ, BR, MC)
+!! Copyright (C) 2009-2024 ABINIT group (JLJ, BR, MC)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -38,13 +33,13 @@ module m_gwls_utility
 
 ! abinit modules
 use defs_basis
-use defs_datatypes
 use m_abicore
 use m_xmpi
 
 use m_io_tools, only : get_unit
 
 implicit none
+
 private
 
 complex(dpc), public, parameter :: cmplx_i = (0.0_dp,1.0_dp)
@@ -72,10 +67,6 @@ contains
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!!
-!! CHILDREN
 !!
 !!
 !! SOURCE
@@ -106,12 +97,6 @@ end function complex_vector_product
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      gwls_GWlanczos
-!!
-!! CHILDREN
-!!      matrix_function,xmpi_sum,zgemm
 !!
 !! SOURCE
 
@@ -146,7 +131,7 @@ integer :: ierr
 ! *************************************************************************
 
 
-ABI_ALLOCATE(C,(Qsize,Xsize))
+ABI_MALLOC(C,(Qsize,Xsize))
 
 ! Compute Q^dagger . X
 call ZGEMM(            'C',   & ! Hermitian conjugate the first array
@@ -181,7 +166,7 @@ cmplx_1,   & ! beta constant
 X,   & ! matrix C
 Hsize)     ! LDC
 
-ABI_DEALLOCATE(C)
+ABI_FREE(C)
 
 end subroutine orthogonalize
 !!***
@@ -196,12 +181,6 @@ end subroutine orthogonalize
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      gwls_DielectricArray,gwls_GenerateEpsilon
-!!
-!! CHILDREN
-!!      matrix_function,xmpi_sum,zgemm
 !!
 !! SOURCE
 
@@ -257,12 +236,6 @@ end subroutine driver_invert_positive_definite_hermitian_matrix
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      gwls_ComputePoles,gwls_GenerateEpsilon
-!!
-!! CHILDREN
-!!      matrix_function,xmpi_sum,zgemm
 !!
 !! SOURCE
 
@@ -338,10 +311,10 @@ logical        :: head_node
 
 ! *************************************************************************
 
-ABI_ALLOCATE(check_matrix,(lmax,lmax))
-ABI_ALLOCATE(yl,(Hsize))
-ABI_ALLOCATE(rl,(Hsize))
-ABI_ALLOCATE(Ayl,(Hsize))
+ABI_MALLOC(check_matrix,(lmax,lmax))
+ABI_MALLOC(yl,(Hsize))
+ABI_MALLOC(rl,(Hsize))
+ABI_MALLOC(Ayl,(Hsize))
 
 mpi_rank  = xmpi_comm_rank(mpi_communicator)
 
@@ -438,10 +411,10 @@ if (head_node) then
 end if
 
 
-ABI_DEALLOCATE(check_matrix)
-ABI_DEALLOCATE(yl)
-ABI_DEALLOCATE(rl)
-ABI_DEALLOCATE(Ayl)
+ABI_FREE(check_matrix)
+ABI_FREE(yl)
+ABI_FREE(rl)
+ABI_FREE(Ayl)
 
 
 10 format(A)

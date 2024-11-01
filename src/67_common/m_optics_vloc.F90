@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_optics_vloc
 !! NAME
 !!  m_optics_vloc
@@ -7,14 +6,10 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2010-2019 ABINIT group (SM,VR,FJ,MT)
+!!  Copyright (C) 2010-2024 ABINIT group (SM,VR,FJ,MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -25,6 +20,20 @@
 #include "abi_common.h"
 
 module m_optics_vloc
+
+ use defs_basis
+ use m_abicore
+ use m_errors
+ use m_wffile
+ use m_xmpi
+ use m_hdr
+ use m_dtset
+ use m_dtfil
+
+use defs_abitypes,   only : MPI_type
+ use m_time,         only : timab
+ use m_io_tools,     only : get_unit
+ use m_mpinfo,       only : proc_distrb_cycle
 
  implicit none
 
@@ -69,30 +78,10 @@ contains
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      outscfcv
-!!
-!! CHILDREN
-!!      hdr_io,timab,wffclose,wffopen,xmpi_exch,xmpi_sum_master
-!!
 !! SOURCE
 
  subroutine optics_vloc(cg,dtfil,dtset,eigen0,gprimd,hdr,kg,mband,mcg,mkmem,mpi_enreg,mpw,&
 &                       nkpt,npwarr,nsppol)
-
- use defs_basis
- use defs_abitypes
- use m_abicore
- use m_errors
- use m_wffile
- use m_xmpi
- use m_hdr
-
- use m_time,         only : timab
- use m_io_tools,     only : get_unit
- use m_mpinfo,       only : proc_distrb_cycle
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: mband,mcg,mkmem,mpw,nkpt,nsppol
@@ -110,7 +99,7 @@ contains
 !scalars
  integer :: iomode,bdtot_index,cplex,etiq,fformopt,ib,icg,ierr,ikg,ikpt
  integer :: ipw,isppol,istwf_k,iwavef,jb,jwavef
- integer :: me,me_kpt,my_nspinor,nband_k,npw_k,sender,ount
+ integer :: me,me_kpt,my_nspinor,nband_k,npw_k,sender,ount,pnp_size
  integer :: spaceComm_band,spaceComm_bandfftspin,spaceComm_fft,spaceComm_k
  logical :: mykpt
  real(dp) :: cgnm1,cgnm2
@@ -148,9 +137,10 @@ contains
  my_nspinor=max(1,dtset%nspinor/mpi_enreg%nproc_spinor)
 
 !Initialize main variables
- ABI_ALLOCATE(psinablapsi,(2,3,mband,mband))
+ ABI_MALLOC(psinablapsi,(2,3,mband,mband))
+ pnp_size=size(psinablapsi)
  psinablapsi=zero
-
+ 
  iomode= IO_MODE_FORTRAN_MASTER
  fformopt=612
  ount = get_unit()
@@ -171,7 +161,7 @@ contains
      nband_k=dtset%nband(ikpt+(isppol-1)*nkpt)
      etiq=ikpt+(isppol-1)*nkpt
      if (me==0) then
-       ABI_ALLOCATE(eig0_k,(nband_k))
+       ABI_MALLOC(eig0_k,(nband_k))
        eig0_k(:)=eigen0(1+bdtot_index:nband_k+bdtot_index)
      end if
 
@@ -185,8 +175,8 @@ contains
        istwf_k=dtset%istwfk(ikpt)
        npw_k=npwarr(ikpt)
        cplex=2;if (istwf_k>1) cplex=1
-       ABI_ALLOCATE(kg_k,(3,npw_k))
-       ABI_ALLOCATE(kpg_k,(npw_k*dtset%nspinor,3))
+       ABI_MALLOC(kg_k,(3,npw_k))
+       ABI_MALLOC(kpg_k,(npw_k*dtset%nspinor,3))
 
 !      Get G-vectors for this k-point
        kg_k(:,1:npw_k)=kg(:,1+ikg:npw_k+ikg)
@@ -206,13 +196,13 @@ contains
        end do !ipw
        kpg_k=two_pi*kpg_k
        if (dtset%nspinor==2) kpg_k(npw_k+1:2*npw_k,1:3)=kpg_k(1:npw_k,1:3)
-       ABI_DEALLOCATE(kg_k)
+       ABI_FREE(kg_k)
 
 !      2-A Computation of <psi_tild_n|-i.nabla|psi_tild_m>
 !      ----------------------------------------------------------------------------------
 !      Computation of (C_nk^*)*C_mk*(k+g) in cartesian coordinates
 
-       ABI_ALLOCATE(tnm,(2,3,nband_k,nband_k))
+       ABI_MALLOC(tnm,(2,3,nband_k,nband_k))
        tnm=zero
 
 !      Loops on bands
@@ -222,7 +212,7 @@ contains
            tmp_shape = shape(mpi_enreg%proc_distrb)
            if (ikpt > tmp_shape(1)) then
              msg='  ikpt out of bounds '
-             MSG_BUG(msg)
+             ABI_BUG(msg)
            end if
            if (abs(mpi_enreg%proc_distrb(ikpt,jb,isppol)-me_kpt)/=0) cycle
          end if
@@ -262,13 +252,13 @@ contains
 
        psinablapsi(:,:,:,:)=tnm(:,:,:,:)
 
-       ABI_DEALLOCATE(tnm)
+       ABI_FREE(tnm)
 
        if (mkmem/=0) then
          icg = icg + npw_k*my_nspinor*nband_k
        end if
 
-       ABI_DEALLOCATE(kpg_k)
+       ABI_FREE(kpg_k)
 
        if (me==0) then
          write(ount)(eig0_k(ib),ib=1,nband_k)
@@ -276,12 +266,12 @@ contains
          write(ount)((psinablapsi(1:2,2,ib,jb),ib=1,nband_k),jb=1,nband_k)
          write(ount)((psinablapsi(1:2,3,ib,jb),ib=1,nband_k),jb=1,nband_k)
        elseif (mpi_enreg%me_band==0.and.mpi_enreg%me_fft==0) then
-         call xmpi_exch(psinablapsi,etiq,me_kpt,psinablapsi,0,spaceComm_k,ierr)
+         call xmpi_exch(psinablapsi,pnp_size,me_kpt,psinablapsi,0,spaceComm_k,etiq,ierr)
        end if
 
      elseif (me==0) then
        sender=minval(mpi_enreg%proc_distrb(ikpt,1:nband_k,isppol))
-       call xmpi_exch(psinablapsi,etiq,sender,psinablapsi,0,spaceComm_k,ierr)
+       call xmpi_exch(psinablapsi,pnp_size,sender,psinablapsi,0,spaceComm_k,etiq,ierr)
        write(ount)(eig0_k(ib),ib=1,nband_k)
        write(ount)((psinablapsi(1:2,1,ib,jb),ib=1,nband_k),jb=1,nband_k)
        write(ount)((psinablapsi(1:2,2,ib,jb),ib=1,nband_k),jb=1,nband_k)
@@ -290,7 +280,7 @@ contains
 
      bdtot_index=bdtot_index+nband_k
      if (me==0)  then
-       ABI_DEALLOCATE(eig0_k)
+       ABI_FREE(eig0_k)
      end if
 !    End loop on spin,kpt
    end do ! ikpt
@@ -300,7 +290,7 @@ contains
  call WffClose(wff1,ierr)
 
 !Datastructures deallocations
- ABI_DEALLOCATE(psinablapsi)
+ ABI_FREE(psinablapsi)
 
  DBG_EXIT("COLL")
 

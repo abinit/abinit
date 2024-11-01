@@ -1,0 +1,83 @@
+#   Rhombohedral As treated as an insulator ; 10 special points
+#   Test the k point generator, as well as the input using angles
+
+ ndtset 2
+
+#Dataset 2 : optimize cell volume and shape
+ dilatmx2  1.05d0
+ getwfk2   1
+ getxred2  1
+ optcell2  2
+
+#Common data
+ acell 3*7.32d0
+ angdeg 3*57.0d0
+
+#acell 3*10.092d0
+#rprim  0.0  0.5  0.5
+#       0.5  0.0  0.5
+#       0.5  0.5  0.0
+
+ ecut  3.0d0
+ ecutsm 0.5d0
+ intxc 1
+ ionmov 2
+ ixc  1
+ kptopt 1
+ natom  2
+ nband 8
+ ngkpt 4 4 4
+ nkpt 10
+ nstep 20
+ ntime 20
+ ntypat  1
+ occopt  4
+ nsym   12
+ symrel   1  0  0   0  1  0   0  0  1
+         -1  0  0   0 -1  0   0  0 -1
+          0  1  0   1  0  0   0  0  1
+          0  0  1   0  1  0   1  0  0
+          1  0  0   0  0  1   0  1  0
+          0  0  1   1  0  0   0  1  0
+          0  1  0   0  0  1   1  0  0
+          0 -1  0  -1  0  0   0  0 -1
+          0  0 -1   0 -1  0  -1  0  0
+         -1  0  0   0  0 -1   0 -1  0
+          0  0 -1  -1  0  0   0 -1  0
+          0 -1  0   0  0 -1  -1  0  0
+ tnons  3*0.0d0 3*0.0d0 30*0.0d0
+ toldff  5.0d-5
+ tolmxf  5.0d-4
+ tsmear 0.06d0
+ typat  1 1
+ xred  3*0.227d0
+       3*-0.227d0
+ znucl 33.0
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "33as.SGS_mod"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t44.abo, tolnlines = 8, tolabs = 1.10e-05, tolrel = 4.0e-04, fld_options = -medium
+#%% [paral_info]
+#%% max_nprocs = 10
+#%% [extra_info]
+#%% keywords = 
+#%% authors = Unknown
+#%% description = 
+#%%   Arsenic in rhombohedral structure.
+#%%   Optimization of unit cell size and shape.
+#%%   With 4x4x4 k point grid, ecut 3.0, occopt 4 and tsmear 0.06d0,
+#%%   one get acell 3*7.325  angdeg 3*57.36 and xred 0.2277
+#%%   These input parameters are too small, but still give a realistic
+#%%   geometry, since with the much better parameters
+#%%   12x12x12 k point grid, ecut 12.0, occopt 4 and tsmear 0.04d0,
+#%%   one gets acell 3*7.633  angdeg 3*54.95 and xred 0.2296, while
+#%%   the experimental values are
+#%%   acell 3*7.751   angdeg 3*54.554 and xred 0.2276 
+#%% topics = k-points, GeoOpt
+#%%<END TEST_INFO>

@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_psxml2ab
 !! NAME
 !! m_psxml2ab
@@ -8,7 +7,7 @@
 !!  convert to abinit internal datastructures for pspheader.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2019 ABINIT group (MJV).
+!! Copyright (C) 2005-2024 ABINIT group (MJV).
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -21,12 +20,6 @@
 !! psphead = psp information structure
 !! atmsymb = atomic symbol
 !!
-!! PARENTS
-!!      inpspheads,pspatm_abinit
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -38,29 +31,27 @@
 module m_psxml2ab
 
  use defs_basis
- use defs_datatypes
  use m_abicore
  use m_errors
-#ifdef HAVE_PSML
+#ifdef HAVE_LIBPSML
  use m_psml
  use m_psml_api
 #endif
 
+ use defs_datatypes, only : pspheader_type
  use m_fstrings,     only : yesno
 
 implicit none
 
 private
 
-#ifdef HAVE_PSML
+#ifdef HAVE_LIBPSML
 public :: psxml2abheader
 !public :: psxml2abfull
 
 CONTAINS
 
 subroutine psxml2abheader(psxmlfile, psphead, atmsymb, creator, iwrite)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -131,8 +122,8 @@ subroutine psxml2abheader(psxmlfile, psphead, atmsymb, creator, iwrite)
    call wrtout(std_out,  message,'COLL')
  end if
 
- ABI_ALLOCATE(zeld, (nvshells))
- ABI_ALLOCATE(zelu, (nvshells))
+ ABI_MALLOC(zeld, (nvshells))
+ ABI_MALLOC(zelu, (nvshells))
  zeld = zero
  zelu = zero
  frmt_str="(a"
@@ -195,7 +186,7 @@ subroutine psxml2abheader(psxmlfile, psphead, atmsymb, creator, iwrite)
        psphead%nproj(il) = psphead%nproj(il) + 1
      end do
    else
-     MSG_BUG('Your psml potential should have either scalar- or non- relativistic projectors')
+     ABI_BUG('Your psml potential should have either scalar- or non- relativistic projectors')
    end if
  end if
 
@@ -359,8 +350,8 @@ subroutine psxml2abheader(psxmlfile, psphead, atmsymb, creator, iwrite)
    end select
  end if
 
- ABI_DEALLOCATE(zeld)
- ABI_DEALLOCATE(zelu)
+ ABI_FREE(zeld)
+ ABI_FREE(zelu)
 
  if (allocated(idx_sr)) then
    ABI_FREE_NOCOUNT(idx_sr)
@@ -379,7 +370,6 @@ end subroutine psxml2abheader
 end module m_psxml2ab
 !!***
 
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/psml_die
 !! NAME
 !! psml_die
@@ -389,7 +379,7 @@ end module m_psxml2ab
 !!  allows calling software to decide how fatal the PSML die call actually is.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2019 ABINIT group (MJV).
+!! Copyright (C) 2005-2024 ABINIT group (MJV).
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -400,20 +390,14 @@ end module m_psxml2ab
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine psml_die(str)
 
   use m_errors
-  implicit none
-
   character(len=*), intent(in) :: str
 
-  MSG_BUG(str)
+  ABI_BUG(str)
 
 end subroutine psml_die
 !!***

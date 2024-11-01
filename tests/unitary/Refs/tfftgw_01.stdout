@@ -1,8 +1,8 @@
 
-.Version 8.0.3 of FFTPROF 
-.(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
+.Version 9.3.1 of FFTPROF 
+.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
-.Copyright (C) 1998-2019 ABINIT group . 
+.Copyright (C) 1998-2024 ABINIT group . 
  FFTPROF comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon  4 Apr 2016.
-- ( at 16h44 )
+.Starting date : Tue 10 Nov 2020.
+- ( at 22h24 )
   
  Tool for profiling and testing the FFT libraries used in ABINIT.
  Allowed options are: 
@@ -55,88 +55,88 @@
 ==== fftbox with isign -1, in-place  0, ndat  1 ====
 ====================================================
         Library        CPU-time   WALL-time   nthreads  ncalls  Max_|Err|   <|Err|>
-- Goedecker (112)       0.0341     0.0341      1 (100%) 5     0.00E+00    0.00E+00
-- Goedecker2002 (412)   0.0334     0.0334      1 (100%) 5     0.00E+00    0.00E+00
-- FFTW3 (312)           0.0327     0.0330      1 (100%) 5     6.48E-16    1.59E-19
+- Goedecker (112)       0.0242     0.0243      1 (100%) 5     0.00E+00    0.00E+00
+- Goedecker2002 (412)   0.0249     0.0250      1 (100%) 5     0.00E+00    0.00E+00
+- FFTW3 (312)           0.0171     0.0172      1 (100%) 5     6.09E-16    1.65E-19
 
- Consistency check: MAX(Max_|Err|) =  6.48E-16, Max(<|Err|>) =  1.59E-19, reference_lib: Goedecker (112)
+ Consistency check: MAX(Max_|Err|) =  6.09E-16, Max(<|Err|>) =  1.65E-19, reference_lib: Goedecker (112)
 
 
 ====================================================
 ==== fftbox with isign -1, in-place  1, ndat  1 ====
 ====================================================
         Library        CPU-time   WALL-time   nthreads  ncalls  Max_|Err|   <|Err|>
-- Goedecker (112)       0.0286     0.0289      1 (100%) 5     0.00E+00    0.00E+00
-- Goedecker2002 (412)   0.0290     0.0290      1 (100%) 5     0.00E+00    0.00E+00
-- FFTW3 (312)           0.0232     0.0232      1 (100%) 5     6.48E-16    1.59E-19
+- Goedecker (112)       0.0207     0.0208      1 (100%) 5     0.00E+00    0.00E+00
+- Goedecker2002 (412)   0.0214     0.0214      1 (100%) 5     0.00E+00    0.00E+00
+- FFTW3 (312)           0.0184     0.0184      1 (100%) 5     6.09E-16    1.65E-19
 
- Consistency check: MAX(Max_|Err|) =  6.48E-16, Max(<|Err|>) =  1.59E-19, reference_lib: Goedecker (112)
+ Consistency check: MAX(Max_|Err|) =  6.09E-16, Max(<|Err|>) =  1.65E-19, reference_lib: Goedecker (112)
 
 
 ====================================================
 ==== fftbox with isign  1, in-place  0, ndat  1 ====
 ====================================================
         Library        CPU-time   WALL-time   nthreads  ncalls  Max_|Err|   <|Err|>
-- Goedecker (112)       0.0295     0.0295      1 (100%) 5     0.00E+00    0.00E+00
-- Goedecker2002 (412)   0.0285     0.0285      1 (100%) 5     0.00E+00    0.00E+00
-- FFTW3 (312)           0.0226     0.0226      1 (100%) 5     1.93E-13    3.09E-15
+- Goedecker (112)       0.0210     0.0211      1 (100%) 5     0.00E+00    0.00E+00
+- Goedecker2002 (412)   0.0209     0.0210      1 (100%) 5     0.00E+00    0.00E+00
+- FFTW3 (312)           0.0158     0.0158      1 (100%) 5     1.91E-13    3.07E-15
 
- Consistency check: MAX(Max_|Err|) =  1.93E-13, Max(<|Err|>) =  3.09E-15, reference_lib: Goedecker (112)
+ Consistency check: MAX(Max_|Err|) =  1.91E-13, Max(<|Err|>) =  3.07E-15, reference_lib: Goedecker (112)
 
 
 ====================================================
 ==== fftbox with isign  1, in-place  1, ndat  1 ====
 ====================================================
         Library        CPU-time   WALL-time   nthreads  ncalls  Max_|Err|   <|Err|>
-- Goedecker (112)       0.0280     0.0280      1 (100%) 5     0.00E+00    0.00E+00
-- Goedecker2002 (412)   0.0314     0.0314      1 (100%) 5     0.00E+00    0.00E+00
-- FFTW3 (312)           0.0240     0.0239      1 (100%) 5     1.93E-13    3.09E-15
+- Goedecker (112)       0.0204     0.0204      1 (100%) 5     0.00E+00    0.00E+00
+- Goedecker2002 (412)   0.0212     0.0213      1 (100%) 5     0.00E+00    0.00E+00
+- FFTW3 (312)           0.0175     0.0175      1 (100%) 5     1.91E-13    3.07E-15
 
- Consistency check: MAX(Max_|Err|) =  1.93E-13, Max(<|Err|>) =  3.09E-15, reference_lib: Goedecker (112)
+ Consistency check: MAX(Max_|Err|) =  1.91E-13, Max(<|Err|>) =  3.07E-15, reference_lib: Goedecker (112)
 
 
 =====================================
 ==== fftu with isign -1, ndat  1 ====
 =====================================
         Library        CPU-time   WALL-time   nthreads  ncalls  Max_|Err|   <|Err|>
-- Goedecker (112)       0.0206     0.0206      1 (100%) 5     0.00E+00    0.00E+00
+- Goedecker (112)       0.0119     0.0119      1 (100%) 5     0.00E+00    0.00E+00
 - Goedecker2002 (412)     N/A        N/A        N/A     N/A       N/A        N/A
-- FFTW3 (312)           0.0110     0.0110      1 (100%) 5     6.54E-16    1.37E-20
+- FFTW3 (312)           0.0069     0.0069      1 (100%) 5     6.37E-16    1.48E-20
 
- Consistency check: MAX(Max_|Err|) =  6.54E-16, Max(<|Err|>) =  1.37E-20, reference_lib: Goedecker (112)
+ Consistency check: MAX(Max_|Err|) =  6.37E-16, Max(<|Err|>) =  1.48E-20, reference_lib: Goedecker (112)
 
 
 =====================================
 ==== fftu with isign  1, ndat  1 ====
 =====================================
         Library        CPU-time   WALL-time   nthreads  ncalls  Max_|Err|   <|Err|>
-- Goedecker (112)       0.0201     0.0201      1 (100%) 5     0.00E+00    0.00E+00
+- Goedecker (112)       0.0134     0.0134      1 (100%) 5     0.00E+00    0.00E+00
 - Goedecker2002 (412)     N/A        N/A        N/A     N/A       N/A        N/A
-- FFTW3 (312)           0.0124     0.0124      1 (100%) 5     1.89E-13    3.12E-15
+- FFTW3 (312)           0.0080     0.0080      1 (100%) 5     1.96E-13    3.09E-15
 
- Consistency check: MAX(Max_|Err|) =  1.89E-13, Max(<|Err|>) =  3.12E-15, reference_lib: Goedecker (112)
+ Consistency check: MAX(Max_|Err|) =  1.96E-13, Max(<|Err|>) =  3.09E-15, reference_lib: Goedecker (112)
 
 
 =============================================================
 ==== rho_tw_g with use_padfft  0, map2sphere  1, ndat  1 ====
 =============================================================
         Library        CPU-time   WALL-time   nthreads  ncalls  Max_|Err|   <|Err|>
-- Goedecker (112)       0.0366     0.0366      1 (100%) 5     0.00E+00    0.00E+00
-- Goedecker2002 (412)   0.0364     0.0369      1 (100%) 5     0.00E+00    0.00E+00
-- FFTW3 (312)           0.0323     0.0325      1 (100%) 5     2.28E-16    8.58E-20
+- Goedecker (112)       0.0262     0.0262      1 (100%) 5     0.00E+00    0.00E+00
+- Goedecker2002 (412)   0.0339     0.0340      1 (100%) 5     0.00E+00    0.00E+00
+- FFTW3 (312)           0.0297     0.0298      1 (100%) 5     2.33E-16    9.16E-20
 
- Consistency check: MAX(Max_|Err|) =  2.28E-16, Max(<|Err|>) =  8.58E-20, reference_lib: Goedecker (112)
+ Consistency check: MAX(Max_|Err|) =  2.33E-16, Max(<|Err|>) =  9.16E-20, reference_lib: Goedecker (112)
 
 
 =============================================================
 ==== rho_tw_g with use_padfft  1, map2sphere  1, ndat  1 ====
 =============================================================
         Library        CPU-time   WALL-time   nthreads  ncalls  Max_|Err|   <|Err|>
-- Goedecker (112)       0.0244     0.0245      1 (100%) 5     0.00E+00    0.00E+00
+- Goedecker (112)       0.0189     0.0189      1 (100%) 5     0.00E+00    0.00E+00
 - Goedecker2002 (412)     N/A        N/A        N/A     N/A       N/A        N/A
-- FFTW3 (312)           0.0225     0.0227      1 (100%) 5     3.08E-16    1.44E-19
+- FFTW3 (312)           0.0212     0.0213      1 (100%) 5     3.35E-16    1.56E-19
 
- Consistency check: MAX(Max_|Err|) =  3.08E-16, Max(<|Err|>) =  1.44E-19, reference_lib: Goedecker (112)
+ Consistency check: MAX(Max_|Err|) =  3.35E-16, Max(<|Err|>) =  1.56E-19, reference_lib: Goedecker (112)
 
 
  Analysis completed.

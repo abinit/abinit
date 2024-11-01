@@ -1,0 +1,3772 @@
+!{\src2tex{textfont=tt}}
+!!****f* ABINIT/xmpi_sum_int
+!! NAME
+!!  xmpi_sum_int
+!!
+!! FUNCTION
+!!  This module contains functions that calls MPI routine,
+!!  if we compile the code using the MPI CPP flags.
+!!  xmpi_sum is the generic function.
+!!
+!! COPYRIGHT
+!!  Copyright (C) 2001-2024 ABINIT group (AR,XG,MB)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~ABINIT/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! NOTES
+!!  MPI2 defines an option MPI_IN_PLACE to do the SUM in-place in the case of intra-communicators.
+!!  The additional array xsum is therefore not needed if MPI_INPLACE is defined.
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!      mpi_allreduce,xmpi_abort
+!!
+!! SOURCE
+
+subroutine xmpi_sum_int(xval,comm,ier)
+
+!Arguments ------------------------------------
+ integer, DEV_CONTARRD intent(inout) :: xval(:)
+ integer,intent(in)                  :: comm
+ integer,intent(out)                 :: ier
+
+!Local variables-------------------------------
+#if defined HAVE_MPI
+ integer :: n1
+ integer,allocatable :: xsum(:)
+#endif
+
+! *************************************************************************
+
+ ier=0
+#if defined HAVE_MPI
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
+   n1 = size(xval)
+
+   !  Accumulate xval on all proc. in comm
+#if defined HAVE_MPI2_INPLACE
+   if (xmpi_use_inplace_operations) then
+     call MPI_ALLREDUCE(MPI_IN_PLACE,xval,n1,MPI_INTEGER,MPI_SUM,comm,ier)
+   else
+#endif
+     ABI_STAT_MALLOC(xsum,(n1), ier)
+     if (ier/= 0) call xmpi_abort(msg='error allocating xsum in xmpi_sum_int')
+     call MPI_ALLREDUCE(xval,xsum,n1,MPI_INTEGER,MPI_SUM,comm,ier)
+     xval (:) = xsum(:)
+     ABI_FREE(xsum)
+#if defined HAVE_MPI2_INPLACE
+   end if
+#endif
+
+ end if
+#endif
+
+end subroutine xmpi_sum_int
+!!***
+
+!> wrapper arround xmpi_sum_int than can be called in C/CUDA
+subroutine xmpi_sum_int_c(xval_ptr,xval_size,comm,ier) bind(c, name="xmpi_sum_int_c")
+
+  use, intrinsic :: iso_c_binding, only: c_associated,c_loc,c_ptr,c_f_pointer,c_int32_t
+  implicit none
+
+  ! dummy args
+  type(c_ptr),                    intent(inout) :: xval_ptr
+  integer(kind=c_int32_t), value, intent(in)    :: xval_size
+  integer(kind=c_int32_t),        intent(in)    :: comm
+  integer(kind=c_int32_t),        intent(out)   :: ier
+
+  ! local vars
+  integer, pointer :: xval(:) => null()
+
+  ! convert the c pointer into a fortran array
+  call c_f_pointer(xval_ptr, xval, [xval_size])
+
+  call xmpi_sum_int(xval, comm, ier)
+
+end subroutine xmpi_sum_int_c
+
+!----------------------------------------------------------------------
+
+!!****f* ABINIT/xmpi_sum_intv
+!! NAME
+!!  xmpi_sum_intv
+!!
+!! FUNCTION
+!!  Combines values from all processes and distribute
+!!  the result back to all processes.
+!!  Target: scalar integers.
+!!
+!! INPUTS
+!!  comm= MPI communicator
+!!
+!! OUTPUT
+!!  ier= exit status, a non-zero value meaning there is an error
+!!
+!! SIDE EFFECTS
+!!  xval= buffer array
+!!
+!! SOURCE
+
+subroutine xmpi_sum_intv(xval,comm,ier)
+
+!Arguments----------------------
+ integer,intent(inout) :: xval
+ integer,intent(in)    :: comm
+ integer,intent(out)   :: ier
+
+!Local variables----------------
+#if defined HAVE_MPI
+ integer :: arr_xsum(1)
+#endif
+
+! *************************************************************************
+
+ ier=0
+#if defined HAVE_MPI
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
+!  Accumulate xval on all proc. in comm
+   call MPI_ALLREDUCE([xval],arr_xsum,1,MPI_INTEGER,MPI_SUM,comm,ier)
+   xval = arr_xsum(1)
+ end if
+#endif
+end subroutine xmpi_sum_intv
+!!***
+
+!> wrapper arround xmpi_sum_intv than can be called in C/CUDA
+subroutine xmpi_sum_intv_c(xval_ptr,comm,ier) bind(c, name="xmpi_sum_intv_c")
+
+  use, intrinsic :: iso_c_binding, only: c_associated,c_loc,c_ptr,c_f_pointer,c_int32_t
+  implicit none
+
+  ! dummy args
+  type(c_ptr),                    intent(inout) :: xval_ptr
+  integer(kind=c_int32_t),        intent(in)    :: comm
+  integer(kind=c_int32_t),        intent(out)   :: ier
+
+  ! local vars
+  integer, pointer :: xval => null()
+
+  ! convert the c pointer into a fortran variable
+  call c_f_pointer(xval_ptr, xval)
+
+  call xmpi_sum_intv(xval, comm, ier)
+
+end subroutine xmpi_sum_intv_c
+
+
+!----------------------------------------------------------------------
+
+!!****f* ABINIT/xmpi_sum_intv2
+!! NAME
+!!  xmpi_sum_intv2
+!!
+!! FUNCTION
+!!  Combines values from all processes and distribute
+!!  the result back to all processes.
+!!  Target: scalar integer without transfers.
+!!
+!! INPUTS
+!!  comm= MPI communicator
+!!
+!! OUTPUT
+!!  ier= exit status, a non-zero value meaning there is an error
+!!
+!! SIDE EFFECTS
+!!  xval= buffer array
+!!  xsum= receive buffer
+!!
+!! SOURCE
+
+subroutine xmpi_sum_intv2(xval,xsum,comm,ier)
+
+!Arguments---------------------
+ integer,intent(inout) :: xval,xsum
+ integer,intent(in) :: comm
+ integer,intent(out) :: ier
+
+!Local variables----------------
+#if defined HAVE_MPI
+ integer :: arr_xsum(1)
+#endif
+
+! *************************************************************************
+
+ ier=0
+#if defined HAVE_MPI
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
+   call MPI_ALLREDUCE([xval],arr_xsum,1,MPI_INTEGER,MPI_SUM,comm,ier)
+   xsum=arr_xsum(1)
+ else
+#endif
+   xsum=xval
+#if defined HAVE_MPI
+ end if
+#endif
+
+end subroutine xmpi_sum_intv2
+!!***
+
+!> wrapper arround xmpi_sum_intv2 than can be called in C/CUDA
+subroutine xmpi_sum_intv2_c(xval_ptr,xsum_ptr,comm,ier) bind(c, name="xmpi_sum_intv2_c")
+
+  use, intrinsic :: iso_c_binding, only: c_associated,c_loc,c_ptr,c_f_pointer,c_int32_t
+  implicit none
+
+  ! dummy args
+  type(c_ptr),                    intent(inout) :: xval_ptr
+  type(c_ptr),                    intent(inout) :: xsum_ptr
+  integer(kind=c_int32_t),        intent(in)    :: comm
+  integer(kind=c_int32_t),        intent(out)   :: ier
+
+  ! local vars
+  integer, pointer :: xval => null()
+  integer, pointer :: xsum => null()
+
+  ! convert the c pointer into a fortran variable
+  call c_f_pointer(xval_ptr, xval)
+  call c_f_pointer(xsum_ptr, xsum)
+
+  call xmpi_sum_intv2(xval, xsum, comm, ier)
+
+end subroutine xmpi_sum_intv2_c
+
+!!****f* ABINIT/xmpi_sum_intn
+!! NAME
+!!  xmpi_sum_intn
+!!
+!! FUNCTION
+!!  Combines values from all processes and distribute
+!!  the result back to all processes.
+!!  Target: one-dimensional integer arrays.
+!!
+!! INPUTS
+!!  n1= first dimension of the array
+!!  comm= MPI communicator
+!!
+!! OUTPUT
+!!  ier= exit status, a non-zero value meaning there is an error
+!!
+!! SIDE EFFECTS
+!!  xval= buffer array
+!!
+!! SOURCE
+
+subroutine xmpi_sum_intn(xval,n1,comm,ier)
+
+!Arguments-------------------------
+ integer, DEV_CONTARRD intent(inout) :: xval(:)
+ integer,intent(in) :: n1
+ integer,intent(in) :: comm
+ integer,intent(out) :: ier
+
+!Local variables-------------------
+#if defined HAVE_MPI
+ integer :: nproc_space_comm
+ integer , allocatable :: xsum(:)
+#endif
+
+! *************************************************************************
+
+ ier=0
+#if defined HAVE_MPI
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
+   call MPI_COMM_SIZE(comm,nproc_space_comm,ier)
+   if (nproc_space_comm /= 1) then
+
+!    Accumulate xval on all proc. in comm
+#if defined HAVE_MPI2_INPLACE
+     if (xmpi_use_inplace_operations) then
+       call MPI_ALLREDUCE(MPI_IN_PLACE,xval,n1,MPI_INTEGER,MPI_SUM,comm,ier)
+     else
+#endif
+       ABI_STAT_MALLOC(xsum,(n1), ier)
+       if (ier/= 0) call xmpi_abort(msg='error allocating xsum in xmpi_sum_intn')
+       call MPI_ALLREDUCE(xval,xsum,n1,MPI_INTEGER,MPI_SUM,comm,ier)
+       xval (:) = xsum(:)
+       ABI_FREE(xsum)
+#if defined HAVE_MPI2_INPLACE
+     endif
+#endif
+
+   end if
+ end if
+#endif
+
+end subroutine xmpi_sum_intn
+!!***
+
+!> wrapper arround xmpi_sum_intn than can be called in C/CUDA
+subroutine xmpi_sum_intn_c(xval_ptr,xval_size,n1,comm,ier) bind(c, name="xmpi_sum_intn_c")
+
+  use, intrinsic :: iso_c_binding, only: c_associated,c_loc,c_ptr,c_f_pointer,c_int32_t
+  implicit none
+
+  ! dummy args
+  type(c_ptr),                    intent(inout) :: xval_ptr
+  integer(kind=c_int32_t), value, intent(in)    :: xval_size
+  integer(kind=c_int32_t),        intent(in)    :: n1
+  integer(kind=c_int32_t),        intent(in)    :: comm
+  integer(kind=c_int32_t),        intent(out)   :: ier
+
+  ! local vars
+  integer, pointer :: xval(:) => null()
+
+  ! convert the c pointer into a fortran array
+  call c_f_pointer(xval_ptr, xval, [xval_size])
+
+  call xmpi_sum_intn(xval, n1, comm, ier)
+
+end subroutine xmpi_sum_intn_c
+
+!----------------------------------------------------------------------
+
+!!****f* ABINIT/xmpi_sum_int2t
+!! NAME
+!!  xmpi_sum_int2t
+!!
+!! FUNCTION
+!!  Combines values from all processes and distribute
+!!  the result back to all processes.
+!!  Target: one-dimensional integer array without transfers.
+!!
+!! INPUTS
+!!  n1= first dimension of the array
+!!  comm= MPI communicator
+!!
+!! OUTPUT
+!!  ier= exit status, a non-zero value meaning there is an error
+!!
+!! SIDE EFFECTS
+!!  xval= buffer array
+!!  xsum= receive buffer
+!!
+!! SOURCE
+
+subroutine xmpi_sum_int2t(xval,xsum,n1,comm,ier)
+
+!Arguments-------------------------
+ integer, DEV_CONTARRD intent(inout) :: xval(:),xsum(:)
+ integer,intent(in) :: n1
+ integer,intent(in) :: comm
+ integer,intent(out) :: ier
+
+! *************************************************************************
+
+ ier=0
+#if defined HAVE_MPI
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
+!  Accumulate xval on all proc. in comm
+   call MPI_ALLREDUCE(xval,xsum,n1,MPI_INTEGER,MPI_SUM,comm,ier)
+ else
+#endif
+   xsum=xval
+#if defined HAVE_MPI
+ end if
+#endif
+
+end subroutine xmpi_sum_int2t
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* ABINIT/xmpi_sum_int2d
+!! NAME
+!!  xmpi_sum_int2d
+!!
+!! FUNCTION
+!!  Combines values from all processes and distribute
+!!  the result back to all processes.
+!!  Target: two-dimensional integer arrays.
+!!
+!! INPUTS
+!!  comm= MPI communicator
+!!
+!! OUTPUT
+!!  ier= exit status, a non-zero value meaning there is an error
+!!
+!! SIDE EFFECTS
+!!  xval= buffer array
+!!
+!! SOURCE
+
+subroutine xmpi_sum_int2d(xval,comm,ier)
+
+!Arguments-------------------------
+ integer, DEV_CONTARRD intent(inout) :: xval(:,:)
+ integer,intent(in) :: comm
+ integer,intent(out) :: ier
+
+!Local variables-------------------
+#if defined HAVE_MPI
+ integer :: my_dt,my_op,n1,n2,nn,nproc_space_comm
+ integer(kind=int64) :: ntot
+ integer,allocatable :: xsum(:,:)
+#endif
+
+! *************************************************************************
+
+ ier=0
+#if defined HAVE_MPI
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
+   call MPI_COMM_SIZE(comm,nproc_space_comm,ier)
+   if (nproc_space_comm /= 1) then
+     n1 =size(xval,dim=1)
+     n2 =size(xval,dim=2)
+
+     !This product of dimensions can be greater than a 32bit integer
+     !We use a INT64 to store it. If it is too large, we switch to an
+     !alternate routine because MPI<4 doesnt handle 64 bit counts.
+     ntot=int(n1*n2,kind=int64)
+     if (ntot<=xmpi_maxint32_64) then
+       nn=n1*n2 ; my_dt=MPI_INTEGER ; my_op=MPI_SUM
+     else
+       nn=1 ; call xmpi_largetype_create(ntot,MPI_INTEGER,my_dt,my_op,MPI_SUM)
+     end if
+
+!    Accumulate xval on all proc. in comm
+#if defined HAVE_MPI2_INPLACE
+     if (xmpi_use_inplace_operations .and. my_op == MPI_SUM) then
+       if (my_op/=MPI_SUM) call xmpi_abort(msg="Too many data for in-place reductions!")
+       call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,my_dt,my_op,comm,ier)
+     else
+#endif
+       ABI_STAT_MALLOC(xsum,(n1,n2), ier)
+       if (ier/=0) call xmpi_abort(msg='error allocating xsum in xmpi_sum_int2d')
+       call MPI_ALLREDUCE(xval,xsum,nn,my_dt,my_op,comm,ier)
+       xval (:,:) = xsum(:,:)
+       ABI_FREE(xsum)
+#if defined HAVE_MPI2_INPLACE
+     end if
+#endif
+
+     if (ntot>xmpi_maxint32_64) call xmpi_largetype_free(my_dt,my_op)
+   end if
+ end if
+#endif
+
+end subroutine xmpi_sum_int2d
+!!***
+
+!> wrapper arround xmpi_sum_int2d than can be called in C/CUDA
+subroutine xmpi_sum_int2d_c(xval_ptr,xval_size,comm,ier) bind(c, name="xmpi_sum_int2d_c")
+
+  use, intrinsic :: iso_c_binding, only: c_associated,c_loc,c_ptr,c_f_pointer,c_int32_t
+  implicit none
+
+  ! dummy args
+  type(c_ptr),                    intent(inout) :: xval_ptr
+  integer(kind=c_int32_t),        intent(in)    :: xval_size(2)
+  integer(kind=c_int32_t),        intent(in)    :: comm
+  integer(kind=c_int32_t),        intent(out)   :: ier
+
+  ! local vars
+  integer, pointer :: xval(:,:) => null()
+
+  ! convert the c pointer into a fortran array
+  call c_f_pointer(xval_ptr, xval, xval_size)
+
+  call xmpi_sum_int2d(xval, comm, ier)
+
+end subroutine xmpi_sum_int2d_c
+
+!----------------------------------------------------------------------
+
+!!****f* ABINIT/xmpi_sum_int3d
+!! NAME
+!!  xmpi_sum_int3d
+!!
+!! FUNCTION
+!!  Combines values from all processes and distribute
+!!  the result back to all processes.
+!!  Target: three-dimensional integer arrays.
+!!
+!! INPUTS
+!!  comm= MPI communicator
+!!
+!! OUTPUT
+!!  ier= exit status, a non-zero value meaning there is an error
+!!
+!! SIDE EFFECTS
+!!  xval= buffer array
+!!
+!! SOURCE
+
+subroutine xmpi_sum_int3d(xval,comm,ier)
+
+!Arguments-------------------------
+ integer, DEV_CONTARRD intent(inout) :: xval(:,:,:)
+ integer,intent(in) :: comm
+ integer,intent(out) :: ier
+
+!Local variables-------------------
+#if defined HAVE_MPI
+ integer :: my_dt,my_op,n1,n2,n3,nn,nproc_space_comm
+ integer(kind=int64) :: ntot
+ integer,allocatable :: xsum(:,:,:)
+#endif
+
+! *************************************************************************
+
+ ier=0
+#if defined HAVE_MPI
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
+   call MPI_COMM_SIZE(comm,nproc_space_comm,ier)
+   if (nproc_space_comm /= 1) then
+     n1 =size(xval,dim=1)
+     n2 =size(xval,dim=2)
+     n3 =size(xval,dim=3)
+
+     !This product of dimensions can be greater than a 32bit integer
+     !We use a INT64 to store it. If it is too large, we switch to an
+     !alternate routine because MPI<4 doesnt handle 64 bit counts.
+     ntot=int(n1*n2*n3,kind=int64)
+     if (ntot<=xmpi_maxint32_64) then
+       nn=n1*n2*n3 ; my_dt=MPI_INTEGER ; my_op=MPI_SUM
+     else
+       nn=1 ; call xmpi_largetype_create(ntot,MPI_INTEGER,my_dt,my_op,MPI_SUM)
+     end if
+
+!    Accumulate xval on all proc. in comm
+#if defined HAVE_MPI2_INPLACE
+     if (xmpi_use_inplace_operations .and. my_op == MPI_SUM) then
+       if (my_op/=MPI_SUM) call xmpi_abort(msg="Too many data for in-place reductions!")
+       call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,my_dt,my_op,comm,ier)
+#endif
+     else
+       ABI_STAT_MALLOC(xsum,(n1,n2,n3), ier)
+       if (ier/= 0) call xmpi_abort(msg='error allocating xsum in xmpi_sum_int3d')
+       call MPI_ALLREDUCE(xval,xsum,nn,my_dt,my_op,comm,ier)
+       xval (:,:,:) = xsum(:,:,:)
+       ABI_FREE(xsum)
+#if defined HAVE_MPI2_INPLACE
+     end if
+#endif
+
+     if (ntot>xmpi_maxint32_64) call xmpi_largetype_free(my_dt,my_op)
+   end if
+ end if
+#endif
+
+end subroutine xmpi_sum_int3d
+!!***
+
+!> wrapper arround xmpi_sum_int3d than can be called in C/CUDA
+subroutine xmpi_sum_int3d_c(xval_ptr,xval_size,comm,ier) bind(c, name="xmpi_sum_int3d_c")
+
+  use, intrinsic :: iso_c_binding, only: c_associated,c_loc,c_ptr,c_f_pointer,c_int32_t
+  implicit none
+
+  ! dummy args
+  type(c_ptr),                    intent(inout) :: xval_ptr
+  integer(kind=c_int32_t),        intent(in)    :: xval_size(3)
+  integer(kind=c_int32_t),        intent(in)    :: comm
+  integer(kind=c_int32_t),        intent(out)   :: ier
+
+  ! local vars
+  integer, pointer :: xval(:,:,:) => null()
+
+  ! convert the c pointer into a fortran array
+  call c_f_pointer(xval_ptr, xval, xval_size)
+
+  call xmpi_sum_int3d(xval, comm, ier)
+
+end subroutine xmpi_sum_int3d_c
+
+!----------------------------------------------------------------------
+
+!!****f* ABINIT/xmpi_sum_int4d
+!! NAME
+!!  xmpi_sum_int4d
+!!
+!! FUNCTION
+!!  Combines values from all processes and distribute
+!!  the result back to all processes.
+!!  Target: four-dimensional integer arrays.
+!!
+!! INPUTS
+!!  comm= MPI communicator
+!!
+!! OUTPUT
+!!  ier= exit status, a non-zero value meaning there is an error
+!!
+!! SIDE EFFECTS
+!!  xval= buffer array
+!!
+!! SOURCE
+
+subroutine xmpi_sum_int4d(xval,comm,ier)
+
+!Arguments-------------------------
+ integer, DEV_CONTARRD intent(inout) :: xval(:,:,:,:)
+ integer,intent(in) :: comm
+ integer,intent(out) :: ier
+
+!Local variables-------------------
+#if defined HAVE_MPI
+ integer :: my_dt,my_op,n1,n2,n3,n4,nn,nproc_space_comm
+ integer(kind=int64) :: ntot
+ integer,allocatable :: xsum(:,:,:,:)
+#endif
+
+! *************************************************************************
+
+ ier=0
+#if defined HAVE_MPI
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
+   call MPI_COMM_SIZE(comm,nproc_space_comm,ier)
+   if (nproc_space_comm /= 1) then
+     n1 =size(xval,dim=1)
+     n2 =size(xval,dim=2)
+     n3 =size(xval,dim=3)
+     n4 =size(xval,dim=4)
+
+     !This product of dimensions can be greater than a 32bit integer
+     !We use a INT64 to store it. If it is too large, we switch to an
+     !alternate routine because MPI<4 doesnt handle 64 bit counts.
+     ntot=int(n1*n2*n3*n4,kind=int64)
+     if (ntot<=xmpi_maxint32_64) then
+       nn=n1*n2*n3*n4 ; my_dt=MPI_INTEGER ; my_op=MPI_SUM
+     else
+       nn=1 ; call xmpi_largetype_create(ntot,MPI_INTEGER,my_dt,my_op,MPI_SUM)
+     end if
+
+!    Accumulate xval on all proc. in comm
+#if defined HAVE_MPI2_INPLACE
+     if (xmpi_use_inplace_operations .and. my_op == MPI_SUM) then
+       if (my_op/=MPI_SUM) call xmpi_abort(msg="Too many data for in-place reductions!")
+       call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,my_dt,my_op,comm,ier)
+     else
+#endif
+       ABI_STAT_MALLOC(xsum,(n1,n2,n3,n4), ier)
+       if (ier/= 0) call xmpi_abort(msg='error allocating xsum in xmpi_sum_int4d')
+       call MPI_ALLREDUCE(xval,xsum,nn,my_dt,my_op,comm,ier)
+       xval (:,:,:,:) = xsum(:,:,:,:)
+       ABI_FREE(xsum)
+#if defined HAVE_MPI2_INPLACE
+     end if
+#endif
+
+     if (ntot>xmpi_maxint32_64) call xmpi_largetype_free(my_dt,my_op)
+   end if
+ end if
+#endif
+
+end subroutine xmpi_sum_int4d
+!!***
+
+!> wrapper arround xmpi_sum_int4d than can be called in C/CUDA
+subroutine xmpi_sum_int4d_c(xval_ptr,xval_size,comm,ier) bind(c, name="xmpi_sum_int4d_c")
+
+  use, intrinsic :: iso_c_binding, only: c_associated,c_loc,c_ptr,c_f_pointer,c_int32_t
+  implicit none
+
+  ! dummy args
+  type(c_ptr),                    intent(inout) :: xval_ptr
+  integer(kind=c_int32_t),        intent(in)    :: xval_size(4)
+  integer(kind=c_int32_t),        intent(in)    :: comm
+  integer(kind=c_int32_t),        intent(out)   :: ier
+
+  ! local vars
+  integer, pointer :: xval(:,:,:,:) => null()
+
+  ! convert the c pointer into a fortran array
+  call c_f_pointer(xval_ptr, xval, xval_size)
+
+  call xmpi_sum_int4d(xval, comm, ier)
+
+end subroutine xmpi_sum_int4d_c
+
+!----------------------------------------------------------------------
+
+!!****f* ABINIT/xmpi_sum_dp
+!! NAME
+!!  xmpi_sum_dp
+!!
+!! FUNCTION
+!!  Combines values from all processes and distribute
+!!  the result back to all processes.
+!!  Target: one-dimensional double precision arrays.
+!!
+!! INPUTS
+!!  comm= MPI communicator
+!!
+!! OUTPUT
+!!  ier= exit status, a non-zero value meaning there is an error
+!!
+!! SIDE EFFECTS
+!!  xval= buffer array
+!!
+!! SOURCE
+
+subroutine xmpi_sum_dp(xval,comm,ier)
+
+!Arguments-------------------------
+ real(dp), DEV_CONTARRD intent(inout) :: xval(:)
+ integer,intent(in) :: comm
+ integer,intent(out) :: ier
+
+!Local variables-------------------
+#if defined HAVE_MPI
+ integer :: n1,nproc_space_comm
+ real(dp),allocatable :: xsum(:)
+#endif
+
+! *************************************************************************
+
+ ier=0
+#if defined HAVE_MPI
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
+   call MPI_COMM_SIZE(comm,nproc_space_comm,ier)
+   if (nproc_space_comm /= 1) then
+     n1 = size(xval)
+
+!    Accumulate xval on all proc. in comm
+#if defined HAVE_MPI2_INPLACE
+     if (xmpi_use_inplace_operations) then
+       call MPI_ALLREDUCE(MPI_IN_PLACE,xval,n1,MPI_DOUBLE_PRECISION,MPI_SUM,comm,ier)
+     else
+#endif
+       ABI_STAT_MALLOC(xsum,(n1), ier)
+       if (ier/= 0) call xmpi_abort(msg='error allocating xsum in xmpi_sum_dp')
+       call MPI_ALLREDUCE(xval,xsum,n1,MPI_DOUBLE_PRECISION,MPI_SUM,comm,ier)
+       xval (:) = xsum(:)
+       ABI_FREE(xsum)
+#if defined HAVE_MPI2_INPLACE
+     end if
+#endif
+
+   end if
+ end if
+#endif
+
+end subroutine xmpi_sum_dp
+!!***
+
+!> wrapper arround xmpi_sum_dp than can be called in C/CUDA
+subroutine xmpi_sum_dp_c(xval_ptr,xval_size,comm,ier) bind(c, name="xmpi_sum_dp_c")
+
+  use, intrinsic :: iso_c_binding, only: c_associated,c_loc,c_ptr,c_f_pointer,c_int32_t
+  implicit none
+
+  ! dummy args
+  type(c_ptr),                    intent(inout) :: xval_ptr
+  integer(kind=c_int32_t), value, intent(in)    :: xval_size
+  integer(kind=c_int32_t),        intent(in)    :: comm
+  integer(kind=c_int32_t),        intent(out)   :: ier
+
+  ! local vars
+  real(dp), pointer :: xval(:) => null()
+
+  ! convert the c pointer into a fortran array
+  call c_f_pointer(xval_ptr, xval, [xval_size])
+
+  call xmpi_sum_dp(xval, comm, ier)
+
+end subroutine xmpi_sum_dp_c
+
+!----------------------------------------------------------------------
+
+!!****f* ABINIT/xmpi_sum_dpvt
+!! NAME
+!!  xmpi_sum_dpvt
+!!
+!! FUNCTION
+!!  Combines values from all processes and distribute
+!!  the result back to all processes.
+!!  Target: scalar double precisions.
+!!
+!! INPUTS
+!!  xval= buffer array
+!!  comm= MPI communicator
+!!
+!! OUTPUT
+!!  xsum= receive buffer
+!!  ier= exit status, a non-zero value meaning there is an error
+!!
+!! SIDE EFFECTS
+!!  None
+!!
+!! SOURCE
+
+subroutine xmpi_sum_dpvt(xval,xsum,comm,ier)
+
+!Arguments-------------------------
+ real(dp),intent(in) :: xval
+ real(dp),intent(out) :: xsum
+ integer ,intent(in) :: comm
+ integer ,intent(out)   :: ier
+
+!Local variables-------------------
+#if defined HAVE_MPI
+ integer :: nproc_space_comm
+ real(dp) :: arr_xsum(1)
+#endif
+
+! *************************************************************************
+
+ ier=0
+#if defined HAVE_MPI
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
+   call MPI_COMM_SIZE(comm,nproc_space_comm,ier)
+   if (nproc_space_comm /= 1) then
+!    Accumulate xval on all proc. in comm
+     call MPI_ALLREDUCE([xval],arr_xsum,1,MPI_DOUBLE_PRECISION,MPI_SUM,comm,ier)
+     xsum=arr_xsum(1)
+   else
+     xsum=xval
+   end if
+ else
+#endif
+   xsum=xval
+#if defined HAVE_MPI
+ end if
+#endif
+
+end subroutine xmpi_sum_dpvt
+!!***
+
+!> wrapper arround xmpi_sum_dpvt than can be called in C/CUDA
+subroutine xmpi_sum_dpvt_c(xval_ptr,xsum_ptr,comm,ier) bind(c, name="xmpi_sum_dpvt_c")
+
+  use, intrinsic :: iso_c_binding, only: c_associated,c_loc,c_ptr,c_f_pointer,c_int32_t
+  implicit none
+
+  ! dummy args
+  type(c_ptr),                    intent(inout) :: xval_ptr
+  type(c_ptr),                    intent(inout) :: xsum_ptr
+  integer(kind=c_int32_t),        intent(in)    :: comm
+  integer(kind=c_int32_t),        intent(out)   :: ier
+
+  ! local vars
+  real(dp), pointer :: xval => null()
+  real(dp), pointer :: xsum => null()
+
+  ! convert the c pointer into a fortran array
+  call c_f_pointer(xval_ptr, xval)
+  call c_f_pointer(xsum_ptr, xsum)
+
+  call xmpi_sum_dpvt(xval, xsum, comm, ier)
+
+end subroutine xmpi_sum_dpvt_c
+
+!----------------------------------------------------------------------
+
+!!****f* ABINIT/xmpi_sum_dpv
+!! NAME
+!!  xmpi_sum_dpv
+!!
+!! FUNCTION
+!!  Combines values from all processes and distribute
+!!  the result back to all processes.
+!!  Target: scalar double precisions.
+!!
+!! INPUTS
+!!  comm= MPI communicator
+!!
+!! OUTPUT
+!!  ier= exit status, a non-zero value meaning there is an error
+!!
+!! SIDE EFFECTS
+!!  xval= buffer array
+!!
+!! SOURCE
+subroutine xmpi_sum_dpv(xval,comm,ier)
+
+!Arguments-------------------------
+ real(dp),intent(inout) :: xval
+ integer ,intent(in) :: comm
+ integer ,intent(out) :: ier
+
+!Local variables-------------------
+#if defined HAVE_MPI
+ integer :: nproc_space_comm
+ real(dp) :: arr_xsum(1)
+#endif
+
+! *************************************************************************
+
+ ier=0
+#if defined HAVE_MPI
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
+!  Accumulate xval on all proc. in comm
+   call MPI_COMM_SIZE(comm,nproc_space_comm,ier)
+   if (nproc_space_comm /= 1) then
+     call MPI_ALLREDUCE([xval],arr_xsum,1,MPI_DOUBLE_PRECISION,MPI_SUM,comm,ier)
+     xval  = arr_xsum(1)
+   end if
+ end if
+#endif
+
+end subroutine xmpi_sum_dpv
+!!***
+
+!> wrapper arround xmpi_sum_dpv than can be called in C/CUDA
+subroutine xmpi_sum_dpv_c(xval_ptr,comm,ier) bind(c, name="xmpi_sum_dpv_c")
+
+  use, intrinsic :: iso_c_binding, only: c_associated,c_loc,c_ptr,c_f_pointer,c_int32_t
+  implicit none
+
+  ! dummy args
+  type(c_ptr),                    intent(inout) :: xval_ptr
+  integer(kind=c_int32_t),        intent(in)    :: comm
+  integer(kind=c_int32_t),        intent(out)   :: ier
+
+  ! local vars
+  real(dp), pointer :: xval => null()
+
+  ! convert the c pointer into a fortran array
+  call c_f_pointer(xval_ptr, xval)
+
+  call xmpi_sum_dpv(xval, comm, ier)
+
+end subroutine xmpi_sum_dpv_c
+
+!----------------------------------------------------------------------
+
+!!****f* ABINIT/xmpi_sum_dpn
+!! NAME
+!!  xmpi_sum_dpn
+!!
+!! FUNCTION
+!!  Combines values from all processes and distribute
+!!  the result back to all processes.
+!!  Target: one-dimensional double precision arrays.
+!!
+!! INPUTS
+!!  n1= first dimension of the array
+!!  comm= MPI communicator
+!!
+!! OUTPUT
+!!  ier= exit status, a non-zero value meaning there is an error
+!!
+!! SIDE EFFECTS
+!!  xval= buffer array
+!!
+!! SOURCE
+
+subroutine xmpi_sum_dpn(xval,n1,comm,ier)
+
+!Arguments-------------------------
+ real(dp), DEV_CONTARRD intent(inout) :: xval(:)
+ integer ,intent(in) :: n1
+ integer ,intent(in) :: comm
+ integer ,intent(out) :: ier
+
+!Local variables-------------------
+#if defined HAVE_MPI
+ integer :: nproc_space_comm
+ real(dp) , allocatable :: xsum(:)
+#endif
+
+! *************************************************************************
+
+ ier=0
+#if defined HAVE_MPI
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
+   call MPI_COMM_SIZE(comm,nproc_space_comm,ier)
+   if (nproc_space_comm /= 1) then
+
+!    Accumulate xval on all proc. in comm
+#if defined HAVE_MPI2_INPLACE
+     if (xmpi_use_inplace_operations) then
+       call MPI_ALLREDUCE(MPI_IN_PLACE,xval,n1,MPI_DOUBLE_PRECISION,MPI_SUM,comm,ier)
+     else
+#endif
+       ABI_STAT_MALLOC(xsum,(n1), ier)
+       if (ier/= 0) call xmpi_abort(msg='error allocating xsum in xmpi_sum_dpn')
+       call MPI_ALLREDUCE(xval,xsum,n1,MPI_DOUBLE_PRECISION,MPI_SUM,comm,ier)
+       xval (:) = xsum(:)
+       ABI_FREE(xsum)
+#if defined HAVE_MPI2_INPLACE
+     end if
+#endif
+
+   end if
+ end if
+#endif
+
+end subroutine xmpi_sum_dpn
+!!***
+
+!> wrapper arround xmpi_sum_dpn than can be called in C/CUDA
+subroutine xmpi_sum_dpn_c(xval_ptr,xval_size,n1,comm,ier) bind(c, name="xmpi_sum_dpn_c")
+
+  use, intrinsic :: iso_c_binding, only: c_associated,c_loc,c_ptr,c_f_pointer,c_int32_t
+  implicit none
+
+  ! dummy args
+  type(c_ptr),                    intent(inout) :: xval_ptr
+  integer(kind=c_int32_t), value, intent(in)    :: xval_size
+  integer(kind=c_int32_t),        intent(in)    :: n1
+  integer(kind=c_int32_t),        intent(in)    :: comm
+  integer(kind=c_int32_t),        intent(out)   :: ier
+
+  ! local vars
+  real(dp), pointer :: xval(:) => null()
+
+  ! convert the c pointer into a fortran array
+  call c_f_pointer(xval_ptr, xval, [xval_size])
+
+  call xmpi_sum_dpn(xval, n1, comm, ier)
+
+end subroutine xmpi_sum_dpn_c
+
+!----------------------------------------------------------------------
+
+!!****f* ABINIT/xmpi_sum_sp2d
+!! NAME
+!!  xmpi_sum_sp2d
+!!
+!! FUNCTION
+!!  Combines values from all processes and distribute
+!!  the result back to all processes.
+!!  Target: double precision two-dimensional arrays.
+!!
+!! INPUTS
+!!  comm= MPI communicator
+!!
+!! OUTPUT
+!!  ier= exit status, a non-zero value meaning there is an error
+!!
+!! SIDE EFFECTS
+!!  xval= buffer array
+!!
+!! SOURCE
+
+subroutine xmpi_sum_sp2d(xval,comm,ier)
+
+!Arguments-------------------------
+ real(sp), DEV_CONTARRD intent(inout) :: xval(:,:)
+ integer ,intent(in) :: comm
+ integer ,intent(out) :: ier
+
+!Local variables-------------------
+#if defined HAVE_MPI
+ integer :: my_dt,my_op,n1,n2,nn,nproc_space_comm
+ integer(kind=int64) :: ntot
+ real(sp),allocatable :: xsum(:,:)
+#endif
+
+! *************************************************************************
+
+ ier=0
+#if defined HAVE_MPI
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
+   call MPI_COMM_SIZE(comm,nproc_space_comm,ier)
+   if (nproc_space_comm /= 1) then
+     n1 = size(xval,dim=1)
+     n2 = size(xval,dim=2)
+
+     !This product of dimensions can be greater than a 32bit integer
+     !We use a INT64 to store it. If it is too large, we switch to an
+     !alternate routine because MPI<4 doesnt handle 64 bit counts.
+     ntot=int(n1*n2,kind=int64)
+     if (ntot<=xmpi_maxint32_64) then
+       nn=n1*n2 ; my_dt=MPI_REAL ; my_op=MPI_SUM
+     else
+       nn=1 ; call xmpi_largetype_create(ntot,MPI_REAL,my_dt,my_op,MPI_SUM)
+     end if
+
+!    Accumulate xval on all proc. in comm
+#if defined HAVE_MPI2_INPLACE
+     if (xmpi_use_inplace_operations .and. my_op == MPI_SUM) then
+       if (my_op/=MPI_SUM) call xmpi_abort(msg="Too many data for in-place reductions!")
+       call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,my_dt,my_op,comm,ier)
+     else
+#endif
+       ABI_STAT_MALLOC(xsum,(n1,n2), ier)
+       if (ier/= 0) call xmpi_abort(msg='error allocating xsum in xmpi_sum_sp2d')
+       call MPI_ALLREDUCE(xval,xsum,nn,my_dt,my_op,comm,ier)
+       xval (:,:) = xsum(:,:)
+       ABI_FREE(xsum)
+#if defined HAVE_MPI2_INPLACE
+    end if
+#endif
+
+     if (ntot>xmpi_maxint32_64) call xmpi_largetype_free(my_dt,my_op)
+   end if
+ end if
+#endif
+
+end subroutine xmpi_sum_sp2d
+!!***
+
+!> wrapper arround xmpi_sum_sp2d than can be called in C/CUDA
+subroutine xmpi_sum_sp2d_c(xval_ptr,xval_size,comm,ier) bind(c, name="xmpi_sum_sp2d_c")
+
+  use, intrinsic :: iso_c_binding, only: c_associated,c_loc,c_ptr,c_f_pointer,c_int32_t
+  implicit none
+
+  ! dummy args
+  type(c_ptr),                    intent(inout) :: xval_ptr
+  integer(kind=c_int32_t),        intent(in)    :: xval_size(2)
+  integer(kind=c_int32_t),        intent(in)    :: comm
+  integer(kind=c_int32_t),        intent(out)   :: ier
+
+  ! local vars
+  real(sp), pointer :: xval(:,:) => null()
+
+  ! convert the c pointer into a fortran array
+  call c_f_pointer(xval_ptr, xval, xval_size)
+
+  call xmpi_sum_sp2d(xval, comm, ier)
+
+end subroutine xmpi_sum_sp2d_c
+
+!----------------------------------------------------------------------
+
+!!****f* ABINIT/xmpi_sum_sp3d
+!! NAME
+!!  xmpi_sum_sp3d
+!!
+!! FUNCTION
+!!  Combines values from all processes and distribute
+!!  the result back to all processes.
+!!  Target: double precision three-dimensional arrays.
+!!
+!! INPUTS
+!!  comm= MPI communicator
+!!
+!! OUTPUT
+!!  ier= exit status, a non-zero value meaning there is an error
+!!
+!! SIDE EFFECTS
+!!  xval= buffer array
+!!
+!! SOURCE
+
+subroutine xmpi_sum_sp3d(xval,comm,ier)
+
+!Arguments-------------------------
+ real(sp), DEV_CONTARRD intent(inout) :: xval(:,:,:)
+ integer ,intent(in) :: comm
+ integer ,intent(out)   :: ier
+
+!Local variables-------------------
+#if defined HAVE_MPI
+ integer :: my_dt,my_op,n1,n2,n3,nn,nproc_space_comm
+ integer(kind=int64) :: ntot
+ real(sp),allocatable :: xsum(:,:,:)
+#endif
+
+! *************************************************************************
+
+ ier=0
+#if defined HAVE_MPI
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
+   call MPI_COMM_SIZE(comm,nproc_space_comm,ier)
+   if (nproc_space_comm /= 1) then
+     n1 = size(xval,dim=1)
+     n2 = size(xval,dim=2)
+     n3 = size(xval,dim=3)
+
+     !This product of dimensions can be greater than a 32bit integer
+     !We use a INT64 to store it. If it is too large, we switch to an
+     !alternate routine because MPI<4 doesnt handle 64 bit counts.
+     ntot=int(n1*n2*n3,kind=int64)
+     if (ntot<=xmpi_maxint32_64) then
+       nn=n1*n2*n3 ; my_dt=MPI_REAL ; my_op=MPI_SUM
+     else
+       nn=1 ; call xmpi_largetype_create(ntot,MPI_REAL,my_dt,my_op,MPI_SUM)
+     end if
+
+!    Accumulate xval on all proc. in comm
+#if defined HAVE_MPI2_INPLACE
+     if (xmpi_use_inplace_operations .and. my_op == MPI_SUM) then
+       if (my_op/=MPI_SUM) call xmpi_abort(msg="Too many data for in-place reductions!")
+       call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,my_dt,my_op,comm,ier)
+     else
+#endif
+       ABI_STAT_MALLOC(xsum,(n1,n2,n3), ier)
+       if (ier/= 0) call xmpi_abort(msg='error allocating xsum in xmpi_sum_sp3d')
+       call MPI_ALLREDUCE(xval,xsum,nn,my_dt,my_op,comm,ier)
+       xval (:,:,:) = xsum(:,:,:)
+       ABI_FREE(xsum)
+#if defined HAVE_MPI2_INPLACE
+     end if
+#endif
+
+     if (ntot>xmpi_maxint32_64) call xmpi_largetype_free(my_dt,my_op)
+   end if
+ end if
+#endif
+
+end subroutine xmpi_sum_sp3d
+!!***
+
+!> wrapper arround xmpi_sum_sp3d than can be called in C/CUDA
+subroutine xmpi_sum_sp3d_c(xval_ptr,xval_size,comm,ier) bind(c, name="xmpi_sum_sp3d_c")
+
+  use, intrinsic :: iso_c_binding, only: c_associated,c_loc,c_ptr,c_f_pointer,c_int32_t
+  implicit none
+
+  ! dummy args
+  type(c_ptr),                    intent(inout) :: xval_ptr
+  integer(kind=c_int32_t),        intent(in)    :: xval_size(3)
+  integer(kind=c_int32_t),        intent(in)    :: comm
+  integer(kind=c_int32_t),        intent(out)   :: ier
+
+  ! local vars
+  real(sp), pointer :: xval(:,:,:) => null()
+
+  ! convert the c pointer into a fortran array
+  call c_f_pointer(xval_ptr, xval, xval_size)
+
+  call xmpi_sum_sp3d(xval, comm, ier)
+
+end subroutine xmpi_sum_sp3d_c
+
+!----------------------------------------------------------------------
+
+!!****f* ABINIT/xmpi_sum_sp4d
+!! NAME
+!!  xmpi_sum_sp4d
+!!
+!! FUNCTION
+!!  Combines values from all processes and distribute
+!!  the result back to all processes.
+!!  Target: double precision four-dimensional arrays.
+!!
+!! INPUTS
+!!  comm= MPI communicator
+!!
+!! OUTPUT
+!!  ier= exit status, a non-zero value meaning there is an error
+!!
+!! SIDE EFFECTS
+!!  xval= buffer array
+!!
+!! SOURCE
+subroutine xmpi_sum_sp4d(xval,comm,ier)
+
+!Arguments-------------------------
+ real(sp),DEV_CONTARRD intent(inout) :: xval(:,:,:,:)
+ integer ,intent(in) :: comm
+ integer ,intent(out) :: ier
+
+!Local variables-------------------
+#if defined HAVE_MPI
+ integer :: my_dt,my_op,n1,n2,n3,n4,nn,nproc_space_comm
+ integer(kind=int64) :: ntot
+ real(sp),allocatable :: xsum(:,:,:,:)
+#endif
+
+! *************************************************************************
+
+ ier=0
+#if defined HAVE_MPI
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
+   call MPI_COMM_SIZE(comm,nproc_space_comm,ier)
+   if (nproc_space_comm /= 1) then
+     n1 = size(xval,dim=1)
+     n2 = size(xval,dim=2)
+     n3 = size(xval,dim=3)
+     n4 = size(xval,dim=4)
+
+     !This product of dimensions can be greater than a 32bit integer
+     !We use a INT64 to store it. If it is too large, we switch to an
+     !alternate routine because MPI<4 doesnt handle 64 bit counts.
+     ntot=int(n1*n2*n3*n4,kind=int64)
+     if (ntot<=xmpi_maxint32_64) then
+       nn=n1*n2*n3*n4 ; my_dt=MPI_REAL ; my_op=MPI_SUM
+     else
+       nn=1 ; call xmpi_largetype_create(ntot,MPI_REAL,my_dt,my_op,MPI_SUM)
+     end if
+
+!    Accumulate xval on all proc. in comm
+#if defined HAVE_MPI2_INPLACE
+     if (xmpi_use_inplace_operations .and. my_op == MPI_SUM) then
+       if (my_op/=MPI_SUM) call xmpi_abort(msg="Too many data for in-place reductions!")
+       call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,my_dt,my_op,comm,ier)
+     else
+#endif
+       ABI_STAT_MALLOC(xsum,(n1,n2,n3,n4), ier)
+       if (ier/= 0) call xmpi_abort(msg='error allocating xsum in xmpi_sum_sp4d')
+       call MPI_ALLREDUCE(xval,xsum,nn,my_dt,my_op,comm,ier)
+       xval (:,:,:,:) = xsum(:,:,:,:)
+       ABI_FREE(xsum)
+#if defined HAVE_MPI2_INPLACE
+     endif
+#endif
+
+     if (ntot>xmpi_maxint32_64) call xmpi_largetype_free(my_dt,my_op)
+   end if
+ end if
+#endif
+
+end subroutine xmpi_sum_sp4d
+!!***
+
+!> wrapper arround xmpi_sum_sp4d than can be called in C/CUDA
+subroutine xmpi_sum_sp4d_c(xval_ptr,xval_size,comm,ier) bind(c, name="xmpi_sum_sp4d_c")
+
+  use, intrinsic :: iso_c_binding, only: c_associated,c_loc,c_ptr,c_f_pointer,c_int32_t
+  implicit none
+
+  ! dummy args
+  type(c_ptr),                    intent(inout) :: xval_ptr
+  integer(kind=c_int32_t),        intent(in)    :: xval_size(4)
+  integer(kind=c_int32_t),        intent(in)    :: comm
+  integer(kind=c_int32_t),        intent(out)   :: ier
+
+  ! local vars
+  real(sp), pointer :: xval(:,:,:,:) => null()
+
+  ! convert the c pointer into a fortran array
+  call c_f_pointer(xval_ptr, xval, xval_size)
+
+  call xmpi_sum_sp4d(xval, comm, ier)
+
+end subroutine xmpi_sum_sp4d_c
+
+!----------------------------------------------------------------------
+
+!!****f* ABINIT/xmpi_sum_sp5d
+!! NAME
+!!  xmpi_sum_sp5d
+!!
+!! FUNCTION
+!!  Combines values from all processes and distribute
+!!  the result back to all processes.
+!!  Target: double precision five-dimensional arrays.
+!!
+!! INPUTS
+!!  comm= MPI communicator
+!!
+!! OUTPUT
+!!  ier= exit status, a non-zero value meaning there is an error
+!!
+!! SIDE EFFECTS
+!!  xval= buffer array
+!!
+!! SOURCE
+subroutine xmpi_sum_sp5d(xval,comm,ier)
+
+!Arguments-------------------------
+ real(sp), DEV_CONTARRD intent(inout) :: xval(:,:,:,:,:)
+ integer ,intent(in) :: comm
+ integer ,intent(out) :: ier
+
+!Local variables-------------------
+#if defined HAVE_MPI
+ integer :: my_dt,my_op,n1,n2,n3,n4,n5,nn,nproc_space_comm
+ integer(kind=int64) :: ntot
+ real(sp),allocatable :: xsum(:,:,:,:,:)
+#endif
+
+! *************************************************************************
+
+ ier=0
+#if defined HAVE_MPI
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
+   call MPI_COMM_SIZE(comm,nproc_space_comm,ier)
+   if (nproc_space_comm /= 1) then
+     n1 = size(xval,dim=1)
+     n2 = size(xval,dim=2)
+     n3 = size(xval,dim=3)
+     n4 = size(xval,dim=4)
+     n5 = size(xval,dim=5)
+
+     !This product of dimensions can be greater than a 32bit integer
+     !We use a INT64 to store it. If it is too large, we switch to an
+     !alternate routine because MPI<4 doesnt handle 64 bit counts.
+     ntot=int(n1*n2*n3*n4*n5,kind=int64)
+     if (ntot<=xmpi_maxint32_64) then
+       nn=n1*n2*n3*n4*n5 ; my_dt=MPI_REAL ; my_op=MPI_SUM
+     else
+       nn=1 ; call xmpi_largetype_create(ntot,MPI_REAL,my_dt,my_op,MPI_SUM)
+     end if
+
+!    Accumulate xval on all proc. in comm
+#if defined HAVE_MPI2_INPLACE
+     if (xmpi_use_inplace_operations .and. my_op == MPI_SUM) then
+       if (my_op/=MPI_SUM) call xmpi_abort(msg="Too many data for in-place reductions!")
+       call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,my_dt,my_op,comm,ier)
+     else
+#endif
+       ABI_STAT_MALLOC(xsum,(n1,n2,n3,n4,n5), ier)
+       if (ier/= 0) call xmpi_abort(msg='error allocating xsum in xmpi_sum_sp5d')
+       call MPI_ALLREDUCE(xval,xsum,nn,my_dt,my_op,comm,ier)
+       xval (:,:,:,:,:) = xsum(:,:,:,:,:)
+       ABI_FREE(xsum)
+#if defined HAVE_MPI2_INPLACE
+     endif
+#endif
+
+     if (ntot>xmpi_maxint32_64) call xmpi_largetype_free(my_dt,my_op)
+   end if
+ end if
+#endif
+
+end subroutine xmpi_sum_sp5d
+!!***
+
+!> wrapper arround xmpi_sum_sp5d than can be called in C/CUDA
+subroutine xmpi_sum_sp5d_c(xval_ptr,xval_size,comm,ier) bind(c, name="xmpi_sum_sp5d_c")
+
+  use, intrinsic :: iso_c_binding, only: c_associated,c_loc,c_ptr,c_f_pointer,c_int32_t
+  implicit none
+
+  ! dummy args
+  type(c_ptr),                    intent(inout) :: xval_ptr
+  integer(kind=c_int32_t),        intent(in)    :: xval_size(5)
+  integer(kind=c_int32_t),        intent(in)    :: comm
+  integer(kind=c_int32_t),        intent(out)   :: ier
+
+  ! local vars
+  real(sp), pointer :: xval(:,:,:,:,:) => null()
+
+  ! convert the c pointer into a fortran array
+  call c_f_pointer(xval_ptr, xval, xval_size)
+
+  call xmpi_sum_sp5d(xval, comm, ier)
+
+end subroutine xmpi_sum_sp5d_c
+
+!----------------------------------------------------------------------
+
+!!****f* ABINIT/xmpi_sum_sp6d
+!! NAME
+!!  xmpi_sum_sp6d
+!!
+!! FUNCTION
+!!  Combines values from all processes and distribute
+!!  the result back to all processes.
+!!  Target: double precision six-dimensional arrays.
+!!
+!! INPUTS
+!!  comm= MPI communicator
+!!
+!! OUTPUT
+!!  ier= exit status, a non-zero value meaning there is an error
+!!
+!! SIDE EFFECTS
+!!  xval= buffer array
+!!
+!! SOURCE
+subroutine xmpi_sum_sp6d(xval,comm,ier)
+
+!Arguments-------------------------
+ real(sp), DEV_CONTARRD intent(inout) :: xval(:,:,:,:,:,:)
+ integer ,intent(in) :: comm
+ integer ,intent(out) :: ier
+
+!Local variables-------------------
+#if defined HAVE_MPI
+ integer :: my_dt,my_op,n1,n2,n3,n4,n5,n6,nn,nproc_space_comm
+ integer(kind=int64) :: ntot
+ real(sp), allocatable :: xsum(:,:,:,:,:,:)
+#endif
+
+! *************************************************************************
+
+ ier=0
+#if defined HAVE_MPI
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
+   call MPI_COMM_SIZE(comm,nproc_space_comm,ier)
+   if (nproc_space_comm /= 1) then
+     n1 = size(xval,dim=1)
+     n2 = size(xval,dim=2)
+     n3 = size(xval,dim=3)
+     n4 = size(xval,dim=4)
+     n5 = size(xval,dim=5)
+     n6 = size(xval,dim=6)
+
+     !This product of dimensions can be greater than a 32bit integer
+     !We use a INT64 to store it. If it is too large, we switch to an
+     !alternate routine because MPI<4 doesnt handle 64 bit counts.
+     ntot=int(n1*n2*n3*n4*n5*n6,kind=int64)
+     if (ntot<=xmpi_maxint32_64) then
+       nn=n1*n2*n3*n4*n5*n6 ; my_dt=MPI_REAL ; my_op=MPI_SUM
+     else
+       nn=1 ; call xmpi_largetype_create(ntot,MPI_REAL,my_dt,my_op,MPI_SUM)
+     end if
+
+!    Accumulate xval on all proc. in comm
+#if defined HAVE_MPI2_INPLACE
+     if (xmpi_use_inplace_operations .and. my_op == MPI_SUM) then
+       if (my_op/=MPI_SUM) call xmpi_abort(msg="Too many data for in-place reductions!")
+       call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,my_dt,my_op,comm,ier)
+     else
+#endif
+       ABI_STAT_MALLOC(xsum,(n1,n2,n3,n4,n5,n6), ier)
+       if (ier/=0) call xmpi_abort(msg='error allocating xsum in xmpi_sum_sp6d')
+       call MPI_ALLREDUCE(xval,xsum,nn,my_dt,my_op,comm,ier)
+       xval (:,:,:,:,:,:) = xsum(:,:,:,:,:,:)
+       ABI_FREE(xsum)
+#if defined HAVE_MPI2_INPLACE
+     end if
+#endif
+
+     if (ntot>xmpi_maxint32_64) call xmpi_largetype_free(my_dt,my_op)
+   end if
+ end if
+#endif
+
+end subroutine xmpi_sum_sp6d
+!!***
+
+!> wrapper arround xmpi_sum_sp6d than can be called in C/CUDA
+subroutine xmpi_sum_sp6d_c(xval_ptr,xval_size,comm,ier) bind(c, name="xmpi_sum_sp6d_c")
+
+  use, intrinsic :: iso_c_binding, only: c_associated,c_loc,c_ptr,c_f_pointer,c_int32_t
+  implicit none
+
+  ! dummy args
+  type(c_ptr),                    intent(inout) :: xval_ptr
+  integer(kind=c_int32_t),        intent(in)    :: xval_size(6)
+  integer(kind=c_int32_t),        intent(in)    :: comm
+  integer(kind=c_int32_t),        intent(out)   :: ier
+
+  ! local vars
+  real(sp), pointer :: xval(:,:,:,:,:,:) => null()
+
+  ! convert the c pointer into a fortran array
+  call c_f_pointer(xval_ptr, xval, xval_size)
+
+  call xmpi_sum_sp6d(xval, comm, ier)
+
+end subroutine xmpi_sum_sp6d_c
+
+!----------------------------------------------------------------------
+
+!!****f* ABINIT/xmpi_sum_sp7d
+!! NAME
+!!  xmpi_sum_sp7d
+!!
+!! FUNCTION
+!!  Combines values from all processes and distribute
+!!  the result back to all processes.
+!!  Target: double precision six-dimensional arrays.
+!!
+!! INPUTS
+!!  comm= MPI communicator
+!!
+!! OUTPUT
+!!  ier= exit status, a non-zero value meaning there is an error
+!!
+!! SIDE EFFECTS
+!!  xval= buffer array
+!!
+!! SOURCE
+subroutine xmpi_sum_sp7d(xval,comm,ier)
+
+!Arguments-------------------------
+ real(sp), DEV_CONTARRD intent(inout) :: xval(:,:,:,:,:,:,:)
+ integer ,intent(in) :: comm
+ integer ,intent(out) :: ier
+
+!Local variables-------------------
+#if defined HAVE_MPI
+ integer :: my_dt,my_op,n1,n2,n3,n4,n5,n6,n7,nn,nproc_space_comm
+ integer(kind=int64) :: ntot
+ real(sp),allocatable :: xsum(:,:,:,:,:,:,:)
+#endif
+
+! *************************************************************************
+ ier=0
+#if defined HAVE_MPI
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
+   call MPI_COMM_SIZE(comm,nproc_space_comm,ier)
+   if (nproc_space_comm /= 1) then
+     n1 = size(xval,dim=1)
+     n2 = size(xval,dim=2)
+     n3 = size(xval,dim=3)
+     n4 = size(xval,dim=4)
+     n5 = size(xval,dim=5)
+     n6 = size(xval,dim=6)
+     n7 = size(xval,dim=7)
+
+     !This product of dimensions can be greater than a 32bit integer
+     !We use a INT64 to store it. If it is too large, we switch to an
+     !alternate routine because MPI<4 doesnt handle 64 bit counts.
+     ntot=int(n1*n2*n3*n4*n5*n6*n7,kind=int64)
+     if (ntot<=xmpi_maxint32_64) then
+       nn=n1*n2*n3*n4*n5*n6*n7 ; my_dt=MPI_REAL ; my_op=MPI_SUM
+     else
+       nn=1 ; call xmpi_largetype_create(ntot,MPI_REAL,my_dt,my_op,MPI_SUM)
+     end if
+
+!    Accumulate xval on all proc. in comm
+#if defined HAVE_MPI2_INPLACE
+     if (xmpi_use_inplace_operations .and. my_op == MPI_SUM) then
+       if (my_op/=MPI_SUM) call xmpi_abort(msg="Too many data for in-place reductions!")
+       call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,my_dt,my_op,comm,ier)
+     else
+#endif
+       ABI_STAT_MALLOC(xsum,(n1,n2,n3,n4,n5,n6,n7), ier)
+       if (ier/= 0) call xmpi_abort(msg='error allocating xsum in xmpi_sum_sp7d')
+       call MPI_ALLREDUCE(xval,xsum,nn,my_dt,my_op,comm,ier)
+       xval (:,:,:,:,:,:,:) = xsum(:,:,:,:,:,:,:)
+       ABI_FREE(xsum)
+#if defined HAVE_MPI2_INPLACE
+     endif
+#endif
+
+     if (ntot>xmpi_maxint32_64) call xmpi_largetype_free(my_dt,my_op)
+   end if
+ end if
+#endif
+
+end subroutine xmpi_sum_sp7d
+!!***
+
+!> wrapper arround xmpi_sum_sp7d than can be called in C/CUDA
+subroutine xmpi_sum_sp7d_c(xval_ptr,xval_size,comm,ier) bind(c, name="xmpi_sum_sp7d_c")
+
+  use, intrinsic :: iso_c_binding, only: c_associated,c_loc,c_ptr,c_f_pointer,c_int32_t
+  implicit none
+
+  ! dummy args
+  type(c_ptr),                    intent(inout) :: xval_ptr
+  integer(kind=c_int32_t),        intent(in)    :: xval_size(7)
+  integer(kind=c_int32_t),        intent(in)    :: comm
+  integer(kind=c_int32_t),        intent(out)   :: ier
+
+  ! local vars
+  real(sp), pointer :: xval(:,:,:,:,:,:,:) => null()
+
+  ! convert the c pointer into a fortran array
+  call c_f_pointer(xval_ptr, xval, xval_size)
+
+  call xmpi_sum_sp7d(xval, comm, ier)
+
+end subroutine xmpi_sum_sp7d_c
+
+
+!----------------------------------------------------------------------
+
+!!****f* ABINIT/xmpi_sum_dp2d
+!! NAME
+!!  xmpi_sum_dp2d
+!!
+!! FUNCTION
+!!  Combines values from all processes and distribute
+!!  the result back to all processes.
+!!  Target: double precision two-dimensional arrays.
+!!
+!! INPUTS
+!!  comm= MPI communicator
+!!  use_omp_map= wether to use OpenMP GPU mapping (fefault: false)
+!!
+!! OUTPUT
+!!  ier= exit status, a non-zero value meaning there is an error
+!!
+!! SIDE EFFECTS
+!!  xval= buffer array
+!!
+!! SOURCE
+
+subroutine xmpi_sum_dp2d(xval,comm,ier,use_omp_map)
+
+!Arguments-------------------------
+ real(dp), DEV_CONTARRD intent(inout) :: xval(:,:)
+ integer ,intent(in) :: comm
+ logical ,intent(in), optional :: use_omp_map
+ integer ,intent(out) :: ier
+
+!Local variables-------------------
+#if defined HAVE_MPI
+ integer :: my_dt,my_op,n1,n2,nn,nproc_space_comm
+#ifdef HAVE_GPU_MPI
+ integer :: i1,i2
+#endif
+ logical :: l_use_omp_map
+ integer(kind=int64) :: ntot
+ real(dp),allocatable :: xsum(:,:)
+#endif
+
+! *************************************************************************
+
+ ier=0
+#if defined HAVE_MPI
+ l_use_omp_map=.false.
+ if(present(use_omp_map)) l_use_omp_map=use_omp_map
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
+   call MPI_COMM_SIZE(comm,nproc_space_comm,ier)
+   if (nproc_space_comm /= 1) then
+     n1 = size(xval,dim=1)
+     n2 = size(xval,dim=2)
+
+     !This product of dimensions can be greater than a 32bit integer
+     !We use a INT64 to store it. If it is too large, we switch to an
+     !alternate routine because MPI<4 doesnt handle 64 bit counts.
+     ntot=int(n1*n2,kind=int64)
+     if (ntot<=xmpi_maxint32_64) then
+       nn=n1*n2 ; my_dt=MPI_DOUBLE_PRECISION ; my_op=MPI_SUM
+     else
+       nn=1 ; call xmpi_largetype_create(ntot,MPI_DOUBLE_PRECISION,my_dt,my_op,MPI_SUM)
+     end if
+
+!    Accumulate xval on all proc. in comm
+#if defined HAVE_MPI2_INPLACE
+     if (xmpi_use_inplace_operations .and. my_op == MPI_SUM) then
+       if (my_op/=MPI_SUM) call xmpi_abort(msg="Too many data for in-place reductions!")
+       if(.not. l_use_omp_map) then
+         call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,my_dt,my_op,comm,ier)
+       else
+#ifdef HAVE_OPENMP_OFFLOAD
+#ifdef HAVE_GPU_MPI
+         ! Proper GPU-aware call
+         !$OMP TARGET DATA USE_DEVICE_PTR(xval)
+         call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,my_dt,my_op,comm,ier)
+         !$OMP END TARGET DATA
+#else
+         !$OMP TARGET UPDATE FROM(xval)
+         call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,my_dt,my_op,comm,ier)
+         !$OMP TARGET UPDATE TO(xval)
+#endif
+#endif
+       end if
+     else
+#endif
+       ABI_STAT_MALLOC(xsum,(n1,n2), ier)
+       if (ier/= 0) call xmpi_abort(msg='error allocating xsum in xmpi_sum_dp2d')
+       if(.not. l_use_omp_map) then
+         call MPI_ALLREDUCE(xval,xsum,nn,my_dt,my_op,comm,ier)
+         xval (:,:) = xsum(:,:)
+       else
+#ifdef HAVE_OPENMP_OFFLOAD
+         !$OMP TARGET ENTER DATA MAP(alloc:xsum)
+#ifdef HAVE_GPU_MPI
+         ! Proper GPU-aware call
+         !$OMP TARGET DATA USE_DEVICE_PTR(xval,xsum)
+         call MPI_ALLREDUCE(xval,xsum,nn,my_dt,my_op,comm,ier)
+         !$OMP END TARGET DATA
+         !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(2) MAP(to:xval,xsum)
+         do i2=1,n2
+           do i1=1,n1
+             xval(i1,i2)=xsum(i1,i2)
+           end do
+         end do
+#else
+         !$OMP TARGET UPDATE FROM(xval)
+         call MPI_ALLREDUCE(xval,xsum,nn,my_dt,my_op,comm,ier)
+         xval (:,:) = xsum(:,:)
+         !$OMP TARGET UPDATE TO(xval)
+#endif
+         !$OMP TARGET EXIT DATA MAP(delete:xsum)
+#endif
+       end if
+       ABI_FREE(xsum)
+#if defined HAVE_MPI2_INPLACE
+     endif
+#endif
+
+     if (ntot>xmpi_maxint32_64) call xmpi_largetype_free(my_dt,my_op)
+   end if
+ end if
+#endif
+
+end subroutine xmpi_sum_dp2d
+!!***
+
+!> wrapper arround xmpi_sum_dp2d than can be called in C/CUDA
+subroutine xmpi_sum_dp2d_c(xval_ptr,xval_size,comm,ier) bind(c, name="xmpi_sum_dp2d_c")
+
+  use, intrinsic :: iso_c_binding, only: c_associated,c_loc,c_ptr,c_f_pointer,c_int32_t
+  implicit none
+
+  ! dummy args
+  type(c_ptr),                    intent(inout) :: xval_ptr
+  integer(kind=c_int32_t),        intent(in)    :: xval_size(2)
+  integer(kind=c_int32_t),        intent(in)    :: comm
+  integer(kind=c_int32_t),        intent(out)   :: ier
+
+  ! local vars
+  real(dp), pointer :: xval(:,:) => null()
+
+  ! convert the c pointer into a fortran array
+  call c_f_pointer(xval_ptr, xval, xval_size)
+
+  call xmpi_sum_dp2d(xval, comm, ier)
+
+end subroutine xmpi_sum_dp2d_c
+
+!----------------------------------------------------------------------
+
+!!****f* ABINIT/xmpi_sum_dp3d
+!! NAME
+!!  xmpi_sum_dp3d
+!!
+!! FUNCTION
+!!  Combines values from all processes and distribute
+!!  the result back to all processes.
+!!  Target: double precision three-dimensional arrays.
+!!
+!! INPUTS
+!!  comm= MPI communicator
+!!
+!! OUTPUT
+!!  ier= exit status, a non-zero value meaning there is an error
+!!
+!! SIDE EFFECTS
+!!  xval= buffer array
+!!
+!! SOURCE
+
+subroutine xmpi_sum_dp3d(xval,comm,ier)
+
+!Arguments-------------------------
+ real(dp), DEV_CONTARRD intent(inout) :: xval(:,:,:)
+ integer ,intent(in) :: comm
+ integer ,intent(out)   :: ier
+
+!Local variables-------------------
+#if defined HAVE_MPI
+ integer :: my_dt,my_op,n1,n2,n3,nn,nproc_space_comm
+ integer(kind=int64) :: ntot
+ real(dp),allocatable :: xsum(:,:,:)
+#endif
+
+! *************************************************************************
+
+ ier=0
+#if defined HAVE_MPI
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
+   call MPI_COMM_SIZE(comm,nproc_space_comm,ier)
+   if (nproc_space_comm /= 1) then
+     n1 = size(xval,dim=1)
+     n2 = size(xval,dim=2)
+     n3 = size(xval,dim=3)
+
+     !This product of dimensions can be greater than a 32bit integer
+     !We use a INT64 to store it. If it is too large, we switch to an
+     !alternate routine because MPI<4 doesnt handle 64 bit counts.
+     ntot=int(n1*n2*n3,kind=int64)
+     if (ntot<=xmpi_maxint32_64) then
+       nn=n1*n2*n3 ; my_dt=MPI_DOUBLE_PRECISION ; my_op=MPI_SUM
+     else
+       nn=1 ; call xmpi_largetype_create(ntot,MPI_DOUBLE_PRECISION,my_dt,my_op,MPI_SUM)
+     end if
+
+!    Accumulate xval on all proc. in comm
+#if defined HAVE_MPI2_INPLACE
+     if (xmpi_use_inplace_operations .and. my_op == MPI_SUM) then
+       if (my_op/=MPI_SUM) call xmpi_abort(msg="Too many data for in-place reductions!")
+       call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,my_dt,my_op,comm,ier)
+     else
+#endif
+       ABI_STAT_MALLOC(xsum,(n1,n2,n3), ier)
+       if (ier/= 0) call xmpi_abort(msg='error allocating xsum in xmpi_sum_dp3d')
+       call MPI_ALLREDUCE(xval,xsum,nn,my_dt,my_op,comm,ier)
+       xval (:,:,:) = xsum(:,:,:)
+       ABI_FREE(xsum)
+#if defined HAVE_MPI2_INPLACE
+     endif
+#endif
+
+     if (ntot>xmpi_maxint32_64) call xmpi_largetype_free(my_dt,my_op)
+   end if
+ end if
+#endif
+
+end subroutine xmpi_sum_dp3d
+!!***
+
+!> wrapper arround xmpi_sum_dp3d than can be called in C/CUDA
+subroutine xmpi_sum_dp3d_c(xval_ptr,xval_size,comm,ier) bind(c, name="xmpi_sum_dp3d_c")
+
+  use, intrinsic :: iso_c_binding, only: c_associated,c_loc,c_ptr,c_f_pointer,c_int32_t
+  implicit none
+
+  ! dummy args
+  type(c_ptr),                    intent(inout) :: xval_ptr
+  integer(kind=c_int32_t),        intent(in)    :: xval_size(3)
+  integer(kind=c_int32_t),        intent(in)    :: comm
+  integer(kind=c_int32_t),        intent(out)   :: ier
+
+  ! local vars
+  real(dp), pointer :: xval(:,:,:) => null()
+
+  ! convert the c pointer into a fortran array
+  call c_f_pointer(xval_ptr, xval, xval_size)
+
+  call xmpi_sum_dp3d(xval, comm, ier)
+
+end subroutine xmpi_sum_dp3d_c
+
+!----------------------------------------------------------------------
+
+!!****f* ABINIT/xmpi_sum_dp4d
+!! NAME
+!!  xmpi_sum_dp4d
+!!
+!! FUNCTION
+!!  Combines values from all processes and distribute
+!!  the result back to all processes.
+!!  Target: double precision four-dimensional arrays.
+!!
+!! INPUTS
+!!  comm= MPI communicator
+!!
+!! OUTPUT
+!!  ier= exit status, a non-zero value meaning there is an error
+!!
+!! SIDE EFFECTS
+!!  xval= buffer array
+!!
+!! SOURCE
+
+subroutine xmpi_sum_dp4d(xval,comm,ier)
+
+!Arguments-------------------------
+ real(dp),DEV_CONTARRD intent(inout) :: xval(:,:,:,:)
+ integer ,intent(in) :: comm
+ integer ,intent(out) :: ier
+
+!Local variables-------------------
+#if defined HAVE_MPI
+ integer :: my_dt,my_op,n1,n2,n3,n4,nn,nproc_space_comm
+ integer(kind=int64) :: ntot
+ real(dp),allocatable :: xsum(:,:,:,:)
+#endif
+
+! *************************************************************************
+
+ ier=0
+#if defined HAVE_MPI
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
+   call MPI_COMM_SIZE(comm,nproc_space_comm,ier)
+   if (nproc_space_comm /= 1) then
+     n1 = size(xval,dim=1)
+     n2 = size(xval,dim=2)
+     n3 = size(xval,dim=3)
+     n4 = size(xval,dim=4)
+
+     !This product of dimensions can be greater than a 32bit integer
+     !We use a INT64 to store it. If it is too large, we switch to an
+     !alternate routine because MPI<4 doesnt handle 64 bit counts.
+     ntot=int(n1*n2*n3*n4,kind=int64)
+     if (ntot<=xmpi_maxint32_64) then
+       nn=n1*n2*n3*n4 ; my_dt=MPI_DOUBLE_PRECISION ; my_op=MPI_SUM
+     else
+       nn=1 ; call xmpi_largetype_create(ntot,MPI_DOUBLE_PRECISION,my_dt,my_op,MPI_SUM)
+     end if
+
+!    Accumulate xval on all proc. in comm
+#if defined HAVE_MPI2_INPLACE
+     if (xmpi_use_inplace_operations .and. my_op == MPI_SUM) then
+       if (my_op/=MPI_SUM) call xmpi_abort(msg="Too many data for in-place reductions!")
+       call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,my_dt,my_op,comm,ier)
+     else
+#endif
+       ABI_STAT_MALLOC(xsum,(n1,n2,n3,n4), ier)
+       if (ier/= 0) call xmpi_abort(msg='error allocating xsum in xmpi_sum_dp4d')
+       call MPI_ALLREDUCE(xval,xsum,nn,my_dt,my_op,comm,ier)
+       xval (:,:,:,:) = xsum(:,:,:,:)
+       ABI_FREE(xsum)
+#if defined HAVE_MPI2_INPLACE
+     endif
+#endif
+
+     if (ntot>xmpi_maxint32_64) call xmpi_largetype_free(my_dt,my_op)
+   end if
+ end if
+#endif
+
+end subroutine xmpi_sum_dp4d
+!!***
+
+!> wrapper arround xmpi_sum_dp4d than can be called in C/CUDA
+subroutine xmpi_sum_dp4d_c(xval_ptr,xval_size,comm,ier) bind(c, name="xmpi_sum_dp4d_c")
+
+  use, intrinsic :: iso_c_binding, only: c_associated,c_loc,c_ptr,c_f_pointer,c_int32_t
+  implicit none
+
+  ! dummy args
+  type(c_ptr),                    intent(inout) :: xval_ptr
+  integer(kind=c_int32_t),        intent(in)    :: xval_size(4)
+  integer(kind=c_int32_t),        intent(in)    :: comm
+  integer(kind=c_int32_t),        intent(out)   :: ier
+
+  ! local vars
+  real(dp), pointer :: xval(:,:,:,:) => null()
+
+  ! convert the c pointer into a fortran array
+  call c_f_pointer(xval_ptr, xval, xval_size)
+
+  call xmpi_sum_dp4d(xval, comm, ier)
+
+end subroutine xmpi_sum_dp4d_c
+
+!----------------------------------------------------------------------
+
+!!****f* ABINIT/xmpi_sum_dp5d
+!! NAME
+!!  xmpi_sum_dp5d
+!!
+!! FUNCTION
+!!  Combines values from all processes and distribute
+!!  the result back to all processes.
+!!  Target: double precision five-dimensional arrays.
+!!
+!! INPUTS
+!!  comm= MPI communicator
+!!
+!! OUTPUT
+!!  ier= exit status, a non-zero value meaning there is an error
+!!
+!! SIDE EFFECTS
+!!  xval= buffer array
+!!
+!! SOURCE
+
+subroutine xmpi_sum_dp5d(xval,comm,ier)
+
+!Arguments-------------------------
+ real(dp), DEV_CONTARRD intent(inout) :: xval(:,:,:,:,:)
+ integer ,intent(in) :: comm
+ integer ,intent(out) :: ier
+
+!Local variables-------------------
+#if defined HAVE_MPI
+ integer :: my_dt,my_op,n1,n2,n3,n4,n5,nn,nproc_space_comm
+ integer(kind=int64) :: ntot
+ real(dp),allocatable :: xsum(:,:,:,:,:)
+#endif
+
+! *************************************************************************
+
+ ier=0
+#if defined HAVE_MPI
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
+   call MPI_COMM_SIZE(comm,nproc_space_comm,ier)
+   if (nproc_space_comm /= 1) then
+     n1 = size(xval,dim=1)
+     n2 = size(xval,dim=2)
+     n3 = size(xval,dim=3)
+     n4 = size(xval,dim=4)
+     n5 = size(xval,dim=5)
+
+     !This product of dimensions can be greater than a 32bit integer
+     !We use a INT64 to store it. If it is too large, we switch to an
+     !alternate routine because MPI<4 doesnt handle 64 bit counts.
+     ntot=int(n1*n2*n3*n4*n5,kind=int64)
+     if (ntot<=xmpi_maxint32_64) then
+       nn=n1*n2*n3*n4*n5 ; my_dt=MPI_DOUBLE_PRECISION ; my_op=MPI_SUM
+     else
+       nn=1 ; call xmpi_largetype_create(ntot,MPI_DOUBLE_PRECISION,my_dt,my_op,MPI_SUM)
+     end if
+
+!    Accumulate xval on all proc. in comm
+#if defined HAVE_MPI2_INPLACE
+     if (xmpi_use_inplace_operations .and. my_op == MPI_SUM) then
+       if (my_op/=MPI_SUM) call xmpi_abort(msg="Too many data for in-place reductions!")
+       call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,my_dt,my_op,comm,ier)
+     else
+#endif
+       ABI_STAT_MALLOC(xsum,(n1,n2,n3,n4,n5), ier)
+       if (ier/= 0) call xmpi_abort(msg='error allocating xsum in xmpi_sum_dp5d')
+       call MPI_ALLREDUCE(xval,xsum,nn,my_dt,my_op,comm,ier)
+       xval (:,:,:,:,:) = xsum(:,:,:,:,:)
+       ABI_FREE(xsum)
+#if defined HAVE_MPI2_INPLACE
+     endif
+#endif
+
+     if (ntot>xmpi_maxint32_64) call xmpi_largetype_free(my_dt,my_op)
+   end if
+ end if
+#endif
+
+end subroutine xmpi_sum_dp5d
+!!***
+
+!> wrapper arround xmpi_sum_dp5d than can be called in C/CUDA
+subroutine xmpi_sum_dp5d_c(xval_ptr,xval_size,comm,ier) bind(c, name="xmpi_sum_dp5d_c")
+
+  use, intrinsic :: iso_c_binding, only: c_associated,c_loc,c_ptr,c_f_pointer,c_int32_t
+  implicit none
+
+  ! dummy args
+  type(c_ptr),                    intent(inout) :: xval_ptr
+  integer(kind=c_int32_t),        intent(in)    :: xval_size(5)
+  integer(kind=c_int32_t),        intent(in)    :: comm
+  integer(kind=c_int32_t),        intent(out)   :: ier
+
+  ! local vars
+  real(dp), pointer :: xval(:,:,:,:,:) => null()
+
+  ! convert the c pointer into a fortran array
+  call c_f_pointer(xval_ptr, xval, xval_size)
+
+  call xmpi_sum_dp5d(xval, comm, ier)
+
+end subroutine xmpi_sum_dp5d_c
+
+!----------------------------------------------------------------------
+
+!!****f* ABINIT/xmpi_sum_dp6d
+!! NAME
+!!  xmpi_sum_dp6d
+!!
+!! FUNCTION
+!!  Combines values from all processes and distribute
+!!  the result back to all processes.
+!!  Target: double precision six-dimensional arrays.
+!!
+!! INPUTS
+!!  comm= MPI communicator
+!!
+!! OUTPUT
+!!  ier= exit status, a non-zero value meaning there is an error
+!!
+!! SIDE EFFECTS
+!!  xval= buffer array
+!!
+!! SOURCE
+subroutine xmpi_sum_dp6d(xval,comm,ier)
+
+!Arguments-------------------------
+ real(dp), DEV_CONTARRD intent(inout) :: xval(:,:,:,:,:,:)
+ integer ,intent(in) :: comm
+ integer ,intent(out) :: ier
+
+!Local variables-------------------
+#if defined HAVE_MPI
+ integer :: my_dt,my_op,n1,n2,n3,n4,n5,n6,nn,nproc_space_comm
+ integer(kind=int64) :: ntot
+ real(dp), allocatable :: xsum(:,:,:,:,:,:)
+#endif
+
+! *************************************************************************
+
+ ier=0
+#if defined HAVE_MPI
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
+   call MPI_COMM_SIZE(comm,nproc_space_comm,ier)
+   if (nproc_space_comm /= 1) then
+     n1 = size(xval,dim=1)
+     n2 = size(xval,dim=2)
+     n3 = size(xval,dim=3)
+     n4 = size(xval,dim=4)
+     n5 = size(xval,dim=5)
+     n6 = size(xval,dim=6)
+
+     !This product of dimensions can be greater than a 32bit integer
+     !We use a INT64 to store it. If it is too large, we switch to an
+     !alternate routine because MPI<4 doesnt handle 64 bit counts.
+     ntot=int(n1*n2*n3*n4*n5*n6,kind=int64)
+     if (ntot<=xmpi_maxint32_64) then
+       nn=n1*n2*n3*n4*n5*n6 ; my_dt=MPI_DOUBLE_PRECISION ; my_op=MPI_SUM
+     else
+       nn=1 ; call xmpi_largetype_create(ntot,MPI_DOUBLE_PRECISION,my_dt,my_op,MPI_SUM)
+     end if
+
+!    Accumulate xval on all proc. in comm
+#if defined HAVE_MPI2_INPLACE
+     if (xmpi_use_inplace_operations .and. my_op == MPI_SUM) then
+       if (my_op/=MPI_SUM) call xmpi_abort(msg="Too many data for in-place reductions!")
+       call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,my_dt,my_op,comm,ier)
+     else
+#endif
+       ABI_STAT_MALLOC(xsum,(n1,n2,n3,n4,n5,n6), ier)
+       if (ier/=0) call xmpi_abort(msg='error allocating xsum in xmpi_sum_dp6d')
+       call MPI_ALLREDUCE(xval,xsum,nn,my_dt,my_op,comm,ier)
+       xval (:,:,:,:,:,:) = xsum(:,:,:,:,:,:)
+       ABI_FREE(xsum)
+#if defined HAVE_MPI2_INPLACE
+     endif
+#endif
+
+     if (ntot>xmpi_maxint32_64) call xmpi_largetype_free(my_dt,my_op)
+   end if
+ end if
+#endif
+
+end subroutine xmpi_sum_dp6d
+!!***
+
+!> wrapper arround xmpi_sum_dp6d than can be called in C/CUDA
+subroutine xmpi_sum_dp6d_c(xval_ptr,xval_size,comm,ier) bind(c, name="xmpi_sum_dp6d_c")
+
+  use, intrinsic :: iso_c_binding, only: c_associated,c_loc,c_ptr,c_f_pointer,c_int32_t
+  implicit none
+
+  ! dummy args
+  type(c_ptr),                    intent(inout) :: xval_ptr
+  integer(kind=c_int32_t),        intent(in)    :: xval_size(6)
+  integer(kind=c_int32_t),        intent(in)    :: comm
+  integer(kind=c_int32_t),        intent(out)   :: ier
+
+  ! local vars
+  real(dp), pointer :: xval(:,:,:,:,:,:) => null()
+
+  ! convert the c pointer into a fortran array
+  call c_f_pointer(xval_ptr, xval, xval_size)
+
+  call xmpi_sum_dp6d(xval, comm, ier)
+
+end subroutine xmpi_sum_dp6d_c
+
+!----------------------------------------------------------------------
+
+!!****f* ABINIT/xmpi_sum_dp7d
+!! NAME
+!!  xmpi_sum_dp7d
+!!
+!! FUNCTION
+!!  Combines values from all processes and distribute
+!!  the result back to all processes.
+!!  Target: double precision six-dimensional arrays.
+!!
+!! INPUTS
+!!  comm= MPI communicator
+!!
+!! OUTPUT
+!!  ier= exit status, a non-zero value meaning there is an error
+!!
+!! SIDE EFFECTS
+!!  xval= buffer array
+!!
+!! SOURCE
+
+subroutine xmpi_sum_dp7d(xval,comm,ier)
+
+!Arguments-------------------------
+ real(dp), DEV_CONTARRD intent(inout) :: xval(:,:,:,:,:,:,:)
+ integer ,intent(in) :: comm
+ integer ,intent(out) :: ier
+
+!Local variables-------------------
+#if defined HAVE_MPI
+ integer :: my_dt,my_op,n1,n2,n3,n4,n5,n6,n7,nn,nproc_space_comm
+ integer(kind=int64) :: ntot
+ real(dp),allocatable :: xsum(:,:,:,:,:,:,:)
+#endif
+
+! *************************************************************************
+ ier=0
+#if defined HAVE_MPI
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
+   call MPI_COMM_SIZE(comm,nproc_space_comm,ier)
+   if (nproc_space_comm /= 1) then
+     n1 = size(xval,dim=1)
+     n2 = size(xval,dim=2)
+     n3 = size(xval,dim=3)
+     n4 = size(xval,dim=4)
+     n5 = size(xval,dim=5)
+     n6 = size(xval,dim=6)
+     n7 = size(xval,dim=7)
+
+     !This product of dimensions can be greater than a 32bit integer
+     !We use a INT64 to store it. If it is too large, we switch to an
+     !alternate routine because MPI<4 doesnt handle 64 bit counts.
+     ntot=int(n1*n2*n3*n4*n5*n6*n7,kind=int64)
+     if (ntot<=xmpi_maxint32_64) then
+       nn=n1*n2*n3*n4*n5*n6*n7 ; my_dt=MPI_DOUBLE_PRECISION ; my_op=MPI_SUM
+     else
+       nn=1 ; call xmpi_largetype_create(ntot,MPI_DOUBLE_PRECISION,my_dt,my_op,MPI_SUM)
+     end if
+
+!    Accumulate xval on all proc. in comm
+#if defined HAVE_MPI2_INPLACE
+     if (xmpi_use_inplace_operations .and. my_op == MPI_SUM) then
+       if (my_op/=MPI_SUM) call xmpi_abort(msg="Too many data for in-place reductions!")
+       call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,my_dt,my_op,comm,ier)
+     else
+#endif
+       ABI_STAT_MALLOC(xsum,(n1,n2,n3,n4,n5,n6,n7), ier)
+       if (ier/= 0) call xmpi_abort(msg='error allocating xsum in xmpi_sum_dp7d')
+       call MPI_ALLREDUCE(xval,xsum,nn,my_dt,my_op,comm,ier)
+       xval (:,:,:,:,:,:,:) = xsum(:,:,:,:,:,:,:)
+       ABI_FREE(xsum)
+#if defined HAVE_MPI2_INPLACE
+     endif
+#endif
+
+     if (ntot>xmpi_maxint32_64) call xmpi_largetype_free(my_dt,my_op)
+   end if
+ end if
+#endif
+
+end subroutine xmpi_sum_dp7d
+!!***
+
+!> wrapper arround xmpi_sum_dp7d than can be called in C/CUDA
+subroutine xmpi_sum_dp7d_c(xval_ptr,xval_size,comm,ier) bind(c, name="xmpi_sum_dp7d_c")
+
+  use, intrinsic :: iso_c_binding, only: c_associated,c_loc,c_ptr,c_f_pointer,c_int32_t
+  implicit none
+
+  ! dummy args
+  type(c_ptr),                    intent(inout) :: xval_ptr
+  integer(kind=c_int32_t),        intent(in)    :: xval_size(7)
+  integer(kind=c_int32_t),        intent(in)    :: comm
+  integer(kind=c_int32_t),        intent(out)   :: ier
+
+  ! local vars
+  real(dp), pointer :: xval(:,:,:,:,:,:,:) => null()
+
+  ! convert the c pointer into a fortran array
+  call c_f_pointer(xval_ptr, xval, xval_size)
+
+  call xmpi_sum_dp7d(xval, comm, ier)
+
+end subroutine xmpi_sum_dp7d_c
+
+!----------------------------------------------------------------------
+
+!!****f* ABINIT/xmpi_sum_dp2t
+!! NAME
+!!  xmpi_sum_dp2t
+!!
+!! FUNCTION
+!!  Combines values from all processes and distribute
+!!  the result back to all processes.
+!!  Target: double precision one-dimensional array without transfers.
+!!
+!! INPUTS
+!!  n1= first dimension of the array
+!!  comm= MPI communicator
+!!
+!! OUTPUT
+!!  ier= exit status, a non-zero value meaning there is an error
+!!
+!! SIDE EFFECTS
+!!  xval= buffer array
+!!  xsum= receive buffer
+!!
+!! SOURCE
+
+subroutine xmpi_sum_dp2t(xval,xsum,n1,comm,ier)
+
+!Arguments-------------------------
+ real(dp), DEV_CONTARRD intent(inout) :: xval(:),xsum(:)
+ integer ,intent(in) :: n1
+ integer ,intent(in) :: comm
+ integer ,intent(out) :: ier
+
+! *************************************************************************
+
+ ier=0
+#if defined HAVE_MPI
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
+!  Accumulate xval on all proc. in comm
+   call MPI_ALLREDUCE(xval,xsum,n1,MPI_DOUBLE_PRECISION,MPI_SUM,comm,ier)
+ else
+#endif
+   xsum=xval
+#if defined HAVE_MPI
+ end if
+#endif
+
+end subroutine xmpi_sum_dp2t
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* ABINIT/xmpi_sum_dp2d2t
+!! NAME
+!!  xmpi_sum_dp2d2t
+!!
+!! FUNCTION
+!!  Combines values from all processes and distribute
+!!  the result back to all processes.
+!!  Target:  double precisions bi-dimensional array
+!!
+!! INPUTS
+!!  n = total send size
+!!  xval= buffer array
+!!  comm= MPI communicator
+!!
+!! OUTPUT
+!!  xsum= receive buffer
+!!  ier= exit status, a non-zero value meaning there is an error
+!!
+!! SOURCE
+
+subroutine xmpi_sum_dp2d2t(xval,xsum,n,comm,ier)
+
+!Arguments-------------------------
+ real(dp), DEV_CONTARRD intent(in) :: xval(:,:)
+ real(dp), DEV_CONTARRD intent(out) :: xsum(:,:)
+ integer ,intent(in) :: n
+ integer ,intent(in) :: comm
+ integer ,intent(out) :: ier
+
+!Local variables-------------------
+
+! *************************************************************************
+
+ ier=0
+#if defined HAVE_MPI
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
+!  Accumulate xval on all proc. in comm
+   call MPI_ALLREDUCE(xval,xsum,n,MPI_DOUBLE_PRECISION,MPI_SUM,comm,ier)
+ else
+#endif
+   xsum=xval
+#if defined HAVE_MPI
+ end if
+#endif
+
+end subroutine xmpi_sum_dp2d2t
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* ABINIT/xmpi_sum_dp3d2t
+!! NAME
+!!  xmpi_sum_dp3d2t
+!!
+!! FUNCTION
+!!  Combines values from all processes and distribute
+!!  the result back to all processes.
+!!  Target: double precision three-dimensional array without transfers.
+!!
+!! INPUTS
+!!  n1= first dimension of the array
+!!  comm= MPI communicator
+!!
+!! OUTPUT
+!!  ier= exit status, a non-zero value meaning there is an error
+!!
+!! SIDE EFFECTS
+!!  xval= buffer array
+!!  xsum= receive buffer
+!!
+!! SOURCE
+
+subroutine xmpi_sum_dp3d2t(xval,xsum,n1,comm,ier)
+
+!Arguments-------------------------
+ real(dp), DEV_CONTARRD intent(inout) :: xval(:,:,:),xsum(:,:,:)
+ integer ,intent(in) :: n1
+ integer ,intent(in) :: comm
+ integer ,intent(out) :: ier
+
+! *************************************************************************
+ ier=0
+#if defined HAVE_MPI
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
+!  Accumulate xval on all proc. in comm
+   call MPI_ALLREDUCE(xval,xsum,n1,MPI_DOUBLE_PRECISION,MPI_SUM,comm,ier)
+ else
+#endif
+   xsum=xval
+#if defined HAVE_MPI
+ end if
+#endif
+
+end subroutine xmpi_sum_dp3d2t
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* ABINIT/xmpi_sum_dp4d2t
+!! NAME
+!!  xmpi_sum_dp4d2t
+!!
+!! FUNCTION
+!!  Combines values from all processes and distribute
+!!  the result back to all processes.
+!!  Target: double precision four-dimensional array without transfers.
+!!
+!! INPUTS
+!!  n1= first dimension of the array
+!!  comm= MPI communicator
+!!
+!! OUTPUT
+!!  ier= exit status, a non-zero value meaning there is an error
+!!
+!! SIDE EFFECTS
+!!  xval= buffer array
+!!  xsum= receive buffer
+!!
+!! SOURCE
+
+subroutine xmpi_sum_dp4d2t(xval,xsum,n1,comm,ier)
+
+!Arguments-------------------------
+ real(dp), DEV_CONTARRD intent(inout) :: xval(:,:,:,:),xsum(:,:,:,:)
+ integer ,intent(in) :: n1
+ integer ,intent(in) :: comm
+ integer ,intent(out) :: ier
+
+! *************************************************************************
+
+ ier=0
+#if defined HAVE_MPI
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
+!  Accumulate xval on all proc. in comm
+   call MPI_ALLREDUCE(xval,xsum,n1,MPI_DOUBLE_PRECISION,MPI_SUM,comm,ier)
+ else
+#endif
+   xsum=xval
+#if defined HAVE_MPI
+ end if
+#endif
+
+end subroutine xmpi_sum_dp4d2t
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* ABINIT/xmpi_sum_c0dc
+!! NAME
+!!  xmpi_sum_c0dc
+!!
+!! FUNCTION
+!!  Combines values from all processes and distribute the result back to all processes.
+!!  Target: double complex scalar
+!!
+!! INPUTS
+!!  comm= MPI communicator
+!!
+!! OUTPUT
+!!  ier= exit status, a non-zero value meaning there is an error
+!!
+!! SIDE EFFECTS
+!!  xval= scalar to be summed.
+!!
+!! SOURCE
+
+subroutine xmpi_sum_c0dc(xval,comm,ier)
+
+!Arguments-------------------------
+ complex(dpc),intent(inout) :: xval
+ integer,intent(in) :: comm
+ integer,intent(out)   :: ier
+
+!Local variables-------------------
+#if defined HAVE_MPI
+ integer :: nproc_space_comm
+ complex(dpc) :: arr_xsum(1)
+#endif
+
+! *************************************************************************
+
+ ier=0
+#if defined HAVE_MPI
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
+   call MPI_COMM_SIZE(comm,nproc_space_comm,ier)
+   if (nproc_space_comm /= 1) then
+!    Accumulate xval on all proc. in comm
+     call MPI_ALLREDUCE([xval],arr_xsum,1,MPI_DOUBLE_COMPLEX,MPI_SUM,comm,ier)
+     xval = arr_xsum(1)
+   end if
+ end if
+#endif
+
+end subroutine xmpi_sum_c0dc
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* ABINIT/xmpi_sum_c0sc
+!! NAME
+!!  xmpi_sum_c0sc
+!!
+!! FUNCTION
+!!  Combines values from all processes and distribute the result back to all processes.
+!!  Target: single-precision complex scalar
+!!
+!! INPUTS
+!!  comm= MPI communicator
+!!
+!! OUTPUT
+!!  ier= exit status, a non-zero value meaning there is an error
+!!
+!! SIDE EFFECTS
+!!  xval= scalar to be summed.
+!!
+!! SOURCE
+
+subroutine xmpi_sum_c0sc(xval,comm,ier)
+
+!Arguments-------------------------
+ complex(sp),intent(inout) :: xval
+ integer,intent(in) :: comm
+ integer,intent(out)   :: ier
+
+!Local variables-------------------
+#if defined HAVE_MPI
+ integer :: nproc_space_comm
+ complex(sp) :: arr_xsum(1)
+#endif
+
+! *************************************************************************
+
+ ier=0
+#if defined HAVE_MPI
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
+   call MPI_COMM_SIZE(comm,nproc_space_comm,ier)
+   if (nproc_space_comm /= 1) then
+     ! Accumulate xval on all proc. in comm
+     call MPI_ALLREDUCE([xval],arr_xsum,1,MPI_COMPLEX,MPI_SUM,comm,ier)
+     xval = arr_xsum(1)
+   end if
+ end if
+#endif
+
+end subroutine xmpi_sum_c0sc
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* ABINIT/xmpi_sum_c1dc
+!! NAME
+!!  xmpi_sum_c1dc
+!!
+!! FUNCTION
+!!  Combines values from all processes and distribute
+!!  the result back to all processes.
+!!  Target: one-dimensional double complex arrays.
+!!
+!! INPUTS
+!!  comm= MPI communicator
+!!
+!! OUTPUT
+!!  ier= exit status, a non-zero value meaning there is an error
+!!
+!! SIDE EFFECTS
+!!  xval= buffer array
+!!
+!! SOURCE
+
+subroutine xmpi_sum_c1dc(xval,comm,ier)
+
+!Arguments-------------------------
+ complex(dpc), DEV_CONTARRD intent(inout) :: xval(:)
+ integer,intent(in) :: comm
+ integer,intent(out) :: ier
+
+!Local variables-------------------
+#if defined HAVE_MPI
+ integer :: n1,nproc_space_comm
+ complex(dpc) , allocatable :: xsum(:)
+#endif
+
+! *************************************************************************
+
+ ier=0
+#if defined HAVE_MPI
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
+   call MPI_COMM_SIZE(comm,nproc_space_comm,ier)
+   if (nproc_space_comm /= 1) then
+     n1 =size(xval,dim=1)
+
+!    Accumulate xval on all proc. in comm
+#if defined HAVE_MPI2_INPLACE
+     if (xmpi_use_inplace_operations) then
+       call MPI_ALLREDUCE(MPI_IN_PLACE,xval,n1,MPI_DOUBLE_COMPLEX,MPI_SUM,comm,ier)
+     else
+#endif
+       ABI_STAT_MALLOC(xsum,(n1), ier)
+       if (ier/= 0) call xmpi_abort(msg='error allocating xsum in xmpi_sum_c1dc')
+       call MPI_ALLREDUCE(xval,xsum,n1,MPI_DOUBLE_COMPLEX,MPI_SUM,comm,ier)
+       xval (:) = xsum(:)
+       ABI_FREE(xsum)
+#if defined HAVE_MPI2_INPLACE
+     endif
+#endif
+
+   end if
+ end if
+#endif
+
+end subroutine xmpi_sum_c1dc
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* ABINIT/xmpi_sum_c2dc
+!! NAME
+!!  xmpi_sum_c2dc
+!!
+!! FUNCTION
+!!  Combines values from all processes and distribute
+!!  the result back to all processes.
+!!  Target: two-dimensional double complex arrays.
+!!
+!! INPUTS
+!!  comm= MPI communicator
+!!
+!! OUTPUT
+!!  ier= exit status, a non-zero value meaning there is an error
+!!
+!! SIDE EFFECTS
+!!  xval= buffer array
+!!
+!! SOURCE
+
+subroutine xmpi_sum_c2dc(xval,comm,ier)
+
+!Arguments-------------------------
+ complex(dpc), DEV_CONTARRD intent(inout) :: xval(:,:)
+ integer,intent(in) :: comm
+ integer,intent(out) :: ier
+
+!Local variables-------------------
+#if defined HAVE_MPI
+ integer :: my_dt,my_op,n1,n2,nn,nproc_space_comm
+ integer(kind=int64) :: ntot
+ complex(dpc),allocatable :: xsum(:,:)
+#endif
+
+! *************************************************************************
+
+ ier=0
+#if defined HAVE_MPI
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
+   call MPI_COMM_SIZE(comm,nproc_space_comm,ier)
+   if (nproc_space_comm /= 1) then
+     n1 =size(xval,dim=1)
+     n2 =size(xval,dim=2)
+
+     !This product of dimensions can be greater than a 32bit integer
+     !We use a INT64 to store it. If it is too large, we switch to an
+     !alternate routine because MPI<4 doesnt handle 64 bit counts.
+     ntot=int(n1*n2,kind=int64)
+     if (ntot<=xmpi_maxint32_64) then
+       nn=n1*n2 ; my_dt=MPI_DOUBLE_COMPLEX ; my_op=MPI_SUM
+     else
+       nn=1 ; call xmpi_largetype_create(ntot,MPI_DOUBLE_COMPLEX,my_dt,my_op,MPI_SUM)
+     end if
+
+!    Accumulate xval on all proc. in comm
+#if defined HAVE_MPI2_INPLACE
+     if (xmpi_use_inplace_operations .and. my_op == MPI_SUM) then
+       if (my_op/=MPI_SUM) call xmpi_abort(msg="Too many data for in-place reductions!")
+       call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,my_dt,my_op,comm,ier)
+     else
+#endif
+       ABI_STAT_MALLOC(xsum,(n1,n2), ier)
+       if (ier/= 0) call xmpi_abort(msg='error allocating xsum in xmpi_sum_c2dc')
+       call MPI_ALLREDUCE(xval,xsum,nn,my_dt,my_op,comm,ier)
+       xval (:,:) = xsum(:,:)
+       ABI_FREE(xsum)
+#if defined HAVE_MPI2_INPLACE
+     end if
+#endif
+
+     if (ntot>xmpi_maxint32_64) call xmpi_largetype_free(my_dt,my_op)
+   end if
+ end if
+#endif
+
+end subroutine xmpi_sum_c2dc
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* ABINIT/xmpi_sum_c3dc
+!! NAME
+!!  xmpi_sum_c3dc
+!!
+!! FUNCTION
+!!  Combines values from all processes and distribute
+!!  the result back to all processes.
+!!  Target: three-dimensional double complex arrays.
+!!
+!! INPUTS
+!!  comm= MPI communicator
+!!
+!! OUTPUT
+!!  ier= exit status, a non-zero value meaning there is an error
+!!
+!! SIDE EFFECTS
+!!  xval= buffer array
+!!
+!! SOURCE
+
+subroutine xmpi_sum_c3dc(xval,comm,ier)
+
+!Arguments-------------------------
+ complex(dpc), DEV_CONTARRD intent(inout) :: xval(:,:,:)
+ integer,intent(in) :: comm
+ integer,intent(out) :: ier
+
+!Local variables-------------------
+#if defined HAVE_MPI
+ integer :: my_dt,my_op,n1,n2,n3,nn,nproc_space_comm
+ integer(kind=int64) :: ntot
+ complex(dpc),allocatable :: xsum(:,:,:)
+#endif
+
+! *************************************************************************
+
+ ier=0
+#if defined HAVE_MPI
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
+   call MPI_COMM_SIZE(comm,nproc_space_comm,ier)
+   if (nproc_space_comm /= 1) then
+     n1 =size(xval,dim=1)
+     n2 =size(xval,dim=2)
+     n3 =size(xval,dim=3)
+
+     !This product of dimensions can be greater than a 32bit integer
+     !We use a INT64 to store it. If it is too large, we switch to an
+     !alternate routine because MPI<4 doesnt handle 64 bit counts.
+     ntot=int(n1*n2*n3,kind=int64)
+     if (ntot<=xmpi_maxint32_64) then
+       nn=n1*n2*n3 ; my_dt=MPI_DOUBLE_COMPLEX ; my_op=MPI_SUM
+     else
+       nn=1 ; call xmpi_largetype_create(ntot,MPI_DOUBLE_COMPLEX,my_dt,my_op,MPI_SUM)
+     end if
+
+!    Accumulate xval on all proc. in comm
+#if defined HAVE_MPI2_INPLACE
+     if (xmpi_use_inplace_operations .and. my_op == MPI_SUM) then
+       if (my_op/=MPI_SUM) call xmpi_abort(msg="Too many data for in-place reductions!")
+       call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,my_dt,my_op,comm,ier)
+     else
+#endif
+       ABI_STAT_MALLOC(xsum,(n1,n2,n3), ier)
+       if (ier/= 0) call xmpi_abort(msg='error allocating xsum in xmpi_sum_c3dc')
+       call MPI_ALLREDUCE(xval,xsum,nn,my_dt,my_op,comm,ier)
+       xval (:,:,:) = xsum(:,:,:)
+       ABI_FREE(xsum)
+#if defined HAVE_MPI2_INPLACE
+     end if
+#endif
+
+     if (ntot>xmpi_maxint32_64) call xmpi_largetype_free(my_dt,my_op)
+   end if
+ end if
+#endif
+
+end subroutine xmpi_sum_c3dc
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* ABINIT/xmpi_sum_c4dc
+!! NAME
+!!  xmpi_sum_c4dc
+!!
+!! FUNCTION
+!!  Combines values from all processes and distribute
+!!  the result back to all processes.
+!!  Target: four-dimensional double complex arrays.
+!!
+!! INPUTS
+!!  comm= MPI communicator
+!!
+!! OUTPUT
+!!  ier= exit status, a non-zero value meaning there is an error
+!!
+!! SIDE EFFECTS
+!!  xval= buffer array
+!!
+!! SOURCE
+
+subroutine xmpi_sum_c4dc(xval,comm,ier)
+
+!Arguments-------------------------
+ complex(dpc), DEV_CONTARRD intent(inout) :: xval(:,:,:,:)
+ integer,intent(in) :: comm
+ integer,intent(out) :: ier
+
+!Local variables-------------------
+#if defined HAVE_MPI
+ integer :: my_dt,my_op,n1,n2,n3,n4,nn,nproc_space_comm
+ integer(kind=int64) :: ntot
+ complex(dpc),allocatable :: xsum(:,:,:,:)
+#endif
+
+! *************************************************************************
+
+ ier=0
+#if defined HAVE_MPI
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
+   call MPI_COMM_SIZE(comm,nproc_space_comm,ier)
+   if (nproc_space_comm /= 1) then
+     n1 =size(xval,dim=1)
+     n2 =size(xval,dim=2)
+     n3 =size(xval,dim=3)
+     n4 =size(xval,dim=4)
+
+     !This product of dimensions can be greater than a 32bit integer
+     !We use a INT64 to store it. If it is too large, we switch to an
+     !alternate routine because MPI<4 doesnt handle 64 bit counts.
+     ntot=int(n1*n2*n3*n4,kind=int64)
+     if (ntot<=xmpi_maxint32_64) then
+       nn=n1*n2*n3*n4 ; my_dt=MPI_DOUBLE_COMPLEX ; my_op=MPI_SUM
+     else
+       nn=1 ; call xmpi_largetype_create(ntot,MPI_DOUBLE_COMPLEX,my_dt,my_op,MPI_SUM)
+     end if
+
+!    Accumulate xval on all proc. in comm
+#if defined HAVE_MPI2_INPLACE
+     if (xmpi_use_inplace_operations .and. my_op == MPI_SUM) then
+       if (my_op/=MPI_SUM) call xmpi_abort(msg="Too many data for in-place reductions!")
+       call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,my_dt,my_op,comm,ier)
+     else
+#endif
+       ABI_STAT_MALLOC(xsum,(n1,n2,n3,n4), ier)
+       if (ier/= 0) call xmpi_abort(msg='error allocating xsum in xmpi_sum_c4dc')
+       call MPI_ALLREDUCE(xval,xsum,nn,my_dt,my_op,comm,ier)
+       xval (:,:,:,:) = xsum(:,:,:,:)
+       ABI_FREE(xsum)
+#if defined HAVE_MPI2_INPLACE
+     endif
+#endif
+
+     if (ntot>xmpi_maxint32_64) call xmpi_largetype_free(my_dt,my_op)
+   end if
+ end if
+#endif
+
+end subroutine xmpi_sum_c4dc
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* ABINIT/xmpi_sum_c5dc
+!! NAME
+!!  xmpi_sum_c5dc
+!!
+!! FUNCTION
+!!  Combines values from all processes and distribute the result back to all processes.
+!!  Target: five-dimensional double precision complex arrays.
+!!
+!! INPUTS
+!!  comm= MPI communicator
+!!
+!! OUTPUT
+!!  ier= exit status, a non-zero value meaning there is an error
+!!
+!! SIDE EFFECTS
+!!  xval= buffer array
+!!
+!! SOURCE
+
+subroutine xmpi_sum_c5dc(xval,comm,ier)
+
+!Arguments-------------------------
+ complex(dpc), DEV_CONTARRD intent(inout) :: xval(:,:,:,:,:)
+ integer,intent(in) :: comm
+ integer,intent(out) :: ier
+
+!Local variables-------------------
+#if defined HAVE_MPI
+ integer :: my_dt,my_op,n1,n2,n3,n4,n5,nn,nproc_space_comm
+ integer(kind=int64) :: ntot
+ complex(dpc),allocatable :: xsum(:,:,:,:,:)
+#endif
+
+! *************************************************************************
+
+ ier=0
+#if defined HAVE_MPI
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
+   call MPI_COMM_SIZE(comm,nproc_space_comm,ier)
+   if (nproc_space_comm /= 1) then
+     n1 =size(xval,dim=1)
+     n2 =size(xval,dim=2)
+     n3 =size(xval,dim=3)
+     n4 =size(xval,dim=4)
+     n5 =size(xval,dim=5)
+
+     !This product of dimensions can be greater than a 32bit integer
+     !We use a INT64 to store it. If it is too large, we switch to an
+     !alternate routine because MPI<4 doesnt handle 64 bit counts.
+     ntot=int(n1*n2*n3*n4*n5,kind=int64)
+     if (ntot<=xmpi_maxint32_64) then
+       nn=n1*n2*n3*n4*n5 ; my_dt=MPI_DOUBLE_COMPLEX ; my_op=MPI_SUM
+     else
+       nn=1 ; call xmpi_largetype_create(ntot,MPI_DOUBLE_COMPLEX,my_dt,my_op,MPI_SUM)
+     end if
+
+!    Accumulate xval on all proc. in comm
+#if defined HAVE_MPI2_INPLACE
+     if (xmpi_use_inplace_operations .and. my_op == MPI_SUM) then
+       if (my_op/=MPI_SUM) call xmpi_abort(msg="Too many data for in-place reductions!")
+       call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,my_dt,my_op,comm,ier)
+     else
+#endif
+       ABI_STAT_MALLOC(xsum,(n1,n2,n3,n4,n5), ier)
+       if (ier/=0) call xmpi_abort(comm,msg='error allocating xsum in xmpi_sum_c5dc')
+       call MPI_ALLREDUCE(xval,xsum,nn,my_dt,my_op,comm,ier)
+       xval (:,:,:,:,:) = xsum(:,:,:,:,:)
+       ABI_FREE(xsum)
+#if defined HAVE_MPI2_INPLACE
+     endif
+#endif
+
+     if (ntot>xmpi_maxint32_64) call xmpi_largetype_free(my_dt,my_op)
+   end if
+ end if
+#endif
+
+end subroutine xmpi_sum_c5dc
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* ABINIT/xmpi_sum_c6dc
+!! NAME
+!!  xmpi_sum_c6dc
+!!
+!! FUNCTION
+!!  Combines values from all processes and distribute the result back to all processes.
+!!  Target: six-dimensional double precision complex arrays.
+!!
+!! INPUTS
+!!  comm= MPI communicator
+!!
+!! OUTPUT
+!!  ier= exit status, a non-zero value meaning there is an error
+!!
+!! SIDE EFFECTS
+!!  xval= buffer array
+!!
+!! SOURCE
+
+subroutine xmpi_sum_c6dc(xval,comm,ier)
+
+!Arguments-------------------------
+ complex(dpc), DEV_CONTARRD intent(inout) :: xval(:,:,:,:,:,:)
+ integer,intent(in) :: comm
+ integer,intent(out) :: ier
+
+!Local variables-------------------
+#if defined HAVE_MPI
+ integer :: my_dt,my_op,n1,n2,n3,n4,n5,n6,nn,nproc_space_comm
+ integer(kind=int64) :: ntot
+ complex(dpc),allocatable :: xsum(:,:,:,:,:,:)
+#endif
+
+! *************************************************************************
+
+ ier=0
+#if defined HAVE_MPI
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
+   call MPI_COMM_SIZE(comm,nproc_space_comm,ier)
+   if (nproc_space_comm /= 1) then
+     n1 =size(xval,dim=1)
+     n2 =size(xval,dim=2)
+     n3 =size(xval,dim=3)
+     n4 =size(xval,dim=4)
+     n5 =size(xval,dim=5)
+     n6 =size(xval,dim=6)
+
+     !This product of dimensions can be greater than a 32bit integer
+     !We use a INT64 to store it. If it is too large, we switch to an
+     !alternate routine because MPI<4 doesnt handle 64 bit counts.
+     ntot=int(n1*n2*n3*n4*n5*n6,kind=int64)
+     if (ntot<=xmpi_maxint32_64) then
+       nn=n1*n2*n3*n4*n5*n6 ; my_dt=MPI_DOUBLE_COMPLEX ; my_op=MPI_SUM
+     else
+       nn=1 ; call xmpi_largetype_create(ntot,MPI_DOUBLE_COMPLEX,my_dt,my_op,MPI_SUM)
+     end if
+
+!    Accumulate xval on all proc. in comm
+#if defined HAVE_MPI2_INPLACE
+     if (xmpi_use_inplace_operations .and. my_op == MPI_SUM) then
+       if (my_op/=MPI_SUM) call xmpi_abort(msg="Too many data for in-place reductions!")
+       call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,my_dt,my_op,comm,ier)
+     else
+#endif
+       ABI_STAT_MALLOC(xsum,(n1,n2,n3,n4,n5,n6), ier)
+       if (ier/=0) call xmpi_abort(msg='error allocating xsum in xmpi_sum_c6dc')
+       call MPI_ALLREDUCE(xval,xsum,nn,my_dt,my_op,comm,ier)
+       xval = xsum
+       ABI_FREE(xsum)
+#if defined HAVE_MPI2_INPLACE
+     endif
+#endif
+
+     if (ntot>xmpi_maxint32_64) call xmpi_largetype_free(my_dt,my_op)
+   end if
+ end if
+#endif
+
+end subroutine xmpi_sum_c6dc
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* ABINIT/xmpi_sum_c7dc
+!! NAME
+!!  xmpi_sum_c7dc
+!!
+!! FUNCTION
+!!  Combines values from all processes and distribute the result back to all processes.
+!!  Target: six-dimensional double precision complex arrays.
+!!
+!! INPUTS
+!!  comm= MPI communicator
+!!
+!! OUTPUT
+!!  ier= exit status, a non-zero value meaning there is an error
+!!
+!! SIDE EFFECTS
+!!  xval= buffer array
+!!
+!! SOURCE
+
+subroutine xmpi_sum_c7dc(xval,comm,ier)
+
+!Arguments-------------------------
+ complex(dpc), DEV_CONTARRD intent(inout) :: xval(:,:,:,:,:,:,:)
+ integer,intent(in) :: comm
+ integer,intent(out) :: ier
+
+!Local variables-------------------
+#if defined HAVE_MPI
+ integer :: my_dt,my_op,n1,n2,n3,n4,n5,n6,n7,nn,nproc_space_comm
+ integer(kind=int64) :: ntot
+ complex(dpc),allocatable :: xsum(:,:,:,:,:,:,:)
+#endif
+
+! *************************************************************************
+
+ ier=0
+#if defined HAVE_MPI
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
+   call MPI_COMM_SIZE(comm,nproc_space_comm,ier)
+   if (nproc_space_comm /= 1) then
+     n1 =size(xval,dim=1)
+     n2 =size(xval,dim=2)
+     n3 =size(xval,dim=3)
+     n4 =size(xval,dim=4)
+     n5 =size(xval,dim=5)
+     n6 =size(xval,dim=6)
+     n7 =size(xval,dim=7)
+
+     !This product of dimensions can be greater than a 32bit integer
+     !We use a INT64 to store it. If it is too large, we switch to an
+     !alternate routine because MPI<4 doesnt handle 64 bit counts.
+     ntot=int(n1*n2*n3*n4*n5*n6*n7,kind=int64)
+     if (ntot<=xmpi_maxint32_64) then
+       nn=n1*n2*n3*n4*n5*n6*n7 ; my_dt=MPI_DOUBLE_COMPLEX ; my_op=MPI_SUM
+     else
+       nn=1 ; call xmpi_largetype_create(ntot,MPI_DOUBLE_COMPLEX,my_dt,my_op,MPI_SUM)
+     end if
+
+!    Accumulate xval on all proc. in comm
+#if defined HAVE_MPI2_INPLACE
+     if (xmpi_use_inplace_operations .and. my_op == MPI_SUM) then
+       if (my_op/=MPI_SUM) call xmpi_abort(msg="Too many data for in-place reductions!")
+       call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,my_dt,my_op,comm,ier)
+     else
+#endif
+       ABI_STAT_MALLOC(xsum,(n1,n2,n3,n4,n5,n6,n7),ier)
+       if (ier/=0) then
+         call xmpi_abort(comm=comm,msg='error allocating xsum in xmpi_sum_c7dc')
+       end if
+       call MPI_ALLREDUCE(xval,xsum,nn,my_dt,my_op,comm,ier)
+       xval = xsum
+       ABI_FREE(xsum)
+#if defined HAVE_MPI2_INPLACE
+     endif
+#endif
+
+     if (ntot>xmpi_maxint32_64) call xmpi_largetype_free(my_dt,my_op)
+   end if
+ end if
+#endif
+
+end subroutine xmpi_sum_c7dc
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* ABINIT/xmpi_sum_c1cplx
+!! NAME
+!!  xmpi_sum_c1cplx
+!!
+!! FUNCTION
+!!  Combines values from all processes and distribute
+!!  the result back to all processes.
+!!  Target: one-dimensional complex arrays.
+!!
+!! INPUTS
+!!  comm= MPI communicator
+!!
+!! OUTPUT
+!!  ier= exit status, a non-zero value meaning there is an error
+!!
+!! SIDE EFFECTS
+!!  xval= buffer array
+!!
+!! SOURCE
+
+subroutine xmpi_sum_c1cplx(xval,comm,ier)
+
+!Arguments----------------
+ complex(spc), DEV_CONTARRD intent(inout) :: xval(:)
+ integer,intent(in) :: comm
+ integer,intent(out) :: ier
+
+!Local variables--------------
+#if defined HAVE_MPI
+ integer :: n1,nproc_space_comm
+ complex(spc),allocatable :: xsum(:)
+#endif
+
+! *************************************************************************
+
+ ier=0
+#if defined HAVE_MPI
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
+   call MPI_COMM_SIZE(comm,nproc_space_comm,ier)
+   if (nproc_space_comm /= 1) then
+     n1 =size(xval,dim=1)
+
+!    Accumulate xval on all proc. in comm
+#if defined HAVE_MPI2_INPLACE
+     if (xmpi_use_inplace_operations) then
+       call MPI_ALLREDUCE(MPI_IN_PLACE,xval,n1,MPI_COMPLEX,MPI_SUM,comm,ier)
+     else
+#endif
+       ABI_STAT_MALLOC(xsum,(n1), ier)
+       if (ier/= 0) call xmpi_abort(msg='error allocating xsum in xmpi_sum_c1cplx')
+       call MPI_ALLREDUCE(xval,xsum,n1,MPI_COMPLEX,MPI_SUM,comm,ier)
+       xval (:) = xsum(:)
+       ABI_FREE(xsum)
+#if defined HAVE_MPI2_INPLACE
+     endif
+#endif
+
+   end if
+ end if
+#endif
+
+end subroutine xmpi_sum_c1cplx
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* ABINIT/xmpi_sum_c2cplx
+!! NAME
+!!  xmpi_sum_c2cplx
+!!
+!! FUNCTION
+!!  Combines values from all processes and distribute
+!!  the result back to all processes.
+!!  Target: two-dimensional complex arrays.
+!!
+!! INPUTS
+!!  comm= MPI communicator
+!!
+!! OUTPUT
+!!  ier= exit status, a non-zero value meaning there is an error
+!!
+!! SIDE EFFECTS
+!!  xval= buffer array
+!!
+!! SOURCE
+
+subroutine xmpi_sum_c2cplx(xval,comm,ier)
+
+!Arguments----------------
+ complex(spc), DEV_CONTARRD intent(inout) :: xval(:,:)
+ integer,intent(in) :: comm
+ integer,intent(out) :: ier
+
+!Local variables--------------
+#if defined HAVE_MPI
+ integer :: my_dt,my_op,n1,n2,nn,nproc_space_comm
+ integer(kind=int64) :: ntot
+ complex(spc), allocatable :: xsum(:,:)
+#endif
+
+! *************************************************************************
+
+ ier=0
+#if defined HAVE_MPI
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
+   call MPI_COMM_SIZE(comm,nproc_space_comm,ier)
+   if (nproc_space_comm /= 1) then
+     n1 =size(xval,dim=1)
+     n2 =size(xval,dim=2)
+
+     !This product of dimensions can be greater than a 32bit integer
+     !We use a INT64 to store it. If it is too large, we switch to an
+     !alternate routine because MPI<4 doesnt handle 64 bit counts.
+     ntot=int(n1*n2,kind=int64)
+     if (ntot<=xmpi_maxint32_64) then
+       nn=n1*n2 ; my_dt=MPI_COMPLEX ; my_op=MPI_SUM
+     else
+       nn=1 ; call xmpi_largetype_create(ntot,MPI_COMPLEX,my_dt,my_op,MPI_SUM)
+     end if
+
+!    Accumulate xval on all proc. in comm
+#if defined HAVE_MPI2_INPLACE
+     if (xmpi_use_inplace_operations .and. my_op == MPI_SUM) then
+       if (my_op/=MPI_SUM) call xmpi_abort(msg="Too many data for in-place reductions!")
+       call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,my_dt,my_op,comm,ier)
+     else
+#endif
+       ABI_STAT_MALLOC(xsum,(n1,n2), ier)
+       if (ier/= 0) call xmpi_abort(msg='error allocating xsum in xmpi_sum_c2cplx')
+       call MPI_ALLREDUCE(xval,xsum,nn,my_dt,my_op,comm,ier)
+       xval (:,:) = xsum(:,:)
+       ABI_FREE(xsum)
+#if defined HAVE_MPI2_INPLACE
+     endif
+#endif
+
+     if (ntot>xmpi_maxint32_64) call xmpi_largetype_free(my_dt,my_op)
+   end if
+ end if
+#endif
+
+end subroutine xmpi_sum_c2cplx
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* ABINIT/xmpi_sum_c3cplx
+!! NAME
+!!  xmpi_sum_c3cplx
+!!
+!! FUNCTION
+!!  Combines values from all processes and distribute
+!!  the result back to all processes.
+!!  Target: three-dimensional complex arrays.
+!!
+!! INPUTS
+!!  comm= MPI communicator
+!!
+!! OUTPUT
+!!  ier= exit status, a non-zero value meaning there is an error
+!!
+!! SIDE EFFECTS
+!!  xval= buffer array
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!      mpi_allreduce,xmpi_abort
+!!
+!! SOURCE
+
+subroutine xmpi_sum_c3cplx(xval,comm,ier)
+
+!Arguments----------------
+ complex(spc), DEV_CONTARRD intent(inout) :: xval(:,:,:)
+ integer,intent(in) :: comm
+ integer,intent(out) :: ier
+
+!Local variables--------------
+#if defined HAVE_MPI
+ integer :: my_dt,my_op,n1,n2,n3,nn,nproc_space_comm
+ integer(kind=int64) :: ntot
+ complex(spc), allocatable :: xsum(:,:,:)
+#endif
+
+! *************************************************************************
+
+ ier=0
+#if defined HAVE_MPI
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
+   call MPI_COMM_SIZE(comm,nproc_space_comm,ier)
+   if (nproc_space_comm /= 1) then
+     n1 =size(xval,dim=1)
+     n2 =size(xval,dim=2)
+     n3 =size(xval,dim=3)
+
+     !This product of dimensions can be greater than a 32bit integer
+     !We use a INT64 to store it. If it is too large, we switch to an
+     !alternate routine because MPI<4 doesnt handle 64 bit counts.
+     ntot=int(n1*n2*n3,kind=int64)
+     if (ntot<=xmpi_maxint32_64) then
+       nn=n1*n2*n3 ; my_dt=MPI_COMPLEX ; my_op=MPI_SUM
+     else
+       nn=1 ; call xmpi_largetype_create(ntot,MPI_COMPLEX,my_dt,my_op,MPI_SUM)
+     end if
+
+!    Accumulate xval on all proc. in comm
+#if defined HAVE_MPI2_INPLACE
+     if (xmpi_use_inplace_operations .and. my_op == MPI_SUM) then
+       if (my_op/=MPI_SUM) call xmpi_abort(msg="Too many data for in-place reductions!")
+       call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,my_dt,my_op,comm,ier)
+     else
+#endif
+       ABI_STAT_MALLOC(xsum,(n1,n2,n3), ier)
+       if (ier/= 0) call xmpi_abort(msg='error allocating xsum in xmpi_sum_c3cplx')
+       call MPI_ALLREDUCE(xval,xsum,nn,my_dt,my_op,comm,ier)
+       xval (:,:,:) = xsum(:,:,:)
+       ABI_FREE(xsum)
+#if defined HAVE_MPI2_INPLACE
+     endif
+#endif
+
+     if (ntot>xmpi_maxint32_64) call xmpi_largetype_free(my_dt,my_op)
+   end if
+ end if
+#endif
+
+end subroutine xmpi_sum_c3cplx
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* ABINIT/xmpi_sum_c4cplx
+!! NAME
+!!  xmpi_sum_c4cplx
+!!
+!! FUNCTION
+!!  Combines values from all processes and distribute
+!!  the result back to all processes.
+!!  Target: four-dimensional complex arrays.
+!!
+!! INPUTS
+!!  comm= MPI communicator
+!!
+!! OUTPUT
+!!  ier= exit status, a non-zero value meaning there is an error
+!!
+!! SIDE EFFECTS
+!!  xval= buffer array
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!      mpi_allreduce,xmpi_abort
+!!
+!! SOURCE
+
+subroutine xmpi_sum_c4cplx(xval,comm,ier)
+
+!Arguments----------------
+ complex(spc), DEV_CONTARRD intent(inout) :: xval(:,:,:,:)
+ integer,intent(in) :: comm
+ integer,intent(out) :: ier
+
+!Local variables--------------
+#if defined HAVE_MPI
+ integer :: my_dt,my_op,n1,n2,n3,n4,nn,nproc_space_comm
+ integer(kind=int64) :: ntot
+ complex(spc),allocatable :: xsum(:,:,:,:)
+#endif
+
+! *************************************************************************
+
+ ier=0
+#if defined HAVE_MPI
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
+   call MPI_COMM_SIZE(comm,nproc_space_comm,ier)
+   if (nproc_space_comm /= 1) then
+     n1 =size(xval,dim=1)
+     n2 =size(xval,dim=2)
+     n3 =size(xval,dim=3)
+     n4 =size(xval,dim=4)
+
+     !This product of dimensions can be greater than a 32bit integer
+     !We use a INT64 to store it. If it is too large, we switch to an
+     !alternate routine because MPI<4 doesnt handle 64 bit counts.
+     ntot=int(n1*n2*n3*n4,kind=int64)
+     if (ntot<=xmpi_maxint32_64) then
+       nn=n1*n2*n3*n4 ; my_dt=MPI_COMPLEX ; my_op=MPI_SUM
+     else
+       nn=1 ; call xmpi_largetype_create(ntot,MPI_COMPLEX,my_dt,my_op,MPI_SUM)
+     end if
+
+!    Accumulate xval on all proc. in comm
+#if defined HAVE_MPI2_INPLACE
+     if (xmpi_use_inplace_operations .and. my_op == MPI_SUM) then
+       if (my_op/=MPI_SUM) call xmpi_abort(msg="Too many data for in-place reductions!")
+       call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,my_dt,my_op,comm,ier)
+     else
+#endif
+       ABI_STAT_MALLOC(xsum,(n1,n2,n3,n4), ier)
+       if (ier/= 0) call xmpi_abort(msg='error allocating xsum in xmpi_sum_c4cplx')
+       call MPI_ALLREDUCE(xval,xsum,nn,my_dt,my_op,comm,ier)
+       xval (:,:,:,:) = xsum(:,:,:,:)
+       ABI_FREE(xsum)
+#if defined HAVE_MPI2_INPLACE
+     endif
+#endif
+
+     if (ntot>xmpi_maxint32_64) call xmpi_largetype_free(my_dt,my_op)
+   end if
+ end if
+#endif
+
+end subroutine xmpi_sum_c4cplx
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* ABINIT/xmpi_sum_c5cplx
+!! NAME
+!!  xmpi_sum_c5cplx
+!!
+!! FUNCTION
+!!  Combines values from all processes and distribute
+!!  the result back to all processes.
+!!  Target: five-dimensional complex arrays.
+!!
+!! INPUTS
+!!  comm= MPI communicator
+!!
+!! OUTPUT
+!!  ier= exit status, a non-zero value meaning there is an error
+!!
+!! SIDE EFFECTS
+!!  xval= buffer array
+!!
+!! SOURCE
+
+subroutine xmpi_sum_c5cplx(xval,comm,ier)
+
+!Arguments----------------
+ complex(spc), DEV_CONTARRD intent(inout) :: xval(:,:,:,:,:)
+ integer,intent(in) :: comm
+ integer,intent(out) :: ier
+
+!Local variables--------------
+#if defined HAVE_MPI
+ integer :: my_dt,my_op,n1,n2,n3,n4,n5,nn,nproc_space_comm
+ integer(kind=int64) :: ntot
+ complex(spc),allocatable :: xsum(:,:,:,:,:)
+#endif
+
+! *************************************************************************
+
+ ier=0
+#if defined HAVE_MPI
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
+   call MPI_COMM_SIZE(comm,nproc_space_comm,ier)
+   if (nproc_space_comm /= 1) then
+     n1 =size(xval,dim=1)
+     n2 =size(xval,dim=2)
+     n3 =size(xval,dim=3)
+     n4 =size(xval,dim=4)
+     n5 =size(xval,dim=5)
+
+     !This product of dimensions can be greater than a 32bit integer
+     !We use a INT64 to store it. If it is too large, we switch to an
+     !alternate routine because MPI<4 doesnt handle 64 bit counts.
+     ntot=int(n1*n2*n3*n4*n5,kind=int64)
+     if (ntot<=xmpi_maxint32_64) then
+       nn=n1*n2*n3*n4*n5 ; my_dt=MPI_COMPLEX ; my_op=MPI_SUM
+     else
+       nn=1 ; call xmpi_largetype_create(ntot,MPI_COMPLEX,my_dt,my_op,MPI_SUM)
+     end if
+
+!    Accumulate xval on all proc. in comm
+#if defined HAVE_MPI2_INPLACE
+     if (xmpi_use_inplace_operations .and. my_op == MPI_SUM) then
+       if (my_op/=MPI_SUM) call xmpi_abort(msg="Too many data for in-place reductions!")
+       call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,my_dt,my_op,comm,ier)
+     else
+#endif
+       ABI_STAT_MALLOC(xsum,(n1,n2,n3,n4,n5), ier)
+       if (ier/= 0) call xmpi_abort(msg='error allocating xsum in xmpi_sum_c5cplx')
+       call MPI_ALLREDUCE(xval,xsum,nn,my_dt,my_op,comm,ier)
+       xval (:,:,:,:,:) = xsum(:,:,:,:,:)
+       ABI_FREE(xsum)
+#if defined HAVE_MPI2_INPLACE
+     endif
+#endif
+
+     if (ntot>xmpi_maxint32_64) call xmpi_largetype_free(my_dt,my_op)
+   end if
+ end if
+#endif
+
+end subroutine xmpi_sum_c5cplx
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* ABINIT/xmpi_sum_c6cplx
+!! NAME
+!!  xmpi_sum_c6cplx
+!!
+!! FUNCTION
+!!  Combines values from all processes and distribute the result back to all processes.
+!!  Target: six-dimensional complex arrays.
+!!
+!! INPUTS
+!!  comm= MPI communicator
+!!
+!! OUTPUT
+!!  ier= exit status, a non-zero value meaning there is an error
+!!
+!! SIDE EFFECTS
+!!  xval= buffer array
+!!
+!! SOURCE
+
+subroutine xmpi_sum_c6cplx(xval,comm,ier)
+
+!Arguments----------------
+ complex(spc), DEV_CONTARRD intent(inout) :: xval(:,:,:,:,:,:)
+ integer,intent(in) :: comm
+ integer,intent(out) :: ier
+
+!Local variables--------------
+#if defined HAVE_MPI
+ integer :: my_dt,my_op,n1,n2,n3,n4,n5,n6,nn,nproc_space_comm
+ integer(kind=int64) :: ntot
+ complex(spc),allocatable :: xsum(:,:,:,:,:,:)
+#endif
+
+! *************************************************************************
+
+ ier=0
+#if defined HAVE_MPI
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
+   call MPI_COMM_SIZE(comm,nproc_space_comm,ier)
+   if (nproc_space_comm /= 1) then
+     n1 =size(xval,dim=1)
+     n2 =size(xval,dim=2)
+     n3 =size(xval,dim=3)
+     n4 =size(xval,dim=4)
+     n5 =size(xval,dim=5)
+     n6 =size(xval,dim=6)
+
+     !This product of dimensions can be greater than a 32bit integer
+     !We use a INT64 to store it. If it is too large, we switch to an
+     !alternate routine because MPI<4 doesnt handle 64 bit counts.
+     ntot=int(n1*n2*n3*n4*n5*n6,kind=int64)
+     if (ntot<=xmpi_maxint32_64) then
+       nn=n1*n2*n3*n4*n5*n6 ; my_dt=MPI_COMPLEX ; my_op=MPI_SUM
+     else
+       nn=1 ; call xmpi_largetype_create(ntot,MPI_COMPLEX,my_dt,my_op,MPI_SUM)
+     end if
+
+!    Accumulate xval on all proc. in comm
+#if defined HAVE_MPI2_INPLACE
+     if (xmpi_use_inplace_operations .and. my_op == MPI_SUM) then
+       if (my_op/=MPI_SUM) call xmpi_abort(msg="Too many data for in-place reductions!")
+       call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,my_dt,my_op,comm,ier)
+     else
+#endif
+       ABI_STAT_MALLOC(xsum,(n1,n2,n3,n4,n5,n6), ier)
+       if (ier/= 0) call xmpi_abort(msg='error allocating xsum in xmpi_sum_c6cplx')
+       call MPI_ALLREDUCE(xval,xsum,nn,my_dt,my_op,comm,ier)
+       xval = xsum
+       ABI_FREE(xsum)
+#if defined HAVE_MPI2_INPLACE
+     endif
+#endif
+
+     if (ntot>xmpi_maxint32_64) call xmpi_largetype_free(my_dt,my_op)
+   end if
+ end if
+#endif
+
+end subroutine xmpi_sum_c6cplx
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* ABINIT/xmpi_sum_coeff5d1
+!! NAME
+!!  xmpi_sum_coeff5d1
+!!
+!! FUNCTION
+!!  Combines values from all processes and distribute the result back to all processes.
+!!  Target: coeff5_type 1D-structure
+!!
+!! INPUTS
+!!  comm= MPI communicator
+!!
+!! OUTPUT
+!!  ier= exit status, a non-zero value meaning there is an error
+!!
+!! SIDE EFFECTS
+!!  xval = coeff5d_type array structure (input and output)
+!!
+!! SOURCE
+
+subroutine xmpi_sum_coeff5d1(xval,comm,ier)
+
+!Arguments ------------------------------------
+ type(coeff5_type),intent(inout) :: xval(:)
+ integer,intent(in) :: comm
+ integer,intent(out)   :: ier
+
+!Local variables-------------------------------
+#if defined HAVE_MPI
+ integer :: buf_size,i2,i3,i4,i5,ii,indx_buf,n1,n2,n3,n4,n5,nb,nproc_space_comm
+ integer, allocatable :: dims(:,:)
+ real(dp),allocatable :: buf(:),xsum(:)
+#endif
+
+! *************************************************************************
+
+ ier=0
+#if defined HAVE_MPI
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
+   call MPI_COMM_SIZE(comm,nproc_space_comm,ier)
+   if (nproc_space_comm /= 1) then
+     nb = size(xval,1)
+
+!    Retrieve sizes of 'value' fields
+     ABI_MALLOC(dims,(5,nb))
+     buf_size=0
+     do ii=1,nb
+       if (.not.allocated(xval(ii)%value)) &
+&        call xmpi_abort(msg='bug in xmpi_sum(coeff5): xval should be allocated!')
+       dims(1,ii)=size(xval(ii)%value,dim=1)
+       dims(2,ii)=size(xval(ii)%value,dim=2)
+       dims(3,ii)=size(xval(ii)%value,dim=3)
+       dims(4,ii)=size(xval(ii)%value,dim=4)
+       dims(5,ii)=size(xval(ii)%value,dim=5)
+       buf_size=buf_size+dims(1,ii)*dims(2,ii)*dims(3,ii)*dims(4,ii)*dims(5,ii)
+     end do
+
+!    Fill in buffer
+     ABI_STAT_MALLOC(buf,(buf_size) ,ier)
+     if (ier/= 0) call xmpi_abort(msg='error allocating buf in xmpi_sum(coeff5)!')
+     indx_buf=1
+     do ii=1,nb
+       n1=dims(1,ii); n2=dims(2,ii)
+       n3=dims(3,ii); n4=dims(4,ii); n5=dims(5,ii)
+       do i5=1,n5
+         do i4=1,n4
+           do i3=1,n3
+             do i2=1,n2
+               buf(indx_buf:indx_buf+n1-1)=xval(ii)%value(1:n1,i2,i3,i4,i5)
+               indx_buf=indx_buf+n1
+             end do
+           end do
+         end do
+       end do
+     end do
+
+!    Accumulate xval%value on all proc. in comm
+#if defined HAVE_MPI2_INPLACE
+     if (xmpi_use_inplace_operations) then
+       call MPI_ALLREDUCE(MPI_IN_PLACE,buf,buf_size,MPI_DOUBLE_PRECISION,MPI_SUM,comm,ier)
+     else
+#endif
+       ABI_STAT_MALLOC(xsum,(buf_size), ier)
+       if (ier/= 0) call xmpi_abort(msg='error allocating xsum in xmpi_sum(coeff5)!')
+       call MPI_ALLREDUCE(buf,xsum,buf_size,MPI_DOUBLE_PRECISION,MPI_SUM,comm,ier)
+       buf = xsum
+       ABI_FREE(xsum)
+#if defined HAVE_MPI2_INPLACE
+     endif
+#endif
+
+!    Transfer buffer into output datastructure
+     indx_buf=1
+     do ii=1,nb
+       n1=dims(1,ii); n2=dims(2,ii)
+       n3=dims(3,ii); n4=dims(4,ii); n5=dims(5,ii)
+       do i5=1,n5
+         do i4=1,n4
+           do i3=1,n3
+             do i2=1,n2
+               xval(ii)%value(1:n1,i2,i3,i4,i5)=buf(indx_buf:indx_buf+n1-1)
+               indx_buf=indx_buf+n1
+             end do
+           end do
+         end do
+       end do
+     end do
+
+     ABI_FREE(dims)
+     ABI_FREE(buf)
+
+   end if
+ end if
+#endif
+
+end subroutine xmpi_sum_coeff5d1
+!!***

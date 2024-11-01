@@ -120,29 +120,36 @@ def main():
         print(__doc__)
         return 1
 
-    top = find_top_build_tree(".", with_abinit=False)
-    # Need top level directory for ref files so check if tests/v1 exists else try ..
-    v1refs = os.path.join(top, "tests", "v1", "Refs")
-    print(v1refs)
-    if not os.path.isdir(v1refs):
-        top = os.path.join(top, "..")
-        v1refs = os.path.join(top, "tests", "v1", "Refs")
-        if not os.path.isdir(v1refs):
-            raise RuntimeError("Cannot find top-level abinit directory containing ~abinit/v1/Refs")
-
     out_paths = sys.argv[1:]
-
     out_paths = [os.path.abspath(p) for p in out_paths]
-    for out_path in out_paths:
-        # Get the name of the substuite from dirname e.g. v7_t85-t86-t87-t88-t89
-        suite_dir = os.path.basename(os.path.dirname(out_path)).split("_")[0]
-        ref_path = os.path.join(top, "tests", suite_dir, "Refs", os.path.basename(out_path))
-        print("Comparing:", os.path.relpath(out_path), "with", ref_path)
-        if not os.path.isfile(ref_path):
-            raise RuntimeError("Cannot find reference file: `%s`" % ref_path)
-        ref_data = get_array_from_path(ref_path)
-        out_data = get_array_from_path(out_path)
-        compare_data(ref_data, out_data, os.path.basename(out_path))
+
+    find_refs = len(out_paths) == 1
+    if find_refs:
+        top = find_top_build_tree(".", with_abinit=False)
+        # Need top level directory for ref files so check if tests/v1 exists else try ..
+        v1refs = os.path.join(top, "tests", "v1", "Refs")
+        print(v1refs)
+        if not os.path.isdir(v1refs):
+            top = os.path.join(top, "..")
+            v1refs = os.path.join(top, "tests", "v1", "Refs")
+            if not os.path.isdir(v1refs):
+                raise RuntimeError("Cannot find top-level abinit directory containing ~abinit/v1/Refs")
+
+        for out_path in out_paths:
+            # Get the name of the substuite from dirname e.g. v7_t85-t86-t87-t88-t89
+            suite_dir = os.path.basename(os.path.dirname(out_path)).split("_")[0]
+            ref_path = os.path.join(top, "tests", suite_dir, "Refs", os.path.basename(out_path))
+            print("Comparing:", os.path.relpath(out_path), "with", ref_path)
+            if not os.path.isfile(ref_path):
+                raise RuntimeError("Cannot find reference file: `%s`" % ref_path)
+            ref_data = get_array_from_path(ref_path)
+            out_data = get_array_from_path(out_path)
+            compare_data(ref_data, out_data, os.path.basename(out_path))
+    else:
+        assert len(out_paths) == 2
+        ref_data = get_array_from_path(out_paths[0])
+        out_data = get_array_from_path(out_paths[1])
+        compare_data(ref_data, out_data, os.path.basename(out_paths[0]))
 
     return 0
 

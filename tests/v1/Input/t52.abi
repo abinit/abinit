@@ -1,0 +1,65 @@
+# Aluminum diatomic molecule for tests. Determine largest SCF eigenvalue.
+# Do not use all the symmetries, in order to be influenced
+# by a large SCF eigenvalue. Still, the largest eigenvalue is eliminated.
+# See test 51 for the computation of the eigenvalues of the Hermitian
+# dielectric matrix.
+
+ acell 18 11 11
+ diemac 1.0d0
+ diemix 1.0d0
+ ecut 2.0
+ enunit 2
+ intxc 1
+ irdwfk 1
+ iscf 1
+ ixc 0
+ kptopt 0
+
+ kpt  0.25  0.25  0.25
+ natom  2   nband 3
+ nkpt 1
+ nstep  20
+
+ nsym 4    # Note : use only four symmetries
+ ntypat  1
+ occopt 1
+ rprim 1 0 0  0 1 0  0 0 1
+ symrel  1 0 0   0  1  0    0  0  1
+         1 0 0   0  1  0    0  0 -1
+         1 0 0   0 -1  0    0  0  1
+         1 0 0   0 -1  0    0  0 -1
+ tnons 3*0.0d0  9*0.0d0
+         0.3333333333333333d0  0.0d0 0.0d0
+         0.3333333333333333d0  0.0d0 0.0d0
+         0.3333333333333333d0  0.0d0 0.0d0
+         0.3333333333333333d0  0.0d0 0.0d0
+
+ toldfe 1.0d-12
+ typat  1 1
+ wtk  1 1 1 1
+ xcart 0.0  0.0 0.0
+       6.0  0.0 0.0
+ znucl  13.0
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosGTH_pwteter/13al.pspgth"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% input_prefix = t51o
+#%% test_chain = t51.abi, t52.abi
+#%% [files]
+#%% files_to_test = 
+#%%   t52.abo, tolnlines = 3, tolabs = 1.000e-9, tolrel = 6.000e-04
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% keywords = NC
+#%% authors = Unknown
+#%% description = 
+#%%   Same system as for case 51. Determination of the largest SCF
+#%%   eigenvalue by brute force : iscf=1 . Get 5.647 . The
+#%%   symmetries make the largest eigenvalue of the Hermitian TC dielectric
+#%%   matrix not appear here, so that this value is to be compared with 5.531.
+#%%<END TEST_INFO>

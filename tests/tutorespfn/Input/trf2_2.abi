@@ -1,0 +1,110 @@
+# Crystalline AlAs : computation of the phonon spectrum and electric field perturbation
+
+   ndtset   8
+
+#Q vectors for all datasets
+
+#Complete set of symmetry-inequivalent qpt chosen to be commensurate
+# with kpt mesh so that only one set of GS wave functions is needed.
+
+   nqpt   1            # One qpt for each dataset (only 0 or 1 allowed)
+   qptopt 1            # activate determining qpts in IBZ with symmetry
+   ngqpt  4 4 4        # these variables mirror those used for the kpt
+   nshiftq 1           # mesh below, but with no shift. In this way,
+   shiftq 0 0 0        # qpts coherent with the kpts are constructed
+                       # the number of resulting q pts is pretdetermined
+                       # through use of the abitk tool
+
+   iqpt: 1 iqpt+ 1     # we automatically iterate through the q pts
+
+
+#Set 1 : iqpt 1 is the gamma point, so Q=0 phonons and electric field pert.
+
+  getddk1   98         # d/dk wave functions 
+  kptopt1   2          # Modify default to use time-reversal symmetry
+  rfelfd1   3          # Electric-field perturbation response
+                       # (in addition to default phonon)
+
+#Sets 2-8 : Finite-wave-vector phonon calculations (defaults for all datasets)
+
+   getwfk   99         # Use GS wave functions
+   kptopt   3          # Need full k-point set for finite-Q response
+   rfphon   1          # Do phonon response
+   tolvrs   1.0d-8     # Converge on potential residual
+
+# turn off various file outputs, here we will be interested only the
+# DDB files
+
+   prtwf 0
+   prtden 0
+   prtpot 0
+   prteig 0
+
+#######################################################################
+#Common input variables
+
+#Definition of the unit cell
+    acell   3*10.61         # This is equivalent to   10.61 10.61 10.61
+    rprim   0.0  0.5  0.5   # In tutorials 1 and 2, these primitive vectors 
+            0.5  0.0  0.5   # (to be scaled by acell) were 1 0 0  0 1 0  0 0 1 
+            0.5  0.5  0.0   # that is, the default.
+
+#Definition of the atom types
+   ntypat   2         # There are two types of atom
+    znucl   13 33     # The keyword "znucl" refers to the atomic number of the 
+                      # possible type(s) of atom. The pseudopotential(s) 
+                      # mentioned in the "files" file must correspond
+                      # to the type(s) of atom. Here, type 1 is the Aluminum,
+                      # type 2 is the Arsenic.
+
+#Definition of the atoms
+    natom   2         # There are two atoms
+    typat   1 2       # The first is of type 1 (Al), the second is of type 2 (As).
+                       
+     xred   0.0  0.0  0.0
+            0.25 0.25 0.25  
+
+#Gives the number of band, explicitely (do not take the default)
+    nband   4         
+
+#Definition of the planewave basis set
+     ecut   3.0           # Maximal kinetic energy cut-off, in Hartree
+
+#Definition of the k-point grid
+    ngkpt   4  4  4          
+  nshiftk   4              # Use one copy of grid only (default)
+   shiftk   0.0 0.0 0.5    # This gives the usual fcc Monkhorst-Pack grid
+            0.0 0.5 0.0
+            0.5 0.0 0.0
+            0.5 0.5 0.5
+
+#Definition of the SCF procedure
+    nstep   25         # Maximal number of SCF cycles
+   diemac   9.0        # Although this is not mandatory, it is worth to
+                       # precondition the SCF cycle. The model dielectric
+                       # function used as the standard preconditioner
+                       # is described in the "dielng" input variable section.
+                       # The dielectric constant of AlAs is smaller that the one of Si (=12).
+
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "13al.981214.fhi, PseudosTM_pwteter/33as.pspnc"
+
+##############################################################
+# This section is used only for regression testing of ABINIT #
+##############################################################
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% exclude_builders = eos_gnu_13.2_serial
+#%% test_chain = trf2_1.abi, trf2_2.abi, trf2_3.abi, trf2_4.abi, trf2_5.abi, trf2_6.abi, trf2_7.abi
+#%% [files]
+#%% files_to_test = 
+#%%   trf2_2.abo, tolnlines= 96, tolabs=  4.2e-6, tolrel=  3.0e-4
+#%% [paral_info]
+#%% max_nprocs = 2
+#%% [extra_info]
+#%% authors = X. Gonze, J. Zwanziger
+#%% keywords = NC, DFPT
+#%% description =  Crystalline AlAs : computation of the phonon spectrum
+#%%<END TEST_INFO>

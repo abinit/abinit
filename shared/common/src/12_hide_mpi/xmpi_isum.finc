@@ -1,0 +1,553 @@
+!{\src2tex{textfont=tt}}
+!!****f* ABINIT/xmpi_isum
+!! NAME
+!!  xmpi_isum
+!!
+!! FUNCTION
+!!  This module contains functions that calls MPI routine,
+!!  if we compile the code using the MPI CPP flags.
+!!  xmpi_isum is the generic function.
+!!
+!! COPYRIGHT
+!!  Copyright (C) 2001-2024 ABINIT group (MG)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~ABINIT/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! NOTES
+!!    MPI_IALLREDUCE(SENDBUF, RECVBUF, COUNT, DATATYPE, OP, COMM, REQUEST, IERROR)
+!!                   <type>    SENDBUF(*), RECVBUF(*)
+!!                   INTEGER    COUNT, DATATYPE, OP, COMM, REQUEST, IERROR
+!!
+!! SOURCE
+
+!!***
+
+!!****f* ABINIT/xmpi_isum_int0d
+!! NAME
+!!  xmpi_isum_int0d
+!!
+!! FUNCTION
+!!  Combines values from all processes and distribute the result back to all processes.
+!!  Target: scalar integers. Non-blocking version.
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SOURCE
+
+subroutine xmpi_isum_int0d(xval, xsum, comm, request, ierr)
+
+!Arguments-------------------------
+ integer ABI_ASYNC, intent(in), target :: xval
+ integer ABI_ASYNC, intent(out), target :: xsum
+ integer,intent(in) :: comm
+ integer,intent(out) :: ierr, request
+
+!Local variables-------------------
+ integer :: itmp
+#ifdef HAVE_MPI_IALLREDUCE
+ integer, pointer :: arr_xval(:),arr_xsum(:)
+ type(c_ptr) :: cptr
+#endif
+
+! *************************************************************************
+
+#ifdef HAVE_MPI_IALLREDUCE
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
+   cptr=c_loc(xval) ; call c_f_pointer(cptr,arr_xval,[1])
+   cptr=c_loc(xsum) ; call c_f_pointer(cptr,arr_xsum,[1])
+   call MPI_IALLREDUCE(arr_xval, arr_xsum, 1, MPI_INTEGER, MPI_SUM, comm, request, ierr)
+   xmpi_count_requests = xmpi_count_requests + 1
+   return
+ end if
+ xsum = xval; request = xmpi_request_null
+ return
+#endif
+
+ ! Call the blocking version and return null request.
+ !write(std_out,*)"will block here and return fake request"
+ itmp = xval
+ call xmpi_sum(itmp, comm, ierr)
+ xsum = itmp; request = xmpi_request_null
+
+end subroutine xmpi_isum_int0d
+!!***
+
+!!****f* ABINIT/xmpi_isum_ip_dp2d
+!! NAME
+!!  xmpi_isum_ip_dp2d
+!!
+!! FUNCTION
+!!  Combines values from all processes and distribute the result back to all processes.
+!!  Target: scalar integers. Non-blocking INPLACE version.
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SOURCE
+
+subroutine xmpi_isum_ip_dp2d(xval, comm, request, ierr)
+
+!Arguments-------------------------
+ real(dp) ABI_ASYNC, intent(inout) :: xval(:,:)
+ integer,intent(in) :: comm
+ integer,intent(out) :: ierr, request
+#if !defined HAVE_MPI2_INPLACE
+ integer :: n1,n2
+ real(dp) ABI_ASYNC, allocatable :: xsum(:,:)
+#endif
+
+! *************************************************************************
+
+#ifdef HAVE_MPI_IALLREDUCE
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
+#if defined HAVE_MPI2_INPLACE
+   call MPI_IALLREDUCE(MPI_IN_PLACE, xval, product(shape(xval)), MPI_DOUBLE_PRECISION, MPI_SUM, comm, request, ierr)
+#else
+   n1 = size(xval,1) ; n2 = size(xval,2)
+   ABI_STAT_MALLOC(xsum,(n1,n2), ierr)
+   if (ierr/= 0) call xmpi_abort(msg='error allocating xsum in xmpi_isum_ip_dp2d')
+   call MPI_IALLREDUCE(xsum, xval, product(shape(xval)), MPI_DOUBLE_PRECISION, MPI_SUM, comm, request, ierr)
+   xval (:,:) = xsum(:,:)
+   ABI_FREE(xsum)
+#endif
+   xmpi_count_requests = xmpi_count_requests + 1
+   return
+ end if
+ request = xmpi_request_null
+ return
+#endif
+
+ ! Call the blocking version and return null request.
+ call xmpi_sum(xval, comm, ierr)
+ request = xmpi_request_null
+
+end subroutine xmpi_isum_ip_dp2d
+!!***
+
+!!****f* ABINIT/xmpi_isum_ip_dp3d
+!! NAME
+!!  xmpi_isum_ip_dp3d
+!!
+!! FUNCTION
+!!  Combines values from all processes and distribute the result back to all processes.
+!!  Target: scalar integers. Non-blocking INPLACE version.
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SOURCE
+
+subroutine xmpi_isum_ip_dp3d(xval, comm, request, ierr)
+
+!Arguments-------------------------
+ real(dp) ABI_ASYNC, intent(inout) :: xval(:,:,:)
+ integer,intent(in) :: comm
+ integer,intent(out) :: ierr, request
+#if !defined HAVE_MPI2_INPLACE
+ integer :: n1,n2,n3
+ real(dp) ABI_ASYNC, allocatable :: xsum(:,:,:)
+#endif
+
+! *************************************************************************
+
+#ifdef HAVE_MPI_IALLREDUCE
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
+#if defined HAVE_MPI2_INPLACE
+   call MPI_IALLREDUCE(MPI_IN_PLACE, xval, product(shape(xval)), MPI_DOUBLE_PRECISION, MPI_SUM, comm, request, ierr)
+#else
+   n1 = size(xval,1) ; n2 = size(xval,2) ; n3 = size(xval,3)
+   ABI_STAT_MALLOC(xsum,(n1,n2,n3), ierr)
+   if (ierr/= 0) call xmpi_abort(msg='error allocating xsum in xmpi_isum_ip_dp3d')
+   call MPI_IALLREDUCE(xsum, xval, product(shape(xval)), MPI_DOUBLE_PRECISION, MPI_SUM, comm, request, ierr)
+   xval (:,:,:) = xsum(:,:,:)
+   ABI_FREE(xsum)
+#endif
+   xmpi_count_requests = xmpi_count_requests + 1
+   return
+ end if
+ request = xmpi_request_null
+ return
+#endif
+
+ ! Call the blocking version and return null request.
+ call xmpi_sum(xval, comm, ierr)
+ request = xmpi_request_null
+
+end subroutine xmpi_isum_ip_dp3d
+!!***
+
+!!****f* ABINIT/xmpi_isum_ip_dp4d
+!! NAME
+!!  xmpi_isum_ip_dp4d
+!!
+!! FUNCTION
+!!  Combines values from all processes and distribute the result back to all processes.
+!!  Target: scalar integers. Non-blocking INPLACE version.
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SOURCE
+
+subroutine xmpi_isum_ip_dp4d(xval, comm, request, ierr)
+
+!Arguments-------------------------
+ real(dp) ABI_ASYNC, intent(inout) :: xval(:,:,:,:)
+ integer,intent(in) :: comm
+ integer,intent(out) :: ierr, request
+#if !defined HAVE_MPI2_INPLACE
+ integer :: n1,n2,n3,n4
+ real(dp) ABI_ASYNC, allocatable :: xsum(:,:,:,:)
+#endif
+
+! *************************************************************************
+
+#ifdef HAVE_MPI_IALLREDUCE
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
+#if defined HAVE_MPI2_INPLACE
+   call MPI_IALLREDUCE(MPI_IN_PLACE, xval, product(shape(xval)), MPI_DOUBLE_PRECISION, MPI_SUM, comm, request, ierr)
+#else
+   n1 = size(xval,1) ; n2 = size(xval,2) ; n3 = size(xval,3) ; n4 = size(xval,4)
+   ABI_STAT_MALLOC(xsum,(n1,n2,n3,n4), ierr)
+   if (ierr/= 0) call xmpi_abort(msg='error allocating xsum in xmpi_isum_ip_dp4d')
+   call MPI_IALLREDUCE(xsum, xval, product(shape(xval)), MPI_DOUBLE_PRECISION, MPI_SUM, comm, request, ierr)
+   xval (:,:,:,:) = xsum(:,:,:,:)
+   ABI_FREE(xsum)
+#endif
+   xmpi_count_requests = xmpi_count_requests + 1
+   return
+ end if
+ request = xmpi_request_null
+ return
+#endif
+
+ ! Call the blocking version and return null request.
+ call xmpi_sum(xval, comm, ierr)
+ request = xmpi_request_null
+
+end subroutine xmpi_isum_ip_dp4d
+!!***
+
+!!****f* ABINIT/xmpi_isum_ip_spc1d
+!! NAME
+!!  xmpi_isum_ip_spc1d
+!!
+!! FUNCTION
+!!  Combines values from all processes and distribute the result back to all processes.
+!!  Target: 1d single precision complex arrays. Non-blocking INPLACE version.
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SOURCE
+
+subroutine xmpi_isum_ip_spc1d(xval, comm, request, ierr)
+
+!Arguments-------------------------
+ complex(sp) ABI_ASYNC, intent(inout) :: xval(:)
+ integer,intent(in) :: comm
+ integer,intent(out) :: ierr, request
+#if !defined HAVE_MPI2_INPLACE
+ integer :: n1
+ complex(sp) ABI_ASYNC, allocatable :: xsum(:)
+#endif
+
+! *************************************************************************
+
+#ifdef HAVE_MPI_IALLREDUCE
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
+#if defined HAVE_MPI2_INPLACE
+   call MPI_IALLREDUCE(MPI_IN_PLACE, xval, product(shape(xval)), MPI_COMPLEX, MPI_SUM, comm, request, ierr)
+#else
+   n1 = size(xval,1)
+   ABI_STAT_MALLOC(xsum,(n1), ierr)
+   if (ierr/= 0) call xmpi_abort(msg='error allocating xsum in xmpi_isum_ip_spc1d')
+   call MPI_IALLREDUCE(xsum, xval, product(shape(xval)), MPI_COMPLEX, MPI_SUM, comm, request, ierr)
+   xval (:) = xsum(:)
+   ABI_FREE(xsum)
+#endif
+   xmpi_count_requests = xmpi_count_requests + 1
+   return
+ end if
+ request = xmpi_request_null
+ return
+#endif
+
+ ! Call the blocking version and return null request.
+ call xmpi_sum(xval, comm, ierr)
+ request = xmpi_request_null
+
+end subroutine xmpi_isum_ip_spc1d
+!!***
+
+!!****f* ABINIT/xmpi_isum_ip_dpc1d
+!! NAME
+!!  xmpi_isum_ip_dpc1d
+!!
+!! FUNCTION
+!!  Combines values from all processes and distribute the result back to all processes.
+!!  Target: 1d double precision complex arrays. Non-blocking INPLACE version.
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SOURCE
+
+subroutine xmpi_isum_ip_dpc1d(xval, comm, request, ierr)
+
+!Arguments-------------------------
+ complex(dp) ABI_ASYNC, intent(inout) :: xval(:)
+ integer,intent(in) :: comm
+ integer,intent(out) :: ierr, request
+#if !defined HAVE_MPI2_INPLACE
+ integer :: n1
+ complex(dp) ABI_ASYNC, allocatable :: xsum(:)
+#endif
+
+! *************************************************************************
+
+#ifdef HAVE_MPI_IALLREDUCE
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
+#if defined HAVE_MPI2_INPLACE
+   call MPI_IALLREDUCE(MPI_IN_PLACE, xval, product(shape(xval)), MPI_DOUBLE_COMPLEX, MPI_SUM, comm, request, ierr)
+#else
+   n1 = size(xval,1)
+   ABI_STAT_MALLOC(xsum,(n1), ierr)
+   if (ierr/= 0) call xmpi_abort(msg='error allocating xsum in xmpi_isum_ip_dpc1d')
+   call MPI_IALLREDUCE(xsum, xval, product(shape(xval)), MPI_DOUBLE_COMPLEX, MPI_SUM, comm, request, ierr)
+   xval (:) = xsum(:)
+   ABI_FREE(xsum)
+#endif
+   xmpi_count_requests = xmpi_count_requests + 1
+   return
+ end if
+ request = xmpi_request_null
+ return
+#endif
+
+ ! Call the blocking version and return null request.
+ call xmpi_sum(xval, comm, ierr)
+ request = xmpi_request_null
+
+end subroutine xmpi_isum_ip_dpc1d
+!!***
+
+!!****f* ABINIT/xmpi_isum_ip_spc2d
+!! NAME
+!!  xmpi_isum_ip_spc2d
+!!
+!! FUNCTION
+!!  Combines values from all processes and distribute the result back to all processes.
+!!  Target: 2d single precision complex arrays. Non-blocking INPLACE version.
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SOURCE
+
+subroutine xmpi_isum_ip_spc2d(xval, comm, request, ierr)
+
+!Arguments-------------------------
+ complex(sp) ABI_ASYNC, intent(inout) :: xval(:,:)
+ integer,intent(in) :: comm
+ integer,intent(out) :: ierr, request
+#if !defined HAVE_MPI2_INPLACE
+ integer :: n1,n2
+ complex(sp) ABI_ASYNC, allocatable :: xsum(:,:)
+#endif
+
+! *************************************************************************
+
+#ifdef HAVE_MPI_IALLREDUCE
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
+#if defined HAVE_MPI2_INPLACE
+   call MPI_IALLREDUCE(MPI_IN_PLACE, xval, product(shape(xval)), MPI_COMPLEX, MPI_SUM, comm, request, ierr)
+#else
+   n1 = size(xval,1) ; n2 = size(xval,2)
+   ABI_STAT_MALLOC(xsum,(n1,n2), ierr)
+   if (ierr/= 0) call xmpi_abort(msg='error allocating xsum in xmpi_isum_ip_spc2d')
+   call MPI_IALLREDUCE(xsum, xval, product(shape(xval)), MPI_DOUBLE_COMPLEX, MPI_SUM, comm, request, ierr)
+   xval (:,:) = xsum(:,:)
+   ABI_FREE(xsum)
+#endif
+   xmpi_count_requests = xmpi_count_requests + 1
+   return
+ end if
+ request = xmpi_request_null
+ return
+#endif
+
+ ! Call the blocking version and return null request.
+ call xmpi_sum(xval, comm, ierr)
+ request = xmpi_request_null
+
+end subroutine xmpi_isum_ip_spc2d
+!!***
+
+!!****f* ABINIT/xmpi_isum_ip_dpc2d
+!! NAME
+!!  xmpi_isum_ip_dpc2d
+!!
+!! FUNCTION
+!!  Combines values from all processes and distribute the result back to all processes.
+!!  Target: 2d double precision complex arrays. Non-blocking INPLACE version.
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SOURCE
+
+subroutine xmpi_isum_ip_dpc2d(xval, comm, request, ierr)
+
+!Arguments-------------------------
+ complex(dp) ABI_ASYNC, intent(inout) :: xval(:,:)
+ integer,intent(in) :: comm
+ integer,intent(out) :: ierr, request
+#if !defined HAVE_MPI2_INPLACE
+ integer :: n1,n2
+ complex(dp) ABI_ASYNC, allocatable :: xsum(:,:)
+#endif
+
+! *************************************************************************
+
+#ifdef HAVE_MPI_IALLREDUCE
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
+#if defined HAVE_MPI2_INPLACE
+   call MPI_IALLREDUCE(MPI_IN_PLACE, xval, product(shape(xval)), MPI_DOUBLE_COMPLEX, MPI_SUM, comm, request, ierr)
+#else
+   n1 = size(xval,1) ; n2 = size(xval,2)
+   ABI_STAT_MALLOC(xsum,(n1,n2), ierr)
+   if (ierr/= 0) call xmpi_abort(msg='error allocating xsum in xmpi_isum_ip_spc2d')
+   call MPI_IALLREDUCE(xsum, xval, product(shape(xval)), MPI_DOUBLE_COMPLEX, MPI_SUM, comm, request, ierr)
+   xval (:,:) = xsum(:,:)
+   ABI_FREE(xsum)
+#endif
+   xmpi_count_requests = xmpi_count_requests + 1
+   return
+ end if
+ request = xmpi_request_null
+ return
+#endif
+
+ ! Call the blocking version and return null request.
+ call xmpi_sum(xval, comm, ierr)
+ request = xmpi_request_null
+
+end subroutine xmpi_isum_ip_dpc2d
+!!***
+
+!!****f* ABINIT/xmpi_isum_ip_spc3d
+!! NAME
+!!  xmpi_isum_ip_spc3d
+!!
+!! FUNCTION
+!!  Combines values from all processes and distribute the result back to all processes.
+!!  Target: 3d single precision complex arrays. Non-blocking INPLACE version.
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SOURCE
+
+subroutine xmpi_isum_ip_spc3d(xval, comm, request, ierr)
+
+!Arguments-------------------------
+ complex(sp) ABI_ASYNC, intent(inout) :: xval(:,:,:)
+ integer,intent(in) :: comm
+ integer,intent(out) :: ierr, request
+#if !defined HAVE_MPI2_INPLACE
+ integer :: n1,n2,n3
+ complex(sp) ABI_ASYNC, allocatable :: xsum(:,:,:)
+#endif
+
+! *************************************************************************
+
+#ifdef HAVE_MPI_IALLREDUCE
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
+#if defined HAVE_MPI2_INPLACE
+   call MPI_IALLREDUCE(MPI_IN_PLACE, xval, product(shape(xval)), MPI_COMPLEX, MPI_SUM, comm, request, ierr)
+#else
+   n1 = size(xval,1) ; n2 = size(xval,2) ; n3 = size(xval,3)
+   ABI_STAT_MALLOC(xsum,(n1,n2,3), ierr)
+   if (ierr/= 0) call xmpi_abort(msg='error allocating xsum in xmpi_isum_ip_spc3d')
+   call MPI_IALLREDUCE(xsum, xval, product(shape(xval)), MPI_DOUBLE_COMPLEX, MPI_SUM, comm, request, ierr)
+   xval (:,:,:) = xsum(:,:,:)
+   ABI_FREE(xsum)
+#endif
+   xmpi_count_requests = xmpi_count_requests + 1
+   return
+ end if
+ request = xmpi_request_null
+ return
+#endif
+
+ ! Call the blocking version and return null request.
+ call xmpi_sum(xval, comm, ierr)
+ request = xmpi_request_null
+
+end subroutine xmpi_isum_ip_spc3d
+!!***
+
+!!****f* ABINIT/xmpi_isum_ip_dpc3d
+!! NAME
+!!  xmpi_isum_ip_dpc3d
+!!
+!! FUNCTION
+!!  Combines values from all processes and distribute the result back to all processes.
+!!  Target: 3d double precision complex arrays. Non-blocking INPLACE version.
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SOURCE
+
+subroutine xmpi_isum_ip_dpc3d(xval, comm, request, ierr)
+
+!Arguments-------------------------
+ complex(dp) ABI_ASYNC, intent(inout) :: xval(:,:,:)
+ integer,intent(in) :: comm
+ integer,intent(out) :: ierr, request
+#if !defined HAVE_MPI2_INPLACE
+ integer :: n1,n2,n3
+ complex(sp) ABI_ASYNC, allocatable :: xsum(:,:,:)
+#endif
+
+! *************************************************************************
+
+#ifdef HAVE_MPI_IALLREDUCE
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
+#if defined HAVE_MPI2_INPLACE
+   call MPI_IALLREDUCE(MPI_IN_PLACE, xval, product(shape(xval)), MPI_DOUBLE_COMPLEX, MPI_SUM, comm, request, ierr)
+#else
+   n1 = size(xval,1) ; n2 = size(xval,2) ; n3 = size(xval,3)
+   ABI_STAT_MALLOC(xsum,(n1,n2,3), ierr)
+   if (ierr/= 0) call xmpi_abort(msg='error allocating xsum in xmpi_isum_ip_dpc3d')
+   call MPI_IALLREDUCE(xsum, xval, product(shape(xval)), MPI_DOUBLE_COMPLEX, MPI_SUM, comm, request, ierr)
+   xval (:,:,:) = xsum(:,:,:)
+   ABI_FREE(xsum)
+#endif
+   xmpi_count_requests = xmpi_count_requests + 1
+   return
+ end if
+ request = xmpi_request_null
+ return
+#endif
+
+ ! Call the blocking version and return null request.
+ call xmpi_sum(xval, comm, ierr)
+ request = xmpi_request_null
+
+end subroutine xmpi_isum_ip_dpc3d
+!!***

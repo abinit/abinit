@@ -1,0 +1,93 @@
+# Fake H crystal.
+# Test cubic spacegroups, Shubnikov type III
+
+ ndtset 51
+
+spgroup1  200  spgroupma1  16   natom1  24
+spgroup2  201  spgroupma2  20   natom2  24
+spgroup3  202  spgroupma3  24   natom3  24
+spgroup4  203  spgroupma4  28   natom4  24
+spgroup5  204  spgroupma5  32   natom5  24
+spgroup6  205  spgroupma6  35   natom6  24
+spgroup7  206  spgroupma7  39   natom7  24
+spgroup8  207  spgroupma8  42   natom8  24
+spgroup9  208  spgroupma9  46   natom9  24
+spgroup10 209  spgroupma10 50   natom10 24
+spgroup11 210  spgroupma11 54   natom11 24
+spgroup12 211  spgroupma12 58   natom12 24
+spgroup13 212  spgroupma13 61   natom13 24
+spgroup14 213  spgroupma14 65   natom14 24
+spgroup15 214  spgroupma15 69   natom15 24
+spgroup16 215  spgroupma16 72   natom16 24
+spgroup17 216  spgroupma17 76   natom17 24
+spgroup18 217  spgroupma18 80   natom18 24
+spgroup19 218  spgroupma19 83   natom19 24
+spgroup20 219  spgroupma20 87   natom20 24
+spgroup21 220  spgroupma21 91   natom21 24
+spgroup22 221  spgroupma22 94   natom22 48
+spgroup23 221  spgroupma23 95   natom23 48
+spgroup24 221  spgroupma24 96   natom24 48
+spgroup25 222  spgroupma25 100  natom25 48
+spgroup26 222  spgroupma26 101  natom26 48
+spgroup27 222  spgroupma27 102  natom27 48
+spgroup28 223  spgroupma28 106  natom28 48
+spgroup29 223  spgroupma29 107  natom29 48
+spgroup30 223  spgroupma30 108  natom30 48
+spgroup31 224  spgroupma31 112  natom31 48
+spgroup32 224  spgroupma32 113  natom32 48
+spgroup33 224  spgroupma33 114  natom33 48
+spgroup34 225  spgroupma34 118  natom34 48
+spgroup35 225  spgroupma35 119  natom35 48
+spgroup36 225  spgroupma36 120  natom36 48
+spgroup37 226  spgroupma37 124  natom37 48
+spgroup38 226  spgroupma38 125  natom38 48
+spgroup39 226  spgroupma39 126  natom39 48
+spgroup40 227  spgroupma40 130  natom40 48
+spgroup41 227  spgroupma41 131  natom41 48
+spgroup42 227  spgroupma42 132  natom42 48
+spgroup43 228  spgroupma43 136  natom43 48
+spgroup44 228  spgroupma44 137  natom44 48
+spgroup45 228  spgroupma45 138  natom45 48
+spgroup46 229  spgroupma46 142  natom46 48
+spgroup47 229  spgroupma47 143  natom47 48
+spgroup48 229  spgroupma48 144  natom48 48
+spgroup49 230  spgroupma49 147  natom49 48
+spgroup50 230  spgroupma50 148  natom50 48
+spgroup51 230  spgroupma51 149  natom51 48
+
+# Common data
+prtvol -1          # stop in abinit (main program), before call driver.
+brvltt -1          # important to reduce the conventional cell to primitive,
+                   # and allow the recognition of space group
+acell 8 8 8
+ntypat 1
+znucl 1
+natrd 1
+xred 0.17 0.15 0.11
+spinat 0.0 0.0 1.0
+typat 1
+ecut 1
+  kptopt 0
+nkpt 1
+nline 1
+nstep 1
+toldfe 1.0d-6
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "01h.bare"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t24.abo, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = Unknown
+#%% keywords = 
+#%% description = 
+#%%   H based fake crystals : magnetic groups, Shubnikov type III
+#%%   Test the generation and recognition of the cubic space groups
+#%%<END TEST_INFO>

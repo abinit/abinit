@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_gruneisen
 !! NAME
 !!  m_gruneisen
@@ -8,7 +7,7 @@
 !!  of dynamical matrices obtained with different unit cell volumes.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2011-2019 ABINIT group (MG)
+!! Copyright (C) 2011-2024 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -28,7 +27,7 @@ MODULE m_gruneisen
  use m_abicore
  use m_xmpi
  use m_crystal
- use m_tetrahedron
+ use m_htetra
  use m_ddb
  use m_ddb_hdr
  use m_ifc
@@ -43,7 +42,7 @@ MODULE m_gruneisen
  use m_fstrings,            only : sjoin, itoa, ltoa, ftoa, strcat
  use m_numeric_tools,       only : central_finite_diff, arth
  use m_kpts,                only : kpts_ibz_from_kptrlatt, tetra_from_kptrlatt
- use m_bz_mesh,             only : kpath_t, kpath_new, kpath_free, kpath_print
+ use m_bz_mesh,             only : kpath_t, kpath_new
  use m_anaddb_dataset,      only : anaddb_dataset_type
  use m_dynmat,              only : massmult_and_breaksym, dfpt_phfrq, gtdyn9
 
@@ -113,40 +112,34 @@ contains  !===========================================================
 !!  Construct new object from a list of DDB files.
 !!
 !! INPUTS
-!!  ddb_paths(:)=Paths of the DDB files (must be ordered by volume)
+!!  ddb_filepaths(:)=Paths of the DDB files (must be ordered by volume)
 !!  inp<anaddb_dataset_type>=Anaddb dataset with input variables
 !!  comm=MPI communicator
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
-type(gruns_t) function gruns_new(ddb_paths, inp, comm) result(new)
+type(gruns_t) function gruns_new(ddb_filepaths, inp, comm) result(new)
 
 !Arguments ------------------------------------
  integer,intent(in) :: comm
  type(anaddb_dataset_type),intent(in) :: inp
 !arrays
- character(len=*),intent(in) :: ddb_paths(:)
+ character(len=*),intent(in) :: ddb_filepaths(:)
 
 !Local variables-------------------------------
- integer,parameter :: natifc0=0,master=0
- integer :: ivol,iblock,natom,ddbun
- integer :: nprocs,my_rank,ierr
+ integer,parameter :: master=0
+ integer :: ivol,iblock,natom,ddbun, nprocs,my_rank,ierr
  character(len=500) :: msg
  type(ddb_hdr_type) :: ddb_hdr
 !arrays
- integer,allocatable :: atifc0(:)
  real(dp) :: dielt(3,3)
- real(dp),allocatable :: zeff(:,:,:)
+ real(dp),allocatable :: zeff(:,:,:), qdrp_cart(:,:,:,:)
 
 ! ************************************************************************
 
  nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
 
- new%nvols = size(ddb_paths)
+ new%nvols = size(ddb_filepaths)
  ABI_MALLOC(new%cryst_vol, (new%nvols))
  ABI_MALLOC(new%ddb_vol, (new%nvols))
  ABI_MALLOC(new%ifc_vol, (new%nvols))
@@ -155,35 +148,34 @@ type(gruns_t) function gruns_new(ddb_paths, inp, comm) result(new)
 
  ddbun = get_unit()
  do ivol=1,new%nvols
-   call wrtout(ab_out, sjoin(" Reading DDB file:", ddb_paths(ivol)))
-   call ddb_hdr_open_read(ddb_hdr,ddb_paths(ivol),ddbun,DDB_VERSION, dimonly=1)
+   call wrtout(ab_out, sjoin(" Reading DDB file:", ddb_filepaths(ivol)))
+
+   call new%ddb_vol(ivol)%from_file(ddb_filepaths(ivol), ddb_hdr, new%cryst_vol(ivol), comm)
+   call new%ddb_vol(ivol)%set_brav(inp%brav)
    natom = ddb_hdr%natom
+   call ddb_hdr%free()
 
-   call ddb_hdr_free(ddb_hdr)
-
-   ABI_MALLOC(atifc0, (natom))
-   atifc0 = 0
-   call ddb_from_file(new%ddb_vol(ivol), ddb_paths(ivol), inp%brav, natom, natifc0, atifc0, new%cryst_vol(ivol), comm)
-   ABI_FREE(atifc0)
    if (my_rank == master) then
-     call crystal_print(new%cryst_vol(ivol), header=sjoin("Structure for ivol:", itoa(ivol)), unit=ab_out, prtvol=-1)
+     call new%cryst_vol(ivol)%print(header=sjoin("Structure for ivol:", itoa(ivol)), unit=ab_out, prtvol=-1)
    end if
 
    ! Get Dielectric Tensor and Effective Charges
    ! (initialized to one_3D and zero if the derivatives are not available in the DDB file)
    ABI_MALLOC(zeff, (3,3,natom))
-   iblock = ddb_get_dielt_zeff(new%ddb_vol(ivol), new%cryst_vol(ivol), inp%rfmeth, inp%chneut, inp%selectz, dielt, zeff)
+   ABI_CALLOC(qdrp_cart, (3,3,3,natom))
+   iblock = new%ddb_vol(ivol)%get_dielt_zeff(new%cryst_vol(ivol), inp%rfmeth, inp%chneut, inp%selectz, dielt, zeff)
    if (iblock == 0) then
-     call wrtout(ab_out, sjoin("- Cannot find dielectric tensor and Born effective charges in DDB file:", ddb_paths(ivol)))
+     call wrtout(ab_out, sjoin("- Cannot find dielectric tensor and Born effective charges in DDB file:", ddb_filepaths(ivol)))
      call wrtout(ab_out, "Values initialized with zeros")
    else
-     call wrtout(ab_out, sjoin("- Found dielectric tensor and Born effective charges in DDB file:", ddb_paths(ivol)))
+     call wrtout(ab_out, sjoin("- Found dielectric tensor and Born effective charges in DDB file:", ddb_filepaths(ivol)))
    end if
 
-   call ifc_init(new%ifc_vol(ivol), new%cryst_vol(ivol), new%ddb_vol(ivol),&
+   call new%ifc_vol(ivol)%init(new%cryst_vol(ivol), new%ddb_vol(ivol),&
      inp%brav,inp%asr,inp%symdynmat,inp%dipdip,inp%rfmeth,inp%ngqpt(1:3),inp%nqshft,inp%q1shft,dielt,zeff,&
-     inp%nsphere,inp%rifcsph,inp%prtsrlr,inp%enunit,comm)
+     qdrp_cart,inp%nsphere,inp%rifcsph,inp%prtsrlr,inp%enunit,comm)
    ABI_FREE(zeff)
+   ABI_FREE(qdrp_cart)
  end do
 
  ! Consistency check
@@ -205,7 +197,7 @@ type(gruns_t) function gruns_new(ddb_paths, inp, comm) result(new)
  end do
  if (ierr /= 0) then
    msg = ltoa([(new%cryst_vol(ivol)%ucvol, ivol=1,new%nvols)])
-   MSG_ERROR(sjoin("Gruneisen calculations requires linear mesh of volumes but received:", msg))
+   ABI_ERROR(sjoin("Gruneisen calculations requires linear mesh of volumes but received:", msg))
  end if
 
 end function gruns_new
@@ -241,11 +233,6 @@ end function gruns_new
 !!
 !!  The derivative dD/dV is computed via central finite difference.
 !!
-!! PARENTS
-!!      m_gruneisen
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine gruns_fourq(gruns, qpt, wvols, gvals, dwdq, phdispl_cart)
@@ -274,10 +261,10 @@ subroutine gruns_fourq(gruns, qpt, wvols, gvals, dwdq, phdispl_cart)
  do ivol=1,gruns%nvols
    if (ivol == gruns%iv0) then
      ! Compute group velocities for V=V0
-     call ifc_fourq(gruns%ifc_vol(ivol), gruns%cryst_vol(ivol), qpt, wvols(:,ivol), phdispl_cart(:,:,:,ivol), &
+     call gruns%ifc_vol(ivol)%fourq(gruns%cryst_vol(ivol), qpt, wvols(:,ivol), phdispl_cart(:,:,:,ivol), &
                     out_d2cart=d2cart(:,:,:,ivol), out_eigvec=eigvec(:,:,:,ivol), dwdq=dwdq)
    else
-     call ifc_fourq(gruns%ifc_vol(ivol), gruns%cryst_vol(ivol), qpt, wvols(:,ivol), phdispl_cart(:,:,:,ivol), &
+     call gruns%ifc_vol(ivol)%fourq(gruns%cryst_vol(ivol), qpt, wvols(:,ivol), phdispl_cart(:,:,:,ivol), &
                     out_d2cart=d2cart(:,:,:,ivol), out_eigvec=eigvec(:,:,:,ivol))
    end if
 
@@ -332,11 +319,6 @@ end subroutine gruns_fourq
 !! OUTPUT
 !!  Only writing
 !!
-!! PARENTS
-!!      m_gruneisen
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine gruns_qpath(gruns, prefix, qpath, ncid, comm)
@@ -385,11 +367,11 @@ subroutine gruns_qpath(gruns, prefix, qpath, ncid, comm)
  ! Write text files with phonon frequencies and gruneisen on the path.
  if (my_rank == master) then
    if (open_file(strcat(prefix, "_GRUNS_QPATH"), msg, newunit=unt, form="formatted", action="write") /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
    write(unt,'(a)')'# Phonon band structure, Gruneisen parameters and group velocity'
    write(unt,'(a)')"# Energy in Hartree, DOS in states/Hartree"
-   call kpath_print(qpath, unit=unt, pre="#")
+   call qpath%print(unit=unt, pre="#")
    write(unt,'(5a)')&
      "# phfreq(mode=1) gruneisen(mode=1) velocity(mode=1)    phfreq(mode=2) gruneisen(mode=2) velocity(mode=2)   ..."
    do iqpt=1,qpath%npts
@@ -461,11 +443,6 @@ end subroutine gruns_qpath
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_gruneisen
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine gruns_qmesh(gruns, prefix, dosdeltae, ngqpt, nshiftq, shiftq, ncid, comm)
@@ -485,7 +462,7 @@ subroutine gruns_qmesh(gruns, prefix, dosdeltae, ngqpt, nshiftq, shiftq, ncid, c
  integer,parameter :: master=0,qptopt1=1,bcorr0=0
  integer :: nprocs,my_rank,iqibz,nqbz,nqibz,ierr,ii,nu,ncerr,nomega,cnt,unt,io
  real(dp) :: gavg,omega_min,omega_max,v2
- type(t_tetrahedron) :: tetra
+ type(htetra_t) :: tetra
  character(len=500) :: msg
 !arrays
  integer :: qptrlatt(3,3)
@@ -501,7 +478,6 @@ subroutine gruns_qmesh(gruns, prefix, dosdeltae, ngqpt, nshiftq, shiftq, ncid, c
 
  write(msg,'(a,(80a),4a)')ch10,('=',ii=1,80),ch10,ch10,' Calculation of Gruneisen DOSes ',ch10
  call wrtout(std_out, msg)
- !call wrtout(ab_out, msg)
 
  ! Generate the q-mesh by finding the IBZ and the corresponding weights.
  ABI_CHECK(all(ngqpt > 0), sjoin("invalid ngqpt:", ltoa(ngqpt)))
@@ -516,7 +492,7 @@ subroutine gruns_qmesh(gruns, prefix, dosdeltae, ngqpt, nshiftq, shiftq, ncid, c
 
  ! Build tetrahedra
  tetra = tetra_from_kptrlatt(gruns%cryst_vol(gruns%iv0), qptopt1, qptrlatt, nshiftq, shiftq, nqibz, qibz, comm, msg, ierr)
- if (ierr /= 0) MSG_ERROR(msg)
+ if (ierr /= 0) ABI_ERROR(msg)
 
  ABI_CALLOC(wvols_qibz, (gruns%natom3, gruns%nvols, nqibz))
  ABI_CALLOC(gvals_qibz, (gruns%natom3, nqibz))
@@ -561,7 +537,8 @@ subroutine gruns_qmesh(gruns, prefix, dosdeltae, ngqpt, nshiftq, shiftq, ncid, c
    do nu=1,gruns%natom3
      cnt = cnt + 1; if (mod(cnt, nprocs) /= my_rank) cycle ! mpi-parallelism
      wibz = wvols_qibz(nu, gruns%iv0, :)
-     call tetra_get_onewk(tetra,iqibz,bcorr0,nomega,nqibz,wibz,omega_min,omega_max,one,wdt)
+     call tetra%get_onewk(iqibz,bcorr0,nomega,nqibz,wibz,omega_min,omega_max,one,wdt)
+     wdt = wdt*wtq(iqibz)
      wdos = wdos + wdt
      grdos = grdos + wdt * gvals_qibz(nu,iqibz)
      gr2dos = gr2dos + wdt * gvals_qibz(nu,iqibz) ** 2
@@ -582,7 +559,7 @@ subroutine gruns_qmesh(gruns, prefix, dosdeltae, ngqpt, nshiftq, shiftq, ncid, c
 
    ! Write text files with Gruneisen and DOSes.
    if (open_file(strcat(prefix, "_GRUNS_DOS"), msg, newunit=unt, form="formatted", action="write") /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
    write(unt,'(a)')'# Phonon density of states, Gruneisen DOS and phonon group velocity DOS'
    write(unt,'(a)')"# Energy in Hartree, DOS in states/Hartree"
@@ -666,7 +643,7 @@ subroutine gruns_qmesh(gruns, prefix, dosdeltae, ngqpt, nshiftq, shiftq, ncid, c
  ABI_FREE(v2dos)
  ABI_FREE(vdos)
 
- call destroy_tetra(tetra)
+ call tetra%free()
 
 end subroutine gruns_qmesh
 !!***
@@ -679,11 +656,6 @@ end subroutine gruns_qmesh
 !!
 !! FUNCTION
 !!  Free dynamic memory.
-!!
-!! PARENTS
-!!      m_gruneisen
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -708,14 +680,14 @@ subroutine gruns_free(gruns)
 
  if (allocated(gruns%ddb_vol)) then
    do ii=1,size(gruns%ddb_vol)
-     call ddb_free(gruns%ddb_vol(ii))
+     call gruns%ddb_vol(ii)%free()
    end do
    ABI_FREE(gruns%ddb_vol)
  end if
 
  if (allocated(gruns%ifc_vol)) then
    do ii=1,size(gruns%ifc_vol)
-     call ifc_free(gruns%ifc_vol(ii))
+     call gruns%ifc_vol(ii)%free()
    end do
    ABI_FREE(gruns%ifc_vol)
  end if
@@ -739,11 +711,6 @@ end subroutine gruns_free
 !!
 !! OUTPUT
 !!  Only writing.
-!!
-!! PARENTS
-!!      anaddb
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -817,26 +784,26 @@ subroutine gruns_anaddb(inp, prefix, comm)
  if (all(inp%ng2qpt /= 0)) then
    call gruns_qmesh(gruns, prefix, inp%dosdeltae, inp%ng2qpt, 1, inp%q2shft, ncid, comm)
  else
-   MSG_WARNING("Cannot compute Gruneisen parameters on q-mesh because ng2qpt == 0")
+   ABI_WARNING("Cannot compute Gruneisen parameters on q-mesh because ng2qpt == 0")
  end if
 
  ! Compute gruneisen on the q-path.
  if (inp%nqpath /= 0) then
    qpath = kpath_new(inp%qpath, gruns%cryst_vol(iv0)%gprimd, inp%ndivsm)
    call gruns_qpath(gruns, prefix, qpath, ncid, comm)
-   call kpath_free(qpath)
+   call qpath%free()
  else
-   MSG_WARNING("Cannot compute Gruneisen parameters on q-path because nqpath == 0")
+   ABI_WARNING("Cannot compute Gruneisen parameters on q-path because nqpath == 0")
  end if
 
  ! Compute speed of sound for V0.
  if (inp%vs_qrad_tolkms(1) > zero) then
-   call ifc_speedofsound(gruns%ifc_vol(iv0), gruns%cryst_vol(iv0), inp%vs_qrad_tolkms, ncid, comm)
+   call gruns%ifc_vol(iv0)%speedofsound(gruns%cryst_vol(iv0), inp%vs_qrad_tolkms, ncid, comm)
  end if
 
  ! Now treat the second list of vectors (only at the Gamma point, but can include non-analyticities)
  if (my_rank == master .and. inp%nph2l /= 0 .and. inp%ifcflag == 1) then
-   call ifc_calcnwrite_nana_terms(gruns%ifc_vol(iv0), gruns%cryst_vol(iv0), inp%nph2l, inp%qph2l, inp%qnrml2, ncid)
+   call gruns%ifc_vol(iv0)%calcnwrite_nana_terms(gruns%cryst_vol(iv0), inp%nph2l, inp%qph2l, inp%qnrml2, ncid)
  end if
 
 #ifdef HAVE_NETCDF

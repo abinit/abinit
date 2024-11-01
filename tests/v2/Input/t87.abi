@@ -1,0 +1,82 @@
+# Test NOSE and LANGEVIN for 2 atoms of Ge in LDA
+# The initial temperature 1000K 
+# will be set by random velocities
+# 10 MD steps with decreasing T to 500K
+# dtion = 200
+
+ndtset  3
+
+ionmov1 0
+
+ionmov2     8          !8 is nose
+getwfk2     1
+noseinert2  100001     !nose thermostat inertia 
+                       !(Slightly different from default value)
+
+ionmov3     9          !9 is Langevin
+mdwall3     1.0        !forbidden border 1 bohr on each side of the cell
+                       !This option is useful for clusters, not for liquids (set to -10000 for no effect)
+friction3  0.0015      !friction coefficient
+delayperm3 200000      !try to commute every 200000 steps (no effect here)
+signperm3  1           !imc=1 favor alternation in permutation
+getwfk3    1
+
+# FOR ALL DATASETS
+
+acell   3*8.000        !cell size
+amu     72.59          !reduced masses, actual 69.723  14.0067
+diemac  1.0d0
+diemix  0.333d0
+dtion   200
+
+ecut    4
+
+ixc     7
+
+kptopt  0
+
+kpt     3*0.00
+natom   2
+nband   6
+nkpt    1
+nline   10
+
+occopt  3
+tsmear  0.002
+
+nstep   50
+nsym    1
+
+ntypat  1
+symrel  1  0  0
+        0  1  0
+        0  0  1
+tnons   3*0.0D0
+tolvrs  1.0d-5         !typical convergence criteria for dynamics simulatio
+typat   1 1
+wtk     1
+znucl   32
+
+ntime   10             !10 MD steps
+mdtemp  1000  500      !initial and final temp
+
+xcart   2.000d0  4.000d0   4.000d0
+        6.590d0  4.000d0   4.000d0
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "32ge_lda.fhi"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t87.abo, tolnlines = 0, tolabs = 6.000e-10, tolrel = 1.000e-09, fld_options =  -medium
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% keywords = 
+#%% authors = J.Y. Raty
+#%% description = 
+#%%   Ge liquid. Test of Nose and Langevin dynamics. 2 atoms in a cell. Allows 10 time steps. 
+#%%<END TEST_INFO>

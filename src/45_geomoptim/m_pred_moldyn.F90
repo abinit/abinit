@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_pred_moldyn
 !! NAME
 !!  m_pred_moldyn
@@ -6,14 +5,10 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2019 ABINIT group (DCA, XG, GMR, SE)
+!!  Copyright (C) 1998-2024 ABINIT group (DCA, XG, GMR, SE)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -52,7 +47,7 @@ contains
 !! Ionmov predictor (1) Molecular dynamics
 !!
 !! Molecular dynamics, with or without viscous damping
-!! This function should be after the call to scfcv
+!! This function should be called after the call to scfcv
 !! Updates positions, velocities and forces
 !!
 !! INPUTS
@@ -88,17 +83,9 @@ contains
 !!   from the values store in the history, thats the reason why
 !!   we cannot simply use hist%xred to obtain those positions.
 !!
-!! PARENTS
-!!      mover
-!!
-!! CHILDREN
-!!      hist2var,var2hist,xcart2xred,xred2xcart
-!!
 !! SOURCE
 
 subroutine pred_moldyn(ab_mover,hist,icycle,itime,ncycle,ntime,zDEBUG,iexit)
-
-implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -135,10 +122,10 @@ real(dp),pointer :: fcart_cur(:,:),fcart_prev(:,:),fcart_prev2(:,:)
 
  if(iexit/=0)then
    if(allocated(vec_tmp1))  then
-     ABI_DEALLOCATE(vec_tmp1)
+     ABI_FREE(vec_tmp1)
    end if
    if(allocated(vec_tmp2))  then
-     ABI_DEALLOCATE(vec_tmp2)
+     ABI_FREE(vec_tmp2)
    end if
    return
  end if
@@ -158,13 +145,13 @@ real(dp),pointer :: fcart_cur(:,:),fcart_prev(:,:),fcart_prev2(:,:)
 !reason to be 'SAVE'
  if (itime==1.and.icycle==1)then
    if(allocated(vec_tmp1))  then
-     ABI_DEALLOCATE(vec_tmp1)
+     ABI_FREE(vec_tmp1)
    end if
    if(allocated(vec_tmp2))  then
-     ABI_DEALLOCATE(vec_tmp2)
+     ABI_FREE(vec_tmp2)
    end if
-   ABI_ALLOCATE(vec_tmp1,(3,ab_mover%natom))
-   ABI_ALLOCATE(vec_tmp2,(3,ab_mover%natom))
+   ABI_MALLOC(vec_tmp1,(3,ab_mover%natom))
+   ABI_MALLOC(vec_tmp2,(3,ab_mover%natom))
  end if
 
 !write(std_out,*) '00'
@@ -173,11 +160,11 @@ real(dp),pointer :: fcart_cur(:,:),fcart_prev(:,:),fcart_prev2(:,:)
 
  call hist2var(acell,hist,ab_mover%natom,rprimd,xred,zDEBUG)
 
- ABI_ALLOCATE(xcart,(3,ab_mover%natom))
+ ABI_MALLOC(xcart,(3,ab_mover%natom))
  call xred2xcart(ab_mover%natom,rprimd,xcart,xred)
 
  if (itime==1.or.itime==2)then
-   ABI_ALLOCATE(xcart_prev,(3,ab_mover%natom))
+   ABI_MALLOC(xcart_prev,(3,ab_mover%natom))
    call xred2xcart(ab_mover%natom,rprimd,xcart_prev,hist%xred(:,:,1))
  end if
 
@@ -199,7 +186,7 @@ real(dp),pointer :: fcart_cur(:,:),fcart_prev(:,:),fcart_prev2(:,:)
 
 !write(std_out,*) '01'
 !##########################################################
-!### 01. Get or compute de time step dtion
+!### 01. Get or compute the time step dtion
 
  if (ab_mover%dtion>0)then
    hh = ab_mover%dtion
@@ -409,10 +396,10 @@ real(dp),pointer :: fcart_cur(:,:),fcart_prev(:,:),fcart_prev2(:,:)
  hist%time(hist%ihist)=time
 
  if (allocated(xcart)) then
-   ABI_DEALLOCATE(xcart)
+   ABI_FREE(xcart)
  end if
  if (allocated(xcart_prev)) then
-   ABI_DEALLOCATE(xcart_prev)
+   ABI_FREE(xcart_prev)
  end if
 
  if (.false.) write(std_out,*) ntime

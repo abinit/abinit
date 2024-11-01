@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_green
 !! NAME
 !!  m_green
@@ -6,14 +5,10 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2019 ABINIT group (BAmadon)
+!! Copyright (C) 2006-2024 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -27,16 +22,24 @@
  MODULE m_green
 
  use defs_basis
- use defs_abitypes
  use m_xmpi
  use m_abicore
  use m_errors
  use m_lib_four
+ use m_splines
 
- use m_io_tools, only : flush_unit, open_file
+ !use defs_abitypes, only : MPI_type
+ use m_crystal, only : crystal_t
+ use m_oper,     only : init_oper, destroy_oper, copy_oper, print_oper, inverse_oper, upfold_oper, &
+                        loc_oper, trace_oper, oper_type
+ use m_paw_dmft, only: paw_dmft_type, construct_nwli_dmft
+ use m_matlu,    only : diff_matlu,print_matlu,trace_matlu, matlu_type, &
+                        sym_matlu,zero_matlu,add_matlu,shift_matlu,init_matlu,destroy_matlu,copy_matlu
+ use m_fstrings, only : int2char4
+ use m_pawang,   only : pawang_type
+ use m_self,     only : self_type
+ use m_io_tools, only : open_file
  use m_time,     only : timab
- use m_oper, only : oper_type
- use m_matlu, only : matlu_type
 
  implicit none
 
@@ -62,7 +65,7 @@
  public :: spline_fct
  private :: occupfd
  private :: distrib_paral
- public :: greenldacompute_green
+ public :: greendftcompute_green
  public :: fermi_green
  public :: newton
  public :: local_ks_green
@@ -86,7 +89,7 @@
   ! type of frequencies used
 
   character(len=12) :: whichgreen
-  ! describe the type of green function computed (LDA, DMFT, KS..)
+  ! describe the type of green function computed (DFT, DMFT, ..)
 
   integer :: nw
   ! dmft frequencies
@@ -196,20 +199,9 @@ CONTAINS
 !! OUTPUTS
 !! green  = variable of type green_type
 !!
-!! PARENTS
-!!      m_dmft,dyson,m_hubbard_one,m_green,qmc_prep_ctqmc,spectral_function
-!!
-!! CHILDREN
-!!      loc_oper,print_matlu,sym_matlu,wrtout
-!!
 !! SOURCE
 
 subroutine init_green(green,paw_dmft,opt_oper_ksloc,wtype)
-
- use m_crystal, only : crystal_t
- use m_oper, only : init_oper
- use m_paw_dmft, only: paw_dmft_type
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -232,11 +224,12 @@ subroutine init_green(green,paw_dmft,opt_oper_ksloc,wtype)
    green%w_type="imag"
  endif
 
+
  if(green%w_type=="imag") then
    nw=paw_dmft%dmft_nwlo
    green%omega=>paw_dmft%omega_lo
  else if(green%w_type=="real") then
-   nw=2*paw_dmft%dmft_nwr
+   nw=size(paw_dmft%omega_r)
    green%omega=>paw_dmft%omega_r
  endif
 
@@ -244,26 +237,26 @@ subroutine init_green(green,paw_dmft,opt_oper_ksloc,wtype)
  green%dmft_nwli=paw_dmft%dmft_nwli
  green%charge_ks=zero
  green%has_charge_matlu=0
- ABI_ALLOCATE(green%charge_matlu,(paw_dmft%natom,paw_dmft%nsppol+1))
+ ABI_MALLOC(green%charge_matlu,(paw_dmft%natom,paw_dmft%nsppol+1))
  green%charge_matlu=zero
  green%has_charge_matlu=1
  green%has_greenmatlu_xsum=0
 
  green%has_charge_matlu_solver=0
- ABI_ALLOCATE(green%charge_matlu_solver,(paw_dmft%natom,paw_dmft%nsppol+1))
+ ABI_MALLOC(green%charge_matlu_solver,(paw_dmft%natom,paw_dmft%nsppol+1))
  green%charge_matlu_solver=zero
  green%has_charge_matlu_solver=1
 
  green%has_charge_matlu_prev=0
- ABI_ALLOCATE(green%charge_matlu_prev,(paw_dmft%natom,paw_dmft%nsppol+1))
+ ABI_MALLOC(green%charge_matlu_prev,(paw_dmft%natom,paw_dmft%nsppol+1))
  green%charge_matlu_prev=zero
  green%has_charge_matlu_prev=1
 
  call init_oper(paw_dmft,green%occup,opt_ksloc=3)
 
 !  built simple arrays to distribute the tasks in compute_green.
- ABI_ALLOCATE(green%procb,(nw,paw_dmft%nkpt))
- ABI_ALLOCATE(green%proct,(nw,0:paw_dmft%nproc-1))
+ ABI_MALLOC(green%procb,(nw,paw_dmft%nkpt))
+ ABI_MALLOC(green%proct,(nw,0:paw_dmft%nproc-1))
 
  call distrib_paral(paw_dmft%nkpt,paw_dmft%nproc,nw,nw_perproc,green%procb,green%proct)
  green%nw=nw
@@ -271,7 +264,7 @@ subroutine init_green(green,paw_dmft,opt_oper_ksloc,wtype)
 !  need to distribute memory over frequencies
 
 !!  begin of temporary modificatios
-! ABI_DATATYPE_ALLOCATE(green%oper,(green%nw_perproc))
+! ABI_MALLOC(green%oper,(green%nw_perproc))
 ! do ifreq=1,green%nw_perproc
 !  call init_oper(paw_dmft,green%oper(ifreq),opt_ksloc=optoper_ksloc)
 ! enddo
@@ -287,7 +280,7 @@ subroutine init_green(green,paw_dmft,opt_oper_ksloc,wtype)
 !
 !
 !!  end of temporary modificatios
- ABI_DATATYPE_ALLOCATE(green%oper,(green%nw))
+ ABI_MALLOC(green%oper,(green%nw))
  do ifreq=1,green%nw
   call init_oper(paw_dmft,green%oper(ifreq),opt_ksloc=optoper_ksloc)
  enddo
@@ -295,7 +288,7 @@ subroutine init_green(green,paw_dmft,opt_oper_ksloc,wtype)
  green%ichargeloc_cv=0
 
  if(paw_dmft%dmft_solv>=4) then
-   ABI_ALLOCATE(green%ecorr_qmc,(paw_dmft%natom))
+   ABI_MALLOC(green%ecorr_qmc,(paw_dmft%natom))
  end if
  if(paw_dmft%dmft_solv>=4) green%ecorr_qmc(:)=zero
 
@@ -321,19 +314,9 @@ end subroutine init_green
 !! OUTPUTS
 !!  green  <type(green_type)>= green function data
 !!
-!! PARENTS
-!!      impurity_solve,m_green
-!!
-!! CHILDREN
-!!      loc_oper,print_matlu,sym_matlu,wrtout
-!!
 !! SOURCE
 
 subroutine init_green_tau(green,paw_dmft,opt_ksloc)
-
- use m_oper, only : init_oper
- use m_paw_dmft, only: paw_dmft_type
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -356,14 +339,14 @@ subroutine init_green_tau(green,paw_dmft,opt_ksloc)
  endif
 
  green%dmftqmc_l=paw_dmft%dmftqmc_l
- ABI_ALLOCATE(green%tau,(green%dmftqmc_l))
+ ABI_MALLOC(green%tau,(green%dmftqmc_l))
  do itau=1,green%dmftqmc_l
   green%tau(itau)=float(itau-1)/float(green%dmftqmc_l)/paw_dmft%temp
  enddo
 
  call init_oper(paw_dmft,green%occup_tau,optksloc)
 
- ABI_DATATYPE_ALLOCATE(green%oper_tau,(paw_dmft%dmftqmc_l))
+ ABI_MALLOC(green%oper_tau,(paw_dmft%dmftqmc_l))
  do itau=1,green%dmftqmc_l
   call init_oper(paw_dmft,green%oper_tau(itau),optksloc)
  enddo
@@ -383,18 +366,9 @@ end subroutine init_green_tau
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_dmft,dyson,m_hubbard_one,m_green,qmc_prep_ctqmc,spectral_function
-!!
-!! CHILDREN
-!!      loc_oper,print_matlu,sym_matlu,wrtout
-!!
 !! SOURCE
 
 subroutine destroy_green(green)
-
- use m_oper, only : destroy_oper
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -409,31 +383,31 @@ subroutine destroy_green(green)
    do ifreq=1,green%nw
     call destroy_oper(green%oper(ifreq))
    enddo
-   ABI_DATATYPE_DEALLOCATE(green%oper)
+   ABI_FREE(green%oper)
  end if
  if ( allocated(green%charge_matlu))       then
-   ABI_DEALLOCATE(green%charge_matlu)
+   ABI_FREE(green%charge_matlu)
  end if
  green%has_charge_matlu=0
 
  if ( allocated(green%charge_matlu_prev))       then
-   ABI_DEALLOCATE(green%charge_matlu_prev)
+   ABI_FREE(green%charge_matlu_prev)
  end if
  green%has_charge_matlu_prev=0
 
  if ( allocated(green%charge_matlu_solver))       then
-   ABI_DEALLOCATE(green%charge_matlu_solver)
+   ABI_FREE(green%charge_matlu_solver)
  end if
  green%has_charge_matlu_solver=0
 
  if ( allocated(green%ecorr_qmc))   then
-    ABI_DEALLOCATE(green%ecorr_qmc)
+    ABI_FREE(green%ecorr_qmc)
  end if
  if ( allocated(green%procb))   then
-    ABI_DEALLOCATE(green%procb)
+    ABI_FREE(green%procb)
  end if
  if ( allocated(green%proct))   then
-    ABI_DEALLOCATE(green%proct)
+    ABI_FREE(green%proct)
  end if
  green%omega => null()
 
@@ -452,19 +426,9 @@ end subroutine destroy_green
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      impurity_solve,m_green
-!!
-!! CHILDREN
-!!      loc_oper,print_matlu,sym_matlu,wrtout
-!!
 !! SOURCE
 
 subroutine destroy_green_tau(green)
-
- use m_crystal, only : crystal_t
- use m_oper, only : destroy_oper
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -485,10 +449,10 @@ subroutine destroy_green_tau(green)
    do itau=1,green%dmftqmc_l
     call destroy_oper(green%oper_tau(itau))
    enddo
-   ABI_DATATYPE_DEALLOCATE(green%oper_tau)
+   ABI_FREE(green%oper_tau)
  end if
  if ( allocated(green%tau))            then
-   ABI_DEALLOCATE(green%tau)
+   ABI_FREE(green%tau)
  end if
 
 end subroutine destroy_green_tau
@@ -510,19 +474,9 @@ end subroutine destroy_green_tau
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      dyson,impurity_solve,m_green,qmc_prep_ctqmc,spectral_function
-!!
-!! CHILDREN
-!!      loc_oper,print_matlu,sym_matlu,wrtout
-!!
 !! SOURCE
 
 subroutine copy_green(green1,green2,opt_tw)
-
- use m_crystal, only : crystal_t
- use m_oper, only : copy_oper
- implicit none
 
 !Arguments ------------------------------------
 !type
@@ -576,21 +530,9 @@ end subroutine copy_green
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_dmft,impurity_solve,m_green,qmc_prep_ctqmc
-!!
-!! CHILDREN
-!!      loc_oper,print_matlu,sym_matlu,wrtout
-!!
 !! SOURCE
 
 subroutine printocc_green(green,option,paw_dmft,pawprtvol,opt_weissgreen,chtype)
-
- use m_crystal, only : crystal_t
- use m_oper, only : print_oper
- use m_matlu, only : diff_matlu,print_matlu,trace_matlu
- use m_paw_dmft, only : paw_dmft_type
- implicit none
 
 !Arguments ------------------------------------
 !type
@@ -680,6 +622,7 @@ end subroutine printocc_green
 !!         2 print KS green function
 !!         3 print both local and KS green function
 !!         4 print spectral function is green%w_type="real"
+!!         5 print k-resolved spectral function is green%w_type="real"
 !!  paw_dmft  <type(paw_dmft_type)>= paw+dmft related data
 !!  pawprtvol = printing option
 !!  opt_wt=1 print green function as a function of frequency
@@ -687,22 +630,9 @@ end subroutine printocc_green
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      impurity_solve,m_green,qmc_prep_ctqmc,spectral_function
-!!
-!! CHILDREN
-!!      loc_oper,print_matlu,sym_matlu,wrtout
-!!
 !! SOURCE
 
 subroutine print_green(char1,green,option,paw_dmft,pawprtvol,opt_wt,opt_decim)
-
- use m_crystal, only : crystal_t
- use m_oper, only : print_oper
- use m_paw_dmft, only : paw_dmft_type
-
- use m_fstrings, only : int2char4
- implicit none
 
 !Arguments ------------------------------------
 !type
@@ -714,7 +644,7 @@ subroutine print_green(char1,green,option,paw_dmft,pawprtvol,opt_wt,opt_decim)
 
 !local variables-------------------------------
  integer :: iall,iatom,ib,ifreq,ikpt,im,ispinor,isppol,itau
- integer :: lsub,mbandc,natom,ndim,nkpt,nspinor,nsppol,optwt,spf_unt,spcorb_unt
+ integer :: lsub,mbandc,natom,ndim,nkpt,nspinor,nsppol,optwt,spf_unt,spfkresolved_unt,spcorb_unt
  character(len=2000) :: message
  integer,allocatable :: unitgreenfunc_arr(:)
  integer,allocatable :: unitgreenloc_arr(:)
@@ -742,7 +672,7 @@ subroutine print_green(char1,green,option,paw_dmft,pawprtvol,opt_wt,opt_decim)
 
 !  == Print local Green Function
  if(option==1.or.option==3) then
-   ABI_ALLOCATE(unitgreenfunc_arr,(natom*nsppol*nspinor))
+   ABI_MALLOC(unitgreenfunc_arr,(natom*nsppol*nspinor))
    iall=0
    do iatom=1,natom
      if(green%oper(1)%matlu(iatom)%lpawu.ne.-1) then
@@ -817,12 +747,12 @@ subroutine print_green(char1,green,option,paw_dmft,pawprtvol,opt_wt,opt_decim)
        enddo ! isppol
      endif ! lpawu=/-1
    enddo ! iatom
-   ABI_DEALLOCATE(unitgreenfunc_arr)
+   ABI_FREE(unitgreenfunc_arr)
  endif
 
 !  == Print ks green function
  if((option==2.or.option==3).and.green%oper(1)%has_operks==1) then
-   ABI_ALLOCATE(unitgreenloc_arr,(nsppol*nkpt))
+   ABI_MALLOC(unitgreenloc_arr,(nsppol*nkpt))
    iall=0
    do isppol = 1 , nsppol
      write(tag_is,'(i1)')isppol
@@ -884,67 +814,112 @@ subroutine print_green(char1,green,option,paw_dmft,pawprtvol,opt_wt,opt_decim)
        enddo
      enddo ! ikpt
    enddo ! isppol
-   ABI_DEALLOCATE(unitgreenloc_arr)
+   ABI_FREE(unitgreenloc_arr)
  endif
 
- if((green%w_type=="real".and.option==4).and.green%oper(1)%has_operks==1) then
+ if((green%w_type=="real".and.option>=4).and.green%oper(1)%has_operks==1) then
    write(message,'(a,a)') ch10,"  == About to print spectral function"
    call wrtout(std_out,message,'COLL')
-   tmpfil = trim(paw_dmft%filapp)//'SpFunc-'//trim(char1)
-   if (open_file(tmpfil, message, newunit=spf_unt, status='unknown', form='formatted') /= 0) then
-     MSG_ERROR(message)
-   end if
-   ABI_ALLOCATE(sf,(green%nw))
-   ABI_ALLOCATE(sf_corr,(green%nw))
-   iall=0
-   sf=czero
-   do isppol = 1 , nsppol
-     do ikpt = 1, nkpt
-       do ib=1,mbandc
-         iall=iall+1
-         do ifreq=1,green%nw
-           sf(ifreq)=sf(ifreq)+green%oper(ifreq)%ks(isppol,ikpt,ib,ib)*green%oper(1)%wtk(ikpt)
-         enddo
-       enddo
-     enddo
-   enddo
-   sf_corr=czero
-   do iatom=1,natom
-     call int2char4(iatom,tag_at)
-     ABI_CHECK((tag_at(1:1)/='#'),'Bug: string length too short!')
-     tmpfil = trim(paw_dmft%filapp)//'SpFunc-cor_orb-'//trim(char1)//'_iatom'//trim(tag_at)
-     if (open_file(tmpfil, message, newunit=spcorb_unt, status='unknown', form='formatted') /= 0) then
-       MSG_ERROR(message)
+   if (option==4) then
+     tmpfil = trim(paw_dmft%filapp)//'SpFunc-'//trim(char1)
+     if (open_file(tmpfil, message, newunit=spf_unt, status='unknown', form='formatted') /= 0) then
+       ABI_ERROR(message)
      end if
-     write(message,*) "#", nspinor,nsppol,ndim,green%nw
-     call wrtout(spcorb_unt,message,'COLL')
-     if(green%oper(1)%matlu(iatom)%lpawu.ne.-1) then
-       write(message,*) "#", green%oper(1)%matlu(iatom)%lpawu
-       call wrtout(spcorb_unt,message,'COLL')
-       ndim=2*green%oper(1)%matlu(iatom)%lpawu+1
-       do isppol = 1 , nsppol
-         do ispinor=1, nspinor
-           do im=1,ndim
-             do ifreq=1,green%nw
-               sf_corr(ifreq)=sf_corr(ifreq)+ green%oper(ifreq)%matlu(iatom)%mat(im,im,isppol,ispinor,ispinor)
+   endif
+   if (option==5) then
+     tmpfil = trim(paw_dmft%filapp)//'_DFTDMFT_SpectralFunction_kresolved_'//trim(char1)
+     if (open_file(tmpfil, message, newunit=spfkresolved_unt, status='unknown', form='formatted') /= 0) then
+       ABI_ERROR(message)
+     end if
+   endif
+   ABI_MALLOC(sf,(green%nw))
+   ABI_MALLOC(sf_corr,(green%nw))
+   iall=0
+   if (option==5) then
+       do ikpt = 1, nkpt
+         sf=czero
+         do ifreq=1,green%nw
+           do isppol = 1 , nsppol
+             do ib=1,mbandc
+               sf(ifreq)=sf(ifreq)+green%oper(ifreq)%ks(isppol,ikpt,ib,ib)
              enddo
+           enddo
+           write(message,*) green%omega(ifreq)*Ha_eV,(-aimag(sf(ifreq)))/pi/Ha_eV,ikpt
+           call wrtout(spfkresolved_unt,message,'COLL')
+         enddo
+           write(message,*)
+           call wrtout(spfkresolved_unt,message,'COLL')
+       enddo
+       write(message,*) ch10
+       call wrtout(spfkresolved_unt,message,'COLL')
+!
+!     do isppol = 1 , nsppol
+!       do ikpt = 1, nkpt
+!         do ib=1,mbandc
+!           sf=czero
+!           write(71,*)
+!           write(71,*)  "#", ikpt, ib
+!           do ifreq=1,green%nw
+!             sf(ifreq)=sf(ifreq)+green%oper(ifreq)%ks(isppol,ikpt,ib,ib)
+!             write(71,*) green%omega(ifreq)*Ha_eV,(-aimag(sf(ifreq)))/pi/Ha_eV,ikpt
+!           enddo
+!         enddo
+!       enddo
+!     enddo
+   endif
+   if (option==4) then
+         sf=czero
+     do isppol = 1 , nsppol
+       do ikpt = 1, nkpt
+         do ib=1,mbandc
+           do ifreq=1,green%nw
+             sf(ifreq)=sf(ifreq)+green%oper(ifreq)%ks(isppol,ikpt,ib,ib)*green%oper(1)%wtk(ikpt)
            enddo
          enddo
        enddo
-     endif
-     do ifreq=1,green%nw
-       write(message,*) green%omega(ifreq),(-aimag(sf_corr(ifreq)))/3.141592653589793238_dp
-       call wrtout(spcorb_unt,message,'COLL')
      enddo
-     close(spcorb_unt)
-   enddo
-   do ifreq=1,green%nw
-     write(message,*) green%omega(ifreq),(-aimag(sf(ifreq)))/3.141592653589793238_dp
-     call wrtout(spf_unt,message,'COLL')
-   enddo
+   endif
+   if(paw_dmft%dmft_kspectralfunc==1) then
+     do iatom=1,natom
+       if(green%oper(1)%matlu(iatom)%lpawu.ne.-1) then
+         sf_corr=czero
+         call int2char4(iatom,tag_at)
+         ABI_CHECK((tag_at(1:1)/='#'),'Bug: string length too short!')
+         tmpfil = trim(paw_dmft%filapp)//'_DFTDMFT_spectralfunction_orb_'//trim(char1)//'_iatom'//trim(tag_at)
+         if (open_file(tmpfil, message, newunit=spcorb_unt, status='unknown', form='formatted') /= 0) then
+           ABI_ERROR(message)
+         end if
+         write(message,*) "#", nspinor,nsppol,ndim,green%nw
+         call wrtout(spcorb_unt,message,'COLL')
+         write(message,*) "#", green%oper(1)%matlu(iatom)%lpawu
+         call wrtout(spcorb_unt,message,'COLL')
+         ndim=2*green%oper(1)%matlu(iatom)%lpawu+1
+         do isppol = 1 , nsppol
+           do ispinor=1, nspinor
+             do im=1,ndim
+               do ifreq=1,green%nw
+                 sf_corr(ifreq)=sf_corr(ifreq)+ green%oper(ifreq)%matlu(iatom)%mat(im,im,isppol,ispinor,ispinor)
+               enddo
+             enddo
+           enddo
+         enddo
+         do ifreq=1,green%nw
+           write(message,*) green%omega(ifreq),(-aimag(sf_corr(ifreq)))/3.141592653589793238_dp
+           call wrtout(spcorb_unt,message,'COLL')
+         enddo
+         close(spcorb_unt)
+       endif
+     enddo
+   endif
+   if (option==4) then
+     do ifreq=1,green%nw
+       write(message,*) green%omega(ifreq),(-aimag(sf(ifreq)))/3.141592653589793238_dp
+       call wrtout(spf_unt,message,'COLL')
+     enddo
+   endif
    close(spf_unt)
-   ABI_DEALLOCATE(sf)
-   ABI_DEALLOCATE(sf_corr)
+   ABI_FREE(sf)
+   ABI_FREE(sf_corr)
  endif
 
  if(optwt==2.and.(option==1.or.option==3)) then
@@ -959,7 +934,7 @@ end subroutine print_green
 !! compute_green
 !!
 !! FUNCTION
-!! compute green function from LDA and self-energy
+!! compute green function from DFT and self-energy
 !!
 !! INPUTS
 !!  pawang <type(pawang)>=paw angular mesh and related data
@@ -976,24 +951,10 @@ end subroutine print_green
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_dmft,fermi_green,m_green,newton,spectral_function
-!!
-!! CHILDREN
-!!      loc_oper,print_matlu,sym_matlu,wrtout
-!!
 !! SOURCE
 
 subroutine compute_green(cryst_struc,green,paw_dmft,pawang,prtopt,self,opt_self,&
 &           opt_nonxsum,opt_nonxsum2)
-
- use m_pawang, only : pawang_type
- use m_crystal, only : crystal_t
- use m_matlu, only : sym_matlu,zero_matlu,add_matlu,print_matlu,shift_matlu,init_matlu,destroy_matlu,copy_matlu
- use m_oper, only : inverse_oper,loc_oper,print_oper,upfold_oper,init_oper,destroy_oper
- use m_paw_dmft, only : paw_dmft_type
- use m_self, only : self_type
- implicit none
 
 !Arguments ------------------------------------
 !type
@@ -1030,7 +991,7 @@ subroutine compute_green(cryst_struc,green,paw_dmft,pawang,prtopt,self,opt_self,
  !if(lintegrate.and.green%w_type=="real") then
  !if(green%w_type=="real") then
  !  message = 'integrate_green not implemented for real frequency'
- !  MSG_BUG(message)
+ !  ABI_BUG(message)
  !endif
  call timab(624,1,tsec)
  if(present(opt_self)) then
@@ -1056,7 +1017,7 @@ subroutine compute_green(cryst_struc,green,paw_dmft,pawang,prtopt,self,opt_self,
 
  if(self%nw/=green%nw)  then
    message = ' BUG: frequencies for green and self not coherent'
-   MSG_BUG(message)
+   ABI_BUG(message)
  endif
 
 ! Initialise spaceComm, myproc, and nproc
@@ -1079,7 +1040,7 @@ subroutine compute_green(cryst_struc,green,paw_dmft,pawang,prtopt,self,opt_self,
 ! ==============================
 ! Initialise Identity
 ! ==============================
- ABI_ALLOCATE(Id,(paw_dmft%mbandc,paw_dmft%mbandc))
+ ABI_MALLOC(Id,(paw_dmft%mbandc,paw_dmft%mbandc))
  Id=zero
  do ib=1, paw_dmft%mbandc
    Id(ib,ib)=one
@@ -1120,7 +1081,7 @@ subroutine compute_green(cryst_struc,green,paw_dmft,pawang,prtopt,self,opt_self,
 ! == Compute Green function G(k)
 ! ================================
  green%occup%ks=czero
- ABI_ALLOCATE(procb_ifreq,(paw_dmft%nkpt))
+ ABI_MALLOC(procb_ifreq,(paw_dmft%nkpt))
  do ifreq=1,green%nw
    !if(present(iii)) write(6,*) ch10,'ifreq  self', ifreq,self%oper(ifreq)%matlu(1)%mat(1,1,1,1,1)
 !   ====================================================
@@ -1132,13 +1093,18 @@ subroutine compute_green(cryst_struc,green,paw_dmft,pawang,prtopt,self,opt_self,
      if(green%w_type=="imag") then
        omega_current=cmplx(zero,green%omega(ifreq),kind=dp)
      else if(green%w_type=="real") then
-       omega_current=cmplx(green%omega(ifreq),0.1/27.211_dp,kind=dp)
+       omega_current=cmplx(green%omega(ifreq),paw_dmft%temp,kind=dp)
      endif
      call init_oper(paw_dmft,self_minus_hdc_oper)
      call init_oper(paw_dmft,green_temp)
 
      call add_matlu(self%oper(ifreq)%matlu,self%hdc%matlu,&
 &                   self_minus_hdc_oper%matlu,green%oper(ifreq)%natom,-1)
+! do iatom = 1 , natom
+   !write(6,*) 'self matlu', ifreq, self%oper(ifreq)%matlu(1)%mat(1,1,1,1,1)
+   !write(6,*) 'self hdc  ', ifreq, self%hdc%matlu(1)%mat(1,1,1,1,1)
+   !write(6,*) 'self_minus_hdc_oper  ', ifreq, self_minus_hdc_oper%matlu(1)%mat(1,1,1,1,1)
+! enddo ! natom
      if(paw_dmft%dmft_solv==4)  then
        call shift_matlu(self_minus_hdc_oper%matlu,paw_dmft%natom,cmplx(self%qmc_shift,0.d0,kind=dp),-1)
        call shift_matlu(self_minus_hdc_oper%matlu,paw_dmft%natom,cmplx(self%qmc_xmu,0.d0,kind=dp),-1)
@@ -1148,7 +1114,7 @@ subroutine compute_green(cryst_struc,green,paw_dmft,pawang,prtopt,self,opt_self,
      end if
 
      procb_ifreq=green%procb(ifreq,:)
-     call upfold_oper(self_minus_hdc_oper,paw_dmft,1,procb=procb_ifreq,iproc=myproc)
+     call upfold_oper(self_minus_hdc_oper,paw_dmft,1,procb=procb_ifreq,iproc=myproc,prt=1)
      do ib1 = 1 , paw_dmft%mbandc
        do ib = 1 , paw_dmft%mbandc
          do ikpt = 1 , paw_dmft%nkpt
@@ -1158,25 +1124,24 @@ subroutine compute_green(cryst_struc,green,paw_dmft,pawang,prtopt,self,opt_self,
                green_temp%ks(is,ikpt,ib,ib1)=       &
 &               ( omega_current     &
 &               + fermilevel                               &
-&               - paw_dmft%eigen_lda(is,ikpt,ib)) * Id(ib,ib1) &
+&               - paw_dmft%eigen_dft(is,ikpt,ib)) * Id(ib,ib1) &
 &               - self_minus_hdc_oper%ks(is,ikpt,ib,ib1)
-
-
-
-
+          !if(ikpt==2.and.ib==ib1) then
+          !  write(6,*) "self",ib1,ib,ikpt,is,ifreq,self_minus_hdc_oper%ks(is,ikpt,ib,ib1)
+          !endif
 !&               - (self%oper(ifreq)%ks(is,ikpt,ib,ib1)-self%hdc%ks(is,ikpt,ib,ib1))
 !               if(prtopt>5) then
 !               if(ikpt==1.and.(ifreq==1.or.ifreq==3).and.ib==16.and.ib1==16) then
 !                write(std_out,*) 'omega_current                         ',omega_current
 !                write(std_out,*) 'fermilevel                            ',fermilevel
-!                write(std_out,*) ' paw_dmft%eigen_lda(is,ikpt,ib)       ', paw_dmft%eigen_lda(is,ikpt,ib),Id(ib,ib1)
+!                write(std_out,*) ' paw_dmft%eigen_dft(is,ikpt,ib)       ', paw_dmft%eigen_dft(is,ikpt,ib),Id(ib,ib1)
 !                write(std_out,*) 'self_minus_hdc_oper%ks(is,ikpt,ib,ib1)',self_minus_hdc_oper%ks(is,ikpt,ib,ib1)
 !                write(std_out,*) 'green                                 ',green%oper(ifreq)%ks(is,ikpt,ib,ib1)
 !               endif
 !               if(ib==1.and.ib1==3) then
 !                 write(std_out,*) "ff compute",ikpt,ifreq,is,ikpt,ib,ib1
 !                 write(std_out,*) "ff compute",ikpt,ifreq, green_temp%ks(is,ikpt,ib,ib1)
-!                 write(std_out,*) "ff details",paw_dmft%eigen_lda(is,ikpt,ib)
+!                 write(std_out,*) "ff details",paw_dmft%eigen_dft(is,ikpt,ib)
 !                 write(std_out,*) "ff details2",fermilevel
 !                 write(std_out,*) "ff details3",Id(ib,ib1)
 !        !        write(std_out,*) "ff details4",self_minus_hdc_oper%ks(is,ikpt,ib,ib1)
@@ -1249,7 +1214,7 @@ subroutine compute_green(cryst_struc,green,paw_dmft,pawang,prtopt,self,opt_self,
 !       ! ok
 !     endif
 ! call flush(std_out)
-     call sym_matlu(cryst_struc,green_temp%matlu,pawang)
+     call sym_matlu(cryst_struc,green_temp%matlu,pawang,paw_dmft)
      call copy_matlu(green_temp%matlu,green%oper(ifreq)%matlu,natom)
 !     if(ifreq==1.and.ifreq==11) then
 !       write(std_out,*) ifreq,nproc,'after sym'
@@ -1261,7 +1226,7 @@ subroutine compute_green(cryst_struc,green,paw_dmft,pawang,prtopt,self,opt_self,
 ! call flush(std_out)
    endif ! parallelisation
  enddo ! ifreq
- ABI_DEALLOCATE(procb_ifreq)
+ ABI_FREE(procb_ifreq)
 
 ! =============================================
 ! built total green function (sum over procs).
@@ -1278,7 +1243,7 @@ subroutine compute_green(cryst_struc,green,paw_dmft,pawang,prtopt,self,opt_self,
      call xmpi_sum(green%oper(ifreq)%ks,spacecomm,ierr)
    else if(optnonxsum==0.and.green%oper(ifreq)%has_operks==0) then
      message = 'optnonxsum==0 and green%oper(ifreq)%has_operks==0: not compatible'
-     MSG_BUG(message)
+     ABI_BUG(message)
    endif
 !   endif
 ! enddo ! ifreq
@@ -1324,7 +1289,7 @@ subroutine compute_green(cryst_struc,green,paw_dmft,pawang,prtopt,self,opt_self,
  endif
 ! call flush(std_out)
 
- ABI_DEALLOCATE(Id)
+ ABI_FREE(Id)
  call timab(624,2,tsec)
 
 end subroutine compute_green
@@ -1356,26 +1321,10 @@ end subroutine compute_green
 !! OUTPUT
 !!   green%occup = occupations
 !!
-!! PARENTS
-!!      m_dmft,fermi_green,impurity_solve,m_green,newton
-!!
-!! CHILDREN
-!!      loc_oper,print_matlu,sym_matlu,wrtout
-!!
 !! SOURCE
 
 subroutine integrate_green(cryst_struc,green,paw_dmft&
 &  ,pawang,prtopt,opt_ksloc,opt_after_solver,opt_diff,opt_nonxsum)
-
- use m_pawang, only : pawang_type
- use m_crystal,   only : crystal_t
- use m_matlu,     only : sym_matlu,print_matlu,init_matlu,&
-& destroy_matlu,diff_matlu,zero_matlu
- use m_paw_dmft,  only : paw_dmft_type
- use m_oper,      only : loc_oper,trace_oper,init_oper,destroy_oper
-! use m_oper, only : loc_oper,trace_oper,upfold_oper,print_oper,identity_oper,init_oper,destroy_oper
- use m_errors
- implicit none
 
 !Arguments ------------------------------------
 !type
@@ -1396,6 +1345,7 @@ subroutine integrate_green(cryst_struc,green,paw_dmft&
  integer :: mband,mbandc,myproc,natom,ndim,nkpt,nproc,nspinor
  integer :: nsppol,option
  integer :: optksloc,spacecomm,optaftsolv,optnonxsum
+ integer, allocatable :: lpawu_natom(:)
  complex(dpc) :: integral
  character(len=500) :: message
  complex(dpc), allocatable :: ff(:)
@@ -1415,7 +1365,7 @@ subroutine integrate_green(cryst_struc,green,paw_dmft&
  endif
  if(green%w_type=="real") then
    message = 'integrate_green not implemented for real frequency'
-   MSG_BUG(message)
+   ABI_BUG(message)
  endif
  if(present(opt_nonxsum)) then
    optnonxsum=opt_nonxsum
@@ -1457,20 +1407,23 @@ subroutine integrate_green(cryst_struc,green,paw_dmft&
  endif
  if(optaftsolv==1.and.abs(optksloc)/=2) then
     message = "integration of ks green function should not be done after call to solver : it has not been computed"
-    MSG_BUG(message)
+    ABI_BUG(message)
  endif
  if(abs(optksloc)>=2.and.green%has_greenmatlu_xsum==0) then
     write(message,'(4a)') ch10,&
 &     "BUG: integrate_green is asked to integrate local green function",ch10,&
 &    " and local green function was non broadcasted in compute_green"
-    MSG_BUG(message)
+    ABI_BUG(message)
  endif
 
 ! Allocations
- ABI_DATATYPE_ALLOCATE(matlu_temp,(natom))
- call init_matlu(natom,nspinor,nsppol,green%oper(1)%matlu(:)%lpawu,matlu_temp)
+ ABI_MALLOC(matlu_temp,(natom))
+ ABI_MALLOC(lpawu_natom,(natom))
+ lpawu_natom(:)=green%oper(1)%matlu(:)%lpawu
+ call init_matlu(natom,nspinor,nsppol,lpawu_natom,matlu_temp)
+ ABI_FREE(lpawu_natom)
 
- ABI_ALLOCATE(ff,(green%nw))
+ ABI_MALLOC(ff,(green%nw))
 
 ! =================================================
 ! == Integrate Local Green function ===============
@@ -1523,14 +1476,14 @@ subroutine integrate_green(cryst_struc,green,paw_dmft&
      endif
 
 !  - Symetrise: continue sum over k-point: Full BZ
-     call sym_matlu(cryst_struc,green%occup%matlu,pawang)
+     call sym_matlu(cryst_struc,green%occup%matlu,pawang,paw_dmft)
      if(abs(prtopt)>2) then
        write(message,'(a,a,i10,a)') ch10,&
 &       "  = green%occup%matlu from int(gloc(w)) with symetrization"
        call wrtout(std_out,message,'COLL')
        call print_matlu(green%occup%matlu,natom,prtopt=3,opt_diag=-1)
      endif
-     call sym_matlu(cryst_struc,matlu_temp,pawang)
+     call sym_matlu(cryst_struc,matlu_temp,pawang,paw_dmft)
 
 !  - Post-treatment for summation over negative and positive frequencies:
 !    necessary in the case of nspinor==2 AND nspinor==1, but valid anywhere
@@ -1582,7 +1535,7 @@ subroutine integrate_green(cryst_struc,green,paw_dmft&
          write(message,'(a,a,i3)') ch10,&
 &        "  = BUG : has_charge_matlu_solver should be 2 and is",&
 &        green%has_charge_matlu_solver
-         MSG_BUG(message)
+         ABI_BUG(message)
        endif
        if(paw_dmft%dmft_solv<=4) then
          call trace_oper(green%occup,green%charge_ks,green%charge_matlu_solver,2)
@@ -1710,7 +1663,7 @@ subroutine integrate_green(cryst_struc,green,paw_dmft&
      endif
 
 !  - Symetrise: continue sum over k-point: Full BZ
-     call sym_matlu(cryst_struc,green%occup%matlu,pawang)
+     call sym_matlu(cryst_struc,green%occup%matlu,pawang,paw_dmft)
      if(abs(prtopt)>=2) then
 !       write(message,'(a,a,i10,a)') ch10,&
 !&        "  = green%occup%matlu from projection of int(gks(w)) with symetrization"
@@ -1754,7 +1707,7 @@ subroutine integrate_green(cryst_struc,green,paw_dmft&
    if(paw_dmft%lpsichiortho==1) then
      call diff_matlu("Local_projection_of_kohnsham_occupations ",&
 &     "Integration_of_local_green_function ",&
-&       green%occup%matlu,matlu_temp,natom,1,tol4)
+&       green%occup%matlu,matlu_temp,natom,option,tol4)
      write(message,'(2a)') ch10,&
 &     '  ***** => Calculations of Green function in KS and local spaces are coherent ****'
      call wrtout(std_out,message,'COLL')
@@ -1794,9 +1747,9 @@ subroutine integrate_green(cryst_struc,green,paw_dmft&
  endif
 
 
- ABI_DEALLOCATE(ff)
+ ABI_FREE(ff)
  call destroy_matlu(matlu_temp,natom)
- ABI_DATATYPE_DEALLOCATE(matlu_temp)
+ ABI_FREE(matlu_temp)
 ! deallocate(charge_loc_old)
  call timab(625,2,tsec)
  DBG_EXIT("COLL")
@@ -1814,7 +1767,7 @@ end subroutine integrate_green
 !! INPUTS
 !!  char1 = character which precises the type of green function computed.
 !!  cryst_struc <type(crystal_t)>= crystal structure data.
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  paw_dmft  <type(paw_dmft_type)>= paw+dmft related data
 !!  green  <type(green_type)>= green function data
 !!  pawang <type(pawang)>=paw angular mesh and related data
@@ -1824,23 +1777,9 @@ end subroutine integrate_green
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_dmft
-!!
-!! CHILDREN
-!!      loc_oper,print_matlu,sym_matlu,wrtout
-!!
 !! SOURCE
 
 subroutine icip_green(char1,cryst_struc,green,paw_dmft,pawang,pawprtvol,self,opt_self)
-
- use m_pawang, only : pawang_type
- use m_crystal, only : crystal_t
- use m_matlu, only : sym_matlu
- use m_paw_dmft, only : paw_dmft_type
- use m_oper, only : loc_oper
- use m_self, only : self_type
- implicit none
 
 !Arguments ------------------------------------
 !type
@@ -1857,7 +1796,7 @@ subroutine icip_green(char1,cryst_struc,green,paw_dmft,pawang,pawprtvol,self,opt
  integer :: option,optself,optlocks,prtopt_for_integrate_green,opt_nonxsum_icip
  character(len=500) :: message
 ! *********************************************************************
- green%whichgreen="LDA"
+ green%whichgreen="DFT"
  prtopt_for_integrate_green=2
 
  if(present(opt_self)) then
@@ -1893,13 +1832,13 @@ subroutine icip_green(char1,cryst_struc,green,paw_dmft,pawang,pawprtvol,self,opt
  call integrate_green(cryst_struc,green,paw_dmft,pawang,prtopt_for_integrate_green,opt_ksloc=3)!,opt_nonxsum=opt_nonxsum_icip)
 !== Print green%oper(:)%ks
 !== Print green%oper(:)%matlu(:)%mat
- if(char1=="LDA") then
+ if(char1=="DFT") then
    option=1
    if(self%oper(1)%matlu(1)%lpawu/=-1) then
      if(abs(real(self%oper(1)%matlu(1)%mat(1,1,1,1,1)))>tol7) then
 ! todo_ab: generalise this
        write(message,'(a,a,2(e15.4))') ch10,&
-&        "Warning:  a LDA calculation is carried out and self is not zero"
+&        "Warning:  a DFT calculation is carried out and self is not zero"
        call wrtout(std_out,message,'COLL')
 !       call abi_abort('COLL')
      endif
@@ -1929,22 +1868,9 @@ end subroutine icip_green
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      impurity_solve,m_green,qmc_prep_ctqmc
-!!
-!! CHILDREN
-!!      loc_oper,print_matlu,sym_matlu,wrtout
-!!
 !! SOURCE
 
 subroutine fourier_green(cryst_struc,green,paw_dmft,pawang,opt_ksloc,opt_tw)
-
- use m_pawang, only : pawang_type
- use m_crystal, only : crystal_t
- use m_matlu, only : sym_matlu,init_matlu,destroy_matlu,print_matlu
- use m_paw_dmft, only : paw_dmft_type
- use m_oper, only : loc_oper
- implicit none
 
 !Arguments ------------------------------------
 !type
@@ -1985,7 +1911,7 @@ subroutine fourier_green(cryst_struc,green,paw_dmft,pawang,opt_ksloc,opt_tw)
 ! Only imaginary frequencies here
  if(green%w_type=="real") then
    message = 'fourier_green not implemented for real frequency'
-   MSG_BUG(message)
+   ABI_BUG(message)
  endif
 
 ! Initialise temporary green function
@@ -1993,8 +1919,8 @@ subroutine fourier_green(cryst_struc,green,paw_dmft,pawang,opt_ksloc,opt_tw)
  call init_green_tau(green_temp,paw_dmft)
 
  !green%oper(:)%matlu(1)%mat(1,1,1,1,1)
- ABI_ALLOCATE(fw,(green%nw))
- ABI_ALLOCATE(ft,(green%dmftqmc_l))
+ ABI_MALLOC(fw,(green%nw))
+ ABI_MALLOC(ft,(green%dmftqmc_l))
 
 !==============================================
 ! == Inverse fourier transformation ===========
@@ -2049,7 +1975,7 @@ subroutine fourier_green(cryst_struc,green,paw_dmft,pawang,opt_ksloc,opt_tw)
        enddo ! ikpt
      enddo ! isppol
      call loc_oper(green%occup_tau,paw_dmft,1)
-     call sym_matlu(cryst_struc,green%occup_tau%matlu,pawang)
+     call sym_matlu(cryst_struc,green%occup_tau%matlu,pawang,paw_dmft)
      write(message,'(a,a,i10,a)') ch10,"  green%occup_tau%matlu from green_occup_tau%ks"
      call wrtout(std_out,message,'COLL')
      call print_matlu(green%occup_tau%matlu,natom,prtopt=3)
@@ -2197,8 +2123,8 @@ subroutine fourier_green(cryst_struc,green,paw_dmft,pawang,opt_ksloc,opt_tw)
      enddo
    endif ! opt_ksloc=2
  endif ! opt_tw==-1
- ABI_DEALLOCATE(fw)
- ABI_DEALLOCATE(ft)
+ ABI_FREE(fw)
+ ABI_FREE(ft)
  call destroy_green_tau(green_temp)
  call destroy_green(green_temp)
 
@@ -2221,21 +2147,9 @@ end subroutine fourier_green
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_dmft
-!!
-!! CHILDREN
-!!      loc_oper,print_matlu,sym_matlu,wrtout
-!!
 !! SOURCE
 
 subroutine check_fourier_green(cryst_struc,green,paw_dmft,pawang)
-
- use m_pawang, only : pawang_type
- use m_crystal, only : crystal_t
- use m_paw_dmft, only : paw_dmft_type
- use m_matlu, only : print_matlu
- implicit none
 
 !Arguments ------------------------------------
 !type
@@ -2252,7 +2166,7 @@ subroutine check_fourier_green(cryst_struc,green,paw_dmft,pawang)
 ! Only imaginary frequencies here
  if(green%w_type=="real") then
    message = 'check_fourier_green not implemented for real frequency'
-   MSG_BUG(message)
+   ABI_BUG(message)
  endif
 
  call init_green(green_check,paw_dmft)
@@ -2302,17 +2216,9 @@ end subroutine check_fourier_green
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      loc_oper,print_matlu,sym_matlu,wrtout
-!!
 !! SOURCE
 
 subroutine compa_occup_ks(green,paw_dmft)
-
- use m_paw_dmft, only : paw_dmft_type
- implicit none
 
 !Arguments ------------------------------------
 !type
@@ -2331,7 +2237,7 @@ subroutine compa_occup_ks(green,paw_dmft)
  do isppol=1,paw_dmft%nsppol
    do ikpt=1,paw_dmft%nkpt
      do ib=1,paw_dmft%mbandc
-       occ1=occupfd(paw_dmft%eigen_lda(isppol,ikpt,ib),paw_dmft%fermie,paw_dmft%temp)
+       occ1=occupfd(paw_dmft%eigen_dft(isppol,ikpt,ib),paw_dmft%fermie,paw_dmft%temp)
        occ2=real(green%occup%ks(isppol,ikpt,ib,ib))
        if(abs(occ1-occ2)>diffmax) then
          diffmax=abs(occ1-occ2)
@@ -2374,7 +2280,7 @@ end subroutine compa_occup_ks
 !! Do integration in matsubara space
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2019 ABINIT group (BAmadon)
+!! Copyright (C) 2006-2024 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2390,18 +2296,8 @@ end subroutine compa_occup_ks
 !!  * integral = integral of ff over matsubara frequencies (there is an accumulation in the present routine, so intent(inout))
 !!  * ft= function is time space
 !!
-!! PARENTS
-!!      m_green
-!!
-!! CHILDREN
-!!      loc_oper,print_matlu,sym_matlu,wrtout
-!!
 !! SOURCE
 subroutine add_int_fct(ifreq,ff,ldiag,omega_current,option,integral,temp,wgt_wlo,dmft_nwlo)
-
- use defs_basis
- use m_paw_dmft, only : paw_dmft_type
- implicit none
 
 !Arguments ------------------------------------
 !type
@@ -2465,7 +2361,7 @@ end subroutine add_int_fct
 !! Do integration in matsubara space
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2019 ABINIT group (BAmadon)
+!! Copyright (C) 2006-2024 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2483,17 +2379,8 @@ end subroutine add_int_fct
 !! SIDE EFFECTS
 !!  ft= function is time space
 !!
-!! PARENTS
-!!      m_green,qmc_prep_ctqmc
-!!
-!! CHILDREN
-!!      loc_oper,print_matlu,sym_matlu,wrtout
-!!
 !! SOURCE
 subroutine int_fct(ff,ldiag,option,paw_dmft,integral,procb,myproc)
-
- use m_paw_dmft, only : paw_dmft_type
- implicit none
 
 !Arguments ------------------------------------
 !type
@@ -2510,7 +2397,7 @@ subroutine int_fct(ff,ldiag,option,paw_dmft,integral,procb,myproc)
  character(len=500) :: message
  integer :: ifreq
 ! *********************************************************************
- ABI_ALLOCATE(procb2,(paw_dmft%dmft_nwlo))
+ ABI_MALLOC(procb2,(paw_dmft%dmft_nwlo))
  if(present(procb).and.present(myproc)) then
    do ifreq=1,paw_dmft%dmft_nwlo
     procb2(ifreq)=(procb(ifreq)==myproc)
@@ -2518,11 +2405,11 @@ subroutine int_fct(ff,ldiag,option,paw_dmft,integral,procb,myproc)
  else if(present(procb).and..not.present(myproc)) then
    write(message,'(a,a,2(e15.4))') ch10,&
 &    "BUG: procb is present and not myproc in int_fct"
-   MSG_BUG(message)
+   ABI_BUG(message)
  else if(.not.present(procb).and.present(myproc)) then
    write(message,'(a,a,2(e15.4))') ch10,&
 &    "BUG: procb is not present and myproc is in int_fct"
-   MSG_BUG(message)
+   ABI_BUG(message)
  else
    do ifreq=1,paw_dmft%dmft_nwlo
      procb2(ifreq)=(1==1)
@@ -2582,7 +2469,7 @@ subroutine int_fct(ff,ldiag,option,paw_dmft,integral,procb,myproc)
     enddo
   endif
  endif  ! ldiag
- ABI_DEALLOCATE(procb2)
+ ABI_FREE(procb2)
 
 end subroutine int_fct
 !!***
@@ -2596,7 +2483,7 @@ end subroutine int_fct
 !! (A spline is performed )
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2019 ABINIT group (BAmadon)
+!! Copyright (C) 2006-2024 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2612,18 +2499,8 @@ end subroutine int_fct
 !!  fw= function is frequency space
 !!  ft= function is time space
 !!
-!! PARENTS
-!!      local_ks_green,m_green
-!!
-!! CHILDREN
-!!      loc_oper,print_matlu,sym_matlu,wrtout
-!!
 !! SOURCE
 subroutine fourier_fct(fw,ft,ldiag,ltau,opt_four,paw_dmft)
-
- use m_paw_dmft, only : paw_dmft_type, construct_nwli_dmft
- use m_splines
- implicit none
 
 !Arguments ------------------------------------
 !type
@@ -2653,25 +2530,25 @@ subroutine fourier_fct(fw,ft,ldiag,ltau,opt_four,paw_dmft)
 ! == inverse fourier transform
  if(opt_four==-1) then
 
-   ABI_ALLOCATE(splined_li,(paw_dmft%dmft_nwli))
+   ABI_MALLOC(splined_li,(paw_dmft%dmft_nwli))
 !   allocate(fw1(0:paw_dmft%dmft_nwlo-1))
    if(paw_dmft%dmft_log_freq==1) then
-     ABI_ALLOCATE(omega_li,(1:paw_dmft%dmft_nwli))
+     ABI_MALLOC(omega_li,(1:paw_dmft%dmft_nwli))
      call construct_nwli_dmft(paw_dmft,paw_dmft%dmft_nwli,omega_li)
      call spline_c(paw_dmft%dmft_nwlo,paw_dmft%dmft_nwli,paw_dmft%omega_lo,&
 &                   omega_li,splined_li,fw)
-     ABI_DEALLOCATE(omega_li)
+     ABI_FREE(omega_li)
    else
      splined_li=fw
    endif
    call invfourier(splined_li,ft,paw_dmft%dmft_nwli,ltau,iflag,beta)
 !   deallocate(fw1)
-   ABI_DEALLOCATE(splined_li)
+   ABI_FREE(splined_li)
 
 ! == direct fourier transform
  else if(opt_four==1) then
 
-   ABI_ALLOCATE(ftr,(ltau))
+   ABI_MALLOC(ftr,(ltau))
 
    iwarn=0
    do itau=1,ltau
@@ -2679,7 +2556,7 @@ subroutine fourier_fct(fw,ft,ldiag,ltau,opt_four,paw_dmft)
        if(ldiag) then
          write(message,'(a,a,2(e15.4))') ch10,&
 &          "green function is not real in imaginary time space",ft(itau)
-         MSG_ERROR(message)
+         ABI_ERROR(message)
        else
          iwarn=iwarn+1
          ftr(itau)=real(ft(itau))
@@ -2691,7 +2568,7 @@ subroutine fourier_fct(fw,ft,ldiag,ltau,opt_four,paw_dmft)
 !       write(std_out,*) itau,ftr(itau)
    enddo
 
-   ABI_ALLOCATE(tospline_li,(paw_dmft%dmft_nwli))
+   ABI_MALLOC(tospline_li,(paw_dmft%dmft_nwli))
    if (log_direct==1) then
 !   do not have a physical meaning..because the log frequency is not
 !   one of the linear frequency.
@@ -2706,19 +2583,19 @@ subroutine fourier_fct(fw,ft,ldiag,ltau,opt_four,paw_dmft)
         !write(1112,*) paw_dmft%omega_li(ifreq),real(tospline_li(ifreq)),aimag(tospline_li(ifreq))
      enddo
      if(paw_dmft%dmft_log_freq==1) then
-       ABI_ALLOCATE(omega_li,(1:paw_dmft%dmft_nwli))
+       ABI_MALLOC(omega_li,(1:paw_dmft%dmft_nwli))
        call construct_nwli_dmft(paw_dmft,paw_dmft%dmft_nwli,omega_li)
        call spline_c(paw_dmft%dmft_nwli,paw_dmft%dmft_nwlo,omega_li,&
 &                 paw_dmft%omega_lo,fw,tospline_li)
-       ABI_DEALLOCATE(omega_li)
+       ABI_FREE(omega_li)
      else
        fw=tospline_li
      endif
    endif
 
-   ABI_DEALLOCATE(tospline_li)
+   ABI_FREE(tospline_li)
 
-   ABI_DEALLOCATE(ftr)
+   ABI_FREE(ftr)
    if(iwarn>0) then
      write(message,'(a,a,2(e15.4))') ch10,&
 &     "WARNING: off-diag green function is not real in imaginary time space",xsto
@@ -2739,7 +2616,7 @@ end subroutine fourier_fct
 !! (A spline is performed )
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2019 ABINIT group (BAmadon)
+!! Copyright (C) 2006-2024 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2756,19 +2633,9 @@ end subroutine fourier_fct
 !!  fw= function is frequency space
 !!  ft= function is time space
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      loc_oper,print_matlu,sym_matlu,wrtout
-!!
 !! SOURCE
 
 subroutine spline_fct(fw1,fw2,opt_spline,paw_dmft)
-
- use defs_basis
- use m_paw_dmft, only : paw_dmft_type, construct_nwli_dmft
- use m_splines
- implicit none
 
 !Arguments ------------------------------------
 !type
@@ -2790,11 +2657,11 @@ subroutine spline_fct(fw1,fw2,opt_spline,paw_dmft)
 
 !   allocate(fw1(0:paw_dmft%dmft_nwlo-1))
    if(paw_dmft%dmft_log_freq==1) then
-     ABI_ALLOCATE(omega_li,(1:size_fw2))
+     ABI_MALLOC(omega_li,(1:size_fw2))
      call construct_nwli_dmft(paw_dmft,size_fw2,omega_li)
      call spline_c(size_fw1,size_fw2,paw_dmft%omega_lo(1:size_fw1),&
 &                   omega_li(1:size_fw2),fw2,fw1)
-     ABI_DEALLOCATE(omega_li)
+     ABI_FREE(omega_li)
    else
      fw2=fw1
    endif
@@ -2804,11 +2671,11 @@ subroutine spline_fct(fw1,fw2,opt_spline,paw_dmft)
 
 
    if(paw_dmft%dmft_log_freq==1) then
-     ABI_ALLOCATE(omega_li,(1:size_fw2))
+     ABI_MALLOC(omega_li,(1:size_fw2))
      call construct_nwli_dmft(paw_dmft,size_fw2,omega_li)
      call spline_c(size_fw2,size_fw1,omega_li(1:size_fw2),&
 &                 paw_dmft%omega_lo(1:size_fw1),fw1,fw2)
-     ABI_DEALLOCATE(omega_li)
+     ABI_FREE(omega_li)
    else
      fw1=fw2
    endif
@@ -2830,18 +2697,9 @@ end subroutine spline_fct
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      qmc_prep_ctqmc
-!!
-!! CHILDREN
-!!      loc_oper,print_matlu,sym_matlu,wrtout
-!!
 !! SOURCE
 
 subroutine occup_green_tau(green)
-
- use m_matlu, only : shift_matlu
- implicit none
 
 !Arguments ------------------------------------
 !type
@@ -2852,7 +2710,7 @@ subroutine occup_green_tau(green)
  complex(dpc), allocatable :: shift(:)
 ! *********************************************************************
 
- ABI_ALLOCATE(shift,(green%oper_tau(1)%natom))
+ ABI_MALLOC(shift,(green%oper_tau(1)%natom))
  do iatom=1,green%oper_tau(1)%natom
    shift(iatom)=-cone
    lpawu=green%oper_tau(1)%matlu(iatom)%lpawu
@@ -2863,7 +2721,7 @@ subroutine occup_green_tau(green)
    endif
  enddo
  call shift_matlu(green%occup_tau%matlu,green%occup_tau%natom,shift)
- ABI_DEALLOCATE(shift)
+ ABI_FREE(shift)
 
 
 end subroutine occup_green_tau
@@ -2879,17 +2737,11 @@ end subroutine occup_green_tau
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
  function occupfd(eig,fermie,temp)
 
- implicit none
 
 !Arguments ------------------------------------
 !type
@@ -2924,20 +2776,9 @@ end subroutine occup_green_tau
 !!  proct(iw,iproc) : 1 if the frequency "iw" should be computed by the proc "iproc"
 !!                    0 if iw should not   "      "
 !!                    careful: if proct=1, it does not mean that each combination {iw,ikpt} is treated by this proc.
-!! PARENTS
-!!      m_green
-!!
-!! CHILDREN
-!!      loc_oper,print_matlu,sym_matlu,wrtout
-!!
 !! SOURCE
 
  subroutine distrib_paral(nkpt,nproc,nw,nw_perproc,procb,proct)
-
- use defs_basis
- use defs_datatypes
- use defs_abitypes
- implicit none
 
 !Arguments ------------------------------------
 !type
@@ -2955,8 +2796,9 @@ end subroutine occup_green_tau
  procb(:,:)=-1
 
  if(nproc.ge.2*nw) then
+ !write(6,*) "AA"
    ratio=nproc/nw
-   ABI_ALLOCATE(proca,(nw,nproc/nw))
+   ABI_MALLOC(proca,(nw,nproc/nw))
    do ir=1,ratio
      do iw=1,nw
        proca(iw,ir)=iw+(ir-1)*nw-1
@@ -2983,9 +2825,10 @@ end subroutine occup_green_tau
      enddo
    enddo
    nw_perproc=1
-   ABI_DEALLOCATE(proca)
+   ABI_FREE(proca)
 
  else if (nproc.ge.nw) then
+ !write(6,*) "BB"
    do iw=1,nw
      procb(iw,:)= iw
      proct(iw,iw)=1
@@ -2997,7 +2840,9 @@ end subroutine occup_green_tau
    nw_perproc=1
 
  else if (nproc.le.nw) then
+ !write(6,*) "CC"
    ratio=nw/nproc
+ !write(6,*) "ratio", ratio
    do iproc=0,nproc-1
      do iw=1,nw
        if (mod(iw-1,nproc)==iproc) then
@@ -3006,6 +2851,9 @@ end subroutine occup_green_tau
        endif
      enddo
    enddo
+    ! do iw=1,nw
+    !   write(6,*) "iw, iproc", iw, procb(iw,1)
+    ! enddo
    nw_perproc=ratio+1
 !  some procs will compute a number of frequency which is ratio and some
 !  other will compute a number of frequency which is ratio+1.
@@ -3028,15 +2876,15 @@ end subroutine occup_green_tau
  end subroutine distrib_paral
 !!***
 
-!!****f* ABINIT/greenldacompute_green
+!!****f* ABINIT/greendftcompute_green
 !! NAME
-!! greenldacompute_green
+!! greendftcompute_green
 !!
 !! FUNCTION
 !! Compute levels for ctqmc
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2019 ABINIT group (BAmadon)
+!! Copyright (C) 1999-2024 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -3046,27 +2894,9 @@ end subroutine occup_green_tau
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      loc_oper,print_matlu,sym_matlu,wrtout
-!!
 !! SOURCE
 
- subroutine greenldacompute_green(cryst_struc,green,pawang,paw_dmft)
-
- use defs_basis
- use defs_datatypes
- use defs_abitypes
- use m_errors
- use m_abicore
-
- use m_pawang, only : pawang_type
- use m_crystal, only : crystal_t
- use m_paw_dmft, only : paw_dmft_type
- use m_oper, only : oper_type,loc_oper
- use m_matlu, only : sym_matlu, print_matlu
- implicit none
+ subroutine greendftcompute_green(cryst_struc,green,pawang,paw_dmft)
 
 !Arguments ------------------------------------
 !scalars
@@ -3091,7 +2921,7 @@ end subroutine occup_green_tau
 
      !  write(6,*) green%oper(1)%ks(1,1,1,1)
  if(green%oper(1)%has_operks==0) then
-  MSG_ERROR("greenlda%oper(1)%ks not allocated")
+  ABI_ERROR("greendft%oper(1)%ks not allocated")
  endif
 
 !======================================
@@ -3105,9 +2935,9 @@ end subroutine occup_green_tau
      !  write(6,*) ifreq,iband,ikpt,isppol
      !  write(6,*) cmplx(0.d0,paw_dmft%omega_lo(ifreq),kind=dp)
      !  write(6,*) paw_dmft%fermie
-     !  write(6,*) paw_dmft%eigen_lda(isppol,ikpt,iband)
+     !  write(6,*) paw_dmft%eigen_dft(isppol,ikpt,iband)
          green%oper(ifreq)%ks(isppol,ikpt,iband,iband)=&
-         cone/(cmplx(0.d0,paw_dmft%omega_lo(ifreq),kind=dp)+paw_dmft%fermie-paw_dmft%eigen_lda(isppol,ikpt,iband))
+         cone/(cmplx(0.d0,paw_dmft%omega_lo(ifreq),kind=dp)+paw_dmft%fermie-paw_dmft%eigen_dft(isppol,ikpt,iband))
        end do
      end do
    end do
@@ -3121,14 +2951,13 @@ end subroutine occup_green_tau
 !======================================================================
 ! Symetrize
 !======================================================================
-   call sym_matlu(cryst_struc,green%oper(ifreq)%matlu,pawang)
-
+   call sym_matlu(cryst_struc,green%oper(ifreq)%matlu,pawang,paw_dmft)
  enddo
- write(message,'(a,2x,a,f13.5)') ch10," == Print LDA Green's function for last frequency"
+ write(message,'(a,2x,a,f13.5)') ch10," == Print DFT Green's function for last frequency"
  call wrtout(std_out,message,'COLL')
  call print_matlu(green%oper(paw_dmft%dmft_nwlo)%matlu,natom,1)
 
- end subroutine greenldacompute_green
+ end subroutine greendftcompute_green
 !!***
 
 
@@ -3137,10 +2966,10 @@ end subroutine occup_green_tau
 !! fermi_green
 !!
 !! FUNCTION
-!!  Compute Fermi level for DMFT or LDA.
+!!  Compute Fermi level for DMFT or DFT.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2019 ABINIT group (BAmadon)
+!! Copyright (C) 2006-2024 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -3149,31 +2978,15 @@ end subroutine occup_green_tau
 !! fermie: current value
 !! f_precision: precision of f required
 !! ITRLST: =1 if last iteration of DMFT
-!! opt_noninter   : if one wants the LDA fermi level
+!! opt_noninter   : if one wants the DFT fermi level
 !! max_iter : max number of iterations.
 !!
 !! OUTPUT
 !! fermie: output value
 !!
-!! PARENTS
-!!      m_dmft
-!!
-!! CHILDREN
-!!      compute_green,integrate_green,newton,wrtout
-!!
 !! SOURCE
 
 subroutine fermi_green(cryst_struc,green,paw_dmft,pawang,self)
-
- use m_abicore
-
- use defs_basis
- use defs_abitypes
- use m_pawang, only : pawang_type
- use m_crystal, only : crystal_t
- use m_paw_dmft, only: paw_dmft_type
- use m_self, only : self_type
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -3296,7 +3109,7 @@ end subroutine fermi_green
 !!  Compute root of a function with newton methods (newton/halley)
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2019 ABINIT group (BAmadon)
+!! Copyright (C) 2006-2024 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -3311,27 +3124,11 @@ end subroutine fermi_green
 !!  f_precision  : output precision on function F
 !!  ierr_hh      : different from zero if an error occurs
 !!
-!! PARENTS
-!!      fermi_green
-!!
-!! CHILDREN
-!!      compute_green,integrate_green
-!!
 !! SOURCE
 
 subroutine newton(cryst_struc,green,paw_dmft,pawang,self,&
 & x_input,x_precision,max_iter,f_precision,ierr_hh,opt_noninter,opt_algo)
 
- use defs_basis
- use defs_abitypes
- use m_abicore
- use m_errors
-
- use m_pawang,    only : pawang_type
- use m_crystal,   only : crystal_t
- use m_paw_dmft,  only: paw_dmft_type
- use m_self,      only : self_type
- implicit none
 !Arguments ------------------------------------
 !scalars
  type(crystal_t),intent(in) :: cryst_struc
@@ -3527,26 +3324,13 @@ subroutine newton(cryst_struc,green,paw_dmft,pawang,self,&
 !!  Fxprime      : Value of F'(x)
 !!  Fxdouble     : Value of F''(x)
 !!
-!! PARENTS
-!!      newton
-!!
-!! CHILDREN
-!!      compute_green,integrate_green
-!!
 !! SOURCE
 
 subroutine function_and_deriv(cryst_struc,f_precision,green,iter,paw_dmft,pawang,self&
 & ,x_input,x_old,x_precision,Fx,Fxprime,Fxdouble,opt_noninter,option)
 
- use m_abicore
 
- use defs_basis
- use defs_abitypes
- use m_errors
- use m_crystal, only : crystal_t
- use m_paw_dmft, only: paw_dmft_type
- use m_self, only : self_type
- implicit none
+
 !Arguments ------------------------------------
 !scalars
  type(crystal_t),intent(in) :: cryst_struc
@@ -3630,26 +3414,13 @@ subroutine function_and_deriv(cryst_struc,f_precision,green,iter,paw_dmft,pawang
 !! Fx           : Value of F(x).
 !! nb_elec_x    : Number of electrons for the value of x
 !!
-!! PARENTS
-!!      newton
-!!
-!! CHILDREN
-!!      compute_green,integrate_green
-!!
 !! SOURCE
 
 subroutine compute_nb_elec(cryst_struc,green,paw_dmft,pawang,self,&
 &  Fx,opt_noninter,nb_elec_x,fermie)
 
- use m_abicore
 
- use defs_basis
- use defs_abitypes
- use m_errors
- use m_crystal, only : crystal_t
- use m_paw_dmft, only: paw_dmft_type
- use m_self, only : self_type
- implicit none
+
 !Arguments ------------------------------------
 !scalars
  type(crystal_t),intent(in) :: cryst_struc
@@ -3688,7 +3459,7 @@ end subroutine newton
 !! do the fourier transformation and print it
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2019 ABINIT group (BAmadon)
+!! Copyright (C) 1999-2024 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -3696,31 +3467,17 @@ end subroutine newton
 !!
 !! INPUTS
 !!  cryst_struc
-!!  istep    =  step of iteration for LDA.
-!!  lda_occup
-!!  mpi_enreg=informations about MPI parallelization
-!!  paw_dmft =  data for self-consistent LDA+DMFT calculations.
+!!  istep    =  step of iteration for DFT.
+!!  dft_occup
+!!  mpi_enreg=information about MPI parallelization
+!!  paw_dmft =  data for self-consistent DFT+DMFT calculations.
 !!
 !! OUTPUT
-!!  paw_dmft =  data for self-consistent LDA+DMFT calculations.
-!!
-!! PARENTS
-!!      m_dmft
-!!
-!! CHILDREN
-!!      fourier_fct,wrtout
+!!  paw_dmft =  data for self-consistent DFT+DMFT calculations.
 !!
 !! SOURCE
 
 subroutine local_ks_green(green,paw_dmft,prtopt)
-
- use defs_basis
- use m_errors
- use m_abicore
-
- use m_crystal, only : crystal_t
- use m_paw_dmft, only : paw_dmft_type
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -3744,7 +3501,7 @@ subroutine local_ks_green(green,paw_dmft,prtopt)
  nkpt=paw_dmft%nkpt
  nsppol=paw_dmft%nsppol
  ltau=128
- ABI_ALLOCATE(tau,(ltau))
+ ABI_MALLOC(tau,(ltau))
  do itau=1,ltau
    tau(itau)=float(itau-1)/float(ltau)/paw_dmft%temp
  end do
@@ -3753,14 +3510,14 @@ subroutine local_ks_green(green,paw_dmft,prtopt)
 !Only imaginary frequencies here
  if(green%w_type=="real") then
    message = ' compute_energy not implemented for real frequency'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
 !=========================================
 !Compute local band ks green function
 ! should be computed in compute_green: it would be less costly in memory.
 !=========================================
- ABI_ALLOCATE(loc_ks,(nsppol,mbandc,paw_dmft%dmft_nwlo))
+ ABI_MALLOC(loc_ks,(nsppol,mbandc,paw_dmft%dmft_nwlo))
  if(green%oper(1)%has_operks==1) then
    loc_ks(:,:,:)=czero
    do isppol=1,nsppol
@@ -3775,16 +3532,16 @@ subroutine local_ks_green(green,paw_dmft,prtopt)
    end do
  else
    message = ' green fct is not computed in ks space'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
 !=========================================
 !Compute fourier transformation
 !=========================================
 
- ABI_ALLOCATE(loc_ks_tau,(nsppol,mbandc,ltau))
- ABI_ALLOCATE(fw,(paw_dmft%dmft_nwlo))
- ABI_ALLOCATE(ft,(ltau))
+ ABI_MALLOC(loc_ks_tau,(nsppol,mbandc,ltau))
+ ABI_MALLOC(fw,(paw_dmft%dmft_nwlo))
+ ABI_MALLOC(ft,(ltau))
  loc_ks_tau(:,:,:)=czero
  do isppol=1,nsppol
    do iband=1,mbandc
@@ -3797,8 +3554,8 @@ subroutine local_ks_green(green,paw_dmft,prtopt)
      end do
    end do
  end do
- ABI_DEALLOCATE(fw)
- ABI_DEALLOCATE(ft)
+ ABI_FREE(fw)
+ ABI_FREE(ft)
  do isppol=1,nsppol
    do iband=1,mbandc
      do itau=1,ltau
@@ -3811,7 +3568,7 @@ subroutine local_ks_green(green,paw_dmft,prtopt)
 !Print out ksloc green function
 !=========================================
  if(abs(prtopt)==1) then
-   ABI_ALLOCATE(unitgreenlocks_arr,(nsppol))
+   ABI_MALLOC(unitgreenlocks_arr,(nsppol))
    do isppol=1,nsppol
      write(tag_is,'(i1)')isppol
      tmpfil = trim(paw_dmft%filapp)//'Gtau_locks_isppol'//tag_is
@@ -3841,13 +3598,13 @@ subroutine local_ks_green(green,paw_dmft,prtopt)
      end do
 !    call flush(unitgreenlocks_arr(isppol))
    end do
-   ABI_DEALLOCATE(unitgreenlocks_arr)
+   ABI_FREE(unitgreenlocks_arr)
  end if
 
 !Deallocations
- ABI_DEALLOCATE(loc_ks)
- ABI_DEALLOCATE(loc_ks_tau)
- ABI_DEALLOCATE(tau)
+ ABI_FREE(loc_ks)
+ ABI_FREE(loc_ks_tau)
+ ABI_FREE(tau)
 
 end subroutine local_ks_green
 !!***

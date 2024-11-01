@@ -3,7 +3,7 @@ Contributors
 
 The ABINIT package : list of contributors.
 
-Copyright (C) 2000-2019 ABINIT group (XG)
+Copyright (C) 2000-2024 ABINIT group (XG)
 This file is distributed under the terms of the
 GNU General Public License, see ~abinit/COPYING
 or http://www.gnu.org/copyleft/gpl.txt .
@@ -14,7 +14,7 @@ For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 The ABINIT project has been initiated by the Universite Catholique
 de Louvain (X. Gonze) and Corning Incorporated (D.C. Allan).
 
-Seven other institutions have also clearly shown their implication
+Nine other institutions have also clearly shown their implication
 in the ABINIT project in the past or currently :
 - l'Universite de Liege (Ph. Ghosez, M. Verstraete),
 - le Commissariat a l'Energie Atomique, Bruyeres-le-chatel (F. Jollet, M. Torrent, B. Amadon),
@@ -24,11 +24,116 @@ in the ABINIT project in the past or currently :
 - U. de Montr\'{e}al (M. Cot\'{e})
 - le Commissariat a l'Energie Atomique, Grenoble (T. Deutsch, D. Caliste),
 - University of West Virginia (A. Romero),
+- Dalhousie University (J. Zwanziger),
+- Institut de Ci\'{e}ncia de Materials de Barcelona (ICMAB-CSIC) (M. Stengel, M. Royo).
 
 Coming now to individuals,
-recent direct contributors to ABINIT (versions 8.0 to 8.10) are listed below.
+recent direct contributors to ABINIT (versions 9.11.6 to 10.2) are listed below.
 For reasons of privacy, we do not provide the e-mail address anymore.
 If you need to contact somebody, try the forum or the github.
+
+G. Antonius
+M. Azizi
+L. Baguet
+J.-M. Beuken
+O. Bistoni
+A. Blanchet
+F. Bottin
+J. Bouchet
+J. Bouquiaux
+F. Brieuc
+F. Bruneval
+Siyu Chen
+A. Donkov
+F. Gendron
+M. Giantomassi
+X. Gonze
+F. Goudreault
+B. Guster
+P. Kestener
+L. MacEnulty
+M. Mignolet
+Ch. Paillard
+S. Ponce
+M. Sarraute
+M. Torrent
+V. Vasilchenko
+M. Verstraete
+He Xu
+J. Zwanziger
+
+
+direct contributors to ABINIT (versions 8.10.0 to 9.11.6)
+F. Akhmetov (Radioteddy on abinit github)
+B. Amadon
+G. Antonius
+L. Baguet
+S. Bandyopadhyay
+L. Bastogne
+J.-M. Beuken
+J. Bieder
+A. Blanchet
+F. Bottin
+J. Bouchet
+J. Bouquiaux
+E. Bousquet
+F. Brieuc
+V. Brousseau
+N. Brouwer
+F. Bruneval
+G. Brunin
+Wei Chen
+J.-B. Charraud
+J. Clerouin
+M. Cote
+A. Donkov
+C. Espejo
+F. Gendron
+Ph. Ghosez
+M. Giantomassi
+O. Gingras
+X. Gonze
+F. Goudreault
+B. Guster
+G. Hautier
+Xu He
+N. Helbig
+F. Jollet 
+T. Karatsu
+P. Kestener
+A. H. Larsen
+L. MacEnulty
+M. Mignolet
+H. Miranda
+F. Naccarato
+O. Nadeau
+D. D. O'Regan
+R. Outerovitch
+Ch. Paillard
+G. Petretto
+N. Pike
+S. Ponce
+Y. Pouillon
+F. Ricci
+G.-M. Rignanese
+M. Rodriguez-Mayorga
+S. Rostami
+M. Royo
+M. Sarraute
+A. Sasani
+B. Sataric
+M. Schmitt
+B. Seddon
+F. Soubiran
+M. Stengel
+M. Torrent
+J. Van Bever
+V. Vasilchenko
+M. Verstraete
+He Xu
+J. Zwanziger
+
+direct contributors to ABINIT (versions 8.0 to 9.0.0) are :
 name                      
 Flavio Abreu Araujo      
 Florian Altvater        
@@ -43,6 +148,7 @@ Fran\c{c}ois Bottin
 Yohann Bouchet
 Eric Bousquet
 Fabien Bruneval
+Guillaume Brunin
 Damien Caliste
 Wei Chen
 Michel Cote
@@ -57,7 +163,8 @@ Matteo Giantomassi
 Olivier Gingras
 Yannick Gillet
 Xavier Gonze
-F. Goudreault (U. Montreal)
+Felix Goudreault 
+Bogdan Guster
 Xu He
 Francois Jollet
 Jonathan Laflamme Janssen
@@ -83,6 +190,7 @@ Bruno Rousseau
 Oleg Rubel
 Abdullah Shukri
 Marc Torrent
+Josja Van Bever
 Michiel Van Setten
 Benoit Van Troeye
 Matthieu Verstraete
@@ -92,7 +200,6 @@ Bin Xu
 Joe Zwanziger
 
 direct contributors to ABINIT (versions 7.0 to 7.11-8.0) are :
-name                      email
 Flavio Abreu Araujo
 Joseba Alberdi
 Bernard Amadon
@@ -169,7 +276,6 @@ Vittorio Zecca
 Joe Zwanziger
 
 direct contributors to ABINIT (version 6.0 to 6.12) are :
-name                      email
 Donat Adams
 Stephan Albrecht
 Bernard Amadon
@@ -242,7 +348,6 @@ Joe Zwanziger
 
 
 direct contributors to ABINIT (versions 5.0 to 5.9) are :
-name                      email
 Bernard Amadon
 Pierre-Matthieu Anglade
 Masao Arai
@@ -319,8 +424,6 @@ Joe Zwanziger
 
 
 direct contributors to ABINIT (versions 4.1 to 4.6) are :
-
-name                    initials          email
 Doug Allan                dca         
 Bohdan Andriyevsky        bandri      
 Fred Arnold               farnold     
@@ -419,8 +522,6 @@ Barry Zorman              bzorman
 
 
 direct contributors to ABINIT (versions 4.0 or before) are :
-
-name                    initials          email
 Doug Allan                dca         
 Christophe Audouze        cau         
 Givanni Bachelet          gb          
@@ -493,8 +594,6 @@ Mike Zhang                mz
 
 
 direct contributors to ABINIT (version 3.0 or before) are :
-
-name                    initials          email
 Doug Allan                dca         
 Gabriel Bester            gbester     
 Jean-Michel Beuken        jmb         
@@ -569,7 +668,6 @@ Gilles Zerah              gz
 Also, the following persons have contributed to either the Corning code
 or the Respfn code (predecessors of ABINIT), or produced pseudopotentials :
 
-name                    initials  email
 Jean-Christophe Charlier  jcc     (1992, Cornell U.)
 Philippe Ghosez           phg     (1992-1998, U.C.L., tests of respfn)
 Stefan Goedecker          sg      (1993, Cornell U., and pseudopotentials)

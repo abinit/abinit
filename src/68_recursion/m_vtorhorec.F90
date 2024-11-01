@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_vtorhorec
 !! NAME
 !!  m_vtorhorec
@@ -6,14 +5,10 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2019 ABINIT group (SLeroux, MMancini).
+!!  Copyright (C) 2008-2024 ABINIT group (SLeroux, MMancini).
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -26,15 +21,17 @@
 module m_vtorhorec
 
  use defs_basis
- use defs_abitypes
- use defs_datatypes
  use defs_rectypes
+ use m_distribfft
  use m_xmpi
  use m_pretty_rec
  use m_errors
  use m_abicore
  use m_per_cond
+ use m_dtset
 
+ use defs_datatypes,     only : pseudopotential_type
+ use defs_abitypes,      only : MPI_type
  use m_time,             only : timein, timab
  use m_rec,              only : Calcnrec, init_nlpsprec, cpu_distribution
  use m_rec_tools,        only : reshape_pot, trottersum, get_pt0_pt1
@@ -43,7 +40,7 @@ module m_vtorhorec
  use m_fft,              only : fourdp
 
 #ifdef HAVE_GPU_CUDA
- use m_initcuda,       only : cudap
+ use m_gpu_toolbox
  use m_hidecudarec
  use m_xredistribute
 #endif
@@ -98,15 +95,6 @@ contains
 !!  rhor(nfft,nspden)=array for electron density in electrons/bohr**3.
 !!  rset%efermi= fermi energy
 !!
-!! PARENTS
-!!      scfcv
-!!
-!! CHILDREN
-!!      calcnrec,cudarec,destroy_distribfft,entropyrec,fermisolverec
-!!      gran_potrec,init_distribfft,nlenergyrec,prtwork,recursion,reshape_pot
-!!      symrhg,timab,transgrid,wrtout,xmpi_allgatherv,xmpi_barrier,xmpi_max
-!!      xmpi_sum,xredistribute
-!!
 !! NOTES
 !!  at this time :
 !!       - grnl in not implemented
@@ -121,8 +109,6 @@ subroutine vtorhorec(dtset,&
 &  ek,enlx,entropy,e_eigenvalues,fermie,&
 &  grnl,initialized,irrzon,nfftf,phnons,&
 &  rhog, rhor, vtrial,rset,deltastep,rprimd,gprimd)
-
- implicit none
 
 !Arguments -------------------------------
 !scalars
@@ -261,7 +247,7 @@ subroutine vtorhorec(dtset,&
    if(.not.(rset%nl%nlpsp)) then
 !    --Local case
 !    --COMPUTATION OF exp( -beta*pot/(4*rtrotter))
-     ABI_ALLOCATE(gcart_loc,(0,0))
+     ABI_MALLOC(gcart_loc,(0,0))
      gcart_loc = 0
      exppot = exp( -(ratio4*vtrial(:,1)))
    else
@@ -269,9 +255,9 @@ subroutine vtorhorec(dtset,&
 !    --COMPUTATION OF exp(-beta*pot/(8*rtrotter))
      exppot = exp( -(ratio8*vtrial(:,1)))
 
-     ABI_ALLOCATE(gcart_loc,(3,dtset%natom))
+     ABI_MALLOC(gcart_loc,(3,dtset%natom))
      gcart_loc = rset%inf%gcart
-     ABI_ALLOCATE(projec,(0:ngfftrec(1)-1,0:ngfftrec(2)-1,0:ngfftrec(3)-1,rset%nl%lmnmax,dtset%natom))
+     ABI_MALLOC(projec,(0:ngfftrec(1)-1,0:ngfftrec(2)-1,0:ngfftrec(3)-1,rset%nl%lmnmax,dtset%natom))
      projec = zero
 
      if(.not.(rset%tronc)) then
@@ -300,9 +286,9 @@ subroutine vtorhorec(dtset,&
 
  if(rset%load == 1)then
 #ifdef HAVE_GPU_CUDA
-   ABI_ALLOCATE(rho_hyb,(1:rset%GPU%par%npt))
-   ABI_ALLOCATE(a_hyb,(0:nrec,1:rset%GPU%par%npt))
-   ABI_ALLOCATE(b2_hyb,(0:nrec,1:rset%GPU%par%npt))
+   ABI_MALLOC(rho_hyb,(1:rset%GPU%par%npt))
+   ABI_MALLOC(a_hyb,(0:nrec,1:rset%GPU%par%npt))
+   ABI_MALLOC(b2_hyb,(0:nrec,1:rset%GPU%par%npt))
    rho_hyb = zero; a_hyb = zero; b2_hyb = zero
    rho_wrk => rho_hyb
    a_wrk   => a_hyb
@@ -334,8 +320,8 @@ subroutine vtorhorec(dtset,&
 #if defined HAVE_GPU_CUDA
    swt_tm = 1;
    call timab(607,1,tsec2)
-   ABI_ALLOCATE(an_dev,(0:recpar%npt-1,0:nrec))
-   ABI_ALLOCATE(bn2_dev,(0:recpar%npt-1,0:nrec))
+   ABI_MALLOC(an_dev,(0:recpar%npt-1,0:nrec))
+   ABI_MALLOC(bn2_dev,(0:recpar%npt-1,0:nrec))
    an_dev = zero
    bn2_dev = zero; bn2_dev(:,0) = one
 
@@ -346,8 +332,8 @@ subroutine vtorhorec(dtset,&
    a_wrk(0:max_rec,1:recpar%npt)  = transpose(an_dev(0:,0:max_rec))
    b2_wrk(0:max_rec,1:recpar%npt) = transpose(bn2_dev(0:,0:max_rec))
 
-   ABI_DEALLOCATE(an_dev)
-   ABI_DEALLOCATE(bn2_dev)
+   ABI_FREE(an_dev)
+   ABI_FREE(bn2_dev)
    call timab(607,2,tsec2)
 
    ipointlocal = recpar%npt+1
@@ -397,7 +383,7 @@ subroutine vtorhorec(dtset,&
        end do
      end do graou1
    else !--We use a troncation
-     ABI_ALLOCATE(exppotloc,(0:nfftrec-1))
+     ABI_MALLOC(exppotloc,(0:nfftrec-1))
      graou2 : do kk = recpar%pt0%z,recpar%pt1%z,dtset%recgratio
        do jj = 0,n2-1,dtset%recgratio
          do ii = 0,n1-1,dtset%recgratio
@@ -442,7 +428,7 @@ subroutine vtorhorec(dtset,&
          end do
        end do
      end do graou2
-     ABI_DEALLOCATE(exppotloc)
+     ABI_FREE(exppotloc)
    end if
 
  end if
@@ -458,8 +444,8 @@ subroutine vtorhorec(dtset,&
 !  --Bufsize contains the values of the number of points calculated
 !  by any proc on the coarse grid; bufsize_f on the fine grid
    call timab(604,1,tsec2) !--start time-counter: transgrid
-   ABI_ALLOCATE(bufsize,(0:rset%mpi%nproc-1))
-   ABI_ALLOCATE(bufdispl,(0:rset%mpi%nproc-1))
+   ABI_MALLOC(bufsize,(0:rset%mpi%nproc-1))
+   ABI_MALLOC(bufdispl,(0:rset%mpi%nproc-1))
    bufsize = 0;
    bufsize(rset%mpi%me) = rset%par%npt
    call xmpi_sum(bufsize,rset%mpi%comm_bandfft,ierr)
@@ -479,10 +465,10 @@ subroutine vtorhorec(dtset,&
 &   rset%mpi%comm_bandfft,ierr)
 
 
-   ABI_ALLOCATE(vcount_0,(0:rset%mpi%nproc-1))
-   ABI_ALLOCATE(displs_0,(0:rset%mpi%nproc-1))
-   ABI_ALLOCATE(vcount_1,(0:rset%mpi%nproc-1))
-   ABI_ALLOCATE(displs_1,(0:rset%mpi%nproc-1))
+   ABI_MALLOC(vcount_0,(0:rset%mpi%nproc-1))
+   ABI_MALLOC(displs_0,(0:rset%mpi%nproc-1))
+   ABI_MALLOC(vcount_1,(0:rset%mpi%nproc-1))
+   ABI_MALLOC(displs_1,(0:rset%mpi%nproc-1))
 
    vcount_0 = 0
    vcount_0(rset%mpi%me) = rset%par%npt*(nrec+1)
@@ -509,13 +495,13 @@ subroutine vtorhorec(dtset,&
 &   rset%mpi%comm_bandfft,ierr)
 
    nullify(rho_wrk,a_wrk,b2_wrk)
-   ABI_DEALLOCATE(rho_hyb)
-   ABI_DEALLOCATE(a_hyb)
-   ABI_DEALLOCATE(b2_hyb)
-   ABI_DEALLOCATE(vcount_0)
-   ABI_DEALLOCATE(displs_0)
-   ABI_DEALLOCATE(vcount_1)
-   ABI_DEALLOCATE(displs_1)
+   ABI_FREE(rho_hyb)
+   ABI_FREE(a_hyb)
+   ABI_FREE(b2_hyb)
+   ABI_FREE(vcount_0)
+   ABI_FREE(displs_0)
+   ABI_FREE(vcount_1)
+   ABI_FREE(displs_1)
    call timab(604,2,tsec2) !--start time-counter: transgrid
  end if
 #endif
@@ -528,13 +514,13 @@ subroutine vtorhorec(dtset,&
    call wrtout(std_out,msg,'COLL')
    call timab(604,1,tsec2) !--start time-counter: transgrid
 
-   ABI_ALLOCATE(rholocal_f,(rset%pawfgr%nfft))
-   ABI_ALLOCATE(rhogf,(2,rset%pawfgr%nfft))
-   ABI_ALLOCATE(rhogc,(2,rset%pawfgr%nfftc))
-   ABI_ALLOCATE(rholoc_2,(1:rset%pawfgr%nfftc))
-   ABI_ALLOCATE(ablocal_2,(1:rset%pawfgr%nfftc,0:nrec,2))
-   ABI_ALLOCATE(ablocal_f,(1:rset%pawfgr%nfft,0:nrec,2))
-   ABI_ALLOCATE(ablocal_1,(1:rset%par%npt,0:nrec,2))
+   ABI_MALLOC(rholocal_f,(rset%pawfgr%nfft))
+   ABI_MALLOC(rhogf,(2,rset%pawfgr%nfft))
+   ABI_MALLOC(rhogc,(2,rset%pawfgr%nfftc))
+   ABI_MALLOC(rholoc_2,(1:rset%pawfgr%nfftc))
+   ABI_MALLOC(ablocal_2,(1:rset%pawfgr%nfftc,0:nrec,2))
+   ABI_MALLOC(ablocal_f,(1:rset%pawfgr%nfft,0:nrec,2))
+   ABI_MALLOC(ablocal_1,(1:rset%par%npt,0:nrec,2))
 
    call destroy_distribfft(rset%mpi%distribfft)
    call init_distribfft(rset%mpi%distribfft,'c',rset%mpi%nproc_fft,rset%pawfgr%ngfftc(2) ,rset%pawfgr%ngfftc(3))
@@ -546,8 +532,8 @@ subroutine vtorhorec(dtset,&
    ablocal_1(:,:,2) = transpose(b2local(:,1:rset%par%npt))
 
    if(get_K_S_G==1 .and. dtset%recgratio>1 ) then
-     ABI_ALLOCATE(aloc_copy,(0:nrec,1:rset%par%npt))
-     ABI_ALLOCATE(b2loc_copy,(0:nrec,1:rset%par%npt))
+     ABI_MALLOC(aloc_copy,(0:nrec,1:rset%par%npt))
+     ABI_MALLOC(b2loc_copy,(0:nrec,1:rset%par%npt))
      aloc_copy = alocal(:,1:rset%par%npt)
      b2loc_copy = b2local(:,1:rset%par%npt)
    end if
@@ -616,13 +602,13 @@ subroutine vtorhorec(dtset,&
        end if
      end do
    end if
-   ABI_DEALLOCATE(ablocal_f)
-   ABI_DEALLOCATE(ablocal_2)
-   ABI_DEALLOCATE(ablocal_1)
-   ABI_DEALLOCATE(rhogf)
-   ABI_DEALLOCATE(rholocal_f)
-   ABI_DEALLOCATE(rhogc)
-   ABI_DEALLOCATE(rholoc_2)
+   ABI_FREE(ablocal_f)
+   ABI_FREE(ablocal_2)
+   ABI_FREE(ablocal_1)
+   ABI_FREE(rhogf)
+   ABI_FREE(rholocal_f)
+   ABI_FREE(rhogc)
+   ABI_FREE(rholoc_2)
 
    call timab(604,2,tsec2) !--stop time-counter: transgrid
  else
@@ -657,14 +643,14 @@ subroutine vtorhorec(dtset,&
 
    if(dtset%recgratio>1) then
 !    --Recgratio>1
-     ABI_ALLOCATE(rhogf,(2,rset%pawfgr%nfft))
-     ABI_ALLOCATE(rhogc,(2,rset%pawfgr%nfftc))
-     ABI_ALLOCATE(entropy_v_f,(rset%pawfgr%nfft,0:4))
-     ABI_ALLOCATE(entropy_v_c,(rset%pawfgr%nfftc,0:4))
-     ABI_ALLOCATE(entropy_v_2,(1:rset%par%npt,0:4))
-     ABI_ALLOCATE(gran_pot_v_f,(rset%pawfgr%nfft,0:4))
-     ABI_ALLOCATE(gran_pot_v_c,(rset%pawfgr%nfftc,0:4))
-     ABI_ALLOCATE(gran_pot_v_2,(1:rset%par%npt,0:4))
+     ABI_MALLOC(rhogf,(2,rset%pawfgr%nfft))
+     ABI_MALLOC(rhogc,(2,rset%pawfgr%nfftc))
+     ABI_MALLOC(entropy_v_f,(rset%pawfgr%nfft,0:4))
+     ABI_MALLOC(entropy_v_c,(rset%pawfgr%nfftc,0:4))
+     ABI_MALLOC(entropy_v_2,(1:rset%par%npt,0:4))
+     ABI_MALLOC(gran_pot_v_f,(rset%pawfgr%nfft,0:4))
+     ABI_MALLOC(gran_pot_v_c,(rset%pawfgr%nfftc,0:4))
+     ABI_MALLOC(gran_pot_v_2,(1:rset%par%npt,0:4))
 
      entropy_v_c = zero; entropy_v_f = zero; entropy_v_2 = zero
      gran_pot_v_c = zero; gran_pot_v_f = zero; gran_pot_v_2 = zero
@@ -689,8 +675,8 @@ subroutine vtorhorec(dtset,&
 &       gran_pot_v_2(ipoint,3),&
 &       gran_pot_v_2(ipoint,4))
      end do
-     ABI_DEALLOCATE(aloc_copy)
-     ABI_DEALLOCATE(b2loc_copy)
+     ABI_FREE(aloc_copy)
+     ABI_FREE(b2loc_copy)
 
      call timab(613+swt_tm,1,tsec2)  !!--start time-counter: sync gpu-cpu
      call xmpi_barrier(rset%mpi%comm_bandfft)
@@ -736,14 +722,14 @@ subroutine vtorhorec(dtset,&
        gran_pot4 = sum(gran_pot_v_f(:,4))
      end if
 
-     ABI_DEALLOCATE(entropy_v_f)
-     ABI_DEALLOCATE(entropy_v_c)
-     ABI_DEALLOCATE(entropy_v_2)
-     ABI_DEALLOCATE(rhogf)
-     ABI_DEALLOCATE(rhogc)
-     ABI_DEALLOCATE(gran_pot_v_f)
-     ABI_DEALLOCATE(gran_pot_v_c)
-     ABI_DEALLOCATE(gran_pot_v_2)
+     ABI_FREE(entropy_v_f)
+     ABI_FREE(entropy_v_c)
+     ABI_FREE(entropy_v_2)
+     ABI_FREE(rhogf)
+     ABI_FREE(rhogc)
+     ABI_FREE(gran_pot_v_f)
+     ABI_FREE(gran_pot_v_c)
+     ABI_FREE(gran_pot_v_2)
 
 
    else
@@ -824,14 +810,14 @@ subroutine vtorhorec(dtset,&
 
 !if(associated(projec))
  if(rset%nl%nlpsp)  then
-   ABI_DEALLOCATE(projec)
+   ABI_FREE(projec)
  end if
  if(associated(gcart_loc))  then
-   ABI_DEALLOCATE(gcart_loc)
+   ABI_FREE(gcart_loc)
  end if
  if((dtset%recgratio/=1 .or. rset%load==1))  then
-   ABI_DEALLOCATE(bufdispl)
-   ABI_DEALLOCATE(bufsize)
+   ABI_FREE(bufdispl)
+   ABI_FREE(bufsize)
  end if
 !------------------------------------------------------------------
 !--Check if the convergence is reached for rho
@@ -917,7 +903,7 @@ subroutine vtorhorec(dtset,&
    write(msg,'(a,2d10.3)')'  temps recursion    ',tsec
    call wrtout(std_out,msg,'COLL')
    write(msg,'(a,l1,a)') ' vtorhorec : rset%debug=-',rset%debug,', debugging mode => stop '
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  call timab(600,2,tsec2)
@@ -925,8 +911,7 @@ subroutine vtorhorec(dtset,&
 
  call symrhg(1,gprimd,irrzon,rset%mpi,nfftf,&
 & dtset%ngfft(1)*dtset%ngfft(2)*dtset%ngfft(3),dtset%ngfft,dtset%nspden,&
-& dtset%nsppol,dtset%nsym,dtset%paral_kgb,&
-& phnons,rhog,rhor,rprimd,dtset%symafm,dtset%symrel)
+& dtset%nsppol,dtset%nsym,phnons,rhog,rhor,rprimd,dtset%symafm,dtset%symrel,dtset%tnons)
 
 end subroutine vtorhorec
 !!***
@@ -951,12 +936,6 @@ end subroutine vtorhorec
 !!  ent_out=entropy at the point
 !!  ent_out1,ent_out2,ent_out3,ent_out4=debug entropy at the point
 !!
-!! PARENTS
-!!      vtorhorec
-!!
-!! CHILDREN
-!!      timab,wrtout
-!!
 !! NOTES
 !!  at this time :
 !!       - multce should be not used
@@ -968,8 +947,6 @@ end subroutine vtorhorec
 subroutine entropyrec(an,bn2,nrec,trotter,ent_out,multce,debug_rec, &
 &                     n_pt_integ,xmax,&
 &                     ent_out1,ent_out2,ent_out3,ent_out4)
-
- implicit none
 
 !Arguments -------------------------------
 !scalars
@@ -1236,8 +1213,6 @@ subroutine entropyrec(an,bn2,nrec,trotter,ent_out,multce,debug_rec, &
 
    function func1_rec(z)
 
-   implicit none
-
    complex(dpc) :: func1_rec
    complex(dpc),intent(in) :: z
 
@@ -1277,13 +1252,6 @@ end subroutine entropyrec
 !!  rho=density, recomputed for the new fermi energy
 !!  a, b2 : coefficient given by recursion recomputed for the new fermi energy
 !!
-!! PARENTS
-!!      vtorhorec
-!!
-!! CHILDREN
-!!      alloc_dens_cuda,dealloc_dens_cuda,density_cuda,density_rec,timab,wrtout
-!!      xmpi_barrier,xmpi_sum
-!!
 !! NOTES
 !!  at this time :
 !!
@@ -1294,8 +1262,6 @@ subroutine fermisolverec(fermie,rho,a,b2,debug_rec,nb_rec, &
   &                      acc, max_it, &
   &                      long_tranche,mpi_enreg,&
   &                      inf_ucvol,gputopo)
-
- implicit none
 
 !Arguments -------------------------------
  !scalars
@@ -1429,7 +1395,7 @@ subroutine fermisolverec(fermie,rho,a,b2,debug_rec,nb_rec, &
    if (res_nelecth*res_nelectl>0) then
      write (msg,'(4a)')' fermisolverec : ERROR- ',ch10,&
 &     ' initial guess for fermi energy doesnt permit to  find solutions in solver',ch10
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
 !  MAIN LOOP   ------------------------------------------------------
@@ -1566,12 +1532,6 @@ end subroutine fermisolverec
 !!
 !! SIDE EFFECTS
 !!
-!! PARENTS
-!!      fermisolverec
-!!
-!! CHILDREN
-!!      timab,trottersum
-!!
 !! NOTES
 !!  at this time :
 !!       - exppot should be replaced by ?
@@ -1583,8 +1543,6 @@ end subroutine fermisolverec
 subroutine density_rec(an,bn2,rho_out,nrec, &
 &                     fermie,tsmear,rtrotter, &
 &                     dim_trott,tol,inf_ucvol)
-
- implicit none
 
 !Arguments -------------------------------
 !scalars
@@ -1687,12 +1645,6 @@ subroutine density_rec(an,bn2,rho_out,nrec, &
 !!  In reality it is not the gren potential but the
 !!  grand-potential (omega=-PV) divided by -T
 !!
-!! PARENTS
-!!      vtorhorec
-!!
-!! CHILDREN
-!!      timab,wrtout
-!!
 !! NOTES
 !!  in reality it is not the gren potential but the grand-potential (omega=-PV) divided by -T
 !!  at this time :
@@ -1705,8 +1657,6 @@ subroutine density_rec(an,bn2,rho_out,nrec, &
 subroutine gran_potrec(an,bn2,nrec,trotter,ene_out, mult, &
 &                     debug_rec,n_pt_integ,xmax,&
 &                     ene_out1,ene_out2,ene_out3,ene_out4)
-
- implicit none
 
 !Arguments -------------------------------
 !scalars
@@ -1947,8 +1897,6 @@ subroutine gran_potrec(an,bn2,nrec,trotter,ene_out, mult, &
 
    function func_rec(z,x)
 
-   implicit none
-
    complex(dpc) :: func_rec
    complex(dpc),intent(in) :: z
    real(dp),intent(in) :: x
@@ -1986,17 +1934,9 @@ end subroutine gran_potrec
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      vtorhorec
-!!
-!! CHILDREN
-!!      recursion_nl,reshape_pot,timab,wrtout,xmpi_sum
-!!
 !! SOURCE
 
 subroutine nlenergyrec(rset,enlx,exppot,ngfft,natom,typat,tsmear,trotter,tol)
-
- implicit none
 
 !Arguments ------------------------------------
 !Scalar
@@ -2047,12 +1987,12 @@ subroutine nlenergyrec(rset,enlx,exppot,ngfft,natom,typat,tsmear,trotter,tol)
  me_count = 0
  dim_trott = max(0,2*trotter-1)
  nullify(projec)
- ABI_ALLOCATE(projec,(0:rset%ngfftrec(1)-1,0:rset%ngfftrec(2)-1,0:rset%ngfftrec(3)-1,rset%nl%lmnmax,natom))
+ ABI_MALLOC(projec,(0:rset%ngfftrec(1)-1,0:rset%ngfftrec(2)-1,0:rset%ngfftrec(3)-1,rset%nl%lmnmax,natom))
  projec = zero
 
  tronc = rset%tronc  !--True if troncation is used
  if(tronc)   then
-   ABI_ALLOCATE(exppotloc,(0:rset%nfftrec-1))
+   ABI_MALLOC(exppotloc,(0:rset%nfftrec-1))
  end if
 
 
@@ -2143,10 +2083,10 @@ subroutine nlenergyrec(rset,enlx,exppot,ngfft,natom,typat,tsmear,trotter,tol)
  call xmpi_sum(enlx,mpi_loc%comm_bandfft,ierr)
 
  if(associated(projec))  then
-   ABI_DEALLOCATE(projec)
+   ABI_FREE(projec)
  end if
  if(tronc)  then
-   ABI_DEALLOCATE(exppotloc)
+   ABI_FREE(exppotloc)
  end if
 
  if(rset%debug)then
@@ -2160,7 +2100,6 @@ end subroutine nlenergyrec
 !!***
 
 
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/first_rec
 !! NAME
 !! first_rec
@@ -2170,7 +2109,7 @@ end subroutine nlenergyrec
 !! compute some quantities which are used in the rest of the calculation.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2009-2019 ABINIT group (MMancini)
+!!  Copyright (C) 2009-2024 ABINIT group (MMancini)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -2198,18 +2137,9 @@ end subroutine nlenergyrec
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      scfcv
-!!
-!! CHILDREN
-!!      cpu_distribution,cudarec,get_pt0_pt1,green_kernel,init_nlpsprec
-!!      random_number,recursion,reshape_pot,timab,timein,wrtout,xmpi_sum
-!!
 !! SOURCE
 
 subroutine first_rec(dtset,psps,rset)
-
- implicit none
 
 !Arguments ------------------------------------
 ! scalars
@@ -2243,7 +2173,7 @@ subroutine first_rec(dtset,psps,rset)
 
  call timab(601,1,tsec)  !!--Start time-counter: initialisation
 
- MSG_WARNING("RECURSION")
+ ABI_WARNING("RECURSION")
  if(dtset%recgratio>1) then
    write(msg,'(a)')'COARSE GRID IS USED'
    call wrtout(std_out,msg,'COLL')
@@ -2275,7 +2205,7 @@ subroutine first_rec(dtset,psps,rset)
 !--COMPUTATION OF THE FOURIER TRANSFORM OF THE GREEN KERNEL (only once)
  write (msg,'(a)')' - green kernel calculation -----------------------'
  call wrtout(std_out,msg,'COLL')
- ABI_ALLOCATE(rset%ZT_p,(1:2,0: nfftrec-1))
+ ABI_MALLOC(rset%ZT_p,(1:2,0: nfftrec-1))
  call timab(601,2,tsec)
  call green_kernel(rset%ZT_p,rset%inf%rmet,rset%inf%ucvol,rtrotter/beta,rset%mpi,ngfftrec,nfftrec)
  call timab(601,1,tsec)
@@ -2306,7 +2236,7 @@ subroutine first_rec(dtset,psps,rset)
      testpts = min(rset%par%npt, 20)
      call timein(tsec2(1),tsec2(2))
      if(rset%tronc) then
-       ABI_ALLOCATE(exppotloc,(0:nfftrec-1))
+       ABI_MALLOC(exppotloc,(0:nfftrec-1))
        do while(ii< testpts)
          trasl = -(/1,2,3/)+ngfftrec(:3)/2
          call reshape_pot(trasl,dtset%nfft,nfftrec,dtset%ngfft(:3),ngfftrec(:3),&
@@ -2323,7 +2253,7 @@ subroutine first_rec(dtset,psps,rset)
 &         6,dtset%natom,dm_projec,0)
          ii=ii+1
        end do
-       ABI_DEALLOCATE(exppotloc)
+       ABI_FREE(exppotloc)
      else
        do while(ii< testpts)
          call recursion(exppot,0,0,0, &
@@ -2352,14 +2282,14 @@ subroutine first_rec(dtset,psps,rset)
 &     rset_test%GPU%par%npt,rset_test%GPU%par)
 
 
-     ABI_ALLOCATE(aloc_cu,(rset_test%GPU%par%npt))
-     ABI_ALLOCATE(b2loc_cu,(rset_test%GPU%par%npt))
+     ABI_MALLOC(aloc_cu,(rset_test%GPU%par%npt))
+     ABI_MALLOC(b2loc_cu,(rset_test%GPU%par%npt))
      call timein(tsec2(1),tsec2(2))
      call cudarec(rset_test, exppot,aloc_cu,b2loc_cu,&
 &     beta,trotter,dtset%rectolden,dtset%recgratio,dtset%ngfft,max_rec)
      call timein(tsec3(1),tsec3(2))
-     ABI_DEALLOCATE(aloc_cu)
-     ABI_DEALLOCATE(b2loc_cu)
+     ABI_FREE(aloc_cu)
+     ABI_FREE(b2loc_cu)
 
      time_cu = (tsec3(1)-tsec2(1))/real(rset_test%GPU%par%npt,dp)
      time_cu = time_cu*time_cu
@@ -2430,12 +2360,6 @@ end subroutine first_rec
 !! OUTPUT
 !!  ZT_p=fourier transforme of the Green kernel
 !!
-!! PARENTS
-!!      first_rec
-!!
-!! CHILDREN
-!!      fourdp,timab,wrtout
-!!
 !! NOTES
 !!  at this time :
 !!       - need a rectangular box
@@ -2444,8 +2368,6 @@ end subroutine first_rec
 
 
 subroutine green_kernel(ZT_p,inf_rmet,inf_ucvol,mult,mpi_enreg,ngfft,nfft)
-
- implicit none
 
 !Arguments -------------------------------
 !scalars
@@ -2473,7 +2395,7 @@ subroutine green_kernel(ZT_p,inf_rmet,inf_ucvol,mult,mpi_enreg,ngfft,nfft)
 
  norme = (mult/pi)**(onehalf)
 
- ABI_ALLOCATE(T_p,(0:nfft-1))
+ ABI_MALLOC(T_p,(0:nfft-1))
 
 !n_green should be better chosen for non rectangular cell
  do xx=1, n_green_max
@@ -2528,7 +2450,7 @@ subroutine green_kernel(ZT_p,inf_rmet,inf_ucvol,mult,mpi_enreg,ngfft,nfft)
  isign = -1
  call fourdp(1,ZT_p,T_p,isign,mpi_enreg,nfft,1,ngfft,0)
 
- ABI_DEALLOCATE(T_p)
+ ABI_FREE(T_p)
 
  ZT_p(:,:) = real(nfft,dp)*ZT_p
 
@@ -2593,12 +2515,6 @@ end subroutine green_kernel
 !!
 !! SIDE EFFECTS
 !!
-!! PARENTS
-!!      first_rec,vtorhorec
-!!
-!! CHILDREN
-!!      fourdp,timab,trottersum,vn_nl_rec
-!!
 !! NOTES
 !!  at this time :
 !!       - exppot should be replaced by ?
@@ -2616,7 +2532,6 @@ subroutine recursion(exppot,coordx,coordy,coordz,an,bn2,rho_out, &
 
 
  use m_linalg_interfaces
- implicit none
 
 !Arguments -------------------------------
 !scalars
@@ -2821,12 +2736,6 @@ subroutine recursion(exppot,coordx,coordy,coordz,an,bn2,rho_out, &
 !! SIDE EFFECTS
 !!  un(:,:,:)=initial vector on the grid. it is changed in output
 !!
-!! PARENTS
-!!      nlenergyrec
-!!
-!! CHILDREN
-!!      fourdp,timab,trottersum,vn_nl_rec,wrtout
-!!
 !! NOTES
 !!  at this time :
 !!       - need a rectangular box (rmet diagonal matrix)
@@ -2839,7 +2748,6 @@ subroutine recursion_nl(exppot,un,rho_out,rset,ngfft, &
 
 
  use m_linalg_interfaces
- implicit none
 
 !Arguments -------------------------------
 !scalars
@@ -3026,12 +2934,6 @@ end subroutine recursion_nl
 !! OUTPUT
 !! vn_nl(:,:,:)=the non_local contribution to vn
 !!
-!! PARENTS
-!!      recursion,recursion_nl
-!!
-!! CHILDREN
-!!      timab
-!!
 !! NOTES
 !!
 !! SOURCE
@@ -3040,7 +2942,6 @@ subroutine vn_nl_rec(vn,natom,typat,ngfftrec,inf_ucvol,nlrec,projec)
 
 
  use m_linalg_interfaces
- implicit none
 
 !Arguments -------------------------------
 !scalars

@@ -1,6 +1,6 @@
 # -*- Python -*-
 #
-# Copyright (C) 2005-2019 ABINIT Group (Yann Pouillon)
+# Copyright (C) 2005-2024 ABINIT Group (Yann Pouillon)
 #
 # This file is part of the ABINIT software package. For license information,
 # please see the COPYING file in the top-level directory of the ABINIT source
@@ -23,9 +23,11 @@ sources = [
  "m_conducti.F90",
  "m_dft_energy.F90",
  "m_extraprho.F90",
+ "m_ephtk.F90",
  "m_forces.F90",
  "m_forstr.F90",
  "m_cgwf.F90",
+ "m_cgwf_cprj.F90",
  "m_epjdos.F90",
  "m_ksdiago.F90",
  "mkcore_wvl.F90",
@@ -37,11 +39,10 @@ sources = [
  "m_iowf.F90",
  "m_eprenorms.F90",
  "m_sigtk.F90",
- "m_vcoul.F90",
  "m_odamix.F90",
+ "m_optic_tools.F90",
  "m_optics_vloc.F90",
  "m_rot_cg.F90",
- "m_orbmag.F90",
  "m_rhotov.F90",
  "m_common.F90",
  "m_positron.F90",
@@ -50,6 +51,7 @@ sources = [
  "m_stress.F90",
  "m_vtorhotf.F90",
  "m_wvl_rho.F90",
+ "m_xc_tb09.F90"
 ]
 
 # IMPORTANT : please use the alphabetic order in the previous list. Do NOT add the new routine names at the end of the list.

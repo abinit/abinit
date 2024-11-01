@@ -1,0 +1,94 @@
+# Input for PAW3 tutorial
+# C - diamond structure
+
+#-------------------------------------------------------------------------------
+#Directories and files
+
+pseudos="C.LDA-PW-paw.xml"
+
+pp_dirpath="../"
+outdata_prefix="outputs/ab_C_test_o"
+tmpdata_prefix="outputs/ab_C_test"
+
+
+#-------------------------------------------------------------------------------
+#Define the different datasets
+
+ndtset 18       # 18 double-index datasets
+udtset 9 2      # 1st index running from 1 to 9 and the 2nd from 1 to 2
+
+#Cutoff variables
+ecut:?  5.0
+ecut+?  5.0
+pawecutdg 110.0
+ecutsm 0.5
+
+#Dataset 1
+#Ground-state run
+chksymbreak 0
+kptopt?1  1
+nshiftk?1 1
+shiftk?1  0.5 0.5 0.5
+ngkpt     10 10 10
+tolvrs?1 1.0d-14
+nstep?1  150
+getwfk21 11
+getwfk31 21
+getwfk41 31
+getwfk51 41
+getwfk61 51
+getwfk71 61
+getwfk81 71
+getwfk91 81
+nbdbuf?1 4
+nband?1  8
+
+#Dataset 2
+#Definition of the k-point grid
+#the band structure
+iscf?2    -2
+getden?2  -1
+kptopt?2  -4
+nband?2    8
+nbdbuf?2   0
+ndivk?2    8 10 6 10 # divisions of the 6 segments
+kptbounds?2 
+           0.5  0.5  0.5  #L
+           0.0  0.0  0.0  #Gamma
+           0.5  0.0  0.5  #X
+           0.75 0.5  0.75 #U
+           0.0  0.0  0.0  #Gamma
+
+tolwfr?2  1.0d-18
+enunit?2  0             # Will output the eigenenergies in Ha
+nstep?2 150
+
+
+#-------------------------------------------------------------------------------
+#Definition of the Unit cell
+
+#Definition of the unit cell
+acell 3*6.7403
+rprim
+   0.5  0.5  0.0
+   0.0  0.5  0.5
+   0.5  0.0  0.5
+
+#Definition of the atom types
+ntypat 1          # One tom type
+znucl 6           # Carbon 
+
+#Definition of the atoms
+natom 2           # 2 atoms per cell
+typat 1 1         # each of type carbon
+xred              # This keyword indicates that the location of the atoms
+                  # will follow, one triplet of number for each atom
+   0.125    0.125    0.125
+  -0.125   -0.125   -0.125
+
+
+#-------------------------------------------------------------------------------
+#Miscelaneous
+
+#GS convergence fix
+istwfk *1

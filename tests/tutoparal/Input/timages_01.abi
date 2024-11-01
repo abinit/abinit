@@ -1,0 +1,90 @@
+#######################################
+#       INPUT FILE FOR ABINIT         #
+#                                     #
+#  Hydronium ion + NH3 molecule       #
+#  Ground state calculation           #
+#  keeping O and H atoms fixed        #
+#######################################
+
+# Definition of the unit cell
+# ===========================
+natom         8
+
+ntypat        3
+
+# Species     
+#             O   N   H   
+znucl         
+              8   7   1   
+
+typat         
+              1   3   3   2   3   3   3   3   
+
+acell         1.90000000000000e+01   9.45000000000000e+00   9.45000000000000e+00
+
+xcart       
+              0.00000000000000e+00   0.00000000000000e+00   0.00000000000000e+00 # O (H2O)
+             -7.10348053351713e-01  -5.40272701392005e-01   1.64595146174340e+00 # H (H2O)
+             -7.26410725481241e-01   1.63952639289158e+00  -5.39327838325563e-01 # H (H2O)
+              7.55890453154257e+00   0.00000000000000e+00   0.00000000000000e+00 # N (NH3)
+              8.21274977352101e+00  -1.88575770800658e-01  -1.80374359383935e+00 # H (NH3)
+              8.16172716793309e+00  -1.48664754874114e+00   1.07147471734616e+00 # H (NH3)
+              8.20330114285658e+00   1.65086474968890e+00   7.60236823259894e-01 # H (NH3)
+              1.94263846460644e+00   4.28967832165041e-02   2.96309057636469e-02 # H (proton)
+
+natfix        2 
+iatfix        1 4      # Keep O and N atoms fixed
+
+pp_dirpath "$ABI_PSPDIR/"
+pseudos "8o_hard.paw, 7n.paw, 1h.paw"
+
+# Electronic configuration
+# ========================
+nband         10       # Number of bands to compute
+kptopt        0        # No autogeneration of kpts so only use Gamma (0,0,0)
+cellcharge    1.0      # Charge of the simulation cell
+
+# Convergence parameters
+# ======================
+ecut          20
+pawecutdg     40
+
+# Control of the SCF cycle
+# ========================
+toldff        5.0d-7   # Stopping criterion of SCF cycle
+nstep         50       # Maximal number of SCF steps
+
+# Control of the relaxation
+# =========================
+ionmov        2        # BFGS (Broyden) algorithm for ions relaxation
+optcell       0        # No cell optimization
+ntime         500      # Max. number of "time" steps
+tolmxf        5.0d-5   # Stopping criterion of relaxation cycle
+
+# Parallelization
+# ===============
+paral_kgb     1        # Force use of lobpcg WITH parallelism on 1 CPU
+bandpp        10
+
+
+##############################################################
+# This section is used only for regression testing of ABINIT #
+##############################################################
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% [NCPU_1]
+#%% files_to_test = 
+#%%   timages_01_MPI1.abo, tolnlines = 7, tolabs = 8.300e-05, tolrel = 2.500e-02, fld_options = -easy
+#%% [paral_info]
+#%% nprocs_to_test = 1
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = G. Genestes, M. Torrent, J. Bieder
+#%% keywords = 
+#%% description = 
+#%%   Hydronium ion + NH3 molecule      
+#%%   Ground state calculation         
+#%%   keeping O and H atoms fixed     
+#%%<END TEST_INFO>

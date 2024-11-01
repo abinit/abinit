@@ -1,0 +1,108 @@
+#################################################################
+# Automatic test for ABINIT:                                    #
+#    Positron lifetime calculation within PAW                   #
+#                                                               #
+#              Al, 4 atoms in the box            M.T. Aug. 2009 #
+#################################################################
+
+# Datasets definition
+  ndtset 6
+
+  positron1  0      ! Dataset 1 is a simple electronic GS calculation
+
+  positron2  1      ! Dataset 2 is a positronic GS calculation
+  getden2    1      !   in presence of the previous electronic density
+  kptopt2    0      !   Use only k=gamma point
+
+  positron3  2      ! Dataset 3 is an electronic GS calculation
+  getden3    2      !   in presence of the previous positronic density
+
+  positron4 -1      ! Dataset 4 is an electronic/positronic GS calculation
+                    !   without storage of the wave-functions
+
+  positron5 -10     ! Datasets 5 is an electronic/positronic GS calculation
+                    !   with storage of the wave-functions
+                    !   stopping when convergence on total energy is reached
+
+  positron6 -10     ! Datasets 5 is an electronic/positronic GS calculation
+  postoldff6 1.5e-3 !   with storage of the wave-functions
+  optforces6 1      !   stopping when convergence on max. force is reached
+  xred6 0.0  0.0 0.0
+        0.51 0.5 0.0 ! This atom is moved in order to have forces acting on it
+        0.5  0.0 0.5
+        0.0  0.5 0.5
+
+  ! For testing purpose, several electron-positron correlations are used
+    ixcpositron2  2 ixcpositron3  2
+    ixcpositron4 11 ixcpositron5 11
+    ixcpositron6 11
+
+# Common input parameters
+  ! Unit cell
+    acell 3*4.05 angstrom
+    rprim 1.0 0.0 0.0
+          0.0 1.0 0.0
+          0.0 0.0 1.0
+    ntypat 1  natom 4  typat 4*1
+    znucl 13
+    xred 0.0 0.0 0.0
+         0.5 0.5 0.0
+         0.5 0.0 0.5
+         0.0 0.5 0.5
+    chkprim 0
+
+  ! K-points and occupations
+    kptopt 1
+    ngkpt 4 4 4
+    occopt 7
+    nband 15
+    posocc 1.0  ! Occupation number for the positron (to be set <1 for bulk calculation with a small cell).
+
+  ! Convergence parameters
+    ecut 8. pawecutdg 15.
+    nstep 50 tolvrs 2.d-10
+    postoldfe 1.d-6  !  Only used for automatic electron-positron
+    posnstep  4    !  calculations (datasets 4 and 5)
+
+!   Miscelaneous
+    prtwf 0 prteig 0           ! To save disk space
+    optforces 0 optstress 0    ! Not relevant here
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "Al.gga.uspp.paw"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t07.abo, tolnlines = 27, tolabs = 3.000e-01, tolrel = 1.100e+00, fld_options = -easy
+#%% [paral_info]
+#%% max_nprocs = 4
+#%% [extra_info]
+#%% authors = M. Torrent
+#%% keywords = PAW, positron
+#%% description = 
+#%%   Test of the computation of the positron lifetime
+#%%   (using the two-component DFT) within PAW.
+#%%   A cubic box with 4 Al atoms at experimental volume.
+#%%   Low cut-offs, few k-points.
+#%%   Datasets 2 to 3 use ixcpositron=2
+#%%   i.e. LDA electron-positron correlation provided by Puska,
+#%%   Seitsonen, and Nieminen (PRB 52, 10947).
+#%%   Datasets 4 to 5 use ixcpositron=11
+#%%   i.e. LDA zero positron density limit parametrized by Arponen
+#%%   and Pajanne and fitted by Sterne and Kaiser (PRB 43, 13892).
+#%%   Dataset 1 performs a simple electronic GS calculation and store the density.
+#%%   Dataset 2 performs a positronic GS calculation in presence of
+#%%   the electronic density computed by dataset 1 (positron=1).
+#%%   Dataset 3 performs an electronic GS calculation in presence of
+#%%   the positronic density computed by dataset 2 (positron=2).
+#%%   Dataset 4 performs an automatic electronic/positronic GS calculation
+#%%   without storage of the wave-functions (positron=-1).
+#%%   Dataset 5 performs an automatic electronic/positronic GS calculation
+#%%   with storage of the wave-functions (positron=-10).
+#%%   Each dataset computes the positron lifetime and annihilation rate
+#%%   after the SCF iterations.
+#%% topics = positron
+#%%<END TEST_INFO>

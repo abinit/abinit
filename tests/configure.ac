@@ -1,6 +1,6 @@
  -*- Autoconf -*-
 #
-# Copyright (C) 2011-2019 ABINIT Group (Yann Pouillon)
+# Copyright (C) 2011-2024 ABINIT Group (Yann Pouillon)
 #
 # This file is part of the ABINIT software package. For license information,
 # please see the COPYING file in the top-level directory of the ABINIT source
@@ -25,8 +25,10 @@
 
 # Initialize Autoconf
 AC_PREREQ(2.62)
-AC_INIT([ABINIT-Test-Suite],[8.11.6],
-  [https://bugs.launchpad.net/abinit/],[abinit-test])
+AC_INIT([ABINIT-Test-Suite],
+    [m4_esyscmd([config/scripts/git-version-gen .tarball-version])],
+    [https://bugs.launchpad.net/abinit/],
+    [abinit-test])
 AC_REVISION([Autotools support for the ABINIT Test Suite])
 AC_CONFIG_AUX_DIR([config/gnu])
 AC_CONFIG_MACRO_DIR([config/m4])
@@ -72,9 +74,9 @@ AC_PROG_CC
 
 # Timeout support
 AC_ARG_ENABLE([test-timeout],
-  AC_HELP_STRING([--enable-test-timeout],[Enable timeout for tests (default: no)]))
+  AS_HELP_STRING([--enable-test-timeout],[Enable timeout for tests (default: no)]))
 AC_ARG_WITH([test-timeout],
-  AC_HELP_STRING([--with-test-timeout],[Test timeout in seconds]))
+  AS_HELP_STRING([--with-test-timeout],[Test timeout in seconds]))
 
 # ---------------------------------------------------------------------------- #
 

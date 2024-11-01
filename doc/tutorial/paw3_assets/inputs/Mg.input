@@ -1,0 +1,24 @@
+Mg 12
+LDA-PW scalarrelativistic loggrid 801 40. logderivrange -10 40 1000
+3 3 0 0 0 0
+3 1 0
+0 0 0
+c
+v
+v
+v
+v
+1
+1.9
+n
+n
+custom polynom2 7 11 vanderbiltortho sincshape
+2 0 ultrasoft
+1.9
+1.9
+1.9
+1.9
+XMLOUT
+prtcorewf noxcnhat nospline noptim
+END
+ 

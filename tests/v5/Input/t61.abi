@@ -1,0 +1,66 @@
+# N2 system.
+# Excited state computation, using LDA/TDLDA
+# Uses nsppol=2, although the molecule is not spin-polarized
+
+ ndtset  2
+
+#DATASET 1  SCF
+  nband1   5
+ prtden1   1
+ getden1   0
+ getwfk1   0
+ tolwfr1   1.0d-15
+
+#DATASET 2 TDDFT
+#Common to all except GS calculations
+ nband2    12
+prtden2    0
+getden2    1
+getwfk2    1
+tolwfr2    1.0d-9
+  iscf2   -1
+
+#Common
+ acell 6  5  5.001 Angstrom
+ boxcenter 3*0.0d0
+ diemac 1.0d0   diemix 0.5d0
+ ecut 25
+ ixc 1
+ nsppol 2    spinmagntarget 0.0d0
+
+  kptopt 0
+ natom  2
+ nbdbuf 0
+
+ nstep 25
+ ntypat  1
+ typat  1 1
+ xcart -0.54885  0 0  0.54885 0 0 Angstrom   ! Distance 1.0977 Angstrom
+ znucl  7
+
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosHGH_pwteter/7n.5.hgh"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t61.abo, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
+#%% [paral_info]
+#%% max_nprocs = 2
+#%% [extra_info]
+#%% authors = Unknown
+#%% keywords = 
+#%% description = 
+#%%   N2 molecule non-spin-polarized, but treated with nsppol=2, in a big box.
+#%%   Similar to test 55 of tests/v3. There should be only
+#%%   small numerical differences with respect to datasets 1 and 2 of this test,
+#%%   due to the fact that the tetragonal symmetry was here slightly broken
+#%%   for sake of portability of the automatic test.
+#%%   Note however that the singlet and triplet states cannot be disentagled,
+#%%   so one gets a big list of excitations, the merge of singlet and triplet
+#%%   excitations.
+#%% topics = TDDFT
+#%%<END TEST_INFO>

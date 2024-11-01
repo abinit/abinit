@@ -1,7 +1,9 @@
 # The following md files have been copied from ~abinit and should be `git ignored`
-README_gpu.md
-README_MacOSX.md
-README_xlf.md
+INSTALL_gpu.md
+INSTALL_EasyBuild.md
+INSTALL_CentOS.md
+INSTALL_MacOS.md
+INSTALL_Ubuntu.md
 # The following md files have been automatically generated and should be `git ignored`
 developers/autoconf_examples.md
 variables/index.md
@@ -26,12 +28,14 @@ variables/rlx.md
 variables/vdw.md
 variables/w90.md
 variables/optic.md
-variables/tdep.md
+variables/atdep.md
 variables/anaddb.md
 variables/varset_stats.md
 topics/Abipy.md
 topics/APPA.md
 topics/Artificial.md
+topics/aTDEP.md
+topics/AtomCentered.md
 topics/AtomManipulator.md
 topics/AtomTypes.md
 topics/Bader.md
@@ -40,11 +44,12 @@ topics/Berry.md
 topics/BandOcc.md
 topics/BoundingProcess.md
 topics/BSE.md
+topics/ConstrainedDFT.md
 topics/ConstrainedPol.md
 topics/Control.md
 topics/Coulomb.md
 topics/CrossingBarriers.md
-topics/CRPA.md
+topics/CalcUJ.md
 topics/crystal.md
 topics/DFT+U.md
 topics/DeltaSCF.md
@@ -60,6 +65,7 @@ topics/ElPhonInt.md
 topics/ElPhonTransport.md
 topics/ElecDOS.md
 topics/ElecBandStructure.md
+topics/ExtFPMD.md
 topics/FileFormats.md
 topics/FitProcess.md
 topics/ForcesStresses.md
@@ -69,17 +75,23 @@ topics/GeoOpt.md
 topics/Git.md
 topics/GSintroduction.md
 topics/GW.md
+topics/GWR.md
 topics/GWls.md
 topics/Hybrids.md
+topics/Install.md
 topics/k-points.md
 topics/LatticeModel.md
+topics/LatticeWannier.md
+topics/LWFModel.md
 topics/LDAminushalf.md
+topics/longwave.md
 topics/LOTF.md
 topics/MagField.md
 topics/MagMom.md
 topics/MolecularDynamics.md
 topics/Macroave.md
 topics/multidtset.md
+topics/NMR.md
 topics/nonlinear.md
 topics/Optic.md
 topics/Output.md
@@ -90,6 +102,7 @@ topics/Planewaves.md
 topics/Phonons.md
 topics/PhononBands.md
 topics/PhononWidth.md
+topics/Polaron.md
 topics/PortabilityNonRegression.md
 topics/positron.md
 topics/printing.md
@@ -107,11 +120,10 @@ topics/SpinDynamicsMultibinit.md
 topics/STM.md
 topics/Susceptibility.md
 topics/TDDFT.md
-topics/Tdep.md
 topics/TDepES.md
 topics/Temperature.md
 topics/TransPath.md
-topics/TuningSpeed.md
+topics/TuningSpeedMem.md
 topics/Unfolding.md
 topics/UnitCell.md
 topics/vdw.md

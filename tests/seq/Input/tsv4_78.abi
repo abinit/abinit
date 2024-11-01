@@ -1,0 +1,118 @@
+#Lattice constants
+#*****************
+   acell 3*1.0616530850E+01
+   rprim 0.0 0.5 0.5
+         0.5 0.0 0.5
+         0.5 0.5 0.0
+
+#Definition of the atoms
+#***********************
+   natom 2
+   ntypat 2
+   znucl 13 33
+   typat 1 2
+   xred  0    0    0
+         0.25 0.25 0.25
+   ixc 1
+
+#k-point grid, scf cycle and plane wave basis
+#********************************************
+   nstep  100
+   ecut  3
+   ngkpt 2 2 2
+   nbdbuf 0
+  nshiftk   4
+   shiftk   0.5 0.5 0.5
+            0.5 0.0 0.0
+            0.0 0.5 0.0
+            0.0 0.0 0.5
+
+
+ndtset  7
+jdtset  11
+        21  22  23
+        31  32  33
+
+###############################################################################
+#                                                                             #
+#                DATASET 1?:Calculation for zero electric field               #
+#                                                                             #
+###############################################################################
+
+#DATASET11 : scf calculation: GS WF in the BZ
+#********************************************
+   prtden11   1
+   kptopt11   1
+   toldfe11   1.0d-12
+ berryopt11  -1
+    rfdir11   1 1 1
+
+
+###############################################################################
+#                                                                             #
+#            DATASET 2?:Calculation for a positive electric field             #
+#                                                                             #
+###############################################################################
+
+#Common variables
+#****************
+   nband2?    4
+   kptopt2?   1
+   berryopt2? 4
+   toldfe2?   1.0d-12
+   rfdir2?    1 1 1
+
+#Value of the electric field for each DATASET
+#********************************************
+   efield21  1.0d-4 0.0 0.0         getwfk21 11
+   efield22  2.0d-4 0.0 0.0         getwfk22 21 
+   efield23  3.0d-4 0.0 0.0         getwfk23 22
+
+
+###############################################################################
+#                                                                             #
+#            DATASET 3?:Calculation for a negative electric field             #
+#                                                                             #
+###############################################################################
+
+#Common variables
+#****************
+   nband3?    4
+   kptopt3?   1
+   berryopt3? 4
+   toldfe3?   1.0d-12
+   rfdir3?    1 1 1
+
+#Value of the electric field for each DATASET
+#********************************************
+   efield31  -1.0d-4 0.0 0.0         getwfk31 11
+   efield32  -2.0d-4 0.0 0.0         getwfk32 31
+   efield33  -3.0d-4 0.0 0.0         getwfk33 32
+
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/13al.pspnc, PseudosTM_pwteter/33as.pspnc"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   tsv4_78.abo, tolnlines=  0, tolabs=  5.757e-08, tolrel=  1.001e+00, fld_options=-easy
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = M. Veithen
+#%% keywords = NC, DFPT
+#%% description = 
+#%%   AlAs, zinc-blende structure.
+#%%   Finite electric field calculation
+#%%   In order to perform a first-principles calculation in an electric
+#%%   field, the wavefunctions must be initialized properly. Therefore,
+#%%   I do first a GS calculation to obtain the WF in the whole BZ under
+#%%   zero electric field. Then, I increase the electric field slowly in
+#%%   successive datasets. The calculation for each dataset is initialized
+#%%   using the WF of a previous one.
+#%%   I consider both positive and negative electric fields.
+#%%   WARNING : HAS BEEN TRANSFERRED TO tests/seq
+#%%<END TEST_INFO>

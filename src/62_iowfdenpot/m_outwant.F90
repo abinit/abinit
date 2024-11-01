@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_outwant
 !! NAME
 !! m_outwant
@@ -7,15 +6,11 @@
 !! Interface with want code.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2019 ABINIT group (CMorari)
+!! Copyright (C) 2005-2024 ABINIT group (CMorari)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -28,10 +23,10 @@
 module m_outwant
 
  use defs_basis
- use defs_abitypes
  use m_errors
  use m_abicore
  use m_hdr
+ use m_dtset
 
  use m_io_tools,   only : open_file
  use m_symtk,      only : matr3inv
@@ -90,17 +85,9 @@ contains
 !! OUTPUT
 !!  (only writing)
 !!
-!! PARENTS
-!!      outscfcv
-!!
-!! CHILDREN
-!!      matr3inv,wrtout
-!!
 !! SOURCE
 
 subroutine outwant(dtset,eig,cg,kg,npwarr,mband,mcg,nkpt,nsppol,mkmem,mpw,prtwant)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -145,7 +132,7 @@ subroutine outwant(dtset,eig,cg,kg,npwarr,mband,mcg,nkpt,nsppol,mkmem,mpw,prtwan
 
 !Open the file
  if (open_file(filewnt,message,newunit=unitwnt,form='unformatted', status='unknown') /=0) then
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 !Comments
@@ -199,7 +186,7 @@ subroutine outwant(dtset,eig,cg,kg,npwarr,mband,mcg,nkpt,nsppol,mkmem,mpw,prtwan
    do ii=1,nkpt
      write(std_out,*) (dtset%kptns(j,ii),j=1,3)
    end do
-   MSG_ERROR("fatal error")
+   ABI_ERROR("fatal error")
  end if
 
  call matr3inv(drprim,gmat)
@@ -271,12 +258,12 @@ subroutine outwant(dtset,eig,cg,kg,npwarr,mband,mcg,nkpt,nsppol,mkmem,mpw,prtwan
 
  if(index.ne.nkpt) then
    write(message,'(a,2i0)')' OutwanT: Wrong assignemt of kpts', index,nkpt
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 !End counting/assigning no of kpts/direction
 !Reordering the coordinates of all atoms - xcoord array
- ABI_ALLOCATE(tpat,(dtset%ntypat))
+ ABI_MALLOC(tpat,(dtset%ntypat))
  tpat(:)=zero
  do i=1,dtset%natom
    do j=1,dtset%ntypat
@@ -284,7 +271,7 @@ subroutine outwant(dtset,eig,cg,kg,npwarr,mband,mcg,nkpt,nsppol,mkmem,mpw,prtwan
    end do
  end do
  maxat=maxval(tpat(:))
- ABI_ALLOCATE(xcoord,(3,maxat,dtset%ntypat))
+ ABI_MALLOC(xcoord,(3,maxat,dtset%ntypat))
  index=1
  do i=1, dtset%ntypat
    do k=1,tpat(i)
@@ -301,8 +288,8 @@ subroutine outwant(dtset,eig,cg,kg,npwarr,mband,mcg,nkpt,nsppol,mkmem,mpw,prtwan
 !ONLY if they are not allready in the list. An index is associated
 !for each kg_tmp which allow us to recover kg(3,mpw*nkpt) from
 !the smaller list kg_tmp(3, imax)
- ABI_ALLOCATE(kg_tmp,(3,mpw*nkpt))
- ABI_ALLOCATE(iwfi,(nkpt,mpw))
+ ABI_MALLOC(kg_tmp,(3,mpw*nkpt))
+ ABI_MALLOC(iwfi,(nkpt,mpw))
  kg_tmp(:,:)=zero
  iwfi(:,:)=zero
  imax=npwarr(1)
@@ -361,8 +348,8 @@ subroutine outwant(dtset,eig,cg,kg,npwarr,mband,mcg,nkpt,nsppol,mkmem,mpw,prtwan
 !  write(std_out,*) tpat(i), nameat
 !  write(std_out,*) ((xcoord(j,k,i),j=1,3),k=1,tpat(i)), 'XCART'
  end do
- ABI_DEALLOCATE(tpat)
- ABI_DEALLOCATE(xcoord)
+ ABI_FREE(tpat)
+ ABI_FREE(xcoord)
 
 !energy cut-off in Rydberg (WANT option)
  write (unitwnt) 2._dp*dtset%ecut, mband
@@ -376,7 +363,7 @@ subroutine outwant(dtset,eig,cg,kg,npwarr,mband,mcg,nkpt,nsppol,mkmem,mpw,prtwan
  do i=1, nkpt
    write(unitwnt) (iwfi(i,j), j=1,mpw)
  end do
- ABI_DEALLOCATE(kg_tmp)
+ ABI_FREE(kg_tmp)
 
 !Eigenvalues in HARTREE
  write (unitwnt)  ( eig( i ), i = 1, bandtot)
@@ -391,7 +378,7 @@ subroutine outwant(dtset,eig,cg,kg,npwarr,mband,mcg,nkpt,nsppol,mkmem,mpw,prtwan
 !from WanT distribution
 
  if (open_file('band.gpl',message,newunit=iunit,status='unknown') /=0) then
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  index=1
@@ -419,7 +406,7 @@ subroutine outwant(dtset,eig,cg,kg,npwarr,mband,mcg,nkpt,nsppol,mkmem,mpw,prtwan
 !!!!!!!!!!!!!!!!!!!!!!!!!!
  iwf = 1
  iwf_k=1
- ABI_ALLOCATE(wfc,(imax))
+ ABI_MALLOC(wfc,(imax))
 
 !Loop over k-pt
  do nkp=1,nkpt
@@ -444,7 +431,7 @@ subroutine outwant(dtset,eig,cg,kg,npwarr,mband,mcg,nkpt,nsppol,mkmem,mpw,prtwan
        iwf=iwf+npwarr(nkp)
      else
        message = 'Wrong mkmem in outwant'
-       MSG_ERROR(message)
+       ABI_ERROR(message)
      end if
      write(unitwnt) (wfc(ig), ig=1,imax)
 !    End loop over bands
@@ -460,8 +447,8 @@ subroutine outwant(dtset,eig,cg,kg,npwarr,mband,mcg,nkpt,nsppol,mkmem,mpw,prtwan
 !  End loop over k-pts
  end do
 
- ABI_DEALLOCATE(iwfi)
- ABI_DEALLOCATE(wfc)
+ ABI_FREE(iwfi)
+ ABI_FREE(wfc)
 
  call wrtout(std_out,'Closing file','COLL')
  close(unit=unitwnt)

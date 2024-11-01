@@ -1,0 +1,72 @@
+#################################################################
+# Automatic test for ABINIT:                                    #
+#    Electron positron Doppler broadening calculation           #
+#    within PAW                                                 #
+#                                                               #
+#              Al, 4 atoms in the box          M.T. Sept. 2014 #
+#################################################################
+
+  positron -10  ! Electron/positron GS calculation
+                ! within self-consistent 2-component DFT
+  posdoppler 1  ! Activation of Doppler broadening calculation
+
+  ! Choose one of the electron-positron correlation functionals
+  ixcpositron 11
+
+# Common input parameters
+  ! Unit cell
+    acell 3*4.05 angstrom
+    rprim 1.0 0.0 0.0
+          0.0 1.0 0.0
+          0.0 0.0 1.0
+    ntypat 1  natom 4  typat 4*1
+    znucl 13
+    xred 0.0 0.0 0.0
+         0.5 0.5 0.0
+         0.5 0.0 0.5
+         0.0 0.5 0.5
+    chkprim 0
+
+  ! K-points and occupations
+    kptopt 1
+    ngkpt 4 4 4
+    occopt 7
+    nband 15
+    posocc 1.0  ! Occupation number for the positron (to be set <1 for bulk calculation with a small cell).
+
+  ! Convergence parameters
+    ecut 8. pawecutdg 15.
+    nstep 50 tolvrs 1.d-10
+
+!   2-component DFT parameters
+    postoldfe 1.d-6
+    posnstep  4
+
+!   Miscelaneous
+    prtwf 0 prteig 0           ! To save disk space
+    optforces 0 optstress 0    ! Not relevant here
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "Al.gga.uspp.paw"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t35.abo,      tolnlines = 12, tolabs = 1.7e-2, tolrel = 1.0, fld_options = -easy
+##%%   t35o_DOPPLER, tolnlines = 0, tolabs = 0., tolrel = 0., fld_options = -easy
+#%% [paral_info]
+#%% max_nprocs = 4
+#%% [extra_info]
+#%% authors = M. Torrent
+#%% keywords = PAW, positron
+#%% description = 
+#%%   Test of the computation of the electron-positron Doppler broadening
+#%%   (using the two-component DFT) within PAW.
+#%%   A cubic box with 4 Al atoms at experimental volume.
+#%%   Low cut-offs, few k-points.
+#%%   Computes the positron lifetime and well as the electron-positron
+#%%   pairs momentum distributions, after the SCF iterations.
+#%% topics = positron
+#%%<END TEST_INFO>

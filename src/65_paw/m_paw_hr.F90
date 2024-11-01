@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_paw_hr
 !! NAME
 !!  m_paw_hr
@@ -8,12 +7,12 @@
 !!  of the commutator PAW [H,r] needed for the correct treatment of the optical limit q-->0
 !!  in the matrix elements <k-q,b1|e^{-iqr}|k,b2>. As PAW is a full potential method 
 !!  the commutator reduces to the contribution given by the velocity operator. 
-!!  However, when the all-electron Hamiltonian is non-local (e.g. LDA+U or 
+!!  However, when the all-electron Hamiltonian is non-local (e.g. DFT+U or 
 !!  LEXX) additional on-site terms have to be considered in the calculation of the
 !!  matrix elements of [H.r].
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2019 ABINIT group (MG)
+!! Copyright (C) 2008-2024 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -59,7 +58,7 @@ MODULE m_paw_hr
 !!  heads and wings of the irreducible polarizability in the long wave-length limit (i.e. q-->0).
 !!  Note that, within the PAW formalism, a standard KS Hamiltonian has a semi-local contribution 
 !!  arising from the kinetic operator (if we work in the AE representation). 
-!!  When LDA+U is used, a fully non-local term is added to the Hamiltonian whose commutator with the position operator 
+!!  When DFT+U is used, a fully non-local term is added to the Hamiltonian whose commutator with the position operator 
 !!  has to be considered during the calculation of the heads and wings of the polarizability in the optical limit
 !!
 !! SOURCE
@@ -98,12 +97,6 @@ CONTAINS  !=====================================================================
 !!
 !! FUNCTION
 !!  Deallocate memory 
-!!
-!! PARENTS
-!!      bethe_salpeter,cchi0q0,cchi0q0_intraband
-!!
-!! CHILDREN
-!!      simp_gen
 !!
 !! SOURCE
 
@@ -156,16 +149,13 @@ end subroutine pawhur_free
 !!      <phi_i|nabla|phi_j>-<tphi_i|nabla|tphi_j> for each type
 !!  ug1(nspinor*npwwfn)=Left wavefunction.
 !!  ug2(nspinor*npwwfn)=Right wavefunction
-!!  HUr(natom)=Commutator of the LDA+U part of the Hamiltonian with the position operator.
+!!  HUr(natom)=Commutator of the DFT+U part of the Hamiltonian with the position operator.
 !!  Cprj_kb1(natom,nspinor),Cprj_kb2(natom,nspinor) <type(pawcprj_type)>=
 !!   projected input wave functions <Proj_i|Cnk> with all NL projectors corresponding to 
 !!   wavefunctions (k,b1,s) and (k,b2,s), respectively.
 !!
 !! OUTPUT
 !!  onsite(2,3)=Onsite contribution to  $i<ug1|\nabla|ug2>$
-!!
-!! PARENTS
-!!      cchi0q0,debug_tools,spectra
 !!
 !! SOURCE
 
@@ -201,7 +191,7 @@ function paw_ihr(isppol,nspinor,npw,istwfk,kpoint,Cryst,Pawtab,ug1,ug2,gvec,Cprj
 ! *************************************************************************
 
  ! [H, r] = -\nabla + [V_{nl}, r] 
- ! Note that V_nl is present only if the AE-Hamiltonian is non-local e.g. LDA+U or LEXX.
+ ! Note that V_nl is present only if the AE-Hamiltonian is non-local e.g. DFT+U or LEXX.
  spinorwf_pad=RESHAPE((/0,0,npw,npw,0,npw,npw,0/),(/2,4/))
  ihr_comm=zero
 
@@ -250,7 +240,7 @@ function paw_ihr(isppol,nspinor,npw,istwfk,kpoint,Cryst,Pawtab,ug1,ug2,gvec,Cprj
        ons_cart(2,2)=ons_cart(2,2) - re_p*nabla_ij(2,ilmn,jlmn)
        ons_cart(2,3)=ons_cart(2,3) - re_p*nabla_ij(3,ilmn,jlmn)
        !
-       if (Pawtab(itypat)%usepawu==1) then ! Add i[V_u, r] 
+       if (Pawtab(itypat)%usepawu/=0) then ! Add i[V_u, r] 
          isel=Hur(iatom)%ij_select(ilmn,jlmn,isppol)
          if (isel>0) then
            hurc_ij(:)=Hur(iatom)%commutator(:,isel,isppol)
@@ -258,7 +248,7 @@ function paw_ihr(isppol,nspinor,npw,istwfk,kpoint,Cryst,Pawtab,ug1,ug2,gvec,Cprj
            ons_cart(1,1)=ons_cart(1,1) - im_p*hurc_ij(1)
            ons_cart(1,2)=ons_cart(1,2) - im_p*hurc_ij(2)
            ons_cart(1,3)=ons_cart(1,3) - im_p*hurc_ij(3)
-                                                                
+
            ons_cart(2,1)=ons_cart(2,1) + re_p*hurc_ij(1)
            ons_cart(2,2)=ons_cart(2,2) + re_p*hurc_ij(2)
            ons_cart(2,3)=ons_cart(2,3) + re_p*hurc_ij(3)
@@ -326,12 +316,6 @@ end function paw_ihr
 !! SIDE EFFECTS
 !!  The cross-term contribution is added to the commutator 
 !!
-!! PARENTS
-!!      cchi0q0
-!!
-!! CHILDREN
-!!      simp_gen
-!!
 !! SOURCE
 
 subroutine paw_cross_ihr_comm(ihr_comm,nspinor,nr,Cryst,Pawfgrtab,Paw_onsite,&
@@ -365,7 +349,7 @@ subroutine paw_cross_ihr_comm(ihr_comm,nspinor,nr,Cryst,Pawfgrtab,Paw_onsite,&
  ABI_CHECK(nspinor==1,"nspinor + pawcross not implemented")
 
  ! [H, r] = -\nabla + [V_{nl}, r]
- ! The V_nl part, present in case of LDA+U, is omitted for the cross terms contribution
+ ! The V_nl part, present in case of DFT+U, is omitted for the cross terms contribution
  ! Recall that delta_rho_tw_ij = (psi_i - phi_i)* (phi_j - tphi_j) + (phi_i - tphi_i)* (psi_j - phi_j)
  ihr_comm_cart(:,1) = czero
 
@@ -417,12 +401,6 @@ end subroutine paw_cross_ihr_comm
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      bethe_salpeter,cchi0q0,cchi0q0_intraband
-!!
-!! CHILDREN
-!!      simp_gen
 !!
 !! SOURCE
 
@@ -601,12 +579,6 @@ end subroutine pawhur_init
 !!
 !! OUTPUT
 !!  rcart_onsite(3,lmn2_size_max,natom)
-!!
-!! PARENTS
-!!      m_paw_hr
-!!
-!! CHILDREN
-!!      simp_gen
 !!
 !! SOURCE
 

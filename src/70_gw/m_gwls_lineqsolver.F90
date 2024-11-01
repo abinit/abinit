@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_gwls_lineqsolver
 !! NAME
 !! m_gwls_lineqsolver
@@ -7,14 +6,10 @@
 !!  .
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2019 ABINIT group (JLJ, BR, MC)
+!! Copyright (C) 2009-2024 ABINIT group (JLJ, BR, MC)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -79,12 +74,6 @@ contains
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      gwls_DielectricArray,gwls_polarisability
-!!
-!! CHILDREN
-!!      hpsikc,precondition_cplx,unset_precondition,xmpi_sum
-!!
 !! SOURCE
 
 subroutine sqmr(b,x,lambda,project_on_what,omega,omega_imaginary,kill_Pc_x)
@@ -140,7 +129,7 @@ logical, optional     :: omega_imaginary, kill_Pc_x
 real(dp) :: norm, tmp(2), residual
 real(dp), allocatable :: g(:), theta(:), rho(:), sigma(:), c(:)
 real(dp), allocatable :: t(:,:), delta(:,:), r(:,:), d(:,:), w(:,:), wmb(:,:)
-integer :: k, l
+integer :: ii,ipw, k, l
 real(dp):: signe
 real(dp):: norm_Axb
 
@@ -150,7 +139,7 @@ real(dp):: norm_b, tol14
 integer :: min_index
 logical :: singular
 logical :: precondition_on
-
+logical :: has_omega
 
 integer :: pow
 
@@ -183,6 +172,8 @@ mpi_rank  = mpi_enreg%me_fft
 ! Which group does this processor belong to, given the communicator?
 mpi_group = mpi_enreg%me_band
 
+! Do we have omega?
+has_omega=present(omega)
 
 ! Test if the input has finite norm
 tol14 = 1.0D-14
@@ -205,18 +196,18 @@ call timab(GWLS_TIMAB,OPTION_TIMAB,tsec)
 head_node = ( mpi_rank == 0 )
 
 !Memory allocation for local variables
-ABI_ALLOCATE(g,    (nline))
-ABI_ALLOCATE(theta,(nline))
-ABI_ALLOCATE(rho,  (nline))
-ABI_ALLOCATE(sigma,(nline))
-ABI_ALLOCATE(c,    (nline))
+ABI_MALLOC(g,    (nline))
+ABI_MALLOC(theta,(nline))
+ABI_MALLOC(rho,  (nline))
+ABI_MALLOC(sigma,(nline))
+ABI_MALLOC(c,    (nline))
 
-ABI_ALLOCATE(t,    (2,npw_g))
-ABI_ALLOCATE(delta,(2,npw_g))
-ABI_ALLOCATE(r,    (2,npw_g))
-ABI_ALLOCATE(d,    (2,npw_g))
-ABI_ALLOCATE(w,    (2,npw_g))
-ABI_ALLOCATE(wmb,  (2,npw_g))
+ABI_MALLOC(t,    (2,npw_g))
+ABI_MALLOC(delta,(2,npw_g))
+ABI_MALLOC(r,    (2,npw_g))
+ABI_MALLOC(d,    (2,npw_g))
+ABI_MALLOC(w,    (2,npw_g))
+ABI_MALLOC(wmb,  (2,npw_g))
 
 
 
@@ -234,7 +225,7 @@ w        = zero
 
 
 ! Determine if the frequency is imaginary
-if (present(omega_imaginary) .and. present(omega)) then
+if (has_omega .and. present(omega_imaginary)) then
   imaginary = omega_imaginary
 else
   imaginary = .false.
@@ -243,7 +234,7 @@ end if
 
 ! Define the sign in front of (H-eig(v))**2. 
 ! If omega_imaginary is not given, we assume that omega is real (and sign=-1). 
-if (present(omega)) then
+if (has_omega) then
   if ( imaginary ) then
     signe = one
   else
@@ -253,7 +244,7 @@ end if
 
 
 !Check for singularity problems
-if (present(omega)) then
+if (has_omega) then
   norm      = minval(abs((eig(1:nbandv)-lambda)**2 + signe*(omega)**2))
   min_index = minloc(abs((eig(1:nbandv)-lambda)**2 + signe*(omega)**2),1)
 else
@@ -325,7 +316,7 @@ if (head_node) then
   write(io_unit,10) "#                                                                                       "
   write(io_unit,11) "#   Call # ", counter
   write(io_unit,12) "#                 lambda = ",lambda," Ha                                                "
-  if (present(omega)) then
+  if (has_omega) then
     write(io_unit,12) "#                 omega  = ",omega," Ha                                          "
     if (imaginary) then
       write(io_unit,10) "#                 omega is imaginary                                             "
@@ -338,7 +329,7 @@ if (head_node) then
 
   write(io_unit,13) "#        project_on_what = ",project_on_what,"                                                 "
   write(io_unit,13) "#                                                                                               "
-  if (present(omega) ) then
+  if (has_omega ) then
     if (imaginary) then
       write(io_unit,10) "#                SOLVE ((H-lambda)^2 + omega^2) x = b"
     else
@@ -381,7 +372,12 @@ end if
 
 k = 1
 l = 1
-r = b
+
+do ipw=1,npw_g
+  do ii=1,2
+    r(ii,ipw) = b(ii,ipw)
+  end do
+end do
 
 if (head_node) then
   write(io_unit,10) "# "
@@ -414,10 +410,14 @@ k=k+1
 l=l+1
 
 ! Apply the A operator
-if (present(omega)) then 
+if (has_omega) then 
   call Hpsik(w,d,lambda)
   call Hpsik(w,cte=lambda)
-  w = w + d*signe*omega**2
+  do ipw=1,npw_g
+    do ii=1,2
+      w(ii,ipw) = w(ii,ipw) + d(ii,ipw)*signe*omega**2
+    end do
+  end do
 else
   call Hpsik(w,d,lambda)
 end if 
@@ -435,7 +435,11 @@ tmp    = cg_zdotc(npw_g,d,w)
 call xmpi_sum(tmp, mpi_communicator,ierr) ! sum on all processors working on FFT!
 
 sigma(k-1) = tmp(1)
-r          = r-(rho(k-1)/sigma(k-1))*w
+do ipw=1,npw_g
+  do ii=1,2
+    r(ii,ipw) = r(ii,ipw)-(rho(k-1)/sigma(k-1))*w(ii,ipw)
+  end do
+end do
 
 ! The following two lines must have a bug! We cannot distribute the norm this way!
 ! theta(k)   = norm_k(r)/g(k-1)
@@ -446,10 +450,12 @@ theta(k)   = dsqrt(tmp(1))/g(k-1)
 
 c(k)       = one/dsqrt(one+theta(k)**2)
 g(k)       = g(k-1)*theta(k)*c(k)
-delta      = delta*(c(k)*theta(k-1))**2+d*rho(k-1)/sigma(k-1)*c(k)**2
-
-x          = x+delta
-
+do ipw=1,npw_g
+  do ii=1,2
+    delta(ii,ipw) = delta(ii,ipw)*(c(k)*theta(k-1))**2+d(ii,ipw)*rho(k-1)/sigma(k-1)*c(k)**2
+    x(ii,ipw) = x(ii,ipw)+delta(ii,ipw)
+  end do
+end do
 
 if (head_node) then
   write(io_unit,16) k, g(k)**2
@@ -463,10 +469,14 @@ if(g(k)**2<tolwfr .or. k>= nline) exit
 ! Safety test every 100 iterations, check that estimated residual is of the right order of magnitude. 
 ! If not, restart SQMR.
 if(mod(l,100)==0) then
-  if(present(omega)) then
+  if(has_omega) then
     call Hpsik(w,x,lambda)
     call Hpsik(w,cte=lambda)
-    w = w + x*signe*omega**2
+    do ipw=1,npw_g
+      do ii=1,2
+        w(ii,ipw) = w(ii,ipw) + x(ii,ipw)*signe*omega**2
+      end do
+    end do
   else
     call Hpsik(w,x,lambda)
   end if
@@ -476,7 +486,11 @@ if(mod(l,100)==0) then
   !if(pow == 3) call pc_k(w,n=nband,above=.true.)
 
   !if(norm_k(w-b)**2 > 10*g(k)**2) exit
-  wmb   = w-b
+  do ipw=1,npw_g
+    do ii=1,2
+      wmb(ii,ipw) = w(ii,ipw) - b(ii,ipw)
+    end do
+  end do
   tmp   = cg_zdotc(npw_g,wmb,wmb)
   call xmpi_sum(tmp, mpi_communicator,ierr) ! sum on all processors working on FFT!
   if(tmp(1) > 10*g(k)**2) exit
@@ -495,7 +509,12 @@ if(pow == 1) call pc_k_valence_kernel(w)
 tmp   = cg_zdotc(npw_g,r,w)
 call xmpi_sum(tmp, mpi_communicator,ierr) ! sum on all processors working on FFT!
 rho(k) = tmp(1)
-d      = w+d*rho(k)/rho(k-1)
+
+do ipw=1,npw_g
+  do ii=1,2
+    d(ii,ipw) = w(ii,ipw)+d(ii,ipw)*rho(k)/rho(k-1)
+  end do
+end do
 
 end do ! end inner loop
 
@@ -506,7 +525,11 @@ if(g(k)**2<tolwfr .or. k>=nline) exit
 if (head_node) write(io_unit,10) "  ----     RESTART of SQMR -----"
 
 !norm_Axb = norm_k(w-b)**2
-wmb  = w-b     
+do ipw=1,npw_g
+  do ii=1,2
+    wmb(ii,ipw) = w(ii,ipw) - b(ii,ipw)
+  end do
+end do
 tmp  = cg_zdotc(npw_g,wmb,wmb)
 call xmpi_sum(tmp, mpi_communicator,ierr) ! sum on all processors working on FFT!
 norm_Axb = tmp(1)
@@ -521,10 +544,14 @@ k = k+1
 l = 1
 
 ! Apply the operator
-if(present(omega)) then
+if(has_omega) then
   call Hpsik(r,x,lambda)
   call Hpsik(r,cte=lambda)
-  r = r + x*signe*omega**2
+  do ipw=1,npw_g
+    do ii=1,2
+      r(ii,ipw) = r(ii,ipw) + x(ii,ipw)*signe*omega**2
+    end do
+  end do
 else
   call Hpsik(r,x,lambda)
 end if
@@ -533,8 +560,13 @@ if(pow == 1) call pc_k_valence_kernel(r)
 !if(pow == 2) call pc_k(r,eig_e=lambda)
 !if(pow == 3) call pc_k(r,n=nband,above=.true.)
 
-r=b-r
+do ipw=1,npw_g
+  do ii=1,2
+    r(ii,ipw) = b(ii,ipw) - r(ii,ipw)
+  end do
 end do
+
+end do ! outer loop
 
 
 ktot = ktot+k
@@ -554,10 +586,14 @@ if( .not. present(kill_Pc_x) .and. pow == 1 ) call pc_k_valence_kernel(x)
 !if(pow == 2) call pc_k(x,eig_e=lambda)
 !if(pow == 3) call pc_k(x,n=nband,above=.true.)
 
-if(present(omega)) then
+if(has_omega) then
   call Hpsik(w,x,lambda)
   call Hpsik(w,cte=lambda)
-  w = w + x*signe*omega**2
+  do ipw=1,npw_g
+    do ii=1,2
+      w(ii,ipw) = w(ii,ipw) + x(ii,ipw)*signe*omega**2
+    end do
+  end do
 else
   call Hpsik(w,x,lambda)
 end if
@@ -566,7 +602,11 @@ if(pow == 1) call pc_k_valence_kernel(w)
 !if(pow == 3) call pc_k(w,n=nband,above=.true.)
 
 !residual = norm_k(w-b)**2
-wmb      = w-b
+do ipw=1,npw_g
+  do ii=1,2
+    wmb(ii,ipw) = w(ii,ipw) - b(ii,ipw)
+  end do
+end do
 tmp      = cg_zdotc(npw_g,wmb,wmb)
 call xmpi_sum(tmp, mpi_communicator,ierr) ! sum on all processors working on FFT!
 residual = tmp(1)
@@ -581,17 +621,17 @@ end if
 
 
 
-ABI_DEALLOCATE(g)
-ABI_DEALLOCATE(theta)
-ABI_DEALLOCATE(rho)
-ABI_DEALLOCATE(sigma)
-ABI_DEALLOCATE(c)
-ABI_DEALLOCATE(t)
-ABI_DEALLOCATE(delta)
-ABI_DEALLOCATE(r)
-ABI_DEALLOCATE(d)
-ABI_DEALLOCATE(w)
-ABI_DEALLOCATE(wmb)
+ABI_FREE(g)
+ABI_FREE(theta)
+ABI_FREE(rho)
+ABI_FREE(sigma)
+ABI_FREE(c)
+ABI_FREE(t)
+ABI_FREE(delta)
+ABI_FREE(r)
+ABI_FREE(d)
+ABI_FREE(w)
+ABI_FREE(wmb)
 
 
 OPTION_TIMAB = 2
@@ -620,12 +660,6 @@ end subroutine sqmr
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      gwls_polarisability
-!!
-!! CHILDREN
-!!      hpsikc,precondition_cplx,unset_precondition,xmpi_sum
 !!
 !! SOURCE
 
@@ -683,27 +717,27 @@ if(sum(b**2) < tol12) then
 else
   
   !Allocation
-  ABI_ALLOCATE(xc,(npw_k))
-  ABI_ALLOCATE(r ,(npw_k))
-  ABI_ALLOCATE(v ,(npw_k))
-  ABI_ALLOCATE(w ,(npw_k))
-  ABI_ALLOCATE(z ,(npw_k))
-  ABI_ALLOCATE(p ,(npw_k))
-  ABI_ALLOCATE(q ,(npw_k))
-  ABI_ALLOCATE(y ,(npw_k))
-  ABI_ALLOCATE(t ,(npw_k))
-  ABI_ALLOCATE(d ,(npw_k))
-  ABI_ALLOCATE(s ,(npw_k))
+  ABI_MALLOC(xc,(npw_k))
+  ABI_MALLOC(r ,(npw_k))
+  ABI_MALLOC(v ,(npw_k))
+  ABI_MALLOC(w ,(npw_k))
+  ABI_MALLOC(z ,(npw_k))
+  ABI_MALLOC(p ,(npw_k))
+  ABI_MALLOC(q ,(npw_k))
+  ABI_MALLOC(y ,(npw_k))
+  ABI_MALLOC(t ,(npw_k))
+  ABI_MALLOC(d ,(npw_k))
+  ABI_MALLOC(s ,(npw_k))
   
-  ABI_ALLOCATE(beta    ,(nline))
-  ABI_ALLOCATE(rho     ,(nline+1))
-  ABI_ALLOCATE(zeta    ,(nline+1))
-  ABI_ALLOCATE(gama    ,(nline+1))
-  ABI_ALLOCATE(eta     ,(nline+1))
-  ABI_ALLOCATE(theta   ,(nline+1))
-  ABI_ALLOCATE(delta   ,(nline))
-  ABI_ALLOCATE(epsilonn,(nline))
-  ABI_ALLOCATE(resid   ,(nline+1))
+  ABI_MALLOC(beta    ,(nline))
+  ABI_MALLOC(rho     ,(nline+1))
+  ABI_MALLOC(zeta    ,(nline+1))
+  ABI_MALLOC(gama    ,(nline+1))
+  ABI_MALLOC(eta     ,(nline+1))
+  ABI_MALLOC(theta   ,(nline+1))
+  ABI_MALLOC(delta   ,(nline))
+  ABI_MALLOC(epsilonn,(nline))
+  ABI_MALLOC(resid   ,(nline+1))
   
   !Initialization
   x  = zero
@@ -813,27 +847,27 @@ else
   x(2,:) = dimag(xc)
   
   !Deallocate
-  ABI_DEALLOCATE(xc) 
-  ABI_DEALLOCATE(r) 
-  ABI_DEALLOCATE(v)
-  ABI_DEALLOCATE(w)
-  ABI_DEALLOCATE(z)
-  ABI_DEALLOCATE(p)
-  ABI_DEALLOCATE(q)
-  ABI_DEALLOCATE(y)
-  ABI_DEALLOCATE(t)
-  ABI_DEALLOCATE(d)
-  ABI_DEALLOCATE(s)
+  ABI_FREE(xc) 
+  ABI_FREE(r) 
+  ABI_FREE(v)
+  ABI_FREE(w)
+  ABI_FREE(z)
+  ABI_FREE(p)
+  ABI_FREE(q)
+  ABI_FREE(y)
+  ABI_FREE(t)
+  ABI_FREE(d)
+  ABI_FREE(s)
   
-  ABI_DEALLOCATE(beta    )  
-  ABI_DEALLOCATE(rho     )
-  ABI_DEALLOCATE(zeta    )
-  ABI_DEALLOCATE(gama    )
-  ABI_DEALLOCATE(eta     )
-  ABI_DEALLOCATE(theta   )
-  ABI_DEALLOCATE(delta   )
-  ABI_DEALLOCATE(epsilonn)
-  ABI_DEALLOCATE(resid   ) 
+  ABI_FREE(beta    )  
+  ABI_FREE(rho     )
+  ABI_FREE(zeta    )
+  ABI_FREE(gama    )
+  ABI_FREE(eta     )
+  ABI_FREE(theta   )
+  ABI_FREE(delta   )
+  ABI_FREE(epsilonn)
+  ABI_FREE(resid   ) 
 
 end if
 

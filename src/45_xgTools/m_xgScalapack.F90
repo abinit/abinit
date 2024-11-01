@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_xgScalapack
 !! NAME
 !!  m_xgScalapack
@@ -6,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2017-2019 ABINIT group (J. Bieder)
+!!  Copyright (C) 2017-2024 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -21,7 +20,7 @@
 
 module m_xgScalapack
 
-  use defs_basis, only : std_err, std_out, dp
+  use defs_basis, only : std_err, std_out, dp, ABI_GPU_DISABLED, ABI_GPU_OPENMP
   use m_abicore
   use m_xmpi
   use m_errors
@@ -85,29 +84,30 @@ module m_xgScalapack
 !!
 !! FUNCTION
 !!  Init the scalapack communicator for next operations.
-!!  If the comm has to many cpus, then take only a subgroup of this comm
+!!  If the comm has too many cpus, then take only a subgroup of this comm
 !!
 !! INPUTS
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_lobpcg2
-!!
-!! CHILDREN
-!!      blacs_gridexit,mpi_comm_free,timab
-!!
 !! SOURCE
-  subroutine  xgScalapack_init(xgScalapack,comm,maxDim,verbosity,usable)
+  subroutine  xgScalapack_init(xgScalapack,comm,maxDim,verbosity,gpu_option,usable)
 
     type(xgScalapack_t), intent(inout) :: xgScalapack
     integer            , intent(in   ) :: comm
     integer            , intent(in   ) :: maxDim
     integer            , intent(in   ) :: verbosity
+    logical            , intent(in   ) :: gpu_option
     logical            , intent(  out) :: usable
     double precision :: tsec(2)
 #ifdef HAVE_LINALG_MKL_THREADS
     integer :: mkl_get_max_threads
+#endif
+#ifdef HAVE_LINALG_OPENBLAS_THREADS
+    integer :: openblas_get_num_threads
+#endif
+#ifdef HAVE_LINALG_NVPL_THREADS
+    integer :: nvpl_blas_get_max_threads
 #endif
     integer :: nthread
 #ifdef HAVE_LINALG_SCALAPACK
@@ -133,6 +133,10 @@ module m_xgScalapack
     nthread = 1
 #ifdef HAVE_LINALG_MKL_THREADS
     nthread =  mkl_get_max_threads()
+#elif HAVE_LINALG_OPENBLAS_THREADS
+    nthread =  openblas_get_num_threads()
+#elif HAVE_LINALG_NVPL_THREADS
+    nthread =  nvpl_blas_get_max_threads()
 #else
     nthread = xomp_get_num_threads(open_parallel=.true.)
     if ( nthread == 0 ) nthread = 1
@@ -158,7 +162,7 @@ module m_xgScalapack
     else if ( nthread > 1 ) then ! disable scalapack with threads since it is not threadsafe
       ! This should be check with new elpa version en MPI+OpenMP
       if ( M__CONFIG > 0 ) then
-        MSG_WARNING("xgScalapack turned off because you have threads")
+        ABI_WARNING("xgScalapack turned off because you have threads")
       end if
       usable = .false.
       return
@@ -186,7 +190,7 @@ module m_xgScalapack
       end if
        call MPI_Comm_split(comm, subgroup, xgScalapack%rank(M__WORLD), xgScalapack%comms(mycomm(1)),ierr)
        if ( ierr /= 0 ) then
-         MSG_ERROR("Error splitting communicator")
+         ABI_ERROR("Error splitting communicator")
        end if
        xgScalapack%comms(mycomm(2)) = xmpi_comm_null
        xgScalapack%rank(mycomm(1)) = xmpi_comm_rank(xgScalapack%comms(mycomm(1)))
@@ -196,14 +200,14 @@ module m_xgScalapack
     else
        call MPI_Comm_dup(comm,xgScalapack%comms(M__SLK),ierr)
        if ( ierr /= 0 ) then
-         MSG_ERROR("Error duplicating communicator")
+         ABI_ERROR("Error duplicating communicator")
        end if
        xgScalapack%rank(M__SLK) = xmpi_comm_rank(xgScalapack%comms(M__SLK))
        xgScalapack%size(M__SLK) = nproc
     end if
 
     if ( xgScalapack%comms(M__SLK) /= xmpi_comm_null ) then
-      call build_grid_scalapack(xgScalapack%grid, xgScalapack%size(M__SLK), xgScalapack%comms(M__SLK))
+      call xgScalapack%grid%init(xgScalapack%size(M__SLK), xgScalapack%comms(M__SLK), gpu_option)
       call BLACS_GridInfo(xgScalapack%grid%ictxt, &
         xgScalapack%grid%dims(M__ROW), xgScalapack%grid%dims(M__COL),&
         xgScalapack%coords(M__ROW), xgScalapack%coords(M__COL))
@@ -213,10 +217,10 @@ module m_xgScalapack
       test_row = INT((xgScalapack%rank(M__SLK)) / xgScalapack%grid%dims(2))
       test_col = MOD((xgScalapack%rank(M__SLK)), xgScalapack%grid%dims(2))
       if ( test_row /= xgScalapack%coords(M__ROW) ) then
-        MSG_WARNING("Row id mismatch")
+        ABI_WARNING("Row id mismatch")
       end if
       if ( test_col /= xgScalapack%coords(M__COL) ) then
-        MSG_WARNING("Col id mismatch")
+        ABI_WARNING("Col id mismatch")
       end if
     end if
 
@@ -234,15 +238,15 @@ module m_xgScalapack
     integer, intent(in) :: maxDim
     if ( myconfig == SLK_AUTO) then
       M__CONFIG = myconfig
-      MSG_COMMENT("xgScalapack in auto mode")
+      ABI_COMMENT("xgScalapack in auto mode")
     else if ( myconfig == SLK_DISABLED) then
       M__CONFIG = myconfig
-      MSG_COMMENT("xgScalapack disabled")
+      ABI_COMMENT("xgScalapack disabled")
     else if ( myconfig > 0) then
       M__CONFIG = myconfig
-      MSG_COMMENT("xgScalapack enabled")
+      ABI_COMMENT("xgScalapack enabled")
     else
-      MSG_WARNING("Bad value for xgScalapack config -> autodetection")
+      ABI_WARNING("Bad value for xgScalapack config -> autodetection")
       M__CONFIG = SLK_AUTO
     end if
     if ( maxDim > 0 ) then
@@ -264,11 +268,12 @@ module m_xgScalapack
 
   !This is for testing purpose.
   !May not be optimal since I do not control old implementation but at least gives a reference.
-  subroutine xgScalapack_heev(xgScalapack,matrixA,eigenvalues)
-    use iso_c_binding
+  subroutine xgScalapack_heev(xgScalapack,matrixA,eigenvalues,gpu_option)
+    use, intrinsic :: iso_c_binding
     type(xgScalapack_t), intent(inout) :: xgScalapack
     type(xgBlock_t)    , intent(inout) :: matrixA
     type(xgBlock_t)    , intent(inout) :: eigenvalues
+    integer, optional  , intent(in)    :: gpu_option
 #ifdef HAVE_LINALG_SCALAPACK
     double precision, pointer :: matrix(:,:) !(cplex*nbli_global,nbco_global)
     double precision, pointer :: eigenvalues_tmp(:,:)
@@ -279,17 +284,27 @@ module m_xgScalapack
     integer :: nbli_global, nbco_global
     type(c_ptr) :: cptr
     integer :: req(2), status(MPI_STATUS_SIZE,2), ierr
+    integer :: l_gpu_option,l_use_gpu_elpa
 #endif
 
 #ifdef HAVE_LINALG_SCALAPACK
     call timab(M__tim_heev,1,tsec)
+
+    l_gpu_option=ABI_GPU_DISABLED
+    if (present(gpu_option)) then
+      l_gpu_option = gpu_option
+    end if
+    l_use_gpu_elpa=0
+#ifdef HAVE_LINALG_ELPA
+    if (l_gpu_option/=ABI_GPU_DISABLED) l_use_gpu_elpa=1
+#endif
 
     ! Keep only working processors
     if ( xgScalapack%comms(M__SLK) /= xmpi_comm_null ) then
 
       call xgBlock_getSize(eigenvalues,nbli_global,nbco_global)
       if ( cols(matrixA) /= nbli_global ) then
-        MSG_ERROR("Number of eigen values differ from number of vectors")
+        ABI_ERROR("Number of eigen values differ from number of vectors")
       end if
 
       if ( space(matrixA) == SPACE_C ) then
@@ -302,14 +317,20 @@ module m_xgScalapack
 
       call xgBlock_getSize(matrixA,nbli_global,nbco_global)
 
-      call xgBlock_reverseMap(matrixA,matrix,nbli_global,nbco_global)
-      call xgBlock_reverseMap(eigenvalues,eigenvalues_tmp,nbco_global,1)
+      if(l_gpu_option==ABI_GPU_OPENMP) then
+        call xgBlock_copy_from_gpu(matrixA)
+        call xgBlock_copy_from_gpu(eigenvalues)
+      end if
+
+      call xgBlock_reverseMap(matrixA,matrix,rows=nbli_global,cols=nbco_global)
+      call xgBlock_reverseMap(eigenvalues,eigenvalues_tmp,rows=nbco_global,cols=1)
       cptr = c_loc(eigenvalues_tmp)
       call c_f_pointer(cptr,vector,(/ nbco_global /))
 
       call compute_eigen1(xgScalapack%comms(M__SLK), &
         toProcessorScalapack(xgScalapack), &
-        cplex,nbli_global,nbco_global,matrix,vector,istwf_k)
+        cplex,nbli_global,nbco_global,matrix,vector,istwf_k,&
+        use_gpu_elpa=l_use_gpu_elpa)
 
     end if
 
@@ -322,12 +343,18 @@ module m_xgScalapack
     if ( any(req/=-1)  ) then
       call MPI_WaitAll(2,req,status,ierr)
       if ( ierr /= 0 ) then
-          MSG_ERROR("Error waiting data")
+          ABI_ERROR("Error waiting data")
       endif
     end if
 #endif
+
+    if(l_gpu_option==ABI_GPU_OPENMP) then
+      call xgBlock_copy_to_gpu(matrixA)
+      call xgBlock_copy_to_gpu(eigenvalues)
+    end if
+
 #else
-   MSG_ERROR("ScaLAPACK support not available")
+   ABI_ERROR("ScaLAPACK support not available")
    ABI_UNUSED(xgScalapack%verbosity)
    ABI_UNUSED(matrixA%normal)
    ABI_UNUSED(eigenvalues%normal)
@@ -337,12 +364,13 @@ module m_xgScalapack
 
   !This is for testing purpose.
   !May not be optimal since I do not control old implementation but at least gives a reference.
-  subroutine xgScalapack_hegv(xgScalapack,matrixA,matrixB,eigenvalues)
-    use iso_c_binding
+  subroutine xgScalapack_hegv(xgScalapack,matrixA,matrixB,eigenvalues,gpu_option)
+    use, intrinsic :: iso_c_binding
     type(xgScalapack_t), intent(inout) :: xgScalapack
     type(xgBlock_t)    , intent(inout) :: matrixA
     type(xgBlock_t)    , intent(inout) :: matrixB
     type(xgBlock_t)    , intent(inout) :: eigenvalues
+    integer, optional  , intent(in)    :: gpu_option
 #ifdef HAVE_LINALG_SCALAPACK
     double precision, pointer :: matrix1(:,:) !(cplex*nbli_global,nbco_global)
     double precision, pointer :: matrix2(:,:) !(cplex*nbli_global,nbco_global)
@@ -354,21 +382,31 @@ module m_xgScalapack
     integer :: nbli_global, nbco_global
     type(c_ptr) :: cptr
     integer :: req(2), status(MPI_STATUS_SIZE,2),ierr
+    integer :: l_gpu_option,l_use_gpu_elpa
 #endif
 
 #ifdef HAVE_LINALG_SCALAPACK
     call timab(M__tim_hegv,1,tsec)
+
+    l_gpu_option=ABI_GPU_DISABLED
+    if (present(gpu_option)) then
+      l_gpu_option = gpu_option
+    end if
+    l_use_gpu_elpa=0
+#ifdef HAVE_LINALG_ELPA
+    if (l_gpu_option/=ABI_GPU_DISABLED) l_use_gpu_elpa=1
+#endif
 
     ! Keep only working processors
     if ( xgScalapack%comms(M__SLK) /= xmpi_comm_null ) then
 
       call xgBlock_getSize(eigenvalues,nbli_global,nbco_global)
       if ( cols(matrixA) /= cols(matrixB) ) then
-        MSG_ERROR("Matrix A and B don't have the same number of vectors")
+        ABI_ERROR("Matrix A and B don't have the same number of vectors")
       end if
 
       if ( cols(matrixA) /= nbli_global ) then
-        MSG_ERROR("Number of eigen values differ from number of vectors")
+        ABI_ERROR("Number of eigen values differ from number of vectors")
       end if
 
       if ( space(matrixA) == SPACE_C ) then
@@ -381,15 +419,22 @@ module m_xgScalapack
 
       call xgBlock_getSize(matrixA,nbli_global,nbco_global)
 
-      call xgBlock_reverseMap(matrixA,matrix1,nbli_global,nbco_global)
-      call xgBlock_reverseMap(matrixB,matrix2,nbli_global,nbco_global)
-      call xgBlock_reverseMap(eigenvalues,eigenvalues_tmp,nbco_global,1)
+      if(l_gpu_option==ABI_GPU_OPENMP) then
+        call xgBlock_copy_from_gpu(matrixA)
+        call xgBlock_copy_from_gpu(matrixB)
+        call xgBlock_copy_from_gpu(eigenvalues)
+      end if
+
+      call xgBlock_reverseMap(matrixA,matrix1,rows=nbli_global,cols=nbco_global)
+      call xgBlock_reverseMap(matrixB,matrix2,rows=nbli_global,cols=nbco_global)
+      call xgBlock_reverseMap(eigenvalues,eigenvalues_tmp,rows=nbco_global,cols=1)
       cptr = c_loc(eigenvalues_tmp)
       call c_f_pointer(cptr,vector,(/ nbco_global /))
 
       call compute_eigen2(xgScalapack%comms(M__SLK), &
         toProcessorScalapack(xgScalapack), &
-        cplex,nbli_global,nbco_global,matrix1,matrix2,vector,istwf_k)
+        cplex,nbli_global,nbco_global,matrix1,matrix2,vector,istwf_k,&
+        use_gpu_elpa=l_use_gpu_elpa)
     end if
 
     call timab(M__tim_hegv,2,tsec)
@@ -401,12 +446,18 @@ module m_xgScalapack
     if ( any(req/=-1)   ) then
       call MPI_WaitAll(2,req,status,ierr)
       if ( ierr /= 0 ) then
-          MSG_ERROR("Error waiting data")
+          ABI_ERROR("Error waiting data")
       endif
     end if
 #endif
+
+    if(l_gpu_option==ABI_GPU_OPENMP) then
+      call xgBlock_copy_to_gpu(matrixA)
+      call xgBlock_copy_to_gpu(eigenvalues)
+    end if
+
 #else
-   MSG_ERROR("ScaLAPACK support not available")
+   ABI_ERROR("ScaLAPACK support not available")
    ABI_UNUSED(xgScalapack%verbosity)
    ABI_UNUSED(matrixA%normal)
    ABI_UNUSED(matrixB%normal)
@@ -423,15 +474,16 @@ module m_xgScalapack
     integer            , intent(  out) :: req
     double precision, pointer :: tab(:,:)
     double precision :: tsec(2)
-    integer :: cols, rows
+    !integer :: cols, rows
     integer :: ierr
     integer :: sendto, receivefrom
     integer :: lap
 
     call timab(M__tim_scatter,1,tsec)
 
-    call xgBlock_getSize(matrix,rows,cols)
-    call xgBlock_reverseMap(matrix,tab,rows,cols)
+    !call xgBlock_getSize(matrix,rows,cols)
+    !call xgBlock_reverseMap(matrix,tab,rows,cols)
+    call xgBlock_reverseMap(matrix,tab)
 
     ! If we did the he(e|g)v and we are the first group
     if ( xgScalapack%comms(M__SLK) /= xmpi_comm_null .and. xgScalapack%rank(M__WORLD)<xgScalapack%size(M__SLK) ) then
@@ -443,7 +495,7 @@ module m_xgScalapack
         call xmpi_isend(tab,sendto,sendto,xgScalapack%comms(M__WORLD),req,ierr)
         !write(*,*) xgScalapack%rank(M__WORLD), "sends to", sendto
         if ( ierr /= 0 ) then
-          MSG_ERROR("Error sending data")
+          ABI_ERROR("Error sending data")
         end if
         !lap = lap+1
         !sendto = xgScalapack%rank(M__WORLD) + lap*xgScalapack%size(M__SLK)
@@ -456,11 +508,11 @@ module m_xgScalapack
         call xmpi_irecv(tab,receivefrom,xgScalapack%rank(M__WORLD),xgScalapack%comms(M__WORLD),req,ierr)
         !write(*,*) xgScalapack%rank(M__WORLD), "receive from", receivefrom
         if ( ierr /= 0 ) then
-          MSG_ERROR("Error receiving data")
+          ABI_ERROR("Error receiving data")
         end if
       end if
     !else
-      !MSG_BUG("Error scattering data")
+      !ABI_BUG("Error scattering data")
     end if
 
     call timab(M__tim_scatter,2,tsec)

@@ -1,0 +1,93 @@
+############################################################
+# GS + Band Structure + Fermi Surface calculation for MgB2
+############################################################
+
+ndtset  3
+
+#Dataset 1 : GS calculation
+kptopt1  1              # Use symmetry and treat only inequivalent points
+ngkpt1   2 2 2
+nshiftk1 1
+shiftk1  0.0 0.0 0.5    # This choice preserves the hexagonal symmetry of the grid,
+occopt1  4              # Marzari smearing
+tsmear1  0.03
+prtden1  1
+tolvrs1  1.0d-10
+
+#Dataset 2 : Band structure calculation.
+iscf2  -2
+getden2 1
+kptopt2 -6
+tolwfr2  1.0d-8
+ndivsm2  4     # Use 4 division for the smallest segment of the path. The remaining number
+               # of divisions will be automatically calculated such that the path is normalized.
+kptbounds2     # Extrema of the k-path.
+           0.0 0.0 0.0  #Gamma
+           0.5 0.0 0.0  #M
+           1/3 1/3 0.0  #K
+           1/3 1/3 0.5  #H
+           0.5 0.0 0.5  #L
+           0.0 0.0 0.5  #A
+           0.0 0.0 0.0  #Gamma
+
+#Dataset 3 : Output of the Fermi surface
+prtfsurf3 1  # To output the FS
+#prtwf3   0
+getwfk3 -1
+iscf3   -3   # NSCF calculation, occupancies and Fermi level are calculated once convergence is achieved.
+             # It should give the same FS as a GS calculation provided that the two
+             # k-meshes are sufficiently dense.
+getden3 1
+occopt3 4
+tsmear3 0.03
+kptopt3 1
+ngkpt3   8 8 8       # too coarse. 24 24 24 for a reasonable FS
+shiftk3  0.0 0.0 0.0 # Shifted grids are not supported by Xcrysden.
+tolwfr3  1.0d-8
+
+#COMMON INPUT DATA###########################################################
+#
+ecut    10.0  #Definition of the plane wave basis set
+nband   11
+nstep   50
+
+# MgB2 lattice structure
+ntypat   2
+znucl   12 5
+natom   3
+typat   1*1 2*2
+
+acell   2*3.086  3.523 Angstrom
+
+rprim   0.866025403784439  0.5  0.0
+       -0.866025403784439  0.5  0.0
+        0.0                0.0  1.0
+
+# Atomic positions
+xred
+ 0.0000000000E+00  0.0000000000E+00  0.0 #Mg
+ 1/3               2/3               0.5 #B
+ 2/3               1/3               0.5 #B
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/12mg.pspnc, 05b.soft_tm"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t14.abo, tolnlines = 2, tolabs = 1.1e-5, tolrel = 2.0e-4, fld_options = -medium
+#%% [paral_info]
+#%% max_nprocs = 2
+#%% [extra_info]
+#%% authors = M. Giantomassi
+#%% keywords = 
+#%% description = 
+#%%   MgB2, space group P6/m m m (#191); Bravais hP (primitive hexag.)
+#%%   GS calculation followed by a band structure calculation in which the
+#%%   k-path is automatically defined via the ndivsm input variable.
+#%%   The third dataset tests the calculation and the output of the Fermi surface (prtfsurf=1)
+#%%   in the Xcrysden format. 
+#%% topics = ElecBandStructure
+#%%<END TEST_INFO>

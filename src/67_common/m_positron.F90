@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_positron
 !! NAME
 !!  m_positron
@@ -7,14 +6,10 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2019 ABINIT group (GJ, MT, JW)
+!!  Copyright (C) 1998-2024 ABINIT group (GJ, MT, JW)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -27,8 +22,6 @@
 module m_positron
 
  use defs_basis
- use defs_datatypes
- use defs_abitypes
  use m_efield
  use m_errors
  use m_abicore
@@ -38,15 +31,21 @@ module m_positron
  use m_hdr
  use m_xmpi
  use m_bandfft_kpt
+ use m_dtset
+ use m_dtfil
+ use m_extfpmd
 
+ use defs_datatypes, only : pseudopotential_type
+ use defs_abitypes, only : MPI_type
  use m_special_funcs,  only : sbf8
  use m_ioarr,    only : ioarr, read_rhor
- use m_pawang,   only : pawang_type, realgaunt
+ use m_pawang,   only : pawang_type
+ use m_paw_sphharm,     only : realgaunt
  use m_pawrad,   only : pawrad_type, simp_gen, nderiv_gen
  use m_pawtab,   only : pawtab_type
  use m_paw_ij,   only : paw_ij_type
  use m_pawfgrtab,only : pawfgrtab_type
- use m_pawrhoij,only : pawrhoij_type, pawrhoij_copy, pawrhoij_alloc, pawrhoij_free,&
+ use m_pawrhoij, only : pawrhoij_type, pawrhoij_copy, pawrhoij_alloc, pawrhoij_free,&
                        pawrhoij_nullify, pawrhoij_gather, pawrhoij_inquire_dim, pawrhoij_symrhoij
  use m_pawcprj,  only : pawcprj_type, pawcprj_alloc, pawcprj_get, pawcprj_mpi_send, &
                         pawcprj_mpi_recv, pawcprj_free, pawcprj_copy, pawcprj_bcast
@@ -59,19 +58,21 @@ module m_positron
  use m_mkrho,           only : initro
  use m_paw_occupancies, only : initrhoij, pawaccrhoij
  use m_gammapositron, only : gammapositron, gammapositron_fft
- use m_forstr,          only : forstr
+ use m_forstr,        only : forstr
  use m_pawxc,         only : pawxcsum
  use m_paw_denpot,    only : pawdensities
  use m_drivexc,       only : mkdenpos
 
  use m_paw_sphharm, only : initylmr
- use m_pawpsp,  only : pawpsp_read_corewf
- use m_crystal, only : crystal_t
- use m_mpinfo,  only : ptabs_fourdp,set_mpi_enreg_fft,unset_mpi_enreg_fft,destroy_mpi_enreg, initmpi_seq, proc_distrb_cycle
- use m_io_tools,only : open_file,close_unit,get_unit
- use m_fftcore, only : sphereboundary
- use m_prep_kgb,        only : prep_fourwf
- use m_fft,            only : fourwf, fourdp
+ use m_pawpsp,      only : pawpsp_read_corewf
+ use m_crystal,     only : crystal_t
+ use m_mpinfo,      only : ptabs_fourdp,set_mpi_enreg_fft,unset_mpi_enreg_fft,destroy_mpi_enreg, initmpi_seq, proc_distrb_cycle
+ use m_io_tools,    only : open_file,close_unit,get_unit
+ use m_fftcore,     only : sphereboundary
+ use m_prep_kgb,    only : prep_fourwf
+ use m_fft,         only : fourwf, fourdp
+ use m_cgprj,       only : ctocprj
+ use m_xg_nonlop,   only : xg_nonlop_t
 
  implicit none
 
@@ -103,10 +104,11 @@ contains
 !!  etotal=current value of total energy
 !!  fock <type(fock_type)>= quantities to calculate Fock exact exchange
 !!  forces_needed=if >0 forces are needed
-!!  fred(3,natom)=forces in reduced coordinates
+!!  gred(3,natom)=gradients wrt nuclear positions in reduced coordinates
 !!  gprimd(3,3)=dimensional primitive translations for reciprocal space
 !!  gmet(3,3)=reciprocal space metric
 !!  grchempottn(3,natom)=d(E_chemical_potential)/d(xred) (hartree)
+!!  grcondft(3,natom)=d(E_constrainedDFT)/d(xred) (hartree)
 !!  grewtn(3,natom)=d(Ewald)/d(xred) (hartree)
 !!  grvdw(3,ngrvdw)=gradients of energy due to Van der Waals DFT-D dispersion (hartree)
 !!  gsqcut=cutoff value on G**2 for sphere inside fft box
@@ -123,7 +125,7 @@ contains
 !!  mcg=size of wave-functions array (cg) =mpw*nspinor*mband*mkmem*nsppol
 !!  mcprj=size of projected wave-functions array (cprj) =nspinor*mband*mkmem*nsppol
 !!  mgfft=maximum size of 1D FFTs
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  my_natom=number of atoms treated by current processor
 !!  n3xccc=dimension of the xccc3d array (0 or nfftf).
 !!  nattyp(ntypat)= # atoms of each type.
@@ -147,6 +149,7 @@ contains
 !!  psps <type(pseudopotential_type)>=variables related to pseudopotentials
 !!  rprimd(3,3)=dimensional primitive translations in real space (bohr)
 !!  stress_needed=if >0 stresses are needed
+!!  strscondft(6)=cDFT correction to stress
 !!  strsxc(6)=xc correction to stress
 !!  symrec(3,3,nsym)=symmetries in reciprocal space, reduced coordinates
 !!  ucvol=unit cell volume in bohr**3.
@@ -154,7 +157,10 @@ contains
 !!  vhartr(nfftf)=array for holding Hartree potential
 !!  vpsp(nfftf)=array for holding local psp
 !!  vxc(nfftf,nspden)=exchange-correlation potential (hartree) in real space
+!!  vxctau(nfft,nspden,4*usekden)=(only for meta-GGA) derivative of XC energy density
+!!                                wrt kinetic energy density (depsxcdtau)
 !!  xccc3d(n3xccc)=3D core electron density for XC core correction, bohr^-3
+!!  xcctau3d(n3xccc*usekden)=(only for meta-GGA): 3D core electron kinetic energy density for XC core correction
 !!  xred(3,natom)=reduced dimensionless atomic coordinates
 !!  ylm(mpw*mkmem,mpsang*mpsang*useylm)= real spherical harmonics for each G and k point
 !!  ylmgr(mpw*mkmem,3,mpsang*mpsang*useylm)= gradients of real spherical harmonics
@@ -171,24 +177,15 @@ contains
 !!  rhog(2,nfft)=Fourier transform of total electron/positron density
 !!  rhor(nfft,nspden)=total electron/positron density (el/bohr**3)
 !!
-!! PARENTS
-!!      scfcv
-!!
-!! CHILDREN
-!!      energies_copy,energies_init,forstr,fourdp,getcut,hartre,initrhoij
-!!      initro,pawcprj_alloc,pawcprj_copy,pawcprj_free,pawmknhat,pawrhoij_alloc
-!!      pawrhoij_copy,pawrhoij_free,read_rhor,wrtout
-!!
 !! SOURCE
 
 subroutine setup_positron(atindx,atindx1,cg,cprj,dtefield,dtfil,dtset,ecore,eigen,etotal,electronpositron,&
-&          energies,fock,forces_needed,fred,gmet,gprimd,grchempottn,grewtn,grvdw,gsqcut,hdr,ifirst_gs,indsym,istep,istep_mix,kg,&
+&          energies,fock,forces_needed,gred,gmet,gprimd,grchempottn,&
+&          grcondft,grewtn,grvdw,gsqcut,hdr,extfpmd,ifirst_gs,indsym,istep,istep_mix,kg,&
 &          kxc,maxfor,mcg,mcprj,mgfft,mpi_enreg,my_natom,n3xccc,nattyp,nfft,ngfft,ngrvdw,nhat,nkxc,npwarr,nvresid,occ,optres,&
 &          paw_ij,pawang,pawfgr,pawfgrtab,pawrad,pawrhoij,pawtab,ph1d,ph1dc,psps,rhog,rhor,&
-&          rprimd,stress_needed,strsxc,symrec,ucvol,usecprj,vhartr,vpsp,vxc,&
-&          xccc3d,xred,ylm,ylmgr)
-
- implicit none
+&          rmet,rprimd,stress_needed,strscondft,strsxc,symrec,ucvol,usecprj,vhartr,vpsp,vxc,vxctau,&
+&          xccc3d,xcctau3d,xred,ylm,ylmgr,xg_nonlop)
 
 !Arguments ------------------------------------
 !scalars
@@ -202,28 +199,31 @@ subroutine setup_positron(atindx,atindx1,cg,cprj,dtefield,dtfil,dtset,ecore,eige
  type(electronpositron_type),pointer :: electronpositron
  type(energies_type),intent(inout) :: energies
  type(hdr_type),intent(inout) :: hdr
+ type(extfpmd_type),pointer,intent(inout) :: extfpmd
  type(MPI_type),intent(inout) :: mpi_enreg
  type(pawang_type),intent(in) :: pawang
  type(pawfgr_type),intent(in) :: pawfgr
  type(pseudopotential_type), intent(in) :: psps
-type(fock_type),pointer, intent(inout) :: fock
+ type(fock_type),pointer, intent(inout) :: fock
+ type(xg_nonlop_t), intent(inout) :: xg_nonlop
 !arrays
  integer,intent(in) :: atindx(dtset%natom),atindx1(dtset%natom),indsym(4,dtset%nsym,dtset%natom)
  integer,intent(in) :: kg(3,dtset%mpw*dtset%mkmem),nattyp(dtset%natom),ngfft(18)
  integer,intent(in) :: npwarr(dtset%nkpt),symrec(3,3,dtset%nsym)
- real(dp),intent(in) :: gmet(3,3),gprimd(3,3),grchempottn(3,dtset%natom)
+ real(dp),intent(in) :: gmet(3,3),gprimd(3,3),grchempottn(3,dtset%natom),grcondft(3,dtset%natom)
  real(dp),intent(in) :: grewtn(3,dtset%natom),grvdw(3,ngrvdw),kxc(nfft,nkxc)
  real(dp),intent(in) :: ph1d(2,3*(2*mgfft+1)*dtset%natom),ph1dc(2,(3*(2*dtset%mgfft+1)*dtset%natom)*dtset%usepaw)
- real(dp),intent(in) :: rprimd(3,3),strsxc(6),vhartr(nfft),vpsp(nfft),vxc(nfft,dtset%nspden)
+ real(dp),intent(in) :: rmet(3,3),strscondft(6),strsxc(6),vhartr(nfft),vpsp(nfft),vxc(nfft,dtset%nspden)
+ real(dp),intent(in) :: vxctau(nfft,dtset%nspden,4*dtset%usekden)
  real(dp),intent(in) :: ylm(dtset%mpw*dtset%mkmem,psps%mpsang*psps%mpsang*psps%useylm)
  real(dp),intent(in) :: ylmgr(dtset%mpw*dtset%mkmem,3,psps%mpsang*psps%mpsang*psps%useylm)
  real(dp),intent(inout) :: cg(2,mcg)
  real(dp),intent(inout) :: nhat(nfft,dtset%nspden*dtset%usepaw)
  real(dp),intent(inout) :: nvresid(nfft,dtset%nspden)
- real(dp),intent(inout) :: eigen(dtset%mband*dtset%nkpt*dtset%nsppol),fred(3,dtset%natom)
+ real(dp),intent(inout) :: eigen(dtset%mband*dtset%nkpt*dtset%nsppol),gred(3,dtset%natom)
  real(dp),intent(inout) :: occ(dtset%mband*dtset%nkpt*dtset%nsppol)
- real(dp),intent(inout) :: rhog(2,nfft),rhor(nfft,dtset%nspden)
- real(dp),intent(inout) :: xccc3d(n3xccc),xred(3,dtset%natom)
+ real(dp),intent(inout) :: rhog(2,nfft),rhor(nfft,dtset%nspden),rprimd(3,3)
+ real(dp),intent(inout) :: xccc3d(n3xccc),xcctau3d(n3xccc*dtset%usekden),xred(3,dtset%natom)
  type(pawcprj_type),intent(inout) :: cprj(dtset%natom,mcprj*usecprj)
  type(paw_ij_type),intent(in) :: paw_ij(my_natom*dtset%usepaw)
  type(pawfgrtab_type),intent(inout) :: pawfgrtab(my_natom*dtset%usepaw)
@@ -250,7 +250,7 @@ type(fock_type),pointer, intent(inout) :: fock
  integer,allocatable :: nlmn(:)
  real(dp) :: cgtmp(2)
  real(dp),parameter :: qphon(3)=(/zero,zero,zero/)
- real(dp),allocatable :: favg_dum(:),fcart_dum(:,:),forold_dum(:,:),fred_tmp(:,:)
+ real(dp),allocatable :: favg_dum(:),fcart_dum(:,:),forold_dum(:,:),gred_tmp(:,:)
  real(dp),allocatable :: gresid_dum(:,:),grhf_dum(:,:),grxc_dum(:,:)
  real(dp),allocatable :: rhog_ep(:,:),scocc(:),str_tmp(:),synlgr_dum(:,:)
  real(dp) :: nhatgr(0,0,0)
@@ -261,15 +261,15 @@ type(fock_type),pointer, intent(inout) :: fock
 
 !Compatibility tests
  if (dtset%positron==0) then
-   MSG_BUG('Not valid for dtset%positron=0!')
+   ABI_BUG('Not valid for dtset%positron=0!')
  end if
 
  if (istep>1.and.nfft/=electronpositron%nfft) then
-   MSG_BUG('Invalid value for nfft!')
+   ABI_BUG('Invalid value for nfft!')
  end if
 
  if (dtset%usewvl==1) then
-   MSG_BUG('Not valid for wavelets!')
+   ABI_BUG('Not valid for wavelets!')
  end if
 
  if (dtset%positron==1) then
@@ -277,7 +277,7 @@ type(fock_type),pointer, intent(inout) :: fock
      do ikpt=1,dtset%nkpt
        if (dtset%nband(ikpt+dtset%nkpt*(isppol-1))/=dtset%nband(1)) then
          message = "dtset%positron needs nband to be the same at each k-point !"
-         MSG_ERROR(message)
+         ABI_ERROR(message)
        end if
      end do
    end do
@@ -360,48 +360,48 @@ type(fock_type),pointer, intent(inout) :: fock
 
 !  -----------------------------------------------------------------------------------------
 !  Update forces and stresses
-!  If electronpositron%calctype==1: fred_ep/stress_ep are the electronic fred/stress
-!  If electronpositron%calctype==2: fred_ep/stress_ep are the positronic fred/stress
+!  If electronpositron%calctype==1: gred_ep/stress_ep are the electronic gred/stress
+!  If electronpositron%calctype==2: gred_ep/stress_ep are the positronic gred/stress
 !  -----------------------------------------------------------------------------------------
    if (history_level==2.or.history_level==3) then
      optstr=0;optfor=0
      if (allocated(electronpositron%stress_ep)) optstr=stress_needed
-     if (allocated(electronpositron%fred_ep).and.forces_needed==2) optfor=1
+     if (allocated(electronpositron%gred_ep).and.forces_needed==2) optfor=1
      if (optfor>0.or.optstr>0) then
-       ABI_ALLOCATE(favg_dum,(3))
-       ABI_ALLOCATE(fcart_dum,(3,dtset%natom))
-       ABI_ALLOCATE(forold_dum,(3,dtset%natom))
-       ABI_ALLOCATE(gresid_dum,(3,dtset%natom))
-       ABI_ALLOCATE(grhf_dum,(3,dtset%natom))
-       ABI_ALLOCATE(grxc_dum,(3,dtset%natom))
-       ABI_ALLOCATE(synlgr_dum,(3,dtset%natom))
-       ABI_ALLOCATE(fred_tmp,(3,dtset%natom))
-       ABI_ALLOCATE(str_tmp,(6))
+       ABI_MALLOC(favg_dum,(3))
+       ABI_MALLOC(fcart_dum,(3,dtset%natom))
+       ABI_MALLOC(forold_dum,(3,dtset%natom))
+       ABI_MALLOC(gresid_dum,(3,dtset%natom))
+       ABI_MALLOC(grhf_dum,(3,dtset%natom))
+       ABI_MALLOC(grxc_dum,(3,dtset%natom))
+       ABI_MALLOC(synlgr_dum,(3,dtset%natom))
+       ABI_MALLOC(gred_tmp,(3,dtset%natom))
+       ABI_MALLOC(str_tmp,(6))
        forold_dum=zero;n3xccc0=n3xccc
        icalctype=electronpositron%calctype;electronpositron%calctype=-icalctype0
        if (electronpositron%calctype==0) electronpositron%calctype=-100
        if (electronpositron%calctype==-1) n3xccc0=0  ! Note: if calctype=-1, previous calculation was positron
        call forstr(atindx1,cg,cprj,diffor_dum,dtefield,dtset,eigen,electronpositron,energies,&
-&       favg_dum,fcart_dum,fock,forold_dum,fred_tmp,grchempottn,gresid_dum,grewtn,grhf_dum,grvdw,grxc_dum,gsqcut,&
-&       indsym,kg,kxc,maxfor_dum,mcg,mcprj,mgfft,mpi_enreg,my_natom,n3xccc0,nattyp,nfft,ngfft,&
+&       favg_dum,fcart_dum,fock,forold_dum,gred_tmp,grchempottn,grcondft,gresid_dum,grewtn,grhf_dum,grvdw,grxc_dum,gsqcut,&
+&       extfpmd,indsym,kg,kxc,maxfor_dum,mcg,mcprj,mgfft,mpi_enreg,my_natom,n3xccc0,nattyp,nfft,ngfft,&
 &       ngrvdw,nhat,nkxc,npwarr,dtset%ntypat,nvresid,occ,optfor,optres,paw_ij,pawang,pawfgr,&
-&       pawfgrtab,pawrad,pawrhoij,pawtab,ph1dc,ph1d,psps,rhog,rhor,rprimd,optstr,strsxc,str_tmp,symrec,&
-&       synlgr_dum,ucvol,usecprj,vhartr,vpsp,vxc,wvl,xccc3d,xred,ylm,ylmgr,0.0_dp)
+&       pawfgrtab,pawrad,pawrhoij,pawtab,ph1dc,ph1d,psps,rhog,rhor,rprimd,optstr,strscondft,strsxc,str_tmp,symrec,&
+&       synlgr_dum,ucvol,usecprj,vhartr,vpsp,vxc,vxctau,wvl,xccc3d,xcctau3d,xred,ylm,ylmgr,0.0_dp,xg_nonlop)
        electronpositron%calctype=icalctype
-       if (optfor>0) electronpositron%fred_ep(:,:)=fred_tmp(:,:)
+       if (optfor>0) electronpositron%gred_ep(:,:)=gred_tmp(:,:)
        if (optstr>0) electronpositron%stress_ep(:)=str_tmp(:)
-       ABI_DEALLOCATE(favg_dum)
-       ABI_DEALLOCATE(fcart_dum)
-       ABI_DEALLOCATE(forold_dum)
-       ABI_DEALLOCATE(gresid_dum)
-       ABI_DEALLOCATE(grhf_dum)
-       ABI_DEALLOCATE(grxc_dum)
-       ABI_DEALLOCATE(synlgr_dum)
-       ABI_DEALLOCATE(fred_tmp)
-       ABI_DEALLOCATE(str_tmp)
+       ABI_FREE(favg_dum)
+       ABI_FREE(fcart_dum)
+       ABI_FREE(forold_dum)
+       ABI_FREE(gresid_dum)
+       ABI_FREE(grhf_dum)
+       ABI_FREE(grxc_dum)
+       ABI_FREE(synlgr_dum)
+       ABI_FREE(gred_tmp)
+       ABI_FREE(str_tmp)
      end if
-     if (optfor==0.and.forces_needed>0.and.allocated(electronpositron%fred_ep)) then
-       electronpositron%fred_ep(:,:)=fred(:,:)-electronpositron%fred_ep(:,:)
+     if (optfor==0.and.forces_needed>0.and.allocated(electronpositron%gred_ep)) then
+       electronpositron%gred_ep(:,:)=gred(:,:)-electronpositron%gred_ep(:,:)
      end if
    end if
 
@@ -410,7 +410,7 @@ type(fock_type),pointer, intent(inout) :: fock
 !  If electronpositron%calctype==1: rhor is the positronic density, rhor_ep is the electronic density
 !  If electronpositron%calctype==2: rhor is the electronic density, rhor_ep is the positronic density
 !  ---------------------------------------------------------------------------------------------------
-   ABI_ALLOCATE(rhog_ep,(2,nfft))
+   ABI_MALLOC(rhog_ep,(2,nfft))
 
 !  ===== PREVIOUS DENSITY RHOR_EP:
    if (history_level==0.or.history_level==1) then
@@ -420,7 +420,7 @@ type(fock_type),pointer, intent(inout) :: fock
        fname=trim(dtfil%fildensin);if (dtset%positron==2) fname=trim(dtfil%fildensin)//'_POSITRON'
        call read_rhor(trim(fname), cplex1, dtset%nspden, nfft, ngfft, rdwrpaw, mpi_enreg, electronpositron%rhor_ep, &
        hdr_den, electronpositron%pawrhoij_ep, comm_cell, check_hdr=hdr)
-       etotal_read = hdr_den%etot; call hdr_free(hdr_den)
+       etotal_read = hdr_den%etot; call hdr_den%free()
        call fourdp(1,rhog_ep,electronpositron%rhor_ep,-1,mpi_enreg,nfft,1,ngfft,0)
        if (dtset%usepaw==1.and.allocated(electronpositron%nhat_ep)) then
          call pawmknhat(occtmp,1,0,0,0,0,gprimd,my_natom,dtset%natom,nfft,ngfft,0,&
@@ -437,11 +437,11 @@ type(fock_type),pointer, intent(inout) :: fock
        call getcut(boxcut_dum,ecut_eff,gmet,gsqcut_eff,dtset%iboxcut,std_out,qphon,ngfft)
        call initro(atindx,dtset%densty,gmet,gsqcut_eff,dtset%usepaw,mgfft,mpi_enreg,&
 &       psps%mqgrid_vl,dtset%natom,nattyp,nfft,ngfft,dtset%nspden,dtset%ntypat,&
-&       dtset%paral_kgb,psps,pawtab,ph1d,psps%qgrid_vl,rhog_ep,electronpositron%rhor_ep,&
+&       psps,pawtab,ph1d,psps%qgrid_vl,rhog_ep,electronpositron%rhor_ep,&
 &       dtset%spinat,ucvol,dtset%usepaw,dtset%ziontypat,dtset%znucl)
        if (dtset%usepaw==1) then
          if (size(electronpositron%pawrhoij_ep)>0) then
-           ABI_DATATYPE_ALLOCATE(pawrhoij_tmp,(my_natom))
+           ABI_MALLOC(pawrhoij_tmp,(my_natom))
            call initrhoij(electronpositron%pawrhoij_ep(1)%cplex_rhoij,dtset%lexexch,&
 &           dtset%lpawu,my_natom,dtset%natom,dtset%nspden,&
 &           electronpositron%pawrhoij_ep(1)%nspinor,dtset%nsppol,&
@@ -458,7 +458,7 @@ type(fock_type),pointer, intent(inout) :: fock
            end if
            call pawrhoij_copy(pawrhoij_tmp,electronpositron%pawrhoij_ep)
            call pawrhoij_free(pawrhoij_tmp)
-           ABI_DATATYPE_DEALLOCATE(pawrhoij_tmp)
+           ABI_FREE(pawrhoij_tmp)
          end if
          if (allocated(electronpositron%nhat_ep)) then
            call pawmknhat(occtmp,1,0,0,0,0,gprimd,my_natom,dtset%natom,nfft,ngfft,0,&
@@ -518,12 +518,12 @@ type(fock_type),pointer, intent(inout) :: fock
          call getcut(boxcut_dum,ecut_eff,gmet,gsqcut_eff,dtset%iboxcut,std_out,qphon,ngfft)
          call initro(atindx,dtset%densty,gmet,gsqcut_eff,dtset%usepaw,mgfft,mpi_enreg,&
 &         psps%mqgrid_vl,dtset%natom,nattyp,nfft,ngfft,dtset%nspden,dtset%ntypat,&
-&         dtset%paral_kgb,psps,pawtab,ph1d,psps%qgrid_vl,rhog,rhor,dtset%spinat,ucvol,&
+&         psps,pawtab,ph1d,psps%qgrid_vl,rhog,rhor,dtset%spinat,ucvol,&
 &         dtset%usepaw,dtset%ziontypat,dtset%znucl)
 
          if (dtset%usepaw==1) then
            if (size(pawrhoij)>0) then
-             ABI_DATATYPE_ALLOCATE(pawrhoij_tmp,(my_natom))
+             ABI_MALLOC(pawrhoij_tmp,(my_natom))
              call initrhoij(pawrhoij(1)%cplex_rhoij,dtset%lexexch,dtset%lpawu,&
 &             my_natom,dtset%natom,dtset%nspden,pawrhoij(1)%nspinor,dtset%nsppol,&
 &             dtset%ntypat,pawrhoij_tmp,dtset%pawspnorb,pawtab,pawrhoij(1)%qphase,dtset%spinat,&
@@ -535,7 +535,7 @@ type(fock_type),pointer, intent(inout) :: fock
              end do
              call pawrhoij_copy(pawrhoij_tmp,pawrhoij)
              call pawrhoij_free(pawrhoij_tmp)
-             ABI_DATATYPE_DEALLOCATE(pawrhoij_tmp)
+             ABI_FREE(pawrhoij_tmp)
            end if
            call pawmknhat(occtmp,1,0,0,0,0,gprimd,my_natom,dtset%natom,nfft,ngfft,0,&
 &           dtset%nspden,dtset%ntypat,pawang,pawfgrtab,nhatgr,nhat,&
@@ -563,7 +563,7 @@ type(fock_type),pointer, intent(inout) :: fock
 !    If PAW, exchange "positronic" and "electronic" rhoij
      if (dtset%usepaw==1) then
        if (size(pawrhoij)>0.and.size(electronpositron%pawrhoij_ep)>0) then
-         ABI_DATATYPE_ALLOCATE(pawrhoij_tmp,(my_natom))
+         ABI_MALLOC(pawrhoij_tmp,(my_natom))
          call pawrhoij_alloc(pawrhoij_tmp,pawrhoij(1)%cplex_rhoij,pawrhoij(1)%nspden,&
 &         pawrhoij(1)%nspinor,pawrhoij(1)%nsppol,dtset%typat,&
 &         pawtab=pawtab,ngrhoij=pawrhoij(1)%ngrhoij,nlmnmix=pawrhoij(1)%lmnmix_sz,&
@@ -573,7 +573,7 @@ type(fock_type),pointer, intent(inout) :: fock
          call pawrhoij_copy(electronpositron%pawrhoij_ep,pawrhoij)
          call pawrhoij_copy(pawrhoij_tmp,electronpositron%pawrhoij_ep)
          call pawrhoij_free(pawrhoij_tmp)
-         ABI_DATATYPE_DEALLOCATE(pawrhoij_tmp)
+         ABI_FREE(pawrhoij_tmp)
        end if
        if (allocated(electronpositron%nhat_ep)) then
          do ispden=1,dtset%nspden
@@ -592,13 +592,13 @@ type(fock_type),pointer, intent(inout) :: fock
      call fourdp(1,rhog_ep,electronpositron%rhor_ep,-1,mpi_enreg,nfft,1,ngfft,0)
    end if
    if (history_level/=-1) then
-     call hartre(1,gsqcut,dtset%usepaw,mpi_enreg,nfft,ngfft,dtset%paral_kgb,rhog_ep,rprimd,&
-&     electronpositron%vha_ep)
+     call hartre(1,gsqcut,dtset%icutcoul,dtset%usepaw,mpi_enreg,nfft,ngfft,&
+&    dtset%nkpt,dtset%rcut,rhog_ep,rprimd,dtset%vcutgeo,electronpositron%vha_ep)
      electronpositron%vha_ep=-electronpositron%vha_ep
    else
      electronpositron%vha_ep=zero
    end if
-   ABI_DEALLOCATE(rhog_ep)
+   ABI_FREE(rhog_ep)
 
 !  ----------------------------------------------------------------------
 !  Initialize/Update energies
@@ -662,18 +662,18 @@ type(fock_type),pointer, intent(inout) :: fock
          end do
        end if
        if (dtset%usepaw==1.and.electronpositron%dimcprj>0) then
-         ABI_ALLOCATE(nlmn,(dtset%natom))
-         ABI_DATATYPE_ALLOCATE(cprj_tmp,(dtset%natom,electronpositron%dimcprj))
+         ABI_MALLOC(nlmn,(dtset%natom))
+         ABI_MALLOC(cprj_tmp,(dtset%natom,electronpositron%dimcprj))
          do iatom=1,dtset%natom
            nlmn(iatom)=cprj(iatom,1)%nlmn
          end do
          call pawcprj_alloc(cprj_tmp,cprj(1,1)%ncpgr,nlmn)
-         ABI_DEALLOCATE(nlmn)
+         ABI_FREE(nlmn)
          call pawcprj_copy(electronpositron%cprj_ep,cprj_tmp)
          call pawcprj_copy(cprj,electronpositron%cprj_ep)
          call pawcprj_copy(cprj_tmp,cprj)
          call pawcprj_free(cprj_tmp)
-         ABI_DATATYPE_DEALLOCATE(cprj_tmp)
+         ABI_FREE(cprj_tmp)
        end if
      end if
 
@@ -692,15 +692,15 @@ type(fock_type),pointer, intent(inout) :: fock
 &   (history_level==0.or.history_level==2.or. &
 &   (history_level==3.and.electronpositron%dimocc==0))) need_scocc=.true.
    if (need_scocc) then
-     nelect=-dtset%charge
+     nelect=-dtset%cellcharge(1)
      do iatom=1,dtset%natom
        nelect=nelect+dtset%ziontypat(dtset%typat(iatom))
      end do
      maxocc=two/real(dtset%nsppol*dtset%nspinor,dp)
-     nocc=(nelect-tol8)/maxocc + 1
+     nocc=int((nelect-tol8)/maxocc) + 1
      nocc=min(nocc,dtset%nband(1)*dtset%nsppol)
      occlast=nelect-maxocc*(nocc-1)
-     ABI_ALLOCATE(scocc,(dtset%nband(1)*dtset%nsppol))
+     ABI_MALLOC(scocc,(dtset%nband(1)*dtset%nsppol))
      scocc=zero
      if (1<nocc)  scocc(1:nocc-1)=maxocc
      if (1<=nocc) scocc(nocc)=occlast
@@ -776,7 +776,7 @@ type(fock_type),pointer, intent(inout) :: fock
    end if
 
    if (need_scocc)  then
-     ABI_DEALLOCATE(scocc)
+     ABI_FREE(scocc)
    end if
 
 !  -----------------------------------------------------------------------------------------------------------
@@ -814,6 +814,18 @@ type(fock_type),pointer, intent(inout) :: fock
      end do
    end if
 
+   ! In some cases cprj are kept in memory, so we have to update them before the call of vtorho
+   if (dtset%cprj_in_memory==2) then
+     iatom=0
+     call wrtout(std_out,' Computing cprj from wavefunctions (positron)')
+     call ctocprj(atindx,cg,1,cprj,gmet,gprimd,iatom,0,&
+&      0,dtset%istwfk,kg,dtset%kptns,mcg,mcprj,dtset%mgfft,dtset%mkmem,mpi_enreg,psps%mpsang,&
+&      dtset%mpw,dtset%natom,nattyp,dtset%nband,dtset%natom,ngfft,dtset%nkpt,dtset%nloalg,npwarr,dtset%nspinor,&
+&      dtset%nsppol,dtset%nsppol,dtset%ntypat,dtset%paral_kgb,ph1d,psps,rmet,dtset%typat,ucvol,dtfil%unpaw,&
+&      xred,ylm,ylmgr)
+     call wrtout(std_out,' cprj is computed')
+   end if
+
 !  =============================================
  end if  ! the type of e-p calculation changes
 !=============================================
@@ -830,7 +842,7 @@ type(fock_type),pointer, intent(inout) :: fock
    else if (electronpositron%calctype==2) then
      message = 'Were are now performing an electronic ground-state calculation in presence of a positron...'
    end if
-   MSG_COMMENT(message)
+   ABI_COMMENT(message)
 !  Output message
    if (dtset%positron<0) then
      if (electronpositron%calctype==0) then
@@ -896,20 +908,11 @@ end subroutine setup_positron
 !! SIDE EFFECTS
 !!  electronpositron <type(electronpositron_type)>=quantities for the electron-positron annihilation
 !!
-!! PARENTS
-!!      outscfcv,posdoppler
-!!
-!! CHILDREN
-!!      gammapositron,gammapositron_fft,mkdenpos,nderiv_gen,pawdensities
-!!      pawxcsum,simp_gen,wrtout,xmpi_sum
-!!
 !! SOURCE
 
 subroutine poslifetime(dtset,electronpositron,gprimd,my_natom,mpi_enreg,n3xccc,nfft,ngfft,nhat,&
 &                      option,pawang,pawrad,pawrhoij,pawtab,rate,rate_paw,rhor,ucvol,xccc3d,&
 &                      rhor_dop_el,pawrhoij_dop_el,pawrhoij_ep) ! optional arguments
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -967,14 +970,17 @@ subroutine poslifetime(dtset,electronpositron,gprimd,my_natom,mpi_enreg,n3xccc,n
 !Tests for developers
  if (.not.associated(electronpositron)) then
    msg='electronpositron variable must be associated!'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
  if (option/=1) then
    if ((.not.present(rhor_dop_el)).or.(.not.present(pawrhoij_dop_el))) then
      msg='when option/=1, rhor_dop_el and pawrhoij_dop_el must be present!'
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
  end if
+
+ ! This to avoid using unitialized variables.
+ lambda_core = zero; lambda_paw = zero; lambda_core_paw = zero
 
 !Constants
  fact=0.0
@@ -988,27 +994,27 @@ subroutine poslifetime(dtset,electronpositron,gprimd,my_natom,mpi_enreg,n3xccc,n
 !Compatibility tests
  if (electronpositron%particle==EP_NOTHING) then
    msg='Not valid for electronpositron%particle=NOTHING!'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
  if (electronpositron%nfft/=nfft) then
    msg='nfft/=electronpositron%nfft!'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
  if (dtset%usepaw==1) then
    if(dtset%pawxcdev==0.and.ngrad==2) then
      msg='GGA is not implemented for pawxcdev=0 (use dtset%pawxcdev/=0)!'
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
  end if
 
 !Select type(s) of enhancement factor
  if ((electronpositron%ixcpositron==1.or.electronpositron%ixcpositron==3).and.option==1) then
    ngamma=2
-   ABI_ALLOCATE(igamma,(ngamma))
+   ABI_MALLOC(igamma,(ngamma))
    igamma(1)=1;igamma(2)=2
  else
    ngamma=1
-   ABI_ALLOCATE(igamma,(ngamma))
+   ABI_MALLOC(igamma,(ngamma))
    if (electronpositron%ixcpositron==-1) igamma(1)=0
    if (electronpositron%ixcpositron== 2) igamma(1)=4
    if (electronpositron%ixcpositron==11.or.electronpositron%ixcpositron==31) igamma(1)=3
@@ -1020,8 +1026,8 @@ subroutine poslifetime(dtset,electronpositron,gprimd,my_natom,mpi_enreg,n3xccc,n
    rhor_ => rhor
    rhor_ep_ => electronpositron%rhor_ep
  else
-   ABI_ALLOCATE(rhor_,(nfft,dtset%nspden))
-   ABI_ALLOCATE(rhor_ep_,(nfft,dtset%nspden))
+   ABI_MALLOC(rhor_,(nfft,dtset%nspden))
+   ABI_MALLOC(rhor_ep_,(nfft,dtset%nspden))
    rhor_=rhor-nhat
    rhor_ep_=electronpositron%rhor_ep-electronpositron%nhat_ep
  end if
@@ -1040,8 +1046,8 @@ subroutine poslifetime(dtset,electronpositron,gprimd,my_natom,mpi_enreg,n3xccc,n
 !  ----------------------------------------------------------------------------------------
 
 !  Select the densities and make them positive
-   ABI_ALLOCATE(rhoe,(nfft,nspden_ep))
-   ABI_ALLOCATE(rhop,(nfft,nspden_ep))
+   ABI_MALLOC(rhoe,(nfft,nspden_ep))
+   ABI_MALLOC(rhop,(nfft,nspden_ep))
    if (electronpositron%particle==EP_ELECTRON) then
      rhoe(:,1)=rhor_ep_(:,1);rhop(:,1)=rhor_(:,1)
    else if (electronpositron%particle==EP_POSITRON) then
@@ -1050,7 +1056,7 @@ subroutine poslifetime(dtset,electronpositron,gprimd,my_natom,mpi_enreg,n3xccc,n
    call mkdenpos(iwarn ,nfft,nspden_ep,1,rhoe,dtset%xc_denpos)
    call mkdenpos(iwarnp,nfft,nspden_ep,1,rhop,dtset%xc_denpos)
    if (option/=1) then
-     ABI_ALLOCATE(rhor_dop_el_,(nfft))
+     ABI_MALLOC(rhor_dop_el_,(nfft))
      rhor_dop_el_(:)=rhor_dop_el(:)
      call mkdenpos(iwarnp,nfft,1,1,rhor_dop_el_,dtset%xc_denpos)
    end if
@@ -1058,7 +1064,7 @@ subroutine poslifetime(dtset,electronpositron,gprimd,my_natom,mpi_enreg,n3xccc,n
 !  Compute enhancement factor at each FFT grid point
 !  gamma(:,1): using total   electronic density
 !  gamma(:,2): using valence electronic density
-   ABI_ALLOCATE(gamma,(nfft,2))
+   ABI_MALLOC(gamma,(nfft,2))
    if (option==1.or.option==2) then
      call gammapositron_fft(electronpositron,gamma,gprimd,igamma(igam),mpi_enreg,&
 &     n3xccc,nfft,ngfft,rhoe,rhop,xccc3d)
@@ -1090,11 +1096,11 @@ subroutine poslifetime(dtset,electronpositron,gprimd,my_natom,mpi_enreg,n3xccc,n
    lambda_ipm     =lambda_ipm     *ucvol/dble(nfftot)
    lambda_core    =lambda_core    *ucvol/dble(nfftot)
    lambda_core_ipm=lambda_core_ipm*ucvol/dble(nfftot)
-   ABI_DEALLOCATE(gamma)
-   ABI_DEALLOCATE(rhoe)
-   ABI_DEALLOCATE(rhop)
+   ABI_FREE(gamma)
+   ABI_FREE(rhoe)
+   ABI_FREE(rhop)
    if (option/=1) then
-     ABI_DEALLOCATE(rhor_dop_el_)
+     ABI_FREE(rhor_dop_el_)
    end if
 !  NC pseudopotential: check electrons/positron number
    if (dtset%usepaw==0.and.igam==ngamma) then
@@ -1149,32 +1155,32 @@ subroutine poslifetime(dtset,electronpositron,gprimd,my_natom,mpi_enreg,n3xccc,n
        ngr=0;if (ngrad==2) ngr=mesh_size
 
 !      Allocations of "on-site" densities
-       ABI_ALLOCATE(rho1 ,(cplex*mesh_size,lm_size,nspden_ep))
-       ABI_ALLOCATE(trho1,(cplex*mesh_size,lm_size,nspden_ep))
-       ABI_ALLOCATE(rho1_ep ,(cplex*mesh_size,lm_size,nspden_ep))
-       ABI_ALLOCATE(trho1_ep,(cplex*mesh_size,lm_size,nspden_ep))
+       ABI_MALLOC(rho1 ,(cplex*mesh_size,lm_size,nspden_ep))
+       ABI_MALLOC(trho1,(cplex*mesh_size,lm_size,nspden_ep))
+       ABI_MALLOC(rho1_ep ,(cplex*mesh_size,lm_size,nspden_ep))
+       ABI_MALLOC(trho1_ep,(cplex*mesh_size,lm_size,nspden_ep))
        if (option/=1) then
-         ABI_ALLOCATE(rho1_j ,(cplex*mesh_size,lm_size,nspden_ep))
-         ABI_ALLOCATE(trho1_j,(cplex*mesh_size,lm_size,nspden_ep))
+         ABI_MALLOC(rho1_j ,(cplex*mesh_size,lm_size,nspden_ep))
+         ABI_MALLOC(trho1_j,(cplex*mesh_size,lm_size,nspden_ep))
        else
-         ABI_ALLOCATE(rho1_j ,(0,0,0))
-         ABI_ALLOCATE(trho1_j,(0,0,0))
+         ABI_MALLOC(rho1_j ,(0,0,0))
+         ABI_MALLOC(trho1_j,(0,0,0))
        end if
        if (include_nhat_in_gamma) then
-         ABI_ALLOCATE(nhat1,(cplex*mesh_size,lm_size,nspden_ep))
-         ABI_ALLOCATE(nhat1_ep,(cplex*mesh_size,lm_size,nspden_ep))
+         ABI_MALLOC(nhat1,(cplex*mesh_size,lm_size,nspden_ep))
+         ABI_MALLOC(nhat1_ep,(cplex*mesh_size,lm_size,nspden_ep))
        else
-         ABI_ALLOCATE(nhat1,(0,0,0))
-         ABI_ALLOCATE(nhat1_ep,(0,0,0))
+         ABI_MALLOC(nhat1,(0,0,0))
+         ABI_MALLOC(nhat1_ep,(0,0,0))
        end if
        if (include_nhat_in_gamma.and.option/=1) then
-         ABI_ALLOCATE(nhat1_j,(cplex*mesh_size,lm_size,nspden_ep))
+         ABI_MALLOC(nhat1_j,(cplex*mesh_size,lm_size,nspden_ep))
        else
-         ABI_ALLOCATE(nhat1_j,(0,0,0))
+         ABI_MALLOC(nhat1_j,(0,0,0))
        end if
-       ABI_ALLOCATE(lmselect,(lm_size))
-       ABI_ALLOCATE(lmselect_ep,(lm_size))
-       ABI_ALLOCATE(lmselect_dum,(lm_size))
+       ABI_MALLOC(lmselect,(lm_size))
+       ABI_MALLOC(lmselect_ep,(lm_size))
+       ABI_MALLOC(lmselect_dum,(lm_size))
 
 !      Compute "on-site" densities (n1, ntild1, nhat1) for electron and positron =====
        lmselect(:)=.true.
@@ -1202,16 +1208,16 @@ subroutine poslifetime(dtset,electronpositron,gprimd,my_natom,mpi_enreg,n3xccc,n
        do iloop=1,2
          if (iloop==1) usecore=1
          if (iloop==2) usecore=pawtab(itypat)%usetcore
-         ABI_ALLOCATE(rhocore,(mesh_size))
+         ABI_MALLOC(rhocore,(mesh_size))
 
 !        First formalism: use densities on r,theta,phi
          if (dtset%pawxcdev==0) then
 
-           ABI_ALLOCATE(gamma,(mesh_size,2))
-           ABI_ALLOCATE(rhoarr1,(mesh_size))
-           ABI_ALLOCATE(rhoarr1_ep,(mesh_size))
+           ABI_MALLOC(gamma,(mesh_size,2))
+           ABI_MALLOC(rhoarr1,(mesh_size))
+           ABI_MALLOC(rhoarr1_ep,(mesh_size))
            if (option/=1) then
-             ABI_ALLOCATE(rhoarr1_j,(mesh_size))
+             ABI_MALLOC(rhoarr1_j,(mesh_size))
            end if
 !          Loop on the angular part
            do ipt=1,pawang%angl_size
@@ -1271,8 +1277,8 @@ subroutine poslifetime(dtset,electronpositron,gprimd,my_natom,mpi_enreg,n3xccc,n
                end if
              end if
 !            Compute Gamma
-             ABI_ALLOCATE(grhoe2,(ngr))
-             ABI_ALLOCATE(grhocore2,(ngr))
+             ABI_MALLOC(grhoe2,(ngr))
+             ABI_MALLOC(grhocore2,(ngr))
              if (option==1.or.option==2) then
                if (electronpositron%particle==EP_ELECTRON) then
                  call gammapositron(gamma,grhocore2,grhoe2,igamma(igam),ngr,mesh_size,&
@@ -1284,10 +1290,10 @@ subroutine poslifetime(dtset,electronpositron,gprimd,my_natom,mpi_enreg,n3xccc,n
              else
                gamma(:,:)=one
              end if
-             ABI_DEALLOCATE(grhoe2)
-             ABI_DEALLOCATE(grhocore2)
+             ABI_FREE(grhoe2)
+             ABI_FREE(grhocore2)
 !            Compute contribution to annihilation rates
-             ABI_ALLOCATE(ff,(mesh_size))
+             ABI_MALLOC(ff,(mesh_size))
              if (option/=1) rhoarr1(:)=rhoarr1_j(:)
              do ii=1,4
                if (ii==1) ff(1:mesh_size)=rhoarr1(1:mesh_size)*rhoarr1_ep(1:mesh_size) &
@@ -1312,27 +1318,27 @@ subroutine poslifetime(dtset,electronpositron,gprimd,my_natom,mpi_enreg,n3xccc,n
                if (ii==3) lambda_core_paw    =lambda_core_paw    +lsign(iloop)*intg
                if (ii==4) lambda_core_paw_ipm=lambda_core_paw_ipm+lsign(iloop)*intg
              end do
-             ABI_DEALLOCATE(ff)
+             ABI_FREE(ff)
            end do ! ipt
-           ABI_DEALLOCATE(gamma)
-           ABI_DEALLOCATE(rhoarr1)
-           ABI_DEALLOCATE(rhoarr1_ep)
+           ABI_FREE(gamma)
+           ABI_FREE(rhoarr1)
+           ABI_FREE(rhoarr1_ep)
            if (option/=1) then
-             ABI_DEALLOCATE(rhoarr1_j)
+             ABI_FREE(rhoarr1_j)
            end if
 
 !          Second formalism: use (l,m) moments for densities
          else if (dtset%pawxcdev/=0) then
 
 !          Build densities
-           ABI_ALLOCATE(gammam,(mesh_size,2,lm_size))
-           ABI_ALLOCATE(rhotot,(mesh_size,lm_size))
-           ABI_ALLOCATE(rhotot_ep,(mesh_size,lm_size))
-           ABI_ALLOCATE(rhosph,(mesh_size))
-           ABI_ALLOCATE(rhosph_ep,(mesh_size))
+           ABI_MALLOC(gammam,(mesh_size,2,lm_size))
+           ABI_MALLOC(rhotot,(mesh_size,lm_size))
+           ABI_MALLOC(rhotot_ep,(mesh_size,lm_size))
+           ABI_MALLOC(rhosph,(mesh_size))
+           ABI_MALLOC(rhosph_ep,(mesh_size))
            if (option/=1) then
-             ABI_ALLOCATE(rhotot_j,(mesh_size,lm_size))
-             ABI_ALLOCATE(rhosph_j,(mesh_size))
+             ABI_MALLOC(rhotot_j,(mesh_size,lm_size))
+             ABI_MALLOC(rhosph_j,(mesh_size))
            end if
            if (usecore==0) rhocore(:)=zero
            if (iloop==1) then
@@ -1367,8 +1373,8 @@ subroutine poslifetime(dtset,electronpositron,gprimd,my_natom,mpi_enreg,n3xccc,n
              end if
            end if
 !          Need gradients of electronic densities for GGA
-           ABI_ALLOCATE(grhoe2,(ngr))
-           ABI_ALLOCATE(grhocore2,(ngr))
+           ABI_MALLOC(grhoe2,(ngr))
+           ABI_MALLOC(grhocore2,(ngr))
            if (ngr>0) then
              if (electronpositron%particle==EP_ELECTRON) then
                call nderiv_gen(grhoe2,rhosph_ep,pawrad(itypat))
@@ -1386,12 +1392,12 @@ subroutine poslifetime(dtset,electronpositron,gprimd,my_natom,mpi_enreg,n3xccc,n
 !          (rho-,rho+ +drho+), (rho-,rho+ -drho+),
 !          (rho- +drho-,rho+ +drho+), (rho- -drho-,rho+ -drho+)
 !          Do a seven steps loop
-           ABI_ALLOCATE(gam_,(mesh_size,2,7))
-           ABI_ALLOCATE(rho_,(mesh_size))
-           ABI_ALLOCATE(rho_ep_,(mesh_size))
-           ABI_ALLOCATE(rhocor_,(mesh_size))
-           ABI_ALLOCATE(grho2_,(ngr))
-           ABI_ALLOCATE(grhocor2_,(ngr))
+           ABI_MALLOC(gam_,(mesh_size,2,7))
+           ABI_MALLOC(rho_,(mesh_size))
+           ABI_MALLOC(rho_ep_,(mesh_size))
+           ABI_MALLOC(rhocor_,(mesh_size))
+           ABI_MALLOC(grho2_,(ngr))
+           ABI_MALLOC(grhocor2_,(ngr))
            do ii=1,7
 !            Apply delta to get perturbed densities
              rho_(:)=rhosph(:);rho_ep_(:)=rhosph_ep(:);if (usecore==1) rhocor_(:)=rhocore(:)
@@ -1428,17 +1434,17 @@ subroutine poslifetime(dtset,electronpositron,gprimd,my_natom,mpi_enreg,n3xccc,n
              end if
            end do ! end loop ii=1,7
 
-           ABI_DEALLOCATE(rhocor_)
-           ABI_DEALLOCATE(grho2_)
-           ABI_DEALLOCATE(grhocor2_)
-           ABI_DEALLOCATE(grhoe2)
-           ABI_DEALLOCATE(grhocore2)
+           ABI_FREE(rhocor_)
+           ABI_FREE(grho2_)
+           ABI_FREE(grhocor2_)
+           ABI_FREE(grhoe2)
+           ABI_FREE(grhocore2)
            rho_   (:)=rhosph   (:);if (electronpositron%particle==EP_POSITRON.and.usecore==1) rho_   (:)=rho_   (:)+rhocore(:)
            rho_ep_(:)=rhosph_ep(:);if (electronpositron%particle==EP_ELECTRON.and.usecore==1) rho_ep_(:)=rho_ep_(:)+rhocore(:)
 !          Compute numerical first and second derivatives of Gamma
 !          d1gam(1) = dgam/drho+ (particle=ELECTRON), dgam/drho- (particle=POSITRON)
 !          d1gam(2) = dgam/drho- (particle=ELECTRON), dgam/drho+ (particle=POSITRON)
-           ABI_ALLOCATE(d1gam,(mesh_size,2,2))
+           ABI_MALLOC(d1gam,(mesh_size,2,2))
            d1gam(:,:,:)=zero
            do ir=1,mesh_size
              if (rho_     (ir)>tol14) d1gam(ir,1,1)=(gam_(ir,1,2)-gam_(ir,1,3))*half/(delta*rho_     (ir))
@@ -1450,7 +1456,7 @@ subroutine poslifetime(dtset,electronpositron,gprimd,my_natom,mpi_enreg,n3xccc,n
 !          d2gam(1) = d2gam/drho+_drho+ (particle=ELECTRON), dgam/drho-_drho- (particle=POSITRON)
 !          d2gam(2) = d2gam/drho-_drho+ (particle=ELECTRON), dgam/drho+_drho- (particle=POSITRON)
 !          d2gam(3) = d2gam/drho-_drho- (particle=ELECTRON), dgam/drho+_drho+ (particle=POSITRON)
-           ABI_ALLOCATE(d2gam,(mesh_size,2,3))
+           ABI_MALLOC(d2gam,(mesh_size,2,3))
            d2gam(:,:,:)=zero
            do ir=1,mesh_size
              if (rho_  (ir)>tol14) d2gam(ir,1,1)=(gam_(ir,1,2)+gam_(ir,1,3)-two*gam_(ir,1,1))/(delta*rho_  (ir))**2
@@ -1472,14 +1478,14 @@ subroutine poslifetime(dtset,electronpositron,gprimd,my_natom,mpi_enreg,n3xccc,n
                end if
              end if
            end do
-           ABI_DEALLOCATE(rho_)
-           ABI_DEALLOCATE(rho_ep_)
+           ABI_FREE(rho_)
+           ABI_FREE(rho_ep_)
 !          Compute useful sums of densities
-           ABI_ALLOCATE(v1sum,(mesh_size,3))
+           ABI_MALLOC(v1sum,(mesh_size,3))
            if ( dtset%pawxcdev>=2)  then
-             ABI_ALLOCATE(v2sum,(mesh_size,lm_size,3))
+             ABI_MALLOC(v2sum,(mesh_size,lm_size,3))
            else
-             ABI_ALLOCATE(v2sum,(0,0,0))
+             ABI_MALLOC(v2sum,(0,0,0))
            end if
            rhotot(:,1)=sqfpi*rhosph(:);rhotot_ep(:,1)=sqfpi*rhosph_ep(:)
            call pawxcsum(1,1,1,lmselect,lmselect_ep,lm_size,mesh_size,3,dtset%pawxcdev,&
@@ -1509,11 +1515,11 @@ subroutine poslifetime(dtset,electronpositron,gprimd,my_natom,mpi_enreg,n3xccc,n
 &               +half*(d2gam(:,2,1)*v2sum(:,ilm,1)+d2gam(:,2,3)*v2sum(:,ilm,3))
              end do
            end if
-           ABI_DEALLOCATE(gam_)
-           ABI_DEALLOCATE(d1gam)
-           ABI_DEALLOCATE(d2gam)
-           ABI_DEALLOCATE(v1sum)
-           ABI_DEALLOCATE(v2sum)
+           ABI_FREE(gam_)
+           ABI_FREE(d1gam)
+           ABI_FREE(d2gam)
+           ABI_FREE(v1sum)
+           ABI_FREE(v2sum)
 
 !          Compute contribution to annihilation rate
 
@@ -1523,10 +1529,10 @@ subroutine poslifetime(dtset,electronpositron,gprimd,my_natom,mpi_enreg,n3xccc,n
              rhosph  (:) = rhosph_j  (:)
            end if
 
-           ABI_ALLOCATE(gg,(mesh_size,4))
+           ABI_MALLOC(gg,(mesh_size,4))
            gg=zero
-           ABI_ALLOCATE(rhoarr1,(mesh_size))
-           ABI_ALLOCATE(rhoarr2,(mesh_size))
+           ABI_MALLOC(rhoarr1,(mesh_size))
+           ABI_MALLOC(rhoarr2,(mesh_size))
            do ilm=1,lm_size
              do ilm1=1,lm_size
                if (lmselect(ilm1)) then
@@ -1551,8 +1557,8 @@ subroutine poslifetime(dtset,electronpositron,gprimd,my_natom,mpi_enreg,n3xccc,n
                end if
              end do
            end do
-           ABI_DEALLOCATE(rhoarr1)
-           ABI_DEALLOCATE(rhoarr2)
+           ABI_FREE(rhoarr1)
+           ABI_FREE(rhoarr2)
            if (electronpositron%particle==EP_ELECTRON) then
              do ilm=1,lm_size
                if (lmselect(ilm)) gg(:,3)=gg(:,3)+rhotot(:,ilm)*rhocore(:)*gammam(:,1,ilm)
@@ -1572,35 +1578,35 @@ subroutine poslifetime(dtset,electronpositron,gprimd,my_natom,mpi_enreg,n3xccc,n
              if (ii==3) lambda_core_paw    =lambda_core_paw    +lsign(iloop)*intg
              if (ii==4) lambda_core_paw_ipm=lambda_core_paw_ipm+lsign(iloop)*intg
            end do
-           ABI_DEALLOCATE(gg)
-           ABI_DEALLOCATE(gammam)
-           ABI_DEALLOCATE(rhotot)
-           ABI_DEALLOCATE(rhotot_ep)
-           ABI_DEALLOCATE(rhosph)
-           ABI_DEALLOCATE(rhosph_ep)
+           ABI_FREE(gg)
+           ABI_FREE(gammam)
+           ABI_FREE(rhotot)
+           ABI_FREE(rhotot_ep)
+           ABI_FREE(rhosph)
+           ABI_FREE(rhosph_ep)
            if (option/=1) then
-             ABI_DEALLOCATE(rhotot_j)
-             ABI_DEALLOCATE(rhosph_j)
+             ABI_FREE(rhotot_j)
+             ABI_FREE(rhosph_j)
            end if
 
          end if ! dtset%pawxcdev
 
-         ABI_DEALLOCATE(rhocore)
+         ABI_FREE(rhocore)
 
        end do ! iloop
 
-       ABI_DEALLOCATE(rho1)
-       ABI_DEALLOCATE(trho1)
-       ABI_DEALLOCATE(rho1_ep)
-       ABI_DEALLOCATE(trho1_ep)
-       ABI_DEALLOCATE(rho1_j)
-       ABI_DEALLOCATE(trho1_j)
-       ABI_DEALLOCATE(nhat1)
-       ABI_DEALLOCATE(nhat1_ep)
-       ABI_DEALLOCATE(nhat1_j)
-       ABI_DEALLOCATE(lmselect)
-       ABI_DEALLOCATE(lmselect_ep)
-       ABI_DEALLOCATE(lmselect_dum)
+       ABI_FREE(rho1)
+       ABI_FREE(trho1)
+       ABI_FREE(rho1_ep)
+       ABI_FREE(trho1_ep)
+       ABI_FREE(rho1_j)
+       ABI_FREE(trho1_j)
+       ABI_FREE(nhat1)
+       ABI_FREE(nhat1_ep)
+       ABI_FREE(nhat1_j)
+       ABI_FREE(lmselect)
+       ABI_FREE(lmselect_ep)
+       ABI_FREE(lmselect_dum)
 
      end do ! iatom
 
@@ -1754,10 +1760,10 @@ subroutine poslifetime(dtset,electronpositron,gprimd,my_natom,mpi_enreg,n3xccc,n
  end if !end if option
 
 !Deallocate memory
- ABI_DEALLOCATE(igamma)
+ ABI_FREE(igamma)
  if (dtset%usepaw==1.and.(.not.include_nhat_in_gamma)) then
-   ABI_DEALLOCATE(rhor_)
-   ABI_DEALLOCATE(rhor_ep_)
+   ABI_FREE(rhor_)
+   ABI_FREE(rhor_ep_)
  end if
 
  DBG_EXIT("COLL")
@@ -1794,13 +1800,13 @@ end subroutine poslifetime
 !!   | nspinor=number of spinorial components of the wavefunctions
 !!   | nsppol=1 for unpolarized, 2 for spin-polarized
 !!   | usepaw=flag for PAW
-!!   | use_gpu_cuda=flag for Cuda use
+!!   | gpu_option=GPU implementation to use, i.e. cuda, openMP, ... (0=not using GPU)
 !!   | wtk(=weights associated with various k points
 !!  filpsp(ntypat)=name(s) of the pseudopotential file(s)
 !!  kg(3,mpw*mkmem)=reduced planewave coordinates.
 !!  mcg=size of wave-functions array (cg) =mpw*nspinor*mband*mkmem*nsppol
 !!  mcprj=size of projected wave-functions array (cprj) =nspinor*mband*mkmem*nsppol
-!!  mpi_enreg= informations about MPI parallelization
+!!  mpi_enreg= information about MPI parallelization
 !!  my_natom=number of atoms treated by current processor
 !!  n3xccc= dimension of the xccc3d array (0 or nfft).
 !!  nfft= number of FFT grid points
@@ -1824,20 +1830,6 @@ end subroutine poslifetime
 !!  print a warning if the core wave function is not localized in the PAW sphere
 !!  implement PAW on-site contribution for state-independent scheme
 !!
-!! PARENTS
-!!      outscfcv
-!!
-!! CHILDREN
-!!      bandfft_kpt_destroy,bandfft_kpt_mpi_recv,bandfft_kpt_mpi_send
-!!      bandfft_kpt_reset,destroy_mpi_enreg,fourdp,fourwf,gammapositron_fft
-!!      initmpi_seq,initylmr,mkdenpos,pawaccrhoij,pawcprj_alloc,pawcprj_bcast
-!!      pawcprj_copy,pawcprj_free,pawcprj_get,pawcprj_mpi_recv,pawcprj_mpi_send
-!!      pawpsp_read_corewf,pawrhoij_alloc,pawrhoij_free,pawrhoij_gather
-!!      pawrhoij_nullify,poslifetime,posratecore,prep_fourwf,ptabs_fourdp,sbf8
-!!      set_mpi_enreg_fft,simp_gen,sphereboundary,pawrhoij_symrhoij,unset_mpi_enreg_fft
-!!      wffclose,wffopen,wrtout,xderivewrecend,xderivewrecinit,xderivewrite
-!!      xmoveoff,xmpi_bcast,xmpi_recv,xmpi_send,xmpi_sum
-!!
 !! SOURCE
 
 !Macro to go from row-column indexing to combined indexing
@@ -1849,8 +1841,6 @@ subroutine posdoppler(cg,cprj,Crystal,dimcprj,dtfil,dtset,electronpositron,&
 &                     filpsp,kg,mcg,mcprj,mpi_enreg,my_natom,&
 &                     n3xccc,nfft,ngfft,nhat,npwarr,occ,pawang,pawrad,&
 &                     pawrhoij,pawtab,rhor,xccc3d)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1883,20 +1873,20 @@ subroutine posdoppler(cg,cprj,Crystal,dimcprj,dtfil,dtset,electronpositron,&
  integer :: icg,icg_pos,id1,id2,id3,ierr,ig1,ig2,ig3,igamma,ii,ikg,ikg_pos,ikpt
  integer :: ikpt_pos,il,ilm,ilmn,iln,indx,indx0,iorder_cprj,iproc,ir,isppol,isppol_pos,istwf_k
  integer :: istwf_k_pos,itypat,iwarn,iwavef,iwavef_pos,j2,j3,jj,jkpt,jl,jlm,jlmn,jln
- integer :: klm,kln,klmn,l_size,ll,llmax,llmin,lm,lmn_size,lmn2_size
+ integer :: klm,kln,klmn,l_size,l_size_max,ll,llmax,llmin,lm,lmn_size,lmn_size_c,lmn2_size
  integer :: mband_cprj,mband_cprj_pos,mcg_pos
  integer :: mcprj_k,mcprj_k_pos,me_band,me_fft,me_kpt,me_kptband
  integer :: mesh_size,meshsz,mm,my_ngrid,my_nspinor,my_nsppol,my_n2,n1,n2,n3,n4,n5,n6
  integer :: nband_cprj_eff_pos,nband_cprj_k,nband_cprj_k_pos
  integer :: nband_eff_pos,nband_k,nband_k_pos
  integer :: nblock_band,nblock_band_eff_pos,nkpt
- integer :: nproc_band,nproc_fft,nproc_kpt,nproc_kptband,npw_k,npw_k_pos
+ integer :: nproc_band,nproc_fft,nproc_spkpt,nproc_kptband,npw_k,npw_k_pos
  integer :: nspden_rhoij,option,tag,unit_doppler
  integer :: tim_fourdp=0,tim_fourwf=-36
  integer :: ylmr_normchoice,ylmr_npts,ylmr_option
  logical,parameter :: include_nhat_in_gamma=.false.,state_dependent=.true.
  logical,parameter :: kgamma_only_positron=.true.,wf_conjugate=.false.
- logical :: cprj_paral_band,ex,mykpt,mykpt_pos,usetimerev
+ logical :: cprj_paral_band,ex,mykpt,mykpt_pos,use_timerev,use_zeromag,abinitcorewf,xmlcorewf
  real(dp) :: arg,bessarg,cpi,cpr,cp11,cp12,cp21,cp22,gammastate,intg
  real(dp) :: lambda_v1,lambda_v2,lambda_core,lambda_pw,occ_el,occ_pos
  real(dp) :: pnorm,pr,rate,rate_ipm,ratec,ratec_ipm,rate_paw,rate_paw_ipm
@@ -1948,7 +1938,7 @@ subroutine posdoppler(cg,cprj,Crystal,dimcprj,dtfil,dtset,electronpositron,&
 !Compatibility tests
  if (.not.associated(electronpositron)) then
    msg='electronpositron variable must be associated!'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
  if (allocated(mpi_enreg%proc_distrb)) then
    do isppol=1,dtset%nsppol
@@ -1956,33 +1946,33 @@ subroutine posdoppler(cg,cprj,Crystal,dimcprj,dtfil,dtset,electronpositron,&
        nband_k=dtset%nband(ikpt+(isppol-1)*dtset%nkpt)
        if (any(mpi_enreg%proc_distrb(ikpt,1:nband_k,isppol)/=mpi_enreg%proc_distrb(ikpt,1,isppol))) then
          msg='proc_distrib cannot be distributed over bands!'
-         MSG_BUG(msg)
+         ABI_BUG(msg)
        end if
      end do
    end do
  end if
  if (dtset%nspinor==2) then
    msg='Doppler broadening not available for spinorial wave functions (nspinor=2)!'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
  if (mcprj==0) then
    msg='<p|Psi> (cprj) datastructure must be kept in memory (see pawusecp input keyword)!'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
  if (dtset%usepaw==0) then
    write(msg,'(5a)') 'Momentum distribution of annihilating electron-positron pairs',ch10,&
 &   'in the Norm-conserving Pseudopotential formalism is incomplete!',ch10,&
 &   'No core contribution is included.'
-   MSG_WARNING(msg)
+   ABI_WARNING(msg)
  end if
  if (any(dtset%nband(:)/=dtset%nband(1))) then
    write(msg,'(a)') 'Number of bands has to be the same for all k-points!'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
  if (dtset%usepaw==1) then
    if (size(pawrhoij)/=mpi_enreg%my_natom) then
      write(msg,'(a)') 'wrong size for pawrhoij! '
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
  end if
 
@@ -1995,7 +1985,7 @@ subroutine posdoppler(cg,cprj,Crystal,dimcprj,dtfil,dtset,electronpositron,&
  nkpt=dtset%nkpt
 
 !Manage kpt/spin parallelism
- ABI_ALLOCATE(my_gridtab,(nkpt))
+ ABI_MALLOC(my_gridtab,(nkpt))
  my_gridtab=0
  do ii=1,nkpt
    if (any(mpi_enreg%my_isppoltab(:)==1)) my_gridtab(ii)=mpi_enreg%my_kpttab(ii)
@@ -2006,7 +1996,7 @@ subroutine posdoppler(cg,cprj,Crystal,dimcprj,dtfil,dtset,electronpositron,&
 
 !Parallel settings
  if (mpi_enreg%paral_kgb/=0) then
-   nproc_kpt=mpi_enreg%nproc_kpt
+   nproc_spkpt=mpi_enreg%nproc_spkpt
    nproc_band=mpi_enreg%nproc_band
    nproc_fft=mpi_enreg%nproc_fft
    nproc_kptband=xmpi_comm_size(mpi_enreg%comm_kptband)
@@ -2018,9 +2008,9 @@ subroutine posdoppler(cg,cprj,Crystal,dimcprj,dtfil,dtset,electronpositron,&
    my_n2=n2/nproc_fft
    accessfil=IO_MODE_FORTRAN;if(nproc_fft>1)accessfil=IO_MODE_MPI
  else
-   nproc_kpt=mpi_enreg%nproc_kpt
+   nproc_spkpt=mpi_enreg%nproc_spkpt
    nproc_band=1;nproc_fft=1
-   nproc_kptband=nproc_kpt
+   nproc_kptband=nproc_spkpt
    me_band=0;me_fft=0
    me_kpt=mpi_enreg%me_kpt
    me_kptband=me_kpt
@@ -2035,8 +2025,8 @@ subroutine posdoppler(cg,cprj,Crystal,dimcprj,dtfil,dtset,electronpositron,&
    rhor_ => rhor
    rhor_ep_ => electronpositron%rhor_ep
  else
-   ABI_ALLOCATE(rhor_,(nfft,dtset%nspden))
-   ABI_ALLOCATE(rhor_ep_,(nfft,dtset%nspden))
+   ABI_MALLOC(rhor_,(nfft,dtset%nspden))
+   ABI_MALLOC(rhor_ep_,(nfft,dtset%nspden))
    rhor_=rhor-nhat
    rhor_ep_=electronpositron%rhor_ep-electronpositron%nhat_ep
  end if
@@ -2089,37 +2079,45 @@ subroutine posdoppler(cg,cprj,Crystal,dimcprj,dtfil,dtset,electronpositron,&
    ylmr_option = 1 ! compute only ylm's in initylmr
 
   !Prepare radial integral for PAW correction for each atom type
-   ABI_DATATYPE_ALLOCATE(radsum1,(dtset%ntypat))
-   ABI_DATATYPE_ALLOCATE(radsum2,(dtset%ntypat))
-   ABI_DATATYPE_ALLOCATE(radsum3,(dtset%ntypat))
-   ABI_DATATYPE_ALLOCATE(radsumc,(dtset%ntypat))
+   ABI_MALLOC(radsum1,(dtset%ntypat))
+   ABI_MALLOC(radsum2,(dtset%ntypat))
+   ABI_MALLOC(radsum3,(dtset%ntypat))
+   ABI_MALLOC(radsumc,(dtset%ntypat))
 
-   ABI_DATATYPE_ALLOCATE(indlmncor,(dtset%ntypat))
-   ABI_DATATYPE_ALLOCATE(phicor,(dtset%ntypat))
-   ABI_DATATYPE_ALLOCATE(gammastate_c,(dtset%natom))
-   ABI_ALLOCATE(nphicor,(dtset%ntypat))
-   ABI_ALLOCATE(lmncmax,(dtset%ntypat))
+   ABI_MALLOC(indlmncor,(dtset%ntypat))
+   ABI_MALLOC(phicor,(dtset%ntypat))
+   ABI_MALLOC(gammastate_c,(dtset%natom))
+   ABI_MALLOC(nphicor,(dtset%ntypat))
+   ABI_MALLOC(lmncmax,(dtset%ntypat))
 
 !  Reading of core wave functions
    if (mpi_enreg%me_cell==0) then
      do itypat=1,dtset%ntypat
-       filename=trim(filpsp(itypat))//'.corewf'
+       filename=trim(filpsp(itypat)) ; iln=len(trim(filename))
+       abinitcorewf=.false. ; if (iln>3) abinitcorewf=(filename(iln-6:iln)=='.abinit')
+       xmlcorewf=.false. ; if (iln>3) xmlcorewf=(filename(iln-3:iln)=='.xml')
+       if ((.not.xmlcorewf).and.(.not.abinitcorewf)) filename=filename(1:iln)//'.corewf'
+       if (abinitcorewf) filename=filename(1:iln-6)//'corewf.abinit'
+       if (xmlcorewf) filename=filename(1:iln-3)//'corewf.xml'
        inquire(file=filename,exist=ex)
        if (.not.ex) then
          write(unit=filename,fmt='(a,i1)') 'corewf.abinit',itypat
          inquire(file=filename,exist=ex)
-         if (.not.ex) then
-           msg='Core wave-functions file is missing!'
-           MSG_ERROR(msg)
-         end if
+       end if
+       if (.not.ex) then
+         write(msg,'(3a)') 'Core wave-functions file is missing!',ch10,&
+&                          'Looking for: psp-name.corewf[.xml][.abinit] or corewf.dat'
+         ABI_ERROR(msg)
        end if
        call pawpsp_read_corewf(energycor,indlmncor(itypat)%value,lcor,lmncmax(itypat),&
 &       ncor,nphicor(itypat),pawrad(itypat),phicor(itypat)%value,&
 &       filename=filename)
 !      The following arrays are not used anymore
-       ABI_DEALLOCATE(energycor)
-       ABI_DEALLOCATE(lcor)
-       ABI_DEALLOCATE(ncor)
+       if (nphicor(itypat)>0) then
+         ABI_FREE(energycor)
+         ABI_FREE(lcor)
+         ABI_FREE(ncor)
+       end if
      end do
    end if
    if (mpi_enreg%nproc_cell>1) then
@@ -2136,27 +2134,31 @@ subroutine posdoppler(cg,cprj,Crystal,dimcprj,dtfil,dtset,electronpositron,&
      lmn_size = pawtab(itypat)%lmn_size
      lmn2_size = pawtab(itypat)%lmn2_size
      basis_size = pawtab(itypat)%basis_size
+     
+     lmn_size_c=lmncmax(itypat)
+     llmax=maxval(indlmncor(itypat)%value(1,1:lmn_size_c))
+     l_size_max=max(l_size,2*llmax+1)
+     
+     ABI_MALLOC(j_bessel,(mesh_size,l_size_max))
+     ABI_MALLOC(ylmp,(l_size_max*l_size_max))
+     ABI_MALLOC(have_intc,(l_size_max,basis_size,nphicor(itypat)))
+     ABI_MALLOC(intc,(l_size_max,basis_size,nphicor(itypat)))
+     ABI_MALLOC(have_rad,(l_size,pawtab(itypat)%ij_size))
+     ABI_MALLOC(radint1,(l_size,pawtab(itypat)%ij_size))
+     ABI_MALLOC(radint2,(l_size,pawtab(itypat)%ij_size))
+     ABI_MALLOC(radint3,(l_size,pawtab(itypat)%ij_size))
 
-     ABI_ALLOCATE(j_bessel,(mesh_size,l_size))
-     ABI_ALLOCATE(ylmp,(l_size*l_size))
-     ABI_ALLOCATE(have_intc,(l_size,basis_size,nphicor(itypat)))
-     ABI_ALLOCATE(have_rad,(l_size,pawtab(itypat)%ij_size))
-     ABI_ALLOCATE(intc,(l_size,basis_size,nphicor(itypat)))
-     ABI_ALLOCATE(radint1,(l_size,pawtab(itypat)%ij_size))
-     ABI_ALLOCATE(radint2,(l_size,pawtab(itypat)%ij_size))
-     ABI_ALLOCATE(radint3,(l_size,pawtab(itypat)%ij_size))
-
-     ABI_ALLOCATE(radsumc(itypat)%value,(2,lmn_size,lmncmax(itypat),n1,my_n2,n3,my_ngrid))
-     ABI_ALLOCATE(radsum1(itypat)%value,(2,lmn2_size,n1,my_n2,n3,my_ngrid))
-     ABI_ALLOCATE(radsum2(itypat)%value,(2,lmn2_size,n1,my_n2,n3,my_ngrid))
-     ABI_ALLOCATE(radsum3(itypat)%value,(2,lmn2_size,n1,my_n2,n3,my_ngrid))
+     ABI_MALLOC(radsumc(itypat)%value,(2,lmn_size,lmn_size_c,n1,my_n2,n3,my_ngrid))
+     ABI_MALLOC(radsum1(itypat)%value,(2,lmn2_size,n1,my_n2,n3,my_ngrid))
+     ABI_MALLOC(radsum2(itypat)%value,(2,lmn2_size,n1,my_n2,n3,my_ngrid))
+     ABI_MALLOC(radsum3(itypat)%value,(2,lmn2_size,n1,my_n2,n3,my_ngrid))
      radsumc(itypat)%value=zero
      radsum1(itypat)%value=zero
      radsum2(itypat)%value=zero
      radsum3(itypat)%value=zero
 
-     ABI_ALLOCATE(jbes,(l_size))
-     ABI_ALLOCATE(ff,(mesh_size))
+     ABI_MALLOC(jbes,(l_size_max))
+     ABI_MALLOC(ff,(mesh_size))
      meshsz=pawrad(itypat)%int_meshsz
      if (meshsz>mesh_size) ff(meshsz+1:mesh_size)=zero
 
@@ -2201,7 +2203,7 @@ subroutine posdoppler(cg,cprj,Crystal,dimcprj,dtfil,dtset,electronpositron,&
 
              have_intc(:,:,:)=.FALSE. ; intc(:,:,:)=zero
 
-             do jlmn = 1,lmncmax(itypat)
+             do jlmn = 1,lmn_size_c
                jln = indlmncor(itypat)%value(5,jlmn)
                jlm = indlmncor(itypat)%value(4,jlmn)
                jl  = indlmncor(itypat)%value(1,jlmn)
@@ -2294,19 +2296,19 @@ subroutine posdoppler(cg,cprj,Crystal,dimcprj,dtfil,dtset,electronpositron,&
        end do ! end loop over i3
      end do ! end loop over ikpt
 
-     ABI_DEALLOCATE(ff)
-     ABI_DEALLOCATE(jbes)
+     ABI_FREE(ff)
+     ABI_FREE(jbes)
 
-     ABI_DEALLOCATE(j_bessel)
-     ABI_DEALLOCATE(ylmp)
+     ABI_FREE(j_bessel)
+     ABI_FREE(ylmp)
 
-     ABI_DEALLOCATE(intc)
-     ABI_DEALLOCATE(have_intc)
+     ABI_FREE(intc)
+     ABI_FREE(have_intc)
 
-     ABI_DEALLOCATE(radint1)
-     ABI_DEALLOCATE(radint2)
-     ABI_DEALLOCATE(radint3)
-     ABI_DEALLOCATE(have_rad)
+     ABI_FREE(radint1)
+     ABI_FREE(radint2)
+     ABI_FREE(radint3)
+     ABI_FREE(have_rad)
 
      call xmpi_sum(radsumc(itypat)%value,mpi_enreg%comm_band,ierr)
      call xmpi_sum(radsum1(itypat)%value,mpi_enreg%comm_band,ierr)
@@ -2317,24 +2319,24 @@ subroutine posdoppler(cg,cprj,Crystal,dimcprj,dtfil,dtset,electronpositron,&
  end if ! PAW
 
 !Allocate main memory
- ABI_ALLOCATE(rho_contrib,(cplex*nfft))
- ABI_ALLOCATE(rho_contrib_g,(cplex,nfft))
- ABI_ALLOCATE(rho_contrib_paw1,(cplex,nfft))
- ABI_ALLOCATE(rho_contrib_paw2,(cplex,nfft))
- ABI_ALLOCATE(rho_contrib_paw3,(cplex,nfft))
+ ABI_MALLOC(rho_contrib,(cplex*nfft))
+ ABI_MALLOC(rho_contrib_g,(cplex,nfft))
+ ABI_MALLOC(rho_contrib_paw1,(cplex,nfft))
+ ABI_MALLOC(rho_contrib_paw2,(cplex,nfft))
+ ABI_MALLOC(rho_contrib_paw3,(cplex,nfft))
 
- ABI_ALLOCATE(rho_moment_v1,(nfft,my_ngrid))
- ABI_ALLOCATE(rho_moment_v2,(nfft,my_ngrid))
- ABI_ALLOCATE(rho_moment_core,(nfft,my_ngrid))
- ABI_ALLOCATE(rho_pw,(nfft,my_ngrid))
+ ABI_MALLOC(rho_moment_v1,(nfft,my_ngrid))
+ ABI_MALLOC(rho_moment_v2,(nfft,my_ngrid))
+ ABI_MALLOC(rho_moment_core,(nfft,my_ngrid))
+ ABI_MALLOC(rho_pw,(nfft,my_ngrid))
  rho_moment_v1=zero;rho_moment_v2=zero
  rho_pw=zero;rho_moment_core=zero
 
 !Prepare gamma(r) for the state independent scheme
- ABI_ALLOCATE(gamma,(nfft,2))
+ ABI_MALLOC(gamma,(nfft,2))
  if (.not.state_dependent) then
-   ABI_ALLOCATE(rhoe,(nfft,1))
-   ABI_ALLOCATE(rhop,(nfft,1))
+   ABI_MALLOC(rhoe,(nfft,1))
+   ABI_MALLOC(rhop,(nfft,1))
    if (electronpositron%particle==EP_ELECTRON) then
      rhoe(:,1)=rhor_ep_(:,1);rhop(:,1)=rhor_(:,1)
    else if (electronpositron%particle==EP_POSITRON) then
@@ -2344,8 +2346,8 @@ subroutine posdoppler(cg,cprj,Crystal,dimcprj,dtfil,dtset,electronpositron,&
    call mkdenpos(iwarn,nfft,1,1,rhop(:,1),dtset%xc_denpos)
    call gammapositron_fft(electronpositron,gamma,Crystal%gprimd,igamma,mpi_enreg,&
 &   n3xccc,nfft,ngfft,rhoe(:,1),rhop(:,1),xccc3d)
-   ABI_DEALLOCATE(rhoe)
-   ABI_DEALLOCATE(rhop)
+   ABI_FREE(rhoe)
+   ABI_FREE(rhop)
  else
    gamma=one
  end if
@@ -2358,9 +2360,9 @@ subroutine posdoppler(cg,cprj,Crystal,dimcprj,dtfil,dtset,electronpositron,&
    call set_mpi_enreg_fft(mpi_enreg_seq,mpi_enreg%comm_fft,mpi_enreg%distribfft,&
 &   mpi_enreg%me_g0,mpi_enreg%paral_kgb)
 !  Allocate memory for state-dependent scheme
-   ABI_ALLOCATE(rhor_dop_el,(nfft))
+   ABI_MALLOC(rhor_dop_el,(nfft))
    if (dtset%usepaw==1) then
-     ABI_DATATYPE_ALLOCATE(pawrhoij_dop_el,(dtset%natom))
+     ABI_MALLOC(pawrhoij_dop_el,(dtset%natom))
      call pawrhoij_inquire_dim(cplex_rhoij=cplex_rhoij,nspden_rhoij=nspden_rhoij,&
 &            nspden=dtset%nspden,spnorb=dtset%pawspnorb,cpxocc=dtset%pawcpxocc)
      call pawrhoij_alloc(pawrhoij_dop_el,cplex_rhoij,nspden_rhoij,&
@@ -2370,11 +2372,11 @@ subroutine posdoppler(cg,cprj,Crystal,dimcprj,dtfil,dtset,electronpositron,&
 !    We use here pawrhoij because polifetime routine
 !    detects by itself the particle described by pawrhoij
      if (mpi_enreg%my_natom<dtset%natom) then
-       ABI_DATATYPE_ALLOCATE(pawrhoij_all,(dtset%natom))
+       ABI_MALLOC(pawrhoij_all,(dtset%natom))
        call pawrhoij_nullify(pawrhoij_all)
        call pawrhoij_gather(pawrhoij,pawrhoij_all,-1,mpi_enreg%comm_atom, &
 &       with_rhoijres=.false.,with_rhoij_=.false.,with_lmnmix=.false.)
-       ABI_DATATYPE_ALLOCATE(pawrhoij_ep_all,(dtset%natom))
+       ABI_MALLOC(pawrhoij_ep_all,(dtset%natom))
        call pawrhoij_nullify(pawrhoij_ep_all)
        call pawrhoij_gather(electronpositron%pawrhoij_ep,pawrhoij_ep_all,-1,mpi_enreg%comm_atom, &
 &       with_rhoijres=.false.,with_rhoij_=.false.,with_lmnmix=.false.)
@@ -2402,7 +2404,7 @@ subroutine posdoppler(cg,cprj,Crystal,dimcprj,dtfil,dtset,electronpositron,&
 &   isppol_pos,mpi_enreg%me_kpt))
 
 !  Retrieve additional data for this kpt_pos
-   ABI_ALLOCATE(occ_k_pos,(nband_k_pos))
+   ABI_MALLOC(occ_k_pos,(nband_k_pos))
    occ_k_pos(:)=occ_pos_ptr(1+bdtot_index_pos:nband_k_pos+bdtot_index_pos)
    nband_eff_pos=1
    do ib_pos=1,nband_k_pos
@@ -2413,23 +2415,23 @@ subroutine posdoppler(cg,cprj,Crystal,dimcprj,dtfil,dtset,electronpositron,&
    nblock_band_eff_pos=nband_eff_pos/blocksize
 
    mcg_pos=npw_k_pos*my_nspinor*nband_eff_pos
-   ABI_ALLOCATE(cg_k_pos,(2,mcg_pos))
+   ABI_MALLOC(cg_k_pos,(2,mcg_pos))
 
    mcprj_k_pos=0
    if (dtset%usepaw==1) then
      nband_cprj_eff_pos=nband_eff_pos/nproc_band
      mcprj_k_pos=my_nspinor*nband_cprj_eff_pos
-     ABI_DATATYPE_ALLOCATE(cprj_k_pos,(dtset%natom,mcprj_k_pos))
+     ABI_MALLOC(cprj_k_pos,(dtset%natom,mcprj_k_pos))
      call pawcprj_alloc(cprj_k_pos,0,dimcprj)
    end if
 
    if (mpi_enreg%paral_kgb==0) then
-     ABI_ALLOCATE(gbound_pos,(2*dtset%mgfft+8,2))
-     ABI_ALLOCATE(kg_k_pos,(3,npw_k_pos))
+     ABI_MALLOC(gbound_pos,(2*dtset%mgfft+8,2))
+     ABI_MALLOC(kg_k_pos,(3,npw_k_pos))
    else if (mykpt_pos) then
      nullify(bandfft_kpt_pos)
    else
-     ABI_DATATYPE_ALLOCATE(bandfft_kpt_pos,)
+     ABI_MALLOC(bandfft_kpt_pos,)
      call bandfft_kpt_reset(bandfft_kpt_pos)
    end if
 
@@ -2446,11 +2448,11 @@ subroutine posdoppler(cg,cprj,Crystal,dimcprj,dtfil,dtset,electronpositron,&
        jj=mpi_enreg%my_kpttab(ikpt_pos)
        bandfft_kpt_pos => bandfft_kpt(jj)
      end if
-     do ii=0,mpi_enreg%nproc_kpt-1
+     do ii=0,mpi_enreg%nproc_spkpt-1
        if (ii/=mpi_enreg%me_kpt) then
          tag=ikpt_pos+(isppol_pos-1)*nkpt+2*nkpt*ii
          call xmpi_send(cg_k_pos,ii,tag,mpi_enreg%comm_kpt,ierr)
-         tag=tag+nkpt*(1+2*mpi_enreg%nproc_kpt)
+         tag=tag+nkpt*(1+2*mpi_enreg%nproc_spkpt)
          if (mpi_enreg%paral_kgb==0) then
            call xmpi_send(kg_k_pos,ii,tag,mpi_enreg%comm_kpt,ierr)
          else
@@ -2465,7 +2467,7 @@ subroutine posdoppler(cg,cprj,Crystal,dimcprj,dtfil,dtset,electronpositron,&
      ii=0;if (allocated(mpi_enreg%proc_distrb)) ii=mpi_enreg%proc_distrb(ikpt_pos,1,isppol_pos)
      tag=ikpt_pos+(isppol_pos-1)*nkpt+2*nkpt*mpi_enreg%me_kpt
      call xmpi_recv(cg_k_pos,ii,tag,mpi_enreg%comm_kpt,ierr)
-     tag=tag+nkpt*(1+2*mpi_enreg%nproc_kpt)
+     tag=tag+nkpt*(1+2*mpi_enreg%nproc_spkpt)
      if (mpi_enreg%paral_kgb==0) then
        call xmpi_recv(kg_k_pos,ii,tag,mpi_enreg%comm_kpt,ierr)
      else
@@ -2480,10 +2482,10 @@ subroutine posdoppler(cg,cprj,Crystal,dimcprj,dtfil,dtset,electronpositron,&
      call sphereboundary(gbound_pos,istwf_k_pos,kg_k_pos,dtset%mgfft,npw_k_pos)
    end if
 
-   ABI_ALLOCATE(cwaver_pos,(cplex*nfft))
-   ABI_ALLOCATE(cwaver_pos_block,(cplex*nfft*bandpp))
+   ABI_MALLOC(cwaver_pos,(cplex*nfft))
+   ABI_MALLOC(cwaver_pos_block,(cplex*nfft*bandpp))
    if (dtset%usepaw==1) then
-     ABI_DATATYPE_ALLOCATE(cprj_pos,(dtset%natom,my_nspinor))
+     ABI_MALLOC(cprj_pos,(dtset%natom,my_nspinor))
      call pawcprj_alloc(cprj_pos,0,dimcprj)
    end if
 
@@ -2494,10 +2496,10 @@ subroutine posdoppler(cg,cprj,Crystal,dimcprj,dtfil,dtset,electronpositron,&
      ib_pos=1+(iblock_pos-1)*blocksize
      if (any(abs(occ_k_pos(ib_pos:ib_pos+blocksize-1))>tol8)) then
 
-       ABI_ALLOCATE(cwaveg_pos,(2,npw_k_pos*blocksize))
-       ABI_ALLOCATE(cwaveaug_pos,(2,n4,n5,n6*bandpp))
-       ABI_ALLOCATE(denpot_dum,(n4,n5,n6))
-       ABI_ALLOCATE(fofgout_dum,(2,npw_k_pos*blocksize))
+       ABI_MALLOC(cwaveg_pos,(2,npw_k_pos*blocksize))
+       ABI_MALLOC(cwaveaug_pos,(2,n4,n5,n6*bandpp))
+       ABI_MALLOC(denpot_dum,(n4,n5,n6))
+       ABI_MALLOC(fofgout_dum,(2,npw_k_pos*blocksize))
        iwavef_pos=(iblock_pos-1)*npw_k_pos*blocksize
        cwaveg_pos(:,1:npw_k_pos*blocksize)= &
 &       cg_k_pos(:,iwavef_pos+1:iwavef_pos+npw_k_pos*blocksize)
@@ -2510,12 +2512,12 @@ subroutine posdoppler(cg,cprj,Crystal,dimcprj,dtfil,dtset,electronpositron,&
 &         gbound_pos,gbound_pos,istwf_k_pos,kg_k_pos,kg_k_pos,&
 &         dtset%mgfft,mpi_enreg,1,ngfft,npw_k_pos,npw_k_pos,&
 &         n4,n5,n6,option,tim_fourwf,weight_pos,weight_pos,&
-&         use_gpu_cuda=dtset%use_gpu_cuda)
+&         gpu_option=dtset%gpu_option)
        else
          call prep_fourwf(denpot_dum,blocksize,cwaveg_pos,cwaveaug_pos,&
 &         iblock_pos,istwf_k_pos,dtset%mgfft,mpi_enreg,nband_k_pos,&
 &         bandpp,ngfft,npw_k_pos,n4,n5,n6,occ_k_pos,option,Crystal%ucvol,wtk_k_pos,&
-&         bandfft_kpt_tab=bandfft_kpt_pos,use_gpu_cuda=dtset%use_gpu_cuda)
+&         bandfft_kpt_tab=bandfft_kpt_pos,gpu_option=dtset%gpu_option)
        end if
 
        cwaver_pos_block=zero
@@ -2535,10 +2537,10 @@ subroutine posdoppler(cg,cprj,Crystal,dimcprj,dtfil,dtset,electronpositron,&
            end if
          end do
        end do
-       ABI_DEALLOCATE(fofgout_dum)
-       ABI_DEALLOCATE(denpot_dum)
-       ABI_DEALLOCATE(cwaveaug_pos)
-       ABI_DEALLOCATE(cwaveg_pos)
+       ABI_FREE(fofgout_dum)
+       ABI_FREE(denpot_dum)
+       ABI_FREE(cwaveaug_pos)
+       ABI_FREE(cwaveg_pos)
 
 !      At this stage, each band proc has bandpp bands in real space
 !      (distributed on FFT procs)
@@ -2556,11 +2558,11 @@ subroutine posdoppler(cg,cprj,Crystal,dimcprj,dtfil,dtset,electronpositron,&
              mesh_size = pawtab(itypat)%mesh_size
              do iat=1,Crystal%nattyp(itypat)
                iatm=iatm+1;iatom=Crystal%atindx1(iatm)
-               ABI_ALLOCATE(gammastate_c(iatom)%value,(lmncmax(itypat)))
+               ABI_MALLOC(gammastate_c(iatom)%value,(lmncmax(itypat)))
                do jlmn=1,lmncmax(itypat)
                  jln = indlmncor(itypat)%value(5,jlmn)
                  contrib(:)=zero
-                 ABI_ALLOCATE(rhocorej,(mesh_size))
+                 ABI_MALLOC(rhocorej,(mesh_size))
                  rhocorej(1:mesh_size)=2*phicor(itypat)%value(1:mesh_size,jln)**2
                  call posratecore(dtset,electronpositron,iatom,dtset%natom,mesh_size,mpi_enreg_seq,&
 &                 1,pawang,pawrad,pawrhoij_all,pawrhoij_ep_all,pawtab,ratec,rhocorej)
@@ -2569,7 +2571,7 @@ subroutine posdoppler(cg,cprj,Crystal,dimcprj,dtfil,dtset,electronpositron,&
 &                 2,pawang,pawrad,pawrhoij_all,pawrhoij_ep_all,pawtab,ratec_ipm,rhocorej)
 
                  gammastate_c(iatom)%value(jlmn)=ratec/ratec_ipm
-                 ABI_DEALLOCATE(rhocorej)
+                 ABI_FREE(rhocorej)
                end do
              end do
            end do
@@ -2688,13 +2690,13 @@ subroutine posdoppler(cg,cprj,Crystal,dimcprj,dtfil,dtset,electronpositron,&
 
 !                Retrieve additional data for this kpt_pos
                  jkpt=jkpt+1
-                 ABI_ALLOCATE(occ_k,(nband_k))
+                 ABI_MALLOC(occ_k,(nband_k))
                  occ_k(:)=occ_ptr(1+bdtot_index:nband_k+bdtot_index)
 
                  mcprj_k=0
                  if (dtset%usepaw==1) then
                    mcprj_k=my_nspinor*nband_cprj_k
-                   ABI_DATATYPE_ALLOCATE(cprj_k,(dtset%natom,mcprj_k))
+                   ABI_MALLOC(cprj_k,(dtset%natom,mcprj_k))
                    call pawcprj_alloc(cprj_k,0,dimcprj)
                    call pawcprj_get(Crystal%atindx1,cprj_k,cprj_ptr,dtset%natom,1,ibg,ikpt,iorder_cprj,&
 &                   isppol,mband_cprj,dtset%mkmem,dtset%natom,nband_cprj_k,nband_cprj_k,my_nspinor,&
@@ -2702,8 +2704,8 @@ subroutine posdoppler(cg,cprj,Crystal,dimcprj,dtfil,dtset,electronpositron,&
                  end if
 
                  if (mpi_enreg%paral_kgb==0) then
-                   ABI_ALLOCATE(gbound,(2*dtset%mgfft+8,2))
-                   ABI_ALLOCATE(kg_k,(3,npw_k))
+                   ABI_MALLOC(gbound,(2*dtset%mgfft+8,2))
+                   ABI_MALLOC(kg_k,(3,npw_k))
                    kg_k(:,1:npw_k)=kg(:,1+ikg:npw_k+ikg)
                    call sphereboundary(gbound,istwf_k,kg_k,dtset%mgfft,npw_k)
                  else
@@ -2711,7 +2713,7 @@ subroutine posdoppler(cg,cprj,Crystal,dimcprj,dtfil,dtset,electronpositron,&
                    bandfft_kpt_el => bandfft_kpt(jj)
                  end if
 
-                 ABI_ALLOCATE(cwaver,(cplex*nfft*bandpp))
+                 ABI_MALLOC(cwaver,(cplex*nfft*bandpp))
 
 !                ==================================================================
 !                Loops on electronic bands
@@ -2722,10 +2724,10 @@ subroutine posdoppler(cg,cprj,Crystal,dimcprj,dtfil,dtset,electronpositron,&
                    if (any(abs(occ_k(ib:ib+blocksize-1))>tol8)) then
 
 !                    Retrieve electronic wave function
-                     ABI_ALLOCATE(cwaveg,(2,npw_k*blocksize))
-                     ABI_ALLOCATE(cwaveaug,(2,n4,n5,n6*bandpp))
-                     ABI_ALLOCATE(denpot_dum,(n4,n5,n6))
-                     ABI_ALLOCATE(fofgout_dum,(2,npw_k*blocksize))
+                     ABI_MALLOC(cwaveg,(2,npw_k*blocksize))
+                     ABI_MALLOC(cwaveaug,(2,n4,n5,n6*bandpp))
+                     ABI_MALLOC(denpot_dum,(n4,n5,n6))
+                     ABI_MALLOC(fofgout_dum,(2,npw_k*blocksize))
                      iwavef=(iblock-1)*npw_k*blocksize
                      cwaveg(:,1:npw_k*blocksize)= &
 &                     cg_ptr(:,icg+iwavef+1:icg+iwavef+npw_k*blocksize)
@@ -2738,12 +2740,12 @@ subroutine posdoppler(cg,cprj,Crystal,dimcprj,dtfil,dtset,electronpositron,&
 &                       gbound,gbound,istwf_k,kg_k,kg_k,&
 &                       dtset%mgfft,mpi_enreg,1,ngfft,npw_k,npw_k,&
 &                       n4,n5,n6,option,tim_fourwf,weight,weight,&
-&                       use_gpu_cuda=dtset%use_gpu_cuda)
+&                       gpu_option=dtset%gpu_option)
                      else
                        call prep_fourwf(denpot_dum,blocksize,cwaveg,cwaveaug,&
 &                       iblock,istwf_k,dtset%mgfft,mpi_enreg,nband_k,&
 &                       bandpp,ngfft,npw_k,n4,n5,n6,occ_k,option,Crystal%ucvol,wtk_k,&
-&                       bandfft_kpt_tab=bandfft_kpt_el,use_gpu_cuda=dtset%use_gpu_cuda)
+&                       bandfft_kpt_tab=bandfft_kpt_el,gpu_option=dtset%gpu_option)
                      end if
 
                      cwaver=zero
@@ -2763,10 +2765,10 @@ subroutine posdoppler(cg,cprj,Crystal,dimcprj,dtfil,dtset,electronpositron,&
                          end if
                        end do
                      end do
-                     ABI_DEALLOCATE(fofgout_dum)
-                     ABI_DEALLOCATE(denpot_dum)
-                     ABI_DEALLOCATE(cwaveaug)
-                     ABI_DEALLOCATE(cwaveg)
+                     ABI_FREE(fofgout_dum)
+                     ABI_FREE(denpot_dum)
+                     ABI_FREE(cwaveaug)
+                     ABI_FREE(cwaveg)
 !                    At this stage, each band proc has bandpp bands in real space
 !                   (distributed on FFT procs)
 
@@ -2793,9 +2795,11 @@ subroutine posdoppler(cg,cprj,Crystal,dimcprj,dtfil,dtset,electronpositron,&
                                pawrhoij_dop_el(iatom)%rhoij_=zero
                              end do
                              cplex_rhoij=2;if (istwf_k>1) cplex_rhoij=1
-                             usetimerev=(dtset%kptopt>0.and.dtset%kptopt<3)
-                             call pawaccrhoij(Crystal%atindx,cplex_rhoij,cprj_k(:,ib_cprj),cprj_k(:,ib_cprj),0,isppol,&
-&                             dtset%natom,dtset%natom,dtset%nspinor,occ_el,1,pawrhoij_dop_el,usetimerev,wtk_k)
+                             use_timerev=(dtset%kptopt>0.and.dtset%kptopt<3)
+                             use_zeromag=(pawrhoij_dop_el(1)%nspden==4.and.dtset%nspden==1)
+                             call pawaccrhoij(Crystal%atindx,cplex_rhoij,cprj_k(:,ib_cprj),&
+&                                 cprj_k(:,ib_cprj),0,isppol,dtset%natom,dtset%natom,dtset%nspinor,&
+&                                 occ_el,1,pawrhoij_dop_el,use_timerev,use_zeromag,wtk_k)
 !                            Is it correct to apply symetries here (on a single band)?
 !                            If not, call pawrhoij_symrhoij with nsym=1
                              call pawrhoij_symrhoij(pawrhoij_dop_el,pawrhoij_dop_el,1,Crystal%gprimd,&
@@ -2875,9 +2879,9 @@ subroutine posdoppler(cg,cprj,Crystal,dimcprj,dtfil,dtset,electronpositron,&
                                    do itypat=1,dtset%ntypat
                                      lmn_size=pawtab(itypat)%lmn_size
                                      lmn2_size=pawtab(itypat)%lmn2_size
-                                     ABI_ALLOCATE(radsumnfft1,(2,lmn2_size))
-                                     ABI_ALLOCATE(radsumnfft2,(2,lmn2_size))
-                                     ABI_ALLOCATE(radsumnfft3,(2,lmn2_size))
+                                     ABI_MALLOC(radsumnfft1,(2,lmn2_size))
+                                     ABI_MALLOC(radsumnfft2,(2,lmn2_size))
+                                     ABI_MALLOC(radsumnfft3,(2,lmn2_size))
 
                                      do iat=1,Crystal%nattyp(itypat)
                                        iatm=iatm+1;iatom=Crystal%atindx1(iatm)
@@ -2934,9 +2938,9 @@ subroutine posdoppler(cg,cprj,Crystal,dimcprj,dtfil,dtset,electronpositron,&
 
                                      end do !end loop over atoms
 
-                                     ABI_DEALLOCATE(radsumnfft1)
-                                     ABI_DEALLOCATE(radsumnfft2)
-                                     ABI_DEALLOCATE(radsumnfft3)
+                                     ABI_FREE(radsumnfft1)
+                                     ABI_FREE(radsumnfft2)
+                                     ABI_FREE(radsumnfft3)
                                    end do !end loop over atom types
 
                                    rho_moment_v1(indx,jkpt) = rho_moment_v1(indx,jkpt) &
@@ -2970,17 +2974,17 @@ subroutine posdoppler(cg,cprj,Crystal,dimcprj,dtfil,dtset,electronpositron,&
                  ibg = ibg + my_nspinor*nband_cprj_k
                  ikg = ikg + npw_k
 
-                 ABI_DEALLOCATE(cwaver)
-                 ABI_DEALLOCATE(occ_k)
+                 ABI_FREE(cwaver)
+                 ABI_FREE(occ_k)
                  if (mpi_enreg%paral_kgb==0) then
-                   ABI_DEALLOCATE(kg_k)
-                   ABI_DEALLOCATE(gbound)
+                   ABI_FREE(kg_k)
+                   ABI_FREE(gbound)
                  else
                    nullify(bandfft_kpt_el)
                  end if
                  if (dtset%usepaw==1) then
                    call pawcprj_free(cprj_k)
-                   ABI_DATATYPE_DEALLOCATE(cprj_k)
+                   ABI_FREE(cprj_k)
                  end if
 
                end if ! mykpt
@@ -3004,24 +3008,24 @@ subroutine posdoppler(cg,cprj,Crystal,dimcprj,dtfil,dtset,electronpositron,&
    end if
    bdtot_index_pos=bdtot_index_pos+nband_k_pos
 
-   ABI_DEALLOCATE(cwaver_pos)
-   ABI_DEALLOCATE(cwaver_pos_block)
-   ABI_DEALLOCATE(cg_k_pos)
-   ABI_DEALLOCATE(occ_k_pos)
+   ABI_FREE(cwaver_pos)
+   ABI_FREE(cwaver_pos_block)
+   ABI_FREE(cg_k_pos)
+   ABI_FREE(occ_k_pos)
    if (mpi_enreg%paral_kgb==0) then
-     ABI_DEALLOCATE(kg_k_pos)
-     ABI_DEALLOCATE(gbound_pos)
+     ABI_FREE(kg_k_pos)
+     ABI_FREE(gbound_pos)
    else if (mykpt_pos) then
      nullify(bandfft_kpt_pos)
    else
      call bandfft_kpt_destroy(bandfft_kpt_pos)
-     ABI_DATATYPE_DEALLOCATE(bandfft_kpt_pos)
+     ABI_FREE(bandfft_kpt_pos)
    end if
    if (dtset%usepaw==1) then
      call pawcprj_free(cprj_pos)
-     ABI_DATATYPE_DEALLOCATE(cprj_pos)
+     ABI_FREE(cprj_pos)
      call pawcprj_free(cprj_k_pos)
-     ABI_DATATYPE_DEALLOCATE(cprj_k_pos)
+     ABI_FREE(cprj_k_pos)
    end if
 
  end do ! ikpt_pos
@@ -3031,7 +3035,7 @@ subroutine posdoppler(cg,cprj,Crystal,dimcprj,dtfil,dtset,electronpositron,&
 
 !In case of parallelism, sum over the communicator(s)
  if (nproc_band>1) then
-   ABI_ALLOCATE(mpibuf,(3*nfft,my_ngrid))
+   ABI_MALLOC(mpibuf,(3*nfft,my_ngrid))
    do jkpt=1,my_ngrid
      mpibuf(       1:  nfft,jkpt)=rho_moment_v1(1:nfft,jkpt)
      mpibuf(  nfft+1:2*nfft,jkpt)=rho_moment_v2(1:nfft,jkpt)
@@ -3043,7 +3047,7 @@ subroutine posdoppler(cg,cprj,Crystal,dimcprj,dtfil,dtset,electronpositron,&
      rho_moment_v2(1:nfft,jkpt)=mpibuf(  nfft+1:2*nfft,jkpt)
      rho_pw(1:nfft,jkpt)       =mpibuf(2*nfft+1:3*nfft,jkpt)
    end do
-   ABI_DEALLOCATE(mpibuf)
+   ABI_FREE(mpibuf)
  end if
  if (dtset%usepaw==1) then
    call xmpi_sum(rho_moment_core,mpi_enreg%comm_band,ierr)
@@ -3077,10 +3081,10 @@ subroutine posdoppler(cg,cprj,Crystal,dimcprj,dtfil,dtset,electronpositron,&
    if (me_kpt==0) then
      filename_dop=trim(dtfil%filnam_ds(4))//'_DOPPLER'
      vec=sqrt(dot_product(Crystal%gprimd(:,3),Crystal%gprimd(:,3)))
-     ABI_ALLOCATE(pcart_k,(3,nfft))
-     ABI_ALLOCATE(rho_moment_k,(nfft))
+     ABI_MALLOC(pcart_k,(3,nfft))
+     ABI_MALLOC(rho_moment_k,(nfft))
      if (dtset%nsppol==2) then
-       ABI_ALLOCATE(rho_moment_k2,(nfft))
+       ABI_MALLOC(rho_moment_k2,(nfft))
      end if
      if (accessfil==IO_MODE_FORTRAN) then  ! >>>>> Fortran access
 !      Open file and write first line
@@ -3101,7 +3105,7 @@ subroutine posdoppler(cg,cprj,Crystal,dimcprj,dtfil,dtset,electronpositron,&
          call xmoveOff(wff,n_int=2,n_dp=10,n_mark=2)
        end if
 !      Store table of FFT points treated by current proc
-       ABI_ALLOCATE(my_ffttab,(nfft))
+       ABI_MALLOC(my_ffttab,(nfft))
        my_ffttab=0
        do i3=1,n3
          do i2=1,n2
@@ -3112,13 +3116,13 @@ subroutine posdoppler(cg,cprj,Crystal,dimcprj,dtfil,dtset,electronpositron,&
            end if
          end do
        end do
-       ABI_ALLOCATE(mpibuf,(1,nfft))
+       ABI_MALLOC(mpibuf,(1,nfft))
      end if
    end if
 
    jkpt=0
    do ikpt=1,nkpt
-     if (nproc_kpt==1) then
+     if (nproc_spkpt==1) then
        rho_moment_k(1:nfft)=rho_moment_v2(1:nfft,ikpt)
      else
        if (my_gridtab(ikpt)/=0) jkpt=jkpt+1
@@ -3150,7 +3154,7 @@ subroutine posdoppler(cg,cprj,Crystal,dimcprj,dtfil,dtset,electronpositron,&
            call xmpi_send(rho_moment_v2(1:nfft,jkpt),0,tag,mpi_enreg%comm_kpt,ierr)
          end if
        end if
-     end if ! nproc_kpt>1
+     end if ! nproc_spkpt>1
      if (me_kpt==0) then
        indx=0
        do i3=1,n3
@@ -3179,17 +3183,17 @@ subroutine posdoppler(cg,cprj,Crystal,dimcprj,dtfil,dtset,electronpositron,&
      end if
    end do
    if (me_kpt==0) then
-     ABI_DEALLOCATE(pcart_k)
-     ABI_DEALLOCATE(rho_moment_k)
+     ABI_FREE(pcart_k)
+     ABI_FREE(rho_moment_k)
      if (dtset%nsppol==2) then
-       ABI_DEALLOCATE(rho_moment_k2)
+       ABI_FREE(rho_moment_k2)
      end if
      if (accessfil==IO_MODE_FORTRAN) then
        ierr=close_unit(unit_doppler,msg)
      else
        call WffClose(wff,ierr)
-       ABI_DEALLOCATE(my_ffttab)
-       ABI_DEALLOCATE(mpibuf)
+       ABI_FREE(my_ffttab)
+       ABI_FREE(mpibuf)
      end if
    end if
  end if ! me_band==0
@@ -3221,74 +3225,74 @@ subroutine posdoppler(cg,cprj,Crystal,dimcprj,dtfil,dtset,electronpositron,&
  call wrtout(ab_out,msg,'COLL')
 
 !Deallocate remaining memory
- ABI_DEALLOCATE(my_gridtab)
- ABI_DEALLOCATE(rho_pw)
- ABI_DEALLOCATE(rho_moment_v1)
- ABI_DEALLOCATE(rho_moment_v2)
- ABI_DEALLOCATE(rho_moment_core)
- ABI_DEALLOCATE(rho_contrib)
- ABI_DEALLOCATE(rho_contrib_g)
- ABI_DEALLOCATE(rho_contrib_paw1)
- ABI_DEALLOCATE(rho_contrib_paw2)
- ABI_DEALLOCATE(rho_contrib_paw3)
+ ABI_FREE(my_gridtab)
+ ABI_FREE(rho_pw)
+ ABI_FREE(rho_moment_v1)
+ ABI_FREE(rho_moment_v2)
+ ABI_FREE(rho_moment_core)
+ ABI_FREE(rho_contrib)
+ ABI_FREE(rho_contrib_g)
+ ABI_FREE(rho_contrib_paw1)
+ ABI_FREE(rho_contrib_paw2)
+ ABI_FREE(rho_contrib_paw3)
  if (state_dependent) then
    call unset_mpi_enreg_fft(mpi_enreg_seq)
    call destroy_mpi_enreg(mpi_enreg_seq)
-   ABI_DEALLOCATE(rhor_dop_el)
+   ABI_FREE(rhor_dop_el)
    if (dtset%usepaw==1) then
      call pawrhoij_free(pawrhoij_dop_el)
-     ABI_DATATYPE_DEALLOCATE(pawrhoij_dop_el)
+     ABI_FREE(pawrhoij_dop_el)
      if (mpi_enreg%my_natom<dtset%natom) then
        call pawrhoij_free(pawrhoij_all)
        call pawrhoij_free(pawrhoij_ep_all)
-       ABI_DATATYPE_DEALLOCATE(pawrhoij_all)
-       ABI_DATATYPE_DEALLOCATE(pawrhoij_ep_all)
+       ABI_FREE(pawrhoij_all)
+       ABI_FREE(pawrhoij_ep_all)
      end if
    end if
  end if
 
- ABI_DEALLOCATE(gamma)
+ ABI_FREE(gamma)
 
  if (dtset%usepaw==1.and.(.not.include_nhat_in_gamma)) then
-   ABI_DEALLOCATE(rhor_)
-   ABI_DEALLOCATE(rhor_ep_)
+   ABI_FREE(rhor_)
+   ABI_FREE(rhor_ep_)
  end if
 
  if (dtset%usepaw==1) then
-   ABI_DEALLOCATE(nphicor)
-   ABI_DEALLOCATE(lmncmax)
+   ABI_FREE(nphicor)
+   ABI_FREE(lmncmax)
    do itypat=1,dtset%ntypat
      if (allocated(phicor(itypat)%value)) then
-       ABI_DEALLOCATE(phicor(itypat)%value)
+       ABI_FREE(phicor(itypat)%value)
      end if
      if (allocated(indlmncor(itypat)%value)) then
-       ABI_DEALLOCATE(indlmncor(itypat)%value)
+       ABI_FREE(indlmncor(itypat)%value)
      end if
      if (allocated(radsumc(itypat)%value)) then
-       ABI_DEALLOCATE(radsumc(itypat)%value)
+       ABI_FREE(radsumc(itypat)%value)
      end if
      if (allocated(radsum1(itypat)%value)) then
-       ABI_DEALLOCATE(radsum1(itypat)%value)
+       ABI_FREE(radsum1(itypat)%value)
      end if
      if (allocated(radsum2(itypat)%value)) then
-       ABI_DEALLOCATE(radsum2(itypat)%value)
+       ABI_FREE(radsum2(itypat)%value)
      end if
      if (allocated(radsum3(itypat)%value)) then
-       ABI_DEALLOCATE(radsum3(itypat)%value)
+       ABI_FREE(radsum3(itypat)%value)
      end if
    end do
    do iatom=1,dtset%natom
      if (allocated(gammastate_c(iatom)%value)) then
-       ABI_DEALLOCATE(gammastate_c(iatom)%value)
+       ABI_FREE(gammastate_c(iatom)%value)
      end if
    end do
-   ABI_DATATYPE_DEALLOCATE(phicor)
-   ABI_DATATYPE_DEALLOCATE(indlmncor)
-   ABI_DATATYPE_DEALLOCATE(radsumc)
-   ABI_DATATYPE_DEALLOCATE(radsum1)
-   ABI_DATATYPE_DEALLOCATE(radsum2)
-   ABI_DATATYPE_DEALLOCATE(radsum3)
-   ABI_DATATYPE_DEALLOCATE(gammastate_c)
+   ABI_FREE(phicor)
+   ABI_FREE(indlmncor)
+   ABI_FREE(radsumc)
+   ABI_FREE(radsum1)
+   ABI_FREE(radsum2)
+   ABI_FREE(radsum3)
+   ABI_FREE(gammastate_c)
  end if
 
  DBG_EXIT("COLL")
@@ -3326,20 +3330,11 @@ end subroutine posdoppler
 !!
 !! SIDE EFFECTS
 !!
-!! PARENTS
-!!      posdoppler
-!!
-!! CHILDREN
-!!      gammapositron,mkdenpos,nderiv_gen,pawdensities,pawxcsum,simp_gen
-!!      xmpi_sum
-!!
 !! SOURCE
 
 subroutine posratecore(dtset,electronpositron,iatom,my_natom,mesh_sizej,mpi_enreg,&
 &                      option,pawang,pawrad,pawrhoij,pawrhoij_ep,&
 &                      pawtab,rate,rhocorej)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -3387,7 +3382,7 @@ subroutine posratecore(dtset,electronpositron,iatom,my_natom,mesh_sizej,mpi_enre
 !Tests for developers
  if (.not.associated(electronpositron)) then
    msg='electronpositron variable must be associated!'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 !Constants
  fact=0.0
@@ -3399,13 +3394,13 @@ subroutine posratecore(dtset,electronpositron,iatom,my_natom,mesh_sizej,mpi_enre
 !Compatibility tests
  if (electronpositron%particle==EP_NOTHING) then
    msg='Not valid for electronpositron%particle=NOTHING!'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
  if (dtset%usepaw==1) then
    if(dtset%pawxcdev==0.and.ngrad==2) then
      msg='GGA is not implemented for pawxcdev=0 (use dtset%pawxcdev/=0)!'
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
  end if
 
@@ -3428,19 +3423,19 @@ subroutine posratecore(dtset,electronpositron,iatom,my_natom,mesh_sizej,mpi_enre
  ngr=0;if (ngrad==2) ngr=mesh_size
 
 !Allocations of "on-site" densities
- ABI_ALLOCATE(rho1 ,(cplex*mesh_size,lm_size,nspden_ep))
- ABI_ALLOCATE(trho1,(cplex*mesh_size,lm_size,nspden_ep))
- ABI_ALLOCATE(rho1_ep ,(cplex*mesh_size,lm_size,nspden_ep))
- ABI_ALLOCATE(trho1_ep,(cplex*mesh_size,lm_size,nspden_ep))
- ABI_ALLOCATE(lmselect,(lm_size))
- ABI_ALLOCATE(lmselect_ep,(lm_size))
- ABI_ALLOCATE(lmselect_dum,(lm_size))
+ ABI_MALLOC(rho1 ,(cplex*mesh_size,lm_size,nspden_ep))
+ ABI_MALLOC(trho1,(cplex*mesh_size,lm_size,nspden_ep))
+ ABI_MALLOC(rho1_ep ,(cplex*mesh_size,lm_size,nspden_ep))
+ ABI_MALLOC(trho1_ep,(cplex*mesh_size,lm_size,nspden_ep))
+ ABI_MALLOC(lmselect,(lm_size))
+ ABI_MALLOC(lmselect_ep,(lm_size))
+ ABI_MALLOC(lmselect_dum,(lm_size))
  if (include_nhat_in_gamma) then
-   ABI_ALLOCATE(nhat1,(cplex*mesh_size,lm_size,nspden_ep))
-   ABI_ALLOCATE(nhat1_ep,(cplex*mesh_size,lm_size,nspden_ep))
+   ABI_MALLOC(nhat1,(cplex*mesh_size,lm_size,nspden_ep))
+   ABI_MALLOC(nhat1_ep,(cplex*mesh_size,lm_size,nspden_ep))
  else
-   ABI_ALLOCATE(nhat1,(0,0,0))
-   ABI_ALLOCATE(nhat1_ep,(0,0,0))
+   ABI_MALLOC(nhat1,(0,0,0))
+   ABI_MALLOC(nhat1_ep,(0,0,0))
  end if
 
 !Compute "on-site" densities (n1, ntild1, nhat1) for electron and positron =====
@@ -3455,14 +3450,14 @@ subroutine posratecore(dtset,electronpositron,iatom,my_natom,mesh_sizej,mpi_enre
 & pawtab(itypat),rho1_ep,trho1_ep)
 !Compute contribution to annihilation rate
 
- ABI_ALLOCATE(rhocore,(mesh_size))
+ ABI_MALLOC(rhocore,(mesh_size))
 
 !First formalism: use densities on r,theta,phi
  if (dtset%pawxcdev==0) then
 
-   ABI_ALLOCATE(gamma,(mesh_size,2))
-   ABI_ALLOCATE(rhoarr1,(mesh_size))
-   ABI_ALLOCATE(rhoarr1_ep,(mesh_size))
+   ABI_MALLOC(gamma,(mesh_size,2))
+   ABI_MALLOC(rhoarr1,(mesh_size))
+   ABI_MALLOC(rhoarr1_ep,(mesh_size))
 
 !  Loop on the angular part
    do ipt=1,pawang%angl_size
@@ -3484,8 +3479,8 @@ subroutine posratecore(dtset,electronpositron,iatom,my_natom,mesh_sizej,mpi_enre
        call mkdenpos(iwarnp,mesh_size,1,1,rhoarr1_ep,dtset%xc_denpos)
      end if
 !    Compute Gamma
-     ABI_ALLOCATE(grhoe2,(ngr))
-     ABI_ALLOCATE(grhocore2,(ngr))
+     ABI_MALLOC(grhoe2,(ngr))
+     ABI_MALLOC(grhocore2,(ngr))
      if (electronpositron%particle==EP_ELECTRON) then
        call gammapositron(gamma,grhocore2,grhoe2,igamma,ngr,mesh_size,&
 &       rhocore,rhoarr1_ep,rhoarr1,1)
@@ -3493,31 +3488,31 @@ subroutine posratecore(dtset,electronpositron,iatom,my_natom,mesh_sizej,mpi_enre
        call gammapositron(gamma,grhocore2,grhoe2,igamma,ngr,mesh_size,&
 &       rhocore,rhoarr1,rhoarr1_ep,1)
      end if
-     ABI_DEALLOCATE(grhoe2)
-     ABI_DEALLOCATE(grhocore2)
+     ABI_FREE(grhoe2)
+     ABI_FREE(grhocore2)
 !    Compute contribution to annihilation rates
 
-     ABI_ALLOCATE(ff,(mesh_size))
+     ABI_MALLOC(ff,(mesh_size))
      ff(1:mesh_size)=rhoarr1_ep(1:mesh_size)*rhocorej(1:mesh_size) &
 &     *gamma(1:mesh_size,1)*pawrad(itypat)%rad(1:mesh_size)**2
      call simp_gen(intg,ff,pawrad(itypat))
      intg=intg*pawang%angwgth(ipt)*four_pi
      rate         =rate         +intg
-     ABI_DEALLOCATE(ff)
+     ABI_FREE(ff)
    end do ! ipt
-   ABI_DEALLOCATE(gamma)
-   ABI_DEALLOCATE(rhoarr1)
-   ABI_DEALLOCATE(rhoarr1_ep)
+   ABI_FREE(gamma)
+   ABI_FREE(rhoarr1)
+   ABI_FREE(rhoarr1_ep)
 
 !Second formalism: use (l,m) moments for densities
  else if (dtset%pawxcdev/=0) then
 
 !  Build densities
-   ABI_ALLOCATE(gammam,(mesh_size,lm_size))
-   ABI_ALLOCATE(rhotot,(mesh_size,lm_size))
-   ABI_ALLOCATE(rhotot_ep,(mesh_size,lm_size))
-   ABI_ALLOCATE(rhosph,(mesh_size))
-   ABI_ALLOCATE(rhosph_ep,(mesh_size))
+   ABI_MALLOC(gammam,(mesh_size,lm_size))
+   ABI_MALLOC(rhotot,(mesh_size,lm_size))
+   ABI_MALLOC(rhotot_ep,(mesh_size,lm_size))
+   ABI_MALLOC(rhosph,(mesh_size))
+   ABI_MALLOC(rhosph_ep,(mesh_size))
 
    rhotot   (:,:)=rho1   (:,:,1)
    rhotot_ep(:,:)=rho1_ep(:,:,1)
@@ -3534,8 +3529,8 @@ subroutine posratecore(dtset,electronpositron,iatom,my_natom,mesh_sizej,mpi_enre
    end if
 
 !  Need gradients of electronic densities for GGA
-   ABI_ALLOCATE(grhoe2,(ngr))
-   ABI_ALLOCATE(grhocore2,(ngr))
+   ABI_MALLOC(grhoe2,(ngr))
+   ABI_MALLOC(grhocore2,(ngr))
    if (ngr>0) then
      if (electronpositron%particle==EP_ELECTRON) then
        call nderiv_gen(grhoe2,rhosph_ep,pawrad(itypat))
@@ -3551,12 +3546,12 @@ subroutine posratecore(dtset,electronpositron,iatom,my_natom,mesh_sizej,mpi_enre
 !  (rho-,rho+ +drho+), (rho-,rho+ -drho+),
 !  (rho- +drho-,rho+ +drho+), (rho- -drho-,rho+ -drho+)
 !  Do a seven steps loop
-   ABI_ALLOCATE(gam_,(mesh_size,2,7))
-   ABI_ALLOCATE(rho_,(mesh_size))
-   ABI_ALLOCATE(rho_ep_,(mesh_size))
-   ABI_ALLOCATE(rhocor_,(mesh_size))
-   ABI_ALLOCATE(grho2_,(ngr))
-   ABI_ALLOCATE(grhocor2_,(ngr))
+   ABI_MALLOC(gam_,(mesh_size,2,7))
+   ABI_MALLOC(rho_,(mesh_size))
+   ABI_MALLOC(rho_ep_,(mesh_size))
+   ABI_MALLOC(rhocor_,(mesh_size))
+   ABI_MALLOC(grho2_,(ngr))
+   ABI_MALLOC(grhocor2_,(ngr))
 
    do ii=1,7
 !    Apply delta to get perturbed densities
@@ -3592,17 +3587,17 @@ subroutine posratecore(dtset,electronpositron,iatom,my_natom,mesh_sizej,mpi_enre
 
    end do ! end loop ii=1,7
 
-   ABI_DEALLOCATE(rhocor_)
-   ABI_DEALLOCATE(grho2_)
-   ABI_DEALLOCATE(grhocor2_)
-   ABI_DEALLOCATE(grhoe2)
-   ABI_DEALLOCATE(grhocore2)
+   ABI_FREE(rhocor_)
+   ABI_FREE(grho2_)
+   ABI_FREE(grhocor2_)
+   ABI_FREE(grhoe2)
+   ABI_FREE(grhocore2)
    rho_   (:)=rhosph   (:);if (electronpositron%particle==EP_POSITRON) rho_   (:)=rho_   (:)+rhocore(:)
    rho_ep_(:)=rhosph_ep(:);if (electronpositron%particle==EP_ELECTRON) rho_ep_(:)=rho_ep_(:)+rhocore(:)
 !  Compute numerical first and second derivatives of Gamma
 !  d1gam(1) = dgam/drho+ (particle=ELECTRON), dgam/drho- (particle=POSITRON)
 !  d1gam(2) = dgam/drho- (particle=ELECTRON), dgam/drho+ (particle=POSITRON)
-   ABI_ALLOCATE(d1gam,(mesh_size,2))
+   ABI_MALLOC(d1gam,(mesh_size,2))
    d1gam(:,:)=zero
    do ir=1,mesh_size
      if (rho_     (ir)>tol14) d1gam(ir,1)=(gam_(ir,1,2)-gam_(ir,1,3))*half/(delta*rho_     (ir))
@@ -3612,7 +3607,7 @@ subroutine posratecore(dtset,electronpositron,iatom,my_natom,mesh_sizej,mpi_enre
 !  d2gam(1) = d2gam/drho+_drho+ (particle=ELECTRON), dgam/drho-_drho- (particle=POSITRON)
 !  d2gam(2) = d2gam/drho-_drho+ (particle=ELECTRON), dgam/drho+_drho- (particle=POSITRON)
 !  d2gam(3) = d2gam/drho-_drho- (particle=ELECTRON), dgam/drho+_drho+ (particle=POSITRON)
-   ABI_ALLOCATE(d2gam,(mesh_size,3))
+   ABI_MALLOC(d2gam,(mesh_size,3))
    d2gam(:,:)=zero
    do ir=1,mesh_size
      if (rho_  (ir)>tol14) d2gam(ir,1)=(gam_(ir,1,2)+gam_(ir,1,3)-two*gam_(ir,1,1))/(delta*rho_  (ir))**2
@@ -3626,14 +3621,14 @@ subroutine posratecore(dtset,electronpositron,iatom,my_natom,mesh_sizej,mpi_enre
      end if
    end do
 
-   ABI_DEALLOCATE(rho_)
-   ABI_DEALLOCATE(rho_ep_)
+   ABI_FREE(rho_)
+   ABI_FREE(rho_ep_)
 !  Compute useful sums of densities
-   ABI_ALLOCATE(v1sum,(mesh_size,3))
+   ABI_MALLOC(v1sum,(mesh_size,3))
    if ( dtset%pawxcdev>=2)  then
-     ABI_ALLOCATE(v2sum,(mesh_size,lm_size,3))
+     ABI_MALLOC(v2sum,(mesh_size,lm_size,3))
    else
-     ABI_ALLOCATE(v2sum,(0,0,0))
+     ABI_MALLOC(v2sum,(0,0,0))
    end if
    rhotot(:,1)=sqfpi*rhosph(:);rhotot_ep(:,1)=sqfpi*rhosph_ep(:)
    call pawxcsum(1,1,1,lmselect,lmselect_ep,lm_size,mesh_size,3,dtset%pawxcdev,&
@@ -3658,41 +3653,41 @@ subroutine posratecore(dtset,electronpositron,iatom,my_natom,mesh_sizej,mpi_enre
      end do
    end if
 
-   ABI_DEALLOCATE(gam_)
-   ABI_DEALLOCATE(d1gam)
-   ABI_DEALLOCATE(d2gam)
-   ABI_DEALLOCATE(v1sum)
-   ABI_DEALLOCATE(v2sum)
+   ABI_FREE(gam_)
+   ABI_FREE(d1gam)
+   ABI_FREE(d2gam)
+   ABI_FREE(v1sum)
+   ABI_FREE(v2sum)
 !  Compute contribution to annihilation rate
-   ABI_ALLOCATE(gg,(mesh_size,4))
+   ABI_MALLOC(gg,(mesh_size,4))
    gg=zero
-   ABI_ALLOCATE(rhoarr2,(mesh_size))
+   ABI_MALLOC(rhoarr2,(mesh_size))
    do ilm=1,lm_size
      if (lmselect_ep(ilm)) gg(:,1)=gg(:,1)+rhotot_ep(:,ilm)*rhocorej(:)*gammam(:,ilm)
    end do
-   ABI_DEALLOCATE(rhoarr2)
+   ABI_FREE(rhoarr2)
    gg(1:mesh_size,1)=gg(1:mesh_size,1)*pawrad(itypat)%rad(1:mesh_size)**2
    call simp_gen(intg,gg(:,1),pawrad(itypat))
    rate         =rate         +intg
-   ABI_DEALLOCATE(gg)
-   ABI_DEALLOCATE(gammam)
-   ABI_DEALLOCATE(rhotot)
-   ABI_DEALLOCATE(rhotot_ep)
-   ABI_DEALLOCATE(rhosph)
-   ABI_DEALLOCATE(rhosph_ep)
+   ABI_FREE(gg)
+   ABI_FREE(gammam)
+   ABI_FREE(rhotot)
+   ABI_FREE(rhotot_ep)
+   ABI_FREE(rhosph)
+   ABI_FREE(rhosph_ep)
 
  end if ! dtset%pawxcdev
- ABI_DEALLOCATE(rhocore)
+ ABI_FREE(rhocore)
 
- ABI_DEALLOCATE(rho1)
- ABI_DEALLOCATE(trho1)
- ABI_DEALLOCATE(rho1_ep)
- ABI_DEALLOCATE(trho1_ep)
- ABI_DEALLOCATE(lmselect)
- ABI_DEALLOCATE(lmselect_ep)
- ABI_DEALLOCATE(lmselect_dum)
- ABI_DEALLOCATE(nhat1)
- ABI_DEALLOCATE(nhat1_ep)
+ ABI_FREE(rho1)
+ ABI_FREE(trho1)
+ ABI_FREE(rho1_ep)
+ ABI_FREE(trho1_ep)
+ ABI_FREE(lmselect)
+ ABI_FREE(lmselect_ep)
+ ABI_FREE(lmselect_dum)
+ ABI_FREE(nhat1)
+ ABI_FREE(nhat1_ep)
 
 !Reduction in case of distribution over atomic sites
  if (mpi_enreg%nproc_atom>1) then

@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_dynmat
 !! NAME
 !!  m_dynmat
@@ -7,17 +6,13 @@
 !!  This module provides low-level tools to operate on the dynamical matrix
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2019 ABINIT group (XG, JCC, MJV, NH, RC, MVeithen, MM, MG, MT, DCA)
+!!  Copyright (C) 2014-2024 ABINIT group (XG, JCC, MJV, NH, RC, MVeithen, MM, MG, MT, DCA)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! TODO
 !!  Use more explicative names for the procedures!
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -29,6 +24,7 @@
 
 module m_dynmat
 
+ use, intrinsic :: iso_c_binding
  use defs_basis
  use m_abicore
  use m_errors
@@ -40,6 +36,7 @@ module m_dynmat
  use m_symtk,           only : mati3inv, matr3inv, littlegroup_q
  use m_cgtools,         only : fxphas_seq
  use m_ewald,           only : ewald9
+ use m_time,            only : timab
 
  implicit none
 
@@ -59,7 +56,7 @@ module m_dynmat
  public :: d2cart_to_red        ! Transform a second-derivative matrix
                                 ! from cartesian to reduced coordinate.
  public :: chkph3               ! Check the completeness of the dynamical matrix
- public :: chneu9               ! Imposition of the Acoustic sum rule on the Effective charges
+ public :: chneu9               ! Imposition of the charge neutrality sum rule on the Effective charges
  public :: d2sym3               ! Build (nearly) all the other matrix elements that can be build using symmetries.
  public :: q0dy3_apply          ! Takes care of the inclusion of the ewald q=0 term in the dynamical matrix
  public :: q0dy3_calc           ! Calculate the q=0 correction term to the dynamical matrix
@@ -69,23 +66,25 @@ module m_dynmat
  public :: dfpt_sydy            ! Symmetrize dynamical matrix (eventually diagonal wrt to the atoms)
  public :: wings3               ! Suppress the wings of the cartesian 2DTE for which the diagonal element is not known
  public :: asrif9               ! Imposes the Acoustic Sum Rule to Interatomic Forces
- public :: make_bigbox          ! Generates a Big Box of R points for the Fourier Transforms the dynamical matrix
- public :: bigbx9               ! Helper functions that faciliates the generation  of a Big Box containing
+ public :: get_bigbox_and_weights ! Compute
+ public :: bigbx9               ! Generates a Big Box of R points for the Fourier Transforms the dynamical matrix
+ public :: make_bigbox          ! Helper functions that faciliates the generation  of a Big Box containing
  public :: canat9               ! From reduced to canonical coordinates
  public :: canct9               ! Convert from canonical coordinates to cartesian coordinates
  public :: chkrp9               ! Check if the rprim used for the definition of the unit cell (in the
                                 ! inputs) are consistent with the rprim used in the routine generating  the Big Box
  public :: dist9                ! Compute the distance between atoms in the big box
  public :: ftifc_q2r            ! Fourier transform of the dynamical matrices to obtain interatomic forces (real space).
- public :: ftifc_r2q            ! Fourier transform of the interatomic forces to obtain dynamical matrices (reciprocal space).
+ private :: ftifc_r2q            ! Fourier transform of the interatomic forces to obtain dynamical matrices (reciprocal space).
  public :: dynmat_dq            ! Compute the derivative D(q)/dq via Fourier transform of the interatomic forces
  public :: ifclo9               ! Convert from cartesian coordinates to local coordinates
  public :: wght9                ! Generates a weight to each R points of the Big Box and for each pair of atoms
  public :: d3sym                ! Given a set of calculated elements of the 3DTE matrix,
                                 ! build (nearly) all the other matrix elements that can be build using symmetries.
- public :: sytens               ! Determines the set of irreductible elements of the non-linear optical susceptibility
+ public :: d3lwsym                                
+ public :: sylwtens             ! Determines the set of irreductible elements of the spatial-dispersion tensors
+ public :: sytens               ! Determines the set of irreductible elements of the nonlinear optical susceptibility
                                 ! and Raman tensors
- public :: symdm9               ! Generate the dynamical matrix in the full BZ from the irreducible q-points.
  public :: axial9               ! Generates the local coordinates system from the  knowledge of the first vector (longitudinal) and
                                 !   the ifc matrix in cartesian coordinates
  public :: dymfz9               ! Multiply the dynamical matrix by a phase shift to account for normalized canonical coordinates.
@@ -94,8 +93,12 @@ module m_dynmat
                                 ! long-range electrostatic interactions.
  public :: dfpt_phfrq           ! Diagonalize IFC(q), return phonon frequencies and eigenvectors.
                                 ! If q is Gamma, the non-analytical behaviour can be included.
+ public :: pheigvec_normalize   ! Normalize input eigenvectors in cartesian coordinates.
+ public :: phdispl_from_eigvec  ! Phonon displacements from eigenvectors
+ public :: phangmom_from_eigvec ! compute phonon angular momentum for one q-point from eigenvectors
  public :: dfpt_prtph           ! Print phonon frequencies
  public :: massmult_and_breaksym  ! Multiply IFC(q) by atomic masses.
+ public :: massmult_and_breaksym_cplx  ! Version for complex array
 
  ! TODO: Change name,
  public :: ftgam
@@ -126,11 +129,6 @@ contains
 !! d2asr=matrix used to store the correction needed to fulfill
 !! the acoustic sum rule.
 !!
-!! PARENTS
-!!      dfpt_gatherdy,m_ddb,m_effective_potential_file
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine asria_calc(asr,d2asr,d2cart,mpert,natom)
@@ -146,7 +144,7 @@ subroutine asria_calc(asr,d2asr,d2cart,mpert,natom)
 !scalars
  integer :: idir1,idir2,ii,ipert1,ipert2
  integer :: constrank, imatelem, iconst, nconst, nd2_packed, info
- !character(len=500) :: message
+ !character(len=500) :: msg
 !arrays
  integer, allocatable :: packingindex(:,:,:,:)
  real(dp), allocatable :: constraints(:,:,:)
@@ -180,13 +178,13 @@ subroutine asria_calc(asr,d2asr,d2cart,mpert,natom)
  if (asr == 5) then
    nconst = 9*natom
    nd2_packed = 3*natom*(3*natom+1)/2
-   ABI_ALLOCATE(constraints,(2,nconst, nd2_packed))
-   ABI_ALLOCATE(d2cart_packed,(2,nd2_packed))
-   ABI_ALLOCATE(constr_rhs,(2,nd2_packed))
-   ABI_ALLOCATE(singvals,(nconst))
-   ABI_ALLOCATE(work,(2,3*nd2_packed))
-   ABI_ALLOCATE(rwork,(5*nd2_packed))
-   ABI_ALLOCATE(packingindex,(3,natom,3,natom))
+   ABI_MALLOC(constraints,(2,nconst, nd2_packed))
+   ABI_MALLOC(d2cart_packed,(2,nd2_packed))
+   ABI_MALLOC(constr_rhs,(2,nd2_packed))
+   ABI_MALLOC(singvals,(nconst))
+   ABI_MALLOC(work,(2,3*nd2_packed))
+   ABI_MALLOC(rwork,(5*nd2_packed))
+   ABI_MALLOC(packingindex,(3,natom,3,natom))
    ii=1
    packingindex=-1
    do ipert2=1,natom
@@ -258,13 +256,13 @@ subroutine asria_calc(asr,d2asr,d2cart,mpert,natom)
      end do
    end do
 
-   ABI_DEALLOCATE(constraints)
-   ABI_DEALLOCATE(d2cart_packed)
-   ABI_DEALLOCATE(singvals)
-   ABI_DEALLOCATE(constr_rhs)
-   ABI_DEALLOCATE(work)
-   ABI_DEALLOCATE(rwork)
-   ABI_DEALLOCATE(packingindex)
+   ABI_FREE(constraints)
+   ABI_FREE(d2cart_packed)
+   ABI_FREE(singvals)
+   ABI_FREE(constr_rhs)
+   ABI_FREE(work)
+   ABI_FREE(rwork)
+   ABI_FREE(packingindex)
  end if
 
 end subroutine asria_calc
@@ -292,11 +290,6 @@ end subroutine asria_calc
 !! Input/Output:
 !! d2cart=matrix of second derivatives of total energy, in cartesian coordinates
 !!
-!! PARENTS
-!!      ddb_elast,ddb_internalstr,dfpt_gatherdy,m_ddb,thmeig
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine asria_corr(asr,d2asr,d2cart,mpert,natom)
@@ -315,9 +308,9 @@ subroutine asria_corr(asr,d2asr,d2cart,mpert,natom)
 ! *********************************************************************
 
  if (asr==0) return
- !call wrtout(std_out,' asria_corr: imposition of the ASR for the interatomic forces.','COLL')
+ !call wrtout(std_out,' asria_corr: imposition of the ASR for the interatomic forces.')
 
-! Remove d2asr
+ ! Remove d2asr
  do ipert2=1,natom
    do idir2=1,3
      do ipert1=1,natom
@@ -363,11 +356,6 @@ end subroutine asria_corr
 !! d2cart=matrix of second derivatives of total energy, in cartesian coordinates
 !! minvers=inverse of the supermatrix for future application of the corrections
 !!
-!! PARENTS
-!!      m_ddb
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine asrprs(asr,asrflag,rotinv,uinvers,vtinvers,singular,d2cart,mpert,natom,xcart)
@@ -387,7 +375,7 @@ subroutine asrprs(asr,asrflag,rotinv,uinvers,vtinvers,singular,d2cart,mpert,nato
  integer :: column,idir1,idir2,ii,info,ipert1,ipert2,jj,n3,row,superdim
  real(dp) :: rcond,test
 ! real(dp) :: tau ! tau is present but commented out in this routine
- character(len=500) :: message
+ character(len=500) :: msg
 !arrays
  integer :: check(3,natom,3)
  real(dp) :: tmp(natom,3,3),weightf(1:natom,1:natom)
@@ -398,21 +386,19 @@ subroutine asrprs(asr,asrflag,rotinv,uinvers,vtinvers,singular,d2cart,mpert,nato
 ! *********************************************************************
 
  if(asr/=3 .and. asr/=4)then
-   write(message,'(3a,i0)')&
-&   'The argument asr should be 3 or 4,',ch10,&
-&   'however, asr = ',asr
-   MSG_BUG(message)
+   write(msg,'(3a,i0)')&
+   'The argument asr should be 3 or 4,',ch10, 'however, asr = ',asr
+   ABI_BUG(msg)
  end if
 
  if (asr==3.or.asr==4)then
-   write(message, '(a,a)' ) ch10, &
-&   'asrprs: imposition of the ASR for the interatomic forces and rotational invariance'
-   call wrtout(std_out,message,'COLL')
+   write(msg, '(a,a)' ) ch10, &
+   'asrprs: imposition of the ASR for the interatomic forces and rotational invariance'
+   call wrtout(std_out,msg)
  end if
 
- write(message,'(a,i6)')' asrflag is', asrflag
- call wrtout(std_out,message,'COLL')
- call wrtout(ab_out,message,'COLL')
+ write(msg,'(a,i0)')' asrflag is ', asrflag
+ call wrtout([std_out, ab_out], msg)
 
 !variables for the dimensions of the matrices
 
@@ -422,8 +408,8 @@ subroutine asrprs(asr,asrflag,rotinv,uinvers,vtinvers,singular,d2cart,mpert,nato
 
  superdim=9*natom*(natom-1)/2+n3
 
- ABI_ALLOCATE(d2vecr,(1:superdim))
- ABI_ALLOCATE(d2vecc,(1:superdim))
+ ABI_MALLOC(d2vecr,(1:superdim))
+ ABI_MALLOC(d2vecc,(1:superdim))
  d2vecr=0d0
  d2vecc=0d0
 
@@ -438,7 +424,7 @@ subroutine asrprs(asr,asrflag,rotinv,uinvers,vtinvers,singular,d2cart,mpert,nato
    weightf(ii,ii)=0d0
  end do
 
- ABI_ALLOCATE(d2cartold,(2,3,mpert,3,mpert))
+ ABI_MALLOC(d2cartold,(2,3,mpert,3,mpert))
 
  d2cartold=d2cart
 
@@ -465,7 +451,7 @@ subroutine asrprs(asr,asrflag,rotinv,uinvers,vtinvers,singular,d2cart,mpert,nato
  end do
 
  if(asrflag==1) then !calculate the pseudo-inverse of the supermatrix
-   ABI_ALLOCATE(superm,(1:superdim,1:superdim))
+   ABI_MALLOC(superm,(1:superdim,1:superdim))
 
    superm=0d0
 
@@ -518,23 +504,21 @@ subroutine asrprs(asr,asrflag,rotinv,uinvers,vtinvers,singular,d2cart,mpert,nato
 
 !  calculate the pseudo-inverse of the supermatrix
 
-   ABI_ALLOCATE(work,(1:6*superdim))
-   ABI_ALLOCATE(vtmatrix,(1:superdim))
-   ABI_ALLOCATE(umatrix,(1:superdim,1:superdim))
+   ABI_MALLOC(work,(1:6*superdim))
+   ABI_MALLOC(vtmatrix,(1:superdim))
+   ABI_MALLOC(umatrix,(1:superdim,1:superdim))
 
 !  singular value decomposition of superm
 
    call dgesvd('A','O',superdim,superdim,superm,superdim,singular,umatrix,superdim, &
-&   vtmatrix, 1, work,6*superdim,info)
+               vtmatrix, 1, work,6*superdim,info)
    ABI_CHECK(info == 0, sjoin('dgesvd returned:', itoa(info)))
 
-   ABI_DEALLOCATE(vtmatrix)
-   ABI_DEALLOCATE(work)
+   ABI_FREE(vtmatrix)
+   ABI_FREE(work)
 
-   write(message, '(a,es16.8,es16.8)' )&
-&   ' Largest and smallest values from svd', singular(1), singular(superdim)
-   call wrtout(std_out,message,'COLL')
-   call wrtout(ab_out,message,'COLL')
+   write(msg, '(a,es16.8,es16.8)' )' Largest and smallest values from svd', singular(1), singular(superdim)
+   call wrtout([std_out, ab_out], msg)
 
 !  Invert U and V**T, orthogonal matrices
 
@@ -545,18 +529,18 @@ subroutine asrprs(asr,asrflag,rotinv,uinvers,vtinvers,singular,d2cart,mpert,nato
      end do
    end do
 
-   ABI_DEALLOCATE(umatrix)
-   ABI_DEALLOCATE(superm)
+   ABI_FREE(umatrix)
+   ABI_FREE(superm)
 
-   write(message,'(a,a)')' asrprs: done with asrflag 1', ch10
-   call wrtout(std_out,message,'COLL')
+   write(msg,'(a,a)')' asrprs: done with asrflag 1', ch10
+   call wrtout(std_out,msg)
 
  end if !asrflag=1
 
  if(asrflag==2) then
 
-   ABI_ALLOCATE(d2vecrnew,(1:superdim))
-   ABI_ALLOCATE(d2veccnew,(1:superdim))
+   ABI_MALLOC(d2vecrnew,(1:superdim))
+   ABI_MALLOC(d2veccnew,(1:superdim))
 
 !  Calculate V**T**-1 Sigma**-1 U**-1 *rhs
 
@@ -605,8 +589,8 @@ subroutine asrprs(asr,asrflag,rotinv,uinvers,vtinvers,singular,d2cart,mpert,nato
      end do
    end do
 
-   ABI_DEALLOCATE(d2vecrnew)
-   ABI_DEALLOCATE(d2veccnew)
+   ABI_FREE(d2vecrnew)
+   ABI_FREE(d2veccnew)
 
    check=0
 
@@ -647,9 +631,8 @@ subroutine asrprs(asr,asrflag,rotinv,uinvers,vtinvers,singular,d2cart,mpert,nato
          end do
          write(std_out,'(i3,i3,i3,es11.3)') idir1,ipert1,idir2,test
 
-         write(message, '(i3,i3,i3,es11.3)' ) idir1,ipert1,idir2,test
-         call wrtout(ab_out,message,'COLL')
-
+         write(msg, '(i3,i3,i3,es11.3)' ) idir1,ipert1,idir2,test
+         call wrtout(ab_out,msg)
        end do
      end do
    end do
@@ -667,14 +650,14 @@ subroutine asrprs(asr,asrflag,rotinv,uinvers,vtinvers,singular,d2cart,mpert,nato
      end do
    end do
 
-   write(message,'(a,a)')' asrprs: done with asrflag 2', ch10
-   call wrtout(std_out,message,'COLL')
+   write(msg,'(a,a)')' asrprs: done with asrflag 2', ch10
+   call wrtout(std_out,msg)
 
  end if !ends asrflag=2
 
- ABI_DEALLOCATE(d2vecr)
- ABI_DEALLOCATE(d2vecc)
- ABI_DEALLOCATE(d2cartold)
+ ABI_FREE(d2vecr)
+ ABI_FREE(d2vecc)
+ ABI_FREE(d2cartold)
 
 end subroutine asrprs
 !!***
@@ -715,11 +698,6 @@ end subroutine asrprs
 !!  d2cart(2,3,mpert,3,mpert)=
 !!    dynamical matrix, effective charges, dielectric tensor,....
 !!    all in cartesian coordinates
-!!
-!! PARENTS
-!!      dfpt_gatherdy,m_ddb
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -863,11 +841,6 @@ end subroutine cart29
 !!  flg2(3)=tell if information of each component of vec2 is valid
 !!  vec2(3)=output vector, in cartesian coordinates
 !!
-!! PARENTS
-!!      dfpt_gatherdy,m_ddb,m_dynmat
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine cart39(flg1,flg2,gprimd,ipert,natom,rprimd,vec1,vec2)
@@ -905,8 +878,8 @@ subroutine cart39(flg1,flg2,gprimd,ipert,natom,rprimd,vec1,vec2)
      if(flg2(idir)==0)vec2(idir)=zero
    end do
 
-!  Treat electric field perturbation
- else if(ipert==natom+2) then
+!  Treat electric field and qvec perturbations
+ else if(ipert==natom+2.or.ipert==natom+8) then
 !  OCL SCALAR
    do idir=1,3
      vec2(idir)=zero
@@ -961,11 +934,6 @@ end subroutine cart39
 !! OUTPUT
 !!  d2red(2,3,mpert,3,mpert)=
 !!    second-derivative matrix in reduced coordinates
-!!
-!! PARENTS
-!!      ddb_interpolate
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1109,11 +1077,6 @@ end subroutine d2cart_to_red
 !! OUTPUT
 !!  eventually send a warning message
 !!
-!! PARENTS
-!!      respfn
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine chkph3(carflg,idir,mpert,natom)
@@ -1127,7 +1090,7 @@ subroutine chkph3(carflg,idir,mpert,natom)
 !Local variables -------------------------
 !scalars
  integer :: idir1,idir2,ipert1,ipert2,send
- character(len=500) :: message
+ character(len=500) :: msg
 
 ! *********************************************************************
 
@@ -1165,14 +1128,27 @@ subroutine chkph3(carflg,idir,mpert,natom)
 
  end if
 
-!If needed, send the message
+ ! If needed, send the message
  if(send==1)then
-   write(message, '(a,a,a,a)' )&
+   write(msg, '(a,a,a,a)' )&
+&    ' chkph3 : WARNING -',ch10,&
+&    '  Dynamical matrix incomplete, phonon frequencies may be wrong, see the log file for more explanations.'
+   call wrtout(ab_out,msg)
+   write(msg, '(11a)' )&
 &   ' chkph3 : WARNING -',ch10,&
-&   '  The dynamical matrix was incomplete :',&
-&   ' phonon frequencies may be wrong ...'
-   call wrtout(std_out,message,'COLL')
-   call wrtout(ab_out,message,'COLL')
+&   '  Dynamical matrix incomplete, phonon frequencies may be wrong.',ch10,&
+&   '  Likely due to a list of perturbations, as defined by rfatpol and rfdir, that does not include',ch10,&
+&   '  all displacements of all atoms and (if non-metallic material) electric field type perturbation.',ch10,&
+&   '  Then, the dynamical matrix includes zeroes when the matrix element is not computed.',ch10,&
+&   '  This is allowed for testing purposes. But the phonon frequencies may be wrong.'
+   call wrtout(std_out,msg)
+   write(msg, '(9a)' )&
+&  '  If there are symmetries, perhaps these matrix elements are zero by symmetry anyhow, and phonon frequencies might be right.',ch10,&
+&  '  Please check the input variables rfatpol and rfdir, to determine whether abinit is doing what you intend it to do.',ch10,&
+&  '  Note that ANADDB is able to detect whether the symmetries allow one to reconstruct the full dynamical matrix from',ch10,&
+&  '  an incomplete one. In this case, passing to ANADDB the delivered _DDB file might confirm (or not) that',ch10,&
+&  '  phonon frequencies are right.'
+   call wrtout(std_out,msg)
  end if
 
 end subroutine chkph3
@@ -1185,11 +1161,11 @@ end subroutine chkph3
 !! chneu9
 !!
 !! FUNCTION
-!! Imposition of the Acoustic sum rule on the Effective charges
+!! Imposition of the charge neutrality sum rule on the Effective charges
 !! and suppress the imaginary part of the dynamical matrix
 !!
 !! INPUTS
-!!  chneut=(0 => no ASR, 1 => equal repartition,2 => weighted repartition )
+!!  chneut=(0 => no ASR, 1 => equal repartition, 2 => weighted repartition )
 !!  mpert =maximum number of ipert
 !!  natom=number of atom
 !!  ntypat=number of types of atoms in unit cell
@@ -1202,11 +1178,6 @@ end subroutine chkph3
 !!  Input/Output
 !!  d2cart=matrix of second derivatives of total energy, in cartesian
 !!       coordinates
-!!
-!! PARENTS
-!!      dfpt_gatherdy,m_ddb
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1223,14 +1194,14 @@ subroutine chneu9(chneut,d2cart,mpert,natom,ntypat,selectz,typat,zion)
 !Local variables -------------------------
 !scalars
  integer :: idir1,idir2,ii,ipert1,ipert2
- character(len=500) :: message
+ character(len=500) :: msg
 !arrays
  real(dp) :: sumwght(2)
  real(dp),allocatable :: wghtat(:)
 
 ! *********************************************************************
 
- ABI_ALLOCATE(wghtat,(natom))
+ ABI_MALLOC(wghtat,(natom))
 
 !In case of acoustic sum rule imposition, compute the weights on each atom.
  if (chneut==1)then
@@ -1263,12 +1234,12 @@ subroutine chneu9(chneut,d2cart,mpert,natom,ntypat,selectz,typat,zion)
 !Calculation of the violation of the charge neutrality
 !and imposition of the charge neutrality condition
  if (chneut/=0)then
-   write(message, '(a,a,a,a,a,a,a)' )&
-&   ' The violation of the charge neutrality conditions',ch10,&
-&   ' by the effective charges is as follows :',ch10,&
-&   '    atom        electric field',ch10,&
-&   ' displacement     direction   '
-   call wrtout(ab_out,message,'COLL')
+   write(msg, '(a,a,a,a,a,a,a)' )&
+    ' The violation of the charge neutrality conditions',ch10,&
+    ' by the effective charges is as follows :',ch10,&
+    '    atom        electric field',ch10,&
+    ' displacement     direction   '
+   call wrtout(ab_out,msg)
    do idir1=1,3
      do idir2=1,3
        do ii=1,2
@@ -1278,15 +1249,15 @@ subroutine chneu9(chneut,d2cart,mpert,natom,ntypat,selectz,typat,zion)
          end do
          do ipert1=1,natom
            d2cart(ii,idir1,ipert1,idir2,natom+2)=&
-&           d2cart(ii,idir1,ipert1,idir2,natom+2)-sumwght(ii)*wghtat(ipert1)
+           d2cart(ii,idir1,ipert1,idir2,natom+2)-sumwght(ii)*wghtat(ipert1)
          end do
        end do
-       write(message, '(i8,i16,2f16.6)' ) idir1,idir2,sumwght(1),sumwght(2)
-       call wrtout(ab_out,message,'COLL')
+       write(msg, '(i8,i16,2f16.6)' ) idir1,idir2,sumwght(1),sumwght(2)
+       call wrtout(ab_out,msg)
      end do
    end do
-   write(message, '(a)' )' '
-   call wrtout(ab_out,message,'COLL')
+   write(msg, '(a)' )' '
+   call wrtout(ab_out,msg)
 
 !  The same for the symmetrical part
    do idir1=1,3
@@ -1298,7 +1269,7 @@ subroutine chneu9(chneut,d2cart,mpert,natom,ntypat,selectz,typat,zion)
          end do
          do ipert2=1,natom
            d2cart(ii,idir1,natom+2,idir2,ipert2)=&
-&           d2cart(ii,idir1,natom+2,idir2,ipert2)-sumwght(ii)*wghtat(ipert2)
+           d2cart(ii,idir1,natom+2,idir2,ipert2)-sumwght(ii)*wghtat(ipert2)
          end do
        end do
      end do
@@ -1372,25 +1343,24 @@ subroutine chneu9(chneut,d2cart,mpert,natom,ntypat,selectz,typat,zion)
  end if
 
 !Write the effective charge tensor
- write(message, '(a,a,a,a,a,a,a)' )&
-& ' Effective charge tensors after ',ch10,&
-& ' imposition of the charge neutrality,',ch10,&
-& ' and eventual restriction to some part :',ch10,&
-& '   atom    displacement  '
- call wrtout(ab_out,message,'COLL')
+ write(msg, '(a,a,a,a,a,a,a)' )&
+   ' Effective charge tensors after ',ch10,&
+   ' imposition of the charge neutrality (if requested by user),',ch10,&
+   ' and eventual restriction to some part :',ch10,&
+  '   atom    displacement  '
+ call wrtout(ab_out,msg)
 
  do ipert1=1,natom
    do idir1=1,3
-     write(message, '(2i10,3es16.6)' )ipert1,idir1,&
-&     (d2cart(1,idir1,ipert1,idir2,natom+2),idir2=1,3)
-     call wrtout(ab_out,message,'COLL')
+     write(msg, '(2i10,3es16.6)' )ipert1,idir1,(d2cart(1,idir1,ipert1,idir2,natom+2),idir2=1,3)
+     call wrtout(ab_out,msg)
    end do
  end do
 
 !Zero the imaginary part of the dynamical matrix
- write(message, '(a)' )' Now, the imaginary part of the dynamical matrix is zeroed '
- call wrtout(ab_out,message,'COLL')
- call wrtout(std_out,message,'COLL')
+ write(msg, '(a)' )' Now, the imaginary part of the dynamical matrix is zeroed '
+ call wrtout(ab_out,msg)
+ call wrtout(std_out,msg)
 
  do ipert1=1,natom
    do ipert2=1,natom
@@ -1402,7 +1372,7 @@ subroutine chneu9(chneut,d2cart,mpert,natom,ntypat,selectz,typat,zion)
    end do
  end do
 
- ABI_DEALLOCATE(wghtat)
+ ABI_FREE(wghtat)
 
 end subroutine chneu9
 !!***
@@ -1464,11 +1434,6 @@ end subroutine chneu9
 !!   On 010331, replaced the loops up to mpert by loops up to
 !!   natom+2, because of a crash bug under Windows. However,
 !!   the problem lies likely in the use of the indsym array.
-!!
-!! PARENTS
-!!      completeperts,m_ddb,respfn
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1536,6 +1501,7 @@ subroutine d2sym3(blkflg,d2,indsym,mpert,natom,nsym,qpt,symq,symrec,symrel,timre
        do ipert2=1,min(natom+2,mpert)
          do idir2=1,3
 
+           ! FIXME use is_type functions
 !          If an element exists
            if(blkflg(idir1,ipert1,idir2,ipert2)==1)then
 
@@ -1814,9 +1780,9 @@ subroutine d2sym3(blkflg,d2,indsym,mpert,natom,nsym,qpt,symq,symrec,symrel,timre
 !one particular perturbation.
 !An additional symmetrization might solve this (do not consider TR-symmetry)
  if (do_final_sym) then
-   ABI_ALLOCATE(d2tmp1,(2,3,3))
-   ABI_ALLOCATE(d2tmp2,(2,3,3))
-   ABI_ALLOCATE(d2work,(2,3,mpert,3,mpert))
+   ABI_MALLOC(d2tmp1,(2,3,3))
+   ABI_MALLOC(d2tmp2,(2,3,3))
+   ABI_MALLOC(d2work,(2,3,mpert,3,mpert))
    d2work(:,:,:,:,:)=d2(:,:,:,:,:)
    do ipert1=1,min(natom+2,mpert)
      if ((ipert1==natom+1.or.ipert1==natom+10.or.ipert1==natom+11).or.(ipert1==natom+2.and.(.not.qzero))) cycle
@@ -1884,9 +1850,9 @@ subroutine d2sym3(blkflg,d2,indsym,mpert,natom,nsym,qpt,symq,symrec,symrel,timre
      d2(:,1:3,1:natom,1:3,natom+2)=d2work(:,1:3,1:natom,1:3,natom+2)
      d2(:,1:3,natom+2,1:3,natom+2)=d2work(:,1:3,natom+2,1:3,natom+2)
    end if
-   ABI_DEALLOCATE(d2tmp1)
-   ABI_DEALLOCATE(d2tmp2)
-   ABI_DEALLOCATE(d2work)
+   ABI_FREE(d2tmp1)
+   ABI_FREE(d2tmp2)
+   ABI_FREE(d2work)
  end if
 
 end subroutine d2sym3
@@ -1901,13 +1867,12 @@ end subroutine d2sym3
 !! FUNCTION
 !! Takes care of the inclusion of the ewald q=0 term in the dynamical
 !! matrix - corrects the dyew matrix provided as input
+!! See Eq.(71) in Gonze&Lee PRB 55, 10355 (1997) [[cite:Gonze1997a]],
+!! get the left hand side.
 !!
 !! INPUTS
-!!  dyewq0(3,3,natom) = part needed to correct
-!!    the dynamical matrix for atom self-interaction.
+!!  dyewq0(3,3,natom) = part needed to correct the dynamical matrix for atom self-interaction.
 !!  natom= number of atom in the unit cell
-!!
-!! OUTPUT
 !!
 !! SIDE EFFECTS
 !!  dyew(2,3,natom,3,natom)= dynamical matrix corrected on output
@@ -1925,11 +1890,6 @@ end subroutine d2sym3
 !!   will produce the correct dynamical matrix dyew starting from
 !!   the previously calculated dyewq0 and the bare(non-corrected)
 !!   dyew matrix
-!!
-!! PARENTS
-!!      m_dynmat,m_ifc,respfn
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1967,6 +1927,7 @@ end subroutine q0dy3_apply
 !!
 !! FUNCTION
 !! Calculate the q=0 correction term to the dynamical matrix
+!! See Eq.(71) in Gonze&Lee PRB 55, 10355 (1997) [[cite:Gonze1997a]], the sum over \kappa"
 !!
 !! INPUTS
 !!  dyew(2,3,natom,3,natom)= dynamical matrix
@@ -2000,11 +1961,6 @@ end subroutine q0dy3_apply
 !!   the previously calculated dyewq0 and the bare(non-corrected)
 !!   dyew matrix
 !!
-!! PARENTS
-!!      ddb_hybrid,m_ifc,respfn
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine q0dy3_calc(natom,dyewq0,dyew,option)
@@ -2019,7 +1975,7 @@ subroutine q0dy3_calc(natom,dyewq0,dyew,option)
 !Local variables -------------------------
 !scalars
  integer :: ia,ib,mu,nu
- character(len=500) :: message
+ character(len=500) :: msg
 
 ! *********************************************************************
 
@@ -2035,10 +1991,10 @@ subroutine q0dy3_calc(natom,dyewq0,dyew,option)
      end do
    end do
  else
-   write (message, '(3a)')&
+   write (msg, '(3a)')&
 &   'option should be 1 or 2.',ch10,&
 &   'action: correct calling routine'
-   MSG_BUG(message)
+   ABI_BUG(msg)
  end if
 
  if(option==2)then
@@ -2089,11 +2045,6 @@ end subroutine q0dy3_calc
 !! TODO
 !! A full description of the equations should be included
 !!
-!! PARENTS
-!!      m_dynmat,m_phgamma,relaxpol
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine symdyma(dmati,indsym,natom,nsym,qptn,rprimd,symrel,symafm)
@@ -2120,7 +2071,7 @@ subroutine symdyma(dmati,indsym,natom,nsym,qptn,rprimd,symrel,symafm)
 
 ! *********************************************************************
 
-!0) initializations
+ ! 0) initializations
  call matr3inv(rprimd,gprimd)
  do isym=1,nsym
    call mati3inv(symrel(:,:,isym),symrec(:,:,isym))
@@ -2164,40 +2115,41 @@ subroutine symdyma(dmati,indsym,natom,nsym,qptn,rprimd,symrel,symafm)
    end do
  end do
 
-
-!Get the symq of the CURRENT Q POINT
-!mjv: set prtvol=0 for production runs.
+ ! Get the symq of the CURRENT Q POINT
+ ! mjv: set prtvol=0 for production runs.
  call littlegroup_q(nsym,qptn,symq,symrec,symafm,timrev,prtvol=0)
 
  indij(:,:)=0
  dynmatint=zero
 
- do isym=1,nsym                                 ! loop over all the symmetries
-!  write(std_out,*) 'current symmetry',isym
-   do itirev=1,2                                 ! loop over the time-reversal symmetry
-     isgn=3-2*itirev                             ! to take into accont the time-reversal
-!    write(std_out,*) 'timereversal',isgn
-     if (symq(4,itirev,isym)==1) then             ! isym belongs to the wave vector point group
-!      write(std_out,*) 'isym belongs to the wave vector point group'
-       do iat=1,natom                              ! loop over the atoms
-         do jat=1,natom                            ! loop over the atoms
-           niat=indsym(4,isym,iat)                   ! niat={R|t}iat
-           njat=indsym(4,isym,jat)                   ! njat={R|t}jat
+ do isym=1,nsym  ! loop over all the symmetries
+   ! write(std_out,*) 'current symmetry',isym
+   do itirev=1,2  ! loop over the time-reversal symmetry
+     isgn=3-2*itirev
+     ! write(std_out,*) 'timereversal',isgn
+
+     if (symq(4,itirev,isym)==1) then ! isym belongs to the wave vector point group
+       ! write(std_out,*) 'isym belongs to the wave vector point group'
+       do iat=1,natom
+         do jat=1,natom
+           niat=indsym(4,isym,iat)  ! niat={R|t}iat
+           njat=indsym(4,isym,jat)  ! njat={R|t}jat
            indij(niat,njat)=indij(niat,njat)+1
-!          write(std_out,'(a,5i5)') 'current status:',iat,jat,niat,njat,indij(niat,njat)
-!          phase calculation, arg1 and arg2 because of two-atom derivative
+           ! write(std_out,'(a,5i5)') 'current status:',iat,jat,niat,njat,indij(niat,njat)
+           ! phase calculation, arg1 and arg2 because of two-atom derivative
            arg1=two_pi*( qptn(1)*indsym(1,isym,iat)+&
-&           qptn(2)*indsym(2,isym,iat)+&
-&           qptn(3)*indsym(3,isym,iat) )
+             qptn(2)*indsym(2,isym,iat)+&
+             qptn(3)*indsym(3,isym,iat) )
            arg2=two_pi*( qptn(1)*indsym(1,isym,jat)+&
-&           qptn(2)*indsym(2,isym,jat)+&
-&           qptn(3)*indsym(3,isym,jat) )
+             qptn(2)*indsym(2,isym,jat)+&
+             qptn(3)*indsym(3,isym,jat) )
+
            re=cos(arg1)*cos(arg2)+sin(arg1)*sin(arg2)
            im=isgn*(cos(arg2)*sin(arg1)-cos(arg1)*sin(arg2))
 
-           do idir=1,3                               ! loop over displacements
-             do jdir=1,3                              ! loop over displacements
-!              we pick the (iat,jat) (3x3) block of the dyn.mat.
+           do idir=1,3     ! loop over displacements
+             do jdir=1,3   ! loop over displacements
+               ! we pick the (iat,jat) (3x3) block of the dyn.mat.
                sumr=zero
                sumi=zero
                do ii=1,3
@@ -2210,7 +2162,6 @@ subroutine symdyma(dmati,indsym,natom,nsym,qptn,rprimd,symrel,symafm)
 
                dynmatint(nsym*(itirev-1)+isym,1,idir,iat,jdir,jat)=re*sumr-im*sumi
                dynmatint(nsym*(itirev-1)+isym,2,idir,iat,jdir,jat)=re*sumi+im*sumr
-
              end do
            end do
          end do
@@ -2219,8 +2170,7 @@ subroutine symdyma(dmati,indsym,natom,nsym,qptn,rprimd,symrel,symafm)
    end do ! time-reversal
  end do ! symmetries
 
-
-!4) make the average, get the final symmetric dynamical matrix
+ !4) make the average, get the final symmetric dynamical matrix
  do iat=1,natom
    do jat=1,natom
      do idir=1,3
@@ -2294,11 +2244,6 @@ end subroutine symdyma
 !!    introduction of the q vector for phonon symmetrization
 !! This routine should once be merged with sygrad...
 !!
-!! PARENTS
-!!      dfpt_nstdy,dfpt_nstpaw
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine dfpt_sygra(natom,desym,deunsy,indsym,ipert,nsym,qpt,symrec)
@@ -2317,16 +2262,6 @@ subroutine dfpt_sygra(natom,desym,deunsy,indsym,ipert,nsym,qpt,symrec)
  real(dp) :: arg,im,re,sumi,sumr
 
 ! *********************************************************************
-
-!DEBUG
-!write(std_out,*)' dfpt_sygra : enter '
-!write(std_out,*)' dfpt_sygra : qpt(:)',qpt(:)
-!do ia=1,natom
-!do mu=1,3
-!write(std_out,*)' dfpt_sygra : deunsy(:2,mu,ia)',deunsy(:2,mu,ia)
-!enddo
-!enddo
-!ENDDEBUG
 
  if (nsym==1) then
 
@@ -2425,11 +2360,6 @@ end subroutine dfpt_sygra
 !! where the columns of R and G are the dimensional primitive translations
 !! in real and reciprocal space respectively.
 !! Note the use of "symrec" in the symmetrization expression above.
-!!
-!! PARENTS
-!!      dfpt_dyfro
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -2578,11 +2508,6 @@ end subroutine dfpt_sydy
 !! OUTPUT
 !!  d2cart(2,3,mpert,3,mpert) without the wings
 !!
-!! PARENTS
-!!      respfn
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine wings3(carflg,d2cart,mpert)
@@ -2648,11 +2573,6 @@ end subroutine wings3
 !! TODO
 !! List of ouput should be included.
 !!
-!! PARENTS
-!!      ddb_hybrid,m_ifc,m_tdep_abitypes
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine asrif9(asr,atmfrc,natom,nrpt,rpt,wghatm)
@@ -2671,13 +2591,10 @@ subroutine asrif9(asr,atmfrc,natom,nrpt,rpt,wghatm)
 
 ! *********************************************************************
 
- DBG_ENTER("COLL")
-
  if(asr==1.or.asr==2)then
-
    found=0
-!  Search for the R vector which is equal to ( 0 , 0 , 0 )
-!  This vector leaves the atom a on itself !
+   ! Search for the R vector which is equal to ( 0 , 0 , 0 )
+   ! This vector leaves the atom a on itself !
    do irpt=1,nrpt
      if (all(abs(rpt(:,irpt))<=1.0d-10)) then
        found=1
@@ -2687,7 +2604,7 @@ subroutine asrif9(asr,atmfrc,natom,nrpt,rpt,wghatm)
    end do
 
    if(found==0)then
-     MSG_BUG('Not able to find the vector R=(0,0,0).')
+     ABI_BUG('Not able to find the vector R=(0,0,0).')
    end if
 
    do mu=1,3
@@ -2696,8 +2613,8 @@ subroutine asrif9(asr,atmfrc,natom,nrpt,rpt,wghatm)
          sumifc=zero
          do ib=1,natom
 
-!          Get the sumifc of interatomic forces acting on the atom ia,
-!          either in a symmetrical manner, or an unsymmetrical one.
+           ! Get the sumifc of interatomic forces acting on the atom ia,
+           ! either in a symmetrical manner, or an unsymmetrical one.
            if(asr==1)then
              do irpt=1,nrpt
                sumifc=sumifc+wghatm(ia,ib,irpt)*atmfrc(mu,ia,nu,ib,irpt)
@@ -2705,26 +2622,172 @@ subroutine asrif9(asr,atmfrc,natom,nrpt,rpt,wghatm)
            else if(asr==2)then
              do irpt=1,nrpt
                sumifc=sumifc+&
-&               (wghatm(ia,ib,irpt)*atmfrc(mu,ia,nu,ib,irpt)+&
-&               wghatm(ia,ib,irpt)*atmfrc(nu,ia,mu,ib,irpt))/2
+                (wghatm(ia,ib,irpt)*atmfrc(mu,ia,nu,ib,irpt)+&
+                 wghatm(ia,ib,irpt)*atmfrc(nu,ia,mu,ib,irpt))/2
              end do
            end if
          end do
 
-!        Correct the self-interaction in order to fulfill the ASR
+         ! Correct the self-interaction in order to fulfill the ASR
          atmfrc(mu,ia,nu,ia,izero)=atmfrc(mu,ia,nu,ia,izero)-sumifc
-         if(asr==2)then
-           atmfrc(nu,ia,mu,ia,izero)=atmfrc(mu,ia,nu,ia,izero)
-         end if
-
+         if (asr==2) atmfrc(nu,ia,mu,ia,izero)=atmfrc(mu,ia,nu,ia,izero)
        end do
      end do
    end do
  end if
 
- DBG_EXIT("COLL")
-
 end subroutine asrif9
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_dynmat/get_bigbox_and_weights
+!! NAME
+!! get_bigbox_and_weights
+!!
+!! FUNCTION
+!! Compute the Big Box containing the R points in the cartesian real space needed to Fourier Transform
+!! the dynamical matrix into its corresponding interatomic force.
+!!
+!! INPUTS
+!! brav= Bravais Lattice (1 or -1=S.C.;2=F.C.C.;3=BCC;4=Hex.)
+!! natom= Number of atoms
+!! nqbz= Number of q-points in BZ.
+!! ngqpt(3)= Numbers used to generate the q points to sample the Brillouin zone using an homogeneous grid
+!! nqshift= number of shifts in q-mesh
+!! qshift(3, nqshift) = Q-mesh shifts
+!! rprim(3,3)= Normalized coordinates in real space.
+!! rprimd, gprimd
+!! rcan(3,natom)  = Atomic position in canonical coordinates
+!! cutmode=Define the cutoff used to filter the output R-points according to their weights.
+!!   0 --> No cutoff (mainly for debugging)
+!!   1 --> Include only those R-points for which sum(abs(wg(:,:,irpt)) < tol20
+!!         This is the approach used for the dynamical matrix.
+!!   2 --> Include only those R-points for which the trace over iatom of abs(wg(iat,iat,irpt)) < tol20
+!!         This option is used for objects that depend on a single atomic index.
+!! comm= MPI communicator
+!!
+!! OUTPUT
+!! nrpt= Total Number of R points in the Big Box
+!! cell(3,nrpt) Give the index of the the cell and irpt
+!! rpt(3,nrpt)= Canonical coordinates of the R points in the unit cell. These coordinates are normalized (=> * acell(3)!!)
+!! r_inscribed_sphere
+!! wghatm(natom,natom,nrpt)= Weights associated to a pair of atoms and to a R vector
+!!
+!! SOURCE
+
+subroutine get_bigbox_and_weights(brav, natom, nqbz, ngqpt, nqshift, qshift, rprim, rprimd, gprim, rcan, &
+                                  cutmode, nrpt, rpt, cell, wghatm, r_inscribed_sphere, comm)
+
+!Arguments -------------------------------
+!scalars
+ integer,intent(in) :: brav, natom, nqbz, nqshift, cutmode, comm
+ integer,intent(out) :: nrpt
+ real(dp),intent(out) :: r_inscribed_sphere
+!arrays
+ integer,intent(in) :: ngqpt(3)
+ real(dp),intent(in) :: gprim(3,3),rprim(3,3),rprimd(3,3), rcan(3, natom)
+ real(dp),intent(in) :: qshift(3, nqshift)
+ integer,allocatable,intent(out) :: cell(:,:)
+ real(dp),allocatable,intent(out) :: rpt(:,:), wghatm(:,:,:)
+
+!Local variables -------------------------
+!scalars
+ integer :: my_ierr, ierr, ii, irpt, all_nrpt
+ real(dp) :: toldist
+ integer :: ngqpt9(9)
+ character(len=500*4) :: msg
+!arrays
+ integer,allocatable :: all_cell(:,:)
+ real(dp),allocatable :: all_rpt(:,:), all_wghatm(:,:,:)
+
+! *********************************************************************
+
+ ABI_CHECK(any(cutmode == [0, 1, 2]), "cutmode should be in [0, 1, 2]")
+
+ ! Create the Big Box of R vectors in real space and compute the number of points (cells) in real space
+ call make_bigbox(brav, all_cell, ngqpt, nqshift, rprim, all_nrpt, all_rpt)
+
+ ! Weights associated to these R points and to atomic pairs
+ ABI_MALLOC(all_wghatm, (natom, natom, all_nrpt))
+
+ ! HM: this tolerance is highly dependent on the compilation/architecture
+ !     numeric errors in the DDB text file. Try a few tolerances and check whether all the weights are found.
+ ngqpt9 = 0; ngqpt9(1:3) = ngqpt(1:3)
+ toldist = tol8
+ do while (toldist <= tol6)
+   ! Note ngqpt(9) with intent(inout)!
+   call wght9(brav, gprim, natom, ngqpt9, nqbz, nqshift, all_nrpt, qshift, rcan, &
+              all_rpt, rprimd, toldist, r_inscribed_sphere, all_wghatm, my_ierr)
+   call xmpi_max(my_ierr, ierr, comm, ii)
+   if (ierr > 0) toldist = toldist * 10
+   if (ierr == 0) exit
+ end do
+
+ if (ierr > 0) then
+   write(msg, '(3a,es14.4,2a,i0, 14a)' ) &
+    'The sum of the weight is not equal to nqpt.',ch10,&
+    'The sum of the weights is: ',sum(all_wghatm),ch10,&
+    'The number of q points is: ',nqbz, ch10, &
+    'This might have several sources.',ch10,&
+    'If toldist is larger than 1.0e-8, the atom positions might be loose.',ch10,&
+    'and the q point weights not computed properly.',ch10,&
+    'Action: make input atomic positions more symmetric.',ch10,&
+    'Otherwise, you might increase "buffer" in m_dynmat.F90 see bigbx9 subroutine and recompile.',ch10,&
+    'Actually, this can also happen when ngqpt is 0 0 0,',ch10,&
+    'if abs(brav) /= 1, in this case you should change brav to 1. If brav is already set to 1 (default) try -1.'
+   ABI_ERROR(msg)
+ end if
+
+ ! Only conserve the necessary points in rpt.
+ nrpt = 0
+ do irpt=1,all_nrpt
+   if (filterw(all_wghatm(:,:,irpt))) cycle
+   nrpt = nrpt + 1
+ end do
+
+ ! Allocate output arrays and transfer data.
+ ABI_MALLOC(rpt, (3, nrpt))
+ ABI_MALLOC(cell, (3, nrpt))
+ ABI_MALLOC(wghatm, (natom, natom, nrpt))
+
+ ii = 0
+ do irpt=1,all_nrpt
+   if (filterw(all_wghatm(:,:,irpt))) cycle
+   ii = ii + 1
+   rpt(:, ii) = all_rpt(:,irpt)
+   wghatm(:,:,ii) = all_wghatm(:,:,irpt)
+   cell(:,ii) = all_cell(:,irpt)
+ end do
+
+ ABI_FREE(all_rpt)
+ ABI_FREE(all_wghatm)
+ ABI_FREE(all_cell)
+
+contains
+
+logical pure function filterw(wg)
+
+ real(dp),intent(in) :: wg(natom,natom)
+ integer :: iat
+ real(dp) :: trace
+
+ select case (cutmode)
+ case (1)
+   filterw = sum(abs(wg)) < tol20
+ case (2)
+   trace = zero
+   do iat=1,natom
+     trace = trace + abs(wg(iat,iat))
+   end do
+   filterw = trace < tol20
+ case default
+   filterw = .False.
+ end select
+
+end function filterw
+
+end subroutine get_bigbox_and_weights
 !!***
 
 !----------------------------------------------------------------------
@@ -2734,7 +2797,7 @@ end subroutine asrif9
 !! make_bigbox
 !!
 !! FUNCTION
-!! Helper functions that faciliates the generation  of a Big Box containing
+!! Helper functions to faciliate the generation of a Big Box containing
 !! all the R points in the cartesian real space needed to Fourier Transform
 !! the dynamical matrix into its corresponding interatomic force.
 !! See bigbx9 for the algorithm.
@@ -2749,21 +2812,16 @@ end subroutine asrif9
 !! rprim(3,3)= Normalized coordinates in real space  !!! IS THIS CORRECT?
 !!
 !! OUTPUT
-!! cell= (nrpt,3) Give the index of the the cell and irpt
-!! nprt= Number of R points in the Big Box
-!! rpt(3,nrpt)= Canonical coordinates of the R points in the unit cell
+!! cell(3,nrpt)= integer coordinates of the cells (R points) in the rprim basis
+!! nprt= Number of cells (R points) in the Big Box
+!! rpt(3,mrpt)= canonical coordinates of the cells (R points)
 !!  These coordinates are normalized (=> * acell(3)!!)
 !!  The array is allocated here with the proper dimension. Client code is responsible
 !!  for the deallocation.
 !!
-!! PARENTS
-!!      m_ifc
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
-subroutine make_bigbox(brav,cell,ngqpt,nqshft,rprim,nrpt,rpt)
+subroutine make_bigbox(brav, cell, ngqpt, nqshft, rprim, nrpt, rpt)
 
 !Arguments -------------------------------
 !scalars
@@ -2790,8 +2848,8 @@ subroutine make_bigbox(brav,cell,ngqpt,nqshft,rprim,nrpt,rpt)
 
  ! Now we can allocate and calculate the points and the weights.
  nrpt = mrpt
- ABI_ALLOCATE(rpt,(3,nrpt))
- ABI_ALLOCATE(cell,(3,nrpt))
+ ABI_MALLOC(rpt,(3,nrpt))
+ ABI_MALLOC(cell,(3,nrpt))
 
  choice=1
  call bigbx9(brav,cell,choice,mrpt,ngqpt,nqshft,nrpt,rprim,rpt)
@@ -2806,7 +2864,7 @@ end subroutine make_bigbox
 !! bigbx9
 !!
 !! FUNCTION
-!! Generation of a Big Box containing all the R points in the
+!! Generation of a Big Box containing all the R points (cells) in the
 !! cartesian real space needed to Fourier Transforms the dynamical
 !! matrix into its corresponding interatomic force.
 !!
@@ -2823,16 +2881,11 @@ end subroutine make_bigbox
 !! rprim(3,3)= Normalized coordinates in real space  !!! IS THIS CORRECT?
 !!
 !! OUTPUT
-!! cell= (nrpt,3) Give the index of the the cell and irpt
-!! nprt= Number of R points in the Big Box
-!! rpt(3,mrpt)= Canonical coordinates of the R points in the unit cell
+!! cell(3,nrpt)= integer coordinates of the cells (R points) in the rprim basis
+!! nprt= Number of cells (R points) in the Big Box
+!! rpt(3,mrpt)= canonical coordinates of the cells (R points)
 !!  These coordinates are normalized (=> * acell(3)!!)
 !!  (output only if choice=1)
-!!
-!! PARENTS
-!!      m_dynmat
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -2872,7 +2925,7 @@ subroutine bigbx9(brav,cell,choice,mrpt,ngqpt,nqshft,nrpt,rprim,rpt)
    if(choice/=0)then
      if (nrpt/=mrpt) then
        write(msg,'(2(a,i0))')' nrpt=',nrpt,' is not equal to mrpt= ',mrpt
-       MSG_BUG(msg)
+       ABI_BUG(msg)
      end if
      irpt=0
      do r1=-lim1,lim1
@@ -2897,7 +2950,7 @@ subroutine bigbx9(brav,cell,choice,mrpt,ngqpt,nqshft,nrpt,rprim,rpt)
    if(choice/=0)then
      if (nrpt/=mrpt) then
        write(msg,'(2(a,i0))')' nrpt=',nrpt,' is not equal to mrpt= ',mrpt
-       MSG_BUG(msg)
+       ABI_BUG(msg)
      end if
      irpt=0
      do r1=-lim1,lim1
@@ -2933,7 +2986,7 @@ subroutine bigbx9(brav,cell,choice,mrpt,ngqpt,nqshft,nrpt,rprim,rpt)
    if(choice/=0)then
      if(nrpt/=mrpt) then
        write(msg,'(2(a,i0))')' nrpt= ',nrpt,' is not equal to mrpt= ',mrpt
-       MSG_BUG(msg)
+       ABI_BUG(msg)
      end if
      irpt=0
      do r1=-lim1,lim1
@@ -2963,7 +3016,7 @@ subroutine bigbx9(brav,cell,choice,mrpt,ngqpt,nqshft,nrpt,rprim,rpt)
    if(choice/=0)then
      if(nrpt/=mrpt)then
        write(msg,'(2(a,i0))')' nrpt=',nrpt,' is not equal to mrpt=',mrpt
-       MSG_BUG(msg)
+       ABI_BUG(msg)
      end if
      irpt=0
      do r1=-lim1,lim1
@@ -2981,7 +3034,7 @@ subroutine bigbx9(brav,cell,choice,mrpt,ngqpt,nqshft,nrpt,rprim,rpt)
 
  else
    write(msg,'(a,i0,a)')' The value of brav= ',brav,' is not allowed (should be -1, 1, 2 or 4).'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
 end subroutine bigbx9
@@ -3007,11 +3060,6 @@ end subroutine bigbx9
 !! rcan(3,natom)  = Atomic position in canonical coordinates
 !! trans(3,natom) = Atomic translations : xred = rcan + trans
 !!
-!! PARENTS
-!!      m_ifc
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 
@@ -3027,49 +3075,39 @@ subroutine canat9(brav,natom,rcan,rprim,trans,xred)
 !Local variables -------------------------
 !scalars
  integer :: found,iatom,ii
- character(len=500) :: message
+ character(len=500) :: msg
 !arrays
  real(dp) :: dontno(3,4),rec(3),rok(3),shift(3),tt(3)
 
 ! *********************************************************************
 
- DBG_ENTER("COLL")
-
 !Normalization of the cartesian atomic coordinates
 !If not normalized : rcan(i) <- rcan(i) * acell(i)
  do iatom=1,natom
-   rcan(:,iatom)=xred(1,iatom)*rprim(:,1)+&
-&   xred(2,iatom)*rprim(:,2)+&
-&   xred(3,iatom)*rprim(:,3)
+   rcan(:,iatom)=xred(1,iatom)*rprim(:,1)+xred(2,iatom)*rprim(:,2)+xred(3,iatom)*rprim(:,3)
  end do
 
-!Study of the different cases for the Bravais lattice:
-
-!Simple Cubic Lattice
+ !Study of the different cases for the Bravais lattice:
  if (abs(brav)==1) then
+   !Simple Cubic Lattice
 
    do iatom=1,natom
-
-!    Canon will produces these coordinate transformations
-!    (Note : here we still use reduced coordinates )
+     ! Canon will produces these coordinate transformations
+     ! (Note: here we still use reduced coordinates )
      call wrap2_pmhalf(xred(1,iatom),rok(1),shift(1))
      call wrap2_pmhalf(xred(2,iatom),rok(2),shift(2))
      call wrap2_pmhalf(xred(3,iatom),rok(3),shift(3))
 
 !    New coordinates : rcan
-     rcan(:,iatom)=rok(1)*rprim(:,1)+&
-&     rok(2)*rprim(:,2)+&
-&     rok(3)*rprim(:,3)
+     rcan(:,iatom)=rok(1)*rprim(:,1)+rok(2)*rprim(:,2)+rok(3)*rprim(:,3)
 !    Translations between New and Old coordinates
-     tt(:)=xred(1,iatom)*rprim(:,1)+&
-&     xred(2,iatom)*rprim(:,2)+&
-&     xred(3,iatom)*rprim(:,3)
+     tt(:)=xred(1,iatom)*rprim(:,1)+xred(2,iatom)*rprim(:,2)+xred(3,iatom)*rprim(:,3)
      trans(:,iatom)=tt(:)-rcan(:,iatom)
    end do
 
  else if (brav==2) then
-!  Face Centered Lattice
-!  Special possible translations in the F.C.C. case
+   ! Face Centered Lattice
+   ! Special possible translations in the F.C.C. case
    dontno(:,:)=zero
    dontno(2,2)=0.5_dp
    dontno(3,2)=0.5_dp
@@ -3081,13 +3119,13 @@ subroutine canat9(brav,natom,rcan,rprim,trans,xred)
      found=0
      do ii=1,4
        if (found==1) exit
-!      Canon will produces these coordinate transformations
+       ! Canon will produce these coordinate transformations
        call wrap2_pmhalf(rcan(1,iatom)+dontno(1,ii),rok(1),shift(1))
        call wrap2_pmhalf(rcan(2,iatom)+dontno(2,ii),rok(2),shift(2))
        call wrap2_pmhalf(rcan(3,iatom)+dontno(3,ii),rok(3),shift(3))
-!      In the F.C.C., ABS[ Ri ] + ABS[ Rj ] < or = 1/2
-!      The equal signs has been treated using a tolerance parameter
-!      not to have twice the same point in the unit cell !
+       ! In the F.C.C., ABS[ Ri ] + ABS[ Rj ] < or = 1/2
+       ! The equal sign hase been treated using a tolerance parameter
+       ! not to have twice the same point in the unit cell !
        rok(1)=rok(1)-1.0d-10
        rok(2)=rok(2)-2.0d-10
        rok(3)=rok(3)-5.0d-10
@@ -3095,11 +3133,11 @@ subroutine canat9(brav,natom,rcan,rprim,trans,xred)
          if (abs(rok(1))+abs(rok(3))<=0.5_dp) then
            if (abs(rok(2))+abs(rok(3))<=0.5_dp) then
              tt(:)=rcan(:,iatom)
-!            New coordinates : rcan
+             ! New coordinates : rcan
              rcan(1,iatom)=rok(1)+1.0d-10
              rcan(2,iatom)=rok(2)+2.0d-10
              rcan(3,iatom)=rok(3)+5.0d-10
-!            Translations between New and Old coordinates
+             ! Translations between New and Old coordinates
              trans(:,iatom)=tt(:)-rcan(:,iatom)
              found=1
            end if
@@ -3109,36 +3147,33 @@ subroutine canat9(brav,natom,rcan,rprim,trans,xred)
    end do
 
  else if (brav==3) then
-!  Body Centered Cubic Lattice
-!  Special possible translations in the B.C.C. case
-
+   ! Body Centered Cubic Lattice
+   ! Special possible translations in the B.C.C. case
    dontno(:,1)=zero
    dontno(:,2)=0.5_dp
    do iatom=1,natom
      found=0
      do ii=1,2
        if (found==1) exit
-!      Canon will produce these coordinate transformations
+       ! Canon will produce these coordinate transformations
        call wrap2_pmhalf(rcan(1,iatom)+dontno(1,ii),rok(1),shift(1))
        call wrap2_pmhalf(rcan(2,iatom)+dontno(2,ii),rok(2),shift(2))
        call wrap2_pmhalf(rcan(3,iatom)+dontno(3,ii),rok(3),shift(3))
-!      In the F.C.C., ABS[ Ri ] < or = 1/2
-!      and    ABS[ R1 ] + ABS[ R2 ] + ABS[ R3 ] < or = 3/4
-!      The equal signs has been treated using a tolerance parameter
-!      not to have twice the same point in the unit cell !
+       ! In the F.C.C., ABS[ Ri ] < or = 1/2
+       ! and    ABS[ R1 ] + ABS[ R2 ] + ABS[ R3 ] < or = 3/4
+       ! The equal signs have been treated using a tolerance parameter
+       ! not to have twice the same point in the unit cell !
        rok(1)=rok(1)-1.0d-10
        rok(2)=rok(2)-2.0d-10
        rok(3)=rok(3)-5.0d-10
        if(abs(rok(1))+abs(rok(2))+abs(rok(3))<=0.75_dp)then
-         if ( abs(rok(1))<=0.5_dp .and.&
-&         abs(rok(2))<=0.5_dp .and.&
-&         abs(rok(3))<=0.5_dp       ) then
+         if ( abs(rok(1))<=0.5_dp .and. abs(rok(2))<=0.5_dp .and. abs(rok(3))<=0.5_dp) then
            tt(:)=rcan(:,iatom)
-!          New coordinates : rcan
+           ! New coordinates : rcan
            rcan(1,iatom)=rok(1)+1.0d-10
            rcan(2,iatom)=rok(2)+2.0d-10
            rcan(3,iatom)=rok(3)+5.0d-10
-!          Translations between New and Old coordinates
+           ! Translations between New and Old coordinates
            trans(:,iatom)=tt(:)-rcan(:,iatom)
            found=1
          end if
@@ -3147,65 +3182,55 @@ subroutine canat9(brav,natom,rcan,rprim,trans,xred)
    end do
 
  else if (brav==4) then
-!  Hexagonal Lattice
-!  In this case, it is easier first to work in reduced coordinates space !
+   ! Hexagonal Lattice
+   ! In this case, it is easier first to work in reduced coordinates space !
    do iatom=1,natom
-!    Passage from the reduced space to the "lozenge" cell
+     ! Passage from the reduced space to the "lozenge" cell
      rec(1)=xred(1,iatom)-0.5_dp
      rec(2)=xred(2,iatom)-0.5_dp
      rec(3)=xred(3,iatom)
-!    Canon will produces these coordinate transformations
+     ! Canon will produces these coordinate transformations
      call wrap2_pmhalf(rec(1),rok(1),shift(1))
      call wrap2_pmhalf(rec(2),rok(2),shift(2))
      call wrap2_pmhalf(rec(3),rok(3),shift(3))
      rec(1)=rok(1)+0.5_dp
      rec(2)=rok(2)+0.5_dp
      rec(3)=rok(3)
-!    Passage in Cartesian Normalized Coordinates
-     rcan(:,iatom)=rec(1)*rprim(:,1)+&
-&     rec(2)*rprim(:,2)+&
-&     rec(3)*rprim(:,3)
-!    Use of a tolerance parameter not to have twice the same point
-!    in the unit cell !
+     ! Passage in Cartesian Normalized Coordinates
+     rcan(:,iatom)=rec(1)*rprim(:,1)+rec(2)*rprim(:,2)+rec(3)*rprim(:,3)
+     ! Use of a tolerance parameter not to have twice the same point in the unit cell !
      rcan(1,iatom)=rcan(1,iatom)-1.0d-10
      rcan(2,iatom)=rcan(2,iatom)-2.0d-10
-!    Passage to the honey-com hexagonal unit cell !
+     ! Passage to the honeycomb hexagonal unit cell !
      if (rcan(1,iatom)>0.5_dp) then
        rcan(1,iatom)=rcan(1,iatom)-1.0_dp
      end if
-     if (rcan(1,iatom)>zero.and.rcan(1,iatom)+sqrt(3.0_dp)*rcan&
-&     (2,iatom)>1.0_dp) then
+     if (rcan(1,iatom)>zero.and.rcan(1,iatom)+sqrt(3.0_dp)*rcan(2,iatom)>1.0_dp) then
        rcan(1,iatom)=rcan(1,iatom)-0.5_dp
        rcan(2,iatom)=rcan(2,iatom)-sqrt(3.0_dp)*0.5_dp
      end if
-     if (rcan(1,iatom)<=zero.and.sqrt(3.0_dp)*rcan(2,iatom)-rcan&
-&     (1,iatom)>1.0_dp) then
+     if (rcan(1,iatom)<=zero.and.sqrt(3.0_dp)*rcan(2,iatom)-rcan(1,iatom)>1.0_dp) then
        rcan(1,iatom)=rcan(1,iatom)+0.5_dp
        rcan(2,iatom)=rcan(2,iatom)-sqrt(3.0_dp)*0.5_dp
      end if
-!    Translations between New and Old coordinates
-     tt(:)=xred(1,iatom)*rprim(:,1)+xred(2,iatom)*rprim(:,2)&
-&     +xred(3,iatom)*rprim(:,3)
+     ! Translations between New and Old coordinates
+     tt(:)=xred(1,iatom)*rprim(:,1)+xred(2,iatom)*rprim(:,2)+xred(3,iatom)*rprim(:,3)
      trans(:,iatom)=tt(:)-rcan(:,iatom)
    end do
 
-!  End of the possible cases for brav : -1, 1, 2, 4.
+   ! End of the possible cases for brav : -1, 1, 2, 4.
  else
-
-   write(message, '(a,i0,a,a,a)' )&
-&   'The required value of brav=',brav,' is not available.',ch10,&
-&   'It should be -1, 1,2 or 4 .'
-   MSG_BUG(message)
+   write(msg, '(a,i0,a,a,a)' )&
+   'The required value of brav=',brav,' is not available.',ch10,&
+   'It should be -1, 1,2 or 4 .'
+   ABI_BUG(msg)
  end if
 
- call wrtout(std_out,' Canonical Atomic Coordinates ',"COLL")
-
+ call wrtout(std_out,' Canonical Atomic Coordinates ')
  do iatom=1,natom
-   write(message, '(a,i5,3es18.8)' )' atom',iatom,rcan(1,iatom),rcan(2,iatom),rcan(3,iatom)
-   call wrtout(std_out,message,'COLL')
+   write(msg, '(a,i5,3es18.8)' )' atom',iatom,rcan(1,iatom),rcan(2,iatom),rcan(3,iatom)
+   call wrtout(std_out,msg)
  end do
-
- DBG_EXIT("COLL")
 
 end subroutine canat9
 !!***
@@ -3235,11 +3260,6 @@ end subroutine canat9
 !! ib=number of the atom in the unit cell
 !! irpt= number of the unit cell to which belong the atom
 !! rcart(3)=cartesian coordinate of the atom indexed by index.
-!!
-!! PARENTS
-!!      ddb_hybrid,m_ifc
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -3301,11 +3321,6 @@ end subroutine canct9
 !! OUTPUT
 !!  (only checking)
 !!
-!! PARENTS
-!!      m_ifc
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine chkrp9(brav,rprim)
@@ -3319,7 +3334,7 @@ subroutine chkrp9(brav,rprim)
 !Local variables -------------------------
 !scalars
  integer :: ii,jj
- character(len=500) :: message
+ character(len=500) :: msg
 
 ! *********************************************************************
 
@@ -3331,16 +3346,15 @@ subroutine chkrp9(brav,rprim)
 !  Face Centered Lattice
    do ii=1,3
      do jj=1,3
-       if (  ( ii==jj .and. abs(rprim(ii,jj))>tol10) .or.&
-&       ( ii/=jj .and. abs(rprim(ii,jj)-.5_dp)>tol10) ) then
-         write(message, '(a,a,a,a,a,a,a,a,a,a,a)' )&
-&         'The input variable rprim does not correspond to the',ch10,&
-&         'fixed rprim to be used with brav=2 and ifcflag=1 :',ch10,&
-&         '   0  1/2  1/2',ch10,&
-&         '  1/2  0   1/2',ch10,&
-&         '  1/2 1/2   0 ',ch10,&
-&         'Action: rebuild your DDB by using the latter rprim.'
-         MSG_ERROR(message)
+       if (  ( ii==jj .and. abs(rprim(ii,jj))>tol10) .or. (ii/=jj .and. abs(rprim(ii,jj)-.5_dp)>tol10) ) then
+         write(msg, '(a,a,a,a,a,a,a,a,a,a,a)' )&
+         'The input variable rprim does not correspond to the',ch10,&
+         'fixed rprim to be used with brav=2 and ifcflag=1 :',ch10,&
+         '   0  1/2  1/2',ch10,&
+         '  1/2  0   1/2',ch10,&
+         '  1/2 1/2   0 ',ch10,&
+         'Action: rebuild your DDB by using the latter rprim.'
+         ABI_ERROR(msg)
        end if
      end do
    end do
@@ -3349,16 +3363,15 @@ subroutine chkrp9(brav,rprim)
 !  Body Centered Cubic Lattice
    do ii=1,3
      do jj=1,3
-       if (  ( ii==jj .and. abs(rprim(ii,jj)+.5_dp)>tol10) .or.&
-&       ( ii/=jj .and. abs(rprim(ii,jj)-.5_dp)>tol10) ) then
-         write(message, '(a,a,a,a,a,a,a,a,a,a,a)' )&
-&         'The input variable rprim does not correspond to the',ch10,&
-&         'fixed rprim to be used with brav=3 and ifcflag=1 :',ch10,&
-&         '  -1/2  1/2  1/2',ch10,&
-&         '   1/2 -1/2  1/2',ch10,&
-&         '   1/2  1/2 -1/2',ch10,&
-&         'Action: rebuild your DDB by using the latter rprim.'
-         MSG_ERROR(message)
+       if (  ( ii==jj .and. abs(rprim(ii,jj)+.5_dp)>tol10) .or. (ii/=jj .and. abs(rprim(ii,jj)-.5_dp)>tol10) ) then
+         write(msg, '(a,a,a,a,a,a,a,a,a,a,a)' )&
+         'The input variable rprim does not correspond to the',ch10,&
+         'fixed rprim to be used with brav=3 and ifcflag=1 :',ch10,&
+         '  -1/2  1/2  1/2',ch10,&
+         '   1/2 -1/2  1/2',ch10,&
+         '   1/2  1/2 -1/2',ch10,&
+         'Action: rebuild your DDB by using the latter rprim.'
+         ABI_ERROR(msg)
        end if
      end do
    end do
@@ -3366,31 +3379,30 @@ subroutine chkrp9(brav,rprim)
  else if (brav==4) then
 !  Hexagonal Lattice
    if (abs(rprim(1,1)-1.0_dp)>tol10 .or. &
-&   abs(rprim(3,3)-1.0_dp)>tol10 .or. &
-&   abs(rprim(2,1)      )>tol10 .or. &
-&   abs(rprim(3,1)      )>tol10 .or. &
-&   abs(rprim(1,3)      )>tol10 .or. &
-&   abs(rprim(2,3)      )>tol10 .or. &
-&   abs(rprim(3,2)      )>tol10 .or. &
-&   abs(rprim(1,2)+0.5_dp)>tol10 .or. &
-&   abs(rprim(2,2)-0.5_dp*sqrt(3.0_dp))>tol10 ) then
-     write(message, '(a,a,a,a,a,a,a,a,a,a,a)' )&
-&     'The input variable rprim does not correspond to the',ch10,&
-&     'fixed rprim to be used with brav=4 and ifcflag=1 :',ch10,&
-&     '   1      0      0',ch10,&
-&     '  -1/2 sqrt[3]/2 0',ch10,&
-&     '   0      0      1',ch10,&
-&     'Action: rebuild your DDB by using the latter rprim.'
-     MSG_ERROR(message)
+       abs(rprim(3,3)-1.0_dp)>tol10 .or. &
+       abs(rprim(2,1)      )>tol10 .or. &
+       abs(rprim(3,1)      )>tol10 .or. &
+       abs(rprim(1,3)      )>tol10 .or. &
+       abs(rprim(2,3)      )>tol10 .or. &
+       abs(rprim(3,2)      )>tol10 .or. &
+       abs(rprim(1,2)+0.5_dp)>tol10 .or. &
+       abs(rprim(2,2)-0.5_dp*sqrt(3.0_dp))>tol10 ) then
+     write(msg, '(a,a,a,a,a,a,a,a,a,a,a)' )&
+      'The input variable rprim does not correspond to the',ch10,&
+      'fixed rprim to be used with brav=4 and ifcflag=1 :',ch10,&
+      '   1      0      0',ch10,&
+      '  -1/2 sqrt[3]/2 0',ch10,&
+      '   0      0      1',ch10,&
+      'Action: rebuild your DDB by using the latter rprim.'
+     ABI_ERROR(msg)
    end if
 
  else
-
-   write(message, '(a,i4,a,a,a,a,a)' )&
-&   'The value of brav=',brav,' is not allowed.',ch10,&
-&   'Only  -1, 1,2,3 or 4 are allowed.',ch10,&
-&   'Action: change the value of brav in your input file.'
-   MSG_ERROR(message)
+   write(msg, '(a,i4,a,a,a,a,a)' )&
+   'The value of brav=',brav,' is not allowed.',ch10,&
+   'Only  -1, 1,2,3 or 4 are allowed.',ch10,&
+   'Action: change the value of brav in your input file.'
+   ABI_ERROR(msg)
  end if
 
 end subroutine chkrp9
@@ -3418,11 +3430,6 @@ end subroutine chkrp9
 !! OUTPUT
 !! dist(natom,natom,nrpt)=distances between atoms
 !!
-!! PARENTS
-!!      m_ifc
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine dist9(acell,dist,gprim,natom,nrpt,rcan,rprim,rpt)
@@ -3445,44 +3452,33 @@ subroutine dist9(acell,dist,gprim,natom,nrpt,rcan,rprim,rpt)
 
 !BIG loop on all generic atoms
  do ia=1,natom
-
-!  First transform canonical coordinates to reduced coordinates
+   ! First transform canonical coordinates to reduced coordinates
    do ii=1,3
-     xred(ii)=gprim(1,ii)*rcan(1,ia)+gprim(2,ii)*rcan(2,ia)&
-&     +gprim(3,ii)*rcan(3,ia)
+     xred(ii)=gprim(1,ii)*rcan(1,ia)+gprim(2,ii)*rcan(2,ia)+gprim(3,ii)*rcan(3,ia)
    end do
-!  Then to cartesian coordinates
-   ra(:)=xred(1)*acell(1)*rprim(:,1)+xred(2)*acell(2)*rprim(:,2)+&
-&   xred(3)*acell(3)*rprim(:,3)
+   ! Then to cartesian coordinates
+   ra(:)=xred(1)*acell(1)*rprim(:,1)+xred(2)*acell(2)*rprim(:,2)+xred(3)*acell(3)*rprim(:,3)
    do ib=1,natom
      do ii=1,3
-       xred(ii)=gprim(1,ii)*rcan(1,ib)+gprim(2,ii)*rcan(2,ib)&
-&       +gprim(3,ii)*rcan(3,ib)
+       xred(ii)=gprim(1,ii)*rcan(1,ib)+gprim(2,ii)*rcan(2,ib)+gprim(3,ii)*rcan(3,ib)
      end do
      do ii=1,3
-       rb(ii)=xred(1)*acell(1)*rprim(ii,1)+&
-&       xred(2)*acell(2)*rprim(ii,2)+&
-&       xred(3)*acell(3)*rprim(ii,3)
+       rb(ii)=xred(1)*acell(1)*rprim(ii,1)+xred(2)*acell(2)*rprim(ii,2)+xred(3)*acell(3)*rprim(ii,3)
      end do
      do irpt=1,nrpt
-!      First transform it to reduced coordinates
+       ! First transform it to reduced coordinates
        do ii=1,3
-         red(ii)=gprim(1,ii)*rpt(1,irpt)+gprim(2,ii)*rpt(2,irpt)&
-&         +gprim(3,ii)*rpt(3,irpt)
+         red(ii)=gprim(1,ii)*rpt(1,irpt)+gprim(2,ii)*rpt(2,irpt)+gprim(3,ii)*rpt(3,irpt)
        end do
-!      Then to cartesian coordinates
+       ! Then to cartesian coordinates
        do ii=1,3
-         rptcar(ii)=red(1)*acell(1)*rprim(ii,1)+&
-&         red(2)*acell(2)*rprim(ii,2)+&
-&         red(3)*acell(3)*rprim(ii,3)
+         rptcar(ii)=red(1)*acell(1)*rprim(ii,1)+red(2)*acell(2)*rprim(ii,2)+red(3)*acell(3)*rprim(ii,3)
        end do
        do ii=1,3
          rdiff(ii)=-rptcar(ii)+ra(ii)-rb(ii)
        end do
        dist(ia,ib,irpt)=(rdiff(1)**2+rdiff(2)**2+rdiff(3)**2)**0.5
-
      end do
-
    end do
  end do
 
@@ -3497,8 +3493,8 @@ end subroutine dist9
 !! ftifc_q2r
 !!
 !! FUNCTION
-!!   Generates the Fourier transform of the dynamical matrices
-!!   to obtain interatomic forces (real space).
+!!  Generates the Fourier transform of the dynamical matrices
+!!  to obtain interatomic forces (real space).
 !!
 !! INPUTS
 !! dynmat(2,3,natom,3,natom,nqpt)= Dynamical matrices coming from the Derivative Data Base
@@ -3513,12 +3509,6 @@ end subroutine dist9
 !!
 !! OUTPUT
 !! atmfrc(3,natom,3,natom,nrpt)= Interatomic Forces in real space.
-!!  We used the imaginary part just for debugging!
-!!
-!! PARENTS
-!!      m_ifc
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -3541,43 +3531,40 @@ subroutine ftifc_q2r(atmfrc,dynmat,gprim,natom,nqpt,nrpt,rpt,spqpt,comm)
 
 ! *********************************************************************
 
- DBG_ENTER("COLL")
-
  nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
 
-!Interatomic Forces from Dynamical Matrices
+ ! Interatomic Forces from Dynamical Matrices
  atmfrc = zero
  do irpt=1,nrpt
    if (mod(irpt, nprocs) /= my_rank) cycle ! mpi-parallelism
    do iqpt=1,nqpt
 
-!    Calculation of the k coordinates in Normalized Reciprocal coordinates
+     ! Calculation of the k coordinates in Normalized Reciprocal coordinates
      kk(1)=spqpt(1,iqpt)*gprim(1,1)+spqpt(2,iqpt)*gprim(1,2)+spqpt(3,iqpt)*gprim(1,3)
      kk(2)=spqpt(1,iqpt)*gprim(2,1)+spqpt(2,iqpt)*gprim(2,2)+spqpt(3,iqpt)*gprim(2,3)
      kk(3)=spqpt(1,iqpt)*gprim(3,1)+spqpt(2,iqpt)*gprim(3,2)+spqpt(3,iqpt)*gprim(3,3)
 
-!    Product of k and r
+     ! Product of k and r
      kr=kk(1)*rpt(1,irpt)+kk(2)*rpt(2,irpt)+kk(3)*rpt(3,irpt)
 
-!    Get the phase factor
+     ! Get the phase factor
      re=cos(two_pi*kr)
      im=sin(two_pi*kr)
 
-!    Now, big inner loops on atoms and directions
-
-!    The indices are ordered to give better speed
+     ! Now, big inner loops on atoms and directions
+     ! The indices are ordered to give better speed
      do ib=1,natom
        do nu=1,3
          do ia=1,natom
            do mu=1,3
-!            Real and imaginary part of the interatomic forces
-             atmfrc(mu,ia,nu,ib,irpt)=atmfrc(mu,ia,nu,ib,irpt)&
-&             +re*dynmat(1,mu,ia,nu,ib,iqpt)&
-&             +im*dynmat(2,mu,ia,nu,ib,iqpt)
-!            The imaginary part should be equal to zero !!!!!!
-!            atmfrc(2,mu,ia,nu,ib,irpt)=atmfrc(2,mu,ia,nu,ib,irpt)
-!            &          +re*dynmat(2,mu,ia,nu,ib,iqpt)
-!            &          -im*dynmat(1,mu,ia,nu,ib,iqpt)
+             ! Real and imaginary part of the interatomic forces
+             atmfrc(mu,ia,nu,ib,irpt)=atmfrc(mu,ia,nu,ib,irpt) &
+              +re*dynmat(1,mu,ia,nu,ib,iqpt)&
+              +im*dynmat(2,mu,ia,nu,ib,iqpt)
+             !The imaginary part should be equal to zero !!!!!!
+             !atmfrc(2,mu,ia,nu,ib,irpt)=atmfrc(2,mu,ia,nu,ib,irpt) &
+             !          +re*dynmat(2,mu,ia,nu,ib,iqpt) &
+             !          -im*dynmat(1,mu,ia,nu,ib,iqpt)
            end do
          end do
        end do
@@ -3587,11 +3574,8 @@ subroutine ftifc_q2r(atmfrc,dynmat,gprim,natom,nqpt,nrpt,rpt,spqpt,comm)
  end do
 
  call xmpi_sum(atmfrc, comm, ierr)
-
-!The sumifc has to be weighted by a normalization factor of 1/nqpt
+ !The sumifc has to be weighted by a normalization factor of 1/nqpt
  atmfrc = atmfrc/nqpt
-
- DBG_EXIT("COLL")
 
 end subroutine ftifc_q2r
 !!***
@@ -3604,9 +3588,8 @@ end subroutine ftifc_q2r
 !! ftifc_r2q
 !!
 !! FUNCTION
-!! (r->q):
-!!   Generates the Fourier transform of the interatomic forces
-!!   to obtain dynamical matrices (reciprocal space).
+!! Generates the Fourier transform of the interatomic forces
+!! to obtain dynamical matrices in reciprocal space: R --> q.
 !!
 !! INPUTS
 !! atmfrc(3,natom,3,natom,nrpt)= Interatomic Forces in real space
@@ -3623,14 +3606,9 @@ end subroutine ftifc_q2r
 !! OUTPUT
 !! dynmat(2,3,natom,3,natom,nqpt)= Dynamical matrices coming from the Derivative Data Base
 !!
-!! PARENTS
-!!      m_dynmat
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
-subroutine ftifc_r2q(atmfrc,dynmat,gprim,natom,nqpt,nrpt,rpt,spqpt,wghatm,comm)
+subroutine ftifc_r2q(atmfrc, dynmat, gprim, natom, nqpt, nrpt, rpt, spqpt, wghatm, comm)
 
 !Arguments -------------------------------
 !scalars
@@ -3645,53 +3623,67 @@ subroutine ftifc_r2q(atmfrc,dynmat,gprim,natom,nqpt,nrpt,rpt,spqpt,wghatm,comm)
 !scalars
  integer :: ia,ib,iqpt,irpt,mu,nu,cnt,my_rank,nprocs, ierr
  real(dp) :: facti,factr,im,kr,re
+ !real(dp) : w(2, natom, natom)
 !arrays
  real(dp) :: kk(3)
 
 ! *********************************************************************
 
  my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
+ dynmat = zero; cnt = 0
 
- dynmat = zero
- cnt = 0
+ ! MG: This is an hotspot. I don'tknow whether one should rewrite with BLAS1 dot or not.
+ ! Note, however, that simply removing the check on the weights inside the loop over atoms.
+ ! leads to a non-negligible speedup with intel (~30% if dipdip -1 is used)
  do iqpt=1,nqpt
+
+   ! Calculation of the k coordinates in Normalized Reciprocal coordinates
+   kk(1)=spqpt(1,iqpt)*gprim(1,1)+spqpt(2,iqpt)* gprim(1,2)+spqpt(3,iqpt)*gprim(1,3)
+   kk(2)=spqpt(1,iqpt)*gprim(2,1)+spqpt(2,iqpt)* gprim(2,2)+spqpt(3,iqpt)*gprim(2,3)
+   kk(3)=spqpt(1,iqpt)*gprim(3,1)+spqpt(2,iqpt)* gprim(3,2)+spqpt(3,iqpt)*gprim(3,3)
+
    do irpt=1,nrpt
      cnt = cnt + 1; if (mod(cnt, nprocs) /= my_rank) cycle ! MPI parallelism.
 
-     ! Calculation of the k coordinates in Normalized Reciprocal coordinates
-     kk(1)=spqpt(1,iqpt)*gprim(1,1)+spqpt(2,iqpt)* gprim(1,2)+spqpt(3,iqpt)*gprim(1,3)
-     kk(2)=spqpt(1,iqpt)*gprim(2,1)+spqpt(2,iqpt)* gprim(2,2)+spqpt(3,iqpt)*gprim(2,3)
-     kk(3)=spqpt(1,iqpt)*gprim(3,1)+spqpt(2,iqpt)* gprim(3,2)+spqpt(3,iqpt)*gprim(3,3)
-
-     ! Product of k and r
-     kr=kk(1)*rpt(1,irpt)+kk(2)*rpt(2,irpt)+kk(3)*rpt(3,irpt)
-
+     ! k.R
+     kr = kk(1)*rpt(1,irpt)+kk(2)*rpt(2,irpt)+kk(3)*rpt(3,irpt)
      ! Get phase factor
-     re=cos(two_pi*kr)
-     im=sin(two_pi*kr)
+     re = cos(two_pi*kr); im = sin(two_pi*kr)
 
      ! Inner loop on atoms and directions
      do ib=1,natom
        do ia=1,natom
-         if(abs(wghatm(ia,ib,irpt))>1.0d-10)then
-           factr=re*wghatm(ia,ib,irpt)
-           facti=im*wghatm(ia,ib,irpt)
+         !if (abs(wghatm(ia,ib,irpt)) > tol10) then  ! Commented by MG
+           factr = re * wghatm(ia,ib,irpt)
+           facti = im * wghatm(ia,ib,irpt)
            do nu=1,3
              do mu=1,3
-               !  Real and imaginary part of the dynamical matrices
-               dynmat(1,mu,ia,nu,ib,iqpt)=dynmat(1,mu,ia,nu,ib,iqpt)&
-&               +factr*atmfrc(mu,ia,nu,ib,irpt)
-!              Atmfrc should be real
-!              &       -im*wghatm(ia,ib,irpt)*atmfrc(2,mu,ia,nu,ib,irpt)
-               dynmat(2,mu,ia,nu,ib,iqpt)=dynmat(2,mu,ia,nu,ib,iqpt)&
-&               +facti*atmfrc(mu,ia,nu,ib,irpt)
-!              Atmfrc should be real
-!              &        +re*wghatm(ia,ib,irpt)*atmfrc(2,mu,ia,nu,ib,irpt)
+               ! Real and imaginary part of the dynamical matrices
+               ! Atmfrc should be real
+               dynmat(1,mu,ia,nu,ib,iqpt) = dynmat(1,mu,ia,nu,ib,iqpt) + factr * atmfrc(mu,ia,nu,ib,irpt)
+               dynmat(2,mu,ia,nu,ib,iqpt) = dynmat(2,mu,ia,nu,ib,iqpt) + facti * atmfrc(mu,ia,nu,ib,irpt)
              end do
            end do
-         end if
+         !end if
        end do
      end do
+
+     ! MG: New version: I don't know if it's faster.
+     !w(1,:,:) = re * wghatm(:,:,irpt)
+     !w(2,:,:) = im * wghatm(:,:,irpt)
+     !do ib=1,natom
+     !  do nu=1,3
+     !    do ia=1,natom
+     !      do mu=1,3
+     !        ! Real and imaginary part of the dynamical matrices
+     !        ! Atmfrc should be real
+     !        dynmat(1,mu,ia,nu,ib,iqpt) = dynmat(1,mu,ia,nu,ib,iqpt) + w(1,ia,ib) * atmfrc(mu,ia,nu,ib,irpt)
+     !        dynmat(2,mu,ia,nu,ib,iqpt) = dynmat(2,mu,ia,nu,ib,iqpt) + w(2,ia,ib) * atmfrc(mu,ia,nu,ib,irpt)
+     !     end do
+     !    end do
+     !  end do
+     !end do
+
    end do
  end do
 
@@ -3725,11 +3717,6 @@ end subroutine ftifc_r2q
 !! dddq(2,3,natom,3,natom,3)= Derivate of the dynamical matrix in cartesian coordinates.
 !!  The tree directions are stored in the last dimension.
 !!  These coordinates are normalized (=> * acell(3)!!)
-!!
-!! PARENTS
-!!      m_ifc
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -3812,11 +3799,6 @@ end subroutine dynmat_dq
 !! OUTPUT
 !! ifcloc(3,3)= matrix of interatomic force constants in local coordinates
 !!
-!! PARENTS
-!!      m_ifc
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine ifclo9(ifccar,ifcloc,vect1,vect2,vect3)
@@ -3866,7 +3848,7 @@ end subroutine ifclo9
 !! wght9
 !!
 !! FUNCTION
-!! Generates a weight to each R points of the Big Box and for each pair of atoms
+!! Generates a weight to each R point of the Big Box and for each pair of atoms
 !! For each R points included in the space generates by moving
 !! the unit cell around each atom; the weight will be one.
 !! Border conditions are provided.
@@ -3887,38 +3869,33 @@ end subroutine ifclo9
 !! rpt(3,nprt)=Canonical coordinates of the R points in the unit cell
 !!  These coordinates are normalized (=> * acell(3))
 !! rprimd(3,3)=dimensional primitive translations for real space (bohr)
+!! toldist= Tolerance on the distance between two R points.
 !!
 !! OUTPUT
 !! wghatm(natom,natom,nrpt)= Weight associated to the couple of atoms and the R vector
 !!  The vector r(atom2)-r(atom1)+rpt should be inside the moving box
 !! ngqpt(6)= can be modified
 !!
-!! PARENTS
-!!      m_ifc
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
-subroutine wght9(brav,gprim,natom,ngqpt,nqpt,nqshft,nrpt,qshft,rcan,rpt,rprimd,tolsym,r_inscribed_sphere,wghatm,ierr)
+subroutine wght9(brav,gprim,natom,ngqpt,nqpt,nqshft,nrpt,qshft,rcan,rpt,rprimd,toldist,r_inscribed_sphere,wghatm,ierr)
 
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: brav,natom,nqpt,nqshft,nrpt
  integer,intent(out) :: ierr
  real(dp),intent(out) :: r_inscribed_sphere
+ real(dp),intent(in) :: toldist
 !arrays
  integer,intent(inout) :: ngqpt(9)
- real(dp),intent(in) :: tolsym
  real(dp),intent(in) :: gprim(3,3),qshft(3,4),rcan(3,natom),rpt(3,nrpt),rprimd(3,3)
  real(dp),intent(out) :: wghatm(natom,natom,nrpt)
 
 !Local variables -------------------------
 !scalars
- integer :: ia,ib,ii,jj,kk,iqshft,irpt,jqshft,nbordh,tok,new_wght,nptws,nreq
- integer :: idir
+ integer :: ia,ib,ii,jj,kk,iqshft,irpt,jqshft,nbordh,tok,nptws,nreq,idir
  real(dp) :: factor,sumwght,normsq,proj
- character(len=500) :: message
+ character(len=500) :: msg
 !arrays
  integer :: nbord(9)
  real(dp) :: rdiff(9),red(3,3),ptws(4, 729),pp(3),rdiff_tmp(3)
@@ -3926,74 +3903,69 @@ subroutine wght9(brav,gprim,natom,ngqpt,nqpt,nqshft,nrpt,qshft,rcan,rpt,rprimd,t
 ! *********************************************************************
 
  ierr = 0
- DBG_ENTER("COLL")
 
-!First analyze the vectors qshft
- if(nqshft/=1)then
+ ! First analyze the vectors qshft
+ if (nqshft /= 1) then
 
-   if(brav==4)then
-     write(message,'(a,a,a,i5,a,a,a)' )&
-&     'For the time being, only nqshft=1',ch10,&
-&     'is allowed with brav=4, while it is nqshft=',nqshft,'.',ch10,&
-&     'Action: in the input file, correct either brav or nqshft.'
-     MSG_ERROR(message)
+   if (brav == 4) then
+     write(msg,'(3a,i0,3a)' )&
+     'For the time being, only nqshft=1',ch10,&
+     'is allowed with brav=4, while it is nqshft=',nqshft,'.',ch10,&
+     'Action: in the input file, correct either brav or nqshft.'
+     ABI_ERROR(msg)
    end if
 
-   if(nqshft==2)then
-!    Make sure that the q vectors form a BCC lattice
+   if (nqshft == 2) then
+     ! Make sure that the q vectors form a BCC lattice
      do ii=1,3
        if(abs(abs(qshft(ii,1)-qshft(ii,2))-.5_dp)>1.d-10)then
-         write(message, '(a,a,a,a,a,a,a)' )&
-&         'The test of the q1shft vectors shows that they',ch10,&
-&         'do not generate a body-centered lattice, which',ch10,&
-&         'is mandatory for nqshft=2.',ch10,&
-&         'Action: change the q1shft vectors in your input file.'
-         MSG_ERROR(message)
+         write(msg, '(a,a,a,a,a,a,a)' )&
+         'The test of the q1shft vectors shows that they',ch10,&
+         'do not generate a body-centered lattice, which',ch10,&
+         'is mandatory for nqshft=2.',ch10,&
+         'Action: change the q1shft vectors in your input file.'
+         ABI_ERROR(msg)
        end if
      end do
-   else if(nqshft==4)then
-!    Make sure that the q vectors form a FCC lattice
+   else if (nqshft == 4) then
+     ! Make sure that the q vectors form a FCC lattice
      do iqshft=1,3
        do jqshft=iqshft+1,4
          tok=0
          do ii=1,3
-!          Test on the presence of a +-0.5 difference
+           ! Test on the presence of a +-0.5 difference
            if(abs(abs(qshft(ii,iqshft)-qshft(ii,jqshft))-.5_dp) <1.d-10) tok=tok+1
-!          Test on the presence of a 0 or +-1.0 difference
+           ! Test on the presence of a 0 or +-1.0 difference
            if(abs(abs(qshft(ii,iqshft)-qshft(ii,jqshft))-1._dp) <1.d-10  .or.&
-&             abs(qshft(ii,iqshft)-qshft(ii,jqshft)) < 1.d-10) tok=tok+4
+              abs(qshft(ii,iqshft)-qshft(ii,jqshft)) < 1.d-10) tok=tok+4
          end do
-!        Test 1 should be satisfied twice, and test 2 once
+         ! Test 1 should be satisfied twice, and test 2 once
          if(tok/=6)then
-           write(message, '(7a)' )&
-&           'The test of the q1shft vectors shows that they',ch10,&
-&           'do not generate a face-centered lattice, which',ch10,&
-&           'is mandatory for nqshft=4.',ch10,&
-&           'Action: change the q1shft vectors in your input file.'
-           MSG_ERROR(message)
+           write(msg, '(7a)' )&
+           'The test of the q1shft vectors shows that they',ch10,&
+           'do not generate a face-centered lattice, which',ch10,&
+           'is mandatory for nqshft=4.',ch10,&
+           'Action: change the q1shft vectors in your input file.'
+           ABI_ERROR(msg)
          end if
        end do
      end do
    else
-     write(message, '(a,i4,3a)' )&
-&     'nqshft must be 1, 2 or 4. It is nqshft=',nqshft,'.',ch10,&
-&     'Action: change nqshft in your input file.'
-     MSG_ERROR(message)
+     write(msg, '(a,i4,3a)' )&
+     'nqshft must be 1, 2 or 4. It is nqshft=',nqshft,'.',ch10,&
+     'Action: change nqshft in your input file.'
+     ABI_ERROR(msg)
    end if
-
  end if
 
  factor=0.5_dp
- if(brav==2 .or. brav==3)then
-   factor=0.25_dp
- end if
+ if(brav==2 .or. brav==3) factor=0.25_dp
  if(nqshft/=1)factor=factor*2
 
  if (brav==1) then
-
    ! Does not support multiple shifts
    if (nqshft/=1) then
-     MSG_ERROR('This version of the weights does not support nqshft/=1.')
+     ABI_ERROR('This version of the weights does not support nqshft/=1.')
    end if
 
    ! Find the points of the lattice given by ngqpt*acell. These are used to define
@@ -4016,8 +3988,7 @@ subroutine wght9(brav,gprim,natom,ngqpt,nqpt,nqshft,nrpt,qshft,rcan,rpt,rprimd,t
      end do
    end do
  end if ! end new_wght
-
-!write(std_out,*)'factor,ngqpt',factor,ngqpt(1:3)
+ !write(std_out,*)'factor,ngqpt',factor,ngqpt(1:3)
 
  r_inscribed_sphere = sum((matmul(rprimd(:,:),ngqpt(1:3)))**2)
  do ii=-1,1
@@ -4039,10 +4010,10 @@ subroutine wght9(brav,gprim,natom,ngqpt,nqpt,nqshft,nrpt,qshft,rcan,rpt,rprimd,t
  do ia=1,natom
    do ib=1,natom
 
-!    Simple Lattice
+     ! Simple Lattice
      if (abs(brav)==1) then
-!      In this case, it is better to work in reduced coordinates
-!      As rcan is in canonical coordinates, => multiplication by gprim
+       ! In this case, it is better to work in reduced coordinates
+       ! As rcan is in canonical coordinates, => multiplication by gprim
        do ii=1,3
          red(1,ii)=  rcan(1,ia)*gprim(1,ii) +rcan(2,ia)*gprim(2,ii) +rcan(3,ia)*gprim(3,ii)
          red(2,ii)=  rcan(1,ib)*gprim(1,ii) +rcan(2,ib)*gprim(2,ii) +rcan(3,ib)*gprim(3,ii)
@@ -4051,14 +4022,14 @@ subroutine wght9(brav,gprim,natom,ngqpt,nqpt,nqshft,nrpt,qshft,rcan,rpt,rprimd,t
 
      do irpt=1,nrpt
 
-!      Initialization of the weights to 1.0
+       ! Initialization of the weights to 1.0
        wghatm(ia,ib,irpt)=1.0_dp
 
-!      Compute the difference vector
+       ! Compute the difference vector
 
-!      Simple Cubic Lattice
+       ! Simple Cubic Lattice
        if (abs(brav)==1) then
-!        Change of rpt to reduced coordinates
+         ! Change of rpt to reduced coordinates
          do ii=1,3
            red(3,ii)=  rpt(1,irpt)*gprim(1,ii) +rpt(2,irpt)*gprim(2,ii) +rpt(3,irpt)*gprim(3,ii)
            rdiff(ii)=red(2,ii)-red(1,ii)+red(3,ii)
@@ -4070,27 +4041,25 @@ subroutine wght9(brav,gprim,natom,ngqpt,nqpt,nqshft,nrpt,qshft,rcan,rpt,rprimd,t
            end do
            rdiff(1:3)=rdiff_tmp(1:3)
          end if
-!        Other lattices
+
        else
+         ! Other lattices
          do ii=1,3
            rdiff(ii)=rcan(ii,ib)-rcan(ii,ia)+rpt(ii,irpt)
          end do
        end if
 
-!      ***************************************************************
-
-!      Assignement of weights
+       ! Assignement of weights
 
        if(nqshft==1 .and. brav/=4)then
 
          if (brav/=1) then
            do ii=1,3
-!            If the rpt vector is greater than
-!            the allowed space => weight = 0.0
+             ! If the rpt vector is greater than the allowed space => weight = 0.0
              if (abs(rdiff(ii))-tol10>factor*ngqpt(ii)) then
                wghatm(ia,ib,irpt)=zero
              else if (abs(abs(rdiff(ii))-factor*ngqpt(ii)) <=1.0d-10) then
-!              If the point is in a boundary position => weight/2
+               ! If the point is in a boundary position => weight/2
                wghatm(ia,ib,irpt)=wghatm(ia,ib,irpt)/2
              end if
            end do
@@ -4103,10 +4072,10 @@ subroutine wght9(brav,gprim,natom,ngqpt,nqpt,nqshft,nrpt,qshft,rcan,rpt,rprimd,t
              ! if rdiff closer to ptws than the origin the weight is zero
              ! if rdiff close to the origin with respect to all the other ptws the weight is 1
              ! if rdiff is equidistant from the origin and N other ptws the weight is 1/(N+1)
-             if (proj-ptws(4,ii)>tolsym) then
+             if (proj - ptws(4,ii) > toldist) then
                nreq = 0
                EXIT
-             else if(abs(proj-ptws(4,ii))<=tolsym) then
+             else if(abs(proj-ptws(4,ii)) <= toldist) then
                nreq=nreq+1
              end if
            end do
@@ -4116,49 +4085,47 @@ subroutine wght9(brav,gprim,natom,ngqpt,nqpt,nqshft,nrpt,qshft,rcan,rpt,rprimd,t
          end if
 
        else if(brav==4)then
-!        Hexagonal
-
-!        Examination of the X and Y boundaries in order to form an hexagon
-!        First generate the relevant boundaries
+         ! Hexagonal
+         ! Examination of the X and Y boundaries in order to form an hexagon
+         ! First generate the relevant boundaries
          rdiff(4)=0.5_dp*( rdiff(1)+sqrt(3.0_dp)*rdiff(2) )
          ngqpt(4)=ngqpt(1)
          rdiff(5)=0.5_dp*( rdiff(1)-sqrt(3.0_dp)*rdiff(2) )
          ngqpt(5)=ngqpt(1)
 
-!        Test the four inequalities
+         ! Test the four inequalities
          do ii=1,5
            if(ii/=2)then
 
              nbord(ii)=0
-!            If the rpt vector is greater than
-!            the allowed space => weight = 0.0
+             ! If the rpt vector is greater than the allowed space => weight = 0.0
              if (abs(rdiff(ii))-1.0d-10>factor*ngqpt(ii)) then
                wghatm(ia,ib,irpt)=zero
              else if (abs(abs(rdiff(ii))-factor*ngqpt(ii)) <=1.0d-10) then
-!              If the point is in a boundary position increment nbord(ii)
+               ! If the point is in a boundary position increment nbord(ii)
                nbord(ii)=1
              end if
 
            end if
          end do
 
-!        Computation of weights
+         ! Computation of weights
          nbordh=nbord(1)+nbord(4)+nbord(5)
          if (nbordh==1) then
            wghatm(ia,ib,irpt)=wghatm(ia,ib,irpt)/2
          else if (nbordh==2) then
            wghatm(ia,ib,irpt)=wghatm(ia,ib,irpt)/3
          else if (nbordh/=0) then
-           MSG_BUG('There is a problem of borders and weights (hex).')
+           ABI_BUG('There is a problem of borders and weights (hex).')
          end if
          if (nbord(3)==1)then
            wghatm(ia,ib,irpt)=wghatm(ia,ib,irpt)/2
          end if
 
-!        BCC packing of k-points
        else if(nqshft==2 .and. brav/=4)then
 
-!        First, generate the relevant boundaries
+         ! BCC packing of k-points
+         ! First, generate the relevant boundaries
          rdiff(4)= rdiff(1)+rdiff(2)
          rdiff(5)= rdiff(1)-rdiff(2)
          rdiff(6)= rdiff(1)+rdiff(3)
@@ -4166,30 +4133,30 @@ subroutine wght9(brav,gprim,natom,ngqpt,nqpt,nqshft,nrpt,qshft,rcan,rpt,rprimd,t
          rdiff(8)= rdiff(3)+rdiff(2)
          rdiff(9)= rdiff(3)-rdiff(2)
          if(ngqpt(2)/=ngqpt(1) .or. ngqpt(3)/=ngqpt(1))then
-           write(message, '(a,a,a,3i6,a,a,a,a)' )&
-&           'In the BCC case, the three ngqpt numbers ',ch10,&
-&           '    ',ngqpt(1),ngqpt(2),ngqpt(3),ch10,&
-&           'should be equal.',ch10,&
-&           'Action: use identical ngqpt(1:3) in your input file.'
-           MSG_ERROR(message)
+           write(msg, '(a,a,a,3i6,a,a,a,a)' )&
+           'In the BCC case, the three ngqpt numbers ',ch10,&
+           '    ',ngqpt(1),ngqpt(2),ngqpt(3),ch10,&
+           'should be equal.',ch10,&
+           'Action: use identical ngqpt(1:3) in your input file.'
+           ABI_ERROR(msg)
          end if
          do ii=4,9
            ngqpt(ii)=ngqpt(1)
          end do
 
-!        Test the relevant inequalities
+         ! Test the relevant inequalities
          nbord(1)=0
          do ii=4,9
-!          If the rpt vector is greater than the allowed space => weight = 0.0
+           ! If the rpt vector is greater than the allowed space => weight = 0.0
            if (abs(rdiff(ii))-1.0d-10>factor*ngqpt(ii)) then
              wghatm(ia,ib,irpt)=zero
            else if (abs(abs(rdiff(ii))-factor*ngqpt(ii)) <=1.0d-10) then
-!            If the point is in a boundary position increment nbord(1)
+             ! If the point is in a boundary position increment nbord(1)
              nbord(1)=nbord(1)+1
            end if
          end do
 
-!        Computation of weights
+         ! Computation of weights
          if (nbord(1)==1) then
            wghatm(ia,ib,irpt)=wghatm(ia,ib,irpt)/2
          else if (nbord(1)==2) then
@@ -4199,43 +4166,42 @@ subroutine wght9(brav,gprim,natom,ngqpt,nqpt,nqshft,nrpt,qshft,rcan,rpt,rprimd,t
          else if (nbord(1)==4) then
            wghatm(ia,ib,irpt)=wghatm(ia,ib,irpt)/6
          else if (nbord(1)/=0) then
-           MSG_ERROR(' There is a problem of borders and weights (BCC).')
+           ABI_ERROR(' There is a problem of borders and weights (BCC).')
          end if
 
-!        FCC packing of k-points
        else if(nqshft==4 .and. brav/=4)then
 
-!        First, generate the relevant boundaries
+         ! FCC packing of k-points
+         ! First, generate the relevant boundaries
          rdiff(4)= (rdiff(1)+rdiff(2)+rdiff(3))*2._dp/3._dp
          rdiff(5)= (rdiff(1)-rdiff(2)+rdiff(3))*2._dp/3._dp
          rdiff(6)= (rdiff(1)+rdiff(2)-rdiff(3))*2._dp/3._dp
          rdiff(7)= (rdiff(1)-rdiff(2)-rdiff(3))*2._dp/3._dp
          if(ngqpt(2)/=ngqpt(1) .or. ngqpt(3)/=ngqpt(1))then
-           write(message, '(a,a,a,3i6,a,a,a,a)' )&
-&           'In the FCC case, the three ngqpt numbers ',ch10,&
-&           '    ',ngqpt(1),ngqpt(2),ngqpt(3),ch10,&
-&           'should be equal.',ch10,&
-&           'Action: use identical ngqpt(1:3) in your input file.'
-           MSG_ERROR(message)
+           write(msg, '(a,a,a,3i6,a,a,a,a)' )&
+           'In the FCC case, the three ngqpt numbers ',ch10,&
+           '    ',ngqpt(1),ngqpt(2),ngqpt(3),ch10,&
+           'should be equal.',ch10,&
+           'Action: use identical ngqpt(1:3) in your input file.'
+           ABI_ERROR(msg)
          end if
          do ii=4,7
            ngqpt(ii)=ngqpt(1)
          end do
 
-!        Test the relevant inequalities
+         ! Test the relevant inequalities
          nbord(1)=0
          do ii=1,7
-
-!          If the rpt vector is greater than the allowed space => weight = 0.0
+           ! If the rpt vector is greater than the allowed space => weight = 0.0
            if (abs(rdiff(ii))-1.0d-10>factor*ngqpt(ii)) then
              wghatm(ia,ib,irpt)=zero
-!            If the point is in a boundary position increment nbord(1)
+             ! If the point is in a boundary position increment nbord(1)
            else if (abs(abs(rdiff(ii))-factor*ngqpt(ii)) <=1.0d-10) then
              nbord(1)=nbord(1)+1
            end if
          end do
 
-!        Computation of weights
+         ! Computation of weights
          if (nbord(1)==1) then
            wghatm(ia,ib,irpt)=wghatm(ia,ib,irpt)/2
          else if (nbord(1)==2) then
@@ -4243,37 +4209,33 @@ subroutine wght9(brav,gprim,natom,ngqpt,nqpt,nqshft,nrpt,qshft,rcan,rpt,rprimd,t
          else if (nbord(1)==3) then
            wghatm(ia,ib,irpt)=wghatm(ia,ib,irpt)/4
          else if (nbord(1)/=0 .and. wghatm(ia,ib,irpt)>1.d-10) then
-!          Interestingly nbord(1)==4 happens for some points outside of the volume
-           MSG_BUG(' There is a problem of borders and weights (FCC).')
+           ! Interestingly nbord(1)==4 happens for some points outside of the volume
+           ABI_BUG(' There is a problem of borders and weights (FCC).')
          end if
 
        else
-         write(message, '(3a,i0,a)' )&
-&         'One should not arrive here ... ',ch10,&
-&         'The value nqshft ',nqshft,' is not available'
-         MSG_BUG(message)
+         write(msg, '(3a,i0,a)' )&
+         'One should not arrive here ... ',ch10,&
+         'The value nqshft ',nqshft,' is not available'
+         ABI_BUG(msg)
        end if
      end do ! Assignement of weights is done
-
    end do ! End of the double loop on ia and ib
  end do
 
-! Check the results
+ ! Check the results
  do ia=1,natom
    do ib=1,natom
      sumwght=zero
      do irpt=1,nrpt
-!      Check if the sum of the weights is equal to the number of q points
+       ! Check if the sum of the weights is equal to the number of q points
        sumwght=sumwght+wghatm(ia,ib,irpt)
-!      write(std_out,'(a,3i5)' )' atom1, atom2, irpt ; rpt ; wghatm ',ia,ib,irpt
-!      write(std_out,'(3es16.6,es18.6)' )&
-!      &    rpt(1,irpt),rpt(2,irpt),rpt(3,irpt),wghatm(ia,ib,irpt)
+       !write(std_out,'(a,3(i0,1x))' )' atom1, atom2, irpt ; rpt ; wghatm ',ia,ib,irpt
+       !write(std_out,'(3es16.6,es18.6)' )rpt(1,irpt),rpt(2,irpt),rpt(3,irpt),wghatm(ia,ib,irpt)
      end do
      if (abs(sumwght-nqpt)>tol10) ierr = 1
    end do
  end do
-
- DBG_EXIT("COLL")
 
 end subroutine wght9
 !!***
@@ -4305,11 +4267,6 @@ end subroutine wght9
 !!  blkflg(3,mpert,3,mpert,3,mpert)= matrix that indicates if an
 !!   element of d3 is available (1 if available, 0 otherwise)
 !!  d3(2,3,mpert,3,mpert,3,mpert)= matrix of the 3DTE
-!!
-!! PARENTS
-!!      m_ddb,nonlinear
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -4478,6 +4435,282 @@ subroutine d3sym(blkflg,d3,indsym,mpert,natom,nsym,symrec,symrel)
 end subroutine d3sym
 !!***
 
+!!****f* m_dynmat/d3lwsym
+!! NAME
+!! d3lwsym
+!!
+!! FUNCTION
+!! Given a set of calculated elements of the 3DTE matrix,
+!! build (nearly) all the other matrix elements that can be build using symmetries.
+!!
+!! INPUTS
+!!  has_strain = if .true. i2pert includes strain perturbation
+!!  indsym(4,nsym,natom)=indirect indexing array : for each
+!!   isym,iatom, fourth element is label of atom into which iatom is sent by
+!!   INVERSE of symmetry operation isym; first three elements are the primitive
+!!   translations which must be subtracted after the transformation to get back
+!!   to the original unit cell.
+!!  mpert =maximum number of ipert
+!!  natom= number of atoms
+!!  nsym=number of space group symmetries
+!!  symrec(3,3,nsym)=3x3 matrices of the group symmetries (reciprocal reduced space)
+!!  symrel(3,3,nsym)=3x3 matrices of the group symmetries (real reduced space)
+!!  symrel_cart(3,3,nsym)=3x3 matrices of the group symmetries (real cartesian space)
+!!
+!! SIDE EFFECTS
+!!  Input/Output
+!!  blkflg(3,mpert,3,mpert,3,mpert)= matrix that indicates if an
+!!   element of d3 is available (1 if available, 0 otherwise)
+!!  d3(2,3,mpert,3,mpert,3,mpert)= matrix of the 3DTE
+!!
+!! PARENTS
+!!      m_ddb,m_nonlinear
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+!subroutine d3lwsym(blkflg,d3,has_strain,indsym,mpert,natom,nsym,symrec,symrel,symrel_cart)
+subroutine d3lwsym(blkflg,d3,indsym,mpert,natom,nsym,symrec,symrel)
+
+!Arguments -------------------------------
+!scalars
+ integer,intent(in) :: mpert,natom,nsym
+! logical,intent(in) :: has_strain
+!arrays
+ integer,intent(in) :: indsym(4,nsym,natom),symrec(3,3,nsym),symrel(3,3,nsym)
+ integer,intent(inout) :: blkflg(3,mpert,3,mpert,3,mpert)
+ real(dp),intent(inout) :: d3(2,3,mpert,3,mpert,3,mpert)
+! real(dp),intent(in) :: symrel_cart(3,3,nsym)
+
+!Local variables -------------------------
+!scalars
+ integer :: found,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert,idisy1,idisy2,idisy3
+ integer :: ipesy1,ipesy2,ipesy3,isym,ithree
+!integer :: istr,i2dir_a,i2dir_b,disy2_a,idisy2_b
+ real(dp) :: sumi,sumr
+ logical :: is_strain
+!arrays
+! integer,save :: idx(18)=(/1,1,2,2,3,3,3,2,3,1,2,1,2,3,1,3,1,2/)
+ integer :: sym1(3,3),sym2(3,3),sym3(3,3)
+! integer :: strflg(3,mpert,3,3,3,mpert),strflg_car(3,mpert,3,3,3,mpert)
+! real(dp) :: d3str(2,3,mpert,3,3,3,mpert)
+
+! *********************************************************************
+
+!First, take into account the permutations symmetry of
+!(i1pert,i1dir) and (i2pert,i2dir)
+ do i1pert = 1, mpert
+   do i2pert = 1, mpert
+     do i3pert = 1, mpert
+
+       do i1dir = 1, 3
+         do i2dir = 1, 3
+           do i3dir = 1, 3
+
+             if ((blkflg(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)==1).and. &
+              (blkflg(i2dir,i2pert,i1dir,i1pert,i3dir,i3pert)/=1)) then
+
+               d3(1,i2dir,i2pert,i1dir,i1pert,i3dir,i3pert) = &
+               d3(1,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)
+               d3(2,i2dir,i2pert,i1dir,i1pert,i3dir,i3pert) = &
+              -d3(2,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)
+
+               blkflg(i2dir,i2pert,i1dir,i1pert,i3dir,i3pert) = 1
+
+             end if
+
+           end do
+         end do
+       end do
+
+     end do
+   end do
+ end do
+
+!For strain perturbation we need an array with the two strain indexes
+! if (has_strain) then
+!   strflg=0
+!   d3str=zero
+!   do i3pert=1, mpert
+!     do i3dir=1,3
+!       do i2pert=natom+3,natom+4
+!         do i2dir=1,3
+!           if (i2pert==natom+3) istr=i2dir
+!           if (i2pert==natom+4) istr=3+i2dir
+!           i2dir_a=idx(2*istr-1); i2dir_b=idx(2*istr)
+!           do i1pert=1,mpert
+!             do i1dir=1,3
+!               if (blkflg(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)==1) then
+!                 strflg(i1dir,i1pert,i2dir_a,i2dir_b,i3dir,i3pert)=1
+!                 d3str(:,i1dir,i1pert,i2dir_a,i2dir_b,i3dir,i3pert)= &
+!               & d3(:,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)          
+!                 if (i2pert==natom+4) then
+!                   strflg(i1dir,i1pert,i2dir_b,i2dir_a,i3dir,i3pert)=1
+!                   d3str(:,i1dir,i1pert,i2dir_b,i2dir_a,i3dir,i3pert)= &
+!                 & d3(:,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)          
+!                 end if
+!               end if
+!             end do
+!           end do
+!         end do
+!       end do
+!     end do
+!   end do
+! end if
+
+!Big Big Loop : symmetrize three times, because
+!of some cases in which one element is not yet available
+!at the first pass, and even at the second one !
+
+ do ithree=1,3
+
+!  Loop over perturbations
+   do i1pert = 1, mpert
+     do i2pert = 1, mpert
+       is_strain=.false.    
+       do i3pert = 1, mpert
+
+         do i1dir = 1, 3
+           do i2dir = 1, 3
+             do i3dir = 1, 3
+
+!              Will get element (idir1,ipert1,idir2,ipert2)
+!              so this element should not yet be present ...
+               if(blkflg(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)/=1)then
+
+                 d3(:,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert) = 0_dp
+
+                 do isym = 1, nsym
+
+                   found = 1
+
+                   if (i1pert <= natom) then
+                     ipesy1 = indsym(4,isym,i1pert)
+                     sym1(:,:) = symrec(:,:,isym)
+                   else if (i1pert == natom + 2) then
+                     ipesy1 = i1pert
+                     sym1(:,:) = symrel(:,:,isym)
+                   else
+                     found = 0
+                   end if
+
+                   if (i2pert <= natom) then
+                     ipesy2 = indsym(4,isym,i2pert)
+                     sym2(:,:) = symrec(:,:,isym)
+                   else if (i2pert == natom + 2) then
+                     ipesy2 = i2pert
+                     sym2(:,:) = symrel(:,:,isym)
+                   else if (i2pert == natom + 3.or. i2pert == natom + 4) then
+                     !TODO: Symmetries on strain perturbation do not work yet.
+                     found = 0
+                     is_strain=.true.
+
+!                     ipesy2 = i2pert
+!                     sym2(:,:) = NINT(symrel_cart(:,:,isym))
+!                     if (i2pert==natom+3) istr=i2dir
+!                     if (i2pert==natom+4) istr=3+i2dir
+!                     i2dir_a=idx(2*istr-1); i2dir_b=idx(2*istr)
+                   else
+                     found = 0
+                   end if
+
+                   if (i3pert <= natom) then
+                     ipesy3 = indsym(4,isym,i3pert)
+                     sym3(:,:) = symrec(:,:,isym)
+                   else if (i3pert == natom + 2.or.i3pert == natom + 8) then
+                     ipesy3 = i3pert
+                     sym3(:,:) = symrel(:,:,isym)
+                   else
+                     found = 0
+                   end if
+
+                   sumr = 0_dp ; sumi = 0_dp;
+                   if (.not.is_strain) then
+                     do idisy1 = 1, 3
+                       do idisy2 = 1, 3
+                         do idisy3 = 1, 3
+
+                           if ((sym1(i1dir,idisy1) /=0).and.(sym2(i2dir,idisy2) /=0) &
+&                           .and.(sym3(i3dir,idisy3) /=0)) then
+
+                             if (blkflg(idisy1,ipesy1,idisy2,ipesy2,idisy3,ipesy3) == 1) then
+
+                               sumr = sumr + sym1(i1dir,idisy1)*sym2(i2dir,idisy2)*&
+&                               sym3(i3dir,idisy3)*d3(1,idisy1,ipesy1,idisy2,ipesy2,idisy3,ipesy3)
+                               sumi = sumi + sym1(i1dir,idisy1)*sym2(i2dir,idisy2)*&
+&                               sym3(i3dir,idisy3)*d3(2,idisy1,ipesy1,idisy2,ipesy2,idisy3,ipesy3)
+
+                             else
+
+                               found = 0
+
+                             end if
+
+                           end if
+
+                         end do
+                       end do
+                     end do
+                   else 
+!                     do idisy1 = 1, 3
+!                       !do idisy2_a = 1, 3
+!                       !  do idisy2_b = 1, 3
+!                       do idisy2 = 1, 3
+!                         if (ipesy2==natom+3) istr=idisy2
+!                         if (ipesy2==natom+4) istr=3+idisy2
+!                         idisy2_a=idx(2*istr-1); idisy2_b=idx(2*istr)
+!                           do idisy3 = 1, 3
+!
+!                             if ((sym1(i1dir,idisy1) /=0).and.(sym2(i2dir_a,idisy2_a) /=0) &
+!&                             .and.(sym2(i2dir_b,idisy2_b) /=0).and.(sym3(i3dir,idisy3) /=0)) then
+!
+!                               if (strflg(idisy1,ipesy1,idisy2_a,idisy2_b,idisy3,ipesy3) == 1) then
+!
+!                                 sumr = sumr + sym1(i1dir,idisy1)*sym2(i2dir_a,idisy2_a)* &
+!&                                sym2(i2dir_b,idisy2_b)*sym3(i3dir,idisy3)*& 
+!&                                d3str(1,idisy1,ipesy1,idisy2_a,idisy2_b,idisy3,ipesy3)
+!                                 sumi = sumi + sym1(i1dir,idisy1)*sym2(i2dir_a,idisy2_b)*&
+!&                                sym2(i2dir_b,idisy2_b)*sym3(i3dir,idisy3)*& 
+!&                                d3str(2,idisy1,ipesy1,idisy2_a,idisy2_b,idisy3,ipesy3)
+!
+!                               else
+!
+!                                 found = 0
+!
+!                               end if
+!
+!                             end if
+!
+!                           end do
+!                         !end do
+!                       end do
+!                     end do
+                   end if        
+
+                   if (found == 1) then
+                     d3(1,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert) = sumr
+                     d3(2,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert) = sumi
+                     blkflg(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert) = 1
+                   end if
+
+                 end do  ! isym
+
+               end if  ! blkflg
+
+!              Close loop over perturbations
+             end do
+           end do
+         end do
+       end do
+     end do
+   end do
+
+ end do  ! close loop over ithree
+
+end subroutine d3lwsym
+!!***
+
 !----------------------------------------------------------------------
 
 !!****f* m_dynmat/sytens
@@ -4514,11 +4747,6 @@ end subroutine d3sym
 !!      -1   ->   use symmetry operations to obtain the corresponding element
 !!      -2   ->   element is zero by symmetry
 !!
-!! PARENTS
-!!      m_ddb,nonlinear,respfn
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine sytens(indsym,mpert,natom,nsym,rfpert,symrec,symrel)
@@ -4541,7 +4769,7 @@ subroutine sytens(indsym,mpert,natom,nsym,rfpert,symrec,symrel)
 
 !***********************************************************************
 
- ABI_ALLOCATE(pertsy,(3,mpert,3,mpert,3,mpert))
+ ABI_MALLOC(pertsy,(3,mpert,3,mpert,3,mpert))
  pertsy(:,:,:,:,:,:) = 0
 
 !Loop over perturbations
@@ -4708,334 +4936,294 @@ subroutine sytens(indsym,mpert,natom,nsym,rfpert,symrec,symrel)
 
  rfpert(:,:,:,:,:,:) = pertsy(:,:,:,:,:,:)
 
- ABI_DEALLOCATE(pertsy)
-
+ ABI_FREE(pertsy)
 
 end subroutine sytens
 !!***
 
-!----------------------------------------------------------------------
-
-!!****f* m_dynmat/symdm9
+!!****f* m_dynmat/sylwtens
+!!
 !! NAME
-!! symdm9
+!! sylwtens
 !!
 !! FUNCTION
-!! Use the set of special k points calculated by the Monkhorst & Pack Technique.
-!! Check if all the information for the k points are present in
-!! the DDB to determine their dynamical matrices.
-!! Generate the dynamical matrices of the set of k points which
-!! samples homogeneously the entire Brillouin zone.
+!! Determines the set of irreductible elements of the non-linear
+!! optical susceptibility and Raman tensors
 !!
 !! INPUTS
-!! blkflg(nsize,nblok)= flag of existence for each element of the DDB
-!! blknrm(1,nblok)=norm of qpt providing normalization
-!! blkqpt(1<ii<9,nblok)=q vector of a phonon mode (ii=1,2,3)
-!! blktyp(nblok)=1 or 2 depending on non-stationary or stationary block 3 for third order derivatives
-!! blkval(2,3*mpert*3*mpert,nblok)= all the dynamical matrices
-!! gprim(3,3)=dimensionless primitive translations in reciprocal space
-!! indsym = mapping of atoms under symops
-!! mpert =maximum number of ipert
-!! natom=number of atoms in unit cell
-!! nblok=number of blocks in the DDB
-!! nqpt=number of special q points
-!! nsym=number of space group symmetries
-!! rfmeth =
-!!   1 or -1 if non-stationary block
-!!   2 or -2 if stationary block
-!!   3 or -3 if third order derivatives
-!!   positive if symmetries are used to set elements to zero whenever possible, negative to prevent this to happen.
-!! rprim(3,3)=dimensionless primitive translations in real space
-!! spqpt(3,nqpt)=set of special q points generated by the Monkhorst & Pack Method
-!! symrec(3,3,nsym)=3x3 matrices of the group symmetries (reciprocal space)
-!! symrel(3,3,nsym)=3x3 matrices of the group symmetries (real space)
-!! comm=MPI communicator.
+!!  has_strain = if .true. i2pert includes strain perturbation
+!!  indsym(4,nsym,natom)=indirect indexing array described above: for each
+!!   isym,iatom, fourth element is label of atom into which iatom is sent by
+!!   INVERSE of symmetry operation isym; first three elements are the primitive
+!!   translations which must be subtracted after the transformation to get back
+!!   to the original unit cell.
+!!  mpert =maximum number of ipert
+!!  natom= number of atoms
+!!  nsym=number of space group symmetries
+!!  symrec(3,3,nsym)=3x3 matrices of the group symmetries (reciprocal reduced space)
+!!  symrel(3,3,nsym)=3x3 matrices of the group symmetries (real reduced space)
+!!  symrel_cart(3,3,nsym)=3x3 matrices of the group symmetries (real cartesian space)
 !!
 !! OUTPUT
-!! dynmat(2,3,natom,3,natom,nqpt)=dynamical matrices relative to the q points of the B.Z. sampling
-!! [qmissing]=Allocatable array with the indices of the q-points in the BZ that could not be obtained
-!!    by symmetry. If qmissing is present, the routine does not stop if the full BZ cannot be reconstructed.
-!!    The caller is responsible for filling the missing entries.
+!!  (see side effects)
 !!
-!! TODO
-!!   * A full description of the inputs should be included
-!!
-!! NOTES
-!!   Time-reversal symmetry is always assumed
+!! SIDE EFFECTS
+!!  rfpert(3,mpert,3,mpert,3,mpert) = array defining the type of perturbations
+!!       that have to be computed
+!!    At the input :
+!!       1   ->   element has to be computed explicitely
+!!    At the output :
+!!       1   ->   element has to be computed explicitely
+!!      -1   ->   use symmetry operations to obtain the corresponding element
+!!      -2   ->   element is zero by symmetry
 !!
 !! PARENTS
-!!      m_ifc
+!!      m_ddb,m_nonlinear,m_respfn_driver
 !!
 !! CHILDREN
 !!
 !! SOURCE
 
-subroutine symdm9(blkflg,blknrm,blkqpt,blktyp,blkval,&
-& dynmat,gprim,indsym,mpert,natom,nblok,nqpt,nsym,rfmeth,&
-& rprim,spqpt,symrec,symrel,comm,qmissing)
+!subroutine sylwtens(indsym,mpert,natom,nsym,rfpert,symrec,symrel,symrel_cart)
+subroutine sylwtens(indsym,mpert,natom,nsym,rfpert,symrec,symrel)
 
 !Arguments -------------------------------
 !scalars
- integer,intent(in) :: mpert,natom,nblok,nqpt,nsym,rfmeth,comm
+ integer,intent(in) :: mpert,natom,nsym
 !arrays
- integer,intent(in) :: blkflg(3,mpert,3,mpert,nblok),blktyp(nblok)
  integer,intent(in) :: indsym(4,nsym,natom),symrec(3,3,nsym),symrel(3,3,nsym)
- integer,allocatable,optional,intent(out) :: qmissing(:)
- real(dp),intent(in) :: blknrm(3,nblok),blkqpt(9,nblok)
- real(dp),intent(in) :: blkval(2,3*mpert*3*mpert,nblok),gprim(3,3),rprim(3,3)
- real(dp),intent(in) :: spqpt(3,nqpt)
- real(dp),intent(out) :: dynmat(2,3,natom,3,natom,nqpt)
+ integer,intent(inout) :: rfpert(3,mpert,3,mpert,3,mpert)
+! real(dp),intent(in) :: symrel_cart(3,3,nsym)
 
 !Local variables -------------------------
 !scalars
- integer :: ia,ib,iblok,idir1,idir2,ii,ipert1,ipert2,iqpt,isym,jj,kk,ll
- integer :: mu,nu,q1,q2,nqmiss,nprocs,my_rank,ierr
- real(dp),parameter :: tol=2.d-8
-!tolerance for equality of q points between those of the DDB and those of the sampling grid
- real(dp) :: arg1,arg2,im,re,sumi,sumr
- logical :: allow_qmiss
- character(len=500) :: message
+ integer :: flag,found,i1dir,i1dir_,i1pert,i1pert_,i2dir,i2dir_,i2pert,i2pert_
+! integer :: i2dir_a,i2dir_b
+ integer :: i3dir,i3dir_,i3pert,i3pert_,idisy1,idisy2,idisy3,ipesy1,ipesy2
+ integer :: ipesy3,isym
+! integer :: istr,idisy2_a,idisy2_b
+ logical :: is_strain
+! real(dp) :: flag_dp
 !arrays
- integer,allocatable :: qtest(:,:)
- integer :: qmiss_(nqpt)
- real(dp) :: qq(3),qsym(6),ss(3,3)
- real(dp),allocatable :: ddd(:,:,:,:,:)
+! integer,save :: idx(18)=(/1,1,2,2,3,3,3,2,3,1,2,1,2,3,1,3,1,2/)
+ integer :: sym1(3,3),sym2(3,3),sym3(3,3)
+ integer,allocatable :: pertsy(:,:,:,:,:,:)
 
-! *********************************************************************
+!***********************************************************************
 
- nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
+ ABI_MALLOC(pertsy,(3,mpert,3,mpert,3,mpert))
+ pertsy(:,:,:,:,:,:) = 0
 
- ! Initialize output (some q-points might not be reconstructed if qmissing is present)
- dynmat = zero
- allow_qmiss = (present(qmissing))
+!Loop over perturbations
 
- ABI_ALLOCATE(ddd,(2,3,natom,3,natom))
-!Check if the blkqpt points and their symmetrics are sufficient
-!in the DDB to retrieve all the q points of the B.Z. sampling
+ do i1pert_ = 1, mpert
+   do i2pert_ = 1, mpert
+     is_strain=.false.    
+     do i3pert_ = 1, mpert
 
-!Initialization of a test variable
-! qtest(iqpt,1)=iblok
-! qtest(iqpt,2)=isym
-! qtest(iqpt,3)=time_reversal
- ABI_ALLOCATE(qtest,(nqpt,3))
- do iqpt=1,nqpt
-   qtest(iqpt,1)=0
- end do
+       do i1dir_ = 1, 3
+         do i2dir_ = 1, 3
+           do i3dir_ = 1, 3
 
-!Q points coming from the DDB
-!write(std_out,*)' Nbr. of Blocks -> ',nblok
-! TODO: This part scales badly with nblock/nqpt
-! One could use listkk or rearrange the loop so that iqpt comes first and then MPI-parallelize.
+             i1pert = (mpert - i1pert_ + 1)
+             if (i1pert <= natom) i1pert = natom + 1 - i1pert
+             i2pert = (mpert - i2pert_ + 1)
+             if (i2pert <= natom) i2pert = natom + 1 - i2pert
+             i3pert = (mpert - i3pert_ + 1)
+             if (i3pert <= natom) i3pert = natom + 1 - i3pert
 
- do iblok=1,nblok
-
-   if (abs(blktyp(iblok))==abs(rfmeth)) then
-     qq(1)=blkqpt(1,iblok)/blknrm(1,iblok)
-     qq(2)=blkqpt(2,iblok)/blknrm(1,iblok)
-     qq(3)=blkqpt(3,iblok)/blknrm(1,iblok)
-
-!    Calculation of the symmetric points (including Time Reversal)
-     do isym=1,nsym
-       qsym(1)=qq(1)*symrec(1,1,isym)+qq(2)*symrec(1,2,isym)+qq(3)*symrec(1,3,isym)
-       qsym(2)=qq(1)*symrec(2,1,isym)+qq(2)*symrec(2,2,isym)+qq(3)*symrec(2,3,isym)
-       qsym(3)=qq(1)*symrec(3,1,isym)+qq(2)*symrec(3,2,isym)+qq(3)*symrec(3,3,isym)
-
-!      Dont forget the Time Reversal symmetry
-       qsym(4)=-qq(1)*symrec(1,1,isym)-qq(2)*symrec(1,2,isym)-qq(3)*symrec(1,3,isym)
-       qsym(5)=-qq(1)*symrec(2,1,isym)-qq(2)*symrec(2,2,isym)-qq(3)*symrec(2,3,isym)
-       qsym(6)=-qq(1)*symrec(3,1,isym)-qq(2)*symrec(3,2,isym)-qq(3)*symrec(3,3,isym)
-
-!      Comparison between the q points and their symmetric points
-!      and the set of q points which samples the entire Brillouin zone
-       do iqpt=1,nqpt
-
-         if (mod(abs(spqpt(1,iqpt)-qsym(1))+tol,1._dp)<2*tol)then
-           if (mod(abs(spqpt(2,iqpt)-qsym(2))+tol,1._dp)<2*tol)then
-             if (mod(abs(spqpt(3,iqpt)-qsym(3))+tol,1._dp)<2*tol)then
-
-!              write(std_out,*)' q point from the DDB ! '
-!              write(std_out,*)' block -> ',iblok
-!              write(std_out,*)' sym.  -> ',isym
-!              write(std_out,*)' No Time Reversal '
-!              write(std_out,*)'(',qsym(1),',',qsym(2),',',qsym(3),')'
-!              write(std_out,*)' '
-
-               qtest(iqpt,1)=iblok
-               qtest(iqpt,2)=isym
-               qtest(iqpt,3)=0
+             if (i1pert <= natom) then
+               i1dir = i1dir_ ; i2dir = i2dir_ ; i3dir = i3dir_
+             else if (i2pert <= natom) then
+               i1dir = i2dir_ ; i2dir = i1dir_ ; i3dir = i3dir_
+             else if (i3pert <= natom) then
+               i1dir = i3dir_ ; i2dir = i2dir_ ; i3dir = i1dir_
+             else
+               i1dir = i1dir_ ; i2dir = i2dir_ ; i3dir = i3dir_
              end if
-           end if
-         end if
 
-         if (mod(abs(spqpt(1,iqpt)-qsym(4))+tol,1._dp)<2*tol)then
-           if (mod(abs(spqpt(2,iqpt)-qsym(5))+tol,1._dp)<2*tol)then
-             if (mod(abs(spqpt(3,iqpt)-qsym(6))+tol,1._dp)<2*tol)then
+             if (rfpert(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert) /= 0) then
 
-!              write(std_out,*)' q point from the DDB ! '
-!              write(std_out,*)' block -> ',iblok
-!              write(std_out,*)' sym.  -> ',isym
-!              write(std_out,*)' Time Reversal '
-!              write(std_out,*)'(',qsym(4),',',qsym(5),',',qsym(6),')'
-!              write(std_out,*)' '
+!              Loop over all symmetries
 
-               qtest(iqpt,1)=iblok
-               qtest(iqpt,2)=isym
-               qtest(iqpt,3)=1
-             end if
-           end if
-         end if
+               flag = 0
+               do isym = 1, nsym
 
-       end do ! iqpt
-     end do ! isym
+                 found = 1
 
-   end if
- end do ! iblok
+!                Select the symmetric element of i1pert,i2pert,i3pert
 
-! Check if all the information relatives to the q points sampling are found in the DDB;
-! if not => stop message
- nqmiss = 0
- do iqpt=1,nqpt
-   if (qtest(iqpt,1)==0) then
-     nqmiss = nqmiss + 1
-     qmiss_(nqmiss) = iqpt
-     write(message, '(3a)' )&
-&     ' symdm9: the bloks found in the DDB are characterized',ch10,&
-&     '  by the following wavevectors :'
-     call wrtout(std_out,message,'COLL')
-     do iblok=1,nblok
-       write(message, '(a,4d20.12)')' ',blkqpt(1,iblok),blkqpt(2,iblok),blkqpt(3,iblok),blknrm(1,iblok)
-       call wrtout(std_out,message,'COLL')
-     end do
-     write(message, '(a,a,a,i0,a,a,a,3es16.6,a,a,a,a)' )&
-&     'Information is missing in the DDB.',ch10,&
-&     'The dynamical matrix number ',iqpt,' cannot be built,',ch10,&
-&     'since no block with wavevector',spqpt(1:3,iqpt),ch10,&
-&     'has been found.',ch10,&
-&     'Action: add the required blok in the DDB, or modify your input file.'
-     if (.not.allow_qmiss) then
-       MSG_ERROR(message)
-     else
-       !continue
-       MSG_COMMENT(message)
-     end if
-   end if
- end do
+                 if (i1pert <= natom) then
+                   ipesy1 = indsym(4,isym,i1pert)
+                   sym1(:,:) = symrec(:,:,isym)
+                 else if (i1pert == natom + 2) then
+                   ipesy1 = i1pert
+                   sym1(:,:) = symrel(:,:,isym)
+                 else
+                   found = 0
+                 end if
 
- ! Will return a list with the index of the q-points that could not be symmetrized.
- if (allow_qmiss) then
-   ABI_ALLOCATE(qmissing, (nqmiss))
-   if (nqmiss > 0) qmissing = qmiss_(1:nqmiss)
- end if
+                 if (i2pert <= natom) then
+                   ipesy2 = indsym(4,isym,i2pert)
+                   sym2(:,:) = symrec(:,:,isym)
+                 else if (i2pert == natom + 2) then
+                   ipesy2 = i2pert
+                   sym2(:,:) = symrel(:,:,isym)
+                 else if (i2pert == natom + 3.or. i2pert == natom + 4) then
+!                  !TODO: Symmetries on strain perturbation do not work yet.
+                   found = 0
+                   is_strain=.true.
+!
+!                   ipesy2 = i2pert
+!                   sym2(:,:) = NINT(symrel_cart(:,:,isym))
+!                   if (i2pert==natom+3) istr=i2dir
+!                   if (i2pert==natom+4) istr=3+i2dir
+!                   i2dir_a=idx(2*istr-1); i2dir_b=idx(2*istr)
+                 else
+                   found = 0
+                 end if
 
-!Generation of the dynamical matrices relative to the q points
-!of the set which samples the entire Brillouin zone
- do iqpt=1,nqpt
-   if (mod(iqpt, nprocs) /= my_rank) cycle ! mpi-parallelism
+                 if (i3pert == natom + 8) then
+                   ipesy3 = i3pert
+                   sym3(:,:) = symrel(:,:,isym)
+                 else
+                   found = 0
+                 end if
 
-   q1=qtest(iqpt,1)
-   q2=qtest(iqpt,2)
-   ! Skip this q-point if don't have enough info and allow_qmiss
-   if (allow_qmiss .and. q1==0) cycle
 
-!  Check if the symmetry accompagnied with time reversal : q <- -q
-   if (qtest(iqpt,3)==0) then
-     do ii=1,3
-       qq(ii)=blkqpt(ii,q1)/blknrm(1,q1)
-       do jj=1,3
-         ss(ii,jj)=zero
-         do kk=1,3
-           do ll=1,3
-             ss(ii,jj)=ss(ii,jj)+rprim(ii,kk)*gprim(jj,ll)*symrel(kk,ll,q2)
-           end do
-         end do
-       end do
-     end do
-   else
-     do ii=1,3
-       qq(ii)=-blkqpt(ii,q1)/blknrm(1,q1)
-       do jj=1,3
-         ss(ii,jj)=zero
-         do kk=1,3
-           do ll=1,3
-             ss(ii,jj)=ss(ii,jj)+rprim(ii,kk)*gprim(jj,ll)*symrel(kk,ll,q2)
-           end do
-         end do
-       end do
-     end do
-   end if
+!                See if the symmetric element is available and check if some
+!                of the elements may be zero. In the latter case, they do not need
+!                to be computed.
 
-!  Check whether all the information is contained in the DDB
-   do ipert2=1,natom
-     do idir2=1,3
-       do ipert1=1,natom
-         do idir1=1,3
-           if(blkflg(idir1,ipert1,idir2,ipert2,q1)/=1)then
-             write(message, '(a,a,a,i6,a,a,a,4i4,a,a,a,a)' )&
-&             'Information are missing in the DDB.',ch10,&
-&             'In block',q1,' the following element is missing :',ch10,&
-&             'idir1,ipert1,idir2,ipert2=',idir1,ipert1,idir2,ipert2,ch10,&
-&             'Action: add the required information in the DDB,',ch10,&
-&             'or modify your input file.'
-             MSG_ERROR(message)
-           end if
-         end do
-       end do
-     end do
-   end do
+                 if (.not.is_strain) then
+                   if ((flag /= -1).and.&
+&                   (ipesy1==i1pert).and.(ipesy2==i2pert).and.(ipesy3==i3pert)) then
+                     flag = sym1(i1dir,i1dir)*sym2(i2dir,i2dir)*sym3(i3dir,i3dir)
+                   end if
 
-!  Read the dynamical matrices in the DDB
-   do ipert2=1,natom
-     do idir2=1,3
-       do ipert1=1,natom
-         do idir1=1,3
-           ddd(:,idir1,ipert1,idir2,ipert2)=blkval(:,idir1+3*(ipert1-1+mpert*(idir2-1+3*(ipert2-1))),q1)
-         end do
-       end do
-     end do
-   end do
+                   do idisy1 = 1, 3
+                     do idisy2 = 1, 3
+                       do idisy3 = 1, 3
 
-!  Calculation of the dynamical matrix of a symmetrical q point
-   do ia=1,natom
-     do ib=1,natom
-!      write(std_out,*)'atom-> ',ia,indsym(4,q2,ia); write(std_out,*)'atom-> ',ib,indsym(4,q2,ib)
-       arg1=two_pi*(qq(1)*indsym(1,q2,ia)+qq(2)*indsym(2,q2,ia)+qq(3)*indsym(3,q2,ia))
-       arg2=two_pi*(qq(1)*indsym(1,q2,ib)+qq(2)*indsym(2,q2,ib)+qq(3)*indsym(3,q2,ib))
-       re=cos(arg1)*cos(arg2)+sin(arg1)*sin(arg2)
-       im=cos(arg2)*sin(arg1)-cos(arg1)*sin(arg2)
-       do mu=1,3
-         do nu=1,3
-           sumr=zero
-           sumi=zero
-           do ii=1,3
-             do jj=1,3
-!              If there is Time Reversal : D.M. <- Complex Conjugate D.M.
-               if (qtest(iqpt,3)==0) then
-                 sumr=sumr+ss(mu,ii)*ss(nu,jj)*ddd(1,ii,indsym(4,q2,ia),jj,indsym(4,q2,ib))
-                 sumi=sumi+ss(mu,ii)*ss(nu,jj)*ddd(2,ii,indsym(4,q2,ia),jj,indsym(4,q2,ib))
-               else
-                 sumr=sumr+ss(mu,ii)*ss(nu,jj)*ddd(1,ii,indsym(4,q2,ia),jj,indsym(4,q2,ib))
-                 sumi=sumi-ss(mu,ii)*ss(nu,jj)*ddd(2,ii,indsym(4,q2,ia),jj,indsym(4,q2,ib))
+                         if ((sym1(i1dir,idisy1) /= 0).and.(sym2(i2dir,idisy2) /= 0).and.&
+&                         (sym3(i3dir,idisy3) /= 0)) then
+                           if (pertsy(idisy1,ipesy1,idisy2,ipesy2,idisy3,ipesy3) == 0) then
+                             found = 0
+!                            exit      ! exit loop over symmetries
+                           end if
+                         end if
+
+
+                         if ((flag == -1).and.&
+&                         ((idisy1/=i1dir).or.(idisy2/=i2dir).or.(idisy3/=i3dir))) then
+                           if ((sym1(i1dir,idisy1)/=0).and.(sym2(i2dir,idisy2)/=0).and.&
+&                           (sym3(i3dir,idisy3)/=0)) then
+                             flag = 0
+                           end if
+                         end if
+
+                       end do
+                     end do
+                   end do
+!                 else 
+!                   if ((flag_dp /= -1).and.&
+!&                   (ipesy1==i1pert).and.(ipesy2==i2pert).and.(ipesy3==i3pert)) then
+!                     flag = sym1(i1dir,i1dir)*sym2(i2dir_a,i2dir_a)* &
+!                   & sym2(i2dir_b,i2dir_b)*sym3(i3dir,i3dir)
+!                   end if
+!
+!                   do idisy1 = 1, 3
+!                     do idisy2 = 1, 3
+!                       if (ipesy2==natom+3) istr=idisy2
+!                       if (ipesy2==natom+4) istr=3+idisy2
+!                       idisy2_a=idx(2*istr-1); idisy2_b=idx(2*istr)
+!                       do idisy3 = 1, 3
+!
+!                         if ((sym1(i1dir,idisy1) /= 0).and.(sym2(i2dir_a,idisy2_a) /= 0).and.&
+!&                          (sym2(i2dir_b,idisy2_b) /= 0).and.(sym3(i3dir,idisy3) /= 0)) then
+!                           if (pertsy(idisy1,ipesy1,idisy2,ipesy2,idisy3,ipesy3) == 0) then
+!                             found = 0
+!!                            exit      ! exit loop over symmetries
+!                           end if
+!                         end if
+!
+!
+!                         if ((flag == -1).and.&
+!&                         ((idisy1/=i1dir).or.(idisy2_a/=i2dir_a).or.(idisy2_b/=i2dir_b).or.(idisy3/=i3dir))) then
+!                           if ((sym1(i1dir,idisy1)/=0).and.(sym2(i2dir_a,idisy2_a)/=0).and.&
+!&                           (sym2(i2dir_b,idisy2_b)/=0).and.(sym3(i3dir,idisy3)/=0)) then
+!                             flag = 0
+!                           end if
+!                         end if
+!
+!                       end do
+!                     end do
+!                   end do
+                 end if
+
+                 if (found == 1) then
+                   pertsy(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert) = -1
+                 end if
+
+!                In case a symmetry operation only changes the sign of an
+!                element, this element has to be equal to zero
+
+                 if (flag == -1) then
+                   pertsy(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert) = -2
+                   exit
+                 end if
+
+               end do    ! close loop on symmetries
+
+!              If the elemetn i1pert,i2pert,i3pert is not symmetric
+!              to a basis element, it is a basis element
+
+               if (pertsy(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert) > -1) then
+                 pertsy(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert) = 1
                end if
-             end do
-           end do
 
-!          Dynmat -> Dynamical Matrix for the q point of the sampling
-!          write(std_out,*)' Sumr -> ',mu,nu,sumr; write(std_out,*)' Sumi -> ',mu,nu,sumi
-           dynmat(1,mu,ia,nu,ib,iqpt)=re*sumr-im*sumi
-           dynmat(2,mu,ia,nu,ib,iqpt)=re*sumi+im*sumr
-         end do ! End loop on the coordinates
+             end if ! rfpert /= 0
+
+           end do        ! close loop over perturbations
+         end do
+       end do
+     end do
+   end do
+ end do
+
+!Now, take into account the permutation of (i1pert,i1dir)
+!and (i2pert,i2dir)
+
+ do i1pert = 1, mpert
+   do i2pert = 1, mpert
+     do i3pert = 1, mpert
+
+       do i1dir = 1, 3
+         do i2dir = 1, 3
+           do i3dir = 1, 3
+
+             if ((i1pert /= i2pert).or.(i1dir /= i2dir)) then
+
+               if ((pertsy(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert) == 1).and.&
+                (pertsy(i2dir,i2pert,i1dir,i1pert,i3dir,i3pert) == 1)) then
+                 pertsy(i2dir,i2pert,i1dir,i1pert,i3dir,i3pert) = -1
+               end if
+
+             end if
+
+           end do
+         end do
        end do
 
-     end do ! End loop on the ia atoms
-   end do ! End loop on the ib atoms
- end do ! End loop on the q points of the sampling
+     end do
+   end do
+ end do
 
- ABI_DEALLOCATE(ddd)
- ABI_DEALLOCATE(qtest)
+ rfpert(:,:,:,:,:,:) = pertsy(:,:,:,:,:,:)
 
- call xmpi_sum(dynmat, comm, ierr)
+ ABI_FREE(pertsy)
 
-end subroutine symdm9
+end subroutine sylwtens
 !!***
 
 !----------------------------------------------------------------------
@@ -5057,11 +5245,6 @@ end subroutine symdm9
 !! OUTPUT
 !! vect2(3)= cartesian coordinates of the second local vector
 !! vect3(3)= cartesian coordinates of the third local vector
-!!
-!! PARENTS
-!!      m_ifc
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -5156,11 +5339,6 @@ end subroutine axial9
 !! OUTPUT
 !! dynmat = phase shifted dynamical matrices
 !!
-!! PARENTS
-!!      m_dynmat,m_ifc
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine dymfz9(dynmat,natom,nqpt,gprim,option,spqpt,trans)
@@ -5182,7 +5360,7 @@ subroutine dymfz9(dynmat,natom,nqpt,gprim,option,spqpt,trans)
 ! *********************************************************************
 
  do iqpt=1,nqpt
-   !  Definition of q in normalized reciprocal space
+   ! Definition of q in normalized reciprocal space
    kk(1)=spqpt(1,iqpt)*gprim(1,1)+spqpt(2,iqpt)*gprim(1,2)+spqpt(3,iqpt)*gprim(1,3)
    kk(2)=spqpt(1,iqpt)*gprim(2,1)+spqpt(2,iqpt)*gprim(2,2)+spqpt(3,iqpt)*gprim(2,3)
    kk(3)=spqpt(1,iqpt)*gprim(3,1)+spqpt(2,iqpt)*gprim(3,2)+spqpt(3,iqpt)*gprim(3,3)
@@ -5195,14 +5373,13 @@ subroutine dymfz9(dynmat,natom,nqpt,gprim,option,spqpt,trans)
 
    do ia=1,natom
      do ib=1,natom
-!      Product of q with the differences between the two atomic translations
-       ktrans=kk(1)*(trans(1,ia)-trans(1,ib))+kk(2)*(trans(2,ia)-&
-&       trans(2,ib))+kk(3)*(trans(3,ia)-trans(3,ib))
+       ! Product of q with the differences between the two atomic translations
+       ktrans=kk(1)*(trans(1,ia)-trans(1,ib))+kk(2)*(trans(2,ia)-trans(2,ib))+kk(3)*(trans(3,ia)-trans(3,ib))
        do mu=1,3
          do nu=1,3
            re=dynmat(1,mu,ia,nu,ib,iqpt)
            im=dynmat(2,mu,ia,nu,ib,iqpt)
-!          Transformation of the Old dynamical matrices by New ones by multiplication by a phase shift
+           ! Transformation of the Old dynamical matrices by New ones by multiplication by a phase shift
            dynmat(1,mu,ia,nu,ib,iqpt)=re*cos(two_pi*ktrans)-im*sin(two_pi*ktrans)
            dynmat(2,mu,ia,nu,ib,iqpt)=re*sin(two_pi*ktrans)+im*cos(two_pi*ktrans)
          end do
@@ -5227,6 +5404,9 @@ end subroutine dymfz9
 !! If plus=1 then adds the non-analytical part to the dynamical
 !!           matrices, with number iqpt.
 !!
+!! For plus=0, see Eq.(76) in Gonze&Lee PRB 55, 10355 (1997) [[cite:Gonze1997a]],
+!! get the left hand side.
+!!
 !! INPUTS
 !! dyew(2,3,natom,3,natom)= Non-analytical part
 !! natom= Number of atoms in the unit cell
@@ -5236,11 +5416,6 @@ end subroutine dymfz9
 !!
 !! OUTPUT
 !! dynmat(2,3,natom,3,natom,nqpt)= Dynamical matrices coming from the Derivative Data Base
-!!
-!! PARENTS
-!!      m_dynmat,m_ifc
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -5256,7 +5431,7 @@ subroutine nanal9(dyew,dynmat,iqpt,natom,nqpt,plus)
 !Local variables -------------------------
 !scalars
  integer :: ia,ib,mu,nu
- character(len=500) :: message
+ character(len=500) :: msg
 
 ! *********************************************************************
 
@@ -5266,7 +5441,7 @@ subroutine nanal9(dyew,dynmat,iqpt,natom,nqpt,plus)
      do ib=1,natom
        do mu=1,3
          do nu=1,3
-!          The following four lines are OK
+           ! The following four lines are OK
            dynmat(1,mu,ia,nu,ib,iqpt)=dynmat(1,mu,ia,nu,ib,iqpt) - dyew(1,mu,ia,nu,ib)
            dynmat(2,mu,ia,nu,ib,iqpt)=dynmat(2,mu,ia,nu,ib,iqpt) - dyew(2,mu,ia,nu,ib)
          end do
@@ -5275,8 +5450,6 @@ subroutine nanal9(dyew,dynmat,iqpt,natom,nqpt,plus)
    end do
 
  else if (plus==1) then
-!  write(std_out,*)' nanal9 : now, only the analytic part '
-!  write(std_out,*)' nanal9 : now, only the ewald part '
    do ia=1,natom
      do ib=1,natom
        do mu=1,3
@@ -5289,10 +5462,10 @@ subroutine nanal9(dyew,dynmat,iqpt,natom,nqpt,plus)
    end do
 
  else
-   write(message,'(3a,i0,a)' )&
-&   'The argument "plus" must be equal to 0 or 1.',ch10,&
-&   'The value ',plus,' is not available.'
-   MSG_BUG(message)
+   write(msg,'(3a,i0,a)' )&
+    'The argument "plus" must be equal to 0 or 1.',ch10,&
+    'The value ',plus,' is not available.'
+   ABI_BUG(msg)
  end if
 
 end subroutine nanal9
@@ -5312,7 +5485,6 @@ end subroutine nanal9
 !! INPUTS
 !! acell(3)=length scales by which rprim is to be multiplied
 !! atmfrc(3,natom,3,natom,nrpt) = Interatomic Forces in real space
-!!  (imaginary part only for debugging)
 !! dielt(3,3) = dielectric tensor
 !! dipdip= if 0, no dipole-dipole interaction was subtracted in atmfrc
 !!  if 1, atmfrc has been build without dipole-dipole part
@@ -5334,86 +5506,93 @@ end subroutine nanal9
 !! xred(3,natom)= relative coords of atoms in unit cell (dimensionless)
 !! zeff(3,3,natom)=effective charge on each atom, versus electric field and atomic displacement
 !! comm=MPI communicator.
+!! [dipquad] = if 1, atmfrc has been build without dipole-quadrupole part
+!! [quadquad] = if 1, atmfrc has been build without quadrupole-quadrupole part
 !!
 !! OUTPUT
 !! d2cart(2,3,mpert,3,mpert)=dynamical matrix obtained for the wavevector qpt (normalized using qphnrm)
 !!
-!! PARENTS
-!!      anaddb,ddb_interpolate,m_effective_potential_file,m_ifc,m_phonons
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine gtdyn9(acell,atmfrc,dielt,dipdip,dyewq0,d2cart,gmet,gprim,mpert,natom,&
-& nrpt,qphnrm,qpt,rmet,rprim,rpt,trans,ucvol,wghatm,xred,zeff,comm)
+                  nrpt,qphnrm,qpt,rmet,rprim,rpt,trans,ucvol,wghatm,xred,zeff,qdrp_cart,ewald_option,comm,&
+                  dipquad,quadquad)  ! optional
 
 !Arguments -------------------------------
 !scalars
- integer,intent(in) :: dipdip,mpert,natom,nrpt,comm
+ integer,intent(in) :: dipdip,mpert,natom,nrpt,ewald_option,comm
  real(dp),intent(in) :: qphnrm,ucvol
+ integer,optional,intent(in) :: dipquad, quadquad
 !arrays
  real(dp),intent(in) :: acell(3),dielt(3,3),gmet(3,3),gprim(3,3),qpt(3)
  real(dp),intent(in) :: rmet(3,3),rprim(3,3),rpt(3,nrpt)
  real(dp),intent(in) :: trans(3,natom),wghatm(natom,natom,nrpt),xred(3,natom)
  real(dp),intent(in) :: zeff(3,3,natom)
+ real(dp),intent(in) :: qdrp_cart(3,3,3,natom)
  real(dp),intent(in) :: atmfrc(3,natom,3,natom,nrpt)
  real(dp),intent(in) :: dyewq0(3,3,natom)
  real(dp),intent(out) :: d2cart(2,3,mpert,3,mpert)
 
 !Local variables -------------------------
 !scalars
- integer,parameter :: nqpt1=1,option2=2,sumg0=0,plus1=1,iqpt1=1
- integer :: i1,i2,ib,nsize
+ integer,parameter :: nqpt1 = 1, option2 = 2, sumg0 = 0, plus1 = 1, iqpt1 = 1
+ integer :: i1, i2, ib, nsize, dipquad_, quadquad_
 !arrays
- real(dp) :: qphon(3)
+ real(dp) :: qphon(3) !, tsec(2)
  real(dp),allocatable :: dq(:,:,:,:,:),dyew(:,:,:,:,:)
 
 ! *********************************************************************
 
- ABI_ALLOCATE(dq,(2,3,natom,3,natom))
+ ! Keep track of time spent in gtdyn9
+ !call timab(1750, 1, tsec)
 
-!Get the normalized wavevector
+ ABI_MALLOC(dq,(2,3,natom,3,natom))
+
+ ! Define quadrupolar options
+ dipquad_=0; if(present(dipquad)) dipquad_=dipquad
+ quadquad_=0; if(present(quadquad)) quadquad_=quadquad
+
+ ! Get the normalized wavevector
  if(abs(qphnrm)<1.0d-7)then
    qphon(1:3)=zero
  else
    qphon(1:3)=qpt(1:3)/qphnrm
  end if
 
-!Generate the analytical part from the interatomic forces
- call ftifc_r2q (atmfrc,dq,gprim,natom,nqpt1,nrpt,rpt,qphon,wghatm, comm)
+ ! Generate the analytical part from the interatomic forces
+ call ftifc_r2q(atmfrc, dq, gprim, natom, nqpt1, nrpt, rpt, qphon, wghatm, comm)
 
-!The analytical dynamical matrix dq has been generated
-!in the normalized canonical coordinate system. Now, the
-!phase is modified, in order to recover the usual (xred) coordinate of atoms.
+ ! The analytical dynamical matrix dq has been generated
+ ! in the normalized canonical coordinate system.
+ ! Now, the phase is modified, in order to recover the usual (xred) coordinate of atoms.
  call dymfz9(dq,natom,nqpt1,gprim,option2,qphon,trans)
 
- if (dipdip==1) then
-!  Add the non-analytical part
-!  Compute dyew(2,3,natom,3,natom)= Ewald part of the dynamical matrix,
-!  second energy derivative wrt xred(3,natom) in Hartrees
-!  (Denoted A-bar in the notes)
-   ABI_ALLOCATE(dyew,(2,3,natom,3,natom))
+ if (dipdip==1.or.dipquad_==1.or.quadquad_==1) then
+   ! Add the non-analytical part
+   ! Compute dyew(2,3,natom,3,natom)= Ewald part of the dynamical matrix,
+   ! second energy derivative wrt xred(3,natom) in Hartrees (Denoted A-bar in the notes)
+   ABI_MALLOC(dyew,(2,3,natom,3,natom))
 
-   call ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol,xred,zeff)
+   call ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol,xred,zeff,&
+      qdrp_cart,option=ewald_option,dipquad=dipquad_,quadquad=quadquad_)
+
    call q0dy3_apply(natom,dyewq0,dyew)
    call nanal9(dyew,dq,iqpt1,natom,nqpt1,plus1)
 
-   ABI_DEALLOCATE(dyew)
+   ABI_FREE(dyew)
  end if
 
-!Copy the dynamical matrix in the proper location
-
-!First zero all the elements
+ ! Copy the dynamical matrix in the proper location
+ ! First zero all the elements
  nsize=2*(3*mpert)**2
  d2cart = zero
 
-!Copy the elements from dq to d2cart
+ ! Copy the elements from dq to d2cart
  d2cart(:,:,1:natom,:,1:natom)=dq(:,:,1:natom,:,1:natom)
 
-!In case we have the gamma point,
+ ! In case we have the gamma point,
  if(qphon(1)**2+qphon(2)**2+qphon(3)**2<1.d-14)then
-!  Copy the effective charge and dielectric constant in the final array
+   ! Copy the effective charge and dielectric constant in the final array
    do i1=1,3
      do i2=1,3
        d2cart(1,i1,natom+2,i2,natom+2)=dielt(i1,i2)
@@ -5425,7 +5604,9 @@ subroutine gtdyn9(acell,atmfrc,dielt,dipdip,dyewq0,d2cart,gmet,gprim,mpert,natom
    end do
  end if
 
- ABI_DEALLOCATE(dq)
+ ABI_FREE(dq)
+
+ !call timab(1750, 2, tsec)
 
 end subroutine gtdyn9
 !!***
@@ -5481,11 +5662,6 @@ end subroutine gtdyn9
 !!   1) One makes the dynamical matrix hermitian...
 !!   2) In case of q=Gamma, only the real part is used.
 !!
-!! PARENTS
-!!      anaddb,m_ddb,m_effective_potential_file,m_ifc,m_phonons,respfn,thmeig
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine dfpt_phfrq(amu,displ,d2cart,eigval,eigvec,indsym,&
@@ -5508,14 +5684,17 @@ subroutine dfpt_phfrq(amu,displ,d2cart,eigval,eigvec,indsym,&
 !scalars
  integer :: analyt,i1,i2,idir1,idir2,ier,ii,imode,ipert1,ipert2
  integer :: jmode,indexi,indexj,index
- real(dp) :: epsq,norm,qphon2
+ real(dp) :: epsq,qphon2
  logical,parameter :: debug = .False.
  real(dp) :: sc_prod
 !arrays
- real(dp) :: qptn(3),dum(2,0)
+ real(dp) :: qptn(3),dum(2,0) !, tsec(2)
  real(dp),allocatable :: matrx(:,:),zeff(:,:),zhpev1(:,:),zhpev2(:)
 
 ! *********************************************************************
+
+ ! Keep track of time spent in dfpt_phfrq
+ !call timab(1751, 1, tsec)
 
  ! Prepare the diagonalisation: analytical part.
  ! Note: displ is used as work space here
@@ -5549,7 +5728,7 @@ subroutine dfpt_phfrq(amu,displ,d2cart,eigval,eigvec,indsym,&
    end do
  end if
 
- !In the case the non-analyticity is required:
+ ! In the case the non-analyticity is required:
  ! the tensor is in cartesian coordinates and this means that qphon must be in given in Cartesian coordinates.
  if(analyt==0)then
 
@@ -5565,7 +5744,7 @@ subroutine dfpt_phfrq(amu,displ,d2cart,eigval,eigvec,indsym,&
      end do
    end do
 
-   ABI_ALLOCATE(zeff,(3,natom))
+   ABI_MALLOC(zeff,(3,natom))
 
    ! Get the effective charges for the limiting direction
    do idir1=1,3
@@ -5594,26 +5773,27 @@ subroutine dfpt_phfrq(amu,displ,d2cart,eigval,eigvec,indsym,&
      end do
    end do
 
-   ABI_DEALLOCATE(zeff)
+   ABI_FREE(zeff)
  end if !  End of the non-analyticity treatment
 
  ! Multiply IFC(q) by masses
  call massmult_and_breaksym(natom, ntypat, typat, amu, displ)
 
-!***********************************************************************
-!Diagonalize the dynamical matrix
+ ! ***********************************************************************
+ ! Diagonalize the dynamical matrix
 
-!Symmetrize the dynamical matrix
-!FIXME: swap the next 2 lines and update test files to include symmetrization for Gamma point too (except in non-analytic case)
-!if (symdynmat==1 .and. analyt > 0) then
+ !Symmetrize the dynamical matrix
+ !FIXME: swap the next 2 lines and update test files to include symmetrization
+ !       for Gamma point too (except in non-analytic case)
+ !if (symdynmat==1 .and. analyt > 0) then
  if (symdynmat==1 .and. analyt == 1) then
    qptn(:)=qphon(:)
    if (analyt==1) qptn(:)=qphon(:)/qphnrm
    call symdyma(displ,indsym,natom,nsym,qptn,rprimd,symrel,symafm)
  end if
 
- ier=0; ii=1
- ABI_ALLOCATE(matrx,(2,(3*natom*(3*natom+1))/2))
+ ii=1
+ ABI_MALLOC(matrx,(2,(3*natom*(3*natom+1))/2))
  do i2=1,3*natom
    do i1=1,i2
      matrx(1,ii)=displ(1+2*(i1-1)+2*(i2-1)*3*natom)
@@ -5622,15 +5802,15 @@ subroutine dfpt_phfrq(amu,displ,d2cart,eigval,eigvec,indsym,&
    end do
  end do
 
- ABI_ALLOCATE(zhpev1,(2,2*3*natom-1))
- ABI_ALLOCATE(zhpev2,(3*3*natom-2))
+ ABI_MALLOC(zhpev1,(2,2*3*natom-1))
+ ABI_MALLOC(zhpev2,(3*3*natom-2))
 
  call ZHPEV ('V','U',3*natom,matrx,eigval,eigvec,3*natom,zhpev1,zhpev2,ier)
  ABI_CHECK(ier == 0, sjoin('zhpev returned:', itoa(ier)))
 
- ABI_DEALLOCATE(matrx)
- ABI_DEALLOCATE(zhpev1)
- ABI_DEALLOCATE(zhpev2)
+ ABI_FREE(matrx)
+ ABI_FREE(zhpev1)
+ ABI_FREE(zhpev2)
 
  if (debug) then
    ! Check the orthonormality of the eigenvectors
@@ -5644,9 +5824,9 @@ subroutine dfpt_phfrq(amu,displ,d2cart,eigval,eigvec,indsym,&
    end do
  end if
 
-!***********************************************************************
+ !***********************************************************************
 
-!Get the phonon frequencies (negative by convention, if the eigenvalue of the dynamical matrix is negative)
+ ! Get the phonon frequencies (negative by convention, if the eigenvalue of the dynamical matrix is negative)
  do imode=1,3*natom
    if(eigval(imode)>=1.0d-16)then
      phfrq(imode)=sqrt(eigval(imode))
@@ -5658,40 +5838,13 @@ subroutine dfpt_phfrq(amu,displ,d2cart,eigval,eigvec,indsym,&
  end do
 
  ! Fix the phase of the eigenvectors
- call fxphas_seq(eigvec,dum,0,0,1,3*natom*3*natom,0,3*natom,3*natom,0)
+ call fxphas_seq(eigvec,dum, 0, 0, 1, 3*natom*3*natom, 0, 3*natom, 3*natom, 0)
 
  ! Normalise the eigenvectors
- do imode=1,3*natom
-   norm=zero
-   do idir1=1,3
-     do ipert1=1,natom
-       i1=idir1+(ipert1-1)*3
-       index=i1+3*natom*(imode-1)
-       norm=norm+eigvec(2*index-1)**2+eigvec(2*index)**2
-     end do
-   end do
-   norm=sqrt(norm)
-   do idir1=1,3
-     do ipert1=1,natom
-       i1=idir1+(ipert1-1)*3
-       index=i1+3*natom*(imode-1)
-       eigvec(2*index-1)=eigvec(2*index-1)/norm
-       eigvec(2*index)=eigvec(2*index)/norm
-     end do
-   end do
- end do
+ call pheigvec_normalize(natom, eigvec)
 
  ! Get the phonon displacements
- do imode=1,3*natom
-   do idir1=1,3
-     do ipert1=1,natom
-       i1=idir1+(ipert1-1)*3
-       index=i1+3*natom*(imode-1)
-       displ(2*index-1)=eigvec(2*index-1) / sqrt(amu(typat(ipert1))*amu_emass)
-       displ(2*index  )=eigvec(2*index  ) / sqrt(amu(typat(ipert1))*amu_emass)
-     end do
-   end do
- end do
+ call phdispl_from_eigvec(natom, ntypat, typat, amu, eigvec, displ)
 
  if (debug) then
    write(std_out,'(a)')' Phonon eigenvectors and displacements '
@@ -5712,7 +5865,175 @@ subroutine dfpt_phfrq(amu,displ,d2cart,eigval,eigvec,indsym,&
    end do
  end if
 
+ !call timab(1751, 2, tsec)
+
 end subroutine dfpt_phfrq
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_dynmat/pheigvec_normalize
+!!
+!! NAME
+!! pheigvec_normalize
+!!
+!! FUNCTION
+!!  Normalize input eigenvectors in cartesian coordinates
+!!
+!! INPUTS
+!!  natom: number of atoms in unit cell
+!!
+!! SIDE EFFECTS
+!!  eigvec(2*3*natom*3*natom)=in output the normalized eigenvectors in cartesian coordinates.
+!!
+!! SOURCE
+
+pure subroutine pheigvec_normalize(natom, eigvec)
+
+!Arguments -------------------------------
+!scalars
+ integer,intent(in) :: natom
+!arrays
+ real(dp),intent(inout) :: eigvec(2*3*natom*3*natom)
+
+!Local variables -------------------------
+!scalars
+ integer :: i1,idir1,imode,ipert1,index
+ real(dp) :: norm
+
+! *********************************************************************
+
+ do imode=1,3*natom
+
+   norm=zero
+   do idir1=1,3
+     do ipert1=1,natom
+       i1=idir1+(ipert1-1)*3
+       index=i1+3*natom*(imode-1)
+       norm=norm+eigvec(2*index-1)**2+eigvec(2*index)**2
+     end do
+   end do
+   norm=sqrt(norm)
+
+   do idir1=1,3
+     do ipert1=1,natom
+       i1=idir1+(ipert1-1)*3
+       index=i1+3*natom*(imode-1)
+       eigvec(2*index-1)=eigvec(2*index-1)/norm
+       eigvec(2*index)=eigvec(2*index)/norm
+     end do
+   end do
+
+ end do
+
+end subroutine pheigvec_normalize
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_dynmat/phdispl_from_eigvec
+!! NAME
+!! phdispl_from_eigvec
+!!
+!! FUNCTION
+!!  Phonon displacements in cart coords from eigenvectors
+!!
+!! INPUTS
+!!  natom: number of atoms in unit cell
+!!  ntypat=number of atom types
+!!  typat(natom)=integer label of each type of atom (1,2,...)
+!!  amu(ntypat)=mass of the atoms (atomic mass unit) matrix (diagonal in the atoms)
+!!  eigvec(2*3*natom*3*natom)= eigenvectors of the dynamical matrix in cartesian coordinates.
+!!
+!! OUTPUT
+!!  displ(2*3*natom*3*natom)=displacements of atoms in cartesian coordinates.
+!!
+!! SOURCE
+
+pure subroutine phdispl_from_eigvec(natom, ntypat, typat, amu, eigvec, displ)
+
+!Arguments -------------------------------
+!scalars
+ integer,intent(in) :: natom, ntypat
+!arrays
+ integer,intent(in) :: typat(natom)
+ real(dp),intent(in) :: amu(ntypat)
+ real(dp),intent(in) :: eigvec(2*3*natom*3*natom)
+ real(dp),intent(out) :: displ(2*3*natom*3*natom)
+
+!Local variables -------------------------
+!scalars
+ integer :: i1,idir1,imode,ipert1, index
+
+! *********************************************************************
+
+ do imode=1,3*natom
+
+   do idir1=1,3
+     do ipert1=1,natom
+       i1=idir1+(ipert1-1)*3
+       index=i1+3*natom*(imode-1)
+       displ(2*index-1)=eigvec(2*index-1) / sqrt(amu(typat(ipert1))*amu_emass)
+       displ(2*index  )=eigvec(2*index  ) / sqrt(amu(typat(ipert1))*amu_emass)
+     end do
+   end do
+
+ end do
+
+end subroutine phdispl_from_eigvec
+!!***
+
+!!****f* m_dynmat/phangmom_from_eigvec
+!! NAME
+!! phangmom_from_eigvec
+!!
+!! FUNCTION
+!!  Phonon angular momenta in cart coords from eigenvectors
+!!
+!! INPUTS
+!!  natom: number of atoms in unit cell
+!!  eigvec(2*3*natom*3*natom)= eigenvectors of the dynamical matrix in cartesian coordinates.
+!!
+!! OUTPUT
+!!  phangmom(3*3*natom)= angular momentum of each phonon mode in cartesian coordinates.
+!!    The first index runs on the direction,
+!!    The second index runs on the modes.
+!!
+!! SOURCE
+
+pure subroutine phangmom_from_eigvec(natom, eigvec, phangmom)
+
+!Arguments -------------------------------
+!scalars
+ integer,intent(in) :: natom
+!arrays
+ real(dp),intent(in) :: eigvec(2*3*natom*3*natom)
+ real(dp),intent(out) :: phangmom(3*3*natom)
+
+!Local variables -------------------------
+!scalars
+ integer :: imode,ipert, index
+!arrays
+ real(dp) :: eigvecatom(2*3)
+
+! *********************************************************************
+
+ phangmom = zero
+
+ do imode=1,3*natom
+   do ipert=1,natom
+     index = 3*natom*(imode-1) + 3*(ipert-1)
+     eigvecatom = eigvec(2*index+1 : 2*index + 2*3) ! = Re(u_x), Im(u_x), Re(u_y), Im(u_y), Re(u_z), Im(u_z)
+     phangmom(3*(imode-1)+1) = phangmom(3*(imode-1)+1)&
+             + two * (eigvecatom(3) * eigvecatom(6) - eigvecatom(4) * eigvecatom(5)) ! Re(u_y)*Im(u_z) - Im(u_y)*Re(u_z)
+     phangmom(3*(imode-1)+2) = phangmom(3*(imode-1)+2)&
+             + two * (eigvecatom(5) * eigvecatom(2) - eigvecatom(6) * eigvecatom(1)) ! Re(u_z)*Im(u_x) - Im(u_z)*Re(u_x)
+     phangmom(3*(imode-1)+3) = phangmom(3*(imode-1)+3)&
+             + two * (eigvecatom(1) * eigvecatom(4) - eigvecatom(2) * eigvecatom(3)) ! Re(u_x)*Im(u_y) - Im(u_x)*Re(u_y)
+   end do
+ end do
+
+end subroutine phangmom_from_eigvec
 !!***
 
 !!****f* m_dynmat/dfpt_prtph
@@ -5738,7 +6059,7 @@ end subroutine dfpt_phfrq
 !!    0=> Hartree and cm-1, 1=> eV and Thz, other=> Ha,Thz,eV,cm-1 and K
 !!  iout= unit for long print (if negative, the routine only print on unit 6, and in Hartree only).
 !!  natom= number of atom
-!!  phfreq(3*natom)= phonon frequencies in Hartree
+!!  phfrq(3*natom)= phonon frequencies in Hartree
 !!  qphnrm=phonon wavevector normalisation factor
 !!  qphon(3)=phonon wavevector
 !!
@@ -5747,12 +6068,6 @@ end subroutine dfpt_phfrq
 !!
 !! NOTES
 !! called by one processor only
-!!
-!! PARENTS
-!!      anaddb,m_effective_potential_file,m_ifc,m_phonons,respfn
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -5770,7 +6085,7 @@ subroutine dfpt_prtph(displ,eivec,enunit,iout,natom,phfrq,qphnrm,qphon)
  integer :: i,idir,ii,imode,jj
  real(dp) :: tolerance
  logical :: t_degenerate
- character(len=500) :: message
+ character(len=500) :: msg
 !arrays
  real(dp) :: vecti(3),vectr(3)
  character(len=1) :: metacharacter(3*natom)
@@ -5779,112 +6094,111 @@ subroutine dfpt_prtph(displ,eivec,enunit,iout,natom,phfrq,qphnrm,qphon)
 
 !Check the value of eivec
  if (all(eivec /= [0,1,2,4])) then
-   write(message, '(a,i0,a,a)' )&
-&   'In the calling subroutine, eivec is',eivec,ch10,&
-&   'but allowed values are between 0 and 4.'
-   MSG_BUG(message)
+   write(msg, '(a,i0,a,a)' )&
+   'In the calling subroutine, eivec is',eivec,ch10,&
+   'but allowed values are between 0 and 4.'
+   ABI_BUG(msg)
  end if
 
 !write the phonon frequencies on unit std_out
- write(message,'(4a)' )' ',ch10,&
-& ' phonon wavelength (reduced coordinates) , ','norm, and energies in hartree'
- call wrtout(std_out,message,'COLL')
+ write(msg,'(4a)' )' ',ch10,' phonon wavelength (reduced coordinates) , ','norm, and energies in hartree'
+ call wrtout(std_out,msg)
 
 !The next format should be rewritten
- write(message,'(a,4f5.2)' )' ',(qphon(i),i=1,3),qphnrm
- call wrtout(std_out,message,'COLL')
+ write(msg,'(a,4f5.2)' )' ',(qphon(i),i=1,3),qphnrm
+ call wrtout(std_out,msg)
  do jj=1,3*natom,5
    if (3*natom-jj<5) then
-     write(message,'(5es17.9)') (phfrq(ii),ii=jj,3*natom)
+     write(msg,'(5es17.9)') (phfrq(ii),ii=jj,3*natom)
    else
-     write(message,'(5es17.9)') (phfrq(ii),ii=jj,jj+4)
+     write(msg,'(5es17.9)') (phfrq(ii),ii=jj,jj+4)
    end if
-   call wrtout(std_out,message,'COLL')
+   call wrtout(std_out,msg)
  end do
- write(message,'(a,es17.9)')' Zero Point Motion energy (sum of freqs/2)=',sum(phfrq(1:3*natom))/2
- call wrtout(std_out,message,'COLL')
+ write(msg,'(a,a,es17.9)') ch10,' Zero Point Motion energy (sum of freqs/2)=',sum(phfrq(1:3*natom))/2
+ call wrtout(std_out,msg)
 
 !Put the wavevector in nice format
  if(iout>=0)then
-   call wrtout(iout,' ','COLL')
+   call wrtout(iout,' ')
    if(qphnrm/=0.0_dp)then
-     write(message, '(a,3f9.5)' )&
-&     '  Phonon wavevector (reduced coordinates) :',(qphon(i)/qphnrm+tol10,i=1,3)
+     write(msg, '(a,3f9.5)' )&
+     '  Phonon wavevector (reduced coordinates) :',(qphon(i)/qphnrm+tol10,i=1,3)
    else
-     write(message, '(3a,3f9.5)' )&
-&     '  Phonon at Gamma, with non-analyticity in the',ch10,&
-&     '  direction (cartesian coordinates)',qphon(1:3)+tol10
+     write(msg, '(3a,3f9.5)' )&
+     '  Phonon at Gamma, with non-analyticity in the',ch10,&
+     '  direction (cartesian coordinates)',qphon(1:3)+tol10
    end if
-   call wrtout(iout,message,'COLL')
+   call wrtout(iout,msg)
 
 !  Write it, in different units.
    if(enunit/=1)then
      write(iout, '(a)' )' Phonon energies in Hartree :'
      do jj=1,3*natom,5
        if (3*natom-jj<5) then
-         write(message, '(1x,5es14.6)') (phfrq(ii),ii=jj,3*natom)
+         write(msg, '(1x,5es14.6)') (phfrq(ii),ii=jj,3*natom)
        else
-         write(message, '(1x,5es14.6)') (phfrq(ii),ii=jj,jj+4)
+         write(msg, '(1x,5es14.6)') (phfrq(ii),ii=jj,jj+4)
        end if
-       call wrtout(iout,message,'COLL')
+       call wrtout(iout,msg)
      end do
    end if
    if(enunit/=0)then
      write(iout, '(a)' )' Phonon energies in meV     :'
      do jj=1,3*natom,5
        if (3*natom-jj<5) then
-         write(message, '("-",5es14.6)') (phfrq(ii)*Ha_eV*1.0d3,ii=jj,3*natom)
+         write(msg, '("-",5es14.6)') (phfrq(ii)*Ha_eV*1.0d3,ii=jj,3*natom)
        else
-         write(message, '("-",5es14.6)') (phfrq(ii)*Ha_eV*1.0d3,ii=jj,jj+4)
+         write(msg, '("-",5es14.6)') (phfrq(ii)*Ha_eV*1.0d3,ii=jj,jj+4)
        end if
-       call wrtout(iout,message,'COLL')
+       call wrtout(iout,msg)
      end do
    end if
    if(enunit/=1)then
      write(iout, '(a)' )' Phonon frequencies in cm-1    :'
      do jj=1,3*natom,5
        if (3*natom-jj<5) then
-         write(message, '("-",5es14.6)') (phfrq(ii)*Ha_cmm1,ii=jj,3*natom)
+         write(msg, '("-",5es14.6)') (phfrq(ii)*Ha_cmm1,ii=jj,3*natom)
        else
-         write(message, '("-",5es14.6)') (phfrq(ii)*Ha_cmm1,ii=jj,jj+4)
+         write(msg, '("-",5es14.6)') (phfrq(ii)*Ha_cmm1,ii=jj,jj+4)
        end if
-       call wrtout(iout,message,'COLL')
+       call wrtout(iout,msg)
      end do
    end if
    if(enunit/=0)then
      write(iout, '(a)' )' Phonon frequencies in Thz     :'
      do jj=1,3*natom,5
        if (3*natom-jj<5) then
-         write(message, '("-",5es14.6)') (phfrq(ii)*Ha_THz,ii=jj,3*natom)
+         write(msg, '("-",5es14.6)') (phfrq(ii)*Ha_THz,ii=jj,3*natom)
        else
-         write(message, '("-",5es14.6)') (phfrq(ii)*Ha_THz,ii=jj,jj+4)
+         write(msg, '("-",5es14.6)') (phfrq(ii)*Ha_THz,ii=jj,jj+4)
        end if
-       call wrtout(iout,message,'COLL')
+       call wrtout(iout,msg)
      end do
    end if
    if(enunit/=0.and.enunit/=1)then
      write(iout, '(a)' )' Phonon energies in Kelvin  :'
      do jj=1,3*natom,5
        if (3*natom-jj<5) then
-         write(message, '("-",5es14.6)') (phfrq(ii)/kb_HaK,ii=jj,3*natom)
+         write(msg, '("-",5es14.6)') (phfrq(ii)/kb_HaK,ii=jj,3*natom)
        else
-         write(message, '("-",5es14.6)') (phfrq(ii)/kb_HaK,ii=jj,jj+4)
+         write(msg, '("-",5es14.6)') (phfrq(ii)/kb_HaK,ii=jj,jj+4)
        end if
-       call wrtout(iout,message,'COLL')
+       call wrtout(iout,msg)
      end do
    end if
  end if
 
 !Take care of the eigendisplacements
  if(eivec==1 .or. eivec==2)then
-   write(message, '(a,a,a,a,a,a,a,a)' ) ch10,&
-&   ' Eigendisplacements ',ch10,&
-&   ' (will be given, for each mode : in cartesian coordinates',ch10,&
-&   '   for each atom the real part of the displacement vector,',ch10,&
-&   '   then the imaginary part of the displacement vector - absolute values smaller than 1.0d-7 are set to zero)'
-   call wrtout(std_out,message,'COLL')
+   write(msg, '(a,a,a,a,a,a,a,a)' ) ch10,&
+   ' Eigendisplacements ',ch10,&
+   ' (will be given, for each mode : in cartesian coordinates',ch10,&
+   '   for each atom the real part of the displacement vector,',ch10,&
+   '   then the imaginary part of the displacement vector - absolute values smaller than 1.0d-7 are set to zero)'
+   call wrtout(std_out,msg)
    if(iout>=0) then
-     call wrtout(iout,message,'COLL')
+     call wrtout(iout,msg)
    end if
 
 !  Examine the degeneracy of each mode. The portability of the echo of the eigendisplacements
@@ -5902,21 +6216,21 @@ subroutine dfpt_prtph(displ,eivec,enunit,iout,natom,phfrq,qphnrm,qphon)
    end do
 
    do imode=1,3*natom
-     write(message,'(a,i4,a,es16.6)' )'  Mode number ',imode,'   Energy',phfrq(imode)
-     call wrtout(std_out,message,'COLL')
+     write(msg,'(a,i4,a,es16.6)' )'  Mode number ',imode,'   Energy',phfrq(imode)
+     call wrtout(std_out,msg)
      if(iout>=0)then
-       write(message, '(a,i4,a,es16.6)' )'  Mode number ',imode,'   Energy',phfrq(imode)
-       call wrtout(iout,message,'COLL')
+       write(msg, '(a,i4,a,es16.6)' )'  Mode number ',imode,'   Energy',phfrq(imode)
+       call wrtout(iout,msg)
      end if
      tolerance=1.0d-7
      if(abs(phfrq(imode))<1.0d-5)tolerance=2.0d-7
      if(phfrq(imode)<1.0d-5)then
-       write(message,'(3a)' )' Attention : low frequency mode.',ch10,&
-&       '   (Could be unstable or acoustic mode)'
-       call wrtout(std_out,message,'COLL')
+       write(msg,'(3a)' )' Attention : low frequency mode.',ch10,&
+       '   (Could be unstable or acoustic mode)'
+       call wrtout(std_out,msg)
        if(iout>=0)then
          write(iout, '(3a)' )' Attention : low frequency mode.',ch10,&
-&         '   (Could be unstable or acoustic mode)'
+         '   (Could be unstable or acoustic mode)'
        end if
      end if
      do ii=1,natom
@@ -5926,12 +6240,12 @@ subroutine dfpt_prtph(displ,eivec,enunit,iout,natom,phfrq,qphnrm,qphon)
          vecti(idir)=displ(2,idir+(ii-1)*3,imode)
          if(abs(vecti(idir))<tolerance)vecti(idir)=0.0_dp
        end do
-       write(message,'(i4,3es16.8,a,4x,3es16.8)' ) ii,vectr(:),ch10,vecti(:)
-       call wrtout(std_out,message,'COLL')
+       write(msg,'(i4,3es16.8,a,4x,3es16.8)' ) ii,vectr(:),ch10,vecti(:)
+       call wrtout(std_out,msg)
        if(iout>=0)then
-         write(message,'(a,i3,3es16.8,2a,3x,3es16.8)') metacharacter(imode),ii,vectr(:),ch10,&
-&         metacharacter(imode),   vecti(:)
-         call wrtout(iout,message,'COLL')
+         write(msg,'(a,i3,3es16.8,2a,3x,3es16.8)') metacharacter(imode),ii,vectr(:),ch10,&
+           metacharacter(imode), vecti(:)
+         call wrtout(iout,msg)
        end if
      end do
    end do
@@ -5941,7 +6255,6 @@ end subroutine dfpt_prtph
 !!***
 
 !!****f* m_dynmat/massmult_and_breaksym
-!!
 !! NAME
 !!  mult_masses_and_break_symms
 !!
@@ -5954,21 +6267,21 @@ end subroutine dfpt_prtph
 !!  natom=number of atoms in unit cell
 !!  ntypat=number of atom types
 !!  typat(natom)=integer label of each type of atom (1,2,...)
+!!  [herm_opt]= 1 to hermitianize mat (default)
+!!              0 if no symmetrization should be performed
 !!
 !! SIDE EFFECTS
 !!  mat(2*3*natom*3*natom)=Multiplies by atomic masses in output.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
-subroutine massmult_and_breaksym(natom, ntypat, typat, amu, mat)
+subroutine massmult_and_breaksym(natom, ntypat, typat, amu, mat, &
+                                 herm_opt) ! optional
 
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: natom,ntypat
+ integer,optional,intent(in) :: herm_opt
 !arrays
  integer,intent(in) :: typat(natom)
  real(dp),intent(in) :: amu(ntypat)
@@ -5976,7 +6289,7 @@ subroutine massmult_and_breaksym(natom, ntypat, typat, amu, mat)
 
 !Local variables -------------------------
 !scalars
- integer :: i1,i2,idir1,idir2,index,ipert1,ipert2
+ integer :: i1,i2,idir1,idir2,index,ipert1,ipert2, herm_opt__
  real(dp),parameter :: break_symm=1.0d-12
  !real(dp),parameter :: break_symm=zero
  real(dp) :: fac
@@ -5984,6 +6297,8 @@ subroutine massmult_and_breaksym(natom, ntypat, typat, amu, mat)
  real(dp) :: nearidentity(3,3)
 
 ! *********************************************************************
+
+ herm_opt__ = 1; if (present(herm_opt)) herm_opt__ = herm_opt
 
  ! This slight breaking of the symmetry allows the results to be more portable between machines
  nearidentity(:,:)=one
@@ -6011,13 +6326,43 @@ subroutine massmult_and_breaksym(natom, ntypat, typat, amu, mat)
  end do
 
  ! Make the dynamical matrix hermitian
- call mkherm(mat,3*natom)
+ if (herm_opt__ == 1) call mkherm(mat,3*natom)
 
 end subroutine massmult_and_breaksym
 !!***
 
-!!****f* m_dynmat/ftgam
+!!****f* m_dynmat/massmult_and_breaksym_cplx
+!! NAME
+!!  mult_masses_and_break_symms_cplx
 !!
+!! FUNCTION
+!!  Similar to massmult_and_breaksym, the only difference is that it receives complex array.
+
+subroutine massmult_and_breaksym_cplx(natom, ntypat, typat, amu, cmat, &
+                                      herm_opt) ! optional
+
+!Arguments -------------------------------
+!scalars
+ integer,intent(in) :: natom,ntypat
+ integer,optional,intent(in) :: herm_opt
+!arrays
+ integer,intent(in) :: typat(natom)
+ real(dp),intent(in) :: amu(ntypat)
+ complex(dp),target,intent(inout) :: cmat(2*3*natom*3*natom)
+
+!Local variables -------------------------
+ integer :: herm_opt__
+ real(dp),pointer :: rmat_ptr(:)
+! *************************************************************************
+
+ call C_F_pointer(c_loc(cmat), rmat_ptr, shape=[3*natom*3*natom])
+ herm_opt__ = 1; if (present(herm_opt)) herm_opt__ = herm_opt
+ call massmult_and_breaksym(natom, ntypat, typat, amu, rmat_ptr, herm_opt=herm_opt__)
+
+end subroutine massmult_and_breaksym_cplx
+!!***
+
+!!****f* m_dynmat/ftgam
 !! NAME
 !! ftgam
 !!
@@ -6051,12 +6396,6 @@ end subroutine massmult_and_breaksym
 !! gam_rpt(2,3*natom*3*natom,nrpt)
 !!  = gamma matrices in real space stored in file unit_gkk_rpt
 !!
-!! PARENTS
-!!      elphon,get_tau_k,integrate_gamma_alt,m_phgamma,mka2f,mka2f_tr
-!!      mka2f_tr_lova,mkph_linwid
-!!
-!! CHILDREN
-!!
 !! NOTES
 !!   copied from ftiaf9.f
 !!   recip to real space: real space is forced to disk file unit_gkk_rpt
@@ -6084,7 +6423,7 @@ subroutine ftgam (wghatm,gam_qpt,gam_rpt,natom,nqpt,nrpt,qtor,coskr, sinkr)
 !scalars
  integer :: iatom,idir,ip,iqpt,irpt,jatom,jdir
  real(dp) :: im,re
- character(len=500) :: message
+ character(len=500) :: msg
 
 ! *********************************************************************
 
@@ -6137,8 +6476,8 @@ subroutine ftgam (wghatm,gam_qpt,gam_rpt,natom,nqpt,nrpt,qtor,coskr, sinkr)
    end do ! end irpt
 
  case default
-   write(message,'(a,i0,a)' )'The only allowed values for qtor are 0 or 1, while qtor= ',qtor,' has been required.'
-   MSG_BUG(message)
+   write(msg,'(a,i0,a)' )'The only allowed values for qtor are 0 or 1, while qtor= ',qtor,' has been required.'
+   ABI_BUG(msg)
  end select
 
 end subroutine ftgam
@@ -6163,12 +6502,6 @@ end subroutine ftgam
 !!
 !! OUTPUT
 !! coskr, sinkr = cosine and sine of phase factors for given r and q points
-!!
-!! PARENTS
-!!      elphon,get_tau_k,integrate_gamma_alt,m_phgamma,mka2f,mka2f_tr
-!!      mka2f_tr_lova,mkph_linwid
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

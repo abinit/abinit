@@ -5,18 +5,21 @@ need_cpp_vars = [
 "HAVE_WANNIER90",
 ]
 
-#: List of keywords that are automatically added to all the tests of this suite. 
+#: List of keywords that are automatically added to all the tests of this suite.
 keywords = [
+"wannier90",
 ]
 
 #: List of input files
 inp_files = [
-"t00.in",
-"t01.in",
-"t02.in",
-"t03.in",
-"t04.in",
-"t11.in",
-"t12.in",
-"t13.in",
+"t00.abi",
+"t01.abi",
+"t02.abi",
+"t03.abi",
+"t04.abi",
+"t05.abi",
+"t11.abi",
+"t12.abi",
+"t13.abi",
+"t14.abi",  # test wfd wannier interface
 ]

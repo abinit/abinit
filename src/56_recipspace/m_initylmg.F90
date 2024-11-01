@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_initylmg
 !! NAME
 !!  m_initylmg
@@ -8,14 +7,10 @@
 !! over a set of (reciprocal space) (k+G) vectors
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2019 ABINIT group (FJ, MT)
+!!  Copyright (C) 1998-2024 ABINIT group (FJ, MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -28,20 +23,21 @@
 module m_initylmg
 
  use defs_basis
- use defs_abitypes
  use m_abicore
  use m_errors
  use m_xmpi
 
- use m_paw_sphharm, only : ass_leg_pol, plm_dtheta, plm_dphi, plm_coeff
- use m_mpinfo,      only : proc_distrb_cycle
+ use defs_abitypes,  only : MPI_type
+ use m_paw_sphharm,  only : ass_leg_pol, plm_dtheta, plm_dphi, plm_coeff
+ use m_mpinfo,       only : proc_distrb_cycle, destroy_mpi_enreg, initmpi_seq
 
  implicit none
 
  private
 !!***
 
- public :: initylmg
+ public :: initylmg       ! Calculate real spherical harmonics Ylm (and gradients) for several k-points
+ public :: initylmg_k     ! Simplified interface to compute Ylm for a single k-point.
 !!***
 
 contains
@@ -93,18 +89,10 @@ contains
 !! $Yr_{lm}(%theta ,%phi)=(Re{Y_{l-m}}+(-1)^m Re{Y_{lm}})/sqrt{2}
 !! $Yr_{l-m}(%theta ,%phi)=(Im{Y_{l-m}}-(-1)^m Im{Y_{lm}})/sqrt{2}
 !!
-!! PARENTS
-!!      debug_tools,dfpt_looppert,dfpt_nstpaw,dfptnl_loop,forstr,gstate
-!!      ks_ddiago,m_cut3d,m_pawpwij,m_shirley,m_wfd,mover,nonlop_test
-!!      partial_dos_fractions,respfn,scfcv
-!!
-!! CHILDREN
-!!      plm_coeff
-!!
 !! SOURCE
 
-subroutine initylmg(gprimd,kg,kptns,mkmem,mpi_enreg,mpsang,mpw,&
-&  nband,nkpt,npwarr,nsppol,optder,rprimd,ylm,ylm_gr)
+subroutine initylmg(gprimd, kg, kptns, mkmem, mpi_enreg, mpsang, mpw, &
+                    nband, nkpt, npwarr, nsppol, optder, rprimd, ylm, ylm_gr)
 
 !Arguments ------------------------------------
 !scalars
@@ -149,16 +137,16 @@ subroutine initylmg(gprimd,kg,kptns,mkmem,mpi_enreg,mpsang,mpw,&
 
 !Allocate some memory
  if (optder/=0) then
-   ABI_ALLOCATE(ylmgr_cart,(3,2))
+   ABI_MALLOC(ylmgr_cart,(3,2))
  end if
  if (optder/=0.and.optder/=2) then
-   ABI_ALLOCATE(ylmgr_red,(3,2))
+   ABI_MALLOC(ylmgr_red,(3,2))
  end if
  if (optder==2) then
-   ABI_ALLOCATE(ylmgr2_cart,(3,3,2))
-   ABI_ALLOCATE(ylmgr2_tmp,(3,3))
-   ABI_ALLOCATE(ylmgr_red,(6,2))
-   ABI_ALLOCATE(blm,(5,mpsang*mpsang))
+   ABI_MALLOC(ylmgr2_cart,(3,3,2))
+   ABI_MALLOC(ylmgr2_tmp,(3,3))
+   ABI_MALLOC(ylmgr_red,(6,2))
+   ABI_MALLOC(blm,(5,mpsang*mpsang))
  end if
 
 !Loop over k-points:
@@ -170,7 +158,7 @@ subroutine initylmg(gprimd,kg,kptns,mkmem,mpi_enreg,mpsang,mpw,&
 
 !  Get k+G-vectors, for this k-point:
    npw_k=npwarr(ikpt)
-   ABI_ALLOCATE(kg_k,(3,npw_k))
+   ABI_MALLOC(kg_k,(3,npw_k))
    kg_k(:,1:npw_k)=kg(:,1+ikg:npw_k+ikg)
 
 !  Special case for l=0
@@ -385,7 +373,7 @@ subroutine initylmg(gprimd,kg,kptns,mkmem,mpi_enreg,mpsang,mpw,&
 !    End condition l<>0
    end if
 
-   ABI_DEALLOCATE(kg_k)
+   ABI_FREE(kg_k)
 
    ikg=ikg+npw_k
  end do !  End Loop over k-points
@@ -393,19 +381,63 @@ subroutine initylmg(gprimd,kg,kptns,mkmem,mpi_enreg,mpsang,mpw,&
 !Release the temporary memory
 !Allocate some memory
  if (optder/=0) then
-   ABI_DEALLOCATE(ylmgr_cart)
+   ABI_FREE(ylmgr_cart)
  end if
  if (optder/=0.and.optder/=2) then
-   ABI_DEALLOCATE(ylmgr_red)
+   ABI_FREE(ylmgr_red)
  end if
  if (optder==2) then
-   ABI_DEALLOCATE(ylmgr2_cart)
-   ABI_DEALLOCATE(ylmgr2_tmp)
-   ABI_DEALLOCATE(ylmgr_red)
-   ABI_DEALLOCATE(blm)
+   ABI_FREE(ylmgr2_cart)
+   ABI_FREE(ylmgr2_tmp)
+   ABI_FREE(ylmgr_red)
+   ABI_FREE(blm)
  end if
 
 end subroutine initylmg
+!!***
+
+!!****f* ABINIT/initylmg_k
+!! NAME
+!! initylmg_k
+!!
+!! FUNCTION
+!! Simplified interface to compute Ylm for a single k-point.
+!! See initylmg for the the meaning of the input variables.
+!!
+!! SOURCE
+
+subroutine initylmg_k(npw, mpsang, optder, rprimd, gprimd, kpt, kg, ylm, ylm_gr)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: mpsang, npw, optder
+!arrays
+ real(dp),intent(in) :: kpt(3)
+ integer,intent(in) :: kg(3,npw)
+ real(dp),intent(in) :: gprimd(3,3), rprimd(3,3)
+ real(dp),intent(out) :: ylm(npw, mpsang*mpsang)
+ real(dp),intent(out) :: ylm_gr(npw, 3+6*(optder/2), mpsang*mpsang)
+
+!Local variables ------------------------------
+!scalars
+ integer,parameter :: nkpt_1 = 1, nsppol_1 = 1
+ integer :: npwarr__(nkpt_1), nband__(nkpt_1 * nsppol_1)
+ real(dp) :: kptns__(3,nkpt_1)
+ type(MPI_type) :: seq_mpi_enreg
+
+!*****************************************************************
+
+ call initmpi_seq(seq_mpi_enreg)
+ npwarr__(1) = npw
+ kptns__(:,1) = kpt
+ nband__ = 1 ! Not used in sequential
+
+ call initylmg(gprimd, kg, kptns__, nkpt_1, seq_mpi_enreg, mpsang, npw, &
+               nband__, nkpt_1, npwarr__, nsppol_1, optder, rprimd, ylm, ylm_gr)
+
+ call destroy_mpi_enreg(seq_mpi_enreg)
+
+end subroutine initylmg_k
 !!***
 
 end module m_initylmg

@@ -1,2 +1,0 @@
-mostlyclean-local:
-	rm -f *.$(MODEXT) *.h

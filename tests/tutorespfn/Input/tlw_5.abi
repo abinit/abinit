@@ -1,0 +1,34 @@
+tlw_5.ddb.out
+Total DDB for GaP phonons including quadrupoles interactions
+9
+tlw_4o_DS4_DDB
+tlw_4o_DS6_DDB
+tlw_4o_DS7_DDB
+tlw_4o_DS8_DDB
+tlw_4o_DS9_DDB
+tlw_4o_DS10_DDB
+tlw_4o_DS11_DDB
+tlw_4o_DS12_DDB
+tlw_4o_DS5_DDB
+
+##############################################################
+# This section is used only for regression testing of ABINIT #
+##############################################################
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = mrgddb
+#%% exclude_builders = bob_gnu_13.2_openmp, scope_gnu_10.2_paral
+#%% test_chain =  tlw_4.abi, tlw_5.abi, tlw_6.abi, tlw_7.abi
+#%% [files]
+#%% files_to_test =
+#%%   tlw_5.ddb.out, tolnlines=  0, tolabs=  1.143e-09, tolrel=  3.000e-09, fld_options = -medium
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = M. Royo
+#%% keywords = DFPT, LONGWAVE
+#%% description =  
+#%%   Input file for mrgddb
+#%%   Apparently, there is a (minor, erratic) problem with openmp (2 procs), for the echo of pseudopotential data in the tlw_5.ddb.out file 
+#%% topics = longwave
+#%%<END TEST_INFO>

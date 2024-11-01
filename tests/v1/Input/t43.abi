@@ -1,0 +1,130 @@
+#  Test the geometry builder : 4 H2O molecules on a slab of silicon,
+#  terminated by H atoms.
+#  There are two datasets, in which objects a and b are switched.
+ ndtset 2
+
+# Single out variables that are important for the geometry builder
+ acell 20 20 30
+ rprim  1 0 0 0 1 0 0 0 1
+ ntypat 3
+ znucl 1 8 14   # Hydrogen, Oxygen, Silicon
+ natrd 27
+ typat     2        # Oxygen of the water molecule
+        2*1        # Hydrogens of the water molecule
+        8*3        # Silicons of the slab
+       16*1        # Hydrogens of the bottom of the slab
+ xcart  0   0   0  # Oxygen of the water molecule
+        2.5 0   0  # Hydrogens of the water molecule
+        0   2.5 0
+
+        0 0 0  2.5 2.5 2.5  # Silicons of the slab
+        5 5 0  7.5 7.5 2.5
+        5 0 5  7.5 2.5 7.5
+        0 5 5  2.5 7.5 7.5
+
+       -2 2 -2    2 -2 -2 # Hydrogens of the bottom
+        3 7 -2    7  3 -2
+        8 2 -2   12 -2 -2
+       13 7 -2   17  3 -2
+       -2 12 -2    2  8 -2
+        3 17 -2    7 13 -2
+        8 12 -2   12  8 -2
+       13 17 -2   17 13 -2
+
+# Here are the variables specific to the geometry builder
+  nobj 2     # two objects
+
+#-------------------------------------------------------
+# Description of objects, dataset 1
+
+# Describe object a : the H2O molecule, repeated four times
+   objan1    3
+  objaat1    1 2 3
+  objarf1    4 1 1 # Repeated four times
+  objaro1    0 90  # The initial angle is zero, but
+                   # the increment of angle associated with the first repetition
+                   # factor is ninety degrees
+  objaax1    0 0 0  0 0 1 # The rotation axis is the z axis
+  objatr1    0 0 20   # This is the initial translation
+             5 5 0    # This is the incremental translation
+
+# Describe object b : the 8 silicon atom cell, repeated 2x2x2
+   objbn1    8
+  objbat1    4 5 6 7 8 9 10 11
+  objbrf1    2 2 2  # Repeated 2x2x2
+  # No rotation, only translation
+  objbtr1    0  0  0     # No initial translation
+            10  0  0     # Translation for the first repetition factor
+             0 10  0     # Translation for the second repetition factor
+             0  0 10     # Translation for the third repetition factor
+#-------------------------------------------------------
+# Description of objects, dataset 2
+
+# Describe object b (note the switch with respect to dataset 1): the H2O molecule, repeated four times
+   objbn2    3
+  objbat2    1 2 3
+  objbrf2    4 1 1 # Repeated four times
+  objbro2    0 90  # The initial angle is zero, but
+                   # the increment of angle associated with the first repetition
+                   # factor is ninety degrees
+  objbax2    0 0 0  0 0 1 # The rotation axis is the z axis
+  objbtr2    0 0 20   # This is the initial translation
+             5 5 0    # This is the incremental translation
+
+# Describe object a : the 8 silicon atom cell, repeated 2x2x2
+   objan2    8
+  objaat2    4 5 6 7 8 9 10 11
+  objarf2    2 2 2  # Repeated 2x2x2
+  # No rotation, only translation
+  objatr2    0  0  0     # No initial translation
+            10  0  0     # Translation for the first repetition factor
+             0 10  0     # Translation for the second repetition factor
+             0  0 10     # Translation for the third repetition factor
+#-------------------------------------------------------
+
+# Altogether : 3*4 atoms in object a ,
+#              8*8 atoms in object b ,
+#               16 additional H atoms   makes 12+64+16=92 atoms
+  natom 92
+
+# The number of bands is 152 :  12 for the 24 H atoms,
+#                               12 for the  4 O atoms,
+#                              128 for the 64 Si atoms.
+# Here, use the fband opportunity
+  fband 0.0d0
+
+# Other variables are now described
+ diemac 1.0d0
+ diemix 1.0d0
+ ecut 0.8   # Completely unrealistic
+ intxc 1
+ nnsclo 1   # This is also to save time
+ enunit 2
+ kptopt 0
+ kpt   3*0.0   kptnrm 1
+ nkpt  1
+ nline 1  nstep 1
+ nsym 1
+ occopt 1 prtvol 10
+ tolwfr 1.0d-16
+ wtk   1
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosGTH_pwteter/01h.pspgth, PseudosTM_pwteter/8o.pspnc, PseudosTM_pwteter/14si.pspnc"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = t43.abo, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% keywords = NC
+#%% authors = Unknown
+#%% description = 
+#%%   Test the geometry builder, and the non-ordering of atoms  :
+#%%   Same thing as test 42, but with an other order for the input of atoms.
+#%%   Also permutes objects a and b , to check whether everything is OK.
+#%% topics = AtomManipulator
+#%%<END TEST_INFO>

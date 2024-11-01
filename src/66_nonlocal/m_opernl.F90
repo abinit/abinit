@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_opernl
 !! NAME
 !!  m_opernl
@@ -7,14 +6,10 @@
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2019 ABINIT group (DCA, XG, DRH)
+!! Copyright (C) 1998-2024 ABINIT group (DCA, XG, DRH)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -125,12 +120,6 @@ contains
 !! This routine basically replaces getgla (gxa here is the former gla),
 !! except for the calculation of <G|dVnl/dk|C> or strain gradients.
 !!
-!! PARENTS
-!!      nonlop_pl
-!!
-!! CHILDREN
-!!      mkffkg
-!!
 !! SOURCE
 
 subroutine opernl2(choice,dgxdis,dgxds,d2gxdis,d2gxds2,dgxdt,&
@@ -139,7 +128,6 @@ subroutine opernl2(choice,dgxdis,dgxds,d2gxdis,d2gxds2,dgxdt,&
 &  mlang5,mlang6,mproj,ndgxdt,nffnl,nincat,nkpg,nlang,nloalg,npw,&
 &  ntypat,ph3d,sign,vect)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -251,11 +239,11 @@ subroutine opernl2(choice,dgxdis,dgxds,d2gxdis,d2gxds2,dgxdt,&
 !!$OMP SHARED(ntypat,ph3d,sign,vect) &
 !!$OMP SHARED(mblkpw,nffkg,nffkgd,nffkge,nffkgs,ntens,mmproj)
 
- ABI_ALLOCATE(ffkg,(mblkpw,nffkg))
- ABI_ALLOCATE(parity,(nffkg))
- ABI_ALLOCATE(kpgx,(mblkpw,ntens))
- ABI_ALLOCATE(scalars,(2,nffkg))
- ABI_ALLOCATE(teffv,(2,mblkpw))
+ ABI_MALLOC(ffkg,(mblkpw,nffkg))
+ ABI_MALLOC(parity,(nffkg))
+ ABI_MALLOC(kpgx,(mblkpw,ntens))
+ ABI_MALLOC(scalars,(2,nffkg))
+ ABI_MALLOC(teffv,(2,mblkpw))
 !!$OMP DO
  do ipw1=1,npw,mblkpw
 
@@ -607,17 +595,17 @@ subroutine opernl2(choice,dgxdis,dgxds,d2gxdis,d2gxds2,dgxdt,&
      write(message,'(a,2i10,a,a)')&
 &     ' Input sign, choice=',sign,choice,ch10,&
 &     ' Are not compatible or allowed. '
-     MSG_BUG(message)
+     ABI_BUG(message)
    end if
 
 !  End loop on blocks of planewaves
  end do
 !!$OMP END DO
- ABI_DEALLOCATE(ffkg)
- ABI_DEALLOCATE(kpgx)
- ABI_DEALLOCATE(parity)
- ABI_DEALLOCATE(scalars)
- ABI_DEALLOCATE(teffv)
+ ABI_FREE(ffkg)
+ ABI_FREE(kpgx)
+ ABI_FREE(parity)
+ ABI_FREE(scalars)
+ ABI_FREE(teffv)
 !!$OMP END PARALLEL
 
 
@@ -739,12 +727,6 @@ end subroutine opernl2
 !! This routine basically replaces getgla (gxa here is the former gla),
 !! except for the calculation of <G|dVnl/dk|C> or strain gradients.
 !!
-!! PARENTS
-!!      nonlop_pl
-!!
-!! CHILDREN
-!!      dfpt_mkffkg
-!!
 !! SOURCE
 
 subroutine opernl3(choice,dgxdis,dgxds,d2gxdis,d2gxds2,dgxdt,&
@@ -752,8 +734,6 @@ subroutine opernl3(choice,dgxdis,dgxds,d2gxdis,d2gxds2,dgxdt,&
 &  jproj,kg_k,kpg_k,kpt,lmnmax,matblk,mincat,mlang1,mlang3,mlang4,&
 &  mlang5,mlang6,mproj,ndgxdt,nffnl,nincat,nkpg,nlang,nloalg,npw,&
 &  ntypat,ph3d,sign,vect)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -869,11 +849,11 @@ subroutine opernl3(choice,dgxdis,dgxds,d2gxdis,d2gxds2,dgxdt,&
 !!$OMP SHARED(ndgxdt,nffkg,nffkgd,nffkge,nffkgs,nincat,nkpg,nlang) &
 !!$OMP SHARED(nloalg,ph3d,npw,ntens,ntypat,sign,vect)
 
- ABI_ALLOCATE(ffkg,(nffkg,mblkpw))
- ABI_ALLOCATE(parity,(nffkg))
- ABI_ALLOCATE(kpgx,(mblkpw,ntens))
- ABI_ALLOCATE(scalars,(2,nffkg))
- ABI_ALLOCATE(teffv,(2,mblkpw))
+ ABI_MALLOC(ffkg,(nffkg,mblkpw))
+ ABI_MALLOC(parity,(nffkg))
+ ABI_MALLOC(kpgx,(mblkpw,ntens))
+ ABI_MALLOC(scalars,(2,nffkg))
+ ABI_MALLOC(teffv,(2,mblkpw))
 !!$OMP DO
  do ipw1=1,npw,mblkpw
 
@@ -1220,17 +1200,17 @@ subroutine opernl3(choice,dgxdis,dgxds,d2gxdis,d2gxds2,dgxdt,&
      write(message, '(a,2i10,a,a)' )&
 &     '  Input sign, choice=',sign,choice,ch10,&
 &     '  Are not compatible or allowed. '
-     MSG_BUG(message)
+     ABI_BUG(message)
    end if
 
 !  End loop on blocks of planewaves
  end do
 !!$OMP END DO
- ABI_DEALLOCATE(ffkg)
- ABI_DEALLOCATE(kpgx)
- ABI_DEALLOCATE(parity)
- ABI_DEALLOCATE(scalars)
- ABI_DEALLOCATE(teffv)
+ ABI_FREE(ffkg)
+ ABI_FREE(kpgx)
+ ABI_FREE(parity)
+ ABI_FREE(scalars)
+ ABI_FREE(teffv)
 !!$OMP END PARALLEL
 
 
@@ -1338,12 +1318,6 @@ end subroutine opernl3
 !!
 !! Present version decomposed according to iffkg
 !!
-!! PARENTS
-!!      nonlop_pl
-!!
-!! CHILDREN
-!!      dfpt_mkffkg
-!!
 !! SOURCE
 
 subroutine opernl4a(choice,dgxdis,dgxds,d2gxdis,d2gxds2,dgxdt,&
@@ -1351,8 +1325,6 @@ subroutine opernl4a(choice,dgxdis,dgxds,d2gxdis,d2gxds2,dgxdt,&
 &  jproj,kg_k,kpg_k,kpt,lmnmax,matblk,mincat,mlang1,mlang3,mlang4,&
 &  mlang5,mlang6,mproj,ndgxdt,nffnl,nincat,nkpg,nlang,nloalg,npw,&
 &  ntypat,ph3d,vect)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1475,11 +1447,11 @@ subroutine opernl4a(choice,dgxdis,dgxds,d2gxdis,d2gxds2,dgxdt,&
 !!$OMP SHARED (ntypat,ph3d,vect) &
 !!$OMP SHARED (mblkpw,jump,nffkgd,nffkg,nffkge,nffkgs,ntens)
 
- ABI_ALLOCATE(ffkg,(nffkg,mblkpw))
- ABI_ALLOCATE(parity,(nffkg))
- ABI_ALLOCATE(kpgx,(mblkpw,ntens))
- ABI_ALLOCATE(scalars,(2,nffkg))
- ABI_ALLOCATE(teffv,(2,mblkpw))
+ ABI_MALLOC(ffkg,(nffkg,mblkpw))
+ ABI_MALLOC(parity,(nffkg))
+ ABI_MALLOC(kpgx,(mblkpw,ntens))
+ ABI_MALLOC(scalars,(2,nffkg))
+ ABI_MALLOC(teffv,(2,mblkpw))
 
 !!$OMP DO
  do ipw1=1,npw,mblkpw
@@ -2266,11 +2238,11 @@ subroutine opernl4a(choice,dgxdis,dgxds,d2gxdis,d2gxds2,dgxdt,&
  end do
 !!$OMP END DO
 
- ABI_DEALLOCATE(ffkg)
- ABI_DEALLOCATE(kpgx)
- ABI_DEALLOCATE(parity)
- ABI_DEALLOCATE(scalars)
- ABI_DEALLOCATE(teffv)
+ ABI_FREE(ffkg)
+ ABI_FREE(kpgx)
+ ABI_FREE(parity)
+ ABI_FREE(scalars)
+ ABI_FREE(teffv)
 !!$OMP END PARALLEL
 
 !DEBUG
@@ -2348,20 +2320,12 @@ end subroutine opernl4a
 !! Present version decomposed according to iffkg
 !! opernl4a.f is from reciprocal space to projected quantities.
 !!
-!! PARENTS
-!!      nonlop_pl
-!!
-!! CHILDREN
-!!      dfpt_mkffkg
-!!
 !! SOURCE
 
 subroutine opernl4b(choice,dgxds,dgxdt,ffnl,gmet,gxa,&
 &  ia3,idir,indlmn,ispinor,itypat,jproj,kg_k,kpg_k,kpt,&
 &  lmnmax,matblk,mincat,mlang3,mlang4,mproj,ndgxdt,nffnl,nincat,&
 &  nkpg,nlang,nloalg,npw,ntypat,ph3d,vect)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2439,11 +2403,11 @@ subroutine opernl4b(choice,dgxds,dgxdt,ffnl,gmet,gxa,&
 !!$OMP SHARED(ndgxdt,nffnl,nincat,nkpg,nlang,nloalg,npw,ntypat,ph3d,vect) &
 !!$OMP SHARED(jump,nffkgd,nffkgk,nffkgs,mblkpw,nffkg,nffkge,ntens)
 
- ABI_ALLOCATE(ffkg,(nffkg,mblkpw))
- ABI_ALLOCATE(parity,(nffkg))
- ABI_ALLOCATE(kpgx,(mblkpw,ntens))
- ABI_ALLOCATE(scalars,(2,nffkg))
- ABI_ALLOCATE(teffv,(2,mblkpw))
+ ABI_MALLOC(ffkg,(nffkg,mblkpw))
+ ABI_MALLOC(parity,(nffkg))
+ ABI_MALLOC(kpgx,(mblkpw,ntens))
+ ABI_MALLOC(scalars,(2,nffkg))
+ ABI_MALLOC(teffv,(2,mblkpw))
 
 !Loop on subsets of plane waves (blocking)
 !!$OMP DO
@@ -3008,18 +2972,18 @@ subroutine opernl4b(choice,dgxds,dgxdt,ffnl,gmet,gxa,&
    else
 !    Problem: choice does not make sense
      write(message,'(a,i0,a)' )' Input choice=',choice,' not allowed. '
-     MSG_BUG(message)
+     ABI_BUG(message)
    end if
 
 !  End loop on blocks of planewaves
  end do
 !!$OMP END DO
 
- ABI_DEALLOCATE(ffkg)
- ABI_DEALLOCATE(kpgx)
- ABI_DEALLOCATE(parity)
- ABI_DEALLOCATE(scalars)
- ABI_DEALLOCATE(teffv)
+ ABI_FREE(ffkg)
+ ABI_FREE(kpgx)
+ ABI_FREE(parity)
+ ABI_FREE(scalars)
+ ABI_FREE(teffv)
 !!$OMP END PARALLEL
 
 end subroutine opernl4b

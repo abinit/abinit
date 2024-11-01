@@ -1,0 +1,100 @@
+#   FCC Al; 10 special points
+#  Test of multidataset mode, with getwfk/=0
+#  Here, test the concept of one input file for a collection of runs
+#  Consider that the previous test has already generated output wfs files,
+#  and use them
+
+ ndtset 1  jdtset 5  getwfk 4
+
+ tsmear1 0.08
+ tsmear2 0.08
+ tsmear3 0.04
+ tsmear4 0.02
+# The four previous data were already in the previous test. The next one
+# is to be computed this time.
+ tsmear5 0.01
+
+ acell 3*7.56
+ ecut 10
+ enunit 2
+
+ kptopt 0
+ nkpt        10
+ kpt
+  .37500000000000  .37500000000000  .37500000000000
+  .37500000000000  .37500000000000  .12500000000000
+  .50000000000000  .50000000000000  .12500000000000
+  .37500000000000  .37500000000000  .62500000000000
+  .37500000000000  .12500000000000  .12500000000000
+  .25000000000000  .50000000000000  .12500000000000
+  .37500000000000  .12500000000000  .62500000000000
+  .00000000000000  .12500000000000  .50000000000000
+  .12500000000000  .12500000000000  .12500000000000
+  .25000000000000  .25000000000000  .12500000000000
+ kptnrm     1
+ wtk
+  .03125000000000  .09375000000000  .09375000000000  .09375000000000
+  .09375000000000  .18750000000000  .18750000000000  .09375000000000
+  .03125000000000  .09375000000000
+
+ intxc 1
+ natom  1 nband 4
+ nline 3
+ nstep 7
+ nsym  24 ntypat  1
+ occopt  4
+ rprim   0 .5 .5  .5 0 .5  .5 .5 0
+ symrel
+       1  0  0    0  1  0    0  0  1
+       0  1 -1    1  0 -1    0  0 -1
+      -1  0  0   -1  0  1   -1  1  0
+       0 -1  1    0 -1  0    1 -1  0
+      -1  0  1   -1  0  0   -1  1  0
+       0 -1  0    0 -1  1    1 -1  0
+       0 -1  1    1 -1  0    0 -1  0
+       0  1 -1    0  0 -1    1  0 -1
+       0  0 -1    1  0 -1    0  1 -1
+      -1  1  0   -1  0  1   -1  0  0
+       1  0 -1    0  1 -1    0  0 -1
+       1 -1  0    0 -1  0    0 -1  1
+      -1  0  0   -1  1  0   -1  0  1
+       0  1  0    1  0  0    0  0  1
+       0  0  1    0  1  0    1  0  0
+       1  0  0    0  0  1    0  1  0
+       0  0  1    1  0  0    0  1  0
+       0  1  0    0  0  1    1  0  0
+      -1  0  1   -1  1  0   -1  0  0
+       0  0 -1    0  1 -1    1  0 -1
+       1  0 -1    0  0 -1    0  1 -1
+       1 -1  0    0 -1  1    0 -1  0
+       0 -1  0    1 -1  0    0 -1  1
+      -1  1  0   -1  0  0   -1  0  1
+ tnons   72*0.0d0
+ toldfe 1.0d-6
+ typat  1
+ xred  0.0 0.0 0.0
+ znucl 13.0
+
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosGTH_pwteter/13al.pspgth"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% output_prefix = t62o
+#%% test_chain = t62.abi, t63.abi 
+#%% [files]
+#%% files_to_test = 
+#%%  t63.abo, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
+#%% [paral_info]
+#%% max_nprocs = 10
+#%% [extra_info]
+#%% keywords = NC
+#%% authors = Unknown
+#%% description = 
+#%%   Test multi-dataset mode. Al metal, 10 k points.
+#%%   Start from the output wfs of the previous dataset. Compute tsmear=0.01.
+#%%   Test the idea of using one input file for different runs.
+#%%   The input file is the same as for test 63, except for the addition of one dataset.
+#%%<END TEST_INFO>

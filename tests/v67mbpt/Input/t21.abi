@@ -1,0 +1,98 @@
+# Crystalline silicon
+# Multiple datasets testing TB09+GW, the cd_use_tangrid and other related variables
+# This test goes also with test v6/t15 (mrgscr) and v6/t16
+
+ndtset 3
+
+#DATASET 1 : SCF calculation of the density
+
+tolvrs1     1.0d-16
+nstep1      15
+nband1      5
+
+#DATASET 2 : Generation of the KSS file
+
+tolwfr2     1.0d-16
+iscf2      -2
+nstep2      12
+nband2      18
+nbdbuf2     4
+getden2     1
+getwfk2     1
+istwfk2    *1
+
+# DATASET 3 : Calculation of screening on 
+#  a grid with custom imaginary freqs
+
+optdriver3  3
+gwcalctyp3  2
+istwfk3    *1
+getwfk3     2
+awtr3       1
+symchi3     1
+inclvkb3    2
+
+ecuteps3    1.0
+nband3      12
+
+spmeth3     1
+nomegasf3   250
+
+gw_frqre_tangrid3  1
+cd_max_freq3     100 eV
+cd_halfway_freq3 25 eV
+nfreqre3          5
+cd_customnimfrqs3 4
+nfreqim3          4
+cd_imfrqs3        0.1 0.5 1.0 5.0
+cd_full_grid      1
+
+# COMMON TO ALL DATASETS
+
+ecut        6
+ecutsm      0.5
+ecutwfn     6
+occopt      1
+enunit      1
+
+kptopt      1
+ngkpt       2 2 2
+nshiftk     1
+shiftk      0.0 0.0 0.0
+
+diemac      12.0
+
+#Structure
+
+acell     3*10.2625546
+rprim       0.0  0.5  0.5
+            0.5  0.0  0.5
+            0.5  0.5  0.0
+
+# Definition of the atom types
+ntypat      1
+znucl       14
+
+# Definition of the atoms
+natom       2
+typat       1 1
+xred
+  -1/8 -1/8 -1/8
+   1/8  1/8  1/8
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/14si.pspnc"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t21.abo, tolnlines = 400, tolabs = 1.1e-2, tolrel = 4.0e-2, fld_options =  -medium
+#%% [paral_info]
+#%% max_nprocs = 3
+#%% [extra_info]
+#%% authors = M. Stankovski
+#%% keywords = NC, GW
+#%% description = Test the cd_custom_imfrq, cd_imfrqs and cd_full_grid options
+#%%<END TEST_INFO>

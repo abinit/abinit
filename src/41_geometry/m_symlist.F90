@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_symlist
 !! NAME
 !!  m_symlist
@@ -7,14 +6,10 @@
 !! Determine the space group from the number and type of symmetry operations
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2019 ABINIT group (RC)
+!!  Copyright (C) 2008-2024 ABINIT group (RC)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -66,16 +61,9 @@ contains
 !! For the time being there are several groups where uncertainties still exist
 !! This will be solved in the very next ABINIT version
 !!
-!! PARENTS
-!!      symspgr
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine symlist_prim(additional_info,nsym,n_axes,spgroup)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -505,16 +493,9 @@ end subroutine symlist_prim
 !! For the time being there are several groups where uncertainties still exist
 !! This will be solved in the very next ABINIT version
 !!
-!! PARENTS
-!!      symspgr
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine symlist_bcc(additional_info,nsym,n_axes,spgroup)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -692,16 +673,9 @@ end subroutine symlist_bcc
 !! For the time being there are several groups where uncertainties still exist
 !! This will be solved in the very next ABINIT version
 !!
-!! PARENTS
-!!      symspgr
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine symlist_fcc(nsym,n_axes,spgroup)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -807,16 +781,9 @@ end subroutine symlist_fcc
 !! For the time being there are several groups where uncertainties still exist
 !! This will be solved in the very next ABINIT version
 !!
-!! PARENTS
-!!      symspgr
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine symlist_others(brvltt,nsym,n_axes,spgroup)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

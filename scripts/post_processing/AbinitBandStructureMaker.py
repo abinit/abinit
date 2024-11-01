@@ -11,10 +11,12 @@ version = '1.3'
 #     : defined a second angletol to distinguish between specialkpt detection and segment construction
 #===================================
 
+# *********  no longer used or maintained  *******
 
 #=====================================================================================================================================================================
 #IMPORTS
 import os
+import re
 import sys
 import time
 from numpy import *
@@ -811,6 +813,7 @@ if ctrl.filetype == 'out':
 
 #------------------------------
 
+    parser_template = '{}\d?\s?=?\s*([\d.E+]+)'
     #compute k-points and energy eigenvalues for each dataset
     starter = ctrl.filedata[:ctrl.datasetlocation[0][2]-1]
     for d in range(len(ctrl.useddataset)):
@@ -825,7 +828,8 @@ if ctrl.filetype == 'out':
         datasetkey.append(['ecut:'])
         for i in range(len(starter)):
             if starter[i].split()[0] == 'ecut%s' %n or starter[i].split()[0] == 'ecut':
-                datasetkey[-1].append(float(starter[i].split()[1]))
+                value = float(re.search(parser_template.format('ecut'), starter[i]).group(1))
+                datasetkey[-1].append(value)
         if len(datasetkey[-1]) == 1:
             datasetkey[-1].append('notfound')
 
@@ -833,10 +837,8 @@ if ctrl.filetype == 'out':
         datasetkey.append(['natom:'])
         for i in range(len(starter)):
             if starter[i].split()[0] == 'natom%s' %n or starter[i].split()[0] == 'natom':
-                if starter[i].split()[1] == '=':
-                   datasetkey[-1].append(float(starter[i].split()[2]))
-                else:
-                   datasetkey[-1].append(float(starter[i].split()[1]))
+                 value = float(re.search(parser_template.format('natom'), starter[i]).group(1)) 
+                 datasetkey[-1].append(value) 
         if len(datasetkey[-1]) == 1:
             datasetkey[-1].append(float(1)) #default
 
@@ -844,7 +846,8 @@ if ctrl.filetype == 'out':
         datasetkey.append(['nband:'])
         for i in range(len(starter)):
             if starter[i].split()[0] == 'nband%s' %n or starter[i].split()[0] == 'nband':
-                datasetkey[-1].append(float(starter[i].split()[1]))
+                value = float(re.search(parser_template.format('nband'), starter[i]).group(1))
+                datasetkey[-1].append(value)
         if len(datasetkey[-1]) == 1:
             datasetkey[-1].append(float(1)) #default
 
@@ -852,7 +855,8 @@ if ctrl.filetype == 'out':
         datasetkey.append(['occopt:'])
         for i in range(len(starter)):
             if starter[i].split()[0] == 'occopt%s' %n or starter[i].split()[0] == 'occopt':
-                datasetkey[-1].append(float(starter[i].split()[1]))
+                value = float(re.search(parser_template.format('occopt'), starter[i]).group(1))
+                datasetkey[-1].append(value)
         if len(datasetkey[-1]) == 1:
             datasetkey[-1].append(float(1)) #default
 

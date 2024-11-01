@@ -1,8 +1,0 @@
-Hartwigsen-Goedecker-Hutter psp for B,  from PRB58, 3641 (1998) 
-    5   3  010605 zatom,zion,pspdat
- 3 1   1 0 2001 0  pspcod,pspxc,lmax,lloc,mmax,r2well 
-  0.433930   -5.578642    0.804251    0.000000   0.000000 rloc, c1, c2, c3, c4
-  0.373843    6.233928    0.000000    0.000000          rs, h11s, h22s, h33s
-  0.360393    0.000000    0.000000    0.000000          rp, h11p, h22p, h33p
-              0.000878    0.000000    0.000000          k11p, k22p, k33p
-1.5 0.4339  2.1                                         rcutoff, rloc

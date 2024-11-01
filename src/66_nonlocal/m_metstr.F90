@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_metstr
 !! NAME
 !!  m_metstr
@@ -7,14 +6,10 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2019 ABINIT group ()
+!!  Copyright (C) 2008-2024 ABINIT group ()
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -54,7 +49,7 @@ contains
 !! tensors.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2019 ABINIT group (DRH, DCA, XG, GMR)
+!! Copyright (C) 1998-2024 ABINIT group (DRH, DCA, XG, GMR)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -118,16 +113,9 @@ contains
 !!       \end{array} \right)
 !! $$
 !!
-!! PARENTS
-!!      nonlop_pl
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine metstr(istr,rank,iterm,gmet,gprimd,aa,bb)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -152,7 +140,7 @@ subroutine metstr(istr,rank,iterm,gmet,gprimd,aa,bb)
    write(message, '(a,i0,a,a,a)' )&
 &   'Input iterm=',iterm,' not allowed.',ch10,&
 &   'Possible values are 1,2,3 only.'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
  if(istr/=old_istr) then
@@ -168,7 +156,7 @@ subroutine metstr(istr,rank,iterm,gmet,gprimd,aa,bb)
      write(message,'(a,i0,a,a,a)')&
 &     'Input istr=',istr,' not allowed.',ch10,&
 &     'Possible values are 1,2,3,4,5,6 only.'
-     MSG_BUG(message)
+     ABI_BUG(message)
    end if
 
    ka=idx(2*istr-1);kb=idx(2*istr)

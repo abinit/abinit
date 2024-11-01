@@ -1,0 +1,64 @@
+# Most trivial case: single H atom
+
+ timopt -1
+
+acell 3*7
+diemac 1.0d0
+diemix 0.5d0
+ecut 70
+
+kptopt 0
+kpt 3*0.25
+natom 1
+nband 1
+nkpt 1
+nline 3
+nsppol 2
+nstep 6
+nsym 8
+ntypat 1
+occ 1
+rprim 1 0 0 0 1 0 0 0 1
+symrel  1  0  0   0  1  0   0  0  1
+       -1  0  0   0  1  0   0  0  1
+        1  0  0   0 -1  0   0  0  1
+       -1  0  0   0 -1  0   0  0  1
+        1  0  0   0  1  0   0  0 -1
+       -1  0  0   0  1  0   0  0 -1
+        1  0  0   0 -1  0   0  0 -1
+       -1  0  0   0 -1  0   0  0 -1
+tnons 24*0
+tolwfr 1.0d-14
+typat 1
+wtk 1 znucl 1
+xred 3*0
+#Additional test
+prtkden 1 # Test the kinetic energy density.
+usekden 1 # Test the kinetic energy density.
+prtgden 1 # Test the gradient of electronic density.
+prtlden 1 # Test the Laplacian of electronic density.
+
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "01h.bare"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit 
+#%% test_chain = t21.abi, t22.abi, t23.abi, t24.abi
+#%% [files]
+#%% files_to_test = t21.abo, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
+#%% [paral_info]
+#%% max_nprocs = 2
+#%% [extra_info]
+#%% keywords = NC
+#%% authors = Unknown
+#%% description = 
+#%%   Isolated Hydrogen atom (see above) 
+#%%   Treated with LSD, Teter rational polynomial parametrization (4/93) (ixc=1).
+#%%   The total energy is -0.4792 Ha.
+#%%   Also additional tests concerning the kinetic energy density calculation,
+#%%   the gradient of electronic density calculation and 
+#%%   the Laplacian of electronic density calculation are performed.
+#%% topics = spinpolarisation, xc
+#%%<END TEST_INFO>

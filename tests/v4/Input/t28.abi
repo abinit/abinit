@@ -1,0 +1,100 @@
+# Fake H crystal.
+# Test trigonal and hexagonal spacegroups
+
+ndtset 33
+
+spgroup1 147  spgroupma1  15
+spgroup2 148  spgroupma2  19  # Rhombohedral
+spgroup3 149  spgroupma3  23
+spgroup4 150  spgroupma4  27
+spgroup5 151  spgroupma5  31
+spgroup6 152  spgroupma6  35
+spgroup7 153  spgroupma7  39
+spgroup8 154  spgroupma8  43
+spgroup9 155  spgroupma9  47   # Rhombohedral
+spgroup10 156  spgroupma10  51
+spgroup11 157  spgroupma11  55
+spgroup12 158  spgroupma12  59
+spgroup13 159  spgroupma13  63
+spgroup14 160  spgroupma14  67 # Rhombohedral
+spgroup15 161  spgroupma15  71 # Rhombohedral
+spgroup16 162  spgroupma16  75
+spgroup17 162  spgroupma17  76
+spgroup18 162  spgroupma18  77
+spgroup19 163  spgroupma19  81
+spgroup20 163  spgroupma20  82
+spgroup21 163  spgroupma21  83
+spgroup22 164  spgroupma22  87
+spgroup23 164  spgroupma23  88
+spgroup24 164  spgroupma24  89
+spgroup25 165  spgroupma25  93
+spgroup26 165  spgroupma26  94
+spgroup27 165  spgroupma27  95
+spgroup28 166  spgroupma28  99 # Rhombohedral
+spgroup29 166  spgroupma29 100 # Rhombohedral
+spgroup30 166  spgroupma30 101 # Rhombohedral
+spgroup31 167  spgroupma31 105 # Rhombohedral
+spgroup32 167  spgroupma32 106 # Rhombohedral
+spgroup33 167  spgroupma33 107 # Rhombohedral
+
+#This is for spgroup 147 to 161
+natom1 6   natom2 6   natom3 6  natom4 6  natom5   6
+natom6 6   natom7 6   natom8 6  natom9 6  natom10  6
+natom11 6   natom12 6   natom13 6  natom14 6  natom15 6
+
+#This is for spgroup 162 to 167
+natom 12
+
+#This is for hR Bravais lattice
+acell2  8 8 8      angdeg2   85 85 85    spgaxor2  2
+acell9  8 8 8      angdeg9   85 85 85    spgaxor9  2
+acell14  8 8 8     angdeg14   85 85 85   spgaxor14 2
+acell15  8 8 8     angdeg15   85 85 85   spgaxor15 2
+acell28  8 8 8     angdeg28   85 85 85   spgaxor28 2
+acell29  8 8 8     angdeg29   85 85 85   spgaxor29 2
+acell30  8 8 8     angdeg30   85 85 85   spgaxor30 2
+acell31  8 8 8     angdeg31   85 85 85   spgaxor31 2
+acell32  8 8 8     angdeg32   85 85 85   spgaxor32 2
+acell33  8 8 8     angdeg33   85 85 85   spgaxor33 2
+
+#This is for hP Bravais lattice
+acell 8 8 9
+angdeg  90 90 120
+
+
+# Common data
+prtvol -1          # stop in abinit (main program), before call driver.
+brvltt -1          # important to reduce the conventional cell to primitive,
+                   # and allow the recognition of space group
+ntypat 1
+znucl 1
+natrd 1
+xred 0.17 0.15 0.11
+spinat 0.0 0.0 1.0
+typat 1
+ecut 1
+  kptopt 0
+nkpt 1
+nline 1
+nstep 1
+toldfe 1.0d-6
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "01h.bare"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t28.abo, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = Unknown
+#%% keywords = 
+#%% description = 
+#%%   H based fake crystals : magnetic groups, Shubnikov type III
+#%%   Test the generation and recognition of the
+#%%   rhombohedral sub system (spgroup 143 to 167)
+#%%<END TEST_INFO>

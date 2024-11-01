@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_sgfft
 !! NAME
 !!  m_sgfft
@@ -8,7 +7,7 @@
 !!
 !! COPYRIGHT
 !! Copyright by Stefan Goedecker, Ithaca, NY USA, July 14, 1993
-!! Copyright (C) 1998-2019 ABINIT group (DCA, XG)
+!! Copyright (C) 1998-2024 ABINIT group (DCA, XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -28,6 +27,7 @@ MODULE m_sgfft
  use m_errors
  use m_fftcore
 
+ use m_fstrings,    only : sjoin, itoa
  use defs_fftdata,  only : mg
 
  implicit none
@@ -85,17 +85,9 @@ CONTAINS  !====================================================================
 !!  Note that the meaning of fftcache has changed from the original
 !!  ncache of SG (that was the maximum number of COMPLEX*16 in the cache)
 !!
-!! PARENTS
-!!      ccfft,m_sgfft
-!!
-!! CHILDREN
-!!      sg_fft_cc
-!!
 !! SOURCE
 
 subroutine sg_fft_cc(fftcache,n1,n2,n3,nd1,nd2,nd3,ndat,isign,arr,ftarr)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -158,17 +150,9 @@ end subroutine sg_fft_cc
 !!  Note that the meaning of fftcache has changed from the original
 !!  ncache of SG (that was the maximum number of COMPLEX*16 in the cache)
 !!
-!! PARENTS
-!!      m_sgfft
-!!
-!! CHILDREN
-!!      sg_fft_cc
-!!
 !! SOURCE
 
 subroutine fft_cc_one_nothreadsafe(fftcache,nd1,nd2,nd3,n1,n2,n3,arr,ftarr,ris)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -197,13 +181,19 @@ subroutine fft_cc_one_nothreadsafe(fftcache,nd1,nd2,nd3,n1,n2,n3,arr,ftarr,ris)
    write(message, '(a,3i10,a,i10,a)' )&
 &   'one of the dimensions n1,n2,n3=',n1,n2,n3,&
 &   'exceeds allowed dimension mg=',mg,ch10
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
 !transform along x direction
  call sg_ctrig(n1,trig,aft,bef,now,ris,ic,ind,mfac,mg)
  call sg_fftx(fftcache,mfac,mg,nd1,nd2,nd3,n2,n3,&
 & arr,ftarr,trig,aft,now,bef,ris,ind,ic)
+
+ ! This to handle 1d FFTs
+ if (n2 == 1 .and. n3 == 1) then
+   !print *, "Returning as n2, n3:", n2, n3
+   return
+ end if
 
 !transform along y direction
  if (n2/=n1)then
@@ -266,17 +256,9 @@ end subroutine fft_cc_one_nothreadsafe
 !! fofg(2,nfft)=f(G), complex.
 !! fofr(cplex*nfft)=input function f(r) (real or complex)
 !!
-!! PARENTS
-!!      fourdp
-!!
-!! CHILDREN
-!!      sg_fft_cc
-!!
 !! SOURCE
 
 subroutine sg_fft_rc(cplex,fofg,fofr,isign,nfft,ngfft)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -319,7 +301,7 @@ subroutine sg_fft_rc(cplex,fofg,fofr,isign,nfft,ngfft)
 &   'The input algorithm number fftalg=',fftalg,' is not allowed.',ch10,&
 &   'The second digit (fftalg(B)) must be 0 or 1.',ch10,&
 &   'Action: change fftalg in your input file.'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
  if (fftalgb==1 .and. ALL(fftalga/=(/1,3,4/)) )then
@@ -327,12 +309,12 @@ subroutine sg_fft_rc(cplex,fofg,fofr,isign,nfft,ngfft)
 &   'The input algorithm number fftalg=',fftalg,' is not allowed.',ch10,&
 &   'When fftalg(B) is 1, the allowed values for fftalg(A) are 1 and 4.',ch10,&
 &   'Action: change fftalg in your input file.'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
  if (n4<n1.or.n5<n2.or.n6<n3) then
    write(msg,'(a,3i8,a,3i8)')'  Each of n4,n5,n6=',n4,n5,n6,'must be >= n1, n2, n3 =',n1,n2,n3
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
 !---------------------------------------------------------
@@ -344,7 +326,7 @@ subroutine sg_fft_rc(cplex,fofg,fofr,isign,nfft,ngfft)
    write(msg, '(a,3i10,a,a,a,i10,a)' )&
 &   'One of the dimensions n1,n2,n3=',n1,n2,n3,',',ch10,&
 &   'exceeds allowed dimension mg=',mg,'.'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 #endif
 
@@ -355,8 +337,8 @@ subroutine sg_fft_rc(cplex,fofg,fofr,isign,nfft,ngfft)
  n5half1=(n2half1/2)*2+1
 
 !This sophisticated algorithm allows to decrease the memory needs.
- ABI_ALLOCATE(work1,(2,n4,n5half1,n6))
- ABI_ALLOCATE(work2,(2,n4,n5half1,n6))
+ ABI_MALLOC(work1,(2,n4,n5half1,n6))
+ ABI_MALLOC(work2,(2,n4,n5half1,n6))
 
  if(isign==1)then
 
@@ -391,10 +373,10 @@ subroutine sg_fft_rc(cplex,fofg,fofr,isign,nfft,ngfft)
 !$OMP&SHARED(n1,n1half1,n1halfm,n2,n2half1,n3) &
 !$OMP&SHARED(n4,n5,now1,now2,ris,trig1,trig2,work2)
 
-   ABI_ALLOCATE(wk2d_a,(2,n4,n5,1))
-   ABI_ALLOCATE(wk2d_b,(2,n4,n5,1))
-   ABI_ALLOCATE(wk2d_c,(2,2*n1halfm+1,n5,1))
-   ABI_ALLOCATE(wk2d_d,(2,2*n1halfm+1,n5,1))
+   ABI_MALLOC(wk2d_a,(2,n4,n5,1))
+   ABI_MALLOC(wk2d_b,(2,n4,n5,1))
+   ABI_MALLOC(wk2d_c,(2,2*n1halfm+1,n5,1))
+   ABI_MALLOC(wk2d_d,(2,2*n1halfm+1,n5,1))
 
 !$OMP DO
    do i3=1,n3
@@ -450,10 +432,10 @@ subroutine sg_fft_rc(cplex,fofg,fofr,isign,nfft,ngfft)
 
    end do ! loop over x-y planes
 !$OMP END DO
-   ABI_DEALLOCATE(wk2d_a)
-   ABI_DEALLOCATE(wk2d_b)
-   ABI_DEALLOCATE(wk2d_c)
-   ABI_DEALLOCATE(wk2d_d)
+   ABI_FREE(wk2d_a)
+   ABI_FREE(wk2d_b)
+   ABI_FREE(wk2d_c)
+   ABI_FREE(wk2d_d)
 !$OMP END PARALLEL
 
  else if(isign==-1)then
@@ -473,10 +455,10 @@ subroutine sg_fft_rc(cplex,fofg,fofr,isign,nfft,ngfft)
 !$OMP&SHARED(n1,n1half1,n1halfm,n2,n2half1,n3) &
 !$OMP&SHARED(n4,n5,now1,now2,ris,trig1,trig2,work1,xnorm)
 
-   ABI_ALLOCATE(wk2d_a,(2,n4,n5,1))
-   ABI_ALLOCATE(wk2d_b,(2,n4,n5,1))
-   ABI_ALLOCATE(wk2d_c,(2,2*n1halfm+1,n5,1))
-   ABI_ALLOCATE(wk2d_d,(2,2*n1halfm+1,n5,1))
+   ABI_MALLOC(wk2d_a,(2,n4,n5,1))
+   ABI_MALLOC(wk2d_b,(2,n4,n5,1))
+   ABI_MALLOC(wk2d_c,(2,2*n1halfm+1,n5,1))
+   ABI_MALLOC(wk2d_d,(2,2*n1halfm+1,n5,1))
 
 !$OMP DO
    do i3=1,n3
@@ -524,10 +506,10 @@ subroutine sg_fft_rc(cplex,fofg,fofr,isign,nfft,ngfft)
 
    end do
 !$OMP END DO
-   ABI_DEALLOCATE(wk2d_a)
-   ABI_DEALLOCATE(wk2d_b)
-   ABI_DEALLOCATE(wk2d_c)
-   ABI_DEALLOCATE(wk2d_d)
+   ABI_FREE(wk2d_a)
+   ABI_FREE(wk2d_b)
+   ABI_FREE(wk2d_c)
+   ABI_FREE(wk2d_d)
 !$OMP END PARALLEL
 
 !$OMP PARALLEL DO SHARED(aft3,bef3,ind3,ic3,now3,n1,n2half1,n4,n5half1,n6,ris,trig3,work1,work2) PRIVATE(i2)
@@ -565,8 +547,8 @@ subroutine sg_fft_rc(cplex,fofg,fofr,isign,nfft,ngfft)
 
  end if ! choice of isign
 
- ABI_DEALLOCATE(work1)
- ABI_DEALLOCATE(work2)
+ ABI_FREE(work1)
+ ABI_FREE(work2)
 
  !DBG_EXIT("COLL")
 
@@ -605,17 +587,9 @@ end subroutine sg_fft_rc
 !!  mg sets the maximum 1 dimensional fft length (any one of n1, n2, or n3)
 !!  XG: the signification of mg is changed with respect to fft3dp !!!
 !!
-!! PARENTS
-!!      fourwf,m_fft
-!!
-!! CHILDREN
-!!      sg_fft_cc
-!!
 !! SOURCE
 
 subroutine sg_fftpad(fftcache,mgfft,n1,n2,n3,nd1,nd2,nd3,ndat,gbound,isign,arr,ftarr)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -672,17 +646,9 @@ end subroutine sg_fftpad
 !!  mg sets the maximum 1 dimensional fft length (any one of n1, n2, or n3)
 !!  XG: the signification of mg is changed with respect to fft3dp !!!
 !!
-!! PARENTS
-!!      m_sgfft
-!!
-!! CHILDREN
-!!      sg_fft_cc
-!!
 !! SOURCE
 
 subroutine fftpad_one_nothreadsafe(fftcache,mgfft,nd1,nd2,nd3,n1,n2,n3,arr,ftarr,ris,gbound)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -711,7 +677,7 @@ subroutine fftpad_one_nothreadsafe(fftcache,mgfft,nd1,nd2,nd3,n1,n2,n3,arr,ftarr
  if (n1>mg.or.n2>mg.or.n3>mg) then
    write(message, '(a,3i10,a,i10)')&
 &   'one of the dimensions n1,n2,n3=',n1,n2,n3,' exceeds the allowed dimension mg=',mg
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 #endif
 
@@ -872,18 +838,10 @@ end subroutine fftpad_one_nothreadsafe
 !! TODO
 !! Use latex for the equation above
 !!
-!! PARENTS
-!!      m_sgfft
-!!
-!! CHILDREN
-!!      sg_fft_cc
-!!
 !! SOURCE
 
 subroutine sg_fftpx(fftcache,mfac,mg,mgfft,nd1,nd2,nd3,n2,n3,&
 &    z,zbr,trig,aft,now,bef,ris,ind,ic,gbound)
-
- implicit none
 
 !Arguments ------------------------------------
 !Dimensions of aft, now, bef, ind, and trig should agree with
@@ -1280,7 +1238,7 @@ subroutine sg_fftpx(fftcache,mfac,mg,mgfft,nd1,nd2,nd3,n2,n3,&
 
          else
 !          All radices treated
-           MSG_BUG('called with factors other than 2, 3, and 5')
+           ABI_BUG('called with factors other than 2, 3, and 5')
          end if
 
        end do  ! End of direct transformation (loop over ic)
@@ -1557,7 +1515,7 @@ subroutine sg_fftpx(fftcache,mfac,mg,mgfft,nd1,nd2,nd3,n2,n3,&
 
        else
 !        All radices are treated
-         MSG_BUG('called with factors other than 2, 3, and 5')
+         ABI_BUG('called with factors other than 2, 3, and 5')
        end if
 
 !      End of bit reversal
@@ -1616,18 +1574,10 @@ end subroutine sg_fftpx
 !! TODO
 !! Use latex for the equation above
 !!
-!! PARENTS
-!!      m_sgfft
-!!
-!! CHILDREN
-!!      sg_fft_cc
-!!
 !! SOURCE
 
 subroutine sg_fftx(fftcache,mfac,mg,nd1,nd2,nd3,n2,n3,z,zbr,&
 & trig,aft,now,bef,ris,ind,ic)
-
- implicit none
 
 !Arguments ------------------------------------
 !Dimensions of aft, now, bef, ind, and trig should agree with
@@ -1650,6 +1600,8 @@ subroutine sg_fftx(fftcache,mfac,mg,nd1,nd2,nd3,n2,n3,z,zbr,&
  real(dp) :: factor,r,r1,r2,r25,r3,r34,r4,r5,s,sin2,s1,s2,s25,s3,s34,s4,s5
 
 ! *************************************************************************
+
+ !print *, "now", now(1:ic)
 
 !Do x transforms in blocks of size "lot" which is set by how
 !many x transform arrays (of size nd1 each) fit into the nominal
@@ -1999,7 +1951,7 @@ subroutine sg_fftx(fftcache,mfac,mg,nd1,nd2,nd3,n2,n3,z,zbr,&
 
        else
 !        All factors have been treated
-         MSG_BUG('called with factors other than 2, 3, and 5')
+         ABI_BUG('called with factors other than 2, 3, and 5')
        end if
 
      end do
@@ -2279,7 +2231,7 @@ subroutine sg_fftx(fftcache,mfac,mg,nd1,nd2,nd3,n2,n3,z,zbr,&
 
      else
 !      All factors treated
-       MSG_BUG('called with factors other than 2, 3, and 5')
+       ABI_BUG('called with factors other than 2, 3, and 5')
      end if
 
 !    ---------------------------------------------------------------
@@ -2331,18 +2283,10 @@ end subroutine sg_fftx
 !! TODO
 !! Use latex for the equation above
 !!
-!! PARENTS
-!!      m_sgfft
-!!
-!! CHILDREN
-!!      sg_fft_cc
-!!
 !! SOURCE
 
 subroutine sg_ffty(fftcache,mfac,mg,nd1,nd2,nd3,n1i,n1,n3i,n3,&
 &          z,zbr,trig,aft,now,bef,ris,ind,ic)
-
- implicit none
 
 !Arguments ------------------------------------
 !Dimensions of aft, now, bef, ind, and trig should agree with
@@ -2367,7 +2311,7 @@ subroutine sg_ffty(fftcache,mfac,mg,nd1,nd2,nd3,n1i,n1,n3i,n3,&
 ! *************************************************************************
 
  if (fftcache<0) then
-   MSG_ERROR('fftcache must be positive')
+   ABI_ERROR('fftcache must be positive')
  end if
 
 !Outer loop over z planes (j2)--note range from n3i to n3
@@ -2689,7 +2633,7 @@ subroutine sg_ffty(fftcache,mfac,mg,nd1,nd2,nd3,n1i,n1,n3i,n3,&
 
      else
 !      All radices treated
-       MSG_BUG('called with factors other than 2, 3, and 5')
+       ABI_BUG('called with factors other than 2, 3, and 5')
      end if
 
    end do
@@ -2962,8 +2906,10 @@ subroutine sg_ffty(fftcache,mfac,mg,nd1,nd2,nd3,n1i,n1,n3i,n3,&
      end do
 
    else
-!    All radices done
-     MSG_BUG('Called with factors other than 2, 3, and 5')
+     ! All radices done
+     !if (now(ic) /= 1) then
+     ABI_BUG(sjoin("Called with factors other than 2, 3, and 5. now(ic) = ", itoa(now(ic))))
+     !end if
    end if
  end do
 !$OMP END PARALLEL DO
@@ -3008,17 +2954,9 @@ end subroutine sg_ffty
 !! TODO
 !! Use latex for the equation above
 !!
-!! PARENTS
-!!      m_sgfft
-!!
-!! CHILDREN
-!!      sg_fft_cc
-!!
 !! SOURCE
 
 subroutine sg_fftz(mfac,mg,nd1,nd2,nd3,n1,n2i,n2,z,zbr,trig,aft,now,bef,ris,ind,ic)
-
- implicit none
 
 !Arguments ------------------------------------
 !Dimensions of aft, now, bef, ind, and trig should agree with
@@ -3400,7 +3338,7 @@ subroutine sg_fftz(mfac,mg,nd1,nd2,nd3,n1,n2i,n2,z,zbr,trig,aft,now,bef,ris,ind,
 
 !    All radices treated
    else
-     MSG_BUG('called with factors other than 2, 3, and 5')
+     ABI_BUG('called with factors other than 2, 3, and 5')
    end if
 
 !  End of direct transformation
@@ -3714,7 +3652,9 @@ subroutine sg_fftz(mfac,mg,nd1,nd2,nd3,n1,n2i,n2,z,zbr,trig,aft,now,bef,ris,ind,
    end do ! ia
 
  else !  All radices treated
-   MSG_BUG('called with factors other than 2, 3, and 5')
+   !if (now(ic) /= 1) then
+   ABI_BUG(sjoin("Called with factors other than 2, 3, and 5. now(ic) = ", itoa(now(ic))))
+   !end if
  end if
 
 end subroutine sg_fftz
@@ -3755,17 +3695,9 @@ end subroutine sg_fftz
 !! Should describe arguments
 !! Should suppress one-letter variables
 !!
-!! PARENTS
-!!      m_sgfft
-!!
-!! CHILDREN
-!!      sg_fft_cc
-!!
 !! SOURCE
 
 subroutine sg_ctrig(n,trig,aft,bef,now,ris,ic,ind,mfac,mg)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -3851,7 +3783,7 @@ subroutine sg_ctrig(n,trig,aft,bef,now,ris,ic,ind,mfac,mg)
      write(message, '(a,i0,2a,i0)' )&
 &     'number of factors ic=',ic,ch10,&
 &     'exceeds dimensioned mfac=',mfac
-     MSG_BUG(message)
+     ABI_BUG(message)
    end if
    if (bef(ic)/=1) then
      aft(ic)=aft(ic)*now(ic)
@@ -3891,12 +3823,12 @@ subroutine sg_ctrig(n,trig,aft,bef,now,ris,ic,ind,mfac,mg)
 
  if (irep/=n) then
    write(message,'(a,i0,a,i0)')'  irep should equal n ; irep=',irep,' n=',n
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
  if (inc/=1) then
    write(message, '(a,i0)' )' inc should equal 1 in sg_ctrig; inc=',inc
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
 end subroutine sg_ctrig
@@ -3914,18 +3846,10 @@ end subroutine sg_ctrig
 !! * This routine is not thread-safe due to the presence of variables with the save attribute!
 !!   DO NOT CALL THIS ROUTINE INSIDE A OPENMP PARALLEL REGION
 !!
-!! PARENTS
-!!      fourwf
-!!
-!! CHILDREN
-!!      sg_fft_cc
-!!
 !! SOURCE
 
 subroutine sg_fftrisc(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
 & kg_kin,kg_kout,mgfft,ndat,ngfft,npwin,npwout,n4,n5,n6,option,weight_r, weight_i)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -3978,7 +3902,7 @@ subroutine sg_fftrisc(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_
 &      kg_kin,kg_kout,mgfft,ngfft,npwin,npwout,n4,n5,n6,option,weight_r,weight_i)
 
    case default
-      MSG_ERROR("Wrong option")
+      ABI_ERROR("Wrong option")
    end select
  end do
 
@@ -4058,18 +3982,10 @@ end subroutine sg_fftrisc
 !!                 fofgout(2,npwout) contains its Fourier transform;
 !!                 no use of fofgin and npwin.
 !!
-!! PARENTS
-!!      m_sgfft
-!!
-!! CHILDREN
-!!      sg_fft_cc
-!!
 !! SOURCE
 
 subroutine fftrisc_one_nothreadsafe(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
 & kg_kin,kg_kout,mgfft,ngfft,npwin,npwout,n4,n5,n6,option,weight_r,weight_i)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -4113,12 +4029,12 @@ subroutine fftrisc_one_nothreadsafe(cplex,denpot,fofgin,fofgout,fofr,gboundin,gb
 
  if(istwf_k>2 .and. option==0)then
    write(message,'(a,i0)')' option=0 is not allowed with istwf_k=',istwf_k
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
  if(istwf_k>=2 .and. option==3)then
    write(message,'(a,i0)')' option=3 is not allowed with istwf_k=',istwf_k
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
 !For all other tests of validity of inputs, assume that they
@@ -4128,11 +4044,11 @@ subroutine fftrisc_one_nothreadsafe(cplex,denpot,fofgin,fofgout,fofr,gboundin,gb
  fftcache=ngfft(8)
 
  if(option/=3)then
-   ABI_ALLOCATE(indpw_kin,(4,npwin))
+   ABI_MALLOC(indpw_kin,(4,npwin))
    call indfftrisc(gboundin(3:3+2*mgfft+4,1),indpw_kin,kg_kin,mgfft,ngbin,ngfft,npwin)
  end if
  if(option==2 .or. option==3)then
-   ABI_ALLOCATE(indpw_kout,(4,npwout))
+   ABI_MALLOC(indpw_kout,(4,npwout))
    call indfftrisc(gboundout(3:3+2*mgfft+4,1),indpw_kout,kg_kout,mgfft,ngbout,ngfft,npwout)
  end if
 
@@ -4200,8 +4116,8 @@ subroutine fftrisc_one_nothreadsafe(cplex,denpot,fofgin,fofgout,fofr,gboundin,gb
  if(istwf_k==1)then
 
 !  Note that the z transform will appear as a y transform
-   ABI_ALLOCATE(wk1d_a,(2,mgb,n3,1))
-   ABI_ALLOCATE(wk1d_b,(2,mgb,n3,1))
+   ABI_MALLOC(wk1d_a,(2,mgb,n3,1))
+   ABI_MALLOC(wk1d_b,(2,mgb,n3,1))
 
    if(option/=3)then
 
@@ -4249,8 +4165,8 @@ subroutine fftrisc_one_nothreadsafe(cplex,denpot,fofgin,fofgout,fofr,gboundin,gb
 !$OMP&SHARED(weight_r,weight_i,wk1d_a,wk1d_b)
 
 !  Allocate two 2-dimensional work arrays
-   ABI_ALLOCATE(wk2d_a,(2,n4,n5,1))
-   ABI_ALLOCATE(wk2d_b,(2,n4,n5,1))
+   ABI_MALLOC(wk2d_a,(2,n4,n5,1))
+   ABI_MALLOC(wk2d_b,(2,n4,n5,1))
 !$OMP DO
    do i3=1,n3
 
@@ -4356,8 +4272,8 @@ subroutine fftrisc_one_nothreadsafe(cplex,denpot,fofgin,fofgout,fofr,gboundin,gb
 !    End loop on planes
    end do
 !$OMP END DO
-   ABI_DEALLOCATE(wk2d_a)
-   ABI_DEALLOCATE(wk2d_b)
+   ABI_FREE(wk2d_a)
+   ABI_FREE(wk2d_b)
 !$OMP END PARALLEL
 
    if(option==2 .or. option==3)then
@@ -4388,8 +4304,8 @@ subroutine fftrisc_one_nothreadsafe(cplex,denpot,fofgin,fofgout,fofr,gboundin,gb
 !$OMP END PARALLEL DO
    end if
 
-   ABI_DEALLOCATE(wk1d_a)
-   ABI_DEALLOCATE(wk1d_b)
+   ABI_FREE(wk1d_a)
+   ABI_FREE(wk1d_b)
 
 !  End general k-point part
  end if
@@ -4405,13 +4321,13 @@ subroutine fftrisc_one_nothreadsafe(cplex,denpot,fofgin,fofgout,fofr,gboundin,gb
    n4half1=(n1half1/2)*2+1
    n5half1=(n2half1/2)*2+1
 !  Note that the z transform will appear as a y transform
-   ABI_ALLOCATE(wk1d_a,(2,mgb,n3,1))
-   ABI_ALLOCATE(wk1d_b,(2,mgb,n3,1))
+   ABI_MALLOC(wk1d_a,(2,mgb,n3,1))
+   ABI_MALLOC(wk1d_b,(2,mgb,n3,1))
 
    if(istwf_k/=2)then
-     ABI_ALLOCATE(pha1,(2,n1))
-     ABI_ALLOCATE(pha2,(2,n2))
-     ABI_ALLOCATE(pha3,(3,n3))
+     ABI_MALLOC(pha1,(2,n1))
+     ABI_MALLOC(pha2,(2,n2))
+     ABI_MALLOC(pha3,(3,n3))
      do i1=1,n1
        pha1(1,i1)=cos(dble(i1-1)*pi/dble(n1))
        pha1(2,i1)=sin(dble(i1-1)*pi/dble(n1))
@@ -4576,10 +4492,10 @@ subroutine fftrisc_one_nothreadsafe(cplex,denpot,fofgin,fofgout,fofr,gboundin,gb
 !$OMP&SHARED(trig2,trig4,trig5,weight_r,weight_i,wk1d_a,wk1d_b)
 
 !  Allocate two 2-dimensional work arrays
-   ABI_ALLOCATE(wk2d_a,(2,n4,n5,1))
-   ABI_ALLOCATE(wk2d_b,(2,n4,n5,1))
-   ABI_ALLOCATE(wk2d_c,(2,2*n1halfm,n5,1))
-   ABI_ALLOCATE(wk2d_d,(2,2*n1halfm,n5,1))
+   ABI_MALLOC(wk2d_a,(2,n4,n5,1))
+   ABI_MALLOC(wk2d_b,(2,n4,n5,1))
+   ABI_MALLOC(wk2d_c,(2,2*n1halfm,n5,1))
+   ABI_MALLOC(wk2d_d,(2,2*n1halfm,n5,1))
 !$OMP DO
    do i3=1,n3
 
@@ -4823,10 +4739,10 @@ subroutine fftrisc_one_nothreadsafe(cplex,denpot,fofgin,fofgout,fofr,gboundin,gb
    end do
 
 !$OMP END DO
-   ABI_DEALLOCATE(wk2d_a)
-   ABI_DEALLOCATE(wk2d_b)
-   ABI_DEALLOCATE(wk2d_c)
-   ABI_DEALLOCATE(wk2d_d)
+   ABI_FREE(wk2d_a)
+   ABI_FREE(wk2d_b)
+   ABI_FREE(wk2d_c)
+   ABI_FREE(wk2d_d)
 !$OMP END PARALLEL
 
    if(option==2 .or. option==3)then
@@ -4874,13 +4790,13 @@ subroutine fftrisc_one_nothreadsafe(cplex,denpot,fofgin,fofgout,fofr,gboundin,gb
 
    end if
 
-   ABI_DEALLOCATE(wk1d_a)
-   ABI_DEALLOCATE(wk1d_b)
+   ABI_FREE(wk1d_a)
+   ABI_FREE(wk1d_b)
 
    if(istwf_k/=2)then
-     ABI_DEALLOCATE(pha1)
-     ABI_DEALLOCATE(pha2)
-     ABI_DEALLOCATE(pha3)
+     ABI_FREE(pha1)
+     ABI_FREE(pha2)
+     ABI_FREE(pha3)
    end if
 
  end if !  End time-reversal symmetry
@@ -4888,10 +4804,10 @@ subroutine fftrisc_one_nothreadsafe(cplex,denpot,fofgin,fofgout,fofr,gboundin,gb
 !------------------------------------------------------------------
 
  if(option/=3) then
-   ABI_DEALLOCATE(indpw_kin)
+   ABI_FREE(indpw_kin)
  end if
  if(option==2 .or. option==3) then
-   ABI_DEALLOCATE(indpw_kout)
+   ABI_FREE(indpw_kout)
  end if
 
 end subroutine fftrisc_one_nothreadsafe
@@ -4983,20 +4899,12 @@ end subroutine fftrisc_one_nothreadsafe
 !! TODO
 !! Complete input and output list.
 !!
-!! PARENTS
-!!      fourwf
-!!
-!! CHILDREN
-!!      sg_fft_cc
-!!
 !! SOURCE
 
 subroutine sg_fftrisc_2(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,&
 & istwf_k,kg_kin,kg_kout,&
 & mgfft,ngfft,npwin,npwout,n4,n5,n6,option,weight_r,weight_2,&
 & luse_ndo,fofgin_p) ! optional
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -5060,17 +4968,17 @@ subroutine sg_fftrisc_2(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,&
  lluse_ndo=.true.
  if(istwf_k/=1)then
    write(message,'(a,i0)' )' It is not yet allowed to use dmft with istwf_k=',istwf_k
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
  if(istwf_k>2 .and. option==0)then
    write(message, '(a,i0)' )' It is not allowed to use option=0 with istwf_k=',istwf_k
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
  if(istwf_k>=2 .and. option==3)then
    write(message, '(a,i0)' )'  It is not allowed to use option=3 with istwf_k=',istwf_k
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
  lluse_ndo=.false.
@@ -5082,7 +4990,7 @@ subroutine sg_fftrisc_2(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,&
      write(message, '(a,a,a,i4,i5)' )&
 &     'fofgin_p has a dimension equal to zero and luse_ndo true',ch10,&
 &     'Action: check dimension of fofgin_p',size(fofgin_p,2),luse_ndo
-     MSG_BUG(message)
+     ABI_BUG(message)
    end if
  end if
 
@@ -5099,11 +5007,11 @@ subroutine sg_fftrisc_2(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,&
  fftcache=ngfft(8)
 
  if(option/=3)then
-   ABI_ALLOCATE(indpw_kin,(4,npwin))
+   ABI_MALLOC(indpw_kin,(4,npwin))
    call indfftrisc(gboundin(3:3+2*mgfft+4,1),indpw_kin,kg_kin,mgfft,ngbin,ngfft,npwin)
  end if
  if(option==2 .or. option==3)then
-   ABI_ALLOCATE(indpw_kout,(4,npwout))
+   ABI_MALLOC(indpw_kout,(4,npwout))
    call indfftrisc(gboundout(3:3+2*mgfft+4,1),indpw_kout,kg_kout,mgfft,ngbout,ngfft,npwout)
  end if
 
@@ -5171,10 +5079,10 @@ subroutine sg_fftrisc_2(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,&
  if(istwf_k==1)then
 
 !  Note that the z transform will appear as a y transform
-   ABI_ALLOCATE(wk1d_a,(2,mgb,n3,1))
-   ABI_ALLOCATE(wk1d_b,(2,mgb,n3,1))
-   ABI_ALLOCATE(wk1d_a_p,(2,mgb,n3,1))
-   ABI_ALLOCATE(wk1d_b_p,(2,mgb,n3,1))
+   ABI_MALLOC(wk1d_a,(2,mgb,n3,1))
+   ABI_MALLOC(wk1d_b,(2,mgb,n3,1))
+   ABI_MALLOC(wk1d_a_p,(2,mgb,n3,1))
+   ABI_MALLOC(wk1d_b_p,(2,mgb,n3,1))
 
    if(option/=3)then
 
@@ -5261,10 +5169,10 @@ subroutine sg_fftrisc_2(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,&
 !$OMP&SHARED(weight_r,weight_i,weight_2,wk1d_a,wk1d_b,wk1d_b_p)
 
 !  Allocate two 2-dimensional work arrays
-   ABI_ALLOCATE(wk2d_a,(2,n4,n5,1))
-   ABI_ALLOCATE(wk2d_b,(2,n4,n5,1))
-   ABI_ALLOCATE(wk2d_a_p,(2,n4,n5,1))
-   ABI_ALLOCATE(wk2d_b_p,(2,n4,n5,1))
+   ABI_MALLOC(wk2d_a,(2,n4,n5,1))
+   ABI_MALLOC(wk2d_b,(2,n4,n5,1))
+   ABI_MALLOC(wk2d_a_p,(2,n4,n5,1))
+   ABI_MALLOC(wk2d_b_p,(2,n4,n5,1))
 !$OMP DO
    do i3=1,n3
 
@@ -5425,10 +5333,10 @@ subroutine sg_fftrisc_2(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,&
 !    End loop on planes
    end do
 !$OMP END DO
-   ABI_DEALLOCATE(wk2d_a)
-   ABI_DEALLOCATE(wk2d_b)
-   ABI_DEALLOCATE(wk2d_a_p)
-   ABI_DEALLOCATE(wk2d_b_p)
+   ABI_FREE(wk2d_a)
+   ABI_FREE(wk2d_b)
+   ABI_FREE(wk2d_a_p)
+   ABI_FREE(wk2d_b_p)
 !$OMP END PARALLEL
 
    if(option==2 .or. option==3)then
@@ -5460,10 +5368,10 @@ subroutine sg_fftrisc_2(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,&
 !$OMP END PARALLEL DO
    end if
 
-   ABI_DEALLOCATE(wk1d_a)
-   ABI_DEALLOCATE(wk1d_b)
-   ABI_DEALLOCATE(wk1d_a_p)
-   ABI_DEALLOCATE(wk1d_b_p)
+   ABI_FREE(wk1d_a)
+   ABI_FREE(wk1d_b)
+   ABI_FREE(wk1d_a_p)
+   ABI_FREE(wk1d_b_p)
 
 !  End general k-point part
  end if
@@ -5479,13 +5387,13 @@ subroutine sg_fftrisc_2(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,&
    n4half1=(n1half1/2)*2+1
    n5half1=(n2half1/2)*2+1
 !  Note that the z transform will appear as a y transform
-   ABI_ALLOCATE(wk1d_a,(2,mgb,n3,1))
-   ABI_ALLOCATE(wk1d_b,(2,mgb,n3,1))
+   ABI_MALLOC(wk1d_a,(2,mgb,n3,1))
+   ABI_MALLOC(wk1d_b,(2,mgb,n3,1))
 
    if(istwf_k/=2)then
-     ABI_ALLOCATE(pha1,(2,n1))
-     ABI_ALLOCATE(pha2,(2,n2))
-     ABI_ALLOCATE(pha3,(3,n3))
+     ABI_MALLOC(pha1,(2,n1))
+     ABI_MALLOC(pha2,(2,n2))
+     ABI_MALLOC(pha3,(3,n3))
      do i1=1,n1
        pha1(1,i1)=cos(dble(i1-1)*pi/dble(n1))
        pha1(2,i1)=sin(dble(i1-1)*pi/dble(n1))
@@ -5657,10 +5565,10 @@ subroutine sg_fftrisc_2(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,&
 !$OMP&SHARED(trig2,trig4,trig5,weight_r,weight_i,wk1d_a,wk1d_b)
 
 !  Allocate two 2-dimensional work arrays
-   ABI_ALLOCATE(wk2d_a,(2,n4,n5,1))
-   ABI_ALLOCATE(wk2d_b,(2,n4,n5,1))
-   ABI_ALLOCATE(wk2d_c,(2,2*n1halfm,n5,1))
-   ABI_ALLOCATE(wk2d_d,(2,2*n1halfm,n5,1))
+   ABI_MALLOC(wk2d_a,(2,n4,n5,1))
+   ABI_MALLOC(wk2d_b,(2,n4,n5,1))
+   ABI_MALLOC(wk2d_c,(2,2*n1halfm,n5,1))
+   ABI_MALLOC(wk2d_d,(2,2*n1halfm,n5,1))
 !$OMP DO
    do i3=1,n3
 
@@ -5908,10 +5816,10 @@ subroutine sg_fftrisc_2(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,&
    end do
 
 !$OMP END DO
-   ABI_DEALLOCATE(wk2d_a)
-   ABI_DEALLOCATE(wk2d_b)
-   ABI_DEALLOCATE(wk2d_c)
-   ABI_DEALLOCATE(wk2d_d)
+   ABI_FREE(wk2d_a)
+   ABI_FREE(wk2d_b)
+   ABI_FREE(wk2d_c)
+   ABI_FREE(wk2d_d)
 !$OMP END PARALLEL
 
    if(option==2 .or. option==3)then
@@ -5961,23 +5869,23 @@ subroutine sg_fftrisc_2(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,&
 
    end if
 
-   ABI_DEALLOCATE(wk1d_a)
-   ABI_DEALLOCATE(wk1d_b)
+   ABI_FREE(wk1d_a)
+   ABI_FREE(wk1d_b)
 
    if(istwf_k/=2)then
-     ABI_DEALLOCATE(pha1)
-     ABI_DEALLOCATE(pha2)
-     ABI_DEALLOCATE(pha3)
+     ABI_FREE(pha1)
+     ABI_FREE(pha2)
+     ABI_FREE(pha3)
    end if
 
 !  End time-reversal symmetry
  end if
 
  if(option/=3) then
-   ABI_DEALLOCATE(indpw_kin)
+   ABI_FREE(indpw_kin)
  end if
  if(option==2 .or. option==3) then
-   ABI_DEALLOCATE(indpw_kout)
+   ABI_FREE(indpw_kout)
  end if
 
  !DBG_EXIT("COLL")
@@ -6012,17 +5920,9 @@ end subroutine sg_fftrisc_2
 !!   vg is given on the FFT mesh instead of the augmented mesh [ldx,ldy,ldz]
 !!   in order to simplify the interface with the other routines operating of vg
 !!
-!! PARENTS
-!!      m_fft
-!!
-!! CHILDREN
-!!      sg_fft_cc
-!!
 !! SOURCE
 
 subroutine sg_poisson(fftcache,cplex,nx,ny,nz,ldx,ldy,ldz,ndat,vg,nr)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

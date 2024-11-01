@@ -1,0 +1,112 @@
+# Input for PARAL_GSWVL tutorial
+# 14 atom boron cluster, parallel calculation
+
+#-------------------------------------------------------------------------------
+#Definition of variables specific to a wavelet calculation
+
+usewvl       1    # Activation of the "wavelet" basis set
+
+wvl_hgrid 0.45    # Wavelet H step grid
+wvl_crmult   5    # Wavelet coarse grid radius multiplier
+wvl_frmult   8    # Wavelet fine grid radius multiplier
+
+icoulomb     1    # Activate the free boundary conditions for the
+                  # Hartree potential computation, done in real space.
+                  # This is the value to choose for molecules in the wavelet formalism.
+
+iscf         0    # Activation of the Direct minimization scheme for the calculation
+                  #   of wavefunctions. This algorithm is fast but working only for
+                  #   systems with a gap, and only for wavelets.
+                  
+nwfshist     6    # Activation of DIIS algoithm (Direct minimization scheme)
+                  #   with 6 wavefunctions stored in history
+
+timopt      10    # This will create a YAML file with the timings of the WVL routines
+
+#-------------------------------------------------------------------------------
+
+#Definition of the unit cell
+acell 3*20        # Lengths of the primitive vectors (big box to isolate the molecule)
+                  # Primitive vectors are not given here  (rprim)
+                  #   because "cubic" is the default value
+
+#Definition of the atom types and pseudopotentials
+ntypat 1          # There is only one type of atom
+znucl 5           # Atomic number of the possible type(s) of atom. Here boron.
+pp_dirpath "$ABI_PSPDIR"        # Path to the directory were
+                                #   pseudopotentials for tests are stored
+pseudos "B-q3"                  # Name and location of the pseudopotential
+                         
+#Definition of the atoms
+natom 14          # There are 14 atoms
+typat 14*1        # They all are of type 1, that is, Carbon
+xcart             # Location of the atoms, given in cartesian coordinates (angstrom):
+ 6.23174441376337462  11.10650949517181125   8.80369514094791228
+ 6.46975493123427281  11.64662037074667290   7.38942614477337933
+ 6.06260066201525571   9.92651732450364754   7.48967117179688202
+ 7.80101706261892769  10.57816432104265840   7.83061522324544157
+ 6.31690262930086011   8.31702761150885550   7.01500573994981380
+ 7.75164346206343247   7.71450195176475972   8.07490331742471490
+ 7.03603095641418808   9.37653827161064335   6.05099299166473248
+ 9.17770300902474467   7.98319528851733384   8.99010444257574015
+ 7.16405045957283093  10.88564910545551710   6.23700501567613319
+ 7.62758557507984225   5.97498074889332820   7.97176704264589375
+ 7.14341418637742454  10.01632171818918770   9.42744042423526629
+ 8.44317230240882566   9.32780744990434307   8.78315808382683194
+ 6.51462241221419625   6.81056643770915038   7.30106028716855171
+ 8.83833328151791164   6.50337987446461785   8.70844982986595006
+
+#k point grid definition
+#  We set the grid manually to impose a computation at Gamma point
+#  (only available value for a molecule)
+kptopt  0         # Option for manual setting of k-points
+istwfk *1         # No time-reversal symmetry optimization (not compatible with WVL)
+nkpt    1         # Number of k-points (here only gamma)
+kpt  3*0.         # - K-point coordinates in reciprocal space
+
+#Parameters for the SCF procedure
+nstep 20          # Maximal number of SCF cycles
+tolwfr 1.0d-14    # Will stop when, twice in a row, the difference 
+                  # between two consecutive evaluations of wavefunction residual 
+                  # differ by less than tolwfr
+                  # This convergence criterion is adapted to direct minimization
+                  #   algorithm (iscf=0)
+
+#Miscelaneous parameters
+prtwf 0           # Do not print wavefunctions
+prtden 0          # Do not print density
+prteig 0          # Do not print eigenvalues
+optstress 0       # Stress tensor computation is not relevant here
+
+
+##############################################################
+# This section is used only for regression testing of ABINIT #
+##############################################################
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% need_cpp_vars = HAVE_BIGDFT
+#%% exclude_builders = ubu_intel_16.0_mpich
+#%% [files]
+#%% [paral_info]
+#%% max_nprocs = 14
+#%% nprocs_to_test = 1, 2, 4, 8, 10, 12
+#%% [NCPU_1]
+#%% files_to_test = tgswvl_1_MPI1.abo, tolnlines =   3, tolabs =  1.1e-5, tolrel= 1.1e-4
+#%% [NCPU_2]
+#%% files_to_test = tgswvl_1_MPI2.abo, tolnlines =   3, tolabs =  1.1e-5, tolrel= 1.1e-4
+#%% [NCPU_4]
+#%% files_to_test = tgswvl_1_MPI4.abo, tolnlines =   3, tolabs =  1.1e-5, tolrel= 1.1e-4
+#%% [NCPU_8]
+#%% files_to_test = tgswvl_1_MPI8.abo, tolnlines =   3, tolabs =  1.1e-5, tolrel= 1.1e-4
+#%% [NCPU_10]
+#%% files_to_test = tgswvl_1_MPI10.abo, tolnlines =   4, tolabs =  1.1e-4, tolrel= 1.1e-4
+#%% [NCPU_12]
+#%% files_to_test = tgswvl_1_MPI12.abo, tolnlines =   3, tolabs =  1.1e-5, tolrel= 1.1e-4
+#%% [extra_info]
+#%% authors = D. Caliste
+#%% keywords = NC,WVL
+#%% description =
+#%%   Input for PARAL_GSWVL tutorial
+#%%   14 atom boron cluster, parallel calculation
+#%%<END TEST_INFO>

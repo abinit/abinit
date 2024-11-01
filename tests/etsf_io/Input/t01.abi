@@ -1,0 +1,76 @@
+#
+# Ice Ih crystal
+#
+# Unoptimized structure #1
+# From T.K. Hirsch and L. Ojamae, JPC B 108 (40), 15856-15864 (2004)
+# Web site: http://www.ifm.liu.se/compchem/
+
+# Definition of the system
+natom  24
+ntypat 2
+znucl  8 1
+typat  8*1 16*2
+acell
+     8.4891 14.7036 13.8627
+xcart
+     0.00000   5.18720   0.45849
+     0.00000   2.59360   4.12639
+     2.24612   1.29680   0.45849
+     2.24612   6.48400   4.12639
+     2.24612   6.48400  -0.45849
+     2.24612   1.29680   3.20942
+     0.00000   2.59360  -0.45849
+     0.00000   5.18720   3.20942
+     0.00000   4.27181   0.17870
+     0.00000   5.14586   1.41479
+     0.00000   3.50900   3.84661
+     0.00000   2.63495   5.08270
+     2.24612   1.25546   1.41479
+     2.24612   0.38140   0.17870
+     2.24612   6.52535   5.08270
+     2.24612   7.39940   3.84661
+     1.48917   6.00563  -0.12023
+     3.00307   6.00563  -0.12023
+     1.48917   1.77517   3.54768
+     3.00307   1.77517   3.54768
+     0.75695   2.11523  -0.12023
+    -0.75695   2.11523  -0.12023
+     0.75695   5.66557   3.54768
+    -0.75695   5.66557   3.54768    Angstrom
+tolsym 1.0e-8
+
+# Definition of the planewave basis set
+ecut   20           # This cut-off is too low for real calculations
+                    # but for the test, it is OK.
+
+# Definition of the k-point grid 
+ngkpt  1  1  1  
+istwfk 1
+
+# Definition of the SCF procedure
+nstep  1            # Just one SCF (this is for testing purpose !)
+toldfe 1.0d-4       # Tolerance on difference of energy
+
+# Output density to an ETSF file
+iomode  3
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosGTH_pwteter/08o.pspgth, PseudosGTH_pwteter/01h.pspgth"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% test_chain = t01.abi, t03.abi
+#%% [files]
+#%% files_to_test = 
+#%%   t01.abo, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = D. Caliste
+#%% keywords = 
+#%% description = 
+#%%   Bulk water ice 1h, made-up with 8 water molecules.
+#%%   Density is exported using the ETSF I/O file format.
+#%%   Should be a nice system to look at with visualisation tools.
+#%%<END TEST_INFO>

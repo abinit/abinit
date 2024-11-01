@@ -1,0 +1,90 @@
+# Crystalline aluminum : conventional cell, comparison with the primitive cell results
+
+ ndtset 4
+ chkprim 0
+
+#Definition of the k-point grid
+ ngkpt  3*2      # This is a 2x2x2 grid, based on the conventional cell vectors
+ nshiftk 1  shiftk 0.0 0.0 0.0
+
+#k-point downsampling for Fock operator
+ fockdownsampling 3*2    
+
+ nstep 15          # Maximal number of SCF cycles
+ toldfe 1.0d-8     # Will stop when, twice in a row, the difference
+
+#DATASET 1  LDA (the pseudopotential for Al is with LDA)
+
+#DATASET 2  HSE06
+ ixc2  -428
+ getwfk2   1
+
+#DATASET 3  PBE0
+ ixc3  41
+ getwfk3   2
+
+#DATASET 4  HSE03
+ ixc4  -427
+ getwfk4   1
+
+#Definition of occupation numbers
+occopt 7
+tsmear 0.04
+
+#Definition of the unit cell
+acell 3*7.60           # This is equivalent to   7.60 7.60 7.60
+
+#Definition of the atom types
+ntypat 1          # There is only one type of atom
+znucl 13          # The keyword "znucl" refers to the atomic number of the
+                  # possible type(s) of atom. The pseudopotential(s)
+                  # mentioned in the "files" file must correspond
+                  # to the type(s) of atom. Here, the only type is Aluminum
+
+
+#Definition of the atoms
+natom 4           # There is only one atom per cell
+typat 4*1           # This atom is of type 1, that is, Aluminum
+xred              # This keyword indicate that the location of the atoms
+                  # will follow, one triplet of number for each atom
+   0.0  0.0  0.0     # Triplet giving the REDUCED coordinate of atom 1.
+   0.0  0.5  0.5
+   0.5  0.0  0.5
+   0.5  0.5  0.0
+
+#Definition of the planewave basis set
+ecut  6.0         # Maximal kinetic energy cut-off, in Hartree
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosGTH_pwteter/13al.pspgth"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test =
+#%%   t73.abo, tolnlines=  0, tolabs=  0.0e-00, tolrel=  0.0e-00
+#%% [paral_info]
+#%% max_nprocs = 4
+#%% [extra_info]
+#%% authors = X. Gonze
+#%% keywords =
+#%% description =
+#%%   Crystalline aluminum, conventional cell. Test of downsampling for HSE06, PBE0, HSE03.
+#%%   2x2x2 for the k point grid in the FBZ
+#%%   1x1x1 for the k point grid for the Fock operator in the FBZ
+#%%   The results can be directly compared with those of the test libxc#72, which use
+#%%   a primitive cell, instead of the conventional one here.
+#%%   The k point sampling (and down sampling) perfectly match. 
+#%%   The observed difference is only due to the differing xc correlation real space sampling.
+#%%   Of course, the total energy from the present test is to be divided by 4, to find a total energy per atom.
+#%%   The results are, in Ha/atom (present test for conventional cell / previous for primitive cell / difference):
+#%%   LDA    -2.075 716 / -2.075 718 / 0.000 002
+#%%   HSE06  -2.095 513 / -2.095 539 / 0.000 026
+#%%   PBE0   -2.081 192 / -2.081 193 / 0.000 001
+#%%   HSE03  -2.123 089 / -2.123 117 / 0.000 028
+#%%   The real space grid sampling cannot appear at the level of the Fock operator,
+#%%   that is completely formulated in reciprocal space. The real space functional 
+#%%   from HSE06 and HSE03 is apparently more affected by the real space sampling than
+#%%   the one from LDA and PBE0 ...
+#%%<END TEST_INFO>

@@ -19,7 +19,7 @@ species
  'C'
  'carbon' 
    21894.16673    : atomic mass
-   1.310000000    : muffin-tin radius
+   1.300000000    : muffin-tin radius
    4              : number of occ. states
    1   0   1   2  : 1s
    2   0   1   2  : 2s
@@ -42,7 +42,7 @@ epsengy
 ! 1 - Adaptive linear
 ! 2 - Pulay mixing
 mixtype
- 2
+ 3
 
 ! Exchange-correlation functional to use
 ! LDA (PW92) is 3 (default) (equiv. Abinit ixc 7)

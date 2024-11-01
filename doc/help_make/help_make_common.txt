@@ -1,0 +1,16 @@
+==============================================================================
+Typing `make` in the src directory (~abinit/shared/common/src) leads to the
+compilation of abinit low-level sources, either standard, or following
+specific indications of a config file, see ~abinit/doc/build/config-template.ac
+for details. Usually, `make` should be prepared by running the "configure"
+script from the top directory and developers can generate it by running
+`./config/scripts/makemake` from there.
+
+Specific keywords for the ~abinit/shared/common/src `make`
+
+parents        update parent and children list in each *.F90 routine
+abirules       enforce ABINIT style in each *.F90 routines (not all yet)
+abiauty        enforce correct indentation (+...) in each *.F90 routine (all)
+clean          clean all the compiled objects and executables inside src
+==============================================================================
+[This file can be found at ~abinit/doc/help_make/help_make_common.txt]

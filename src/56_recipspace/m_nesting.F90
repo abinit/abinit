@@ -1,19 +1,16 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_nesting
 !! NAME
 !!  m_nesting
 !!
 !! FUNCTION
+!!  This module provides functions to compute the nesting factor:
+!!      N(\qq) = \sum_{mn\kk} \delta(\ee_{\kpq m}) \delta(\ee_{\kk n})
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2019 ABINIT group (MG, MJV)
+!! Copyright (C) 2008-2024 ABINIT group (MG, MJV)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -23,15 +20,15 @@
 
 #include "abi_common.h"
 
-MODULE m_nesting
+module m_nesting
 
  use defs_basis
  use m_errors
  use m_abicore
- use m_kptrank
+ use m_krank
  use m_sort
 
- use m_numeric_tools,  only : wrap2_zero_one, interpol3d
+ use m_numeric_tools,  only : wrap2_zero_one, interpol3d_0d
  use m_io_tools,       only : open_file
  use m_bz_mesh,        only : make_path
  use m_pptools,        only : printxsf
@@ -75,17 +72,9 @@ CONTAINS  !=====================================================================
 !!  TODO : better use of symmetries to reduce the computational effort
 !! Must be called with kpt = full grid! Reduction by symmetry is not possible for q-dependent quantities (or not easy :)
 !!
-!! PARENTS
-!!      m_nesting,outelph
-!!
-!! CHILDREN
-!!      make_path,printxsf,wrap2_zero_one
-!!
 !! SOURCE
 
-subroutine bfactor(nkptfull,kptfull,nqpt,qpt,kptrank_t,nkpt,weight,nband,nestfactor)
-
- implicit none
+subroutine bfactor(nkptfull,kptfull,nqpt,qpt,krank,nkpt,weight,nband,nestfactor)
 
 !Arguments ------------------------------------
 !scalars
@@ -93,14 +82,14 @@ subroutine bfactor(nkptfull,kptfull,nqpt,qpt,kptrank_t,nkpt,weight,nband,nestfac
 !arrays
  real(dp),intent(in) :: kptfull(3,nkptfull),qpt(3,nqpt),weight(nband,nkpt)
  real(dp),intent(out) :: nestfactor(nqpt)
- type(kptrank_type), intent(in) :: kptrank_t
+ type(krank_t), intent(in) :: krank
 
 !Local variables-------------------------------
 !scalars
  integer :: ib1,ib2,ikplusq_irr,ikpt
  integer :: irank_kpt,ikpt_irr,iqpt,symrank_kpt
  real(dp) :: w1,w2
- !character(len=500) :: message
+ !character(len=500) :: msg
 !arrays
  real(dp) :: kptpq(3)
 
@@ -110,31 +99,31 @@ subroutine bfactor(nkptfull,kptfull,nqpt,qpt,kptrank_t,nkpt,weight,nband,nestfac
 
  do iqpt=1,nqpt
    do ikpt=1,nkptfull
-     call get_rank_1kpt (kptfull(:,ikpt),irank_kpt,kptrank_t)
-     ikpt_irr = kptrank_t%invrank(irank_kpt)
+     irank_kpt = krank%get_rank(kptfull(:,ikpt))
+     ikpt_irr = krank%invrank(irank_kpt)
 
      kptpq(:) = kptfull(:,ikpt) + qpt(:,iqpt)
-     call get_rank_1kpt (kptpq,symrank_kpt,kptrank_t)
+     symrank_kpt = krank%get_rank(kptpq)
 
-     ikplusq_irr = kptrank_t%invrank(symrank_kpt)
+     ikplusq_irr = krank%invrank(symrank_kpt)
      if (ikplusq_irr == -1) then
-       MSG_ERROR('It looks like no kpoint equiv to k+q!')
+       ABI_ERROR('It looks like no kpoint equiv to k+q!')
      end if
 
      do ib1=1,nband
-       w1 = weight(ib1,ikpt_irr) !weight for distance from the Fermi surface
+       w1 = weight(ib1, ikpt_irr) ! weight for distance from the Fermi surface
        if (w1 < tol6 ) cycle
        do ib2=1,nband
-         w2 = weight(ib2,ikplusq_irr) !weight for distance from the Fermi surface
+         w2 = weight(ib2, ikplusq_irr) ! weight for distance from the Fermi surface
          if (w1 < tol6 ) cycle
-         nestfactor(iqpt) = nestfactor(iqpt) + w1*w2
+         nestfactor(iqpt) = nestfactor(iqpt) + w1 * w2
        end do !ib2
      end do !ib1
 
    end do !ikpt
  end do !iqpt
 
-!need prefactor of (1/nkptfull) for normalisation of integration
+ ! need prefactor of (1/nkptfull) for normalisation of integration
  nestfactor(:) = (one/nkptfull) * nestfactor(:)
 
 end subroutine bfactor
@@ -166,19 +155,11 @@ end subroutine bfactor
 !! OUTPUT
 !!   Write data to file.
 !!
-!! PARENTS
-!!      elphon,m_ebands
-!!
-!! CHILDREN
-!!      make_path,printxsf,wrap2_zero_one
-!!
 !! SOURCE
 
 subroutine mknesting(nkpt,kpt,kptrlatt,nband,weight,nqpath,&
-& qpath_vertices,nqptfull,qptfull,base_name,gprimd,gmet,prtnest,qptrlatt,&
-& nsym,symrec) ! optional
-
- implicit none
+                     qpath_vertices,nqptfull,qptfull,base_name,gprimd,gmet,prtnest,qptrlatt,&
+                     nsym,symrec) ! optional
 
 !Arguments ------------------------------------
 !scalars
@@ -200,8 +181,8 @@ subroutine mknesting(nkpt,kpt,kptrlatt,nband,weight,nqpath,&
 !scalars
  integer :: ikpt,jkpt
  integer :: ik1, ik2, ik3, nkptfull
- character(len=500) :: message
- type(kptrank_type) :: kptrank_t
+ character(len=500) :: msg
+ type(krank_t) :: krank
 !arrays
  integer,allocatable :: tmprank(:),ktable(:)
  character(len=fnlen) :: tmpname
@@ -211,24 +192,23 @@ subroutine mknesting(nkpt,kpt,kptrlatt,nband,weight,nqpath,&
 ! *************************************************************************
 
  if (kptrlatt(1,2) /= 0 .or. kptrlatt(1,3) /= 0 .or. kptrlatt(2,1) /= 0 .or. &
-&    kptrlatt(2,3) /= 0 .or. kptrlatt(3,1) /= 0 .or. kptrlatt(3,2) /= 0 ) then
-   write (message,'(4a)')&
-&   'kptrlatt should be diagonal in order to calculate the nesting factor,',ch10,&
-&   'skipping the nesting factor calculation ',ch10
-   MSG_WARNING(message)
+    kptrlatt(2,3) /= 0 .or. kptrlatt(3,1) /= 0 .or. kptrlatt(3,2) /= 0 ) then
+   write (msg,'(4a)')&
+    'kptrlatt should be diagonal in order to calculate the nesting factor,',ch10,&
+    'skipping the nesting factor calculation ',ch10
+   ABI_WARNING(msg)
    return
  end if
 
  if (prtnest /= 1 .and. prtnest /= 2) then
-   MSG_BUG('prtnest should be 1 or 2')
+   ABI_BUG('prtnest should be 1 or 2')
  end if
 
- !write(message,'(a,9(i0,1x))')' mknesting : kptrlatt = ',kptrlatt
- !call wrtout(std_out,message,'COLL')
+ !write(msg,'(a,9(i0,1x))')' mknesting : kptrlatt = ',kptrlatt
+ !call wrtout(std_out,msg,'COLL')
 
  nkptfull = kptrlatt(1,1)*kptrlatt(2,2)*kptrlatt(3,3)
- ABI_MALLOC(nestordered,(nkptfull))
- nestordered(:)=zero
+ ABI_CALLOC(nestordered, (nkptfull))
  ABI_MALLOC(kptfull,(3,nkptfull))
 
  ikpt = 0
@@ -236,41 +216,40 @@ subroutine mknesting(nkpt,kpt,kptrlatt,nband,weight,nqpath,&
    do ik2 = 0, kptrlatt(2,2)-1
      do ik1 = 0, kptrlatt(1,1)-1
        ikpt = ikpt+1
-       kptfull(:,ikpt) = (/dble(ik1)/dble(kptrlatt(1,1)), dble(ik2)/dble(kptrlatt(2,2)),dble(ik3)/dble(kptrlatt(3,3))/)
+       kptfull(:,ikpt) = [dble(ik1)/dble(kptrlatt(1,1)), dble(ik2)/dble(kptrlatt(2,2)),dble(ik3)/dble(kptrlatt(3,3))]
      end do
    end do
  end do
 
-!NOTE: input weights are not normalised, the normalisation factor in introduced in bfactor
-!new version now puts kptfull in correct order before bfactor, so no need to re-order...
+ ! NOTE: input weights are not normalised, the normalisation factor in introduced in bfactor
+ ! new version now puts kptfull in correct order before bfactor, so no need to re-order...
  if (present(symrec)) then
    ABI_CHECK(present(nsym), "error - provide nsym and symrec arguments together")
-   call mkkptrank (kpt,nkpt,kptrank_t, nsym, symrec)
+   krank = krank_new(nkpt, kpt, nsym=nsym, symrec=symrec)
  else
-   call mkkptrank (kpt,nkpt,kptrank_t)
+   krank = krank_new(nkpt, kpt)
  end if
 
- call bfactor(nkptfull,kptfull,nkptfull,kptfull,kptrank_t,nkpt,weight,nband,nestordered)
+ call bfactor(nkptfull, kptfull, nkptfull, kptfull, krank, nkpt, weight, nband, nestordered)
 
-!================================================================================================
-!use linear interpolation to plot the bfactor along the given q-path
-!1) order the kpoints of the grid putting them in increasing x, then y, then z (FORTRAN convention)
-!2) make table from input kpts to ordered kpts
-!3) perform interpolation
-!================================================================================================
+ !================================================================================================
+ !use linear interpolation to plot the bfactor along the given q-path
+ ! 1) order the kpoints of the grid putting them in increasing x, then y, then z (FORTRAN convention)
+ ! 2) make table from input kpts to ordered kpts
+ ! 3) perform interpolation
+ !================================================================================================
 
  call outnesting(base_name,gmet,gprimd,kptrlatt,nestordered,nkptfull,nqpath,prtnest,qpath_vertices)
  ABI_FREE(nestordered)
-!
-!now do the same, but for the nesting factor over the phonon qpoints only
-!
- ABI_MALLOC(nestfactor,(nqptfull))
- call bfactor(nkptfull,kptfull,nqptfull,qptfull,kptrank_t,nkpt,weight,nband,nestfactor)
 
- call destroy_kptrank (kptrank_t)
+ ! Now do the same, but for the nesting factor over the phonon qpoints only
+ ABI_MALLOC(nestfactor, (nqptfull))
+ call bfactor(nkptfull,kptfull,nqptfull,qptfull,krank,nkpt,weight,nband,nestfactor)
+
+ call krank%free()
  ABI_FREE(kptfull)
 
- call mkkptrank (qptfull,nqptfull,kptrank_t)
+ krank = krank_new(nqptfull, qptfull)
 
  ABI_MALLOC(ktable,(nqptfull))
  do ikpt=1,nqptfull
@@ -278,14 +257,16 @@ subroutine mknesting(nkpt,kpt,kptrlatt,nband,weight,nqpath,&
  end do
 
  ABI_MALLOC(tmprank, (nqptfull))
- tmprank = kptrank_t%rank
+ do ikpt=1,nqptfull
+   tmprank(ikpt) = krank%get_rank(qptfull(:,ikpt))
+ end do
  call sort_int(nqptfull, tmprank, ktable)
  ABI_FREE(tmprank)
- call destroy_kptrank (kptrank_t)
+ call krank%free()
 
 !fill the datagrid for the nesting factor using the Fortran convention and the conventional unit cell
 !NOTE: the Fortran convention is a must if we want to plot the data
-!in the BXSF format, useful for the linear interpolation since we use interpol3d.F90
+!in the BXSF format, useful for the linear interpolation since we use interpol3d_0d.F90
  ABI_MALLOC(nestordered,(nqptfull))
  nestordered(:)=zero
  do jkpt=1,nqptfull
@@ -328,111 +309,95 @@ end subroutine mknesting
 !! OUTPUT
 !!  only write to file
 !!
-!! PARENTS
-!!      m_nesting
-!!
-!! CHILDREN
-!!      make_path,printxsf,wrap2_zero_one
-!!
 !! SOURCE
 
 subroutine outnesting(base_name,gmet,gprimd,kptrlatt,nestordered,nkpt,nqpath,prtnest,qpath_vertices)
-
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: nqpath,prtnest,nkpt
  character(len=*),intent(in) :: base_name
 !arrays
  integer,intent(in) :: kptrlatt(3,3)
- real(dp),intent(in) :: gprimd(3,3)
- real(dp),intent(in) :: gmet(3,3)
- real(dp),intent(in) :: qpath_vertices(3,nqpath)
- real(dp),intent(in) :: nestordered(nkpt)
+ real(dp),intent(in) :: gprimd(3,3), gmet(3,3)
+ real(dp),intent(in) :: qpath_vertices(3,nqpath), nestordered(nkpt)
 
 !Local variables-------------------------------
 !scalars
- integer :: unit_nest,nkx,nky,nkz
- integer :: indx,ii,ipoint,npt_tot,realrecip
+ integer :: unit_nest,nkx,nky,nkz,indx,ii,ipoint,npt_tot,realrecip
  character(len=fnlen) :: fname
- character(len=500) :: message
- real(dp) :: res, kval
+ character(len=500) :: msg
+ real(dp) :: res(3), kval
 !arrays
  integer :: ndiv(nqpath-1)
  real(dp),allocatable :: finepath(:,:)
- real(dp) :: tmpkpt(3)
- real(dp) :: origin(3),qpt(3)
+ real(dp) :: tmpkpt(3),origin(3),qpt(3)
 ! dummy variables for call to printxsf
  integer :: natom, ntypat, typat(1)
  real(dp) :: xcart (3,1), znucl(1)
 
 ! *************************************************************************
 
-!===================================================================
-!Definition of the q path along which ph linwid will be interpolated
-!===================================================================
+ ! Definition of the q path along which ph linwid will be interpolated
  call make_path(nqpath,qpath_vertices,gmet,'G',20,ndiv,npt_tot,finepath)
 
- nkx=kptrlatt(1,1)
- nky=kptrlatt(2,2)
- nkz=kptrlatt(3,3)
+ nkx = kptrlatt(1,1)
+ nky = kptrlatt(2,2)
+ nkz = kptrlatt(3,3)
 
  if (nkpt /= nkx*nky*nkz) then
-   write(message,'(a,9(i0,1x),2x,i0)')' Wrong input value for kptrlatt  ',kptrlatt, nkpt
-   MSG_BUG(message)
+   write(msg,'(a,9(i0,1x),2x,i0)')' Wrong input value for kptrlatt  ',kptrlatt, nkpt
+   ABI_BUG(msg)
  end if
 
- ! open output file and write header
- if (open_file(base_name,message,newunit=unit_nest,status="unknown",form="formatted",action="write") /= 0) then
-    MSG_ERROR(message)
+ ! Open output file and write header
+ if (open_file(base_name,msg,newunit=unit_nest,status="unknown",form="formatted",action="write") /= 0) then
+    ABI_ERROR(msg)
  end if
 
- write (unit_nest,'(a)')'#'
- write (unit_nest,'(a)')'# ABINIT package : Nesting factor file'
- write (unit_nest,'(a)')'#'
- write (unit_nest,'(a,i10,a)')'# Nesting factor calculated on ',npt_tot,' Q-points'
- write (unit_nest,'(a)')'# Description of the Q-path :'
- write (unit_nest,'(a,i10)')'# Number of line segments = ',nqpath-1
- write (unit_nest,'(a)')'# Vertices of the Q-path and corresponding index = '
+ write(unit_nest,'(a)')'#'
+ write(unit_nest,'(a)')'# ABINIT package : Nesting factor file'
+ write(unit_nest,'(a)')'#'
+ write(unit_nest,'(a,i10,a)')'# Nesting factor calculated on ',npt_tot,' Q-points'
+ write(unit_nest,'(a)')'# Description of the Q-path :'
+ write(unit_nest,'(a,i10)')'# Number of line segments = ',nqpath-1
+ write(unit_nest,'(a)')'# Vertices of the Q-path and corresponding index = '
  indx=1
  do ii=1,nqpath
-   write (unit_nest,'(a,3(E16.6,1x),i8)')'#  ',qpath_vertices(:,ii),indx
+   write(unit_nest,'(a,3(E16.6,1x),i8)')'#  ',qpath_vertices(:,ii),indx
    if(ii<nqpath) indx=indx+ndiv(ii)
  end do
- write (unit_nest,'(a)')'#'
+ write(unit_nest,'(a)')'#'
 
-!Get qpoint along the q-path from finepath and interpolate the nesting factor
+ !Get qpoint along the q-path from finepath and interpolate the nesting factor
  indx=1
 
+ write (unit_nest,'(a)')'# index nesting, qfrac_coords'
  do ipoint=1, npt_tot
    qpt(:) = finepath(:,ipoint)
-   call wrap2_zero_one(qpt(1),tmpkpt(1),res)
-   call wrap2_zero_one(qpt(2),tmpkpt(2),res)
-   call wrap2_zero_one(qpt(3),tmpkpt(3),res)
-
-   kval = interpol3d(tmpkpt,nkx,nky,nkz,nestordered)
-
-   write(unit_nest,'(i5,18e16.5)')indx,kval
-   indx = indx+1
+   call wrap2_zero_one(qpt, tmpkpt, res)
+   kval = interpol3d_0d(tmpkpt, nkx, nky, nkz, nestordered)
+   write(unit_nest,'(i5,e16.5,1x,3(es11.4,1x))')indx,kval,tmpkpt
+   indx = indx + 1
  end do
 
  close (unit_nest)
  ABI_FREE(finepath)
 
- if (prtnest==2) then !write also the nest factor in the XSF format
-   fname=trim(base_name) // '_NEST_XSF'
+ if (prtnest==2) then
+   ! write also the nesting factor in the XSF format
+   fname = trim(base_name) // '_NEST_XSF'
 
-   if (open_file(fname,message,newunit=unit_nest,status="unknown",form="formatted",action="write") /= 0) then
-      MSG_ERROR(message)
+   if (open_file(fname,msg,newunit=unit_nest,status="unknown",form="formatted",action="write") /= 0) then
+      ABI_ERROR(msg)
    end if
 
-   origin(:)=zero
-   realrecip=1 !reciprocal space
+   origin(:) = zero
+   realrecip = 1 !reciprocal space
    natom = 1
    ntypat = 1
-   typat = (/1/)
-   xcart = reshape ((/zero, zero, zero/), (/3,1/))
-   znucl = (/one/)
+   typat = [1]
+   xcart = reshape ([zero, zero, zero], [3, 1])
+   znucl = [one]
    call printxsf(nkx,nky,nkz,nestordered,gprimd,origin,natom, ntypat, typat, xcart, znucl, unit_nest,realrecip)
 
    close (unit_nest)
@@ -441,5 +406,5 @@ subroutine outnesting(base_name,gmet,gprimd,kptrlatt,nestordered,nkpt,nqpath,prt
 end subroutine outnesting
 !!***
 
-END MODULE m_nesting
+end module m_nesting
 !!***

@@ -52,7 +52,7 @@ prteig 0
 #%% [files]
 #%% files_to_test = 
 #%%   t12.out, tolnlines=    0,   tolabs=  0.0,         tolrel= 0.0
-#%% psp_files = 83bi.psphgh
+#%% psp_files = PseudosHGH_pwteter/83bi.5.hgh
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

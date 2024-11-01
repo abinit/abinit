@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_paw_nmr
 !! NAME
 !!  m_paw_nmr
@@ -8,7 +7,7 @@
 !!   observables (PAW approach).
 !!
 !! COPYRIGHT
-!! Copyright (C) 2018-2019 ABINIT group (JWZ, MT)
+!! Copyright (C) 2018-2024 ABINIT group (JWZ, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -31,7 +30,6 @@ MODULE m_paw_nmr
 
  use m_symtk,      only : matpointsym
  use m_pawang,     only : pawang_type
- use m_paw_sphharm, only : slxyzs
  use m_pawtab,     only : pawtab_type
  use m_pawrad,     only : pawrad_type,pawrad_deducer0,simp_gen
  use m_pawtab,     only : pawtab_type
@@ -47,110 +45,11 @@ MODULE m_paw_nmr
 !public procedures.
  public :: make_efg_onsite ! Compute the electric field gradient due to PAW on-site densities
  public :: make_fc_paw     ! Compute the PAW on-site contribution to the Fermi-contact
- public :: make_orbl_paw     ! Compute the PAW on-site contribution for orbital magnetism, 1/2<L>
 
 CONTAINS  !========================================================================================
 !!***
 
-!----------------------------------------------------------------------
-
-!!****f* m_paw_nmr/make_orbl_paw
-!! NAME
-!! make_orbl_paw
-!!
-!! FUNCTION
-!! Compute the onsite contribution to orbital magnetism, 1/2 <L>
-!!
-!! INPUTS
-!!  idir=cartesian direction of interest
-!!  natom=number of atoms in cell.
-!!  ntypat=number of atom types
-!!  pawrad(ntypat) <type(pawrad_type)>=paw radial mesh and related data
-!!  pawtab(ntypat) <type(pawtab_type)>=paw tabulated starting data
-!!  typat(ntypat)
-!!
-!! OUTPUT
-!!  orbl=complex(dpc) 1/2<L_dir>
-
-!! NOTES
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!
-!! SOURCE
-
-subroutine make_orbl_paw(idir,natom,ntypat,orbl,pawrad,pawtab,typat)
-
- implicit none
-
-!Arguments ------------------------------------
- !scalars
- integer,intent(in) :: idir,natom,ntypat
- complex(dpc),intent(out) :: orbl
- !arrays
- integer,intent(in) :: typat(ntypat)
- type(pawrad_type),intent(in) :: pawrad(ntypat)
- type(pawtab_type),target,intent(in) :: pawtab(ntypat)
-
-!Local variables-------------------------------
- !scalars
- integer :: iatom,il,im,ilmn,itypat,jl,jm,jlmn,klmn,kln,mesh_size
- real(dp) :: intg
- complex(dpc) :: orbl_me
- !arrays
- integer,ABI_CONTIGUOUS pointer :: indlmn(:,:)
- real(dp),allocatable :: ff(:)
-
-! ************************************************************************
-
- DBG_ENTER("COLL")
-
- !loop over atoms in cell
- orbl = czero
- do iatom = 1, natom
-   itypat=typat(iatom)
-   indlmn => pawtab(itypat)%indlmn
-   
-   mesh_size=pawtab(itypat)%mesh_size
-   ABI_ALLOCATE(ff,(mesh_size))
-
-!    loop over basis elements for this atom
-!    ----
-     do jlmn=1,pawtab(itypat)%lmn_size
-       jl=indlmn(1,jlmn)
-       jm=indlmn(2,jlmn)
-       do ilmn=1,pawtab(itypat)%lmn_size
-         il=indlmn(1,ilmn)
-         im=indlmn(2,ilmn)
-
-         klmn=max(jlmn,ilmn)*(max(jlmn,ilmn)-1)/2 + min(jlmn,ilmn)
-         kln = pawtab(itypat)%indklmn(2,klmn) ! need this for mesh selection below
-
-         ! compute <L_dir>
-         call slxyzs(jl,jm,idir,il,im,orbl_me)
-
-         ! compute integral of phi_i*phi_j - tphi_i*tphi_j
-         if (abs(orbl_me) > tol8) then
-            ff(1:mesh_size)=pawtab(itypat)%phiphj(1:mesh_size,kln) - pawtab(itypat)%tphitphj(1:mesh_size,kln)
-            call pawrad_deducer0(ff,mesh_size,pawrad(itypat))
-            call simp_gen(intg,ff,pawrad(itypat))
-            
-            orbl = orbl + half*orbl_me*intg
-
-         end if ! end check that |L_dir| > 0, otherwise ignore term
-
-      end do ! end loop over ilmn
-   end do ! end loop over jlmn
-      
-   ABI_DEALLOCATE(ff)
-
- end do     ! Loop on atoms
-
- DBG_EXIT("COLL")
-
- end subroutine make_orbl_paw
-!!***
+!--------------------------------------------------------------------------------------------------
 
 !!****f* m_paw_nmr/make_efg_onsite
 !! NAME
@@ -189,13 +88,6 @@ subroutine make_orbl_paw(idir,natom,ntypat,orbl,pawrad,pawtab,typat)
 !! Eq. 11 and 12 of Profeta et al., but note that their sum over occupied states times 2 for occupation number is
 !! replaced in the Kresse and Joubert formulation by the sum over $\rho_{ij}$ occupations for each basis element pair.
 !!
-!! PARENTS
-!!      calc_efg
-!!
-!! CHILDREN
-!!      free_my_atmtab,get_my_atmtab,matpointsym,pawdensities,pawrad_deducer0
-!!      simp_gen,xmpi_sum
-!!
 !! SOURCE
 
 subroutine make_efg_onsite(efg,my_natom,natom,nsym,ntypat,paw_an,pawang,pawrhoij,pawrad,pawtab, &
@@ -222,7 +114,8 @@ subroutine make_efg_onsite(efg,my_natom,natom,nsym,ntypat,paw_an,pawang,pawrhoij
 !Local variables-------------------------------
 !scalars
  integer :: cplex,iatom,iatom_tot,ictr,ierr,imesh_size,ispden,itypat
- integer :: lm,lm_size,lnspden,mesh_size,my_comm_atom,nzlmopt,nspden
+ integer :: lm,lm_size,local_paw_print_vol
+ integer :: mesh_size,my_comm_atom,nzlmopt,nspden
  integer :: opt_compch,opt_dens,opt_l,opt_print
  logical :: my_atmtab_allocated,paral_atom
  real(dp) :: c1,c2,c3,compch_sph,intg
@@ -265,12 +158,12 @@ subroutine make_efg_onsite(efg,my_natom,natom,nsym,ntypat,paw_an,pawang,pawrhoij
 !  and therefore nothing to contribute to the on-site electric field gradient
 
    mesh_size=pawtab(itypat)%mesh_size
-   ABI_ALLOCATE(ff,(mesh_size))
+   ABI_MALLOC(ff,(mesh_size))
 
    cplex = pawrhoij(iatom)%qphase
    nspden = pawrhoij(iatom)%nspden
-   ABI_ALLOCATE(lmselectin,(lm_size))
-   ABI_ALLOCATE(lmselectout,(lm_size))
+   ABI_MALLOC(lmselectin,(lm_size))
+   ABI_MALLOC(lmselectout,(lm_size))
    lmselectin = .true. ! compute all moments of densities
    nzlmopt = -1
    opt_compch = 0
@@ -278,73 +171,65 @@ subroutine make_efg_onsite(efg,my_natom,natom,nsym,ntypat,paw_an,pawang,pawrhoij
    opt_dens = 0 ! compute all densities
    opt_l = -1 ! all moments contribute
    opt_print = 0 ! do not print out moments
+   local_paw_print_vol = 0 ! standard amount of printing in pawdensities
 
-   ABI_ALLOCATE(nhat1,(cplex*mesh_size,lm_size,nspden))
-   ABI_ALLOCATE(rho1,(cplex*mesh_size,lm_size,nspden))
-   ABI_ALLOCATE(trho1,(cplex*mesh_size,lm_size,nspden))
+   ABI_MALLOC(nhat1,(cplex*mesh_size,lm_size,nspden*(1-((opt_dens+1)/2))))
+   ABI_MALLOC(rho1,(cplex*mesh_size,lm_size,nspden))
+   ABI_MALLOC(trho1,(cplex*mesh_size,lm_size,nspden*(1-((opt_dens+1)/2))))
 
-!  loop over spin components
-!  nspden = 1: just a single component
-!  nspden = 2: two components, loop over them
-!  nspden = 4: total is in component 1, only one of interest
-   if ( nspden == 2 ) then
-     lnspden = 2
-   else
-     lnspden = 1
-   end if
-   do ispden=1,lnspden
+!  construct multipole expansion of on-site charge densities for this atom
+   call pawdensities(compch_sph,cplex,iatom_tot,lmselectin,lmselectout,lm_size,&
+&   nhat1,nspden,nzlmopt,opt_compch,opt_dens,opt_l,opt_print,&
+&   pawang,local_paw_print_vol,pawrad(itypat),pawrhoij(iatom),pawtab(itypat),&
+&   rho1,trho1)
 
-!    construct multipole expansion of on-site charge densities for this atom
-     call pawdensities(compch_sph,cplex,iatom_tot,lmselectin,lmselectout,lm_size,&
-&     nhat1,nspden,nzlmopt,opt_compch,opt_dens,opt_l,opt_print,&
-&     pawang,0,pawrad(itypat),pawrhoij(iatom),pawtab(itypat),&
-&     rho1,trho1)
+!  spin components:
+!  nspden(1) contains total in all cases
+   ispden = 1
 
-     do lm = 5, 9 ! loop on L=2 components of multipole expansion
+   do lm = 5, 9 ! loop on L=2 components of multipole expansion
 
-       if(.not. lmselectout(lm)) cycle ! skip moments that contributes zero
+     if(.not. lmselectout(lm)) cycle ! skip moments that contributes zero
 
-!      the following is r^2*(n1-tn1-nhat)/r^3 for this multipole moment
-!      use only the real part of the density in case of cplex==2
-       do imesh_size = 2, mesh_size
-         ictr = cplex*(imesh_size - 1) + 1
-         ff(imesh_size)=(rho1(ictr,lm,ispden)-trho1(ictr,lm,ispden)-&
-&         nhat1(ictr,lm,ispden))/&
-&         pawrad(itypat)%rad(imesh_size)
-       end do
-       call pawrad_deducer0(ff,mesh_size,pawrad(itypat))
-       call simp_gen(intg,ff,pawrad(itypat))
-       select case (lm)
-       case (5) ! S_{2,-2}
-         efg(1,2,iatom_tot) = efg(1,2,iatom_tot) - c3*intg ! xy case
-       case (6) ! S_{2,-1}
-         efg(2,3,iatom_tot) = efg(2,3,iatom_tot) - c3*intg ! yz case
-       case (7) ! S_{2, 0}
-         efg(1,1,iatom_tot) = efg(1,1,iatom_tot) + c2*intg ! xx case
-         efg(2,2,iatom_tot) = efg(2,2,iatom_tot) + c2*intg ! yy case
-         efg(3,3,iatom_tot) = efg(3,3,iatom_tot) - c1*intg ! zz case
-       case (8) ! S_{2,+1}
-         efg(1,3,iatom_tot) = efg(1,3,iatom_tot) - c3*intg ! xz case
-       case (9) ! S_{2,+2}
-         efg(1,1,iatom_tot) = efg(1,1,iatom_tot) - c3*intg ! xx case
-         efg(2,2,iatom_tot) = efg(2,2,iatom_tot) + c3*intg ! yy case
-       end select
+!    the following is r^2*(n1-tn1-nhat)/r^3 for this multipole moment
+!    use only the real part of the density in case of cplex==2
+     do imesh_size = 2, mesh_size
+       ictr = cplex*(imesh_size - 1) + 1
+       ff(imesh_size)=rho1(ictr,lm,ispden)-trho1(ictr,lm,ispden)-nhat1(ictr,lm,ispden)
+       ff(imesh_size)=ff(imesh_size)/pawrad(itypat)%rad(imesh_size)
+     end do
+     call pawrad_deducer0(ff,mesh_size,pawrad(itypat))
+     call simp_gen(intg,ff,pawrad(itypat))
+     select case (lm)
+     case (5) ! S_{2,-2}
+       efg(1,2,iatom_tot) = efg(1,2,iatom_tot) - c3*intg ! xy case
+     case (6) ! S_{2,-1}
+       efg(2,3,iatom_tot) = efg(2,3,iatom_tot) - c3*intg ! yz case
+     case (7) ! S_{2, 0}
+       efg(1,1,iatom_tot) = efg(1,1,iatom_tot) + c2*intg ! xx case
+       efg(2,2,iatom_tot) = efg(2,2,iatom_tot) + c2*intg ! yy case
+       efg(3,3,iatom_tot) = efg(3,3,iatom_tot) - c1*intg ! zz case
+     case (8) ! S_{2,+1}
+       efg(1,3,iatom_tot) = efg(1,3,iatom_tot) - c3*intg ! xz case
+     case (9) ! S_{2,+2}
+       efg(1,1,iatom_tot) = efg(1,1,iatom_tot) - c3*intg ! xx case
+       efg(2,2,iatom_tot) = efg(2,2,iatom_tot) + c3*intg ! yy case
+     end select
 
-     end do  ! end loop over LM components with L=2
+   end do  ! end loop over LM components with L=2
 
-   end do    ! Loop on spin components
 
 !  Symmetrization of EFG
    efg(2,1,iatom_tot) = efg(1,2,iatom_tot)
    efg(3,1,iatom_tot) = efg(1,3,iatom_tot)
    efg(3,2,iatom_tot) = efg(2,3,iatom_tot)
 
-   ABI_DEALLOCATE(lmselectin)
-   ABI_DEALLOCATE(lmselectout)
-   ABI_DEALLOCATE(ff)
-   ABI_DEALLOCATE(nhat1)
-   ABI_DEALLOCATE(rho1)
-   ABI_DEALLOCATE(trho1)
+   ABI_FREE(lmselectin)
+   ABI_FREE(lmselectout)
+   ABI_FREE(ff)
+   ABI_FREE(nhat1)
+   ABI_FREE(rho1)
+   ABI_FREE(trho1)
 
  end do     ! Loop on atoms
 
@@ -403,12 +288,6 @@ subroutine make_efg_onsite(efg,my_natom,natom,nsym,ntypat,paw_an,pawang,pawrhoij
 !! procedure resulting from $\chi = sum_i (y_i - m*x_i)^2$ . This is more stable than
 !! computing the derivative of the whole function and extrapolating it to zero.
 !! See Zwanziger, J. Phys. Conden. Matt. 21, 15024-15036 (2009) [[cite:Zwanziger2009]].
-!!
-!! PARENTS
-!!      calc_fc
-!!
-!! CHILDREN
-!!      free_my_atmtab,get_my_atmtab,xmpi_sum
 !!
 !! SOURCE
 

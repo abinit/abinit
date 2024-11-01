@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_pred_isokinetic
 !! NAME
 !!  m_pred_isokinetic
@@ -7,14 +6,10 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2019 ABINIT group (DCA, XG, GMR, JCC, SE)
+!!  Copyright (C) 1998-2024 ABINIT group (DCA, XG, GMR, JCC, SE)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -60,7 +55,7 @@ contains
 !! are solved with the algorithm proposed by Zhang [J. Chem. Phys. 106, 6102 (1997)] [[cite:Zhang1997]],
 !! as worked out by Minary et al, J. Chem. Phys. 188, 2510 (2003) [[cite:Minary2003]].
 !! The conservation of the kinetic energy is obtained within machine precision, at each step.
-!! Related parameters : the time step (dtion), the initial temperature (mdtemp(1)) if the velocities are not defined to start with.
+!! Related parameters: the time step (dtion), the initial temperature (mdtemp(1)) if the velocities are not defined to start with.
 !!
 !! INPUTS
 !! ab_mover <type(abimover)> : Datatype with all the information needed by the preditor
@@ -72,12 +67,6 @@ contains
 !!
 !! SIDE EFFECTS
 !! hist <type(abihist)> : History of positions,forces acell, rprimd, stresses
-!! PARENTS
-!!      mover
-!!
-!! CHILDREN
-!!      hist2var,var2hist,wrtout,xcart2xred,xred2xcart
-!!
 !! SOURCE
 
 subroutine pred_isokinetic(ab_mover,hist,itime,ntime,zDEBUG,iexit)
@@ -105,7 +94,6 @@ subroutine pred_isokinetic(ab_mover,hist,itime,ntime,zDEBUG,iexit)
 
  real(dp) :: acell(3),rprimd(3,3)
  real(dp) :: fcart(3,ab_mover%natom)
-!real(dp) :: fred_corrected(3,ab_mover%natom)
  real(dp) :: xcart(3,ab_mover%natom),xcart_next(3,ab_mover%natom)
  real(dp) :: xred(3,ab_mover%natom),xred_next(3,ab_mover%natom)
  real(dp) :: vel(3,ab_mover%natom)
@@ -121,12 +109,8 @@ subroutine pred_isokinetic(ab_mover,hist,itime,ntime,zDEBUG,iexit)
 !ENDDEBUG
 
  if(iexit/=0)then
-   if (allocated(fcart_m))       then
-     ABI_DEALLOCATE(fcart_m)
-   end if
-   if (allocated(vel_nexthalf))  then
-     ABI_DEALLOCATE(vel_nexthalf)
-   end if
+   ABI_SFREE(fcart_m)
+   ABI_SFREE(vel_nexthalf)
    return
  end if
 
@@ -148,19 +132,15 @@ subroutine pred_isokinetic(ab_mover,hist,itime,ntime,zDEBUG,iexit)
 !###     dataset that exit before itime==ntime
 
  if(itime==1)then
-   if (allocated(fcart_m))       then
-     ABI_DEALLOCATE(fcart_m)
-   end if
-   if (allocated(vel_nexthalf))  then
-     ABI_DEALLOCATE(vel_nexthalf)
-   end if
+   ABI_SFREE(fcart_m)
+   ABI_SFREE(vel_nexthalf)
  end if
 
  if (.not.allocated(fcart_m))       then
-   ABI_ALLOCATE(fcart_m,(3,ab_mover%natom))
+   ABI_MALLOC(fcart_m,(3,ab_mover%natom))
  end if
  if (.not.allocated(vel_nexthalf))  then
-   ABI_ALLOCATE(vel_nexthalf,(3,ab_mover%natom))
+   ABI_MALLOC(vel_nexthalf,(3,ab_mover%natom))
  end if
 
 !write(std_out,*) 'isokinetic 03'
@@ -191,19 +171,6 @@ subroutine pred_isokinetic(ab_mover,hist,itime,ntime,zDEBUG,iexit)
    write (std_out,*) etotal
  end if
 
-!Get rid of mean force on whole unit cell, but only if no
-!generalized constraints are in effect
-!  call fcart2fred(hist%fcart(:,:,hist%ihist),fred_corrected,rprimd,ab_mover%natom)
-!  if(ab_mover%nconeq==0)then
-!    amass_tot=sum(ab_mover%amass(:))
-!    do ii=1,3
-!      if (ii/=3.or.ab_mover%jellslab==0) then
-!        favg=sum(fred_corrected(ii,:))/dble(ab_mover%natom)
-!        fred_corrected(ii,:)=fred_corrected(ii,:)-favg*ab_mover%amass(:)/amass_tot
-!      end if
-!    end do
-!  end if
-
 !Count the number of degrees of freedom, taking into account iatfix.
 !Also fix the velocity to zero for the fixed atoms
  nxyzatfree=0
@@ -218,7 +185,7 @@ subroutine pred_isokinetic(ab_mover,hist,itime,ntime,zDEBUG,iexit)
  enddo
 
 !Now, the number of degrees of freedom is reduced by four because of the kinetic energy conservation
-!and because of the conservation of the total momentum for each dimension, in case no atom position is fixed for that dimension 
+!and because of the conservation of the total momentum for each dimension, in case no atom position is fixed for that dimension
 !(in the latter case, one degree of freedom has already been taken away)
 !This was not done until v8.9 of ABINIT ...
  ndegfreedom=nxyzatfree
@@ -246,7 +213,7 @@ subroutine pred_isokinetic(ab_mover,hist,itime,ntime,zDEBUG,iexit)
    end do
 
 !  Computation of vel(:,:) at the next positions
-!  Computation of v2gauss, actually twice the kinetic energy. 
+!  Computation of v2gauss, actually twice the kinetic energy.
 !  Called 2K, cf Eq. (A13) of [[cite:Minary2003]].
    v2gauss=0.0_dp
    do iatom=1,ab_mover%natom
@@ -288,7 +255,7 @@ subroutine pred_isokinetic(ab_mover,hist,itime,ntime,zDEBUG,iexit)
          vel(idim,iatom)=zero
        endif
      enddo
-   enddo  
+   enddo
 
    if (zDEBUG)then
      write(std_out,*) 'Computation of the second half-velocity'

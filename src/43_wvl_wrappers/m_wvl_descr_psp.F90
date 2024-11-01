@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_wvl_descr_psp
 !! NAME
 !!  wvl_descr_psp
@@ -7,14 +6,10 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2019 ABINIT group (DC)
+!!  Copyright (C) 2008-2024 ABINIT group (DC)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -29,6 +24,8 @@ module m_wvl_descr_psp
  use defs_basis
  use m_errors
  use m_abicore
+
+ use defs_datatypes, only : pseudopotential_type, pseudopotential_gth_type
 
  implicit none
 
@@ -67,17 +64,10 @@ contains
 !!                 | nelpsp   = the ionic pseudo-charge
 !!                 | natsc    = number of atoms with semicore
 !!
-!! PARENTS
-!!      gstate
-!!
-!! CHILDREN
-!!      atomic_info,psp_from_data,wrtout
-!!
 !! SOURCE
 
 subroutine wvl_descr_psp_set(filoccup, nsppol, psps, spinat, wvl)
 
- use defs_datatypes
  use defs_wvltypes
 #if defined HAVE_BIGDFT
  use BigDFT_API, only: aoig_set,UNINITIALIZED,dict_init,dict_free,dictionary, &
@@ -166,17 +156,10 @@ end subroutine wvl_descr_psp_set
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      psp10in,psp2in,psp3in,pspatm
-!!
-!! CHILDREN
-!!      atomic_info,psp_from_data,wrtout
-!!
 !! SOURCE
 
 subroutine wvl_descr_psp_fill(gth_params, ipsp, ixc, nelpsp, nzatom, pspunit)
 
-  use defs_datatypes
 #if defined HAVE_BIGDFT
   use BigDFT_API, only: atomic_info, UNINITIALIZED, psp_from_data
 #endif
@@ -212,7 +195,7 @@ subroutine wvl_descr_psp_fill(gth_params, ipsp, ixc, nelpsp, nzatom, pspunit)
 &     "wvl_descr_psp_fill : bug, chemical element not found in BigDFT table",ch10,&
 &     "Action: upgrade BigDFT table"
      call wrtout(ab_out,message,'COLL')
-     MSG_BUG(message)
+     ABI_BUG(message)
    end if
    gth_params%set(ipsp) = .true.
  end if
@@ -235,7 +218,7 @@ subroutine wvl_descr_psp_fill(gth_params, ipsp, ixc, nelpsp, nzatom, pspunit)
      gth_params%radii_cf(ipsp, 2) = UNINITIALIZED(gth_params%radii_cf(ipsp, 2))
      write(message, '(a,a,a,a,a,a,a)' ) '-', ch10,&
 &     '- wvl_descr_psp_fill : COMMENT -',ch10,&
-&     "-  the pseudo-potential does not include geometric informations,",ch10,&
+&     "-  the pseudo-potential does not include geometric information,",ch10,&
 &     '-  values have been computed.'
      call wrtout(ab_out,message,'COLL')
      call wrtout(std_out,  message,'COLL')
@@ -314,12 +297,6 @@ end subroutine wvl_descr_psp_fill
 !! OUTPUT
 !! wvl <type(wvl_internal_type)>=internal variables for wavelets
 !!
-!! PARENTS
-!!      gstate,wvl_memory
-!!
-!! CHILDREN
-!!      deallocate_atoms_data,f_free_ptr
-!!
 !! SOURCE
 
 subroutine wvl_descr_free(wvl)
@@ -351,7 +328,7 @@ subroutine wvl_descr_free(wvl)
  call deallocate_atoms_data(wvl%atoms)
 #endif
  if(allocated(wvl%npspcode_paw_init_guess)) then
-   ABI_DEALLOCATE(wvl%npspcode_paw_init_guess)
+   ABI_FREE(wvl%npspcode_paw_init_guess)
  end if
 end subroutine wvl_descr_free
 !!***
@@ -378,13 +355,6 @@ end subroutine wvl_descr_free
 !!                 | iatype   =  types for atoms
 !!                 | lfrztyp  =  flag for the movement of atoms.
 !!                 | natpol   =  integer related to polarisation at the first step
-!!
-!! PARENTS
-!!      gstate,wvl_memory
-!!
-!! CHILDREN
-!!      allocate_atoms_nat,allocate_atoms_ntypes,astruct_set_n_atoms
-!!      astruct_set_n_types,f_release_routine,f_routine
 !!
 !! SOURCE
 
@@ -479,12 +449,6 @@ end subroutine wvl_descr_atoms_set
 !!                 | iatype   =  types for atoms
 !!                 | lfrztyp  =  flag for the movement of atoms.
 !!                 | natpol   =  integer related to polarisation at the first step
-!!
-!! PARENTS
-!!      gstate
-!!
-!! CHILDREN
-!!      astruct_set_symmetries,symmetry_set_n_sym,wrtout
 !!
 !! SOURCE
 

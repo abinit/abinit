@@ -76,7 +76,7 @@ def get_allowed_cpp_vars():
 
     # Extract CPP options from the libPAW header files
     cpp_libpaw = set()
-    for root, dirs, files in os.walk(os.path.join(abidir, "src/42_libpaw")):
+    for root, dirs, files in os.walk(os.path.join(abidir, "src/39_libpaw")):
         for src in files:
             if not re_hdrfile.search(src): continue
             with open(os.path.join(root, src), "rt") as fh:

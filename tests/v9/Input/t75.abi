@@ -1,0 +1,49 @@
+#################################################################
+#    Test the use of useylm=1 for NCPPs with all KB energies    #
+#    being negative. LiH molecule.                      MR 2021 # 
+#################################################################
+
+# Unit cell
+acell 3*10.0   
+rprim 1.0 0.0 0.0
+      0.0 1.0 0.0
+      0.0 0.0 1.0
+ntypat 2          
+znucl 1 3
+natom 2  
+typat 1 2  
+xcart 
+    0.00000000    0.00000000    0.00000000
+    3.03          0.0           0.0
+
+#k-points and bands
+kpt 0 0 0
+nband 4
+
+#Convergence parameters
+useylm 1
+toldff 1.d-3
+diemac 2.0
+ecut  20.0 
+nstep 100     
+
+#Exchange-correlation functional
+ixc  7  
+
+pp_dirpath "$ABI_PSPDIR/Pseudodojo_nc_sr_04_pw_standard_psp8"
+pseudos "H.psp8, Li.psp8"
+
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test =
+#%%   t75.abo, tolnlines = 5, tolabs = 1.e-06, tolrel = 1.e-08, fld_options= -medium;
+#%% [paral_info]
+#%% max_nprocs = 4
+#%% [extra_info]
+#%% authors = M. Royo
+#%% keywords = 
+#%% description = LiH molecule in a big box
+#%%<END TEST_INFO>

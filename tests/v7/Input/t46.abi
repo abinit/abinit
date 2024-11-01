@@ -1,0 +1,72 @@
+# Si in diamond structure; 2 special points; low ecut.
+# With a 4x4x4 k point grid (!only one shift, but OK
+#    because symmetry is imposed), compute the
+#    dielectric constant with a scissor
+
+ ndtset 4
+
+#First dataset : SC run with 2 kpoints
+ kptopt1 1
+ prtden1 1
+
+#Second dataset : d/dk response calculation
+ iscf2 -3
+ rfelfd2 2     getwfk2 1    getden2 1
+ rfdir2  1 0 0
+ kptopt2 2
+
+#Third dataset : homogeneous electric field response without a scissor
+ rfelfd3 3     getwfk3 1     getddk3 2
+ rfdir3  1 1 1
+ kptopt3 2
+
+#Fourth dataset : homogeneous electric field response with a scissor
+ rfelfd4 3     getwfk4 1     getddk4 2
+ rfdir4  1 1 1
+ kptopt4 2
+ dfpt_sciss4 0.5 eV
+
+#Common data
+ acell 3*10.18
+ diemac 12.0d0
+ ecut 3.0
+ natom  2
+ nband 4
+ nstep 15
+ ntypat  1
+ rprim   0 .5 .5  .5 0 .5  .5 .5 0
+ tolwfr 3.0d-22
+ typat  1 1
+ xred 3*0.00d0 3*1/4
+ znucl 14
+
+#k point sampling
+ ngkpt 4 4 4
+ nshiftk 4
+ shiftk 0.5  0.5  0.5
+        0.5  0.0  0.0
+        0.0  0.5  0.0
+        0.0  0.0  0.5
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/14si.pspnc"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t46.abo, tolnlines= 0, tolabs=  0.000, tolrel=  0.000
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = Unknown
+#%% keywords = NC, DFPT
+#%% description = 
+#%%   Si in diamond structure; 2 special points; low ecut.
+#%%   With a 4x4x4 k point grid (!only one shift, but OK
+#%%   because symmetry is imposed), compute the
+#%%   dielectric constant with a scissor .
+#%%   Note that the fulfilment of the charge neutrality sum rule, already broken without a scissor operator, is
+#%%   strongly affected by a scissor
+#%%<END TEST_INFO>

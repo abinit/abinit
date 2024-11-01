@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_ga
 !! NAME
 !!  m_ga
@@ -8,12 +7,10 @@
 !!  Genetic algorithm stochastic search implementation.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2012-2019 ABINIT group (MT)
+!! Copyright (C) 2012-2024 ABINIT group (MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
 !!
 !! SOURCE
 
@@ -26,11 +23,9 @@
 MODULE m_ga
 
  use defs_basis
- use defs_abitypes
  use m_errors
  use m_abicore
-
- !use m_results_img, only : results_img_type, gather_array_img
+ use m_dtset
 
  implicit none
 
@@ -85,16 +80,9 @@ CONTAINS !===========================================================
 !!  ga_param=datastructure of type ga_type.
 !!            several parameters for Genetic Algorithm random search.
 !!
-!! PARENTS
-!!      gstateimg
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine ga_init(dtset,ga_param)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -109,7 +97,7 @@ subroutine ga_init(dtset,ga_param)
    ga_param%ga_fitness           = dtset%ga_fitness
    ga_param%ga_opt_percent       = dtset%ga_opt_percent
    ga_param%ga_algor             = dtset%ga_algor
-   ABI_ALLOCATE(ga_param%ga_iatfix,(3,dtset%natom))
+   ABI_MALLOC(ga_param%ga_iatfix,(3,dtset%natom))
    ga_param%ga_iatfix            = dtset%iatfix
  end if
 
@@ -133,16 +121,9 @@ end subroutine ga_init
 !!  ga_param=datastructure of type ga_type.
 !!            parameters for Genetic algorithm search.
 !!
-!! PARENTS
-!!      gstateimg
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine ga_destroy(ga_param)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -151,7 +132,7 @@ subroutine ga_destroy(ga_param)
 !************************************************************************
 
  if(allocated(ga_param%ga_iatfix))then
-   ABI_DEALLOCATE(ga_param%ga_iatfix)
+   ABI_FREE(ga_param%ga_iatfix)
  endif
  call ga_nullify(ga_param)
 
@@ -175,16 +156,9 @@ end subroutine ga_destroy
 !!  ga_param=datastructure of type ga_type.
 !!            several parameters for Genetic algorithm search.
 !!
-!! PARENTS
-!!      m_ga
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine ga_nullify(ga_param)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

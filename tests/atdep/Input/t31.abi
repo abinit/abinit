@@ -1,0 +1,50 @@
+NormalMode
+#DEFINE_UNITCELL
+brav 7 0
+natom_unitcell 2
+xred_unitcell 0.0 0.0 0.0 0.5 0.5 0.5 
+typat_unitcell 1 2
+ntypat 2
+amu 2.43050000E+01 1.59994000E+01
+#DEFINE_SUPERCELL
+rprimd  16.4446695 0.0000000 0.0000000 0.0000000 16.4446695 0.0000000 0.0000000 0.0000000 16.4446695
+multiplicity 4 0 0 0 4 0 0 0 4
+natom 128
+typat 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2
+temperature  2.00000000E+03
+#DEFINE_COMPUTATIONAL_DETAILS
+nstep_max 20
+nstep_min 1
+rcut 7.50
+#OPTIONAL_INPUT_VARIABLES
+order 4 5. 5.
+bzpath 6 X G M R G X
+use_ideal_positions 1
+dielec_constant 3.0
+born_charge 1.75 -1.75
+ngqpt1 6 6 6
+ngqpt2 12 12 12
+enunit 1
+TheEnd
+ 
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = atdep
+#%% exclude_builders = bob_gnu_13.2_openmp
+#%% md_hist = t31
+#%% [files]
+#%% files_to_test = 
+#%%   t31.abo, tolnlines = 165, tolabs = 2.e-3, tolrel = 1.e-4, fld_options = -medium;
+#%%   t31omega.dat, tolnlines = 5, tolabs = 2.e-3, tolrel = 1.e-4, fld_options = -medium;
+#%%   t31thermo.dat, tolnlines = 5, tolabs = 2.e-3, tolrel = 1.e-4, fld_options = -medium;
+#%%   t31thermo3.dat, tolnlines = 12, tolabs = 2.e-3, tolrel = 1.e-4, fld_options = -medium;
+#%% [paral_info]
+#%% max_nprocs = 10
+#%% [extra_info]
+#%% authors = F. Bottin & J. Bouchet
+#%% keywords = atdep
+#%% description = 
+#%%   test aTDEP (4th order)
+#%%   MgO (B2) with 128 atoms at T = 2000 K. With LOTO.
+#%% topics = aTDEP
+#%%<END TEST_INFO>

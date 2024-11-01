@@ -1,0 +1,89 @@
+t65o_DS3_WFK
+1      ! kpoint
+1      ! band < 10  1=s      2,3,4 = p
+0      # Do not look for a GW QPS file
+7      ! radius of the sphere
+0      ! exit
+1      ! continue work
+1      ! kpoint
+2      ! band < 10  2=p      2,3,4 = p
+0      # Do not look for a GW QPS file
+7      ! radius of the sphere
+0      ! exit
+1      ! continue work
+1      ! kpoint
+3      ! band < 10
+0      # Do not look for a GW QPS file
+7      ! radius of the sphere
+0      ! exit
+1      ! continue work
+1      ! kpoint
+4      ! band < 10
+0      # Do not look for a GW QPS file
+7      ! radius of the sphere
+0      ! exit
+1      ! continue work
+1      ! kpoint
+5      ! band < 10
+0      # Do not look for a GW QPS file
+7      ! radius of the sphere
+0      ! exit
+1      ! continue work
+1      ! kpoint
+6      ! band < 10
+0      # Do not look for a GW QPS file
+7      ! radius of the sphere
+0      ! exit
+1      ! continue work
+1      ! kpoint
+7      ! band < 10
+0      # Do not look for a GW QPS file
+7      ! radius of the sphere
+0      ! exit
+1      ! continue work
+1      ! kpoint
+8      ! band < 10
+0      # Do not look for a GW QPS file
+7      ! radius of the sphere
+0      ! exit
+1      ! continue work
+1      ! kpoint
+9      ! band < 10
+0      # Do not look for a GW QPS file
+7      ! radius of the sphere
+0      ! exit
+1      ! continue work
+1      ! kpoint
+10     ! band < 10
+0      # Do not look for a GW QPS file
+7      ! radius of the sphere
+0      ! exit
+1      ! continue work
+2      ! kpoint
+1      ! band < 10
+0      # Do not look for a GW QPS file
+7      ! radius of the sphere
+0      ! exit
+1      ! continue work
+3      ! kpoint
+1      ! band < 10
+0      # Do not look for a GW QPS file
+7      ! radius of the sphere
+0      ! exit
+0      ! final exit
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = cut3d
+#%% test_chain = t65.abi, t66.abi, t67.abi
+#%% [files]
+#%% files_to_test = 
+#%%   t67.stdout, tolnlines = 3, tolabs = 1.10e-06, tolrel = 6.000e-07
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = Unknown
+#%% keywords = 
+#%% description = 
+#%%   Analysis of the output WFs of the test#66 by cut3d : angular analysis. istwfk/=1
+#%%<END TEST_INFO>

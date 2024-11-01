@@ -1,0 +1,70 @@
+# Input for PAW3 tutorial
+# Mg - hexagonal structure - metallic bulk
+
+#-------------------------------------------------------------------------------
+#Directories and files
+
+pseudos="Mg.LDA-PW-paw.xml"
+
+pp_dirpath="../"
+outdata_prefix="outputs/ab_Mg_equi_o"
+tmpdata_prefix="outputs/ab_Mg_equi"
+
+
+#-------------------------------------------------------------------------------
+#Define the different datasets
+
+ndtset 7             # 7 datasets
+acell: 3*0.94 Bohr   # The starting values of the cell parameters
+acell+ 3*0.02 Bohr   # The increment of acell from one dataset to the other
+
+
+#-------------------------------------------------------------------------------
+#Convergence parameters
+
+#Cutoff variables
+ecut  15.0
+pawecutdg 110.0
+ecutsm 0.5
+
+#Definition of the k-point grid
+chksymbreak 0
+kptopt 1
+nshiftk 1
+shiftk 0.0 0.0 0.5
+ngkpt 10 10 10
+
+#Bands and occupations
+nband  25
+nbdbuf 5
+
+#Parameters for metals
+tsmear 0.4109804423E-02
+occopt 7
+
+#SCF cycle parameters
+tolvrs 1.0d-14
+nstep  150
+
+
+#-------------------------------------------------------------------------------
+#Definition of the Unit cell
+
+#Definition of the unit cell
+acell 3*1.
+rprim
+     6.0646414   0.0000000   0.0000000
+     3.0323207   5.2521335   0.0000000
+     0.0000000   0.0000000   9.8460968
+
+#Definition of the atom types
+ntypat 1          # One tom type
+znucl 12          # Magnesium 
+
+#Definition of the atoms
+natom 2           # 2 atoms per cell
+typat 1 1         # each of type carbon
+xred              # This keyword indicates that the location of the atoms
+                  # will follow, one triplet of number for each atom
+   1/3   1/3   1/4
+   2/3   2/3   3/4

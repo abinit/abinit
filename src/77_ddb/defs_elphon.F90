@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/defs_elphon
 !!
 !! NAME
@@ -10,7 +9,7 @@
 !!  used, or be written to disk. All combinations should be feasible.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2004-2019 ABINIT group (MVer, MG)
+!! Copyright (C) 2004-2024 ABINIT group (MVer, MG)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -20,10 +19,6 @@
 !!  Contains the following datastructures:
 !!   1) elph_type contains data and dimensions for the kpoints near the
 !!      fermi surface and the $g_{k k+q}$ matrix elements
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -39,9 +34,8 @@ module defs_elphon
  use m_abicore
  use m_errors
  use m_xmpi
-
- use m_kptrank,  only : kptrank_type, destroy_kptrank, copy_kptrank
- use m_crystal,    only : crystal_t
+ use m_krank
+ use m_crystal
 
  implicit none
 
@@ -51,6 +45,7 @@ module defs_elphon
  public :: gam_mult_displ
  public :: complete_gamma
  public :: complete_gamma_tr
+ public :: mkqptequiv
 
 !----------------------------------------------------------------------
 !!****t* defs_elphon/elph_kgrid_type
@@ -73,7 +68,7 @@ module defs_elphon
    integer :: new_nkptirr                     ! number of k-points in irreducible grid
    integer :: my_nkpt                         ! number of k-points on present processor
 
-   type(kptrank_type) :: kptrank_t            ! ranking of all kpoints on phonon calculation grid, and inverse rank
+   type(krank_t) :: krank            ! ranking of all kpoints on phonon calculation grid, and inverse rank
 
    integer, allocatable :: irr2full(:)            ! correspondence of irred kpoints to a full one
    integer, allocatable :: full2irr(:,:)          ! correspondence of full k to one irred kpoints through sym and timrev
@@ -295,7 +290,7 @@ module defs_elphon
 
 !----------------------------------------------------------------------
 
-CONTAINS  !=========================================================================================================================
+CONTAINS
 !!***
 
 !----------------------------------------------------------------------
@@ -311,18 +306,11 @@ CONTAINS  !=====================================================================
 !! INPUTS
 !!  elph_ds = elphon datastructure
 !!
-!! PARENTS
-!!      elphon
-!!
-!! CHILDREN
-!!
 !! NOTES
 !!
 !! SOURCE
 
 subroutine elph_ds_clean(elph_ds)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -331,50 +319,24 @@ subroutine elph_ds_clean(elph_ds)
 ! *************************************************************************
 
  !@elph_type
- if (allocated(elph_ds%qirredtofull))  then
-   ABI_DEALLOCATE(elph_ds%qirredtofull)
- end if
- if (allocated(elph_ds%wtq))  then
-   ABI_DEALLOCATE(elph_ds%wtq)
- end if
- if (allocated(elph_ds%n0))  then
-   ABI_DEALLOCATE(elph_ds%n0)
- end if
- if (allocated(elph_ds%qpt_full))  then
-   ABI_DEALLOCATE(elph_ds%qpt_full)
- end if
- if (allocated(elph_ds%gkk_intweight))  then
-   ABI_DEALLOCATE(elph_ds%gkk_intweight)
- end if
- if (allocated(elph_ds%gkk_qpt))  then
-   ABI_DEALLOCATE(elph_ds%gkk_qpt)
- end if
- if (allocated(elph_ds%gkk_rpt))  then
-   ABI_DEALLOCATE(elph_ds%gkk_rpt)
- end if
- if (allocated(elph_ds%gkk2))  then
-   ABI_DEALLOCATE(elph_ds%gkk2)
- end if
- if (allocated(elph_ds%gamma_qpt))  then
-   ABI_DEALLOCATE(elph_ds%gamma_qpt)
- end if
- if (allocated(elph_ds%gamma_rpt))  then
-   ABI_DEALLOCATE(elph_ds%gamma_rpt)
- end if
- if (allocated(elph_ds%phfrq))  then
-   ABI_DEALLOCATE(elph_ds%phfrq)
- end if
- if (allocated(elph_ds%a2f))  then
-   ABI_DEALLOCATE(elph_ds%a2f)
- end if
- if (allocated(elph_ds%qgrid_data))  then
-   ABI_DEALLOCATE(elph_ds%qgrid_data)
- end if
+ ABI_SFREE(elph_ds%qirredtofull)
+ ABI_SFREE(elph_ds%wtq)
+ ABI_SFREE(elph_ds%n0)
+ ABI_SFREE(elph_ds%qpt_full)
+ ABI_SFREE(elph_ds%gkk_intweight)
+ ABI_SFREE(elph_ds%gkk_qpt)
+ ABI_SFREE(elph_ds%gkk_rpt)
+ ABI_SFREE(elph_ds%gkk2)
+ ABI_SFREE(elph_ds%gamma_qpt)
+ ABI_SFREE(elph_ds%gamma_rpt)
+ ABI_SFREE(elph_ds%phfrq)
+ ABI_SFREE(elph_ds%a2f)
+ ABI_SFREE(elph_ds%qgrid_data)
 
  call elph_k_destroy (elph_ds%k_phon)
  call elph_k_destroy (elph_ds%k_fine)
 
- call destroy_kptrank (elph_ds%k_fine%kptrank_t)
+ call elph_ds%k_fine%krank%free()
 
 end subroutine elph_ds_clean
 !!***
@@ -392,18 +354,11 @@ end subroutine elph_ds_clean
 !! INPUTS
 !!  elph_tr_ds = elphon transport datastructure
 !!
-!! PARENTS
-!!      elphon
-!!
-!! CHILDREN
-!!
 !! NOTES
 !!
 !! SOURCE
 
 subroutine elph_tr_ds_clean(elph_tr_ds)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -412,84 +367,32 @@ subroutine elph_tr_ds_clean(elph_tr_ds)
 ! *************************************************************************
 
  !@elph_tr_type
- if (allocated(elph_tr_ds%el_veloc))  then
-   ABI_DEALLOCATE(elph_tr_ds%el_veloc)
- end if
- if (allocated(elph_tr_ds%FSelecveloc_sq))  then
-   ABI_DEALLOCATE(elph_tr_ds%FSelecveloc_sq)
- end if
- if (allocated(elph_tr_ds%veloc_sq0))  then
-   ABI_DEALLOCATE(elph_tr_ds%veloc_sq0)
- end if
- if (allocated(elph_tr_ds%veloc_sq))  then
-   ABI_DEALLOCATE(elph_tr_ds%veloc_sq)
- end if
- if (allocated(elph_tr_ds%dos_n0))  then
-   ABI_DEALLOCATE(elph_tr_ds%dos_n0)
- end if
- if (allocated(elph_tr_ds%dos_n))  then
-   ABI_DEALLOCATE(elph_tr_ds%dos_n)
- end if
- if (allocated(elph_tr_ds%en_all))  then
-   ABI_DEALLOCATE(elph_tr_ds%en_all)
- end if
- if (allocated(elph_tr_ds%de_all))  then
-   ABI_DEALLOCATE(elph_tr_ds%de_all)
- end if
- if (allocated(elph_tr_ds%gamma_qpt_tr))  then
-   ABI_DEALLOCATE(elph_tr_ds%gamma_qpt_tr)
- end if
- if (allocated(elph_tr_ds%gamma_qpt_trin))  then
-   ABI_DEALLOCATE(elph_tr_ds%gamma_qpt_trin)
- end if
- if (allocated(elph_tr_ds%gamma_qpt_trout))  then
-   ABI_DEALLOCATE(elph_tr_ds%gamma_qpt_trout)
- end if
- if (allocated(elph_tr_ds%gamma_rpt_tr))  then
-   ABI_DEALLOCATE(elph_tr_ds%gamma_rpt_tr)
- end if
- if (allocated(elph_tr_ds%gamma_rpt_trin))  then
-   ABI_DEALLOCATE(elph_tr_ds%gamma_rpt_trin)
- end if
- if (allocated(elph_tr_ds%gamma_rpt_trout))  then
-   ABI_DEALLOCATE(elph_tr_ds%gamma_rpt_trout)
- end if
- if (allocated(elph_tr_ds%a2f_1d_tr))  then
-   ABI_DEALLOCATE(elph_tr_ds%a2f_1d_tr)
- end if
- if (allocated(elph_tr_ds%a2f_1d_trin))  then
-   ABI_DEALLOCATE(elph_tr_ds%a2f_1d_trin)
- end if
- if (allocated(elph_tr_ds%a2f_1d_trout))  then
-   ABI_DEALLOCATE(elph_tr_ds%a2f_1d_trout)
- end if
- if (allocated(elph_tr_ds%tmp_gkk_intweight))  then
-   ABI_DEALLOCATE(elph_tr_ds%tmp_gkk_intweight)
- end if
- if (allocated(elph_tr_ds%tmp_gkk_intweight1))  then
-   ABI_DEALLOCATE(elph_tr_ds%tmp_gkk_intweight1)
- end if
- if (allocated(elph_tr_ds%tmp_gkk_intweight2))  then
-   ABI_DEALLOCATE(elph_tr_ds%tmp_gkk_intweight2)
- end if
- if (allocated(elph_tr_ds%tmp_velocwtk))  then
-   ABI_DEALLOCATE(elph_tr_ds%tmp_velocwtk)
- end if
- if (allocated(elph_tr_ds%tmp_velocwtk1))  then
-   ABI_DEALLOCATE(elph_tr_ds%tmp_velocwtk1)
- end if
- if (allocated(elph_tr_ds%tmp_velocwtk2))  then
-   ABI_DEALLOCATE(elph_tr_ds%tmp_velocwtk2)
- end if
- if (allocated(elph_tr_ds%tmp_vvelocwtk))  then
-   ABI_DEALLOCATE(elph_tr_ds%tmp_vvelocwtk)
- end if
- if (allocated(elph_tr_ds%tmp_vvelocwtk1))  then
-   ABI_DEALLOCATE(elph_tr_ds%tmp_vvelocwtk1)
- end if
- if (allocated(elph_tr_ds%tmp_vvelocwtk2))  then
-   ABI_DEALLOCATE(elph_tr_ds%tmp_vvelocwtk2)
- end if
+ ABI_SFREE(elph_tr_ds%el_veloc)
+ ABI_SFREE(elph_tr_ds%FSelecveloc_sq)
+ ABI_SFREE(elph_tr_ds%veloc_sq0)
+ ABI_SFREE(elph_tr_ds%veloc_sq)
+ ABI_SFREE(elph_tr_ds%dos_n0)
+ ABI_SFREE(elph_tr_ds%dos_n)
+ ABI_SFREE(elph_tr_ds%en_all)
+ ABI_SFREE(elph_tr_ds%de_all)
+ ABI_SFREE(elph_tr_ds%gamma_qpt_tr)
+ ABI_SFREE(elph_tr_ds%gamma_qpt_trin)
+ ABI_SFREE(elph_tr_ds%gamma_qpt_trout)
+ ABI_SFREE(elph_tr_ds%gamma_rpt_tr)
+ ABI_SFREE(elph_tr_ds%gamma_rpt_trin)
+ ABI_SFREE(elph_tr_ds%gamma_rpt_trout)
+ ABI_SFREE(elph_tr_ds%a2f_1d_tr)
+ ABI_SFREE(elph_tr_ds%a2f_1d_trin)
+ ABI_SFREE(elph_tr_ds%a2f_1d_trout)
+ ABI_SFREE(elph_tr_ds%tmp_gkk_intweight)
+ ABI_SFREE(elph_tr_ds%tmp_gkk_intweight1)
+ ABI_SFREE(elph_tr_ds%tmp_gkk_intweight2)
+ ABI_SFREE(elph_tr_ds%tmp_velocwtk)
+ ABI_SFREE(elph_tr_ds%tmp_velocwtk1)
+ ABI_SFREE(elph_tr_ds%tmp_velocwtk2)
+ ABI_SFREE(elph_tr_ds%tmp_vvelocwtk)
+ ABI_SFREE(elph_tr_ds%tmp_vvelocwtk1)
+ ABI_SFREE(elph_tr_ds%tmp_vvelocwtk2)
 
 end subroutine elph_tr_ds_clean
 !!***
@@ -507,17 +410,11 @@ end subroutine elph_tr_ds_clean
 !! INPUTS
 !!  elph_k = elphon k-points datastructure
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! NOTES
 !!
 !! SOURCE
 
 subroutine elph_k_copy(elph_k_in, elph_k_out)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -536,34 +433,33 @@ subroutine elph_k_copy(elph_k_in, elph_k_out)
 
  elph_k_out%my_nkpt = elph_k_in%my_nkpt
 
- ABI_ALLOCATE(elph_k_out%my_kpt,(elph_k_out%nkpt))
+ ABI_MALLOC(elph_k_out%my_kpt,(elph_k_out%nkpt))
  elph_k_out%my_kpt = elph_k_in%my_kpt
 
- ABI_ALLOCATE(elph_k_out%my_ikpt,(elph_k_out%my_nkpt))
+ ABI_MALLOC(elph_k_out%my_ikpt,(elph_k_out%my_nkpt))
  elph_k_out%my_ikpt = elph_k_in%my_ikpt
 
- ABI_ALLOCATE(elph_k_out%kptirr,(3,elph_k_out%nkptirr))
+ ABI_MALLOC(elph_k_out%kptirr,(3,elph_k_out%nkptirr))
  elph_k_out%kptirr = elph_k_in%kptirr
- ABI_ALLOCATE(elph_k_out%wtkirr,(elph_k_out%nkptirr))
+ ABI_MALLOC(elph_k_out%wtkirr,(elph_k_out%nkptirr))
  elph_k_out%wtkirr = elph_k_in%wtkirr
 
- ABI_ALLOCATE(elph_k_out%wtk,(elph_k_out%nband,elph_k_out%nkpt,elph_k_out%nsppol))
+ ABI_MALLOC(elph_k_out%wtk,(elph_k_out%nband,elph_k_out%nkpt,elph_k_out%nsppol))
  elph_k_out%wtk = elph_k_in%wtk
- ABI_ALLOCATE(elph_k_out%kpt,(3,elph_k_out%nkpt))
+ ABI_MALLOC(elph_k_out%kpt,(3,elph_k_out%nkpt))
  elph_k_out%kpt = elph_k_in%kpt
 
- call copy_kptrank(elph_k_in%kptrank_t, elph_k_out%kptrank_t)
+ elph_k_out%krank = elph_k_in%krank%copy()
 
- ABI_ALLOCATE(elph_k_out%irr2full,(elph_k_out%nkptirr))
+ ABI_MALLOC(elph_k_out%irr2full,(elph_k_out%nkptirr))
  elph_k_out%irr2full = elph_k_in%irr2full
- ABI_ALLOCATE(elph_k_out%full2irr,(3,elph_k_out%nkpt))
+ ABI_MALLOC(elph_k_out%full2irr,(3,elph_k_out%nkpt))
  elph_k_out%full2irr = elph_k_in%full2irr
- ABI_ALLOCATE(elph_k_out%full2full,(2,elph_k_out%nsym,elph_k_out%nkpt))
+ ABI_MALLOC(elph_k_out%full2full,(2,elph_k_out%nsym,elph_k_out%nkpt))
  elph_k_out%full2full = elph_k_in%full2full
 
- ABI_ALLOCATE(elph_k_out%irredtoGS,(elph_k_out%nkptirr))
+ ABI_MALLOC(elph_k_out%irredtoGS,(elph_k_out%nkptirr))
  elph_k_out%irredtoGS = elph_k_in%irredtoGS
-
 
 end subroutine elph_k_copy
 !!***
@@ -581,18 +477,11 @@ end subroutine elph_k_copy
 !! INPUTS
 !!  elph_k = elphon k-points datastructure
 !!
-!! PARENTS
-!!      defs_elphon
-!!
-!! CHILDREN
-!!
 !! NOTES
 !!
 !! SOURCE
 
 subroutine elph_k_destroy(elph_k)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -601,56 +490,24 @@ subroutine elph_k_destroy(elph_k)
 ! *************************************************************************
 
  !@elph_kgrid_type
- if(allocated(elph_k%irr2full)) then
-   ABI_DEALLOCATE (elph_k%irr2full)
- end if
- if(allocated(elph_k%full2irr)) then
-   ABI_DEALLOCATE (elph_k%full2irr)
- end if
- if(allocated(elph_k%full2full)) then
-   ABI_DEALLOCATE (elph_k%full2full)
- end if
- if(allocated(elph_k%irredtoGS)) then
-   ABI_DEALLOCATE (elph_k%irredtoGS)
- end if
- if(allocated(elph_k%new_irredtoGS)) then
-   ABI_DEALLOCATE (elph_k%new_irredtoGS)
- end if
- if(allocated(elph_k%kpt)) then
-   ABI_DEALLOCATE (elph_k%kpt)
- end if
- if(allocated(elph_k%kptirr)) then
-   ABI_DEALLOCATE (elph_k%kptirr)
- end if
- if(allocated(elph_k%new_kptirr)) then
-   ABI_DEALLOCATE (elph_k%new_kptirr)
- end if
- if(allocated(elph_k%my_kpt)) then
-   ABI_DEALLOCATE (elph_k%my_kpt)
- end if
- if(allocated(elph_k%my_ikpt)) then
-   ABI_DEALLOCATE (elph_k%my_ikpt)
- end if
- if(allocated(elph_k%wtk)) then
-   ABI_DEALLOCATE (elph_k%wtk)
- end if
- if(allocated(elph_k%wtq)) then
-   ABI_DEALLOCATE (elph_k%wtq)
- end if
- if(allocated(elph_k%wtkirr)) then
-   ABI_DEALLOCATE (elph_k%wtkirr)
- end if
- if(allocated(elph_k%new_wtkirr)) then
-   ABI_DEALLOCATE (elph_k%new_wtkirr)
- end if
- if(allocated(elph_k%velocwtk)) then
-   ABI_DEALLOCATE (elph_k%velocwtk)
- end if
- if(allocated(elph_k%vvelocwtk)) then
-   ABI_DEALLOCATE (elph_k%vvelocwtk)
- end if
+ ABI_SFREE(elph_k%irr2full)
+ ABI_SFREE(elph_k%full2irr)
+ ABI_SFREE(elph_k%full2full)
+ ABI_SFREE(elph_k%irredtoGS)
+ ABI_SFREE(elph_k%new_irredtoGS)
+ ABI_SFREE(elph_k%kpt)
+ ABI_SFREE(elph_k%kptirr)
+ ABI_SFREE(elph_k%new_kptirr)
+ ABI_SFREE(elph_k%my_kpt)
+ ABI_SFREE(elph_k%my_ikpt)
+ ABI_SFREE(elph_k%wtk)
+ ABI_SFREE(elph_k%wtq)
+ ABI_SFREE(elph_k%wtkirr)
+ ABI_SFREE(elph_k%new_wtkirr)
+ ABI_SFREE(elph_k%velocwtk)
+ ABI_SFREE(elph_k%vvelocwtk)
 
- call destroy_kptrank (elph_k%kptrank_t)
+ call elph_k%krank%free()
 
 end subroutine elph_k_destroy
 !!***
@@ -669,18 +526,11 @@ end subroutine elph_k_destroy
 !!  nproc = number of k-parallel processors
 !!  elph_k = elphon k-points datastructure
 !!
-!! PARENTS
-!!      elphon
-!!
-!! CHILDREN
-!!
 !! NOTES
 !!
 !! SOURCE
 
 subroutine elph_k_procs(nproc, elph_k)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -691,9 +541,9 @@ subroutine elph_k_procs(nproc, elph_k)
 ! *************************************************************************
 
  if (allocated(elph_k%my_kpt)) then
-   ABI_DEALLOCATE (elph_k%my_kpt)
+   ABI_FREE (elph_k%my_kpt)
  end if
- ABI_ALLOCATE (elph_k%my_kpt, (elph_k%nkpt))
+ ABI_MALLOC (elph_k%my_kpt, (elph_k%nkpt))
 
  elph_k%my_kpt = 0
  elph_k%my_nkpt = 0
@@ -705,9 +555,9 @@ subroutine elph_k_procs(nproc, elph_k)
 
 ! create inverse mapping from ik_this_proc to ikpt
  if (allocated(elph_k%my_ikpt)) then
-   ABI_DEALLOCATE (elph_k%my_ikpt)
+   ABI_FREE (elph_k%my_ikpt)
  end if
- ABI_ALLOCATE (elph_k%my_ikpt, (elph_k%my_nkpt))
+ ABI_MALLOC (elph_k%my_ikpt, (elph_k%my_nkpt))
  elph_k%my_ikpt = 0
 
  ik_this_proc = 0
@@ -745,18 +595,9 @@ end subroutine elph_k_procs
 !! OUTPUT
 !!   gam_now = output gamma matrices multiplied by displacement matrices
 !!
-!! PARENTS
-!!      get_tau_k,m_phgamma,mka2f,mka2f_tr,mka2f_tr_lova,mkph_linwid,nmsq_gam
-!!      nmsq_gam_sumfs,nmsq_pure_gkk,nmsq_pure_gkk_sumfs,normsq_gkq
-!!
-!! CHILDREN
-!!      zgemm
-!!
 !! SOURCE
 
 subroutine gam_mult_displ(nbranch, displ_red, gam_bare, gam_now)
-
- implicit none
 
 !Arguments -------------------------------
  integer, intent(in)  :: nbranch
@@ -771,13 +612,9 @@ subroutine gam_mult_displ(nbranch, displ_red, gam_bare, gam_now)
 
  gam_now = zero
 
- call zgemm('c','n',nbranch,nbranch,nbranch,cone,&
-& displ_red,nbranch,gam_bare,&
-& nbranch,czero,zgemm_tmp_mat,nbranch)
+ call zgemm('c','n',nbranch,nbranch,nbranch,cone,displ_red,nbranch,gam_bare,nbranch,czero,zgemm_tmp_mat,nbranch)
 
- call zgemm('n','n',nbranch,nbranch,nbranch,cone,&
-& zgemm_tmp_mat,nbranch,displ_red,&
-& nbranch,czero,gam_now,nbranch)
+ call zgemm('n','n',nbranch,nbranch,nbranch,cone,zgemm_tmp_mat,nbranch,displ_red,nbranch,czero,gam_now,nbranch)
 
 end subroutine gam_mult_displ
 !!***
@@ -789,7 +626,7 @@ end subroutine gam_mult_displ
 !!
 !! FUNCTION
 !! Use the set of special q points calculated by the Monkhorst & Pack Technique.
-!! Check if all the informations for the q points are present in the input gamma matrices.
+!! Check if all the information for the q points are present in the input gamma matrices.
 !! Generate the gamma matrices (already summed over the FS) of the set of q points which
 !! samples homogeneously the entire Brillouin zone.
 !!
@@ -800,17 +637,9 @@ end subroutine gam_mult_displ
 !! gamma_qpt = in/out: set of gamma matrix elements completed and symmetrized
 !!    gamma_qpt(2,nbranch**2,nsppol,nqpt_full)
 !!
-!! PARENTS
-!!      elphon,integrate_gamma_alt,m_phgamma
-!!
-!! CHILDREN
-!!      zgemm
-!!
 !! SOURCE
 
 subroutine complete_gamma(Cryst,nbranch,nsppol,nqptirred,nqpt_full,ep_scalprod,qirredtofull,qpttoqpt,gamma_qpt)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -832,13 +661,13 @@ subroutine complete_gamma(Cryst,nbranch,nsppol,nqptirred,nqpt_full,ep_scalprod,q
  real(dp) :: tmp_mat(2,nbranch,nbranch)
  real(dp) :: tmp_mat2(2,nbranch,nbranch)
  real(dp) :: ss_allatoms(2,nbranch,nbranch)
- real(dp) :: c_one(2), c_zero(2)
+ complex(dpc) :: c_one, c_zero
  real(dp),allocatable :: gkk_qpt_new(:,:,:),gkk_qpt_tmp(:,:,:)
 
 ! *********************************************************************
 
- c_one = (/one,zero/)
- c_zero = (/zero,zero/)
+ c_one = dcmplx(one,zero)
+ c_zero = dcmplx(zero,zero)
 
  natom = Cryst%natom
  nsym  = Cryst%nsym
@@ -855,8 +684,8 @@ subroutine complete_gamma(Cryst,nbranch,nsppol,nqptirred,nqpt_full,ep_scalprod,q
 
  symmetrized_qpt(:) = -1
 
- ABI_ALLOCATE(gkk_qpt_new,(2,nbranch**2,nsppol))
- ABI_ALLOCATE(gkk_qpt_tmp,(2,nbranch**2,nsppol))
+ ABI_MALLOC(gkk_qpt_new,(2,nbranch**2,nsppol))
+ ABI_MALLOC(gkk_qpt_tmp,(2,nbranch**2,nsppol))
 
  do iqpt=1,nqpt_full
 !
@@ -1017,8 +846,8 @@ subroutine complete_gamma(Cryst,nbranch,nsppol,nqptirred,nqpt_full,ep_scalprod,q
    end do !itim
  end do !iqpt
 
- ABI_DEALLOCATE(gkk_qpt_new)
- ABI_DEALLOCATE(gkk_qpt_tmp)
+ ABI_FREE(gkk_qpt_new)
+ ABI_FREE(gkk_qpt_tmp)
 
 end subroutine complete_gamma
 !!***
@@ -1030,7 +859,7 @@ end subroutine complete_gamma
 !!
 !! FUNCTION
 !! Use the set of special q points calculated by the Monkhorst & Pack Technique.
-!! Check if all the informations for the q points are present in
+!! Check if all the information for the q points are present in
 !! the input gamma transport matrices.
 !! Generate the gamma transport matrices (already summed over the FS) of the set of q points which
 !! samples homogeneously the entire Brillouin zone.
@@ -1049,18 +878,11 @@ end subroutine complete_gamma
 !! gamma_qpt_tr = in/out: set of gamma matrix elements completed and symmetrized
 !!    gamma_qpt_tr(2,9,nbranch*nbranch,nsppol,nqpt_full)
 !!
-!! PARENTS
-!!      elphon
-!!
-!! CHILDREN
-!!      dgemm
-!!
 !! SOURCE
 
 subroutine complete_gamma_tr(crystal,ep_scalprod,nbranch,nqptirred,nqpt_full,nsppol,gamma_qpt_tr,qirredtofull,qpttoqpt)
 
  use m_linalg_interfaces
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1076,7 +898,7 @@ subroutine complete_gamma_tr(crystal,ep_scalprod,nbranch,nqptirred,nqpt_full,nsp
  integer :: ieqqpt,ii,iqpt,isppol,isym
  integer :: itim,jj,kk,ll,neqqpt
  integer :: iatom,ancestor_iatom
- integer :: iqpt_fullbz,imode, itensor
+ integer :: iqpt_fullbz,imode, itensor,reim
  real(dp),parameter :: tol=2.d-8
 !arrays
  integer :: symrel(3,3,crystal%nsym),symrec(3,3,crystal%nsym)
@@ -1084,18 +906,14 @@ subroutine complete_gamma_tr(crystal,ep_scalprod,nbranch,nqptirred,nqpt_full,nsp
  integer :: gkk_flag(nbranch,nbranch,nsppol,nqpt_full)
  real(dp) :: gprimd(3,3),rprimd(3,3)
  real(dp) :: ss(3,3), sscart(3,3)
- real(dp) :: tmp_mat(2,nbranch,nbranch)
- real(dp) :: tmp_mat2(2,nbranch,nbranch)
- real(dp) :: tmp_tensor(2,3,3)
- real(dp) :: tmp_tensor2(2,3,3)
+ real(dp) :: tmp_mat(nbranch,nbranch)
+ real(dp) :: tmp_mat2(nbranch,nbranch)
+ real(dp) :: tmp_tensor(3,3)
+ real(dp) :: tmp_tensor2(3,3)
  real(dp) :: ss_allatoms(nbranch,nbranch)
- real(dp) :: c_one(2), c_zero(2)
  real(dp),allocatable :: gkk_qpt_new(:,:,:,:),gkk_qpt_tmp(:,:,:,:)
 
 ! *********************************************************************
-
- c_one = (/one,zero/)
- c_zero = (/zero,zero/)
 
  gprimd = crystal%gprimd
  rprimd = crystal%rprimd
@@ -1116,8 +934,8 @@ subroutine complete_gamma_tr(crystal,ep_scalprod,nbranch,nqptirred,nqpt_full,nsp
  symmetrized_qpt(:) = -1
 ! isppol=1
 
- ABI_ALLOCATE(gkk_qpt_new,(2,9,nbranch*nbranch, nsppol))
- ABI_ALLOCATE(gkk_qpt_tmp,(2,9,nbranch*nbranch, nsppol))
+ ABI_MALLOC(gkk_qpt_new,(2,9,nbranch*nbranch, nsppol))
+ ABI_MALLOC(gkk_qpt_tmp,(2,9,nbranch*nbranch, nsppol))
 
  do iqpt=1,nqpt_full
 
@@ -1195,47 +1013,25 @@ subroutine complete_gamma_tr(crystal,ep_scalprod,nbranch,nqptirred,nqpt_full,nsp
 
 !        for each tensor component, rotate the cartesian directions of phonon modes
          do itensor = 1, 9
-!          multiply by the ss matrices
-           tmp_mat2(:,:,:) = zero
-           tmp_mat(:,:,:) = reshape(gkk_qpt_tmp(:,itensor,:,isppol),&
-&           (/2,nbranch,nbranch/))
-           call DGEMM ('N','N',nbranch,nbranch,nbranch,&
-&           one,ss_allatoms,nbranch,tmp_mat(1,:,:),nbranch,zero,&
-&           tmp_mat2(1,:,:),nbranch)
-           call DGEMM ('N','N',nbranch,nbranch,nbranch,&
-&           one,ss_allatoms,nbranch,tmp_mat(2,:,:),nbranch,zero,&
-&           tmp_mat2(2,:,:),nbranch)
-
-           call DGEMM ('N','T',nbranch,nbranch,nbranch,&
-&           one,tmp_mat2(1,:,:),nbranch,ss_allatoms,nbranch,zero,&
-&           tmp_mat(1,:,:),nbranch)
-           call DGEMM ('N','T',nbranch,nbranch,nbranch,&
-&           one,tmp_mat2(2,:,:),nbranch,ss_allatoms,nbranch,zero,&
-&           tmp_mat(2,:,:),nbranch)
-
-           gkk_qpt_tmp(:,itensor,:,isppol) = reshape (tmp_mat, (/2,nbranch*nbranch/))
+           do reim=1,2  ! Real/Imaginary parts 
+!            Multiply by the ss matrices
+             tmp_mat2(:,:) = zero
+             tmp_mat(:,:) = reshape(gkk_qpt_tmp(reim,itensor,:,isppol),(/nbranch,nbranch/))
+             call DGEMM ('N','N',nbranch,nbranch,nbranch,one,ss_allatoms,nbranch,tmp_mat,nbranch,zero,tmp_mat2,nbranch)
+             call DGEMM ('N','T',nbranch,nbranch,nbranch,one,tmp_mat2,nbranch,ss_allatoms,nbranch,zero,tmp_mat,nbranch)
+             gkk_qpt_tmp(reim,itensor,:,isppol) = reshape (tmp_mat, (/nbranch*nbranch/))
+           enddo
          end do ! itensor
 
 !        for each cartesian direction/phonon mode, rotate the tensor components
          do imode = 1, nbranch*nbranch
-           tmp_tensor2(:,:,:) = zero
-           tmp_tensor(:,:,:) = reshape(gkk_qpt_tmp(:,:,imode,isppol),&
-&           (/2,3,3/))
-           call DGEMM ('N','N',3,3,3,&
-&           one,sscart,3,tmp_tensor(1,:,:),3,zero,&
-&           tmp_tensor2(1,:,:),3)
-           call DGEMM ('N','T',3,3,3,&
-&           one,tmp_tensor2(1,:,:),3,sscart,3,zero,&
-&           tmp_tensor(1,:,:),3)
-
-           call DGEMM ('N','N',3,3,3,&
-&           one,sscart,3,tmp_tensor(2,:,:),3,zero,&
-&           tmp_tensor2(2,:,:),3)
-           call DGEMM ('N','T',3,3,3,&
-&           one,tmp_tensor2(2,:,:),3,sscart,3,zero,&
-&           tmp_tensor(2,:,:),3)
-
-           gkk_qpt_tmp(:,:,imode,isppol) = reshape (tmp_tensor, (/2,9/)) ! modified by BX
+           do reim=1,2  ! Real/Imaginary parts 
+             tmp_tensor2(:,:) = zero
+             tmp_tensor(:,:) = reshape(gkk_qpt_tmp(reim,:,imode,isppol),(/3,3/))
+             call DGEMM ('N','N',3,3,3,one,sscart,3,tmp_tensor,3,zero,tmp_tensor2,3)
+             call DGEMM ('N','T',3,3,3,one,tmp_tensor2,3,sscart,3,zero,tmp_tensor,3)
+             gkk_qpt_tmp(reim,:,imode,isppol) = reshape (tmp_tensor, (/9/)) ! modified by BX
+           enddo
          end do ! imode
 
 !        add to gkk_qpt_new
@@ -1306,51 +1102,26 @@ subroutine complete_gamma_tr(crystal,ep_scalprod,nbranch,nqptirred,nqpt_full,nsp
 
        do isppol=1,nsppol
          do itensor = 1, 9
-!          multiply by the ss^{-1} matrices
-           tmp_mat2(:,:,:) = zero
-           tmp_mat(:,:,:) = reshape(gkk_qpt_new(:,itensor,:,isppol),&
-&           (/2,nbranch,nbranch/))
-
-
-           call DGEMM ('N','N',nbranch,nbranch,nbranch,&
-&           one,ss_allatoms,nbranch,tmp_mat(1,:,:),nbranch,zero,&
-&           tmp_mat2(1,:,:),nbranch)
-           call DGEMM ('N','N',nbranch,nbranch,nbranch,&
-&           one,ss_allatoms,nbranch,tmp_mat(2,:,:),nbranch,zero,&
-&           tmp_mat2(2,:,:),nbranch)
-
-           call DGEMM ('N','T',nbranch,nbranch,nbranch,&
-&           one,tmp_mat2(1,:,:),nbranch,ss_allatoms,nbranch,zero,&
-&           tmp_mat(1,:,:),nbranch)
-           call DGEMM ('N','T',nbranch,nbranch,nbranch,&
-&           one,tmp_mat2(2,:,:),nbranch,ss_allatoms,nbranch,zero,&
-&           tmp_mat(2,:,:),nbranch)
-
-
-           gkk_qpt_tmp(:,itensor,:,isppol) = reshape (tmp_mat, (/2,nbranch*nbranch/))
+           do reim=1,2  ! Real/Imaginary parts
+!            Multiply by the ss^{-1} matrices
+             tmp_mat2(:,:) = zero
+             tmp_mat(:,:) = reshape(gkk_qpt_new(reim,itensor,:,isppol),(/nbranch,nbranch/))
+             call DGEMM ('N','N',nbranch,nbranch,nbranch,one,ss_allatoms,nbranch,tmp_mat,nbranch,zero,tmp_mat2,nbranch)
+             call DGEMM ('N','T',nbranch,nbranch,nbranch,one,tmp_mat2,nbranch,ss_allatoms,nbranch,zero,tmp_mat,nbranch)
+             gkk_qpt_tmp(reim,itensor,:,isppol) = reshape (tmp_mat, (/nbranch*nbranch/))
+           enddo
          end do ! itensor
 
 !        for each cartesian direction/phonon mode, rotate the tensor components
          do imode = 1, nbranch*nbranch
-           tmp_tensor2(:,:,:) = zero
-           tmp_tensor(:,:,:) = reshape(gkk_qpt_tmp(:,:,imode,isppol),&
-&           (/2,3,3/))
-           call DGEMM ('N','N',3,3,3,&
-&           one,sscart,3,tmp_tensor(1,:,:),3,zero,&
-&           tmp_tensor2(1,:,:),3)
-           call DGEMM ('N','T',3,3,3,&
-&           one,tmp_tensor2(1,:,:),3,sscart,3,zero,&
-&           tmp_tensor(1,:,:),3)
-
-           call DGEMM ('N','N',3,3,3,&
-&           one,sscart,3,tmp_tensor(2,:,:),3,zero,&
-&           tmp_tensor2(2,:,:),3)
-           call DGEMM ('N','T',3,3,3,&
-&           one,tmp_tensor2(2,:,:),3,sscart,3,zero,&
-&           tmp_tensor(2,:,:),3)
-
-!          gkk_qpt_new(:,:,imode,isppol) = reshape (tmp_tensor, (/2,9/)) ! Modified by BX
-           gkk_qpt_tmp(:,:,imode,isppol) = reshape (tmp_tensor, (/2,9/)) ! Modified by BX
+           do reim=1,2  ! Real/Imaginary parts
+             tmp_tensor2(:,:) = zero
+             tmp_tensor(:,:) = reshape(gkk_qpt_tmp(reim,:,imode,isppol),(/3,3/))
+             call DGEMM ('N','N',3,3,3,one,sscart,3,tmp_tensor,3,zero,tmp_tensor2,3)
+             call DGEMM ('N','T',3,3,3,one,tmp_tensor2,3,sscart,3,zero,tmp_tensor,3)
+!            gkk_qpt_new(:,:,imode,isppol) = reshape (tmp_tensor, (/2,9/)) ! Modified by BX
+             gkk_qpt_tmp(reim,:,imode,isppol) = reshape (tmp_tensor, (/9/)) ! Modified by BX
+           enddo
          end do ! imode
 
          if (gkk_flag (1,1,isppol,ieqqpt) == -1) then
@@ -1371,10 +1142,130 @@ subroutine complete_gamma_tr(crystal,ep_scalprod,nbranch,nqptirred,nqpt_full,nsp
  end do
 !end iqpt do
 
- ABI_DEALLOCATE(gkk_qpt_new)
- ABI_DEALLOCATE(gkk_qpt_tmp)
+ ABI_FREE(gkk_qpt_new)
+ ABI_FREE(gkk_qpt_tmp)
 
 end subroutine complete_gamma_tr
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_fstab/mkqptequiv
+!! NAME
+!! mkqptequiv
+!!
+!! FUNCTION
+!! This routine determines the equivalence between
+!!   1) qpoints and fermi surface kpoints
+!!   2) qpoints under symmetry operations
+!!
+!! INPUTS
+!!   Cryst<crystal_t>=Info on unit cell and symmetries.
+!!   kpt_phon = fermi surface kpoints
+!!   nkpt_phon = number of kpoints in the full FS set
+!!   nqpt = number of qpoints
+!!   qpt_full = qpoint coordinates
+!!
+!! OUTPUT
+!!   FSfullpqtofull = mapping of k + q onto k' for k and k' in full BZ
+!!   qpttoqpt(itim,isym,iqpt) = qpoint index which transforms to iqpt under isym and with time reversal itim.
+!!
+!! NOTES
+!!   REMOVED 3/6/2008: much too large matrix, and not used at present
+!!       FStoqpt = mapping of kpoint pairs (1 irreducible and 1 full) to qpoints
+!!
+!! SOURCE
+
+subroutine mkqptequiv(FSfullpqtofull,Cryst,kpt_phon,nkpt_phon,nqpt,qpttoqpt,qpt_full,mqtofull)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: nkpt_phon,nqpt
+ type(crystal_t),intent(in) :: Cryst
+!arrays
+ integer,intent(out) :: FSfullpqtofull(nkpt_phon,nqpt),qpttoqpt(2,Cryst%nsym,nqpt)
+ integer,intent(out),optional :: mqtofull(nqpt)
+ real(dp),intent(in) :: kpt_phon(3,nkpt_phon),qpt_full(3,nqpt)
+
+!Local variables-------------------------------
+!scalars
+ integer :: ikpt_phon,iFSqpt,iqpt,isym,symrankkpt_phon
+ !character(len=500) :: message
+ type(krank_t) :: krank
+!arrays
+ real(dp) :: tmpkpt(3),gamma_kpt(3)
+
+! *************************************************************************
+
+ call wrtout(std_out,' mkqptequiv : making rankkpt_phon and invrankkpt_phon',"COLL")
+
+ krank = krank_new(nkpt_phon, kpt_phon)
+
+ FSfullpqtofull = -999
+ gamma_kpt(:) = zero
+
+ do ikpt_phon=1,nkpt_phon
+   do iqpt=1,nqpt
+     ! tmpkpt = jkpt = ikpt + qpt
+     tmpkpt(:) = kpt_phon(:,ikpt_phon) + qpt_full(:,iqpt)
+
+     ! which kpt is it among the full FS kpts?
+     symrankkpt_phon = krank%get_rank(tmpkpt)
+
+     FSfullpqtofull(ikpt_phon,iqpt) = krank%invrank(symrankkpt_phon)
+     if (FSfullpqtofull(ikpt_phon, iqpt) == -1) then
+       ABI_ERROR("looks like no kpoint equiv to k+q !!!")
+     end if
+
+   end do
+ end do
+
+ if (present(mqtofull)) then
+   do iqpt=1,nqpt
+     tmpkpt(:) = gamma_kpt(:) - qpt_full(:,iqpt)
+
+     ! which kpt is it among the full FS kpts?
+     symrankkpt_phon = krank%get_rank(tmpkpt)
+
+     mqtofull(iqpt) = krank%invrank(symrankkpt_phon)
+     if (mqtofull(iqpt) == -1) then
+       ABI_ERROR("looks like no kpoint equiv to -q !!!")
+     end if
+   end do
+ end if
+
+ call krank%free()
+
+ ! start over with q grid
+ call wrtout(std_out,' mkqptequiv : FSfullpqtofull made. Do qpttoqpt',"COLL")
+
+ krank = krank_new(nqpt, qpt_full)
+
+ qpttoqpt(:,:,:) = -1
+ do iFSqpt=1,nqpt
+   do isym=1,Cryst%nsym
+     tmpkpt(:) =  Cryst%symrec(:,1,isym)*qpt_full(1,iFSqpt) &
+                + Cryst%symrec(:,2,isym)*qpt_full(2,iFSqpt) &
+                + Cryst%symrec(:,3,isym)*qpt_full(3,iFSqpt)
+
+     symrankkpt_phon = krank%get_rank(tmpkpt)
+     if (krank%invrank(symrankkpt_phon) == -1) then
+       ABI_ERROR("looks like no kpoint equiv to q by symmetry without time reversal!!!")
+     end if
+     qpttoqpt(1,isym,krank%invrank(symrankkpt_phon)) = iFSqpt
+
+     tmpkpt = -tmpkpt
+     symrankkpt_phon = krank%get_rank(tmpkpt)
+     if (krank%invrank(symrankkpt_phon) == -1) then
+       ABI_ERROR('looks like no kpoint equiv to q by symmetry with time reversal!!!')
+     end if
+     qpttoqpt(2,isym,krank%invrank(symrankkpt_phon)) = iFSqpt
+   end do
+ end do
+
+ call krank%free()
+
+end subroutine mkqptequiv
 !!***
 
 end module defs_elphon
