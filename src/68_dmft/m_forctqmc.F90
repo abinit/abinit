@@ -96,8 +96,7 @@ contains
 !! SOURCE
 
 
-subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang, &
-                        & pawprtvol,weiss)
+subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,weiss)
 
 !Arguments ------------------------------------
 !scalars
@@ -136,6 +135,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang, &
  type(matlu_type), allocatable :: matlu4(:),matlumag(:),matlumag_orb(:),matlumag_spin(:),matlumag_tot(:)
  type(matlu_type), allocatable :: udens_atoms(:),udens_atoms_for_s(:)
  type(vee_type), allocatable :: vee_for_s(:),vee_rotated(:)
+ character(len=13) :: tag
  character(len=500) :: message
 ! ************************************************************************
 
@@ -163,7 +163,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang, &
  !omega_current=czero
 
 ! Initialise nproc
- nproc = paw_dmft%nproc
+ nproc  = paw_dmft%nproc
  myproc = paw_dmft%myproc
 
 ! ======================================
@@ -231,7 +231,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang, &
  !end if
 
  useylm = 0
- if (nspinor == 2 .and. (.not. triqs)) useylm = 1      ! to avoid complex G(tau)
+ if (nspinor == 2 .and. (.not. triqs)) useylm = 1 ! to avoid complex G(tau)
  
  !write(6,*) "nspinor,useylm",nspinor,useylm
  if (useylm == 0) then
@@ -305,7 +305,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang, &
 
    if (useylm == 1) then
      message = "Computation of the moments is not implemented for the ylm case"
-     ABI_ERROR(message)
+     ABI_BUG(message)
    end if 
 
    call init_oper(paw_dmft,levels_slm,opt_ksloc=2)
@@ -354,7 +354,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang, &
    ! Print atomic energy levels in Ylm basis
    ! --------------------------------
    if (pawprtvol >= 3) then
-     write(message,'(a,a)') ch10, " == Print Energy levels in Ylm basis"
+     write(message,'(2a)') ch10, " == Print Energy levels in Ylm basis"
      call wrtout(std_out,message,'COLL')
      call print_matlu(energy_level%matlu(:),natom,1)
    end if ! pawprtvol>=3
@@ -384,7 +384,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang, &
      opt_real = 1
      if (triqs) opt_real = 0
      call diag_matlu(energy_level%matlu(:),level_diag%matlu(:),natom,pawprtvol,eigvectmatlu(:),&
-        & nsppol_imp=nsppol_imp,opt_real=opt_real,test=paw_dmft%dmft_solv)  ! temporary: test should be extended to all cases.
+                   & nsppol_imp=nsppol_imp,opt_real=opt_real,test=paw_dmft%dmft_solv)  ! temporary: test should be extended to all cases.
 
 !     call rotate_matlu(energy_level%matlu,eigvectmatlu,natom,3,1)
 !       write(message,'(a,2x,a,f13.5)') ch10,&
@@ -400,14 +400,15 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang, &
 
      ! Print diagonalized levels
      ! --------------------------
+     write(tag,'(f13.5)') paw_dmft%fermie
      if (pawprtvol >= 3) then
-       write(message,'(a,2x,a,f13.5)') ch10,&
-         & " == Print Diagonalized Energy levels for Fermi Level=",paw_dmft%fermie
+       write(message,'(a,2x,2a)') ch10,&
+         & " == Print Diagonalized Energy levels for Fermi Level=",adjustl(tag)
        call wrtout(std_out,message,'COLL')
        call print_matlu(energy_level%matlu(:),natom,1,compl=1,opt_exp=1)
      else
-       write(message,'(a,2x,a,f13.5)') ch10,&
-         & " == Energy levels Diagonalized for Fermi Level=",paw_dmft%fermie
+       write(message,'(a,2x,2a)') ch10,&
+         & " == Energy levels Diagonalized for Fermi Level=",adjustl(tag)
        call wrtout(std_out,message,'COLL')
      end if ! pawprtvol>=3
 
@@ -480,14 +481,14 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang, &
      ndim = 2*hu(itypat)%lpawu + 1
      ABI_MALLOC(vee,(ndim,ndim,ndim,ndim))
      call calc_vee(f4of2_sla,f6of2_sla,paw_dmft%j_for_s/paw_dmft%u_for_s, &
-        & hu_for_s(itypat)%lpawu,pawang,one,vee(:,:,:,:))
+                 & hu_for_s(itypat)%lpawu,pawang,one,vee(:,:,:,:))
      hu_for_s(itypat)%vee(:,:,:,:) = cmplx(vee(:,:,:,:),zero,kind=dp)
      ABI_FREE(vee)
    end do
    ABI_MALLOC(vee_for_s,(natom))
    call init_vee(paw_dmft,vee_for_s(:))
-   call rotatevee_hu(hu_for_s(:),paw_dmft,pawprtvol,eigvectmatlu(:),rot_type_vee, &
-                   & udens_atoms_for_s(:),vee_for_s(:))
+   call rotatevee_hu(hu_for_s(:),paw_dmft,pawprtvol,eigvectmatlu(:), &
+                   & rot_type_vee,udens_atoms_for_s(:),vee_for_s(:))
    call destroy_hu(hu_for_s(:),ntypat)
 !      udens_atoms_for_s will be used later.
    ABI_FREE(hu_for_s)
@@ -535,12 +536,12 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang, &
 
  ! Print atomic levels
  ! -------------------
- if (pawprtvol >= 3) then
-   write(message,'(a,2x,a,f13.5)') ch10," == Print Energy levels after rotation"
+ if (pawprtvol >= 3 .and. opt_diag == 2 .and. opt_rot == 1) then
+   write(message,'(a,2x,a)') ch10," == Print Energy levels after rotation"
    call wrtout(std_out,message,'COLL')
    call print_matlu(energy_level%matlu(:),natom,1)
  else
-   write(message,'(a,2x,a,f13.5)') ch10," == CT-QMC Energy levels rotated"
+   write(message,'(a,2x,a)') ch10," == CT-QMC Energy levels rotated"
    call wrtout(std_out,message,'COLL')
  end if ! pawprtvol>=3
  
@@ -564,7 +565,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang, &
    if (useylm == 1) then
      call slm2ylm_matlu(matlu1(:),natom,1,pawprtvol)
      if (pawprtvol >= 3) then
-       write(message,'(2a)') ch10, " == Print occupations in Ylm basis"
+       write(message,'(2a)') ch10," == Print occupations in Ylm basis"
        call wrtout(std_out,message,'COLL')
        call print_matlu(matlu1(:),natom,1)
      end if
@@ -575,7 +576,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang, &
    if (opt_rot == 1 .or. opt_rot == 2) then
      call rotate_matlu(matlu1(:),eigvectmatlu(:),natom,1)
    end if 
-   write(message,'(a,2x,a,f13.5)') ch10," == Rotated occupations (for information)"
+   write(message,'(a,2x,a)') ch10," == Rotated occupations (for information)"
    call wrtout(std_out,message,'COLL')
    call print_matlu(matlu1(:),natom,1,compl=1)
    call checkreal_matlu(matlu1(:),natom,tol10)
@@ -610,10 +611,10 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang, &
 
     ! Print Weiss function
     ! --------------------
-   write(message,'(a,2x,a,f13.5)') ch10," == Print weiss for 1st freq before rot" ! debug
+   write(message,'(a,2x,a)') ch10," == Print weiss for 1st freq before rot" ! debug
    call wrtout(std_out,message,'COLL') ! debug
    call print_matlu(weiss_for_rot%oper(1)%matlu(:),natom,1,compl=1) !  debug
-   write(message,'(a,2x,a,f13.5)') ch10," == Print weiss for last freq before rot" ! debug
+   write(message,'(a,2x,a)') ch10," == Print weiss for last freq before rot" ! debug
    call wrtout(std_out,message,'COLL') ! debug
    call print_matlu(weiss_for_rot%oper(nwlo)%matlu(:),natom,1,compl=1) !  debug
 !    write(message,'(a,2x,a,f13.5)') ch10,& ! debug
@@ -663,10 +664,10 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang, &
 
    call flush_unit(std_out)
    if (pawprtvol >= 3) then
-     write(message,'(a,2x,a,f13.5)') ch10," == Print weiss for small freq 1 after rot" ! debug
+     write(message,'(a,2x,a)') ch10," == Print weiss for small freq 1 after rot" ! debug
      call wrtout(std_out,message,'COLL') ! debug
      call print_matlu(weiss_for_rot%oper(1)%matlu(:),natom,1,compl=1) !  debug
-     write(message,'(a,2x,a,f13.5)') ch10," == Print weiss for last freq after rot"   ! debug
+     write(message,'(a,2x,a)') ch10," == Print weiss for last freq after rot"   ! debug
      call wrtout(std_out,message,'COLL')   ! debug
      call print_matlu(weiss_for_rot%oper(nwlo)%matlu(:),natom,1,compl=1) ! debug
    end if ! pawprtvol>=3
@@ -788,16 +789,16 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang, &
    call print_green('Weiss_diag',weiss_for_rot,1,paw_dmft,opt_wt=1,opt_decim=1)
  end if 
 
- write(message,'(a,2x,a,f13.5)') ch10," == Preparing data for CTQMC"
+ write(message,'(a,2x,a)') ch10," == Preparing data for CTQMC"
  call wrtout(std_out,message,'COLL')
 
 ! Print Rotate Weiss for 1st and last frequencies
 ! ------------------------------------------------
  if (pawprtvol >= 3) then
-   write(message,'(a,2x,a,f13.5)') ch10," == Print rotated weiss function for small freq in the rotated basis"  ! debug
+   write(message,'(a,2x,a)') ch10," == Print rotated weiss function for small freq in the rotated basis"  ! debug
    call wrtout(std_out,message,'COLL')  ! debug
    call print_matlu(weiss_for_rot%oper(1)%matlu(:),natom,1,compl=1)  ! debug
-   write(message,'(a,2x,a,f13.5)') ch10," == Print rotated weiss function for largest freq in the rotated basis"  ! debug
+   write(message,'(a,2x,a)') ch10," == Print rotated weiss function for largest freq in the rotated basis"  ! debug
    call wrtout(std_out,message,'COLL')  ! debug
    call print_matlu(weiss_for_rot%oper(nwlo)%matlu(:),natom,1,compl=1)  ! debug
  end if ! pawprtvol>=3
@@ -886,7 +887,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang, &
  ! Print G_0^-1 for 1st and last frequencies.
  ! -----------------------------------------
  if (pawprtvol >= 3) then
-   write(message,'(a,2x,a,f13.5)') ch10," == Print G_0^-1 for small freq in the rotated basis"  ! debug
+   write(message,'(a,2x,a)') ch10," == Print G_0^-1 for small freq in the rotated basis"  ! debug
    call wrtout(std_out,message,'COLL')  ! debug
    call print_matlu(weiss_for_rot%oper(1)%matlu(:),natom,1)  ! debug
    write(message,'(a,2x,a,e18.10,a)') ch10,&   ! debug
@@ -922,8 +923,8 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang, &
    ! Print -G_0^-1+iw_n
    ! --------------------
    if (optdb == 1) then
-     call printplot_matlu(weiss_for_rot%oper(ifreq)%matlu(:),natom,& 
-      & paw_dmft%omega_lo(ifreq),"G0inv_minus_omega",20000,imre=1)
+     call printplot_matlu(weiss_for_rot%oper(ifreq)%matlu(:),natom,paw_dmft%omega_lo(ifreq), &
+                        & "G0inv_minus_omega",20000,imre=1)
    end if 
  end do ! ifreq
  
@@ -931,7 +932,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang, &
  ! ------------------------------------------------------------------
  ABI_FREE(shift)
  if (pawprtvol >= 3) then
-   write(message,'(a,2x,a,f13.5)') ch10,&  ! debug
+   write(message,'(a,2x,a)') ch10,&  ! debug
      & " == Print G_0^-1-iw_n=-(F-levels) for last freq in the rotated basis"  ! debug
    call wrtout(std_out,message,'COLL')   ! debug
    call print_matlu(weiss_for_rot%oper(nwlo)%matlu(:),natom,1,compl=1) ! debug
@@ -951,7 +952,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang, &
    call init_matlu(natom,nspinor,nsppol,paw_dmft%lpawu(:),matlu3(:))
    call init_matlu(natom,nspinor,nsppol,paw_dmft%lpawu(:),matlu4(:))
 
-   write(message,'(a,2x,a,f13.5)') ch10,  " == energy_levels"
+   write(message,'(a,2x,a)') ch10," == energy_levels"
    call wrtout(std_out,message,'COLL')
    call print_matlu(energy_level%matlu(:),natom,1,opt_exp=2,compl=1)
 
@@ -1676,11 +1677,11 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang, &
 !     transformation is done).
 ! =================================================================
  if (pawprtvol >= 3) then
-   write(message,'(a,2x,a,f13.5)') ch10, &  ! debug
+   write(message,'(a,2x,a)') ch10, &  ! debug
       & " == Print green function for small tau after CTQMC"  ! debug
    call wrtout(std_out,message,'COLL')  ! debug
    call print_matlu(green%oper_tau(1)%matlu(:),natom,1)  ! debug
-   write(message,'(a,2x,a,f13.5)') ch10,&  ! debug
+   write(message,'(a,2x,a)') ch10,&  ! debug
       & " == Print green function for small freq after CTQMC"  ! debug
    call wrtout(std_out,message,'COLL')  ! debug
    call print_matlu(green%oper(1)%matlu(:),natom,1)  ! debug
@@ -1692,7 +1693,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang, &
 
  if (pawprtvol >= 3) then
 !  === Compute non rotated Occupations in green%occup_tau
-   write(message,'(a,2x,a,f13.5)') ch10," == Occupation from G(tau) in the ctqmc basis"
+   write(message,'(a,2x,a)') ch10," == Occupation from G(tau) in the ctqmc basis"
    call wrtout(std_out,message,'COLL')
    call print_matlu(green%occup_tau%matlu(:),natom,1)
  end if ! pawprtvol>=3
@@ -1783,7 +1784,7 @@ end if !nspinor
    call rotate_matlu(green%occup_tau%matlu(:),eigvectmatlu(:),natom,0)
  end if 
  if (useylm == 1) then
-   write(message,'(a,2x,a,f13.5)') ch10," == Occupation from G(tau) in the Ylm basis"
+   write(message,'(a,2x,a)') ch10," == Occupation from G(tau) in the Ylm basis"
    call wrtout(std_out,message,'COLL')
    call print_matlu(green%occup_tau%matlu(:),natom,1)
  end if ! useylm=1
@@ -1791,7 +1792,7 @@ end if !nspinor
  if (useylm == 1) then
    call slm2ylm_matlu(green%occup_tau%matlu(:),natom,2,0)
  end if
- write(message,'(a,2x,a,f13.5)') ch10," == Occupation from G(tau) in the Slm basis"
+ write(message,'(a,2x,a)') ch10," == Occupation from G(tau) in the Slm basis"
  call wrtout(std_out,message,'COLL')
  call print_matlu(green%occup_tau%matlu(:),natom,1)
 
@@ -1840,21 +1841,21 @@ end if !nspinor
  !call wrtout(std_out,message,'COLL')  ! debug
 
  if (pawprtvol >= 3) then
-   write(message,'(a,2x,a,f13.5)') ch10, &                  ! debug
+   write(message,'(a,2x,a)') ch10, &                  ! debug
      & " == Print green function for small time after rotation (in the original basis)" ! debug
    call wrtout(std_out,message,'COLL')                  ! debug
    call print_matlu(green%oper_tau(1)%matlu(:),natom,1)  ! debug
-   write(message,'(a,2x,a,f13.5)') ch10,&                  ! debug
+   write(message,'(a,2x,a)') ch10,&                  ! debug
      & " == Print green function for small freq after rotation (in the original basis)" ! debug
    call wrtout(std_out,message,'COLL')                  ! debug
    call print_matlu(green%oper(1)%matlu(:),natom,1)  ! debug
    !< HACK >
-   write(message,'(a,2x,a,f13.5)') ch10,&  ! debug
+   write(message,'(a,2x,a)') ch10,&  ! debug
      & " == Print diagonalized weiss_for_rot function after rotation for small freq in the ctqmc basis"  ! debug
    call wrtout(std_out,message,'COLL')  ! debug
    call print_matlu(weiss_for_rot%oper(1)%matlu(:),natom,1)  ! debug
    !</ HACK >
-   write(message,'(a,2x,a,f13.5)') ch10,&  ! debug
+   write(message,'(a,2x,a)') ch10,&  ! debug
      & " == Print weiss function for small freq in the original basis"  ! debug
    call wrtout(std_out,message,'COLL')  ! debug
    call print_matlu(weiss%oper(1)%matlu(:),natom,1)  ! debug
@@ -1864,7 +1865,7 @@ end if !nspinor
      call sym_matlu(weiss%oper(ifreq)%matlu(:),paw_dmft)
    end do
    call gather_oper(weiss%oper(:),weiss%distrib,paw_dmft,opt_ksloc=2)
-   write(message,'(a,2x,a,f13.5)') ch10,&  ! debug
+   write(message,'(a,2x,a)') ch10,&  ! debug
      & " == Print symmetrized weiss function for small freq in the original basis"  ! debug
    call wrtout(std_out,message,'COLL')  ! debug
    call print_matlu(weiss%oper(1)%matlu(:),natom,1)  ! debug
@@ -1875,11 +1876,11 @@ end if !nspinor
  call copy_matlu(green%occup_tau%matlu(:),matlu1(:),natom)
  call sym_matlu(matlu1(:),paw_dmft)
 
- write(message,'(a,2x,a,f13.5)') ch10," == Occupation from G(tau) in the original basis"
+ write(message,'(a,2x,a)') ch10," == Occupation from G(tau) in the original basis"
  call wrtout(std_out,message,'COLL')
  call print_matlu(green%occup_tau%matlu(:),natom,1)
 
- write(message,'(a,2x,a,f13.5)') ch10," == Symmetrized occupations"
+ write(message,'(a,2x,a)') ch10," == Symmetrized occupations"
  call wrtout(std_out,message,'COLL')
  call print_matlu(matlu1(:),natom,1)
 
@@ -1891,7 +1892,7 @@ end if !nspinor
 ! Symmetrize green function G(tau) and G(ifreq) to recover symmetry
 ! artificially broken by QMC
 ! =================================================================
- write(message,'(a,2x,a,f13.5)') ch10," == Symmetrize green function after QMC "
+ write(message,'(a,2x,a)') ch10," == Symmetrize green function after QMC "
  call wrtout(std_out,message,'COLL')
  do itau=1,1 !paw_dmft%dmftqmc_l
    call sym_matlu(green%oper_tau(itau)%matlu(:),paw_dmft)
@@ -1902,11 +1903,11 @@ end if !nspinor
  end do ! ifreq
  call gather_oper(green%oper(:),green%distrib,paw_dmft,opt_ksloc=2)
  if (pawprtvol >= 3) then
-   write(message,'(a,2x,a,f13.5)') ch10, &  ! debug
+   write(message,'(a,2x,a)') ch10, &  ! debug
       & " == Print green function for small time after symmetrization"  !  debug
    call wrtout(std_out,message,'COLL')  ! debug
    call print_matlu(green%oper_tau(1)%matlu(:),natom,1)  ! debug
-   write(message,'(a,2x,a,f13.5)') ch10, &  ! debug
+   write(message,'(a,2x,a)') ch10, &  ! debug
       & " == Print green function for small freq after symmetrization"  !  debug
    call wrtout(std_out,message,'COLL')  ! debug
    call print_matlu(green%oper(1)%matlu(:),natom,1)  ! debug
