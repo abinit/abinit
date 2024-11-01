@@ -1397,6 +1397,9 @@ class BaseTest(object):
     # Possible status of the test.
     _possible_status = ["failed", "passed", "succeeded", "skipped", "disabled"]
 
+    def is_chain(self):
+        return False
+
     def __init__(self, test_info, abenv):
         logger.info("Initializing BaseTest from inp_fname: ",
                     test_info.inp_fname)
@@ -3208,6 +3211,9 @@ class ChainOfTests(object):
     It provides the same interface as the one given by BaseTest
     """
     Error = BaseTestError
+
+    def is_chain(self):
+        return True
 
     def __init__(self, tests):
         self.tests = tuple(t for t in tests)
