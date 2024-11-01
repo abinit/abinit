@@ -3218,7 +3218,7 @@ contains
     type(xgBlock_t), intent(in   ) :: da
     integer, intent(in) :: shift,nblocks,nspinor
 
-    integer :: iblock,ispinor,ncols_nospin
+    integer :: iblock,ispinor,ncols_nospin,irow,nrows
     double precision :: tsec(2)
 
     call timab(tim_ymax,1,tsec)
@@ -3228,6 +3228,7 @@ contains
     end if
     call xgBlock_check_gpu_option(xgBlockA,da)
 
+    nrows = xgBlockA%rows
     ncols_nospin = xgBlockA%cols / nspinor
     if ( da%rows /= nblocks*ncols_nospin ) then
       ABI_ERROR("rows(da)/=nblocks*ncols_nospin")
@@ -3241,22 +3242,26 @@ contains
 
     select case(xgBlockA%space)
     case (SPACE_R)
-      !$omp parallel do shared(da,xgBlockA), &
-      !$omp& schedule(static)
+      !$omp parallel do collapse(3) shared(da,xgBlockA) private(irow,iblock,ispinor)
       do iblock = 1, ncols_nospin
         do ispinor = 1, nspinor
-          xgBlockA%vecR(:,nspinor*(iblock-1)+ispinor) = - da%vecR(iblock+shift,1) * xgBlockA%vecR(:,nspinor*(iblock-1)+ispinor)
+          do irow = 1, nrows
+            xgBlockA%vecR(irow,nspinor*(iblock-1)+ispinor) = - da%vecR(iblock+shift,1) &
+             & * xgBlockA%vecR(irow,nspinor*(iblock-1)+ispinor)
+          end do
         end do
       end do
       !$omp end parallel do
     case (SPACE_CR)
       ABI_ERROR("Not implemented")
     case (SPACE_C)
-      !$omp parallel do shared(da,xgBlockA), &
-      !$omp& schedule(static)
+      !$omp parallel do collapse(3) shared(da,xgBlockA) private(irow,iblock,ispinor)
       do iblock = 1, ncols_nospin
         do ispinor = 1, nspinor
-          xgBlockA%vecC(:,nspinor*(iblock-1)+ispinor) = - da%vecR(iblock+shift,1) * xgBlockA%vecC(:,nspinor*(iblock-1)+ispinor)
+          do irow = 1, nrows
+            xgBlockA%vecC(irow,nspinor*(iblock-1)+ispinor) = - da%vecR(iblock+shift,1) &
+             & * xgBlockA%vecC(irow,nspinor*(iblock-1)+ispinor)
+          end do
         end do
       end do
       !$omp end parallel do
@@ -3279,10 +3284,8 @@ contains
     type(xgBlock_t), intent(in   ) :: xgBlockB
     type(xgBlock_t), intent(in   ) :: xgBlockW
 
-    integer :: iblock,fact
-
+    integer :: iblock,fact,rows,cols,jblock
 #if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
-    integer :: rows,cols,jblock
     complex(dpc), ABI_CONTIGUOUS pointer :: xgBlockA__vecC(:,:),xgBlockB__vecC(:,:),xgBlockW__vecC(:,:)
     real(dp), ABI_CONTIGUOUS pointer :: xgBlockA__vecR(:,:),xgBlockB__vecR(:,:),xgBlockW__vecR(:,:),da__vecR(:,:)
 #endif
@@ -3309,6 +3312,8 @@ contains
 
     fact = 1 ; if (xgBlockA%space==SPACE_CR) fact = 2
 
+    rows = fact*xgBlockA%rows; cols = xgBlockA%cols
+
     if (xgBlockA%gpu_option==ABI_GPU_KOKKOS) then
 
 #if defined HAVE_GPU && defined HAVE_KOKKOS
@@ -3328,7 +3333,6 @@ contains
 
 #if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
 
-      rows = fact*xgBlockA%rows; cols = xgBlockA%cols
       select case(xgBlockA%space)
       case (SPACE_R,SPACE_CR)
         xgBlockA__vecR => xgBlockA%vecR
@@ -3364,17 +3368,19 @@ contains
 
       select case(xgBlockA%space)
       case (SPACE_R,SPACE_CR)
-        !$omp parallel do shared(da,xgBlockB,xgBlockW,xgBlockA), &
-        !$omp& schedule(static)
-        do iblock = 1, xgBlockA%cols
-          xgBlockA%vecR(:,iblock) = - da%vecR(iblock,1) * xgBlockB%vecR(:,iblock) + xgBlockW%vecR(:,iblock)
+        !$omp parallel do collapse(2) shared(da,xgBlockB,xgBlockW,xgBlockA) private(iblock,jblock)
+        do iblock = 1, cols
+          do jblock = 1, rows
+            xgBlockA%vecR(jblock,iblock) = - da%vecR(iblock,1) * xgBlockB%vecR(jblock,iblock) + xgBlockW%vecR(jblock,iblock)
+          end do
         end do
         !$omp end parallel do
       case (SPACE_C)
-        !$omp parallel do shared(da,xgBlockB,xgBlockW,xgBlockA), &
-        !$omp& schedule(static)
-        do iblock = 1, xgBlockA%cols
-          xgBlockA%vecC(:,iblock) = - da%vecR(iblock,1) * xgBlockB%vecC(:,iblock) + xgBlockW%vecC(:,iblock)
+        !$omp parallel do collapse(2) shared(da,xgBlockB,xgBlockW,xgBlockA) private(iblock,jblock)
+        do iblock = 1, cols
+          do jblock = 1, rows
+            xgBlockA%vecC(jblock,iblock) = - da%vecR(iblock,1) * xgBlockB%vecC(jblock,iblock) + xgBlockW%vecC(jblock,iblock)
+          end do
         end do
         !$omp end parallel do
       end select
@@ -3397,7 +3403,7 @@ contains
     type(xgBlock_t), intent(in   ) :: da
     type(xgBlock_t), intent(in   ) :: xgBlockB
 
-    integer :: iblock
+    integer :: iblock,irow,cols,rows,fact
     double precision :: tsec(2)
 
     call timab(tim_yxmax,1,tsec)
@@ -3411,8 +3417,8 @@ contains
     if ( xgBlockA%space /= xgBlockB%space ) then
       ABI_ERROR("Must be same space for ymax")
     end if
-    if ( xgBlockA%LDim /= xgBlockB%LDim ) then
-      ABI_ERROR("Must have same LDim for ymax")
+    if ( xgBlockA%rows /= xgBlockB%rows ) then
+      ABI_ERROR("Must have same rows for ymax")
     end if
     if ( xgBlockA%cols /= xgBlockB%cols ) then
       ABI_ERROR("Must have same cols for ymax")
@@ -3421,19 +3427,25 @@ contains
       ABI_ERROR("Must have same cols for ymax")
     end if
 
+    cols = xgBlockA%cols
+    rows = xgBlockA%rows
+    fact = 1 ; if (xgBlockA%space==SPACE_CR) fact = 2
+
     select case(xgBlockA%space)
     case (SPACE_R,SPACE_CR)
-      !$omp parallel do shared(da,xgBlockB,xgBlockA), &
-      !$omp& schedule(static)
-      do iblock = 1, xgBlockA%cols
-        xgBlockA%vecR(:,iblock) = xgBlockA%vecR(:,iblock) - da%vecR(iblock,1) * xgBlockB%vecR(:,iblock)
+      !$omp parallel do collapse(2) shared(da,xgBlockB,xgBlockA) private(iblock,irow)
+      do iblock = 1, cols
+        do irow = 1, fact*rows
+          xgBlockA%vecR(irow,iblock) = xgBlockA%vecR(irow,iblock) - da%vecR(iblock,1) * xgBlockB%vecR(irow,iblock)
+        end do
       end do
       !$omp end parallel do
     case (SPACE_C)
-      !$omp parallel do shared(da,xgBlockB,xgBlockA), &
-      !$omp& schedule(static)
-      do iblock = 1, xgBlockA%cols
-        xgBlockA%vecC(:,iblock) = xgBlockA%vecC(:,iblock) - da%vecR(iblock,1) * xgBlockB%vecC(:,iblock)
+      !$omp parallel do collapse(2) shared(da,xgBlockB,xgBlockA) private(iblock,irow)
+      do iblock = 1, cols
+        do irow = 1, rows
+          xgBlockA%vecC(irow,iblock) = xgBlockA%vecC(irow,iblock) - da%vecR(iblock,1) * xgBlockB%vecC(irow,iblock)
+        end do
       end do
       !$omp end parallel do
     end select
@@ -3511,7 +3523,7 @@ contains
     integer,          intent(in)    :: nspinor
     type(xgBlock_t) , intent(inout) :: Y
 
-    integer :: iblock,rows,cols
+    integer :: iblock,irow,rows,cols
     type(xgBlock_t) :: X_spinor, Y_spinor
     double precision :: tsec(2)
 
@@ -3548,39 +3560,43 @@ contains
 
     select case(X%space)
     case (SPACE_R)
-      !$omp parallel do shared(X_spinor,Y_spinor,diag), &
-      !$omp& schedule(static)
+      !$omp parallel do collapse(2) shared(X_spinor,Y_spinor,diag) private(iblock,irow)
       do iblock = 1, cols
-        Y_spinor%vecR(1:rows,iblock) = Y_spinor%vecR(1:rows,iblock) &
-          & + X_spinor%vecR(1:rows,iblock) * diag%vecR(1:rows,1)
+        do irow=1,rows
+          Y_spinor%vecR(irow,iblock) = Y_spinor%vecR(irow,iblock) &
+            & + X_spinor%vecR(irow,iblock) * diag%vecR(irow,1)
+        end do
       end do
     case (SPACE_CR)
       if (diag%space==SPACE_R) then
-        !$omp parallel do shared(X_spinor,Y_spinor,diag), &
-        !$omp& schedule(static)
+        !$omp parallel do collapse(2) shared(X_spinor,Y_spinor,diag) private(iblock,irow)
         do iblock = 1, cols
-          Y_spinor%vecR(1:2*rows:2,iblock) = Y_spinor%vecR(1:2*rows:2,iblock) &
-            & + X_spinor%vecR(1:2*rows:2,iblock) * diag%vecR(1:rows,1)
-          Y_spinor%vecR(2:2*rows:2,iblock) = Y_spinor%vecR(2:2*rows:2,iblock) &
-            & + X_spinor%vecR(2:2*rows:2,iblock) * diag%vecR(1:rows,1)
+          do irow=1,rows
+            Y_spinor%vecR(2*irow-1,iblock) = Y_spinor%vecR(2*irow-1,iblock) &
+              & + X_spinor%vecR(2*irow-1,iblock) * diag%vecR(irow,1)
+            Y_spinor%vecR(2*irow  ,iblock) = Y_spinor%vecR(2*irow  ,iblock) &
+              & + X_spinor%vecR(2*irow  ,iblock) * diag%vecR(irow,1)
+          end do
         end do
       else
         ABI_ERROR('Not implemented')
       end if
     case (SPACE_C)
       if (diag%space==SPACE_C) then
-        !$omp parallel do shared(X_spinor,Y_spinor,diag), &
-        !$omp& schedule(static)
+        !$omp parallel do collapse(2) shared(X_spinor,Y_spinor,diag) private(iblock,irow)
         do iblock = 1, cols
-          Y_spinor%vecC(1:rows,iblock) = Y_spinor%vecC(1:rows,iblock) &
-            & + X_spinor%vecC(1:rows,iblock) * diag%vecC(1:rows,1)
+          do irow=1,rows
+            Y_spinor%vecC(irow,iblock) = Y_spinor%vecC(irow,iblock) &
+              & + X_spinor%vecC(irow,iblock) * diag%vecC(irow,1)
+          end do
         end do
       else if (diag%space==SPACE_R) then
-        !$omp parallel do shared(X_spinor,Y_spinor,diag), &
-        !$omp& schedule(static)
+        !$omp parallel do collapse(2) shared(X_spinor,Y_spinor,diag) private(iblock,irow)
         do iblock = 1, cols
-          Y_spinor%vecC(1:rows,iblock) = Y_spinor%vecC(1:rows,iblock) &
-            & + X_spinor%vecC(1:rows,iblock) * diag%vecR(1:rows,1)
+          do irow=1,rows
+            Y_spinor%vecC(irow,iblock) = Y_spinor%vecC(irow,iblock) &
+              & + X_spinor%vecC(irow,iblock) * diag%vecR(irow,1)
+          end do
         end do
       else
         ABI_ERROR('Not implemented')
@@ -3979,7 +3995,6 @@ contains
 
     call timab(tim_colw_mul,1,tsec)
 
-    ABI_UNUSED((/irow/)) ! Use in OpenMP GPU
     rows = size(vec,dim=1)
 
     if (xgBlock%rows/=rows) then
@@ -4045,23 +4060,26 @@ contains
 
       select case(xgBlock%space)
       case (SPACE_R)
-        !$omp parallel do shared(xgBlock,vec), &
-        !$omp& schedule(static)
+        !$omp parallel do collapse(2) shared(xgBlock,vec) private(iblock,irow)
         do iblock = 1, xgBlock%cols
-          xgBlock%vecR(1:rows,iblock) = xgBlock%vecR(1:rows,iblock) * vec(1:rows)
+          do irow = 1, rows
+            xgBlock%vecR(irow,iblock) = xgBlock%vecR(irow,iblock) * vec(irow)
+          end do
         end do
       case (SPACE_CR)
-        !$omp parallel do shared(xgBlock,vec), &
-        !$omp& schedule(static)
+        !$omp parallel do collapse(2) shared(xgBlock,vec) private(iblock,irow)
         do iblock = 1, xgBlock%cols
-          xgBlock%vecR(1:2*rows:2,iblock) = xgBlock%vecR(1:2*rows:2,iblock) * vec(1:rows)
-          xgBlock%vecR(2:2*rows:2,iblock) = xgBlock%vecR(2:2*rows:2,iblock) * vec(1:rows)
+          do irow = 1, rows
+            xgBlock%vecR(2*irow-1,iblock) = xgBlock%vecR(2*irow-1,iblock) * vec(irow)
+            xgBlock%vecR(2*irow  ,iblock) = xgBlock%vecR(2*irow  ,iblock) * vec(irow)
+          end do
         end do
       case (SPACE_C)
-        !$omp parallel do shared(xgBlock,vec), &
-        !$omp& schedule(static)
+        !$omp parallel do collapse(2) shared(xgBlock,vec) private(iblock,irow)
         do iblock = 1, xgBlock%cols
-          xgBlock%vecC(1:rows,iblock) = xgBlock%vecC(1:rows,iblock) * vec(1:rows)
+          do irow = 1, rows
+            xgBlock%vecC(irow,iblock) = xgBlock%vecC(irow,iblock) * vec(irow)
+          end do
         end do
       end select
 
@@ -4143,11 +4161,11 @@ contains
       case (SPACE_R,SPACE_CR)
         ABI_ERROR("Error colwiseMulC")
       case (SPACE_C)
-        !$omp parallel do shared(xgBlock,vec), &
-        !$omp& schedule(static)
+        !$omp parallel do collapse(2) shared(xgBlock,vec) private(iblock,irow)
         do iblock = 1, xgBlock%cols
-          xgBlock%vecC(1:min(xgBlock%rows,rows),iblock) = &
-            xgBlock%vecC(1:min(xgBlock%rows,rows),iblock) * vec(1:min(xgBlock%rows,rows))
+          do irow=1, rows
+            xgBlock%vecC(irow,iblock) = xgBlock%vecC(irow,iblock) * vec(irow)
+          end do
         end do
       end select
 
@@ -4302,9 +4320,9 @@ contains
     integer :: col
     integer :: row
     integer :: fact
+    integer :: rows,cols
 
 #if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
-    integer :: rows,cols
     real(dp), ABI_CONTIGUOUS pointer :: xgBlockA__vecR(:,:), xgBlockB__vecR(:,:)
     complex(dpc), ABI_CONTIGUOUS pointer :: xgBlockA__vecC(:,:), xgBlockB__vecC(:,:)
 #endif
@@ -4325,11 +4343,11 @@ contains
     call xgBlock_check_gpu_option(xgBlockA,xgBlockB)
 
     fact = 1 ; if (xgBlockA%space==SPACE_CR) fact = 2
+    rows=fact*xgBlockB%rows
+    cols=xgBlockB%cols
 
     if (xgBlockA%gpu_option==ABI_GPU_OPENMP) then
 #if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
-      cols=xgBlockB%cols
-      rows=fact*xgBlockB%rows
       select case(xgBlockA%space)
       case (SPACE_R,SPACE_CR)
         xgBlockA__vecR => xgBlockA%vecR
@@ -4356,17 +4374,17 @@ contains
     else
       select case(xgBlockA%space)
       case (SPACE_R,SPACE_CR)
-        !$omp parallel do schedule(static)
-        do col = 1, xgBlockB%cols
-          do row = 1, fact*xgBlockB%rows
+        !$omp parallel do collapse(2) shared(xgBlockA,xgBlockB) private(col,row)
+        do col = 1, cols
+          do row = 1, rows
             xgBlockA%vecR(row,col) = xgBlockA%vecR(row,col) + xgBlockB%vecR(row,col)
           end do
         end do
         !call daxpy(xgBlockA%cols*xgBlockA%LDim,1.d0,xgBlockB%vecR,1,xgBlockA%vecR1)
       case (SPACE_C)
-        !$omp parallel do schedule(static)
-        do col = 1, xgBlockB%cols
-          do row = 1, fact*xgBlockB%rows
+        !$omp parallel do collapse(2) shared(xgBlockA,xgBlockB) private(col,row)
+        do col = 1, cols
+          do row = 1, rows
             xgBlockA%vecC(row,col) = xgBlockA%vecC(row,col) + xgBlockB%vecC(row,col)
           end do
         end do
@@ -4545,15 +4563,13 @@ contains
 
       select case(xgBlock%space)
       case(SPACE_R,SPACE_CR)
-        !$omp parallel do shared(dot,xgBlock), &
-        !$omp& schedule(static)
+        !$omp parallel do shared(dot,xgBlock)
         do icol = 1, xgBlock%cols
           dot%vecR(icol,1) = fact*ddot(fact*xgBlock%rows,xgBlock%vecR(:,icol),1,xgBlock%vecR(:,icol),1)
         end do
         !$omp end parallel do
         if (xgBlock%me_g0==1) then
-          !$omp parallel do shared(dot,xgBlock) &
-          !$omp& schedule(static)
+          !$omp parallel do shared(dot,xgBlock)
           do icol = 1, xgBlock%cols
             dot%vecR(icol,1) = dot%vecR(icol,1) - ddot(2,xgBlock%vecR(:,icol),1,xgBlock%vecR(:,icol),1)
           end do
@@ -4562,8 +4578,7 @@ contains
       case(SPACE_C)
 #if defined(FC_CRAY)
 !FIXME zdotc call goes wrong with NVHPC (NVHPC 22.11, MKL 22.3) or CRAY
-        !$omp parallel do private(ii,tmp), &
-        !$omp& schedule(static)
+        !$omp parallel do private(ii,tmp)
         do icol = 1, xgBlock%cols
           tmp=0
           do ii = 1, xgBlock%rows
@@ -4573,8 +4588,7 @@ contains
         end do
         !$omp end parallel do
 #else
-        !$omp parallel do shared(dot,xgBlock), &
-        !$omp& schedule(static)
+        !$omp parallel do shared(dot,xgBlock)
         do icol = 1, xgBlock%cols
           ! Instead of calling a complex function to get only the real part of the
           ! result
@@ -4834,8 +4848,7 @@ contains
 
       select case(xgBlockA%space)
       case(SPACE_R,SPACE_CR)
-        !$omp parallel do shared(dot,xgBlockA,xgBlockB) &
-        !$omp& schedule(static)
+        !$omp parallel do shared(dot,xgBlockA,xgBlockB)
         do icol = 1, xgBlockA%cols
           dot%vecR(icol,1) = fact*ddot(fact*xgBlockA%rows,xgBlockA%vecR(:,icol),1,xgBlockB%vecR(:,icol),1)
         end do
@@ -4865,8 +4878,7 @@ contains
       case(SPACE_C)
 #if defined(FC_NVHPC) || defined(FC_CRAY)
 !FIXME zdotc call goes wrong with NVHPC (NVHPC 22.11, MKL 22.3) or CRAY
-        !$omp parallel do private(ii,tmp) shared(dot,xgBlockA,xgBlockB), &
-        !$omp& schedule(static)
+        !$omp parallel do private(ii,tmp) shared(dot,xgBlockA,xgBlockB)
         do icol = 1, xgBlockA%cols
           tmp=0
           do ii = 1, xgBlockA%rows
@@ -4876,8 +4888,7 @@ contains
         end do
         !$omp end parallel do
 #else
-        !$omp parallel do shared(dot,xgBlockA,xgBlockB), &
-        !$omp& schedule(static)
+        !$omp parallel do shared(dot,xgBlockA,xgBlockB)
         do icol = 1, xgBlockA%cols
           dot%vecC(icol,1) = zdotc(xgBlockA%rows,xgBlockA%vecC(:,icol),1,xgBlockB%vecC(:,icol),1)
         end do
@@ -4924,14 +4935,13 @@ contains
     double precision,      intent(inout), optional :: min_val
     integer, dimension(2), intent(inout), optional, target :: min_elt
 
-    integer :: irow
+    integer :: irow,icol,rows,cols
 
 #if defined HAVE_GPU
     ! TODO: evaluate if total_size should be a 64 bit integer, i.e.
     ! does spacedim * neigenpairs be larger than 2^31 = 2. 10^9
     integer(kind=c_int32_t)  :: total_size
 #if defined HAVE_OPENMP_OFFLOAD
-    integer :: icol,rows,cols
     complex(dpc), ABI_CONTIGUOUS pointer :: xgBlockA__vecC(:,:),xgBlockB__vecC(:,:),divResult__vecC(:,:)
     real(dp), ABI_CONTIGUOUS pointer :: xgBlockA__vecR(:,:),xgBlockB__vecR(:,:),divResult__vecR(:,:)
 #endif
@@ -4942,6 +4952,8 @@ contains
 
     call xgBlock_check_gpu_option(xgBlockA,xgBlockB)
     call xgBlock_check_gpu_option(xgBlockA,divResult)
+
+    rows = xgBlockA%rows; cols = xgBlockA%cols
 
     if (xgBlockA%gpu_option==ABI_GPU_KOKKOS) then
 
@@ -5002,7 +5014,6 @@ contains
 #if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
 
       total_size = xgBlockA%rows * xgBlockA%cols
-      rows = xgBlockA%rows; cols = xgBlockA%cols
       select case(xgBlockA%space)
       case(SPACE_R)
         xgBlockA__vecR => xgBlockA%vecR
@@ -5074,10 +5085,11 @@ contains
 
       select case(xgBlockA%space)
       case(SPACE_R)
-        !$omp parallel do shared(divResult,xgBlockA,xgBlockB), &
-        !$omp& schedule(static)
-        do irow = 1, xgBlockA%rows
-          divResult%vecR(irow,:) = xgBlockA%vecR(irow,:)/xgBlockB%vecR(irow,:)
+        !$omp parallel do collapse(2) shared(divResult,xgBlockA,xgBlockB) private(icol,irow)
+        do icol = 1, cols
+          do irow = 1, rows
+            divResult%vecR(irow,icol) = xgBlockA%vecR(irow,icol)/xgBlockB%vecR(irow,icol)
+          end do
         end do
         !$omp end parallel do
 
@@ -5096,10 +5108,11 @@ contains
 
       case(SPACE_C)
 
-        !$omp parallel do shared(divResult,xgBlockA,xgBlockB), &
-        !$omp& schedule(static)
-        do irow = 1, xgBlockA%rows
-          divResult%vecC(irow,:) = xgBlockA%vecC(irow,:)/xgBlockB%vecC(irow,:)
+        !$omp parallel do collapse(2) shared(divResult,xgBlockA,xgBlockB) private(icol,irow)
+        do icol = 1, cols
+          do irow = 1, rows
+            divResult%vecC(irow,icol) = xgBlockA%vecC(irow,icol)/xgBlockB%vecC(irow,icol)
+          end do
         end do
         !$omp end parallel do
 

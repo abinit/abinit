@@ -46,6 +46,12 @@ target_compile_definitions(65_paw
   PRIVATE
   HAVE_CONFIG_H)
 
+if(HAVE_OPENMP_OFFLOAD)
+  target_compile_options(66_nonlocal
+    PRIVATE
+    $<$<COMPILE_LANGUAGE:Fortran>:${OPENMP_OFFLOAD_FLAGS}>)
+endif()
+
 target_link_libraries(65_paw
   PUBLIC
   abinit::10_defs

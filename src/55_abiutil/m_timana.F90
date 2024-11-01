@@ -1262,6 +1262,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(2107)='xg_nonlop%make_Sij              '
  names(2108)='xg_nonlop%make_ekb              '
  names(2109)='xg_nonlop%apply_diag            '
+ names(2110)='xg_nonlop%init                  '
 
  names(2120)='xg_nonlop%getXSX                '
  names(2121)='xg_nonlop%getXHX                '
@@ -1548,7 +1549,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
      tslots(:5)=(/1375,1370,-235,-1371,-1372/)
    case(52)
 !      Total of xg_nonlop
-     tslots(:10)=(/2100,2101,2102,2103,2104,2105,2106,2107,2108,2109/)
+     tslots(:11)=(/2100,2101,2102,2103,2104,2105,2106,2107,2108,2109,2110/)
    case(53)
 !      Estimate the complement of xg_nonlop%getcprj
      tslots(:6)=(/2134,2101,-2130,-2131,-2132,-2133/)
@@ -1835,7 +1836,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
        case(5)
          list(:7)=(/940,941,942,943,944,945,TIMER_SIZE/)             ; msg= 'rhotov '
        case(6)
-         list(:22)=(/980,981,982,983,984,28,985,271,986,987,988,989,990,991,992,993,994,995,996,997,1620,TIMER_SIZE/)
+         list(:21)=(/980,981,982,983,984,28,985,271,986,987,988,989,990,991,992,993,994,995,996,997,TIMER_SIZE/)
          msg= 'vtorho '
        case(7)
          list(:18)=(/28,31,22,530,585,583,590,222,572,842,537,586,591,578,1295,1300,1600,TIMER_SIZE/) ; msg='vtowfk '
@@ -1975,7 +1976,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
        case(84)
          list(:5)=(/1370,235,1371,1372,1375/)  ; msg='getchc'
        case(85)
-         list(:14)=(/2100,2101,2102,2103,2104,2105,2106,2107,2108,2109,2120,2121,2122,2123/) ; msg='xg_nonlop'
+         list(:15)=(/2100,2101,2102,2103,2104,2105,2106,2107,2108,2109,2110,2120,2121,2122,2123/) ; msg='xg_nonlop'
        case(86)
          list(:6)=(/2101,2130,2131,2132,2133,2134/) ; msg='xg_nonlop%getcprj'
        case(87)
