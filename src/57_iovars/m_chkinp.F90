@@ -878,9 +878,16 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 !  ecutsm
    call chkdpr(0,0,cond_string,cond_values,ierr,'ecutsm',dt%ecutsm,1,0.0_dp,iout)
 !  With non-zero optcell, one must use non-zero ecutsm
-   if(dt%optcell/=0 )then
-     cond_string(1)='optcell' ; cond_values(1)=dt%optcell
-     call chkdpr(1,1,cond_string,cond_values,ierr,'ecutsm',dt%ecutsm,1,tol8,iout)
+   !if(dt%optcell/=0 )then
+   !  cond_string(1)='optcell' ; cond_values(1)=dt%optcell
+   !  call chkdpr(1,1,cond_string,cond_values,ierr,'ecutsm',dt%ecutsm,1,tol8,iout)
+   !end if
+!  At present (v10.2.2), Chebyshev filtering algorithm (wfoptalg=1 or 111) cannot be used with ecutsm=0.
+!  So we allow ecutsm=0 but with a warning.
+   if(dt%optcell/=0 .and. dt%ecutsm < tol8 .and. dt%wfoptalg/=1 .and. dt%wfoptalg/=111) then
+     write(msg, "(2a)") 'For optcell > 0, it is highly recommended to set ecutsm > 0 to have better precision on stress',&
+                      & ' (available only if wfoptalg is neither 1 nor 111).'
+     ABI_WARNING(msg)
    end if
 
 !  ecutwfn <= ecut. This is also needed for the correct evaluation
@@ -1927,6 +1934,17 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
        end if
      end do
    end if
+
+!  nbdbuf
+!  At this stage, nbdbuf Must be greater or equal to 0, or take the special value -101. 
+!  Note that other negative values are permitted in input, but immediately
+!  transformed to a fraction of the number of bands hence a positive number.
+   call chkint_ge(0,0,cond_string,cond_values,ierr,'nbdbuf',dt%nbdbuf,-101,iout)
+   if(dt%nbdbuf/=-101)then
+     cond_string(1)='nbdbuf' ; cond_values(1)=dt%nbdbuf
+     call chkint_ge(1,1,cond_string,cond_values,ierr,'nbdbuf',dt%nbdbuf,0,iout)
+   endif
+
 
 !  nbandkss
 !  Must be greater or equal to -1

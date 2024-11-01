@@ -261,7 +261,6 @@ contains
 !! SOURCE
  subroutine destroy_gemm_nonlop_ompgpu()
 
-  integer :: ikpt
   character(len=200) :: msg
 
 ! *************************************************************************
@@ -285,7 +284,7 @@ contains
 !!
 !! SOURCE
  subroutine gemm_nonlop_ompgpu(atindx1,choice,cpopt,cprjin,dimenl1,dimenl2,dimekbq,dimffnlin,dimffnlout,&
-&                 enl,enlout,ffnlin,ffnlout,gmet,gprimd,idir,indlmn,istwf_k,&
+&                 enl,enl_ndat,enlout,ffnlin,ffnlout,gmet,gprimd,idir,indlmn,istwf_k,&
 &                 kgin,kgout,kpgin,kpgout,kptin,kptout,lambda,lmnmax,matblk,mgfft,&
 &                 mpi_enreg,natom,nattyp,ndat,ngfft,nkpgin,nkpgout,nloalg,&
 &                 nnlout,npwin,npwout,nspinor,nspinortot,ntypat,only_SO,paw_opt,&
@@ -306,7 +305,7 @@ contains
   !arrays
   integer,intent(in),target :: atindx1(natom),indlmn(6,lmnmax,ntypat),kgin(3,npwin)
   integer,intent(in),target :: kgout(3,npwout),nattyp(ntypat),ngfft(18),nloalg(3),typat(natom)
-  real(dp),intent(in),target :: enl(dimenl1,dimenl2,nspinortot**2,dimekbq)
+  real(dp),intent(in),ABI_CONTIGUOUS target :: enl(:,:,:,:),enl_ndat(:,:,:,:,:)
   real(dp),intent(in),target :: ffnlin(npwin,dimffnlin,lmnmax,ntypat)
   real(dp),intent(in),target :: ffnlout(npwout,dimffnlout,lmnmax,ntypat),gmet(3,3)
   real(dp),intent(in) :: gprimd(3,3),kptin(3),kptout(3)
@@ -321,21 +320,18 @@ contains
   type(pawcprj_type),intent(inout) :: cprjin(natom,nspinor*((cpopt+5)/5)*ndat)
 
   ! locals
-  integer :: ii, ia, idat, igrad, nprojs, ngrads, ngrads2, shift, iatom, nlmn, ierr, ibeg, iend, ikpt, ikin, ikout
-  integer :: cplex, cplex_enl, cplex_fac, proj_shift, grad_shift
-  integer :: projs_beg,projs_end,dprojs_beg,dprojs_end,d2projs_beg,d2projs_end
+  integer :: ii, idat, igrad, nprojs, ngrads, ngrads2, shift, iatom, nlmn, ierr, ibeg, iend, ikin, ikout
+  integer :: cplex, cplex_enl, cplex_fac
   integer :: nnlout_test
   integer :: iatm, ndgxdt, ndgxdtfac, nd2gxdt, nd2gxdtfac, optder, itypat, ilmn
   integer :: cplex_dgxdt(9), cplex_d2gxdt(18)
-  logical :: local_vectproj
-  real(dp) :: dgxdt_dum_in(1,1,1,1,1), dgxdt_dum_out(1,1,1,1,1),dgxdt_dum_out2(1,1,1,1,1)
+  logical :: local_vectproj,use_enl_ndat
   real(dp) :: d2gxdt_dum_in(1,1,1,1,1), d2gxdt_dum_out(1,1,1,1,1),d2gxdt_dum_out2(1,1,1,1,1)
 
   real(dp), ABI_CONTIGUOUS pointer :: projections(:,:,:)
   real(dp), allocatable, target :: s_dprojections(:,:,:), vnl_dprojections(:,:,:)
   real(dp), allocatable, target :: d2projections(:,:,:)
   integer :: ipw, iproj, iblock, nprojs_blk, i1, i2, i
-  integer :: nprojs_my_blk
   logical :: is_last
   real(dp), ABI_CONTIGUOUS pointer :: projs_(:,:,:),dprojs_(:,:,:),d2projs_(:,:,:)
   real(dp), ABI_CONTIGUOUS pointer :: projs_r_(:,:,:),projs_i_(:,:,:)
@@ -343,7 +339,7 @@ contains
   real(dp), ABI_CONTIGUOUS pointer :: d2projs_r_(:,:,:),d2projs_i_(:,:,:)
   real(dp), allocatable :: enlk(:),fnlk(:,:),ddkk(:,:),strnlk(:,:),gmet2(:,:)
   real(dp), allocatable :: work1(:),work2(:),work3(:,:),work4(:,:),work5(:,:,:),work6(:,:,:),work7(:,:,:)
-  integer :: idbeg,idend,idfbeg,idfend,dshift,id2beg,id2end,d2shift,dfshift,enlout_shift
+  integer :: idbeg,idend,idfbeg,idfend,dshift,id2beg,id2end,d2shift,dfshift,enlout_shift,ndat_enl
   real(dp) :: work(6)
   integer :: ndgxdt_stored,ishift
   integer :: mu0,ic,nu,mu,jc,mua,mub,nua1,nua2,nub1,nub2
@@ -353,7 +349,7 @@ contains
   integer, ABI_CONTIGUOUS pointer :: atindx1_(:),indlmn_(:,:,:),nattyp_(:)
   real(dp),pointer :: ffnlin_(:,:,:,:),ffnlout_(:,:,:,:)
   real(dp),pointer :: ph3din_(:,:,:),ph3dout_(:,:,:)
-  real(dp),pointer :: enl_(:,:,:,:)
+  real(dp), ABI_CONTIGUOUS pointer :: enl_(:,:,:,:,:),enl_ndat_(:,:,:,:,:)
   real(dp), ABI_CONTIGUOUS pointer :: sij_(:,:)
   real(dp), ABI_CONTIGUOUS pointer :: kpgin_(:,:),kpgout_(:,:)
   logical :: nld_on_gpu
@@ -392,6 +388,15 @@ contains
     end if
   end if
 
+  ! Check if provided buffers are already mapped on GPU
+  transfer_vectin=.not. xomp_target_is_present(c_loc(vectin)) &
+      .and. ((cpopt < 2 .and. choice < 2) .or. (cpopt <= 3 .and. choice >= 2) &
+      .or. (choice/=7 .and.paw_opt >=3))
+  transfer_vectout=.not. xomp_target_is_present(c_loc(vectout)) &
+      .and. (signs==2 .and. (paw_opt == 0 .or. paw_opt == 1 .or. paw_opt == 4))
+  transfer_svectout=.not. xomp_target_is_present(c_loc(svectout)) &
+      .and. (signs==2 .and. (paw_opt == 3 .or. paw_opt == 4))
+
   ikin=1; ikout=1;
   select case (select_k)
   case (K_H_K)
@@ -407,6 +412,8 @@ contains
   cplex_enl=1;if (paw_opt>0) cplex_enl=2*dimenl1/(lmnmax*(lmnmax+1)) ! is enl complex?
   cplex_fac=max(cplex,dimekbq)
   if ((nspinortot==2.or.cplex_enl==2).and.paw_opt>0.and.choice/=7) cplex_fac=2 ! is vnl_projections complex?
+  use_enl_ndat=.false. ; if (size(enl_ndat)>0) use_enl_ndat=.true.
+  ndat_enl=1; if(use_enl_ndat) ndat_enl=ndat
 
   ! Processing one atom : set pointers to atom-specific arrays (for opernlc)
   if(iatom_only > 0) then
@@ -435,21 +442,36 @@ contains
         sij_(:,1)=sij(:,1)
       end if
     end if
-    if (size(enl)>0) then
-      ABI_MALLOC(enl_,(size(enl,1),1,nspinor**2,size(enl,4)))
+    if (size(enl_ndat)>0) then
+      ABI_MALLOC(enl_,(size(enl_ndat,1),1,nspinor**2,ndat,size(enl_ndat,5)))
+      do idat=1,ndat
+        do ii=1,size(enl_ndat,5)
+          do ispden=1,nspinor**2
+            if (dimenl2==natom .and. usepaw==1) then
+              enl_(:,1,ispden,idat,ii)=enl_ndat(:,iatom_only,ispden,idat,ii)
+            else if (dimenl2==ntypat) then
+              enl_(:,1,ispden,idat,ii)=enl_ndat(:,itypat,ispden,idat,ii)
+            else
+              enl_(:,1,ispden,idat,ii)=enl_ndat(:,1,ispden,idat,ii)
+            end if
+          end do
+        end do
+      end do
+    else if (size(enl)>0) then
+      ABI_MALLOC(enl_,(size(enl,1),1,nspinor**2,size(enl,4),1))
       do ii=1,size(enl,4)
         do ispden=1,nspinor**2
           if (dimenl2==natom .and. usepaw==1) then
-            enl_(:,1,ispden,ii)=enl(:,iatom_only,ispden,ii)
+            enl_(:,1,ispden,ii,1)=enl(:,iatom_only,ispden,ii)
           else if (dimenl2==ntypat) then
-            enl_(:,1,ispden,ii)=enl(:,itypat,ispden,ii)
+            enl_(:,1,ispden,ii,1)=enl(:,itypat,ispden,ii)
           else
-            enl_(:,1,ispden,ii)=enl(:,1,ispden,ii)
+            enl_(:,1,ispden,ii,1)=enl(:,1,ispden,ii)
           end if
         end do
       end do
     else
-      ABI_MALLOC(enl_,(0,0,0,0))
+      ABI_MALLOC(enl_,(0,0,0,0,0))
     end if
 
   ! Usual case : all atoms are processed
@@ -461,11 +483,65 @@ contains
     nattyp_     => nattyp
     ffnlin_     => ffnlin
     ffnlout_    => ffnlout
-    enl_        => enl
+    enl_(1:dimenl1,1:dimenl2,1:nspinortot**2,1:dimekbq,1:1)        => enl(:,:,:,:)
+    if(use_enl_ndat) then
+      enl_   => enl_ndat
+    end if
     sij_        => sij
     indlmn_     => indlmn
     ph3din_     => ph3din
     ph3dout_    => ph3dout
+  end if
+
+  ! The number of projectors used for computation may vary among
+  ! nonlop calls, from computing on all atoms to a select one for
+  ! some perturbations.
+  ! In such cases, projs arrays must be recomputed
+  nprojs=0
+  do itypat=1,ntypat_
+    nprojs = nprojs + count(indlmn_(3,:,itypat)>0)*nattyp_(itypat)
+  end do
+
+  if(nprojs == 0) then
+    ! TODO check if this is correct
+    if (iatom_only>0) then
+      ABI_FREE(atindx1_)
+      ABI_FREE(nattyp_)
+      ABI_FREE(ph3din_)
+      ABI_FREE(ph3dout_)
+      ABI_FREE(ffnlin_)
+      ABI_FREE(ffnlout_)
+      ABI_FREE(enl_)
+      ABI_FREE(indlmn_)
+      if (size(sij) > 1) then
+        ABI_FREE(sij_)
+      end if
+    end if
+    if(signs == 1) then
+      enlout=zero
+      return
+    end if
+    if(signs == 2) then
+      if(transfer_vectout) then
+        vectout = zero
+      else
+        call gpu_set_to_zero(svectout, int(2,c_size_t) * npwout * nspinor * ndat)
+      end if
+      if(paw_opt>0) then
+        if(transfer_svectout .and. transfer_vectin) then
+          svectout = vectin
+        else if(transfer_vectin) then
+          svectout = vectin
+          !$OMP TARGET UPDATE TO(svectout)
+        else if(transfer_svectout) then
+          !$OMP TARGET UPDATE FROM(vectin)
+          svectout = vectin
+        else
+          call gpu_copy(svectout, vectin, int(2,c_size_t) * npwin * nspinor * ndat)
+        end if
+      end if
+      return
+    end if
   end if
 
   !Eventually re-compute (k+G) vectors (and related data)
@@ -496,25 +572,7 @@ contains
 
   !$OMP TARGET ENTER DATA MAP(to:kpgin_,kpgout_)
 
-  nprojs_my_blk = gemm_nonlop_kpt(ikout)%nprojs_blk
-
-  ! The number of projectors used for computation may vary among
-  ! nonlop calls, from computing on all atoms to a select one for
-  ! some perturbations.
-  ! In such cases, projs arrays must be recomputed
-  nprojs=0
-  do itypat=1,ntypat_
-    nprojs = nprojs + count(indlmn_(3,:,itypat)>0)*nattyp_(itypat)
-  end do
-
   ! Allocate and copy GPU buffers if user doesn't manage them
-  transfer_vectin=.not. xomp_target_is_present(c_loc(vectin)) &
-      .and. ((cpopt < 2 .and. choice < 2) .or. (cpopt <= 3 .and. choice >= 2) &
-      .or. (choice/=7 .and.paw_opt >=3))
-  transfer_vectout=.not. xomp_target_is_present(c_loc(vectout)) &
-      .and. (signs==2 .and. (paw_opt == 0 .or. paw_opt == 1 .or. paw_opt == 4))
-  transfer_svectout=.not. xomp_target_is_present(c_loc(svectout)) &
-      .and. (signs==2 .and. (paw_opt == 3 .or. paw_opt == 4))
   !$OMP TARGET ENTER DATA MAP(to:vectin)      IF(transfer_vectin)
   !$OMP TARGET ENTER DATA MAP(alloc:vectout)  IF(transfer_vectout)
   !$OMP TARGET ENTER DATA MAP(alloc:svectout) IF(transfer_svectout)
@@ -527,7 +585,10 @@ contains
   vectout_  => vectout
   svectout_ => svectout
 
-  !$OMP TARGET ENTER DATA MAP(to:atindx1,indlmn,enl)
+  !$OMP TARGET ENTER DATA MAP(to:atindx1,indlmn,enl_)
+  if(size(enl_)>0) then
+    !$OMP TARGET ENTER DATA MAP(to:enl_)
+  end if
   if(gpu_initialised == 0 .or. mod__ndat /= ndat*nspinor .or. nprojs /= mod__nprojs &
   &    .or. cplex /= mod__cplex .or. cplex_fac /= mod__cplex_fac) then
     call alloc_work_buffers(cplex, cplex_fac,&
@@ -552,19 +613,6 @@ contains
     end if
   end if
   !$OMP TARGET UPDATE TO(sij_typ)
-
-  if(nprojs == 0) then
-    ! TODO check if this is correct
-    if(signs == 1) then
-      enlout=zero
-      return
-    end if
-    if(signs == 2) then
-      vectout = zero
-      if(paw_opt>0) svectout = vectin
-      return
-    end if
-  end if
 
   ndgxdt = -1
   nd2gxdt = -1
@@ -698,19 +746,6 @@ contains
     ABI_MALLOC(d2projections,(1, 1, ndat))
   end if
 
-  if(nprojs == 0) then
-    ! TODO check if this is correct
-    if(signs == 1) then
-      enlout=zero
-      return
-    end if
-    if(signs == 2) then
-      vectout = zero
-      if(paw_opt>0) svectout = vectin
-      return
-    end if
-  end if
-
   if(signs == 1 .and. choice > 0) then
     enlout=zero
     !$OMP TARGET ENTER DATA MAP(to:enlout)
@@ -839,7 +874,7 @@ contains
         &         iatm,indlmn_,itypat,lambda,mpi_enreg,natom_,&
         &         ndgxdt,ndgxdtfac,nd2gxdt,nd2gxdtfac,&
         &         nattyp_(itypat),nlmn,nspinor,nspinortot,optder,paw_opt,sij_typ(:,itypat),&
-        &         ndat,ibeg-1,iend,nprojs,ntypat_,gpu_option)
+        &         ndat,ibeg-1,iend,nprojs,ntypat,ndat_enl,gpu_option)
 
         shift = shift + nattyp_(itypat)*nlmn
         iatm = iatm+nattyp_(itypat)
@@ -1129,6 +1164,9 @@ contains
   end if
 #endif
 
+  if(size(enl_)>0) then
+    !$OMP TARGET EXIT DATA MAP(delete:enl_)
+  end if
 ! Release memory
 
   if (iatom_only>0) then
@@ -1171,7 +1209,7 @@ contains
     ABI_FREE(gmet2)
   end if
 
-  !$OMP TARGET EXIT DATA MAP(delete:atindx1,indlmn,enl)
+  !$OMP TARGET EXIT DATA MAP(delete:atindx1,indlmn)
   if (allocated(dprojections)) then
     !$OMP TARGET EXIT DATA MAP(delete:dprojections) IF(ndgxdt>0)
     ABI_FREE(dprojections)
@@ -1199,7 +1237,7 @@ contains
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
  subroutine gemm_nonlop_ompgpu(atindx1,choice,cpopt,cprjin,dimenl1,dimenl2,dimekbq,dimffnlin,dimffnlout,&
-&                 enl,enlout,ffnlin,ffnlout,gmet,gprimd,idir,indlmn,istwf_k,&
+&                 enl,enl_ndat,enlout,ffnlin,ffnlout,gmet,gprimd,idir,indlmn,istwf_k,&
 &                 kgin,kgout,kpgin,kpgout,kptin,kptout,lambda,lmnmax,matblk,mgfft,&
 &                 mpi_enreg,natom,nattyp,ndat,ngfft,nkpgin,nkpgout,nloalg,&
 &                 nnlout,npwin,npwout,nspinor,nspinortot,ntypat,only_SO,paw_opt,&
@@ -1220,7 +1258,7 @@ contains
   !arrays
   integer,intent(in),target :: atindx1(natom),indlmn(6,lmnmax,ntypat),kgin(3,npwin)
   integer,intent(in),target :: kgout(3,npwout),nattyp(ntypat),ngfft(18),nloalg(3),typat(natom)
-  real(dp),intent(in),target :: enl(dimenl1,dimenl2,nspinortot**2,dimekbq)
+  real(dp),intent(in),target :: enl(:,:,:,:),enl_ndat(:,:,:,:,:)
   real(dp),intent(in),target :: ffnlin(npwin,dimffnlin,lmnmax,ntypat)
   real(dp),intent(in),target :: ffnlout(npwout,dimffnlout,lmnmax,ntypat),gmet(3,3)
   real(dp),intent(in) :: gprimd(3,3),kptin(3),kptout(3)
@@ -1239,7 +1277,7 @@ contains
   ABI_UNUSED((/nkpgout,nnlout,npwin,npwout,nspinor,nspinortot,ntypat,only_SO/))
   ABI_UNUSED((/paw_opt,signs,tim_nonlop,useylm,gpu_option,usepaw,select_k,iatom_only/))
   ABI_UNUSED((/atindx1,indlmn,kgin,kgout,nattyp,ngfft,nloalg,typat/))
-  ABI_UNUSED((/enl,ffnlin,ffnlout,gmet,gprimd,kpgin,kpgout,kptin,kptout/))
+  ABI_UNUSED((/enl,enl_ndat,ffnlin,ffnlout,gmet,gprimd,kpgin,kpgout,kptin,kptout/))
   ABI_UNUSED((/ucvol,lambda,sij,ph3din,ph3dout,vectin,enlout,svectout,vectout,vectproj/))
   ABI_UNUSED_A(cprjin)
   ABI_UNUSED_A(mpi_enreg)

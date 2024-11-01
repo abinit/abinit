@@ -2149,6 +2149,9 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  if (dtset%optdriver/=RUNL_GSTATE .and. dtset%optdriver/=RUNL_RESPFN) then
    dtset%gpu_option=ABI_GPU_DISABLED  ! GPU only compatible with GS and RESPFN
  end if
+ if (dtset%optdriver==RUNL_RESPFN .and. dtset%gpu_option/=ABI_GPU_OPENMP) then
+   dtset%gpu_option=ABI_GPU_DISABLED  ! RESPFN on GPU only implemented with OpenMP
+ end if
  if (dtset%tfkinfunc/=0) dtset%gpu_option=ABI_GPU_DISABLED  ! Recursion method has its own GPU impl
  if (dtset%nspinor/=1)   dtset%gpu_option=ABI_GPU_DISABLED  ! nspinor=2 not yet GPU compatible
 
@@ -2574,12 +2577,20 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
 !
    !nline
    dtsets(idtset)%nline=4
-
+   !Specific value for wavelets
    if(dtsets(idtset)%usewvl==1 .and. .not. wvl_bigdft) then
      if(dtsets(idtset)%usepaw==1) then
        dtsets(idtset)%nline=4
      else
        dtsets(idtset)%nline=2
+     end if
+   end if
+   !For Chebyshev filtering algo, nline is the degree of the Chebyshev polynomial
+   if (mod(dtsets(idtset)%wfoptalg,10) == 1) then
+     if (dtsets(idtset)%gpu_option == ABI_GPU_DISABLED) then
+       dtsets(idtset)%nline = 6
+     else
+       dtsets(idtset)%nline = 6
      end if
    end if
 
