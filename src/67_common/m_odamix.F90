@@ -48,6 +48,7 @@ module m_odamix
  use m_rhotoxc,    only : rhotoxc
  use m_fft,        only : fourdp
  use m_xc_tb09,    only : xc_tb09_update_c
+ use m_dft_energy, only : entropy
 
  implicit none
 
@@ -405,27 +406,7 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
    end do
  end if
 
-!In case we have other sources of entropy than kohn-sham states occupation,
-!we sum all entropy terms. %entropy is now total entropy.
-!Examples of other sources of entropy: finite-temperature xc functionals, extfpmd, ...
- energies%entropy=energies%entropy_ks
- if(abs(energies%entropy_paw)>tiny(zero))     energies%entropy=energies%entropy+energies%entropy_paw
- if(abs(energies%entropy_xc)>tiny(zero))      energies%entropy=energies%entropy+energies%entropy_xc
- if(abs(energies%entropy_extfpmd)>tiny(zero)) energies%entropy=energies%entropy+energies%entropy_extfpmd
-
-!When the finite-temperature VG broadening scheme is used,
-!the total entropy contribution "tsmear*entropy" has a meaning,
-!and gather the two last terms of Eq.8 of VG paper
-!Warning : might have to be changed for fixed moment calculations
- if(dtset%occopt>=3 .and. dtset%occopt<=8) then
-   if (abs(dtset%tphysel) < tol10) then
-     energies%e_entropy = - dtset%tsmear * energies%entropy
-   else
-     energies%e_entropy = - dtset%tphysel * energies%entropy
-   end if
- else
-   energies%e_entropy = zero
- end if
+ call entropy(dtset,energies)
 
 !Turn it into an electric enthalpy,refer to Eq.(33) of Suppl. of Nat. Phys. paper (5,304,2009) [[cite:Stengel2009]]
 ! the missing volume is added here
@@ -663,27 +644,7 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
    end do
  end if
 
-!In case we have other sources of entropy than kohn-sham states occupation,
-!we sum all entropy terms. %entropy is now total entropy.
-!Examples of other sources of entropy: finite-temperature xc functionals, extfpmd, ...
- energies%entropy=energies%entropy_ks
- if(abs(energies%entropy_paw)>tiny(zero))     energies%entropy=energies%entropy+energies%entropy_paw
- if(abs(energies%entropy_xc)>tiny(zero))      energies%entropy=energies%entropy+energies%entropy_xc
- if(abs(energies%entropy_extfpmd)>tiny(zero)) energies%entropy=energies%entropy+energies%entropy_extfpmd
-
-!When the finite-temperature VG broadening scheme is used,
-!the total entropy contribution "tsmear*entropy" has a meaning,
-!and gather the two last terms of Eq.8 of VG paper
-!Warning : might have to be changed for fixed moment calculations
- if(dtset%occopt>=3 .and. dtset%occopt<=8) then
-   if (abs(dtset%tphysel) < tol10) then
-     energies%e_entropy = - dtset%tsmear * energies%entropy
-   else
-     energies%e_entropy = - dtset%tphysel * energies%entropy
-   end if
- else
-   energies%e_entropy = zero
- end if
+ call entropy(dtset,energies)
 
  etotal=energies%h0+energies%e_hartree+energies%e_xc+energies%e_corepsp + &
  & energies%e_entropy + energies%e_elecfield + energies%e_magfield

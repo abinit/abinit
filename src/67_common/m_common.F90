@@ -60,6 +60,7 @@ module m_common
  use defs_datatypes,      only : pspheader_type, ebands_t
  use m_pspheads,          only : inpspheads, pspheads_comm
  use m_kpts,              only : kpts_timrev_from_kptopt
+ use m_dft_energy,        only : entropy
 
  implicit none
 
@@ -1498,25 +1499,9 @@ subroutine prtene(dtset,energies,iout,usepaw)
  if (abs(energies%e_ewald)<1.e-15_dp.and.abs(energies%e_hartree)<1.e-15_dp) ipositron=1
  call energies_eval_eint(energies,dtset,usepaw,optdc,etotal,etotaldc)
 
-!In case we have other sources of entropy than kohn-sham states occupation,
-!we sum all entropy terms. %entropy is now total entropy.
-!Examples of other sources of entropy: finite-temperature xc functionals, extfpmd, ...
- energies%entropy=energies%entropy_ks
- if(abs(energies%entropy_paw)>tiny(zero))     energies%entropy=energies%entropy+energies%entropy_paw
- if(abs(energies%entropy_xc)>tiny(zero))      energies%entropy=energies%entropy+energies%entropy_xc
- if(abs(energies%entropy_extfpmd)>tiny(zero)) energies%entropy=energies%entropy+energies%entropy_extfpmd
+ call entropy(dtset,energies)
+ eent=energies%e_entropy
 
-!Here, treat the case of metals
-!In re-smeared case the free energy is defined with tphysel
- if(dtset%occopt>=3 .and. dtset%occopt<=8)then
-   if (abs(dtset%tphysel) < tol10) then
-     eent=-dtset%tsmear * energies%entropy
-   else
-     eent=-dtset%tphysel * energies%entropy
-   end if
- else
-   eent=zero
- end if
 ! If DMFT is used and DMFT Entropy is not computed, then do not print
 ! non interacting entropy
  testdmft=(dtset%dmftcheck>=0.and.dtset%usedmft>=1.and.(sum(dtset%upawu(:,1))>=tol8.or.  &
