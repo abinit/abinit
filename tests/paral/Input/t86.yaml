@@ -1,19 +1,34 @@
 tol_eq: 1.0e-6
+tol_vec: 1.0e-5
 
-lda:
+ks:
     # tolvrs 1.0e-7
-    tol_abs: 5.0e-7
-    tol_rel: 5.0e-7
-    results_gs!:
+    tol_abs: 5.0e-6
+    tol_rel: 5.0e-6
+    ResultsGS!:
         convergence:
             ceil: 1.0e-6
-        stress tensor:
-            tensor_is_symetric: true
+        cartesian_stress_tensor:
+            tol_vec: 1.0e-7
+
+#    EtotSteps:
+#        data:
+#            callback:
+#                method: last_iter
+#                tol_iter: 3
+#                Etot(hartree):
+#                    tol: 1.0e-7
+#                deltaE(h):
+#                    ceil: 2.0e-8
+#                residm:
+#                    ceil: 5.0e-7
+#                nres2:
+#                    ceil: 2.0e-8
 
 dmft:
     tol_abs: 2.0e-8
     tol_rel: 5.0e-9
-    results_gs!:  # hard reset result_gs
+    ResultsGS!:  # hard reset result_gs
         convergence:
             ceil: 1.0e-6
             deltae:
@@ -23,21 +38,35 @@ dmft:
         fermie:
             tol_abs: 1.0e-7
             tol_rel: 1.0e-8
-        stress tensor:
+        cartesian_stress_tensor:
             ignore: true
-    Etot:
-        Total energy eV:
-            tol_abs: 1.0e-5
+    EnergyTerms:
+        total_energy_eV:
+            tol_abs: 1.0e-4
             tol_rel: 1.0e-8
-    Etot DC:
+    EnergyTermsDC:
         tol_abs: 1.0e-7
-        Total DC energy eV:
-            tol_abs: 1.0e-5
+        total_energy_dc_eV:
+            tol_abs: 1.0e-4
             tol_rel: 1.0e-8
+
+#    EtotSteps:
+#        data:
+#            callback:
+#                method: last_iter
+#                tol_iter: 3
+#                Etot(hartree):
+#                    tol: 1.0e-7
+#                deltaE(h):
+#                    ceil: 2.0e-4
+#                residm:
+#                    ceil: 1.0e-12
+#                nres2:
+#                    ceil: 2.0e-1
 
 
 filters:
-    lda:
+    ks:
         dtset: 1
     dmft:
         dtset: 2

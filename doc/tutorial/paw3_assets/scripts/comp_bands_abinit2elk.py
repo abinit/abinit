@@ -3,10 +3,10 @@
 import sys, string 
 
 if len(sys.argv)<2 or len(sys.argv)>11:
-    print 'Usage: python comp_band_abinit2elk.py [abinit _EIG file] ...'
-    print '          ... [elk BAND.OUT file] [align #kpt #band] ...'
-    print '          ... [nbdbuf #] [Fermi #abinit #elk]'
-    print '              (align, eV, nbdbuf and Fermi sections optional)'
+    print ('Usage: python comp_band_abinit2elk.py [abinit _EIG file] ...')
+    print ('          ... [elk BAND.OUT file] [align #kpt #band] ...')
+    print ('          ... [nbdbuf #] [Fermi #abinit #elk]')
+    print ('              (align, eV, nbdbuf and Fermi sections optional)')
     sys.exit()
 
 
@@ -24,23 +24,23 @@ iarg = 3
 while iarg < len(sys.argv):
     if str(sys.argv[iarg])=='eV':
         eVconv = str(sys.argv[iarg]) # Assume Ha values and convert to eV
-        print '# Values assumed to be in Ha and converted to eV'
+        print ('# Values assumed to be in Ha and converted to eV')
     if str(sys.argv[iarg])=='align':
         align_values = 1
-	align_ikpt = int(sys.argv[iarg+1])
-	align_iband = int(sys.argv[iarg+2])
-        print '# Values aligned at kpt:','%4i'%align_ikpt,\
-	      ' and band:','%4i'%align_iband
-	iarg = iarg + 2
+        align_ikpt = int(sys.argv[iarg+1])
+        align_iband = int(sys.argv[iarg+2])
+        print ('# Values aligned at kpt:','%4i'%align_ikpt,\
+	      ' and band:','%4i'%align_iband)
+        iarg = iarg + 2
     if (str(sys.argv[iarg])=='Fermi' or \
             str(sys.argv[iarg])=='fermi'): # Align Fermi energies
         align_values_fermi = 1
-	align_abinit_fermi = float(sys.argv[iarg+1])
-	align_elk_fermi = float(sys.argv[iarg+2])
+        align_abinit_fermi = float(sys.argv[iarg+1])
+        align_elk_fermi = float(sys.argv[iarg+2])
         iarg = iarg + 2
     if str(sys.argv[iarg])=='nbdbuf':
         nbdbuf = int(sys.argv[iarg+1])
-	print '# nbdbuf set, last:','%4i'%nbdbuf,' bands will be ignored'
+        print ('# nbdbuf set, last:','%4i'%nbdbuf,' bands will be ignored')
         iarg = iarg + 1
     iarg = iarg + 1
 
@@ -57,7 +57,7 @@ for iline in range(2,len(abinit_file_data)):
     if abinit_file_data[iline].find('kpt#') > -1:
         continue
     # Accumulate values
-    new_values = map(float,string.split(abinit_file_data[iline]))
+    new_values = map(float,abinit_file_data[iline].split())
     k_point_list.extend(new_values)
     # If we are on last line, finish appending
     if iline == len(abinit_file_data)-1:
@@ -66,8 +66,8 @@ for iline in range(2,len(abinit_file_data)):
     # If the next line is a k-point spec., append.
     if abinit_file_data[iline+1].find('kpt#') > -1:
         abinit_band_data.append(k_point_list)
-	k_point_list = []
-	continue
+        k_point_list = []
+        continue
 
 #print 'nkpt:',len(abinit_band_data)       
 #print 'nbnds:',len(abinit_band_data[0])
@@ -87,34 +87,34 @@ if align_values:
     previous_kpt_val = -1.0
     for iline in range(0,len(elk_file_data)-1):
         kpt = kpt + 1
-        if string.split(elk_file_data[iline]) == []: # skip blank lines
-	   kpt = -1
+        if elk_file_data[iline].split() == []: # skip blank lines
+           kpt = -1
            band = band + 1
-	   continue
-        val_list = map(float,string.split(elk_file_data[iline]))
-	elk_align_value = val_list[1]
-	if previous_kpt_val==elk_align_value: # skip repeated kpts
+           continue
+        val_list = list(map(float,elk_file_data[iline].split()))
+        elk_align_value = val_list[1]
+        if previous_kpt_val==elk_align_value: # skip repeated kpts
             kpt = kpt - 1
-	    band = band - 1
-	    continue
-	if kpt+1==align_ikpt and band+1==align_iband:
-	    break
+            band = band - 1
+            continue
+        if kpt+1==align_ikpt and band+1==align_iband:
+            break
     abinit_align_value = abinit_band_data[align_ikpt-1][align_iband-1]
-    print '# Abinit alignment value: ',\
-          '%18.9E'%abinit_align_value
-    print '#    Elk alignment value: ',\
-          '%18.9E'%elk_align_value
+    print ('# Abinit alignment value: ',\
+          '%18.9E'%abinit_align_value)
+    print ('#    Elk alignment value: ',\
+          '%18.9E'%elk_align_value)
     input_file2_r.close()
     input_file2_r = open(input_file2_name, "r")
 
 # If Fermi alignment is done, print info
 if align_values_fermi:
-    print '# Abinit Fermi energy (Ha): ',\
-          '%18.9E'%align_abinit_fermi
-    print '#    Elk Fermi energy (Ha): ',\
-          '%18.9E'%align_elk_fermi
+    print ('# Abinit Fermi energy (Ha): ',\
+          '%18.9E'%align_abinit_fermi)
+    print ('#    Elk Fermi energy (Ha): ',\
+          '%18.9E'%align_elk_fermi)
 
-print '#   k-point       abinit val          elk val             diff        %diff'
+print ('#   k-point       abinit val          elk val             diff        %diff')
 
 # Now we begin the reading and comparison of the data
 Ha_to_eV = 27.21138386
@@ -134,21 +134,21 @@ while input_file2_current_line.endswith('\n'):
     input_file2_current_line = input_file2_r.readline()
     if not input_file2_current_line.endswith('\n'): # stop at last line
         break
-    if string.split(input_file2_current_line) == []: # skip blank lines
+    if input_file2_current_line.split() == []: # skip blank lines
         kpt = -1
         band = band + 1
-	if band == nbands-nbdbuf:
-	    break
-        print '     '
+        if band == nbands-nbdbuf:
+          break
+        print ('     ')
         continue
     # Parse the records of the lines
     numbers_list2 = []
-    numbers2 = map(float, string.split(input_file2_current_line))
+    numbers2 = map(float, input_file2_current_line.split())
     numbers_list2.extend(numbers2)
     # Cycle if k-point value is repeated in elk
     if numbers_list2[0] == previous_kpt_val:
         kpt = kpt - 1
-	continue
+        continue
     previous_kpt_val = numbers_list2[0]
     # Calculate difference,average,max,min
     if align_values:
@@ -161,7 +161,7 @@ while input_file2_current_line.endswith('\n'):
         numbers_list2[1] = numbers_list2[1] - align_elk_fermi
     if eVconv=='eV':
         abinit_band_data[kpt][band] = abinit_band_data[kpt][band]*Ha_to_eV
-	numbers_list2[1] = numbers_list2[1]*Ha_to_eV
+        numbers_list2[1] = numbers_list2[1]*Ha_to_eV
     diff = numbers_list2[1] - abinit_band_data[kpt][band]
     if numbers_list2[1]!=0.0:
         percentage = (abinit_band_data[kpt][band]/numbers_list2[1] - 1.0)*100.0
@@ -172,32 +172,32 @@ while input_file2_current_line.endswith('\n'):
     nvals = nvals + 1
     if diff<min_diff:
         min_diff = diff
-	min_percentage = percentage
+        min_percentage = percentage
     if diff>max_diff:
         max_diff = diff
-	max_percentage = percentage
+        max_percentage = percentage
     if align_values and band+1==align_iband and reset_done: # Save current averages for the
         occ_avg_diff = avg_diff             # occupied states and reset
         occ_avg_percentage = avg_percentage
         occ_min_diff = min_diff
-	occ_min_percentage = min_percentage
+        occ_min_percentage = min_percentage
         occ_max_diff = max_diff
-	occ_max_percentage = max_percentage
+        occ_max_percentage = max_percentage
         occ_nvals = nvals
-	nvals = 0
-	avg_diff = 0.0
-	avg_percentage = 0.0
-	min_diff = 1000000000.0
-	max_diff = -100000000.0
-	reset_done = 0
+        nvals = 0
+        avg_diff = 0.0
+        avg_percentage = 0.0
+        min_diff = 1000000000.0
+        max_diff = -100000000.0
+        reset_done = 0
 
     # Print the output data
     if abs(abinit_band_data[kpt][band])<0.1 or abs(numbers_list2[1])<0.1:
-        print '%14.9f'%numbers_list2[0],'%18.9E'%abinit_band_data[kpt][band],\
-              '%18.9E'%numbers_list2[1],'%12.3E'%diff,' (','%7.3f'%percentage,'%)'
+        print ('%14.9f'%numbers_list2[0],'%18.9E'%abinit_band_data[kpt][band],\
+              '%18.9E'%numbers_list2[1],'%12.3E'%diff,' (','%7.3f'%percentage,'%)')
     else:
-        print '%14.9f'%numbers_list2[0],'%14.9f'%abinit_band_data[kpt][band],\
-	      '%18.9f'%numbers_list2[1],'%16.3E'%diff,' (','%7.3f'%percentage,'%)'
+        print ('%14.9f'%numbers_list2[0],'%14.9f'%abinit_band_data[kpt][band],\
+	      '%18.9f'%numbers_list2[1],'%16.3E'%diff,' (','%7.3f'%percentage,'%)')
 
 input_file2_r.close
 
@@ -212,29 +212,29 @@ else:
 if align_values:
     occ_avg_diff = occ_avg_diff/float(occ_nvals)
     occ_avg_percentage = occ_avg_percentage/float(occ_nvals)
-    print '#'
-    print '# AVERAGES FOR OCCUPIED STATES:' 
-    print '#        nvals:','%5i'%occ_nvals 
-    print '# average diff:','%12.6F'%occ_avg_diff,eVconv
-    print '# minimum diff:','%12.6F'%occ_min_diff,eVconv
-    print '# maximum diff:','%12.6F'%occ_max_diff,eVconv
-    print '#'
-    print '# AVERAGES FOR UNOCCUPIED STATES:'
-    print '#        nvals:','%5i'%nvals
-    print '# average diff:','%12.6F'%avg_diff,eVconv
-    print '# minimum diff:','%12.6F'%min_diff,eVconv
-    print '# maximum diff:','%12.6F'%max_diff,eVconv
-    print '#'
-    print '# NOTE: Abinit values are read in fixed format with five decimal'
-    print '#       places. For low values, ~E-04 or ~E-03 may be the highest'
-    print '#       precision you can get.'
+    print ('#')
+    print ('# AVERAGES FOR OCCUPIED STATES:') 
+    print ('#        nvals:','%5i'%occ_nvals) 
+    print ('# average diff:','%12.6F'%occ_avg_diff,eVconv)
+    print ('# minimum diff:','%12.6F'%occ_min_diff,eVconv)
+    print ('# maximum diff:','%12.6F'%occ_max_diff,eVconv)
+    print ('#')
+    print ('# AVERAGES FOR UNOCCUPIED STATES:')
+    print ('#        nvals:','%5i'%nvals)
+    print ('# average diff:','%12.6F'%avg_diff,eVconv)
+    print ('# minimum diff:','%12.6F'%min_diff,eVconv)
+    print ('# maximum diff:','%12.6F'%max_diff,eVconv)
+    print ('#')
+    print ('# NOTE: Abinit values are read in fixed format with five decimal')
+    print ('#       places. For low values, ~E-04 or ~E-03 may be the highest')
+    print ('#       precision you can get.')
 else:
-    print '#        nvals:','%5i'%nvals
-    print '# average diff:','%12.6F'%avg_diff,eVconv
-    print '# minimum diff:','%12.6F'%min_diff,eVconv
-    print '# maximum diff:','%12.6F'%max_diff,eVconv
-    print '#'
-    print '# NOTE: Abinit values are read in fixed format with five decimal'
-    print '#       places. For low values, ~E-04 or ~E-03 may be the highest'
-    print '#       precision you can get.'
+    print ('#        nvals:','%5i'%nvals)
+    print ('# average diff:','%12.6F'%avg_diff,eVconv)
+    print ('# minimum diff:','%12.6F'%min_diff,eVconv)
+    print ('# maximum diff:','%12.6F'%max_diff,eVconv)
+    print ('#')
+    print ('# NOTE: Abinit values are read in fixed format with five decimal')
+    print ('#       places. For low values, ~E-04 or ~E-03 may be the highest')
+    print ('#       precision you can get.')
 

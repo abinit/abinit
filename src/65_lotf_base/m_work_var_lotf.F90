@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/work_var_lotf
 !! NAME
 !! work_var_lotf
@@ -6,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2019 ABINIT group (MMancini)
+!! Copyright (C) 2005-2024 ABINIT group (MMancini)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -59,12 +58,6 @@ contains
 !! INPUTS
 !!  natom=number of atoms
 !!
-!! PARENTS
-!!      m_lotf
-!!
-!! CHILDREN
-!!      dist_pbc
-!!
 !! SOURCE
 
  subroutine work_var_set()
@@ -76,16 +69,16 @@ contains
 ! *************************************************************************
 
   !--ifixed from ATOMFLAGS is initialized :
-   ABI_ALLOCATE(ifixed,(lotfvar%natom))
+   ABI_MALLOC(ifixed,(lotfvar%natom))
    ifixed(:) = 1
 
   !--FINDS  FITTED ATOMS
-  ! ABI_ALLOCATE(tquant,(lotfvar%natom))
+  ! ABI_MALLOC(tquant,(lotfvar%natom))
   ! tquant(:) = .true.
   !  nquant = lotfvar%natom
   !nqxx   = lotfvar%natom
 
-   ABI_ALLOCATE(iq,(lotfvar%natom))
+   ABI_MALLOC(iq,(lotfvar%natom))
    iq(:)=(/(iat,iat=1,lotfvar%natom)/)
 
  end subroutine work_var_set
@@ -101,19 +94,13 @@ contains
 !!
 !! INPUTS
 !!
-!! PARENTS
-!!      m_lotf
-!!
-!! CHILDREN
-!!      dist_pbc
-!!
 !! SOURCE
 
  subroutine work_var_dealloc()
 
 ! *************************************************************************
-   ABI_DEALLOCATE(iq)
-   ABI_DEALLOCATE(ifixed)
+   ABI_FREE(iq)
+   ABI_FREE(ifixed)
  end subroutine work_var_dealloc
  !!***
 
@@ -125,12 +112,6 @@ contains
 !! FUNCTION
 !!
 !! INPUTS
-!! PARENTS
-!!      m_lotf
-!!
-!! CHILDREN
-!!      dist_pbc
-!!
 !! SOURCE
 
  subroutine cutoff_init()
@@ -168,7 +149,7 @@ contains
      write(message,'(2a,2(a,f12.6))')&
 &     'LOTF: cut off too large : ',ch10,&
 &     ' cut-off (A) is ', rcut_nbl ,  ' min. allowed : ',half/blmin
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
  end subroutine cutoff_init
  !!***
@@ -181,12 +162,6 @@ contains
 !! FUNCTION
 !!
 !! INPUTS
-!! PARENTS
-!!      m_lotf
-!!
-!! CHILDREN
-!!      dist_pbc
-!!
 !! SOURCE
 
  subroutine smallfit(tau0,ndum)

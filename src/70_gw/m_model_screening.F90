@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_model_screening
 !! NAME
 !! m_model_screening
@@ -7,14 +6,10 @@
 !!  Module containing functions for calculating and fitting model dielectric functions
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2019 ABINIT group (MS)
+!!  Copyright (C) 2008-2024 ABINIT group (MS)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -79,10 +74,6 @@ CONTAINS  !=====================================================================
 !! OUTPUT
 !!
 !! NOTES
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -152,10 +143,6 @@ end subroutine im_screening
 !!
 !! NOTES
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine re_screening(omega,fval,nomega,coeff,ncoeff)
@@ -223,11 +210,6 @@ end subroutine re_screening
 !! OUTPUT
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_model_screening
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -299,11 +281,6 @@ end subroutine re_and_im_screening
 !! OUTPUT
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      calc_sigc_pole_cd
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -382,10 +359,6 @@ end subroutine re_and_im_screening_with_phase
 !!
 !! NOTES
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine sequential_fitting(omega,refval,imfval,nomega,nfreqre,coeff,&
@@ -434,7 +407,7 @@ subroutine sequential_fitting(omega,refval,imfval,nomega,nfreqre,coeff,&
     call dfit_re_and_im_screening(re_zvals,im_zvals,imfval,refval,&
 &    nomega,3,thiscoeff,prtvol)
 #else
-    MSG_ERROR(' ABINIT was not compiled with the levmar library!')
+    ABI_ERROR(' ABINIT was not compiled with the levmar library!')
 #endif
     ! Remove current fit
     call re_and_im_screening(omega,pole_func,nomega,thiscoeff,3)
@@ -467,10 +440,6 @@ end subroutine sequential_fitting
 !! OUTPUT
 !!
 !! NOTES
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -530,7 +499,7 @@ subroutine init_peaks_from_grid(omega,fval,nomega,nfreqre,nfreqim,coeff,ncoeff,p
       end if
     else if (ploc(ip)<nfreqre+nfreqim+1) then ! We are right on the imaginary axis
       if (ploc(ip)==nfreqre+nfreqim) then
-        MSG_ERROR(' Peak in upper left corner. This should never happen')
+        ABI_ERROR(' Peak in upper left corner. This should never happen')
       end if
       b2   = AIMAG(omega(ploc(ip)+1))
       val2 = AIMAG(fval(ploc(ip)+1))
@@ -589,11 +558,6 @@ end subroutine init_peaks_from_grid
 !! OUTPUT
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_model_screening
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -664,10 +628,6 @@ end subroutine init_single_peak
 !! OUTPUT
 !!
 !! NOTES
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -749,11 +709,6 @@ end subroutine init_peaks_even_dist
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      m_model_screening
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine print_peaks(omega,fval,nomega,nfreqre,nfreqim)
@@ -777,7 +732,7 @@ subroutine print_peaks(omega,fval,nomega,nfreqre,nfreqim)
 ! *********************************************************************
 
   if (open_file("grid_peak_tree.dat", msg, newunit=unt_tmp) /= 0) then
-    MSG_ERROR(msg)
+    ABI_ERROR(msg)
   end if
 
   do iim=nfreqim,1,-1
@@ -885,11 +840,6 @@ end subroutine print_peaks
 !! OUTPUT
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_model_screening
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1064,11 +1014,6 @@ end subroutine find_peaks
 !! OUTPUT
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      mrgscr
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

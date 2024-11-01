@@ -1,0 +1,40 @@
+#---------------------------------------------------------------
+#Information about the DDB
+#---------------------------------------------------------------
+ngqpt =  4 4 4    # Mesh of Q-points in the DDB (by default == 1 1 1)
+dipdip  = 1       #(Default is 1)recompute the dipole-dipole interaction.
+
+#---------------------------------------------------------------
+#Inputs for the molecular dynamics:
+#---------------------------------------------------------------
+
+dynamics = 25     # Molecular dynamic flag
+ncell = 6 6 6     # Size of the supercell for the simulation
+hmctt = 40        #Number of timesteps for hybrid monte carlo trial trajectory using the NPT mover (dynamics 13)
+ntime = 200       #Number of timesteps 
+nctime = 80       #Number of timesteps after which a timestipe is printed to the _HIST.nc file 
+temperature = 300 # Temperature of the simulation (default = 325K).
+dtion =  30       # Delta Time for IONs (default 100 , one atomic time unit is 2.42e-17 seconds)
+
+##############################################################
+# This section is used only for regression testing of ABINIT #
+##############################################################
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = multibinit
+#%% input_ddb = tmulti_l_6_DDB
+#%% need_cpp_vars = HAVE_XML
+#%% coeff_xml = tmulti_l_8_1.xml
+#%% [files]
+#%% files_to_test =
+#%%   tmulti_l_8_1.abo, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00, fld_options = -medium;
+#%% [paral_info]
+#%% max_nprocs = 10
+#%% [extra_info]
+#%% authors = L. BASTOGNE
+#%% keywords = Effective potential, multibinit
+#%% description = 
+#%%   running a molecular dynamics using an effective lattice model
+#%% topics = LatticeModel
+#%%<END TEST_INFO>
+

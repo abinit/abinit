@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_gwls_wf
 !! NAME
 !! m_gwls_wf
@@ -7,14 +6,10 @@
 !!  .
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2019 ABINIT group (JLJ, BR, MC)
+!! Copyright (C) 2009-2024 ABINIT group (JLJ, BR, MC)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -67,12 +62,6 @@ contains
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      gwls_hamiltonian
-!!
-!! CHILDREN
-!!      xmpi_sum
-!!
 !! SOURCE
 
 subroutine set_wf(dv2,nx2,ny2,nz2,nk2,nb2,ng2,cbf2,cf2,cb2)
@@ -105,10 +94,6 @@ end subroutine set_wf
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!!
-!! CHILDREN
 !!
 !!
 !! SOURCE
@@ -141,10 +126,6 @@ end function norm_k
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!!
-!! CHILDREN
 !!
 !!
 !! SOURCE
@@ -176,10 +157,6 @@ end function norm_kc
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!!
-!! CHILDREN
 !!
 !!
 !! SOURCE
@@ -211,10 +188,6 @@ end function scprod_kc
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!!
-!! CHILDREN
 !!
 !!
 !! SOURCE
@@ -228,7 +201,7 @@ end function scprod_kc
 !  integer :: i
 !  real(dp), allocatable :: eq_lin(:,:)
 !! *************************************************************************
-!  ABI_ALLOCATE(eq_lin,(4,k))
+!  ABI_MALLOC(eq_lin,(4,k))
 !
 !  !Copy the input data into 4 vectors that will be overwritten by dgtsv()
 !  eq_lin = zero
@@ -246,7 +219,7 @@ end function scprod_kc
 !  !to SEX, at order k, from orbital n.
 !  !We now replace the screened coulomb interaction by the coulomb hole...
 !  contribution = (eq_lin(4,1)-1.0)*norm_svne**2
-!  ABI_DEALLOCATE(eq_lin)
+!  ABI_FREE(eq_lin)
 ! end function contribution
 !!***
 
@@ -261,10 +234,6 @@ end function scprod_kc
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!!
-!! CHILDREN
 !!
 !!
 !! SOURCE
@@ -281,9 +250,9 @@ end function scprod_kc
 !  complex(dpc), allocatable :: a(:,:),b(:,:)  !For the (non-banded) solver of AX=B
 !! *************************************************************************
 !  !write(std_out,*)  "Allocating..."
-!  ABI_ALLOCATE(a,(kmax*nseeds,kmax*nseeds))
-!  ABI_ALLOCATE(b,(kmax*nseeds,1))
-!  ABI_ALLOCATE(ipiv,(kmax*nseeds))
+!  ABI_MALLOC(a,(kmax*nseeds,kmax*nseeds))
+!  ABI_MALLOC(b,(kmax*nseeds,1))
+!  ABI_MALLOC(ipiv,(kmax*nseeds))
 !  !write(std_out,*)  "Zeroing..."
 !  a=zero
 !  b=zero
@@ -323,9 +292,9 @@ end function scprod_kc
 !  contribution_bloc(1) = real(b(1,1))*norm_svne**2
 !  contribution_bloc(2) = aimag(b(1,1))*norm_svne**2
 !  !write(std_out,*)  "Deallocating..."
-!  ABI_DEALLOCATE(a)
-!  ABI_DEALLOCATE(b)
-!  ABI_DEALLOCATE(ipiv)
+!  ABI_FREE(a)
+!  ABI_FREE(b)
+!  ABI_FREE(ipiv)
 ! end function contribution_bloc
 !!***
 
@@ -340,10 +309,6 @@ end function scprod_kc
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!!
-!! CHILDREN
 !!
 !!
 !! SOURCE

@@ -1,0 +1,773 @@
+\chapter{The \textit{configure} script}
+
+\section{Running configure}
+
+Autoconf is a tool producing a shell script that automatically configures
+software source code to adapt to many kinds of environments. \textbf{The
+configuration script produced by Autoconf is independent of Autoconf
+when it is run, so that its users do not need to install Autoconf}.
+In other words: you do not need have Autoconf installed to build ABINIT.
+Moreover this configuration script requires no manual user intervention
+when run; it do not normally even need an argument specifying the
+system type. Instead, it individually tests for the presence of each
+feature that the software package it is tuned to might need. However
+it does not yet have paranormal powers, and in particular has no access
+to what you have in mind. You still have to explicitely interact with
+it for now, and the best way to do it is through the numerous options
+of this \textit{configure} script. \\
+
+
+One highly-recommended step is to create a build directory and go
+there before running configure:
+
+\begin{verbatim}
+mkdir tmp-build && cd tmp-build
+\end{verbatim}
+
+In the following, we will assume that you have done so.\\
+
+
+If you run it without arguments, the \textit{configure} script will
+do its best to detect the components of your computer and development
+environment automatically. It is however possible to tune its behavior
+through the use of two classes of parameters:
+\begin{itemize}
+\item command-line options, composed of triggers (\textit{enable/disable})
+and specifiers (\textit{with/without}), plus a few special options; 
+\item environment variables, which influence the overall behaviour of the
+script. 
+\end{itemize}
+A typical call looks like:\begin{verbatim}
+    ../configure [OPTION] ... [VAR=VALUE] ...
+\end{verbatim}Here is what {[}OPTION{]} stands for:
+
+\begin{center}
+\begin{tabular}{|l|p{7cm}|}
+\hline 
+\textbf{Type ...}  & \textbf{if you want to ...} \tabularnewline
+\hline 
+\texttt{-{-}enable-FEATURE{[}=ARG{]}}  & activate FEATURE {[}ARG=yes{]} \tabularnewline
+\texttt{-{-}disable-FEATURE}  & do not activate FEATURE (same as \hbox{-{-}enable-FEATURE}=no) \tabularnewline
+\hline 
+\texttt{-{-}with-PACKAGE{[}=ARG{]}}  & use PACKAGE {[}ARG=yes{]} \tabularnewline
+\texttt{-{-}without-PACKAGE}  & do not use PACKAGE (same as \hbox{-{-}with-PACKAGE}=no) \tabularnewline
+\hline
+\end{tabular}
+\par\end{center}
+
+To assign environment variables (e.g., CPP, FC, \ldots{}), you specify
+them as \texttt{VAR=VALUE} couples on the command line. Please note
+that there must be no spaces around the '=' sign. Moreover, \texttt{VALUE}
+must be quoted when it contains spaces. If some assignements are ignored
+by the configure script, just try the other way around:\begin{verbatim}
+    VAR=VALUE ... ./configure [OPTION] ...
+\end{verbatim}
+
+In this chapter, the defaults for the options are specified in square
+brackets. No brackets means that there is no default value.
+
+
+\section{Environment variables}
+
+In table \ref{tab:env-summary}, you will find short descriptions
+of the most useful variables recognized by the configure script of
+ABINIT. Use these variables to override the choices made by \texttt{configure}
+or to help it to find libraries and programs with nonstandard names/locations.
+Please note that they always have precedence over command-line options.
+\\
+
+
+%
+\begin{table}
+\begin{centering}
+\begin{tabular}{|l|p{12cm}|}
+\hline 
+\textbf{Option}  & \textbf{Description} \tabularnewline
+\hline 
+AR  & Archiver \tabularnewline
+ARFLAGS  & Archiver flags \tabularnewline
+\hline 
+CPP  & C preprocessor \tabularnewline
+CPPFLAGS  & C/C++ preprocessor flags, e.g. \texttt{-I<include\_dir>} if you have
+headers in a non-standard directory named \textit{<include\_dir>} \tabularnewline
+\hline 
+CC  & C compiler command \tabularnewline
+CFLAGS  & C compiler flags \tabularnewline
+CC\_LDFLAGS  & C link flags to prepend to the command line \tabularnewline
+CC\_LIBS  & Libraries to append when linking a C program \tabularnewline
+\hline 
+CXX  & C++ compiler command \tabularnewline
+CXXFLAGS  & C++ compiler flags \tabularnewline
+CXX\_LDFLAGS  & C++ link flags to prepend to the command line \tabularnewline
+CXX\_LIBS  & Libraries to append when linking a C++ program \tabularnewline
+\hline 
+FC  & Fortran compiler command \tabularnewline
+FCFLAGS  & Fortran compiler flags \tabularnewline
+FC\_LDFLAGS  & Fortran link flags to prepend to the command line \tabularnewline
+FC\_LIBS  & Libraries to append when linking a Fortran program \tabularnewline
+\hline
+\end{tabular}
+\par\end{centering}
+
+\caption{Influencial environment variables for the build system of ABINIT.}
+
+
+\label{tab:env-summary} 
+\end{table}
+
+
+There are 2 environment variables of critical importance to the build
+system, though they cannot be managed by \textit{configure}: 
+\begin{itemize}
+\item \textit{PATH}, which defines the order in which the compilers will
+be found, and the number of hits; 
+\item \textit{LD\_LIBRARY\_PATH}, which will greatly help the build system
+find usable external libraries, in particular MPI. 
+\end{itemize}
+Improper settings of these 2 variables may cause a great confusion
+to the configure script in some cases, in particular when looking
+for MPI compilers and libraries. A typical issue encountered is the
+following crash:{\scriptsize
+\begin{verbatim}
+checking for gcc... /home/pouillon/hpc/openmpi-1.2.4-gcc4.1/bin/mpicc
+checking for C compiler default output file name... a.out
+checking whether the C compiler works... configure: error: cannot run C compiled programs.
+If you meant to cross compile, use `--host'.
+See `config.log' for more details.
+\end{verbatim}
+}And a look at config.log shows:{\scriptsize
+\begin{verbatim}
+...
+configure:6613: checking whether the C compiler works
+configure:6623: ./a.out ./a.out: error while loading shared libraries:
+libmpi.so.0: cannot open shared object file: No such file or directory
+configure:6626: $? = 127
+configure:6635: error: cannot run C compiled programs.
+...
+\end{verbatim}
+}
+
+This kind of error results from a missing path in the \textit{LD\_LIBRARY\_PATH}
+environment variable, and can be solved very easily, in the present
+case this way:{\scriptsize
+\begin{verbatim}
+export LD_LIBRARY_PATH="/home/pouillon/hpc/openmpi-1.2.4-gcc4.1/lib:${LD_LIBRARY_PATH}" \end{verbatim}
+}in the case of a BASH shell, and by:{\scriptsize
+\begin{verbatim}
+setenv LD_LIBRARY_PATH "/home/pouillon/hpc/openmpi-1.2.4-gcc4.1/lib:${LD_LIBRARY_PATH}" \end{verbatim}
+}for a C shell.
+
+
+\section{The configuration process}
+
+Configuring ABINIT is a delicate step-by-step process, because each
+component is interacting permanently with most others. This is reflected
+in the output of \textit{configure}, that we describe in this section.\\
+
+
+The process starts with an overall startup, where the basic parameters
+required by Autoconf and Automake are set. During the second part
+of this step, the build system of ABINIT reads the options from the
+command line and from a config file, making sure that the environment
+variables will always have precedence over the command-line options,
+which in turn override the options read from the config file. It then
+reports about changes in the user interface of the build system, warning
+the user if they have used an obsolete option.\\
+
+
+The next step is about ensuring the overall consistency of the options
+provided to configure. The build system takes the necessary decisions
+so that the code may be built safely. It then parses the options,
+and issues an error if the user has provided invalid options. The
+error messages give all the information needed to fix the problems.\\
+
+
+Then comes the MPI startup stage, which the first half of the configuration
+of MPI support. This must happen \textbackslash{}underline\{before\}
+any Autoconf compiler test, in order to give the build system the
+possibility to consistently select the MPI compilers that have been
+detected. This step is mandatory to avoid configuration issues later
+on, due to mismatches between the sequential and parallel compilers.\\
+
+
+The next step is to find the various utilities that the build system
+may need along the rest of the configuration process. This runs usually
+very smoothly, since these tools are found on most of the platforms
+ABINIT runs on.\\
+
+
+The preprocessing step is where serious things really start. The C
+preprocessor is searched for, which involves in turn the search for
+a working C compiler. At this point, all compilers must already have
+been selected. This is also typically where \textit{configure} may
+crash if the MPI installation detected is broken or misconfigured
+(see \textquotedbl{}Environment variables\textquotedbl{} section within
+this chapter), because the C compiler will not be able to produce
+executables. This is why MPI support is disabled by default, and we
+are open to any suggestion.\\
+
+
+The three next steps involve the search for suitable C, C++ and Fortran
+compilers, the detection of their type, and the application of tricks
+to have them work properly on the user's platform. These are also
+stages where the configuration may fail, in particular if no suitable
+Fortran compiler is found.\\
+
+
+Then the build system configures the use of the archiver, to build
+the numerous libraries that are part of ABINIT.\\
+
+
+The two next steps are about fine-tuning the compile flags so that
+the build will work fine if the architecture is 64-bit (work still
+in progress), and to set the adequate level of optimization according
+to the platform parameters identified so far.\\
+
+
+Here comes the probably most critical step of the configuration: MPI
+support. If everything could be set during the MPI startup stage,
+no further test is performed, and the parallel code is marked for
+building. If not, the build system will try to detect whether the
+compilers are able to build MPI source code and set the MPI options
+accordingly.\\
+
+
+Once all this is done, the build system can set the parameters for
+the linear algebra and FFT libraries (work still in progress), before
+turning to the connectors (see Fig.~\ref{fig:cfg-connectors}).\\
+
+\begin{figure}
+  \centerline{\includegraphics[width=15cm]{connectors}}
+  \caption{Dependency diagram of the connectors.}
+  \label{fig:cfg-connectors}
+\end{figure}
+
+One last configuration step is dedicated to the nightly build support,
+which is now working but still at an early stage of development.\\
+
+
+The very last step is to output the configuration to the numerous
+makefiles, as well as to a few other important files. At the end,
+a warning is issued if the Fortran compiler in use is known to cause
+trouble.
+
+
+\section{Options provided by Autoconf}
+
+Every \textit{configure} script generated by Autoconf provides a basic
+set of options, whatever the package and the environment. They either
+give information on the tunable parameters of the package or influence
+globally the build process. In most cases you will only need a few
+of them, if any. \\
+
+
+Overall configuration:
+
+\begin{center}
+\begin{tabular}{|rl|l|}
+\hline 
+\multicolumn{2}{|l|}{\textbf{Option}} & \textbf{Description} \tabularnewline
+\hline 
+-h,  & -{-}help  & display all options and exit \tabularnewline
+ & -{-}help=short  & display options specific to the ABINIT package \tabularnewline
+ & -{-}help=recursive  & display the short help of all the included packages \tabularnewline
+-V,  & -{-}version  & display version information and exit \tabularnewline
+-q,  & -{-}quiet, -{-}silent  & do not print `checking...' messages \tabularnewline
+ & -{-}cache-file=FILE  & cache test results in FILE {[}disabled{]} \tabularnewline
+-C,  & -{-}config-cache  & alias for `-{-}cache-file=config.cache' \tabularnewline
+-n,  & -{-}no-create  & do not create output files \tabularnewline
+ & -{-}srcdir=DIR  & find the sources in DIR {[}configure dir or `..'{]} \tabularnewline
+\hline
+\end{tabular}
+\par\end{center}
+
+Installation directories:
+
+\begin{center}
+\begin{tabular}{|l|p{9cm}|}
+\hline 
+\textbf{Option}  & \textbf{Description} \tabularnewline
+\hline 
+\texttt{-{-}prefix=PREFIX}  & install architecture-independent files in PREFIX {[}/opt{]} \tabularnewline
+\texttt{-{-}exec-prefix=EPREFIX}  & install architecture-dependent files in EPREFIX {[}PREFIX{]} \tabularnewline
+\hline
+\end{tabular}
+\par\end{center}
+
+By default, \texttt{make install} will install all the files in subdirectories
+of \textit{/opt/abinit/$<$version$>$}. You can specify an installation
+prefix other than \textit{/opt} using \texttt{\hbox{-{-}prefix}},
+for instance \texttt{\hbox{-{-}prefix=\$HOME}}. \\
+
+
+For a finer-grained control, use the options below. \\
+
+
+Fine tuning of the installation directories:
+
+\begin{center}
+\begin{tabular}{|l|l|}
+\hline 
+\textbf{Option}  & \textbf{Description} \tabularnewline
+\hline 
+\texttt{-{-}bindir=DIR}  & user executables {[}EPREFIX/bin{]} \tabularnewline
+\texttt{-{-}sbindir=DIR}  & system admin executables {[}EPREFIX/sbin{]} \tabularnewline
+\texttt{-{-}libexecdir=DIR}  & program executables {[}EPREFIX/libexec{]} \tabularnewline
+\texttt{-{-}datadir=DIR}  & read-only architecture-independent data {[}PREFIX/share{]} \tabularnewline
+\texttt{-{-}sysconfdir=DIR}  & read-only single-machine data {[}PREFIX/etc{]} \tabularnewline
+\texttt{-{-}sharedstatedir=DIR}  & modifiable architecture-independent data {[}PREFIX/com{]} \tabularnewline
+\texttt{-{-}localstatedir=DIR}  & modifiable single-machine data {[}PREFIX/var{]} \tabularnewline
+\texttt{-{-}libdir=DIR}  & object code libraries {[}EPREFIX/lib{]} \tabularnewline
+\texttt{-{-}includedir=DIR}  & C header files {[}PREFIX/include{]} \tabularnewline
+\texttt{-{-}oldincludedir=DIR}  & C header files for non-gcc {[}/usr/include{]} \tabularnewline
+\texttt{-{-}infodir=DIR}  & info documentation {[}PREFIX/info{]} \tabularnewline
+\texttt{-{-}mandir=DIR}  & man documentation {[}PREFIX/man{]} \tabularnewline
+\hline
+\end{tabular}
+\par\end{center}
+
+Program names:
+
+\begin{center}
+\begin{tabular}{|l|p{7cm}|}
+\hline 
+\textbf{Option}  & \textbf{Description} \tabularnewline
+\hline 
+\texttt{-{-}program-prefix=PREFIX}  & prepend PREFIX to installed program names \tabularnewline
+\texttt{-{-}program-suffix=SUFFIX}  & append SUFFIX to installed program names \tabularnewline
+\texttt{-{-}program-transform-name=PROGRAM}  & run sed PROGRAM on installed program names \tabularnewline
+\hline
+\end{tabular}
+\par\end{center}
+
+System types:
+
+\begin{center}
+\begin{tabular}{|l|l|}
+\hline 
+\textbf{Option}  & \textbf{Description} \tabularnewline
+\hline 
+\texttt{-{-}build=BUILD}  & configure for building on BUILD {[}guessed{]} \tabularnewline
+\texttt{-{-}host=HOST}  & cross-compile to build programs to run on HOST {[}BUILD{]} \tabularnewline
+\texttt{-{-}target=TARGET}  & configure for building compilers for TARGET {[}HOST{]} \tabularnewline
+\hline
+\end{tabular}
+\par\end{center}
+
+Developer options:
+
+\begin{center}
+\begin{tabular}{|l|l|}
+\hline 
+\textbf{Option}  & \textbf{Description} \tabularnewline
+\hline 
+\texttt{-{-}enable-shared{[}=PKGS{]}}  & build shared libraries {[}default=no{]} \tabularnewline
+\texttt{-{-}enable-dependency-tracking}  & speeds up one-time build \tabularnewline
+\texttt{-{-}enable-dependency-tracking}  & do not reject slow dependency extractors \tabularnewline
+\texttt{-{-}with-gnu-ld}  & assume the C compiler uses GNU ld {[}default=no{]} \tabularnewline
+\hline
+\end{tabular}
+\par\end{center}
+
+The following sections describe Abinit-specific options.
+
+
+\section{Compiler options}
+
+
+\subsection{Debugging}
+
+The build system of Abinit provides a comprehensive database of debugging
+flags, covering all supported compiler vendors, compiler versions
+and architectures. They can be accessed when using the \textit{profile}
+debugging mode of the build system, which is enabled when the \textit{\hbox{-{-}enable-debug}}
+option is neither set to {}``yes'' nor {}``no''. The profile mode
+offers 4 different optimization levels, controlled by the value of
+the\textit{ \hbox{-{-}enable-debug}} option: 
+\begin{itemize}
+\item \textit{basic};
+\item \textit{enhanced};
+\item \textit{paranoid};
+\item \textit{naughty}.
+\end{itemize}
+The default level is \textit{basic}, which corresponds to the setting
+of minimal compiler-dependent debugging flags, typically {}``\textit{-g}''.
+The \textit{enhanced} level add checks for the most common bad programming
+practices, while the \textit{paranoid} level covers a much broader
+range of mistakes. The \textit{naughty} level should be used by developers
+only, since it tries to make the build fail. It is important to note
+that these debugging levels are strictly ordered and cumulative. This
+means e.g. that setting \textit{\hbox{-{-}enable-debug=paranoid}}
+will also apply the flags from the \textit{basic} and \textit{enhanced}
+levels.\\
+
+
+When \textit{\hbox{-{-}enable-debug=yes}}, the build system expects
+debugging parameters from the command line. Compile flags may be specified
+through the \textit{CFLAGS\_DEBUG} (C programs), \textit{CXXFLAGS\_DEBUG}
+(C++ programs) and \textit{FCFLAGS\_DEBUG} (Fortran programs) environment
+variables. Link flags may be provided through \textit{CC\_LDFLAGS\_DEBUG}
+(C programs), \textit{CXX\_LDFLAGS\_DEBUG} (C++ programs) and \textit{FC\_LDFLAGS\_DEBUG}
+(Fortran programs). Linking additional libraries should be done through
+\textit{CC\_LIBS\_DEBUG} (C programs), \textit{CXX\_LIBS\_DEBUG} (C++
+programs) and \textit{FC\_LIBS\_DEBUG} (Fortran programs).\\
+
+
+When \textit{\hbox{-{-}enable-debug=no}}, the debugging features
+of the build system are completely silenced and the above environment
+variables are ignored.
+
+
+\subsection{Optimization}
+
+The build system of Abinit provides a comprehensive database of optimization
+flags, covering all supported compiler vendors, compiler versions
+and architectures. They can be accessed when using the \textit{profile}
+optimization mode of the build system, which is enabled when the \textit{\hbox{-{-}enable-optim}}
+option is neither set to {}``yes'' nor {}``no''. The profile mode
+offers 3 different optimization levels, controlled by the value of
+the\textit{ \hbox{-{-}enable-optim}} option: 
+\begin{itemize}
+\item \textit{safe}; 
+\item \textit{standard}; 
+\item \textit{aggressive}.
+\end{itemize}
+These names are self-explanatory, and the default is of course \textit{standard},
+which corresponds to the optimization database present in version
+4 of Abinit, extended and updated. The \textit{safe} level may be
+quite convenient when the build fails at the standard level, due to
+bugs in the compilers. It is obvious that the \textit{aggressive}
+level should be used with extreme care, and systematically accompanied
+by a run of the whole test suite before any production calculation.\\
+
+
+When \textit{\hbox{-{-}enable-optim=yes}}, the build system expects
+optimization parameters from the command line. Compile flags may be
+specified through the \textit{CFLAGS\_OPTIM} (C programs), \textit{CXXFLAGS\_OPTIM}
+(C++ programs) and \textit{FCFLAGS\_OPTIM} (Fortran programs) environment
+variables. Link flags may be provided through \textit{CC\_LDFLAGS\_OPTIM}
+(C programs), \textit{CXX\_LDFLAGS\_OPTIM} (C++ programs) and \textit{FC\_LDFLAGS\_OPTIM}
+(Fortran programs). Linking additional libraries should be done through
+\textit{CC\_LIBS\_OPTIM} (C programs), \textit{CXX\_LIBS\_OPTIM} (C++
+programs) and \textit{FC\_LIBS\_OPTIM} (Fortran programs).\\
+
+
+When \textit{\hbox{-{-}enable-optim=no}}, the optimization features
+of the build system are completely silenced and the above environment
+variables are ignored. Please note that debugging has precedence over
+optimization, and that the latter is disabled for all debugging levels
+above \textit{basic}.
+
+
+\subsection{Hints}
+
+Abinit is a complex project, embedding the source code of other projects
+as well. In order to be successful, the builds require \textit{hints}
+in addition to the other flags. The build system of Abinit thus provides
+a comprehensive database of optimization flags, covering all supported
+compiler vendors, compiler versions and architectures. This is the
+purpose of the \textit{\hbox{-{-}enable-hints}} option, which
+defaults to {}``yes''. It is extremely recommend to keep it so.\\
+
+
+However, there are cases where even the build system is not able to
+provide sufficient information for a successful build. It can thus
+be complemented by extra information from the command line. Compile
+flags may be specified through the \textit{CFLAGS\_EXTRA} (C programs),
+\textit{CXXFLAGS\_EXTRA} (C++ programs) and \textit{FCFLAGS\_EXTRA}
+(Fortran programs) environment variables. Link flags may be provided
+through \textit{CC\_LDFLAGS\_EXTRA} (C programs), \textit{CXX\_LDFLAGS\_EXTRA}
+(C++ programs) and \textit{FC\_LDFLAGS\_EXTRA} (Fortran programs).
+Linking additional libraries should be done through \textit{CC\_LIBS\_EXTRA}
+(C programs), \textit{CXX\_LIBS\_EXTRA} (C++ programs) and \textit{FC\_LIBS\_EXTRA}
+(Fortran programs).
+
+
+\subsection{64-bit architectures}
+
+Most 64-bit architectures do not require specific flags for successful
+builds. However, in some situations, in particular on hybrid 32/64-bit
+systems, it is necessary to add such flags to select the proper binary
+object format. In these cases, you may want to use the \textit{\hbox{-{-}enable-64bit-flags}}
+option, in particular if you encounter link-time and/or run-time problems.\\
+
+
+Please note that the support for 64-bit architectures is still incomplete
+and will be reworked during the next development cycle of ABINIT.
+
+
+\subsection{Overriding the build-system settings}
+
+In some extremely rare configurations, the build system is not able
+to set properly the build parameters. Should this happen, you can
+override all build-system settings by directly providing the flags
+from the command line. Compile flags may be specified through the
+\textit{CFLAGS} (C programs), \textit{CXXFLAGS} (C++ programs) and
+\textit{FCFLAGS} (Fortran programs) environment variables. Link flags
+may be provided through \textit{CC\_LDFLAGS} (C programs), \textit{CXX\_LDFLAGS}
+(C++ programs) and \textit{FC\_LDFLAGS} (Fortran programs). Linking
+additional libraries should be done through \textit{CC\_LIBS} (C programs),
+\textit{CXX\_LIBS} (C++ programs) and \textit{FC\_LIBS} (Fortran programs).\\
+
+
+If you had to that, please report a bug to \href{https://bugs.launchpad.net/abinit/+filebug}{https://bugs.launchpad.net/abinit/+filebug},
+providing as much information as you can on the architecture, including
+and the compiler, including how to get the version number of the compiler
+on the command line and the output of this command. We will add support
+for your case as soon as we can.
+
+
+\section{MPI options}
+
+In addition to serial optimization, ABINIT provides parallel binaries
+relying upon the MPI library. If you do not know what MPI stands for,
+then you \underbar{really} need the help of a computer scientist before
+reading this section. First let us make clear that we cannot provide
+you with any support to install MPI. If you need to do it, we advise
+you to ask help to your system and/or network administrators, because
+it will likely require special permissions and fair technical skills.
+In many cases you will already have a working installation of MPI
+at your disposal, and will at most need some information about its
+location.\\
+
+
+Providing extended support for MPI is extremely delicate: there is
+no standard location for the package, there are concurrent implementations
+following different philosophies, and Fortran support is compiler-dependent.
+Moreover, there might be several versions of MPI installed on your
+system, and you have to choose one of them carefully. In particular,
+if you want to enable the build of parallel code in ABINIT --- which
+you will likely do --- you have to build ABINIT with the same Fortran
+compiler that has been used for MPI.\\
+
+
+The MPI options provided by the build system are summarized in the
+following table.\\
+
+
+\begin{center}
+\begin{tabular}{|l|l|}
+\hline 
+\textbf{Option}  & \textbf{Description} \tabularnewline
+\hline 
+\texttt{-{-}enable-mpi}  & Enable MPI support\tabularnewline
+\texttt{-{-}enable-mpi-io}  & Enable parallel I/O {[}default=no{]}\tabularnewline
+\texttt{-{-}enable-mpi-trace}  & Enable MPI time tracing {[}default=no{]}\tabularnewline
+\hline 
+\texttt{-{-}with-mpi-prefix=PATH}  & Prefix for the MPI installation\tabularnewline
+\hline 
+\texttt{-{-}with-mpi-level=NUMBER} & MPI implementation level (1 or 2)\tabularnewline
+\hline 
+\texttt{-{-}with-mpi-includes=FLAGS}  & MPI include flags\tabularnewline
+\texttt{-{-}with-mpi-libs=LIBS}  & MPI libraries to append at the link stage\tabularnewline
+\hline 
+\texttt{-{-}with-mpi-runner=PROG}  & Full path to the MPI runner program\tabularnewline
+\hline
+\end{tabular}
+\par\end{center}
+
+If \hbox{-{-}enable-mpi} is left unset, there are 2 ways of enabling
+the build of parallel binaries: either by using the \hbox{-{-}with-mpi-prefix}
+option, or by specifying MPI-capable compilers from the command line,
+through the CC (C compiler), CXX (C++ compiler) and FC (Fortran compiler)
+environment variables. Please note that you have to specify \hbox{-{-}with-mpi-runner}
+manually in the latter case.\\
+
+
+If \textquotedbl{}-{-}enable-mpi\textquotedbl{} is set to \textquotedbl{}yes\textquotedbl{},
+the parallel code will be built only if a usable MPI implementation
+can be detected. If the \textquotedbl{}-{-}with-mpi-prefix\textquotedbl{}
+option is provided, \textit{enable\_mpi} is automatically set to \textquotedbl{}yes\textquotedbl{}
+and the build system tries to find a usable generic MPI installation
+at the specified location very early during the configuration. If
+this step is successful, the compilers and the runner provided by
+MPI are used in \textit{lieu} of the user-specified ones, and no further
+test is performed. If \textquotedbl{}-{-}with-mpi-prefix\textquotedbl{}
+is not present, the build of parallel code will be deactivated unless
+\textquotedbl{}-{-}enable-mpi\textquotedbl{} is explicitely set
+to \textquotedbl{}yes\textquotedbl{}. \\
+
+
+If the first attempt fails, a second one is undertaken once the compilers
+have been configured. The build system then checks whether the compilers
+are able to build MPI source code natively, taking advantage of the
+user-specified parameters. If successful, a MPI runner will be looked
+for using the \textit{PATH} environment variable. If something goes
+wrong, the build of parallel code will be automatically disabled.
+In such a case, and as a last resort, the user may force the build
+through the use of \textquotedbl{}-{-}enable-mpi=manual\textquotedbl{}.
+\\
+
+
+Additional levels of parallelization may be activated, though they
+are still experimental and meant to be used by developers only: 
+\begin{itemize}
+\item \textquotedbl{}-{-}enable-mpi-io\textquotedbl{}: parallel file I/O; 
+\item \textquotedbl{}-{-}enable-mpi-trace\textquotedbl{}: parallel time
+tracing. 
+\end{itemize}
+You will find a detailed description of all these options in the source
+package of ABINIT, within the MPI support section of the \textquotedbl{}{~}abinit/doc/build/config-template.ac9\textquotedbl{}
+template. We warmly recommend you to have a close look at this file
+and to use it as much as you wish.
+
+
+\section{External libraries}
+
+The \textit{configure} script of ABINIT provides a unified way of
+dealing with external libraries, by means of a trigger (enable/disable)
+and two specifiers (for include and link flags) for each package.
+Below the surface, things are however much more complex: some libraries
+are required by ABINIT, others not; some are contained within the
+source package, others are too big to be included; a few of them depend
+on other external libraries, which may or may not be found within
+the package. The current situation is summarized in table \ref{tab:dsc-extlibs},
+and the corresponding options are described in table \ref{tab:opt-extlibs}.
+\\
+
+
+%
+\begin{table}
+\begin{centering}
+\begin{tabular}{|c|c|c|c|c|}
+\hline 
+\textbf{Library}  & \textbf{Internal}  & \textbf{Required}  & \textbf{Depends}  & \textbf{Note} \tabularnewline
+\hline 
+bigdft  & yes  & no  & ---  & \tabularnewline
+\hline 
+etsf-io  & yes  & no  & netcdf  & \tabularnewline
+\hline 
+etsf-xc  & yes  & no  & ---  & \textit{Needs more testing} \tabularnewline
+\hline 
+fftw  & no  & no  & ---  & \tabularnewline
+\hline 
+fox  & yes  & no  & ---  & \textit{Currently unsupported} \tabularnewline
+\hline 
+linalg  & yes  & yes  & ---  & \tabularnewline
+\hline 
+netcdf  & yes  & no  & ---  & \tabularnewline
+\hline 
+wannier90  & yes  & no  & ---  & \textit{Test library for the plug-in feature} \tabularnewline
+\end{tabular}
+\par\end{centering}
+
+\caption{Specifications of the ABINIT libraries.}
+
+
+\label{tab:dsc-extlibs} 
+\end{table}
+
+
+When a library is required and cannot be found outside the source
+package, the build system systematically restores consistency by ignoring
+user requests and disabling the corresponding support. \\
+
+
+Providing automatic external library detection lead to complicate
+the build system too much, and jeopardized its maintainability. Hence
+we decided to aim at maximum simplicity. This means that you need
+to provide the include and link flags yourself, just as you would
+do when directly calling the compiler, e.g.:
+
+{\small \begin{verbatim} ./configure \
+ --enable-netcdf \
+ --with-netcdf-includes=\textquotedbl{}-I/opt/etsf/include/g95\textquotedbl{}
+\
+ --with-netcdf-libs=\textquotedbl{}-L/opt/etsf/lib -lnetcdf\textquotedbl{}
+\end{verbatim} }{\small \par}
+
+%
+\begin{table}
+\begin{centering}
+\begin{tabular}{|l|p{9cm}|}
+\hline 
+\textbf{Option}  & \textbf{Description} \tabularnewline
+\hline 
+\texttt{-{-}enable-bigdft}  & Enable support for the BigDFT wavelet library {[}default=yes{]} \tabularnewline
+\texttt{-{-}with-bigdft-includes}  & Include flags for the BigDFT library \tabularnewline
+\texttt{-{-}with-bigdft-libs}  & Library flags for the BigDFT library \tabularnewline
+\hline 
+\texttt{-{-}enable-etsf-io}  & Enable support for the ETSF I/O library {[}default=no{]} \tabularnewline
+\texttt{-{-}with-etsf-io-includes}  & Include flags for the ETSF I/O library \tabularnewline
+\texttt{-{-}with-etsf-io-libs}  & Library flags for the ETSF I/O library \tabularnewline
+\hline 
+\texttt{-{-}enable-etsf-xc}  & Enable support for the ETSF exchange-correlation library {[}default=no{]} \tabularnewline
+\texttt{-{-}with-etsf-xc-includes}  & Include flags for the XC library \tabularnewline
+\texttt{-{-}with-etsf-xc-libs}  & Library flags for the ETSF XC library \tabularnewline
+\hline 
+\texttt{-{-}enable-fftw}  & Enable support for the FFTW library {[}default=no{]} \tabularnewline
+\texttt{-{-}enable-fftw-threads}  & Enable support for the threaded FFTW library {[}default=no{]} \tabularnewline
+\texttt{-{-}with-fftw-libs}  & Library flags for the FFTW library \tabularnewline
+\hline 
+\texttt{-{-}enable-fox}  & Enable support for the FoX I/O library {[}default=no{]} \tabularnewline
+\texttt{-{-}with-fox-includes}  & Include flags for the FoX I/O library \tabularnewline
+\texttt{-{-}with-fox-libs}  & Library flags for the FoX I/O library \tabularnewline
+\hline 
+\texttt{-{-}with-linalg-libs}  & Library flags for the linalg library \tabularnewline
+\hline 
+\texttt{-{-}enable-netcdf}  & Enable support for the NetCDF I/O library {[}default=no{]} \tabularnewline
+\texttt{-{-}with-netcdf-includes}  & Include flags for the NetCDF library \tabularnewline
+\texttt{-{-}with-netcdf-libs}  & Library flags for the NetCDF library \tabularnewline
+\hline 
+\texttt{-{-}enable-wannier90}  & Enable support for the Wannier90 library {[}default=no{]} \tabularnewline
+\texttt{-{-}with-wannier90-includes}  & Include flags for the Wannier90 library \tabularnewline
+\texttt{-{-}with-wannier90-libs}  & Library flags for the Wannier90 library \tabularnewline
+\hline
+\end{tabular}
+\par\end{centering}
+
+\caption{External library options of ABINIT.}
+
+
+\label{tab:opt-extlibs} 
+\end{table}
+
+
+
+\section{Other options}
+
+The \textit{configure} script provides a few more options. Though
+most of them will only be used in specific situations, they might
+prove very convenient in these cases. The full list of special options
+may be found in table \ref{tab:opt-special}. \\
+
+
+The build system of ABINIT makes it possible to use config files to
+store your preferred build parameters. A fully documented template
+is provided in the source code under \textit{~abinit/doc/build/config-template.ac9},
+along with a few examples in \textit{~abinit/doc/build/config-examples/}.
+After editing this file to suit your needs, you may save it as \textit{\$HOME/.abinit/build/$<$hostname$>$.ac}
+to keep these parameters as per-user defaults. Just replace \textit{$<$hostname$>$}
+by the name of your machine, excluding the domain name. E.g.: if your
+machine is called \textit{myhost.mydomain}, you will save this file
+as \textit{\$HOME/.abinit/build/myhost.ac}. You may put this file
+at the top level of an ABINIT source tree as well, in which case its
+definitions will apply to this particular tree only. Using config
+files is highly recommended, since it saves you from typing all the
+options on the command-line each time you build a new version of ABINIT.
+\\
+
+
+%
+\begin{table}
+\begin{centering}
+\begin{tabular}{|l|l|}
+\hline 
+\textbf{Option}  & \textbf{Description} \tabularnewline
+\hline 
+\texttt{-{-}enable-config-file}  & Read options from config files {[}default=yes{]} \tabularnewline
+\texttt{-{-}with-config-file=FILE}  & Specify config file to read options from \tabularnewline
+\hline 
+\texttt{-{-}enable-cclock}  & Use C clock for timings {[}default=no{]} \tabularnewline
+\hline 
+\texttt{-{-}enable-stdin}  & Read file lists from standard input {[}default=yes{]} \tabularnewline
+\hline
+\end{tabular}
+\par\end{centering}
+
+\caption{Special options of ABINIT.}
+
+
+\label{tab:opt-special} 
+\end{table}
+

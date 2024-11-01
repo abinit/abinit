@@ -7,7 +7,7 @@
 !! Solve Anderson model with the density/density Hubbard one approximation
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2019 ABINIT group (BAmadon)
+!! Copyright (C) 2006-2024 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -15,10 +15,6 @@
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -51,7 +47,7 @@ contains
 !! Solve the hubbard one approximation
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2019 ABINIT group (BAmadon)
+!! Copyright (C) 1999-2024 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -59,22 +55,16 @@ contains
 !!
 !! INPUTS
 !!  cryst_struc
-!!  istep    =  step of iteration for LDA.
-!!  lda_occup
-!!  mpi_enreg=informations about MPI parallelization
-!!  paw_dmft =  data for self-consistent LDA+DMFT calculations.
+!!  istep    =  step of iteration for DFT.
+!!  dft_occup
+!!  mpi_enreg=information about MPI parallelization
+!!  paw_dmft =  data for self-consistent DFT+DMFT calculations.
 !!  pawang <type(pawang)>=paw angular mesh and related data
 !!
 !! OUTPUT
-!!  paw_dmft =  data for self-consistent LDA+DMFT calculations.
+!!  paw_dmft =  data for self-consistent DFT+DMFT calculations.
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      impurity_solve,spectral_function
-!!
-!! CHILDREN
-!!      combin,destroy_green,init_green,wrtout
 !!
 !! SOURCE
 
@@ -144,18 +134,18 @@ subroutine hubbard_one(cryst_struc,green,hu,paw_dmft,pawang,pawprtvol,hdc,weiss)
 !======================================
 !Allocations: levels and eigenvectors
 !======================================
- ABI_DATATYPE_ALLOCATE(level_diag,(natom))
- ABI_DATATYPE_ALLOCATE(eigvectmatlu,(natom,nsppol))
- ABI_DATATYPE_ALLOCATE(udens_atoms,(natom))
+ ABI_MALLOC(level_diag,(natom))
+ ABI_MALLOC(eigvectmatlu,(natom,nsppol))
+ ABI_MALLOC(udens_atoms,(natom))
  call init_matlu(natom,nspinor,nsppol,paw_dmft%lpawu,level_diag)
  do iatom=1,cryst_struc%natom
    lpawu=paw_dmft%lpawu(iatom)
    if(lpawu/=-1) then
      tndim=nspinor*(2*lpawu+1)
      do isppol=1,nsppol
-       ABI_ALLOCATE(eigvectmatlu(iatom,isppol)%value,(tndim,tndim))
+       ABI_MALLOC(eigvectmatlu(iatom,isppol)%value,(tndim,tndim))
      end do
-     ABI_ALLOCATE(udens_atoms(iatom)%value,(2*(2*lpawu+1),2*(2*lpawu+1)))
+     ABI_MALLOC(udens_atoms(iatom)%value,(2*(2*lpawu+1),2*(2*lpawu+1)))
      level_diag(iatom)%mat=czero
    end if
  end do
@@ -171,7 +161,7 @@ subroutine hubbard_one(cryst_struc,green,hu,paw_dmft,pawang,pawprtvol,hdc,weiss)
 !     do isppol=1,nsppol
 !!      Take \epsilon_{nks}
 !!      ========================
-!       energy_level%ks(isppol,ikpt,iband,iband)=paw_dmft%eigen_lda(isppol,ikpt,iband)
+!       energy_level%ks(isppol,ikpt,iband,iband)=paw_dmft%eigen_dft(isppol,ikpt,iband)
 !     end do
 !   end do
 ! end do
@@ -181,7 +171,7 @@ subroutine hubbard_one(cryst_struc,green,hu,paw_dmft,pawang,pawprtvol,hdc,weiss)
 !!Compute atomic levels from projection of \epsilon_{nks} and symetrize
 !!======================================================================
 ! call loc_oper(energy_level,paw_dmft,1)
-! write(message,'(a,2x,a,f13.5)') ch10," == Print Energy levels before sym and only LDA"
+! write(message,'(a,2x,a,f13.5)') ch10," == Print Energy levels before sym and only DFT"
 ! call wrtout(std_out,message,'COLL')
 ! call print_matlu(energy_level%matlu,natom,1)
 ! do iatom = 1 , natom
@@ -209,7 +199,7 @@ subroutine hubbard_one(cryst_struc,green,hu,paw_dmft,pawang,pawprtvol,hdc,weiss)
 !========================
 !Compute Weiss function
 !========================
- ABI_ALLOCATE(Id,(20,20,nspinor,nspinor))
+ ABI_MALLOC(Id,(20,20,nspinor,nspinor))
  do iatom = 1 , natom
    lpawu=paw_dmft%lpawu(iatom)
    if(lpawu/=-1) then
@@ -241,7 +231,7 @@ subroutine hubbard_one(cryst_struc,green,hu,paw_dmft,pawang,pawprtvol,hdc,weiss)
      end do ! ifreq
    end if ! lpawu
  end do ! natom
- ABI_DEALLOCATE(Id)
+ ABI_FREE(Id)
 
 !=================================================================
 !Diagonalizes atomic levels and keep eigenvectors in eigvectmatlu
@@ -350,18 +340,18 @@ subroutine hubbard_one(cryst_struc,green,hu,paw_dmft,pawang,pawprtvol,hdc,weiss)
  call destroy_green(green_hubbard)
  call destroy_oper(energy_level)
  call destroy_matlu(level_diag,natom)
- ABI_DATATYPE_DEALLOCATE(level_diag)
+ ABI_FREE(level_diag)
  do iatom=1,cryst_struc%natom
    lpawu=paw_dmft%lpawu(iatom)
    if(lpawu/=-1) then
-     ABI_DEALLOCATE(udens_atoms(iatom)%value)
+     ABI_FREE(udens_atoms(iatom)%value)
      do isppol=1,nsppol
-       ABI_DEALLOCATE(eigvectmatlu(iatom,isppol)%value)
+       ABI_FREE(eigvectmatlu(iatom,isppol)%value)
      end do
    end if
  end do
- ABI_DATATYPE_DEALLOCATE(eigvectmatlu)
- ABI_DATATYPE_DEALLOCATE(udens_atoms)
+ ABI_FREE(eigvectmatlu)
+ ABI_FREE(udens_atoms)
 !!***
 
 contains
@@ -374,7 +364,7 @@ contains
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2019 ABINIT group (BAmadon)
+!! Copyright (C) 1999-2024 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -382,22 +372,16 @@ contains
 !!
 !! INPUTS
 !!  cryst_struc
-!!  istep    =  step of iteration for LDA.
-!!  lda_occup
-!!  mpi_enreg=informations about MPI parallelization
-!!  paw_dmft =  data for self-consistent LDA+DMFT calculations.
+!!  istep    =  step of iteration for DFT.
+!!  dft_occup
+!!  mpi_enreg=information about MPI parallelization
+!!  paw_dmft =  data for self-consistent DFT+DMFT calculations.
 !!  pawang <type(pawang)>=paw angular mesh and related data
 !!
 !! OUTPUT
-!!  paw_dmft =  data for self-consistent LDA+DMFT calculations.
+!!  paw_dmft =  data for self-consistent DFT+DMFT calculations.
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      hubbard_one
-!!
-!! CHILDREN
-!!      combin,destroy_green,init_green,wrtout
 !!
 !! SOURCE
 
@@ -464,18 +448,18 @@ subroutine green_atomic_hubbard(cryst_struc,green_hubbard,hu,level_diag,paw_dmft
 !      ===================================
 !      Allocations
 !      ===================================
-       ABI_DATATYPE_ALLOCATE(occ_level,(0:nlevels))
-       ABI_ALLOCATE(maxener,(0:nlevels))
-       ABI_ALLOCATE(minener,(0:nlevels))
-       ABI_ALLOCATE(elevels,(nlevels))
-       ABI_DATATYPE_ALLOCATE(e_nelec,(0:nlevels))
+       ABI_MALLOC(occ_level,(0:nlevels))
+       ABI_MALLOC(maxener,(0:nlevels))
+       ABI_MALLOC(minener,(0:nlevels))
+       ABI_MALLOC(elevels,(nlevels))
+       ABI_MALLOC(e_nelec,(0:nlevels))
        do nelec=0,nlevels ! number of electrons
          cnk=nint(permutations(nlevels,nelec)/factorial(nelec))
-         ABI_ALLOCATE(occ_level(nelec)%repart      ,(cnk,nelec))
-         ABI_ALLOCATE(occ_level(nelec)%ocp         ,(cnk,nlevels))
-         ABI_ALLOCATE(occ_level(nelec)%transition  ,(cnk,nlevels-nelec))
-         ABI_ALLOCATE(occ_level(nelec)%transition_m,(cnk,nlevels))
-         ABI_ALLOCATE(e_nelec  (nelec)%config      ,(cnk))
+         ABI_MALLOC(occ_level(nelec)%repart      ,(cnk,nelec))
+         ABI_MALLOC(occ_level(nelec)%ocp         ,(cnk,nlevels))
+         ABI_MALLOC(occ_level(nelec)%transition  ,(cnk,nlevels-nelec))
+         ABI_MALLOC(occ_level(nelec)%transition_m,(cnk,nlevels))
+         ABI_MALLOC(e_nelec  (nelec)%config      ,(cnk))
          e_nelec(nelec)%config(:)=zero
 !        write(std_out,*) "permutations",nint(permutations(nlevels,nelec)/factorial(nelec))
 !        write(std_out,*) "size",size(occ_level),size(occ_level(nelec)%repart,1)
@@ -485,8 +469,8 @@ subroutine green_atomic_hubbard(cryst_struc,green_hubbard,hu,level_diag,paw_dmft
 !        levels
 !        levels
        end do
-       ABI_ALLOCATE(occup,(0:nlevels,nlevels))
-       ABI_ALLOCATE(nconfig_nelec,(0:nlevels))
+       ABI_MALLOC(occup,(0:nlevels,nlevels))
+       ABI_MALLOC(nconfig_nelec,(0:nlevels))
 
 !      ===================================
 !      Initialization
@@ -506,7 +490,7 @@ subroutine green_atomic_hubbard(cryst_struc,green_hubbard,hu,level_diag,paw_dmft
              if(abs(aimag(level_diag(iatom)%mat(im1,im1,isppol,ispinor,ispinor)))>tol8) then
                message = " Hubbard I: levels are imaginary"
                write(std_out,*) level_diag(iatom)%mat(im1,im1,isppol,ispinor,ispinor)
-               MSG_BUG(message)
+               ABI_BUG(message)
              end if
              if(nsppol==1.and.nspinor==1) then
                elevels(nspinor*(2*lpawu+1)+iacc)=level_diag(iatom)%mat(im1,im1,isppol,ispinor,ispinor)
@@ -532,7 +516,7 @@ subroutine green_atomic_hubbard(cryst_struc,green_hubbard,hu,level_diag,paw_dmft
          call combin(1,nconfig,nconfig_nelec,nelec,nlevels,occ_level,occup)
          if(nconfig_nelec(nelec)/=nint(permutations(nlevels,nelec)/factorial(nelec))) then
            message = " BUG in hubbard_one/combin"
-           MSG_BUG(message)
+           ABI_BUG(message)
          end if
          occ_level(nelec)%ocp=zero
          do iconfig=1,nconfig_nelec(nelec)
@@ -693,8 +677,8 @@ subroutine green_atomic_hubbard(cryst_struc,green_hubbard,hu,level_diag,paw_dmft
 !      ===================================
 !      Built Green Function
 !      ===================================
-       ABI_ALLOCATE(green_temp,(green_hubbard%nw,nlevels))
-       ABI_ALLOCATE(green_temp_realw,(green_hubbard%nw,nlevels))
+       ABI_MALLOC(green_temp,(green_hubbard%nw,nlevels))
+       ABI_MALLOC(green_temp_realw,(green_hubbard%nw,nlevels))
 !      For each freq.
 
        green_temp=czero
@@ -749,26 +733,26 @@ subroutine green_atomic_hubbard(cryst_struc,green_hubbard,hu,level_diag,paw_dmft
        end do
 
 !      End calculation for this frequency
-       ABI_DEALLOCATE(green_temp)
-       ABI_DEALLOCATE(green_temp_realw)
+       ABI_FREE(green_temp)
+       ABI_FREE(green_temp_realw)
 
 !      ===================================
 !      Deallocations
 !      ===================================
        do nelec=0,nlevels
-         ABI_DEALLOCATE(occ_level(nelec)%repart)
-         ABI_DEALLOCATE(occ_level(nelec)%ocp)
-         ABI_DEALLOCATE(occ_level(nelec)%transition)
-         ABI_DEALLOCATE(occ_level(nelec)%transition_m)
-         ABI_DEALLOCATE(e_nelec(nelec)%config)
+         ABI_FREE(occ_level(nelec)%repart)
+         ABI_FREE(occ_level(nelec)%ocp)
+         ABI_FREE(occ_level(nelec)%transition)
+         ABI_FREE(occ_level(nelec)%transition_m)
+         ABI_FREE(e_nelec(nelec)%config)
        end do
-       ABI_DATATYPE_DEALLOCATE(occ_level)
-       ABI_DEALLOCATE(occup)
-       ABI_DEALLOCATE(nconfig_nelec)
-       ABI_DATATYPE_DEALLOCATE(e_nelec)
-       ABI_DEALLOCATE(elevels)
-       ABI_DEALLOCATE(maxener)
-       ABI_DEALLOCATE(minener)
+       ABI_FREE(occ_level)
+       ABI_FREE(occup)
+       ABI_FREE(nconfig_nelec)
+       ABI_FREE(e_nelec)
+       ABI_FREE(elevels)
+       ABI_FREE(maxener)
+       ABI_FREE(minener)
      end if
    end do
    call destroy_green(green_hubbard_realw)
@@ -784,7 +768,7 @@ subroutine green_atomic_hubbard(cryst_struc,green_hubbard,hu,level_diag,paw_dmft
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2019 ABINIT group (BAmadon)
+!! Copyright (C) 1999-2024 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -796,10 +780,6 @@ subroutine green_atomic_hubbard(cryst_struc,green_hubbard,hu,level_diag,paw_dmft
 !! OUTPUT
 !!
 !! NOTES
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

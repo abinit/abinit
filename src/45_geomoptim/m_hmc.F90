@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_hmc
 !! NAME
 !!  m_hmc
@@ -7,16 +6,12 @@
 !!  Auxiliary hmc functions
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2018-2019 ABINIT group (SPr)
+!!  Copyright (C) 2018-2024 ABINIT group (SPr)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! NOTES
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -64,17 +59,10 @@ contains
 !!
 !! NOTES
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine compute_kinetic_energy(ab_mover,vel,ekin)
     
- use defs_basis
- implicit none
-
 !Arguments ------------------------------------
  type(abimover),intent(in)   :: ab_mover              
  real(dp),      intent(in)   :: vel(3,ab_mover%natom) ! velocities
@@ -116,17 +104,10 @@ end subroutine compute_kinetic_energy
 !!
 !! NOTES
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine generate_random_velocities(ab_mover,kbtemp,seed,vel,ekin)
     
- use defs_basis
- implicit none
-
 !Arguments ------------------------------------
  type(abimover),intent(in)   :: ab_mover              
  integer,       intent(inout):: seed
@@ -196,17 +177,10 @@ end subroutine generate_random_velocities
 !!
 !! NOTES
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine metropolis_check(seed,de,kbtemp,iacc)
     
- use defs_basis
- implicit none
-
 !Arguments ------------------------------------
  integer,       intent(inout):: seed
  real(dp),      intent(in)   :: de         

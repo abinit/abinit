@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_crystal
 !! NAME
 !! m_crystal
@@ -7,14 +6,10 @@
 !! Module containing the definition of the crystal_t data type and methods used to handle it.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2019 ABINIT group (MG, YP, MJV)
+!!  Copyright (C) 2008-2024 ABINIT group (MG, YP, MJV, GA)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -24,7 +19,7 @@
 
 #include "abi_common.h"
 
-MODULE m_crystal
+module m_crystal
 
  use defs_basis
  use m_errors
@@ -32,17 +27,16 @@ MODULE m_crystal
  use m_atomdata
  use m_xmpi
  use m_nctk
- use iso_c_binding
-#ifdef HAVE_NETCDF
+ use, intrinsic :: iso_c_binding
  use netcdf
-#endif
 
  use m_io_tools,       only : file_exists
  use m_numeric_tools,  only : set2unit
- use m_fstrings,       only : int2char10, sjoin, yesno
+ use m_hide_lapack,    only : matrginv
+ use m_fstrings,       only : int2char10, sjoin, yesno, itoa, strcat
  use m_symtk,          only : mati3inv, sg_multable, symatm, print_symmetries
  use m_spgdata,        only : spgdata
- use m_geometry,       only : metric, xred2xcart, remove_inversion, getspinrot, symredcart
+ use m_geometry,       only : metric, xred2xcart, xcart2xred, remove_inversion, getspinrot, symredcart, normv
  use m_io_tools,       only : open_file
 
  implicit none
@@ -83,6 +77,9 @@ MODULE m_crystal
   integer :: ntypat
   ! Number of type of atoms
 
+  integer :: nirredat
+  ! Number of irreducibel atoms
+
   integer :: npsp
   ! No. of pseudopotentials
 
@@ -95,6 +92,9 @@ MODULE m_crystal
   ! 2 => take advantage of time-reversal symmetry.
 
   real(dp) :: ucvol
+  ! Real space unit cell volume.
+
+  !real(dp) :: bzvol
   ! Real space unit cell volume.
 
   logical :: use_antiferro
@@ -146,6 +146,9 @@ MODULE m_crystal
   ! typat(natom), nattyp(ntypat)
   ! Type of each natom and number of atoms of each type.
 
+  integer,allocatable :: irredatindx(:)
+  ! Index of irreducible atoms
+
   real(dp),allocatable :: tnons(:,:)
   ! tnons(3,nsym)
   ! Fractional translations (reduced coordinates)
@@ -162,7 +165,6 @@ MODULE m_crystal
   ! spinrot(4,nsym)
   ! spinor rotation matrices.
 
-  ! Useful quantities that might be added in the future
   real(dp),allocatable :: amu(:)
   !  amu(ntypat)
   !  mass of the atoms (atomic mass unit)
@@ -192,6 +194,9 @@ MODULE m_crystal
    procedure :: ncwrite_path => crystal_ncwrite_path
    ! Dump the object to netcdf file.
 
+   procedure :: ncread => crystal_ncread
+   ! Read the object from a netcdf file.
+
    procedure :: isymmorphic
    ! True if space group is symmorphic.
 
@@ -201,26 +206,67 @@ MODULE m_crystal
    procedure :: isalchemical
    ! True if we are using alchemical pseudopotentials.
 
+   procedure :: malloc => crystal_malloc
+   ! Allocate memory.
+
    procedure :: free => crystal_free
    ! Free memory.
+
+   procedure :: copy => crystal_copy
+   ! Copy object.
+
+   procedure :: bcast => crystal_bcast
+   ! Master broadcasts data and others allocate their arrays.
 
    procedure :: new_without_symmetries => crystal_without_symmetries
    ! Return new object without symmetries (actually nsym = 1 and identity operation)
 
+   procedure :: new_trinv_only => crystal_trinv_only
+   ! Return new object without only identity, inversion & TR symmetries (if present)
+
    procedure :: get_point_group => crystal_point_group
    ! Return the symmetries of the point group of the crystal.
+
+   procedure :: index_atoms => crystal_index_atoms
+   ! Generate index table of atoms.
+
+   procedure :: compute_sym => crystal_compute_sym
+   ! Compute all symetries and construct tables.
+
+   procedure :: compute_geometry => crystal_compute_geometry
+   ! Compute the different metrics and the angle between primitive vectors.
 
    procedure :: symbol_type
    ! Return the atomic symbol from the itypat index.
 
+   procedure :: symbol_iatom
+   ! Return the atomic symbol from the iatom index.
+
    procedure :: adata_type
    ! Return atomic data from the itypat index.
+
+   procedure :: compare => crystal_compare
+   ! Compare two crystalline structures, write warning messages if they differ, return exit status
+
+   procedure :: print => crystal_print
+   ! Print dimensions and basic info stored in the object
+
+   procedure :: print_abivars => crystal_print_abivars
+   ! Print unit cell info in Abinit/abivars format
+
+   procedure :: symmetrize_cart_vec3 => crystal_symmetrize_cart_vec3
+   ! Symmetrize a 3d cartesian vector
+
+   procedure :: symmetrize_cart_tens33 => crystal_symmetrize_cart_tens33
+   ! Symmetrize a cartesian 3x3 tensor
+
+   procedure :: get_redcart_qdirs => get_redcart_qdirs
+   ! Return predefined list of 6 q-versors in reciprocal space reduced coordinates.
 
  end type crystal_t
 
  public :: crystal_init            ! Main Creation method.
- public :: crystal_print           ! Print dimensions and basic info stored in the object
-
+ public :: crystal_free            ! Main Destruction method.
  public :: symbols_crystal         ! Return an array with the atomic symbol:["Sr","Ru","O1","O2","O3"]
  public :: prt_cif                 ! Print CIF file.
  public :: prtposcar               ! output VASP style POSCAR and FORCES files.
@@ -270,19 +316,11 @@ CONTAINS  !=====================================================================
 !!  5) constraints for the relaxation
 !!  6) Likely I will need also info on the electric field and berryopt
 !!
-!! PARENTS
-!!      dfpt_looppert,eig2tot,gwls_hamiltonian,m_ddb
-!!      m_effective_potential,m_effective_potential_file,m_tdep_abitypes,mover
-!!      optic,outscfcv,respfn,vtorho
-!!
-!! CHILDREN
-!!      mati3inv,sg_multable
-!!
 !! SOURCE
 
 subroutine crystal_init(amu,Cryst,space_group,natom,npsp,ntypat,nsym,rprimd,typat,xred,&
-& zion,znucl,timrev,use_antiferro,remove_inv,title,&
-& symrel,tnons,symafm) ! Optional
+                        zion,znucl,timrev,use_antiferro,remove_inv,title,&
+                        symrel,tnons,symafm) ! Optional
 
 !Arguments ------------------------------------
 !scalars
@@ -298,94 +336,53 @@ subroutine crystal_init(amu,Cryst,space_group,natom,npsp,ntypat,nsym,rprimd,typa
 
 !Local variables-------------------------------
 !scalars
- integer :: iat,indx,itypat,pinv,isym,nsym_noI
- real(dp) :: tolsym8,ucvol
+ integer :: pinv,nsym_noI
  !character(len=500) :: msg
 !arrays
- integer :: symrec(3,3)
- real(dp) :: gprimd(3,3),gmet(3,3),rmet(3,3)
  integer,pointer :: symrel_noI(:,:,:)
- integer,allocatable :: indsym(:,:,:)
  real(dp),pointer :: tnons_noI(:,:)
 ! *************************************************************************
 
  !@crystal_t
- Cryst%natom  = natom
+ Cryst%natom = natom
  Cryst%ntypat = ntypat
- Cryst%npsp   = npsp
+ Cryst%npsp = npsp
  Cryst%space_group = space_group
-
- call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
-
- Cryst%ucvol  = ucvol
+ Cryst%nsym = nsym
+ Cryst%timrev = timrev
+ Cryst%use_antiferro = use_antiferro
  Cryst%rprimd = rprimd
- Cryst%rmet   = rmet
- Cryst%gmet   = gmet
- Cryst%gprimd = gprimd
 
- Cryst%angdeg(1)=ACOS(Cryst%rmet(2,3)/SQRT(Cryst%rmet(2,2)*Cryst%rmet(3,3)))/two_pi*360.0d0
- Cryst%angdeg(2)=ACOS(Cryst%rmet(1,3)/SQRT(Cryst%rmet(1,1)*Cryst%rmet(3,3)))/two_pi*360.0d0
- Cryst%angdeg(3)=ACOS(Cryst%rmet(1,2)/SQRT(Cryst%rmet(1,1)*Cryst%rmet(2,2)))/two_pi*360.0d0
-
- ABI_MALLOC(Cryst%typat,(natom))
- ABI_MALLOC(Cryst%xred,(3,natom))
- ABI_MALLOC(Cryst%xcart,(3,natom))
- ABI_MALLOC(Cryst%zion,(ntypat))
- ABI_MALLOC(Cryst%znucl,(npsp))
- ABI_MALLOC(Cryst%amu, (ntypat))
+ call Cryst%free()
+ call Cryst%malloc()
 
  Cryst%amu   = amu
  Cryst%typat = typat
  Cryst%xred  = xred
  Cryst%zion  = zion
  Cryst%znucl = znucl
-
- call xred2xcart(natom,rprimd,Cryst%xcart,Cryst%xred)
-
- ABI_MALLOC(Cryst%title,(ntypat))
  Cryst%title = title
 
- ! Generate index table of atoms, in order for them to be used type after type.
- ABI_MALLOC(Cryst%atindx,(natom))
- ABI_MALLOC(Cryst%atindx1,(natom))
- ABI_MALLOC(Cryst%nattyp,(ntypat))
+ call Cryst%compute_geometry()
 
- indx=1
- do itypat=1,ntypat
-   Cryst%nattyp(itypat)=0
-   do iat=1,natom
-     if (Cryst%typat(iat)==itypat) then
-       Cryst%atindx (iat )=indx
-       Cryst%atindx1(indx)=iat
-       indx=indx+1
-       Cryst%nattyp(itypat)=Cryst%nattyp(itypat)+1
-     end if
-   end do
- end do
+ call Cryst%index_atoms()
 
- Cryst%timrev = timrev
-
+ ! TODO: Make this more elegant
  if (PRESENT(symrel).and.PRESENT(tnons).and.PRESENT(symafm)) then
    if (.not.remove_inv) then
      ! Just a copy
-     Cryst%nsym= nsym
-     ABI_MALLOC(Cryst%symrel,(3,3,nsym))
-     ABI_MALLOC(Cryst%symrec,(3,3,nsym))
-     ABI_MALLOC(Cryst%tnons,(3,nsym))
-     ABI_MALLOC(Cryst%symafm,(nsym))
      Cryst%symrel=symrel
      Cryst%tnons=tnons
      Cryst%symafm=symafm
-     Cryst%use_antiferro = use_antiferro
-     do isym=1,nsym
-       call mati3inv(symrel(:,:,isym),symrec)
-       Cryst%symrec(:,:,isym)=symrec
-     end do
    else
      ! Remove inversion, just to be compatible with old GW implementation
      ! TODO should be removed!
      call remove_inversion(nsym,symrel,tnons,nsym_noI,symrel_noI,tnons_noI,pinv)
      Cryst%nsym=nsym_noI
+     ABI_SFREE(Cryst%symrel)
+     ABI_SFREE(Cryst%symrec)
+     ABI_SFREE(Cryst%tnons)
+     ABI_SFREE(Cryst%symafm)
      ABI_MALLOC(Cryst%symrel,(3,3,nsym_noI))
      ABI_MALLOC(Cryst%symrec,(3,3,nsym_noI))
      ABI_MALLOC(Cryst%tnons,(3,nsym_noI))
@@ -393,14 +390,9 @@ subroutine crystal_init(amu,Cryst,space_group,natom,npsp,ntypat,nsym,rprimd,typa
      Cryst%symrel=symrel_noI
      Cryst%tnons=tnons_noI
      if (ANY(symafm==-1)) then
-       MSG_BUG('Solve the problem with inversion before adding ferromagnetic symmetries')
+       ABI_BUG('Solve the problem with inversion before adding ferromagnetic symmetries')
      end if
      Cryst%symafm=1
-     Cryst%use_antiferro=use_antiferro
-     do isym=1,nsym_noI
-       call mati3inv(symrel_noI(:,:,isym),symrec)
-       Cryst%symrec(:,:,isym)=symrec
-     end do
      ABI_FREE(symrel_noI)
      ABI_FREE(tnons_noI)
    end if
@@ -408,40 +400,16 @@ subroutine crystal_init(amu,Cryst,space_group,natom,npsp,ntypat,nsym,rprimd,typa
  else
    ! Find symmetries symrec,symrel,tnons,symafm
    ! TODO This should be a wrapper around the abinit library whose usage is not so straightforward
-   MSG_BUG('NotImplememented: symrel, symrec and tnons should be specied')
+   ABI_BUG('NotImplememented: symrel, symrec and tnons should be specied')
  end if
 
- ! Get symmetries in cartesian coordinates
- ABI_MALLOC(cryst%symrel_cart, (3, 3, cryst%nsym))
- do isym =1,cryst%nsym
-   call symredcart(cryst%rprimd, cryst%gprimd, cryst%symrel_cart(:,:,isym), cryst%symrel(:,:,isym))
-   ! purify operations in cartesian coordinates.
-   where (abs(cryst%symrel_cart(:,:,isym)) < tol14)
-     cryst%symrel_cart(:,:,isym) = zero
-   end where
- end do
-
- ! === Obtain a list of rotated atoms ===
- ! $ R^{-1} (xred(:,iat)-\tau) = xred(:,iat_sym) + R_0 $
- ! * indsym(4,  isym,iat) gives iat_sym in the original unit cell.
- ! * indsym(1:3,isym,iat) gives the lattice vector $R_0$.
- !
- ABI_MALLOC(indsym,(4,Cryst%nsym,natom)); indsym = 0
- tolsym8=tol8
- call symatm(indsym,natom,Cryst%nsym,Cryst%symrec,Cryst%tnons,tolsym8,Cryst%typat,Cryst%xred)
-
- ABI_MALLOC(Cryst%indsym,(4,Cryst%nsym,natom))
- Cryst%indsym=indsym
- ABI_FREE(indsym)
-
- ! Rotations in spinor space
- ABI_MALLOC(Cryst%spinrot,(4,Cryst%nsym))
- do isym=1,Cryst%nsym
-   call getspinrot(Cryst%rprimd,Cryst%spinrot(:,isym),Cryst%symrel(:,:,isym))
- end do
+ ! Compute all symetries and construct tables.
+ call Cryst%compute_sym()
 
 end subroutine crystal_init
 !!***
+
+!----------------------------------------------------------------------
 
 !!****f* m_crystal/crystal_without_symmetries
 !! NAME
@@ -453,10 +421,6 @@ end subroutine crystal_init
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -479,22 +443,278 @@ end function crystal_without_symmetries
 
 !----------------------------------------------------------------------
 
+!!****f* m_crystal/crystal_trinv_only
+!! NAME
+!!  crystal_trinv_only
+!!
+!! FUNCTION
+! ! Return new crystal_t without only identity, inversion & TR symmetries (if present)
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SOURCE
+
+type(crystal_t) function crystal_trinv_only(self) result(new)
+
+!Arguments ------------------------------------
+ class(crystal_t), intent(in) :: self
+
+!Local variables-------------------------------
+ integer,parameter :: timrev2 = 2
+ real(dp),parameter :: new_tnons(3,2) = zero
+ integer :: inv_idx, new_symafm(2), new_symrel(3,3,2)
+! *************************************************************************
+
+ inv_idx = self%idx_spatial_inversion()
+ if (inv_idx == 0) then ! no spatial inversion
+   new = self%new_without_symmetries(); new%timrev = timrev2
+ else ! spatial inversion is present
+   new_symrel(:,:,1) = identity_3d; new_symrel(:,:,2) = self%symrel(:,:,inv_idx)
+   new_symafm(1) = 1; new_symafm(2) = self%symafm(inv_idx)
+
+   call crystal_init(self%amu, new, 2, self%natom, self%npsp, self%ntypat, 2, self%rprimd, self%typat, &
+     self%xred, self%zion, self%znucl, timrev2, .False., .False., self%title, &
+     symrel=new_symrel, tnons=new_tnons, symafm=new_symafm)
+ endif
+
+end function crystal_trinv_only
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_crystal/crystal_index_atoms
+!! NAME
+!!  crystal_index_atoms
+!!
+!! FUNCTION
+!!  Generate index table of atoms, in order for them to be used type after type.
+!!
+!! SOURCE
+
+subroutine crystal_index_atoms(Cryst)
+
+!Arguments ------------------------------------
+ class(crystal_t),intent(inout) :: Cryst
+
+!Local variables-------------------------------
+!scalars
+ integer :: iat,indx,itypat
+
+! *********************************************************************
+
+ !ABI_MALLOC(Cryst%nattyp,(Cryst%ntypat))
+ indx=1
+ do itypat=1,Cryst%ntypat
+   Cryst%nattyp(itypat)=0
+   do iat=1,Cryst%natom
+     if (Cryst%typat(iat)==itypat) then
+       Cryst%atindx (iat )=indx
+       Cryst%atindx1(indx)=iat
+       indx=indx+1
+       Cryst%nattyp(itypat)=Cryst%nattyp(itypat)+1
+     end if
+   end do
+ end do
+
+end subroutine crystal_index_atoms
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_crystal/crystal_compute_sym
+!! NAME
+!!  crystal_compute_sym
+!!
+!! FUNCTION
+!!  Get symmetries in cartesian coordinates, construct rotation tables
+!!  for atoms with and without spinor, and construct list of reducible atoms.
+!!
+!! SOURCE
+
+subroutine crystal_compute_sym(Cryst)
+
+!Arguments ------------------------------------
+ class(crystal_t),intent(inout) :: Cryst
+
+!Local variables-------------------------------
+!scalars
+ integer :: iat,indx,isym
+ real(dp) :: tolsym8
+ logical, allocatable :: irredat_tmp(:)
+!arrays
+ integer :: symrec(3,3)
+
+! *********************************************************************
+
+ ! Get symmetries in reciprocal space
+ do isym=1,Cryst%nsym
+   call mati3inv(Cryst%symrel(:,:,isym),symrec)
+   Cryst%symrec(:,:,isym)=symrec
+ end do
+
+ ! Get symmetries in cartesian coordinates
+ do isym =1,Cryst%nsym
+   call symredcart(Cryst%rprimd, Cryst%gprimd, Cryst%symrel_cart(:,:,isym), Cryst%symrel(:,:,isym))
+   ! purify operations in cartesian coordinates.
+   where (abs(Cryst%symrel_cart(:,:,isym)) < tol14)
+     Cryst%symrel_cart(:,:,isym) = zero
+   end where
+ end do
+
+ ! === Obtain a list of rotated atoms ===
+ ! $ R^{-1} (xred(:,iat)-\tau) = xred(:,iat_sym) + R_0 $
+ ! * indsym(4,  isym,iat) gives iat_sym in the original unit cell.
+ ! * indsym(1:3,isym,iat) gives the lattice vector $R_0$.
+ !
+ tolsym8=tol8
+ call symatm(Cryst%indsym, Cryst%natom, Cryst%nsym, Cryst%symrec, Cryst%tnons, tolsym8, Cryst%typat, Cryst%xred)
+
+ ! Rotations in spinor space
+ do isym=1,Cryst%nsym
+   call getspinrot(Cryst%rprimd, Cryst%spinrot(:,isym), Cryst%symrel(:,:,isym))
+ end do
+
+! Find list of irreducible atoms by using the indsym
+ ABI_MALLOC(irredat_tmp, (Cryst%natom))
+ irredat_tmp = .TRUE.
+
+ Cryst%nirredat = 0
+ do iat = 1,Cryst%natom
+   if(irredat_tmp(iat))then
+      Cryst%nirredat = Cryst%nirredat + 1
+      do isym = 1,Cryst%nsym
+         if (Cryst%indsym(4,isym,iat) /= iat)then
+           irredat_tmp(Cryst%indsym(4,isym,iat)) = .FALSE.
+         endif
+      enddo
+   endif
+ enddo
+
+ ! Write indexes of irreducible atoms
+ ABI_MALLOC(Cryst%irredatindx,(Cryst%nirredat))
+ indx = 0
+ do iat = 1,Cryst%natom
+    if (irredat_tmp(iat)) then
+      indx = indx + 1
+      cryst%irredatindx(indx) = iat
+    endif
+ enddo
+
+ ABI_SFREE(irredat_tmp)
+
+end subroutine crystal_compute_sym
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_crystal/crystal_compute_geometry
+!! NAME
+!!  crystal_compute_geometry
+!!
+!! FUNCTION
+!!  Compute the different metrics and the angle between primitive vectors.
+!!  Also compute cartesian coordinates of atoms.
+!!
+!! SOURCE
+
+subroutine crystal_compute_geometry(Cryst)
+
+!Arguments ------------------------------------
+ class(crystal_t),intent(inout) :: Cryst
+
+! *********************************************************************
+
+ call metric(Cryst%gmet,Cryst%gprimd,-1,Cryst%rmet,Cryst%rprimd,Cryst%ucvol)
+
+ Cryst%angdeg(1)=ACOS(Cryst%rmet(2,3)/SQRT(Cryst%rmet(2,2)*Cryst%rmet(3,3)))/two_pi*360.0d0
+ Cryst%angdeg(2)=ACOS(Cryst%rmet(1,3)/SQRT(Cryst%rmet(1,1)*Cryst%rmet(3,3)))/two_pi*360.0d0
+ Cryst%angdeg(3)=ACOS(Cryst%rmet(1,2)/SQRT(Cryst%rmet(1,1)*Cryst%rmet(2,2)))/two_pi*360.0d0
+
+ call xred2xcart(Cryst%natom,Cryst%rprimd,Cryst%xcart,Cryst%xred)
+
+end subroutine crystal_compute_geometry
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_crystal/crystal_malloc
+!! NAME
+!!  crystal_malloc
+!!
+!! FUNCTION
+!!  Allocate the dynamic arrays in a crystal_t data type.
+!!
+!! SOURCE
+
+subroutine crystal_malloc(Cryst)
+
+!Arguments ------------------------------------
+ class(crystal_t),intent(inout) :: Cryst
+
+!Local variables-------------------------------
+!scalars
+ integer :: ii
+! *********************************************************************
+
+!integer
+ ABI_MALLOC(Cryst%typat,(Cryst%natom))
+ ABI_MALLOC(Cryst%xred,(3,Cryst%natom))
+ ABI_MALLOC(Cryst%xcart,(3,Cryst%natom))
+ ABI_MALLOC(Cryst%zion,(Cryst%ntypat))
+ ABI_MALLOC(Cryst%znucl,(Cryst%npsp))
+ ABI_MALLOC(Cryst%amu, (Cryst%ntypat))
+
+ ABI_MALLOC(Cryst%symrel,(3,3,Cryst%nsym))
+ ABI_MALLOC(Cryst%symrec,(3,3,Cryst%nsym))
+ ABI_MALLOC(Cryst%tnons,(3,Cryst%nsym))
+ ABI_MALLOC(Cryst%symafm,(Cryst%nsym))
+ ABI_MALLOC(Cryst%symrel_cart, (3, 3, Cryst%nsym))
+ ABI_MALLOC(Cryst%indsym,(4, Cryst%nsym, Cryst%natom))
+
+ ABI_MALLOC(Cryst%atindx,(Cryst%natom))
+ ABI_MALLOC(Cryst%atindx1,(Cryst%natom))
+ ABI_MALLOC(Cryst%nattyp,(Cryst%ntypat))
+ ABI_MALLOC(Cryst%spinrot, (4, Cryst%nsym))
+
+ ABI_MALLOC(Cryst%title,(Cryst%ntypat))
+
+ ! nirredat must first be computed from indsym
+ !ABI_MALLOC(Cryst%irredatindx,(Cryst%nirredat))
+
+ Cryst%typat = zero
+ Cryst%xred = zero
+ Cryst%xcart = zero
+ Cryst%zion = zero
+ Cryst%znucl = zero
+ Cryst%amu = zero
+ Cryst%symrel = zero
+ Cryst%symrec = zero
+ Cryst%tnons = zero
+ Cryst%symafm = zero
+ Cryst%symrel_cart = zero
+ Cryst%indsym = zero
+ Cryst%atindx = zero
+ Cryst%atindx1 = zero
+ Cryst%nattyp = zero
+ Cryst%spinrot = zero
+
+ do ii=1,Cryst%ntypat
+   Cryst%title(ii) = ''
+ end do
+
+end subroutine crystal_malloc
+!!***
+
+!----------------------------------------------------------------------
+
 !!****f* m_crystal/crystal_free
 !! NAME
 !!  crystal_free
 !!
 !! FUNCTION
 !!  Destroy the dynamic arrays in a crystal_t data type.
-!!
-!! PARENTS
-!!      anaddb,bethe_salpeter,cut3d,dfpt_looppert,eig2tot,eph,fold2Bloch,gstate
-!!      gwls_hamiltonian,m_ddk,m_dvdb,m_effective_potential
-!!      m_effective_potential_file,m_gruneisen,m_ioarr,m_iowf,m_wfd,m_wfk
-!!      mlwfovlp_qp,mover,mrgscr,optic,outscfcv,respfn,screening,sigma,vtorho
-!!      wfk_analyze
-!!
-!! CHILDREN
-!!      mati3inv,sg_multable
 !!
 !! SOURCE
 
@@ -515,6 +735,7 @@ subroutine crystal_free(Cryst)
  ABI_SFREE(Cryst%atindx1)
  ABI_SFREE(Cryst%typat)
  ABI_SFREE(Cryst%nattyp)
+ ABI_SFREE(Cryst%irredatindx)
 
 !real
  ABI_SFREE(Cryst%tnons)
@@ -529,6 +750,252 @@ subroutine crystal_free(Cryst)
  ABI_SFREE(Cryst%title)
 
 end subroutine crystal_free
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_crystal/crystal_copy
+!! NAME
+!!  crystal_copy
+!!
+!! FUNCTION
+!!  Copy the object.
+!!
+!! OUTPUTS
+!!  new = A new crystal instance
+!!
+!! SOURCE
+
+subroutine crystal_copy(Cryst, new)
+
+!Arguments ------------------------------------
+ class(crystal_t),intent(inout) :: Cryst
+ class(crystal_t),intent(out) :: new
+
+! *********************************************************************
+
+ ! Copy dimensions, scalar variables, and static arrays
+ new%natom = Cryst%natom
+ new%nsym = Cryst%nsym
+ new%ntypat = Cryst%ntypat
+ new%nirredat = Cryst%nirredat
+ new%npsp = Cryst%npsp
+ new%space_group = Cryst%space_group
+ new%timrev = Cryst%timrev
+ new%ucvol = Cryst%ucvol
+ new%use_antiferro = Cryst%use_antiferro
+ new%angdeg = Cryst%angdeg
+ new%gmet = Cryst%gmet
+ new%gprimd = Cryst%gprimd
+ new%rmet = Cryst%rmet
+ new%rprimd = Cryst%rprimd
+
+ ! Allocate memory
+ call new%malloc()
+ if (allocated(Cryst%irredatindx)) then
+   ABI_MALLOC(new%irredatindx,(new%nirredat))
+ end if
+
+ ! Copy dynamic arrays
+ new%indsym = Cryst%indsym
+ new%symafm = Cryst%symafm
+ new%symrec = Cryst%symrec
+ new%symrel = Cryst%symrel
+ new%symrel_cart = Cryst%symrel_cart
+ new%atindx = Cryst%atindx
+ new%atindx1 = Cryst%atindx1
+ new%typat = Cryst%typat
+ new%nattyp = Cryst%nattyp
+ new%tnons = Cryst%tnons
+ new%xcart = Cryst%xcart
+ new%xred = Cryst%xred
+ new%spinrot = Cryst%spinrot
+ new%amu = Cryst%amu
+ new%zion = Cryst%zion
+ new%znucl = Cryst%znucl
+ new%title = Cryst%title
+ if (allocated(Cryst%irredatindx)) then
+   new%irredatindx = Cryst%irredatindx
+ end if
+
+end subroutine crystal_copy
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_crystal/crystal_bcast
+!! NAME
+!!  crystal_bcast
+!!
+!! FUNCTION
+!!  Master broadcasts data and others allocate their arrays.
+!!
+!! SOURCE
+
+subroutine crystal_bcast(Cryst, comm)
+
+!Arguments ------------------------------------
+ class(crystal_t),intent(inout) :: Cryst
+ integer, intent(in) :: comm
+
+!Local variables -------------------------
+ integer, parameter :: master=0
+ integer :: ierr
+
+! *********************************************************************
+
+ if (xmpi_comm_size(comm) == 1) return
+
+ DBG_ENTER("COLL")
+
+ ! Integers
+ call xmpi_bcast(Cryst%natom, master, comm, ierr)
+ call xmpi_bcast(Cryst%nsym, master, comm, ierr)
+ call xmpi_bcast(Cryst%ntypat, master, comm, ierr)
+ call xmpi_bcast(Cryst%nirredat, master, comm, ierr)
+ call xmpi_bcast(Cryst%npsp, master, comm, ierr)
+ call xmpi_bcast(Cryst%space_group, master, comm, ierr)
+ call xmpi_bcast(Cryst%timrev, master, comm, ierr)
+ call xmpi_bcast(Cryst%use_antiferro, master, comm, ierr)
+
+ if (xmpi_comm_rank(comm) /= master) then
+   call Cryst%free()
+   call Cryst%malloc()
+ end if
+
+ ! Floats
+ call xmpi_bcast(Cryst%ucvol, master, comm, ierr)
+
+ ! Arrays
+ call xmpi_bcast(Cryst%angdeg, master, comm, ierr)
+ call xmpi_bcast(Cryst%gmet, master, comm, ierr)
+ call xmpi_bcast(Cryst%gprimd, master, comm, ierr)
+ call xmpi_bcast(Cryst%rmet, master, comm, ierr)
+ call xmpi_bcast(Cryst%rprimd, master, comm, ierr)
+ call xmpi_bcast(Cryst%indsym, master, comm, ierr)
+ call xmpi_bcast(Cryst%symafm, master, comm, ierr)
+ call xmpi_bcast(Cryst%symrec, master, comm, ierr)
+ call xmpi_bcast(Cryst%symrel, master, comm, ierr)
+ call xmpi_bcast(Cryst%symrel_cart, master, comm, ierr)
+ call xmpi_bcast(Cryst%atindx, master, comm, ierr)
+ call xmpi_bcast(Cryst%atindx1, master, comm, ierr)
+ call xmpi_bcast(Cryst%typat, master, comm, ierr)
+ call xmpi_bcast(Cryst%nattyp, master, comm, ierr)
+ call xmpi_bcast(Cryst%tnons, master, comm, ierr)
+ call xmpi_bcast(Cryst%xcart, master, comm, ierr)
+ call xmpi_bcast(Cryst%xred, master, comm, ierr)
+ call xmpi_bcast(Cryst%spinrot, master, comm, ierr)
+ call xmpi_bcast(Cryst%amu, master, comm, ierr)
+ call xmpi_bcast(Cryst%zion, master, comm, ierr)
+ call xmpi_bcast(Cryst%znucl, master, comm, ierr)
+
+
+ call xmpi_bcast(Cryst%title, master, comm, ierr)
+
+ ! It is not always allocated on master node,
+ ! and it can be computed afterward on each node.
+ !call xmpi_bcast(Cryst%irredatindx, master, comm, ierr)
+
+ DBG_EXIT("COLL")
+
+end subroutine crystal_bcast
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_crystal/crystal_compare
+!! NAME
+!!  crystal_compare
+!!
+!! FUNCTION
+!!   Compare two crystalline structures,
+!!   write warning messages to stdout if they differ, return exit status
+!!
+!! INPUTS
+!!  [header]=Optional header message.
+!!
+!! OUTPUT
+!!
+!! SOURCE
+
+integer function crystal_compare(self, other, header) result(ierr)
+
+!Arguments ------------------------------------
+!scalars
+ class(crystal_t),intent(in) :: self, other
+ character(len=*),optional,intent(in) :: header
+
+!Local variables-------------------------------
+ !integer :: isym, iat, itypat
+! *********************************************************************
+
+ if (present(header)) call wrtout(std_out, header)
+ ierr = 0
+
+ ! Test basic dimensions and metadata.
+ ABI_CHECK_IEQ_IERR(self%natom, other%natom, "Different natom" , ierr)
+ ABI_CHECK_IEQ_IERR(self%ntypat, other%ntypat, "Different ntypat" , ierr)
+ ABI_CHECK_IEQ_IERR(self%npsp, other%npsp, "Different npsp" , ierr)
+ ABI_CHECK_IEQ_IERR(self%nsym, other%nsym, "Different nsym" , ierr)
+ ABI_CHECK_IEQ_IERR(self%timrev, other%timrev, "Different timrev" , ierr)
+
+ if (ierr /= 0) goto 10
+ ! After this point, we know that basic dimensions agree with each other.
+ ! Yes, I use GOTO and I'm proud of that!
+
+ ! Check direct lattice
+ if (any(abs(self%rprimd - other%rprimd) > tol6)) then
+   ABI_WARNING("Found critical diffs in rprimd lattice vectors.")
+   ierr = ierr + 1
+ end if
+
+ ! Check Symmetries
+ if (any(self%symrel /= other%symrel)) then
+   ABI_WARNING("Found critical diffs in symrel symmetries.")
+   ierr = ierr + 1
+ end if
+ if (any(abs(self%tnons - other%tnons) > tol3)) then
+   ABI_WARNING("Found critical diffs in fractional translations tnons.")
+   ierr = ierr + 1
+ end if
+ if (self%use_antiferro .neqv. other%use_antiferro) then
+   ABI_WARNING("Different values of use_antiferro")
+   ierr = ierr + 1
+ end if
+
+ ! Atoms
+ if (any(self%typat /= other%typat)) then
+   ABI_WARNING("Found critical diffs in typat.")
+   ierr = ierr + 1
+ end if
+ if (any(abs(self%zion - other%zion) > tol3)) then
+   ABI_WARNING("Found critical diffs in zion.")
+   ierr = ierr + 1
+ end if
+ if (any(abs(self%znucl - other%znucl) > tol3)) then
+   ABI_WARNING("Found critical diffs in znucl.")
+   ierr = ierr + 1
+ end if
+ if (any(abs(self%amu - other%amu) > tol3)) then
+   ABI_WARNING("Found critical diffs in amu.")
+   ierr = ierr + 1
+ end if
+ if (any(abs(self%xred - other%xred) > tol6)) then
+   ABI_WARNING("Found critical diffs in xred.")
+   ierr = ierr + 1
+ end if
+
+ if (ierr /= 0) goto 10
+ return
+
+ ! Print structure to aid debugging. Caller will handle exit status.
+10 call wrtout(std_out, " Comparing crystal1 and crystal2 for possible differences before returning ierr /= 0!")
+   call self%print(header="crystal1")
+   call wrtout(std_out, "")
+   call other%print(header="crystal2")
+   call wrtout(std_out, "")
+
+end function crystal_compare
 !!***
 
 !----------------------------------------------------------------------
@@ -550,26 +1017,19 @@ end subroutine crystal_free
 !! OUTPUT
 !!  Only printing
 !!
-!! PARENTS
-!!      eph,gwls_hamiltonian,m_dvdb,m_gruneisen,setup_bse,setup_screening
-!!      setup_sigma,wfk_analyze
-!!
-!! CHILDREN
-!!      mati3inv,sg_multable
-!!
 !! SOURCE
 
-subroutine crystal_print(Cryst,header,unit,mode_paral,prtvol)
+subroutine crystal_print(Cryst, header, unit, mode_paral, prtvol)
 
 !Arguments ------------------------------------
 !scalars
- integer,optional,intent(in) :: unit,prtvol
+ integer,optional,intent(in) :: unit, prtvol
  character(len=*),optional,intent(in) :: mode_paral
  character(len=*),optional,intent(in) :: header
- type(crystal_t),intent(in) :: Cryst
+ class(crystal_t),intent(in) :: Cryst
 
 !Local variables-------------------------------
- integer :: my_unt,my_prtvol,nu,iatom
+ integer :: my_unt,my_prtvol,nu,iatom, isym, ii, nsym
  character(len=4) :: my_mode
  character(len=500) :: msg
 ! *********************************************************************
@@ -580,14 +1040,14 @@ subroutine crystal_print(Cryst,header,unit,mode_paral,prtvol)
 
  msg=' ==== Info on the Cryst% object ==== '
  if (PRESENT(header)) msg=' ==== '//TRIM(ADJUSTL(header))//' ==== '
- call wrtout(my_unt,msg,my_mode)
+ call wrtout(my_unt, sjoin(ch10, msg), my_mode)
 
  write(msg,'(a)')' Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):'
  call wrtout(my_unt,msg,my_mode)
  do nu=1,3
    write(msg,'(1x,a,i1,a,3f11.7,2x,a,i1,a,3f11.7)')&
-    'R(',nu,')=',Cryst%rprimd(:,nu)+tol10,&
-    'G(',nu,')=',Cryst%gprimd(:,nu)+tol10 !tol10 is used to be consistent with metric.F90
+    'R(',nu,')=',Cryst%rprimd(:,nu)+tol10, &
+    'G(',nu,')=',Cryst%gprimd(:,nu)+tol10  ! tol10 is used to be consistent with metric.F90
    call wrtout(my_unt,msg,my_mode)
  end do
 
@@ -602,23 +1062,100 @@ subroutine crystal_print(Cryst,header,unit,mode_paral,prtvol)
  else if (Cryst%timrev==2) then
    msg = ' Time-reversal symmetry is present '
  else
-   MSG_BUG('Wrong value for timrev')
+   ABI_BUG(sjoin('Wrong value for timrev:', itoa(cryst%timrev)))
  end if
  call wrtout(my_unt,msg,my_mode)
  if (my_prtvol == -1) return
 
  if (my_prtvol > 0) then
-   call print_symmetries(Cryst%nsym,Cryst%symrel,Cryst%tnons,Cryst%symafm,unit=my_unt,mode_paral=my_mode)
+   call print_symmetries(Cryst%nsym, Cryst%symrel, Cryst%tnons, Cryst%symafm, unit=my_unt, mode_paral=my_mode)
    if (Cryst%use_antiferro) call wrtout(my_unt,' System has magnetic symmetries ',my_mode)
+
+   ! Print indsym using the same format as in symatm
+   nsym = cryst%nsym
+   do iatom=1,cryst%natom
+     write(msg, '(a,i0,a)' )' symatm: atom number ',iatom,' is reached starting at atom'
+     call wrtout(std_out, msg)
+     do ii=1,(nsym-1)/24+1
+       if (cryst%natom<100) then
+         write(msg, '(1x,24i3)' ) (cryst%indsym(4,isym,iatom),isym=1+(ii-1)*24,min(nsym,ii*24))
+       else
+         write(msg, '(1x,24i6)' ) (cryst%indsym(4,isym,iatom),isym=1+(ii-1)*24,min(nsym,ii*24))
+       end if
+       call wrtout(std_out, msg)
+     end do
+   end do
+
  end if
 
- call wrtout(my_unt,"Reduced atomic positions [iatom, xred, symbol]:",my_mode)
+ call wrtout(my_unt, " Reduced atomic positions [iatom, xred, symbol]:", my_mode)
  do iatom=1,cryst%natom
-   write(msg,"(i5,a,2x,3f11.7,2x,a)")iatom,")",cryst%xred(:,iatom),symbol_type(cryst,cryst%typat(iatom))
+   write(msg,"(i5,a,2x,3f11.7,2x,a)")iatom,")",cryst%xred(:,iatom), cryst%symbol_type(cryst%typat(iatom))
    call wrtout(my_unt,msg,my_mode)
  end do
 
 end subroutine crystal_print
+!!***
+
+!!****f* m_crystal/crystal_print_abivars
+!! NAME
+!!  crystal_print_abivars
+!!
+!! FUNCTION
+!!   Print unit cell info in Abinit/abivars format
+!!
+!! INPUTS
+!!  unit=Output unit
+!!
+!! OUTPUT
+!!  Only printing
+!!
+!! SOURCE
+
+subroutine crystal_print_abivars(cryst, unit)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: unit
+ class(crystal_t),intent(in) :: cryst
+
+!Local variables-------------------------------
+ integer :: iatom, ii
+ !character(len=500) :: fmt
+! *********************************************************************
+
+ if (unit == dev_null) return
+
+ ! Write variables using standard Abinit input format.
+ write(unit, "(/,/,a)")" # Abinit variables"
+ write(unit, "(a)")" acell 1.0 1.0 1.0"
+ write(unit, "(a)")" rprimd"
+ do ii=1,3
+    write(unit, "(3(f11.7,1x))")cryst%rprimd(:, ii)
+ end do
+ write(unit, "(a, i0)")" natom ", cryst%natom
+ write(unit, "(a, i0)")" ntypat ", cryst%ntypat
+ write(unit, strcat("(a, ", itoa(cryst%natom), "(i0,1x))")) " typat ", cryst%typat
+ write(unit, strcat("(a, ", itoa(cryst%npsp), "(f5.1,1x))")) " znucl ", cryst%znucl
+ write(unit, "(a)")" xred"
+ do iatom=1,cryst%natom
+   write(unit,"(1x, 3f11.7,2x,2a)")cryst%xred(:,iatom), " # ", cryst%symbol_type(cryst%typat(iatom))
+ end do
+
+ ! Write variables using the abivars format supported by structure variable.
+ !write(unit, "(/,/,a)")" # Abivars format (external file with structure variable)"
+ !write(unit, "(a)")" acell 1.0 1.0 1.0"
+ !write(unit, "(a)")" rprimd"
+ !do ii=1,3
+ !   write(unit, "(1x, 3(f11.7,1x))")cryst%rprimd(:, ii)
+ !end do
+ !write(unit, "(a, i0)")" natom ", cryst%natom
+ !write(unit, "(a)")" xred_symbols"
+ !do iatom=1,cryst%natom
+ !  write(unit,"(1x, 3f11.7,2x,a)")cryst%xred(:,iatom), cryst%symbol_type(cryst%typat(iatom))
+ !end do
+
+end subroutine crystal_print_abivars
 !!***
 
 !----------------------------------------------------------------------
@@ -641,12 +1178,6 @@ end subroutine crystal_print
 !! OUTPUT
 !! symbols = array with the symbol of each atoms
 !!
-!! PARENTS
-!!      m_effective_potential_file,m_fit_polynomial_coeff,m_polynomial_coeff
-!!
-!! CHILDREN
-!!      mati3inv,sg_multable
-!!
 !! SOURCE
 
 subroutine symbols_crystal(natom,ntypat,npsp,symbols,typat,znucl)
@@ -665,7 +1196,7 @@ subroutine symbols_crystal(natom,ntypat,npsp,symbols,typat,znucl)
  integer :: ia,ii,itypat,jj
 ! *************************************************************************
 
- !  Fill the symbols array
+ ! Fill the symbols array
  do ia=1,natom
    symbols(ia) = adjustl(znucl2symbol(znucl(typat(ia))))
  end do
@@ -701,10 +1232,6 @@ end subroutine symbols_crystal
 !! FUNCTION
 !!  Return the index of the spatial inversion, 0 if not present
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 pure function idx_spatial_inversion(Cryst) result(inv_idx)
@@ -739,10 +1266,6 @@ end function idx_spatial_inversion
 !! FUNCTION
 !!  Returns .TRUE. if space group is symmorphic, i.e. all fractional translations are zero.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 pure function isymmorphic(Cryst) result(ans)
@@ -768,17 +1291,11 @@ end function isymmorphic
 !! FUNCTION
 !!  Returns .TRUE. if we are using alchemical pseudopotentials
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
-pure function isalchemical(Cryst) result(ans)
+pure logical function isalchemical(Cryst) result(ans)
 
 !Arguments ------------------------------------
-!scalars
- logical :: ans
  class(crystal_t),intent(in) :: Cryst
 
 ! *************************************************************************
@@ -797,21 +1314,18 @@ end function isalchemical
 !! FUNCTION
 !!  Return atomic data from the itypat index
 !!
-!! PARENTS
-!!
 !! SOURCE
 
-function adata_type(crystal,itypat) result(atom)
+type(atomdata_t) function adata_type(crystal, itypat) result(atom)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: itypat
  class(crystal_t),intent(in) :: crystal
- type(atomdata_t) :: atom
 
 ! *************************************************************************
 
- call atomdata_from_znucl(atom,crystal%znucl(itypat))
+ call atomdata_from_znucl(atom, crystal%znucl(itypat))
 
 end function adata_type
 !!***
@@ -824,8 +1338,6 @@ end function adata_type
 !!
 !! FUNCTION
 !!  Return the atomic symbol from the itypat index
-!!
-!! PARENTS
 !!
 !! SOURCE
 
@@ -851,6 +1363,32 @@ end function symbol_type
 
 !----------------------------------------------------------------------
 
+!!****f* m_crystal/symbol_iatom
+!! NAME
+!!  symbol_iatom
+!!
+!! FUNCTION
+!!  Return the atomic symbol from the iatom index
+!!
+!! SOURCE
+
+function symbol_iatom(crystal, iatom) result(symbol)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: iatom
+ character(len=2) :: symbol
+ class(crystal_t),intent(in) :: crystal
+
+! *************************************************************************
+
+ symbol = crystal%symbol_type(crystal%typat(iatom))
+
+end function symbol_iatom
+!!***
+
+!----------------------------------------------------------------------
+
 !!****f* m_crystal/crystal_point_group
 !! NAME
 !!  crystal_point_group
@@ -868,12 +1406,6 @@ end function symbol_type
 !!  ptg_symrec(3,3,ptg_nsym)=Rotations in reciprocal space
 !!  has_inversion=True if spatial inversion is present in the point group.
 !!
-!! PARENTS
-!!      m_skw
-!!
-!! CHILDREN
-!!      mati3inv,sg_multable
-!!
 !! SOURCE
 
 subroutine crystal_point_group(cryst, ptg_nsym, ptg_symrel, ptg_symrec, has_inversion, include_timrev)
@@ -889,13 +1421,11 @@ subroutine crystal_point_group(cryst, ptg_nsym, ptg_symrel, ptg_symrec, has_inve
 
 !Local variables-------------------------------
 !scalars
- logical :: debug
- integer :: isym,search,tmp_nsym,ierr
- logical :: found,my_include_timrev
+ integer :: isym, search, tmp_nsym, ierr
+ logical :: found, my_include_timrev, debug
 !arrays
  integer :: work_symrel(3,3,cryst%nsym)
  integer,allocatable :: symafm(:)
- real(dp),allocatable :: tnons(:,:)
 
 ! *************************************************************************
 
@@ -940,12 +1470,10 @@ subroutine crystal_point_group(cryst, ptg_nsym, ptg_symrel, ptg_symrec, has_inve
 
  debug = .False.
  if (debug) then
-   ABI_CALLOC(tnons, (3, ptg_nsym))
    ABI_MALLOC(symafm, (ptg_nsym))
    symafm = 1
-   call sg_multable(ptg_nsym, symafm, ptg_symrel, tnons, tol12, ierr)
+   call sg_multable(ptg_nsym, symafm, ptg_symrel, ierr)
    ABI_CHECK(ierr == 0, "point group is not a group! See messages above")
-   ABI_FREE(tnons)
    ABI_FREE(symafm)
  end if
 
@@ -972,13 +1500,6 @@ end subroutine crystal_point_group
 !! NOTES
 !!  Alchemy not treated, since crystal should be initialized at the beginning of the run.
 !!
-!! PARENTS
-!!      anaddb,eig2tot,exc_spectra,dfpt_looppert,m_haydock,m_phonons,m_shirley
-!!      outscfcv,sigma
-!!
-!! CHILDREN
-!!      atomdata_from_znucl
-!!
 !! SOURCE
 
 integer function crystal_ncwrite(cryst, ncid) result(ncerr)
@@ -988,7 +1509,6 @@ integer function crystal_ncwrite(cryst, ncid) result(ncerr)
  class(crystal_t),intent(in) :: cryst
  integer,intent(in) :: ncid
 
-#ifdef HAVE_NETCDF
 !Local variables-------------------------------
 !scalars
  integer :: itypat
@@ -1001,27 +1521,31 @@ integer function crystal_ncwrite(cryst, ncid) result(ncerr)
 
 ! *************************************************************************
 
- ! TODO alchemy not treated correctly
+ ! TODO alchemy not treated correctly by ETSF_IO specs.
  if (cryst%isalchemical()) then
    write(msg,"(3a)")&
     "Alchemical crystals are not fully supported by the netcdf format",ch10,&
     "Important parameters (e.g. znucl, symbols) are not written with the correct value"
-   MSG_WARNING(msg)
+   ABI_WARNING(msg)
  end if
 
  symmorphic = yesno(cryst%isymmorphic())
 
  ! Define dimensions.
+ ! npsp added in v9.
  ncerr = nctk_def_dims(ncid, [ &
    nctkdim_t("complex", 2), nctkdim_t("symbol_length", 2),&
    nctkdim_t("character_string_length", 80), nctkdim_t("number_of_cartesian_directions", 3),&
    nctkdim_t("number_of_reduced_dimensions", 3), nctkdim_t("number_of_vectors", 3),&
    nctkdim_t("number_of_atoms", cryst%natom), nctkdim_t("number_of_atom_species", cryst%ntypat),&
+   nctkdim_t("number_of_atom_pseudopotentials", cryst%npsp),&
    nctkdim_t("number_of_symmetry_operations", cryst%nsym)], defmode=.True.)
  NCF_CHECK(ncerr)
 
  ! Define variables
- NCF_CHECK(nctk_def_iscalars(ncid, [character(len=nctk_slen) :: "space_group"]))
+ ncerr = nctk_def_iscalars(ncid, [character(len=nctk_slen) :: &
+    "space_group", "time_reversal", "use_antiferromagnetic_symmetries"])
+ NCF_CHECK(ncerr)
 
  ncerr = nctk_def_arrays(ncid, [ &
   ! Atomic structure and symmetry operations
@@ -1055,11 +1579,11 @@ integer function crystal_ncwrite(cryst, ncid) result(ncerr)
 
  ! Set-up atomic symbols.
  do itypat=1,cryst%ntypat
-   call atomdata_from_znucl(atom,cryst%znucl(itypat))
+   call atomdata_from_znucl(atom, cryst%znucl(itypat))
    symbols(itypat) = atom%symbol
    write(symbols_long(itypat),'(a2,a78)') symbols(itypat),REPEAT(CHAR(0),78)
    write(psp_desc(itypat),'(2a)') &
-&    cryst%title(itypat)(1:MIN(80,LEN_TRIM(cryst%title(itypat)))),REPEAT(CHAR(0),MAX(0,80-LEN_TRIM(cryst%title(itypat))))
+     cryst%title(itypat)(1:MIN(80,LEN_TRIM(cryst%title(itypat)))),REPEAT(CHAR(0),MAX(0,80-LEN_TRIM(cryst%title(itypat))))
  end do
 
  ! Write data.
@@ -1083,9 +1607,15 @@ integer function crystal_ncwrite(cryst, ncid) result(ncerr)
  NCF_CHECK(nf90_put_var(ncid, vid("symrel_cart"), cryst%symrel_cart))
  NCF_CHECK(nf90_put_var(ncid, vid("indsym"), cryst%indsym))
 
-#else
- MSG_ERROR("netcdf library not available")
-#endif
+! Variables pertaining to the symmetry of the wavefunctions.
+! Note that these variables will be used in crystal_compare
+ NCF_CHECK(nf90_put_var(ncid, vid("time_reversal"), cryst%timrev))
+
+ if (cryst%use_antiferro) then
+    NCF_CHECK(nf90_put_var(ncid, vid("use_antiferromagnetic_symmetries"), 1))
+ else
+    NCF_CHECK(nf90_put_var(ncid, vid("use_antiferromagnetic_symmetries"), 0))
+ end if
 
 contains
  integer function vid(vname)
@@ -1112,10 +1642,6 @@ end function crystal_ncwrite
 !! OUTPUT
 !!  Only writing
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 integer function crystal_ncwrite_path(crystal, path) result(ncerr)
@@ -1125,11 +1651,8 @@ integer function crystal_ncwrite_path(crystal, path) result(ncerr)
  character(len=*),intent(in) :: path
  class(crystal_t),intent(in) :: crystal
 
-#ifdef HAVE_NETCDF
 !Local variables-------------------------------
-!scalars
  integer :: ncid
-
 ! *************************************************************************
 
  ncerr = nf90_noerr
@@ -1142,10 +1665,101 @@ integer function crystal_ncwrite_path(crystal, path) result(ncerr)
 
  NCF_CHECK(crystal_ncwrite(crystal, ncid))
  NCF_CHECK(nf90_close(ncid))
-#endif
 
 end function crystal_ncwrite_path
 !!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_crystal/crystal_ncread
+!! NAME
+!! crystal_ncread
+!!
+!! FUNCTION
+!! Read the crystal object from a NETCDF file.
+!!
+!! INPUTS
+!!  cryst<crystal_t>=Object defining the unit cell and its symmetries.
+!!  ncid=NC file handle.
+!!
+!! OUTPUT
+!!  crystal
+!!
+!! SOURCE
+
+subroutine crystal_ncread(cryst, ncid)
+
+!Arguments ------------------------------------
+!scalars
+ class(crystal_t),intent(inout) :: cryst
+ integer,intent(in) :: ncid
+
+!Local variables ------------------------------------
+!scalars
+ integer :: use_antiferro
+
+! *************************************************************************
+
+ !NCF_CHECK(nf90_inq_varid(ncid, varname, varid))
+
+ ! ---------------
+ ! Read dimensions
+ ! ---------------
+ NCF_CHECK(nctk_get_dim(ncid, "number_of_atoms", cryst%natom))
+ NCF_CHECK(nctk_get_dim(ncid, "number_of_atom_species", cryst%ntypat))
+ NCF_CHECK(nctk_get_dim(ncid, "number_of_atom_pseudopotentials", cryst%npsp))
+ NCF_CHECK(nctk_get_dim(ncid, "number_of_symmetry_operations", cryst%nsym))
+
+ ! ---------------
+ ! Allocate memory
+ ! ---------------
+ call cryst%malloc()
+
+ ! ------------
+ ! read scalars
+ ! ------------
+ NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "space_group"), cryst%space_group))
+ NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "time_reversal"), cryst%timrev))
+ NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "use_antiferromagnetic_symmetries"), use_antiferro))
+ cryst%use_antiferro = .False.
+ if (use_antiferro/=0) cryst%use_antiferro = .True.
+
+ ! -----------
+ ! read arrays
+ ! -----------
+ NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "primitive_vectors"), cryst%rprimd))
+ NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "reduced_symmetry_matrices"), cryst%symrel))
+ NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "reduced_symmetry_translations"), cryst%tnons))
+ NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "atom_species"), cryst%typat))
+ NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "reduced_atom_positions"), cryst%xred))
+ NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "atomic_numbers"), cryst%znucl(1:cryst%ntypat)))
+ NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "atomic_mass_units"), cryst%amu))
+
+ NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "symafm"), cryst%symafm))
+ NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "symrel_cart"), cryst%symrel_cart))
+ NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "indsym"), cryst%indsym))
+
+ if (cryst%npsp == cryst%ntypat) then
+   NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "valence_charges"), cryst%zion))
+ end if
+
+ ! Ignore those
+ !NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "pseudopotential_types"), psp_desc))
+ !NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "atom_species_names"), symbols_long))
+ !NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "chemical_symbols"), symbols))
+
+ ! -----------------------
+ ! Complete initialization
+ ! -----------------------
+
+ call Cryst%compute_geometry()
+ call Cryst%index_atoms()
+ call Cryst%compute_sym()
+
+end subroutine crystal_ncread
+!!***
+
+!----------------------------------------------------------------------
 
 !!****f* m_crystal/prt_cif
 !! NAME
@@ -1160,15 +1774,10 @@ end function crystal_ncwrite_path
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      outscfcv
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine prt_cif(brvltt, ciffname, natom, nsym, ntypat, rprimd, &
-&   spgaxor, spgroup, spgorig, symrel, tnon, typat, xred, znucl)
+                   spgaxor, spgroup, spgorig, symrel, tnon, typat, xred, znucl)
 
 !Arguments ------------------------------------
 !scalars
@@ -1185,10 +1794,7 @@ subroutine prt_cif(brvltt, ciffname, natom, nsym, ntypat, rprimd, &
 
 !Local variables -------------------------------
 !scalars
- integer :: unitcif
- integer :: iatom, isym
- integer :: sporder
- integer :: itypat, nat_this_type
+ integer :: unitcif, iatom, isym, sporder, itypat, nat_this_type
  real(dp) :: ucvol
  type(atomdata_t) :: atom
 !arrays
@@ -1199,22 +1805,20 @@ subroutine prt_cif(brvltt, ciffname, natom, nsym, ntypat, rprimd, &
  character(len=10) :: str_nat_type
  character(len=100) :: chemformula
  character(len=500) :: msg
- real(dp) :: angle(3)
- real(dp) :: gprimd(3,3)
- real(dp) :: rmet(3,3), gmet(3,3)
+ real(dp) :: angle(3), gprimd(3,3), rmet(3,3), gmet(3,3)
 
 !*************************************************************************
 
-!open file in append mode xlf and other compilers refuse append mode
+ ! open file in append mode xlf and other compilers refuse append mode
  if (open_file(ciffname,msg,newunit=unitcif) /=0) then
-   MSG_WARNING(msg)
+   ABI_WARNING(msg)
    return
  end if
 
-!print title for dataset
+ ! print title for dataset
  write (unitcif,'(a)') 'data_set'
 
-!print cell parameters a,b,c, angles, volume
+ ! print cell parameters a,b,c, angles, volume
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
  angle(1)=acos(rmet(2,3)/sqrt(rmet(2,2)*rmet(3,3)))/two_pi*360.0_dp
  angle(2)=acos(rmet(1,3)/sqrt(rmet(1,1)*rmet(3,3)))/two_pi*360.0_dp
@@ -1228,7 +1832,7 @@ subroutine prt_cif(brvltt, ciffname, natom, nsym, ntypat, rprimd, &
  write (unitcif,'(a,E20.10)') '_cell_angle_gamma                  ', angle(3)
  write (unitcif,'(a,E20.10)') '_cell_volume                       ', ucvol*(Bohr_Ang)**3
 
-!print reduced positions
+ ! print reduced positions
  write (unitcif,'(a)') 'loop_'
  write (unitcif,'(a,E20.10)') '  _atom_site_label                   '
  write (unitcif,'(a,E20.10)') '  _atom_site_fract_x                 '
@@ -1239,12 +1843,10 @@ subroutine prt_cif(brvltt, ciffname, natom, nsym, ntypat, rprimd, &
    write (unitcif,'(2a,3E20.10)') '  ', atom%symbol, xred(:,iatom)
  end do
 
-!
 !other specs in CIF dictionary which may be useful:
 !GEOM_BOND GEOM_ANGLE GEOM_TORSION
-!
 
-!print chemical composition in simplest form
+ ! print chemical composition in simplest form
  chemformula = "'"
  do itypat = 1, ntypat
    nat_this_type = 0
@@ -1258,7 +1860,7 @@ subroutine prt_cif(brvltt, ciffname, natom, nsym, ntypat, rprimd, &
  chemformula = trim(chemformula) // "'"
  write (unitcif,'(2a)') '_chemical_formula_analytical              ', chemformula
 
-!FIXME: check that brvltt is correctly used here - is it equal to bravais(1) in the invars routines?
+ !FIXME: check that brvltt is correctly used here - is it equal to bravais(1) in the invars routines?
  if (brvltt==1) then
    write (unitcif,'(a)') '_symmetry_cell_setting             triclinic'
  else if(brvltt==2)then
@@ -1277,7 +1879,7 @@ subroutine prt_cif(brvltt, ciffname, natom, nsym, ntypat, rprimd, &
 
  call spgdata(brvsb,intsb,intsbl,ptintsb,ptschsb,schsb,spgaxor,spgroup,sporder,spgorig)
 
-!print symmetry operations
+ ! print symmetry operations
  write (unitcif,'(a,I6)') "_symmetry_Int_Tables_number          ", spgroup
  write (unitcif,'(5a)') "_symmetry_space_group_name_H-M        '", brvsb, " ", trim(intsb), "'"
  write (unitcif,'(a)') ''
@@ -1288,7 +1890,7 @@ subroutine prt_cif(brvltt, ciffname, natom, nsym, ntypat, rprimd, &
    write (unitcif,'(2a)') '  ', trim(tmpstring)
  end do
 
- close (unitcif)
+ close(unitcif)
 
 end subroutine prt_cif
 !!***
@@ -1304,11 +1906,6 @@ end subroutine prt_cif
 !! OUTPUT
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      prt_cif
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1366,8 +1963,9 @@ end subroutine symrel2string
 !! FUNCTION
 !!  output VASP style POSCAR and FORCES files for use with frozen phonon codes, like
 !!  PHON from Dario Alfe' or frophon
-!!  IMPORTANT: the order of atoms is fixed such that typat is re-grouped. First typat=1
-!!  then typat=2, etc...
+!!  IMPORTANT: the order of atoms is fixed such that typat is re-grouped.
+!!  First typat=1 then typat=2, etc...
+!!  Only master should call this routine in MPI-mode.
 !!
 !! INPUTS
 !!  fcart = forces on atoms in cartesian coordinates
@@ -1381,12 +1979,6 @@ end subroutine symrel2string
 !!
 !! OUTPUTS
 !!   Only files written
-!!
-!! PARENTS
-!!      afterscfloop
-!!
-!! CHILDREN
-!!      atomdata_from_znucl
 !!
 !! SOURCE
 
@@ -1412,28 +2004,27 @@ subroutine prtposcar(fcart, fnameradix, natom, ntypat, rprimd, typat, ucvol, xre
  integer :: natoms_this_type(ntypat)
  character(len=2) :: symbol
  character(len=7) :: natoms_this_type_str
- character(len=100) :: chem_formula, natoms_all_types
+ character(len=100) :: chem_formula, natoms_all_types, atomsstring_all_types
  character(len=500) :: msg
- character(len=fnlen) :: fname
 
 !************************************************************************
 
-!output POSCAR file for positions, atom types etc
- fname = trim(fnameradix)//"_POSCAR"
- if (open_file(fname,msg,newunit=iout) /= 0) then
-   MSG_ERROR(msg)
+ ! Output POSCAR file for positions, atom types etc
+ if (open_file(trim(fnameradix)//"_POSCAR", msg, newunit=iout) /= 0) then
+   ABI_ERROR(msg)
  end if
 
  natoms_this_type = 0
- do itypat=1, ntypat
+ do itypat=1,ntypat
    do iatom=1,natom
-     if (typat(iatom) == itypat) natoms_this_type(itypat) = natoms_this_type(itypat)+1
+     if (typat(iatom) == itypat) natoms_this_type(itypat) = natoms_this_type(itypat) + 1
    end do
  end do
 
  chem_formula = ""
+ atomsstring_all_types = "  "
  do itypat=1, ntypat
-   call atomdata_from_znucl(atom,znucl(itypat))
+   call atomdata_from_znucl(atom, znucl(itypat))
    symbol = atom%symbol
    if (natoms_this_type(itypat) < 10) then
      write (natoms_this_type_str, '(I1)') natoms_this_type(itypat)
@@ -1443,21 +2034,28 @@ subroutine prtposcar(fcart, fnameradix, natom, ntypat, rprimd, typat, ucvol, xre
      write (natoms_this_type_str, '(I3)') natoms_this_type(itypat)
    end if
    chem_formula = trim(chem_formula) // symbol // trim(natoms_this_type_str)
+   atomsstring_all_types = trim(atomsstring_all_types) // "  " // symbol
  end do
- write (iout,'(2a)') "ABINIT generated POSCAR file. Title string - should be chemical formula... ",&
-& trim(chem_formula)
 
- write (iout,'(E24.14)') -ucvol*Bohr_Ang*Bohr_Ang*Bohr_Ang
+ write (iout,'(3a,E24.14)') "ABINIT generated POSCAR file. Chemical formula is ",trim(chem_formula), &
+&  "  Volume (AA^3) = ", ucvol*Bohr_Ang*Bohr_Ang*Bohr_Ang
+
+ write (iout,'(E10.1)')  1.0_dp
  write (iout,'(3E24.14,1x)') Bohr_Ang*rprimd(:,1) ! (angstr? bohr?)
  write (iout,'(3E24.14,1x)') Bohr_Ang*rprimd(:,2)
  write (iout,'(3E24.14,1x)') Bohr_Ang*rprimd(:,3)
+
+ write (iout, '(a)') atomsstring_all_types
+
  natoms_all_types = "   "
  do itypat=1, ntypat
    write (natoms_this_type_str, '(I7)') natoms_this_type(itypat)
    natoms_all_types = trim(natoms_all_types) // "   " // trim(natoms_this_type_str)
  end do
+
  write (iout,'(a)') trim(natoms_all_types)
  write (iout,'(a)') "Direct"
+
  do itypat=1, ntypat
    do iatom=1,natom
      if (typat(iatom) /= itypat) cycle
@@ -1466,17 +2064,16 @@ subroutine prtposcar(fcart, fnameradix, natom, ntypat, rprimd, typat, ucvol, xre
  end do
  close (iout)
 
-!output FORCES file for forces in same order as positions above
- fname = trim(fnameradix)//"_FORCES"
- if (open_file(fname,msg,newunit=iout) /= 0 ) then
-   MSG_ERROR(msg)
+ ! output FORCES file for forces in same order as positions above
+ if (open_file(trim(fnameradix)//"_FORCES", msg, newunit=iout) /= 0 ) then
+   ABI_ERROR(msg)
  end if
 
-!ndisplacements
-!iatom_displaced displacement_red_coord(3)
-!forces_cart_ev_Angstr(3)
-!...
-!<repeat for other displaced atoms>
+ !ndisplacements
+ !iatom_displaced displacement_red_coord(3)
+ !forces_cart_ev_Angstr(3)
+ !...
+ !<repeat for other displaced atoms>
  write (iout,'(I7)') 1
  write (iout,'(a)') '1 0 0 0        ! TO BE FILLED IN '
  do itypat=1, ntypat
@@ -1485,10 +2082,159 @@ subroutine prtposcar(fcart, fnameradix, natom, ntypat, rprimd, typat, ucvol, xre
      write (iout,'(3(E24.14,1x))') Ha_eV/Bohr_Ang*fcart(:,iatom)
    end do
  end do
+
  close (iout)
 
 end subroutine prtposcar
 !!***
 
-END MODULE m_crystal
+!----------------------------------------------------------------------
+
+!!****f* m_crystal/crystal_symmetrize_cart_vec3
+!! NAME
+!!  crystal_symmetrize_cart_vec3
+!!
+!! FUNCTION
+!!  Use spatial and time-reversal symmetry (TR) to symmetrize a Cartesian vector of real elements.
+!!
+!! INPUTS
+!!  v(3)=Vector in Cartesian coordinates.
+!!  time_opt=Prefactor that defines how the vectors transforms under TR. Usually +1 or -1
+!!      Note that TR is used only if cryst%timrev == 2. time_opt = 0 disables TR for testing purposes.
+!!
+!! SOURCE
+
+function crystal_symmetrize_cart_vec3(cryst, v, time_opt) result(vsum)
+
+!Arguments ------------------------------------
+ class(crystal_t),intent(in) :: cryst
+ real(dp),intent(in) :: v(3)
+ integer,intent(in) :: time_opt
+ real(dp) :: vsum(3)
+
+!Local variables-------------------------------
+ integer :: isym, itime, nsym_sum
+ real(dp) :: vsym(3), tsign
+! *************************************************************************
+
+ vsum = zero; nsym_sum = 0
+ do itime=1,cryst%timrev
+   tsign = 1
+   if (itime == cryst%timrev) then
+     if (time_opt == 0) cycle
+     tsign = time_opt
+   end if
+   do isym=1, cryst%nsym
+     nsym_sum = nsym_sum + 1
+     vsym = matmul(cryst%symrel_cart(:,:,isym), v) * tsign
+     vsum = vsum + vsym
+   end do
+ end do
+ vsum = vsum / nsym_sum
+
+end function crystal_symmetrize_cart_vec3
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_crystal/crystal_symmetrize_cart_tens33
+!! NAME
+!!  crystal_symmetrize_cart_tens33
+!!
+!! FUNCTION
+!!  Symmetrize a cartesian 3x3 tensor
+!!  Use spatial and time-reversal symmetry (TR) to symmetrize a Cartesian 3x3 tensor of real elements.
+!!
+!! INPUTS
+!!  v(3)=Vector in Cartesian coordinates.
+!!  time_opt=Prefacator that defines how the vectors transforms under TR. Usually +1 or -1
+!!      Note that TR is used only if cryst%timrev == 2. time_opt = 0 disables TR for testing purposes.
+!!
+!! SOURCE
+
+function crystal_symmetrize_cart_tens33(cryst, t, time_opt) result(tsum)
+
+!Arguments ------------------------------------
+ class(crystal_t),intent(in) :: cryst
+ real(dp),intent(in) :: t(3,3)
+ integer,intent(in) :: time_opt
+ real(dp) :: tsum(3,3)
+
+!Local variables-------------------------------
+ integer :: isym, itime, nsym_sum
+ real(dp) :: tsym(3,3), tsign
+! *************************************************************************
+
+ tsum = zero; nsym_sum = 0
+
+ do itime=1,cryst%timrev
+   tsign = 1
+   if (itime == cryst%timrev) then
+     if (time_opt == 0) cycle
+     tsign = time_opt
+   end if
+   do isym=1, cryst%nsym
+     nsym_sum = nsym_sum + 1
+     tsym = tsign * matmul((cryst%symrel_cart(:,:,isym)), matmul(t, transpose(cryst%symrel_cart(:,:,isym))))
+     tsum = tsum + tsym
+   end do
+ end do
+
+ tsum = tsum / nsym_sum
+
+end function crystal_symmetrize_cart_tens33
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_crystal/get_recart_qdirs
+!! NAME
+!!  get_recart_qdirs
+!!
+!! FUNCTION
+!!  Return predefined list of 6 q-versors in reciprocal space reduced coordinates.
+!!  First 3 entries are along the recip. space lattice vectors, then along the Cartesian axis x,y,z.
+!!  The optional qlen argument, can be used to rescale the vectors. Default: 1
+!!
+!! INPUTS
+!!
+!! SOURCE
+
+subroutine get_redcart_qdirs(cryst, nq, qdirs, qlen)
+
+ class(crystal_t),intent(in) :: cryst
+ integer,intent(out) :: nq
+ real(dp),allocatable,intent(out) :: qdirs(:,:)
+ real(dp),optional,intent(in) :: qlen
+
+!Local variables-------------------------------
+ integer :: iq
+ real(dp) :: qred2cart(3,3), qcart2red(3,3)
+
+! *************************************************************************
+
+ qred2cart = two_pi * cryst%gprimd
+ qcart2red = qred2cart
+ call matrginv(qcart2red, 3, 3)
+
+ nq = 6
+ ABI_MALLOC(qdirs, (3, nq))
+ qdirs(:,1) = [one, zero, zero]  ! (100)
+ qdirs(:,2) = [zero, one, zero]  ! (010)
+ qdirs(:,3) = [zero, zero, one]  ! (001)
+ qdirs(:,4) = matmul(qcart2red, [one, zero, zero]) ! (x)
+ qdirs(:,5) = matmul(qcart2red, [zero, one, zero]) ! (y)
+ qdirs(:,6) = matmul(qcart2red, [zero, zero, one]) ! (z)
+
+ ! normalization
+ do iq=1,nq
+   qdirs(:,iq) = qdirs(:,iq) / normv(qdirs(:,iq), cryst%gmet, "G")
+ end do
+
+ if (present(qlen)) qdirs = qlen * qdirs
+
+end subroutine get_redcart_qdirs
+!!***
+
+end module m_crystal
 !!***

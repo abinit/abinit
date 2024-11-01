@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/eval_lotf
 !! NAME
 !! eval_lotf
@@ -6,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2019 ABINIT group (MMancini)
+!! Copyright (C) 2005-2024 ABINIT group (MMancini)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -45,12 +44,6 @@ contains
  !! FUNCTION
  !!
  !! INPUTS
- !! PARENTS
-!!      m_lotf
-!!
- !! CHILDREN
-!!      dist_pbc,wrtout
-!!
  !! SOURCE
  !--Similar to SWCALC but without the triplets (used for the pair potential part and for the coordination) 
  subroutine phi_n_calc(alpha_dum,nneig,nlist,r0,rv,epot_dum,&
@@ -177,12 +170,6 @@ contains
  !! FUNCTION
  !!
  !! INPUTS
- !! PARENTS
-!!      m_lotf
-!!
- !! CHILDREN
-!!      dist_pbc,wrtout
-!!
  !! SOURCE
  subroutine calc_coord2(nneig,r0,rv,coordatom_dum)
 
@@ -220,12 +207,6 @@ contains
  !! FUNCTION
  !!
  !! INPUTS
- !! PARENTS
-!!      m_lotf
-!!
- !! CHILDREN
-!!      dist_pbc,wrtout
-!!
  !! SOURCE
  subroutine eval_forces_U_n(nneig,nlist,r0,rv,up_list,forc_dum2)
   use pbc_lotf,only : dist_pbc
@@ -270,12 +251,6 @@ contains
  !! FUNCTION
  !!
  !! INPUTS
- !! PARENTS
-!!      m_lotf
-!!
- !! CHILDREN
-!!      dist_pbc,wrtout
-!!
  !! SOURCE
  subroutine eval_forces_U_n_2(alpha_dum,nneig,nlist,&
    r0,rv,up_list,rho_p_sum,forc_dum2)
@@ -354,12 +329,6 @@ contains
  !! FUNCTION
  !!
  !! INPUTS
- !! PARENTS
-!!      m_lotf
-!!
- !! CHILDREN
-!!      dist_pbc,wrtout
-!!
  !! SOURCE
  subroutine eval_force_devs_new_d(alpha_dum,nneig,nlist,neig2,nlist2,&
    r0,rv,rv2,up_list,upp_list,fact2,ffit,&
@@ -550,12 +519,6 @@ contains
  !! upgraded to use the linked cell method (Knuth) 
  !! 
  !! INPUTS
- !! PARENTS
-!!      m_lotf
-!!
- !! CHILDREN
-!!      dist_pbc,wrtout
-!!
  !! SOURCE
  subroutine  upd_lis0(tau0,neighl,nneig,niter)   
   use defs_param_lotf,only : lotfvar
@@ -652,7 +615,7 @@ contains
     write(message,'(a,i8,2a)')&
       & 'ERROR IN UPD_LIS0: ICELL_TOT = ',icell_tot,ch10,&
       & 'ERROR IN UPD_LIS0: RAISE ICELLX_A'
-    MSG_ERROR(message)
+    ABI_ERROR(message)
   endif
 
   !-- clears head vector & constructs head & list      
@@ -721,7 +684,7 @@ contains
     do while(iat > 0)
       i = list(iat) 
       do while(i  > 0) 
-        if(i==iat) MSG_ERROR("i==iat")
+        if(i==iat) ABI_ERROR("i==iat")
         call dist_pbc(tau0(:,i),tau0(:,iat))
         if(r2 < rcut2) then 
           nneig(iat) = nneig(iat) + 1
@@ -735,7 +698,7 @@ contains
       if(ANY(nneig(:) > lotfvar%nneigx))  then 
         write(message,'(a,i8,a)')&
           'UPD_LIS CLASSIC: max no. of neighbours: ',lotfvar%nneigx,' is too small'
-        MSG_ERROR(message)
+        ABI_ERROR(message)
       endif
 
 
@@ -747,7 +710,7 @@ contains
         i = head(icn) 
 
         do while(i>0)
-          if(i==iat) MSG_ERROR("i==iat")
+          if(i==iat) ABI_ERROR("i==iat")
           call dist_pbc(tau0(:,i),tau0(:,iat))
           if(r2 < rcut2) then 
             nneig(iat) = nneig(iat) + 1
@@ -760,7 +723,7 @@ contains
         if(ANY(nneig(:) > lotfvar%nneigx))  then 
           write(message,'(a,i8,a)')&
             'UPD_LIS CLASSIC: max no. of neighbours: ',lotfvar%nneigx,' is too small'
-          MSG_ERROR(message)
+          ABI_ERROR(message)
         endif
       enddo
 
@@ -791,12 +754,6 @@ contains
  !!  all the bonds considered here are already 100% in the fitting zone.    
  !!  Here we just need to eliminate bonds or triplets that are too long..
  !! 
- !! PARENTS
-!!      m_lotf
-!!
- !! CHILDREN
-!!      dist_pbc,wrtout
-!!
  !! SOURCE
  subroutine tuneparms(tau0,tfit_int,rcf2_int)
 
@@ -846,7 +803,7 @@ contains
     iat = ibnd_mat(1,ibn)
     i   = ibnd_mat(2,ibn)
     if( (npract(iat) > 50).and.(npract(i) > 50) )then  
-      MSG_ERROR('LOTF: NPRACT 50 (A) ') 
+      ABI_ERROR('LOTF: NPRACT 50 (A) ') 
     endif
   enddo
 

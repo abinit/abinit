@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_mkcore
 !! NAME
 !!  m_mkcore
@@ -7,14 +6,10 @@
 !!  Routines related to non-linear core correction.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2019 ABINIT group (DCA, XG, GMR, TRangel, MT)
+!!  Copyright (C) 1998-2024 ABINIT group (DCA, XG, GMR, TRangel, MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -27,15 +22,15 @@
 module m_mkcore
 
  use defs_basis
- use defs_abitypes
  use m_abicore
  use m_xmpi
  use m_errors
  use m_linalg_interfaces
 
- use m_geometry,   only : strconv
- use m_time,       only : timab
- use m_mpinfo,     only : ptabs_fourdp
+ use defs_abitypes, only : mpi_type
+ use m_geometry,    only : strconv
+ use m_time,        only : timab
+ use m_mpinfo,      only : ptabs_fourdp
  use m_sort,        only : sort_dp
  use m_pawrad,      only : pawrad_type, pawrad_init, pawrad_free
  use m_pawtab,      only : pawtab_type
@@ -100,12 +95,6 @@ contains
 !! NOTES
 !! Note that this routine is tightly connected to the dfpt_mkcore.f routine
 !!
-!! PARENTS
-!!      dfpt_dyfro,forces,nonlinear,prcref,prcref_PMA,respfn,setvtr,stress
-!!      xchybrid_ncpp_cc
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine mkcore(corstr,dyfrx2,grxc,mpi_enreg,natom,nfft,nspden,ntypat,n1,n1xccc,&
@@ -148,9 +137,9 @@ subroutine mkcore(corstr,dyfrx2,grxc,mpi_enreg,natom,nfft,nspden,ntypat,n1,n1xcc
 !Make sure option is acceptable
  if (option<0.or.option>4) then
    write(message, '(a,i12,a,a,a)' )&
-&   'option=',option,' is not allowed.',ch10,&
-&   'Must be 1, 2, 3 or 4.'
-   MSG_BUG(message)
+    'option=',option,' is not allowed.',ch10,&
+    'Must be 1, 2, 3 or 4.'
+   ABI_BUG(message)
  end if
 
 !Zero out only the appropriate array according to option:
@@ -170,7 +159,7 @@ subroutine mkcore(corstr,dyfrx2,grxc,mpi_enreg,natom,nfft,nspden,ntypat,n1,n1xcc
 !  Zero out fr-wf part of the dynamical matrix
    dyfrx2(:,:,:)=zero
  else
-   MSG_BUG(" Can't be here! (bad option)")
+   ABI_BUG(" Can't be here! (bad option)")
  end if
 
 !Compute lengths of cross products for pairs of primitive
@@ -205,7 +194,7 @@ subroutine mkcore(corstr,dyfrx2,grxc,mpi_enreg,natom,nfft,nspden,ntypat,n1,n1xcc
  delta2div6=delta**2/6.0d0
 
  if (option>=2) then
-   ABI_ALLOCATE(work,(n1,n2,n3))
+   ABI_MALLOC(work,(n1,n2,n3))
 !  For spin-polarization, replace vxc by (1/2)*(vxc(up)+vxc(down))
 !  For non-collinear magnetism, replace vxc by (1/2)*(vxc^{11}+vxc^{22})
    if (nspden>=2) then
@@ -273,8 +262,8 @@ subroutine mkcore(corstr,dyfrx2,grxc,mpi_enreg,natom,nfft,nspden,ntypat,n1,n1xcc
 
 !  Allocate arrays that depends on the range
    mrange=maxval(irange(1:3))
-   ABI_ALLOCATE(ii,(2*mrange+1,3))
-   ABI_ALLOCATE(rrdiff,(2*mrange+1,3))
+   ABI_MALLOC(ii,(2*mrange+1,3))
+   ABI_MALLOC(rrdiff,(2*mrange+1,3))
 
 !  Set up counters that explore the relevant range
 !  of points around the atom
@@ -439,24 +428,17 @@ subroutine mkcore(corstr,dyfrx2,grxc,mpi_enreg,natom,nfft,nspden,ntypat,n1,n1xcc
 
 !            If option is not 1, 2, 3, or 4.
            else
-             MSG_BUG("Can't be here in mkcore")
+             ABI_BUG("Can't be here in mkcore")
 !            End of choice of option
            end if
 
-!          End of condition on the range
-         end if
+         end if ! End of condition on the range
+       end do ! End loop on ishift1
+     end do ! End loop on ishift2
+   end do ! End loop on ishift3
 
-!        End loop on ishift1
-       end do
-
-!      End loop on ishift2
-     end do
-
-!    End loop on ishift3
-   end do
-
-   ABI_DEALLOCATE(ii)
-   ABI_DEALLOCATE(rrdiff)
+   ABI_FREE(ii)
+   ABI_FREE(rrdiff)
 
    if(option==2)then
      fact=-(ucvol/dble(nfftot))/range
@@ -465,8 +447,7 @@ subroutine mkcore(corstr,dyfrx2,grxc,mpi_enreg,natom,nfft,nspden,ntypat,n1,n1xcc
      grxc(3,iatom)=grxc3*fact
    end if
 
-!  End big loop on atoms
- end do
+ end do !  End big loop on atoms
 
  if (option==2) then
 
@@ -516,7 +497,7 @@ subroutine mkcore(corstr,dyfrx2,grxc,mpi_enreg,natom,nfft,nspden,ntypat,n1,n1xcc
  end if
 
  if(option>=2)  then
-   ABI_DEALLOCATE(work)
+   ABI_FREE(work)
  end if
 
  if(mpi_enreg%nproc_fft > 1) then
@@ -544,10 +525,6 @@ subroutine mkcore(corstr,dyfrx2,grxc,mpi_enreg,natom,nfft,nspden,ntypat,n1,n1xcc
 !!
 !! FUNCTION
 !!  Define magnitude of cross product of two vectors
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -579,7 +556,7 @@ end subroutine mkcore
 !! INPUTS
 !!  atindx1(natom)=index table for atoms, inverse of atindx
 !!  icoulomb= periodic treatment of Hartree potential: 0=periodic, 1=free BC, 2=surface BC
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  natom=number of atoms in cell.
 !!  nfft=(effective) number of FFT grid points (for this processor)
 !!  nspden=number of spin-density components
@@ -599,6 +576,7 @@ end subroutine mkcore
 !!  xcccrc(ntypat)=XC core correction cutoff radius (bohr) for each atom type
 !!  xccc1d(n1xccc,6,ntypat)=1D core charge function and 5 derivatives for each atom type
 !!  xred(3,natom)=reduced coordinates for atoms in unit cell
+!!  [usekden]= --optional-- if TRUE, output the kinetic energy density instead of the density
 !!
 !! OUTPUT
 !!  === if option==1 ===
@@ -612,30 +590,27 @@ end subroutine mkcore
 !!    frozen-wavefunction part of the dynamical matrix
 !!
 !! SIDE EFFECTS
-!!  xccc3d(n1*n2*n3)=3D core electron density for XC core correction (bohr^-3)
+!!  xccc3d(n1*n2*n3)=3D core electron (event. kinetic energy) density for XC core correction (bohr^-3)
 !!   (computed and returned when option=1, needed as input when option=3)
 !!
 !! NOTES
 !!  Based on mkcore.F90
 !!
-!! PARENTS
-!!      forces,setvtr,stress
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine mkcore_alt(atindx1,corstr,dyfrx2,grxc,icoulomb,mpi_enreg,natom,nfft,nspden,&
 &          nattyp,ntypat,n1,n1xccc,n2,n3,option,rprimd,ucvol,vxc,xcccrc,xccc1d,&
-&          xccc3d,xred,pawrad,pawtab,usepaw)
+&          xccc3d,xred,pawrad,pawtab,usepaw,&
+&          usekden) ! optional argument
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: icoulomb,n1,n1xccc,n2,n3,natom,nfft,nspden,ntypat,option,usepaw
+ logical,intent(in),optional :: usekden
  real(dp),intent(in) :: ucvol
  type(mpi_type),intent(in) :: mpi_enreg
  type(pawrad_type),intent(in) :: pawrad(:)
- type(pawtab_type),intent(in) :: pawtab(:)
+ type(pawtab_type),target,intent(in) :: pawtab(:)
 !arrays
  integer,intent(in) :: atindx1(natom),nattyp(ntypat)
  real(dp),intent(in) :: rprimd(3,3),xccc1d(n1xccc,6,ntypat)
@@ -648,9 +623,9 @@ subroutine mkcore_alt(atindx1,corstr,dyfrx2,grxc,icoulomb,mpi_enreg,natom,nfft,n
 !scalars
  integer :: i1,i2,i3,iat,iatm,iatom,ier,ipts
  integer :: ishift,ishift1,ishift2,ishift3
- integer :: itypat,ixp,jj,jpts,me_fft,mrange,mu
+ integer :: itypat,ixp,jj,jpts,me_fft,mrange,msz,mu
  integer :: nfftot,npts,npts12,nu
- logical :: letsgo
+ logical :: letsgo,usekden_
  real(dp) :: aa,bb,cc,dd,delta,delta2div6,deltam1
  real(dp) :: diff,difmag,fact,range,range2
  real(dp) :: rangem1,rdiff1,rdiff2,rdiff3
@@ -669,19 +644,27 @@ subroutine mkcore_alt(atindx1,corstr,dyfrx2,grxc,icoulomb,mpi_enreg,natom,nfft,n
  real(dp) :: scale(3),tau(3),tsec(2),tt(3)
  real(dp),allocatable :: dtcore(:),d2tcore(:),rnorm(:)
  real(dp),allocatable :: rrdiff(:,:),tcore(:)
- real(dp), ABI_CONTIGUOUS pointer :: vxc_eff(:)
+ real(dp),allocatable,target :: tcoretau(:,:) ! only needed in PAW case.
+ real(dp), ABI_CONTIGUOUS pointer :: corespl(:,:),vxc_eff(:)
 
 !************************************************************************
 
  call timab(12,1,tsec)
 
-!Make sure option is acceptable
+!Make sure options are acceptable
  if (option<0.or.option>4) then
    write(message, '(a,i12,a,a,a)' )&
-&   'option=',option,' is not allowed.',ch10,&
-&   'Must be 1, 2, 3 or 4.'
-   MSG_BUG(message)
+    'option=',option,' is not allowed.',ch10,&
+    'Must be 1, 2, 3 or 4.'
+   ABI_BUG(message)
  end if
+
+ usekden_=.false.;if (present(usekden)) usekden_=usekden
+ if (usekden_) then
+   message='usekden=1 mkcore_alt not yet in production. You have been warned! May not work with PAW or NC'
+   ABI_WARNING(message)
+ end if
+
 
 !Zero out only the appropriate array according to option:
  if (option==1) then
@@ -734,7 +717,7 @@ subroutine mkcore_alt(atindx1,corstr,dyfrx2,grxc,icoulomb,mpi_enreg,natom,nfft,n
 !  For spin-polarization, replace vxc by (1/2)*(vxc(up)+vxc(down))
 !  For non-collinear magnetism, replace vxc by (1/2)*(vxc^{11}+vxc^{22})
    if (nspden>=2) then
-     ABI_ALLOCATE(vxc_eff,(nfft))
+     ABI_MALLOC(vxc_eff,(nfft))
      do jj=1,nfft
        vxc_eff(jj)=half*(vxc(jj,1)+vxc(jj,2))
      end do
@@ -749,14 +732,25 @@ subroutine mkcore_alt(atindx1,corstr,dyfrx2,grxc,icoulomb,mpi_enreg,natom,nfft,n
 
 !  Set search range (density cuts off perfectly beyond range)
    range=xcccrc(itypat);if (usepaw==1) range=pawtab(itypat)%rcore
-   range2=range**2 ; rangem1=one/range
 
 !  Skip loop if this type has no core charge
    if (abs(range)<1.d-16) cycle
 
-!  PAW: create mesh for core density
+   range2=range**2 ; rangem1=one/range
+
+
+!  PAW: select core density type and create mesh
    if (usepaw==1) then
-     call pawrad_init(core_mesh,mesh_size=pawtab(itypat)%core_mesh_size,&
+     if (usekden_) then
+       msz=pawtab(itypat)%coretau_mesh_size
+       ABI_MALLOC(tcoretau,(msz,1))
+       tcoretau(:,1)=pawtab(itypat)%coretau(:)
+       corespl => tcoretau
+     else
+       msz=pawtab(itypat)%core_mesh_size
+       corespl => pawtab(itypat)%tcoredens
+     end if
+     call pawrad_init(core_mesh,mesh_size=msz,&
 &     mesh_type=pawrad(itypat)%mesh_type,&
 &     rstep=pawrad(itypat)%rstep,lstep=pawrad(itypat)%lstep)
    end if
@@ -781,8 +775,8 @@ subroutine mkcore_alt(atindx1,corstr,dyfrx2,grxc,icoulomb,mpi_enreg,natom,nfft,n
 
 !    Allocate arrays that depends on the range
      mrange=maxval(irange(1:3))
-     ABI_ALLOCATE(ii,(2*mrange+1,3))
-     ABI_ALLOCATE(rrdiff,(2*mrange+1,3))
+     ABI_MALLOC(ii,(2*mrange+1,3))
+     ABI_MALLOC(rrdiff,(2*mrange+1,3))
 
 !    Set up counters that explore the relevant range of points around the atom
      if (geocode=='P') then
@@ -811,18 +805,18 @@ subroutine mkcore_alt(atindx1,corstr,dyfrx2,grxc,icoulomb,mpi_enreg,natom,nfft,n
        end do
      end if
      npts12=ishiftmax(1)*ishiftmax(2)
-     ABI_ALLOCATE(indx1,(npts12))
-     ABI_ALLOCATE(indx2,(npts12))
-     ABI_ALLOCATE(iindex,(npts12))
-     ABI_ALLOCATE(rnorm,(npts12))
+     ABI_MALLOC(indx1,(npts12))
+     ABI_MALLOC(indx2,(npts12))
+     ABI_MALLOC(iindex,(npts12))
+     ABI_MALLOC(rnorm,(npts12))
      if (option==1.or.option==3) then
-       ABI_ALLOCATE(tcore,(npts12))
+       ABI_MALLOC(tcore,(npts12))
      end if
      if (option>=2) then
-       ABI_ALLOCATE(dtcore,(npts12))
+       ABI_MALLOC(dtcore,(npts12))
      end if
      if (option==4) then
-       ABI_ALLOCATE(d2tcore,(npts12))
+       ABI_MALLOC(d2tcore,(npts12))
      end if
 
 !    Conduct loop over restricted range of grid points for iatom
@@ -858,7 +852,7 @@ subroutine mkcore_alt(atindx1,corstr,dyfrx2,grxc,icoulomb,mpi_enreg,natom,nfft,n
        if (npts==0) cycle
        if (npts>npts12) then
          message='npts>npts12!'
-         MSG_BUG(message)
+         ABI_BUG(message)
        end if
 
 !      Evaluate core density (and derivatives) on the set of selected points
@@ -868,22 +862,19 @@ subroutine mkcore_alt(atindx1,corstr,dyfrx2,grxc,icoulomb,mpi_enreg,natom,nfft,n
          if (option==1.or.option==3) then
 !          Evaluate fit of core density
            call paw_splint(core_mesh%mesh_size,core_mesh%rad, &
-&           pawtab(itypat)%tcoredens(:,1), &
-&           pawtab(itypat)%tcoredens(:,3),&
+&           corespl(:,1),corespl(:,3),&
 &           npts,rnorm(1:npts),tcore(1:npts))
          end if
          if (option>=2) then
 !          Evaluate fit of 1-der of core density
            call paw_splint(core_mesh%mesh_size,core_mesh%rad, &
-&           pawtab(itypat)%tcoredens(:,2), &
-&           pawtab(itypat)%tcoredens(:,4),&
+&           corespl(:,2),corespl(:,4),&
 &           npts,rnorm(1:npts),dtcore(1:npts))
          end if
          if (option==4) then
 !          Evaluate fit of 2nd-der of core density
            call paw_splint(core_mesh%mesh_size,core_mesh%rad, &
-&           pawtab(itypat)%tcoredens(:,3), &
-&           pawtab(itypat)%tcoredens(:,5),&
+&           corespl(:,3),corespl(:,5),&
 &           npts,rnorm(1:npts),d2tcore(1:npts))
          end if
        else
@@ -982,20 +973,23 @@ subroutine mkcore_alt(atindx1,corstr,dyfrx2,grxc,icoulomb,mpi_enreg,natom,nfft,n
 
      end do ! Loop on ishift3
 
-     ABI_DEALLOCATE(ii)
-     ABI_DEALLOCATE(rrdiff)
-     ABI_DEALLOCATE(indx1)
-     ABI_DEALLOCATE(indx2)
-     ABI_DEALLOCATE(iindex)
-     ABI_DEALLOCATE(rnorm)
+     ABI_FREE(ii)
+     ABI_FREE(rrdiff)
+     ABI_FREE(indx1)
+     ABI_FREE(indx2)
+     ABI_FREE(iindex)
+     ABI_FREE(rnorm)
      if (allocated(tcore)) then
-       ABI_DEALLOCATE(tcore)
+       ABI_FREE(tcore)
+     end if
+     if (allocated(tcoretau)) then
+       ABI_FREE(tcoretau)
      end if
      if (allocated(dtcore)) then
-       ABI_DEALLOCATE(dtcore)
+       ABI_FREE(dtcore)
      end if
      if (allocated(d2tcore)) then
-       ABI_DEALLOCATE(d2tcore)
+       ABI_FREE(d2tcore)
      end if
 
      if (option==2) then
@@ -1014,7 +1008,7 @@ subroutine mkcore_alt(atindx1,corstr,dyfrx2,grxc,icoulomb,mpi_enreg,natom,nfft,n
  end do
 
  if(option>=2.and.nspden>=2)  then
-   ABI_DEALLOCATE(vxc_eff)
+   ABI_FREE(vxc_eff)
  end if
 
 !Forces: translate into reduced coordinates
@@ -1065,10 +1059,6 @@ subroutine mkcore_alt(atindx1,corstr,dyfrx2,grxc,icoulomb,mpi_enreg,natom,nfft,n
 !! FUNCTION
 !!  Define magnitude of cross product of two vectors
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
    function cross_mkcore_alt(xx,yy,zz,aa,bb,cc)
@@ -1089,11 +1079,6 @@ subroutine mkcore_alt(atindx1,corstr,dyfrx2,grxc,icoulomb,mpi_enreg,natom,nfft,n
 !! FUNCTION
 !!  Find the grid index of a given position in the cell according to the BC
 !!  Determine also whether the index is inside or outside the box for free BC
-!!
-!! PARENTS
-!!      mkcore
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1154,12 +1139,6 @@ end subroutine mkcore_alt
 !! NOTES
 !! Note that this routine is tightly connected to the mkcore.f routine
 !!
-!! PARENTS
-!!      dfpt_dyxc1,dfpt_eltfrxc,dfpt_looppert,dfpt_nselt,dfpt_nstdy,dfpt_nstpaw
-!!      dfptnl_loop
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine dfpt_mkcore(cplex,idir,ipert,natom,ntypat,n1,n1xccc,&
@@ -1198,14 +1177,14 @@ subroutine dfpt_mkcore(cplex,idir,ipert,natom,ntypat,n1,n1xccc,&
 !   write(message,'(a,i0,a,a,a,i0,a)')&
 !&   ' The argument ipert must be between 1 and natom+7=',natom+7,',',ch10,&
 !&   ' while it is ipert=',ipert,'.'
-!   MSG_BUG(message)
+!   ABI_BUG(message)
 ! end if
 
  if( (ipert==natom+3 .or. ipert==natom+4) .and. cplex/=1) then
    write(message,'(3a,i4,a)')&
 &   'The argument cplex must be 1 for strain perturbationh',ch10,&
 &   'while it is cplex=',cplex,'.'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
 !Zero out array
@@ -1218,7 +1197,7 @@ subroutine dfpt_mkcore(cplex,idir,ipert,natom,ntypat,n1,n1xccc,&
      write(message,'(a,a,a,i4,a)')&
 &     'The argument idir must be between 1 and 3,',ch10,&
 &     'while it is idir=',idir,'.'
-     MSG_BUG(message)
+     ABI_BUG(message)
    end if
 
 !  Compute lengths of cross products for pairs of primitive
@@ -1297,8 +1276,8 @@ subroutine dfpt_mkcore(cplex,idir,ipert,natom,ntypat,n1,n1xccc,&
 
 !    Allocate arrays that depends on the range
      mrange=maxval(irange(1:3))
-     ABI_ALLOCATE(ii,(2*mrange+1,3))
-     ABI_ALLOCATE(rrdiff,(2*mrange+1,3))
+     ABI_MALLOC(ii,(2*mrange+1,3))
+     ABI_MALLOC(rrdiff,(2*mrange+1,3))
 
 !    Consider each component in turn
      do mu=1,3
@@ -1321,7 +1300,7 @@ subroutine dfpt_mkcore(cplex,idir,ipert,natom,ntypat,n1,n1xccc,&
 !      write(message, '(a,a,a,a,i6,a)' ) ch10,&
 !      &    ' dfpt_mkcore : BUG -',ch10,&
 !      &    '  The range around atom',iatom,' is too large.'
-!      MSG_BUG(message)
+!      ABI_BUG(message)
 !      end if
 
 !      Set up a counter that explore the relevant range
@@ -1428,8 +1407,8 @@ subroutine dfpt_mkcore(cplex,idir,ipert,natom,ntypat,n1,n1xccc,&
 !      End loop on ishift3
      end do
 
-     ABI_DEALLOCATE(ii)
-     ABI_DEALLOCATE(rrdiff)
+     ABI_FREE(ii)
+     ABI_FREE(rrdiff)
 !    End loop on atoms
    end do
 

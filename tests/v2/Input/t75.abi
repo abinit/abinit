@@ -1,0 +1,103 @@
+# Rhombohedral Bi treated as a metal ; 2 special points
+# Comparison of forces without and with spin-orbit
+# The value of u is not the equilibrium one.
+
+ ndtset 7
+#ndtset 1 jdtset 4  nstep4 1 nline 1    prtvol -10
+
+#Datasets 1-3 : without spin-orbit
+ nband1 6
+ xred1  3*0.230d0
+       3*-0.230d0
+
+ nband2   6
+ xred2    3*0.231d0
+          3*-0.231d0
+ getwfk2 -1
+
+ nband3   6
+ xred3  3*0.232d0
+       3*-0.232d0
+ getwfk3 -1
+
+#Fourth dataset : nspinor=2, without spin-orbit
+ nband4   12
+ nspinor4  2
+ so_psp4   0
+ xred4  3*0.231d0
+       3*-0.231d0
+ getwfk4   2
+
+
+#Dataset 5-7 : nspinor=2, with spin-orbit
+ nband5   12
+ nspinor5  2
+ xred5  3*0.230d0
+       3*-0.230d0
+ getwfk5   1
+
+ nband6   12
+ nspinor6  2
+ xred6  3*0.231d0
+       3*-0.231d0
+ getwfk6   4
+
+ nband7   12
+ nspinor7  2
+ xred7  3*0.232d0
+       3*-0.232d0
+ getwfk7   6
+
+
+
+
+#Common data
+ acell 3*9.00d0
+ angdeg 3*57.25d0
+ ecut  2.0d0
+ kptopt 1
+ natom  2
+ ngkpt 2 2 2
+ nstep 20
+ ntypat  1
+ occopt  4
+ toldff  1.0d-7
+ tsmear 0.02d0
+ typat  1 1
+ znucl 83.0
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosHGH_pwteter/83bi.5.hgh"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t75.abo, tolnlines = 10, tolabs = 4.0e-05, tolrel = 1.000e-01, fld_options = -medium
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% keywords = 
+#%% authors = Unknown
+#%% description = 
+#%%   Bismuth, treated as a metal, with 2 special points
+#%%   Test the effect of spin-orbit coupling, especially the forces.
+#%%   The dataset 1 to 3 are related to the nspinor=1 case. The forces
+#%%   are computed from finite differences of energy :
+#%%   abs(etotal3-etotal1)=0.00090461 Ha
+#%%   abs(xcart3-xcart1)=0.089970092 (taking into account both atoms)
+#%%   Their ratio is 0.01005456 Ha/Bohr, to be compared with
+#%%   fcart2=1.0049850156E-02 Ha/Bohr 
+#%%   The dataset 4 checks the case nspinor=2, pspso=1 (no spin-orbit yet)
+#%%   The dataset 5 to 7 try to reproduce the comparison of forces
+#%%   with spin-orbit :
+#%%   abs(etotal7-etotal5)=0.000445155 Ha
+#%%   abs(xcart7-xcart5)=0.089970092 (taking into account both atoms)
+#%%   Their ratio is 3.83633E-03 Ha/Bohr ...
+#%%   A better finite-difference scheme incorporating also data from 
+#%%   half-displacement, lead to 3.81832E-03 Ha/Bohr.
+#%%   This is in excellent agreement with
+#%%   fcart6=3.8183150850E-03 Ha/Bohr
+#%% topics = spinpolarisation
+#%%<END TEST_INFO>

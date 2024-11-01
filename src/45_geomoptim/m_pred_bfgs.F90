@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_pred_bfgs
 !! NAME
 !!  m_pred_bfgs
@@ -6,14 +5,10 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2019 ABINIT group (DCA, XG, GMR, JCC, SE, FB)
+!!  Copyright (C) 1998-2024 ABINIT group (DCA, XG, GMR, JCC, SE, FB)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -33,7 +28,7 @@ module m_pred_bfgs
  use m_lbfgs
  use m_errors
 
- use m_geometry,    only : mkrdim, fcart2fred, metric
+ use m_geometry,    only : mkrdim, fcart2gred, metric
  use m_bfgs,        only : hessinit, hessupdt, brdene
 
  implicit none
@@ -89,18 +84,9 @@ contains
 !! SIDE EFFECTS
 !! hist <type(abihist)> : History of positions,forces acell, rprimd, stresses
 !!
-!! PARENTS
-!!      mover
-!!
-!! CHILDREN
-!!      brdene,dgetrf,dgetri,fcart2fred,hessinit,hessupdt,hist2var,metric
-!!      mkrdim,var2hist,xfh_recover_new,xfpack_f2vout,xfpack_vin2x,xfpack_x2vin
-!!
 !! SOURCE
 
 subroutine pred_bfgs(ab_mover,ab_xfh,forstr,hist,ionmov,itime,zDEBUG,iexit)
-
-implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -145,27 +131,13 @@ real(dp) :: xred(3,ab_mover%natom),strten(6)
 !***************************************************************************
 
  if(iexit/=0)then
-   if (allocated(vin))        then
-     ABI_DEALLOCATE(vin)
-   end if
-   if (allocated(vout))       then
-     ABI_DEALLOCATE(vout)
-   end if
-   if (allocated(vin_prev))   then
-     ABI_DEALLOCATE(vin_prev)
-   end if
-   if (allocated(vout_prev))  then
-     ABI_DEALLOCATE(vout_prev)
-   end if
-   if (allocated(vinres))  then
-     ABI_DEALLOCATE(vinres)
-   end if
-   if (allocated(vin1))  then
-     ABI_DEALLOCATE(vin1)
-   end if
-   if (allocated(hessin))     then
-     ABI_DEALLOCATE(hessin)
-   end if
+   ABI_SFREE(vin)
+   ABI_SFREE(vout)
+   ABI_SFREE(vin_prev)
+   ABI_SFREE(vout_prev)
+   ABI_SFREE(vinres)
+   ABI_SFREE(vin1)
+   ABI_SFREE(hessin)
    return
  end if
 
@@ -174,8 +146,7 @@ real(dp) :: xred(3,ab_mover%natom),strten(6)
 !### 01. Debugging and Verbose
 
  if(zDEBUG)then
-   write(std_out,'(a,3a,35a,42a)') ch10,('-',kk=1,3),&
-&   'Debugging and Verbose for pred_bfgs',('-',kk=1,42)
+   write(std_out,'(a,3a,35a,42a)') ch10,('-',kk=1,3),'Debugging and Verbose for pred_bfgs',('-',kk=1,42)
    write(std_out,*) 'ionmov: ',ionmov
    write(std_out,*) 'itime:  ',itime
  end if
@@ -185,15 +156,10 @@ real(dp) :: xred(3,ab_mover%natom),strten(6)
 !### 02. Compute the dimension of vectors (ndim)
 
  ndim=3*ab_mover%natom
- if(ab_mover%optcell==1 .or.&
-& ab_mover%optcell==4 .or.&
-& ab_mover%optcell==5 .or.&
-& ab_mover%optcell==6) ndim=ndim+1
+ if(ab_mover%optcell==1) ndim=ndim+1
  if(ab_mover%optcell==2 .or.&
 & ab_mover%optcell==3) ndim=ndim+6
- if(ab_mover%optcell==7 .or.&
-& ab_mover%optcell==8 .or.&
-& ab_mover%optcell==9) ndim=ndim+3
+ if(ab_mover%optcell>=4) ndim=ndim+3
 
  if(zDEBUG) write(std_out,*) 'Dimension of vin, vout and hessian (ndim): ',ndim
 
@@ -204,36 +170,22 @@ real(dp) :: xred(3,ab_mover%natom),strten(6)
 !Notice that vin, vout, etc could be allocated
 !From a previous dataset with a different ndim
  if(itime==1)then
-   if (allocated(vin))        then
-     ABI_DEALLOCATE(vin)
-   end if
-   if (allocated(vout))       then
-     ABI_DEALLOCATE(vout)
-   end if
-   if (allocated(vin_prev))   then
-     ABI_DEALLOCATE(vin_prev)
-   end if
-   if (allocated(vout_prev))  then
-     ABI_DEALLOCATE(vout_prev)
-   end if
-   if (allocated(vinres))  then
-     ABI_DEALLOCATE(vinres)
-   end if
-   if (allocated(vin1))  then
-     ABI_DEALLOCATE(vin1)
-   end if
-   if (allocated(hessin))     then
-     ABI_DEALLOCATE(hessin)
-   end if
+   ABI_SFREE(vin)
+   ABI_SFREE(vout)
+   ABI_SFREE(vin_prev)
+   ABI_SFREE(vout_prev)
+   ABI_SFREE(vinres)
+   ABI_SFREE(vin1)
+   ABI_SFREE(hessin)
    if(npul>1) then
-     ABI_ALLOCATE(vinres,(npul+1,ndim))
-     ABI_ALLOCATE(vin1,(npul+1,ndim))
+     ABI_MALLOC(vinres,(npul+1,ndim))
+     ABI_MALLOC(vin1,(npul+1,ndim))
    end if
-   ABI_ALLOCATE(vin,(ndim))
-   ABI_ALLOCATE(vout,(ndim))
-   ABI_ALLOCATE(vin_prev,(ndim))
-   ABI_ALLOCATE(vout_prev,(ndim))
-   ABI_ALLOCATE(hessin,(ndim,ndim))
+   ABI_MALLOC(vin,(ndim))
+   ABI_MALLOC(vout,(ndim))
+   ABI_MALLOC(vin_prev,(ndim))
+   ABI_MALLOC(vout_prev,(ndim))
+   ABI_MALLOC(hessin,(ndim,ndim))
  end if
 
 !write(std_out,*) 'bfgs 04'
@@ -251,9 +203,9 @@ real(dp) :: xred(3,ab_mover%natom),strten(6)
 !Fill the residual with forces (No preconditioning)
 !Or the preconditioned forces
  if (ab_mover%goprecon==0)then
-   call fcart2fred(hist%fcart(:,:,hist%ihist),residual,rprimd,ab_mover%natom)
+   call fcart2gred(hist%fcart(:,:,hist%ihist),residual,rprimd,ab_mover%natom)
  else
-   residual(:,:)=forstr%fred(:,:)
+   residual(:,:)=forstr%gred(:,:)
  end if
 
  if(zDEBUG)then
@@ -301,7 +253,7 @@ real(dp) :: xred(3,ab_mover%natom),strten(6)
 !The values of vin from the previous iteration
 !should be the same
 !if (itime==1)then
- call xfpack_x2vin(acell, acell0, ab_mover%natom, ndim,&
+ call xfpack_x2vin(acell, ab_mover%natom, ndim,&
 & ab_mover%nsym, ab_mover%optcell, rprim, rprimd0,&
 & ab_mover%symrel, ucvol, ucvol0, vin, xred)
 !end if
@@ -345,7 +297,7 @@ real(dp) :: xred(3,ab_mover%natom),strten(6)
 
    if (ab_mover%restartxf/=0) then
 
-     call xfh_recover_new(ab_xfh,ab_mover,acell,acell0,cycl_main,residual,&
+     call xfh_recover_new(ab_xfh,ab_mover,acell,cycl_main,residual,&
 &     hessin,ndim,rprim,rprimd0,strten,ucvol,ucvol0,vin,&
 &     vin_prev,vout,vout_prev,xred)
 
@@ -424,11 +376,11 @@ real(dp) :: xred(3,ab_mover%natom),strten(6)
    end if
 
    if (nitpul>1) then
-     ABI_ALLOCATE(alpha,(nitpul,ndim))
+     ABI_MALLOC(alpha,(nitpul,ndim))
      alpha=zero
      do kk=1,ndim
-       ABI_ALLOCATE(amat,(nitpul,nitpul))
-       ABI_ALLOCATE(amatinv,(nitpul,nitpul))
+       ABI_MALLOC(amat,(nitpul,nitpul))
+       ABI_MALLOC(amatinv,(nitpul,nitpul))
        amat=zero;amatinv=zero
        do ii=1,nitpul
          do jj=ii,nitpul
@@ -440,14 +392,14 @@ real(dp) :: xred(3,ab_mover%natom),strten(6)
        if (abs(vin(kk)-vin_prev(kk))<tol10) then
          alpha(:,kk)=zero
        else
-         ABI_ALLOCATE(ipiv,(nitpul))
-         ABI_ALLOCATE(rwork,(nitpul))
+         ABI_MALLOC(ipiv,(nitpul))
+         ABI_MALLOC(rwork,(nitpul))
 !          amatinv=1.d5*amatinv
          call dgetrf(nitpul,nitpul,amatinv,nitpul,ipiv,ierr)
          call dgetri(nitpul,amatinv,nitpul,ipiv,rwork,nitpul,ierr)
 !          amatinv=1.d5*amatinv
-         ABI_DEALLOCATE(ipiv)
-         ABI_DEALLOCATE(rwork)
+         ABI_FREE(ipiv)
+         ABI_FREE(rwork)
          det=zero
          do ii=1,nitpul
            do jj=1,nitpul
@@ -458,14 +410,14 @@ real(dp) :: xred(3,ab_mover%natom),strten(6)
          alpha(:,kk)=alpha(:,kk)/det
        end if
      end do
-     ABI_DEALLOCATE(amat)
-     ABI_DEALLOCATE(amatinv)
+     ABI_FREE(amat)
+     ABI_FREE(amatinv)
      vin(:)=vin1(nitpul,:)+alpha0*(vin1(nitpul+1,:)-vin1(nitpul,:))
      vin=zero
      do ii=1,nitpul
        vin(:)=vin(:)+ alpha(ii,:)*(vin1(ii,:))
      end do
-     ABI_DEALLOCATE(alpha)
+     ABI_FREE(alpha)
    end if
 
 
@@ -565,7 +517,7 @@ end subroutine pred_bfgs
 !! (reduced nuclei coordinates), and unit cell parameters
 !! (acell and rprim) the L-Broyden-Fletcher-Goldfarb-Shanno
 !! minimization is performed on the total energy function, using
-!! its gradient (atomic forces and stress : fred or fcart and
+!! its gradient (atomic forces and stress : gred or fcart and
 !! stress) as calculated by the routine scfcv. Some atoms can be
 !! kept fixed, while the optimization of unit cell parameters is
 !! only performed if optcell/=0. The convergence requirement on
@@ -586,18 +538,9 @@ end subroutine pred_bfgs
 !! SIDE EFFECTS
 !! hist <type(abihist)> : History of positions,forces acell, rprimd, stresses
 !!
-!! PARENTS
-!!      mover
-!!
-!! CHILDREN
-!!      fcart2fred,hist2var,lbfgs_destroy,lbfgs_init,metric,mkrdim,var2hist
-!!      xfh_recover_new,xfpack_f2vout,xfpack_vin2x,xfpack_x2vin
-!!
 !! SOURCE
 
 subroutine pred_lbfgs(ab_mover,ab_xfh,forstr,hist,ionmov,itime,zDEBUG,iexit)
-
-implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -644,28 +587,13 @@ real(dp) :: strten(6)
 
  if(iexit/=0)then
    call lbfgs_destroy()
-
-   if (allocated(vin))        then
-     ABI_DEALLOCATE(vin)
-   end if
-   if (allocated(vout))       then
-     ABI_DEALLOCATE(vout)
-   end if
-   if (allocated(vin_prev))   then
-     ABI_DEALLOCATE(vin_prev)
-   end if
-   if (allocated(vout_prev))  then
-     ABI_DEALLOCATE(vout_prev)
-   end if
-   if (allocated(vinres))  then
-     ABI_DEALLOCATE(vinres)
-   end if
-   if (allocated(vin1))  then
-     ABI_DEALLOCATE(vin1)
-   end if
-   if (allocated(hessin))     then
-     ABI_DEALLOCATE(hessin)
-   end if
+   ABI_SFREE(vin)
+   ABI_SFREE(vout)
+   ABI_SFREE(vin_prev)
+   ABI_SFREE(vout_prev)
+   ABI_SFREE(vinres)
+   ABI_SFREE(vin1)
+   ABI_SFREE(hessin)
    return
  end if
 
@@ -674,8 +602,7 @@ real(dp) :: strten(6)
 !### 01. Debugging and Verbose
 
  if(zDEBUG)then
-   write(std_out,'(a,3a,35a,42a)') ch10,('-',kk=1,3),&
-&   'Debugging and Verbose for pred_bfgs',('-',kk=1,42)
+   write(std_out,'(a,3a,35a,42a)') ch10,('-',kk=1,3),'Debugging and Verbose for pred_bfgs',('-',kk=1,42)
    write(std_out,*) 'ionmov: ',ionmov
    write(std_out,*) 'itime:  ',itime
  end if
@@ -685,15 +612,10 @@ real(dp) :: strten(6)
 !### 02. Compute the dimension of vectors (ndim)
 
  ndim=3*ab_mover%natom
- if(ab_mover%optcell==1 .or.&
-& ab_mover%optcell==4 .or.&
-& ab_mover%optcell==5 .or.&
-& ab_mover%optcell==6) ndim=ndim+1
+ if(ab_mover%optcell==1) ndim=ndim+1
  if(ab_mover%optcell==2 .or.&
 & ab_mover%optcell==3) ndim=ndim+6
- if(ab_mover%optcell==7 .or.&
-& ab_mover%optcell==8 .or.&
-& ab_mover%optcell==9) ndim=ndim+3
+ if(ab_mover%optcell>=4) ndim=ndim+3
 
  if(zDEBUG) write(std_out,*) 'Dimension of vin, vout and hessian (ndim): ',ndim
 
@@ -704,36 +626,22 @@ real(dp) :: strten(6)
 !Notice that vin, vout, etc could be allocated
 !From a previous dataset with a different ndim
  if(itime==1)then
-   if (allocated(vin))        then
-     ABI_DEALLOCATE(vin)
-   end if
-   if (allocated(vout))       then
-     ABI_DEALLOCATE(vout)
-   end if
-   if (allocated(vin_prev))   then
-     ABI_DEALLOCATE(vin_prev)
-   end if
-   if (allocated(vout_prev))  then
-     ABI_DEALLOCATE(vout_prev)
-   end if
-   if (allocated(vinres))  then
-     ABI_DEALLOCATE(vinres)
-   end if
-   if (allocated(vin1))  then
-     ABI_DEALLOCATE(vin1)
-   end if
-   if (allocated(hessin))     then
-     ABI_DEALLOCATE(hessin)
-   end if
+   ABI_SFREE(vin)
+   ABI_SFREE(vout)
+   ABI_SFREE(vin_prev)
+   ABI_SFREE(vout_prev)
+   ABI_SFREE(vinres)
+   ABI_SFREE(vin1)
+   ABI_SFREE(hessin)
    if(npul>1) then
-     ABI_ALLOCATE(vinres,(npul+1,ndim))
-     ABI_ALLOCATE(vin1,(npul+1,ndim))
+     ABI_MALLOC(vinres,(npul+1,ndim))
+     ABI_MALLOC(vin1,(npul+1,ndim))
    end if
-   ABI_ALLOCATE(vin,(ndim))
-   ABI_ALLOCATE(vout,(ndim))
-   ABI_ALLOCATE(vin_prev,(ndim))
-   ABI_ALLOCATE(vout_prev,(ndim))
-   ABI_ALLOCATE(hessin,(ndim,ndim))
+   ABI_MALLOC(vin,(ndim))
+   ABI_MALLOC(vout,(ndim))
+   ABI_MALLOC(vin_prev,(ndim))
+   ABI_MALLOC(vout_prev,(ndim))
+   ABI_MALLOC(hessin,(ndim,ndim))
  end if
 
 !write(std_out,*) 'bfgs 04'
@@ -751,9 +659,9 @@ real(dp) :: strten(6)
 !Fill the residual with forces (No preconditioning)
 !Or the preconditioned forces
  if (ab_mover%goprecon==0)then
-   call fcart2fred(hist%fcart(:,:,hist%ihist),residual,rprimd,ab_mover%natom)
+   call fcart2gred(hist%fcart(:,:,hist%ihist),residual,rprimd,ab_mover%natom)
  else
-   residual(:,:)= forstr%fred(:,:)
+   residual(:,:)= forstr%gred(:,:)
  end if
 
  if(zDEBUG)then
@@ -801,7 +709,7 @@ real(dp) :: strten(6)
 !The values of vin from the previous iteration
 !should be the same
 !if (itime==1)then
- call xfpack_x2vin(acell, acell0, ab_mover%natom, ndim,&
+ call xfpack_x2vin(acell, ab_mover%natom, ndim,&
 & ab_mover%nsym, ab_mover%optcell, rprim, rprimd0,&
 & ab_mover%symrel, ucvol, ucvol0, vin, xred)
 !end if
@@ -817,27 +725,28 @@ real(dp) :: strten(6)
 !Initialise the Hessian matrix using gmet
  if (itime==1)then
 
-   ABI_ALLOCATE(diag,(ndim))
+   ABI_MALLOC(diag,(ndim))
    do ii=1,3*ab_mover%natom
-!      diag(ii) = 1.00_dp / rprimd(MODULO(ii-1,3)+1,MODULO(ii-1,3)+1)**2
+     !diag(ii) = 1.00_dp / rprimd(MODULO(ii-1,3)+1,MODULO(ii-1,3)+1)**2
      diag(ii) = gmet(MODULO(ii-1,3)+1,MODULO(ii-1,3)+1)
    end do
    if(ab_mover%optcell/=0)then
-!     These values might lead to too large changes in some cases ...
+     ! These values might lead to too large changes in some cases ...
      do ii=3*ab_mover%natom+1,ndim
        diag(ii) = ab_mover%strprecon*30.0_dp/ucvol
        if(ab_mover%optcell==1) diag(ii) = diag(ii) / three
      end do
    end if
 
+   !call lbfgs_destroy()
    call lbfgs_init(ndim,5,diag)
-   ABI_DEALLOCATE(diag)
+   ABI_FREE(diag)
 
    if (ab_mover%restartxf/=0) then
 
-     call xfh_recover_new(ab_xfh,ab_mover,acell,acell0,cycl_main,residual,&
-&     hessin,ndim,rprim,rprimd0,strten,ucvol,ucvol0,vin,&
-&     vin_prev,vout,vout_prev,xred)
+     call xfh_recover_new(ab_xfh,ab_mover,acell,cycl_main,residual,&
+       hessin,ndim,rprim,rprimd0,strten,ucvol,ucvol0,vin,&
+       vin_prev,vout,vout_prev,xred)
 
    end if
 
@@ -882,11 +791,11 @@ real(dp) :: strten(6)
  vout_prev(:) = vout
  info = lbfgs_execute(vin,etotal,vout)
 
- if (info /= 1) then
+ if (info /= -1) then
    write (ionmov22_errmsg, '(a,i0,3a)') &
     'Lbfgs routine failed. Returned value: ', info,ch10, &
     'Restart your calculation from last step or try a different ionmov'
-   MSG_ERROR_CLASS(ionmov22_errmsg, "Ionmov22Error")
+   ABI_ERROR_CLASS(ionmov22_errmsg, "Ionmov22Error")
  end if
 
 !zDEBUG (vin,vout after prediction)

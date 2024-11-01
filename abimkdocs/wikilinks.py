@@ -1,4 +1,4 @@
-'''
+"""
 WikiLinks Extension for Python-Markdown
 ======================================
 
@@ -12,8 +12,7 @@ Original code Copyright [Waylan Limberg](http://achinghead.com/).
 All changes Copyright The Python Markdown Project
 
 License: [BSD](http://www.opensource.org/licenses/bsd-license.php)
-'''
-from __future__ import absolute_import, unicode_literals, print_function
+"""
 
 from markdown import Extension
 from markdown.inlinepatterns import Pattern
@@ -80,6 +79,7 @@ class WikiLinks(Pattern):
         website = Website.get()
         page_rpath = None
         try:
+            #print("meta_rpath:", self.md.Meta["rpath"][0])
             page_rpath = self.md.Meta["rpath"][0].replace("'", "").replace('"', "")
             return website.get_wikilink(token, page_rpath)
         except Exception as exc:

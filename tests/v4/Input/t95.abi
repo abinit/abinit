@@ -1,0 +1,53 @@
+#Preparation for positron calculation
+#FCC Al crystal, with a conventional cell (only 4 atoms per cell)
+
+prtden 1
+
+acell 3*7.7925
+rprim 1.0 0.0 0.0
+      0.0 1.0 0.0
+      0.0 0.0 1.0
+ntypat 1
+znucl 13
+natom 4
+typat 4*1
+xred
+0.0 0.0 0.0
+0.5 0.5 0.0
+0.5 0.0 0.5
+0.0 0.5 0.5
+chkprim 0
+
+ecut 12.0
+nband 15
+
+kptopt 1
+ngkpt 4 4 4
+
+nstep 20
+toldfe 1.0d-9
+occopt 7
+tsmear 5.0d-3
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "13al.psppos"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% test_chain = t95.abi, t96.abi
+#%% [files]
+#%% files_to_test = 
+#%%   t95.abo, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
+#%% [shell]
+#%% post_commands = ww_cp t95o_DEN t96i_DEN
+#%% [paral_info]
+#%% max_nprocs = 2
+#%% [extra_info]
+#%% authors = Unknown 
+#%% keywords = 
+#%% description = 
+#%%   Al FCC, in conventional cell (4 atoms/cell).
+#%%   Preparation of the positron calculation, test#96.
+#%% topics = positron
+#%%<END TEST_INFO>

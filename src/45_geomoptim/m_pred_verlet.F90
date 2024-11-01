@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_pred_verlet
 !! NAME
 !!  m_pred_verlet
@@ -7,14 +6,10 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2019 ABINIT group (DCA, XG, GMR, JCC, SE)
+!!  Copyright (C) 1998-2024 ABINIT group (DCA, XG, GMR, JCC, SE)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -32,7 +27,7 @@ module m_pred_verlet
  use m_abihist
  use m_xfpack
 
- use m_geometry,       only : mkrdim, xcart2xred, xred2xcart, fcart2fred, metric
+ use m_geometry,       only : mkrdim, xcart2xred, xred2xcart, fcart2gred, metric
 
  implicit none
 
@@ -84,13 +79,6 @@ contains
 !! hist <type(abihist)> : History of positions,forces
 !!                               acell, rprimd, stresses
 !!
-!! PARENTS
-!!      mover
-!!
-!! CHILDREN
-!!      fcart2fred,hist2var,metric,mkrdim,var2hist,wrtout,xcart2xred
-!!      xfpack_f2vout,xfpack_vin2x,xfpack_x2vin,xred2xcart
-!!
 !! SOURCE
 
 subroutine pred_verlet(ab_mover,hist,ionmov,itime,ntime,zDEBUG,iexit)
@@ -110,13 +98,13 @@ subroutine pred_verlet(ab_mover,hist,ionmov,itime,ntime,zDEBUG,iexit)
 !Local variables-------------------------------
 !scalars
  integer  :: ii,istopped,jj,kk,ndim,nstopped
- real(dp) :: amass_tot,etotal,diag,favg,ekin_corr,scprod,taylor,ucvol0
+ real(dp) :: amass_tot,etotal,diag,gr_avg,ekin_corr,scprod,taylor,ucvol0
  real(dp),save :: ucvol,ucvol_next
  character(len=500) :: message
 !arrays
  integer  :: stopped(ab_mover%natom)
  real(dp) :: acell0(3),fcart(3,ab_mover%natom)
- real(dp) :: fred_corrected(3,ab_mover%natom)
+ real(dp) :: gred_corrected(3,ab_mover%natom)
  real(dp) :: gprimd(3,3),gmet(3,3),rmet(3,3), strten(6)
  real(dp) :: xcart(3,ab_mover%natom),xcart_next(3,ab_mover%natom)
  real(dp) :: xred(3,ab_mover%natom),xred_next(3,ab_mover%natom)
@@ -132,27 +120,13 @@ subroutine pred_verlet(ab_mover,hist,ionmov,itime,ntime,zDEBUG,iexit)
 !***************************************************************************
 
  if(iexit/=0)then
-   if (allocated(vin))           then
-     ABI_DEALLOCATE(vin)
-   end if
-   if (allocated(vin_next))      then
-     ABI_DEALLOCATE(vin_next)
-   end if
-   if (allocated(vout))          then
-     ABI_DEALLOCATE(vout)
-   end if
-   if (allocated(vin_prev))      then
-     ABI_DEALLOCATE(vin_prev)
-   end if
-   if (allocated(vout_prev))     then
-     ABI_DEALLOCATE(vout_prev)
-   end if
-   if (allocated(hessin))        then
-     ABI_DEALLOCATE(hessin)
-   end if
-   if (allocated(vel_prevhalf))  then
-     ABI_DEALLOCATE(vel_prevhalf)
-   end if
+    ABI_SFREE(vin)
+    ABI_SFREE(vin_next)
+    ABI_SFREE(vout)
+    ABI_SFREE(vin_prev)
+    ABI_SFREE(vout_prev)
+    ABI_SFREE(hessin)
+    ABI_SFREE(vel_prevhalf)
    return
  end if
 
@@ -161,15 +135,10 @@ subroutine pred_verlet(ab_mover,hist,ionmov,itime,ntime,zDEBUG,iexit)
 !### 01. Compute the dimension of vectors (ndim)
 
  ndim=3*ab_mover%natom
- if(ab_mover%optcell==1 .or.&
-& ab_mover%optcell==4 .or.&
-& ab_mover%optcell==5 .or.&
-& ab_mover%optcell==6) ndim=ndim+1
+ if(ab_mover%optcell==1) ndim=ndim+1
  if(ab_mover%optcell==2 .or.&
 & ab_mover%optcell==3) ndim=ndim+6
- if(ab_mover%optcell==7 .or.&
-& ab_mover%optcell==8 .or.&
-& ab_mover%optcell==9) ndim=ndim+3
+ if(ab_mover%optcell>=4) ndim=ndim+3
 
 !write(std_out,*) 'verlet 02'
 !##########################################################
@@ -178,35 +147,21 @@ subroutine pred_verlet(ab_mover,hist,ionmov,itime,ntime,zDEBUG,iexit)
 !Notice that vin, vout, etc could be allocated
 !From a previous dataset with a different ndim
  if(itime==1)then
-   if (allocated(vin))           then
-     ABI_DEALLOCATE(vin)
-   end if
-   if (allocated(vin_next))      then
-     ABI_DEALLOCATE(vin_next)
-   end if
-   if (allocated(vout))          then
-     ABI_DEALLOCATE(vout)
-   end if
-   if (allocated(vin_prev))      then
-     ABI_DEALLOCATE(vin_prev)
-   end if
-   if (allocated(vout_prev))     then
-     ABI_DEALLOCATE(vout_prev)
-   end if
-   if (allocated(hessin))        then
-     ABI_DEALLOCATE(hessin)
-   end if
-   if (allocated(vel_prevhalf))  then
-     ABI_DEALLOCATE(vel_prevhalf)
-   end if
+   ABI_SFREE(vin)
+   ABI_SFREE(vin_next)
+   ABI_SFREE(vout)
+   ABI_SFREE(vin_prev)
+   ABI_SFREE(vout_prev)
+   ABI_SFREE(hessin)
+   ABI_SFREE(vel_prevhalf)
 
-   ABI_ALLOCATE(vin,(ndim))
-   ABI_ALLOCATE(vin_next,(ndim))
-   ABI_ALLOCATE(vout,(ndim))
-   ABI_ALLOCATE(vin_prev,(ndim))
-   ABI_ALLOCATE(vout_prev,(ndim))
-   ABI_ALLOCATE(hessin,(ndim,ndim))
-   ABI_ALLOCATE(vel_prevhalf,(3,ab_mover%natom))
+   ABI_MALLOC(vin,(ndim))
+   ABI_MALLOC(vin_next,(ndim))
+   ABI_MALLOC(vout,(ndim))
+   ABI_MALLOC(vin_prev,(ndim))
+   ABI_MALLOC(vout_prev,(ndim))
+   ABI_MALLOC(hessin,(ndim,ndim))
+   ABI_MALLOC(vel_prevhalf,(3,ab_mover%natom))
  end if
 
 !write(std_out,*) 'verlet 03'
@@ -245,13 +200,13 @@ subroutine pred_verlet(ab_mover,hist,ionmov,itime,ntime,zDEBUG,iexit)
 
 !Get rid of mean force on whole unit cell, but only if no
 !generalized constraints are in effect
- call fcart2fred(fcart,fred_corrected,rprimd,ab_mover%natom)
+ call fcart2gred(fcart,gred_corrected,rprimd,ab_mover%natom)
  if(ab_mover%nconeq==0)then
    amass_tot=sum(ab_mover%amass(:))
    do kk=1,3
      if (kk/=3.or.ab_mover%jellslab==0) then
-       favg=sum(fred_corrected(kk,:))/dble(ab_mover%natom)
-       fred_corrected(kk,:)=fred_corrected(kk,:)-favg*ab_mover%amass(:)/amass_tot
+       gr_avg=sum(gred_corrected(kk,:))/dble(ab_mover%natom)
+       gred_corrected(kk,:)=gred_corrected(kk,:)-gr_avg*ab_mover%amass(:)/amass_tot
      end if
    end do
  end if
@@ -261,10 +216,10 @@ subroutine pred_verlet(ab_mover,hist,ionmov,itime,ntime,zDEBUG,iexit)
 !### 04. Fill the vectors vin and vout
 
 !Initialize input vectors : first vin, then vout
- call xfpack_x2vin(acell, acell0, ab_mover%natom, ndim,&
+ call xfpack_x2vin(acell, ab_mover%natom, ndim,&
 & ab_mover%nsym, ab_mover%optcell, rprim, rprimd,&
 & ab_mover%symrel, ucvol, ucvol0, vin, xred)
- call xfpack_f2vout(fred_corrected, ab_mover%natom, ndim,&
+ call xfpack_f2vout(gred_corrected, ab_mover%natom, ndim,&
 & ab_mover%optcell, ab_mover%strtarget, strten, ucvol,&
 & vout)
 
@@ -380,7 +335,7 @@ subroutine pred_verlet(ab_mover,hist,ionmov,itime,ntime,zDEBUG,iexit)
    rprimd_next(:,:)=rprimd(:,:)
    write(std_out,*) 'ucvol',ucvol
 !  Store all these next values in vin_next
-   call xfpack_x2vin(acell_next,acell0,ab_mover%natom,&
+   call xfpack_x2vin(acell_next,ab_mover%natom,&
 &   ndim,ab_mover%nsym,ab_mover%optcell,rprim_next,&
 &   rprimd,ab_mover%symrel,ucvol_next,ucvol0,&
 &   vin_next,xred_next)
@@ -496,7 +451,7 @@ subroutine pred_verlet(ab_mover,hist,ionmov,itime,ntime,zDEBUG,iexit)
 !    Generate xred_next from xcart_next
      call xcart2xred(ab_mover%natom,rprimd_next,xcart_next,xred_next)
 !    Store xred_next, and eventual acell_next and rprim_next in vin
-     call xfpack_x2vin(acell_next,acell0,&
+     call xfpack_x2vin(acell_next,&
 &     ab_mover%natom,ndim,ab_mover%nsym,ab_mover%optcell,&
 &     rprim_next,rprimd,&
 &     ab_mover%symrel,ucvol_next,ucvol0,vin_next,xred_next)

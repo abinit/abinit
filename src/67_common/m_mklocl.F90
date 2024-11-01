@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_mklocl
 !! NAME
 !!  m_mklocl
@@ -7,14 +6,10 @@
 !!   Routines related to the local part of the pseudopotentials.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2019 ABINIT group (DCA, XG, GMR, MM, DRH)
+!!  Copyright (C) 1998-2024 ABINIT group (DCA, XG, GMR, MM, DRH)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -27,19 +22,24 @@
 module m_mklocl
 
  use defs_basis
- use defs_datatypes
- use defs_abitypes
  use defs_wvltypes
  use m_abicore
  use m_errors
  use m_xmpi
+ use m_dtset
 
+ use defs_datatypes, only : pseudopotential_type
+ use defs_abitypes, only : MPI_type
  use m_time,     only : timab
  use m_geometry, only : xred2xcart
  use m_mpinfo,   only : ptabs_fourdp
  use m_pawtab,   only : pawtab_type
  use m_mklocl_realspace, only : mklocl_realspace, mklocl_wavelets
  use m_fft,      only : fourdp
+ use m_gtermcutoff,only : termcutoff
+
+ use m_splines,  only : splfit
+ use m_dfpt_mkvxc, only : dfpt_mkvxcgga_n0met
 
 #if defined HAVE_BIGDFT
  use BigDFT_API, only : ELECTRONIC_DENSITY
@@ -55,6 +55,9 @@ module m_mklocl
  public :: mklocl_recipspace
  public :: dfpt_vlocal           ! Local part of 1st-order potential due to atomic displacement.
  public :: vlocalstr             ! Compute strain derivatives of local ionic potential
+ public :: dfpt_vlocaldq         ! Compute the first q-gradient of the 1st-order potential due to atomic displacement. 
+ public :: dfpt_vlocaldqdq       ! Compute the second q-gradient of the 1st-order potential due to atomic displacement. 
+ public :: dfpt_vmetdqdq       ! Compute the second q-gradient of the 1st-order potential due to a metric perturbation.
 !!***
 
 contains
@@ -122,20 +125,11 @@ contains
 !! and the internal loops to be considered were sufficiently different
 !! as to make the two routine different.
 !!
-!! PARENTS
-!!      forces,prcref,prcref_PMA,respfn,setvtr
-!!
-!! CHILDREN
-!!      mklocl_realspace,mklocl_recipspace,mklocl_wavelets,wvl_rho_abi2big
-!!      xred2xcart
-!!
 !! SOURCE
 
 subroutine mklocl(dtset, dyfrlo,eei,gmet,gprimd,grtn,gsqcut,lpsstr,mgfft,&
 &  mpi_enreg,natom,nattyp,nfft,ngfft,nspden,ntypat,option,pawtab,ph1d,psps,qprtrb,&
 &  rhog,rhor,rprimd,ucvol,vprtrb,vpsp,wvl,wvl_den,xred)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -171,29 +165,29 @@ subroutine mklocl(dtset, dyfrlo,eei,gmet,gprimd,grtn,gsqcut,lpsstr,mgfft,&
    write(message,'(a,i0,a,a)')&
 &   'From the calling routine, option=',option,ch10,&
 &   'The only allowed values are between 1 and 4.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
  if (option > 2 .and. .not.psps%vlspl_recipSpace) then
    write(message,'(a,i0,a,a,a,a)')&
 &   'From the calling routine, option=',option,ch10,&
 &   'but the local part of the pseudo-potential is in real space.',ch10,&
 &   'Action: set icoulomb = 0 to turn-off real space computations.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
  if (option > 2 .and. dtset%usewvl == 1) then
    write(message,'(a,i0,a,a)')&
 &   'From the calling routine, option=',option,ch10,&
 &   'but this is not implemented yet from wavelets.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  if (dtset%usewvl == 0) then
 !  Plane wave case
    if (psps%vlspl_recipSpace) then
-     call mklocl_recipspace(dyfrlo,eei,gmet,gprimd,grtn,gsqcut,lpsstr,mgfft, &
-&     mpi_enreg,psps%mqgrid_vl,natom,nattyp,nfft,ngfft, &
-&     ntypat,option,dtset%paral_kgb,ph1d,psps%qgrid_vl,qprtrb,rhog,ucvol, &
-&     psps%vlspl,vprtrb,vpsp)
+     call mklocl_recipspace(dyfrlo,eei,gmet,gprimd,grtn,gsqcut,&
+&     dtset%icutcoul,lpsstr,mgfft,mpi_enreg,psps%mqgrid_vl,natom,nattyp, &
+&     nfft,ngfft,dtset%nkpt,ntypat,option,ph1d,psps%qgrid_vl,qprtrb,dtset%rcut,&
+&     rhog,rprimd,ucvol,dtset%vcutgeo,psps%vlspl,vprtrb,vpsp)
    else
      call mklocl_realspace(grtn,dtset%icoulomb,mpi_enreg,natom,nattyp,nfft, &
 &     ngfft,dtset%nscforder,nspden,ntypat,option,pawtab,psps,rhog,rhor, &
@@ -201,7 +195,7 @@ subroutine mklocl(dtset, dyfrlo,eei,gmet,gprimd,grtn,gsqcut,lpsstr,mgfft,&
    end if
  else
 !  Store xcart for each atom
-   ABI_ALLOCATE(xcart,(3, dtset%natom))
+   ABI_MALLOC(xcart,(3, dtset%natom))
    call xred2xcart(dtset%natom, rprimd, xcart, xred)
 !  Eventually retrieve density
 #if defined HAVE_BIGDFT
@@ -214,7 +208,7 @@ subroutine mklocl(dtset, dyfrlo,eei,gmet,gprimd,grtn,gsqcut,lpsstr,mgfft,&
    call mklocl_wavelets(dtset%efield, grtn, mpi_enreg, dtset%natom, &
 &   nfft, nspden, option, rprimd, vpsp, &
 &   wvl_den, wvl, xcart)
-   ABI_DEALLOCATE(xcart)
+   ABI_FREE(xcart)
  end if
 
 end subroutine mklocl
@@ -274,24 +268,16 @@ end subroutine mklocl
 !! and the internal loops to be considered were sufficiently different
 !! as to make the two routine different.
 !!
-!! PARENTS
-!!      dfpt_dyfro,mklocl,stress
-!!
-!! CHILDREN
-!!      fourdp,ptabs_fourdp,timab,wrtout,xmpi_sum
-!!
 !! SOURCE
 
-subroutine mklocl_recipspace(dyfrlo,eei,gmet,gprimd,grtn,gsqcut,lpsstr,mgfft,&
-&  mpi_enreg,mqgrid,natom,nattyp,nfft,ngfft,ntypat,option,paral_kgb,ph1d,qgrid,qprtrb,&
-&  rhog,ucvol,vlspl,vprtrb,vpsp)
-
- implicit none
+subroutine mklocl_recipspace(dyfrlo,eei,gmet,gprimd,grtn,gsqcut,icutcoul,lpsstr,mgfft,&
+&  mpi_enreg,mqgrid,natom,nattyp,nfft,ngfft,nkpt,ntypat,option,ph1d,qgrid,qprtrb,&
+&  rcut,rhog,rprimd,ucvol,vcutgeo,vlspl,vprtrb,vpsp)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: mgfft,mqgrid,natom,nfft,ntypat,option,paral_kgb
- real(dp),intent(in) :: eei,gsqcut,ucvol
+ integer,intent(in) :: mgfft,mqgrid,natom,nfft,nkpt,ntypat,option,icutcoul
+ real(dp),intent(in) :: eei,gsqcut,rcut,rprimd(3,3),ucvol,vcutgeo(3)
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: nattyp(ntypat),ngfft(18),qprtrb(3)
@@ -307,16 +293,22 @@ subroutine mklocl_recipspace(dyfrlo,eei,gmet,gprimd,grtn,gsqcut,lpsstr,mgfft,&
  integer :: i1,i2,i3,ia,ia1,ia2,id1,id2,id3,ierr,ig1,ig2,ig3,ii,itypat
  integer :: jj,me_fft,me_g0,n1,n2,n3,nproc_fft,shift1
  integer :: shift2,shift3
+#ifdef FC_NVHPC
+!Silly trick to prevent NVHPC optimization issue
+ logical :: nothing=.false.
+#endif
  real(dp),parameter :: tolfix=1.0000001_dp
  real(dp) :: aa,bb,cc,cutoff,dbl_ig1,dbl_ig2,dbl_ig3,dd,diff,dq,dq2div6,dqdiv6
- real(dp) :: dqm1,ee,ff,gmag,gsquar,ph12i,ph12r,ph1i,ph1r,ph2i,ph2r
- real(dp) :: ph3i,ph3r,phimag_igia,phre_igia,sfi,sfr
+ real(dp) :: dqm1,ee,ff,gmag,gsquar!beta,gcart_para,gcart_perp
+ real(dp) :: ph12i,ph12r,ph1i,ph1r,ph2i,ph2r
+ real(dp) :: ph3i,ph3r,phimag_igia,phre_igia,rcut_loc,sfi,sfr
  real(dp) :: svion,svioni,svionr,term,vion1,vion2,xnorm
  character(len=500) :: message
 !arrays
  integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:),ffti2_local(:)
  integer, ABI_CONTIGUOUS pointer :: fftn3_distrib(:),ffti3_local(:)
  real(dp) :: gcart(3),tsec(2)
+ real(dp),allocatable :: gcutoff(:)
  real(dp),allocatable :: work1(:,:)
 
 ! *************************************************************************
@@ -354,9 +346,10 @@ subroutine mklocl_recipspace(dyfrlo,eei,gmet,gprimd,grtn,gsqcut,lpsstr,mgfft,&
 
 !Zero out array to permit accumulation over atom types below:
  if(option==1)then
-   ABI_ALLOCATE(work1,(2,nfft))
+   ABI_MALLOC(work1,(2,nfft))
    work1(:,:)=zero
  end if
+
 !
  dq=(qgrid(mqgrid)-qgrid(1))/dble(mqgrid-1)
  dqm1=1.0_dp/dq
@@ -371,6 +364,10 @@ subroutine mklocl_recipspace(dyfrlo,eei,gmet,gprimd,grtn,gsqcut,lpsstr,mgfft,&
  dyfrlo(:,:,:)=zero
  me_g0=0
  ia1=1
+
+ !Initialize Gcut-off array from m_gtermcutoff
+ call termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
+ rcut_loc = half*SQRT(DOT_PRODUCT(rprimd(:,3),rprimd(:,3)))
 
  do itypat=1,ntypat
 !  ia1,ia2 sets range of loop over atoms:
@@ -412,7 +409,7 @@ subroutine mklocl_recipspace(dyfrlo,eei,gmet,gprimd,grtn,gsqcut,lpsstr,mgfft,&
              dd = bb*(bb**2-1.0_dp)*dq2div6
 
              vion1 = (aa*vlspl(jj,1,itypat)+bb*vlspl(jj+1,1,itypat) +&
-&             cc*vlspl(jj,2,itypat)+dd*vlspl(jj+1,2,itypat) ) / gsquar
+&             cc*vlspl(jj,2,itypat)+dd*vlspl(jj+1,2,itypat) ) / gsquar * gcutoff(ii)
 
              if(option==1)then
 
@@ -435,6 +432,11 @@ subroutine mklocl_recipspace(dyfrlo,eei,gmet,gprimd,grtn,gsqcut,lpsstr,mgfft,&
 
 !              Loop over all atoms of this type:
                do ia=ia1,ia2
+#ifdef FC_NVHPC
+                 !Silly trick to prevent NVHPC optimization issue
+                 if(nothing) write(100,*) shift1,shift2,shift3
+#endif                 
+
                  shift1=1+n1+(ia-1)*(2*n1+1)
                  shift2=1+n2+(ia-1)*(2*n2+1)+natom*(2*n1+1)
                  shift3=1+n3+(ia-1)*(2*n3+1)+natom*(2*n1+1+2*n2+1)
@@ -481,45 +483,88 @@ subroutine mklocl_recipspace(dyfrlo,eei,gmet,gprimd,grtn,gsqcut,lpsstr,mgfft,&
                end do
 
              else if(option==3)then
+!               if(icutcoul .ne. 2) then
+!                Also get (dV(q)/dq)/q:
+!                (note correction of Numerical Recipes sign error
+!                before (3._dp*aa**2-1._dp)
+!                ee*dqm1 + ff*dqdiv6 is the best estimate of dV(q)/dq from splines
+                 ee= vlspl(jj+1,1,itypat)-vlspl(jj,1,itypat)
+                 ff=  (3._dp*bb**2-1._dp)*vlspl(jj+1,2,itypat) &
+&                 - (3._dp*aa**2-1._dp)*vlspl(jj,2,itypat)
+                 vion2 = ( ( ee*dqm1 + ff*dqdiv6 )/gmag&
+&                 - 2.0_dp*vion1                 ) / gsquar 
 
-!              Also get (dV(q)/dq)/q:
-!              (note correction of Numerical Recipes sign error
-!              before (3._dp*aa**2-1._dp)
-!              ee*dqm1 + ff*dqdiv6 is the best estimate of dV(q)/dq from splines
-               ee= vlspl(jj+1,1,itypat)-vlspl(jj,1,itypat)
-               ff=  (3._dp*bb**2-1._dp)*vlspl(jj+1,2,itypat) &
-&               - (3._dp*aa**2-1._dp)*vlspl(jj,2,itypat)
-               vion2 = ( ( ee*dqm1 + ff*dqdiv6 )/gmag&
-&               - 2.0_dp*vion1                 ) / gsquar
-
-               gcart(1)=gprimd(1,1)*dble(ig1)+gprimd(1,2)*dble(ig2)+&
-&               gprimd(1,3)*dble(ig3)
-               gcart(2)=gprimd(2,1)*dble(ig1)+gprimd(2,2)*dble(ig2)+&
-&               gprimd(2,3)*dble(ig3)
-               gcart(3)=gprimd(3,1)*dble(ig1)+gprimd(3,2)*dble(ig2)+&
-&               gprimd(3,3)*dble(ig3)
-!              Assemble structure over all atoms of given type
-               sfr=zero
-               sfi=zero
-               do ia=ia1,ia2
-                 sfr=sfr+phre_mk(ig1,ig2,ig3,ia)
-                 sfi=sfi-phimag_mk(ig1,ig2,ig3,ia)
-               end do
-
-!              Compute Re( rho^*(G)* sf ) * [(dV(G)/dG)/|G|]
-               term=(rhog(re,ii)*sfr+rhog(im,ii)*sfi)*vion2
-
-!              Compute contribution to stress tensor
-               lpsstr(1)=lpsstr(1)-term*gcart(1)*gcart(1)
-               lpsstr(2)=lpsstr(2)-term*gcart(2)*gcart(2)
-               lpsstr(3)=lpsstr(3)-term*gcart(3)*gcart(3)
-               lpsstr(4)=lpsstr(4)-term*gcart(3)*gcart(2)
-               lpsstr(5)=lpsstr(5)-term*gcart(3)*gcart(1)
-               lpsstr(6)=lpsstr(6)-term*gcart(2)*gcart(1)
+                 gcart(1)=gprimd(1,1)*dble(ig1)+gprimd(1,2)*dble(ig2)+&
+&                 gprimd(1,3)*dble(ig3)
+                 gcart(2)=gprimd(2,1)*dble(ig1)+gprimd(2,2)*dble(ig2)+&
+&                 gprimd(2,3)*dble(ig3)
+                 gcart(3)=gprimd(3,1)*dble(ig1)+gprimd(3,2)*dble(ig2)+&
+&                 gprimd(3,3)*dble(ig3)
+!                Assemble structure over all atoms of given type
+                 sfr=zero
+                 sfi=zero
+                 do ia=ia1,ia2
+                   sfr=sfr+phre_mk(ig1,ig2,ig3,ia)
+                   sfi=sfi-phimag_mk(ig1,ig2,ig3,ia)
+                 end do               
+!                Compute Re( rho^*(G)* sf ) * [(dV(G)/dG)/|G|]
+                 term=(rhog(re,ii)*sfr+rhog(im,ii)*sfi)*vion2
+!                Compute contribution to stress tensor
+                 lpsstr(1)=lpsstr(1)-term*gcart(1)*gcart(1)
+                 lpsstr(2)=lpsstr(2)-term*gcart(2)*gcart(2)
+                 lpsstr(3)=lpsstr(3)-term*gcart(3)*gcart(3)
+                 lpsstr(4)=lpsstr(4)-term*gcart(3)*gcart(2)
+                 lpsstr(5)=lpsstr(5)-term*gcart(3)*gcart(1)
+                 lpsstr(6)=lpsstr(6)-term*gcart(2)*gcart(1)
+!               else if (icutcoul .eq. 2) then
+!!                Also get (dV(q)/dq)/q:
+!!                (note correction of Numerical Recipes sign error
+!!                before (3._dp*aa**2-1._dp)
+!!                ee*dqm1 + ff*dqdiv6 is the best estimate of dV(q)/dq from splines
+!                 ee= vlspl(jj+1,1,itypat)-vlspl(jj,1,itypat)
+!                 ff=  (3._dp*bb**2-1._dp)*vlspl(jj+1,2,itypat) &
+!&                 - (3._dp*aa**2-1._dp)*vlspl(jj,2,itypat)
+!                 vion2 = ( ( ee*dqm1 + ff*dqdiv6 )/gmag&
+!&                 - 2.0_dp*vion1          ) / gsquar 
+!
+!                 gcart(1)=gprimd(1,1)*dble(ig1)+gprimd(1,2)*dble(ig2)+&
+!&                 gprimd(1,3)*dble(ig3)
+!                 gcart(2)=gprimd(2,1)*dble(ig1)+gprimd(2,2)*dble(ig2)+&
+!&                 gprimd(2,3)*dble(ig3)
+!                 gcart(3)=gprimd(3,1)*dble(ig1)+gprimd(3,2)*dble(ig2)+&
+!&                 gprimd(3,3)*dble(ig3)
+!!                Assemble structure over all atoms of given type
+!                 sfr=zero
+!                 sfi=zero
+!                 do ia=ia1,ia2
+!                   sfr=sfr+phre_mk(ig1,ig2,ig3,ia)
+!                   sfi=sfi-phimag_mk(ig1,ig2,ig3,ia)
+!                 end do
+!                 !Implement beta correction as in eq. 62 (PRB 96 075448 2017)           
+!                 gcart_para = sqrt(gcart(1)**2+gcart(2)**2)
+!                 gcart_perp = gcart(3)
+!                 gsquar = gcart(1)**2+gcart(2)**2+gcart(3)**2
+!                 if(gcart_para .gt. tol12) then
+!                   beta = gsquar*rcut_loc/(two*gcart_para)* &
+!                        &       exp(-gcart_para*rcut_loc)* &
+!                        &cos(gcart_perp*rcut_loc)/(one-exp(-gcart_para*rcut_loc)*cos(gcart_perp*rcut_loc))
+!                 else
+!                   beta = zero
+!                 end if
+!!                Compute Re( rho^*(G)* sf ) * [(dV(G)/dG)/|G|]
+!                 term=(rhog(re,ii)*sfr+rhog(im,ii)*sfi)*vion2
+!!                Compute contribution to stress tensor                 
+!                 lpsstr(1)=lpsstr(1)-term*(gcart(1)*gcart(1))*(1+beta)
+!                 lpsstr(2)=lpsstr(2)-term*(gcart(2)*gcart(2))*(1+beta)
+!                 lpsstr(3)=lpsstr(3)-term*(gcart(3)*gcart(3)-gsquar)
+!                 lpsstr(4)=lpsstr(4)-term*gcart(3)*gcart(2)
+!                 lpsstr(5)=lpsstr(5)-term*gcart(3)*gcart(1)
+!                 lpsstr(6)=lpsstr(6)-term*gcart(2)*gcart(1)
+!              endif
 
              else
                write(message, '(a,i0,a)' )' mklocl: Option=',option,' not allowed.'
-               MSG_BUG(message)
+               ABI_BUG(message)
              end if ! End option choice
 
 !            End skip G**2 outside cutoff:
@@ -551,10 +596,7 @@ subroutine mklocl_recipspace(dyfrlo,eei,gmet,gprimd,grtn,gsqcut,lpsstr,mgfft,&
      work1(re,1)=zero
      work1(im,1)=zero
    end if
-
-!  DEBUG
 !  write(std_out,*) ' mklocl_recipspace : will add potential with strength vprtrb(:)=',vprtrb(:)
-!  ENDDEBUG
 
 !  Allow for the addition of a perturbing potential
    if ((vprtrb(1)**2+vprtrb(2)**2) > 1.d-30) then
@@ -590,9 +632,11 @@ subroutine mklocl_recipspace(dyfrlo,eei,gmet,gprimd,grtn,gsqcut,lpsstr,mgfft,&
    xnorm=1.0_dp/ucvol
    vpsp(:)=vpsp(:)*xnorm
 
-   ABI_DEALLOCATE(work1)
+   ABI_FREE(work1)
 
  end if
+
+ ABI_FREE(gcutoff) 
 
  if(option==2)then
 !  Init mpi_comm
@@ -614,15 +658,25 @@ subroutine mklocl_recipspace(dyfrlo,eei,gmet,gprimd,grtn,gsqcut,lpsstr,mgfft,&
 
 !  Normalize and add term -eei/ucvol on diagonal
 !  (see page 802 of notes)
-   lpsstr(1)=(lpsstr(1)-eei)/ucvol
-   lpsstr(2)=(lpsstr(2)-eei)/ucvol
-   lpsstr(3)=(lpsstr(3)-eei)/ucvol
-   lpsstr(4)=lpsstr(4)/ucvol
-   lpsstr(5)=lpsstr(5)/ucvol
-   lpsstr(6)=lpsstr(6)/ucvol
+!   if(icutcoul .ne. 2) then
+     lpsstr(1)=(lpsstr(1)-eei)/ucvol
+     lpsstr(2)=(lpsstr(2)-eei)/ucvol
+     lpsstr(3)=(lpsstr(3)-eei)/ucvol
+     lpsstr(4)=lpsstr(4)/ucvol
+     lpsstr(5)=lpsstr(5)/ucvol
+     lpsstr(6)=lpsstr(6)/ucvol
+!   elseif (icutcoul .eq. 2) then
+!     lpsstr(1)=(lpsstr(1)-eei)/ucvol
+!     lpsstr(2)=(lpsstr(2)-eei)/ucvol
+!     lpsstr(3)=(lpsstr(3)-eei)/ucvol
+!     lpsstr(4)=lpsstr(4)/ucvol
+!     lpsstr(5)=lpsstr(5)/ucvol
+!     lpsstr(6)=lpsstr(6)/ucvol   
+     !lpsstr=lpsstr/ucvol
+!   endif 
 
  end if
-
+ 
  if(option==4)then
 !  Init mpi_comm
    if(mpi_enreg%nproc_fft>1)then
@@ -734,24 +788,15 @@ end subroutine mklocl_recipspace
 !!  vpsp1(cplex*nfft)=first-order local crystal pseudopotential in real space
 !!    (including the minus sign, forgotten in the paper non-linear..
 !!
-!! PARENTS
-!!      dfpt_looppert,dfpt_nstdy,dfpt_nstpaw,dfptnl_loop
-!!
-!! CHILDREN
-!!      fourdp,ptabs_fourdp
-!!
 !! SOURCE
 
 subroutine dfpt_vlocal(atindx,cplex,gmet,gsqcut,idir,ipert,&
 & mpi_enreg,mqgrid,natom,nattyp,nfft,ngfft,&
-& ntypat,n1,n2,n3,paral_kgb,ph1d,qgrid,qphon,ucvol,vlspl,vpsp1,xred)
-
- implicit none
+& ntypat,n1,n2,n3,ph1d,qgrid,qphon,ucvol,vlspl,vpsp1,xred)
 
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: cplex,idir,ipert,mqgrid,n1,n2,n3,natom,nfft,ntypat
- integer,intent(in) :: paral_kgb
  real(dp),intent(in) :: gsqcut,ucvol
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
@@ -788,7 +833,7 @@ subroutine dfpt_vlocal(atindx,cplex,gmet,gsqcut,idir,ipert,&
  else
 
 !  (In case of a phonon perturbation)
-   ABI_ALLOCATE(work1,(2,nfft))
+   ABI_MALLOC(work1,(2,nfft))
    work1(1:2,1:nfft)=0.0_dp
 
    dq=(qgrid(mqgrid)-qgrid(1))/dble(mqgrid-1)
@@ -886,7 +931,7 @@ subroutine dfpt_vlocal(atindx,cplex,gmet,gsqcut,idir,ipert,&
    xnorm=1.0_dp/ucvol
    vpsp1(1:cplex*nfft)=vpsp1(1:cplex*nfft)*xnorm
 
-   ABI_DEALLOCATE(work1)
+   ABI_FREE(work1)
 
 !  End the condition of non-electric-field
  end if
@@ -987,6 +1032,8 @@ end subroutine dfpt_vlocal
 !!  qgrid(mqgrid)=q grid for spline from 0 to qmax.
 !!  ucvol=unit cell volume ($\textrm{Bohr}^3$).
 !!  vlspl(mqgrid,2,ntypat)=q^2 v(q) spline for each type of atom.
+!!  [g0term]= optional, if present an alternative treatment of the G=0 term,
+!!            adopoted for the flexoelectric tensor calculation, is performed.
 !!
 !! OUTPUT
 !!  vpsp1(nfft)=first-order local crystal pseudopotential in real space.
@@ -999,23 +1046,16 @@ end subroutine dfpt_vlocal
 !! as to make the two routines different.
 !! * The routine was adapted from mklocl.F90
 !!
-!! PARENTS
-!!      dfpt_looppert,dfpt_nselt,dfpt_nstpaw
-!!
-!! CHILDREN
-!!      fourdp,ptabs_fourdp
-!!
 !! SOURCE
 
 subroutine vlocalstr(gmet,gprimd,gsqcut,istr,mgfft,mpi_enreg,&
-&  mqgrid,natom,nattyp,nfft,ngfft,ntypat,paral_kgb,ph1d,qgrid,&
-&  ucvol,vlspl,vpsp1)
-
- implicit none
+&  mqgrid,natom,nattyp,nfft,ngfft,ntypat,ph1d,qgrid,&
+&  ucvol,vlspl,vpsp1,g0term)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: istr,mgfft,mqgrid,natom,nfft,ntypat,paral_kgb
+ integer,intent(in) :: istr,mgfft,mqgrid,natom,nfft,ntypat
+ integer,optional,intent(in) :: g0term
  real(dp),intent(in) :: gsqcut,ucvol
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
@@ -1027,12 +1067,13 @@ subroutine vlocalstr(gmet,gprimd,gsqcut,istr,mgfft,mpi_enreg,&
 !Local variables-------------------------------
 !scalars
  integer,parameter :: im=2,re=1
+ integer :: g0term_
  integer :: i1,i2,i3,ia,ia1,ia2,id1,id2,id3,ig1,ig2,ig3,ii,itypat,jj
  integer :: ka,kb,n1,n2,n3
  real(dp),parameter :: tolfix=1.0000001_dp
  real(dp) :: aa,bb,cc,cutoff,dd,dgsquards,diff
  real(dp) :: dq,dq2div6,dqdiv6,dqm1,ee,ff,gmag,gsquar
- real(dp) :: sfi,sfr,term,vion1,vion2
+ real(dp) :: sfi,sfr,term,vion1,vion2,vlocg0
  real(dp) :: xnorm
  character(len=500) :: message
 !arrays
@@ -1075,7 +1116,7 @@ subroutine vlocalstr(gmet,gprimd,gsqcut,istr,mgfft,mpi_enreg,&
    write(message, '(a,i10,a,a,a)' )&
 &   ' Input istr=',istr,' not allowed.',ch10,&
 &   ' Possible values are 1,2,3,4,5,6 only.'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
  ka=idx(2*istr-1);kb=idx(2*istr)
@@ -1091,7 +1132,7 @@ subroutine vlocalstr(gmet,gprimd,gsqcut,istr,mgfft,mpi_enreg,&
  call ptabs_fourdp(mpi_enreg,n2,n3,fftn2_distrib,ffti2_local,fftn3_distrib,ffti3_local)
 
 !Zero out array to permit accumulation over atom types below:
- ABI_ALLOCATE(work1,(2,nfft))
+ ABI_MALLOC(work1,(2,nfft))
  work1(:,:)=0.0_dp
 !
  dq=(qgrid(mqgrid)-qgrid(1))/dble(mqgrid-1)
@@ -1191,6 +1232,23 @@ subroutine vlocalstr(gmet,gprimd,gsqcut,istr,mgfft,mpi_enreg,&
  work1(re,1)=0.0_dp
  work1(im,1)=0.0_dp
 
+!Alternative treatment of Vloc(G=0) for the flexoelectric tensor calculation
+ g0term_=0; if (present(g0term)) g0term_=g0term
+ if (g0term_==1) then
+   vlocg0=zero
+   if (istr<=3) then
+     ia1=1
+     do itypat=1,ntypat
+    !  ia1,ia2 sets range of loop over atoms:
+
+       ia2=ia1+nattyp(itypat)-1
+       do ia=ia1,ia2
+         vlocg0=vlocg0+vlspl(1,2,itypat)
+       end do
+     end do
+     work1(re,1)=-half*vlocg0
+   end if
+ end if
 
 !Transform back to real space
  call fourdp(1,work1,vpsp1,1,mpi_enreg,nfft,1,ngfft,0)
@@ -1199,7 +1257,7 @@ subroutine vlocalstr(gmet,gprimd,gsqcut,istr,mgfft,mpi_enreg,&
  xnorm=1.0_dp/ucvol
  vpsp1(:)=vpsp1(:)*xnorm
 
- ABI_DEALLOCATE(work1)
+ ABI_FREE(work1)
 
  contains
 
@@ -1277,6 +1335,914 @@ subroutine vlocalstr(gmet,gprimd,gsqcut,istr,mgfft,mpi_enreg,&
 
 end subroutine vlocalstr
 !!***
+
+!!****f* ABINIT/dfpt_vlocaldq
+!! NAME
+!! dfpt_vlocaldq
+!!
+!! FUNCTION
+!! Compute q-gradient (at q=0) of the local part of 1st-order 
+!! atomic displacement potential from the appropriate
+!! atomic pseudopotential with structure and derivative factor.
+!!
+!! INPUTS
+!!  atindx(natom)=index table for atoms (see gstate.f)
+!!  cplex: if 1, real space 1-order functions on FFT grid
+!!    are REAL, if 2, COMPLEX
+!!  gmet(3,3)=reciprocal space metric (Bohr**-2)
+!!  gsqcut=cutoff G**2 for included G s in fft box.
+!!  idir=direction of atomic displacement (=1,2 or 3 : displacement of
+!!    atom ipert along the 1st, 2nd or 3rd axis).
+!!  ipert=number of the atom being displaced in the frozen-phonon
+!!  mpi_enreg=information about MPI parallelization
+!!  mqgrid=dimension of q grid for pseudopotentials
+!!  natom=number of atoms in cell.
+!!  nattyp(ntypat)=number of atoms of each type in cell.
+!!  nfft=(effective) number of FFT grid points (for this processor)
+!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!  ntypat=number of types of atoms in cell.
+!!  n1,n2,n3=fft grid.
+!!  ph1d(2,3*(2*mgfft+1)*natom)=1-dim structure factor phase information.
+!!  qdir=direction of the q-gradient 
+!!  qgrid(mqgrid)=grid of q points from 0 to qmax.
+!!  qphon(3)=wavevector of the phonon
+!!  ucvol=unit cell volume (Bohr**3).
+!!  vlspl(mqgrid,2,ntypat)=spline fit of q^2 V(q) for each type of atom.
+!!
+!! OUTPUT
+!!  vpsp1dq(cplex*nfft)=q-gradient (at q=0) of the first-order local 
+!!  crystal pseudopotential in real space
+!!    (including the minus sign, forgotten in the paper non-linear..
+!!
+!! NOTES
+!! * IMPORTANT: the formalism followed in this routine
+!!   assumes a phase factor for the perturbation that 
+!!   is different to the one used elsewhere in the code (See M.Stengel paper):
+!!         
+!!             here: e^{i q (R_l + \tau_{\kappa})}
+!!   rest of ABINIT: e^{i q R_l}  
+!!
+!!  **A -i factor has been factorized out in all the contributions of the first
+!!    q-gradient of the atomic displacement Hamiltonian. This is lately included 
+!!    in the matrix element calculation.
+!!
+!! SOURCE
+
+subroutine dfpt_vlocaldq(atindx,cplex,gmet,gsqcut,idir,ipert,&
+& mpi_enreg,mqgrid,natom,nattyp,nfft,ngfft,&
+& ntypat,n1,n2,n3,ph1d,qdir,qgrid,qphon,ucvol,vlspl,vpsp1dq)
+
+ implicit none
+
+!Arguments -------------------------------
+!scalars
+ integer,intent(in) :: cplex,idir,ipert,mqgrid,n1,n2,n3,natom,nfft,ntypat
+ integer,intent(in) :: qdir
+ real(dp),intent(in) :: gsqcut,ucvol
+ type(MPI_type),intent(in) :: mpi_enreg
+!arrays
+ integer,intent(in) :: atindx(natom),nattyp(ntypat),ngfft(18)
+ real(dp),intent(in) :: gmet(3,3),ph1d(2,(2*n1+1+2*n2+1+2*n3+1)*natom)
+ real(dp),intent(in) :: qgrid(mqgrid),qphon(3),vlspl(mqgrid,2,ntypat)
+ real(dp),intent(out) :: vpsp1dq(cplex*nfft)
+
+!Local variables -------------------------
+!scalars
+ integer :: i1,i2,i3,ia1,iatom,id1,id2,id3,ig1,ig2,ig3,ii,ii1,im=2
+ integer :: itypat,re=1
+ real(dp),parameter :: tolfix=1.000000001_dp
+ real(dp) :: cutoff,gfact,gmag,gq1
+ real(dp) :: gq2,gq3,gsquar
+ real(dp) :: sfi,sfr,xnorm
+ logical :: qeq0
+ character(len=500) :: msg
+!arrays
+ integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:),ffti2_local(:)
+ integer, ABI_CONTIGUOUS pointer :: fftn3_distrib(:),ffti3_local(:)
+ real(dp) :: gq(3),gvec(3),vion1(1),vion1dq(1)
+ real(dp),allocatable :: work1(:,:)
+
+! *********************************************************************
+
+ iatom=ipert
+
+ if(iatom==natom+1 .or. iatom==natom+2 .or. iatom==natom+10  .or. iatom==natom+11 .or. iatom==natom+5)then
+
+!  (In case of d/dk or an electric field, or magnetic (Zeeman) field->[natom+5] SPr deb )
+   vpsp1dq(1:cplex*nfft)=zero
+
+ else
+
+!  (In case of a phonon perturbation)
+   ABI_MALLOC(work1,(2,nfft))
+   work1(1:2,1:nfft)=0.0_dp
+
+   cutoff=gsqcut*tolfix
+   id1=n1/2+2
+   id2=n2/2+2
+   id3=n3/2+2
+
+   ! Get the distrib associated with this fft_grid
+   call ptabs_fourdp(mpi_enreg,n2,n3,fftn2_distrib,ffti2_local,fftn3_distrib,ffti3_local)
+
+!  This is to allow q=0
+   qeq0=.false.
+   if(qphon(1)**2+qphon(2)**2+qphon(3)**2<1.d-15) then 
+     qeq0=.true.
+   else
+     msg='This routine cannot be used for q/=0'
+     ABI_BUG(msg)
+   end if
+
+!  Determination of the atom type
+   ia1=0
+   itypat=0
+   do ii=1,ntypat
+     ia1=ia1+nattyp(ii)
+     if(atindx(iatom)<=ia1.and.itypat==0)itypat=ii
+   end do
+
+   ii=0
+
+   do i3=1,n3
+     ig3=i3-(i3/id3)*n3-1
+     gq3=dble(ig3)+qphon(3)
+     gq(3)=gq3
+     do i2=1,n2
+       if (fftn2_distrib(i2)==mpi_enreg%me_fft) then
+         ig2=i2-(i2/id2)*n2-1
+         gq2=dble(ig2)+qphon(2)
+         gq(2)=gq2
+
+!        Note the lower limit of the next loop
+         ii1=1
+         if(i3==1 .and. i2==1 .and. qeq0 .and. ig2==0 .and. ig3==0)then
+           ii1=2
+           ii=ii+1
+         end if
+         do i1=ii1,n1
+           ig1=i1-(i1/id1)*n1-1
+           gq1=dble(ig1)+qphon(1)
+           gq(1)=gq1
+           ii=ii+1
+           gsquar=gsq_vl3(gq1,gq2,gq3)
+!          Skip G**2 outside cutoff:
+           if (gsquar<=cutoff) then
+             gmag=sqrt(gsquar)
+
+!            Evaluate spline fit to get V(q) and V(q)':
+             call splfit(qgrid,vion1dq,vlspl(:,:,itypat),1,(/gmag/),vion1,mqgrid,1)
+
+             vion1=vion1/gsquar
+             vion1dq=(vion1dq-2.0_dp*gmag*vion1)/gsquar
+
+             gvec=(/ig1,ig2,ig3/)
+             gfact=dot_product(gmet(qdir,:),gvec(:))/gmag
+
+!            Phase   G*xred  (complex conjugate) *2*pi*(g_idir)*vion1dq*gfact
+             sfr=phre_vl3(ig1,ig2,ig3,iatom)*two_pi*gq(idir)*vion1dq(1)*gfact
+             sfi=-phimag_vl3(ig1,ig2,ig3,iatom)*two_pi*gq(idir)*vion1dq(1)*gfact
+!            Phase   G*xred  (complex conjugate) *2*pi*(\delta_{idir,qdir})*vion1
+             if (idir==qdir) then
+               sfr=sfr + phre_vl3(ig1,ig2,ig3,iatom)*two_pi*vion1(1)
+               sfi=sfi - phimag_vl3(ig1,ig2,ig3,iatom)*two_pi*vion1(1)
+             end if         
+
+             work1(re,ii)=sfr
+             work1(im,ii)=sfi
+           end if
+
+         end do
+       end if
+     end do
+   end do
+
+!  Transform back to real space
+   call fourdp(cplex,work1,vpsp1dq,1,mpi_enreg,nfft,1,ngfft,0)
+
+   xnorm=1.0_dp/ucvol
+   vpsp1dq(1:cplex*nfft)=vpsp1dq(1:cplex*nfft)*xnorm
+
+   ABI_FREE(work1)
+
+!  End the condition of non-electric-field
+ end if
+
+ contains
+
+!Real and imaginary parts of phase.
+ function phr_vl3(x1,y1,x2,y2,x3,y3)
+   real(dp) :: phr_vl3
+   real(dp),intent(in) :: x1,x2,x3,y1,y2,y3
+   phr_vl3=(x1*x2-y1*y2)*x3-(y1*x2+x1*y2)*y3
+ end function phr_vl3
+
+ function phi_vl3(x1,y1,x2,y2,x3,y3)
+   real(dp) :: phi_vl3
+   real(dp),intent(in) :: x1,x2,x3,y1,y2,y3
+   phi_vl3=(x1*x2-y1*y2)*y3+(y1*x2+x1*y2)*x3
+ end function phi_vl3
+
+!  Warning : this function differ from similar ones for ground-state calculations : note the atindx !!
+ function ph1_vl3(nri,ig1,ia)
+   real(dp) :: ph1_vl3
+   integer,intent(in) :: nri,ig1,ia
+   ph1_vl3=ph1d(nri,ig1+1+n1+(atindx(ia)-1)*(2*n1+1))
+ end function ph1_vl3
+
+!  Warning : this function differ from similar ones for ground-state calculations : note the atindx !!
+ function ph2_vl3(nri,ig2,ia)
+   real(dp) :: ph2_vl3
+   integer,intent(in) :: nri,ig2,ia
+   ph2_vl3=ph1d(nri,ig2+1+n2+(atindx(ia)-1)*(2*n2+1)+natom*(2*n1+1))
+ end function ph2_vl3
+
+!  Warning : this function differ from similar ones for ground-state calculations : note the atindx !!
+ function ph3_vl3(nri,ig3,ia)
+   real(dp) :: ph3_vl3
+   integer,intent(in) :: nri,ig3,ia
+   ph3_vl3=ph1d(nri,ig3+1+n3+(atindx(ia)-1)*(2*n3+1)+natom*(2*n1+1+2*n2+1))
+ end function ph3_vl3
+
+ function phre_vl3(ig1,ig2,ig3,ia)
+   real(dp) :: phre_vl3
+   integer,intent(in) :: ig1,ig2,ig3,ia
+   phre_vl3=phr_vl3(ph1_vl3(re,ig1,ia),ph1_vl3(im,ig1,ia),&
+&   ph2_vl3(re,ig2,ia),ph2_vl3(im,ig2,ia),ph3_vl3(re,ig3,ia),ph3_vl3(im,ig3,ia))
+ end function phre_vl3
+
+ function phimag_vl3(ig1,ig2,ig3,ia)
+   real(dp) :: phimag_vl3
+   integer,intent(in) :: ig1,ig2,ig3,ia
+   phimag_vl3=phi_vl3(ph1_vl3(re,ig1,ia),ph1_vl3(im,ig1,ia),&
+&   ph2_vl3(re,ig2,ia),ph2_vl3(im,ig2,ia),ph3_vl3(re,ig3,ia),ph3_vl3(im,ig3,ia))
+ end function phimag_vl3
+
+ function gsq_vl3(g1,g2,g3)
+   real(dp) :: gsq_vl3
+   real(dp),intent(in) :: g1,g2,g3 ! Note that they are real, unlike in other similar function definitions
+!Define G^2 based on G space metric gmet.
+   gsq_vl3=g1*g1*gmet(1,1)+g2*g2*gmet(2,2)+&
+&   g3*g3*gmet(3,3)+2.0_dp*g1*g2*gmet(1,2)+&
+&   2.0_dp*g2*g3*gmet(2,3)+2.0_dp*g3*g1*gmet(3,1)
+ end function gsq_vl3
+
+end subroutine dfpt_vlocaldq
+!!***
+
+!!****f* ABINIT/dfpt_vlocaldqdq
+!! NAME
+!! dfpt_vlocaldqdq
+!!
+!! FUNCTION
+!! Compute 2nd q-gradient (at q=0) of the local part of 1st-order 
+!! atomic displacement potential from the appropriate
+!! atomic pseudopotential with structure and derivative factor.
+!!
+!! INPUTS
+!!  atindx(natom)=index table for atoms (see gstate.f)
+!!  cplex: if 1, real space 1-order functions on FFT grid
+!!    are REAL, if 2, COMPLEX
+!!  gmet(3,3)=reciprocal space metric (Bohr**-2)
+!!  gsqcut=cutoff G**2 for included G s in fft box.
+!!  idir=direction of atomic displacement (=1,2 or 3 : displacement of
+!!    atom ipert along the 1st, 2nd or 3rd axis).
+!!  ipert=number of the atom being displaced in the frozen-phonon
+!!  mpi_enreg=information about MPI parallelization
+!!  mqgrid=dimension of q grid for pseudopotentials
+!!  natom=number of atoms in cell.
+!!  nattyp(ntypat)=number of atoms of each type in cell.
+!!  nfft=(effective) number of FFT grid points (for this processor)
+!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!  ntypat=number of types of atoms in cell.
+!!  n1,n2,n3=fft grid.
+!!  ph1d(2,3*(2*mgfft+1)*natom)=1-dim structure factor phase information.
+!!  qdir1=direction of the first q-gradient 
+!!  qdir2=direction of the second q-gradient 
+!!  qgrid(mqgrid)=grid of q points from 0 to qmax.
+!!  qphon(3)=wavevector of the phonon
+!!  ucvol=unit cell volume (Bohr**3).
+!!  vlspl(mqgrid,2,ntypat)=spline fit of q^2 V(q) for each type of atom.
+!!
+!! OUTPUT
+!!  vpsp1dqdq(cplex*nfft)=2nd q-gradient (at q=0) of the first-order local 
+!!  crystal pseudopotential in real space
+!!
+!! NOTES
+!! * IMPORTANT: the formalism followed in this routine
+!!   assumes a phase factor for the perturbation that 
+!!   is different to the one used elsewhere in the code (See M.Stengel paper):
+!!         
+!!             here: e^{i q (R_l + \tau_{\kappa})}
+!!   rest of ABINIT: e^{i q R_l}  
+!!
+!!  **A -i factor has been factorized out in all the contributions of the second
+!!    q-gradient of the atomic displacement Hamiltonian. This is lately included 
+!!    in the whole frozen contribution to the q-gradient of the 
+!!    2nd order energy wrt an atomic displacement and a strain:
+!!    \Delta E^{\tau_{\kappa\alpha}^* (\beta)}_{m\kvec,\gamma\delta}
+!!     
+!!
+!! SOURCE
+
+subroutine dfpt_vlocaldqdq(atindx,cplex,gmet,gsqcut,idir,ipert,&
+& mpi_enreg,mqgrid,natom,nattyp,nfft,ngfft,&
+& ntypat,n1,n2,n3,ph1d,qdir1,qdir2,qgrid,qphon,ucvol,vlspl,vpsp1dqdq)
+
+ implicit none
+
+!Arguments -------------------------------
+!scalars
+ integer,intent(in) :: cplex,idir,ipert,mqgrid,n1,n2,n3,natom,nfft,ntypat
+ integer,intent(in) :: qdir1,qdir2
+ real(dp),intent(in) :: gsqcut,ucvol
+ type(MPI_type),intent(in) :: mpi_enreg
+!arrays
+ integer,intent(in) :: atindx(natom),nattyp(ntypat),ngfft(18)
+ real(dp),intent(in) :: gmet(3,3),ph1d(2,(2*n1+1+2*n2+1+2*n3+1)*natom)
+ real(dp),intent(in) :: qgrid(mqgrid),qphon(3),vlspl(mqgrid,2,ntypat)
+ real(dp),intent(out) :: vpsp1dqdq(cplex*nfft)
+
+!Local variables -------------------------
+!scalars
+ integer :: alpha, delta, gamma
+ integer :: i1,i2,i3,ia1,iatom,id1,id2,id3,ig1,ig2,ig3,ii,ii1,im=2
+ integer :: itypat,re=1
+ real(dp),parameter :: tolfix=1.000000001_dp
+ real(dp) :: cutoff,delad,delag,gfact,gfact1,gfact2,gmag,gq1
+ real(dp) :: gq2,gq3,gsquar
+ real(dp) :: sfi,sfr,term1,term2,xnorm
+ logical :: qeq0
+ character(len=500) :: msg
+!arrays
+ integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:),ffti2_local(:)
+ integer, ABI_CONTIGUOUS pointer :: fftn3_distrib(:),ffti3_local(:)
+ real(dp) :: gq(3),gvec(3),vion1(1),vion1dq(1),vion1dqdq(1)
+ real(dp),allocatable :: work1(:,:)
+
+! *********************************************************************
+
+ iatom=ipert
+
+ if(iatom==natom+1 .or. iatom==natom+2 .or. iatom==natom+10  .or. iatom==natom+11 .or. iatom==natom+5)then
+
+!  (In case of d/dk or an electric field, or magnetic (Zeeman) field->[natom+5] SPr deb )
+   vpsp1dqdq(1:cplex*nfft)=zero
+
+ else
+
+   alpha=idir; delta=qdir2; gamma=qdir1
+
+   !Kronecker deltas
+   delad=0.0_dp; delag=0.0_dp
+   if (alpha==delta) delad=1.0_dp
+   if (alpha==gamma) delag=1.0_dp
+
+!  (In case of a phonon perturbation)
+   ABI_MALLOC(work1,(2,nfft))
+   work1(1:2,1:nfft)=0.0_dp
+
+   cutoff=gsqcut*tolfix
+   id1=n1/2+2
+   id2=n2/2+2
+   id3=n3/2+2
+
+   ! Get the distrib associated with this fft_grid
+   call ptabs_fourdp(mpi_enreg,n2,n3,fftn2_distrib,ffti2_local,fftn3_distrib,ffti3_local)
+
+!  This is to allow q=0
+   qeq0=.false.
+   if(qphon(1)**2+qphon(2)**2+qphon(3)**2<1.d-15) then 
+     qeq0=.true.
+   else
+     msg='This routine cannot be used for q/=0'
+     ABI_BUG(msg)
+   end if
+
+!  Determination of the atom type
+   ia1=0
+   itypat=0
+   do ii=1,ntypat
+     ia1=ia1+nattyp(ii)
+     if(atindx(iatom)<=ia1.and.itypat==0)itypat=ii
+   end do
+
+   ii=0
+
+   do i3=1,n3
+     ig3=i3-(i3/id3)*n3-1
+     gq3=dble(ig3)+qphon(3)
+     gq(3)=gq3
+     do i2=1,n2
+       if (fftn2_distrib(i2)==mpi_enreg%me_fft) then
+         ig2=i2-(i2/id2)*n2-1
+         gq2=dble(ig2)+qphon(2)
+         gq(2)=gq2
+
+!        Note the lower limit of the next loop
+         ii1=1
+         if(i3==1 .and. i2==1 .and. qeq0 .and. ig2==0 .and. ig3==0)then
+           ii1=2
+           ii=ii+1
+         end if
+         do i1=ii1,n1
+           ig1=i1-(i1/id1)*n1-1
+           gq1=dble(ig1)+qphon(1)
+           gq(1)=gq1
+           ii=ii+1
+           gsquar=gsq_vl3(gq1,gq2,gq3)
+!          Skip G**2 outside cutoff:
+           if (gsquar<=cutoff) then
+             gmag=sqrt(gsquar)
+
+!            Evaluate spline fit to get first V(q) and V(q)' and later V(q)'':
+             call splfit(qgrid,vion1dq,vlspl(:,:,itypat),1,(/gmag/),vion1,mqgrid,1)
+             vion1=vion1/gsquar
+             vion1dq=(vion1dq-2.0_dp*gmag*vion1)/gsquar
+
+             call splfit(qgrid,vion1dqdq,vlspl(:,:,itypat),2,(/gmag/),vion1,mqgrid,1)
+             vion1dqdq=(vion1dqdq-4.0_dp*gmag*vion1dq-2.0_dp*vion1)/gsquar
+
+             gvec=(/ig1,ig2,ig3/)
+             gfact1=dot_product(gmet(gamma,:),gvec(:))
+             gfact2=dot_product(gmet(delta,:),gvec(:))
+             gfact=gvec(alpha)*gfact1*gfact2/gsquar
+
+             term1=delag*gfact2+delad*gfact1+gvec(alpha)*gmet(gamma,delta)
+             term1=term1-gfact
+             term1=term1*vion1dq(1)/gmag
+
+             term2=vion1dqdq(1)*gfact
+
+!            structure factors
+             sfr=phre_vl3(ig1,ig2,ig3,iatom)
+             sfi=-phimag_vl3(ig1,ig2,ig3,iatom)
+
+!            Multiply structure factor times vion derivatives:
+             work1(re,ii)=sfr*(term1+term2)*two_pi
+             work1(im,ii)=sfi*(term1+term2)*two_pi
+
+           end if
+
+         end do
+       end if
+     end do
+   end do
+
+!  Transform back to real space
+   call fourdp(cplex,work1,vpsp1dqdq,1,mpi_enreg,nfft,1,ngfft,0)
+
+   xnorm=1.0_dp/ucvol
+   vpsp1dqdq(1:cplex*nfft)=vpsp1dqdq(1:cplex*nfft)*xnorm
+
+   ABI_FREE(work1)
+
+!  End the condition of non-electric-field
+ end if
+
+ contains
+
+!Real and imaginary parts of phase.
+ function phr_vl3(x1,y1,x2,y2,x3,y3)
+   real(dp) :: phr_vl3
+   real(dp),intent(in) :: x1,x2,x3,y1,y2,y3
+   phr_vl3=(x1*x2-y1*y2)*x3-(y1*x2+x1*y2)*y3
+ end function phr_vl3
+
+ function phi_vl3(x1,y1,x2,y2,x3,y3)
+   real(dp) :: phi_vl3
+   real(dp),intent(in) :: x1,x2,x3,y1,y2,y3
+   phi_vl3=(x1*x2-y1*y2)*y3+(y1*x2+x1*y2)*x3
+ end function phi_vl3
+
+!  Warning : this function differ from similar ones for ground-state calculations : note the atindx !!
+ function ph1_vl3(nri,ig1,ia)
+   real(dp) :: ph1_vl3
+   integer,intent(in) :: nri,ig1,ia
+   ph1_vl3=ph1d(nri,ig1+1+n1+(atindx(ia)-1)*(2*n1+1))
+ end function ph1_vl3
+
+!  Warning : this function differ from similar ones for ground-state calculations : note the atindx !!
+ function ph2_vl3(nri,ig2,ia)
+   real(dp) :: ph2_vl3
+   integer,intent(in) :: nri,ig2,ia
+   ph2_vl3=ph1d(nri,ig2+1+n2+(atindx(ia)-1)*(2*n2+1)+natom*(2*n1+1))
+ end function ph2_vl3
+
+!  Warning : this function differ from similar ones for ground-state calculations : note the atindx !!
+ function ph3_vl3(nri,ig3,ia)
+   real(dp) :: ph3_vl3
+   integer,intent(in) :: nri,ig3,ia
+   ph3_vl3=ph1d(nri,ig3+1+n3+(atindx(ia)-1)*(2*n3+1)+natom*(2*n1+1+2*n2+1))
+ end function ph3_vl3
+
+ function phre_vl3(ig1,ig2,ig3,ia)
+   real(dp) :: phre_vl3
+   integer,intent(in) :: ig1,ig2,ig3,ia
+   phre_vl3=phr_vl3(ph1_vl3(re,ig1,ia),ph1_vl3(im,ig1,ia),&
+&   ph2_vl3(re,ig2,ia),ph2_vl3(im,ig2,ia),ph3_vl3(re,ig3,ia),ph3_vl3(im,ig3,ia))
+ end function phre_vl3
+
+ function phimag_vl3(ig1,ig2,ig3,ia)
+   real(dp) :: phimag_vl3
+   integer,intent(in) :: ig1,ig2,ig3,ia
+   phimag_vl3=phi_vl3(ph1_vl3(re,ig1,ia),ph1_vl3(im,ig1,ia),&
+&   ph2_vl3(re,ig2,ia),ph2_vl3(im,ig2,ia),ph3_vl3(re,ig3,ia),ph3_vl3(im,ig3,ia))
+ end function phimag_vl3
+
+ function gsq_vl3(g1,g2,g3)
+   real(dp) :: gsq_vl3
+   real(dp),intent(in) :: g1,g2,g3 ! Note that they are real, unlike in other similar function definitions
+!Define G^2 based on G space metric gmet.
+   gsq_vl3=g1*g1*gmet(1,1)+g2*g2*gmet(2,2)+&
+&   g3*g3*gmet(3,3)+2.0_dp*g1*g2*gmet(1,2)+&
+&   2.0_dp*g2*g3*gmet(2,3)+2.0_dp*g3*g1*gmet(3,1)
+ end function gsq_vl3
+
+end subroutine dfpt_vlocaldqdq
+!!***
+
+
+!!****f* ABINIT/dfpt_vmetdqdq	
+!! NAME
+!! dfpt_vmetdqdq
+!!
+!! FUNCTION
+!! Compute second q-gradient (at q=0) of the local part of 1st-order 
+!! metric potential from the appropriate atomic pseudopotential 
+!! with structure and derivative factor. Additionaly, compute the 
+!! second q-gradient (at q=0) of the Hartree and XC (if GGA) potentials of the metric 
+!! perturbation.
+!! Cartesian coordinates are employed to define the direction of the 
+!! metric perturbation and the two q-gradients.
+!!
+!! INPUTS
+!!  cplex: if 1, real space 1-order functions on FFT grid
+!!    are REAL, if 2, COMPLEX
+!!  gmet(3,3)=reciprocal space metric (Bohr**-2)
+!!  gsqcut=cutoff G**2 for included G s in fft box.
+!!  gprimd(3,3)=dimensional reciprocal space primitive translations
+!!  idir= strain perturbation direction
+!!  ipert=number of the atom being displaced in the frozen-phonon
+!!  kxc(nfft,nkxc)=exchange and correlation kernel
+!!  mpi_enreg=information about MPI parallelization
+!!  mqgrid=dimension of q grid for pseudopotentials
+!!  natom=number of atoms in cell.
+!!  nattyp(ntypat)=number of atoms of each type in cell.
+!!  nfft=(effective) number of FFT grid points (for this processor)
+!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!  nkxc=second dimension of the kxc array. If /=0, the XC kernel must be computed.
+!!  nspden=number of spin-density components
+!!  ntypat=number of types of atoms in cell.
+!!  n1,n2,n3=fft grid.
+!!  opthartdqdq= if 1 activates the calculation 2nd q-gradient of the Hartree potential 
+!!  ph1d(2,3*(2*mgfft+1)*natom)=1-dim structure factor phase information.
+!!  qdir=direction of the q-gradient 
+!!  qgrid(mqgrid)=grid of q points from 0 to qmax.
+!!  qphon(3)=wavevector of the phonon
+!!  rhog(2,nfft)=array for Fourier transform of GS electron density
+!!  rhor(nfftf,nspden)=array for GS electron density in electrons/bohr**3.
+!!  ucvol=unit cell volume (Bohr**3).
+!!  vlspl(mqgrid,2,ntypat)=spline fit of q^2 V(q) for each type of atom.
+!!
+!! OUTPUT
+!!  vhart1dqdq(cplex*nfft)=2nd q-gradient (at q=0) of the GS density Hartree potential from the metric perturbation
+!!  vpsp1dqdq(cplex*nfft)=2nd q-gradient (at q=0) of the first-order metric local 
+!!  crystal pseudopotential in real space
+!!  vxc1dqdq(cplex*nfft)=2nd q-gradient (at q=0) of the GS density XC potential from the metric perturbation (only finite if GGA)
+!!
+!! NOTES
+!! ** IMPORTANT: the formalism followed in this routine
+!!    assumes a phase factor for the perturbation that 
+!!    is different to the one used elsewhere in the code (See M.Stengel paper):
+!!         
+!!             here: e^{i q (R_l + \tau_{\kappa})}
+!!    rest of ABINIT: e^{i q R_l}  
+!!
+!!  **Since the 2nd derivative w.r.t q-vector is calculated along cartesian
+!!    directions, the 1/twopi**2 factor (that in the rest of the code is applied
+!!    in the reduced to cartesian derivative conversion process) is here 
+!!    explicictly included in the formulas.
+!!  
+!!  **Notice that idir=1-9, in contrast to the strain perturbation (idir=1-6),
+!!    because this term is not symmetric w.r.t permutations of the two strain
+!!    indices.
+!!
+!!  **A -i factor has been factorized out in all the contributions of the second
+!!    q-gradient of the metric Hamiltonian. This is lately included in the contribution
+!!    of the corresponing term (T4) to the flexoelectric tensor in dfpt_flexoout.F90
+!!
+!! SOURCE
+
+subroutine dfpt_vmetdqdq(cplex,gmet,gprimd,gsqcut,idir,ipert,&
+& kxc,mpi_enreg,mqgrid,natom,nattyp,nfft,ngfft,&
+& ntypat,n1,n2,n3,nkxc,nspden,opthartdqdq,ph1d,qdir,qgrid,qphon,rhog,rhor,&
+& ucvol,vlspl,vhart1dqdq,vpsp1dqdq,vxc1dqdq)
+
+ implicit none
+
+!Arguments -------------------------------
+!scalars
+ integer,intent(in) :: cplex,idir,ipert,mqgrid,n1,n2,n3,natom,nfft,nkxc,ntypat
+ integer,intent(in) :: nspden,opthartdqdq,qdir
+ real(dp),intent(in) :: gsqcut,ucvol
+ type(MPI_type),intent(in) :: mpi_enreg
+!arrays
+ integer,intent(in) :: nattyp(ntypat),ngfft(18)
+ real(dp),intent(in) :: gmet(3,3),gprimd(3,3), kxc(nfft,nkxc)
+ real(dp),intent(in) :: ph1d(2,(2*n1+1+2*n2+1+2*n3+1)*natom)
+ real(dp),intent(in) :: qgrid(mqgrid),qphon(3),rhog(2,nfft),rhor(cplex*nfft,nspden)
+ real(dp),intent(in) :: vlspl(mqgrid,2,ntypat)
+ real(dp),intent(out) :: vhart1dqdq(cplex*nfft),vpsp1dqdq(cplex*nfft)
+ real(dp),intent(out) :: vxc1dqdq(cplex*nfft)
+
+!Local variables -------------------------
+!scalars
+ integer :: beta, delta, gamma
+ integer :: ia,i1,i2,i3,ia1,ia2,id1,id2,id3,ig1,ig2,ig3,ii,ii1
+ integer :: itypat,jj
+ integer, parameter :: im=2, re=1
+ real(dp),parameter :: tolfix=1.000000001_dp
+ real(dp) :: cutoff,delbd,delbg,deldg,gfact,gmag,gq1
+ real(dp) :: gq2,gq3,gsquar,pisqrinv
+ real(dp) :: sfi,sfr,term1,term2,tmpre,tmpim,uogsquar,work1re,xnorm
+ logical :: qeq0
+ character(len=500) :: msg
+!arrays
+ integer,save :: idx(18)=(/1,1,2,2,3,3,3,2,3,1,2,1,2,3,1,3,1,2/)
+ integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:),ffti2_local(:)
+ integer, ABI_CONTIGUOUS pointer :: fftn3_distrib(:),ffti3_local(:)
+ real(dp) :: gq(3),gqc(3),vion1(1),vion1dq(1),vion1dqdq(1)
+ real(dp),allocatable :: work1(:,:)
+
+! *********************************************************************
+
+
+ if(ipert/=natom+3 .and. ipert/=natom+4)then
+
+   vpsp1dqdq(1:cplex*nfft)=zero
+
+ else
+
+   beta=idx(2*idir-1); delta=idx(2*idir); gamma=qdir
+
+   !Kronecker deltas
+   delbd=0.0_dp; delbg=0.0_dp; deldg=0.0_dp
+   if (beta==delta) delbd=1.0_dp
+   if (beta==gamma) delbg=1.0_dp
+   if (delta==gamma) deldg=1.0_dp
+
+   ABI_MALLOC(work1,(2,nfft))
+   work1(1:2,1:nfft)=0.0_dp
+
+   cutoff=gsqcut*tolfix
+   id1=n1/2+2
+   id2=n2/2+2
+   id3=n3/2+2
+
+   !Get the distrib associated with this fft_grid
+   call ptabs_fourdp(mpi_enreg,n2,n3,fftn2_distrib,ffti2_local,fftn3_distrib,ffti3_local)
+
+!  This is to allow q=0
+   qeq0=.false.
+   if(qphon(1)**2+qphon(2)**2+qphon(3)**2<1.d-15) then 
+     qeq0=.true.
+   else
+     msg='This routine cannot be used for q/=0'
+     ABI_BUG(msg)
+   end if
+
+   ia1=1
+   do itypat=1,ntypat
+  !  ia1,ia2 sets range of loop over atoms:
+     ia2=ia1+nattyp(itypat)-1
+
+     ii=0
+
+     do i3=1,n3
+       ig3=i3-(i3/id3)*n3-1
+       gq3=dble(ig3)+qphon(3)
+       gq(3)=gq3
+       do i2=1,n2
+         if (fftn2_distrib(i2)==mpi_enreg%me_fft) then
+           ig2=i2-(i2/id2)*n2-1
+           gq2=dble(ig2)+qphon(2)
+           gq(2)=gq2
+
+!          Note the lower limit of the next loop
+           ii1=1
+           if(i3==1 .and. i2==1 .and. qeq0 .and. ig2==0 .and. ig3==0)then
+            ii1=2
+             ii=ii+1
+           end if
+           do i1=ii1,n1
+             ig1=i1-(i1/id1)*n1-1
+             gq1=dble(ig1)+qphon(1)
+             gq(1)=gq1
+             ii=ii+1
+             gsquar=gsq_vl(ig1,ig2,ig3)
+!            Skip G**2 outside cutoff:
+             if (gsquar<=cutoff) then
+               gmag=sqrt(gsquar)
+
+!              Obtain G in cartesian coordinates
+               gqc(1)=gprimd(1,1)*gq(1)+gprimd(1,2)*gq(2)+gprimd(1,3)*gq(3)
+               gqc(2)=gprimd(2,1)*gq(1)+gprimd(2,2)*gq(2)+gprimd(2,3)*gq(3)
+               gqc(3)=gprimd(3,1)*gq(1)+gprimd(3,2)*gq(2)+gprimd(3,3)*gq(3)
+
+!              Evaluate spline fit to get first V(q) and V(q)' and later V(q)'':
+               call splfit(qgrid,vion1dq,vlspl(:,:,itypat),1,(/gmag/),vion1,mqgrid,1)
+               vion1=vion1/gsquar
+               vion1dq=(vion1dq-2.0_dp*gmag*vion1)/gsquar
+
+               call splfit(qgrid,vion1dqdq,vlspl(:,:,itypat),2,(/gmag/),vion1,mqgrid,1)
+               vion1dqdq=(vion1dqdq-4.0_dp*gmag*vion1dq-2.0_dp*vion1)/gsquar
+
+!              Assemble structure factor over all atoms of given type:
+               sfr=0.0_dp
+               sfi=0.0_dp
+               do ia=ia1,ia2
+                 sfr=sfr+phre_vl(ig1,ig2,ig3,ia)
+                 sfi=sfi-phimag_vl(ig1,ig2,ig3,ia)
+               end do
+
+               gfact=gqc(beta)*gqc(delta)*gqc(gamma)/gsquar
+  
+               term1=delbd*gqc(gamma)+delbg*gqc(delta)+deldg*gqc(beta)
+               term1=term1-gfact
+               term1=term1*vion1dq(1)/gmag
+
+               term2=vion1dqdq(1)*gfact
+
+!              Multiply structure factor times vion derivatives:
+               work1(re,ii)=work1(re,ii)+sfr*(term1+term2)
+               work1(im,ii)=work1(im,ii)+sfi*(term1+term2)
+
+!              End skip G**2 outside cutoff:
+             end if
+
+           end do
+         end if
+       end do
+     end do
+
+     ia1=ia2+1
+
+!  End loop on type of atoms
+   end do
+
+!  Set Vloc(G=0)=0:
+   work1(re,1)=0.0_dp
+   work1(im,1)=0.0_dp
+
+!  Transform back to real space
+   call fourdp(cplex,work1,vpsp1dqdq,1,mpi_enreg,nfft,1,ngfft,0)
+
+   xnorm=1.0_dp/ucvol/two_pi
+   vpsp1dqdq(1:cplex*nfft)=vpsp1dqdq(1:cplex*nfft)*xnorm
+
+   work1=0.0_dp
+
+!  Calculate the GS density Hartree contribution
+   if (opthartdqdq==1) then
+
+     pisqrinv=1.0_dp/pi**2
+     
+     ii=0
+     do i3=1,n3
+       ig3=i3-(i3/id3)*n3-1
+       gq3=dble(ig3)+qphon(3)
+       gq(3)=gq3
+       do i2=1,n2
+         if (fftn2_distrib(i2)==mpi_enreg%me_fft) then
+           ig2=i2-(i2/id2)*n2-1
+           gq2=dble(ig2)+qphon(2)
+           gq(2)=gq2
+
+!          Note the lower limit of the next loop
+           ii1=1
+           if(i3==1 .and. i2==1 .and. qeq0 .and. ig2==0 .and. ig3==0)then
+             ii1=2
+             ii=ii+1
+           end if
+           do i1=ii1,n1
+             ig1=i1-(i1/id1)*n1-1
+             gq1=dble(ig1)+qphon(1)
+             gq(1)=gq1
+             ii=ii+1
+             gsquar=gsq_vl(ig1,ig2,ig3)
+!            Skip G**2 outside cutoff:
+             if (gsquar<=cutoff) then
+
+!              Precalculate quotient of G powers
+               uogsquar= 1.0_dp/gsquar
+
+!              Obtain G in cartesian coordinates
+               gqc(1)=gprimd(1,1)*gq(1)+gprimd(1,2)*gq(2)+gprimd(1,3)*gq(3)
+               gqc(2)=gprimd(2,1)*gq(1)+gprimd(2,2)*gq(2)+gprimd(2,3)*gq(3)
+               gqc(3)=gprimd(3,1)*gq(1)+gprimd(3,2)*gq(2)+gprimd(3,3)*gq(3)
+
+               term1=4.0_dp*gqc(beta)*gqc(gamma)*gqc(delta)*uogsquar*uogsquar
+               term2=delbd*gqc(gamma)+delbg*gqc(delta)+deldg*gqc(beta) 
+               term2=-term2*uogsquar
+
+               work1re=pisqrinv*uogsquar*(term1+term2)
+               work1(re,ii)=rhog(re,ii)*work1re
+               work1(im,ii)=rhog(im,ii)*work1re
+
+!              End skip G**2 outside cutoff:
+             end if
+
+           end do
+         end if
+       end do
+     end do
+
+!    Set V(G=0)=0:
+     work1(re,1)=0.0_dp
+     work1(im,1)=0.0_dp
+
+!    Transform back to real space
+     call fourdp(cplex,work1,vhart1dqdq,1,mpi_enreg,nfft,1,ngfft,0)
+
+!  End the calculation of the Hartree contribution 
+   end if
+
+   ABI_FREE(work1)
+
+!  Calculate the GS density XC contribution (if GGA)
+   vxc1dqdq(:)=zero
+   if (nkxc == 7) then
+     call dfpt_mkvxcgga_n0met(beta,1,delta,gamma,gprimd,kxc,mpi_enreg, &
+   & nfft,ngfft,nkxc,nspden,rhor,vxc1dqdq)
+
+     !Fictitious i factor temporarily applied. 
+     !It is later canceled by the (-i) factor of the total matrix element
+     do ii=1,nfft
+       jj=ii*2
+       tmpre=vxc1dqdq(jj-1); tmpim=vxc1dqdq(jj)
+       vxc1dqdq(jj-1)=-tmpim; vxc1dqdq(jj)=tmpre
+     end do
+   end if
+
+!End the condition of non-electric-field
+ end if
+
+ contains
+
+!Real and imaginary parts of phase.
+   function phr_vl(x1,y1,x2,y2,x3,y3)
+   real(dp) :: phr_vl,x1,x2,x3,y1,y2,y3
+   phr_vl=(x1*x2-y1*y2)*x3-(y1*x2+x1*y2)*y3
+ end function phr_vl
+
+   function phi_vl(x1,y1,x2,y2,x3,y3)
+   real(dp):: phi_vl,x1,x2,x3,y1,y2,y3
+   phi_vl=(x1*x2-y1*y2)*y3+(y1*x2+x1*y2)*x3
+ end function phi_vl
+
+   function ph1_vl(nri,ig1,ia)
+   real(dp):: ph1_vl
+   integer :: nri,ig1,ia
+   ph1_vl=ph1d(nri,ig1+1+n1+(ia-1)*(2*n1+1))
+ end function ph1_vl
+
+   function ph2_vl(nri,ig2,ia)
+   real(dp):: ph2_vl
+   integer :: nri,ig2,ia
+   ph2_vl=ph1d(nri,ig2+1+n2+(ia-1)*(2*n2+1)+natom*(2*n1+1))
+ end function ph2_vl
+
+   function ph3_vl(nri,ig3,ia)
+   real(dp):: ph3_vl
+   integer :: nri,ig3,ia
+   ph3_vl=ph1d(nri,ig3+1+n3+(ia-1)*(2*n3+1)+natom*(2*n1+1+2*n2+1))
+ end function ph3_vl
+
+   function phre_vl(ig1,ig2,ig3,ia)
+   real(dp):: phre_vl
+   integer :: ig1,ig2,ig3,ia
+   phre_vl=phr_vl(ph1_vl(re,ig1,ia),ph1_vl(im,ig1,ia),&
+&   ph2_vl(re,ig2,ia),ph2_vl(im,ig2,ia),ph3_vl(re,ig3,ia),ph3_vl(im,ig3,ia))
+ end function phre_vl
+
+   function phimag_vl(ig1,ig2,ig3,ia)
+   real(dp) :: phimag_vl
+   integer :: ig1,ig2,ig3,ia
+   phimag_vl=phi_vl(ph1_vl(re,ig1,ia),ph1_vl(im,ig1,ia),&
+&   ph2_vl(re,ig2,ia),ph2_vl(im,ig2,ia),ph3_vl(re,ig3,ia),ph3_vl(im,ig3,ia))
+ end function phimag_vl
+
+   function gsq_vl(i1,i2,i3)
+   real(dp) :: gsq_vl
+   integer :: i1,i2,i3
+!Define G^2 based on G space metric gmet.
+   gsq_vl=dble(i1*i1)*gmet(1,1)+dble(i2*i2)*gmet(2,2)+&
+&   dble(i3*i3)*gmet(3,3)+dble(2*i1*i2)*gmet(1,2)+&
+&   dble(2*i2*i3)*gmet(2,3)+dble(2*i3*i1)*gmet(3,1)
+ end function gsq_vl
+
+end subroutine dfpt_vmetdqdq
 
 end module m_mklocl
 !!***

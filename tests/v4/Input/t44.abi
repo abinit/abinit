@@ -1,0 +1,31 @@
+Abinit            # Which code have you used to get the input data?
+Potential         # Which is the input data used to compute the band offset?
+t44_VHXC          # Name of the file where the input data is stored
+2                 # Number of convolutions required to calculate the macro. ave.
+4.4               # First length for the filter function in macroscopic average
+4.45              # Second length
+0                 # Total charge  (not needed)
+spline            # Type of interpolation
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = macroave
+#%% test_chain = t42.abi, t43.abi, t44.abi, t45.abi
+#%% [files]
+#%% files_to_test = 
+#%%   t44_VHXC.MAV, tolnlines=  0, tolabs=  0.000e+00, tolrel=  0.000e+00, fld_options=-easy;
+#%%   t44_VHXC.PAV, tolnlines=  0, tolabs=  0.000e+00, tolrel=  0.000e+00, fld_options=-easy
+#%% [shell]
+#%% pre_commands = iw_cp t44.abi macroave.in
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = Unknown
+#%% keywords = NC
+#%% description = 
+#%%   Si/Ge heterojunction, see test 42
+#%%   Analyze the Hartree and XC potential : two filter functions,
+#%%   using two distinct values (on the order of the average
+#%%   layer width, but otherwise arbitrary), and spline interpolation.
+#%% topics = Macroave
+#%%<END TEST_INFO>

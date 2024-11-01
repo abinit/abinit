@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_eprenorms
 !! NAME
 !! m_eprenorms
@@ -12,7 +11,7 @@
 !! Contact gmatteo
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2019 ABINIT group (YG)
+!! Copyright (C) 2001-2024 ABINIT group (YG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -28,8 +27,7 @@
 module m_eprenorms
 
  use defs_basis
- use defs_abitypes
- use defs_datatypes
+ use m_abicore
  use m_errors
  use m_xmpi
 #ifdef HAVE_NETCDF
@@ -37,8 +35,9 @@ module m_eprenorms
 #endif
  use m_nctk
 
- use m_crystal,  only : crystal_t
- use m_kpts,     only : listkk
+ use defs_datatypes, only : ebands_t
+ use m_crystal,      only : crystal_t
+ use m_kpts,         only : listkk
 
  implicit none
 
@@ -119,26 +118,14 @@ CONTAINS  !=====================================================================
 !! OUTPUT
 !!  Epren<eprenorms_t>=Datatype gathering electron-phonon renormalizations
 !!
-!! PARENTS
-!!      m_eprenorms
-!!
-!! CHILDREN
-!!      listkk
-!!
 !! SOURCE
 
 subroutine eprenorms_init(Epren,nkpt,nsppol,mband,ntemp)
-
- implicit none
 
 !Arugments -----------------------------------
 !scalars
  integer,intent(in) :: nkpt, nsppol, mband, ntemp
  type(eprenorms_t) :: Epren
-!arrays
-
-!Local variables------------------------------
-!scalars
 !arrays
 
 !*************************************************************************
@@ -174,17 +161,9 @@ end subroutine eprenorms_init
 !! INPUTS
 !! Epren<eprenorms_t>=The datatype to be freed
 !!
-!! PARENTS
-!!      bethe_salpeter,optic
-!!
-!! CHILDREN
-!!      listkk
-!!
 !! SOURCE
 
 subroutine eprenorms_free(Epren)
-
- implicit none
 
 !Arguments -----------------------------------
 !scalars
@@ -192,24 +171,12 @@ subroutine eprenorms_free(Epren)
 
 !*********************************************************************
 
- if (allocated(Epren%temps)) then
-   ABI_FREE(Epren%temps)
- end if
- if (allocated(Epren%kpts)) then
-   ABI_FREE(Epren%kpts)
- end if
- if (allocated(Epren%eigens)) then
-   ABI_FREE(Epren%eigens)
- end if
- if (allocated(Epren%occs)) then
-   ABI_FREE(Epren%occs)
- end if
- if (allocated(Epren%renorms)) then
-   ABI_FREE(Epren%renorms)
- end if
- if (allocated(Epren%linewidth)) then
-   ABI_FREE(Epren%linewidth)
- end if
+ ABI_SFREE(Epren%temps)
+ ABI_SFREE(Epren%kpts)
+ ABI_SFREE(Epren%eigens)
+ ABI_SFREE(Epren%occs)
+ ABI_SFREE(Epren%renorms)
+ ABI_SFREE(Epren%linewidth)
 
 end subroutine eprenorms_free
 !!***
@@ -229,17 +196,9 @@ end subroutine eprenorms_free
 !! SIDE EFFECTS
 !! Epren<eprenorms_t> = fields are initialized and filled with data from filename
 !!
-!! PARENTS
-!!      optic,setup_bse
-!!
-!! CHILDREN
-!!      listkk
-!!
 !! SOURCE
 
 subroutine eprenorms_from_epnc(Epren,filename)
-
- implicit none
 
 !Arguments -----------------------------------
 !scalars
@@ -295,17 +254,9 @@ end subroutine eprenorms_from_epnc
 !! SIDE EFFECTS
 !!  Epren<eprenorms_t> = Data broadcasted on every node from master
 !!
-!! PARENTS
-!!      optic,setup_bse
-!!
-!! CHILDREN
-!!      listkk
-!!
 !! SOURCE
 
 subroutine eprenorms_bcast(Epren,master,comm)
-
- implicit none
 
 !Arguments -----------------------------------
 !scalars
@@ -357,17 +308,9 @@ end subroutine eprenorms_bcast
 !!  Bst<bands_t> : eigens are changed according to epren
 !!                 linewidth is allocated and filled with data if do_linewidth
 !!
-!! PARENTS
-!!      m_exc_spectra,m_haydock,optic
-!!
-!! CHILDREN
-!!      listkk
-!!
 !! SOURCE
 
 subroutine renorm_bst(Epren,Bst,Cryst,itemp,do_lifetime,do_check)
-
- implicit none
 
 !Arguments -----------------------------------
 !scalars
@@ -422,10 +365,10 @@ subroutine renorm_bst(Epren,Bst,Cryst,itemp,do_lifetime,do_check)
        if (ANY(ABS(Bst%eig(1:MIN(10,nband_tmp),ikpt,isppol) - Epren%eigens(1:MIN(10,nband_tmp),ik_eph,isppol)) > tol3)) then
          !write(stdout,*) "eig : ",BSt%eig(1:MIN(10,nband_tmp),ikpt,isppol)
          !write(stdout,*) "eigens : ",Epren%eigens(1:MIN(10,nband_tmp),ikpt,isppol)
-         MSG_ERROR("Error in eigenvalues, check the _EP.nc file with respect to your input file !")
+         ABI_ERROR("Error in eigenvalues, check the _EP.nc file with respect to your input file !")
        end if
        if (ANY(ABS(Bst%occ(1:MIN(10,nband_tmp),ikpt,isppol) - Epren%occs(1:MIN(10,nband_tmp),ik_eph,isppol)) > tol3)) then
-         MSG_ERROR("Error in occupations, check the _EP.nc file with respect to your input file !")
+         ABI_ERROR("Error in occupations, check the _EP.nc file with respect to your input file !")
        end if
      end if
 

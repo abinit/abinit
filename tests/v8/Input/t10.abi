@@ -1,0 +1,28 @@
+##############################################################################
+#Test for multibinit, just read xml and generate the effective potential into XML file
+##############################################################################
+prt_model = 1
+dipdip_prt = 1
+ncell =   2 2 2
+dynamics =  13
+optcell = 2
+temperature = 1000
+ntime  = 50
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = multibinit
+#%% system_xml = t10_sys.xml
+#%% [files]
+#%% files_to_test = 
+#%%   t10.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy;
+#%%   t10_model.xml, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = A. MARTIN
+#%% keywords = Effective potential, multibinit
+#%% description = 
+#%%   read xml and generate effective potential in XML file
+#%% topics = LatticeModel,DynamicsMultibinit
+#%%<END TEST_INFO>

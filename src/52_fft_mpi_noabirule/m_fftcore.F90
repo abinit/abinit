@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_fftcore
 !! NAME
 !!  m_fftcore
@@ -9,12 +8,10 @@
 !!  inside a sphere or to count them.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2019 ABINIT group (SG, XG, AR, MG, MT)
+!!  Copyright (C) 2014-2024 ABINIT group (SG, XG, AR, MG, MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
 !!
 !! TODO
 !!  1) Pass distribfft instead of MPI_enreg to simplify the API and facilitate code-reuse.
@@ -42,6 +39,7 @@ module m_fftcore
 
  use m_time,         only : timab
  use m_fstrings,     only : itoa, sjoin
+ use m_geometry,     only : normv
  use defs_abitypes,  only : MPI_type
  use m_mpinfo,       only : destroy_mpi_enreg, initmpi_seq
 
@@ -113,22 +111,22 @@ module m_fftcore
 
 #define FFTALGA_SIZE 5
  character(len=*),private,parameter :: fftalga2name(1:FFTALGA_SIZE)= &
-& (/"Goedecker     ", &
-&   "Vendor FFT    ", &
-&   "FFTW3         ", &
-&   "Goedecker2002 ", &
-&   "DFTI          " /)
+ (/"Goedecker     ", &
+   "Vendor FFT    ", &
+   "FFTW3         ", &
+   "Goedecker2002 ", &
+   "DFTI          " /)
 
 #define FFTALGB_SIZE 1
  character(len=*),private,parameter :: fftalgb2name(0:FFTALGB_SIZE)= &
-& (/"C2C",&
-&   "R2C"/)
+ (/"C2C",&
+   "R2C"/)
 
 #define FFTALGC_SIZE 2
  character(len=*),private,parameter :: fftalgc2name(0:FFTALGC_SIZE)= &
-& (/"No pad         ",&
-&   "zero-pad       ",&
-&   "zero-pad+cache "/)
+ (/"No pad         ",&
+   "zero-pad       ",&
+   "zero-pad+cache "/)
 
 contains
 !!***
@@ -146,8 +144,6 @@ contains
 !!
 !! INPUTS
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 integer function fftcore_set_mixprec(wp) result(old_wp)
@@ -163,11 +159,11 @@ integer function fftcore_set_mixprec(wp) result(old_wp)
 
  select case (fftcore_mixprec)
  case (0)
-   if (old_wp /= fftcore_mixprec) call wrtout(std_out, " Activating FFT in double-precision.")
+   if (old_wp /= fftcore_mixprec) call wrtout(std_out, " fftcore_mixprec 0 --> Using double-precision FFT", newlines=1)
  case (1)
-   if (old_wp /= fftcore_mixprec) call wrtout(std_out, " Activating FFT in mixed precision.")
+   if (old_wp /= fftcore_mixprec) call wrtout(std_out, " fftcore_mixprec 1 --> Using mixed precision FFT", newlines=1)
  case default
-   MSG_ERROR(sjoin("Wrong value for input wp:", itoa(fftcore_mixprec)))
+   ABI_ERROR(sjoin("Wrong value for input wp:", itoa(fftcore_mixprec)))
  end select
 
 end function fftcore_set_mixprec
@@ -185,19 +181,14 @@ end function fftcore_set_mixprec
 !! INPUTS
 !!  fftalg=Input variable.
 !!
-!! PARENTS
-!!
 !! SOURCE
 
-pure function fftalg_isavailable(fftalg) result(ans)
+logical pure function fftalg_isavailable(fftalg) result(ans)
 
 !Arguments ------------------------------------
-!scalars
  integer,intent(in) :: fftalg
- logical :: ans
 
 !Local variables-------------------------------
-!scalars
  integer :: fftalga,fftalgb,fftalgc
 
 ! *************************************************************************
@@ -208,11 +199,11 @@ pure function fftalg_isavailable(fftalg) result(ans)
  fftalgc = mod(fftalg,10)
 
  ! Optional FFT libraries.
-#ifndef HAVE_FFT_FFTW3
+#ifndef HAVE_FFTW3
  if (fftalga == FFT_FFTW3) ans = .FALSE.
 #endif
 
-#ifndef HAVE_FFT_DFTI
+#ifndef HAVE_DFTI
  if (fftalga == FFT_DFTI) ans = .FALSE.
 #endif
 
@@ -230,8 +221,6 @@ end function fftalg_isavailable
 !!
 !! INPUTS
 !!  fftalg=Input variable.
-!!
-!! PARENTS
 !!
 !! SOURCE
 
@@ -274,8 +263,6 @@ end function fftalg_has_mpi
 !! OUTPUT
 !!  fftalg=Integer used to select the FFT library.
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 pure function fftalg_for_npfft(nproc_fft) result(fftalg)
@@ -294,9 +281,9 @@ pure function fftalg_for_npfft(nproc_fft) result(fftalg)
  if (nproc_fft > 1) fftalg = 401
  !if (nproc_fft > 1) fftalg = 402
 
-#ifdef HAVE_FFT_FFTW3
+#ifdef HAVE_FFTW3
  fftalg = 312
-#elif defined HAVE_FFT_DFTI
+#elif defined HAVE_DFTI
  fftalg = 512
  if (nproc_fft > 1) fftalg = 401  ! MPI-FFT with DFTI is not implemented yet
 #endif
@@ -322,12 +309,6 @@ end function fftalg_for_npfft
 !!  library=String with the name of FFT library
 !!  cplex_mode= String defining whether the FFT library supports real<-->complex transforms.
 !!  padding_mode=Padding mode.
-!!
-!! PARENTS
-!!      m_fft,m_fft_prof
-!!
-!! CHILDREN
-!!      xmpi_sum,xmpi_sum_master
 !!
 !! SOURCE
 
@@ -372,8 +353,6 @@ end subroutine fftalg_info
 !!   Use C to get the real cache size.
 !!   See http://stackoverflow.com/questions/12594208/c-program-to-determine-levels-size-of-cache
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 pure function get_cache_kb()
@@ -408,33 +387,24 @@ end function get_cache_kb
 !! OUTPUT
 !!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft.
 !!
-!! PARENTS
-!!      m_dvdb,m_phgamma,m_wfk,mrgdv
-!!
-!! CHILDREN
-!!      xmpi_sum,xmpi_sum_master
-!!
 !! SOURCE
 
 pure subroutine ngfft_seq(ngfft, n123)
 
 !Arguments ------------------------------------
-!scalars
-!arrays
  integer,intent(in) :: n123(3)
  integer,intent(out) :: ngfft(18)
 
 !Local variables-------------------------------
-!scalars
  integer :: fftalg
 
 ! *************************************************************************
 
- ! Default  for the sequential case.
+ ! Default for sequential case.
  fftalg = 112
-#ifdef HAVE_FFT_FFTW3
+#ifdef HAVE_FFTW3
  fftalg = 312
-#elif defined HAVE_FFT_DFTI
+#elif defined HAVE_DFTI
  fftalg = 512
 #endif
 
@@ -472,16 +442,9 @@ end subroutine ngfft_seq
 !! OUTPUT
 !!  Only writing
 !!
-!! PARENTS
-!!      bethe_salpeter,eph,getng,m_fft,m_fft_prof,m_wfd,screening,setup_bse
-!!      sigma,wfk_analyze
-!!
-!! CHILDREN
-!!      xmpi_sum,xmpi_sum_master
-!!
 !! SOURCE
 
-subroutine print_ngfft(ngfft,header,unit,mode_paral,prtvol)
+subroutine print_ngfft(ngfft, header, unit, mode_paral, prtvol)
 
 !Arguments ------------------------------------
 !scalars
@@ -492,7 +455,6 @@ subroutine print_ngfft(ngfft,header,unit,mode_paral,prtvol)
  integer,intent(in) :: ngfft(18)
 
 !Local variables-------------------------------
-!scalars
  integer :: my_unt,my_prtvol
  character(len=4) :: my_mode
  character(len=500) :: msg
@@ -507,21 +469,21 @@ subroutine print_ngfft(ngfft,header,unit,mode_paral,prtvol)
  if (PRESENT(header)) msg=ch10//' ==== '//TRIM(ADJUSTL(header))//' ==== '
  call wrtout(my_unt,msg,my_mode)
  write(msg,'(2(a,3i5,a),a,i5,2a,i5)')&
-&  '  FFT mesh divisions ........................ ',ngfft(1),ngfft(2),ngfft(3),ch10,&
-&  '  Augmented FFT divisions ................... ',ngfft(4),ngfft(5),ngfft(6),ch10,&
-&  '  FFT algorithm ............................. ',ngfft(7),ch10,&
-&  '  FFT cache size ............................ ',ngfft(8)
+  '  FFT mesh divisions ........................ ',ngfft(1),ngfft(2),ngfft(3),ch10,&
+  '  Augmented FFT divisions ................... ',ngfft(4),ngfft(5),ngfft(6),ch10,&
+  '  FFT algorithm ............................. ',ngfft(7),ch10,&
+  '  FFT cache size ............................ ',ngfft(8)
  call wrtout(my_unt,msg,my_mode)
 
- if (my_prtvol>0) then
+ if (my_prtvol > 0) then
    write(msg,'(6(a,i5,a),a,4i5)')&
-&    '  FFT parallelization level ................. ',ngfft(9),ch10,&
-&    '  Number of processors in my FFT group ...... ',ngfft(10),ch10,&
-&    '  Index of me in my FFT group ............... ',ngfft(11),ch10,&
-&    '  No of xy planes in R space treated by me .. ',ngfft(12),ch10,&
-&    '  No of xy planes in G space treated by me .. ',ngfft(13),ch10,&
-&    '  MPI communicator for FFT .................. ',ngfft(14),ch10,&
-&    '  Value of ngfft(15:18) ..................... ',ngfft(15:18)
+    '  FFT parallelization level ................. ',ngfft(9),ch10,&
+    '  Number of processors in my FFT group ...... ',ngfft(10),ch10,&
+    '  Index of me in my FFT group ............... ',ngfft(11),ch10,&
+    '  No of xy planes in R space treated by me .. ',ngfft(12),ch10,&
+    '  No of xy planes in G space treated by me .. ',ngfft(13),ch10,&
+    '  MPI communicator for FFT .................. ',ngfft(14),ch10,&
+    '  Value of ngfft(15:18) ..................... ',ngfft(15:18)
    call wrtout(my_unt,msg,my_mode)
  end if
 
@@ -553,11 +515,6 @@ end subroutine print_ngfft
 !! first Brillouin zone.  No measure is taken to fold input kpt back
 !! into first zone.  Given arbitrary kpt, this will cause trouble.
 !!
-!! PARENTS
-!!      getcut,getng
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine bound(dsqmax,dsqmin,gbound,gmet,kpt,ngfft,plane)
@@ -575,16 +532,9 @@ subroutine bound(dsqmax,dsqmin,gbound,gmet,kpt,ngfft,plane)
 !scalars
  integer :: i1,i1min,i2,i2min,i3,i3min
  real(dp) :: dsm,dsp
- character(len=500) :: message
+ character(len=500) :: msg
 
 ! *************************************************************************
-
-! dsq(i1,i2,i3)=gmet(1,1)*(kpt(1)+dble(i1))**2&
-!& +gmet(2,2)*(kpt(2)+dble(i2))**2&
-!& +gmet(3,3)*(kpt(3)+dble(i3))**2&
-!& +2._dp*(gmet(1,2)*(kpt(1)+dble(i1))*(kpt(2)+dble(i2))&
-!& +gmet(2,3)*(kpt(2)+dble(i2))*(kpt(3)+dble(i3))&
-!& +gmet(3,1)*(kpt(3)+dble(i3))*(kpt(1)+dble(i1)))
 
 !Set plane to impossible value
  plane=0
@@ -665,13 +615,13 @@ subroutine bound(dsqmax,dsqmin,gbound,gmet,kpt,ngfft,plane)
 
  if (plane==0) then
 !  Trouble: missed boundary somehow
-   write(message, '(a,a,a,3f9.4,a,3i5,a,a,a,a,a)' )&
-&   'Trouble finding boundary of G sphere for',ch10,&
-&   'kpt=',kpt(:),' and ng=',ngfft(1:3),ch10,&
-&   'Action : check that kpt lies',&
-&   'reasonably within first Brillouin zone; ',ch10,&
-&   'else code bug, contact ABINIT group.'
-   MSG_BUG(message)
+   write(msg, '(a,a,a,3f9.4,a,3(i0,1x),a,a,a,a,a)' )&
+   'Trouble finding boundary of G sphere for',ch10,&
+   'kpt=',kpt(:),' and ng=',ngfft(1:3),ch10,&
+   'Action : check that kpt lies',&
+   'reasonably within first Brillouin zone; ',ch10,&
+   'else code bug, contact ABINIT group.'
+   ABI_BUG(msg)
  end if
 
  gbound(1)=i1min
@@ -708,16 +658,18 @@ end subroutine bound
 !!
 !! INPUTS
 !! boxcutmin=minimum value of boxcut admitted (boxcut is the ratio
-!!  between the radius of the sphere contained in the FFT box, and the
-!!  radius of the planewave sphere) : usually 2.0 .
+!!   between the radius of the sphere contained in the FFT box, and the
+!!   radius of the planewave sphere): usually 2.0.
+!! chksymtnons= if==3, will impose the FFT grid to be invariant under the spatial symmetries.
 !! ecut=energy cutoff in Hartrees
 !! gmet(3,3)=reciprocal space metric (bohr**-2).
 !! kpt(3)=input k vector in terms of reciprocal lattice primitive translations
 !! me_fft=index of the processor in the FFT set (use 0 if sequential)
 !! nproc_fft=number of processors in the FFT set (use 1 if sequential)
 !! nsym=number of symmetry elements in group
-!! paral_fft=0 if no FFT parallelisation ; 1 if FFT parallelisation
+!! paral_fft=0 if no FFT parallelisation; 1 if FFT parallelisation
 !! symrel(3,3,nsym)=symmetry matrices in real space (integers)
+!! tnons(3,nsym)=nonsymmorphic translations associated to symrel
 !!
 !! OUTPUT
 !! mgfft= max(ngfft(1),ngfft(2),ngfft(3))
@@ -725,11 +677,9 @@ end subroutine bound
 !!
 !! SIDE EFFECTS
 !! Input/Output
-!! ngfft(1:18)=integer array with FFT box dimensions and other
-!!   information on FFTs. On input ngfft(1:3) contains
-!!   optional trial values. If ngfft(1:3)/minbox is greater than value
-!!   calculated to avoid wrap-around error and ngfft obeys constraint
-!!   placed by the FFT routine that is used
+!! ngfft(1:18)=integer array with FFT box dimensions and other information on FFTs.
+!!   On input ngfft(1:3) contains optional trial values. If ngfft(1:3)/minbox is greater than value
+!!   calculated to avoid wrap-around error and ngfft obeys constraint placed by the FFT routine that is used
 !!   then ngfft(1:3) is left unchanged. Otherwise set to value computed in now.
 !!
 !! Note that there is the possibility of an undetected error if we
@@ -737,49 +687,47 @@ end subroutine bound
 !! are different. In the future we should handle this case.
 !!
 !! ngfft(4),ngfft(5),ngfft(6)= modified values to avoid cache trashing,
-!!        presently : ngfft(4)=ngfft(1)+1 if ngfft(1) is even ;
-!!                    ngfft(5)=ngfft(2)+1 if ngfft(2) is even.
-!!           in the other cases, ngfft(4:6)=ngfft(1:3).
+!!   presently: ngfft(4)=ngfft(1)+1 if ngfft(1) is even;
+!!              ngfft(5)=ngfft(2)+1 if ngfft(2) is even.
+!!   in the other cases, ngfft(4:6)=ngfft(1:3).
 !!   Other choices may better, but this is left for the future.
 !! ngfft(7)=choice for FFT algorithm, see the input variable fftalg
 !! ngfft(8)=size of the cache, in bytes (not used here presently).!!
 !!   other ngfft slots are used for parallelism see ~abinit/doc/variables/vargs.htm#ngfft
-!! [unit] = Output Unit number (DEFAULT std_out)
-!!
-!! PARENTS
-!!      fftprof,m_fft,m_fft_prof,memory_eval,mpi_setup,mrgscr,scfcv
-!!
-!! CHILDREN
-!!      bound,print_ngfft,sort_int,wrtout
+!! [ngfftc(1:18)]= -optional- value of ngfft for the "coarse" grid
+!! [unit] = -optional-  output unit number (DEFAULT std_out)
+!! [gpu_option] = GPU implementation to use, i.e. cuda, openMP, ... (0=not using GPU)
 !!
 !! SOURCE
 
-subroutine getng(boxcutmin,ecut,gmet,kpt,me_fft,mgfft,nfft,ngfft,nproc_fft,nsym,paral_fft,symrel,&
-&                ngfftc,use_gpu_cuda,unit) ! optional
+subroutine getng(boxcutmin, chksymtnons, ecut, gmet, kpt, me_fft, mgfft, nfft, ngfft, &
+                nproc_fft, nsym, paral_fft, symrel, tnons, &
+                ngfftc, unit, gpu_option) ! optional
 
  use defs_fftdata,  only : mg
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: me_fft,nproc_fft,nsym,paral_fft
+ integer,intent(in) :: chksymtnons,me_fft,nproc_fft,nsym,paral_fft
  integer,intent(out) :: mgfft,nfft
- integer,optional,intent(in) :: unit,use_gpu_cuda
+ integer,optional,intent(in) :: unit,gpu_option
  real(dp),intent(in) :: boxcutmin,ecut
 !arrays
  integer,intent(in) :: symrel(3,3,nsym)
  integer,intent(in),optional :: ngfftc(3)
  integer,intent(inout) :: ngfft(18)
  real(dp),intent(in) :: gmet(3,3),kpt(3)
+ real(dp),intent(in) :: tnons(3,nsym)
 
 !Local variables-------------------------------
 !scalars
  integer,save :: first=1,msrch(3),previous_paral_mode=0
- integer :: element,ii,index,isrch,isrch1,isrch2,isrch3,isym,jj,mu,paral_fft_
- integer :: plane,testok,tobechecked,ount,fftalga
+ integer :: element,ifactor,ii,index,ipower,isrch,isrch1,isrch2,isrch3,isym,jj,mu,paral_fft_
+ integer :: plane,testok,tobechecked,ount,fftalga,nn,ngdiv,valpow
  real(dp),parameter :: minbox=0.75_dp
- real(dp) :: dsqmax,dsqmin,ecutmx,prodcurrent,prodtrial,xx,yy
+ real(dp) :: dsqmax,dsqmin,ecutmx,prodcurrent,prodtrial,tnscaled,xx,yy
  logical :: testdiv
- character(len=500) :: message
+ character(len=500) :: msg
  integer,parameter :: largest_ngfft=mg ! Goedecker FFT: any powers of 2, 3, and 5 - must be coherent with defs_fftdata.F90
  integer,parameter :: maxpow2 =16      ! int(log(largest_ngfft+half)/log(two))
  integer,parameter :: maxpow3 =6       ! int(log(largest_ngfft+half)/log(three))
@@ -787,14 +735,23 @@ subroutine getng(boxcutmin,ecut,gmet,kpt,me_fft,mgfft,nfft,ngfft,nproc_fft,nsym,
  integer,parameter :: maxpow7 =0
  integer,parameter :: maxpow11=0
  integer,parameter :: mmsrch=(maxpow2+1)*(maxpow3+1)*(maxpow5+1)*(maxpow7+1)*(maxpow11+1)
+ integer,parameter :: nfactor=10, mpower=5
+!Arrays
  integer,save :: iperm(mmsrch),srch(mmsrch,3)
  integer(i8b) :: li_srch(mmsrch)
  integer :: divisor(3,3),gbound(3),imax(3),imin(3),ngcurrent(3)
  integer :: ngmax(3),ngsav(3),ngtrial(3)
+ integer :: npower(3,mpower)
+ integer,parameter :: factor(10) = (/1,2,3,4,5,6,8,9,10,12/)
+ integer,parameter :: power(5) = (/2,3,5,7,11/)
 
 ! *************************************************************************
 
- ount = std_out; if (PRESENT(unit)) ount = unit
+ ount = std_out; if (present(unit)) ount = unit
+
+!DEBUG
+!write(std_out,*)' m_fftcore/getng : enter'
+!ENDDEBUG
 
  fftalga = ngfft(7)/100
 
@@ -866,10 +823,10 @@ subroutine getng(boxcutmin,ecut,gmet,kpt,me_fft,mgfft,nfft,ngfft,nproc_fft,nsym,
          srch(msrch(2),2)=srch(ii,1)
        end if
      end do
-     !write(message,'(a,i0,a,i0,2a,i0)')&
+     !write(msg,'(a,i0,a,i0,2a,i0)')&
      ! 'The second and third dimension of the FFT grid: ',ngfft(2),", ",ngfft(3),ch10,&
      ! 'were imposed to be multiple of the number of processors for the FFT: ', nproc_fft
-     !if (ount /= dev_null) MSG_COMMENT(message)
+     !if (ount /= dev_null) ABI_COMMENT(msg)
    else
      msrch(2)=msrch(1)
      srch(:,2)=srch(:,1)
@@ -882,13 +839,18 @@ subroutine getng(boxcutmin,ecut,gmet,kpt,me_fft,mgfft,nfft,ngfft,nproc_fft,nsym,
 !  The set of allowed ngfft values has been found
  end if ! first==1
 
+!=============================================================================================
+!
+! Determination of sufficient values of ngfft with ngfft(2) and ngfft(3) taken inside
+! sets of values that take into account the constraint on nproc_fft
+
 !Save input values of ngfft
  ngsav(1:3) = ngfft(1:3)
 
 !As an initial guess for ngfft, use the provided coarse mesh grid
  if (PRESENT(ngfftc)) then
    ngfft(1:3)=ngfftc(1:3)
-   call wrtout(ount,' Using supplied coarse mesh as initial guess.','COLL')
+   call wrtout(ount,' Using supplied coarse mesh as initial guess.')
  else
    ngfft(1:3)=2
  end if
@@ -911,11 +873,11 @@ subroutine getng(boxcutmin,ecut,gmet,kpt,me_fft,mgfft,nfft,ngfft,nproc_fft,nsym,
 
      if (ii==msrch(plane)-1)then
        ! Here, we are in trouble
-       write(message, '(a,i12,5a)' ) &
-&       'ngfft is bigger than allowed value =',ngfft(plane),'.',ch10,&
-&       'This indicates that desired ngfft is larger than getng',ch10,&
-&       'can handle. The code has to be changed and compiled.'
-       MSG_BUG(message)
+       write(msg, '(a,i12,5a)' ) &
+        'ngfft is bigger than allowed value =',ngfft(plane),'.',ch10,&
+        'This indicates that desired ngfft is larger than getng',ch10,&
+        'can handle. The code has to be changed and compiled.'
+       ABI_BUG(msg)
      end if
    end do
 
@@ -925,16 +887,22 @@ subroutine getng(boxcutmin,ecut,gmet,kpt,me_fft,mgfft,nfft,ngfft,nproc_fft,nsym,
  ecutmx=0.5_dp*pi**2*dsqmin
 
 !Print results
- write(message, '(a,1p,e14.6,a,3i8,a,a,e14.6)' ) &
-& ' For input ecut=',ecut,' best grid ngfft=',ngfft(1:3),ch10,&
-& '       max ecut=',ecutmx
- call wrtout(ount,message,'COLL')
+ write(msg, '(a,1p,e14.6,a,3i8,a,a,e14.6)' ) &
+  ' For input ecut=',ecut,' best grid ngfft=',ngfft(1:3),ch10,&
+  '       max ecut=',ecutmx
+ call wrtout(ount,msg)
 
 ! The FFT grid is compatible with the symmetries if for each
 ! symmetry isym, each ii and each jj, the quantity
 ! (ngfft(jj)*symrel(jj,ii,isym))/ngfft(ii) is an integer.
 ! This relation is immediately verified for diagonal elements, since
 ! symrel is an integer. It is also verified if symrel(ii,jj,isym) is zero.
+! Moreover, to cope with the non-symmorphic translation vectors, at least the
+! origin must be sent to a point of the FFT grid. Hence, the non-symmorphic
+! translations tnons(i) multiplied by ngfft(i) must be an integer.
+! The latter condition is however imposed only when chksymtnons=3.
+! Indeed, ABINIT will be able to reimpose the symmetry at the level of the density and potential.
+! This might be a problem for GW calculations, though ...
 
 !Compute the biggest (positive) common divisor of each off-diagonal element of the symmetry matrices
  divisor(:,:)=0; tobechecked=0
@@ -961,7 +929,8 @@ subroutine getng(boxcutmin,ecut,gmet,kpt,me_fft,mgfft,nfft,ngfft,nproc_fft,nsym,
    end do
  end do
 
-!Check whether there is a problem
+!Check whether there is a problem: the grid must be invariant
+!with respect to point symmetry operations, and spatial symmetry operations if chksymtnons==3
  testok=1
  if(tobechecked==1)then
    do ii=1,3
@@ -970,42 +939,136 @@ subroutine getng(boxcutmin,ecut,gmet,kpt,me_fft,mgfft,nfft,ngfft,nproc_fft,nsym,
        yy=xx/ngfft(ii)
        if(abs(yy-nint(yy))>tol8)testok=0
      end do
+     if(chksymtnons==3)then
+       do isym=1,nsym
+         tnscaled=tnons(ii,isym)*ngfft(ii)
+         if(abs(tnscaled-nint(tnscaled))>tol8)testok=0
+       enddo
+     endif
    end do
  end if
 
-!There is definitely a problem
+!DEBUG
+!write(std_out,*)' m_fftcore/getng : chksymtnons,testok,nproc_fft=',chksymtnons,testok,nproc_fft
+!ENDDEBUG
+
+!If there is a problem
  if(testok==0)then
-!  Use a brute force algorithm
-!  1) Because one knows that three identical numbers will satisfy
-!  the constraint, use the maximal ngfft value to define current triplet
-!  and associate total number of grid points
-   ngcurrent(1:3)=maxval(ngfft(1:3))
-!  Takes into account the fact that ngfft(2) and ngfft(3) must
-!  be multiple of nproc_fft
-   if(mod(ngcurrent(1),nproc_fft)/=0)ngcurrent(1:3)=ngcurrent(1:3)*max(1,nproc_fft)
-   prodcurrent=ngcurrent(1)**3+1.0d-3
-!  2) Define maximal values for each component, limited
-!  by the maximal value of the list
-   ngmax(1)=min(int(prodcurrent/(ngfft(2)*ngfft(3))),srch(msrch(1),1))
-   ngmax(2)=min(int(prodcurrent/(ngfft(1)*ngfft(3))),srch(msrch(2),2))
-   ngmax(3)=min(int(prodcurrent/(ngfft(1)*ngfft(2))),srch(msrch(3),3))
-!  3) Get minimal and maximal search indices
+!  Find the powers of 2, 3, 5 (possibly 7 and 11) that are needed or will be enough in ngfft,
+!  taking both the constraint on nproc_nfft and the constraint on tnons.
+!  First decompose nproc_fft, providing divisors of ngfft(2:3)
+   nn=nproc_fft
+   npower(:,:)=0
+   do ipower=1,mpower
+     valpow=power(ipower)
+     do while (mod(nn,valpow)==0)
+       nn=nn/valpow
+       npower(3,ipower)=npower(3,ipower)+1
+     end do
+   enddo
+   if(nn/=1)then
+     ABI_ERROR(sjoin("nproc_fft: ", itoa(nproc_fft), "is not a multiple of 2, 3, 5, 7 or 11"))
+   endif
+   npower(2,:)=npower(3,:)
+
+!  Then examine tnons
+   if(chksymtnons==3)then
+     do ii=1,3
+       do ifactor=1,nfactor
+         testok=1
+         do isym=1,nsym
+           tnscaled=factor(ifactor)*tnons(ii,isym)
+           if(abs(tnscaled-nint(tnscaled))>tol8)testok=0
+         enddo
+         if(testok==1)exit
+       enddo
+       if(testok==1)then
+         if(ifactor/=1)then
+           if(ifactor==2)npower(ii,1)=max(npower(ii,1),1)  ! At least one power of 2
+           if(ifactor==3)npower(ii,2)=max(npower(ii,2),1)  ! At least one power of 3
+           if(ifactor==4)npower(ii,1)=max(npower(ii,1),2)  ! At least two powers of 2
+           if(ifactor==5)npower(ii,3)=max(npower(ii,3),1)  ! At least one power of 5
+           if(ifactor==6)then
+             npower(ii,1)=max(npower(ii,1),1)  ! At least one power of 2
+             npower(ii,2)=max(npower(ii,2),1)  ! At least one power of 3
+           endif
+           if(ifactor==7)npower(ii,1)=max(npower(ii,1),3)  ! At least three powers of 2
+           if(ifactor==8)npower(ii,2)=max(npower(ii,2),2)  ! At least two powers of 3
+           if(ifactor==9)then
+             npower(ii,1)=max(npower(ii,1),1)  ! At least one power of 2
+             npower(ii,3)=max(npower(ii,3),1)  ! At least one power of 5
+           end if
+           if(ifactor==10)then
+             npower(ii,1)=max(npower(ii,1),2)  ! At least two powers of 2
+             npower(ii,2)=max(npower(ii,2),1)  ! At least one power of 3
+           end if
+         endif
+       else
+         write(msg, '(5a,i12,2a,9i12,2a,3f10.7,2a)' ) &
+          'Chksymtnons=1 . Found potentially symmetry-breaking value of tnons, ', ch10,&
+&         '   which is neither a rational fraction in 1/8th nor in 1/12th (1/9th and 1/10th are tolerated also) :', ch10,&
+&         '   for the symmetry number ',isym,ch10,&
+&         '   symrel is ',symrel(1:3,1:3,isym),ch10,&
+&         '   tnons is ',tnons(1:3,isym),ch10,&
+          'This problem should have been caught earlier.'
+         ABI_BUG(msg)
+       endif
+     enddo ! ii
+   endif ! chksymtnons
+
+!  Get minimal search indices, simply those of the current ngfft
    do ii=1,3
      do isrch=1,msrch(ii)
        index=srch(isrch,ii)
        if(index==ngfft(ii))imin(ii)=isrch
-!      One cannot suppose that imax belongs to the allowed list,
+     end do
+   end do
+
+!  Get maximal search indices : the ngtrial values must be identical (to fulfill the constraint induced by the
+!  off diagonal elements of symrel), but also must contain sufficient powers of basic primes (2, 3, 5, 7, 11),
+!  and be bigger than all current ngfft components. This should guarantee that such a triplet fulfills all constraints.
+!  Determine the divisor of allowed ngmax
+   ngdiv=1
+   do ipower=1,mpower
+     ngdiv=ngdiv*power(ipower)**(maxval(npower(:,ipower)))
+   enddo
+   ngmax(1)=ngdiv*(maxval(ngfft(1:3)-1)/ngdiv+1)
+   ngmax(1:3)=ngmax(1)
+   do ii=1,3
+     do isrch=1,msrch(ii)
+       index=srch(isrch,ii)
+       if(mod(index,ngdiv)==0 .and. index>=ngmax(ii))then
+         imax(ii)=isrch
+         ngmax(ii)=index
+         exit
+       endif
+     end do
+   end do
+!  This gives a tentative symetric triplet
+   ngcurrent(1:3)=ngmax(1:3)
+   prodcurrent=ngmax(1)*ngmax(2)*ngmax(3)+1.0d-3
+!  However, it is perhaps possible to do better, by assymetric triplets, still giving lower prodcurrent !
+   ngmax(1)=min(int(prodcurrent/(ngfft(2)*ngfft(3))),srch(msrch(1),1))
+   ngmax(2)=min(int(prodcurrent/(ngfft(1)*ngfft(3))),srch(msrch(2),2))
+   ngmax(3)=min(int(prodcurrent/(ngfft(1)*ngfft(2))),srch(msrch(3),3))
+   do ii=1,3
+     do isrch=1,msrch(ii)
+       index=srch(isrch,ii)
+!      One cannot suppose that ngmax belongs to the allowed list,
 !      so must use <= instead of == , to determine largest index
        if(index<=ngmax(ii))imax(ii)=isrch
      end do
    end do
-!  4) Compute product of trial ngffts
-!  DEBUG
-!  write(ount,*)' getng : enter triple loop '
-!  write(ount,*)'imin',imin(1:3)
-!  write(ount,*)'imax',imax(1:3)
-!  write(ount,*)'ngcurrent',ngcurrent(1:3)
-!  ENDDEBUG
+
+!DEBUG
+!write(std_out,*)' ngmin(1:3)=',srch(imin(1),1),srch(imin(2),2),srch(imin(3),3)
+!write(std_out,*)' ngmax(1:3)=',ngmax(1:3)
+!ENDDEBUG
+
+   ngcurrent(1:3)=ngmax(1:3)
+   prodcurrent=ngmax(1)*ngmax(2)*ngmax(3)+1.0d-3
+
+!  Now, start brute force search
    do isrch1=imin(1),imax(1)
      ngtrial(1)=srch(isrch1,1)
      do isrch2=imin(2),imax(2)
@@ -1023,13 +1086,20 @@ subroutine getng(boxcutmin,ecut,gmet,kpt,me_fft,mgfft,nfft,ngfft,nproc_fft,nsym,
              yy=xx/ngtrial(ii)
              if(abs(yy-nint(yy))>tol8)testok=0
            end do
+           if(chksymtnons==3)then
+             do isym=1,nsym
+               tnscaled=tnons(ii,isym)*ngtrial(ii)
+               if(abs(tnscaled-nint(tnscaled))>tol8)testok=0
+             enddo
+           endif
          end do
 !        DEBUG
 !        write(ount,'(a,3i6,a,i3,a,es16.6)' )' getng : current trial triplet',ngtrial(1:3),&
 !        &     ' testok=',testok,' prodtrial=',prodtrial
 !        ENDDEBUG
          if(testok==0)cycle
-!        The symmetry constraints are fulfilled, so update current values
+!        When one arrives here, the symmetry constraints are fulfilled, so update current values
+!        Then continues the search, in hope of a better value.
          ngcurrent(1:3)=ngtrial(1:3)
          prodcurrent=prodtrial
        end do
@@ -1041,25 +1111,25 @@ subroutine getng(boxcutmin,ecut,gmet,kpt,me_fft,mgfft,nfft,ngfft,nproc_fft,nsym,
 !  ecutmx=maximum ecut consistent with chosen ngfft
    ecutmx=0.5_dp*pi**2*dsqmin
 !  Give results
-   write(message, '(a,3i8,a,a,e14.6)' ) &
-&   ' However, must be changed due to symmetry =>',ngfft(1:3),ch10,&
-&   '       with max ecut=',ecutmx
-   call wrtout(ount,message,'COLL')
+   write(msg, '(a,3i8,a,a,e14.6)' ) &
+    ' However, must be changed due to symmetry =>',ngfft(1:3),ch10,&
+    '       with max ecut=',ecutmx
+   call wrtout(ount,msg)
 
    if (prodcurrent>huge(ii)) then
-     write(message, '(5a)' )&
-&     'The best FFT grid will lead to indices larger',ch10,&
-&     'than the largest representable integer on this machine.',ch10,&
-&     'Action: try to deal with smaller problems. Also contact ABINIT group.'
-     MSG_ERROR(message)
+     write(msg, '(5a)' )&
+      'The best FFT grid will lead to indices larger',ch10,&
+      'than the largest representable integer on this machine.',ch10,&
+      'Action: try to deal with smaller problems. Also contact ABINIT group.'
+     ABI_ERROR(msg)
    end if
 
  end if ! testok==0
 
 !Possibly use the input values of ngfft
- if ( int( dble(ngsav(1)) / minbox ) >= ngfft(1) .and.&
-&     int( dble(ngsav(2)) / minbox ) >= ngfft(2) .and.&
-&     int( dble(ngsav(3)) / minbox ) >= ngfft(3) ) then
+ if (int( dble(ngsav(1)) / minbox ) >= ngfft(1) .and.&
+     int( dble(ngsav(2)) / minbox ) >= ngfft(2) .and.&
+     int( dble(ngsav(3)) / minbox ) >= ngfft(3) ) then
 
 !  Must check whether the values are in the allowed list
    testok=0
@@ -1072,9 +1142,9 @@ subroutine getng(boxcutmin,ecut,gmet,kpt,me_fft,mgfft,nfft,ngfft,nproc_fft,nsym,
      end do
    end do
    if(testok==3)then
-     write(message,'(a,3(a,i1,a,i3),a)') ' input values of',&
-&     (' ngfft(',mu,') =',ngsav(mu),mu=1,3),' are alright and will be used'
-     call wrtout(ount,message,'COLL')
+     write(msg,'(a,3(a,i1,a,i3),a)') ' input values of',&
+      (' ngfft(',mu,') =',ngsav(mu),mu=1,3),' are alright and will be used'
+     call wrtout(ount,msg)
      do mu = 1,3
        ngfft(mu) = ngsav(mu)
      end do
@@ -1088,23 +1158,23 @@ subroutine getng(boxcutmin,ecut,gmet,kpt,me_fft,mgfft,nfft,ngfft,nproc_fft,nsym,
  if (paral_fft_==1) then
    ! For the time being, one need ngfft(2) and ngfft(3) to be multiple of nproc_fft
    if(modulo(ngfft(2),nproc_fft)/=0)then
-     write(message,'(3a,i5,a,i5)')&
-&     'The second dimension of the FFT grid, ngfft(2), should be',&
-&     'a multiple of the number of processors for the FFT, nproc_fft.',&
-&     'However, ngfft(2)=',ngfft(2),' and nproc_fft=',nproc_fft
-     MSG_BUG(message)
+     write(msg,'(4a,i5,a,i5)')&
+      'The second dimension of the FFT grid, ngfft(2), should be ',&
+      'a multiple of the number of processors for the FFT, nproc_fft.',ch10,&
+      'However, ngfft(2)=',ngfft(2),' and nproc_fft=',nproc_fft
+     ABI_BUG(msg)
    end if
    if(modulo(ngfft(3),nproc_fft)/=0)then
-     write(message,'(3a,i5,a,i5)')&
-&     'The third dimension of the FFT grid, ngfft(3), should be',&
-&     'a multiple of the number of processors for the FFT, nproc_fft.',&
-&     'However, ngfft(3)=',ngfft(3),' and nproc_fft=',nproc_fft
-     MSG_BUG(message)
+     write(msg,'(4a,i5,a,i5)')&
+      'The third dimension of the FFT grid, ngfft(3), should be ',&
+      'a multiple of the number of processors for the FFT, nproc_fft.',ch10,&
+      'However, ngfft(3)=',ngfft(3),' and nproc_fft=',nproc_fft
+     ABI_BUG(msg)
    end if
 
  else if (paral_fft_/=0) then
-   write(message,'(a,i0)')'paral_fft_ should be 0 or 1, but its value is ',paral_fft_
-   MSG_BUG(message)
+   write(msg,'(a,i0)')'paral_fft_ should be 0 or 1, but its value is ',paral_fft_
+   ABI_BUG(msg)
  end if
 
 ! Compute effective number of FFT points (for this MPI node if parall FFT)
@@ -1125,8 +1195,8 @@ subroutine getng(boxcutmin,ecut,gmet,kpt,me_fft,mgfft,nfft,ngfft,nproc_fft,nsym,
    ngfft(6)=ngfft(3)
  end if
 
- if (present(use_gpu_cuda)) then
-   if (use_gpu_cuda==1) then
+ if (present(gpu_option)) then
+   if (gpu_option/=ABI_GPU_DISABLED) then
      ngfft(4)=ngfft(1)
      ngfft(5)=ngfft(2)
      ngfft(6)=ngfft(3)
@@ -1148,7 +1218,6 @@ subroutine getng(boxcutmin,ecut,gmet,kpt,me_fft,mgfft,nfft,ngfft,nproc_fft,nsym,
    ngfft(12)=ngfft(2)/nproc_fft
    ngfft(13)=ngfft(3)/nproc_fft
  end if
-
 
  call print_ngfft(ngfft,header="FFT mesh",unit=ount,mode_paral="COLL")
 
@@ -1189,17 +1258,9 @@ end subroutine getng
 !! OUTPUT
 !!  gbound(2*mgfft+8,2)=defined above
 !!
-!! PARENTS
-!!      dfpt_eltfrkin,dfpt_mkrho,fock_getghc,m_bandfft_kpt,m_cut3d,m_epjdos
-!!      m_fft,m_fft_prof,m_fock,m_gsphere,m_hamiltonian,m_wfd,mkrho,mlwfovlp
-!!      pawmkaewf,posdoppler,scfcv,spin_current,suscep_stat,susk,tddft,wfconv
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
-subroutine sphereboundary(gbound,istwf_k,kg_k,mgfft,npw)
-
+subroutine sphereboundary(gbound, istwf_k, kg_k, mgfft, npw)
 
 !Arguments ------------------------------------
 !scalars
@@ -1212,7 +1273,7 @@ subroutine sphereboundary(gbound,istwf_k,kg_k,mgfft,npw)
 !scalars
  integer :: dim_a,dim_b,fftalgc,g_a,gmax_a,gmax_b,gmax_b1,gmax_b2,gmin_a,gmin_b
  integer :: gmin_b1,gmin_b2,igb,ii,iloop,ipw,testm,testp,kgk
- character(len=500) :: message
+ character(len=500) :: msg
 !arrays
  integer :: gmax(2),gmin(2)
 
@@ -1374,13 +1435,13 @@ subroutine sphereboundary(gbound,istwf_k,kg_k,mgfft,npw)
          end if ! Endif take into account time-reversal symmetry
 
          if (igb+1>2*mgfft+4) then
-           write(message, '(2a, 4(a,3(i0,1x),a))' )&
+           write(msg, '(2a, 4(a,3(i0,1x),a))' )&
              "About to overwrite gbound array (FFT mesh too small) ",ch10, &
              "   iloop, igb, mgb = ",iloop,igb,2*mgfft+4, ch10, &
              "   istwfk, mgfft, npw = ",istwf_k, mgfft, npw, ch10, &
              "   minval(kg_k) = ",minval(kg_k, dim=2), ch10, &
              "   maxval(kg_k) = ",maxval(kg_k, dim=2), ch10
-           MSG_BUG(message)
+           ABI_BUG(msg)
          end if
 
          gbound(igb,ii)=gmin_b
@@ -1428,17 +1489,17 @@ end subroutine sphereboundary
 !! sphere
 !!
 !! FUNCTION
-!! Array cg is defined in sphere with npw points. Insert cg inside box
-!! of n1*n2*n3 points to define array cfft for fft box.
-!! corresponds to given element in cg.  rest of cfft is filled with 0 s.
+!! Array cg is defined in sphere with npw g-vectors.
+!! Insert cg inside FFT box of n1*n2*n3 points to define array cfft for
+!! rest of cfft is filled with 0 s.
 !!
-!! iflag=1==>insert cg into cfft.
-!! iflag=2==>insert cg into cfft, where the second and third dimension
-!! have been switched (needed for new 2002 SGoedecker FFT)
+!! iflag=1 ==> insert cg into cfft.
+!! iflag=2 ==> insert cg into cfft, where the second and third dimension
+!!      have been switched (needed for new 2002 SGoedecker FFT)
 !! iflag=-1==> extract cg from cfft.
 !! iflag=-2==> extract cg from cfft, where the second and third dimension
 !! have been switched (needed for new 2002 SGoedecker FFT)
-!!  (WARNING : iflag=-2 cannot use symmetry operations)
+!!      WARNING: iflag=-2 cannot use symmetry operations.
 !!
 !! There is also the possibility to apply a symmetry operation,
 !! as well as to make a shift in reciprocal space, or to multiply
@@ -1447,9 +1508,9 @@ end subroutine sphereboundary
 !!
 !! INPUTS
 !! cg(2,npw*ndat)= contains values for npw G vectors in basis sphere
-!! ndat=number of FFT to do in //
+!! ndat=number of wavefunctions
 !! npw=number of G vectors in basis at this k point
-!! cfft(2,n4,n5,n6) = fft box
+!! cfft(2,n4,n5,n6*ndat) = array in FFT box
 !! n1,n2,n3=physical dimension of the box (cfft)
 !! n4,n5,n6=memory dimension of cfft
 !! kg_k(3,npw)=integer coordinates of G vectors in basis sphere
@@ -1457,7 +1518,7 @@ end subroutine sphereboundary
 !! iflag=option parameter. Possible values: -1, -2, 1, 2
 !! me_g0=1 if this node has G=0.
 !! shiftg(3)=The shift in reciprocal space.
-!! symm(3,3)=symmetry operation in reciprocal space to be applied.
+!! symrec(3,3)=symmetry operation in reciprocal space to be applied (symrec)
 !! xnorm=Normalization factor.
 !!
 !! SIDE EFFECTS
@@ -1469,8 +1530,7 @@ end subroutine sphereboundary
 !! cg and cfft are assumed to be of type COMPLEX, although this routine treats
 !! them as real of twice the length to avoid nonstandard complex*16.
 !! If istwf_k differs from 1, then special storage modes must be taken
-!! into account, for symmetric wavefunctions coming from k=(0 0 0) or other
-!! special k points.
+!! into account, for symmetric wavefunctions coming from k=(0 0 0) or other special k points.
 !!
 !! TODO
 !! 1) Order arguments
@@ -1478,23 +1538,16 @@ end subroutine sphereboundary
 !! 3) If symmetries are used with or without shiftg, it might happen that the FFT mesh
 !!    is not large enough to accomodate the rotated G, in this case one should return ierr /= 0
 !!
-!! PARENTS
-!!      cg_rotate,fourwf,m_fft,m_fftcore,m_fftw3,m_io_kss,wfconv
-!!
-!! CHILDREN
-!!      xmpi_sum,xmpi_sum_master
-!!
 !! SOURCE
 
-subroutine sphere(cg,ndat,npw,cfft,n1,n2,n3,n4,n5,n6,kg_k,istwf_k,iflag,me_g0,shiftg,symm,xnorm)
-
+subroutine sphere(cg, ndat, npw, cfft, n1, n2, n3, n4, n5, n6, kg_k, istwf_k, iflag, me_g0, shiftg, symrec, xnorm)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: iflag,istwf_k,n1,n2,n3,n4,n5,n6,ndat,npw,me_g0
  real(dp),intent(in) :: xnorm
 !arrays
- integer,intent(in) :: kg_k(3,npw),shiftg(3),symm(3,3)
+ integer,intent(in) :: kg_k(3,npw),shiftg(3),symrec(3,3)
  real(dp),intent(inout) :: cfft(2,n4,n5,n6*ndat),cg(2,npw*ndat)
 
 !Local variables-------------------------------
@@ -1510,8 +1563,15 @@ subroutine sphere(cg,ndat,npw,cfft,n1,n2,n3,n4,n5,n6,kg_k,istwf_k,iflag,me_g0,sh
 
  DBG_ENTER("COLL")
 
- !In the case of special k-points, invariant under time-reversal,
- !but not Gamma, initialize the inverse coordinates. !Remember indeed that
+ if (n4 < 1) ABI_BUG('Wrong n4!')
+ if (n5 < 1) ABI_BUG('Wrong n5!')
+ if (n6 < 1) ABI_BUG('Wrong n6!')
+ if (ndat < 1) ABI_BUG('Wrong ndat!')
+ if (npw < 1) ABI_BUG('Wrong npw!')
+
+ ! In the case of special k-points, invariant under time-reversal,
+ ! but not Gamma, initialize the inverse coordinates.
+ ! Remember that:
  !
  !  u_k(G) = u_{k+G0}(G-G0); u_{-k}(G) = u_k(G)^* and therefore:
  !  u_{G0/2}(G) = u_{G0/2}(-G-G0)^*.
@@ -1560,9 +1620,9 @@ subroutine sphere(cg,ndat,npw,cfft,n1,n2,n3,n4,n5,n6,kg_k,istwf_k,iflag,me_g0,sh
 !$OMP PARALLEL DO PRIVATE(i1,i2,i3) IF (ndat>1)
        do idat=1,ndat
          do ipw=1,npw
-           i1=kg_k(1,ipw); if(i1<0)i1=i1+n1; i1=i1+1
-           i2=kg_k(2,ipw); if(i2<0)i2=i2+n2; i2=i2+1
-           i3=kg_k(3,ipw); if(i3<0)i3=i3+n3; i3=i3+1
+           i1=kg_k(1,ipw); if(i1<0) i1=i1+n1; i1=i1+1
+           i2=kg_k(2,ipw); if(i2<0) i2=i2+n2; i2=i2+1
+           i3=kg_k(3,ipw); if(i3<0) i3=i3+n3; i3=i3+1
 
            cfft(1,i1,i2,i3+n6*(idat-1))=cg(1,ipw+npw*(idat-1))
            cfft(2,i1,i2,i3+n6*(idat-1))=cg(2,ipw+npw*(idat-1))
@@ -1574,9 +1634,9 @@ subroutine sphere(cg,ndat,npw,cfft,n1,n2,n3,n4,n5,n6,kg_k,istwf_k,iflag,me_g0,sh
 !$OMP PARALLEL DO PRIVATE(i1,i2,i3) IF (ndat>1)
        do idat=1,ndat
          do ipw=1,npw
-           i1=kg_k(1,ipw); if(i1<0)i1=i1+n1; i1=i1+1
-           i2=kg_k(2,ipw); if(i2<0)i2=i2+n2; i2=i2+1
-           i3=kg_k(3,ipw); if(i3<0)i3=i3+n3; i3=i3+1
+           i1=kg_k(1,ipw); if(i1<0) i1=i1+n1; i1=i1+1
+           i2=kg_k(2,ipw); if(i2<0) i2=i2+n2; i2=i2+1
+           i3=kg_k(3,ipw); if(i3<0) i3=i3+n3; i3=i3+1
 
            cfft(1,i1,i3,i2+n6*(idat-1))=cg(1,ipw+npw*(idat-1))
            cfft(2,i1,i3,i2+n6*(idat-1))=cg(2,ipw+npw*(idat-1))
@@ -1600,9 +1660,9 @@ subroutine sphere(cg,ndat,npw,cfft,n1,n2,n3,n4,n5,n6,kg_k,istwf_k,iflag,me_g0,sh
 !$OMP PARALLEL DO PRIVATE(i1,i1inv,i2,i2inv,i3,i3inv) IF (ndat>1)
        do idat=1,ndat
          do ipw=npwmin,npw
-           i1=kg_k(1,ipw); if(i1<0)i1=i1+n1; i1=i1+1
-           i2=kg_k(2,ipw); if(i2<0)i2=i2+n2; i2=i2+1
-           i3=kg_k(3,ipw); if(i3<0)i3=i3+n3; i3=i3+1
+           i1=kg_k(1,ipw); if(i1<0) i1=i1+n1; i1=i1+1
+           i2=kg_k(2,ipw); if(i2<0) i2=i2+n2; i2=i2+1
+           i3=kg_k(3,ipw); if(i3<0) i3=i3+n3; i3=i3+1
            ! Construct the coordinates of -k-G
            i1inv=i1inver(i1) ; i2inv=i2inver(i2) ; i3inv=i3inver(i3)
 
@@ -1618,9 +1678,9 @@ subroutine sphere(cg,ndat,npw,cfft,n1,n2,n3,n4,n5,n6,kg_k,istwf_k,iflag,me_g0,sh
 !$OMP PARALLEL DO PRIVATE(i1,i1inv,i2,i2inv,i3,i3inv) IF (ndat>1)
        do idat=1,ndat
          do ipw=npwmin,npw
-           i1=kg_k(1,ipw); if(i1<0)i1=i1+n1; i1=i1+1
-           i2=kg_k(2,ipw); if(i2<0)i2=i2+n2; i2=i2+1
-           i3=kg_k(3,ipw); if(i3<0)i3=i3+n3; i3=i3+1
+           i1=kg_k(1,ipw); if(i1<0) i1=i1+n1; i1=i1+1
+           i2=kg_k(2,ipw); if(i2<0) i2=i2+n2; i2=i2+1
+           i3=kg_k(3,ipw); if(i3<0) i3=i3+n3; i3=i3+1
 
            ! Construct the coordinates of -k-G
            i1inv=i1inver(i1) ; i2inv=i2inver(i2) ; i3inv=i3inver(i3)
@@ -1636,10 +1696,11 @@ subroutine sphere(cg,ndat,npw,cfft,n1,n2,n3,n4,n5,n6,kg_k,istwf_k,iflag,me_g0,sh
    end if
 
  else if (iflag==-1 .or. iflag==-2) then
+   ! extract cg(output) from cfft(input)
 
    use_symmetry=0
    identity(:,:)=0; identity(1,1)=1 ; identity(2,2)=1 ; identity(3,3)=1
-   if(sum((symm(:,:)-identity(:,:))**2)/=0)use_symmetry=1
+   if(sum((symrec(:,:)-identity(:,:))**2)/=0)use_symmetry=1
    if(sum(shiftg(:)**2)/=0)use_symmetry=1
 
    ! Extract cg from cfft, ignoring components outside range of cg:
@@ -1650,9 +1711,9 @@ subroutine sphere(cg,ndat,npw,cfft,n1,n2,n3,n4,n5,n6,kg_k,istwf_k,iflag,me_g0,sh
 !$OMP PARALLEL DO PRIVATE(i1,i2,i3,ipwdat,i3dat) IF (ndat>1)
          do idat=1,ndat
            do ipw=1,npw
-             i1=kg_k(1,ipw); if(i1<0)i1=i1+n1; i1=i1+1
-             i2=kg_k(2,ipw); if(i2<0)i2=i2+n2; i2=i2+1
-             i3=kg_k(3,ipw); if(i3<0)i3=i3+n3; i3=i3+1
+             i1=kg_k(1,ipw); if(i1<0) i1=i1+n1; i1=i1+1
+             i2=kg_k(2,ipw); if(i2<0) i2=i2+n2; i2=i2+1
+             i3=kg_k(3,ipw); if(i3<0) i3=i3+n3; i3=i3+1
              ipwdat = ipw + (idat-1) * npw
              i3dat = i3 + (idat-1) * n6
 
@@ -1661,12 +1722,13 @@ subroutine sphere(cg,ndat,npw,cfft,n1,n2,n3,n4,n5,n6,kg_k,istwf_k,iflag,me_g0,sh
            end do
          end do
        else
+         ! iflag==-2
 !$OMP PARALLEL DO PRIVATE(i1,i2,i3,ipwdat,i2dat) IF (ndat>1)
          do idat=1,ndat
            do ipw=1,npw
-             i1=kg_k(1,ipw); if(i1<0)i1=i1+n1; i1=i1+1
-             i2=kg_k(2,ipw); if(i2<0)i2=i2+n2; i2=i2+1
-             i3=kg_k(3,ipw); if(i3<0)i3=i3+n3; i3=i3+1
+             i1=kg_k(1,ipw); if(i1<0) i1=i1+n1; i1=i1+1
+             i2=kg_k(2,ipw); if(i2<0) i2=i2+n2; i2=i2+1
+             i3=kg_k(3,ipw); if(i3<0) i3=i3+n3; i3=i3+1
 
              ipwdat = ipw + (idat-1) * npw
              i2dat = i2 + (idat-1) * n6
@@ -1677,22 +1739,26 @@ subroutine sphere(cg,ndat,npw,cfft,n1,n2,n3,n4,n5,n6,kg_k,istwf_k,iflag,me_g0,sh
          end do
        end if
      else
+       ! use_symmetry == 1
 !$OMP PARALLEL DO PRIVATE(i1,i2,i3,j1,j2,j3,l1,l2,l3,ipwdat,i3dat) IF (ndat>1)
        do idat=1,ndat
          do ipw=1,npw
            l1=kg_k(1,ipw)+shiftg(1)
            l2=kg_k(2,ipw)+shiftg(2)
            l3=kg_k(3,ipw)+shiftg(3)
-           j1=symm(1,1)*l1+symm(1,2)*l2+symm(1,3)*l3
-           j2=symm(2,1)*l1+symm(2,2)*l2+symm(2,3)*l3
-           j3=symm(3,1)*l1+symm(3,2)*l2+symm(3,3)*l3
-           if(j1<0)j1=j1+n1; i1=j1+1
-           if(j2<0)j2=j2+n2; i2=j2+1
-           if(j3<0)j3=j3+n3; i3=j3+1
+           j1=symrec(1,1)*l1+symrec(1,2)*l2+symrec(1,3)*l3
+           j2=symrec(2,1)*l1+symrec(2,2)*l2+symrec(2,3)*l3
+           j3=symrec(3,1)*l1+symrec(3,2)*l2+symrec(3,3)*l3
+           if(j1<0) j1=j1+n1; i1=j1+1
+           if(j2<0) j2=j2+n2; i2=j2+1
+           if(j3<0) j3=j3+n3; i3=j3+1
+           ! [i1, i2, i3] are the indices of S(g + g0) in the FFT box.
+           ! while ipw is the index of g in kg_k
 
            ipwdat = ipw + (idat-1) * npw
            i3dat = i3 + (idat-1)*n6
 
+           ! c(g) = cfft(S(g + shiftg))
            cg(1,ipwdat)=cfft(1,i1,i2,i3dat)*xnorm
            cg(2,ipwdat)=cfft(2,i1,i2,i3dat)*xnorm
          end do
@@ -1720,9 +1786,9 @@ subroutine sphere(cg,ndat,npw,cfft,n1,n2,n3,n4,n5,n6,kg_k,istwf_k,iflag,me_g0,sh
 !$OMP PARALLEL DO PRIVATE(i1,i1inv,i2,i2inv,i3,i3inv,ipwdat,i3dat,i3invdat) IF (ndat>1)
          do idat=1,ndat
            do ipw=npwmin,npw
-             i1=kg_k(1,ipw); if(i1<0)i1=i1+n1; i1=i1+1
-             i2=kg_k(2,ipw); if(i2<0)i2=i2+n2; i2=i2+1
-             i3=kg_k(3,ipw); if(i3<0)i3=i3+n3; i3=i3+1
+             i1=kg_k(1,ipw); if(i1<0) i1=i1+n1; i1=i1+1
+             i2=kg_k(2,ipw); if(i2<0) i2=i2+n2; i2=i2+1
+             i3=kg_k(3,ipw); if(i3<0) i3=i3+n3; i3=i3+1
 
              ! Construct the coordinates of -k-G
              i1inv=i1inver(i1); i2inv=i2inver(i2); i3inv=i3inver(i3)
@@ -1741,9 +1807,9 @@ subroutine sphere(cg,ndat,npw,cfft,n1,n2,n3,n4,n5,n6,kg_k,istwf_k,iflag,me_g0,sh
 !$OMP PARALLEL DO PRIVATE(i1,i1inv,i2,i2inv,i3,i3inv,ipwdat,i2dat,i2invdat) IF (ndat>1)
          do idat=1,ndat
            do ipw=npwmin,npw
-             i1=kg_k(1,ipw); if(i1<0)i1=i1+n1; i1=i1+1
-             i2=kg_k(2,ipw); if(i2<0)i2=i2+n2; i2=i2+1
-             i3=kg_k(3,ipw); if(i3<0)i3=i3+n3; i3=i3+1
+             i1=kg_k(1,ipw); if(i1<0) i1=i1+n1; i1=i1+1
+             i2=kg_k(2,ipw); if(i2<0) i2=i2+n2; i2=i2+1
+             i3=kg_k(3,ipw); if(i3<0) i3=i3+n3; i3=i3+1
 
              ! Construct the coordinates of -k-G
              i1inv=i1inver(i1) ; i2inv=i2inver(i2) ; i3inv=i3inver(i3)
@@ -1759,7 +1825,8 @@ subroutine sphere(cg,ndat,npw,cfft,n1,n2,n3,n4,n5,n6,kg_k,istwf_k,iflag,me_g0,sh
          end do
        end if
 
-     else ! Use symmetry
+     else
+       ! Use symmetry
        id1=n1/2+2
        id2=n2/2+2
        id3=n3/2+2
@@ -1768,18 +1835,18 @@ subroutine sphere(cg,ndat,npw,cfft,n1,n2,n3,n4,n5,n6,kg_k,istwf_k,iflag,me_g0,sh
        do idat=1,ndat
          do ipw=npwmin,npw
 
-           i1=kg_k(1,ipw); if(i1<0)i1=i1+n1; i1=i1+1
-           i2=kg_k(2,ipw); if(i2<0)i2=i2+n2; i2=i2+1
-           i3=kg_k(3,ipw); if(i3<0)i3=i3+n3; i3=i3+1
+           i1=kg_k(1,ipw); if(i1<0) i1=i1+n1; i1=i1+1
+           i2=kg_k(2,ipw); if(i2<0) i2=i2+n2; i2=i2+1
+           i3=kg_k(3,ipw); if(i3<0) i3=i3+n3; i3=i3+1
 
            i1inv=i1inver(i1) ; i2inv=i2inver(i2) ; i3inv=i3inver(i3)
 
            l1=kg_k(1,ipw)+shiftg(1)
            l2=kg_k(2,ipw)+shiftg(2)
            l3=kg_k(3,ipw)+shiftg(3)
-           j1=symm(1,1)*l1+symm(1,2)*l2+symm(1,3)*l3
-           j2=symm(2,1)*l1+symm(2,2)*l2+symm(2,3)*l3
-           j3=symm(3,1)*l1+symm(3,2)*l2+symm(3,3)*l3
+           j1=symrec(1,1)*l1+symrec(1,2)*l2+symrec(1,3)*l3
+           j2=symrec(2,1)*l1+symrec(2,2)*l2+symrec(2,3)*l3
+           j3=symrec(3,1)*l1+symrec(3,2)*l2+symrec(3,3)*l3
            if(j1<0)j1=j1+n1 ; i1=j1+1
            if(j2<0)j2=j2+n2 ; i2=j2+1
            if(j3<0)j3=j3+n3 ; i3=j3+1
@@ -1788,9 +1855,9 @@ subroutine sphere(cg,ndat,npw,cfft,n1,n2,n3,n4,n5,n6,kg_k,istwf_k,iflag,me_g0,sh
            l1=i1inv-(i1inv/id1)*n1-1+shiftg(1)
            l2=i2inv-(i2inv/id2)*n2-1+shiftg(2)
            l3=i3inv-(i3inv/id3)*n3-1+shiftg(3)
-           j1=symm(1,1)*l1+symm(1,2)*l2+symm(1,3)*l3
-           j2=symm(2,1)*l1+symm(2,2)*l2+symm(2,3)*l3
-           j3=symm(3,1)*l1+symm(3,2)*l2+symm(3,3)*l3
+           j1=symrec(1,1)*l1+symrec(1,2)*l2+symrec(1,3)*l3
+           j2=symrec(2,1)*l1+symrec(2,2)*l2+symrec(2,3)*l3
+           j3=symrec(3,1)*l1+symrec(3,2)*l2+symrec(3,3)*l3
            if(j1<0)j1=j1+n1 ; i1inv=j1+1
            if(j2<0)j2=j2+n2 ; i2inv=j2+1
            if(j3<0)j3=j3+n3 ; i3inv=j3+1
@@ -1810,7 +1877,7 @@ subroutine sphere(cg,ndat,npw,cfft,n1,n2,n3,n4,n5,n6,kg_k,istwf_k,iflag,me_g0,sh
 
  else
    write(msg,'(a,i0,a)')'  iflag=',iflag,' not acceptable.'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
  DBG_EXIT("COLL")
@@ -1873,16 +1940,9 @@ end subroutine sphere
 !! TODO
 !! Order arguments
 !!
-!! PARENTS
-!!      fourwf
-!!
-!! CHILDREN
-!!      xmpi_sum,xmpi_sum_master
-!!
 !! SOURCE
 
 subroutine sphere_fft(cg,ndat,npw,cfft,n1,n2,n3,n4,n5,kg_k,tab_fftwf2_local,nd2proc)
-
 
 !Arguments ------------------------------------
 !scalars
@@ -1973,12 +2033,6 @@ end subroutine sphere_fft
 !!   sphere_fft1 is similar to sphere_fft, the only difference being that ndat > 1 is not supported.
 !!   Why? Should merge the two APIs.
 !!
-!! PARENTS
-!!      m_fft
-!!
-!! CHILDREN
-!!      xmpi_sum,xmpi_sum_master
-!!
 !! SOURCE
 
 subroutine sphere_fft1(cg,ndat,npw,cfft,n1,n2,n3,n4,n5,n6,kg_k,tab_fftwf2_local)
@@ -2041,16 +2095,9 @@ end subroutine sphere_fft1
 !! OUTPUTS
 !! to_cg(2,to_npw*ndat)= Output u(g) defined on the list of vectors to_kg_k with time-reversal mode to_istwfk
 !!
-!! PARENTS
-!!      m_fft
-!!
-!! CHILDREN
-!!      xmpi_sum,xmpi_sum_master
-!!
 !! SOURCE
 
 subroutine change_istwfk(from_npw,from_kg,from_istwfk,to_npw,to_kg,to_istwfk,n1,n2,n3,ndat,from_cg,to_cg)
-
 
 !Arguments ------------------------------------
 !scalars
@@ -2100,12 +2147,9 @@ end subroutine change_istwfk
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 pure subroutine switch(n1dfft,n2,lot,n1,lzt,zt,zw)
-
 
 !Arguments ------------------------------------
  integer,intent(in) :: n1dfft,n2,lot,n1,lzt
@@ -2153,12 +2197,9 @@ end subroutine switch
 !! OUTPUT
 !!  zw(2,lot,n2)=Cache working array
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 pure subroutine switch_cent(n1dfft,max2,m2,n2,lot,n1,lzt,zt,zw)
-
 
 !Arguments ------------------------------------
  integer,intent(in) :: n1dfft,max2,m2,n2,lot,n1,lzt
@@ -2227,12 +2268,9 @@ end subroutine switch_cent
 !! OUTPUT
 !!  zw(2,lot,n2)
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 pure subroutine switchreal(includelast,n1dfft,n2,n2eff,lot,n1zt,lzt,zt,zw)
-
 
 !Arguments ------------------------------------
  integer,intent(in) :: includelast,n1dfft,n2,n2eff,lot,n1zt,lzt
@@ -2314,12 +2352,9 @@ end subroutine switchreal
 !! OUTPUT
 !!  zw(2,lot,n2)
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 pure subroutine switchreal_cent(includelast,n1dfft,max2,n2,lot,n1zt,lzt,zt,zw)
-
 
 !Arguments ------------------------------------
  integer,intent(in) :: includelast,n1dfft,max2,n2,lot,n1zt,lzt
@@ -2415,12 +2450,9 @@ end subroutine switchreal_cent
 !! OUTPTU
 !! zmpi2(2,md1,md2proc,nnd3)
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 pure subroutine scramble(i1,j2,lot,n1dfft,md1,n3,md2proc,nnd3,zw,zmpi2)
-
 
 !Arguments ------------------------------------
  integer,intent(in) :: i1,j2,lot,n1dfft,md1,n3,md2proc,nnd3
@@ -2428,7 +2460,6 @@ pure subroutine scramble(i1,j2,lot,n1dfft,md1,n3,md2proc,nnd3,zw,zmpi2)
  real(dp),intent(inout) :: zmpi2(2,md1,md2proc,nnd3)
 
 !Local variables-------------------------------
-!scalars
  integer :: i3,i
 
 ! *************************************************************************
@@ -2463,12 +2494,9 @@ end subroutine scramble
 !! OUTPUT
 !!  zw(2,lot,n3)=Cache work array with the z-lines.
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 pure subroutine fill(nd1,nd3,lot,n1dfft,n3,zf,zw)
-
 
 !Arguments ------------------------------------
  integer,intent(in) :: nd1,nd3,lot,n1dfft,n3
@@ -2514,12 +2542,9 @@ end subroutine fill
 !!   zw(2,lot,n3)= Filled cache work array.
 !!     zw(:,1:n1dfft,n3) contains the lines to be transformed along.
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 pure subroutine fill_cent(md1,md3,lot,n1dfft,max3,m3,n3,zf,zw)
-
 
 !Arguments ------------------------------------
  integer,intent(in) :: md1,md3,lot,n1dfft,max3,m3,n3
@@ -2578,12 +2603,9 @@ end subroutine fill_cent
 !! OUTPUT
 !!  zf(2,nd1,nd3)= zf(:,1:n1dfft,:1:n3) is filled with the results stored in zw
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 pure subroutine unfill(nd1,nd3,lot,n1dfft,n3,zw,zf)
-
 
 !Arguments ------------------------------------
  integer,intent(in) :: nd1,nd3,lot,n1dfft,n3
@@ -2626,12 +2648,9 @@ end subroutine unfill
 !! OUTPUT
 !!  zf(2,md1,md3)= zf(:,1:n1dfft,1:m3) is filled with the non-zero components.
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 pure subroutine unfill_cent(md1,md3,lot,n1dfft,max3,m3,n3,zw,zf)
-
 
 !Arguments ------------------------------------
  integer,intent(in) :: md1,md3,lot,n1dfft,max3,m3,n3
@@ -2673,16 +2692,9 @@ end subroutine unfill_cent
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_fftw3,m_sg2002
-!!
-!! CHILDREN
-!!      xmpi_sum,xmpi_sum_master
-!!
 !! SOURCE
 
 pure subroutine unmpiswitch(j3,n1dfft,Jp2st,J2st,lot,n1,nd2proc,nd3proc,nproc,ioption,zw,zmpi1)
-
 
 !Arguments ------------------------------------
  integer,intent(in) :: j3,n1dfft,lot,n1,nd2proc,nd3proc,nproc,ioption
@@ -2752,16 +2764,9 @@ end subroutine unmpiswitch
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_fftw3,m_sg2002
-!!
-!! CHILDREN
-!!      xmpi_sum,xmpi_sum_master
-!!
 !! SOURCE
 
 pure subroutine unmpiswitch_cent(j3,n1dfft,Jp2stf,J2stf,lot,max1,md1,m1,n1,md2proc,nd3proc,nproc,ioption,zw,zmpi1)
-
 
 !Arguments ------------------------------------
  integer,intent(in) :: j3,n1dfft,lot,max1,md1,m1,n1,md2proc,nd3proc,nproc,ioption
@@ -2856,12 +2861,9 @@ end subroutine unmpiswitch_cent
 !! OUTPUT
 !!  zw(2,lot,n3)= cache work array
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 pure subroutine unscramble(i1,j2,lot,n1dfft,md1,n3,md2proc,nnd3,zmpi2,zw)
-
 
 !Arguments ------------------------------------
  integer,intent(in) :: i1,j2,lot,n1dfft,md1,n3,md2proc,nnd3
@@ -2903,12 +2905,9 @@ end subroutine unscramble
 !! OUTPUT
 !!  zt(2,lzt,n1)
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 pure subroutine unswitch(n1dfft,n2,lot,n1,lzt,zw,zt)
-
 
 !Arguments ------------------------------------
  integer,intent(in) :: n1dfft,n2,lot,n1,lzt
@@ -2950,12 +2949,9 @@ end subroutine unswitch
 !! OUTPUT
 !!  zt(2,lzt,n1)
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 pure subroutine unswitch_cent(n1dfft,max2,m2,n2,lot,n1,lzt,zw,zt)
-
 
 !Arguments ------------------------------------
  integer,intent(in) :: n1dfft,max2,m2,n2,lot,n1,lzt
@@ -3007,12 +3003,9 @@ end subroutine unswitch_cent
 !! OUTPUT
 !!  zt(2,lzt,n1)
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 pure subroutine unswitchreal(n1dfft,n2,n2eff,lot,n1zt,lzt,zw,zt)
-
 
 !Arguments ------------------------------------
  integer,intent(in) :: n1dfft,n2,n2eff,lot,n1zt,lzt
@@ -3063,12 +3056,9 @@ end subroutine unswitchreal
 !! OUTPUT
 !!  zt(2,lzt,n1)
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 pure subroutine unswitchreal_cent(n1dfft,max2,n2,lot,n1zt,lzt,zw,zt)
-
 
 !Arguments ------------------------------------
  integer,intent(in) :: n1dfft,max2,n2,lot,n1zt,lzt
@@ -3126,16 +3116,9 @@ end subroutine unswitchreal_cent
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_fftw3,m_sg2002
-!!
-!! CHILDREN
-!!      xmpi_sum,xmpi_sum_master
-!!
 !! SOURCE
 
 pure subroutine mpiswitch(j3,n1dfft,Jp2st,J2st,lot,n1,nd2proc,nd3proc,nproc,ioption,zmpi1,zw)
-
 
 !Arguments ------------------------------------
  integer,intent(in) :: j3,n1dfft,lot,n1,nd2proc,nd3proc,nproc,ioption
@@ -3216,18 +3199,11 @@ end subroutine mpiswitch
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_fftw3,m_sg2002
-!!
-!! CHILDREN
-!!      xmpi_sum,xmpi_sum_master
-!!
 !! SOURCE
 
 
 pure subroutine mpiswitch_cent(j3,n1dfft,Jp2stb,J2stb,lot,max1,md1,m1,n1,md2proc,&
-&  nd3proc,nproc,ioption,zmpi1,zw,max2,m2,n2)
-
+                               nd3proc,nproc,ioption,zmpi1,zw,max2,m2,n2)
 
 !Arguments ------------------------------------
  integer,intent(in) :: j3,n1dfft,lot,max1,md1,m1,n1,md2proc,nd3proc,nproc,ioption
@@ -3253,7 +3229,7 @@ pure subroutine mpiswitch_cent(j3,n1dfft,Jp2stb,J2stb,lot,max1,md1,m1,n1,md2proc
        if (mfft.gt.n1dfft) then
          Jp2stb=Jp2
          J2stb=J2
-         !MSG_WARNING("Returning from mpiswithc_cent")
+         !ABI_WARNING("Returning from mpiswithc_cent")
          return
        end if
 
@@ -3288,7 +3264,7 @@ pure subroutine mpiswitch_cent(j3,n1dfft,Jp2stb,J2stb,lot,max1,md1,m1,n1,md2proc
        if (mfft.gt.n1dfft) then
          Jp2stb=Jp2
          J2stb=J2
-         !MSG_WARNING("Returning from mpiswithc_cent")
+         !ABI_WARNING("Returning from mpiswithc_cent")
          return
        end if
 
@@ -3339,12 +3315,9 @@ end subroutine mpiswitch_cent
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 pure subroutine mpifft_fg2dbox(nfft,ndat,fofg,n1,n2,n3,n4,nd2proc,n6,fftn2_distrib,ffti2_local,me_fft,workf)
-
 
 !Arguments ------------------------------------
 !scalars
@@ -3390,12 +3363,9 @@ end subroutine mpifft_fg2dbox
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 pure subroutine mpifft_fg2dbox_dpc(nfft,ndat,fofg,n1,n2,n3,n4,nd2proc,n6,fftn2_distrib,ffti2_local,me_fft,workf)
-
 
 !Arguments ------------------------------------
 !scalars
@@ -3440,12 +3410,9 @@ end subroutine mpifft_fg2dbox_dpc
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 pure subroutine mpifft_dbox2fg(n1,n2,n3,n4,nd2proc,n6,ndat,fftn2_distrib,ffti2_local,me_fft,workf,nfft,fofg)
-
 
 !Arguments ------------------------------------
 !scalars
@@ -3495,12 +3462,9 @@ end subroutine mpifft_dbox2fg
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 pure subroutine mpifft_dbox2fg_dpc(n1,n2,n3,n4,nd2proc,n6,ndat,fftn2_distrib,ffti2_local,me_fft,workf,nfft,fofg)
-
 
 !Arguments ------------------------------------
 !scalars
@@ -3550,12 +3514,9 @@ end subroutine mpifft_dbox2fg_dpc
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 pure subroutine mpifft_dbox2fr(n1,n2,n3,n4,n5,nd3proc,ndat,fftn3_distrib,ffti3_local,me_fft,workr,cplex,nfft,fofr)
-
 
 !Arguments ------------------------------------
 !scalars
@@ -3599,7 +3560,7 @@ pure subroutine mpifft_dbox2fr(n1,n2,n3,n4,n5,nd3proc,ndat,fftn3_distrib,ffti3_l
            frbase=2*n1*(i2-1+n2*(i3_local-1)) + (idat - 1) * cplex * nfft
            !if (frbase > cplex*nfft*ndat - 2*n1) then
            !   write(std_out,*)i2,i3_local,frbase,cplex*nfft*ndat
-           !   MSG_ERROR("frbase")
+           !   ABI_ERROR("frbase")
            !end if
            do i1=1,n1
              fofr(2*i1-1+frbase)=workr(1,i1,i2,i3_ldat)
@@ -3611,7 +3572,7 @@ pure subroutine mpifft_dbox2fr(n1,n2,n3,n4,n5,nd3proc,ndat,fftn3_distrib,ffti3_l
    end do
 
  case default
-   !MSG_BUG("Wrong cplex")
+   !ABI_BUG("Wrong cplex")
    fofr = huge(one)
  end select
 
@@ -3630,12 +3591,9 @@ end subroutine mpifft_dbox2fr
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 pure subroutine mpifft_dbox2fr_dpc(n1,n2,n3,n4,n5,nd3proc,ndat,fftn3_distrib,ffti3_local,me_fft,workr,cplex,nfft,fofr)
-
 
 !Arguments ------------------------------------
 !scalars
@@ -3687,7 +3645,7 @@ pure subroutine mpifft_dbox2fr_dpc(n1,n2,n3,n4,n5,nd3proc,ndat,fftn3_distrib,fft
    end do
 
  case default
-   !MSG_BUG("Wrong cplex")
+   !ABI_BUG("Wrong cplex")
    fofr = huge(one)
  end select
 
@@ -3706,12 +3664,9 @@ end subroutine mpifft_dbox2fr_dpc
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 pure subroutine mpifft_fr2dbox(cplex,nfft,ndat,fofr,n1,n2,n3,n4,n5,nd3proc,fftn3_distrib,ffti3_local,me_fft,workr)
-
 
 !Arguments ------------------------------------
 !scalars
@@ -3764,7 +3719,7 @@ pure subroutine mpifft_fr2dbox(cplex,nfft,ndat,fofr,n1,n2,n3,n4,n5,nd3proc,fftn3
    end do
 
  case default
-   !MSG_BUG("Wrong cplex")
+   !ABI_BUG("Wrong cplex")
    workr = huge(one)
  end select
 
@@ -3783,12 +3738,9 @@ end subroutine mpifft_fr2dbox
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 pure subroutine mpifft_fr2dbox_dpc(cplex,nfft,ndat,fofr,n1,n2,n3,n4,n5,nd3proc,fftn3_distrib,ffti3_local,me_fft,workr)
-
 
 !Arguments ------------------------------------
 !scalars
@@ -3839,7 +3791,7 @@ pure subroutine mpifft_fr2dbox_dpc(cplex,nfft,ndat,fofr,n1,n2,n3,n4,n5,nd3proc,f
    end do
 
  case default
-   !MSG_BUG("Wrong cplex")
+   !ABI_BUG("Wrong cplex")
    workr = huge(one)
  end select
 
@@ -3869,16 +3821,9 @@ end subroutine mpifft_fr2dbox_dpc
 !!   in a representation that is directly usable by sg_fftrisc.f
 !! ngb=number of FFTs along z
 !!
-!! PARENTS
-!!      m_sgfft
-!!
-!! CHILDREN
-!!      xmpi_sum,xmpi_sum_master
-!!
 !! SOURCE
 
 subroutine indfftrisc(gbound,indpw_k,kg_k,mgfft,ngb,ngfft,npw_k)
-
 
 !Arguments ------------------------------------
 !scalars
@@ -3899,7 +3844,7 @@ subroutine indfftrisc(gbound,indpw_k,kg_k,mgfft,ngb,ngfft,npw_k)
  n1=ngfft(1) ; n2=ngfft(2) ; n3=ngfft(3)
 
 !First, generate a 2d index for each column of data
- ABI_ALLOCATE(index2d,(n1,n2))
+ ABI_MALLOC(index2d,(n1,n2))
  index2d(:,:)=0
  index=1
  igb=3
@@ -3961,7 +3906,7 @@ subroutine indfftrisc(gbound,indpw_k,kg_k,mgfft,ngb,ngfft,npw_k)
    end do
  end do
 
- ABI_DEALLOCATE(index2d)
+ ABI_FREE(index2d)
 
 end subroutine indfftrisc
 !!***
@@ -4001,13 +3946,6 @@ end subroutine indfftrisc
 !! NOTES
 !!  Must take into account the time-reversal symmetry when istwf_k is not 1.
 !!
-!! PARENTS
-!!      getmpw,initberry,initorbmag,kpgio,ks_ddiago,m_fft,m_fftcore,m_gsphere
-!!      m_hamiltonian,m_wfd,mkpwind_k,wfconv
-!!
-!! CHILDREN
-!!      xmpi_sum,xmpi_sum_master
-!!
 !! SOURCE
 
 
@@ -4030,7 +3968,7 @@ subroutine kpgsph(ecut,exchn2n3d,gmet,ikg,ikpt,istwf_k,kg,kpt,mkmem,mpi_enreg,mp
  integer, save :: alloc_size=0
  real(dp) :: gap_pw,gmet11,gmet_trace,gmin,gs_fact,gs_part,gscut,v1,v2,v3,xx
  logical :: ipw_ok
- character(len=500) :: message
+ character(len=500) :: msg
 !arrays
  integer :: ngrid(3),nmax(3),nmin(3),n2,ierr
  integer,allocatable :: array_ipw(:),ig1arr(:),ig2arr(:)
@@ -4045,28 +3983,28 @@ subroutine kpgsph(ecut,exchn2n3d,gmet,ikg,ikpt,istwf_k,kg,kpt,mkmem,mpi_enreg,mp
 
  call timab(23,1,tsec)
  if(istwf_k<1 .or. istwf_k>9)then
-   write(message,'(3a,i0,a)' )&
-&   'The variable istwf_k must be between 1 and 9, while',ch10,&
-&   'the argument of the routine istwf_k =',istwf_k,'.'
-   MSG_BUG(message)
+   write(msg,'(3a,i0,a)' )&
+    'The variable istwf_k must be between 1 and 9, while',ch10,&
+    'the argument of the routine istwf_k =',istwf_k,'.'
+   ABI_BUG(msg)
  end if
 
  if(ikg+mpw>mkmem*mpw)then
-   write(message,'(5a,i0,a,i0,a,i0,4a)')&
-&   'The variables ikg, mkmem, and mpw  must satisfy ikg<=(mkmem-1)*mpw,',ch10,&
-&   'while the arguments of the routine are',ch10,&
-&   'ikg =',ikg,', mkmem =',mkmem,', mpw =',mpw,ch10,&
-&   'Probable cause: Known error in invars1 for parallel spin-polarized case.',ch10,&
-&   'Temporary solution: Change the number of parallel processes.'
-   MSG_BUG(message)
+   write(msg,'(5a,i0,a,i0,a,i0,4a)')&
+    'The variables ikg, mkmem, and mpw  must satisfy ikg<=(mkmem-1)*mpw,',ch10,&
+    'while the arguments of the routine are',ch10,&
+    'ikg =',ikg,', mkmem =',mkmem,', mpw =',mpw,ch10,&
+    'Probable cause: Known error in invars1 for parallel spin-polarized case.',ch10,&
+    'Temporary solution: Change the number of parallel processes.'
+   ABI_BUG(msg)
  end if
 
  np_band=0
  if (mpw>0) then
    np_band=1; if(mpi_enreg%paral_kgb==1) np_band=max(1,mpi_enreg%nproc_band)
    alloc_size=max(alloc_size,(mpw+1)*np_band)
-   ABI_ALLOCATE(kg_small,(3, alloc_size))
-   ABI_ALLOCATE(kg_ind,(alloc_size))
+   ABI_MALLOC(kg_small,(3, alloc_size))
+   ABI_MALLOC(kg_ind,(alloc_size))
    kg_ind(:)=0
  end if
 
@@ -4090,7 +4028,7 @@ subroutine kpgsph(ecut,exchn2n3d,gmet,ikg,ikpt,istwf_k,kg,kpt,mkmem,mpi_enreg,mp
  do ii=1,3
    xx=gmet(ii,ii)*minor(ii)-numer(ii)
    if(xx<tol10*gmet_trace**3 .or. minor(ii)<tol10*gmet_trace**2)then
-     MSG_BUG('The metric tensor seem incorrect')
+     ABI_BUG('The metric tensor seem incorrect')
    end if
    kmax(ii)=sqrt(gscut*minor(ii)/xx)
    nmax(ii)=floor(kmax(ii)-kpt(ii)+tol10)
@@ -4106,12 +4044,12 @@ subroutine kpgsph(ecut,exchn2n3d,gmet,ikg,ikpt,istwf_k,kg,kpt,mkmem,mpi_enreg,mp
 !0 1 2 3 ... nmax nmin ... -1
 !If the mode is not standard, then some part of the FFT grid must be selected
 !
- ABI_ALLOCATE(ig1arr,(ngrid(1)))
- ABI_ALLOCATE(ig2arr,(ngrid(2)))
- ABI_ALLOCATE(ig3arr,(ngrid(3)))
- ABI_ALLOCATE(kg1arr,(ngrid(1)))
- ABI_ALLOCATE(kg2arr,(ngrid(2)))
- ABI_ALLOCATE(kg3arr,(ngrid(3)))
+ ABI_MALLOC(ig1arr,(ngrid(1)))
+ ABI_MALLOC(ig2arr,(ngrid(2)))
+ ABI_MALLOC(ig3arr,(ngrid(3)))
+ ABI_MALLOC(kg1arr,(ngrid(1)))
+ ABI_MALLOC(kg2arr,(ngrid(2)))
+ ABI_MALLOC(kg3arr,(ngrid(3)))
 
  do ig1p=1,ngrid(1)
    ig1arr(ig1p)=ig1p-1
@@ -4123,7 +4061,7 @@ subroutine kpgsph(ecut,exchn2n3d,gmet,ikg,ikpt,istwf_k,kg,kpt,mkmem,mpi_enreg,mp
 !---------------------------------------------------------------------
  ig2pmax=ngrid(2)
  if(istwf_k>=2 .and. exchn2n3d==0) ig2pmax=nmax(2)+1
- ABI_ALLOCATE(array_ipw,(-ig2pmax:ig2pmax))
+ ABI_MALLOC(array_ipw,(-ig2pmax:ig2pmax))
  array_ipw(:)=0
  do ig2p=1,ig2pmax
    ig2arr(ig2p)=ig2p-1
@@ -4256,48 +4194,44 @@ subroutine kpgsph(ecut,exchn2n3d,gmet,ikg,ikpt,istwf_k,kg,kpt,mkmem,mpi_enreg,mp
  end if
  alloc_size = max(alloc_size,npw)
 
- ABI_DEALLOCATE(ig1arr)
- ABI_DEALLOCATE(ig2arr)
- ABI_DEALLOCATE(ig3arr)
- ABI_DEALLOCATE(kg1arr)
- ABI_DEALLOCATE(kg2arr)
- ABI_DEALLOCATE(kg3arr)
+ ABI_FREE(ig1arr)
+ ABI_FREE(ig2arr)
+ ABI_FREE(ig3arr)
+ ABI_FREE(kg1arr)
+ ABI_FREE(kg2arr)
+ ABI_FREE(kg3arr)
 
 !BandFFT: plane-wave load balancing
- if (mpi_enreg%paral_kgb==1.and.mpi_enreg%nproc_fft>1.and. &
-&    mpi_enreg%pw_unbal_thresh>zero.and. &
-&    istwf_k==1) then
+ if (mpi_enreg%paral_kgb==1.and.mpi_enreg%nproc_fft>1.and. mpi_enreg%pw_unbal_thresh>zero.and. istwf_k==1) then
 !  Check for reequilibration
    np_fft=max(1,mpi_enreg%nproc_fft)
-   ABI_ALLOCATE(npw_gather,(np_fft)) ! Count pw before balancing
+   ABI_MALLOC(npw_gather,(np_fft)) ! Count pw before balancing
    call xmpi_allgather(npw,npw_gather,mpi_enreg%comm_fft,ierr)
    gap_pw = 100._dp*(maxval(npw_gather(:))-minval(npw_gather))/(1.*sum(npw_gather(:))/np_fft)
-   write(message,'(a,f5.2)' ) ' Relative gap for number of plane waves between process (%): ',gap_pw
-   call wrtout(std_out,message,'COLL')
+   write(msg,'(a,f5.2)' ) ' Relative gap for number of plane waves between process (%): ',gap_pw
+   call wrtout(std_out,msg)
    if(gap_pw > mpi_enreg%pw_unbal_thresh) then ! Effective reequilibration
-     write(message,'(a,f5.2,a,i4,a,f5.2,a)') &
-&        'Plane-wave unbalancing (',gap_pw,'%) for kpt ',ikpt,' is higher than threshold (',&
-&        mpi_enreg%pw_unbal_thresh,'%); a plane-wave balancing procedure is activated!'
-     call wrtout(std_out,message,'COLL')
+     write(msg,'(a,f5.2,a,i4,a,f5.2,a)') &
+        'Plane-wave unbalancing (',gap_pw,'%) for kpt ',ikpt,' is higher than threshold (',&
+        mpi_enreg%pw_unbal_thresh,'%); a plane-wave balancing procedure is activated!'
+     call wrtout(std_out,msg)
      !Get optimal number
      npw_split=sum(npw_gather(:))
      npw=npw_split/np_fft
      npw_remain=modulo(npw_split,np_fft)
      if(mpi_enreg%me_fft < npw_remain) npw=npw+1
      ig=npw
-#ifdef DEBUG_MODE
-     write(message,*) 'New npw_fft = ', npw
-     call wrtout(std_out,message,'COLL')
-#endif
+     !write(msg,*) 'New npw_fft = ', npw
+     !call wrtout(std_out,msg)
      alloc_size = max(alloc_size,npw)
      if(mpw>0 ) then  !Step for requilibration between fft process
-       ABI_ALLOCATE(npw_disp,(np_fft))
+       ABI_MALLOC(npw_disp,(np_fft))
        npw_disp=0
        do i1=2,np_fft
          npw_disp(i1) = npw_disp(i1-1) + npw_gather(i1-1)
        end do
-       ABI_ALLOCATE(kg_ind_gather,(npw_split))
-       ABI_ALLOCATE(kg_small_gather,(3,npw_split))
+       ABI_MALLOC(kg_ind_gather,(npw_split))
+       ABI_MALLOC(kg_small_gather,(3,npw_split))
        call xmpi_allgatherv(kg_ind, npw_gather(mpi_enreg%me_fft+1) , &
 &            kg_ind_gather,npw_gather,npw_disp,mpi_enreg%comm_fft,ierr)
        call xmpi_allgatherv(kg_small,3*npw_gather(mpi_enreg%me_fft+1), &
@@ -4306,14 +4240,14 @@ subroutine kpgsph(ecut,exchn2n3d,gmet,ikg,ikpt,istwf_k,kg,kpt,mkmem,mpi_enreg,mp
        kg_small(:,1:npw)=kg_small_gather(:,npw_before+1:npw_before+npw)
        kg_ind(  1:npw)=kg_ind_gather(npw_before+1:npw_before+npw)
 #ifdef DEBUG_MODE
-       call wrtout(std_out,"keeping values done",'COLL')
+       call wrtout(std_out,"keeping values done")
 #endif
-       ABI_DEALLOCATE(npw_disp)
-       ABI_DEALLOCATE(kg_ind_gather)
-       ABI_DEALLOCATE(kg_small_gather)
+       ABI_FREE(npw_disp)
+       ABI_FREE(kg_ind_gather)
+       ABI_FREE(kg_small_gather)
      end if
    end if!End of reequilibration step for paral KGB
-   ABI_DEALLOCATE(npw_gather)
+   ABI_FREE(npw_gather)
  end if
 
 !BandFFT: band load balancing
@@ -4336,13 +4270,14 @@ subroutine kpgsph(ecut,exchn2n3d,gmet,ikg,ikpt,istwf_k,kg,kpt,mkmem,mpi_enreg,mp
        mpi_enreg%my_kgtab(i1,ikpt_this_proc) = kg_ind(i1)
      end if
    end do
-   ABI_DEALLOCATE(kg_small)
-   ABI_DEALLOCATE(kg_ind)
+   ABI_FREE(kg_small)
+   ABI_FREE(kg_ind)
  end if
 
- ABI_DEALLOCATE(array_ipw)
+ ABI_FREE(array_ipw)
 
 !Take care of the me_g0 flag
+ mpi_enreg%me_g0_fft=mpi_enreg%me_g0
  if(mpi_enreg%paral_kgb==1.and.mpi_enreg%nproc_band>0) then
    if(mpi_enreg%me_band==0.and.mpi_enreg%me_g0==1) then
 !    In this case, the processors had the 0 G vector before the new distribution, and still keeps it
@@ -4355,11 +4290,11 @@ subroutine kpgsph(ecut,exchn2n3d,gmet,ikg,ikpt,istwf_k,kg,kpt,mkmem,mpi_enreg,mp
 
 !Check that npw is not zero
  if(mpi_enreg%paral_kgb==1.and.npw==0) then
-   write(message,'(5a)' )&
-&   'Please decrease the number of npband*npfft MPI processes!',ch10,&
-&   'One of the MPI process has no plane-wave to handle.',ch10,&
-&   'Action: decrease npband and/or npfft.'
-   MSG_ERROR(message)
+   write(msg,'(5a)' )&
+    'Please decrease the number of npband*npfft MPI processes!',ch10,&
+    'One of the MPI process has no plane-wave to handle.',ch10,&
+    'Action: decrease npband and/or npfft.'
+   ABI_ERROR(msg)
  endif
 
  call timab(23,2,tsec)
@@ -4394,12 +4329,6 @@ end subroutine kpgsph
 !!
 !! NOTES
 !!  This routine has been extracted from kpgsph...
-!!
-!! PARENTS
-!!      finddistrproc
-!!
-!! CHILDREN
-!!      xmpi_sum,xmpi_sum_master
 !!
 !! SOURCE
 
@@ -4443,7 +4372,7 @@ subroutine kpgcount(ecut,exchn2n3d,gmet,istwfk,kpt,ngmax,ngmin,nkpt)
    do ii=1,3
      xx=gmet(ii,ii)*minor(ii)-numer(ii)
      if(xx<tol10*gmet_trace**3.or.minor(ii)<tol10*gmet_trace**2)then
-       MSG_BUG('The metric tensor seem incorrect')
+       ABI_BUG('The metric tensor seem incorrect')
      end if
      kmax=sqrt(gscut*minor(ii)/xx)
      nmax(ii)=floor(kmax-kpt(ii,ikpt)+tol10)
@@ -4491,26 +4420,15 @@ end subroutine kpgcount
 !!  ecut=Cutoff energy for planewave basis set.
 !!  gmet(3,3)=reciprocal space metric ($\textrm{bohr}^{-2}$).
 !!  istwfk=Options defining if time-reversal is used to decrease the number of G"s.
+!!  [kin_sorted]=True if output g-vectors should be sorted by |k+g|^2/2. Default: False.
 !!
 !! OUTPUT
 !!  npw_k=Total number of G-vectors in the full G-sphere.
-!!
-!! SIDE EFFECTS
-!!  kg_k(:,:):
-!!   allocated inside the routine.
-!!   output: kg_k(3,npw_k) contains the list of G-vectors.
-!!
-!! PARENTS
-!!      fftprof,m_ebands,m_fft,m_fft_prof,m_gkk,m_io_kss,m_phgamma,m_phpi
-!!      m_shirley,m_sigmaph,m_wfd,m_wfk,outkss
-!!
-!! CHILDREN
-!!      xmpi_sum,xmpi_sum_master
+!!  kg_k(3,npw_k) list of G-vectors allocated by the routine.
 !!
 !! SOURCE
 
-subroutine get_kg(kpoint,istwf_k,ecut,gmet,npw_k,kg_k)
-
+subroutine get_kg(kpoint, istwf_k, ecut, gmet, npw_k, kg_k, kin_sorted)
 
 !Arguments ------------------------------------
 !scalars
@@ -4520,27 +4438,37 @@ subroutine get_kg(kpoint,istwf_k,ecut,gmet,npw_k,kg_k)
 !arrays
  integer,allocatable,intent(out) :: kg_k(:,:)
  real(dp),intent(in) :: gmet(3,3),kpoint(3)
+ logical,optional,intent(in) :: kin_sorted
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: mkmem_=1,exchn2n3d0=0,ikg0=0
+ integer,parameter :: mkmem_ = 1, exchn2n3d0 = 0, ikg0 = 0
  integer :: npw_k_test
  type(MPI_type) :: MPI_enreg_seq
 !arrays
- integer :: kg_dum(3,0)
+ integer :: kg_dum(3, 0)
+ integer,allocatable :: iwork(:,:)
 
 ! *********************************************************************
 
  call initmpi_seq(MPI_enreg_seq)
 
  ! Calculate the number of G-vectors for this k-point.
- call kpgsph(ecut,exchn2n3d0,gmet,ikg0,0,istwf_k,kg_dum,kpoint,0,MPI_enreg_seq,0,npw_k)
+ call kpgsph(ecut,exchn2n3d0, gmet, ikg0, 0, istwf_k, kg_dum, kpoint, 0, MPI_enreg_seq, 0, npw_k)
 
  ! Allocate and calculate the set of G-vectors.
  ABI_MALLOC(kg_k,(3,npw_k))
- call kpgsph(ecut,exchn2n3d0,gmet,ikg0,0,istwf_k,kg_k,kpoint,mkmem_,MPI_enreg_seq,npw_k,npw_k_test)
+ call kpgsph(ecut, exchn2n3d0, gmet, ikg0, 0, istwf_k, kg_k, kpoint, mkmem_, MPI_enreg_seq, npw_k, npw_k_test)
 
  call destroy_mpi_enreg(MPI_enreg_seq)
+
+ if (present(kin_sorted)) then
+   if (kin_sorted) then
+     call sort_gvecs(npw_k, kpoint, gmet, kg_k, iwork)
+     kg_k = iwork
+     ABI_FREE(iwork)
+   end if
+ end if
 
 end subroutine get_kg
 !!***
@@ -4566,15 +4494,9 @@ end subroutine get_kg
 !! NOTES
 !!   mpi_enreg is not necessary in this case (the info is also in ngfft), but much more easy to read...
 !!
-!! PARENTS
-!!      m_fft_prof,m_gsphere,m_screening,m_shirley,m_wfd,prcref,prcref_PMA
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
-subroutine kgindex(indpw_k,kg_k,mask,mpi_enreg,ngfft,npw_k)
-
+subroutine kgindex(indpw_k, kg_k, mask, mpi_enreg, ngfft, npw_k)
 
 !Arguments ------------------------------------
 !scalars
@@ -4610,7 +4532,7 @@ subroutine kgindex(indpw_k,kg_k,mask,mpi_enreg,ngfft,npw_k)
    fftn2_distrib => mpi_enreg%distribfft%tab_fftdp2dg_distrib
    ffti2_local => mpi_enreg%distribfft%tab_fftdp2dg_local
  else
-   MSG_BUG("Unable to find an allocated distrib for this fft grid")
+   ABI_BUG("Unable to find an allocated distrib for this fft grid")
  end if
 
  !call ptabs_fourwf(mpi_enreg,n2,n3,fftn2_distrib,ffti2_local,fftn3_distrib,ffti3_local)
@@ -4627,9 +4549,9 @@ subroutine kgindex(indpw_k,kg_k,mask,mpi_enreg,ngfft,npw_k)
      indpw_k(ig)=0
      mask(ig)=.false.
    end if
-   if (any(kg_k(:,ig)>ngfft(1:3)/2) .or. any(kg_k(:,ig)<-(ngfft(1:3)-1)/2) ) then
+   if (any(kg_k(:,ig) > ngfft(1:3)/2) .or. any(kg_k(:,ig) < -(ngfft(1:3)-1)/2) ) then
      write(msg,'(a,3(i0,1x),a)')" The G-vector: ",kg_k(:, ig)," falls outside the FFT box. Increase boxcutmin (?)"
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
  end do
 
@@ -4657,8 +4579,6 @@ end subroutine kgindex
 !!
 !! SIDE EFFECTS
 !!   rhopart(nd1,nd2)=density in the x-y plane, accumulated in output.
-!!
-!! PARENTS
 !!
 !! SOURCE
 
@@ -4733,16 +4653,9 @@ end subroutine addrho
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_fftw3,m_sg2002
-!!
-!! CHILDREN
-!!      xmpi_sum,xmpi_sum_master
-!!
 !! SOURCE
 
 subroutine multpot(icplexwf,icplex,includelast,nd1,nd2,n2,lot,n1dfft,pot,zw)
-
 
  !Arguments ------------------------------------
  integer,intent(in) :: icplexwf,icplex,includelast,nd1,nd2,n2,lot,n1dfft
@@ -4759,7 +4672,7 @@ subroutine multpot(icplexwf,icplex,includelast,nd1,nd2,n2,lot,n1dfft,pot,zw)
    ! Real u(r)
 
    if (icplex==2) then
-     MSG_BUG('multpot: icplexwf=1 and icplex=2')
+     ABI_BUG('multpot: icplexwf=1 and icplex=2')
    else
      ! TO BE SPEEDED UP : should use the same trick as Stefan
      if(includelast==1)then
@@ -4852,15 +4765,9 @@ end subroutine multpot
 !! OUTPUT
 !!   rhor_glob(cplex*nfft_tot,nspden)=Global array
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      xmpi_sum,xmpi_sum_master
-!!
 !! SOURCE
 
 subroutine mpifft_collect_datar(ngfft,cplex,nfft,nspden,rhor,comm_fft,fftn3_distrib,ffti3_local,rhor_glob,master)
-
 
 !Arguments ------------------------------------
 !scalars

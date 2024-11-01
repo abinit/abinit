@@ -1,7 +1,7 @@
+
 #if defined HAVE_CONFIG_H
 #include "config.h"
 #endif
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_ImpurityOperator
 !! NAME
 !!  m_ImpurityOperator
@@ -10,18 +10,12 @@
 !!  manage all related to Impurity
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2019 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2024 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 
@@ -43,7 +37,7 @@ PRIVATE
 !!  This structured datatype contains the necessary data
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2019 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2024 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -78,6 +72,18 @@ TYPE, PUBLIC :: ImpurityOperator
   TYPE(ListCdagC) , ALLOCATABLE, DIMENSION(:  )          :: particles 
    !  for each flavor, particles(iflavor)%list(2,maxnbofsegment) 
    !  gives the beginning and end of each segment.
+
+  DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:)          :: Magmommat_orb 
+   !  for iflavor1 and iflavor2, Magmommat(iflavor1,iflavor2) is the
+   !  orbital magnetic moments 
+
+  DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:)          :: Magmommat_spin 
+   !  for iflavor1 and iflavor2, Magmommat(iflavor1,iflavor2) is the
+   !  spin magnetic moments 
+
+  DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:)          :: Magmommat_tot 
+   !  for iflavor1 and iflavor2, Magmommat(iflavor1,iflavor2) is the
+   !  total magnetic moments 
 
   DOUBLE PRECISION _PRIVATE :: checkNumber
   DOUBLE PRECISION _PRIVATE :: tolerance
@@ -114,6 +120,8 @@ PUBLIC  :: ImpurityOperator_doCheck
 PRIVATE :: ImpurityOperator_checkOverlap
 PUBLIC  :: ImpurityOperator_getError
 PUBLIC  :: ImpurityOperator_printLatex
+PUBLIC  :: ImpurityOperator_occup_histo_time
+PUBLIC  :: ImpurityOperator_setMagmommat
 
 CONTAINS
 !!***
@@ -127,7 +135,7 @@ CONTAINS
 !!  Initialize and allocate
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2019 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2024 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -136,18 +144,13 @@ CONTAINS
 !!  this=ImpurtiyOperator
 !!  flavors=number of flavors
 !!  beta=inverse temperature
+!!  opt_histo=opt_histo
 !!
 !! OUTPUT
 !!
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 
@@ -186,6 +189,12 @@ SUBROUTINE ImpurityOperator_init(this, flavors, beta)
   FREEIF(this%updates)
   MALLOC(this%updates,(1:flavors))
   this%updates = 0.d0
+  FREEIF(this%Magmommat_orb)
+  MALLOC(this%Magmommat_orb,(1:flavors,1:flavors))
+  FREEIF(this%Magmommat_spin)
+  MALLOC(this%Magmommat_spin,(1:flavors,1:flavors))
+  FREEIF(this%Magmommat_tot)
+  MALLOC(this%Magmommat_tot,(1:flavors,1:flavors))
   !CALL ImpurityOperator_computeU(this, U, J)
   !this%mat_U = U
   !IF ( ASSOCIATED(this%mu) ) FREE(this%mu)
@@ -212,7 +221,7 @@ END SUBROUTINE ImpurityOperator_init
 !!  reset operator
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2019 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2024 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -225,12 +234,6 @@ END SUBROUTINE ImpurityOperator_init
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 
@@ -269,7 +272,7 @@ END SUBROUTINE ImpurityOperator_reset
 !!  Compute an interaction this for t2g like interaction
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2019 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2024 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -284,12 +287,6 @@ END SUBROUTINE ImpurityOperator_reset
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 
@@ -343,7 +340,7 @@ END SUBROUTINE ImpurityOperator_computeU
 !!  Set directly the U interaction this
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2019 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2024 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -357,12 +354,6 @@ END SUBROUTINE ImpurityOperator_computeU
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 
@@ -394,7 +385,7 @@ END SUBROUTINE ImpurityOperator_setUmat
 !!  Set directly the chemical potential
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2019 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2024 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -408,12 +399,6 @@ END SUBROUTINE ImpurityOperator_setUmat
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 
@@ -441,7 +426,7 @@ END SUBROUTINE ImpurityOperator_setMu
 !!  active a flavor
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2019 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2024 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -455,12 +440,6 @@ END SUBROUTINE ImpurityOperator_setMu
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 
@@ -490,7 +469,7 @@ END SUBROUTINE ImpurityOperator_activateParticle
 !!  positive if outside a segment
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2019 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2024 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -506,12 +485,6 @@ END SUBROUTINE ImpurityOperator_activateParticle
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 
@@ -571,7 +544,7 @@ END FUNCTION ImpurityOperator_getAvailableTime
 !!  get the time available without the segment "position"
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2019 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2024 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -586,12 +559,6 @@ END FUNCTION ImpurityOperator_getAvailableTime
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 
@@ -633,7 +600,7 @@ END FUNCTION ImpurityOperator_getAvailedTime
 !!  add a segment to the active flavor
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2019 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2024 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -650,12 +617,6 @@ END FUNCTION ImpurityOperator_getAvailedTime
 !!   this%particles(aF)%list is updated
 !!   this%overlaps  is updated
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 
@@ -751,7 +712,7 @@ END SUBROUTINE ImpurityOperator_add
 !!  Return the segment at position_val
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2019 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2024 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -766,12 +727,6 @@ END SUBROUTINE ImpurityOperator_add
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 
@@ -822,7 +777,7 @@ END FUNCTION ImpurityOperator_getSegment
 !!  Remove a segment for the active flavor
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2019 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2024 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -836,12 +791,6 @@ END FUNCTION ImpurityOperator_getSegment
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 
@@ -905,7 +854,7 @@ END SUBROUTINE ImpurityOperator_remove
 !!  Get the overlap induced by CdagC_1 in the current configuration
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2019 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2024 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -920,12 +869,6 @@ END SUBROUTINE ImpurityOperator_remove
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 
@@ -978,7 +921,7 @@ END FUNCTION ImpurityOperator_getNewOverlap
 !!  Get the sign of the ratio of impurity traces
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2019 ABINIT group (B. Amadon)
+!!  Copyright (C) 2013-2024 ABINIT group (B. Amadon)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -996,11 +939,6 @@ END FUNCTION ImpurityOperator_getNewOverlap
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Ctqmc_tryAddRemove
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1100,7 +1038,7 @@ END FUNCTION ImpurityOperator_getsign
 !!  new (anti-)segment.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2019 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2024 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1115,12 +1053,6 @@ END FUNCTION ImpurityOperator_getsign
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 
@@ -1169,7 +1101,7 @@ END FUNCTION ImpurityOperator_getTraceAdd
 !!  (anti-)segment.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2019 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2024 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1184,12 +1116,6 @@ END FUNCTION ImpurityOperator_getTraceAdd
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 
@@ -1239,7 +1165,7 @@ END FUNCTION ImpurityOperator_getTraceRemove
 !!  Compute the overlap of a segment with a flavor
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2019 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2024 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1255,12 +1181,6 @@ END FUNCTION ImpurityOperator_getTraceRemove
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 
@@ -1413,7 +1333,7 @@ END FUNCTION ImpurityOperator_overlapSegFlav
 !!  Returns the overlap of flavor with the others
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2019 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2024 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1428,12 +1348,6 @@ END FUNCTION ImpurityOperator_overlapSegFlav
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 
@@ -1468,7 +1382,7 @@ END FUNCTION ImpurityOperator_overlapflavor
 !!  compute the overlap of flavor1 with the configuration of flavor2
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2019 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2024 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1484,12 +1398,6 @@ END FUNCTION ImpurityOperator_overlapflavor
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 
@@ -1533,7 +1441,7 @@ END FUNCTION ImpurityOperator_overlapSwap
 !!  Swap to flavors
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2019 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2024 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1548,12 +1456,6 @@ END FUNCTION ImpurityOperator_overlapSwap
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 
@@ -1597,7 +1499,7 @@ END SUBROUTINE ImpurityOperator_swap
 !!  Compute overlap between two flavors
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2019 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2024 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1613,12 +1515,6 @@ END SUBROUTINE ImpurityOperator_swap
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 
@@ -1666,7 +1562,7 @@ END FUNCTION ImpurityOperator_overlapIJ
 !!  measure double occupancy and interaction energy
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2019 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2024 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1680,12 +1576,6 @@ END FUNCTION ImpurityOperator_overlapIJ
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 
@@ -1728,7 +1618,7 @@ END SUBROUTINE ImpurityOperator_measDE
 !!  Compute from scratch all overlaps
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2019 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2024 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1741,12 +1631,6 @@ END SUBROUTINE ImpurityOperator_measDE
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 
@@ -1780,7 +1664,7 @@ END SUBROUTINE ImpurityOperator_cleanOverlaps
 !!  measure the number of electrons on flavor flavor
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2019 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2024 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1795,12 +1679,6 @@ END SUBROUTINE ImpurityOperator_cleanOverlaps
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 
@@ -1845,7 +1723,7 @@ END FUNCTION ImpurityOperator_measN
 !!  destroy and deallocate
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2019 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2024 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1858,12 +1736,6 @@ END FUNCTION ImpurityOperator_measN
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 
@@ -1882,6 +1754,9 @@ SUBROUTINE ImpurityOperator_destroy(this)
   ENDIF
   CALL ListCdagC_destroy(this%list_swap)
   FREEIF(this%mat_U)
+  FREEIF(this%Magmommat_orb)
+  FREEIF(this%Magmommat_spin)
+  FREEIF(this%Magmommat_tot)
   FREEIF(this%overlaps)
   FREEIF(this%updates)
   this%activeFlavor = 0
@@ -1898,7 +1773,7 @@ END SUBROUTINE ImpurityOperator_destroy
 !!  compute error on the overlap (numerical accumulation)
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2019 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2024 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1912,12 +1787,6 @@ END SUBROUTINE ImpurityOperator_destroy
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 
@@ -1963,7 +1832,7 @@ END SUBROUTINE ImpurityOperator_getErrorOverlap
 !!  set the check mechanism
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2019 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2024 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1977,12 +1846,6 @@ END SUBROUTINE ImpurityOperator_getErrorOverlap
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 
@@ -2006,7 +1869,7 @@ END SUBROUTINE ImpurityOperator_doCheck
 !!  between Tmin and Tmax (c+ and c)
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2019 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2024 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -2023,12 +1886,6 @@ END SUBROUTINE ImpurityOperator_doCheck
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 
@@ -2129,7 +1986,7 @@ END SUBROUTINE ImpurityOperator_checkOverlap
 !!  get error on computing the overlap
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2019 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2024 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -2143,12 +2000,6 @@ END SUBROUTINE ImpurityOperator_checkOverlap
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 
@@ -2179,7 +2030,7 @@ END FUNCTION ImpurityOperator_getError
 !!  print in a latex format all the configuration
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2019 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2024 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -2194,12 +2045,6 @@ END FUNCTION ImpurityOperator_getError
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 
@@ -2280,5 +2125,377 @@ SUBROUTINE ImpurityOperator_printLatex(this, ostream, isweep)
 END SUBROUTINE ImpurityOperator_printLatex
 !!***
 
+!!****f* ABINIT/m_ImpurityOperator/ImpurityOperator_occup_histo_time
+!! NAME
+!!  ImpurityOperator_occup_histo_time
+!!
+!! SUBROUTINE
+!!  Compute histogrammes of occupations.
+!!
+!! COPYRIGHT
+!!  Copyright (C) 2013-2024 ABINIT group (B. Amadon, F. Gendron)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! INPUTS
+!!  this=ImpurityOperator
+!!  histo=histogramme of occupations
+!!
+!! OUTPUT
+!!  ImpurityOperator_occup_histo_time=number of electrons
+!!
+!! SIDE EFFECTS
+!!
+!! NOTES
+!!
+!! SOURCE
+
+SUBROUTINE ImpurityOperator_occup_histo_time(this,histo,occupconfig,suscep,ntau,chi,chicharge,ntot,opt_histo,nspinor)
+
+!Arguments ------------------------------------
+  TYPE(ImpurityOperator), INTENT(IN)            :: this
+  DOUBLE PRECISION, DIMENSION(:), INTENT(OUT)   :: histo
+  DOUBLE PRECISION, DIMENSION(:), INTENT(OUT)   :: occupconfig
+  DOUBLE PRECISION, DIMENSION(:,:), INTENT(OUT) :: suscep
+  INTEGER, INTENT(IN)                           :: ntau
+  DOUBLE PRECISION, DIMENSION(:,:), INTENT(OUT) :: chi
+  DOUBLE PRECISION, DIMENSION(:,:), INTENT(OUT) :: chicharge
+  DOUBLE PRECISION, DIMENSION(:), INTENT(OUT)   :: ntot
+ !Local variables ------------------------------
+  DOUBLE PRECISION                   :: tau
+  INTEGER                            :: scanning, opt_histo,nspinor
+  INTEGER                            :: iflavor, itau,jtau,kdeltatau,noccup,iconfig,sumh,nmeas
+  INTEGER                            :: iflavor1, iflavor2     
+  INTEGER, ALLOCATABLE, DIMENSION(:,:)        :: occup
+  INTEGER, ALLOCATABLE, DIMENSION(:)          :: occuptot
+  INTEGER, ALLOCATABLE, DIMENSION(:,:)          :: spinup,spindn
+  INTEGER, ALLOCATABLE, DIMENSION(:)          :: occupconfig_loc
+  DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:)          :: histo_loc
+!  DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:)          :: histo_loc_config
+  DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:)  :: magmommat_orb
+  DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:)  :: magmommat_spin
+  DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:)  :: magmommat_tot
+  DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:)  :: mu_tmp
+ !-------------------------------------------------------------
+
+
+  MALLOC(occuptot,(1:ntau))
+  MALLOC(spinup,(1:3,1:ntau))
+  MALLOC(spindn,(1:3,1:ntau))
+  MALLOC(occup,(1:this%flavors,1:ntau))
+  MALLOC(occupconfig_loc,(2**this%flavors))
+  MALLOC(histo_loc,(1:this%flavors+1))
+  occupconfig_loc=0
+  nmeas=0
+
+  do itau=1,ntau
+    tau=float(itau-1)/float(ntau)*this%beta
+    occuptot(itau)=0
+    spinup(:,itau)=0
+    spindn(:,itau)=0
+!    write(6,*) "tau",tau
+    iconfig=0
+    do iflavor = 1, this%flavors
+      occup(iflavor,itau)=0
+      do scanning = 1, this%particles(iflavor)%tail
+!        write(6,*) itau,iflavor,scanning
+!        write(6,*) "tau",tau,this%particles(iflavor)%list(scanning,Cdag_),this%particles(iflavor)%list(scanning,C_)
+!        write(6,*) "Hello Fred 2",tau,iflavor,this%particles(iflavor)%list(scanning,C_)-this%particles(iflavor)%list(scanning,Cdag_),this%beta
+
+        if(this%particles(iflavor)%list(scanning,C_)>this%beta.and.tau<this%particles(iflavor)%list(scanning,Cdag_)) then
+
+          if(tau<(this%particles(iflavor)%list(scanning,C_)-this%beta).and.&
+&            tau>(this%particles(iflavor)%list(scanning,Cdag_)-this%beta)) then 
+            occup(iflavor,itau)=occup(iflavor,itau)+1
+          endif 
+
+        else
+
+          if(tau<this%particles(iflavor)%list(scanning,C_).and.tau>this%particles(iflavor)%list(scanning,Cdag_)) then 
+             occup(iflavor,itau)=occup(iflavor,itau)+1
+          endif
+
+       endif
+
+      enddo
+
+      !full orbital
+      if ( this%particles(iflavor)%list(0,C_) .eq. 0.d0 ) then
+        !write(6,*) "Yes",this%particles(iflavor)%list(0,C_)
+        occup(iflavor,itau)=occup(iflavor,itau)+1
+      endif
+
+      occuptot(itau)= occuptot(itau) + occup(iflavor,itau)
+      if(nspinor .eq. 1) then
+        if(iflavor<this%flavors/2+1) THEN
+          spinup(1,itau)= spinup(1,itau) + occup(iflavor,itau)
+          if(iflavor==1.or.iflavor==2.or.iflavor==4.or.iflavor==6.or.iflavor==7.or.iflavor==9) THEN
+            spinup(2,itau)= spinup(2,itau) + occup(iflavor,itau)
+          else
+            spinup(3,itau)= spinup(3,itau) + occup(iflavor,itau)
+            !if(spinup(3,itau)>4) THEN
+            ! write(6,*) "Error",spinup(:,itau),occup(:,itau)
+            ! if(iflavor==1.or.iflavor==2.or.iflavor==4) THEN
+            !   write(6,*) iflavor,occup(iflavor,itau)
+            ! endif
+            ! stop
+            !endif
+          endif
+        else
+          spindn(1,itau)= spindn(1,itau) + occup(iflavor,itau)
+          if(iflavor==1.or.iflavor==2.or.iflavor==4.or.iflavor==6.or.iflavor==7.or.iflavor==9) THEN
+            spindn(2,itau)= spindn(2,itau) + occup(iflavor,itau)
+          else
+            spindn(3,itau)= spindn(3,itau) + occup(iflavor,itau)
+            !if(spindn(3,itau)>4) THEN
+            ! write(6,*) "Error spin",spindn(:,itau),occup(:,itau)
+            ! write(6,*) "Error occup",occup(:,itau)
+            ! if(iflavor==1.or.iflavor==2.or.iflavor==4) THEN
+            !   write(6,*) iflavor,occup(iflavor,itau)
+            ! endif
+            ! stop
+            !endif
+          endif
+        endif
+      else 
+      !spin-orbit case (here only useful for chi_charge and f-elements)
+        if(iflavor < 7) then
+          !mj=5/2
+          spinup(2,itau) = spinup(2,itau) + occup(iflavor,itau)
+          !if(iflavor ==1.or.iflavor==2.or.iflavor==3.or.iflavor==4) then
+          !  spinup(2,itau) = spinup(2,itau) + occup(iflavor,itau)
+          !else
+          !  spinup(3,itau) = spinup(3,itau) + occup(iflavor,itau)
+          !end if
+        else
+          !mj=7/2
+          spinup(3,itau) = spindn(3,itau) + occup(iflavor,itau)
+        end if
+      end if 
+
+!   === Construct index of configuration in base 10
+      iconfig=iconfig+2**(iflavor-1)*occup(iflavor,itau)
+
+    enddo
+
+!   === After the loop over flavor, iconfig has a meaning and can be used 
+    occupconfig_loc(iconfig+1)= occupconfig_loc(iconfig+1)+1
+  nmeas=nmeas+1
+
+  enddo
+
+  histo_loc=0
+  do itau=1,ntau
+    histo_loc(occuptot(itau)+1)=histo_loc(occuptot(itau)+1)+1
+  enddo
+
+!  write(6,*)
+!  write(6,*) "=== Histogram of occupations ===="
+  do noccup=1,this%flavors+1
+     histo_loc(noccup)=histo_loc(noccup)/float(ntau)*100.0
+!     write(6,*)  noccup-1, histo_loc(noccup)
+     histo(noccup)= histo(noccup) + histo_loc(noccup)
+  enddo
+!  write(6,*) "================================="
+!  write(6,*)
+
+!  write(6,*) "================================="
+  sumh=zero
+  do iconfig=1,2**(this%flavors)
+   ! occupconfig_loc(iconfig)=occupconfig_loc(iconfig)/float(ntau)*100.0 
+    occupconfig(iconfig)=occupconfig(iconfig)+float(occupconfig_loc(iconfig))/float(ntau)*100.0
+!    write(6,*) "one step",float(occupconfig_loc(iconfig))/float(ntau)*100.0
+    sumh=sumh+occupconfig_loc(iconfig)
+  enddo
+!  write(6,*) "sumh",sumh,ntau,nmeas
+
+!============================================================
+! Susceptibility Section
+!============================================================
+if(opt_histo .gt. 1) then
+  if(nspinor .eq. 1) then
+    ! == Scalar Spin Susceptibility
+    do itau=1,ntau
+    !tau=float(itau-1)/float(ntau)*this%beta
+    ! write(7735,*) float(itau-1)/float(ntau)*this%beta,spinup(itau),spindn(itau),(spinup(itau)-spindn(itau))**2
+    ! write(7736,*) float(itau-1)/float(ntau)*this%beta,(spinup(1,itau)-spindn(1,itau)),(spinup(2,itau)-spindn(2,itau)),(spinup(3,itau)-spindn(3,itau))
+      do jtau=1,ntau
+        !tauj=float(jtau-1)/float(ntau)*this%beta
+        kdeltatau=jtau-itau+1
+        if(jtau<itau) kdeltatau=kdeltatau+ntau
+        if(kdeltatau> ntau) write(std_out,*) "Warning kdeltatau"
+        suscep(1,kdeltatau)=suscep(1,kdeltatau)+float((spinup(1,jtau)-spindn(1,jtau)))*float((spinup(1,itau)-spindn(1,itau)))
+        suscep(2,kdeltatau)=suscep(2,kdeltatau)+float((spinup(2,jtau)-spindn(2,jtau)))*float((spinup(2,itau)-spindn(2,itau)))
+        suscep(3,kdeltatau)=suscep(3,kdeltatau)+float((spinup(3,jtau)-spindn(3,jtau)))*float((spinup(3,itau)-spindn(3,itau)))
+        ! write(6,*) "Su",suscep(kdeltatau),spinup(tau)-spindn(jtau),spinup(itau)-spindn(itau)
+        ! write(6,*) "Su",itau,jtau,kdeltatau
+      enddo
+      !write(7735,*) float(itau-1)/float(ntau)*this%beta,spinup(itau),spindn(itau),(spinup(itau)-spindn(itau))**2
+      !write(7736,*) float(itau-1)/float(ntau)*this%beta,(spinup(itau)-spindn(itau))**2
+      !write(7737,*) float(itau-1)/float(ntau)*this%beta,suscep(1)
+    enddo
+
+  else
+    ! == Spin Orbit Susceptibility
+    MALLOC(magmommat_orb,(1:this%flavors,1:this%flavors))
+    magmommat_orb=this%Magmommat_orb
+    MALLOC(magmommat_spin,(1:this%flavors,1:this%flavors))
+    magmommat_spin=this%Magmommat_spin
+    MALLOC(magmommat_tot,(1:this%flavors,1:this%flavors))
+    magmommat_tot=this%Magmommat_tot
+    MALLOC(mu_tmp,(1:3,1:ntau))
+
+    ! == Product of occupation matrix with magnetic moment matrix
+    do itau=1,ntau
+      mu_tmp(:,itau)=0
+      do iflavor1=1,this%flavors
+        do iflavor2=1,this%flavors
+          if(iflavor1==iflavor2) then
+            mu_tmp(1,itau) = mu_tmp(1,itau) + magmommat_tot(iflavor1,iflavor2)*occup(iflavor1,itau)
+            mu_tmp(2,itau) = mu_tmp(2,itau) + magmommat_orb(iflavor1,iflavor2)*occup(iflavor1,itau)
+            mu_tmp(3,itau) = mu_tmp(3,itau) + magmommat_spin(iflavor1,iflavor2)*occup(iflavor1,itau)
+            !write(6,*) itau, magmommat(iflavor1,iflavor2), mu_tmp(:,itau)/ntau
+          end if
+        end do
+      end do
+    end do
+
+    ! == Correlation function of mu_tmp for magnetic susceptibility with SOC (Approach 1)
+    do itau=1,ntau
+      do jtau=1,ntau
+        kdeltatau=jtau-itau+1
+        if(jtau<itau) kdeltatau=kdeltatau+ntau
+        if(kdeltatau> ntau) write(std_out,*) "Warning kdeltatau"
+        chi(1,kdeltatau) = chi(1,kdeltatau) + (mu_tmp(1,itau))*(mu_tmp(1,jtau))
+        chi(2,kdeltatau) = chi(2,kdeltatau) + (mu_tmp(2,itau))*(mu_tmp(2,jtau))
+        chi(3,kdeltatau) = chi(3,kdeltatau) + (mu_tmp(3,itau))*(mu_tmp(3,jtau))
+      end do
+    end do
+
+    FREE(mu_tmp)
+    FREE(magmommat_orb)
+    FREE(magmommat_spin)
+    FREE(magmommat_tot)
+  endif
+endif
+  
+if(opt_histo .gt. 2) then
+  if(nspinor .eq. 1) then
+  ! == Scalar Charge Susceptibility
+
+    do itau = 1,ntau
+      ntot(1) = ntot(1) + occuptot(itau)
+      ntot(2) = ntot(2) + float(spinup(2,itau)+spindn(2,itau))
+      ntot(3) = ntot(3) + float(spinup(3,itau)+spindn(3,itau))
+    enddo
+
+    do itau=1,ntau
+      do jtau=1,ntau
+        kdeltatau=jtau-itau+1
+        if(jtau<itau) kdeltatau=kdeltatau+ntau
+        if(kdeltatau> ntau) write(std_out,*) "Warning kdeltatau"
+        chicharge(1,kdeltatau)=chicharge(1,kdeltatau)+float((spinup(1,jtau)+spindn(1,jtau)))*float((spinup(1,itau)+spindn(1,itau)))
+        chicharge(2,kdeltatau)=chicharge(2,kdeltatau)+float((spinup(2,jtau)+spindn(2,jtau)))*float((spinup(2,itau)+spindn(2,itau)))
+        chicharge(3,kdeltatau)=chicharge(3,kdeltatau)+float((spinup(3,jtau)+spindn(3,jtau)))*float((spinup(3,itau)+spindn(3,itau)))
+      enddo
+    enddo
+
+  else
+  ! == Spin-orbit Charge Susceptibility
+  ! ntot(1) = Full occuptation, ntot(2) = mj_5/2, ntot(3) = mj_7/2 
+    do itau = 1,ntau                                                    
+      ntot(1) = ntot(1) + occuptot(itau)                                
+      ntot(2) = ntot(2) + float(spinup(2,itau))          
+      ntot(3) = ntot(3) + float(spinup(3,itau))          
+    enddo                                                               
+
+    do itau=1,ntau                                                                                                                  
+      do jtau=1,ntau                                                                                                                
+        kdeltatau=jtau-itau+1                                                                                                       
+        if(jtau<itau) kdeltatau=kdeltatau+ntau                                                                                      
+        if(kdeltatau> ntau) write(std_out,*) "Warning kdeltatau"                                                                    
+        chicharge(1,kdeltatau)=chicharge(1,kdeltatau)+float(occuptot(jtau))*float(occuptot(itau)) 
+        chicharge(2,kdeltatau)=chicharge(2,kdeltatau)+float(spinup(2,jtau))*float(spindn(2,itau)) 
+        chicharge(3,kdeltatau)=chicharge(3,kdeltatau)+float(spinup(3,jtau))*float(spinup(3,itau)) 
+      enddo                                                                                                                         
+    enddo                                                                                                                           
+  end if                                                                                                                                   
+endif
+
+  FREE(occup)
+  FREE(occupconfig_loc)
+  FREE(histo_loc)
+  FREE(occuptot)
+  FREE(spinup)
+  FREE(spindn)
+
+
+END SUBROUTINE ImpurityOperator_occup_histo_time
+!!***
+
+!!****f* ABINIT/m_ImpurityOperator/ImpurityOperator_setMagmommat
+!! NAME
+!!  ImpurityOperator_setMagmommat
+!!
+!! FUNCTION
+!!  Set directly the Magnetic moment this
+!!
+!! COPYRIGHT
+!!  Copyright (C) 2013-2024 ABINIT group (F. Gendron)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! INPUTS
+!!  this=ImpurtityOperator
+!!  matU=interaction this
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!
+!! NOTES
+!!
+!! PARENTS
+!!  Will be filled automatically by the parent script
+!!
+!! CHILDREN
+!!  Will be filled automatically by the parent script
+!!
+!! SOURCE
+
+SUBROUTINE ImpurityOperator_setMagmommat(this, Magmom_orb, Magmom_spin, Magmom_tot)
+
+!Arguments ------------------------------------
+  TYPE(ImpurityOperator), INTENT(INOUT) :: this
+  DOUBLE PRECISION, DIMENSION(:,:), INTENT(IN   ) :: Magmom_orb
+  DOUBLE PRECISION, DIMENSION(:,:), INTENT(IN   ) :: Magmom_spin
+  DOUBLE PRECISION, DIMENSION(:,:), INTENT(IN   ) :: Magmom_tot
+!Local-----------------------------------------
+  INTEGER :: iflavor1
+  INTEGER :: iflavor2
+
+ !debug
+ ! write(6,*) "Inside Impurity_set Magmommat"
+ !
+ ! do iflavor1=1,10
+ !   do iflavor2=1,10
+ !      if(iflavor1==iflavor2) THEN
+ !        write(6,*) iflavor1, iflavor2, Magmom(iflavor1,iflavor2)
+ !      end if
+ !   end do
+ ! end do
+
+  DO iflavor1 = 1, this%flavors
+    DO iflavor2 = 1, this%flavors
+      this%Magmommat_orb(iflavor1,iflavor2) = Magmom_orb(iflavor1,iflavor2)
+      this%Magmommat_spin(iflavor1,iflavor2) = Magmom_spin(iflavor1,iflavor2)
+      this%Magmommat_tot(iflavor1,iflavor2) = Magmom_tot(iflavor1,iflavor2)
+    END DO
+  END DO
+
+END SUBROUTINE ImpurityOperator_setMagmommat
+!!***
 END MODULE m_ImpurityOperator
 !!***

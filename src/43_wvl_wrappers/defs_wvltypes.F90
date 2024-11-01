@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/defs_wvltypes
 !! NAME
 !! defs_wvltypes
@@ -13,7 +12,7 @@
 !! * wvl_data : container for all required wavelets data.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2019 ABINIT group (DC)
+!! Copyright (C) 2001-2024 ABINIT group (DC)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -233,7 +232,7 @@ CONTAINS
 !!  Nullify all wvl pointers
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2019 ABINIT group (T. Rangel)
+!!  Copyright (C) 2013-2024 ABINIT group (T. Rangel)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -248,15 +247,6 @@ CONTAINS
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      driver
-!!
-!! CHILDREN
-!!      nullify_atoms_data,nullify_dft_local_fields,nullify_diis_objects
-!!      nullify_gaussian_basis,nullify_gpu_pointers
-!!      nullify_local_zone_descriptors,nullify_locreg_descriptors
-!!      nullify_orbitals_data,nullify_paw_objects,nullify_rholoc_objects
-!!
 !! SOURCE
 
 subroutine nullify_wvl_data(wvl)
@@ -269,7 +259,6 @@ subroutine nullify_wvl_data(wvl)
 ! *************************************************************************
 
 #if defined HAVE_BIGDFT
-
  DBG_ENTER("COLL")
 
 !1)   wvl_projectors_type: projectors
@@ -347,9 +336,10 @@ pure function comms_cubic_null() result(comms)
    nullify(comms%nvctr_par)
  end function comms_cubic_null
 !!***
-#endif
 
- !ABI_UNUSED(wvl%den%symObj)
+#else
+ ABI_UNUSED(wvl%projectors%nlpsp)
+#endif
 
 end subroutine nullify_wvl_data
 !!***

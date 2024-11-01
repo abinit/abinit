@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_eph_double_grid
 !! NAME
 !!  m_eph_double_grid
@@ -7,12 +6,10 @@
 !!  Structure and functions to create a double grid mapping
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2019 ABINIT group (HM)
+!!  Copyright (C) 2008-2024 ABINIT group (HM)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
 !!
 !! SOURCE
 
@@ -25,15 +22,15 @@
 module m_eph_double_grid
 
  use defs_basis
- use defs_abitypes
  use m_errors
  use m_ebands
+ use m_abicore
 
  use defs_datatypes,   only : ebands_t
  use m_numeric_tools,  only : wrap2_pmhalf
  use m_symtk,          only : mati3inv
  use m_crystal,        only : crystal_t
- use m_kpts,           only : listkk
+ use m_kpts,           only : kpts_timrev_from_kptopt !, listkk
  use m_fstrings,       only : itoa, sjoin
 
  implicit none
@@ -56,10 +53,8 @@ module m_eph_double_grid
 
    type(ebands_t) :: ebands_dense
    ! ebands structure with the eigenvalues on the dense grid
+   ! TODO: Should be replaced by ebands_dense%eig to reduce memory requirements (occ, kpts ...)
 
-   real(dp),allocatable :: kpts_coarse(:,:)
-   real(dp),allocatable :: kpts_dense(:,:)
-   real(dp),allocatable :: kpts_dense_ibz(:,:)
    integer :: coarse_nbz, dense_nbz, dense_nibz
 
    real(dp),allocatable :: weights_dense(:)
@@ -78,7 +73,7 @@ module m_eph_double_grid
    ! multiplicity of the meshes
 
    integer :: ndiv = 1
-   ! interp_kmult(1)*interp_kmult(2)*interp_kmult(3)
+   ! ndiv = interp_kmult(1)*interp_kmult(2)*interp_kmult(3)
 
    ! the integer indexes for the coarse grid are calculated for kk(3) with:
    ! [mod(nint((kpt(1)+1)*self%nkpt_coarse(1)),self%nkpt_coarse(1))+1,
@@ -87,11 +82,13 @@ module m_eph_double_grid
 
    integer,allocatable :: indexes_to_coarse(:,:,:)
    ! given integer indexes get the array index of the kpoint (coarse)
+
    integer,allocatable :: coarse_to_indexes(:,:)
    ! given the array index get the integer indexes of the kpoints (coarse)
 
    integer,allocatable :: indexes_to_dense(:,:,:)
    ! given integer indexes get the array index of the kpoint (dense)
+
    integer,allocatable :: dense_to_indexes(:,:)
    ! given the array index get the integer indexes of the kpoint (dense)
 
@@ -99,9 +96,6 @@ module m_eph_double_grid
    ! map coarse to dense mesh (nbz_coarse,mult(interp_kmult))
 
    integer,allocatable :: bz2lgkibz(:)
-   ! map full brillouin zone of dense grid to a little group of k
-
-   !integer,allocatable :: bz2lgkibzkq(:)
    ! map full brillouin zone of dense grid to a little group of k
 
    integer,allocatable :: mapping(:,:)
@@ -124,8 +118,7 @@ module m_eph_double_grid
  end type eph_double_grid_t
 !!***
 
- public :: eph_double_grid_new
- ! Initialize the double grid structure
+ public :: eph_double_grid_new  ! Initialize the double grid structure
 
 contains  !=====================================================
 !!***
@@ -178,14 +171,9 @@ contains  !=====================================================
 !!
 !! INPUTS
 !!
-!! PARENTS
-!!      m_sigmaph
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
-type (eph_double_grid_t) function eph_double_grid_new(cryst, ebands_dense, kptrlatt_coarse, kptrlatt_dense) result(eph_dg)
+type(eph_double_grid_t) function eph_double_grid_new(cryst, ebands_dense, kptrlatt_coarse, kptrlatt_dense) result(eph_dg)
 
 !Arguments-------------------------------
  type(crystal_t), intent(in) :: cryst
@@ -193,11 +181,14 @@ type (eph_double_grid_t) function eph_double_grid_new(cryst, ebands_dense, kptrl
  integer, intent(in) :: kptrlatt_coarse(3,3), kptrlatt_dense(3,3)
 
 !Local variables ------------------------
- integer,parameter :: sppoldbl1=1,timrev1=1
- integer :: i_dense,i_coarse,this_dense,i_subdense,i1,i2,i3,ii,jj,kk
+ !integer,parameter :: sppoldbl1 = 1
+ integer :: i_dense,i_coarse,this_dense,i_subdense,i1,i2,i3,ii,jj,kk,timrev
  integer :: nkpt_coarse(3), nkpt_dense(3), interp_kmult(3), interp_side(3)
- integer,allocatable :: indkk(:,:)
- real(dp):: shift !,dksqmax
+ !integer,allocatable :: indkk(:,:)
+
+! *************************************************************************
+
+ timrev = kpts_timrev_from_kptopt(ebands_dense%kptopt)
 
  nkpt_coarse(1) = kptrlatt_coarse(1,1)
  nkpt_coarse(2) = kptrlatt_coarse(2,2)
@@ -212,7 +203,7 @@ type (eph_double_grid_t) function eph_double_grid_new(cryst, ebands_dense, kptrl
  eph_dg%interp_kmult = interp_kmult
  eph_dg%nkpt_coarse = nkpt_coarse
  eph_dg%nkpt_dense = nkpt_dense
- eph_dg%ebands_dense = ebands_dense
+ call ebands_copy(ebands_dense, eph_dg%ebands_dense)
 
  ! A microzone is the set of points in the fine grid belonging to a certain coarse point
  ! we have to consider a side of a certain size around the coarse point
@@ -227,28 +218,26 @@ type (eph_double_grid_t) function eph_double_grid_new(cryst, ebands_dense, kptrl
                (2*interp_side(2)+1)*&
                (2*interp_side(3)+1)
 
-
  write(std_out,*) 'coarse:      ', nkpt_coarse
- write(std_out,*) 'dense:       ', nkpt_dense
+ write(std_out,*) 'fine:        ', nkpt_dense
  write(std_out,*) 'interp_kmult:', interp_kmult
  write(std_out,*) 'ndiv:        ', eph_dg%ndiv
- ABI_CHECK(all(nkpt_dense(:) >= nkpt_coarse(:)), 'dense mesh is smaller than coarse mesh.')
 
- ABI_MALLOC(eph_dg%kpts_coarse,(3,eph_dg%coarse_nbz))
- ABI_MALLOC(eph_dg%kpts_dense,(3,eph_dg%dense_nbz))
- ABI_MALLOC(eph_dg%coarse_to_dense,(eph_dg%coarse_nbz,eph_dg%ndiv))
+ ABI_CHECK(all(nkpt_dense(:) >= nkpt_coarse(:)), 'fine mesh is smaller than coarse mesh.')
 
- ABI_MALLOC(eph_dg%dense_to_indexes,(3,eph_dg%dense_nbz))
- ABI_MALLOC(eph_dg%indexes_to_dense,(nkpt_dense(1),nkpt_dense(2),nkpt_dense(3)))
+ ABI_MALLOC(eph_dg%coarse_to_dense, (eph_dg%coarse_nbz, eph_dg%ndiv))
 
- ABI_MALLOC(eph_dg%coarse_to_indexes,(3,eph_dg%dense_nbz))
- ABI_MALLOC(eph_dg%indexes_to_coarse,(nkpt_coarse(1),nkpt_coarse(2),nkpt_coarse(3)))
+ ABI_MALLOC(eph_dg%dense_to_indexes, (3, eph_dg%dense_nbz))
+ ABI_MALLOC(eph_dg%indexes_to_dense, (nkpt_dense(1), nkpt_dense(2), nkpt_dense(3)))
 
- ABI_MALLOC(eph_dg%bz2lgkibz,(eph_dg%dense_nbz))
- ABI_MALLOC(eph_dg%mapping,(6,eph_dg%ndiv))
- ABI_MALLOC(eph_dg%weights_dense,(eph_dg%dense_nbz))
+ ABI_MALLOC(eph_dg%coarse_to_indexes, (3, eph_dg%dense_nbz))
+ ABI_MALLOC(eph_dg%indexes_to_coarse, (nkpt_coarse(1), nkpt_coarse(2), nkpt_coarse(3)))
 
- write(std_out,*) 'create dense to coarse mapping'
+ ABI_MALLOC(eph_dg%bz2lgkibz, (eph_dg%dense_nbz))
+ ABI_MALLOC(eph_dg%mapping, (6, eph_dg%ndiv))
+ ABI_MALLOC(eph_dg%weights_dense, (eph_dg%dense_nbz))
+
+ write(std_out,*) 'create fine to coarse mapping'
  ! generate mapping of points in dense bz to the dense bz
  ! coarse loop
  i_dense = 0
@@ -261,9 +250,9 @@ type (eph_double_grid_t) function eph_double_grid_new(cryst, ebands_dense, kptrl
        !eph_dg%kpts_coarse(:,i_coarse) = [dble(ii-1)/nkpt_coarse(1),&
        !                                  dble(jj-1)/nkpt_coarse(2),&
        !                                  dble(kk-1)/nkpt_coarse(3)]
-       call wrap2_pmhalf(dble(ii-1)/nkpt_coarse(1),eph_dg%kpts_coarse(1,i_coarse),shift)
-       call wrap2_pmhalf(dble(jj-1)/nkpt_coarse(2),eph_dg%kpts_coarse(2,i_coarse),shift)
-       call wrap2_pmhalf(dble(kk-1)/nkpt_coarse(3),eph_dg%kpts_coarse(3,i_coarse),shift)
+       !call wrap2_pmhalf(dble(ii-1)/nkpt_coarse(1),eph_dg%kpts_coarse(1,i_coarse),shift)
+       !call wrap2_pmhalf(dble(jj-1)/nkpt_coarse(2),eph_dg%kpts_coarse(2,i_coarse),shift)
+       !call wrap2_pmhalf(dble(kk-1)/nkpt_coarse(3),eph_dg%kpts_coarse(3,i_coarse),shift)
 
        !create the fine mesh
        do i3=1,interp_kmult(3)
@@ -275,12 +264,12 @@ type (eph_double_grid_t) function eph_double_grid_new(cryst, ebands_dense, kptrl
              !     [dble((ii-1)*interp_kmult(1)+i1-1)/(nkpt_coarse(1)*interp_kmult(1)),&
              !      dble((jj-1)*interp_kmult(2)+i2-1)/(nkpt_coarse(2)*interp_kmult(2)),&
              !      dble((kk-1)*interp_kmult(3)+i3-1)/(nkpt_coarse(3)*interp_kmult(3))]
-             call wrap2_pmhalf((dble(ii-1)*interp_kmult(1)+i1-1)/(nkpt_coarse(1)*interp_kmult(1)), &
-               eph_dg%kpts_dense(1,i_dense),shift)
-             call wrap2_pmhalf((dble(jj-1)*interp_kmult(2)+i2-1)/(nkpt_coarse(2)*interp_kmult(2)), &
-               eph_dg%kpts_dense(2,i_dense),shift)
-             call wrap2_pmhalf((dble(kk-1)*interp_kmult(3)+i3-1)/(nkpt_coarse(3)*interp_kmult(3)), &
-               eph_dg%kpts_dense(3,i_dense),shift)
+             !call wrap2_pmhalf((dble(ii-1)*interp_kmult(1)+i1-1)/(nkpt_coarse(1)*interp_kmult(1)), &
+             !  eph_dg%kpts_dense(1,i_dense),shift)
+             !call wrap2_pmhalf((dble(jj-1)*interp_kmult(2)+i2-1)/(nkpt_coarse(2)*interp_kmult(2)), &
+             !  eph_dg%kpts_dense(2,i_dense),shift)
+             !call wrap2_pmhalf((dble(kk-1)*interp_kmult(3)+i3-1)/(nkpt_coarse(3)*interp_kmult(3)), &
+             !  eph_dg%kpts_dense(3,i_dense),shift)
 
              !integer indexes mapping
              eph_dg%indexes_to_dense((ii-1)*interp_kmult(1)+i1,&
@@ -293,7 +282,7 @@ type (eph_double_grid_t) function eph_double_grid_new(cryst, ebands_dense, kptrl
          enddo
        enddo
        eph_dg%indexes_to_coarse(ii,jj,kk) = i_coarse
-       eph_dg%coarse_to_indexes(:,i_coarse) = [ii,jj,kk]
+       eph_dg%coarse_to_indexes(:,i_coarse) = [ii, jj, kk]
      enddo
    enddo
  enddo
@@ -327,7 +316,7 @@ type (eph_double_grid_t) function eph_double_grid_new(cryst, ebands_dense, kptrl
    enddo
  enddo
 
- ABI_CHECK(i_dense == eph_dg%dense_nbz, 'dense mesh mapping is incomplete')
+ ABI_CHECK(i_dense == eph_dg%dense_nbz, 'fine mesh mapping is incomplete')
 
  !calculate the weights of each fine point
  !different methods to distribute the weights might lead to better convergence
@@ -344,27 +333,23 @@ type (eph_double_grid_t) function eph_double_grid_new(cryst, ebands_dense, kptrl
  eph_dg%weights_dense = 1/eph_dg%weights_dense/(interp_kmult(1)*interp_kmult(2)*interp_kmult(3))
 
  !3.
- ABI_MALLOC(eph_dg%kpts_dense_ibz,(3,ebands_dense%nkpt))
- eph_dg%kpts_dense_ibz = ebands_dense%kptns
  eph_dg%dense_nibz = ebands_dense%nkpt
 
  !4.
  write(std_out,*) 'map bz -> ibz'
  ABI_MALLOC(eph_dg%bz2ibz_dense,(eph_dg%dense_nbz))
- call eph_double_grid_bz2ibz(eph_dg, eph_dg%kpts_dense_ibz, eph_dg%dense_nibz,&
-                             cryst%symrel, cryst%nsym, eph_dg%bz2ibz_dense, timrev1)
+ call eph_double_grid_bz2ibz(eph_dg, ebands_dense%kptns, eph_dg%dense_nibz,&
+                             cryst%symrel, cryst%nsym, eph_dg%bz2ibz_dense, timrev)
 
-#if 0
- ABI_MALLOC(indkk,(eph_dg%dense_nbz,6))
- call listkk(dksqmax, cryst%gmet, indkk, eph_dg%kpts_dense_ibz, eph_dg%kpts_dense,&
-             eph_dg%dense_nibz, eph_dg%dense_nbz, cryst%nsym,&
-             sppoldbl1, cryst%symafm, cryst%symrel, timrev1, use_symrec=.False.)
+ !ABI_MALLOC(indkk,(eph_dg%dense_nbz,6))
+ !call listkk(dksqmax, cryst%gmet, indkk, ebands_dense%kptns, eph_dg%kpts_dense,&
+ !            eph_dg%dense_nibz, eph_dg%dense_nbz, cryst%nsym,&
+ !            sppoldbl1, cryst%symafm, cryst%symrel, timrev, use_symrec=.False.)
 
- do ii=1,eph_dg%dense_nbz
-   ABI_CHECK((indkk(ii,1)==eph_dg%bz2ibz_dense(ii)),'Unmatching indexes')
- end do
- ABI_FREE(indkk)
-#endif
+ !do ii=1,eph_dg%dense_nbz
+ !  ABI_CHECK((indkk(ii,1)==eph_dg%bz2ibz_dense(ii)),'Unmatching indexes')
+ !end do
+ !ABI_FREE(indkk)
 
 end function eph_double_grid_new
 !!***
@@ -377,11 +362,6 @@ end function eph_double_grid_new
 !!
 !! INPUTS
 !!
-!! PARENTS
-!!      m_sigmaph
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine eph_double_grid_free(self)
@@ -390,9 +370,6 @@ subroutine eph_double_grid_free(self)
 
  ABI_SFREE(self%weights_dense)
  ABI_SFREE(self%bz2ibz_dense)
- ABI_SFREE(self%kpts_coarse)
- ABI_SFREE(self%kpts_dense)
- ABI_SFREE(self%kpts_dense_ibz)
  ABI_SFREE(self%coarse_to_dense)
  ABI_SFREE(self%dense_to_indexes)
  ABI_SFREE(self%indexes_to_dense)
@@ -400,6 +377,8 @@ subroutine eph_double_grid_free(self)
  ABI_SFREE(self%indexes_to_coarse)
  ABI_SFREE(self%bz2lgkibz)
  ABI_SFREE(self%mapping)
+
+ call ebands_free(self%ebands_dense)
 
 end subroutine eph_double_grid_free
 !!***
@@ -415,11 +394,6 @@ end subroutine eph_double_grid_free
 !! INPUTS
 !!   kpt=kpoint to be mapped (reduced coordinates)
 !!   opt=Map to the coarse (1) or dense grid (2)
-!!
-!! PARENTS
-!!      m_sigmaph
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -449,7 +423,7 @@ integer function eph_double_grid_get_index(self,kpt,opt) result(ikpt)
              mod(nint((wrap_kpt(2)+2)*self%nkpt_dense(2)),self%nkpt_dense(2))+1,&
              mod(nint((wrap_kpt(3)+2)*self%nkpt_dense(3)),self%nkpt_dense(3))+1)
  else
-   MSG_ERROR(sjoin("Error in eph_double_grid_get_index opt. Possible values are 1 or 2. Got", itoa(opt)))
+   ABI_ERROR(sjoin("Error in eph_double_grid_get_index opt. Possible values are 1 or 2. Got", itoa(opt)))
  endif
 
 end function eph_double_grid_get_index
@@ -473,10 +447,6 @@ end function eph_double_grid_get_index
 !!  bz2ibz: indexes mapping bz to ibz
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -527,21 +497,21 @@ subroutine eph_double_grid_bz2ibz(self,kpt_ibz,nibz,symmat,nsym,bz2ibz,timrev,ma
        call wrap2_pmhalf(kpt_sym(1),wrap_kpt(1),shift)
        call wrap2_pmhalf(kpt_sym(2),wrap_kpt(2),shift)
        call wrap2_pmhalf(kpt_sym(3),wrap_kpt(3),shift)
-       ik_bz = eph_double_grid_get_index(self,wrap_kpt,2)
+       ik_bz = self%get_index(wrap_kpt, 2)
 
        ! check if applying this symmetry operation to kpt gives kpt_dense
        if (bz2ibz(ik_bz)==0) then
-       if (((self%kpts_dense(1,ik_bz)-wrap_kpt(1))**2+&
-            (self%kpts_dense(2,ik_bz)-wrap_kpt(2))**2+&
-            (self%kpts_dense(3,ik_bz)-wrap_kpt(3))**2)<tol6) then
-         bz2ibz(ik_bz) = ik_ibz
-         if (present(mapping)) then
-           mapping(ik_bz,1) = isym
-           mapping(ik_bz,2) = itimrev
-         endif
-         counter = counter + 1
-         if (counter==self%dense_nbz) exit outer
-       end if
+       !if (((self%kpts_dense(1,ik_bz)-wrap_kpt(1))**2+&
+       !     (self%kpts_dense(2,ik_bz)-wrap_kpt(2))**2+&
+       !     (self%kpts_dense(3,ik_bz)-wrap_kpt(3))**2)<tol6) then
+       bz2ibz(ik_bz) = ik_ibz
+       if (present(mapping)) then
+         mapping(ik_bz,1) = isym
+         mapping(ik_bz,2) = itimrev
+       endif
+       counter = counter + 1
+       if (counter==self%dense_nbz) exit outer
+       !end if
        end if
      end do
    end do
@@ -552,18 +522,14 @@ subroutine eph_double_grid_bz2ibz(self,kpt_ibz,nibz,symmat,nsym,bz2ibz,timrev,ma
    ABI_CHECK(bz2ibz(ik_bz).ne.0,'Mapping not found')
  end do
 
- !call cwtime(cpu,wall,gflops,"stop")
- !write(msg,'(2(a,f8.2))') "little group of k mapping cpu:",cpu,", wall:",wall
- !call wrtout(std_out, msg, do_flush=.True.)
-
 end subroutine eph_double_grid_bz2ibz
 !!***
 
 !----------------------------------------------------------------------
 
-!!****f* m_sigmaph/eph_double_grid_mapping
+!!****f* m_sigmaph/eph_double_grid_get_mapping
 !! NAME
-!!  eph_double_grid_mapping
+!!  eph_double_grid_get_mapping
 !!
 !! FUNCTION
 !!  Campute mapping of k, k+q and q to the indexes in the double grid structure
@@ -573,10 +539,6 @@ end subroutine eph_double_grid_bz2ibz
 !!
 !! OUTPUT
 !!  mapping: array with the mapping of k, k+q and q to the BZ and IBZ of the double grid structure
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -591,9 +553,9 @@ subroutine eph_double_grid_get_mapping(self,kk,kq,qpt)
  integer :: ik_bz, ikq_bz, iq_bz
  integer :: ik_ibz_fine,iq_ibz_fine,ikq_ibz_fine,ik_bz_fine,ikq_bz_fine,iq_bz_fine
 
- ik_bz  = eph_double_grid_get_index(self,kk,1)
- ikq_bz = eph_double_grid_get_index(self,kq,1)
- iq_bz  = eph_double_grid_get_index(self,qpt,1)
+ ik_bz  = self%get_index(kk, 1)
+ ikq_bz = self%get_index(kq, 1)
+ iq_bz  = self%get_index(qpt, 1)
 
  ik_bz_fine  = self%coarse_to_dense(ik_bz,1)
  ik_ibz_fine = self%bz2ibz_dense(ik_bz_fine)

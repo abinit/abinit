@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_pred_nose
 !! NAME
 !!  m_pred_nose
@@ -7,14 +6,10 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2019 ABINIT group (DCA, XG, GMR, JCC, SE)
+!!  Copyright (C) 1998-2024 ABINIT group (DCA, XG, GMR, JCC, SE)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -80,12 +75,6 @@ contains
 !! SIDE EFFECTS
 !! hist <type(abihist)> : History of positions,forces acell, rprimd, stresses
 !!
-!! PARENTS
-!!      mover
-!!
-!! CHILDREN
-!!      hist2var,metric,var2hist,wrtout,xcart2xred,xred2xcart
-!!
 !! SOURCE
 
 subroutine pred_nose(ab_mover,hist,itime,ntime,zDEBUG,iexit)
@@ -121,7 +110,6 @@ subroutine pred_nose(ab_mover,hist,itime,ntime,zDEBUG,iexit)
  real(dp) :: gmet(3,3)
  real(dp) :: rmet(3,3)
  real(dp) :: fcart(3,ab_mover%natom)
-!real(dp) :: fred_corrected(3,ab_mover%natom)
  real(dp) :: xred(3,ab_mover%natom),xred_next(3,ab_mover%natom)
  real(dp) :: xcart(3,ab_mover%natom),xcart_next(3,ab_mover%natom)
  real(dp) :: vel(3,ab_mover%natom),vel_temp(3,ab_mover%natom)
@@ -136,12 +124,8 @@ subroutine pred_nose(ab_mover,hist,itime,ntime,zDEBUG,iexit)
 !***************************************************************************
 
  if(iexit/=0)then
-   if (allocated(fcart_m))     then
-     ABI_DEALLOCATE(fcart_m)
-   end if
-   if (allocated(fcart_mold))  then
-     ABI_DEALLOCATE(fcart_mold)
-   end if
+    ABI_SFREE(fcart_m)
+    ABI_SFREE(fcart_mold)
    return
  end if
 
@@ -150,19 +134,15 @@ subroutine pred_nose(ab_mover,hist,itime,ntime,zDEBUG,iexit)
 !### 01. Allocate the arrays fcart_m and fcart_mold
 
  if(itime==1)then
-   if (allocated(fcart_m))     then
-     ABI_DEALLOCATE(fcart_m)
-   end if
-   if (allocated(fcart_mold))  then
-     ABI_DEALLOCATE(fcart_mold)
-   end if
+   ABI_SFREE(fcart_m)
+   ABI_SFREE(fcart_mold)
  end if
 
  if(.not.allocated(fcart_m))     then
-   ABI_ALLOCATE(fcart_m,(3,ab_mover%natom))
+   ABI_MALLOC(fcart_m,(3,ab_mover%natom))
  end if
  if(.not.allocated(fcart_mold))  then
-   ABI_ALLOCATE(fcart_mold,(3,ab_mover%natom))
+   ABI_MALLOC(fcart_mold,(3,ab_mover%natom))
  end if
 
 !write(std_out,*) 'nose 02'
@@ -185,19 +165,6 @@ subroutine pred_nose(ab_mover,hist,itime,ntime,zDEBUG,iexit)
  do ii=1,3
    write(std_out,*) rmet(ii,:)
  end do
-
-!Get rid of mean force on whole unit cell, but only if no
-!generalized constraints are in effect
-!  call fcart2fred(fcart,fred_corrected,rprimd,ab_mover%natom)
-!  if(ab_mover%nconeq==0)then
-!    amass_tot=sum(ab_mover%amass(:))
-!    do ii=1,3
-!      if (ii/=3.or.ab_mover%jellslab==0) then
-!        favg=sum(fred_corrected(ii,:))/dble(ab_mover%natom)
-!        fred_corrected(ii,:)=fred_corrected(ii,:)-favg*ab_mover%amass(:)/amass_tot
-!      end if
-!    end do
-!  end if
 
 !write(std_out,*) 'nose 03'
 !##########################################################

@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_forctqmc
 !! NAME
 !!  m_forctqmc
@@ -7,7 +6,7 @@
 !! Prepare CTQMC and call CTQMC
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2019 ABINIT group (BAmadon)
+!! Copyright (C) 2006-2024 ABINIT group (BAmadon, VPlanes)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -15,10 +14,6 @@
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -31,6 +26,38 @@
 MODULE m_forctqmc
 
  use defs_basis
+ use m_errors
+ use m_xmpi
+ use m_abicore
+ use m_Ctqmc
+ use m_CtqmcInterface
+ use m_Ctqmcoffdiag
+ use m_CtqmcoffdiagInterface
+ use m_GreenHyb
+ use m_data4entropyDMFT
+
+ use m_pawang, only : pawang_type
+ use m_crystal, only : crystal_t
+ use m_green, only : green_type,occup_green_tau,print_green,printocc_green,spline_fct,copy_green,init_green,destroy_green,&
+& int_fct,greendftcompute_green,fourier_green
+ use m_paw_dmft, only : paw_dmft_type
+ use m_hide_lapack,         only : xginv
+ use m_oper, only : oper_type,destroy_oper,init_oper,inverse_oper
+ use m_self, only : self_type
+ use m_matlu, only : matlu_type,sym_matlu, print_matlu, &
+& diag_matlu,init_matlu,destroy_matlu,rotate_matlu,checkdiag_matlu,checkreal_matlu, &
+& copy_matlu, diff_matlu, slm2ylm_matlu, shift_matlu, prod_matlu,fac_matlu,&
+& add_matlu,printplot_matlu,identity_matlu,zero_matlu,magmomforb_matlu,magmomfspin_matlu,gather_matlu,trace_matlu, &
+& magmomfzeeman_matlu,chi_matlu
+ use m_hu, only : hu_type,rotatevee_hu,vee_ndim2tndim_hu_r,copy_hu,destroy_hu
+ use m_io_tools, only : flush_unit, open_file
+ use m_datafordmft, only : hybridization_asymptotic_coefficient,compute_levels
+ use m_special_funcs, only : sbf8
+ use m_paw_numeric, only : jbessel=>paw_jbessel
+ use m_paw_correlations, only : calc_vee
+#ifdef HAVE_NETCDF
+  use netcdf !If calling TRIQS via python invocation, write a .nc file
+#endif
 
  implicit none
 
@@ -38,6 +65,10 @@ MODULE m_forctqmc
 
  public :: qmc_prep_ctqmc
  public :: testcode_ctqmc
+ public :: testcode_ctqmc_b
+ public :: ctqmcoutput_to_green
+ public :: ctqmcoutput_printgreen
+ public :: ctqmc_calltriqs
 !!***
 
 contains
@@ -47,13 +78,6 @@ contains
 !!
 !! FUNCTION
 !! Prepare and call the qmc subroutines
-!!
-!! COPYRIGHT
-!! Copyright (C) 1999-2019 ABINIT group (BAmadon,VPlanes)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
 !!  cryst_struc <type(crystal_t)>=crystal structure data
@@ -68,61 +92,10 @@ contains
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      impurity_solve
-!!
-!! CHILDREN
-!!      add_matlu,checkreal_matlu,compute_levels,copy_green,copy_matlu
-!!      ctqmc_triqs_run,ctqmcinterface_finalize,ctqmcinterface_init
-!!      ctqmcinterface_run,ctqmcinterface_setopts,data4entropydmft_setdocc
-!!      destroy_green,destroy_matlu,destroy_oper,diag_matlu,diff_matlu
-!!      fac_matlu,flush_unit,fourier_green,hybridization_asymptotic_coefficient
-!!      identity_matlu,init_green,init_matlu,init_oper,int_fct,inverse_oper
-!!      jbessel,occup_green_tau,print_green,print_matlu,printocc_green
-!!      printplot_matlu,prod_matlu,rotate_matlu,rotatevee_hu,sbf8,shift_matlu
-!!      slm2ylm_matlu,sym_matlu,testcode_ctqmc,vee_ndim2tndim_hu_r,wrtout,xginv
-!!      xmpi_barrier,xmpi_bcast
-!!
 !! SOURCE
 
+
 subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,weiss)
-
- use defs_basis
- use defs_datatypes
- use defs_abitypes
- use m_errors
- use m_xmpi
-
- use m_special_funcs, only : sbf8
- use m_pawang, only : pawang_type
- use m_crystal, only : crystal_t
- use m_green, only : green_type,occup_green_tau,print_green,printocc_green,spline_fct,copy_green,init_green,destroy_green,&
-& int_fct,greenldacompute_green,fourier_green
- use m_paw_dmft, only : paw_dmft_type
- use m_hide_lapack,         only : xginv
- use m_oper, only : oper_type,destroy_oper,init_oper,inverse_oper
- use m_self, only : self_type
- use m_matlu, only : matlu_type,sym_matlu, print_matlu, &
-& diag_matlu,init_matlu,destroy_matlu,rotate_matlu,checkdiag_matlu,checkreal_matlu, &
-& copy_matlu, diff_matlu, slm2ylm_matlu, shift_matlu, prod_matlu,fac_matlu,&
-& add_matlu,printplot_matlu,identity_matlu
- use m_hu, only : hu_type,rotatevee_hu,vee_ndim2tndim_hu_r
- use m_Ctqmc
- use m_CtqmcInterface
- use m_Ctqmcoffdiag
- use m_CtqmcoffdiagInterface
- use m_GreenHyb
- use m_data4entropyDMFT
- !use m_self, only : self_type,initialize_self,destroy_self,print_self,rw_self
- use m_io_tools, only : flush_unit, open_file
- use m_paw_numeric, only : jbessel=>paw_jbessel
- use m_datafordmft, only : hybridization_asymptotic_coefficient,compute_levels
-
-#if defined HAVE_TRIQS_v2_0 || defined HAVE_TRIQS_v1_4
- use TRIQS_CTQMC !Triqs module
-#endif
- use ISO_C_BINDING
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -138,15 +111,17 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
 
 !Local variables ------------------------------
  character(len=500) :: message
- character(len=2) :: gtau_iter,iatomnb
- integer :: iatom,ierr,if1,if2,iflavor,iflavor1,iflavor2,iflavor3,ifreq,im,im1,ispinor,ispinor1,isppol,itau,itypat,im2,ispinor2
+ integer :: iatom,ierr,if1,if2,iflavor1,iflavor2,ifreq,im1,ispinor,ispinor1,isppol,itau,itypat,im2,ispinor2
  integer :: lpawu,master,mbandc,natom,nflavor,nkpt,nspinor,nsppol,nsppol_imp,tndim,ispa,ispb,ima,imb
  integer :: nproc,opt_diag,opt_nondiag,testcode,testrot,dmft_nwlo,opt_fk,useylm,nomega,opt_rot
- integer :: ier,rot_type_vee
+ integer :: ier,rot_type_vee,icomp
+ real(dp) :: f4of2_sla,f6of2_sla
  complex(dpc) :: omega_current,integral(2,2)
- real(dp) :: doccsum,noise,omega
- real(dp) :: facd,facnd
+ real(dp) :: doccsum,noise,omega,EE
  logical :: nondiaglevels
+ complex(dpc), allocatable :: muorb
+ complex(dpc), allocatable :: muspin
+ complex(dpc), allocatable :: muzeem
 ! arrays
  real(dp), allocatable :: docc(:,:)
  real(dp), allocatable, target :: gtmp(:,:), levels_ctqmc(:) !modif
@@ -154,7 +129,6 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
  complex(dpc), allocatable :: hybri_limit(:,:)
  real(dp), allocatable, target :: gtmp_nd(:,:,:)
  real(dp) :: umod(2,2)
- character(len=30) :: tmpfil
  complex(dpc), allocatable :: fw1(:,:),gw_tmp(:,:)
  complex(dpc), allocatable, target :: gw_tmp_nd(:,:,:) !modif
  complex(dpc), allocatable, target :: fw1_nd(:,:,:) !modif
@@ -162,6 +136,10 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
  complex(dpc), allocatable :: shift(:)
  integer,parameter :: optdb=0
  type(coeff2_type), allocatable :: udens_atoms(:)
+ type(coeff2_type), allocatable :: udens_atoms_for_s(:)
+ type(coeff2c_type), allocatable :: magmom_orb(:)
+ type(coeff2c_type), allocatable :: magmom_spin(:)
+ type(coeff2c_type), allocatable :: magmom_tot(:)
 ! Type    -----------------------------------------
  type(coeff2c_type), allocatable :: eigvectmatlu(:,:)
  type(green_type)  :: weiss_for_rot
@@ -170,51 +148,30 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
  type(matlu_type), allocatable :: matlu2(:)
  type(matlu_type), allocatable :: matlu3(:)
  type(matlu_type), allocatable :: matlu4(:)
+ type(matlu_type), allocatable :: matlumag(:)
+ type(matlu_type), allocatable :: matlumag_orb(:)
+ type(matlu_type), allocatable :: matlumag_spin(:)
+ type(matlu_type), allocatable :: matlumag_tot(:)
  type(matlu_type), allocatable :: identity(:)
  type(matlu_type), allocatable :: level_diag(:)
  type(oper_type)  :: energy_level
+ type(hu_type), allocatable :: hu_for_s(:)
  !type(self_type) :: self
 ! type(green_type) :: gw_loc
  type(CtqmcInterface) :: hybrid   !!! WARNING THIS IS A BACKUP PLAN
  type(CtqmcoffdiagInterface) :: hybridoffdiag   !!! WARNING THIS IS A BACKUP PLAN
- type(green_type) :: greenlda
+ type(green_type) :: greendft
  type(matlu_type), allocatable  :: hybri_coeff(:)
+ integer :: unt,unt2
 ! Var added to the code for TRIQS_CTQMC test and default value -----------------------------------------------------------
- logical(kind=1) :: rot_inv = .false.
  logical(kind=1) :: leg_measure = .true.
-#if defined HAVE_TRIQS_v2_0 || defined HAVE_TRIQS_v1_4
- logical(kind=1) :: hist = .false.
- logical(kind=1) :: wrt_files = .true.
- logical(kind=1) :: tot_not = .true.
-#endif
-
- integer :: nfreq,unt,unt2
- integer :: ntau ! >= 2*nfreq + 1
- integer :: nleg
- integer :: ileg
- integer :: verbosity_solver ! min 0 -> max 3
-
- real(dp) :: beta,besp,bespp,xx
- complex(dpc) :: u_nl
-
- complex(dpc), allocatable, target ::fw1_nd_tmp(:,:,:)
- complex(dpc), allocatable, target :: g_iw(:,:,:)
- real(dp), allocatable, target :: u_mat_ij(:,:)
- real(dp), allocatable, target :: u_mat_ijkl(:,:,:,:)
- real(dp), allocatable, target :: u_mat_ijkl_tmp(:,:,:,:)
-!  real(dp), allocatable, target :: gtau(:,:,:)
- real(dp), allocatable, target :: gl_nd(:,:,:)
- real(dp), allocatable :: jbes(:)
-
- type(c_ptr) :: levels_ptr, fw1_nd_ptr, u_mat_ij_ptr, u_mat_ijkl_ptr, g_iw_ptr, gtau_ptr, gl_ptr
-
 ! ************************************************************************
  mbandc=paw_dmft%mbandc
  nkpt=paw_dmft%nkpt
  nsppol=paw_dmft%nsppol
  natom=paw_dmft%natom
  nspinor=paw_dmft%nspinor
- greenlda%whichgreen="LDA"
+ greendft%whichgreen="DFT"
 
  call init_green(weiss_for_rot,paw_dmft,opt_oper_ksloc=2)
 ! weiss_for_rot=>weiss
@@ -235,10 +192,19 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
 ! ======================================
 ! Allocations: diagonalization and eigenvectors
 ! ======================================
- ABI_DATATYPE_ALLOCATE(udens_atoms,(natom))
- ABI_DATATYPE_ALLOCATE(eigvectmatlu,(natom,nsppol))
- ABI_DATATYPE_ALLOCATE(dmat_diag,(natom))
- ABI_DATATYPE_ALLOCATE(identity,(natom))
+ ABI_MALLOC(udens_atoms,(natom))
+ ABI_MALLOC(eigvectmatlu,(natom,nsppol))
+ ABI_MALLOC(magmom_orb,(natom))
+ ABI_MALLOC(matlumag_orb,(natom))
+ ABI_MALLOC(magmom_spin,(natom))
+ ABI_MALLOC(matlumag_spin,(natom))
+ ABI_MALLOC(magmom_tot,(natom))
+ ABI_MALLOC(matlumag_tot,(natom))
+ if(paw_dmft%ientropy==1) then
+   ABI_MALLOC(udens_atoms_for_s,(natom))
+ endif
+ ABI_MALLOC(dmat_diag,(natom))
+ ABI_MALLOC(identity,(natom))
  call init_matlu(natom,nspinor,nsppol,paw_dmft%lpawu,dmat_diag)
  call init_matlu(natom,nspinor,nsppol,paw_dmft%lpawu,identity)
  call identity_matlu(identity,natom)
@@ -247,9 +213,18 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
    if(lpawu/=-1) then
      tndim=nspinor*(2*lpawu+1)
      do isppol=1,nsppol
-       ABI_ALLOCATE(eigvectmatlu(iatom,isppol)%value,(tndim,tndim))
+       ABI_MALLOC(eigvectmatlu(iatom,isppol)%value,(tndim,tndim))
      end do
-     ABI_ALLOCATE(udens_atoms(iatom)%value,(2*(2*lpawu+1),2*(2*lpawu+1)))
+     ABI_MALLOC(udens_atoms(iatom)%value,(2*(2*lpawu+1),2*(2*lpawu+1)))
+     if(paw_dmft%ientropy==1) then
+       ABI_MALLOC(udens_atoms_for_s(iatom)%value,(2*(2*lpawu+1),2*(2*lpawu+1)))
+     endif
+     ABI_MALLOC(magmom_orb(iatom)%value,(2*(2*lpawu+1),2*(2*lpawu+1)))
+     magmom_orb(iatom)%value=czero
+     ABI_MALLOC(magmom_spin(iatom)%value,(2*(2*lpawu+1),2*(2*lpawu+1)))
+     magmom_spin(iatom)%value=czero
+     ABI_MALLOC(magmom_tot(iatom)%value,(2*(2*lpawu+1),2*(2*lpawu+1)))
+     magmom_tot(iatom)%value=czero  
      dmat_diag(iatom)%mat=czero
    end if
  end do
@@ -301,15 +276,15 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
  end if
 
 
-! if(useylm==1.and.opt_diag/=1) MSG_ERROR("useylm==1 and opt_diag/=0 is not possible")
+! if(useylm==1.and.opt_diag/=1) ABI_ERROR("useylm==1 and opt_diag/=0 is not possible")
  if(hu(1)%jpawu_zero.and.nsppol==2) nsppol_imp=2 ! J=0 and nsppol=2
  if(.not.hu(1)%jpawu_zero.or.nsppol/=2) nsppol_imp=1  ! J/=0 ou nsppol=1
 ! =================================================================
-! Compute LDA Green's function to compare to weiss_for_rot (check)
+! Compute DFT Green's function to compare to weiss_for_rot (check)
 ! =================================================================
-! call init_green(greenlda,paw_dmft,opt_oper_ksloc=3)
-! call greenldacompute_green(cryst_struc,greenlda,pawang,paw_dmft)
-!! call copy_green(greenlda,weiss_for_rot,2)
+! call init_green(greendft,paw_dmft,opt_oper_ksloc=3)
+! call greendftcompute_green(cryst_struc,greendft,pawang,paw_dmft)
+!! call copy_green(greendft,weiss_for_rot,2)
 
 ! =================================================================
 ! Compute atomic levels
@@ -397,7 +372,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
 ! =================================================================
 ! Diagonalize atomic levels
 ! =================================================================
-     ABI_DATATYPE_ALLOCATE(level_diag,(natom))
+     ABI_MALLOC(level_diag,(natom))
      call init_matlu(natom,nspinor,nsppol,paw_dmft%lpawu,level_diag)
 
      ! Diagonalise atomic levels (opt_real is necessary, because
@@ -418,7 +393,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
 
 
      call destroy_matlu(level_diag,natom)
-     ABI_DATATYPE_DEALLOCATE(level_diag)
+     ABI_FREE(level_diag)
 
      ! Print diagonalized levels
      ! --------------------------
@@ -432,7 +407,10 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
 &       " == Energy levels Diagonalized for Fermi Level=",paw_dmft%fermie
        call wrtout(std_out,message,'COLL')
      end if
+
      call rotatevee_hu(cryst_struc,hu,nspinor,nsppol,pawprtvol,eigvectmatlu,udens_atoms,rot_type_vee)
+
+
    else if (opt_diag==0) then
      do iatom=1,cryst_struc%natom
        lpawu=paw_dmft%lpawu(iatom)
@@ -483,15 +461,31 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
    end if
 
    !if (.not.hu(1)%jpawu_zero) &
-   !MSG_WARNING("In qmc_prep_ctqmc J/=0 and rotation matrix not rotated")
+   !ABI_WARNING("In qmc_prep_ctqmc J/=0 and rotation matrix not rotated")
 !  Rotate interaction.
 !   call rotatevee_hu(cryst_struc,hu,nspinor,nsppol,pawprtvol,eigvectmatlu,udens_atoms)
    call rotatevee_hu(cryst_struc,hu,nspinor,nsppol,pawprtvol,eigvectmatlu,udens_atoms,rot_type_vee)
+
 
  end if
 ! ===========================================================================================
 ! END Of diagonalization
 ! ===========================================================================================
+     if(paw_dmft%ientropy==1) then
+       ABI_MALLOC(hu_for_s,(cryst_struc%ntypat))
+       ! Usefull to compute interaction energy for U=1 J=J/U when U=0.
+       call copy_hu(cryst_struc%ntypat,hu,hu_for_s)
+       f4of2_sla=-1_dp
+       f6of2_sla=-1_dp
+       do itypat=1,cryst_struc%ntypat
+         call calc_vee(f4of2_sla,f6of2_sla,paw_dmft%j_for_s/paw_dmft%u_for_s,hu_for_s(itypat)%lpawu,pawang,one,hu_for_s(itypat)%vee)
+       enddo
+       call rotatevee_hu(cryst_struc,hu_for_s,nspinor,nsppol,pawprtvol,eigvectmatlu,udens_atoms_for_s,rot_type_vee)
+       call destroy_hu(hu_for_s,cryst_struc%ntypat,paw_dmft%dmftqmc_t2g,paw_dmft%dmftqmc_x2my2d)
+!      udens_atoms_for_s will be used later.
+       ABI_FREE(hu_for_s)
+     endif
+
 
  call flush_unit(std_out)
 
@@ -549,7 +543,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
 ! information.
 !====================================================================
  if(opt_diag==1) then
-   ABI_DATATYPE_ALLOCATE(matlu1,(natom))
+   ABI_MALLOC(matlu1,(natom))
    call init_matlu(natom,nspinor,nsppol,paw_dmft%lpawu,matlu1)
    call copy_matlu(green%occup%matlu,matlu1,natom)
    if(pawprtvol>=3) then
@@ -578,7 +572,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
    call print_matlu(matlu1,natom,1,compl=1)
    call checkreal_matlu(matlu1,natom,tol10)
    call destroy_matlu(matlu1,natom)
-   ABI_DATATYPE_DEALLOCATE(matlu1)
+   ABI_FREE(matlu1)
 
  end if
 
@@ -592,12 +586,12 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
   ! Rotate Weiss function first in Ylm basis
   ! -------------------------------------------------------------------
  if(useylm==1) then
-   write(message,'(a,2x,a)') ch10, " == Rotation of weiss and greenlda in the Ylm Basis="
+   write(message,'(a,2x,a)') ch10, " == Rotation of weiss and greendft in the Ylm Basis="
    call wrtout(std_out,message,'COLL')
    do ifreq=1,paw_dmft%dmft_nwlo
      call slm2ylm_matlu(weiss_for_rot%oper(ifreq)%matlu,natom,1,0)
      call slm2ylm_matlu(weiss%oper(ifreq)%matlu,natom,1,0)
-     ! call slm2ylm_matlu(greenlda%oper(ifreq)%matlu,natom,1,0)
+     ! call slm2ylm_matlu(greendft%oper(ifreq)%matlu,natom,1,0)
    end do
  end if
 
@@ -618,17 +612,17 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
    call wrtout(std_out,message,'COLL') ! debug
    call print_matlu(weiss_for_rot%oper(paw_dmft%dmft_nwlo)%matlu,natom,1,compl=1) !  debug
 !    write(message,'(a,2x,a,f13.5)') ch10,& ! debug
-!&   " == Print LDA G for 1st freq before rot" ! debug
+!&   " == Print DFT G for 1st freq before rot" ! debug
 !    call wrtout(std_out,message,'COLL') ! debug
-!    call print_matlu(greenlda%oper(1)%matlu,natom,1,compl=1,opt_exp=2) !  debug
+!    call print_matlu(greendft%oper(1)%matlu,natom,1,compl=1,opt_exp=2) !  debug
 !    write(message,'(a,2x,a,f13.5)') ch10,& ! debug
-!&   " == Print LDA G for last freq before rot" ! debug
+!&   " == Print DFT G for last freq before rot" ! debug
 !    call wrtout(std_out,message,'COLL') ! debug
-!    call print_matlu(greenlda%oper(paw_dmft%dmft_nwlo)%matlu,natom,1,compl=1,opt_exp=2) !  debug
+!    call print_matlu(greendft%oper(paw_dmft%dmft_nwlo)%matlu,natom,1,compl=1,opt_exp=2) !  debug
  end if
 
  if(opt_diag/=0) then
-   ! Rotate Weiss function first in Ylm basis then in the rotated basis.
+   ! Rotate Weiss function from the Slm (or Ylm) to the basis of diagonalisation
    ! -------------------------------------------------------------------
    write(message,'(a,2x,a)') ch10, " == Rotation of weiss ="
    call wrtout(std_out,message,'COLL')
@@ -638,17 +632,18 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
 !    call checkdiag_matlu(weiss_for_rot%oper(ifreq)%matlu,natom,tol6)
    end do
 
+
    if(paw_dmft%myproc .eq. mod(nproc+1,nproc)) then
-     if (open_file(trim(paw_dmft%filapp)//"_atom__G0w_.dat", message, newunit=unt) /= 0) then
-       MSG_ERROR(message)
+     if (open_file(trim(paw_dmft%filapp)//"_atom_G0w_.dat", message, newunit=unt) /= 0) then
+       ABI_ERROR(message)
      end if
      do ifreq=1,paw_dmft%dmft_nwlo
        write(unt,'(29f21.14)') paw_dmft%omega_lo(ifreq),&
-&       (((weiss_for_rot%oper(ifreq)%matlu(1)%mat(im1,im1,isppol,ispinor,ispinor),&
+&       (((weiss_for_rot%oper(ifreq)%matlu(natom)%mat(im1,im1,isppol,ispinor,ispinor),&
 &       im1=1,3),ispinor=1,nspinor),isppol=1,nsppol)
      end do
      close(unt)
-   end if
+  end if
 
    call flush_unit(std_out)
    if(pawprtvol>=3) then
@@ -662,24 +657,24 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
      call print_matlu(weiss_for_rot%oper(paw_dmft%dmft_nwlo)%matlu,natom,1,compl=1) ! debug
    end if
 
-!   ! Rotate LDA Green's function first in Ylm basis then in the rotated basis and compare to weiss_for_rot
+!   ! Rotate DFT Green's function first in Ylm basis then in the rotated basis and compare to weiss_for_rot
 !   ! -----------------------------------------------------------------------------------------------------
-!   write(message,'(a,2x,a)') ch10, " == Rotation of greenlda ="
+!   write(message,'(a,2x,a)') ch10, " == Rotation of greendft ="
 !   call wrtout(std_out,message,'COLL')
 !   do ifreq=1,paw_dmft%dmft_nwlo
-!     if(opt_rot==1) call rotate_matlu(greenlda%oper(ifreq)%matlu,eigvectmatlu,natom,3,1)
-!     call diff_matlu("Weiss_for_rot","greenlda",weiss_for_rot%oper(ifreq)%matlu,greenlda%oper(ifreq)%matlu,natom,1,tol14)
+!     if(opt_rot==1) call rotate_matlu(greendft%oper(ifreq)%matlu,eigvectmatlu,natom,3,1)
+!     call diff_matlu("Weiss_for_rot","greendft",weiss_for_rot%oper(ifreq)%matlu,greendft%oper(ifreq)%matlu,natom,1,tol14)
 !!    call checkdiag_matlu(weiss_for_rot%oper(ifreq)%matlu,natom,tol6)
 !   end do
 !   if(pawprtvol>=3) then
 !     write(message,'(a,2x,a,f13.5)') ch10,& ! debug
-!&    " == Print greenlda for small freq 1 after rot" ! debug
+!&    " == Print greendft for small freq 1 after rot" ! debug
 !     call wrtout(std_out,message,'COLL') ! debug
-!     call print_matlu(greenlda%oper(1)%matlu,natom,1,compl=1,opt_exp=2) !  debug
+!     call print_matlu(greendft%oper(1)%matlu,natom,1,compl=1,opt_exp=2) !  debug
 !     write(message,'(a,2x,a,f13.5)') ch10,&   ! debug
-!&    " == Print greenlda for last freq after rot"   ! debug
+!&    " == Print greendft for last freq after rot"   ! debug
 !     call wrtout(std_out,message,'COLL')   ! debug
-!     call print_matlu(greenlda%oper(paw_dmft%dmft_nwlo)%matlu,natom,1,compl=1,opt_exp=2) ! debug
+!     call print_matlu(greendft%oper(paw_dmft%dmft_nwlo)%matlu,natom,1,compl=1,opt_exp=2) ! debug
 !   end if
 !   call flush_unit(std_out)
  end if
@@ -687,7 +682,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
 ! =================================================================
 ! Compute analytic limit of hybridization and rotate it
 ! =================================================================
- ABI_DATATYPE_ALLOCATE(hybri_coeff,(paw_dmft%natom))
+ ABI_MALLOC(hybri_coeff,(paw_dmft%natom))
  call init_matlu(paw_dmft%natom,paw_dmft%nspinor,paw_dmft%nsppol,paw_dmft%lpawu,hybri_coeff)
  !write(6,*)"hybri1",hybri_coeff(1)%mat(1,1,1,1,1),paw_dmft%natom,cryst_struc%natom
 
@@ -734,7 +729,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
 
    write(message,'(2a)') ch10,' QMC STOP: DEBUG'
    call wrtout(std_out,message,'COLL')
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 ! =================================================================
 ! Check
@@ -807,8 +802,8 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
 ! Compute inverse of weiss  for each Frequency
 ! ----------------------------------------------
  do ifreq=1,paw_dmft%dmft_nwlo
-   ABI_DATATYPE_ALLOCATE(matlu1,(natom))
-   ABI_DATATYPE_ALLOCATE(matlu2,(natom))
+   ABI_MALLOC(matlu1,(natom))
+   ABI_MALLOC(matlu2,(natom))
    call init_matlu(natom,nspinor,nsppol,paw_dmft%lpawu,matlu1)
    call init_matlu(natom,nspinor,nsppol,paw_dmft%lpawu,matlu2)
 
@@ -847,8 +842,8 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
 
    call destroy_matlu(matlu1,natom)
    call destroy_matlu(matlu2,natom)
-   ABI_DATATYPE_DEALLOCATE(matlu1)
-   ABI_DATATYPE_DEALLOCATE(matlu2)
+   ABI_FREE(matlu1)
+   ABI_FREE(matlu2)
  end do
 
  ! Copy weiss_for_rot into weiss
@@ -872,7 +867,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
 ! Substract frequency from diagonal part
 ! ======================================
 
- ABI_ALLOCATE(shift,(natom))
+ ABI_MALLOC(shift,(natom))
  do ifreq=1,paw_dmft%dmft_nwlo
    shift(:)=cmplx(zero,paw_dmft%omega_lo(ifreq),kind=dp)
 
@@ -897,7 +892,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
 
  ! Print -G_0^+1-iw_n=(F-levels) for last freq in the rotated basis"
  ! ------------------------------------------------------------------
- ABI_DEALLOCATE(shift)
+ ABI_FREE(shift)
  if(pawprtvol>=3) then
    write(message,'(a,2x,a,f13.5)') ch10,&  ! debug
 &  " == Print G_0^-1-iw_n=-(F-levels) for last freq in the rotated basis"  ! debug
@@ -909,10 +904,10 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
 ! ======================================
 
  if(opt_nondiag==1) then
-   ABI_DATATYPE_ALLOCATE(matlu1,(natom))
-   ABI_DATATYPE_ALLOCATE(matlu2,(natom))
-   ABI_DATATYPE_ALLOCATE(matlu3,(natom))
-   ABI_DATATYPE_ALLOCATE(matlu4,(natom))
+   ABI_MALLOC(matlu1,(natom))
+   ABI_MALLOC(matlu2,(natom))
+   ABI_MALLOC(matlu3,(natom))
+   ABI_MALLOC(matlu4,(natom))
    call init_matlu(natom,nspinor,nsppol,paw_dmft%lpawu,matlu1)
    call init_matlu(natom,nspinor,nsppol,paw_dmft%lpawu,matlu2)
    call init_matlu(natom,nspinor,nsppol,paw_dmft%lpawu,matlu3)
@@ -1019,14 +1014,75 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
    call destroy_matlu(matlu2,natom)
    call destroy_matlu(matlu3,natom)
    call destroy_matlu(matlu4,natom)
-   ABI_DATATYPE_DEALLOCATE(matlu1)
-   ABI_DATATYPE_DEALLOCATE(matlu2)
-   ABI_DATATYPE_DEALLOCATE(matlu3)
-   ABI_DATATYPE_DEALLOCATE(matlu4)
- end if
+   ABI_FREE(matlu1)
+   ABI_FREE(matlu2)
+   ABI_FREE(matlu3)
+   ABI_FREE(matlu4)
+ end if ! if opt_nondiag=1
+
+ ! =======================
+ ! 
+ ! Rotation of Magnetic moment for CT-QMC
+ !
+ ! =======================
+ if(nspinor .eq. 2 .and. paw_dmft%dmftctqmc_config .gt. 1) then
+   write(message,'(a,2x,2a)') ch10, " == Making rotation for magnetic moments", ch10
+   call wrtout(std_out,message,'COLL')
+
+   !create a rotation matrix for diagonal Hamiltonian 
+   if(opt_diag == 0) then
+     write(message,'(a,2x,2a)') ch10, " --> Hamiltonian is already diagonal in Slm", ch10                 
+     call wrtout(std_out,message,'COLL')
+     do iatom = 1,paw_dmft%natom
+       if(paw_dmft%lpawu(iatom) /= -1) then
+         do iflavor1=1,tndim
+           do iflavor2=1,tndim
+             if(iflavor1==iflavor2) then
+               eigvectmatlu(iatom,1)%value(iflavor1,iflavor2)=cone
+             else
+               eigvectmatlu(iatom,1)%value(iflavor1,iflavor2)=czero
+             end if 
+           end do
+         end do
+       end if 
+     end do
+   end if !end opt_diag=0
+
+   ! == orbital angular momentum
+   call init_matlu(natom=natom,nspinor=paw_dmft%nspinor,nsppol=paw_dmft%nsppol,lpawu_natom=paw_dmft%lpawu,matlu=matlumag_orb)
+   call zero_matlu(matlumag_orb,natom=natom)
+   call chi_matlu(matlumag_orb,natom=natom,option=1,optprt=0)
+   call rotate_matlu(matlumag_orb,eigvectmatlu,natom=natom,prtopt=3,inverse=1)
+   !call print_matlu(matlumag_orb,iatom,prtopt=1)
+   call gather_matlu(matlumag_orb,magmom_orb,natom=natom,option=1,prtopt=0)
+   call destroy_matlu(matlumag_orb,natom=natom)
+  
+   ! == spin angular momentum
+   call init_matlu(natom=natom,nspinor=paw_dmft%nspinor,nsppol=paw_dmft%nsppol,lpawu_natom=paw_dmft%lpawu,matlu=matlumag_spin)
+   call zero_matlu(matlumag_spin,natom=natom)
+   call chi_matlu(matlumag_spin,natom=natom,option=2,optprt=0)
+   call rotate_matlu(matlumag_spin,eigvectmatlu,natom=natom,prtopt=3,inverse=1)
+   !call print_matlu(matlumag_spin,natom,prtopt=1)
+   call gather_matlu(matlumag_spin,magmom_spin,natom=natom,option=1,prtopt=0)
+   call destroy_matlu(matlumag_spin,natom=natom)
+   
+   ! == total angular momentum
+   call init_matlu(natom=natom,nspinor=paw_dmft%nspinor,nsppol=paw_dmft%nsppol,lpawu_natom=paw_dmft%lpawu,matlu=matlumag_tot)
+   call zero_matlu(matlumag_tot,natom=natom)
+   call chi_matlu(matlumag_tot,natom=natom,option=3,optprt=0)
+   call rotate_matlu(matlumag_tot,eigvectmatlu,natom=natom,prtopt=3,inverse=1)
+   !call print_matlu(matlumag_tot,natom=1,prtopt=1)
+   call gather_matlu(matlumag_tot,magmom_tot,natom=natom,option=1,prtopt=0)
+   call destroy_matlu(matlumag_tot,natom=natom)
+ 
+   write(message,'(a,2x,2a)') ch10, " ==> Rotation done", ch10       
+   call wrtout(std_out,message,'COLL')                                                     
+   
+ end if ! dmftctqmc_config
+ !======================
 
 ! =========================================================================================
-! Start big loop to compute hybridization
+! Start big loop over atoms to compute hybridization and do the CTQMC
 ! =========================================================================================
  do iatom=1,cryst_struc%natom
    green%ecorr_qmc(iatom)=zero
@@ -1051,42 +1107,36 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
        end if
      end if
 
-     !allocate(correl_loc(nflavor,nflavor))
-     !ABI_ALLOCATE(f_with_k,(MIN(paw_dmft%dmft_nwli,paw_dmft%dmftqmc_l),nflavor))
-     ABI_ALLOCATE(fw1,(paw_dmft%dmft_nwlo,nflavor))
-     ABI_ALLOCATE(fw1_nd,(paw_dmft%dmft_nwlo,nflavor,nflavor))
-     ABI_ALLOCATE(levels_ctqmc,(nflavor))
-     ABI_ALLOCATE(levels_ctqmc_nd,(nflavor,nflavor))
+     ABI_MALLOC(fw1,(paw_dmft%dmft_nwlo,nflavor))
+     ABI_MALLOC(fw1_nd,(paw_dmft%dmft_nwlo,nflavor,nflavor))
+     ABI_MALLOC(levels_ctqmc,(nflavor))
+     ABI_MALLOC(levels_ctqmc_nd,(nflavor,nflavor))
      levels_ctqmc_nd=czero
-     ABI_ALLOCATE(hybri_limit,(nflavor,nflavor))
+     ABI_MALLOC(hybri_limit,(nflavor,nflavor))
      hybri_limit=czero
      fw1_nd=czero
      fw1=czero
-     !allocate(fw2(paw_dmft%dmft_nwli))
-! =================================================================
-! Compute Hybridization
-! =================================================================
 
+     ! =================================================================
+     ! Put hybridization in new arrays for CTQMC
+     ! =================================================================
      if (testcode==0) then
        iflavor1=0
        iflavor2=0
+
        do isppol=1,nsppol
          do ispinor1=1,nspinor
            do ispinor2=1,nspinor
              do im1=1,tndim
                do im2=1,tndim
+
                  ! first diagonal terms whatever opt_nondiag
                  iflavor1=im1+tndim*(ispinor1-1)+tndim*(isppol-1)
                  iflavor2=im2+tndim*(ispinor2-1)+tndim*(isppol-1)
-                 !write(6,*) isppol,ispinor1,ispinor2,im1,im2
-                 !write(6,*) iflavor1,iflavor2
 
                  if ( iflavor1==iflavor2 ) then
 
-!              Do spline of weiss function for im and isppol
-!              Construction of fw1
-!             =================================================================
-
+                   ! Put weiss_for_rot in fw1
                    do ifreq=1,paw_dmft%dmft_nwlo
                      if(opt_fk==1) then
                        fw1(ifreq,iflavor1)= weiss_for_rot%oper(ifreq)%matlu(iatom)%mat(im1,im1,isppol,ispinor1,ispinor1)
@@ -1100,16 +1150,18 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
                    hybri_limit(iflavor1,iflavor1)=hybri_coeff(iatom)%mat(im1,im1,isppol,ispinor1,ispinor1)
 
 
+                   ! case nsppol=nspinor=1
                    if(nsppol==1.and.nspinor==1) then
-                     !f_with_k(:,iflavor+tndim)=f_with_k(:,iflavor)
                      fw1(:,iflavor1+tndim)=fw1(:,iflavor1)
                      fw1_nd(:,iflavor1+tndim,iflavor1+tndim)=fw1(:,iflavor1)
                      levels_ctqmc(iflavor1+tndim)=levels_ctqmc(iflavor1)
                      hybri_limit(iflavor1+tndim,iflavor1+tndim)=hybri_limit(iflavor1,iflavor1)
                    end if
 
+                 ! off diagonal terms
                  else
 
+                   ! Put weiss_for_rot in fw1_nd
                    do ifreq=1,paw_dmft%dmft_nwlo
                      if(opt_fk==1) then
                        fw1_nd(ifreq,iflavor1,iflavor2)= &
@@ -1118,19 +1170,10 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
                        fw1_nd(ifreq,iflavor1,iflavor2)= &
 &                       weiss_for_rot%oper(ifreq)%matlu(iatom)%mat(im1,im2,isppol,ispinor1,ispinor2)
                      end if
-
-        ! omega=pi*paw_dmft%temp*(two*float(ifreq)-1)
-         !write(3333,*) omega,weiss_for_rot%oper(ifreq)%matlu(iatom)%mat(im1,im2,isppol,ispinor1,ispinor2)
-         !write(4444,*) omega,fw1_nd(ifreq,iflavor1,iflavor2),"#",iflavor1,iflavor2
-        ! if(iflavor1/=iflavor2)write(5555,*) omega,imag(fw1_nd(ifreq,iflavor1,iflavor2)),"#",iflavor1,iflavor2
-
                    end do
                    hybri_limit(iflavor1,iflavor2)=hybri_coeff(iatom)%mat(im1,im2,isppol,ispinor1,ispinor2)
 
-        ! write(3333,*)
-        ! write(4444,*)
-        ! write(5555,*)
-
+                   ! case nsppol=nspinor=1
                    if(nsppol==1.and.nspinor==1) then
                      fw1_nd(:,iflavor1+tndim,iflavor2+tndim) = fw1_nd(:,iflavor1,iflavor2)
                      hybri_limit(iflavor1+tndim,iflavor2+tndim)=hybri_limit(iflavor1,iflavor2)
@@ -1147,6 +1190,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
 ! < HACK >
        ! JB. On 1000 cpus this can not work since all CPU try to open/write the files
        ! Action : Don't print it or check only one cpu does it.
+
        if(pawprtvol>=10000000) then
          write(message,'(a,2x,a)') ch10,  " == Hybri for all flavors for CTQMC "
          call wrtout(std_out,message,'COLL')
@@ -1156,30 +1200,26 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
          end do
 
          if (open_file('Hybri_cijoveromega',message, newunit=unt, status='unknown', form='formatted') /= 0) then
-           MSG_ERROR(message)
+           ABI_ERROR(message)
          end if
          if (open_file('Hybri',message,newunit=unt2,status='unknown',form='formatted') /= 0) then
-           MSG_ERROR(message)
+           ABI_ERROR(message)
          end if
          do ifreq=1,paw_dmft%dmft_nwlo
-!              weiss_for_rot is G_0^-1-iw_n=-(F-levels)
+           !  weiss_for_rot is G_0^-1-iw_n=-(F-levels)
            if(optdb==1) call printplot_matlu(weiss_for_rot%oper(ifreq)%matlu,natom,paw_dmft%omega_lo(ifreq),"weissbefore112",30000)
          end do
          do iflavor1=1,nflavor
            do iflavor2=1,nflavor
              do ifreq=1,paw_dmft%dmft_nwlo
                omega=pi*paw_dmft%temp*(two*float(ifreq)-1)
-!              fw1_nd is -G_0^+1-iw_n=(F-levels)
+               ! fw1_nd is -G_0^+1-iw_n=(F-levels)
                write(unt,'(300e16.5)') paw_dmft%omega_lo(ifreq)&
 &               ,fw1_nd(ifreq,iflavor1,iflavor2)-hybri_limit(iflavor1,iflavor2)/cmplx(0.d0,paw_dmft%omega_lo(ifreq),kind=dp)
                write(unt2,'(300e16.5)') paw_dmft%omega_lo(ifreq),fw1_nd(ifreq,iflavor1,iflavor2)
-               !write(1111,*) omega,real(fw1_nd(ifreq,iflavor1,iflavor2))
-               !write(1112,*) omega,imag(fw1_nd(ifreq,iflavor1,iflavor2))
              end do
              write(unt,*)
              write(unt2,*)
-            ! write(1111,*)
-            ! write(1112,*)
            end do
          end do
          close(unt)
@@ -1188,16 +1228,15 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
      end if ! testcode
    ! </ HACK >
 
-! ====================================================================================
-!  TEST
-!  For testing purpose, built ultra simple hybridization (constant in
-!  imaginary time or very simple) or extract some part of the calculated hybridization
-! ====================================================================================
-
+     ! ====================================================================================
+     !  TEST
+     !  For testing purpose, built ultra simple hybridization (constant in
+     !  imaginary time or very simple) or extract some part of the calculated hybridization
+     ! ====================================================================================
      if(testcode>=1) then
        dmft_nwlo=paw_dmft%dmft_nwlo
        paw_dmft%dmft_nwlo=paw_dmft%dmftqmc_l
-       ABI_ALLOCATE(gw1_nd,(paw_dmft%dmft_nwlo,nflavor,nflavor))
+       ABI_MALLOC(gw1_nd,(paw_dmft%dmft_nwlo,nflavor,nflavor))
        gw1_nd=czero
 
        !  Call testcode_ctqmc: built simple hybridization
@@ -1209,54 +1248,10 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
        !  ima and imb are defined above.
        !----------------------------------------------------------------
        else if (testcode==2) then
-         facnd=0.8d0
-         facd=1.0d0
-         !write(6,*) "fac",facnd,facd
-         levels_ctqmc_nd(2,2)   = energy_level%matlu(iatom)%mat(imb,imb,1,ispb,ispb)
-         levels_ctqmc_nd(1,1)   = energy_level%matlu(iatom)%mat(ima,ima,1,ispa,ispa)
-         levels_ctqmc(2)   = real(energy_level%matlu(iatom)%mat(imb,imb,1,ispb,ispb),kind=dp)
-         levels_ctqmc(1)   = real(energy_level%matlu(iatom)%mat(ima,ima,1,ispa,ispa),kind=dp)
-         if(opt_diag/=1) then
-           levels_ctqmc_nd(1,2)   = energy_level%matlu(iatom)%mat(ima,imb,1,ispa,ispb)
-           levels_ctqmc_nd(2,1)   = energy_level%matlu(iatom)%mat(imb,ima,1,ispb,ispa)
-         end if
-         hybri_limit(1,1)  = facd*hybri_coeff(iatom)%mat(ima,ima,1,ispa,ispa)
-         hybri_limit(2,2)  = facd*hybri_coeff(iatom)%mat(imb,imb,1,ispb,ispb)
-         hybri_limit(1,2)  = facnd*hybri_coeff(iatom)%mat(ima,imb,1,ispa,ispb)
-         hybri_limit(2,1)  = facnd*hybri_coeff(iatom)%mat(imb,ima,1,ispb,ispa)
-         !write(6,*) "hybri_limit",hybri_limit
-         !write(6,*) "levels_ctqmc",levels_ctqmc
-         umod=zero
-
-         tmpfil = 'fw1_nd_re'
-         !if (open_file(newunit=unt,message,file=trim(tmpfil),status='unknown',form='formatted')/=0) then
-         !  MSG_ERROR(message)
-         !end if
-         tmpfil = 'fw1_nd_im'
-         !if (open_file(newunit=unt2,message,file=trim(tmpfil),status='unknown',form='formatted')/=0) then
-         !  MSG_ERROR(message)
-         !end if
-         write(std_out,*) "testcode==2",ispa,ispb,ima,imb
-         write(std_out,*) "opt_fk==",opt_fk
-         do ifreq=1,paw_dmft%dmftqmc_l
-           if (opt_fk==1) then
-             fw1_nd(ifreq,1,1) = facd*weiss_for_rot%oper(ifreq)%matlu(iatom)%mat(ima,ima,1,ispa,ispa)
-             fw1_nd(ifreq,2,2) = facd*weiss_for_rot%oper(ifreq)%matlu(iatom)%mat(imb,imb,1,ispb,ispb)
-             !fw1_nd(ifreq,1,2) =  weiss_for_rot%oper(ifreq)%matlu(iatom)%mat(ima,imb,1,ispa,ispb)
-             !fw1_nd(ifreq,2,1) =  weiss_for_rot%oper(ifreq)%matlu(iatom)%mat(imb,ima,1,ispb,ispa)
-             fw1_nd(ifreq,1,2) = facnd*weiss_for_rot%oper(ifreq)%matlu(iatom)%mat(ima,imb,1,ispa,ispb)
-             fw1_nd(ifreq,2,1) = facnd*weiss_for_rot%oper(ifreq)%matlu(iatom)%mat(imb,ima,1,ispb,ispa)
-             omega=pi*paw_dmft%temp*(two*float(ifreq)-1)
-           else if (opt_fk==0) then
-             fw1_nd(ifreq,1,1) =  facd*weiss_for_rot%oper(ifreq)%matlu(iatom)%mat(ima,ima,1,ispa,ispa)
-             fw1_nd(ifreq,2,2) =  facd*weiss_for_rot%oper(ifreq)%matlu(iatom)%mat(imb,imb,1,ispb,ispb)
-             fw1_nd(ifreq,1,2) =  facnd*weiss_for_rot%oper(ifreq)%matlu(iatom)%mat(ima,imb,1,ispa,ispb)
-             fw1_nd(ifreq,2,1) =  facnd*weiss_for_rot%oper(ifreq)%matlu(iatom)%mat(imb,ima,1,ispb,ispa)
-             call xginv(fw1_nd(ifreq,:,:),2)
-           end if
-         end do
          !close(unt)
          !close(unt2)
+         call testcode_ctqmc_b(energy_level,hybri_coeff,weiss_for_rot,paw_dmft%dmftqmc_l,fw1_nd,&
+&         levels_ctqmc,levels_ctqmc_nd,hybri_limit,paw_dmft%temp,umod,opt_diag,opt_fk)
        end if
 
        ! Calculation of Inverse Green's function from hybridization
@@ -1284,22 +1279,10 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
        !-------------------------------------------------------------
        do if1=1,2
          do if2=1,2
-           do ifreq=1,paw_dmft%dmftqmc_l
-             omega=pi*paw_dmft%temp*(two*float(ifreq)-1)
-             !write(999,*) omega,gw1_nd(ifreq,if1,if2)
-           end do
-           !write(999,*)
            call int_fct(gw1_nd(:,if1,if2),(if1==if2),2,paw_dmft,integral(if1,if2))  ! test_1
-          ! write(std_out,*) "testctqmc occupations of input Green's function",(integral(if1,if2))
          end do
        end do
        ! Write Occupations
-       !-------------------------------------------------------------
-       do if1=1,2
-         do if2=1,2
-          ! write(std_out,*) "testctqmc occupations of input Green's function",(integral(if1,if2)+conjg(integral(if2,if1)))/two
-         end do
-       end do
        write(std_out,*) "Occupation of model in matrix form"
        do if1=1,2
          write(std_out,'(2(2f13.5,3x))') ((integral(if1,if2)+conjg(integral(if2,if1)))/two,if2=1,2)
@@ -1316,9 +1299,12 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
          fw1_nd=gw1_nd
        end if
 
-       ABI_DEALLOCATE(gw1_nd)
+       ABI_FREE(gw1_nd)
        paw_dmft%dmft_nwlo=dmft_nwlo
+
+     ! and testcode>1
      end if
+
 
      call flush_unit(std_out)
 ! =================================================================
@@ -1329,7 +1315,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
 ! ___________________________________________________________________________________
 
 ! =================================================================
-!    Main calls to CTQMC code in ABINIT
+!    Main calls to CTQMC code in ABINIT (INITIALIZATION and OPTIONS)
 ! =================================================================
      if(paw_dmft%dmft_solv==5.or.paw_dmft%dmft_solv==8) then
 
@@ -1343,12 +1329,13 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
        nomega=paw_dmft%dmftqmc_l
        call CtqmcInterface_init(hybrid,paw_dmft%dmftqmc_seed,paw_dmft%dmftqmc_n, &
 &       paw_dmft%dmftqmc_therm, paw_dmft%dmftctqmc_meas,nflavor,paw_dmft%dmftqmc_l,one/paw_dmft%temp,zero,&
-&       std_out,paw_dmft%spacecomm)
+&       std_out,paw_dmft%spacecomm,paw_dmft%nspinor)
 !    options
 ! =================================================================
        call CtqmcInterface_setOpts(hybrid,&
        opt_Fk      =opt_fk,&
 &       opt_order   =paw_dmft%dmftctqmc_order ,&
+&       opt_histo   =paw_dmft%dmftctqmc_config ,&
 &       opt_movie   =paw_dmft%dmftctqmc_mov   ,&
 &       opt_analysis=paw_dmft%dmftctqmc_correl,&
 &       opt_check   =paw_dmft%dmftctqmc_check ,&
@@ -1362,12 +1349,13 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
        call CtqmcoffdiagInterface_init(hybridoffdiag,paw_dmft%dmftqmc_seed,paw_dmft%dmftqmc_n, &
 &        paw_dmft%dmftqmc_therm, paw_dmft%dmftctqmc_meas,nflavor,&
 &        paw_dmft%dmftqmc_l,one/paw_dmft%temp,zero,&
-&        std_out,paw_dmft%spacecomm,opt_nondiag)
+&        std_out,paw_dmft%spacecomm,opt_nondiag,paw_dmft%nspinor)
 !    options
 ! =================================================================
        call CtqmcoffdiagInterface_setOpts(hybridoffdiag,&
        opt_Fk      =opt_fk,&
 &       opt_order   =paw_dmft%dmftctqmc_order ,&
+&       opt_histo   =paw_dmft%dmftctqmc_config ,&
 &       opt_movie   =paw_dmft%dmftctqmc_mov   ,&
 &       opt_analysis=paw_dmft%dmftctqmc_correl,&
 &       opt_check   =paw_dmft%dmftctqmc_check ,&
@@ -1376,523 +1364,161 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
 &       opt_gmove   =paw_dmft%dmftctqmc_gmove )
      endif
 
-       write(message,'(a,2x,2a)') ch10,&
-&       " == Initialization CTQMC done", ch10
+       write(message,'(a,2x,2a)') ch10, " == Initialization CTQMC done", ch10
        call wrtout(std_out,message,'COLL')
      end if
 
-     if(paw_dmft%dmft_solv==6.or.paw_dmft%dmft_solv==7) then
-       ABI_ALLOCATE(gw_tmp_nd,(paw_dmft%dmft_nwli,nflavor,nflavor)) !because size allocation problem with TRIQS paw_dmft%dmft_nwlo must be >= paw_dmft%dmft_nwli
+     if(paw_dmft%dmft_solv==6.or.paw_dmft%dmft_solv==7.or.paw_dmft%dmft_solv==9) then
+       ABI_MALLOC(gw_tmp_nd,(paw_dmft%dmft_nwli,nflavor,nflavor))
+       !because size allocation problem with TRIQS paw_dmft%dmft_nwlo must be >= paw_dmft%dmft_nwli
          open(unit=505,file=trim(paw_dmft%filapp)//"_Legendre_coefficients.dat", status='unknown',form='formatted')
      else
-       if(paw_dmft%dmft_solv==5) ABI_ALLOCATE(gw_tmp,(paw_dmft%dmft_nwlo,nflavor+1))
-       ABI_ALLOCATE(gw_tmp_nd,(paw_dmft%dmft_nwlo,nflavor,nflavor+1))
-!     use  gw_tmp to put freq
+       if(paw_dmft%dmft_solv==5) then
+         ABI_MALLOC(gw_tmp,(paw_dmft%dmft_nwlo,nflavor+1))
+       end if
+       ABI_MALLOC(gw_tmp_nd,(paw_dmft%dmft_nwlo,nflavor,nflavor+1))
+       !use  gw_tmp to put freq
        do ifreq=1,paw_dmft%dmft_nwlo
-          if(paw_dmft%dmft_solv==5) gw_tmp(ifreq,nflavor+1)=cmplx(zero,paw_dmft%omega_lo(ifreq),kind=dp)
+         if(paw_dmft%dmft_solv==5) gw_tmp(ifreq,nflavor+1)=cmplx(zero,paw_dmft%omega_lo(ifreq),kind=dp)
          gw_tmp_nd(ifreq,nflavor,nflavor+1)=cmplx(zero,paw_dmft%omega_lo(ifreq),kind=dp)
        end do
      end if
 
-     ABI_ALLOCATE(gtmp,(paw_dmft%dmftqmc_l,nflavor))
+     ABI_MALLOC(gtmp,(paw_dmft%dmftqmc_l,nflavor))
      ! THIS IS A BACKUP PLAN. USING paw_dmft%hybrid makes a segfault on TIKAL
      ! PSC with MPI only (and max2_open64). paw_dmf%hybrid is corrupted
      ! somewhere but I could not find the place in all DMFT routines
-     ABI_ALLOCATE(gtmp_nd,(paw_dmft%dmftqmc_l,nflavor,nflavor))
+     ABI_MALLOC(gtmp_nd,(paw_dmft%dmftqmc_l,nflavor,nflavor))
      call flush_unit(std_out)
 
-     if(testcode==0) then
-      !unitnb=100000+paw_dmft%myproc
-      !call int2char4(paw_dmft%myproc,tag_proc)
-      !tmpfil = 'hybrilimit'//tag_proc
-      !open (unit=unitnb,file=trim(tmpfil),status='unknown',form='formatted')
-      !do iflavor1=1,nflavor
-      !  do iflavor2=1,nflavor
-      !    write(unitnb,*) iflavor1,iflavor2,hybri_limit(iflavor1,iflavor2)
-      !  enddo
-      !enddo
+     ! =================================================================
+     !    BEGIN CALL TO CTQMC SOLVERS
+     ! =================================================================
 
-! =================================================================
-!    CTQMC run Abinit
-! =================================================================
+     if(testcode==0) then
+
+       ! =================================================================
+       !    CTQMC run Abinit
+       ! =================================================================
        if(paw_dmft%dmft_solv==5) then
 
-         ABI_ALLOCATE(docc,(1:nflavor,1:nflavor))
+         ABI_MALLOC(docc,(1:nflavor,1:nflavor))
          docc(:,:) = zero
+
          call CtqmcInterface_run(hybrid,fw1(1:paw_dmft%dmftqmc_l,:),Gtau=gtmp,&
 &         Gw=gw_tmp,D=docc(:,:),E=green%ecorr_qmc(iatom),&
 !&       matU=hu(itypat)%udens,opt_levels=levels_ctqmc)
-&         matU=udens_atoms(iatom)%value,opt_levels=levels_ctqmc)
+&         matU=udens_atoms(iatom)%value,opt_levels=levels_ctqmc,Magmom_orb=REAL(magmom_orb(iatom)%value),&
+&        Magmom_spin=REAL(magmom_spin(iatom)%value),Magmom_tot=REAL(magmom_tot(iatom)%value),Iatom=iatom,fname=paw_dmft%filapp)
          call data4entropyDMFT_setDocc(paw_dmft%forentropyDMFT,iatom,docc)
-         ABI_DEALLOCATE(docc)
+         ABI_FREE(docc)
+         !DO iflavor = 1, nflavor
+         !  hybrid%Hybrid%Greens(iflavor)%oper(1:this%samples) = gtmp(1:this%samples,iflavor)
+         !  CALL GreenHyb_forFourier(this%Greens(iflavor), Gomega=Gw(:,iflavor), omega=Gw(:,this%flavors+1))
+         !END DO
 
-! =================================================================
-!    CTQMC run TRIQS
-! =================================================================
+       ! =================================================================
+       !    CTQMC run Abinit off diagonal terms in hybridization
+       ! =================================================================
        else if (paw_dmft%dmft_solv==8) then
-         ABI_ALLOCATE(docc,(1:nflavor,1:nflavor))
+       ! =================================================================
+
+         ABI_MALLOC(docc,(1:nflavor,1:nflavor))
          docc(:,:) = zero
+
          call CtqmcoffdiagInterface_run(hybridoffdiag,fw1_nd(1:paw_dmft%dmftqmc_l,:,:),Gtau=gtmp_nd,&
 &        Gw=gw_tmp_nd,D=doccsum,E=green%ecorr_qmc(iatom),&
-&        Noise=noise,matU=udens_atoms(iatom)%value,Docc=docc,opt_levels=levels_ctqmc,hybri_limit=hybri_limit)
-         ABI_DEALLOCATE(docc)
+&        Noise=noise,matU=udens_atoms(iatom)%value,Docc=docc,opt_levels=levels_ctqmc,hybri_limit=hybri_limit,&
+&        Magmom_orb=REAL(magmom_orb(iatom)%value),Magmom_spin=REAL(magmom_spin(iatom)%value),&
+&        Magmom_tot=REAL(magmom_tot(iatom)%value),Iatom=iatom,fname=paw_dmft%filapp)
+
+         ! For entropy (alternative formulation)
+         if(paw_dmft%ientropy==1) then
+           EE=zero
+           do if1=1,nflavor
+             do if2=if1+1,nflavor
+               EE=EE+docc(if1,if2)*udens_atoms_for_s(iatom)%value(if1,if2)
+         !      write(std_out,*) udens_atoms_for_s(iatom)%value(if1,if2),docc(if1,if2)
+             enddo
+           enddo
+           ! Here in udens U=1, J=J/U, so we need to multiply bu U/Ha_eV
+           write(message,'(a,3(f14.10,3x))') "For entropy calculation E_corr_qmc, u_for_s, j_for,s", &
+&          paw_dmft%u_for_s*EE/Ha_eV,paw_dmft%u_for_s,paw_dmft%j_for_s
+           call wrtout(std_out,message,'COLL')
+           EE=zero
+           do if1=1,nflavor
+             do if2=if1+1,nflavor
+               EE=EE+docc(if1,if2)*udens_atoms(iatom)%value(if1,if2)
+         !      write(std_out,*) udens_atoms(iatom)%value(if1,if2),docc(if1,if2)
+             enddo
+           enddo
+           ! Here in udens U=U, J=J, so we obtain directly the results
+           write(message,'(a,3(f14.10,3x))') "Reference   calculation E_corr_qmc, upawu  , jpawu  ", &
+&             EE,hu(itypat)%upawu*Ha_eV,hu(itypat)%jpawu*Ha_eV
+           call wrtout(std_out,message,'COLL')
+         endif
+         ABI_FREE(docc)
        ! TODO: Handle de luj0 case for entropy
 
-       else if (paw_dmft%dmft_solv>=6.and.paw_dmft%dmft_solv<=7) then
+       ! =================================================================
+       !    CTQMC run TRIQS
+       ! =================================================================
+       else if ((paw_dmft%dmft_solv>=6.and.paw_dmft%dmft_solv<=7).or.paw_dmft%dmft_solv==9) then
+       ! =================================================================
 
-       ! fw1_nd: Hybridation
-       ! levels_ctqmc: niveaux
-       ! hu(itypat)%udens(:,:) : U_ij
-       ! hu(itypat)%u(:,:,:,:) : uijkl
-       ! temperature : paw_dmft%temp
-       ! paw_dmft%dmftqmc_l: nombre de points en temps -1
-       ! paw_dmft%dmftqmc_n: nombre de cycles
-       ! ?? Quelles sorties: Les fonctions de Green
-       ! frequence/temps/Legendre.
-       ! Double occupations ?? <n_i n_j>
-       ! test n_tau > 2*nfreq => ntau = 2*nfreq + 1
-!        for non diagonal code:
-!        call CtqmcInterface_run(hybrid,fw1_nd(1:paw_dmft%dmftqmc_l,:,:),Gtau=gtmp_nd,&
-!&       Gw=gw_tmp_nd,D=Doccsum,E=green%ecorr_qmc(iatom),&
-!&       Noise=Noise,matU=hu(itypat)%udens,opt_levels=levels_ctqmc,hybri_limit=hybri_limit)
-       !Check choice of user to fix model bool var for the solver
-         if (paw_dmft%dmft_solv==6) then
-           rot_inv = .false.
-         else !obviously paw_dmft%dmft_solv==7 with rot invariant terms
-           rot_inv = .true.
-         end if
+         if ( paw_dmft%dmft_solv==9.or.(paw_dmft%dmftqmc_l >= (2*paw_dmft%dmft_nwli)+1) ) then
 
-         nfreq = paw_dmft%dmft_nwli
-       !paw_dmft%dmft_nwlo = paw_dmft%dmft_nwli !transparent for user
-         ntau  = paw_dmft%dmftqmc_l !(2*paw_dmft%dmftqmc_l)+1 !nfreq=paw_dmft%dmft_nwli
-         nleg  = paw_dmft%dmftctqmc_triqs_nleg
-
-         if ( ntau >= (2*nfreq)+1 ) then
-
-           verbosity_solver = paw_dmft%prtvol
-           beta = 1.0/(paw_dmft%temp*Ha_eV)
-
-         !Allocation in/output array phase:
-           ABI_ALLOCATE(fw1_nd_tmp,(1:nflavor,1:nflavor,1:nfreq)) !column major
-           ABI_ALLOCATE(g_iw,(1:nflavor,1:nflavor,1:nfreq)) !column major
-!          ABI_ALLOCATE(gtau,(1:nflavor,1:nflavor,1:ntau)) !column major
-           ABI_ALLOCATE(u_mat_ij,(1:nflavor,1:nflavor)) !column major
-           ABI_ALLOCATE(u_mat_ijkl,(1:nflavor,1:nflavor,1:nflavor,1:nflavor)) !column major
-           ABI_ALLOCATE(u_mat_ijkl_tmp,(1:nflavor,1:nflavor,1:nflavor,1:nflavor)) !column major
-
-           if ( leg_measure ) then !only if functionality is enabled
-             ABI_ALLOCATE(gl_nd,(1:nleg,1:nflavor,1:nflavor)) !column major !nl = 30 by default
-           end if
-
-       !Conversion datas Ha -> eV (some duplications for test...)
-       !fw1_nd_tmp = fw1_nd(1:paw_dmft%dmftqmc_l,:,:) * Ha_eV !fw1_nd = fw1_nd * Ha_eV !Ok?
-
-           do iflavor=1,nflavor
-             do iflavor1=1,nflavor
-               do ifreq=1,nfreq
-                 fw1_nd_tmp(iflavor,iflavor1,ifreq) = fw1_nd(ifreq,iflavor,iflavor1) * Ha_eV
-!              WRITE(500,*) "[IN Fortran] F[ w= ",ifreq," l= ",iflavor," l_= ",iflavor1,"] = ",fw1_nd(ifreq,iflavor,iflavor1)
-               end do
-             end do
-           end do
-
-         !Report test
-!         WRITE(502,*) hu(itypat)%udens
-!         do ifreq=1,paw_dmft%dmftqmc_l
-!           write(501,*) ((fw1_nd(ifreq,iflavor,iflavor1),iflavor=1,nflavor),iflavor1=1,nflavor)
-!         enddo
-         !write(866,*)paw_dmft%dmft_nwlo,paw_dmft%dmftqmc_l
-         !write(866,*) u_mat_ij
-!        do iflavor=1,nflavor+1
-!          do iflavor1=1,nflavor+1
-!            WRITE(502,*) "[OUT Fortran] U(i,j)[ l= ",iflavor," l_= ",iflavor1,"] = ",hu(itypat)%udens(iflavor,iflavor1)
-!          enddo
-!        enddo
-
-!          if(paw_dmft%myproc==0) then
-!          do iflavor=1,nflavor
-!            do iflavor1=1,nflavor
-!               do iflavor2=1,nflavor
-!                  do iflavor3=1,nflavor
-!                    write(490,*), hu(itypat)%vee(iflavor,iflavor1,iflavor2,iflavor3)
-!                  enddo
-!                 enddo
-!                enddo
-!              enddo
-!          endif
-
-!          if(paw_dmft%myproc==0) then
-!          do iflavor=1,nflavor
-!            do iflavor1=1,nflavor
-!            write(491,*), hu(itypat)%udens(iflavor,iflavor1) !(1,1,1,1)
-!            enddo
-!          enddo
-!          endif
-
-!          do iflavor=1,nflavor
-!            do iflavor1=1,nflavor
-!          do iflavor2=1,nflavor
-!            do iflavor3=1,nflavor
-                 ! WRITE(552,*), hu(itypat)%vee!(iflavor,iflavor1,iflavor2,iflavor3)
-!            enddo
-!          enddo
-!            enddo
-!          enddo
-
-           call vee_ndim2tndim_hu_r(lpawu,hu(itypat)%vee,u_mat_ijkl_tmp,1)
-           do iflavor=1,nflavor
-             do iflavor1=1,nflavor
-               do iflavor2=1,nflavor
-                 do iflavor3=1,nflavor
-                   u_mat_ijkl(iflavor,iflavor1,iflavor2,iflavor3)   =  Ha_eV * u_mat_ijkl_tmp(iflavor,iflavor1,iflavor2,iflavor3)
-                 end do
-               end do
-             end do
-           end do
-
-         !u_mat_ijkl   =  Ha_eV * reshape( u_mat_ijkl , [nflavor,nflavor,nflavor,nflavor] )  !column -> row major + conversion
-           u_mat_ij     = transpose( hu(itypat)%udens ) * Ha_eV !column -> row major + conversion
-           levels_ctqmc = levels_ctqmc * Ha_eV
-
-         !Location array in memory for C++ pointer args to pass
-           g_iw_ptr       = C_LOC( gw_tmp_nd ) !C_LOC( g_iw )
-           gtau_ptr       = C_LOC( gtmp_nd ) !C_LOC( gtau )
-           gl_ptr         = C_LOC( gl_nd )
-           fw1_nd_ptr     = C_LOC( fw1_nd_tmp )
-           u_mat_ij_ptr   = C_LOC( u_mat_ij )
-           u_mat_ijkl_ptr = C_LOC( u_mat_ijkl )
-           levels_ptr     = C_LOC( levels_ctqmc )
-
-         !Calling interfaced TRIQS solver subroutine from src/01_triqs_ext package
-#if defined HAVE_TRIQS_v2_0 || defined HAVE_TRIQS_v1_4
-           call Ctqmc_triqs_run (     rot_inv, leg_measure, hist, wrt_files, tot_not,                            &
-&           nflavor, nfreq, ntau , nleg, int(paw_dmft%dmftqmc_n/paw_dmft%nproc),       &
-&           paw_dmft%dmftctqmc_meas*2*2*nflavor, paw_dmft%dmftqmc_therm,               &
-&           verbosity_solver, paw_dmft%dmftqmc_seed,beta,                              &
-&           levels_ptr,  u_mat_ij_ptr, u_mat_ijkl_ptr, fw1_nd_ptr,                     &
-&           g_iw_ptr, gtau_ptr, gl_ptr, paw_dmft%spacecomm                             )
-#endif
-
-         !WRITE(*,*) "Hello Debug"
-         !call xmpi_barrier(paw_dmft%spacecomm) !Resynch all processus after calling Impurity solver from TRIQS
-
-         !Report output datas from TRIQS to Abinit
-         !Interacting G(iw)
-           do ifreq=1,nfreq
-             do iflavor1=1,nflavor
-               do iflavor=1,nflavor
-!                gw_tmp_nd(ifreq,iflavor,iflavor1) = g_iw(iflavor,iflavor1,ifreq) !* Ha_eV !because 1/ G0(eV)
-            !  WRITE(503,*) "[OUT Fortran] G(iw)[ w= ",ifreq," l= ",iflavor," l_= ",iflavor1,"] = ",gw_tmp_nd(ifreq,iflavor,iflavor1)!g_iw(iflavor,iflavor1,ifreq)
-               end do
-             end do
-           end do
-
-!        Convert in Ha
-           gw_tmp_nd = gw_tmp_nd*Ha_eV
-
-!            do iflavor1=1,nflavor
-!              do iflavor=1,nflavor
-!
-!               WRITE(510,*) "[OUT Fortran] U[ l= ",iflavor," l_= ",iflavor1,"] = ",u_mat_ij(iflavor,iflavor1)
-!              enddo
-!            enddo
-
-!        if(paw_dmft%myproc==0) write(6,*) "essai",paw_dmft%myproc, gw_tmp_nd(2,1,1)
-!        if(paw_dmft%myproc==1) write(6,*) "essai",paw_dmft%myproc,gw_tmp_nd(2,1,1)
-!        if(paw_dmft%myproc==0) write(621,*) "essai",paw_dmft%myproc, gw_tmp_nd(2,1,1)
-!        if(paw_dmft%myproc==1) write(622,*) "essai",paw_dmft%myproc,gw_tmp_nd(2,1,1)
-!        call flush_unit(621)
-!        call flush_unit(622)
-!        write(message,*) ch10, "essai",paw_dmft%myproc, paw_dmft%myproc,paw_dmft%dmftqmc_seed!gw_tmp_nd(2,1,1)
-!        call wrtout(555,message,'PERS',.true.)
-!        if(paw_dmft%myproc==0) write(499,*) "essai",paw_dmft%myproc, paw_dmft%dmftqmc_seed
-!        if(paw_dmft%myproc==1) write(498,*) "essai",paw_dmft%myproc,paw_dmft%dmftqmc_seed
-
-         !Its associated G(tau): Problem of compatibility => paw_dmft%dmftqmc_l < (2*paw_dmft%dmftqmc_l)+1 => We report only  paw_dmft%dmftqmc_l =  first values of G(tau)...
-!          do iflavor=1,nflavor
-!            do iflavor1=1,nflavor
-!              do itau=1,ntau
-!                if ( modulo(itau,2) == 1 ) then !Problem of binding: paw_dmft%dmftqmc_l =! ntau => We take one value by 2 and Write in file all the G(tau) out function from TRIQS
-                 !gtmp_nd(itau,iflavor,iflavor1) = gtau(iflavor,iflavor1,itau)
-!                endif
-!                if(paw_dmft%myproc==0) then
-!                  WRITE(504,*) "[OUT Fortran] G[ tau= ",itau," l= ",iflavor," l_= ",iflavor1,"] = ",gtmp_nd(itau,iflavor,iflavor1) !gtmp_nd(itau,iflavor,iflavor1) !passage ok avec ntau/iflavor1/iflavor (iflavor,iflavor1,ntau)
-!                endif
-!              enddo
-!            enddo
-!          enddo
-
-         !Legendre Polynoms G(L) for extrapolation of Interacting G(iw) by FT, only if leg_measure == TRUE
-           if (leg_measure) then
-             do ileg=1,nleg
-               WRITE(505,*) ileg,((gl_nd(ileg,iflavor,iflavor1),iflavor=1,nflavor),iflavor1=1,nflavor)
-             end do
-             close(505)
-           end if
-!        if(paw_dmft%myproc==0) then
-!          do itau=1,paw_dmft%dmftqmc_l
-!            write(490,*) ((gtmp_nd(itau,iflavor,iflavor1),iflavor=1,nflavor),iflavor1=1,nflavor)
-!          enddo
-!        endif
-           ABI_DEALLOCATE( fw1_nd_tmp )
-           ABI_DEALLOCATE( g_iw )
-           ABI_DEALLOCATE( u_mat_ijkl )
-           ABI_DEALLOCATE( u_mat_ijkl_tmp )
-           ABI_DEALLOCATE( u_mat_ij )
-! =========================================================================
-!   Compute Green's function in imaginary freq using Legendre coefficients
-! =========================================================================
-           if (leg_measure) then
-             call xmpi_barrier(paw_dmft%spacecomm)
-             call flush_unit(std_out)
-             write(message,'(2a)') ch10,"    ==  Compute G(iw_n) from Legendre coefficients"
-             call wrtout(std_out,message,'COLL')
-             ABI_ALLOCATE( jbes, (nleg))
-             gw_tmp_nd=czero
-
-        !   write(77,*) " TEST OF BESSEL S ROUTINES 0 0"
-
-        !   xx=0_dp
-        !   ileg=0
-        !   call sbf8(ileg+1,xx,jbes)
-        !   write(77,*) "T0 A",jbes(ileg+1)
-        !   call jbessel(jbes(ileg+1),besp,bespp,ileg,1,xx)
-        !   write(77,*) "T0 B",jbes(ileg+1)
-        !   write(77,*) "T0 C",bessel_jn(ileg,xx)
-
-        !   write(77,*) " TEST OF BESSEL S ROUTINES 1.5 0"
-
-        !   xx=1.5_dp
-        !   ileg=0
-        !   call sbf8(ileg+1,xx,jbes)
-        !   write(77,*) "T1 A",jbes(ileg+1)
-        !   call jbessel(jbes(ileg+1),besp,bespp,ileg,1,xx)
-        !   write(77,*) "T1 B",jbes(ileg+1)
-        !   write(77,*) "T1 C",bessel_jn(ileg,xx)
-
-        !   write(77,*) " TEST OF BESSEL S ROUTINES 1.5 1"
-
-        !   xx=1.5_dp
-        !   ileg=1
-        !   call sbf8(ileg+1,xx,jbes)
-        !   write(77,*) "T2 A",jbes(ileg+1)
-        !   call jbessel(jbes(ileg+1),besp,bespp,ileg,1,xx)
-        !   write(77,*) "T2 B",jbes(ileg+1)
-        !   write(77,*) "T2 C",bessel_jn(ileg,xx)
-
-
-             do ifreq=1,paw_dmft%dmft_nwli
-               xx=real(2*ifreq-1,kind=dp)*pi/two
-               if(xx<=100_dp) call sbf8(nleg,xx,jbes)
-               do ileg=1,nleg
-              ! write(77,*) "A",ifreq,jbes(ileg),xx
-
-                 if(xx>=99) call jbessel(jbes(ileg),besp,bespp,ileg-1,1,xx)
-              ! write(77,*) "B",ifreq,jbes(ileg),xx
-
-               !write(77,*) "C",ifreq,jbes(ileg),xx
-
-                 u_nl=sqrt(float(2*ileg-1))*(-1)**(ifreq-1)*cmplx(0_dp,one)**(ileg)*jbes(ileg)
-           !    write(77,*) "----------",ileg,jbes(ileg), u_nl,gl_nd(ileg,1,1)
-
-                 do iflavor=1,nflavor
-                   do iflavor1=1,nflavor
-                     gw_tmp_nd(ifreq,iflavor,iflavor1)= gw_tmp_nd(ifreq,iflavor,iflavor1) + &
-&                     u_nl*gl_nd(ileg,iflavor,iflavor1)
-                   end do
-                 end do
-
-           !    write(77,*) "------------------", gw_tmp_nd(ifreq,1,1)
-
-               end do
-           !  write(77,*) "------------------ sum ", gw_tmp_nd(ifreq,1,1)
-             end do
-             ABI_DEALLOCATE( jbes )
-             call xmpi_barrier(paw_dmft%spacecomm)
-             call flush_unit(std_out)
-           end if
-           gw_tmp_nd = gw_tmp_nd*Ha_eV
-
-
-
-! =========================================================================
-
-           if ( leg_measure ) then !only if functionality is enabled
-             ABI_DEALLOCATE(gl_nd)
-           end if
+           call ctqmc_calltriqs(paw_dmft,cryst_struc,hu,levels_ctqmc,gtmp_nd,gw_tmp_nd,fw1_nd,leg_measure,iatom)
 
          else
            write(message,'(2a)') ch10," Can't launch TRIQS CTHYB solver because dmftqmc_l must be >= 2*dmft_nwli + 1"
-           MSG_ERROR(message)
+           ABI_ERROR(message)
          end if
 
        end if
 
-! =================================================================
-!    END CTQMC run TRIQS
-! =================================================================
-
+     ! =================================================================
+     !    CTQMC run for tests
+     ! =================================================================
      else if (testcode>=1) then
-
-
-! =================================================================
-!    CTQMC run for tests
-! =================================================================
-       write(std_out,*) "nomega,dmftqmc_l",nomega,paw_dmft%dmftqmc_l
        call CtqmcInterface_run(hybrid,fw1(1:nomega,:),Gtau=gtmp,&
 &       Gw=gw_tmp,E=green%ecorr_qmc(iatom),&
-&       matU=umod,opt_levels=levels_ctqmc)
+&       matU=umod,opt_levels=levels_ctqmc,Iatom=iatom,fname=paw_dmft%filapp)
 
-! for non diagonal code
-!       call CtqmcInterface_run(hybrid,fw1_nd(1:nomega,:,:),Gtau=gtmp_nd,&
-!&       Gw=gw_tmp_nd,D=Doccsum,E=green%ecorr_qmc(iatom),&
-!&       Noise=Noise,matU=umod,opt_levels=levels_ctqmc,hybri_limit=hybri_limit)
+      ! for non diagonal code
+      !       call CtqmcInterface_run(hybrid,fw1_nd(1:nomega,:,:),Gtau=gtmp_nd,&
+      !&       Gw=gw_tmp_nd,D=Doccsum,E=green%ecorr_qmc(iatom),&
+      !&       Noise=Noise,matU=umod,opt_levels=levels_ctqmc,hybri_limit=hybri_limit)
 
-     end if
+      !  If test of the code is activated, and testrot =1 rotate back green's function   and stop the code.
+      ! --------------------------------------------------------------------------------------------------
+       if(testcode==1) then
 
-! =================================================================
-!  TEST
-!  If test of the code is activated, and testrot =1 rotate back green's function
-!  and stop the code.
-! =================================================================
-     if(testcode==1) then
+         call testcode_ctqmc(paw_dmft%dmftqmc_l,fw1_nd,fw1,gtmp_nd,gw_tmp_nd,&
+&         levels_ctqmc,hybri_limit,nflavor,2,paw_dmft%temp,testrot,testcode,umod)
 
-       call testcode_ctqmc(paw_dmft%dmftqmc_l,fw1_nd,fw1,gtmp_nd,gw_tmp_nd,&
-&       levels_ctqmc,hybri_limit,nflavor,2,paw_dmft%temp,testrot,testcode,umod)
-
-       write(message,'(2a)') ch10,' testcode end of test calculation'
-       MSG_ERROR(message)
-     end if
-     if(testcode==2) then
-       write(message,'(2a)') ch10,' testcode 2 end of test calculation'
-       MSG_ERROR(message)
-     end if
-
-! =================================================================
-     ABI_DEALLOCATE(fw1)
-     ABI_DEALLOCATE(fw1_nd)
-
-     !----------------------------------------
-     ! <DEBUG>
-     !----------------------------------------
-     ! Construct UNIT
-     if(paw_dmft%idmftloop < 10) then
-       write(gtau_iter,'("0",i1)') paw_dmft%idmftloop
-     elseif(paw_dmft%idmftloop >= 10 .and. paw_dmft%idmftloop < 100) then
-       write(gtau_iter,'(i2)') paw_dmft%idmftloop
-     else
-       gtau_iter="xx"
-     end if
-     if(iatom < 10) then
-       write(iatomnb,'("0",i1)') iatom
-     elseif(iatom >= 10 .and. iatom < 100) then
-       write(iatomnb,'(i2)') iatom
-     else
-       iatomnb='xx'
-     end if
-
-     if(paw_dmft%myproc .eq. mod(nproc+1,nproc)) then
-! < HACK >
-       if(paw_dmft%dmft_solv==6.or.paw_dmft%dmft_solv==7) then
-         if (open_file(trim(paw_dmft%filapp)//"_atom_"//iatomnb//"_Gw_"//gtau_iter//".dat", message, newunit=unt) /=0) then
-           MSG_ERROR(message)
-         end if
-         do ifreq=1,paw_dmft%dmft_nwli
-           write(unt,'(29f21.14)') paw_dmft%omega_lo(ifreq),((gw_tmp_nd(ifreq,iflavor,iflavor)), iflavor=1, nflavor)
-         end do
-         close(unt)
-       else
-         if(paw_dmft%dmft_solv==5) then
-           if (open_file(trim(paw_dmft%filapp)//"_atom_"//iatomnb//"_Gtau_"//gtau_iter//".dat", message, newunit=unt) /= 0) then
-             MSG_ERROR(message)
-           end if
-           do itau=1,paw_dmft%dmftqmc_l
-             write(unt,'(29f21.14)') float(itau-1)/float(paw_dmft%dmftqmc_l)/paw_dmft%temp,&
-             (gtmp(itau,iflavor), iflavor=1, nflavor)
-           end do
-           write(unt,'(29f21.14)') 1/paw_dmft%temp, (-1_dp-gtmp(1,iflavor), iflavor=1, nflavor)
-           close(unt)
-         endif
-         if(paw_dmft%dmft_solv==8) then
-           if (open_file(trim(paw_dmft%filapp)//"_atom_"//iatomnb//"_Gtau_offdiag_unsym_"//gtau_iter//".dat",&
-&           message, newunit=unt) /= 0) then
-             MSG_ERROR(message)
-           end if
-           do itau=1,paw_dmft%dmftqmc_l
-             write(unt,'(196f21.14)') float(itau-1)/float(paw_dmft%dmftqmc_l)/paw_dmft%temp,&
-             ((gtmp_nd(itau,iflavor,iflavor1), iflavor=1, nflavor),iflavor1=1, nflavor)
-           end do
-           close(unt)
-           ABI_DATATYPE_ALLOCATE(matlu1,(natom))
-           call init_matlu(natom,nspinor,nsppol,paw_dmft%lpawu,matlu1)
-           do itau=1,paw_dmft%dmftqmc_l
-             do isppol=1,nsppol
-               do ispinor1=1,nspinor
-                 do im1=1,tndim
-                   iflavor1=im1+tndim*(ispinor1-1)+tndim*(isppol-1)
-                   do ispinor2=1,nspinor
-                     do im2=1,tndim
-                       iflavor2=im2+tndim*(ispinor2-1)+tndim*(isppol-1)
-                       matlu1(iatom)%mat(im1,im2,isppol,ispinor1,ispinor2)=&
-&                        gtmp_nd(itau,iflavor1,iflavor2)
-                     end do  ! im2
-                   end do  ! ispinor2
-                 end do  ! im1
-               end do  ! ispinor
-             end do ! isppol
-             call rotate_matlu(matlu1,eigvectmatlu,natom,3,0)
-             call slm2ylm_matlu(matlu1,natom,2,0)
-             call sym_matlu(cryst_struc,matlu1,pawang)
-             call slm2ylm_matlu(matlu1,natom,1,0)
-             call rotate_matlu(matlu1,eigvectmatlu,natom,3,1)
-             do isppol=1,nsppol
-               do ispinor1=1,nspinor
-                 do im1=1,tndim
-                   iflavor1=im1+tndim*(ispinor1-1)+tndim*(isppol-1)
-                   do ispinor2=1,nspinor
-                     do im2=1,tndim
-                       iflavor2=im2+tndim*(ispinor2-1)+tndim*(isppol-1)
-                       gtmp_nd(itau,iflavor1,iflavor2)=&
-                        matlu1(iatom)%mat(im1,im2,isppol,ispinor1,ispinor2)
-                     end do  ! im2
-                   end do  ! ispinor2
-                 end do  ! im1
-               end do  ! ispinor
-             end do ! isppol
-           end do  !itau
-           call destroy_matlu(matlu1,natom)
-           ABI_DATATYPE_DEALLOCATE(matlu1)
-           if (open_file(trim(paw_dmft%filapp)//"_atom_"//iatomnb//"_Gtau_offdiag_"//gtau_iter//".dat",&
-&           message, newunit=unt) /= 0) then
-             MSG_ERROR(message)
-           end if
-           do itau=1,paw_dmft%dmftqmc_l
-             write(unt,'(196f21.14)') float(itau-1)/float(paw_dmft%dmftqmc_l)/paw_dmft%temp,&
-             ((gtmp_nd(itau,iflavor,iflavor1), iflavor=1, nflavor),iflavor1=1, nflavor)
-           end do
-           close(unt)
-         endif
-         !open(unit=4243, file=trim(paw_dmft%filapp)//"_atom_"//iatomnb//"_F_"//gtau_iter//".dat")
-         !call BathOperator_printF(paw_dmft%hybrid(iatom)%hybrid%bath,4243) !Already comment here
-         !close(4243)
-         if(paw_dmft%dmft_solv==5) then
-           if (open_file(trim(paw_dmft%filapp)//"_atom_"//iatomnb//"_Gw_"//gtau_iter//".dat", message, newunit=unt) /= 0) then
-             MSG_ERROR(message)
-           end if
-           do ifreq=1,paw_dmft%dmft_nwlo
-             write(unt,'(29f21.14)') paw_dmft%omega_lo(ifreq), &
-&             (gw_tmp(ifreq,iflavor), iflavor=1, nflavor)
-           end do
-         endif
-         close(unt)
+         write(message,'(2a)') ch10,' testcode end of test calculation'
+         ABI_ERROR(message)
        end if
-! </ HACK >
-     end if
+       if(testcode==2) then
+         write(message,'(2a)') ch10,' testcode 2 end of test calculation'
+         ABI_ERROR(message)
+       end if
 
-     !----------------------------------------
-     ! </DEBUG>
-     !----------------------------------------
-     if(paw_dmft%dmft_solv>=6.and.paw_dmft%dmft_solv<=7) then
+     end if
+     ! =================================================================
+     !    END CALL TO CTQMC SOLVERS
+     ! =================================================================
+
+
+     ! Print green function is files directly from CTQMC
+     ! --------------------------------------------------
+     call ctqmcoutput_printgreen(paw_dmft,gtmp_nd,gw_tmp_nd,gtmp,gw_tmp,iatom)
+
+
+     ! If the CTQMC code in ABINIT was used, then destroy it and deallocate arrays
+     ! ----------------------------------------------------------------------------
+     if(paw_dmft%dmft_solv<6.and.paw_dmft%dmft_solv>7) then
      !Nothing just hybrid var problem
      else
        write(message,'(a,2x,a)') ch10,&
@@ -1904,150 +1530,51 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
 &       " == Destroy CTQMC done"
        call wrtout(std_out,message,'COLL')
      end if
-     !ABI_DEALLOCATE(f_with_k)
-     ABI_DEALLOCATE(hybri_limit)
-     ABI_DEALLOCATE(levels_ctqmc_nd)
-     ABI_DEALLOCATE(levels_ctqmc)
+     ABI_FREE(hybri_limit)
+     ABI_FREE(levels_ctqmc_nd)
+     ABI_FREE(levels_ctqmc)
+     ABI_FREE(fw1)
+     ABI_FREE(fw1_nd)
 
 ! ___________________________________________________________________________________
 !
-!  FOURTH PART : USE OUTPUT OF CTQMC AND DO BACK ROTATION
+!  FOURTH PART : USE OUTPUT OF CTQMC AND THEN DO BACK ROTATION
 ! ___________________________________________________________________________________
 !
-     do itau=1,paw_dmft%dmftqmc_l
-       green%oper_tau(itau)%matlu(iatom)%mat(:,:,:,:,:)=czero
-     end do
-     green%occup_tau%matlu(iatom)%mat(nflavor:,:,:,:,:)=czero
 
-     do ifreq=1,paw_dmft%dmft_nwlo
-       green%oper(ifreq)%matlu(iatom)%mat(:,:,:,:,:)=czero
-     end do
-     green%occup%matlu(iatom)%mat(:,:,:,:,:)=czero
+     ! Put green's function values from CTQMC into green structure
+     !-------------------------------------------------------------
+     call ctqmcoutput_to_green(green,paw_dmft,gtmp_nd,gw_tmp_nd,gtmp,gw_tmp,iatom,leg_measure,opt_nondiag)
 
-!   built time and frequency green's function from output of CTQMC
-! =================================================================
-     if(opt_nondiag==1) then
-       do isppol=1,nsppol
-         do ispinor1=1,nspinor
-           do im1=1,tndim
-             iflavor1=im1+tndim*(ispinor1-1)+tndim*(isppol-1)
-             do ispinor2=1,nspinor
-               do im2=1,tndim
-                 iflavor2=im2+tndim*(ispinor2-1)+tndim*(isppol-1)
-                  ! NNtodo here: nsppol=1 above, only, with symetrisation
-                  ! automatic
-!               iflavor1=im+(isppol-1)*tndim
-                 do itau=1,paw_dmft%dmftqmc_l
-                   green%oper_tau(itau)%matlu(iatom)%mat(im1,im2,isppol,ispinor1,ispinor2)=&
-&                   gtmp_nd(itau,iflavor1,iflavor2)
-                   if(nsppol==1.and.nspinor==1) then
-                     green%oper_tau(itau)%matlu(iatom)%mat(im1,im2,isppol,ispinor1,ispinor2)=&
-&                     (gtmp_nd(itau,iflavor1,iflavor2)+gtmp_nd(itau,iflavor1+tndim,iflavor2+tndim))/two
-                   end if
-                  ! NNtodo here: isppol above should be one and symetrized
-                  ! gtmp
-                 end do  !itau
-!               ifreq2=0
-                 if(paw_dmft%dmft_solv<6.or.leg_measure) then
-                   do ifreq=1,paw_dmft%dmft_nwlo
-!                   if(paw_dmft%select_log(ifreq)==1) then
-!                     ifreq2=ifreq2+1
-                     green%oper(ifreq)%matlu(iatom)%mat(im1,im2,isppol,ispinor1,ispinor2)=&
-&                     gw_tmp_nd(ifreq,iflavor1,iflavor2)
-                     if(nsppol==1.and.nspinor==1) then
-                       green%oper(ifreq)%matlu(iatom)%mat(im1,im2,isppol,ispinor1,ispinor2)=&
-&                       (gw_tmp_nd(ifreq,iflavor1,iflavor2)+&
-&                       gw_tmp_nd(ifreq,iflavor1+tndim,iflavor2+tndim))/two
-                     end if
-                    ! NNtodo here: isppol above should be one and symetrized
-                    ! gw_tmp
-!                   endif
-                   end do ! ifreq
-                 end if
-               end do  ! im2
-             end do  ! ispinor2
-           end do  ! im1
-         end do  ! ispinor
-       end do ! isppol
-       if(paw_dmft%dmft_solv>=6.and..not.leg_measure) then
+     ! Deallocate arrays for CTQMC
+     !-----------------------------
+     if(paw_dmft%dmft_solv<6) then
+       ABI_FREE(gw_tmp)
+     endif
+     ABI_FREE(gw_tmp_nd)
+     ABI_FREE(gtmp)
+     ABI_FREE(gtmp_nd)
+
+
+
+     ! Do Fourier transform if it was not done (ie if TRIQS is used without legendre measurement)
+     !----------------------------------------------------------------------------------------------
+     if(opt_nondiag==1) then  ! (As leg_measure is activated by defautl, this fourier is never done).
+       if(paw_dmft%dmft_solv>=6.and..not.leg_measure.and.paw_dmft%dmft_solv<=7) then
          write(message,'(2a,i3,13x,a)') ch10,'   ===  Direct Fourier Transform t->w of Weiss Field'
          call wrtout(std_out,message,'COLL')
          call fourier_green(cryst_struc,green,paw_dmft,&
 &         pawang,opt_ksloc=2,opt_tw=1)
        end if
-     else
-       iflavor=0
-       do isppol=1,nsppol
-         do ispinor=1,nspinor
-           do im=1,tndim
-              ! NNtodo here: nsppol=1 above, only, with symetrisation
-              ! automatic
-!           iflavor=im+(isppol-1)*tndim
-             iflavor=iflavor+1
-             do itau=1,paw_dmft%dmftqmc_l
-               green%oper_tau(itau)%matlu(iatom)%mat(im,im,isppol,ispinor,ispinor)=gtmp(itau,iflavor)
-               if(nsppol==1.and.nspinor==1) then
-                 green%oper_tau(itau)%matlu(iatom)%mat(im,im,isppol,ispinor,ispinor)=&
-&                 (gtmp(itau,iflavor)+gtmp(itau,iflavor+tndim))/two
-               end if
-              ! NNtodo here: isppol above should be one and symetrized
-              ! gtmp
-             end do
-!           ifreq2=0
-             do ifreq=1,paw_dmft%dmft_nwlo
-!             if(paw_dmft%select_log(ifreq)==1) then
-!               ifreq2=ifreq2+1
-               green%oper(ifreq)%matlu(iatom)%mat(im,im,isppol,ispinor,ispinor)=gw_tmp(ifreq,iflavor)
-               if(nsppol==1.and.nspinor==1) then
-                 green%oper(ifreq)%matlu(iatom)%mat(im,im,isppol,ispinor,ispinor)=&
-&                 (gw_tmp(ifreq,iflavor)+gw_tmp(ifreq,iflavor+tndim))/two
-               end if
-               ! if opt_nondiag=0, then:
-               ! As Green's function is diagonal, one suppress off diag  terms in Weiss, if any.
-               ! (If off diag are non zero in the density matrix and thus in the Green's function,
-               !  there is a warning in checkreal_matlu above).
-               do im1=1,tndim
-                 do ispinor1=1,nspinor
-                   if(im/=im1.or.ispinor/=ispinor1) then
-                     weiss%oper(ifreq)%matlu(iatom)%mat(im,im1,isppol,ispinor,ispinor1)=czero
-                   end if
-                 end do
-               end do
-              ! NNtodo here: isppol above should be one and symetrized
-              ! gw_tmp
-!             endif
-             end do
-           end do
-         end do
-       end do
-     end if
-     if(paw_dmft%dmft_solv<6) then
-      ! write(6,*) "dmft_solv",paw_dmft%dmft_solv
-       ABI_DEALLOCATE(gw_tmp)
      endif
-     ABI_DEALLOCATE(gw_tmp_nd)
-     ABI_DEALLOCATE(gtmp)
-     ABI_DEALLOCATE(gtmp_nd)
-     if(nsppol==1.and.nspinor==1) then
-       write(message,'(a,2x,a,f13.5)') ch10,&
-&       " == nsppol==1 and nspden==1: Green functions from CTQMC have been symetrized over spin"
-       call wrtout(std_out,message,'COLL')
-     end if
-     !write(message,'(i3,4x,2e21.14)') 5,weiss_for_rot%oper(1)%matlu(1)%mat(1,1,1,1,1)
-     !call wrtout(std_out,message,'COLL')  ! debug
-!     do im=1,tndim
-!       do itau=1,paw_dmft%dmftqmc_l
-!         gtt=(green%oper_tau(itau)%matlu(iatom)%mat(im,im,1,1,1)+&
-!&         green%oper_tau(itau)%matlu(iatom)%mat(im,im,2,1,1))/two
-!         green%oper_tau(itau)%matlu(iatom)%mat(im,im,1,1,1)=gtt
-!         green%oper_tau(itau)%matlu(iatom)%mat(im,im,2,1,1)=gtt
-!       enddo
-!     enddo
-!     write(6,*)" SYMETRISATION OVER ISPPOL"
-     !deallocate(correl_loc,f_with_k,gtmp,fw1,fw2)
-   end if
- end do ! iatom
 
+
+   end if
+
+ end do ! iatom
+! =========================================================================================
+!  End big loop over atoms to compute hybridization and do the CTQMC
+! =========================================================================================
 
  if(paw_dmft%dmft_prgn==1) then
    call print_green('QMC_diag_notsym',green,1,paw_dmft,pawprtvol=1,opt_wt=2)
@@ -2060,7 +1587,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
 ! Copy Weiss_for_rot into weiss and rotate back weiss to the original basis
 ! =================================================================
 
-! ABI_ALLOCATE(shift,(natom))
+! ABI_MALLOC(shift,(natom))
 ! do ifreq=1,paw_dmft%dmft_nwlo
 !  ! First weiss_for_rot contains -G_0^-1+iw_n
 !  ! -------------------------------------------
@@ -2088,7 +1615,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
 !  ! --------------------
 !   call rotate_matlu(weiss_for_rot%oper(ifreq)%matlu,eigvectmatlu,natom,3,0)
 ! end do
-! ABI_DEALLOCATE(shift)
+! ABI_FREE(shift)
 
 ! =================================================================
 ! Here compute Self energy from Dyson and print it
@@ -2128,6 +1655,64 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
    call print_matlu(green%occup_tau%matlu,natom,1)
  end if
 
+! =================================================================
+! 
+!  === Compute magnetic moments from CT-QMC occupations for 
+!  the x,y and z axes when SOC is activated
+! 
+! =================================================================
+if(paw_dmft%nspinor .eq. 2) then
+  ABI_MALLOC(matlumag,(natom))
+  write(message,'(a,2x,a)') ch10,"== Magnetic moments from CT-QMC occupation matrix "
+  call wrtout(std_out,message,'COLL')
+
+  do iatom=1,cryst_struc%natom                                                     
+    lpawu=paw_dmft%lpawu(iatom)                                                    
+    if(lpawu .ne. -1) then                                                         
+      write(message,'(a,3x,a,i4)') ch10,"-------> For Correlated Atom",iatom       
+      call wrtout(std_out,message,'COLL')                                          
+                                                                                   
+      ! == orbital angular momentum
+      do icomp=1,3 !x,y,z components
+        muorb=czero
+        call init_matlu(natom=natom,nspinor=paw_dmft%nspinor,nsppol=paw_dmft%nsppol,lpawu_natom=paw_dmft%lpawu,matlu=matlumag)
+        call copy_matlu(green%occup_tau%matlu,matlumag,natom)
+        call rotate_matlu(matlumag,eigvectmatlu,natom=natom,prtopt=0,inverse=0)
+        call magmomforb_matlu(matlumag,muorb,natom=natom,option=icomp,optprt=0)
+        write(message,'(a,2x,a,i4,a,f8.4)') ch10," Orbital angular momentum for axis ", icomp, " is ", REAL(muorb)
+        call wrtout(std_out,message,'COLL')
+        call destroy_matlu(matlumag,(natom))
+      end do
+
+      ! == spin angular momentum
+      do icomp=1,3 !x,y,z components
+        muspin=czero
+        call init_matlu(natom=natom,nspinor=paw_dmft%nspinor,nsppol=paw_dmft%nsppol,lpawu_natom=paw_dmft%lpawu,matlu=matlumag)
+        call copy_matlu(green%occup_tau%matlu,matlumag,natom=natom)
+        call rotate_matlu(matlumag,eigvectmatlu,natom=natom,prtopt=0,inverse=0)
+        call magmomfspin_matlu(matlumag,muspin,natom=natom,option=icomp,optprt=0)
+        write(message,'(a,2x,a,i4,a,f8.4)') ch10," Spin angular momentum for axis ", icomp, " is ", REAL(muspin)
+        call wrtout(std_out,message,'COLL')
+        call destroy_matlu(matlumag,(natom))
+      end do
+ 
+      ! == total angular momentum (L_u + 2*S_u)
+      do icomp=1,3 !x,y,z components
+        muzeem=czero
+        call init_matlu(natom=natom,nspinor=paw_dmft%nspinor,nsppol=paw_dmft%nsppol,lpawu_natom=paw_dmft%lpawu,matlu=matlumag)
+        call copy_matlu(green%occup_tau%matlu,matlumag,natom=natom)
+        call rotate_matlu(matlumag,eigvectmatlu,natom=natom,prtopt=0,inverse=0)
+        call magmomfzeeman_matlu(matlumag,muzeem,natom=natom,option=icomp,optprt=0)
+        write(message,'(a,2x,a,i4,a,f8.4)') ch10," Zeeman angular momentum for axis ", icomp, " is ", REAL(muzeem)
+        call wrtout(std_out,message,'COLL')
+        call destroy_matlu(matlumag,(natom))
+      end do
+    endif !lpawu
+  end do !iatom
+  ABI_FREE(matlumag)
+end if !nspinor
+! =================================================================
+
  write(message,'(a,2x,a,f13.5)') ch10,&
 & " == Rotate Green function to original basis "
  call wrtout(std_out,message,'COLL')
@@ -2156,6 +1741,17 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
  write(message,'(a,2x,a,f13.5)') ch10," == Occupation from G(tau) in the Slm basis"
  call wrtout(std_out,message,'COLL')
  call print_matlu(green%occup_tau%matlu,natom,1)
+
+ ! Put Weiss off diagonal terms to zero because Green function will not have any offdiag terms
+ !------------------------------------------------------------------------------
+ !   (if opt_nondiag=0 ie dmft_solv=5)
+ do ifreq=1,paw_dmft%dmft_nwlo
+   if(opt_nondiag==0) call zero_matlu(weiss%oper(ifreq)%matlu,natom,onlynondiag=1)
+ end do
+ !    ( if opt_nondiag=0, then:
+ !       As Green's function is diagonal, one suppress off diag  terms in Weiss, if any.
+ !      (If off diag are non zero in the density matrix and thus in the Green's function,
+ !       there is a warning in checkreal_matlu above).)
 
  ! Rotate Green's and Weiss functions into Ylm basis and then Slm basis
  !-------------------------------------------------------------
@@ -2189,7 +1785,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
    call print_matlu(weiss%oper(1)%matlu,natom,1)  ! debug
 
    do ifreq=1,paw_dmft%dmft_nwlo
-     call sym_matlu(cryst_struc,weiss%oper(ifreq)%matlu,pawang)
+     call sym_matlu(cryst_struc,weiss%oper(ifreq)%matlu,pawang,paw_dmft)
    end do
    write(message,'(a,2x,a,f13.5)') ch10,&  ! debug
 &  " == Print symetrized weiss function for small freq in the original basis"  ! debug
@@ -2198,10 +1794,10 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
  end if
 
 
- ABI_DATATYPE_ALLOCATE(matlu1,(natom))
+ ABI_MALLOC(matlu1,(natom))
  call init_matlu(natom,nspinor,nsppol,paw_dmft%lpawu,matlu1)
  call copy_matlu(green%occup_tau%matlu,matlu1,natom)
- call sym_matlu(cryst_struc,matlu1,pawang)
+ call sym_matlu(cryst_struc,matlu1,pawang,paw_dmft)
 
  write(message,'(a,2x,a,f13.5)') ch10," == Occupation from G(tau) in the original basis"
  call wrtout(std_out,message,'COLL')
@@ -2213,7 +1809,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
 
  call diff_matlu("CTQMC Occup","CTQMC Occup symetrized",green%occup_tau%matlu,matlu1,natom,0,tol4,ierr)
  call destroy_matlu(matlu1,natom)
- ABI_DATATYPE_DEALLOCATE(matlu1)
+ ABI_FREE(matlu1)
 
 ! =================================================================
 ! Symetrise green function G(tau) and G(ifreq) to recover symetry
@@ -2223,10 +1819,10 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
 & " == Symetrise green function after QMC "
  call wrtout(std_out,message,'COLL')
  do itau=1,paw_dmft%dmftqmc_l
-   call sym_matlu(cryst_struc,green%oper_tau(itau)%matlu,pawang)
+   call sym_matlu(cryst_struc,green%oper_tau(itau)%matlu,pawang,paw_dmft)
  end do
  do ifreq=1,paw_dmft%dmft_nwlo
-   call sym_matlu(cryst_struc,green%oper(ifreq)%matlu,pawang)
+   call sym_matlu(cryst_struc,green%oper(ifreq)%matlu,pawang,paw_dmft)
  end do
  if(pawprtvol>=3) then
    write(message,'(a,2x,a,f13.5)') ch10,&  ! debug
@@ -2252,30 +1848,135 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
 
  call destroy_oper(energy_level)
  call destroy_matlu(dmat_diag,natom)
- ABI_DATATYPE_DEALLOCATE(dmat_diag)
+ ABI_FREE(dmat_diag)
  call destroy_matlu(identity,natom)
- ABI_DATATYPE_DEALLOCATE(identity)
+ ABI_FREE(identity)
  do iatom=1,cryst_struc%natom
    lpawu=paw_dmft%lpawu(iatom)
    if(lpawu/=-1) then
      do isppol=1,nsppol
-       ABI_DEALLOCATE(eigvectmatlu(iatom,isppol)%value)
-       !ABI_DEALLOCATE(udens_atoms(iatom))
+       ABI_FREE(eigvectmatlu(iatom,isppol)%value)
+       !ABI_FREE(udens_atoms(iatom))
      end do
-     ABI_DEALLOCATE(udens_atoms(iatom)%value)
+     ABI_FREE(udens_atoms(iatom)%value)
+     ABI_FREE(magmom_orb(iatom)%value)
+     ABI_FREE(magmom_spin(iatom)%value)
+     ABI_FREE(magmom_tot(iatom)%value)
    end if
  end do
- ABI_DATATYPE_DEALLOCATE(udens_atoms)
- ABI_DATATYPE_DEALLOCATE(eigvectmatlu)
+ ABI_FREE(udens_atoms)
+ ABI_FREE(eigvectmatlu)
+ ABI_FREE(magmom_orb)
+ ABI_FREE(magmom_spin)
+ ABI_FREE(magmom_tot)
+ ABI_FREE(matlumag_orb)
+ ABI_FREE(matlumag_spin)
+ ABI_FREE(matlumag_tot)
  call destroy_green(weiss_for_rot)
 ! call destroy_green(gw_loc)
-! call destroy_green(greenlda)
+! call destroy_green(greendft)
 
 !  destroy limit of hybridization
  call destroy_matlu(hybri_coeff,paw_dmft%natom)
- ABI_DATATYPE_DEALLOCATE(hybri_coeff)
+ ABI_FREE(hybri_coeff)
 
 end subroutine qmc_prep_ctqmc
+!!***
+
+!!****f* m_forctqmc/testcode_ctqmc_b
+!! NAME
+!! testcode_ctqmc_b
+!!
+!! FUNCTION
+!! Setup ultra simple hybridization to test CTQMC in simple situations.
+!!
+!! INPUTS
+!! temp = temperature
+!! dmftqmc_l = number of times slices
+!! levels_ctqmc_nd=level matrix
+!!
+!! OUTPUT
+!! fw1_nd=hybridization matrix
+!! umod = value of U
+!! hybri_limit= limit of F
+!! weiss_for_rot= weiss function
+!! hybri_coeff
+!!
+!! SIDE EFFECTS
+!!
+!! NOTES
+!!
+!! SOURCE
+
+subroutine testcode_ctqmc_b(energy_level,hybri_coeff,weiss_for_rot,dmftqmc_l,fw1_nd,levels_ctqmc,&
+&   levels_ctqmc_nd,hybri_limit,temp,umod,opt_diag,opt_fk)
+
+!Arguments ------------------------------------
+!scalars
+ integer, intent(in) :: dmftqmc_l,opt_diag,opt_fk
+ real(dp), intent(in) :: temp
+ real(dp), intent(out) :: umod(2,2)
+ real(dp), intent(inout) :: levels_ctqmc(:)
+ complex(dpc), intent(out) :: fw1_nd(:,:,:)
+ complex(dpc),  intent(inout) :: levels_ctqmc_nd(:,:)
+ complex(dpc),  intent(inout) :: hybri_limit(:,:)
+ type(oper_type)  :: energy_level
+ type(matlu_type), allocatable  :: hybri_coeff(:)
+ type(green_type)  :: weiss_for_rot
+
+!Local variables ------------------------------
+ integer :: ifreq,iatom,ima,imb,ispa,ispb
+ real(dp) :: omega
+ real(dp) :: facnd, facd
+ character(len=30) :: tmpfil
+! ************************************************************************
+ facnd=0.8d0
+ facd=1.0d0
+ !write(6,*) "fac",facnd,facd
+ levels_ctqmc_nd(2,2)   = energy_level%matlu(iatom)%mat(imb,imb,1,ispb,ispb)
+ levels_ctqmc_nd(1,1)   = energy_level%matlu(iatom)%mat(ima,ima,1,ispa,ispa)
+ levels_ctqmc(2)   = real(energy_level%matlu(iatom)%mat(imb,imb,1,ispb,ispb),kind=dp)
+ levels_ctqmc(1)   = real(energy_level%matlu(iatom)%mat(ima,ima,1,ispa,ispa),kind=dp)
+ if(opt_diag/=1) then
+   levels_ctqmc_nd(1,2)   = energy_level%matlu(iatom)%mat(ima,imb,1,ispa,ispb)
+   levels_ctqmc_nd(2,1)   = energy_level%matlu(iatom)%mat(imb,ima,1,ispb,ispa)
+ end if
+ hybri_limit(1,1)  = facd*hybri_coeff(iatom)%mat(ima,ima,1,ispa,ispa)
+ hybri_limit(2,2)  = facd*hybri_coeff(iatom)%mat(imb,imb,1,ispb,ispb)
+ hybri_limit(1,2)  = facnd*hybri_coeff(iatom)%mat(ima,imb,1,ispa,ispb)
+ hybri_limit(2,1)  = facnd*hybri_coeff(iatom)%mat(imb,ima,1,ispb,ispa)
+ !write(6,*) "hybri_limit",hybri_limit
+ !write(6,*) "levels_ctqmc",levels_ctqmc
+ umod=zero
+
+ tmpfil = 'fw1_nd_re'
+ !if (open_file(newunit=unt,message,file=trim(tmpfil),status='unknown',form='formatted')/=0) then
+ !  ABI_ERROR(message)
+ !end if
+ tmpfil = 'fw1_nd_im'
+ !if (open_file(newunit=unt2,message,file=trim(tmpfil),status='unknown',form='formatted')/=0) then
+ !  ABI_ERROR(message)
+ !end if
+ write(std_out,*) "testcode==2",ispa,ispb,ima,imb
+ write(std_out,*) "opt_fk==",opt_fk
+ do ifreq=1,dmftqmc_l
+   if (opt_fk==1) then
+     fw1_nd(ifreq,1,1) = facd*weiss_for_rot%oper(ifreq)%matlu(iatom)%mat(ima,ima,1,ispa,ispa)
+     fw1_nd(ifreq,2,2) = facd*weiss_for_rot%oper(ifreq)%matlu(iatom)%mat(imb,imb,1,ispb,ispb)
+     !fw1_nd(ifreq,1,2) =  weiss_for_rot%oper(ifreq)%matlu(iatom)%mat(ima,imb,1,ispa,ispb)
+     !fw1_nd(ifreq,2,1) =  weiss_for_rot%oper(ifreq)%matlu(iatom)%mat(imb,ima,1,ispb,ispa)
+     fw1_nd(ifreq,1,2) = facnd*weiss_for_rot%oper(ifreq)%matlu(iatom)%mat(ima,imb,1,ispa,ispb)
+     fw1_nd(ifreq,2,1) = facnd*weiss_for_rot%oper(ifreq)%matlu(iatom)%mat(imb,ima,1,ispb,ispa)
+     omega=pi*temp*(two*float(ifreq)-1)
+   else if (opt_fk==0) then
+     fw1_nd(ifreq,1,1) =  facd*weiss_for_rot%oper(ifreq)%matlu(iatom)%mat(ima,ima,1,ispa,ispa)
+     fw1_nd(ifreq,2,2) =  facd*weiss_for_rot%oper(ifreq)%matlu(iatom)%mat(imb,imb,1,ispb,ispb)
+     fw1_nd(ifreq,1,2) =  facnd*weiss_for_rot%oper(ifreq)%matlu(iatom)%mat(ima,imb,1,ispa,ispb)
+     fw1_nd(ifreq,2,1) =  facnd*weiss_for_rot%oper(ifreq)%matlu(iatom)%mat(imb,ima,1,ispb,ispa)
+     call xginv(fw1_nd(ifreq,:,:),2)
+   end if
+ end do
+end subroutine testcode_ctqmc_b
 !!***
 
 
@@ -2285,13 +1986,6 @@ end subroutine qmc_prep_ctqmc
 !!
 !! FUNCTION
 !! Setup ultra simple hybridization to test CTQMC in simple situations.
-!!
-!! COPYRIGHT
-!! Copyright (C) 1999-2019 ABINIT group (BAmadon)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
 !! gtmp_nd
@@ -2315,26 +2009,11 @@ end subroutine qmc_prep_ctqmc
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      qmc_prep_ctqmc
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine testcode_ctqmc(dmftqmc_l,fw1_nd,fw1,gtmp_nd,gw_tmp_nd,levels_ctqmc,hybri_limit,&
 &   nflavor,opt,temp,testrot,testcode,umod)
 
- use defs_basis
- use defs_datatypes
- use defs_abitypes
- use m_errors
- use m_ctqmc
- use m_CtqmcInterface
- use m_greenhyb
- !use m_self, only : self_type,initialize_self,destroy_self,print_self,rw_self
- use m_io_tools, only : flush_unit
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2363,7 +2042,7 @@ subroutine testcode_ctqmc(dmftqmc_l,fw1_nd,fw1,gtmp_nd,gw_tmp_nd,levels_ctqmc,hy
  if (testcode==0) return
  if (nflavor/=2) then
    write(message,'(2a)') ch10,' testcode nflavor.ne.2'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  simplehyb=2
@@ -2407,7 +2086,7 @@ subroutine testcode_ctqmc(dmftqmc_l,fw1_nd,fw1,gtmp_nd,gw_tmp_nd,levels_ctqmc,hy
  !write(6,*) "RR1",RR1
  if(abs(RR1(1,1)-one).gt.tol7.or.abs(RR1(1,2)).gt.tol7.or.abs(RR1(2,2)-one).gt.tol7.or.abs(RR1(2,1)).gt.tol7) then
    write(message,'(2a)') ch10,' testcode error in rotation matrix'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 
@@ -2440,7 +2119,7 @@ subroutine testcode_ctqmc(dmftqmc_l,fw1_nd,fw1,gtmp_nd,gw_tmp_nd,levels_ctqmc,hy
    if(testrot==1.and.(abs(tbi1-tbi2)<tol6)) then
      write(message,'(3a)') ch10,' testrot=1 with tbi1=tbi2 is equivalent' &
      ,'to testrot=0: change testrot'
-     MSG_WARNING(message)
+     ABI_WARNING(message)
    end if
    ! Built fw1_nd
    !==============
@@ -2569,13 +2248,881 @@ subroutine testcode_ctqmc(dmftqmc_l,fw1_nd,fw1,gtmp_nd,gw_tmp_nd,levels_ctqmc,hy
    end do
 
    write(message,'(2a)') ch10,' testcode end of test calculation'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
 
  end if
  close(444)
  close(555)
 
 end subroutine testcode_ctqmc
+!!***
+
+!!****f* m_forctqmc/ctqmcoutput_to_green
+!! NAME
+!! ctqmcoutput_to_green
+!!
+!! FUNCTION
+!!  Put values of green function from ctqmc into green datatype
+!!  Symetrize over spin if calculation is non magnetic
+!!
+!! INPUTS
+!!  paw_dmft <type(paw_dmft_type)>= DMFT data structure
+!!  gtmp_nd(dmftqmc_l,nflavor,nflavor) = Green's fct in imag time (with off diag terms)
+!!  gw_tmp_nd(nb_of_frequency,nflavor,nflavor) = Green's fct in imag freq (with off diag terms)
+!!  gtmp(dmftqmc_l,nflavor) = Green's fct in imag time (diag)
+!!  gw_tmp(nb_of_frequency,nflavor+1) =Green's fct in imag freq (diag)
+!!  iatom = atoms on which the calculation has been done
+!!  leg_measure = logical, to Legendre Measurement or not (if done Green function is frequency is computed)
+!!  opt_nondiag = integer, it activated, then
+!!
+!! OUTPUT
+!!  green <type(green_type)>= green's function
+!!
+!!
+!! SIDE EFFECTS
+!!
+!! NOTES
+!!
+!! SOURCE
+
+subroutine ctqmcoutput_to_green(green,paw_dmft,gtmp_nd,gw_tmp_nd,gtmp,gw_tmp,iatom,leg_measure,opt_nondiag)
+
+!Arguments ------------------------------------
+!scalars
+ type(paw_dmft_type), intent(in)  :: paw_dmft
+ type(green_type), intent(inout) :: green
+ real(dp), allocatable, intent(in) :: gtmp_nd(:,:,:)
+ complex(dpc), allocatable, intent(in) :: gw_tmp(:,:)
+ complex(dpc), allocatable, intent(in) :: gw_tmp_nd(:,:,:)
+ real(dp), allocatable, intent(in) :: gtmp(:,:)
+ integer, intent(in) :: iatom,opt_nondiag
+ logical(kind=1), intent(in) :: leg_measure
+ character(len=500) :: message
+
+!Local variables ------------------------------
+ integer :: ifreq, itau,im1,im2,isppol,ispinor1,ispinor2,iflavor1
+ integer :: iflavor2,tndim,ispinor,iflavor,im,nflavor
+! ************************************************************************
+ tndim=2*paw_dmft%lpawu(iatom)+1
+ nflavor=2*(tndim)
+
+ do itau=1,paw_dmft%dmftqmc_l
+   green%oper_tau(itau)%matlu(iatom)%mat(:,:,:,:,:)=czero
+ end do
+ green%occup_tau%matlu(iatom)%mat(nflavor:,:,:,:,:)=czero
+
+ do ifreq=1,paw_dmft%dmft_nwlo
+   green%oper(ifreq)%matlu(iatom)%mat(:,:,:,:,:)=czero
+ end do
+ green%occup%matlu(iatom)%mat(:,:,:,:,:)=czero
+
+!   built time and frequency green's function from output of CTQMC
+! =================================================================
+ if(opt_nondiag==1) then
+   do isppol=1,paw_dmft%nsppol
+     do ispinor1=1,paw_dmft%nspinor
+       do im1=1,tndim
+         iflavor1=im1+tndim*(ispinor1-1)+tndim*(isppol-1)
+         do ispinor2=1,paw_dmft%nspinor
+           do im2=1,tndim
+             iflavor2=im2+tndim*(ispinor2-1)+tndim*(isppol-1)
+             do itau=1,paw_dmft%dmftqmc_l
+               green%oper_tau(itau)%matlu(iatom)%mat(im1,im2,isppol,ispinor1,ispinor2)=&
+&               gtmp_nd(itau,iflavor1,iflavor2)
+               ! symetrize over spin if nsppol=nspinor=1
+               if(paw_dmft%nsppol==1.and.paw_dmft%nspinor==1) then
+                 green%oper_tau(itau)%matlu(iatom)%mat(im1,im2,isppol,ispinor1,ispinor2)=&
+&                 (gtmp_nd(itau,iflavor1,iflavor2)+gtmp_nd(itau,iflavor1+tndim,iflavor2+tndim))/two
+               end if
+             end do  !itau
+             if(paw_dmft%dmft_solv<6.or.leg_measure) then
+               do ifreq=1,paw_dmft%dmft_nwlo
+                 green%oper(ifreq)%matlu(iatom)%mat(im1,im2,isppol,ispinor1,ispinor2)=&
+&                 gw_tmp_nd(ifreq,iflavor1,iflavor2)
+               ! symetrize over spin if nsppol=nspinor=1
+                 if(paw_dmft%nsppol==1.and.paw_dmft%nspinor==1) then
+                   green%oper(ifreq)%matlu(iatom)%mat(im1,im2,isppol,ispinor1,ispinor2)=&
+&                   (gw_tmp_nd(ifreq,iflavor1,iflavor2)+&
+&                   gw_tmp_nd(ifreq,iflavor1+tndim,iflavor2+tndim))/two
+                 end if
+               end do ! ifreq
+             end if
+           end do  ! im2
+         end do  ! ispinor2
+       end do  ! im1
+     end do  ! ispinor
+   end do ! isppol
+ else
+   iflavor=0
+   do isppol=1,paw_dmft%nsppol
+     do ispinor=1,paw_dmft%nspinor
+       do im=1,tndim
+         iflavor=iflavor+1
+         do itau=1,paw_dmft%dmftqmc_l
+           green%oper_tau(itau)%matlu(iatom)%mat(im,im,isppol,ispinor,ispinor)=gtmp(itau,iflavor)
+           ! symetrize over spin if nsppol=paw_dmft%nspinor=1
+           if(paw_dmft%nsppol==1.and.paw_dmft%nspinor==1) then
+             green%oper_tau(itau)%matlu(iatom)%mat(im,im,isppol,ispinor,ispinor)=&
+&             (gtmp(itau,iflavor)+gtmp(itau,iflavor+tndim))/two
+           end if
+         end do
+!       ifreq2=0
+         do ifreq=1,paw_dmft%dmft_nwlo
+!         if(paw_dmft%select_log(ifreq)==1) then
+!           ifreq2=ifreq2+1
+           green%oper(ifreq)%matlu(iatom)%mat(im,im,isppol,ispinor,ispinor)=gw_tmp(ifreq,iflavor)
+           ! symetrize over spin if nsppol=paw_dmft%nspinor=1
+           if(paw_dmft%nsppol==1.and.paw_dmft%nspinor==1) then
+             green%oper(ifreq)%matlu(iatom)%mat(im,im,isppol,ispinor,ispinor)=&
+&             (gw_tmp(ifreq,iflavor)+gw_tmp(ifreq,iflavor+tndim))/two
+           end if
+         end do
+       end do
+     end do
+   end do
+ end if
+ if(paw_dmft%nsppol==1.and.paw_dmft%nspinor==1) then
+   write(message,'(a,2x,a,f13.5)') ch10,&
+&   " == nsppol==1 and nspden==1: Green functions from CTQMC have been symetrized over spin"
+   call wrtout(std_out,message,'COLL')
+ end if
+
+end subroutine ctqmcoutput_to_green
+!!***
+
+!!****f* m_forctqmc/ctqmcoutput_printgreen
+!! NAME
+!! ctqmcoutput_printgreen
+!!
+!! FUNCTION
+!!  Print values of green function in files.
+!!  Symetrize imaginary time Green's function in a peculiar case
+!!  (dmft_solv=8 and natom=1). Should be moved later.
+!!
+!! INPUTS
+!!  paw_dmft <type(paw_dmft_type)>= DMFT data structure
+!!  gtmp_nd(dmftqmc_l,nflavor,nflavor) = Green's fct in imag time (with off diag terms)
+!!  gw_tmp_nd(nb_of_frequency,nflavor,nflavor) = Green's fct in imag freq (with off diag terms)
+!!  gtmp(dmftqmc_l,nflavor) = Green's fct in imag time (diag)
+!!  gw_tmp(nb_of_frequency,nflavor+1) =Green's fct in imag freq (diag)
+!!  iatom = atoms on which the calculation has been done
+!!
+!! OUTPUT
+!!
+!!
+!! SIDE EFFECTS
+!!
+!! NOTES
+!!
+!! SOURCE
+
+subroutine ctqmcoutput_printgreen(paw_dmft,gtmp_nd,gw_tmp_nd,gtmp,gw_tmp,iatom)
+
+!Arguments ------------------------------------
+!scalars
+ type(paw_dmft_type), intent(in)  :: paw_dmft
+ real(dp), allocatable, intent(inout) :: gtmp_nd(:,:,:)
+ complex(dpc), allocatable, intent(in) :: gw_tmp(:,:)
+ complex(dpc), allocatable, intent(in) :: gw_tmp_nd(:,:,:)
+ real(dp), allocatable, intent(in) :: gtmp(:,:)
+ integer, intent(in) :: iatom
+
+!Local variables ------------------------------
+ character(len=500) :: message
+ integer :: ifreq, itau,iflavor1
+ integer :: tndim,iflavor,nflavor
+ character(len=2) :: gtau_iter,iatomnb
+ integer :: unt
+! ************************************************************************
+ tndim=2*paw_dmft%lpawu(iatom)+1
+ nflavor=2*(tndim)
+ !----------------------------------------
+ ! <DEBUG>
+ !----------------------------------------
+ ! Construct UNIT
+ if(paw_dmft%idmftloop < 10) then
+   write(gtau_iter,'("0",i1)') paw_dmft%idmftloop
+ elseif(paw_dmft%idmftloop >= 10 .and. paw_dmft%idmftloop < 100) then
+   write(gtau_iter,'(i2)') paw_dmft%idmftloop
+ else
+   gtau_iter="xx"
+ end if
+ if(iatom < 10) then
+   write(iatomnb,'("0",i1)') iatom
+ elseif(iatom >= 10 .and. iatom < 100) then
+   write(iatomnb,'(i2)') iatom
+ else
+   iatomnb='xx'
+ end if
+
+ if(paw_dmft%myproc .eq. mod(paw_dmft%nproc+1,paw_dmft%nproc)) then
+! < HACK >
+  if(paw_dmft%dmft_solv==6.or.paw_dmft%dmft_solv==7) then
+    if (open_file(trim(paw_dmft%filapp)//"_atom_"//iatomnb//"_Gw_"//gtau_iter//".dat", message, newunit=unt) /=0) then
+      ABI_ERROR(message)
+    end if
+    do ifreq=1,paw_dmft%dmft_nwli
+      write(unt,'(29f21.14)') paw_dmft%omega_lo(ifreq),((gw_tmp_nd(ifreq,iflavor,iflavor)), iflavor=1, nflavor)
+    end do
+    close(unt)
+  else
+    if(paw_dmft%dmft_solv==5) then
+      if (open_file(trim(paw_dmft%filapp)//"_atom_"//iatomnb//"_Gtau_"//gtau_iter//".dat", message, newunit=unt) /= 0) then
+        ABI_ERROR(message)
+      end if
+      do itau=1,paw_dmft%dmftqmc_l
+        write(unt,'(29f21.14)') float(itau-1)/float(paw_dmft%dmftqmc_l)/paw_dmft%temp,&
+        (gtmp(itau,iflavor), iflavor=1, nflavor)
+      end do
+      write(unt,'(29f21.14)') 1/paw_dmft%temp, (-1_dp-gtmp(1,iflavor), iflavor=1, nflavor)
+      close(unt)
+    endif
+    if(paw_dmft%dmft_solv==8) then
+      if (open_file(trim(paw_dmft%filapp)//"_atom_"//iatomnb//"_Gtau_offdiag_unsym_"//gtau_iter//".dat",&
+&      message, newunit=unt) /= 0) then
+        ABI_ERROR(message)
+      end if
+      do itau=1,paw_dmft%dmftqmc_l
+        write(unt,'(196f21.14)') float(itau-1)/float(paw_dmft%dmftqmc_l)/paw_dmft%temp,&
+        ((gtmp_nd(itau,iflavor,iflavor1), iflavor=1, nflavor),iflavor1=1, nflavor)
+      end do
+      close(unt)
+!      if(paw_dmft%natom==1) then ! If natom>1, it should be moved outside the loop over atoms
+!        ABI_MALLOC(matlu1,(paw_dmft%natom))
+!        call init_matlu(paw_dmft%natom,paw_dmft%nspinor,paw_dmft%nsppol,paw_dmft%lpawu,matlu1)
+!        do itau=1,paw_dmft%dmftqmc_l
+!          do isppol=1,paw_dmft%nsppol
+!            do ispinor1=1,paw_dmft%nspinor
+!              do im1=1,tndim
+!                iflavor1=im1+tndim*(ispinor1-1)+tndim*(isppol-1)
+!                do ispinor2=1,paw_dmft%nspinor
+!                  do im2=1,tndim
+!                    iflavor2=im2+tndim*(ispinor2-1)+tndim*(isppol-1)
+!                    matlu1(iatom)%mat(im1,im2,isppol,ispinor1,ispinor2)=&
+!&                     gtmp_nd(itau,iflavor1,iflavor2)
+!                  end do  ! im2
+!                end do  ! ispinor2
+!              end do  ! im1
+!            end do  ! ispinor
+!          end do ! isppol
+!          call rotate_matlu(matlu1,eigvectmatlu,paw_dmft%natom,3,0)
+!          call slm2ylm_matlu(matlu1,paw_dmft%natom,2,0)
+!          call sym_matlu(cryst_struc,matlu1,pawang,paw_dmft)
+!          call slm2ylm_matlu(matlu1,paw_dmft%natom,1,0)
+!          call rotate_matlu(matlu1,eigvectmatlu,paw_dmft%natom,3,1)
+!          do isppol=1,paw_dmft%nsppol
+!            do ispinor1=1,paw_dmft%nspinor
+!              do im1=1,tndim
+!                iflavor1=im1+tndim*(ispinor1-1)+tndim*(isppol-1)
+!                do ispinor2=1,paw_dmft%nspinor
+!                  do im2=1,tndim
+!                    iflavor2=im2+tndim*(ispinor2-1)+tndim*(isppol-1)
+!                    gtmp_nd(itau,iflavor1,iflavor2)=&
+!                     matlu1(iatom)%mat(im1,im2,isppol,ispinor1,ispinor2)
+!                  end do  ! im2
+!                end do  ! ispinor2
+!              end do  ! im1
+!            end do  ! ispinor
+!          end do ! isppol
+!        end do  !itau
+!        call destroy_matlu(matlu1,paw_dmft%natom)
+!        ABI_FREE(matlu1)
+!      endif ! if natom=1
+      if (open_file(trim(paw_dmft%filapp)//"_atom_"//iatomnb//"_Gtau_offdiag_"//gtau_iter//".dat",&
+&      message, newunit=unt) /= 0) then
+        ABI_ERROR(message)
+      end if
+      do itau=1,paw_dmft%dmftqmc_l
+        write(unt,'(196f21.14)') float(itau-1)/float(paw_dmft%dmftqmc_l)/paw_dmft%temp,&
+        ((gtmp_nd(itau,iflavor,iflavor1), iflavor=1, nflavor),iflavor1=1, nflavor)
+      end do
+      close(unt)
+    endif
+    !open(unit=4243, file=trim(paw_dmft%filapp)//"_atom_"//iatomnb//"_F_"//gtau_iter//".dat")
+    !call BathOperator_printF(paw_dmft%hybrid(iatom)%hybrid%bath,4243) !Already comment here
+    !close(4243)
+    if(paw_dmft%dmft_solv==5) then
+      if (open_file(trim(paw_dmft%filapp)//"_atom_"//iatomnb//"_Gw_"//gtau_iter//".dat", message, newunit=unt) /= 0) then
+        ABI_ERROR(message)
+      end if
+      do ifreq=1,paw_dmft%dmft_nwlo
+        write(unt,'(29f21.14)') paw_dmft%omega_lo(ifreq), &
+&        (gw_tmp(ifreq,iflavor), iflavor=1, nflavor)
+      end do
+    endif
+    close(unt)
+  end if
+! </ HACK >
+  end if
+
+
+end subroutine ctqmcoutput_printgreen
+!!***
+
+!!****f* m_forctqmc/ctqmc_calltriqs
+!! NAME
+!! ctqmc_calltriqs
+!!
+!! FUNCTION
+!!  Call TRIQS solver and perform calculation of Green's function using
+!!  Legendre coefficients.
+!!
+!! INPUTS
+!!  paw_dmft <type(paw_dmft_type)>= DMFT data structure
+!!  cryst_struc <type(crystal_t)>=crystal structure data
+!!  hu <type(hu_type)>= U interaction
+!!  levels_ctqmc(nflavor) = atomic levels
+!!  gw_tmp_nd(nb_of_frequency,nflavor,nflavor) = Green's fct in imag freq (with off diag terms)
+!!  gtmp_nd(dmftqmc_l,nflavor,nflavor) = Green's fct in imag time (with off diag terms)
+!!  fw1_nd(dmft_nwlo,nflavor,nflavor) = Hybridization fct in imag time (with off diag terms)
+!!  leg_measure = logical, true is legendre measurement is activated
+!!  iatom= index of atom
+!!
+!! OUTPUT
+!!
+!!
+!! SIDE EFFECTS
+!!
+!! NOTES
+!!
+!! SOURCE
+
+subroutine ctqmc_calltriqs(paw_dmft,cryst_struc,hu,levels_ctqmc,gtmp_nd,gw_tmp_nd,fw1_nd,leg_measure,iatom)
+
+#if defined HAVE_TRIQS_v2_0 || defined HAVE_TRIQS_v1_4
+ use TRIQS_CTQMC !Triqs module
+#endif
+#if defined HAVE_PYTHON_INVOCATION
+ use INVOKE_PYTHON
+#endif
+ use, intrinsic :: iso_c_binding
+
+!Arguments ------------------------------------
+!scalars
+ type(paw_dmft_type), intent(in)  :: paw_dmft
+ type(crystal_t),intent(in) :: cryst_struc
+ type(hu_type), intent(in) :: hu(cryst_struc%ntypat)
+ real(dp), allocatable, target, intent(inout) :: gtmp_nd(:,:,:)
+ complex(dpc), allocatable, target, intent(inout) :: gw_tmp_nd(:,:,:)
+ complex(dpc), allocatable, target, intent(in) :: fw1_nd(:,:,:)
+ real(dp), allocatable, target, intent(inout) ::  levels_ctqmc(:)
+ logical(kind=1), intent(in) :: leg_measure
+ integer, intent(in) :: iatom
+
+!Local variables ------------------------------
+ complex(dpc), allocatable, target ::fw1_nd_tmp(:,:,:)
+ complex(dpc), allocatable, target :: g_iw(:,:,:)
+ real(dp), allocatable, target :: u_mat_ij(:,:)
+ real(dp), allocatable, target :: u_mat_ijkl(:,:,:,:)
+ real(dp), allocatable, target :: u_mat_ijkl_tmp(:,:,:,:)
+ real(dp), allocatable, target :: gl_nd(:,:,:)
+ type(c_ptr) :: levels_ptr, fw1_nd_ptr, u_mat_ij_ptr, u_mat_ijkl_ptr, g_iw_ptr, gtau_ptr, gl_ptr
+ real(dp), allocatable :: jbes(:)
+ character(len=500) :: message
+ integer :: itau, ifreq, iflavor1
+ integer :: iflavor2,iflavor,nflavor,iflavor3,itypat
+ integer :: nfreq,ntau,nleg,ileg
+ integer :: verbosity_solver ! min 0 -> max 3
+ logical(kind=1) :: rot_inv = .false.
+ logical(kind=1) :: hist = .false.
+ logical(kind=1) :: wrt_files = .true.
+ logical(kind=1) :: tot_not = .true.
+ real(dp) :: beta,besp,bespp,xx
+ complex(dpc) :: u_nl
+
+!----------
+!Variables for writing out the NETCDF file
+!----------
+ integer(kind=4) :: ncid
+ integer(kind=4) :: dim_one_id, dim_nflavor_id, dim_nwlo_id, dim_nwli_id
+ integer(kind=4) :: dim_qmc_l_id, dim_nleg_id
+ integer(kind=4), dimension(2) :: dim_u_mat_ij_id
+ integer(kind=4), dimension(3) :: dim_fw1_id, dim_g_iw_id, dim_gl_id, dim_gtau_id
+ integer(kind=4), dimension(4) :: dim_u_mat_ijkl_id
+ integer(kind=4) :: var_rot_inv_id, var_leg_measure_id, var_hist_id, var_wrt_files_id
+ integer(kind=4) :: var_tot_not_id, var_n_orbitals_id, var_n_freq_id, var_n_tau_id, var_n_l_id, var_n_cycles_id
+ integer(kind=4) :: var_cycle_length_id, var_ntherm_id, var_verbo_id, var_seed_id, var_beta_id
+ integer(kind=4) :: var_levels_id, var_u_mat_ij_id, var_u_mat_ijkl_id, var_real_fw1_nd_id, var_imag_fw1_nd_id
+ integer(kind=4) :: var_real_g_iw_id, var_imag_g_iw_id, var_gtau_id, var_gl_id, var_spacecomm_id
+
+ integer(kind=4) :: varid
+ logical :: file_exists
+ complex :: i
+ character(len=100) :: filename
+
+ real(dp), allocatable, target :: new_re_g_iw(:,:,:), new_im_g_iw(:,:,:)
+ real(dp), allocatable, target :: new_g_tau(:,:,:), new_gl(:,:,:)
+!----------
+! ************************************************************************
+
+ ! fw1_nd: Hybridation
+ ! levels_ctqmc: niveaux
+ ! hu(itypat)%udens(:,:) : U_ij
+ ! hu(itypat)%u(:,:,:,:) : uijkl
+ ! temperature : paw_dmft%temp
+ ! paw_dmft%dmftqmc_l: nombre de points en temps -1
+ ! paw_dmft%dmftqmc_n: nombre de cycles
+ ! ?? Quelles sorties: Les fonctions de Green
+ ! frequence/temps/Legendre.
+ ! Double occupations ?? <n_i n_j>
+ ! test n_tau > 2*nfreq => ntau = 2*nfreq + 1
+ !   for non diagonal code:
+ !   call CtqmcInterface_run(hybrid,fw1_nd(1:paw_dmft%dmftqmc_l,:,:),Gtau=gtmp_nd,&
+ !&  Gw=gw_tmp_nd,D=Doccsum,E=green%ecorr_qmc(iatom),&
+ !&  Noise=Noise,matU=hu(itypat)%udens,opt_levels=levels_ctqmc,hybri_limit=hybri_limit)
+ !Check choice of user to fix model bool var for the solver
+ if (paw_dmft%dmft_solv==6) then
+   rot_inv = .false.
+ else !obviously paw_dmft%dmft_solv==7 with rot invariant terms
+   rot_inv = .true.
+ end if
+
+ nfreq = paw_dmft%dmft_nwli
+ !paw_dmft%dmft_nwlo = paw_dmft%dmft_nwli !transparent for user
+ ntau  = paw_dmft%dmftqmc_l !(2*paw_dmft%dmftqmc_l)+1 !nfreq=paw_dmft%dmft_nwli
+ nleg  = paw_dmft%dmftctqmc_triqs_nleg
+ nflavor=2*(2*paw_dmft%lpawu(iatom)+1)
+ itypat=cryst_struc%typat(iatom)
+
+
+ verbosity_solver = paw_dmft%prtvol
+ beta = 1.0/(paw_dmft%temp*Ha_eV)
+
+ !Allocation in/output array phase:
+ ABI_MALLOC(fw1_nd_tmp,(1:nflavor,1:nflavor,1:nfreq)) !column major
+ ABI_MALLOC(g_iw,(1:nflavor,1:nflavor,1:nfreq)) !column major
+ ABI_MALLOC(u_mat_ij,(1:nflavor,1:nflavor)) !column major
+ ABI_MALLOC(u_mat_ijkl,(1:nflavor,1:nflavor,1:nflavor,1:nflavor)) !column major
+ ABI_MALLOC(u_mat_ijkl_tmp,(1:nflavor,1:nflavor,1:nflavor,1:nflavor)) !column major
+
+ if ( leg_measure ) then !only if functionality is enabled
+   ABI_MALLOC(gl_nd,(1:nleg,1:nflavor,1:nflavor)) !column major !nl = 30 by default
+ end if
+
+ !Conversion datas Ha -> eV (some duplications for test...)
+ !fw1_nd_tmp = fw1_nd(1:paw_dmft%dmftqmc_l,:,:) * Ha_eV !fw1_nd = fw1_nd * Ha_eV !Ok?
+
+ do iflavor=1,nflavor
+   do iflavor1=1,nflavor
+     do ifreq=1,nfreq
+       fw1_nd_tmp(iflavor,iflavor1,ifreq) = fw1_nd(ifreq,iflavor,iflavor1) * Ha_eV
+!        WRITE(500,*) "[IN Fortran] F[ w= ",ifreq," l= ",iflavor," l_= ",iflavor1,"] = ",fw1_nd(ifreq,iflavor,iflavor1)
+     end do
+   end do
+ end do
+
+    !Report test
+!    WRITE(502,*) hu(itypat)%udens
+!    do ifreq=1,paw_dmft%dmftqmc_l
+!      write(501,*) ((fw1_nd(ifreq,iflavor,iflavor1),iflavor=1,nflavor),iflavor1=1,nflavor)
+!    enddo
+    !write(866,*)paw_dmft%dmft_nwlo,paw_dmft%dmftqmc_l
+    !write(866,*) u_mat_ij
+!   do iflavor=1,nflavor+1
+!     do iflavor1=1,nflavor+1
+!       WRITE(502,*) "[OUT Fortran] U(i,j)[ l= ",iflavor," l_= ",iflavor1,"] = ",hu(itypat)%udens(iflavor,iflavor1)
+!     enddo
+!   enddo
+
+!          if(paw_dmft%myproc==0) then
+!          do iflavor=1,nflavor
+!            do iflavor1=1,nflavor
+!               do iflavor2=1,nflavor
+!                  do iflavor3=1,nflavor
+!                    write(490,*), hu(itypat)%vee(iflavor,iflavor1,iflavor2,iflavor3)
+!                  enddo
+!                 enddo
+!                enddo
+!              enddo
+!          endif
+
+!          if(paw_dmft%myproc==0) then
+!          do iflavor=1,nflavor
+!            do iflavor1=1,nflavor
+!            write(491,*), hu(itypat)%udens(iflavor,iflavor1) !(1,1,1,1)
+!            enddo
+!          enddo
+!          endif
+
+!          do iflavor=1,nflavor
+!            do iflavor1=1,nflavor
+!          do iflavor2=1,nflavor
+!            do iflavor3=1,nflavor
+                 ! WRITE(552,*), hu(itypat)%vee!(iflavor,iflavor1,iflavor2,iflavor3)
+!            enddo
+!          enddo
+!            enddo
+!          enddo
+
+ call vee_ndim2tndim_hu_r(paw_dmft%lpawu(iatom),hu(itypat)%vee,u_mat_ijkl_tmp,1)
+ do iflavor=1,nflavor
+   do iflavor1=1,nflavor
+     do iflavor2=1,nflavor
+       do iflavor3=1,nflavor
+         u_mat_ijkl(iflavor,iflavor1,iflavor2,iflavor3)   =  Ha_eV * u_mat_ijkl_tmp(iflavor,iflavor1,iflavor2,iflavor3)
+       end do
+     end do
+   end do
+ end do
+
+ !u_mat_ijkl   =  Ha_eV * reshape( u_mat_ijkl , [nflavor,nflavor,nflavor,nflavor] )  !column -> row major + conversion
+ u_mat_ij     = transpose( hu(itypat)%udens ) * Ha_eV !column -> row major + conversion
+ levels_ctqmc = levels_ctqmc * Ha_eV
+
+ !Location array in memory for C++ pointer args to pass
+ !----------------------------------------------------
+ g_iw_ptr       = C_LOC( gw_tmp_nd ) !C_LOC( g_iw )
+ gtau_ptr       = C_LOC( gtmp_nd ) !C_LOC( gtau )
+ gl_ptr         = C_LOC( gl_nd )
+ fw1_nd_ptr     = C_LOC( fw1_nd_tmp )
+ u_mat_ij_ptr   = C_LOC( u_mat_ij )
+ u_mat_ijkl_ptr = C_LOC( u_mat_ijkl )
+ levels_ptr     = C_LOC( levels_ctqmc )
+
+ !Calling interfaced TRIQS solver subroutine from src/67_triqs_ext package
+ if (paw_dmft%dmft_solv==9) then
+#ifndef HAVE_NETCDF
+  write(message,'(2a)') ch10,' NETCDF requiered! ABINIT communicates with the python script through netcdf.'
+  call wrtout(std_out,message,'COLL')
+  ABI_ERROR(message)
+#else
+#ifndef HAVE_PYTHON_INVOCATION
+  write(message,'(23a)') ch10,' Python invocation flag requiered! You need to install ABINIT with ',&
+   'enable_python_invocation = yes" in your "configure.ac" file.'
+  call wrtout(std_out,message,'COLL')
+  ABI_ERROR(message)
+#else
+  ! Creating the NETCDF file
+  ! write(std_out, "(a)") trim(paw_dmft%filapp)
+  write(filename, '(a, a)') trim(paw_dmft%filnamei), "_abinit_output_for_py.nc"
+  write(std_out, '(3a)') ch10, "    Creating NETCDF file: ", trim(filename)
+  NCF_CHECK(nf90_create(filename, NF90_CLOBBER, ncid))
+ 
+  ! Defining the dimensions of the variables to write in the NETCDF file
+  NCF_CHECK(nf90_def_dim(ncid, "one", 1, dim_one_id))
+  NCF_CHECK(nf90_def_dim(ncid, "nflavor", nflavor, dim_nflavor_id))
+  NCF_CHECK(nf90_def_dim(ncid, "nwlo", paw_dmft%dmft_nwlo, dim_nwlo_id))
+  NCF_CHECK(nf90_def_dim(ncid, "nwli", paw_dmft%dmft_nwli, dim_nwli_id))
+  NCF_CHECK(nf90_def_dim(ncid, "qmc_l", paw_dmft%dmftqmc_l, dim_qmc_l_id))
+  NCF_CHECK(nf90_def_dim(ncid, "nleg", nleg, dim_nleg_id))
+ 
+  dim_u_mat_ij_id = (/ dim_nflavor_id, dim_nflavor_id /)
+  dim_u_mat_ijkl_id = (/ dim_nflavor_id, dim_nflavor_id, dim_nflavor_id, dim_nflavor_id /)
+  dim_fw1_id = (/ dim_nflavor_id, dim_nflavor_id, dim_nwli_id /)
+  dim_g_iw_id = (/ dim_nwli_id, dim_nflavor_id, dim_nflavor_id /)
+  dim_gtau_id = (/ dim_qmc_l_id, dim_nflavor_id, dim_nflavor_id /)
+  dim_gl_id = (/ dim_nleg_id, dim_nflavor_id, dim_nflavor_id /)
+ 
+  ! Defining the variables
+  NCF_CHECK(nf90_def_var(ncid, "rot_inv",         NF90_INT, dim_one_id,           var_rot_inv_id))
+  NCF_CHECK(nf90_def_var(ncid, "leg_measure",     NF90_INT, dim_one_id,           var_leg_measure_id))
+  NCF_CHECK(nf90_def_var(ncid, "hist",            NF90_INT, dim_one_id,           var_hist_id))
+  NCF_CHECK(nf90_def_var(ncid, "wrt_files",       NF90_INT, dim_one_id,           var_wrt_files_id))
+  NCF_CHECK(nf90_def_var(ncid, "tot_not",         NF90_INT, dim_one_id,           var_tot_not_id))
+  NCF_CHECK(nf90_def_var(ncid, "n_orbitals",      NF90_INT, dim_one_id,           var_n_orbitals_id))
+  NCF_CHECK(nf90_def_var(ncid, "n_freq",          NF90_INT, dim_one_id,           var_n_freq_id))
+  NCF_CHECK(nf90_def_var(ncid, "n_tau",           NF90_INT, dim_one_id,           var_n_tau_id))
+  NCF_CHECK(nf90_def_var(ncid, "n_l",             NF90_INT, dim_one_id,           var_n_l_id))
+  NCF_CHECK(nf90_def_var(ncid, "n_cycles",        NF90_INT, dim_one_id,           var_n_cycles_id))
+  NCF_CHECK(nf90_def_var(ncid, "cycle_length",    NF90_INT, dim_one_id,           var_cycle_length_id))
+  NCF_CHECK(nf90_def_var(ncid, "ntherm",          NF90_INT, dim_one_id,           var_ntherm_id))
+  NCF_CHECK(nf90_def_var(ncid, "verbo",           NF90_INT, dim_one_id,           var_verbo_id))
+  NCF_CHECK(nf90_def_var(ncid, "seed",            NF90_INT, dim_one_id,           var_seed_id))
+  NCF_CHECK(nf90_def_var(ncid, "beta",            NF90_FLOAT, dim_one_id,         var_beta_id))
+  NCF_CHECK(nf90_def_var(ncid, "levels",          NF90_DOUBLE, dim_nflavor_id,    var_levels_id))
+  NCF_CHECK(nf90_def_var(ncid, "u_mat_ij",        NF90_DOUBLE, dim_u_mat_ij_id,   var_u_mat_ij_id))
+  NCF_CHECK(nf90_def_var(ncid, "u_mat_ijkl",      NF90_DOUBLE, dim_u_mat_ijkl_id, var_u_mat_ijkl_id))
+  NCF_CHECK(nf90_def_var(ncid, "real_fw1_nd",     NF90_DOUBLE, dim_fw1_id,        var_real_fw1_nd_id))
+  NCF_CHECK(nf90_def_var(ncid, "imag_fw1_nd",     NF90_DOUBLE, dim_fw1_id,        var_imag_fw1_nd_id))
+  NCF_CHECK(nf90_def_var(ncid, "real_g_iw",       NF90_DOUBLE, dim_g_iw_id,       var_real_g_iw_id))
+  NCF_CHECK(nf90_def_var(ncid, "imag_g_iw",       NF90_DOUBLE, dim_g_iw_id,       var_imag_g_iw_id))
+  NCF_CHECK(nf90_def_var(ncid, "gtau",            NF90_DOUBLE, dim_gtau_id,       var_gtau_id))
+  NCF_CHECK(nf90_def_var(ncid, "gl",              NF90_DOUBLE, dim_gl_id,         var_gl_id))
+  NCF_CHECK(nf90_def_var(ncid, "spacecomm",       NF90_INT, dim_one_id,           var_spacecomm_id))
+  NCF_CHECK(nf90_enddef(ncid))
+ 
+  ! Filling the variables with actual data
+  if (rot_inv) then 
+   NCF_CHECK(nf90_put_var(ncid, var_rot_inv_id,       1))  
+  else 
+   NCF_CHECK(nf90_put_var(ncid, var_rot_inv_id,       0))  
+  end if
+  if (leg_measure) then
+   NCF_CHECK(nf90_put_var(ncid, var_leg_measure_id,   1))
+  else
+   NCF_CHECK(nf90_put_var(ncid, var_leg_measure_id,   0))
+  end if
+  if (hist) then
+   NCF_CHECK(nf90_put_var(ncid, var_hist_id,          1))
+  else
+   NCF_CHECK(nf90_put_var(ncid, var_hist_id,          0))
+  end if
+  if (wrt_files) then
+   NCF_CHECK(nf90_put_var(ncid, var_wrt_files_id,     1))
+  else
+   NCF_CHECK(nf90_put_var(ncid, var_wrt_files_id,     0))
+  end if
+  if (tot_not) then
+   NCF_CHECK(nf90_put_var(ncid, var_tot_not_id,       1))
+  else
+   NCF_CHECK(nf90_put_var(ncid, var_tot_not_id,       0))
+  end if
+  NCF_CHECK(nf90_put_var(ncid, var_n_orbitals_id,         nflavor))
+  NCF_CHECK(nf90_put_var(ncid, var_n_freq_id,             nfreq))
+  NCF_CHECK(nf90_put_var(ncid, var_n_tau_id,              ntau))
+  NCF_CHECK(nf90_put_var(ncid, var_n_l_id,                nleg))
+  NCF_CHECK(nf90_put_var(ncid, var_n_cycles_id,           int(paw_dmft%dmftqmc_n/paw_dmft%nproc)))
+  NCF_CHECK(nf90_put_var(ncid, var_cycle_length_id,       paw_dmft%dmftctqmc_meas*2*2*nflavor))
+  NCF_CHECK(nf90_put_var(ncid, var_ntherm_id,             paw_dmft%dmftqmc_therm))
+  NCF_CHECK(nf90_put_var(ncid, var_verbo_id,              verbosity_solver))
+  NCF_CHECK(nf90_put_var(ncid, var_seed_id,               paw_dmft%dmftqmc_seed))
+  NCF_CHECK(nf90_put_var(ncid, var_beta_id,               beta))
+  NCF_CHECK(nf90_put_var(ncid, var_levels_id,             levels_ctqmc))
+  NCF_CHECK(nf90_put_var(ncid, var_u_mat_ij_id,           u_mat_ij))
+  NCF_CHECK(nf90_put_var(ncid, var_u_mat_ijkl_id,         u_mat_ijkl))
+  NCF_CHECK(nf90_put_var(ncid, var_real_fw1_nd_id,        real(fw1_nd_tmp)))
+  NCF_CHECK(nf90_put_var(ncid, var_imag_fw1_nd_id,        aimag(fw1_nd_tmp)))
+  NCF_CHECK(nf90_put_var(ncid, var_real_g_iw_id,          real(gw_tmp_nd)))
+  NCF_CHECK(nf90_put_var(ncid, var_imag_g_iw_id,          aimag(gw_tmp_nd)))
+  NCF_CHECK(nf90_put_var(ncid, var_gtau_id,               gtmp_nd))
+  NCF_CHECK(nf90_put_var(ncid, var_gl_id,                 gl_nd))
+  NCF_CHECK(nf90_put_var(ncid, var_spacecomm_id,          paw_dmft%spacecomm))
+  NCF_CHECK(nf90_close(ncid))
+
+  write(std_out, '(4a)') ch10, "    NETCDF file ", trim(filename), " written; Launching python invocation"
+ 
+  ! Invoking python to execute the script
+  ! call Invoke_python_triqs (paw_dmft%myproc, trim(paw_dmft%filnamei)//c_null_char, paw_dmft%spacecomm)
+  call Invoke_python_triqs (paw_dmft%myproc, trim(paw_dmft%filnamei)//c_null_char)
+  call xmpi_barrier(paw_dmft%spacecomm)
+  call flush_unit(std_out)
+ 
+  ! Allocating the fortran variables for the results
+  ABI_MALLOC(new_re_g_iw,(nflavor,nflavor, paw_dmft%dmft_nwli))
+  ABI_MALLOC(new_im_g_iw,(nflavor,nflavor, paw_dmft%dmft_nwli))
+  ABI_MALLOC(new_g_tau,(nflavor,nflavor, paw_dmft%dmftqmc_l))
+  ABI_MALLOC(new_gl,(nflavor,nflavor, nleg))
+  i = (0, 1)
+  
+  ! Check if file exists
+  write(filename, '(a, a)') trim(paw_dmft%filnamei), "_py_output_for_abinit.nc"
+
+  INQUIRE(FILE=filename, EXIST=file_exists)
+  if(.not. file_exists) then
+   write(message,'(4a)') ch10,' Cannot find file ', trim(filename), '! Make sure the python script writes it with the right name and at the right place!'
+   call wrtout(std_out,message,'COLL')
+   ABI_ERROR(message)
+  endif
+
+  write(std_out, '(3a)') ch10, "    Reading NETCDF file ", trim(filename)
+
+  ! Opening the NETCDF file
+  NCF_CHECK(nf90_open(filename, nf90_nowrite, ncid))
+ 
+  ! Read from the file
+  ! Re{G_iw}
+  write(std_out, '(2a)') ch10, "    -- Re[G(iw_n)]"
+  NCF_CHECK(nf90_inq_varid(ncid, "re_g_iw", varid))
+  NCF_CHECK(nf90_get_var(ncid, varid, new_re_g_iw))
+  ! Im{G_iw}
+  write(std_out, '(2a)') ch10, "    -- Im[G(iw_n)]"
+  NCF_CHECK(nf90_inq_varid(ncid, "im_g_iw", varid))
+  NCF_CHECK(nf90_get_var(ncid, varid, new_im_g_iw))
+  ! G_tau
+  write(std_out, '(2a)') ch10, "    -- G(tau)"
+  NCF_CHECK(nf90_inq_varid(ncid, "g_tau", varid))
+  NCF_CHECK(nf90_get_var(ncid, varid, new_g_tau))
+  ! G_l
+  write(std_out, '(2a)') ch10, "    -- G_l"
+  NCF_CHECK(nf90_inq_varid(ncid, "gl", varid))
+  NCF_CHECK(nf90_get_var(ncid, varid, new_gl))
+
+  ! Assigning data
+  do iflavor1=1, nflavor
+   do iflavor2=1, nflavor
+    do ifreq=1, paw_dmft%dmft_nwli
+     gw_tmp_nd(ifreq, iflavor1, iflavor2) = new_re_g_iw(iflavor1, iflavor2, ifreq) &
+&               + i*new_im_g_iw(iflavor1, iflavor2, ifreq)
+    end do
+    do itau=1, paw_dmft%dmftqmc_l
+     gtmp_nd(itau, iflavor1, iflavor2) = new_g_tau(iflavor1, iflavor2, itau)
+    end do
+    do ileg=1, nleg
+     gl_nd(ileg, iflavor1, iflavor2) = new_gl(iflavor1, iflavor2, ileg)
+    end do
+   end do
+  end do
+ 
+  ! Deallocating
+  ABI_FREE(new_re_g_iw)
+  ABI_FREE(new_im_g_iw)
+  ABI_FREE(new_g_tau)
+  ABI_FREE(new_gl) 
+#endif
+#endif
+ elseif(paw_dmft%dmft_solv == 6 .or. paw_dmft%dmft_solv == 7) then
+  !Calling interfaced TRIQS solver subroutine from src/01_triqs_ext package
+  !----------------------------------------------------
+#if defined HAVE_TRIQS_v2_0 || defined HAVE_TRIQS_v1_4
+ call Ctqmc_triqs_run (     rot_inv, leg_measure, hist, wrt_files, tot_not,   &
+&  nflavor, nfreq, ntau , nleg, int(paw_dmft%dmftqmc_n/paw_dmft%nproc),       &
+&  paw_dmft%dmftctqmc_meas*2*2*nflavor, paw_dmft%dmftqmc_therm,               &
+&  verbosity_solver, paw_dmft%dmftqmc_seed,beta,                              &
+&  levels_ptr,  u_mat_ij_ptr, u_mat_ijkl_ptr, fw1_nd_ptr,                     &
+!&  g_iw_ptr, gtau_ptr, gl_ptr, paw_dmft%spacecomm                             )
+&  g_iw_ptr, gtau_ptr, gl_ptr, paw_dmft%myproc                             )
+#endif
+ endif
+
+  !WRITE(*,*) "Hello Debug"
+  !call xmpi_barrier(paw_dmft%spacecomm) !Resynch all processus after calling Impurity solver from TRIQS
+
+  !Report output datas from TRIQS to Abinit
+  !Interacting G(iw)
+ do ifreq=1,nfreq
+   do iflavor1=1,nflavor
+     do iflavor=1,nflavor
+    !   gw_tmp_nd(ifreq,iflavor,iflavor1) = g_iw(iflavor,iflavor1,ifreq) !* Ha_eV !because 1/ G0(eV)
+    !  WRITE(503,*) "[OUT Fortran] G(iw)[ w= ",ifreq," l= ",iflavor," l_= ",iflavor1,"] = ",gw_tmp_nd(ifreq,iflavor,iflavor1)!g_iw(iflavor,iflavor1,ifreq)
+     end do
+   end do
+ end do
+
+! Convert in Ha
+ gw_tmp_nd = gw_tmp_nd*Ha_eV
+
+!     do iflavor1=1,nflavor
+!       do iflavor=1,nflavor
+!
+!        WRITE(510,*) "[OUT Fortran] U[ l= ",iflavor," l_= ",iflavor1,"] = ",u_mat_ij(iflavor,iflavor1)
+!       enddo
+!     enddo
+
+! if(paw_dmft%myproc==0) write(6,*) "essai",paw_dmft%myproc, gw_tmp_nd(2,1,1)
+! if(paw_dmft%myproc==1) write(6,*) "essai",paw_dmft%myproc,gw_tmp_nd(2,1,1)
+! if(paw_dmft%myproc==0) write(621,*) "essai",paw_dmft%myproc, gw_tmp_nd(2,1,1)
+! if(paw_dmft%myproc==1) write(622,*) "essai",paw_dmft%myproc,gw_tmp_nd(2,1,1)
+! call flush_unit(621)
+! call flush_unit(622)
+! write(message,*) ch10, "essai",paw_dmft%myproc, paw_dmft%myproc,paw_dmft%dmftqmc_seed!gw_tmp_nd(2,1,1)
+! call wrtout(555,message,'PERS',.true.)
+! if(paw_dmft%myproc==0) write(499,*) "essai",paw_dmft%myproc, paw_dmft%dmftqmc_seed
+! if(paw_dmft%myproc==1) write(498,*) "essai",paw_dmft%myproc,paw_dmft%dmftqmc_seed
+
+  !Its associated G(tau): Problem of compatibility => paw_dmft%dmftqmc_l < (2*paw_dmft%dmftqmc_l)+1 => We report only  paw_dmft%dmftqmc_l =  first values of G(tau)...
+!   do iflavor=1,nflavor
+!     do iflavor1=1,nflavor
+!       do itau=1,ntau
+!         if ( modulo(itau,2) == 1 ) then !Problem of binding: paw_dmft%dmftqmc_l =! ntau => We take one value by 2 and Write in file all the G(tau) out function from TRIQS
+          !gtmp_nd(itau,iflavor,iflavor1) = gtau(iflavor,iflavor1,itau)
+!         endif
+!         if(paw_dmft%myproc==0) then
+!           WRITE(504,*) "[OUT Fortran] G[ tau= ",itau," l= ",iflavor," l_= ",iflavor1,"] = ",gtmp_nd(itau,iflavor,iflavor1) !gtmp_nd(itau,iflavor,iflavor1) !passage ok avec ntau/iflavor1/iflavor (iflavor,iflavor1,ntau)
+!         endif
+!       enddo
+!     enddo
+!   enddo
+
+  ! Write Legendre Polynoms G(L) for extrapolation of Interacting G(iw) by FT, only if leg_measure == TRUE
+  ! -------------------------------------------------------------------------------------------
+ if (leg_measure) then
+   do ileg=1,nleg
+     WRITE(505,*) ileg,((gl_nd(ileg,iflavor,iflavor1),iflavor=1,nflavor),iflavor1=1,nflavor)
+   end do
+   close(505)
+ end if
+! f(paw_dmft%myproc==0) then
+!  do itau=1,paw_dmft%dmftqmc_l
+!    write(490,*) ((gtmp_nd(itau,iflavor,iflavor1),iflavor=1,nflavor),iflavor1=1,nflavor)
+!  enddo
+! ndif
+ ABI_FREE( fw1_nd_tmp )
+ ABI_FREE( g_iw )
+ ABI_FREE( u_mat_ijkl )
+ ABI_FREE( u_mat_ijkl_tmp )
+ ABI_FREE( u_mat_ij )
+
+
+  !  Compute Green's function in imaginary freq using Legendre coefficients
+  ! -----------------------------------------------------------------------
+ if (leg_measure) then
+   call xmpi_barrier(paw_dmft%spacecomm)
+   call flush_unit(std_out)
+   write(message,'(2a)') ch10,"    ==  Compute G(iw_n) from Legendre coefficients"
+   call wrtout(std_out,message,'COLL')
+   ABI_MALLOC( jbes, (nleg))
+   gw_tmp_nd=czero
+
+  !   write(77,*) " TEST OF BESSEL S ROUTINES 0 0"
+
+  !   xx=0_dp
+  !   ileg=0
+  !   call sbf8(ileg+1,xx,jbes)
+  !   write(77,*) "T0 A",jbes(ileg+1)
+  !   call jbessel(jbes(ileg+1),besp,bespp,ileg,1,xx)
+  !   write(77,*) "T0 B",jbes(ileg+1)
+  !   write(77,*) "T0 C",bessel_jn(ileg,xx)
+
+  !   write(77,*) " TEST OF BESSEL S ROUTINES 1.5 0"
+
+  !   xx=1.5_dp
+  !   ileg=0
+  !   call sbf8(ileg+1,xx,jbes)
+  !   write(77,*) "T1 A",jbes(ileg+1)
+  !   call jbessel(jbes(ileg+1),besp,bespp,ileg,1,xx)
+  !   write(77,*) "T1 B",jbes(ileg+1)
+  !   write(77,*) "T1 C",bessel_jn(ileg,xx)
+
+  !   write(77,*) " TEST OF BESSEL S ROUTINES 1.5 1"
+
+  !   xx=1.5_dp
+  !   ileg=1
+  !   call sbf8(ileg+1,xx,jbes)
+  !   write(77,*) "T2 A",jbes(ileg+1)
+  !   call jbessel(jbes(ileg+1),besp,bespp,ileg,1,xx)
+  !   write(77,*) "T2 B",jbes(ileg+1)
+  !   write(77,*) "T2 C",bessel_jn(ileg,xx)
+
+
+   do ifreq=1,paw_dmft%dmft_nwli
+     xx=real(2*ifreq-1,kind=dp)*pi/two
+     if(xx<=100_dp) call sbf8(nleg,xx,jbes)
+     do ileg=1,nleg
+    ! write(77,*) "A",ifreq,jbes(ileg),xx
+
+       if(xx>=99) call jbessel(jbes(ileg),besp,bespp,ileg-1,1,xx)
+    ! write(77,*) "B",ifreq,jbes(ileg),xx
+
+     !write(77,*) "C",ifreq,jbes(ileg),xx
+
+       u_nl=sqrt(float(2*ileg-1))*(-1)**(ifreq-1)*cmplx(0_dp,one)**(ileg)*jbes(ileg)
+      write(77,*) "----------",ileg,jbes(ileg), u_nl,gl_nd(ileg,1,1)
+
+       do iflavor=1,nflavor
+         do iflavor1=1,nflavor
+           gw_tmp_nd(ifreq,iflavor,iflavor1)= gw_tmp_nd(ifreq,iflavor,iflavor1) + &
+&           u_nl*gl_nd(ileg,iflavor,iflavor1)
+         end do
+       end do
+
+  !    write(77,*) "------------------", gw_tmp_nd(ifreq,1,1)
+
+     end do
+  !  write(77,*) "------------------ sum ", gw_tmp_nd(ifreq,1,1)
+   end do
+   ABI_FREE( jbes )
+   call xmpi_barrier(paw_dmft%spacecomm)
+   call flush_unit(std_out)
+ end if
+ gw_tmp_nd = gw_tmp_nd*Ha_eV
+
+
+ if ( leg_measure ) then !only if functionality is enabled
+   ABI_FREE(gl_nd)
+ end if
+
+
+end subroutine ctqmc_calltriqs
 !!***
 
 END MODULE m_forctqmc

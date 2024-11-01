@@ -16,7 +16,7 @@ from time import gmtime,strftime
 
 # Initial setup
 my_name     = "make-cppopts-dumper"
-my_output   = "src/10_dumpinfo/m_cppopts_dumper.F90"
+my_output   = "shared/common/src/14_hidewrite/m_cppopts_dumper.F90"
 
 # Check if we are in the top of the ABINIT source tree
 if ( not os.path.exists("configure.ac") or
@@ -29,7 +29,7 @@ if ( not os.path.exists("configure.ac") or
 now = strftime("%Y/%m/%d %H:%M:%S +0000",gmtime())
 
 # Init template
-cppopts_dumper_module = """\
+cppopts_dumper_module = r"""
 !{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_cppopts_dumper
 !! NAME
@@ -39,7 +39,7 @@ cppopts_dumper_module = """\
 !!  Displays preprocessing options activated at compile-time.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2010-2019 ABINIT group (Yann Pouillon)
+!!  Copyright (C) 2010-2024 ABINIT group (Yann Pouillon)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt.
@@ -144,7 +144,7 @@ chk_verbose = opts.verbose
 my_name = os.path.basename(sys.argv[0])
 
 # Init regular expressions
-re_m4file  = re.compile("\.m4$")
+re_m4file  = re.compile(r"\.m4$")
 re_acdef  = re.compile("AC_DEFINE\\(")
 
 # Init CPP options

@@ -1,0 +1,77 @@
+# Computation of the electric field gradient at the atomic sites in stishovite
+# Stishovite is a polymorph of SiO2 and has the rutile structure.
+
+# Computation of EFG requires the use of PAW, Norm-conserving pseudopotentials are
+# not appropriate for this calculation.
+
+# here are the two variables needed to trigger computation of the field gradient
+nucefg 2 # NUClear properties EFG, value of 2 means to also print its components
+quadmom 0.0 -0.02558 # quadrupole moments of the nuclei (Si-29, O-17 here)
+                     # so that couplings as measured in NMR or NQR are also
+                     # reported, in MHz frequency units
+                     
+                     
+#Definition of the unit cell
+# stishovite has a primitive tetragonal cell, so two sides are equal,
+# the third different, and the angles all 90 degrees
+
+acell      8.0298189198E+00  8.0298189198E+00  5.1240093322E+00 Bohr
+rprim 1.0 0.0 0.0
+      0.0 1.0 0.0
+      0.0 0.0 1.0
+
+#Definition of the atom types and pseudopotentials
+ntypat 2 # two types of atoms
+znucl 14 8 # atomic number of atoms, will be cross checked against pseudopotential files
+           # here Silicon (14) and Oxygen (8). Pseudopotentials must be listed in this order.
+           # this order defines type 1 as silicon, type 2 as oxygen
+
+pp_dirpath "$ABI_PSPDIR" # pseudopotential directory
+pseudos "Si.GGA-PBE-rpaw-1.55.abinit, O.GGA-PBE-rpaw-1.45.abinit"
+
+#Definition of the atoms
+natom 6 # 6 atoms in the unit cell 
+typat    1 1 2 2 2 2 # atoms listed as silicons, then oxygens  
+# next are the 6 atomic positions, in order of typat (silicon, then oxygen)
+# xred gives them in units of the cell translation vectors, as is commonly
+# done in crystallography
+xred      3.1301524738E-20  1.2463357829E-20 -8.3403774579E-17
+          5.0000000000E-01  5.0000000000E-01  5.0000000000E-01
+          3.0660149474E-01  3.0660149474E-01 -8.3403774579E-17
+          8.0660149474E-01  1.9339850526E-01  5.0000000000E-01
+          1.9339850526E-01  8.0660149474E-01  5.0000000000E-01
+          6.9339850526E-01  6.9339850526E-01 -8.3403774579E-17
+
+#Numerical parameters of the calculation : planewave basis set and k point grid
+ecut 15 # plane wave cutoff energy, always need to check convergence of ecut in real runs
+pawecutdg 20 # cutoff energy for PAW fine grid
+ngkpt 8 8 6 # Parameters of Monkhorst-Pack kpoint grid. Convergence should be checked for
+            # this parameter as well.
+
+#Parameters for the SCF procedure
+nstep 10
+tolvrs 1.0D-18
+
+# suppress printing of density, wavefunctions, etc for this tutorial
+prtden 0
+prtwf 0
+prteig 0
+
+
+##############################################################
+# This section is used only for regression testing of ABINIT #
+##############################################################
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   tnuc_1.abo, tolnlines=  12, tolabs=  1.2e-8 , tolrel= 3.0e-3
+#%% [paral_info]
+#%% max_nprocs = 4
+#%% [extra_info]
+#%% authors = J. Zwanziger
+#%% keywords = PAW
+#%% description = 
+#%% topics = EFG, SmartSymm
+#%%<END TEST_INFO>

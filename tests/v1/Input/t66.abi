@@ -1,0 +1,85 @@
+# Hydrogen diatomic molecule. acell much too small.
+# Multidataset testing : geometry optimisation,
+# then use getxcart and getwfk, and increase the number of bands
+# as well as ecut for a fixed geometry calculation.
+
+ getxcart -1
+ getwfk -1
+
+# DATASET configuration
+#----------------------
+ ndtset 2
+
+# Atomic Structure
+#-----------------
+ acell 7 5 5
+ rprim 1 0 0
+       0 1 0
+       0 0 1
+ natom  2
+ ntypat  1
+ xcart  -0.385  0 0
+         0.385  0 0
+         Angstrom
+ typat  2*1
+ znucl  1.0
+
+# Structure Optimization
+#-----------------------
+ ionmov1  2
+ ionmov2  0
+ ntime  5
+ tolmxf 5.0d-5
+
+# Other Variables
+#----------------
+
+ ecut1   12  # First dataset
+ nband1   1
+
+ ecut2   15  # Second dataset
+ nband2   3
+
+ kptopt 0
+ nkpt  1
+ kptnrm  4
+ kpt  1 1 1
+ wtk  1
+ diemac 1.0d0
+ diemix 0.5d0
+ densfor_pred 1
+ nline 3
+ nstep 7
+ nsym 8
+ occopt 1
+ symrel  1  0  0   0  1  0   0  0  1
+        -1  0  0   0  1  0   0  0  1
+         1  0  0   0 -1  0   0  0  1
+        -1  0  0   0 -1  0   0  0  1
+         1  0  0   0  1  0   0  0 -1
+        -1  0  0   0  1  0   0  0 -1
+         1  0  0   0 -1  0   0  0 -1
+        -1  0  0   0 -1  0   0  0 -1
+ tnons 24*0
+ toldff 5.0d-6
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/1h.pspnc"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t66.abo, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% keywords = NC
+#%% authors = Unknown
+#%% description = 
+#%%   Test multi-dataset mode. H2 molecule with 1 k points.
+#%%   Use getxcart=-1 and getwfk=-1 : first perform a geometry optimization,
+#%%   with minimal number of bands, then compute more bands at fixed geometry,
+#%%   with an increased ecut.
+#%%<END TEST_INFO>

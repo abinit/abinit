@@ -1,0 +1,35 @@
+t23.ddb.out
+DDB for BaTiO3-cubic, a=7.5589, 45Ha, 10SP IBZ, SCI=0. (G and X only)
+14
+t23.ddb.Ba.G.in
+t23.ddb.Ti.G.in
+t23.ddb.O1.G.in
+t23.ddb.O2.G.in
+t23.ddb.Ef.G.in
+t23.ddb.Bax.X.in
+t23.ddb.Baz.X.in
+t23.ddb.O1x.X.in
+t23.ddb.O1y.X.in
+t23.ddb.O1z.X.in
+t23.ddb.O2x.X.in
+t23.ddb.O2z.X.in
+t23.ddb.Tix.X.in
+t23.ddb.Tiz.X.in
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = mrgddb
+#%% test_chain = t23.abi, t24.abi
+#%% [files]
+#%% files_to_test = 
+#%%   t23.ddb.out, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
+#%% extra_inputs = t23.ddb.Ba.G.in.gz, t23.ddb.Ti.G.in.gz, t23.ddb.O1.G.in.gz, t23.ddb.O2.G.in.gz, t23.ddb.Ef.G.in.gz, t23.ddb.Bax.X.in.gz, t23.ddb.Baz.X.in.gz, t23.ddb.O1x.X.in.gz, t23.ddb.O1y.X.in.gz, t23.ddb.O1z.X.in.gz, t23.ddb.O2x.X.in.gz, t23.ddb.O2z.X.in.gz, t23.ddb.Tix.X.in.gz, t23.ddb.Tiz.X.in.gz
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% keywords = 
+#%% authors = Unknown
+#%% description = 
+#%%   Generates a DDB for BaTiO3 containing only the 2DTEs at the 
+#%%   (0 0 0) and (1/2 0 0) q-points. This is a standalone test of MRGDDB.
+#%%<END TEST_INFO>

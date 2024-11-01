@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_gwls_ComputeCorrelationEnergy
 !! NAME
 !! m_gwls_ComputeCorrelationEnergy
@@ -7,14 +6,10 @@
 !!  .
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2019 ABINIT group (JLJ, BR, MC)
+!! Copyright (C) 2009-2024 ABINIT group (JLJ, BR, MC)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -23,8 +18,6 @@
 #endif
 
 #include "abi_common.h"
-
-
 
 module m_gwls_ComputeCorrelationEnergy
 
@@ -47,13 +40,12 @@ use m_gwls_LanczosBasis
 
 ! abinit modules
 use defs_basis
-use defs_datatypes
-use defs_abitypes
 use defs_wvltypes
 use m_abicore
 use m_xmpi
 use m_pawang
 use m_errors
+use m_dtset
 
 use m_time,             only : timab
 use m_io_tools,         only : get_unit,open_file
@@ -84,11 +76,6 @@ contains
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_gwls_sternheimer
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine compute_correlations_shift_lanczos(dtset, Sigma_x,Vxc_energy,debug)
@@ -99,7 +86,6 @@ subroutine compute_correlations_shift_lanczos(dtset, Sigma_x,Vxc_energy,debug)
 ! The shift lanczos algorithm is used.
 !
 !----------------------------------------------------------------------------------------------------
-implicit none
 
 type(dataset_type),intent(in) :: dtset
 
@@ -182,10 +168,10 @@ logical :: use_model
 
 real(dp)       :: pole_energy
 
-real(dp)       :: sigma_A_Lanczos      
-real(dp)       :: sigma_A_model_Lanczos      
-real(dp)       :: sigma_B_Lanczos      
-real(dp)       :: sigma_B_model_Lanczos      
+real(dp)       :: sigma_A_Lanczos
+real(dp)       :: sigma_A_model_Lanczos
+real(dp)       :: sigma_B_Lanczos
+real(dp)       :: sigma_B_model_Lanczos
 
 real(dp)       :: correlations
 real(dp)       :: renormalized_energy
@@ -262,18 +248,18 @@ lmax_model   = nseeds*kmax_model
 call setup_Lanczos_basis(lmax,lmax_model)
 
 ! allocate eigenvalues array
-ABI_ALLOCATE(epsilon_eigenvalues_0, (lmax))
-ABI_ALLOCATE(epsilon_model_eigenvalues_0, (lmax_model))
+ABI_MALLOC(epsilon_eigenvalues_0, (lmax))
+ABI_MALLOC(epsilon_model_eigenvalues_0, (lmax_model))
 
 ! set omega=0 for exact dielectric operator
 call set_dielectric_function_frequency([0.0_dp,omega_static])
 
 ! and make note that the Sternheimer solutions must be kept (for use in the projected Sternheimer section).
 if(dtset%gwls_recycle == 1) then
-  ABI_ALLOCATE(Sternheimer_solutions_zero,(2,npw_k,lmax,nbandv))
+  ABI_MALLOC(Sternheimer_solutions_zero,(2,npw_k,lmax,nbandv))
   Sternheimer_solutions_zero = zero
   write_solution = .true.
-end if 
+end if
 if(dtset%gwls_recycle == 2) then
   write(recy_name,'(A,I0.4,A)') "Recycling_",mpi_enreg%me,".dat"
 
@@ -284,7 +270,7 @@ if(dtset%gwls_recycle == 2) then
 
   if (open_file(file=recy_name,iomsg=msg,newunit=recy_unit,access='direct',form='unformatted',&
 &               status='replace',recl=recy_line_size)/=0) then
-    MSG_ERROR(msg)
+    ABI_ERROR(msg)
   end if
 
   write_solution = .true.
@@ -345,7 +331,7 @@ call write_timing_log(timing_string,time)
 call output_epsilon_eigenvalues(lmax_model,epsilon_model_eigenvalues_0,2)
 
 
-ABI_ALLOCATE(eigenvalues_static_eps_model_m1_minus_one, (lmax_model))
+ABI_MALLOC(eigenvalues_static_eps_model_m1_minus_one, (lmax_model))
 
 do l = 1, lmax_model
 eigenvalues_static_eps_model_m1_minus_one(l) = one/epsilon_model_eigenvalues_0(l)-one
@@ -363,7 +349,7 @@ end do
 
 !  Setup various arrays necessary for the Sternheimer projection scheme
 nfrequencies = dtset%gwls_n_proj_freq
-ABI_ALLOCATE(list_projection_frequencies,(nfrequencies))
+ABI_MALLOC(list_projection_frequencies,(nfrequencies))
 
 list_projection_frequencies = dtset%gwls_list_proj_freq
 
@@ -385,7 +371,7 @@ epsilon_eigenvalues_0,debug,use_model)
 
 ! The Sternheimer solutions at $\omega = 0$ have been used to make the basis for the projected Sternheimer equations.
 if(dtset%gwls_recycle == 1) then
-  ABI_DEALLOCATE(Sternheimer_solutions_zero)
+  ABI_FREE(Sternheimer_solutions_zero)
 end if
 if(dtset%gwls_recycle == 2) then
   close(recy_unit,status='delete')
@@ -436,7 +422,7 @@ call compute_eps_model_m1_minus_one(lmax_model, npt_gauss, second_model_paramete
 
 OPTION_TIMAB = 2
 call timab(GWLS_TIMAB,OPTION_TIMAB,tsec)
-ABI_DEALLOCATE(epsilon_model_eigenvalues_0)
+ABI_FREE(epsilon_model_eigenvalues_0)
 
 
 call cpu_time(time2)
@@ -455,7 +441,7 @@ call write_timing_log(timing_string,time)
 !--------------------------------------------------------------------------------
 
 call cpu_time(time1)
-ABI_ALLOCATE(psie_k, (2,npw_k))
+ABI_MALLOC(psie_k, (2,npw_k))
 
 GWLS_TIMAB   = 1510
 OPTION_TIMAB = 1
@@ -466,7 +452,7 @@ psie_k = cg(:,(e-1)*npw_k+1:e*npw_k)
 
 call modify_Lbasis_Coulomb(psie_k, lmax, lmax_model)
 
-ABI_DEALLOCATE(psie_k)
+ABI_FREE(psie_k)
 
 OPTION_TIMAB = 2
 call timab(GWLS_TIMAB,OPTION_TIMAB,tsec)
@@ -480,7 +466,7 @@ call write_timing_log(timing_string,time)
 !--------------------------------------------------------------------------------
 !
 !
-! 
+!
 ! Diagonalize the static array eps^{-1} - eps^{-1}_model in order to
 ! be able to apply diagonal shift Lanczos.
 !
@@ -493,12 +479,12 @@ GWLS_TIMAB   = 1511
 OPTION_TIMAB = 1
 call timab(GWLS_TIMAB,OPTION_TIMAB,tsec)
 
-ABI_ALLOCATE(Lbasis_diagonalize_dielectric_terms, (npw_k,lmax))
-ABI_ALLOCATE(hermitian_static_eps_m1_minus_eps_model_m1, (lmax,lmax))
+ABI_MALLOC(Lbasis_diagonalize_dielectric_terms, (npw_k,lmax))
+ABI_MALLOC(hermitian_static_eps_m1_minus_eps_model_m1, (lmax,lmax))
 
-ABI_ALLOCATE(eigenvalues_static_eps_m1_minus_eps_model_m1, (lmax))
+ABI_MALLOC(eigenvalues_static_eps_m1_minus_eps_model_m1, (lmax))
 
-ABI_ALLOCATE(rwork, (3*lmax-2))
+ABI_MALLOC(rwork, (3*lmax-2))
 
 
 hermitian_static_eps_m1_minus_eps_model_m1(:,:) = eps_m1_minus_eps_model_m1(:,:,1)
@@ -507,16 +493,16 @@ hermitian_static_eps_m1_minus_eps_model_m1(:,:) = eps_m1_minus_eps_model_m1(:,:,
 
 ! WORK QUERRY
 lwork = -1
-ABI_ALLOCATE(work, (1))
+ABI_MALLOC(work, (1))
 call ZHEEV( 'V',        & ! Compute eigenvectors and eigenvalues
-'U',        & ! use Upper triangular part 
+'U',        & ! use Upper triangular part
 lmax,        & ! order of matrix
 hermitian_static_eps_m1_minus_eps_model_m1,  & ! initial matrix on input; eigenvectors on output
 lmax,        & ! LDA
-eigenvalues_static_eps_m1_minus_eps_model_m1,& ! eigenvalues 
+eigenvalues_static_eps_m1_minus_eps_model_m1,& ! eigenvalues
 work, lwork, rwork, info )  ! work stuff
 
-if ( info /= 0) then        
+if ( info /= 0) then
   debug_unit = get_unit()
   write(debug_filename,'(A,I4.4,A)') 'LAPACK_DEBUG_PROC=',mpi_enreg%me,'.log'
 
@@ -530,19 +516,19 @@ if ( info /= 0) then
 
 end if
 
-! COMPUTATION 
+! COMPUTATION
 lwork = nint(dble(work(1)))
-ABI_DEALLOCATE(work)
-ABI_ALLOCATE(work, (lwork))
+ABI_FREE(work)
+ABI_MALLOC(work, (lwork))
 call ZHEEV( 'V',        & ! Compute eigenvectors and eigenvalues
-'U',        & ! use Upper triangular part 
+'U',        & ! use Upper triangular part
 lmax,        & ! order of matrix
 hermitian_static_eps_m1_minus_eps_model_m1,  & ! initial matrix on input; eigenvectors on output
 lmax,        & ! LDA
-eigenvalues_static_eps_m1_minus_eps_model_m1,& ! eigenvalues 
+eigenvalues_static_eps_m1_minus_eps_model_m1,& ! eigenvalues
 work, lwork, rwork, info )  ! work stuff
 
-if ( info /= 0) then        
+if ( info /= 0) then
   debug_unit = get_unit()
   write(debug_filename,'(A,I4.4,A)') 'LAPACK_DEBUG_PROC=',mpi_enreg%me,'.log'
 
@@ -558,17 +544,17 @@ end if
 
 
 
-ABI_DEALLOCATE(work)
-ABI_DEALLOCATE(rwork)
+ABI_FREE(work)
+ABI_FREE(rwork)
 
 !--------------------------------------------------------------------------------
 !
 ! update basis: L' = L . Q
-! 
+!
 !
 ! CAREFUL!!! We must multiply by conjg(hermitian_static_eps_m1_minus_eps_model_m1),
 !            which is the COMPLEX CONJUGATE of the eigenvectors of the matrix
-!            eps^{-1}-eps_m^{-1}, because we have MODIFIED the basis Lbasis_lanczos 
+!            eps^{-1}-eps_m^{-1}, because we have MODIFIED the basis Lbasis_lanczos
 !            to contain the complex conjugate of the eigenvectors of eps.
 !            This is somewhat subtle, but forgetting to do this leads to small errors
 !            in the results...
@@ -589,7 +575,7 @@ time = time2-time1
 write(timing_string,'(A)')  "Time to diagonalize eps^{-1}(0)-eps^{-1}(0)_model   :   "
 call write_timing_log(timing_string,time)
 
-ABI_DEALLOCATE(hermitian_static_eps_m1_minus_eps_model_m1)
+ABI_FREE(hermitian_static_eps_m1_minus_eps_model_m1)
 
 
 call cpu_time(setup_time2)
@@ -611,7 +597,7 @@ OPTION_TIMAB = 1
 call timab(GWLS_TIMAB,OPTION_TIMAB,tsec)
 
 
-ABI_ALLOCATE(AT_Lanczos,(n_ext_freq,lmax))
+ABI_MALLOC(AT_Lanczos,(n_ext_freq,lmax))
 call compute_AT_shift_Lanczos(n_ext_freq,dtset%gw_freqsp, model_parameter, lmax, Lbasis_diagonalize_dielectric_terms,&
 &                             kmax_analytic, AT_Lanczos)
 
@@ -619,7 +605,7 @@ OPTION_TIMAB = 2
 call timab(GWLS_TIMAB,OPTION_TIMAB,tsec)
 
 
-ABI_DEALLOCATE(Lbasis_diagonalize_dielectric_terms)
+ABI_FREE(Lbasis_diagonalize_dielectric_terms)
 
 call cpu_time(time2)
 time = time2 - time1
@@ -634,7 +620,7 @@ GWLS_TIMAB   = 1513
 OPTION_TIMAB = 1
 call timab(GWLS_TIMAB,OPTION_TIMAB,tsec)
 
-ABI_ALLOCATE(AT_model_Lanczos,(n_ext_freq,lmax_model))
+ABI_MALLOC(AT_model_Lanczos,(n_ext_freq,lmax_model))
 call compute_AT_shift_Lanczos(n_ext_freq,dtset%gw_freqsp, model_parameter, lmax_model,  &
 Lbasis_model_lanczos, kmax_analytic, AT_model_Lanczos)
 
@@ -656,11 +642,11 @@ call write_timing_log(timing_string,time)
 
 call cpu_time(time1)
 
-ABI_ALLOCATE(array_integrand_exact_sector,(npt_gauss+1,n_ext_freq))
+ABI_MALLOC(array_integrand_exact_sector,(npt_gauss+1,n_ext_freq))
 
-ABI_ALLOCATE( tmp_dielectric_array, (lmax,lmax,npt_gauss+1))
+ABI_MALLOC( tmp_dielectric_array, (lmax,lmax,npt_gauss+1))
 
-do iw = 1, npt_gauss + 1 
+do iw = 1, npt_gauss + 1
 
 lorentzian      = model_parameter**2/(list_omega(iw)**2+model_parameter**2)
 tmp_dielectric_array(:,:,iw) = eps_m1_minus_eps_model_m1(:,:,iw)-lorentzian*eps_m1_minus_eps_model_m1(:,:,1)
@@ -676,7 +662,7 @@ kmax_numeric, npt_gauss, tmp_dielectric_array, array_integrand_exact_sector )
 OPTION_TIMAB = 2
 call timab(GWLS_TIMAB,OPTION_TIMAB,tsec)
 
-ABI_DEALLOCATE( tmp_dielectric_array)
+ABI_FREE( tmp_dielectric_array)
 call cpu_time(time2)
 time = time2 - time1
 write(timing_string,'(A)')  "Time to compute numerical term by SHIFT LANCZOS     :   "
@@ -686,13 +672,13 @@ call write_timing_log(timing_string,time)
 
 call cpu_time(time1)
 
-ABI_ALLOCATE(array_integrand_model_sector,(npt_gauss+1,n_ext_freq))
+ABI_MALLOC(array_integrand_model_sector,(npt_gauss+1,n_ext_freq))
 
-!ABI_ALLOCATE( tmp_dielectric_array, (lmax_model,lmax_model,npt_gauss+1))
-ABI_ALLOCATE( tmp_dielectric_array, (lmax_model,blocksize_epsilon,npt_gauss+1))
+!ABI_MALLOC( tmp_dielectric_array, (lmax_model,lmax_model,npt_gauss+1))
+ABI_MALLOC( tmp_dielectric_array, (lmax_model,blocksize_epsilon,npt_gauss+1))
 
 
-do iw = 1, npt_gauss + 1 
+do iw = 1, npt_gauss + 1
 
 lorentzian      = model_parameter**2/(list_omega(iw)**2+model_parameter**2)
 !tmp_dielectric_array(:,:,iw) = eps_model_m1_minus_one(:,:,iw)-lorentzian*eps_model_m1_minus_one(:,:,1)
@@ -716,7 +702,7 @@ array_integrand_model_sector )
 OPTION_TIMAB = 2
 call timab(GWLS_TIMAB,OPTION_TIMAB,tsec)
 
-ABI_DEALLOCATE(tmp_dielectric_array)
+ABI_FREE(tmp_dielectric_array)
 call cpu_time(time2)
 time = time2 - time1
 write(timing_string,'(A)')  "Time to compute numerical model   SHIFT LANCZOS     :   "
@@ -745,7 +731,7 @@ call output_Sigma_A_by_eigenvalues(n_ext_freq,lmax_model,dtset%gw_freqsp,AT_mode
 
 !epsilon_eigenvalues_0
 
-ABI_DEALLOCATE(epsilon_eigenvalues_0)
+ABI_FREE(epsilon_eigenvalues_0)
 !--------------------------------------------------------------------------------
 !
 ! Iterate on external frequencies
@@ -772,7 +758,7 @@ call write_text_block_in_Timing_log(timing_string)
 
 !--------------------------------------------------------------------------------
 !
-! compute the pole term 
+! compute the pole term
 !                        CAREFUL! The real valence states must still be allocated
 !                        for the dielectric operator to work properly
 !
@@ -862,7 +848,7 @@ call write_timing_log(timing_string,freq_time)
 
 correlations        = pole_energy+sigma_A_Lanczos+sigma_A_model_Lanczos+sigma_B_Lanczos+sigma_B_model_Lanczos
 
-renormalized_energy = eig(e) + Sigma_x-Vxc_energy +correlations 
+renormalized_energy = eig(e) + Sigma_x-Vxc_energy +correlations
 write(std_out,10) '                               '
 write(std_out,14) ' For omega                   : ',external_omega     ,' Ha = ',external_omega     *Ha_eV,' eV'
 write(std_out,14) '   <psi_e | Sigma_c  | psi_e>: ',correlations       ,' Ha = ',correlations       *Ha_eV,' eV'
@@ -876,12 +862,12 @@ write(ab_out,14) '   eps_e + <Sigma_xc - V_xc> : ',renormalized_energy,' Ha = ',
 
 end do
 
-ABI_DEALLOCATE(AT_Lanczos)
-ABI_DEALLOCATE(AT_model_Lanczos)
-ABI_DEALLOCATE(array_integrand_exact_sector)
-ABI_DEALLOCATE(array_integrand_model_sector)
-ABI_DEALLOCATE(eigenvalues_static_eps_model_m1_minus_one)
-ABI_DEALLOCATE(eigenvalues_static_eps_m1_minus_eps_model_m1) 
+ABI_FREE(AT_Lanczos)
+ABI_FREE(AT_model_Lanczos)
+ABI_FREE(array_integrand_exact_sector)
+ABI_FREE(array_integrand_model_sector)
+ABI_FREE(eigenvalues_static_eps_model_m1_minus_one)
+ABI_FREE(eigenvalues_static_eps_m1_minus_eps_model_m1)
 call clean_degeneracy_table_for_poles()
 call cleanup_Pk_model()
 call cleanup_Lanczos_basis()
@@ -910,11 +896,6 @@ end subroutine compute_correlations_shift_lanczos
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      gwls_sternheimer
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine compute_correlations_no_model_shift_lanczos(dtset, Sigma_x,Vxc_energy,debug)
@@ -930,7 +911,6 @@ subroutine compute_correlations_no_model_shift_lanczos(dtset, Sigma_x,Vxc_energy
 !
 ! Shift lanczos is used for the resolvents.
 !----------------------------------------------------------------------------------------------------
-implicit none
 
 type(dataset_type),intent(in) :: dtset
 
@@ -998,9 +978,9 @@ character(500) :: msg
 
 real(dp)       :: pole_energy
 
-real(dp)       :: sigma_A_Lanczos      
-real(dp)       :: sigma_A_model_Lanczos      
-real(dp)       :: sigma_B_Lanczos      
+real(dp)       :: sigma_A_Lanczos
+real(dp)       :: sigma_A_model_Lanczos
+real(dp)       :: sigma_B_Lanczos
 real(dp)       :: sigma_B_model_Lanczos
 
 real(dp)       :: correlations
@@ -1071,14 +1051,14 @@ lmax         = nseeds*kmax
 call setup_Lanczos_basis(lmax,0)
 
 ! allocate eigenvalues array
-ABI_ALLOCATE(epsilon_eigenvalues_0, (lmax))
+ABI_MALLOC(epsilon_eigenvalues_0, (lmax))
 
 ! set omega=0 for exact dielectric operator
 call set_dielectric_function_frequency([0.0_dp,omega_static])
 
 ! and make note that the Sternheimer solutions must be kept (for use in the projected Sternheimer section).
 if(dtset%gwls_recycle == 1) then
-  ABI_ALLOCATE(Sternheimer_solutions_zero,(2,npw_k,lmax,nbandv))
+  ABI_MALLOC(Sternheimer_solutions_zero,(2,npw_k,lmax,nbandv))
   Sternheimer_solutions_zero = zero
   write_solution = .true.
 end if
@@ -1092,7 +1072,7 @@ if(dtset%gwls_recycle == 2) then
 
   if (open_file(file=recy_name,iomsg=msg,newunit=recy_unit,access='direct',form='unformatted',&
 &               status='replace',recl=recy_line_size)/=0) then
-    MSG_ERROR(msg)
+    ABI_ERROR(msg)
   end if
 
   write_solution = .true.
@@ -1135,7 +1115,7 @@ Sigma_x_Lanczos_projected =  exchange(e, Lbasis_lanczos)
 
 !  Setup various arrays necessary for the Sternheimer projection scheme
 nfrequencies = dtset%gwls_n_proj_freq
-ABI_ALLOCATE(list_projection_frequencies,(nfrequencies))
+ABI_MALLOC(list_projection_frequencies,(nfrequencies))
 
 list_projection_frequencies = dtset%gwls_list_proj_freq
 
@@ -1161,7 +1141,7 @@ epsilon_eigenvalues_0,debug,use_model)
 
 ! The Sternheimer solutions at $\omega = 0$ have been used to make the basis for the projected Sternheimer equations.
 if(dtset%gwls_recycle == 1) then
-  ABI_DEALLOCATE(Sternheimer_solutions_zero)
+  ABI_FREE(Sternheimer_solutions_zero)
 end if
 if(dtset%gwls_recycle == 2) then
   close(recy_unit,status='delete')
@@ -1199,7 +1179,7 @@ call write_timing_log(timing_string,time)
 !--------------------------------------------------------------------------------
 
 call cpu_time(time1)
-ABI_ALLOCATE(psie_k, (2,npw_k))
+ABI_MALLOC(psie_k, (2,npw_k))
 psie_k = cg(:,(e-1)*npw_k+1:e*npw_k)
 
 lmax_model = 0
@@ -1207,7 +1187,7 @@ call modify_Lbasis_Coulomb(psie_k, lmax, lmax_model) ! lmax_model is set to zero
 ! the model lanczos basis (which doesn't exist
 ! in this case) will not be modified
 
-ABI_DEALLOCATE(psie_k)
+ABI_FREE(psie_k)
 
 call cpu_time(time2)
 time = time2-time1
@@ -1229,7 +1209,7 @@ call write_timing_log(timing_string,setup_time)
 
 call cpu_time(time1)
 
-ABI_ALLOCATE(AT_Lanczos,(n_ext_freq,lmax))
+ABI_MALLOC(AT_Lanczos,(n_ext_freq,lmax))
 ! Note that the array eps^{-1}(0) - 1 is diagonal in the lanczos basis already! No need to diagonalize, so we can
 ! use Lbasis_lanczos directly...
 call compute_AT_shift_Lanczos(n_ext_freq,dtset%gw_freqsp, model_parameter, lmax, Lbasis_lanczos, kmax_analytic, AT_Lanczos)
@@ -1249,13 +1229,13 @@ call write_timing_log(timing_string,time)
 
 call cpu_time(time1)
 
-ABI_ALLOCATE(array_integrand_exact_sector,(npt_gauss+1,n_ext_freq))
-ABI_ALLOCATE(array_integrand_model_sector,(npt_gauss+1,n_ext_freq))
+ABI_MALLOC(array_integrand_exact_sector,(npt_gauss+1,n_ext_freq))
+ABI_MALLOC(array_integrand_model_sector,(npt_gauss+1,n_ext_freq))
 
 
-ABI_ALLOCATE( tmp_dielectric_array, (lmax,lmax,npt_gauss+1))
+ABI_MALLOC( tmp_dielectric_array, (lmax,lmax,npt_gauss+1))
 
-do iw = 1, npt_gauss + 1 
+do iw = 1, npt_gauss + 1
 
 lorentzian      = model_parameter**2/(list_omega(iw)**2+model_parameter**2)
 tmp_dielectric_array(:,:,iw) = eps_m1_minus_eps_model_m1(:,:,iw)-lorentzian*eps_m1_minus_eps_model_m1(:,:,1)
@@ -1267,7 +1247,7 @@ kmax_numeric, npt_gauss, tmp_dielectric_array, array_integrand_exact_sector )
 
 array_integrand_model_sector = zero ! just a dummy array in this case
 
-ABI_DEALLOCATE( tmp_dielectric_array)
+ABI_FREE( tmp_dielectric_array)
 call cpu_time(time2)
 time = time2 - time1
 write(timing_string,'(A)')  "Time to compute numerical term by SHIFT LANCZOS     :   "
@@ -1318,7 +1298,7 @@ call write_text_block_in_Timing_log(timing_string)
 
 !--------------------------------------------------------------------------------
 !
-! compute the pole term 
+! compute the pole term
 !                        CAREFUL! The real valence states must still be allocated
 !                        for the dielectric operator to work properly
 !
@@ -1343,7 +1323,7 @@ call cpu_time(time1)
 
 sigma_A_Lanczos      = dble(sum(AT_Lanczos(iw_ext,:)*(one/epsilon_eigenvalues_0(:)-one)))
 
-ABI_DEALLOCATE(epsilon_eigenvalues_0)
+ABI_FREE(epsilon_eigenvalues_0)
 
 call cpu_time(time2)
 time = time2-time1
@@ -1387,7 +1367,7 @@ call write_timing_log(timing_string,freq_time)
 
 correlations        = pole_energy+sigma_A_Lanczos+sigma_B_Lanczos
 
-renormalized_energy = eig(e) + Sigma_x-Vxc_energy +correlations 
+renormalized_energy = eig(e) + Sigma_x-Vxc_energy +correlations
 write(std_out,10) '                               '
 write(std_out,14) ' For omega                   : ',external_omega     ,' Ha = ',external_omega     *Ha_eV,' eV'
 write(std_out,14) '  <psi_e | Sigma_c  | psi_e> : ',correlations       ,' Ha = ',correlations       *Ha_eV,' eV'
@@ -1402,15 +1382,16 @@ write(ab_out,14) '   eps_e + <Sigma_xc - V_xc> : ',renormalized_energy,' Ha = ',
 
 end do
 
-ABI_DEALLOCATE(AT_Lanczos)
-ABI_DEALLOCATE(array_integrand_exact_sector)
-ABI_DEALLOCATE(array_integrand_model_sector)
+ABI_FREE(AT_Lanczos)
+ABI_FREE(array_integrand_exact_sector)
+ABI_FREE(array_integrand_model_sector)
 call clean_degeneracy_table_for_poles()
 call cleanup_Pk_model()
 call cleanup_Lanczos_basis()
 call cleanup_projected_Sternheimer_epsilon()
 
 call cpu_time(total_time2)
+total_time1 = zero
 total_time = total_time2-total_time1
 write(timing_string,'(A)')  "               TOTAL TIME                           :   "
 call write_timing_log(timing_string,total_time)
@@ -1434,11 +1415,6 @@ end subroutine compute_correlations_no_model_shift_lanczos
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      gwls_ComputeCorrelationEnergy
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine compute_integrands_shift_lanczos(iw_ext,n_ext_freq,npt_gauss, array_integrand_exact_sector, &
@@ -1447,7 +1423,6 @@ array_integrand_model_sector, sigma_B_Lanczos, sigma_B_model_Lanczos)
 !
 ! This subroutine computes the integrands, assuming data was generated by shift lanczos.
 !----------------------------------------------------------------------------------------------------
-implicit none
 
 integer,  intent(in)   :: iw_ext, npt_gauss, n_ext_freq
 
@@ -1456,10 +1431,10 @@ complex(dpc),  intent(in)   :: array_integrand_model_sector(npt_gauss+1,n_ext_fr
 
 real(dp), intent(out)  :: sigma_B_Lanczos, sigma_B_model_Lanczos
 
-real(dp) :: integrand_Lanczos , integrand_model_Lanczos 
+real(dp) :: integrand_Lanczos , integrand_model_Lanczos
 real(dp) :: omega_prime
 
-integer         :: iw 
+integer         :: iw
 integer         :: io_unit
 character(256)  :: title_string
 character(256)  :: timing_string
@@ -1477,7 +1452,7 @@ if (mpi_enreg%me == 0) then
     write(title_string,'(A,I1,A)')  'APPROXIMATE_INTEGRANDS_',iw_ext,'.dat'
   else if (iw_ext < 100) then
     write(title_string,'(A,I2,A)')  'APPROXIMATE_INTEGRANDS_',iw_ext,'.dat'
-  else 
+  else
     write(title_string,'(A,I3,A)')  'APPROXIMATE_INTEGRANDS_',iw_ext,'.dat'
   end if
 
@@ -1555,11 +1530,6 @@ end subroutine compute_integrands_shift_lanczos
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      gwls_ComputeCorrelationEnergy
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine output_results(iw_ext,npt_gauss, lmax,lmax_model, model_parameter, second_model_parameter,  external_omega, &
@@ -1569,20 +1539,19 @@ Sigma_x_Lanczos_projected )
 !
 ! This subroutine computes the integrands
 !----------------------------------------------------------------------------------------------------
-implicit none
 
 integer,  intent(in)   :: iw_ext,lmax,lmax_model,npt_gauss
 real(dp), intent(in)   :: model_parameter, second_model_parameter,  external_omega
 real(dp), intent(in)   :: Sigma_x,Vxc_energy,pole_energy,sigma_A_Lanczos
 real(dp), intent(in)   :: sigma_A_model_Lanczos,sigma_B_Lanczos,sigma_B_model_Lanczos
 
-real(dp), optional, intent(in)   :: Sigma_x_Lanczos_projected 
+real(dp), optional, intent(in)   :: Sigma_x_Lanczos_projected
 
 integer         :: io_unit
 
 character(128) :: filename
 
-real(dp)       :: Sigma_c 
+real(dp)       :: Sigma_c
 
 ! *************************************************************************
 
@@ -1593,7 +1562,7 @@ if (mpi_enreg%me == 0) then
     write(filename,'(A,I1,A)')  'ALL_ENERGY_',iw_ext,'.dat'
   else if (iw_ext < 100) then
     write(filename,'(A,I2,A)')  'ALL_ENERGY_',iw_ext,'.dat'
-  else 
+  else
     write(filename,'(A,I3,A)')  'ALL_ENERGY_',iw_ext,'.dat'
   end if
 
@@ -1640,12 +1609,12 @@ if (mpi_enreg%me == 0) then
   write(io_unit,30) '      Sigma_x   (Ha)      :     ', Sigma_x
 
   if (present(Sigma_x_Lanczos_projected) ) then
-    write(io_unit,30) '   Sigma_x_PROJECTED (Ha) :     ', Sigma_x_Lanczos_projected 
-  end if 
+    write(io_unit,30) '   Sigma_x_PROJECTED (Ha) :     ', Sigma_x_Lanczos_projected
+  end if
 
 
 
-  write(io_unit,30) '    < V_xc >_e  (Ha)      :     ', Vxc_energy 
+  write(io_unit,30) '    < V_xc >_e  (Ha)      :     ', Vxc_energy
   write(io_unit,10) '                                                                             '
   write(io_unit,30) '       poles    (Ha)      :     ', pole_energy
   write(io_unit,30) '     Sigma_A_1  (Ha)      :     ', sigma_A_Lanczos
@@ -1656,7 +1625,7 @@ if (mpi_enreg%me == 0) then
 
   Sigma_c = pole_energy+sigma_A_Lanczos+sigma_A_model_Lanczos+sigma_B_Lanczos+sigma_B_model_Lanczos
 
-  write(io_unit,30) '      Sigma_c   (Ha)      :     ',Sigma_c 
+  write(io_unit,30) '      Sigma_c   (Ha)      :     ',Sigma_c
   write(io_unit,10) '                                                                             '
   write(io_unit,30) '       E_e      (Ha)      :     ', eig(e)+Sigma_x-Vxc_energy+Sigma_c
 
@@ -1686,11 +1655,6 @@ end subroutine output_results
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      gwls_ComputeCorrelationEnergy
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine output_epsilon_eigenvalues(lmax,eigenvalues,which_case)
@@ -1701,7 +1665,6 @@ subroutine output_epsilon_eigenvalues(lmax,eigenvalues,which_case)
 !                               1 )   the exact dielectric matrix
 !                               2 )   the model dielectric matrix
 !----------------------------------------------------------------------------------------------------
-implicit none
 
 integer,      intent(in) ::  lmax, which_case
 real(dp),     intent(in) :: eigenvalues(lmax)
@@ -1736,7 +1699,7 @@ if (mpi_enreg%me == 0) then
   do l = 1, lmax
 
   write(io_unit,20) l, eigenvalues(l)
-  end do 
+  end do
 
 
   close(io_unit)
@@ -1763,16 +1726,11 @@ end subroutine output_epsilon_eigenvalues
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      gwls_ComputeCorrelationEnergy
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine output_Sigma_A_by_eigenvalues(n_ext_freq,lmax,external_frequencies,AT_Lanczos,eigenvalues_array,which_case)
 !----------------------------------------------------------------------------------------------------
-!       This routine outputs the eigenvalues of the static dielectric matrix, as well as the 
+!       This routine outputs the eigenvalues of the static dielectric matrix, as well as the
 !       contributions to Sigma_A, decomposed by eigenvalues.
 !
 !       There are three cases to consider:
@@ -1780,7 +1738,6 @@ subroutine output_Sigma_A_by_eigenvalues(n_ext_freq,lmax,external_frequencies,AT
 !                               2 )   a model is being used; we are printing A1
 !                               2 )   a model is being used; we are printing A2
 !----------------------------------------------------------------------------------------------------
-implicit none
 
 integer,      intent(in) :: n_ext_freq, lmax, which_case
 complex(dpc), intent(in) :: AT_Lanczos(n_ext_freq,lmax)
@@ -1819,7 +1776,7 @@ if (mpi_enreg%me == 0) then
   open(file=filename,status=files_status_new,unit=io_unit)
   write(io_unit,10) '#-----------------------------------------------------------------------------------------------'
   write(io_unit,10) '#'
-  write(io_unit,10) '#  This file contains the contributions to Sigma_A, the analytical self-energy term,' 
+  write(io_unit,10) '#  This file contains the contributions to Sigma_A, the analytical self-energy term,'
   write(io_unit,10) '#  as a function of the eigenvalue of the dielectric operator.'
   write(io_unit,10) '#'
   write(io_unit,10) '# Definitions:'
@@ -1878,7 +1835,7 @@ if (mpi_enreg%me == 0) then
 
 
   write(io_unit,20) real(eig), matrix, eig*matrix
-  end do 
+  end do
 
 
   close(io_unit)

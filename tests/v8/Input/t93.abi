@@ -1,0 +1,90 @@
+# Test G0W0 with nspinor, Contour-deformation and Hilbert transform, no SOC
+ndtset 3
+
+#nspinor 1 nspden 1  nsppol 1 nband    16  # uncomment this line to run similar calculation in collinear mode.
+nspinor 2 nspden 1  nsppol 1  nband  32  so_psp *0
+
+ecut     12
+ecuteps  2
+ecutsigx 8 
+
+nshiftk  1
+shiftk   0 0 0
+ngkpt    2 2 2  #4 4 4
+istwfk   *1
+
+#awtr       1
+#symchi    0
+symchi     1
+inclvkb    0
+symsigma   1
+#symsigma   0
+gwcalctyp   2  # CD method
+
+nkptgw    3
+kptgw
+0.00000000E+00  0.00000000E+00  0.00000000E+00 
+5.00000000E-01  0.00000000E+00  0.00000000E+00 
+5.00000000E-01  5.00000000E-01  0.00000000E+00 
+
+bdgw  1 12 1 12 1 12
+
+#################
+### DATASET 1 ###
+#################
+tolwfr   1e-16
+
+#################
+### DATASET 2 ###
+#################
+optdriver2  3
+getwfk2     1
+
+spmeth2      1        # Use Hilbert transform : Im chi0 --> chi0.
+nomegasf2   250       # Number of points for Imchi0 (should be subject of convergence tests,
+nfreqre2     15               
+nfreqim2     5                
+freqremax2   15 eV            
+freqremin2   0 eV             
+
+#################
+### DATASET 3 ###
+#################
+optdriver3  4
+getwfk3     1
+getscr3     2
+
+# Definition of the unit cell: fcc
+acell  3*10.217        
+rprim  0.0  0.5  0.5   # FCC primitive vectors (to be scaled by acell)
+       0.5  0.0  0.5
+       0.5  0.5  0.0
+
+# Definition of the atom types
+ntypat 1          
+znucl 14         
+
+# Definition of the atoms
+natom 2           
+typat 1 1         
+xred              
+   0.0  0.0  0.0
+   0.25 0.25 0.25
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "Si_r.psp8"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test =
+#%%  t93.abo, tolnlines = 50, tolabs = 0.15, tolrel = 4.0e-2;
+#%% [paral_info]
+#%% max_nprocs = 8
+#%% [extra_info]
+#%% authors = M. Giantomassi
+#%% keywords = NC, GW, SOC
+#%% description = 
+#%%  Test G0W0 with nspinor, Contour-deformation and Hilbert transform, no SOC
+#%%<END TEST_INFO>

@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/predict_ga
 !! NAME
 !! predict_ga
@@ -9,7 +8,7 @@
 !! to the next generation. Those are chosen from ga_opt_percent% best fit and (1-ga_opt_percent)% from Genetic rules
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2019 ABINIT group (XG, AHR)
+!! Copyright (C) 2009-2024 ABINIT group (XG, AHR)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -47,13 +46,6 @@
 !!    at input, history of the values of xred for all images
 !!    at output, the predicted values of xred for all images
 !!
-!! PARENTS
-!!      predictimg
-!!
-!! CHILDREN
-!!      convert_coortogen,convert_gentocoor,initialize_perm,metric,mkradim
-!!      mkrdim,randomize_parent,sort_dp,swap,symanal,symfind,symlatt
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -73,13 +65,12 @@ MODULE m_use_ga
  use m_geometry,       only : mkradim, mkrdim, metric, dist2
  use m_results_img,    only : results_img_type,gather_array_img
  use m_numeric_tools,  only : uniformrandom
-
+ 
  implicit none
 
  private
 
  public :: predict_ga
-
 
 CONTAINS
 
@@ -132,34 +123,34 @@ subroutine predict_ga(itimimage_eff,idum,ga_param,natom,nimage,&
  ndimen=3*natom
  nspinor=results_img(nimage,itimimage_eff)%nsppol
 
- ABI_ALLOCATE(coor,(ndimen,nimage))
- ABI_ALLOCATE(coor_old,(ndimen,nimage))
- ABI_ALLOCATE(acell,(3,nimage))
- ABI_ALLOCATE(acell_old,(3,nimage))
- ABI_ALLOCATE(rprim,(3,3,nimage))
- ABI_ALLOCATE(rprimd,(3,3,nimage))
- ABI_ALLOCATE(rprim_old,(3,3,nimage))
+ ABI_MALLOC(coor,(ndimen,nimage))
+ ABI_MALLOC(coor_old,(ndimen,nimage))
+ ABI_MALLOC(acell,(3,nimage))
+ ABI_MALLOC(acell_old,(3,nimage))
+ ABI_MALLOC(rprim,(3,3,nimage))
+ ABI_MALLOC(rprimd,(3,3,nimage))
+ ABI_MALLOC(rprim_old,(3,3,nimage))
 
- ABI_ALLOCATE(zperm1,(natom))
- ABI_ALLOCATE(zperm2,(natom))
- ABI_ALLOCATE(ieperm,(nimage))
- ABI_ALLOCATE(ihperm,(nimage))
- ABI_ALLOCATE(ibgperm,(nspinor,nimage))
- ABI_ALLOCATE(ibgoptperm,(nspinor,nimage))
+ ABI_MALLOC(zperm1,(natom))
+ ABI_MALLOC(zperm2,(natom))
+ ABI_MALLOC(ieperm,(nimage))
+ ABI_MALLOC(ihperm,(nimage))
+ ABI_MALLOC(ibgperm,(nspinor,nimage))
+ ABI_MALLOC(ibgoptperm,(nspinor,nimage))
 
- ABI_ALLOCATE(etotal_img,(nimage))
- ABI_ALLOCATE(enthalpy_img,(nimage))
+ ABI_MALLOC(etotal_img,(nimage))
+ ABI_MALLOC(enthalpy_img,(nimage))
 
 !to store locally the calculated band gaps
- ABI_ALLOCATE(bg_img,(nspinor,nimage))
- ABI_ALLOCATE(bg_opt_img,(nspinor,nimage))
+ ABI_MALLOC(bg_img,(nspinor,nimage))
+ ABI_MALLOC(bg_opt_img,(nspinor,nimage))
 
- ABI_ALLOCATE(fitness,(nimage))
+ ABI_MALLOC(fitness,(nimage))
 
- ABI_ALLOCATE(zcoor1,(natom))
- ABI_ALLOCATE(zcoor2,(natom))
- ABI_ALLOCATE(vson1,(ndimen))
- ABI_ALLOCATE(vson2,(ndimen))
+ ABI_MALLOC(zcoor1,(natom))
+ ABI_MALLOC(zcoor2,(natom))
+ ABI_MALLOC(vson1,(ndimen))
+ ABI_MALLOC(vson2,(ndimen))
 
  call initialize_perm(ieperm,nimage)
  call initialize_perm(ihperm,nimage)
@@ -449,28 +440,28 @@ subroutine predict_ga(itimimage_eff,idum,ga_param,natom,nimage,&
    call convert_gentocoor(results_img(iimage,next_itimimage)%xred,coor(:,iimage),natom)
  enddo
 
- ABI_DEALLOCATE(coor)
- ABI_DEALLOCATE(acell)
- ABI_DEALLOCATE(acell_old)
- ABI_DEALLOCATE(rprim)
- ABI_DEALLOCATE(rprimd)
- ABI_DEALLOCATE(rprim_old)
- ABI_DEALLOCATE(zcoor1)
- ABI_DEALLOCATE(zcoor2)
- ABI_DEALLOCATE(coor_old)
- ABI_DEALLOCATE(zperm1)
- ABI_DEALLOCATE(zperm2)
- ABI_DEALLOCATE(ieperm)
- ABI_DEALLOCATE(ihperm)
- ABI_DEALLOCATE(ibgperm)
- ABI_DEALLOCATE(ibgoptperm)
- ABI_DEALLOCATE(etotal_img)
- ABI_DEALLOCATE(bg_img)
- ABI_DEALLOCATE(bg_opt_img)
- ABI_DEALLOCATE(enthalpy_img)
- ABI_DEALLOCATE(fitness)
- ABI_DEALLOCATE(vson1)
- ABI_DEALLOCATE(vson2)
+ ABI_FREE(coor)
+ ABI_FREE(acell)
+ ABI_FREE(acell_old)
+ ABI_FREE(rprim)
+ ABI_FREE(rprimd)
+ ABI_FREE(rprim_old)
+ ABI_FREE(zcoor1)
+ ABI_FREE(zcoor2)
+ ABI_FREE(coor_old)
+ ABI_FREE(zperm1)
+ ABI_FREE(zperm2)
+ ABI_FREE(ieperm)
+ ABI_FREE(ihperm)
+ ABI_FREE(ibgperm)
+ ABI_FREE(ibgoptperm)
+ ABI_FREE(etotal_img)
+ ABI_FREE(bg_img)
+ ABI_FREE(bg_opt_img)
+ ABI_FREE(enthalpy_img)
+ ABI_FREE(fitness)
+ ABI_FREE(vson1)
+ ABI_FREE(vson2)
 
 end subroutine predict_ga
 
@@ -679,41 +670,6 @@ INTEGER FUNCTION checkatomicdist(natom,coord,rprimd)
  enddo
 
 END FUNCTION checkatomicdist
-
-SUBROUTINE checksymmetrygroup(rprimd,xred,typat,msym,natom,ptgroupma,spgroup)
-
-  implicit none
-
-!Arguments ------------------------------------
-!scalars
-  integer,intent(in) :: msym,natom
-  integer,intent(in)  :: typat(natom)
-  integer,intent(out) :: ptgroupma,spgroup
-! Arrays
-  real(dp),intent(in) :: rprimd(3,3),xred(3,natom)
-
-!Local variables ---------------------------------------
-!scalars
-  integer :: berryopt,jellslab=0,noncoll,nptsym,nzchempot=0,use_inversion
-  integer :: chkprim,nsym
-! Arrays
-  integer :: bravais(11),ptsymrel(3,3,msym)
-  integer :: symafm(msym),symrel(3,3,msym)
-  real(dp) :: efield(3),gprimd(3,3),spinat(3,natom)
-  real(dp) :: tnons(3,msym)
-  real(dp) :: genafm(3)
-
-! given the acel, rprim and coor
-! this suroutine find the symmetry group
-
-  call symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tol3)
-
-  call symfind(berryopt,efield,gprimd,jellslab,msym,natom,noncoll,nptsym,nsym,&
-&           nzchempot,0,ptsymrel,spinat,symafm,symrel,tnons,tol3,typat,use_inversion,xred)
-
-  call symanal(bravais,chkprim,genafm,msym,nsym,ptgroupma,rprimd,spgroup,symafm,symrel,tnons,tol3)
-
-END SUBROUTINE checksymmetrygroup
 
 DOUBLE PRECISION FUNCTION gaussian_random(idum,sigma)
 

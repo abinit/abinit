@@ -1,0 +1,84 @@
+# Ni2 molecule
+
+ndtset 3
+
+# First dataset : no atomic potential shifts
+natvshift1  0
+
+# Other datasets : turn on the atomic potential shifts for d levels
+natvshift   5
+
+# Second dataset : shifts of d levels
+atvshift2 0 0 0.001 0 0  0 0 0.001 0 0 # shift of m=0 d level, first atom spin up/down
+          0 0 0.001 0 0  0 0 0.001 0 0 # shift of m=0 d level, second atom spin up/down
+atvshift3 0 0.001 0 0.001 0  0 0.001 0 0.001 0 # shift of m=1 and m=-1 d level, first atom spin up/down
+          0 0.001 0 0.001 0  0 0.001 0 0.001 0 # shift of m=1 and m=-1 d level, second atom spin up/down
+
+# Common data
+acell 2*11 11
+diemac 2.0d0
+diemix 0.2d0
+ecut 15
+npulayit 3
+getwfk -1
+  kptopt 0
+#pawecutdg 20
+pawecutdg 40
+occopt 7
+tsmear 0.01
+natom 2
+nsppol 2
+nspden 2
+nstep 22
+nstep2 10
+nstep3 8
+nsym 1
+ntypat 1
+rprim  1 0 0
+       0 1 0
+       0 0 1
+toldfe 1.0d-8
+typat 2*1
+usepawu 1
+dmatpuopt  1   # choose expression of the density matrix
+lpawu 2
+xcart   2*0  -2.1    2*0   2.1
+znucl 28
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "28ni.paw"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t15.abo, tolnlines = 2, tolabs = 5.000e-01, tolrel = 4.000e-01, fld_options = -ridiculous
+#%% [paral_info]
+#%% max_nprocs = 2
+#%% [extra_info]
+#%% authors = X. Gonze
+#%% keywords = PAW, DFTU 
+#%% description = 
+#%%   Ni molecule in a big box.
+#%%   Test the use of the atvshift variable
+#%%   First dataset : no shift, the ten states number 9 to 18
+#%%   come from the 3d atomic states, the state number 19 is a bonding 4s state.
+#%%   States number 16 and 17 are degenerate 3d pi antibonding states (m=1 and -1).
+#%%   State number 18 is a 3d sigma antibonding state (m=0).
+#%%   Second dataset : add a 0.001 atomic shift to the m=0 potential. Most of the
+#%%   levels change by less than 0.0002 (and their energy decrease), except state number
+#%%   9 (a 3d sigma bonding state (m=0)), that goes from -0.24020 to -0.23982 (+0.0004)
+#%%   and state number 18, that goes from -0.15439 to 0.15399 (+0.0004).
+#%%   Third dataset : add a 0.001 atomic shift to the m=1 and m=-1 potentials.
+#%%   All the levels are affected (likely the m=1 and -1 orbitals adjust, and cause modification
+#%%   of the potential), but the states 10, 11, 16, and 17 increase their energy, while the
+#%%   other state see their energy decrease.
+#%%   Acting separately on the m=1 potential or the m=-1 cause (correctly) the breaking
+#%%   of the degeneracy.
+#%%   This test was not easy to make portable. The problem lies in the fact that when the density
+#%%   becomes negative, due to Bragg oscillations, the xc kernel can be extremely large, and when
+#%%   use for the prediction of the residual of the forces, the differences between machines
+#%%   can be extremely large. IN order to see this effect, put ecut 7 and npulayit 7 (its default value).
+#%% topics = DFT+U
+#%%<END TEST_INFO>

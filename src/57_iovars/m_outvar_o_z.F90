@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_outvar_o_z
 !! NAME
 !!  m_outvar_o_z
@@ -7,14 +6,10 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2019 ABINIT group (DCA, XG, GMR, MM)
+!!  Copyright (C) 1998-2024 ABINIT group (DCA, XG, GMR, MM)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -27,14 +22,15 @@
 module m_outvar_o_z
 
  use defs_basis
- use defs_abitypes
+
  use m_errors
  use m_results_out
  use m_abicore
  use m_xmpi
+ use m_dtset
 
  use m_geometry,     only : mkrdim, xred2xcart
- use m_parser,       only : prttagm, prttagm_images
+ use m_parser,       only : prttagm, prttagm_images, ab_dimensions
 
  implicit none
 
@@ -103,12 +99,6 @@ contains
 !!  Note that acell, occ, rprim, xred and vel might have been modified by the
 !!  computation, so that their values if choice=1 or choice=2 will differ.
 !!
-!! PARENTS
-!!      outvars
-!!
-!! CHILDREN
-!!      mkrdim,prtocc,prttagm,prttagm_images,xred2xcart
-!!
 !! SOURCE
 
  subroutine outvar_o_z(choice,dtsets,iout,&
@@ -130,13 +120,12 @@ contains
 !scalars
  integer,parameter :: nkpt_max=50
  integer :: iat,icount,idtset,ii,iimage,ndtset_alloc_tmp
- integer :: narr!,jdtset
+ integer :: narr
  integer :: multi_kptopt
  integer :: natom
  integer :: nimage,nnos,nsym
- integer :: ntypalch,ntypat,size1,size2,tnkpt,timopt_default,tmpimg0
+ integer :: ntypalch,ntypat,size1,size2,test_write,tnkpt,timopt_default,tmpimg0
  logical :: compute_static_images
-! character(len=4) :: appen
  character(len=1) :: firstchar_gpu
 !arrays
  integer,allocatable :: narrm(:)
@@ -152,45 +141,40 @@ contains
 !###########################################################
 !### 01. Initial allocations and initialisations.
 
- ABI_ALLOCATE(dprarr,(marr,0:ndtset_alloc))
- ABI_ALLOCATE(dprarr_images,(marr,mxvals%nimage,0:ndtset_alloc))
- ABI_ALLOCATE(intarr,(marr,0:ndtset_alloc))
- ABI_ALLOCATE(narrm,(0:ndtset_alloc))
- ABI_ALLOCATE(nimagem,(0:ndtset_alloc))
- ABI_ALLOCATE(prtimg,(mxvals%nimage,0:ndtset_alloc))
+ ABI_MALLOC(dprarr,(marr,0:ndtset_alloc))
+ ABI_MALLOC(dprarr_images,(marr,mxvals%nimage,0:ndtset_alloc))
+ ABI_MALLOC(intarr,(marr,0:ndtset_alloc))
+ ABI_MALLOC(narrm,(0:ndtset_alloc))
+ ABI_MALLOC(nimagem,(0:ndtset_alloc))
+ ABI_MALLOC(prtimg,(mxvals%nimage,0:ndtset_alloc))
 
  do idtset=0,ndtset_alloc
    nimagem(idtset)=dtsets(idtset)%nimage
  end do
 
- firstchar_gpu=' ';if (maxval(dtsets(1:ndtset_alloc)%use_gpu_cuda)>0) firstchar_gpu='-'
+ firstchar_gpu=' '
+ if (maxval(dtsets(1:ndtset_alloc)%gpu_option)/=ABI_GPU_DISABLED) firstchar_gpu='-'
 
-!if(multivals%natom==0)natom=dtsets(1)%natom
  natom=dtsets(1)%natom
-!if(multivals%nimage==0)nimage=dtsets(1)%nimage
  nimage=dtsets(1)%nimage
-!if(multivals%nnos==0)nnos=dtsets(1)%nnos
  nnos=dtsets(1)%nnos
-!if(multivals%nsym==0)nsym=dtsets(1)%nsym
  nsym=-1;nsym=dtsets(1)%nsym
-!if(multivals%ntypalch==0)ntypalch=dtsets(1)%ntypalch
  ntypalch=dtsets(1)%ntypalch
-!if(multivals%ntypat==0)ntypat=dtsets(1)%ntypat
  ntypat=dtsets(1)%ntypat
 
 !###########################################################
 !### 02. Specific treatment for occopt, xangst, xcart, xred
 
 !Must compute xangst and xcart
- ABI_ALLOCATE(xangst_,(3,mxvals%natom,mxvals%nimage,0:ndtset_alloc))
- ABI_ALLOCATE(xcart_,(3,mxvals%natom,mxvals%nimage,0:ndtset_alloc))
+ ABI_MALLOC(xangst_,(3,mxvals%natom,mxvals%nimage,0:ndtset_alloc))
+ ABI_MALLOC(xcart_,(3,mxvals%natom,mxvals%nimage,0:ndtset_alloc))
  xangst_(:,:,:,:)=0.0_dp ; xcart_(:,:,:,:)=0.0_dp
 
  do idtset=1,ndtset_alloc
    natom=dtsets(idtset)%natom
-   ABI_ALLOCATE(xred,(3,natom))
-   ABI_ALLOCATE(xangst,(3,natom))
-   ABI_ALLOCATE(xcart,(3,natom))
+   ABI_MALLOC(xred,(3,natom))
+   ABI_MALLOC(xangst,(3,natom))
+   ABI_MALLOC(xcart,(3,natom))
    do iimage=1,dtsets(idtset)%nimage
      xred(:,1:natom)=results_out(idtset)%xred(:,1:natom,iimage)
      call mkrdim(results_out(idtset)%acell(:,iimage),results_out(idtset)%rprim(:,:,iimage),rprimd)
@@ -206,9 +190,9 @@ contains
      xangst_(1:3,1:natom,dtsets(idtset)%nimage+1:mxvals%nimage,idtset)=zero
      xcart_(1:3,1:natom,dtsets(idtset)%nimage+1:mxvals%nimage,idtset)=zero
    end if
-   ABI_DEALLOCATE(xred)
-   ABI_DEALLOCATE(xangst)
-   ABI_DEALLOCATE(xcart)
+   ABI_FREE(xred)
+   ABI_FREE(xangst)
+   ABI_FREE(xcart)
  end do
 
 !###########################################################
@@ -234,6 +218,9 @@ contains
 
  intarr(1,:)=dtsets(:)%optcell
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'optcell','INT',0)
+
+ intarr(1,:)=dtsets(:)%optdcmagpawu
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'optdcmagpawu','INT',0)
 
  intarr(1,:)=dtsets(:)%optdriver
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'optdriver','INT',0)
@@ -348,6 +335,29 @@ contains
  intarr(1,:)=dtsets(:)%pawxcdev
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'pawxcdev','INT',0)
 
+ intarr(1,:)=dtsets(:)%ph_intmeth
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'ph_intmeth','INT',0)
+
+ intarr(1,:)=dtsets(:)%ph_ndivsm
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'ph_ndivsm','INT',0)
+
+ do idtset=0,ndtset_alloc
+   intarr(1:3,idtset)=dtsets(idtset)%ph_ngqpt
+ end do
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,3,narrm,ncid,ndtset_alloc,'ph_ngqpt','INT',0)
+
+ intarr(1,:)=dtsets(:)%ph_nqpath
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'ph_nqpath','INT',0)
+
+ intarr(1,:)=dtsets(:)%ph_nqshift
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'ph_nqshift','INT',0)
+
+ dprarr(1,:)=dtsets(:)%ph_smear
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'ph_smear','ENE',0)
+
+ dprarr(1,:)=dtsets(:)%ph_wstep
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'ph_wstep','ENE',0)
+
 !pimass
  icount=0
  do idtset=0, ndtset_alloc
@@ -365,11 +375,6 @@ contains
 
  intarr(1,:)=dtsets(:)%pitransform
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'pitransform','INT',0)
-
- dprarr(1,:)=dtsets(:)%polcen(1)
- dprarr(2,:)=dtsets(:)%polcen(2)
- dprarr(3,:)=dtsets(:)%polcen(3)
- call prttagm(dprarr,intarr,iout,jdtset_,1,marr,3,narrm,ncid,ndtset_alloc,'polcen','DPR',0)
 
  intarr(1,:)=dtsets(:)%plowan_bandi
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'plowan_bandi','INT',0)
@@ -394,19 +399,20 @@ contains
  narr=100
  do idtset=0,ndtset_alloc       ! specific size for each dataset
    narrm(idtset)=3*dtsets(idtset)%plowan_nt
-   if(idtset==0)narrm(idtset)=100
-   if (narrm(idtset)>0.and.dtsets(idtset)%plowan_compute>0) then
+   !if(idtset==0)narrm(idtset)=100
+   if (narrm(idtset)>0.and.dtsets(idtset)%plowan_compute>=0) then
      intarr(1:narrm(idtset),idtset)=dtsets(idtset)%plowan_it(1:narrm(idtset))
    end if
  end do
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,narr,narrm,ncid,ndtset_alloc,'plowan_it','INT',1)
 
+
 !plowan_iatom
  narr=mxvals%natom
  do idtset=0,ndtset_alloc       ! specific size for each dataset
    narrm(idtset)=dtsets(idtset)%plowan_natom
-   if(idtset==0)narrm(idtset)=mxvals%natom
-   if (narrm(idtset)>0.and.dtsets(idtset)%plowan_compute>0) then
+   !if(idtset==0)narrm(idtset)=mxvals%natom
+   if (narrm(idtset)>0.and.dtsets(idtset)%plowan_compute>=0) then
      intarr(1:narrm(idtset),idtset)=dtsets(idtset)%plowan_iatom(1:narrm(idtset))
    end if
  end do
@@ -416,8 +422,8 @@ contains
  narr=mxvals%natom
  do idtset=0,ndtset_alloc       ! specific size for each dataset
    narrm(idtset)=dtsets(idtset)%plowan_natom
-   if(idtset==0)narrm(idtset)=mxvals%natom
-   if (narrm(idtset)>0.and.dtsets(idtset)%plowan_compute>0) then
+   !if(idtset==0)narrm(idtset)=mxvals%natom
+   if (narrm(idtset)>0.and.dtsets(idtset)%plowan_compute>=0) then
      intarr(1:narrm(idtset),idtset)=dtsets(idtset)%plowan_nbl(1:narrm(idtset))
    end if
  end do
@@ -427,8 +433,8 @@ contains
  narr=12*mxvals%natom
  do idtset=0,ndtset_alloc       ! specific size for each dataset
    narrm(idtset)=sum(dtsets(idtset)%plowan_nbl(1:dtsets(idtset)%plowan_natom))
-   if(idtset==0)narrm(idtset)=12*mxvals%natom
-   if (narrm(idtset)>0.and.dtsets(idtset)%plowan_compute>0) then
+   !if(idtset==0)narrm(idtset)=12*mxvals%natom
+   if (narrm(idtset)>0.and.dtsets(idtset)%plowan_compute>=0) then
      intarr(1:narrm(idtset),idtset)=dtsets(idtset)%plowan_lcalc(1:narrm(idtset))
    end if
  end do
@@ -438,13 +444,17 @@ contains
  narr=12*mxvals%natom
  do idtset=0,ndtset_alloc       ! specific size for each dataset
    narrm(idtset)=sum(dtsets(idtset)%plowan_nbl(1:dtsets(idtset)%plowan_natom))
-   if(idtset==0)narrm(idtset)=12*mxvals%natom
-   if (narrm(idtset)>0.and.dtsets(idtset)%plowan_compute>0) then
+   !if(idtset==0)narrm(idtset)=12*mxvals%natom
+   if (narrm(idtset)>0.and.dtsets(idtset)%plowan_compute>=0) then
      intarr(1:narrm(idtset),idtset)=dtsets(idtset)%plowan_projcalc(1:narrm(idtset))
    end if
  end do
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,narr,narrm,ncid,ndtset_alloc,'plowan_projcalc','INT',1)
 
+ dprarr(1,:)=dtsets(:)%polcen(1)
+ dprarr(2,:)=dtsets(:)%polcen(2)
+ dprarr(3,:)=dtsets(:)%polcen(3)
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,3,narrm,ncid,ndtset_alloc,'polcen','DPR',0)
 
  intarr(1,:)=dtsets(:)%posdoppler
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'posdoppler','INT',0)
@@ -470,6 +480,8 @@ contains
  intarr(1,:)=dtsets(:)%ppmodel
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'ppmodel','INT',0)
 
+ intarr(1,:)=dtsets(:)%prepalw
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'prepalw','INT',0)
 
  intarr(1,:)=dtsets(:)%prepanl
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'prepanl','INT',0)
@@ -494,6 +506,9 @@ contains
  intarr(1,:)=dtsets(:)%prtbltztrp
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'prtbltztrp','INT',0)
 
+ intarr(1,:)=dtsets(:)%prtchkprdm
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'prtchkprdm','INT',0)
+
  intarr(1,:)=dtsets(:)%prtcif
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'prtcif','INT',0)
 
@@ -512,9 +527,6 @@ contains
  intarr(1,:)=dtsets(:)%prtebands
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'prtebands','INT',0)
 
- intarr(1,:)=dtsets(:)%prtefg
- call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'prtefg','INT',0)
-
  intarr(1,:)=dtsets(:)%prtefmas
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'prtefmas','INT',0)
 
@@ -526,9 +538,6 @@ contains
 
  intarr(1,:)=dtsets(:)%prteliash
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'prteliash','INT',0)
-
- intarr(1,:)=dtsets(:)%prtfc
- call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'prtfc','INT',0)
 
  intarr(1,:)=dtsets(:)%prtfull1wf
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'prtfull1wf','INT',0)
@@ -557,6 +566,11 @@ contains
  intarr(1,:)=dtsets(:)%prtnabla
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'prtnabla','INT',0)
 
+ intarr(1,:)=dtsets(:)%prtnest
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'prtnest','INT',0)
+
+ intarr(1,:)=dtsets(:)%prtocc
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'prtocc','INT',0)
 
  intarr(1,:)=dtsets(:)%prtphbands
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'prtphbands','INT',0)
@@ -569,6 +583,9 @@ contains
 
  intarr(1,:)=dtsets(:)%prtposcar
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'prtposcar','INT',0)
+
+ intarr(1,:)=dtsets(:)%prtprocar
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'prtprocar','INT',0)
 
  intarr(1,:)=dtsets(:)%prtpot
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'prtpot','INT',0)
@@ -625,12 +642,16 @@ contains
  intarr(1,:)=dtsets(:)%prt1dm
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'prt1dm','INT',0)
 
+ !ptcharge
  do idtset=0, ndtset_alloc
    do ii = 1, ntypat
      dprarr(ii,idtset) = dtsets(idtset)%ptcharge(ii)
    end do ! end loop over ntypat
  end do ! end loop over datasets
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,ntypat,narrm,ncid,ndtset_alloc,'ptcharge','DPR',0)
+
+ intarr(1,:)=dtsets(:)%prt_lorbmag
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'prt_lorbmag','INT',0)
 
  intarr(1,:)=dtsets(:)%ptgroupma
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'ptgroupma','INT',0)
@@ -656,9 +677,7 @@ contains
      dprarr(1:narrm(idtset),idtset)=dtsets(idtset)%qmass(1:narrm(idtset))
    end if
  end do
- call prttagm(dprarr,intarr,iout,jdtset_,1,marr,narr,&
-& narrm,ncid,ndtset_alloc,'qmass','DPR',&
-& multivals%nnos)
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,narr,narrm,ncid,ndtset_alloc,'qmass','DPR',multivals%nnos)
 
  intarr(1,:)=dtsets(:)%qprtrb(1)
  intarr(2,:)=dtsets(:)%qprtrb(2)
@@ -689,9 +708,7 @@ contains
 &     (/ narrm(idtset) /) )
    end if
  end do
- call prttagm(dprarr,intarr,iout,jdtset_,1,marr,narr,&
-& narrm,ncid,ndtset_alloc,'qptdm','DPR',&
-& multivals%nqptdm)
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,narr,narrm,ncid,ndtset_alloc,'qptdm','DPR',multivals%nqptdm)
 
  do idtset=0, ndtset_alloc
    do ii = 1, ntypat
@@ -700,6 +717,10 @@ contains
  end do ! end loop over datasets
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,ntypat,narrm,ncid,ndtset_alloc,'quadmom','DPR',0)
 
+ intarr(1,:)=dtsets(:)%quadquad
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'quadquad','INT',0)
+
+
 !###########################################################
 !### 03. Print all the input variables (R)
 !##
@@ -707,6 +728,9 @@ contains
 !variables used for the random positions in unit cell
  intarr(1,:)=dtsets(:)%random_atpos
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'random_atpos','INT',0)
+
+ dprarr(1,:)=dtsets(:)%ratsm
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'ratsm','LEN',0)
 
  do idtset=0, ndtset_alloc
    do ii = 1, ntypat
@@ -752,7 +776,6 @@ contains
  dprarr(3,:)=dtsets(:)%red_dfield(3)
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,3,narrm,ncid,ndtset_alloc,'red_dfield','DPR',0)
 
-
  dprarr(1,:)=dtsets(:)%red_efield(1)    !!HONG
  dprarr(2,:)=dtsets(:)%red_efield(2)
  dprarr(3,:)=dtsets(:)%red_efield(3)
@@ -766,12 +789,18 @@ contains
  intarr(1,:)=dtsets(:)%restartxf
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'restartxf','INT',0)
 
- intarr(1,:)=dtsets(:)%rfasr
- call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'rfasr','INT',0)
+!intarr(1,:)=dtsets(:)%rfasr
+!call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'rfasr','INT',0)
 
- intarr(1,:)=dtsets(:)%rfatpol(1)
- intarr(2,:)=dtsets(:)%rfatpol(2)
- call prttagm(dprarr,intarr,iout,jdtset_,2,marr,2,narrm,ncid,ndtset_alloc,'rfatpol','INT',0)
+ test_write=0
+ do idtset=1,ndtset_alloc
+   if(dtsets(idtset)%rfatpol(1)/=1 .or. dtsets(idtset)%rfatpol(2)/=dtsets(idtset)%natom)test_write=1
+ enddo
+ if(test_write==1)then
+   intarr(1,:)=dtsets(:)%rfatpol(1)
+   intarr(2,:)=dtsets(:)%rfatpol(2)
+   call prttagm(dprarr,intarr,iout,jdtset_,2,marr,2,narrm,ncid,ndtset_alloc,'rfatpol','INT',0)
+ endif
 
  intarr(1,:)=dtsets(:)%rfddk
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'rfddk','INT',0)
@@ -796,6 +825,9 @@ contains
  intarr(1,:)=dtsets(:)%rfstrs
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'rfstrs','INT',0)
 
+ intarr(1,:)=dtsets(:)%rfstrs_ref
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'rfstrs_ref','INT',0)
+
  intarr(1,:)=dtsets(:)%rfuser
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'rfuser','INT',0)
 
@@ -817,6 +849,14 @@ contains
 
  dprarr(1,:)=dtsets(:)%rhoqpmix
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'rhoqpmix','DPR',0)
+
+ dprarr(1,:)=dtsets(:)%rifcsph
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'rifcsph','DPR',0)
+
+ intarr(1,:)=dtsets(:)%rmm_diis
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'rmm_diis','INT',0)
+ intarr(1,:)=dtsets(:)%rmm_diis_savemem
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'rmm_diis_savemem','INT',0)
 
 !rprim
  prtimg(:,:)=1
@@ -846,8 +886,7 @@ contains
      narrm(idtset)=3*dtsets(idtset)%nshiftk
      if (narrm(idtset)>0) then
        dprarr(1:narrm(idtset),idtset)=&
-&       reshape(dtsets(idtset)%shiftk(1:3,1:dtsets(idtset)%nshiftk),&
-&       (/ narrm(idtset) /) )
+&       reshape(dtsets(idtset)%shiftk(1:3,1:dtsets(idtset)%nshiftk),(/ narrm(idtset) /) )
      end if
      if(dtsets(idtset)%kptopt<=0)then
        narrm(idtset)=0
@@ -865,6 +904,11 @@ contains
  dprarr(1,:)=dtsets(:)%sigma_erange(1)
  dprarr(2,:)=dtsets(:)%sigma_erange(2)
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,2,narrm,ncid,ndtset_alloc,'sigma_erange','ENE',0)
+
+ intarr(1,:)=dtsets(:)%transport_ngkpt(1)
+ intarr(2,:)=dtsets(:)%transport_ngkpt(2)
+ intarr(3,:)=dtsets(:)%transport_ngkpt(3)
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,3,narrm,ncid,ndtset_alloc,'transport_ngkpt','INT',0)
 
  intarr(1,:)=dtsets(:)%sigma_ngkpt(1)
  intarr(2,:)=dtsets(:)%sigma_ngkpt(2)
@@ -906,17 +950,11 @@ contains
  do idtset=1,ndtset_alloc       ! specific size for each dataset
    narrm(idtset)=3*dtsets(idtset)%natom
    if (narrm(idtset)>0) then
-     dprarr(1:narrm(idtset),idtset)=&
-&     reshape(dtsets(idtset)%spinat(1:3,1:dtsets(idtset)%natom),&
-&     (/ narrm(idtset) /) )
+     dprarr(1:narrm(idtset),idtset)=reshape(dtsets(idtset)%spinat(1:3,1:dtsets(idtset)%natom), (/narrm(idtset)/))
    end if
-   if(sum(abs( dtsets(idtset)%spinat(1:3,1:dtsets(idtset)%natom))) < tol12 )then
-     narrm(idtset)=0
-   end if
+   if(sum(abs( dtsets(idtset)%spinat(1:3,1:dtsets(idtset)%natom))) < tol12 ) narrm(idtset)=0
  end do
- call prttagm(dprarr,intarr,iout,jdtset_,2,marr,narr,&
-& narrm,ncid,ndtset_alloc,'spinat','DPR',&
-& multivals%natom)
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,narr,narrm,ncid,ndtset_alloc,'spinat','DPR',multivals%natom)
 
  dprarr(1,:)=dtsets(:)%spinmagntarget
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'spinmagntarget','DPR',0)
@@ -950,8 +988,7 @@ contains
      if(dtsets(idtset)%iscf>=0)then
        do iimage=1,dtsets(idtset)%nimage
          if (narrm(idtset)>0) then
-           dprarr_images(1:narrm(idtset),iimage,idtset)=&
-&           results_out(idtset)%strten(:,iimage)
+           dprarr_images(1:narrm(idtset),iimage,idtset)=results_out(idtset)%strten(:,iimage)
          end if
          if(.not.(dtsets(idtset)%dynimage(iimage)==1.or.compute_static_images))then
            prtimg(iimage,idtset)=0
@@ -964,8 +1001,7 @@ contains
 !  This is a trick to force printing of strten even if zero, still not destroying the value of nimagem(0).
    tmpimg0=nimagem(0)
    nimagem(0)=0
-   call prttagm_images(dprarr_images,iout,jdtset_,2,&
-&   marr,narrm,ncid,ndtset_alloc,'strten','DPR',&
+   call prttagm_images(dprarr_images,iout,jdtset_,2,marr,narrm,ncid,ndtset_alloc,'strten','DPR',&
 &   mxvals%nimage,nimagem,ndtset,prtimg,strimg)
    nimagem(0)=tmpimg0
  end if
@@ -976,8 +1012,7 @@ contains
  do idtset=1,ndtset_alloc       ! specific size for each dataset
    narrm(idtset)=dtsets(idtset)%nsym
    if (narrm(idtset)>0) then
-     intarr(1:narrm(idtset),idtset)=&
-&     dtsets(idtset)%symafm(1:narrm(idtset))
+     intarr(1:narrm(idtset),idtset)=dtsets(idtset)%symafm(1:narrm(idtset))
    end if
  end do
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,narr,narrm,ncid,ndtset_alloc,'symafm','INT', multivals%nsym)
@@ -1006,6 +1041,9 @@ contains
  intarr(1,:)=dtsets(:)%symsigma
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'symsigma','INT',0)
 
+ intarr(1,:)=dtsets(:)%symv1scf
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'symv1scf','INT',0)
+
 !###########################################################
 !### 03. Print all the input variables (T)
 !##
@@ -1027,11 +1065,8 @@ contains
 
 
 !timopt
- timopt_default=1
-!MPI parallel case
- if(xmpi_paral==1)then
-   timopt_default=0
- end if
+ timopt_default=1; if(xmpi_paral==1) timopt_default=0
+
  if(timopt/=timopt_default)then
    intarr(1,:)=timopt
    intarr(1,0)=timopt_default
@@ -1054,6 +1089,9 @@ contains
    end if
  end do
  call prttagm(dprarr,intarr,iout,jdtset_,-3,marr,narr,narrm,ncid,ndtset_alloc,'tnons','DPR',multivals%nsym)
+
+ dprarr(1,:)=dtsets(:)%tolcum
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'tolcum','DPR',0)
 
  dprarr(1,:)=dtsets(:)%toldfe
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'toldfe','ENE',0)
@@ -1085,6 +1123,11 @@ contains
  dprarr(1,:)=dtsets(:)%tolwfr
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'tolwfr','DPR',0)
 
+ if ( any( abs(dtsets(:)%tolwfr-dtsets(:)%tolwfr_diago)>tiny(zero) ) ) then ! output tolwfr_diago only if different than tolwfr
+   dprarr(1,:)=dtsets(:)%tolwfr_diago
+   call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'tolwfr_diago','DPR',0)
+ end if
+
  dprarr(1,:)=dtsets(:)%tphysel
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'tphysel','ENE',0)
 
@@ -1103,8 +1146,7 @@ contains
      intarr(1:narrm(idtset),idtset)=dtsets(idtset)%typat(1:narrm(idtset))
    end if
  end do
- call prttagm(dprarr,intarr,iout,jdtset_,4,marr,narr,&
-& narrm,ncid,ndtset_alloc,'typat','INT',multivals%natom,forceprint=2)
+ call prttagm(dprarr,intarr,iout,jdtset_,4,marr,narr,narrm,ncid,ndtset_alloc,'typat','INT',multivals%natom,forceprint=2)
 
 !###########################################################
 !### 03. Print all the input variables (U)
@@ -1155,6 +1197,12 @@ contains
  intarr(1,:)=dtsets(:)%use_gemm_nonlop
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'use_gemm_nonlop','INT',0)
 
+ intarr(1,:)=dtsets(:)%useextfpmd
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'useextfpmd','INT',0)
+
+ intarr(1,:)=dtsets(:)%use_yaml
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'use_yaml','INT',0)
+
  intarr(1,:)=dtsets(:)%use_nonscf_gkk
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'use_nonscf_gkk','INT',0)
 
@@ -1203,11 +1251,11 @@ contains
  intarr(1,0:ndtset_alloc)=dtsets(0:ndtset_alloc)%useylm
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'useylm','INT',0,firstchar=firstchar_gpu)
 
- intarr(1,:)=dtsets(:)%use_gpu_cuda
- call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'use_gpu_cuda','INT',0,firstchar=firstchar_gpu)
-
  intarr(1,:)=dtsets(:)%use_slk
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'use_slk','INT',0, firstchar="-")
+
+ intarr(1,:)=dtsets(:)%use_oldchi
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'use_oldchi','INT',0)
 
 
 !###########################################################
@@ -1279,7 +1327,6 @@ contains
  call prttagm_images(dprarr_images,iout,jdtset_,2,marr,narrm,ncid,ndtset_alloc,'vel','DPR',&
 & mxvals%nimage,nimagem,ndtset,prtimg,strimg)
 
-
 !vel_cell
 !At present, vel_cell does not depend on image... but this might change in the future.
  prtimg(:,:)=1
@@ -1309,6 +1356,9 @@ contains
  dprarr(1,:)=dtsets(:)%vis
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'vis','DPR',0)
 
+ dprarr(1,:)=dtsets(:)%vloc_rcut
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'vloc_rcut','LEN',0)
+
  dprarr(1,:)=dtsets(:)%vprtrb(1)
  dprarr(2,:)=dtsets(:)%vprtrb(2)
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,2,narrm,ncid,ndtset_alloc,'vprtrb','ENE',0)
@@ -1317,6 +1367,8 @@ contains
 !###########################################################
 !### 03. Print all the input variables (W)
 !##
+ intarr(1,:)=dtsets(:)%wfinit
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'wfinit','INT',0)
 
  dprarr(1,:)=dtsets(:)%wfmix
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'wfmix','DPR',0)
@@ -1334,46 +1386,39 @@ contains
      narrm(idtset)=3*dtsets(idtset)%natom*dtsets(idtset)%nconeq
      if (narrm(idtset)>0)&
 &     dprarr(1:narrm(idtset),idtset)=&
-&     reshape(dtsets(idtset)%wtatcon(1:3,1:dtsets(idtset)%natom,&
-&     1:dtsets(idtset)%nconeq),&
-&     (/ narrm(idtset) /) )
+&     reshape(dtsets(idtset)%wtatcon(1:3,1:dtsets(idtset)%natom,1:dtsets(idtset)%nconeq),(/ narrm(idtset) /) )
    else
      narrm(idtset)=3*mxvals%natom*mxvals%nconeq
      if (narrm(idtset)>0)&
 &     dprarr(1:narrm(idtset),idtset)=&
-&     reshape(dtsets(idtset)%wtatcon(1:3,1:mxvals%natom,&
-&     1:mxvals%nconeq),&
-&     (/ narrm(idtset) /) )
+&     reshape(dtsets(idtset)%wtatcon(1:3,1:mxvals%natom,1:mxvals%nconeq),(/ narrm(idtset) /) )
    end if
  end do
- call prttagm(dprarr,intarr,iout,jdtset_,1,marr,narr,&
-& narrm,ncid,ndtset_alloc,'wtatcon','DPR',&
-& multivals%natom+multivals%nconeq)
+
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,narr,narrm,ncid,ndtset_alloc,'wtatcon','DPR',&
+   multivals%natom+multivals%nconeq)
 
 !wtk
- tnkpt=0
- dprarr(:,0)=1
- narr=dtsets(1)%nkpt            ! default size for all datasets
- if(prtvol_glob==0 .and. narr>nkpt_max)then
-   narr=nkpt_max
-   tnkpt=1
- end if
- do idtset=1,ndtset_alloc       ! specific size for each dataset
-   narrm(idtset)=dtsets(idtset)%nkpt
-   if (narrm(idtset)>0) then
-     dprarr(1:narrm(idtset),idtset)=dtsets(idtset)%wtk(1:narrm(idtset))+tol12
-   end if
-
-   if(prtvol_glob==0 .and. narrm(idtset)>nkpt_max)then
-     narrm(idtset)=nkpt_max
+ if (allocated(dtsets(0)%wtk)) then
+   tnkpt=0
+   dprarr(:,0)=1
+   narr=dtsets(1)%nkpt ! default size for all datasets
+   if(prtvol_glob==0 .and. narr>nkpt_max)then
+     narr=nkpt_max
      tnkpt=1
    end if
- end do
- call prttagm(dprarr,intarr,iout,jdtset_,4,marr,narr,&
-& narrm,ncid,ndtset_alloc,'wtk','DPR',multivals%nkpt)
+   do idtset=1,ndtset_alloc       ! specific size for each dataset
+     narrm(idtset)=dtsets(idtset)%nkpt
+     if (narrm(idtset)>0) dprarr(1:narrm(idtset),idtset)=dtsets(idtset)%wtk(1:narrm(idtset))+tol12
 
- if(tnkpt==1) write(iout,'(23x,a,i3,a)' ) &
-& 'outvars : Printing only first ',nkpt_max,' k-points.'
+     if(prtvol_glob==0 .and. narrm(idtset)>nkpt_max)then
+       narrm(idtset)=nkpt_max
+       tnkpt=1
+     end if
+   end do
+   call prttagm(dprarr,intarr,iout,jdtset_,4,marr,narr,narrm,ncid,ndtset_alloc,'wtk','DPR',multivals%nkpt)
+   if(tnkpt==1) write(iout,'(23x,a,i3,a)' ) 'outvars : Printing only first ',nkpt_max,' k-points.'
+ end if
 
 !WVL - wavelets variables
  if (any(dtsets(:)%usewvl==1)) then
@@ -1412,11 +1457,11 @@ contains
    narrm(idtset)=3*size1
    do iimage=1,nimagem(idtset)
      if (narrm(idtset)>0) then
-       dprarr_images(1:narrm(idtset),iimage,idtset)=&
-&       reshape(xangst_(1:3,1:size1,iimage,idtset), (/ narrm(idtset) /) )
+       dprarr_images(1:narrm(idtset),iimage,idtset)=reshape(xangst_(1:3,1:size1,iimage,idtset), (/narrm(idtset)/))
      end if
    end do
  end do
+
  call prttagm_images(dprarr_images,iout,jdtset_,-2,marr,narrm,ncid,ndtset_alloc,'xangst','DPR',&
 & mxvals%nimage,nimagem,ndtset,prtimg,strimg)
 
@@ -1431,20 +1476,27 @@ contains
    narrm(idtset)=3*size1
    do iimage=1,nimagem(idtset)
      if (narrm(idtset)>0) then
-       dprarr_images(1:narrm(idtset),iimage,idtset)=&
-&       reshape(xcart_(1:3,1:size1,iimage,idtset), (/ narrm(idtset) /) )
+       dprarr_images(1:narrm(idtset),iimage,idtset)=reshape(xcart_(1:3,1:size1,iimage,idtset), (/ narrm(idtset) /) )
      end if
    end do
  end do
+
  call prttagm_images(dprarr_images,iout,jdtset_,-2,marr,narrm,ncid,ndtset_alloc,'xcart','DPR',&
 & mxvals%nimage,nimagem,ndtset,prtimg,strimg)
-
 
  dprarr(1,:)=dtsets(:)%xc_denpos
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'xc_denpos','DPR',0)
 
+ if (any(dtsets(:)%usekden==1).and.any(dtsets(:)%xc_taupos/=dtsets(:)%xc_denpos)) then
+   dprarr(1,:)=dtsets(:)%xc_taupos
+   call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'xc_taupos','DPR',0)
+ end if
+
  dprarr(1,:)=dtsets(:)%xc_tb09_c
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'xc_tb09_c','DPR',0)
+
+ intarr(1,:)=dtsets(:)%x1rdm
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'x1rdm','INT',0)
 
 !xred
  prtimg(:,:)=1
@@ -1474,12 +1526,10 @@ contains
    end if
    narrm(idtset)=3*size2
    if (narrm(idtset)>0) then
-     dprarr(1:narrm(idtset),idtset)=&
-&     reshape(dtsets(idtset)%xredsph_extra(:,1:size2), (/ narrm(idtset) /) )
+     dprarr(1:narrm(idtset),idtset)= reshape(dtsets(idtset)%xredsph_extra(:,1:size2), (/ narrm(idtset) /) )
    end if
  end do
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,3,narrm,ncid,ndtset_alloc,'xredsph_extra','DPR',1)
-
 
 
 !###########################################################
@@ -1500,10 +1550,8 @@ contains
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,3,narrm,ncid,ndtset_alloc,'zeemanfield','BFI',0)
 
 !ziontypat   ! After all, should always echo this value
- if(sum(dtsets(:)%ntypalch)>0)then   ! After all, should always echo this value ...
-
-
-   narr=ntypat                      ! default size for all datasets
+ if(sum(dtsets(:)%ntypalch)>0)then
+   narr=ntypat                    ! default size for all datasets
    do idtset=0,ndtset_alloc       ! specific size for each dataset
      narrm(idtset)=dtsets(idtset)%ntypat
      if(idtset==0)narrm(idtset)=mxvals%ntypat
@@ -1513,27 +1561,24 @@ contains
    end do
    call prttagm(dprarr,intarr,iout,jdtset_,1,marr,narr,&
 &   narrm,ncid,ndtset_alloc,'ziontypat','DPR',multivals%ntypat,forceprint=2)
-
  end if
 
  do idtset=0,ndtset_alloc
    dprarr(1:npsp,idtset)=dtsets(idtset)%znucl(1:npsp)
  end do
- call prttagm(dprarr,intarr,iout,jdtset_,4,marr,npsp,narrm,ncid,ndtset_alloc,'znucl','DPR',0,&
-& forceprint=2)
+ call prttagm(dprarr,intarr,iout,jdtset_,4,marr,npsp,narrm,ncid,ndtset_alloc,'znucl','DPR',0,forceprint=2)
 
 !###########################################################
 !## Deallocation for generic arrays, and for n-z variables
 
- ABI_DEALLOCATE(dprarr)
- ABI_DEALLOCATE(intarr)
- ABI_DEALLOCATE(narrm)
- ABI_DEALLOCATE(nimagem)
- ABI_DEALLOCATE(dprarr_images)
- ABI_DEALLOCATE(prtimg)
-
- ABI_DEALLOCATE(xangst_)
- ABI_DEALLOCATE(xcart_)
+ ABI_FREE(dprarr)
+ ABI_FREE(intarr)
+ ABI_FREE(narrm)
+ ABI_FREE(nimagem)
+ ABI_FREE(dprarr_images)
+ ABI_FREE(prtimg)
+ ABI_FREE(xangst_)
+ ABI_FREE(xcart_)
 
 contains
 !!***
@@ -1560,12 +1605,6 @@ contains
 !!
 !! OUTPUT
 !!  (only writing)
-!!
-!! PARENTS
-!!      outvar_o_z
-!!
-!! CHILDREN
-!!      appdig
 !!
 !! SOURCE
 
@@ -1602,12 +1641,12 @@ subroutine prtocc(dtsets,iout,jdtset_,mxvals,ndtset_alloc,nimagem,prtvol_glob,re
 
  if(ndtset_alloc<1)then
    write(message, '(a,i0,a)' )' ndtset_alloc=',ndtset_alloc,', while it should be >= 1.'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
  if(ndtset_alloc>9999)then
    write(message, '(a,i0,a)' )' ndtset_alloc=',ndtset_alloc,', while it must be lower than 100.'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
 !It is important to take iscf into account, since when it is -2, occupation numbers must be ignored
@@ -1656,10 +1695,6 @@ subroutine prtocc(dtsets,iout,jdtset_,mxvals,ndtset_alloc,nimagem,prtvol_glob,re
    multi_nband=1
  end if
 
-!DEBUG
-! write(std_out,*)' prtocc : 1 '
-!ENDDEBUG
-
  multi_nimage=0
  if(ndtset_alloc>1)then
    do idtset=1,ndtset_alloc
@@ -1680,8 +1715,7 @@ subroutine prtocc(dtsets,iout,jdtset_,mxvals,ndtset_alloc,nimagem,prtvol_glob,re
    if(nimagem(idtset)>1)then
      nban=sum(dtsets(idtset)%nband(1:dtsets(idtset)%nsppol*dtsets(idtset)%nkpt))
      do iban=1,nban
-       if(sum(abs( results_out(idtset)%occ(iban,2:nimagem(idtset))- &
-&       results_out(idtset)%occ(iban,1)))>tol12)then
+       if(sum(abs( results_out(idtset)%occ(iban,2:nimagem(idtset))- results_out(idtset)%occ(iban,1)))>tol12)then
          test_multiimages(idtset)=.true.
        end if
      end do
@@ -1722,9 +1756,7 @@ subroutine prtocc(dtsets,iout,jdtset_,mxvals,ndtset_alloc,nimagem,prtvol_glob,re
    end if
  end if
 
-!DEBUG
 ! write(std_out,*)' prtocc : 4, multi= ',multi
-!ENDDEBUG
 
 !At this stage, if multi==1, the occ must be printed
 !if multi==0, then it might be that we have the default values.
@@ -1741,9 +1773,7 @@ subroutine prtocc(dtsets,iout,jdtset_,mxvals,ndtset_alloc,nimagem,prtvol_glob,re
    end if
  end do
 
-!DEBUG
 ! write(std_out,*)' prtocc : 5, print= ',print
-!ENDDEBUG
 
 !Now, print occ in the generic occupation-number set case (occ is independent of the dtset).
  if(print==1 .and. multi==0)then
@@ -1755,9 +1785,7 @@ subroutine prtocc(dtsets,iout,jdtset_,mxvals,ndtset_alloc,nimagem,prtvol_glob,re
      tnkpt=1
    end if
 
-!DEBUG
 ! write(std_out,*)' prtocc : 6, do-loop over iimage '
-!ENDDEBUG
 
    do iimage=1,nimagem(generic)
      if(iimage==1 .or. test_multiimages(generic) )then
@@ -1793,9 +1821,7 @@ subroutine prtocc(dtsets,iout,jdtset_,mxvals,ndtset_alloc,nimagem,prtvol_glob,re
    end do
  end if
 
-!DEBUG
 ! write(std_out,*)' prtocc : 7, finished do-loop over iimage '
-!ENDDEBUG
 
 !Now, print occ in the other cases (occ depends on the dataset)
  if(print==1 .and. multi==1)then
@@ -1848,7 +1874,7 @@ subroutine prtocc(dtsets,iout,jdtset_,mxvals,ndtset_alloc,nimagem,prtvol_glob,re
    end do
  end if
 
- ABI_DEALLOCATE(test_multiimages)
+ ABI_FREE(test_multiimages)
 
 end subroutine prtocc
 !!***

@@ -1,8 +1,8 @@
 
-.Version 8.0.3 of MRGSCR 
-.(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
+.Version 10.1.4.5 of MRGSCR, released Sep 2024.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2019 ABINIT group . 
+.Copyright (C) 1998-2024 ABINIT group . 
  MRGSCR comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,11 +14,11 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon  4 Apr 2016.
-- ( at 19h49 )
+.Starting date : Sat 14 Sep 2024.
+- ( at 06h47 )
   
->>>  Enter the number of files to merge: 
->>>  Enter the name of the file to be analyzed: 
+->>  Enter the number of files to merge: 
+->>  Enter the name of the file to be analyzed: 
 
  Running single-file mode:
  Checking the integrity of file: t37o_DS3_SCR
@@ -80,8 +80,8 @@
  22   0.00   5.00
  23   0.00  12.93
  24   0.00  25.52
- 25   0.00  45.50
- 26   0.00  77.22
+ 25   0.00  45.51
+ 26   0.00  77.24
 
  Checking if the list of q-points is complete. 
 
@@ -145,7 +145,7 @@
 
  11 real frequencies will be kept.
  Finally, we have 16 frequencies. 11 real, and 5 imaginary.
->>>  Enter the full name of the final output file: 
+->>  Enter the full name of the final output file: 
  ==== Header of the final file ====
  SCR file: epsilon^-1 , calculated using inclvkb = 2
  TESTPARTICLE RPA
@@ -194,8 +194,8 @@
  12   0.00   5.00
  13   0.00  12.93
  14   0.00  25.52
- 15   0.00  45.50
- 16   0.00  77.22
+ 15   0.00  45.51
+ 16   0.00  77.24
 
  ==== Frequencies have been removed successfully === 
 

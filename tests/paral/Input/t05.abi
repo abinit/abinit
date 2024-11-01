@@ -1,0 +1,66 @@
+# N2 system. 
+# Excited state computation, using LDA/TDLDA
+# Uses nsppol=2, although the molecule is not spin-polarized
+
+ ndtset  2  
+
+#DATASET 1  SCF
+   nband1   5
+  prtden1   1
+  getden1   0
+  getwfk1   0
+  tolwfr1   1.0d-15
+
+#DATASET 2 TDDFT
+#Common to all except GS calculations
+  nband2    12
+ getden2    1
+ getwfk2    1
+ tolwfr2    1.0d-9
+   iscf2   -1
+
+#Common
+ acell 6  5  5.001 Angstrom
+ nsppol 2   spinmagntarget 0.0d0
+ boxcenter 3*0.0d0
+ diemac 1.0d0   diemix 0.5d0
+ ecut 25
+ ixc  1
+ paral_kgb 0
+ kptopt 0
+ natom  2 
+ nbdbuf 0
+
+ nstep 25
+ ntypat  1
+ typat  1 1
+ xcart -0.54885  0 0  0.54885 0 0 Angstrom   ! Distance 1.0977 Angstrom
+ znucl  7
+
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosHGH_pwteter/7n.5.hgh"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% [paral_info]
+#%% nprocs_to_test = 1, 2, 4, 10
+#%% max_nprocs = 10
+#%% [NCPU_1]
+#%% files_to_test = t05_MPI1.abo, tolnlines=   0,   tolabs=  0.0,      tolrel= 0.0
+#%% [NCPU_2]
+#%% files_to_test = t05_MPI2.abo, tolnlines=   0,   tolabs=  0.0,      tolrel= 0.0
+#%% [NCPU_4]
+#%% files_to_test = t05_MPI4.abo, tolnlines=   0,   tolabs=  0.0,      tolrel= 0.0
+#%% [NCPU_10]
+#%% files_to_test = t05_MPI10.abo, tolnlines=   0,   tolabs=  0.0,      tolrel= 0.0
+#%% [extra_info]
+#%% keywords = NC, TDDFT
+#%% authors = Unknown
+#%% description = 
+#%%   N2 molecule
+#%%   Test TDDFT in parallel, with nsppol=2 even if the molecule is non spin-polarized
+#%% topics = TDDFT
+#%%<END TEST_INFO>

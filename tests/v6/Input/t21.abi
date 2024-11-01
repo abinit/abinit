@@ -1,0 +1,63 @@
+# Rhombohedral Bi treated as a metal ; 2 special points
+# Relax six different images (with different acell parameters)
+# using the steepest-descent algorithm
+
+#Test also a path (of images) divided into segments
+
+ ntimimage 15
+ nimage 6
+ imgmov 1
+ fxcartfactor 10.0
+ tolimg 1.d-5
+ prtvolimg 0
+
+ acell          3*9.0d0  ! Starting point
+ acell_3img    3*10.0d0  ! Intermediate point
+ acell_lastimg 3*11.0d0  ! End point
+ dilatmx 1.25
+ chkdilatmx 0
+
+ xred  3*0.200d0
+       3*-0.200d0
+ chkprim 0
+
+#Common data
+ ndtset 1
+
+ angdeg 3*57.25d0
+ ecut  2.0d0
+ kptopt 1
+ natom  2
+ nband 6
+ ngkpt 2 2 2
+ nstep 20
+ ntypat  1
+ occopt  4
+ toldff  1.0d-7
+ tsmear 0.02d0
+ typat  1 1
+ znucl 83.0
+
+#This is to save memory and prevent density history storage
+ densfor_pred 1
+
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosHGH_pwteter/83bi.5.hgh"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t21.abo, tolnlines = 25, tolabs = 5.e-6, tolrel = 1.0e-3, fld_options = -medium
+#%% [paral_info]
+#%% max_nprocs = 2
+#%% [extra_info]
+#%% authors = Unknown
+#%% keywords = 
+#%% description = 
+#%%   Bismuth, rhombohedral, two atoms per unit cell
+#%%   Scalar relativistic.
+#%%   Relax four different images, using the steepest descent algorithm.
+#%%<END TEST_INFO>

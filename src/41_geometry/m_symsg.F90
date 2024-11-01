@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_symsg
 !! NAME
 !!  m_symsg
@@ -7,14 +6,10 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1999-2019 ABINIT group (RC,XG)
+!!  Copyright (C) 1999-2024 ABINIT group (RC,XG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -69,12 +64,6 @@ contains
 !! symafm(nsym)=(anti)ferromagnetic part of symmetry operations
 !! symrel(3,3,nsym) = 3D matrix containg symmetry operations
 !! tnons(3,nsym) = 2D matrix containing translations associated
-!!
-!! PARENTS
-!!      gensymspgr
-!!
-!! CHILDREN
-!!      bldgrp,spgdata,timab
 !!
 !! SOURCE
 
@@ -250,8 +239,7 @@ subroutine symsgcube(msym,nsym,shubnikov,spgaxor,spgorig,spgroup,spgroupma,symaf
      if (spgorig==1) then
        symrel(:,:,2) = genrot(:,:)
        symrel(:,:,3) = genmmp(:,:)
-       symrel(:,:,4) = genmpm(:,:)
-       nogen=4
+       nogen=3
        nsym=12
        call bldgrp(msym,nogen,nsym,symafm,symrel,tnons)
        do ii=1,12
@@ -558,12 +546,6 @@ end subroutine symsgcube
 !! symrel(3,3,nsym) = 3D matrix containg symmetry operations
 !! tnons(3,nsym) = 2D matrix containing translations associated
 !!
-!! PARENTS
-!!      gensymspgr
-!!
-!! CHILDREN
-!!      bldgrp,spgdata
-!!
 !! SOURCE
 
 subroutine symsghexa(brvltt,msym,nsym,shubnikov,spgaxor,spgorig,spgroup,spgroupma,symafm,symrel,tnons)
@@ -588,6 +570,7 @@ subroutine symsghexa(brvltt,msym,nsym,shubnikov,spgaxor,spgorig,spgroup,spgroupm
 !arrays
  integer :: genm(3,3),genmmp(3,3),genswm(3,3),genswmmm(3,3),genswmmp(3,3)
  integer :: genswp(3,3)
+ integer :: genswmmm_r(3,3), genswp_r(3,3)
 
 !*************************************************************************
 
@@ -599,15 +582,22 @@ subroutine symsghexa(brvltt,msym,nsym,shubnikov,spgaxor,spgorig,spgroup,spgroupm
  symrel(:,:,1)=0 ; symrel(1,1,1)=1 ; symrel(2,2,1)=1 ; symrel(3,3,1)=1
 
 !Predefine some generators
- genswm(:,:)=0 ; genswm(2,1)=1 ; genswm(1,2)=1 ; genswm(3,3)=-1 !reshape((/0,1,0,1,0,0,0,0,-1/),(/3,3/),(/0,0/),(/2,1/) )
- genswmmm(:,:)=0 ; genswmmm(2,1)=-1 ; genswmmm(1,2)=-1 ; genswmmm(3,3)=-1
-!reshape((/0,-1,0,-1,0,0,0,0,-1/),(/3,3/),(/0,0/),(/2,1/) )
- genswmmp(:,:)=0 ; genswmmp(2,1)=-1 ; genswmmp(1,2)=-1 ; genswmmp(3,3)=1
-!reshape((/0,-1,0,-1,0,0,0,0,1/),(/3,3/),(/0,0/),(/2,1/) )
- genswp(:,:)=0 ; genswp(2,1)=1 ; genswp(1,2)=1 ; genswp(3,3)=1
-!reshape((/0,1,0,1,0,0,0,0,1/),(/3,3/),(/0,0/),(/2,1/) )
- genmmp(:,:)=0 ; genmmp(1,1)=-1 ; genmmp(2,2)=-1 ; genmmp(3,3)=1
-!reshape((/-1,0,0,0,-1,0,0,0,1/),(/3,3/),(/0,0/),(/2,1/) )
+ genswm(:,:)=0 ; genswm(2,1)=1 ; genswm(1,2)=1 ; genswm(3,3)=-1           ! 2 fold axis along x+y, hex setting
+!reshape((/0,1,0,1,0,0,0,0,-1/),(/3,3/),(/0,0/),(/2,1/) )   ! x -> +y; y -> +x; z -> -z
+
+ genswmmm(:,:)=0 ; genswmmm(2,1)=-1 ; genswmmm(1,2)=-1 ; genswmmm(3,3)=-1 ! 2 fold axis along x-y, hex setting
+!reshape((/0,-1,0,-1,0,0,0,0,-1/),(/3,3/),(/0,0/),(/2,1/) ) ! x -> -y; y -> -x; z -> -z
+ genswmmm_r(:,:)=0 ; genswmmm_r(3,1)=-1 ; genswmmm_r(2,2)=-1 ; genswmmm_r(1,3)=-1 ! 2 fold axis along z-x, rhombo setting
+
+ genswmmp(:,:)=0 ; genswmmp(2,1)=-1 ; genswmmp(1,2)=-1 ; genswmmp(3,3)=1  ! mirror plane perpendicular to x+y
+!reshape((/0,-1,0,-1,0,0,0,0,1/),(/3,3/),(/0,0/),(/2,1/) )  ! x -> -y; y -> -x; z -> +z
+
+ genswp(:,:)=0 ; genswp(2,1)=1 ; genswp(1,2)=1 ; genswp(3,3)=1            ! mirror plane perpendicular to x-y, hex setting
+!reshape((/0,1,0,1,0,0,0,0,1/),(/3,3/),(/0,0/),(/2,1/) )    ! x -> +y; y -> +x; z -> +z 
+ genswp_r(:,:)=0 ; genswp_r(1,3)=1 ; genswp_r(2,2)=1 ; genswp_r(3,1)=1    ! mirror plane perpendicular to z-x, rhombo setting
+
+ genmmp(:,:)=0 ; genmmp(1,1)=-1 ; genmmp(2,2)=-1 ; genmmp(3,3)=1          ! 2 fold axis along z
+!reshape((/-1,0,0,0,-1,0,0,0,1/),(/3,3/),(/0,0/),(/2,1/) )  ! x-> -x; y -> -y; z -> z
 
 !Initialize the associated translations matrix to 0
  do ii=1,nsym
@@ -633,58 +623,70 @@ subroutine symsghexa(brvltt,msym,nsym,shubnikov,spgaxor,spgorig,spgroup,spgroupm
 
 !    Assigns the generators to each space group
      select case (spgroup)
-     case (143,146,147,148)        !P3, R3, PB3, RB3
+     case (143,146,147,148)            !P3, R3, PB3, RB3
        symrel(:,:,3)=0 ; symrel(1,2,3)=-1 ; symrel(2,1,3)=1 ; symrel(2,2,3)=-1 ; symrel(3,3,3)=1
 !        reshape((/0,-1,0,1,-1,0,0,0,1/), (/3,3/), (/0,0/), (/2,1/) )
-       nogen=0
-     case (144)                !P31
+       nogen=0 ! All symmetries have been generated:
+               !??? for 146 147 need to complete with inversion or translation sym inside hex cell or both
+     case (144)                        !P31
        tnons(:,2)=(/0.d0,0.d0,twothird/)
        symrel(:,:,3)=0 ; symrel(1,2,3)=-1 ; symrel(2,1,3)=1 ; symrel(2,2,3)=-1 ; symrel(3,3,3)=1
 !        reshape((/0,-1,0,1,-1,0,0,0,1/), (/3,3/), (/0,0/), (/2,1/) )
        tnons(:,3)=(/0.d0,0.d0,third/)
-       nogen=0
-     case (145)                !P32
+       nogen=0 ! All symmetries have been generated
+     case (145)                        !P32
        tnons(:,2)=(/0.d0,0.d0,third/)
        symrel(:,:,3)=0 ; symrel(1,2,3)=-1 ; symrel(2,1,3)=1 ; symrel(2,2,3)=-1 ; symrel(3,3,3)=1
 !        reshape((/0,-1,0,1,-1,0,0,0,1/), (/3,3/), (/0,0/), (/2,1/) )
        tnons(:,3)=(/0.d0,0.d0,twothird/)
-       nogen=0
-     case (149)                !P312
-       symrel(:,:,3) = genswmmm(:,:)
+       nogen=0 ! All symmetries have been generated
+     case (149)                        !P312
+       symrel(:,:,3) = genswmmm(:,:)   ! 2 fold axis along x-y
        nogen=3
-     case (150,155)                !P321, R32
-       symrel(:,:,3) = genswm(:,:)
+     case (150,155)                    !P321, R32
+       symrel(:,:,3) = genswm(:,:)     ! 2 fold axis along x+y
        nogen=3
-     case (151)                !P3112
+       ! 155 add sets at 2/3 1/3 1/3 and 1/3 2/3 2/3
+     case (151)                        !P3112
        tnons(:,2)=(/0.d0,0.d0,twothird/)
-       symrel(:,:,3) = genswmmm(:,:)
+       symrel(:,:,3) = genswmmm(:,:)   ! 2 fold axis along x-y
+       tnons(:,3)=(/0.d0,0.d0,twothird/)
        nogen=3
-     case (152)                !P3121
+     case (152)                        !P3121
        tnons(:,2)=(/0.d0,0.d0,twothird/)
-       symrel(:,:,3) = genswm(:,:)
+       symrel(:,:,3) = genswm(:,:)     ! 2 fold axis along x+y
        nogen=3
-     case (153)                !P3212
+     case (153)                        !P3212
        tnons(:,2)=(/0.d0,0.d0,third/)
-       symrel(:,:,3) = genswmmm(:,:)
+       symrel(:,:,3) = genswmmm(:,:)   ! 2 fold axis along x-y
+       tnons(:,3)=(/0.d0,0.d0,third/)
        nogen=3
-     case (154)                !P3221
+     case (154)                        !P3221
        tnons(:,2)=(/0.d0,0.d0,third/)
-       symrel(:,:,3) = genswm(:,:)
+       symrel(:,:,3) = genswm(:,:)     ! 2 fold axis along x+y
        nogen=3
-     case (156,160,164,166)        !P3m1, R3m, PB3m1, RB3m
-       symrel(:,:,3) = genswmmp(:,:)
+     case (156,160,164,166)            !P3m1, R3m, PB3m1, RB3m
+       symrel(:,:,3) = genswmmp(:,:)   ! mirror plane perpendicular to x+y
        nogen=3
-     case (157,162)                !P31m, PB31m
-       symrel(:,:,3) = genswp(:,:)
+       ! 160 add sets at 2/3 1/3 1/3 and 1/3 2/3 2/3
+       ! 164 also has 2 and -3 axes
+       ! 166 also has 2 and -3 axes and sets at 2/3 1/3 1/3 and 1/3 2/3 2/3
+     case (157,162)                    !P31m, PB31m
+       symrel(:,:,3) = genswp(:,:)     ! mirror plane perpendicular to x-y
        nogen=3
-     case (158,161,165,167)        !P3c1, R3c, PB3c1, RB3c
-       symrel(:,:,3) = genswmmp(:,:)
+       ! 162 also has 2 and -3 axes 
+     case (158,161,165,167)            !P3c1, R3c, PB3c1, RB3c
+       symrel(:,:,3) = genswmmp(:,:)   ! mirror plane perpendicular to x+y
        tnons(:,3)=(/0.d0,0.d0,0.5d0/)
        nogen=3
-     case (159,163)                !P31c, PB31c
-       symrel(:,:,3) = genswp(:,:)
+       ! 161 add sets at 2/3 1/3 1/3 and 1/3 2/3 2/3
+       ! 165 also has 2 and -3 axes
+       ! 167 also has 2 and -3 axes and sets at 2/3 1/3 1/3 and 1/3 2/3 2/3
+     case (159,163)                    !P31c, PB31c
+       symrel(:,:,3) = genswp(:,:)     ! mirror plane perpendicular to x-y
        tnons(:,3)=(/0.d0,0.d0,0.5d0/)
        nogen=3
+       ! 163 also has 2 and -3 axes 
      end select
 
      select case (spgroup)
@@ -707,19 +709,20 @@ subroutine symsghexa(brvltt,msym,nsym,shubnikov,spgaxor,spgorig,spgroup,spgroupm
 !    Assignment of common three-fold rotation
      symrel(:,:,2)=0 ; symrel(1,3,2)=1 ; symrel(3,2,2)=1 ; symrel(2,1,2)=1
 !    reshape((/0,0,1,1,0,0,0,1,0/),(/3,3/),(/0,0/),(/2,1/) )
+!    Inverse of same operation, but this is not a generator!
      symrel(:,:,3)=0 ; symrel(3,1,3)=1 ; symrel(2,3,3)=1 ; symrel(1,2,3)=1
 !    reshape((/0,1,0,0,0,1,1,0,0/), (/3,3/), (/0,0/), (/2,1/) )
 
      select case (spgroup)
      case (146,148)       !R3
      case (155,166)       !R32, RB3m
-       symrel(:,:,4) = genswmmm(:,:)
+       symrel(:,:,4) = genswmmm_r(:,:) ! 2 fold axis along x-y
        nogen=4
      case (160)           !R3m
-       symrel(:,:,4) = genswp(:,:)
+       symrel(:,:,4) = genswp_r(:,:)   ! mirror plane perpendicular to z-x
        nogen=4
      case (161,167)       !R3c, RB3c
-       symrel(:,:,4) = genswp(:,:)
+       symrel(:,:,4) = genswp_r(:,:)   ! mirror plane perpendicular to z-x
        tnons(:,4)=(/0.5d0,0.5d0,0.5d0/)
        nogen=4
      end select
@@ -898,12 +901,6 @@ end subroutine symsghexa
 !! symafm(nsym)=(anti)ferromagnetic part of symmetry operations
 !! symrel(3,3,nsym) = 3D matrix containg symmetry operations
 !! tnons(3,nsym) = 2D matrix containing translations associated
-!!
-!! PARENTS
-!!      gensymspgr
-!!
-!! CHILDREN
-!!      spgdata
 !!
 !! SOURCE
 
@@ -1444,12 +1441,6 @@ end subroutine symsgmono
 !! symrel(3,3,nsym) = 3D matrix containg symmetry operations
 !! tnons(3,nsym) = 2D matrix containing translations associated
 !!
-!! PARENTS
-!!      gensymspgr
-!!
-!! CHILDREN
-!!      bldgrp,spgdata
-!!
 !! SOURCE
 
 subroutine symsgortho(msym,nsym,shubnikov,spgaxor,spgorig,spgroup,&
@@ -1939,12 +1930,6 @@ end subroutine symsgortho
 !! symrel(3,3,nsym) = 3D matrix containg symmetry operations
 !! tnons(3,nsym) = 2D matrix containing translations associated
 !!
-!! PARENTS
-!!      gensymspgr
-!!
-!! CHILDREN
-!!      bldgrp,spgdata
-!!
 !! SOURCE
 
 subroutine symsgtetra(msym,nsym,shubnikov,spgaxor,spgorig,spgroup,spgroupma,symafm,symrel,tnons)
@@ -2322,9 +2307,9 @@ subroutine symsgtetra(msym,nsym,shubnikov,spgaxor,spgorig,spgroup,spgroupma,syma
 &     318,324,329,335,342,344,354,356,390,394,402,406,&
 &     438,440,450,452,486,488,498,502,534,536,544,548)
      symafm(2:3)=-1
-   case(365,377,413,425,461,473,509,521)
-     symafm(2)=-1
-     symafm(5:6)=-1
+!  case(365,377,413,425,461,473,509,521) !XG230719
+!    symafm(2)=-1
+!    symafm(5:6)=-1
    case(366,378,414,426,462,474,510,522,554,564)
      symafm(3:5)=-1
    case(367,379,415,427,463,475,511,523,555,565)
@@ -2332,16 +2317,18 @@ subroutine symsgtetra(msym,nsym,shubnikov,spgaxor,spgorig,spgroup,spgroupma,syma
    case(368,380,416,428,464,476,512,524,556,566)
      symafm(3:4)=-1
      symafm(6)=-1
-   case(369,381,417,429,465,477,513,525)
-     symafm(2)=-1
-     symafm(5)=-1
+!  case(369,381,417,429,465,477,513,525) !XG230719
+!    symafm(2)=-1
+!    symafm(5)=-1
    case(370,382,418,430,466,478,514,526,558,568)
      symafm(3:6)=-1
    case(371,383,419,431,467,479,515,527,559,569)
      symafm(6)=-1
-   case(553,563)
+!  case(553,563)
+   case(365,377,413,425,461,473,509,521,553,563) !XG230719
      symafm(5:6)=-1
-   case(557,567)
+!  case(557,567)
+   case(369,381,417,429,465,477,513,525,557,567) !XG230719
      symafm(5)=-1
    end select
  end if
@@ -2391,11 +2378,6 @@ end subroutine symsgtetra
 !! SIDE EFFECTS
 !! nogen = number of generators, number of operations to be applied onto themselves
 !!
-!! PARENTS
-!!      symsgcube,symsghexa,symsgortho,symsgtetra
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine bldgrp(msym,nogen,nsym,symafm,symrel,tnons)
@@ -2429,9 +2411,9 @@ subroutine bldgrp(msym,nogen,nsym,symafm,symrel,tnons)
  nastyzero=0.1
 
 !DEBUG
-! write(std_out,*)' bldgrp : enter, builds the space group symmetry '
-! write(std_out,*)' bldgrp : number of generators : ',nogen
-! write(std_out,*)' bldgrp : nsym,msym=',nsym,msym
+  write(std_out,*)' bldgrp : enter, builds the space group symmetry '
+  write(std_out,*)' bldgrp : number of generators : ',nogen
+  write(std_out,*)' bldgrp : nsym,msym=',nsym,msym
 !ENDDEBUG
 
  if (nogen<1) then
@@ -2440,7 +2422,7 @@ subroutine bldgrp(msym,nogen,nsym,symafm,symrel,tnons)
 &   'and it should be greater than one',ch10,&
 &   'This is not allowed.  ',ch10,&
 &   'Action: Contact ABINIT group '
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 !Transfer the generators to bcksymrel
@@ -2461,7 +2443,7 @@ subroutine bldgrp(msym,nogen,nsym,symafm,symrel,tnons)
  do ijkl=1,nsym
 
 !  DEBUG
-!  write(std_out,*)' bldgrp : in loop, ijkl,nogen=',ijkl,nogen
+   write(std_out,*)' bldgrp : in loop, ijkl,nogen=',ijkl,nogen
 !  ENDDEBUG
 
    nogen_new=nogen
@@ -2509,12 +2491,14 @@ subroutine bldgrp(msym,nogen,nsym,symafm,symrel,tnons)
 !      Add the new determined symmetry if it is unique
        if (flagtr+flagop<2) then
          nogen_new=nogen_new+1
-!        DEBUG
-!         write(std_out,*)' added one more symmetry : nogen_new=',nogen_new
-!        ENDDEBUG
          bcksymrel(:,:,nogen_new)=matrintoper(:,:)
          bcktnons(:,nogen_new)=matrinttransl(:)
          bcksymafm(nogen_new)=matrintsymafm
+!        DEBUG
+         write(std_out,*)' added one more symmetry : nogen_new=',nogen_new
+         write(std_out,'(i3,2x,9i3,3es12.2,i3)')&
+&          nogen_new,bcksymrel(:,:,nogen_new),bcktnons(:,nogen_new),bcksymafm(nogen_new)
+!        ENDDEBUG
        end if
 
      end do
@@ -2536,11 +2520,11 @@ subroutine bldgrp(msym,nogen,nsym,symafm,symrel,tnons)
    write(message, '(a,i7,a,a,i7)' )&
 &   'The symmetries obtained are  ',nogen,ch10,&
 &   'and they should be ',nsym
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
 !DEBUG
-!write(std_out,*)' bldgrp : exit with  ',nogen,' operation symmetries'
+ write(std_out,*)' bldgrp : exit with  ',nogen,' operation symmetries'
 !ENDDEBUG
 
 end subroutine bldgrp

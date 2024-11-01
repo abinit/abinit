@@ -1,0 +1,96 @@
+# SrVO3, a simple archetypal correlated material
+#
+# In this test, we compute the DFT electronic structure of SrVO3 in the first 
+# dataset and then the orbital character of the bands for the t2g and eg
+# orbitals of the vanadium atom and the p orbitals of the oygen atoms.
+
+#Multi-dataset parameters
+ndtset 2                # Two datasets
+jdtset 1 2
+getden -1               # Second one takes the density of the first
+
+#Definition of the unit cell
+acell   3*7.2605        # Cubic cell with
+rprim 1.0 0.0 0.0       # real space primitive translation vectors
+      0.0 1.0 0.0
+      0.0 0.0 1.0
+
+#Definition of the atom types and pseudopotentials
+natom 5                 # Five atoms
+ntypat 3                # Three types
+znucl  23 38 8          # First atom type should be the correlated one V
+                        # then, we have Sr and O.
+typat 1 2 3 3 3         # V Sr O3
+xred                    # This keyword indicates that the location of the atoms
+                        # will follow, one triplet of number for each atom.
+                        # We use relative distance, along the translational
+                        # lattice vectors.
+     0.00 0.00 0.00
+     0.50 0.50 0.50
+     0.50 0.00 0.00
+     0.00 0.50 0.00
+     0.00 0.00 0.50
+pp_dirpath "$ABI_PSPDIR"        # This is the path to the directory where
+                                # pseudopotentials for tests are stored
+pseudos "Pseudodojo_paw_pw_standard/V.xml, Pseudodojo_paw_pw_standard/Sr.xml, Pseudodojo_paw_pw_standard/O.xml" # Name and location of the pseudopotentials
+
+#Planewave basis set, number of bands and occupations
+ecut      12.0          # Maximal plane-wave kinetic energy cut-off, in Hartree
+pawecutdg 20.0          # PAW: Energy Cutoff for the Double Grid
+nband     30            # Number of bands
+occopt    3             # Occupation option for metal
+tsmear    1200 K        # Temperature of smearing
+
+pawprtvol 3             # Printing additional information
+
+#First dataset specific parameters
+nstep     40            # Number of iterations for the DFT convergence   
+nline     3             # Number of line minimisations
+nnsclo    3             # Number of non-self consistent loops
+tolwfr    1.0d-15       # Tolerance of the DFT convergence
+#K point grid
+ngkpt   3 3 3           # Reciprocal space vectors are built from
+                        # the rprim parameters. This is the size of the
+                        # reciprocal k-points.
+nshiftk 4               # Convergence of the density with regular shifts.
+shiftk  0.5 0.5 0.5
+        0.5 0.0 0.0
+        0.0 0.5 0.0
+        0.0 0.0 0.5
+istwfk *1
+
+#Second dataset specific parameters
+nbandkss2   2
+kssform2    3
+pawfatbnd2  1           # Fatbands, only resolved for total angular momenta
+iscf2      -2           #
+kptopt2    -4           # Bandstructure: 4 segments
+ndivk2     18 20 20 28  # Lengths of each segments
+kptbounds2              # The four segments of the band structure are
+                        # connecting 5 points of the Brillouin zone,
+                        # given here.
+        1/4 1/4 1/4     # R'
+        0.0 0.0 0.0     # Gamma
+        1/2 0.0 0.0     # X
+        1/2 1/2 0.0     # M
+        0.0 0.0 0.0     # Gamma
+
+##############################################################
+# This section is used only for regression testing of ABINIT #
+##############################################################
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% test_chain = tdmft_1.abi
+#%% [files]
+#%% [paral_info]
+#%% max_nprocs = 24
+#%% nprocs_to_test = 24
+#%% [NCPU_24]
+#%% files_to_test = tdmft_1_MPI24.abo, tolnlines=   12,   tolabs=  2.0e-3,  tolrel= 2.0e-3, fld_options = -medium
+#%% [shell]
+#%% [extra_info]
+#%% keywords = LDA, FATBANDS
+#%% authors = B. Amadon, O. Gingras
+#%% description = For SrVO3, compute band structure
+#%%<END TEST_INFO>

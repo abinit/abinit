@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/ptg_C1
 !!
 !! NAME
@@ -7,7 +6,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 2010-2019 ABINIT group (MG)
+!! Copyright (C) 2010-2024 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -16,11 +15,6 @@
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_ptgroups
-!!
-!! CHILDREN
 !!
 !! SOURCE
 !!
@@ -62,7 +56,7 @@ contains
  ABI_MALLOC(sym, (3,3,nsym))
  sym(:,:,1) = RESHAPE( (/1, 0, 0, 0, 1, 0, 0, 0, 1/) ,(/3,3/) )
 
-! Number of classes and corresponding indeces
+! Number of classes and corresponding indices
  nclass = 1
  ABI_MALLOC(class_ids, (2,nclass))
  class_ids(1,1) = 1
@@ -72,7 +66,7 @@ ABI_MALLOC(class_names,(1))
  class_names(1) = "1+"
 
 ! List of irreducible representations.
- ABI_DT_MALLOC(Irr, (1))
+ ABI_MALLOC(Irr, (1))
  Irr(1)%name = "A"
  Irr(1)%dim = 1
  Irr(1)%nsym = 1

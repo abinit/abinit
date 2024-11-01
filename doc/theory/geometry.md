@@ -34,7 +34,7 @@ Representation in reduced coordinates:
  x^{red}_{3\tau} &\rightarrow& {xred(3,iatom)} \,.
 \end{eqnarray*}
 
-Related input variables: [[xangst]], [[xcart]], [[xred]].
+Related input variables: [[xcart]], [[xred]].
 
 The volume of the primitive unit cell (called *ucvol* in the code) is
 

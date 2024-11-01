@@ -1,0 +1,15 @@
+# ===========================================
+# Makefile (include)
+# Use it to build a standalone LIBPAW library
+#                                 M.T. Dec 15
+# ===========================================
+
+# FC : Fortran compiler (use mpif90 to include MPI)
+# CC : Fortran compiler (use mpicc to include MPI)
+# FCFLAGS= Fortran compiler flags
+# CFLAGS= C compiler flags
+
+FC = gfortran
+CC = gcc
+FCFLAGS = -O2 -ffree-line-length-none
+CFLAGS = -O2

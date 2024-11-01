@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_forces
 !! NAME
 !!  m_forces
@@ -7,14 +6,10 @@
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2019 ABINIT group (DCA, XG, GMR, FJ, MM, MT, SCE)
+!! Copyright (C) 1998-2024 ABINIT group (DCA, XG, GMR, FJ, MM, MT, SCE)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -27,16 +22,17 @@
 module m_forces
 
  use defs_basis
- use defs_datatypes
- use defs_abitypes
  use defs_wvltypes
  use m_abicore
  use m_efield
  use m_errors
  use m_atomdata
+ use m_dtset
 
+ use defs_datatypes,     only : pseudopotential_type
+ use defs_abitypes,      only : MPI_type
  use m_time,             only : timab
- use m_geometry,         only : fred2fcart, metric, xred2xcart
+ use m_geometry,         only : gred2fcart, metric, xred2xcart
  use m_fock,             only : fock_type
  use m_pawrad,           only : pawrad_type
  use m_pawtab,           only : pawtab_type
@@ -97,6 +93,7 @@ contains
 !!   | wtatcon(3,natom,nconeq)=weights for atomic constraints
 !!  fock <type(fock_type)>= quantities to calculate Fock exact exchange
 !!  grchempottn(3,natom)=d(E_chemical potential)/d(xred) (hartree)
+!!  grcondft(3,natom)=d(E_constrainedDFT)/d(xred) (hartree)
 !!  grewtn(3,natom)=d(Ewald)/d(xred) (hartree)
 !!  grnl(3*natom)=gradients of Etot due to nonlocal contributions
 !!  grvdw(3,ngrvdw)=gradients of energy due to Van der Waals DFT-D dispersion (hartree)
@@ -121,8 +118,11 @@ contains
 !!  rprimd(3,3)=dimensional primitive translations in real space (bohr)
 !!  symrec(3,3,nsym)=symmetries in reciprocal space, reduced coordinates
 !!  usefock=1 if fock operator is used; 0 otherwise.
+!!  usekden= 1 is kinetic energy density has to be computed, 0 otherwise
 !!  vresid(nfft,nspden)=potential residual (if non-collinear magn., only trace of it)
 !!  vxc(nfft,nspden)=exchange-correlation potential (hartree) in real space
+!!  vxctau(nfft,nspden,4*usekden)=(only for meta-GGA): derivative of XC energy density
+!!                                wrt kinetic energy density (depsxcdtau)
 !!  xred(3,natom)=reduced dimensionless atomic coordinates
 !!  xred_old(3,natom)=previous reduced dimensionless atomic coordinates
 !!
@@ -131,7 +131,7 @@ contains
 !!         force between the input and the output.
 !!  favg(3)=mean of the forces before correction for translational symmetry
 !!  forold(3,natom)=cartesian forces of previous SCF cycle (hartree/bohr)
-!!  fred(3,natom)=symmetrized grtn = d(etotal)/d(xred)
+!!  gred(3,natom)=symmetrized grtn = d(etotal)/d(xred)
 !!  gresid(3,natom)=forces due to the residual of the density/potential
 !!  grhf(3,natom)=Hellman-Feynman derivatives of the total energy
 !!  grxc(9+3*natom)=d(Exc)/d(xred) if core charges are used
@@ -141,7 +141,7 @@ contains
 !! SIDE EFFECTS
 !!  electronpositron <type(electronpositron_type)>=quantities for the electron-positron annihilation (optional argument)
 !!  fcart(3,natom)=forces in cartesian coordinates (Ha/Bohr)
-!!    Note : unlike fred, this array has been corrected by enforcing
+!!    Note : unlike gred, this array has been corrected by enforcing
 !!    the translational symmetry, namely that the sum of force
 !!    on all atoms is zero.
 !!
@@ -160,25 +160,16 @@ contains
 !!   in real and reciprocal space respectively.
 !! * Note the use of "symrec" in the symmetrization expression above.
 !!
-!! PARENTS
-!!      etotfor,forstr
-!!
-!! CHILDREN
-!!      atm2fft,constrf,dgemv,fourdp,fred2fcart,fresid,fresidrsp,metric,mkcore
-!!      mkcore_alt,mkcore_wvl,mklocl,sygrad,timab,xchybrid_ncpp_cc,zerosym
-!!
 !! SOURCE
 
 subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,&
-&                  forold,fred,grchempottn,gresid,grewtn,&
+&                  forold,gred,grchempottn,grcondft,gresid,grewtn,&
 &                  grhf,grnl,grvdw,grxc,gsqcut,indsym,&
 &                  maxfor,mgfft,mpi_enreg,n1xccc,n3xccc,&
 &                  nattyp,nfft,ngfft,ngrvdw,ntypat,&
 &                  pawrad,pawtab,ph1d,psps,rhog,rhor,rprimd,symrec,synlgr,usefock,&
-&                  vresid,vxc,wvl,wvl_den,xred,&
+&                  vresid,vxc,vxctau,wvl,wvl_den,xred,&
 &                  electronpositron) ! optional argument
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -196,14 +187,15 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,&
 !arrays
  integer,intent(in) :: atindx1(dtset%natom),indsym(4,dtset%nsym,dtset%natom)
  integer,intent(in) :: nattyp(ntypat),ngfft(18),symrec(3,3,dtset%nsym)
- real(dp),intent(in) :: grchempottn(3,dtset%natom),grewtn(3,dtset%natom),grvdw(3,ngrvdw),grnl(3*dtset%natom)
+ real(dp),intent(in) :: grchempottn(3,dtset%natom),grcondft(3,dtset%natom),grewtn(3,dtset%natom)
+ real(dp),intent(in) :: grvdw(3,ngrvdw),grnl(3*dtset%natom)
  real(dp),intent(in) :: ph1d(2,3*(2*mgfft+1)*dtset%natom)
- real(dp),intent(in) :: rhog(2,nfft),rhor(nfft,dtset%nspden),rprimd(3,3)
- real(dp),intent(in) :: vxc(nfft,dtset%nspden)
+ real(dp),intent(in) :: rhog(2,nfft),rhor(nfft,dtset%nspden)
+ real(dp),intent(in) :: vxc(nfft,dtset%nspden),vxctau(nfft,dtset%nspden,4*dtset%usekden)
  real(dp),intent(inout) :: fcart(3,dtset%natom),forold(3,dtset%natom)
  real(dp),intent(inout) :: vresid(nfft,dtset%nspden),xred(3,dtset%natom)
- real(dp),intent(out) :: favg(3),fred(3,dtset%natom),gresid(3,dtset%natom)
- real(dp),intent(out) :: grhf(3,dtset%natom)
+ real(dp),intent(out) :: favg(3),gred(3,dtset%natom),gresid(3,dtset%natom)
+ real(dp),intent(out) :: grhf(3,dtset%natom),rprimd(3,3)
  real(dp),intent(inout) :: grxc(3,dtset%natom)
  real(dp),intent(out) :: synlgr(3,dtset%natom)
  type(pawrad_type),intent(in) :: pawrad(ntypat*psps%usepaw)
@@ -211,7 +203,7 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,&
 
 !Local variables-------------------------------
 !scalars
- integer :: coredens_method,fdir,iatom,idir,indx,ipositron,itypat,mu
+ integer :: coredens_method,coretau_method,fdir,iatom,idir,indx,ipositron,itypat,mu
  integer :: optatm,optdyfr,opteltfr,optgr,option,optn,optn2,optstr,optv,vloc_method
  real(dp) :: eei_dum1,eei_dum2,ucvol,ucvol_local,vol_element
  logical :: calc_epaw3_forces, efield_flag
@@ -223,8 +215,8 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,&
  real(dp),allocatable :: atmrho_dum(:),atmvloc_dum(:),dyfrlo_dum(:,:,:)
  real(dp),allocatable :: dyfrn_dum(:,:,:),dyfrv_dum(:,:,:)
  real(dp),allocatable :: dyfrx2_dum(:,:,:),eltfrn_dum(:,:),gauss_dum(:,:)
- real(dp),allocatable :: epawf3red(:,:),fin(:,:),fionred(:,:),grl(:,:),grnl_tmp(:,:),grtn(:,:)
- real(dp),allocatable :: grtn_indx(:,:),v_dum(:),vxctotg(:,:)
+ real(dp),allocatable :: epawf3red(:,:),fin(:,:),fionred(:,:),grl(:,:),grl_dum(:,:)
+ real(dp),allocatable :: grnl_tmp(:,:),grtn(:,:),grtn_indx(:,:),grxctau(:,:),v_dum(:),vxctotg(:,:)
  real(dp),allocatable :: xccc3d_dum(:)
 
 ! *************************************************************************
@@ -232,7 +224,7 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,&
  call timab(69,1,tsec)
 
 !Save input value of forces
- ABI_ALLOCATE(fin,(3,dtset%natom))
+ ABI_MALLOC(fin,(3,dtset%natom))
  fin(:,:)=fcart(:,:)
 
 !Compute different geometric tensor, as well as ucvol, from rprimd
@@ -241,11 +233,12 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,&
 !Check if we're in hybrid norm conserving pseudopotential
  is_hybrid_ncpp=(psps%usepaw==0 .and. &
 & (dtset%ixc==41.or.dtset%ixc==42.or.libxc_functionals_is_hybrid()))
+
 !=======================================================================
 !========= Local pseudopotential and core charge contributions =========
 !=======================================================================
 
- ABI_ALLOCATE(grl,(3,dtset%natom))
+ ABI_MALLOC(grl,(3,dtset%natom))
 
 !Determine by which method the local ionic potential and/or the pseudo core
 !  charge density contributions have to be computed
@@ -256,64 +249,98 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,&
  if (dtset%icoulomb>0) vloc_method=2
  if (psps%usewvl==1) vloc_method=2
 !Pseudo core charge density:
-! Method 1: PAW, nc_xccc_gspace
-! Method 2: Norm-conserving PP, wavelets
+! Method 1 construct through G space FT: PAW, nc_xccc_gspace==1
+! Method 2 construct in real space     : Norm-conserving PP default, wavelets
  coredens_method=1;if (psps%usepaw==0) coredens_method=2
  if (psps%nc_xccc_gspace==1) coredens_method=1
  if (psps%nc_xccc_gspace==0) coredens_method=2
  if (psps%usewvl==1) coredens_method=2
+!Pseudo core charge kinetic energy density: same convention as coredens_method
+ coretau_method=0
+ if (dtset%usekden==1) then
+   coretau_method=1;if (psps%nc_xccc_gspace==0) coretau_method=2
+ end if
 
 !Local ionic potential and/or pseudo core charge by method 1
- if (vloc_method==1.or.coredens_method==1) then
-   call timab(550,1,tsec)
-   optv=0;if (vloc_method==1) optv=1
-   optn=0;if (coredens_method==1) optn=n3xccc/nfft
-   optatm=0;optdyfr=0;optgr=1;optstr=0;optn2=1;opteltfr=0
+ if (vloc_method==1.or.coredens_method==1.or.coretau_method==1) then
    if (psps%nc_xccc_gspace==1.and.psps%usepaw==0.and.is_hybrid_ncpp) then
-     MSG_BUG(' Not yet implemented !')
+     ABI_BUG(' Not yet implemented !')
    end if
+   call timab(550,1,tsec)
+!  Allocate (unused) dummy variables, otherwise some compilers complain
+   ABI_MALLOC(gauss_dum,(0,0))
+   ABI_MALLOC(atmrho_dum,(0))
+   ABI_MALLOC(atmvloc_dum,(0))
+   ABI_MALLOC(dyfrn_dum,(0,0,0))
+   ABI_MALLOC(dyfrv_dum,(0,0,0))
+   ABI_MALLOC(eltfrn_dum,(0,0))
+!  Compute Vxc in reciprocal space
    if (coredens_method==1.and.n3xccc>0) then
-     ABI_ALLOCATE(v_dum,(nfft))
-     ABI_ALLOCATE(vxctotg,(2,nfft))
+     ABI_MALLOC(v_dum,(nfft))
+     ABI_MALLOC(vxctotg,(2,nfft))
      v_dum(:)=vxc(:,1);if (dtset%nspden>=2) v_dum(:)=0.5_dp*(v_dum(:)+vxc(:,2))
      call fourdp(1,vxctotg,v_dum,-1,mpi_enreg,nfft,1,ngfft,0)
      call zerosym(vxctotg,2,ngfft(1),ngfft(2),ngfft(3),&
 &     comm_fft=mpi_enreg%comm_fft,distribfft=mpi_enreg%distribfft)
-     ABI_DEALLOCATE(v_dum)
+     ABI_FREE(v_dum)
    else
-     ABI_ALLOCATE(vxctotg,(0,0))
+     ABI_MALLOC(vxctotg,(0,0))
    end if
-!  Allocate (unused) dummy variables, otherwise some compilers complain
-   ABI_ALLOCATE(gauss_dum,(0,0))
-   ABI_ALLOCATE(atmrho_dum,(0))
-   ABI_ALLOCATE(atmvloc_dum,(0))
-   ABI_ALLOCATE(dyfrn_dum,(0,0,0))
-   ABI_ALLOCATE(dyfrv_dum,(0,0,0))
-   ABI_ALLOCATE(eltfrn_dum,(0,0))
-   call atm2fft(atindx1,atmrho_dum,atmvloc_dum,dyfrn_dum,dyfrv_dum,&
-&   eltfrn_dum,gauss_dum,gmet,gprimd,&
-&   grxc,grl,gsqcut,mgfft,psps%mqgrid_vl,dtset%natom,nattyp,nfft,ngfft,ntypat,&
-&   optatm,optdyfr,opteltfr,optgr,optn,optn2,optstr,optv,psps,pawtab,ph1d,psps%qgrid_vl,qprtrb_dum,&
-&   rhog,strn_dummy6,strv_dummy6,ucvol,psps%usepaw,vxctotg,vxctotg,vxctotg,vprtrb_dum,psps%vlspl,&
-&   comm_fft=mpi_enreg%comm_fft,me_g0=mpi_enreg%me_g0,&
-&   paral_kgb=mpi_enreg%paral_kgb,distribfft=mpi_enreg%distribfft)
-   ABI_DEALLOCATE(gauss_dum)
-   ABI_DEALLOCATE(atmrho_dum)
-   ABI_DEALLOCATE(atmvloc_dum)
-   ABI_DEALLOCATE(dyfrn_dum)
-   ABI_DEALLOCATE(dyfrv_dum)
-   ABI_DEALLOCATE(eltfrn_dum)
-   ABI_DEALLOCATE(vxctotg)
+!  Compute contribution to forces from Vloc and/or pseudo core density
+   optv=0;if (vloc_method==1) optv=1
+   optn=0;if (coredens_method==1) optn=n3xccc/nfft
+   optatm=0;optdyfr=0;optgr=1;optstr=0;optn2=1;opteltfr=0
+   if (vloc_method==1.or.coredens_method==1) then
+     call atm2fft(atindx1,atmrho_dum,atmvloc_dum,dyfrn_dum,dyfrv_dum,&
+&     eltfrn_dum,gauss_dum,gmet,gprimd,&
+&     grxc,grl,gsqcut,mgfft,psps%mqgrid_vl,dtset%natom,nattyp,nfft,ngfft,ntypat,&
+&     optatm,optdyfr,opteltfr,optgr,optn,optn2,optstr,optv,psps,pawtab,ph1d,psps%qgrid_vl,qprtrb_dum,&
+&     dtset%rcut,rhog,rprimd,strn_dummy6,strv_dummy6,ucvol,psps%usepaw,vxctotg,vxctotg,vxctotg,vprtrb_dum,psps%vlspl,&
+&     comm_fft=mpi_enreg%comm_fft,me_g0=mpi_enreg%me_g0,&
+&     paral_kgb=mpi_enreg%paral_kgb,distribfft=mpi_enreg%distribfft)
+   end if
    if (n3xccc==0.and.coredens_method==1) grxc=zero
+   ABI_FREE(vxctotg)
+   if (dtset%usekden==1.and.coretau_method==1..and.n3xccc>0) then
+!    Compute contribution to forces from pseudo kinetic energy core density
+     optv=0;optn=1;optn2=4
+     ABI_MALLOC(grxctau,(3,dtset%natom))
+     ABI_MALLOC(grl_dum,(0,0))
+     ABI_MALLOC(v_dum,(nfft))
+     ABI_MALLOC(vxctotg,(2,nfft))
+     v_dum(:)=vxctau(:,1,1);if (dtset%nspden>=2) v_dum(:)=0.5_dp*(v_dum(:)+vxctau(:,2,1))
+     call fourdp(1,vxctotg,v_dum,-1,mpi_enreg,nfft,1,ngfft,0)
+     call zerosym(vxctotg,2,ngfft(1),ngfft(2),ngfft(3),&
+&     comm_fft=mpi_enreg%comm_fft,distribfft=mpi_enreg%distribfft)
+     ABI_FREE(v_dum)
+     call atm2fft(atindx1,atmrho_dum,atmvloc_dum,dyfrn_dum,dyfrv_dum,&
+&     eltfrn_dum,gauss_dum,gmet,gprimd,&
+&     grxctau,grl_dum,gsqcut,mgfft,psps%mqgrid_vl,dtset%natom,nattyp,nfft,ngfft,ntypat,&
+&     optatm,optdyfr,opteltfr,optgr,optn,optn2,optstr,optv,psps,pawtab,ph1d,psps%qgrid_vl,qprtrb_dum,&
+&     dtset%rcut,rhog,rprimd,strn_dummy6,strv_dummy6,ucvol,psps%usepaw,vxctotg,vxctotg,vxctotg,vprtrb_dum,psps%vlspl,&
+&     comm_fft=mpi_enreg%comm_fft,me_g0=mpi_enreg%me_g0,&
+&     paral_kgb=mpi_enreg%paral_kgb,distribfft=mpi_enreg%distribfft)
+     grxc(:,:)=grxc(:,:)+grxctau(:,:)
+     ABI_FREE(grl_dum)
+     ABI_FREE(grxctau)
+     ABI_FREE(vxctotg)
+   end if
+!  Deallocate temporary arrays
+   ABI_FREE(gauss_dum)
+   ABI_FREE(atmrho_dum)
+   ABI_FREE(atmvloc_dum)
+   ABI_FREE(dyfrn_dum)
+   ABI_FREE(dyfrv_dum)
+   ABI_FREE(eltfrn_dum)
    call timab(550,2,tsec)
  end if
 
 !Local ionic potential by method 2
  if (vloc_method==2) then
    option=2
-   ABI_ALLOCATE(dyfrlo_dum,(3,3,dtset%natom))
-   ABI_ALLOCATE(grtn_indx,(3,dtset%natom))
-   ABI_ALLOCATE(v_dum,(nfft))
+   ABI_MALLOC(dyfrlo_dum,(3,3,dtset%natom))
+   ABI_MALLOC(grtn_indx,(3,dtset%natom))
+   ABI_MALLOC(v_dum,(nfft))
    call mklocl(dtset,dyfrlo_dum,eei_dum1,gmet,gprimd,grtn_indx,gsqcut,dummy6,mgfft,&
 &   mpi_enreg,dtset%natom,nattyp,nfft,ngfft,dtset%nspden,ntypat,option,pawtab,ph1d,psps,&
 &   qprtrb_dum,rhog,rhor,rprimd,ucvol,vprtrb_dum,v_dum,wvl,wvl_den,xred)
@@ -321,55 +348,66 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,&
 !    Has to use the indexing array atindx1
      grl(1:3,atindx1(iatom))=grtn_indx(1:3,iatom)
    end do
-   ABI_DEALLOCATE(dyfrlo_dum)
-   ABI_DEALLOCATE(grtn_indx)
-   ABI_DEALLOCATE(v_dum)
+   ABI_FREE(dyfrlo_dum)
+   ABI_FREE(grtn_indx)
+   ABI_FREE(v_dum)
 !  If gradients are computed in real space, we need to symmetrize the system before summing.
 !  Rshaltaf: I changed the following line to include surfaces BC
    if (dtset%icoulomb == 1 .or. dtset%icoulomb == 2) then
-     ABI_ALLOCATE(grnl_tmp,(3,dtset%natom))
+     ABI_MALLOC(grnl_tmp,(3,dtset%natom))
      call sygrad(grnl_tmp,dtset%natom,grl,dtset%nsym,symrec,indsym)
      grl(:, :) = grnl_tmp(:, :)
-     ABI_DEALLOCATE(grnl_tmp)
+     ABI_FREE(grnl_tmp)
    end if
  end if
 
 !Pseudo core electron density by method 2
- if (coredens_method==2) then
+ if (coredens_method==2.or.coretau_method==2) then
    if (n1xccc/=0) then
      call timab(53,1,tsec)
      option=2
-     ABI_ALLOCATE(dyfrx2_dum,(3,3,dtset%natom))
-     ABI_ALLOCATE(xccc3d_dum,(n3xccc))
-     if (is_hybrid_ncpp) then
-       call xchybrid_ncpp_cc(dtset,eei_dum1,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,&
-&       dummy6,eei_dum2,xccc3d_dum,grxc=grxc,xcccrc=psps%xcccrc,xccc1d=psps%xccc1d,xred=xred,n1xccc=n1xccc)
-     else
-       if (psps%usewvl==0.and.psps%usepaw==0.and.dtset%icoulomb==0) then
-         call mkcore(dummy6,dyfrx2_dum,grxc,mpi_enreg,dtset%natom,nfft,dtset%nspden,ntypat,&
-&         ngfft(1),n1xccc, ngfft(2),ngfft(3),option,rprimd,dtset%typat,ucvol,vxc,&
-&         psps%xcccrc,psps%xccc1d,xccc3d_dum,xred)
-       else if (psps%usewvl==0.and.(psps%usepaw==1.or.dtset%icoulomb==1)) then
-         call mkcore_alt(atindx1,dummy6,dyfrx2_dum,grxc,dtset%icoulomb,mpi_enreg,dtset%natom,nfft,&
-&         dtset%nspden,nattyp,ntypat,ngfft(1),n1xccc,ngfft(2),ngfft(3),option,rprimd,&
-&         ucvol,vxc,psps%xcccrc,psps%xccc1d,xccc3d_dum,xred,pawrad,pawtab,psps%usepaw)
-       else if (psps%usewvl==1.and.psps%usepaw==1) then
-         ucvol_local=ucvol
+     ABI_MALLOC(dyfrx2_dum,(3,3,dtset%natom))
+     ABI_MALLOC(xccc3d_dum,(n3xccc))
+     if (coredens_method==2) then
+       if (is_hybrid_ncpp) then
+         call xchybrid_ncpp_cc(dtset,eei_dum1,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,&
+&         dummy6,eei_dum2,xccc3d_dum,grxc=grxc,xcccrc=psps%xcccrc,xccc1d=psps%xccc1d,xred=xred,n1xccc=n1xccc)
+       else
+         if (psps%usewvl==0.and.psps%usepaw==0.and.dtset%icoulomb==0) then
+           call mkcore(dummy6,dyfrx2_dum,grxc,mpi_enreg,dtset%natom,nfft,dtset%nspden,ntypat,&
+&           ngfft(1),n1xccc, ngfft(2),ngfft(3),option,rprimd,dtset%typat,ucvol,vxc,&
+&           psps%xcccrc,psps%xccc1d,xccc3d_dum,xred)
+         else if (psps%usewvl==0.and.(psps%usepaw==1.or.dtset%icoulomb==1)) then
+           call mkcore_alt(atindx1,dummy6,dyfrx2_dum,grxc,dtset%icoulomb,mpi_enreg,dtset%natom,nfft,&
+&           dtset%nspden,nattyp,ntypat,ngfft(1),n1xccc,ngfft(2),ngfft(3),option,rprimd,&
+&           ucvol,vxc,psps%xcccrc,psps%xccc1d,xccc3d_dum,xred,pawrad,pawtab,psps%usepaw)
+         else if (psps%usewvl==1.and.psps%usepaw==1) then
+           ucvol_local=ucvol
 #if defined HAVE_BIGDFT
-!        ucvol_local=product(wvl_den%denspot%dpbox%hgrids)*real(product(wvl_den%denspot%dpbox%ndims),dp)
-!        call mkcore_wvl_old(atindx1,dummy6,dyfrx2_dum,wvl%atoms%astruct%geocode,grxc,wvl%h,dtset%natom,&
+!          ucvol_local=product(wvl_den%denspot%dpbox%hgrids)*real(product(wvl_den%denspot%dpbox%ndims),dp)
+!          call mkcore_wvl_old(atindx1,dummy6,dyfrx2_dum,wvl%atoms%astruct%geocode,grxc,wvl%h,dtset%natom,&
 ! &           nattyp,nfft,wvl_den%denspot%dpbox%nscatterarr(mpi_enreg%me_wvl,:),dtset%nspden,ntypat,&
 ! &           wvl%Glr%d%n1,wvl%Glr%d%n1i,wvl%Glr%d%n2,wvl%Glr%d%n2i,wvl%Glr%d%n3,wvl_den%denspot%dpbox%n3pi,&
 ! &           n3xccc,option,pawrad,pawtab,psps%gth_params%psppar,rprimd,ucvol_local,vxc,xccc3d_dum,xred,&
 ! &           mpi_comm_wvl=mpi_enreg%comm_wvl)
-         call mkcore_wvl(atindx1,dummy6,grxc,dtset%natom,nattyp,nfft,dtset%nspden,ntypat,&
-&         n1xccc,n3xccc,option,pawrad,pawtab,rprimd,vxc,psps%xccc1d,xccc3d_dum,&
-&         psps%xcccrc,xred,wvl_den,wvl,mpi_comm_wvl=mpi_enreg%comm_wvl)
+           call mkcore_wvl(atindx1,dummy6,grxc,dtset%natom,nattyp,nfft,dtset%nspden,ntypat,&
+&           n1xccc,n3xccc,option,pawrad,pawtab,rprimd,vxc,psps%xccc1d,xccc3d_dum,&
+&           psps%xcccrc,xred,wvl_den,wvl,mpi_comm_wvl=mpi_enreg%comm_wvl)
 #endif
+         end if
        end if
      end if
-     ABI_DEALLOCATE(xccc3d_dum)
-     ABI_DEALLOCATE(dyfrx2_dum)
+     if (dtset%usekden==1.and.coretau_method==2) then
+       ABI_MALLOC(grxctau,(3,dtset%natom))
+       call mkcore_alt(atindx1,dummy6,dyfrx2_dum,grxctau,dtset%icoulomb,mpi_enreg,dtset%natom,nfft,&
+&       dtset%nspden,nattyp,ntypat,ngfft(1),n1xccc,ngfft(2),ngfft(3),option,rprimd,&
+&       ucvol,vxctau(:,:,1),psps%xcccrc,psps%xccc1d,xccc3d_dum,xred,pawrad,pawtab,psps%usepaw,&
+&       usekden=.true.)
+       grxc(:,:)=grxc(:,:)+grxctau(:,:)
+       ABI_FREE(grxctau)
+     end if
+     ABI_FREE(xccc3d_dum)
+     ABI_FREE(dyfrx2_dum)
      call timab(53,2,tsec)
    else
      grxc(:,:)=zero
@@ -381,7 +419,7 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,&
 !=======================================================================
 
 !Only has to apply symmetries
- ABI_ALLOCATE(grnl_tmp,(3,dtset%natom))
+ ABI_MALLOC(grnl_tmp,(3,dtset%natom))
  do iatom=1,dtset%natom
    indx=3*(iatom-1);grnl_tmp(1:3,atindx1(iatom))=grnl(indx+1:indx+3)
  end do
@@ -390,7 +428,7 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,&
  else
    synlgr = grnl_tmp
  end if
- ABI_DEALLOCATE(grnl_tmp)
+ ABI_FREE(grnl_tmp)
 
 !=======================================================================
 !============ Density/potential residual contributions =================
@@ -402,7 +440,7 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,&
  else if (dtset%usewvl==0.and.(abs(dtset%densfor_pred)==4.or.abs(dtset%densfor_pred)==6)) then
    call fresidrsp(atindx1,dtset,gmet,gprimd,gresid,gsqcut,mgfft,&
 &   mpi_enreg,psps%mqgrid_vl,nattyp,nfft,ngfft,ntypat,psps,pawtab,ph1d,&
-&   psps%qgrid_vl,ucvol,psps%usepaw,vresid,psps%zionpsp,psps%znuclpsp)
+&   psps%qgrid_vl,rprimd,ucvol,psps%usepaw,vresid,psps%zionpsp,psps%znuclpsp)
  else
    gresid(:,:)=zero
  end if
@@ -421,7 +459,7 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,&
 & dtset%berryopt==14 .or. dtset%berryopt==16 .or. dtset%berryopt==17)
  calc_epaw3_forces = (efield_flag .and. dtset%optforces /= 0 .and. psps%usepaw == 1)
  if ( efield_flag ) then
-   ABI_ALLOCATE(fionred,(3,dtset%natom))
+   ABI_MALLOC(fionred,(3,dtset%natom))
    fionred(:,:)=zero
    do iatom=1,dtset%natom
      itypat=dtset%typat(iatom)
@@ -441,7 +479,7 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,&
 
 !(compute additional F3-type force due to projectors for electric field with PAW)
  if ( efield_flag .and. calc_epaw3_forces ) then
-   ABI_ALLOCATE(epawf3red,(3,dtset%natom))
+   ABI_MALLOC(epawf3red,(3,dtset%natom))
 ! dtefield%epawf3(iatom,idir,fdir) contains
    epawf3red(:,:)=zero
    do iatom=1,dtset%natom
@@ -480,16 +518,18 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,&
 
 !Collect grads of etot wrt reduced coordinates
 !This gives non-symmetrized Hellman-Feynman reduced gradients
- ABI_ALLOCATE(grtn,(3,dtset%natom))
- grtn(:,:)=grl(:,:)+grchempottn(:,:)+grewtn(:,:)+synlgr(:,:)+grxc(:,:)
-! grtn(:,:)=grl(:,:)+grewtn(:,:)+synlgr(:,:)+grxc(:,:)
+ ABI_MALLOC(grtn,(3,dtset%natom))
+ grtn(:,:)=grl(:,:)+grchempottn(:,:)+grcondft(:,:)+grewtn(:,:)+synlgr(:,:)+grxc(:,:)
 
- if (usefock==1 .and. associated(fock).and.fock%fock_common%optfor) then
-   grtn(:,:)=grtn(:,:)+fock%fock_common%forces(:,:)
+ if (usefock==1 .and. associated(fock)) then
+   if (fock%fock_common%optfor) then
+     grtn(:,:)=grtn(:,:)+fock%fock_common%forces(:,:)
+   end if
  end if
+
  if (ngrvdw==dtset%natom) grtn(:,:)=grtn(:,:)+grvdw(:,:)
 ! note that fionred is subtracted, because it really is a force and we need to
-! turn it back into a gradient. The fred2fcart routine below includes the minus
+! turn it back into a gradient. The gred2fcart routine below includes the minus
 ! sign to convert gradients back to forces
  if ( efield_flag ) grtn(:,:)=grtn(:,:)-fionred(:,:)
 ! epawf3red is added, because it actually is a gradient, not a force
@@ -514,11 +554,11 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,&
  ipositron=0
  if (present(electronpositron)) then
    if (associated(electronpositron)) then
-     if (allocated(electronpositron%fred_ep)) ipositron=electronpositron_calctype(electronpositron)
+     if (allocated(electronpositron%gred_ep)) ipositron=electronpositron_calctype(electronpositron)
    end if
  end if
  if (abs(ipositron)==1) then
-   grtn(:,:)=grtn(:,:)-grxc(:,:)-grchempottn(:,:)-grewtn(:,:)-gresid(:,:)-two*grl(:,:)
+   grtn(:,:)=grtn(:,:)-grxc(:,:)-grchempottn(:,:)-grcondft(:,:)-grewtn(:,:)-gresid(:,:)-two*grl(:,:)
 !  grtn(:,:)=grtn(:,:)-grxc(:,:)-grewtn(:,:)-gresid(:,:)-two*grl(:,:)
    grl(:,:)=-grl(:,:);grxc(:,:)=zero;gresid(:,:)=zero
    if (ngrvdw==dtset%natom) grtn(:,:)=grtn(:,:)-grvdw(:,:)
@@ -528,22 +568,22 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,&
      fionred(:,:)=zero
    end if
  end if
- if (ipositron>0) grtn(:,:)=grtn(:,:)+electronpositron%fred_ep(:,:)
+ if (ipositron>0) grtn(:,:)=grtn(:,:)+electronpositron%gred_ep(:,:)
 
 !Symmetrize all grads explicitly for given space group:
  if (dtset%usewvl == 0) then
-   call sygrad(fred,dtset%natom,grtn,dtset%nsym,symrec,indsym)
+   call sygrad(gred,dtset%natom,grtn,dtset%nsym,symrec,indsym)
  else
-   fred = grtn
+   gred = grtn
  end if
 
 !Conversion to cartesian coordinates (bohr) AND
 !Subtract off average force from each force component
 !to avoid spurious drifting of atoms across cell.
-! notice that fred2fcart multiplies fred by -1 to convert it
+! notice that gred2fcart multiplies gred by -1 to convert it
 ! from a gradient (input) to a force (output)
 
- call fred2fcart(favg,(dtset%jellslab==0 .and. dtset%nzchempot==0),fcart,fred,gprimd,dtset%natom)
+ call gred2fcart(favg,(dtset%jellslab==0 .and. dtset%nzchempot==0),fcart,gred,gprimd,dtset%natom)
 
 !Compute maximal force and maximal difference
  maxfor=zero;diffor=zero
@@ -562,18 +602,18 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,&
  end do
 
 !Apply any generalized constraints to the forces
- if (dtset%nconeq>0) call constrf(diffor,fcart,forold,fred,dtset%iatfix,dtset%ionmov,maxfor,&
+ if (dtset%nconeq>0) call constrf(diffor,fcart,forold,gred,dtset%iatfix,dtset%ionmov,maxfor,&
 & dtset%natom,dtset%nconeq,dtset%prtvol,rprimd,dtset%wtatcon,xred)
 
 !=======================================================================
 !Memory deallocations
- ABI_DEALLOCATE(grl)
- ABI_DEALLOCATE(grtn)
- ABI_DEALLOCATE(fin)
+ ABI_FREE(grl)
+ ABI_FREE(grtn)
+ ABI_FREE(fin)
  if ( efield_flag )  then
-   ABI_DEALLOCATE(fionred)
+   ABI_FREE(fionred)
    if ( calc_epaw3_forces ) then
-     ABI_DEALLOCATE(epawf3red)
+     ABI_FREE(epawf3red)
    end if
  end if
 
@@ -589,8 +629,8 @@ end subroutine forces
 !!
 !! FUNCTION
 !! Symmetrize derivatives of energy with respect to coordinates.
-!! Unsymmetrized gradients are input as dedt; symmetrized grads are then placed in fred.
-!! If nsym=1 simply copy dedt into fred (only symmetry is identity).
+!! Unsymmetrized gradients are input as dedt; symmetrized grads are then placed in gred.
+!! If nsym=1 simply copy dedt into gred (only symmetry is identity).
 !!
 !! INPUTS
 !!  natom=number of atoms in cell
@@ -604,7 +644,7 @@ end subroutine forces
 !!   see symatm where this is computed)
 !!
 !! OUTPUT
-!! fred(3,3,natom)=symmetrized gradients wrt reduced coordinates (hartree)
+!! gred(3,3,natom)=symmetrized gradients wrt reduced coordinates (hartree)
 !!
 !! NOTES
 !! symmetrization of gradients with respect to reduced
@@ -621,16 +661,9 @@ end subroutine forces
 !! in real and reciprocal space respectively.
 !! Note the use of "symrec" in the symmetrization expression above.
 !!
-!! PARENTS
-!!      forces
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
-subroutine sygrad(fred,natom,dedt,nsym,symrec,indsym)
-
- implicit none
+subroutine sygrad(gred,natom,dedt,nsym,symrec,indsym)
 
 !Arguments ------------------------------------
 !scalars
@@ -638,7 +671,7 @@ subroutine sygrad(fred,natom,dedt,nsym,symrec,indsym)
 !arrays
  integer,intent(in) :: indsym(4,nsym,natom),symrec(3,3,nsym)
  real(dp),intent(in) :: dedt(3,natom)
- real(dp),intent(out) :: fred(3,natom)
+ real(dp),intent(out) :: gred(3,natom)
 
 !Local variables-------------------------------
 !scalars
@@ -650,7 +683,7 @@ subroutine sygrad(fred,natom,dedt,nsym,symrec,indsym)
 !
  if (nsym==1) then
 !  only symmetry is identity so simply copy
-   fred(:,:)=dedt(:,:)
+   gred(:,:)=dedt(:,:)
  else
 !  actually conduct symmetrization
    do ia=1,natom
@@ -662,8 +695,8 @@ subroutine sygrad(fred,natom,dedt,nsym,symrec,indsym)
 &         dble(symrec(mu,2,isym))*dedt(2,ind)+&
 &         dble(symrec(mu,3,isym))*dedt(3,ind)
        end do
-       fred(mu,ia)=summ/dble(nsym)
-       if(abs(fred(mu,ia))<tol)fred(mu,ia)=0.0_dp
+       gred(mu,ia)=summ/dble(nsym)
+       if(abs(gred(mu,ia))<tol)gred(mu,ia)=0.0_dp
      end do
    end do
  end if
@@ -714,18 +747,10 @@ end subroutine sygrad
 !! OUTPUT
 !! gresid(3,natom)=forces due to the residual of the potential
 !!
-!! PARENTS
-!!      forces
-!!
-!! CHILDREN
-!!      atm2fft,fourdp,wrtout
-!!
 !! SOURCE
 
 subroutine fresidrsp(atindx1,dtset,gmet,gprimd,gresid,gsqcut,mgfft,mpi_enreg,mqgrid,nattyp,nfft,&
-&          ngfft,ntypat,psps,pawtab,ph1d,qgrid,ucvol,usepaw,vresid,zion,znucl)
-
- implicit none
+&          ngfft,ntypat,psps,pawtab,ph1d,qgrid,rprimd,ucvol,usepaw,vresid,zion,znucl)
 
 !Arguments ------------------------------------
 !scalars
@@ -738,6 +763,7 @@ subroutine fresidrsp(atindx1,dtset,gmet,gprimd,gresid,gsqcut,mgfft,mpi_enreg,mqg
  integer,intent(in) :: atindx1(dtset%natom),nattyp(ntypat),ngfft(18)
  real(dp),intent(in) :: gmet(3,3),gprimd(3,3),ph1d(2,3*(2*mgfft+1)*dtset%natom)
  real(dp),intent(in) :: qgrid(mqgrid),vresid(nfft,dtset%nspden),zion(ntypat)
+ real(dp),intent(inout) :: rprimd(3,3)
  real(dp),intent(in) :: znucl(ntypat)
  real(dp),intent(out) :: gresid(3,dtset%natom)
  type(pawtab_type),intent(in) :: pawtab(ntypat*usepaw)
@@ -758,23 +784,23 @@ subroutine fresidrsp(atindx1,dtset,gmet,gprimd,gresid,gsqcut,mgfft,mpi_enreg,mqg
 
 !Inits
  optatm=0;optdyfr=0;opteltfr=0;optgr=1;optstr=0;optv=0;optn=1
- ABI_ALLOCATE(vresg,(2,nfft))
+ ABI_MALLOC(vresg,(2,nfft))
 
 !Transfer potential residual to reciprocal space
 !Use only Vres=Vres11+Vres22=Vres_up+Vres_dn
- ABI_ALLOCATE(work,(nfft))
+ ABI_MALLOC(work,(nfft))
  work(:)=vresid(:,1)
  if (dtset%nspden>=2) work(:)=work(:)+vresid(:,2)
  call fourdp(1,vresg,work,-1,mpi_enreg,nfft,1,ngfft,0)
- ABI_DEALLOCATE(work)
+ ABI_FREE(work)
 
-!Determine wether a gaussan atomic density has to be used or not
+!Determine whether a gaussan atomic density has to be used or not
  usegauss=.true.
  if (usepaw==0) usegauss = any(.not.psps%nctab(1:ntypat)%has_tvale)
  if (usepaw==1) usegauss=(minval(pawtab(1:ntypat)%has_tvale)==0)
  if (usegauss) then
    optn2=3
-   ABI_ALLOCATE(gauss,(2,ntypat))
+   ABI_MALLOC(gauss,(2,ntypat))
    do itypat=1,ntypat
      gauss(1,itypat)=zion(itypat)
      gauss(2,itypat) = atom_length(dtset%densty(itypat,1),zion(itypat),znucl(itypat))
@@ -782,7 +808,7 @@ subroutine fresidrsp(atindx1,dtset,gmet,gprimd,gresid,gsqcut,mgfft,mpi_enreg,mqg
    call wrtout(std_out," Computing residual forces using gaussian functions as atomic densities", "COLL")
  else
    optn2=2
-   ABI_ALLOCATE(gauss,(2,0))
+   ABI_MALLOC(gauss,(2,0))
    call wrtout(std_out," Computing residual forces using atomic densities taken from pseudos", "COLL")
  end if
 
@@ -790,15 +816,15 @@ subroutine fresidrsp(atindx1,dtset,gmet,gprimd,gresid,gsqcut,mgfft,mpi_enreg,mqg
  call atm2fft(atindx1,dummy_out1,dummy_out2,dummy_out3,dummy_out4,&
 & dummy_out5,gauss,gmet,gprimd,gresid,dummy_out6,gsqcut,mgfft,&
 & mqgrid,dtset%natom,nattyp,nfft,ngfft,ntypat,optatm,optdyfr,opteltfr,optgr,optn,optn2,optstr,optv,&
-& psps,pawtab,ph1d,qgrid,dummy3,dummy_in1,strn_dummy6,strv_dummy6,ucvol,usepaw,vresg,vresg,vresg,dummy2,dummy_in2,&
-& comm_fft=mpi_enreg%comm_fft,me_g0=mpi_enreg%me_g0,&
+& psps,pawtab,ph1d,qgrid,dummy3,dtset%rcut,dummy_in1,rprimd,strn_dummy6,strv_dummy6,ucvol,usepaw,&
+& vresg,vresg,vresg,dummy2,dummy_in2,comm_fft=mpi_enreg%comm_fft,me_g0=mpi_enreg%me_g0,&
 & paral_kgb=mpi_enreg%paral_kgb,distribfft=mpi_enreg%distribfft)
 
 !In case of nspden>=2, has to apply 1/2 factor
  if (dtset%nspden>=2) gresid=gresid*half
 
- ABI_DEALLOCATE(gauss)
- ABI_DEALLOCATE(vresg)
+ ABI_FREE(gauss)
+ ABI_FREE(vresg)
 
 end subroutine fresidrsp
 !!***
@@ -849,18 +875,10 @@ end subroutine fresidrsp
 !! These modifications are not efficient when large FFT grids are used.
 !! So they have to be considered as a first step before a comprehensive parallelization of this routine.
 !!
-!! PARENTS
-!!      forces,prcref,prcref_PMA,scfcv
-!!
-!! CHILDREN
-!!      atomdata_from_znucl,mean_fftr,pre_gather,pre_scatter
-!!
 !! SOURCE
 
 subroutine fresid(dtset,gresid,mpi_enreg,nfft,ngfft,ntypat,option,&
 &                 pawtab,rhor,rprimd,ucvol,work,xred_new,xred_old,znucl)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -933,8 +951,8 @@ subroutine fresid(dtset,gresid,mpi_enreg,nfft,ngfft,ntypat,option,&
  n4=n3/mpi_enreg%nproc_fft
  nfftot=PRODUCT(ngfft(1:3));nfft_tmp=nfftot
  if(mpi_enreg%paral_kgb==1) then
-   ABI_ALLOCATE(rhor_tot,(nfftot,dtset%nspden))
-   ABI_ALLOCATE(work_tot,(nfftot,dtset%nspden))
+   ABI_MALLOC(rhor_tot,(nfftot,dtset%nspden))
+   ABI_MALLOC(work_tot,(nfftot,dtset%nspden))
    do ispden=1,dtset%nspden
      call pre_gather(rhor(:,ispden),rhor_tot(:,ispden),n1,n2,n3,n4,mpi_enreg)
      call pre_gather(work(:,ispden),work_tot(:,ispden),n1,n2,n3,n4,mpi_enreg)
@@ -945,9 +963,9 @@ subroutine fresid(dtset,gresid,mpi_enreg,nfft,ngfft,ntypat,option,&
  quit=0
 
 !Initialize appropriation function
- ABI_ALLOCATE(approp,(nfft_tmp))
- ABI_ALLOCATE(atmrho,(nfft_tmp,dtset%nspden))
- ABI_ALLOCATE(my_sphere,(nfft_tmp))
+ ABI_MALLOC(approp,(nfft_tmp))
+ ABI_MALLOC(atmrho,(nfft_tmp,dtset%nspden))
+ ABI_MALLOC(my_sphere,(nfft_tmp))
 
  approp(:)=app_remain
 !First loop over atoms in unit cell : build appropriation function
@@ -1001,8 +1019,8 @@ subroutine fresid(dtset,gresid,mpi_enreg,nfft,ngfft,ntypat,option,&
 
 !    Allocate ii and rrdiff
      mshift=2*maxval(irange(1:3))+1
-     ABI_ALLOCATE(ii,(mshift,3))
-     ABI_ALLOCATE(rrdiff,(mshift,3))
+     ABI_MALLOC(ii,(mshift,3))
+     ABI_MALLOC(rrdiff,(mshift,3))
 
 !    Consider each component in turn
      do mu=1,3
@@ -1340,8 +1358,8 @@ subroutine fresid(dtset,gresid,mpi_enreg,nfft,ngfft,ntypat,option,&
        rho_tot(1:dtset%nspden)=rho_tot(1:dtset%nspden)+rhosum(1:dtset%nspden)*nfftot
      end if
 
-     ABI_DEALLOCATE(ii)
-     ABI_DEALLOCATE(rrdiff)
+     ABI_FREE(ii)
+     ABI_FREE(rrdiff)
 
 !    End loop on atoms
    end do
@@ -1413,12 +1431,12 @@ subroutine fresid(dtset,gresid,mpi_enreg,nfft,ngfft,ntypat,option,&
 !  ENDDEBUG
  end if
 
- ABI_DEALLOCATE(approp)
- ABI_DEALLOCATE(atmrho)
- ABI_DEALLOCATE(my_sphere)
+ ABI_FREE(approp)
+ ABI_FREE(atmrho)
+ ABI_FREE(my_sphere)
  if(mpi_enreg%paral_kgb==1) then
-   ABI_DEALLOCATE(rhor_tot)
-   ABI_DEALLOCATE(work_tot)
+   ABI_FREE(rhor_tot)
+   ABI_FREE(work_tot)
  end if
 
 !DEBUG
@@ -1463,7 +1481,7 @@ end subroutine fresid
 !! OUTPUT
 !!  diffor=maximum absolute change in component of projected fcart between present
 !!          and previous SCF cycle
-!!  fred(3,natom)=grads of Etot wrt reduced coordinates (hartree)
+!!  gred(3,natom)=grads of Etot wrt reduced coordinates (hartree)
 !!  maxfor=maximum absolute value of fcart
 !!
 !! SIDE EFFECTS
@@ -1472,19 +1490,12 @@ end subroutine fresid
 !!
 !! TODO
 !!
-!! PARENTS
-!!      forces
-!!
-!! CHILDREN
-!!      dposv,prtxvf,wrtout,xred2xcart
-!!
 !! SOURCE
 
-subroutine constrf(diffor,fcart,forold,fred,iatfix,ionmov,maxfor,natom,&
+subroutine constrf(diffor,fcart,forold,gred,iatfix,ionmov,maxfor,natom,&
 & nconeq,prtvol,rprimd,wtatcon,xred)
 
  use m_linalg_interfaces
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1494,7 +1505,7 @@ subroutine constrf(diffor,fcart,forold,fred,iatfix,ionmov,maxfor,natom,&
  integer,intent(in) :: iatfix(3,natom)
  real(dp),intent(in) :: rprimd(3,3),wtatcon(3,natom,nconeq)
  real(dp),intent(inout) :: fcart(3,natom),forold(3,natom),xred(3,natom)
- real(dp),intent(inout) :: fred(3,natom) !vz_i
+ real(dp),intent(inout) :: gred(3,natom) !vz_i
 
 !Local variables -------------------------
 !scalars
@@ -1507,14 +1518,14 @@ subroutine constrf(diffor,fcart,forold,fred,iatfix,ionmov,maxfor,natom,&
 !************************************************************************
 
 !Allocate temporary variables
- ABI_ALLOCATE(fpcart,(3,natom))
- ABI_ALLOCATE(fcartvec,(3*natom))
- ABI_ALLOCATE(fvector,(nconeq))
- ABI_ALLOCATE(vel_dummy,(3,natom))
- ABI_ALLOCATE(wmatrix,(nconeq,nconeq))
- ABI_ALLOCATE(wtatconvec,(3*natom,nconeq))
- ABI_ALLOCATE(wtcoeffs,(nconeq))
- ABI_ALLOCATE(xcart,(3,natom))
+ ABI_MALLOC(fpcart,(3,natom))
+ ABI_MALLOC(fcartvec,(3*natom))
+ ABI_MALLOC(fvector,(nconeq))
+ ABI_MALLOC(vel_dummy,(3,natom))
+ ABI_MALLOC(wmatrix,(nconeq,nconeq))
+ ABI_MALLOC(wtatconvec,(3*natom,nconeq))
+ ABI_MALLOC(wtcoeffs,(nconeq))
+ ABI_MALLOC(xcart,(3,natom))
 
 !If prtvol>10, output coordinates and forces prior to projecting
  if(prtvol>=10)then
@@ -1522,7 +1533,7 @@ subroutine constrf(diffor,fcart,forold,fred,iatfix,ionmov,maxfor,natom,&
    call wrtout(std_out,message,'COLL')
    call xred2xcart(natom,rprimd,xcart,xred)
    prtvel=0
-   call prtxvf(fcart,fred,iatfix,06,natom,prtvel,vel_dummy,xcart,xred)
+   call prtxvf(fcart,gred,iatfix,06,natom,prtvel,vel_dummy,xcart,xred)
  end if
 
 !Transfer fcart and wtatcon to flat vectors
@@ -1553,7 +1564,7 @@ subroutine constrf(diffor,fcart,forold,fred,iatfix,ionmov,maxfor,natom,&
 &   'Constraint matrix is not positive definite,',ch10,&
 &   'probably because constraints are linearly dependent.',ch10,&
 &   'Action: Check for linear dependence of constraints.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 !The solution vector is returned in fvector, so copy it to a more sensible location
@@ -1565,10 +1576,10 @@ subroutine constrf(diffor,fcart,forold,fred,iatfix,ionmov,maxfor,natom,&
    fpcart(:,:)=fpcart(:,:)-wtcoeffs(iconeq)*wtatcon(:,:,iconeq)
  end do
 
-!Reconvert constrained forces back from fpcart to fred
+!Reconvert constrained forces back from fpcart to gred
  do iatom=1,natom
    do mu=1,3
-     fred(mu,iatom)= - (rprimd(1,mu)*fpcart(1,iatom)+&
+     gred(mu,iatom)= - (rprimd(1,mu)*fpcart(1,iatom)+&
 &     rprimd(2,mu)*fpcart(2,iatom)+&
 &     rprimd(3,mu)*fpcart(3,iatom))
    end do
@@ -1579,7 +1590,7 @@ subroutine constrf(diffor,fcart,forold,fred,iatfix,ionmov,maxfor,natom,&
    write(message,'(a)')' constrf - coordinates and forces after constraint projections:'
    call wrtout(std_out,message,'COLL')
    prtvel=0
-   call prtxvf(fpcart,fred,iatfix,06,natom,prtvel,vel_dummy,xcart,xred)
+   call prtxvf(fpcart,gred,iatfix,06,natom,prtvel,vel_dummy,xcart,xred)
  end if
 
 !Copy the constrained forces, fpcart, back to fcart
@@ -1605,14 +1616,14 @@ subroutine constrf(diffor,fcart,forold,fred,iatfix,ionmov,maxfor,natom,&
  forold(:,:)=fcart(:,:)
 
 !Dellocate temporary variables
- ABI_DEALLOCATE(fpcart)
- ABI_DEALLOCATE(fcartvec)
- ABI_DEALLOCATE(fvector)
- ABI_DEALLOCATE(vel_dummy)
- ABI_DEALLOCATE(wmatrix)
- ABI_DEALLOCATE(wtatconvec)
- ABI_DEALLOCATE(wtcoeffs)
- ABI_DEALLOCATE(xcart)
+ ABI_FREE(fpcart)
+ ABI_FREE(fcartvec)
+ ABI_FREE(fvector)
+ ABI_FREE(vel_dummy)
+ ABI_FREE(wmatrix)
+ ABI_FREE(wtatconvec)
+ ABI_FREE(wtcoeffs)
+ ABI_FREE(xcart)
 
 end subroutine constrf
 !!***

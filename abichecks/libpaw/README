@@ -1,0 +1,10 @@
+==========================
+README: libpaw test series
+==========================
+
+Please, see the README file in the tests directory (above this one) to get help.
+
+Description
+===========
+
+Tests 01 checks the packaging of a standalone LibPAW.

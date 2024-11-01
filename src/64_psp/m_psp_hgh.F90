@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_psp_hgh
 !! NAME
 !!  m_psp_hgh
@@ -7,14 +6,10 @@
 !! Initialize pspcod=2, 3, 10 pseudopotentials (GTH)
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2019 ABINIT group (DCA, XG, GMR, MT, FD, PT)
+!!  Copyright (C) 1998-2024 ABINIT group (DCA, XG, GMR, MT, FD, PT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -27,12 +22,12 @@
 module m_psp_hgh
 
  use defs_basis
- use defs_datatypes
- use defs_abitypes
  use m_splines
  use m_abicore
  use m_errors
+ use m_dtset
 
+ use defs_datatypes, only : pseudopotential_type
  use m_special_funcs,  only : abi_derfc
 #if defined HAVE_BIGDFT
  use BigDFT_API, only: atomic_info
@@ -107,17 +102,9 @@ contains
 !!   | vlspl_recipSpace(IN)=.true. if pseudo are expressed in reciprocal space.
 !!   | gth_params(OUT)=store GTH coefficients and parameters.
 !!
-!! PARENTS
-!!      pspatm
-!!
-!! CHILDREN
-!!      psp2lo,psp2nl,spline,wrtout,wvl_descr_psp_fill
-!!
 !! SOURCE
 
 subroutine psp2in(dtset,ekb,epsatm,ffspl,indlmn,ipsp,lmax,nproj,psps,vlspl,dvlspl,zion)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -194,7 +181,7 @@ subroutine psp2in(dtset,ekb,epsatm,ffspl,indlmn,ipsp,lmax,nproj,psps,vlspl,dvlsp
      write(message, '(a,es12.4,a,a,a,i2,a)' )&
 &     'With non-zero h1p (=',h1p,'), mpsang should be at least 2,',ch10,&
 &     'while mpsang=',psps%mpsang,'.'
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
    nproj(2)=1
    if (lmax<1) then
@@ -202,7 +189,7 @@ subroutine psp2in(dtset,ekb,epsatm,ffspl,indlmn,ipsp,lmax,nproj,psps,vlspl,dvlsp
 &     'Input lmax=',lmax,' disagree with input h1p=',h1p,'.',&
 &     'Your pseudopotential is incoherent.',ch10,&
 &     'Action: correct your pseudopotential file.'
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
  end if
 
@@ -230,13 +217,13 @@ subroutine psp2in(dtset,ekb,epsatm,ffspl,indlmn,ipsp,lmax,nproj,psps,vlspl,dvlsp
 !compute q^2V(q) or V(r)
 !MJV NOTE: psp2lo should never be called with dvspl unallocated, which
 !is possible unless .not.psps%vlspl_recipSpace
- ABI_ALLOCATE(dvloc,(psps%mqgrid_vl))
+ ABI_MALLOC(dvloc,(psps%mqgrid_vl))
  call psp2lo(cc1,cc2,cc3,cc4,dvloc,epsatm,psps%mqgrid_vl,psps%qgrid_vl,&
 & vlspl(:,1),rloc,psps%vlspl_recipSpace,yp1,ypn,zion)
 
 !Fit spline to (q^2)V(q) or V(r)
- ABI_ALLOCATE(work_space,(psps%mqgrid_vl))
- ABI_ALLOCATE(work_spl,(psps%mqgrid_vl))
+ ABI_MALLOC(work_space,(psps%mqgrid_vl))
+ ABI_MALLOC(work_spl,(psps%mqgrid_vl))
  call spline (psps%qgrid_vl,vlspl(:,1),psps%mqgrid_vl,yp1,ypn,work_spl)
  vlspl(:,2)=work_spl(:)
  if (.not.psps%vlspl_recipSpace) then
@@ -245,9 +232,9 @@ subroutine psp2in(dtset,ekb,epsatm,ffspl,indlmn,ipsp,lmax,nproj,psps,vlspl,dvlsp
    dvlspl(:,2)=work_spl(:)
  end if
 
- ABI_DEALLOCATE(work_space)
- ABI_DEALLOCATE(work_spl)
- ABI_DEALLOCATE(dvloc)
+ ABI_FREE(work_space)
+ ABI_FREE(work_spl)
+ ABI_FREE(dvloc)
 
 
 !Second, compute KB energies and form factors and fit splines
@@ -261,7 +248,7 @@ subroutine psp2in(dtset,ekb,epsatm,ffspl,indlmn,ipsp,lmax,nproj,psps,vlspl,dvlsp
 
  ! Handle IO error
  10 continue
- MSG_ERROR(errmsg)
+ ABI_ERROR(errmsg)
 
 end subroutine psp2in
 !!***
@@ -290,17 +277,9 @@ end subroutine psp2in
 !!   second derivative from spline fit for each angular momentum
 !!   and each projector
 !!
-!! PARENTS
-!!      psp2in
-!!
-!! CHILDREN
-!!      spline
-!!
 !! SOURCE
 
 subroutine psp2nl(ekb,ffspl,h1p,h1s,h2s,lnmax,mqgrid,qgrid,rrp,rrs)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -319,7 +298,7 @@ subroutine psp2nl(ekb,ffspl,h1p,h1s,h2s,lnmax,mqgrid,qgrid,rrp,rrs)
 
 ! *************************************************************************
 
- ABI_ALLOCATE(work,(mqgrid))
+ ABI_MALLOC(work,(mqgrid))
 
 !Kleinman-Bylander energies ekb were set to zero in calling program
 
@@ -395,7 +374,7 @@ subroutine psp2nl(ekb,ffspl,h1p,h1s,h2s,lnmax,mqgrid,qgrid,rrp,rrs)
 !  ffspl(:,:,iln)=0.0d0
  end if
 
- ABI_DEALLOCATE(work)
+ ABI_FREE(work)
 
 end subroutine psp2nl
 !!***
@@ -436,18 +415,10 @@ end subroutine psp2nl
 !!  yp1,ypn=derivative of q^2 v(q) wrt q at q=0 and q=qmax
 !!   (needed for spline fitter).
 !!
-!! PARENTS
-!!      psp10in,psp2in,psp3in
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
 subroutine psp2lo(cc1,cc2,cc3,cc4,dvloc,epsatm,mqgrid,qgrid,q2vq,&
 &  rloc,vlspl_recipSpace,yp1,ypn,zion)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -599,17 +570,9 @@ end subroutine psp2lo
 !!   | useylm(IN)=governs the way the nonlocal operator is to be applied:
 !!   |            1=using Ylm, 0=using Legendre polynomials
 !!
-!! PARENTS
-!!      pspatm
-!!
-!! CHILDREN
-!!      psp2lo,psp3nl,spline,wrtout,wvl_descr_psp_fill
-!!
 !! SOURCE
 
 subroutine psp3in(dtset, ekb, epsatm, ffspl, indlmn, ipsp, lmax, nproj, psps, pspso, vlspl, zion)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -935,22 +898,22 @@ subroutine psp3in(dtset, ekb, epsatm, ffspl, indlmn, ipsp, lmax, nproj, psps, ps
    end do
  end do
 
- ABI_ALLOCATE(dvlspl,(psps%mqgrid_ff))
+ ABI_MALLOC(dvlspl,(psps%mqgrid_ff))
 !First, the local potential --  compute on q grid and fit spline
  call psp2lo(cc1,cc2,cc3,cc4,dvlspl,epsatm,psps%mqgrid_ff,psps%qgrid_ff,vlspl(:,1),rloc,.true.,yp1,ypn,zion)
- ABI_DEALLOCATE(dvlspl)
+ ABI_FREE(dvlspl)
 
 !DEBUG
 !write(std_out,*)' psp3in : after psp2lo '
 !ENDDEBUG
 
 !Fit spline to q^2 V(q) (Numerical Recipes subroutine)
- ABI_ALLOCATE(work_space,(psps%mqgrid_ff))
- ABI_ALLOCATE(work_spl,(psps%mqgrid_ff))
+ ABI_MALLOC(work_space,(psps%mqgrid_ff))
+ ABI_MALLOC(work_spl,(psps%mqgrid_ff))
  call spline (psps%qgrid_ff,vlspl(:,1),psps%mqgrid_ff,yp1,ypn,work_spl)
  vlspl(:,2)=work_spl(:)
- ABI_DEALLOCATE(work_space)
- ABI_DEALLOCATE(work_spl)
+ ABI_FREE(work_space)
+ ABI_FREE(work_spl)
 
 !Second, compute KB energies and form factors and fit splines
  ekb(:)=zero
@@ -959,10 +922,10 @@ subroutine psp3in(dtset, ekb, epsatm, ffspl, indlmn, ipsp, lmax, nproj, psps, ps
  mproj=maxval(nproj)
  if (mproj>0) then
 
-   ABI_ALLOCATE(ekb_sr,(psps%mpsang,mproj))
-   ABI_ALLOCATE(ffspl_sr,(psps%mqgrid_ff,2,psps%mpsang,mproj))
-   ABI_ALLOCATE(ekb_so,(psps%mpsang,mproj))
-   ABI_ALLOCATE(ffspl_so,(psps%mqgrid_ff,2,psps%mpsang,mproj))
+   ABI_MALLOC(ekb_sr,(psps%mpsang,mproj))
+   ABI_MALLOC(ffspl_sr,(psps%mqgrid_ff,2,psps%mpsang,mproj))
+   ABI_MALLOC(ekb_so,(psps%mpsang,mproj))
+   ABI_MALLOC(ffspl_so,(psps%mqgrid_ff,2,psps%mpsang,mproj))
 
    call psp3nl(ekb_sr,ffspl_sr,h11s,h22s,h33s,h11p,h22p,h33p,h11d,h22d,&
 &   h33d,h11f,mproj,psps%mpsang,psps%mqgrid_ff,psps%qgrid_ff,rrd,rrf,rrp,rrs)
@@ -988,17 +951,17 @@ subroutine psp3in(dtset, ekb, epsatm, ffspl, indlmn, ipsp, lmax, nproj, psps, ps
      end if
    end do
 
-   ABI_DEALLOCATE(ekb_sr)
-   ABI_DEALLOCATE(ffspl_sr)
-   ABI_DEALLOCATE(ekb_so)
-   ABI_DEALLOCATE(ffspl_so)
+   ABI_FREE(ekb_sr)
+   ABI_FREE(ffspl_sr)
+   ABI_FREE(ekb_so)
+   ABI_FREE(ffspl_so)
  end if
 
  return
 
  ! Handle IO error
  10 continue
- MSG_ERROR(errmsg)
+ ABI_ERROR(errmsg)
 
 end subroutine psp3in
 !!***
@@ -1037,18 +1000,10 @@ end subroutine psp3in
 !!   second derivative from spline fit for each angular momentum and
 !!   each projectors
 !!
-!! PARENTS
-!!      psp3in
-!!
-!! CHILDREN
-!!      spline,zhpev
-!!
 !! SOURCE
 
 subroutine psp3nl(ekb,ffspl,h11s,h22s,h33s,h11p,h22p,h33p,h11d,h22d,&
 &                  h33d,h11f,mproj,mpsang,mqgrid,qgrid,rrd,rrf,rrp,rrs)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1071,8 +1026,8 @@ subroutine psp3nl(ekb,ffspl,h11s,h22s,h33s,h11p,h22p,h33p,h11d,h22d,&
 
 ! *************************************************************************
 
- ABI_ALLOCATE(ppspl,(mqgrid,2,mpsang,mproj))
- ABI_ALLOCATE(work,(mqgrid))
+ ABI_MALLOC(ppspl,(mqgrid,2,mpsang,mproj))
+ ABI_MALLOC(work,(mqgrid))
 
  qmax=qgrid(mqgrid)
  jobz='v'
@@ -1103,8 +1058,8 @@ subroutine psp3nl(ekb,ffspl,h11s,h22s,h33s,h11p,h22p,h33p,h11d,h22d,&
 
  if(nproj/=0)then
 
-   ABI_ALLOCATE(uu,(nproj,nproj))
-   ABI_ALLOCATE(zz,(2,nproj,nproj))
+   ABI_MALLOC(uu,(nproj,nproj))
+   ABI_MALLOC(zz,(2,nproj,nproj))
 
    if (nproj > 1) then
      call ZHPEV(jobz,uplo,nproj,ap,ww,zz,ldz,work1,rwork1,info)
@@ -1158,8 +1113,8 @@ subroutine psp3nl(ekb,ffspl,h11s,h22s,h33s,h11p,h22p,h33p,h11d,h22d,&
      end do
    end do
 
-   ABI_DEALLOCATE(uu)
-   ABI_DEALLOCATE(zz)
+   ABI_FREE(uu)
+   ABI_FREE(zz)
  end if !  End condition on nproj(/=0)
 
 !--------------------------------------------------------------------
@@ -1185,8 +1140,8 @@ subroutine psp3nl(ekb,ffspl,h11s,h22s,h33s,h11p,h22p,h33p,h11d,h22d,&
 
  if(nproj/=0)then
 
-   ABI_ALLOCATE(uu,(nproj,nproj))
-   ABI_ALLOCATE(zz,(2,nproj,nproj))
+   ABI_MALLOC(uu,(nproj,nproj))
+   ABI_MALLOC(zz,(2,nproj,nproj))
 
    if (nproj > 1) then
      call ZHPEV(jobz,uplo,nproj,ap,ww,zz,ldz,work1,rwork1,info)
@@ -1243,8 +1198,8 @@ subroutine psp3nl(ekb,ffspl,h11s,h22s,h33s,h11p,h22p,h33p,h11d,h22d,&
      end do
    end do
 
-   ABI_DEALLOCATE(uu)
-   ABI_DEALLOCATE(zz)
+   ABI_FREE(uu)
+   ABI_FREE(zz)
  end if !  End condition on nproj(/=0)
 
 !-----------------------------------------------------------------------
@@ -1266,7 +1221,7 @@ subroutine psp3nl(ekb,ffspl,h11s,h22s,h33s,h11p,h22p,h33p,h11d,h22d,&
    write(message, '(a,a,a)' )&
 &   '  only two d-projectors are allowed ',ch10,&
 &   '  Action: check your pseudopotential file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
 !  nproj=3 ; ldz=3 ; ap(1,6)=h33d
 !  ap(1,4)= 0.5d0*sqrt(63.d0/143.d0)*h33d
 !  ap(1,5)= -0.5d0*(18.d0/sqrt(143.d0))*h33d
@@ -1274,8 +1229,8 @@ subroutine psp3nl(ekb,ffspl,h11s,h22s,h33s,h11p,h22p,h33p,h11d,h22d,&
 
  if(nproj/=0)then
 
-   ABI_ALLOCATE(uu,(nproj,nproj))
-   ABI_ALLOCATE(zz,(2,nproj,nproj))
+   ABI_MALLOC(uu,(nproj,nproj))
+   ABI_MALLOC(zz,(2,nproj,nproj))
 
    if (nproj > 1) then
      call ZHPEV(jobz,uplo,nproj,ap,ww,zz,ldz,work1,rwork1,info)
@@ -1321,8 +1276,8 @@ subroutine psp3nl(ekb,ffspl,h11s,h22s,h33s,h11p,h22p,h33p,h11d,h22d,&
      end do
    end do
 
-   ABI_DEALLOCATE(uu)
-   ABI_DEALLOCATE(zz)
+   ABI_FREE(uu)
+   ABI_FREE(zz)
  end if !  End condition on nproj(/=0)
 
 !-----------------------------------------------------------------------
@@ -1346,8 +1301,8 @@ subroutine psp3nl(ekb,ffspl,h11s,h22s,h33s,h11p,h22p,h33p,h11d,h22d,&
 
 !-----------------------------------------------------------------------
 
- ABI_DEALLOCATE(ppspl)
- ABI_DEALLOCATE(work)
+ ABI_FREE(ppspl)
+ ABI_FREE(work)
 
 end subroutine psp3nl
 !!***
@@ -1406,17 +1361,9 @@ end subroutine psp3nl
 !!   | useylm(IN)=governs the way the nonlocal operator is to be applied:
 !!   |            1=using Ylm, 0=using Legendre polynomials
 !!
-!! PARENTS
-!!      pspatm
-!!
-!! CHILDREN
-!!      psp10nl,psp2lo,spline,wrtout,wvl_descr_psp_fill
-!!
 !! SOURCE
 
 subroutine psp10in(dtset, ekb, epsatm, ffspl, indlmn, ipsp, lmax, nproj, psps, pspso, vlspl, zion)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1473,9 +1420,9 @@ subroutine psp10in(dtset, ekb, epsatm, ffspl, indlmn, ipsp, lmax, nproj, psps, p
    call wrtout(std_out,  message,'COLL')
    lmax=1
  end if
- ABI_ALLOCATE(rr,(0:lmax))
- ABI_ALLOCATE(hij,(0:lmax,3,3))
- ABI_ALLOCATE(kij,(0:lmax,3,3))
+ ABI_MALLOC(rr,(0:lmax))
+ ABI_MALLOC(hij,(0:lmax,3,3))
+ ABI_MALLOC(kij,(0:lmax,3,3))
  rr(:)=zero; hij(:,:,:)=zero; kij(:,:,:)=zero
 
 !Read and echo the coefficients of non-local projectors
@@ -1555,19 +1502,19 @@ subroutine psp10in(dtset, ekb, epsatm, ffspl, indlmn, ipsp, lmax, nproj, psps, p
    end do
  end do
 
- ABI_ALLOCATE(dvlspl,(psps%mqgrid_ff))
+ ABI_MALLOC(dvlspl,(psps%mqgrid_ff))
 !First, the local potential --  compute on q grid and fit spline
  call psp2lo(cc(1),cc(2),cc(3),cc(4),dvlspl,epsatm,psps%mqgrid_ff,psps%qgrid_ff,&
 & vlspl(:,1),rloc,.true.,yp1,ypn,zion)
- ABI_DEALLOCATE(dvlspl)
+ ABI_FREE(dvlspl)
 
 !Fit spline to q^2 V(q) (Numerical Recipes subroutine)
- ABI_ALLOCATE(work_space,(psps%mqgrid_ff))
- ABI_ALLOCATE(work_spl,(psps%mqgrid_ff))
+ ABI_MALLOC(work_space,(psps%mqgrid_ff))
+ ABI_MALLOC(work_spl,(psps%mqgrid_ff))
  call spline (psps%qgrid_ff,vlspl(:,1),psps%mqgrid_ff,yp1,ypn,work_spl)
  vlspl(:,2)=work_spl(:)
- ABI_DEALLOCATE(work_space)
- ABI_DEALLOCATE(work_spl)
+ ABI_FREE(work_space)
+ ABI_FREE(work_spl)
 
 !Second, compute KB energies and form factors and fit splines
  ekb(:)=zero
@@ -1577,22 +1524,22 @@ subroutine psp10in(dtset, ekb, epsatm, ffspl, indlmn, ipsp, lmax, nproj, psps, p
 
  if (mproj>0) then
 
-   ABI_ALLOCATE(ekb_sr,(psps%mpsang,mproj))
-   ABI_ALLOCATE(ffspl_sr,(psps%mqgrid_ff,2,psps%mpsang,mproj))
-   ABI_ALLOCATE(ekb_so,(psps%mpsang,mproj))
-   ABI_ALLOCATE(ffspl_so,(psps%mqgrid_ff,2,psps%mpsang,mproj))
+   ABI_MALLOC(ekb_sr,(psps%mpsang,mproj))
+   ABI_MALLOC(ffspl_sr,(psps%mqgrid_ff,2,psps%mpsang,mproj))
+   ABI_MALLOC(ekb_so,(psps%mpsang,mproj))
+   ABI_MALLOC(ffspl_so,(psps%mqgrid_ff,2,psps%mpsang,mproj))
 
    call psp10nl(ekb_sr,ffspl_sr,hij,lmax,mproj,psps%mpsang,psps%mqgrid_ff,&
 &   nproj,psps%qgrid_ff,rr)
    if(pspso/=0) then
-     ABI_ALLOCATE(dummy_nproj,(psps%mpsang))
+     ABI_MALLOC(dummy_nproj,(psps%mpsang))
      dummy_nproj(1)=0
      do ll=1,lmax
        dummy_nproj(ll+1)=nproj(psps%mpsang+ll)
      end do
      call psp10nl(ekb_so,ffspl_so,kij,lmax,mproj,psps%mpsang,psps%mqgrid_ff,&
 &     dummy_nproj,psps%qgrid_ff,rr)
-     ABI_DEALLOCATE(dummy_nproj)
+     ABI_FREE(dummy_nproj)
    end if
 
 !  Convert ekb and ffspl
@@ -1611,21 +1558,21 @@ subroutine psp10in(dtset, ekb, epsatm, ffspl, indlmn, ipsp, lmax, nproj, psps, p
      end if
    end do
 
-   ABI_DEALLOCATE(ekb_sr)
-   ABI_DEALLOCATE(ffspl_sr)
-   ABI_DEALLOCATE(ekb_so)
-   ABI_DEALLOCATE(ffspl_so)
+   ABI_FREE(ekb_sr)
+   ABI_FREE(ffspl_sr)
+   ABI_FREE(ekb_so)
+   ABI_FREE(ffspl_so)
  end if
 
- ABI_DEALLOCATE(rr)
- ABI_DEALLOCATE(hij)
- ABI_DEALLOCATE(kij)
+ ABI_FREE(rr)
+ ABI_FREE(hij)
+ ABI_FREE(kij)
 
  return
 
  ! Handle IO error
  10 continue
- MSG_ERROR(errmsg)
+ ABI_ERROR(errmsg)
 
 end subroutine psp10in
 !!***
@@ -1655,17 +1602,9 @@ end subroutine psp10in
 !!   second derivative from spline fit for each angular momentum and
 !!   each projectors
 !!
-!! PARENTS
-!!      psp10in
-!!
-!! CHILDREN
-!!      spline,zhpev
-!!
 !! SOURCE
 
 subroutine psp10nl(ekb,ffspl,hij,lmax,mproj,mpsang,mqgrid,nproj,qgrid,rr)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1687,8 +1626,8 @@ subroutine psp10nl(ekb,ffspl,hij,lmax,mproj,mpsang,mqgrid,nproj,qgrid,rr)
 
 ! *************************************************************************
 
- ABI_ALLOCATE(ppspl,(mqgrid,2,mpsang,mproj))
- ABI_ALLOCATE(work,(mqgrid))
+ ABI_MALLOC(ppspl,(mqgrid,2,mpsang,mproj))
+ ABI_MALLOC(work,(mqgrid))
 
  qmax=qgrid(mqgrid)
  jobz='v'
@@ -1704,7 +1643,7 @@ subroutine psp10nl(ekb,ffspl,hij,lmax,mproj,mpsang,mqgrid,nproj,qgrid,rr)
      priloop: do iproj=1,jproj
        ipack=iproj+(jproj-1)*jproj/2
        if(mod((jproj-1)*jproj,2)/=0) then
-         MSG_ERROR("odd")
+         ABI_ERROR("odd")
        end if
        ap(1,ipack)=hij(ll,iproj,jproj)
      end do priloop
@@ -1712,8 +1651,8 @@ subroutine psp10nl(ekb,ffspl,hij,lmax,mproj,mpsang,mqgrid,nproj,qgrid,rr)
 
    if(numproj/=0)then
 
-     ABI_ALLOCATE(uu,(numproj,numproj))
-     ABI_ALLOCATE(zz,(2,numproj,numproj))
+     ABI_MALLOC(uu,(numproj,numproj))
+     ABI_MALLOC(zz,(2,numproj,numproj))
 
      if (numproj > 1) then
        call ZHPEV(jobz,uplo,numproj,ap,ww,zz,numproj,work1,rwork1,info)
@@ -1805,7 +1744,7 @@ subroutine psp10nl(ekb,ffspl,hij,lmax,mproj,mpsang,mqgrid,nproj,qgrid,rr)
          write(message, '(3a)' )&
 &         ' only two d-projectors are allowed ',ch10,&
 &         ' Action: check your pseudopotential file.'
-         MSG_ERROR(message)
+         ABI_ERROR(message)
        end if
 
        rrl=rr(2)
@@ -1840,7 +1779,7 @@ subroutine psp10nl(ekb,ffspl,hij,lmax,mproj,mpsang,mqgrid,nproj,qgrid,rr)
          write(message, '(a,a,a)' )&
 &         'only one f-projector is allowed ',ch10,&
 &         'Action: check your pseudopotential file.'
-         MSG_ERROR(message)
+         ABI_ERROR(message)
        end if
 
        rrl=rr(3)
@@ -1858,7 +1797,7 @@ subroutine psp10nl(ekb,ffspl,hij,lmax,mproj,mpsang,mqgrid,nproj,qgrid,rr)
 &       yp1j(1),ypnj(1),ppspl(:,2,4,1))
 
      else
-       MSG_ERROR("lmax>3?")
+       ABI_ERROR("lmax>3?")
      end if
 
 !    Linear combination using the eigenvectors
@@ -1872,16 +1811,16 @@ subroutine psp10nl(ekb,ffspl,hij,lmax,mproj,mpsang,mqgrid,nproj,qgrid,rr)
        end do
      end do
 
-     ABI_DEALLOCATE(uu)
-     ABI_DEALLOCATE(zz)
+     ABI_FREE(uu)
+     ABI_FREE(zz)
 
 !    End condition on numproj(/=0)
    end if
 
  end do lloop
 
- ABI_DEALLOCATE(ppspl)
- ABI_DEALLOCATE(work)
+ ABI_FREE(ppspl)
+ ABI_FREE(work)
 
 end subroutine psp10nl
 !!***

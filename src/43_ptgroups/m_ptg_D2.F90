@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/ptg_D2
 !!
 !! NAME
@@ -7,7 +6,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 2010-2019 ABINIT group (MG)
+!! Copyright (C) 2010-2024 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -16,11 +15,6 @@
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_ptgroups
-!!
-!! CHILDREN
 !!
 !! SOURCE
 !!
@@ -51,13 +45,13 @@ contains
  use m_defs_ptgroups,  only : irrep_t
  implicit none
 !Arguments ------------------------------------
- integer,intent(out) :: nclass,nsym 
+ integer,intent(out) :: nclass,nsym
  !arrays
  integer,allocatable,intent(out) :: sym(:,:,:), class_ids(:,:)
  character(len=5),allocatable,intent(out) :: class_names(:)
  type(irrep_t),allocatable,intent(out) :: Irr(:)
  !Local variables-------------------------------
- complex(dpc) :: j=(0.0_dp,1.0_dp) 
+ complex(dpc) :: j=(0.0_dp,1.0_dp)
  ! ********************************************************************************
 ! List of symmetries packed in classes
  nsym = 4
@@ -67,7 +61,7 @@ contains
  sym(:,:,3) = RESHAPE( (/-1, 0, 0, 0, 1, 0, 0, 0, -1/) ,(/3,3/) )
  sym(:,:,4) = RESHAPE( (/1, 0, 0, 0, -1, 0, 0, 0, -1/) ,(/3,3/) )
 
-! Number of classes and corresponding indeces
+! Number of classes and corresponding indices
  nclass = 4
  ABI_MALLOC(class_ids, (2,nclass))
  class_ids(1,1) = 1
@@ -80,13 +74,13 @@ contains
  class_ids(2,4) = 4
 
 ABI_MALLOC(class_names,(4))
- class_names(1) = "1+" 
- class_names(2) = "2+" 
- class_names(3) = "2+" 
- class_names(4) = "2+" 
+ class_names(1) = "1+"
+ class_names(2) = "2+"
+ class_names(3) = "2+"
+ class_names(4) = "2+"
 
 ! List of irreducible representations.
- ABI_DT_MALLOC(Irr, (4))
+ ABI_MALLOC(Irr, (4))
  Irr(1)%name = "A"
  Irr(1)%dim = 1
  Irr(1)%nsym = 4
@@ -125,7 +119,7 @@ ABI_MALLOC(class_names,(4))
 
  RETURN
   if (.FALSE.) write(std_out,*) j
- end subroutine ptg_D2 
+ end subroutine ptg_D2
 !!***
 
 end module m_ptg_D2

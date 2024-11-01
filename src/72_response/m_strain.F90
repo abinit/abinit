@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_strain
 !!
 !! NAME
@@ -9,7 +8,7 @@
 !! Container type is defined
 !!
 !! COPYRIGHT
-!! Copyright (C) 2010-2019 ABINIT group (AM)
+!! Copyright (C) 2010-2024 ABINIT group (AM)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -42,7 +41,7 @@ module m_strain
  public  :: strain_apply
 !!***
 
-!!****t* defs_abitypes/strain_type
+!!****t* m_strain/strain_type
 !! NAME
 !! strain_type
 !!
@@ -86,17 +85,9 @@ CONTAINS  !=====================================================================
 !! OUTPUT
 !!  strain = structure with all information of strain
 !!
-!! PARENTS
-!!      compute_anharmonics,m_effective_potential
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
 subroutine strain_init(strain,delta,direction,name)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -146,17 +137,9 @@ end subroutine strain_init
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      compute_anharmonics
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
 subroutine strain_free(strain)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -193,17 +176,9 @@ end subroutine strain_free
 !! OUTPUT
 !!  strain = structure with all information of strain
 !!
-!! PARENTS
-!!      compute_anharmonics,m_effective_potential,m_fit_data
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
 subroutine strain_get(strain,rprim,rprim_def,mat_delta,symmetrized)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -231,7 +206,7 @@ subroutine strain_get(strain,rprim,rprim_def,mat_delta,symmetrized)
 &   (present(rprim).and..not.present(rprim_def))) then
     write(message, '(a)' )&
 &     ' strain_get: should give rprim_def and rprim as input of the routines'
-    MSG_BUG(message)
+    ABI_BUG(message)
   end if
 
  if(present(rprim_def).and.present(rprim))then
@@ -259,7 +234,7 @@ subroutine strain_get(strain,rprim,rprim_def,mat_delta,symmetrized)
  else
    write(message, '(a)' )&
 &     ' strain_get: should give rprim_def or mat_delta as input of the routines'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
  if(symmetrized_in)then
@@ -293,16 +268,9 @@ end subroutine strain_get
 !! OUTPUT
 !!  strain = structure with all information of strain
 !!
-!! PARENTS
-!!   anharmonic_terms_compute,
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine strain_apply(rprim,rprim_def,strain)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -337,16 +305,9 @@ end subroutine strain_apply
 !! OUTPUT
 !!
 !!
-!! PARENTS
-!!   multibinit
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine strain_def2strain(mat_strain,strain)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -452,16 +413,9 @@ end subroutine strain_def2strain
 !! OUTPUT
 !!
 !!
-!! PARENTS
-!!   multibinit
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine strain_strain2def(mat_strain,strain)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -511,17 +465,9 @@ end subroutine strain_strain2def
 !! OUTPUT
 !! eff_pot = supercell structure with data to be output
 !!
-!! PARENTS
-!!      m_effective_potential
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
 subroutine strain_print(strain)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

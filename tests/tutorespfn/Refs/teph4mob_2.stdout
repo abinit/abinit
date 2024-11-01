@@ -1,0 +1,210 @@
+
+.Version 9.11.0 of MRGDDB 
+.(MPI version, prepared for a x86_64_linux_intel19.1 computer) 
+
+.Copyright (C) 1998-2024 ABINIT group . 
+ MRGDDB comes with ABSOLUTELY NO WARRANTY.
+ It is free software, and you are welcome to redistribute it
+ under certain conditions (GNU General Public License,
+ see ~abinit/COPYING or http://www.gnu.org/copyleft/gpl.txt).
+
+ ABINIT is a project of the Universite Catholique de Louvain,
+ Corning Inc. and other collaborators, see ~abinit/doc/developers/contributors.txt .
+ Please read https://docs.abinit.org/theory/acknowledgments for suggested
+ acknowledgments of the ABINIT effort.
+ For more information, see https://www.abinit.org .
+
+.Starting date : Wed 31 May 2023.
+- ( at 00h20 )
+  
+  Give name for output derivative database : 
+ teph4mob_2_DDB
+  Give short description of the derivative database :
+ AlAs phonons on 4 4 4 mesh
+  Give number of input ddbs
+           8
+  Give name for derivative database number           1  : 
+ teph4mob_1o_DS3_DDB
+  Give name for derivative database number           2  : 
+ teph4mob_1o_DS4_DDB
+  Give name for derivative database number           3  : 
+ teph4mob_1o_DS5_DDB
+  Give name for derivative database number           4  : 
+ teph4mob_1o_DS6_DDB
+  Give name for derivative database number           5  : 
+ teph4mob_1o_DS7_DDB
+  Give name for derivative database number           6  : 
+ teph4mob_1o_DS8_DDB
+  Give name for derivative database number           7  : 
+ teph4mob_1o_DS9_DDB
+  Give name for derivative database number           8  : 
+ teph4mob_1o_DS10_DDB
+ 
+  merge_ddb: Reading all headers.
+ Opening DDB file: teph4mob_1o_DS3_DDB
+ Opening DDB file: teph4mob_1o_DS4_DDB
+ Opening DDB file: teph4mob_1o_DS5_DDB
+ Opening DDB file: teph4mob_1o_DS6_DDB
+ Opening DDB file: teph4mob_1o_DS7_DDB
+ Opening DDB file: teph4mob_1o_DS8_DDB
+ Opening DDB file: teph4mob_1o_DS9_DDB
+ Opening DDB file: teph4mob_1o_DS10_DDB
+ Opening DDB file: teph4mob_1o_DS3_DDB
+ 
+ read the input derivative database number     1
+ Opening DDB file: teph4mob_1o_DS3_DDB
+ compare the current and input DDB information
+ 
+  ==== Info on the Cryst% object ====
+ Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
+ R(1)=  0.0000000  5.3050000  5.3050000  G(1)= -0.0942507  0.0942507  0.0942507
+ R(2)=  5.3050000  0.0000000  5.3050000  G(2)=  0.0942507 -0.0942507  0.0942507
+ R(3)=  5.3050000  5.3050000  0.0000000  G(3)=  0.0942507  0.0942507 -0.0942507
+ Unit cell volume ucvol=  2.9859750E+02 bohr^3
+ Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
+ Time-reversal symmetry is present
+ Reduced atomic positions [iatom, xred, symbol]:
+    1)    0.0000000  0.0000000  0.0000000  Al
+    2)    0.2500000  0.2500000  0.2500000  As
+ 
+ DDB file with 1 blocks has been read.
+ add block #    1 from file teph4mob_1o_DS3_DDB
+ 
+ read the input derivative database number     2
+ Opening DDB file: teph4mob_1o_DS4_DDB
+ compare the current and input DDB information
+  compar8 : assume that one of the DDB to be merged use Time-Reversal to
+  decrease the number of k-points
+ 
+  ==== Info on the Cryst% object ====
+ Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
+ R(1)=  0.0000000  5.3050000  5.3050000  G(1)= -0.0942507  0.0942507  0.0942507
+ R(2)=  5.3050000  0.0000000  5.3050000  G(2)=  0.0942507 -0.0942507  0.0942507
+ R(3)=  5.3050000  5.3050000  0.0000000  G(3)=  0.0942507  0.0942507 -0.0942507
+ Unit cell volume ucvol=  2.9859750E+02 bohr^3
+ Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
+ Time-reversal symmetry is present
+ Reduced atomic positions [iatom, xred, symbol]:
+    1)    0.0000000  0.0000000  0.0000000  Al
+    2)    0.2500000  0.2500000  0.2500000  As
+ 
+ DDB file with 1 blocks has been read.
+ add block #    1 from file teph4mob_1o_DS4_DDB
+ 
+ read the input derivative database number     3
+ Opening DDB file: teph4mob_1o_DS5_DDB
+ compare the current and input DDB information
+ 
+  ==== Info on the Cryst% object ====
+ Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
+ R(1)=  0.0000000  5.3050000  5.3050000  G(1)= -0.0942507  0.0942507  0.0942507
+ R(2)=  5.3050000  0.0000000  5.3050000  G(2)=  0.0942507 -0.0942507  0.0942507
+ R(3)=  5.3050000  5.3050000  0.0000000  G(3)=  0.0942507  0.0942507 -0.0942507
+ Unit cell volume ucvol=  2.9859750E+02 bohr^3
+ Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
+ Time-reversal symmetry is present
+ Reduced atomic positions [iatom, xred, symbol]:
+    1)    0.0000000  0.0000000  0.0000000  Al
+    2)    0.2500000  0.2500000  0.2500000  As
+ 
+ DDB file with 1 blocks has been read.
+ add block #    1 from file teph4mob_1o_DS5_DDB
+ 
+ read the input derivative database number     4
+ Opening DDB file: teph4mob_1o_DS6_DDB
+ compare the current and input DDB information
+ 
+  ==== Info on the Cryst% object ====
+ Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
+ R(1)=  0.0000000  5.3050000  5.3050000  G(1)= -0.0942507  0.0942507  0.0942507
+ R(2)=  5.3050000  0.0000000  5.3050000  G(2)=  0.0942507 -0.0942507  0.0942507
+ R(3)=  5.3050000  5.3050000  0.0000000  G(3)=  0.0942507  0.0942507 -0.0942507
+ Unit cell volume ucvol=  2.9859750E+02 bohr^3
+ Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
+ Time-reversal symmetry is present
+ Reduced atomic positions [iatom, xred, symbol]:
+    1)    0.0000000  0.0000000  0.0000000  Al
+    2)    0.2500000  0.2500000  0.2500000  As
+ 
+ DDB file with 1 blocks has been read.
+ add block #    1 from file teph4mob_1o_DS6_DDB
+ 
+ read the input derivative database number     5
+ Opening DDB file: teph4mob_1o_DS7_DDB
+ compare the current and input DDB information
+ 
+  ==== Info on the Cryst% object ====
+ Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
+ R(1)=  0.0000000  5.3050000  5.3050000  G(1)= -0.0942507  0.0942507  0.0942507
+ R(2)=  5.3050000  0.0000000  5.3050000  G(2)=  0.0942507 -0.0942507  0.0942507
+ R(3)=  5.3050000  5.3050000  0.0000000  G(3)=  0.0942507  0.0942507 -0.0942507
+ Unit cell volume ucvol=  2.9859750E+02 bohr^3
+ Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
+ Time-reversal symmetry is present
+ Reduced atomic positions [iatom, xred, symbol]:
+    1)    0.0000000  0.0000000  0.0000000  Al
+    2)    0.2500000  0.2500000  0.2500000  As
+ 
+ DDB file with 1 blocks has been read.
+ add block #    1 from file teph4mob_1o_DS7_DDB
+ 
+ read the input derivative database number     6
+ Opening DDB file: teph4mob_1o_DS8_DDB
+ compare the current and input DDB information
+ 
+  ==== Info on the Cryst% object ====
+ Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
+ R(1)=  0.0000000  5.3050000  5.3050000  G(1)= -0.0942507  0.0942507  0.0942507
+ R(2)=  5.3050000  0.0000000  5.3050000  G(2)=  0.0942507 -0.0942507  0.0942507
+ R(3)=  5.3050000  5.3050000  0.0000000  G(3)=  0.0942507  0.0942507 -0.0942507
+ Unit cell volume ucvol=  2.9859750E+02 bohr^3
+ Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
+ Time-reversal symmetry is present
+ Reduced atomic positions [iatom, xred, symbol]:
+    1)    0.0000000  0.0000000  0.0000000  Al
+    2)    0.2500000  0.2500000  0.2500000  As
+ 
+ DDB file with 1 blocks has been read.
+ add block #    1 from file teph4mob_1o_DS8_DDB
+ 
+ read the input derivative database number     7
+ Opening DDB file: teph4mob_1o_DS9_DDB
+ compare the current and input DDB information
+ 
+  ==== Info on the Cryst% object ====
+ Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
+ R(1)=  0.0000000  5.3050000  5.3050000  G(1)= -0.0942507  0.0942507  0.0942507
+ R(2)=  5.3050000  0.0000000  5.3050000  G(2)=  0.0942507 -0.0942507  0.0942507
+ R(3)=  5.3050000  5.3050000  0.0000000  G(3)=  0.0942507  0.0942507 -0.0942507
+ Unit cell volume ucvol=  2.9859750E+02 bohr^3
+ Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
+ Time-reversal symmetry is present
+ Reduced atomic positions [iatom, xred, symbol]:
+    1)    0.0000000  0.0000000  0.0000000  Al
+    2)    0.2500000  0.2500000  0.2500000  As
+ 
+ DDB file with 1 blocks has been read.
+ add block #    1 from file teph4mob_1o_DS9_DDB
+ 
+ read the input derivative database number     8
+ Opening DDB file: teph4mob_1o_DS10_DDB
+ compare the current and input DDB information
+ 
+  ==== Info on the Cryst% object ====
+ Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
+ R(1)=  0.0000000  5.3050000  5.3050000  G(1)= -0.0942507  0.0942507  0.0942507
+ R(2)=  5.3050000  0.0000000  5.3050000  G(2)=  0.0942507 -0.0942507  0.0942507
+ R(3)=  5.3050000  5.3050000  0.0000000  G(3)=  0.0942507  0.0942507 -0.0942507
+ Unit cell volume ucvol=  2.9859750E+02 bohr^3
+ Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
+ Time-reversal symmetry is present
+ Reduced atomic positions [iatom, xred, symbol]:
+    1)    0.0000000  0.0000000  0.0000000  Al
+    2)    0.2500000  0.2500000  0.2500000  As
+ 
+ DDB file with 1 blocks has been read.
+ add block #    1 from file teph4mob_1o_DS10_DDB
+ Final DDB has      8 blocks.
+-
+- Proc.   0 individual time (sec): cpu=          0.0  wall=          0.3
++mrgddb : the run completed successfully

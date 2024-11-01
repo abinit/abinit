@@ -1,0 +1,72 @@
+###################################################
+# Automatic test for ABINIT:                       #
+#   Al 4 atoms, PAW, short MD restarting using     #
+#   restartxf -1 to test restart from HIST file    #
+####################################################
+ 
+# MD
+ionmov 12
+dtion  50
+mdtemp 2000 2000
+nctime 1
+ntime  2
+restartxf -1
+# Simulation box
+acell 3*6.4272325 angstrom
+rprim  1.0  0.0  0.0
+       0.0  1.0  0.0
+       0.0  0.0  1.0
+nsym 1
+chkprim 0
+# Atom types and positions
+ntypat 1
+znucl 13
+pp_dirpath "$ABI_PSPDIR/"
+pseudos "Al.GGA-PBE.xml"
+natom 4
+typat *1
+xred
+0.000000 0.000000 0.000000
+0.000000 0.500000 0.500000
+0.500000 0.000000 0.500000
+0.500000 0.500000 0.000000
+# Planewave basis set
+ecut  5
+pawecutdg  10
+# k-points grid
+nband  20
+kptopt 1
+ngkpt  2 2 2
+# Occupations
+occopt 3
+tsmear 2000 K
+# Convergence
+nstep 100
+tolvrs 1e-4
+# Printing parameters
+prtwf 0
+prtden 0     
+prteig 0    
+prtebands 0  
+prtdos 0     
+pawprtdos 0  
+pawprtvol 0 
+prtgsr 0     
+##############################################################
+# This section is used only for regression testing of ABINIT #
+##############################################################
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%%  executable = abinit
+#%%  test_chain = t81.abi, t82.abi
+#%% [files]
+#%% files_to_test = 
+#%%  t82.abo, tolnlines = 0, tolabs = 0.0, tolrel= 0.0, fld_options= -ridiculous;
+#%% [paral_info]
+#%%  max_nprocs = 4
+#%% [extra_info]
+#%%  authors = F. Brieuc
+#%%  keywords = PAW
+#%%  description = Short MD traj restarting from HIST file using restarxf -1
+#%%  topics = MolecularDynamics
+#%%<END TEST_INFO>

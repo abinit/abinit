@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_dmft
 !! NAME
 !!  m_dmft
@@ -6,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2019 ABINIT group (BAmadon)
+!! Copyright (C) 2006-2024 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -14,10 +13,6 @@
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -31,6 +26,35 @@
 MODULE m_dmft
 
  use defs_basis
+#ifdef HAVE_NETCDF
+ use netcdf
+#endif
+ use m_xmpi
+ use m_errors
+ use m_abicore
+ use m_data4entropyDMFT
+
+ use m_time,           only : timab
+ use m_pawang, only : pawang_type
+ use m_pawtab, only : pawtab_type
+ use m_paw_dmft, only: paw_dmft_type
+ use m_crystal, only : crystal_t
+ use m_green, only : green_type, destroy_green, icip_green,init_green,&
+&                    print_green,printocc_green,&
+&                    integrate_green,copy_green,compute_green,&
+&                    check_fourier_green,local_ks_green,fermi_green, &
+&                    fourier_green, init_green_tau,destroy_green_tau
+ use m_oper, only : oper_type,diff_oper,upfold_oper,loc_oper, trace_oper, inverse_oper !,upfold_oper,init_oper,destroy_oper,print_oper
+ use m_self, only : self_type,initialize_self,destroy_self,print_self,dc_self,rw_self,new_self,make_qmcshift_self
+ use m_hu, only : hu_type,init_hu,destroy_hu
+ use m_energy, only : energy_type,init_energy,destroy_energy,compute_energy,print_energy,compute_dftu_energy
+ use m_matlu, only : print_matlu,sym_matlu, matlu_type,init_matlu,destroy_matlu, add_matlu, copy_matlu
+ use m_datafordmft, only : psichi_renormalization
+ use m_io_tools, only : flush_unit
+ use m_hubbard_one, only : hubbard_one
+ use m_dftu_self, only : dftu_self
+ use m_forctqmc, only : qmc_prep_ctqmc
+
  implicit none
 
  private
@@ -50,67 +74,23 @@ contains
 !! FUNCTION
 !! Solve the DMFT loop from PAW data.
 !!
-!! COPYRIGHT
-!! Copyright (C) 1999-2019 ABINIT group (BAmadon)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
-!!
 !! INPUTS
 !!  cryst_struc <type(crystal_t)>=crystal structure data
-!!  istep           =  step of iteration for LDA.
-!!  lda_occup <type(oper_type)> = occupations in the correlated orbitals in LDA
-!!  paw_dmft <type(paw_dmft_type)> =  data for self-consistent LDA+DMFT calculations.
+!!  istep           =  step of iteration for DFT.
+!!  dft_occup <type(oper_type)> = occupations in the correlated orbitals in DFT
+!!  paw_dmft <type(paw_dmft_type)> =  data for self-consistent DFT+DMFT calculations.
 !!  pawang <type(pawang)>=paw angular mesh and related data
 !!  pawtab(ntypat*usepaw) <type(pawtab_type)>=paw tabulated starting data
 !!  pawprtvol  = option for printing
 !!
 !! OUTPUT
-!!  paw_dmft <type(paw_dmft_type)> =  data for self-consistent LDA+DMFT calculations.
+!!  paw_dmft <type(paw_dmft_type)> =  data for self-consistent DFT+DMFT calculations.
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      vtorho
-!!
-!! CHILDREN
-!!      check_fourier_green,compute_energy,compute_green,compute_ldau_energy
-!!      data4entropydmft_setdc,data4entropydmft_sethu,dc_self,destroy_energy
-!!      destroy_green,destroy_hu,destroy_self,diff_oper,dyson,fermi_green
-!!      icip_green,impurity_solve,init_energy,init_green,init_hu
-!!      initialize_self,integrate_green,local_ks_green,make_qmcshift_self
-!!      new_self,print_self,printocc_green,psichi_renormalization,rw_self
-!!      m_spectral_function,timab,wrtout
-!!
 !! SOURCE
 
-subroutine dmft_solve(cryst_struc,istep,lda_occup,paw_dmft,pawang,pawtab,pawprtvol)
-
-
- use defs_basis
- use defs_abitypes
- use m_xmpi
- use m_errors
- use m_abicore
- use m_data4entropyDMFT
-
- use m_time,           only : timab
- use m_pawang, only : pawang_type
- use m_pawtab, only : pawtab_type
- use m_paw_dmft, only: paw_dmft_type
- use m_crystal, only : crystal_t
- use m_green, only : green_type, destroy_green, icip_green,init_green,&
-&                    print_green,printocc_green,&
-&                    integrate_green,copy_green,compute_green,&
-&                    check_fourier_green,local_ks_green,fermi_green
- use m_oper, only : oper_type,diff_oper,upfold_oper,loc_oper!,upfold_oper,init_oper,destroy_oper,print_oper
- use m_self, only : self_type,initialize_self,destroy_self,print_self,dc_self,rw_self,new_self,make_qmcshift_self
- use m_hu, only : hu_type,init_hu,destroy_hu
- use m_energy, only : energy_type,init_energy,destroy_energy,compute_energy,print_energy,compute_ldau_energy
- use m_matlu, only : print_matlu,sym_matlu!,identity_matlu
- use m_datafordmft, only : psichi_renormalization
- implicit none
+subroutine dmft_solve(cryst_struc,istep,dft_occup,paw_dmft,pawang,pawtab,pawprtvol)
 
 !Arguments ------------------------------------
 !scalars
@@ -120,7 +100,7 @@ subroutine dmft_solve(cryst_struc,istep,lda_occup,paw_dmft,pawang,pawtab,pawprtv
  type(pawang_type), intent(in) :: pawang
  type(crystal_t),intent(in) :: cryst_struc
  type(pawtab_type),intent(in)  :: pawtab(cryst_struc%ntypat)
- type(oper_type),intent(in)  :: lda_occup
+ type(oper_type),intent(in)  :: dft_occup
  type(paw_dmft_type), intent(inout)  :: paw_dmft
 
 !Local variables ------------------------------
@@ -133,7 +113,7 @@ subroutine dmft_solve(cryst_struc,istep,lda_occup,paw_dmft,pawang,pawtab,pawprtv
  character(len=200) :: char_enddmft
 ! type
  type(green_type) :: green
- type(green_type) :: greenlda
+ type(green_type) :: greendft
  type(hu_type),allocatable :: hu(:)
  type(green_type) :: weiss
  type(self_type) :: self
@@ -176,7 +156,7 @@ subroutine dmft_solve(cryst_struc,istep,lda_occup,paw_dmft,pawang,pawtab,pawprtv
 
  if(istep==0) then
    message = ' istep should not be equal to zero'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
  spaceComm=paw_dmft%spacecomm
  !if(mpi_enreg%paral_kgb==1) spaceComm=mpi_enreg%comm_kpt
@@ -186,29 +166,29 @@ subroutine dmft_solve(cryst_struc,istep,lda_occup,paw_dmft,pawang,pawtab,pawprtv
  call init_energy(cryst_struc,energies_dmft)
 
 !===========================================================================
-!==  First construct LDA green function (Init, Compute, Integrate, Print)
+!==  First construct DFT green function (Init, Compute, Integrate, Print)
 !===========================================================================
  write(message,'(6a)') ch10,' =====================================', &
-& ch10,' =====  LDA Green Function Calculation',&
+& ch10,' =====  DFT Green Function Calculation',&
 & ch10,' ====================================='
  call wrtout(std_out,message,'COLL')
- call icip_green("LDA",cryst_struc,greenlda,paw_dmft,pawang,3,self)
- !call print_green('LDA_NOT_renormalized',greenlda,1,paw_dmft,pawprtvol=1,opt_wt=1)
+ call icip_green("DFT",cryst_struc,greendft,paw_dmft,pawang,3,self)
+ !call print_green('DFT_NOT_renormalized',greendft,1,paw_dmft,pawprtvol=1,opt_wt=1)
 
-!== Compare greenlda%occup and lda_occup: check that LDA green function is fine
+!== Compare greendft%occup and dft_occup: check that DFT green function is fine
 !----------------------------------------------------------------------
  write(message,'(2a)') ch10,&
 & '  == Check lda occ. mat. from green with respect to the direct calc =='
  call wrtout(std_out,message,'COLL')
- call diff_oper("Occup from LDA green function",&
-& "LDA occupations",greenlda%occup,lda_occup,1,paw_dmft%dmft_tolfreq)
+ call diff_oper("Occup from DFT green function",&
+& "DFT occupations",greendft%occup,dft_occup,1,paw_dmft%dmft_tolfreq)
 ! write(message,'(2a)') ch10,&
 !& '  ***** => Warning : diff_oper is suppressed for test'
 ! call wrtout(std_out,message,'COLL')
  write(message,'(2a)') ch10,&
 & '  ***** => Calculation of Green function is thus correct without self ****'
  call wrtout(std_out,message,'COLL')
- call destroy_green(greenlda)
+ call destroy_green(greendft)
 
 !== Orthonormalize psichi
 !----------------------------------------------------------------------
@@ -219,10 +199,9 @@ subroutine dmft_solve(cryst_struc,istep,lda_occup,paw_dmft,pawang,pawtab,pawprtv
      natomcor=natomcor+1
    end if
  end do
- opt_renorm=3
-! write(6,*) "natomcor",natomcor
-! if(natomcor>1) opt_renorm=2
- if(paw_dmft%nspinor==2.and.paw_dmft%dmft_solv==8) opt_renorm=2 ! necessary to use hybri_limit in qmc_prep_ctqmc
+ opt_renorm=paw_dmft%dmft_wanorthnorm
+!if(natomcor>1) opt_renorm=2 ! if number of atoms is larger than one, one must use a new orthogonalization scheme.
+ if(paw_dmft%nspinor==2.and.(paw_dmft%dmft_solv==8.or.paw_dmft%dmft_solv==9)) opt_renorm=2 ! necessary to use hybri_limit in qmc_prep_ctqmc
                                                                 ! ought to be  generalized  in the  future
  if(paw_dmft%dmft_solv/=-1) then
    call psichi_renormalization(cryst_struc,paw_dmft,pawang,opt=opt_renorm)
@@ -241,33 +220,33 @@ subroutine dmft_solve(cryst_struc,istep,lda_occup,paw_dmft,pawang,pawtab,pawprtv
 
 
 !  ===========================================================================
-!  ==  re-construct LDA green function with new psichis
+!  ==  re-construct DFT green function with new psichis
 !  ===========================================================================
    write(message,'(6a)')&
 &   ch10,' ==============================================================='&
-&   ,ch10,' =====  LDA Green Function Calculation with renormalized psichi'&
+&   ,ch10,' =====  DFT Green Function Calculation with renormalized psichi'&
 &   ,ch10,' =============================================================='
  end if
  call timab(621,2,tsec)
 
  call wrtout(std_out,message,'COLL')
- call icip_green("LDA_renormalized",cryst_struc,greenlda,&
+ call icip_green("DFT_renormalized",cryst_struc,greendft,&
 & paw_dmft,pawang,pawprtvol,self)
- !call print_green('LDA_renormalized',greenlda,1,paw_dmft,pawprtvol=1,opt_wt=1)
+ !call print_green('DFT_renormalized',greendft,1,paw_dmft,pawprtvol=1,opt_wt=1)
 
  !Need to store idmftloop and set it to zero to avoid useless print_energy in ab_out
  idmftloop=paw_dmft%idmftloop
  paw_dmft%idmftloop=0
- call compute_energy(cryst_struc,energies_dmft,greenlda,paw_dmft,pawprtvol,pawtab,self,occ_type=" lda",part='both')
+ call compute_energy(cryst_struc,energies_dmft,greendft,paw_dmft,pawprtvol,pawtab,self,occ_type=" lda",part='both')
  paw_dmft%idmftloop=idmftloop
 
  if(paw_dmft%dmft_prgn==1) then
    if(paw_dmft%lpsichiortho==1) then
-     call local_ks_green(greenlda,paw_dmft,prtopt=1)
+     call local_ks_green(greendft,paw_dmft,prtopt=1)
    end if
  end if
  call destroy_self(self)
-!call printocc_green(greenlda,9,paw_dmft,3,chtype="LDA GREEN PSICHI")
+!call printocc_green(greendft,9,paw_dmft,3,chtype="DFT GREEN PSICHI")
 
  write(message,'(6a)')&
 & ch10,' ==============================================================='&
@@ -276,8 +255,8 @@ subroutine dmft_solve(cryst_struc,istep,lda_occup,paw_dmft,pawang,pawtab,pawprtv
  call wrtout(std_out,message,'COLL')
 !== define Interaction from input upawu and jpawu
 !----------------------------------------------------------------------
- ABI_DATATYPE_ALLOCATE(hu,(cryst_struc%ntypat))
- call init_hu(cryst_struc,pawtab,hu,paw_dmft%dmftqmc_t2g)
+ ABI_MALLOC(hu,(cryst_struc%ntypat))
+ call init_hu(cryst_struc,pawtab,hu,paw_dmft%dmftqmc_t2g,paw_dmft%dmftqmc_x2my2d)
  call initialize_self(self,paw_dmft)
 
  ! Set Hu in density representation for calculation of entropy if needed...
@@ -290,7 +269,7 @@ subroutine dmft_solve(cryst_struc,istep,lda_occup,paw_dmft,pawang,pawtab,pawprtv
 !== define self from scratch or file and double counting
 !----------------------------------------------------------------------
 !-  Self allocated
- call dc_self(greenlda%charge_matlu,cryst_struc,hu,self,paw_dmft%dmft_dc,pawprtvol)
+ call dc_self(greendft%charge_matlu,cryst_struc,hu,self,paw_dmft%dmft_dc,pawprtvol)
 
 !-   Read self or do self=hdc
  if(paw_dmft%dmft_solv==4) then
@@ -310,7 +289,7 @@ subroutine dmft_solve(cryst_struc,istep,lda_occup,paw_dmft,pawang,pawtab,pawprtv
 !if(paw_dmft%dmft_solv==4.and.paw_dmft%dmft_rslf/=1) &
 !&           call make_qmcshift_self(cryst_struc,hu,self,apply=.true.)
 
- call destroy_green(greenlda)  ! destroy LDA green function
+ call destroy_green(greendft)  ! destroy DFT green function
  call print_self(self,"print_dc",paw_dmft,prtopt=2)
 
 
@@ -471,7 +450,7 @@ subroutine dmft_solve(cryst_struc,istep,lda_occup,paw_dmft,pawang,pawtab,pawprtv
 !  == Save self on disk
 !  ---------------------------------------------------------------------
    call timab(627,1,tsec)
-   call rw_self(self,paw_dmft,prtopt=2,opt_rw=2)
+   call rw_self(self,paw_dmft,prtopt=2,opt_rw=2,pawang=pawang,cryst_struc=cryst_struc)
    call timab(627,2,tsec)
 
 !  == Test convergency
@@ -500,17 +479,19 @@ subroutine dmft_solve(cryst_struc,istep,lda_occup,paw_dmft,pawang,pawtab,pawprtv
 & '========'
  call wrtout(std_out,message,'COLL')
 
- ! compute Edc for U=1 and J=U/J
- call init_energy(cryst_struc,energies_tmp)
- !call compute_ldau_energy(cryst_struc,energies_tmp,green,paw_dmft,pawtab)
- call compute_ldau_energy(cryst_struc,energies_tmp,green,paw_dmft,pawtab,paw_dmft%forentropyDMFT%J_over_U)
- call data4entropyDMFT_setDc(paw_dmft%forentropyDMFT,energies_tmp%e_dc(:))
- call destroy_energy(energies_tmp,paw_dmft)
+ if(paw_dmft%dmft_entropy/=0) then
+   ! compute Edc for U=1 and J=U/J
+   call init_energy(cryst_struc,energies_tmp)
+   !call compute_dftu_energy(cryst_struc,energies_tmp,green,paw_dmft,pawtab)
+   call compute_dftu_energy(cryst_struc,energies_tmp,green,paw_dmft,pawtab,paw_dmft%forentropyDMFT%J_over_U)
+   call data4entropyDMFT_setDc(paw_dmft%forentropyDMFT,energies_tmp%e_dc(:))
+   call destroy_energy(energies_tmp,paw_dmft)
+ endif
 
 !== Compute final values for green functions, occupations, and spectral function
 !--------------------------------------------------------------------------------
 !Do not compute here, because, one want a energy computed after the
-!solver (for Hubbard I and LDA+U).
+!solver (for Hubbard I and DFT+U).
  call compute_green(cryst_struc,green,paw_dmft,pawang,1,self,opt_self=1,opt_nonxsum=1)
  call integrate_green(cryst_struc,green,paw_dmft,pawang,prtopt=2,opt_ksloc=3) !,opt_nonxsum=1)
 !call compute_energy(cryst_struc,energies_dmft,green,paw_dmft,pawprtvol,pawtab,self,opt=0)
@@ -549,7 +530,7 @@ subroutine dmft_solve(cryst_struc,istep,lda_occup,paw_dmft,pawang,pawtab,pawprtv
  call destroy_green(green)
 !todo_ab rotate back density matrix into unnormalized basis just for
 !printout
- call destroy_hu(hu,cryst_struc%ntypat,paw_dmft%dmftqmc_t2g)
+ call destroy_hu(hu,cryst_struc%ntypat,paw_dmft%dmftqmc_t2g,paw_dmft%dmftqmc_x2my2d)
  call destroy_self(self)
  call destroy_energy(energies_dmft,paw_dmft)
 
@@ -557,7 +538,7 @@ subroutine dmft_solve(cryst_struc,istep,lda_occup,paw_dmft,pawang,pawtab,pawprtv
 & '========'
  call wrtout(std_out,message,'COLL')
 
- ABI_DATATYPE_DEALLOCATE(hu)
+ ABI_FREE(hu)
 
  DBG_EXIT("COLL")
 
@@ -572,61 +553,22 @@ end subroutine dmft_solve
 !! FUNCTION
 !! Solve the Impurity problem
 !!
-!! COPYRIGHT
-!! Copyright (C) 1999-2019 ABINIT group (BAmadon)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
-!!
 !! INPUTS
 !!  cryst_struc <type(crystal_t)>=crystal structure data
-!!  lda_occup
-!!  paw_dmft =  data for self-consistent LDA+DMFT calculations.
+!!  dft_occup
+!!  paw_dmft =  data for self-consistent DFT+DMFT calculations.
 !!  pawang <type(pawang)>=paw angular mesh and related data
 !!  pawtab <type(pawtab)>
 !!
 !! OUTPUT
-!!  paw_dmft =  data for self-consistent LDA+DMFT calculations.
+!!  paw_dmft =  data for self-consistent DFT+DMFT calculations.
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_dmft
-!!
-!! CHILDREN
-!!      copy_green,destroy_green_tau,flush_unit,fourier_green,m_hubbard_one
-!!      init_green_tau,integrate_green,ldau_self,print_green,print_matlu
-!!      printocc_green,qmc_prep_ctqmc,timab,trace_oper,wrtout
 !!
 !! SOURCE
 
 subroutine impurity_solve(cryst_struc,green,hu,paw_dmft,&
 & pawang,pawtab,self_old,self_new,weiss,pawprtvol)
-
-
- use defs_basis
- use defs_abitypes
- use m_errors
- use m_abicore
-
- use m_time,    only : timab
- use m_crystal, only : crystal_t
- use m_green, only : green_type, fourier_green&
-& ,init_green_tau,destroy_green_tau,print_green,printocc_green,integrate_green,copy_green
- use m_paw_dmft, only : paw_dmft_type
- use m_oper,     only : trace_oper
- use m_hu, only : hu_type
- use m_matlu, only : matlu_type,print_matlu,init_matlu,destroy_matlu
- use m_self, only : self_type
- use m_energy, only : energy_type
- use m_pawang, only : pawang_type
- use m_pawtab, only : pawtab_type
- use m_io_tools, only : flush_unit
- use m_hubbard_one, only : hubbard_one
- use m_ldau_self, only : ldau_self
- use m_forctqmc, only : qmc_prep_ctqmc
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -716,10 +658,10 @@ subroutine impurity_solve(cryst_struc,green,hu,paw_dmft,&
  call wrtout(std_out,message,'COLL')
  if(abs(paw_dmft%dmft_solv)==1) then
 
-!  == LDA+U for test -> self
+!  == DFT+U for test -> self
 !  -------------------
-   call ldau_self(cryst_struc,green,paw_dmft,&
-&   pawtab,self_new,opt_ldau=1,prtopt=pawprtvol)
+   call dftu_self(cryst_struc,green,paw_dmft,&
+&   pawtab,self_new,opt_dftu=1,prtopt=pawprtvol)
  else if(abs(paw_dmft%dmft_solv)==2) then
 
 !  == Hubbard One -> green
@@ -734,7 +676,7 @@ subroutine impurity_solve(cryst_struc,green,hu,paw_dmft,&
    call copy_green(weiss,green,opt_tw=1)
 !  call qmc_prep
    message = '  ===  QMC not yet distributed '
-   MSG_ERROR(message)
+   ABI_ERROR(message)
 !   call qmc_prep(cryst_struc,green,hu,mpi_enreg,paw_dmft,pawang&
 !&   ,pawprtvol,self_old%qmc_xmu,weiss)
 
@@ -864,19 +806,12 @@ end subroutine impurity_solve
 !! FUNCTION
 !! Use the Dyson Equation to compute self-energy from green function
 !!
-!! COPYRIGHT
-!! Copyright (C) 1999-2019 ABINIT group (BAmadon)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
-!!
 !! INPUTS
 !!  dtset <type(dataset_type)>=all input variables for this dataset
-!!  istep    =  step of iteration for LDA.
-!!  lda_occup
-!!  mpi_enreg=informations about MPI parallelization
-!!  paw_dmft =  data for self-consistent LDA+DMFT calculations.
+!!  istep    =  step of iteration for DFT.
+!!  dft_occup
+!!  mpi_enreg=information about MPI parallelization
+!!  paw_dmft =  data for self-consistent DFT+DMFT calculations.
 !!  opt_weissgreen= 1: compute weiss from green and self
 !!                = 2: compute green from weiss and self
 !!                = 4: compute green from weiss and self without
@@ -884,32 +819,13 @@ end subroutine impurity_solve
 !!
 !! OUTPUT
 !!  edmft  = energy in DMFT.
-!!  paw_dmft =  data for self-consistent LDA+DMFT calculations.
+!!  paw_dmft =  data for self-consistent DFT+DMFT calculations.
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      dmft_solve
-!!
-!! CHILDREN
-!!      add_matlu,copy_green,destroy_green,init_green,inverse_oper,timab,wrtout
 !!
 !! SOURCE
 
 subroutine dyson(green,paw_dmft,self,weiss,opt_weissself)
-
- use defs_basis
- use m_abicore
- use m_errors
-
- use m_time,         only : timab
- use m_paw_dmft, only: paw_dmft_type
- use m_crystal, only : crystal_t
- use m_green, only : green_type, destroy_green,init_green,copy_green
- use m_oper, only : oper_type,inverse_oper
- use m_matlu, only : matlu_type,add_matlu,print_matlu
- use m_self, only : self_type
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -986,7 +902,7 @@ subroutine dyson(green,paw_dmft,self,weiss,opt_weissself)
    ! write(66,*) paw_dmft%omega_lo(ifreq), real(self%oper(ifreq)%matlu(1)%mat(1,1,1,1,1)),aimag(self%oper(ifreq)%matlu(1)%mat(1,1,1,1,1))
    else
      message = " BUG in dyson.F90"
-     MSG_BUG(message)
+     ABI_BUG(message)
    end if
  end do
 
@@ -1006,57 +922,24 @@ end subroutine dyson
 !! FUNCTION
 !! Print the spectral function computed from Green function in real frequency
 !!
-!! COPYRIGHT
-!! Copyright (C) 1999-2019 ABINIT group (BAmadon)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
-!!
 !! INPUTS
 !!  cryst_struc <type(crystal_t)>=crystal structure data
 !!  green  <type(green_type)>= green function data
 !!  hu  <type(hu_type)>= datatype of type hu
-!!  paw_dmft =  data for self-consistent LDA+DMFT calculations.
+!!  paw_dmft =  data for self-consistent DFT+DMFT calculations.
 !!  pawang <type(pawang)>=paw angular mesh and related data
 !!  self <type(self_type)>= variables related to self-energy
 !!  prtopt= option for printing
 !!
 !! OUTPUT
-!!  paw_dmft =  data for self-consistent LDA+DMFT calculations.
+!!  paw_dmft = data for self-consistent DFT+DMFT calculations.
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_dmft
-!!
-!! CHILDREN
-!!      compute_green,copy_green,copy_matlu,dc_self,destroy_green,destroy_self
-!!      dyson,hubbard_one,init_green,initialize_self,ldau_self,print_green
-!!      rw_self,wrtout
 !!
 !! SOURCE
 
 subroutine spectral_function(cryst_struc,green,hu,paw_dmft,&
 & pawang,pawtab,self_old,prtopt)
-
- use defs_basis
- use defs_abitypes
- use m_errors
- use m_abicore
-
- use m_crystal, only : crystal_t
- use m_green, only : init_green,green_type,print_green,copy_green,compute_green,destroy_green
- use m_matlu, only : copy_matlu
- use m_paw_dmft, only : paw_dmft_type
- use m_hu, only : hu_type
- use m_self, only : self_type,initialize_self,dc_self,destroy_self,rw_self
- use m_energy, only : energy_type
- use m_pawang, only : pawang_type
- use m_pawtab, only : pawtab_type
- use m_hubbard_one, only : hubbard_one
- use m_ldau_self, only : ldau_self
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1092,10 +975,10 @@ subroutine spectral_function(cryst_struc,green,hu,paw_dmft,&
  call wrtout(std_out,message,'COLL')
  if(abs(paw_dmft%dmft_solv)==1) then
 
-!  == LDA+U for test
+!  == DFT+U for test
 !  -------------------
-   call ldau_self(cryst_struc,greenr,paw_dmft,&
-&   pawtab,selfr,opt_ldau=1,prtopt=prtopt)
+   call dftu_self(cryst_struc,greenr,paw_dmft,&
+&   pawtab,selfr,opt_dftu=1,prtopt=prtopt)
  else if(abs(paw_dmft%dmft_solv)==2) then
 
 !  == Hubbard One
@@ -1108,14 +991,14 @@ subroutine spectral_function(cryst_struc,green,hu,paw_dmft,&
 !  == Nothing
 !  -------------------
    message = "spectral_function: This section of code is disabled!"
-   MSG_ERROR(message)
+   ABI_ERROR(message)
    call copy_green(weissr,greenr,opt_tw=1)
 
  else if(abs(paw_dmft%dmft_solv)>=5) then
 
 !  == Nothing
 !  -------------------
-   MSG_ERROR("Stopping before copy_green")
+   ABI_ERROR("Stopping before copy_green")
    call copy_green(weissr,greenr,opt_tw=1)
 
  else if(abs(paw_dmft%dmft_solv)==0) then

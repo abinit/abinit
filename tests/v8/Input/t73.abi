@@ -1,0 +1,85 @@
+#### MnO AFM non-collinear spins along [111]; ddk with ixcrot=2
+
+nsym  1
+
+ecut  5
+
+ixc   7
+
+##### K-POINTS
+kptopt  3
+ngkpt   3*2
+shiftk  0.5 0.5 0.5
+chksymbreak 0
+
+# mixing
+diemix    0.8
+diemixmag 0.8
+diemac 20
+
+# crystal def.
+natom  4 
+ntypat 2 
+typat  1 1 2 2
+znucl  25 8
+
+chkprim 0
+acell 3*4.50 Angstrom
+rprim 0.0 1/2 1/2
+      1/2 0.0 1/2
+      1.0 1.0 0.0
+xred 
+0 0 0
+0.0 0.0 0.5
+0.5 0.5 0.25
+0.5 0.5 0.75
+
+# Magnetism
+so_psp  1 1
+nsppol  1
+nspden  4
+nspinor 2
+prtdensph 1
+spinmagntarget 0
+spinat
+ 5  5  5
+-5 -5 -5
+6*0
+
+# dataset 2: ddk
+ixcrot  2
+irdwfk  -1
+iscf    -3
+tolwfr  1.0E-16
+rfelfd  2
+rfdir   1 0 0
+nqpt    1
+qpt     0.0 0.0 0.0
+nband   42
+nline   12
+nstep   20
+
+
+# printing options
+prtden  0
+prteig  0
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "Mn-sp-r_LDA_1012_dojov0.4.psp8, O-r_LDA_1012_dojov0.4.psp8"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% test_chain = t71.abi, t72.abi, t73.abi, t74.abi, t75.abi, t76.abi, t77.abi, t78.abi, t79.abi, t80.abi
+#%% [files]
+#%% files_to_test = 
+#%%    t73.abo,  tolnlines =0, tolabs =0, tolrel = 1.0E-8, fld_options=-medium ;
+#%% [paral_info]
+#%% max_nprocs = 8
+#%% [shell]
+#%% post_commands = ww_cp t73o_1WF13 t76i_1WF13
+#%% [extra_info]
+#%% authors = E. Bousquet
+#%% keywords = DFPT, ddk, non-collinear, SOC
+#%% description = DFPT in non-collinear magnetism: ddk with ixcrot=2
+#%%<END TEST_INFO>

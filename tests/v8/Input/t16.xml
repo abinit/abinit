@@ -5,7 +5,7 @@
 		0.00000e+00	1.88973e+00	0.00000e+00
 		0.00000e+00	0.00000e+00	1.88973e+00
 	</unit_cell>
-  <atom damping_factor="1.00000e+00" gyroratio="1.76000e+11" index_spin="1" mass="1.00800e+00" massunits="atomicmassunit">
+  <atom damping_factor="1.00000e+00" gyroratio="1.00000e+00" index_spin="1" mass="1.00800e+00" massunits="atomicmassunit">
 	  <position units="bohrradius">
 		  0.00000e+00	0.00000e+00	0.00000e+00
 	  </position>
@@ -17,27 +17,27 @@
     <nterms>6</nterms>
     <spin_exchange_term>
       <ijR>1 1 0 -1 0</ijR>
-      <data>0.0375 	 0.0375 	 0.0375</data>
+      <data>0.01875 	 0.01875 	 0.01875</data>
     </spin_exchange_term>
     <spin_exchange_term>
       <ijR>1 1 1 0 0</ijR>
-      <data>0.0375 	 0.0375 	 0.0375</data>
+      <data>0.01875 	 0.01875 	 0.01875</data>
     </spin_exchange_term>
     <spin_exchange_term>
       <ijR>1 1 0 1 0</ijR>
-      <data>0.0375 	 0.0375 	 0.0375</data>
+      <data>0.01875 	 0.01875 	 0.01875</data>
     </spin_exchange_term>
     <spin_exchange_term>
       <ijR>1 1 0 0 1</ijR>
-      <data>0.0375 	 0.0375 	 0.0375</data>
+      <data>0.01875 	 0.01875 	 0.01875</data>
     </spin_exchange_term>
     <spin_exchange_term>
       <ijR>1 1 -1 0 0</ijR>
-      <data>0.0375 	 0.0375 	 0.0375</data>
+      <data>0.01875 	 0.01875 	 0.01875</data>
     </spin_exchange_term>
     <spin_exchange_term>
       <ijR>1 1 0 0 -1</ijR>
-      <data>0.0375 	 0.0375 	 0.0375</data>
+      <data>0.01875 	 0.01875 	 0.01875</data>
     </spin_exchange_term>
   </spin_exchange_list>
 </System_definition>

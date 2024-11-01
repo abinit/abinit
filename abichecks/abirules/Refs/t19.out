@@ -1,8 +1,0 @@
-
----------------------------------------------------------------------
- Looking for forbidden strings in doc/*/*.yml file(s):       
-  - forbidden usage of \n instead of carriage return                 
----------------------------------------------------------------------
------------>
-- There are 3 yml files in the complete set.
-- No Error or Warning !

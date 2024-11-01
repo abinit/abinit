@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_mpinfo
 !! NAME
 !! m_mpinfo
@@ -6,14 +5,10 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2019 ABINIT group (MT, GG, XG, FJ, AR, MB, CMartins)
+!!  Copyright (C) 2008-2024 ABINIT group (MT, GG, XG, FJ, AR, MB, CMartins)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! TODO
 !!  Change the name of the datatype: (MPI_|mpi_) is a reserved keyword
@@ -38,18 +33,19 @@ MODULE m_mpinfo
  use m_xmpi
  use m_sort
  use m_distribfft
+ use m_dtset
 
- use defs_abitypes,   only : MPI_type, dataset_type
+ use defs_abitypes,   only : MPI_type
+ use m_fstrings,      only : sjoin, ltoa
  use m_io_tools,      only : file_exists, open_file
  use m_libpaw_tools,  only : libpaw_write_comm_set
  use m_paral_atom,    only : get_my_natom, get_my_atmtab
- use m_dtset,         only : get_npert_rbz
 
  implicit none
 
  private
 
-#if defined HAVE_MPI1 || (defined HAVE_MPI && defined FC_G95)
+#if defined HAVE_MPI1
  include 'mpif.h'
 #endif
 
@@ -64,6 +60,9 @@ MODULE m_mpinfo
  public :: mpi_distrib_is_ok     ! Check if a MPI datastructure contains number of processors
                                  ! compatible (in terms of efficiency) with the number of spins/kpts/bands
  public :: proc_distrb_cycle     ! Test a condition to cycle
+ public :: proc_distrb_nband     ! Return number of bands present on this cpu
+ public :: proc_distrb_cycle_bands ! Return array of logicals for bands to cycle at this k and spin
+ public :: proc_distrb_band      ! Return array of me indices for bands at this k and spin
 
  public :: initmpi_seq           ! Initializes the MPI information for sequential use.
  public :: initmpi_world         ! %comm_world is redifined for the number of processors on which ABINIT is launched
@@ -88,7 +87,7 @@ MODULE m_mpinfo
  public :: iwrite_fftdatar  ! Select the subset of processors that will write density/potential files.
 
  public :: distrb2          ! Creates the tabs of repartition of processors for sharing the jobs on k-points, spins and bands.
- public :: distrb2_hf       ! Ceate the tabs of repartition for Hartree-Fock calculations.
+ public :: distrb2_hf       ! Creates the tabs of repartition for Hartree-Fock calculations.
 !!***
 
 CONTAINS  !========================================================================================
@@ -117,11 +116,6 @@ CONTAINS  !=====================================================================
 !!
 !! SIDE EFFECTS
 !!  MPI_enreg<MPI_type>=All pointer set to null().
-!!
-!! PARENTS
-!!      lapackprof,mpi_setup
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -157,11 +151,6 @@ end subroutine init_mpi_enreg
 !! SIDE EFFECTS
 !!  MPI_enreg<MPI_type>=All pointer set to null().
 !!
-!! PARENTS
-!!      initmpi_seq,m_fft_prof,m_wfd
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine nullify_mpi_enreg(MPI_enreg)
@@ -192,17 +181,6 @@ subroutine nullify_mpi_enreg(MPI_enreg)
 !! SIDE EFFECTS
 !!  MPI_enreg<MPI_type>=Datatype gathering information on the parallelism.
 !!
-!! PARENTS
-!!      abinit,bethe_salpeter,bsepostproc,calc_vhxc_me,conducti,cut3d
-!!      debug_tools,dfpt_nstpaw,dieltcel,eph,fftprof,gwls_hamiltonian,inwffil
-!!      ks_ddiago,lapackprof,linear_optics_paw,m_cut3d,m_dvdb,m_fft,m_fft_prof
-!!      m_fftcore,m_fock,m_gsphere,m_hamiltonian,m_ioarr,m_kxc,m_pawpwij
-!!      m_ppmodel,m_screening,m_wfd,m_wfk,mlwfovlp_qp,mover_effpot,mrggkk
-!!      mrgscr,partial_dos_fractions,posdoppler,scfcv,screening,sigma
-!!      suscep_stat,susk,suskmm,ujdet,vdw_kernelgen,wfk_analyze
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine destroy_mpi_enreg(MPI_enreg)
@@ -215,7 +193,7 @@ subroutine destroy_mpi_enreg(MPI_enreg)
 
  if (associated(mpi_enreg%distribfft)) then
    call destroy_distribfft(mpi_enreg%distribfft)
-   ABI_DATATYPE_DEALLOCATE(mpi_enreg%distribfft)
+   ABI_FREE(mpi_enreg%distribfft)
    nullify(mpi_enreg%distribfft)
  end if
 
@@ -226,7 +204,7 @@ subroutine destroy_mpi_enreg(MPI_enreg)
  ABI_SFREE(mpi_enreg%mkmem)
  ABI_SFREE(mpi_enreg%my_kpttab)
  if (associated(mpi_enreg%my_atmtab)) then
-   ABI_DEALLOCATE(mpi_enreg%my_atmtab)
+   ABI_FREE(mpi_enreg%my_atmtab)
    nullify(mpi_enreg%my_atmtab)
  end if
  ABI_SFREE(mpi_enreg%distrb_pert)
@@ -255,14 +233,9 @@ end subroutine destroy_mpi_enreg
 !! OUTPUT
 !!  MPI_enreg2<MPI_type>=output mpi_enreg datastructure
 !!
-!! PARENTS
-!!      gwls_hamiltonian,inwffil,m_fft_prof,m_fock,m_wfd
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
-subroutine copy_mpi_enreg(MPI_enreg1,MPI_enreg2)
+subroutine copy_mpi_enreg(MPI_enreg1, MPI_enreg2)
 
 !Arguments ------------------------------------
 !scalars
@@ -286,6 +259,7 @@ subroutine copy_mpi_enreg(MPI_enreg1,MPI_enreg2)
  mpi_enreg2%nproc_fft=mpi_enreg1%nproc_fft
  mpi_enreg2%paral_kgb=mpi_enreg1%paral_kgb
  mpi_enreg2%me_g0=mpi_enreg1%me_g0
+ mpi_enreg2%me_g0_fft=mpi_enreg1%me_g0_fft
  mpi_enreg2%paral_pert=mpi_enreg1%paral_pert
  mpi_enreg2%me_pert=mpi_enreg1%me_pert
  mpi_enreg2%nproc_pert=mpi_enreg1%nproc_pert
@@ -297,7 +271,7 @@ subroutine copy_mpi_enreg(MPI_enreg1,MPI_enreg2)
  mpi_enreg2%comm_bandspinorfft=mpi_enreg1%comm_bandspinorfft
  mpi_enreg2%comm_kpt=mpi_enreg1%comm_kpt
  mpi_enreg2%me_kpt=mpi_enreg1%me_kpt
- mpi_enreg2%nproc_kpt=mpi_enreg1%nproc_kpt
+ mpi_enreg2%nproc_spkpt=mpi_enreg1%nproc_spkpt
  mpi_enreg2%my_isppoltab=mpi_enreg1%my_isppoltab
  mpi_enreg2%my_natom=mpi_enreg1%my_natom
  mpi_enreg2%comm_atom=mpi_enreg1%comm_atom
@@ -327,7 +301,7 @@ subroutine copy_mpi_enreg(MPI_enreg1,MPI_enreg2)
 !pointers
  if (associated(mpi_enreg1%distribfft)) then
    if (.not.associated(mpi_enreg2%distribfft)) then
-     ABI_DATATYPE_ALLOCATE(mpi_enreg2%distribfft,)
+     ABI_MALLOC(mpi_enreg2%distribfft,)
    end if
    call copy_distribfft(mpi_enreg1%distribfft,mpi_enreg2%distribfft)
  end if
@@ -336,36 +310,36 @@ subroutine copy_mpi_enreg(MPI_enreg1,MPI_enreg2)
    sz1=size(mpi_enreg1%proc_distrb,1)
    sz2=size(mpi_enreg1%proc_distrb,2)
    sz3=size(mpi_enreg1%proc_distrb,3)
-   ABI_ALLOCATE(mpi_enreg2%proc_distrb,(sz1,sz2,sz3))
+   ABI_MALLOC(mpi_enreg2%proc_distrb,(sz1,sz2,sz3))
    mpi_enreg2%proc_distrb=mpi_enreg1%proc_distrb
  end if
  if (allocated(mpi_enreg1%kptdstrb)) then
    sz1=size(mpi_enreg1%kptdstrb,1)
    sz2=size(mpi_enreg1%kptdstrb,2)
    sz3=size(mpi_enreg1%kptdstrb,3)
-   ABI_ALLOCATE(mpi_enreg2%kptdstrb,(sz1,sz2,sz3))
+   ABI_MALLOC(mpi_enreg2%kptdstrb,(sz1,sz2,sz3))
    mpi_enreg2%kptdstrb=mpi_enreg1%kptdstrb
  end if
  if (allocated(mpi_enreg1%kpt_loc2fbz_sp)) then
    sz1=size(mpi_enreg1%kpt_loc2fbz_sp,1)-1
    sz2=size(mpi_enreg1%kpt_loc2fbz_sp,2)
    sz3=size(mpi_enreg1%kpt_loc2fbz_sp,3)
-   ABI_ALLOCATE(mpi_enreg2%kpt_loc2fbz_sp,(0:sz1,1:sz2,1:sz3))
+   ABI_MALLOC(mpi_enreg2%kpt_loc2fbz_sp,(0:sz1,1:sz2,1:sz3))
    mpi_enreg2%kpt_loc2fbz_sp=mpi_enreg1%kpt_loc2fbz_sp
  end if
  if (allocated(mpi_enreg1%kpt_loc2ibz_sp)) then
    sz1=size(mpi_enreg1%kpt_loc2ibz_sp,1)-1
    sz2=size(mpi_enreg1%kpt_loc2ibz_sp,2)
    sz3=size(mpi_enreg1%kpt_loc2ibz_sp,3)
-   ABI_ALLOCATE(mpi_enreg2%kpt_loc2ibz_sp,(0:sz1,1:sz2,1:sz3))
+   ABI_MALLOC(mpi_enreg2%kpt_loc2ibz_sp,(0:sz1,1:sz2,1:sz3))
    mpi_enreg2%kpt_loc2ibz_sp=mpi_enreg1%kpt_loc2ibz_sp
  end if
  if (allocated(mpi_enreg1%mkmem)) then
-   ABI_ALLOCATE(mpi_enreg2%mkmem,(0:size(mpi_enreg1%mkmem,1)-1))
+   ABI_MALLOC(mpi_enreg2%mkmem,(0:size(mpi_enreg1%mkmem,1)-1))
    mpi_enreg2%mkmem=mpi_enreg1%mkmem
  end if
  if (associated(mpi_enreg1%my_atmtab)) then
-   ABI_ALLOCATE(mpi_enreg2%my_atmtab,(size(mpi_enreg1%my_atmtab)))
+   ABI_MALLOC(mpi_enreg2%my_atmtab,(size(mpi_enreg1%my_atmtab)))
    mpi_enreg2%my_atmtab=mpi_enreg1%my_atmtab
  else
    nullify(mpi_enreg2%my_atmtab)
@@ -373,32 +347,32 @@ subroutine copy_mpi_enreg(MPI_enreg1,MPI_enreg2)
  if (allocated(mpi_enreg1%my_kgtab)) then
    sz1=size(mpi_enreg1%my_kgtab,1)
    sz2=size(mpi_enreg1%my_kgtab,2)
-   ABI_ALLOCATE(mpi_enreg2%my_kgtab,(sz1,sz2))
+   ABI_MALLOC(mpi_enreg2%my_kgtab,(sz1,sz2))
    mpi_enreg2%my_kgtab=mpi_enreg1%my_kgtab
  end if
  if (allocated(mpi_enreg1%distrb_pert)) then
-   ABI_ALLOCATE(mpi_enreg2%distrb_pert,(size(mpi_enreg1%distrb_pert)))
+   ABI_MALLOC(mpi_enreg2%distrb_pert,(size(mpi_enreg1%distrb_pert)))
    mpi_enreg2%distrb_pert=mpi_enreg1%distrb_pert
  end if
  if (allocated(mpi_enreg1%distrb_img)) then
-   ABI_ALLOCATE(mpi_enreg2%distrb_img,(size(mpi_enreg1%distrb_img)))
+   ABI_MALLOC(mpi_enreg2%distrb_img,(size(mpi_enreg1%distrb_img)))
    mpi_enreg2%distrb_img=mpi_enreg1%distrb_img
  end if
  if (allocated(mpi_enreg1%my_imgtab)) then
-   ABI_ALLOCATE(mpi_enreg2%my_imgtab,(size(mpi_enreg1%my_imgtab)))
+   ABI_MALLOC(mpi_enreg2%my_imgtab,(size(mpi_enreg1%my_imgtab)))
    mpi_enreg2%my_imgtab=mpi_enreg1%my_imgtab
  end if
  if (allocated(mpi_enreg1%distrb_hf)) then
    sz1=size(mpi_enreg1%distrb_hf,1)
    sz2=size(mpi_enreg1%distrb_hf,2)
    sz3=size(mpi_enreg1%distrb_hf,3)
-   ABI_ALLOCATE(mpi_enreg2%distrb_hf,(sz1,sz2,sz3))
+   ABI_MALLOC(mpi_enreg2%distrb_hf,(sz1,sz2,sz3))
    mpi_enreg2%distrb_hf=mpi_enreg1%distrb_hf
  end if
 
 !Optional pointers
  if (allocated(mpi_enreg1%my_kpttab)) then
-   ABI_ALLOCATE(mpi_enreg2%my_kpttab,(size(mpi_enreg1%my_kpttab)))
+   ABI_MALLOC(mpi_enreg2%my_kpttab,(size(mpi_enreg1%my_kpttab)))
    mpi_enreg2%my_kpttab=mpi_enreg1%my_kpttab
  end if
 
@@ -427,11 +401,6 @@ end subroutine copy_mpi_enreg
 !! SIDE EFFECTS
 !!  MPI_enreg<MPI_type>=FFT pointer/flags intialized
 !!
-!! PARENTS
-!!      atm2fft,dfpt_atm2fft,pawmknhat,pawmknhat_psipsi,pawsushat,posdoppler
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine set_mpi_enreg_fft(MPI_enreg,comm_fft,distribfft,me_g0,paral_kgb)
@@ -449,9 +418,13 @@ subroutine set_mpi_enreg_fft(MPI_enreg,comm_fft,distribfft,me_g0,paral_kgb)
  mpi_enreg%me_g0=me_g0
  mpi_enreg%nproc_fft=xmpi_comm_size(comm_fft)
  mpi_enreg%me_fft=xmpi_comm_rank(comm_fft)
+ mpi_enreg%me_g0_fft=0
+ if (mpi_enreg%me_fft==0) then
+   mpi_enreg%me_g0_fft=1
+ end if
  if (associated(mpi_enreg%distribfft)) then
    call destroy_distribfft(mpi_enreg%distribfft)
-   ABI_DATATYPE_DEALLOCATE(mpi_enreg%distribfft)
+   ABI_FREE(mpi_enreg%distribfft)
  end if
  mpi_enreg%distribfft => distribfft
 
@@ -473,11 +446,6 @@ end subroutine set_mpi_enreg_fft
 !! SIDE EFFECTS
 !!  MPI_enreg<MPI_type>=FFT pointer/flags intialized
 !!
-!! PARENTS
-!!      atm2fft,dfpt_atm2fft,pawmknhat,pawmknhat_psipsi,pawsushat,posdoppler
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine unset_mpi_enreg_fft(MPI_enreg)
@@ -492,6 +460,7 @@ subroutine unset_mpi_enreg_fft(MPI_enreg)
  mpi_enreg%comm_fft=xmpi_comm_self
  mpi_enreg%nproc_fft=1
  mpi_enreg%me_fft=0
+ mpi_enreg%me_g0_fft=1
  mpi_enreg%paral_kgb=0
  nullify(mpi_enreg%distribfft)
 
@@ -523,15 +492,6 @@ end subroutine unset_mpi_enreg_fft
 !!  ffti2_local(:) = local i2 indices in fourdp
 !!  fftn3_distrib(:) = rank of the processor which own fft planes in 3rd dimension for fourdp
 !!  ffti3_local(:) = local i3 indices in fourdp
-!!
-!! PARENTS
-!!      dfpt_eltfrhar,dfpt_eltfrloc,dfpt_vlocal,fftpac,fourdp,hartre,hartrestr
-!!      indirect_parallel_Fourier,initro,laplacian,m_fock,m_ioarr,mag_constr
-!!      make_efg_el,mkcore,mkcore_paw,mklocl_realspace,mklocl_recipspace
-!!      moddiel,out1dm,posdoppler,prcrskerker2,strhar,symrhg,vlocalstr,xcden
-!!      xcpot
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -574,8 +534,8 @@ subroutine ptabs_fourdp(MPI_enreg,n2,n3,fftn2_distrib,ffti2_local,fftn3_distrib,
    end if
  end if
 
- if(.not.(grid_found)) then
-   MSG_BUG("Unable to find an allocated distrib for this fft grid")
+ if (.not.grid_found) then
+   ABI_BUG(sjoin("Unable to find an allocated distrib for this fft grid with n2, n3 = ", ltoa([n2, n3])))
  end if
 
 end subroutine ptabs_fourdp
@@ -606,11 +566,6 @@ end subroutine ptabs_fourdp
 !!  ffti2_local(:) = local i2 indices in fourwf
 !!  fftn3_distrib(:) = rank of the processors which own fft planes in 3rd dimension for fourwf
 !!  ffti3_local(:) = local i3 indices in fourwf
-!!
-!! PARENTS
-!!      fourwf
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -652,8 +607,8 @@ subroutine ptabs_fourwf(MPI_enreg,n2,n3,fftn2_distrib,ffti2_local,fftn3_distrib,
    end if
  end if
 
- if(.not.(grid_found)) then
-   MSG_BUG("Unable to find an allocated distrib for this fft grid")
+ if(.not. grid_found) then
+   ABI_BUG(sjoin("Unable to find an allocated distrib for this fft grid", ltoa([n2, n3])))
  end if
 
 end subroutine ptabs_fourwf
@@ -681,11 +636,6 @@ end subroutine ptabs_fourwf
 !!                                       FALSE otherwise
 !!  [msg]= -optional- warning message to be printed out
 !!
-!! PARENTS
-!!  driver,mpi_setup
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 logical function mpi_distrib_is_ok(MPI_enreg,nband,nkpt,nkpt_current_proc,nsppol,msg)
@@ -701,26 +651,26 @@ logical function mpi_distrib_is_ok(MPI_enreg,nband,nkpt,nkpt_current_proc,nsppol
  mpi_distrib_is_ok=.true.
 
  if (MPI_enreg%paralbd==0) then
-   if (MPI_enreg%nproc_kpt-floor(nsppol*nkpt*one/nkpt_current_proc)>=nkpt_current_proc) then
+   if (MPI_enreg%nproc_spkpt-floor(nsppol*nkpt*one/nkpt_current_proc)>=nkpt_current_proc) then
      mpi_distrib_is_ok=.false.
      if (present(msg)) then
        write(msg,'(a,i0,4a,i0,3a)') &
-&        'Your number of spins*k-points (=',nsppol*nkpt,') ',&
-&        'will not distribute correctly',ch10, &
-&        'with the current number of processors (=',MPI_enreg%nproc_kpt,').',ch10,&
-&        'You will leave some empty.'
+        'Your number of spins*k-points (=',nsppol*nkpt,') ',&
+        'will not distribute correctly',ch10, &
+        'with the current number of processors (=',MPI_enreg%nproc_spkpt,').',ch10,&
+        'You will leave some empty.'
      end if
    end if
  else
-   if (mod(nband,max(1,MPI_enreg%nproc_kpt/(nsppol*nkpt)))/=0) then
+   if (mod(nband,max(1,MPI_enreg%nproc_spkpt/(nsppol*nkpt)))/=0) then
      mpi_distrib_is_ok=.false.
      if (present(msg)) then
        write(msg,'(a,i0,2a,i0,4a,i0,7a)')&
-&        'Your number of spins*k-points (=',nsppol*nkpt,') ',&
-&         'and bands (=',nband,') ',&
-&         'will not distribute correctly',ch10,&
-&         'with the current number of processors (=',MPI_enreg%nproc_kpt,').',ch10,&
-&         'You will leave some empty.'
+        'Your number of spins*k-points (=',nsppol*nkpt,') ',&
+         'and bands (=',nband,') ',&
+         'will not distribute correctly',ch10,&
+         'with the current number of processors (=',MPI_enreg%nproc_spkpt,').',ch10,&
+         'You will leave some empty.'
      end if
    end if
  end if
@@ -733,13 +683,10 @@ end function mpi_distrib_is_ok
 !!  proc_distrb_cycle
 !!
 !! FUNCTION
-!!  test a condition to cycle
+!!  test a condition to cycle over bands and k-points which do not belong to the present processor
+!!  if return value is true, you can cycle over the given range of bands for this k and sppol
 !!
 !! INPUTS
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -756,6 +703,7 @@ function proc_distrb_cycle(distrb,ikpt,iband1,iband2,isppol,me)
  proc_distrb_cycle=.false.
  if (allocated(distrb)) then
    if (isppol==-1) then
+! in this condition, if one of the distrb is for me, then the minval will be == 0, so it returns false
      proc_distrb_cycle=(minval(abs(distrb(ikpt,iband1:iband2,:)-me))/=0)
    else
      proc_distrb_cycle=(minval(abs(distrb(ikpt,iband1:iband2,isppol)-me))/=0)
@@ -763,6 +711,160 @@ function proc_distrb_cycle(distrb,ikpt,iband1,iband2,isppol,me)
  end if
 
 end function proc_distrb_cycle
+!!***
+
+!!****f* ABINIT/proc_distrb_nband
+!! NAME
+!!  proc_distrb_nband
+!!
+!! FUNCTION
+!!  return number of bands at this k and spin which are on current proc "me"
+!!  NB: could replace proc_distrb_cycle with "proc_distrb_nband > 0"
+!!  isppol -1 means for all spin channels, I think...
+!!
+!! INPUTS
+!!
+!! SOURCE
+
+function proc_distrb_nband(distrb,ikpt,nband_k,isppol,me)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: ikpt,isppol,me,nband_k
+ integer,allocatable,intent(in) :: distrb(:,:,:)
+ integer :: proc_distrb_nband
+
+! *************************************************************************
+
+ proc_distrb_nband=0
+ if (allocated(distrb)) then
+   if (isppol==-1) then
+!TODO: check this is used correctly : in nsppol 2 case you could end up with 2*nband
+     proc_distrb_nband=(count(distrb(ikpt,1:nband_k,:)==me))
+   else
+     proc_distrb_nband=(count(distrb(ikpt,1:nband_k,isppol)==me))
+   end if
+ end if
+
+end function proc_distrb_nband
+!!***
+
+!!****f* ABINIT/proc_distrb_cycle_bands
+!! NAME
+!!  proc_distrb_cycle_bands
+!!
+!! FUNCTION
+!!  return vector of logicals for each band being on present proc
+!!
+!! INPUTS
+!!
+!! SOURCE
+
+subroutine proc_distrb_cycle_bands(cycle_bands,distrb,ikpt,isppol,me)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: ikpt,isppol,me
+ integer,allocatable,intent(in) :: distrb(:,:,:)
+ logical,allocatable,intent(out) :: cycle_bands(:)
+ character(len=500) :: msg
+
+! *************************************************************************
+
+ ABI_REMALLOC (cycle_bands, (size(distrb, 2)))
+ cycle_bands=.false.
+ if (allocated(distrb)) then
+   if (isppol==-1) then
+! TODO : should raise error here - the output rank will be all wrong
+!   could return an OR of the two spin channels, if appropriate
+     cycle_bands=(distrb(ikpt,:,1)/=me)
+     write (msg, "(a)") " for the moment proc_distrb_cycle_bands does not handle the 'any spin' option nsppol -1"
+     ABI_ERROR(msg)
+   else
+     cycle_bands=(distrb(ikpt,:,isppol)/=me)
+   end if
+ end if
+
+end subroutine proc_distrb_cycle_bands
+!!***
+
+!!****f* ABINIT/proc_distrb_kptband
+!! NAME
+!!  proc_distrb_kptband
+!!
+!! FUNCTION
+!!  return vector of processor indices for each band, within the full kpt communicator
+!!
+!! INPUTS
+!!
+!! SOURCE
+
+subroutine proc_distrb_kptband(kpt_band_procs,distrb,ikpt,isppol)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: ikpt,isppol
+ integer,allocatable,intent(in) :: distrb(:,:,:)
+ integer,allocatable,intent(out) :: kpt_band_procs(:)
+ character(len=500) :: msg
+
+! *************************************************************************
+
+ ABI_REMALLOC(kpt_band_procs, (size(distrb, 2)))
+ kpt_band_procs=-1
+ if (allocated(distrb)) then
+   if (isppol==-1) then
+     ! TODO : should raise error here - the output rank will be all wrong for isppol 2!
+     kpt_band_procs=distrb(ikpt,:,1)
+     write (msg, "(a)") " for the moment proc_distrb_kptband does not handle the 'any spin' option nsppol -1"
+     ABI_ERROR(msg)
+   else
+     kpt_band_procs=distrb(ikpt,:,isppol)
+   end if
+ end if
+
+end subroutine proc_distrb_kptband
+!!***
+
+!!****f* ABINIT/proc_distrb_band
+!! NAME
+!!  proc_distrb_band
+!!
+!! FUNCTION
+!!  return `rank_band` array with the rank of the processor in comm_band treating `band`
+!!
+!! INPUTS
+!!
+!! SOURCE
+
+subroutine proc_distrb_band(rank_band,distrib,ikpt,isppol,nband,me_band,me_kpt,comm_band)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: nband, ikpt, isppol
+ integer,intent(in) :: me_band,me_kpt,comm_band
+ integer,allocatable,intent(in) :: distrib(:,:,:)
+ integer,intent(out) :: rank_band(nband)
+
+ integer :: ierr, iband
+
+! *************************************************************************
+
+ rank_band = 0
+
+ if (allocated(distrib)) then
+   do iband=1, nband
+     ! is this (k, band, spin) on current proc?
+     if (distrib(ikpt,iband,isppol)/=me_kpt) cycle
+     ! if so save rank in band subcommunicator
+     rank_band(iband) = me_band+1
+   end do
+   call xmpi_sum(rank_band,comm_band,ierr)
+ end if
+
+ rank_band = rank_band-1
+
+end subroutine proc_distrb_band
 !!***
 
 !!****f* ABINIT/initmpi_world
@@ -775,12 +877,6 @@ end function proc_distrb_cycle
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      finddistrproc
-!!
-!! CHILDREN
-!!      abi_io_redirect,libpaw_write_comm_set
 !!
 !! SOURCE
 
@@ -802,10 +898,10 @@ subroutine initmpi_world(mpi_enreg,nproc)
 
  if(nproc==mpi_enreg%nproc) return
 
- ABI_ALLOCATE(ranks,(0:nproc-1))
+ ABI_MALLOC(ranks,(0:nproc-1))
  ranks(0:nproc-1)=(/((ii),ii=0,nproc-1)/)
  mpi_enreg%comm_world=xmpi_subcomm(xmpi_world,nproc,ranks)
- ABI_DEALLOCATE(ranks)
+ ABI_FREE(ranks)
 
  if(mpi_enreg%me<nproc)  then
    mpi_enreg%me=xmpi_comm_rank(mpi_enreg%comm_world)
@@ -833,18 +929,6 @@ end subroutine initmpi_world
 !! OUTPUT
 !!  mpi_enreg=information about MPI parallelization
 !!
-!! PARENTS
-!!      atm2fft,bethe_salpeter,bsepostproc,calc_vhxc_me,cut3d,debug_tools
-!!      dfpt_atm2fft,dfpt_nstpaw,dieltcel,eph,fftprof,ks_ddiago
-!!      linear_optics_paw,m_cut3d,m_dvdb,m_fft,m_fft_prof,m_fftcore,m_gsphere
-!!      m_hamiltonian,m_ioarr,m_kxc,m_mpinfo,m_pawpwij,m_ppmodel,m_screening
-!!      m_wfd,m_wfk,mlwfovlp_qp,mrggkk,mrgscr,partial_dos_fractions,pawmknhat
-!!      pawmknhat_psipsi,pawsushat,posdoppler,scfcv,screening,sigma,suscep_stat
-!!      susk,suskmm,ujdet,vdw_kernelgen,wfk_analyze
-!!
-!! CHILDREN
-!!      nullify_mpi_enreg
-!!
 !! SOURCE
 
 subroutine initmpi_seq(mpi_enreg)
@@ -863,6 +947,7 @@ subroutine initmpi_seq(mpi_enreg)
  mpi_enreg%me_cell=0
  mpi_enreg%me_fft=0
  mpi_enreg%me_g0=1
+ mpi_enreg%me_g0_fft=1
  mpi_enreg%me_img=0
  mpi_enreg%me_hf=0
  mpi_enreg%me_kpt=0
@@ -880,7 +965,7 @@ subroutine initmpi_seq(mpi_enreg)
  mpi_enreg%nproc_fft=1
  mpi_enreg%nproc_img=1
  mpi_enreg%nproc_hf=1
- mpi_enreg%nproc_kpt=1
+ mpi_enreg%nproc_spkpt=1
  mpi_enreg%nproc_pert=1
  mpi_enreg%nproc_spinor=1
  mpi_enreg%nproc_wvl=1
@@ -917,7 +1002,7 @@ subroutine initmpi_seq(mpi_enreg)
 !Allocate and nullify distribfft datastructure
 ! This is not good since distribfft is not initialized here (even with 0s).
 ! It can be dangerous if use with no care (Valgrind might complain)
- ABI_DATATYPE_ALLOCATE(mpi_enreg%distribfft,)
+ ABI_MALLOC(mpi_enreg%distribfft,)
 
  DBG_EXIT("COLL")
 
@@ -942,12 +1027,6 @@ end subroutine initmpi_seq
 !!    my_natom                  =number of atoms treated by current proc
 !!    my_atmtab(mpi_enreg%natom)=indexes of the atoms treated by current processor
 !!
-!! PARENTS
-!!      m_paral_pert,mpi_setup
-!!
-!! CHILDREN
-!!      get_my_atmtab,get_my_natom
-!!
 !! SOURCE
 
 subroutine initmpi_atom(dtset,mpi_enreg)
@@ -971,13 +1050,13 @@ subroutine initmpi_atom(dtset,mpi_enreg)
  mpi_enreg%comm_atom=xmpi_comm_self
  mpi_enreg%my_natom=dtset%natom
  if (associated(mpi_enreg%my_atmtab))then
-   ABI_DEALLOCATE(mpi_enreg%my_atmtab)
+   ABI_FREE(mpi_enreg%my_atmtab)
  end if
  nullify(mpi_enreg%my_atmtab)
 
  if (xmpi_paral==0) then
    mpi_enreg%nproc_atom=0
-   ABI_ALLOCATE(mpi_enreg%my_atmtab,(0))
+   ABI_MALLOC(mpi_enreg%my_atmtab,(0))
    return
  end if
 
@@ -993,13 +1072,13 @@ subroutine initmpi_atom(dtset,mpi_enreg)
 &   msg=' Parallelisation over atoms only compatible with GS or RF !'
    if (dtset%macro_uj/=0)msg=' Parallelisation over atoms not compatible with macro_uj!=0 !'
    if (msg/='') then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
  end if
 
  if (mpi_enreg%comm_atom==xmpi_comm_null) then
    mpi_enreg%nproc_atom=0;mpi_enreg%my_natom=0
-   ABI_ALLOCATE(mpi_enreg%my_atmtab,(0))
+   ABI_MALLOC(mpi_enreg%my_atmtab,(0))
    return
  end if
 
@@ -1025,10 +1104,10 @@ subroutine initmpi_atom(dtset,mpi_enreg)
      call get_my_atmtab(mpi_enreg%comm_atom,mpi_enreg%my_atmtab,my_atmtab_allocated, &
 &     paral_atom,dtset%natom)
    else if (.not.paral_atom) then
-     ABI_ALLOCATE(mpi_enreg%my_atmtab,(dtset%natom))
+     ABI_MALLOC(mpi_enreg%my_atmtab,(dtset%natom))
      mpi_enreg%my_atmtab(1:dtset%natom)=(/(iatom, iatom=1,dtset%natom)/)
    else if (mpi_enreg%my_natom==0) then
-     ABI_ALLOCATE(mpi_enreg%my_atmtab,(0))
+     ABI_MALLOC(mpi_enreg%my_atmtab,(0))
    end if
 
  end if
@@ -1050,11 +1129,6 @@ end subroutine initmpi_atom
 !! SIDE EFFECTS
 !!  mpi_enreg=information about MPI parallelization
 !!
-!! PARENTS
-!!      abinit
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine clnmpi_atom(mpi_enreg)
@@ -1074,7 +1148,7 @@ subroutine clnmpi_atom(mpi_enreg)
  end if
 
  if(associated(mpi_enreg%my_atmtab)) then
-   ABI_DEALLOCATE(mpi_enreg%my_atmtab)
+   ABI_FREE(mpi_enreg%my_atmtab)
  end if
 
  mpi_enreg%nproc_atom=1
@@ -1098,13 +1172,6 @@ end subroutine clnmpi_atom
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      mpi_setup
-!!
-!! CHILDREN
-!!      mpi_cart_coords,mpi_cart_create,mpi_cart_sub,mpi_comm_rank,wrtout
-!!      xmpi_abort,xmpi_comm_free
 !!
 !! SOURCE
 
@@ -1140,7 +1207,7 @@ subroutine initmpi_grid(mpi_enreg)
    mpi_enreg%nproc_fft    = 0
    mpi_enreg%nproc_band   = 0
    mpi_enreg%nproc_hf    = 0
-   mpi_enreg%nproc_kpt    = 0
+   mpi_enreg%nproc_spkpt    = 0
    mpi_enreg%nproc_spinor   = 0
    mpi_enreg%comm_fft            = xmpi_comm_null
    mpi_enreg%comm_band           = xmpi_comm_null
@@ -1163,20 +1230,20 @@ subroutine initmpi_grid(mpi_enreg)
    if (mpi_enreg%nproc_spinor>1) mpi_enreg%paral_spinor=1
 
     !Effective number of processors used for the grid
-   nproc_eff=mpi_enreg%nproc_fft*mpi_enreg%nproc_band *mpi_enreg%nproc_kpt*mpi_enreg%nproc_spinor
+   nproc_eff=mpi_enreg%nproc_fft*mpi_enreg%nproc_band *mpi_enreg%nproc_spkpt*mpi_enreg%nproc_spinor
    if(nproc_eff/=nproc) then
-     write(msg,'(4a,5(a,i0))') &
-&     '  The number of band*FFT*kpt*spinor processors, npband*npfft*npkpt*npspinor should be',ch10,&
-&     '  equal to the total number of processors, nproc.',ch10,&
-&     '  However, npband   =',mpi_enreg%nproc_band,&
-&     '           npfft    =',mpi_enreg%nproc_fft,&
-&     '           npkpt    =',mpi_enreg%nproc_kpt,&
-&     '           npspinor =',mpi_enreg%nproc_spinor,&
-&     '       and nproc    =',nproc
-     MSG_WARNING(msg)
+     write(msg,'(4a,5(a,i0,a))') &
+      '  The number of band*FFT*spin*kpt*spinor processors, npband*npfft*np_spkpt*npspinor should be',ch10,&
+      '  equal to the total number of processors, nproc.',ch10,&
+      '  However, npband   =',mpi_enreg%nproc_band, ch10, &
+      '           npfft    =',mpi_enreg%nproc_fft, ch10, &
+      '           np_spkpt =',mpi_enreg%nproc_spkpt, ch10, &
+      '           npspinor =',mpi_enreg%nproc_spinor, ch10, &
+      '           nproc    =',nproc,ch10
+     ABI_WARNING(msg)
    end if
 
-   !Nothing to do if only 1 proc
+   ! Nothing to do if only 1 proc
    if (nproc_eff==1) return
 
    ! Initialize the communicator for Hartree-Fock to xmpi_comm_self
@@ -1205,30 +1272,30 @@ subroutine initmpi_grid(mpi_enreg)
      !  valgrind claims this is not deallocated in test v5/72
      !  Can someone knowledgable check?
      dimcart=4
-     ABI_ALLOCATE(sizecart,(dimcart))
-     ABI_ALLOCATE(periode,(dimcart))
+     ABI_MALLOC(sizecart,(dimcart))
+     ABI_MALLOC(periode,(dimcart))
 !    MT 2012-june: change the order of the indexes; not sure this is efficient
 !    (not efficient on TGCC-Curie).
-     sizecart(1)=mpi_enreg%nproc_kpt  ! mpi_enreg%nproc_kpt
+     sizecart(1)=mpi_enreg%nproc_spkpt  ! mpi_enreg%nproc_spkpt
      sizecart(2)=mpi_enreg%nproc_band ! mpi_enreg%nproc_band
      sizecart(3)=mpi_enreg%nproc_spinor ! mpi_enreg%nproc_spinor
      sizecart(4)=mpi_enreg%nproc_fft  ! mpi_enreg%nproc_fft
      periode(:)=.false.;reorder=.false.
      call MPI_CART_CREATE(spacecomm,dimcart,sizecart,periode,reorder,commcart_4d,ierr)
-     ABI_DEALLOCATE(periode)
-     ABI_DEALLOCATE(sizecart)
+     ABI_FREE(periode)
+     ABI_FREE(sizecart)
 
 !    Find the index and coordinates of the current processor
      call MPI_COMM_RANK(commcart_4d, me_cart_4d, ierr)
-     ABI_ALLOCATE(coords,(dimcart))
+     ABI_MALLOC(coords,(dimcart))
      call MPI_CART_COORDS(commcart_4d, me_cart_4d,dimcart,coords,ierr)
      mpi_enreg%me_kpt =coords(1)
      mpi_enreg%me_band=coords(2)
      mpi_enreg%me_spinor=coords(3)
      mpi_enreg%me_fft =coords(4)
-     ABI_DEALLOCATE(coords)
+     ABI_FREE(coords)
 
-     ABI_ALLOCATE(keepdim,(dimcart))
+     ABI_MALLOC(keepdim,(dimcart))
 
 !    Create the communicator for fft distribution
      keepdim(1)=.false.
@@ -1296,19 +1363,17 @@ subroutine initmpi_grid(mpi_enreg)
      keepdim(4)=.true.
      call MPI_CART_SUB(commcart_4d, keepdim, mpi_enreg%comm_bandspinorfft,ierr)
 
-     ABI_DEALLOCATE(keepdim)
+     ABI_FREE(keepdim)
      call xmpi_comm_free(commcart_4d)
    end if
 
-!  Write some data
-   write(msg,'(a,4i5)') 'npfft, npband, npspinor and npkpt: ',&
-&   mpi_enreg%nproc_fft,mpi_enreg%nproc_band, &
-&   mpi_enreg%nproc_spinor,mpi_enreg%nproc_kpt
-   call wrtout(std_out,msg,'COLL')
-   write(msg,'(a,4i5)') 'me_fft, me_band, me_spinor , me_kpt: ',&
-&   mpi_enreg%me_fft,mpi_enreg%me_band,&
-&   mpi_enreg%me_spinor, mpi_enreg%me_kpt
-   call wrtout(std_out,msg,'COLL')
+   !Write some data
+   !write(msg,'(a,4i5)') 'npfft, npband, npspinor and np_spkpt: ',&
+   !mpi_enreg%nproc_fft,mpi_enreg%nproc_band, mpi_enreg%nproc_spinor,mpi_enreg%nproc_spkpt
+   !call wrtout(std_out,msg,'COLL')
+   !write(msg,'(a,4i5)') 'me_fft, me_band, me_spinor , me_kpt: ',&
+   !mpi_enreg%me_fft,mpi_enreg%me_band,mpi_enreg%me_spinor, mpi_enreg%me_kpt
+   !call wrtout(std_out,msg,'COLL')
 
  else ! paral_hf==1
 !* Option Hartree-Fock is active and more than 1 processor is dedicated to the parallelization over occupied states.
@@ -1328,24 +1393,24 @@ subroutine initmpi_grid(mpi_enreg)
 
 !* Create the global cartesian 2D- communicator
    dimcart=2
-   ABI_ALLOCATE(sizecart,(dimcart))
-   ABI_ALLOCATE(periode,(dimcart))
-   sizecart(1)=mpi_enreg%nproc_kpt  ! mpi_enreg%nproc_kpt
+   ABI_MALLOC(sizecart,(dimcart))
+   ABI_MALLOC(periode,(dimcart))
+   sizecart(1)=mpi_enreg%nproc_spkpt  ! mpi_enreg%nproc_spkpt
    sizecart(2)=mpi_enreg%nproc_hf   ! mpi_enreg%nproc_hf
    periode(:)=.false.;reorder=.false.
    call MPI_CART_CREATE(spacecomm,dimcart,sizecart,periode,reorder,commcart_2d,ierr)
-   ABI_DEALLOCATE(periode)
-   ABI_DEALLOCATE(sizecart)
+   ABI_FREE(periode)
+   ABI_FREE(sizecart)
 
 !* Find the index and coordinates of the current processor
    call MPI_COMM_RANK(commcart_2d, me_cart_2d, ierr)
-   ABI_ALLOCATE(coords,(dimcart))
+   ABI_MALLOC(coords,(dimcart))
    call MPI_CART_COORDS(commcart_2d, me_cart_2d,dimcart,coords,ierr)
    mpi_enreg%me_kpt =coords(1)
    mpi_enreg%me_hf=coords(2)
-   ABI_DEALLOCATE(coords)
+   ABI_FREE(coords)
 
-   ABI_ALLOCATE(keepdim,(dimcart))
+   ABI_MALLOC(keepdim,(dimcart))
 
 !* Create the communicator for kpt distribution
    keepdim(1)=.true.
@@ -1357,14 +1422,14 @@ subroutine initmpi_grid(mpi_enreg)
    keepdim(2)=.true.
    call MPI_CART_SUB(commcart_2d, keepdim, mpi_enreg%comm_hf,ierr)
 
-   ABI_DEALLOCATE(keepdim)
+   ABI_FREE(keepdim)
    call xmpi_comm_free(commcart_2d)
 
 !* Write some data
-   write(msg,'(a,2(1x,i0))') 'nphf and npkpt: ',mpi_enreg%nproc_hf, mpi_enreg%nproc_kpt
-   call wrtout(std_out,msg,'COLL')
+   write(msg,'(a,2(1x,i0))') 'nphf and np_spkpt: ',mpi_enreg%nproc_hf, mpi_enreg%nproc_spkpt
+   call wrtout(std_out,msg)
    write(msg,'(a,2(1x,i0))') 'me_hf, me_kpt: ',mpi_enreg%me_hf, mpi_enreg%me_kpt
-   call wrtout(std_out,msg,'COLL')
+   call wrtout(std_out,msg)
  end if
 #endif
 
@@ -1384,11 +1449,6 @@ end subroutine initmpi_grid
 !!
 !! SIDE EFFECTS
 !!  mpi_enreg=information about MPI parallelization
-!!
-!! PARENTS
-!!      abinit
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1479,12 +1539,6 @@ end subroutine clnmpi_grid
 !!    mpi_enreg%me_img=my rank in comm_img
 !!    mpi_enreg%distrb_img(:)=index of processor treating each image (in comm_img communicator)
 !!
-!! PARENTS
-!!      mpi_setup
-!!
-!! CHILDREN
-!!      sort_int
-!!
 !! SOURCE
 
 subroutine initmpi_img(dtset,mpi_enreg,option)
@@ -1511,8 +1565,7 @@ subroutine initmpi_img(dtset,mpi_enreg,option)
    mpi_enreg%comm_cell=mpi_enreg%comm_world
  end if
 
- if (xmpi_paral==1.and.dtset%npimage>1.and.dtset%npimage<=mpi_enreg%nproc.and. &
-&    dtset%optdriver==RUNL_GSTATE) then
+ if (xmpi_paral==1.and.dtset%npimage>1.and.dtset%npimage<=mpi_enreg%nproc.and. dtset%optdriver==RUNL_GSTATE) then
 
 !  Activate flag for parallelization over images
    mpi_enreg%paral_img=1
@@ -1524,27 +1577,27 @@ subroutine initmpi_img(dtset,mpi_enreg,option)
      nimage_eff=max(ndynimage_eff,dtset%nimage-ndynimage_eff)
      if (dtset%npimage>nimage_eff) then
        write(unit=msg,fmt='(3a,i4,a,i4,4a)') &
-&       'The number of processors used for the parallelization',ch10,&
-&       ' over images (npimage=',dtset%npimage,&
-&       ') is greater than the number of dynamic (or static) images (',nimage_eff,') !',ch10,&
-&       ' This is unefficient.',ch10
-       MSG_WARNING(msg)
+        'The number of processors used for the parallelization',ch10,&
+        ' over images (npimage=',dtset%npimage,&
+        ') is greater than the number of dynamic (or static) images (',nimage_eff,') !',ch10,&
+        ' This is inefficient.',ch10
+       ABI_WARNING(msg)
      end if
      if (dtset%npimage>mpi_enreg%nproc) then
        write(unit=msg,fmt='(3a,i6,a,i4,4a)') &
-&       'The number of processors used for the parallelization',ch10,&
-&       ' over images (nproc=',mpi_enreg%nproc,&
-&       ') is smaller than npimage in input file (',dtset%npimage,&
-&       ')!',ch10,' This is unconsistent.',ch10
-       MSG_ERROR(msg)
+        'The number of processors used for the parallelization',ch10,&
+        ' over images (nproc=',mpi_enreg%nproc,&
+        ') is smaller than npimage in input file (',dtset%npimage,&
+        ')!',ch10,' This is unconsistent.',ch10
+       ABI_ERROR(msg)
      end if
      if (mod(nimage_eff,dtset%npimage)/=0) then
        write(unit=msg,fmt='(3a,i4,a,i4,4a)') &
-&       'The number of processors used for the parallelization',ch10,&
-&       ' over images (npimage=',dtset%npimage,&
-&       ') does not divide the number of dynamic images (',nimage_eff,&
-&       ') !',ch10,' This is unefficient (charge unbalancing).',ch10
-       MSG_WARNING(msg)
+        'The number of processors used for the parallelization',ch10,&
+        ' over images (npimage=',dtset%npimage,&
+        ') does not divide the number of dynamic images (',nimage_eff,&
+        ') !',ch10,' This is inefficient (charge unbalancing).',ch10
+       ABI_WARNING(msg)
      end if
    end if
 
@@ -1563,7 +1616,7 @@ subroutine initmpi_img(dtset,mpi_enreg,option)
    if (option==1.or.option==-1) then
 !    Indexes of images treated by current proc
      if (mpi_enreg%me<=iprocmax) then
-       ABI_ALLOCATE(mpi_enreg%my_imgtab,(mpi_enreg%my_nimage))
+       ABI_MALLOC(mpi_enreg%my_imgtab,(mpi_enreg%my_nimage))
        nrank=0
        imod=mpi_enreg%me/nproc_per_image+1;imod=mod(imod,dtset%npimage)
 !      Dynamic images
@@ -1589,28 +1642,28 @@ subroutine initmpi_img(dtset,mpi_enreg,option)
          end if
        end do
        if (nrank/=mpi_enreg%my_nimage) then
-         MSG_BUG('Error on nrank !')
+         ABI_BUG('Error on nrank !')
        end if
 !      Sort images by increasing index (this step is MANDATORY !!)
-       ABI_ALLOCATE(ranks,(nrank))
+       ABI_MALLOC(ranks,(nrank))
        call sort_int(nrank,mpi_enreg%my_imgtab,ranks)
-       ABI_DEALLOCATE(ranks)
+       ABI_FREE(ranks)
      else
-       ABI_ALLOCATE(mpi_enreg%my_imgtab,(0))
+       ABI_MALLOC(mpi_enreg%my_imgtab,(0))
      end if
    end if
    if (option==2.or.option==3.or.option==-1) then
 !    Communicator over one image
      if (mpi_enreg%me<=iprocmax) then
-       ABI_ALLOCATE(ranks,(nproc_per_image))
+       ABI_MALLOC(ranks,(nproc_per_image))
        iprocmin=(mpi_enreg%me/nproc_per_image)*nproc_per_image
        ranks=(/((iprocmin+irank-1),irank=1,nproc_per_image)/)
        mpi_enreg%comm_cell=xmpi_subcomm(mpi_enreg%comm_world,nproc_per_image,ranks)
-       ABI_DEALLOCATE(ranks)
+       ABI_FREE(ranks)
        mpi_enreg%me_cell=xmpi_comm_rank(mpi_enreg%comm_cell)
        mpi_enreg%nproc_cell=nproc_per_image
        if (mpi_enreg%me_cell==0.and.mod(mpi_enreg%me,nproc_per_image)/=0) then
-         MSG_BUG('Error on me_cell !')
+         ABI_BUG('Error on me_cell !')
        end if
      else
        mpi_enreg%comm_img=xmpi_comm_null
@@ -1621,17 +1674,17 @@ subroutine initmpi_img(dtset,mpi_enreg,option)
    if (option==3.or.option==-1) then
 !    Communicator over all images
      if (mpi_enreg%me<=iprocmax) then
-       ABI_ALLOCATE(ranks,(dtset%npimage))
+       ABI_MALLOC(ranks,(dtset%npimage))
        iprocmin=mod(mpi_enreg%me,nproc_per_image)
        ranks=(/((iprocmin+(irank-1)*nproc_per_image),irank=1,dtset%npimage)/)
        mpi_enreg%comm_img=xmpi_subcomm(mpi_enreg%comm_world,dtset%npimage,ranks)
-       ABI_DEALLOCATE(ranks)
+       ABI_FREE(ranks)
        mpi_enreg%me_img=xmpi_comm_rank(mpi_enreg%comm_img)
        mpi_enreg%nproc_img=dtset%npimage
        if (iprocmin==0.and.mpi_enreg%me_img==0.and.mpi_enreg%me/=0) then
-         MSG_BUG('Error on me_img!')
+         ABI_BUG('Error on me_img!')
        end if
-       ABI_ALLOCATE(mpi_enreg%distrb_img,(dtset%nimage))
+       ABI_MALLOC(mpi_enreg%distrb_img,(dtset%nimage))
 !      Dynamic images
        nrank=0
        do irank=1,dtset%nimage
@@ -1654,7 +1707,7 @@ subroutine initmpi_img(dtset,mpi_enreg,option)
        mpi_enreg%comm_img=xmpi_comm_null
        mpi_enreg%nproc_img=0
        mpi_enreg%me_img=-1
-       ABI_ALLOCATE(mpi_enreg%distrb_img,(0))
+       ABI_MALLOC(mpi_enreg%distrb_img,(0))
      end if
    end if
 
@@ -1750,7 +1803,7 @@ subroutine initmpi_img(dtset,mpi_enreg,option)
    end if
 !  Indexes of images treated by current proc
    if (option==1.or.option==-1) then
-     ABI_ALLOCATE(mpi_enreg%my_imgtab,(mpi_enreg%my_nimage))
+     ABI_MALLOC(mpi_enreg%my_imgtab,(mpi_enreg%my_nimage))
      mpi_enreg%my_imgtab=(/(irank,irank=1,mpi_enreg%my_nimage)/)
    end if
 !  Communicator over all images
@@ -1764,7 +1817,7 @@ subroutine initmpi_img(dtset,mpi_enreg,option)
      mpi_enreg%nproc_img=1
      mpi_enreg%comm_img=xmpi_comm_self
      mpi_enreg%me_img=0
-     ABI_ALLOCATE(mpi_enreg%distrb_img,(dtset%nimage))
+     ABI_MALLOC(mpi_enreg%distrb_img,(dtset%nimage))
      mpi_enreg%distrb_img(:)=0
    end if
  end if
@@ -1782,11 +1835,6 @@ end subroutine initmpi_img
 !!
 !! FUNCTION
 !!  Cleans-up the mpi information for parallelism over images of the cell (npimage>1).
-!!
-!! PARENTS
-!!      abinit
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1811,12 +1859,8 @@ subroutine clnmpi_img(mpi_enreg)
    mpi_enreg%comm_img=xmpi_comm_null
  end if
 
- if (allocated(mpi_enreg%my_imgtab))  then
-   ABI_DEALLOCATE(mpi_enreg%my_imgtab)
- end if
- if (allocated(mpi_enreg%distrb_img))  then
-   ABI_DEALLOCATE(mpi_enreg%distrb_img)
- end if
+ ABI_SFREE(mpi_enreg%my_imgtab)
+ ABI_SFREE(mpi_enreg%distrb_img)
 
  mpi_enreg%paral_img=0
  mpi_enreg%my_nimage=1
@@ -1845,12 +1889,6 @@ end subroutine clnmpi_img
 !! SIDE EFFECTS
 !!  mpi_enreg=information about MPI parallelization
 !!
-!! PARENTS
-!!      mpi_setup
-!!
-!! CHILDREN
-!!      get_npert_rbz,xmpi_comm_free
-!!
 !! SOURCE
 
 subroutine initmpi_pert(dtset,mpi_enreg)
@@ -1864,7 +1902,7 @@ subroutine initmpi_pert(dtset,mpi_enreg)
 !scalars
  integer:: iprocmin,irank,npert,nproc_per_cell,nrank,numproc
  integer,allocatable :: ranks(:)
- character(len=500) :: msg
+ !character(len=500) :: msg
 !arrays
  integer,pointer :: nkpt_rbz(:)
  real(dp),pointer :: nband_rbz(:,:)
@@ -1872,11 +1910,10 @@ subroutine initmpi_pert(dtset,mpi_enreg)
 ! ***********************************************************************
 
  if (mpi_enreg%me_pert<0) then
-   msg='Error in MPI distribution! Change your proc(s) distribution or use autoparal>0.'
-   MSG_ERROR(msg)
+   ABI_ERROR('Error in MPI distribution! Change your proc(s) distribution or use autoparal>0.')
  end if
 
- call get_npert_rbz(dtset,nband_rbz,nkpt_rbz,npert)
+ call dtset%get_npert_rbz(nband_rbz, nkpt_rbz, npert)
 
  if (dtset%nppert>=1) then
    if (mpi_enreg%comm_cell/=mpi_enreg%comm_world) then
@@ -1890,18 +1927,18 @@ subroutine initmpi_pert(dtset,mpi_enreg)
 
    if (mpi_enreg%me>=0) then
      nproc_per_cell=mpi_enreg%nproc/dtset%nppert
-     ABI_ALLOCATE(ranks,(dtset%nppert))
+     ABI_MALLOC(ranks,(dtset%nppert))
      iprocmin=mod(mpi_enreg%me,nproc_per_cell)
      ranks=(/((iprocmin+(irank-1)*nproc_per_cell),irank=1,dtset%nppert)/)
      mpi_enreg%comm_pert=xmpi_subcomm(mpi_enreg%comm_world,dtset%nppert,ranks)
-     ABI_DEALLOCATE(ranks)
+     ABI_FREE(ranks)
      mpi_enreg%me_pert=xmpi_comm_rank(mpi_enreg%comm_pert)
      mpi_enreg%nproc_pert=dtset%nppert
      if (iprocmin==0.and.mpi_enreg%me_pert==0.and.mpi_enreg%me/=0) then
-       MSG_BUG('Error on me_pert!')
+       ABI_BUG('Error on me_pert!')
      end if
 !    Define mpi_enreg%distrb_pert
-     ABI_ALLOCATE(mpi_enreg%distrb_pert,(npert))
+     ABI_MALLOC(mpi_enreg%distrb_pert,(npert))
      nrank=0
      do irank=1,npert
        nrank=nrank+1
@@ -1922,23 +1959,23 @@ subroutine initmpi_pert(dtset,mpi_enreg)
        end do
      end if
 !    Communicator over one cell
-     ABI_ALLOCATE(ranks,(nproc_per_cell))
+     ABI_MALLOC(ranks,(nproc_per_cell))
      iprocmin=(mpi_enreg%me/nproc_per_cell)*nproc_per_cell
      ranks=(/((iprocmin+irank-1),irank=1,nproc_per_cell)/)
      mpi_enreg%comm_cell_pert=xmpi_subcomm(mpi_enreg%comm_world,nproc_per_cell,ranks)
-     ABI_DEALLOCATE(ranks)
+     ABI_FREE(ranks)
    end if
 
  else  !nppert<=1
    mpi_enreg%nproc_pert=1
    mpi_enreg%comm_pert=xmpi_comm_self
    mpi_enreg%me_pert=0
-   ABI_ALLOCATE(mpi_enreg%distrb_pert,(npert))
+   ABI_MALLOC(mpi_enreg%distrb_pert,(npert))
    mpi_enreg%distrb_pert(:)=0
  end if
 
- ABI_DEALLOCATE(nband_rbz)
- ABI_DEALLOCATE(nkpt_rbz)
+ ABI_FREE(nband_rbz)
+ ABI_FREE(nkpt_rbz)
 
 end subroutine initmpi_pert
 !!***
@@ -1953,11 +1990,6 @@ end subroutine initmpi_pert
 !!  Cleans-up the mpi information for parallelization over perturbations.
 !!
 !! INPUTS
-!!
-!! PARENTS
-!!      abinit
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1980,9 +2012,7 @@ subroutine clnmpi_pert(mpi_enreg)
      mpi_enreg%comm_pert=xmpi_comm_null
    end if
 
-   if (allocated(mpi_enreg%distrb_pert))  then
-     ABI_DEALLOCATE(mpi_enreg%distrb_pert)
-   end if
+   ABI_SFREE(mpi_enreg%distrb_pert)
 
    mpi_enreg%me_pert=0
    mpi_enreg%me_cell=0
@@ -2012,17 +2042,13 @@ end subroutine clnmpi_pert
 !!  mpi_enreg=information about MPI parallelization
 !!  mpi_enreg%comm_band=communicator of BAND set
 !!
-!! PARENTS
-!!      dfpt_looppert
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
-subroutine initmpi_band(mpi_enreg,nband,nkpt,nsppol)
+subroutine initmpi_band(mkmem,mpi_enreg,nband,nkpt,nsppol)
 
 !Arguments ------------------------------------
 !scalars
+ integer,intent(in) :: mkmem
  integer,intent(in) :: nkpt,nsppol
  integer,intent(in) :: nband(nkpt*nsppol)
  type(MPI_type),intent(inout) :: mpi_enreg
@@ -2030,57 +2056,96 @@ subroutine initmpi_band(mpi_enreg,nband,nkpt,nsppol)
 !Local variables-------------------------------
 !scalars
  integer :: ii,ikpt,iproc_min,iproc_max,irank,isppol
- integer :: me,nband_k,nproc,nbsteps,nrank,nstates,spacecomm
+ integer :: me,nband_k,nproc,nb_per_proc,nrank,nstates,spacecomm
+ integer :: maxproc_bandpool, mband
  character(len=500) :: msg
 !arrays
  integer,allocatable :: ranks(:)
 
 ! ***********************************************************************
 
+! reinstate default just to be sure - can be switched inside a previous part of the same dtset!
  mpi_enreg%comm_band=xmpi_comm_self
+ mpi_enreg%nproc_band=1
 
- if (mpi_enreg%paralbd==1.and.xmpi_paral==1) then
+ mband = maxval(nband)
+
+ ABI_UNUSED(mkmem)
 
 !  Comm_kpt is supposed to treat spins, k-points and bands
-   spacecomm=mpi_enreg%comm_kpt
-   nproc=mpi_enreg%nproc_kpt
+!MJV: I think we need to make a proper subcomm here, not treat bands inside the same comm...
+ spacecomm=mpi_enreg%comm_kpt
+ nproc=mpi_enreg%nproc_spkpt
+
+! make sure we have saturated kpt parallelization
+ if (mpi_enreg%paralbd==1 .and. xmpi_paral==1 .and. nproc >= 2*nkpt*nsppol) then
+
+! number of procs per kpt/spin, on which we can distribute bands
+   maxproc_bandpool=floor(nproc*one/(nkpt*nsppol))
    me=mpi_enreg%me_kpt
 
+!! total number of states/bands, over all k and spin
    nstates=sum(nband(1:nkpt*nsppol))
-   nbsteps=nstates/nproc
-   if (mod(nstates,nproc)/=0) nbsteps=nbsteps+1
+! number of bands per proc in the band pool
+!   nb_per_proc=nstates/maxproc_bandpool
 
-   if (nbsteps<maxval(nband(1:nkpt*nsppol))) then
+   do nb_per_proc = mband / maxproc_bandpool, mband
+     if (mod(mband,nb_per_proc)==0) exit
+   end do
 
-     nrank=0
+   nrank=0
+
+! NB: do this for all procs even if mkmem == 0, otherwise the subcomm call below fails
+   if (nb_per_proc<mband) then
      do isppol=1,nsppol
        do ikpt=1,nkpt
          ii=ikpt+(isppol-1)*nkpt
          nband_k=nband(ii)
-         if (nbsteps<nband_k) then
+         if (nb_per_proc<nband_k) then
            iproc_min=minval(mpi_enreg%proc_distrb(ikpt,:,isppol))
            iproc_max=maxval(mpi_enreg%proc_distrb(ikpt,:,isppol))
            if ((me>=iproc_min).and.(me<=iproc_max)) then
              nrank=iproc_max-iproc_min+1
              if (.not.allocated(ranks)) then
-               ABI_ALLOCATE(ranks,(nrank))
+               ABI_MALLOC(ranks,(nrank))
                if (nrank>0) ranks=(/((iproc_min+irank-1),irank=1,nrank)/)
              else if (nrank/=size(ranks)) then
-               msg='Number of bands per proc should be the same for all k-points!'
-               MSG_BUG(msg)
+               ! TODO MJV: still can not lift this restriction...
+               ABI_BUG('Number of bands per proc should be the same for all k-points!')
              end if
            end if
          end if
        end do
      end do
+
      if (.not.allocated(ranks)) then
-       ABI_ALLOCATE(ranks,(0))
+       nrank = 0
+       ABI_MALLOC(ranks,(0))
      end if
 
-     mpi_enreg%comm_band=xmpi_subcomm(spacecomm,nrank,ranks)
+!     ABI_CHECK(nrank*nkpt==nproc, ' band and k-point distribution should be rectangular: make sure nproc=nkpt*integer')
 
-     ABI_DEALLOCATE(ranks)
+     if (nrank*nkpt*nsppol < nproc) then
+       write(unit=msg,fmt='(a,i6,2a,i6,a,i6,4a)') &
+        'The number of processors nproc = ', nproc, ch10,&
+        ' is not equal to nrank (=',nrank,&
+        ') times nkpt*nsppol (',nkpt*nsppol,&
+        ' , which may change with perturbation) !',ch10,&
+        ' This is inefficient (load unbalancing). Adjust nband to have a divisor <= nproc/nkpt/nsppol',ch10
+       ABI_WARNING(msg)
+     end if
+     ! NB: everyone in spacecomm has to call subcomm, even if it is a trivial call with self_comm for the subcomm
+     mpi_enreg%comm_band=xmpi_subcomm(spacecomm,nrank,ranks, my_rank_in_group=mpi_enreg%me_band)
+     mpi_enreg%nproc_band=nrank
+    ! mpi_enreg%me_band=mod(me, nrank)
+
+     write(msg,'(4(a,i0))') 'P Present parallel dimensions: nkpt= ',nkpt,' nsppol ',nsppol,&
+      ' nband per processor= ', nb_per_proc, ' npband= ',nrank
+     call wrtout(std_out,msg)
+
+     ABI_FREE(ranks)
    end if
+
  end if
 
 end subroutine initmpi_band
@@ -2106,11 +2171,6 @@ end subroutine initmpi_band
 !!
 !! SIDE EFFECTS
 !!  array_allgather= gathered data
-!!
-!! PARENTS
-!!      fresid
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -2152,11 +2212,6 @@ end subroutine pre_gather
 !! OUTPUT
 !!  array= scattered data
 !!
-!! PARENTS
-!!      fresid
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine pre_scatter(array,array_allgather,n1,n2,n3,n4,mpi_enreg)
@@ -2186,10 +2241,6 @@ end subroutine pre_scatter
 !!
 !! INPUTS
 !!  mpi_enreg<MPI_type>=Datatype gathering information on the parallelism
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -2230,7 +2281,7 @@ end function iwrite_fftdatar
 !! SIDE EFFECTS
 !!   mpi_enreg%proc_distrb(nkpt,mband,nsppol)=number of the processor
 !!       that will treat each band in each k point.
-!!   mpi_enreg%nproc_kpt is set
+!!   mpi_enreg%nproc_spkpt is set
 !!
 !! NOTES
 !!  For the time being, the band parallelisation works only
@@ -2240,37 +2291,40 @@ end function iwrite_fftdatar
 !!  of k points for spin up and spin down would conflict with the
 !!  present computation of k+G sphere, independent of the spin.
 !!
-!! PARENTS
-!!      dfpt_looppert,eig2stern,eig2tot,mpi_setup
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
-subroutine distrb2(mband,nband,nkpt,nproc,nsppol,mpi_enreg)
+subroutine distrb2(mband,mband_mem_out,nband,nkpt,nproc,nsppol,mpi_enreg)
 
 !Arguments ------------------------------------
  integer,intent(in) :: mband,nkpt,nproc,nsppol
  integer,intent(in) :: nband(nkpt*nsppol)
+ integer,intent(out) :: mband_mem_out
  type(MPI_type),intent(inout) :: mpi_enreg
 
 !Local variables-------------------------------
- integer :: inb,inb1,ind,ind0,nband_k,proc_max,proc_min
- integer :: iiband,iikpt,iisppol,ikpt_this_proc,nbsteps,nproc_kpt,temp_unit
+ integer :: maxproc_bandpool
+ integer :: nproc_band
+ integer :: inb1,ind,ind0,nband_k,proc_max,proc_min
+ integer :: nband_k_sp2,minb_per_proc
+ integer :: iiband,iikpt,iisppol,ikpt_this_proc,nb_per_proc,nproc_spkpt,temp_unit
  integer :: kpt_distrb(nkpt)
  logical,save :: first=.true.,has_file
- character(len=500) :: message
+ character(len=500) :: msg
 
 !******************************************************************
 
- nproc_kpt=mpi_enreg%nproc_kpt
- if (mpi_enreg%paral_pert==1) nproc_kpt=nproc
+ nproc_spkpt=mpi_enreg%nproc_spkpt
+ if (mpi_enreg%paral_pert==1) nproc_spkpt=nproc
+! if (mpi_enreg%paral_pert==1) nproc_spkpt=nproc/mpi_enreg%nproc_pert
+
+ mband_mem_out = 0
 
 !Initialization of proc_distrb
+ mpi_enreg%proc_distrb = nproc+1
  do iisppol=1,nsppol
-   do iiband=1,mband
-     do iikpt=1,nkpt
-       mpi_enreg%proc_distrb(iikpt,iiband,iisppol)=nproc_kpt-1
+   do iikpt=1,nkpt
+     do iiband=1,nband(iikpt+(iisppol-1)*nkpt)
+       mpi_enreg%proc_distrb(iikpt,iiband,iisppol)=nproc_spkpt-1
      end do
    end do
  end do
@@ -2280,19 +2334,21 @@ subroutine distrb2(mband,nband,nkpt,nproc,nsppol,mpi_enreg)
 !Some checks
  !if (mpi_enreg%paralbd==0 .and. any(dtset%optdriver == [RUNL_GSTATE, RUNL_RESPFN])) then
  if (mpi_enreg%paralbd==0) then
-!  Check if nkpt and nproc_kpt match
-   if(nproc_kpt>nkpt*nsppol) then
-!    Too much proc. with respect to nkpt
-     write(message,'(a,i0,a,i0,a,i0,2a)')&
-&     'nproc_kpt=',nproc_kpt,' >= nkpt=',nkpt,'* nsppol=',nsppol,ch10,&
-&     'The number of processors is larger than nkpt*nsppol. This is a waste.'
-     MSG_WARNING(message)
-   else if (mod(nkpt*nsppol,nproc_kpt) /= 0) then
-!    nkpt not a multiple of nproc_kpt
-     write(message,'(a,i0,a,i0,3a)')&
-&     'nkpt*nsppol (', nkpt*nsppol, ') is not a multiple of nproc_kpt (',nproc_kpt, ')', ch10,&
-&     'The k-point parallelisation is not efficient.'
-     MSG_WARNING(message)
+!  Check if nkpt and nproc_spkpt match
+   if(nproc_spkpt>nkpt*nsppol) then
+!    Too many proc. with respect to nkpt
+     write(msg,'(a,i0,a,i0,a,i0,4a)')&
+      'nproc_spkpt= ',nproc_spkpt,' >= nkpt= ',nkpt,'* nsppol= ',nsppol,ch10,&
+      'The number of processors is larger than nkpt*nsppol. This is a WASTE.',ch10,&
+      ' Ignore this warning if this is not a GS run'
+     ABI_WARNING(msg)
+   else if (mod(nkpt*nsppol,nproc_spkpt) /= 0) then
+!    nkpt not a multiple of nproc_spkpt
+     write(msg,'(a,i0,a,i0,5a)')&
+      'nkpt*nsppol (', nkpt*nsppol, ') is not a multiple of nproc_spkpt (',nproc_spkpt, ')', ch10,&
+      'The k-point parallelisation is INEFFICIENT. ',ch10,&
+      'Ignore this warning if this is not a GS run.'
+     ABI_WARNING(msg)
    end if
  end if
 
@@ -2303,10 +2359,11 @@ subroutine distrb2(mband,nband,nkpt,nproc,nsppol,mpi_enreg)
    first=.false.; has_file = file_exists("kpt_distrb")
  end if
 
+!---------------------------------------------------------------------------
 !Initialize the processor distribution, either from a file, or from an algorithm
  if (has_file) then
-   if (open_file('kpt_distrb',message,newunit=temp_unit,form='formatted',status='old') /= 0) then
-     MSG_ERROR(message)
+   if (open_file('kpt_distrb',msg,newunit=temp_unit,form='formatted',status='old') /= 0) then
+     ABI_ERROR(msg)
    end if
    rewind(unit=temp_unit)
    if (mpi_enreg%paralbd == 1) then
@@ -2317,7 +2374,7 @@ subroutine distrb2(mband,nband,nkpt,nproc,nsppol,mpi_enreg)
    end if
    close(temp_unit)
    proc_max=0
-   proc_min=nproc_kpt
+   proc_min=nproc_spkpt
 !  -> determine the range of proc. requested
    if (mpi_enreg%paralbd == 1) then
      do iisppol=1,nsppol
@@ -2341,31 +2398,32 @@ subroutine distrb2(mband,nband,nkpt,nproc,nsppol,mpi_enreg)
      end do
    end if ! mpi_enreg%paralbd
 
-   if(proc_max>(nproc_kpt-1)) then
+   if(proc_max>(nproc_spkpt-1)) then
 !    Too much proc. requested
-     write(message, '(a,a,a,i0,a,a,a)' )&
-&     'The number of processors mentioned in the kpt_distrb file',ch10,&
-&     'must be lower or equal to the actual number of processors =',nproc_kpt-1,ch10,&
-&     'Action: change the kpt_distrb file, or increase the','  number of processors.'
-     MSG_ERROR(message)
+     write(msg, '(a,a,a,i0,a,a,a)' )&
+      'The number of processors mentioned in the kpt_distrb file',ch10,&
+      'must be lower or equal to the actual number of processors =',nproc_spkpt-1,ch10,&
+      'Action: change the kpt_distrb file, or increase the','  number of processors.'
+     ABI_ERROR(msg)
    end if
 
-   if(proc_max/=(nproc_kpt-1)) then
+   if(proc_max/=(nproc_spkpt-1)) then
 !    Too few proc. used
-     write(message, '(a,i0,a,a,a,i0,a,a,a)' )&
-&     'Only ',proc_max+1,' processors are used (from kpt_distrb file),',ch10,&
-&     'when',nproc_kpt,' processors are available.',ch10,&
-&     'Action: adjust number of processors and kpt_distrb file.'
-     MSG_ERROR(message)
+     write(msg, '(a,i0,a,a,a,i0,a,a,a)' )&
+      'Only ',proc_max+1,' processors are used (from kpt_distrb file),',ch10,&
+      'when',nproc_spkpt,' processors are available.',ch10,&
+      'Action: adjust number of processors and kpt_distrb file.'
+     ABI_ERROR(msg)
    end if
 
    if(proc_min<0) then
-     write(message, '(a,a,a)' )&
-&     'The number of processors must be bigger than 0 in kpt_distrb file.',ch10,&
-&     'Action: modify kpt_distrb file.'
-     MSG_ERROR(message)
+     write(msg, '(a,a,a)' )&
+      'The number of processors must be bigger than 0 in kpt_distrb file.',ch10,&
+      'Action: modify kpt_distrb file.'
+     ABI_ERROR(msg)
    end if
 
+!---------------------------------------------------------------------------
  else
 !  'kpt_distrb' file does not exist
 
@@ -2375,14 +2433,21 @@ subroutine distrb2(mband,nband,nkpt,nproc,nsppol,mpi_enreg)
      if (nproc<(nkpt*nsppol)) then
 
 !      Does not allow a processor to treat different spins
+!     NB: for odd nproc this will happen anyway for the middle proc - will this not unbalance things?
        ind0=0
-       inb1=(nkpt*nsppol)/nproc;if (mod((nkpt*nsppol),nproc)/=0) inb1=inb1+1
+       inb1=(nkpt*nsppol)/nproc
+       if (mod((nkpt*nsppol),nproc)/=0) inb1=inb1+1
        do iikpt=1,nkpt
          nband_k=nband(iikpt)
-         ind=ind0/inb1
+         nband_k_sp2=nband(iikpt+nkpt*(nsppol-1))
+         !ind=ind0/inb1
+         ind=mod(ind0,nproc)
          do iiband=1,nband_k
            mpi_enreg%proc_distrb(iikpt,iiband,1)=ind
-           if (nsppol==2) mpi_enreg%proc_distrb(iikpt,iiband,2)=nproc-ind-1
+           if (nsppol==2 .and. iiband <= nband_k_sp2) then
+             mpi_enreg%proc_distrb(iikpt,iiband,2)=ind
+           end if
+           !if (nsppol==2) mpi_enreg%proc_distrb(iikpt,iiband,2)=nproc-ind-1
          end do
          ind0=ind0+1
        end do
@@ -2399,25 +2464,40 @@ subroutine distrb2(mband,nband,nkpt,nproc,nsppol,mpi_enreg)
 !    Possible band parallelization
      else
 !      Does not allow a processor to treat different spins
-       ind0=0;inb=nproc/(nkpt*nsppol)
+       ind0=0
+       maxproc_bandpool=floor(nproc*one/(nkpt*nsppol))
        do iikpt=1,nkpt
          nband_k=nband(iikpt)
-         inb1=nband_k/inb;if (mod(nband_k,inb)/=0) inb1=inb1+1
-         do iiband=1,nband_k
-           ind=(iiband-1)/inb1+ind0
-           mpi_enreg%proc_distrb(iikpt,iiband,1)=ind
-           if (nsppol==2) mpi_enreg%proc_distrb(iikpt,iiband,2)=nproc-ind-1
+         nband_k_sp2=nband(iikpt+nkpt*(nsppol-1))
+         minb_per_proc=floor(nband_k*one/maxproc_bandpool)
+         if (mod(nband_k,maxproc_bandpool)/=0) minb_per_proc=minb_per_proc+1
+         do nb_per_proc = minb_per_proc, nband_k
+           if (mod(nband_k,nb_per_proc)==0) exit
          end do
-         ind0=ind+1
+         nproc_band = nband_k / nb_per_proc
+
+         mband_mem_out = max(mband_mem_out,nb_per_proc)
+         do iiband=1,nband_k
+           ind=mod((iiband-1)/nb_per_proc+ind0, nproc)
+           !ind = mod( mod((iiband-1),nproc_band) + ind0, nproc )
+           mpi_enreg%proc_distrb(iikpt,iiband,1)=ind
+!TODO : could end up with 0 bands on certain procs with this configuration and nband(k) /= constant
+           if (nsppol==2 .and. iiband <= nband_k_sp2) then
+             mpi_enreg%proc_distrb(iikpt,iiband,2)=ind+nkpt*nproc_band
+           end if
+           !if (nsppol==2) mpi_enreg%proc_distrb(iikpt,iiband,2)=nproc-ind-1
+         end do
+         ind0=ind+1 ! take last proc associated to the bands at iikpt, and increment
+         !ind0 = ind0 + nproc_band
        end do
 
 !      MT130831 : OLD CODING
-!      ind0=0;inb=nproc/(nkpt*nsppol)
+!      ind0=0;maxproc_bandpool=nproc/(nkpt*nsppol)
 !      do iisppol=1,nsppol;do iikpt=1,nkpt
 !      nband_k=nband(iikpt+(iisppol-1)*nkpt)
-!      inb1=nband_k/inb;if (mod(nband_k,inb)/=0) inb1=inb1+1
+!      nb_per_proc=nband_k/maxproc_bandpool;if (mod(nband_k,maxproc_bandpool)/=0) nb_per_proc=nb_per_proc+1
 !      do iiband=1,nband_k
-!      ind=(iiband-1)/inb1+ind0
+!      ind=(iiband-1)/nb_per_proc+ind0
 !      mpi_enreg%proc_distrb(iikpt,iiband,iisppol)=ind
 !      end do
 !      ind0=ind+1
@@ -2431,7 +2511,7 @@ subroutine distrb2(mband,nband,nkpt,nproc,nsppol,mpi_enreg)
 !    do iisppol=1,nsppol;do iikpt=1,nkpt
 !    nband_k=nband(iikpt+(iisppol-1)*nkpt)
 !    do iiband=1,nband_k
-!    mpi_enreg%proc_distrb(iikpt,iiband,iisppol)=ind/nbsteps
+!    mpi_enreg%proc_distrb(iikpt,iiband,iisppol)=ind/nb_per_proc
 !    ind=ind+1
 !    end do;end do;end do
 !    XG060807 : END OF OLD CODING
@@ -2440,14 +2520,17 @@ subroutine distrb2(mband,nband,nkpt,nproc,nsppol,mpi_enreg)
 
 !    Does not allow a processor to treat different spins
      ind0=0
-     nbsteps=(nsppol*nkpt)/nproc_kpt
-     if (mod((nsppol*nkpt),nproc_kpt)/=0) nbsteps=nbsteps+1
+     nb_per_proc=(nsppol*nkpt)/nproc_spkpt
+     if (mod((nsppol*nkpt),nproc_spkpt)/=0) nb_per_proc=nb_per_proc+1
      do iikpt=1,nkpt
        nband_k=nband(iikpt)
-       ind=ind0/nbsteps
+       ind=ind0/nb_per_proc
        do iiband=1,nband_k
          mpi_enreg%proc_distrb(iikpt,iiband,1)=ind
-         if (nsppol==2) mpi_enreg%proc_distrb(iikpt,iiband,2)=nproc_kpt-ind-1
+         if (nsppol==2) then
+!TODO: why are these bands ordered in the opposite direction wrt spin 1??
+           mpi_enreg%proc_distrb(iikpt,iiband,2)=nproc_spkpt-ind-1
+         end if
        end do
        ind0=ind0+1
      end do
@@ -2458,8 +2541,8 @@ subroutine distrb2(mband,nband,nkpt,nproc,nsppol,mpi_enreg)
 !    nband_k = nband(iikpt+(iisppol-1)*nkpt)
 !    do iiband=1,nband_k
 !    Distribute k-points homogeneously
-!    proc_distrb(iikpt,iiband,iisppol)=mod(iikpt-1,nproc_kpt)
-!    mpi_enreg%proc_distrb(iikpt,iiband,iisppol)=ind/nbsteps
+!    proc_distrb(iikpt,iiband,iisppol)=mod(iikpt-1,nproc_spkpt)
+!    mpi_enreg%proc_distrb(iikpt,iiband,iisppol)=ind/nb_per_proc
 !    end do
 !    ind=ind + 1
 !    end do;end do
@@ -2469,6 +2552,7 @@ subroutine distrb2(mband,nband,nkpt,nproc,nsppol,mpi_enreg)
 
  end if ! has_file
 
+! local indices on cpus, for each sppol kpt band
  mpi_enreg%my_kpttab(:)=0
  mpi_enreg%my_isppoltab(:)=0
  do iisppol=1,nsppol
@@ -2482,6 +2566,8 @@ subroutine distrb2(mband,nband,nkpt,nproc,nsppol,mpi_enreg)
    end do
  end do
 
+ if (mband_mem_out == 0) mband_mem_out = mband
+
 end subroutine distrb2
 !!***
 
@@ -2490,7 +2576,7 @@ end subroutine distrb2
 !!  distrb2_hf
 !!
 !! FUNCTION
-!!  Ceate the tabs of repartition of processors for sharing the jobs
+!!  Create the tabs of repartition of processors for sharing the jobs
 !!  on occupied states (labeled by k-points, bands and spin indices) for Hartree-Fock calculation.
 !!
 !! INPUTS
@@ -2502,7 +2588,7 @@ end subroutine distrb2
 !! SIDE EFFECTS
 !!   mpi_enreg%proc_distrb(nkpthf,nbandhf,nsppol)=number of the processor
 !!       that will treat each band in each k point.
-!!   mpi_enreg%nproc_kpt is set
+!!   mpi_enreg%nproc_spkpt is set
 !!
 !! NOTES
 !!  For the time being, the band parallelisation works only
@@ -2511,11 +2597,6 @@ end subroutine distrb2
 !!  in the kpgio routine, where a different parallel repartition
 !!  of k points for spin up and spin down would conflict with the
 !!  present computation of k+G sphere, independent of the spin.
-!!
-!! PARENTS
-!!      mpi_setup
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -2527,7 +2608,7 @@ subroutine distrb2_hf(nbandhf,nkpthf, nproc, nsppol, mpi_enreg)
 
 !Local variables-------------------------------
  integer :: ind,iiband,iikpt,iistep,nproc_hf
- character(len=500) :: message
+ character(len=500) :: msg
 
 !******************************************************************
 
@@ -2547,15 +2628,15 @@ subroutine distrb2_hf(nbandhf,nkpthf, nproc, nsppol, mpi_enreg)
 
  if (nsppol==2) then
 !* Check that the distribution over (spin,k point) allow to consider spin up and spin dn independently.
-   if (mpi_enreg%nproc_kpt/=1.and.mod(mpi_enreg%nproc_kpt,2)/=0) then
-     MSG_ERROR( 'The variable nproc_kpt is not even but nssppol= 2')
+   if (mpi_enreg%nproc_spkpt/=1.and.mod(mpi_enreg%nproc_spkpt,2)/=0) then
+     ABI_ERROR( 'The variable nproc_spkpt is not even but nsppol= 2')
 !* In this case, one processor will carry both spin. (this will create pbms for the calculation)
    end if
 !* Check that the number of band is the same for each spin, at each k-point. (It should be)
 !*   do iikpt=1,nkpthf
 !*     if (nband(iikpt)/=nband(iikpt+nkpthf)) then
-!*     message = ' WARNING - the number of bands is different for spin up or spin down. '
-!*     MSG_ERROR(message)
+!*     msg = ' WARNING - the number of bands is different for spin up or spin down. '
+!*     ABI_ERROR(msg)
 !*     end if
 !*    end do
 !* If one of this test is not good for one proc then other procs fall in deadlock, according to distrb2.
@@ -2566,17 +2647,17 @@ subroutine distrb2_hf(nbandhf,nkpthf, nproc, nsppol, mpi_enreg)
 !* Check if nkpthf and nproc_hf match
  if (nproc_hf>nkpthf*nbandhf) then
 !* There are too many processors with respect to nkpthf*nbandhf
-   write(message, '(a,a,i4,a,i4,a,i4,a,a)' ) ch10,&
+   write(msg, '(a,a,i4,a,i4,a,i4,a,a)' ) ch10,&
 &   'nproc_hf=',nproc_hf,' >= nkpthf=',nkpthf,'* nbandhf=',nbandhf,ch10,&
 &   'The number of processors is larger than nkpthf*nbandhf. This is a waste.'
-   MSG_WARNING(message)
+   ABI_WARNING(msg)
 
  else if(mod(nkpthf*nbandhf,nproc_hf)/=0) then
 !* nkpthf*nbandhf is not a multiple of nproc_hf
-   write(message, '(2a,i5,a,i5,3a)' ) ch10,&
+   write(msg, '(2a,i5,a,i5,3a)' ) ch10,&
 &   'nkpthf*nbandhf (', nkpthf*nbandhf, ') is not a multiple of nproc_hf (',nproc_hf, ')', ch10,&
 &   'The parallelisation may not be efficient.'
-   MSG_WARNING(message)
+   ABI_WARNING(msg)
  end if
 
 !*** End of testing section ***
@@ -2649,29 +2730,29 @@ subroutine distrb2_hf(nbandhf,nkpthf, nproc, nsppol, mpi_enreg)
 !
 !    if(proc_max>(nproc_hf-1)) then
 ! !*    Too much proc. requested
-!      write(message, '(a,a,a,i4,a,a,a)' )&
+!      write(msg, '(a,a,a,i4,a,a,a)' )&
 ! &     '  The number of processors mentioned in the kpt_distrb file',ch10,&
 ! &     '  must be lower or equal to the actual number of processors =',&
 ! &     nproc_hf-1,ch10,&
 ! &     '  Action: change the kpt_distrb file, or increase the',&
 ! &     '  number of processors.'
-!      MSG_ERROR(message)
+!      ABI_ERROR(msg)
 !    end if
 !
 !    if(proc_max/=(nproc_hf-1)) then
 ! !*    Too few proc. used
-!      write(message, '(a,i4,a,a,a,i4,a,a,a)' )&
+!      write(msg, '(a,i4,a,a,a,i4,a,a,a)' )&
 ! &     '  Only ',proc_max+1,' processors are used (from kpt_distrb file),',ch10,&
 ! &     '  when',nproc_hf,' processors are available.',ch10,&
 ! &     '  Action: adjust number of processors and kpt_distrb file.'
-!      MSG_ERROR(message)
+!      ABI_ERROR(msg)
 !    end if
 !
 !    if(proc_min<0) then
-!      write(message, '(a,a,a)' )&
+!      write(msg, '(a,a,a)' )&
 ! &     '  The number of processors must be bigger than 0 in kpt_distrb file.',ch10,&
 ! &     ' Action: modify kpt_distrb file.'
-!      MSG_ERROR(message)
+!      ABI_ERROR(msg)
 !    end if
 !  else
 ! !* The file does not exist...

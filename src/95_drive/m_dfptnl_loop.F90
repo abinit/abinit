@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_dfptnl_loop
 !! NAME
 !!  m_dfptnl_loop
@@ -6,14 +5,10 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2018-2019 ABINIT group (LB)
+!!  Copyright (C) 2018-2024 ABINIT group (LB)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -44,7 +39,7 @@ contains
 !! Loop over the perturbations j1, j2 and j3
 !!
 !! COPYRIGHT
-!! Copyright (C) 2018-2019 ABINIT group (LB)
+!! Copyright (C) 2018-2024 ABINIT group (LB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -130,14 +125,6 @@ contains
 !! SIDE EFFECTS
 !!  hdr <type(hdr_type)>=the header of wf, den and pot files
 !!
-!! PARENTS
-!!      nonlinear
-!!
-!! CHILDREN
-!!      appdig,dfpt_mkcore,dfpt_mkvxc,dfpt_vlocal,dfptnl_mv,dfptnl_resp
-!!      dotprod_vn,fourdp,getph,hartre,hdr_free,initylmg,inwffil,read_rhor
-!!      status,timab,wffclose,wrtout
-!!
 !! SOURCE
 
 subroutine dfptnl_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gsqcut, &
@@ -150,25 +137,25 @@ subroutine dfptnl_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gs
 & d3etot_1,d3etot_2,d3etot_3,d3etot_4,d3etot_5,d3etot_6,d3etot_7,d3etot_8,d3etot_9)
 
  use defs_basis
- use defs_datatypes
- use defs_abitypes
  use defs_wvltypes
-
  use m_errors
  use m_abicore
  use m_hdr
  use m_nctk
  use m_wffile
  use m_wfk
+ use m_dtset
+ use m_dtfil
 
+ use defs_datatypes, only : pseudopotential_type
+ use defs_abitypes, only : MPI_type
  use m_time,        only : timab
  use m_io_tools,    only : file_exists
  use m_kg,          only : getph
  use m_inwffil,     only : inwffil
  use m_fft,         only : fourdp
  use m_ioarr,       only : read_rhor
- use m_hamiltonian, only : destroy_hamiltonian,destroy_rf_hamiltonian,gs_hamiltonian_type,&
-                           init_hamiltonian,init_rf_hamiltonian,rf_hamiltonian_type
+ use m_hamiltonian, only : gs_hamiltonian_type, init_hamiltonian
  use m_pawdij,      only : pawdij, pawdijfr, symdij
  use m_pawfgr,      only : pawfgr_type
  use m_pawfgrtab,   only : pawfgrtab_type
@@ -189,7 +176,6 @@ subroutine dfptnl_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gs
  use m_mkcore,      only : dfpt_mkcore
  use m_mklocl,      only : dfpt_vlocal
  use m_dfptnl_pert, only : dfptnl_pert
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -241,11 +227,12 @@ subroutine dfptnl_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gs
  integer,parameter :: level=51
  integer :: ask_accurate,comm_cell,counter,cplex,cplex_rhoij,formeig,flag1,flag3
  integer :: has_dijfr,has_diju
- integer :: i1dir,i1pert,i2dir,i2pert,i3dir,i3pert,iatom,idir_dkde,ierr,iexit,ii,ireadwf
+ integer :: i1dir,i1pert,i2dir,i2pert,i3dir,i3pert,iatom,idir_dkde,ierr,ii,ireadwf
  integer :: mcg,mpsang,n1,n2,n3,n3xccc,ndir,nfftotf,nhat1grdim,npert_phon,nspden,nspden_rhoij,nwffile
  integer :: option,optene,optfr,optorth,pert1case,pert2case,pert3case
  integer :: qphase_rhoij,rdwrpaw,second_idir,timrev,usexcnhat
- real(dp) :: dummy_real,ecut_eff
+ logical :: non_magnetic_xc
+ real(dp) :: dummy_real,dummy_real2, dummy_real3, ecut_eff
  character(len=500) :: message
  character(len=fnlen) :: fiden1i,fiwf1i,fiwf2i,fiwf3i,fiwfddk,fnamewff(5)
  type(gs_hamiltonian_type) :: gs_hamkq
@@ -286,16 +273,16 @@ subroutine dfptnl_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gs
 
  qphon(:)=zero
 
- ABI_ALLOCATE(cg1,(2,dtset%mpw*dtset%nspinor*mband*dtset%mk1mem*dtset%nsppol))
- ABI_ALLOCATE(cg2,(2,dtset%mpw*dtset%nspinor*mband*dtset%mk1mem*dtset%nsppol))
- ABI_ALLOCATE(cg3,(2,dtset%mpw*dtset%nspinor*mband*dtset%mk1mem*dtset%nsppol))
- ABI_ALLOCATE(eigen1,(2*dtset%mband*dtset%mband*dtset%nkpt*dtset%nsppol))
- ABI_ALLOCATE(eigen2,(2*dtset%mband*dtset%mband*dtset%nkpt*dtset%nsppol))
- ABI_ALLOCATE(eigen3,(2*dtset%mband*dtset%mband*dtset%nkpt*dtset%nsppol))
- ABI_ALLOCATE(rho1r1,(cplex*nfftf,dtset%nspden))
- ABI_ALLOCATE(rho2r1,(cplex*nfftf,dtset%nspden))
- ABI_ALLOCATE(rho2g1,(2,nfftf))
- ABI_ALLOCATE(rho3r1,(cplex*nfftf,dtset%nspden))
+ ABI_MALLOC(cg1,(2,dtset%mpw*dtset%nspinor*mband*dtset%mk1mem*dtset%nsppol))
+ ABI_MALLOC(cg2,(2,dtset%mpw*dtset%nspinor*mband*dtset%mk1mem*dtset%nsppol))
+ ABI_MALLOC(cg3,(2,dtset%mpw*dtset%nspinor*mband*dtset%mk1mem*dtset%nsppol))
+ ABI_MALLOC(eigen1,(2*dtset%mband*dtset%mband*dtset%nkpt*dtset%nsppol))
+ ABI_MALLOC(eigen2,(2*dtset%mband*dtset%mband*dtset%nkpt*dtset%nsppol))
+ ABI_MALLOC(eigen3,(2*dtset%mband*dtset%mband*dtset%nkpt*dtset%nsppol))
+ ABI_MALLOC(rho1r1,(cplex*nfftf,dtset%nspden))
+ ABI_MALLOC(rho2r1,(cplex*nfftf,dtset%nspden))
+ ABI_MALLOC(rho2g1,(2,nfftf))
+ ABI_MALLOC(rho3r1,(cplex*nfftf,dtset%nspden))
 
  ask_accurate=1 ; formeig = 1 ; ireadwf = 1
  n1=ngfftf(1) ; n2=ngfftf(2) ; n3=ngfftf(3)
@@ -308,30 +295,31 @@ subroutine dfptnl_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gs
 !* PAW: Initialize the overlap coefficients and allocate the Dij coefficients.
  call init_hamiltonian(gs_hamkq,psps,pawtab,dtset%nspinor,dtset%nsppol,dtset%nspden,natom,&
 & dtset%typat,xred,dtset%nfft,dtset%mgfft,dtset%ngfft,rprimd,dtset%nloalg,&
-& usecprj=usecprj,ph1d=ph1d,nucdipmom=dtset%nucdipmom,use_gpu_cuda=dtset%use_gpu_cuda,paw_ij=paw_ij0)
+& usecprj=usecprj,ph1d=ph1d,nucdipmom=dtset%nucdipmom,paw_ij=paw_ij0,&
+& gpu_option=dtset%gpu_option)
 
- ABI_ALLOCATE(vpsp1,(cplex*nfftf))
- ABI_ALLOCATE(xccc3d1,(cplex*nfftf))
- ABI_ALLOCATE(xccc3d2,(cplex*nfftf))
- ABI_ALLOCATE(xccc3d3,(cplex*nfftf))
- ABI_ALLOCATE(vhartr1_i2pert,(cplex*nfftf))
- ABI_ALLOCATE(vxc1_i2pert,(cplex*nfftf,dtset%nspden))
- ABI_ALLOCATE(vtrial1_i2pert,(cplex*nfftf,dtset%nspden))
+ ABI_MALLOC(vpsp1,(cplex*nfftf))
+ ABI_MALLOC(xccc3d1,(cplex*nfftf))
+ ABI_MALLOC(xccc3d2,(cplex*nfftf))
+ ABI_MALLOC(xccc3d3,(cplex*nfftf))
+ ABI_MALLOC(vhartr1_i2pert,(cplex*nfftf))
+ ABI_MALLOC(vxc1_i2pert,(cplex*nfftf,dtset%nspden))
+ ABI_MALLOC(vtrial1_i2pert,(cplex*nfftf,dtset%nspden))
 
- ABI_ALLOCATE(vresid_dum,(0,0))
+ ABI_MALLOC(vresid_dum,(0,0))
 ! PAW stuff
  usexcnhat = 0
  nhat1grdim=0
- ABI_ALLOCATE(nhat1gr,(0,0,0))
+ ABI_MALLOC(nhat1gr,(0,0,0))
  nhat1gr(:,:,:) = zero
  rdwrpaw=psps%usepaw
 !Allocate 1st-order PAW occupancies (rhoij1)
  if (psps%usepaw==1) then
    call pawrhoij_inquire_dim(cplex_rhoij=cplex_rhoij,qphase_rhoij=qphase_rhoij,nspden_rhoij=nspden_rhoij,&
 &                        nspden=dtset%nspden,spnorb=dtset%pawspnorb,cplex=cplex,cpxocc=dtset%pawcpxocc)
-   ABI_DATATYPE_ALLOCATE(pawrhoij1_i1pert,(natom))
-   ABI_DATATYPE_ALLOCATE(pawrhoij1_i2pert,(natom))
-   ABI_DATATYPE_ALLOCATE(pawrhoij1_i3pert,(natom))
+   ABI_MALLOC(pawrhoij1_i1pert,(natom))
+   ABI_MALLOC(pawrhoij1_i2pert,(natom))
+   ABI_MALLOC(pawrhoij1_i3pert,(natom))
    call pawrhoij_nullify(pawrhoij1_i1pert)
    call pawrhoij_nullify(pawrhoij1_i2pert)
    call pawrhoij_nullify(pawrhoij1_i3pert)
@@ -342,9 +330,9 @@ subroutine dfptnl_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gs
    call pawrhoij_alloc(pawrhoij1_i3pert,cplex_rhoij,nspden_rhoij,dtset%nspinor,dtset%nsppol,&
 &   dtset%typat,qphase=qphase_rhoij,pawtab=pawtab,comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
  else
-   ABI_DATATYPE_ALLOCATE(pawrhoij1_i1pert,(0))
-   ABI_DATATYPE_ALLOCATE(pawrhoij1_i2pert,(0))
-   ABI_DATATYPE_ALLOCATE(pawrhoij1_i3pert,(0))
+   ABI_MALLOC(pawrhoij1_i1pert,(0))
+   ABI_MALLOC(pawrhoij1_i2pert,(0))
+   ABI_MALLOC(pawrhoij1_i3pert,(0))
  end if
 
  mcg=mpw*nspinor*mband*mkmem*nsppol
@@ -353,21 +341,21 @@ subroutine dfptnl_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gs
  if(psps%usepaw==1) then
    usexcnhat=maxval(pawtab(:)%usexcnhat)
 !  1st-order compensation density
-   ABI_ALLOCATE(nhat1_i1pert,(cplex*nfftf,dtset%nspden))
+   ABI_MALLOC(nhat1_i1pert,(cplex*nfftf,dtset%nspden))
    nhat1_i1pert=zero
-   ABI_ALLOCATE(nhat1_i2pert,(cplex*nfftf,dtset%nspden))
+   ABI_MALLOC(nhat1_i2pert,(cplex*nfftf,dtset%nspden))
    nhat1_i2pert=zero
-   ABI_ALLOCATE(nhat1_i3pert,(cplex*nfftf,dtset%nspden))
+   ABI_MALLOC(nhat1_i3pert,(cplex*nfftf,dtset%nspden))
    nhat1_i3pert=zero
 
 !  1st-order arrays/variables related to the PAW spheres
-   ABI_DATATYPE_ALLOCATE(paw_an1_i2pert,(natom))
-   ABI_DATATYPE_ALLOCATE(paw_ij1_i2pert,(natom))
+   ABI_MALLOC(paw_an1_i2pert,(natom))
+   ABI_MALLOC(paw_ij1_i2pert,(natom))
    call paw_an_nullify(paw_an1_i2pert)
    call paw_ij_nullify(paw_ij1_i2pert)
 
    has_dijfr=1
-   has_diju=0; if(dtset%usepawu==5.or.dtset%usepawu==6) has_diju=1
+   has_diju=merge(0,1,dtset%usepawu==0)
 
    call paw_an_init(paw_an1_i2pert,dtset%natom,dtset%ntypat,0,0,dtset%nspden,cplex,dtset%pawxcdev,&
 &   dtset%typat,pawang,pawtab,has_vxc=1,&
@@ -378,14 +366,15 @@ subroutine dfptnl_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gs
 &   has_dij=1,has_dijhartree=1,has_dijfr=has_dijfr,has_dijU=has_diju,&
 &   mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
  else
-   ABI_ALLOCATE(nhat1_i1pert,(0,0))
-   ABI_ALLOCATE(nhat1_i2pert,(0,0))
-   ABI_ALLOCATE(nhat1_i3pert,(0,0))
-   ABI_DATATYPE_ALLOCATE(paw_an1_i2pert,(0))
-   ABI_DATATYPE_ALLOCATE(paw_ij1_i2pert,(0))
+   ABI_MALLOC(nhat1_i1pert,(0,0))
+   ABI_MALLOC(nhat1_i2pert,(0,0))
+   ABI_MALLOC(nhat1_i3pert,(0,0))
+   ABI_MALLOC(paw_an1_i2pert,(0))
+   ABI_MALLOC(paw_ij1_i2pert,(0))
  end if ! PAW
 
  n3xccc=0;if(psps%n1xccc/=0)n3xccc=nfftf
+ non_magnetic_xc=(dtset%usepaw==1.and.mod(abs(dtset%usepawu),10)==4)
 
 !Loop over the perturbations j1, j2, j3
 
@@ -419,7 +408,7 @@ subroutine dfptnl_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gs
 
          call read_rhor(fiden1i, cplex, dtset%nspden, nfftf, ngfftf, rdwrpaw, mpi_enreg, rho1r1, &
          hdr_den, pawrhoij1_i1pert, comm_cell, check_hdr=hdr)
-         call hdr_free(hdr_den)
+         call hdr_den%free()
        end if
 
        xccc3d1(:) = zero
@@ -467,7 +456,7 @@ subroutine dfptnl_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gs
 
                call read_rhor(fiden1i, cplex, dtset%nspden, nfftf, ngfftf, rdwrpaw, mpi_enreg, rho3r1, &
                hdr_den, pawrhoij1_i3pert, comm_cell, check_hdr=hdr)
-               call hdr_free(hdr_den)
+               call hdr_den%free()
              end if
 
              xccc3d3(:) = zero
@@ -498,7 +487,7 @@ subroutine dfptnl_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gs
                    if(i2pert<=dtset%natom) npert_phon = npert_phon + 1
                    if(i3pert<=dtset%natom) npert_phon = npert_phon + 1
                    if (npert_phon>1) then
-                     MSG_ERROR("dfptnl_loop is available with at most one phonon perturbation. Change your input!")
+                     ABI_ERROR("dfptnl_loop is available with at most one phonon perturbation. Change your input!")
                    end if
 
                    pert2case = i2dir + (i2pert-1)*3
@@ -526,13 +515,13 @@ subroutine dfptnl_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gs
 
                      call read_rhor(fiden1i, cplex, dtset%nspden, nfftf, ngfftf, rdwrpaw, mpi_enreg, rho2r1, &
                      hdr_den, pawrhoij1_i2pert , comm_cell, check_hdr=hdr)
-                     call hdr_free(hdr_den)
+                     call hdr_den%free()
 
 !                    Compute up+down rho1(G) by fft
-                     ABI_ALLOCATE(work,(cplex*nfftf))
+                     ABI_MALLOC(work,(cplex*nfftf))
                      work(:)=rho2r1(:,1)
                      call fourdp(cplex,rho2g1,work,-1,mpi_enreg,nfftf,1,ngfftf,0)
-                     ABI_DEALLOCATE(work)
+                     ABI_FREE(work)
 
                    end if
 
@@ -612,7 +601,7 @@ subroutine dfptnl_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gs
                      end if ! psps%n1xccc/=0
 
                      call dfpt_vlocal(atindx,cplex,gmet,gsqcut,i2dir,i2pert,mpi_enreg,psps%mqgrid_vl,dtset%natom,&
-&                     nattyp,nfftf,ngfftf,psps%ntypat,n1,n2,n3,dtset%paral_kgb,ph1df,psps%qgrid_vl,&
+&                     nattyp,nfftf,ngfftf,psps%ntypat,n1,n2,n3,ph1df,psps%qgrid_vl,&
 &                     dtset%qptn,ucvol,psps%vlspl,vpsp1,xred)
 
                    end if ! usepaw
@@ -620,7 +609,7 @@ subroutine dfptnl_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gs
                    option=1;optene=0
                    call dfpt_rhotov(cplex,dummy_real,dummy_real,dummy_real,dummy_real,dummy_real,&
 &                   gsqcut,i2dir,i2pert,dtset%ixc,kxc,mpi_enreg,dtset%natom,nfftf,ngfftf,nhat,&
-&                   nhat1_i2pert,nhat1gr,nhat1grdim,nkxc,nspden,n3xccc,optene,option,dtset%paral_kgb,&
+&                   nhat1_i2pert,nhat1gr,nhat1grdim,nkxc,nspden,n3xccc,non_magnetic_xc,optene,option,&
 &                   dtset%qptn,rhog,rho2g1,rhor,rho2r1,rprimd,ucvol,psps%usepaw,usexcnhat,vhartr1_i2pert,&
 &                   vpsp1,vresid_dum,dummy_real,vtrial1_i2pert,vxc,vxc1_i2pert,xccc3d2,dtset%ixcrot)
 
@@ -639,17 +628,17 @@ subroutine dfptnl_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gs
 
 !                    Computation of "on-site" first-order potentials, first-order densities
                      option=1
-                     call pawdenpot(dummy_real,dummy_real,dummy_real,i2pert,dtset%ixc,natom,dtset%natom,&
+                     call pawdenpot(dummy_real,dummy_real2,dummy_real3,i2pert,dtset%ixc,natom,dtset%natom,&
 &                     nspden,psps%ntypat,dtset%nucdipmom,&
 &                     0,option,paw_an1_i2pert,paw_an0,paw_ij1_i2pert,pawang,&
 &                     dtset%pawprtvol,pawrad,pawrhoij1_i2pert,dtset%pawspnorb,pawtab,dtset%pawxcdev,&
-&                     dtset%spnorbscl,dtset%xclevel,dtset%xc_denpos,ucvol,psps%znuclpsp, &
+&                     dtset%spnorbscl,dtset%xclevel,dtset%xc_denpos,dtset%xc_taupos,ucvol,psps%znuclpsp, &
 &                     comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
                 !    First-order Dij computation
 !                     call timab(561,1,tsec)
                      if (has_dijfr>0) then
                        !vpsp1 contribution to Dij already stored in frozen part of Dij
-                       ABI_ALLOCATE(vtrial1_tmp,(cplex*nfftf,nspden))
+                       ABI_MALLOC(vtrial1_tmp,(cplex*nfftf,nspden))
                        vtrial1_tmp=vtrial1_i2pert
                        do ii=1,min(nspden,2)
                          vtrial1_tmp(:,ii)=vtrial1_tmp(:,ii)-vpsp1(:)
@@ -660,10 +649,10 @@ subroutine dfptnl_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gs
                      call pawdij(cplex,dtset%enunit,gprimd,i2pert,natom,dtset%natom,&
 &                     nfftf,nfftotf,dtset%nspden,psps%ntypat,paw_an1_i2pert,paw_ij1_i2pert,pawang,&
 &                     pawfgrtab,dtset%pawprtvol,pawrad,pawrhoij1_i2pert,dtset%pawspnorb,pawtab,&
-&                     dtset%pawxcdev,qphon,dtset%spnorbscl,ucvol,dtset%charge,vtrial1_tmp,vxc1_i2pert,xred,&
+&                     dtset%pawxcdev,qphon,dtset%spnorbscl,ucvol,dtset%cellcharge(1),vtrial1_tmp,vxc1_i2pert,xred,&
 &                     mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
                      if (has_dijfr>0) then
-                       ABI_DEALLOCATE(vtrial1_tmp)
+                       ABI_FREE(vtrial1_tmp)
                      end if
                      call symdij(gprimd,indsy1,i2pert,natom,dtset%natom,nsym1,psps%ntypat,0,&
 &                     paw_ij1_i2pert,pawang1,dtset%pawprtvol,pawtab,rprimd,symaf1,symrc1, &
@@ -688,7 +677,7 @@ subroutine dfptnl_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gs
                      else if (i1pert==natom+2) then
                        second_idir = i1dir
                      else
-                       MSG_BUG(" i1pert or i3pert is supposed to be equal to natom+2, which is not the case here.")
+                       ABI_BUG(" i1pert or i3pert is supposed to be equal to natom+2, which is not the case here.")
                      end if
                      call rf2_getidir(i2dir,second_idir,idir_dkde)
                      file_index(3) = idir_dkde+9+(dtset%natom+6)*3
@@ -717,7 +706,7 @@ subroutine dfptnl_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gs
                          fiwfddk = nctk_ncify(fiwfddk)
                        end if
                        if (.not. file_exists(fiwfddk)) then
-                         MSG_ERROR('Missing file: '//TRIM(fiwfddk))
+                         ABI_ERROR('Missing file: '//TRIM(fiwfddk))
                        end if
                      end if
                      write(message,'(2a)')'-dfptnl_loop : read the wavefunctions from file: ',trim(fiwfddk)
@@ -744,7 +733,7 @@ subroutine dfptnl_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gs
 
 !                  Eventually close the dot file
                    do ii=1,nwffile
-                     call wfk_close(ddk_f(ii))
+                     call ddk_f(ii)%close()
                    end do
 
 !                   if (psps%usepaw==1) then
@@ -766,42 +755,42 @@ subroutine dfptnl_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gs
  end do     ! i1pert
 
 !More memory cleaning
- call destroy_hamiltonian(gs_hamkq)
+ call gs_hamkq%free()
 
- ABI_DEALLOCATE(cg1)
- ABI_DEALLOCATE(cg2)
- ABI_DEALLOCATE(cg3)
- ABI_DEALLOCATE(eigen1)
- ABI_DEALLOCATE(eigen2)
- ABI_DEALLOCATE(eigen3)
- ABI_DEALLOCATE(rho1r1)
- ABI_DEALLOCATE(rho2r1)
- ABI_DEALLOCATE(rho2g1)
- ABI_DEALLOCATE(rho3r1)
- ABI_DEALLOCATE(nhat1gr)
- ABI_DEALLOCATE(vresid_dum)
- ABI_DEALLOCATE(vtrial1_i2pert)
- ABI_DEALLOCATE(vxc1_i2pert)
- ABI_DEALLOCATE(vhartr1_i2pert)
- ABI_DEALLOCATE(vpsp1)
- ABI_DEALLOCATE(xccc3d1)
- ABI_DEALLOCATE(xccc3d2)
- ABI_DEALLOCATE(xccc3d3)
+ ABI_FREE(cg1)
+ ABI_FREE(cg2)
+ ABI_FREE(cg3)
+ ABI_FREE(eigen1)
+ ABI_FREE(eigen2)
+ ABI_FREE(eigen3)
+ ABI_FREE(rho1r1)
+ ABI_FREE(rho2r1)
+ ABI_FREE(rho2g1)
+ ABI_FREE(rho3r1)
+ ABI_FREE(nhat1gr)
+ ABI_FREE(vresid_dum)
+ ABI_FREE(vtrial1_i2pert)
+ ABI_FREE(vxc1_i2pert)
+ ABI_FREE(vhartr1_i2pert)
+ ABI_FREE(vpsp1)
+ ABI_FREE(xccc3d1)
+ ABI_FREE(xccc3d2)
+ ABI_FREE(xccc3d3)
  if (psps%usepaw==1) then
    call pawrhoij_free(pawrhoij1_i1pert)
    call pawrhoij_free(pawrhoij1_i2pert)
    call pawrhoij_free(pawrhoij1_i3pert)
-   ABI_DEALLOCATE(nhat1_i1pert)
-   ABI_DEALLOCATE(nhat1_i2pert)
-   ABI_DEALLOCATE(nhat1_i3pert)
+   ABI_FREE(nhat1_i1pert)
+   ABI_FREE(nhat1_i2pert)
+   ABI_FREE(nhat1_i3pert)
    call paw_an_free(paw_an1_i2pert)
    call paw_ij_free(paw_ij1_i2pert)
-   ABI_DATATYPE_DEALLOCATE(paw_an1_i2pert)
-   ABI_DATATYPE_DEALLOCATE(paw_ij1_i2pert)
+   ABI_FREE(paw_an1_i2pert)
+   ABI_FREE(paw_ij1_i2pert)
  end if
- ABI_DATATYPE_DEALLOCATE(pawrhoij1_i1pert)
- ABI_DATATYPE_DEALLOCATE(pawrhoij1_i2pert)
- ABI_DATATYPE_DEALLOCATE(pawrhoij1_i3pert)
+ ABI_FREE(pawrhoij1_i1pert)
+ ABI_FREE(pawrhoij1_i2pert)
+ ABI_FREE(pawrhoij1_i3pert)
 
  call timab(503,2,tsec)
 

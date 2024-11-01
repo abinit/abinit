@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_bs_defs
 !! NAME
 !!  m_bs_defs
@@ -7,15 +6,11 @@
 !!  This module defines basic structures used for Bethe-Salpeter calculations.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1992-2018 EXC and ABINIT group (L.Reining, V.Olevano, F.Sottile, S.Albrecht, G.Onida, MG)
+!! Copyright (C) 1992-2024 ABINIT and EXC group (L.Reining, V.Olevano, F.Sottile, S.Albrecht, G.Onida, MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -27,13 +22,13 @@
 
 MODULE m_bs_defs
 
- use defs_basis 
+ use defs_basis
  use m_abicore
- use m_errors 
+ use m_errors
 
  implicit none
 
- private 
+ private
 !!***
 
 ! Algorithm used to solve the BS problem.
@@ -62,9 +57,9 @@ MODULE m_bs_defs
 !! integer,public,parameter :: BSE_WFREQ_FULL  =3
 
 ! Flags for the interpolation
- integer,public,parameter :: BSE_INTERP_YG            =0 ! Interpolation with 8 neighbours
- integer,public,parameter :: BSE_INTERP_RL            =1 ! Interpolation with 1 neighbour (Rohlfing & Louie 2000)
- integer,public,parameter :: BSE_INTERP_RL2           =2 ! Hybrid between RL & YG with 2 neighbours (for debug)
+ integer,public,parameter :: BSE_INTERP_YG        =0 ! Interpolation with 8 neighbours
+ integer,public,parameter :: BSE_INTERP_RL        =1 ! Interpolation with 1 neighbour (Rohlfing & Louie 2000)
+ integer,public,parameter :: BSE_INTERP_RL2       =2 ! Hybrid between RL & YG with 2 neighbours (for debug)
 
  character(len=fnlen),public,parameter :: BSE_NOFILE="None"
 
@@ -75,27 +70,27 @@ MODULE m_bs_defs
 !!  transition
 !!
 !! FUNCTION
-!!  The transition derived data type is used to store the correspondence 
-!!  between the transition index and the set of quantum numbers (ik_bz,v,c) 
+!!  The transition derived data type is used to store the correspondence
+!!  between the transition index and the set of quantum numbers (ik_bz,v,c)
 !!  The energy of the transition is stored as well.
 !!
-!! SOURCE                                                                                   
+!! SOURCE
 
  type,public :: transition
-   integer :: k=0               ! Index of the k-point in the BZ
-   integer :: v=0               ! Valence band index.
-   integer :: c=0               ! Conduction band index.
-   complex(dpc) :: en=huge(one) ! Transition energy 
+   integer :: k = 0               ! Index of the k-point in the BZ
+   integer :: v = 0               ! Valence band index.
+   integer :: c = 0               ! Conduction band index.
+   complex(dpc) :: en=huge(one) ! Transition energy
  end type transition
 
  public :: init_transitions     ! Main creation method.
  public :: repr_trans           ! Returns a string representing the transition or a couple of transitions.
 !!***
 
- interface repr_trans 
+ interface repr_trans
    module procedure repr_1trans
    module procedure repr_2trans
- end interface repr_trans 
+ end interface repr_trans
 
 !----------------------------------------------------------------------
 
@@ -104,7 +99,7 @@ MODULE m_bs_defs
 !!  excparam
 !!
 !! FUNCTION
-!!  The excparam derived data type contains the parameters controlling the BS calculation. 
+!!  The excparam derived data type contains the parameters controlling the BS calculation.
 !!
 !! SOURCE
 
@@ -117,7 +112,7 @@ type,public :: excparam
   integer :: use_coupling      ! Include off-diagonal block coupling resonant and anti-resonant transitions.
   integer :: exchange_term     ! Include the exchange term in the BS Hamiltonian.
   integer :: inclvkb           ! Option for the inclusion of the commutator [Vnl, r] for the optical limit.
-  integer :: mdlf_type         ! Model dielectric function type. 
+  integer :: mdlf_type         ! Model dielectric function type.
   integer :: nline             ! Number of line minimization used for CG minimization.
   integer :: nbdbuf            ! Number of states in the buffer that will be excluded from the convergence check (CG only)
   integer :: nstates           ! Number of states that will be considered in the CG minimization.
@@ -171,7 +166,7 @@ type,public :: excparam
   real(dp) :: ircut            ! Infrared cutoff for transitions
   real(dp) :: uvcut            ! Ultraviolet cutoff for transitions.
   real(dp) :: haydock_tol(2)   ! Tolerance for stopping the Haydock algorithm.
-  real(dp) :: cg_tolwfr        ! Tolerance for stopping the CG algorithm 
+  real(dp) :: cg_tolwfr        ! Tolerance for stopping the CG algorithm
 
   !Interp@BSE
   real(dp) :: interp_m3_width  ! Width of the interpolated M3 method along the diagonal
@@ -197,7 +192,7 @@ type,public :: excparam
   ! nreh(nsppol)
   ! Number of resonant electron-hole transitions for each spin.
 
-  integer,allocatable :: vcks2t(:,:,:,:)  
+  integer,allocatable :: vcks2t(:,:,:,:)
   ! vcks2t(v,c,ik_bz,spin) gives the transition index associated to (v,c,kbz,spin)
 
   !Interp@BSE
@@ -205,7 +200,7 @@ type,public :: excparam
 
   integer,allocatable :: nreh_interp(:)
   ! nreh_interp(nsppol)
-  ! Number of transitions for the interpolated mesh   
+  ! Number of transitions for the interpolated mesh
 
   integer,allocatable :: vcks2t_interp(:,:,:,:)
   ! vcks2t(v,c,ik_bz_dense,spin) : Transition index for the dense kmesh
@@ -219,14 +214,14 @@ type,public :: excparam
   type(transition),allocatable :: Trans(:,:)
   ! Trans(max_nreh,nsppol)
 
-  type(transition),allocatable :: Trans_interp(:,:) 
+  type(transition),allocatable :: Trans_interp(:,:)
   ! Transitions for interpolated mesh
 
+  contains
+    procedure :: free => bs_parameters_free
+    procedure :: print => print_bs_parameters
+    procedure :: calctype2str => bsp_calctype2str
 end type excparam
-
- public :: bs_parameters_free
- public :: print_bs_parameters
- public :: bsp_calctype2str
 !!***
 
 !!****t* m_bs_defs/excfiles
@@ -234,20 +229,20 @@ end type excparam
 !!  excfiles
 !!
 !! FUNCTION
-!!  The excfiles derived data type contains file names and unit numbers used to store 
-!!  temporary or final results of the Bethe-Salpeter calculation. 
+!!  The excfiles derived data type contains file names and unit numbers used to store
+!!  temporary or final results of the Bethe-Salpeter calculation.
 !!
 !! SOURCE
 
 type,public :: excfiles
 
-  character(len=fnlen) :: in_hreso = BSE_NOFILE   
+  character(len=fnlen) :: in_hreso = BSE_NOFILE
   ! Name of the input file with the resonant part of the Hamiltonian (Hermitian).
 
   character(len=fnlen) :: out_hreso = BSE_NOFILE
   ! Name of the output file with the resonant part of the Hamiltonian (Hermitian).
 
-  character(len=fnlen) :: in_hcoup = BSE_NOFILE   
+  character(len=fnlen) :: in_hcoup = BSE_NOFILE
   ! Name of the input file with the coupling part of the Hamiltonian (Symmetric).
 
   character(len=fnlen) :: out_hcoup = BSE_NOFILE
@@ -260,18 +255,18 @@ type,public :: excfiles
   ! Name of the output file with the eigenvalues and the eigenvectors of the Hamiltonian.
 
   character(len=fnlen) :: in_haydock_basename = BSE_NOFILE
-  ! Name of the input file used to restart Haydock algorithm. 
+  ! Name of the input file used to restart Haydock algorithm.
 
   character(len=fnlen) :: out_basename = BSE_NOFILE
   ! Prefix to be used for other output files.
 
+contains
+  procedure :: print => print_bs_files
+  ! Printout of the excfiles data type.
 end type excfiles
-
-public :: print_bs_files    ! Printout of the excfiles data type.
 !!***
 
-
-CONTAINS  !========================================================================================================
+contains
 !!***
 
 !----------------------------------------------------------------------
@@ -283,76 +278,29 @@ CONTAINS  !=====================================================================
 !! FUNCTION
 !!  Free all memory allocated in a structure of type excparam
 !!
-!! SIDE EFFECTS
-!!  Bsp<excparam>=All associated pointers are deallocated.
-!!
-!! PARENTS
-!!      bethe_salpeter
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
 subroutine bs_parameters_free(BSp)
 
- implicit none
-
 !Arguments ------------------------------------
-!scalars
- type(excparam),intent(inout) :: BSp
+ class(excparam),intent(inout) :: BSp
 
 !************************************************************************
- 
- !@excparam
- if (allocated(BSp%q)) then
-   ABI_FREE(BSp%q)
- end if
 
- if (allocated(Bsp%nreh)) then
-   ABI_FREE(Bsp%nreh)
- end if
- if (allocated(Bsp%vcks2t)) then
-   ABI_FREE(Bsp%vcks2t)
- end if
- if (allocated(Bsp%omega)) then
-   ABI_FREE(Bsp%omega)
- end if
-
- if (allocated(Bsp%lomo_spin)) then 
-   ABI_FREE(Bsp%lomo_spin)
- end if
- if (allocated(Bsp%homo_spin)) then 
-   ABI_FREE(Bsp%homo_spin)
- end if
- if (allocated(Bsp%lumo_spin)) then 
-   ABI_FREE(Bsp%lumo_spin)
- end if
- if (allocated(Bsp%humo_spin)) then 
-   ABI_FREE(Bsp%humo_spin)
- end if
- if (allocated(Bsp%nbndv_spin)) then 
-   ABI_FREE(Bsp%nbndv_spin)
- end if
- if (allocated(Bsp%nbndc_spin)) then 
-   ABI_FREE(Bsp%nbndc_spin)
- end if
-
- if (allocated(Bsp%Trans)) then
-   ABI_DT_FREE(Bsp%Trans)
- end if
-
- if (allocated(Bsp%nreh_interp)) then
-   ABI_FREE(Bsp%nreh_interp)
- end if
-
- if (allocated(Bsp%vcks2t_interp)) then
-   ABI_FREE(Bsp%vcks2t_interp)
- end if
-
- if (allocated(Bsp%Trans_interp)) then
-   ABI_DT_FREE(Bsp%Trans_interp)
- end if
+ ABI_SFREE(BSp%q)
+ ABI_FREE(Bsp%nreh)
+ ABI_SFREE(Bsp%vcks2t)
+ ABI_SFREE(Bsp%omega)
+ ABI_SFREE(Bsp%lomo_spin)
+ ABI_SFREE(Bsp%homo_spin)
+ ABI_SFREE(Bsp%lumo_spin)
+ ABI_SFREE(Bsp%humo_spin)
+ ABI_SFREE(Bsp%nbndv_spin)
+ ABI_SFREE(Bsp%nbndc_spin)
+ ABI_SFREE(Bsp%Trans)
+ ABI_SFREE(Bsp%nreh_interp)
+ ABI_SFREE(Bsp%vcks2t_interp)
+ ABI_SFREE(Bsp%Trans_interp)
 
 end subroutine bs_parameters_free
 !!***
@@ -366,41 +314,27 @@ end subroutine bs_parameters_free
 !! FUNCTION
 !!  Printout of the parameters used for the BS calculation.
 !!
-!! INPUTS
-!!  p<excparam>=Datatype storing the parameters of the Bethe-Salpeter calculation.
-!!
-!! OUTPUT
-!!  Only printing.
-!!
-!! PARENTS
-!!      setup_bse
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
-subroutine print_bs_parameters(BSp,header,unit,mode_paral,prtvol) 
-
- implicit none
+subroutine print_bs_parameters(BSp, header, unit, mode_paral, prtvol)
 
 !Arguments ------------------------------------
 !scalars
+ class(excparam),intent(in) :: BSp
  integer,optional,intent(in) :: unit,prtvol
- character(len=4),optional,intent(in) :: mode_paral 
+ character(len=4),optional,intent(in) :: mode_paral
  character(len=*),optional,intent(in) :: header
- type(excparam),intent(inout) :: BSp
 
 !Local variables ------------------------------
 !scalars
  integer :: my_unt,my_prtvol,iq,ii,spin
  character(len=4) :: my_mode
- character(len=500) :: msg      
+ character(len=500) :: msg
 
-! ********************************************************************* 
+! *********************************************************************
 
  my_unt   =std_out; if (PRESENT(unit      )) my_unt   =unit
- my_prtvol=0      ; if (PRESENT(prtvol    )) my_prtvol=prtvol 
+ my_prtvol=0      ; if (PRESENT(prtvol    )) my_prtvol=prtvol
  my_mode  ='COLL' ; if (PRESENT(mode_paral)) my_mode  =mode_paral
 
  msg=' ==== Parameters of the Bethe-Salpeter run ==== '
@@ -422,40 +356,39 @@ subroutine print_bs_parameters(BSp,header,unit,mode_paral,prtvol)
  call wrtout(my_unt,msg,my_mode)
 
  write(msg,'(4(a,i0,a))')&
-&  ' Dimension of the v, W matrices,  npweps  = ',BSp%npweps,ch10,&
-&  ' Cutoff for the wavefunctions,    npwwfn  = ',BSp%npwwfn,ch10,&
-&  ' Number of k-points in the IBZ,   nkibz   = ',BSp%nkibz,ch10,&
-&  ' Highest empty band included,     nband   = ',BSp%nbnds,""
+  ' Dimension of the v, W matrices,  npweps  = ',BSp%npweps,ch10,&
+  ' Cutoff for the wavefunctions,    npwwfn  = ',BSp%npwwfn,ch10,&
+  ' Number of k-points in the IBZ,   nkibz   = ',BSp%nkibz,ch10,&
+  ' Highest empty band included,     nband   = ',BSp%nbnds,""
  call wrtout(my_unt,msg,my_mode)
 
  do spin=1,Bsp%nsppol
    msg = " === Spin UP ==="; if (spin == 2) msg = " === Spin DOWN ==="
    call wrtout(my_unt,msg,my_mode)
    write(msg,'(5(a,i0,a))')&
-&    ' Number of resonant transitions          ',BSp%nreh(spin),ch10,&
-&    ' Lowest occupied state                   ',BSp%lomo_spin(spin),ch10,&
-&    ' Highest occupied state                  ',BSp%homo_spin(spin),ch10,&
-&    ' Lowest unoccupied state                 ',BSp%lumo_spin(spin),ch10,&
-&    ' Highest unoccupied state                ',BSp%nbnds,""
-!&    ' Number of valence bands                 ',BSp%nbndv,ch10,&
-!&    ' Number of conduction bands              ',BSp%nbndc,""
+    ' Number of resonant transitions          ',BSp%nreh(spin),ch10,&
+    ' Lowest occupied state                   ',BSp%lomo_spin(spin),ch10,&
+    ' Highest occupied state                  ',BSp%homo_spin(spin),ch10,&
+    ' Lowest unoccupied state                 ',BSp%lumo_spin(spin),ch10,&
+    ' Highest unoccupied state                ',BSp%nbnds,""
+    !' Number of valence bands                 ',BSp%nbndv,ch10,&
+    !' Number of conduction bands              ',BSp%nbndc,""
    call wrtout(my_unt,msg,my_mode)
  end do
 
  write(msg,'(3(a,f6.2,a),a,f6.2)')&
-&  ' Minimum frequency [eV]           Emin    = ',BSp%omegai*Ha_eV,ch10,&
-&  ' Maximum frequency [eV]           Emax    = ',BSp%omegae*Ha_eV,ch10,&
-&  ' Frequency step [eV]              dE      = ',BSp%domega*Ha_eV,ch10,&
-&  ' Lorentzian broadening [eV]       eta     = ',BSp%broad*Ha_eV
+  ' Minimum frequency [eV]           Emin    = ',BSp%omegai*Ha_eV,ch10,&
+  ' Maximum frequency [eV]           Emax    = ',BSp%omegae*Ha_eV,ch10,&
+  ' Frequency step [eV]              dE      = ',BSp%domega*Ha_eV,ch10,&
+  ' Lorentzian broadening [eV]       eta     = ',BSp%broad*Ha_eV
  call wrtout(my_unt,msg,my_mode)
- !
+
  ! Calculation type
- call bsp_calctype2str(Bsp,msg)
+ call bsp_calctype2str(Bsp, msg)
  call wrtout(my_unt,msg,my_mode)
 
  if (ABS(Bsp%mbpt_sciss)>tol6) then
-   write(msg,'(a,f5.2)')&
-&   " Scissors operator energy [eV] =         ",Bsp%mbpt_sciss*Ha_eV
+   write(msg,'(a,f5.2)')" Scissors operator energy [eV] =         ",Bsp%mbpt_sciss*Ha_eV
    call wrtout(my_unt,msg,my_mode)
  end if
 
@@ -467,7 +400,7 @@ subroutine print_bs_parameters(BSp,header,unit,mode_paral,prtvol)
  if (BSp%use_coulomb_term) msg=' Excitonic effects (W term) included'
  call wrtout(my_unt,msg,my_mode)
 
- if (BSp%use_coulomb_term) then 
+ if (BSp%use_coulomb_term) then
    msg=" Full W_GG' included"
    if (BSp%use_diagonal_Wgg) msg=' Only diagonal term W_GG included'
    call wrtout(my_unt,msg,my_mode)
@@ -484,12 +417,12 @@ subroutine print_bs_parameters(BSp,header,unit,mode_paral,prtvol)
  call wrtout(my_unt,msg,my_mode)
 
  if(Bsp%use_interp) then
-   call wrtout(my_unt,' Interpolation technique used',my_mode)   
+   call wrtout(my_unt,' Interpolation technique used',my_mode)
  end if
-   
+
  if(Bsp%use_interp) then
    select case (Bsp%interp_mode)
-   case (1) 
+   case (1)
      msg = ' Interpolation using WFK on the dense mesh'
    case (2)
      msg = ' Interpolation using WFK on the dense mesh + ABC divergence'
@@ -531,14 +464,13 @@ subroutine print_bs_parameters(BSp,header,unit,mode_paral,prtvol)
    call wrtout(my_unt,msg,my_mode)
  end do
 
- !TODO 
+ !TODO
  !Add file sizes and size of the buffer used for the matrix.
 
 end subroutine print_bs_parameters
 !!***
 
 !----------------------------------------------------------------------
-
 
 !!****f* m_bs_defs/bsp_calctype2str
 !! NAME
@@ -547,22 +479,14 @@ end subroutine print_bs_parameters
 !! FUNCTION
 !!  Returns a string with the calculation type.
 !!
-!! PARENTS
-!!      m_bs_defs,m_exc_spectra,setup_bse
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
-subroutine bsp_calctype2str(BSp,str)
-
- implicit none
+subroutine bsp_calctype2str(BSp, str)
 
 !Arguments ------------------------------------
 !scalars
+ class(excparam),intent(in) :: BSp
  character(len=500),intent(out) :: str
- type(excparam),intent(in) :: BSp
 
 !************************************************************************
 
@@ -611,18 +535,10 @@ end subroutine bsp_calctype2str
 !!    input:  allocatable array
 !!    output: Trans(max_nreh,nsppol) stores the correspondence t -> (band,kbz,spin) and the transition energy.
 !!
-!! PARENTS
-!!      setup_bse,setup_bse_interp
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
 subroutine init_transitions(Trans,lomo_spin,humo_spin,ir_cut,uv_cut,nkbz,nbnds,nkibz,nsppol,nspinor,gw_energy,occ,ktab,&
-&  minmax_tene,nreh) 
-
- implicit none
+                            minmax_tene,nreh)
 
 !Arguments ------------------------------------
 !scalars
@@ -632,7 +548,7 @@ subroutine init_transitions(Trans,lomo_spin,humo_spin,ir_cut,uv_cut,nkbz,nbnds,n
  type(transition),allocatable,intent(out) :: Trans(:,:)
 !arrays
  integer,intent(in) :: lomo_spin(nsppol),humo_spin(nsppol)
- integer,intent(in) :: ktab(nkbz) 
+ integer,intent(in) :: ktab(nkbz)
  integer,intent(out) :: nreh(nsppol)
  real(dp),intent(in) :: occ(nbnds,nkibz,nsppol)
  complex(dpc),intent(in) :: gw_energy(nbnds,nkibz,nsppol)
@@ -645,13 +561,13 @@ subroutine init_transitions(Trans,lomo_spin,humo_spin,ir_cut,uv_cut,nkbz,nbnds,n
  logical :: add_transition
 
 !************************************************************************
-      
- ! Find transitions                                                  
+
+ ! Find transitions
  max_occ=2/(nsppol*nspinor)
  nreh=0
  min_tene = -one; max_tene = zero
  !
- ! sweep=1 calculats the number of resonants transitions taking into 
+ ! sweep=1 calculats the number of resonants transitions taking into
  !         account a possible energy cutoff.
  ! sweep=2 initializes the tables describing the e-h transition.
  !
@@ -660,15 +576,15 @@ subroutine init_transitions(Trans,lomo_spin,humo_spin,ir_cut,uv_cut,nkbz,nbnds,n
    if (sweep==2) then
      ! Allocate Trans structure.
      max_nreh = MAXVAL(nreh)
-     ABI_DT_MALLOC(Trans, (max_nreh,nsppol))
+     ABI_MALLOC(Trans, (max_nreh,nsppol))
    end if
    !
    do spin=1,nsppol
      it=0
      lomo = lomo_spin(spin)
      humo = humo_spin(spin)
-     do ik_bz=1,nkbz 
-       ik_ibz=ktab(ik_bz) 
+     do ik_bz=1,nkbz
+       ik_ibz=ktab(ik_bz)
        !
        do iv=lomo,humo
          do ic=lomo,humo
@@ -677,34 +593,34 @@ subroutine init_transitions(Trans,lomo_spin,humo_spin,ir_cut,uv_cut,nkbz,nbnds,n
            tene = DBLE(cplx_enet)
 
            add_transition =                      &
-&             (tene > tol12) .and.               &  ! Resonant transition.
-&             ( ABS(delta_f) > tol12) .and.      &  ! c-v transition.
-&             (tene < uv_cut .and. tene > ir_cut)   ! Energy cutoff.
+              (tene > tol12) .and.               &  ! Resonant transition.
+              ( ABS(delta_f) > tol12) .and.      &  ! c-v transition.
+              (tene < uv_cut .and. tene > ir_cut)   ! Energy cutoff.
 
            if (add_transition) then
-             it = it + 1 
+             it = it + 1
              max_tene = MAX(max_tene, tene)
              min_tene = MAX(min_tene, tene)
            end if
-           if (add_transition.and.sweep==2) then 
-             Trans(it,spin)%k  = ik_bz 
-             Trans(it,spin)%v  = iv 
-             Trans(it,spin)%c  = ic 
+           if (add_transition.and.sweep==2) then
+             Trans(it,spin)%k  = ik_bz
+             Trans(it,spin)%v  = iv
+             Trans(it,spin)%c  = ic
              Trans(it,spin)%en = cplx_enet
            end if
 
-         end do 
-       end do 
+         end do
+       end do
      end do ! ik_bz
      ! Save number of transitions for this spin.
-     if (sweep==1) nreh(spin) = it 
+     if (sweep==1) nreh(spin) = it
    end do ! spin
    !
  end do ! sweep
 
  minmax_tene = [min_tene, max_tene]
 
-end subroutine init_transitions                                           
+end subroutine init_transitions
 !!***
 
 !----------------------------------------------------------------------
@@ -723,19 +639,14 @@ end subroutine init_transitions
 !! OUTPUT
 !!  str(len=500)=The string representing the transition.
 !!
-!! PARENTS
-!!
 !! SOURCE
 
-pure function repr_1trans(Trans,prtvol) result(str)
-
- implicit none 
+pure function repr_1trans(Trans, prtvol) result(str)
 
 !Arguments ------------------------------------
-!scalars
+ class(transition),intent(in) :: Trans
  integer,optional,intent(in) :: prtvol
  character(len=500) :: str
- type(transition),intent(in) :: Trans 
 
 !Local variables ------------------------------
 !scalars
@@ -747,7 +658,7 @@ pure function repr_1trans(Trans,prtvol) result(str)
 
  if (my_prtvol==0) then
    write(str,'(3(a,i3))')" k= ",Trans%k," v= ",Trans%v," c= ",Trans%c
- else 
+ else
    write(str,'(3(a,i3),a,2f6.2)')" k= ",Trans%k," v= ",Trans%v," c= ",Trans%c," ene= ",Trans%en*Ha_eV
  end if
 
@@ -770,13 +681,9 @@ end function repr_1trans
 !! OUTPUT
 !!  string(len=500)=The string representing the transition.
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 pure function repr_2trans(Trans1,Trans2,prtvol) result(string)
-
- implicit none 
 
 !Arguments ------------------------------------
 !scalars
@@ -785,7 +692,6 @@ pure function repr_2trans(Trans1,Trans2,prtvol) result(string)
  type(transition),intent(in) :: Trans1,Trans2
 
 !Local variables ------------------------------
-!scalars
  integer :: my_prtvol
 
 !************************************************************************
@@ -815,38 +721,28 @@ end function repr_2trans
 !! OUTPUT
 !!  Only printing.
 !!
-!! PARENTS
-!!      setup_bse
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
-subroutine print_bs_files(BS_files,header,unit,mode_paral,prtvol)                                   
-
- implicit none 
+subroutine print_bs_files(BS_files,header,unit,mode_paral,prtvol)
 
 !Arguments ------------------------------------
-!scalars
- type(excfiles),intent(in) :: BS_files
+ class(excfiles),intent(in) :: BS_files
  integer,optional,intent(in) :: unit,prtvol
- character(len=4),optional,intent(in) :: mode_paral 
+ character(len=4),optional,intent(in) :: mode_paral
  character(len=*),optional,intent(in) :: header
-!arrays
 
 !Local variables ------------------------------
 !scalars
  integer :: my_unt,my_prtvol
  character(len=4) :: my_mode
- character(len=500) :: msg      
-! ********************************************************************* 
+ character(len=500) :: msg
+! *********************************************************************
 
  !@excfiles
  my_unt   =std_out; if (PRESENT(unit      )) my_unt   =unit
- my_prtvol=0      ; if (PRESENT(prtvol    )) my_prtvol=prtvol 
+ my_prtvol=0      ; if (PRESENT(prtvol    )) my_prtvol=prtvol
  my_mode  ='COLL' ; if (PRESENT(mode_paral)) my_mode  =mode_paral
-                                                                    
+
  msg=' ==== Files used for the Bethe-Salpeter calculation  ==== '
  if (PRESENT(header)) msg=' ==== '//TRIM(ADJUSTL(header))//' ==== '
  call wrtout(my_unt,msg,my_mode)

@@ -1,0 +1,27 @@
+t11o_DS1_DEN
+2
+2
+-0.25 -0.25 -0.25
+ 1.50  1.50  1.50
+70
+t12.abo
+1
+5
+t12.aboden
+0
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = cut3d
+#%% test_chain = t11.abi, t12.abi, t13.abi
+#%% [files]
+#%% files_to_test = 
+#%%   t12.abo, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = Unknown
+#%% keywords = 
+#%% description = 
+#%%   cut3d treatment of DEN file from 11. Checks that DEN is properly generated.
+#%%<END TEST_INFO>

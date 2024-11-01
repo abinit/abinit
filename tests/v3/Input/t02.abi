@@ -1,0 +1,149 @@
+# Rhombohedral Bi treated as a semiconductor
+# 2x2x2 grid, defined by hand, using time-reversal
+# symmetry to lower the number of k points to 3.
+# Also, the applicable symmetries have been
+# defined by hand, as symmetries cannot be used
+# yet for the conversion of wavefunctions in the
+# spinor case in the present v3.1.3
+
+ prtvol 10
+
+ ndtset 10
+
+#Datasets 1-3 : GS
+ xred1  0.2309d0   2*0.231d0
+       3*-0.231d0
+
+ xred2    3*0.231d0
+          3*-0.231d0
+ getwfk2 -1
+
+ xred3  0.2311d0   2*0.231d0
+        3*-0.231d0
+ getwfk3 -1
+
+
+#Dataset 4 : RF
+ nqpt4     1
+ qpt4      3*0.0d0
+ rfphon4   1
+ getwfk4   2
+ toldfe4   1.0d-7
+ xred4     3*0.231d0
+           3*-0.231d0
+
+#Datasets 5 : GS, spinor wavefunctions, but no SO coupling
+ xred5    3*0.231d0
+          3*-0.231d0
+ getwfk5  2
+ nspinor5  2
+ nband5    10
+ so_psp5    0
+
+#Dataset 6 : RF, spinor wavefunctions, but no SO coupling
+ nqpt6     1
+ qpt6      3*0.0d0
+ rfphon6   1
+ getwfk6   5
+ toldfe6   1.0d-7
+ xred6     3*0.231d0
+           3*-0.231d0
+ nspinor6  2
+ nband6    10
+ so_psp6    0
+
+#Datasets 7-9 : GS with spin-orbit
+ xred7     0.2309d0   2*0.231d0
+           3*-0.231d0
+ nspinor7  2
+ nband7    10
+
+ xred8     3*0.231d0
+           3*-0.231d0
+ getwfk8  -1
+ nspinor8  2
+ nband8    10
+
+
+ xred9     0.2311d0   2*0.231d0
+           3*-0.231d0
+ getwfk9  -1
+ nspinor9  2
+ nband9    10
+
+#Dataset 10 : RF with spin-orbit
+ nqpt10     1
+ qpt10      3*0.0d0
+ rfphon10   1
+ getwfk10   8
+ toldfe10   1.0d-7
+ xred10     3*0.231d0
+            3*-0.231d0
+ nspinor10  2
+ nband10    10
+
+#Common data
+ acell 3*9.0d0
+ angdeg 3*57.25d0
+ ecut  2.0d0
+ natom  2
+ nband  5
+ nstep 20
+ nsym 2
+ symrel 1 0 0  0 1 0  0 0 1
+        1 0 0  0 0 1  0 1 0
+ ntypat  1
+ rfatpol   1 1
+ rfdir     1 0 0
+ tolvrs  1.0d-16
+ typat  1 1
+ znucl 83.d0
+
+  kptopt 0
+       kpt    1/4  1/4  1/4
+             -1/4  1/4  1/4
+              1/4 -1/4  1/4
+     nkpt         3
+       wtk    1/4    1/4   1/2
+
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosHGH_pwteter/83bi.5.hgh"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t02.abo, tolnlines = 6, tolabs = 3.0e-06, tolrel = 5.000e-06, fld_options = -medium
+#%% [paral_info]
+#%% max_nprocs = 3
+#%% [extra_info]
+#%% authors = Unknown
+#%% keywords = NC, DFPT
+#%% description = 
+#%%     Bi A7 structure (2 atoms per unit cell),
+#%%     using the HGH pseudopotential, within LDA. 
+#%%     Fixed cell dimensions. Treated as a semi-conductor
+#%%     Test the response to atomic displacements,
+#%%     with and without spin-orbit.
+#%%     Perform first computation without spin-orbit.
+#%%     Datasets 1-3 : frozen-phonon, without SO
+#%%     Datasets 4 : RF, without SO
+#%%     the comparison between frozen-phonon
+#%%     from dataset 1 and 3 (2DTE=2.35465660) 
+#%%     and RF from dataset 4(2DTE=2.35465792)
+#%%     is excellent.
+#%%     Dataset 5 : GS, with nspinor=2, but no
+#%%     spin-orbit yet.
+#%%     Dataset 6 : RF, with nspinor=2, but no
+#%%     spin-orbit yet. The agreement with 
+#%%     nspinor=1 RF is excellent.
+#%%     Dataset 7-9 : frozen-phonon with spin-orbit
+#%%     Dataset 10 : RF with spin-orbit.
+#%%     The agreement is as good as without
+#%%     spin-orbit ! Frozen-phonon 2DTE=2.48156,
+#%%     RF 2DTE=2.48156 .
+#%%     NOTE : the old t02.in file, which was giving
+#%%     troubles in v3.1.2 is now called t02a.in
+#%%<END TEST_INFO>

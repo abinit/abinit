@@ -1,0 +1,60 @@
+# Crazy Si cell with 4 atoms.
+# Used to test the generation of symmetry matrices from
+# input spatial group
+
+# checks several orientation into an orthorhombic space group
+
+ ndtset 4
+
+ spgaxor1 1
+ spgaxor2 3
+ spgaxor3 5
+ spgaxor4 7
+
+ spgroup 62
+
+#common declarations
+
+ natom 8
+ acell 3*10.26311
+ rprim 1 0 0  0 1 0  0 0 1
+ diemac 12.d0
+ ecut 1.00
+ enunit 2
+ intxc 1
+ kpt 0 0 0   kptnrm 1
+ natrd 1
+ nband 16
+ kptopt 0
+
+ nkpt  1
+ nline 1
+ nstep 1
+ ntypat  1
+ occopt  1
+ prtvol 10
+ tolwfr 1.0d-13
+ wtk   1
+   xred        .1       .2       .3
+ znucl 14
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosGTH_pwteter/14si.pspgth"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t92.abo, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% keywords = NC
+#%% authors = Unknown
+#%% description = 
+#%%   Crazy 8-atom Si cell. Test the symmetrizer:
+#%%   Fast test for the same orthorhombic group, uses different orientations.
+#%%   Note : since the sets of atoms generated for different orientations
+#%%   are not equivalent, the final energies also differ.
+#%%<END TEST_INFO>

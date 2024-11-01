@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_nucprop
 !! NAME
 !!  m_nucprop
@@ -8,14 +7,10 @@
 !!  electric field gradient and Fermi contact
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2019 ABINIT group (MT, JWZ)
+!! Copyright (C) 1998-2024 ABINIT group (MT, JWZ)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -60,19 +55,12 @@ module m_nucprop
 
 contains
 
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/calc_efg
 !! NAME
 !! calc_efg
 !!
 !! FUNCTION
 !! calculation and output of electric field gradient tensor at each atomic site
-!!
-!! COPYRIGHT
-!! Copyright (C) 2005-2019 ABINIT group (JZ,MT)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~ABINIT/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! INPUTS
 !!  mpi_atmtab(:)=--optional-- indexes of the atoms treated by current proc
@@ -82,17 +70,17 @@ contains
 !!  natom=number of atoms in cell.
 !!  nfft=number of points on fft grid
 !!  ngfft(18)=details of fft
+!!  nhat(nfft,nspden)=compensation charge density
 !!  nspden=number of spin densities
 !!  nsym=number of symmetries in space group
 !!  ntypat=number of atom types
-!!  paral_kgb
+!!  nucefg=1 to print summary output, 2 for detailed output
 !!  ptcharge(ntypat)=user input charges on atoms to make simple point charge calc
 !!  paw_an(my_natom) <type(paw_an_type)>=paw arrays given on angular mesh
 !!  pawang <type(pawang_type)>=paw angular mesh and related data
 !!  pawrad(ntypat) <type(pawrad_type)>=paw radial mesh and related data
 !!  pawrhoij(my_natom) <type(pawrhoij_type)>= paw rhoij occupancies and related data
 !!  pawtab(ntypat) <type(pawtab_type)>=paw tabulated starting data
-!!  prtefg=1 to print summary output, 2 for detailed output
 !!  quadmom(ntypat)=quadrupole moments in barns of different atomic nuclei
 !!  rhor(nfft,nspden)=electron density on grid (strictly $\tilde{n}+\hat{n}$)
 !!  rprimd(3,3)=matrix relating cartesian coordinates to crystal coordinates
@@ -107,30 +95,16 @@ contains
 !! OUTPUT
 !!  (only writing, printing)
 !!
-!! SIDE EFFECTS
-!!
-!!
-!! NOTES
-!!
-!! PARENTS
-!!      outscfcv
-!!
-!! CHILDREN
-!!      dsyev,free_my_atmtab,get_my_atmtab,make_efg_el,make_efg_ion
-!!      make_efg_onsite,wrtout
-!!
 !! SOURCE
 
-  subroutine calc_efg(mpi_enreg,my_natom,natom,nfft,ngfft,nspden,nsym,ntypat,paral_kgb,&
-       &                    paw_an,pawang,pawrad,pawrhoij,pawtab,&
-       &                    ptcharge,prtefg,quadmom,rhor,rprimd,symrel,tnons,typat,ucvol,usepaw,xred,zion,&
-       &                    mpi_atmtab,comm_atom) ! optional arguments (parallelism)
-
-    implicit none
+  subroutine calc_efg(mpi_enreg,my_natom,natom,nfft,ngfft,nhat,nspden,nsym,nucefg,ntypat,&
+                      paw_an,pawang,pawrad,pawrhoij,pawtab,&
+                      ptcharge,quadmom,rhor,rprimd,symrel,tnons,typat,ucvol,usepaw,xred,zion,&
+                      mpi_atmtab,comm_atom) ! optional arguments (parallelism)
 
     !Arguments ------------------------------------
     !scalars
-    integer,intent(in) :: my_natom,natom,nfft,nspden,nsym,ntypat,paral_kgb,prtefg,usepaw
+    integer,intent(in) :: my_natom,natom,nfft,nspden,nsym,nucefg,ntypat,usepaw
     integer,optional,intent(in) :: comm_atom
     real(dp),intent(in) :: ucvol
     type(MPI_type),intent(in) :: mpi_enreg
@@ -138,7 +112,7 @@ contains
     !arrays
     integer,intent(in) :: ngfft(18),symrel(3,3,nsym),typat(natom)
     integer,optional,target,intent(in) :: mpi_atmtab(:)
-    real(dp),intent(in) :: ptcharge(ntypat)
+    real(dp),intent(in) :: nhat(nfft,nspden),ptcharge(ntypat)
     real(dp),intent(in) :: quadmom(ntypat),rhor(nfft,nspden),rprimd(3,3)
     real(dp),intent(in) :: tnons(3,nsym),zion(ntypat)
     real(dp),intent(inout) :: xred(3,natom)
@@ -149,8 +123,9 @@ contains
 
     !Local variables-------------------------------
     !scalars
-    integer :: INFO,LDA,LWORK,N,iatom,my_comm_atom
+    integer :: ii,INFO,LDA,LWORK,N,iatom,my_comm_atom
     logical :: my_atmtab_allocated,paral_atom
+    real(dp),parameter :: efg_si = 9.7173624292E21 ! convert EFG in au to SI units V/m2
     real(dp) :: cq,eta,vxx,vyy,vzz
     character(len=500) :: message
     !arrays
@@ -164,7 +139,7 @@ contains
     !Compatibility tests
     if (usepaw /= 1) then
        message = ' usepaw /= 1 but EFG calculation requires PAW '
-       MSG_ERROR(message)
+       ABI_ERROR(message)
     end if
 
     !Set up parallelism over atoms
@@ -173,17 +148,17 @@ contains
     my_comm_atom=xmpi_comm_self;if (present(comm_atom)) my_comm_atom=comm_atom
     call get_my_atmtab(my_comm_atom,my_atmtab,my_atmtab_allocated,paral_atom,natom,my_natom_ref=my_natom)
 
-    ABI_ALLOCATE(efg,(3,3,natom))
-    ABI_ALLOCATE(efg_el,(3,3,natom))
-    ABI_ALLOCATE(efg_ion,(3,3,natom))
-    ABI_ALLOCATE(efg_paw,(3,3,natom))
-    ABI_ALLOCATE(efg_point_charge,(3,3,natom))
+    ABI_MALLOC(efg,(3,3,natom))
+    ABI_MALLOC(efg_el,(3,3,natom))
+    ABI_MALLOC(efg_ion,(3,3,natom))
+    ABI_MALLOC(efg_paw,(3,3,natom))
+    ABI_MALLOC(efg_point_charge,(3,3,natom))
     efg_el(:,:,:) = zero
     efg_ion(:,:,:) = zero
     efg_paw(:,:,:) = zero
     efg_point_charge(:,:,:) = zero
 
-    call make_efg_el(efg_el,mpi_enreg,natom,nfft,ngfft,nspden,nsym,paral_kgb,rhor,rprimd,symrel,tnons,xred)
+    call make_efg_el(efg_el,mpi_enreg,natom,nfft,ngfft,nhat,nspden,nsym,rhor,rprimd,symrel,tnons,xred)
 
     call make_efg_ion(efg_ion,natom,nsym,ntypat,rprimd,symrel,tnons,typat,ucvol,xred,zion)
 
@@ -199,7 +174,7 @@ contains
     !note here all atoms of the same type will have the same valence; in the future this
     !could be made more flexible by having ptcharge(natom) but that will require a slightly
     !different version than the existing make_efg_ion routine
-    if(prtefg > 2) then
+    if(nucefg > 2) then
        call make_efg_ion(efg_point_charge,natom,nsym,ntypat,rprimd,symrel,tnons,typat,ucvol,xred,ptcharge)
     end if
 
@@ -222,61 +197,65 @@ contains
           vxx = eigval(3)
           vyy = eigval(2)
        end if
-       if (abs(quadmom(typat(iatom))) > tol8 ) then ! only relevant when quadmom > 0 for a given atom
-          !    cq = (eQ)*Vzz/h, where Q is the electric quadrupole moment and Vzz is the largest in magnitude
-          !    principal component of the EFG tensor. Q is input in quadmom in barns, and Vzz is computed in atomic
-          !    units. The factor 2349647.81 Ha^{-1}Bohr^2 fm^{-2} sec^-1 converts from atomic units to frequency (see
-          !    http://www.ismar.org/ISMARpedia/index.php/Nuclear_Quadrupole_Resonance for discussion); we divide by
-          !    10^6 to convert to MHz from Hz and multiply by 100 to convert from fm^2 to Barns.
-          cq = vzz*quadmom(typat(iatom))*2349647.81/1.0E4
-          if(abs(cq) > tol6 )then ! if Cq is non-zero, eta is meaningful, otherwise it s numerical noise
-             eta = abs(vxx - vyy)/abs(vzz)
-          else
-             eta=zero
-          end if
+       ! Cq = (eq)*(eQ)/h where eq is the efg vzz; Q is the nuclear quad moment in barns (10E-28 m2)
+       ! multiply vzz (in au) by efg_si to get volts/m^2
+       ! multiply quadmom by e_Cb (the electric charge unit) and 1D-28 to get eQ in SI units
+       ! divide by Plancks Constant to get freq
+       ! multiply by 1D-6 to get MHz
+       cq = 1.0D-6*vzz*efg_si*quadmom(typat(iatom))*e_Cb*1.0D-28/6.62607015D-34
+       if (abs(cq) > tol8) then
+         eta = abs(vxx-vyy)/abs(vzz)
        else
-          cq =zero
-          eta =zero
+         cq = zero
+         eta = zero ! if Cq is small then eta is meaningless
        end if
-       !  we always write Cq and eta, these are the NMR observables
-       write(message,'(a,i3,a,i3,a,f13.6,a,f13.6)') ' Atom ',iatom,', typat ',typat(iatom),': Cq = ',cq,' MHz     eta = ',eta
+
+       write(message,'(a,a,i4,a,i4)')ch10,'   atom : ',iatom,'   typat : ',typat(iatom)
        call wrtout(ab_out,message,'COLL')
-       if (prtefg > 1) then ! print detailed results on component EFG's
-          write(message,'(a,a,f13.6,a,a,3f13.6)')ch10,'      efg eigval : ',eigval(1),ch10,&
-               &     '-         eigvec : ',matr(1,1),matr(2,1),matr(3,1)
-          call wrtout(ab_out,message,'COLL')
-          write(message,'(a,f13.6,a,a,3f13.6)')'      efg eigval : ',eigval(2),ch10,&
-               &     '-         eigvec : ',matr(1,2),matr(2,2),matr(3,2)
-          call wrtout(ab_out,message,'COLL')
-          write(message,'(a,f13.6,a,a,3f13.6)')'      efg eigval : ',eigval(3),ch10,&
-               &     '-         eigvec : ',matr(1,3),matr(2,3),matr(3,3)
-          call wrtout(ab_out,message,'COLL')
-          write(message,'(a,a,3f13.6)')ch10,'      total efg : ',efg(1,1,iatom),efg(1,2,iatom),efg(1,3,iatom)
-          call wrtout(ab_out,message,'COLL')
-          write(message,'(a,3f13.6)')'      total efg : ',efg(2,1,iatom),efg(2,2,iatom),efg(2,3,iatom)
-          call wrtout(ab_out,message,'COLL')
-          write(message,'(a,3f13.6,a)')'      total efg : ',efg(3,1,iatom),efg(3,2,iatom),efg(3,3,iatom),ch10
-          call wrtout(ab_out,message,'COLL')
-          write(message,'(a,a,3f13.6)')ch10,'      efg_el : ',efg_el(1,1,iatom),efg_el(1,2,iatom),efg_el(1,3,iatom)
-          call wrtout(ab_out,message,'COLL')
-          write(message,'(a,3f13.6)')'      efg_el : ',efg_el(2,1,iatom),efg_el(2,2,iatom),efg_el(2,3,iatom)
-          call wrtout(ab_out,message,'COLL')
-          write(message,'(a,3f13.6,a)')'      efg_el : ',efg_el(3,1,iatom),efg_el(3,2,iatom),efg_el(3,3,iatom),ch10
-          call wrtout(ab_out,message,'COLL')
-          write(message,'(a,3f13.6)')'      efg_ion : ',efg_ion(1,1,iatom),efg_ion(1,2,iatom),efg_ion(1,3,iatom)
-          call wrtout(ab_out,message,'COLL')
-          write(message,'(a,3f13.6)')'      efg_ion : ',efg_ion(2,1,iatom),efg_ion(2,2,iatom),efg_ion(2,3,iatom)
-          call wrtout(ab_out,message,'COLL')
-          write(message,'(a,3f13.6,a)')'      efg_ion : ',efg_ion(3,1,iatom),efg_ion(3,2,iatom),efg_ion(3,3,iatom),ch10
-          call wrtout(ab_out,message,'COLL')
-          write(message,'(a,3f13.6)')'      efg_paw : ',efg_paw(1,1,iatom),efg_paw(1,2,iatom),efg_paw(1,3,iatom)
-          call wrtout(ab_out,message,'COLL')
-          write(message,'(a,3f13.6)')'      efg_paw : ',efg_paw(2,1,iatom),efg_paw(2,2,iatom),efg_paw(2,3,iatom)
-          call wrtout(ab_out,message,'COLL')
-          write(message,'(a,3f13.6,a)')'      efg_paw : ',efg_paw(3,1,iatom),efg_paw(3,2,iatom),efg_paw(3,3,iatom),ch10
-          call wrtout(ab_out,message,'COLL')
+       if (nucefg > 1) then
+         write(message,'(2a,f9.4,a,f9.4,a,f9.4)') ch10,'   Nuclear quad. mom. (barns) : ',quadmom(typat(iatom)),&
+           & '   Cq (MHz) : ',cq,'   eta : ',eta
+         call wrtout(ab_out,message,'COLL')
        end if
-       if (prtefg > 2) then ! write output of pure pointcharge calculation
+      
+       ! for printing and test portability, it's better to simply set very small eigvals to zero 
+       do ii=1,3 
+         if (abs(eigval(ii))<tol8) eigval(ii)=zero
+       end do 
+       write(message,'(2a,f13.6,a,es16.8,a,a,3f13.6)')ch10,'      efg eigval (au) : ',eigval(1),' ; (V/m^2) : ',eigval(1)*efg_si,ch10,&
+            &     '-         eigvec : ',matr(1,1),matr(2,1),matr(3,1)
+       call wrtout(ab_out,message,'COLL')
+       write(message,'(2a,f13.6,a,es16.8,a,a,3f13.6)')ch10,'      efg eigval (au) : ',eigval(2),' ; (V/m^2) : ',eigval(2)*efg_si,ch10,&
+            &     '-         eigvec : ',matr(1,2),matr(2,2),matr(3,2)
+       call wrtout(ab_out,message,'COLL')
+       write(message,'(2a,f13.6,a,es16.8,a,a,3f13.6)')ch10,'      efg eigval (au) : ',eigval(3),' ; (V/m^2) : ',eigval(3)*efg_si,ch10,&
+            &     '-         eigvec : ',matr(1,3),matr(2,3),matr(3,3)
+       call wrtout(ab_out,message,'COLL')
+       write(message,'(a,a,3f13.6)')ch10,'      total efg : ',efg(1,1,iatom),efg(1,2,iatom),efg(1,3,iatom)
+       call wrtout(ab_out,message,'COLL')
+       write(message,'(a,3f13.6)')'      total efg : ',efg(2,1,iatom),efg(2,2,iatom),efg(2,3,iatom)
+       call wrtout(ab_out,message,'COLL')
+       write(message,'(a,3f13.6,a)')'      total efg : ',efg(3,1,iatom),efg(3,2,iatom),efg(3,3,iatom),ch10
+       call wrtout(ab_out,message,'COLL')
+       write(message,'(a,a,3f13.6)')ch10,'      efg_el : ',efg_el(1,1,iatom),efg_el(1,2,iatom),efg_el(1,3,iatom)
+       call wrtout(ab_out,message,'COLL')
+       write(message,'(a,3f13.6)')'      efg_el : ',efg_el(2,1,iatom),efg_el(2,2,iatom),efg_el(2,3,iatom)
+       call wrtout(ab_out,message,'COLL')
+       write(message,'(a,3f13.6,a)')'      efg_el : ',efg_el(3,1,iatom),efg_el(3,2,iatom),efg_el(3,3,iatom),ch10
+       call wrtout(ab_out,message,'COLL')
+       write(message,'(a,3f13.6)')'      efg_ion : ',efg_ion(1,1,iatom),efg_ion(1,2,iatom),efg_ion(1,3,iatom)
+       call wrtout(ab_out,message,'COLL')
+       write(message,'(a,3f13.6)')'      efg_ion : ',efg_ion(2,1,iatom),efg_ion(2,2,iatom),efg_ion(2,3,iatom)
+       call wrtout(ab_out,message,'COLL')
+       write(message,'(a,3f13.6,a)')'      efg_ion : ',efg_ion(3,1,iatom),efg_ion(3,2,iatom),efg_ion(3,3,iatom),ch10
+       call wrtout(ab_out,message,'COLL')
+       write(message,'(a,3f13.6)')'      efg_paw : ',efg_paw(1,1,iatom),efg_paw(1,2,iatom),efg_paw(1,3,iatom)
+       call wrtout(ab_out,message,'COLL')
+       write(message,'(a,3f13.6)')'      efg_paw : ',efg_paw(2,1,iatom),efg_paw(2,2,iatom),efg_paw(2,3,iatom)
+       call wrtout(ab_out,message,'COLL')
+       write(message,'(a,3f13.6,a)')'      efg_paw : ',efg_paw(3,1,iatom),efg_paw(3,2,iatom),efg_paw(3,3,iatom),ch10
+       call wrtout(ab_out,message,'COLL')
+       if (nucefg > 2) then ! write output of pure pointcharge calculation
           matr(:,:) = efg_point_charge(:,:,iatom)
           call dsyev('V','U',N,matr,LDA,eigval,work,LWORK,INFO) ! get eigenvalues and eigenvectors
           if (eigval(3) > abs(eigval(1)) ) then ! In NMR, the convention is that whatever component is
@@ -289,29 +268,21 @@ contains
              vxx = eigval(3)
              vyy = eigval(2)
           end if
-          if (abs(quadmom(typat(iatom))) > tol8 ) then ! only relevant when quadmom > 0 for a given atom
-             !      cq = e2Qq/h, where Vzz = eq and quadmom = Q; the other factors convert from atomic units to MHz
-             cq = vzz*quadmom(typat(iatom))*2349647.81/1.0E4
-             if(abs(cq) > tol6 )then ! if Cq is non-zero, eta is meaningful, otherwise it s numerical noise
-                eta = abs(vxx - vyy)/abs(vzz)
-             else
-                eta=zero
-             end if
+          cq = 1.0D-6*vzz*efg_si*quadmom(typat(iatom))*e_Cb*1.0D-28/6.62607015D-34
+          if (abs(cq) > tol8) then
+            eta = abs(vxx-vyy)/abs(vzz)
           else
-             cq =zero
-             eta =zero
+            eta = zero ! if Cq is small then eta is meaningless
           end if
-          !    we always write Cq and eta, these are the NMR observables
-          write(message,'(a,i3,a,i3,a,f13.6,a,f13.6)') ' Atom ',iatom,', typat ',typat(iatom),&
-               &     ': Point charge Cq = ',cq,' MHz     eta = ',eta
+          write(message,'(a,f9.4,a,f9.4)') '  Point charge Cq = ',cq,' MHz     eta = ',eta
           call wrtout(ab_out,message,'COLL')
-          write(message,'(a,a,f13.6,a,a,3f13.6)')ch10,'      point charge efg eigval : ',eigval(1),ch10,&
+          write(message,'(2a,f13.6,a,es16.8,a,a,3f13.6)')ch10,'      point charge eigval (au) : ',eigval(1),' ; (V/m^2) : ',eigval(1)*efg_si,ch10,&
                &     '-         eigvec : ',matr(1,1),matr(2,1),matr(3,1)
           call wrtout(ab_out,message,'COLL')
-          write(message,'(a,f13.6,a,a,3f13.6)')'      point charge efg eigval : ',eigval(2),ch10,&
+          write(message,'(2a,f13.6,a,es16.8,a,a,3f13.6)')ch10,'      point charge eigval (au) : ',eigval(2),' ; (V/m^2) : ',eigval(2)*efg_si,ch10,&
                &     '-         eigvec : ',matr(1,2),matr(2,2),matr(3,2)
           call wrtout(ab_out,message,'COLL')
-          write(message,'(a,f13.6,a,a,3f13.6)')'      point charge efg eigval : ',eigval(3),ch10,&
+          write(message,'(2a,f13.6,a,es16.8,a,a,3f13.6)')ch10,'      point charge eigval (au) : ',eigval(3),' ; (V/m^2) : ',eigval(3)*efg_si,ch10,&
                &     '-         eigvec : ',matr(1,3),matr(2,3),matr(3,3)
           call wrtout(ab_out,message,'COLL')
           write(message,'(a,a,3f13.6)')ch10,'      point charge efg : ',efg_point_charge(1,1,iatom),&
@@ -328,11 +299,11 @@ contains
     write(message,'(3a)')ch10,ch10,ch10
     call wrtout(ab_out,message,'COLL')
 
-    ABI_DEALLOCATE(efg)
-    ABI_DEALLOCATE(efg_el)
-    ABI_DEALLOCATE(efg_ion)
-    ABI_DEALLOCATE(efg_paw)
-    ABI_DEALLOCATE(efg_point_charge)
+    ABI_FREE(efg)
+    ABI_FREE(efg_el)
+    ABI_FREE(efg_ion)
+    ABI_FREE(efg_paw)
+    ABI_FREE(efg_point_charge)
 
     !Destroy atom table used for parallelism
     call free_my_atmtab(my_atmtab,my_atmtab_allocated)
@@ -346,19 +317,12 @@ contains
 !!***
 
 !!***
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/calc_fc
 !! NAME
 !! calc_fc
 !!
 !! FUNCTION
 !! calculation and output of Fermi-contact term at each atomic site
-!!
-!! COPYRIGHT
-!! Copyright (C) 2009-2019 ABINIT group (JWZ,MT)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~ABINIT/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! INPUTS
 !!  mpi_atmtab(:)=--optional-- indexes of the atoms treated by current proc
@@ -381,18 +345,10 @@ contains
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      outscfcv
-!!
-!! CHILDREN
-!!      free_my_atmtab,get_my_atmtab,make_fc_paw,wrtout
-!!
 !! SOURCE
 
   subroutine calc_fc(my_natom,natom,nspden,ntypat,pawrad,pawrhoij,pawtab,typat,usepaw,&
        &                  mpi_atmtab,comm_atom) ! optional arguments (parallelism)
-
-    implicit none
 
     !Arguments ------------------------------------
     !scalars
@@ -419,7 +375,7 @@ contains
     !Compatibility tests
     if (usepaw /= 1) then
        message = ' usepaw /= 1 but Fermi-contact calculation requires PAW '
-       MSG_ERROR(message)
+       ABI_ERROR(message)
     end if
 
     !Set up parallelism over atoms
@@ -429,7 +385,7 @@ contains
     call get_my_atmtab(my_comm_atom,my_atmtab,my_atmtab_allocated,paral_atom,natom,my_natom_ref=my_natom)
 
     !Initialization
-    ABI_ALLOCATE(fc,(nspden,natom))
+    ABI_MALLOC(fc,(nspden,natom))
 
     !Computation
     if (paral_atom) then
@@ -462,7 +418,7 @@ contains
     call wrtout(ab_out,message,'COLL')
 
     !Memory deallocation
-    ABI_DEALLOCATE(fc)
+    ABI_FREE(fc)
 
     !Destroy atom table used for parallelism
     call free_my_atmtab(my_atmtab,my_atmtab_allocated)
@@ -470,19 +426,12 @@ contains
   end subroutine calc_fc
 !!***
 
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/make_efg_ion
 !! NAME
 !! make_efg_ion
 !!
 !! FUNCTION
 !! compute the electric field gradient due to ionic cores
-!!
-!! COPYRIGHT
-!! Copyright (C) 2005-2019 ABINIT group (JWZ)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~ABINIT/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! INPUTS
 !! natom, number of atoms in the unit cell
@@ -516,15 +465,9 @@ contains
 !! the sum over atoms is carried out by an Ewald method as detailed in the Honma reference, specifically
 !! his Eq. 4.8.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine make_efg_ion(efg,natom,nsym,ntypat,rprimd,symrel,tnons,typat,ucvol,xred,zion)
-
-  implicit none
 
   !Arguments ------------------------------------
   !scalars
@@ -554,9 +497,9 @@ subroutine make_efg_ion(efg,natom,nsym,ntypat,rprimd,symrel,tnons,typat,ucvol,xr
   !write(std_out,*)' make_efg_ion : enter'
   !ENDDEBUG
 
-  ABI_ALLOCATE(efg_g,(3,3,natom))
-  ABI_ALLOCATE(efg_r,(3,3,natom))
-  ABI_ALLOCATE(xcart,(3,natom))
+  ABI_MALLOC(efg_g,(3,3,natom))
+  ABI_MALLOC(efg_r,(3,3,natom))
+  ABI_MALLOC(xcart,(3,natom))
   efg(:,:,:) = zero ! final efg tensor
   efg_g(:,:,:) = zero ! part of tensor accumulated in G space
   efg_r(:,:,:) = zero ! part of tensor accumulated in R space
@@ -693,9 +636,9 @@ subroutine make_efg_ion(efg,natom,nsym,ntypat,rprimd,symrel,tnons,typat,ucvol,xr
      call matpointsym(iatom,efg(:,:,iatom),natom,nsym,rprimd,symrel,tnons,xred)
   end do
 
-  ABI_DEALLOCATE(efg_g)
-  ABI_DEALLOCATE(efg_r)
-  ABI_DEALLOCATE(xcart)
+  ABI_FREE(efg_g)
+  ABI_FREE(efg_r)
+  ABI_FREE(xcart)
 
   !DEBUG
   !write(std_out,*)' make_efg_ion : exit '
@@ -705,7 +648,6 @@ subroutine make_efg_ion(efg,natom,nsym,ntypat,rprimd,symrel,tnons,typat,ucvol,xr
 end subroutine make_efg_ion
 !!***
 
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/make_efg_el
 !! NAME
 !! make_efg_el
@@ -713,16 +655,11 @@ end subroutine make_efg_ion
 !! FUNCTION
 !! compute the electric field gradient due to electron density
 !!
-!! COPYRIGHT
-!! Copyright (C) 2005-2019 ABINIT group (JWZ)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~ABINIT/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!!
 !! INPUTS
 !! mpi_enreg=information about MPI parallelization
 !! natom, number of atoms in unit cell
 !! nfft,ngfft(18), number of FFT points and details of FFT
+!! nhat(nfft,nspden) compensation charge density
 !! nspden, number of spin components
 !! nsym=number of symmetries in space group
 !! rhor(nfft,nspden), valence electron density, here $\tilde{n} + \hat{n}$
@@ -750,25 +687,17 @@ end subroutine make_efg_ion
 !! \end{displaymath}
 !!
 !!
-!! PARENTS
-!!      calc_efg
-!!
-!! CHILDREN
-!!      fourdp,matpointsym,matr3inv,ptabs_fourdp,xmpi_sum,xred2xcart
-!!
 !! SOURCE
 
-subroutine make_efg_el(efg,mpi_enreg,natom,nfft,ngfft,nspden,nsym,paral_kgb,rhor,rprimd,symrel,tnons,xred)
-
-  implicit none
+subroutine make_efg_el(efg,mpi_enreg,natom,nfft,ngfft,nhat,nspden,nsym,rhor,rprimd,symrel,tnons,xred)
 
   !Arguments ------------------------------------
   !scalars
-  integer,intent(in) :: natom,nfft,nspden,nsym,paral_kgb
+  integer,intent(in) :: natom,nfft,nspden,nsym
   type(MPI_type),intent(in) :: mpi_enreg
   !arrays
   integer,intent(in) :: ngfft(18),symrel(3,3,nsym)
-  real(dp),intent(in) :: rhor(nfft,nspden),rprimd(3,3),tnons(3,nsym),xred(3,natom)
+  real(dp),intent(in) :: nhat(nfft,nspden),rhor(nfft,nspden),rprimd(3,3),tnons(3,nsym),xred(3,natom)
   real(dp),intent(out) :: efg(3,3,natom)
 
   !Local variables-------------------------------
@@ -782,7 +711,7 @@ subroutine make_efg_el(efg,mpi_enreg,natom,nfft,ngfft,nspden,nsym,paral_kgb,rhor
   integer :: id(3)
   integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:),ffti2_local(:)
   integer, ABI_CONTIGUOUS pointer :: fftn3_distrib(:),ffti3_local(:)
-  real(dp) :: gprimd(3,3),gred(3),gvec(3),ratom(3)
+  real(dp) :: gprimd(3,3),gqred(3),gvec(3),ratom(3)
   real(dp),allocatable :: fofg(:,:),fofr(:),gq(:,:),xcart(:,:)
 
   ! ************************************************************************
@@ -791,9 +720,9 @@ subroutine make_efg_el(efg,mpi_enreg,natom,nfft,ngfft,nspden,nsym,paral_kgb,rhor
   !write(std_out,*)' make_efg_el : enter'
   !ENDDEBUG
 
-  ABI_ALLOCATE(fofg,(2,nfft))
-  ABI_ALLOCATE(fofr,(nfft))
-  ABI_ALLOCATE(xcart,(3,natom))
+  ABI_MALLOC(fofg,(2,nfft))
+  ABI_MALLOC(fofr,(nfft))
+  ABI_MALLOC(xcart,(3,natom))
 
   efg(:,:,:) = zero
   call xred2xcart(natom,rprimd,xcart,xred) ! get atomic locations in cartesian coords
@@ -802,12 +731,12 @@ subroutine make_efg_el(efg,mpi_enreg,natom,nfft,ngfft,nspden,nsym,paral_kgb,rhor
   tim_fourdp = 0 ! timing code, not using
   fftdir = -1 ! FT from R to G
   cplex = 1 ! fofr is real
-  !here we are only interested in the total charge density including nhat, which is rhor(:,1)
+  !here we are only interested in the valence pseudo charge density, which is rhor(:,1)-nhat(:,1)
   !regardless of the value of nspden. This may change in the future depending on
   !developments with noncollinear magnetization and so forth. Such a change will
   !require an additional loop over nspden.
   !Multiply by -1 to convert the electron particle density to the charge density
-  fofr(:) = -rhor(:,1)
+  fofr(:) = -(rhor(:,1)-nhat(:,1))
 
   ! Get the distrib associated with this fft_grid  See hartre.F90 for another example where
   ! this is done
@@ -822,7 +751,7 @@ subroutine make_efg_el(efg,mpi_enreg,natom,nfft,ngfft,nspden,nsym,paral_kgb,rhor
 
   ! In order to speed the routine, precompute the components of g
   ! Also check if the booked space was large enough...
-  ABI_ALLOCATE(gq,(3,max(n1,n2,n3)))
+  ABI_MALLOC(gq,(3,max(n1,n2,n3)))
   do ii=1,3
      id(ii)=ngfft(ii)/2+2
      do ing=1,ngfft(ii)
@@ -835,13 +764,13 @@ subroutine make_efg_el(efg,mpi_enreg,natom,nfft,ngfft,nspden,nsym,paral_kgb,rhor
   ! Triple loop on each dimension
   do i3=1,n3
      ig3=i3-(i3/id3)*n3-1
-     gred(3) = gq(3,i3)
+     gqred(3) = gq(3,i3)
 
      do i2=1,n2
         ig2=i2-(i2/id2)*n2-1
         if (fftn2_distrib(i2) == me_fft) then
 
-           gred(2) = gq(2,i2)
+           gqred(2) = gq(2,i2)
            i2_local = ffti2_local(i2)
            i23=n1*(i2_local-1 +(n2/nproc_fft)*(i3-1))
            ! Do the test that eliminates the Gamma point outside of the inner loop
@@ -851,8 +780,8 @@ subroutine make_efg_el(efg,mpi_enreg,natom,nfft,ngfft,nspden,nsym,paral_kgb,rhor
            ! Final inner loop on the first dimension (note the lower limit)
            do i1=ii1,n1
               !         gs=gs2+ gq(1,i1)*(gq(1,i1)*gmet(1,1)+gqg2p3)
-              gred(1) = gq(1,i1)
-              gvec(1:3) = MATMUL(gprimd,gred)
+              gqred(1) = gq(1,i1)
+              gvec(1:3) = MATMUL(gprimd,gqred)
               fofg_index=i1+i23
               trace = dot_product(gvec,gvec)
               do ii = 1, 3 ! sum over components of efg tensor
@@ -881,10 +810,10 @@ subroutine make_efg_el(efg,mpi_enreg,natom,nfft,ngfft,nspden,nsym,paral_kgb,rhor
      call matpointsym(iatom,efg(:,:,iatom),natom,nsym,rprimd,symrel,tnons,xred)
   end do
 
-  ABI_DEALLOCATE(fofg)
-  ABI_DEALLOCATE(fofr)
-  ABI_DEALLOCATE(xcart)
-  ABI_DEALLOCATE(gq)
+  ABI_FREE(fofg)
+  ABI_FREE(fofr)
+  ABI_FREE(xcart)
+  ABI_FREE(gq)
 
   !DEBUG
   !write(std_out,*)' make_efg_el : exit '

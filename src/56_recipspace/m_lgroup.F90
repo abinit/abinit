@@ -1,10 +1,9 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_lgroup
 !! NAME
 !! m_lgroup
 !!
 !! FUNCTION
-!! The little group of a q-point is defined as the subset of the space group that preserves q,
+!! The little group of a q-point is defined as the subgroup of rotations that preserves q,
 !! modulo a G0 vector (also called umklapp vector). Namely:
 !!
 !!    Sq = q + G0
@@ -19,14 +18,10 @@
 !! than the irredubile zone defined by the point group of the crystal. The two zones coincide when q=0
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2019 ABINIT group (MG)
+!!  Copyright (C) 2008-2024 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -47,11 +42,11 @@ module m_lgroup
  use m_sort
  use m_xmpi
 
- use m_fstrings,      only : ftoa, ktoa, sjoin
+ use m_fstrings,      only : ftoa, ktoa, sjoin, ltoa
  use m_numeric_tools, only : wrap2_pmhalf
  use m_geometry,      only : normv
  use m_kpts,          only : listkk
- use m_symtk,         only : chkgrp, littlegroup_q
+ use m_symtk,         only : sg_multable, littlegroup_q
 
  implicit none
 
@@ -85,10 +80,10 @@ module m_lgroup
    ! One should pay attention when calling other routines in which timrev is required
    ! Because from Sq = q does not necessarily follow that -Sq = q if q is not on zone-border.
    ! The operations in G-space stored here already include time-reversal if input_timrev == 1
-   ! so one should call k-point routines with timrev = 0.
+   ! so one should call k-point routines with timrev = 0 when using the operations of the little group.
 
    real(dp) :: point(3)
-   ! The external q-point.
+   ! The external q-point in reduced coordinates.
 
    integer,allocatable :: symtab(:,:,:)
    ! symtab(4, 2, cryst%nsym)
@@ -103,19 +98,20 @@ module m_lgroup
 
    integer, allocatable :: symafm_lg(:)
    ! symafm_lg(nsym_lg)
-   ! Anti-ferromagnetic character
+   ! Anti-ferromagnetic character associated to symrec_lg
 
    integer,allocatable :: bz2ibz_smap(:,:)
-   ! bz2ibz_smap(nbz, 6) Mapping BZ --> IBZ.
+   ! bz2ibz_smap(6, nbz)
+   ! Mapping BZ --> IBZ(q)
    ! Note that here we used the symmetries of the little group.
 
    integer, allocatable :: lgsym2glob(:, :)
    ! lgsym2glob(2, nsym_lg)
    ! Mapping isym_lg --> [isym, itime]
-   ! where isym is the index of the operaion in crystal%symrec
-   ! and itim is 2 if time-reversal T must be included else 1.
+   ! where isym is the index of the operation in the global array crystal%symrec
+   ! and itime is 2 if time-reversal T must be included else 1.
 
-  real(dp) :: gmet(3,3)
+   real(dp) :: gmet(3,3)
    ! Reciprocal space metric in bohr^{-2}
 
    real(dp),allocatable :: ibz(:,:)
@@ -130,10 +126,13 @@ module m_lgroup
 
    procedure :: findq_ibzk => lgroup_findq_ibzk
    ! Find the index of the point in the IBZ(k).
+
    procedure :: find_ibzimage => lgroup_find_ibzimage
    ! Find the symmetrical image in the IBZ(k) of a qpoint in the BZ.
+
    procedure :: print => lgroup_print
    ! Print the object
+
    procedure :: free => lgroup_free
    ! Free memory.
 
@@ -164,10 +163,6 @@ contains  !=====================================================
 !!  comm= MPI communicator.
 !!  sord=Defines how to order the points in %ibz. ">" for increasing norm. "<" decreasing. Default: ">"
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 type(lgroup_t) function lgroup_new(cryst, kpoint, timrev, nkbz, kbz, nkibz, kibz, comm, sord) result(new)
@@ -182,18 +177,17 @@ type(lgroup_t) function lgroup_new(cryst, kpoint, timrev, nkbz, kbz, nkibz, kibz
 
 !Local variables ------------------------------
 !scalars
- integer,parameter :: iout0=0,my_timrev0=0,chksymbreak0=0,debug=0
- integer :: otimrev_k,ierr,itim,isym,nsym_lg,ik_ibz,ik_bz
- real(dp) :: ksign
+ integer,parameter :: iout0=0, my_timrev0 = 0, chksymbreak0 = 0, debug = 0
+ integer :: otimrev_k,ierr,itim,isym,ik_ibz,ik_bz,ksign,isym_lgk
 !arrays
  integer :: symrec_lg(3,3,2*cryst%nsym), symafm_lg(2*cryst%nsym), lgsym2glob(2, 2*cryst%nsym)
- real(dp) :: kred(3),shift(3)
  integer,allocatable :: ibz2bz(:), iperm(:), inv_iperm(:)
- real(dp),allocatable :: wtk(:),wtk_folded(:), kord(:,:)
+ real(dp) :: kred(3), shift(3)
+ real(dp),allocatable :: wtk_folded(:), kord(:,:)
 
 ! *************************************************************************
 
- ! TODO: Option to exclude umklapp/time-reversal symmetry and kptopt
+ ! TODO: Add option to exclude umklapp/time-reversal symmetry and kptopt
  new%point = kpoint
  new%input_timrev = timrev
  new%gmet = cryst%gmet
@@ -221,83 +215,94 @@ type(lgroup_t) function lgroup_new(cryst, kpoint, timrev, nkbz, kbz, nkibz, kibz
 
  ! Check group closure.
  if (debug /= 0) then
-   call chkgrp(new%nsym_lg, symafm_lg, symrec_lg, ierr)
+   call sg_multable(new%nsym_lg, symafm_lg, symrec_lg, ierr)
    ABI_CHECK(ierr == 0, "Error in group closure")
  end if
 
  ! Find the irreducible zone with the little group operations.
  ! Do not use time-reversal since it has been manually introduced previously
  ABI_MALLOC(ibz2bz, (nkbz))
- ABI_MALLOC(wtk_folded, (nkbz))
- ABI_MALLOC(wtk, (nkbz))
- wtk = one / nkbz ! Weights sum up to one
-
  ABI_MALLOC(new%bz2ibz_smap, (6, nkbz))
  ! IBZ2BZ ?
 
  ! TODO: In principle here we would like to have a set that contains the initial IBZ.
- call symkpt(chksymbreak0, cryst%gmet, ibz2bz, iout0, kbz, nkbz, new%nibz,&
-   new%nsym_lg, new%symrec_lg, my_timrev0, wtk, wtk_folded, new%bz2ibz_smap, comm)
+ call symkpt_new(chksymbreak0, cryst%gmet, ibz2bz, iout0, kbz, nkbz, new%nibz,&
+                 new%nsym_lg, new%symrec_lg, my_timrev0, new%bz2ibz_smap, comm)
 
  ABI_MALLOC(new%ibz, (3, new%nibz))
- ABI_MALLOC(new%weights, (new%nibz))
+ ABI_CALLOC(new%weights, (new%nibz))
+
+ do ik_bz=1,nkbz
+   ik_ibz   = new%bz2ibz_smap(1, ik_bz)
+   isym_lgk = new%bz2ibz_smap(2, ik_bz)
+   new%bz2ibz_smap(2, ik_bz) = lgsym2glob(1, isym_lgk)
+   new%bz2ibz_smap(3, ik_bz) = lgsym2glob(2, isym_lgk)
+   new%weights(ik_ibz) = new%weights(ik_ibz) + 1
+ end do
+ new%weights(:) = new%weights(:) / nkbz
 
  do ik_ibz=1,new%nibz
    ik_bz = ibz2bz(ik_ibz)
-   new%ibz(:,ik_ibz) = kbz(:, ik_bz)
-   new%weights(ik_ibz) = wtk_folded(ik_bz)
+   new%ibz(:, ik_ibz) = kbz(:, ik_bz)
  end do
 
-#if 0
+ ! TODO: Activate this part so that we can cache the q-point in the IBZ.
+ ! Results are ok but this change is postponed because it leads to an increase
+ ! in the walltime spent in listkk likely because of the different order.
+
  ! Need to repack the IBZ points and rearrange the other arrays dimensioned with nibz.
  ! In principle, the best approach would be to pack in stars using crystal%symrec.
- ! For the time being we pack in shells (much easier). Use wtk as workspace to store the norm.
- ksign = + one
+ ! For the time being we pack in shells (much easier). Use wtk_folded as workspace to store the norm.
+
+ !ksign = 0
+ ksign = +1
  if (present(sord)) then
-   if (sord == "<") ksign = - one
+   if (sord == "<") ksign = -1
+   if (sord == ">") ksign = +1
+   !if (sord == "r") ksign = 0
  end if
 
- do ik_ibz=1,new%nibz
-   call wrap2_pmhalf(new%ibz(:, ik_ibz), kred, shift)
-   wtk(ik_ibz) = ksign * normv(kred, cryst%gmet, "G")
- end do
+ if (ksign /= 0) then
+   ABI_MALLOC(wtk_folded, (new%nibz))
+   do ik_ibz=1,new%nibz
+     call wrap2_pmhalf(new%ibz(:, ik_ibz), kred, shift)
+     wtk_folded(ik_ibz) = ksign * normv(kred, cryst%gmet, "G")
+   end do
 
- ABI_MALLOC(iperm, (new%nibz))
- iperm = [(ik_ibz, ik_ibz=1, new%nibz)]
- call sort_dp(new%nibz, wtk, iperm, tol12)
- !iperm = [(ik_ibz, ik_ibz=1, new%nibz)]
+   ABI_MALLOC(iperm, (new%nibz))
+   iperm = [(ik_ibz, ik_ibz=1, new%nibz)]
+   call sort_dp(new%nibz, wtk_folded, iperm, tol12)
+   !iperm = [(ik_ibz, ik_ibz=1, new%nibz)]
 
- ! Trasfer data.
- ABI_MALLOC(kord, (3, new%nibz))
- do ik_ibz=1,new%nibz
-   kord(:, ik_ibz) = new%ibz(:, iperm(ik_ibz))
-   wtk_folded(ik_ibz) = new%weights(iperm(ik_ibz))
- end do
- new%ibz = kord(:, 1:new%nibz)
- new%weights = wtk_folded(1:new%nibz)
+   ! Trasfer data.
+   ABI_MALLOC(kord, (3, new%nibz))
+   do ik_ibz=1,new%nibz
+     kord(:, ik_ibz) = new%ibz(:, iperm(ik_ibz))
+     wtk_folded(ik_ibz) = new%weights(iperm(ik_ibz))
+   end do
+   new%ibz = kord(:, 1:new%nibz)
+   new%weights = wtk_folded(1:new%nibz)
 
- ! Rearrange bz2ibz_smap as well.
- ABI_MALLOC(inv_iperm, (new%nibz))
- do ik_ibz=1,new%nibz
-   inv_iperm(iperm(ik_ibz)) =  ik_ibz
- end do
+   ! Rearrange bz2ibz_smap as well --> need the inverse of iperm.
+   ABI_MALLOC(inv_iperm, (new%nibz))
+   do ik_ibz=1,new%nibz
+     inv_iperm(iperm(ik_ibz)) = ik_ibz
+   end do
 
- do ik_bz=1,new%nbz
-   ik_ibz = new%bz2ibz_smap(1, ik_bz)
-   !new%bz2ibz_smap(1, ik_bz) = iperm(ik_ibz)
-   new%bz2ibz_smap(1, ik_bz) = inv_iperm(ik_ibz)
- end do
+   do ik_bz=1,new%nbz
+     ik_ibz = new%bz2ibz_smap(1, ik_bz)
+     new%bz2ibz_smap(1, ik_bz) = inv_iperm(ik_ibz)
+   end do
 
- ABI_FREE(inv_iperm)
- ABI_FREE(kord)
- ABI_FREE(iperm)
-#endif
+   ABI_FREE(inv_iperm)
+   ABI_FREE(kord)
+   ABI_FREE(iperm)
+   ABI_FREE(wtk_folded)
+ end if
 
  ABI_FREE(ibz2bz)
- ABI_FREE(wtk_folded)
- ABI_FREE(wtk)
 
- ! Debug section.
+ ! Debugging section.
  ABI_CHECK(sum(new%weights) - one < tol6, sjoin("Weights don't sum up to one but to:", ftoa(sum(new%weights))))
 
  if (debug /= 0) then
@@ -325,10 +330,6 @@ end function lgroup_new
 !!  qpt(3)=q-point in reduced coordinates.
 !!  [qtol]=Optional tolerance for q-point comparison.
 !!         For each reduced direction the absolute difference between the coordinates must be less that qtol
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -373,10 +374,6 @@ end function lgroup_findq_ibzk
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 integer function lgroup_find_ibzimage(self, qpt) result(iq_ibz)
@@ -420,10 +417,6 @@ end function lgroup_find_ibzimage
 !! OUTPUT
 !!  Only printing
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine lgroup_print(self, title, unit, prtvol)
@@ -435,7 +428,7 @@ subroutine lgroup_print(self, title, unit, prtvol)
 
 !Local variables-------------------------------
 !scalars
- integer :: my_prtvol,my_unt,ik
+ integer :: my_prtvol, my_unt, ik, ii
  character(len=500) :: msg
 ! *************************************************************************
 
@@ -452,7 +445,10 @@ subroutine lgroup_print(self, title, unit, prtvol)
   ' Time-reversal flag (0: No, 1: Yes) .... ', self%input_timrev, ch10
  call wrtout(my_unt, msg)
 
- if (my_prtvol /= 0) then
+ if (my_prtvol > 1) then
+   do ii=1,self%nsym_lg
+     call wrtout(std_out, sjoin("lgsym2glob:", ltoa(self%lgsym2glob(:, ii))))
+   end do
    do ik=1,self%nibz
       call wrtout(my_unt, sjoin(ktoa(self%ibz(:,ik)), ftoa(self%weights(ik))))
    end do
@@ -467,11 +463,6 @@ end subroutine lgroup_print
 !!
 !! FUNCTION
 !!  Free memory
-!!
-!! PARENTS
-!!      m_sigmaph
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

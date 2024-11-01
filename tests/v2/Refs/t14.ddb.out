@@ -1,8 +1,8 @@
 
  **** DERIVATIVE DATABASE ****    
-+DDB, Version number    100401
++DDB, Version number  20230401
 
- DDB for Quartz, 30.0Ha, 1SP in the IBZ, 022092. Gamma, 0 0 1/4, 1/2 0 1/4.                                                                                                                                                                                              
+ DDB for Quartz, 30.0Ha, 1SP in the IBZ, 022092. Gamma, 0 0 1/4, 1/2 0 1/4.
 
     usepaw         0
      natom         9
@@ -118,7 +118,7 @@
  **** Database of total energy derivatives ****
  Number of data blocks=    3
   
- 2nd derivatives (non-stat.)  - # elements :     900
+ 2nd derivatives (non-stat.)  - # elements :         900
  qpt  0.00000000E+00  0.00000000E+00  0.00000000E+00   1.0
    1   1   1   1  0.35853444863350D+02  0.00000000000000D+00
    2   1   1   1 -0.17926722353142D+02  0.26110844475161D+00
@@ -1021,7 +1021,7 @@
    2  11   3  11 -0.12385499801543D-05 -0.69773346980239D-06
    3  11   3  11 -0.35071765796135D+02  0.00000000000000D+00
   
- 2nd derivatives (non-stat.)  - # elements :     729
+ 2nd derivatives (non-stat.)  - # elements :         729
  qpt  0.00000000E+00  0.00000000E+00  2.50000000E-01   1.0
    1   1   1   1  0.35727329471931D+02  0.13878853365780D-20
    2   1   1   1 -0.17863618230516D+02 -0.10732971953003D+00
@@ -1753,7 +1753,7 @@
    2   9   3   9 -0.21440877209350D+02 -0.22706861244349D-01
    3   9   3   9  0.28025161046969D+02 -0.52235436721616D-19
   
- 2nd derivatives (non-stat.)  - # elements :     729
+ 2nd derivatives (non-stat.)  - # elements :         729
  qpt  5.00000000E-01  0.00000000E+00  2.50000000E-01   1.0
    1   1   1   1  0.39496411198487D+02  0.15152812110756D-20
    2   1   1   1 -0.17880586155214D+02 -0.11130429512690D+00
@@ -2484,14 +2484,3 @@
    1   9   3   9  0.14978841324812D+02 -0.10947228579709D-01
    2   9   3   9 -0.20748255716614D+02 -0.38740569766019D-01
    3   9   3   9  0.25949471644208D+02  0.55042897869994D-20
-
- List of bloks and their characteristics 
-  
- 2nd derivatives (non-stat.)  - # elements :     900
- qpt  0.00000000E+00  0.00000000E+00  0.00000000E+00   1.0
-  
- 2nd derivatives (non-stat.)  - # elements :     729
- qpt  0.00000000E+00  0.00000000E+00  2.50000000E-01   1.0
-  
- 2nd derivatives (non-stat.)  - # elements :     729
- qpt  5.00000000E-01  0.00000000E+00  2.50000000E-01   1.0

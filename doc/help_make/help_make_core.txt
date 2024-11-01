@@ -1,0 +1,20 @@
+==============================================================================
+Typing `make` in the src directory (~abinit/src) leads to the compilation of
+all abinit sources, either standard, or following specific indications
+of a config file, see ~abinit/doc/build/config-template.ac9 for details.
+Usually, `make` should be prepared by running the "configure" script 
+from the top directory while developers can generate it by running
+ `./config/scripts/makemake`.
+
+In addition, `make` can be issued with the name of a main program like 
+abinit, anaddb, cut3d, ...). In this case, the selected set of routines 
+and/or the main code will be (re)compiled.
+
+Specific keywords for the ~abinit/src `make`
+
+parents        update parent and children list in each *.F90 routine
+abirules       enforce ABINIT style in each *.F90 routines (not all yet)
+abiauty        enforce correct indentation (+...) in each *.F90 routine (all)
+clean          clean all the compiled objects and executables inside src
+==============================================================================
+[This file can be found at ~abinit/doc/help_make/help_make_core.txt]

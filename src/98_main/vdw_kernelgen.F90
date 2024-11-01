@@ -6,7 +6,7 @@
 !!  Generates vdW-DF kernels from the user input.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2011-2019 ABINIT group (Yann Pouillon)
+!!  Copyright (C) 2011-2024 ABINIT group (Yann Pouillon)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt.
@@ -23,13 +23,6 @@
 !!  The input data must be provided in a pre-defined order and contain all
 !!  adjustable parameters related to the generation of vdW-DF kernels.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      abi_io_redirect,abimem_init,abinit_doctor,destroy_mpi_enreg,flush_unit
-!!      herald,initmpi_seq,wrtout,xc_vdw_done,xc_vdw_get_params,xc_vdw_init
-!!      xc_vdw_memcheck,xc_vdw_show,xc_vdw_write,xmpi_end,xmpi_init
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -40,20 +33,22 @@
 
 program vdw_kernelgen
 
-#if defined DEV_YP_VDWXC
  use defs_basis
  use defs_abitypes
- use m_build_info
  use m_errors
  use m_xc_vdw
  use m_mpinfo
  use m_xmpi
+
+
 #if defined HAVE_MPI2
  use mpi
 #endif
 
- use m_specialmsg,  only : specialmsg_getcount, herald
- use m_io_tools,    only : flush_unit
+ use m_build_info,   only : abinit_version
+ use m_specialmsg,   only : specialmsg_getcount, herald
+ use m_io_tools,     only : flush_unit
+
  implicit none
 
 #if defined HAVE_MPI1
@@ -65,24 +60,20 @@ program vdw_kernelgen
 !Local variables-------------------------------
 !no_abirules
 !
- character(len=24) :: codename
  character(len=500) :: message
- integer :: ierr
+ 
  type(MPI_type) :: mpi_enreg,mpi_enreg_seq
-
+#if defined DEV_YP_VDWXC
+ character(len=24) :: codename
  type(xc_vdw_type) :: vdw_params
  character(len=fnlen) :: vdw_filnam
-
 #endif
 
 !******************************************************************
 !BEGIN EXECUTABLE SECTION
 
-#if defined DEV_YP_VDWXC
-
 !Change communicator for I/O (mandatory!)
  call abi_io_redirect(new_io_comm=xmpi_world)
-
 !Initialize MPI : one should write a separate routine -init_mpi_enreg-
 !for doing that !!
  call xmpi_init()
@@ -96,7 +87,7 @@ program vdw_kernelgen
    write(message,'(3a)') &
 &   '  In order to use MPI_IO, you must compile with the MPI flag ',ch10,&
 &   '  Action : recompile your code with different CPP flags.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 #endif
 
@@ -113,9 +104,8 @@ program vdw_kernelgen
 !* Init fake MPI type with values for sequential case.
  call initmpi_seq(MPI_enreg_seq)
 
- write(message,'(3a)') ch10,'vdW-DF functionals are not fully operational yet.',&
-& ch10
- MSG_ERROR(message)
+
+#if defined DEV_YP_VDWXC
 
 !=== Write greetings ===
  codename='vdW_KernelGen'//repeat(' ',11)
@@ -177,6 +167,10 @@ program vdw_kernelgen
  call abinit_doctor("__vdw_kernelgen")
 
  call xmpi_end()
+
+#else
+ write(message,'(3a)') ch10,'vdW-DF functionals are not fully operational yet.',ch10
+ ABI_ERROR(message)
 #endif
 
  end program vdw_kernelgen

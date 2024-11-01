@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_atprj
 !!
 !! NAME
@@ -8,7 +7,7 @@
 !! Module to output atomic projections of phonon modes
 !!
 !! COPYRIGHT
-!! Copyright (C) 2011-2019 ABINIT group (MJV)
+!! Copyright (C) 2011-2024 ABINIT group (MJV)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -53,11 +52,13 @@ type, public :: atprj_type
   integer, allocatable :: iatprj_bs(:)
   character(len=fnlen), allocatable :: filename(:,:)
 
-end type atprj_type
+contains
 
-public :: atprj_init
-public :: atprj_print
-public :: atprj_destroy
+   procedure :: init => atprj_init
+   procedure :: print => atprj_print
+   procedure :: free => atprj_free
+
+end type atprj_type
 
 contains
 !!***
@@ -77,22 +78,14 @@ contains
 !! outfile_radix = base file name for output files
 !!
 !! OUTPUT
-!! t_atprj = container object for atomic projections
-!!
-!! PARENTS
-!!      m_phonons
-!!
-!! CHILDREN
+!! atprj = container object for atomic projections
 !!
 !! SOURCE
 
-subroutine atprj_init(t_atprj, natom, natprj_bs, iatprj_bs, outfile_radix)
+subroutine atprj_init(atprj, natom, natprj_bs, iatprj_bs, outfile_radix)
 
- implicit none
-
- type(atprj_type), intent(out) :: t_atprj
- integer, intent(in) :: natom
- integer, intent(in) :: natprj_bs
+ class(atprj_type), intent(out) :: atprj
+ integer, intent(in) :: natom, natprj_bs
  integer, intent(in) :: iatprj_bs(natprj_bs)
  character(len=*), intent(in) :: outfile_radix
 
@@ -103,14 +96,14 @@ subroutine atprj_init(t_atprj, natom, natprj_bs, iatprj_bs, outfile_radix)
  character(len=500) :: msg
 ! *************************************************************************
 
- t_atprj%natprj_bs = natprj_bs
- t_atprj%natom = natom
+ atprj%natprj_bs = natprj_bs
+ atprj%natom = natom
 
- ABI_ALLOCATE(t_atprj%iatprj_bs,(natprj_bs))
- t_atprj%iatprj_bs = iatprj_bs
+ ABI_MALLOC(atprj%iatprj_bs,(natprj_bs))
+ atprj%iatprj_bs = iatprj_bs
 
 ! for each phonon mode and atom for projection, open a file
- ABI_ALLOCATE(t_atprj%filename ,(3*natom,natprj_bs))
+ ABI_MALLOC(atprj%filename ,(3*natom,natprj_bs))
  iunit = get_unit()
  do imode = 1, 3*natom
    call int2char4(imode, imodestring)
@@ -118,16 +111,15 @@ subroutine atprj_init(t_atprj, natom, natprj_bs, iatprj_bs, outfile_radix)
    do iatom = 1, natprj_bs
      call int2char4(iatom, iatomstring)
      ABI_CHECK((iatomstring(1:1)/='#'),'Bug: string length too short!')
-     t_atprj%filename(imode,iatom) = trim(outfile_radix)//"_mod"//trim(imodestring)//"_iat"//trim(iatomstring)
-     if (open_file(t_atprj%filename(imode,iatom), msg, newunit=iunit, form="formatted", action="write") /= 0) then
-       MSG_ERROR(msg)
+     atprj%filename(imode,iatom) = trim(outfile_radix)//"_mod"//trim(imodestring)//"_iat"//trim(iatomstring)
+     if (open_file(atprj%filename(imode,iatom), msg, newunit=iunit, form="formatted", action="write") /= 0) then
+       ABI_ERROR(msg)
      end if
      ! print header
      write (unit=iunit, fmt='(a)') '##'
      write (unit=iunit, fmt='(a,I6,a)') '##  This file contains abinit phonon frequencies for mode number ', &
-&          imode, ' along a path in reciprocal space,'
-     write (unit=iunit, fmt='(a,I6)') '##  the third column is the projection along atom number ',&
-&          t_atprj%iatprj_bs(iatom)
+          imode, ' along a path in reciprocal space,'
+     write (unit=iunit, fmt='(a,I6)') '##  the third column is the projection along atom number ',atprj%iatprj_bs(iatom)
      write (unit=iunit, fmt='(a)') '##'
 
      close (iunit)
@@ -138,7 +130,6 @@ end subroutine atprj_init
 !!***
 
 !!****f* m_atprj/atprj_print
-!!
 !! NAME
 !! atprj_print
 !!
@@ -146,29 +137,22 @@ end subroutine atprj_init
 !! print out 1 line per atomic projection file
 !!
 !! INPUT
-!! t_atprj = container object for atomic projections
+!! atprj = container object for atomic projections
 !! phfrq = phonon frequencies for present q point
 !! eigvec = eigenvectors for present q point
 !!
 !! OUTPUT
 !!  writes to files
 !!
-!! PARENTS
-!!      m_phonons
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
-subroutine atprj_print(t_atprj, iq, phfrq, eigvec)
-
- implicit none
+subroutine atprj_print(atprj, iq, phfrq, eigvec)
 
 !arguments
+ class(atprj_type), intent(in) :: atprj
  integer, intent(in) :: iq
- type(atprj_type), intent(in) :: t_atprj
- real(dp), intent(in) :: phfrq(3*t_atprj%natom)
- real(dp), intent(in) :: eigvec(2,3,t_atprj%natom,3,t_atprj%natom)
+ real(dp), intent(in) :: phfrq(3*atprj%natom)
+ real(dp), intent(in) :: eigvec(2,3,atprj%natom,3,atprj%natom)
 
 !local variables
  integer :: jatom, idir, iatom, imode, iunit, jdir
@@ -177,11 +161,11 @@ subroutine atprj_print(t_atprj, iq, phfrq, eigvec)
 ! *************************************************************************
 
  iunit = get_unit()
- do iatom = 1, t_atprj%natom
+ do iatom = 1, atprj%natom
    do idir = 1, 3
      imode = idir + 3*(iatom-1)
-     do jatom = 1, t_atprj%natprj_bs
-       open (unit=iunit, file=t_atprj%filename(imode,jatom), position='append')
+     do jatom = 1, atprj%natprj_bs
+       open (unit=iunit, file=atprj%filename(imode,jatom), position='append')
        write (unit=iunit, fmt='(a,I4,a)') '# atom ', jatom, ' sum of directions'
        proj = sum(eigvec(:,:,jatom,idir,iatom)**2)
        write (unit=iunit, fmt='(I6,2E20.10)') iq, phfrq(imode), proj
@@ -199,10 +183,10 @@ subroutine atprj_print(t_atprj, iq, phfrq, eigvec)
 end subroutine atprj_print
 !!***
 
-!!****f* m_atprj/atprj_destroy
+!!****f* m_atprj/atprj_free
 !!
 !! NAME
-!! atprj_destroy
+!! atprj_free
 !!
 !! FUNCTION
 !! deallocate atomic projection datastructure and close files
@@ -210,30 +194,18 @@ end subroutine atprj_print
 !! INPUT
 !!
 !! OUTPUT
-!! t_atprj = container object for atomic projections
-!!
-!! PARENTS
-!!      m_phonons
-!!
-!! CHILDREN
+!! atprj = container object for atomic projections
 !!
 !! SOURCE
 
-subroutine atprj_destroy(t_atprj)
+subroutine atprj_free(atprj)
 
- implicit none
+ class(atprj_type), intent(inout) :: atprj
 
- type(atprj_type), intent(inout) :: t_atprj
+ ABI_SFREE(atprj%iatprj_bs)
+ ABI_SFREE(atprj%filename)
 
- if (allocated(t_atprj%iatprj_bs)) then
-   ABI_DEALLOCATE(t_atprj%iatprj_bs)
- end if
-
- if (allocated(t_atprj%filename)) then
-   ABI_DEALLOCATE(t_atprj%filename)
- end if
-
-end subroutine atprj_destroy
+end subroutine atprj_free
 
 end module m_atprj
 !!***

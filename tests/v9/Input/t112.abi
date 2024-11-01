@@ -1,0 +1,79 @@
+#spin
+nsppol 1
+nspden 4
+nspinor  2
+spinat 2  0  0  
+      -2  0  0  
+       0  0  0
+       0  0  0
+
+#Parameters
+nstep  8
+ecut 8
+pawecutdg  10
+toldfe  1.0d-6
+nband  60
+nbdbuf 8
+occopt 7  tsmear 0.015
+
+#Structural parameters
+natom 4
+ntypat 2
+typat 1 1 2 2
+znucl 28 8
+xred 0 0 0
+    0.0 0.0 0.5
+    0.5 0.5 0.25
+    0.5 0.5 0.75
+
+acell   3*7.92
+
+rprim 0.0 1/2 1/2
+      1/2 0.0 1/2
+      1.0 1.0 0.0
+
+# Kpoint Grid
+kptopt   4 
+ngkpt    2 2 2
+
+
+# LDA+U
+usepawu   1
+lpawu   2  -1
+upawu  4.0 0.0 eV
+jpawu  0.9 0.0 eV
+
+prtwf   0
+nsym    1 
+irdwfk  0
+ 
+nline   3
+
+prt_lorbmag   1
+
+diemixmag  0.2 
+diemix 0.1
+
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "28ni.paw, 8o.2.paw"
+
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% exclude_builders = eos_gnu_13.2_serial
+#%% [files]
+#%% files_to_test =
+#%%   t112.abo, tolnlines = 50, tolabs = 1.000e-02, tolrel = 1.000e-03
+#%% [paral_info]
+#%% max_nprocs = 8
+#%% [extra_info]
+#%% authors = A. Sasani, E. Bousquet.
+#%% keywords = PAW, DFTU, prt_lorbmag
+#%% description =
+#%%   Test for the printing of the local orbital magnetic moment 
+#%%   of NiO (fcc supercell with 2 Ni and 2 O atoms).
+#%%   Cut-off and k-points are unrealistic.
+#%%   Works only in the case of PAW and DFT+U
+#%%<END TEST_INFO>

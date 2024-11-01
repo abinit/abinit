@@ -1,0 +1,61 @@
+!Input file for the anaddb code. Analysis of the Al DDB
+
+!Flags
+ ifcflag   1     ! Interatomic force constant flag
+
+!Effective charges
+ enunit    2
+ chneut 0
+
+!Interatomic force constant info
+  dipdip  0      ! Dipole-dipole interaction treatment
+  ifcana  1      ! Analysis of the IFCs
+  ifcout 20      ! Number of IFC's written in the output, per atom
+  natifc  1      ! Number of atoms in the cell for which ifc's are analysed
+   atifc  1      ! List of atoms
+
+!Wavevector grid number 1 (coarse grid, from DDB)
+  brav    2      ! Bravais Lattice : 1-S.C., 2-F.C., 3-B.C., 4-Hex.)
+  ngqpt   4  4  4   ! Monkhorst-Pack indices
+  nqshft  1         ! number of q-points in repeated basic q-cell
+  q1shft  0.0  0.0  0.0
+
+!Wavevector list number 1 (Reduced coordinates and normalization factor)
+  nph1l    17      ! number of phonons in list 1
+  qph1l   0.0  0.0  0.0    1.0   ! (Gamma point)
+          0.1  0.1  0.0    1.0
+          0.2  0.2  0.0    1.0
+          0.3  0.3  0.0    1.0
+          0.4  0.4  0.0    1.0
+          0.5    0.5    0.0      1.0 !   (X point) equivalent to  0.5  0.5  1.0
+          0.429  0.429  0.858    1.0
+          0.358  0.358  0.716    1.0
+          0.286  0.286  0.572    1.0
+          0.215  0.215  0.430    1.0
+          0.143  0.143  0.286    1.0
+          0.072  0.072  0.144    1.0
+          0.0    0.0    0.0      1.0 !   (Gamma point)
+          0.125  0.125  0.125    1.0
+          0.250  0.250  0.250    1.0
+          0.375  0.375  0.375    1.0
+          0.5    0.5    0.5      1.0 !   (L point again)
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = anaddb
+#%% input_ddb = t79.ddb.out
+#%% test_chain = t78.abi, t79.abi, t80.abi, t81.abi
+#%% [files]
+#%% files_to_test = 
+#%%   t80.abo, tolnlines = 10, tolabs = 2.e-4, tolrel = 1.e-6, fld_options =  
+#%% [paral_info]
+#%% max_nprocs = 4
+#%% [extra_info]
+#%% authors = Unknown
+#%% keywords = 
+#%% description = 
+#%%   Phonon band structure of Al, from DDB of test 78.
+#%%   The parameters were really too low in test 78, so that some
+#%%   phonon unstabilities are present close to Gamma.
+#%%   Similar to Tv2#28
+#%%<END TEST_INFO>

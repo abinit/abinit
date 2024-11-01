@@ -1,0 +1,103 @@
+#Input file for test of PIMD
+
+ndtset 6
+
+nsym 1
+
+nstep 8
+ecut 5.0
+pawecutdg 8.0
+prtden 0
+prtwf 0
+toldff 1.0d-08 
+
+#geometry
+xcart  0.0  0.0 0.0
+       0.75 0.0 0.0  Angstrom
+xcart_lastimg
+       0.0  0.0 0.0
+       0.75 0.0 0.0  Angstrom
+acell 3*5.0
+acell_lastimg 3*5.0
+
+#system
+natom 2
+ntypat 1
+znucl  1
+typat  1 1
+pawovlp 10 !For testing purpose only
+
+#ZB sampling
+kptopt 1
+ngkpt 1 1 1
+nshiftk 1
+shiftk 0.0 0.0 0.0
+
+#general parameters for PIMD
+amu 1.0
+pimass 1.0
+mdtemp  600.0  300.0 
+optcell 0 #NVT
+dynimage 6*1
+nimage 6
+ntimimage 5
+dtion 5.0
+adpimd 0 adpimd_gamma 1.
+
+#DATASET 1: langevin + primitive coordinates
+imgmov1 9
+irandom1 1
+vis1 5.0d-04
+pitransform1 0  #primitive
+
+#DATASET 2: langevin + normal mode coordinates
+imgmov2 9
+irandom2 1
+vis2 5.0d-04
+pitransform2 2  #normal mode
+
+#DATASET 3: langevin + staging coordinates
+imgmov3 9
+irandom3 1
+vis3 5.0d-04
+pitransform3 2  #staging
+
+#DATASET 4: Nose-Hoover chains + primitive coordinates
+imgmov4 13
+nnos4 5
+qmass4 5*10.0
+pitransform4 0  #primitive
+
+#DATASET 5: Nose-Hoover chains + normal mode coordinates
+imgmov5 13
+nnos5 5
+qmass5 5*10.0
+pitransform5 1  #normal mode
+
+#DATASET 6: Nose-Hoover chains + staging coordinates
+imgmov6 13
+nnos6 5
+qmass6 5*10.0
+pitransform6 2  #staging
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "1h.atompaw"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = t08.abo, tolnlines=5, tolabs=2.0e-4, tolrel=6.0e-4, fld_options = -easy
+#%% [paral_info]
+#%% max_nprocs = 10
+#%% [extra_info]
+#%% authors = G. Geneste
+#%% keywords = PIMD, NVT
+#%% description =
+#%%    Hydrogen molecule: Test the Path-Integral Molecular Dynamics (PIMD) implementation
+#%%    in (N,V,T) ensemble. THe two thermostats (Nose-Hoover chains and Langevin) are tested
+#%%    together with the three coordinate systems (primitive, normal mode, staging).
+#%%    NOTE: MPI run with 2 procs is ok but fldiff comparison fails due to an extra section with
+#%%    --- Pseudopotential description --
+#%% topics = PIMD
+#%%<END TEST_INFO>

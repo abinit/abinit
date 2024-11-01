@@ -1,14 +1,43 @@
+BUILT_SOURCES = $(top_srcdir)/.version
+$(top_srcdir)/.version:
+	echo $(VERSION) > $@-t && mv $@-t $@
+
 # Additional files to distribute
 EXTRA_DIST += \
 	KNOWN_PROBLEMS \
 	PACKAGING \
-	README_MacOSX.md \
-	README_gpu.md \
-	README_xlf.md \
+	INSTALL_CentOS.md \
+	INSTALL_EasyBuild.md \
+	INSTALL_MacOS.md \
+	INSTALL_Ubuntu.md \
+	INSTALL_gpu.md \
 	RELNOTES \
+	abimkdocs \
+	abimkdocs_plugin \
+	abimkdocs_tests \
+	abinit_theme \
+	abinit.pc.in \
+	abisrc.py \
+	abisrc_requirements.txt \
 	autogen.sh \
-	mkrobodoc.sh \
-	wipeout.sh
+	doc/tests \
+	doc/theory/aTDEP/aTDEP_Guide.pdf \
+	doc/theory/aTDEP/aTDEP_Paper.pdf \
+	doc/topics/documents/elphon_manual.pdf \
+	doc/topics/documents/geometry.pdf \
+	doc/topics/documents/gwa.pdf \
+	doc/topics/documents/howto_chebfi.pdf \
+	doc/topics/documents/hybrids-2017.pdf \
+	doc/topics/documents/noncol.pdf \
+	mkdocs.yml.in \
+	mksite.py \
+	requirements.txt \
+	scripts \
+	setup.cfg \
+	tasks.py \
+	set_abienv.sh \
+	wipeout.sh \
+	upgrade-build-config-file.sh
 
 # Additional files to clean
 CLEANFILES += \
@@ -18,7 +47,7 @@ CLEANFILES += \
 install-data-local: config.pc
 	$(INSTALL) -d -m 755 $(DESTDIR)$(libdir)/pkgconfig
 	$(INSTALL_DATA) -m 644 config.pc \
-	 $(DESTDIR)$(libdir)/pkgconfig/abinit.pc
+	$(DESTDIR)$(libdir)/pkgconfig/abinit.pc
 
 # Files to uninstall
 uninstall-local:
@@ -31,33 +60,32 @@ basic_tests:
 # Let Automake know how to perform basic tests
 #check-local:
 #$(MAKE) basic_tests @SET_MAKE@
+#check-local:
+#	cat $(top_srcdir)/tests/built-in/README
 check-local:
-	cat $(top_srcdir)/tests/built-in/README
+	cd $(abspath $(top_builddir))/tests && $(abspath $(top_srcdir))/tests/runtests.py --no-logo --no-colors --keyword MINIMAL --yaml-simplified-diff --forced-tolerance=easy && rm -rf $(abspath $(top_builddir))/tests/Test_suite $(abspath $(top_builddir))/tests/.*.pickle && echo "For these quick tests, the tests/Test_suite directory has been erased!"
 
 # Set of internal tests
 test_fast:
-	cp $(top_builddir)/src/98_main/abinit $(top_srcdir)/tests/built-in/Input/abinit && cd $(top_srcdir)/tests/built-in/Input && ./abinit < testin_fast.files >& testin_fast.stdout && cat testin_fast_tmp_STATUS && rm -f abinit *DDB *EIG *out* *nc *WFK
+	cp $(top_builddir)/src/98_main/abinit $(top_srcdir)/tests/built-in/Input/abinit && cd $(top_srcdir)/tests/built-in/Input && export ABI_PSPDIR="../../Psps_for_tests" && ./abinit testin_fast.abi >& testin_fast.stdout && cat testin_fastt_STATUS && rm -f abinit *DDB *EIG *out* *nc *WFK *abo* *o_* *t_STATUS*
 
 test_v1:
-	cp $(top_builddir)/src/98_main/abinit $(top_srcdir)/tests/built-in/Input/abinit && cd $(top_srcdir)/tests/built-in/Input && ./abinit < testin_v1.files >& testin_v1.stdout && cat testin_v1_tmp_STATUS && rm -f abinit *DDB *EIG *out* *nc *WFK
+	cp $(top_builddir)/src/98_main/abinit $(top_srcdir)/tests/built-in/Input/abinit && cd $(top_srcdir)/tests/built-in/Input && export ABI_PSPDIR="../../Psps_for_tests" && ./abinit testin_v1.abi >& testin_v1.stdout && cat testin_v1t_STATUS && rm -f abinit *DDB *EIG *out* *nc *WFK *abo* *o_* *t_STATUS*
 
 test_v5:
-	cp $(top_builddir)/src/98_main/abinit $(top_srcdir)/tests/built-in/Input/abinit && cd $(top_srcdir)/tests/built-in/Input && ./abinit < testin_v5.files >& testin_v5.stdout && cat testin_v5_tmp_STATUS && rm -f abinit *DDB *EIG *out* *nc *WFK
+	cp $(top_builddir)/src/98_main/abinit $(top_srcdir)/tests/built-in/Input/abinit && cd $(top_srcdir)/tests/built-in/Input && export ABI_PSPDIR="../../Psps_for_tests" && ./abinit testin_v5.abi >& testin_v5.stdout && cat testin_v5t_STATUS && rm -f abinit *DDB *EIG *out* *nc *WFK *abo* *o_* *t_STATUS*
 
 test_bigdft:
-	cp $(top_builddir)/src/98_main/abinit $(top_srcdir)/tests/built-in/Input/abinit && cd $(top_srcdir)/tests/built-in/Input && ./abinit < testin_bigdft.files >& testin_bigdft.stdout && cat testin_bigdft_tmp_STATUS && rm -f abinit *DDB *EIG *out* *nc *WFK
-
-test_etsf_io:
-	cp $(top_builddir)/src/98_main/abinit $(top_srcdir)/tests/built-in/Input/abinit && cd $(top_srcdir)/tests/built-in/Input && ./abinit < testin_etsf_io.files >& testin_etsf_io.stdout && cat testin_etsf_io_tmp_STATUS && rm -f abinit *DDB *EIG *out* *nc *WFK
+	cp $(top_builddir)/src/98_main/abinit $(top_srcdir)/tests/built-in/Input/abinit && cd $(top_srcdir)/tests/built-in/Input && export ABI_PSPDIR="../../Psps_for_tests" && ./abinit testin_bigdft.abi >& testin_bigdft.stdout && cat testin_bigdftt_STATUS && rm -f abinit *DDB *EIG *out* *nc *WFK *abo* *o_* *t_STATUS*
 
 test_libxc:
-	cp $(top_builddir)/src/98_main/abinit $(top_srcdir)/tests/built-in/Input/abinit && cd $(top_srcdir)/tests/built-in/Input && ./abinit < testin_libxc.files >& testin_libxc.stdout && cat testin_libxc_tmp_STATUS && rm -f abinit *DDB *EIG *out* *nc *WFK
+	cp $(top_builddir)/src/98_main/abinit $(top_srcdir)/tests/built-in/Input/abinit && cd $(top_srcdir)/tests/built-in/Input && export ABI_PSPDIR="../../Psps_for_tests" && ./abinit testin_libxc.abi >& testin_libxc.stdout && cat testin_libxct_STATUS && rm -f abinit *DDB *EIG *out* *nc *WFK *abo* *o_* *t_STATUS*
 
 test_wannier90:
-	cp $(top_builddir)/src/98_main/abinit $(top_srcdir)/tests/built-in/Input/abinit && cd $(top_srcdir)/tests/built-in/Input && ./abinit < testin_wannier90.files >& testin_wannier90.stdout && cat testin_wannier90_tmp_STATUS  && rm -f abinit *DDB *EIG *out* *nc *WFK *DEN *chk *eig *mmn *amn
+	cp $(top_builddir)/src/98_main/abinit $(top_srcdir)/tests/built-in/Input/abinit && cd $(top_srcdir)/tests/built-in/Input && export ABI_PSPDIR="../../Psps_for_tests" && ./abinit testin_wannier90.abi >& testin_wannier90.stdout && cat testin_wannier90t_STATUS  && rm -f abinit *DDB *EIG *out* *nc *WFK *DEN *chk *eig *mmn *amn *abo* *o_* *t_STATUS*
 
 tests_in:
-	$(MAKE) test_fast test_v1 test_v5 test_bigdft test_etsf_io test_libxc test_wannier90
+	$(MAKE) test_fast test_v1 test_v5 test_libxc test_wannier90
 
 # ---------------------------------------------------------------------------- #
 
@@ -73,17 +101,14 @@ help_dev dev_help dev:
 # robodoc-html-x.x.x.tar contains all html files produced by ROBODOC
 robodoc:
 	rm -rf tmp-robodoc robodoc-html && mkdir tmp-robodoc
-	cp -rf $(top_srcdir)/src/[0-9]* tmp-robodoc
+	cp -rfL $(top_srcdir)/shared/common/src/[0-3]* tmp-robodoc
+	cp -rf $(top_srcdir)/src/[4-9]* tmp-robodoc
 	cp $(top_srcdir)/config/robodoc/robodoc-html.rc tmp-robodoc/robodoc.rc
 	cd tmp-robodoc && rm -f */*.in && rm -f */interfaces* && robodoc > ../robodoc.log 2> ../robodoc.err
 	mv -f tmp-robodoc/www/robodoc robodoc-html
 	tardir=robodoc-html && $(am__tar) | GZIP=$(GZIP_ENV) gzip -c >robodoc-html-$(VERSION).tar.gz
 	rm -rf robodoc-html tmp-robodoc
 	cat $(top_srcdir)/doc/developers/robodoc.doc.txt >> robodoc.err
-
-#Run abilint
-run_abilint :
-	python $(srcdir)/config/scripts/abilint --graph=directories . .
 
 # ---------------------------------------------------------------------------- #
 
@@ -93,7 +118,6 @@ multi_nprocs = 4
 # Special targets for parallel builds, in order to work around random
 # failures (e.g. LibXC, NetCDF) and make sure dependencies are met
 multi:
-	cd fallbacks && $(MAKE) @SET_MAKE@
 	$(MAKE) -j$(multi_nprocs) @SET_MAKE@
 
 multi_dual mj2:
@@ -148,6 +172,16 @@ binary_package_lite:
 	 mkdir -p etc; \
 	 chmod -R o+rX *
 
+dist-hook:
+	echo $(VERSION) > $(distdir)/.tarball-version
+	(GITGEN_VERSION=`(cd @top_srcdir@ && ./config/scripts/git-version-gen\
+                .tarball-version)` ; \
+	 test "x$(VERSION)" = "x$${GITGEN_VERSION}" || \
+         ((echo "Stale version;"; echo $(VERSION); echo "$${GITGEN_VERSION}"; \
+           echo "Please run:" ; \
+           echo "     (cd @top_srcdir@ && ./config/script/makemake)" ; \
+           echo "before make dist") 1>&2 ; rm -r $(distdir) ; exit 1))
+
 dist-lite: distdir
 	tardir=$(distdir) && \
 	  cd $(distdir)/doc; rm -rf build* inp* t* guide  && \
@@ -164,9 +198,9 @@ dist-lite: distdir
 bin_prep:
 	rm -fr abinitbin-$(VERSION) abinitbin.tar abinitbin_seq-$(VERSION)* abinitbin_seqpar-$(VERSION)*
 	mkdir abinitbin-$(VERSION)
-	tar -cvf abinitbin.tar AUTHORS COPYING INSTALL KNOWN_PROBLEMS NEWS README* RELNOTES THANKS src \
+	tar -cvf abinitbin.tar AUTHORS COPYING INSTALL* KNOWN_PROBLEMS NEWS README* RELNOTES THANKS src \
             doc scripts developers tests/Psps* tests/v*/Input tests/tutorial tests/paral tests/buil* tests/Scripts tests/cpu \
-            tests/tutorespfn tests/bigdft tests/etsf_io tests/libxc tests/wannier90 tests/atompaw tests/mpiio tests/psml
+            tests/tutorespfn tests/bigdft tests/netcdf tests/libxc tests/wannier90 tests/atompaw tests/mpiio tests/psml
 	mv abinitbin.tar abinitbin-$(VERSION)
 	cd abinitbin-$(VERSION) ; tar -xvf abinitbin.tar ; \
             rm -fr abinitbin.tar ; \
@@ -186,7 +220,7 @@ bin_prep:
             cd ../tests ; rm -fr */,* ; cd .. ; \
             mkdir opt ; mv src/98_main/* opt ; rm -fr src ; \
             cp ../developers/maintainers/Makefile_topdir_binarypack Makefile ; \
-            cp ../developers/maintainers/Makefile_testdir_binarypack tests/Makefile ;
+            cp ../developers/maintainers/Makefile_testdir_binarypack tests/Makefile
 
 # FIXME: there is no point anymore in having 2 binary distributions
 bin_seq: bin_prep

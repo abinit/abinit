@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_berrytk
 !! NAME
 !!  m_berrytk
@@ -6,14 +5,10 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2000-2019 ABINIT  group (MVeithen)
+!!  Copyright (C) 2000-2024 ABINIT  group (MVeithen)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -131,19 +126,11 @@ contains
 !!  - cg1_k can either be computed for all valence bands or
 !!    for a group of valence bands defined by minbd and maxbd.
 !!
-!! PARENTS
-!!      berryphase_new,cgwf,chern_number,getcgqphase,make_grad_berry
-!!
-!! CHILDREN
-!!      dzgedi,dzgefa,overlap_g
-!!
 !! SOURCE
 
 subroutine smatrix(cg,cgq,cg1_k,ddkflag,dtm_k,icg,icg1,itrs,job,maxbd,&
 &  mcg_k,mcg_q,mcg1_k,minbd,mpw,mband_occ,nband_occ,npw_k1,npw_k2,nspinor,&
 &  pwind_k,pwnsfac_k,sflag_k,shiftbd,smat_inv,smat_k,smat_k_paw,usepaw)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -182,10 +169,10 @@ subroutine smatrix(cg,cgq,cg1_k,ddkflag,dtm_k,icg,icg1,itrs,job,maxbd,&
 !stop
 !ENDDEBUG
 
- ABI_ALLOCATE(ipvt,(nband_occ))
- ABI_ALLOCATE(zgwork,(2,nband_occ))
- ABI_ALLOCATE(vect1,(2,0:mpw*nspinor))
- ABI_ALLOCATE(vect2,(2,0:mpw*nspinor))
+ ABI_MALLOC(ipvt,(nband_occ))
+ ABI_MALLOC(zgwork,(2,nband_occ))
+ ABI_MALLOC(vect1,(2,0:mpw*nspinor))
+ ABI_MALLOC(vect2,(2,0:mpw*nspinor))
  vect1(:,0) = zero ; vect2(:,0) = zero
 
 !Check if the values of ddkflag and job are compatible
@@ -194,7 +181,7 @@ subroutine smatrix(cg,cgq,cg1_k,ddkflag,dtm_k,icg,icg1,itrs,job,maxbd,&
    write(message,'(a,i3,a,a)')&
 &   ' job is equal to ',job,ch10,&
 &   ' while only the values job = 0, 1, 10, 11, 20, or 21 are allowed.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  if (ddkflag == 1) then
@@ -202,7 +189,7 @@ subroutine smatrix(cg,cgq,cg1_k,ddkflag,dtm_k,icg,icg1,itrs,job,maxbd,&
      write(message,'(a,i0,a,a)')&
 &     ' job is equal to ',job,ch10,&
 &     ' while ddkflag = 1. This is not allowed.'
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
  end if
 
@@ -212,7 +199,7 @@ subroutine smatrix(cg,cgq,cg1_k,ddkflag,dtm_k,icg,icg1,itrs,job,maxbd,&
      write(message,'(3a,i4,a,i4)')&
 &     '  The content of sflag_k must be 0 or 1.',ch10,&
 &     '  However, for iband=',iband,', sflag_k(iband)=',sflag_k(iband)
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
  end do
 
@@ -224,7 +211,7 @@ subroutine smatrix(cg,cgq,cg1_k,ddkflag,dtm_k,icg,icg1,itrs,job,maxbd,&
    end do
    if (count > 1) then
      message = 'in case shiftbd = 0, only 1 element of sflag can be 0'
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
  end if
 
@@ -240,7 +227,7 @@ subroutine smatrix(cg,cgq,cg1_k,ddkflag,dtm_k,icg,icg1,itrs,job,maxbd,&
 !!
 !! debugging based on norm of k1 vector
 !
-!ABI_ALLOCATE(my_pwind_k,(mpw))
+!ABI_MALLOC(my_pwind_k,(mpw))
 !!
 !do iband = 1, nband_occ
 !!
@@ -323,7 +310,7 @@ subroutine smatrix(cg,cgq,cg1_k,ddkflag,dtm_k,icg,icg1,itrs,job,maxbd,&
 !!
 !end do   ! iband
 !!
-!ABI_DEALLOCATE(my_pwind_k)
+!ABI_FREE(my_pwind_k)
 !!
  do iband = 1, nband_occ
 
@@ -616,10 +603,10 @@ subroutine smatrix(cg,cgq,cg1_k,ddkflag,dtm_k,icg,icg1,itrs,job,maxbd,&
 
  end if ! end job == 20 .or. job == 21 case
 
- ABI_DEALLOCATE(ipvt)
- ABI_DEALLOCATE(zgwork)
- ABI_DEALLOCATE(vect1)
- ABI_DEALLOCATE(vect2)
+ ABI_FREE(ipvt)
+ ABI_FREE(zgwork)
+ ABI_FREE(vect1)
+ ABI_FREE(vect2)
 
 !DEBUG
 !write(std_out,*)' dtm_k=',dtm_k(:)
@@ -669,18 +656,10 @@ end subroutine smatrix
 !! - unit_out = 0 is allowed, in this case, there will be no
 !!   output of the results
 !!
-!! PARENTS
-!!      berryphase_new,relaxpol
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
 subroutine polcart(red_ptot,pel,pel_cart,pelev,pion,pion_cart,polunit,&
 &  ptot_cart,rprimd,ucvol,unit_out,usepaw)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

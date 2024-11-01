@@ -1,0 +1,123 @@
+# Fake H crystal.
+# Test tetragonal spacegroups
+
+ndtset 80
+
+spgroup1   111   spgroupma1   256   natom1   16
+spgroup2   111   spgroupma2   257   natom2   16
+spgroup3   111   spgroupma3   258   natom3   16
+spgroup4   112   spgroupma4   264   natom4   16
+spgroup5   112   spgroupma5   265   natom5   16
+spgroup6   112   spgroupma6   266   natom6   16
+spgroup7   113   spgroupma7   272   natom7   16
+spgroup8   113   spgroupma8   273   natom8   16
+spgroup9   113   spgroupma9   274   natom9   16
+spgroup10   114   spgroupma10   280   natom10   16
+spgroup11   114   spgroupma11   281   natom11   16
+spgroup12   114   spgroupma12   282   natom12   16
+spgroup13   115   spgroupma13   288   natom13   16
+spgroup14   115   spgroupma14   289   natom14   16
+spgroup15   115   spgroupma15   290   natom15   16
+spgroup16   116   spgroupma16   296   natom16   16
+spgroup17   116   spgroupma17   297   natom17   16
+spgroup18   116   spgroupma18   298   natom18   16
+spgroup19   117   spgroupma19   304   natom19   16
+spgroup20   117   spgroupma20   305   natom20   16
+spgroup21   117   spgroupma21   306   natom21   16
+spgroup22   118   spgroupma22   312   natom22   16
+spgroup23   118   spgroupma23   313   natom23   16
+spgroup24   118   spgroupma24   314   natom24   16
+spgroup25   119   spgroupma25   320   natom25   16
+spgroup26   120   spgroupma26   326   natom26   16
+spgroup27   121   spgroupma27   332   natom27   16
+spgroup28   122   spgroupma28   338   natom28   16
+spgroup29   123   spgroupma29   348   natom29   32
+spgroup30   123   spgroupma30   349   natom30   32
+spgroup31   123   spgroupma31   350   natom31   32
+spgroup32   124   spgroupma32   360   natom32   32
+spgroup33   124   spgroupma33   361   natom33   32
+spgroup34   124   spgroupma34   362   natom34   32
+spgroup35   125   spgroupma35   372   natom35   32
+spgroup36   125   spgroupma36   373   natom36   32
+spgroup37   125   spgroupma37   374   natom37   32
+spgroup38   126   spgroupma38   384   natom38   32
+spgroup39   126   spgroupma39   385   natom39   32
+spgroup40   126   spgroupma40   386   natom40   32
+spgroup41   127   spgroupma41   396   natom41   32
+spgroup42   127   spgroupma42   397   natom42   32
+spgroup43   127   spgroupma43   398   natom43   32
+spgroup44   128   spgroupma44   408   natom44   32
+spgroup45   128   spgroupma45   409   natom45   32
+spgroup46   128   spgroupma46   410   natom46   32
+spgroup47   129   spgroupma47   420   natom47   32
+spgroup48   129   spgroupma48   421   natom48   32
+spgroup49   129   spgroupma49   422   natom49   32
+spgroup50   130   spgroupma50   432   natom50   32
+spgroup51   130   spgroupma51   433   natom51   32
+spgroup52   130   spgroupma52   434   natom52   32
+spgroup53   131   spgroupma53   444   natom53   32
+spgroup54   131   spgroupma54   445   natom54   32
+spgroup55   131   spgroupma55   446   natom55   32
+spgroup56   132   spgroupma56   456   natom56   32
+spgroup57   132   spgroupma57   457   natom57   32
+spgroup58   132   spgroupma58   458   natom58   32
+spgroup59   133   spgroupma59   468   natom59   32
+spgroup60   133   spgroupma60   469   natom60   32
+spgroup61   133   spgroupma61   470   natom61   32
+spgroup62   134   spgroupma62   480   natom62   32
+spgroup63   134   spgroupma63   481   natom63   32
+spgroup64   134   spgroupma64   482   natom64   32
+spgroup65   135   spgroupma65   492   natom65   32
+spgroup66   135   spgroupma66   493   natom66   32
+spgroup67   135   spgroupma67   494   natom67   32
+spgroup68   136   spgroupma68   504   natom68   32
+spgroup69   136   spgroupma69   505   natom69   32
+spgroup70   136   spgroupma70   506   natom70   32
+spgroup71   137   spgroupma71   516   natom71   32
+spgroup72   137   spgroupma72   517   natom72   32
+spgroup73   137   spgroupma73   518   natom73   32
+spgroup74   138   spgroupma74   528   natom74   32
+spgroup75   138   spgroupma75   529   natom75   32
+spgroup76   138   spgroupma76   530   natom76   32
+spgroup77   139   spgroupma77   540   natom77   32
+spgroup78   140   spgroupma78   550   natom78   32
+spgroup79   141   spgroupma79   560   natom79   32
+spgroup80   142   spgroupma80   570   natom80   32
+
+# Common data
+prtvol -1          # stop in abinit (main program), before call driver.
+brvltt -1          # important to reduce the conventional cell to primitive,
+                   # and allow the recognition of space group
+acell 7 7 9
+angdeg  90 90 90
+ntypat 1
+znucl 1
+natrd 1
+xred 0.17 0.15 0.11
+spinat 0.0 0.0 1.0
+typat 1
+ecut 1
+  kptopt 0
+nkpt 1
+nline 1
+nstep 1
+toldfe 1.0d-6
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "01h.bare"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t37.abo, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = Unknown
+#%% keywords = 
+#%% description = 
+#%%   H based fake crystals : magnetic groups, Shubnikov type IV
+#%%   Test the generation and recognition of the tetragonal space groups (part II)
+#%%<END TEST_INFO>

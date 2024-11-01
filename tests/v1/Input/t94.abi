@@ -1,0 +1,61 @@
+# Crazy tetragonal Si cell with 8 atoms.
+# Used to test the generation of symmetry matrices from
+# input spatial group, group 136, P42/mnm
+
+
+ ndtset 2
+ xred1
+ 0.3 0.3 0.1
+ 0.7 0.7 0.1
+ 0.2 0.8 0.6
+ 0.8 0.2 0.6
+ 0.2 0.8 0.4
+ 0.8 0.2 0.4
+ 0.3 0.3 0.9
+ 0.7 0.7 0.9
+
+ xred2 0.3 0.3 0.1
+
+#common declarations
+
+ natom 8
+ acell 3*10.26311
+ rprim 1 0 0  0 1 0  0 0 1
+ diemac 12.d0
+ ecut 1.00
+ enunit 2
+ intxc 1
+ kptopt 0 kpt 0 0 0 kptnrm 1
+ natrd 1
+ nband 16
+ nkpt  1
+ nline 1
+ nstep 1
+ ntypat  1
+ occopt  1
+ prtvol 10
+ spgroup 136
+ tolwfr 1.0d-13
+ wtk   1
+ znucl 14
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosGTH_pwteter/14si.pspgth"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t94.abo, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% keywords = NC
+#%% authors = Unknown
+#%% description = 
+#%%   Crazy tetragonal Si cell with 8 atoms. Test the symmetrizer.
+#%%   Used to test the generation of symmetry matrices from input spatial group, P42/mnm
+#%%   Dataset 1 : Full set of atoms
+#%%   Dataset 2 : Irreducible unit cell.
+#%%<END TEST_INFO>

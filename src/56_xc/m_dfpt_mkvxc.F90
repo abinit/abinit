@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_dfpt_mkvxc
 !! NAME
 !!  m_dfpt_mkvxc
@@ -7,14 +6,10 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2001-2019 ABINIT group (XG, DRH, FR, EB, SPr)
+!!  Copyright (C) 2001-2024 ABINIT group (XG, DRH, FR, EB, SPr)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -27,14 +22,14 @@
 module m_dfpt_mkvxc
 
  use defs_basis
- use defs_abitypes
  use m_errors
  use m_abicore
  use m_xc_noncoll
 
+ use defs_abitypes,     only : MPI_type
  use m_time,     only : timab
  use m_symtk,    only : matr3inv
- use m_xctk,     only : xcden, xcpot
+ use m_xctk,     only : xcden, xcpot, xcpotdq
 
  implicit none
 
@@ -43,6 +38,8 @@ module m_dfpt_mkvxc
 
  public :: dfpt_mkvxc
  public :: dfpt_mkvxc_noncoll
+ public :: dfpt_mkvxcggadq
+ public :: dfpt_mkvxcgga_n0met
 !!***
 
 contains
@@ -72,6 +69,7 @@ contains
 !!  nhat1gr(cplex*nfft,nspden,3*nhat1grdim)= -PAW only- gradients of 1st-order compensation density
 !!  nhat1grdim= -PAW only- 1 if nhat1gr array is used ; 0 otherwise
 !!  nkxc=second dimension of the kxc array
+!!  non_magnetic_xc= if true, handle density/potential as non-magnetic (even if it is)
 !!  nspden=number of spin-density components
 !!  n3xccc=dimension of xccc3d1 ; 0 if no XC core correction is used, otherwise, nfft
 !!  option=if 0, work only with the XC core-correction,
@@ -95,7 +93,7 @@ contains
 !!    if nspden>=2: kxc(:,1)= d2Exc/drho_up drho_up
 !!                  kxc(:,2)= d2Exc/drho_up drho_dn
 !!                  kxc(:,3)= d2Exc/drho_dn drho_dn
-!!   ===== if GGA
+!!   ===== if GGA (or mGGA)
 !!    if nspden==1:
 !!       kxc(:,1)= d2Exc/drho2
 !!       kxc(:,2)= 1/|grad(rho)| dExc/d|grad(rho)|
@@ -124,25 +122,18 @@ contains
 !!       kxc(:,17)=grady(rho_dn)
 !!       kxc(:,18)=gradz(rho_up)
 !!       kxc(:,19)=gradz(rho_dn)
-!!
-!! PARENTS
-!!      dfpt_dyxc1,dfpt_mkvxc_noncoll,dfpt_nstdy,dfpt_nstpaw,dfpt_rhotov
-!!      dfptnl_loop,m_kxc,nres2vres
-!!
-!! CHILDREN
-!!      dfpt_mkvxcgga,matr3inv,timab
+!!    Note about mGGA: 2nd derivatives involving Tau or Laplacian are not taken into account (yet)
 !!
 !! SOURCE
 
 subroutine dfpt_mkvxc(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat1,nhat1dim,nhat1gr,nhat1grdim,&
-&          nkxc,nspden,n3xccc,option,paral_kgb,qphon,rhor1,rprimd,usexcnhat,vxc1,xccc3d1)
-
- implicit none
+&          nkxc,non_magnetic_xc,nspden,n3xccc,option,qphon,rhor1,rprimd,usexcnhat,vxc1,xccc3d1)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: cplex,ixc,n3xccc,nfft,nhat1dim,nhat1grdim
- integer,intent(in) :: nkxc,nspden,option,paral_kgb,usexcnhat
+ integer,intent(in) :: nkxc,nspden,option,usexcnhat
+ logical,intent(in) :: non_magnetic_xc
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: ngfft(18)
@@ -169,12 +160,12 @@ subroutine dfpt_mkvxc(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat1,nhat1dim,nhat1gr,
  call timab(181,1,tsec)
 
  if(nspden/=1 .and. nspden/=2) then
-   MSG_BUG('For nspden==4 please use dfpt_mkvxc_noncoll!')
+   ABI_BUG('For nspden==4 please use dfpt_mkvxc_noncoll!')
  end if
 
 !Special case: no XC applied
  if (ixc==0.or.nkxc==0) then
-   MSG_WARNING('Note that no xc is applied (ixc=0)')
+   ABI_WARNING('Note that no xc is applied (ixc=0)')
    vxc1=zero
    return
  end if
@@ -184,9 +175,17 @@ subroutine dfpt_mkvxc(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat1,nhat1dim,nhat1gr,
 
 !  PAW: eventually substract compensation density
    if (option/=0) then
-     if (usexcnhat==0.and.nhat1dim==1) then
-       ABI_ALLOCATE(rhor1_,(cplex*nfft,nspden))
-       rhor1_(:,:)=rhor1(:,:)-nhat1(:,:)
+     if ((usexcnhat==0.and.nhat1dim==1).or.(non_magnetic_xc)) then
+       ABI_MALLOC(rhor1_,(cplex*nfft,nspden))
+       if (usexcnhat==0.and.nhat1dim==1) then
+         rhor1_(:,:)=rhor1(:,:)-nhat1(:,:)
+       else
+         rhor1_(:,:)=rhor1(:,:)
+       end if
+       if (non_magnetic_xc) then
+         if(nspden==2) rhor1_(:,2)=rhor1_(:,1)*half
+         if(nspden==4) rhor1_(:,2:4)=zero
+       end if
      else
        rhor1_ => rhor1
      end if
@@ -307,28 +306,36 @@ subroutine dfpt_mkvxc(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat1,nhat1dim,nhat1gr,
 
    end if ! n3xccc==0
 
-   if (option/=0.and.usexcnhat==0.and.nhat1dim==1) then
-     ABI_DEALLOCATE(rhor1_)
+   if (option/=0.and.((usexcnhat==0.and.nhat1dim==1).or.(non_magnetic_xc))) then
+     ABI_FREE(rhor1_)
    end if
 
 !  Treat GGA
  else if (nkxc==7.or.nkxc==19) then
 
-! Transfer the data to spin-polarized storage
+!  Transfer the data to spin-polarized storage
 
-! Treat the density change
-   ABI_ALLOCATE(rhor1_,(cplex*nfft,nspden))
+!  Treat the density change
+   ABI_MALLOC(rhor1_,(cplex*nfft,nspden))
    if (option==1 .or. option==2) then
      if (nspden==1) then
        do ir=1,cplex*nfft
          rhor1_(ir,1)=rhor1(ir,1)
        end do
      else
-       do ir=1,cplex*nfft
-         rho1_dn=rhor1(ir,1)-rhor1(ir,2)
-         rhor1_(ir,1)=rhor1(ir,2)
-         rhor1_(ir,2)=rho1_dn
-       end do
+       if(non_magnetic_xc) then
+         do ir=1,cplex*nfft
+           rho1_dn=rhor1(ir,1)*half
+           rhor1_(ir,1)=rho1_dn
+           rhor1_(ir,2)=rho1_dn
+         end do
+       else
+         do ir=1,cplex*nfft
+           rho1_dn=rhor1(ir,1)-rhor1(ir,2)
+           rhor1_(ir,1)=rhor1(ir,2)
+           rhor1_(ir,2)=rho1_dn
+         end do
+       end if
      end if
    else
      do ispden=1,nspden
@@ -337,6 +344,7 @@ subroutine dfpt_mkvxc(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat1,nhat1dim,nhat1gr,
        end do
      end do
    end if
+
    if( (option==0 .or. option==1) .and. n3xccc/=0)then
      spin_scale=one;if (nspden==2) spin_scale=half
      do ispden=1,nspden
@@ -349,29 +357,45 @@ subroutine dfpt_mkvxc(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat1,nhat1dim,nhat1gr,
 !  PAW: treat also compensation density (and gradients)
    nhat1dim_=nhat1dim ; nhat1rgdim_=nhat1grdim
    if (option/=0.and.nhat1dim==1.and.nspden==2) then
-     ABI_ALLOCATE(nhat1_,(cplex*nfft,nspden))
-     do ir=1,cplex*nfft
-       rho1_dn=nhat1(ir,1)-nhat1(ir,2)
-       nhat1_(ir,1)=nhat1(ir,2)
-       nhat1_(ir,2)=rho1_dn
-     end do
+     ABI_MALLOC(nhat1_,(cplex*nfft,nspden))
+     if (non_magnetic_xc) then
+       do ir=1,cplex*nfft
+         rho1_dn=nhat1(ir,1)*half
+         nhat1_(ir,1:2)=rho1_dn
+       end do
+     else
+       do ir=1,cplex*nfft
+         rho1_dn=nhat1(ir,1)-nhat1(ir,2)
+         nhat1_(ir,1)=nhat1(ir,2)
+         nhat1_(ir,2)=rho1_dn
+       end do
+     end if
    else if (option==0) then
-     ABI_ALLOCATE(nhat1_,(0,0))
+     ABI_MALLOC(nhat1_,(0,0))
      nhat1dim_=0
    else
      nhat1_ => nhat1
    end if
    if (option/=0.and.nhat1grdim==1.and.nspden==2) then
-     ABI_ALLOCATE(nhat1gr_,(cplex*nfft,nspden,3))
-     do ii=1,3
-       do ir=1,cplex*nfft
-         rho1_dn=nhat1gr(ir,1,ii)-nhat1gr(ir,2,ii)
-         nhat1gr_(ir,1,ii)=nhat1gr(ir,2,ii)
-         nhat1gr_(ir,2,ii)=rho1_dn
+     ABI_MALLOC(nhat1gr_,(cplex*nfft,nspden,3))
+     if (non_magnetic_xc) then
+       do ii=1,3
+         do ir=1,cplex*nfft
+           rho1_dn=nhat1(ir,1)*half
+           nhat1gr_(ir,1:2,ii)=rho1_dn
+         end do
        end do
-     end do
+     else
+       do ii=1,3
+         do ir=1,cplex*nfft
+           rho1_dn=nhat1gr(ir,1,ii)-nhat1gr(ir,2,ii)
+           nhat1gr_(ir,1,ii)=nhat1gr(ir,2,ii)
+           nhat1gr_(ir,2,ii)=rho1_dn
+         end do
+       end do
+     end if
    else if (option==0) then
-     ABI_ALLOCATE(nhat1gr_,(0,0,0))
+     ABI_MALLOC(nhat1gr_,(0,0,0))
      nhat1rgdim_=0
    else
      nhat1gr_ => nhat1gr
@@ -380,18 +404,18 @@ subroutine dfpt_mkvxc(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat1,nhat1dim,nhat1gr,
    call matr3inv(rprimd,gprimd)
 
    call dfpt_mkvxcgga(cplex,gprimd,kxc,mpi_enreg,nfft,ngfft,nhat1_,nhat1dim_,&
-&   nhat1gr_,nhat1rgdim_,nkxc,nspden,paral_kgb,qphon,rhor1_,usexcnhat,vxc1)
+&   nhat1gr_,nhat1rgdim_,nkxc,nspden,qphon,rhor1_,usexcnhat,vxc1)
 
-   ABI_DEALLOCATE(rhor1_)
+   ABI_FREE(rhor1_)
    if ((option==0).or.(nhat1dim==1.and.nspden==2)) then
-     ABI_DEALLOCATE(nhat1_)
+     ABI_FREE(nhat1_)
    end if
    if ((option==0).or.(nhat1grdim==1.and.nspden==2)) then
-     ABI_DEALLOCATE(nhat1gr_)
+     ABI_FREE(nhat1gr_)
    end if
 
  else
-   MSG_BUG('Invalid nkxc!')
+   ABI_BUG('Invalid nkxc!')
 
  end if ! LDA or GGA
 
@@ -418,7 +442,7 @@ end subroutine dfpt_mkvxc
 !!  gprimd(3,3)=dimensional primitive translations in reciprocal space (bohr^-1)
 !!  gsqcut=cutoff value on G**2 for sphere inside fft box.
 !!  kxc(nfft,nkxc)=exchange and correlation kernel (see below)
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  nfft=(effective) number of FFT grid points (for this processor)
 !!  ngfft(18)=contain all needed information about 3D FFT
 !!  nhat1(cplex*nfft,2*nhat1dim)= -PAW only- 1st-order compensation density
@@ -468,23 +492,15 @@ end subroutine dfpt_mkvxc
 !!       kxc(:,18)=gradz(rho_up)
 !!       kxc(:,19)=gradz(rho_dn)
 !!
-!! PARENTS
-!!      dfpt_mkvxc
-!!
-!! CHILDREN
-!!      xcden,xcpot
-!!
 !! SOURCE
 
 subroutine dfpt_mkvxcgga(cplex,gprimd,kxc,mpi_enreg,nfft,ngfft,&
 &                    nhat1,nhat1dim,nhat1gr,nhat1grdim,nkxc,&
-&                    nspden,paral_kgb,qphon,rhor1,usexcnhat,vxc1)
-
- implicit none
+&                    nspden,qphon,rhor1,usexcnhat,vxc1)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: cplex,nfft,nhat1dim,nhat1grdim,nkxc,nspden,paral_kgb,usexcnhat
+ integer,intent(in) :: cplex,nfft,nhat1dim,nhat1grdim,nkxc,nspden,usexcnhat
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: ngfft(18)
@@ -498,7 +514,7 @@ subroutine dfpt_mkvxcgga(cplex,gprimd,kxc,mpi_enreg,nfft,ngfft,&
 
 !Local variables-------------------------------
 !scalars
- integer :: ii,ir,ishift,mgga,ngrad,nspgrad
+ integer :: ii,ir,ishift,ngrad,nspgrad,use_laplacian
  logical :: test_nhat
  real(dp) :: coeff_grho,coeff_grho_corr,coeff_grho_dn,coeff_grho_up
  real(dp) :: coeffim_grho,coeffim_grho_corr,coeffim_grho_dn,coeffim_grho_up
@@ -517,16 +533,16 @@ subroutine dfpt_mkvxcgga(cplex,gprimd,kxc,mpi_enreg,nfft,ngfft,&
 
  if (nkxc/=12*min(nspden,2)-5) then
    msg='Wrong nkxc value for GGA!'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
 !metaGGA contributions are not taken into account here
- mgga=0
+ use_laplacian=0
 
 !PAW: substract 1st-order compensation density from 1st-order density
  test_nhat=((nhat1dim==1).and.(usexcnhat==0.or.nhat1grdim==1))
  if (test_nhat) then
-   ABI_ALLOCATE(rhor1_ptr,(cplex*nfft,nspden))
+   ABI_MALLOC(rhor1_ptr,(cplex*nfft,nspden))
    rhor1_ptr(:,:)=rhor1(:,:)-nhat1(:,:)
  else
    rhor1_ptr => rhor1
@@ -538,8 +554,8 @@ subroutine dfpt_mkvxcgga(cplex,gprimd,kxc,mpi_enreg,nfft,ngfft,&
 !rho1now(:,:,1) contains the first-order density, and
 !rho1now(:,:,2:4) contains the gradients of the first-order density
  ishift=0 ; ngrad=2
- ABI_ALLOCATE(rho1now,(cplex*nfft,nspden,ngrad*ngrad))
- call xcden(cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden,paral_kgb,qphon,rhor1_ptr,rho1now)
+ ABI_MALLOC(rho1now,(cplex*nfft,nspden,ngrad*ngrad))
+ call xcden(cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden,qphon,rhor1_ptr,rho1now)
 
 !PAW: add "exact" gradients of compensation density
  if (test_nhat.and.usexcnhat==1) then
@@ -551,12 +567,12 @@ subroutine dfpt_mkvxcgga(cplex,gprimd,kxc,mpi_enreg,nfft,ngfft,&
    end do
  end if
  if (test_nhat) then
-   ABI_DEALLOCATE(rhor1_ptr)
+   ABI_FREE(rhor1_ptr)
  end if
 
 !Apply the XC kernel
  nspgrad=2; if (nspden==2) nspgrad=5
- ABI_ALLOCATE(dnexcdn,(cplex*nfft,nspgrad))
+ ABI_MALLOC(dnexcdn,(cplex*nfft,nspgrad))
 
  if (cplex==1) then  ! Treat real case first
    if (nspden==1) then
@@ -688,13 +704,13 @@ subroutine dfpt_mkvxcgga(cplex,gprimd,kxc,mpi_enreg,nfft,ngfft,&
  end if
 
  vxc1(:,:)=zero
- call xcpot(cplex,dnexcdn,gprimd,ishift,mgga,mpi_enreg,nfft,ngfft,ngrad,nspden,&
-& nspgrad,paral_kgb,qphon,rho1now,vxc1)
+ call xcpot(cplex,gprimd,ishift,use_laplacian,mpi_enreg,nfft,ngfft,ngrad,nspden,&
+& nspgrad,qphon,depsxc=dnexcdn,rhonow=rho1now,vxc=vxc1)
 
 !call filterpot(paral_kgb,cplex,gmet,gsqcut,nfft,ngfft,nspden,qphon,vxc1)
 
- ABI_DEALLOCATE(dnexcdn)
- ABI_DEALLOCATE(rho1now)
+ ABI_FREE(dnexcdn)
+ ABI_FREE(rho1now)
 
  DBG_EXIT("COLL")
 
@@ -715,6 +731,7 @@ end subroutine dfpt_mkvxcgga
 !!  cplex= if 1, real space 1-order functions on FFT grid are REAL,
 !!         if 2, COMPLEX
 !!  ixc= choice of exchange-correlation scheme
+!!  ixcrot= option for rotation of collinear spin potential to non collinear full matrix
 !!  kxc(nfft,nkxc)=exchange and correlation kernel (see rhotoxc.F90)
 !!  mpi_enreg=information about MPI parallelization
 !!  nfft=(effective) number of FFT grid points (for this processor)
@@ -727,6 +744,7 @@ end subroutine dfpt_mkvxcgga
 !!  nhat1gr(cplex*nfft,nspden,3*nhat1grdim)= -PAW only- gradients of 1st-order compensation density
 !!  nhat1grdim= -PAW only- 1 if nhat1gr array is used ; 0 otherwise
 !!  nkxc=second dimension of the kxc array
+!!  non_magnetic_xc= if true, handle density/potential as non-magnetic (even if it is)
 !!  nspden=number of spin-density components
 !!  n3xccc=dimension of xccc3d1 ; 0 if no XC core correction is used, otherwise, nfft
 !!  optnc=option for non-collinear magnetism (nspden=4):
@@ -747,24 +765,17 @@ end subroutine dfpt_mkvxcgga
 !!  vxc1(cplex*nfft,nspden)=change in exchange-correlation potential (including
 !!   core-correction, if applicable)
 !!
-!! PARENTS
-!!      dfpt_dyxc1,dfpt_nstdy,dfpt_nstpaw,dfpt_rhotov,nres2vres
-!!
-!! CHILDREN
-!!      dfpt_mkvxc,rotate_back_mag,rotate_back_mag_dfpt,rotate_mag,timab
-!!
 !! SOURCE
 
 subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat,nhatdim,nhat1,nhat1dim,&
-&          nhat1gr,nhat1grdim,nkxc,nspden,n3xccc,optnc,option,paral_kgb,qphon,rhor,rhor1,&
-&          rprimd,usexcnhat,vxc,vxc1,xccc3d1,ixcrot)
-
- implicit none
+&          nhat1gr,nhat1grdim,nkxc,non_magnetic_xc,nspden,n3xccc,optnc,option,qphon,&
+&          rhor,rhor1,rprimd,usexcnhat,vxc,vxc1,xccc3d1,ixcrot)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: cplex,ixc,n3xccc,nfft,nhatdim,nhat1dim,nhat1grdim,optnc
- integer,intent(in) :: nkxc,nspden,option,paral_kgb,usexcnhat
+ integer,intent(in) :: nkxc,nspden,option,usexcnhat
+ logical,intent(in) :: non_magnetic_xc
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: ngfft(18)
@@ -794,16 +805,16 @@ subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat,nhatdim,nh
  call timab(181,1,tsec)
 
  if(nspden/=4) then
-   MSG_BUG('only for nspden=4!')
+   ABI_BUG('only for nspden=4!')
  end if
 
  if(nkxc/=2*min(nspden,2)-1) then
-   MSG_BUG('nspden=4 works only with LSDA.')
+   ABI_BUG('nspden=4 works only with LSDA.')
  end if
 
 !Special case: no XC applied
  if (ixc==0.or.nkxc==0) then
-   MSG_WARNING('Note that no xc is applied (ixc=0)')
+   ABI_WARNING('Note that no xc is applied (ixc=0)')
    vxc1(:,:)=zero
    return
  end if
@@ -816,24 +827,40 @@ subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat,nhatdim,nh
    vxc1(:,:)=zero
 
 !  PAW: possibly substract compensation density
-   if (usexcnhat==0.and.nhatdim==1) then
-     ABI_ALLOCATE(rhor_,(nfft,nspden))
-     rhor_(:,:) =rhor(:,:)-nhat(:,:)
+   if ((usexcnhat==0.and.nhatdim==1).or.(non_magnetic_xc)) then
+     ABI_MALLOC(rhor_,(nfft,nspden))
+     if (usexcnhat==0.and.nhatdim==1) then
+       rhor_(:,:) =rhor(:,:)-nhat(:,:)
+     else
+       rhor_(:,:) =rhor(:,:)
+     end if
+     if (non_magnetic_xc) then
+       if(nspden==2) rhor_(:,2)=rhor_(:,1)*half
+       if(nspden==4) rhor_(:,2:4)=zero
+     end if
    else
      rhor_ => rhor
    end if
-   if (usexcnhat==0.and.nhat1dim==1) then
-     ABI_ALLOCATE(rhor1_,(cplex*nfft,nspden))
-     rhor1_(:,:)=rhor1(:,:)-nhat1(:,:)
+   if ((usexcnhat==0.and.nhat1dim==1).or.(non_magnetic_xc)) then
+     ABI_MALLOC(rhor1_,(cplex*nfft,nspden))
+     if (usexcnhat==0.and.nhatdim==1) then
+       rhor1_(:,:)=rhor1(:,:)-nhat1(:,:)
+     else
+       rhor1_(:,:)=rhor1(:,:)
+     end if
+     if (non_magnetic_xc) then
+       if(nspden==2) rhor1_(:,2)=rhor1_(:,1)*half
+       if(nspden==4) rhor1_(:,2:4)=zero
+     end if
    else
      rhor1_ => rhor1
    end if
 
 !  Magnetization
    mag => rhor_(:,2:4)
-   ABI_ALLOCATE(rhor1_diag,(cplex*nfft,2))
-   ABI_ALLOCATE(vxc1_diag,(cplex*nfft,2))
-   ABI_ALLOCATE(m_norm,(nfft))
+   ABI_MALLOC(rhor1_diag,(cplex*nfft,2))
+   ABI_MALLOC(vxc1_diag,(cplex*nfft,2))
+   ABI_MALLOC(m_norm,(nfft))
 
 !  -- Rotate rho(r)^(1)
 !  SPr: for option=0 the rhor is not used, only core density xccc3d1
@@ -846,7 +873,7 @@ subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat,nhatdim,nh
 !                 (put all nhat options to zero).
 !  The collinear routine dfpt_mkvxc wants a general density built as (tr[rho],rho_upup)
    call dfpt_mkvxc(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat1_zero,0,nhat1gr_zero,0,&
-&   nkxc,2,n3xccc,option,paral_kgb,qphon,rhor1_diag,rprimd,0,vxc1_diag,xccc3d1)
+&   nkxc,non_magnetic_xc,2,n3xccc,option,qphon,rhor1_diag,rprimd,0,vxc1_diag,xccc3d1)
 
    !call test_rotations(0,1)
 
@@ -864,14 +891,14 @@ subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat,nhatdim,nh
      vxc1(:,3:4)=zero
    end if
 
-   ABI_DEALLOCATE(rhor1_diag)
-   ABI_DEALLOCATE(vxc1_diag)
-   ABI_DEALLOCATE(m_norm)
-   if (usexcnhat==0.and.nhatdim==1) then
-     ABI_DEALLOCATE(rhor_)
+   ABI_FREE(rhor1_diag)
+   ABI_FREE(vxc1_diag)
+   ABI_FREE(m_norm)
+   if ((usexcnhat==0.and.nhatdim==1).or.(non_magnetic_xc)) then
+     ABI_FREE(rhor_)
    end if
-   if (usexcnhat==0.and.nhat1dim==1) then
-     ABI_DEALLOCATE(rhor1_)
+   if ((usexcnhat==0.and.nhat1dim==1).or.(non_magnetic_xc)) then
+     ABI_FREE(rhor1_)
    end if
 
  end if ! nkxc=1 or nkxc=3
@@ -881,6 +908,289 @@ subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat,nhatdim,nh
  DBG_EXIT("COLL")
 
 end subroutine dfpt_mkvxc_noncoll
+!!***
+
+!!****f* ABINIT/dfpt_mkvxcggadq
+!! NAME
+!! dfpt_mkvxcggadq
+!!
+!! FUNCTION
+!! Compute the first-order change of exchange-correlation potential
+!! in case of GGA functionals
+!! Use the q-gradient (Cartesian) of the exchange-correlation kernel.
+!!
+!! INPUTS
+!!  cplex= if 1, real space 1-order functions on FFT grid are REAL,
+!!    if 2, COMPLEX
+!!  gmet(3,3)=metrix tensor in G space in Bohr**-2.
+!!  gprimd(3,3)=dimensional primitive translations in reciprocal space (bohr^-1)
+!!  gsqcut=cutoff value on G**2 for sphere inside fft box.
+!!  kxc(nfft,nkxc)=exchange and correlation kernel (see below)
+!!  mpi_enreg=information about MPI parallelization
+!!  nfft=(effective) number of FFT grid points (for this processor)
+!!  ngfft(18)=contain all needed information about 3D FFT
+!!  nkxc=second dimension of the kxc array
+!!  nspden=number of spin-density components
+!!  qdirc= indicates the Cartesian direction of the q-gradient (1,2 or 3)
+!!  rhor1tmp(cplex*nfft,2)=array for first-order electron spin-density
+!!   in electrons/bohr**3 (second index corresponds to spin-up and spin-down)
+!!
+!! OUTPUT
+!!  vxc1(2*nfft,nspden)=change in exchange-correlation potential
+!!
+!! NOTES
+!!  For the time being, a rather crude coding, to be optimized ...
+!!  Content of Kxc array:
+!!  Only works with nspden=1
+!!   ===== if GGA
+!!    if nspden==1:
+!!       kxc(:,1)= d2Exc/drho2
+!!       kxc(:,2)= 1/|grad(rho)| dExc/d|grad(rho)|
+!!       kxc(:,3)= 1/|grad(rho)| d2Exc/d|grad(rho)| drho
+!!       kxc(:,4)= 1/|grad(rho)| * d/d|grad(rho)| ( 1/|grad(rho)| dExc/d|grad(rho)| )
+!!       kxc(:,5)= gradx(rho)
+!!       kxc(:,6)= grady(rho)
+!!       kxc(:,7)= gradz(rho)
+!!
+!! SOURCE
+
+subroutine dfpt_mkvxcggadq(cplex,gprimd,kxc,mpi_enreg,nfft,ngfft,&
+&                    nkxc,nspden,qdirc,rhor1,vxc1)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: cplex,nfft,nkxc,nspden,qdirc
+ type(MPI_type),intent(in) :: mpi_enreg
+!arrays
+ integer,intent(in) :: ngfft(18)
+ real(dp),intent(in) :: gprimd(3,3)
+ real(dp),intent(in) :: kxc(nfft,nkxc)
+ real(dp),intent(in),target :: rhor1(cplex*nfft,nspden)
+ real(dp),intent(out) :: vxc1(2*nfft,nspden)
+
+!Local variables-------------------------------
+!scalars
+ integer :: ii,ir,ishift,ngrad,nspgrad
+ real(dp) :: gradrho_gradrho1
+ character(len=500) :: msg
+!arrays
+ real(dp) :: qphon(3)
+ real(dp) :: r0(3),r1(3)
+ real(dp),allocatable :: ar1(:,:)
+ real(dp),allocatable :: a_gradi_r1(:,:)
+ real(dp),allocatable :: dadgradn_t1(:,:,:),dadgradn_t2(:,:)
+ real(dp),allocatable :: rho1now(:,:,:)
+ real(dp),ABI_CONTIGUOUS pointer :: rhor1_ptr(:,:)
+
+! *************************************************************************
+
+ DBG_EXIT("COLL")
+
+ if (nkxc/=7) then
+   msg='Wrong nkxc value for GGA in the longwave driver (optdriver=10)!'
+   ABI_BUG(msg)
+ end if
+
+!Compute the gradients of the first-order density
+!rho1now(:,:,1) contains the first-order density, and
+!rho1now(:,:,2:4) contains the gradients of the first-order density
+ ishift=0 ; ngrad=2
+ qphon(:)=zero 
+ rhor1_ptr => rhor1
+ ABI_MALLOC(rho1now,(cplex*nfft,nspden,ngrad*ngrad))
+ call xcden(cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden,qphon,rhor1_ptr,rho1now)
+
+!Apply the XC kernel
+ nspgrad=1
+ ABI_MALLOC(ar1,(cplex*nfft,nspgrad))
+ ABI_MALLOC(a_gradi_r1,(cplex*nfft,nspgrad))
+ ABI_MALLOC(dadgradn_t1,(cplex*nfft,nspgrad,3))
+ ABI_MALLOC(dadgradn_t2,(cplex*nfft,nspgrad))
+ do ir=1,nfft
+   r0(:)=kxc(ir,5:7); r1(:)=rho1now(ir,1,2:4)
+   gradrho_gradrho1=dot_product(r0,r1)
+   ar1(ir,1)=kxc(ir,2)*rho1now(ir,1,1)
+   a_gradi_r1(ir,1)=kxc(ir,2)*r1(qdirc)
+   dadgradn_t2(ir,1)=kxc(ir,4)*gradrho_gradrho1*r0(qdirc)
+   dadgradn_t1(ir,1,:)=kxc(ir,4)*r0(:)*r0(qdirc)*rho1now(ir,1,1)
+ end do
+ do ii=1,3
+   if (ii==qdirc) dadgradn_t1(:,1,ii)=dadgradn_t1(:,1,ii)+ar1(:,1)
+ end do
+
+!Incorporate the terms that do not need further treatment 
+!(a -i factor is applied here)
+ do ir=1,nfft
+   ii=2*ir
+   vxc1(ii-1,1)=zero
+   vxc1(ii,1)= -a_gradi_r1(ir,1) -dadgradn_t2(ir,1)
+ end do
+ ABI_FREE(rho1now)
+ ABI_FREE(a_gradi_r1)
+ ABI_FREE(dadgradn_t2)
+ ABI_FREE(ar1)
+
+!Now the term whose sum over real-space derivatives has to be computed
+ call xcpotdq(dadgradn_t1,cplex,gprimd,ishift,mpi_enreg,nfft, &
+& ngfft,ngrad,nspden,nspgrad,vxc1)
+
+ ABI_FREE(dadgradn_t1)
+
+end subroutine dfpt_mkvxcggadq
+!!***
+
+!!****f* ABINIT/dfpt_mkvxcgga_n0met
+!! NAME
+!! dfpt_mkvxcgga_n0met
+!!
+!! FUNCTION
+!! Compute the contribution to the second q-gradient of the metric 
+!! perturbation that comes from gga XC potentials and depends only
+!! on ground state rho
+!! 
+!! INPUTS
+!!  beta= indicates the Cartesian direction of the metric perturbation
+!!  cplex= if 1, real space 1-order functions on FFT grid are REAL,
+!!    if 2, COMPLEX
+!!  delta= indicates the Cartesian direction of the first q-gradient 
+!!  gamma= indicates the Cartesian direction of the second q-gradient
+!!  gmet(3,3)=metrix tensor in G space in Bohr**-2.
+!!  gprimd(3,3)=dimensional primitive translations in reciprocal space (bohr^-1)
+!!  gsqcut=cutoff value on G**2 for sphere inside fft box.
+!!  kxc(nfft,nkxc)=exchange and correlation kernel (see below)
+!!  mpi_enreg=information about MPI parallelization
+!!  nfft=(effective) number of FFT grid points (for this processor)
+!!  ngfft(18)=contain all needed information about 3D FFT
+!!  nkxc=second dimension of the kxc array
+!!  nspden=number of spin-density components
+!!  rho(cplex*nfft,2)=array for ground-state electron spin-density
+!!   in electrons/bohr**3 (second index corresponds to spin-up and spin-down)
+!!
+!! OUTPUT
+!!  vxc1(2*nfft,nspden)=change in exchange-correlation potential
+!!
+!! NOTES
+!!  For the time being, a rather crude coding, to be optimized ...
+!!  Content of Kxc array:
+!!  Only works with nspden=1
+!!   ===== if GGA
+!!    if nspden==1:
+!!       kxc(:,1)= d2Exc/drho2
+!!       kxc(:,2)= 1/|grad(rho)| dExc/d|grad(rho)|
+!!       kxc(:,3)= 1/|grad(rho)| d2Exc/d|grad(rho)| drho
+!!       kxc(:,4)= 1/|grad(rho)| * d/d|grad(rho)| ( 1/|grad(rho)| dExc/d|grad(rho)| )
+!!       kxc(:,5)= gradx(rho)
+!!       kxc(:,6)= grady(rho)
+!!       kxc(:,7)= gradz(rho)
+!!
+!! SOURCE
+
+subroutine dfpt_mkvxcgga_n0met(beta,cplex,delta,gamma,gprimd,kxc,mpi_enreg,nfft,ngfft,&
+&                    nkxc,nspden,rhor,vxc1)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: beta,cplex,delta,gamma,nfft,nkxc,nspden
+ type(MPI_type),intent(in) :: mpi_enreg
+!arrays
+ integer,intent(in) :: ngfft(18)
+ real(dp),intent(in) :: gprimd(3,3)
+ real(dp),intent(in) :: kxc(nfft,nkxc)
+ real(dp),intent(in),target :: rhor(cplex*nfft,nspden)
+ real(dp),intent(out) :: vxc1(2*nfft,nspden)
+
+!Local variables-------------------------------
+!scalars
+ integer :: alpha,ii,ir,ishift,ngrad,nspgrad
+ real(dp) :: delag,delad,delbd,delbg,deldg
+ real(dp) :: gmodsq
+ character(len=500) :: msg
+!arrays
+ real(dp) :: r0(3)
+ real(dp),allocatable :: dadgg(:,:),dadgtgn(:,:),gna(:,:),dadgngn_1(:,:),dadgngn_2(:,:)
+ real(dp),allocatable :: dadgngn(:,:,:),kro_an(:,:,:),sumgrad(:,:,:)
+
+! *************************************************************************
+
+ DBG_EXIT("COLL")
+
+ if (nkxc/=7) then
+   msg='Wrong nkxc value for GGA in the longwave driver (optdriver=10)!'
+   ABI_BUG(msg)
+ end if
+
+!Kronecker deltas
+ delbd=0.0_dp; delbg=0.0_dp; deldg=0.0_dp
+ if (beta==delta) delbd=1.0_dp
+ if (beta==gamma) delbg=1.0_dp
+ if (delta==gamma) deldg=1.0_dp
+
+!Apply the XC kernel
+ nspgrad=1
+ ABI_MALLOC(dadgg,(cplex*nfft,nspgrad))
+ ABI_MALLOC(dadgtgn,(cplex*nfft,nspgrad))
+ ABI_MALLOC(gna,(cplex*nfft,nspgrad))
+ ABI_MALLOC(dadgngn_1,(cplex*nfft,nspgrad))
+ ABI_MALLOC(dadgngn_2,(cplex*nfft,nspgrad))
+ do ir=1,nfft
+   r0(:)=kxc(ir,5:7)
+   gmodsq=r0(1)**2+r0(2)**2+r0(3)**2
+   dadgg(ir,1)=kxc(ir,4)*gmodsq*(delbd*r0(gamma)+delbg*r0(delta))
+   dadgtgn(ir,1)=two*kxc(ir,4)*r0(beta)*r0(delta)*r0(gamma)
+   gna(ir,1)=(delbg*r0(delta)+delbd*r0(gamma)+two*deldg*r0(beta))*kxc(ir,2)
+   dadgngn_1(ir,1)=delbd*kxc(ir,4)*rhor(ir,1)*r0(gamma)
+   dadgngn_2(ir,1)=delbg*kxc(ir,4)*rhor(ir,1)*r0(delta)
+ end do
+
+!Incorporate the terms that do not need further treatment 
+ do ir=1,nfft
+   ii=2*ir
+   vxc1(ii-1,1)= -dadgg(ir,1)-dadgtgn(ir,1)-gna(ir,1)
+   vxc1(ii,1)= zero
+ end do
+ ABI_FREE(dadgg)
+ ABI_FREE(dadgtgn)
+ ABI_FREE(gna)
+
+!Build the last term whose gradient needs to be computed
+ ABI_MALLOC(dadgngn,(cplex*nfft,nspgrad,3))
+ ABI_MALLOC(kro_an,(cplex*nfft,nspgrad,3))
+ ABI_MALLOC(sumgrad,(cplex*nfft,nspgrad,3))
+ do alpha=1,3
+   delad=0.0_dp; delag=0.0_dp
+   if (alpha==delta) delad=1.0_dp
+   if (alpha==gamma) delag=1.0_dp
+   do ir=1,nfft
+     r0(:)=kxc(ir,5:7)
+     dadgngn(ir,1,alpha)=(dadgngn_1(ir,1)+dadgngn_2(ir,1))*r0(alpha)
+     kro_an(ir,1,alpha)=(delbd*delag+delbg*delad)*rhor(ir,1)*kxc(ir,2)
+     sumgrad(ir,1,alpha)=dadgngn(ir,1,alpha)+kro_an(ir,1,alpha)
+   end do
+ end do
+
+ ABI_FREE(dadgngn_1)
+ ABI_FREE(dadgngn_2)
+ ABI_FREE(dadgngn)
+ ABI_FREE(kro_an)
+
+!Now the term whose sum over real-space derivatives has to be computed.
+!(Use the same routine as in the q-gradient of the XC kernel. It saves
+! the gradient sum in the imaginary part of vxc1 and includes an additional
+! two_pi factor. Need to fix this after the call.) 
+ ishift=0 ; ngrad=2
+ call xcpotdq(sumgrad,cplex,gprimd,ishift,mpi_enreg,nfft, &
+& ngfft,ngrad,nspden,nspgrad,vxc1)
+
+ do ir=1,nfft
+   ii=2*ir
+   vxc1(ii-1,1)=vxc1(ii-1,1)+vxc1(ii,1)/two_pi
+   vxc1(ii,1)=zero
+ end do 
+
+ 
+ ABI_FREE(sumgrad)
+
+end subroutine dfpt_mkvxcgga_n0met
 !!***
 
 end module m_dfpt_mkvxc

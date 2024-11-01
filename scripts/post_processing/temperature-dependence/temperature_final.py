@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 # Author: Samuel Ponc\'e + Yannick Gillet
-# Date: 30/04/2013 -- 11/09/2014 -- 07/08/2015
-# Version: 1.4
+# Date: 30/04/2013 -- 11/09/2014 -- 07/08/2015 -- 21/12/2020
+# Version: 1.5
 # This is the executable script 
 
-from __future__ import division, print_function
+#from __future__ import division, print_function
 import sys
 import os
 import copy
@@ -53,7 +53,7 @@ def main():
    | |_) | |_) |____| __/ _ \ '_ ` _ \| '_ \ / _ \ '__/ _` | __| | | | '__/ _ \ 
    |  __/|  __/_____| ||  __/ | | | | | |_) |  __/ | | (_| | |_| |_| | | |  __/ 
    |_|   |_|         \__\___|_| |_| |_| .__/ \___|_|  \__,_|\__|\__,_|_|  \___| 
-                                      |_|                              Version 1.3         
+                                      |_|                              Version 1.5         
   """
 
   header +=  '\nThis script compute the static/dynamic zero-point motion \n\
@@ -64,7 +64,7 @@ def main():
   print(header)
 
   # Enter the number of cpu on which you want to multi-thread
-  user_input = raw_input('Enter the number of cpu on which you want to multi-thread\n')
+  user_input = input('Enter the number of cpu on which you want to multi-thread\n')
   nb_cpus = user_input
   try:
     nb_cpus = int(user_input)
@@ -72,15 +72,15 @@ def main():
     raise Exception('The value you enter is not an integer!')
   
   # Type of calculation the user want to perform
-  user_input = raw_input('Define the type of calculation you want to perform. Type:\n\
+  user_input = input('Define the type of calculation you want to perform. Type:\n\
                          1 if you want to run a non-adiabatic AHC calculation\n \
                         2 if you want to run a static AHC calculation\n \
                         3 if you want to run a static AHC calculation without control on active space (not recommended !)\n \
   Note that for 1 & 2 you need _EIGR2D.nc and _GKK.nc files obtained through ABINIT option "ieig2rf 5"\n')
-  type = N.int(user_input)
+  type = int(user_input)
   
   # Define the output file name
-  user_input = raw_input('Enter name of the output file\n')
+  user_input = input('Enter name of the output file\n')
   output = user_input.strip()
   
   if type <= 0 or type > 3:
@@ -89,8 +89,8 @@ def main():
   
   # Enter the value of the smearing parameter for dynamic AHC
   if type == 1 or type == 2:
-    user_input = raw_input('Enter value of the smearing parameter for AHC (in eV)\n')
-    smearing = N.float(user_input)
+    user_input = input('Enter value of the smearing parameter for AHC (in eV)\n')
+    smearing = float(user_input)
     smearing = smearing/Ha2eV
   elif type == 3:
     print("The smearing parameter will be the one specified in the abinit input variable elph_imagden\n")
@@ -100,41 +100,41 @@ def main():
   
   # Enter the value of the smearing parameter for Gaussian broadening
   if type == 1 or type == 2:
-    user_input = raw_input('Enter value of the Gaussian broadening for the Eliashberg function and PDOS (in eV)\n')
-    gaussian_smearing = N.float(user_input)
+    user_input = input('Enter value of the Gaussian broadening for the Eliashberg function and PDOS (in eV)\n')
+    gaussian_smearing = float(user_input)
     gaussian_smearing = gaussian_smearing/Ha2eV
   elif type == 3:
-    user_input = raw_input('Enter value of the Gaussian broadening for the PDOS (in eV)\n')
-    gaussian_smearing = N.float(user_input)
+    user_input = input('Enter value of the Gaussian broadening for the PDOS (in eV)\n')
+    gaussian_smearing = float(user_input)
     gaussian_smearing = gaussian_smearing/Ha2eV
   else:
     gaussian_smearing = None
   
   # Enter the value of the emergy range for the PDOS and Eliashberg calculations
   if type == 1 or type == 2:
-    user_input = raw_input('Enter the energy range for the PDOS and Eliashberg calculations (in eV): [e.g. 0 0.5] \n')
+    user_input = input('Enter the energy range for the PDOS and Eliashberg calculations (in eV): [e.g. 0 0.5] \n')
     energy_range = user_input.split()
-    energy = N.linspace(N.float(energy_range[0])/Ha2eV,N.float(energy_range[1])/Ha2eV,500)  
+    energy = N.linspace(float(energy_range[0])/Ha2eV,float(energy_range[1])/Ha2eV,500)  
   elif type == 3:
-    user_input = raw_input('Enter the energy range for the PDOS (in eV): [e.g. 0 0.5] \n')
+    user_input = input('Enter the energy range for the PDOS (in eV): [e.g. 0 0.5] \n')
     energy_range = user_input.split()
-    energy = N.linspace(N.float(energy_range[0])/Ha2eV,N.float(energy_range[1])/Ha2eV,500)  
+    energy = N.linspace(float(energy_range[0])/Ha2eV,float(energy_range[1])/Ha2eV,500)  
   else:
     energy = None
   
   # Temperature dependence analysis
-  user_input = raw_input('Introduce the min temperature, the max temperature and the temperature steps. e.g. 0 200 50 for (0,50,100,150)\n')
+  user_input = input('Introduce the min temperature, the max temperature and the temperature steps. e.g. 0 200 50 for (0,50,100,150)\n')
   temp_info = user_input.split()
   if(len(temp_info) == 1):
     # If the user specifies only one value, it is the temperature !
-    all_temp = [N.float(temp_info[0])]
+    all_temp = [float(temp_info[0])]
   else:
-    all_temp = [T for T in N.arange(N.float(temp_info[0]),N.float(temp_info[1]),N.float(temp_info[2]))]
+    all_temp = [T for T in N.arange(float(temp_info[0]),float(temp_info[1]),float(temp_info[2]))]
   
   # Lifetime is always activated now !
   lifetime = True
   # Broadening lifetime of the electron
-  #user_input = raw_input('Do you want to compute the lifetime of the electrons? [y/n]\n')
+  #user_input = input('Do you want to compute the lifetime of the electrons? [y/n]\n')
   #tmp =user_input.split()[0]
   #if tmp == 'y':
   #  lifetime = True
@@ -142,16 +142,24 @@ def main():
   #  lifetime = False
   
   # Get the nb of Q-points from user 
-  user_input = raw_input('Enter the number of Q-points you have\n')
+  user_input = input('Enter the number of Q-points you have\n')
   try:
     nbQ = int(user_input)
   except ValueError:
     raise Exception('The value you enter is not an integer!')
-  
+
+  # SP: update 07/24
+  # Get the weight of q-points from the user (not available anymore in _EIGR2D.nc
+  user_input = input('Enter the q-point weight for each q-points (in the same order)\n')
+  tmp_info = user_input.split()
+  wtq = N.zeros((nbQ))
+  for ii in N.arange(nbQ):
+    wtq[ii] = float(tmp_info[ii])
+
   # Get the path of the DDB files from user
   DDB_files = []
   for ii in N.arange(nbQ):
-    user_input = raw_input('Enter the name of the %s DDB file\n' %ii)
+    user_input = input('Enter the name of the %s DDB file\n' %ii)
     if len(user_input.split()) != 1:
       raise Exception("You should provide only 1 file")
     else: # Append and TRIM the input string with STRIP
@@ -165,7 +173,7 @@ def main():
   # Get the path of the eigq files from user
   eigq_files = []
   for ii in N.arange(nbQ):
-    user_input = raw_input('Enter the name of the %s eigq file\n' %ii)
+    user_input = input('Enter the name of the %s eigq file\n' %ii)
     if len(user_input.split()) != 1:
       raise Exception("You should provide only 1 file")
     else:
@@ -174,7 +182,7 @@ def main():
   # Get the path of the EIGR2D files from user
   EIGR2D_files = []
   for ii in N.arange(nbQ):
-    user_input = raw_input('Enter the name of the %s EIGR2D file\n' %ii)
+    user_input = input('Enter the name of the %s EIGR2D file\n' %ii)
     if len(user_input.split()) != 1:
       raise Exception("You should provide only 1 file")
     else:
@@ -184,7 +192,7 @@ def main():
   if type == 1 or type == 2:
     GKK_files = []
     for ii in N.arange(nbQ):
-      user_input = raw_input('Enter the name of the %s GKK file\n' %ii)
+      user_input = input('Enter the name of the %s GKK file\n' %ii)
       if len(user_input.split()) != 1:
         raise Exception("You should provide only 1 file")
       else:
@@ -193,7 +201,7 @@ def main():
     GKK_files = []
   
   # Take the EIG at Gamma
-  user_input = raw_input('Enter the name of the unperturbed EIG.nc file at Gamma\n')
+  user_input = input('Enter the name of the unperturbed EIG.nc file at Gamma\n')
   if len(user_input.split()) != 1:
     raise Exception("You sould only provide 1 file")
   else:
@@ -237,11 +245,11 @@ def main():
             degen[ispin,ikpt,iband] = count
   
   # Create the random Q-integration (wtq=1/nqpt):
-  if (abs(EIGR2D.wtq) < tol6):
-    wtq = N.ones((nbQ))
-    wtq = wtq*(1.0/nbQ)
-  else:
-    wtq = N.zeros((nbQ))
+  #if (abs(EIGR2D.wtq) < tol6):
+  #  wtq = N.ones((nbQ))
+  #  wtq = wtq*(1.0/nbQ)
+  #else:
+  #  wtq = N.zeros((nbQ))
   
   #DBSP
   #wtq = N.ones((nbQ))
@@ -257,18 +265,20 @@ def main():
   eig0_pass = copy.deepcopy(eig0.EIG)
   
   if type == 1 or type == 2:
-    total = zpm(zip(nbqpt,wtq,eigq_files,DDB_files,EIGR2D_files,GKK_files),ddw_save,ddw_save2,nb_cpus,type,\
+    arguments = list(zip(nbqpt,wtq,eigq_files,DDB_files,EIGR2D_files,GKK_files))   
+    total = zpm(arguments,ddw_save,ddw_save2,nb_cpus,type,\
                all_temp,smearing,eig0_pass,degen,energy,gaussian_smearing)
   elif type == 3:
-    total = zpm(zip(nbqpt,wtq,eigq_files,DDB_files,EIGR2D_files),ddw_save,ddw_save2,nb_cpus,type,\
+    arguments = list(zip(nbqpt,wtq,eigq_files,DDB_files,EIGR2D_files))  
+    total = zpm(arguments,ddw_save,ddw_save2,nb_cpus,type,\
                all_temp,smearing,eig0_pass,degen,energy,gaussian_smearing)
   total_corr = total.total_corr
-  
-  if (abs(EIGR2D.wtq) > tol6):
-    total_wtq = total.total_wtq
-    print("Total weigth is ",total_wtq)
-    if (total_wtq < 0.9 or total_wtq > 1.1):
-      raise Exception("The total weigth is not equal to 1.0. Check that you provide all the q-points.")
+
+  #if (abs(EIGR2D.wtq) > tol6):
+  total_wtq = total.total_wtq
+  print("Total weigth is ",total_wtq)
+  if (total_wtq < 0.9 or total_wtq > 1.1):
+    raise Exception("The total weigth is not equal to 1.0. Check that you provide all the q-points.")
   
   
   # Report wall time (before writing final result to be able to include it)
@@ -284,11 +294,11 @@ def main():
   root = nc.Dataset(EIGR2D_files[0],'r')
   # Determine nsppol from reading occ
   nsppol = len(root.variables['occupations'][:,0,0])
-  mband = len(root.dimensions['product_mband_nsppol'])/nsppol
+  mband = len(root.dimensions['maximum_number_of_bands'])/nsppol
   # Create dimension
   ncfile.createDimension('number_of_atoms',len(root.dimensions['number_of_atoms']))
   ncfile.createDimension('number_of_kpoints',len(root.dimensions['number_of_kpoints']))
-  ncfile.createDimension('product_mband_nsppol',len(root.dimensions['product_mband_nsppol']))
+  ncfile.createDimension('product_mband_nsppol',len(root.dimensions['maximum_number_of_bands']))
   ncfile.createDimension('cartesian',3)
   ncfile.createDimension('cplex',2)
   ncfile.createDimension('number_of_qpoints',nbQ)
@@ -299,11 +309,11 @@ def main():
   data = ncfile.createVariable('reduced_coordinates_of_kpoints','d',('number_of_kpoints','cartesian'))
   data[:,:] = root.variables['reduced_coordinates_of_kpoints'][:,:]
   data = ncfile.createVariable('eigenvalues','d',('number_of_spins','number_of_kpoints','max_number_of_states'))
-  data[:,:,:] = root.variables['eigenvalues'][:,:,:]
+  data[:,:,:] = eig0.EIG
   data = ncfile.createVariable('occupations','i',('number_of_spins','number_of_kpoints','max_number_of_states'))
   data[:,:,:] = root.variables['occupations'][:,:,:]
   data = ncfile.createVariable('primitive_vectors','d',('cartesian','cartesian'))
-  data[:,:] = root.variables['primitive_vectors'][:,:]
+  data[:,:] = GKK.rprimd
   data = ncfile.createVariable('temperature','d',('number_of_temperature'))
   data[:] = all_temp
   data = ncfile.createVariable('zero_point_motion','d',('number_of_temperature','number_of_spins','number_of_kpoints',\
@@ -340,11 +350,11 @@ def main():
     root = nc.Dataset(EIGR2D_files[0],'r')
     # Determine nsppol from reading occ
     nsppol = len(root.variables['occupations'][:,0,0])
-    mband = len(root.dimensions['product_mband_nsppol'])/nsppol
+    mband = len(root.dimensions['maximum_number_of_bands'])/nsppol
     # Create dimension
     ncfile.createDimension('number_of_atoms',len(root.dimensions['number_of_atoms']))
     ncfile.createDimension('number_of_kpoints',len(root.dimensions['number_of_kpoints']))
-    ncfile.createDimension('product_mband_nsppol',len(root.dimensions['product_mband_nsppol']))
+    ncfile.createDimension('product_mband_nsppol',len(root.dimensions['maximum_number_of_bands']))
     ncfile.createDimension('cartesian',3)
     ncfile.createDimension('cplex',2)
     ncfile.createDimension('number_of_qpoints',nbQ)
@@ -355,11 +365,11 @@ def main():
     data = ncfile.createVariable('reduced_coordinates_of_kpoints','d',('number_of_kpoints','cartesian'))
     data[:,:] = root.variables['reduced_coordinates_of_kpoints'][:,:]
     data = ncfile.createVariable('eigenvalues','d',('number_of_spins','number_of_kpoints','max_number_of_states'))
-    data[:,:,:] = root.variables['eigenvalues'][:,:,:]
+    data[:,:,:] = eig0.EIG
     data = ncfile.createVariable('occupations','i',('number_of_spins','number_of_kpoints','max_number_of_states'))
     data[:,:,:] = root.variables['occupations'][:,:,:]
     data = ncfile.createVariable('primitive_vectors','d',('cartesian','cartesian'))
-    data[:,:] = root.variables['primitive_vectors'][:,:]
+    data[:,:] = GKK.rprimd
     data = ncfile.createVariable('Phonon_energy','d',('max_number_of_freq'))
     data[:] = energy
     data = ncfile.createVariable('g2F','d',('number_of_spins','max_number_of_freq','number_of_kpoints',\
@@ -376,11 +386,11 @@ def main():
   root = nc.Dataset(EIGR2D_files[0],'r')
   # Determine nsppol from reading occ
   nsppol = len(root.variables['occupations'][:,0,0])
-  mband = len(root.dimensions['product_mband_nsppol'])/nsppol
+  mband = len(root.dimensions['maximum_number_of_bands'])/nsppol
   # Create dimension
   ncfile.createDimension('number_of_atoms',len(root.dimensions['number_of_atoms']))
   ncfile.createDimension('number_of_kpoints',len(root.dimensions['number_of_kpoints']))
-  ncfile.createDimension('product_mband_nsppol',len(root.dimensions['product_mband_nsppol']))
+  ncfile.createDimension('product_mband_nsppol',len(root.dimensions['maximum_number_of_bands']))
   ncfile.createDimension('cartesian',3)
   ncfile.createDimension('cplex',2)
   ncfile.createDimension('number_of_qpoints',nbQ)
@@ -391,11 +401,11 @@ def main():
   data = ncfile.createVariable('reduced_coordinates_of_kpoints','d',('number_of_kpoints','cartesian'))
   data[:,:] = root.variables['reduced_coordinates_of_kpoints'][:,:]
   data = ncfile.createVariable('eigenvalues','d',('number_of_spins','number_of_kpoints','max_number_of_states'))
-  data[:,:,:] = root.variables['eigenvalues'][:,:,:]
+  data[:,:,:] = eig0.EIG
   data = ncfile.createVariable('occupations','d',('number_of_spins','number_of_kpoints','max_number_of_states'))
   data[:,:,:] = root.variables['occupations'][:,:,:]
   data = ncfile.createVariable('primitive_vectors','d',('cartesian','cartesian'))
-  data[:,:] = root.variables['primitive_vectors'][:,:]
+  data[:,:] = GKK.rprimd
   data = ncfile.createVariable('Phonon_energy','d',('max_number_of_freq'))
   data[:] = energy
   data = ncfile.createVariable('phonon_density_of_states','d',('max_number_of_freq'))

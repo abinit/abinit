@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_energy
 !! NAME
 !!  m_energy
@@ -6,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2019 ABINIT group (BAmadon)
+!! Copyright (C) 2006-2024 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -14,10 +13,6 @@
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -53,7 +48,7 @@ MODULE m_energy
  public :: init_energy
  public :: compute_energy
  public :: compute_migdal_energy
- public :: compute_ldau_energy
+ public :: compute_dftu_energy
  public :: destroy_energy
  public :: print_energy
  public :: compute_noninterentropy
@@ -71,7 +66,7 @@ MODULE m_energy
 
  type, public :: energy_type ! for each typat
 
-  real(dp) :: eband_lda
+  real(dp) :: eband_dft
 
   real(dp) :: eband_dmft
 
@@ -79,7 +74,7 @@ MODULE m_energy
 
   real(dp) :: e_hu_tot
 
-  real(dp) :: e_hu_ldau_tot
+  real(dp) :: e_hu_dftu_tot
 
   real(dp) :: e_hu_mig_tot
 
@@ -93,7 +88,7 @@ MODULE m_energy
 
   real(dp), allocatable :: e_hu(:)
 
-  real(dp), allocatable :: e_hu_ldau(:)
+  real(dp), allocatable :: e_hu_dftu(:)
 
   real(dp), allocatable :: e_hu_mig(:)
 
@@ -121,17 +116,9 @@ CONTAINS  !=====================================================================
 !! OUTPUTS
 !! energies_dmft  = structure of data for dmft of type energy_type
 !!
-!! PARENTS
-!!      m_dmft
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
 subroutine init_energy(cryst_struc,energies_dmft)
-
- implicit none
 
 !Arguments ------------------------------------
 !type
@@ -140,21 +127,21 @@ subroutine init_energy(cryst_struc,energies_dmft)
 !Local variables ------------------------------------
 !************************************************************************
 
- ABI_ALLOCATE(energies_dmft%e_dc,(cryst_struc%natom))
- ABI_ALLOCATE(energies_dmft%e_hu,(cryst_struc%natom))
- ABI_ALLOCATE(energies_dmft%e_hu_ldau,(cryst_struc%natom))
- ABI_ALLOCATE(energies_dmft%e_hu_mig,(cryst_struc%natom))
- ABI_ALLOCATE(energies_dmft%e_hu_qmc,(cryst_struc%natom))
+ ABI_MALLOC(energies_dmft%e_dc,(cryst_struc%natom))
+ ABI_MALLOC(energies_dmft%e_hu,(cryst_struc%natom))
+ ABI_MALLOC(energies_dmft%e_hu_dftu,(cryst_struc%natom))
+ ABI_MALLOC(energies_dmft%e_hu_mig,(cryst_struc%natom))
+ ABI_MALLOC(energies_dmft%e_hu_qmc,(cryst_struc%natom))
  energies_dmft%e_dc=zero
  energies_dmft%e_hu=zero
- energies_dmft%e_hu_ldau=zero
+ energies_dmft%e_hu_dftu=zero
  energies_dmft%e_hu_mig=zero
  energies_dmft%e_hu_qmc=zero
- energies_dmft%eband_lda=zero
+ energies_dmft%eband_dft=zero
  energies_dmft%eband_dmft=zero
  energies_dmft%e_dc_tot=zero
  energies_dmft%e_hu_tot=zero
- energies_dmft%e_hu_ldau_tot=zero
+ energies_dmft%e_hu_dftu_tot=zero
  energies_dmft%e_hu_mig_tot=zero
  energies_dmft%e_hu_qmc_tot=zero
  energies_dmft%edmft=zero
@@ -175,17 +162,9 @@ end subroutine init_energy
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_dmft
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
 subroutine destroy_energy(energies_dmft,paw_dmft)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -195,19 +174,19 @@ subroutine destroy_energy(energies_dmft,paw_dmft)
 ! *********************************************************************
   paw_dmft%edmft=energies_dmft%edmft
  if ( allocated(energies_dmft%e_dc) )   then
-   ABI_DEALLOCATE(energies_dmft%e_dc)
+   ABI_FREE(energies_dmft%e_dc)
  end if
  if ( allocated(energies_dmft%e_hu) )   then
-   ABI_DEALLOCATE(energies_dmft%e_hu)
+   ABI_FREE(energies_dmft%e_hu)
  end if
- if ( allocated(energies_dmft%e_hu_ldau) )  then
-   ABI_DEALLOCATE(energies_dmft%e_hu_ldau)
+ if ( allocated(energies_dmft%e_hu_dftu) )  then
+   ABI_FREE(energies_dmft%e_hu_dftu)
  end if
  if ( allocated(energies_dmft%e_hu_mig) )  then
-   ABI_DEALLOCATE(energies_dmft%e_hu_mig)
+   ABI_FREE(energies_dmft%e_hu_mig)
  end if
   if ( allocated(energies_dmft%e_hu_qmc) )  then
-   ABI_DEALLOCATE(energies_dmft%e_hu_qmc)
+   ABI_FREE(energies_dmft%e_hu_qmc)
  end if
 
 
@@ -226,17 +205,9 @@ end subroutine destroy_energy
 !!
 !! SIDE EFFECTS
 !!
-!! PARENTS
-!!      m_energy
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
 subroutine print_energy(cryst_struc,energies_dmft,pawprtvol,pawtab,idmftloop)
-
- implicit none
 
 !Arguments ------------------------------------
 !type
@@ -262,7 +233,7 @@ subroutine print_energy(cryst_struc,energies_dmft,pawprtvol,pawtab,idmftloop)
 &       ", E_hu_qmc  =",energies_dmft%e_hu_qmc(iatom)
        call wrtout(std_out,message,'COLL')
        write(message,'(26x,a,f12.6)')  &
-&       ", E_hu_ldau =",energies_dmft%e_hu_ldau(iatom)
+&       ", E_hu_dftu =",energies_dmft%e_hu_dftu(iatom)
        call wrtout(std_out,message,'COLL')
        write(message,'(26x,a,f12.6)')  &
 &       ", E_dc =",energies_dmft%e_dc(iatom)
@@ -273,15 +244,15 @@ subroutine print_energy(cryst_struc,energies_dmft,pawprtvol,pawtab,idmftloop)
  write(message,'(a,5x,2a,5x,a,9(a,5x,a,2x,f15.11),a,5x,a)') ch10 &
 &      ,"-----------------------------------------------",ch10 &
 &      ,"--- Energy in DMFT (in Ha)  ",ch10 &
-&      ,"--- E_bandlda (1)  (Ha.) = ",energies_dmft%eband_lda,ch10 &
+&      ,"--- E_bandlda (1)  (Ha.) = ",energies_dmft%eband_dft,ch10 &
 &      ,"--- E_banddmft(2)  (Ha.) = ",energies_dmft%eband_dmft,ch10 &
 &      ,"--- E_hu      (3)  (Ha.) = ",energies_dmft%e_hu_tot,ch10 &
 &      ,"--- E_hu_mig  (4)  (Ha.) = ",energies_dmft%e_hu_mig_tot,ch10 &
 &      ,"--- E_hu_qmc  (4)  (Ha.) = ",energies_dmft%e_hu_qmc_tot,ch10 &
-&      ,"--- E_hu_ldau (5)  (Ha.) = ",energies_dmft%e_hu_ldau_tot,ch10 &
+&      ,"--- E_hu_dftu (5)  (Ha.) = ",energies_dmft%e_hu_dftu_tot,ch10 &
 &      ,"--- E_dc      (6)  (Ha.) = ",energies_dmft%e_dc_tot,ch10 &
 &      ,"--- edmft=(    3-6)(Ha.) = ",energies_dmft%edmft,ch10 &
-&      ,"---       (2-1+3-6)(Ha.) = ",energies_dmft%eband_dmft-energies_dmft%eband_lda+energies_dmft%edmft,ch10 &
+&      ,"---       (2-1+3-6)(Ha.) = ",energies_dmft%eband_dmft-energies_dmft%eband_dft+energies_dmft%edmft,ch10 &
 &      ,"-----------------------------------------------"
  call wrtout(std_out,message,'COLL')
  if(idmftloop>=1) then
@@ -312,17 +283,9 @@ end subroutine print_energy
 !! SIDE EFFECTS
 !! energies_dmft <type(energy_type)> = DMFT energy structure data
 !!
-!! PARENTS
-!!      m_dmft
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
 subroutine compute_energy(cryst_struc,energies_dmft,green,paw_dmft,pawprtvol,pawtab,self,occ_type,part)
-
- implicit none
 
 !Arguments ------------------------------------
 !type
@@ -346,13 +309,13 @@ subroutine compute_energy(cryst_struc,energies_dmft,green,paw_dmft,pawprtvol,paw
  real(dp) :: e_hu_migdal_tot
 ! *********************************************************************
  if(part=='both') then
-   write(message,'(2a)') ch10,"  == Compute LDA+DMFT energy terms "
+   write(message,'(2a)') ch10,"  == Compute DFT+DMFT energy terms "
    call wrtout(std_out,message,'COLL')
  else if(part=='band') then
-   write(message,'(2a)') ch10,"  == Compute LDA+DMFT energy terms : Band energy terms"
+   write(message,'(2a)') ch10,"  == Compute DFT+DMFT energy terms : Band energy terms"
    call wrtout(std_out,message,'COLL')
  else if(part=='corr') then
-   write(message,'(2a)') ch10,"  == Compute LDA+DMFT energy terms : Correlation energy terms only"
+   write(message,'(2a)') ch10,"  == Compute DFT+DMFT energy terms : Correlation energy terms only"
    call wrtout(std_out,message,'COLL')
  else if(part=='none') then
  endif
@@ -360,7 +323,7 @@ subroutine compute_energy(cryst_struc,energies_dmft,green,paw_dmft,pawprtvol,paw
 ! Only imaginary frequencies here
  if(green%w_type=="real".or.self%w_type=="real") then
    message = 'compute_energy not implemented for real frequency'
-   MSG_BUG(message)
+   ABI_BUG(message)
  endif
  natom=cryst_struc%natom
  nsppol=paw_dmft%nsppol
@@ -384,19 +347,19 @@ subroutine compute_energy(cryst_struc,energies_dmft,green,paw_dmft,pawprtvol,paw
 !
 !! == Compute Band Energy (classical)
 !! -----------------------------------------------------------------------
-!     call compute_band_energy(energies_dmft,green,paw_dmft,occ_type,fcalc_lda=3)
-!     write(std_out,*) paw_dmft%fermie_lda,paw_dmft%fermie
-!     write(message,'(2a,f10.6)') ch10,"Compute Band energy ref  free lda -ef ",energies_dmft%eband_lda
+!     call compute_band_energy(energies_dmft,green,paw_dmft,occ_type,fcalc_dft=3)
+!     write(std_out,*) paw_dmft%fermie_dft,paw_dmft%fermie
+!     write(message,'(2a,f10.6)') ch10,"Compute Band energy ref  free lda -ef ",energies_dmft%eband_dft
 !     call wrtout(std_out,message,'COLL')
-     call compute_band_energy(energies_dmft,green,paw_dmft,occ_type,ecalc_lda=1)
+     call compute_band_energy(energies_dmft,green,paw_dmft,occ_type,ecalc_dft=1)
 !     write(message,'(2a,f10.6)') ch10,"Compute Band energy ref  -ef          ",energies_dmft%eband_dmft
 !     call wrtout(std_out,message,'COLL')
 !! call wrtout(ab_out,message,'COLL')
-!     write(message,'(2a,f10.6)') ch10,"Compute Band energy ref   lda         ",energies_dmft%eband_lda
+!     write(message,'(2a,f10.6)') ch10,"Compute Band energy ref   lda         ",energies_dmft%eband_dft
 !     call wrtout(std_out,message,'COLL')
 !! if(occ_type=="nlda") eband2=energies_dmft%eband_dmft
    else
-     call compute_band_energy(energies_dmft,green,paw_dmft,occ_type,ecalc_lda=1)
+     call compute_band_energy(energies_dmft,green,paw_dmft,occ_type,ecalc_dft=1)
    endif
 
  endif
@@ -404,13 +367,13 @@ subroutine compute_energy(cryst_struc,energies_dmft,green,paw_dmft,pawprtvol,paw
 
 ! == Compute Correlation energy from Migdal formula
 ! -----------------------------------------------------------------------
-   ABI_ALLOCATE(e_hu_migdal,(cryst_struc%natom))
+   ABI_MALLOC(e_hu_migdal,(cryst_struc%natom))
    e_hu_migdal(:) = zero
    call compute_migdal_energy(cryst_struc,e_hu_migdal,e_hu_migdal_tot,green,paw_dmft,pawprtvol,self)
    energies_dmft%e_hu_mig(:)= e_hu_migdal(:)
    energies_dmft%e_hu_mig_tot = e_hu_migdal_tot
 ! write(std_out,*) "MIGDAL",e_hu_migdal_tot,e_hu_migdal
-   ABI_DEALLOCATE(e_hu_migdal)
+   ABI_FREE(e_hu_migdal)
 
 ! == Compute Correlation energy from QMC correlations.
 ! -----------------------------------------------------------------------
@@ -425,18 +388,18 @@ subroutine compute_energy(cryst_struc,energies_dmft,green,paw_dmft,pawprtvol,paw
      endif ! lpawu
    enddo ! iatom
 
-! == Compute LDA+U interaction energy
+! == Compute DFT+U interaction energy
 ! -----------------------------------------------------------------------
-   call compute_ldau_energy(cryst_struc,energies_dmft,green,paw_dmft,pawtab)
+   call compute_dftu_energy(cryst_struc,energies_dmft,green,paw_dmft,pawtab)
    if(abs(paw_dmft%dmft_solv)<=1) then
-     energies_dmft%e_hu= energies_dmft%e_hu_ldau
-     energies_dmft%e_hu_tot= energies_dmft%e_hu_ldau_tot
+     energies_dmft%e_hu= energies_dmft%e_hu_dftu
+     energies_dmft%e_hu_tot= energies_dmft%e_hu_dftu_tot
      if((abs(energies_dmft%e_hu_tot-energies_dmft%e_hu_mig_tot).ge.0.000001).and.(occ_type/=" lda")) then
-       write(message,'(2a,2e18.8,a)') ch10,'   BUG: Migdal energy and LDA+U energy do not coincide',&
+       write(message,'(2a,2e18.8,a)') ch10,'   BUG: Migdal energy and DFT+U energy do not coincide',&
 &       energies_dmft%e_hu_tot,energies_dmft%e_hu_mig_tot,occ_type
-       MSG_ERROR(message)
+       ABI_ERROR(message)
      endif
-   else if(paw_dmft%dmft_solv==2.or.paw_dmft%dmft_solv==6.or.paw_dmft%dmft_solv==7) then
+   else if(paw_dmft%dmft_solv==2.or.paw_dmft%dmft_solv==6.or.paw_dmft%dmft_solv==7.or.paw_dmft%dmft_solv==9) then
      energies_dmft%e_hu= energies_dmft%e_hu_mig
      energies_dmft%e_hu_tot= energies_dmft%e_hu_mig_tot
      energies_dmft%e_hu_qmc_tot = energies_dmft%e_hu_tot
@@ -458,10 +421,10 @@ subroutine compute_energy(cryst_struc,energies_dmft,green,paw_dmft,pawprtvol,paw
  if(part/='none') then
    call print_energy(cryst_struc,energies_dmft,pawprtvol,pawtab,paw_dmft%idmftloop)
  endif
-! write(message,'(2a)') ch10," == The LDA+U self-energy is == "
+! write(message,'(2a)') ch10," == The DFT+U self-energy is == "
 ! call wrtout(std_out,message,'COLL')
 ! call print_oper(self%oper(1),5,paw_dmft,2)
-! a voir: energies_dmft%e_hu_tot = energies_dmft%e_hu_ldau_tot
+! a voir: energies_dmft%e_hu_tot = energies_dmft%e_hu_dftu_tot
 
 end subroutine compute_energy
 !!***
@@ -477,27 +440,19 @@ end subroutine compute_energy
 !!  green  <type(green_type)>= green function data
 !!  paw_dmft  <type(paw_dmft_type)>= paw+dmft related data
 !!  occ_type=  character ("lda" or "nlda") for printing.
-!!  fcalc_lda= if present, compute free energy instead of total energy.
-!!  fcalc_lda= 2 do a free energy calculation with the dmft fermie level
+!!  fcalc_dft= if present, compute free energy instead of total energy.
+!!  fcalc_dft= 2 do a free energy calculation with the dmft fermie level
 !!           = 2/3 subtract fermie to eigenvalues and free energy
-!!           =1/3 fermie_lda level and free energy
-!!  ecalc_lda= 1 subtract fermie to eigenvalues
+!!           =1/3 fermie_dft level and free energy
+!!  ecalc_dft= 1 subtract fermie to eigenvalues
 !! OUTPUT
 !!
 !! SIDE EFFECTS
 !!  energies_dmft <type(energy_type)> = DMFT energy structure data
 !!
-!! PARENTS
-!!      m_energy
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
-subroutine compute_band_energy(energies_dmft,green,paw_dmft,occ_type,ecalc_lda,fcalc_lda,ecalc_dmft)
-
- implicit none
+subroutine compute_band_energy(energies_dmft,green,paw_dmft,occ_type,ecalc_dft,fcalc_dft,ecalc_dmft)
 
 !Arguments ------------------------------------
 !type
@@ -505,8 +460,8 @@ subroutine compute_band_energy(energies_dmft,green,paw_dmft,occ_type,ecalc_lda,f
  type(green_type),intent(in) :: green
  type(paw_dmft_type), intent(inout) :: paw_dmft
  character(len=4), intent(in) :: occ_type
- integer, intent(in), optional :: ecalc_lda
- integer, intent(in), optional :: fcalc_lda
+ integer, intent(in), optional :: ecalc_dft
+ integer, intent(in), optional :: fcalc_dft
  integer, intent(in), optional :: ecalc_dmft
 ! integer :: prtopt
 
@@ -521,7 +476,7 @@ subroutine compute_band_energy(energies_dmft,green,paw_dmft,occ_type,ecalc_lda,f
 
 ! == Compute Band Energy
 ! -----------------------------------------------------------------------
- energies_dmft%eband_lda=zero
+ energies_dmft%eband_dft=zero
  energies_dmft%eband_dmft=zero
  totch=zero
  totch2=zero
@@ -529,46 +484,46 @@ subroutine compute_band_energy(energies_dmft,green,paw_dmft,occ_type,ecalc_lda,f
  do isppol=1,paw_dmft%nsppol
    do ikpt=1,paw_dmft%nkpt
      do ib=1,paw_dmft%mbandc
-       if(present(fcalc_lda)) then
-         if (fcalc_lda==1.or.fcalc_lda==3) fermie_used=paw_dmft%fermie_lda
-         if (fcalc_lda==2.or.fcalc_lda==4) fermie_used=paw_dmft%fermie ! only for B3 terms
-         if((paw_dmft%eigen_lda(isppol,ikpt,ib)-fermie_used).ge.zero) then
-           energies_dmft%eband_lda=energies_dmft%eband_lda - &
-&             log ( one + exp ( - beta* (paw_dmft%eigen_lda(isppol,ikpt,ib)-fermie_used)))*paw_dmft%wtk(ikpt)
+       if(present(fcalc_dft)) then
+         if (fcalc_dft==1.or.fcalc_dft==3) fermie_used=paw_dmft%fermie_dft
+         if (fcalc_dft==2.or.fcalc_dft==4) fermie_used=paw_dmft%fermie ! only for B3 terms
+         if((paw_dmft%eigen_dft(isppol,ikpt,ib)-fermie_used).ge.zero) then
+           energies_dmft%eband_dft=energies_dmft%eband_dft - &
+&             log ( one + exp ( - beta* (paw_dmft%eigen_dft(isppol,ikpt,ib)-fermie_used)))*paw_dmft%wtk(ikpt)
          else
-           energies_dmft%eband_lda=energies_dmft%eband_lda  &
-&             -(log ( one + exp ( beta* (paw_dmft%eigen_lda(isppol,ikpt,ib)-fermie_used))))*paw_dmft%wtk(ikpt) &
-&              + beta*paw_dmft%eigen_lda(isppol,ikpt,ib)*paw_dmft%wtk(ikpt)
-           if(fcalc_lda==3.or.fcalc_lda==2) then
+           energies_dmft%eband_dft=energies_dmft%eband_dft  &
+&             -(log ( one + exp ( beta* (paw_dmft%eigen_dft(isppol,ikpt,ib)-fermie_used))))*paw_dmft%wtk(ikpt) &
+&              + beta*paw_dmft%eigen_dft(isppol,ikpt,ib)*paw_dmft%wtk(ikpt)
+           if(fcalc_dft==3.or.fcalc_dft==2) then
                    ! subtract fermi level, (useful to directly count the number of electrons)
-             energies_dmft%eband_lda=energies_dmft%eband_lda  &
+             energies_dmft%eband_dft=energies_dmft%eband_dft  &
 &                                 - beta*fermie_used*paw_dmft%wtk(ikpt)
              totch=totch+paw_dmft%wtk(ikpt)
            endif
          endif
        else ! usual calculation: total non interacting energy
-         fermie_used=paw_dmft%fermie_lda
+         fermie_used=paw_dmft%fermie_dft
 !            write(std_out,*) "isppol,ikpt,ib",isppol,ikpt,ib
-!            write(std_out,*) "paw_dmft%eigen_lda",paw_dmft%eigen_lda(isppol,ikpt,ib)
+!            write(std_out,*) "paw_dmft%eigen_dft",paw_dmft%eigen_dft(isppol,ikpt,ib)
 !            write(std_out,*) green%occup%ks(isppol,ikpt,ib,ib)
-!            write(std_out,*) occup_fd(paw_dmft%eigen_lda(isppol,ikpt,ib),paw_dmft%fermie,paw_dmft%temp)
-         if(present(ecalc_lda)) then
-           if(ecalc_lda==1.or.ecalc_lda==3) fermie_used=paw_dmft%fermie_lda
-           if(ecalc_lda==2.or.ecalc_lda==4) fermie_used=paw_dmft%fermie ! only for B3 terms
-           if(ecalc_lda==3.or.ecalc_lda==2) then
-             energies_dmft%eband_lda=energies_dmft%eband_lda- &
-&               occup_fd(paw_dmft%eigen_lda(isppol,ikpt,ib),fermie_used,paw_dmft%temp)*&
+!            write(std_out,*) occup_fd(paw_dmft%eigen_dft(isppol,ikpt,ib),paw_dmft%fermie,paw_dmft%temp)
+         if(present(ecalc_dft)) then
+           if(ecalc_dft==1.or.ecalc_dft==3) fermie_used=paw_dmft%fermie_dft
+           if(ecalc_dft==2.or.ecalc_dft==4) fermie_used=paw_dmft%fermie ! only for B3 terms
+           if(ecalc_dft==3.or.ecalc_dft==2) then
+             energies_dmft%eband_dft=energies_dmft%eband_dft- &
+&               occup_fd(paw_dmft%eigen_dft(isppol,ikpt,ib),fermie_used,paw_dmft%temp)*&
 &               fermie_used*paw_dmft%wtk(ikpt)
-             totch2=totch2+paw_dmft%wtk(ikpt)*occup_fd(paw_dmft%eigen_lda(isppol,ikpt,ib),fermie_used,paw_dmft%temp)
+             totch2=totch2+paw_dmft%wtk(ikpt)*occup_fd(paw_dmft%eigen_dft(isppol,ikpt,ib),fermie_used,paw_dmft%temp)
            endif
          endif
-         energies_dmft%eband_lda=energies_dmft%eband_lda+ &
-&           occup_fd(paw_dmft%eigen_lda(isppol,ikpt,ib),fermie_used,paw_dmft%temp)*&
-&           paw_dmft%eigen_lda(isppol,ikpt,ib)*paw_dmft%wtk(ikpt)
+         energies_dmft%eband_dft=energies_dmft%eband_dft+ &
+&           occup_fd(paw_dmft%eigen_dft(isppol,ikpt,ib),fermie_used,paw_dmft%temp)*&
+&           paw_dmft%eigen_dft(isppol,ikpt,ib)*paw_dmft%wtk(ikpt)
        endif
        energies_dmft%eband_dmft=energies_dmft%eband_dmft+ &
 &         green%occup%ks(isppol,ikpt,ib,ib)*&
-&         paw_dmft%eigen_lda(isppol,ikpt,ib)*paw_dmft%wtk(ikpt)
+&         paw_dmft%eigen_dft(isppol,ikpt,ib)*paw_dmft%wtk(ikpt)
          totch3=totch3+paw_dmft%wtk(ikpt)*green%occup%ks(isppol,ikpt,ib,ib)
          if(present(ecalc_dmft)) then
            energies_dmft%eband_dmft=energies_dmft%eband_dmft- &
@@ -578,22 +533,22 @@ subroutine compute_band_energy(energies_dmft,green,paw_dmft,occ_type,ecalc_lda,f
      enddo
    enddo
  enddo
- if(paw_dmft%nsppol==1.and.paw_dmft%nspinor==1)  energies_dmft%eband_lda=two*energies_dmft%eband_lda
+ if(paw_dmft%nsppol==1.and.paw_dmft%nspinor==1)  energies_dmft%eband_dft=two*energies_dmft%eband_dft
  if(paw_dmft%nsppol==1.and.paw_dmft%nspinor==1)  energies_dmft%eband_dmft=two*energies_dmft%eband_dmft
- if(present(fcalc_lda)) then
-   energies_dmft%eband_lda=energies_dmft%eband_lda/beta
-   if(fcalc_lda==3.or.fcalc_lda==2) write(std_out,*) "compute_band_energy totch",totch
+ if(present(fcalc_dft)) then
+   energies_dmft%eband_dft=energies_dmft%eband_dft/beta
+   if(fcalc_dft==3.or.fcalc_dft==2) write(std_out,*) "compute_band_energy totch",totch
  endif
- if(present(ecalc_lda)) then
-   if(ecalc_lda==3.or.ecalc_lda==2) write(std_out,*) "compute_band_energy totch2",totch2
+ if(present(ecalc_dft)) then
+   if(ecalc_dft==3.or.ecalc_dft==2) write(std_out,*) "compute_band_energy totch2",totch2
  endif
 ! write(std_out,*) "compute_band_energy totch3",totch3
 
  if (occ_type==" lda") then
-   if(abs(energies_dmft%eband_lda-energies_dmft%eband_dmft)>tol5) then
+   if(abs(energies_dmft%eband_dft-energies_dmft%eband_dmft)>tol5) then
      write(message,'(5x,a,a,a,15x,a,f12.6,a,15x,a,5x,f12.5)')  "Warning !:"&
-&     ,"Differences between band energy from LDA occupations",ch10&
-&     ,"and LDA green function is:",energies_dmft%eband_lda-energies_dmft%eband_dmft,ch10&
+&     ,"Differences between band energy from DFT occupations",ch10&
+&     ,"and DFT green function is:",energies_dmft%eband_dft-energies_dmft%eband_dmft,ch10&
 &     ,"which is larger than",tol5
      call wrtout(std_out,message,'COLL')
      write(message,'(a)') &
@@ -601,8 +556,8 @@ subroutine compute_band_energy(energies_dmft,green,paw_dmft,occ_type,ecalc_lda,f
      call wrtout(std_out,message,'COLL')
    else
      write(message,'(a,a,a,10x,a,f12.6,a,10x,a,5x,f12.5)')  "          "&
-&     ,"Differences between band energy from LDA occupations",ch10&
-&     ,"and LDA green function is:",energies_dmft%eband_lda-energies_dmft%eband_dmft,ch10&
+&     ,"Differences between band energy from DFT occupations",ch10&
+&     ,"and DFT green function is:",energies_dmft%eband_dft-energies_dmft%eband_dmft,ch10&
 &     ,"which is smaller than",tol5
      call wrtout(std_out,message,'COLL')
    endif
@@ -631,12 +586,6 @@ end subroutine compute_band_energy
 !!  e_hu_mig(natom)= Migdal energy for each atom.
 !!  e_hu_mig_tot= Total Migdal energy.
 !!
-!! PARENTS
-!!      m_energy
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
 subroutine compute_migdal_energy(cryst_struc,e_hu_migdal,e_hu_migdal_tot,green,paw_dmft,pawprtvol,self)
@@ -644,7 +593,6 @@ subroutine compute_migdal_energy(cryst_struc,e_hu_migdal,e_hu_migdal_tot,green,p
 #ifdef FC_INTEL
 !DEC$ NOOPTIMIZE
 #endif
- implicit none
 
 !Arguments ------------------------------------
 !type
@@ -668,7 +616,7 @@ subroutine compute_migdal_energy(cryst_struc,e_hu_migdal,e_hu_migdal_tot,green,p
 ! Only imaginary frequencies here
  if(green%w_type=="real".or.self%w_type=="real") then
    message = 'compute_migdal_energy not implemented for real frequency'
-   MSG_BUG(message)
+   ABI_BUG(message)
  endif
 
 ! == Compute Correlation energy from Migdal formula
@@ -680,7 +628,7 @@ subroutine compute_migdal_energy(cryst_struc,e_hu_migdal,e_hu_migdal_tot,green,p
  nwlo=green%nw
  if (green%nw/=self%nw) then
    message = 'self and green do not contains the same number of frequencies'
-   MSG_BUG(message)
+   ABI_BUG(message)
  endif
 ! write(std_out,*) "beta",beta
 
@@ -761,12 +709,12 @@ subroutine compute_migdal_energy(cryst_struc,e_hu_migdal,e_hu_migdal_tot,green,p
 end subroutine compute_migdal_energy
 !!***
 
-!!****f* m_energy/compute_ldau_energy
+!!****f* m_energy/compute_dftu_energy
 !! NAME
-!! compute_ldau_energy
+!! compute_dftu_energy
 !!
 !! FUNCTION
-!!  Initialize noccmmp from green%occup and compute LDA+U energy with it
+!!  Initialize noccmmp from green%occup and compute DFT+U energy with it
 !!
 !! INPUTS
 !!  cryst_struc <type(crystal_t)>=crystal structure data
@@ -778,17 +726,9 @@ end subroutine compute_migdal_energy
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_dmft,m_energy
-!!
-!! CHILDREN
-!!      pawpuenergy,wrtout
-!!
 !! SOURCE
 
-subroutine compute_ldau_energy(cryst_struc,energies_dmft,green,paw_dmft,pawtab,renorm)
-
- implicit none
+subroutine compute_dftu_energy(cryst_struc,energies_dmft,green,paw_dmft,pawtab,renorm)
 
 !Arguments ------------------------------------
 !type
@@ -804,7 +744,8 @@ subroutine compute_ldau_energy(cryst_struc,energies_dmft,green,paw_dmft,pawtab,r
  integer :: iatom,idijeff,im,im1,ispinor,ispinor1,isppol,ldim,lpawu
  integer :: nocc,nsploop,prt_pawuenergy
  real(dp) :: upawu,jpawu
- real(dp) :: eldaumdcdc,eldaumdc,e_ee,e_dc,e_dcdc,xe1,xe2
+ real(dp) :: edftumdcdc,edftumdc,e_ee,e_dc,e_dcdc,xe1,xe2
+ real(dp) :: edftumdc_for_s,edftumdcdc_for_s,e_ee_for_s,e_dc_for_s,e_dcdc_for_s
  character(len=500) :: message
 ! arrays
  integer,parameter :: spinor_idxs(2,4)=RESHAPE((/1,1,2,2,1,2,2,1/),(/2,4/))
@@ -820,9 +761,10 @@ subroutine compute_ldau_energy(cryst_struc,energies_dmft,green,paw_dmft,pawtab,r
  nocc=nsploop
  e_ee=zero
  e_dc=zero
+ e_dc_for_s=zero
  e_dcdc=zero
- eldaumdc=zero
- eldaumdcdc=zero
+ edftumdc=zero
+ edftumdcdc=zero
  isppol=0
  ispinor=0
  ispinor1=0
@@ -834,9 +776,9 @@ subroutine compute_ldau_energy(cryst_struc,energies_dmft,green,paw_dmft,pawtab,r
    lpawu=paw_dmft%lpawu(iatom)
    if(lpawu.ne.-1) then
      ldim=2*lpawu+1
-     
-     ABI_ALLOCATE(noccmmp,(2,2*pawtab_%lpawu+1,2*pawtab_%lpawu+1,nocc))
-     ABI_ALLOCATE(nocctot,(nocc))
+
+     ABI_MALLOC(noccmmp,(2,2*pawtab_%lpawu+1,2*pawtab_%lpawu+1,nocc))
+     ABI_MALLOC(nocctot,(nocc))
      noccmmp(:,:,:,:)=zero ; nocctot(:)=zero
 
 ! - Setup nocctot and noccmmp
@@ -900,8 +842,8 @@ subroutine compute_ldau_energy(cryst_struc,energies_dmft,green,paw_dmft,pawtab,r
      xe1=e_dc
      xe2=e_ee
     ! write(std_out,*)" nocctot(1)",nocctot(1),green%charge_matlu_solver(iatom,1)
-     eldaumdc = zero
-     eldaumdcdc = zero
+     edftumdc = zero
+     edftumdcdc = zero
      if ( present(renorm) ) then
        upawu = one
        jpawu = renorm(iatom)
@@ -912,24 +854,39 @@ subroutine compute_ldau_energy(cryst_struc,energies_dmft,green,paw_dmft,pawtab,r
        prt_pawuenergy=3
      end if
 
-     call pawuenergy(iatom,eldaumdc,eldaumdcdc,noccmmp,nocctot,prt_pawuenergy,pawtab_,&
+     call pawuenergy(iatom,edftumdc,edftumdcdc,noccmmp,nocctot,prt_pawuenergy,pawtab_,&
 &                    dmft_dc=paw_dmft%dmft_dc,e_ee=e_ee,e_dc=e_dc,e_dcdc=e_dcdc,&
 &                    u_dmft=upawu,j_dmft=jpawu)
 
-     energies_dmft%e_dc(iatom)=e_dc-xe1
-     energies_dmft%e_hu_ldau(iatom)=e_ee-xe2
+     if(paw_dmft%ientropy==1) then
+       call pawuenergy(iatom,edftumdc_for_s,edftumdcdc_for_s,noccmmp,nocctot,prt_pawuenergy,pawtab_,&
+&                      dmft_dc=paw_dmft%dmft_dc,e_ee=e_ee_for_s,e_dc=e_dc_for_s,e_dcdc=e_dcdc_for_s,&
+&                      u_dmft=paw_dmft%u_for_s/Ha_eV,j_dmft=paw_dmft%j_for_s/Ha_eV)
+     endif
 
-     ABI_DEALLOCATE(noccmmp)
-     ABI_DEALLOCATE(nocctot)
+
+     energies_dmft%e_dc(iatom)=e_dc-xe1 ! probably wrong but not used
+     energies_dmft%e_hu_dftu(iatom)=e_ee-xe2 ! idem
+
+     ABI_FREE(noccmmp)
+     ABI_FREE(nocctot)
    endif ! lpawu/=-1
  enddo
 
 ! - gather results
 ! -----------------------------------------------------------------------
- energies_dmft%e_dc_tot=e_dc ! todo_ab: here or not ?
- energies_dmft%e_hu_ldau_tot=e_ee
+ energies_dmft%e_dc_tot=e_dc ! this is the onlu quantity used after.
+ energies_dmft%e_hu_dftu_tot=e_ee
+ if(paw_dmft%ientropy==1) then
+   write(message,'(a,3(f14.10,3x))') "For entropy calculation E_dc_tot, u_for_s, j_for,s", &
+  & e_dc_for_s,paw_dmft%u_for_s,paw_dmft%j_for_s
+   call wrtout(std_out,message,'COLL')
+   write(message,'(a,3(f14.10,3x))') "Reference   calculation E_dc_tot, upawu  , jpawu  ", &
+  & e_dc,upawu*Ha_eV,jpawu*Ha_eV
+   call wrtout(std_out,message,'COLL')
+ endif
 
-end subroutine compute_ldau_energy
+end subroutine compute_dftu_energy
 !!***
 
 !!****f* m_energy/compute_noninterentropy
@@ -947,16 +904,9 @@ end subroutine compute_ldau_energy
 !!
 !! SIDE EFFECTS
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
 subroutine compute_noninterentropy(cryst_struc,green,paw_dmft)
-
- implicit none
 
 !Arguments ------------------------------------
 !type
@@ -969,7 +919,7 @@ subroutine compute_noninterentropy(cryst_struc,green,paw_dmft)
  real(dp) :: beta,eig,fermi,s_1,s_2,occ1,occ2,f_1,e_1,f_1a,s_1a,e_2
  character(len=800) :: message
 ! *********************************************************************
- write(message,'(2a,i6)') ch10,"  == Compute T*Entropy for fermi level and DFT-KS-LDA eigenvalues "
+ write(message,'(2a,i6)') ch10,"  == Compute T*Entropy for fermi level and DFT-KS eigenvalues "
  call wrtout(std_out,message,'COLL')
 
  natom=cryst_struc%natom
@@ -986,8 +936,8 @@ subroutine compute_noninterentropy(cryst_struc,green,paw_dmft)
  do isppol=1,paw_dmft%nsppol
    do ikpt=1,paw_dmft%nkpt
      do ib=1,paw_dmft%mbandc
-       eig=paw_dmft%eigen_lda(isppol,ikpt,ib)
-       fermi=paw_dmft%fermie_lda
+       eig=paw_dmft%eigen_dft(isppol,ikpt,ib)
+       fermi=paw_dmft%fermie_dft
        fermi=paw_dmft%fermie
        occ1=occup_fd(eig,fermi,paw_dmft%temp)
        occ2=green%occup%ks(isppol,ikpt,ib,ib)
@@ -1051,17 +1001,10 @@ end subroutine compute_noninterentropy
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
  function occup_fd(eig,fermie,temp)
-
- implicit none
 
 !Arguments ------------------------------------
 !type

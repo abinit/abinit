@@ -1,0 +1,46 @@
+#---------------------------------------------------------------
+#Print the model into XML file:
+#---------------------------------------------------------------
+prt_model = 4
+
+#---------------------------------------------------------------
+#Information about the DDB and the training set
+#---------------------------------------------------------------
+ngqpt =  4 4 4    # Mesh of Q-points in the DDB (default 1 1 1)
+dipdip = 1        # Recompute the dipole-dipole interaction (default 1)
+ncell = 2 2 2     # Number of cells in the DDB regarding to the RS (default 1 1 )
+
+#---------------------------------------------------------------
+#Inputs for the bounding process:
+#---------------------------------------------------------------
+
+bound_model = 3        # Flag to activate the bound process (default 0)
+bound_rangePower = 6 8 # Range of the power for the additional terms in the bound process (defaut 6 6)
+bound_EFS = 0 1 1      # Bound regarding to (E)nergy (F)orces and (S)tress 
+bound_penalty = 1.001  # Penalty on the Goal Function (GF_new/GF_init) can't be bigger than this value
+
+##############################################################
+# This section is used only for regression testing of ABINIT #
+##############################################################
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = multibinit
+#%% input_ddb = tmulti_l_6_DDB
+#%% need_cpp_vars = HAVE_XML
+#%% system_xml = no
+#%% coeff_xml = tmulti_l_7_1_coeffs.xml
+#%% md_hist = tmulti_l_6_HIST.nc
+#%% exclude_builders = .*_nag_7.[01]_.* 
+#%% [files]
+#%% files_to_test =
+#%%   tmulti_l_7_1.abo, tolnlines = 1, tolabs = 1.0e-6, tolrel = 1.0e-6, fld_options = -medium;
+#%%   tmulti_l_7_1_coeffs.xml, tolnlines = 15, tolabs = 8.0, tolrel = 1.0e-4, fld_options = -medium;
+#%% [paral_info]
+#%% max_nprocs = 10
+#%% [extra_info]
+#%% authors = L. BASTOGNE
+#%% keywords = Effective potential, multibinit, effpot
+#%% description = 
+#%%   Bounding an existing model
+#%% topics = LatticeModel
+#%%<END TEST_INFO>

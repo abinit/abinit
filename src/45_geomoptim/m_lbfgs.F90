@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_lbfgs
 !! NAME
 !!  m_lbfgs
@@ -10,14 +9,10 @@
 !!  They have been reshaped and translated into modern fortran here.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2012-2019 ABINIT group (FB)
+!! Copyright (C) 2012-2024 ABINIT group (FB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -31,6 +26,8 @@ module m_lbfgs
 
  use defs_basis
  use m_abicore
+
+ implicit none
 
 type,public :: lbfgs_internal
  integer              :: lbfgs_status
@@ -81,16 +78,9 @@ contains
 !!
 !! SIDE EFFECTS
 !!
-!! PARENTS
-!!      pred_lbfgs
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine lbfgs_init(ndim,history_record,diag_guess)
-
-implicit none
 
 integer,intent(in)   :: ndim
 integer,intent(in)   :: history_record
@@ -102,10 +92,10 @@ integer :: nwork
  lbfgs_plan%iter   = 0
  lbfgs_plan%ndim = ndim
  lbfgs_plan%history_record = history_record
- ABI_ALLOCATE(lbfgs_plan%diag,(ndim))
+ ABI_MALLOC(lbfgs_plan%diag,(ndim))
 
  nwork = ndim * ( 2 * history_record + 1 ) + 2 * history_record
- ABI_ALLOCATE(lbfgs_plan%work,(nwork))
+ ABI_MALLOC(lbfgs_plan%work,(nwork))
 
  lbfgs_plan%gtol = 0.9
  lbfgs_plan%line_stpmin = 1.0e-20
@@ -131,23 +121,12 @@ end subroutine lbfgs_init
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      pred_lbfgs
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine lbfgs_destroy()
 
-implicit none
-
- if(allocated (lbfgs_plan%work)) then
-   ABI_DEALLOCATE(lbfgs_plan%work)
- end if
- if(allocated (lbfgs_plan%diag)) then
-   ABI_DEALLOCATE(lbfgs_plan%diag)
- end if
+ ABI_SFREE(lbfgs_plan%work)
+ ABI_SFREE(lbfgs_plan%diag)
 
 end subroutine lbfgs_destroy
 !!***
@@ -169,16 +148,10 @@ end subroutine lbfgs_destroy
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      pred_lbfgs
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 function lbfgs_execute(x,f,gradf)
 
-implicit none
 real(dp),intent(inout) :: x(lbfgs_plan%ndim)
 real(dp),intent(in)    :: f
 real(dp),intent(in)    :: gradf(lbfgs_plan%ndim)
@@ -194,7 +167,8 @@ integer                :: lbfgs_execute
        lbfgs_plan%line_bracket, lbfgs_plan%line_stage1, lbfgs_plan%line_infoc)
 
 
- lbfgs_execute = lbfgs_plan%lbfgs_status
+!lbfgs_execute = lbfgs_plan%lbfgs_status
+ lbfgs_execute = lbfgs_plan%line_info
 
 end function lbfgs_execute
 !!***
@@ -216,11 +190,6 @@ end function lbfgs_execute
 !!
 !! SIDE EFFECTS
 !!
-!! PARENTS
-!!      m_lbfgs
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine lbfgs(N,M,X,F,G,DIAG,W,IFLAG,      &
@@ -231,8 +200,6 @@ subroutine lbfgs(N,M,X,F,G,DIAG,W,IFLAG,      &
                  LINE_STY,LINE_FY,LINE_DGY,   &
                  LINE_STMIN,LINE_STMAX,       &
                  LINE_BRACKT,LINE_STAGE1,LINE_INFOC)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -388,19 +355,12 @@ end subroutine lbfgs
 !!
 !! SIDE EFFECTS
 !!
-!! PARENTS
-!!      m_lbfgs
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine mcsrch(N,X,F,G,S,STP,FTOL,MAXFEV,INFO,NFEV,WA, &
                   GTOL,STPMIN,STPMAX,DGINIT,FINIT, &
                   STX,FX,DGX,STY,FY,DGY,STMIN,STMAX, &
                   BRACKT,STAGE1,INFOC)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -609,16 +569,9 @@ end subroutine mcsrch
 !!
 !! SIDE EFFECTS
 !!
-!! PARENTS
-!!      m_lbfgs
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine mcstep(STX,FX,DX,STY,FY,DY,STP,FP,DG,BRACKT,STPMIN,STPMAX,INFO)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

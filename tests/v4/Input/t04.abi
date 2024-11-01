@@ -1,0 +1,65 @@
+#   ----------------------------------------
+#   -     Input file for Abinit            -
+#   - Ca, simple cubic , 1 special k-point -
+#   -     Testing GS paw energy            -
+#   ----------------------------------------
+
+# 1-PAW options:
+# ---------------------
+  pawecutdg 15.
+  pawoptmix 1
+  pawmixdg 1
+
+# 2-Options for output:
+# ---------------------
+  prtdos 0 prtwf 0  enunit 2
+
+# 3-Parameters governing the convergence:
+# ---------------------------------------
+  ecut 3.  nband 6  nline 5  ntime 5  nstep 25
+  toldfe 1.d-8
+
+# 4-Options for the choice of calculation:
+# ----------------------------------------
+  ixc 7  occopt 7  tsmear 0.02
+  optcell 0  ionmov 0
+  so_psp 1
+  ortalg 1
+
+# 5-Definition of the unit cell:
+# ------------------------------
+  acell 3.0 3.5 4.0
+  rprim  1.4  0.0  0.0
+         0.0  1.4  0.0
+         0.0  0.0  1.4
+  natom 1  ntypat 1
+  typat 1  znucl 20.
+  xred 0.00 0.00 0.00
+  nsym 1
+
+# 6-Definition of K-points :
+# --------------------------
+  kptopt 0
+  nkpt 1  kptnrm 1  istwfk 1
+  kpt 0 0 0
+  wtk 1
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "20ca.paw"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t04.abo, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00, fld_options =  -medium
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = Unknown
+#%% keywords = PAW
+#%% description = 
+#%%   Ca in orthorhombic structure. 1 k point, low ecut.
+#%%   Perform a test of GS total energy computation, using an
+#%%   experimental PAW pseudopotential (pspcod=7).
+#%%<END TEST_INFO>

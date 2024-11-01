@@ -1,0 +1,97 @@
+
+\chapter{Adding external libraries / plug-ins}
+
+
+\section{Overall procedure}
+
+For all the tasks to perform, just use the existing libraries as examples
+and tutorials as soon as you have a doubt. All paths are given from
+the top source directory. Please note that this procedure has been
+elaborated and complexified progressively and is now being reworked
+in order to greatly simplify it. \\
+
+\begin{enumerate}
+\item Create a new directory in \textit{plugins/}, with a short and explicit
+name. 
+\item Copy the tarball to the new directory and go there. Its name should
+be: \textit{$<$package\_name$>$.tar.gz}. The package name may of
+course include a version number. 
+\item Create a RoboDOC header briefly describing the library. The file should
+have the same name as the directory, plus leading and trailing underscores.
+Suggestion: copy the one from \textit{lib/netcdf/} and start from
+it. 
+\item Create a makefile with the same name as the directory, plus a \textquotedbl{}.mk\textquotedbl{}
+extension. It will tell the build system how to perform the various
+steps of the library build: uncompress, configure, build, install.
+Suggestion: copy the one from \textit{lib/netcdf/} and use it as a
+starting point. 
+\item Create a \textit{abinit.amf} file containing a list of additional
+files to clean. It will basically consists in the libraries, binaries,
+headers and Fortran modules used by ABINIT. Suggestion: use \textit{lib/netcdf/abinit.amf}
+to see which is the format to follow. 
+\item Edit \textit{config/specs/extlibs.cf}: add one line for your library
+following the specified format. Put the most important module only
+in the second column if your library has several C/C++ headers or
+Fortran modules. The name of the library should be the same as for
+the directory. 
+\item Edit \textit{config/specs/libraries.cf}: 
+
+\begin{itemize}
+\item [a. ] in \texttt{abinit\_libs}, add the library \textbf{after} the
+others it could depend on and \textbf{before} the libraries depending
+on it; 
+\item [b. ] in \texttt{abilibs\_specs}, copy the \textquotedbl{}netcdf\textquotedbl{}
+line, changing only its name and removing \texttt{|ABI\_LIB\_INC}
+if your library has no C/C++ header and no Fortran module; here the
+order is external/internal, then alphabetical, so you should add your
+library before the \textquotedbl{}defs\textquotedbl{} line; 
+\item [c. ] describe the dependencies in \texttt{abilibs\_deps}. 
+\end{itemize}
+The name of the library should be the same as for the directory. 
+
+\item Edit \textit{config/specs/binaries.cf}: add the library to the dependencies
+of every binary that may use it; the line should be put \textbf{before}
+the libraries it depends on and \textbf{after} the libraries that
+depend on it. The name of the library should be the same as for the
+directory. 
+\item Edit \textit{config/specs/options.cf}: add the \texttt{-{}-enable-{*}}
+and \texttt{-{}-with-{*}} options for your library, with short and
+precise info strings. Use \textit{netcdf} as a typical example. 
+\item Edit \textit{config/m4/tricks.m4}: add a \textquotedbl{}tricky\textquotedbl{}
+macro at the end of the file. You may leave it empty, just as many
+of them already are. 
+\item Edit \textit{configure.ac}: 
+
+\begin{itemize}
+\item [a. ] at the beginning, where external packages are declared; 
+\item [b. ] at the end, where the external library macros are called. 
+\end{itemize}
+Add the relevant information using what is there as examples. 
+
+\item Run \textit{config/scripts/makemake}, and watch carefully any possible
+error message. 
+\item Run \textit{configure}, and watch carefully any possible error message. 
+\item Run \textit{make}, and watch carefully any possible error message. 
+\end{enumerate}
+
+\section{The library makefile}
+
+The build system expects a few things from the makefile \textit{$<$lib\_name$>$.mk}
+managing the package stored in \textit{$<$package\_name$>$.tar.gz}: 
+\begin{itemize}
+\item it should uncompress in \textit{lib/$<$lib\_name$>$/$<$package\_name$>$},
+and thus move the uncompressed directory afterwards if it not the
+case (see \textit{lib/fox/fox.mk} for an example); 
+\item it should install in \textit{lib/$<$lib\_name$>$/tmp}, so that the
+build system of ABINIT may import all required data by itself if the
+package is managed by the Autotools. 
+\end{itemize}
+Please read all the library makefiles contained within ABINIT before
+writing yours, this might help you a lot.
+
+
+\section{Fine-tuning \textit{abinit.amf}}
+
+Once you manage to build your library properly, run a \textit{make
+clean} from within and add all remaining files that should have been
+swept off to the list contained in \textit{abinit.amf}.

@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_pretty_rec
 !! NAME
 !!  m_pretty_rec
@@ -8,7 +7,7 @@
 !!  recursion
 !!
 !! COPYRIGHT
-!! Copyright (C) 2002-2019 ABINIT group (XG)
+!! Copyright (C) 2002-2024 ABINIT group (XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -16,10 +15,6 @@
 !!
 !! NOTES
 !!
-!! PARENTS
-!!
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -63,10 +58,6 @@ CONTAINS  !===========================================================
 !! SIDE EFFECTS
 !!
 !! OUTPUT
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine prtworksim(work_now)
@@ -104,10 +95,6 @@ end subroutine prtworksim
 !! SIDE EFFECTS
 !!
 !! OUTPUT
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine prtworksiRe(work_now)
@@ -146,10 +133,6 @@ end subroutine prtworksiRe
 !! SIDE EFFECTS
 !!
 !! OUTPUT
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine prtworkadv(work_now,adv)

@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_wvl_wfsinp
 !! NAME
 !!  m_wvl_wfsinp
@@ -7,14 +6,10 @@
 !!  Routines to initialize (wavelet) wavefunctions
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2019 ABINIT group (DC)
+!!  Copyright (C) 1998-2024 ABINIT group (DC)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -27,15 +22,16 @@
 module m_wvl_wfsinp
 
  use defs_basis
- use defs_abitypes
- use defs_datatypes
  use defs_wvltypes
  use m_wffile
  use m_abicore
  use m_errors
  use m_xmpi
+ use m_hdr
+ use m_dtset
 
-
+ use defs_datatypes, only : pseudopotential_type
+ use defs_abitypes,  only : MPI_type
  use m_geometry,  only : xred2xcart
  use m_abi2big,   only : wvl_occ_abi2big, wvl_occopt_abi2big, wvl_setngfft, wvl_setboxgeometry
  use m_psolver,   only : psolver_kernel
@@ -75,22 +71,16 @@ contains
 !!  dtset <type(dataset_type)>=input variables.
 !!  hdr0 <type(hdr_type)>=the header of wf, den and pot files (read from restart)
 !!  hdr <type(hdr_type)>=the header of wf, den and pot files
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  option=1 for reading a file following ABINIT format, -1 for a BigDFT format.
 !!  rprimd(3,3)=dimensional primitive translations in real space (bohr)
-!!  wff <type(wffile_type)>= structure with informations on wf file.
+!!  wff <type(wffile_type)>= structure with information on wf file.
 !!  xred(3,natom)=reduced dimensionless atomic coordinates.
 !!
 !! OUTPUT
 !!
 !! SIDE EFFECTS
-!!  wfs <type(wvl_projector_type)>=wavefunctions informations for wavelets.
-!!
-!! PARENTS
-!!      inwffil
-!!
-!! CHILDREN
-!!      first_orthon,wrtout,wvl_occ_abi2big,wvl_read
+!!  wfs <type(wvl_projector_type)>=wavefunctions information for wavelets.
 !!
 !! SOURCE
 
@@ -100,7 +90,6 @@ subroutine wvl_wfsinp_disk(dtset, hdr0, hdr, mpi_enreg, occ, option, rprimd, wff
  use BigDFT_API, only : first_orthon,sumrho,communicate_density,plot_density
  use dynamic_memory
 #endif
-  implicit none
 
 !Arguments -------------------------------
   !scalars
@@ -146,7 +135,7 @@ subroutine wvl_wfsinp_disk(dtset, hdr0, hdr, mpi_enreg, occ, option, rprimd, wff
  me=xmpi_comm_rank(comm)
  nproc=xmpi_comm_size(comm)
 !We allocate psi.
-!ABI_ALLOCATE(wfs%ks%psi,( max(wfs%ks%orbs%npsidim_comp,wfs%ks%orbs%npsidim_orbs)+ndebug) )
+!ABI_MALLOC(wfs%ks%psi,( max(wfs%ks%orbs%npsidim_comp,wfs%ks%orbs%npsidim_orbs)+ndebug) )
  wfs%ks%psi=f_malloc_ptr(max(wfs%ks%orbs%npsidim_comp,wfs%ks%orbs%npsidim_orbs)+ndebug,id='psi')
 
  write(message, '(a,a,a,a,I0)' ) ch10, &
@@ -162,10 +151,10 @@ subroutine wvl_wfsinp_disk(dtset, hdr0, hdr, mpi_enreg, occ, option, rprimd, wff
    call first_orthon(me, nproc, wfs%ks%orbs, wfs%ks%lzd, wfs%ks%comms, &
 &   wfs%ks%psi, wfs%ks%hpsi, wfs%ks%psit, wfs%ks%orthpar,wvl%paw)
  else
-!  ABI_ALLOCATE(wfs%ks%hpsi,(max(wfs%ks%orbs%npsidim_orbs,wfs%ks%orbs%npsidim_comp)))
+!  ABI_MALLOC(wfs%ks%hpsi,(max(wfs%ks%orbs%npsidim_orbs,wfs%ks%orbs%npsidim_comp)))
    wfs%ks%hpsi=f_malloc_ptr(max(wfs%ks%orbs%npsidim_orbs,wfs%ks%orbs%npsidim_comp),id='hpsi')
    if(wvl%paw%usepaw==1) then
-     ABI_ALLOCATE(wvl%paw%spsi,(max(wfs%ks%orbs%npsidim_orbs,wfs%ks%orbs%npsidim_comp)))
+     ABI_MALLOC(wvl%paw%spsi,(max(wfs%ks%orbs%npsidim_orbs,wfs%ks%orbs%npsidim_comp)))
    end if
 
 !  Set orbs%eval=-0.5.
@@ -202,7 +191,7 @@ subroutine wvl_wfsinp_disk(dtset, hdr0, hdr, mpi_enreg, occ, option, rprimd, wff
 !& wvl_den%denspot%hgrids(1),wvl_den%denspot%hgrids(2),wvl_den%denspot%hgrids(3),&
 !& wvl%atoms,xcart,wvl_den%denspot%dpcom%ngatherarr,&
 !& wvl_den%denspot%rhov(1+wvl_den%denspot%dpcom%nscatterarr(me,4)*wfs%Lzd%Glr%d%n1i*wfs%Lzd%Glr%d%n2i))
-!ABI_DEALLOCATE(xcart)
+!ABI_FREE(xcart)
 !end of debug
 
 
@@ -234,16 +223,6 @@ end subroutine wvl_wfsinp_disk
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      mover
-!!
-!! CHILDREN
-!!      copy_old_wavefunctions,deallocate_wfd,first_orthon
-!!      local_potential_dimensions,nullify_gaussian_basis,psolver_kernel
-!!      reformatmywaves,wrtout,wvl_denspot_free,wvl_denspot_set
-!!      wvl_projectors_free,wvl_projectors_set,wvl_setboxgeometry,wvl_setngfft
-!!      wvl_wfs_free,wvl_wfs_lr_copy,wvl_wfs_set,xred2xcart
-!!
 !! SOURCE
 
 
@@ -256,7 +235,6 @@ subroutine wvl_wfsinp_reformat(dtset, mpi_enreg, psps, rprimd, wvl, xred, xred_o
 & deallocate_coulomb_operator, nullify_gaussian_basis
  use dynamic_memory
 #endif
-  implicit none
 
 !Arguments ------------------------------------
   type(dataset_type), intent(inout)      :: dtset
@@ -298,11 +276,11 @@ subroutine wvl_wfsinp_reformat(dtset, mpi_enreg, psps, rprimd, wvl, xred, xred_o
  me=xmpi_comm_rank(comm)
  nproc=xmpi_comm_size(comm)
 !Convert input xred_old (reduced coordinates) to xcart_old (cartesian)
- ABI_ALLOCATE(xcart_old,(3, dtset%natom))
+ ABI_MALLOC(xcart_old,(3, dtset%natom))
  call xred2xcart(dtset%natom, rprimd, xcart_old, xred_old)
 
 !Copy current to old.
- ABI_ALLOCATE(eigen_old,(wvl%wfs%ks%orbs%norb))
+ ABI_MALLOC(eigen_old,(wvl%wfs%ks%orbs%norb))
  eigen_old = wvl%wfs%ks%orbs%eval
  hgrid_old = wvl%descr%h
  call copy_old_wavefunctions(nproc, wvl%wfs%ks%orbs, &
@@ -360,10 +338,10 @@ subroutine wvl_wfsinp_reformat(dtset, mpi_enreg, psps, rprimd, wvl, xred, xred_o
 
 !Recopy old eval for precond.
  wvl%wfs%ks%orbs%eval = eigen_old
- ABI_DEALLOCATE(eigen_old)
+ ABI_FREE(eigen_old)
 
 !We allocate psi.
-!ABI_ALLOCATE(wvl%wfs%ks%psi,( max(wvl%wfs%ks%orbs%npsidim_comp,wvl%wfs%ks%orbs%npsidim_orbs)+ndebug) )
+!ABI_MALLOC(wvl%wfs%ks%psi,( max(wvl%wfs%ks%orbs%npsidim_comp,wvl%wfs%ks%orbs%npsidim_orbs)+ndebug) )
  wvl%wfs%ks%psi=f_malloc_ptr(max(wvl%wfs%ks%orbs%npsidim_comp,wvl%wfs%ks%orbs%npsidim_orbs)+ndebug,id='psi')
  write(message, '(a,a,a,a,I0)' ) ch10, &
 & ' wvl_wfsinp_reformat: allocate wavefunctions,', ch10, &
@@ -372,7 +350,7 @@ subroutine wvl_wfsinp_reformat(dtset, mpi_enreg, psps, rprimd, wvl, xred, xred_o
  call wrtout(std_out,message,'COLL')
 
 !Convert input xred (reduced coordinates) to xcart (cartesian)
- ABI_ALLOCATE(xcart,(3, dtset%natom))
+ ABI_MALLOC(xcart,(3, dtset%natom))
  call xred2xcart(dtset%natom, rprimd, xcart, xred)
 
 !We transfer the old wavefunctions to the new ones.
@@ -381,11 +359,11 @@ subroutine wvl_wfsinp_reformat(dtset, mpi_enreg, psps, rprimd, wvl, xred, xred_o
 & nSize_old(3), xcart_old, keys_old, psi_old, wvl%descr%h(1), wvl%descr%h(2), &
 & wvl%descr%h(3), wvl%descr%Glr%d%n1, wvl%descr%Glr%d%n2, wvl%descr%Glr%d%n3, xcart, &
 & wvl%wfs%ks%lzd%Glr%wfd, wvl%wfs%ks%psi)
- ABI_DEALLOCATE(xcart)
- ABI_DEALLOCATE(xcart_old)
+ ABI_FREE(xcart)
+ ABI_FREE(xcart_old)
 
 !We free the old descriptors and arrays.
- ABI_DEALLOCATE(psi_old)
+ ABI_FREE(psi_old)
  call deallocate_wfd(keys_old)
 
  call local_potential_dimensions(me,wvl%wfs%ks%lzd,wvl%wfs%ks%orbs,wvl%den%denspot%xc,&
@@ -394,7 +372,7 @@ subroutine wvl_wfsinp_reformat(dtset, mpi_enreg, psps, rprimd, wvl, xred, xred_o
 !it seems that the table "wvl%projectors%G" is no more used
 !but it's not allocated -> fortran runtime error
 #if defined HAVE_BIGDFT
- ABI_DATATYPE_ALLOCATE(wvl%projectors%G,(dtset%ntypat))
+ ABI_MALLOC(wvl%projectors%G,(dtset%ntypat))
  do itypat=1,dtset%ntypat
    call nullify_gaussian_basis(wvl%projectors%G(itypat))
  end do
@@ -435,23 +413,16 @@ end subroutine wvl_wfsinp_reformat
 !!  hdr0 <type(hdr_type)>=the header of wf, den and pot files (read from restart)
 !!  hdr <type(hdr_type)>=the header of wf, den and pot files
 !!  ireadwf=1 for reading from file, 0 otherwise.
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  option=1 for reading a file following ABINIT format, -1 for a BigDFT format.
 !!  rprimd(3,3)=dimensional primitive translations in real space (bohr)
-!!  wff <type(wffile_type)>= structure with informations on wf file.
+!!  wff <type(wffile_type)>= structure with information on wf file.
 !!  xred(3,natom)=reduced dimensionless atomic coordinates
 !!
 !! OUTPUT
 !!
 !! SIDE EFFECTS
-!!  wvl <type(wvl_data)>=wavefunctions & projectors informations for wavelets.
-!!
-!! PARENTS
-!!      inwffil
-!!
-!! CHILDREN
-!!      input_wf_diag,mklocl_wavelets,wrtout,wvl_occ_abi2big,wvl_occopt_abi2big
-!!      xred2xcart
+!!  wvl <type(wvl_data)>=wavefunctions & projectors information for wavelets.
 !!
 !! SOURCE
 
@@ -462,7 +433,6 @@ subroutine wvl_wfsinp_scratch(dtset, mpi_enreg, occ, rprimd, wvl, xred)
       & input_variables, calculate_rhocore, deallocate_Lzd_except_Glr, INPUT_IG_OFF,&
       & SMEARING_DIST_ERF, PSPCODE_PAW
 #endif
-  implicit none
 
 !Arguments -------------------------------
   !scalars
@@ -508,7 +478,7 @@ subroutine wvl_wfsinp_scratch(dtset, mpi_enreg, occ, rprimd, wvl, xred)
  me=xmpi_comm_rank(comm)
  nproc=xmpi_comm_size(comm)
 !Store xcart for each atom
- ABI_ALLOCATE(xcart,(3, dtset%natom))
+ ABI_MALLOC(xcart,(3, dtset%natom))
  call xred2xcart(dtset%natom, rprimd, xcart, xred)
 
 !We allocate temporary arrays for rho and vpsp.
@@ -517,17 +487,17 @@ subroutine wvl_wfsinp_scratch(dtset, mpi_enreg, occ, rprimd, wvl, xred)
    size_vpsp=wvl%descr%Glr%d%n1i*wvl%descr%Glr%d%n2i*wvl%den%denspot%dpbox%n3pi
    shift_vpsp=wvl%den%denspot%dpbox%ndims(1)*wvl%den%denspot%dpbox%ndims(2) &
 &   *wvl%den%denspot%dpbox%nscatterarr(me,4)
-   ABI_ALLOCATE(vpsp,(size_vpsp+shift_vpsp))
+   ABI_MALLOC(vpsp,(size_vpsp+shift_vpsp))
  else
-   ABI_ALLOCATE(vpsp,(1))
+   ABI_MALLOC(vpsp,(1))
  end if
 
  if(.not. onlywf) then
-   ABI_ALLOCATE(rhor,(dtset%nfft,dtset%nspden))
+   ABI_MALLOC(rhor,(dtset%nfft,dtset%nspden))
    call mklocl_wavelets(elecfield, xcart, mpi_enreg, dtset%natom, &
 &   dtset%nfft, dtset%nspden, 1, rprimd, vpsp, &
 &   wvl%den, wvl%descr, xcart)
-   ABI_DEALLOCATE(rhor)
+   ABI_FREE(rhor)
  end if
 
 ! IMPORTANT: onlywf=.true. does not work yet, do not change this:
@@ -571,7 +541,7 @@ subroutine wvl_wfsinp_scratch(dtset, mpi_enreg, occ, rprimd, wvl, xred)
 !to input_wf_diag to allocate spsi inside this routine
  if(dtset%usepaw==1) then
    wvl%descr%atoms%npspcode(:)=PSPCODE_PAW
-   ABI_ALLOCATE(wvl%descr%paw%spsi,(max(wvl%wfs%ks%orbs%npsidim_orbs,wvl%wfs%ks%orbs%npsidim_comp)))
+   ABI_MALLOC(wvl%descr%paw%spsi,(max(wvl%wfs%ks%orbs%npsidim_orbs,wvl%wfs%ks%orbs%npsidim_comp)))
    do ii=1,size(wvl%wfs%ks%psi)
      wvl%descr%paw%spsi(ii)=wvl%wfs%ks%psi(ii)
      wvl%wfs%ks%hpsi(ii)=wvl%wfs%ks%psi(ii)
@@ -590,8 +560,8 @@ subroutine wvl_wfsinp_scratch(dtset, mpi_enreg, occ, rprimd, wvl, xred)
 & '  | wavefunctions have been calculated.'
  call wrtout(std_out,message,'COLL')
 
- ABI_DEALLOCATE(xcart)
- ABI_DEALLOCATE(vpsp)
+ ABI_FREE(xcart)
+ ABI_FREE(vpsp)
 
 #else
  BIGDFT_NOTENABLED_ERROR()

@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_mep
 !! NAME
 !!  m_mep
@@ -8,7 +7,7 @@
 !!  Minimal Energy Path (MEP) search implementation.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2012-2019 ABINIT group (MT)
+!! Copyright (C) 2012-2024 ABINIT group (MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -16,10 +15,6 @@
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -32,14 +27,15 @@
 MODULE m_mep
 
  use defs_basis
- use defs_abitypes
  use m_abicore
  use m_errors
+ use m_dtset
  use m_xmpi
 
- use m_geometry,    only : fred2fcart, fcart2fred, xcart2xred, xred2xcart, metric
+ use defs_abitypes, only : MPI_type
+ use m_geometry,    only : gred2fcart, fcart2gred, xcart2xred, xred2xcart, metric
  use m_bfgs,        only : hessupdt
- use m_results_img, only : results_img_type,gather_array_img
+ use m_results_img, only : results_img_type, gather_array_img
 
  implicit none
 
@@ -112,17 +108,9 @@ CONTAINS
 !!  mep_param=datastructure of type mep_type.
 !!            several parameters for Minimal Energy Path (MEP) search.
 !!
-!! PARENTS
-!!      gstateimg
-!!
-!! CHILDREN
-!!      wrtout,xcart2xred,xred2xcart
-!!
 !! SOURCE
 
 subroutine mep_init(dtset,mep_param)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -171,17 +159,9 @@ end subroutine mep_init
 !!  mep_param=datastructure of type mep_type.
 !!            several parameters for Minimal Energy Path (MEP) search.
 !!
-!! PARENTS
-!!      gstateimg
-!!
-!! CHILDREN
-!!      wrtout,xcart2xred,xred2xcart
-!!
 !! SOURCE
 
 subroutine mep_destroy(mep_param)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -189,33 +169,15 @@ subroutine mep_destroy(mep_param)
 
 !************************************************************************
 
- if (allocated(mep_param%bfgs_xprev)) then
-   ABI_DEALLOCATE(mep_param%bfgs_xprev)
- end if
- if (allocated(mep_param%gbfgs_hess))     then
-   ABI_DEALLOCATE(mep_param%gbfgs_hess)
- end if
- if (allocated(mep_param%bfgs_fprev)) then
-   ABI_DEALLOCATE(mep_param%bfgs_fprev)
- end if
- if (allocated(mep_param%lbfgs_hess))     then
-   ABI_DEALLOCATE(mep_param%lbfgs_hess)
- end if
- if (allocated(mep_param%qmin_vel))     then
-   ABI_DEALLOCATE(mep_param%qmin_vel)
- end if
- if (allocated(mep_param%rk4_xcart1)) then
-   ABI_DEALLOCATE(mep_param%rk4_xcart1)
- end if
- if (allocated(mep_param%rk4_fcart1)) then
-   ABI_DEALLOCATE(mep_param%rk4_fcart1)
- end if
- if (allocated(mep_param%rk4_fcart2)) then
-   ABI_DEALLOCATE(mep_param%rk4_fcart2)
- end if
- if (allocated(mep_param%rk4_fcart3)) then
-   ABI_DEALLOCATE(mep_param%rk4_fcart3)
- end if
+ ABI_SFREE(mep_param%bfgs_xprev)
+ ABI_SFREE(mep_param%gbfgs_hess)
+ ABI_SFREE(mep_param%bfgs_fprev)
+ ABI_SFREE(mep_param%lbfgs_hess)
+ ABI_SFREE(mep_param%qmin_vel)
+ ABI_SFREE(mep_param%rk4_xcart1)
+ ABI_SFREE(mep_param%rk4_fcart1)
+ ABI_SFREE(mep_param%rk4_fcart2)
+ ABI_SFREE(mep_param%rk4_fcart3)
 
  nullify(mep_param%iatfix)
 
@@ -251,17 +213,9 @@ end subroutine mep_destroy
 !!  xred(3,natom,nimage)=reduced coordinates of atoms in each image along the path
 !!                       before and after time evolution
 !!
-!! PARENTS
-!!      predict_neb,predict_steepest,predict_string
-!!
-!! CHILDREN
-!!      wrtout,xcart2xred,xred2xcart
-!!
 !! SOURCE
 
 subroutine mep_steepest(fcart,list_dynimage,mep_param,natom,ndynimage,nimage,rprimd,xcart,xred)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -281,8 +235,8 @@ subroutine mep_steepest(fcart,list_dynimage,mep_param,natom,ndynimage,nimage,rpr
 
 !************************************************************************
 
- ABI_ALLOCATE(xred_old,(3,natom))
- ABI_ALLOCATE(xstep,(3,natom))
+ ABI_MALLOC(xred_old,(3,natom))
+ ABI_MALLOC(xstep,(3,natom))
 
  do idynimage=1,ndynimage
    iimage=list_dynimage(idynimage)
@@ -315,8 +269,8 @@ subroutine mep_steepest(fcart,list_dynimage,mep_param,natom,ndynimage,nimage,rpr
 
  end do
 
- ABI_DEALLOCATE(xred_old)
- ABI_DEALLOCATE(xstep)
+ ABI_FREE(xred_old)
+ ABI_FREE(xstep)
 
 end subroutine mep_steepest
 !!***
@@ -351,17 +305,9 @@ end subroutine mep_steepest
 !!  xred(3,natom,nimage)=reduced coordinates of atoms in each image along the path
 !!                       before and after time evolution
 !!
-!! PARENTS
-!!      predict_neb
-!!
-!! CHILDREN
-!!      wrtout,xcart2xred,xred2xcart
-!!
 !! SOURCE
 
 subroutine mep_qmin(fcart,itime,list_dynimage,mep_param,natom,ndynimage,nimage,rprimd,xcart,xred)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -385,14 +331,14 @@ subroutine mep_qmin(fcart,itime,list_dynimage,mep_param,natom,ndynimage,nimage,r
 !Allocate history array (at first time step)
  if (itime==1) then
    if (allocated(mep_param%qmin_vel)) then
-     ABI_DEALLOCATE(mep_param%qmin_vel)
+     ABI_FREE(mep_param%qmin_vel)
    end if
-   ABI_ALLOCATE(mep_param%qmin_vel,(3,natom,ndynimage))
+   ABI_MALLOC(mep_param%qmin_vel,(3,natom,ndynimage))
    mep_param%qmin_vel=zero
  end if
 
- ABI_ALLOCATE(xred_old,(3,natom))
- ABI_ALLOCATE(xstep,(3,natom))
+ ABI_MALLOC(xred_old,(3,natom))
+ ABI_MALLOC(xstep,(3,natom))
 
  do idynimage=1,ndynimage
    iimage=list_dynimage(idynimage)
@@ -441,8 +387,8 @@ subroutine mep_qmin(fcart,itime,list_dynimage,mep_param,natom,ndynimage,nimage,r
 
  end do
 
- ABI_DEALLOCATE(xred_old)
- ABI_DEALLOCATE(xstep)
+ ABI_FREE(xred_old)
+ ABI_FREE(xstep)
 
 end subroutine mep_qmin
 !!***
@@ -480,18 +426,10 @@ end subroutine mep_qmin
 !! NOTES
 !!  Could see Numerical Recipes (Fortran), 1986, page 307.
 !!
-!! PARENTS
-!!      predict_neb
-!!
-!! CHILDREN
-!!      wrtout,xcart2xred,xred2xcart
-!!
 !! SOURCE
 
 subroutine mep_lbfgs(fcart,itime,list_dynimage,mep_param,natom,ndynimage,&
 &                    nimage,rprimd,xcart,xred)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -511,45 +449,45 @@ subroutine mep_lbfgs(fcart,itime,list_dynimage,mep_param,natom,ndynimage,&
  character(len=500) :: msg
 !arrays
  real(dp) :: gprimd(3,3),gmet(3,3),rmet(3,3)
- real(dp),allocatable :: fred(:,:),xstep(:,:)
+ real(dp),allocatable :: gred(:,:),xstep(:,:)
 
 !************************************************************************
 
 !Allocate history array (at first time step)
  if (itime==1) then
    if (allocated(mep_param%bfgs_xprev)) then
-     ABI_DEALLOCATE(mep_param%bfgs_xprev)
+     ABI_FREE(mep_param%bfgs_xprev)
    end if
    if (allocated(mep_param%bfgs_fprev)) then
-     ABI_DEALLOCATE(mep_param%bfgs_fprev)
+     ABI_FREE(mep_param%bfgs_fprev)
    end if
    if (allocated(mep_param%lbfgs_hess)) then
-     ABI_DEALLOCATE(mep_param%lbfgs_hess)
+     ABI_FREE(mep_param%lbfgs_hess)
    end if
-   ABI_ALLOCATE(mep_param%bfgs_xprev,(3,natom,ndynimage))
-   ABI_ALLOCATE(mep_param%bfgs_fprev,(3,natom,ndynimage))
-   ABI_ALLOCATE(mep_param%lbfgs_hess,(3*natom,3*natom,ndynimage))
+   ABI_MALLOC(mep_param%bfgs_xprev,(3,natom,ndynimage))
+   ABI_MALLOC(mep_param%bfgs_fprev,(3,natom,ndynimage))
+   ABI_MALLOC(mep_param%lbfgs_hess,(3*natom,3*natom,ndynimage))
    mep_param%bfgs_xprev=zero
    mep_param%bfgs_fprev=zero
  end if
 
 !Temporary storage
- ABI_ALLOCATE(fred,(3,natom))
- ABI_ALLOCATE(xstep,(3,natom))
+ ABI_MALLOC(gred,(3,natom))
+ ABI_MALLOC(xstep,(3,natom))
 
 !Loop over images
  do idynimage=1,ndynimage
    iimage=list_dynimage(idynimage)
    call metric(gmet,gprimd,-1,rmet,rprimd(:,:,iimage),ucvol)
-   call fcart2fred(fcart(:,:,iimage),fred,rprimd(:,:,iimage),natom)
+   call fcart2gred(fcart(:,:,iimage),gred,rprimd(:,:,iimage),natom)
 
 !  Test if a reset is needed
    reset=.false.
    if (itime>1) then
-     dot1=mep_img_dotp(mep_param%bfgs_fprev(:,:,idynimage),fred)
+     dot1=mep_img_dotp(mep_param%bfgs_fprev(:,:,idynimage),gred)
      dot2=mep_img_dotp(mep_param%bfgs_fprev(:,:,idynimage), &
 &                      mep_param%bfgs_fprev(:,:,idynimage))
-!     dot1=mep_img_dotp_red(rmet,mep_param%bfgs_fprev(:,:,idynimage),fred)
+!     dot1=mep_img_dotp_red(rmet,mep_param%bfgs_fprev(:,:,idynimage),gred)
 !     dot2=mep_img_dotp_red(rmet,mep_param%bfgs_fprev(:,:,idynimage), &
 !&                               mep_param%bfgs_fprev(:,:,idynimage))
      reset=((dot2<two*abs(dot1)).or.abs(dot2)<tol8)
@@ -580,12 +518,12 @@ subroutine mep_lbfgs(fcart,itime,list_dynimage,mep_param,natom,ndynimage,&
      call hessupdt(mep_param%lbfgs_hess(:,:,idynimage),&
 &                  mep_param%iatfix,natom,3*natom, &
                    xred(:,:,iimage),mep_param%bfgs_xprev(:,:,idynimage),&
-                   fred(:,:),mep_param%bfgs_fprev(:,:,idynimage))
+                   gred(:,:),mep_param%bfgs_fprev(:,:,idynimage))
    end if
 
 !  Update history
    mep_param%bfgs_xprev(:,:,idynimage)=xred(:,:,iimage)
-   mep_param%bfgs_fprev(:,:,idynimage)=fred(:,:)
+   mep_param%bfgs_fprev(:,:,idynimage)=gred(:,:)
 
 !  Compute image step
    xstep=zero
@@ -596,7 +534,7 @@ subroutine mep_lbfgs(fcart,itime,list_dynimage,mep_param,natom,ndynimage,&
          indj=3*(jatom-1)
          do jj=1,3
            xstep(ii,iatom)=xstep(ii,iatom) &
-&             -mep_param%lbfgs_hess(indi+ii,indj+jj,idynimage)*fred(jj,jatom)
+&             -mep_param%lbfgs_hess(indi+ii,indj+jj,idynimage)*gred(jj,jatom)
          end do
        end do
      end do
@@ -624,8 +562,8 @@ subroutine mep_lbfgs(fcart,itime,list_dynimage,mep_param,natom,ndynimage,&
 !End loop over images
  end do
 
- ABI_DEALLOCATE(fred)
- ABI_DEALLOCATE(xstep)
+ ABI_FREE(gred)
+ ABI_FREE(xstep)
 
 end subroutine mep_lbfgs
 !!***
@@ -666,18 +604,10 @@ end subroutine mep_lbfgs
 !!  Could see Numerical Recipes (Fortran), 1986, page 307.
 !!  Has to work in cartesian coordinates
 !!
-!! PARENTS
-!!      predict_neb
-!!
-!! CHILDREN
-!!      wrtout,xcart2xred,xred2xcart
-!!
 !! SOURCE
 
 subroutine mep_gbfgs(fcart,itime,list_dynimage,mep_param,mpi_enreg,natom,&
 &                    ndynimage,nimage,nimage_tot,rprimd,xcart,xred)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -700,7 +630,7 @@ subroutine mep_gbfgs(fcart,itime,list_dynimage,mep_param,mpi_enreg,natom,&
  integer,allocatable :: dynimage_tot(:),iatfix_fake(:,:),ind_dynimage_tot(:)
  integer,allocatable :: list_dynimage_tot(:)
  real(dp) :: favg(3),gprimd(3,3),gmet(3,3),rmet(3,3)
- real(dp),allocatable :: buffer(:,:),buffer_all(:,:),fred(:,:)
+ real(dp),allocatable :: buffer(:,:),buffer_all(:,:),gred(:,:)
  real(dp),allocatable :: fcart_all(:,:,:),fcartp_all(:,:,:)
  real(dp),allocatable :: gmet_all(:,:,:),gprimd_all(:,:,:),rprimd_all(:,:,:)
  real(dp),allocatable :: xcart_all(:,:,:),xcartp_all(:,:,:),xred_old(:,:),xstep_all(:,:,:)
@@ -708,9 +638,9 @@ subroutine mep_gbfgs(fcart,itime,list_dynimage,mep_param,mpi_enreg,natom,&
 !************************************************************************
 
 !Retrieve indexes of all dynamical images
- ABI_ALLOCATE(ind_dynimage_tot,(nimage_tot))
+ ABI_MALLOC(ind_dynimage_tot,(nimage_tot))
  if (mpi_enreg%paral_img==1) then
-   ABI_ALLOCATE(dynimage_tot,(nimage_tot))
+   ABI_MALLOC(dynimage_tot,(nimage_tot))
    dynimage_tot=0
    do idynimage=1,ndynimage
      iimage=list_dynimage(idynimage)
@@ -719,7 +649,7 @@ subroutine mep_gbfgs(fcart,itime,list_dynimage,mep_param,mpi_enreg,natom,&
    end do
    call xmpi_sum(dynimage_tot,mpi_enreg%comm_img,ierr)
    ndynimage_tot=count(dynimage_tot(:)>0)
-   ABI_ALLOCATE(list_dynimage_tot,(ndynimage_tot))
+   ABI_MALLOC(list_dynimage_tot,(ndynimage_tot))
    idynimage=0;ind_dynimage_tot(:)=-1
    do iimage_tot=1,nimage_tot
      if (dynimage_tot(iimage_tot)>0) then
@@ -728,10 +658,10 @@ subroutine mep_gbfgs(fcart,itime,list_dynimage,mep_param,mpi_enreg,natom,&
        list_dynimage_tot(idynimage)=iimage_tot
      end if
    end do
-   ABI_DEALLOCATE(dynimage_tot)
+   ABI_FREE(dynimage_tot)
  else
    ndynimage_tot=ndynimage
-   ABI_ALLOCATE(list_dynimage_tot,(ndynimage))
+   ABI_MALLOC(list_dynimage_tot,(ndynimage))
    ind_dynimage_tot(:)=-1
    do idynimage=1,ndynimage
      ind_dynimage_tot(list_dynimage(idynimage))=idynimage
@@ -742,32 +672,32 @@ subroutine mep_gbfgs(fcart,itime,list_dynimage,mep_param,mpi_enreg,natom,&
 !Allocate history array (at first time step)
  if (itime==1) then
    if (allocated(mep_param%bfgs_xprev)) then
-     ABI_DEALLOCATE(mep_param%bfgs_xprev)
+     ABI_FREE(mep_param%bfgs_xprev)
    end if
    if (allocated(mep_param%bfgs_fprev)) then
-     ABI_DEALLOCATE(mep_param%bfgs_fprev)
+     ABI_FREE(mep_param%bfgs_fprev)
    end if
    if (allocated(mep_param%gbfgs_hess)) then
-     ABI_DEALLOCATE(mep_param%gbfgs_hess)
+     ABI_FREE(mep_param%gbfgs_hess)
    end if
-   ABI_ALLOCATE(mep_param%bfgs_xprev,(3,natom,ndynimage))
-   ABI_ALLOCATE(mep_param%bfgs_fprev,(3,natom,ndynimage))
-   ABI_ALLOCATE(mep_param%gbfgs_hess,(3*natom*ndynimage_tot,3*natom*ndynimage_tot))
+   ABI_MALLOC(mep_param%bfgs_xprev,(3,natom,ndynimage))
+   ABI_MALLOC(mep_param%bfgs_fprev,(3,natom,ndynimage))
+   ABI_MALLOC(mep_param%gbfgs_hess,(3*natom*ndynimage_tot,3*natom*ndynimage_tot))
    mep_param%bfgs_xprev=zero
    mep_param%bfgs_fprev=zero
  end if
 
 !Retrieve positions and forces for all images
- ABI_ALLOCATE(xcart_all,(3,natom,ndynimage_tot))
- ABI_ALLOCATE(fcart_all,(3,natom,ndynimage_tot))
- ABI_ALLOCATE(xcartp_all,(3,natom,ndynimage_tot))
- ABI_ALLOCATE(fcartp_all,(3,natom,ndynimage_tot))
- ABI_ALLOCATE(rprimd_all,(3,3,ndynimage_tot))
- ABI_ALLOCATE(gprimd_all,(3,3,ndynimage_tot))
- ABI_ALLOCATE(gmet_all,(3,3,ndynimage_tot))
+ ABI_MALLOC(xcart_all,(3,natom,ndynimage_tot))
+ ABI_MALLOC(fcart_all,(3,natom,ndynimage_tot))
+ ABI_MALLOC(xcartp_all,(3,natom,ndynimage_tot))
+ ABI_MALLOC(fcartp_all,(3,natom,ndynimage_tot))
+ ABI_MALLOC(rprimd_all,(3,3,ndynimage_tot))
+ ABI_MALLOC(gprimd_all,(3,3,ndynimage_tot))
+ ABI_MALLOC(gmet_all,(3,3,ndynimage_tot))
  if (mpi_enreg%paral_img==1) then
-   ABI_ALLOCATE(buffer,(12*natom+27,nimage))
-   ABI_ALLOCATE(buffer_all,(12*natom+27,nimage_tot))
+   ABI_MALLOC(buffer,(12*natom+27,nimage))
+   ABI_MALLOC(buffer_all,(12*natom+27,nimage_tot))
    buffer=zero
    do idynimage=1,ndynimage
      iimage=list_dynimage(idynimage)
@@ -797,8 +727,8 @@ subroutine mep_gbfgs(fcart,itime,list_dynimage,mep_param,mpi_enreg,natom,&
      gprimd_all(1:3,1:3,idynimage)=reshape(buffer_all(indi+10:indi+18,iimage_tot),(/3,3/))
      gmet_all  (1:3,1:3,idynimage)=reshape(buffer_all(indi+19:indi+27,iimage_tot),(/3,3/))
    end do
-   ABI_DEALLOCATE(buffer)
-   ABI_DEALLOCATE(buffer_all)
+   ABI_FREE(buffer)
+   ABI_FREE(buffer_all)
  else
    do idynimage=1,ndynimage
      iimage=list_dynimage(idynimage)
@@ -855,39 +785,39 @@ subroutine mep_gbfgs(fcart,itime,list_dynimage,mep_param,mpi_enreg,natom,&
  else
 
 !  Impose here f-fprev=0 (cannot be done inside hessupdt in cartesian coordinates)
-   ABI_ALLOCATE(fred,(3,natom))
+   ABI_MALLOC(gred,(3,natom))
    do idynimage=1,ndynimage_tot
      fcartp_all(:,:,idynimage)=fcartp_all(:,:,idynimage)-fcart_all(:,:,idynimage)
-     call fcart2fred(fcartp_all(:,:,idynimage),fred,rprimd_all(:,:,idynimage),natom)
+     call fcart2gred(fcartp_all(:,:,idynimage),gred,rprimd_all(:,:,idynimage),natom)
      where (mep_param%iatfix(:,:)==1) ! iatfix is defined in reduced coordinates
-       fred(:,:)=zero
+       gred(:,:)=zero
      end where
-     call fred2fcart(favg,.TRUE.,fcartp_all(:,:,idynimage),fred,gprimd_all(:,:,idynimage),natom)
+     call gred2fcart(favg,.TRUE.,fcartp_all(:,:,idynimage),gred,gprimd_all(:,:,idynimage),natom)
      do iatom=1,natom
        fcartp_all(:,iatom,idynimage)=fcartp_all(:,iatom,idynimage) &
 &                                   +fcart_all(:,iatom,idynimage)+favg(:)
      end do
    end do
-   ABI_DEALLOCATE(fred)
+   ABI_FREE(gred)
 
 !  f-fprev=0 has already been imposed for fixed atoms:
 !  we call hessupdt with no fixed atom
-   ABI_ALLOCATE(iatfix_fake,(3,natom))
+   ABI_MALLOC(iatfix_fake,(3,natom))
    iatfix_fake(:,:)=0
    call hessupdt(mep_param%gbfgs_hess,&
 &                iatfix_fake,natom,3*natom*ndynimage_tot, &
                  xcart_all,xcartp_all,fcart_all,fcartp_all, &
 &                nimage=ndynimage_tot)
-   ABI_DEALLOCATE(iatfix_fake)
+   ABI_FREE(iatfix_fake)
  end if
 
 !Free memory
- ABI_DEALLOCATE(xcart_all)
- ABI_DEALLOCATE(xcartp_all)
- ABI_DEALLOCATE(fcartp_all)
- ABI_DEALLOCATE(rprimd_all)
- ABI_DEALLOCATE(gprimd_all)
- ABI_DEALLOCATE(gmet_all)
+ ABI_FREE(xcart_all)
+ ABI_FREE(xcartp_all)
+ ABI_FREE(fcartp_all)
+ ABI_FREE(rprimd_all)
+ ABI_FREE(gprimd_all)
+ ABI_FREE(gmet_all)
 
 !Update history
  do idynimage=1,ndynimage
@@ -897,7 +827,7 @@ subroutine mep_gbfgs(fcart,itime,list_dynimage,mep_param,mpi_enreg,natom,&
  end do
 
 !Compute image step
- ABI_ALLOCATE(xstep_all,(3,natom,ndynimage_tot))
+ ABI_MALLOC(xstep_all,(3,natom,ndynimage_tot))
  xstep_all=zero
  do idynimage=1,ndynimage_tot
    indi=3*natom*(idynimage-1)
@@ -934,7 +864,7 @@ subroutine mep_gbfgs(fcart,itime,list_dynimage,mep_param,mpi_enreg,natom,&
  end if
 
 !Update positions
- ABI_ALLOCATE(xred_old,(3,natom))
+ ABI_MALLOC(xred_old,(3,natom))
  do idynimage=1,ndynimage
    iimage=list_dynimage(idynimage)
    iimage_tot=mpi_enreg%my_imgtab(iimage)
@@ -951,13 +881,13 @@ subroutine mep_gbfgs(fcart,itime,list_dynimage,mep_param,mpi_enreg,natom,&
      end if
    end do
  end do
- ABI_DEALLOCATE(xred_old)
+ ABI_FREE(xred_old)
 
 !Free memory
- ABI_DEALLOCATE(fcart_all)
- ABI_DEALLOCATE(xstep_all)
- ABI_DEALLOCATE(ind_dynimage_tot)
- ABI_DEALLOCATE(list_dynimage_tot)
+ ABI_FREE(fcart_all)
+ ABI_FREE(xstep_all)
+ ABI_FREE(ind_dynimage_tot)
+ ABI_FREE(list_dynimage_tot)
 
 end subroutine mep_gbfgs
 !!***
@@ -991,17 +921,9 @@ end subroutine mep_gbfgs
 !!  xred(3,natom,nimage)=reduced coordinates of atoms in each image along the path
 !!                       before and after time evolution
 !!
-!! PARENTS
-!!      predict_string
-!!
-!! CHILDREN
-!!      wrtout,xcart2xred,xred2xcart
-!!
 !! SOURCE
 
 subroutine mep_rk4(fcart,itime,list_dynimage,mep_param,natom,ndynimage,nimage,rprimd,xcart,xred)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1029,32 +951,32 @@ subroutine mep_rk4(fcart,itime,list_dynimage,mep_param,natom,ndynimage,nimage,rp
 !Store data according to Runge-Kutta algo step
  if (istep_rk==1) then
    if (allocated(mep_param%rk4_xcart1)) then
-     ABI_DEALLOCATE(mep_param%rk4_xcart1)
+     ABI_FREE(mep_param%rk4_xcart1)
    end if
    if (allocated(mep_param%rk4_fcart1)) then
-     ABI_DEALLOCATE(mep_param%rk4_fcart1)
+     ABI_FREE(mep_param%rk4_fcart1)
    end if
-   ABI_ALLOCATE(mep_param%rk4_xcart1,(3,natom,nimage))
-   ABI_ALLOCATE(mep_param%rk4_fcart1,(3,natom,nimage))
+   ABI_MALLOC(mep_param%rk4_xcart1,(3,natom,nimage))
+   ABI_MALLOC(mep_param%rk4_fcart1,(3,natom,nimage))
    mep_param%rk4_xcart1 = xcart
    mep_param%rk4_fcart1 = fcart
  else if (istep_rk==2) then
    if (allocated(mep_param%rk4_fcart2)) then
-     ABI_DEALLOCATE(mep_param%rk4_fcart2)
+     ABI_FREE(mep_param%rk4_fcart2)
    end if
-   ABI_ALLOCATE(mep_param%rk4_fcart2,(3,natom,nimage))
+   ABI_MALLOC(mep_param%rk4_fcart2,(3,natom,nimage))
    mep_param%rk4_fcart2 = fcart
  else if (istep_rk==3) then
    if (allocated(mep_param%rk4_fcart3)) then
-     ABI_DEALLOCATE(mep_param%rk4_fcart3)
+     ABI_FREE(mep_param%rk4_fcart3)
    end if
-   ABI_ALLOCATE(mep_param%rk4_fcart3,(3,natom,nimage))
+   ABI_MALLOC(mep_param%rk4_fcart3,(3,natom,nimage))
    mep_param%rk4_fcart3 = fcart
  end if
 
- ABI_ALLOCATE(xred_old,(3,natom))
+ ABI_MALLOC(xred_old,(3,natom))
  if (istep_rk==0) then
-   ABI_ALLOCATE(xstep,(3,natom))
+   ABI_MALLOC(xstep,(3,natom))
  end if
 
  do idynimage=1,ndynimage
@@ -1111,24 +1033,24 @@ subroutine mep_rk4(fcart,itime,list_dynimage,mep_param,natom,ndynimage,nimage,rp
 
  end do
 
- ABI_DEALLOCATE(xred_old)
+ ABI_FREE(xred_old)
  if (istep_rk==0) then
-   ABI_DEALLOCATE(xstep)
+   ABI_FREE(xstep)
  end if
 
 !Cancel storage when final RK step has been done
  if (istep_rk==0) then
    if (allocated(mep_param%rk4_xcart1)) then
-     ABI_DEALLOCATE(mep_param%rk4_xcart1)
+     ABI_FREE(mep_param%rk4_xcart1)
    end if
    if (allocated(mep_param%rk4_fcart1)) then
-     ABI_DEALLOCATE(mep_param%rk4_fcart1)
+     ABI_FREE(mep_param%rk4_fcart1)
    end if
    if (allocated(mep_param%rk4_fcart2)) then
-     ABI_DEALLOCATE(mep_param%rk4_fcart2)
+     ABI_FREE(mep_param%rk4_fcart2)
    end if
    if (allocated(mep_param%rk4_fcart3)) then
-     ABI_DEALLOCATE(mep_param%rk4_fcart3)
+     ABI_FREE(mep_param%rk4_fcart3)
    end if
  end if
 
@@ -1152,16 +1074,10 @@ end subroutine mep_rk4
 !! OUTPUT
 !!  mep_img_dotp=dot product
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !!
 !! SOURCE
 
 function mep_img_dotp(vect1,vect2)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1177,7 +1093,7 @@ function mep_img_dotp(vect1,vect2)
 
  size1=size(vect1,1);size2=size(vect1,2)
  if (size1/=size(vect2,1).or.size2/=size(vect2,2)) then
-   MSG_BUG("Error on dimensions !")
+   ABI_BUG("Error on dimensions !")
  end if
 
  mep_img_dotp=sum(vect1*vect2)
@@ -1201,16 +1117,10 @@ end function mep_img_dotp
 !! OUTPUT
 !!  mep_img_norm=norm
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !!
 !! SOURCE
 
 function mep_img_norm(vect)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1244,15 +1154,9 @@ end function mep_img_norm
 !! OUTPUT
 !!  mep_img_dotp_red=dot product
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 function mep_img_dotp_red(rmet,vect1,vect2)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1268,7 +1172,7 @@ function mep_img_dotp_red(rmet,vect1,vect2)
 
  size1=size(vect1,1);size2=size(vect1,2)
  if (size1/=size(vect2,1).or.size2/=size(vect2,2).or.size1/=3) then
-   MSG_BUG("Error on dimensions !")
+   ABI_BUG("Error on dimensions !")
  end if
 
  mep_img_dotp_red=zero
@@ -1301,16 +1205,10 @@ end function mep_img_dotp_red
 !! OUTPUT
 !!  mep_img_norm_red=norm
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !!
 !! SOURCE
 
 function mep_img_norm_red(rmet,vect)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

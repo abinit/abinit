@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_frskerker1
 !! NAME
 !! m_frskerker1
@@ -9,7 +8,7 @@
 !! with some residuals and a real space dielectric function
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2019 ABINIT group (DCA, XG, MT)
+!! Copyright (C) 1998-2024 ABINIT group (DCA, XG, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~ABINIT/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -18,10 +17,6 @@
 !! NOTES
 !! this is neither a function nor a subroutine. This is a module
 !! It is made of two functions and one init subroutine
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -34,9 +29,10 @@
 module m_frskerker1
 
   use defs_basis
-  use defs_abitypes
   use m_abicore
+  use m_dtset
 
+  use defs_abitypes, only : MPI_type
   use m_spacepar,  only : laplacian
   use m_numeric_tools, only : dotproduct
 
@@ -66,17 +62,9 @@ contains
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      prcrskerker1
-!!
-!! CHILDREN
-!!      laplacian
-!!
 !! SOURCE
 
 subroutine frskerker1__init(dtset_in,mpi_enreg_in,nfft_in,ngfft_in,nspden_in,dielng_in,deltaW_in,gprimd_in,mat_in,g2cart_in )
-
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in)                  :: nfft_in,ngfft_in(18),nspden_in
@@ -97,9 +85,9 @@ subroutine frskerker1__init(dtset_in,mpi_enreg_in,nfft_in,ngfft_in,nspden_in,die
    nspden=nspden_in
    ngfft=ngfft_in
    nfft=nfft_in
-   ABI_ALLOCATE(deltaW,(size(deltaW_in,1),size(deltaW_in,2)))
-   ABI_ALLOCATE(mat,(size(mat_in,1),size(mat_in,2)))
-   ABI_ALLOCATE(g2cart,(size(g2cart_in,1)))
+   ABI_MALLOC(deltaW,(size(deltaW_in,1),size(deltaW_in,2)))
+   ABI_MALLOC(mat,(size(mat_in,1),size(mat_in,2)))
+   ABI_MALLOC(g2cart,(size(g2cart_in,1)))
    deltaW=deltaW_in
    dielng=dielng_in
    mat=mat_in
@@ -122,26 +110,18 @@ subroutine frskerker1__init(dtset_in,mpi_enreg_in,nfft_in,ngfft_in,nspden_in,die
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      prcrskerker1
-!!
-!! CHILDREN
-!!      laplacian
-!!
 !! SOURCE
 
 subroutine frskerker1__end()
-
-  implicit none
 
 ! *************************************************************************
   if(ok) then
 !  ! set ok to false which prevent using the pf and dpf
    ok = .false.
 !  ! free memory
-   ABI_DEALLOCATE(deltaW)
-   ABI_DEALLOCATE(mat)
-   ABI_DEALLOCATE(g2cart)
+   ABI_FREE(deltaW)
+   ABI_FREE(mat)
+   ABI_FREE(g2cart)
   end if
 
  end subroutine frskerker1__end
@@ -160,16 +140,9 @@ subroutine frskerker1__end()
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      laplacian
-!!
 !! SOURCE
 
 subroutine frskerker1__newvres(nv1,nv2,x, grad, vrespc)
-
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: nv1,nv2
@@ -196,15 +169,9 @@ end subroutine frskerker1__newvres
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 function frskerker1__pf(nv1,nv2,vrespc)
-
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: nv1,nv2
@@ -217,7 +184,7 @@ function frskerker1__pf(nv1,nv2,vrespc)
 
   if(ok) then
    buffer1=vrespc
-   call laplacian(gprimd,mpi_enreg_ptr,nfft,nspden,ngfft,dtset_ptr%paral_kgb,&
+   call laplacian(gprimd,mpi_enreg_ptr,nfft,nspden,ngfft,&
 &    rdfuncr=buffer1,laplacerdfuncr=buffer2,g2cart_in=g2cart)
    buffer2(:,:)=(vrespc(:,:)-((dielng)**2)*buffer2(:,:)) * half -deltaW
    frskerker1__pf=dotproduct(nv1,nv2,vrespc,buffer2) !*half-dotproduct(nv1,nv2,vrespc,deltaW)
@@ -243,15 +210,10 @@ function frskerker1__pf(nv1,nv2,vrespc)
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 function frskerker1__dpf(nv1,nv2,vrespc)
 
- implicit none
 !Arguments ------------------------------------
  integer,intent(in) :: nv1,nv2
  real(dp),intent(in):: vrespc(nv1,nv2)
@@ -263,7 +225,7 @@ function frskerker1__dpf(nv1,nv2,vrespc)
 
   if(ok) then
    buffer1=vrespc
-   call laplacian(gprimd,mpi_enreg_ptr,nfft,nspden,ngfft,dtset_ptr%paral_kgb,&
+   call laplacian(gprimd,mpi_enreg_ptr,nfft,nspden,ngfft,&
 &    rdfuncr=buffer1,laplacerdfuncr=buffer2,g2cart_in=g2cart)
    frskerker1__dpf(:,:)= vrespc(:,:)-deltaW-((dielng)**2)*buffer2(:,:)
   else

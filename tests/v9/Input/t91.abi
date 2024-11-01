@@ -1,0 +1,68 @@
+# Crystalline silicon
+# test occopt 9
+#
+
+pp_dirpath "$ABI_PSPDIR"
+pseudos "Si.GGA-PBE-rpaw-1.55.abinit"
+prtwf 0
+prtden 0
+
+#Dataset 1 : SCF calculation
+ ngkpt   4 4 4   # Use a rather loose grid for SCF calculation
+ toldfe  1.0d-10
+
+#Definition of the unit cell
+acell 3*10.18
+rprim  0.0  0.5  0.5
+       0.5  0.0  0.5
+       0.5  0.5  0.0
+
+#Definition of the atom types
+ntypat 1
+znucl 14
+
+#Definition of the atoms
+natom 2
+typat 1 1
+xred   0.0  0.0  0.0
+       1/4  1/4  1/4
+
+#Definition of the planewave basis set
+ecut  8.0
+pawecutdg 16.0
+
+#Definition of the k-point grid
+kptopt 1
+nshiftk 4
+shiftk 0.5 0.5 0.5
+       0.5 0.0 0.0
+       0.0 0.5 0.0
+       0.0 0.0 0.5
+
+#Definition of the SCF procedure
+nstep 10
+diemac 12.0
+
+# Occopt 9 test
+nband 8
+ivalence 4
+nqfd 0.5 # exciting 0.5 electrons per u.c.
+occopt 9
+tsmear 0.003
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t91.abo, tolnlines = 0, tolabs = 1.000e-07, tolrel = 1.000e-06;
+#%% [paral_info]
+#%% max_nprocs = 4
+#%% [extra_info]
+#%% authors = Ch. Paillard
+#%% keywords = 
+#%% description = 
+#%%   2 Silicon atoms, in a diamond structure.
+#%%   Test the computation of occopt 9.
+#%% topics = PAW 
+#%%<END TEST_INFO>

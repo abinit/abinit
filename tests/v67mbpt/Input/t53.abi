@@ -1,0 +1,45 @@
+&FILES
+ ddkfile_1 = 't52o_DS4_1WF7',
+ ddkfile_2 = 't52o_DS5_1WF8',
+ ddkfile_3 = 't52o_DS6_1WF9',
+ wfkfile = 't52o_DS3_WFK'
+/
+&PARAMETERS
+ broadening = 0.000003674984,
+ domega = 0.0003674984,
+ maxomega = 0.3674984,
+ scissor = 0.029399875,
+ tolerance = 0.0000,
+ do_temperature = .TRUE.,
+/
+&COMPUTATIONS
+ num_lin_comp = 1,
+ lin_comp = 11,
+ num_nonlin_comp = 0,
+ num_linel_comp = 0,
+ num_nonlin2_comp = 0,
+/
+&TEMPERATURE
+ epfile = 'test_EP.nc',
+/
+
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = optic
+#%% test_chain = t52.abi, t53.abi
+#%% [files]
+#%% files_to_test = 
+#%%  t53_0001_0001_T0001-linopt.out,               tolnlines = 20 , tolabs = 1.1e-2, tolrel = 4.0e-2, fld_options =  -ridiculous;
+#%%  t53_0001_0001_T0005-linopt.out,               tolnlines = 20 , tolabs = 1.1e-2, tolrel = 4.0e-2, fld_options =  -ridiculous;
+#%%  t53_0001_0001_T0010-linopt.out,               tolnlines = 20 , tolabs = 1.1e-2, tolrel = 4.0e-2, fld_options =  -ridiculous;
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = Y. Gillet
+#%% keywords = NC, optic
+#%% description = 
+#%%   Silicon: Solution of optic with temperature-dependent renormalization
+#%%   WARNING: This feature is still under testing, files and variables could change in the next versions
+#%% topics = Optic
+#%%<END TEST_INFO>

@@ -1,0 +1,98 @@
+# Fe LDA+U
+# Tests various usepawu (>0 and <0)
+
+#OPTIONS AND DATASETS
+prtvol 3
+pawprtvol -3
+nline 12
+tolvrs 1.0d-15
+chksymbreak 0
+
+ndtset 8
+
+nstep1 21
+nstep2 21
+
+nstep3 31
+nstep4 31
+
+nstep5 33
+nstep6 33
+
+nstep7 31
+nstep8 31
+
+optdcmagpawu1 1
+optdcmagpawu2 1
+optdcmagpawu3 1
+optdcmagpawu4 1
+
+optdcmagpawu5 3
+optdcmagpawu6 3
+optdcmagpawu7 3
+optdcmagpawu8 3
+
+usepawu1  1 
+usepawu2 -1 
+usepawu3  4 
+usepawu4 -4 
+
+usepawu5  1 
+usepawu6 -1 
+usepawu7  4 
+usepawu8 -4 
+
+# SPIN 
+nsppol  1
+nspinor 2
+nspden  4
+spinat 1.0 1.0 1.0
+
+# CONVERGENCE PARAM
+ecut 14
+pawecutdg  30
+nband  24
+occopt 7
+tsmear 1600 K
+
+# PHYSICAL DATA
+natom 1 ntypat  1 typat  1  
+znucl  26.0 
+xred  0.d0   0.d0   0.d0
+
+#Definition of the unit cell
+acell   3*5.42
+rprim     -0.5  0.5  0.5
+           0.5 -0.5  0.5
+           0.5  0.5 -0.5
+
+# POINTSK 
+kptopt 3  
+ngkpt 1 1 1
+nshiftk 1
+shiftk 0.0 0.0 0.0
+
+# DFT+U
+dmatpuopt 2
+lpawu   2
+upawu  6.0000 eV
+jpawu  1.0000 eV
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "26fe.lda2.paw"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test =
+#%%   t78.abo, tolnlines = 23, tolabs = 1.100e-04, tolrel = 2.000e-03, fld_options = -easy
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = L. Baguet
+#%% keywords = PAW, DFTU
+#%% description =
+#%%  Tests various usepawu on Fe. usepaw=X should give the same result than usepawu=-X.
+#%% topics = DFT+U
+#%%<END TEST_INFO>

@@ -1,0 +1,113 @@
+# Silicon structure
+     acell     10.263  10.263  10.263
+     rprim      0.00   0.50   0.50
+                0.50   0.00   0.50
+                0.50   0.50   0.00
+     natom      2
+      xred      0.00   0.00   0.00
+                0.25   0.25   0.25
+    ntypat      1
+     typat      1      1
+     znucl     14.00
+ symmorphi      0
+
+# Parameters common to all runs
+     ngkpt      4      4      4
+   nshiftk      1
+    shiftk      0.00   0.00   0.00
+    istwfk      8*1
+
+     nstep    100
+    enunit      2
+
+    ndtset      5
+      ecut      6.0
+    ecutwfn     6.0
+    ecutsigx    1.49923969E+00
+    ecuteps     1.49923969E+00
+
+# Self-consistent run to get the WFK file
+    tolwfr1     1.00d-10
+    nband1      35
+    nbdbuf1      5
+    gwpara       1 # Note: gwpara 2 is better
+    symsigma     0 # Note: symsigma 1 is better
+
+# Calculation of the dielectric matrix - iteration 1
+ optdriver2     3
+ gwcalctyp2    28
+    getwfk2     1
+
+     nband2    10
+      awtr2     0     # Note : the default awtr 1 is better
+    symchi2     0     # Note : the default symchi 1 is better
+
+# Calculation of the model GW corrections - iteration 1
+ optdriver3     4
+ gwcalctyp3    28
+    getwfk3     1
+    getscr3     2
+     nband3    10
+ gw_icutcoul3     3   # old deprecated value of icutcoul, only used for legacy
+
+# Calculation of the dielectric matrix - iteration 2
+ optdriver4     3
+ gwcalctyp4    28
+    getwfk4     1
+    getqps4     3
+
+     nband4    10
+      awtr4     0     # Note : the default awtr 1 is better
+    symchi4     0     # Note : the default symchi 1 is better
+
+
+# Calculation of the model GW corrections - iteration 2
+ optdriver5     4
+ gwcalctyp5    28
+    getwfk5     1
+    getqps5     3
+    getscr5     4
+     nband5    10
+ gw_icutcoul5     3   # old deprecated value of icutcoul, only used for legacy
+
+#Common to all model GW calculations
+   rhoqpmix     0.5
+     nkptgw     8
+      kptgw
+              0.00000000E+00  0.00000000E+00  0.00000000E+00
+              2.50000000E-01  0.00000000E+00  0.00000000E+00
+              5.00000000E-01  0.00000000E+00  0.00000000E+00
+              2.50000000E-01  2.50000000E-01  0.00000000E+00
+              5.00000000E-01  2.50000000E-01  0.00000000E+00
+             -2.50000000E-01  2.50000000E-01  0.00000000E+00
+              5.00000000E-01  5.00000000E-01  0.00000000E+00
+             -2.50000000E-01  5.00000000E-01  2.50000000E-01
+       bdgw
+              1 8
+              1 8
+              1 8
+              1 8
+              1 8
+              1 8
+              1 8
+              1 8
+
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/14si.pspnc"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t88.abo, tolnlines = 22, tolabs = 5.000e-03, tolrel = 2.000e-01
+#%% [paral_info]
+#%% max_nprocs = 8
+#%% [extra_info]
+#%% authors = F. Bruneval
+#%% keywords = GW
+#%% description = 
+#%%   Si FCC, in primitive cell (2 atoms/cell).
+#%%   Test self-consistent model GW (2 iterations) following Faleev et al. [PRL 93, 126406 (2004)].
+#%%<END TEST_INFO>

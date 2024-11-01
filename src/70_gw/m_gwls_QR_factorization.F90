@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_gwls_QR_factorization
 !! NAME
 !! m_gwls_QR_factorization
@@ -7,14 +6,10 @@
 !!  .
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2019 ABINIT group (JLJ, BR, MC)
+!! Copyright (C) 2009-2024 ABINIT group (JLJ, BR, MC)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -43,13 +38,12 @@ use m_gwls_hamiltonian
 
 !abinit modules
 use defs_basis
-use defs_datatypes
-use defs_abitypes
 use defs_wvltypes
 use m_abicore
 use m_xmpi
 use m_errors
 
+use defs_abitypes, only : MPI_type
 use m_io_tools,  only : get_unit
 use m_time,      only : timab
 
@@ -78,12 +72,6 @@ contains
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      gwls_GWlanczos,gwls_QR_factorization
-!!
-!! CHILDREN
-!!      xmpi_allgather,xmpi_sum
-!!
 !! SOURCE
 
 subroutine extract_QR(mpi_communicator,Hsize,Xsize,Xmatrix,Rmatrix)
@@ -91,15 +79,15 @@ subroutine extract_QR(mpi_communicator,Hsize,Xsize,Xmatrix,Rmatrix)
 ! This function computes the QR factorization:
 !
 !                X = Q . R
-! 
-! in order to extract the matrix of orthonormal vectors Q and 
+!
+! in order to extract the matrix of orthonormal vectors Q and
 ! the R matrix.
 !
 ! On output, the matrix X is replaced by Q.
 !
-! If the code is running with only one processor, this routine 
+! If the code is running with only one processor, this routine
 ! simply invokes extract_QR_serial, which wraps standard Lapack routines.
-! If we are running in MPI parallel, the serial Lapack routines no 
+! If we are running in MPI parallel, the serial Lapack routines no
 ! longer work (and understanding scalapack is too complicated right now).
 ! Thus, in that case, this routine implements some old school Gram-Schmidt
 ! algorithm.
@@ -107,9 +95,9 @@ subroutine extract_QR(mpi_communicator,Hsize,Xsize,Xmatrix,Rmatrix)
 implicit none
 
 integer,        intent(in) :: Hsize, Xsize, mpi_communicator
-complex(dpc),intent(inout) :: Xmatrix(Hsize,Xsize)  
+complex(dpc),intent(inout) :: Xmatrix(Hsize,Xsize)
 
-complex(dpc),  intent(out),optional :: Rmatrix(Xsize,Xsize)  
+complex(dpc),  intent(out),optional :: Rmatrix(Xsize,Xsize)
 
 ! local variables
 
@@ -148,23 +136,17 @@ end subroutine extract_QR
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      gwls_DielectricArray
-!!
-!! CHILDREN
-!!      xmpi_allgather,xmpi_sum
-!!
 !! SOURCE
 
 subroutine extract_SVD(mpi_communicator, Hsize,lsolutions_max,svd_matrix,svd_values)
 !--------------------------------------------------------------------------
 ! This function computes the singular value decomposition
 !
-!                X = U . SIGMA . V^dagger 
-! 
+!                X = U . SIGMA . V^dagger
+!
 ! More specifically,  the matrix U of orthonormal vectors and SIGMA
 ! the eigenvalues are returned.
-! 
+!
 ! different algorithms are used, depending on parallelisation scheme.
 !--------------------------------------------------------------------------
 implicit none
@@ -197,7 +179,7 @@ if ( .false. ) then
 
 else
 
-  ABI_ALLOCATE(Rmatrix,(lsolutions_max,lsolutions_max))
+  ABI_MALLOC(Rmatrix,(lsolutions_max,lsolutions_max))
 
   ! perform QR first
   call extract_QR(mpi_communicator, Hsize,lsolutions_max,svd_matrix,Rmatrix)
@@ -205,7 +187,7 @@ else
   ! perform SVD on the much smaller Rmatrix!
   call extract_SVD_lapack(lsolutions_max,lsolutions_max,Rmatrix,svd_values)
 
-  ABI_ALLOCATE(svd_tmp,(Hsize,lsolutions_max))
+  ABI_MALLOC(svd_tmp,(Hsize,lsolutions_max))
 
   ! Rmatrix is overwritten with U matrix from SVD. Update the svd_matrix
   call ZGEMM(            'N',   & ! Leave first array as is
@@ -224,8 +206,8 @@ else
 
   svd_matrix(:,:) = svd_tmp(:,:)
 
-  ABI_DEALLOCATE(svd_tmp)
-  ABI_DEALLOCATE(Rmatrix)
+  ABI_FREE(svd_tmp)
+  ABI_FREE(Rmatrix)
 end if
 OPTION_TIMAB = 2
 call timab(GWLS_TIMAB,OPTION_TIMAB,tsec)
@@ -245,20 +227,14 @@ end subroutine extract_SVD
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      gwls_QR_factorization
-!!
-!! CHILDREN
-!!      xmpi_allgather,xmpi_sum
-!!
 !! SOURCE
 
 subroutine extract_SVD_lapack(Hsize,lsolutions_max,svd_matrix,svd_values)
 !--------------------------------------------------------------------------
 ! This function computes the singular value decomposition
 ! using lapack routines. This is not appropriate in MPI parallel!
-! 
-! 
+!
+!
 !--------------------------------------------------------------------------
 implicit none
 
@@ -284,14 +260,14 @@ character(50)  :: debug_filename
 
 
 ! allocate arrays for the svd
-ABI_ALLOCATE(svd_U                  ,(1,1))
-ABI_ALLOCATE(svd_V                  ,(1,1))
+ABI_MALLOC(svd_U                  ,(1,1))
+ABI_MALLOC(svd_V                  ,(1,1))
 
 
 ! DIMENSION QUERRY for singluar decomposition problem
 
-ABI_ALLOCATE(rwork_svd    ,(5*min(Hsize,lsolutions_max)))
-ABI_ALLOCATE(work_svd,(1))
+ABI_MALLOC(rwork_svd    ,(5*min(Hsize,lsolutions_max)))
+ABI_MALLOC(work_svd,(1))
 lwork_svd = -1
 
 call zgesvd('O',            & ! The first min(m,n) columns of U (the left singular vectors) are overwritten on the array A;
@@ -310,7 +286,7 @@ lwork_svd,      & ! size of work array
 rwork_svd,      & ! work array
 info_zgesvd )
 
-if ( info_zgesvd /= 0) then        
+if ( info_zgesvd /= 0) then
   debug_unit = get_unit()
   write(debug_filename,'(A,I4.4,A)') 'LAPACK_DEBUG_PROC=',mpi_enreg%me,'.log'
 
@@ -331,9 +307,9 @@ end if
 
 lwork_svd = nint(dble(work_svd(1)))
 
-ABI_DEALLOCATE(work_svd)
+ABI_FREE(work_svd)
 
-ABI_ALLOCATE(work_svd,(lwork_svd))
+ABI_MALLOC(work_svd,(lwork_svd))
 
 ! computation run
 
@@ -353,7 +329,7 @@ lwork_svd,      & ! size of work array
 rwork_svd,      & ! work array
 info_zgesvd )
 
-if ( info_zgesvd /= 0) then        
+if ( info_zgesvd /= 0) then
   debug_unit = get_unit()
   write(debug_filename,'(A,I4.4,A)') 'LAPACK_DEBUG_PROC=',mpi_enreg%me,'.log'
 
@@ -370,10 +346,10 @@ end if
 
 
 
-ABI_DEALLOCATE(work_svd)
-ABI_DEALLOCATE(rwork_svd)
-ABI_DEALLOCATE(svd_U)
-ABI_DEALLOCATE(svd_V)
+ABI_FREE(work_svd)
+ABI_FREE(rwork_svd)
+ABI_FREE(svd_U)
+ABI_FREE(svd_V)
 
 end subroutine extract_SVD_lapack
 !!***
@@ -393,12 +369,6 @@ end subroutine extract_SVD_lapack
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      gwls_QR_factorization
-!!
-!! CHILDREN
-!!      xmpi_allgather,xmpi_sum
-!!
 !! SOURCE
 
 subroutine extract_QR_Householder(mpi_communicator,Hsize,Xsize,Xmatrix,Rmatrix)
@@ -406,26 +376,26 @@ subroutine extract_QR_Householder(mpi_communicator,Hsize,Xsize,Xmatrix,Rmatrix)
 ! This function computes the QR factorization:
 !
 !                X = Q . R
-! 
-! in order to extract the matrix of orthonormal vectors Q and 
+!
+! in order to extract the matrix of orthonormal vectors Q and
 ! the R matrix.
 !
 ! On output, the matrix X is replaced by Q.
 !
 ! This routine uses Householder operations to generate Q and R.
-! Special attention is given to the fact that the matrix may be 
+! Special attention is given to the fact that the matrix may be
 ! distributed across processors and MPI communication is necessary.
-! 
+!
 !--------------------------------------------------------------------------
 implicit none
 
 integer,        intent(in) :: Hsize, Xsize, mpi_communicator
-complex(dpc),intent(inout) :: Xmatrix(Hsize,Xsize)  
+complex(dpc),intent(inout) :: Xmatrix(Hsize,Xsize)
 
-complex(dpc),  intent(out),optional :: Rmatrix(Xsize,Xsize)  
+complex(dpc),  intent(out),optional :: Rmatrix(Xsize,Xsize)
 
 ! local variables
-integer        :: numbrer_of_plane_waves 
+integer        :: numbrer_of_plane_waves
 
 integer        :: io_unit
 integer        :: ierr
@@ -460,7 +430,7 @@ complex(dpc), allocatable :: coeff(:)
 
 integer :: mpi_rank
 integer :: mpi_nproc
-logical :: head_node    
+logical :: head_node
 
 ! *************************************************************************
 
@@ -496,7 +466,7 @@ if (debug .and.  head_node ) then
     write(io_unit,25) "#   The algorithm is running in MPI parallel with ",mpi_nproc," processors"
     write(io_unit,10) "#                                                                                       "
     write(io_unit,10) "#======================================================================================="
-  end if        
+  end if
 
   counter = counter + 1
 
@@ -513,7 +483,7 @@ end if
 !--------------------------------------------------------------------------------
 ! Get the number of plane waves on every processor
 !--------------------------------------------------------------------------------
-ABI_ALLOCATE(nproc_array,(mpi_nproc))
+ABI_MALLOC(nproc_array,(mpi_nproc))
 
 nproc_array = 0
 
@@ -537,7 +507,7 @@ nproc_array(j) = 0
 do i = 1, j-1
 nproc_array(j) = nproc_array(j)+nproc_array(i)
 end do
-end do 
+end do
 
 
 !--------------------------------------------------------------------------------
@@ -545,17 +515,17 @@ end do
 !
 !--------------------------------------------------------------------------------
 
-ABI_ALLOCATE(A_matrix, (Hsize,Xsize))
-ABI_ALLOCATE(V_matrix, (Hsize,Xsize))
-ABI_ALLOCATE(list_beta, (Xsize))
-ABI_ALLOCATE(coeff   , (Xsize))
+ABI_MALLOC(A_matrix, (Hsize,Xsize))
+ABI_MALLOC(V_matrix, (Hsize,Xsize))
+ABI_MALLOC(list_beta, (Xsize))
+ABI_MALLOC(coeff   , (Xsize))
 
 A_matrix(:,:) = Xmatrix(:,:)
 V_matrix(:,:) = cmplx_0
 list_beta(:)  = cmplx_0
 
 
-ABI_ALLOCATE(vj, (Hsize))
+ABI_MALLOC(vj, (Hsize))
 
 do j = 1, Xsize
 
@@ -592,7 +562,7 @@ if (abs(norm_x) > tol14) then
   ! update vj, on the right processor!
   if ( l_local <= Hsize  .and. l_local >= 1) then
 
-    phase = vj(l_local) 
+    phase = vj(l_local)
 
     if (abs(phase) < tol14) then
       phase = cmplx_1
@@ -650,7 +620,7 @@ end do
 !
 !--------------------------------------------------------------------------------
 
-ABI_ALLOCATE(Rinternal,(Xsize,Xsize))
+ABI_MALLOC(Rinternal,(Xsize,Xsize))
 
 Rinternal = cmplx_0
 
@@ -660,7 +630,7 @@ do i = 1, j
 l_local = i-nproc_array(1+mpi_rank)
 
 if ( l_local <= Hsize  .and. l_local >= 1) then
-  Rinternal(i,j) = A_matrix(l_local,j) 
+  Rinternal(i,j) = A_matrix(l_local,j)
 end if
 
 end do ! i
@@ -675,7 +645,7 @@ call xmpi_sum(Rinternal,mpi_communicator,ierr) ! sum on all processors
 !
 !--------------------------------------------------------------------------------
 
-ABI_ALLOCATE( Qinternal, (Hsize,Xsize))
+ABI_MALLOC( Qinternal, (Hsize,Xsize))
 
 ! initialize Q to the identity in the top corner
 Qinternal = cmplx_0
@@ -693,7 +663,7 @@ end do ! j
 ! Build Q interatively
 do j = Xsize,1, -1
 
-vj(:) = V_matrix(:,j) 
+vj(:) = V_matrix(:,j)
 
 
 ! Update the A matrix
@@ -729,9 +699,9 @@ end do ! j
 
 
 ! clean up
-ABI_DEALLOCATE(V_matrix)
-ABI_DEALLOCATE(coeff)
-ABI_DEALLOCATE(vj)
+ABI_FREE(V_matrix)
+ABI_FREE(coeff)
+ABI_FREE(vj)
 
 !--------------------------------------------------------------------------------
 ! Do some debug, if requested
@@ -750,7 +720,7 @@ if (debug ) then
   end if
 
 
-  ABI_ALLOCATE(error,(Xsize,Xsize))
+  ABI_MALLOC(error,(Xsize,Xsize))
 
   error = cmplx_0
 
@@ -759,7 +729,7 @@ if (debug ) then
   do l1=1,Xsize
 
   cmplx_value = complex_vector_product(Qinternal(:,l1),Qinternal(:,l2),Hsize)
-  call xmpi_sum(cmplx_value,mpi_communicator,ierr) ! sum on all processors working on FFT! 
+  call xmpi_sum(cmplx_value,mpi_communicator,ierr) ! sum on all processors working on FFT!
 
   error(l1,l2) = error(l1,l2)+cmplx_value
 
@@ -772,9 +742,9 @@ if (debug ) then
   end if
 
 
-  ABI_DEALLOCATE(error)
+  ABI_FREE(error)
 
-  ABI_ALLOCATE(error,(Hsize,Xsize))
+  ABI_MALLOC(error,(Hsize,Xsize))
 
   error = Xmatrix
 
@@ -793,13 +763,13 @@ if (debug ) then
   end do
   end do
 
-  call xmpi_sum(real_value,mpi_communicator,ierr) ! sum on all processors 
+  call xmpi_sum(real_value,mpi_communicator,ierr) ! sum on all processors
 
 
   real_value = sqrt(real_value)
 
   if ( head_node) then
-    write(io_unit,12) "#               || Xin - Q.R ||   = ",real_value 
+    write(io_unit,12) "#               || Xin - Q.R ||   = ",real_value
 
     if ( real_value > 1.0D-10 ) write(io_unit,10) "#               ERROR!              "
 
@@ -826,7 +796,7 @@ if (debug ) then
 
   end if
 
-  ABI_DEALLOCATE(error)
+  ABI_FREE(error)
 
 end if
 
@@ -841,11 +811,11 @@ if (present(Rmatrix)) then
   Rmatrix = Rinternal
 end if
 
-ABI_DEALLOCATE(Qinternal)
-ABI_DEALLOCATE(Rinternal)
-ABI_DEALLOCATE(nproc_array)
-ABI_DEALLOCATE(A_matrix)
-ABI_DEALLOCATE(list_beta)
+ABI_FREE(Qinternal)
+ABI_FREE(Rinternal)
+ABI_FREE(nproc_array)
+ABI_FREE(A_matrix)
+ABI_FREE(list_beta)
 
 
 10 format(A)

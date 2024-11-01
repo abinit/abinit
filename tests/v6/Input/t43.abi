@@ -1,0 +1,89 @@
+# Finite electric field calculation of alas at clamped atomic positions
+# (after M. Veithen, 04.5.2005)
+
+#Definition of the elementary cell
+#*********************************
+   acell 3*10.53
+   rprim 0.0 0.5 0.5
+         0.5 0.0 0.5
+         0.5 0.5 0.0
+
+#Definition of the atoms
+#***********************
+   natom 2
+   ntypat 2
+   znucl 13 33
+   typat 1 2
+   xred  0.00  0.00  0.00
+         0.25  0.25  0.25
+
+#Definition of the SCF procedure
+#*******************************
+   toldfe 1.0d-22 # ultratight convergence so all test
+                  # platforms show same convergence
+                  # behavior in the 10 allowed steps
+   nstep 10
+   nband 4
+   nbdbuf 0
+
+
+#Definition of the plane wave basis set
+#**************************************
+   ecut  4
+   pawecutdg 8
+   ecutsm 0.5
+   dilatmx 1.05
+
+   kptopt 1
+   symmorphi 0
+   ngkpt 2 2 2 # do not expect converged results with such
+               # coarse k point mesh!!
+   nshiftk 4
+   shiftk 0.5 0.5 0.5
+          0.5 0.0 0.0
+          0.0 0.5 0.0
+          0.0 0.0 0.5
+
+
+# ndtset  11
+  ndtset   3
+jdtset  11
+        21  # 22  23  24  25     # The additional 8 values of the field have been suppressed to spare CPU time
+        31  # 32  33  34  35
+
+berryopt11 -1       rfdir11    1 1 1
+
+berryopt21  4       efield21   0.0001  0.0001  0.0001    getwfk21  11
+berryopt22  4       efield22   0.0002  0.0002  0.0002    getwfk22  21
+berryopt23  4       efield23   0.0003  0.0003  0.0003    getwfk23  22
+berryopt24  4       efield24   0.0004  0.0004  0.0004    getwfk24  23
+berryopt25  4       efield25   0.0005  0.0005  0.0005    getwfk25  24
+
+berryopt31  4       efield31  -0.0001 -0.0001 -0.0001    getwfk31  11
+berryopt32  4       efield32  -0.0002 -0.0002 -0.0002    getwfk32  31
+berryopt33  4       efield33  -0.0003 -0.0003 -0.0003    getwfk33  32
+berryopt34  4       efield34  -0.0004 -0.0004 -0.0004    getwfk34  33
+berryopt35  4       efield35  -0.0005 -0.0005 -0.0005    getwfk35  34
+
+bfield 3*0.0
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "al_ps.abinit.paw, as_ps.paw"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t43.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = J. Zwanziger
+#%% keywords = PAW, DFPT
+#%% description = 
+#%%   PAW Berrys Phase calculation of Born effective charge in AlAs by
+#%%   finite electric fields (contributed by J. Zwanziger, adapted from efield tutorial.)
+#%%   Cannot be executed with more than 1 MPI node.
+#%% topics = Berry
+#%%<END TEST_INFO>

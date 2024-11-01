@@ -1,0 +1,32 @@
+# anaddb input file to compute DFPT properties of AlP,
+# based on previous abinit computations in tpolarization_2.abi
+
+# General information
+#********************
+   rfmeth  1
+   chneut  2
+
+# Flags
+#*******
+   elaflag  3
+ piezoflag  3
+ instrflag  1
+
+##############################################################
+# This section is used only for regression testing of ABINIT #
+##############################################################
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = anaddb
+#%% test_chain = tpolarization_2.abi, tpolarization_3.abi
+#%% input_ddb = tpolarization_2o_DS3_DDB
+#%% [files]
+#%% files_to_test = 
+#%%   tpolarization_3.abo, tolnlines=  2, tolabs=  5.000e-07, tolrel=  3.000e-04, fld_options=-medium
+#%% [paral_info]
+#%% max_nprocs = 4
+#%% [extra_info]
+#%% authors = J. Zwanziger, M. Veithen, P. Ghosez
+#%% keywords = 
+#%% description = Anaddb input file.
+#%%<END TEST_INFO>

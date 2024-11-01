@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_suscep_stat
 !! NAME
 !! m_suscep_stat
@@ -7,14 +6,10 @@
 !! Compute the susceptibility matrix
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2019 ABINIT group (XG, AR, MB)
+!!  Copyright (C) 2008-2024 ABINIT group (XG, AR, MB)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -27,11 +22,12 @@
 MODULE m_suscep_stat
 
  use defs_basis
- use defs_abitypes
  use m_xmpi
  use m_errors
  use m_abicore
+ use m_distribfft
 
+ use defs_abitypes, only : MPI_type
  use m_time,    only : timab
  use m_pawang,  only : pawang_type
  use m_pawtab,  only : pawtab_type
@@ -147,14 +143,6 @@ CONTAINS  !=====================================================================
 !!   four susceptibilities are non-zero: chi0-(s1,s1),(s3,s3).
 !!   They are stored in susmat(:,ipw1,1:2,ipw2,1:2)
 !!
-!! PARENTS
-!!      vtorho
-!!
-!! CHILDREN
-!!      destroy_mpi_enreg,fftpac,init_distribfft_seq,initmpi_seq,pawcprj_alloc
-!!      pawcprj_free,pawcprj_get,pawcprj_mpi_allgather,pawgylmg,ph1d3d
-!!      sphereboundary,susk,suskmm,symg,symrhg,timab,xmpi_sum,zhpev
-!!
 !! SOURCE
 
 subroutine suscep_stat(atindx,atindx1,cg,cprj,dielar,dimcprj,doccde,&
@@ -166,8 +154,6 @@ subroutine suscep_stat(atindx,atindx1,cg,cprj,dielar,dimcprj,doccde,&
 &  pawang,pawtab,phnonsdiel,ph1ddiel,rprimd,&
 &  susmat,symafm,symrel,tnons,typat,ucvol,unpaw,usecprj,usepaw,usetimerev,&
 &  wtk,ylmdiel)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -206,7 +192,7 @@ subroutine suscep_stat(atindx,atindx1,cg,cprj,dielar,dimcprj,doccde,&
  integer :: ispinor,istwf_k,isym,j1,j2,j3,jj,jsp,k1,k2,k3
  integer :: my_nspinor,nband_k,nband_loc,ndiel1,ndiel2,ndiel3,ndiel4,ndiel5,ndiel6
  integer :: nkpg_diel,npw_k,npwsp,nspden_eff,nspden_tmp,nsym1,nsym2
- integer :: paral_kgb_diel,spaceComm,t1,t2,testocc
+ integer :: spaceComm,t1,t2,testocc
  real(dp) :: ai,ai2,ar,ar2,diegap,dielam,emax,invnsym
  real(dp) :: invnsym1,invnsym2,phi1,phi12,phi2,phr1,phr12
  real(dp) :: phr2,sumdocc,weight
@@ -241,12 +227,12 @@ subroutine suscep_stat(atindx,atindx1,cg,cprj,dielar,dimcprj,doccde,&
    write (message,'(3a)')&
 &   ' cprj datastructure must be allocated !',ch10,&
 &   ' Action: change pawusecp input keyword.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  if (mpi_enreg%paral_spinor==1) then
    message = ' not yet allowed for parallelization over spinors !'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 !Init mpicomm
@@ -293,16 +279,16 @@ subroutine suscep_stat(atindx,atindx1,cg,cprj,dielar,dimcprj,doccde,&
  if (nsym2 > 0) invnsym2=one/dble(nsym2)
 
 !Allocations
- ABI_ALLOCATE(occ_deavg,(mband))
+ ABI_MALLOC(occ_deavg,(mband))
  if(occopt>=3) then
-   ABI_ALLOCATE(drhode,(2,npwdiel,nspden_eff))
+   ABI_MALLOC(drhode,(2,npwdiel,nspden_eff))
  else
-   ABI_ALLOCATE(drhode,(0,0,0))
+   ABI_MALLOC(drhode,(0,0,0))
  end if
  if(extrap==1) then
-   ABI_ALLOCATE(rhoextrap,(ndiel4,ndiel5,ndiel6,nspinor))
+   ABI_MALLOC(rhoextrap,(ndiel4,ndiel5,ndiel6,nspinor))
  else
-   ABI_ALLOCATE(rhoextrap,(0,0,0,0))
+   ABI_MALLOC(rhoextrap,(0,0,0,0))
  end if
 
 !zero the susceptibility matrix and other needed quantities
@@ -314,23 +300,23 @@ subroutine suscep_stat(atindx,atindx1,cg,cprj,dielar,dimcprj,doccde,&
 
 !PAW additional initializations
  if (usepaw==1) then
-   ABI_ALLOCATE(gylmg_diel,(npwdiel,lmax_diel**2,ntypat))
-   ABI_ALLOCATE(ph3d_diel,(2,npwdiel,natom))
+   ABI_MALLOC(gylmg_diel,(npwdiel,lmax_diel**2,ntypat))
+   ABI_MALLOC(ph3d_diel,(2,npwdiel,natom))
    if (neglect_pawhat==0) then
-     ABI_ALLOCATE(phkxred_diel,(2,natom))
-     ABI_ALLOCATE(kpg_dum,(0,0))
+     ABI_MALLOC(phkxred_diel,(2,natom))
+     ABI_MALLOC(kpg_dum,(0,0))
      kpt_diel(1:3,1)=zero;phkxred_diel(1,:)=one;phkxred_diel(2,:)=zero;nkpg_diel=0
 !    write(std_out,*) ' lmax_diel ', lmax_diel
      call pawgylmg(gprimd,gylmg_diel,kg_diel,kpg_dum,kpt_diel,lmax_diel,nkpg_diel,npwdiel,ntypat,pawtab,ylmdiel)
      call ph1d3d(1,natom,kg_diel,natom,natom,npwdiel,ndiel1,ndiel2,ndiel3,phkxred_diel,ph1ddiel,ph3d_diel)
-     ABI_DEALLOCATE(phkxred_diel)
-     ABI_DEALLOCATE(kpg_dum)
+     ABI_FREE(phkxred_diel)
+     ABI_FREE(kpg_dum)
    else
      gylmg_diel=zero;ph3d_diel=one
    end if
  else
-   ABI_ALLOCATE(gylmg_diel,(0,0,0))
-   ABI_ALLOCATE(ph3d_diel,(0,0,0))
+   ABI_MALLOC(gylmg_diel,(0,0,0))
+   ABI_MALLOC(ph3d_diel,(0,0,0))
  end if
 
  call timab(741,2,tsec)
@@ -362,11 +348,11 @@ subroutine suscep_stat(atindx,atindx1,cg,cprj,dielar,dimcprj,doccde,&
      call timab(742,1,tsec)
 
 
-     ABI_ALLOCATE(gbound,(2*mgfftdiel+8,2))
-     ABI_ALLOCATE(kg_k,(3,npw_k))
+     ABI_MALLOC(gbound,(2*mgfftdiel+8,2))
+     ABI_MALLOC(kg_k,(3,npw_k))
 
      if (usepaw==1) then
-       ABI_DATATYPE_ALLOCATE(cprj_k,(natom,my_nspinor*nband_k))
+       ABI_MALLOC(cprj_k,(natom,my_nspinor*nband_k))
        if (neglect_pawhat==0) then
          call pawcprj_alloc(cprj_k,0,dimcprj)
          if (mpi_enreg%nproc_band==1) then
@@ -375,21 +361,21 @@ subroutine suscep_stat(atindx,atindx1,cg,cprj,dielar,dimcprj,doccde,&
 &           mpicomm=mpi_enreg%comm_kpt,proc_distrb=mpi_enreg%proc_distrb)
          else
            nband_loc=nband_k/mpi_enreg%nproc_band
-           ABI_DATATYPE_ALLOCATE(cprj_loc,(natom,my_nspinor*nband_loc))
+           ABI_MALLOC(cprj_loc,(natom,my_nspinor*nband_loc))
            call pawcprj_alloc(cprj_loc,0,dimcprj)
            call pawcprj_get(atindx1,cprj_loc,cprj,natom,1,ibg,ikpt,iorder_cprj,isp,&
 &           mband/mpi_enreg%nproc_band,mkmem,natom,nband_loc,nband_loc,my_nspinor,nsppol,unpaw,&
 &           mpicomm=mpi_enreg%comm_kpt,proc_distrb=mpi_enreg%proc_distrb)
-           call pawcprj_mpi_allgather(cprj_loc,cprj_k,natom,my_nspinor*nband_loc,dimcprj,0,&
-&           mpi_enreg%nproc_band,mpi_enreg%comm_band,ierr,rank_ordered=.true.)
+           call pawcprj_mpi_allgather(cprj_loc,cprj_k,natom,my_nspinor*nband_loc,mpi_enreg%bandpp,&
+&           dimcprj,0,mpi_enreg%nproc_band,mpi_enreg%comm_band,ierr,rank_ordered=.true.)
            call pawcprj_free(cprj_loc)
-           ABI_DATATYPE_DEALLOCATE(cprj_loc)
+           ABI_FREE(cprj_loc)
          end if
        else
          !call pawcprj_nullify(cprj_k)
        end if
      else
-       ABI_DATATYPE_ALLOCATE(cprj_k,(0,0))
+       ABI_MALLOC(cprj_k,(0,0))
      end if
 
      kg_k(:,1:npw_k)=kg(:,1+ikg:npw_k+ikg)
@@ -427,15 +413,15 @@ subroutine suscep_stat(atindx,atindx1,cg,cprj,dielar,dimcprj,doccde,&
 &       gbound_diel,gylmg_diel,icg,ikpt,&
 &       isp,istwf_k,kg_diel,kg_k,lmax_diel,mband,mcg,mgfftdiel,mpi_enreg,&
 &       natom,nband_k,ndiel4,ndiel5,ndiel6,neglect_pawhat,ngfftdiel,nkpt,&
-&       npwdiel,npw_k,nspden,nspden_eff,nspinor,nsppol,ntypat,occ,occopt,occ_deavg,paral_kgb_diel,&
+&       npwdiel,npw_k,nspden,nspden_eff,nspinor,nsppol,ntypat,occ,occopt,occ_deavg,&
 &       pawang,pawtab,ph3d_diel,rhoextrap,sumdocc,&
 &       susmat,typat,ucvol,usepaw,wtk)
      end if
 
      call timab(743,2,tsec)
 
-     ABI_DEALLOCATE(gbound)
-     ABI_DEALLOCATE(kg_k)
+     ABI_FREE(gbound)
+     ABI_FREE(kg_k)
 
      bdtot_index=bdtot_index+nband_k
 
@@ -449,7 +435,7 @@ subroutine suscep_stat(atindx,atindx1,cg,cprj,dielar,dimcprj,doccde,&
          call pawcprj_free(cprj_k)
        end if
      end if
-     ABI_DATATYPE_DEALLOCATE(cprj_k)
+     ABI_FREE(cprj_k)
 
 !    End loop on ikpt:  --------------------------------------------------------
    end do
@@ -466,8 +452,8 @@ subroutine suscep_stat(atindx,atindx1,cg,cprj,dielar,dimcprj,doccde,&
 !    Warning2 : if non-collinear magnetism, treat both spins
 !    Warning3 : this is subtle for antiferro magnetism
      nspden_tmp=1;if (antiferro) nspden_tmp=2
-     ABI_ALLOCATE(rhoextrr,(nfftdiel,nspden_tmp))
-     ABI_ALLOCATE(rhoextrg,(2,nfftdiel))
+     ABI_MALLOC(rhoextrr,(nfftdiel,nspden_tmp))
+     ABI_MALLOC(rhoextrg,(2,nfftdiel))
      if (nspden==1.and.nspinor==2) rhoextrap(:,:,:,1)=rhoextrap(:,:,:,1)+rhoextrap(:,:,:,2)
 
      do ispinor=1,min(nspinor,nspden)
@@ -480,7 +466,7 @@ subroutine suscep_stat(atindx,atindx1,cg,cprj,dielar,dimcprj,doccde,&
 !      (note symrhg also make the reverse FFT, to get symmetrized density;
 !      this is useless here, and should be made an option)
        call symrhg(1,gprimd,irrzondiel,mpi_enreg_diel,nfftdiel,nfftdiel,ngfftdiel,&
-&       nspden_tmp,1,nsym,paral_kgb_diel,phnonsdiel,rhoextrg,rhoextrr,rprimd,symafm,symrel)
+&       nspden_tmp,1,nsym,phnonsdiel,rhoextrg,rhoextrr,rprimd,symafm,symrel,tnons)
 
        do ipw2=1,npwdiel
          j1=kg_diel(1,ipw2) ; j2=kg_diel(2,ipw2) ; j3=kg_diel(3,ipw2)
@@ -500,8 +486,8 @@ subroutine suscep_stat(atindx,atindx1,cg,cprj,dielar,dimcprj,doccde,&
        end do
 
      end do
-     ABI_DEALLOCATE(rhoextrg)
-     ABI_DEALLOCATE(rhoextrr)
+     ABI_FREE(rhoextrg)
+     ABI_FREE(rhoextrr)
 
      call timab(744,2,tsec)
 
@@ -510,10 +496,10 @@ subroutine suscep_stat(atindx,atindx1,cg,cprj,dielar,dimcprj,doccde,&
 !  End loop over spins ---------------------------------------------------------
  end do
 
- ABI_DEALLOCATE(occ_deavg)
- ABI_DEALLOCATE(rhoextrap)
- ABI_DEALLOCATE(gylmg_diel)
- ABI_DEALLOCATE(ph3d_diel)
+ ABI_FREE(occ_deavg)
+ ABI_FREE(rhoextrap)
+ ABI_FREE(gylmg_diel)
+ ABI_FREE(ph3d_diel)
  !end if
 
  call destroy_mpi_enreg(mpi_enreg_diel)
@@ -523,7 +509,7 @@ subroutine suscep_stat(atindx,atindx1,cg,cprj,dielar,dimcprj,doccde,&
 
  if(xmpi_paral==1)then
    call timab(746,1,tsec)
-   ABI_ALLOCATE(sussum,(2*npwdiel*nspden*npwdiel*nspden))
+   ABI_MALLOC(sussum,(2*npwdiel*nspden*npwdiel*nspden))
 !  Recreate full susmat on all proc.
 !  This should be coded more efficiently,
 !  since half of the matrix is still empty, and
@@ -531,7 +517,7 @@ subroutine suscep_stat(atindx,atindx1,cg,cprj,dielar,dimcprj,doccde,&
    sussum(:)=reshape(susmat(:,:,:,:,:),(/2*npwdiel*nspden*npwdiel*nspden/))
    call xmpi_sum(sussum,spaceComm,ierr)
    susmat(:,:,:,:,:)=reshape(sussum(:),(/2,npwdiel,nspden,npwdiel,nspden/))
-   ABI_DEALLOCATE(sussum)
+   ABI_FREE(sussum)
 !  Recreate full drhode on all proc.
    if(occopt>=3 .and. testocc==1)then
      call xmpi_sum(drhode,spaceComm,ierr)
@@ -567,13 +553,13 @@ subroutine suscep_stat(atindx,atindx1,cg,cprj,dielar,dimcprj,doccde,&
 
 !Compute symmetric of G-vectors and eventual phases
 !(either time-reversal or spatial symmetries)
- ABI_ALLOCATE(tmrev_g,(npwdiel))
- ABI_ALLOCATE(sym_g,(npwdiel,nsym))
- ABI_ALLOCATE(phdiel,(2,npwdiel,nsym))
+ ABI_MALLOC(tmrev_g,(npwdiel))
+ ABI_MALLOC(sym_g,(npwdiel,nsym))
+ ABI_MALLOC(phdiel,(2,npwdiel,nsym))
  call symg(kg_diel,npwdiel,nsym,phdiel,sym_g,symrel,tmrev_g,tnons)
 
 !Impose spatial symmetries to the spin-diagonal susceptibility matrix
- ABI_ALLOCATE(suswk,(2,npwdiel,npwdiel,nspden_eff))
+ ABI_MALLOC(suswk,(2,npwdiel,npwdiel,nspden_eff))
  do isp=1,nspden_eff
    suswk(:,:,:,isp)=susmat(:,:,isp,:,isp) ! Temporary storage
  end do
@@ -613,7 +599,7 @@ subroutine suscep_stat(atindx,atindx1,cg,cprj,dielar,dimcprj,doccde,&
      end do
    end do
  end do
- ABI_DEALLOCATE(suswk)
+ ABI_FREE(suswk)
 
 
 !--  Add contribibution to susceptibility due to change of Fermi level -----------
@@ -622,7 +608,7 @@ subroutine suscep_stat(atindx,atindx1,cg,cprj,dielar,dimcprj,doccde,&
  if (occopt>=3.and.testocc==1) then
 
 !  Impose spatial symmetries to drhode
-   ABI_ALLOCATE(drhode_wk,(2,npwdiel,nspden_eff))
+   ABI_MALLOC(drhode_wk,(2,npwdiel,nspden_eff))
    do isp=1,nspden_eff
      jsp=min(3-isp,nsppol)
      do ipw1=1,npwdiel
@@ -672,11 +658,11 @@ subroutine suscep_stat(atindx,atindx1,cg,cprj,dielar,dimcprj,doccde,&
        end do
      end do
    end do
-   ABI_DEALLOCATE(drhode_wk)
+   ABI_FREE(drhode_wk)
 
  end if
  !if (occopt>=3)  then
- ABI_DEALLOCATE(drhode)
+ ABI_FREE(drhode)
  !end if
 
 
@@ -684,7 +670,7 @@ subroutine suscep_stat(atindx,atindx1,cg,cprj,dielar,dimcprj,doccde,&
 !---------------------------------------------------------------------------------
 
  if (usetimerev==1) then
-   ABI_ALLOCATE(suswk,(2,npwdiel,npwdiel,1))
+   ABI_MALLOC(suswk,(2,npwdiel,npwdiel,1))
 
 !  Impose the time-reversal symmetry to the spin-diagonal susceptibility matrix
    do isp=1,nspden_eff
@@ -715,12 +701,12 @@ subroutine suscep_stat(atindx,atindx1,cg,cprj,dielar,dimcprj,doccde,&
        end do
      end do
    end if
-   ABI_DEALLOCATE(suswk)
+   ABI_FREE(suswk)
  end if
 
- ABI_DEALLOCATE(phdiel)
- ABI_DEALLOCATE(sym_g)
- ABI_DEALLOCATE(tmrev_g)
+ ABI_FREE(phdiel)
+ ABI_FREE(sym_g)
+ ABI_FREE(tmrev_g)
 
 
 !-- The full susceptibility matrix is computed -----------------------------------
@@ -732,11 +718,11 @@ subroutine suscep_stat(atindx,atindx1,cg,cprj,dielar,dimcprj,doccde,&
  if(diag==1)then
 
    npwsp=npwdiel*nspden_eff
-   ABI_ALLOCATE(sush,(npwsp*(npwsp+1)))
-   ABI_ALLOCATE(susvec,(2,npwsp,npwsp))
-   ABI_ALLOCATE(eig_diel,(npwsp))
-   ABI_ALLOCATE(zhpev1,(2,2*npwsp-1))
-   ABI_ALLOCATE(zhpev2,(3*npwsp-2))
+   ABI_MALLOC(sush,(npwsp*(npwsp+1)))
+   ABI_MALLOC(susvec,(2,npwsp,npwsp))
+   ABI_MALLOC(eig_diel,(npwsp))
+   ABI_MALLOC(zhpev1,(2,2*npwsp-1))
+   ABI_MALLOC(zhpev2,(3*npwsp-2))
    ier=0
 
 !  Store the susceptibility matrix in proper mode before calling zhpev
@@ -775,12 +761,12 @@ subroutine suscep_stat(atindx,atindx1,cg,cprj,dielar,dimcprj,doccde,&
      write(std_out,'(i5,es16.6)' )ii,eig_diel(ii)
    end do
 
-   ABI_DEALLOCATE(sush)
-   ABI_DEALLOCATE(susvec)
-   ABI_DEALLOCATE(eig_diel)
-   ABI_DEALLOCATE(zhpev1)
-   ABI_DEALLOCATE(zhpev2)
-   MSG_ERROR("Stopping here!")
+   ABI_FREE(sush)
+   ABI_FREE(susvec)
+   ABI_FREE(eig_diel)
+   ABI_FREE(zhpev1)
+   ABI_FREE(zhpev2)
+   ABI_ERROR("Stopping here!")
  end if
 
  call timab(747,2,tsec)
@@ -886,14 +872,6 @@ end subroutine suscep_stat
 !! This is in slight violation of programming rules, but I think it is safe, since the pointers remain local
 !! GZ
 !!
-!! PARENTS
-!!      suscep_stat
-!!
-!! CHILDREN
-!!      destroy_mpi_enreg,fourwf,init_distribfft_seq,initmpi_seq,pawsushat
-!!      sphereboundary,timab,xmpi_allgather,xmpi_allgatherv,xmpi_alltoallv
-!!      xmpi_sum
-!!
 !! SOURCE
 
 subroutine susk(atindx,bdtot_index,cg_mpi,cprj_k,doccde,drhode,eigen,extrap,gbound,&
@@ -903,8 +881,6 @@ subroutine susk(atindx,bdtot_index,cg_mpi,cprj_k,doccde,drhode,eigen,extrap,gbou
 &  npwdiel,npw_k_mpi,nspden,nspden_eff,nspinor,nsppol,ntypat,occ,occopt,occ_deavg,&
 &  pawang,pawtab,ph3d_diel,rhoextrap,sumdocc,&
 &  susmat,typat,ucvol,usepaw,wtk)
-
- implicit none
 
 !Arguments ------------------------------------
 !This type is defined in defs_mpi
@@ -951,11 +927,12 @@ subroutine susk(atindx,bdtot_index,cg_mpi,cprj_k,doccde,drhode,eigen,extrap,gbou
  integer,allocatable :: band_loc(:),kg_k_gather(:,:),npw_per_proc(:),rdispls(:)
  integer,allocatable :: rdispls_all(:),rdisplsloc(:),recvcounts(:)
  integer,allocatable :: recvcountsloc(:),sdispls(:),sdisplsloc(:),sendcounts(:)
- integer,allocatable :: sendcountsloc(:),susmat_mpi(:,:,:)
+ integer,allocatable :: sendcountsloc(:)
  integer,allocatable,target :: kg_k_gather_all(:,:)
  real(dp) :: tsec(2)
  real(dp),allocatable :: cwavef(:,:),cwavef_alltoall(:,:)
  real(dp),allocatable :: cwavef_alltoall_gather(:,:),dummy(:,:),rhoaug(:,:,:)
+ real(dp),allocatable :: susmat_mpi(:,:,:)
  real(dp),allocatable :: wfprod(:,:),wfraug(:,:,:,:),wfrspa(:,:,:,:,:,:)
  real(dp),allocatable,target :: cg_local(:,:)
  real(dp),pointer :: cg(:,:)
@@ -988,13 +965,13 @@ subroutine susk(atindx,bdtot_index,cg_mpi,cprj_k,doccde,drhode,eigen,extrap,gbou
 !ENDDEBUG
 
 !Allocations, initializations
- ABI_ALLOCATE(rhoaug,(ndiel4,ndiel5,ndiel6))
- ABI_ALLOCATE(wfraug,(2,ndiel4,ndiel5,ndiel6))
- ABI_ALLOCATE(wfprod,(2,npwdiel))
- ABI_ALLOCATE(wfrspa,(2,ndiel4,ndiel5,ndiel6,nspinor,mband))
- ABI_ALLOCATE(dummy,(2,1))
+ ABI_MALLOC(rhoaug,(ndiel4,ndiel5,ndiel6))
+ ABI_MALLOC(wfraug,(2,ndiel4,ndiel5,ndiel6))
+ ABI_MALLOC(wfprod,(2,npwdiel))
+ ABI_MALLOC(wfrspa,(2,ndiel4,ndiel5,ndiel6,nspinor,mband))
+ ABI_MALLOC(dummy,(2,1))
  wfrspa(:,:,:,:,:,:)=zero
- ABI_ALLOCATE(treat_band,(nband_k))
+ ABI_MALLOC(treat_band,(nband_k))
  treat_band(:)=.true.
  isp1=isp;isp2=isp
  if (nspden_eff==2.and.nspinor==2) isp2=isp+1
@@ -1006,14 +983,14 @@ subroutine susk(atindx,bdtot_index,cg_mpi,cprj_k,doccde,drhode,eigen,extrap,gbou
    spaceComm=mpi_enreg%comm_band
    blocksize=mpi_enreg%nproc_band
    nbdblock=nband_k/blocksize
-   ABI_ALLOCATE(sdispls,(blocksize))
-   ABI_ALLOCATE(sdisplsloc,(blocksize))
-   ABI_ALLOCATE(sendcounts,(blocksize))
-   ABI_ALLOCATE(sendcountsloc,(blocksize))
-   ABI_ALLOCATE(rdispls,(blocksize))
-   ABI_ALLOCATE(rdisplsloc,(blocksize))
-   ABI_ALLOCATE(recvcounts,(blocksize))
-   ABI_ALLOCATE(recvcountsloc,(blocksize))
+   ABI_MALLOC(sdispls,(blocksize))
+   ABI_MALLOC(sdisplsloc,(blocksize))
+   ABI_MALLOC(sendcounts,(blocksize))
+   ABI_MALLOC(sendcountsloc,(blocksize))
+   ABI_MALLOC(rdispls,(blocksize))
+   ABI_MALLOC(rdisplsloc,(blocksize))
+   ABI_MALLOC(recvcounts,(blocksize))
+   ABI_MALLOC(recvcountsloc,(blocksize))
 !  First gather the kg_k in kg_k_gather_all
    npw_k_loc=npw_k_mpi
    call xmpi_allgather(npw_k_loc,recvcounts,spaceComm,ier)
@@ -1022,12 +999,12 @@ subroutine susk(atindx,bdtot_index,cg_mpi,cprj_k,doccde,drhode,eigen,extrap,gbou
      rdispls(iproc)=rdispls(iproc-1)+recvcounts(iproc-1)
    end do
    ndatarecv=rdispls(blocksize)+recvcounts(blocksize)
-   ABI_ALLOCATE(kg_k_gather,(3,ndatarecv))
+   ABI_MALLOC(kg_k_gather,(3,ndatarecv))
    recvcountsloc(:)=recvcounts(:)*3
    rdisplsloc(:)=rdispls(:)*3
    call xmpi_allgatherv(kg_k_mpi,3*npw_k_loc,kg_k_gather,recvcountsloc(:),rdisplsloc,spaceComm,ier)
-   ABI_ALLOCATE(npw_per_proc,(mpi_enreg%nproc_fft))
-   ABI_ALLOCATE(rdispls_all,(mpi_enreg%nproc_fft))
+   ABI_MALLOC(npw_per_proc,(mpi_enreg%nproc_fft))
+   ABI_MALLOC(rdispls_all,(mpi_enreg%nproc_fft))
    spaceComm=mpi_enreg%comm_fft
    call xmpi_allgather(ndatarecv,npw_per_proc,spaceComm,ier)
    rdispls_all(1)=0
@@ -1035,16 +1012,16 @@ subroutine susk(atindx,bdtot_index,cg_mpi,cprj_k,doccde,drhode,eigen,extrap,gbou
      rdispls_all(iproc)=rdispls_all(iproc-1)+npw_per_proc(iproc-1)
    end do
    npw_tot=rdispls_all(mpi_enreg%nproc_fft)+npw_per_proc(mpi_enreg%nproc_fft)
-   ABI_ALLOCATE(kg_k_gather_all,(3,npw_tot))
+   ABI_MALLOC(kg_k_gather_all,(3,npw_tot))
    call xmpi_allgatherv(kg_k_gather,3*ndatarecv,kg_k_gather_all,3*npw_per_proc(:),3*rdispls_all,spaceComm,ier)
 !  At this point kg_k_gather_all contains all the kg
    if(allocated(cwavef))  then
-     ABI_DEALLOCATE(cwavef)
+     ABI_FREE(cwavef)
    end if
-   ABI_ALLOCATE(cwavef,(2,npw_k_loc*nspinor*blocksize))
+   ABI_MALLOC(cwavef,(2,npw_k_loc*nspinor*blocksize))
    sizemax_per_proc=nband_k/(mpi_enreg%nproc_band*mpi_enreg%nproc_fft)+1
-   ABI_ALLOCATE(band_loc,(sizemax_per_proc))
-   ABI_ALLOCATE(cg_local,(2,sizemax_per_proc*npw_tot*nspinor))
+   ABI_MALLOC(band_loc,(sizemax_per_proc))
+   ABI_MALLOC(cg_local,(2,sizemax_per_proc*npw_tot*nspinor))
    iband_loc=0
    do ibdblock=1,nbdblock
      cwavef(:,1:npw_k_loc*nspinor*blocksize)=&
@@ -1053,7 +1030,7 @@ subroutine susk(atindx,bdtot_index,cg_mpi,cprj_k,doccde,drhode,eigen,extrap,gbou
      do iproc=1,blocksize
        sdispls(iproc)=(iproc-1)*npw_k_loc
      end do
-     ABI_ALLOCATE(cwavef_alltoall,(2,ndatarecv*nspinor))
+     ABI_MALLOC(cwavef_alltoall,(2,ndatarecv*nspinor))
      recvcountsloc(:)=recvcounts(:)*2*nspinor
      rdisplsloc(:)=rdispls(:)*2*nspinor
      sendcountsloc(:)=sendcounts(:)*2*nspinor
@@ -1062,7 +1039,7 @@ subroutine susk(atindx,bdtot_index,cg_mpi,cprj_k,doccde,drhode,eigen,extrap,gbou
      spaceComm=mpi_enreg%comm_band
      call xmpi_alltoallv(cwavef,sendcountsloc,sdisplsloc,cwavef_alltoall,recvcountsloc,rdisplsloc,spaceComm,ier)
      call timab(547,2,tsec)
-     ABI_ALLOCATE(cwavef_alltoall_gather,(2,npw_tot*nspinor))
+     ABI_MALLOC(cwavef_alltoall_gather,(2,npw_tot*nspinor))
      blocksize=mpi_enreg%nproc_band
      spaceComm=mpi_enreg%comm_fft
      call xmpi_allgatherv(cwavef_alltoall,2*nspinor*ndatarecv,cwavef_alltoall_gather,&
@@ -1075,8 +1052,8 @@ subroutine susk(atindx,bdtot_index,cg_mpi,cprj_k,doccde,drhode,eigen,extrap,gbou
        band_loc(iband_loc)=iband
        cg_local(:,1+(iband_loc-1)*npw_tot*nspinor:iband_loc*npw_tot*nspinor)=cwavef_alltoall_gather(:,1:npw_tot*nspinor)
      end if
-     ABI_DEALLOCATE(cwavef_alltoall_gather)
-     ABI_DEALLOCATE(cwavef_alltoall)
+     ABI_FREE(cwavef_alltoall_gather)
+     ABI_FREE(cwavef_alltoall)
    end do
 !  On exit:
 !  npw_tot will be npw
@@ -1088,18 +1065,18 @@ subroutine susk(atindx,bdtot_index,cg_mpi,cprj_k,doccde,drhode,eigen,extrap,gbou
    cg=>cg_local(:,:)
    icg=>icg_loc
    call sphereboundary(gbound,istwf_k,kg_k,mgfftdiel,npw_k)
-   ABI_DEALLOCATE(npw_per_proc)
-   ABI_DEALLOCATE(rdispls_all)
-   ABI_DEALLOCATE(sendcounts)
-   ABI_DEALLOCATE(recvcounts)
-   ABI_DEALLOCATE(sdispls)
-   ABI_DEALLOCATE(rdispls)
-   ABI_DEALLOCATE(sendcountsloc)
-   ABI_DEALLOCATE(sdisplsloc)
-   ABI_DEALLOCATE(recvcountsloc)
-   ABI_DEALLOCATE(rdisplsloc)
-   ABI_DEALLOCATE(kg_k_gather)
-   ABI_DEALLOCATE(cwavef)
+   ABI_FREE(npw_per_proc)
+   ABI_FREE(rdispls_all)
+   ABI_FREE(sendcounts)
+   ABI_FREE(recvcounts)
+   ABI_FREE(sdispls)
+   ABI_FREE(rdispls)
+   ABI_FREE(sendcountsloc)
+   ABI_FREE(sdisplsloc)
+   ABI_FREE(recvcountsloc)
+   ABI_FREE(rdisplsloc)
+   ABI_FREE(kg_k_gather)
+   ABI_FREE(cwavef)
 !  Because they will be summed over all procs, and arrive on input, rescale drhode and rhoextrap
    if(occopt>=3)drhode(:,:,isp1:isp2)=drhode(:,:,isp1:isp2)/real(mpi_enreg%nproc_fft*mpi_enreg%nproc_band,dp)
    if(extrap==1)rhoextrap(:,:,:,:)=rhoextrap(:,:,:,:)/real(mpi_enreg%nproc_fft*mpi_enreg%nproc_band,dp)
@@ -1120,7 +1097,7 @@ subroutine susk(atindx,bdtot_index,cg_mpi,cprj_k,doccde,drhode,eigen,extrap,gbou
  call timab(752,1,tsec)
 
 !Loop over bands to fft and store Fourier transform of wavefunction
- ABI_ALLOCATE(cwavef,(2,npw_k))
+ ABI_MALLOC(cwavef,(2,npw_k))
  do iband=1,nband_k
    if(.not. treat_band(iband))  cycle ! I am not treating this band (only for the parallel case)
    iband_loc=iband_loc+1
@@ -1235,7 +1212,7 @@ subroutine susk(atindx,bdtot_index,cg_mpi,cprj_k,doccde,drhode,eigen,extrap,gbou
  call timab(752,2,tsec)
  call timab(753,1,tsec)
 
- ABI_DEALLOCATE(cwavef)
+ ABI_FREE(cwavef)
 
 !Stuff for parallelism (bands-FFT)
  if(mpi_enreg%paral_kgb==1) then
@@ -1249,13 +1226,13 @@ subroutine susk(atindx,bdtot_index,cg_mpi,cprj_k,doccde,drhode,eigen,extrap,gbou
    if(occopt>=3) then
      call xmpi_sum(sumdocc,mpi_enreg%comm_bandfft,ier)
    end if
-   ABI_ALLOCATE(susmat_mpi,(2,npwdiel,npwdiel))
+   ABI_MALLOC(susmat_mpi,(2,npwdiel,npwdiel))
    do i1=isp1,isp2
      susmat_mpi(:,:,:)=susmat(:,:,i1,:,i1)
      call xmpi_sum(susmat_mpi,mpi_enreg%comm_bandfft,ier)
      susmat(:,:,i1,:,i1)=susmat_mpi(:,:,:)/real(mpi_enreg%nproc_fft*mpi_enreg%nproc_band,dp)
    end do
-   ABI_DEALLOCATE(susmat_mpi)
+   ABI_FREE(susmat_mpi)
  end if
  call timab(753,2,tsec)
 
@@ -1368,25 +1345,25 @@ subroutine susk(atindx,bdtot_index,cg_mpi,cprj_k,doccde,drhode,eigen,extrap,gbou
  call timab(755,1,tsec)
 
  if(mpi_enreg%paral_kgb==1) then
-   ABI_ALLOCATE(susmat_mpi,(2,npwdiel,npwdiel))
+   ABI_MALLOC(susmat_mpi,(2,npwdiel,npwdiel))
    do i1=isp1,isp2
      susmat_mpi(:,:,:)=susmat(:,:,i1,:,i1)
      call xmpi_sum(susmat_mpi,mpi_enreg%comm_bandfft,ier)
      susmat(:,:,i1,:,i1)=susmat_mpi(:,:,:)
    end do
-   ABI_DEALLOCATE(susmat_mpi)
-   ABI_DEALLOCATE(band_loc)
-   ABI_DEALLOCATE(treat_band)
-   ABI_DEALLOCATE(cg_local)
-   ABI_DEALLOCATE(kg_k_gather_all)
+   ABI_FREE(susmat_mpi)
+   ABI_FREE(band_loc)
+   ABI_FREE(treat_band)
+   ABI_FREE(cg_local)
+   ABI_FREE(kg_k_gather_all)
  end if
 
  call destroy_mpi_enreg(mpi_enreg_diel)
- ABI_DEALLOCATE(dummy)
- ABI_DEALLOCATE(rhoaug)
- ABI_DEALLOCATE(wfprod)
- ABI_DEALLOCATE(wfraug)
- ABI_DEALLOCATE(wfrspa)
+ ABI_FREE(dummy)
+ ABI_FREE(rhoaug)
+ ABI_FREE(wfprod)
+ ABI_FREE(wfraug)
+ ABI_FREE(wfrspa)
 
  call timab(755,2,tsec)
  call timab(750,2,tsec)
@@ -1481,31 +1458,22 @@ end subroutine susk
 !!  susmat(2,npwdiel,nspden,npwdiel,nspden)=
 !!   the susceptibility (or density-density response) matrix in reciprocal space
 !!
-!! PARENTS
-!!      suscep_stat
-!!
-!! CHILDREN
-!!      destroy_mpi_enreg,fourwf,init_distribfft_seq,initmpi_seq,pawsushat
-!!      timab
-!!
 !! SOURCE
 
 subroutine suskmm(atindx,bdtot_index,cg,cprj_k,doccde,drhode,eigen,extrap,gbound,&
 &  gbound_diel,gylmg_diel,icg,ikpt,isp,istwf_k,kg_diel,kg_k,&
 &  lmax_diel,mband,mcg,mgfftdiel,mpi_enreg,&
 &  natom,nband_k,ndiel4,ndiel5,ndiel6,neglect_pawhat,ngfftdiel,nkpt,&
-&  npwdiel,npw_k,nspden,nspden_eff,nspinor,nsppol,ntypat,occ,occopt,occ_deavg,paral_kgb,&
+&  npwdiel,npw_k,nspden,nspden_eff,nspinor,nsppol,ntypat,occ,occopt,occ_deavg,&
 &  pawang,pawtab,ph3d_diel,rhoextrap,sumdocc,&
 &  susmat,typat,ucvol,usepaw,wtk)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: bdtot_index,extrap,icg,ikpt,isp,istwf_k,lmax_diel,mband,mcg
  integer,intent(in) :: mgfftdiel,natom,nband_k,ndiel4,ndiel5,ndiel6,neglect_pawhat
  integer,intent(in) :: nkpt,npw_k,npwdiel,nspden,nspden_eff,nspinor
- integer,intent(in) :: nsppol,ntypat,occopt,paral_kgb,usepaw
+ integer,intent(in) :: nsppol,ntypat,occopt,usepaw
  real(dp),intent(in) :: ucvol
  real(dp),intent(inout) :: sumdocc
  type(MPI_type),intent(in) :: mpi_enreg
@@ -1543,21 +1511,16 @@ subroutine suskmm(atindx,bdtot_index,cg,cprj_k,doccde,drhode,eigen,extrap,gbound
 
 ! *************************************************************************
 
-!DEBUG
-!write(std_out,*)' suskmm : enter '
-!if(.true.)stop
-!ENDDEBUG
-
  call timab(760,1,tsec)
  call timab(761,1,tsec)
 
 !Allocations, initializations
  ndiel1=ngfftdiel(1) ; ndiel2=ngfftdiel(2) ; ndiel3=ngfftdiel(3)
  testocc=1
- ABI_ALLOCATE(rhoaug,(ndiel4,ndiel5,ndiel6))
- ABI_ALLOCATE(wfraug,(2,ndiel4,ndiel5,ndiel6))
- ABI_ALLOCATE(wfprod,(2,npwdiel))
- ABI_ALLOCATE(dummy,(2,1))
+ ABI_MALLOC(rhoaug,(ndiel4,ndiel5,ndiel6))
+ ABI_MALLOC(wfraug,(2,ndiel4,ndiel5,ndiel6))
+ ABI_MALLOC(wfprod,(2,npwdiel))
+ ABI_MALLOC(dummy,(2,1))
 
 !The dielectric stuff is performed in sequential mode.
 !Set mpi_enreg_diel accordingly
@@ -1587,7 +1550,7 @@ subroutine suskmm(atindx,bdtot_index,cg,cprj_k,doccde,drhode,eigen,extrap,gbound
 &   '  The number of bands must be larger or equal to 2, in suskmm.',ch10,&
 &   '  It is equal to ',nband_k,'.',ch10,&
 &   '  Action : choose another preconditioner.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 !Compute the effective number of blocks, and the number of bands in
@@ -1602,11 +1565,11 @@ subroutine suskmm(atindx,bdtot_index,cg,cprj_k,doccde,drhode,eigen,extrap,gbound
 !ENDDEBUG
 
 !wfrspa1 will contain the wavefunctions of the slow sampling (iblk1)
- ABI_ALLOCATE(wfrspa1,(2,ndiel4,ndiel5,ndiel6,nspinor,nbnd_in_blk))
+ ABI_MALLOC(wfrspa1,(2,ndiel4,ndiel5,ndiel6,nspinor,nbnd_in_blk))
 !wfrspa2 will contain the wavefunctions of the rapid sampling (iblk2)
- ABI_ALLOCATE(wfrspa2,(2,ndiel4,ndiel5,ndiel6,nspinor,nbnd_in_blk))
+ ABI_MALLOC(wfrspa2,(2,ndiel4,ndiel5,ndiel6,nspinor,nbnd_in_blk))
 
- ABI_ALLOCATE(cwavef,(2,npw_k))
+ ABI_MALLOC(cwavef,(2,npw_k))
 
  call timab(761,2,tsec)
 
@@ -1965,13 +1928,13 @@ subroutine suskmm(atindx,bdtot_index,cg,cprj_k,doccde,drhode,eigen,extrap,gbound
 !ENDDEBUG
 
  call destroy_mpi_enreg(mpi_enreg_diel)
- ABI_DEALLOCATE(cwavef)
- ABI_DEALLOCATE(dummy)
- ABI_DEALLOCATE(rhoaug)
- ABI_DEALLOCATE(wfprod)
- ABI_DEALLOCATE(wfraug)
- ABI_DEALLOCATE(wfrspa1)
- ABI_DEALLOCATE(wfrspa2)
+ ABI_FREE(cwavef)
+ ABI_FREE(dummy)
+ ABI_FREE(rhoaug)
+ ABI_FREE(wfprod)
+ ABI_FREE(wfraug)
+ ABI_FREE(wfrspa1)
+ ABI_FREE(wfrspa2)
 
  call timab(760,2,tsec)
 

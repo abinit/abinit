@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_wfd_optic
 !! NAME
 !!  m_wfd_optic
@@ -7,14 +6,10 @@
 !!  Functions to compute optical matrix elements using the wavefunction descriptor.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2019 ABINIT group (MG)
+!!  Copyright (C) 2008-2024 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -33,10 +28,10 @@ module m_wfd_optic
 
  use defs_datatypes,      only : ebands_t, pseudopotential_type
  use m_hide_lapack,       only : matrginv
- use m_bz_mesh,           only : kmesh_t, get_BZ_item
+ use m_bz_mesh,           only : kmesh_t
  use m_crystal,           only : crystal_t
  use m_vkbr,              only : vkbr_t, vkbr_free, vkbr_init, nc_ihr_comm
- use m_wfd,               only : wfd_t
+ use m_wfd,               only : wfdgw_t, wave_t
  use m_pawtab,            only : pawtab_type
  use m_pawcprj,           only : pawcprj_type, pawcprj_alloc, pawcprj_free
  use m_paw_hr,            only : pawhur_t, paw_ihr
@@ -64,25 +59,18 @@ contains
 !! lomo_min,max_band=minimum and max band index to be calculated.
 !! nkbz=Number of points in the full Brillouin zone.
 !! inclvkb=if different from 0, [Vnl,r] is included in the calculation of the
-!!   matrix element of the velocity operator. No meaning for PAW (except for LDA+U)
+!!   matrix element of the velocity operator. No meaning for PAW (except for DFT+U)
 !! qpt(3)
 !! Kmesh<kmesh_t>=Info on the k-point sampling for wave functions.
 !! Cryst<crystal_t>=Structure defining the crystalline structure.
 !! KS_Bst<ebands_t>
 !! Pawtab(Cryst%ntypat*usepaw)<pawtab_type>=PAW tabulated starting data
 !! Psps <pseudopotential_type>=variables related to pseudopotentials.
-!! Hur(Cryst%natom*usepaw)<pawhur_t>=Only for PAW and LDA+U, quantities used to evaluate the commutator [H_u,r].
-!! Wfd<wfd_t>=Handler for the wavefunctions.
+!! Hur(Cryst%natom*usepaw)<pawhur_t>=Only for PAW and DFT+U, quantities used to evaluate the commutator [H_u,r].
+!! Wfd<wfdgw_t>=Handler for the wavefunctions.
 !!
 !! OUTPUT
 !! opt_cvk(lomo_min:max_band,lomo_min:max_band,nkbz,nsppol)=Matrix elements <c k|e^{+iqr}|v k>
-!!
-!! PARENTS
-!!      m_exc_spectra,m_haydock
-!!
-!! CHILDREN
-!!      get_bz_item,matrginv,pawcprj_alloc,pawcprj_free,vkbr_free,vkbr_init
-!!      wfd_distribute_bbp,wfd_get_cprj,wrtout,xmpi_barrier,xmpi_sum
 !!
 !! SOURCE
 
@@ -96,7 +84,7 @@ subroutine calc_optical_mels(Wfd,Kmesh,KS_Bst,Cryst,Psps,Pawtab,Hur,&
  type(crystal_t),intent(in) :: Cryst
  type(pseudopotential_type),intent(in) :: Psps
  type(ebands_t),intent(in) :: KS_Bst
- type(wfd_t),target,intent(inout) :: Wfd
+ type(wfdgw_t),target,intent(inout) :: Wfd
 !arrays
  integer,intent(in) :: lomo_spin(Wfd%nsppol)
  real(dp),intent(in) :: qpoint(3)
@@ -110,7 +98,9 @@ subroutine calc_optical_mels(Wfd,Kmesh,KS_Bst,Cryst,Psps,Pawtab,Hur,&
  integer :: ik_bz,ik_ibz,itim_k,isym_k,ib_c,ib_v,ierr,my_rank
  real(dp) :: ediff
  complex(dpc) :: emcvk
+ character(len=500) :: msg
  type(vkbr_t) :: vkbr
+ type(wave_t),pointer :: wave_v, wave_c
 !arrays
  integer,allocatable :: bbp_distrb(:,:)
  integer,ABI_CONTIGUOUS pointer :: kg_k(:,:)
@@ -134,14 +124,14 @@ subroutine calc_optical_mels(Wfd,Kmesh,KS_Bst,Cryst,Psps,Pawtab,Hur,&
  usepaw  = Wfd%usepaw
 
  if (usepaw==1) then
-   ABI_DT_MALLOC(Cp_v,(Wfd%natom,nspinor))
+   ABI_MALLOC(Cp_v,(Wfd%natom,nspinor))
    call pawcprj_alloc(Cp_v,0,Wfd%nlmn_atm)
-   ABI_DT_MALLOC(Cp_c,(Wfd%natom,nspinor))
+   ABI_MALLOC(Cp_c,(Wfd%natom,nspinor))
    call pawcprj_alloc(Cp_c,0,Wfd%nlmn_atm)
  end if
 
  if (inclvkb==1.and.usepaw==0) then
-   MSG_ERROR("inclvkb==1 not coded,using inclvkb==2")
+   ABI_ERROR("inclvkb==1 not coded,using inclvkb==2")
  end if
  !
  ! Calculate the matrix elements of ir in the IBZ.
@@ -172,14 +162,15 @@ subroutine calc_optical_mels(Wfd,Kmesh,KS_Bst,Cryst,Psps,Pawtab,Hur,&
     ! TODO: The lower triangle can be Reconstructed by symmetry.
     do ib_v=lomo_spin(spin),max_band ! Loop over bands
       if ( ALL(bbp_distrb(ib_v,:)/=my_rank) ) CYCLE
-      ug_v => Wfd%Wave(ib_v,ik_ibz,spin)%ug
-      if (usepaw==1) then
-        call wfd%get_cprj(ib_v,ik_ibz,spin,Cryst,Cp_v,sorted=.FALSE.)
-      end if
+
+      ABI_CHECK(wfd%get_wave_ptr(ib_v, ik_ibz, spin, wave_v, msg) == 0, msg)
+      ug_v => wave_v%ug
+      if (usepaw==1) call wfd%get_cprj(ib_v,ik_ibz,spin,Cryst,Cp_v,sorted=.FALSE.)
 
       do ib_c=lomo_spin(spin),max_band
        if (bbp_distrb(ib_v,ib_c)/=my_rank) CYCLE
-       ug_c => Wfd%Wave(ib_c,ik_ibz,spin)%ug
+       ABI_CHECK(wfd%get_wave_ptr(ib_c, ik_ibz, spin, wave_c, msg) == 0, msg)
+       ug_c => wave_c%ug
 
        if (usepaw==0) then
          ! Calculate matrix elements of i[H,r] for NC pseudopotentials.
@@ -211,9 +202,9 @@ subroutine calc_optical_mels(Wfd,Kmesh,KS_Bst,Cryst,Psps,Pawtab,Hur,&
 
  if (usepaw==1) then
    call pawcprj_free(Cp_v)
-   ABI_DT_FREE(Cp_v)
+   ABI_FREE(Cp_v)
    call pawcprj_free(Cp_c)
-   ABI_DT_FREE(Cp_c)
+   ABI_FREE(Cp_c)
  end if
  !
  ! ======================================================
@@ -237,7 +228,7 @@ subroutine calc_optical_mels(Wfd,Kmesh,KS_Bst,Cryst,Psps,Pawtab,Hur,&
    do ik_bz=1,nkbz
     !
     ! Get ik_ibz, and symmetries index from ik_bz.
-    call get_BZ_item(Kmesh,ik_bz,kbz,ik_ibz,isym_k,itim_k)
+    call Kmesh%get_BZ_item(ik_bz,kbz,ik_ibz,isym_k,itim_k)
 
     mat_dp = DBLE(Cryst%symrec(:,:,isym_k))
     call matrginv(mat_dp,3,3) ! Invert
@@ -272,8 +263,6 @@ contains
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
 !!
 !! SOURCE
 

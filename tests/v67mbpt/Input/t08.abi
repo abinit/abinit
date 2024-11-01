@@ -1,0 +1,108 @@
+# Crystalline alpha-quartz
+# Calculation of the GW corrections with non-symmorphic operations, with
+# a non-ordered set of atoms
+
+ndtset 3
+
+# DATASET 1 : KSS calculations using also symmorphic operations
+nband1      55       # number of (occ and empty) bands to be computed
+nbdbuf1     5
+tolwfr1     1.0d-10
+istwfk1     *1
+
+# DATASET 2 : screening calculation
+optdriver2  3
+symchi2     1
+getwfk2    -1
+ecutwfn2    6
+ecuteps2    1.1
+fftgw2      11
+nband2      50
+inclvkb2    0 # Disable [Vnl, r] to reduce wall time.
+
+# DATASET 3 : sigma calculation
+optdriver3 4
+symsigma3  1
+getwfk3   -2
+getscr3   -1
+ppmodel3   1
+ecutsigx3   6
+ecutwfn3    6
+fftgw3      11
+nband3      50
+nkptgw3     1
+kptgw3   0.0  0.0  1/4
+bdgw3    24  25
+zcut3     0.1 eV
+gw_icutcoul3  3  # old deprecated value of icutcoul, only used for legacy
+
+
+#################### COMMON PART #########################
+
+# number of self-consistent field steps
+nstep        20
+diemac       4.0
+#tolvrs       1d-5
+# energy cutoff [Ha]:
+ecut         6
+
+#Definition of the k-point grid
+occopt 1           # Semiconductor
+kptopt 1           # Option for the automatic generation of k points, taking
+                   # into account the symmetry
+
+ngkpt   3 3 2
+nshiftk  1
+shiftk  0.0 0.0 0.5
+
+# Definition of the atom types
+npsp   2
+znucl  14  8
+ntypat 2
+
+# Definition of the atoms
+natom 9
+# Chose an arbitrary order
+typat 2 1 2 2 1 1 2 2 2
+
+# Experimental parameters (Wyckoff pag 312)
+# u(Si)= 0.465
+# x= 0.415 ; y= 0.272 ; z= 0.120
+
+acell   2*4.91304  5.40463  Angstrom
+
+#With respect to test v6#98, translate all atoms by 0.5   0.25 0.5
+xred   0.915   0.522   0.620              #O
+       0.965   0.250   0.500              #Si
+      -0.643  -0.165   0.9533333333333333 #O
+       0.772   0.665   0.0466666666666666 #O
+       0.500   0.715   0.1666666666666666 #Si
+      -0.965  -0.215   0.8333333333333333 #Si
+      -0.772   0.393   0.2866666666666666 #O
+       0.643  -0.022  -0.620              #O
+      -0.915   0.107   0.7133333333333333 #O
+
+rprim   5.0000000000e-01 -8.6602540378e-01  0.0000000000e+00
+        5.0000000000e-01  8.6602540378e-01  0.0000000000e+00
+        0.0000000000e+00  0.0000000000e+00  1.0000000000e+00
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/14si.pspnc, 08o_001023.pspfhi"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t08.abo, tolnlines = 23, tolabs = 2.0e-3, tolrel = 6.0e-3, fld_options =  -medium
+#%% [paral_info]
+#%% max_nprocs = 4
+#%% [extra_info]
+#%% authors = X. Gonze
+#%% keywords = NC, GW
+#%% description = 
+#%%   Crystalline alpha-quartz
+#%%   Calculation of the GW corrections with non-symmorphic operations,
+#%%   but with a set of translated atoms. Norm-conserving case.
+#%%   Similar to v6#97.
+#%%<END TEST_INFO>

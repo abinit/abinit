@@ -1,6 +1,6 @@
 # -*- Autoconf -*-
 #
-# Copyright (C) 2005-2019 ABINIT Group (Yann Pouillon)
+# Copyright (C) 2005-2024 ABINIT Group (Yann Pouillon)
 #
 # This file is part of the Abinit software package. For license information,
 # please see the COPYING file in the top-level directory of the Abinit source
@@ -241,6 +241,14 @@ AC_DEFUN([ABI_INIT_CPU_INFO],[
           abi_cpu_model="opteron"
         fi
       fi
+      dnl EPYC ?
+      if test "${abi_cpu_model}" = ""; then
+        abi_cpu_model=`cat cpuinfo | grep -i 'EPYC'`
+        if test "${abi_cpu_model}" != ""; then
+          abi_cpu_vendor="amd"
+          abi_cpu_model="epyc"
+        fi
+      fi
       dnl Sempron ?
       if test "${abi_cpu_model}" = ""; then
         abi_cpu_model=`cat cpuinfo | grep 'Sempron'`
@@ -353,7 +361,7 @@ AC_DEFUN([ABI_INIT_OS_INFO],[
 AC_DEFUN([ABI_INIT_HEADER],[
   dnl Set top of file ...
   AH_TOP([/*
- * Copyright (C) 2005-2019 ABINIT Group (Yann Pouillon)
+ * Copyright (C) 2005-2024 ABINIT Group (Yann Pouillon)
  *
  * This file is part of the Abinit software package. For license information,
  * please see the COPYING file in the top-level directory of the Abinit source
@@ -370,29 +378,48 @@ AC_DEFUN([ABI_INIT_HEADER],[
 #define FC_INTEL 1
 #endif
 
+/* FIXME Requyires investigation: as nvcompiler is LLVM-based, should we assume FC_LLVM as well ? */
+#ifdef __NVCOMPILER
+#define FC_NVHPC 1
+#endif
+
 ])
 
   dnl ... as well as bottom
   AH_BOTTOM([/* *** BEGIN sanity checks *** */
 
 /* MPI options */
-#if defined HAVE_MPI 
+#if defined HAVE_MPI
 
 /* Check that one MPI level is actually defined */
-#if ! defined HAVE_MPI1 && ! defined HAVE_MPI2
-#error "HAVE_MPI1 and HAVE_MPI2 are both undefined"
+#if ! defined HAVE_MPI1 && ! defined HAVE_MPI2 && ! defined HAVE_MPI3
+#error "HAVE_MPI1, HAVE_MPI2, and HAVE_MPI3, are all undefined"
 #endif
 
 /* Check that only one MPI level has been defined */
-#if defined HAVE_MPI1 && defined HAVE_MPI2
+#if defined HAVE_MPI1
+#  if defined HAVE_MPI2
+#    if defined HAVE_MPI3
+#      error "HAVE_MPI1, Have_MPI2, and HAVE_MPI3, are all defined"
+#    else
 #error "HAVE_MPI1 and HAVE_MPI2 are both defined"
+#    endif
+#  else
+#    if defined HAVE_MPI3
+#      error "HAVE_MPI1 and HAVE_MPI3 are both defined"
+#    endif
+#  endif
+#else
+#  if defined HAVE_MPI2 && defined HAVE_MPI3
+#    error "HAVE_MPI2 and HAVE_MPI3 are both defined"
+#  endif
 #endif
 
 #else /* HAVE_MPI */
 
 /* Check that no MPI level is defined */
-#if defined HAVE_MPI1 || defined HAVE_MPI2
-#error "HAVE_MPI1 and HAVE_MPI2 must be undefined"
+#if defined HAVE_MPI1 || defined HAVE_MPI2 || defined HAVE_MPI3
+#error "HAVE_MPI1, HAVE_MPI2, and HAVE_MPI3, must be undefined"
 #endif
 
 /* Check that MPI-IO is undefined */
@@ -401,16 +428,6 @@ AC_DEFUN([ABI_INIT_HEADER],[
 #endif
 
 #endif /* HAVE_MPI */
-
-/* ETSF_IO support */
-#if defined HAVE_ETSF_IO
-
-/* Check that NetCDF is defined */
-#if ! defined HAVE_NETCDF
-#error "HAVE_NETCDF must but defined for ETSF_IO to work"
-#endif
-
-#endif /* HAVE_ETSF_IO */
 
 /* *** END sanity checks *** */
 
@@ -464,7 +481,7 @@ AC_DEFUN([ABI_INIT_INSTALL_DIRS],[
 AC_DEFUN([ABI_INIT_TARGET],[
   dnl Clean-up operating system name
   [abi_target_os=`echo ${target_os} | sed -e 's/-.*//'`]
-  
+
   ABINIT_TARGET="${target_cpu}_${abi_target_os}_${abi_fc_vendor}${abi_fc_version}"
   AC_DEFINE_UNQUOTED(ABINIT_TARGET,"${ABINIT_TARGET}",
     [Abinit target description.])

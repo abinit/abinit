@@ -1,0 +1,44 @@
+!Input file for the anaddb code. Analysis of the BaTiO3 DDB
+
+!Flags
+ dieflag   2     ! 2=> electronic dielectric tensor only
+
+!Wavevector list number 1 (Reduced coordinates and normalization factor)
+  nph1l    7       ! number of phonons in list 1
+  qph1l   0.0    0.0    0.0       1.0  !  (Gamma point)
+          0.5    0.0    0.0       1.0  !  (X point)
+          0.0    0.5    0.5       1.0  !  (M point)
+          0.5    0.5    0.5       1.0  !  (R point)
+          0.125  0.125  0.125     1.0  !  (1/4 along the Gamma-R line)
+          0.25   0.25   0.25      1.0  !  (1/2 along the Gamma-R line)
+          0.375  0.375  0.375     1.0  !  (3/4 along the Gamma-R line)
+
+
+!Wavevector list number 2 (Gamma point only, with limiting direction
+!           in cartesian coordinates. )
+  nph2l  1         ! number of phonons in list 2
+  qph2l  0.0 0.0 1.0    0.0
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = anaddb
+#%% test_chain = t18.abi, t19.abi, t20.abi, t21.abi
+#%% [files]
+#%% files_to_test = 
+#%%   t18.abo, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
+#%% extra_inputs = t18.ddb.in.gz
+#%% [paral_info]
+#%% max_nprocs = 4
+#%% [extra_info]
+#%% keywords = 
+#%% authors = Unknown
+#%% description = 
+#%%   Analyze a DDB for BaTiO3 (see also tests 19 and 20). Here, 
+#%%   no use of IFCs is done. Phonon frequencies at the
+#%%   Gamma, X, M, R and along the Gamma-R line are obtained
+#%%   directly from the DDB. They are to be compared
+#%%   with the data in the TABLE II of Ghosez et al, Ferroelectrics,
+#%%   206-207, 205 (1998), as well as FIGURE I. 
+#%%   At q(1/8 1/8 1/8), the lowest frequency is  i 136.7 cm-1 .
+#%% topics = Phonons
+#%%<END TEST_INFO>

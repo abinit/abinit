@@ -1,0 +1,42 @@
+NormalMode
+#DEFINE_UNITCELL
+brav 6 0
+natom_unitcell 2
+xred_unitcell -0.33333333333333 0.0 0.0 0.33333333333333 0.33333333333333 0.5
+typat_unitcell 1 1
+ntypat 1
+amu 4.78800000E+01
+#DEFINE_SUPERCELL
+rprimd  22.2762747 0.0000000 0.0000000 -11.1381373 19.2918198 0.0000000 0.0000000 0.0000000 35.2619154
+multiplicity 4 0 0 0 4 0 0 0 4
+natom  128
+typat 1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1 
+temperature 300
+#DEFINE_COMPUTATIONAL_DETAILS
+nstep_max 20
+nstep_min 1
+rcut 9.64
+#OPTIONAL_INPUT_VARIABLES
+use_ideal_positions 1
+enunit 1
+TheEnd
+ 
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = atdep
+#%% md_hist = t11
+#%% [files]
+#%% files_to_test = 
+#%%   t11.abo, tolnlines = 1, tolabs = 2.e-3, tolrel = 1.e-4, fld_options = -medium;
+#%%   t11omega.dat, tolnlines = 5, tolabs = 2.e-3, tolrel = 1.e-4, fld_options = -medium;
+#%%   t11thermo.dat, tolnlines = 5, tolabs = 2.e-3, tolrel = 1.e-4, fld_options = -medium;
+#%% [paral_info]
+#%% max_nprocs = 10
+#%% [extra_info]
+#%% authors = F. Bottin & J. Bouchet
+#%% keywords = atdep
+#%% description = 
+#%%   test aTDEP (2nd order)
+#%%   Titanium (hcp) with 128 atoms at T = 300 K.
+#%% topics = aTDEP
+#%%<END TEST_INFO>

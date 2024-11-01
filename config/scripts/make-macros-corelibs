@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright (C) 2005-2019 ABINIT Group (Yann Pouillon)
+# Copyright (C) 2005-2024 ABINIT Group (Yann Pouillon)
 #
 # This file is part of the ABINIT software package. For license information,
 # please see the COPYING file in the top-level directory of the ABINIT source
@@ -88,7 +88,7 @@ if ( not os.path.exists("configure.ac") or
 # Read config file(s)
 for cnf_file in my_configs:
   if ( os.path.exists(cnf_file) ):
-    if ( re.search("\.cf$",cnf_file) ):
+    if ( re.search(r"\.cf$",cnf_file) ):
       exec(compile(open(cnf_file).read(), cnf_file, 'exec'))
   else:
     print("%s: Could not find config file (%s)." % (my_name,cnf_file))
@@ -108,13 +108,32 @@ abinit_corelibs.sort()
 inc = ""
 sub = ""
 
+# Process special include dirs
+inc_blocks = {
+    "common":"shared/common/src",
+    "core":"src",
+    "libpaw":"shared/libpaw",
+}
+for block, subdir in inc_blocks.items():
+  inc += "  src_%s_fcflags='" % block
+  for incdir in ["incs", "mods"]:
+    inc += " -I$(top_builddir)/{path} -I$(top_srcdir)/{path}".format(
+      path=os.path.join(subdir, incdir))
+  inc += "'\n"
+  sub += "  AC_SUBST(src_%s_fcflags)\n" % (block)
+
 # Process libraries
-abinit_corelibs.append("incs")
-abinit_corelibs.append("mods")
 for lib in abinit_corelibs:
-  inc += "  src_%s_incs='-I$(top_builddir)/src/%s -I$(top_srcdir)/src/%s'\n" % \
-    (lib,lib,lib)
-  sub += "  AC_SUBST(src_%s_incs)\n" % (lib)
+  if ( cnf.get(lib, "parent") == "common" ):
+    par_dir = "shared/common/src/%s" % lib
+  elif ( cnf.get(lib, "parent") == "libpaw" ):
+    par_dir = "shared/libpaw/src"
+  else:
+    par_dir = "src/%s" % lib
+
+  inc += "  src_{name}_fcflags='-I$(top_builddir)/{path} -I$(top_srcdir)/{path}'\n".format(
+    name=lib, path=par_dir)
+  sub += "  AC_SUBST(src_%s_fcflags)\n" % (lib)
 
 # Update macro
 mac = macro_header(my_name,now)

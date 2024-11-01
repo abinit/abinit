@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/defs_PSolver
 !! NAME
 !! defs_PSolver
@@ -8,7 +7,7 @@
 !! for the bigDFT Poisson Solver
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2019 ABINIT group (MT)
+!! Copyright (C) 2001-2024 ABINIT group (MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -30,11 +29,6 @@ module defs_PSolver
 !! PSolver
 !!
 !! FUNCTION
-!!
-!! PARENTS
-!!      mklocl_realspace
-!!
-!! CHILDREN
 !!
 !! SOURCE
    subroutine PSolver(geocode,datacode,iproc,nproc,n01,n02,n03,xc,hx,hy,hz,&

@@ -1,0 +1,24 @@
+t55.ddb.out
+He BCC conventional cell  DDB file
+4
+t54o_DS2_DDB
+t54o_DS3_DDB
+t54o_DS4_DDB
+t54o_DS5_DDB
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = mrgddb
+#%% test_chain = t54.abi, t55.abi, t56.abi, t57.abi
+#%% [files]
+#%% files_to_test = 
+#%%   t55.ddb.out, tolnlines=    0,   tolabs=  0.0,         tolrel= 0.0
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = Unknown
+#%% keywords = 
+#%% description = 
+#%%   He BCC conventional cell. Fake smooth pseudopotential.
+#%%   Follow-up of test 54. Merge the DDB files.
+#%%<END TEST_INFO>

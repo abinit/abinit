@@ -1,0 +1,41 @@
+# Bidimensional layer of magnesium atoms
+# Square lattice, without mirror symmetry.
+# Examine the list of k points
+
+ prtkpt 1
+ kptopt 1
+ kptrlen 60.0d0
+
+ acell 2*12.0d0  10.0d0
+
+ ecut 4.5
+ natom 4
+ nstep 1
+ ntypat  1
+ tolvrs 3.0d-20
+ typat  4*1
+ xcart  3.0  1.0  0.0
+       -1.0  3.0  0.0
+       -3.0 -1.0  0.0
+        1.0 -3.0  0.0
+ znucl 12.0
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/12mg.pspnc"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% expected_failure = yes
+#%% [files]
+#%% files_to_test = 
+#%%   t63.abo, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% keywords = 
+#%% authors = Unknown
+#%% description = 
+#%%   2D 4 point symmetry: test the sets of k points generated automatically
+#%% topics = k-points
+#%%<END TEST_INFO>

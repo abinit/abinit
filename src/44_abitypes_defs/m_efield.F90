@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_efield
 !! NAME
 !!  m_efield
@@ -6,10 +5,9 @@
 !! FUNCTION
 !!  This module contains the declaration of data types and methods
 !!  used to handle electric fields
-!!  Imported object from defs_datatypes
 !!
 !! COPYRIGHT
-!! Copyright (C) 2011-2019 ABINIT group (MJV)
+!! Copyright (C) 2011-2024 ABINIT group (MJV)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -19,10 +17,6 @@
 !! OUTPUT
 !!
 !! NOTES
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -46,7 +40,7 @@ module m_efield
 !!***
 
 
-!!****t* defs_datatypes/efield_type
+!!****t* m_efield/efield_type
 !! NAME
 !! efield_type
 !!
@@ -251,8 +245,6 @@ contains
 
 subroutine destroy_efield(dtefield)
 
- implicit none
-
 !Arguments ------------------------------------
 !array
  type(efield_type),intent(inout) :: dtefield !vz_i
@@ -261,91 +253,91 @@ subroutine destroy_efield(dtefield)
 
 ! Integer pointers
   if(allocated(dtefield%atom_indsym))  then
-    ABI_DEALLOCATE(dtefield%atom_indsym)
+    ABI_FREE(dtefield%atom_indsym)
   end if
   if(allocated(dtefield%cgindex))  then
-    ABI_DEALLOCATE(dtefield%cgindex)
+    ABI_FREE(dtefield%cgindex)
   end if
   if(allocated(dtefield%cgqindex))  then
-    ABI_DEALLOCATE(dtefield%cgqindex)
+    ABI_FREE(dtefield%cgqindex)
   end if
   if(allocated(dtefield%cprjindex))  then
-    ABI_DEALLOCATE(dtefield%cprjindex)
+    ABI_FREE(dtefield%cprjindex)
   end if
   if(allocated(dtefield%fkgindex))  then
-    ABI_DEALLOCATE(dtefield%fkgindex)
+    ABI_FREE(dtefield%fkgindex)
   end if
   if(allocated(dtefield%idxkstr))  then
-    ABI_DEALLOCATE(dtefield%idxkstr)
+    ABI_FREE(dtefield%idxkstr)
   end if
   if(allocated(dtefield%ikpt_dk))  then
-    ABI_DEALLOCATE(dtefield%ikpt_dk)
+    ABI_FREE(dtefield%ikpt_dk)
   end if
   if(allocated(dtefield%indkk_f2ibz))  then
-    ABI_DEALLOCATE(dtefield%indkk_f2ibz)
+    ABI_FREE(dtefield%indkk_f2ibz)
   end if
   if(allocated(dtefield%i2fbz))  then
-    ABI_DEALLOCATE(dtefield%i2fbz)
+    ABI_FREE(dtefield%i2fbz)
   end if
   if(allocated(dtefield%kgindex))  then
-    ABI_DEALLOCATE(dtefield%kgindex)
+    ABI_FREE(dtefield%kgindex)
   end if
   if(allocated(dtefield%lmn_size))  then
-    ABI_DEALLOCATE(dtefield%lmn_size)
+    ABI_FREE(dtefield%lmn_size)
   end if
   if(allocated(dtefield%lmn2_size))  then
-    ABI_DEALLOCATE(dtefield%lmn2_size)
+    ABI_FREE(dtefield%lmn2_size)
   end if
   if(allocated(dtefield%nband_occ))  then
-    ABI_DEALLOCATE(dtefield%nband_occ)
+    ABI_FREE(dtefield%nband_occ)
   end if
   if(allocated(dtefield%nneigh))  then
-    ABI_DEALLOCATE(dtefield%nneigh)
+    ABI_FREE(dtefield%nneigh)
   end if
   if(allocated(dtefield%sflag))  then
-    ABI_DEALLOCATE(dtefield%sflag)
+    ABI_FREE(dtefield%sflag)
   end if
   if(allocated(dtefield%str_neigh))  then
-    ABI_DEALLOCATE(dtefield%str_neigh)
+    ABI_FREE(dtefield%str_neigh)
   end if
   if(allocated(dtefield%strg_neigh))  then
-    ABI_DEALLOCATE(dtefield%strg_neigh)
+    ABI_FREE(dtefield%strg_neigh)
   end if
 
 ! Real(dp) pointers
 
   if(allocated(dtefield%coord_str))  then
-    ABI_DEALLOCATE(dtefield%coord_str)
+    ABI_FREE(dtefield%coord_str)
   end if
   if(allocated(dtefield%epawf3))  then
-    ABI_DEALLOCATE(dtefield%epawf3)
+    ABI_FREE(dtefield%epawf3)
   end if
   if(allocated(dtefield%epaws3))  then
-    ABI_DEALLOCATE(dtefield%epaws3)
+    ABI_FREE(dtefield%epaws3)
   end if
   if(allocated(dtefield%expibi))  then
-    ABI_DEALLOCATE(dtefield%expibi)
+    ABI_FREE(dtefield%expibi)
   end if
   if(allocated(dtefield%fkptns))  then
-    ABI_DEALLOCATE(dtefield%fkptns)
+    ABI_FREE(dtefield%fkptns)
   end if
   if(allocated(dtefield%qijb_kk))  then
-    ABI_DEALLOCATE(dtefield%qijb_kk)
+    ABI_FREE(dtefield%qijb_kk)
   end if
   if(allocated(dtefield%rij))  then
-    ABI_DEALLOCATE(dtefield%rij)
+    ABI_FREE(dtefield%rij)
   end if
   if(allocated(dtefield%smat))  then
-    ABI_DEALLOCATE(dtefield%smat)
+    ABI_FREE(dtefield%smat)
   end if
   if(allocated(dtefield%zarot))  then
-    ABI_DEALLOCATE(dtefield%zarot)
+    ABI_FREE(dtefield%zarot)
   end if
 
 ! pointer to cprj
   if(allocated(dtefield%cprj)) then
     call pawcprj_free(dtefield%cprj)
-    ABI_DATATYPE_DEALLOCATE(dtefield%cprj)
+    ABI_FREE(dtefield%cprj)
   end if
 
 end subroutine destroy_efield

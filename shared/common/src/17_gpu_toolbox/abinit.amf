@@ -1,0 +1,26 @@
+h_list = \
+ abi_gpu_header_common.h \
+ cuda_api_error_check.h \
+ hip_api_error_check.h \
+ gpu_fft.h \
+ gpu_linalg.h
+
+cpp_list = \
+ dev_spec_cuda.cpp \
+ dev_spec_hip.cpp \
+ gpu_fft_cuda.cpp \
+ gpu_fft_hip.cpp \
+ gpu_linalg_cuda.cpp \
+ gpu_linalg_hip.cpp \
+ timing_cuda.cpp \
+ timing_hip.cpp
+
+EXTRA_DIST += $(h_list) $(cpp_list)
+
+dev_spec.$(OBJEXT): dev_spec.cpp
+gpu_fft.$(OBJEXT): gpu_fft.cpp
+gpu_linalg.$(OBJEXT): gpu_linalg.cpp
+timing.$(OBJEXT): timing.cpp
+
+# make sure lib12_hide_mpi is recompiled if any file from finc_list is modified
+lib17_gpu_toolbox_a_DEPENDENCIES = $(h_list) $(cpp_list)

@@ -5,14 +5,10 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2019 ABINIT group (XG, DC, GMR)
+!!  Copyright (C) 2008-2024 ABINIT group (XG, DC, GMR)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -95,17 +91,9 @@ contains
 !! FUNCTION
 !!  Initialize the object
 !!
-!! PARENTS
-!!      m_ab7_mixing
-!!
-!! CHILDREN
-!!      nullify_
-!!
 !! SOURCE
 
 subroutine init_(mix)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -120,6 +108,7 @@ subroutine init_(mix)
  mix%n_pulayit = 7
  mix%n_pawmix  = 0
  mix%n_atom    = 0
+ mix%space     = 0
  mix%useprec   = .true.
 
  call nullify_(mix)
@@ -134,17 +123,9 @@ end subroutine init_
 !! FUNCTION
 !!  Nullify the pointers
 !!
-!! PARENTS
-!!      m_ab7_mixing
-!!
-!! CHILDREN
-!!      nullify_
-!!
 !! SOURCE
 
 subroutine nullify_(mix)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -175,18 +156,10 @@ end subroutine nullify_
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      dfpt_scfcv,scfcv
-!!
-!! CHILDREN
-!!      nullify_
-!!
 !! SOURCE
 
 subroutine ab7_mixing_new(mix, iscf, kind, space, nfft, nspden, &
 &  npawmix, errid, errmess, npulayit, useprec)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -226,7 +199,8 @@ subroutine ab7_mixing_new(mix, iscf, kind, space, nfft, nspden, &
       & iscf /= AB7_MIXING_ANDERSON_2 .and. &
       & iscf /= AB7_MIXING_CG_ENERGY .and. &
       & iscf /= AB7_MIXING_PULAY .and. &
-      & iscf /= AB7_MIXING_CG_ENERGY_2) then
+      & iscf /= AB7_MIXING_CG_ENERGY_2 .and. &
+      & iscf /= AB7_MIXING_NONE) then
     errid = AB7_ERROR_MIXING_ARG
     write(errmess, "(A,I0,A)") "Unknown mixing scheme (", iscf, ")."
     return
@@ -246,8 +220,12 @@ subroutine ab7_mixing_new(mix, iscf, kind, space, nfft, nspden, &
 
  ! Set-up internal dimensions.
  !These arrays are needed only in the self-consistent case
- if (iscf == AB7_MIXING_EIG) then
-    !    For iscf==1, five additional vectors are needed
+ if (iscf == AB7_MIXING_NONE) then
+    !    For iscf==0, one additional vector is needed.
+    !    The index 1 is attributed to the new residual potential.
+    mix%n_fftgr=1 ; mix%n_index=1
+ else if (iscf == AB7_MIXING_EIG) then
+    !    For iscf==1, five additional vectors are needed.
     !    The index 1 is attributed to the old trial potential,
     !    The new residual potential, and the new
     !    preconditioned residual potential receive now a temporary index
@@ -294,23 +272,25 @@ subroutine ab7_mixing_new(mix, iscf, kind, space, nfft, nspden, &
  ! Allocate new arrays.
  !allocate(mix%i_rhor(mix%n_index), stat = i_stat)
  !call memocc_abi(i_stat, mix%i_rhor, 'mix%i_rhor', subname)
- ABI_DATATYPE_ALLOCATE(mix%i_rhor,(mix%n_index))
+ ABI_MALLOC(mix%i_rhor,(mix%n_index))
  mix%i_rhor(:)=0
  !allocate(mix%i_vtrial(mix%n_index), stat = i_stat)
  !call memocc_abi(i_stat, mix%i_vtrial, 'mix%i_vtrial', subname)
- ABI_DATATYPE_ALLOCATE(mix%i_vtrial,(mix%n_index))
+ ABI_MALLOC(mix%i_vtrial,(mix%n_index))
  mix%i_vtrial(:)=0
  !allocate(mix%i_vresid(mix%n_index), stat = i_stat)
  !call memocc_abi(i_stat, mix%i_vresid, 'mix%i_vresid', subname)
- ABI_DATATYPE_ALLOCATE(mix%i_vresid,(mix%n_index))
+ ABI_MALLOC(mix%i_vresid,(mix%n_index))
  mix%i_vresid(:)=0
  !allocate(mix%i_vrespc(mix%n_index), stat = i_stat)
  !call memocc_abi(i_stat, mix%i_vrespc, 'mix%i_vrespc', subname)
- ABI_DATATYPE_ALLOCATE(mix%i_vrespc,(mix%n_index))
+ ABI_MALLOC(mix%i_vrespc,(mix%n_index))
  mix%i_vrespc(:)=0
 
  ! Setup initial values.
- if (iscf == AB7_MIXING_EIG) then
+ if (iscf == AB7_MIXING_NONE) then
+    mix%i_vresid(1)=1
+ else if (iscf == AB7_MIXING_EIG) then
     mix%i_vtrial(1)=1 ; mix%i_vresid(1)=2 ; mix%i_vrespc(1)=3
  else if(iscf == AB7_MIXING_SIMPLE) then
     mix%i_vtrial(1)=1 ; mix%i_vresid(1)=2 ; mix%i_vrespc(1)=3
@@ -361,17 +341,9 @@ end subroutine ab7_mixing_new
 !! NOTES
 !!  Obsolete?
 !!
-!! PARENTS
-!!      dfpt_scfcv,scfcv
-!!
-!! CHILDREN
-!!      nullify_
-!!
 !! SOURCE
 
 subroutine ab7_mixing_use_disk_cache(mix, fnametmp_fft)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -403,12 +375,6 @@ end subroutine ab7_mixing_use_disk_cache
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      newrho,newvtr
-!!
-!! CHILDREN
-!!      nullify_
 !!
 !! SOURCE
 
@@ -445,12 +411,6 @@ end subroutine ab7_mixing_use_moving_atoms
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      dfpt_newvtr,newrho,newvtr
-!!
-!! CHILDREN
-!!      nullify_
-!!
 !! SOURCE
 subroutine ab7_mixing_copy_current_step(mix, arr_resid, errid, errmess, &
 &  arr_respc, arr_paw_resid, arr_paw_respc, arr_atm)
@@ -466,20 +426,41 @@ subroutine ab7_mixing_copy_current_step(mix, arr_resid, errid, errmess, &
  real(dp), intent(in), optional :: arr_atm(3, mix%n_atom)
 ! *************************************************************************
 
- if (.not. associated(mix%f_fftgr)) then
+
+ if (mix%n_fftgr>0 .and. (.not. associated(mix%f_fftgr))) then
     errid = AB7_ERROR_MIXING_ARG
     write(errmess, '(a,a,a,a)' )ch10,&
-         & ' ab7_mixing_set_arr_current_step: ERROR -',ch10,&
+         & ' ab7_mixing_set_arr_current_step: ERROR (1) -',ch10,&
+         & '  Working arrays not yet allocated.'
+    return
+ end if
+ if (mix%n_pawmix>0 .and. (.not. associated(mix%f_paw))) then
+    errid = AB7_ERROR_MIXING_ARG
+    write(errmess, '(a,a,a,a)' )ch10,&
+         & ' ab7_mixing_set_arr_current_step: ERROR (2) -',ch10,&
+         & '  Working arrays not yet allocated.'
+    return
+ end if
+ if (mix%n_atom>0 .and. (.not. associated(mix%f_atm))) then
+    errid = AB7_ERROR_MIXING_ARG
+    write(errmess, '(a,a,a,a)' )ch10,&
+         & ' ab7_mixing_set_arr_current_step: ERROR (3) -',ch10,&
          & '  Working arrays not yet allocated.'
     return
  end if
  errid = AB7_NO_ERROR
 
- mix%f_fftgr(:,:,mix%i_vresid(1)) = arr_resid(:,:)
- if (present(arr_respc)) mix%f_fftgr(:,:,mix%i_vrespc(1)) = arr_respc(:,:)
- if (present(arr_paw_resid)) mix%f_paw(:, mix%i_vresid(1)) = arr_paw_resid(:)
- if (present(arr_paw_respc)) mix%f_paw(:, mix%i_vrespc(1)) = arr_paw_respc(:)
- if (present(arr_atm)) mix%f_atm(:,:, mix%i_vresid(1)) = arr_atm(:,:)
+ if (mix%n_fftgr>0) then
+   if (mix%i_vresid(1)>0) mix%f_fftgr(:,:,mix%i_vresid(1)) = arr_resid(:,:)
+   if (present(arr_respc).and.mix%i_vrespc(1)>0) mix%f_fftgr(:,:,mix%i_vrespc(1)) = arr_respc(:,:)
+ end if
+ if (mix%n_pawmix>0) then
+   if (present(arr_paw_resid).and.mix%i_vresid(1)>0) mix%f_paw(:, mix%i_vresid(1)) = arr_paw_resid(:)
+   if (present(arr_paw_respc).and.mix%i_vrespc(1)>0) mix%f_paw(:, mix%i_vrespc(1)) = arr_paw_respc(:)
+ end if
+ if (mix%n_atom>0) then
+   if (present(arr_atm).and.mix%i_vresid(1)>0) mix%f_atm(:,:, mix%i_vresid(1)) = arr_atm(:,:)
+ end if
 
 end subroutine ab7_mixing_copy_current_step
 !!***
@@ -499,17 +480,9 @@ end subroutine ab7_mixing_copy_current_step
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      dfpt_newvtr,newrho,newvtr
-!!
-!! CHILDREN
-!!      nullify_
-!!
 !! SOURCE
 
 subroutine ab7_mixing_eval_allocate(mix, istep)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -532,12 +505,12 @@ subroutine ab7_mixing_eval_allocate(mix, istep)
  if (.not. associated(mix%f_fftgr)) then
    !allocate(mix%f_fftgr(mix%space * mix%nfft,mix%nspden,mix%n_fftgr), stat = i_stat)
    !call memocc_abi(i_stat, mix%f_fftgr, 'mix%f_fftgr', subname)
-   ABI_ALLOCATE(mix%f_fftgr,(mix%space * mix%nfft,mix%nspden,mix%n_fftgr))
+   ABI_MALLOC(mix%f_fftgr,(mix%space * mix%nfft,mix%nspden,mix%n_fftgr))
    mix%f_fftgr(:,:,:)=zero
-   if (mix%mffmem == 0 .and. istep_ > 1) then
+   if (mix%mffmem == 0 .and. istep_ > 1 .and. mix%n_fftgr>0) then
      call timab(83,1,tsec)
      if (open_file(mix%diskCache,msg,newunit=temp_unit,form='unformatted',status='old') /= 0) then
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
      rewind(temp_unit)
      read(temp_unit) mix%f_fftgr
@@ -549,8 +522,8 @@ subroutine ab7_mixing_eval_allocate(mix, istep)
  if (.not. associated(mix%f_paw)) then
     !allocate(mix%f_paw(mix%n_pawmix,mix%n_fftgr), stat = i_stat)
     !call memocc_abi(i_stat, mix%f_paw, 'mix%f_paw', subname)
-    ABI_ALLOCATE(mix%f_paw,(mix%n_pawmix,mix%n_fftgr))
-    if (mix%n_pawmix > 0) then
+    ABI_MALLOC(mix%f_paw,(mix%n_pawmix,mix%n_fftgr))
+    if (mix%n_pawmix > 0 .and. mix%n_fftgr>0) then
       mix%f_paw(:,:)=zero
       if (mix%mffmem == 0 .and. istep_ > 1) then
         read(temp_unit) mix%f_paw
@@ -563,7 +536,7 @@ subroutine ab7_mixing_eval_allocate(mix, istep)
  if (.not. associated(mix%f_atm)) then
     !allocate(mix%f_atm(3,mix%n_atom,mix%n_fftgr), stat = i_stat)
     !call memocc_abi(i_stat, mix%f_atm, 'mix%f_atm', subname)
-    ABI_ALLOCATE(mix%f_atm,(3,mix%n_atom,mix%n_fftgr))
+    ABI_MALLOC(mix%f_atm,(3,mix%n_atom,mix%n_fftgr))
  end if
 
  end subroutine ab7_mixing_eval_allocate
@@ -584,17 +557,9 @@ subroutine ab7_mixing_eval_allocate(mix, istep)
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      dfpt_newvtr,newrho,newvtr
-!!
-!! CHILDREN
-!!      nullify_
-!!
 !! SOURCE
 
  subroutine ab7_mixing_eval_deallocate(mix)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -613,20 +578,24 @@ subroutine ab7_mixing_eval_allocate(mix, istep)
  if (mix%mffmem == 0) then
     call timab(83,1,tsec)
     if (open_file(mix%diskCache,msg,newunit=temp_unit,form='unformatted',status='unknown') /= 0) then
-      MSG_ERROR(msg)
+      ABI_ERROR(msg)
     end if
     rewind(temp_unit)
     ! VALGRIND complains not all of f_fftgr_disk is initialized
-     write(temp_unit) mix%f_fftgr
-    if (mix%n_pawmix > 0) then
+    if (mix%n_fftgr > 0) then
+      write(temp_unit) mix%f_fftgr
+    end if
+    if (mix%n_pawmix > 0 .and. mix%n_fftgr > 0) then
       write(temp_unit) mix%f_paw
     end if
     close(unit=temp_unit)
     call timab(83,2,tsec)
-    ABI_DEALLOCATE(mix%f_fftgr)
-    nullify(mix%f_fftgr)
+    if (associated(mix%f_fftgr)) then
+      ABI_FREE(mix%f_fftgr)
+      nullify(mix%f_fftgr)
+    end if
     if (associated(mix%f_paw)) then
-       ABI_DEALLOCATE(mix%f_paw)
+       ABI_FREE(mix%f_paw)
        nullify(mix%f_paw)
     end if
  end if
@@ -649,20 +618,12 @@ end subroutine ab7_mixing_eval_deallocate
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      dfpt_newvtr,newrho,newvtr
-!!
-!! CHILDREN
-!!      nullify_
-!!
 !! SOURCE
 
  subroutine ab7_mixing_eval(mix, arr, istep, nfftot, ucvol, &
 & mpi_comm, mpi_summarize, errid, errmess, &
 & reset, isecur, pawarr, pawopt, response, etotal, potden, &
 & resnrm, comm_atom)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -675,7 +636,7 @@ end subroutine ab7_mixing_eval_deallocate
  character(len = 500), intent(out) :: errmess
  logical, intent(in), optional :: reset
  integer, intent(in), optional :: isecur, comm_atom, pawopt, response
- real(dp), intent(inout), optional :: pawarr(mix%n_pawmix)
+ real(dp), intent(inout), optional, target :: pawarr(mix%n_pawmix)
  real(dp), intent(in), optional :: etotal
  real(dp), intent(in), optional :: potden(mix%space * mix%nfft,mix%nspden)
  real(dp), intent(out), optional :: resnrm
@@ -685,16 +646,20 @@ end subroutine ab7_mixing_eval_deallocate
  integer :: moveAtm, dbl_nnsclo, initialized, isecur_
  integer :: usepaw, pawoptmix_, response_
  real(dp) :: resnrm_
+!arrays
+ real(dp),target :: dum(1)
+ real(dp),pointer :: pawarr_(:)
+
 ! *************************************************************************
 
  ! Argument checkings.
- if (mix%iscf == AB7_MIXING_NONE) then
-    errid = AB7_ERROR_MIXING_ARG
-    write(errmess, '(a,a,a,a)' )ch10,&
-         & ' ab7_mixing_eval: ERROR -',ch10,&
-         & '  No method has been chosen.'
-    return
- end if
+ !if (mix%iscf == AB7_MIXING_NONE) then
+ !   errid = AB7_ERROR_MIXING_ARG
+ !   write(errmess, '(a,a,a,a)' )ch10,&
+ !        & ' ab7_mixing_eval: ERROR -',ch10,&
+ !        & '  No method has been chosen.'
+ !   return
+ !end if
  if (mix%n_pawmix > 0 .and. .not. present(pawarr)) then
     errid = AB7_ERROR_MIXING_ARG
     write(errmess, '(a,a,a,a)' )ch10,&
@@ -711,13 +676,15 @@ end subroutine ab7_mixing_eval_deallocate
  end if
  errid = AB7_NO_ERROR
 
- ! Miscellaneous
- moveAtm = 0
- if (mix%n_atom > 0) moveAtm = 1
+ ! Reset if requested
  initialized = 1
  if (present(reset)) then
     if (reset) initialized = 0
  end if
+
+ ! Miscellaneous
+ moveAtm = 0
+ if (mix%n_atom > 0) moveAtm = 1
  isecur_ = 0
  if (present(isecur)) isecur_ = isecur
  usepaw = 0
@@ -726,10 +693,13 @@ end subroutine ab7_mixing_eval_deallocate
  if (present(pawopt)) pawoptmix_ = pawopt
  response_ = 0
  if (present(response)) response_ = response
+ pawarr_ => dum ; if (present(pawarr)) pawarr_ => pawarr
 
  ! Do the mixing.
  resnrm_ = 0.d0
- if (mix%iscf == AB7_MIXING_EIG) then
+ if (mix%iscf == AB7_MIXING_NONE) then
+   arr(:,:)=arr(:,:)+mix%f_fftgr(:,:,1)
+ else if (mix%iscf == AB7_MIXING_EIG) then
     !  This routine compute the eigenvalues of the SCF operator
     call scfeig(istep, mix%space * mix%nfft, mix%nspden, &
          & mix%f_fftgr(:,:,mix%i_vrespc(1)), arr, &
@@ -742,13 +712,13 @@ end subroutine ab7_mixing_eval_deallocate
       call scfopt(mix%space, mix%f_fftgr,mix%f_paw,mix%iscf,istep,&
          & mix%i_vrespc,mix%i_vtrial, &
          & mpi_comm,mpi_summarize,mix%nfft,mix%n_pawmix,mix%nspden, &
-         & mix%n_fftgr,mix%n_index,mix%kind,pawoptmix_,usepaw,pawarr, &
+         & mix%n_fftgr,mix%n_index,mix%kind,pawoptmix_,usepaw,pawarr_, &
          & resnrm_, arr, errid, errmess, comm_atom=comm_atom)
     else
       call scfopt(mix%space, mix%f_fftgr,mix%f_paw,mix%iscf,istep,&
          & mix%i_vrespc,mix%i_vtrial, &
          & mpi_comm,mpi_summarize,mix%nfft,mix%n_pawmix,mix%nspden, &
-         & mix%n_fftgr,mix%n_index,mix%kind,pawoptmix_,usepaw,pawarr, &
+         & mix%n_fftgr,mix%n_index,mix%kind,pawoptmix_,usepaw,pawarr_, &
          & resnrm_, arr, errid, errmess)
     end if
     !  Change atomic positions
@@ -769,8 +739,8 @@ end subroutine ab7_mixing_eval_deallocate
        return
     end if
     if (mix%n_atom == 0) then
-       ABI_ALLOCATE(mix%xred,(3,0))
-       ABI_ALLOCATE(mix%dtn_pc,(3,0))
+       ABI_MALLOC(mix%xred,(3,0))
+       ABI_MALLOC(mix%dtn_pc,(3,0))
     end if
     call scfcge(mix%space,dbl_nnsclo,mix%dtn_pc,etotal,mix%f_atm,&
          & mix%f_fftgr,initialized,mix%iscf,isecur_,istep,&
@@ -779,8 +749,8 @@ end subroutine ab7_mixing_eval_deallocate
          & mix%nspden,mix%n_fftgr,mix%n_index,mix%kind,&
          & response_,potden,ucvol,arr,mix%xred, errid, errmess)
     if (mix%n_atom == 0) then
-       ABI_DEALLOCATE(mix%xred)
-       ABI_DEALLOCATE(mix%dtn_pc)
+       ABI_FREE(mix%xred)
+       ABI_FREE(mix%dtn_pc)
     end if
     if (dbl_nnsclo == 1) errid = AB7_ERROR_MIXING_INC_NNSLOOP
  end if
@@ -805,17 +775,9 @@ end subroutine ab7_mixing_eval
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      dfpt_scfcv,scfcv
-!!
-!! CHILDREN
-!!      nullify_
-!!
 !! SOURCE
 
 subroutine ab7_mixing_deallocate(mix)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -826,27 +788,13 @@ subroutine ab7_mixing_deallocate(mix)
  character(len = *), parameter :: subname = "ab7_mixing_deallocate"
 ! *************************************************************************
 
- if (associated(mix%i_rhor)) then
-    ABI_DATATYPE_DEALLOCATE(mix%i_rhor)
- end if
- if (associated(mix%i_vtrial)) then
-    ABI_DATATYPE_DEALLOCATE(mix%i_vtrial)
- end if
- if (associated(mix%i_vresid)) then
-    ABI_DATATYPE_DEALLOCATE(mix%i_vresid)
- end if
- if (associated(mix%i_vrespc)) then
-    ABI_DATATYPE_DEALLOCATE(mix%i_vrespc)
- end if
- if (associated(mix%f_fftgr)) then
-    ABI_DEALLOCATE(mix%f_fftgr)
- end if
- if (associated(mix%f_paw)) then
-    ABI_DEALLOCATE(mix%f_paw)
- end if
- if (associated(mix%f_atm)) then
-    ABI_DEALLOCATE(mix%f_atm)
- end if
+ ABI_SFREE_PTR(mix%i_rhor)
+ ABI_SFREE_PTR(mix%i_vtrial)
+ ABI_SFREE_PTR(mix%i_vresid)
+ ABI_SFREE_PTR(mix%i_vrespc)
+ ABI_SFREE_PTR(mix%f_fftgr)
+ ABI_SFREE_PTR(mix%f_paw)
+ ABI_SFREE_PTR(mix%f_atm)
 
  call nullify_(mix)
 
@@ -936,20 +884,12 @@ end subroutine ab7_mixing_deallocate
 !! This routine is much too difficult to read ! Should be rewritten ...
 !! Maybe make separate subroutines for line search and CG step ?!
 !!
-!! PARENTS
-!!      m_ab7_mixing
-!!
-!! CHILDREN
-!!      aprxdr,findminscf,sqnormm_v,wrtout
-!!
 !! SOURCE
 
 subroutine scfcge(cplex,dbl_nnsclo,dtn_pc,etotal,f_atm,&
 & f_fftgr,initialized,iscf,isecur,istep,&
 & i_rhor,i_vresid,i_vrespc,moved_atm_inside,mpicomm,mpi_summarize,&
 & natom,nfft,nfftot,nspden,n_fftgr,n_index,opt_denpot,response,rhor,ucvol,vtrial,xred,errid,errmess)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -981,7 +921,7 @@ subroutine scfcge(cplex,dbl_nnsclo,dtn_pc,etotal,f_atm,&
  integer :: choice,iatom,idir,ifft,iline_cge_input,ilinmin_input,isp
  integer :: testcg,tmp,errid_
  real(dp),save :: d2edv2_old2,d_lambda_old2,dedv_old2,etotal_old
- real(dp),save :: etotal_previous,lambda_adapt,lambda_new,lambda_old,resid_old
+ real(dp),save :: etotal_previous=MAGIC_UNDEF,lambda_adapt,lambda_new,lambda_old,resid_old
  real(dp) :: d2e11,d2e12,d2e22,d2edv2_new,d2edv2_old
  real(dp) :: d2edv2_predict,d_lambda,de1,de2,dedv_mix
  real(dp) :: dedv_new,dedv_old,dedv_predict,determ,etotal_input
@@ -1200,14 +1140,14 @@ subroutine scfcge(cplex,dbl_nnsclo,dtn_pc,etotal,f_atm,&
 &       'Potential-based CG line minimization not',' converged after ',number_of_restart,' restarts. ',ch10,&
 &       'Action : read the eventual warnings about lack of convergence.',ch10,&
 &       'Some might be relevant. Otherwise, raise nband. Returning'
-       MSG_WARNING(errmess)
+       ABI_WARNING(errmess)
        return
      end if
 !    Make reduction in lambda_adapt (kind of steepest descent...)
      write(message,'(a,a,a)')&
 &     'Potential-based CG line minimization has trouble to converge.',ch10,&
 &     'The algorithm is restarted with more secure parameters.'
-     MSG_WARNING(message)
+     ABI_WARNING(message)
      number_of_restart=number_of_restart+1
 !    At the second restart, double the number of non-self consistent loops.
      if(number_of_restart>=2)dbl_nnsclo=1
@@ -1546,7 +1486,7 @@ subroutine scfcge(cplex,dbl_nnsclo,dtn_pc,etotal,f_atm,&
 !      Take care of vtrial
        f_fftgr(:,:,1)=vtrial(:,:)
 
-       ABI_ALLOCATE(tmp_fft1,(cplex*nfft,nspden))
+       ABI_MALLOC(tmp_fft1,(cplex*nfft,nspden))
 !      Take care of vresid
        tmp_fft1(:,:)=f_fftgr(:,:,i_vresid(2))
        f_fftgr(:,:,i_vresid(2))=tmp_fft1(:,:)&
@@ -1567,7 +1507,7 @@ subroutine scfcge(cplex,dbl_nnsclo,dtn_pc,etotal,f_atm,&
 &       +ratio*(f_fftgr(:,:,i_vrespc(1))-tmp_fft1(:,:))&
 &       +gamma*(f_fftgr(:,:,i_vrespc(3))-tmp_fft1(:,:))
        f_fftgr(:,:,i_vrespc(3))=tmp_fft1(:,:)
-       ABI_DEALLOCATE(tmp_fft1)
+       ABI_FREE(tmp_fft1)
 
        if(moved_atm_inside==1)then
          do idir=1,3
@@ -1738,17 +1678,9 @@ end subroutine scfcge
 !!  vrespc(nfft,nspden)=the input preconditioned residual potential
 !!  work(nfft,nspden,2)=work space
 !!
-!! PARENTS
-!!      m_ab7_mixing
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
 subroutine scfeig(istep,nfft,nspden,vrespc,vtrial,vtrial0,work,errid,errmess)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1931,20 +1863,12 @@ end subroutine scfeig
 !!                               the input preconditioned residual potential
 !!                           at output, it is the new aug. occupancies.
 !!
-!! PARENTS
-!!      m_ab7_mixing
-!!
-!! CHILDREN
-!!      dgetrf,dgetri,dotprodm_v,sqnormm_v,wrtout,xmpi_sum
-!!
 !! SOURCE
 
 subroutine scfopt(cplex,f_fftgr,f_paw,iscf,istep,i_vrespc,i_vtrial,&
 & mpicomm,mpi_summarize,nfft,npawmix,nspden,n_fftgr,&
 & n_index,opt_denpot,pawoptmix,usepaw,vpaw,vresid,vtrial,errid,errmess, &
 & comm_atom) ! optional
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2185,7 +2109,7 @@ subroutine scfopt(cplex,f_fftgr,f_paw,iscf,istep,i_vrespc,i_vtrial,&
      end do
    end if
    if (usepaw==1.and.pawoptmix==1) then
-     ABI_ALLOCATE(amat_paw,(niter))
+     ABI_MALLOC(amat_paw,(niter))
      amat_paw(:)=zero
      do ii=1,niter
        do index=1,npawmix
@@ -2201,21 +2125,21 @@ subroutine scfopt(cplex,f_fftgr,f_paw,iscf,istep,i_vrespc,i_vtrial,&
      if (ii<niter) amat(niter,ii)=amat(ii,niter)
    end do
    if (usepaw==1.and.pawoptmix==1)then
-     ABI_DEALLOCATE(amat_paw)
+     ABI_FREE(amat_paw)
    end if
 
 !  Invert "A" matrix
-   ABI_ALLOCATE(amatinv,(niter,niter))
+   ABI_MALLOC(amatinv,(niter,niter))
    amatinv(1:niter,1:niter)=amat(1:niter,1:niter)
-   ABI_ALLOCATE(ipiv,(niter))
-   ABI_ALLOCATE(rwork,(niter))
+   ABI_MALLOC(ipiv,(niter))
+   ABI_MALLOC(rwork,(niter))
    call dgetrf(niter,niter,amatinv,niter,ipiv,ierr)
    call dgetri(niter,amatinv,niter,ipiv,rwork,niter,ierr)
-   ABI_DEALLOCATE(ipiv)
-   ABI_DEALLOCATE(rwork)
+   ABI_FREE(ipiv)
+   ABI_FREE(rwork)
 
 !  Compute "alpha" factors
-   ABI_ALLOCATE(alpha,(niter))
+   ABI_MALLOC(alpha,(niter))
    alpha=zero
    det=zero
    do ii=1,niter
@@ -2225,7 +2149,7 @@ subroutine scfopt(cplex,f_fftgr,f_paw,iscf,istep,i_vrespc,i_vtrial,&
      end do
    end do
    alpha(:)=alpha(:)/det
-   ABI_DEALLOCATE(amatinv)
+   ABI_FREE(amatinv)
    write(message,'(a,5(1x,g10.3))')' mixing of old trial potential: alpha(m:m-4)=',(alpha(ii),ii=niter,max(1,niter-4),-1)
    call wrtout(std_out,message,'COLL')
 
@@ -2253,7 +2177,7 @@ subroutine scfopt(cplex,f_fftgr,f_paw,iscf,istep,i_vrespc,i_vtrial,&
      f_paw(index,i_vstore)=current
    end do
 
-   ABI_DEALLOCATE(alpha)
+   ABI_FREE(alpha)
 !  _______________________________________________________________
 !  End of choice of optimization method
  end if
@@ -2314,20 +2238,12 @@ end subroutine scfopt
 !!         1 if negative second derivative
 !!         2 if some other problem
 !!
-!! PARENTS
-!!      scfcge
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
 subroutine findminscf(choice,dedv_1,dedv_2,dedv_predict,&
 & d2edv2_1,d2edv2_2,d2edv2_predict,&
 & etotal_1,etotal_2,etotal_predict,&
 & lambda_1,lambda_2,lambda_predict,errid,errmess)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2372,7 +2288,7 @@ subroutine findminscf(choice,dedv_1,dedv_2,dedv_predict,&
    if(d2edv2_mid<0.0_dp)then
      errid = AB7_ERROR_MIXING_INTERNAL
      write(errmess,'(a,es18.10,a)')'The second derivative is negative, equal to ',d2edv2_mid,'.'
-     MSG_WARNING(errmess)
+     ABI_WARNING(errmess)
    end if
 
  else if(choice==2) then
@@ -2390,7 +2306,7 @@ subroutine findminscf(choice,dedv_1,dedv_2,dedv_predict,&
      write(errmess, '(a,es18.10,a,a,a)' )&
 &     'The second derivative is negative, equal to',d2edv2_predict,'.',ch10,&
 &     '=> Pivoting                     '
-     MSG_WARNING(errmess)
+     ABI_WARNING(errmess)
      if(etotal_2 < etotal_1)then
        lambda_predict=lambda_2-0.5_dp*(lambda_1-lambda_2)
      else
@@ -2461,18 +2377,10 @@ end subroutine findminscf
 !!     opt_storage=0: V are stored as : V^11, V^22, V^12, i.V^21 (complex)
 !!     opt_storage=1: V are stored as : V, B_x, B_y, B_z         (complex)
 !!
-!! PARENTS
-!!      scfopt
-!!
-!! CHILDREN
-!!      timab,xmpi_sum
-!!
 !! SOURCE
 
 subroutine dotprodm_v(cplex,cpldot,dot,index1,index2,mpicomm,mpi_summarize,&
 &   mult1,mult2,nfft,npot1,npot2,nspden,opt_storage,potarr1,potarr2)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2638,18 +2546,10 @@ end subroutine dotprodm_v
 !!     V are stored as : V^11, V^22, V^12, i.V^21 (complex)
 !!     N are stored as : n, m_x, m_y, mZ          (complex)
 !!
-!! PARENTS
-!!      aprxdr
-!!
-!! CHILDREN
-!!      timab,xmpi_sum
-!!
 !! SOURCE
 
 subroutine dotprodm_vn(cplex,cpldot,denarr,dot,id,ip,mpicomm, mpi_summarize,multd,multp,&
 & nden,nfft,nfftot,npot,nspden,potarr,ucvol)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2928,17 +2828,9 @@ end subroutine dotprodm_vn
 !! OUTPUT
 !!  norm2(mult)= value of the square of the norm of the different potentials
 !!
-!! PARENTS
-!!      scfcge,scfopt
-!!
-!! CHILDREN
-!!      timab,xmpi_sum
-!!
 !! SOURCE
 
 subroutine sqnormm_v(cplex,index,mpicomm, mpi_summarize,mult,nfft,norm2,npot,nspden,opt_storage,potarr)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -3051,19 +2943,11 @@ end subroutine sqnormm_v
 !! NOTES
 !! Should be OpenMP parallelized
 !!
-!! PARENTS
-!!      scfcge
-!!
-!! CHILDREN
-!!      dotprodm_vn
-!!
 !! SOURCE
 
 subroutine aprxdr(cplex,choice,dedv_mix,dedv_new,dedv_old,&
 &  f_atm,f_fftgr,i_rhor2,i_vresid,moved_atm_inside,&
 &  mpicomm,mpi_summarize,natom,nfft,nfftot,nspden,n_fftgr,rhor,ucvol,xred)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -3087,7 +2971,7 @@ subroutine aprxdr(cplex,choice,dedv_mix,dedv_new,dedv_old,&
 
 ! *************************************************************************
 
- ABI_ALLOCATE(ddens,(cplex*nfft,nspden,1))
+ ABI_MALLOC(ddens,(cplex*nfft,nspden,1))
 
 !Compute approximative derivative of the energy
 !with respect to change of potential
@@ -3112,7 +2996,7 @@ subroutine aprxdr(cplex,choice,dedv_mix,dedv_new,dedv_old,&
    dedv_mix = dedv_temp(1)
  end if
 
- ABI_DEALLOCATE(ddens)
+ ABI_FREE(ddens)
 
 !-------------------------------------------------------
 

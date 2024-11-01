@@ -1,7 +1,7 @@
+
 #if defined HAVE_CONFIG_H
 #include "config.h"
 #endif
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_GreenHyboffdiag
 !! NAME
 !!  m_GreenHyboffdiag
@@ -10,18 +10,12 @@
 !!  Manage a green function for one orbital
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2019 ABINIT group (B.Amadon, J. Denier and J. Bieder)
+!!  Copyright (C) 2013-2024 ABINIT group (B.Amadon, J. Denier and J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 
@@ -39,7 +33,6 @@ MODULE m_GreenHyboffdiag
 #endif
  
  IMPLICIT NONE
-
 
  public ::  GreenHyboffdiag_init
  public ::  GreenHyboffdiag_reset
@@ -66,7 +59,7 @@ MODULE m_GreenHyboffdiag
 !!  This structured datatype contains the necessary data
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2019 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2024 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -172,7 +165,7 @@ CONTAINS
 !!  Initialize and allocate
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2019 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2024 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -189,12 +182,6 @@ CONTAINS
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 
@@ -305,7 +292,7 @@ END SUBROUTINE GreenHyboffdiag_init
 !!  reset green function
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2019 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2024 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -318,12 +305,6 @@ END SUBROUTINE GreenHyboffdiag_init
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 
@@ -349,7 +330,7 @@ END SUBROUTINE GreenHyboffdiag_reset
 !!  clear green function
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2019 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2024 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -362,12 +343,6 @@ END SUBROUTINE GreenHyboffdiag_reset
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 
@@ -407,7 +382,7 @@ END SUBROUTINE GreenHyboffdiag_clear
 !!  set Green function in frequencies
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2019 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2024 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -421,12 +396,6 @@ END SUBROUTINE GreenHyboffdiag_clear
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 
@@ -463,7 +432,7 @@ END SUBROUTINE GreenHyboffdiag_setOperW
 !!  Measure Green's function
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2019 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2024 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -479,12 +448,6 @@ END SUBROUTINE GreenHyboffdiag_setOperW
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 
@@ -511,7 +474,7 @@ SUBROUTINE GreenHyboffdiag_measHybrid(op, Mmatrix, ListCdagC_1, updated,signvalu
   INTEGER                        :: iflavorbis
   INTEGER                        :: iC_m,iC_m_add
   INTEGER                        :: iCdag_m,iCdag_m_add
-  INTEGER                        :: stail,ii
+  INTEGER                        :: stail !,ii
 !  DOUBLE PRECISION               :: pi_invBeta
   DOUBLE PRECISION               :: mbeta_two
   DOUBLE PRECISION               :: beta 
@@ -554,6 +517,7 @@ SUBROUTINE GreenHyboffdiag_measHybrid(op, Mmatrix, ListCdagC_1, updated,signvalu
     ! FIXME SHOULD be much more faster
     
 
+   ! write(6,*) "LKLLL2b"
     SELECT CASE(op%iTech)
     CASE (GREENHYB_TAU)
       argument = DBLE(op%factor)
@@ -609,6 +573,7 @@ SUBROUTINE GreenHyboffdiag_measHybrid(op, Mmatrix, ListCdagC_1, updated,signvalu
   
       ! This is new measurement, thus op%factor should be put to one
       op%factor = 1
+   ! write(6,*) "LKLLL2C"
 
 
       ! initialized index idx_old for the doubles loops over flavors and segments.
@@ -776,6 +741,7 @@ SUBROUTINE GreenHyboffdiag_measHybrid(op, Mmatrix, ListCdagC_1, updated,signvalu
        iC_m_add=iC_m_add+tail
       END DO ! iflavor
       op%signvalueold = signvalue
+   ! write(6,*) "LKLLL2D"
     CASE (GREENHYB_OMEGA)
     !  argument = DBLE(op%factor)
     !  DO iomega = 1, omegaSamples
@@ -820,7 +786,7 @@ END SUBROUTINE GreenHyboffdiag_measHybrid
 !!  reduce green function
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2019 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2024 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -833,12 +799,6 @@ END SUBROUTINE GreenHyboffdiag_measHybrid
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 
@@ -877,7 +837,7 @@ END SUBROUTINE GreenHyboffdiag_getHybrid
 !!  impose number of electrons for this flavor
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2019 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2024 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -892,12 +852,6 @@ END SUBROUTINE GreenHyboffdiag_getHybrid
 !!
 !! NOTES
 !!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
-!!
 !! SOURCE
 
 SUBROUTINE GreenHyboffdiag_setN(op,N)
@@ -906,7 +860,7 @@ SUBROUTINE GreenHyboffdiag_setN(op,N)
   TYPE(GreenHyboffdiag)    , INTENT(INOUT)    :: op
   DOUBLE PRECISION  , INTENT(IN   )    :: N(op%nflavors)
   INTEGER :: iflavor,iflavor2
-  COMPLEX(KIND=8) :: tmpoper
+  !COMPLEX(KIND=8) :: tmpoper
 
   IF ( op%set .EQV. .FALSE. ) &
     CALL ERROR("GreenHyboffdiag_setN: green op%operator not set                ")
@@ -947,7 +901,7 @@ END SUBROUTINE GreenHyboffdiag_setN
 !!  Set first moments for G
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2019 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2024 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -963,12 +917,6 @@ END SUBROUTINE GreenHyboffdiag_setN
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 
@@ -986,13 +934,15 @@ SUBROUTINE GreenHyboffdiag_setMuD1(op,iflavor,iflavor2,mu,d1)
 !Local variables ------------------------------------
   DOUBLE PRECISION                :: mu2
 !*********************************************************************
+
+  ABI_UNUSED((/d1/))
   
   mu2=0
   if(iflavor==iflavor2) mu2=mu
 
   if(iflavor==iflavor2) then
-    !op%Mk(iflavor,iflavor2,3) = -d1-(mu*mu)
-    op%Mk(iflavor,iflavor2,3) = -(mu*mu)
+    op%Mk(iflavor,iflavor2,3) = -d1-(mu*mu)
+    !op%Mk(iflavor,iflavor2,3) = -(mu*mu)
     op%Mk(iflavor,iflavor2,2) = -mu
  !sui!write(6,*) "setmud1",iflavor,iflavor2, op%Mk(iflavor,iflavor2,2), op%Mk(iflavor,iflavor2,3)
   else
@@ -1012,7 +962,7 @@ END SUBROUTINE GreenHyboffdiag_setMuD1
 !!  Compute full moments
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2019 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2024 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1028,9 +978,6 @@ END SUBROUTINE GreenHyboffdiag_setMuD1
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
 !!
 !! CHI
 !!  Will be filled automatically by the parent script
@@ -1079,7 +1026,7 @@ END SUBROUTINE GreenHyboffdiag_setMoments
 !!  perform back fourier transform
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2019 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2024 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1093,12 +1040,6 @@ END SUBROUTINE GreenHyboffdiag_setMoments
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 
@@ -1125,12 +1066,12 @@ include 'mpif.h'
   INTEGER :: delta
   INTEGER :: residu
   INTEGER :: iflavor1
-  INTEGER :: iflavor2,unitnb,unitnb1
+  INTEGER :: iflavor2,unitnb !,unitnb1
   INTEGER, ALLOCATABLE, DIMENSION(:) :: counts
   INTEGER, ALLOCATABLE, DIMENSION(:) :: displs
   DOUBLE PRECISION :: A,AA ! Correction factor
   COMPLEX(KIND=8) :: B,BB ! Correction factor
-  COMPLEX(KIND=8) :: C,CC ! Correction factor
+  COMPLEX(KIND=8) :: C !,CC ! Correction factor
   DOUBLE PRECISION :: inv_beta
   DOUBLE PRECISION :: pi_invBeta
   DOUBLE PRECISION :: two_invBeta
@@ -1149,6 +1090,11 @@ include 'mpif.h'
   CHARACTER(len=5) :: funct
   character(len=4) :: tag_proc
   character(len=30) :: tmpfil
+
+#if defined HAVE_MPI && !defined HAVE_MPI2_INPLACE
+  INTEGER :: my_count
+  DOUBLE PRECISION, ALLOCATABLE , DIMENSION(:) :: opertau_buf
+#endif
 
   IF ( op%set .EQV. .FALSE. ) &
     CALL ERROR("GreenHyboffdiag_backFourier : Uninitialized GreenHyboffdiag structure")
@@ -1381,9 +1327,19 @@ include 'mpif.h'
       IF ( op%have_MPI .EQV. .TRUE. ) THEN
 ! rassembler les resultats
 #ifdef HAVE_MPI
-        CALL MPI_ALLGATHERV(MPI_IN_PLACE, 0, MPI_DATATYPE_NULL, &
+#if defined HAVE_MPI2_INPLACE
+        CALL MPI_ALLGATHERV(MPI_IN_PLACE, 0, MPI_DOUBLE_PRECISION, &
                           opertau, counts, displs, &
                           MPI_DOUBLE_PRECISION, op%MY_COMM, residu)
+#else
+    my_count=tauBegin-tauEnd+1
+    MALLOC(opertau_buf,(my_count))
+    opertau_buf(1:my_count)=opertau(tauBegin:tauEnd)
+    CALL MPI_ALLGATHERV(opertau_buf, my_count, MPI_DOUBLE_PRECISION, &
+                      opertau, counts, displs, &
+                      MPI_DOUBLE_PRECISION, op%MY_COMM, residu)
+    FREE(opertau_buf)
+#endif
 #endif
         FREE(counts)
         FREE(displs)
@@ -1429,7 +1385,7 @@ END SUBROUTINE GreenHyboffdiag_backFourier
 !!  perform forward fourier transform
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2019 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2024 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1445,12 +1401,6 @@ END SUBROUTINE GreenHyboffdiag_backFourier
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 
@@ -1497,6 +1447,12 @@ include 'mpif.h'
   COMPLEX(KIND=8) :: iwtau
   COMPLEX(KIND=8), ALLOCATABLE, DIMENSION(:) :: Gwtmp  
   DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:) :: omegatmp
+
+#if defined HAVE_MPI && !defined HAVE_MPI2_INPLACE
+  INTEGER :: my_count
+  COMPLEX(KIND=8), ALLOCATABLE , DIMENSION(:) :: Gwtmp_buf
+#endif
+
   nflavors=op%nflavors
 
 !sui!write(6,*) " Fourier transformation begin"
@@ -1629,7 +1585,7 @@ include 'mpif.h'
 !  DO iflavor1 = 1, nflavors
 !    op%Mk(iflavor1,iflavor1,1) = -1.d0
 !  ENDDO
-  op%Mk(:,:,3) = 0.d0
+!  op%Mk(:,:,3) = 0.d0
 
   MALLOC(omegatmp,(omegaBegin:omegaEnd))
   IF ( PRESENT(omega) ) THEN
@@ -1708,9 +1664,19 @@ include 'mpif.h'
        !call flush(12819)
        IF ( op%have_MPI .EQV. .TRUE. ) THEN
 #ifdef HAVE_MPI
-        CALL MPI_ALLGATHERV(MPI_IN_PLACE, 0, MPI_DATATYPE_NULL, &
+#if defined HAVE_MPI2_INPLACE
+        CALL MPI_ALLGATHERV(MPI_IN_PLACE, 0, MPI_DOUBLE_COMPLEX, &
                           Gwtmp  , counts, displs, &
                           MPI_DOUBLE_COMPLEX, op%MY_COMM, residu)
+#else
+        my_count=omegaBegin-omegaEnd+1
+        MALLOC(Gwtmp_buf,(my_count))
+        Gwtmp_buf(1:my_count)=Gwtmp(omegaBegin:omegaEnd)
+        CALL MPI_ALLGATHERV(Gwtmp_buf, my_count, MPI_DOUBLE_COMPLEX, &
+                          Gwtmp  , counts, displs, &
+                          MPI_DOUBLE_COMPLEX, op%MY_COMM, residu)
+        FREE(Gwtmp_buf)
+#endif
 #endif
       END IF
       IF ( PRESENT(Gomega) ) THEN
@@ -1748,7 +1714,7 @@ END SUBROUTINE GreenHyboffdiag_forFourier
 !!  print Green function
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2019 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2024 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1762,12 +1728,6 @@ END SUBROUTINE GreenHyboffdiag_forFourier
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 
@@ -1819,7 +1779,7 @@ END SUBROUTINE GreenHyboffdiag_print
 !!  destroy green function
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2019 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2024 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1832,12 +1792,6 @@ END SUBROUTINE GreenHyboffdiag_print
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 
@@ -1907,9 +1861,12 @@ END SUBROUTINE GreenHyboffdiag_destroy
        integer    :: i,j,k,p
        real*8     :: rincopy(L+1),a(L),b(L),c(L),d(L),u(L+1), q(L+1),XM(L+1)
        complex*16 :: cdummy,explus,ex,j_dpc
-       real*8     :: one,two,zero,three,six,wn,tau,xpi,delta,om
+       real*8     :: one,two,zero,three,six,tau,xpi,delta,om !wn,
        complex*16     :: czero
 !***********************************************
+
+       ABI_UNUSED((/aa, c3/))
+       ABI_UNUSED((/lflag/))
        czero=cmplx(0.d0,0.d0)
        zero=0.d0
        one=1.d0

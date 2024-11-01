@@ -1,0 +1,73 @@
+#Test linear chain of atoms
+#Two psps (Ge+Si), but the mixing coefficients
+#are such that the pseudo-atoms are pure Si
+#This test is the same as the GS part of Test_v2#4,
+#except for the definition of a pseudo-atom through
+#mixing coefficients. It should give exactly
+#the same numerical results.
+
+ densty  1.1    ! This is needed to have exactly the same initialisation as previous test
+ ntypalch    1            # This pseudo-atom is alchemical
+ mixalch     0.0   1.0    # Mixing coefficients : the pseudo-atom
+                          # is made of pure silicon
+ znucl       32.0  14.0   # znucl(npsp) : Germanium, then Silicon
+
+#Ground state
+ nqpt 0
+
+#Common data
+    npsp   2            # Two pseudopotentials to be read
+  ntypat   1            # Only one type of pseudo-atom
+   acell   3*10.00
+     amu   1.0d0
+  diemac   1.5
+    ecut   1.20
+     ixc   3
+  kptopt   0
+     kpt   0.00000   0.00000  -0.37500
+           0.00000   0.00000  -0.12500
+           0.00000   0.00000   0.12500
+           0.00000   0.00000   0.37500
+   natom   2
+   nband   4
+   ngfft   3*16
+    nkpt   4
+   nstep   30
+    nsym   1
+  occopt   1
+  prtden   1
+   rprim   1.0  0.0  0.0
+           0.0  1.0  0.0
+           0.0  0.0  1.0
+  symrel   1  0  0
+           0  1  0
+           0  0  1
+    xred   0.0  0.0 -0.15
+           0.0  0.0  0.15
+   tnons   3*0.0
+   typat   1 1
+  tolwfr   1.e-22
+     wtk   4*0.25
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "32ge.SJ_mod, 14si.Hamann_mod"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t93.abo, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
+#%% [paral_info]
+#%% max_nprocs = 4
+#%% [extra_info]
+#%% authors = Unknown
+#%% keywords = 
+#%% description = 
+#%%   Linear chain of X2 molecules (2 atoms per unit cell),
+#%%   using alchemical atoms, GS only.
+#%%   The first psp is Ge, the second one is Si, but the
+#%%   mixing coefficients are 0.0 and 1.0 .
+#%%   See previous test, except GS only, and the two atoms are switched.
+#%% topics = AtomTypes
+#%%<END TEST_INFO>

@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_ptgroups
 !! NAME
 !! m_ptgroups
@@ -8,7 +7,7 @@
 !!  character tables of the 32 point groups.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2010-2019 ABINIT group (MG)
+!! Copyright (C) 2010-2024 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -30,7 +29,7 @@ module m_ptgroups
  use m_io_tools,       only : open_file
  use m_fstrings,       only : sjoin
  use m_numeric_tools,  only : get_trace, cmplx_sphcart
- use m_symtk,          only : mati3inv
+ use m_symtk,          only : mati3inv, sg_multable
 
 ! Import group tables
  use m_ptg_C1
@@ -110,12 +109,6 @@ CONTAINS  !===========================================================
 !! class_ids(2,nclass)=Initial and final index in sym, for each
 !! Irreps(nclass)=Datatype gathering data on the different irreducible representations.
 !!
-!! PARENTS
-!!      m_ptgroups
-!!
-!! CHILDREN
-!!      irrep_free
-!!
 !! SOURCE
 
 subroutine get_point_group(ptg_name,nsym,nclass,sym,class_ids,class_names,Irreps)
@@ -125,7 +118,7 @@ subroutine get_point_group(ptg_name,nsym,nclass,sym,class_ids,class_names,Irreps
 !Arguments ------------------------------------
 !scalars
  integer,intent(out) :: nclass,nsym
- character(len=5),intent(in) :: ptg_name
+ character(len=*),intent(in) :: ptg_name
 !arrays
  integer,allocatable,intent(out) :: sym(:,:,:),class_ids(:,:)
  character(len=5),allocatable,intent(out) :: class_names(:)
@@ -204,7 +197,7 @@ subroutine get_point_group(ptg_name,nsym,nclass,sym,class_ids,class_names,Irreps
  CASE ('m-3m')
    call ptg_Oh  (nsym,nclass,sym,class_ids,class_names,Irreps)
  CASE DEFAULT
-   MSG_BUG(sjoin("Unknown value for ptg_name:", ptg_name))
+   ABI_BUG(sjoin("Unknown value for ptg_name:", ptg_name))
  END SELECT
 
  ! Calculate the trace of each irreducible representation in order to have the character at hand.
@@ -247,12 +240,6 @@ end subroutine get_point_group
 !!
 !!  * The routine assumes that anti-ferromagnetic symmetries (if any) have been removed by the caller.
 !!
-!! PARENTS
-!!      m_esymm,m_ptgroups
-!!
-!! CHILDREN
-!!      irrep_free
-!!
 !! SOURCE
 
 subroutine get_classes(nsym,sym,nclass,nelements,elements_idx)
@@ -269,11 +256,12 @@ subroutine get_classes(nsym,sym,nclass,nelements,elements_idx)
 
 !Local variables-------------------------------
 !scalars
- integer :: isym,jsym,ksym,identity_idx !,ierr
+ integer :: isym,jsym,ksym,identity_idx,ierr
  character(len=500) :: msg
 !arrays
  integer :: cjg(3,3),ss(3,3),xx(3,3),xxm1(3,3),test(3,3)
  integer :: identity(3,3)
+ integer :: dummy_symafm(nsym)
  logical :: found(nsym),found_identity
 
 !************************************************************************
@@ -290,13 +278,12 @@ subroutine get_classes(nsym,sym,nclass,nelements,elements_idx)
   write(msg,'(3a)')&
 &  'Either identity is not present or it is not the first operation ',ch10,&
 &  'check set of symmetry operations '
-  MSG_ERROR(msg)
+  ABI_ERROR(msg)
  end if
- !
- ! Is it a group? Note that I assume that AFM sym.op (if any) have been pruned in the caller.
- !dummy_symafm=1
- !call chkgrp(nsym,dummy_symafm,sym,ierr)
- !ABI_CHECK(ierr==0,"Error in group closure")
+  
+ dummy_symafm=1
+ call sg_multable(nsym,dummy_symafm,sym,ierr)
+ ABI_CHECK(ierr==0,"Error in group closure")
 
  nclass=0; nelements(:)=0; elements_idx(:,:)=0; found(:)=.FALSE.
  do isym=1,nsym
@@ -338,11 +325,6 @@ end subroutine get_classes
 !!
 !! OUTPUT
 !!  Only writing.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      irrep_free
 !!
 !! SOURCE
 
@@ -387,12 +369,6 @@ end subroutine show_character_tables
 !! FUNCTION
 !!  Deallocate all memory allocated in the point_group_t datatype.
 !!
-!! PARENTS
-!!      m_ptgroups
-!!
-!! CHILDREN
-!!      irrep_free
-!!
 !! SOURCE
 
 subroutine point_group_free(Ptg)
@@ -418,7 +394,7 @@ subroutine point_group_free(Ptg)
 
  if (allocated(Ptg%Irreps)) then
    call irrep_free(Ptg%Irreps)
-   ABI_DT_FREE(Ptg%Irreps)
+   ABI_FREE(Ptg%Irreps)
  end if
 
 end subroutine point_group_free
@@ -438,12 +414,6 @@ end subroutine point_group_free
 !!
 !! OUTPUT
 !!  The datatype completely initialized.
-!!
-!! PARENTS
-!!      m_esymm,m_ptgroups
-!!
-!! CHILDREN
-!!      irrep_free
 !!
 !! SOURCE
 
@@ -478,12 +448,6 @@ end subroutine point_group_init
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_ptgroups
-!!
-!! CHILDREN
-!!      irrep_free
 !!
 !! SOURCE
 
@@ -568,12 +532,6 @@ end subroutine point_group_print
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_esymm
-!!
-!! CHILDREN
-!!      irrep_free
-!!
 !! SOURCE
 
 subroutine locate_sym(Ptg,asym,sym_idx,cls_idx,ierr)
@@ -619,9 +577,9 @@ subroutine locate_sym(Ptg,asym,sym_idx,cls_idx,ierr)
 &    " sym_idx= ",sym_idx, " and cls_idx= ",cls_idx
    if (PRESENT(ierr)) then
      ierr=1
-     MSG_WARNING(msg)
+     ABI_WARNING(msg)
    else
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
  end if
 
@@ -644,11 +602,6 @@ end subroutine locate_sym
 !!
 !! OUTPUT
 !!  mtab(nsym,nsym)=The index of the product S_i * S_j in the input set sym.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      irrep_free
 !!
 !! SOURCE
 
@@ -687,7 +640,7 @@ subroutine mult_table(nsym,sym,mtab)
 
    if ( ANY(found /= 1)) then
      write(std_out,*)"found = ",found
-     MSG_ERROR("Input elements do not form a group")
+     ABI_ERROR("Input elements do not form a group")
    end if
  end do ! isym
 
@@ -713,11 +666,6 @@ end subroutine mult_table
 !!
 !! TODO
 !!   This is a stub. I still have to complete the fileformat for the Bilbao database.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      irrep_free
 !!
 !! SOURCE
 
@@ -753,14 +701,14 @@ subroutine groupk_from_file(Lgrps,spgroup,fname,nkpt,klist,ierr)
 
  ierr=0
  if (open_file(fname,msg,newunit=unt,form="formatted") /=0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  read(unt,*,ERR=10)          ! Skip the header.
  read(unt,*,ERR=10) fvers    ! File version.
  if (fvers > last_file_version) then
    write(msg,"(2(a,i0))")" Found file format= ",fvers," but the latest supported version is: ",last_file_version
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
  read(unt,*,ERR=10) ita_spgroup
  read(unt,*,ERR=10) basis
@@ -768,18 +716,18 @@ subroutine groupk_from_file(Lgrps,spgroup,fname,nkpt,klist,ierr)
  if (spgroup/=ita_spgroup) then
    write(msg,'(a,2i0)')&
 &   " Input space group does not match with the value reported on file: ",spgroup,ita_spgroup
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  if (basis /= "b") then
    msg=" Wrong value for basis: "//TRIM(basis)
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  ! * Read the list of the k-points.
  read(unt,*,ERR=10) nkpt
 
- ABI_DT_MALLOC(Lgrps,(nkpt))
+ ABI_MALLOC(Lgrps,(nkpt))
 
  ABI_MALLOC(klist,(3,nkpt))
  ABI_MALLOC(kname,(nkpt))
@@ -819,7 +767,7 @@ subroutine groupk_from_file(Lgrps,spgroup,fname,nkpt,klist,ierr)
        if ( (now-prev) /= 1 ) then
          write(msg,"(2(a,i0))")&
 &          " Symmetries on file are not ordered in classes. icls= ",icls,", isym= ",isym
-         MSG_ERROR(msg)
+         ABI_ERROR(msg)
        else
          prev = now
        end if
@@ -841,7 +789,7 @@ subroutine groupk_from_file(Lgrps,spgroup,fname,nkpt,klist,ierr)
    ABI_CHECK(Gk%nclass == nirreps_k,"Gk%nclass /= nirreps_k")
 
    !$$ allocate(Gk%class_names(Gk%nclass))
-   ABI_DT_MALLOC(Gk%Irreps,(nirreps_k))
+   ABI_MALLOC(Gk%Irreps,(nirreps_k))
 
    do irp=1,nirreps_k
      OneIrr =>  Gk%Irreps(irp)
@@ -878,12 +826,6 @@ end subroutine groupk_from_file
 !! FUNCTION
 !!  Deallocate all memory allocated in the irrep_t datatype.
 !!
-!! PARENTS
-!!      m_ptgroups
-!!
-!! CHILDREN
-!!      irrep_free
-!!
 !! SOURCE
 
 subroutine irrep_free_0d(Irrep)
@@ -915,11 +857,6 @@ end subroutine irrep_free_0d
 !! FUNCTION
 !!  Deallocate all memory allocated in the irrep_t datatype.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      irrep_free
-!!
 !! SOURCE
 
 subroutine irrep_free_1d(Irrep)
@@ -950,12 +887,6 @@ end subroutine irrep_free_1d
 !!  Perform a copy of a set of irrep_t datatypes. Optionally one can multiply
 !!  by a phase factor.
 !!
-!! PARENTS
-!!      m_esymm
-!!
-!! CHILDREN
-!!      irrep_free
-!!
 !! SOURCE
 
 subroutine copy_irrep(In_irreps,Out_irreps,phase_fact)
@@ -980,7 +911,7 @@ subroutine copy_irrep(In_irreps,Out_irreps,phase_fact)
  dim2 = SIZE(Out_irreps)
  if (dim1/=dim2) then
    msg = " irreps to be copied have different dimension"
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  my_phase_fact=cone
@@ -988,7 +919,7 @@ subroutine copy_irrep(In_irreps,Out_irreps,phase_fact)
    my_phase_fact=phase_fact
    if (SIZE(phase_fact) /= In_irreps(1)%nsym) then
      msg = " irreps to be copied have different dimension"
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
  end if
 
@@ -1022,10 +953,6 @@ end subroutine copy_irrep
 !!
 !! OUTPUT
 !!  Irrep<irrep_t>=
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1072,10 +999,6 @@ end subroutine init_irrep
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 function sum_irreps(Irrep1,Irrep2,ii,jj,kk,ll) result(res)
@@ -1098,19 +1021,19 @@ function sum_irreps(Irrep1,Irrep2,ii,jj,kk,ll) result(res)
 
  nsym = Irrep1%nsym
  if (nsym /= Irrep2%nsym) then
-   MSG_WARNING("Irreps have different nsym")
+   ABI_WARNING("Irreps have different nsym")
    ierr=ierr+1
  end if
 
  if (Irrep1%dim /= Irrep2%dim) then
-   MSG_WARNING("Irreps have different dimensions")
+   ABI_WARNING("Irreps have different dimensions")
    write(std_out,*)Irrep1%dim,Irrep2%dim
    ierr=ierr+1
  end if
 
  if (ii>Irrep2%dim .or. jj>Irrep2%dim .or. &
 &    kk>Irrep1%dim .or. ll>Irrep1%dim) then
-   MSG_WARNING("Wrong indeces")
+   ABI_WARNING("Wrong indices")
    write(std_out,*)ii,Irrep2%dim,jj,Irrep2%dim,kk>Irrep1%dim,ll,Irrep1%dim
    ierr=ierr+1
  end if
@@ -1133,11 +1056,6 @@ end function sum_irreps
 !! FUNCTION
 !!  Deallocate all memory allocate in the group_k_t.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      irrep_free
-!!
 !! SOURCE
 
 subroutine groupk_free(Gk)
@@ -1150,27 +1068,19 @@ subroutine groupk_free(Gk)
 ! *************************************************************************
 
 ! integer
- if (allocated(Gk%class_ids))   then
-   ABI_FREE(Gk%class_ids)
- end if
- if (allocated(Gk%sym))   then
-   ABI_FREE(Gk%sym)
- end if
+ ABI_SFREE(Gk%class_ids)
+ ABI_SFREE(Gk%sym)
 
 !real
- if (allocated(Gk%tnons)) then
-   ABI_FREE(Gk%tnons)
- end if
+ ABI_SFREE(Gk%tnons)
 
 !character
- if (allocated(Gk%class_names)) then
-   ABI_FREE(Gk%class_names)
- end if
+ ABI_SFREE(Gk%class_names)
 
 !type
  if (allocated(Gk%Irreps)) then
    call irrep_free(Gk%Irreps)
-   ABI_DT_FREE(Gk%Irreps)
+   ABI_FREE(Gk%Irreps)
  end if
 
 end subroutine groupk_free

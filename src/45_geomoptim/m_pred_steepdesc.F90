@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_pred_steepdesc
 !! NAME
 !!  m_pred_steepdesc
@@ -6,14 +5,10 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2019 ABINIT group (DCA, XG, GMR, SE)
+!!  Copyright (C) 1998-2024 ABINIT group (DCA, XG, GMR, SE)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -80,12 +75,6 @@ contains
 !! * This routine is a predictor, it only produces new positions
 !!   to be computed in the next iteration, this routine should
 !!   produce not output at all
-!!
-!! PARENTS
-!!      mover
-!!
-!! CHILDREN
-!!      hist2var,mkradim,mkrdim,var2hist,xcart2xred,xred2xcart
 !!
 !! SOURCE
 

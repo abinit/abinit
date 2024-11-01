@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_mklocl_realspace
 !! NAME
 !!  m_mklocl_realspace
@@ -8,17 +7,13 @@
 !!   Computation is done in real space (useful for isolated systems).
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2019 ABINIT group (TRangel, MT, DC)
+!!  Copyright (C) 2013-2024 ABINIT group (TRangel, MT, DC)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! TODO
 !!  This module could be merged with m_mklocl
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -31,13 +26,13 @@
 module m_mklocl_realspace
 
  use defs_basis
- use defs_datatypes
- use defs_abitypes
  use defs_wvltypes
  use m_xmpi
  use m_abicore
  use m_errors
 
+ use defs_datatypes, only : pseudopotential_type
+ use defs_abitypes, only : MPI_type
  use m_time,        only : timab
  use m_geometry,    only : xred2xcart
  use m_fft_mesh,    only : mkgrid_fft
@@ -48,7 +43,6 @@ module m_mklocl_realspace
  use m_abi2big,     only : wvl_rhov_abi2big
  use m_wvl_wfs,     only : derf_ab
  use m_fft,         only : fourdp
-
 
  implicit none
 
@@ -100,11 +94,6 @@ contains
 !!                 reduced coordinates. Multiply them by rprimd to get
 !!                 gradients in cartesian coordinates.
 !!
-!! PARENTS
-!!      mklocl
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine mklocl_realspace(grtn,icoulomb,mpi_enreg,natom,nattyp,nfft,ngfft,nscforder, &
@@ -117,7 +106,6 @@ subroutine mklocl_realspace(grtn,icoulomb,mpi_enreg,natom,nattyp,nfft,ngfft,nscf
 #else
  use defs_wvltypes, only : coulomb_operator
 #endif
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -174,7 +162,7 @@ subroutine mklocl_realspace(grtn,icoulomb,mpi_enreg,natom,nattyp,nfft,ngfft,nscf
  if (nproc_fft==1) n3d=n3  !for serial runs
  comm_fft=mpi_enreg%comm_fft
  if(me_fft /= mpi_enreg%me_fft .or. nproc_fft /= mpi_enreg%nproc_fft) then
-   MSG_BUG("mpi_enreg%x_fft not equal to the corresponding values in ngfft")
+   ABI_BUG("mpi_enreg%x_fft not equal to the corresponding values in ngfft")
  end if
 
 !Conditions for periodicity in the three directions
@@ -186,10 +174,10 @@ subroutine mklocl_realspace(grtn,icoulomb,mpi_enreg,natom,nattyp,nfft,ngfft,nscf
  call ptabs_fourdp(mpi_enreg,n2,n3,fftn2_distrib,ffti2_local,fftn3_distrib,ffti3_local)
 
 !Store xcart for each atom
- ABI_ALLOCATE(xcart,(3, natom))
+ ABI_MALLOC(xcart,(3, natom))
  call xred2xcart(natom, rprimd, xcart, xred)
 !Store cartesian coordinates for each grid points
- ABI_ALLOCATE(gridcart,(3, nfft))
+ ABI_MALLOC(gridcart,(3, nfft))
  call mkgrid_fft(ffti3_local,fftn3_distrib,gridcart,nfft,ngfft,rprimd)
 
 !Check whether all the PSP considered are of type GTH-HGH or PAW
@@ -228,12 +216,12 @@ subroutine mklocl_realspace(grtn,icoulomb,mpi_enreg,natom,nattyp,nfft,ngfft,nscf
    else if (option == 2) then
 
 !    Compute Hartree potential from rhor
-     ABI_ALLOCATE(vhartr,(nfft))
+     ABI_MALLOC(vhartr,(nfft))
      call psolver_hartree(entmp, (/ hgx, hgy, hgz /), icoulomb, me_fft, comm_fft, nfft, &
 &     (/n1,n2,n3/), nproc_fft, nscforder, nspden, rhor, vhartr, usewvl)
 
 !    Allocate temporary array for forces
-     ABI_ALLOCATE(gxyz,(3, natom))
+     ABI_MALLOC(gxyz,(3, natom))
 
 !    Calculate local part of the forces grtn (inspired from BigDFT routine)
      call local_forces_new(fftn3_distrib,ffti3_local,geocode,me_fft, ntypat, natom, &
@@ -250,8 +238,8 @@ subroutine mklocl_realspace(grtn,icoulomb,mpi_enreg,natom,nattyp,nfft,ngfft,nscf
      end do
 
 !    Deallocate local variables
-     ABI_DEALLOCATE(vhartr)
-     ABI_DEALLOCATE(gxyz)
+     ABI_FREE(vhartr)
+     ABI_FREE(gxyz)
    end if
 
 !----------------------------------------------------------------------
@@ -275,22 +263,22 @@ subroutine mklocl_realspace(grtn,icoulomb,mpi_enreg,natom,nattyp,nfft,ngfft,nscf
    else if (option == 2) then
 !    Allocate array to store cartesian gradient computed with
 !    an interpolation of rhor
-     ABI_ALLOCATE(grtn_cart_interpol,(3, natom))
+     ABI_MALLOC(grtn_cart_interpol,(3, natom))
      grtn_cart_interpol(:, :) = 0._dp
 
      n_interpol = nStep ** 3
-     ABI_ALLOCATE(coordRed_interpol,(3, nStep ** 3))
-     ABI_ALLOCATE(coordCart_interpol,(3, nStep ** 3))
+     ABI_MALLOC(coordRed_interpol,(3, nStep ** 3))
+     ABI_MALLOC(coordCart_interpol,(3, nStep ** 3))
 
      if (testing .and. customRho) then
 !      Use a custom rho instead of the self-consistent one.
-       ABI_ALLOCATE(rhor_testing,(nfft))
-       ABI_ALLOCATE(rhog_testing,(2, nfft))
+       ABI_MALLOC(rhor_testing,(nfft))
+       ABI_MALLOC(rhog_testing,(2, nfft))
      end if
 
-     ABI_ALLOCATE(rhor_interpol,(nfft * n_interpol))
-     ABI_ALLOCATE(rhor_work,(nfft * n_interpol))
-     ABI_ALLOCATE(rhog_interpol,(2, nfft * n_interpol))
+     ABI_MALLOC(rhor_interpol,(nfft * n_interpol))
+     ABI_MALLOC(rhor_work,(nfft * n_interpol))
+     ABI_MALLOC(rhog_interpol,(2, nfft * n_interpol))
 
      if (testing .and. customRho) then
 !      Testing only, changing rho with a centered gaussian
@@ -363,7 +351,7 @@ subroutine mklocl_realspace(grtn,icoulomb,mpi_enreg,natom,nattyp,nfft,ngfft,nscf
          end do
        end do
      end do
-     ABI_DEALLOCATE(rhor_work)
+     ABI_FREE(rhor_work)
 
 !    Compute grid access in the interpolated volume
      ii = 0
@@ -419,7 +407,7 @@ subroutine mklocl_realspace(grtn,icoulomb,mpi_enreg,natom,nattyp,nfft,ngfft,nscf
 &             '  pseudo-potential local part sampling is not wide enough', ch10, &
 &             '  want to access position ', jj, ' whereas mqgrid_vl = ', psps%mqgrid_vl, ch10, &
 &             '  Action : no idea, contact developpers...'
-             MSG_ERROR(message)
+             ABI_ERROR(message)
            end if
            delta = r - psps%qgrid_vl(jj)
            bb = delta * invdr
@@ -570,20 +558,20 @@ subroutine mklocl_realspace(grtn,icoulomb,mpi_enreg,natom,nattyp,nfft,ngfft,nscf
 &         rprimd(3, igeo) * grtn_cart_interpol(3, ia)
        end do
      end do
-     ABI_DEALLOCATE(rhor_interpol)
-     ABI_DEALLOCATE(rhog_interpol)
-     ABI_DEALLOCATE(coordRed_interpol)
-     ABI_DEALLOCATE(coordCart_interpol)
+     ABI_FREE(rhor_interpol)
+     ABI_FREE(rhog_interpol)
+     ABI_FREE(coordRed_interpol)
+     ABI_FREE(coordCart_interpol)
      if (testing .and. customRho) then
-       ABI_DEALLOCATE(rhor_testing)
-       ABI_DEALLOCATE(rhog_testing)
+       ABI_FREE(rhor_testing)
+       ABI_FREE(rhog_testing)
      end if
 
      if (testing) then
        call system_clock(tpsStop, count_rate = countParSeconde)
        write(std_out,*) "Tps : ", real(tpsStop - tpsStart) / real(countParSeconde)
        write(std_out,*) grtn_cart_interpol
-       MSG_ERROR("Testing section!")
+       ABI_ERROR("Testing section!")
      end if
 
    end if
@@ -592,8 +580,8 @@ subroutine mklocl_realspace(grtn,icoulomb,mpi_enreg,natom,nattyp,nfft,ngfft,nscf
  end if ! GTH/HGH/PAW psps
 
 !Release temporary memory
- ABI_DEALLOCATE(xcart)
- ABI_DEALLOCATE(gridcart)
+ ABI_FREE(xcart)
+ ABI_FREE(gridcart)
 
 !Close timing counters
  if (option==2)then
@@ -615,11 +603,6 @@ end subroutine mklocl_realspace
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      mklocl_realspace
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine createIonicPotential_new(fftn3_distrib,ffti3_local,geocode,iproc,&
@@ -627,7 +610,6 @@ subroutine createIonicPotential_new(fftn3_distrib,ffti3_local,geocode,iproc,&
 &  hxh,hyh,hzh,n1i,n2i,n3d,n3i,kernel,pot_ion,spaceworld,pawtab,usepaw)
 
  use defs_wvltypes, only : coulomb_operator
-implicit none
 
 !Arguments -------------------------------
 !scalars
@@ -663,7 +645,7 @@ implicit none
 #if defined HAVE_BIGDFT
 
  if(nproc<0)then
-   MSG_ERROR('nproc should not be negative')
+   ABI_ERROR('nproc should not be negative')
  end if
 
 !Ionic charge (must be calculated for the PS active processes)
@@ -890,16 +872,10 @@ implicit none
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      mklocl_realspace
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine calcVloc_mklocl(yy,xx,rloc,Z)
 
- implicit none
 !Arguments ------------------------------------
 !scalars
  real(dp),intent(in)  :: xx,rloc,Z
@@ -931,13 +907,10 @@ subroutine calcVloc_mklocl(yy,xx,rloc,Z)
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 function vloc_zero_mklocl(charge,rloc,msz,rad,vloc,d2vloc)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1001,18 +974,12 @@ end subroutine createIonicPotential_new
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      mklocl_realspace
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine local_forces_new(fftn3_distrib,ffti3_local,&
      geocode,iproc,ntypes,nat,iatype,rxyz,gridcart,psppar,nelpsp,hxh,hyh,hzh,&
      n1,n2,n3,n3d,rho,pot,floc,pawtab,usepaw)
 
-  implicit none
 
 !Arguments -------------------------------
 !scalars
@@ -1203,16 +1170,10 @@ subroutine local_forces_new(fftn3_distrib,ffti3_local,&
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      mklocl_realspace
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine calcdVloc_mklocl(yy,xx,rloc,Z)
 
- implicit none
 !Arguments ------------------------------------
 !scalars
  real(dp),intent(in)  :: xx,rloc,Z
@@ -1244,13 +1205,10 @@ subroutine calcdVloc_mklocl(yy,xx,rloc,Z)
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 function dvloc_zero_mklocl(charge,rloc,msz,rad,vloc,d2vloc)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1316,16 +1274,10 @@ end subroutine local_forces_new
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      mklocl_realspace
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine ind_positions_mklocl(periodic,i,n,j,go)
 
- implicit none
 
 !Arguments -------------------------------
  logical, intent(in) :: periodic
@@ -1363,7 +1315,7 @@ subroutine ind_positions_mklocl(periodic,i,n,j,go)
 !!
 !! INPUTS
 !!  efield (3)=external electric field
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  natom=number of atoms
 !!  nfft=size of vpsp (local potential)
 !!  nspden=number of spin-density components
@@ -1380,12 +1332,6 @@ subroutine ind_positions_mklocl(periodic,i,n,j,go)
 !!                 reduced coordinates. Multiply them by rprimd to get
 !!                 gradients in cartesian coordinates.
 !!
-!! PARENTS
-!!      mklocl,wvl_wfsinp_scratch
-!!
-!! CHILDREN
-!!      calcdvloc_wvl,derf_ab,paw_splint_der
-!!
 !! SOURCE
 
 subroutine mklocl_wavelets(efield, grtn, mpi_enreg, natom, nfft, &
@@ -1396,7 +1342,6 @@ subroutine mklocl_wavelets(efield, grtn, mpi_enreg, natom, nfft, &
  use BigDFT_API, only : ELECTRONIC_DENSITY,createIonicPotential,local_forces
  use poisson_solver, only : H_potential
 #endif
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1496,22 +1441,23 @@ subroutine mklocl_wavelets(efield, grtn, mpi_enreg, natom, nfft, &
 
    if (wvl_den%denspot%rhov_is/=ELECTRONIC_DENSITY) then
      message='denspot bigdft datstructure should contain rhor!'
-     MSG_BUG(message)
+     ABI_BUG(message)
    end if
 
 !  Extract density rhor from bigDFT datastructure
-   ABI_ALLOCATE(rhov,(nfft, nspden))
-   ABI_ALLOCATE(vhartr,(nfft))
+   ABI_MALLOC(rhov,(nfft, nspden))
+   ABI_MALLOC(vhartr,(nfft))
+   rhov=zero ; vhartr=zero
    shift = wvl_den%denspot%dpbox%ndims(1) * wvl_den%denspot%dpbox%ndims(2) &
 &   * wvl_den%denspot%dpbox%i3xcsh
-   do i = 1, nfft
+   do i = 1, min(nfft,size(wvl_den%denspot%rhov)-shift)
      rhov(i, 1) = wvl_den%denspot%rhov(i + shift)
      vhartr(i)  = wvl_den%denspot%rhov(i + shift)
    end do
    if (nspden == 2) then
      shift = shift + wvl_den%denspot%dpbox%ndims(1) * wvl_den%denspot%dpbox%ndims(2) &
 &     * wvl_den%denspot%dpbox%n3d
-     do i = 1, nfft
+     do i = 1, min(nfft,size(wvl_den%denspot%rhov)-shift)
        rhov(i, 2) =             wvl_den%denspot%rhov(i + shift)
        vhartr(i)  = vhartr(i) + wvl_den%denspot%rhov(i + shift)
      end do
@@ -1521,7 +1467,7 @@ subroutine mklocl_wavelets(efield, grtn, mpi_enreg, natom, nfft, &
    call H_potential('D',wvl_den%denspot%pkernel,vhartr,vhartr,energ,zero,.false.)
 
 !  Allocate temporary array for forces
-   ABI_ALLOCATE(gxyz,(3, natom))
+   ABI_MALLOC(gxyz,(3, natom))
 
 !  Calculate local part of the forces grtn (modified BigDFT routine)
    call local_forces_wvl(me,natom,xcart,&
@@ -1558,15 +1504,15 @@ subroutine mklocl_wavelets(efield, grtn, mpi_enreg, natom, nfft, &
    end do
 
 !  Deallocate local variables
-   ABI_DEALLOCATE(vhartr)
-   ABI_DEALLOCATE(rhov)
-   ABI_DEALLOCATE(gxyz)
+   ABI_FREE(vhartr)
+   ABI_FREE(rhov)
+   ABI_FREE(gxyz)
 
 !----------------------------------------------------------------------
 
  else ! option switch
    message = 'Internal error, option should be 1 or 2!'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 #else
@@ -1602,12 +1548,6 @@ end subroutine mklocl_wavelets
 !! OUTPUT
 !!  floc(3,natom)=local ionic potential contribution to forces
 !!
-!! PARENTS
-!!      mklocl_wavelets
-!!
-!! CHILDREN
-!!      calcdvloc_wvl,derf_ab,paw_splint_der
-!!
 !! SOURCE
 
 subroutine local_forces_wvl(iproc,natom,rxyz,hxh,hyh,hzh,n1,n2,n3,n3pi,i3s,n1i,n2i,&
@@ -1617,7 +1557,6 @@ subroutine local_forces_wvl(iproc,natom,rxyz,hxh,hyh,hzh,n1,n2,n3,n3pi,i3s,n1i,n
 #if defined HAVE_BIGDFT
  use BigDFT_API, only : PSPCODE_PAW,ind_positions
 #endif
- implicit none
 
 !Arguments -------------------------------
 !scalars
@@ -1819,17 +1758,10 @@ subroutine local_forces_wvl(iproc,natom,rxyz,hxh,hyh,hzh,n1,n2,n3,n3pi,i3s,n1i,n
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      mklocl_wavelets
-!!
-!! CHILDREN
-!!      calcdvloc_wvl,derf_ab,paw_splint_der
-!!
 !! SOURCE
 
 subroutine calcdVloc_wvl(yy,xx,rloc,Z)
 
- implicit none
 !Arguments ------------------------------------
 !scalars
  real(dp),intent(in)  :: xx,rloc,Z
@@ -1861,13 +1793,10 @@ subroutine calcdVloc_wvl(yy,xx,rloc,Z)
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 function dvloc_zero_wvl(charge,rloc,msz,rad,vloc,d2vloc)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars

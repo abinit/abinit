@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/bond_lotf
 !! NAME
 !! bond_lotf
@@ -8,7 +7,7 @@
 !!  set them.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2019 ABINIT group (MMancini)
+!! Copyright (C) 2005-2024 ABINIT group (MMancini)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -64,11 +63,6 @@ contains
 !! FUNCTION
 !!
 !! INPUTS
-!! PARENTS
-!!      m_lotf
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
  subroutine bond_tafit_init(nax)
@@ -80,7 +74,7 @@ contains
 
 ! *************************************************************************
 
-   ABI_ALLOCATE(tafit,(nax))
+   ABI_MALLOC(tafit,(nax))
 
   !--MMANCINI strange!!!!!
   !  tafit(:nax) = tquant(:nax)
@@ -96,11 +90,6 @@ contains
 !! FUNCTION
 !!
 !! INPUTS
-!! PARENTS
-!!      m_lotf
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
  subroutine bond_atom_init(nneigx,nneig,neighl)
@@ -130,8 +119,8 @@ contains
 
   !--Now find initial numbers of active/border bonds :
   !  (0)        CLEARS THE BOND(atom) MATRIX :
-   ABI_ALLOCATE(ibnd_mat,(2,nbondex))
-   ABI_ALLOCATE(ibnd_dum,(2,nfitmax*6))
+   ABI_MALLOC(ibnd_mat,(2,nbondex))
+   ABI_MALLOC(ibnd_dum,(2,nfitmax*6))
    ibnd_mat = 0
    ibnd_dum = 0
 
@@ -160,7 +149,7 @@ contains
 &     'ERROR: BOND_ATOM_INIT',ch10,&
 &     'IBN_TOT2 =  ',ibn_tot2,ch10,&
 &     ' ibnd_dum out of bounds, ibn_tot2 too large '
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
 
    end if
 
@@ -171,7 +160,7 @@ contains
    end do
 
 
-   ABI_DEALLOCATE(ibnd_dum)
+   ABI_FREE(ibnd_dum)
  end subroutine bond_atom_init
  !!***
 
@@ -185,11 +174,6 @@ contains
 !!  allocate imat,ibmat,ibmat_large
 !! INPUTS
 !!
-!! PARENTS
-!!      m_lotf
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
  subroutine bond_matrix_alloc(nax,nneigx)
@@ -202,9 +186,9 @@ contains
 
 ! *************************************************************************
 
-   ABI_ALLOCATE(ibmat,(nneigx,0:nfitmax))
-   ABI_ALLOCATE(ibmat_large,(nfitmax,nfitmax))
-   ABI_ALLOCATE(imat,(nax))
+   ABI_MALLOC(ibmat,(nneigx,0:nfitmax))
+   ABI_MALLOC(ibmat_large,(nfitmax,nfitmax))
+   ABI_MALLOC(imat,(nax))
  end subroutine bond_matrix_alloc
  !!***
 
@@ -216,11 +200,6 @@ contains
 !!  Set or update bond matrix imat,ibmat,ibmat_large
 !!  associates the bond to the atom neighlists
 !! INPUTS
-!!
-!! PARENTS
-!!      m_lotf
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -282,11 +261,6 @@ contains
 !!  nneig
 !!  neighl
 !!
-!! PARENTS
-!!      m_lotf
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
  subroutine bond_compute(nneig,neighl)
@@ -303,7 +277,7 @@ contains
 
 ! *************************************************************************
 
-   ABI_ALLOCATE(ibnd_dum,(2,nfitmax*6))
+   ABI_MALLOC(ibnd_dum,(2,nfitmax*6))
    ibnd_dum(:,:) = 0
    ibn_tot  = 0    ! bonds between the fitted atoms
    ibn_tot2 = 0    ! existing but non optimized bonds with border atoms
@@ -312,7 +286,7 @@ contains
 
    if(nfit <= 0) then
      write(msg,'(a,i8)')' UPDLIS WARNING : nfit <= 0 = ', nfit
-     MSG_WARNING(msg)
+     ABI_WARNING(msg)
    end if
 
    do ii = 1,nfit
@@ -336,7 +310,7 @@ contains
 &     'ERROR: BOND_ATOM_INIT',ch10,&
 &     'IBN_TOT2 =  ',ibn_tot2,ch10,&
 &     ' ibnd_dum out of bounds, ibn_tot2 too large '
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
   !--reorder to keep 'variational' bonds first :
@@ -345,7 +319,7 @@ contains
      ibnd_mat(:,ii) = ibnd_dum(:,ii-ibn_tot)
    end do
 
-   ABI_DEALLOCATE (ibnd_dum)
+   ABI_FREE (ibnd_dum)
  end subroutine bond_compute
  !!***
 
@@ -357,11 +331,6 @@ contains
 !! FUNCTION
 !!  set nfitmax (or control it), ifit,nfit
 !! INPUTS
-!! PARENTS
-!!      m_lotf
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
  subroutine bond_fit_set(nax,nfitdum)
@@ -379,10 +348,10 @@ contains
 
    if(.not. allocated(ifit)) then
      nfitmax = nfitdum + 1000
-     ABI_ALLOCATE(ifit,(nfitmax))
+     ABI_MALLOC(ifit,(nfitmax))
    elseif(nfitdum > nfitmax) then
      write(msg,'(a)')' BOND_FIT_SET : PROBLEM OF dimensionS !! '
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
    ifit = 0
@@ -406,22 +375,17 @@ contains
 !!
 !! INPUTS
 !!
-!! PARENTS
-!!      m_lotf
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
  subroutine  bond_dealloc()
 
 ! *************************************************************************
-   ABI_DEALLOCATE(ibnd_mat)
-   ABI_DEALLOCATE(tafit)
-   ABI_DEALLOCATE(ifit)
-   ABI_DEALLOCATE(ibmat)
-   ABI_DEALLOCATE(ibmat_large)
-   ABI_DEALLOCATE(imat)
+   ABI_FREE(ibnd_mat)
+   ABI_FREE(tafit)
+   ABI_FREE(ifit)
+   ABI_FREE(ibmat)
+   ABI_FREE(ibmat_large)
+   ABI_FREE(imat)
  end subroutine bond_dealloc
 
 end module bond_lotf

@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_hidecudarec
 !! NAME
 !! m_hidecudarec
@@ -7,16 +6,12 @@
 !!  Call the C-cu program to make recursion on GPU
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2009-2019 ABINIT group (MMancini)
+!!  Copyright (C) 2009-2024 ABINIT group (MMancini)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! NOTES
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -35,11 +30,11 @@ module m_hidecudarec
  use defs_basis
  use defs_rectypes
  use m_abicore
-#if defined HAVE_GPU_CUDA
- use m_initcuda
-#endif
-
  use m_fft,        only : fourdp
+
+#if defined HAVE_GPU_CUDA
+ use m_gpu_toolbox
+#endif
 
  implicit none
 
@@ -71,12 +66,6 @@ CONTAINS !===========================================================
 !! INPUTS
 !! nptrec=number of vectors allocated on device
 !! nfft=size of the grid (and so of a vector)
-!! PARENTS
-!!      m_hidecudarec
-!!
-!! CHILDREN
-!!      unset_dev
-!!
 !! SOURCE
 #if defined HAVE_GPU_CUDA
 subroutine prt_mem_usage(nptrec,nfft)
@@ -134,12 +123,6 @@ end subroutine prt_mem_usage
 !! OUTPUT
 !! recgpu=initialisation of GPU variables for recursion
 !!
-!! PARENTS
-!!      m_rec
-!!
-!! CHILDREN
-!!      unset_dev
-!!
 !! SOURCE
 #if defined HAVE_GPU_CUDA
 
@@ -154,7 +137,7 @@ subroutine InitRecGPU_0(recgpu,mpi_ab)
 ! *************************************************************************
  recgpu%nptrec = 0
  nullify(recgpu%map)
- ABI_ALLOCATE(recgpu%map,(0:mpi_ab%nproc-1))
+ ABI_MALLOC(recgpu%map,(0:mpi_ab%nproc-1))
  recgpu%map = -1       !--Initial guess no gpu
 
 end subroutine InitRecGPU_0
@@ -178,12 +161,6 @@ end subroutine InitRecGPU_0
 !!
 !! OUTPUT
 !!  recgpuinfo<recGPU_type>=contains information of recursion with GPU
-!!
-!! PARENTS
-!!      m_rec
-!!
-!! CHILDREN
-!!      unset_dev
 !!
 !! SOURCE
 #if defined HAVE_GPU_CUDA
@@ -278,12 +255,6 @@ end subroutine InitRecGPU
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      first_rec,vtorhorec
-!!
-!! CHILDREN
-!!      unset_dev
-!!
 !! SOURCE
 #if defined HAVE_GPU_CUDA
 
@@ -377,12 +348,6 @@ end subroutine cudarec
 !! OUTPUT
 !! nptrec(ndevice)=number of points for recursion on GPU
 !!
-!! PARENTS
-!!      m_rec
-!!
-!! CHILDREN
-!!      unset_dev
-!!
 !! SOURCE
 
 subroutine CleanRecGPU(recgpu,load)
@@ -397,14 +362,14 @@ subroutine CleanRecGPU(recgpu,load)
  recgpu%nptrec = 0
 
  if(associated(recgpu%map))  then
-   ABI_DEALLOCATE(recgpu%map)
+   ABI_FREE(recgpu%map)
  end if
  if(load==1)then
    if(allocated(recgpu%par%displs)) then
-     ABI_DEALLOCATE(recgpu%par%displs)
+     ABI_FREE(recgpu%par%displs)
    end if
    if(allocated(recgpu%par%vcount)) then
-     ABI_DEALLOCATE(recgpu%par%vcount)
+     ABI_FREE(recgpu%par%vcount)
    end if
  endif
  call unset_dev()

@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_ab7_symmetry
 !! NAME
 !! m_ab7_symmetry
@@ -6,12 +5,10 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2019 ABINIT group (DC)
+!!  Copyright (C) 2008-2024 ABINIT group (DC)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
 !!
 !! SOURCE
 
@@ -132,7 +129,7 @@ contains
     ! Normal treatment.
     n_symmetries = n_symmetries + 1
 
-    ABI_DATATYPE_ALLOCATE(token,)
+    ABI_MALLOC(token,)
     token%id = n_symmetries
     call new_symmetry(token%data)
     token%next => my_symmetries
@@ -170,7 +167,7 @@ contains
        end do
        tmp%next => token%next
     end if
-    ABI_DATATYPE_DEALLOCATE(token)
+    ABI_FREE(token)
     if (AB_DBG) write(std_err,*) "AB symmetry: free done"
   end subroutine free_item
 
@@ -251,25 +248,25 @@ contains
     if (AB_DBG) write(std_err,*) "AB symmetry: free a symmetry."
 
     if (associated(sym%xRed))  then
-      ABI_DEALLOCATE(sym%xRed)
+      ABI_FREE(sym%xRed)
     end if
     if (associated(sym%spinAt))  then
-      ABI_DEALLOCATE(sym%spinAt)
+      ABI_FREE(sym%spinAt)
     end if
     if (associated(sym%typeAt))  then
-      ABI_DEALLOCATE(sym%typeAt)
+      ABI_FREE(sym%typeAt)
     end if
     if (associated(sym%indexingAtoms))  then
-      ABI_DEALLOCATE(sym%indexingAtoms)
+      ABI_FREE(sym%indexingAtoms)
     end if
     if (associated(sym%sym))  then
-      ABI_DEALLOCATE(sym%sym)
+      ABI_FREE(sym%sym)
     end if
     if (associated(sym%symAfm))  then
-      ABI_DEALLOCATE(sym%symAfm)
+      ABI_FREE(sym%symAfm)
     end if
     if (associated(sym%transNon))  then
-      ABI_DEALLOCATE(sym%transNon)
+      ABI_FREE(sym%transNon)
     end if
   end subroutine free_symmetry
 
@@ -387,9 +384,9 @@ contains
     end if
 
     token%data%nAtoms =  nAtoms
-    ABI_ALLOCATE(token%data%typeAt,(nAtoms))
+    ABI_MALLOC(token%data%typeAt,(nAtoms))
     token%data%typeAt = typeAt
-    ABI_ALLOCATE(token%data%xRed,(3, nAtoms))
+    ABI_MALLOC(token%data%xRed,(3, nAtoms))
     token%data%xRed   = xRed
 
     ! We unset only the symmetries
@@ -397,7 +394,7 @@ contains
        token%data%nSym = 0
     end if
     if (associated(token%data%indexingAtoms)) then
-      ABI_DEALLOCATE(token%data%indexingAtoms)
+      ABI_FREE(token%data%indexingAtoms)
     end if
   end subroutine symmetry_set_structure
 
@@ -430,7 +427,7 @@ contains
     end if
 
     token%data%withSpin = 4
-    ABI_ALLOCATE(token%data%spinAt,(3, nAtoms))
+    ABI_MALLOC(token%data%spinAt,(3, nAtoms))
     token%data%spinAt = spinAt
 
     ! We unset only the symmetries
@@ -468,7 +465,7 @@ contains
     end if
 
     token%data%withSpin = 2
-    ABI_ALLOCATE(token%data%spinAt,(3,nAtoms))
+    ABI_MALLOC(token%data%spinAt,(3,nAtoms))
     token%data%spinAt = 0._dp
     token%data%spinAt(3, :) = real(spinAt)
 
@@ -642,7 +639,7 @@ contains
        berryopt = 0
     end if
     if (AB_DBG) write(std_err,*) "AB symmetry: call ABINIT symlatt."
-    call symlatt(sym%bravais, AB7_MAX_SYMMETRIES, &
+    call symlatt(sym%bravais, std_out, AB7_MAX_SYMMETRIES, &
          & sym%nBravSym, sym%bravSym, sym%rprimd, sym%tolsym)
     if (AB_DBG) write(std_err,*) "AB symmetry: call ABINIT OK."
     if (AB_DBG) write(std_err, "(A,I3)") "  nSymBrav :", sym%nBravSym
@@ -687,7 +684,7 @@ contains
     type(symmetry_type), intent(inout) :: sym
     integer, intent(out) :: errno
 
-    integer :: berryopt, jellslab, noncol
+    integer :: berryopt, invar_z
     integer :: use_inversion
     real(dp), pointer :: spinAt_(:,:)
     integer  :: sym_(3, 3, AB7_MAX_SYMMETRIES)
@@ -706,20 +703,15 @@ contains
     else
        berryopt = 0
     end if
-    if (sym%withJellium) then
-       jellslab = 1
+    if (sym%withJellium .or. sym%nzchempot/=0) then
+       invar_z = 2
     else
-       jellslab = 0
+       invar_z = 0
     end if
-    if (sym%withSpin == 4) then
-       noncol = 1
-       spinAt_ => sym%spinAt
-    else if (sym%withSpin == 2) then
-       noncol = 0
+    if (sym%withSpin == 2 .or. sym%withSpin == 4) then
        spinAt_ => sym%spinAt
     else
-       noncol = 0
-       ABI_ALLOCATE(spinAt_,(3, sym%nAtoms))
+       ABI_MALLOC(spinAt_,(3, sym%nAtoms))
        spinAt_ = 0
     end if
     if (sym%withSpinOrbit) then
@@ -730,26 +722,26 @@ contains
 
     if (sym%nsym == 0) then
        if (AB_DBG) write(std_err,*) "AB symmetry: call ABINIT symfind."
-       call symfind(berryopt, sym%field, sym%gprimd, jellslab, AB7_MAX_SYMMETRIES, &
-            & sym%nAtoms, noncol, sym%nBravSym, sym%nSym, sym%nzchempot, 0, sym%bravSym, spinAt_, &
+       call symfind(sym%gprimd, AB7_MAX_SYMMETRIES, &
+            & sym%nAtoms, sym%nBravSym, sym%withSpin, sym%nSym, 0, sym%bravSym, spinAt_, &
             & symAfm_, sym_, transNon_, sym%tolsym, sym%typeAt, &
-            & use_inversion, sym%xRed)
+            & use_inversion, sym%xRed, invardir_red=sym%field, invar_z=invar_z)
        if (AB_DBG) write(std_err,*) "AB symmetry: call ABINIT OK."
        if (AB_DBG) write(std_err, "(A,I3)") "  nSym:", sym%nSym
        if (associated(sym%sym))  then
-          ABI_DEALLOCATE(sym%sym)
+          ABI_FREE(sym%sym)
        end if
        if (associated(sym%symAfm))  then
-          ABI_DEALLOCATE(sym%symAfm)
+          ABI_FREE(sym%symAfm)
        end if
        if (associated(sym%transNon))  then
-          ABI_DEALLOCATE(sym%transNon)
+          ABI_FREE(sym%transNon)
        end if
-       ABI_ALLOCATE(sym%sym,(3, 3, sym%nSym))
+       ABI_MALLOC(sym%sym,(3, 3, sym%nSym))
        sym%sym(:,:,:) = sym_(:,:, 1:sym%nSym)
-       ABI_ALLOCATE(sym%symAfm,(sym%nSym))
+       ABI_MALLOC(sym%symAfm,(sym%nSym))
        sym%symAfm(:) = symAfm_(1:sym%nSym)
-       ABI_ALLOCATE(sym%transNon,(3, sym%nSym))
+       ABI_MALLOC(sym%transNon,(3, sym%nSym))
        sym%transNon(:,:) = transNon_(:, 1:sym%nSym)
     else if (sym%nsym < 0) then
        sym%nsym = -sym%nsym
@@ -759,7 +751,7 @@ contains
     end if
 
     if (sym%withSpin == 1) then
-       ABI_DEALLOCATE(spinAt_)
+       ABI_FREE(spinAt_)
     end if
 
     if (AB_DBG) write(std_err,*) "AB symmetry: call ABINIT symanal."
@@ -827,11 +819,11 @@ contains
        errno = AB7_ERROR_ARG
        return
     else
-       ABI_ALLOCATE(token%data%sym, (3, 3, nSym))
+       ABI_MALLOC(token%data%sym, (3, 3, nSym))
        token%data%sym(:,:,:) = sym(:,:,:)
-       ABI_ALLOCATE(token%data%symAfm, (nSym))
+       ABI_MALLOC(token%data%symAfm, (nSym))
        token%data%symAfm(:) = symAfm(:)
-       ABI_ALLOCATE(token%data%transNon, (3, nSym))
+       ABI_MALLOC(token%data%transNon, (3, nSym))
        token%data%transNon(:,:) = transNon(:,:)
 
        token%data%auto = .false.
@@ -978,11 +970,11 @@ contains
     integer :: isym
 
     if (.not. associated(sym%indexingAtoms)) then
-      ABI_ALLOCATE(sym%indexingAtoms,(4, sym%nSym, sym%nAtoms))
+      ABI_MALLOC(sym%indexingAtoms,(4, sym%nSym, sym%nAtoms))
     end if
 
     !Get the symmetry matrices in terms of reciprocal basis
-    ABI_ALLOCATE(symrec,(3, 3, sym%nSym))
+    ABI_MALLOC(symrec,(3, 3, sym%nSym))
     do isym = 1, sym%nSym, 1
        call mati3inv(sym%sym(:,:,isym), symrec(:,:,isym))
     end do
@@ -991,7 +983,7 @@ contains
     call symatm(sym%indexingAtoms, sym%nAtoms, sym%nSym, symrec, &
          & sym%transNon, sym%tolsym, sym%typeAt, sym%xRed)
 
-    ABI_DEALLOCATE(symrec)
+    ABI_FREE(symrec)
   end subroutine compute_equivalent_atoms
 
   subroutine symmetry_get_equivalent_atom(id, equiv, iAtom, errno)

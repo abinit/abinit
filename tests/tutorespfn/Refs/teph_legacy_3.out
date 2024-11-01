@@ -1,0 +1,57 @@
+
+.Version 9.7.4 of MRGGKK 
+.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+
+.Copyright (C) 1998-2024 ABINIT group . 
+ MRGGKK comes with ABSOLUTELY NO WARRANTY.
+ It is free software, and you are welcome to redistribute it
+ under certain conditions (GNU General Public License,
+ see ~abinit/COPYING or http://www.gnu.org/copyleft/gpl.txt).
+
+ ABINIT is a project of the Universite Catholique de Louvain,
+ Corning Inc. and other collaborators, see ~abinit/doc/developers/contributors.txt .
+ Please read https://docs.abinit.org/theory/acknowledgments for suggested
+ acknowledgments of the ABINIT effort.
+ For more information, see https://www.abinit.org .
+
+.Starting date : Wed  4 May 2022.
+- ( at 03h29 )
+  
+ Files file format: 
+
+  Name of the output file
+  Integer flag: 0 --> binary output,   1 --> ascii formatted output
+  Name of the groud state wavefunction file WF
+  Number of 1WF, of GKK files, and number of 1WF files in all the GKK files
+  Names of the 1WF files...
+  Names of the GKK files...
+
+ Enter name of output file:
+ Output                     = teph_legacy_3o_GKK.bin
+ Ground State file          = teph_legacy_1o_DS6_WFK
+ Number of 1WF files        =    0
+ Number of GKK files        =    9
+ Total Number of 1WF in GKK =    9
+
+ normal input for GS file
+ header echoed to output file
+ normal input for GKK file
+mrggkk : try to reread GS eigenvalues
+ normal input for GKK file
+mrggkk : try to reread GS eigenvalues
+ normal input for GKK file
+mrggkk : try to reread GS eigenvalues
+ normal input for GKK file
+mrggkk : try to reread GS eigenvalues
+ normal input for GKK file
+mrggkk : try to reread GS eigenvalues
+ normal input for GKK file
+mrggkk : try to reread GS eigenvalues
+ normal input for GKK file
+mrggkk : try to reread GS eigenvalues
+ normal input for GKK file
+mrggkk : try to reread GS eigenvalues
+ normal input for GKK file
+mrggkk : try to reread GS eigenvalues
+
+ Done

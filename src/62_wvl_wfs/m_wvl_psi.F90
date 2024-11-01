@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_wvl_psi
 !! NAME
 !!  m_wvl_psi
@@ -6,14 +5,10 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2019 ABINIT group (DC, MT)
+!!  Copyright (C) 1998-2024 ABINIT group (DC, MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -26,13 +21,14 @@
 module m_wvl_psi
 
   use defs_basis
-  use defs_abitypes
-  use defs_datatypes
   use defs_wvltypes
   use m_errors
   use m_xmpi
   use m_abicore
+  use m_dtset
 
+  use defs_datatypes, only : pseudopotential_type
+  use defs_abitypes,  only : MPI_type
   use m_energies, only : energies_type
   use m_pawcprj,  only : pawcprj_type, pawcprj_alloc
   use m_abi2big,  only : wvl_vxc_abi2big, wvl_vtrial_abi2big
@@ -62,8 +58,8 @@ contains
 !! INPUTS
 !!  dtset <type(dataset_type)>=input variables.
 !!  istep=id of the current iteration (first is 1).
-!!  mpi_enreg=informations about MPI parallelization
-!!  proj <type(wvl_projector_type)>=projectors informations for wavelets.
+!!  mpi_enreg=information about MPI parallelization
+!!  proj <type(wvl_projector_type)>=projectors information for wavelets.
 !!  vtrial(dtset%nfft)=external potential.
 !!  xcart(3,natom)=cartesian atomic coordinates
 !!
@@ -76,13 +72,7 @@ contains
 !!   | e_nlpsp_vfock(OUT)=nonlocal psp + potential Fock ACE part of total energy
 !!  residm=max value for gradient in the minimisation process.
 !!  rhor(dtset%nfft)=electron density in r space
-!!  wfs <type(wvl_projector_type)>=wavefunctions informations for wavelets.
-!!
-!! PARENTS
-!!      vtorho
-!!
-!! CHILDREN
-!!      calculate_energy_and_gradient,hpsitopsi,pawcprj_alloc,wrtout
+!!  wfs <type(wvl_projector_type)>=wavefunctions information for wavelets.
 !!
 !! SOURCE
 
@@ -126,7 +116,7 @@ subroutine wvl_hpsitopsi(cprj,dtset,energies,istep,mcprj,mpi_enreg,residm,wvl,xc
  if(wvl%wfs%ks%orthpar%methOrtho .ne. 0) then
    write(message,'(2a)') ch10,&
 &   'wvl_hpsitopsi: the only orthogonalization method supported for PAW+WVL is Cholesky'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  write(message, '(a,a)' ) ch10,&
@@ -211,12 +201,6 @@ end subroutine wvl_hpsitopsi
 !!  vtrial(nfft,nspden)=new potential
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      afterscfloop,rhotov,setvtr,vtorho
-!!
-!! CHILDREN
-!!      psitohpsi,total_energies,wrtout,wvl_vtrial_abi2big,wvl_vxc_abi2big
 !!
 !! SOURCE
 
@@ -339,12 +323,6 @@ end subroutine wvl_psitohpsi
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      forstr,vtorho
-!!
-!! CHILDREN
-!!      nonlocal_forces,wrtout,xmpi_sum
-!!
 !! SOURCE
 
 subroutine wvl_nl_gradient(grnl, mpi_enreg, natom, rprimd, wvl, xcart)
@@ -385,7 +363,7 @@ subroutine wvl_nl_gradient(grnl, mpi_enreg, natom, rprimd, wvl, xcart)
  grnl(:, :) = zero
  strtens(:,:)=zero
 
- ABI_ALLOCATE(gxyz,(3, natom))
+ ABI_MALLOC(gxyz,(3, natom))
  gxyz(:,:) = zero
 
 !Add the nonlocal part of the forces to grtn (BigDFT routine)
@@ -410,7 +388,7 @@ subroutine wvl_nl_gradient(grnl, mpi_enreg, natom, rprimd, wvl, xcart)
 &     rprimd(3, igeo) * gxyz(3, ia)
    end do
  end do
- ABI_DEALLOCATE(gxyz)
+ ABI_FREE(gxyz)
 
 #else
  BIGDFT_NOTENABLED_ERROR()
@@ -436,12 +414,6 @@ end subroutine wvl_nl_gradient
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      afterscfloop
-!!
-!! CHILDREN
-!!      calculatetailcorrection,dcopy,wrtout,xmpi_allgatherv
 !!
 !! SOURCE
 
@@ -509,7 +481,7 @@ subroutine wvl_tail_corrections(dtset, energies, etotal, mpi_enreg, psps, wvl, x
 !Calculate energy correction due to finite size effects
 !---reformat potential
  nsize = wvl%descr%Glr%d%n1i * wvl%descr%Glr%d%n2i
- ABI_ALLOCATE(wvl%den%denspot%pot_work, (nsize * wvl%descr%Glr%d%n3i * dtset%nsppol))
+ ABI_MALLOC(wvl%den%denspot%pot_work, (nsize * wvl%descr%Glr%d%n3i * dtset%nsppol))
 
  if (parallel) then
    call xmpi_allgatherv(wvl%den%denspot%rhov, &
@@ -536,7 +508,7 @@ subroutine wvl_tail_corrections(dtset, energies, etotal, mpi_enreg, psps, wvl, x
 &   wvl%wfs%ks%psi, .false., ekin_sum, epot_sum, eproj_sum)
  end if
 
- ABI_DEALLOCATE(wvl%den%denspot%pot_work)
+ ABI_FREE(wvl%den%denspot%pot_work)
 
  energies%e_kinetic = ekin_sum
  energies%e_localpsp = epot_sum - two * energies%e_hartree

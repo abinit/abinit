@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_fftw3
 !! NAME
 !! m_fftw3
@@ -7,7 +6,7 @@
 !!  This module provides wrappers for the FFTW3 routines: in-place and out-of-place version.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2019 ABINIT group (MG, FD)
+!! Copyright (C) 2009-2024 ABINIT group (MG, FD)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -48,18 +47,18 @@ MODULE m_fftw3
  use m_cplxtools
  use m_distribfft
  use m_fftcore
- use iso_c_binding
+ use, intrinsic :: iso_c_binding
 
  use m_time,           only : timab
  use m_numeric_tools,  only : imax_loc
  use defs_abitypes,    only : MPI_type
  use m_mpinfo,         only : ptabs_fourwf
- use m_fstrings,       only : strcat
+ use m_fstrings,       only : strcat, itoa, sjoin
  use m_fft_mesh,       only : zpad_t, zpad_init, zpad_free
 
  implicit none
 
-#ifdef HAVE_FFT_FFTW3_MPI
+#ifdef HAVE_FFTW3_MPI
  include 'fftw3-mpi.f03'
 #endif
 
@@ -74,9 +73,11 @@ MODULE m_fftw3
  public :: fftw3_seqfourdp      ! 3D FFT of lengths nx, ny, nz. Mainly used for densities or potentials.
  public :: fftw3_seqfourwf      ! FFT transform of wavefunctions (high-level interface).
  public :: fftw3_fftrisc
+ public :: fftw3_fftrisc_mixprec ! Mixed precision version of fftrisc: input/output in dp, computation done in sp.
  public :: fftw3_fftug          ! G-->R. 3D zero-padded FFT of lengths nx, ny, nz. Mainly used for wavefunctions
  public :: fftw3_fftur          ! R-->G, 3D zero-padded FFT of lengths nx, ny, nz. Mainly used for wavefunctions
  public :: fftw3_use_lib_threads
+ public :: fftw3_spawn_threads_here
 
  public :: fftw3_mpifourdp
 
@@ -106,7 +107,7 @@ MODULE m_fftw3
  public :: fftw3_applypot_many
  public :: fftw3_accrho
 
-#ifdef HAVE_FFT_FFTW3_MPI
+#ifdef HAVE_FFTW3_MPI
 ! flags copied from fftw3.f
  integer,public,parameter :: ABI_FFTW_FORWARD = FFTW_FORWARD
  integer,public,parameter :: ABI_FFTW_BACKWARD = FFTW_BACKWARD
@@ -138,7 +139,7 @@ MODULE m_fftw3
  ! It should be at least integer*@SIZEOF_INT_P@
  ! MKL wrappers requires it to be integer*8, so do _not_ use C_INTPTR_T.
 
-#ifdef HAVE_FFT_FFTW3_THREADS
+#ifdef HAVE_FFTW3_THREADS
  integer,private,save :: THREADS_INITED = 0
  ! 1 if treads have been initialized. 0 otherwise.
 #endif
@@ -207,7 +208,7 @@ MODULE m_fftw3
    module procedure fftw3_fftpad_dpc
  end interface fftw3_fftpad
 
-#ifdef HAVE_FFT_FFTW3
+#ifdef HAVE_FFTW3
   ! Overloaded planner.
  interface fftw3_plan_many_dft
    module procedure dplan_many_dft_1D
@@ -247,7 +248,7 @@ MODULE m_fftw3
 !!     builders with MKL should use m_dfti.F90
 !!     builders with FFTW3 should provide a recent version of the library
 !!
-#ifndef HAVE_FFT_FFTW3_MPI
+#ifndef HAVE_FFTW3_MPI
  ! Fortran binding for fftw_malloc
  interface fftw_malloc
    type(C_PTR) function fftw_malloc(alloc_size) bind(C, name='fftw_malloc')
@@ -288,12 +289,6 @@ CONTAINS  !===========================================================
 !! OUTPUT
 !! fofr(cplex,ldx*ldy*ldz*ndat)=The FFT of fofg
 !!
-!! PARENTS
-!!      fourdp,m_fft
-!!
-!! CHILDREN
-!!      fftw3_destroy_plan,fftw3_execute_dft
-!!
 !! SOURCE
 
 subroutine fftw3_seqfourdp(cplex,nx,ny,nz,ldx,ldy,ldz,ndat,isign,fofg,fofr,fftw_flags)
@@ -308,6 +303,7 @@ subroutine fftw3_seqfourdp(cplex,nx,ny,nz,ldx,ldy,ldz,ndat,isign,fofg,fofr,fftw_
 
 !Local variables-------------------------------
 !scalars
+ integer,parameter :: iscale1 = 1
  integer :: my_flags,ii,jj
  complex(spc), allocatable :: work_sp(:)
 
@@ -326,10 +322,10 @@ subroutine fftw3_seqfourdp(cplex,nx,ny,nz,ldx,ldy,ldz,ndat,isign,fofg,fofr,fftw_
      else if (isign == ABI_FFTW_FORWARD) then ! -1
        work_sp(:) = cmplx(fofr(1::2), fofr(2::2), kind=spc)
      else
-       MSG_BUG("Wrong isign")
+       ABI_BUG("Wrong isign")
      end if
 
-     call fftw3_c2c_ip_spc(nx,ny,nz,ldx,ldy,ldz,ndat,isign,work_sp,fftw_flags=my_flags)
+     call fftw3_c2c_ip_spc(nx, ny, nz, ldx, ldy, ldz, ndat, iscale1, isign, work_sp, fftw_flags=my_flags)
 
      if (isign == ABI_FFTW_BACKWARD) then ! +1
        jj = 1
@@ -338,7 +334,7 @@ subroutine fftw3_seqfourdp(cplex,nx,ny,nz,ldx,ldy,ldz,ndat,isign,fofg,fofr,fftw_
          fofr(jj+1) = aimag(work_sp(ii))
          jj = jj + 2
        end do
-     else if (isign == ABI_FFTW_FORWARD) then  ! -1
+     else if (isign == ABI_FFTW_FORWARD) then ! -1
        jj = 1
        do ii=1,ldx*ldy*ldz*ndat
          fofg(jj) = real(work_sp(ii), kind=dp)
@@ -356,23 +352,25 @@ subroutine fftw3_seqfourdp(cplex,nx,ny,nz,ldx,ldy,ldz,ndat,isign,fofg,fofr,fftw_
      case (ABI_FFTW_FORWARD)  ! -1
        call fftw3_many_dft_op(nx,ny,nz,ldx,ldy,ldz,ndat,isign,fofr,fofg,fftw_flags=my_flags)
      case default
-       MSG_BUG("Wrong isign")
+       ABI_BUG("Wrong isign")
      end select
    end if
 
  case (1)
    ! Real case.
    select case (isign)
-   case (ABI_FFTW_FORWARD) ! -1; R --> G
+   case (ABI_FFTW_FORWARD)
+     ! -1; R --> G
      call fftw3_r2c_op(nx,ny,nz,ldx,ldy,ldz,ndat,fofr,fofg,fftw_flags=my_flags)
-   case (ABI_FFTW_BACKWARD) ! +1; G --> R
+   case (ABI_FFTW_BACKWARD)
+     ! +1; G --> R
      call fftw3_c2r_op(nx,ny,nz,ldx,ldy,ldz,ndat,fofg,fofr,fftw_flags=my_flags)
    case default
-     MSG_BUG("Wrong isign")
+     ABI_BUG("Wrong isign")
    end select
 
  case default
-   MSG_BUG(" Wrong value for cplex")
+   ABI_BUG(" Wrong value for cplex")
  end select
 
 end subroutine fftw3_seqfourdp
@@ -441,16 +439,10 @@ end subroutine fftw3_seqfourdp
 !!                fofgout(2,npwout*ndat) contains its output Fourier transform;
 !!                no use of fofgin and npwin.
 !!
-!! PARENTS
-!!      fourwf
-!!
-!! CHILDREN
-!!      fftw3_destroy_plan,fftw3_execute_dft
-!!
 !! SOURCE
 
-subroutine fftw3_seqfourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
-&  kg_kin,kg_kout,mgfft,ndat,ngfft,npwin,npwout,ldx,ldy,ldz,option,weight_r,weight_i)
+subroutine fftw3_seqfourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k, &
+                          kg_kin,kg_kout,mgfft,ndat,ngfft,npwin,npwout,ldx,ldy,ldz,option,weight_r,weight_i)
 
 !Arguments ------------------------------------
 !scalars
@@ -479,24 +471,22 @@ subroutine fftw3_seqfourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,i
 
 ! *************************************************************************
 
- nx=ngfft(1); ny=ngfft(2); nz=ngfft(3)
- fftalg=ngfft(7); fftalga=fftalg/100; fftalgc=mod(fftalg,10)
- fftcache=ngfft(8)
-
- if (ALL(option /= (/0,1,2,3/))) then
-   write(msg,'(a,i0,a)')' The option number',option,' is not allowed. Only option=0, 1, 2 or 3 are allowed presently.'
-   MSG_ERROR(msg)
+ if (all(option /= [0, 1, 2, 3])) then
+   write(msg,'(a,i0,a)')' Option:',option,' is not allowed. Only option=0, 1, 2 or 3 are allowed presently.'
+   ABI_ERROR(msg)
  end if
 
- if (option==1 .and. cplex/=1) then
-   write(msg,'(a,i0)')' With the option number 1, cplex must be 1 but it is cplex=',cplex
-   MSG_ERROR(msg)
+ if (option == 1 .and. cplex /= 1) then
+   ABI_ERROR(sjoin("With option number 1, cplex must be 1 but it is cplex:", itoa(cplex)))
  end if
 
  if (option==2 .and. (cplex/=1 .and. cplex/=2)) then
-   write(msg,'(a,i0)')' With the option number 2, cplex must be 1 or 2, but it is cplex=',cplex
-   MSG_ERROR(msg)
+   ABI_ERROR(sjoin("With the option number 2, cplex must be 1 or 2, but it is cplex:", itoa(cplex)))
  end if
+
+ nx=ngfft(1); ny=ngfft(2); nz=ngfft(3)
+ fftalg=ngfft(7); fftalga=fftalg/100; fftalgc=mod(fftalg,10)
+ fftcache=ngfft(8)
 
  use_fftrisc = (fftalgc==2)
  if (istwf_k==2.and.option==3) use_fftrisc = .FALSE.
@@ -505,7 +495,7 @@ subroutine fftw3_seqfourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,i
  nthreads = xomp_get_num_threads(open_parallel=.TRUE.)
 
  if (use_fftrisc) then
-   !call wrtout(std_out, calling fftw3_fftrisc","COLL")
+   !call wrtout(std_out, calling fftw3_fftrisc")
 
    if (ndat == 1) then
      if (fftcore_mixprec == 0) then
@@ -617,7 +607,7 @@ subroutine fftw3_seqfourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,i
 
      CASE DEFAULT
        write(msg,'(a,i0,a)')'Option',option,' is not allowed. Only option=0, 1, 2 or 3 are allowed presently.'
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      END SELECT
 
    end if
@@ -692,7 +682,7 @@ subroutine fftw3_seqfourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,i
 
    CASE DEFAULT
      write(msg,'(a,i0,a)')'Option',option,' is not allowed. Only option=0, 1, 2 or 3 are allowed presently.'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    END SELECT
 
 
@@ -758,10 +748,9 @@ subroutine fftw3_seqfourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,i
 
    CASE DEFAULT
      write(msg,'(a,i0,a)')'Option',option,' is not allowed. Only option=0, 1, 2 or 3 are allowed presently.'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    END SELECT
 #endif
-
  end if
 
 end subroutine fftw3_seqfourwf
@@ -779,15 +768,11 @@ end subroutine fftw3_seqfourwf
 !! in both directions. Also accomplish some post-processing.
 !! See fftw3_fftrisc_dp for API doc.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      fftw3_destroy_plan,fftw3_execute_dft
-!!
 !! SOURCE
 
 subroutine fftw3_fftrisc_sp(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,kg_kin,kg_kout,&
-& mgfft,ngfft,npwin,npwout,ldx,ldy,ldz,option,weight_r,weight_i)
+                            mgfft,ngfft,npwin,npwout,ldx,ldy,ldz,option, &
+                            weight_r,weight_i, abi_convention, iscale)
 
 !Arguments ------------------------------------
 !scalars
@@ -800,10 +785,12 @@ subroutine fftw3_fftrisc_sp(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,
  real(dp),intent(inout) :: denpot(cplex*ldx,ldy,ldz)
  real(sp),intent(inout) :: fofr(2,ldx*ldy*ldz)
  real(sp),intent(inout) :: fofgout(2,npwout)
+ logical,optional,intent(in) :: abi_convention
+ integer,optional,intent(in) :: iscale
 
 ! *************************************************************************
 
-#ifdef HAVE_FFT_FFTW3
+#ifdef HAVE_FFTW3
 
 #undef  FFT_PRECISION
 #undef  MYKIND
@@ -820,7 +807,7 @@ subroutine fftw3_fftrisc_sp(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,
 #include "fftw3_fftrisc.finc"
 
 #else
- MSG_ERROR("FFTW3 support not activated")
+ ABI_ERROR("FFTW3 support not activated")
  ABI_UNUSED((/cplex,gboundin(1,1),gboundout(1,1),istwf_k,kg_kin(1,1),kg_kout(1,1)/))
  ABI_UNUSED((/mgfft,ngfft(1),npwin,npwout,ldx,ldy,ldz,option/))
  ABI_UNUSED((/denpot(1,1,1),weight_r,weight_i/))
@@ -900,16 +887,11 @@ end subroutine fftw3_fftrisc_sp
 !!                 fofgout(2,npwout) contains its Fourier transform;
 !!                 no use of fofgin and npwin.
 !!
-!! PARENTS
-!!      m_fftw3
-!!
-!! CHILDREN
-!!      fftw3_destroy_plan,fftw3_execute_dft
-!!
 !! SOURCE
 
 subroutine fftw3_fftrisc_dp(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,kg_kin,kg_kout,&
-& mgfft,ngfft,npwin,npwout,ldx,ldy,ldz,option,weight_r,weight_i)
+                            mgfft,ngfft,npwin,npwout,ldx,ldy,ldz,option, &
+                            weight_r, weight_i, abi_convention, iscale)
 
 !Arguments ------------------------------------
 !scalars
@@ -921,10 +903,12 @@ subroutine fftw3_fftrisc_dp(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,
  real(dp),intent(in) :: fofgin(2,npwin)
  real(dp),intent(inout) :: denpot(cplex*ldx,ldy,ldz),fofr(2,ldx*ldy*ldz)
  real(dp),intent(inout) :: fofgout(2,npwout)
+ logical,optional,intent(in) :: abi_convention
+ integer,optional,intent(in) :: iscale
 
 ! *************************************************************************
 
-#ifdef HAVE_FFT_FFTW3
+#ifdef HAVE_FFTW3
 
 #undef  FFT_PRECISION
 #undef  MYKIND
@@ -941,7 +925,7 @@ subroutine fftw3_fftrisc_dp(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,
 #include "fftw3_fftrisc.finc"
 
 #else
- MSG_ERROR("FFTW3 support not activated")
+ ABI_ERROR("FFTW3 support not activated")
  ABI_UNUSED((/cplex,gboundin(1,1),gboundout(1,1),istwf_k,kg_kin(1,1),kg_kout(1,1)/))
  ABI_UNUSED((/mgfft,ngfft(1),npwin,npwout,ldx,ldy,ldz,option/))
  ABI_UNUSED((/denpot(1,1,1),fofgin(1,1),fofgout(1,1),fofr(1,1),weight_r,weight_i/))
@@ -960,14 +944,11 @@ end subroutine fftw3_fftrisc_dp
 !!  Mixed precision version of fftrisc: input/output in dp, computation done in sp.
 !!  See fftw3_fftrisc_dp for API docs.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine fftw3_fftrisc_mixprec(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,kg_kin,kg_kout,&
-& mgfft,ngfft,npwin,npwout,ldx,ldy,ldz,option,weight_r,weight_i)
+                                 mgfft,ngfft,npwin,npwout,ldx,ldy,ldz,option, &
+                                 weight_r,weight_i, abi_convention, iscale) ! optional
 
 !Arguments ------------------------------------
 !scalars
@@ -979,10 +960,12 @@ subroutine fftw3_fftrisc_mixprec(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboun
  real(dp),intent(in) :: fofgin(2,npwin)
  real(dp),intent(inout) :: denpot(cplex*ldx,ldy,ldz),fofr(2,ldx*ldy*ldz)
  real(dp),intent(inout) :: fofgout(2,npwout)
+ logical,optional,intent(in) :: abi_convention
+ integer,optional,intent(in) :: iscale
 
 ! *************************************************************************
 
-#ifdef HAVE_FFT_FFTW3
+#ifdef HAVE_FFTW3
 
 #undef  FFT_PRECISION
 #undef  MYKIND
@@ -999,7 +982,7 @@ subroutine fftw3_fftrisc_mixprec(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboun
 #include "fftw3_fftrisc.finc"
 
 #else
- MSG_ERROR("FFTW3 support not activated")
+ ABI_ERROR("FFTW3 support not activated")
  ABI_UNUSED((/cplex,gboundin(1,1),gboundout(1,1),istwf_k,kg_kin(1,1),kg_kout(1,1)/))
  ABI_UNUSED((/mgfft,ngfft(1),npwin,npwout,ldx,ldy,ldz,option/))
  ABI_UNUSED((/denpot(1,1,1),fofgin(1,1),fofgout(1,1),fofr(1,1),weight_r,weight_i/))
@@ -1030,20 +1013,16 @@ end subroutine fftw3_fftrisc_mixprec
 !! mgfft=Max number of FFT divisions (used to dimension gbound)
 !! kg_k(3,npw_k)=G-vectors in reduced coordinates
 !! gbound(2*mgfft+8,2)=Table for zero-padded FFT. See sphereboundary.
-!!  ug(npw_k*ndat)=wavefunctions in reciprocal space.
+!! ug(npw_k*ndat)=wavefunctions in reciprocal space.
 !!
 !! OUTPUT
 !!  ur(ldx*ldy*ldz*ndat)=wavefunctions in real space.
 !!
-!! PARENTS
-!!      m_fftw3
-!!
-!! CHILDREN
-!!      fftw3_destroy_plan,fftw3_execute_dft
-!!
 !! SOURCE
 
-subroutine fftw3_fftug_dp(fftalg,fftcache,npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_k,mgfft,kg_k,gbound,ug,ur)
+subroutine fftw3_fftug_dp(fftalg, fftcache, npw_k, nx, ny, nz, ldx, ldy, ldz, ndat, &
+                          istwf_k, mgfft, kg_k,gbound, ug, ur, &
+                          isign, iscale)  ! optional
 
 !Arguments ------------------------------------
 !scalars
@@ -1053,25 +1032,35 @@ subroutine fftw3_fftug_dp(fftalg,fftcache,npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_
  integer,intent(in) :: gbound(2*mgfft+8,2),kg_k(3,npw_k)
  real(dp),target,intent(in) :: ug(2*npw_k*ndat)
  real(dp),target,intent(inout) :: ur(2*ldx*ldy*ldz*ndat)
+ integer,optional,intent(in) :: isign, iscale
 
-#ifdef HAVE_FFT_FFTW3
+#ifdef HAVE_FFTW3
 !Local variables-------------------------------
 !scalars
  integer,parameter :: dist=2
+ integer :: iscale__, isign__
  real(dp) :: fofgout(2,0)
  real(dp),ABI_CONTIGUOUS pointer :: real_ug(:,:),real_ur(:,:)
 
 ! *************************************************************************
 
+ iscale__ = 0; if (present(iscale)) iscale__ = iscale
+ isign__ = +1; if (present(isign)) isign__ = isign
+
 #undef TK_PREF
 #define TK_PREF(name) CONCAT(cg_,name)
 
+#undef  FFT_PRECISION
+#define FFT_PRECISION FFT_DOUBLE
+
 #include "fftug.finc"
+
+#undef  FFT_PRECISION
 
 #else
  ! Silence compiler warning
- MSG_ERROR("FFT_FFTW3 support not activated")
- ABI_UNUSED((/fftalg,fftcache,npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_k,mgfft,kg_k(1,1),gbound(1,1)/))
+ ABI_ERROR("FFT_FFTW3 support not activated")
+ ABI_UNUSED((/fftalg,fftcache,npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_k,mgfft,kg_k(1,1),gbound(1,1),iscale,isign/))
  ABI_UNUSED((/ug(1),ur(1)/))
 #endif
 
@@ -1088,59 +1077,51 @@ end subroutine fftw3_fftug_dp
 !! Compute ndat zero-padded FFTs from G-->R.
 !! Mainly used for the transform of wavefunctions.
 !! TARGET: spc arrays
-!!
-!! INPUTS
-!! fftalg=FFT algorith (see input variable)
-!! fftcache=size of the cache (kB)
-!! npw_k=number of plane waves for this k-point.
-!! nx,ny,nz=Number of point along the three directions.
-!! ldx,ldy,ldz=Leading dimensions of the array.
-!! ndat=Number of transforms
-!! istwf_k=Option describing the storage of the wavefunction.
-!! mgfft=Max number of FFT divisions (used to dimension gbound)
-!! kg_k(3,npw_k)=G-vectors in reduced coordinates
-!! gbound(2*mgfft+8,2)=Table for padded-FFT. See sphereboundary.
-!!  ug(npw_k*ndat)=wavefunctions in reciprocal space.
-!!
-!! OUTPUT
-!!  ur(ldx*ldy*ldz*ndat)=wavefunctions in real space
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      fftw3_destroy_plan,fftw3_execute_dft
+!! See fftw3_fftug_dp for API docs.
 !!
 !! SOURCE
 
-subroutine fftw3_fftug_spc(fftalg,fftcache,npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_k,mgfft,kg_k,gbound,ug,ur)
+subroutine fftw3_fftug_spc(fftalg, fftcache, npw_k, nx, ny, nz, ldx, ldy, ldz, ndat, &
+                           istwf_k, mgfft, kg_k, gbound, ug, ur, &
+                           isign, iscale) ! optional
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: fftalg,fftcache
  integer,intent(in) :: npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_k,mgfft
+ integer,optional,intent(in) :: isign, iscale
 !arrays
  integer,intent(in) :: gbound(2*mgfft+8,2),kg_k(3,npw_k)
  complex(spc),target,intent(in) :: ug(npw_k*ndat)
  complex(spc),target,intent(inout) :: ur(ldx*ldy*ldz*ndat)
 
-#ifdef HAVE_FFT_FFTW3
+#ifdef HAVE_FFTW3
 !Local variables-------------------------------
 !scalars
  integer,parameter :: dist=1
+ integer :: iscale__, isign__
 !arrays
  real(sp) :: fofgout(2,0)
  real(sp),ABI_CONTIGUOUS pointer :: real_ug(:,:),real_ur(:,:)
 
 ! *************************************************************************
 
+ iscale__ = 0; if (present(iscale)) iscale__ = iscale
+ isign__ = +1; if (present(isign)) isign__ = isign
+
 #undef TK_PREF
 #define TK_PREF(name) CONCAT(cplx_,name)
 
+#undef  FFT_PRECISION
+#define FFT_PRECISION FFT_SINGLE
+
 #include "fftug.finc"
+
+#undef  FFT_PRECISION
 
 #else
  ! Silence compiler warning
- MSG_ERROR("FFTW3 support not activated")
+ ABI_ERROR("FFTW3 support not activated")
  ABI_UNUSED((/fftalg,fftcache,npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_k,mgfft,kg_k(1,1),gbound(1,1)/))
  ABI_UNUSED((/ug(1),ur(1)/))
 #endif
@@ -1158,31 +1139,13 @@ end subroutine fftw3_fftug_spc
 !! Compute ndat zero-padded FFTs.
 !! Mainly used for the transform of wavefunctions.
 !! TARGET: DPC arrays
-!!
-!! INPUTS
-!! fftalg=FFT algorith (see input variable)
-!! fftcache=size of the cache (kB)
-!! npw_k=number of plane waves for this k-point.
-!! nx,ny,nz=Number of point along the three directions.
-!! ldx,ldy,ldz=Leading dimensions of the array.
-!! ndat=Number of transforms
-!! istwf_k=Option describing the storage of the wavefunction.
-!! mgfft=Max number of FFT divisions (used to dimension gbound)
-!! kg_k(3,npw_k)=G-vectors in reduced coordinates
-!! gbound(2*mgfft+8,2)=Table for padded-FFT. See sphereboundary.
-!!  ug(npw_k*ndat)=wavefunctions in reciprocal space
-!!
-!! OUTPUT
-!!  ur(ldx*ldy*ldz*ndat)=wavefunctions in real space.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      fftw3_destroy_plan,fftw3_execute_dft
+!! See fftw3_fftug_dp for API docs.
 !!
 !! SOURCE
 
-subroutine fftw3_fftug_dpc(fftalg,fftcache,npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_k,mgfft,kg_k,gbound,ug,ur)
+subroutine fftw3_fftug_dpc(fftalg, fftcache, npw_k, nx, ny, nz, ldx, ldy, ldz, ndat, &
+                           istwf_k, mgfft, kg_k, gbound, ug, ur, &
+                           isign, iscale)  ! optional
 
 !Arguments ------------------------------------
 !scalars
@@ -1192,25 +1155,35 @@ subroutine fftw3_fftug_dpc(fftalg,fftcache,npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf
  integer,intent(in) :: gbound(2*mgfft+8,2),kg_k(3,npw_k)
  complex(dpc),target,intent(in) :: ug(npw_k*ndat)
  complex(dpc),target,intent(inout) :: ur(ldx*ldy*ldz*ndat)
+ integer,optional,intent(in) :: isign, iscale
 
-#ifdef HAVE_FFT_FFTW3
+#ifdef HAVE_FFTW3
 !Local variables-------------------------------
 !scalars
  integer,parameter :: dist=1
+ integer :: iscale__, isign__
 !arrays
  real(dp) :: fofgout(2,0)
  real(dp),ABI_CONTIGUOUS pointer :: real_ug(:,:),real_ur(:,:)
 
 ! *************************************************************************
 
+ iscale__ = 0; if (present(iscale)) iscale__ = iscale
+ isign__ = +1; if (present(isign)) isign__ = isign
+
 #undef TK_PREF
 #define TK_PREF(name) CONCAT(cplx_,name)
 
+#undef  FFT_PRECISION
+#define FFT_PRECISION FFT_DOUBLE
+
 #include "fftug.finc"
+
+#undef  FFT_PRECISION
 
 #else
  ! Silence compiler warning
- MSG_ERROR("FFTW3 support not activated")
+ ABI_ERROR("FFTW3 support not activated")
  ABI_UNUSED((/fftalg,fftcache,npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_k,mgfft,kg_k(1,1),gbound(1,1)/))
  ABI_UNUSED((/ug(1),ur(1)/))
 #endif
@@ -1243,46 +1216,53 @@ end subroutine fftw3_fftug_dpc
 !!
 !! SIDE EFFECT
 !! ur(ldx*ldy*ldz*ndat)= In input: wavefunctions in real space.
-!!                       Destroyed in output. Do not use ur anymore!
+!!                       Destroyed in output. Do not use it anymore!
 !! OUTPUT
 !! ug(npw_k*ndat)=wavefunctions in reciprocal space.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      fftw3_destroy_plan,fftw3_execute_dft
-!!
 !! SOURCE
 
-subroutine fftw3_fftur_dp(fftalg,fftcache,npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_k,mgfft,kg_k,gbound,ur,ug)
+subroutine fftw3_fftur_dp(fftalg, fftcache, npw_k, nx, ny, nz, ldx, ldy, ldz, ndat, &
+                          istwf_k, mgfft, kg_k, gbound, ur, ug, &
+                          isign, iscale) ! optional
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: fftalg,fftcache
  integer,intent(in) :: npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_k,mgfft
+ integer,optional,intent(in) :: isign, iscale
 !arrays
  integer,intent(in) :: gbound(2*mgfft+8,2),kg_k(3,npw_k)
  real(dp),target,intent(inout) :: ur(2*ldx*ldy*ldz*ndat)
  real(dp),target,intent(inout) :: ug(2*npw_k*ndat)
 
-#ifdef HAVE_FFT_FFTW3
+#ifdef HAVE_FFTW3
 !Local variables-------------------------------
 !scalars
  integer,parameter :: dist=2
+ integer :: iscale__, isign__
 !arrays
  real(dp) :: dum_ugin(2,0)
  real(dp),ABI_CONTIGUOUS pointer :: real_ug(:,:),real_ur(:,:)
 
 ! *************************************************************************
 
+ iscale__ = 1; if (present(iscale)) iscale__ = iscale
+ isign__ = -1; if (present(isign)) isign__ = isign
+
 #undef TK_PREF
 #define TK_PREF(name) CONCAT(cg_,name)
 
+#undef  FFT_PRECISION
+#define FFT_PRECISION FFT_DOUBLE
+
 #include "fftur.finc"
+
+#undef  FFT_PRECISION
 
 #else
  ! Silence compiler warning
- MSG_ERROR("FFTW3 support not activated")
+ ABI_ERROR("FFTW3 support not activated")
  ABI_UNUSED((/fftalg,fftcache/))
  ABI_UNUSED((/npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_k,mgfft,kg_k(1,1),gbound(1,1)/))
  ABI_UNUSED((/ug(1),ur(1)/))
@@ -1301,61 +1281,51 @@ end subroutine fftw3_fftur_dp
 !! Compute ndat zero-padded FFTs from R- to G-space .
 !! Mainly used for the transform of wavefunctions.
 !! TARGET: spc arrays
-!!
-!! INPUTS
-!! fftalg=FFT algorith (see input variable)
-!! fftcache=size of the cache (kB)
-!! npw_k=number of plane waves for this k-point.
-!! nx,ny,nz=Number of point along the three directions.
-!! ldx,ldy,ldz=Leading dimensions of the array.
-!! ndat=Number of transforms
-!! istwf_k=Option describing the storage of the wavefunction.
-!! mgfft=Max number of FFT divisions (used to dimension gbound)
-!! kg_k(3,npw_k)=G-vectors in reduced coordinates
-!! gbound(2*mgfft+8,2)=Table for padded-FFT. See sphereboundary.
-!!
-!! SIDE EFFECT
-!! ur(ldx*ldy*ldz*ndat)= In input: wavefunctions in real space.
-!!                       Destroyed in output. Do not use ur anymore!
-!! OUTPUT
-!! ug(npw_k*ndat)=wavefunctions in reciprocal space.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      fftw3_destroy_plan,fftw3_execute_dft
+!! See fftw3_fftur_dp for API doc.
 !!
 !! SOURCE
 
-subroutine fftw3_fftur_spc(fftalg,fftcache,npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_k,mgfft,kg_k,gbound,ur,ug)
+subroutine fftw3_fftur_spc(fftalg, fftcache, npw_k, nx, ny, nz, ldx, ldy, ldz, ndat, &
+                           istwf_k, mgfft, kg_k, gbound, ur, ug, &
+                           isign, iscale) ! optional
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: fftalg,fftcache
  integer,intent(in) :: npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_k,mgfft
+ integer,optional,intent(in) :: isign, iscale
 !arrays
  integer,intent(in) :: gbound(2*mgfft+8,2),kg_k(3,npw_k)
  complex(spc),target,intent(inout) :: ur(ldx*ldy*ldz*ndat)
  complex(spc),target,intent(inout) :: ug(npw_k*ndat)
 
-#ifdef HAVE_FFT_FFTW3
+#ifdef HAVE_FFTW3
 !Local variables-------------------------------
 !scalars
  integer,parameter :: dist=1
+ integer :: iscale__, isign__
 !arrays
  real(sp) :: dum_ugin(2,0)
  real(sp),ABI_CONTIGUOUS pointer :: real_ug(:,:),real_ur(:,:)
 
 ! *************************************************************************
 
+ iscale__ = 1; if (present(iscale)) iscale__ = iscale
+ isign__ = -1; if (present(isign)) isign__ = isign
+
 #undef TK_PREF
 #define TK_PREF(name) CONCAT(cplx_,name)
 
+#undef  FFT_PRECISION
+#define FFT_PRECISION FFT_SINGLE
+
 #include "fftur.finc"
+
+#undef  FFT_PRECISION
 
 #else
  ! Silence compiler warning
- MSG_ERROR("FFTW3 support not activated")
+ ABI_ERROR("FFTW3 support not activated")
  ABI_UNUSED((/fftalg,fftcache/))
  ABI_UNUSED((/npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_k,mgfft,kg_k(1,1),gbound(1,1)/))
  ABI_UNUSED((/ug(1),ur(1)/))
@@ -1374,61 +1344,51 @@ end subroutine fftw3_fftur_spc
 !! Compute ndat zero-padded FFTs from R ro G.
 !! Mainly used for the transform of wavefunctions.
 !! TARGET: DPC arrays
-!!
-!! INPUTS
-!! fftalg=FFT algorith (see input variable)
-!! fftcache=size of the cache (kB)
-!! npw_k=number of plane waves for this k-point.
-!! nx,ny,nz=Number of point along the three directions.
-!! ldx,ldy,ldz=Leading dimensions of the array.
-!! ndat=Number of transforms
-!! istwf_k=Option describing the storage of the wavefunction.
-!! mgfft=Max number of FFT divisions (used to dimension gbound)
-!! kg_k(3,npw_k)=G-vectors in reduced coordinates
-!! gbound(2*mgfft+8,2)=Table for padded-FFT. See sphereboundary.
-!!
-!! SIDE EFFECT
-!! ur(ldx*ldy*ldz*ndat)= In input: wavefunctions in real space.
-!!                       Destroyed in output. Do not use ur anymore!
-!! OUTPUT
-!! ug(npw_k*ndat)=wavefunctions in reciprocal space
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      fftw3_destroy_plan,fftw3_execute_dft
+!! See fftw3_fftur_dp for API doc.
 !!
 !! SOURCE
 
-subroutine fftw3_fftur_dpc(fftalg,fftcache,npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_k,mgfft,kg_k,gbound,ur,ug)
+subroutine fftw3_fftur_dpc(fftalg, fftcache, npw_k, nx, ny, nz, ldx, ldy, ldz, ndat, &
+                           istwf_k, mgfft, kg_k, gbound, ur, ug, &
+                           isign, iscale) ! optional
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: fftalg,fftcache
  integer,intent(in) :: npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_k,mgfft
+ integer,optional,intent(in) :: isign, iscale
 !arrays
  integer,intent(in) :: gbound(2*mgfft+8,2),kg_k(3,npw_k)
  complex(dpc),target,intent(inout) :: ur(ldx*ldy*ldz*ndat)
  complex(dpc),target,intent(inout) :: ug(npw_k*ndat)
 
-#ifdef HAVE_FFT_FFTW3
+#ifdef HAVE_FFTW3
 !Local variables-------------------------------
 !scalars
  integer,parameter :: dist=1
+ integer :: iscale__, isign__
 !arrays
  real(dp) :: dum_ugin(2,0)
  real(dp),ABI_CONTIGUOUS pointer :: real_ug(:,:),real_ur(:,:)
 
 ! *************************************************************************
 
+ iscale__ = 1; if (present(iscale)) iscale__ = iscale
+ isign__ = -1; if (present(isign)) isign__ = isign
+
 #undef TK_PREF
 #define TK_PREF(name) CONCAT(cplx_,name)
 
+#undef  FFT_PRECISION
+#define FFT_PRECISION FFT_DOUBLE
+
 #include "fftur.finc"
+
+#undef  FFT_PRECISION
 
 #else
  ! Silence compiler warning
- MSG_ERROR("FFTW3 support not activated")
+ ABI_ERROR("FFTW3 support not activated")
  ABI_UNUSED((/fftalg,fftcache/))
  ABI_UNUSED((/npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_k,mgfft,kg_k(1,1),gbound(1,1)/))
  ABI_UNUSED((/ug(1),ur(1)/))
@@ -1451,6 +1411,7 @@ end subroutine fftw3_fftur_dpc
 !! nx,ny,nz=Number of points along the three directions.
 !! ldx,ldy,ldz=Physical dimensions of the array.
 !! ndat=Number of FFTs to be done.
+!! iscale=0 if G --> R FFT should not be scaled.
 !! isign= +1 : ff(G) => ff(R); -1 : ff(R) => ff(G)
 !! [fftw_flags]=Flags used to create the plan. They can be combined with the "+" operator.
 !!   Defaults to ABI_FFTW_ESTIMATE.
@@ -1460,23 +1421,18 @@ end subroutine fftw3_fftur_dpc
 !!    In input: the complex array to be transformed.
 !!    In output: the Fourier transformed in the space specified by isign.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      fftw3_destroy_plan,fftw3_execute_dft
-!!
 !! SOURCE
 
-subroutine fftw3_c2c_ip_spc(nx,ny,nz,ldx,ldy,ldz,ndat,isign,ff,fftw_flags)
+subroutine fftw3_c2c_ip_spc(nx, ny, nz, ldx, ldy, ldz, ndat, iscale, isign, ff, fftw_flags)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: nx,ny,nz,ldx,ldy,ldz,ndat,isign
+ integer,intent(in) :: nx,ny,nz,ldx,ldy,ldz,ndat,iscale,isign
  integer,optional,intent(in) :: fftw_flags
 !arrays
  complex(spc),intent(inout) :: ff(ldx*ldy*ldz*ndat)
 
-#ifdef HAVE_FFT_FFTW3
+#ifdef HAVE_FFTW3
 !Local variables-------------------------------
 !scalars
  integer,parameter :: rank3=3,nt_all=-1
@@ -1491,8 +1447,8 @@ subroutine fftw3_c2c_ip_spc(nx,ny,nz,ldx,ldy,ldz,ndat,isign,ff,fftw_flags)
 
  stride = 1
  dist   = ldx*ldy*ldz
- embed  = (/ldx,ldy,ldz/)
- n      = (/nx ,ny ,nz /)
+ embed  = [ldx, ldy, ldz]
+ n      = [nx, ny, nz]
 
  my_plan = fftw3_plan_many_dft(rank3, n, ndat, ff, embed, stride, dist, ff, embed, stride, dist, isign, my_flags, nt_all)
 
@@ -1501,12 +1457,12 @@ subroutine fftw3_c2c_ip_spc(nx,ny,nz,ldx,ldy,ldz,ndat,isign,ff,fftw_flags)
 
  call fftw3_destroy_plan(my_plan)
 
- if (isign==ABI_FFTW_FORWARD) then ! -1, FFTW returns not normalized FTs
+ if (isign == ABI_FFTW_FORWARD .and. iscale /= 0) then ! -1, FFTW returns not normalized FTs
    call xscal(ldx*ldy*ldz*ndat, REAL(one/(nx*ny*nz),KIND=sp), ff, 1)
  end if
 
 #else
- MSG_ERROR("FFTW3 support not activated")
+ ABI_ERROR("FFTW3 support not activated")
  ABI_UNUSED((/nx,ny,nz,ldx,ldy,ldz,isign/))
  ABI_UNUSED(ff)
  if (PRESENT(fftw_flags)) then
@@ -1543,14 +1499,9 @@ end subroutine fftw3_c2c_ip_spc
 !!    input: The array with the data to be transformed.
 !!    output: The results of the FFT.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      fftw3_destroy_plan,fftw3_execute_dft
-!!
 !! SOURCE
 
-subroutine fftw3_fftpad_spc(ff,nx,ny,nz,ldx,ldy,ldz,ndat,mgfft,isign,gbound)
+subroutine fftw3_fftpad_spc(ff, nx, ny, nz, ldx, ldy, ldz, ndat, mgfft, isign, gbound, iscale)
 
 !Arguments ------------------------------------
 !scalars
@@ -1558,18 +1509,22 @@ subroutine fftw3_fftpad_spc(ff,nx,ny,nz,ldx,ldy,ldz,ndat,mgfft,isign,gbound)
 !arrays
  integer,intent(in) :: gbound(2*mgfft+8,2)
  complex(spc),intent(inout) :: ff(ldx*ldy*ldz*ndat)
+ integer,optional,intent(in) :: iscale
 
-#ifdef HAVE_FFT_FFTW3
+#ifdef HAVE_FFTW3
 !Local variables-------------------------------
  integer,parameter :: dst=1
+ integer :: iscale__
  real(sp) :: fact
 
 ! *************************************************************************
 
+ iscale__ = merge(1, 0, isign == -1); if (present(iscale)) iscale__ = iscale
+
 #include "fftw3_fftpad.finc"
 
 #else
- MSG_ERROR("FFTW3 support not activated")
+ ABI_ERROR("FFTW3 support not activated")
  ABI_UNUSED((/nx,ny,nz,ldx,ldy,ldz,ndat,mgfft,isign/))
  ABI_UNUSED(gbound(1,1))
  ABI_UNUSED(ff(1))
@@ -1591,6 +1546,7 @@ end subroutine fftw3_fftpad_spc
 !! nx,ny,nz=Number of points along the three directions.
 !! ldx,ldy,ldz=Physical dimensions of the array.
 !! ndat=Number of FFTs to be done.
+!! iscale=0 if G --> R FFT should not be scaled.
 !! isign= +1 : ff(G) => ff(R); -1 : ff(R) => ff(G)
 !! [fftw_flags]=Flags used to create the plan. They can be combined with the "+" operator.
 !!   Defaults to ABI_FFTW_ESTIMATE.
@@ -1600,23 +1556,18 @@ end subroutine fftw3_fftpad_spc
 !!    In input: the complex array to be transformed.
 !!    In output: the Fourier transformed in the space specified by isign.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      fftw3_destroy_plan,fftw3_execute_dft
-!!
 !! SOURCE
 
-subroutine fftw3_c2c_ip_dpc(nx,ny,nz,ldx,ldy,ldz,ndat,isign,ff,fftw_flags)
+subroutine fftw3_c2c_ip_dpc(nx, ny, nz, ldx, ldy, ldz, ndat, iscale, isign, ff, fftw_flags)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: nx,ny,nz,ldx,ldy,ldz,ndat,isign
+ integer,intent(in) :: nx,ny,nz,ldx,ldy,ldz,ndat,iscale,isign
  integer,optional,intent(in) :: fftw_flags
 !arrays
  complex(dpc),intent(inout) :: ff(ldx*ldy*ldz*ndat)
 
-#ifdef HAVE_FFT_FFTW3
+#ifdef HAVE_FFTW3
 !Local variables-------------------------------
 !scalars
  integer,parameter :: rank3=3,nt_all=-1
@@ -1631,8 +1582,8 @@ subroutine fftw3_c2c_ip_dpc(nx,ny,nz,ldx,ldy,ldz,ndat,isign,ff,fftw_flags)
 
  stride = 1
  dist   = ldx*ldy*ldz
- embed  = (/ldx,ldy,ldz/)
- n      = (/nx ,ny ,nz /)
+ embed  = [ldx, ldy, ldz]
+ n      = [nx, ny, nz]
 
  my_plan = fftw3_plan_many_dft(rank3, n, ndat, ff, embed, stride, dist, ff, embed, stride, dist, isign, my_flags, nt_all)
 
@@ -1641,12 +1592,13 @@ subroutine fftw3_c2c_ip_dpc(nx,ny,nz,ldx,ldy,ldz,ndat,isign,ff,fftw_flags)
 
  call fftw3_destroy_plan(my_plan)
 
- if (isign==ABI_FFTW_FORWARD) then ! -1, FFTW returns not normalized FTs
-  call ZDSCAL(ldx*ldy*ldz*ndat, one/(nx*ny*nz), ff, 1)
+ ! -1, FFTW returns not normalized FTs
+ if (isign == ABI_FFTW_FORWARD .and. iscale /= 0) then
+   call ZDSCAL(ldx*ldy*ldz*ndat, one/(nx*ny*nz), ff, 1)
  end if
 
 #else
- MSG_ERROR("FFTW3 support not activated")
+ ABI_ERROR("FFTW3 support not activated")
  ABI_UNUSED((/nx,ny,nz,ldx,ldy,ldz,isign/))
  ABI_UNUSED(ff)
  if (PRESENT(fftw_flags)) then
@@ -1671,6 +1623,7 @@ end subroutine fftw3_c2c_ip_dpc
 !! nx,ny,nz=Number of points along the three directions.
 !! ldx,ldy,ldz=Physical dimensions of the array.
 !! ndat=Number of FFTs to be done.
+!! iscale=0 if G --> R FFT should not be scaled.
 !! isign= +1 : ff(G) => gg(R); -1 : ff(R) => gg(G)
 !! ff(ldx*ldy*ldz*ndat)=The array to be transformed.
 !! [fftw_flags]=Flags used to create the plan. They can be combined with the "+" operator.
@@ -1679,24 +1632,19 @@ end subroutine fftw3_c2c_ip_dpc
 !! OUTPUT
 !! gg(ldx*ldy*ldz*ndat)=The FFT of ff.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      fftw3_destroy_plan,fftw3_execute_dft
-!!
 !! SOURCE
 
-subroutine fftw3_c2c_op_spc(nx,ny,nz,ldx,ldy,ldz,ndat,isign,ff,gg,fftw_flags)
+subroutine fftw3_c2c_op_spc(nx, ny, nz, ldx, ldy, ldz, ndat, iscale, isign, ff, gg, fftw_flags)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: nx,ny,nz,ldx,ldy,ldz,isign,ndat
+ integer,intent(in) :: nx,ny,nz,ldx,ldy,ldz,iscale,isign,ndat
  integer,optional,intent(in) :: fftw_flags
 !arrays
  complex(spc),intent(in) :: ff(ldx*ldy*ldz*ndat)
  complex(spc),intent(out) :: gg(ldx*ldy*ldz*ndat)
 
-#ifdef HAVE_FFT_FFTW3
+#ifdef HAVE_FFTW3
 !Local variables-------------------------------
 !scalars
  integer,parameter :: rank3=3,nt_all=-1
@@ -1711,8 +1659,8 @@ subroutine fftw3_c2c_op_spc(nx,ny,nz,ldx,ldy,ldz,ndat,isign,ff,gg,fftw_flags)
 
  stride = 1
  dist   = ldx*ldy*ldz
- embed  = (/ldx,ldy,ldz/)
- n      = (/nx ,ny ,nz/)
+ embed  = [ldx, ldy, ldz]
+ n      = [nx, ny, nz]
 
  my_plan = fftw3_plan_many_dft(rank3, n, ndat, ff, embed, stride, dist, gg, embed, stride, dist, isign, my_flags, nt_all)
 
@@ -1721,12 +1669,12 @@ subroutine fftw3_c2c_op_spc(nx,ny,nz,ldx,ldy,ldz,ndat,isign,ff,gg,fftw_flags)
 
  call fftw3_destroy_plan(my_plan)
 
- if (isign==ABI_FFTW_FORWARD) then ! -1, FFTW returns not normalized FTs
+ if (isign == ABI_FFTW_FORWARD .and. iscale /= 0) then ! -1, FFTW returns not normalized FTs
    call xscal(ldx*ldy*ldz*ndat, REAL(one/(nx*ny*nz), KIND=sp), gg, 1)
  end if
 
 #else
- MSG_ERROR("FFTW3 support not activated")
+ ABI_ERROR("FFTW3 support not activated")
  ABI_UNUSED((/nx,ny,nz,ldx,ldy,ldz,isign/))
  ABI_UNUSED(ff)
  ABI_UNUSED(gg)
@@ -1752,6 +1700,7 @@ end subroutine fftw3_c2c_op_spc
 !! nx,ny,nz=Number of points along the three directions.
 !! ldx,ldy,ldz=Physical dimensions of the array.
 !! ndat=Number of FFTs to be done.
+!! iscale=0 if G --> R FFT should not be scaled.
 !! isign= +1 : ff(G) => gg(R); -1 : ff(R) => gg(G)
 !! ff(ldx*ldy*ldz*ndat)=The array to be transformed.
 !! [fftw_flags]=Flags used to create the plan. They can be combined with the "+" operator.
@@ -1760,24 +1709,19 @@ end subroutine fftw3_c2c_op_spc
 !! OUTPUT
 !! gg(ldx*ldy*ldz*ndat)=The FFT of ff.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      fftw3_destroy_plan,fftw3_execute_dft
-!!
 !! SOURCE
 
-subroutine fftw3_c2c_op_dpc(nx,ny,nz,ldx,ldy,ldz,ndat,isign,ff,gg,fftw_flags)
+subroutine fftw3_c2c_op_dpc(nx, ny, nz, ldx, ldy, ldz, ndat, iscale, isign, ff, gg, fftw_flags)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: nx,ny,nz,ldx,ldy,ldz,isign,ndat
+ integer,intent(in) :: nx,ny,nz,ldx,ldy,ldz,isign,ndat,iscale
  integer,optional,intent(in) :: fftw_flags
 !arrays
  complex(dpc),intent(in) :: ff(ldx*ldy*ldz*ndat)
  complex(dpc),intent(out) :: gg(ldx*ldy*ldz*ndat)
 
-#ifdef HAVE_FFT_FFTW3
+#ifdef HAVE_FFTW3
 !Local variables-------------------------------
 !scalars
  integer,parameter :: rank3=3,nt_all=-1
@@ -1792,8 +1736,8 @@ subroutine fftw3_c2c_op_dpc(nx,ny,nz,ldx,ldy,ldz,ndat,isign,ff,gg,fftw_flags)
 
  stride = 1
  dist   = ldx*ldy*ldz
- embed  = (/ldx,ldy,ldz/)
- n      = (/nx ,ny ,nz/)
+ embed  = [ldx, ldy, ldz]
+ n      = [nx, ny, nz]
 
  my_plan = fftw3_plan_many_dft(rank3, n, ndat, ff, embed, stride, dist, gg, embed, stride, dist, isign, my_flags, nt_all)
 
@@ -1802,12 +1746,12 @@ subroutine fftw3_c2c_op_dpc(nx,ny,nz,ldx,ldy,ldz,ndat,isign,ff,gg,fftw_flags)
 
  call fftw3_destroy_plan(my_plan)
 
- if (isign==ABI_FFTW_FORWARD) then ! -1, FFTW returns not normalized FTs
+ if (isign == ABI_FFTW_FORWARD .and. iscale /= 0) then ! -1, FFTW returns not normalized FTs
    call xscal(ldx*ldy*ldz*ndat, one/(nx*ny*nz), gg, 1)
  end if
 
 #else
- MSG_ERROR("FFTW3 support not activated")
+ ABI_ERROR("FFTW3 support not activated")
  ABI_UNUSED((/nx,ny,nz,ldx,ldy,ldz,isign/))
  ABI_UNUSED(ff)
  ABI_UNUSED(gg)
@@ -1843,12 +1787,6 @@ end subroutine fftw3_c2c_op_dpc
 !!  FIXME For the time-being. No augmentation of the mesh to reduce memory conflicts, as MKL crashes
 !!  if the advanced interface is used.
 !!
-!! PARENTS
-!!      m_fftw3
-!!
-!! CHILDREN
-!!      fftw3_destroy_plan,fftw3_execute_dft
-!!
 !! SOURCE
 
 subroutine fftw3_r2c_op(nx,ny,nz,ldx,ldy,ldz,ndat,ff,gg,fftw_flags)
@@ -1861,7 +1799,7 @@ subroutine fftw3_r2c_op(nx,ny,nz,ldx,ldy,ldz,ndat,ff,gg,fftw_flags)
  real(dp),intent(in) :: ff(ldx*ldy*ldz*ndat)
  real(dp),intent(out) :: gg(2,ldx*ldy*ldz*ndat)
 
-#ifdef HAVE_FFT_FFTW3
+#ifdef HAVE_FFTW3
 !Local variables-------------------------------
 !scalars
  integer,parameter :: rank3=3,nt_all=-1
@@ -1889,15 +1827,15 @@ subroutine fftw3_r2c_op(nx,ny,nz,ldx,ldy,ldz,ndat,ff,gg,fftw_flags)
  ABI_MALLOC(gg_hp,(2,nhp*ndat))
 
 #ifdef DEV_RC_BUG
- if (ndat/=1) MSG_ERROR("ndat/=1 + MKL not coded")
+ if (ndat/=1) ABI_ERROR("ndat/=1 + MKL not coded")
 
  if (ANY( n /= inembed )) then
-   MSG_ERROR("Augmentation not supported")
+   ABI_ERROR("Augmentation not supported")
  end if
 
  call dfftw_plan_dft_r2c_3d(my_plan, nx, ny, nz, ff, gg_hp, my_flags)
  if (my_plan==NULL_PLAN) then
-   MSG_ERROR("dfftw_plan_dft_r2c_3d returned NULL_PLAN")
+   ABI_ERROR("dfftw_plan_dft_r2c_3d returned NULL_PLAN")
  end if
 
  !fftw_plan fftw_plan_many_dft_r2c(int rank3, const int *n, int howmany,
@@ -1912,10 +1850,11 @@ subroutine fftw3_r2c_op(nx,ny,nz,ldx,ldy,ldz,ndat,ff,gg,fftw_flags)
 
  call fftw3_destroy_plan(my_plan)
 
- call ZDSCAL(nhp*ndat, one/(nx*ny*nz), gg_hp, 1)  ! FFTW returns not normalized FTs
+ ! FFTW returns not normalized FTs
+ call ZDSCAL(nhp*ndat, one/(nx*ny*nz), gg_hp, 1)
+
  ! Reconstruct full FFT: Hermitian redundancy: out[i] is the conjugate of out[n-i]
  padx = (nx/2+1)
-
  ABI_MALLOC(i1inver,(padx))
  ABI_MALLOC(i2inver,(ny))
  ABI_MALLOC(i3inver,(nz))
@@ -1960,11 +1899,10 @@ subroutine fftw3_r2c_op(nx,ny,nz,ldx,ldy,ldz,ndat,ff,gg,fftw_flags)
  ABI_FREE(i1inver)
  ABI_FREE(i2inver)
  ABI_FREE(i3inver)
-
  ABI_FREE(gg_hp)
 
 #else
- MSG_ERROR("FFTW3 support not activated")
+ ABI_ERROR("FFTW3 support not activated")
  ABI_UNUSED((/nx,ny,nz,ldx,ldy,ldz/))
  ABI_UNUSED(ff)
  ABI_UNUSED(gg(1,1))
@@ -2000,12 +1938,6 @@ end subroutine fftw3_r2c_op
 !!  FIXME For the time-being. No augmentation of the mesh to reduce memory conflicts, as MKL crashes
 !!  if the advanced interface is used.
 !!
-!! PARENTS
-!!      m_fftw3
-!!
-!! CHILDREN
-!!      fftw3_destroy_plan,fftw3_execute_dft
-!!
 !! SOURCE
 
 subroutine fftw3_c2r_op(nx,ny,nz,ldx,ldy,ldz,ndat,ff,gg,fftw_flags)
@@ -2018,7 +1950,7 @@ subroutine fftw3_c2r_op(nx,ny,nz,ldx,ldy,ldz,ndat,ff,gg,fftw_flags)
  real(dp),intent(in) :: ff(2,ldx*ldy*ldz*ndat)
  real(dp),intent(out) :: gg(ldx*ldy*ldz*ndat)
 
-#ifdef HAVE_FFT_FFTW3
+#ifdef HAVE_FFTW3
 !Local variables-------------------------------
 !scalars
  integer,parameter :: rank3=3,nt_all=-1
@@ -2032,7 +1964,7 @@ subroutine fftw3_c2r_op(nx,ny,nz,ldx,ldy,ldz,ndat,ff,gg,fftw_flags)
 
 #ifdef DEV_RC_BUG
  if (ANY( (/nx,ny,nz/) /= (/ldx,ldy,ldz/) )) then
-   MSG_ERROR("Augmentation not supported")
+   ABI_ERROR("Augmentation not supported")
  end if
 #endif
 
@@ -2065,10 +1997,10 @@ subroutine fftw3_c2r_op(nx,ny,nz,ldx,ldy,ldz,ndat,ff,gg,fftw_flags)
 
  ! NOTE: The c2r transform destroys its input array even for out-of-place transforms.
 #ifdef DEV_RC_BUG
- if (ndat/=1) MSG_ERROR("ndat/=1 + MKL not coded")
+ if (ndat/=1) ABI_ERROR("ndat/=1 + MKL not coded")
  call dfftw_plan_dft_c2r_3d(my_plan, nx, ny, nz, ff_hp, gg, my_flags)
  if (my_plan==NULL_PLAN) then
-   MSG_ERROR("dfftw_plan_dft_c2r_3d returned NULL_PLAN")
+   ABI_ERROR("dfftw_plan_dft_c2r_3d returned NULL_PLAN")
  end if
 #else
  my_plan = dplan_many_dft_c2r(rank3, n, ndat, ff_hp, inembed, stride, idist, gg, onembed, stride, odist, my_flags, nt_all)
@@ -2078,11 +2010,10 @@ subroutine fftw3_c2r_op(nx,ny,nz,ldx,ldy,ldz,ndat,ff,gg,fftw_flags)
  call dfftw_execute_dft_c2r(my_plan, ff_hp, gg)
 
  call fftw3_destroy_plan(my_plan)
-
  ABI_FREE(ff_hp)
 
 #else
- MSG_ERROR("FFTW3 support not activated")
+ ABI_ERROR("FFTW3 support not activated")
  ABI_UNUSED((/nx,ny,nz,ldx,ldy,ldz/))
  ABI_UNUSED(ff(1,1))
  ABI_UNUSED(gg(1))
@@ -2117,12 +2048,6 @@ end subroutine fftw3_c2r_op
 !! OUTPUT
 !! fout(2,ldx*ldy*ldz*ndat)=The Fourier transform of fin.
 !!
-!! PARENTS
-!!      m_fftw3
-!!
-!! CHILDREN
-!!      fftw3_destroy_plan,fftw3_execute_dft
-!!
 !! SOURCE
 
 subroutine fftw3_many_dft_op(nx,ny,nz,ldx,ldy,ldz,ndat,isign,fin,fout,fftw_flags)
@@ -2135,7 +2060,7 @@ subroutine fftw3_many_dft_op(nx,ny,nz,ldx,ldy,ldz,ndat,isign,fin,fout,fftw_flags
  real(dp),intent(in) :: fin(2*ldx*ldy*ldz*ndat)
  real(dp),intent(out) :: fout(2*ldx*ldy*ldz*ndat)
 
-#ifdef HAVE_FFT_FFTW3
+#ifdef HAVE_FFTW3
 !Local variables-------------------------------
 !scalars
  integer,parameter :: rank3=3,nt_all=-1
@@ -2150,8 +2075,8 @@ subroutine fftw3_many_dft_op(nx,ny,nz,ldx,ldy,ldz,ndat,isign,fin,fout,fftw_flags
 
  stride = 1
  dist   = ldx*ldy*ldz
- embed  = (/ldx,ldy,ldz/)
- n      = (/nx ,ny ,nz /)
+ embed  = [ldx, ldy, ldz]
+ n      = [nx, ny, nz]
 
  my_plan = fftw3_plan_many_dft(rank3, n, ndat, fin, embed, stride, dist, fout, embed, stride, dist, isign, my_flags, nt_all)
 
@@ -2160,13 +2085,13 @@ subroutine fftw3_many_dft_op(nx,ny,nz,ldx,ldy,ldz,ndat,isign,fin,fout,fftw_flags
 
  call fftw3_destroy_plan(my_plan)
 
- if (isign==ABI_FFTW_FORWARD) then ! -1, FFTW returns not normalized FTs
+ ! -1, FFTW returns not normalized FTs
+ if (isign == ABI_FFTW_FORWARD) then
   call ZDSCAL(ldx*ldy*ldz*ndat, one/(nx*ny*nz), fout, 1)
-  !call cg_zscal(ldx*ldy*ldz*ndat, (/one/(nx*ny*nz), zero/), fout)
  end if
 
 #else
- MSG_ERROR("FFTW3 support not activated")
+ ABI_ERROR("FFTW3 support not activated")
  ABI_UNUSED((/nx,ny,nz,ldx,ldy,ldz,ndat,isign/))
  if (PRESENT(fftw_flags)) then
    ABI_UNUSED(fftw_flags)
@@ -2202,12 +2127,6 @@ end subroutine fftw3_many_dft_op
 !!   In input: The complex array to be transformed.
 !!   In output: The FFT results.
 !!
-!! PARENTS
-!!      m_fftw3
-!!
-!! CHILDREN
-!!      fftw3_destroy_plan,fftw3_execute_dft
-!!
 !! SOURCE
 
 subroutine fftw3_many_dft_ip(nx,ny,nz,ldx,ldy,ldz,ndat,isign,finout,fftw_flags)
@@ -2219,7 +2138,7 @@ subroutine fftw3_many_dft_ip(nx,ny,nz,ldx,ldy,ldz,ndat,isign,finout,fftw_flags)
 !arrays
  real(dp),intent(inout) :: finout(2*ldx*ldy*ldz*ndat)
 
-#ifdef HAVE_FFT_FFTW3
+#ifdef HAVE_FFTW3
 !Local variables-------------------------------
 !scalars
  integer,parameter :: rank3=3,nt_all=-1
@@ -2234,23 +2153,22 @@ subroutine fftw3_many_dft_ip(nx,ny,nz,ldx,ldy,ldz,ndat,isign,finout,fftw_flags)
 
  stride = 1
  dist   = ldx*ldy*ldz
- embed  = (/ldx,ldy,ldz/)
- n      = (/nx ,ny ,nz /)
+ embed  = [ldx, ldy, ldz]
+ n      = [nx, ny, nz]
 
- my_plan = fftw3_plan_many_dft(rank3, n, ndat, finout, embed, stride, dist, finout,embed, stride, dist, isign, my_flags, nt_all)
+ my_plan = fftw3_plan_many_dft(rank3, n, ndat, finout, embed, stride, dist, finout, embed, stride, dist, isign, my_flags, nt_all)
 
  ! Now perform the 3D FFT via FFTW.
  call dfftw_execute_dft(my_plan, finout, finout)
-
  call fftw3_destroy_plan(my_plan)
 
- if (isign==ABI_FFTW_FORWARD) then ! -1, FFTW returns not normalized FTs
+ ! -1, FFTW returns not normalized FTs
+ if (isign == ABI_FFTW_FORWARD) then
   call ZDSCAL(ldx*ldy*ldz*ndat, one/(nx*ny*nz), finout, 1)
-  !call cg_zscal(ldx*ldy*ldz*ndat, (/one/(nx*ny*nz),zero/), finout)
  end if
 
 #else
- MSG_ERROR("FFTW3 support not activated")
+ ABI_ERROR("FFTW3 support not activated")
  ABI_UNUSED((/nx,ny,nz,ldx,ldy,ldz,ndat,isign/))
  if (PRESENT(fftw_flags)) then
    ABI_UNUSED(fftw_flags)
@@ -2281,30 +2199,24 @@ end subroutine fftw3_many_dft_ip
 !!  fftw3_cleanup does not deallocate your plans, however. To prevent memory leaks, you must still call
 !!  fftw_destroy_plan before executing fftw3_cleanup
 !!
-!! PARENTS
-!!      driver
-!!
-!! CHILDREN
-!!      fftw3_destroy_plan,fftw3_execute_dft
-!!
 !! SOURCE
 
 subroutine fftw3_cleanup()
 
 ! *************************************************************************
 
-#ifdef HAVE_FFT_FFTW3_MPI
+#ifdef HAVE_FFTW3_MPI
  call fftw_mpi_cleanup()
 #endif
-#ifdef HAVE_FFT_FFTW3_THREADS
+#ifdef HAVE_FFTW3_THREADS
  if (THREADS_INITED==1) then
    call dfftw_cleanup_threads()
    THREADS_INITED = 0
  end if
-#elif defined HAVE_FFT_FFTW3
+#elif defined HAVE_FFTW3
  call dfftw_cleanup()
 #else
- MSG_ERROR("FFTW3 support not activated")
+ ABI_ERROR("FFTW3 support not activated")
 #endif
 
 end subroutine fftw3_cleanup
@@ -2321,12 +2233,6 @@ end subroutine fftw3_cleanup
 !!
 !! INPUTS
 !!
-!! PARENTS
-!!      m_fftw3
-!!
-!! CHILDREN
-!!      fftw3_destroy_plan,fftw3_execute_dft
-!!
 !! SOURCE
 
 subroutine fftw3_destroy_plan(plan)
@@ -2337,7 +2243,7 @@ subroutine fftw3_destroy_plan(plan)
 
 ! *************************************************************************
 
-#ifdef HAVE_FFT_FFTW3
+#ifdef HAVE_FFTW3
 !$OMP CRITICAL (OMPC_fftw3_destroy_plan)
  call dfftw_destroy_plan(plan)
 !$OMP END CRITICAL (OMPC_fftw3_destroy_plan)
@@ -2365,31 +2271,25 @@ end subroutine fftw3_destroy_plan
 !!  The one-time initialization required to use FFTW3 threads is performed when the routine
 !!  is called for the first time.
 !!
-!! PARENTS
-!!      driver,fftprof
-!!
-!! CHILDREN
-!!      fftw3_destroy_plan,fftw3_execute_dft
-!!
 !! SOURCE
 
 subroutine fftw3_init_threads()
 
 !Local variables ------------------------------
 !scalars
-#ifdef HAVE_FFT_FFTW3_THREADS
+#ifdef HAVE_FFTW3_THREADS
  integer :: iret
 #endif
 
 ! *************************************************************************
 
-#ifdef HAVE_FFT_FFTW3_THREADS
+#ifdef HAVE_FFTW3_THREADS
  if (THREADS_INITED==0) then
-   !call wrtout(std_out,"Calling dfftw_init_threads()","COLL")
+   !call wrtout(std_out,"Calling dfftw_init_threads()")
    call dfftw_init_threads(iret)
 
    if (iret==0) then
-     MSG_WARNING(" dfftw_init_threads returned 0; threaded FFTW3 is not being used!")
+     ABI_WARNING(" dfftw_init_threads returned 0; threaded FFTW3 is not being used!")
    else
      THREADS_INITED=1
    end if
@@ -2397,12 +2297,12 @@ subroutine fftw3_init_threads()
  end if
 
 #ifndef HAVE_OPENMP
-  MSG_WARNING("Using FFTW3 with threads but HAVE_OPENMP is not defined!")
+  ABI_WARNING("Using FFTW3 with threads but HAVE_OPENMP is not defined!")
 #endif
 #endif
 
-#ifdef HAVE_FFT_FFTW3_MPI
-  !call wrtout(std_out,"Calling fftw_mpi_init()","COLL")
+#ifdef HAVE_FFTW3_MPI
+  !call wrtout(std_out,"Calling fftw_mpi_init()")
   call fftw_mpi_init()
 #endif
 
@@ -2425,23 +2325,16 @@ end subroutine fftw3_init_threads
 !! INPUTS
 !!  [nthreads]=The number of threads you want FFTW3 to use.  Default xomp_get_max_threads()
 !!
-!! PARENTS
-!!      m_fft_prof,m_fftw3
-!!
-!! CHILDREN
-!!      fftw3_destroy_plan,fftw3_execute_dft
-!!
 !! SOURCE
 
 subroutine fftw3_set_nthreads(nthreads)
 
 !Arguments ------------------------------------
-!scalars
  integer,optional,intent(in) :: nthreads
 
 !Local variables ------------------------------
 !scalars
-#ifdef HAVE_FFT_FFTW3_THREADS
+#ifdef HAVE_FFTW3_THREADS
  integer :: istat,nt
  integer,parameter :: enough=1
  integer,save :: nwarns=0
@@ -2449,9 +2342,9 @@ subroutine fftw3_set_nthreads(nthreads)
 
 ! *************************************************************************
 
-#ifdef HAVE_FFT_FFTW3_THREADS
+#ifdef HAVE_FFTW3_THREADS
  if (THREADS_INITED==0) then
-   MSG_WARNING("Threads are not initialized")
+   ABI_WARNING("Threads are not initialized")
  end if
 
  if (PRESENT(nthreads)) then
@@ -2469,7 +2362,7 @@ subroutine fftw3_set_nthreads(nthreads)
 #ifndef HAVE_OPENMP
   if (nwarns <= enough) then
     nwarns = nwarns + 1
-    MSG_WARNING("Using FFTW3 with threads but HAVE_OPENMP is not defined!")
+    ABI_WARNING("Using FFTW3 with threads but HAVE_OPENMP is not defined!")
   end if
 #endif
 
@@ -2508,15 +2401,9 @@ end subroutine fftw3_set_nthreads
 !!     input: The array with the data to be transformed.
 !!     output: The results of the FFT.
 !!
-!! PARENTS
-!!      m_fftw3
-!!
-!! CHILDREN
-!!      fftw3_destroy_plan,fftw3_execute_dft
-!!
 !! SOURCE
 
-subroutine fftw3_fftpad_dp(ff,nx,ny,nz,ldx,ldy,ldz,ndat,mgfft,isign,gbound)
+subroutine fftw3_fftpad_dp(ff, nx, ny, nz, ldx, ldy, ldz, ndat, mgfft, isign, gbound, iscale)
 
 !Arguments ------------------------------------
 !scalars
@@ -2524,19 +2411,23 @@ subroutine fftw3_fftpad_dp(ff,nx,ny,nz,ldx,ldy,ldz,ndat,mgfft,isign,gbound)
 !arrays
  integer,intent(in) :: gbound(2*mgfft+8,2)
  real(dp),intent(inout) :: ff(2*ldx*ldy*ldz*ndat)
+ integer,optional,intent(in) :: iscale
 
 !Local variables-------------------------------
 !scalars
-#ifdef HAVE_FFT_FFTW3
+#ifdef HAVE_FFTW3
  integer,parameter :: dst=2
+ integer :: iscale__
  real(dp) :: fact
 
 ! *************************************************************************
 
+ iscale__ = merge(1, 0, isign == -1); if (present(iscale)) iscale__ = iscale
+
 #include "fftw3_fftpad.finc"
 
 #else
- MSG_ERROR("FFTW3 support not activated")
+ ABI_ERROR("FFTW3 support not activated")
  ABI_UNUSED((/nx,ny,nz,ldx,ldy,ldz,mgfft,isign/))
  ABI_UNUSED(gbound(1,1))
  ABI_UNUSED(ff(1))
@@ -2571,34 +2462,32 @@ end subroutine fftw3_fftpad_dp
 !!    input: The array with the data to be transformed.
 !!    output: The results of the FFT.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      fftw3_destroy_plan,fftw3_execute_dft
-!!
 !! SOURCE
 
-subroutine fftw3_fftpad_dpc(ff,nx,ny,nz,ldx,ldy,ldz,ndat,mgfft,isign,gbound)
+subroutine fftw3_fftpad_dpc(ff, nx, ny, nz, ldx, ldy, ldz, ndat, mgfft, isign, gbound, iscale)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nx,ny,nz,ldx,ldy,ldz,ndat,mgfft,isign
+ integer,optional,intent(in) :: iscale
 !arrays
  integer,intent(in) :: gbound(2*mgfft+8,2)
  complex(dpc),intent(inout) :: ff(ldx*ldy*ldz*ndat)
 
-#ifdef HAVE_FFT_FFTW3
+#ifdef HAVE_FFTW3
 !Local variables-------------------------------
-!scalars
  integer,parameter :: dst=1
+ integer :: iscale__
  real(dp) :: fact
 
 ! *************************************************************************
 
+ iscale__ = merge(1, 0, isign == -1); if (present(iscale)) iscale__ = iscale
+
 #include "fftw3_fftpad.finc"
 
 #else
- MSG_ERROR("FFTW3 support not activated")
+ ABI_ERROR("FFTW3 support not activated")
  ABI_UNUSED((/nx,ny,nz,ldx,ldy,ldz,ndat,mgfft,isign/))
  ABI_UNUSED(gbound(1,1))
  ABI_UNUSED(ff(1))
@@ -2607,7 +2496,7 @@ subroutine fftw3_fftpad_dpc(ff,nx,ny,nz,ldx,ldy,ldz,ndat,mgfft,isign,gbound)
 end subroutine fftw3_fftpad_dpc
 !!***
 
-#ifdef HAVE_FFT_FFTW3
+#ifdef HAVE_FFTW3
 
 !----------------------------------------------------------------------
 
@@ -2619,8 +2508,6 @@ end subroutine fftw3_fftpad_dpc
 !! INPUTS
 !!
 !! SIDE EFFECTS
-!!
-!! PARENTS
 !!
 !! SOURCE
 
@@ -2647,14 +2534,14 @@ function dplan_many_dft_1D(rank,n,howmany,fin,inembed,istride,idist,fout,onembed
 !$OMP END CRITICAL (OMPC_dfftw_plan_many_dft_1D)
 
  if (plan==NULL_PLAN) then
-   call wrtout(std_out,"dfftw_plan_many_dft returned NULL_PLAN!","COLL")
+   call wrtout(std_out, "dfftw_plan_many_dft returned NULL_PLAN!")
    write(frmt,*)"(a,",rank,"(1x,i0),3(a,i0),a,2(a,",rank,"(1x,i0),2(a,i0),a))"
    write(msg,frmt)&
 &    " n= ",n," howmany= ",howmany," sign= ",sign," flags= ",flags,ch10,&
 &    " inembed= ",inembed," istride= ",istride," idist=",idist,ch10,    &
 &    " onembed= ",onembed," ostride= ",ostride," odist=",idist,ch10
-   call wrtout(std_out,msg,"COLL")
-   MSG_ERROR("Check FFTW library and/or abinit code")
+   call wrtout(std_out, msg)
+   ABI_ERROR("Check FFTW library and/or abinit code")
  end if
 
 end function dplan_many_dft_1D
@@ -2670,8 +2557,6 @@ end function dplan_many_dft_1D
 !! INPUTS
 !!
 !! SIDE EFFECTS
-!!
-!! PARENTS
 !!
 !! SOURCE
 
@@ -2698,14 +2583,14 @@ function dplan_many_dft_2D(rank,n,howmany,fin,inembed,istride,idist,fout,onembed
 !$OMP END CRITICAL (OMPC_dfftw_plan_many_dft_2D)
 
  if (plan==NULL_PLAN) then
-   call wrtout(std_out,"dfftw_plan_many_dft returned NULL_PLAN!","COLL")
+   call wrtout(std_out, "dfftw_plan_many_dft returned NULL_PLAN!")
    write(frmt,*)"(a,",rank,"(1x,i0),3(a,i0),a,2(a,",rank,"(1x,i0),2(a,i0),a))"
    write(msg,frmt)&
 &    " n= ",n," howmany= ",howmany," sign= ",sign," flags= ",flags,ch10,&
 &    " inembed= ",inembed," istride= ",istride," idist=",idist,ch10,    &
 &    " onembed= ",onembed," ostride= ",ostride," odist=",idist,ch10
-   call wrtout(std_out,msg,"COLL")
-   MSG_ERROR("Check FFTW library and/or abinit code")
+   call wrtout(std_out, msg)
+   ABI_ERROR("Check FFTW library and/or abinit code")
  end if
 
 end function dplan_many_dft_2D
@@ -2721,8 +2606,6 @@ end function dplan_many_dft_2D
 !! INPUTS
 !!
 !! SIDE EFFECTS
-!!
-!! PARENTS
 !!
 !! SOURCE
 !! FIXME  technically it should be intent(inout) since FFTW3 can destroy the input for particular flags.
@@ -2750,14 +2633,14 @@ function cplan_many_dft(rank,n,howmany,fin,inembed,istride,idist,fout,onembed,os
 !$OMP END CRITICAL (OMPC_cplan_many_dft)
 
  if (plan==NULL_PLAN) then ! handle the error
-   call wrtout(std_out,"sfftw_plan_many_dft returned NULL_PLAN (complex version)","COLL")
+   call wrtout(std_out, "sfftw_plan_many_dft returned NULL_PLAN (complex version)")
    write(frmt,*)"(a,",rank,"(1x,i0),3(a,i0),a,2(a,",rank,"(1x,i0),2(a,i0),a))"
    write(msg,frmt)&
 &    " n = ",n," howmany = ",howmany," sign = ",sign," flags = ",flags,ch10,&
 &    " inembed = ",inembed," istride = ",istride," idist =",idist,ch10,     &
 &    " onembed = ",onembed," ostride = ",ostride," odist =",idist,ch10
-   call wrtout(std_out,msg,"COLL")
-   MSG_ERROR("Check FFTW library and/or abinit code")
+   call wrtout(std_out, msg)
+   ABI_ERROR("Check FFTW library and/or abinit code")
  end if
 
 end function cplan_many_dft
@@ -2773,8 +2656,6 @@ end function cplan_many_dft
 !! INPUTS
 !!
 !! SIDE EFFECTS
-!!
-!! PARENTS
 !!
 !! SOURCE
 !! FIXME  technically it should be intent(inout) since FFTW3 can destroy the input for particular flags.
@@ -2802,14 +2683,14 @@ function zplan_many_dft(rank,n,howmany,fin,inembed,istride,idist,fout,onembed,os
 !$OMP END CRITICAL (OMPC_zplan_many_dft)
 
  if (plan==NULL_PLAN) then ! handle the error
-   call wrtout(std_out,"dfftw_plan_many_dft returned NULL_PLAN (complex version)","COLL")
+   call wrtout(std_out, "dfftw_plan_many_dft returned NULL_PLAN (complex version)")
    write(frmt,*)"(a,",rank,"(1x,i0),3(a,i0),a,2(a,",rank,"(1x,i0),2(a,i0),a))"
    write(msg,frmt)&
 &    " n = ",n," howmany = ",howmany," sign = ",sign," flags = ",flags,ch10,&
 &    " inembed = ",inembed," istride = ",istride," idist =",idist,ch10,     &
 &    " onembed = ",onembed," ostride = ",ostride," odist =",idist,ch10
-   call wrtout(std_out,msg,"COLL")
-   MSG_ERROR("Check FFTW library and/or abinit code")
+   call wrtout(std_out, msg)
+   ABI_ERROR("Check FFTW library and/or abinit code")
  end if
 
 end function zplan_many_dft
@@ -2825,8 +2706,6 @@ end function zplan_many_dft
 !! INPUTS
 !!
 !! SIDE EFFECTS
-!!
-!! PARENTS
 !!
 !! SOURCE
 !! FIXME  technically it should be intent(inout) since FFTW3 can destroy the input
@@ -2855,14 +2734,14 @@ function dplan_many_dft_r2c(rank,n,howmany,fin,inembed,istride,idist,fout,onembe
 !$OMP END CRITICAL (OMPC_dplan_many_dft_r2c)
 
  if (plan==NULL_PLAN) then ! handle the error.
-   call wrtout(std_out,"dfftw_plan_many_dft_r2c returned NULL_PLAN","COLL")
+   call wrtout(std_out, "dfftw_plan_many_dft_r2c returned NULL_PLAN")
    write(frmt,*)"(a,",rank,"(1x,i0),2(a,i0),a,2(a,",rank,"(1x,i0),2(a,i0),a))"
    write(msg,frmt)&
 &    " n = ",n," howmany = ",howmany," flags = ",flags,ch10,&
 &    " inembed = ",inembed," istride = ",istride," idist = ",idist,ch10,&
 &    " onembed = ",onembed," ostride = ",ostride," odist = ",idist,ch10
-   call wrtout(std_out,msg,"COLL")
-   MSG_ERROR("Check FFTW library and/or abinit code")
+   call wrtout(std_out, msg)
+   ABI_ERROR("Check FFTW library and/or abinit code")
  end if
 
 end function dplan_many_dft_r2c
@@ -2878,8 +2757,6 @@ end function dplan_many_dft_r2c
 !! INPUTS
 !!
 !! SIDE EFFECTS
-!!
-!! PARENTS
 !!
 !! SOURCE
 
@@ -2906,14 +2783,14 @@ function dplan_many_dft_c2r(rank,n,howmany,fin,inembed,istride,idist,fout,onembe
 !$OMP END CRITICAL (OMPC_dplan_many_dft_c2r)
 
  if (plan==NULL_PLAN) then ! handle the error.
-   call wrtout(std_out,"dfftw_plan_many_dft_c2r returned NULL_PLAN","COLL")
+   call wrtout(std_out, "dfftw_plan_many_dft_c2r returned NULL_PLAN")
    write(frmt,*)"(a,",rank,"(1x,i0),2(a,i0),a,2(a,",rank,"(1x,i0),2(a,i0),a))"
    write(msg,frmt)&
 &    " n = ",n," howmany = ",howmany," flags = ",flags,ch10,&
 &    " inembed = ",inembed," istride = ",istride," idist = ",idist,ch10,&
 &    " onembed = ",onembed," ostride = ",ostride," odist = ",idist,ch10
-   call wrtout(std_out,msg,"COLL")
-   MSG_ERROR("Check FFTW library and/or abinit code")
+   call wrtout(std_out, msg)
+   ABI_ERROR("Check FFTW library and/or abinit code")
  end if
 
 end function dplan_many_dft_c2r
@@ -2938,14 +2815,9 @@ end function dplan_many_dft_c2r
 !!  containing the real and imaginary part. I have to admit that this interface
 !!  is a bit ambiguous since FFTW3 provides routines for real-to-real transforms.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      fftw3_destroy_plan,fftw3_execute_dft
-!!
 !! SOURCE
 
-#ifdef HAVE_FFT_FFTW3
+#ifdef HAVE_FFTW3
 
 subroutine fftw3_execute_dft_dp(plan, in, out)
 
@@ -2970,14 +2842,9 @@ end subroutine fftw3_execute_dft_dp
 !! NAME
 !! fftw3_execute_dft_spc
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      fftw3_destroy_plan,fftw3_execute_dft
-!!
 !! SOURCE
 
-#ifdef HAVE_FFT_FFTW3
+#ifdef HAVE_FFTW3
 
 subroutine fftw3_execute_dft_spc(plan, in, out)
 
@@ -3002,14 +2869,9 @@ end subroutine fftw3_execute_dft_spc
 !! NAME
 !! fftw3_execute_dft_dpc
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      fftw3_destroy_plan,fftw3_execute_dft
-!!
 !! SOURCE
 
-#ifdef HAVE_FFT_FFTW3
+#ifdef HAVE_FFTW3
 
 subroutine fftw3_execute_dft_dpc(plan, in, out)
 
@@ -3036,14 +2898,9 @@ end subroutine fftw3_execute_dft_dpc
 !!
 !! FUNCTION
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      fftw3_destroy_plan,fftw3_execute_dft
-!!
 !! SOURCE
 
-#ifdef HAVE_FFT_FFTW3
+#ifdef HAVE_FFTW3
 
 subroutine fftw3_alloc_real1d_dp(size,cptr,fptr)
 
@@ -3057,7 +2914,7 @@ subroutine fftw3_alloc_real1d_dp(size,cptr,fptr)
 
  cptr = fftw_malloc( INT(size*C_DOUBLE, KIND=C_SIZE_T))
  if (.not. C_ASSOCIATED(cptr)) then
-   MSG_ERROR("fftw_malloc returned NULL!")
+   ABI_ERROR("fftw_malloc returned NULL!")
  end if
 
  call c_f_pointer(cptr, fptr, [size])
@@ -3073,14 +2930,9 @@ end subroutine fftw3_alloc_real1d_dp
 !! NAME
 !! fftw3_alloc_real2d_dp
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      fftw3_destroy_plan,fftw3_execute_dft
-!!
 !! SOURCE
 
-#ifdef HAVE_FFT_FFTW3
+#ifdef HAVE_FFTW3
 
 subroutine fftw3_alloc_real2d_dp(shape,cptr,fptr)
 
@@ -3094,7 +2946,7 @@ subroutine fftw3_alloc_real2d_dp(shape,cptr,fptr)
 
  cptr = fftw_malloc( INT(product(shape)*C_DOUBLE, KIND=C_SIZE_T))
  if (.not. C_ASSOCIATED(cptr)) then
-   MSG_ERROR("fftw_malloc returned NULL!")
+   ABI_ERROR("fftw_malloc returned NULL!")
  end if
 
  call c_f_pointer(cptr, fptr, shape)
@@ -3110,14 +2962,9 @@ end subroutine fftw3_alloc_real2d_dp
 !! NAME
 !! fftw3_alloc_complex1d_spc
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      fftw3_destroy_plan,fftw3_execute_dft
-!!
 !! SOURCE
 
-#ifdef HAVE_FFT_FFTW3
+#ifdef HAVE_FFTW3
 
 subroutine fftw3_alloc_complex1d_spc(size,cptr,fptr)
 
@@ -3131,7 +2978,7 @@ subroutine fftw3_alloc_complex1d_spc(size,cptr,fptr)
 
  cptr = fftw_malloc( INT(2*size*C_FLOAT, KIND=C_SIZE_T))
  if (.not. C_ASSOCIATED(cptr)) then
-   MSG_ERROR("fftw_malloc returned NULL!")
+   ABI_ERROR("fftw_malloc returned NULL!")
  end if
 
  call c_f_pointer(cptr, fptr, [size])
@@ -3147,14 +2994,9 @@ end subroutine fftw3_alloc_complex1d_spc
 !! NAME
 !! fftw3_alloc_complex1d_dpc
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      fftw3_destroy_plan,fftw3_execute_dft
-!!
 !! SOURCE
 
-#ifdef HAVE_FFT_FFTW3
+#ifdef HAVE_FFTW3
 
 subroutine fftw3_alloc_complex1d_dpc(size,cptr,fptr)
 
@@ -3168,7 +3010,7 @@ subroutine fftw3_alloc_complex1d_dpc(size,cptr,fptr)
 
  cptr = fftw_malloc( INT(2*size*C_DOUBLE, KIND=C_SIZE_T))
  if (.not. C_ASSOCIATED(cptr)) then
-   MSG_ERROR("fftw_malloc returned NULL!")
+   ABI_ERROR("fftw_malloc returned NULL!")
  end if
 
  call c_f_pointer(cptr, fptr, [size])
@@ -3191,8 +3033,6 @@ end subroutine fftw3_alloc_complex1d_dpc
 !! INPUTS
 !!  ndat=Number of FFT transforms to do
 !!  nthreads = Number of threads available
-!!
-!! PARENTS
 !!
 !! SOURCE
 
@@ -3224,12 +3064,6 @@ end function fftw3_spawn_threads_here
 !! FUNCTION
 !!
 !! INPUTS
-!!
-!! PARENTS
-!!      m_fft
-!!
-!! CHILDREN
-!!      fftw3_destroy_plan,fftw3_execute_dft
 !!
 !! SOURCE
 
@@ -3265,11 +3099,6 @@ end subroutine fftw3_use_lib_threads
 !! n0,n0_tr : local size on the shared dimension (nz or ny if transposed mode is used)
 !! offset,offset_tr : offset per process in continuous tabx
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      fftw3_destroy_plan,fftw3_execute_dft
-!!
 !! SOURCE
 
 subroutine fftwmpi_get_work_array(cdata_f,cdata_r,rank,nx,ny,nz,ndat,comm_fft,n0,offset,n0_tr,offset_tr)
@@ -3281,7 +3110,7 @@ subroutine fftwmpi_get_work_array(cdata_f,cdata_r,rank,nx,ny,nz,ndat,comm_fft,n0
  type(C_PTR), intent(out) :: cdata_f,cdata_r
 
 !Local variables-------------------------------
-#ifdef HAVE_FFT_FFTW3_MPI
+#ifdef HAVE_FFTW3_MPI
 !scalars
  integer(C_INTPTR_T) :: alloc_local
 !arrays
@@ -3304,7 +3133,7 @@ subroutine fftwmpi_get_work_array(cdata_f,cdata_r,rank,nx,ny,nz,ndat,comm_fft,n0
  cdata_r = fftw_alloc_complex(alloc_local)
 
 #else
-  MSG_ERROR("FFTW3_MPI support not activated")
+  ABI_ERROR("FFTW3_MPI support not activated")
   ABI_UNUSED((/nx,ny,nz,ndat,rank,comm_fft/))
   cdata_f = C_NULL_PTR; cdata_r = C_NULL_PTR
   n0 = 0; offset = 0; n0_tr = 0; offset_tr = 0
@@ -3327,11 +3156,6 @@ end subroutine fftwmpi_get_work_array
 !! OUTPUT
 !! cdata_f,cdata_r: C pointers to free for fourier andreal data
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      fftw3_destroy_plan,fftw3_execute_dft
-!!
 !! SOURCE
 
 subroutine fftwmpi_free_work_array(cdata_f,cdata_r)
@@ -3342,11 +3166,11 @@ subroutine fftwmpi_free_work_array(cdata_f,cdata_r)
 
 ! *************************************************************************
 
-#ifdef HAVE_FFT_FFTW3_MPI
+#ifdef HAVE_FFTW3_MPI
  call fftw_free(cdata_r)
  call fftw_free(cdata_f)
 #else
- MSG_ERROR("FFTW3_MPI support not activated")
+ ABI_ERROR("FFTW3_MPI support not activated")
  if(.false.) then
    cdata_r = C_NULL_PTR; cdata_f = C_NULL_PTR
  end if
@@ -3382,11 +3206,6 @@ end subroutine fftwmpi_free_work_array
 !! OUTPUT
 !! fout(2,ldx*ldy*ldz*ndat)=The Fourier transform of fin.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      fftw3_destroy_plan,fftw3_execute_dft
-!!
 !! SOURCE
 
 subroutine fftw3mpi_many_dft_ip(nx,ny,nz,ldx,ldy,ldz,ndat,isign,fin,fout,comm_fft,fftw_flags)
@@ -3399,7 +3218,7 @@ subroutine fftw3mpi_many_dft_ip(nx,ny,nz,ldx,ldy,ldz,ndat,isign,fin,fout,comm_ff
  real(dp),intent(in) :: fin(2,ldx,ldy,ldz*ndat)
  real(dp),intent(out) :: fout(2,ldx,ldy,ldz*ndat)
 
-#ifdef HAVE_FFT_FFTW3_MPI
+#ifdef HAVE_FFTW3_MPI
 !Local variables-------------------------------
 !scalars
  integer,parameter :: rank3=3
@@ -3458,7 +3277,7 @@ subroutine fftw3mpi_many_dft_ip(nx,ny,nz,ldx,ldy,ldz,ndat,isign,fin,fout,comm_ff
  call fftw_free(cdata)
 
 #else
- MSG_ERROR("FFTW3_MPI support not activated")
+ ABI_ERROR("FFTW3_MPI support not activated")
  ABI_UNUSED((/nx,ny,nz,ldx,ldy,ldz,ndat,isign/))
  ABI_UNUSED(comm_fft)
  if (PRESENT(fftw_flags)) then
@@ -3498,11 +3317,6 @@ end subroutine fftw3mpi_many_dft_ip
 !! OUTPUT
 !! fout(2,ldx*ldy*ldz*ndat)=The Fourier transform of fin.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      fftw3_destroy_plan,fftw3_execute_dft
-!!
 !! SOURCE
 
 subroutine fftw3mpi_many_dft_tr(nx,ny,nz,ndat,isign,fin,fout,comm_fft,fftw_flags)
@@ -3516,7 +3330,7 @@ subroutine fftw3mpi_many_dft_tr(nx,ny,nz,ndat,isign,fin,fout,comm_fft,fftw_flags
  complex(C_DOUBLE_COMPLEX),ABI_CONTIGUOUS pointer :: fout(:,:,:)
 
 !Local variables-------------------------------
-#ifdef HAVE_FFT_FFTW3_MPI
+#ifdef HAVE_FFTW3_MPI
 !scalars
  integer :: my_flags
  !FFTWMPI stuff
@@ -3542,7 +3356,7 @@ subroutine fftw3mpi_many_dft_tr(nx,ny,nz,ndat,isign,fin,fout,comm_fft,fftw_flags
  call fftw_destroy_plan(plan)
 
 #else
- MSG_ERROR("FFTW3_MPI support not activated")
+ ABI_ERROR("FFTW3_MPI support not activated")
  ABI_UNUSED((/nx,ny,nz,ndat,isign,comm_fft/))
  if (PRESENT(fftw_flags)) then
     ABI_UNUSED(fftw_flags)
@@ -3579,12 +3393,6 @@ end subroutine fftw3mpi_many_dft_tr
 !! real space     --> dim = [  nx  | ny | nz/np_fft]
 !! fourier  space --> dim = [ nx/2 | nz | ny/np_ff ]
 !!
-!! PARENTS
-!!      m_fftw3
-!!
-!! CHILDREN
-!!      fftw3_destroy_plan,fftw3_execute_dft
-!!
 !! SOURCE
 
 subroutine fftw3_mpifourdp_c2r(nfft,ngfft,ndat,&
@@ -3602,7 +3410,7 @@ subroutine fftw3_mpifourdp_c2r(nfft,ngfft,ndat,&
  real(dp),intent(out) :: fofr(nfft*ndat)
 
 !Local variables-------------------------------
-#ifdef HAVE_FFT_FFTW3_MPI
+#ifdef HAVE_FFTW3_MPI
 !scalars
  integer,parameter :: rank3=3
  integer :: nx,ny,nz,nproc_fft
@@ -3686,7 +3494,7 @@ subroutine fftw3_mpifourdp_c2r(nfft,ngfft,ndat,&
  call fftw_free(cdata_real)
 
 #else
- MSG_ERROR("FFTW3_MPI support not activated")
+ ABI_ERROR("FFTW3_MPI support not activated")
  ABI_UNUSED((/nfft,ngfft(1),ndat,comm_fft/))
  ABI_UNUSED((/fftn2_distrib(1),ffti2_local(1)/))
  ABI_UNUSED((/fftn3_distrib(1),ffti3_local(1)/))
@@ -3727,12 +3535,6 @@ end subroutine fftw3_mpifourdp_c2r
 !! fft have been computed, the symetric data needed are dispatched over
 !! other process in parallel
 !!
-!! PARENTS
-!!      m_fftw3
-!!
-!! CHILDREN
-!!      fftw3_destroy_plan,fftw3_execute_dft
-!!
 !! SOURCE
 
 
@@ -3751,7 +3553,7 @@ subroutine fftw3_mpifourdp_r2c(nfft,ngfft,ndat,&
  real(dp),intent(out) :: fofg(2,nfft*ndat)
 
 !Local variables-------------------------------
-#ifdef HAVE_FFT_FFTW3_MPI
+#ifdef HAVE_FFTW3_MPI
  !scalars
  integer,parameter :: rank3=3
  integer :: my_flags,nproc_fft,nx,ny,nz
@@ -3838,7 +3640,7 @@ subroutine fftw3_mpifourdp_r2c(nfft,ngfft,ndat,&
  call fftw_free(cdata_real)
 
 #else
- MSG_ERROR("FFTW3_MPI support not activated")
+ ABI_ERROR("FFTW3_MPI support not activated")
  ABI_UNUSED((/nfft,ngfft(1),ndat,comm_fft/))
  ABI_UNUSED((/fftn2_distrib(1),ffti2_local(1)/))
  ABI_UNUSED((/fftn3_distrib(1),ffti3_local(1)/))
@@ -3878,11 +3680,6 @@ end subroutine fftw3_mpifourdp_r2c
 !! fofg(2,nfft*ndat)=f(G), complex.
 !! fofr(cplex*nfft*ndat)=input function f(r) (real or complex)
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      fftw3_destroy_plan,fftw3_execute_dft
-!!
 !! SOURCE
 
 subroutine old_fftw3_mpifourdp(cplex,nfft,ngfft,ndat,isign,&
@@ -3898,7 +3695,7 @@ subroutine old_fftw3_mpifourdp(cplex,nfft,ngfft,ndat,isign,&
  integer,intent(in) :: fftn3_distrib(ngfft(3)),ffti3_local(ngfft(3))
  real(dp),intent(inout) :: fofg(2,nfft*ndat),fofr(cplex*nfft*ndat)
 
-#ifdef HAVE_FFT_FFTW3_MPI
+#ifdef HAVE_FFTW3_MPI
 !Local variables-------------------------------
 !scalars
  integer :: nx,ny,nz,my_flags
@@ -3934,7 +3731,7 @@ subroutine old_fftw3_mpifourdp(cplex,nfft,ngfft,ndat,isign,&
 &     fofg,fofr,comm_fft,fftw_flags=my_flags)
 
    case default
-     MSG_BUG("Wrong isign")
+     ABI_BUG("Wrong isign")
    end select
 
  case (2)
@@ -3943,11 +3740,11 @@ subroutine old_fftw3_mpifourdp(cplex,nfft,ngfft,ndat,isign,&
 &    fftn2_distrib,ffti2_local,fftn3_distrib,ffti3_local,fofg,fofr,comm_fft,fftw_flags=my_flags)
 
  case default
-   MSG_BUG(" Wrong value for cplex")
+   ABI_BUG(" Wrong value for cplex")
  end select
 
 #else
- MSG_ERROR("FFTW3_MPI support not activated")
+ ABI_ERROR("FFTW3_MPI support not activated")
  ABI_UNUSED((/cplex,nfft,ngfft(1),ndat,isign,comm_fft/))
  ABI_UNUSED((/fftn2_distrib(1),ffti2_local(1)/))
  ABI_UNUSED((/fftn3_distrib(1),ffti3_local(1)/))
@@ -3993,12 +3790,6 @@ end subroutine old_fftw3_mpifourdp
 !! fofg(2,nfft*ndat)=f(G), complex.
 !! fofr(cplex*nfft*ndat)=input function f(r) (real or complex)
 !!
-!! PARENTS
-!!      m_fftw3
-!!
-!! CHILDREN
-!!      fftw3_destroy_plan,fftw3_execute_dft
-!!
 !! SOURCE
 
 subroutine fftw3_mpifourdp_c2c(cplex,nfft,ngfft,ndat,isign,&
@@ -4014,7 +3805,7 @@ subroutine fftw3_mpifourdp_c2c(cplex,nfft,ngfft,ndat,isign,&
  integer,intent(in) :: fftn3_distrib(ngfft(3)),ffti3_local(ngfft(3))
  real(dp),intent(inout) :: fofg(2,nfft*ndat),fofr(cplex*nfft*ndat)
 
-#ifdef HAVE_FFT_FFTW3_MPI
+#ifdef HAVE_FFTW3_MPI
 !Local variables-------------------------------
 !scalars
  integer,parameter :: rank3=3
@@ -4095,14 +3886,14 @@ subroutine fftw3_mpifourdp_c2c(cplex,nfft,ngfft,ndat,isign,&
      call mpifft_dbox2fg_dpc(n1,n2,n3,n4,nd2proc,n6,ndat,fftn2_distrib,ffti2_local,me_fft,f03_cdata,nfft,fofg)
 
  case default
-   MSG_ERROR("Wrong sign")
+   ABI_ERROR("Wrong sign")
  end select
 
  call fftw_destroy_plan(plan)
  call fftw_free(cptr_cdata)
 
 #else
- MSG_ERROR("FFTW3_MPI support not activated")
+ ABI_ERROR("FFTW3_MPI support not activated")
  ABI_UNUSED((/cplex,nfft,ngfft(1),ndat,isign,comm_fft/))
  ABI_UNUSED((/fftn2_distrib(1),ffti2_local(1)/))
  ABI_UNUSED((/fftn3_distrib(1),ffti3_local(1)/))
@@ -4174,12 +3965,6 @@ end subroutine fftw3_mpifourdp_c2c
 !!   to a value so small, that not even a single one dimensional transform
 !!   can be done in the workarray zw, the program stops with an error message.
 !!
-!! PARENTS
-!!      m_fft
-!!
-!! CHILDREN
-!!      fftw3_destroy_plan,fftw3_execute_dft
-!!
 !! SOURCE
 
 subroutine fftw3_mpiback_wf(cplexwf,ndat,n1,n2,n3,nd1,nd2,nd3proc,&
@@ -4191,7 +3976,7 @@ subroutine fftw3_mpiback_wf(cplexwf,ndat,n1,n2,n3,nd1,nd2,nd3proc,&
  real(dp),intent(in) :: zf(2,md1,md3,md2proc,ndat)
  real(dp),intent(out) :: zr(2,nd1,nd2,nd3proc,ndat)
 
-#ifdef HAVE_FFT_FFTW3
+#ifdef HAVE_FFTW3
 !Local variables-------------------------------
  integer,parameter :: nt1=1
  integer :: j,i1,i2,idat,ierr,includelast
@@ -4212,7 +3997,7 @@ subroutine fftw3_mpiback_wf(cplexwf,ndat,n1,n2,n3,nd1,nd2,nd3proc,&
 
 ! *************************************************************************
 
- !call wrtout(std_out,"mpiback standard ALLTOALL + FFTW3","COLL")
+ !call wrtout(std_out,"mpiback standard ALLTOALL + FFTW3")
 
  ! FIXME must provide a default value but which one?
  ! ioption = 0
@@ -4228,7 +4013,7 @@ subroutine fftw3_mpiback_wf(cplexwf,ndat,n1,n2,n3,nd1,nd2,nd3proc,&
 &    'ncache has to be enlarged to be able to hold at',ch10, &
 &    'least one 1-d FFT of each size even though this will',ch10,&
 &    'reduce the performance for shorter transform lengths'
-    MSG_ERROR(msg)
+    ABI_ERROR(msg)
  end if
 
  ! Effective m1 and m2 (complex-to-complex or real-to-complex)
@@ -4461,7 +4246,7 @@ subroutine fftw3_mpiback_wf(cplexwf,ndat,n1,n2,n3,nd1,nd2,nd3proc,&
  end if
 
 #else
- MSG_ERROR("FFTW3 support not activated")
+ ABI_ERROR("FFTW3 support not activated")
  ABI_UNUSED((/cplexwf,ndat,n1,n2,n3,nd1,nd2,nd3proc/))
  ABI_UNUSED((/ max1,max2,max3,m1,m2,m3,md1,md2proc,md3,comm_fft/))
  ABI_UNUSED((/zf(1,1,1,1,1),zr(1,1,1,1,1)/))
@@ -4529,12 +4314,6 @@ end subroutine fftw3_mpiback_wf
 !!  to a value so small, that not even a single one dimensional transform
 !!  can be done in the workarray zw, the program stops with an error message.
 !!
-!! PARENTS
-!!      m_fft
-!!
-!! CHILDREN
-!!      fftw3_destroy_plan,fftw3_execute_dft
-!!
 !! SOURCE
 
 subroutine fftw3_mpiforw_wf(cplexwf,ndat,n1,n2,n3,nd1,nd2,nd3proc,&
@@ -4550,7 +4329,7 @@ subroutine fftw3_mpiforw_wf(cplexwf,ndat,n1,n2,n3,nd1,nd2,nd3proc,&
 
 !Local variables-------------------------------
 !scalars
-#ifdef HAVE_FFT_FFTW3
+#ifdef HAVE_FFTW3
  integer :: j,i1,i2,i3,idat,ierr,nproc_fft,me_fft,nthreads
  integer :: ioption,j2,j3,j2st,jp2st,lot1,lot2,lot3,lzt,m1zt,ma,mb,n1dfft,nnd3
  integer :: m2eff,ncache,n1eff,n1half,i1inv,i2inv,i3inv
@@ -4582,7 +4361,7 @@ subroutine fftw3_mpiforw_wf(cplexwf,ndat,n1,n2,n3,nd1,nd2,nd3proc,&
 &    'ncache has to be enlarged to be able to hold at',ch10, &
 &    'least one 1-d FFT of each size even though this will',ch10,&
 &    'reduce the performance for shorter transform lengths'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  ! Effective m1 and m2 (complex-to-complex or real-to-complex)
@@ -4818,7 +4597,7 @@ subroutine fftw3_mpiforw_wf(cplexwf,ndat,n1,n2,n3,nd1,nd2,nd3proc,&
  end if
 
 #else
- MSG_ERROR("FFTW3 support not activated")
+ ABI_ERROR("FFTW3 support not activated")
  ABI_UNUSED((/cplexwf,ndat,n1,n2,n3,nd1,nd2,nd3proc/))
  ABI_UNUSED((/max1,max2,max3,m1,m2,m3,md1,md2proc,md3,comm_fft/))
  ABI_UNUSED((/zf(1,1,1,1,1),zr(1,1,1,1,1)/))
@@ -4880,12 +4659,6 @@ end subroutine fftw3_mpiforw_wf
 !!   to a value so small, that not even a single one dimensional transform
 !!   can be done in the workarray zw, the program stops with an error message.
 !!
-!! PARENTS
-!!      m_fftw3
-!!
-!! CHILDREN
-!!      fftw3_destroy_plan,fftw3_execute_dft
-!!
 !! SOURCE
 
 subroutine fftw3_mpiback(cplex,ndat,n1,n2,n3,nd1,nd2,nd3,nd1eff,nd2proc,nd3proc,option,zf,zr,comm_fft)
@@ -4898,7 +4671,7 @@ subroutine fftw3_mpiback(cplex,ndat,n1,n2,n3,nd1,nd2,nd3,nd1eff,nd2proc,nd3proc,
 
 !Local variables-------------------------------
 !scalaras
-#ifdef HAVE_FFT_FFTW3
+#ifdef HAVE_FFTW3
  integer :: j,i1,idat,ierr,includelast,j2,j2st,j3,jeff,jp2st,lzt,nthreads
  integer :: ma,mb,n1dfft,n1eff,n2eff,n1zt,ncache,nnd3,nproc_fft,me_fft,lot1,lot2,lot3
  integer(KIND_FFTW_PLAN) :: bw_plan1_lot,bw_plan1_rest
@@ -4921,12 +4694,12 @@ subroutine fftw3_mpiback(cplex,ndat,n1,n2,n3,nd1,nd2,nd3,nd1eff,nd2proc,nd3proc,
 &    'ncache has to be enlarged to be able to hold at',ch10, &
 &    'least one 1-d FFT of each size even though this will',ch10,&
 &    'reduce the performance for shorter transform lengths'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
 ! check input
  if (nd1<n1 .or. nd2<n2 .or. nd3<n3) then
-   MSG_ERROR("nd1<n1 .or. nd2<n2 .or. nd3<n3")
+   ABI_ERROR("nd1<n1 .or. nd2<n2 .or. nd3<n3")
  end if
 
  ! Effective n1 and n2 (complex-to-complex or real-to-complex)
@@ -5121,7 +4894,7 @@ subroutine fftw3_mpiback(cplex,ndat,n1,n2,n3,nd1,nd2,nd3,nd1eff,nd2proc,nd3proc,
  end if
 
 #else
- MSG_ERROR("FFTW3 support not activated")
+ ABI_ERROR("FFTW3 support not activated")
  ABI_UNUSED((/cplex,ndat,n1,n2,n3,nd1,nd2,nd1eff,nd2proc,nd3proc,option,comm_fft/))
  ABI_UNUSED((/zf(1,1,1,1,1),zr(1,1,1,1,1)/))
 #endif
@@ -5179,12 +4952,6 @@ end subroutine fftw3_mpiback
 !!  to a value so small, that not even a single one dimensional transform
 !!  can be done in the workarray zw, the program stops with an error message.
 !!
-!! PARENTS
-!!      m_fftw3
-!!
-!! CHILDREN
-!!      fftw3_destroy_plan,fftw3_execute_dft
-!!
 !! SOURCE
 
 subroutine fftw3_mpiforw(cplex,ndat,n1,n2,n3,nd1,nd2,nd3,nd1eff,nd2proc,nd3proc,option,zr,zf,comm_fft)
@@ -5199,7 +4966,7 @@ subroutine fftw3_mpiforw(cplex,ndat,n1,n2,n3,nd1,nd2,nd3,nd1eff,nd2proc,nd3proc,
 
 !Local variables-------------------------------
 !scalars
-#ifdef HAVE_FFT_FFTW3
+#ifdef HAVE_FFTW3
  integer :: j,i1,idat,ierr,j2,j2st,j3,jp2st,lzt,nthreads
  integer :: ma,mb,n1dfft,n1eff,n2eff,n1zt,ncache,nnd3,nproc_fft,me_fft,lot1,lot2,lot3
  integer(KIND_FFTW_PLAN) :: fw_plan1_lot,fw_plan1_rest
@@ -5221,12 +4988,12 @@ subroutine fftw3_mpiforw(cplex,ndat,n1,n2,n3,nd1,nd2,nd3,nd1eff,nd2proc,nd3proc,
 &     'ncache has to be enlarged to be able to hold at',ch10, &
 &     'least one 1-d FFT of each size even though this will',ch10,&
 &     'reduce the performance for shorter transform lengths'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  ! check input
  if (nd1<n1 .or. nd2<n2 .or. nd3<n3) then
-   MSG_ERROR("forw: assertion error nd1<n1 .or. nd2<n2 .or. nd3<n3")
+   ABI_ERROR("forw: assertion error nd1<n1 .or. nd2<n2 .or. nd3<n3")
  end if
 
 !Effective n1 and n2 (complex-to-complex or real-to-complex)
@@ -5405,7 +5172,7 @@ subroutine fftw3_mpiforw(cplex,ndat,n1,n2,n3,nd1,nd2,nd3,nd1eff,nd2proc,nd3proc,
  end if
 
 #else
- MSG_ERROR("FFTW3 support not activated")
+ ABI_ERROR("FFTW3 support not activated")
  ABI_UNUSED((/cplex,ndat,n1,n2,n3,nd1,nd2,nd1eff,nd2proc,nd3proc,option,comm_fft/))
  ABI_UNUSED((/zf(1,1,1,1,1),zr(1,1,1,1,1)/))
 #endif
@@ -5444,12 +5211,6 @@ end subroutine fftw3_mpiforw
 !! fofg(2,nfft)=f(G), complex.
 !! fofr(cplex*nfft)=input function f(r) (real or complex)
 !!
-!! PARENTS
-!!      fourdp,m_fft
-!!
-!! CHILDREN
-!!      fftw3_destroy_plan,fftw3_execute_dft
-!!
 !! SOURCE
 
 subroutine fftw3_mpifourdp(cplex,nfft,ngfft,ndat,isign,&
@@ -5479,8 +5240,8 @@ subroutine fftw3_mpifourdp(cplex,nfft,ngfft,ndat,isign,&
 
  nd2proc=((n2-1)/nproc_fft) +1
  nd3proc=((n6-1)/nproc_fft) +1
- ABI_ALLOCATE(workr,(2,n4,n5,nd3proc,ndat))
- ABI_ALLOCATE(workf,(2,n4,n6,nd2proc,ndat))
+ ABI_MALLOC(workr,(2,n4,n5,nd3proc,ndat))
+ ABI_MALLOC(workf,(2,n4,n6,nd2proc,ndat))
 
  ! Complex to Complex
  ! TODO: Complex to Real
@@ -5503,11 +5264,11 @@ subroutine fftw3_mpifourdp(cplex,nfft,ngfft,ndat,isign,&
    call mpifft_dbox2fg(n1,n2,n3,n4,nd2proc,n6,ndat,fftn2_distrib,ffti2_local,me_fft,workf,nfft,fofg)
 
  case default
-   MSG_BUG("Wrong isign")
+   ABI_BUG("Wrong isign")
  end select
 
- ABI_DEALLOCATE(workr)
- ABI_DEALLOCATE(workf)
+ ABI_FREE(workr)
+ ABI_FREE(workf)
 
 end subroutine fftw3_mpifourdp
 !!***
@@ -5561,12 +5322,6 @@ end subroutine fftw3_mpifourdp
 !!   to a value so small, that not even a single one dimensional transform
 !!   can be done in the workarray zw, the program stops with an error message.
 !!
-!! PARENTS
-!!      m_fft
-!!
-!! CHILDREN
-!!      fftw3_destroy_plan,fftw3_execute_dft
-!!
 !! SOURCE
 
 
@@ -5583,7 +5338,7 @@ subroutine fftw3_applypot(cplexwf,cplex,ndat,n1,n2,n3,nd1,nd2,nd3,nd3proc,&
 
 !Local variables-------------------------------
 !scalars
-#ifdef HAVE_FFT_FFTW3
+#ifdef HAVE_FFTW3
  integer,parameter :: unused0=0
  integer :: j,i1,i2,i3,idat,ierr,j3glob,nthreads
  integer :: ioption,j2,j3,lzt,m1zt,ma,mb,n1dfft,nnd3,lot1,lot2,lot3
@@ -5613,10 +5368,10 @@ subroutine fftw3_applypot(cplexwf,cplex,ndat,n1,n2,n3,nd1,nd2,nd3,nd3proc,&
 &    'ncache has to be enlarged to be able to hold at',ch10,&
 &    'least one 1-d FFT of each size even though this will',ch10,&
 &    'reduce the performance for shorter transform lengths'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
- !call wrtout(std_out,"applypot standard ALLTOALL + FFTW3","COLL")
+ !call wrtout(std_out,"applypot standard ALLTOALL + FFTW3")
 
  ! Effective m1 and m2 (complex-to-complex or real-to-complex)
  n1eff=n1; m2ieff=m2i; m2oeff=m2o; m1zt=n1
@@ -5632,11 +5387,11 @@ subroutine fftw3_applypot(cplexwf,cplex,ndat,n1,n2,n3,nd1,nd2,nd3,nd3proc,&
  ! maximal number of big box 3rd dim slices for all procs
  nnd3=nd3proc*nproc_fft
 
- ABI_ALLOCATE(zw,(2,ncache/2))
- ABI_ALLOCATE(zt,(2,lzt,m1zt))
- ABI_ALLOCATE(zmpi2,(2,md1,md2proc,nnd3))
+ ABI_MALLOC(zw,(2,ncache/2))
+ ABI_MALLOC(zt,(2,lzt,m1zt))
+ ABI_MALLOC(zmpi2,(2,md1,md2proc,nnd3))
  if (nproc_fft > 1)  then
-   ABI_ALLOCATE(zmpi1,(2,md1,md2proc,nnd3))
+   ABI_MALLOC(zmpi1,(2,md1,md2proc,nnd3))
  end if
 
  lot3=ncache/(2*n3)
@@ -5963,15 +5718,15 @@ subroutine fftw3_applypot(cplexwf,cplex,ndat,n1,n2,n3,nd1,nd2,nd3,nd3proc,&
    call dfftw_destroy_plan(fw_plan2_rest)
  end if
 
- ABI_DEALLOCATE(zmpi2)
- ABI_DEALLOCATE(zw)
- ABI_DEALLOCATE(zt)
+ ABI_FREE(zmpi2)
+ ABI_FREE(zw)
+ ABI_FREE(zt)
  if (nproc_fft > 1)  then
-   ABI_DEALLOCATE(zmpi1)
+   ABI_FREE(zmpi1)
  end if
 
 #else
- MSG_ERROR("FFTW3 support not activated")
+ ABI_ERROR("FFTW3 support not activated")
  ABI_UNUSED((/cplexwf,cplex,ndat,n1,n2,n3,nd1,nd2,nd3,nd3proc/))
  ABI_UNUSED((/max1i,max2i,max3i,m1i,m2i,m3i,md1,md2proc,md3/))
  ABI_UNUSED((/max1o,max2o,max3o,m1o,m2o,m3o,comm_fft,nproc_fft,me_fft/))
@@ -6033,12 +5788,6 @@ end subroutine fftw3_applypot
 !!   to a value so small, that not even a single one dimensional transform
 !!   can be done in the workarray zw, the program stops with an error message.
 !!
-!! PARENTS
-!!      m_fft
-!!
-!! CHILDREN
-!!      fftw3_destroy_plan,fftw3_execute_dft
-!!
 !! SOURCE
 
 subroutine fftw3_accrho(cplexwf,ndat,n1,n2,n3,nd1,nd2,nd3,nd3proc,&
@@ -6053,7 +5802,7 @@ subroutine fftw3_accrho(cplexwf,ndat,n1,n2,n3,nd1,nd2,nd3,nd3proc,&
 
 !Local variables-------------------------------
 !scalars
-#ifdef HAVE_FFT_FFTW3
+#ifdef HAVE_FFTW3
  integer,parameter :: unused0=0
  integer :: j,i1,idat,ierr,j3glob
  integer :: ioption,j2,j3,j2st,jp2st,lzt,m1zt,ma,mb,n1dfft,nnd3
@@ -6081,7 +5830,7 @@ subroutine fftw3_accrho(cplexwf,ndat,n1,n2,n3,nd1,nd2,nd3,nd3proc,&
 &     'ncache has to be enlarged to be able to hold at',ch10,&
 &     'least one 1-d FFT of each size even though this will',ch10,&
 &     'reduce the performance for shorter transform lengths'
-    MSG_ERROR(msg)
+    ABI_ERROR(msg)
  end if
 
 !Effective m1 and m2 (complex-to-complex or real-to-complex)
@@ -6097,11 +5846,11 @@ subroutine fftw3_accrho(cplexwf,ndat,n1,n2,n3,nd1,nd2,nd3,nd3proc,&
  ! maximal number of big box 3rd dim slices for all procs
  nnd3=nd3proc*nproc_fft
 
- ABI_ALLOCATE(zw,(2,ncache/2))
- ABI_ALLOCATE(zt,(2,lzt,m1zt))
- ABI_ALLOCATE(zmpi2,(2,md1,md2proc,nnd3))
+ ABI_MALLOC(zw,(2,ncache/2))
+ ABI_MALLOC(zt,(2,lzt,m1zt))
+ ABI_MALLOC(zmpi2,(2,md1,md2proc,nnd3))
  if (nproc_fft > 1)  then
-   ABI_ALLOCATE(zmpi1,(2,md1,md2proc,nnd3))
+   ABI_MALLOC(zmpi1,(2,md1,md2proc,nnd3))
  end if
 
  ! Create plans.
@@ -6287,15 +6036,15 @@ subroutine fftw3_accrho(cplexwf,ndat,n1,n2,n3,nd1,nd2,nd3,nd3proc,&
    call dfftw_destroy_plan(bw_plan2_rest)
  end if
 
- ABI_DEALLOCATE(zmpi2)
- ABI_DEALLOCATE(zw)
- ABI_DEALLOCATE(zt)
+ ABI_FREE(zmpi2)
+ ABI_FREE(zw)
+ ABI_FREE(zt)
  if (nproc_fft > 1)  then
-   ABI_DEALLOCATE(zmpi1)
+   ABI_FREE(zmpi1)
  end if
 
 #else
- MSG_ERROR("FFTW3 support not activated")
+ ABI_ERROR("FFTW3 support not activated")
  ABI_UNUSED((/cplexwf,ndat,n1,n2,n3,nd1,nd2,nd3proc/))
  ABI_UNUSED((/ max1,max2,max3,m1,m2,m3,md1,md2proc,md3,comm_fft,nproc_fft,me_fft/))
  ABI_UNUSED((/zf(1,1,1,1,1),rho(1,1,1),weight_r(1),weight_i(1)/))
@@ -6362,12 +6111,6 @@ end subroutine fftw3_accrho
 !!   to a value so small, that not even a single one dimensional transform
 !!   can be done in the workarray zw, the program stops with an error message.
 !!
-!! PARENTS
-!!      m_fft
-!!
-!! CHILDREN
-!!      fftw3_destroy_plan,fftw3_execute_dft
-!!
 !! SOURCE
 
 subroutine fftw3_mpiback_manywf(cplexwf,ndat,n1,n2,n3,nd1,nd2,nd3proc,&
@@ -6379,7 +6122,7 @@ subroutine fftw3_mpiback_manywf(cplexwf,ndat,n1,n2,n3,nd1,nd2,nd3proc,&
  real(dp),intent(in) :: zf(2,md1,md3,md2proc,ndat)
  real(dp),intent(out) :: zr(2,nd1,nd2,nd3proc,ndat)
 
-#ifdef HAVE_FFT_FFTW3
+#ifdef HAVE_FFTW3
 !Local variables-------------------------------
  integer,parameter :: nt1=1
  integer :: j,i1,i2,idat,ierr,includelast,nthreads
@@ -6401,7 +6144,7 @@ subroutine fftw3_mpiback_manywf(cplexwf,ndat,n1,n2,n3,nd1,nd2,nd3proc,&
 
 ! *************************************************************************
 
- !call wrtout(std_out,"mpiback with non-blocking IALLTOALL + FFTW3","COLL")
+ !call wrtout(std_out,"mpiback with non-blocking IALLTOALL + FFTW3")
 
 
  ! FIXME must provide a default value but which one?
@@ -6418,7 +6161,7 @@ subroutine fftw3_mpiback_manywf(cplexwf,ndat,n1,n2,n3,nd1,nd2,nd3proc,&
 &    'ncache has to be enlarged to be able to hold at',ch10, &
 &    'least one 1-d FFT of each size even though this will',ch10,&
 &    'reduce the performance for shorter transform lengths'
-    MSG_ERROR(msg)
+    ABI_ERROR(msg)
  end if
 
  ! Effective m1 and m2 (complex-to-complex or real-to-complex)
@@ -6646,7 +6389,7 @@ subroutine fftw3_mpiback_manywf(cplexwf,ndat,n1,n2,n3,nd1,nd2,nd3proc,&
  end if
 
 #else
- MSG_ERROR("FFTW3 support not activated")
+ ABI_ERROR("FFTW3 support not activated")
  ABI_UNUSED((/cplexwf,ndat,n1,n2,n3,nd1,nd2,nd3proc/))
  ABI_UNUSED((/ max1,max2,max3,m1,m2,m3,md1,md2proc,md3,comm_fft/))
  ABI_UNUSED((/zf(1,1,1,1,1),zr(1,1,1,1,1)/))
@@ -6714,12 +6457,6 @@ end subroutine fftw3_mpiback_manywf
 !!  to a value so small, that not even a single one dimensional transform
 !!  can be done in the workarray zw, the program stops with an error message.
 !!
-!! PARENTS
-!!      m_fft
-!!
-!! CHILDREN
-!!      fftw3_destroy_plan,fftw3_execute_dft
-!!
 !! SOURCE
 
 subroutine fftw3_mpiforw_manywf(cplexwf,ndat,n1,n2,n3,nd1,nd2,nd3proc,&
@@ -6735,7 +6472,7 @@ subroutine fftw3_mpiforw_manywf(cplexwf,ndat,n1,n2,n3,nd1,nd2,nd3proc,&
 
 !Local variables-------------------------------
 !scalars
-#ifdef HAVE_FFT_FFTW3
+#ifdef HAVE_FFTW3
  integer :: j,i1,i2,i3,idat,ierr,nproc_fft,me_fft
  integer :: ioption,j2,j3,j2st,jp2st,lot1,lot2,lot3,lzt,m1zt,ma,mb,n1dfft,nnd3
  integer :: m2eff,ncache,n1eff,n1half,i1inv,i2inv,i3inv,nthreads
@@ -6768,7 +6505,7 @@ subroutine fftw3_mpiforw_manywf(cplexwf,ndat,n1,n2,n3,nd1,nd2,nd3proc,&
 &    'ncache has to be enlarged to be able to hold at',ch10, &
 &    'least one 1-d FFT of each size even though this will',ch10,&
 &    'reduce the performance for shorter transform lengths'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  ! Effective m1 and m2 (complex-to-complex or real-to-complex)
@@ -6997,7 +6734,7 @@ subroutine fftw3_mpiforw_manywf(cplexwf,ndat,n1,n2,n3,nd1,nd2,nd3proc,&
  end if
 
 #else
- MSG_ERROR("FFTW3 support not activated")
+ ABI_ERROR("FFTW3 support not activated")
  ABI_UNUSED((/cplexwf,ndat,n1,n2,n3,nd1,nd2,nd3proc/))
  ABI_UNUSED((/max1,max2,max3,m1,m2,m3,md1,md2proc,md3,comm_fft/))
  ABI_UNUSED((/zf(1,1,1,1,1),zr(1,1,1,1,1)/))
@@ -7055,12 +6792,6 @@ end subroutine fftw3_mpiforw_manywf
 !!   to a value so small, that not even a single one dimensional transform
 !!   can be done in the workarray zw, the program stops with an error message.
 !!
-!! PARENTS
-!!      m_fft
-!!
-!! CHILDREN
-!!      fftw3_destroy_plan,fftw3_execute_dft
-!!
 !! SOURCE
 
 
@@ -7077,7 +6808,7 @@ subroutine fftw3_applypot_many(cplexwf,cplex,ndat,n1,n2,n3,nd1,nd2,nd3,nd3proc,&
 
 !Local variables-------------------------------
 !scalars
-#ifdef HAVE_FFT_FFTW3
+#ifdef HAVE_FFTW3
  integer,parameter :: unused0=0
  integer :: j,i1,i2,i3,idat,ierr,j3glob,nthreads
  integer :: ioption,j2,j3,lzt,m1zt,ma,mb,n1dfft,nnd3,lot1,lot2,lot3
@@ -7108,10 +6839,10 @@ subroutine fftw3_applypot_many(cplexwf,cplex,ndat,n1,n2,n3,nd1,nd2,nd3,nd3proc,&
 &    'ncache has to be enlarged to be able to hold at',ch10,&
 &    'least one 1-d FFT of each size even though this will',ch10,&
 &    'reduce the performance for shorter transform lengths'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
- !call wrtout(std_out,"applypot with non-blocking IALLTOALL + FFTW3","COLL")
+ !call wrtout(std_out,"applypot with non-blocking IALLTOALL + FFTW3")
  !write(std_out,"(a,i0)")"in applypot_many with ndat: ",ndat
 
  ! Effective m1 and m2 (complex-to-complex or real-to-complex)
@@ -7128,11 +6859,11 @@ subroutine fftw3_applypot_many(cplexwf,cplex,ndat,n1,n2,n3,nd1,nd2,nd3,nd3proc,&
  ! maximal number of big box 3rd dim slices for all procs
  nnd3=nd3proc*nproc_fft
 
- ABI_ALLOCATE(zw,(2,ncache/2))
- ABI_ALLOCATE(zt,(2,lzt,m1zt))
- ABI_ALLOCATE(zmpi2,(2,md1,md2proc,nnd3,ndat))
+ ABI_MALLOC(zw,(2,ncache/2))
+ ABI_MALLOC(zt,(2,lzt,m1zt))
+ ABI_MALLOC(zmpi2,(2,md1,md2proc,nnd3,ndat))
  if (nproc_fft > 1)  then
-   ABI_ALLOCATE(zmpi1,(2,md1,md2proc,nnd3,ndat))
+   ABI_MALLOC(zmpi1,(2,md1,md2proc,nnd3,ndat))
  end if
 
  lot3=ncache/(2*n3)
@@ -7470,15 +7201,15 @@ subroutine fftw3_applypot_many(cplexwf,cplex,ndat,n1,n2,n3,nd1,nd2,nd3,nd3proc,&
    call dfftw_destroy_plan(fw_plan2_rest)
  end if
 
- ABI_DEALLOCATE(zmpi2)
- ABI_DEALLOCATE(zw)
- ABI_DEALLOCATE(zt)
+ ABI_FREE(zmpi2)
+ ABI_FREE(zw)
+ ABI_FREE(zt)
  if (nproc_fft > 1)  then
-   ABI_DEALLOCATE(zmpi1)
+   ABI_FREE(zmpi1)
  end if
 
 #else
- MSG_ERROR("FFTW3 support not activated")
+ ABI_ERROR("FFTW3 support not activated")
  ABI_UNUSED((/cplexwf,cplex,ndat,n1,n2,n3,nd1,nd2,nd3,nd3proc/))
  ABI_UNUSED((/max1i,max2i,max3i,m1i,m2i,m3i,md1,md2proc,md3/))
  ABI_UNUSED((/max1o,max2o,max3o,m1o,m2o,m3o,comm_fft,nproc_fft,me_fft/))
@@ -7514,12 +7245,6 @@ end subroutine fftw3_applypot_many
 !!   vg is given on the FFT mesh instead of the augmented mesh [ldx,ldy,ldz]
 !!   in order to simplify the interface with the other routines operating of vg
 !!
-!! PARENTS
-!!      m_fft
-!!
-!! CHILDREN
-!!      fftw3_destroy_plan,fftw3_execute_dft
-!!
 !! SOURCE
 
 subroutine fftw3_poisson(cplex,nx,ny,nz,ldx,ldy,ldz,ndat,vg,nr)
@@ -7531,7 +7256,7 @@ subroutine fftw3_poisson(cplex,nx,ny,nz,ldx,ldy,ldz,ndat,vg,nr)
  real(dp),intent(inout) :: nr(cplex*ldx*ldy*ldz*ndat)
  real(dp),intent(in) :: vg(nx*ny*nz)
 
-#ifdef HAVE_FFT_FFTW3
+#ifdef HAVE_FFTW3
 !Local variables-------------------------------
 !scalars
  integer,parameter :: rank1=1,rank2=2

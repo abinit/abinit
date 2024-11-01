@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/vdw_dftd3_data
 !!
 !! NAME
@@ -6,11 +5,11 @@
 !!
 !! FUNCTION
 !! Retrieve data (tabulated coefficients) for DFT-D3 corrections (see
-!! vdw_dftd3 routine for more informations). It retrieves the tabulated
+!! vdw_dftd3 routine for more information). It retrieves the tabulated
 !! dispersion coefficients C6, the supporting points of the interpolation
 !! and the cut-off radii (R0) for the dispersion correction
 !! COPYRIGHT
-!! Copyright (C) 2015-2019 ABINIT group (BVT)
+!! Copyright (C) 2015-2024 ABINIT group (BVT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -31,11 +30,6 @@
 !!  vdw_dftd3_cnj: referenced coordination number used as supporting points of the
 !!                 interpolation, ordered by reference number and by pair of chemical element
 !!  index_cnj: table containing the index of non-zero values of CNj coefficients
-!!
-!! PARENTS
-!!      vdw_dftd3
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

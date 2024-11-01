@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_relaxpol
 !! NAME
 !!  m_relaxpol
@@ -6,14 +5,10 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1999-2019 ABINIT group (MVeithen)
+!!  Copyright (C) 1999-2024 ABINIT group (MVeithen)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -36,7 +31,6 @@ module m_relaxpol
  use m_geometry,  only : xcart2xred
  use m_dynmat,    only : symdyma
  use m_crystal,   only : crystal_t
-
 
  implicit none
 
@@ -64,7 +58,7 @@ contains
 !!   is not in the data block), (1=> the element is in the data blok)
 !! blkval(2,msize) = matrix that contains the second-order energy derivatives
 !! etotal = Kohn-Sham energy at zero electric field
-!! fred(3,natom) = -1 times the forces in reduced coordinates
+!! gred(3,natom) = -1 times the forces in reduced coordinates
 !! iatfix(natom) = indices of the atoms that are held fixed in the relaxation
 !! iout = unit number for output
 !! istrfix(6) = indices of the elements of the strain tensor that
@@ -98,19 +92,11 @@ contains
 !! - In case relaxat = 0 and relaxstr = 0, the routine only
 !!   computes the polarization in cartesian coordinates.
 !!
-!! PARENTS
-!!      anaddb
-!!
-!! CHILDREN
-!!      dzgedi,dzgefa,matr3inv,polcart,symdyma,xcart2xred
-!!
 !! SOURCE
 
-subroutine relaxpol(Crystal,blkflg,blkval,etotal,fred,iatfix,iout,istrfix,&
+subroutine relaxpol(Crystal,blkflg,blkval,etotal,gred,iatfix,iout,istrfix,&
 & mpert,msize,natfix,natom,nstrfix,pel,red_ptot,relaxat,relaxstr,&
 & strten,targetpol,usepaw)
-
- implicit none
 
 !Arguments -------------------------------
 !scalars
@@ -121,7 +107,7 @@ subroutine relaxpol(Crystal,blkflg,blkval,etotal,fred,iatfix,iout,istrfix,&
 !arrays
  integer,intent(in) :: blkflg(msize),iatfix(natom)
  integer,intent(in) :: istrfix(6)
- real(dp),intent(in) :: fred(3,natom),pel(3),strten(6)
+ real(dp),intent(in) :: gred(3,natom),pel(3),strten(6)
  real(dp),intent(in) :: red_ptot(3)
  real(dp),intent(inout) :: blkval(2,msize),targetpol(3)
 
@@ -151,7 +137,7 @@ subroutine relaxpol(Crystal,blkflg,blkval,etotal,fred,iatfix,iout,istrfix,&
 
 !Check if some degrees of freedom remain fixed during the optimization
 
- ABI_ALLOCATE(irelaxat,(natom))
+ ABI_MALLOC(irelaxat,(natom))
  irelaxat(:) = 1   ; irelaxstrain(:) = 1
  if (natfix > 0) then
    do ii = 1, natfix
@@ -161,7 +147,7 @@ subroutine relaxpol(Crystal,blkflg,blkval,etotal,fred,iatfix,iout,istrfix,&
 &       'The value of iatfix(',ii,') is ',iatom,', which is not allowed.',ch10,&
 &       'iatfix must be larger than 0 and smaller than natom.',ch10,&
 &       'Action: correct iatfix in your input file.'
-       MSG_ERROR(message)
+       ABI_ERROR(message)
      end if
      irelaxat(iatom) = 0
    end do
@@ -175,15 +161,15 @@ subroutine relaxpol(Crystal,blkflg,blkval,etotal,fred,iatfix,iout,istrfix,&
 &       'istrfix(',ii,') is',istrain,', which is not allowed.',ch10,&
 &       'istrfix must be larger than 0 and smaller than 6.',ch10,&
 &       'Action : correct istrfix in your input file.'
-       MSG_ERROR(message)
+       ABI_ERROR(message)
      end if
      irelaxstrain(istrain) = 0
    end do
  end if
 
 
- ABI_ALLOCATE(rfpert,(mpert,3))
- ABI_ALLOCATE(cfac,(mpert,mpert))
+ ABI_MALLOC(rfpert,(mpert,3))
+ ABI_MALLOC(cfac,(mpert,mpert))
  call matr3inv(rprimd,gprimd)
 
 !Compute the size of the matrix that contains the second-order derivatives
@@ -213,15 +199,15 @@ subroutine relaxpol(Crystal,blkflg,blkval,etotal,fred,iatfix,iout,istrfix,&
    end do
  end if
 
- ABI_ALLOCATE(fcmat,(2,sizef,sizef))
- ABI_ALLOCATE(ifcmat,(2,sizef,sizef))
- ABI_ALLOCATE(vec,(sizef))
- ABI_ALLOCATE(delta,(sizef))
- ABI_ALLOCATE(ipvt,(sizef))
- ABI_ALLOCATE(zgwork,(2,sizef))
- ABI_ALLOCATE(fcart,(3,natom))
- ABI_ALLOCATE(felfd,(3,natom))
- ABI_ALLOCATE(fdiff,(3,natom))
+ ABI_MALLOC(fcmat,(2,sizef,sizef))
+ ABI_MALLOC(ifcmat,(2,sizef,sizef))
+ ABI_MALLOC(vec,(sizef))
+ ABI_MALLOC(delta,(sizef))
+ ABI_MALLOC(ipvt,(sizef))
+ ABI_MALLOC(zgwork,(2,sizef))
+ ABI_MALLOC(fcart,(3,natom))
+ ABI_MALLOC(felfd,(3,natom))
+ ABI_MALLOC(fdiff,(3,natom))
 
 !Build the vector that stores the forces, sigma and the polarization
 
@@ -237,9 +223,9 @@ subroutine relaxpol(Crystal,blkflg,blkval,etotal,fred,iatfix,iout,istrfix,&
    favg(:) = zero
    do iatom = 1, natom
      do idir = 1, 3
-       fcart(idir,iatom) = -(gprimd(idir,1)*fred(1,iatom) + &
-&       gprimd(idir,2)*fred(2,iatom) + &
-&       gprimd(idir,3)*fred(3,iatom))
+       fcart(idir,iatom) = -(gprimd(idir,1)*gred(1,iatom) + &
+&       gprimd(idir,2)*gred(2,iatom) + &
+&       gprimd(idir,3)*gred(3,iatom))
        favg(idir) = favg(idir) + fcart(idir,iatom)
      end do
    end do
@@ -308,7 +294,7 @@ subroutine relaxpol(Crystal,blkflg,blkval,etotal,fred,iatfix,iout,istrfix,&
 
 !Symmetrize the dynamical matrix
 
- ABI_ALLOCATE(dymati,(2*3*natom*3*natom))
+ ABI_MALLOC(dymati,(2*3*natom*3*natom))
 !by the symdyma routine
  do ipert = 1, natom
    do idir = 1, 3
@@ -339,7 +325,7 @@ subroutine relaxpol(Crystal,blkflg,blkval,etotal,fred,iatfix,iout,istrfix,&
    end do
  end do
 
- ABI_DEALLOCATE(dymati)
+ ABI_FREE(dymati)
 
 !Define conversion factors for blkval
  cfac(:,:) = 1._dp
@@ -401,7 +387,7 @@ subroutine relaxpol(Crystal,blkflg,blkval,etotal,fred,iatfix,iout,istrfix,&
 &   'relaxat = ',relaxat,', relaxstr = ', relaxstr, ch10,&
 &   'are missing in the DDB.',ch10,&
 &   'Action: correct your DDB or change your input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 
@@ -649,18 +635,18 @@ subroutine relaxpol(Crystal,blkflg,blkval,etotal,fred,iatfix,iout,istrfix,&
 
  end if    !  (relaxat /= 0).or.(relaxstr /= 0)
 
- ABI_DEALLOCATE(cfac)
- ABI_DEALLOCATE(fdiff)
- ABI_DEALLOCATE(felfd)
- ABI_DEALLOCATE(delta)
- ABI_DEALLOCATE(fcart)
- ABI_DEALLOCATE(fcmat)
- ABI_DEALLOCATE(ifcmat)
- ABI_DEALLOCATE(ipvt)
- ABI_DEALLOCATE(rfpert)
- ABI_DEALLOCATE(vec)
- ABI_DEALLOCATE(zgwork)
- ABI_DEALLOCATE(irelaxat)
+ ABI_FREE(cfac)
+ ABI_FREE(fdiff)
+ ABI_FREE(felfd)
+ ABI_FREE(delta)
+ ABI_FREE(fcart)
+ ABI_FREE(fcmat)
+ ABI_FREE(ifcmat)
+ ABI_FREE(ipvt)
+ ABI_FREE(rfpert)
+ ABI_FREE(vec)
+ ABI_FREE(zgwork)
+ ABI_FREE(irelaxat)
 
 end subroutine relaxpol
 !!***

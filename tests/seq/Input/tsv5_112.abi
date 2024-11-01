@@ -1,0 +1,63 @@
+#NaF Berry phase calculation with GGA
+#
+#Primitive cell definition
+#*************************
+   acell 3*4.62 angstrom
+   rprim 0.0 0.5 0.5
+         0.5 0.0 0.5
+         0.5 0.5 0.0
+
+#Atom definition
+#***************
+   natom 2
+   ntypat 2
+   znucl 11 9 
+   typat 1 2
+
+#SCF parameters
+#**************
+   nstep 1
+
+
+#Planewave basis
+#***************
+   pawecutdg 80.
+
+   ecut  40.
+   kptopt 3 
+   ngkpt 2 2 2 
+   nshiftk 4
+   shiftk 0.5 0.5 0.5
+          0.5 0.0 0.0
+          0.0 0.5 0.0
+          0.0 0.0 0.5
+   toldfe 1.0d-12
+
+# Berry phase calculation of the polarization
+#********************************************
+   berryopt -1
+   rfdir 1 1 1
+
+ xcart   1.0000000000E-02  0.0000000000E+00  0.0000000000E+00
+         4.3652673487E+00  4.3652673487E+00  4.3652673487E+00
+
+ nbdbuf 0
+
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "Na.noRSO.9e.pawps, F.noRSO.rc1.4.pawps"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = tsv5_112.abo,     tolnlines=  0, tolabs=  1.166e-06, tolrel= 5.000e-06, fld_options=-easy
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% keywords = PAW, DFPT
+#%% authors =  P. Hermet
+#%% description = 
+#%%   NaF Sodium Fluoride FCC (rocksalt structure) with 2 atoms per cell.
+#%%   Test computation of the Berry phase in PAW.
+#%%<END TEST_INFO>

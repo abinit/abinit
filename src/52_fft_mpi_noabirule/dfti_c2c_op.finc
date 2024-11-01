@@ -1,4 +1,4 @@
-#ifdef HAVE_FFT_DFTI
+#ifdef HAVE_DFTI
 !Local variables-------------------------------
 !scalars
  integer :: status 
@@ -16,7 +16,7 @@
  status = DftiSetValue(Desc1, DFTI_OUTPUT_STRIDES,  (/0,1,ldx,ldx*ldy/) )
  status = DftiSetValue(Desc1, DFTI_PLACEMENT, DFTI_NOT_INPLACE)
 
- if (isign==-1) then
+ if (isign == -1 .and. iscale /= 0) then
    status = DftiSetValue(Desc1, DFTI_FORWARD_SCALE, one/DBLE(nx*ny*nz) )
  end if
                                                                                      
@@ -28,7 +28,7 @@
  else if (isign==+1) then
    status = DftiComputeBackward(Desc1, ff, gg)
  else 
-   MSG_ERROR("Wrong isign")
+   ABI_ERROR("Wrong isign")
  end if
  DFTI_CHECK(status)
 
@@ -36,8 +36,8 @@
  DFTI_CHECK(status)
 
 #else 
- MSG_ERROR("FFT_DFTI support not activated")
- ABI_UNUSED((/nx,ny,nz,ldx,ldy,ldz,ndat,isign/))
+ ABI_ERROR("FFT_DFTI support not activated")
+ ABI_UNUSED((/nx,ny,nz,ldx,ldy,ldz,ndat,iscale,isign/))
  ABI_UNUSED(ff)
  ABI_UNUSED(gg)
 #endif

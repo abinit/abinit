@@ -1,0 +1,99 @@
+#test silicon linear chain and finite oscillating electric field
+ ndtset 5
+
+ getwfk1   0
+  nstep1   30
+
+ qprtrb2   0 0 1
+ vprtrb2 100.0   0.0
+
+ qprtrb3   0 0 1
+ vprtrb3  10.0   0.0
+
+ qprtrb4   0 0 1
+ vprtrb4   1.0   0.0
+
+ qprtrb5   0 0 1
+ vprtrb5 -10.0   0.0
+
+#Common data
+ acell   2*10.00  50.00
+ diecut 1.20
+ dielam 0.5
+ diegap 0.2
+ ecut  2.00
+ getwfk 1
+ iprcel 45
+ ixc 3
+ kptopt 0
+
+ kpt
+   0.00000   0.00000   0.500
+ natom  8 nband 16
+ ngfft  2*16 64  nkpt  1
+ nstep 15
+ nsym   1 ntypat  1
+ occopt 1
+ rprim   1.0  0.0  0.0
+         0.0  1.0  0.0
+         0.0  0.0  1.0
+ symrel  1  0  0   0  1  0   0  0  1
+ xred    0.0  0.0  0.0
+         0.0  0.0  0.05
+         0.0  0.0  0.25
+         0.0  0.0  0.30
+         0.0  0.0  0.50
+         0.0  0.0  0.55
+         0.0  0.0  0.75
+         0.0  0.0  0.80
+ tnons 3*0.0
+ typat  8*1
+ tolwfr  1.e-22
+ wtk 1
+ znucl  14
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "14si.Hamann_mod"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t01.abo, tolnlines = 2, tolabs = 1e-8, tolrel = 1e-3
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = Unknown
+#%% keywords = 
+#%% description = 
+#%%  Chain of Silicon diatomic molecules (4 Si2 molecules in the cell)
+#%%  Freeze oscillatory perturbations with different wavelengths and intensities,
+#%%  thanks to the qprtrb and vprtrb input variables.
+#%%  This should be linked with the computation of the dielectric constant,
+#%%  test v2#05, that uses directly the RF capabilities of ABINIT,
+#%%  for one diatomic molecule.
+#%%  For dataset 1, one reproduces the results obtained in Tv2#05, multiplied by 4.
+#%%  The total energy is consistent up to more than 10 digits :
+#%%  -6.6499924738006 Ha for Tv2#05, -26.599969895203 Ha for the present calculation.
+#%%  For dataset 2, the perturbation qprtrb 0 0 1 is frozen in, with vprtrb 100.
+#%%  The total energy is -26.600317638775 Ha. The difference wrt the unperturbed situation is
+#%%  0.000348743572 Ha.
+#%%  For dataset 3, a much smaller perturbation (10 times smaller) is taken,
+#%%  giving total energy -26.599973367786 Ha. The difference wrt the unperturbed situation is
+#%%  0.3472583 microHa.
+#%%  For dataset 4, an even smaller perturbation (100 times smaller) is taken,
+#%%  giving total energy -26.599969929928 Ha. The difference wrt the unperturbed situation is
+#%%  0.000034725 microHa. With datasets 3 and 4, we are in the linear regime.
+#%%  The previous amplitude is better for such studies.
+#%%  Dataset 5 is the same as 3, with reversed amplitude. Results are similar to dataset 3.
+#%%  I had no sufficient time to analyze these data correctly and make the connection with the
+#%%  results of Tv2#05, unfortunately. The following (also test 02 below) gives some more data, and raise questions.
+#%%  There might be some problem with the use of qprtrb and vprtrb.
+#%%  For dataset 2, the group of the four lowest eigenenergies (each corresponding to a different molecule) is :
+#%%  -0.47198  -0.46381  -0.46091  -0.45266 , whose spread is 0.01932 Ha.
+#%%  One might think that the maximum and minimum of the potential are separated roughly by 0.02 Ha.
+#%%  The value vprtrb 100 corresponds to a cosine wave whose amplitude is 100, divided by the volume
+#%%  of the cell, that is 5000 Bohr^3 : 0.02 Ha. The maximum
+#%%  and minimum of the potential should thus be separated by 0.04 Ha. There seems to be a factor of 2 off.
+#%%<END TEST_INFO>

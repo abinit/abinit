@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_paw_pwaves_lmn
 !! NAME
 !!  m_paw_pwaves_lmn
@@ -11,7 +10,7 @@
 !!  inside the spheres around each atom.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2019 ABINIT group (MG,MT)
+!! Copyright (C) 2008-2024 ABINIT group (MG,MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -23,10 +22,6 @@
 !!   Every time a developer changes the structure "type_name" adding new entries, he/she has to make sure
 !!   that all the strongly connected routines are changed accordingly to accommodate the modification of the data type.
 !!   Typical examples of strongly connected routines are creation, destruction or reset methods.
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -126,11 +121,6 @@ CONTAINS !===========================================================
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      classify_bands,exc_plot,m_wfd,pawmkaewf,screening,sigma,wfk_analyze
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine paw_pwaves_lmn_init(Paw_onsite,my_natom,natom,ntypat,rprimd,xcart,Pawtab, &
@@ -182,7 +172,7 @@ subroutine paw_pwaves_lmn_init(Paw_onsite,my_natom,natom,ntypat,rprimd,xcart,Paw
  call get_my_atmtab(my_comm_atom,my_atmtab,my_atmtab_allocated,paral_atom,natom,my_natom_ref=my_natom)
 
  ! Prepare the spline. Calculate 2nd derivatives of partial waves for each atom type.
- ABI_DT_MALLOC(Paw_lmn_spline,(ntypat))
+ ABI_MALLOC(Paw_lmn_spline,(ntypat))
 
  do itypat=1,ntypat
    ln_size  =Pawtab(itypat)%basis_size
@@ -239,7 +229,7 @@ subroutine paw_pwaves_lmn_init(Paw_onsite,my_natom,natom,ntypat,rprimd,xcart,Paw
      call wrap2_zero_one(rsph_red(3,ifgd),red(3),shift(3))
      Paw_onsite(iatom1)%r0shift(:,ifgd) = NINT(shift)
      !if (ANY( ABS(shift) > tol12)) then
-       !MSG_WARNING("rmR_red is outside the first unit cell.")
+       !ABI_WARNING("rmR_red is outside the first unit cell.")
        !write(ab_out,*)rsph_red(:,ifgd),shift
      !end if
    end do
@@ -414,7 +404,7 @@ subroutine paw_pwaves_lmn_init(Paw_onsite,my_natom,natom,ntypat,rprimd,xcart,Paw
  !
  !* Free 2nd derivates used for spline.
  call paw_pwaves_lmn_free(Paw_lmn_spline)
- ABI_DATATYPE_DEALLOCATE(Paw_lmn_spline)
+ ABI_FREE(Paw_lmn_spline)
 
  ! Destroy atom table used for parallelism
  call free_my_atmtab(my_atmtab,my_atmtab_allocated)
@@ -433,12 +423,6 @@ end subroutine paw_pwaves_lmn_init
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      classify_bands,exc_plot,m_paw_pwaves_lmn,m_wfd,pawmkaewf,screening
-!!      sigma,wfk_analyze
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

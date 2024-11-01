@@ -1,0 +1,92 @@
+# Al(1-x) Gax As
+# Images with different concentrations (alchemical)
+
+#Simply compute the total energy
+
+ ndtset 2
+
+#Parameters for images
+ ntimimage 1 
+ nimage1 4
+ nimage2 4
+
+#Alchemy
+ mixalch1           1.0  0.0
+ mixalch_lastimg1   0.0  1.0
+ mixalch2           1.0  0.0
+ mixalch_2img2      0.9  0.1
+ mixalch_3img2      0.75 0.25
+ mixalch_4img2      0.55 0.45
+
+
+#-----------------------------------------------------------------------
+#Common data
+
+#Definition of the unit cell
+acell 3*10.61          # The unit cell of GaAs and AlAs are nearly identical
+rprim  0.0  0.5  0.5   # In tutorials 1 and 2, these primitive vectors 
+       0.5  0.0  0.5   # (to be scaled by acell) were 1 0 0  0 1 0  0 0 1 
+       0.5  0.5  0.0   # that is, the default.
+
+#Definition of the atom types
+ntypat 2               # There are two types of atom
+ntypalch 1
+npsp 3
+znucl 33 13 31         # The keyword "znucl" refers to the atomic number of the 
+                       # possible type(s) of atom. The pseudopotential(s) 
+                       # mentioned in the "files" file must correspond
+                       # to the type(s) of atom. Here, type 1 is the Arsenic,
+                       # type 2 will be a mixture of Al and Ga
+
+#Definition of the atoms
+natom 2                # There are two atoms
+typat 1 2              # The first is of type 1 (Al), the second is of type 2 (As).
+xred                   # This keyword indicate that the location of the atoms
+                       # will follow, one triplet of number for each atom
+   0.0  0.0  0.0       # Triplet giving the REDUCED coordinate of atom 1.
+   0.25 0.25 0.25      # Triplet giving the REDUCED coordinate of atom 2.
+
+#Gives the number of band, explicitely (do not take the default)
+nband  4               # For an insulator (if described correctly as an insulator 
+                       # by DFT), there is no need to include conduction bands 
+                       # in response-function calculations
+
+#Exchange-correlation functional
+ixc 1             # LDA Teter Pade parametrization
+
+#Definition of the planewave basis set
+ecut    3.0           # Maximal kinetic energy cut-off, in Hartree
+ 
+#Convergence parameters
+ nstep 20
+ toldfe  1.0d-7
+
+#Definition of the k-point grid
+kptrlatt -4  4  4      # In cartesian coordinates, this grid is simple cubic, and
+          4 -4  4      # actually corresponds to the so-called 8x8x8 Monkhorst-Pack grid.
+          4  4 -4      # It might as well be obtained through the use of
+                       # ngkpt, nshiftk and shiftk .
+
+
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "33as.SGS_mod, 13al.981214.fhi, 31ga.SGS_mod"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t28.abo, tolnlines = 3, tolabs = 1.1e-7, tolrel = 2.0e-4, fld_options = -medium
+#%% [paral_info]
+#%% max_nprocs = 4
+#%% [extra_info]
+#%% authors = Unknown
+#%% keywords = STRING 
+#%% description = 
+#%%   Ga Al(1-x) Asx
+#%%   Test of alchemical calculations with images.
+#%%   Mostly checking the treatment of input variables and their echo.
+#%%   (Tests 30-36 are more slots for testing the ground state)
+#%% topics = AtomTypes
+#%%<END TEST_INFO>

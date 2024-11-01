@@ -1,0 +1,67 @@
+#################################################################
+# Automatic test for ABINIT:                                    #
+#    Test of several variables reserved to experienced users:   #
+#       bxctmindg, iboxcut, mqgriddg                            #
+#                                                               #
+#              Silicon, 2 atoms in the box              MT 2009 #
+#################################################################
+
+# Datasets definition
+  ndtset 2
+
+! First dataset uses the default values
+! In second dataset, keyword are explicitely modified
+  bxctmindg2 1.6  ! (default 2.0 )
+  iboxcut2   1    ! (default 1   )
+  mqgriddg2  3501 ! (default 3001)
+
+#########################
+# Common input parameters
+  ! Unit cell
+    acell 3*5.43 angstrom
+    rprim 0   1/2 1/2
+          1/2 0   1/2
+          1/2 1/2 0
+    ntypat 1  natom 2  typat 2*1
+    znucl 14
+    xred 0   0   0
+         1/4 1/4 1/4
+
+  ! K-points and occupations
+    kptopt 1
+    ngkpt 2 2 2
+    nshiftk 4
+    shiftk 1/2 1/2 1/2
+           1/2 0   0
+           0   1/2 0
+           0   0   1/2
+    occopt 1
+    nband 4
+
+  ! Convergence parameters
+    ecut 7. pawecutdg 12.
+    nstep 50  tolvrs 1.d-10
+
+!   Miscelaneous
+    prtwf 0 prteig 0 prtden 0 ! To save disk space
+
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "si_ps.736.lda"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t17.abo, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00, fld_options =  -medium
+#%% [paral_info]
+#%% max_nprocs = 2
+#%% [extra_info]
+#%% authors = M. Torrent
+#%% keywords = PAW
+#%% description = 
+#%%   PAW: test of some variables reserved to experienced users
+#%%   Silicon with few k-points and low cut-off
+#%% topics = PAW
+#%%<END TEST_INFO>

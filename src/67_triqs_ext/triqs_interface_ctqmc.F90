@@ -1,3 +1,4 @@
+
 #if defined HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -30,7 +31,7 @@ MODULE TRIQS_CTQMC
 
                                &    levels,  u_mat_ij, u_mat_ijkl, fiw_nd, g_iw, gtau, gl, comm                        ) bind( c )
      
-      use iso_c_binding
+      use, intrinsic :: iso_c_binding
 
       LOGICAL(Kind=1), VALUE, INTENT(IN) :: rot_inv, leg_measure, hist, wrt_files, tot_not
  
@@ -45,6 +46,6 @@ MODULE TRIQS_CTQMC
     end subroutine Ctqmc_triqs_run
    
   end interface
- 
+
 
 END MODULE TRIQS_CTQMC

@@ -1,0 +1,66 @@
+# Test the HGH pseudo-potentials using a molecule with Ga : the gallaborane.
+
+ nstep 20
+
+ acell 3*10
+ ecut 10
+ kptopt 0
+ kpt   0 0 0
+ istwfk 1
+ natom  8
+ nband 6
+ nkpt  1
+ nsym  1
+ ntypat  3
+ rprim   1 0 0  0 1 0  0 0 1
+ symrel  1 0 0  0 1 0  0 0 1
+ toldfe 1.0d-6
+ typat  1 2 3 3 3 3 3 3
+ xcart
+ 0 0 0
+ 2.192 0 0
+ 1.437623199004281621 1.044494393323724765 0
+ 1.437623199004281621 -1.044494393323724765 0
+ -0.6546356874363436925 0 1.40387076211977058
+ -0.6546356874363436925 0 -1.40387076211977058
+ 2.788500000000000132 0 1.033168306714835246
+ 2.788500000000000132 0 -1.033168306714835246
+
+ znucl 31 5 1
+
+ usewvl 1
+ iscf 0
+ optstress 0
+ optforces 0
+ wvl_hgrid 0.5
+ icoulomb 1
+ nscforder 14
+ wvl_nprccg 5
+ wvl_bigdft_comp 1 #to follow the BigDFT workflow
+
+# Avoid print densities, wavefunctions and eigenvalues
+ prteig 0
+ prtden 0
+ prtwf  0
+
+ pp_dirpath "$ABI_PSPDIR/PseudosHGH_pwteter"
+ pseudos "31ga.3.hgh, 5b.3.hgh, 1h.1.hgh"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t05.abo, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00, fld_options = -medium
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = D. Caliste
+#%% keywords = 
+#%% description = 
+#%%   5. Galaborane molecule to test the HGH pseudo-potentials.
+#%%   WARNING : BigDFT try to read an additional line giving rcutoff and rloc, present in some pseudopotentials.
+#%%   If such a line exist after the value defined by lmax, but does NOT contain proper rcutoff and rloc (e.g. 0.0), BigDFT might fail by hanging
+#%%   or SEGFAULT, without giving proper error message. This is difficult to debug.
+#%% topics = Wavelets
+#%%<END TEST_INFO>

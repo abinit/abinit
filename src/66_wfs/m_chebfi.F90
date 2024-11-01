@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_chebfi
 !! NAME
 !!  m_chebfi
@@ -7,14 +6,10 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2019 ABINIT group (AL)
+!!  Copyright (C) 2014-2024 ABINIT group (AL)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -27,14 +22,15 @@
 module m_chebfi
 
  use defs_basis
- use defs_abitypes
  use m_errors
  use m_xmpi
  use m_abicore
  use m_abi_linalg
  use m_rayleigh_ritz
  use m_invovl
+ use m_dtset
 
+ use defs_abitypes, only : mpi_type
  use m_time,          only : timab
  use m_cgtools,       only : dotprod_g
  use m_bandfft_kpt,   only : bandfft_kpt, bandfft_kpt_get_ikpt
@@ -84,15 +80,6 @@ contains
 !! SIDE EFFECTS
 !!  cg(2,*)=updated wavefunctions
 !!
-!! PARENTS
-!!      vtowfk
-!!
-!! CHILDREN
-!!      apply_invovl,dotprod_g,getghc,pawcprj_alloc,pawcprj_axpby,pawcprj_copy
-!!      pawcprj_free,prep_getghc,prep_index_wavef_bandpp
-!!      rayleigh_ritz_distributed,rayleigh_ritz_subdiago,timab,wrtout
-!!      xmpi_alltoallv,xmpi_barrier,xmpi_max,xmpi_min,xmpi_sum
-!!
 !! NOTES
 !!  -- TODO --
 !!  Normev?
@@ -113,8 +100,6 @@ contains
 !! SOURCE
 
 subroutine chebfi(cg,dtset,eig,enlx,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspinor,prtvol,resid)
-
- implicit none
 
 !Arguments ------------------------------------
  type(gs_hamiltonian_type),intent(inout) :: gs_hamk
@@ -155,7 +140,7 @@ subroutine chebfi(cg,dtset,eig,enlx,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspino
  integer :: mcg
  real(dp) :: dprod_r, dprod_i
  character(len=500) :: message
- integer :: rdisplsloc(mpi_enreg%nproc_band),recvcountsloc(mpi_enreg%nproc_band)
+ integer :: rdisplsloc(mpi_enreg%nproc_band), recvcountsloc(mpi_enreg%nproc_band)
  integer :: sdisplsloc(mpi_enreg%nproc_band), sendcountsloc(mpi_enreg%nproc_band)
  integer :: ikpt_this_proc, npw_filter, nband_filter
  type(pawcprj_type), allocatable :: cwaveprj(:,:), cwaveprj_next(:,:), cwaveprj_prev(:,:)
@@ -186,23 +171,23 @@ subroutine chebfi(cg,dtset,eig,enlx,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspino
  ! Initialize the _filter pointers. Depending on paral_kgb, they might point to the actual arrays or to _alltoall variables
  if (dtset%paral_kgb == 1) then
    ikpt_this_proc = bandfft_kpt_get_ikpt()
-   npw_filter = bandfft_kpt(ikpt_this_proc)%ndatarecv
-   nband_filter = mpi_enreg%bandpp
+   npw_filter     = bandfft_kpt(ikpt_this_proc)%ndatarecv
+   nband_filter   = mpi_enreg%bandpp
 
-   ABI_ALLOCATE(cg_alltoall1, (2, npw_filter*nspinor*nband_filter))
-   ABI_ALLOCATE(gsc_alltoall1, (2, npw_filter*nspinor*nband_filter))
-   ABI_ALLOCATE(ghc_alltoall1, (2, npw_filter*nspinor*nband_filter))
-   ABI_ALLOCATE(gvnlxc_alltoall1, (2, npw_filter*nspinor*nband_filter))
-   ABI_ALLOCATE(cg_alltoall2, (2, npw_filter*nspinor*nband_filter))
-   ABI_ALLOCATE(gsc_alltoall2, (2, npw_filter*nspinor*nband_filter))
-   ABI_ALLOCATE(ghc_alltoall2, (2, npw_filter*nspinor*nband_filter))
-   ABI_ALLOCATE(gvnlxc_alltoall2, (2, npw_filter*nspinor*nband_filter))
+   ABI_MALLOC(cg_alltoall1,     (2, npw_filter*nspinor*nband_filter))
+   ABI_MALLOC(gsc_alltoall1,    (2, npw_filter*nspinor*nband_filter))
+   ABI_MALLOC(ghc_alltoall1,    (2, npw_filter*nspinor*nband_filter))
+   ABI_MALLOC(gvnlxc_alltoall1, (2, npw_filter*nspinor*nband_filter))
+   ABI_MALLOC(cg_alltoall2,     (2, npw_filter*nspinor*nband_filter))
+   ABI_MALLOC(gsc_alltoall2,    (2, npw_filter*nspinor*nband_filter))
+   ABI_MALLOC(ghc_alltoall2,    (2, npw_filter*nspinor*nband_filter))
+   ABI_MALLOC(gvnlxc_alltoall2, (2, npw_filter*nspinor*nband_filter))
 
    ! Init tranpose variables
-   recvcountsloc=bandfft_kpt(ikpt_this_proc)%recvcounts*2*nspinor*mpi_enreg%bandpp
-   rdisplsloc=bandfft_kpt(ikpt_this_proc)%rdispls*2*nspinor*mpi_enreg%bandpp
-   sendcountsloc=bandfft_kpt(ikpt_this_proc)%sendcounts*2*nspinor
-   sdisplsloc=bandfft_kpt(ikpt_this_proc)%sdispls*2*nspinor
+   recvcountsloc = bandfft_kpt(ikpt_this_proc)%recvcounts * 2 * nspinor * mpi_enreg%bandpp
+   rdisplsloc    = bandfft_kpt(ikpt_this_proc)%rdispls    * 2 * nspinor * mpi_enreg%bandpp
+   sendcountsloc = bandfft_kpt(ikpt_this_proc)%sendcounts * 2 * nspinor
+   sdisplsloc    = bandfft_kpt(ikpt_this_proc)%sdispls    * 2 * nspinor
 
    ! Load balancing, so that each processor has approximately the same number of converged and non-converged bands
    ! for two procs, rearrange 1 2 3 4 5 6 as 1 4 2 5 3 6
@@ -227,9 +212,10 @@ subroutine chebfi(cg,dtset,eig,enlx,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspino
 
    ! sort according to bandpp (from lobpcg, I don't fully understand what's going on but it works and it's fast)
    call prep_index_wavef_bandpp(mpi_enreg%nproc_band,mpi_enreg%bandpp,&
-&   nspinor,bandfft_kpt(ikpt_this_proc)%ndatarecv,&
-&   bandfft_kpt(ikpt_this_proc)%recvcounts,bandfft_kpt(ikpt_this_proc)%rdispls,&
-&   index_wavef_band)
+        &   nspinor,bandfft_kpt(ikpt_this_proc)%ndatarecv,&
+        &   bandfft_kpt(ikpt_this_proc)%recvcounts,bandfft_kpt(ikpt_this_proc)%rdispls,&
+        &   index_wavef_band)
+
    cg_alltoall2(:,:) = cg_alltoall1(:,index_wavef_band)
 
    cg_filter => cg_alltoall2
@@ -249,17 +235,17 @@ subroutine chebfi(cg,dtset,eig,enlx,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspino
  ! to whether it's nband x npw (paral_kgb == 0) or ndatarecv*bandpp (paral_kgb = 1)
 
  ! Allocate filter variables for the application of the Chebyshev polynomial
- ABI_ALLOCATE(cg_filter_next, (2, npw_filter*nspinor*nband_filter))
- ABI_ALLOCATE(cg_filter_prev, (2, npw_filter*nspinor*nband_filter))
- ABI_ALLOCATE(gsc_filter_prev, (2, npw_filter*nspinor*nband_filter))
- ABI_ALLOCATE(gsc_filter_next, (2, npw_filter*nspinor*nband_filter))
- ABI_ALLOCATE(gsm1hc_filter, (2, npw_filter*nspinor*nband_filter))
+ ABI_MALLOC(cg_filter_next, (2, npw_filter*nspinor*nband_filter))
+ ABI_MALLOC(cg_filter_prev, (2, npw_filter*nspinor*nband_filter))
+ ABI_MALLOC(gsc_filter_prev, (2, npw_filter*nspinor*nband_filter))
+ ABI_MALLOC(gsc_filter_next, (2, npw_filter*nspinor*nband_filter))
+ ABI_MALLOC(gsm1hc_filter, (2, npw_filter*nspinor*nband_filter))
 
  ! PAW init
  if(paw) then
-   ABI_DATATYPE_ALLOCATE(cwaveprj, (gs_hamk%natom,nspinor*nband_filter))
-   ABI_DATATYPE_ALLOCATE(cwaveprj_next, (gs_hamk%natom,nspinor*nband_filter))
-   ABI_DATATYPE_ALLOCATE(cwaveprj_prev, (gs_hamk%natom,nspinor*nband_filter))
+   ABI_MALLOC(cwaveprj, (gs_hamk%natom,nspinor*nband_filter))
+   ABI_MALLOC(cwaveprj_next, (gs_hamk%natom,nspinor*nband_filter))
+   ABI_MALLOC(cwaveprj_prev, (gs_hamk%natom,nspinor*nband_filter))
    call pawcprj_alloc(cwaveprj,0,gs_hamk%dimcprj)
    call pawcprj_alloc(cwaveprj_next,0,gs_hamk%dimcprj)
    call pawcprj_alloc(cwaveprj_prev,0,gs_hamk%dimcprj)
@@ -299,9 +285,9 @@ subroutine chebfi(cg,dtset,eig,enlx,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspino
  call wrtout(std_out,message,'COLL')
  ! update eigenvalues and residuals
  call timab(timer_update_eigen, 1, tsec)
- ABI_ALLOCATE(resids_filter, (nband_filter))
- ABI_ALLOCATE(residvec_filter, (2, npw_filter*nspinor))
- ABI_ALLOCATE(nline_bands, (nband_filter))
+ ABI_MALLOC(resids_filter, (nband_filter))
+ ABI_MALLOC(residvec_filter, (2, npw_filter*nspinor))
+ ABI_MALLOC(nline_bands, (nband_filter))
  do iband=1, nband_filter
    shift = npw_filter*nspinor*(iband-1)
    call dotprod_g(eig(iband),dprod_i,gs_hamk%istwf_k,npw_filter*nspinor,1,ghc_filter(:, shift+1:shift+npw_filter*nspinor),&
@@ -333,7 +319,7 @@ subroutine chebfi(cg,dtset,eig,enlx,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspino
  ! if(mpi_enreg%me == 0) write(0, *) nline_max
  do iband=1, nband_filter
    ! nline necessary to converge to tolwfr
-   nline_tolwfr = cheb_oracle(eig(iband), filter_low, dtset%ecut, dtset%tolwfr / resids_filter(iband), dtset%nline)
+   nline_tolwfr = cheb_oracle(eig(iband), filter_low, dtset%ecut, dtset%tolwfr_diago / resids_filter(iband), dtset%nline)
    ! nline necessary to decrease residual by a constant factor
    nline_decrease = cheb_oracle(eig(iband), filter_low, dtset%ecut, 0.1_dp, dtset%nline)
 
@@ -352,8 +338,8 @@ subroutine chebfi(cg,dtset,eig,enlx,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspino
  ! write(message, *) 'Mean nline', REAL(nline_total)/REAL(nband), 'max imbalance (%)', load_imbalance*100
  ! call wrtout(std_out,message,'COLL')
 
- ABI_DEALLOCATE(resids_filter)
- ABI_DEALLOCATE(residvec_filter)
+ ABI_FREE(resids_filter)
+ ABI_FREE(residvec_filter)
 
  !======================================================================================================
  ! Chebyshev polynomial application
@@ -385,7 +371,7 @@ subroutine chebfi(cg,dtset,eig,enlx,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspino
    if(paw) then
      call timab(timer_apply_inv_ovl, 1, tsec)
      call apply_invovl(gs_hamk, ghc_filter(:,shift:), gsm1hc_filter(:,shift:), cwaveprj_next(:,iactive:), &
-&     npw_filter, nactive, mpi_enreg, nspinor)
+&     npw_filter, nactive, mpi_enreg, nspinor, dtset%invovl_blksliced)
      call timab(timer_apply_inv_ovl, 2, tsec)
    else
      gsm1hc_filter(:,shift:) = ghc_filter(:,shift:)
@@ -477,16 +463,16 @@ subroutine chebfi(cg,dtset,eig,enlx,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspino
    call pawcprj_free(cwaveprj)
    call pawcprj_free(cwaveprj_next)
    call pawcprj_free(cwaveprj_prev)
-   ABI_DATATYPE_DEALLOCATE(cwaveprj)
-   ABI_DATATYPE_DEALLOCATE(cwaveprj_next)
-   ABI_DATATYPE_DEALLOCATE(cwaveprj_prev)
+   ABI_FREE(cwaveprj)
+   ABI_FREE(cwaveprj_next)
+   ABI_FREE(cwaveprj_prev)
  end if
- ABI_DEALLOCATE(nline_bands)
- ABI_DEALLOCATE(cg_filter_next)
- ABI_DEALLOCATE(cg_filter_prev)
- ABI_DEALLOCATE(gsc_filter_prev)
- ABI_DEALLOCATE(gsc_filter_next)
- ABI_DEALLOCATE(gsm1hc_filter)
+ ABI_FREE(nline_bands)
+ ABI_FREE(cg_filter_next)
+ ABI_FREE(cg_filter_prev)
+ ABI_FREE(gsc_filter_prev)
+ ABI_FREE(gsc_filter_next)
+ ABI_FREE(gsm1hc_filter)
 
  !======================================================================================================
  ! Filtering done, tranpose back
@@ -505,7 +491,7 @@ subroutine chebfi(cg,dtset,eig,enlx,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspino
      gvnlxc_alltoall1(:,index_wavef_band) = gvnlxc_alltoall2(:,:)
    end if
 
-   ABI_DEALLOCATE(index_wavef_band)
+   ABI_FREE(index_wavef_band)
 
    call timab(timer_sync, 1, tsec)
    call xmpi_barrier(mpi_enreg%comm_band)
@@ -528,14 +514,14 @@ subroutine chebfi(cg,dtset,eig,enlx,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspino
    call timab(timer_alltoall, 2, tsec)
 
    if(mpi_enreg%paral_kgb == 1) then
-     ABI_DEALLOCATE(cg_alltoall1)
-     ABI_DEALLOCATE(gsc_alltoall1)
-     ABI_DEALLOCATE(ghc_alltoall1)
-     ABI_DEALLOCATE(gvnlxc_alltoall1)
-     ABI_DEALLOCATE(cg_alltoall2)
-     ABI_DEALLOCATE(gsc_alltoall2)
-     ABI_DEALLOCATE(ghc_alltoall2)
-     ABI_DEALLOCATE(gvnlxc_alltoall2)
+     ABI_FREE(cg_alltoall1)
+     ABI_FREE(gsc_alltoall1)
+     ABI_FREE(ghc_alltoall1)
+     ABI_FREE(gvnlxc_alltoall1)
+     ABI_FREE(cg_alltoall2)
+     ABI_FREE(gsc_alltoall2)
+     ABI_FREE(ghc_alltoall2)
+     ABI_FREE(gvnlxc_alltoall2)
    end if
  else
    ! nothing to do, the _filter variables already point to the right ones
@@ -610,18 +596,11 @@ end subroutine chebfi
 !! OUTPUT
 !! y= Tn(x)
 !!
-!! PARENTS
-!!      chebfi
-!!
-!! CHILDREN
-!!
 !! NOTES
 !!
 !! SOURCE
 
 function cheb_poly(x, n, a, b) result(y)
-
- implicit none
 
  integer, intent(in) :: n
  integer :: i
@@ -661,18 +640,11 @@ end function cheb_poly
 !! OUTPUT
 !! n= number of iterations needed to decrease residual by tol
 !!
-!! PARENTS
-!!      chebfi
-!!
-!! CHILDREN
-!!
 !! NOTES
 !!
 !! SOURCE
 
 function cheb_oracle(x, a, b, tol, nmax) result(n)
-
- implicit none
 
  real(dp) :: tol
 

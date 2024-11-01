@@ -1,0 +1,70 @@
+# -----------------------------------------------------------------
+# FCC Argon - Test of Van der Waals (DFT-D3) dispersion potential
+# Test on the relaxation of unit cell + 3-body term potential
+# -----------------------------------------------------------------
+
+ecutsm 0.5
+dilatmx 1.05
+ecut 34
+toldfe 1.0d-6
+nstep 20
+acell 3*12
+rprim 0 0.5 0.5
+      0.5 0 0.5
+      0.5 0.5 0
+
+nband 5
+ntypat  1
+znucl 18
+natom 1
+typat  1*1
+xred
+0 0.0 0.0
+
+ngkpt   3*2
+nshiftk 4
+shiftk 0.5 0.0 0.0
+       0.0 0.5 0.0
+       0.0 0.0 0.5 
+       0.5 0.5 0.5
+
+diemac 4.0
+
+ixc 11
+
+# Activation of vdW DFT-D3
+vdw_xc 6
+vdw_tol 1d-10 # Tolerance on the pair-wise term
+vdw_tol_3bt 1d-10 # Tolerance on the 3-body term
+
+optcell 1
+ionmov  3
+ntime   5
+tolmxf 1d-4
+
+prtden 0
+prtwf  0
+prteig 0
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "18ar.revpbe"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t97.abo, tolnlines = 9, tolabs = 5.0e-04, tolrel = 5.0e-04, fld_options = -easy
+#%% [paral_info]
+#%% max_nprocs = 2
+#%% [extra_info]
+#%% authors = B. VAN TROEYE
+#%% keywords = RELAXATION, VDW, DFT-D3, 3-BODY_TERM
+#%% description = 
+#%%   Relaxation of FCC Argon crystal with DFT-D3 dispersion correction
+#%%   Both the pair-wise term and the 3-body term are included
+#%%   In this test the following properties are thus tested: contribution
+#%%   to the energy and to the stress of DFT-D3 including the 3-body term
+#%% topics = vdw
+#%%<END TEST_INFO>
+

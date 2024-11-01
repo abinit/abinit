@@ -26,41 +26,35 @@ def patch(fromfile, tofile):
     Use the unix tools diff and patch to patch tofile.
     Returns 0 if success
     """
-    # Temporary patch file.
-    _, tmp = tempfile.mkstemp(suffix='.patch')
+    with tempfile.NamedTemporaryFile(delete=True, suffix=".patch") as f:
+        tmp = f.name
 
-    # An exit status of 0 means no differences were found, 1 means some
-    # differences were found, and 2 means trouble.
-    #diff_cmd = "diff -c %s %s > %s" % (fromfile, tofile, tmp)
-    diff_cmd = "diff -c %s %s > %s" % (tofile, fromfile, tmp)
-    print(diff_cmd)
+        # An exit status of 0 means no differences were found, 1 means some
+        # differences were found, and 2 means trouble.
+        diff_cmd = "diff -c %s %s > %s" % (tofile, fromfile, tmp)
+        print(diff_cmd)
 
-    retcode = os.system(diff_cmd)
+        retcode = os.system(diff_cmd)
 
-    #if retcode >= 2:
-    #    warnings.warn("%s returned %s, won't patch!" % (diff_cmd, retcode) )
-    #    return retcode
+        # if retcode >= 2:
+        #    warnings.warn("%s returned %s, won't patch!" % (diff_cmd, retcode) )
+        #    return retcode
 
-    # Keep a backup copy of tofile.
-    bkp = tofile + ".orig"
-    shutil.copy(tofile, bkp)
+        # Keep a backup copy of tofile.
+        bkp = tofile + ".orig"
+        shutil.copy(tofile, bkp)
 
-    #print(open(tmp, "r").readlines())
-    #patch_cmd = "patch -p1 -i %s -o %s" % (tmp, tofile)
-    #patch_cmd = "patch -p0 < %s" % tmp
-    patch_cmd = "cp %s %s" % (fromfile, tofile)
-    #print(patch_cmd)
+        # print(open(tmp, "r").readlines())
+        # patch_cmd = "patch -p1 -i %s -o %s" % (tmp, tofile)
+        # patch_cmd = "patch -p0 < %s" % tmp
+        patch_cmd = "cp %s %s" % (fromfile, tofile)
+        # print(patch_cmd)
 
-    retcode = os.system(patch_cmd)
-    if retcode != 0:
-        warnings.warn("%s returned %s, reverting to original file" % (patch_cmd, retcode))
-        shutil.move(bkp, tofile)
-        return retcode
-
-    try:
-        os.remove(tmp)
-    except IOError:
-        pass
+        retcode = os.system(patch_cmd)
+        if retcode != 0:
+            warnings.warn("%s returned %s, reverting to original file" % (patch_cmd, retcode))
+            shutil.move(bkp, tofile)
+            return retcode
 
     return retcode
 
@@ -604,6 +598,62 @@ hds++++oyyydshhoooos++++++oo+ooo++++s+/ssdmyhhhhyo///yymyhsoy/:..`      `::.
                         `.-////-..`
                       .:::-.`
 """
+
+
+from functools import wraps
+
+
+class lazy_property(object):
+    """
+    lazy_property descriptor
+
+    Used as a decorator to create lazy attributes. Lazy attributes
+    are evaluated on first use.
+    """
+
+    def __init__(self, func):
+        self.__func = func
+        wraps(self.__func)(self)
+
+    def __get__(self, inst, inst_cls):
+        if inst is None:
+            return self
+
+        if not hasattr(inst, '__dict__'):
+            raise AttributeError("'%s' object has no attribute '__dict__'"
+                                 % (inst_cls.__name__,))
+
+        name = self.__name__
+        if name.startswith('__') and not name.endswith('__'):
+            name = '_%s%s' % (inst_cls.__name__, name)
+
+        value = self.__func(inst)
+        inst.__dict__[name] = value
+        return value
+
+    @classmethod
+    def invalidate(cls, inst, name):
+        """Invalidate a lazy attribute.
+
+        This obviously violates the lazy contract. A subclass of lazy
+        may however have a contract where invalidation is appropriate.
+        """
+        inst_cls = inst.__class__
+
+        if not hasattr(inst, '__dict__'):
+            raise AttributeError("'%s' object has no attribute '__dict__'"
+                                 % (inst_cls.__name__,))
+
+        if name.startswith('__') and not name.endswith('__'):
+            name = '_%s%s' % (inst_cls.__name__, name)
+
+        if not isinstance(getattr(inst_cls, name), cls):
+            raise AttributeError("'%s.%s' is not a %s attribute"
+                                 % (inst_cls.__name__, name, cls.__name__))
+
+        if name in inst.__dict__:
+            del inst.__dict__[name]
+
 
 
 if __name__ == "__main__":

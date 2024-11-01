@@ -1,0 +1,71 @@
+# Most trivial case: single H atom
+
+acell 3*7
+diemac 1.0d0
+diemix 0.5d0
+ecut 70
+
+irdwfk 1
+
+ixc 7
+
+kptopt 0
+kpt 3*0.25
+natom 1
+nband 1
+nkpt 1
+nline 2
+nsppol 2
+nstep 2
+nsym 8
+ntypat 1
+occ 1
+prtvol 10
+rprim 1 0 0 0 1 0 0 0 1
+symrel  1  0  0   0  1  0   0  0  1
+       -1  0  0   0  1  0   0  0  1
+        1  0  0   0 -1  0   0  0  1
+       -1  0  0   0 -1  0   0  0  1
+        1  0  0   0  1  0   0  0 -1
+       -1  0  0   0  1  0   0  0 -1
+        1  0  0   0 -1  0   0  0 -1
+       -1  0  0   0 -1  0   0  0 -1
+tnons 24*0
+tolwfr 1.0d-14
+typat 1
+wtk 1 znucl 1
+xred 3*0
+
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "01h.bare"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit 
+#%% input_prefix = t21o 
+#%% test_chain = t21.abi, t22.abi, t23.abi, t24.abi
+#%% [files]
+#%% files_to_test = t22.abo, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
+#%% [paral_info]
+#%% max_nprocs = 2
+#%% [extra_info]
+#%% keywords = NC 
+#%% authors = Unknown
+#%% description = 
+#%%   Isolated Hydrogen atom (see above)
+#%%   Treated with LSD, Perdew-Wang 92 (ixc=7).
+#%%   The one dimensional treatment
+#%%   of H in the LSD gives the total energy of -13.00 eV, that is -0.478 Ha
+#%%   see J.P. Perdew et al , Phys. Rev. B 46, 6671 (1992)  
+#%%   (maybe not very accurate!)
+#%%   Here, the answer is -0.4792 Ha.
+#%%   Going to 100 Ha cut-off gives -0.4795 Ha.
+#%%   Going to 150 Ha cut-off gives -0.4798 Ha.
+#%%   Keeping 70 Ha cut-off, but going to 0.002 bohr decay length gives 
+#%%   a lowering in energy on the order of 0.00003 Ha.
+#%%   Increasing the cell size to 8x8x8, while keeping ecut to 70 Ha cut-off
+#%%   and 0.005 bohr decay length gives -0.4783 Ha.
+#%%   For speed-up, it begins with the wavefunctions from test 21.
+#%% topics = xc
+#%%<END TEST_INFO>

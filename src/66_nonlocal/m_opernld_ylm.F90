@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_opernld_ylm
 !! NAME
 !!  m_opernld_ylm
@@ -7,14 +6,10 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2019 ABINIT group (MT)
+!!  Copyright (C) 2008-2024 ABINIT group (MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -108,6 +103,7 @@ contains
 !! --If (paw_opt==3)
 !!      if choice=1 : enlout(1)             -> contribution to <c|S|c> (note: not including <c|c>)
 !!      if choice=2 : enlout(3*natom)       -> contribution to <c|dS/d_atm.pos|c>
+!!      if choice=53: enlout(3)             -> 1st deriv. (twist) of energy wrt k
 !!      if choice=54: enlout(18*natom)      -> 2nd deriv. of energy wrt atm. pos and right k (Born eff. charge)
 !!      if choice=55: enlout(36)            -> 2nd deriv. of energy wrt strain and right k (piezoelastic tensor)
 !!      if choice=8 : enlout(6)             -> 2nd deriv. of energy wrt 2 k
@@ -119,36 +115,33 @@ contains
 !! Operate for one type of atom, and within this given type of atom,
 !! for a subset of at most nincat atoms.
 !!
-!! PARENTS
-!!      nonlop_ylm
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine opernld_ylm(choice,cplex,cplex_fac,ddkk,dgxdt,dgxdtfac,dgxdtfac_sij,d2gxdt,&
-&                      enlk,enlout,fnlk,gx,gxfac,gxfac_sij,ia3,natom,nd2gxdt,ndgxdt,&
-&                      ndgxdtfac,nincat,nlmn,nnlout,nspinor,paw_opt,strnlk)
-
- implicit none
+&                      enlk,enlout,fnlk,gx,gxfac,gxfac_sij,ia3,natom,ndat_left,nd2gxdt,ndgxdt,&
+&                      ndgxdtfac,nincat,nlmn,nnlout,nspinor,paw_opt,strnlk,&
+&                      enlout_im)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: choice,cplex,cplex_fac,ia3,natom,nd2gxdt,ndgxdt
  integer,intent(in) :: ndgxdtfac,nincat,nlmn,nnlout,nspinor,paw_opt
+ integer,intent(in) :: ndat_left
  real(dp),intent(inout) :: enlk
 !arrays
  real(dp),intent(in) :: d2gxdt(cplex,nd2gxdt,nlmn,nincat,nspinor)
  real(dp),intent(in) :: dgxdt(cplex,ndgxdt,nlmn,nincat,nspinor)
  real(dp),intent(in) :: dgxdtfac(cplex_fac,ndgxdtfac,nlmn,nincat,nspinor)
  real(dp),intent(in) :: dgxdtfac_sij(cplex,ndgxdtfac,nlmn,nincat,nspinor*(paw_opt/3))
- real(dp),intent(in) :: gx(cplex,nlmn,nincat,nspinor),gxfac(cplex_fac,nlmn,nincat,nspinor)
+ real(dp),intent(in) :: gx(cplex,nlmn,nincat,nspinor*ndat_left),gxfac(cplex_fac,nlmn,nincat,nspinor)
  real(dp),intent(in) :: gxfac_sij(cplex,nlmn,nincat,nspinor*(paw_opt/3))
- real(dp),intent(inout) :: ddkk(6),enlout(nnlout),fnlk(3*natom),strnlk(6)
+ real(dp),intent(inout) :: ddkk(6),enlout(nnlout*ndat_left),fnlk(3*natom),strnlk(6)
+ real(dp),intent(inout),optional :: enlout_im(nnlout*ndat_left)
 
 !Local variables-------------------------------
 !scalars
- integer :: ia,iashift,ilmn,iplex,ishift,ispinor,mu,mua,mua1,mua2,mub,mushift,mut,muu,nu,nushift
+ integer :: ia,iashift,idat_left,ilmn,iplex,ishift,ispinor,mu,mua,mua1,mua2,mub,mushift,mut,muu
+ integer :: nu,nushift
  real(dp) :: dummy
 !arrays
  integer,parameter :: alpha(6)=(/1,2,3,3,3,2/),beta(6)=(/1,2,3,2,1,1/)
@@ -166,15 +159,43 @@ subroutine opernld_ylm(choice,cplex,cplex_fac,ddkk,dgxdt,dgxdtfac,dgxdtfac_sij,d
 
 !  ============== Accumulate the non-local energy ===============
    if (choice==1) then
-     do ispinor=1,nspinor
-       do ia=1,nincat
-         do ilmn=1,nlmn
-           do iplex=1,cplex
-             enlout(1)=enlout(1)+gxfac(iplex,ilmn,ia,ispinor)*gx(iplex,ilmn,ia,ispinor)
+     if (present(enlout_im).and.cplex==2) then ! cplex=cplex_fac=2
+       do idat_left=1,ndat_left
+         do ispinor=1,nspinor
+           do ia=1,nincat
+             do ilmn=1,nlmn
+               enlout   (idat_left)=enlout   (idat_left)+gxfac(1,ilmn,ia,ispinor)*gx(1,ilmn,ia,ispinor+(idat_left-1)*nspinor)
+               enlout   (idat_left)=enlout   (idat_left)+gxfac(2,ilmn,ia,ispinor)*gx(2,ilmn,ia,ispinor+(idat_left-1)*nspinor)
+               enlout_im(idat_left)=enlout_im(idat_left)+gxfac(2,ilmn,ia,ispinor)*gx(1,ilmn,ia,ispinor+(idat_left-1)*nspinor)
+               enlout_im(idat_left)=enlout_im(idat_left)-gxfac(1,ilmn,ia,ispinor)*gx(2,ilmn,ia,ispinor+(idat_left-1)*nspinor)
+             end do
            end do
          end do
        end do
-     end do
+     else if (present(enlout_im).and.cplex_fac==2) then ! cplex=1,cplex_fac=2
+       do idat_left=1,ndat_left
+         do ispinor=1,nspinor
+           do ia=1,nincat
+             do ilmn=1,nlmn
+               enlout   (idat_left)=enlout   (idat_left)+gxfac(1,ilmn,ia,ispinor)*gx(1,ilmn,ia,ispinor+(idat_left-1)*nspinor)
+               enlout_im(idat_left)=enlout_im(idat_left)+gxfac(2,ilmn,ia,ispinor)*gx(1,ilmn,ia,ispinor+(idat_left-1)*nspinor)
+             end do
+           end do
+         end do
+       end do
+     else ! only the real part is needed or the imaginary part is zero
+       do idat_left=1,ndat_left
+         do ispinor=1,nspinor
+           do ia=1,nincat
+             do ilmn=1,nlmn
+               do iplex=1,cplex
+                 enlout(idat_left)=enlout(idat_left)+gxfac(iplex,ilmn,ia,ispinor)*gx(iplex,ilmn,ia,ispinor+(idat_left-1)*nspinor)
+               end do
+             end do
+           end do
+         end do
+       end do
+     end if
    end if
 
 !  ============ Accumulate the forces contributions =============
@@ -305,15 +326,16 @@ subroutine opernld_ylm(choice,cplex,cplex_fac,ddkk,dgxdt,dgxdtfac,dgxdtfac_sij,d
    end if
 
 !  ======== Accumulate the contributions of twist derivatives of E wrt to k ==========
+! accumulate <u|dp_i/dk_(idir+1)>D_ij<dp_j/dk(idir+2)|u>
    if (choice==53) then
-     enlj(1:3)=zero
-     ABI_ALLOCATE(cft,(3,nlmn))
-     ABI_ALLOCATE(cfu,(3,nlmn))
+     enlj(:)=zero
+     ABI_MALLOC(cft,(3,nlmn))
+     ABI_MALLOC(cfu,(3,nlmn))
 !    If cplex=1, dgxdt is pure imaginary;
 !    If cplex_fac=1, dgxdtfac is pure imaginary;
      do ispinor=1,nspinor
        do ia=1,nincat
-         if(cplex==2)then
+        if(cplex==2)then
            cft(1:3,1:nlmn)=cmplx(dgxdt(1,1:3,1:nlmn,ia,ispinor),dgxdt(2,1:3,1:nlmn,ia,ispinor))
          else
            cft(1:3,1:nlmn)=cmplx(zero,dgxdt(1,1:3,1:nlmn,ia,ispinor))
@@ -327,20 +349,31 @@ subroutine opernld_ylm(choice,cplex,cplex_fac,ddkk,dgxdt,dgxdtfac,dgxdtfac_sij,d
            do mu=1,3
              mut = twist_dir(2*mu-1)
              muu = twist_dir(2*mu)
-             enlj(mu) = enlj(mu) + aimag(conjg(cft(mut,ilmn))*cfu(muu,ilmn))
-             enlj(mu) = enlj(mu) - aimag(conjg(cft(muu,ilmn))*cfu(mut,ilmn))
-           end do
-         end do
-       end do
-     end do
-     enlout(1:3)=enlout(1:3)+enlj(1:3)
-     ABI_DEALLOCATE(cft)
-     ABI_DEALLOCATE(cfu)
+             if (cplex == 2) then
+               enlj(2*mu-1) = enlj(2*mu-1) + real(conjg(cft(mut,ilmn))*cfu(muu,ilmn))
+               enlj(2*mu)   = enlj(2*mu)   + aimag(conjg(cft(mut,ilmn))*cfu(muu,ilmn))
+             else
+               enlj(mu) = enlj(mu) + real(conjg(cft(mut,ilmn))*cfu(muu,ilmn))
+             end if
+           end do ! end loop over mu=1,3
+         end do ! end loop over ilmn states
+       end do ! end loop over ia atoms
+     end do ! end loop over ispinor
+     do mu = 1, 3
+       if (cplex == 2) then
+         enlout(2*mu-1)=enlout(2*mu-1)+enlj(2*mu-1)
+         enlout(2*mu)  =enlout(2*mu)  +enlj(2*mu)
+       else
+         enlout(mu)=enlout(mu)+enlj(mu)
+       end if
+     end do ! end loop over mu = 1, 3
+     ABI_FREE(cft)
+     ABI_FREE(cfu)
    end if
 
 !  ====== Accumulate the effective charges contributions =========
    if (choice==54) then
-     ABI_ALLOCATE(enljj,(18))
+     ABI_MALLOC(enljj,(18))
      do ispinor=1,nspinor
        do ia=1,nincat
          enljj(1:18)=zero
@@ -397,12 +430,12 @@ subroutine opernld_ylm(choice,cplex,cplex_fac,ddkk,dgxdt,dgxdtfac,dgxdtfac_sij,d
          enlout(iashift+1:iashift+18)=enlout(iashift+1:iashift+18)+enljj(1:18)
        end do
      end do
-     ABI_DEALLOCATE(enljj)
+     ABI_FREE(enljj)
    end if
 
 !  ====== Accumulate the piezoelectric tensor contributions =========
    if (choice==55) then
-     ABI_ALLOCATE(enljj,(36))
+     ABI_MALLOC(enljj,(36))
      do ispinor=1,nspinor
        do ia=1,nincat
          enljj(1:36)=zero;enlj(:)=zero
@@ -497,7 +530,7 @@ subroutine opernld_ylm(choice,cplex,cplex_fac,ddkk,dgxdt,dgxdtfac,dgxdtfac_sij,d
          ddkk(1:6)=ddkk(1:6)+enlj(1:6)
        end do
      end do
-     ABI_DEALLOCATE(enljj)
+     ABI_FREE(enljj)
    end if
 
 !  ======= Accumulate the elastic tensor contributions ==========
@@ -550,8 +583,8 @@ subroutine opernld_ylm(choice,cplex,cplex_fac,ddkk,dgxdt,dgxdtfac,dgxdtfac_sij,d
 
 !  ======== Accumulate the contributions of 2nd-derivatives of E wrt to k ==========
    if (choice==8) then
-     ABI_ALLOCATE(cft,(3,nlmn))
-     ABI_ALLOCATE(cfu,(3,nlmn))
+     ABI_MALLOC(cft,(3,nlmn))
+     ABI_MALLOC(cfu,(3,nlmn))
      do ispinor=1,nspinor
        do ia=1,nincat
          enlj(1:6)=zero
@@ -583,16 +616,16 @@ subroutine opernld_ylm(choice,cplex,cplex_fac,ddkk,dgxdt,dgxdtfac,dgxdtfac_sij,d
          enlout(1:6)=enlout(1:6)+two*enlj(1:6)
        end do
      end do
-     ABI_DEALLOCATE(cft)
-     ABI_DEALLOCATE(cfu)
+     ABI_FREE(cft)
+     ABI_FREE(cfu)
    end if
 
 !  ======== Accumulate the contributions of partial 2nd-derivatives of E wrt to k ==========
 !  Full derivative wrt to k1, right derivative wrt to k2
    if (choice==81) then
-     ABI_ALLOCATE(cft,(3,nlmn))
-     ABI_ALLOCATE(cfu,(6,nlmn))
-     ABI_ALLOCATE(enljj,(18))
+     ABI_MALLOC(cft,(3,nlmn))
+     ABI_MALLOC(cfu,(6,nlmn))
+     ABI_MALLOC(enljj,(18))
      do ispinor=1,nspinor
        do ia=1,nincat
          enljj(1:18)=zero
@@ -637,9 +670,9 @@ subroutine opernld_ylm(choice,cplex,cplex_fac,ddkk,dgxdt,dgxdtfac,dgxdtfac_sij,d
          enlout(1:18)=enlout(1:18)+enljj(1:18)
        end do
      end do
-     ABI_DEALLOCATE(cft)
-     ABI_DEALLOCATE(cfu)
-     ABI_DEALLOCATE(enljj)
+     ABI_FREE(cft)
+     ABI_FREE(cfu)
+     ABI_FREE(enljj)
    end if
 
  end if
@@ -648,15 +681,33 @@ subroutine opernld_ylm(choice,cplex,cplex_fac,ddkk,dgxdt,dgxdtfac,dgxdtfac_sij,d
 
 !  ============== Accumulate contribution to <c|S|c> ===============
    if (choice==1) then
-     do ispinor=1,nspinor
-       do ia=1,nincat
-         do ilmn=1,nlmn
-           do iplex=1,cplex
-             enlout(1)=enlout(1)+gxfac_sij(iplex,ilmn,ia,ispinor)*gx(iplex,ilmn,ia,ispinor)
+     if (present(enlout_im).and.cplex==2) then ! cplex=2
+       do idat_left=1,ndat_left
+         do ispinor=1,nspinor
+           do ia=1,nincat
+             do ilmn=1,nlmn
+               enlout   (idat_left)=enlout   (idat_left)+gxfac_sij(1,ilmn,ia,ispinor)*gx(1,ilmn,ia,ispinor+(idat_left-1)*nspinor)
+               enlout   (idat_left)=enlout   (idat_left)+gxfac_sij(2,ilmn,ia,ispinor)*gx(2,ilmn,ia,ispinor+(idat_left-1)*nspinor)
+               enlout_im(idat_left)=enlout_im(idat_left)+gxfac_sij(2,ilmn,ia,ispinor)*gx(1,ilmn,ia,ispinor+(idat_left-1)*nspinor)
+               enlout_im(idat_left)=enlout_im(idat_left)-gxfac_sij(1,ilmn,ia,ispinor)*gx(2,ilmn,ia,ispinor+(idat_left-1)*nspinor)
+             end do
            end do
          end do
        end do
-     end do
+     else ! only the real part is needed or the imaginary part is zero
+       do idat_left=1,ndat_left
+         do ispinor=1,nspinor
+           do ia=1,nincat
+             do ilmn=1,nlmn
+               do iplex=1,cplex
+                 enlout(idat_left)=enlout(idat_left)+&
+&                   gxfac_sij(iplex,ilmn,ia,ispinor)*gx(iplex,ilmn,ia,ispinor+(idat_left-1)*nspinor)
+               end do
+             end do
+           end do
+         end do
+       end do
+     end if
    end if
 
 !  ============== Accumulate contribution to <c|dS/d_atm_pos|c> ===============
@@ -756,9 +807,55 @@ subroutine opernld_ylm(choice,cplex,cplex_fac,ddkk,dgxdt,dgxdtfac,dgxdtfac_sij,d
      enlout(1:6)=enlout(1:6)+enlj(1:6)
    end if
 
+!  ====== Accumulate the contributions of twist derivatives of <c|S|c> wrt to k ==========
+! Choice 53: <u|dp_i/dk_(idir+1)>Sij<dp_j/dk_(idir+2)|u>
+   if (choice==53) then
+     enlj(:)=zero
+     ABI_MALLOC(cft,(3,nlmn))
+     ABI_MALLOC(cfu,(3,nlmn))
+!    If cplex=1, dgxdt is pure imaginary;
+!    If cplex_fac=1, dgxdtfac is pure imaginary;
+     do ispinor=1,nspinor
+       do ia=1,nincat
+        if(cplex==2)then
+           cft(1:3,1:nlmn)=cmplx(dgxdt(1,1:3,1:nlmn,ia,ispinor),dgxdt(2,1:3,1:nlmn,ia,ispinor))
+         else
+           cft(1:3,1:nlmn)=cmplx(zero,dgxdt(1,1:3,1:nlmn,ia,ispinor))
+         end if
+         if(cplex_fac==2)then
+           cfu(1:3,1:nlmn)=cmplx(dgxdtfac_sij(1,1:3,1:nlmn,ia,ispinor),dgxdtfac_sij(2,1:3,1:nlmn,ia,ispinor))
+         else
+           cfu(1:3,1:nlmn)=cmplx(zero,dgxdtfac_sij(1,1:3,1:nlmn,ia,ispinor))
+         end if
+         do ilmn=1,nlmn
+           do mu=1,3
+             mut = twist_dir(2*mu-1)
+             muu = twist_dir(2*mu)
+             if (cplex == 2) then
+               enlj(2*mu-1) = enlj(2*mu-1) + real(conjg(cft(mut,ilmn))*cfu(muu,ilmn))
+               enlj(2*mu)   = enlj(2*mu)   + aimag(conjg(cft(mut,ilmn))*cfu(muu,ilmn))
+             else
+               enlj(mu) = enlj(mu) + real(conjg(cft(mut,ilmn))*cfu(muu,ilmn))
+             end if
+           end do ! end loop over mu=1,3
+         end do ! end loop over ilmn states
+       end do ! end loop over ia atoms
+     end do ! end loop over ispinor
+     do mu = 1, 3
+       if (cplex == 2) then
+         enlout(2*mu-1)=enlout(2*mu-1)+enlj(2*mu-1)
+         enlout(2*mu)  =enlout(2*mu)  +enlj(2*mu)
+       else
+         enlout(mu)=enlout(mu)+enlj(mu)
+       end if
+     end do ! end loop over mu = 1, 3
+     ABI_FREE(cft)
+     ABI_FREE(cfu)
+   end if
+
 !  ====== Accumulate contribution to <c|d2S/d_atm_pos d_left_k|c> =========
    if (choice==54) then
-     ABI_ALLOCATE(enljj,(18))
+     ABI_MALLOC(enljj,(18))
      do ispinor=1,nspinor
        do ia=1,nincat
          enljj(1:18)=zero
@@ -801,12 +898,12 @@ subroutine opernld_ylm(choice,cplex,cplex_fac,ddkk,dgxdt,dgxdtfac,dgxdtfac_sij,d
          enlout(iashift+1:iashift+18)=enlout(iashift+1:iashift+18)+enljj(1:18)
        end do
      end do
-     ABI_DEALLOCATE(enljj)
+     ABI_FREE(enljj)
    end if
 
 !  ====== Accumulate contribution to <c|d2S/d_dstrain d_right_k|c> =========
    if (choice==55) then
-     ABI_ALLOCATE(enljj,(36))
+     ABI_MALLOC(enljj,(36))
      do ispinor=1,nspinor
        do ia=1,nincat
          enljj(1:36)=zero;enlj(:)=zero
@@ -874,13 +971,13 @@ subroutine opernld_ylm(choice,cplex,cplex_fac,ddkk,dgxdt,dgxdtfac,dgxdtfac_sij,d
          ddkk(1:6)=ddkk(1:6)+enlj(1:6)
        end do
      end do
-     ABI_DEALLOCATE(enljj)
+     ABI_FREE(enljj)
    end if
 
 !  ======  Accumulate contribution to <c|d2S/d_k d_k|c> =========
    if (choice==8) then
-     ABI_ALLOCATE(cft,(3,nlmn))
-     ABI_ALLOCATE(cfu,(3,nlmn))
+     ABI_MALLOC(cft,(3,nlmn))
+     ABI_MALLOC(cfu,(3,nlmn))
      do ispinor=1,nspinor
        do ia=1,nincat
          enlj(1:6)=zero
@@ -908,16 +1005,16 @@ subroutine opernld_ylm(choice,cplex,cplex_fac,ddkk,dgxdt,dgxdtfac,dgxdtfac_sij,d
          enlout(1:6)=enlout(1:6)+two*enlj(1:6)
        end do
      end do
-     ABI_DEALLOCATE(cft)
-     ABI_DEALLOCATE(cfu)
+     ABI_FREE(cft)
+     ABI_FREE(cfu)
    end if
 
 !  ======  Accumulate contribution to <c|d/d_k[d(right)S/d_k]|c> =========
 !  Full derivative wrt to k1, right derivative wrt to k2
    if (choice==81) then
-     ABI_ALLOCATE(cft,(3,nlmn))
-     ABI_ALLOCATE(cfu,(6,nlmn))
-     ABI_ALLOCATE(enljj,(18))
+     ABI_MALLOC(cft,(3,nlmn))
+     ABI_MALLOC(cfu,(6,nlmn))
+     ABI_MALLOC(enljj,(18))
      do ispinor=1,nspinor
        do ia=1,nincat
          enljj(1:18)=zero
@@ -962,9 +1059,9 @@ subroutine opernld_ylm(choice,cplex,cplex_fac,ddkk,dgxdt,dgxdtfac,dgxdtfac_sij,d
          enlout(1:18)=enlout(1:18)+enljj(1:18)
        end do
      end do
-     ABI_DEALLOCATE(cft)
-     ABI_DEALLOCATE(cfu)
-     ABI_DEALLOCATE(enljj)
+     ABI_FREE(cft)
+     ABI_FREE(cfu)
+     ABI_FREE(enljj)
    end if
 
  end if

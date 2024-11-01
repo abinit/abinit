@@ -1,0 +1,60 @@
+# Test paral_kgb 0 eigensolver and IO routines with idle processors.
+ndtset   2
+
+ecut      12
+pawecutdg 12
+nband      6
+nsppol     2
+spinmagntarget 0.0
+#iomode 1
+
+ngkpt    1 1 1
+nshiftk  1
+shiftk   0.0 0.0 0.0
+
+#################
+### DATASET 1 ###
+#################
+tolvrs1   1e-12
+
+#################
+### DATASET 2 ###
+#################
+tolvrs2   1e-8
+getden2   -1
+getwfk2   -1
+
+acell 1.0    1.0    1.0
+xred  
+    0.0    0.0    0.0
+    0.25    0.25    0.25
+
+typat   1 1
+ntypat   1
+rprim  
+    6.3285005521    0.0           3.6537614973
+    2.1095001840    5.9665675402  3.6537614973
+    0.0             0.0           7.3075229946
+
+natom   2
+znucl   14
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "Si-LDA.paw"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% [paral_info]
+#%% nprocs_to_test = 1, 4
+#%% max_nprocs = 4
+#%% [NCPU_1]
+#%% files_to_test = t62_MPI1.abo, tolnlines= 20, tolabs=  2.0e-5, tolrel= 3.0e-4
+#%% [NCPU_4]
+#%% files_to_test = t62_MPI4.abo, tolnlines= 20, tolabs=  2.0e-5, tolrel= 3.0e-4
+#%% [extra_info]
+#%% authors = M. Giantomassi
+#%% keywords = PAW
+#%% description = Test paral_kgb 0 eigensolver and IO routines with idle processors.
+#%%<END TEST_INFO>

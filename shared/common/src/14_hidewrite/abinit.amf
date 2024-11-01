@@ -1,0 +1,4 @@
+EXTRA_DIST += generate_build_info.cmake
+CLEANFILES += m_build_info.$(MODEXT)
+
+m_abicore.$(OBJEXT) m_specialmsg.$(OBJEXT): m_build_info.$(OBJEXT)

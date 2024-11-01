@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_jellium
 !! NAME
 !!  m_jellium
@@ -7,14 +6,10 @@
 !!  Routines related to jellium
 !!
 !! COPYRIGHT
-!! Copyright (C) 2007-2019 ABINIT group (SC)
+!! Copyright (C) 2007-2024 ABINIT group (SC)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -27,11 +22,11 @@
 module m_jellium
 
  use defs_basis
- use defs_abitypes
  use m_errors
  use m_abicore
 
- use m_fft,      only : fourdp
+ use defs_abitypes, only : MPI_type
+ use m_fft,         only : fourdp
 
  implicit none
 
@@ -75,22 +70,14 @@ contains
 !!  (if option==2) rhog(2,nfft), rhor(nfft,nspden)=reciprocal, real space
 !!   updated initial electronic density
 !!
-!! PARENTS
-!!      extraprho,gstate,setvtr
-!!
-!! CHILDREN
-!!      fourdp
-!!
 !! SOURCE
 
 subroutine jellium(gmet,gsqcut,mpi_enreg,nfft,ngfft,nspden,&
-&  option,paral_kgb,slabwsrad,rhog,rhor,rprimd,vjell,slabzstart,slabzend)
-
- implicit none
+&  option,slabwsrad,rhog,rhor,rprimd,vjell,slabzstart,slabzend)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: nfft,nspden,option,paral_kgb
+ integer,intent(in) :: nfft,nspden,option
  real(dp),intent(in) :: gsqcut,slabwsrad,slabzend,slabzstart
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
@@ -114,7 +101,7 @@ subroutine jellium(gmet,gsqcut,mpi_enreg,nfft,ngfft,nspden,&
 
 !Enforce that nspden<=2
  if(nspden>2) then
-   MSG_ERROR('Jellium possible only with nspden <= 2.')
+   ABI_ERROR('Jellium possible only with nspden <= 2.')
  end if
 
 !Make sure option is acceptable
@@ -122,7 +109,7 @@ subroutine jellium(gmet,gsqcut,mpi_enreg,nfft,ngfft,nspden,&
    write(message, '(a,i0,3a)' )&
 &   'option=',option,' is not allowed.',ch10,&
 &   'Must be 1 or 2.'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
  zcellength=rprimd(3,3)
@@ -136,11 +123,11 @@ subroutine jellium(gmet,gsqcut,mpi_enreg,nfft,ngfft,nspden,&
  nfftot=n1*n2*n3
  cutoff=gsqcut*tolfix
 
- ABI_ALLOCATE(rhjg,(2,nfft))
- ABI_ALLOCATE(rhjr,(nfft))
+ ABI_MALLOC(rhjg,(2,nfft))
+ ABI_MALLOC(rhjr,(nfft))
  rhjg(:,:)=zero
  if(option==1) then
-   ABI_ALLOCATE(vjelg,(2,nfft))
+   ABI_MALLOC(vjelg,(2,nfft))
    vjelg(:,:)=zero
  end if
 
@@ -209,10 +196,10 @@ subroutine jellium(gmet,gsqcut,mpi_enreg,nfft,ngfft,nspden,&
    end do
  end if
 
- ABI_DEALLOCATE(rhjg)
- ABI_DEALLOCATE(rhjr)
+ ABI_FREE(rhjg)
+ ABI_FREE(rhjr)
  if(option==1) then
-   ABI_DEALLOCATE(vjelg)
+   ABI_FREE(vjelg)
  end if
 
 !DEBUG

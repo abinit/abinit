@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_dfpt_elt
 !! NAME
 !!  m_dfpt_elt
@@ -7,14 +6,10 @@
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2019 ABINIT group (DRH, DCA, XG, GM, AR, MB)
+!! Copyright (C) 1998-2024 ABINIT group (DRH, DCA, XG, GM, AR, MB)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -27,12 +22,13 @@
 module m_dfpt_elt
 
  use defs_basis
- use defs_datatypes
- use defs_abitypes
  use m_abicore
  use m_errors
  use m_xmpi
+ use m_dtset
 
+ use defs_datatypes, only : pseudopotential_type
+ use defs_abitypes, only : MPI_type
  use m_time,        only : timab
  use m_special_funcs,  only : abi_derfc
  use m_geometry,    only : metric
@@ -45,10 +41,10 @@ module m_dfpt_elt
  use m_atm2fft,     only : atm2fft, dfpt_atm2fft
  use m_mkcore,      only : dfpt_mkcore
  use m_dfpt_mkvxcstr, only : dfpt_mkvxcstr
- use m_paral_atom, only : get_my_atmtab, free_my_atmtab
- use m_mpinfo,  only : ptabs_fourdp, proc_distrb_cycle
+ use m_paral_atom,   only : get_my_atmtab, free_my_atmtab
+ use m_mpinfo,       only : ptabs_fourdp, proc_distrb_cycle, proc_distrb_nband
  use m_fftcore,      only : sphereboundary
- use m_fft,             only : fourdp
+ use m_fft,          only : fourdp
 
  implicit none
 
@@ -61,6 +57,8 @@ module m_dfpt_elt
  public :: dfpt_eltfrhar
  public :: elt_ewald
  public :: dfpt_ewald
+ public :: dfpt_ewalddq
+ public :: dfpt_ewalddqdq
 !!***
 
 contains
@@ -125,21 +123,11 @@ contains
 !!      Much of the code in versions of this routine prior to 4.4.5
 !!      has been transfered to its child eltxccore.
 !!
-!! PARENTS
-!!      respfn
-!!
-!! CHILDREN
-!!      atm2fft,dfpt_atm2fft,dfpt_mkcore,dfpt_mkvxcstr,dotprod_vn,eltxccore
-!!      fourdp,metric,paw_spline,pawpsp_cg,pawrad_free,pawrad_init,pawtab_free
-!!      pawtab_nullify,redgr,timab,xmpi_sum
-!!
 !! SOURCE
 
 subroutine dfpt_eltfrxc(atindx,dtset,eltfrxc,enxc,gsqcut,kxc,mpi_enreg,mgfft,&
 & nattyp,nfft,ngfft,ngfftf,nhat,nkxc,n3xccc,pawtab,ph1d,psps,rhor,rprimd,&
 & usexcnhat,vxc,xccc3d,xred)
-
- implicit none
 
 !Arguments ------------------------------------
 !type
@@ -153,12 +141,12 @@ subroutine dfpt_eltfrxc(atindx,dtset,eltfrxc,enxc,gsqcut,kxc,mpi_enreg,mgfft,&
  integer,intent(in) :: atindx(dtset%natom),nattyp(dtset%ntypat),ngfft(18)
  integer,intent(in) :: ngfftf(18)
  real(dp),intent(in) :: nhat(nfft,dtset%nspden*psps%usepaw)
- real(dp),intent(in) :: ph1d(2,3*(2*mgfft+1)*dtset%natom),rprimd(3,3)
+ real(dp),intent(in) :: ph1d(2,3*(2*mgfft+1)*dtset%natom)
  real(dp),intent(in) :: vxc(nfft,dtset%nspden),xccc3d(n3xccc)
  real(dp),intent(in) :: xred(3,dtset%natom)
  real(dp),intent(in),target :: rhor(nfft,dtset%nspden)
  real(dp),intent(inout) :: kxc(nfft,nkxc)
- real(dp),intent(out) :: eltfrxc(6+3*dtset%natom,6)
+ real(dp),intent(out) :: eltfrxc(6+3*dtset%natom,6),rprimd(3,3)
  type(pawtab_type),intent(in) :: pawtab(dtset%ntypat*dtset%usepaw)
 
 !Local variables-------------------------------
@@ -167,6 +155,7 @@ subroutine dfpt_eltfrxc(atindx,dtset,eltfrxc,enxc,gsqcut,kxc,mpi_enreg,mgfft,&
  integer :: cplex,fgga,ia,idir,ielt,ieltx,ierr,ifft,ii,ipert,is1,is2,ispden,ispden_c,jj,ka,kb
  integer :: kd,kg,n1,n1xccc,n2,n3,n3xccc_loc,optatm,optdyfr,opteltfr,optgr
  integer :: option,optn,optn2,optstr,optv
+ logical :: nmxc
  real(dp) :: d2eacc,d2ecdgs2,d2exdgs2,d2gsds1ds2,d2gstds1ds2,decdgs,dexdgs
  real(dp) :: dgsds10,dgsds20,dgstds10,dgstds20,rstep,spnorm,tmp0,tmp0t
  real(dp) :: ucvol,valuei,yp1,ypn
@@ -198,14 +187,14 @@ subroutine dfpt_eltfrxc(atindx,dtset,eltfrxc,enxc,gsqcut,kxc,mpi_enreg,mgfft,&
 
  n1xccc = psps%n1xccc
  if(psps%usepaw==0)then
-   ABI_ALLOCATE(xcccrc,(dtset%ntypat))
-   ABI_ALLOCATE(xccc1d,(n1xccc,6,dtset%ntypat))
+   ABI_MALLOC(xcccrc,(dtset%ntypat))
+   ABI_MALLOC(xccc1d,(n1xccc,6,dtset%ntypat))
    xcccrc = psps%xcccrc
    xccc1d = psps%xccc1d
  end if
 
  if (usexcnhat==0.and.dtset%usepaw==1) then
-   ABI_ALLOCATE(rhor_,(nfft,dtset%nspden))
+   ABI_MALLOC(rhor_,(nfft,dtset%nspden))
    rhor_(:,:) = rhor(:,:)-nhat(:,:)
  else
    rhor_ => rhor
@@ -219,16 +208,17 @@ subroutine dfpt_eltfrxc(atindx,dtset,eltfrxc,enxc,gsqcut,kxc,mpi_enreg,mgfft,&
  end if
 
  fgga=0 ; if(nkxc==7.or.nkxc==19) fgga=1
+ nmxc=(dtset%usepaw==1.and.mod(abs(dtset%usepawu),10)==4)
 
- ABI_ALLOCATE(eltfrxc_tmp,(6+3*dtset%natom,6))
- ABI_ALLOCATE(eltfrxc_tmp2,(6+3*dtset%natom,6))
- ABI_ALLOCATE(vxc10,(nfft,dtset%nspden))
- ABI_ALLOCATE(xccc3d1,(cplex*nfft))
+ ABI_MALLOC(eltfrxc_tmp,(6+3*dtset%natom,6))
+ ABI_MALLOC(eltfrxc_tmp2,(6+3*dtset%natom,6))
+ ABI_MALLOC(vxc10,(nfft,dtset%nspden))
+ ABI_MALLOC(xccc3d1,(cplex*nfft))
 
  if(n1xccc/=0) then
-   ABI_ALLOCATE(vxc_core,(nfft))
-   ABI_ALLOCATE(vxc10_core,(nfft))
-   ABI_ALLOCATE(vxc1is_core,(nfft))
+   ABI_MALLOC(vxc_core,(nfft))
+   ABI_MALLOC(vxc10_core,(nfft))
+   ABI_MALLOC(vxc1is_core,(nfft))
 
    if(dtset%nspden==1) then
      vxc_core(:)=vxc(:,1)
@@ -244,13 +234,13 @@ subroutine dfpt_eltfrxc(atindx,dtset,eltfrxc,enxc,gsqcut,kxc,mpi_enreg,mgfft,&
 !arising from the strain dependence of the gradient operator itself
 
  if(fgga==1) then
-   ABI_ALLOCATE(rho0_redgr,(3,nfft,dtset%nspden))
-   ABI_ALLOCATE(work,(nfft))
-   ABI_ALLOCATE(workgr,(nfft,3))
+   ABI_MALLOC(rho0_redgr,(3,nfft,dtset%nspden))
+   ABI_MALLOC(work,(nfft))
+   ABI_MALLOC(workgr,(nfft,3))
 
 !  Set up metric tensor derivatives
-   ABI_ALLOCATE(dgm,(3,3,6))
-   ABI_ALLOCATE(d2gm,(3,3,6,6))
+   ABI_MALLOC(dgm,(3,3,6))
+   ABI_MALLOC(d2gm,(3,3,6,6))
 !  Loop over 2nd strain index
    do is2=1,6
      kg=idx(2*is2-1);kd=idx(2*is2)
@@ -288,7 +278,7 @@ subroutine dfpt_eltfrxc(atindx,dtset,eltfrxc,enxc,gsqcut,kxc,mpi_enreg,mgfft,&
    if(n1xccc/=0) then
      work(:)=work(:)+xccc3d(:)
    end if
-   call redgr (work,workgr,mpi_enreg,nfft,ngfft,mpi_enreg%paral_kgb)
+   call redgr (work,workgr,mpi_enreg,nfft,ngfft)
    do ifft=1,nfft
      rho0_redgr(:,ifft,1)=workgr(ifft,:)
    end do
@@ -297,15 +287,14 @@ subroutine dfpt_eltfrxc(atindx,dtset,eltfrxc,enxc,gsqcut,kxc,mpi_enreg,mgfft,&
      if(n1xccc/=0) then
        work(:)=work(:)+xccc3d(:)
      end if
-     call redgr(work,workgr,mpi_enreg,nfft,ngfft,mpi_enreg%paral_kgb)
+     call redgr(work,workgr,mpi_enreg,nfft,ngfft)
      do ifft=1,nfft
        rho0_redgr(:,ifft,2)=workgr(ifft,:)
      end do
    end if
-   ABI_DEALLOCATE(work)
-   ABI_DEALLOCATE(workgr)
+   ABI_FREE(work)
+   ABI_FREE(workgr)
  end if !GGA
-
 
 !Null the elastic tensor accumulator
  eltfrxc(:,:)=zero;eltfrxc_tmp(:,:)=zero;eltfrxc_tmp2(:,:) = zero
@@ -334,7 +323,7 @@ subroutine dfpt_eltfrxc(atindx,dtset,eltfrxc,enxc,gsqcut,kxc,mpi_enreg,mgfft,&
 
      if (psps%usepaw==1 .or. psps%nc_xccc_gspace==1) then
 !      Calculation in Reciprocal space for paw or NC with nc_xccc_gspace
-       ABI_ALLOCATE(xccc3d1_temp,(cplex*nfft,1))
+       ABI_MALLOC(xccc3d1_temp,(cplex*nfft,1))
        xccc3d1_temp = zero
 
        call dfpt_atm2fft(atindx,cplex,gmet,gprimd,gsqcut,is2,ipert,&
@@ -344,7 +333,7 @@ subroutine dfpt_eltfrxc(atindx,dtset,eltfrxc,enxc,gsqcut,kxc,mpi_enreg,mgfft,&
 &       comm_fft=mpi_enreg%comm_fft,me_g0=mpi_enreg%me_g0,&
 &       paral_kgb=mpi_enreg%paral_kgb,distribfft=mpi_enreg%distribfft)
        xccc3d1(:) = xccc3d1_temp(:,1)
-       ABI_DEALLOCATE(xccc3d1_temp)
+       ABI_FREE(xccc3d1_temp)
 
      else
 !      Calculation in direct space for norm conserving:
@@ -361,7 +350,7 @@ subroutine dfpt_eltfrxc(atindx,dtset,eltfrxc,enxc,gsqcut,kxc,mpi_enreg,mgfft,&
    if(fgga==0 .or. (fgga==1 .and. n1xccc/=0)) then
      option=0
      call dfpt_mkvxcstr(cplex,idir,ipert,kxc,mpi_enreg,dtset%natom,nfft,ngfft,nhat,&
-&     dummy_in,nkxc,dtset%nspden,n3xccc_loc,option,mpi_enreg%paral_kgb,qphon,rhor,rhor,&
+&     dummy_in,nkxc,nmxc,dtset%nspden,n3xccc_loc,option,qphon,rhor,rhor,&
 &     rprimd,dtset%usepaw,usexcnhat,vxc10,xccc3d1)
      if(n1xccc/=0)then
        if(dtset%nspden==1) then
@@ -379,7 +368,7 @@ subroutine dfpt_eltfrxc(atindx,dtset,eltfrxc,enxc,gsqcut,kxc,mpi_enreg,mgfft,&
    if(fgga==1) then
      option=2
      call dfpt_mkvxcstr(cplex,idir,ipert,kxc,mpi_enreg,dtset%natom,nfft,ngfft,nhat,&
-&     dummy_in,nkxc,dtset%nspden,n3xccc_loc,option,mpi_enreg%paral_kgb,qphon,rhor,rhor,&
+&     dummy_in,nkxc,nmxc,dtset%nspden,n3xccc_loc,option,qphon,rhor,rhor,&
 &     rprimd,dtset%usepaw,usexcnhat,vxc10,xccc3d1)
      if(n1xccc/=0)then
        if(dtset%nspden==1) then
@@ -513,9 +502,9 @@ subroutine dfpt_eltfrxc(atindx,dtset,eltfrxc,enxc,gsqcut,kxc,mpi_enreg,mgfft,&
      if (psps%usepaw==1 .or. psps%nc_xccc_gspace==1) then
 !      Calculation in Reciprocal space for paw or NC with nc_xccc_gspace
        optatm=0;optdyfr=0;optgr=0;optstr=0;optv=0;optn=n3xccc/nfft;optn2=1;opteltfr=1
-       ABI_ALLOCATE(vxc10_coreg,(2,nfft))
-       ABI_ALLOCATE(vxc_coreg,(2,nfft))
-       ABI_ALLOCATE(vxc1is_coreg,(2,nfft))
+       ABI_MALLOC(vxc10_coreg,(2,nfft))
+       ABI_MALLOC(vxc_coreg,(2,nfft))
+       ABI_MALLOC(vxc1is_coreg,(2,nfft))
 
        vxc10_coreg(:,:)=zero;vxc10_coreg(:,:)=zero;vxc1is_coreg(:,:)=zero;
 
@@ -527,12 +516,13 @@ subroutine dfpt_eltfrxc(atindx,dtset,eltfrxc,enxc,gsqcut,kxc,mpi_enreg,mgfft,&
        call atm2fft(atindx,dummy_out1,dummy_out2,dummy_out3,dummy_out4,eltfrxc_tmp2,dummy_in,gmet,gprimd,&
 &       dummy_out5,dummy_out6,gsqcut,mgfft,psps%mqgrid_vl,dtset%natom,nattyp,nfft,ngfft,dtset%ntypat,&
 &       optatm,optdyfr,opteltfr,optgr,optn,optn2,optstr,optv,psps,pawtab,ph1d,psps%qgrid_vl,dtset%qprtrb,&
-&       dummy_in,strn_dummy6,strv_dummy6,ucvol,psps%usepaw,vxc_coreg,vxc10_coreg,vxc1is_coreg,dtset%vprtrb,psps%vlspl,is2_in=is2,&
+&       dtset%rcut,dummy_in,rprimd,strn_dummy6,strv_dummy6,ucvol,psps%usepaw,&
+&       vxc_coreg,vxc10_coreg,vxc1is_coreg,dtset%vprtrb,psps%vlspl,is2_in=is2,&
 &       comm_fft=mpi_enreg%comm_fft,me_g0=mpi_enreg%me_g0,&
 &       paral_kgb=mpi_enreg%paral_kgb,distribfft=mpi_enreg%distribfft)
 
 !       The indexing array atindx is used to reestablish the correct order of atoms
-       ABI_ALLOCATE(elt_work,(6+3*dtset%natom,6))
+       ABI_MALLOC(elt_work,(6+3*dtset%natom,6))
        elt_work(1:6,1:6)=eltfrxc_tmp2(1:6,1:6)
        do ia=1,dtset%natom
          ielt=7+3*(ia-1)
@@ -540,12 +530,12 @@ subroutine dfpt_eltfrxc(atindx,dtset,eltfrxc,enxc,gsqcut,kxc,mpi_enreg,mgfft,&
          elt_work(ielt:ielt+2,1:6)=eltfrxc_tmp2(ieltx:ieltx+2,1:6)
        end do
        eltfrxc_tmp2(:,:)=elt_work(:,:)
-       ABI_DEALLOCATE(elt_work)
+       ABI_FREE(elt_work)
 
 
-       ABI_DEALLOCATE(vxc10_coreg)
-       ABI_DEALLOCATE(vxc_coreg)
-       ABI_DEALLOCATE(vxc1is_coreg)
+       ABI_FREE(vxc10_coreg)
+       ABI_FREE(vxc_coreg)
+       ABI_FREE(vxc1is_coreg)
        eltfrxc(:,:)= eltfrxc(:,:) + eltfrxc_tmp2(:,:)
 
      else
@@ -562,11 +552,11 @@ subroutine dfpt_eltfrxc(atindx,dtset,eltfrxc,enxc,gsqcut,kxc,mpi_enreg,mgfft,&
 &         n1,n1xccc,n2,n3,rprimd,dtset%typat,ucvol,vxc_core,vxc10_core,vxc1is_core,&
 &         xcccrc,xccc1d,xred,mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
 !        if (is2==1) print*,"elt-frxc from eltxccore",is2,eltfrxc_test1(1,1)*ucvol/dble(nfft)
-         ABI_DATATYPE_ALLOCATE(pawtab_test,(dtset%ntypat))
+         ABI_MALLOC(pawtab_test,(dtset%ntypat))
          call pawtab_nullify(pawtab_test)
          do jj=1,dtset%ntypat
            pawtab_test(jj)%mqgrid=psps%mqgrid_vl
-           ABI_ALLOCATE(pawtab_test(jj)%tcorespl,(pawtab_test(jj)%mqgrid,2))
+           ABI_MALLOC(pawtab_test(jj)%tcorespl,(pawtab_test(jj)%mqgrid,2))
            rstep=xcccrc(jj)/dble(n1xccc-1)
            call pawrad_init(mesh=core_mesh,mesh_size=n1xccc,mesh_type=1,rstep=rstep)
            call pawpsp_cg(pawtab_test(jj)%dncdq0,pawtab_test(jj)%d2ncdq0,psps%mqgrid_vl,psps%qgrid_vl,&
@@ -577,9 +567,9 @@ subroutine dfpt_eltfrxc(atindx,dtset,eltfrxc,enxc,gsqcut,kxc,mpi_enreg,mgfft,&
 !            do ii=1,psps%mqgrid_vl;write(200+jj,*) psps%qgrid_vl(ii),pawtab_test(jj)%tcorespl(ii,1);enddo
 !          end if
          end do
-         ABI_ALLOCATE(vxc10_coreg,(2,nfft))
-         ABI_ALLOCATE(vxc_coreg,(2,nfft))
-         ABI_ALLOCATE(vxc1is_coreg,(2,nfft))
+         ABI_MALLOC(vxc10_coreg,(2,nfft))
+         ABI_MALLOC(vxc_coreg,(2,nfft))
+         ABI_MALLOC(vxc1is_coreg,(2,nfft))
          vxc10_coreg(:,:)=zero;vxc10_coreg(:,:)=zero;vxc1is_coreg(:,:)=zero;
          call fourdp(1,vxc10_coreg,vxc10_core,-1,mpi_enreg,nfft,1, ngfft, 0)
          call fourdp(1,vxc_coreg,vxc_core,-1,mpi_enreg,nfft,1, ngfft,0)
@@ -588,13 +578,14 @@ subroutine dfpt_eltfrxc(atindx,dtset,eltfrxc,enxc,gsqcut,kxc,mpi_enreg,mgfft,&
          call atm2fft(atindx,dummy_out1,dummy_out2,dummy_out3,dummy_out4,eltfrxc_test2,dummy_in,gmet,gprimd,&
 &         dummy_out5,dummy_out6,gsqcut,mgfft,psps%mqgrid_vl,dtset%natom,nattyp,nfft,ngfft,dtset%ntypat,&
 &         optatm,optdyfr,opteltfr,optgr,optn,optn2,optstr,optv,psps,pawtab_test,ph1d,psps%qgrid_vl,dtset%qprtrb,&
-&         dummy_in,corstr,dummy6,ucvol,psps%usepaw,vxc_coreg,vxc10_coreg,vxc1is_coreg,dtset%vprtrb,psps%vlspl,is2_in=is2)
-         ABI_DEALLOCATE(vxc10_coreg)
-         ABI_DEALLOCATE(vxc_coreg)
-         ABI_DEALLOCATE(vxc1is_coreg)
+&         dtset%rcut,dummy_in,rprimd,corstr,dummy6,ucvol,psps%usepaw,&
+&         vxc_coreg,vxc10_coreg,vxc1is_coreg,dtset%vprtrb,psps%vlspl,is2_in=is2)
+         ABI_FREE(vxc10_coreg)
+         ABI_FREE(vxc_coreg)
+         ABI_FREE(vxc1is_coreg)
          call pawrad_free(core_mesh)
          call pawtab_free(pawtab_test)
-         ABI_DATATYPE_DEALLOCATE(pawtab_test)
+         ABI_FREE(pawtab_test)
          eltfrxc(:,:)= eltfrxc(:,:)+eltfrxc_test2(:,:)
 !        if (is2==1) print*,"cor-str from atm2fft",is2,corstr*ucvol
 !        if (is2==1) print*,"elt-frxc from atm2fft  ",is2,eltfrxc_test2(1,1)
@@ -624,28 +615,28 @@ subroutine dfpt_eltfrxc(atindx,dtset,eltfrxc,enxc,gsqcut,kxc,mpi_enreg,mgfft,&
    eltfrxc(:,:)=eltfrxc_tmp(:,:)+eltfrxc*ucvol/dble(nfft)
  end if
 
- ABI_DEALLOCATE(eltfrxc_tmp)
- ABI_DEALLOCATE(eltfrxc_tmp2)
- ABI_DEALLOCATE(vxc10)
- ABI_DEALLOCATE(xccc3d1)
+ ABI_FREE(eltfrxc_tmp)
+ ABI_FREE(eltfrxc_tmp2)
+ ABI_FREE(vxc10)
+ ABI_FREE(xccc3d1)
  if(psps%usepaw==0)then
-   ABI_DEALLOCATE(xccc1d)
-   ABI_DEALLOCATE(xcccrc)
+   ABI_FREE(xccc1d)
+   ABI_FREE(xcccrc)
  end if
  if (usexcnhat==0.and.dtset%usepaw==1) then
-   ABI_DEALLOCATE(rhor_)
+   ABI_FREE(rhor_)
  end if
 
  if(n1xccc/=0) then
-   ABI_DEALLOCATE(vxc_core)
-   ABI_DEALLOCATE(vxc10_core)
-   ABI_DEALLOCATE(vxc1is_core)
+   ABI_FREE(vxc_core)
+   ABI_FREE(vxc10_core)
+   ABI_FREE(vxc1is_core)
  end if
 
  if(fgga==1) then
-   ABI_DEALLOCATE(rho0_redgr)
-   ABI_DEALLOCATE(dgm)
-   ABI_DEALLOCATE(d2gm)
+   ABI_FREE(rho0_redgr)
+   ABI_FREE(dgm)
+   ABI_FREE(d2gm)
  end if
 
 end subroutine dfpt_eltfrxc
@@ -664,7 +655,7 @@ end subroutine dfpt_eltfrxc
 !! over the second strain and over all atomic displacements.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2019 ABINIT group (DRH, DCA, XG, GMR)
+!! Copyright (C) 1998-2024 ABINIT group (DRH, DCA, XG, GMR)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -701,20 +692,12 @@ end subroutine dfpt_eltfrxc
 !! NOTES
 !! Note that this routine is related to the mkcore.f routine
 !!
-!! PARENTS
-!!      dfpt_eltfrxc
-!!
-!! CHILDREN
-!!      free_my_atmtab,get_my_atmtab,timab,xmpi_sum
-!!
 !! SOURCE
 
 subroutine eltxccore(eltfrxc,is2_in,my_natom,natom,nfft,ntypat,&
 & n1,n1xccc,n2,n3,rprimd,typat,ucvol,vxc_core,vxc10_core,vxc1is_core,&
 & xcccrc,xccc1d,xred, &
 & mpi_atmtab,comm_atom) ! optional arguments (parallelism)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -724,10 +707,10 @@ subroutine eltxccore(eltfrxc,is2_in,my_natom,natom,nfft,ntypat,&
 !arrays
  integer,intent(in) :: typat(natom)
  integer,optional,target,intent(in) :: mpi_atmtab(:)
- real(dp),intent(in) :: rprimd(3,3),vxc10_core(nfft),vxc1is_core(nfft)
+ real(dp),intent(in) :: vxc10_core(nfft),vxc1is_core(nfft)
  real(dp),intent(in) :: vxc_core(nfft),xccc1d(n1xccc,6,ntypat)
  real(dp),intent(in) :: xcccrc(ntypat),xred(3,natom)
- real(dp),intent(inout) :: eltfrxc(6+3*natom,6)
+ real(dp),intent(inout) :: eltfrxc(6+3*natom,6),rprimd(3,3)
 
 !Local variables-------------------------------
 !scalars
@@ -778,7 +761,7 @@ subroutine eltxccore(eltfrxc,is2_in,my_natom,natom,nfft,ntypat,&
 !Compute 1st and 2nd derivatives of metric tensor wrt all strain components
 !and store for use in inner loop below.
 
- ABI_ALLOCATE(d2rm,(3,3,6,6))
+ ABI_MALLOC(d2rm,(3,3,6,6))
 
 !Loop over 2nd strain index
  do is2=1,6
@@ -843,7 +826,7 @@ subroutine eltxccore(eltfrxc,is2_in,my_natom,natom,nfft,ntypat,&
 !    allowed one
      if(2*irange(mu)+1 > mshift)then
        write(message, '(a,i0,a)' )' The range around atom',iatom,' is too large.'
-       MSG_BUG(message)
+       ABI_BUG(message)
      end if
 
 !    Set up a counter that explore the relevant range
@@ -998,7 +981,7 @@ subroutine eltxccore(eltfrxc,is2_in,my_natom,natom,nfft,ntypat,&
 !Destroy atom table used for parallelism
  call free_my_atmtab(my_atmtab,my_atmtab_allocated)
 
- ABI_DEALLOCATE(d2rm)
+ ABI_FREE(d2rm)
 
  contains
 
@@ -1027,7 +1010,7 @@ end subroutine eltxccore
 !!  gprimd(3,3)=dimensional primitive translations for reciprocal space (bohr**-1)
 !!  gsqcut=cutoff on G^2 based on ecut
 !!  mgfft=maximum size of 1D FFTs
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  mqgrid=dimensioned number of q grid points for local psp spline
 !!  natom=number of atoms in unit cell
 !!  nattyp(ntypat)=number of atoms of each type
@@ -1044,18 +1027,10 @@ end subroutine eltxccore
 !!  eltfrloc(6+3*natom,6)=non-symmetrized local pseudopotenial contribution
 !!   to the elastic tensor and internal strain.
 !!
-!! PARENTS
-!!      respfn
-!!
-!! CHILDREN
-!!      ptabs_fourdp,timab,xmpi_sum
-!!
 !! SOURCE
 
 subroutine dfpt_eltfrloc(atindx,eltfrloc,gmet,gprimd,gsqcut,mgfft,&
 &  mpi_enreg,mqgrid,natom,nattyp,nfft,ngfft,ntypat,ph1d,qgrid,rhog,vlspl)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1098,7 +1073,7 @@ subroutine dfpt_eltfrloc(atindx,eltfrloc,gmet,gprimd,gsqcut,mgfft,&
 !-----
 !Compute 1st and 2nd derivatives of metric tensor wrt all strain components
 !and store for use in inner loop below.
- ABI_ALLOCATE(d2gm,(3,3,6,6))
+ ABI_MALLOC(d2gm,(3,3,6,6))
 
 !Loop over 2nd strain index
  do is2=1,6
@@ -1252,7 +1227,7 @@ subroutine dfpt_eltfrloc(atindx,eltfrloc,gmet,gprimd,gsqcut,mgfft,&
 
 !The indexing array atindx is used to reestablish the correct
 !order of atoms
- ABI_ALLOCATE(elt_work,(6+3*natom,6))
+ ABI_MALLOC(elt_work,(6+3*natom,6))
  elt_work(1:6,1:6)=eltfrloc(1:6,1:6)
  do ia=1,natom
    ielt=7+3*(ia-1)
@@ -1261,8 +1236,8 @@ subroutine dfpt_eltfrloc(atindx,eltfrloc,gmet,gprimd,gsqcut,mgfft,&
  end do
  eltfrloc(:,:)=elt_work(:,:)
 
- ABI_DEALLOCATE(d2gm)
- ABI_DEALLOCATE(elt_work)
+ ABI_FREE(d2gm)
+ ABI_FREE(elt_work)
 
  contains
 
@@ -1362,7 +1337,7 @@ end subroutine dfpt_eltfrloc
 !! elastic tensor
 !!
 !! INPUTS
-!!  cg(2,mpw*nspinor*mband*mkmem*nsppol)=<G|Cnk>=Fourier coefficients of wavefunction
+!!  cg(2,mpw*nspinor*mband_mem*mkmem*nsppol)=<G|Cnk>=Fourier coefficients of wavefunction
 !!  ecut=cut-off energy for plane wave basis sphere (Ha)
 !!  ecutsm=smearing energy for plane wave kinetic energy (Ha) (NOT NEEDED !)
 !!  effmass_free=effective mass for electrons (1. in common case)
@@ -1371,6 +1346,7 @@ end subroutine dfpt_eltfrloc
 !!  kptns(3,nkpt)=coordinates of k points in terms of reciprocal space
 !!   primitive translations
 !!  mband=maximum number of bands
+!!  mband_mem=maximum number of bands in memory
 !!  mgfft=maximum size of 1D FFTs
 !!  mkmem=number of k points treated by this node.
 !!  mpi_enreg=information about MPI parallelization
@@ -1391,29 +1367,21 @@ end subroutine dfpt_eltfrloc
 !!  eltfrkin(6,6)=non-symmetrized kinetic energy contribution to the
 !!                    elastic tensor
 !!
-!! PARENTS
-!!      respfn
-!!
-!! CHILDREN
-!!      d2kindstr2,metric,sphereboundary,timab,xmpi_sum
-!!
 !! SOURCE
 
 subroutine dfpt_eltfrkin(cg,eltfrkin,ecut,ecutsm,effmass_free,&
-&  istwfk,kg,kptns,mband,mgfft,mkmem,mpi_enreg,&
+&  istwfk,kg,kptns,mband,mband_mem,mgfft,mkmem,mpi_enreg,&
 &  mpw,nband,nkpt,ngfft,npwarr,nspinor,nsppol,occ,rprimd,wtk)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: mband,mgfft,mkmem,mpw,nkpt,nspinor,nsppol
+ integer,intent(in) :: mband,mband_mem,mgfft,mkmem,mpw,nkpt,nspinor,nsppol
  real(dp),intent(in) :: ecut,ecutsm,effmass_free
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: istwfk(nkpt),kg(3,mpw*mkmem),nband(nkpt*nsppol)
  integer,intent(in) :: ngfft(18),npwarr(nkpt)
- real(dp),intent(in) :: cg(2,mpw*nspinor*mband*mkmem*nsppol),kptns(3,nkpt)
+ real(dp),intent(in) :: cg(2,mpw*nspinor*mband_mem*mkmem*nsppol),kptns(3,nkpt)
  real(dp),intent(in) :: occ(mband*nkpt*nsppol),rprimd(3,3),wtk(nkpt)
  real(dp),intent(out) :: eltfrkin(6,6)
 
@@ -1422,6 +1390,7 @@ subroutine dfpt_eltfrkin(cg,eltfrkin,ecut,ecutsm,effmass_free,&
  integer :: bdtot_index,iband,icg,ierr,ii,ikg
  integer :: ikpt,index,ipw,isppol,istwf_k,jj,master,me,n1,n2
  integer :: n3,nband_k,nkinout,npw_k,spaceComm
+ integer :: nband_me, iband_me
  real(dp) :: ucvol
 !arrays
  integer,allocatable :: gbound(:,:),kg_k(:,:)
@@ -1447,9 +1416,9 @@ subroutine dfpt_eltfrkin(cg,eltfrkin,ecut,ecutsm,effmass_free,&
  icg=0
 
  n1=ngfft(1) ; n2=ngfft(2) ; n3=ngfft(3)
- ABI_ALLOCATE(kg_k,(3,mpw))
- ABI_ALLOCATE(cwavef,(2,mpw*nspinor))
- ABI_ALLOCATE(eltfrkink,(6,6))
+ ABI_MALLOC(kg_k,(3,mpw))
+ ABI_MALLOC(cwavef,(2,mpw*nspinor))
+ ABI_MALLOC(eltfrkink,(6,6))
 
 !Define k-points distribution
 
@@ -1470,10 +1439,14 @@ subroutine dfpt_eltfrkin(cg,eltfrkin,ecut,ecutsm,effmass_free,&
        cycle
      end if
 
-     ABI_ALLOCATE(gbound,(2*mgfft+8,2))
+! find number of bands I will actually treat
+     nband_me = proc_distrb_nband(mpi_enreg%proc_distrb,ikpt,nband_k,isppol,me)
+
+     ABI_MALLOC(gbound,(2*mgfft+8,2))
      kpoint(:)=kptns(:,ikpt)
 
      kg_k(:,:) = 0
+
 
 !$OMP PARALLEL DO PRIVATE(ipw) SHARED(ikg,kg,kg_k,npw_k)
      do ipw=1,npw_k
@@ -1489,14 +1462,16 @@ subroutine dfpt_eltfrkin(cg,eltfrkin,ecut,ecutsm,effmass_free,&
      eltfrkink(:,:)=0.0_dp
 
      nkinout=6*6
-     ABI_ALLOCATE(ekinout,(nkinout))
+     ABI_MALLOC(ekinout,(nkinout))
      ekinout(:)=zero
 
+     iband_me = 0
      do iband=1,nband_k
 
        if(mpi_enreg%proc_distrb(ikpt,iband,isppol) /= me) cycle
+       iband_me = iband_me + 1
 
-       cwavef(:,1:npw_k*nspinor)=cg(:,1+(iband-1)*npw_k*nspinor+icg:iband*npw_k*nspinor+icg)
+       cwavef(:,1:npw_k*nspinor)=cg(:,1+(iband_me-1)*npw_k*nspinor+icg:iband_me*npw_k*nspinor+icg)
 
        call d2kindstr2(cwavef,ecut,ecutsm,effmass_free,ekinout,gmet,gprimd,&
 &       istwf_k,kg_k,kpoint,npw_k,nspinor)
@@ -1505,17 +1480,17 @@ subroutine dfpt_eltfrkin(cg,eltfrkin,ecut,ecutsm,effmass_free,&
 
      end do !iband
 
-     ABI_DEALLOCATE(ekinout)
+     ABI_FREE(ekinout)
 
      eltfrkin(:,:)=eltfrkin(:,:)+wtk(ikpt)*eltfrkink(:,:)
 
-     ABI_DEALLOCATE(gbound)
+     ABI_FREE(gbound)
 
      bdtot_index=bdtot_index+nband_k
 
      if (mkmem/=0) then
 !      Handle case in which kg, cg, are kept in core
-       icg=icg+npw_k*nspinor*nband_k
+       icg=icg+npw_k*nspinor*nband_me
        ikg=ikg+npw_k
      end if
 
@@ -1534,9 +1509,9 @@ subroutine dfpt_eltfrkin(cg,eltfrkin,ecut,ecutsm,effmass_free,&
  call xmpi_sum(eltfrkin,spaceComm,ierr)
  call timab(48,2,tsec)
 
- ABI_DEALLOCATE(cwavef)
- ABI_DEALLOCATE(eltfrkink)
- ABI_DEALLOCATE(kg_k)
+ ABI_FREE(cwavef)
+ ABI_FREE(eltfrkink)
+ ABI_FREE(kg_k)
 
  DBG_EXIT("COLL")
 
@@ -1579,17 +1554,10 @@ subroutine dfpt_eltfrkin(cg,eltfrkin,ecut,ecutsm,effmass_free,&
 !! cut-off energy). The smearing factor is $x^2 (3-2x)$, where
 !! x = (ecut- unmodified energy)/ecutsm.
 !!
-!! PARENTS
-!!      dfpt_eltfrkin
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine d2kindstr2(cwavef,ecut,ecutsm,effmass_free,ekinout,gmet,gprimd,&
 &            istwfk,kg_k,kpt,npw,nspinor)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1733,7 +1701,7 @@ end subroutine dfpt_eltfrkin
 !!  gsqcut =Fourier cutoff on G^2 for "large sphere" of radius double
 !!   that of the basis sphere--appropriate for charge density rho(G),
 !!   Hartree potential, and pseudopotentials
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  nfft =(effective) number of FFT grid points (for this processor)
 !!  ngfft(18)=contain all needed information about 3D FFT,
 !!    see ~abinit/doc/variables/vargs.htm#ngfft
@@ -1745,17 +1713,9 @@ end subroutine dfpt_eltfrkin
 !! NOTES
 !! *based largely on hartre.f
 !!
-!! PARENTS
-!!      respfn
-!!
-!! CHILDREN
-!!      metric,ptabs_fourdp,timab,xmpi_sum
-!!
 !! SOURCE
 
 subroutine dfpt_eltfrhar(eltfrhar,rprimd,gsqcut,mpi_enreg,nfft,ngfft,rhog)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1804,7 +1764,7 @@ subroutine dfpt_eltfrhar(eltfrhar,rprimd,gsqcut,mpi_enreg,nfft,ngfft,rhog)
 
 !In order to speed the routine, precompute the components of g+q
 !Also check if the booked space was large enough...
- ABI_ALLOCATE(gq,(3,max(n1,n2,n3)))
+ ABI_MALLOC(gq,(3,max(n1,n2,n3)))
  do ii=1,3
    id(ii)=ngfft(ii)/2+2
    do ing=1,ngfft(ii)
@@ -1914,7 +1874,7 @@ subroutine dfpt_eltfrhar(eltfrhar,rprimd,gsqcut,mpi_enreg,nfft,ngfft,rhog)
 !  End loop in istr2
  end do
 
- ABI_DEALLOCATE(gq)
+ ABI_FREE(gq)
 
 !Init mpi_comm
  call timab(48,1,tsec)
@@ -1957,19 +1917,11 @@ end subroutine dfpt_eltfrhar
 !! OUTPUT
 !! elteew(6+3*natom,6)=2nd derivatives of Ewald energy wrt strain
 !!
-!! PARENTS
-!!      respfn
-!!
-!! CHILDREN
-!!      free_my_atmtab,get_my_atmtab,timab,wrtout,xmpi_sum
-!!
 !! SOURCE
 
 subroutine elt_ewald(elteew,gmet,gprimd,my_natom,natom,ntypat,rmet,rprimd,&
 &                 typat,ucvol,xred,zion, &
 &                 mpi_atmtab,comm_atom) ! optional arguments (parallelism)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2069,13 +2021,14 @@ subroutine elt_ewald(elteew,gmet,gprimd,my_natom,natom,ntypat,rmet,rprimd,&
 !Here, a bias is introduced, because G-space summation scales
 !better than r space summation ! Note : debugging is the most
 !easier at fixed eta.
- eta=pi*200._dp/33.0_dp*sqrt(1.69_dp*recip/direct)
+! eta=pi*200._dp/33.0_dp*sqrt(1.69_dp*recip/direct)
+eta=1.0_dp
 
 !Conduct reciprocal space summations
  fac=pi**2/eta ; gsum=zero
- ABI_ALLOCATE(d2sumg,(6+3*natom,6))
- ABI_ALLOCATE(drhoisr,(3,natom))
- ABI_ALLOCATE(drhoisi,(3,natom))
+ ABI_MALLOC(d2sumg,(6+3*natom,6))
+ ABI_MALLOC(drhoisr,(3,natom))
+ ABI_MALLOC(drhoisi,(3,natom))
  d2sumg(:,:)=zero
 
 !Sum over G space, done shell after shell until all
@@ -2189,15 +2142,15 @@ subroutine elt_ewald(elteew,gmet,gprimd,my_natom,natom,ntypat,rmet,rprimd,&
  sumg=gsum/(two_pi*ucvol)
  d2sumg(:,:)=d2sumg(:,:)/(two_pi*ucvol)
 
- ABI_DEALLOCATE(drhoisr)
- ABI_DEALLOCATE(drhoisi)
+ ABI_FREE(drhoisr)
+ ABI_FREE(drhoisi)
 !Stress tensor is now computed elsewhere (ewald2) hence do not need
 !length scale gradients (used to compute them here).
 
 !Conduct real space summations
  reta=sqrt(eta)
  fac=2._dp*sqrt(eta/pi)
- ABI_ALLOCATE(d2sumr,(6+3*natom,6))
+ ABI_MALLOC(d2sumr,(6+3*natom,6))
  sumr=zero;d2sumr(:,:)=zero
 
 !In the following a summation is being conducted over all
@@ -2304,13 +2257,13 @@ subroutine elt_ewald(elteew,gmet,gprimd,my_natom,natom,ntypat,rmet,rprimd,&
 !In case of parallelism over atoms: communicate
  if (paral_atom) then
    call timab(48,1,tsec)
-   ABI_ALLOCATE(mpibuf,((6+3*natom)*6+1))
+   ABI_MALLOC(mpibuf,((6+3*natom)*6+1))
    mpibuf(1:(6+3*natom)*6)=reshape(d2sumr(:,:),shape=(/((6+3*natom)*6)/))
    mpibuf((6+3*natom)*6+1)=sumr
    call xmpi_sum(mpibuf,my_comm_atom,ierr)
    sumr=mpibuf((6+3*natom)*6+1)
    d2sumr(:,:)=reshape(mpibuf(1:(6+3*natom)*6),shape=(/(6+3*natom),6/))
-   ABI_DEALLOCATE(mpibuf)
+   ABI_FREE(mpibuf)
    call timab(48,2,tsec)
  end if
 
@@ -2333,8 +2286,8 @@ subroutine elt_ewald(elteew,gmet,gprimd,my_natom,natom,ntypat,rmet,rprimd,&
    end do
  end do
 
- ABI_DEALLOCATE(d2sumg)
- ABI_DEALLOCATE(d2sumr)
+ ABI_FREE(d2sumg)
+ ABI_FREE(d2sumr)
 
 !Output the final values of ng and nr
  write(message, '(a,i4,a,i4)' )' elt_ewald : nr and ng are ',nr,' and ',ng
@@ -2379,18 +2332,10 @@ end subroutine elt_ewald
 !! dyew(2,3,natom,3,natom)= Ewald part of the dynamical matrix,
 !!    second energy derivative wrt xred(3,natom), Hartrees.
 !!
-!! PARENTS
-!!      respfn
-!!
-!! CHILDREN
-!!      free_my_atmtab,get_my_atmtab,timab,xmpi_sum
-!!
 !! SOURCE
 
 subroutine dfpt_ewald(dyew,gmet,my_natom,natom,qphon,rmet,sumg0,typat,ucvol,xred,zion, &
 &                 mpi_atmtab,comm_atom ) ! optional arguments (parallelism))
-
- implicit none
 
 !Arguments -------------------------------
 !scalars
@@ -2466,7 +2411,7 @@ subroutine dfpt_ewald(dyew,gmet,my_natom,natom,qphon,rmet,sumg0,typat,ucvol,xred
 &           'The phonon wavelength should not be zero : ',ch10,&
 &           'there are non-analytical terms that the code cannot handle.',ch10,&
 &           'Action : subtract this wavelength from the input.'
-           MSG_ERROR(message)
+           ABI_ERROR(message)
          end if
        else
          arg=fac*gsq
@@ -2512,7 +2457,6 @@ subroutine dfpt_ewald(dyew,gmet,my_natom,natom,qphon,rmet,sumg0,typat,ucvol,xred
      end do
    end do
  end do
-
 
 !Do sums over real space:
  reta=sqrt(eta)
@@ -2570,7 +2514,7 @@ subroutine dfpt_ewald(dyew,gmet,my_natom,natom,qphon,rmet,sumg0,typat,ucvol,xred
 &               'The distance between two atoms vanishes.',ch10,&
 &               'This is not allowed.',ch10,&
 &               'Action: check the input for the atoms number',ia,' and',ib,'.'
-               MSG_ERROR(message)
+               ABI_ERROR(message)
              else
                do mu=1,3
                  do nu=1,mu
@@ -2640,6 +2584,728 @@ subroutine dfpt_ewald(dyew,gmet,my_natom,natom,qphon,rmet,sumg0,typat,ucvol,xred
  call free_my_atmtab(my_atmtab,my_atmtab_allocated)
 
 end subroutine dfpt_ewald
+!!***
+
+!!****f* ABINIT/dfpt_ewalddq
+!!
+!! NAME
+!! dfpt_ewalddq
+!!
+!! FUNCTION
+!! Compute the first q-gradient of Ewald contribution to the dynamical matrix, at a given q wavevector.
+!! If q=0 is asked, sumg0 should be put to 0. Otherwise, it should be put to 1.
+!!
+!! COPYRIGHT
+!! Copyright (C) 1998-2024 ABINIT group (MR, MS)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! INPUTS
+!! gmet(3,3)=metric tensor in reciprocal space (length units **-2)
+!! mpi_atmtab(:)=--optional-- indexes of the atoms treated by current proc
+!! comm_atom=--optional-- MPI communicator over atoms
+!! my_natom=number of atoms treated by current processor
+!! natom=number of atoms in unit cell
+!! qphon(3)=phonon wavevector (same system of coordinates as the
+!!          reciprocal lattice vectors)
+!! rmet(3,3)=metric tensor in real space (length units squared)
+!! sumg0: if=1, the sum in reciprocal space must include g=0,
+!!   if=0, this contribution must be skipped (q=0 singularity)
+!! typat(natom)=integer label of each type of atom (1,2,...)
+!! ucvol=unit cell volume in (whatever length scale units)**3
+!! xred(3,natom)=relative coords of atoms in unit cell (dimensionless)
+!! zion(ntypat)=charge on each type of atom (real number)
+!!
+!! OUTPUT
+!! dyewdq(2,3,natom,3,natom,3)= First q-gradient of Ewald part of the dynamical matrix,
+!!    second energy derivative wrt xred(3,natom), Hartrees.
+!!
+!! SOURCE
+
+subroutine dfpt_ewalddq(dyewdq,gmet,my_natom,natom,qphon,rmet,sumg0,typat,ucvol,xred,zion, &
+&                 mpi_atmtab,comm_atom ) ! optional arguments (parallelism))
+
+!Arguments -------------------------------
+!scalars
+ integer,intent(in) :: my_natom,natom,sumg0
+ real(dp),intent(in) :: ucvol
+!arrays
+ integer,intent(in) :: typat(natom)
+ integer,optional,intent(in) :: comm_atom
+ integer,optional,target,intent(in) :: mpi_atmtab(:)
+ real(dp),intent(in) :: gmet(3,3),qphon(3),rmet(3,3),xred(3,natom),zion(*)
+ real(dp),intent(out) :: dyewdq(2,3,natom,3,natom,3)
+
+!Local variables -------------------------
+!nr, ng affect convergence of sums (nr=3,ng=5 is not good enough):
+!scalars
+ integer,parameter :: im=2,nng=10,nnr=6,re=1
+ integer ::ia,ia0,ib,ierr,ig1,ig2,ig3,ii,iq,ir1,ir2,ir3,mu,my_comm_atom,newg,newr,ng,nr,nu
+ logical :: my_atmtab_allocated,paral_atom
+ real(dp) :: arg,arga,argb,c1i,c1r,delag,delbg,derfc_arg
+ real(dp) :: direct,dot1,dot2,dot3,dotr1,dotr2,dotr3
+ real(dp) :: eta,fac,fac2,gdot12,gdot13,gdot23,gsq,gpqdq,gterms,norm1
+ real(dp) :: r1,r2,r3,rdot12,rdot13,rdot23,recip,reta
+ real(dp) :: reta3m,rmagn,rsq,term,term1,term2,term3
+ character(len=500) :: message
+!arrays
+ real(dp) :: tsec(2)
+ integer,pointer :: my_atmtab(:)
+ real(dp) :: dakk(3),gpq(3),rq(3)
+
+! *************************************************************************
+
+!Set up parallelism over atoms
+ paral_atom=(present(comm_atom).and.(my_natom/=natom))
+ nullify(my_atmtab);if (present(mpi_atmtab)) my_atmtab => mpi_atmtab
+ my_comm_atom=xmpi_comm_self;if (present(comm_atom)) my_comm_atom=comm_atom
+ call get_my_atmtab(my_comm_atom,my_atmtab,my_atmtab_allocated,paral_atom,natom,my_natom_ref=my_natom)
+
+!Compute eta for approximately optimized summations:
+ direct=rmet(1,1)+rmet(1,2)+rmet(1,3)+rmet(2,1)+&
+& rmet(2,2)+rmet(2,3)+rmet(3,1)+rmet(3,2)+rmet(3,3)
+ recip=gmet(1,1)+gmet(1,2)+gmet(1,3)+gmet(2,1)+&
+& gmet(2,2)+gmet(2,3)+gmet(3,1)+gmet(3,2)+gmet(3,3)
+ eta=pi*(dble(nng)/dble(nnr))*sqrt(1.69_dp*recip/direct)
+
+!Test Ewald s summation
+!eta=1.2_dp*eta
+
+!Sum over G space, done shell after shell until all
+!contributions are too small.
+ fac=pi**2.d0/eta
+ fac2=2.d0*fac
+ dyewdq(:,:,:,:,:,:)=zero
+ ng=0
+ do
+   ng=ng+1
+   newg=0
+
+   do ig3=-ng,ng
+     do ig2=-ng,ng
+       do ig1=-ng,ng
+
+!        Exclude shells previously summed over
+         if(abs(ig1)==ng .or. abs(ig2)==ng .or. abs(ig3)==ng&
+&         .or. ng==1 ) then
+
+           gpq(1)=dble(ig1)+qphon(1)
+           gpq(2)=dble(ig2)+qphon(2)
+           gpq(3)=dble(ig3)+qphon(3)
+           gdot12=gmet(2,1)*gpq(1)*gpq(2)
+           gdot13=gmet(3,1)*gpq(1)*gpq(3)
+           gdot23=gmet(3,2)*gpq(2)*gpq(3)
+           dot1=gmet(1,1)*gpq(1)**2+gdot12+gdot13
+           dot2=gmet(2,2)*gpq(2)**2+gdot12+gdot23
+           dot3=gmet(3,3)*gpq(3)**2+gdot13+gdot23
+           gsq=dot1+dot2+dot3
+  !        Skip q=0:
+           if (gsq<1.0d-20) then
+             if (sumg0==1) then
+               write(message,'(3a)')&
+  &             'The G=0 term has no contributions at first order in q: ',ch10,&
+  &             'Action : sumg0=0 '
+               ABI_ERROR(message)
+             end if
+           else
+             arg=fac*gsq
+  !          Larger arg gives 0 contribution:
+             if (arg <= 80._dp) then
+!              When any term contributes then include next shell
+               newg=1
+               term=exp(-arg)/gsq
+               do ia0=1,my_natom
+                 ia=ia0;if(paral_atom)ia=my_atmtab(ia0)
+                 arga=two_pi*(gpq(1)*xred(1,ia)+gpq(2)*xred(2,ia)+gpq(3)*xred(3,ia))
+                 do ib=1,ia
+                   argb=two_pi*(gpq(1)*xred(1,ib)+gpq(2)*xred(2,ib)+gpq(3)*xred(3,ib))
+                   arg=arga-argb
+                   c1r=cos(arg)*term
+                   c1i=sin(arg)*term
+
+                   do iq=1,3
+                     gpqdq=gmet(iq,1)*gpq(1)+gmet(iq,2)*gpq(2)+gmet(iq,3)*gpq(3)
+                     do mu=1,3
+                       delag=zero; if(iq==mu) delag=one
+                       do nu=1,mu
+                         delbg=zero; if(iq==nu) delbg=one
+                         term1=delag*gpq(nu)+delbg*gpq(mu)
+                         term2=gpq(mu)*gpq(nu)*gpqdq
+                         term3=fac2*term2
+                         term2=two*term2/gsq
+                         gterms=term1-term2-term3
+                         dyewdq(re,mu,ia,nu,ib,iq)=dyewdq(re,mu,ia,nu,ib,iq)+gterms*c1r
+                         dyewdq(im,mu,ia,nu,ib,iq)=dyewdq(im,mu,ia,nu,ib,iq)+gterms*c1i
+                       end do
+                     end do
+                   end do
+
+                 end do
+               end do
+             end if
+  !          Endif g/=0 :
+           end if
+         end if
+  !        End triple loop over G s:
+       end do
+     end do
+   end do
+
+!  Check if new shell must be calculated
+   if (newg==0) exit
+ end do !  End the loop on ng (new shells). Note that there is one exit from this loop.
+
+!End G summation by accounting for some common factors.
+!(for the charges:see end of routine)
+ norm1=4.0_dp*pi/ucvol
+ do ia0=1,my_natom
+   ia=ia0;if(paral_atom)ia=my_atmtab(ia0)
+   do ib=1,ia
+     do iq=1,3
+       do mu=1,3
+         do nu=1,mu
+           dyewdq(:,mu,ia,nu,ib,iq)=dyewdq(:,mu,ia,nu,ib,iq)*norm1
+         end do
+       end do
+     end do
+   end do
+ end do
+
+!Do sums over real space:
+ reta=sqrt(eta)
+ reta3m=-eta*reta
+ fac=4._dp/3.0_dp/sqrt(pi)
+ nr=0
+ do
+   nr=nr+1
+   newr=0
+
+   do ir3=-nr,nr
+     do ir2=-nr,nr
+       do ir1=-nr,nr
+         if( abs(ir3)==nr .or. abs(ir2)==nr .or. abs(ir1)==nr .or. nr==1 )then
+
+           arg=two_pi*(qphon(1)*ir1+qphon(2)*ir2+qphon(3)*ir3)
+           c1r=cos(arg)*reta3m
+           c1i=sin(arg)*reta3m
+           do ia0=1,my_natom
+             ia=ia0;if(paral_atom)ia=my_atmtab(ia0)
+             do ib=1,ia
+               r1=dble(ir1)+xred(1,ib)-xred(1,ia)
+               r2=dble(ir2)+xred(2,ib)-xred(2,ia)
+               r3=dble(ir3)+xred(3,ib)-xred(3,ia)
+               dakk(:)=two_pi*(/r1,r2,r3/)
+               rdot12=rmet(2,1)*r1*r2
+               rdot13=rmet(3,1)*r1*r3
+               rdot23=rmet(3,2)*r2*r3
+               dotr1=rmet(1,1)*r1**2+rdot12+rdot13
+               dotr2=rmet(2,2)*r2**2+rdot12+rdot23
+               dotr3=rmet(3,3)*r3**2+rdot13+rdot23
+               rsq=dotr1+dotr2+dotr3
+               rmagn=sqrt(rsq)
+!              Avoid zero denominators in term :
+               if (rmagn>=1.0d-12) then
+                 arg=reta*rmagn
+                 term=zero
+                 if (arg<8.0_dp) then
+!                  Note: erfc(8) is about 1.1e-29,
+!                  so don t bother with larger arg.
+!                  Also: exp(-64) is about 1.6e-28,
+!                  so don t bother with larger arg**2 in exp.
+                   newr=1
+                   derfc_arg = abi_derfc(arg)
+                   term=derfc_arg/arg**3
+                   term1=2.0_dp/sqrt(pi)*exp(-arg**2)/arg**2
+                   term2=-(term+term1)
+                   term3=(3*term+term1*(3.0_dp+2.0_dp*arg**2))/rsq
+                   rq(1)=rmet(1,1)*r1+rmet(1,2)*r2+rmet(1,3)*r3
+                   rq(2)=rmet(2,1)*r1+rmet(2,2)*r2+rmet(2,3)*r3
+                   rq(3)=rmet(3,1)*r1+rmet(3,2)*r2+rmet(3,3)*r3
+                   do iq=1,3
+                     do mu=1,3
+!                       do nu=1,3
+                       do nu=1,mu
+                         dyewdq(re,mu,ia,nu,ib,iq)=dyewdq(re,mu,ia,nu,ib,iq)-&
+&                         c1i*dakk(iq)*(rq(mu)*rq(nu)*term3+rmet(mu,nu)*term2)
+                         dyewdq(im,mu,ia,nu,ib,iq)=dyewdq(im,mu,ia,nu,ib,iq)+&
+&                         c1r*dakk(iq)*(rq(mu)*rq(nu)*term3+rmet(mu,nu)*term2)
+                       end do
+                     end do
+                   end do
+                 end if
+               else
+                 if (ia/=ib)then
+                   write(message,'(a,a,a,a,a,i5,a,i5,a)')&
+&                   'The distance between two atoms vanishes.',ch10,&
+&                   'This is not allowed.',ch10,&
+&                   'Action: check the input for the atoms number',ia,' and',ib,'.'
+                   ABI_ERROR(message)
+                 end if
+               end if
+
+             end do ! End loop over ib:
+           end do ! End loop over ia:
+         end if
+       end do ! End triple loop over real space points:
+     end do
+   end do
+
+!  Check if new shell must be calculated
+   if(newr==0) exit
+ end do !  End loop on nr (new shells). Note that there is an exit within the loop
+
+!Take account of the charges
+!write(std_out,*)' '
+ do ia0=1,my_natom
+   ia=ia0;if(paral_atom)ia=my_atmtab(ia0)
+   do ib=1,ia
+     do iq=1,3
+       do mu=1,3
+         do nu=1,mu
+           do ii=1,2
+             dyewdq(ii,mu,ia,nu,ib,iq)=dyewdq(ii,mu,ia,nu,ib,iq)*&
+&             zion(typat(ia))*zion(typat(ib))
+           end do
+         end do
+       end do
+     end do
+   end do
+ end do
+
+!Symmetrize with respect to the directions
+ do ia0=1,my_natom
+   ia=ia0;if(paral_atom)ia=my_atmtab(ia0)
+   do ib=1,ia
+     do iq=1,3
+       do mu=1,3
+         do nu=1,mu
+           dyewdq(re,nu,ia,mu,ib,iq)=dyewdq(re,mu,ia,nu,ib,iq)
+           dyewdq(im,nu,ia,mu,ib,iq)=dyewdq(im,mu,ia,nu,ib,iq)
+         end do
+       end do
+     end do
+   end do
+ end do
+
+!In case of parallelism over atoms: communicate
+ if (paral_atom) then
+   call timab(48,1,tsec)
+   call xmpi_sum(dyewdq,my_comm_atom,ierr)
+   call timab(48,2,tsec)
+ end if
+
+!Fill the upper part of the matrix, with the hermitian conjugate
+ do ia=1,natom
+   do ib=1,ia
+     do iq=1,3
+       do nu=1,3
+         do mu=1,3
+           dyewdq(re,mu,ib,nu,ia,iq)=dyewdq(re,mu,ia,nu,ib,iq)
+           dyewdq(im,mu,ib,nu,ia,iq)=-dyewdq(im,mu,ia,nu,ib,iq)
+         end do
+       end do
+     end do
+   end do
+ end do
+
+!Destroy atom table used for parallelism
+ call free_my_atmtab(my_atmtab,my_atmtab_allocated)
+
+end subroutine dfpt_ewalddq
+!!***
+
+!!****f* ABINIT/dfpt_ewalddqdq
+!!
+!! NAME
+!! dfpt_ewalddqdq
+!!
+!! FUNCTION
+!! Compute the second q-gradient of Ewald contribution to the dynamical matrix, at a given q wavevector,
+!! sumed over the second atomic sublattice.
+!! If q=0 is asked, sumg0 should be put to 0. Otherwise, it should be put to 1.
+!!
+!! COPYRIGHT
+!! Copyright (C) 1998-2024 ABINIT group (MR, MS)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! INPUTS
+!! gmet(3,3)=metric tensor in reciprocal space (length units **-2)
+!! mpi_atmtab(:)=--optional-- indexes of the atoms treated by current proc
+!! comm_atom=--optional-- MPI communicator over atoms
+!! my_natom=number of atoms treated by current processor
+!! natom=number of atoms in unit cell
+!! qphon(3)=phonon wavevector (same system of coordinates as the
+!!          reciprocal lattice vectors)
+!! rmet(3,3)=metric tensor in real space (length units squared)
+!! sumg0: if=1, the sum in reciprocal space must include g=0,
+!!   if=0, this contribution must be skipped (q=0 singularity)
+!! typat(natom)=integer label of each type of atom (1,2,...)
+!! ucvol=unit cell volume in (whatever length scale units)**3
+!! xred(3,natom)=relative coords of atoms in unit cell (dimensionless)
+!! zion(ntypat)=charge on each type of atom (real number)
+!!
+!! OUTPUT
+!! dyewdqdq(2,3,natom,3,3,3)= First q-gradient of Ewald part of the dynamical matrix,
+!!    sumed over second atomic sublattice.
+!!
+!! SOURCE
+
+subroutine dfpt_ewalddqdq(dyewdqdq,gmet,my_natom,natom,qphon,rmet,sumg0,typat,ucvol,xred,zion, &
+&                 mpi_atmtab,comm_atom ) ! optional arguments (parallelism))
+
+!Arguments -------------------------------
+!scalars
+ integer,intent(in) :: my_natom,natom,sumg0
+ real(dp),intent(in) :: ucvol
+!arrays
+ integer,intent(in) :: typat(natom)
+ integer,optional,intent(in) :: comm_atom
+ integer,optional,target,intent(in) :: mpi_atmtab(:)
+ real(dp),intent(in) :: gmet(3,3),qphon(3),rmet(3,3),xred(3,natom),zion(*)
+ real(dp),intent(out) :: dyewdqdq(2,3,natom,3,3,3)
+
+!Local variables -------------------------
+!nr, ng affect convergence of sums (nr=3,ng=5 is not good enough):
+!scalars
+ integer,parameter :: im=2,nng=10,nnr=6,re=1
+ integer :: ia,ia0,ib,ierr,ig1,ig2,ig3,ii,iq1,iq2,ir1,ir2,ir3,mu,my_comm_atom,newg,newr,ng,nr,nu
+ logical :: my_atmtab_allocated,paral_atom
+ real(dp) :: arg,arga,argb,c1i,c1r,delad,delag,delbd,delbg,derfc_arg
+ real(dp) :: direct,dot1,dot2,dot3,dotr1,dotr2,dotr3
+ real(dp) :: eta,fac,fac2,fac8,fac2sqr,gdot12,gdot13,gdot23,gsq,gsqsq,gpqdq1,gpqdq2,gterms,g0term,norm1
+ real(dp) :: r1,r2,r3,rdot12,rdot13,rdot23,recip,reta
+ real(dp) :: reta3m,rmagn,rsq,term,term1,term2,term3
+ character(len=500) :: message
+!arrays
+ integer,pointer :: my_atmtab(:)
+ real(dp) :: dakk(3),gpq(3),rq(3)
+ real(dp) :: tsec(2)
+ real(dp),allocatable :: work(:,:,:,:,:,:,:)
+
+! *************************************************************************
+
+!Set up parallelism over atoms
+ paral_atom=(present(comm_atom).and.(my_natom/=natom))
+ nullify(my_atmtab);if (present(mpi_atmtab)) my_atmtab => mpi_atmtab
+ my_comm_atom=xmpi_comm_self;if (present(comm_atom)) my_comm_atom=comm_atom
+ call get_my_atmtab(my_comm_atom,my_atmtab,my_atmtab_allocated,paral_atom,natom,my_natom_ref=my_natom)
+
+!Compute eta for approximately optimized summations:
+ direct=rmet(1,1)+rmet(1,2)+rmet(1,3)+rmet(2,1)+&
+& rmet(2,2)+rmet(2,3)+rmet(3,1)+rmet(3,2)+rmet(3,3)
+ recip=gmet(1,1)+gmet(1,2)+gmet(1,3)+gmet(2,1)+&
+& gmet(2,2)+gmet(2,3)+gmet(3,1)+gmet(3,2)+gmet(3,3)
+ eta=pi*(dble(nng)/dble(nnr))*sqrt(1.69_dp*recip/direct)
+! eta=1.0_dp
+
+!Test Ewald s summation
+!eta=1.2_dp*eta
+
+!Sum terms over g space:
+ fac=pi**2.0_dp/eta
+ fac2=2.0_dp*fac
+ fac8=4.0_dp*fac2
+ fac2sqr=fac2*fac2
+ ABI_MALLOC(work,(2,3,natom,3,natom,3,3))
+ work(:,:,:,:,:,:,:)=zero
+ ng=0
+ do
+   ng=ng+1
+   newg=0
+
+   do ig3=-ng,ng
+     do ig2=-ng,ng
+       do ig1=-ng,ng
+
+!        Exclude shells previously summed over
+         if(abs(ig1)==ng .or. abs(ig2)==ng .or. abs(ig3)==ng&
+&         .or. ng==1 ) then
+
+           gpq(1)=dble(ig1)+qphon(1)
+           gpq(2)=dble(ig2)+qphon(2)
+           gpq(3)=dble(ig3)+qphon(3)
+           gdot12=gmet(2,1)*gpq(1)*gpq(2)
+           gdot13=gmet(3,1)*gpq(1)*gpq(3)
+           gdot23=gmet(3,2)*gpq(2)*gpq(3)
+           dot1=gmet(1,1)*gpq(1)**2+gdot12+gdot13
+           dot2=gmet(2,2)*gpq(2)**2+gdot12+gdot23
+           dot3=gmet(3,3)*gpq(3)**2+gdot13+gdot23
+           gsq=dot1+dot2+dot3
+           gsqsq=gsq*gsq
+!          Skip q=0:
+           if (gsq<1.0d-20) then
+
+!            At second order in q there is a nonvanishing G=0 contribution in the longwave limit
+             if (sumg0==1) then
+               do ia0=1,my_natom
+                 ia=ia0;if(paral_atom)ia=my_atmtab(ia0)
+                 do ib=1,ia
+                   do iq2=1,3
+                     do iq1=1,3
+                       do mu=1,3
+                         delag=zero; if(iq1==mu) delag=one
+                         delad=zero; if(iq2==mu) delad=one
+                         do nu=1,mu
+                           delbg=zero; if(iq1==nu) delbg=one
+                           delbd=zero; if(iq2==nu) delbd=one
+                           g0term=-fac*(delad*delbg+delbd*delag)
+                           work(re,mu,ia,nu,ib,iq1,iq2)=work(re,mu,ia,nu,ib,iq1,iq2)+g0term
+                         end do
+                       end do
+                     end do
+                   end do
+                 end do
+               end do
+             end if
+
+           else
+             arg=fac*gsq
+!            Larger arg gives 0 contribution:
+             if (arg <= 80._dp) then
+               newg=1
+               term=exp(-arg)/gsq
+               do ia0=1,my_natom
+                 ia=ia0;if(paral_atom)ia=my_atmtab(ia0)
+                 arga=two_pi*(gpq(1)*xred(1,ia)+gpq(2)*xred(2,ia)+gpq(3)*xred(3,ia))
+                 do ib=1,ia
+                   argb=two_pi*(gpq(1)*xred(1,ib)+gpq(2)*xred(2,ib)+gpq(3)*xred(3,ib))
+                   arg=arga-argb
+                   c1r=cos(arg)*term
+                   c1i=sin(arg)*term
+
+                   do iq2=1,3
+                     gpqdq2=gmet(iq2,1)*gpq(1)+gmet(iq2,2)*gpq(2)+gmet(iq2,3)*gpq(3)
+                     do iq1=1,3
+                       gpqdq1=gmet(iq1,1)*gpq(1)+gmet(iq1,2)*gpq(2)+gmet(iq1,3)*gpq(3)
+                       do mu=1,3
+                         delag=zero; if(iq1==mu) delag=one
+                         delad=zero; if(iq2==mu) delad=one
+                         do nu=1,mu
+                           delbg=zero; if(iq1==nu) delbg=one
+                           delbd=zero; if(iq2==nu) delbd=one
+
+                           term1=gpqdq2*(delag*gpq(nu)+delbg*gpq(mu))
+                           term1=term1+gpqdq1*(delad*gpq(nu)+delbd*gpq(mu))
+                           term1=term1+gpq(mu)*gpq(nu)*gmet(iq1,iq2)
+                           term1=-term1*(fac2+2.0_dp/gsq)
+
+                           term2=delag*delbd + delbg*delad
+
+                           term3=gpqdq1*gpqdq2*gpq(mu)*gpq(nu)
+                           term3=term3*(fac8/gsq + fac2sqr + 8.0_dp/gsqsq)
+
+                           gterms=term1+term2+term3
+                           work(re,mu,ia,nu,ib,iq1,iq2)=work(re,mu,ia,nu,ib,iq1,iq2)+gterms*c1r
+                           work(im,mu,ia,nu,ib,iq1,iq2)=work(im,mu,ia,nu,ib,iq1,iq2)+gterms*c1i
+                         end do
+                       end do
+                     end do
+                   end do
+                 end do
+               end do
+             end if
+!            Endif g/=0 :
+           end if
+         end if
+!        End triple loop over G s:
+       end do
+     end do
+   end do
+
+!  Check if new shell must be calculated
+   if (newg==0) exit
+ end do !  End the loop on ng (new shells). Note that there is one exit from this loop.
+
+!End G summation by accounting for some common factors.
+!(for the charges:see end of routine)
+ norm1=4.0_dp*pi/ucvol
+ do ia0=1,my_natom
+   ia=ia0;if(paral_atom)ia=my_atmtab(ia0)
+   do ib=1,ia
+     do iq2=1,3
+       do iq1=1,3
+         do mu=1,3
+           do nu=1,mu
+             work(:,mu,ia,nu,ib,iq1,iq2)=work(:,mu,ia,nu,ib,iq1,iq2)*norm1
+           end do
+         end do
+       end do
+     end do
+   end do
+ end do
+
+!Do sums over real space:
+ reta=sqrt(eta)
+ reta3m=eta*reta
+ fac=4._dp/3.0_dp/sqrt(pi)
+ nr=0
+ do
+   nr=nr+1
+   newr=0
+
+   do ir3=-nr,nr
+     do ir2=-nr,nr
+       do ir1=-nr,nr
+         if( abs(ir3)==nr .or. abs(ir2)==nr .or. abs(ir1)==nr .or. nr==1 )then
+
+           arg=two_pi*(qphon(1)*ir1+qphon(2)*ir2+qphon(3)*ir3)
+           c1r=cos(arg)*reta3m
+           c1i=sin(arg)*reta3m
+           do ia0=1,my_natom
+             ia=ia0;if(paral_atom)ia=my_atmtab(ia0)
+             do ib=1,ia
+               r1=dble(ir1)+xred(1,ib)-xred(1,ia)
+               r2=dble(ir2)+xred(2,ib)-xred(2,ia)
+               r3=dble(ir3)+xred(3,ib)-xred(3,ia)
+               dakk(:)=two_pi*(/r1,r2,r3/)
+               rdot12=rmet(2,1)*r1*r2
+               rdot13=rmet(3,1)*r1*r3
+               rdot23=rmet(3,2)*r2*r3
+               dotr1=rmet(1,1)*r1**2+rdot12+rdot13
+               dotr2=rmet(2,2)*r2**2+rdot12+rdot23
+               dotr3=rmet(3,3)*r3**2+rdot13+rdot23
+               rsq=dotr1+dotr2+dotr3
+               rmagn=sqrt(rsq)
+!              Avoid zero denominators in term :
+               if (rmagn>=1.0d-12) then
+                 arg=reta*rmagn
+                 term=zero
+                 if (arg<8.0_dp) then
+!                  Note: erfc(8) is about 1.1e-29,
+!                  so don t bother with larger arg.
+!                  Also: exp(-64) is about 1.6e-28,
+!                  so don t bother with larger arg**2 in exp.
+                   newr=1
+                   derfc_arg = abi_derfc(arg)
+                   term=derfc_arg/arg**3
+                   term1=2.0_dp/sqrt(pi)*exp(-arg**2)/arg**2
+                   term2=-(term+term1)
+                   term3=(3*term+term1*(3.0_dp+2.0_dp*arg**2))/rsq
+                   rq(1)=rmet(1,1)*r1+rmet(1,2)*r2+rmet(1,3)*r3
+                   rq(2)=rmet(2,1)*r1+rmet(2,2)*r2+rmet(2,3)*r3
+                   rq(3)=rmet(3,1)*r1+rmet(3,2)*r2+rmet(3,3)*r3
+                   do iq2=1,3
+                     do iq1=1,3
+                       do mu=1,3
+!                         do nu=1,3
+                         do nu=1,mu
+                           work(re,mu,ia,nu,ib,iq1,iq2)=work(re,mu,ia,nu,ib,iq1,iq2)+&
+&                           c1r*dakk(iq1)*dakk(iq2)*(rq(mu)*rq(nu)*term3+rmet(mu,nu)*term2)
+                           work(im,mu,ia,nu,ib,iq1,iq2)=work(im,mu,ia,nu,ib,iq1,iq2)+&
+&                           c1i*dakk(iq1)*dakk(iq2)*(rq(mu)*rq(nu)*term3+rmet(mu,nu)*term2)
+                         end do
+                       end do
+                     end do
+                   end do
+                 end if
+               else
+                 if (ia/=ib)then
+                   write(message,'(a,a,a,a,a,i5,a,i5,a)')&
+&                   'The distance between two atoms vanishes.',ch10,&
+&                   'This is not allowed.',ch10,&
+&                   'Action: check the input for the atoms number',ia,' and',ib,'.'
+                   ABI_ERROR(message)
+                 end if
+               end if
+
+             end do ! End loop over ib:
+           end do ! End loop over ia:
+         end if
+       end do ! End triple loop over real space points:
+     end do
+   end do
+
+!  Check if new shell must be calculated
+   if(newr==0) exit
+ end do !  End loop on nr (new shells). Note that there is an exit within the loop
+
+!Take account of the charges
+!write(std_out,*)' '
+ do ia0=1,my_natom
+   ia=ia0;if(paral_atom)ia=my_atmtab(ia0)
+   do ib=1,ia
+     do iq2=1,3
+       do iq1=1,3
+         do mu=1,3
+           do nu=1,mu
+             do ii=1,2
+               work(ii,mu,ia,nu,ib,iq1,iq2)=work(ii,mu,ia,nu,ib,iq1,iq2)*&
+&               zion(typat(ia))*zion(typat(ib))
+             end do
+           end do
+         end do
+       end do
+     end do
+   end do
+ end do
+
+!Symmetrize with respect to the directions
+ do ia0=1,my_natom
+   ia=ia0;if(paral_atom)ia=my_atmtab(ia0)
+   do ib=1,ia
+     do iq2=1,3
+       do iq1=1,3
+         do mu=1,3
+           do nu=1,mu
+             work(re,nu,ia,mu,ib,iq1,iq2)=work(re,mu,ia,nu,ib,iq1,iq2)
+             work(im,nu,ia,mu,ib,iq1,iq2)=work(im,mu,ia,nu,ib,iq1,iq2)
+           end do
+         end do
+       end do
+     end do
+   end do
+ end do
+
+!In case of parallelism over atoms: communicate
+ if (paral_atom) then
+   call timab(48,1,tsec)
+   call xmpi_sum(work,my_comm_atom,ierr)
+   call timab(48,2,tsec)
+ end if
+
+!Fill the upper part of the matrix, with the hermitian conjugate
+ do ia=1,natom
+   do ib=1,ia
+     do iq2=1,3
+       do iq1=1,3
+         do nu=1,3
+           do mu=1,3
+             work(re,mu,ib,nu,ia,iq1,iq2)=work(re,mu,ia,nu,ib,iq1,iq2)
+             work(im,mu,ib,nu,ia,iq1,iq2)=-work(im,mu,ia,nu,ib,iq1,iq2)
+           end do
+         end do
+       end do
+     end do
+   end do
+ end do
+
+!Perform the summation over the second atomic sublattice
+ dyewdqdq(:,:,:,:,:,:)=zero
+ do ia=1,natom
+   do iq2=1,3
+     do iq1=1,3
+       do nu=1,3
+         do mu=1,3
+           do ib=1,natom
+             dyewdqdq(re,mu,ia,nu,iq1,iq2)=dyewdqdq(re,mu,ia,nu,iq1,iq2) + &
+           & work(re,mu,ia,nu,ib,iq1,iq2)
+             dyewdqdq(im,mu,ia,nu,iq1,iq2)=dyewdqdq(im,mu,ia,nu,iq1,iq2) + &
+           & work(im,mu,ia,nu,ib,iq1,iq2)
+           end do
+         end do
+       end do
+     end do
+   end do
+ end do
+ ABI_FREE(work)
+
+!Destroy atom table used for parallelism
+ call free_my_atmtab(my_atmtab,my_atmtab_allocated)
+
+end subroutine dfpt_ewalddqdq
 !!***
 
 end module m_dfpt_elt

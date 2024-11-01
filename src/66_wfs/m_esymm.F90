@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_esymm
 !! NAME
 !! m_esymm
@@ -8,14 +7,10 @@
 !! the irreducible representations associated to electronic eigenstates.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2019 ABINIT group (MG)
+!!  Copyright (C) 2008-2024 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -32,7 +27,7 @@ MODULE m_esymm
  use m_errors
 
  use m_io_tools,       only : file_exists
- use m_symtk,          only : matr3inv, chkgrp, symrelrot, littlegroup_q
+ use m_symtk,          only : matr3inv, sg_multable, symrelrot, littlegroup_q
  use m_symfind,        only : symbrav
  use m_fstrings,       only : int2char10, itoa, sjoin
  use m_numeric_tools,  only : print_arr, set2unit, get_trace
@@ -159,8 +154,8 @@ MODULE m_esymm
   type(coeffi1_type),allocatable :: irrep2b(:)
   ! irrep2b(0:nclass)%value(:)
   ! Ragged arrays with the mapping between the set of irreducible representation and the band indices.
-  ! irrep2b(irp)%value(:) gives the indeces of the states belonging to irrep irp, irp=1,nclass
-  ! irrep2b(0)%value(:) stores the indeces of the states that have not been classified due to
+  ! irrep2b(irp)%value(:) gives the indices of the states belonging to irrep irp, irp=1,nclass
+  ! irrep2b(0)%value(:) stores the indices of the states that have not been classified due to
   !   the presence of an accidental degeneracy.
 
   integer,allocatable :: degs_bounds(:,:)
@@ -245,12 +240,6 @@ CONTAINS  !=====================================================================
 !! NOTES
 !!   The present implementation does NOT work at zone border if the little group of
 !!   kpt_in is non-symmorphic namely thers is at lest a symmetry operation with non-zero tnons.
-!!
-!! PARENTS
-!!      classify_bands
-!!
-!! CHILDREN
-!!      xgeev,xginv,zpotrf,ztrsm
 !!
 !! SOURCE
 
@@ -360,7 +349,7 @@ subroutine esymm_init(esymm,kpt_in,Cryst,only_trace,nspinor,first_ib,nbnds,EDIFF
    write(msg,'(4a)')ch10,&
 &    "Band classification in terms of magnetic space groups not coded! ",ch10,&
 &    "Only the ferromagnetic subgroup will be used "
-   MSG_COMMENT(msg)
+   ABI_COMMENT(msg)
  end if
 
  ABI_MALLOC(symrec_fm,(3,3,nsym_fm))
@@ -432,9 +421,9 @@ subroutine esymm_init(esymm,kpt_in,Cryst,only_trace,nspinor,first_ib,nbnds,EDIFF
  ABI_MALLOC(dum_symafm,(esymm%nsym_gk))
  dum_symafm=1
 
- call chkgrp(esymm%nsym_gk,dum_symafm,sgk,grp_ierr)
-
- ABI_CHECK(grp_ierr==0,"chkgrp failed")
+!Check group closure
+ call sg_multable(esymm%nsym_gk,dum_symafm,sgk,grp_ierr)
+ ABI_CHECK(grp_ierr==0,"sg_multable failed")
  ABI_FREE(dum_symafm)
 
  ABI_MALLOC(tmp_nelements,(esymm%nsym_gk))
@@ -476,7 +465,7 @@ subroutine esymm_init(esymm,kpt_in,Cryst,only_trace,nspinor,first_ib,nbnds,EDIFF
 
    spgroup=0
    chkprim=1 ! Cell must be primitive.
-   !call symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tolsym)
+   !call symlatt(bravais,std_out,msym,nptsym,ptsymrel,rprimd,tolsym)
    !call symspgr(bravais,Cryst%nsym,spgroup,Cryst%symrel,Cryst%tnons,tolsym)
 
    !call symanal(bravais,chkprim,genafm,msym,nsym,ptgroupma,rprimd,spgroup,symafm,symrel,tnons,tolsym)
@@ -485,7 +474,7 @@ subroutine esymm_init(esymm,kpt_in,Cryst,only_trace,nspinor,first_ib,nbnds,EDIFF
    lgroup_fname = "lgroup_"//TRIM(spgroup_str)
 
    if (file_exists(lgroup_fname)) then
-     MSG_ERROR("Not coded")
+     ABI_ERROR("Not coded")
 
      ! Read little groups from the external database.
      !% call init_groupk_from_file(Lgrp,spgroup,lgroup_fname,ierr)
@@ -500,11 +489,11 @@ subroutine esymm_init(esymm,kpt_in,Cryst,only_trace,nspinor,first_ib,nbnds,EDIFF
 &      "Non-symmorphic small group and zone border. ",ch10,&
 &      "External file: ",TRIM(lgroup_fname)," containing Bilbao tables not found ",ch10,&
 &      "Character analysis cannot be performed. Accidental degeneracies cannot be detected. "
-     MSG_WARNING(msg)
+     ABI_WARNING(msg)
 
      esymm%has_chtabs = .FALSE.
 
-     ! Reorder indeces such that symmetries are packed in classes.
+     ! Reorder indices such that symmetries are packed in classes.
      ABI_MALLOC(new_idx,(esymm%nsym_gk))
      ABI_MALLOC(new_g0,(3,esymm%nsym_gk))
      new_g0=0; iord = 0
@@ -604,7 +593,7 @@ subroutine esymm_init(esymm,kpt_in,Cryst,only_trace,nspinor,first_ib,nbnds,EDIFF
    !call symrelrot(esymm%nsym_gk,conv_gprimd,axes,conv_symrec,tolsym)
    call symrelrot(esymm%nsym_gk,Cryst%gprimd,conv_gprimd,conv_symrec,tolsym)
 
-   ! 3) Reorder indeces such that symmetries are packed in classes.
+   ! 3) Reorder indices such that symmetries are packed in classes.
    ABI_MALLOC(found,(esymm%nsym_gk))
    ABI_MALLOC(new_idx,(esymm%nsym_gk))
    ABI_MALLOC(new_g0,(3,esymm%nsym_gk))
@@ -636,7 +625,7 @@ subroutine esymm_init(esymm,kpt_in,Cryst,only_trace,nspinor,first_ib,nbnds,EDIFF
        write(std_out,'(a,i2,a,9i2,4x,a,9i2)')" found ",found(isym)," Ptg ",Ptg%sym(:,:,isym),"conv_symrec ",conv_symrec(:,:,isym)
      end do
      msg = " sgk and esymm%Ptg are inconsistent. Check tables or source"
-     MSG_WARNING(msg)
+     ABI_WARNING(msg)
      esymm%err_msg = msg(1:500)
      esymm%err_status = ESYM_PTG_WRONG_MAPPING
      esymm%has_chtabs = .FALSE.
@@ -654,7 +643,7 @@ subroutine esymm_init(esymm,kpt_in,Cryst,only_trace,nspinor,first_ib,nbnds,EDIFF
    if (esymm%has_chtabs) then
      ! Multiply the point group irreps by e^{-ik.\tau} to have the irreps of the little group.
      ! Store the results in esymm%Ref_irreps so that one can classify the states afterwards.
-     ABI_DT_MALLOC(esymm%Ref_irreps,(esymm%nclass))
+     ABI_MALLOC(esymm%Ref_irreps,(esymm%nclass))
      ABI_MALLOC(phase_mkt,(esymm%nsym_gk))
 
      do isym_gk=1,esymm%nsym_gk
@@ -726,7 +715,7 @@ subroutine esymm_init(esymm,kpt_in,Cryst,only_trace,nspinor,first_ib,nbnds,EDIFF
          write(msg,'(a,i2,2a,i0,a,i2)')&
 &          "Herring test for the irreducible representation number ",irp,ch10,&
 &          "gave ",esymm%herring_test(irp),", while it should be 0 or +- ",Ptg%nsym
-          MSG_WARNING(msg)
+          ABI_WARNING(msg)
           esymm%err_msg   =msg
           esymm%err_status=esymm_HERRING_WRONG_TEST
        end if
@@ -784,10 +773,10 @@ subroutine esymm_init(esymm,kpt_in,Cryst,only_trace,nspinor,first_ib,nbnds,EDIFF
 
  nacc_deg=0
  ABI_MALLOC(esymm%degs_dim,(esymm%ndegs))
- ABI_DT_MALLOC(esymm%Calc_irreps,(esymm%ndegs))
+ ABI_MALLOC(esymm%Calc_irreps,(esymm%ndegs))
 
  if (esymm%can_use_tr)  then
-   ABI_DT_MALLOC(esymm%trCalc_irreps,(esymm%ndegs))
+   ABI_MALLOC(esymm%trCalc_irreps,(esymm%ndegs))
  end if
 
  do idg=1,esymm%ndegs
@@ -811,7 +800,7 @@ subroutine esymm_init(esymm,kpt_in,Cryst,only_trace,nspinor,first_ib,nbnds,EDIFF
    ABI_FREE(dim_irreps)
    if (nacc_deg/=0) then
      write(msg,'(a,i0,a)')" Detected ",nacc_deg," accidental degeneracies."
-     MSG_WARNING(msg)
+     ABI_WARNING(msg)
      esymm%err_status=ESYM_ACCDEG_ERROR
      ! TODO this should signal to the caller that we have to decompose the calculated representation.
      esymm%err_msg =msg(1:500)
@@ -834,12 +823,6 @@ end subroutine esymm_init
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      classify_bands
-!!
-!! CHILDREN
-!!      xgeev,xginv,zpotrf,ztrsm
 !!
 !! SOURCE
 
@@ -949,12 +932,6 @@ end subroutine esymm_print
 !! FUNCTION
 !!  Deallocate the memory allocated in the esymm_t datatype (scalar version)
 !!
-!! PARENTS
-!!      m_esymm
-!!
-!! CHILDREN
-!!      xgeev,xginv,zpotrf,ztrsm
-!!
 !! SOURCE
 
 subroutine esymm_free_0D(esymm)
@@ -983,7 +960,7 @@ subroutine esymm_free_0D(esymm)
    do ii=LBOUND(esymm%irrep2b,DIM=1),UBOUND(esymm%irrep2b,DIM=1)
      ABI_FREE(esymm%irrep2b(ii)%value)
    end do
-   ABI_DT_FREE(esymm%irrep2b)
+   ABI_FREE(esymm%irrep2b)
  end if
 
  if (allocated(esymm%Calc_irreps)) call irrep_free(esymm%Calc_irreps)
@@ -1001,11 +978,6 @@ end subroutine esymm_free_0D
 !!
 !! FUNCTION
 !!  Deallocate the memory allocated in the esymm_t datatype (2D version)
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      xgeev,xginv,zpotrf,ztrsm
 !!
 !! SOURCE
 
@@ -1039,12 +1011,6 @@ end subroutine esymm_free_2D
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      classify_bands
-!!
-!! CHILDREN
-!!      xgeev,xginv,zpotrf,ztrsm
 !!
 !! SOURCE
 
@@ -1089,7 +1055,7 @@ subroutine esymm_finalize(esymm,prtvol)
 &    "Reference character table not available. ",ch10,&
 &    "Symmetry analysis not available. Using heuristic method to classify the states.",ch10,&
 &    "It might not work, especially if accidental degeneracies are present."
-   MSG_WARNING(msg)
+   ABI_WARNING(msg)
    !
    ! The simplest thing we can do here is using the calculated matrices to get the
    ! character and comparing the results hoping everything is OK.
@@ -1121,7 +1087,7 @@ subroutine esymm_finalize(esymm,prtvol)
      write(msg,'(3a)')&
 &      "The number of different calculated traces is found to be greater than nclasses!",ch10,&
 &      "Heuristic method clearly failed. Symmetry analysis cannot be performed."
-     MSG_WARNING(msg)
+     ABI_WARNING(msg)
      esymm%err_status = ESYM_HEUR_WRONG_NCLASSES
      esymm%err_msg    = msg
 
@@ -1143,7 +1109,7 @@ subroutine esymm_finalize(esymm,prtvol)
              write(msg,'(3a)')&
 &              "Found two set of degenerate states with same character but different dimension!",ch10,&
 &              "heuristic method clearly failed. Symmetry analysis cannot be performed."
-             MSG_ERROR(msg)
+             ABI_ERROR(msg)
              esymm%err_status = ESYM_HEUR_WRONG_DIMS
              esymm%err_msg    = msg
            end if
@@ -1177,8 +1143,8 @@ subroutine esymm_finalize(esymm,prtvol)
    end do
  end if
  !
- ! %irrep2b(0)) gives the indeces of the states that have not been classified.
- ABI_DT_MALLOC(esymm%irrep2b,(0:esymm%nclass))
+ ! %irrep2b(0)) gives the indices of the states that have not been classified.
+ ABI_MALLOC(esymm%irrep2b,(0:esymm%nclass))
 
  !write(std_out,*)"b2irrep",esymm%b2irrep
 
@@ -1196,7 +1162,7 @@ subroutine esymm_finalize(esymm,prtvol)
 
  if (size(esymm%irrep2b(0)%value) /= 0) then
    write(msg,'(a,i0,a)')" Band classification algorithm was not able to classify ",size(esymm%irrep2b(0)%value)," states."
-   MSG_WARNING(msg)
+   ABI_WARNING(msg)
    esymm%err_status = ESYM_CLASSIFICATION_ERROR
    esymm%err_msg    = msg
  end if
@@ -1235,7 +1201,7 @@ subroutine esymm_finalize(esymm,prtvol)
 
    if (max_err>TOL_ORTHO) then
      write(msg,'(a,es10.2)')" Too large maximum error on \sum_R \chi^*_a(R)\chi_b(R) = N_R \delta_{ab}: ",max_err
-     MSG_WARNING(msg)
+     ABI_WARNING(msg)
      esymm%err_status =  ESYM_ORTHO_ERROR
      esymm%err_msg    =  msg
    else
@@ -1269,7 +1235,7 @@ subroutine esymm_finalize(esymm,prtvol)
 
      if (max_err>TOL_UNITARY) then
        write(msg,'(a,es10.2)')" Too large maximum error on the unitary of representions matrices: ",max_err
-       MSG_WARNING(msg)
+       ABI_WARNING(msg)
        esymm%err_msg    = msg
        esymm%err_status = ESYM_UNITARY_ERROR
      else
@@ -1297,8 +1263,6 @@ end subroutine esymm_finalize
 !!  esymm<esymm_t>
 !!  trace(%nsym_gk)=The trace of the representation to be compared with the internal database (if present).
 !!  tolerr=Absolute error on the character.
-!!
-!! PARENTS
 !!
 !! SOURCE
 
@@ -1342,12 +1306,6 @@ end function which_irrep
 !! INPUTS
 !!  esymm<esymm_t>
 !!
-!! PARENTS
-!!      calc_sigc_me,calc_sigx_me,cohsex_me
-!!
-!! CHILDREN
-!!      xgeev,xginv,zpotrf,ztrsm
-!!
 !! SOURCE
 
 subroutine esymm_symmetrize_mels(esymm,lbnd,ubnd,in_me,out_me)
@@ -1372,7 +1330,7 @@ subroutine esymm_symmetrize_mels(esymm,lbnd,ubnd,in_me,out_me)
 ! *********************************************************************
 
  if (esymm_failed(esymm)) then
-   MSG_ERROR("Symmetrization cannot be performed. You should not be here!")
+   ABI_ERROR("Symmetrization cannot be performed. You should not be here!")
  end if
 
  do idg1=1,esymm%ndegs  ! First loop over set of degenerate states.
@@ -1380,7 +1338,7 @@ subroutine esymm_symmetrize_mels(esymm,lbnd,ubnd,in_me,out_me)
    b1_stop  = esymm%degs_bounds(2,idg1)
 
    !if (b1_stop<lbnd .or. b2_start >ubnd) then
-   !  MSG_ERROR("Wrong band indeces, check esymm initialization")
+   !  ABI_ERROR("Wrong band indices, check esymm initialization")
    !end if
 
    Irrep1 => esymm%Calc_irreps(idg1)
@@ -1399,7 +1357,7 @@ subroutine esymm_symmetrize_mels(esymm,lbnd,ubnd,in_me,out_me)
      if (esymm%can_use_tr) tr_Irrep2 => esymm%trCalc_irreps(idg2)
      !
      ! Symmetrize the off-diagonal matrix elements.
-     ! summing over kk and ll. ii and jj are the indeces of the bands that are symmetrized
+     ! summing over kk and ll. ii and jj are the indices of the bands that are symmetrized
      do ii=1,b1_stop-b1_start+1
        ib= ii+b1_start-1
        do jj=1,b2_stop-b2_start+1
@@ -1414,7 +1372,7 @@ subroutine esymm_symmetrize_mels(esymm,lbnd,ubnd,in_me,out_me)
              dsd = sum_irreps(Irrep1,Irrep2,kk,ii,ll,jj)
              ofd = ofd + dsd * in_me(1,kb,lb)
              if (esymm%can_use_tr) then
-               tr_dsd = sum_irreps(tr_Irrep1,tr_Irrep2,kk,jj,ll,ii) ! Exchange of band indeces.
+               tr_dsd = sum_irreps(tr_Irrep1,tr_Irrep2,kk,jj,ll,ii) ! Exchange of band indices.
                tr_ofd = tr_ofd + tr_dsd * in_me(2,kb,lb)            ! Contribution obtained from TR.
              end if
            end do
@@ -1441,8 +1399,6 @@ end subroutine esymm_symmetrize_mels
 !! INPUTS
 !!  esymm<esymm_t>
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 function esymm_failed(esymm)
@@ -1468,12 +1424,6 @@ end function esymm_failed
 !! FUNCTION
 !!
 !! INPUTS
-!!
-!! PARENTS
-!!      m_esymm
-!!
-!! CHILDREN
-!!      xgeev,xginv,zpotrf,ztrsm
 !!
 !! SOURCE
 

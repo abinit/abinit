@@ -7,11 +7,11 @@ plotly: true
 
 This page is intended as a quick reference to the Markdown syntax and the extensions
 available in the Abinit documentation.
-Markdown can be used *almost everywhere*: user-guide, tutorials, release notes, theory notes, the 
-description of the input variables stored in python files inside `abimkdocs` as well as 
+Markdown can be used *almost everywhere*: user guides, tutorials, release notes, theory notes, the
+description of the input variables stored in python files inside `abimkdocs`, as well as
 in the `TEST_INFO` section of the automatic tests.
 
-As the [original/official Markdown syntax rules](https://daringfireball.net/projects/markdown/syntax#html)
+As the [original/official Markdown syntax rules](https://daringfireball.net/projects/markdown/syntax#html) &nbsp;
 state:
 
 > Markdown’s syntax is intended for one purpose: to be used as a format for writing for the web.
@@ -24,10 +24,10 @@ state:
 >
 > For any markup that is not covered by Markdown’s syntax, you simply use HTML itself.
 
-Basic Markdown syntax already covers most of our needs and the *Abinit extensions* 
-([wiki links](#wiki-links) and [Abinit plugins](#abinit-extensions))
-facilitate the integration between the documentation on the website and the new developments done in the gilab branch.
-This page, for example, is entirely written in Markdown with the exception of the last 
+Basic Markdown syntax already covers most of our needs and the *Abinit extensions*
+([wikilinks](#wikilinks) and [Abinit extensions](#abinit-extensions))
+facilitate the integration between the documentation on the website and the new developments done in the gitlab branch.
+This page, for example, is entirely written in Markdown with the exception of the last
 two sections in which we discuss advanced features requiring some HTML code.
 
 ## Markdown quick reference
@@ -45,8 +45,8 @@ two sections in which we discuss advanced features requiring some HTML code.
 | `==highlight==` | ==highlight== | [Mark](http://facelessuser.github.io/pymdown-extensions/extensions/mark/)
 | `^^underline me^^` | ^^underline me^^ | [Caret](https://facelessuser.github.io/pymdown-extensions/extensions/caret/)
 
-As Markdown is not a "publishing format" providing a way to color text is out-of-scope for Markdown
-but it's possible to use raw HTML code.
+As Markdown is not a "publishing format", providing a way to color text is out-of-scope for Markdown,
+but it is possible to use raw HTML code.
 For example, the following Markdown text:
 
 ```md
@@ -58,33 +58,58 @@ produces: Some Markdown text with <span style="color:red">some *red* text</span>
 For a more complete introduction to Markdown, please consult the
 [Markdown Cheatsheet](https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet).
 
+### Lists
+
+Unnumbered lists are created by a **blank line** followed by a star (or a dash) for each line in the list.
+For example, after a blank line, the following Markdown text:
+```md
+* List item A
+* List item B
+```
+
+This produces
+
+* List item A
+* List item B
+
+For numbered list, start with the numbers instead of stars:
+
+```md
+1. List item 1
+2. List item 2
+```
+
+This produces
+
+1. List item 1
+2. List item 2
 
 ### Code and syntax highlighting
 
 Blocks of code are either fenced by lines with three back-ticks ``` or are indented with **four spaces**.
-For example, the Markdown text:
+For example, the Markdown text
 ~~~text
 ```
 Fenced code has three back-ticks around it.
 ```
 ~~~
 
-produces: 
+produces
 ```
 Fenced code has three back-ticks around it.
 ```
 
-Alternatively, one can indent the code with four space such as in:
+while indenting the code with four space, such as in
 
 ```md
-    abinit < tbase1_x.files 2> log &
+    abinit run.abi 2> log &
 ```
 
-that produces:
+produces
 
-    abinit < tbase1_x.files 2> log &
+    abinit run.abi 2> log &
 
-Fenced blocks is an alternative form that allows the specification of the language 
+Fenced blocks is an alternative form that allows the specification of the language
 used for syntax highlighting.
 Fortran code, for example, can be included with:
 
@@ -134,7 +159,7 @@ Content Cell  | Content Cell
 
 
 !!! warning
-    If the text inside the colum contains pipes (|), enclose it with back-ticks.
+    If the text inside the colum contains pipes (|), enclose it with back-ticks,
     or use a `\` before the pipe.
 
 
@@ -152,34 +177,45 @@ For figures with a caption use the [markdown-figures extension](https://github.c
 
 ```md
 ![](../tutorial/bse_assets/tbs5.png)
-:   Convergenge of BSE optical spectrum wrt $\kk$-point sampling.
+:   Convergence of BSE optical spectrum wrt $\kk$-point sampling.
     See also [[ngkpt]] and [[shiftk]].
 ```
 
 ![](../tutorial/bse_assets/tbs5.png)
-:   Convergenge of BSE optical spectrum wrt $\kk$-point sampling.
+:   Convergence of BSE optical spectrum wrt $\kk$-point sampling.
     See also [[ngkpt]] and [[shiftk]].
 
-The caption can contain Latex equations as well as [Abinit wiki links](#wiki-links).
+The caption can contain Latex equations as well as [Abinit wikilinks](#wikilinks).
 `#!html <img>` and `#!html <figure>` elements are automatically centered via CSS directives declared in `extra.css`.
 
 <!--
 !!! note
-    In the two examples, the location of the png files is given by relative URLs (relative to this page). 
+    In the two examples, the location of the png files is given by relative URLs (relative to this page).
     In the first example we have used a root-relative URL (`/tutorial/bse_assets/tbs2_1.png`) where
-    the "root" `/` corresponds to the `~abinit/doc` directory if you are running the webserver locally 
-    or to the Abinit website domain if the documentation is served on the internet. 
-    In the second example, we have used a relative URL (relative to this page). 
+    the "root" `/` corresponds to the `~abinit/doc` directory if you are running the webserver locally
+    or to the Abinit website domain if the documentation is served on the internet.
+    In the second example, we have used a relative URL (relative to this page).
     Mkdocs will convert all Markdown URLs into relative URLs so that the website can be easily deployed.
-    A concise explanation of absolute, relative and root-relative links is given 
+    A concise explanation of absolute, relative and root-relative links is given
     [here](https://mor10.com/html-basics-hyperlink-syntax-absolute-relative-and-root-relative/).
 -->
 
+If you need to customize the height and width of the image, use
+
+```md
+![](../tutorial/eph4mob_assets/workflow.png ){: style="height:500px;width:400px"}
+```
+
+![](../tutorial/eph4mob_assets/workflow.png ){: style="height:500px;width:400px"}
+
+Note that this is not standard markdown but an extension provided by
+[Attribute Lists extension](https://python-markdown.github.io/extensions/attr_list/)
+that adds a syntax to define attributes on the various HTML elements in markdown’s output.
 
 ### Pdf Files
 
 Links to internal pdf files shipped with the Abinit documentation are inserted using the
-base name of the pdf file and the [wikilink syntax](#wiki-links):
+base name of the pdf file and the [wikilink syntax](#wikilinks):
 
 ```
     Please consult the [[pdf:howto_chebfi]] document.
@@ -220,50 +256,122 @@ The video below gives an overwiew of the command line options of `runtests.py`
 [![asciicast](https://asciinema.org/a/40324.png)](https://asciinema.org/a/40324)
 
 More advanced features such as video galleries require a bit of HTML/CSS/JS code in the Markdown page.
-See for example the [Abinit video gallery](../topics/external_resources#abinit-videos)
+See for example the [Abinit video gallery](/topics/external_resources#abinit-videos)
 built with [lightGallery](http://sachinchoolur.github.io/lightGallery/).
 
 
 ## Links
 
-### Markdown links 
+### Markdown links
 
-The Markdown syntax for links is:
+To create a link, enclose the link text in brackets (e.g., [Duck Duck Go]) and then follow
+it immediately with the URL in parentheses (e.g., (https://duckduckgo.com)).
+Alternatively, one can enclose the URLs directly between `<>`.
+The table below shows typical scenarios:
 
-| Markdown | Result | Extension required |
+| Markdown | Result
+| :-- | :--
+| `[Duck Duck Go](https://duckduckgo.com)` | [Duck Duck Go](https://duckduckgo.com)
+| `<https://www.abinit.org>` | <https://www.abinit.org>
+| `[Links for videos section in the same page](#videos)` | [Links to videos section in the same page](#videos)
+
+!!! note
+
+    Links to external websites are signaled with the [fontawesome](http://fontawesome.io/) &nbsp; icon:
+    <i class="fa fa-external-link" aria-hidden="true"></i>. See CSS rules in **extra.css**.
+
+Markdown can also be used for creating internal links to **other pages** of the ABINIT website.
+The main problem is that you need to know the **relative URL** (or the root-relative URL) of the HTML page you want to refer to.
+Unfortunately, this is not so easy since the HTML pages are automatically generated by *mksite.py* and *mkdocs* 
+hence you need to understand how these tools work internally.
+Just to make things even more complicated, there are different ways to achieve the same result 
+(**relative urls**, **root-relative urls**, **mkdocs md syntax**).
+Let's try to clarify this point using a very pragmatic approach.
+
+First of all, it is very important to understand that in the *mkdocs.yml* configuration file,
+the [use_directory_urls](https://www.mkdocs.org/user-guide/configuration/#use_directory_urls) option is set to True.
+This means that mkdocs creates a directory with an *index.html* file for each md page
+included in the ABINIT documentation.
+For instance, the **abimkdocs.md** and **markdown.md** files located in ~abinit/doc/developers
+are converted by mkdocs into the following hierarchy of HTML files:
+
+- /developers/abimkdocs/index.html
+- /developers/markdown/index.html
+
+in which the content of e.g. *abimkdocs.md* is used to generate *abimkdocs/index.html*.
+
+!!! important
+
+    In these examples the `/` symbol **does not correspond to the root of your filesystem**
+    but to the root directory used by the web-server for serving HTML files.
+    Roughly speaking, your ~abinit/doc/ directory is consired as the root node.
+
+We use this convention because it leads to more user-friendly URLs as the abimkdocs page
+is now served by the *local web server* at **http://127.0.0.1:8000/developers/abimkdocs**
+instead of the lengthier **http://127.0.0.1:8000/developers/abimkdocs.html**.
+Once the website is deployed in production, the same page will be served at <https://docs.abinit.org/developers/abimkdocs>
+instead of *https://docs.abinit.org/developers/abimkdocs.html*.
+
+At this point it should be clear that the relative path you see on your file system **is not the same**
+as the relative URL seen by the web-server.
+In other words, you should **add an extra** "../" to the relative path you have on your file system
+to account for the creation of the directory.
+This syntax is clearly unintuitive and error-prone but it is worth knowing especially if, for some reason,
+you need to inject in the md page HTML code with relative hrefs.
+
+Fortunately, you are not obliged to use relative URLs in markdown links since there are two other approaches
+that are much more user-friendly and much easier to maintain.
+The first one is based on **root-relative URLs** while the second one relies on
+[preprocessing operations performed by mkdocs](https://www.mkdocs.org/user-guide/writing-your-docs/#internal-links).
+
+In brief, root-relative URLs can be seen as paths relative to your ~abinit/doc/ directory provided you add
+a `/` at the beginning of the string while the mkdocs syntax is activated by using relative paths as seen on your files system
+with the crucial difference that you **must include the .md extension** at the end of the URL.
+As usual, it is much easier to explain the different cases by examples:
+
+| Markdown | Result | Link Type |
 | :-- | :-- | :--
-| `[Links for videos](#videos)` | [Links for videos](#videos)  | --
-| `[About topics](abimkdocs#topics)` | [About topics](abimkdocs#topics)  | --
-| `[MBPT document](../theory/mbt)` | [MBPT document](../theory/mbt) | --
-| `[The Abinit website](https://www.abinit.org)` | [The Abinit website](https://www.abinit.org)  | --
-| `<https://www.abinit.org>` | <https://www.abinit.org> | --
+| `[MBPT document](/theory/mbt)` | [MBPT document](/theory/mbt) | root-relative URL (**recommended**)
+| `[MBPT document](../theory/mbt.md)` | [MBPT document](../theory/mbt.md) | mkdocs preprocessed relative URL
+| `[About topics](/developers/abimkdocs#topics)` | [About topics](/developers/abimkdocs#topics)  | root-relative + HTML fragment  (**recommended**)
+| `[About topics](abimkdocs.md#topics)` | [About topics](abimkdocs.md#topics)  | mkdocs preprocessed relative URL + HTML fragment
+| `[About topics](../abimkdocs#topics)` | [About topics](../abimkdocs#topics)  | relative URL (no mkdocs preprocessing) + HTML fragment (**don't use it**)
 
-This is the **recommended** approach to create links to external resources, or internal links to other pages 
-of the website, especially when there's no shortcut is made available by the [wikilink syntax](#wiki-links).
-Links to external websites are signaled with the [fontawesome](http://fontawesome.io/) icon:
-<i class="fa fa-external-link" aria-hidden="true"></i> (see CSS rules in *extra.css*).
+!!! important
 
-Note that linking to a page that is located in the same directory is trivial in Markdown.
-All the tutorials, for example, are placed in the same directory (~doc/tutorial).
-To refer to the first PAW tutorial from the second tutorial, use:
+    Relative URLs obviously depend on the location of the page containg the link whereas root-relative URLs are invariant.
+    It is evident that absolute (file-system dependent) paths such as `~gmatteo/abinit/doc/theory/mbt` won't work when
+    the website is deployed so don't use them.
 
-    [The first PAW tutorial](paw1)
 
-There are however cases in which we would like to have an even simpler syntax to generate automatically
+At this point you may ask why do we have all these different approaches and which one should I use when writing the documentation?
+To make a long story short, **we strongly suggest to use root-relative URLs**.
+The reason is that root-relative URLs look like "absolute paths" so one can easily use regular expressions
+to update the links everywhere if md pages are moved around.
+The mkdocs syntax is shorter if you are referring to another md page in the same directory but since the ABINIT
+website does not have so many nested levels, root-relative URLs are not necessarily much longer than the mkdocs syntax.
+
+The mkdocs syntax has the advantage that mkdocs can immediately check whether the internal URL is correct while building
+the web site but, as a matter of fact, we perform a similar check by running linkchecker with our buildbot infrastructure.
+This means that if you use root-relative URLs in the docs, mkdocs won't be able to detect broken links while
+you are working interactively but the error will be automatically detected by our test farm.
+
+There are however cases in which we would like to have an even **simpler syntax** to automatically generate 
 links within our documentation, in particular links to:
 
-* The input variables declared in `abinit_vars.yml`.
+* The input variables declared in the `abimkdocs` directory.
 * The bibliographic citations declared in `abiref.bib`.
 * Input files or pseudopotentials used in the Abinit test suite.
 * Website pages commonly mentioned such as e.g. the [[topic:index|topics page]].
 
-For this reason, we use the [extentions API](https://python-markdown.github.io/extensions/api)
-provided by python Markdown to extend the syntax of the parser, using the "Wikilink" syntax.
+For this reason, we use the [extensions API](https://python-markdown.github.io/extensions/api) &nbsp;
+provided by python Markdown to extend the syntax of the parser, using the Wikilink syntax so that 
+you don't need to know the root-relative or the relative URL of the HTML page you want to link.
 Typical cases are discussed in the next sections.
 
 ### Wikilinks
 
-The wikilink syntax is used with two pairs of square brackets and possible separators (:, # and |).
+The [wikilink syntax](https://python-markdown.github.io/extensions/wikilinks) &nbsp; is used with two pairs of square brackets and possible separators (:, # and |).
 In the simple case, this gives <span style="background-color: #E0E0E0;font-size:90%;"> &#91; [name] &#93;</span> although the more general form is
 
 <span style="background-color: #E0E0E0;font-size:90%;"> &#91; [namespace:name#section|text] &#93;</span>
@@ -276,7 +384,7 @@ The namespace is not echoed in the Web page, while if a `text` is given, it will
 
     Do not use parentheses within the pair of double brackets, the whole expression will not be recognized.
 
-When an internal link is recognized, the dokuwiki string is replaced by the adequate HTML link
+When an internal link is recognized, the wikilink string is replaced by the adequate HTML link
 There are a couple of names immediately recognized:
 
 * the name of an Abinit input variable e.g. "ecut"  (provided it is mentioned in `variables_abinit.py`)
@@ -294,13 +402,14 @@ Examples:
 | `[[anaddb:dipdip]]` | [[anaddb:dipdip]]
 | `[[dipdip@anaddb]]` | [[dipdip@anaddb]]
 | `[[cite:Amadon2008]]` | [[cite:Amadon2008]]
-| `[[~abinit/tests/tutorial/Input/tbase1_1.in]]` | [[~abinit/tests/tutorial/Input/tbase1_1.in]]
-| `[[tests/tutorial/Input/tbase1_1.in]]` | [[tests/tutorial/Input/tbase1_1.in]]
+| `[[~abinit/tests/tutorial/Input/tbase1_1.abi]]` | [[~abinit/tests/tutorial/Input/tbase1_1.abi]]
+| `[[tests/tutorial/Input/tbase1_1.abi]]` | [[tests/tutorial/Input/tbase1_1.abi]]
 | `[[test:libxc_41]]` | [[test:libxc_41]]
-| `[[tests/tutorial/Refs/tbase1_1.out]]` |  [[tests/tutorial/Refs/tbase1_1.out]]
-| `[[~abinit/tests/tutorial/Refs/tbase1_1.out]]` |  [[~abinit/tests/tutorial/Refs/tbase1_1.out]]
-| `[[~abinit/tests/Psps_for_tests/6c.lda.atompaw]]` | [[~abinit/tests/Psps_for_tests/6c.lda.atompaw]]
-| `[[tests/Psps_for_tests/6c.lda.atompaw]]` | [[tests/Psps_for_tests/6c.lda.atompaw]]
+| `[[tests/tutorial/Refs/tbase1_1.abo]]` |  [[tests/tutorial/Refs/tbase1_1.abo]]
+| `[[~abinit/tests/tutorial/Refs/tbase1_1.abo]]` |  [[~abinit/tests/tutorial/Refs/tbase1_1.abo]]
+| `[[~abinit/tests/Psps_for_tests/6c_lda.paw]]` | [[~abinit/tests/Psps_for_tests/6c_lda.paw]]
+| `[[tests/Psps_for_tests/6c_lda.paw]]` | [[tests/Psps_for_tests/6c_lda.paw]]
+| `[[:digit:]]' ` | [[:digit:]]
 
 The input variables for anaddb, optic and aim will be recognized if they are used with
 the namespaces `anaddb`, `optic` and `aim`.
@@ -328,10 +437,6 @@ To specify the name of the anchor in a bibliographic citation use the syntax wit
 
 that is rendered in HTML as: Please consult [[cite:Gonze2016 | the last generic ABINIT article]].
 
-!!! warning
-
-    Please use the `cite` namespace. The syntax **without** namespace is deprecated and will be removed.
-
 The script does a bit of formatting in these examples: it keeps one pair of square brackets
 in the case of a bibliographic reference, and addd *~abinit/* in the case of a path.
 The syntax `[[test:libxc_41]]` is preferable when documenting new tests in the release notes.
@@ -347,14 +452,6 @@ The python code issues a warning in the terminal if the link cannot be establish
 
 Other internal links can be recognized thanks to the namespace.
 
-<!--
-`tutorial`, `topic`, `help`, `theorydoc, and `varset` create a link
-to the corresponding Markdown files inside the `tutorials`, `topic`, `user-guide`, `vari
-A first set of allowed internal namespaces are:
-In such cases, provided there is a corresponding generated HTML file
-that has a name that start with the namespace and end with the name, the link will be established.
--->
-
 Examples:
 
 Namespace      | Markdown                         | Result
@@ -368,7 +465,7 @@ Namespace      | Markdown                         | Result
  `theory`      | `[[theory:mbt]]`                 | [[theory:mbt]]
  `varset`      | `[[varset:bse]]`                 | [[varset:bse]]
  `cite`        | `[[cite:Amadon2008]]`            | [[cite:Amadon2008]]
- `ac`          | `[[ac:abiref_gnu_5.3_debug.ac]]` | [[ac:abiref_gnu_5.3_debug.ac]]
+ `ac`          | `[[ac:abiref_nag_7.0_openmpi.ac]]` | [[ac:abiref_nag_7.0_openmpi.ac]]
  `pdf`         | `[[pdf:howto_chebfi.pdf]]`       | [[pdf:howto_chebfi.pdf]]
  `pdf`         | `[[pdf:howto_chebfi]]`           | [[pdf:howto_chebfi]]
  `src`         | `[[src:94_scfcv/m_scfcv.F90]]`   | [[src:94_scfcv/m_scfcv.F90]]
@@ -381,7 +478,7 @@ Namespace      | Markdown                         | Result
 ## 4 More detailed presentation of the files file
 ```
 
-Also in this case, it's possible to specify the name of the link 
+Also in this case, it's possible to specify the name of the link
 with the `|` separator so `[[topic:PIMD#1|Introduction]]` becomes [[topic:PIMD#1|Introduction]].
 
 
@@ -416,7 +513,7 @@ that produces: Fix https://github.com/abinit/abinit/issues/1
 
 ### External links
 
-As for dokuwiki, some external links are also recognized. The following case are treated:
+As for the internal wikilinks, some external links are also recognized. The following case are treated:
 
 * a link that starts with `www.`
 * the namespaces `http`, `https`, `ftp`, `file`
@@ -426,7 +523,7 @@ As for dokuwiki, some external links are also recognized. The following case are
 | `[[https://www.abinit.org]]` | [[https://www.abinit.org]]
 | `https://www.abinit.org` | https://www.abinit.org
 
-It's also possible to specify the name of the link with the `|` separator:
+It is also possible to specify the name of the link with the `|` separator:
 For example, `[[https://wiki.abinit.org|The ABINIT Wiki]]` produces [[https://wiki.abinit.org|The ABINIT Wiki]]
 
 The markdown parser supports aliases for commonly used links.
@@ -443,21 +540,21 @@ The aliases are defined in the `mkdocs.yml` configuration file (`abimkdocs_alias
 
 ### Permalinks
 
-Permalinks are a feature of the [Table of Contents extension](https://python-markdown.github.io/extensions/toc),
+Permalinks are a feature of the [Table of Contents extension](https://python-markdown.github.io/extensions/toc) &nbsp;,
 which is part of the standard Markdown library.
 The extension inserts an anchor at the end of each headline, which makes it possible to directly link to a subpart of the document.
 
 By default, all headers will automatically have unique id attributes generated based upon the text of the header.
-The name of the anchor is constructed from the header by converting the string to lower-case ASCII, 
+The name of the anchor is constructed from the header by converting the string to lower-case ASCII,
 removing dots and other symbols such as `&` and replacing white spaces with a dash `-`.
-For instance, `#wiki-links` is the anchor associated to the "Wiki Links" section
+For instance, `#pdf-files` is the anchor associated to the "Pdf Files" section
 in this page and we can thus refer to it with the Markdown syntax:
 
 ```md
-As we have seen in the [previous section](#wiki-links)
+As we have seen in the [previous section](#pdf-files)
 ```
 
-that produces: As we have seen in the [previous section](#wiki-links)
+that produces: As we have seen in the [previous section](#pdf-files)
 
 !!! tip
     Hover with the mouse on the header in the HTML page to show the permalink in the browser.
@@ -487,9 +584,9 @@ Also in this case, we get the correct result:
 
 An example of [root-relative link](/developers/abimkdocs.md#getting-started)
 
-Note that Mkdocs converts all URLs to relative URLs so the two approaches are completely equivalent 
-still the use of relative URLs is strongly suggested because developers will be able to open the link 
-in their editor (provided the editor is Markdown-aware). 
+Note that Mkdocs converts all URLs to relative URLs so the two approaches are completely equivalent
+still the use of relative URLs is strongly suggested because developers will be able to open the link
+in their editor (provided the editor is Markdown-aware).
 -->
 
 !!! note
@@ -505,7 +602,7 @@ in their editor (provided the editor is Markdown-aware).
 
 ### SmartSymbols
 
-[SmartSymbols](https://facelessuser.github.io/pymdown-extensions/extensions/smartsymbols/)
+[SmartSymbols](https://facelessuser.github.io/pymdown-extensions/extensions/smartsymbols/) &nbsp;
 adds syntax for creating special characters such as trademarks, arrows, fractions, etc.
 The list of symbols supported by the extension is:
 
@@ -526,7 +623,7 @@ Markdown       | Result
 
 ### Definition Lists
 
-The [Definition Lists](https://python-markdown.github.io/extensions/definition_lists) extension 
+The [Definition Lists](https://python-markdown.github.io/extensions/definition_lists) &nbsp; extension
 adds the ability to create definition lists in Markdown documents.
 This extension is included in the standard Markdown library.
 The following text:
@@ -553,7 +650,7 @@ Orange
 ### Admonitions
 
 [Admonitions](
-https://python-markdown.github.io/extensions/admonition) are useful
+https://python-markdown.github.io/extensions/admonition) &nbsp; are useful
 to stress important sections (useful e.g. in the Abinit tutorials).
 Admonition are created using the Markdown syntax:
 
@@ -572,7 +669,7 @@ and
 for an admonition with a custom title (make sure to quote the title).
 
 The types of admonitions available for use in MkDocs depend on the theme being used.
-The Material theme [supports](http://squidfunk.github.io/mkdocs-material/extensions/admonition/#types) the following types:
+The Material theme [supports](http://squidfunk.github.io/mkdocs-material/extensions/admonition/#types) &nbsp; the following types:
 
 !!! note
     I am a "note" admonition and look the same as "seealso".
@@ -600,16 +697,16 @@ The Material theme [supports](http://squidfunk.github.io/mkdocs-material/extensi
 
 
 For the complete list, please consult the mkdocs-material
-[documentation](http://squidfunk.github.io/mkdocs-material/extensions/admonition/)
+[documentation](http://squidfunk.github.io/mkdocs-material/extensions/admonition/).
 
 ### Details
 
-[Detail](https://facelessuser.github.io/pymdown-extensions/extensions/details/)
+[Detail](https://facelessuser.github.io/pymdown-extensions/extensions/details/) &nbsp;
 is an extension that creates collapsible elements that hide their content.
 It uses the HTML5 `#!html <details><summary>` tags to accomplish this.
 It supports nesting and you can also force the default state to be open.
 This extension is used in the documentation of the input variable to generate
-a container with the list of tests associated to the variable but it can also be used for 
+a container with the list of tests associated to the variable but it can also be used for
 long FAQs of Q&A sections in the tutorials.
 
 Examples:
@@ -640,50 +737,29 @@ creates a *closed* element:
 
 ## Abinit extensions
 
-To create a button that opens a dialog containing the input file, use:
+To create a button that opens a ==dialog== containing an **input file**, use:
 
 ```
-    {% dialog tests/v1/Input/t01.in %}
-```
-
-that produces:
-
-{% dialog tests/v1/Input/t01.in %}
-
-If multiple files are used such as in:
-
-    {% dialog tests/v1/Input/t01.in tests/v1/Input/t02.in tests/v1/Input/t03.in %}
-
-a modal window with tabs is produced:
-
-{% dialog tests/v1/Input/t01.in tests/v1/Input/t02.in tests/v1/Input/t03.in %}
-
-
-To create a button that opens a modal window containing the input file, use:
-
-```
-    {% modal tests/v1/Input/t01.in %}
+    {% dialog tests/v1/Input/t01.abi %}
 ```
 
 that produces:
 
-{% modal tests/v1/Input/t01.in %}
+{% dialog tests/v1/Input/t01.abi %}
 
-This is useful for tutorials to give direct access to the input files.
 If multiple files are used such as in:
 
-```
-    {% modal tests/v1/Input/t01.in tests/v1/Input/t02.in %}
-```
+    {% dialog tests/v1/Input/t01.abi tests/v1/Input/t02.abi tests/v1/Input/t03.abi %}
 
-a modal window with tabs is produced
+multiple buttons are produced:
 
-{% modal tests/v1/Input/t01.in tests/v1/Input/t02.in %}
+{% dialog tests/v1/Input/t01.abi tests/v1/Input/t02.abi tests/v1/Input/t03.abi %}
+
 
 ## MathJax
 
 Formulas written in LaTeX are interpreted automatically (at visualization time) thanks to the
-[MathJax](http://docs.mathjax.org/en/latest/mathjax.html) on-the-flight processor
+[MathJax](http://docs.mathjax.org/en/latest/mathjax.html) &nbsp; on-the-flight processor
 while the math extension for Python-Markdown is provided by
 [python-markdown-math](https://github.com/mitya57/python-markdown-math).
 
@@ -746,7 +822,7 @@ Please consult the preamble in `abinit_theme/main.html` for the complete list of
 ## Unicode
 
 Unicode characters in particular Greek symbols and accented characters can be used in the documentation.
-The websites uses the [Google's Roboto font](https://fonts.google.com/specimen/Roboto) so Greek symbols
+The websites uses the [Google's Roboto font](https://fonts.google.com/specimen/Roboto) &nbsp; so Greek symbols
 can be included without using MathJax either by specifying the HTML entity or by copying the unicode character
 given in the two tables below.
 This could be useful if the page does not contain Latex equations and there are just a few Greek symbols to be inserted.
@@ -760,23 +836,23 @@ Please do not use unicode characters in Latex equations.
 | GREEK CAPITAL  LETTER DELTA	  | Δ		| &‌#916; | &‌#x0394	| &‌Delta;
 | GREEK CAPITAL  LETTER EPSILON	  | Ε		| &‌#917; | &‌#x0395	| &‌Epsilon;
 | GREEK CAPITAL  LETTER ZETA	  | Ζ		| &‌#918; | &‌#x0396	| &‌Zeta;
-| GREEK CAPITAL  LETTER ETA	  | Η		| &‌#919; | &‌#x0397	| &‌Eta;
+| GREEK CAPITAL  LETTER ETA	      | Η		| &‌#919; | &‌#x0397	| &‌Eta;
 | GREEK CAPITAL  LETTER THETA	  | Θ		| &‌#920; | &‌#x0398	| &‌Theta;
 | GREEK CAPITAL  LETTER IOTA	  | Ι		| &‌#921; | &‌#x0399	| &‌Iota;
 | GREEK CAPITAL  LETTER KAPPA	  | Κ		| &‌#922; | &‌#x039A	| &‌Kappa;
 | GREEK CAPITAL  LETTER LAM(B)DA  | Λ		| &‌#923; | &‌#x039B	| &‌Lambda;
-| GREEK CAPITAL  LETTER MU	  | Μ		| &‌#924; | &‌#x039C	| &‌Mu;
-| GREEK CAPITAL  LETTER NU	  | Ν		| &‌#925; | &‌#x039D	| &‌Nu;
-| GREEK CAPITAL  LETTER XI	  | Ξ		| &‌#926; | &‌#x039E	| &‌Xi;
+| GREEK CAPITAL  LETTER MU	      | Μ		| &‌#924; | &‌#x039C	| &‌Mu;
+| GREEK CAPITAL  LETTER NU	      | Ν		| &‌#925; | &‌#x039D	| &‌Nu;
+| GREEK CAPITAL  LETTER XI	      | Ξ		| &‌#926; | &‌#x039E	| &‌Xi;
 | GREEK CAPITAL  LETTER OMICRON	  | Ο		| &‌#927; | &‌#x039F	| &‌Omicron;
-| GREEK CAPITAL  LETTER PI	  | Π		| &‌#928; | &‌#x03A0	| &‌Pi;
-| GREEK CAPITAL  LETTER RHO	  | Ρ		| &‌#929; | &‌#x03A1	| &‌Rho;
+| GREEK CAPITAL  LETTER PI	      | Π		| &‌#928; | &‌#x03A0	| &‌Pi;
+| GREEK CAPITAL  LETTER RHO	      | Ρ		| &‌#929; | &‌#x03A1	| &‌Rho;
 | GREEK CAPITAL  LETTER SIGMA	  | Σ		| &‌#931; | &‌#x03A3	| &‌Sigma;
-| GREEK CAPITAL  LETTER TAU	  | Τ		| &‌#932; | &‌#x03A4	| &‌Tau;
+| GREEK CAPITAL  LETTER TAU	      | Τ		| &‌#932; | &‌#x03A4	| &‌Tau;
 | GREEK CAPITAL  LETTER UPSILON	  | Υ		| &‌#933; | &‌#x03A5	| &‌Upsilon;
-| GREEK CAPITAL  LETTER PHI	  | Φ		| &‌#934; | &‌#x03A6	| &‌Phi;
-| GREEK CAPITAL  LETTER CHI	  | Χ		| &‌#935; | &‌#x03A7	| &‌Chi;
-| GREEK CAPITAL  LETTER PSI	  | Ψ		| &‌#936; | &‌#x03A8	| &‌Psi;
+| GREEK CAPITAL  LETTER PHI       | Φ		| &‌#934; | &‌#x03A6	| &‌Phi;
+| GREEK CAPITAL  LETTER CHI       | Χ		| &‌#935; | &‌#x03A7	| &‌Chi;
+| GREEK CAPITAL  LETTER PSI       | Ψ		| &‌#936; | &‌#x03A8	| &‌Psi;
 | GREEK CAPITAL  LETTER OMEGA	  | Ω		| &‌#937; | &‌#x03A9	| &‌Omega;
 
 | Character Name                  | Character   | Entity       | Hex Entity     | HTML  Entity
@@ -785,23 +861,23 @@ Please do not use unicode characters in Latex equations.
 | GREEK SMALL LETTER BETA	  | β		| &‌#946; | &‌#x03B2	| &‌beta;
 | GREEK SMALL LETTER GAMMA	  | γ		| &‌#947; | &‌#x03B3	| &‌gamma;
 | GREEK SMALL LETTER DELTA	  | δ		| &‌#948; | &‌#x03B4	| &‌delta;
-| GREEK SMALL LETTER EPSILON	  | ε		| &‌#949; | &‌#x03B5	| &‌epsilon;
+| GREEK SMALL LETTER EPSILON  | ε		| &‌#949; | &‌#x03B5	| &‌epsilon;
 | GREEK SMALL LETTER ZETA	  | ζ		| &‌#950; | &‌#x03B6	| &‌zeta;
 | GREEK SMALL LETTER ETA	  | η		| &‌#951; | &‌#x03B7	| &‌eta;
 | GREEK SMALL LETTER THETA	  | θ		| &‌#952; | &‌#x03B8	| &‌theta;
 | GREEK SMALL LETTER IOTA	  | ι		| &‌#953; | &‌#x03B9	| &‌iota;
 | GREEK SMALL LETTER KAPPA	  | κ		| &‌#954; | &‌#x03BA	| &‌kappa;
-| GREEK SMALL LETTER LAM(B)DA	  | λ		| &‌#955; | &‌#x03BB	| &‌lambda;
+| GREEK SMALL LETTER LAM(B)DA | λ		| &‌#955; | &‌#x03BB	| &‌lambda;
 | GREEK SMALL LETTER MU		  | μ		| &‌#956; | &‌#x03BC	| &‌mu;
 | GREEK SMALL LETTER NU		  | ν		| &‌#957; | &‌#x03BD	| &‌nu;
 | GREEK SMALL LETTER XI		  | ξ		| &‌#958; | &‌#x03BE	| &‌xi;
-| GREEK SMALL LETTER OMICRON	  | ο		| &‌#959; | &‌#x03BF	| &‌omicron;
+| GREEK SMALL LETTER OMICRON  | ο		| &‌#959; | &‌#x03BF	| &‌omicron;
 | GREEK SMALL LETTER PI		  | π		| &‌#960; | &‌#x03C0	| &‌pi;
 | GREEK SMALL LETTER RHO	  | ρ		| &‌#961; | &‌#x03C1	| &‌rho;
-| GREEK SMALL LETTER FINAL SIGMA  | ς		| &‌#962; | &‌#x03C2	|  
+| GREEK SMALL LETTER FINAL SIGMA  | ς		| &‌#962; | &‌#x03C2	|
 | GREEK SMALL LETTER SIGMA	  | σ		| &‌#963; | &‌#x03C3	| &‌sigma;
 | GREEK SMALL LETTER TAU	  | τ		| &‌#964; | &‌#x03C4	| &‌tau;
-| GREEK SMALL LETTER UPSILON	  | υ		| &‌#965; | &‌#x03C5	| &‌upsilon;
+| GREEK SMALL LETTER UPSILON  | υ		| &‌#965; | &‌#x03C5	| &‌upsilon;
 | GREEK SMALL LETTER PHI	  | φ		| &‌#966; | &‌#x03C6	| &‌phi;
 | GREEK SMALL LETTER CHI	  | χ		| &‌#967; | &‌#x03C7	| &‌chi;
 | GREEK SMALL LETTER PSI	  | ψ		| &‌#968; | &‌#x03C8	| &‌psi;
@@ -812,7 +888,7 @@ Taken from <https://sites.psu.edu/symbolcodes/languages/ancient/greek/greekchart
 
 ## Plotly
 
-[plotly](https://plot.ly/api/) is a high-level, declarative charting library built on top of d3.js and stack.gl.
+[plotly](https://plot.ly/api/) &nbsp; is a high-level, declarative charting library built on top of d3.js and stack.gl.
 plotly.js ships with over 20 chart types, including scientific charts, 3D graphs, statistical charts, SVG maps,
 financial charts, and more.
 Note that plotly is deactivated by default so you have to activate it inside the Markdown page by adding
@@ -863,10 +939,10 @@ $(function() {
 plotly is used to plot the [code statistics](codestats.md) but it's not required for the proper functioning of the website.
 
 
-## Using HTML directly 
+## Using HTML directly
 
 HTML code can be used in Markdown but keep in mind that
-standard Markdown parsers will ignore text inside block-level HTML tags so
+standard Markdown parsers ignore text inside block-level HTML tags so
 
 ```html
 <div>
@@ -882,73 +958,17 @@ generates a directory with an `index.html` file for every markdown page declared
 This means that a local webserver will serve this page at `http://127.0.0.1:8000/developers/markdown/index.html`
 that can be equivalently reached from the more user friendly URL `http://127.0.0.1:8000/developers/markdown/`.
 
-This implementation detail does not affect links specified either with wikilink or markdown syntax because 
+This implementation detail does not affect links specified either with wikilink or markdown syntax because
 the python code will perform the automatic translation of the URLs.
-It does affect, however, the way you should specify `src` or `href` in HTML code because 
+It does affect, however, the way you should specify `src` or `href` in HTML code because
 one should take into account the *extra directory* created by Mkdocs.
 In a nutshell, **prepend** a `../` to the relative path you would use inside the shell to specify the location
 of that resource with respect to the present page.
 
-For instance, to build a Bootstrap carousel in this page using the images located in 
-the `~abinit/doc/tutorial/bse_assets/` directory, one should use:
-
-```html
-<div id="myCarousel" class="carousel slide" data-ride="carousel">
-  <!-- Indicators -->
-  <ol class="carousel-indicators">
-    <li data-target="#myCarousel" data-slide-to="0" class="active"></li>
-    <li data-target="#myCarousel" data-slide-to="1"></li>
-  </ol>
-  <!-- Wrapper for slides -->
-  <div class="carousel-inner" role="listbox">
-    <div class="item active">
-      <img src="../../tutorial/bse_assets/tbs2_1.png" alt="Uncoverged BSE spectrum">
-      <div class="carousel-caption">Unconverged BSE optical spectrum</div>
-    </div>
-    <div class="item">
-      <img src="../../tutorial/bse_assets/tbs5.png" alt="Converged BSE spectrum">
-      <div class="carousel-caption">Convergenge of BSE optical spectrum wrt k-point sampling</div>
-    </div>
-  </div>
-  ...
-  ...
-</div>
-```
-
-that produces:
-
-<div id="myCarousel" class="carousel slide" data-ride="carousel">
-  <!-- Indicators -->
-  <ol class="carousel-indicators">
-    <li data-target="#myCarousel" data-slide-to="0" class="active"></li>
-    <li data-target="#myCarousel" data-slide-to="1"></li>
-  </ol>
-
-  <!-- Wrapper for slides -->
-  <div class="carousel-inner" role="listbox">
-    <div class="item active">
-      <img src="../../tutorial/bse_assets/tbs2_1.png" alt="Uncoverged BSE spectrum">
-      <div class="carousel-caption">Unconverged BSE optical spectrum</div>
-    </div>
-    <div class="item">
-      <img src="../../tutorial/bse_assets/tbs5.png" alt="Converged BSE spectrum">
-      <div class="carousel-caption">Convergenge of BSE optical spectrum wrt k-point sampling</div>
-    </div>
-  </div>
-
-  <!-- Left and right controls -->
-  <a class="left carousel-control" href="#myCarousel" role="button" data-slide="prev">
-    <span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span>
-    <span class="sr-only">Previous</span>
-  </a>
-  <a class="right carousel-control" href="#myCarousel" role="button" data-slide="next">
-    <span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span>
-    <span class="sr-only">Next</span>
-  </a>
-</div>
-
+<!--
 !!! warning
-    Do not use root-relative URLs (e.g. `/tutorial/bse_assets/tbs5.png`) in HTML code 
+    Do not use root-relative URLs (e.g. `/tutorial/bse_assets/tbs5.png`) in HTML code
     because this will create problems when the site is deployed.
-    Besides relative URLs allow us to serve multiple versions of the Abinit documentation 
+    Besides relative URLs allow us to serve multiple versions of the Abinit documentation
     associated to the different versions of the code.
+-->

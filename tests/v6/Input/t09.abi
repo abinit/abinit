@@ -1,0 +1,57 @@
+# print out crystallographic information file (CIF) from abinit data.
+prtcif 1
+
+# this file concerns simple cubic Titanium, for test purposes (symmetry operations
+#  do not need to worry about conventional vs primitive unit cells)
+
+
+# very bad tolerance - we are only interested in geometry output for CIF
+tolwfr 1.0d-4
+prtwf 0
+
+# underconverged k-point grid
+ngkpt 1 1 1
+kptopt 1
+
+#  as is the kinetic energy cutoff
+ecut 4.0
+
+#  use a non-shifted grid for the kpoints
+nshiftk 1
+shiftk 0.0 0.0 0.
+
+# slightly random cell parameters, estimated from hcp Ti bulk interatomic distances
+acell 3*2.9508  Angstr
+angdeg 90 90 90  # cubic cell
+nband 5
+nbdbuf 1
+nline 8
+
+#  include metallic occupation function with a small smearing
+occopt 7
+tsmear 0.001
+
+natom 1
+typat 1
+xred
+0.00 0.00 0.00
+ntypat 1
+znucl 22  # Titanium
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/22ti.pspnc"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t09.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -medium
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = M. Verstraete
+#%% keywords = CIF
+#%% description = 
+#%%   Print out CIF file for simple cubic Ti crystal, for reference purposes (conventional = primitive unit cell for symmetry ops)
+#%%<END TEST_INFO>

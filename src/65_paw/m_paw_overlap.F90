@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_paw_overlap
 !! NAME
 !!  m_paw_overlap
@@ -9,7 +8,7 @@
 !!  Mainly used in Berry phase formalism.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2018-2019 ABINIT group (JWZ,TRangel,BA,FJ,PHermet)
+!! Copyright (C) 2018-2024 ABINIT group (JWZ,TRangel,BA,FJ,PHermet)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -25,14 +24,13 @@
 MODULE m_paw_overlap
 
  use defs_basis
- use defs_abitypes
  use m_errors
  use m_abicore
  use m_xmpi
 
+ use defs_abitypes, only : MPI_type
  use m_special_funcs, only : sbf8
  use m_efield, only : efield_type
-
  use m_pawang, only : pawang_type
  use m_pawcprj, only : pawcprj_type
  use m_pawrad, only : pawrad_type,simp_gen
@@ -92,29 +90,21 @@ CONTAINS  !=====================================================================
 !! This routine assumes that the cprj are not explicitly ordered by
 !! atom type.
 !!
-!! PARENTS
-!!      chern_number
-!!
-!! CHILDREN
-!!      expibi,qijb_kk
-!!
 !! SOURCE
 
- subroutine overlap_k1k2_paw(cprj_k1,cprj_k2,dk,gprimd,k1k2_paw,lmn2max,lmnsize,mband,&
-&                           natom,nspinor,ntypat,pawang,pawrad,pawtab,typat,xred)
-
- implicit none
+ subroutine overlap_k1k2_paw(cprj_k1,cprj_k2,dk,gprimd,k1k2_paw,lmn2max,lmnsize,&
+&                           natom,nband,nband_occ,nspinor,ntypat,pawang,pawrad,pawtab,typat,xred)
 
 !Arguments---------------------------
 !scalars
- integer,intent(in) :: lmn2max,mband,natom,nspinor,ntypat
+ integer,intent(in) :: lmn2max,natom,nband,nband_occ,nspinor,ntypat
  type(pawang_type),intent(in) :: pawang
- type(pawcprj_type),intent(in) :: cprj_k1(natom,mband),cprj_k2(natom,mband)
+ type(pawcprj_type),intent(in) :: cprj_k1(natom,nband),cprj_k2(natom,nband)
 
 !arrays
  integer,intent(in) :: lmnsize(ntypat),typat(natom)
  real(dp),intent(in) :: dk(3),gprimd(3,3),xred(natom,3)
- real(dp),intent(out) :: k1k2_paw(2,mband,mband)
+ real(dp),intent(out) :: k1k2_paw(2,nband_occ,nband_occ)
  type(pawrad_type),intent(in) :: pawrad(ntypat)
  type(pawtab_type),intent(in) :: pawtab(ntypat)
 
@@ -133,13 +123,13 @@ CONTAINS  !=====================================================================
  k1k2_paw(:,:,:) = zero
 
  ! obtain the atomic phase factors for the input k vector shift
- ABI_ALLOCATE(calc_expibi,(2,natom))
+ ABI_MALLOC(calc_expibi,(2,natom))
  call expibi(calc_expibi,dk,natom,xred)
 
  ! obtain the onsite PAW terms for the input k vector shift
- ABI_ALLOCATE(calc_qijb,(2,lmn2max,natom))
+ ABI_MALLOC(calc_qijb,(2,lmn2max,natom))
  call qijb_kk(calc_qijb,dk,calc_expibi,gprimd,lmn2max,natom,ntypat,pawang,pawrad,pawtab,typat)
- ABI_DEALLOCATE(calc_expibi)
+ ABI_FREE(calc_expibi)
 
  do iatom = 1, natom
    itypat = typat(iatom)
@@ -148,9 +138,9 @@ CONTAINS  !=====================================================================
      do jlmn=1,lmnsize(itypat)
        klmn=max(ilmn,jlmn)*(max(ilmn,jlmn)-1)/2 + min(ilmn,jlmn)
        paw_onsite = cmplx(calc_qijb(1,klmn,iatom),calc_qijb(2,klmn,iatom))
-       do iband = 1, mband
-         do jband = 1, mband
-           do ispinor = 1, nspinor
+       do ispinor = 1, nspinor
+         do iband = 1, nband_occ
+           do jband = 1, nband_occ
              ibs = nspinor*(iband-1) + ispinor
              jbs = nspinor*(jband-1) + ispinor
              cpk1=cmplx(cprj_k1(iatom,ibs)%cp(1,ilmn),cprj_k1(iatom,ibs)%cp(2,ilmn))
@@ -158,15 +148,15 @@ CONTAINS  !=====================================================================
              cterm = conjg(cpk1)*paw_onsite*cpk2
              k1k2_paw(1,iband,jband) = k1k2_paw(1,iband,jband)+real(cterm)
              k1k2_paw(2,iband,jband) = k1k2_paw(2,iband,jband)+aimag(cterm)
-           end do ! end loop over ispinor
-         end do ! end loop over jband
-       end do ! end loop over iband
+           end do ! end loop over jband
+         end do ! end loop over iband
+       end do ! end loop over ispinor
      end do ! end loop over ilmn
    end do ! end loop over jlmn
 
  end do ! end loop over atoms
 
- ABI_DEALLOCATE(calc_qijb)
+ ABI_FREE(calc_qijb)
 
  end subroutine overlap_k1k2_paw
 !!***
@@ -213,21 +203,12 @@ CONTAINS  !=====================================================================
 !! NOTES
 !!  The mpi part will work with mlwfovlp but not for berryphase_new
 !!
-!! PARENTS
-!!      mlwfovlp
-!!
-!! CHILDREN
-!!      initylmr,pawcprj_alloc,pawcprj_free,pawcprj_get,pawcprj_getdim,sbf8
-!!      simp_gen
-!!
 !! SOURCE
 
  subroutine smatrix_pawinit(atindx1,cm2,cprj,ikpt1,ikpt2,isppol,&
 & g1,gprimd,kpt,mband,mbandw,mkmem,mpi_enreg,&
 & natom,nband,nkpt,nspinor,nsppol,ntypat,pawang,pawrad,pawtab,rprimd,&
 & seed_name,typat,xred)
-
- implicit none
 
 !Arguments---------------------------
 !scalars
@@ -276,17 +257,17 @@ CONTAINS  !=====================================================================
 !
 !Allocate cprj_k1 and cprj_k2
 !
- ABI_ALLOCATE(dimcprj,(natom))
+ ABI_MALLOC(dimcprj,(natom))
  call pawcprj_getdim(dimcprj,natom,nattyp_dum,ntypat,typat,pawtab,'R')
 
  nband_k=nband(ikpt1)
- ABI_DATATYPE_ALLOCATE(cprj_k1,(natom,nband_k*nspinor))
+ ABI_MALLOC(cprj_k1,(natom,nband_k*nspinor))
  call pawcprj_alloc(cprj_k1,0,dimcprj)
 
  nband_k=nband(ikpt2)
- ABI_DATATYPE_ALLOCATE(cprj_k2,(natom,nband_k*nspinor))
+ ABI_MALLOC(cprj_k2,(natom,nband_k*nspinor))
  call pawcprj_alloc(cprj_k2,0,dimcprj)
- ABI_DEALLOCATE(dimcprj)
+ ABI_FREE(dimcprj)
 
 !mpi initialization
  spaceComm=MPI_enreg%comm_cell
@@ -350,7 +331,7 @@ CONTAINS  !=====================================================================
      open (unit=iunit, file=cprj_file,form='unformatted',status='old',iostat=ios)
      if(ios /= 0) then
        write(message,*) " smatrix_pawinit: file",trim(cprj_file), "not found"
-       MSG_ERROR(message)
+       ABI_ERROR(message)
      end if
 !
 !    start reading
@@ -369,7 +350,7 @@ CONTAINS  !=====================================================================
      close (unit=iunit,iostat=ios)
      if(ios /= 0) then
        write(message,*) " smatrix_pawinit: error closing file ",trim(cprj_file)
-       MSG_ERROR(message)
+       ABI_ERROR(message)
      end if
 !
    end if
@@ -418,8 +399,8 @@ CONTAINS  !=====================================================================
 !--- Compute intermediate quantities: "b" vector=k2-k1 and its
 !normalized value: bbn (and its norm: bnorm)
 !compute also Ylm(b).
- ABI_ALLOCATE(ylmb,(pawang%l_size_max*pawang%l_size_max))
- ABI_ALLOCATE(ylmrgr_dum,(1,1,0))
+ ABI_MALLOC(ylmb,(pawang%l_size_max*pawang%l_size_max))
+ ABI_MALLOC(ylmrgr_dum,(1,1,0))
  bb(:)=kpt(:,ikpt2)-kpt(:,ikpt1)+g1(:)
  bb1=bb
  xx=gprimd(1,1)*bb(1)+gprimd(1,2)*bb(2)+gprimd(1,3)*bb(3)
@@ -450,10 +431,10 @@ CONTAINS  !=====================================================================
 !write(std_out,*) "bbn",bbn(:)
 !write(std_out,*) "xx,yy,zz",xx,yy,zz
 !write(std_out,*) "bnorm",bnorm
- ABI_DEALLOCATE(ylmrgr_dum)
+ ABI_FREE(ylmrgr_dum)
 
 !------- First Compute Qij(b)-
- ABI_ALLOCATE(sb_out, (pawang%l_size_max))
+ ABI_MALLOC(sb_out, (pawang%l_size_max))
  cm2=zero
 
  do iatom=1,natom
@@ -462,7 +443,7 @@ CONTAINS  !=====================================================================
 !  ---  en coordonnnes reelles cartesiennes (espace reel)
 !  ---  first radial part(see pawinit)
    mesh_size=pawtab(itypat)%mesh_size
-   ABI_ALLOCATE(j_bessel,(mesh_size,pawang%l_size_max))
+   ABI_MALLOC(j_bessel,(mesh_size,pawang%l_size_max))
 
 
 !  ---  compute bessel function for (br) for all angular momenta necessary
@@ -506,12 +487,12 @@ CONTAINS  !=====================================================================
        qijb=zero
        do ll=lmin,lmax,2
          lm0=ll*ll+ll+1
-         ABI_ALLOCATE(ff,(mesh_size))
+         ABI_MALLOC(ff,(mesh_size))
          ff(1:mesh_size)=(pawtab(itypat)%phiphj(1:mesh_size,kln)&
 &         -pawtab(itypat)%tphitphj(1:mesh_size,kln))&
 &         *j_bessel(1:mesh_size,ll+1)
          call simp_gen(intg,ff,pawrad(itypat))
-         ABI_DEALLOCATE(ff)
+         ABI_FREE(ff)
          qijbtemp=zero
          do mm=-ll,ll
            isel=pawang%gntselect(lm0+mm,klm)
@@ -585,15 +566,15 @@ CONTAINS  !=====================================================================
      end do ! ilmn
    end do ! jlmn
 !  write(std_out,*) "final qijtot",qijtot
-   ABI_DEALLOCATE(j_bessel)
+   ABI_FREE(j_bessel)
  end do ! iatom
 
- ABI_DEALLOCATE(sb_out)
- ABI_DEALLOCATE(ylmb)
+ ABI_FREE(sb_out)
+ ABI_FREE(ylmb)
  call pawcprj_free(cprj_k1)
  call pawcprj_free(cprj_k2)
- ABI_DATATYPE_DEALLOCATE(cprj_k1)
- ABI_DATATYPE_DEALLOCATE(cprj_k2)
+ ABI_FREE(cprj_k1)
+ ABI_FREE(cprj_k2)
 
  DBG_EXIT("COLL")
 
@@ -629,16 +610,9 @@ CONTAINS  !=====================================================================
 !! This routine assumes that the cprj are not explicitly ordered by
 !! atom type.
 !!
-!! PARENTS
-!!      berryphase_new,cgwf,make_grad_berry
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
  subroutine smatrix_k_paw(cprj_k,cprj_kb,dtefield,kdir,kfor,mband,natom,smat_k_paw,typat)
-
- implicit none
 
 !Arguments---------------------------
 !scalars
@@ -673,9 +647,9 @@ CONTAINS  !=====================================================================
        paw_onsite = cmplx(dtefield%qijb_kk(1,klmn,iatom,kdir),&
 &       dtefield%qijb_kk(2,klmn,iatom,kdir))
        if (kfor > 1) paw_onsite = conjg(paw_onsite)
-       do iband = 1, dtefield%mband_occ
-         do jband = 1, dtefield%mband_occ
-           do ispinor = 1, nspinor
+       do ispinor = 1, nspinor
+         do iband = 1, dtefield%mband_occ
+           do jband = 1, dtefield%mband_occ
              ibs = nspinor*(iband-1) + ispinor
              jbs = nspinor*(jband-1) + ispinor
              cpk=cmplx(cprj_k(iatom,ibs)%cp(1,ilmn),cprj_k(iatom,ibs)%cp(2,ilmn))
@@ -683,9 +657,9 @@ CONTAINS  !=====================================================================
              cterm = conjg(cpk)*paw_onsite*cpkb
              smat_k_paw(1,iband,jband) = smat_k_paw(1,iband,jband)+dreal(cterm)
              smat_k_paw(2,iband,jband) = smat_k_paw(2,iband,jband)+dimag(cterm)
-           end do ! end loop over ispinor
-         end do ! end loop over jband
-       end do ! end loop over iband
+           end do ! end loop over jband
+         end do ! end loop over iband
+       end do ! end loop over ispinor
      end do ! end loop over ilmn
    end do ! end loop over jlmn
 
@@ -727,18 +701,10 @@ CONTAINS  !=====================================================================
 !! this function computes the on-site data for the PAW version of
 !! <u_nk|u_mk+b>, that is, two Bloch vectors at two different k points.
 !!
-!! PARENTS
-!!      initberry,overlap_k1k2_paw
-!!
-!! CHILDREN
-!!      initylmr,sbf8,simp_gen
-!!
 !! SOURCE
 
  subroutine qijb_kk(calc_qijb,dkvecs,expibi,gprimd,lmn2max,natom,ntypat,&
 &                   pawang,pawrad,pawtab,typat)
-
- implicit none
 
 !Arguments---------------------------
 !scalars
@@ -773,16 +739,16 @@ CONTAINS  !=====================================================================
  ylmr_nrm(1) = one ! weight of normed point for initylmr
  ylmr_option = 1 ! compute only ylm's in initylmr
 
- ABI_ALLOCATE(sb_out, (pawang%l_size_max))
+ ABI_MALLOC(sb_out, (pawang%l_size_max))
 
  do iatom = 1, natom
 
    itypat = typat(iatom)
    mesh_size = pawtab(itypat)%mesh_size
 
-   ABI_ALLOCATE(j_bessel,(mesh_size,pawang%l_size_max))
-   ABI_ALLOCATE(ff,(mesh_size))
-   ABI_ALLOCATE(ylmb,(pawang%l_size_max*pawang%l_size_max))
+   ABI_MALLOC(j_bessel,(mesh_size,pawang%l_size_max))
+   ABI_MALLOC(ff,(mesh_size))
+   ABI_MALLOC(ylmb,(pawang%l_size_max*pawang%l_size_max))
 
    !    here is exp(-i b.R) for current atom: recall storage in expibi
    etb = cmplx(expibi(1,iatom),expibi(2,iatom))
@@ -840,12 +806,12 @@ CONTAINS  !=====================================================================
      end do ! end loop on lmin-lmax bessel l values
    end do ! end loop on lmn2_size klmn basis pairs
 
-   ABI_DEALLOCATE(j_bessel)
-   ABI_DEALLOCATE(ff)
-   ABI_DEALLOCATE(ylmb)
+   ABI_FREE(j_bessel)
+   ABI_FREE(ff)
+   ABI_FREE(ylmb)
  end do ! end loop over atoms
 
- ABI_DEALLOCATE(sb_out)
+ ABI_FREE(sb_out)
 
  end subroutine qijb_kk
 !!***
@@ -871,16 +837,9 @@ CONTAINS  !=====================================================================
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      initberry,overlap_k1k2_paw
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
  subroutine expibi(calc_expibi,dkvecs,natom,xred)
-
- implicit none
 
 !Arguments---------------------------
 !scalars

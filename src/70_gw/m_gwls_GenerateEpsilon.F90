@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_gwls_GenerateEpsilon
 !! NAME
 !! m_gwls_GenerateEpsilon
@@ -7,14 +6,10 @@
 !!  .
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2019 ABINIT group (JLJ, BR, MC)
+!! Copyright (C) 2009-2024 ABINIT group (JLJ, BR, MC)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -43,8 +38,7 @@ use m_gwls_GWlanczos
 ! Abinit modules
 use m_abicore
 use defs_basis
-use defs_datatypes
-use defs_abitypes
+use m_dtset
 
 use m_io_tools,    only : get_unit
 
@@ -81,17 +75,6 @@ contains
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      gwls_ComputeCorrelationEnergy
-!!
-!! CHILDREN
-!!      cpu_time,diagonalize_lanczos_banded
-!!      driver_invert_positive_definite_hermitian_matrix
-!!      generateprintdielectriceigenvalues
-!!      matrix_function_epsilon_model_operator
-!!      set_dielectric_function_frequency,setup_pk_model,write_timing_log,zgemm
-!!      zheevd
-!!
 !! SOURCE
 
 subroutine driver_generate_dielectric_matrix(epsilon_matrix_function,nseeds,kmax,&
@@ -101,7 +84,6 @@ epsilon_eigenvalues,Lbasis,debug)
 ! implicit dielectic operator and then diagonalizes the banded
 ! Lanczos matrix.
 !----------------------------------------------------------------------
-implicit none
 interface
   subroutine epsilon_matrix_function(v_out,v_in,l)
   use defs_basis
@@ -137,12 +119,12 @@ mpi_communicator = mpi_enreg%comm_bandfft
 
 
 !Create seeds
-ABI_ALLOCATE(seeds,(npw_k,nseeds))
+ABI_MALLOC(seeds,(npw_k,nseeds))
 call get_seeds(first_seed, nseeds, seeds)
 
 ! compute the Lanczos basis
-ABI_ALLOCATE(alpha,(nseeds,nseeds,kmax))
-ABI_ALLOCATE(beta ,(nseeds,nseeds,kmax))
+ABI_MALLOC(alpha,(nseeds,nseeds,kmax))
+ABI_MALLOC(beta ,(nseeds,nseeds,kmax))
 
 call block_lanczos_algorithm(mpi_communicator,epsilon_matrix_function,kmax,nseeds,npw_k,        &
 seeds,alpha,beta,Lbasis)
@@ -154,9 +136,9 @@ if (debug) then
   call ritz_analysis_general(mpi_communicator, epsilon_matrix_function,nseeds*kmax,npw_k,Lbasis,epsilon_eigenvalues)
 end if
 
-ABI_DEALLOCATE(seeds)
-ABI_DEALLOCATE(alpha)
-ABI_DEALLOCATE(beta)
+ABI_FREE(seeds)
+ABI_FREE(alpha)
+ABI_FREE(beta)
 
 end subroutine driver_generate_dielectric_matrix
 !!***
@@ -172,26 +154,14 @@ end subroutine driver_generate_dielectric_matrix
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_gwls_GenerateEpsilon
-!!
-!! CHILDREN
-!!      cpu_time,diagonalize_lanczos_banded
-!!      driver_invert_positive_definite_hermitian_matrix
-!!      generateprintdielectriceigenvalues
-!!      matrix_function_epsilon_model_operator
-!!      set_dielectric_function_frequency,setup_pk_model,write_timing_log,zgemm
-!!      zheevd
-!!
 !! SOURCE
 
-subroutine GeneratePrintDielectricEigenvalues(epsilon_matrix_function,kmax,output_filename,Lbasis,alpha,beta)
+subroutine GeneratePrintDielectricEigenvalues(epsilon_matrix_function,nseeds,kmax,output_filename,Lbasis,alpha,beta)
 !----------------------------------------------------------------------
 ! This routine computes the Lanczos approximate representation of the
 ! implicit dielectic operator and then diagonalizes the banded
 ! Lanczos matrix.
 !----------------------------------------------------------------------
-implicit none
 interface
   subroutine epsilon_matrix_function(v_out,v_in,l)
   use defs_basis
@@ -203,14 +173,14 @@ interface
   end subroutine epsilon_matrix_function
 end interface
 
-integer,       intent(in) :: kmax
+integer,       intent(in) :: nseeds, kmax
 
 character(*),  intent(in) :: output_filename
 
 
-complex(dpc), intent(out) :: Lbasis(npw_k,nseeds*kmax)  
-complex(dpc), intent(out) :: alpha(nseeds,nseeds,kmax)
-complex(dpc), intent(out) :: beta (nseeds,nseeds,kmax)
+complex(dpc), intent(out) :: Lbasis(:,:)
+complex(dpc), intent(out) :: alpha(:,:,:)
+complex(dpc), intent(out) :: beta (:,:,:)
 
 
 ! local variables
@@ -218,7 +188,7 @@ complex(dpc), intent(out) :: beta (nseeds,nseeds,kmax)
 
 complex(dpc),allocatable :: seeds(:,:)
 
-complex(dpc),allocatable :: Lbasis_diag(:,:)  
+complex(dpc),allocatable :: Lbasis_diag(:,:)
 
 
 real(dp),    allocatable :: psik(:,:)
@@ -232,7 +202,7 @@ integer :: io_unit
 integer :: lmax
 integer :: l
 integer :: ir1, ir2, ir3
-integer :: n1, n2, n3 
+integer :: n1, n2, n3
 
 real(dp) :: R, G
 real(dp) :: sigma_R, sigma_G
@@ -250,17 +220,17 @@ debug = .false.
 lmax = kmax*nseeds
 mpi_communicator = mpi_enreg%comm_bandfft
 !Create seeds
-ABI_ALLOCATE(seeds,(npw_k,nseeds))
+ABI_MALLOC(seeds,(npw_k,nseeds))
 call get_seeds(first_seed, nseeds, seeds)
 
 ! compute the Lanczos basis
-ABI_ALLOCATE(Lbasis_diag,(npw_k,lmax))
-ABI_ALLOCATE(epsilon_eigenvalues,(lmax))
+ABI_MALLOC(Lbasis_diag,(npw_k,lmax))
+ABI_MALLOC(epsilon_eigenvalues,(lmax))
 
-ABI_ALLOCATE(psik,(2,npw_k))
-ABI_ALLOCATE(psir,(2,n4,n5,n6))
-ABI_ALLOCATE(G_array,(npw_k))
-ABI_ALLOCATE(R_array,(n4,n5,n6))
+ABI_MALLOC(psik,(2,npw_k))
+ABI_MALLOC(psir,(2,n4,n5,n6))
+ABI_MALLOC(G_array,(npw_k))
+ABI_MALLOC(R_array,(n4,n5,n6))
 
 psir = zero
 R_array = zero
@@ -369,14 +339,14 @@ end do
 
 close(io_unit)
 
-ABI_DEALLOCATE(seeds)
-ABI_DEALLOCATE(Lbasis_diag)
-ABI_DEALLOCATE(psik)
-ABI_DEALLOCATE(psir)
-ABI_DEALLOCATE(G_array)
-ABI_DEALLOCATE(R_array)
+ABI_FREE(seeds)
+ABI_FREE(Lbasis_diag)
+ABI_FREE(psik)
+ABI_FREE(psir)
+ABI_FREE(G_array)
+ABI_FREE(R_array)
 
-ABI_DEALLOCATE(epsilon_eigenvalues)
+ABI_FREE(epsilon_eigenvalues)
 
 
 10 format(A)
@@ -395,17 +365,6 @@ end subroutine GeneratePrintDielectricEigenvalues
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      gwls_sternheimer
-!!
-!! CHILDREN
-!!      cpu_time,diagonalize_lanczos_banded
-!!      driver_invert_positive_definite_hermitian_matrix
-!!      generateprintdielectriceigenvalues
-!!      matrix_function_epsilon_model_operator
-!!      set_dielectric_function_frequency,setup_pk_model,write_timing_log,zgemm
-!!      zheevd
 !!
 !! SOURCE
 
@@ -481,13 +440,13 @@ e            = dtset%gwls_band_index
 
 
 
-ABI_ALLOCATE(Lbasis_exact,(npw_k,kmax_exact*nseeds))
-ABI_ALLOCATE(Lbasis_model,(npw_k,kmax_model*nseeds))
+ABI_MALLOC(Lbasis_exact,(npw_k,kmax_exact*nseeds))
+ABI_MALLOC(Lbasis_model,(npw_k,kmax_model*nseeds))
 
-ABI_ALLOCATE(alpha_exact, (nseeds,nseeds,kmax_exact))
-ABI_ALLOCATE(beta_exact , (nseeds,nseeds,kmax_exact))
-ABI_ALLOCATE(alpha_model, (nseeds,nseeds,kmax_model))
-ABI_ALLOCATE(beta_model , (nseeds,nseeds,kmax_model))
+ABI_MALLOC(alpha_exact, (nseeds,nseeds,kmax_exact))
+ABI_MALLOC(beta_exact , (nseeds,nseeds,kmax_exact))
+ABI_MALLOC(alpha_model, (nseeds,nseeds,kmax_model))
+ABI_MALLOC(beta_model , (nseeds,nseeds,kmax_model))
 
 
 ! set omega=0 for exact dielectric operator
@@ -497,7 +456,7 @@ call set_dielectric_function_frequency([zero,zero])
 
 call cpu_time(time1)
 output_filename = 'EIGENVALUES_EXACT.dat'
-call GeneratePrintDielectricEigenvalues(matrix_function_epsilon_k, kmax_exact, &
+call GeneratePrintDielectricEigenvalues(matrix_function_epsilon_k, nseeds, kmax_exact, &
 output_filename, Lbasis_exact, alpha_exact, beta_exact)
 
 
@@ -512,8 +471,8 @@ call write_timing_log(timing_string,time)
 call cpu_time(time1)
 call setup_Pk_model(zero,second_model_parameter)
 output_filename = 'EIGENVALUES_MODEL.dat'
-call GeneratePrintDielectricEigenvalues(matrix_function_epsilon_model_operator, kmax_model, output_filename,&
-Lbasis_model, alpha_model, beta_model)
+call GeneratePrintDielectricEigenvalues(matrix_function_epsilon_model_operator, nseeds, kmax_model, &
+&output_filename, Lbasis_model, alpha_model, beta_model)
 call cpu_time(time2)
 time = time2-time1
 write(timing_string,'(A)')  "Time to compute the MODEL Static Dielectric Matrix  :   "
@@ -529,8 +488,8 @@ end if
 lmax = nseeds*kmax
 
 ! Build model operator matrix elements in the exact basis
-ABI_ALLOCATE(model_epsilon_matrix, (lmax,lmax))
-ABI_ALLOCATE(vector, (npw_k))
+ABI_MALLOC(model_epsilon_matrix, (lmax,lmax))
+ABI_MALLOC(vector, (npw_k))
 
 model_epsilon_matrix = cmplx_0
 
@@ -547,7 +506,7 @@ end do
 
 end do
 
-ABI_DEALLOCATE(vector)
+ABI_FREE(vector)
 
 call cpu_time(time2)
 time = time2-time1
@@ -557,7 +516,7 @@ call write_timing_log(timing_string,time)
 
 
 
-! Compare the traces 
+! Compare the traces
 
 
 io_unit = get_unit()
@@ -610,14 +569,14 @@ flush(io_unit2)
 ! Iterate every 10 values of k max, or else the linear algebra gets too expensive...
 do k = 4, kmax, 4
 
-ABI_ALLOCATE(sub_Lbasis_exact,(npw_k,k*nseeds))
-ABI_ALLOCATE(sub_Lbasis_model,(npw_k,k*nseeds))
+ABI_MALLOC(sub_Lbasis_exact,(npw_k,k*nseeds))
+ABI_MALLOC(sub_Lbasis_model,(npw_k,k*nseeds))
 
 
-ABI_ALLOCATE(eig_exact,(k*nseeds))
-ABI_ALLOCATE(eig_model,(k*nseeds))
-ABI_ALLOCATE(dummy,(k*nseeds,k*nseeds))
-ABI_ALLOCATE(dummy2,(k*nseeds,k*nseeds))
+ABI_MALLOC(eig_exact,(k*nseeds))
+ABI_MALLOC(eig_model,(k*nseeds))
+ABI_MALLOC(dummy,(k*nseeds,k*nseeds))
+ABI_MALLOC(dummy2,(k*nseeds,k*nseeds))
 
 sub_Lbasis_exact(:,:) = Lbasis_exact(:,1:k*nseeds)
 sub_Lbasis_model(:,:) = Lbasis_model(:,1:k*nseeds)
@@ -656,7 +615,7 @@ dummy2(lm,lm) = eig_exact(lm)
 tr_eps_3 = tr_eps_3 + dble(model_epsilon_matrix(lm,lm)) - dble(eig_exact(lm))
 end do
 
-ABI_ALLOCATE(dummy3,(k*nseeds,k*nseeds))
+ABI_MALLOC(dummy3,(k*nseeds,k*nseeds))
 call ZGEMM(      'N',   & ! Hermitian conjugate the first array
 'N',   & ! Leave second array as is
 k*nseeds,   & ! the number of rows of the  matrix op( A )
@@ -672,7 +631,7 @@ dummy3,   & ! matrix C
 k*nseeds)     ! LDC
 
 dummy2(:,:) = dummy3(:,:)
-ABI_DEALLOCATE(dummy3)
+ABI_FREE(dummy3)
 
 ! find eigenvalues
 !call heevd(dummy2, eig_exact)
@@ -681,12 +640,12 @@ lwork  = k*nseeds+1
 lrwork = k*nseeds
 liwork = 1
 
-ABI_ALLOCATE(work,(lwork))
-ABI_ALLOCATE(rwork,(lrwork))
-ABI_ALLOCATE(iwork,(liwork))
+ABI_MALLOC(work,(lwork))
+ABI_MALLOC(rwork,(lrwork))
+ABI_MALLOC(iwork,(liwork))
 
 call zheevd('N', 'U',k*nseeds, dummy2, k*nseeds, eig_exact, work, lwork, rwork, lrwork, iwork, liwork, info)
-if ( info /= 0) then        
+if ( info /= 0) then
   debug_unit = get_unit()
   write(debug_filename,'(A,I4.4,A)') 'LAPACK_DEBUG_PROC=',mpi_enreg%me,'.log'
 
@@ -711,19 +670,19 @@ flush(io_unit2)
 
 
 
-ABI_DEALLOCATE(work)
-ABI_DEALLOCATE(rwork)
-ABI_DEALLOCATE(iwork)
+ABI_FREE(work)
+ABI_FREE(rwork)
+ABI_FREE(iwork)
 
 
 
-ABI_DEALLOCATE(sub_Lbasis_exact)
-ABI_DEALLOCATE(sub_Lbasis_model)
+ABI_FREE(sub_Lbasis_exact)
+ABI_FREE(sub_Lbasis_model)
 
-ABI_DEALLOCATE(eig_exact)
-ABI_DEALLOCATE(eig_model)
-ABI_DEALLOCATE(dummy)
-ABI_DEALLOCATE(dummy2)
+ABI_FREE(eig_exact)
+ABI_FREE(eig_model)
+ABI_FREE(dummy)
+ABI_FREE(dummy2)
 end do
 
 close(io_unit)
@@ -734,13 +693,13 @@ time = time2-time1
 write(timing_string,'(A)')  "Time to compute the TRACES of the Dielectric Matrices:   "
 call write_timing_log(timing_string,time)
 
-ABI_DEALLOCATE(Lbasis_exact)
-ABI_DEALLOCATE(Lbasis_model)
-ABI_DEALLOCATE(alpha_exact)
-ABI_DEALLOCATE(beta_exact )
-ABI_DEALLOCATE(alpha_model)
-ABI_DEALLOCATE(beta_model )
-ABI_DEALLOCATE(model_epsilon_matrix)
+ABI_FREE(Lbasis_exact)
+ABI_FREE(Lbasis_model)
+ABI_FREE(alpha_exact)
+ABI_FREE(beta_exact )
+ABI_FREE(alpha_model)
+ABI_FREE(beta_model )
+ABI_FREE(model_epsilon_matrix)
 
 
 

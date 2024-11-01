@@ -4,6 +4,9 @@ from __future__ import print_function, division, absolute_import #, unicode_lite
 
 import sys
 import os
+# Set ABI_PSPDIR env variable to point to the absolute path of Psps_for_tests
+os.environ["ABI_PSPDIR"] = os.path.abspath(os.path.join(os.path.dirname(__file__), "Psps_for_tests"))
+#print("ABI_PSPDIR:", os.environ["ABI_PSPDIR"])
 import platform
 import time
 
@@ -48,13 +51,37 @@ __author__ = "Matteo Giantomassi"
 
 _my_name = os.path.basename(__file__) + "-" + __version__
 
+ALL_BINARIES = [
+    "abinit",
+    "abitk",
+    "aim",
+    "anaddb",
+    "band2eps",
+    "conducti",
+    "cut3d",
+    "dummy_tests",
+    "fftprof",
+    "fold2Bloch",
+    "ioprof",
+    "lapackprof",
+    "macroave",
+    "mrgddb",
+    "mrgdv",
+    "mrggkk",
+    "mrgscr",
+    "multibinit",
+    "optic",
+    "atdep",
+    "testtransposer",
+    "lruj",
+]
 
 def str_examples():
     return """
 Usage example (assuming the script is executed within a build tree):
 
-    runtests.py                      ==> Run the entire test suite with one python thread.
-    runtests.py -j2                  ==> Run the entire test suite with two python threads.
+    runtests.py                      ==> Run the entire test suite with one python process.
+    runtests.py -j2                  ==> Run the entire test suite with two python processes.
     runtests.py v1 v2 -k abinit      ==> Run only the tests in v1,v2 containing abinit as keyword.
     runtests.py v3[:4] v4[45:] v5[3] ==> Run the tests in v3 from t1.in to t3.in, all the
                                          tests in v4 starting from t45.in, and test t3 in v5
@@ -118,16 +145,21 @@ def vararg_callback(option, opt_str, value, parser):
 def make_abinit(num_threads, touch_patterns=None):
     """
     Find the top-level directory of the build tree and issue `make -j num_threads`.
-
-    Returns:
-        Exit status of the subprocess.
+    Return: Exit status of the subprocess.
     """
     top = find_top_build_tree(".", with_abinit=False)
 
     if touch_patterns:
         abenv.touch_srcfiles([s.strip() for s in touch_patterns.split(",") if s])
 
-    return os.system("cd %s && make -j%d" % (top, num_threads))
+    retcode = os.system("cd %s && make -j%d" % (top, num_threads))
+    if retcode == 0 and  platform.system() == "Darwin":
+        for binary in ALL_BINARIES:
+            cmd = f"codesign -v --force --deep {top}/src/98_main/{binary}"
+            cprint("Executing: %s" % cmd, "yellow")
+            os.system(cmd)
+
+    return retcode
 
 
 def parse_stats(stats):
@@ -164,7 +196,6 @@ def reload_test_suite(status_list):
 
 
 def main():
-
     usage = "usage: %prog [suite_args] [options]. Use [-h|--help] for help."
     version = "%prog " + str(__version__)
 
@@ -205,13 +236,8 @@ def main():
                             "(irrespectively of its value)."
                       ))
 
-    parser.add_option("-j", "--jobs", dest="py_nthreads", type="int", default=1,
-                      help="Number of python threads.")
-
-    parser.add_option("-r", "--regenerate", dest="regenerate", default=False, action="store_true",
-                      help=("Regenerate the test suite database"
-                            "(use this option after any change of the input files of the test suite or"
-                            " any change of the python scripts)."))
+    parser.add_option("-j", "--jobs", dest="py_nprocs", type="int", default=1,
+                      help="Number of python processes.")
 
     parser.add_option("--use-cache", default=False, action="store_true",
                       help=("Load database from pickle file."
@@ -249,6 +275,13 @@ def main():
 
     parser.add_option("--etsf", action="store_true", default=False,
                        help="Validate netcdf files produced by the tests. Requires netcdf4")
+
+    parser.add_option("-Y","--yaml-simplified-diff", dest="yaml_simplified_diff", default=False, action="store_true",
+                      help="Will only perform a simplified diff when comparing .abo files (based only on YAML sections)")
+
+    parser.add_option("-T","--forced-tolerance", dest="forced_tolerance", type="string", default="default",
+                      help="[string] Force the use of fldiff comparison tool with the specified tolerance. "+
+                           "Possible values are: default (from test config), high(1.e-10), medium (1.e-8), easy (1.e-5), ridiculous (1.e-2)")
 
     parser.add_option("--touch", default="",
                       help=("Used in conjunction with `-m`."
@@ -360,7 +393,7 @@ def main():
 
     mpi_nprocs = options.mpi_nprocs
     omp_nthreads = options.omp_nthreads
-    py_nthreads = options.py_nthreads
+    py_nprocs = options.py_nprocs
 
     cprint("Running on %s -- system %s -- ncpus %s -- Python %s -- %s" % (
           gethostname(), system, ncpus_detected, platform.python_version(), _my_name),
@@ -419,7 +452,7 @@ def main():
                     raise RuntimeError("Cannot locate srun in $PATH. "
                                        "Please check your environment")
 
-                runner = JobRunner.srun(timebomb=timebomb)
+                runner = JobRunner.srun(timebomb=timebomb, mpi_args=options.mpi_args)
 
             else:
                 if options.use_mpiexec:
@@ -435,7 +468,7 @@ def main():
                             "Please check your environment")
 
                 runner = JobRunner.generic_mpi(use_mpiexec=use_mpiexec, timebomb=timebomb,
-                                              mpi_args=options.mpi_args)
+                                               mpi_args=options.mpi_args)
 
         if omp_nthreads > 0:
             omp_env = OMPEnvironment(OMP_NUM_THREADS=omp_nthreads)
@@ -487,18 +520,6 @@ def main():
         test_suite = reload_test_suite(status_list=parse_stats(options.rerun))
 
     else:
-        if options.regenerate:
-             cprint("""
-`--regenerate` option has been removed in version 0.5.4
-
-Now the input files of the test farm are always analyzed when the script is executed and
-a new database is constructed from scratch. Developers can now `git checkout` a new
-branch containing changes in the test suite and runtests.py will run the new version of the tests.
-
-Use `--use-cache` to reload the database from the pickle file but remember that this could lead to
-unexpected behaviour if the pickle database is not up-to-date with the tests available in the active git branch.
-""", "red")
-
         regenerate = not options.use_cache
         try:
             test_suite = abitests.select_tests(suite_args, regenerate=regenerate,
@@ -524,19 +545,18 @@ unexpected behaviour if the pickle database is not up-to-date with the tests ava
 
     # Run the tested selected by the user.
     if omp_nthreads == 0:
-        ncpus_used = mpi_nprocs * py_nthreads
-        msg = ("Running %s test(s) with MPI_procs=%s, py_threads=%s..."
-               % (test_suite.full_length, mpi_nprocs, py_nthreads))
+        ncpus_used = mpi_nprocs * py_nprocs
+        msg = ("Running %s test(s) with MPI_procs: %s, py_nprocs: %s" % (test_suite.full_length, mpi_nprocs, py_nprocs))
     else:
-        ncpus_used = mpi_nprocs * omp_nthreads * py_nthreads
-        msg = ("Running %s test(s) with MPI_nprocs=%s, OMP_nthreads=%s, py_nthreads=%s..."
-               % (test_suite.full_length, mpi_nprocs, omp_nthreads, py_nthreads))
+        ncpus_used = mpi_nprocs * omp_nthreads * py_nprocs
+        msg = ("Running %s test(s) with MPI_nprocs: %s, OMP_nthreads: %s, py_nprocs: %s"
+               % (test_suite.full_length, mpi_nprocs, omp_nthreads, py_nprocs))
     cprint(msg, "yellow")
 
     if ncpus_used < 0.3 * ncpus_detected:
-        msg = ("[TIP] runtests.py is using %s CPUs but your architecture has %s CPUs\n"
-              "You may want to use python threads to speed up the execution\n"
-              "Use `runtests -jNUM` to run with NUM threads" % (ncpus_used, ncpus_detected))
+        msg = ("[TIP] runtests.py is using %s CPUs but your architecture has %s CPUs (including Hyper-Threading)\n"
+              "You may want to use python processes to speed up the execution\n"
+              "Use `runtests -jNUM` to run with NUM processes" % (ncpus_used, ncpus_detected))
         cprint(msg, "blue")
 
     elif ncpus_used > 1.5 * ncpus_detected:
@@ -564,14 +584,16 @@ unexpected behaviour if the pickle database is not up-to-date with the tests ava
 
     results = test_suite.run_tests(build_env, workdir, runner,
                                    nprocs=mpi_nprocs,
-                                   nthreads=py_nthreads,
+                                   py_nprocs=py_nprocs,
                                    runmode=runmode,
                                    erase_files=options.erase_files,
                                    make_html_diff=options.make_html_diff,
                                    sub_timeout=options.sub_timeout,
                                    pedantic=options.pedantic,
                                    abimem_check=options.abimem,
-                                   etsf_check=options.etsf)
+                                   etsf_check=options.etsf,
+                                   simplified_diff=options.yaml_simplified_diff,
+                                   forced_tolerance=options.forced_tolerance)
     if results is None: return 99
 
     if options.looponfail:
@@ -605,7 +627,7 @@ unexpected behaviour if the pickle database is not up-to-date with the tests ava
                     test_suite = AbinitTestSuite(test_suite.abenv, test_list=test_list)
                     results = test_suite.run_tests(build_env, workdir, runner,
                                                    nprocs=mpi_nprocs,
-                                                   nthreads=py_nthreads,
+                                                   py_nprocs=py_nprocs,
                                                    runmode=runmode,
                                                    erase_files=options.erase_files,
                                                    make_html_diff=options.make_html_diff,
@@ -617,17 +639,6 @@ unexpected behaviour if the pickle database is not up-to-date with the tests ava
 
         if count == max_iterations:
             cprint("Reached max_iterations", "red")
-
-    # Threads do not play well with KeyBoardInterrupt
-    #except KeyboardInterrupt:
-    #    all_programs = ["abinit", "anaddb", "mrgscr", "mrgddb", "mrgdv", "mpirun", "mpiexec"]
-    #    cprint("Interrupt sent by user. Will try to `killall executables` where:")
-    #    print("executables:", str(all_programs))
-    #    answer = prompt("Do you want to kill'em all? [Y/n]")
-    #    if not answer.lower().strip() in ["n", "no"]:
-    #        for prog in all_programs:
-    #            os.system("killall %s" % prog)
-    #    return 66
 
     # Edit input files.
     if options.edit:

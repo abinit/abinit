@@ -1,0 +1,70 @@
+# Hydrogen diatomic molecule
+# Use the HCTH GGA
+# Datasets 1 to 3 : GS computations at slightly different geometries,
+#  for finite-difference analysis of forces, including the target
+#  geometry (for dataset 3)
+
+ ndtset 5
+
+    xred1  -0.047 0 0   0.04690  0 0
+    xred2  -0.047 0 0   0.04695  0 0
+    xred3  -0.047 0 0   0.047    0 0
+    xred4  -0.047 0 0   0.04705  0 0
+    xred5  -0.047 0 0   0.04710  0 0
+
+#Common data
+ acell 12 10 10
+ amu 1.008
+ diemac 1.0d0   diemix 0.5d0
+ ecut 4.5
+ ixc 23
+ getwfk -1
+
+  kptopt 0
+ kpt   3*0.0
+ natom  2
+ nband 1
+
+ nkpt 1
+ nline 3   nstep 30
+ nsym 4  ntypat  1
+
+ rprim 1 0 0  0 1 0  0 0 1
+ symrel  1  0  0   0  1  0   0  0  1
+         1  0  0   0  1  0   0  0 -1
+         1  0  0   0 -1  0   0  0  1
+         1  0  0   0 -1  0   0  0 -1
+ tnons 12*0
+ tolvrs 1.0d-16
+ typat  2*1
+ wtk  1
+ znucl  1.0
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "01h_WC.fhi"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t48.abo, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = Unknown
+#%% keywords = 
+#%% description = 
+#%%   H2 molecule, using a local pseudopotential,
+#%%   and the Wu-Cohen GGA.
+#%%   Similar to Test v3#48
+#%%   Compute the total energy and force as a
+#%%   displacement of the second atom along x.
+#%%   Direct calculation of the gradient with respect
+#%%   to reduced coordinates gives -3.469435369425Ha
+#%%   while finite differences gives :
+#%%   with delta(xred)=0.0002, -3.4694479488 Ha
+#%%   with delta(xred)=0.0001, -3.4694385143 Ha .
+#%%   Combining the results gives -3.4694353695 Ha.
+#%%   Excellent.
+#%%<END TEST_INFO>

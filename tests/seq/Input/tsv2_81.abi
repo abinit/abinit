@@ -1,0 +1,73 @@
+# N atom
+  ndtset 3
+
+#DATASET 1 : SC run 
+  prtden1  1 
+  occopt1  2
+     occ1  1.0 1.0 1.0 1.0
+           1.0 0.0 0.0 0.0
+  kptopt1  0
+     kpt1   3*0.25d0
+  tolwfr1  1.0d-9
+
+#DATASET 2 : NSC run, using the symmetries => in the IZB
+ kptopt2   1
+  ngkpt2  4 4 4
+   iscf2  -2     
+ getwfk2   1   
+ getden2   1
+ tolwfr2   1.0d-9
+
+#DATASET 3 : NSC run in the full BZ, used to compute the Berry phase
+
+berryopt3 1
+nberry3   2
+bdberry3  1 4 1 1
+kberry3   1 0 0
+          0 0 1
+
+kptopt3    3
+ ngkpt3  4 4 4
+  iscf3  -2
+getwfk3   2
+getden3   1
+tolwfr3   1.0d-9
+
+ xred   0.00 0.0 0.02
+ chksymtnons 0
+ shiftk 0.5 0.5 0.5
+ acell  3*9
+ ecut 5
+ znucl  7.0
+ diemac 1.0d0
+ diemix 0.5d0
+ enunit 2
+ intxc 1
+ natom  1 
+ nband 4 4
+ nbdbuf 0
+ nstep 50
+ nsppol 2    spinmagntarget 1.0d0
+ ntypat  1
+ rprim 1 0 0  0 1 0  0 0 1
+#tsmear is relatively small
+# tsmear 0.02
+ typat  1 
+ 
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/7n.pspnc"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = tsv2_81.abo, tolnlines=0, tolabs=0.0, tolrel=0.0
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% keywords = NC
+#%% description = 
+#%%   81. Nitrogen atom in a big box, spin-polarized.
+#%%   Compute Berry phase for atom at different positions.
+#%%<END TEST_INFO>

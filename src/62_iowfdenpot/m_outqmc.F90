@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_outqmc
 !! NAME
 !! m_outqmc
@@ -10,15 +9,11 @@
 !!   N.D.M.Hine (nicholas.hine at imperial.ac.uk) November 2004
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2019 ABINIT group (DCA, XG, GMR, JYR, MKV, MT, FJ)
+!! Copyright (C) 1998-2024 ABINIT group (DCA, XG, GMR, JYR, MKV, MT, FJ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -31,12 +26,15 @@
 module m_outqmc
 
  use defs_basis
- use defs_datatypes
- use defs_abitypes
  use m_errors
  use m_abicore
  use m_xmpi
+ use m_hdr
+ use m_dtset
 
+
+ use defs_datatypes, only : pseudopotential_type
+ use defs_abitypes, only : mpi_type
  use m_io_tools,    only : get_unit
  use m_geometry,    only : xred2xcart
  use m_results_gs , only : results_gs_type
@@ -77,17 +75,9 @@ contains
 !! OUTPUT
 !! Writes the file pwfn.data
 !!
-!! PARENTS
-!!      gstate
-!!
-!! CHILDREN
-!!      wrtout,xred2xcart
-!!
 !! SOURCE
 
 subroutine outqmc(cg,dtset,eigen,gprimd,hdr,kg,mcg,mpi_enreg,npwarr,occ,psps,results_gs)
-
- implicit none
 
 !Arguments -------------------------------
 !scalars
@@ -135,7 +125,7 @@ subroutine outqmc(cg,dtset,eigen,gprimd,hdr,kg,mcg,mpi_enreg,npwarr,occ,psps,res
 
  if(mpi_enreg%paral_spinor==1)then
    message = ' Parallelization over spinors is not currently supported'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 !write(std_out,*)ch10,'outqmc: DEBUG: dtset%ndtset = ',dtset%ndtset,ch10
@@ -151,7 +141,7 @@ subroutine outqmc(cg,dtset,eigen,gprimd,hdr,kg,mcg,mpi_enreg,npwarr,occ,psps,res
  open(io,file=pwfnfilename,form='formatted',recl=300,status='unknown',iostat=ierr)
 
  if(ierr/=0)then
-   MSG_ERROR("Unable to open file: "//trim(pwfnfilename))
+   ABI_ERROR("Unable to open file: "//trim(pwfnfilename))
  end if
 
 !Check if the full set of k vectors has been used in this calculation
@@ -160,7 +150,7 @@ subroutine outqmc(cg,dtset,eigen,gprimd,hdr,kg,mcg,mpi_enreg,npwarr,occ,psps,res
    write(message,'(3a)')' outqmc: ERROR - kptopt=1 so k-points have been ',&
 &   'generated in the irreducible Brillouin Zone only. ',&
 &   'Set kptopt=2 to obtain full set of k-points.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 !Check if the full set of G vectors has been used in this calculation
@@ -171,7 +161,7 @@ subroutine outqmc(cg,dtset,eigen,gprimd,hdr,kg,mcg,mpi_enreg,npwarr,occ,psps,res
 &     '  istwfk(',ikpt,')=',dtset%istwfk(ikpt),' (ie /= 1) so some ',&
 &     'G-vectors may not be present.',ch10,'  Set istwfk=1 for each ',&
 &     'k-point to obtain full set.'
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
  end do !ikpt
 
@@ -278,10 +268,10 @@ subroutine outqmc(cg,dtset,eigen,gprimd,hdr,kg,mcg,mpi_enreg,npwarr,occ,psps,res
  case(4)
    close(io,status='delete')
    write(message,'(a)')' outqmc: ERROR - nspden=4 but CASINO cannot yet deal with non-collinear spins.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  case default
    close(io,status='delete')
-   MSG_ERROR('Unrecognized value of nspden.')
+   ABI_ERROR('Unrecognized value of nspden.')
  end select
 
  write(io,"('Total energy (au per primitive cell)')")
@@ -316,7 +306,7 @@ subroutine outqmc(cg,dtset,eigen,gprimd,hdr,kg,mcg,mpi_enreg,npwarr,occ,psps,res
  write(io,'(1x,i3)')dtset%natom
  write(io,"('Atomic numbers and positions of atoms (au)')")
 
- ABI_ALLOCATE(xcart_qmc,(3,dtset%natom))
+ ABI_MALLOC(xcart_qmc,(3,dtset%natom))
  call xred2xcart(dtset%natom,hdr%rprimd,xcart_qmc,hdr%xred)
  do ii=1,dtset%natom
    tmpr=r2s(xcart_qmc(1,ii),'(f24.14)')
@@ -325,7 +315,7 @@ subroutine outqmc(cg,dtset,eigen,gprimd,hdr,kg,mcg,mpi_enreg,npwarr,occ,psps,res
    jj=psps%znucltypat(dtset%typat(ii))
    write(io,'(1x,i2,3(1x,a))')jj,trim(tmpr),trim(tmpr2),trim(tmpr3)
  end do
- ABI_DEALLOCATE(xcart_qmc)
+ ABI_FREE(xcart_qmc)
 
  write(io,"('Primitive lattice vectors (au)')")
  do ii=1,3
@@ -383,7 +373,7 @@ subroutine outqmc(cg,dtset,eigen,gprimd,hdr,kg,mcg,mpi_enreg,npwarr,occ,psps,res
 !The number of xxx_shift's might seem excessive but the re-ordering of the
 !list from (spin, kpt, band, kg) to (kpt, spin, band, kgfull) is quite
 !complicated
- ABI_ALLOCATE(cgfull,(2,nkgfull*dtset%nspinor*dtset%nsppol*dtset%mband*dtset%nkpt))
+ ABI_MALLOC(cgfull,(2,nkgfull*dtset%nspinor*dtset%nsppol*dtset%mband*dtset%nkpt))
  cgfull(1:2,1:nkgfull*dtset%nspinor*dtset%nsppol*dtset%mband*dtset%nkpt)=0
  icg_shift=1
  do isppol=1,dtset%nsppol
@@ -437,7 +427,7 @@ subroutine outqmc(cg,dtset,eigen,gprimd,hdr,kg,mcg,mpi_enreg,npwarr,occ,psps,res
        if(occ(iocc)/=int(occ(iocc)))then
          write(message,'(a,i5,a,i1,a,i5,a,f11.8,a)')&
 &         'Non-integer occupation number for kpt ',ikpt,', sppol ',isppol,', band ',iband,': occ=',occ(iocc),'.'
-         MSG_WARNING(message)
+         ABI_WARNING(message)
        end if
        iocc=iocc+1
        norm=0
@@ -448,7 +438,7 @@ subroutine outqmc(cg,dtset,eigen,gprimd,hdr,kg,mcg,mpi_enreg,npwarr,occ,psps,res
        if((norm<0.999).or.(norm>1.001))then
          write(message,'(a,i5,a,i1,a,i5,a,f11.8,a)')&
 &         'Incorrectly normalised orbital for kpt ',ikpt,', sppol ',isppol,', band ',iband,': norm=',norm,'.'
-         MSG_WARNING(message)
+         ABI_WARNING(message)
        end if
      end do !iband
    end do !isppol
@@ -530,8 +520,6 @@ end subroutine outqmc
 
  function i2s(n)
 
- implicit none
-
 !Arguments ----------------------
  integer, intent(in) :: n
  character(len=20) :: i2s
@@ -606,8 +594,6 @@ end function i2s
 !! SOURCE
 
  function r2s(r,real_format)
-
- implicit none
 
 !Arguments -------------------------
  real(dp),intent(in) :: r

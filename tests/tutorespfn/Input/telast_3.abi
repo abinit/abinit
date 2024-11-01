@@ -1,0 +1,24 @@
+!the input file for the anaddb code
+
+  elaflag  3  !the flag for the elastic constant
+piezoflag  3  !the flag for the piezoelectric constant
+instrflag  1  !the flag for the internal strain tensor
+
+##############################################################
+# This section is used only for regression testing of ABINIT #
+##############################################################
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = anaddb
+#%% test_chain = telast_2.abi, telast_3.abi
+#%% input_ddb = telast_2o_DS3_DDB
+#%% [files]
+#%% files_to_test = 
+#%%   telast_3.abo, tolnlines=  2, tolabs=  2.0e-4, tolrel=  1.1, fld_options = -easy
+#%% [paral_info]
+#%% max_nprocs = 4
+#%% [extra_info]
+#%% authors = D. Hamann
+#%% keywords =  NC, DFPT
+#%% description =  The input file for the anaddb code
+#%%<END TEST_INFO>

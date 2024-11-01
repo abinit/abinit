@@ -1,0 +1,53 @@
+# General informations
+#**********************
+   rfmeth  1
+   enunit  0
+   eivec   0
+   chneut  0
+   selectz  0
+
+!Wavevector grid number 1 (coarse grid from DDB)
+  brav    1
+  ngqpt   2 2 2
+  nqshft  1
+  q1shft  3*0.0
+
+!Wavevector list number 1 (Reduced coordinates and normalization factor)
+  nph1l 8
+  qph1l
+   0.00000000E+00  0.00000000E+00  0.00000000E+00 1.0
+   2.50000000E-01  0.00000000E+00  0.00000000E+00 1.0
+   5.00000000E-01  0.00000000E+00  0.00000000E+00 1.0
+   2.50000000E-01  2.50000000E-01  0.00000000E+00 1.0
+   5.00000000E-01  2.50000000E-01  0.00000000E+00 1.0
+  -2.50000000E-01  2.50000000E-01  0.00000000E+00 1.0
+   5.00000000E-01  5.00000000E-01  0.00000000E+00 1.0
+  -2.50000000E-01  5.00000000E-01  2.50000000E-01 1.0
+
+
+# Flags
+#*******
+   ifcflag  1
+   prtddb   1
+   dieflag  0
+   thmflag  0
+    nlflag  0
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = anaddb
+#%% test_chain = t61.abi, t62.abi, t63.abi, t64.abi, t65.abi
+#%% input_ddb = t62o_DDB
+#%% [files]
+#%% files_to_test =
+#%%   t64_DDB, tolnlines = 4, tolabs = 2.000e-08, tolrel = 1.000e-6
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors =  G. Antonius
+#%% keywords = ddb
+#%% description =
+#%%   Diamond structure.
+#%%   Interpolation of the DDB from a 2x2x2 q-points grid
+#%%   onto a 4x4x4 q-points grid using the interatomic force constants.
+#%%<END TEST_INFO>

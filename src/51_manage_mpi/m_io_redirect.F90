@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_io_redirect
 !! NAME
 !!  m_io_redirect
@@ -7,7 +6,7 @@
 !!  management of output and log files when parallelisation on cells is activated
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2001-2019 ABINIT group (FJ,MT)
+!!  Copyright (C) 2001-2024 ABINIT group (FJ,MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~ABINIT/Infos/copyright
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -60,18 +59,10 @@ contains
 !!   nam= name of the extension of the files
 !!   nfil= number of files to be named
 !!
-!! PARENTS
-!!      dfpt_looppert,gstateimg
-!!
-!! CHILDREN
-!!      abi_io_redirect,libpaw_write_comm_set
-!!
 !! SOURCE
 !!
  subroutine localfilnam(commspace,commspace1,commworld,filnam,nam,nfil)
 
- implicit none
- 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: commspace,commspace1,commworld,nfil
@@ -88,8 +79,8 @@ contains
  
  if (nfil<=1) return
 
- ABI_ALLOCATE(filout,(nfil))
- ABI_ALLOCATE(fillog,(nfil))
+ ABI_MALLOC(filout,(nfil))
+ ABI_MALLOC(fillog,(nfil))
  me=xmpi_comm_rank(commworld)
  me_loc=xmpi_comm_rank(commspace1)
  call int2char4(me,tag)
@@ -129,17 +120,9 @@ contains
 !!   paral= flag to activate parallelisation
 !!   prtvol= flag to activate printing
 !!
-!! PARENTS
-!!      dfpt_looppert,gstateimg
-!!
-!! CHILDREN
-!!      abi_io_redirect,libpaw_write_comm_set
-!!
 !! SOURCE
 !!
  subroutine localwrfile(commspace,ii,nfil,paral,prtvol)
-
- implicit none
 
 !Arguments ------------------------------------
  integer, intent(in) :: commspace,ii,nfil,paral,prtvol
@@ -162,7 +145,7 @@ contains
      call abi_io_redirect(new_ab_out=get_unit())
      if (me==0) then 
        if (open_file(NULL_FILE,msg,unit=ab_out,status='unknown') /= 0) then
-         MSG_ERROR(msg)
+         ABI_ERROR(msg)
        end if
      end if
    else
@@ -172,14 +155,14 @@ contains
    call abi_io_redirect(new_ab_out=get_unit())
    if (me==0) then 
      if (open_file(filout(ii),msg,unit=ab_out,status='unknown') /= 0) then
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
    end if
  end if
  if (paral==1.and.me==0.and.do_write_log) then
    call abi_io_redirect(new_std_out=get_unit())
    if (open_file(fillog(ii),msg,unit=std_out,status='unknown') /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
  end if
 
@@ -203,18 +186,10 @@ contains
 !!   paral= flag to activate parallelisation
 !!   prtvol= flag to activate printing
 !!
-!! PARENTS
-!!      dfpt_looppert,gstateimg
-!!
-!! CHILDREN
-!!      abi_io_redirect,libpaw_write_comm_set
-!!
 !! SOURCE
 !!
  subroutine localrdfile(commspace,commworld,compute_all,nfil,paral,prtvol,dyn)
 
- implicit none
- 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: commspace,commworld,nfil,paral,prtvol
@@ -243,7 +218,7 @@ contains
      if (present(dyn)) then
        my_dyn => dyn
      else
-       ABI_ALLOCATE(my_dyn,(nfil))
+       ABI_MALLOC(my_dyn,(nfil))
        my_dyn(:)=1
      end if
      do ii=1,nfil
@@ -263,7 +238,7 @@ contains
      end do
      call flush_unit(ab_out)
      if (.not.present(dyn)) then
-       ABI_DEALLOCATE(my_dyn)
+       ABI_FREE(my_dyn)
      end if
    end if
    call xmpi_barrier(commspace)
@@ -289,8 +264,8 @@ contains
 
  call xmpi_barrier(commspace)
 
- ABI_DEALLOCATE(filout)
- ABI_DEALLOCATE(fillog)
+ ABI_FREE(filout)
+ ABI_FREE(fillog)
 
  end subroutine localrdfile
 !!***
@@ -309,18 +284,10 @@ contains
 !!   paral= flag to activate parallelisation
 !!   prtvol= flag to activate printing  
 !!
-!! PARENTS
-!!      dfpt_looppert,gstateimg
-!!
-!! CHILDREN
-!!      abi_io_redirect,libpaw_write_comm_set
-!!
 !! SOURCE
 !!
  subroutine localredirect(commspace,commworld,nfil,paral,prtvol)
 
- implicit none
- 
 !Arguments ------------------------------------
 !scalars
  integer, intent(in) :: commspace,commworld,nfil,paral,prtvol

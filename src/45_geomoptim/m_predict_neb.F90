@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_predict_neb
 !! NAME
 !!  m_predict_neb
@@ -7,14 +6,10 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2012-2019 ABINIT group (MT)
+!!  Copyright (C) 2012-2024 ABINIT group (MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -27,13 +22,13 @@
 module m_predict_neb
 
  use defs_basis
- use defs_abitypes
  use m_splines
  use m_mep
  use m_abicore
  use m_errors
  use m_xmpi
 
+ use defs_abitypes, only : MPI_type
  use m_results_img, only : results_img_type, gather_array_img, scatter_array_img, get_geometry_img
 
  implicit none
@@ -91,13 +86,6 @@ contains
 !!    at input, history of the values of xred for all images
 !!    at output, the predicted values of xred for all images
 !!
-!! PARENTS
-!!      predictimg
-!!
-!! CHILDREN
-!!      gather_array_img,get_geometry_img,mep_gbfgs,mep_lbfgs,mep_qmin
-!!      mep_steepest,xmpi_bcast
-!!
 !! SOURCE
 
 subroutine predict_neb(itimimage,itimimage_eff,list_dynimage,mep_param,mpi_enreg,natom,&
@@ -131,30 +119,30 @@ subroutine predict_neb(itimimage,itimimage_eff,list_dynimage,mep_param,mpi_enreg
 
 ! *************************************************************************
 
- ABI_ALLOCATE(xred,(3,natom,nimage))
+ ABI_MALLOC(xred,(3,natom,nimage))
 
 !Parallelism over images: only one process per image of the cell
  if (mpi_enreg%me_cell==0) then
 
 !  Retrieve positions and forces
-   ABI_ALLOCATE(etotal,(nimage))
-   ABI_ALLOCATE(xcart,(3,natom,nimage))
-   ABI_ALLOCATE(fcart,(3,natom,nimage))
-   ABI_ALLOCATE(rprimd,(3,3,nimage))
+   ABI_MALLOC(etotal,(nimage))
+   ABI_MALLOC(xcart,(3,natom,nimage))
+   ABI_MALLOC(fcart,(3,natom,nimage))
+   ABI_MALLOC(rprimd,(3,3,nimage))
    call get_geometry_img(etotal,natom,nimage,results_img(:,itimimage_eff),&
 &   fcart,rprimd,xcart,xred)
 
 !  Array containing effective NEB forces (F_ortho+F_spring)
-   ABI_ALLOCATE(neb_forces,(3,natom,nimage))
+   ABI_MALLOC(neb_forces,(3,natom,nimage))
 
 !  Parallelism: gather data of all images
    if (mpi_enreg%paral_img==1) then
-     ABI_ALLOCATE(buffer,(6*natom+1,nimage))
-     ABI_ALLOCATE(buffer_all,(6*natom+1,nimage_tot))
-     ABI_ALLOCATE(xcart_all,(3,natom,nimage_tot))
-     ABI_ALLOCATE(fcart_all,(3,natom,nimage_tot))
-     ABI_ALLOCATE(etotal_all,(nimage_tot))
-     ABI_ALLOCATE(neb_forces_all,(3,natom,nimage_tot))
+     ABI_MALLOC(buffer,(6*natom+1,nimage))
+     ABI_MALLOC(buffer_all,(6*natom+1,nimage_tot))
+     ABI_MALLOC(xcart_all,(3,natom,nimage_tot))
+     ABI_MALLOC(fcart_all,(3,natom,nimage_tot))
+     ABI_MALLOC(etotal_all,(nimage_tot))
+     ABI_MALLOC(neb_forces_all,(3,natom,nimage_tot))
      buffer=zero;ii=0
      buffer(ii+1:ii+3*natom,1:nimage)=reshape(xcart,(/3*natom,nimage/));ii=3*natom
      buffer(ii+1:ii+3*natom,1:nimage)=reshape(fcart,(/3*natom,nimage/));ii=6*natom
@@ -163,8 +151,8 @@ subroutine predict_neb(itimimage,itimimage_eff,list_dynimage,mep_param,mpi_enreg
      xcart_all(:,:,:)=reshape(buffer_all(ii+1:ii+3*natom,1:nimage_tot),(/3,natom,nimage_tot/));ii=3*natom
      fcart_all(:,:,:)=reshape(buffer_all(ii+1:ii+3*natom,1:nimage_tot),(/3,natom,nimage_tot/));ii=6*natom
      etotal_all(:)=buffer_all(ii+1,1:nimage_tot);ii=0
-     ABI_DEALLOCATE(buffer)
-     ABI_DEALLOCATE(buffer_all)
+     ABI_FREE(buffer)
+     ABI_FREE(buffer_all)
    else
      xcart_all      => xcart
      fcart_all      => fcart
@@ -175,9 +163,9 @@ subroutine predict_neb(itimimage,itimimage_eff,list_dynimage,mep_param,mpi_enreg
 !  coordif is the vector between two images
 !  dimage is the distance between two images
 !  tangent is the tangent at image i
-   ABI_ALLOCATE(coordif,(3,natom,nimage_tot))
-   ABI_ALLOCATE(tangent,(3,natom,nimage_tot))
-   ABI_ALLOCATE(dimage,(nimage_tot))
+   ABI_MALLOC(coordif,(3,natom,nimage_tot))
+   ABI_MALLOC(tangent,(3,natom,nimage_tot))
+   ABI_MALLOC(dimage,(nimage_tot))
 
 !  Compute distances between images
    coordif(:,:,1)=zero;dimage(1)=zero
@@ -192,8 +180,9 @@ subroutine predict_neb(itimimage,itimimage_eff,list_dynimage,mep_param,mpi_enreg
 !  === Original definition of tangent
    if (mep_param%neb_algo==0) then
      do iimage=2,nimage_tot-1
+!      tangent(:,:,iimage)=xcart_all(:,:,iimage+1)-xcart_all(:,:,iimage-1)
        tangent(:,:,iimage)=coordif(:,:,iimage  )/dimage(iimage) &
-&       +coordif(:,:,iimage+1)/dimage(iimage+1)
+&                         +coordif(:,:,iimage+1)/dimage(iimage+1)
      end do
 !    === Improved tangent (J. Chem. Phys. 113, 9978 (2000) [[cite:Henkelman2000]])
    else
@@ -211,10 +200,10 @@ subroutine predict_neb(itimimage,itimimage_eff,list_dynimage,mep_param,mpi_enreg
 &         abs(etotal_all(iimage-1)-etotal_all(iimage)))
          if (etotal_all(iimage+1)>etotal_all(iimage-1)) then   ! V_i+1 > V_i-1
            tangent(:,:,iimage)=coordif(:,:,iimage+1)*dvmax &
-&           +coordif(:,:,iimage  )*dvmin
+&                             +coordif(:,:,iimage  )*dvmin
          else                                                  ! V_i+1 < V_i-1
            tangent(:,:,iimage)=coordif(:,:,iimage+1)*dvmin &
-&           +coordif(:,:,iimage  )*dvmax
+&                             +coordif(:,:,iimage  )*dvmax
          end if
        end if
      end do
@@ -226,14 +215,14 @@ subroutine predict_neb(itimimage,itimimage_eff,list_dynimage,mep_param,mpi_enreg
    end do
 
 !  Compute spring constant(s)
-   ABI_ALLOCATE(spring,(nimage_tot))
+   ABI_MALLOC(spring,(nimage_tot))
    if (abs(mep_param%neb_spring(2)-mep_param%neb_spring(1))<tol8) then ! Constant spring
      spring(:)=mep_param%neb_spring(1)
    else                                                                ! Variable spring
      emax=maxval(etotal_all(:))
      eref=max(etotal_all(1),etotal_all(nimage_tot))
-     spring(1)=zero
-     do iimage=2,nimage_tot
+     spring(:)=mep_param%neb_spring(1)
+     do iimage=2,nimage_tot-1
        ecur=max(etotal_all(iimage-1),etotal_all(iimage))
        if (ecur<eref) then
          spring(iimage)=mep_param%neb_spring(1)
@@ -265,13 +254,14 @@ subroutine predict_neb(itimimage,itimimage_eff,list_dynimage,mep_param,mpi_enreg
    neb_forces_all(:,:,nimage_tot)=fcart_all(:,:,nimage_tot)
    do iimage=2,nimage_tot-1
 !    === Standard NEB
-     if (iimage/=iimage_min.and.iimage/=iimage_max) then
+     if (iimage/=iimage_max) then
+!    if (iimage/=iimage_min.and.iimage/=iimage_max) then
        f_para1=mep_img_dotp(fcart_all(:,:,iimage),tangent(:,:,iimage))
        if (mep_param%neb_algo==0) then   ! Original NEB algo
-         ABI_ALLOCATE(vect,(3,natom))
+         ABI_MALLOC(vect,(3,natom))
          vect(:,:)=spring(iimage+1)*coordif(:,:,iimage+1)-spring(iimage)*coordif(:,:,iimage)
          f_para2=mep_img_dotp(vect,tangent(:,:,iimage))
-         ABI_DEALLOCATE(vect)
+         ABI_FREE(vect)
        else       ! Modification from J. Chem. Phys. 113, 9978 (2000) [[cite:Henkelman2000]]
          f_para2=spring(iimage+1)*dimage(iimage+1)-spring(iimage)*dimage(iimage)
        end if
@@ -306,26 +296,26 @@ subroutine predict_neb(itimimage,itimimage_eff,list_dynimage,mep_param,mpi_enreg
      call mep_gbfgs(neb_forces,itimimage,list_dynimage,mep_param,mpi_enreg,natom,ndynimage,&
 &     nimage,nimage_tot,rprimd,xcart,xred)
    else
-     MSG_BUG("Inconsistent solver !")
+     ABI_BUG("Inconsistent solver !")
    end if
 
 !  Free memory
-   ABI_DEALLOCATE(spring)
-   ABI_DEALLOCATE(coordif)
-   ABI_DEALLOCATE(tangent)
-   ABI_DEALLOCATE(dimage)
+   ABI_FREE(spring)
+   ABI_FREE(coordif)
+   ABI_FREE(tangent)
+   ABI_FREE(dimage)
    if (mpi_enreg%paral_img==1)  then
-     ABI_DEALLOCATE(xcart_all)
-     ABI_DEALLOCATE(fcart_all)
-     ABI_DEALLOCATE(etotal_all)
-     ABI_DEALLOCATE(neb_forces_all)
+     ABI_FREE(xcart_all)
+     ABI_FREE(fcart_all)
+     ABI_FREE(etotal_all)
+     ABI_FREE(neb_forces_all)
    end if
 
-   ABI_DEALLOCATE(neb_forces)
-   ABI_DEALLOCATE(etotal)
-   ABI_DEALLOCATE(xcart)
-   ABI_DEALLOCATE(fcart)
-   ABI_DEALLOCATE(rprimd)
+   ABI_FREE(neb_forces)
+   ABI_FREE(etotal)
+   ABI_FREE(xcart)
+   ABI_FREE(fcart)
+   ABI_FREE(rprimd)
  end if ! mpi_enreg%me_cell==0
 
 !Store acell, rprim, xred and vel for the new iteration
@@ -339,7 +329,7 @@ subroutine predict_neb(itimimage,itimimage_eff,list_dynimage,mep_param,mpi_enreg
    results_img(iimage,next_itimimage)%vel(:,:)     =results_img(iimage,itimimage_eff)%vel(:,:)
    results_img(iimage,next_itimimage)%vel_cell(:,:)=results_img(iimage,itimimage_eff)%vel_cell(:,:)
  end do
- ABI_DEALLOCATE(xred)
+ ABI_FREE(xred)
 
 end subroutine predict_neb
 !!***

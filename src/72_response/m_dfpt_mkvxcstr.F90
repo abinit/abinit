@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_dfpt_mkvxcstr
 !! NAME
 !!  m_dfpt_mkvxcstr
@@ -7,14 +6,10 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2001-2019 ABINIT group (DRH,XG)
+!!  Copyright (C) 2001-2024 ABINIT group (DRH,XG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -27,10 +22,10 @@
 module m_dfpt_mkvxcstr
 
  use defs_basis
- use defs_abitypes
  use m_errors
  use m_abicore
 
+ use defs_abitypes, only : MPI_type
  use m_time,      only : timab
  use m_symtk,     only : matr3inv
  use m_xctk,      only : xcden, xcpot
@@ -68,6 +63,7 @@ contains
 !!  nhat(nfft,nspden*nhatdim)= -PAW only- compensation density
 !!  nhat1(cplex*nfft,2nspden*usepaw)= -PAW only- 1st-order compensation density
 !!  nkxc=second dimension of the kxc array
+!!  non_magnetic_xc= if true, handle density/potential as non-magnetic (even if it is)
 !!  nspden=number of spin-density components
 !!  n3xccc=dimension of xccc3d1 ; 0 if no XC core correction is used, otherwise, nfft
 !!  option=if 0, work only with strain-derivative frozen-wavefunction
@@ -86,23 +82,17 @@ contains
 !!  vxc1(cplex*nfft,nspden)=change in exchange-correlation potential (including
 !!   core-correction, if applicable)
 !!
-!! PARENTS
-!!      dfpt_eltfrxc,dfpt_nselt,dfpt_nstpaw,dfpt_rhotov
-!!
-!! CHILDREN
-!!      dfpt_mkvxcstrgga,matr3inv,timab
-!!
 !! SOURCE
 
 subroutine dfpt_mkvxcstr(cplex,idir,ipert,kxc,mpi_enreg,natom,nfft,ngfft,nhat,nhat1,&
-& nkxc,nspden,n3xccc,option,paral_kgb,qphon,rhor,rhor1,rprimd,usepaw,usexcnhat,vxc1,xccc3d1)
-
- implicit none
+&                        nkxc,non_magnetic_xc,nspden,n3xccc,option,qphon,&
+&                        rhor,rhor1,rprimd,usepaw,usexcnhat,vxc1,xccc3d1)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: cplex,idir,ipert,n3xccc,natom,nfft,nkxc,nspden,option
- integer,intent(in) :: paral_kgb,usepaw,usexcnhat
+ integer,intent(in) :: usepaw,usexcnhat
+ logical,intent(in) :: non_magnetic_xc
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: ngfft(18)
@@ -130,26 +120,25 @@ subroutine dfpt_mkvxcstr(cplex,idir,ipert,kxc,mpi_enreg,natom,nfft,ngfft,nhat,nh
 
  if(nspden/=1 .and. nspden/=2) then
    message = ' dfpt_mkvxc, Only for nspden==1 and 2.'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
  if (usepaw==1.and.usexcnhat==0) then
-   ABI_ALLOCATE(rhor_,(nfft,nspden))
+   ABI_MALLOC(rhor_,(nfft,nspden))
    rhor_(:,:)=rhor(:,:)-nhat(:,:)
  else
    rhor_ => rhor
  end if
 
  if (usepaw==1.and.usexcnhat==0.and.option==1) then
-   ABI_ALLOCATE(rhor1_,(nfft,nspden))
+   ABI_MALLOC(rhor1_,(nfft,nspden))
    rhor1_(:,:)=rhor1(:,:)-nhat1(:,:)
  else
    rhor1_ => rhor1
  end if
 
-
 !Inhomogeneous term for diagonal strain
- ABI_ALLOCATE(rhowk1,(nfft,nspden))
+ ABI_MALLOC(rhowk1,(nfft,nspden))
  if(option==0 .or. option==2) then
    if(ipert==natom+3) then
      rhowk1(:,:)=-rhor_(:,:)
@@ -162,6 +151,11 @@ subroutine dfpt_mkvxcstr(cplex,idir,ipert,kxc,mpi_enreg,natom,nfft,ngfft,nhat,nh
    else
      rhowk1(:,:)=rhor1_(:,:)
    end if
+ end if
+
+ if (non_magnetic_xc) then
+   if(nspden==2) rhowk1(:,2)=rhowk1(:,1)*half
+   if(nspden==4) rhowk1(:,2:4)=zero
  end if
 
 !Treat first LDA
@@ -215,14 +209,14 @@ subroutine dfpt_mkvxcstr(cplex,idir,ipert,kxc,mpi_enreg,natom,nfft,ngfft,nhat,nh
      write(message, '(a,i10,a,a,a)' )&
 &     'Input dir gives istr=',istr,' not allowed.',ch10,&
 &     'Possible values are 1,2,3,4,5,6 only.'
-     MSG_BUG(message)
+     ABI_BUG(message)
    end if
 
 !  Rescalling needed for use in dfpt_eltfrxc for elastic tensor (not internal strain tensor).
    str_scale=one;if(option==2) str_scale=two
 
-!  FTransfer the data to spin-polarized storage
-   ABI_ALLOCATE(rhor1tmp,(cplex*nfft,nspden))
+!  Transfer the data to spin-polarized storage
+   ABI_MALLOC(rhor1tmp,(cplex*nfft,nspden))
    if(nspden==1)then
      do ir=1,cplex*nfft
        rhor1tmp(ir,1)=rhowk1(ir,1)
@@ -244,22 +238,22 @@ subroutine dfpt_mkvxcstr(cplex,idir,ipert,kxc,mpi_enreg,natom,nfft,ngfft,nhat,nh
    end if
 
    call dfpt_mkvxcstrgga(cplex,gprimd,istr,kxc,mpi_enreg,nfft,ngfft,nkxc,&
-&   nspden,paral_kgb,qphon,rhor1tmp,str_scale,vxc1)
-   ABI_DEALLOCATE(rhor1tmp)
+&   nspden,qphon,rhor1tmp,str_scale,vxc1)
+   ABI_FREE(rhor1tmp)
 
  else
-   MSG_BUG('Invalid nkxc!')
+   ABI_BUG('Invalid nkxc!')
 
  end if ! LDA or GGA
 
  if (usepaw==1.and.usexcnhat==0) then
-   ABI_DEALLOCATE(rhor_)
+   ABI_FREE(rhor_)
  end if
  if (usepaw==1.and.usexcnhat==0.and.option==1) then
-   ABI_DEALLOCATE(rhor1_)
+   ABI_FREE(rhor1_)
  end if
 
- ABI_DEALLOCATE(rhowk1)
+ ABI_FREE(rhowk1)
 
  call timab(181,2,tsec)
 
@@ -328,22 +322,14 @@ end subroutine dfpt_mkvxcstr
 !!       kxc(:,18)=gradz(rho_up)
 !!       kxc(:,19)=gradz(rho_dn)
 !!
-!! PARENTS
-!!      dfpt_mkvxcstr
-!!
-!! CHILDREN
-!!      xcden,xcpot
-!!
 !! SOURCE
 
 subroutine dfpt_mkvxcstrgga(cplex,gprimd,istr,kxc,mpi_enreg,nfft,ngfft,&
-& nkxc,nspden,paral_kgb,qphon,rhor1tmp,str_scale,vxc1)
-
- implicit none
+& nkxc,nspden,qphon,rhor1tmp,str_scale,vxc1)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: cplex,istr,nfft,nkxc,nspden,paral_kgb
+ integer,intent(in) :: cplex,istr,nfft,nkxc,nspden
  real(dp) :: str_scale
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
@@ -367,11 +353,11 @@ subroutine dfpt_mkvxcstrgga(cplex,gprimd,istr,kxc,mpi_enreg,nfft,ngfft,&
 
  if (nkxc/=12*min(nspden,2)-5) then
    msg='Wrong nkxc value for GGA!'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
  if (nspden>2) then
    msg='Not compatible with non-collinear magnetism!'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
 !metaGGA contributions are not taken into account here
@@ -385,8 +371,8 @@ subroutine dfpt_mkvxcstrgga(cplex,gprimd,istr,kxc,mpi_enreg,nfft,ngfft,&
 !rho1now(:,:,1) contains the first-order density, and
 !rho1now(:,:,2:4) contains the gradients of the first-order density
  ishift=0 ; ngrad=2
- ABI_ALLOCATE(rho1now,(cplex*nfft,nspden,ngrad*ngrad))
- call xcden(cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden,paral_kgb,qphon,rhor1tmp,rho1now)
+ ABI_MALLOC(rho1now,(cplex*nfft,nspden,ngrad*ngrad))
+ call xcden(cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden,qphon,rhor1tmp,rho1now)
 
 !Calculate the 1st-order contribution to grad(n) from the strain derivative
 !  acting on the gradient operator acting on the GS charge density,
@@ -394,7 +380,7 @@ subroutine dfpt_mkvxcstrgga(cplex,gprimd,istr,kxc,mpi_enreg,nfft,ngfft,&
 !   (dGprim/ds_alpha_beta)(i,j) = -half.( delta_alpha,i Gprim(beta,j) + delta_beta,i Gprim(alpha,j) )
 !To finally get:
 !   (nabla)^(alpha,beta)_i[n] = -half ( delta_alpha,i nabla_beta[n] + delta_beta,i nabla_alpha[n] )
- ABI_ALLOCATE(rhodgnow,(cplex*nfft,nspden,3))
+ ABI_MALLOC(rhodgnow,(cplex*nfft,nspden,3))
  rhodgnow(1:nfft,1:nspden,1:3)=zero
  if (nspden==1) then
    if (istr==1) rhodgnow(1:nfft,1,1)=-     kxc(1:nfft,5)
@@ -439,7 +425,7 @@ subroutine dfpt_mkvxcstrgga(cplex,gprimd,istr,kxc,mpi_enreg,nfft,ngfft,&
 
 !Apply the XC kernel
  nspgrad=2; if (nspden==2) nspgrad=5
- ABI_ALLOCATE(dnexcdn,(cplex*nfft,nspgrad))
+ ABI_MALLOC(dnexcdn,(cplex*nfft,nspgrad))
 
 !== Non polarized
  if (nspden==1) then
@@ -500,18 +486,18 @@ subroutine dfpt_mkvxcstrgga(cplex,gprimd,istr,kxc,mpi_enreg,nfft,ngfft,&
    end do
 
  end if ! nspden
- ABI_DEALLOCATE(rhodgnow)
+ ABI_FREE(rhodgnow)
 
  vxc1(:,:)=zero
- call xcpot(cplex,dnexcdn,gprimd,ishift,mgga,mpi_enreg,nfft,ngfft,ngrad,nspden,&
-& nspgrad,paral_kgb,qphon,rho1now,vxc1)
+ call xcpot(cplex,gprimd,ishift,mgga,mpi_enreg,nfft,ngfft,ngrad,nspden,&
+& nspgrad,qphon,depsxc=dnexcdn,rhonow=rho1now,vxc=vxc1)
 
 !if you uncomment the following line, you will have to modify
 !the original function call to pass in gmet and gsqcut
 !call filterpot(cplex,gmet,gsqcut,nfft,ngfft,nspden,qphon,vxc1)
 
- ABI_DEALLOCATE(dnexcdn)
- ABI_DEALLOCATE(rho1now)
+ ABI_FREE(dnexcdn)
+ ABI_FREE(rho1now)
 
 end subroutine dfpt_mkvxcstrgga
 !!***

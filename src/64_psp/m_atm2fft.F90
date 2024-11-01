@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_atm2fft
 !! NAME
 !!  m_atm2fft
@@ -7,14 +6,10 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2019 ABINIT group (FJ, MT)
+!!  Copyright (C) 1998-2024 ABINIT group (FJ, MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -24,20 +19,29 @@
 
 #include "abi_common.h"
 
+! nvtx related macro definition
+#include "nvtx_macros.h"
+
 module m_atm2fft
 
  use defs_basis
- use defs_abitypes
  use m_abicore
  use m_errors
  use m_xmpi
+ use m_distribfft
+ use m_dtset
 
+ use defs_abitypes, only : mpi_type
  use m_time,        only : timab
  use defs_datatypes,only : pseudopotential_type
+ use m_gtermcutoff, only : termcutoff
  use m_pawtab,      only : pawtab_type
- use m_distribfft,  only : distribfft_type
  use m_fft,         only : zerosym, fourdp
  use m_mpinfo,      only : set_mpi_enreg_fft, unset_mpi_enreg_fft, initmpi_seq
+
+#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
+ use m_nvtx_data
+#endif
 
  implicit none
 
@@ -56,13 +60,13 @@ contains
 !! atm2fft
 !!
 !! FUNCTION
-!! This routine sums atomic functions (density or potential) defined
+!! This routine sums atomic functions (density, kinetic density or potential) defined
 !! (in rec. space) on a radial grid to get global quantities on the
 !! fine FFT grid. It can also compute contribution to energy derivatives
 !! of these atomic functions.
 !!
 !! Possible options:
-!!   optn=1: compute a sum of local atomic densities or contrib. to energy derivatives
+!!   optn=1: compute a sum of local atomic [kinetic] densities or contrib. to energy derivatives
 !!   optv=1: compute a sum of local atomic potentials or contrib. to energy derivatives
 !!
 !!   optatm =1: computes sum of atomic potentials/densities
@@ -154,6 +158,7 @@ contains
 !!          if optn2=1: n^AT is the atomic PAW PS core density stored in array pawtab%tcorespl()
 !!                   2: n^AT is the atomic PAW PS valence density stored in array pawtab%tvalespl()
 !!                   3: n^AT is a gaussian density: n(g)=gauss(1,ityp)*exp[-(gauss(2,ityp)*G)^2]
+!!                   4: n^AT is the atomic PAW PS core kinetic density stored in array pawtab%ttaucorespl()
 !! Note: optv and optn can be activated together
 !!
 !! Options controlling which contrib. to Etot derivatives are computed:
@@ -178,30 +183,20 @@ contains
 !!                                                    vg=potential residual
 !!    etc...
 !!
-!! PARENTS
-!!      dfpt_dyfro,dfpt_eltfrxc,extraprho,forces,fresidrsp,prcref,prcref_PMA
-!!      respfn,setvtr,stress
-!!
-!! CHILDREN
-!!      destroy_distribfft,fourdp,init_distribfft_seq,initmpi_seq
-!!      set_mpi_enreg_fft,timab,unset_mpi_enreg_fft,wrtout,xmpi_sum,zerosym
-!!
 !! SOURCE
 
 subroutine atm2fft(atindx1,atmrho,atmvloc,dyfrn,dyfrv,eltfrn,gauss,gmet,gprimd,&
 &                  grn,grv,gsqcut,mgfft,mqgrid,natom,nattyp,nfft,ngfft,ntypat,&
 &                  optatm,optdyfr,opteltfr,optgr,optn,optn2,optstr,optv,&
-&                  psps,pawtab,ph1d,qgrid,qprtrb,rhog,strn,strv,ucvol,usepaw,vg,vg1,vg1_core,vprtrb,vspl,&
+&                  psps,pawtab,ph1d,qgrid,qprtrb,rcut,rhog,rprimd,strn,strv,ucvol,usepaw,vg,vg1,vg1_core,vprtrb,vspl,&
 &                  is2_in,comm_fft,me_g0,paral_kgb,distribfft) ! optional arguments
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: mgfft,mqgrid,natom,nfft,ntypat,optatm,optdyfr,opteltfr
  integer,intent(in) :: optgr,optn,optn2,optstr,optv,usepaw
  integer,optional,intent(in) :: is2_in,me_g0,comm_fft,paral_kgb
- real(dp),intent(in) :: gsqcut,ucvol
+ real(dp),intent(in) :: rcut,gsqcut,ucvol
  type(pseudopotential_type),target,intent(in) :: psps
  type(distribfft_type),optional,intent(in),target :: distribfft
 !arrays
@@ -209,6 +204,7 @@ subroutine atm2fft(atindx1,atmrho,atmvloc,dyfrn,dyfrv,eltfrn,gauss,gmet,gprimd,&
  real(dp),intent(in) :: gauss(2,ntypat*(optn2/3)),gmet(3,3),gprimd(3,3)
  real(dp),intent(in) :: ph1d(2,3*(2*mgfft+1)*natom),qgrid(mqgrid)
  real(dp),intent(in) :: rhog(2,nfft*optv*max(optgr,optstr,optdyfr,opteltfr))
+ real(dp),intent(inout) :: rprimd(3,3)
  real(dp),intent(in) :: vg(2,nfft*optn*max(optgr,optstr,optdyfr,opteltfr))
  real(dp),intent(in) :: vg1(2,nfft*optn*opteltfr),vg1_core(2,nfft*optn*opteltfr)
  real(dp),intent(in) :: vprtrb(2),vspl(mqgrid,2,ntypat*optv)
@@ -223,51 +219,55 @@ subroutine atm2fft(atindx1,atmrho,atmvloc,dyfrn,dyfrv,eltfrn,gauss,gmet,gprimd,&
 
 !Local variables ------------------------------
 !scalars
- integer,parameter :: im=2,re=1
+ integer,parameter :: im=2,re=1,icutcoul=3
  integer :: i1,i2,i3,ia,ia1,ia2,id1,id2,id3,ierr,ig1,ig1_,ig2,ig2_,ig3,ig3_,ii,is1,is2
  integer :: itypat,jj,js,ka,kb,kd,kg,me_fft,my_comm_fft,ndir,n1,n2,n3,nproc_fft,paral_kgb_fft
  integer :: shift1,shift2,shift3
  logical :: have_g0
- real(dp),parameter :: tolfix=1.0000001_dp
+#ifdef FC_NVHPC
+!Silly trick to prevent NVHPC optimization issue
+ logical :: nothing=.false.
+#endif
+ real(dp),parameter :: tolfix=1.0000001_dp, vcutgeo(3)=zero
  real(dp) :: aa,alf2pi2,bb,cc,cutoff,dbl_ig1,dbl_ig2,dbl_ig3,dd,dg1,dg2,d2g,diff
  real(dp) :: dn_at,d2n_at,d2n_at2,dq,dq2div6,dqdiv6,dqm1,dv_at,ee,ff,gauss1,gauss2,gg,gmag,gsquar,n_at
  real(dp) :: ph12i,ph12r,ph1i,ph1r,ph2i,ph2r,ph3i,ph3r,sfi,sfr,term,term1,term2,tmpni,tmpnr
  real(dp) :: tmpvi,tmpvr,v_at,xnorm
  character(len=500) :: message
  type(distribfft_type),pointer :: my_distribfft
+ type(distribfft_type),target :: my_distribfft_
  type(mpi_type) :: mpi_enreg_fft
 !arrays
  integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:),ffti2_local(:)
- real(dp), ABI_CONTIGUOUS pointer :: tvalespl(:,:),tcorespl(:,:)
+ real(dp), ABI_CONTIGUOUS pointer :: tvalespl(:,:),tcorespl(:,:),ttaucorespl(:,:)
+ real(dp), pointer :: dncdq0, dtaucdq0, dnvdq0
  integer,save :: idx(12)=(/1,1,2,2,3,3,3,2,3,1,2,1/)
  integer  :: delta(6)=(/1,1,1,0,0,0/)
  real(dp) :: dgm(3,3,6),d2gm(3,3,6,6),gcart(3),tsec(2)
  real(dp),allocatable :: dyfrn_indx(:,:,:),dyfrv_indx(:,:,:),grn_indx(:,:)
  real(dp),allocatable :: grv_indx(:,:),phim_igia(:),phre_igia(:),workn(:,:)
+ real(dp),allocatable :: gcutoff(:)
  real(dp),allocatable :: workv(:,:)
 
 ! *************************************************************************
 
  DBG_ENTER("COLL")
-
 !Check optional arguments
  if (present(comm_fft)) then
    if ((.not.present(paral_kgb)).or.(.not.present(me_g0))) then
-     MSG_BUG(' Need paral_kgb and me_g0 with comm_fft !')
+     ABI_BUG(' Need paral_kgb and me_g0 with comm_fft !')
    end if
  end if
 
  n1=ngfft(1) ; n2=ngfft(2) ; n3=ngfft(3)
-
  me_fft=ngfft(11)
  nproc_fft=ngfft(10)
-
 
 !Get the distrib associated with this fft_grid
  if (present(distribfft)) then
    my_distribfft => distribfft
  else
-   ABI_DATATYPE_ALLOCATE(my_distribfft,)
+   my_distribfft => my_distribfft_
    call init_distribfft_seq(my_distribfft,'f',n2,n3,'fourdp')
  end if
  if (n2==my_distribfft%n2_coarse) then
@@ -277,12 +277,12 @@ subroutine atm2fft(atindx1,atmrho,atmvloc,dyfrn,dyfrv,eltfrn,gauss,gmet,gprimd,&
    fftn2_distrib => my_distribfft%tab_fftdp2dg_distrib
    ffti2_local => my_distribfft%tab_fftdp2dg_local
  else
-   MSG_BUG("Unable to find an allocated distrib for this fft grid")
+   ABI_BUG("Unable to find an allocated distrib for this fft grid")
  end if
 
  if (present(is2_in)) then
    if(is2_in<1.or.is2_in>6) then
-     MSG_BUG("is2_in must be between 1 and 6")
+     ABI_BUG("is2_in must be between 1 and 6")
    else
      ndir = 1
    end if
@@ -291,27 +291,27 @@ subroutine atm2fft(atindx1,atmrho,atmvloc,dyfrn,dyfrv,eltfrn,gauss,gmet,gprimd,&
 
 !Zero out arrays to permit accumulation over atom types
  if (optv==1.and.optatm==1) then
-   ABI_ALLOCATE(workv,(2,nfft))
+   ABI_MALLOC(workv,(2,nfft))
    workv(:,:)=zero
  end if
  if (optn==1.and.optatm==1) then
-   ABI_ALLOCATE(workn,(2,nfft))
+   ABI_MALLOC(workn,(2,nfft))
    workn(:,:)=zero
  end if
  if (optv==1.and.optgr==1) then
-   ABI_ALLOCATE(grv_indx,(3,natom))
+   ABI_MALLOC(grv_indx,(3,natom))
    grv_indx(:,:)=zero
  end if
  if (optn==1.and.optgr==1) then
-   ABI_ALLOCATE(grn_indx,(3,natom))
+   ABI_MALLOC(grn_indx,(3,natom))
    grn_indx(:,:)=zero
  end if
  if (optv==1.and.optdyfr==1) then
-   ABI_ALLOCATE(dyfrv_indx,(3,3,natom))
+   ABI_MALLOC(dyfrv_indx,(3,3,natom))
    dyfrv_indx(:,:,:)=zero
  end if
  if (optn==1.and.optdyfr==1) then
-   ABI_ALLOCATE(dyfrn_indx,(3,3,natom))
+   ABI_MALLOC(dyfrn_indx,(3,3,natom))
    dyfrn_indx(:,:,:)=zero
  end if
  if (optv==1.and.optstr==1) strv(:)=zero
@@ -357,8 +357,12 @@ subroutine atm2fft(atindx1,atmrho,atmvloc,dyfrn,dyfrv,eltfrn,gauss,gmet,gprimd,&
  id2=n2/2+2
  id3=n3/2+2
 
- ABI_ALLOCATE(phre_igia,(natom))
- ABI_ALLOCATE(phim_igia,(natom))
+ ABI_MALLOC(phre_igia,(natom))
+ ABI_MALLOC(phim_igia,(natom))
+
+ !Initialize Gcut-off array from m_termcutoff
+ !ABI_MALLOC(gcutoff,(nfft))
+ call termcutoff(gcutoff,gsqcut,icutcoul,ngfft,1,rcut,rprimd,vcutgeo)
 
  ia1=1
  do itypat=1,ntypat
@@ -375,9 +379,17 @@ subroutine atm2fft(atindx1,atmrho,atmvloc,dyfrn,dyfrv,eltfrn,gauss,gmet,gprimd,&
    if (usepaw == 1) then
      tcorespl => pawtab(itypat)%tcorespl
      tvalespl => pawtab(itypat)%tvalespl
+     ttaucorespl => pawtab(itypat)%tcoretauspl
+     dncdq0 => pawtab(itypat)%dncdq0
+     dnvdq0 => pawtab(itypat)%dnvdq0
+     dtaucdq0 => pawtab(itypat)%dtaucdq0
    else
      tcorespl => psps%nctab(itypat)%tcorespl
      tvalespl => psps%nctab(itypat)%tvalespl
+     ttaucorespl => psps%nctab(itypat)%ttaucorespl
+     dncdq0 => psps%nctab(itypat)%dncdq0
+     dnvdq0 => psps%nctab(itypat)%dnvdq0
+     dtaucdq0 => psps%nctab(itypat)%dtaucdq0
    end if
 
    do i3=1,n3
@@ -404,6 +416,10 @@ subroutine atm2fft(atindx1,atmrho,atmvloc,dyfrn,dyfrv,eltfrn,gauss,gmet,gprimd,&
 
 !            Compute structure factor for all atoms of given type:
              do ia=ia1,ia2
+#ifdef FC_NVHPC
+               !Silly trick to prevent NVHPC optimization issue
+               if(nothing) write(100,*) shift1,shift2,shift3
+#endif                 
                shift1=1+n1+(ia-1)*(2*n1+1)
                shift2=1+n2+(ia-1)*(2*n2+1)+natom*(2*n1+1)
                shift3=1+n3+(ia-1)*(2*n3+1)+natom*(2*n1+1+2*n2+1)
@@ -441,7 +457,7 @@ subroutine atm2fft(atindx1,atmrho,atmvloc,dyfrn,dyfrv,eltfrn,gauss,gmet,gprimd,&
                else
                  v_at=(aa*vspl(jj,1,itypat)+bb*vspl(jj+1,1,itypat)+&
 &                 cc*vspl(jj,2,itypat)+dd*vspl(jj+1,2,itypat)) &
-&                 /gsquar
+&                 /gsquar * gcutoff(ii)
                end if
              end if
              if (optn==1) then
@@ -451,9 +467,13 @@ subroutine atm2fft(atindx1,atmrho,atmvloc,dyfrn,dyfrv,eltfrn,gauss,gmet,gprimd,&
                  n_at=(aa*tvalespl(jj,1)+bb*tvalespl(jj+1,1)+cc*tvalespl(jj,2)+dd*tvalespl(jj+1,2))
                else if (optn2==3) then
                  n_at=gauss1*exp(-gsquar*alf2pi2)
+               else if (optn2==4) then
+                 n_at=(aa*ttaucorespl(jj,1)+bb*ttaucorespl(jj+1,1)+cc*ttaucorespl(jj,2)+dd*ttaucorespl(jj+1,2))
                else
                  n_at=zero
                end if
+!DEBUG MJV for mGGA NC potentials
+!write (1003, *)  jj, n_at, '#optn==1 jj n_at xccc/xcctau in recip space'
              end if
 
 !            Compute sum of local atomic potentials or densities
@@ -551,19 +571,13 @@ subroutine atm2fft(atindx1,atmrho,atmvloc,dyfrn,dyfrv,eltfrn,gauss,gmet,gprimd,&
                if (optn==1) then
                  if (have_g0) then
                    if (optn2==1) then
-                     if (usepaw ==1) then
-                       dn_at=pawtab(itypat)%dncdq0
-                     else
-                       dn_at=psps%nctab(itypat)%dncdq0
-                     end if
+                     dn_at=dncdq0
                    else if (optn2==2) then
-                     if (usepaw == 1) then
-                       dn_at=pawtab(itypat)%dnvdq0
-                     else
-                       dn_at=psps%nctab(itypat)%dnvdq0
-                     end if
+                      dn_at=dnvdq0
                    else if (optn2==3) then
                      dn_at=-two*gauss1*alf2pi2
+                   else if (optn2==4) then
+                     dn_at=dtaucdq0
                    end if
                    if (opteltfr==1) then
                      d2n_at = 0
@@ -574,9 +588,7 @@ subroutine atm2fft(atindx1,atmrho,atmvloc,dyfrn,dyfrv,eltfrn,gauss,gmet,gprimd,&
                      ff=(3._dp*bb**2-1._dp)*tcorespl(jj+1,2) &
 &                     -(3._dp*aa**2-1._dp)*tcorespl(jj,2)
 !                    Also get nc''(q)
-                     if (opteltfr==1) then
-                       gg=aa*tcorespl(jj,2)+bb*tcorespl(jj+1,2)
-                     end if
+                     if (opteltfr==1) gg=aa*tcorespl(jj,2)+bb*tcorespl(jj+1,2)
                    else if (optn2==2) then
                      ee=tvalespl(jj+1,1)-tvalespl(jj,1)
                      ff=(3._dp*bb**2-1._dp)*tvalespl(jj+1,2) &
@@ -587,7 +599,12 @@ subroutine atm2fft(atindx1,atmrho,atmvloc,dyfrn,dyfrv,eltfrn,gauss,gmet,gprimd,&
                      end if
                    else if (optn2==3) then
                      dn_at=-two*gauss1*alf2pi2*exp(-gsquar*alf2pi2)
-                   else
+                   else if (optn2==4.and.usepaw==1) then
+                     ee=ttaucorespl(jj+1,1)-ttaucorespl(jj,1)
+                     ff=(3._dp*bb**2-1._dp)*ttaucorespl(jj+1,2) &
+&                     -(3._dp*aa**2-1._dp)*ttaucorespl(jj,2)
+!                    Also get nc''(q)
+                     if (opteltfr==1) gg=aa*ttaucorespl(jj,2)+bb*ttaucorespl(jj+1,2)
                    end if
                    dn_at  = (ee*dqm1+ff*dqdiv6)/gmag
                    if (opteltfr==1) then
@@ -714,41 +731,44 @@ subroutine atm2fft(atindx1,atmrho,atmvloc,dyfrn,dyfrv,eltfrn,gauss,gmet,gprimd,&
 !  End loop on type of atoms
  end do
 
- ABI_DEALLOCATE(phre_igia)
- ABI_DEALLOCATE(phim_igia)
+ ABI_FREE(phre_igia)
+ ABI_FREE(phim_igia)
+ ABI_FREE(gcutoff)
 
 !Get local potential or density back to real space
  if(optatm==1)then
 !  Allow for the addition of a perturbing potential
-   if ((optv==1).and.(vprtrb(1)**2+vprtrb(2)**2) > 1.d-30) then
-!    Find the linear indices which correspond with the input wavevector qprtrb
-!    The double modulus handles both i>=n and i<0, mapping into [0,n-1];
-!    then add 1 to get range [1,n] for each
-     i3=1+mod(n3+mod(qprtrb(3),n3),n3)
-     i2=1+mod(n2+mod(qprtrb(2),n2),n2)
-     i1=1+mod(n1+mod(qprtrb(1),n1),n1)
-!    Compute the linear index in the 3 dimensional array
-     ii=i1+n1*((ffti2_local(i2)-1)+(n2/nproc_fft)*(i3-1))
-!    Add in the perturbation at G=qprtrb
-     workv(re,ii)=workv(re,ii)+0.5_dp*vprtrb(1)
-     workv(im,ii)=workv(im,ii)+0.5_dp*vprtrb(2)
-!    Same thing for G=-qprtrb
-     i3=1+mod(n3+mod(-qprtrb(3),n3),n3)
-     i2=1+mod(n2+mod(-qprtrb(2),n2),n2)
-     i1=1+mod(n1+mod(-qprtrb(1),n1),n1)
-!    ii=i1+n1*((i2-1)+n2*(i3-1))
-     workv(re,ii)=workv(re,ii)+0.5_dp*vprtrb(1)
-     workv(im,ii)=workv(im,ii)-0.5_dp*vprtrb(2)
-     write(message, '(a,1p,2e12.4,a,0p,3i4,a)' )&
-&     ' atm2fft: perturbation of vprtrb=', vprtrb,&
-&     ' and q=',qprtrb,' has been added'
-     call wrtout(std_out,message,'COLL')
+   if (optv==1) then
+     if ((vprtrb(1)**2+vprtrb(2)**2) > 1.d-30) then
+!      Find the linear indices which correspond with the input wavevector qprtrb
+!      The double modulus handles both i>=n and i<0, mapping into [0,n-1];
+!      then add 1 to get range [1,n] for each
+       i3=1+mod(n3+mod(qprtrb(3),n3),n3)
+       i2=1+mod(n2+mod(qprtrb(2),n2),n2)
+       i1=1+mod(n1+mod(qprtrb(1),n1),n1)
+!      Compute the linear index in the 3 dimensional array
+       ii=i1+n1*((ffti2_local(i2)-1)+(n2/nproc_fft)*(i3-1))
+!      Add in the perturbation at G=qprtrb
+       workv(re,ii)=workv(re,ii)+0.5_dp*vprtrb(1)
+       workv(im,ii)=workv(im,ii)+0.5_dp*vprtrb(2)
+!      Same thing for G=-qprtrb
+       i3=1+mod(n3+mod(-qprtrb(3),n3),n3)
+       i2=1+mod(n2+mod(-qprtrb(2),n2),n2)
+       i1=1+mod(n1+mod(-qprtrb(1),n1),n1)
+!      ii=i1+n1*((i2-1)+n2*(i3-1))
+       workv(re,ii)=workv(re,ii)+0.5_dp*vprtrb(1)
+       workv(im,ii)=workv(im,ii)-0.5_dp*vprtrb(2)
+       write(message, '(a,1p,2e12.4,a,0p,3i4,a)' )&
+&       ' atm2fft: perturbation of vprtrb=', vprtrb,&
+&       ' and q=',qprtrb,' has been added'
+       call wrtout(std_out,message,'COLL')
+     end if
    end if
 
    if (optv==1.or.optn==1) then
 !    Create fake mpi_enreg to wrap fourdp
      call initmpi_seq(mpi_enreg_fft)
-     ABI_DATATYPE_DEALLOCATE(mpi_enreg_fft%distribfft)
+     ABI_FREE(mpi_enreg_fft%distribfft)
      if (present(comm_fft)) then
        call set_mpi_enreg_fft(mpi_enreg_fft,comm_fft,my_distribfft,me_g0,paral_kgb)
        my_comm_fft=comm_fft;paral_kgb_fft=paral_kgb
@@ -763,13 +783,13 @@ subroutine atm2fft(atindx1,atmrho,atmvloc,dyfrn,dyfrv,eltfrn,gauss,gmet,gprimd,&
        call zerosym(workv,2,n1,n2,n3,comm_fft=my_comm_fft,distribfft=my_distribfft)
        call fourdp(1,workv,atmvloc,1,mpi_enreg_fft,nfft,1,ngfft,0)
        atmvloc(:)=atmvloc(:)*xnorm
-       ABI_DEALLOCATE(workv)
+       ABI_FREE(workv)
      end if
      if (optn==1) then
        call zerosym(workn,2,n1,n2,n3,comm_fft=my_comm_fft,distribfft=my_distribfft)
        call fourdp(1,workn,atmrho,1,mpi_enreg_fft,nfft,1,ngfft,0)
        atmrho(:)=atmrho(:)*xnorm
-       ABI_DEALLOCATE(workn)
+       ABI_FREE(workn)
      end if
 !    Destroy fake mpi_enreg
      call unset_mpi_enreg_fft(mpi_enreg_fft)
@@ -814,13 +834,13 @@ subroutine atm2fft(atindx1,atmrho,atmvloc,dyfrn,dyfrv,eltfrn,gauss,gmet,gprimd,&
      do ia=1,natom
        grv(1:3,atindx1(ia))=grv_indx(1:3,ia)
      end do
-     ABI_DEALLOCATE(grv_indx)
+     ABI_FREE(grv_indx)
    end if
    if (optn==1) then
      do ia=1,natom
        grn(1:3,atindx1(ia))=grn_indx(1:3,ia)
      end do
-     ABI_DEALLOCATE(grn_indx)
+     ABI_FREE(grn_indx)
    end if
  end if
 
@@ -847,24 +867,23 @@ subroutine atm2fft(atindx1,atmrho,atmvloc,dyfrn,dyfrv,eltfrn,gauss,gmet,gprimd,&
      do ia=1,natom
        dyfrv(1:3,1:3,atindx1(ia))=dyfrv_indx(1:3,1:3,ia)
      end do
-     ABI_DEALLOCATE(dyfrv_indx)
+     ABI_FREE(dyfrv_indx)
    end if
    if (optn==1) then
      do ia=1,natom
        dyfrn(1:3,1:3,atindx1(ia))=dyfrn_indx(1:3,1:3,ia)
      end do
-     ABI_DEALLOCATE(dyfrn_indx)
+     ABI_FREE(dyfrn_indx)
    end if
  end if
 
  if (.not.present(distribfft)) then
    call destroy_distribfft(my_distribfft)
-   ABI_DATATYPE_DEALLOCATE(my_distribfft)
  end if
 
  DBG_EXIT("COLL")
 
- contains
+   contains
 
    function gsq_atm(i1,i2,i3)
 
@@ -978,13 +997,6 @@ end subroutine atm2fft
 !!  - 1st-order local potential: optv=1
 !!  - 1st-order PS core density: optn=1, optn2=1
 !!
-!! PARENTS
-!!      dfpt_dyxc1,dfpt_eltfrxc,dfpt_looppert,dfpt_nstpaw,pawgrnl
-!!
-!! CHILDREN
-!!      destroy_distribfft,fourdp,init_distribfft_seq,initmpi_seq
-!!      set_mpi_enreg_fft,unset_mpi_enreg_fft,zerosym
-!!
 !! SOURCE
 
 subroutine dfpt_atm2fft(atindx,cplex,gmet,gprimd,gsqcut,idir,ipert,&
@@ -992,8 +1004,6 @@ subroutine dfpt_atm2fft(atindx,cplex,gmet,gprimd,gsqcut,idir,ipert,&
 &                   ph1d,qgrid,qphon,typat,ucvol,usepaw,xred,psps,pawtab,&
 &                   atmrhor1,atmrhog1,atmvlocr1,atmvlocg1,distribfft,gauss,comm_fft,me_g0,optn_in,&
 &                   optn2_in,optv_in,paral_kgb,vspl) ! optional arguments
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1023,17 +1033,24 @@ subroutine dfpt_atm2fft(atindx,cplex,gmet,gprimd,gsqcut,idir,ipert,&
  integer :: ii,itypat,jj,me_fft,my_comm_fft,n1,n2,n3,nattyp,nproc_fft,ntype,paral_kgb_fft
  integer :: optn,optv,optn2,shift1,shift2,shift3,type1,type2
  logical :: have_g0,qeq0,qeq05
+#ifdef FC_NVHPC
+!Silly trick to prevent NVHPC optimization issue
+ logical :: nothing=.false.
+#endif
  real(dp),parameter :: tolfix=1.0000001_dp
  real(dp) :: aa,alf2pi2,bb,cc,cutoff,dd,diff,dq,dq2div6,dqdiv6,dqm1,ee,ff
  real(dp) :: gauss1,gauss2,gmag,gq1,gq2,gq3,gsquar,n_at,dn_at,ph12i,ph12r,ph1i
  real(dp) :: ph1r,ph2i,ph2r,ph3i,ph3r,phqim,phqre,qxred2pi
  real(dp) :: sfi,sfqi,sfqr,sfr,term_n,term_v,v_at,dv_at,xnorm
  type(distribfft_type),pointer :: my_distribfft
+ type(distribfft_type),target :: my_distribfft_
  type(mpi_type) :: mpi_enreg_fft
 !arrays
  integer :: eps1(6)=(/1,2,3,2,3,1/),eps2(6)=(/1,2,3,3,1,2/),jdir(ndir)
  integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:)
  real(dp), ABI_CONTIGUOUS pointer :: tvalespl(:,:),tcorespl(:,:)
+ real(dp), ABI_CONTIGUOUS pointer :: ttaucorespl(:,:)
+ real(dp), pointer :: dncdq0, dtaucdq0, dnvdq0
  real(dp) ::  gq(6),gcart(3)
  real(dp),allocatable :: phim_igia(:),phre_igia(:),workn(:,:,:),workv(:,:,:)
 
@@ -1044,11 +1061,12 @@ subroutine dfpt_atm2fft(atindx,cplex,gmet,gprimd,gsqcut,idir,ipert,&
 ! *************************************************************************
 
  DBG_ENTER("COLL")
+ ABI_NVTX_START_RANGE(NVTX_DFPT_ATM2FFT)
 
 !  Check optional arguments
  if (present(comm_fft)) then
    if ((.not.present(paral_kgb)).or.(.not.present(me_g0))) then
-     MSG_BUG('Need paral_kgb and me_g0 with comm_fft !')
+     ABI_BUG('Need paral_kgb and me_g0 with comm_fft !')
    end if
  end if
 
@@ -1057,7 +1075,7 @@ subroutine dfpt_atm2fft(atindx,cplex,gmet,gprimd,gsqcut,idir,ipert,&
      optn2 = 3
    else
      if(optn2_in/=3)then
-       MSG_BUG('optn2 must be set to 3!')
+       ABI_BUG('optn2 must be set to 3!')
      else
        optn2 = optn2_in
      end if
@@ -1071,7 +1089,7 @@ subroutine dfpt_atm2fft(atindx,cplex,gmet,gprimd,gsqcut,idir,ipert,&
      optn = optn_in
    end if
    if (.not.present(optn2_in)) then
-     MSG_BUG('rho1 calculation need optn2 !')
+     ABI_BUG('rho1 calculation need optn2 !')
    else
      optn2 = optn2_in
    end if
@@ -1085,13 +1103,13 @@ subroutine dfpt_atm2fft(atindx,cplex,gmet,gprimd,gsqcut,idir,ipert,&
      optv = 1
    else
      if(optv_in/=1)then
-       MSG_BUG('optv_in must be set to 1!')
+       ABI_BUG('optv_in must be set to 1!')
      else
        optv = optv_in
      end if
    end if
    if(.not.present(vspl))then
-     MSG_BUG('vloc1 calculation need vspl!')
+     ABI_BUG('vloc1 calculation need vspl!')
    end if
  else
    optv  = 0
@@ -1137,15 +1155,15 @@ subroutine dfpt_atm2fft(atindx,cplex,gmet,gprimd,gsqcut,idir,ipert,&
    if (present(distribfft)) then
      my_distribfft => distribfft
    else
-     ABI_DATATYPE_ALLOCATE(my_distribfft,)
-     call init_distribfft_seq(my_distribfft,'f',n2,n3,'fourdp')
+     my_distribfft => my_distribfft_
+     call init_distribfft_seq(my_distribfft_,'f',n2,n3,'fourdp')
    end if
    if (n2==my_distribfft%n2_coarse) then
      fftn2_distrib => my_distribfft%tab_fftdp2_distrib
    else if (n2 == my_distribfft%n2_fine) then
      fftn2_distrib => my_distribfft%tab_fftdp2dg_distrib
    else
-     MSG_BUG("Unable to find an allocated distrib for this fft grid")
+     ABI_BUG("Unable to find an allocated distrib for this fft grid")
    end if
 
    qeq0=(qphon(1)**2+qphon(2)**2+qphon(3)**2<1.d-15)
@@ -1154,7 +1172,7 @@ subroutine dfpt_atm2fft(atindx,cplex,gmet,gprimd,gsqcut,idir,ipert,&
 &   abs(abs(qphon(3))-half)<tol12)
 
    if (nproc_fft>1.and.qeq05) then
-     MSG_ERROR('not compatible with FFT parallelism')
+     ABI_ERROR('not compatible with FFT parallelism')
    end if
 
    if (optn2==3)then
@@ -1181,11 +1199,11 @@ subroutine dfpt_atm2fft(atindx,cplex,gmet,gprimd,gsqcut,idir,ipert,&
 
 !   Zero out temporary arrays
    if (optv==1) then
-     ABI_ALLOCATE(workv,(2,nfft,ndir))
+     ABI_MALLOC(workv,(2,nfft,ndir))
      workv(:,:,:)=zero
    end if
    if (optn==1) then
-     ABI_ALLOCATE(workn,(2,nfft,ndir))
+     ABI_MALLOC(workn,(2,nfft,ndir))
      workn(:,:,:)=zero
    end if
 
@@ -1194,14 +1212,14 @@ subroutine dfpt_atm2fft(atindx,cplex,gmet,gprimd,gsqcut,idir,ipert,&
      ia1=1
      type1 = 1
      type2 = ntype
-     ABI_ALLOCATE(phre_igia,(natom))
-     ABI_ALLOCATE(phim_igia,(natom))
+     ABI_MALLOC(phre_igia,(natom))
+     ABI_MALLOC(phim_igia,(natom))
    else
      type1 = itypat
      type2 = itypat
      ntype = 1
-     ABI_ALLOCATE(phre_igia,(iatm:iatm))
-     ABI_ALLOCATE(phim_igia,(iatm:iatm))
+     ABI_MALLOC(phre_igia,(iatm:iatm))
+     ABI_MALLOC(phim_igia,(iatm:iatm))
    end if
 
 
@@ -1218,9 +1236,17 @@ subroutine dfpt_atm2fft(atindx,cplex,gmet,gprimd,gsqcut,idir,ipert,&
      if (usepaw == 1) then
        tcorespl => pawtab(itypat)%tcorespl
        tvalespl => pawtab(itypat)%tvalespl
+       ttaucorespl => pawtab(itypat)%tcoretauspl
+       dncdq0 => pawtab(itypat)%dncdq0
+       dnvdq0 => pawtab(itypat)%dnvdq0
+       dtaucdq0 => pawtab(itypat)%dtaucdq0
      else
        tcorespl => psps%nctab(itypat)%tcorespl
        tvalespl => psps%nctab(itypat)%tvalespl
+       ttaucorespl => psps%nctab(itypat)%ttaucorespl
+       dncdq0 => psps%nctab(itypat)%dncdq0
+       dnvdq0 => psps%nctab(itypat)%dnvdq0
+       dtaucdq0 => psps%nctab(itypat)%dtaucdq0
      end if
 
      ii=0
@@ -1267,6 +1293,10 @@ subroutine dfpt_atm2fft(atindx,cplex,gmet,gprimd,gsqcut,idir,ipert,&
                phim_igia(:) = zero
 
                do ia=ia1,ia2
+#ifdef FC_NVHPC
+                 !Silly trick to prevent NVHPC optimization issue
+                 if(nothing) write(100,*) shift1,shift2,shift3
+#endif                 
                  shift1=1+n1+(ia-1)*(2*n1+1)
                  shift2=1+n2+(ia-1)*(2*n2+1)+natom*(2*n1+1)
                  shift3=1+n3+(ia-1)*(2*n3+1)+natom*(2*n1+1+2*n2+1)
@@ -1321,17 +1351,9 @@ subroutine dfpt_atm2fft(atindx,cplex,gmet,gprimd,gsqcut,idir,ipert,&
 !                Also get (dn^AT(q)/dq)/q:
                  if (have_g0) then
                    if (optn2==1) then
-                     if (usepaw == 1) then
-                       dn_at=pawtab(itypat)%dncdq0
-                     else
-                       dn_at=psps%nctab(itypat)%dncdq0
-                     end if
+                     dn_at=dncdq0
                    else if (optn2==2) then
-                     if (usepaw == 1) then
-                       dn_at=pawtab(itypat)%dnvdq0
-                     else
-                       dn_at=psps%nctab(itypat)%dnvdq0
-                     end if
+                     dn_at=dnvdq0
                    else if (optn2==3) then
                      dn_at=-two*gauss1*alf2pi2
                    end if
@@ -1430,8 +1452,8 @@ subroutine dfpt_atm2fft(atindx,cplex,gmet,gprimd,gsqcut,idir,ipert,&
      ia1=ia2+1
    end do ! end loop itype
 
-   ABI_DEALLOCATE(phre_igia)
-   ABI_DEALLOCATE(phim_igia)
+   ABI_FREE(phre_igia)
+   ABI_FREE(phim_igia)
 
    if(ipert==natom+3.or.ipert==natom+4) then
 !    Set Vloc(G=0)=0:
@@ -1470,7 +1492,7 @@ subroutine dfpt_atm2fft(atindx,cplex,gmet,gprimd,gsqcut,idir,ipert,&
      xnorm=one/ucvol
 !    Create fake mpi_enreg to wrap fourdp
      call initmpi_seq(mpi_enreg_fft)
-     ABI_DATATYPE_DEALLOCATE(mpi_enreg_fft%distribfft)
+     ABI_FREE(mpi_enreg_fft%distribfft)
      if (present(comm_fft)) then
        call set_mpi_enreg_fft(mpi_enreg_fft,comm_fft,my_distribfft,me_g0,paral_kgb)
        my_comm_fft=comm_fft;paral_kgb_fft=paral_kgb
@@ -1492,7 +1514,7 @@ subroutine dfpt_atm2fft(atindx,cplex,gmet,gprimd,gsqcut,idir,ipert,&
        end do
 
        !if (present(atmvlocg1)) atmvlocg1 = workv
-       ABI_DEALLOCATE(workv)
+       ABI_FREE(workv)
      end if
 
      if (optn==1) then
@@ -1507,7 +1529,7 @@ subroutine dfpt_atm2fft(atindx,cplex,gmet,gprimd,gsqcut,idir,ipert,&
          atmrhor1(:,id)=atmrhor1(:,id)*xnorm
        end do
        !if (present(atmrhog1)) atmrhog1 = workn
-       ABI_DEALLOCATE(workn)
+       ABI_FREE(workn)
      end if
 
 !    Destroy fake mpi_enreg
@@ -1516,12 +1538,12 @@ subroutine dfpt_atm2fft(atindx,cplex,gmet,gprimd,gsqcut,idir,ipert,&
 
    if (.not.present(distribfft)) then
      call destroy_distribfft(my_distribfft)
-     ABI_DATATYPE_DEALLOCATE(my_distribfft)
    end if
 
 !  End the condition of non-electric-field
  end if
 
+ ABI_NVTX_END_RANGE()
  DBG_EXIT("COLL")
 
 end subroutine dfpt_atm2fft

@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_lobpcg
 !! NAME
 !!  m_lobpcg
@@ -8,15 +7,11 @@
 !!  They permit to hide the complex/real form of the WFs.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2019 ABINIT group (FBottin,CS,FDahm,MT)
+!! Copyright (C) 2009-2024 ABINIT group (FBottin,CS,FDahm,MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! NOTES
 !!
@@ -33,11 +28,12 @@ MODULE m_lobpcg
  use defs_basis
  use m_abicore
  use m_errors
- use defs_abitypes
  use m_wfutils
  use m_abi_linalg
  use m_cgtools
+ use m_dtset
 
+ use defs_abitypes,       only : mpi_type
  use m_time,              only : timab
 
  implicit none
@@ -60,7 +56,7 @@ CONTAINS
 !!  for a block of band (band-FFT parallelisation)
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2019 ABINIT group (FBottin,CS)
+!! Copyright (C) 1998-2024 ABINIT group (FBottin,CS)
 !! this file is distributed under the terms of the
 !! gnu general public license, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -73,7 +69,7 @@ CONTAINS
 !!  $ghc(vectsize,blocksize)=<G|H|C_{n,k}> for a block of bands$.
 !!  iterationnumber=number of iterative minimizations in LOBPCG
 !!  kinpw(npw)=(modified) kinetic energy for each plane wave (Hartree)
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  nspinor=number of spinorial components of the wavefunctions (on current proc)
 !!  $vect(vectsize,blocksize)=<G|H|C_{n,k}> for a block of bands$.
 !!  npw=number of planewaves at this k point.
@@ -88,26 +84,18 @@ CONTAINS
 !! OUTPUT
 !!  vect(2,npw)=<g|(h-eval)|c_{n,k}>*(polynomial ratio)
 !!
-!! PARENTS
-!!      lobpcgwf
-!!
-!! CHILDREN
-!!      abi_xcopy,cg_precon_block,cg_zprecon_block,timab
-!!
 !! SOURCE
 
 subroutine xprecon(cg,eval,blocksize,iterationnumber,kinpw,&
 &  mpi_enreg,npw,nspinor,optekin,optpcon,pcon,ghc,vect,vectsize,&
 &  timopt,tim_xprecon) ! optional arguments
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: blocksize,iterationnumber,npw,nspinor,optekin
  integer,intent(in) :: optpcon,vectsize
  integer, intent(in), optional :: timopt,tim_xprecon
- type(mpi_type),intent(inout) :: mpi_enreg
+ type(mpi_type),intent(in) :: mpi_enreg
 !arrays
  real(dp),intent(inout) :: cg(vectsize,blocksize),eval(blocksize,blocksize)
  real(dp),intent(in) :: kinpw(npw)
@@ -130,10 +118,10 @@ subroutine xprecon(cg,eval,blocksize,iterationnumber,kinpw,&
    call cg_precon_block(cg,eval,blocksize,iterationnumber,kinpw,&
 &    npw,nspinor,mpi_enreg%me_g0,optekin,optpcon,pcon,ghc,vect,vectsize,mpi_enreg%comm_bandspinorfft)
  else
-   ABI_ALLOCATE(z_cg,(vectsize,blocksize))
-   ABI_ALLOCATE(z_eval,(blocksize,blocksize))
-   ABI_ALLOCATE(z_ghc,(vectsize,blocksize))
-   ABI_ALLOCATE(z_vect,(vectsize,blocksize))
+   ABI_MALLOC(z_cg,(vectsize,blocksize))
+   ABI_MALLOC(z_eval,(blocksize,blocksize))
+   ABI_MALLOC(z_ghc,(vectsize,blocksize))
+   ABI_MALLOC(z_vect,(vectsize,blocksize))
 
    call abi_xcopy(x_cplx*vectsize*blocksize,cg,1,z_cg,1)
    call abi_xcopy(x_cplx*vectsize*blocksize,ghc,1,z_ghc,1)
@@ -148,10 +136,10 @@ subroutine xprecon(cg,eval,blocksize,iterationnumber,kinpw,&
    call abi_xcopy(x_cplx*vectsize*blocksize,z_vect,1,vect,1)
    call abi_xcopy(x_cplx*blocksize*blocksize,z_eval,1,eval,1)
 
-   ABI_DEALLOCATE(z_cg)
-   ABI_DEALLOCATE(z_eval)
-   ABI_DEALLOCATE(z_ghc)
-   ABI_DEALLOCATE(z_vect)
+   ABI_FREE(z_cg)
+   ABI_FREE(z_eval)
+   ABI_FREE(z_ghc)
+   ABI_FREE(z_vect)
  endif
 
  if (present(tim_xprecon).and.present(timopt)) then

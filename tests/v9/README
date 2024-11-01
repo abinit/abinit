@@ -1,0 +1,38 @@
+This directory, v9, contains tests which
+are related to various developments in
+version 9.x.x of Abinit
+
+Please, see the README file in the tests directory (above this one) to get help.
+
+
+------------------------------------------------------------------
+
+* Tests 1-30 concern ground state 
+
+* Tests 31-40 concern GW/BSE
+
+* Tests 41-49 concern response functions except electron-phonon 
+
+* Tests 50-70 concern electron-phonon
+
+* Tests 71-80 concern ground state
+
+* Tests 81-89 concern multibinit
+
+* Tests 90-99 concern ground state
+
+* Tests 105-109 concern paw+u (specifically lruj)
+
+* Tests 110-119 concern lattice Wannier function
+
+* Tests 120-129 concern PAW hybrid functionals
+
+* Tests 130-139 concern ground state
+
+* Tests 140-149 concern response functions except electron-phonon 
+
+* Test  150 concerning write_files supravariable
+
+* Test  180-199 concern ground state geometry recognition
+
+------------------------------------------------------------------

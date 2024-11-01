@@ -1,0 +1,94 @@
+#Test the use of a double loop, up to a dataset number that is beyond 1000 (last one is 1022).
+
+# Computation of the band structure.
+# First, a SCF density computation, then a non-SCF band structure calculation.
+
+ndtset 204
+udtset 102 2
+
+# Translate the atoms from one dataset to the next one
+xred:?            # This keyword indicate that the location of the atoms
+                  # will follow, one triplet of number for each atom
+   0.0  0.0  0.0  # Triplet giving the REDUCED coordinate of atom 1.
+   1/4  1/4  1/4  # Triplet giving the REDUCED coordinate of atom 2.
+xred+?   6*0.0001
+ chksymtnons 0
+
+#Definition of the planewave basis set
+ ecut 4.0
+#ecut:? 4.0         # Starting kinetic energy cut-off, in Hartree
+#ecut+? 0.1         # Increment of kinetic energy cut-off, in Hartree
+
+getwfk11  0
+getwfk  -2
+
+#Dataset 1 : usual self-consistent calculation
+kptopt?1 1          # Option for the automatic generation of k points,
+                   # taking into account the symmetry
+nshiftk?1 4
+shiftk?1  0.5 0.5 0.5  # These shifts will be the same for all grids
+          0.5 0.0 0.0
+          0.0 0.5 0.0
+          0.0 0.0 0.5
+ngkpt?1  1 1 1
+prtden?1  1         # Print the density, for use by dataset 2
+toldfe?1  1.0d-6    # This value is way too large for most realistic studies of materials
+
+#Dataset 2 : the band structure
+iscf?2    -2
+getden?2  -1
+kptopt?2  -1
+nband?2   8
+ndivk?2   2     # 2 divisions of the segment
+kptbounds?2  0.5  0.0  0.0 # L point
+             0.0  0.0  0.0 # Gamma point
+tolwfr?2  1.0d-12
+enunit?2  1             # Will output the eigenenergies in eV
+
+
+#Definition of the unit cell
+acell 3*10.217         # This is equivalent to   10.217 10.217 10.217
+rprim  0.0  0.5  0.5   # FCC primitive vectors (to be scaled by acell)
+       0.5  0.0  0.5
+       0.5  0.5  0.0
+
+#Definition of the atom types
+ntypat 1          # There is only one type of atom
+znucl 14          # The keyword "znucl" refers to the atomic number of the
+                  # possible type(s) of atom. The pseudopotential(s)
+                  # mentioned in the "files" file must correspond
+                  # to the type(s) of atom. Here, the only type is Silicon.
+
+#Definition of the atoms
+natom 2           # There are two atoms
+typat 1 1         # They both are of type 1, that is, Silicon.
+
+#Definition of the SCF procedure
+nstep 10          # Maximal number of SCF cycles
+diemac 12.0       # Although this is not mandatory, it is worth to
+                  # precondition the SCF cycle. The model dielectric
+                  # function used as the standard preconditioner
+                  # is described in the "dielng" input variable section.
+                  # Here, we follow the prescription for bulk silicon.
+
+#timopt 1
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/14si.pspnc"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t34.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options =  
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = Unknown
+#%% keywords = 
+#%% description = 
+#%%   Crystalline silicon. Diamond structure.
+#%%   Quick test of the use of datasets with a numbering beyond 1000 (the last one is 1022).
+#%%   (Tests 35-40 are for response-function)
+#%%<END TEST_INFO>

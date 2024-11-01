@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/m_rot_cg
 !! NAME
 !! m_rot_cg
@@ -7,21 +6,9 @@
 !!  Rotate the cg coefficient with the rotation matrix obtained from the
 !!  diagonalisation of the non-diagonal occupation matrix produced by DMFT.
 !!
-!! COPYRIGHT
-!! Copyright (C) 1998-2019 ABINIT group (TCavignac)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
-!!
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      mkrho
-!!
-!! CHILDREN
 !!
 !! SOURCE
 !!
@@ -36,10 +23,9 @@
 module m_rot_cg
 
   use defs_basis
-  use defs_abitypes
-  use m_profiling_abi
   use m_xmpi
   use m_errors
+  use m_abicore
 
   implicit none
 
@@ -59,13 +45,6 @@ module m_rot_cg
 !! and return diagonalised occupations and associated eigen vectors sorted
 !! with descending occupation
 !!
-!! COPYRIGHT
-!! Copyright (C) 1998-2019 ABINIT group (TCavignac)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
-!!
 !! INPUTS
 !!   occ_nd_cpx(nband, nband) = matrix of non diagonal occupations for DMFT
 !!   nband = number of band to be processed
@@ -75,26 +54,12 @@ module m_rot_cg
 !!   occ_diag(2, nband) = diagonal occupation in the new band space
 !!   cwavef_rot(2, npw, nband) = fourier coefficient of wave functions for all bands rotated in the band space
 !!
-!! PARENTS
-!!      mkrho
-!!
-!! CHILDREN
-!!
 !! SOURCE
 !!
 !! TODO /!\ No parallel computing yet !
 !! TODO add the possibility of using ScaLAPACK to do computation in parallel
 
 subroutine diag_occ(occ_nd_cpx, nband, occ_diag)
-
-  use defs_basis
-  use defs_abitypes
-  use m_profiling_abi
-  use m_xmpi
-  use m_errors
-
-! use m_paw_dmft,     only : paw_dmft_type
-  implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -131,14 +96,14 @@ subroutine diag_occ(occ_nd_cpx, nband, occ_diag)
 !! Get diagonal occupations and associeted base
 
 ! Compute the optimal working array size
-  ABI_ALLOCATE(work,(1))
+  ABI_MALLOC(work,(1))
   work = czero
   call zheev('V', 'U', nband, occ_nd_cpx, nband, occ_diag, work, -1, rwork, info)
-  lwork = work(1)
-  ABI_DEALLOCATE(work)
+  lwork = int(work(1))
+  ABI_FREE(work)
 
 ! Compute the eigenvalues (occ_diag) and vectors
-  ABI_ALLOCATE(work,(lwork))
+  ABI_MALLOC(work,(lwork))
   work = czero
 
   call zheev('V', 'U', nband, occ_nd_cpx, nband, occ_diag, work, lwork, rwork, info)
@@ -146,18 +111,18 @@ subroutine diag_occ(occ_nd_cpx, nband, occ_diag)
 !! obtain the true eigen values of occupation matrix in descending order
   occ_diag = -occ_diag
 
-  ABI_DEALLOCATE(work)
+  ABI_FREE(work)
 
   if (info > 0) then
     message=""
     write(message, "(a,i5)") " something wrong happened with the diagonalisation of &
 &the occupation matrix (did't converge), info=",info
-    MSG_ERROR(message)
+    ABI_ERROR(message)
   else if (info < 0) then
     message=""
     write(message, "(a,i5)") " something wrong happened with the diagonalisation of &
 &the occupation matrix (bad input argument), info=",info
-    MSG_ERROR(message)
+    ABI_ERROR(message)
   end if
 
   DBG_EXIT("COLL")
@@ -172,13 +137,6 @@ end subroutine diag_occ
 !! FUNCTION
 !! Use for DMFT in KGB parallelisation. Diagonalise the occupation matrix
 !! and use the resulting base to represent the wave functions.
-!!
-!! COPYRIGHT
-!! Copyright (C) 1998-2019 ABINIT group (TCavignac)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
 !!   occ_nd(2, nband, nband) = matrix of non diagonal occupations for DMFT
@@ -198,11 +156,6 @@ end subroutine diag_occ
 !! SIDE EFFECT
 !!   cwavef is rotated with the unitary matrix obtained from the diagonalisation
 !!   of occupations (occ_nd)
-!! PARENTS
-!!      mkrho
-!!
-!! CHILDREN
-!!
 !! SOURCE
 !!
 !! TODO /!\ No parallel computing yet !
@@ -210,15 +163,6 @@ end subroutine diag_occ
 !! TODO Make the computation of the new wf parallel
 
 subroutine rot_cg(occ_nd, cwavef, npw, nband, blocksize, nspinor, first_bandc, nbandc, occ_diag)
-
-  use defs_basis
-  use defs_abitypes
-  use m_profiling_abi
-  use m_xmpi
-  use m_errors
-
-! use m_paw_dmft,     only : paw_dmft_type
-  implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -248,7 +192,7 @@ subroutine rot_cg(occ_nd, cwavef, npw, nband, blocksize, nspinor, first_bandc, n
 
   if(nband /= blocksize) then
     message = " DMFT in KGB cannot be used with multiple blocks yet. Make sure that bandpp*npband = nband."
-    MSG_ERROR(message)
+    ABI_ERROR(message)
   end if
 
 !! Initialisation

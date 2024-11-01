@@ -1,0 +1,71 @@
+#Definition de la maille
+#***********************
+   acell 3*10.260157145
+   angdeg 3*55.63241086
+
+#Definition du type d'atomes
+#***************************
+   ntypat 3
+   znucl 41 3 8
+   ixc 7
+
+#Definition des atomes
+#*********************
+   natom 10
+   natrd 10
+   typat 2*1 2*2 6*3
+
+ xred        -6.2167749428E-04 -6.2167749428E-04 -6.2167749428E-04
+              4.9937832251E-01  4.9937832251E-01  4.9937832251E-01
+              2.8311188469E-01  2.8311188469E-01  2.8311188469E-01
+              7.8311188469E-01  7.8311188469E-01  7.8311188469E-01
+              7.1853575943E-01  3.6749800127E-01  1.0707868171E-01
+              1.0707868171E-01  7.1853575943E-01  3.6749800127E-01
+              3.6749800127E-01  1.0707868171E-01  7.1853575943E-01
+              8.6749800127E-01  2.1853575943E-01  6.0707868171E-01
+              6.0707868171E-01  8.6749800127E-01  2.1853575943E-01
+              2.1853575943E-01  6.0707868171E-01  8.6749800127E-01
+
+#Definition de la base d'ondes planes et de la grille ds l'espace k
+#******************************************************************
+   ecut 3
+   kptopt   1
+   ngkpt 2 2 2
+   nshiftk 1
+   shiftk 0.5 0.5 0.5
+   nband   34
+
+#Definition de la procedure SCF
+#******************************
+   nstep 200
+   diemac 6.0
+   toldfe  1.0d-10
+
+   ndtset 2   jdtset  1 2
+   berryopt1 -1    rfdir1    1 1 1 
+   berryopt2  4    efield2   0.0001 0.00 0.00  getwfk2 1
+
+
+nbdbuf 0
+
+
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "41nb_001023.pspfhi, 03li.pspfhi, 08o_001023.pspfhi"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%  tsv4_55.abo,      tolnlines=  2, tolabs=  1.1e-03, tolrel=  4.0e-04, fld_options=-easy
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% keywords = NC, DFPT
+#%% authors = M. Veithen
+#%% description = 
+#%%   LiNbO3, rhombohedral.
+#%%   Test finite electric field
+#%%   Check the corectness of the symmetry operations with non-zero tnons.
+#%%<END TEST_INFO>

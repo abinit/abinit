@@ -54,4 +54,4 @@ field) can be computed as well.
 
 ## Tutorials
 
-* The [[tutorial:ffield]|tutorial on polarization and finite electric field deals with the computation of the polarization of an insulator (e.g. ferroelectric, or dielectric material) thanks to the Berry phase approach, and also presents the computation of materials properties in the presence of a finite electric field (also thanks to the Berry phase approach).
+* The [[tutorial:polarization]|tutorial on polarization and finite electric field deals with the computation of the polarization of an insulator (e.g. ferroelectric, or dielectric material) thanks to the Berry phase approach, and also presents the computation of materials properties in the presence of a finite electric field (also thanks to the Berry phase approach).

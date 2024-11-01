@@ -1,0 +1,79 @@
+# silicon with PAW, creates both DEN and PAWDEN files.
+# note that the DEN file is the standard, but includes
+# only \tilde{n} and \hat{n}, needed for later PAW
+# computations. The PAWDEN file is the correct PAW
+# reconstructed density, and is useful for visualization
+# and for AIM.
+
+ndtset 1
+
+ecut 5
+
+kptopt 1
+tolvrs 1.0D-12
+
+prtden1 2 # generates DEN file + PAWDEN file (AE valence density)
+# Only the first dataset is done for now.
+prtden2 3 # generates DEN file + PAWDEN file (AE valence + core density)
+prtden3 4 # generates DEN file + core, valence and full atomic protodensity
+prtden4 5 # generates DEN file + PAWDEN file (AE valence density) + core, valence and full atomic protodensity
+prtden5 6 # generates DEN file + PAWDEN file (AE valence + core density) + core, valence and full atomic protodensity
+prtden6 7 # generates DEN file + the different contributions to the valence bulk density (n_tilde-n_hat), n_onsite and n_tilde_onsite.
+
+prtwf 1
+prteig 0
+
+getwfk -1
+
+pawecutdg 5 # set very low, for speed. In general must
+# be >= ecut, and should be part of convergence tests.
+
+nstep1 50
+nstep 5
+
+acell 3*5.43 angstrom
+rprim
+0 1/2 1/2
+1/2 0 1/2
+1/2 1/2 0
+
+occopt 1
+nband 4
+ngkpt 2 2 2
+nshiftk 4
+shiftk
+3*1/2
+1/2 0 0
+0 1/2 0
+0 0 1/2
+
+znucl 14
+ntypat 1
+typat 2*1
+natom 2
+xred 3*0 3*1/4
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "si_ps.736.lda"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% test_chain = t11.abi, t12.abi, t13.abi
+#%% [files]
+#%% files_to_test = 
+#%%   t11.abo, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00, fld_options = -medium
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = M. Stankovski  
+#%% keywords = PAW
+#%% description = 
+#%%   Generate both DEN and PAWDEN files for silicon. Note that in the PAW case, DEN files
+#%%   include the valence density and compensation charge, while PAWDEN files include the
+#%%   valence and on-site corrections, but not the compensation charge. Therefore, DEN files are
+#%%   needed for further computations, while PAWDEN files are useful for visualization, AIM, and other
+#%%   post-processing of the density.
+#%%   PAW AE DEN not compatible with parallelization over atoms.
+#%% topics = PAW
+#%%<END TEST_INFO>

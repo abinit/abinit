@@ -1,0 +1,72 @@
+#   Si in diamond structure; 2 special points; low ecut.
+
+ acell 3*10.26311
+ diemac 12.0d0
+ ecut 5.8
+ enunit 2  
+ intxc 1
+ kptopt 0
+ kpt   1 1 1     1 2 2   kptnrm 4
+ natom  2 nband 4
+ nkpt  2
+ nline 3   
+ nstep 10
+ nsym  24   ntypat  1
+ occ 4*2.0d0 occopt  0     prtvol 10
+ rprim   0 .5 .5  .5 0 .5  .5 .5 0
+ symrel
+  1  0  0   0  1  0   0  0  1
+  0  1 -1   1  0 -1   0  0 -1
+  0 -1  1   0 -1  0   1 -1  0
+ -1  0  0  -1  0  1  -1  1  0
+  0  1  0   0  0  1   1  0  0
+  1  0 -1   0  0 -1   0  1 -1
+  0 -1  0   1 -1  0   0 -1  1
+ -1  0  1  -1  1  0  -1  0  0
+  0  0  1   1  0  0   0  1  0
+  0  0 -1   0  1 -1   1  0 -1
+  1 -1  0   0 -1  1   0 -1  0
+ -1  1  0  -1  0  0  -1  0  1
+  1  0 -1   0  1 -1   0  0 -1
+  0  1  0   1  0  0   0  0  1
+ -1  0  1  -1  0  0  -1  1  0
+  0 -1  0   0 -1  1   1 -1  0
+ -1  1  0  -1  0  1  -1  0  0
+  1 -1  0   0 -1  0   0 -1  1
+  0  0 -1   1  0 -1   0  1 -1
+  0  0  1   0  1  0   1  0  0
+  0 -1  1   1 -1  0   0 -1  0
+ -1  0  0  -1  1  0  -1  0  1
+  1  0  0   0  0  1   0  1  0
+  0  1 -1   0  0 -1   1  0 -1
+ timopt -1
+ tnons 72*0.0
+ tolmxf 1.0d-4
+ tolwfr 1.0d-14
+ typat  1 1  
+ wtk   1 3
+ xred 3*0.00d0 3*0.25d0
+ znucl 14
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "14si.psp"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% test_chain = t03.abi, t05.abi, t06.abi, t07.abi, t08.abi, t09.abi, t11.abi, t12.abi, t14.abi, t16.abi
+#%% [files]
+#%% files_to_test = 
+#%%   t03.abo, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = Unknown 
+#%% references = 
+#%% keywords = 
+#%% description = 
+#%%   2 special k point Si in 2-atom diamond unit cell.  Uses symmetry.
+#%%   mkmem=mkpt, mffmem=1 ("in core" solution), 
+#%%   This calculation is also iterated to convergence.  ecut too small.
+#%%   Uses original Teter extended norm conserving psp 14si.psp.
+#%%<END TEST_INFO>

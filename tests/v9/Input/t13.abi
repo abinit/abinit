@@ -1,0 +1,61 @@
+#   Test  iron BCC metallic spin-polarized ferromagnetic collinear and non-collinear
+
+ndtset 5
+
+
+nsppol1   2                 spinat1 0 0 4     nband1 12
+nspinor2  2   nspden2  4    spinat2 0 0 4     nband2 24
+nspinor3  2   nspden3  4    spinat3 4 0 0     nband3 24
+nspinor4  2   nspden4  4    spinat4 0 4 0     nband4 24
+nspinor5  2   nspden5  4    spinat5 sqrt(8.0) sqrt(8.0) 0     nband5 24
+
+
+#
+
+kptopt 4
+ecut 10.0
+
+occopt 7
+
+nstep 12
+tolwfr    1.0d-12
+
+#Definition of the k-point grid
+ngkpt 2 2 2   # Much too coarse. Only for testing purposes.
+
+#Definition of the atoms
+natom 1
+typat 1           # This atom is of type 1, that is, Fe
+xred              # This keyword indicate that the location of the atoms
+   0.0  0.0  0.0  # will follow, one triplet of number for each atom
+                  # Triplet giving the REDUCED coordinate of atom 1.
+ntypat 1
+znucl 26
+
+#Definition of the unit cell
+acell   3*4.8
+rprim     -0.5  0.5  0.5
+           0.5 -0.5  0.5
+           0.5  0.5 -0.5
+
+ so_psp 0
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/26fe.pspnc"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test =
+#%%   t13.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0e-0 ;
+#%% [paral_info]
+#%% max_nprocs = 10
+#%% [extra_info]
+#%% authors = X. Gonze
+#%% keywords = PAW
+#%% description =
+#%%   BCC iron, ferromagnetic, GGA, PAW.
+#%%   Test collinear treatment as well as non-collinear, with different starting spinat
+#%%   See test v9#41 for DFPT, with PAW atomic data.
+#%% topics = PAW
+#%%<END TEST_INFO>

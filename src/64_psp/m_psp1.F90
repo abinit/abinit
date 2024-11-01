@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_psp1
 !! NAME
 !!  m_psp1
@@ -7,14 +6,10 @@
 !!  Initialize pspcod=1 or 4 pseudopotential (Teter format)
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2019 ABINIT group (DCA, XG, GMR, FrD, MT)
+!!  Copyright (C) 1998-2024 ABINIT group (DCA, XG, GMR, FrD, MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -106,12 +101,6 @@ contains
 !!    revised expression for core density of 5 Nov 1992, while
 !!    for pspcod=4, it is an older expression, of 7 May 1992 .
 !!
-!! PARENTS
-!!      pspatm
-!!
-!! CHILDREN
-!!      psp1cc,psp1lo,psp1nl,psp4cc,spline,wrtout
-!!
 !! SOURCE
 
 subroutine psp1in(dq,ekb,ekb1,ekb2,epsatm,epspsp,&
@@ -154,7 +143,7 @@ subroutine psp1in(dq,ekb,ekb1,ekb2,epsatm,epspsp,&
 &   'Using Teter grid (pspcod=1 and 4) but mmax=',mmax,ch10,&
 &   'mmax must be 2001 for Teter grid.',ch10,&
 &   'Action: check your pseudopotential input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 !File format of formatted Teter psp input (the 3 first lines
@@ -243,8 +232,8 @@ subroutine psp1in(dq,ekb,ekb1,ekb2,epsatm,epspsp,&
 !drad(:)= inverse of d(r(i))/d(i) for radial grid
 !wfll(:,1),...,wfll(:,4)=reference config. wavefunctions
 
- ABI_ALLOCATE(vloc,(mmax))
- ABI_ALLOCATE(vpspll,(mmax,mpsang))
+ ABI_MALLOC(vloc,(mmax))
+ ABI_MALLOC(vpspll,(mmax,mpsang))
  if(lmax==-1) vpspll(:,:)=zero
 
 !(1) Read atomic pseudopotential for each l, filling up array vpspll
@@ -258,9 +247,9 @@ subroutine psp1in(dq,ekb,ekb1,ekb2,epsatm,epspsp,&
  vloc( 1:mmax ) = vpspll( 1:mmax , lloc+1 )
 
 !(2) Create radial grid, and associated quantities
- ABI_ALLOCATE(rad,(mmax))
- ABI_ALLOCATE(drad,(mmax))
- ABI_ALLOCATE(wksincos,(mmax,2,2))
+ ABI_MALLOC(rad,(mmax))
+ ABI_MALLOC(drad,(mmax))
+ ABI_MALLOC(wksincos,(mmax,2,2))
 
 !Teter grid--need both r and dr in this case
  do ii=0,mmax-1
@@ -281,9 +270,9 @@ subroutine psp1in(dq,ekb,ekb1,ekb2,epsatm,epspsp,&
 
 !(3)Carry out calculations for local (lloc) pseudopotential.
 !Obtain Fourier transform (1-d sine transform) to get q^2 V(q).
- ABI_ALLOCATE(work_space,(mqgrid))
- ABI_ALLOCATE(work_spl1,(mqgrid))
- ABI_ALLOCATE(work_spl2,(mqgrid))
+ ABI_MALLOC(work_space,(mqgrid))
+ ABI_MALLOC(work_spl1,(mqgrid))
+ ABI_MALLOC(work_spl2,(mqgrid))
  call psp1lo(drad,epsatm,mmax,mqgrid,qgrid,&
 & work_spl1,rad,vloc,wksincos,yp1,ypn,zion)
 
@@ -292,9 +281,9 @@ subroutine psp1in(dq,ekb,ekb1,ekb2,epsatm,epspsp,&
  vlspl(:,1)=work_spl1(:)
  vlspl(:,2)=work_spl2(:)
 
- ABI_DEALLOCATE(work_space)
- ABI_DEALLOCATE(work_spl1)
- ABI_DEALLOCATE(work_spl2)
+ ABI_FREE(work_space)
+ ABI_FREE(work_spl1)
+ ABI_FREE(work_spl2)
 
 !(4)Take care of non-local part
 
@@ -314,7 +303,7 @@ subroutine psp1in(dq,ekb,ekb1,ekb2,epsatm,epspsp,&
 !  Proceed to make Kleinman-Bylander form factors for each l up to lmax
 
 !  Read wavefunctions for each l up to lmax
-   ABI_ALLOCATE(wfll,(mmax,mpsang))
+   ABI_MALLOC(wfll,(mmax,mpsang))
    do ipsang=1,lmax+1
 !    For pspcod==4, wfs for the local angular momentum are not written
      if (nproj(ipsang)/=0 .or. pspcod==1) then
@@ -325,7 +314,7 @@ subroutine psp1in(dq,ekb,ekb1,ekb2,epsatm,epspsp,&
 &         'angular momenta in order expected for first projection',&
 &         'operator.',ch10,' Values are ',ipsang-1,ll,ch10,&
 &         'Action: check your pseudopotential input file.'
-         MSG_ERROR(message)
+         ABI_ERROR(message)
        end if
        read (tmp_unit,*,err=10,iomsg=errmsg) wfll(:,ipsang)
 
@@ -341,8 +330,8 @@ subroutine psp1in(dq,ekb,ekb1,ekb2,epsatm,epspsp,&
    nlmax=lmax
    if (lloc==lmax) nlmax=lmax-1
 !  write(std_out,*)' psp1in : lmax,lloc=',lmax,lloc
-   ABI_ALLOCATE(ekb_tmp,(mpsang,2))
-   ABI_ALLOCATE(ffspl_tmp,(mqgrid,2,nlmax+1,2))
+   ABI_MALLOC(ekb_tmp,(mpsang,2))
+   ABI_MALLOC(ffspl_tmp,(mqgrid,2,nlmax+1,2))
 
    call psp1nl(drad,ekb_tmp(:,1),ffspl_tmp(:,:,:,1),lloc,&
 &   nlmax,mmax,mpsang,mqgrid,qgrid,rad,vloc,vpspll,wfll,wksincos)
@@ -360,7 +349,7 @@ subroutine psp1in(dq,ekb,ekb1,ekb2,epsatm,epspsp,&
 &         'angular momenta in order expected for second projection',&
 &         'operator.',ch10,' Values are ',ipsang-1,ll,ch10,&
 &         'Action: check your pseudopotential input file.'
-         MSG_ERROR(message)
+         ABI_ERROR(message)
        end if
        read (tmp_unit,*,err=10,iomsg=errmsg) wfll(:,ipsang)
 
@@ -389,22 +378,22 @@ subroutine psp1in(dq,ekb,ekb1,ekb2,epsatm,epspsp,&
      end if
    end do
 
-   ABI_DEALLOCATE(ekb_tmp)
-   ABI_DEALLOCATE(ffspl_tmp)
-   ABI_DEALLOCATE(wfll)
+   ABI_FREE(ekb_tmp)
+   ABI_FREE(ffspl_tmp)
+   ABI_FREE(wfll)
  end if
 
- ABI_DEALLOCATE(vpspll)
- ABI_DEALLOCATE(rad)
- ABI_DEALLOCATE(drad)
- ABI_DEALLOCATE(vloc)
- ABI_DEALLOCATE(wksincos)
+ ABI_FREE(vpspll)
+ ABI_FREE(rad)
+ ABI_FREE(drad)
+ ABI_FREE(vloc)
+ ABI_FREE(wksincos)
 
  return
 
  ! Handle IO error
  10 continue
- MSG_ERROR(errmsg)
+ ABI_ERROR(errmsg)
 
 end subroutine psp1in
 !!***
@@ -436,12 +425,6 @@ end subroutine psp1in
 !!  =$\displaystyle -Zv/\pi+q^2 4\pi\int(\frac{\sin(2\pi q r)}{2 \pi q r})(r^2 v(r)+r Zv)dr$.
 !!  yp1,ypn=derivative of q^2 v(q) wrt q at q=0 and q=qmax
 !!   (needed for spline fitter).
-!!
-!! PARENTS
-!!      psp1in
-!!
-!! CHILDREN
-!!      der_int,sincos
 !!
 !! SOURCE
 
@@ -560,8 +543,8 @@ end subroutine psp1lo
 !! psp1nl
 !!
 !! FUNCTION
-!! Make Kleinman-Bylander form factors f_l(q) for each l from
-!! 0 to lmax; Vloc is assumed local potential.
+!! Make Kleinman-Bylander form factors f_l(q) for each l from 0 to lmax.
+!! Vloc is assumed local potential.
 !!
 !! INPUTS
 !!  dr(mmax)=inverse of grid spacing for radial grid
@@ -601,12 +584,6 @@ end subroutine psp1lo
 !! This is the eigenvalue of the Kleinman-Bylander operator and sets
 !! the energy scale of the nonlocal psp corrections.
 !! Bessel functions replaced by besj, which accomodates args near 0.
-!!
-!! PARENTS
-!!      psp1in
-!!
-!! CHILDREN
-!!      besjm,der_int,sincos,spline
 !!
 !! SOURCE
 
@@ -652,18 +629,18 @@ subroutine psp1nl(dr,ekb,ffspl,lloc,lmax,mmax,mpsang,mqgrid,&
 &     'Allowed values are -1 for no nonlocal correction or else',ch10,&
 &     '0, 1, 2, or 3 for maximum l nonlocal correction.',ch10,&
 &     'Action: check the input atomic psp data file for lmax.'
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
 
 !  Compute normalizing integrals eta=<dV> and mean square
 !  nonlocal psp correction dvms=<dV^2>
 !  "dvwf" consistently refers to dV(r)*wf(r) where dV=nonlocal correction
 
-   ABI_ALLOCATE(work1,(mmax+1))
-   ABI_ALLOCATE(work2,(mmax+1))
-   ABI_ALLOCATE(work_spl,(mqgrid))
-   ABI_ALLOCATE(work5,(mmax))
-   ABI_ALLOCATE(besjx,(mmax))
+   ABI_MALLOC(work1,(mmax+1))
+   ABI_MALLOC(work2,(mmax+1))
+   ABI_MALLOC(work_spl,(mqgrid))
+   ABI_MALLOC(work5,(mmax))
+   ABI_MALLOC(besjx,(mmax))
 
    do lp1=1,lmax+1
 
@@ -759,8 +736,8 @@ subroutine psp1nl(dr,ekb,ffspl,lloc,lmax,mmax,mpsang,mqgrid,&
 !      Ask irmax to be lower than mmax
        if(irmax>mmax-1)irmax=mmax-1
 
-       ABI_ALLOCATE(work3,(irmax-1))
-       ABI_ALLOCATE(work4,(irmax-1))
+       ABI_MALLOC(work3,(irmax-1))
+       ABI_MALLOC(work4,(irmax-1))
 
 !      Loop over q values
        do iq=2,mqgrid
@@ -831,8 +808,8 @@ subroutine psp1nl(dr,ekb,ffspl,lloc,lmax,mmax,mpsang,mqgrid,&
        call spline(qgrid,ffspl(:,1,lp1),mqgrid,yp1,ypn,&
 &       ffspl(:,2,lp1))
 
-       ABI_DEALLOCATE(work3)
-       ABI_DEALLOCATE(work4)
+       ABI_FREE(work3)
+       ABI_FREE(work4)
 
      else
 !      KB energy is zero, put nonlocal correction at l=0 to 0
@@ -841,11 +818,11 @@ subroutine psp1nl(dr,ekb,ffspl,lloc,lmax,mmax,mpsang,mqgrid,&
 
    end do !    End loop on angular momenta
 
-   ABI_DEALLOCATE(work1)
-   ABI_DEALLOCATE(work2)
-   ABI_DEALLOCATE(work_spl)
-   ABI_DEALLOCATE(work5)
-   ABI_DEALLOCATE(besjx)
+   ABI_FREE(work1)
+   ABI_FREE(work2)
+   ABI_FREE(work_spl)
+   ABI_FREE(work5)
+   ABI_FREE(besjx)
  end if !  End of lmax/=-1 condition
 
 end subroutine psp1nl
@@ -870,11 +847,6 @@ end subroutine psp1nl
 !! OUTPUT
 !!  df(0 to n)=derivative $ \frac{df}{dr}$ on grid
 !!  smf= $ \int_{r(0)}^{r(nlast)} f(r) dr $.
-!!
-!! PARENTS
-!!      psp1lo,psp1nl
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -904,7 +876,7 @@ subroutine der_int(ff,df,rr,dr,nlast,smf)
  if (nlast<0.or.nlast>nmax) then
    write(message, '(a,i12,a,i12)' )&
 &   ' nlast=',nlast,' lies outside range [0,nmax] with dimension nmax=',nmax
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
 !Compute derivatives at lower end, near r=0
@@ -921,7 +893,7 @@ subroutine der_int(ff,df,rr,dr,nlast,smf)
 !Compute derivative at upper end of range
  if (nlast < 4) then
    message = ' der_int: ff does not have enough elements. nlast is too low'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  df(nlast-1)=-1.d0/12.d0*ff(nlast-4)&
@@ -976,11 +948,6 @@ end subroutine der_int
 !! this algorithm places strong constraints on accuracy,
 !! so this routine is machine-dependent.
 !!
-!! PARENTS
-!!      psp1lo,psp1nl
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine sincos(iq,irmax,mmax,pspwk,rad,tpiq)
@@ -998,16 +965,9 @@ subroutine sincos(iq,irmax,mmax,pspwk,rad,tpiq)
  integer :: ir,nstep
  real(dp) :: prevcos,prevsin
  logical :: testmipspro
-#if defined HAVE_LINALG_MLIB
- real(dp) :: halfpi
-#endif
 
 
 ! *************************************************************************
-
-#if defined HAVE_LINALG_MLIB
- halfpi=asin(1.0d0)
-#endif
 
  if(iq==2)then
 
@@ -1030,20 +990,12 @@ subroutine sincos(iq,irmax,mmax,pspwk,rad,tpiq)
 !  fortunately, on the SGI - R10000 the normal computation is fast enough.
 
    testmipspro=.false.
-#ifdef FC_MIPSPRO
-   testmipspro=.true.
-#endif
    nstep=40
    if(iq-(iq/nstep)*nstep == 0 .or. testmipspro)then
 
 !    Every nstep steps, uses the hard way
      do ir=2,irmax
-#if defined HAVE_LINALG_MLIB
-!      There is a bug in the hp library !! Sine is slightly inaccurate !
-       pspwk(ir,1,2)=cos(tpiq*rad(ir)-halfpi)
-#else
        pspwk(ir,1,2)=sin(tpiq*rad(ir))
-#endif
        pspwk(ir,2,2)=cos(tpiq*rad(ir))
      end do
 
@@ -1090,12 +1042,6 @@ end subroutine sincos
 !! WARNINGS
 !! the fifth derivative is not yet delivered.
 !!
-!! PARENTS
-!!      psp1in
-!!
-!! CHILDREN
-!!      spline
-!!
 !! SOURCE
 
 subroutine psp4cc(fchrg,n1xccc,xccc1d)
@@ -1123,10 +1069,10 @@ subroutine psp4cc(fchrg,n1xccc,xccc1d)
 
 ! *************************************************************************
 
- ABI_ALLOCATE(ff,(n1xccc))
- ABI_ALLOCATE(ff2,(n1xccc))
- ABI_ALLOCATE(work,(n1xccc))
- ABI_ALLOCATE(xx,(n1xccc))
+ ABI_MALLOC(ff,(n1xccc))
+ ABI_MALLOC(ff2,(n1xccc))
+ ABI_MALLOC(work,(n1xccc))
+ ABI_MALLOC(xx,(n1xccc))
 
 
  if(n1xccc > 1)then
@@ -1136,7 +1082,7 @@ subroutine psp4cc(fchrg,n1xccc,xccc1d)
    end do
  else
    write(message, '(a,i0)' )'  n1xccc should larger than 1, while it is n1xccc=',n1xccc
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
 !Initialization, to avoid some problem with some compilers
@@ -1187,10 +1133,10 @@ subroutine psp4cc(fchrg,n1xccc,xccc1d)
 
  xccc1d(:,6)=zero
 
- ABI_DEALLOCATE(ff)
- ABI_DEALLOCATE(ff2)
- ABI_DEALLOCATE(work)
- ABI_DEALLOCATE(xx)
+ ABI_FREE(ff)
+ ABI_FREE(ff2)
+ ABI_FREE(work)
+ ABI_FREE(xx)
 
 !DEBUG
 !write(std_out,*)' psp1cc : output of core charge density and derivatives '

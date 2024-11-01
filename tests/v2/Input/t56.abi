@@ -1,0 +1,47 @@
+# Chromium atom, in a box, treated like a metal, with LDA, non-spin-polarized
+# The FHI pseudopotential includes a core charge,
+# inducing non-linear XC core correction
+# Many parameters are too small for converged calculation.
+
+ acell 3*9.001
+ diemac 2.0d0
+ ecut 30
+ ixc 1
+ kptopt 0
+
+ kpt   3*0.0
+ natom  1
+ nband 6
+ nkpt 1
+#nstep 7
+ nstep 20
+
+ ntypat  1
+ occopt 7
+#toldfe 1.d-6
+ tolvrs 1.d-5
+ typat  1
+ wtk 1.0
+ xred 0.0 0.0 0.0
+ znucl  24.0
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "24cr.000107.fhi"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%  t56.abo, tolnlines = 9, tolabs = 4.0e-8, tolrel = 1.0e-2
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% keywords = 
+#%% authors = Unknown
+#%% description = 
+#%%   Test a FHI pseudopotential for Chromium, with non-linear XC 
+#%%   core correction. The ecut is too low, the box is too small.
+#%%   Use metallic occupation numbers.
+#%%   The convergence is not enough to make finite-difference of energy.
+#%%<END TEST_INFO>

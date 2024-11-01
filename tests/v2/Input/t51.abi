@@ -1,0 +1,55 @@
+# Oxygen molecule, treated like a metal, with nsppol=2 and GGA
+# The pseudopotential includes a core charge,
+# inducing non-linear XC core correction
+# Very careful calculation, using high value of isecur, and nnsclo
+
+ acell  6.500  6.500  9.000
+
+ diemac 1.0d0
+ diemix 0.333333333333d0
+ ecut 13.00
+ isecur 4
+ iscf 6
+ ixc 11
+ kptopt 0
+
+ kpt   3*0.0
+ natom  2
+ nband 8
+ nkpt 1
+ nline 6
+ nnsclo 4
+ nsppol 2
+ nstep 15
+ nsym 1
+ ntypat  1
+ occopt 7
+ rprim 1 0 0  0 1 0  0 0 1
+ spinat 0.0 0.0 1.0
+        0.0 0.0 1.0
+ toldff 1.d-8
+ tsmear 0.02
+ typat  1 1
+ wtk  1
+ xred  0.0 0.0  0.1155     0.0 0.0 -0.1155
+ znucl  8.0
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/8o.pspnc"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t51.abo  ,tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
+#%% [paral_info]
+#%% max_nprocs = 2
+#%% [extra_info]
+#%% keywords = 
+#%% authors = Unknown
+#%% description = 
+#%%   O2 (nsppol=2, non-linear XC core correction, GGA)    
+#%%   Similar to test50, except use iscf=6 .
+#%% topics = SCFAlgorithms
+#%%<END TEST_INFO>

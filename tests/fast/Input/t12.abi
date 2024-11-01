@@ -1,0 +1,37 @@
+#   Si in diamond structure; compute band structure at Gamma, X, and L.
+
+ acell 3*10.26311
+ ecut 5.8
+ enunit 2   intxc 1   irdwfk  1
+ iscf -2  kptopt 0
+ kpt   0 0 0     0 1 1   1 1 1   kptnrm 2  # Gamma, X, L
+ natom  2 nband 8  nbdbuf 0
+ nkpt  3
+ nstep 20
+ nsym 1
+ ntypat  1
+ occ 4*2.0d0 occopt  0  
+ rprim   0 .5 .5  .5 0 .5  .5 .5 0
+ tolwfr 1.0d-12
+ typat  1 1 
+ xred 3*0.00d0 3*0.25d0
+ znucl 14
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/14si.pspnc"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% test_chain = t03.abi, t05.abi, t06.abi, t07.abi, t08.abi, t09.abi, t11.abi, t12.abi, t14.abi, t16.abi
+#%% [files]
+#%% files_to_test = 
+#%%   t12.abo, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = Unknown
+#%% keywords = 
+#%% description = 
+#%%   Same as 11 but with mkmem = 0, mffmem=0 (out-of-core).
+#%%<END TEST_INFO>

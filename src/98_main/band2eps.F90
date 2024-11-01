@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****p* ABINIT/band2eps
 !! NAME
 !! band2eps
@@ -9,7 +8,7 @@
 !! of each atom.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2019 ABINIT group (FDortu,MVeithen)
+!! Copyright (C) 1999-2024 ABINIT group (FDortu,MVeithen)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -20,12 +19,6 @@
 !!
 !! OUTPUT
 !!  (main routine)
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      abi_io_redirect,abimem_init,band2eps_dtset_free,instrng,inupper
-!!      invars11,outvars_band2eps,xmpi_end,xmpi_init
 !!
 !! SOURCE
 
@@ -39,9 +32,7 @@
 program band2eps
 
  use defs_basis
- use defs_abitypes
  use m_abimover
- use m_build_info
  use m_xmpi
  use m_abicore
  use m_errors
@@ -50,16 +41,16 @@ program band2eps
  use m_effective_potential_file
  use m_band2eps_dataset
 
+ use m_build_info,    only : abinit_version
  use m_io_tools,      only : open_file
  use m_fstrings,      only : int2char4, tolower, inupper
  use m_time,          only : asctime
  use m_parser,        only : instrng
+
  implicit none
 
 !Arguments -----------------------------------
-
 !Local variables-------------------------------
-!no_abirules
  integer,parameter :: master=0
  character(len=fnlen) :: filnam(4)
  real(dp) :: E,deltaE
@@ -76,7 +67,7 @@ program band2eps
  real(dp),allocatable :: displ(:,:)
  type(band2eps_dataset_type) :: inp
  character(len=500) :: message
- character(len=strlen) :: string
+ character(len=strlen) :: string, raw_string
   !scale : hold the scale for each line (dimension=nlines)
   !qname : hold the name (gamma,R,etc..) for each extremity of line (dimension=nlines+1)
   !nqptl : =nqpt by line (dimension=nlines)
@@ -136,7 +127,7 @@ program band2eps
 !strlen from defs_basis module
  write(std_out,'(a,a)') 'Opening and reading input file: ', filnam(1)
  option=1
- call instrng (filnam(1),lenstr,option,strlen,string)
+ call instrng (filnam(1),lenstr,option,strlen,string, raw_string)
  !To make case-insensitive, map characters to upper case:
  call inupper(string(1:lenstr))
 
@@ -147,16 +138,16 @@ program band2eps
 !Open the '.eps' file for write
  write(std_out,'(a,a)') 'Creation of file ', filnam(2)
  if (open_file(filnam(2),message,newunit=unt1,form="formatted",status="unknown",action="write") /= 0) then
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 !Open the phonon energies file
  if (open_file(filnam(3),message,newunit=unt2,form="formatted") /= 0) then
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
  if(filnam(4)/='no') then
 !  Open the displacements file
    if (open_file(filnam(4),message,newunit=unt3,form="formatted",status="old",action='read') /= 0) then
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
  end if
 
@@ -168,10 +159,10 @@ program band2eps
  kmaxN=9600
 
 !Allocate dynamique variables
- ABI_ALLOCATE(phfrqqm1,(3*inp%natom))
- ABI_ALLOCATE(phfrq,(3*inp%natom))
- ABI_ALLOCATE(color,(3,3*inp%natom))
- ABI_ALLOCATE(colorAtom,(3,inp%natom))
+ ABI_MALLOC(phfrqqm1,(3*inp%natom))
+ ABI_MALLOC(phfrq,(3*inp%natom))
+ ABI_MALLOC(color,(3,3*inp%natom))
+ ABI_MALLOC(colorAtom,(3,inp%natom))
 !colorAtom(1,1:5) : atoms contributing to red (ex : [1 0 0 0 0])
 !colorAtom(2,1:5) : atoms contributing to green (ex : [0 1 0 0 0])
 !colorAtom(3,1:5) : atoms contributing to blue (ex : [0 0 1 1 1])
@@ -179,7 +170,7 @@ program band2eps
  colorAtom(1,:) = inp%red
  colorAtom(2,:) = inp%green
  colorAtom(3,:) = inp%blue
- ABI_ALLOCATE(displ,(inp%natom,3*inp%natom))
+ ABI_MALLOC(displ,(inp%natom,3*inp%natom))
 !Read end of input file
 
 !Multiplication factor for units (from Hartree to cm-1 or THz)
@@ -307,7 +298,6 @@ program band2eps
  write(unt1,'(a)') '%****Vertical graduation****'
  deltaE=(inp%max-inp%min)/inp%ngrad
 
-!Replacing do loop with real variables with standard g95 do loop
  E=inp%min
  do
 !  do E=inp%min,(inp%max-deltaE/2),deltaE

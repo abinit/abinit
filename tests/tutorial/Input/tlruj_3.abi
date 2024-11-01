@@ -1,0 +1,34 @@
+#################################################################
+## Automatic tutorial for ABINIT:                              ##
+## Linear Response Hubbard U and Hund's J (LRUJ)               ##
+## post-processing utility for the determination of            ##
+## said parameters in situ and ab initio                       ##
+##    Initialization of WFK files                              ##
+##                                                             ##
+## Antiferro. II NiO, 4 atom | Hubbard U on Ni 3d | LMac 2022  ##
+#################################################################
+
+#List of files to be read into LRUJ via command line
+tlruj_2.o_DS1_LRUJ.nc tlruj_2.o_DS2_LRUJ.nc tlruj_2.o_DS3_LRUJ.nc tlruj_2.o_DS4_LRUJ.nc tlruj_2.o_DS5_LRUJ.nc
+
+##############################################################
+# This section is used only for regression testing of ABINIT #
+##############################################################
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = lruj
+#%% test_chain = tlruj_1.abi,tlruj_2.abi,tlruj_3.abi
+#%% [files]
+#%% files_to_test = 
+#%%   tlruj_3.stdout, tolnlines = 10, tolabs = 1.01e-03, tolrel = 1.01e-03, fld_options =  -medium
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = L. MacEnulty
+#%% keywords = PAW, DFTU,LRUJ,UJDET,linear,response,Hubbard U
+#%% description = 
+#%%   AFII NiO 4-atom cell | LRUJ utility | LMac 2022
+#%%   Linear Response Hubbard U and Hund's J (LRUJ)
+#%%   post-processing utility for the determination of
+#%%   said parameters in situ and ab initio
+#%%<END TEST_INFO>

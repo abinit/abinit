@@ -1,20 +1,15 @@
-!{\src2tex{textfont=tt}}
 !!****m* m_mkrho/m_mkrho
 !! NAME
 !!  m_mkrho
 !!
 !! FUNCTION
-!!
+!!  Procedures for computing densities from KS orbitals.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2019 ABINIT group (DCA, XG, GMR, LSI, AR, MB, MT)
+!!  Copyright (C) 1998-2024 ABINIT group (DCA, XG, GMR, LSI, AR, MB, MT, SM, VR, FJ)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -26,17 +21,22 @@
 
 module m_mkrho
 
+ use, intrinsic :: iso_c_binding, only: c_size_t
+
  use defs_basis
- use defs_abitypes
  use defs_wvltypes
  use m_abicore
  use m_xmpi
  use m_errors
+ use m_dtset
+ use m_extfpmd
+ use m_abi_linalg
 
+ use defs_abitypes,  only : MPI_type
+ use m_fstrings,     only : sjoin, itoa
  use m_time,         only : timab
  use m_fftcore,      only : sphereboundary
  use m_fft,          only : fftpac, zerosym, fourwf, fourdp
- use m_hamiltonian,  only : gs_hamiltonian_type
  use m_bandfft_kpt,  only : bandfft_kpt_set_ikpt
  use m_paw_dmft,     only : paw_dmft_type
  use m_spacepar,     only : symrhg
@@ -45,11 +45,15 @@ module m_mkrho
  use m_mpinfo,       only : ptabs_fourdp, proc_distrb_cycle
  use m_pawtab,       only : pawtab_type
  use m_io_tools,     only : open_file
- use m_splines,      only : spline,splint
+ use m_splines,      only : spline, splint
  use m_sort,         only : sort_dp
  use m_prep_kgb,     only : prep_fourwf
  use m_wvl_rho,      only : wvl_mkrho
  use m_rot_cg,       only : rot_cg
+
+#if defined HAVE_YAKL
+ use gator_mod
+#endif
 
  implicit none
 
@@ -103,7 +107,7 @@ contains
 !!  irrzon(nfft**(1-1/nsym),2,(nspden/nsppol)-3*(nspden/4))=irreducible zone data
 !!  kg(3,mpw*mkmem)=reduced planewave coordinates
 !!  mcg=size of wave-functions array (cg) =mpw*nspinor*mband*mkmem*nsppol
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  npwarr(nkpt)=number of planewaves and boundary planewaves at each k
 !!  occ(mband*nkpt*nsppol)=
 !!          occupation numbers for each band (usually 2.0) at each k point
@@ -117,8 +121,8 @@ contains
 !!  rprimd(3,3)=dimensional real space primitive translations
 !!  tim_mkrho=timing code of the calling routine(can be set to 0 if not attributed)
 !!  ucvol=unit cell volume (Bohr**3)
-!!  wvl_den <type(wvl_denspot_type)>=density informations for wavelets
-!!  wvl_wfs <type(wvl_projector_type)>=wavefunctions informations for wavelets
+!!  wvl_den <type(wvl_denspot_type)>=density information for wavelets
+!!  wvl_wfs <type(wvl_projector_type)>=wavefunctions information for wavelets
 !!
 !! OUTPUT
 !! rhog(2,nfft)=total electron density in G space
@@ -126,26 +130,18 @@ contains
 !!   (if spin polarized, array contains total density in first half and spin-up density in second half)
 !!   (for non-collinear magnetism, first element: total density, 3 next ones: mx,my,mz in units of hbar/2)
 !!
-!! PARENTS
-!!      afterscfloop,energy,gstate,respfn,scfcv,vtorho
-!!
-!! CHILDREN
-!!      bandfft_kpt_set_ikpt,fftpac,fourwf,prep_fourwf,prtrhomxmn
-!!      sphereboundary,symrhg,timab,wrtout,wvl_mkrho,xmpi_sum,diag_occ_rot_cg
-!!
 !! SOURCE
 
 subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phnons,&
 &                rhog,rhor,rprimd,tim_mkrho,ucvol,wvl_den,wvl_wfs,&
-&                option) !optional
-
- implicit none
+&                option,extfpmd) !optional
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: mcg,tim_mkrho
  integer,intent(in),optional :: option
  real(dp),intent(in) :: ucvol
+ type(extfpmd_type),intent(in),pointer,optional :: extfpmd
  type(MPI_type),intent(inout) :: mpi_enreg
  type(dataset_type),intent(in) :: dtset
  type(paw_dmft_type), intent(in)  :: paw_dmft
@@ -154,7 +150,7 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
 !no_abirules
 !nfft**(1-1/nsym) is 1 if nsym==1, and nfft otherwise
  integer, intent(in) :: irrzon(dtset%nfft**(1-1/dtset%nsym),2,  &
-&               (dtset%nspden/dtset%nsppol)-3*(dtset%nspden/4))
+   &               (dtset%nspden/dtset%nsppol)-3*(dtset%nspden/4))
  integer, intent(in) :: kg(3,dtset%mpw*dtset%mkmem),npwarr(dtset%nkpt)
  real(dp), intent(in) :: gprimd(3,3)
  real(dp), intent(in) :: cg(2,mcg)
@@ -169,25 +165,35 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
 !scalars
  integer,save :: nskip=0
  integer :: alpha,use_nondiag_occup_dmft,bdtot_index,beta,blocksize,iband,iband1,ibandc1,ib,iblock,icg,ierr
- integer :: ifft,ikg,ikpt,ioption,ipw,ipwsp,ishf,ispden,ispinor,ispinor_index
+ integer :: ifft,ikg,ikpt,ioption,ipw,ipwbd,ipwsp,ishf,ispden,ispinor,ispinor_index
  integer :: isppol,istwf_k,jspinor_index
- integer :: me,my_nspinor,n1,n2,n3,n4,n5,n6,nalpha,nband_k,nbandc1,nbdblock,nbeta
- integer :: ndat,nfftot,npw_k,spaceComm,tim_fourwf
+ integer :: me,my_nspinor,n1,n2,n3,n4,n5,n6,nalpha,nband_k,nband_occ,nbandc1,nbdblock,nbeta
+ integer :: ndat,nfftot,npw_k,spaceComm,tim_fourwf,gpu_option
+ integer :: iband_me
+ integer :: mband_mem
  real(dp) :: kpt_cart,kg_k_cart,gp2pi1,gp2pi2,gp2pi3,cwftmp
  real(dp) :: weight,weight_i
  !character(len=500) :: message
 !arrays
- integer,allocatable :: gbound(:,:),kg_k(:,:)
+ integer,allocatable :: gbound(:,:)
+ integer, ABI_CONTIGUOUS pointer :: kg_k(:,:) => null()
  logical :: locc_test,nspinor1TreatedByThisProc,nspinor2TreatedByThisProc
- real(dp) :: dummy(2,1),tsec(2)
- real(dp),allocatable :: cwavef(:,:,:),cwavefb(:,:,:),cwavef_x(:,:)
- real(dp),allocatable :: cwavef_y(:,:),cwavefb_x(:,:),cwavefb_y(:,:),kg_k_cart_block(:)
- real(dp),allocatable :: occ_k(:),rhoaug(:,:,:),rhoaug_down(:,:,:)
- real(dp),allocatable :: rhoaug_mx(:,:,:),rhoaug_my(:,:,:),rhoaug_up(:,:,:)
- real(dp),allocatable :: taur_alphabeta(:,:,:,:),wfraug(:,:,:,:)
- real(dp),allocatable :: occ_diag(:)
-! real(dp),allocatable :: occ_nd(2, :, :)
- real(dp),allocatable :: cwavef_rot(:,:,:,:)
+ real(dp) :: dummy(2,1) = reshape( (/0.0, 0.0/), shape(dummy))
+ real(dp) :: tsec(2)
+ real(dp),allocatable :: cwavef_rot(:,:,:,:),occ_diag(:),occ_k(:)
+ real(dp),allocatable :: kg_k_cart_block(:),taur_alphabeta(:,:,:,:),weight_t(:)
+ real(dp), ABI_CONTIGUOUS pointer :: cwavef(:,:,:)  => null()
+ real(dp), ABI_CONTIGUOUS pointer :: cwavefb(:,:,:) => null()
+ real(dp), ABI_CONTIGUOUS pointer :: cwavef_x(:,:)  => null()
+ real(dp), ABI_CONTIGUOUS pointer :: cwavef_y(:,:)  => null()
+ real(dp), ABI_CONTIGUOUS pointer :: cwavefb_x(:,:) => null() ! only use when paral_kgb=0
+ real(dp), ABI_CONTIGUOUS pointer :: cwavefb_y(:,:) => null() ! only use when paral_kgb=0
+ real(dp), ABI_CONTIGUOUS pointer :: rhoaug(:,:,:)      => null()
+ real(dp), ABI_CONTIGUOUS pointer :: rhoaug_down(:,:,:) => null()
+ real(dp), ABI_CONTIGUOUS pointer :: rhoaug_up(:,:,:)   => null()
+ real(dp), ABI_CONTIGUOUS pointer :: rhoaug_mx(:,:,:)   => null()
+ real(dp), ABI_CONTIGUOUS pointer :: rhoaug_my(:,:,:)   => null()
+ real(dp), ABI_CONTIGUOUS pointer :: wfraug(:,:,:,:)    => null()
 
 ! *************************************************************************
 
@@ -196,6 +202,9 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
  call timab(790+tim_mkrho,1,tsec)
  call timab(799,1,tsec)
 
+ if(mpi_enreg%paralbd==0) tim_fourwf=3
+ if(mpi_enreg%paralbd==1) tim_fourwf=6
+
  if(.not.(present(option))) then
    ioption=0
  else
@@ -203,7 +212,7 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
  end if
 
  if(ioption/=0.and.paw_dmft%use_sc_dmft==1) then
-   MSG_ERROR('option argument value of this routines should be 0 if usedmft=1.')
+   ABI_ERROR('option argument value of this routines should be 0 if usedmft=1.')
  end if
  if(paw_dmft%use_sc_dmft/=0) then
    nbandc1=(paw_dmft%mbandc-1)*paw_dmft%use_sc_dmft+1
@@ -242,13 +251,13 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
  case (1)
    nalpha = 3
    nbeta = 1
-   ABI_ALLOCATE(taur_alphabeta,(dtset%nfft,dtset%nspden,3,1))
+   ABI_MALLOC(taur_alphabeta,(dtset%nfft,dtset%nspden,3,1))
  case (2)
    nalpha = 3
    nbeta = 3
-   ABI_ALLOCATE(taur_alphabeta,(dtset%nfft,dtset%nspden,3,3))
+   ABI_MALLOC(taur_alphabeta,(dtset%nfft,dtset%nspden,3,3))
  case default
-   MSG_BUG('ioption argument value should be 0,1 or 2.')
+   ABI_BUG(sjoin('ioption argument value should be 0,1 or 2 while got:', itoa(ioption)))
  end select
 
 !Init me
@@ -269,49 +278,100 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
      return
    case (1)
      !call wvl_mkrho(dtset, mpi_enreg, occ, rhor, wvl_wfs, wvl_den)
-     MSG_ERROR("kinetic energy density (taur) is not yet implemented in wavelet formalism.")
+     ABI_ERROR("kinetic energy density (taur) is not yet implemented in wavelet formalism.")
    case (2)
      !call wvl_mkrho(dtset, mpi_enreg, occ, rhor, wvl_wfs, wvl_den)
-     MSG_BUG('kinetic energy density tensor (taur_(alpha,beta)) is not yet implemented in wavelet formalism.')
+     ABI_BUG('kinetic energy density tensor (taur_(alpha,beta)) is not yet implemented in wavelet formalism.')
    end select
  end if
 !WVL - Following is done in plane waves.
+
+ gpu_option=dtset%gpu_option
+ !FIXME Disable for now when running with HIP (bug sometimes occurs)
+#ifdef HAVE_GPU_HIP
+ gpu_option=ABI_GPU_DISABLED
+#endif
 
 !start loop over alpha and beta
 
  do alpha=1,nalpha
    do beta=1,nbeta
 
-!    start loop over spin and k points
+     ! start loop over spin and k points
      bdtot_index=0
      icg=0
 
-!    n4,n5,n6 are FFT dimensions, modified to avoir cache trashing
+     ! n4,n5,n6 are FFT dimensions, modified to avoid cache trashing
      n1 = dtset%ngfft(1) ; n2 = dtset%ngfft(2) ; n3 = dtset%ngfft(3)
      n4 = dtset%ngfft(4) ; n5 = dtset%ngfft(5) ; n6 = dtset%ngfft(6)
-     ndat = 1 ; if (mpi_enreg%paral_kgb==1) ndat = mpi_enreg%bandpp
-     ABI_ALLOCATE(cwavef,(2,dtset%mpw,my_nspinor))
-     ABI_ALLOCATE(rhoaug,(n4,n5,n6))
-     ABI_ALLOCATE(wfraug,(2,n4,n5,n6*ndat))
-     ABI_ALLOCATE(cwavefb,(2,dtset%mpw*paw_dmft%use_sc_dmft,my_nspinor))
-     if(dtset%nspden==4) then
-       ABI_ALLOCATE(rhoaug_up,(n4,n5,n6))
-       ABI_ALLOCATE(rhoaug_down,(n4,n5,n6))
-       ABI_ALLOCATE(rhoaug_mx,(n4,n5,n6))
-       ABI_ALLOCATE(rhoaug_my,(n4,n5,n6))
-       rhoaug_up(:,:,:)=zero
-       rhoaug_down(:,:,:)=zero
-       rhoaug_mx(:,:,:)=zero
-       rhoaug_my(:,:,:)=zero
+
+     ndat = 1
+     if (mpi_enreg%paral_kgb==1) then
+       ndat = mpi_enreg%bandpp
+     else if (gpu_option/=ABI_GPU_DISABLED) then
+       ndat = dtset%mband
+     end if
+
+     if (gpu_option == ABI_GPU_KOKKOS) then
+#if defined HAVE_GPU && defined HAVE_YAKL
+       ABI_MALLOC_MANAGED(cwavef,(/2,dtset%mpw*ndat,my_nspinor/))
+#endif
+     else
+       if (gpu_option/=ABI_GPU_DISABLED) then
+         ABI_MALLOC(cwavef,(2,dtset%mpw*ndat,my_nspinor))
+       else
+         ABI_MALLOC(cwavef,(2,dtset%mpw,my_nspinor))
+       end if
+     end if
+
+     if(gpu_option == ABI_GPU_KOKKOS) then
+#if defined HAVE_GPU && defined HAVE_YAKL
+       ABI_MALLOC_MANAGED(rhoaug,  (/n4,n5,n6/))
+       ABI_MALLOC_MANAGED(wfraug,  (/2,n4,n5,n6*ndat/))
+       ABI_MALLOC_MANAGED(cwavefb, (/2,dtset%mpw*paw_dmft%use_sc_dmft,my_nspinor/))
+       if(dtset%nspden==4) then
+         ABI_MALLOC_MANAGED(rhoaug_up,  (/n4,n5,n6/))
+         ABI_MALLOC_MANAGED(rhoaug_down,(/n4,n5,n6/))
+         ABI_MALLOC_MANAGED(rhoaug_mx,  (/n4,n5,n6/))
+         ABI_MALLOC_MANAGED(rhoaug_my,  (/n4,n5,n6/))
+         rhoaug_up(:,:,:)=zero
+         rhoaug_down(:,:,:)=zero
+         rhoaug_mx(:,:,:)=zero
+         rhoaug_my(:,:,:)=zero
+       end if
+#endif
+     else
+       ABI_MALLOC(rhoaug,  (n4,n5,n6))
+#ifdef HAVE_OPENMP_OFFLOAD
+       !$OMP TARGET ENTER DATA MAP(alloc:rhoaug) IF(gpu_option==ABI_GPU_OPENMP)
+#endif
+       ABI_MALLOC(wfraug,  (2,n4,n5,n6*ndat))
+       ABI_MALLOC(cwavefb,  (2,dtset%mpw*paw_dmft%use_sc_dmft,my_nspinor))
+       if(dtset%nspden==4) then
+         ABI_MALLOC(rhoaug_up,  (n4,n5,n6))
+         ABI_MALLOC(rhoaug_down,(n4,n5,n6))
+         ABI_MALLOC(rhoaug_mx,  (n4,n5,n6))
+         ABI_MALLOC(rhoaug_my,  (n4,n5,n6))
+         rhoaug_up(:,:,:)=zero
+         rhoaug_down(:,:,:)=zero
+         rhoaug_mx(:,:,:)=zero
+         rhoaug_my(:,:,:)=zero
+       end if
      end if
 
      do isppol=1,dtset%nsppol
        ikg=0
 
-       rhoaug(:,:,:)=zero
+       if(gpu_option==ABI_GPU_OPENMP) then
+         call gpu_set_to_zero(rhoaug,int(n4,c_size_t)*n5*n6)
+       else
+         rhoaug(:,:,:)=zero
+       end if
        do ikpt=1,dtset%nkpt
 
          nband_k = dtset%nband(ikpt+(isppol-1)*dtset%nkpt)
+         mband_mem = nband_k
+         if (dtset%paral_kgb==0) mband_mem = nband_k/mpi_enreg%nproc_band
          npw_k=npwarr(ikpt)
          istwf_k = dtset%istwfk(ikpt)
 
@@ -320,188 +380,253 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
            cycle
          end if
 
-         ABI_ALLOCATE(gbound,(2*dtset%mgfft+8,2))
-         ABI_ALLOCATE(kg_k,(3,npw_k))
+         ABI_MALLOC(gbound,(2*dtset%mgfft+8,2))
+         if(gpu_option == ABI_GPU_KOKKOS) then
+#if defined HAVE_GPU && defined HAVE_YAKL
+           ABI_MALLOC_MANAGED(kg_k, (/3,npw_k/))
+#endif
+         else
+           ABI_MALLOC(kg_k,(3,npw_k))
+         end if
 
          kg_k(:,1:npw_k)=kg(:,1+ikg:npw_k+ikg)
          call sphereboundary(gbound,istwf_k,kg_k,dtset%mgfft,npw_k)
 
 !        Loop over bands to fft and square for rho(r)
-!        Shoulb be changed to treat bands by batch always
+!        Should be changed to treat bands by batch always
 
-         if(mpi_enreg%paral_kgb /= 1) then  ! Not yet parallelized on spinors
-           do iband=1,nband_k
-!            if(paw_dmft%use_sc_dmft==1) then
-!            write(std_out,*) 'iband  ',iband,occ(iband+bdtot_index),paw_dmft%occnd(iband,iband,ikpt,isppol)
-!            else
-!            write(std_out,*) 'iband  ',iband,occ(iband+bdtot_index)
-!            endif
-             if(mpi_enreg%paralbd==1)then
-               if(proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,iband,iband,isppol,me)) cycle
+         if (mpi_enreg%paral_kgb /= 1) then  ! Not yet parallelized on spinors
+
+#ifdef HAVE_OPENMP_OFFLOAD
+           ! With OpenMP GPU, uploading kg_k when paral_kgb==0
+           !$OMP TARGET ENTER DATA MAP(to:kg_k) IF(gpu_option==ABI_GPU_OPENMP)
+#endif
+
+           if (gpu_option /= ABI_GPU_DISABLED) then
+             !On GPU, treat all bands at once
+             ABI_MALLOC(weight_t,(nband_k))
+             nband_occ = 0
+             do iband=1,nband_k
+               ipwsp = (iband-1)*npw_k*my_nspinor + icg
+               weight_t(iband) = occ(iband+bdtot_index) * dtset%wtk(ikpt)/ucvol
+               locc_test = abs(occ(iband+bdtot_index))>tol8
+               if (locc_test) then
+                 nband_occ = nband_occ +1
+                 ipwbd = (nband_occ-1) * npw_k
+                 cwavef(:,ipwbd+1:ipwbd+npw_k,1) = cg(:,ipwsp+1:ipwsp+npw_k)
+                 if (my_nspinor==2) cwavef(:,ipwbd+1:ipwbd+npw_k,2) = cg(:,ipwsp+npw_k+1:ipwsp+npw_k+npw_k)
+                 if (ioption==1) then ! Multiplication by 2pi i (k+G)_alpha
+                   gp2pi2 = gprimd(alpha,2)*two_pi ; gp2pi2 = gprimd(alpha,2)*two_pi ; gp2pi3 = gprimd(alpha,3)*two_pi
+                   kpt_cart = gp2pi1*dtset%kptns(1,ikpt) + gp2pi2*dtset%kptns(2,ikpt) + gp2pi3*dtset%kptns(3,ikpt)
+                   do ispinor=1,my_nspinor
+                     do ipw=1,npw_k
+                       kg_k_cart = gp2pi1*kg_k(1,ipw) + gp2pi2*kg_k(2,ipw) + gp2pi3*kg_k(3,ipw) + kpt_cart
+                       cwftmp = -cwavef(2,ipwbd+ipw,ispinor)*kg_k_cart
+                       cwavef(2,ipwbd+ipw,ispinor) = cwavef(1,ipwbd+ipw,ispinor)*kg_k_cart
+                       cwavef(1,ipwbd+ipw,ispinor) = cwftmp
+                     end do
+                   end do
+                 else if (ioption==2) then
+                   ABI_ERROR('kinetic energy density tensor (taur_(alpha,beta)) is not yet implemented.')
+                 end if ! end if ioption==1
+               end if ! end if locc_test
+             end do ! end iband=1,nband_k
+             if (nband_occ>0) then
+               call fourwf(1,rhoaug,cwavef(:,1:nband_occ*npw_k,1),dummy,wfraug(:,:,:,1:n6*nband_occ),&
+&                gbound,gbound,istwf_k,kg_k,kg_k,dtset%mgfft,mpi_enreg,nband_occ,dtset%ngfft,&
+&                npw_k,1,n4,n5,n6,1,tim_fourwf,weight,weight_i,&
+&                weight_array_r=weight_t(1:nband_occ),weight_array_i=weight_t(1:nband_occ),&
+&                gpu_option=gpu_option)
              end if
-             do ibandc1=1,nbandc1 ! in case of DMFT
-!              Check if DMFT and only treat occupied states (check on occ.)
-               if(paw_dmft%use_sc_dmft == 1) then
-                 iband1 = paw_dmft%include_bands(ibandc1)
-                 if(paw_dmft%band_in(iband)) then
-                   if(.not. paw_dmft%band_in(iband1))  stop
-                   use_nondiag_occup_dmft = 1
-                   locc_test = abs(paw_dmft%occnd(1,iband,iband1,ikpt,isppol)) +&
-&                   abs(paw_dmft%occnd(2,iband,iband1,ikpt,isppol))>tol8
-!                  write(std_out,*) "mkrho,ikpt,iband,use_occnd",ikpt,iband
+             ABI_FREE(weight_t)
+
+           else ! CPU version
+
+             iband_me = 0
+             do iband=1,nband_k
+               if(mpi_enreg%paralbd==1)then
+                 if(proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,iband,iband,isppol,me)) cycle
+               end if
+               iband_me = iband_me + 1
+               do ibandc1=1,nbandc1 ! in case of DMFT
+                 ! Check if DMFT and only treat occupied states (check on occ.)
+                 if(paw_dmft%use_sc_dmft == 1) then
+                   iband1 = paw_dmft%include_bands(ibandc1)
+                   if(paw_dmft%band_in(iband)) then
+                     if(.not. paw_dmft%band_in(iband1))  stop
+                     use_nondiag_occup_dmft = 1
+                     locc_test = abs(paw_dmft%occnd(1,iband,iband1,ikpt,isppol)) +&
+                       &                   abs(paw_dmft%occnd(2,iband,iband1,ikpt,isppol))>tol8
+                   else
+                     use_nondiag_occup_dmft = 0
+                     locc_test = abs(occ(iband+bdtot_index))>tol8
+                     if(ibandc1 /=1 .and. .not. paw_dmft%band_in(iband)) cycle
+                   end if
                  else
                    use_nondiag_occup_dmft = 0
                    locc_test = abs(occ(iband+bdtot_index))>tol8
-                   if(ibandc1 /=1 .and. .not. paw_dmft%band_in(iband)) cycle
                  end if
-               else
-                 use_nondiag_occup_dmft = 0
-                 locc_test = abs(occ(iband+bdtot_index))>tol8
-               end if
-
-               if (locc_test) then
-!                Obtain Fourier transform in fft box and accumulate the density or the kinetic energy density
-!                Not yet parallise on nspinor if paral_kgb non equal to 1
-                 ipwsp=(iband-1)*npw_k*my_nspinor +icg
-                 cwavef(:,1:npw_k,1)=cg(:,1+ipwsp:ipwsp+npw_k)
-                 if (my_nspinor==2) cwavef(:,1:npw_k,2)=cg(:,ipwsp+npw_k+1:ipwsp+2*npw_k)
-
-                 if(ioption==1)then
-!                  Multiplication by 2pi i (k+G)_alpha
-                   gp2pi1=gprimd(alpha,1)*two_pi ; gp2pi2=gprimd(alpha,2)*two_pi ; gp2pi3=gprimd(alpha,3)*two_pi
-                   kpt_cart=gp2pi1*dtset%kptns(1,ikpt)+gp2pi2*dtset%kptns(2,ikpt)+gp2pi3*dtset%kptns(3,ikpt)
-                   do ispinor=1,my_nspinor
-                     do ipw=1,npw_k
-                       kg_k_cart=gp2pi1*kg_k(1,ipw)+gp2pi2*kg_k(2,ipw)+gp2pi3*kg_k(3,ipw)+kpt_cart
-                       cwftmp=-cwavef(2,ipw,ispinor)*kg_k_cart
-                       cwavef(2,ipw,ispinor)=cwavef(1,ipw,ispinor)*kg_k_cart
-                       cwavef(1,ipw,ispinor)=cwftmp
+                 if (locc_test) then
+                   ! Obtain Fourier transform in fft box and accumulate the density or
+                   ! the kinetic energy density
+                   ! Not yet parallelized on nspinor if paral_kgb/=1
+                   ipwsp=(iband_me-1)*npw_k*my_nspinor +icg
+                   cwavef(:,1:npw_k,1) =                  cg(:,1+ipwsp      :ipwsp+npw_k)
+                   if (my_nspinor==2) cwavef(:,1:npw_k,2)=cg(:,1+ipwsp+npw_k:ipwsp+2*npw_k)
+                   if(ioption==1)then
+                     ! Multiplication by 2pi i (k+G)_alpha
+                     gp2pi1=gprimd(alpha,1)*two_pi ; gp2pi2=gprimd(alpha,2)*two_pi ; gp2pi3=gprimd(alpha,3)*two_pi
+                     kpt_cart=gp2pi1*dtset%kptns(1,ikpt)+gp2pi2*dtset%kptns(2,ikpt)+gp2pi3*dtset%kptns(3,ikpt)
+                     do ispinor=1,my_nspinor
+                       do ipw=1,npw_k
+                         kg_k_cart=gp2pi1*kg_k(1,ipw)+gp2pi2*kg_k(2,ipw)+gp2pi3*kg_k(3,ipw)+kpt_cart
+                         cwftmp=-cwavef(2,ipw,ispinor)*kg_k_cart
+                         cwavef(2,ipw,ispinor)=cwavef(1,ipw,ispinor)*kg_k_cart
+                         cwavef(1,ipw,ispinor)=cwftmp
+                       end do
                      end do
-                   end do
-                 else if(ioption==2)then
-                   MSG_ERROR('kinetic energy density tensor (taur_(alpha,beta)) is not yet implemented.')
-                 end if
+                   else if(ioption==2)then
+                     ABI_ERROR('kinetic energy density tensor (taur_(alpha,beta)) is not yet implemented.')
+                   end if
+                   ! Non diag occupation in DMFT.
+                   ! TODO : this will break in full distrib of band memory
+                   if(use_nondiag_occup_dmft==1) then
+                     ipwsp=(iband1-1)*npw_k*my_nspinor +icg
+                     cwavefb(:,1:npw_k,1)=cg(:,1+ipwsp:ipwsp+npw_k)
+                     if (my_nspinor==2) cwavefb(:,1:npw_k,2)=cg(:,ipwsp+npw_k+1:ipwsp+2*npw_k)
+                     weight  =paw_dmft%occnd(1,iband,iband1,ikpt,isppol)*dtset%wtk(ikpt)/ucvol
+                     weight_i=paw_dmft%occnd(2,iband,iband1,ikpt,isppol)*dtset%wtk(ikpt)/ucvol
+                   else
+                     weight=occ(iband+bdtot_index)*dtset%wtk(ikpt)/ucvol
+                     weight_i=weight
+                   end if
 
-!                Non diag occupation in DMFT.
-                 if(use_nondiag_occup_dmft==1) then
-                   ipwsp=(iband1-1)*npw_k*my_nspinor +icg
-                   cwavefb(:,1:npw_k,1)=cg(:,1+ipwsp:ipwsp+npw_k)
-                   if (my_nspinor==2) cwavefb(:,1:npw_k,2)=cg(:,ipwsp+npw_k+1:ipwsp+2*npw_k)
-                   weight  =paw_dmft%occnd(1,iband,iband1,ikpt,isppol)*dtset%wtk(ikpt)/ucvol
-                   weight_i=paw_dmft%occnd(2,iband,iband1,ikpt,isppol)*dtset%wtk(ikpt)/ucvol
+                   ! The same section of code is also found in vtowfk.F90 : should be rationalized !
 
+                   call fourwf(1,rhoaug,cwavef(:,:,1),dummy,wfraug,gbound,gbound,&
+                     &                 istwf_k,kg_k,kg_k,dtset%mgfft,mpi_enreg,1,dtset%ngfft,&
+                     &                 npw_k,1,n4,n5,n6,1,tim_fourwf,weight,weight_i,&
+                     &                 use_ndo=use_nondiag_occup_dmft,fofginb=cwavefb(:,:,1),&
+                     &                 gpu_option=gpu_option)
+                   if(dtset%nspinor==2)then
+                     if(dtset%nspden==1) then
+                       ! We need only the total density : accumulation continues on top of rhoaug
+                       call fourwf(1,rhoaug,cwavef(:,:,2),dummy,wfraug,gbound,gbound,&
+                         &                     istwf_k,kg_k,kg_k,dtset%mgfft,mpi_enreg,1,dtset%ngfft,&
+                         &                     npw_k,1,n4,n5,n6,1,tim_fourwf,weight,weight_i,&
+                         &                     use_ndo=use_nondiag_occup_dmft,fofginb=cwavefb(:,:,2),&
+                         &                     gpu_option=gpu_option)
+                     else if(dtset%nspden==4) then
+                       ! Build the four components of rho. We use only norm quantities and, so fourwf.
+                       ! $\sum_{n} f_n \Psi^{* \alpha}_n \Psi^{\alpha}_n =\rho^{\alpha \alpha}$
+                       ! $\sum_{n} f_n (\Psi^{1}+\Psi^{2})^*_n (\Psi^{1}+\Psi^{2})_n=rho+m_x$
+                       ! $\sum_{n} f_n (\Psi^{1}-i \Psi^{2})^*_n (\Psi^{1}-i \Psi^{2})_n=rho+m_y$
+                       if(gpu_option == ABI_GPU_KOKKOS) then
+#if defined HAVE_GPU && defined HAVE_YAKL
+                         ABI_MALLOC_MANAGED(cwavef_x, (/2,npw_k/))
+                         ABI_MALLOC_MANAGED(cwavef_y, (/2,npw_k/))
+                         ABI_MALLOC_MANAGED(cwavefb_x,(/2,npw_k*paw_dmft%use_sc_dmft/))
+                         ABI_MALLOC_MANAGED(cwavefb_y,(/2,npw_k*paw_dmft%use_sc_dmft/))
+#endif
+                       else
+                         ABI_MALLOC(cwavef_x,(2,npw_k))
+                         ABI_MALLOC(cwavef_y,(2,npw_k))
+                         ABI_MALLOC(cwavefb_x,(2,npw_k*paw_dmft%use_sc_dmft))
+                         ABI_MALLOC(cwavefb_y,(2,npw_k*paw_dmft%use_sc_dmft))
+                       end if
+                       ! $(\Psi^{1}+\Psi^{2})$
+                       cwavef_x(:,:)=cwavef(:,1:npw_k,1)+cwavef(:,1:npw_k,2)
+                       ! $(\Psi^{1}-i \Psi^{2})$
+                       cwavef_y(1,:)=cwavef(1,1:npw_k,1)+cwavef(2,1:npw_k,2)
+                       cwavef_y(2,:)=cwavef(2,1:npw_k,1)-cwavef(1,1:npw_k,2)
+                       if(use_nondiag_occup_dmft==1) then
+                         cwavefb_x(:,:)=cwavefb(:,1:npw_k,1)+cwavefb(:,1:npw_k,2)
+                         cwavefb_y(1,:)=cwavefb(1,1:npw_k,1)+cwavefb(2,1:npw_k,2)
+                         cwavefb_y(2,:)=cwavefb(2,1:npw_k,1)-cwavefb(1,1:npw_k,2)
+                       end if
+                       rhoaug_up(:,:,:)=rhoaug(:,:,:) !Already computed
+                       call fourwf(1,rhoaug_down,cwavef(:,:,2),dummy,wfraug,gbound,gbound,&
+                         &                     istwf_k,kg_k,kg_k,dtset%mgfft,mpi_enreg,1,dtset%ngfft,&
+                         &                     npw_k,1,n4,n5,n6,1,tim_fourwf,weight,weight_i,&
+                         &                     use_ndo=use_nondiag_occup_dmft,fofginb=cwavefb(:,:,2),&
+                         &                     gpu_option=gpu_option)
+
+                       call fourwf(1,rhoaug_mx,cwavef_x,dummy,wfraug,gbound,gbound,&
+                         &                     istwf_k,kg_k,kg_k,dtset%mgfft,mpi_enreg,1,dtset%ngfft,&
+                         &                     npw_k,1,n4,n5,n6,1,tim_fourwf,weight,weight_i,&
+                         &                     use_ndo=use_nondiag_occup_dmft,fofginb=cwavefb_x,&
+                         &                     gpu_option=gpu_option)
+
+                       call fourwf(1,rhoaug_my,cwavef_y,dummy,wfraug,gbound,gbound,&
+                         &                     istwf_k,kg_k,kg_k,dtset%mgfft,mpi_enreg,1,dtset%ngfft,&
+                         &                     npw_k,1,n4,n5,n6,1,tim_fourwf,weight,weight_i,&
+                         &                     use_ndo=use_nondiag_occup_dmft,fofginb=cwavefb_y,&
+                         &                     gpu_option=gpu_option)
+                       if(gpu_option == ABI_GPU_KOKKOS) then
+#if defined HAVE_GPU && defined HAVE_YAKL
+                         ABI_FREE_MANAGED(cwavef_x)
+                         ABI_FREE_MANAGED(cwavef_y)
+                         ABI_FREE_MANAGED(cwavefb_x)
+                         ABI_FREE_MANAGED(cwavefb_y)
+#endif
+                       else
+                         ABI_FREE(cwavef_x)
+                         ABI_FREE(cwavef_y)
+                         ABI_FREE(cwavefb_x)
+                         ABI_FREE(cwavefb_y)
+                       end if
+                     end if ! dtset%nspden/=4
+                   end if
                  else
-                   weight=occ(iband+bdtot_index)*dtset%wtk(ikpt)/ucvol
-                   weight_i=weight
-                 end if
+                   ! Accumulate the number of one-way 3D ffts skipped
+                   nskip=nskip+1
+                 end if ! abs(occ(iband+bdtot_index))>tol8
+               end do ! iband1=1,(nband_k-1)*paw_dmft%use_sc_dmft+1
+             end do ! iband=1,nband_k
 
-                 if(mpi_enreg%paralbd==0) tim_fourwf=3
-                 if(mpi_enreg%paralbd==1) tim_fourwf=6
+           end if ! gpu_option
 
-!                The same section of code is also found in vtowfk.F90 : should be rationalized !
-
-                 call fourwf(1,rhoaug,cwavef(:,:,1),dummy,wfraug,gbound,gbound,&
-&                 istwf_k,kg_k,kg_k,dtset%mgfft,mpi_enreg,1,dtset%ngfft,&
-&                 npw_k,1,n4,n5,n6,1,tim_fourwf,weight,weight_i,&
-&                 use_ndo=use_nondiag_occup_dmft,fofginb=cwavefb(:,:,1),&
-&                 use_gpu_cuda=dtset%use_gpu_cuda)
-
-
-                 if(dtset%nspinor==2)then
-!                  DEBUG GZ !To obtain a x-directed magnetization(test)
-!                  cwavef1(1,1:npw_k)=-cwavef(2,1:npw_k)
-!                  cwavef1(2,1:npw_k)= cwavef(1,1:npw_k)
-!                  ENDDEBUG
-
-                   if(dtset%nspden==1) then
-!                    We need only the total density : accumulation continues on top of rhoaug
-
-                     call fourwf(1,rhoaug,cwavef(:,:,2),dummy,wfraug,gbound,gbound,&
-&                     istwf_k,kg_k,kg_k,dtset%mgfft,mpi_enreg,1,dtset%ngfft,&
-&                     npw_k,1,n4,n5,n6,1,tim_fourwf,weight,weight_i,&
-&                     use_ndo=use_nondiag_occup_dmft,fofginb=cwavefb(:,:,2),use_gpu_cuda=dtset%use_gpu_cuda)
-
-
-                   else if(dtset%nspden==4) then
-                     ! Build the four components of rho. We use only norm quantities and, so fourwf.
-                     ! $\sum_{n} f_n \Psi^{* \alpha}_n \Psi^{\alpha}_n =\rho^{\alpha \alpha}$
-                     ! $\sum_{n} f_n (\Psi^{1}+\Psi^{2})^*_n (\Psi^{1}+\Psi^{2})_n=rho+m_x$
-                     ! $\sum_{n} f_n (\Psi^{1}-i \Psi^{2})^*_n (\Psi^{1}-i \Psi^{2})_n=rho+m_y$
-                     ABI_ALLOCATE(cwavef_x,(2,npw_k))
-                     ABI_ALLOCATE(cwavef_y,(2,npw_k))
-                     ABI_ALLOCATE(cwavefb_x,(2,npw_k*paw_dmft%use_sc_dmft))
-                     ABI_ALLOCATE(cwavefb_y,(2,npw_k*paw_dmft%use_sc_dmft))
-                     ! $(\Psi^{1}+\Psi^{2})$
-                     cwavef_x(:,:)=cwavef(:,1:npw_k,1)+cwavef(:,1:npw_k,2)
-                     ! $(\Psi^{1}-i \Psi^{2})$
-                     cwavef_y(1,:)=cwavef(1,1:npw_k,1)+cwavef(2,1:npw_k,2)
-                     cwavef_y(2,:)=cwavef(2,1:npw_k,1)-cwavef(1,1:npw_k,2)
-                     if(use_nondiag_occup_dmft==1) then
-                       cwavefb_x(:,:)=cwavefb(:,1:npw_k,1)+cwavefb(:,1:npw_k,2)
-                       cwavefb_y(1,:)=cwavefb(1,1:npw_k,1)+cwavefb(2,1:npw_k,2)
-                       cwavefb_y(2,:)=cwavefb(2,1:npw_k,1)-cwavefb(1,1:npw_k,2)
-                     end if
-                     rhoaug_up(:,:,:)=rhoaug(:,:,:) !Already computed
-
-                     call fourwf(1,rhoaug_down,cwavef(:,:,2),dummy,wfraug,gbound,gbound,&
-&                     istwf_k,kg_k,kg_k,dtset%mgfft,mpi_enreg,1,dtset%ngfft,&
-&                     npw_k,1,n4,n5,n6,1,tim_fourwf,weight,weight_i,&
-&                     use_ndo=use_nondiag_occup_dmft,fofginb=cwavefb(:,:,2),use_gpu_cuda=dtset%use_gpu_cuda)
-
-                     call fourwf(1,rhoaug_mx,cwavef_x,dummy,wfraug,gbound,gbound,&
-&                     istwf_k,kg_k,kg_k,dtset%mgfft,mpi_enreg,1,dtset%ngfft,&
-&                     npw_k,1,n4,n5,n6,1,tim_fourwf,weight,weight_i,&
-&                     use_ndo=use_nondiag_occup_dmft,fofginb=cwavefb_x,use_gpu_cuda=dtset%use_gpu_cuda)
-
-                     call fourwf(1,rhoaug_my,cwavef_y,dummy,wfraug,gbound,gbound,&
-&                     istwf_k,kg_k,kg_k,dtset%mgfft,mpi_enreg,1,dtset%ngfft,&
-&                     npw_k,1,n4,n5,n6,1,tim_fourwf,weight,weight_i,&
-&                     use_ndo=use_nondiag_occup_dmft,fofginb=cwavefb_y,use_gpu_cuda=dtset%use_gpu_cuda)
-
-                     ABI_DEALLOCATE(cwavef_x)
-                     ABI_DEALLOCATE(cwavef_y)
-                     ABI_DEALLOCATE(cwavefb_x)
-                     ABI_DEALLOCATE(cwavefb_y)
-
-                   end if ! dtset%nspden/=4
-                 end if
-
-               else
-!                Accumulate the number of one-way 3D ffts skipped
-                 nskip=nskip+1
-               end if ! abs(occ(iband+bdtot_index))>tol8
-!              End loop on iband
-             end do ! iband1=1,(nband_k-1)*paw_dmft%use_sc_dmft+1
-           end do ! iband=1,nband_k
-
+#ifdef HAVE_OPENMP_OFFLOAD
+           !$OMP TARGET EXIT DATA MAP(delete:kg_k) IF(gpu_option==ABI_GPU_OPENMP)
+#endif
          else !paral_kgb==1
+
            if(proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,isppol,me)) cycle
 
            call bandfft_kpt_set_ikpt(ikpt,mpi_enreg)
-
            nbdblock=nband_k/(mpi_enreg%nproc_band * mpi_enreg%bandpp)
            blocksize=nband_k/nbdblock
-           if(allocated(cwavef))  then
-             ABI_DEALLOCATE(cwavef)
+
+           if(gpu_option == ABI_GPU_KOKKOS) then
+#if defined HAVE_GPU && defined HAVE_YAKL
+             if(associated(cwavef))  then
+               ABI_FREE_MANAGED(cwavef)
+             end if
+             ABI_MALLOC_MANAGED(cwavef,(/2,npw_k*blocksize,dtset%nspinor/))
+#endif
+           else
+             if(associated(cwavef))  then
+               ABI_FREE(cwavef)
+             end if
+             ABI_MALLOC(cwavef,(2,npw_k*blocksize,dtset%nspinor))
            end if
-           ABI_ALLOCATE(cwavef,(2,npw_k*blocksize,dtset%nspinor))
            if(ioption==1)  then
-             ABI_ALLOCATE(kg_k_cart_block,(npw_k))
+             ABI_MALLOC(kg_k_cart_block,(npw_k))
            end if
-           ABI_ALLOCATE(occ_k,(nband_k))
+           ABI_MALLOC(occ_k,(nband_k))
            occ_k(:)=occ(bdtot_index+1:bdtot_index+nband_k)
 
 ! ---------- DMFT
            if(allocated(cwavef_rot))  then
-             ABI_DEALLOCATE(cwavef_rot)
-             ABI_DEALLOCATE(occ_diag)
-             ! ABI_DEALLOCATE(occ_nd)
+             ABI_FREE(cwavef_rot)
+             ABI_FREE(occ_diag)
+             ! ABI_FREE(occ_nd)
            end if
            if(paw_dmft%use_sc_dmft==1) then
              ! Allocation of DMFT temporaries arrays
-             ABI_ALLOCATE(cwavef_rot,(2,npw_k,blocksize,dtset%nspinor))
-             ABI_ALLOCATE(occ_diag,(blocksize))
-             ! ABI_ALLOCATE(occ_nd,(2, blocksize, blocksize, dtset%nspinor))
+             ABI_MALLOC(cwavef_rot,(2,npw_k,blocksize,dtset%nspinor))
+             ABI_MALLOC(occ_diag,(blocksize))
+             ! ABI_MALLOC(occ_nd,(2, blocksize, blocksize, dtset%nspinor))
            end if
 ! ---------- END DMFT
 
@@ -544,7 +669,7 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
                  end do
                end do
              else if(ioption==2)then
-               MSG_ERROR("kinetic energy density tensor (taur_(alpha,beta)) is not yet implemented.")
+               ABI_ERROR("kinetic energy density tensor (taur_(alpha,beta)) is not yet implemented.")
              end if
 
 ! ---------- DMFT
@@ -572,7 +697,7 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
              if (nspinor1TreatedByThisProc) then
                call prep_fourwf(rhoaug,blocksize,cwavef(:,:,1),wfraug,iblock,istwf_k,dtset%mgfft,mpi_enreg,&
 &               nband_k,ndat,dtset%ngfft,npw_k,n4,n5,n6,occ_k,1,ucvol,&
-&               dtset%wtk(ikpt),use_gpu_cuda=dtset%use_gpu_cuda)
+&               dtset%wtk(ikpt),gpu_option=gpu_option)
              end if
              call timab(538,2,tsec)
              if(dtset%nspinor==2)then
@@ -581,58 +706,95 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
                    call prep_fourwf(rhoaug,blocksize,cwavef(:,:,2),wfraug,&
 &                   iblock,istwf_k,dtset%mgfft,mpi_enreg,&
 &                   nband_k,ndat,dtset%ngfft,npw_k,n4,n5,n6,occ_k,1,ucvol,&
-&                   dtset%wtk(ikpt),use_gpu_cuda=dtset%use_gpu_cuda)
+&                   dtset%wtk(ikpt),gpu_option=gpu_option)
                  end if
                else if(dtset%nspden==4 ) then
-                 ABI_ALLOCATE(cwavef_x,(2,npw_k*blocksize))
-                 ABI_ALLOCATE(cwavef_y,(2,npw_k*blocksize))
+
+                 if(gpu_option == ABI_GPU_KOKKOS) then
+#if defined HAVE_GPU && defined HAVE_YAKL
+                   ABI_MALLOC_MANAGED(cwavef_x,(/2,npw_k*blocksize/))
+                   ABI_MALLOC_MANAGED(cwavef_y,(/2,npw_k*blocksize/))
+#endif
+                 else
+                   ABI_MALLOC(cwavef_x,(2,npw_k*blocksize))
+                   ABI_MALLOC(cwavef_y,(2,npw_k*blocksize))
+                 end if
+
                  cwavef_x(:,:)=cwavef(:,:,1)+cwavef(:,:,2)
                  cwavef_y(1,:)=cwavef(1,:,1)+cwavef(2,:,2)
                  cwavef_y(2,:)=cwavef(2,:,1)-cwavef(1,:,2)
+
                  call timab(538,1,tsec)
                  if (nspinor1TreatedByThisProc) then
                    call prep_fourwf(rhoaug_down,blocksize,cwavef(:,:,2),wfraug,&
 &                   iblock,istwf_k,dtset%mgfft,mpi_enreg,&
 &                   nband_k,ndat,dtset%ngfft,npw_k,n4,n5,n6,occ_k,1,ucvol,&
-&                   dtset%wtk(ikpt),use_gpu_cuda=dtset%use_gpu_cuda)
+&                   dtset%wtk(ikpt),gpu_option=gpu_option)
                  end if
                  if (nspinor2TreatedByThisProc) then
                    call prep_fourwf(rhoaug_mx,blocksize,cwavef_x,wfraug,&
 &                   iblock,istwf_k,dtset%mgfft,mpi_enreg,&
 &                   nband_k,ndat,dtset%ngfft,npw_k,n4,n5,n6,occ_k,1,ucvol,&
-&                   dtset%wtk(ikpt),use_gpu_cuda=dtset%use_gpu_cuda)
+&                   dtset%wtk(ikpt),gpu_option=gpu_option)
                    call prep_fourwf(rhoaug_my,blocksize,cwavef_y,wfraug,&
 &                   iblock,istwf_k,dtset%mgfft,mpi_enreg,&
 &                   nband_k,ndat,dtset%ngfft,npw_k,n4,n5,n6,occ_k,1,ucvol,&
-&                   dtset%wtk(ikpt),use_gpu_cuda=dtset%use_gpu_cuda)
+&                   dtset%wtk(ikpt),gpu_option=gpu_option)
                  end if
                  call timab(538,2,tsec)
-                 ABI_DEALLOCATE(cwavef_x)
-                 ABI_DEALLOCATE(cwavef_y)
+
+                 if(gpu_option == ABI_GPU_KOKKOS) then
+#if defined HAVE_GPU && defined HAVE_YAKL
+                   ABI_FREE_MANAGED(cwavef_x)
+                   ABI_FREE_MANAGED(cwavef_y)
+#endif
+                 else
+                   ABI_FREE(cwavef_x)
+                   ABI_FREE(cwavef_y)
+                 end if
+
                end if
              end if
            end do !iblock
            if(ioption==1)  then
-             ABI_DEALLOCATE(kg_k_cart_block)
+             ABI_FREE(kg_k_cart_block)
            end if
-           if (allocated(cwavef))  then
-             ABI_DEALLOCATE(cwavef)
+
+           if (associated(cwavef))  then
+             if(gpu_option == ABI_GPU_KOKKOS) then
+#if defined HAVE_GPU && defined HAVE_YAKL
+               ABI_FREE_MANAGED(cwavef)
+#endif
+             else
+               ABI_FREE(cwavef)
+             end if
            end if
-           ABI_DEALLOCATE(occ_k)
+
+           ABI_FREE(occ_k)
          end if
 
-         ABI_DEALLOCATE(gbound)
-         ABI_DEALLOCATE(kg_k)
+         ABI_FREE(gbound)
+
+         if(gpu_option == ABI_GPU_KOKKOS) then
+#if defined HAVE_GPU && defined HAVE_YAKL
+           ABI_FREE_MANAGED(kg_k)
+#endif
+         else
+           ABI_FREE(kg_k)
+         end if
 
          bdtot_index=bdtot_index+nband_k
 
          if (dtset%mkmem/=0) then
-           icg=icg+npw_k*my_nspinor*nband_k
+           icg=icg+npw_k*my_nspinor*mband_mem !iband_me
            ikg=ikg+npw_k
          end if
 
        end do ! ikpt
 
+#ifdef HAVE_OPENMP_OFFLOAD
+       !$OMP TARGET UPDATE FROM(rhoaug) IF(gpu_option==ABI_GPU_OPENMP)
+#endif
        if(mpi_enreg%paral_kgb == 1) then
          call bandfft_kpt_set_ikpt(-1,mpi_enreg)
          if (dtset%nspden==4) then
@@ -660,25 +822,52 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
          call fftpac(ispden,mpi_enreg,dtset%nspden,n1,n2,n3,n4,n5,n6,dtset%ngfft,rhor,rhoaug_my,1)
          ispden=4
          call fftpac(ispden,mpi_enreg,dtset%nspden,n1,n2,n3,n4,n5,n6,dtset%ngfft,rhor,rhoaug_down,1)
-         ABI_DEALLOCATE(rhoaug_up)
-         ABI_DEALLOCATE(rhoaug_down)
-         ABI_DEALLOCATE(rhoaug_mx)
-         ABI_DEALLOCATE(rhoaug_my)
+         if(gpu_option == ABI_GPU_KOKKOS) then
+#if defined HAVE_GPU && defined HAVE_YAKL
+           ABI_FREE_MANAGED(rhoaug_up)
+           ABI_FREE_MANAGED(rhoaug_down)
+           ABI_FREE_MANAGED(rhoaug_mx)
+           ABI_FREE_MANAGED(rhoaug_my)
+#endif
+         else
+           ABI_FREE(rhoaug_up)
+           ABI_FREE(rhoaug_down)
+           ABI_FREE(rhoaug_mx)
+           ABI_FREE(rhoaug_my)
+         end if
        end if
 
      end do ! isppol
 
-     if(allocated(cwavef))  then
-       ABI_DEALLOCATE(cwavef)
+     if(gpu_option == ABI_GPU_KOKKOS) then
+#if defined HAVE_GPU && defined HAVE_YAKL
+       if(associated(cwavef))  then
+         ABI_FREE_MANAGED(cwavef)
+       end if
+       if(associated(cwavefb))  then
+         ABI_FREE_MANAGED(cwavefb)
+       end if
+       ABI_FREE_MANAGED(rhoaug)
+       ABI_FREE_MANAGED(wfraug)
+#endif
+     else
+       if(associated(cwavef))  then
+         ABI_FREE(cwavef)
+       end if
+       if(associated(cwavefb))  then
+         ABI_FREE(cwavefb)
+       endif
+#ifdef HAVE_OPENMP_OFFLOAD
+       !$OMP TARGET EXIT DATA MAP(delete:rhoaug) IF(gpu_option==ABI_GPU_OPENMP)
+#endif
+       ABI_FREE(rhoaug)
+       ABI_FREE(wfraug)
      end if
-     ABI_DEALLOCATE(cwavefb)
-     ABI_DEALLOCATE(rhoaug)
-     ABI_DEALLOCATE(wfraug)
 
      if(allocated(cwavef_rot))  then
-       ABI_DEALLOCATE(cwavef_rot)
-       ABI_DEALLOCATE(occ_diag)
-       ! ABI_DEALLOCATE(occ_nd)
+       ABI_FREE(cwavef_rot)
+       ABI_FREE(occ_diag)
+       ! ABI_FREE(occ_nd)
      end if
 
 !    Recreate full rhor on all proc.
@@ -727,10 +916,26 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
 
  nfftot=dtset%ngfft(1) * dtset%ngfft(2) * dtset%ngfft(3)
 
+!Add extfpmd free electrons contribution to density
+ if(present(extfpmd)) then
+   if(associated(extfpmd)) then
+     if(extfpmd%version==10) then
+       do ispden=1,dtset%nspden
+         do ifft=1,dtset%nfft
+           rhor(ifft,ispden)=rhor(ifft,ispden)+extfpmd%nelectarr(ifft,ispden)/ucvol/dtset%nspden
+         end do
+       end do
+     else
+       rhor(:,:)=rhor(:,:)+extfpmd%nelect/ucvol/dtset%nspden
+     end if
+     rhog(1,1)=rhog(1,1)+extfpmd%nelect/ucvol/dtset%nspden
+   end if
+ end if
+
  select case (ioption)
  case(0, 1)
    call symrhg(1,gprimd,irrzon,mpi_enreg,dtset%nfft,nfftot,dtset%ngfft,dtset%nspden,dtset%nsppol,dtset%nsym,&
-   dtset%paral_kgb,phnons,rhog,rhor,rprimd,dtset%symafm,dtset%symrel)
+               phnons,rhog,rhor,rprimd,dtset%symafm,dtset%symrel,dtset%tnons)
    if(ioption==1)then
 !$OMP PARALLEL DO
      do ifft=1,dtset%nfft
@@ -741,7 +946,7 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
      end do
    end if
  case(2)
-   MSG_BUG('kinetic energy density tensor (taur_(alpha,beta)) is not yet implemented.')
+   ABI_BUG('kinetic energy density tensor (taur_(alpha,beta)) is not yet implemented.')
    !call symtaug(1,gprimd,irrzon,mpi_enreg,dtset%nfft,nfftot,dtset%ngfft,dtset%nspden,dtset%nsppol,dtset%nsym,&
    !dtset%paral_kgb,phnons,rhog,rhor,rprimd,dtset%symafm,dtset%symrel)
  end select
@@ -755,7 +960,7 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
  call timab(799,1,tsec)
 
  if(ioption==1 .or. ioption==2)  then
-   ABI_DEALLOCATE(taur_alphabeta)
+   ABI_FREE(taur_alphabeta)
  end if
 
 !Find and print minimum and maximum total electron density
@@ -772,7 +977,6 @@ end subroutine mkrho
 !!***
 
 !!****f* m_mkrho/initro
-!!
 !! NAME
 !! initro
 !!
@@ -788,7 +992,7 @@ end subroutine mkrho
 !! gsqcut=cutoff G**2 for included G s in fft box (larger sphere).
 !! izero=if 1, unbalanced components of rho(g) have to be set to zero
 !! mgfft=maximum size of 1D FFTs
-!! mpi_enreg=informations about mpi parallelization
+!! mpi_enreg=information about mpi parallelization
 !! mqgrid=number of grid pts in q array for n^AT(q) spline.
 !! natom=number of atoms in cell.
 !! nattyp(ntypat)=number of atoms of each type in cell.
@@ -811,22 +1015,14 @@ end subroutine mkrho
 !! rhor(nfft,nspden)=initialized total density in real space.
 !!         as well as spin-up part if spin-polarized
 !!
-!! PARENTS
-!!      gstate,setup_positron
-!!
-!! CHILDREN
-!!      fourdp,ptabs_fourdp,wrtout,zerosym
-!!
 !! SOURCE
 
 subroutine initro(atindx,densty,gmet,gsqcut,izero,mgfft,mpi_enreg,mqgrid,natom,nattyp,&
-&  nfft,ngfft,nspden,ntypat,paral_kgb,psps,pawtab,ph1d,qgrid,rhog,rhor,spinat,ucvol,usepaw,zion,znucl)
-
- implicit none
+&  nfft,ngfft,nspden,ntypat,psps,pawtab,ph1d,qgrid,rhog,rhor,spinat,ucvol,usepaw,zion,znucl)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: izero,mgfft,mqgrid,natom,nfft,nspden,ntypat,paral_kgb
+ integer,intent(in) :: izero,mgfft,mqgrid,natom,nfft,nspden,ntypat
  integer,intent(in) :: usepaw
  real(dp),intent(in) :: gsqcut,ucvol
  type(mpi_type),intent(in) :: mpi_enreg
@@ -840,7 +1036,6 @@ subroutine initro(atindx,densty,gmet,gsqcut,izero,mgfft,mpi_enreg,mqgrid,natom,n
  type(pawtab_type),intent(in) :: pawtab(ntypat*usepaw)
 
 !Local variables-------------------------------
-!The decay lengths should be optimized element by element, and even pseudopotential by pseudopotential.
 !scalars
  integer,parameter :: im=2,re=1
  integer :: i1,i2,i3,ia,ia1,ia2,id1,id2,id3,ig1,ig2,ig3,ii,ispden
@@ -852,61 +1047,53 @@ subroutine initro(atindx,densty,gmet,gsqcut,izero,mgfft,mpi_enreg,mqgrid,natom,n
  character(len=500) :: message
 !arrays
  integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:),ffti2_local(:),fftn3_distrib(:),ffti3_local(:)
- real(dp),allocatable :: length(:),spinat_indx(:,:),work(:)
- logical,allocatable :: use_gaussian(:)
+ real(dp) :: length(ntypat)
+ real(dp),allocatable :: work(:), spinat_indx(:,:)
+ logical :: use_gaussian(ntypat)
 
 ! *************************************************************************
 
- if(nspden==4)then
-   write(std_out,*)' initro : might work yet for nspden=4 (not checked)'
-   write(std_out,*)' spinat',spinat(1:3,1:natom)
-!  stop
+ if (nspden==4) then
+   ABI_COMMENT('initro: might work yet for nspden=4 (not checked)')
+   !write(std_out,*)' spinat',spinat(1:3,1:natom)
  end if
 
- n1=ngfft(1)
- n2=ngfft(2)
- n3=ngfft(3)
- me_fft=ngfft(11)
- nproc_fft=ngfft(10)
- ABI_ALLOCATE(work,(nfft))
- ABI_ALLOCATE(spinat_indx,(3,natom))
+ n1=ngfft(1); n2=ngfft(2); n3=ngfft(3); me_fft=ngfft(11); nproc_fft=ngfft(10)
+
+ ABI_MALLOC(work,(nfft))
+ ABI_MALLOC(spinat_indx,(3,natom))
 
  ! Get the distrib associated with this fft_grid
  call ptabs_fourdp(mpi_enreg,n2,n3,fftn2_distrib,ffti2_local,fftn3_distrib,ffti3_local)
 
-!Transfer the spinat array to an array in which the atoms have the proper order, type by type.
+ ! Transfer the spinat array to an array in which the atoms have the proper order, type by type.
  do ia=1,natom
    spinat_indx(:,atindx(ia))=spinat(:,ia)
  end do
 
-!Check whether the values of spinat are acceptable
- if(nspden==2)then
+ ! Check whether the values of spinat are acceptable
+ if (nspden==2)then
    ia1=1
    do itypat=1,ntypat
-!    ia1,ia2 sets range of loop over atoms:
+     !ia1,ia2 sets range of loop over atoms:
      ia2=ia1+nattyp(itypat)-1
      do ia=ia1,ia2
        if( sqrt(spinat_indx(1,ia)**2+spinat_indx(2,ia)**2+spinat_indx(3,ia)**2) &
-&       > abs(zion(itypat))*(1.0_dp + epsilon(0.0_dp)) ) then
-         write(message, '(a,a,a,a,i4,a,a,3es11.4,a,a,a,es11.4)' ) ch10,&
-&         ' initro : WARNING - ',ch10,&
-&         '  For type-ordered atom number ',ia,ch10,&
-&         '  input spinat=',spinat_indx(:,ia),'  is larger, in magnitude,',ch10,&
-&         '  than zion(ia)=',zion(itypat)
-         call wrtout(std_out,message,'COLL')
-         call wrtout(ab_out,message,'COLL')
+           > abs(zion(itypat))*(1.0_dp + epsilon(0.0_dp)) ) then
+         write(message, '(a,i0,a,a,3es11.4,a,a,a,es11.4)' )&
+         '  For type-ordered atom number ',ia,ch10,&
+         '  input spinat=',spinat_indx(:,ia),'  is larger, in magnitude,',ch10,&
+         '  than zion(ia)=',zion(itypat)
+         call wrtout([std_out, ab_out], message)
        end if
      end do
      ia1=ia2+1
    end do
  end if
 
-!Compute the decay length of each type of atom
- ABI_ALLOCATE(length,(ntypat))
- ABI_ALLOCATE(use_gaussian,(ntypat))
+ ! Compute the decay length of each type of atom depending on data available in pseudos.
  jtemp=0
  do itypat=1,ntypat
-
    use_gaussian(itypat)=.true.
    if (usepaw==0) use_gaussian(itypat) = .not. psps%nctab(itypat)%has_tvale
    if (usepaw==1) use_gaussian(itypat)=(pawtab(itypat)%has_tvale==0)
@@ -915,14 +1102,13 @@ subroutine initro(atindx,densty,gmet,gsqcut,izero,mgfft,mpi_enreg,mqgrid,natom,n
    if (use_gaussian(itypat)) then
      length(itypat) = atom_length(densty(itypat,1),zion(itypat),znucl(itypat))
      write(message,'(a,i3,a,f12.4,a,a,a,f12.4,a,i3,a,es12.4,a)' )&
-&     ' initro: for itypat=',itypat,', take decay length=',length(itypat),',',ch10,&
-&     ' initro: indeed, coreel=',znucl(itypat)-zion(itypat),', nval=',int(zion(itypat)),' and densty=',densty(itypat,1),'.'
-     call wrtout(std_out,message,'COLL')
+      ' initro: for itypat=',itypat,', take decay length=',length(itypat),',',ch10,&
+      ' initro: indeed, coreel=',znucl(itypat)-zion(itypat),', nval=',int(zion(itypat)),' and densty=',densty(itypat,1),'.'
+     call wrtout(std_out,message)
    else
      write(message,"(a,i3,a)")' initro: for itypat=',itypat,", take pseudo charge density from pp file"
-     call wrtout(std_out,message,"COLL")
+     call wrtout(std_out,message)
    end if
-
  end do
 
  if (jtemp>0) then
@@ -941,20 +1127,19 @@ subroutine initro(atindx,densty,gmet,gsqcut,izero,mgfft,mpi_enreg,mqgrid,natom,n
  if(nspden /= 4) then
 
    do ispden=nspden,1,-1
-!    This loop overs spins will actually be as follows :
-!    ispden=2 for spin up
-!    ispden=1 for total spin (also valid for non-spin-polarized calculations)
-!    The reverse ispden order is chosen, in order to end up with
-!    rhog containing the proper total density.
-
-     rhog(:,:)=zero
+     ! This loop overs spins will actually be as follows:
+     !  ispden=2 for spin up
+     !  ispden=1 for total spin (also valid for non-spin-polarized calculations)
+     !
+     ! The reverse ispden order is chosen, in order to end up with
+     ! rhog containing the proper total density.
+     rhog = zero
 
      ia1=1
      do itypat=1,ntypat
-
        if (use_gaussian(itypat)) alf2pi2=(two_pi*length(itypat))**2
 
-!      ia1,ia2 sets range of loop over atoms:
+       ! ia1,ia2 sets range of loop over atoms:
        ia2=ia1+nattyp(itypat)-1
        ii=0
        jtemp=0
@@ -968,18 +1153,18 @@ subroutine initro(atindx,densty,gmet,gsqcut,izero,mgfft,mpi_enreg,mqgrid,natom,n
 
                ig1=i1-(i1/id1)*n1-1
                ii=ii+1
-!              gsquar=gsq_ini(ig1,ig2,ig3)
                gsquar=dble(ig1*ig1)*gmet(1,1)+dble(ig2*ig2)*gmet(2,2)+&
-&               dble(ig3*ig3)*gmet(3,3)+dble(2*ig1*ig2)*gmet(1,2)+&
-&               dble(2*ig2*ig3)*gmet(2,3)+dble(2*ig3*ig1)*gmet(3,1)
+                      dble(ig3*ig3)*gmet(3,3)+dble(2*ig1*ig2)*gmet(1,2)+&
+                      dble(2*ig2*ig3)*gmet(2,3)+dble(2*ig3*ig1)*gmet(3,1)
 
-!              Skip G**2 outside cutoff:
+               ! Skip G**2 outside cutoff:
                if (gsquar<=cutoff) then
 
-!                Assemble structure factor over all atoms of given type,
-!                also taking into account the spin-charge on each atom:
+                 ! Assemble structure factor over all atoms of given type,
+                 ! also taking into account the spin-charge on each atom:
+
                  sfr=zero;sfi=zero
-                 if(ispden==1)then
+                 if (ispden==1) then
                    do ia=ia1,ia2
                      sfr=sfr+phre_ini(ig1,ig2,ig3,ia)
                      sfi=sfi-phimag_ini(ig1,ig2,ig3,ia)
@@ -991,17 +1176,17 @@ subroutine initro(atindx,densty,gmet,gsqcut,izero,mgfft,mpi_enreg,mqgrid,natom,n
                  else
                    fact0=half;if (.not.use_gaussian(itypat)) fact0=half/zion(itypat)
                    do ia=ia1,ia2
-!                    Here, take care only of the z component
+                     ! Here, take care only of the z component
                      fact=fact0*(zion(itypat)+spinat_indx(3,ia))
                      sfr=sfr+phre_ini(ig1,ig2,ig3,ia)*fact
                      sfi=sfi-phimag_ini(ig1,ig2,ig3,ia)*fact
                    end do
                  end if
 
-!                Charge density integrating to one
+                 ! Charge density integrating to one
                  if (use_gaussian(itypat)) then
                    rhoat=xnorm*exp(-gsquar*alf2pi2)
-!                  Multiply structure factor times rhoat (atomic density in reciprocal space)
+                   ! Multiply structure factor times rhoat (atomic density in reciprocal space)
                    rhog(re,ii)=rhog(re,ii)+sfr*rhoat
                    rhog(im,ii)=rhog(im,ii)+sfi*rhoat
                  else
@@ -1019,9 +1204,9 @@ subroutine initro(atindx,densty,gmet,gsqcut,izero,mgfft,mpi_enreg,mqgrid,natom,n
                      rhoat=(aa*psps%nctab(itypat)%tvalespl(jj,1)+bb*psps%nctab(itypat)%tvalespl(jj+1,1)+&
                      cc*psps%nctab(itypat)%tvalespl(jj,2)+dd*psps%nctab(itypat)%tvalespl(jj+1,2))*xnorm
                    else
-                     MSG_BUG('Initialization of density is non consistent.')
+                     ABI_BUG('Initialization of density is non consistent.')
                    end if
-!                  Multiply structure factor times rhoat (atomic density in reciprocal space)
+                   ! Multiply structure factor times rhoat (atomic density in reciprocal space)
                    rhog(re,ii)=rhog(re,ii)+sfr*rhoat
                    rhog(im,ii)=rhog(im,ii)+sfi*rhoat
                  end if
@@ -1030,32 +1215,33 @@ subroutine initro(atindx,densty,gmet,gsqcut,izero,mgfft,mpi_enreg,mqgrid,natom,n
                  jtemp=jtemp+1
                end if
 
-             end do ! End loop on i1
+             end do ! i1
            end if
-         end do ! End loop on i2
-       end do ! End loop on i3
+         end do ! i2
+       end do ! i3
        ia1=ia2+1
 
-     end do ! End loop on type of atoms
+     end do ! itypat
 
-!    Set contribution of unbalanced components to zero
+     ! Set contribution of unbalanced components to zero
      if (izero==1) then
        call zerosym(rhog,2,n1,n2,n3,comm_fft=mpi_enreg%comm_fft,distribfft=mpi_enreg%distribfft)
      end if
      !write(std_out,*)"initro: ispden, ucvol * rhog(:2,1)",ispden, ucvol * rhog(:2,1)
 
-!    Note, we end with ispden=1, so that rhog contains the total density
+     ! Note, we end with ispden=1, so that rhog contains the total density
      call fourdp(1,rhog,work,1,mpi_enreg,nfft,1,ngfft,0)
      rhor(:,ispden)=work(:)
    end do ! End loop on spins
 
- else if(nspden==4) then
+ else if (nspden==4) then
+
    do ispden=nspden,1,-1
-!    This loop overs spins will actually be as follows :
-!    ispden=2,3,4 for mx,my,mz
-!    ispden=1 for total spin (also valid for non-spin-polarized calculations)
-!    The reverse ispden order is chosen, in order to end up with
-!    rhog containing the proper total density.
+     ! This loop overs spins will actually be as follows:
+     ! ispden=2,3,4 for mx,my,mz
+     ! ispden=1 for total spin (also valid for non-spin-polarized calculations)
+     ! The reverse ispden order is chosen, in order to end up with
+     ! rhog containing the proper total density.
 
      rhog(:,:)=zero
 
@@ -1064,7 +1250,7 @@ subroutine initro(atindx,densty,gmet,gsqcut,izero,mgfft,mpi_enreg,mqgrid,natom,n
 
        if (use_gaussian(itypat)) alf2pi2=(two_pi*length(itypat))**2
 
-!      ia1,ia2 sets range of loop over atoms:
+       ! ia1,ia2 sets range of loop over atoms:
        ia2=ia1+nattyp(itypat)-1
        ii=0
        jtemp=0
@@ -1077,16 +1263,15 @@ subroutine initro(atindx,densty,gmet,gsqcut,izero,mgfft,mpi_enreg,mqgrid,natom,n
 
                ig1=i1-(i1/id1)*n1-1
                ii=ii+1
-!              gsquar=gsq_ini(ig1,ig2,ig3)
                gsquar=dble(ig1*ig1)*gmet(1,1)+dble(ig2*ig2)*gmet(2,2)+&
-&               dble(ig3*ig3)*gmet(3,3)+dble(2*ig1*ig2)*gmet(1,2)+&
-&               dble(2*ig2*ig3)*gmet(2,3)+dble(2*ig3*ig1)*gmet(3,1)
+                      dble(ig3*ig3)*gmet(3,3)+dble(2*ig1*ig2)*gmet(1,2)+&
+                      dble(2*ig2*ig3)*gmet(2,3)+dble(2*ig3*ig1)*gmet(3,1)
 
-!              Skip G**2 outside cutoff:
+               ! Skip G**2 outside cutoff:
                if (gsquar<=cutoff) then
 
-!                Assemble structure factor over all atoms of given type,
-!                also taking into account the spin-charge on each atom:
+                 ! Assemble structure factor over all atoms of given type,
+                 ! also taking into account the spin-charge on each atom:
                  sfr=zero;sfi=zero
                  if(ispden==1)then
                    do ia=ia1,ia2
@@ -1100,14 +1285,14 @@ subroutine initro(atindx,densty,gmet,gsqcut,izero,mgfft,mpi_enreg,mqgrid,natom,n
                  else
                    fact0=one;if (.not.use_gaussian(itypat)) fact0=one/zion(itypat)
                    do ia=ia1,ia2
-!                    Here, take care of the components of m
+                     ! Here, take care of the components of m
                      fact=fact0*spinat_indx(ispden-1,ia)
                      sfr=sfr+phre_ini(ig1,ig2,ig3,ia)*fact
                      sfi=sfi-phimag_ini(ig1,ig2,ig3,ia)*fact
                    end do
                  end if
 
-!                Charge density integrating to one
+                 ! Charge density integrating to one
                  if (use_gaussian(itypat)) then
                    rhoat=xnorm*exp(-gsquar*alf2pi2)
                  else
@@ -1125,46 +1310,43 @@ subroutine initro(atindx,densty,gmet,gsqcut,izero,mgfft,mpi_enreg,mqgrid,natom,n
                      rhoat=(aa*psps%nctab(itypat)%tvalespl(jj,1)+bb*psps%nctab(itypat)%tvalespl(jj+1,1)+&
                      cc*psps%nctab(itypat)%tvalespl(jj,2)+dd*psps%nctab(itypat)%tvalespl(jj+1,2))*xnorm
                    else
-                     MSG_BUG('Initialization of density is non consistent.')
+                     ABI_BUG('Initialization of density is non consistent.')
                    end if
                  end if
 
-!                Multiply structure factor times rhoat (atomic density in reciprocal space)
+                 ! Multiply structure factor times rhoat (atomic density in reciprocal space)
                  rhog(re,ii)=rhog(re,ii)+sfr*rhoat
                  rhog(im,ii)=rhog(im,ii)+sfi*rhoat
                else
                  jtemp=jtemp+1
                end if
 
-             end do ! End loop on i1
+             end do ! i1
            end if
-         end do ! End loop on i2
-       end do ! End loop on i3
+         end do ! i2
+       end do ! i3
        ia1=ia2+1
-     end do ! End loop on type of atoms
+     end do ! itypat
 
-!    Set contribution of unbalanced components to zero
+     ! Set contribution of unbalanced components to zero
      if (izero==1) then
        call zerosym(rhog,2,n1,n2,n3,comm_fft=mpi_enreg%comm_fft,distribfft=mpi_enreg%distribfft)
      end if
      !write(std_out,*)"initro: ispden, ucvol * rhog(:2,1)",ispden, ucvol * rhog(:2,1)
 
-!    Note, we end with ispden=1, so that rhog contains the total density
+     ! Note, we end with ispden=1, so that rhog contains the total density
      call fourdp(1,rhog,work,1,mpi_enreg,nfft,1,ngfft,0)
      rhor(:,ispden)=work(:)
+   end do ! ispden
 
-   end do ! End loop on spins
-
-!  Non-collinear magnetism: avoid zero magnetization, because it produces numerical instabilities
-!    Add a small real to the magnetization
+   ! Non-collinear magnetism: avoid zero magnetization, because it produces numerical instabilities
+   ! Add a small real to the magnetization
    if (all(abs(spinat(:,:))<tol10)) rhor(:,4)=rhor(:,4)+tol14
 
  end if ! nspden==4
 
- ABI_DEALLOCATE(length)
- ABI_DEALLOCATE(use_gaussian)
- ABI_DEALLOCATE(spinat_indx)
- ABI_DEALLOCATE(work)
+ ABI_FREE(spinat_indx)
+ ABI_FREE(work)
 
  contains
 
@@ -1228,8 +1410,7 @@ end subroutine initro
 !! prtrhomxmn
 !!
 !! FUNCTION
-!! If option==1, compute the maximum and minimum of the density (and spin-polarization
-!! if nspden==2), and print it.
+!! If option==1, compute the maximum and minimum of the density (and spin-polarization if nspden==2), and print it.
 !! If option==2, also compute and print the second maximum or minimum
 !!
 !! INPUTS
@@ -1246,32 +1427,20 @@ end subroutine initro
 !!                          (If optrhor==4, rhor is expected to be the ELF (elfr))
 !!  rhor(nfft,nspden)=electron density (electrons/bohr^3)
 !!
-!! OUTPUT
-!!
-!! SIDE EFFECTS
-!!
 !! NOTES
 !!  The tolerance tol12 aims at giving a machine-independent ordering.
 !!  (this trick is used in bonds.f, listkk.f, prtrhomxmn.f and rsiaf9.f)
-!!
-!! PARENTS
-!!      afterscfloop,bethe_salpeter,clnup1,mkrho,screening,sigma,vtorho
-!!
-!! CHILDREN
-!!      wrtout,xmpi_sum
 !!
 !! SOURCE
 
 subroutine prtrhomxmn(iout,mpi_enreg,nfft,ngfft,nspden,option,rhor,optrhor,ucvol)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: iout,nfft,nspden,option
+ type(MPI_type),intent(in) :: mpi_enreg
  integer,intent(in),optional :: optrhor
  real(dp),intent(in),optional :: ucvol
- type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: ngfft(18)
  real(dp),intent(in) :: rhor(nfft,nspden)
@@ -1302,8 +1471,7 @@ subroutine prtrhomxmn(iout,mpi_enreg,nfft,ngfft,nspden,option,rhor,optrhor,ucvol
  end if
 
  if(option/=1 .and. option/=2)then
-   write(message, '(a,i0)' )' Option must be 1 or 2, while it is ',option
-   MSG_BUG(message)
+   ABI_BUG(sjoin(' Option must be 1 or 2, while it is:', itoa(option)))
  end if
 
  if (mpi_enreg%nproc_wvl>1) then
@@ -1333,10 +1501,10 @@ subroutine prtrhomxmn(iout,mpi_enreg,nfft,ngfft,nspden,option,rhor,optrhor,ucvol
  if(nspden==2)nitems=5   ! Total density, spin up, spin down, magnetization, zeta
  if(nspden==4)nitems=6   ! Total density, x, y, z, magnetization, zeta
 
- ABI_ALLOCATE(value,(2,2,nitems))
- ABI_ALLOCATE(iindex,(2,2,nitems))
- ABI_ALLOCATE(array,(nfft))
- ABI_ALLOCATE(integrated,(nitems))
+ ABI_MALLOC(value,(2,2,nitems))
+ ABI_MALLOC(iindex,(2,2,nitems))
+ ABI_MALLOC(array,(nfft))
+ ABI_MALLOC(integrated,(nitems))
 
  do iitems=1,nitems
 
@@ -1449,7 +1617,7 @@ subroutine prtrhomxmn(iout,mpi_enreg,nfft,ngfft,nspden,option,rhor,optrhor,ucvol
 
  end do ! iitems
 
- ABI_DEALLOCATE(array)
+ ABI_FREE(array)
 
 !-------------------------------------------------------------------
 !Enter section for FFT parallel case
@@ -1466,10 +1634,10 @@ subroutine prtrhomxmn(iout,mpi_enreg,nfft,ngfft,nspden,option,rhor,optrhor,ucvol
  if (reduce) then
 
 !  Communicate all data to all processors with only two global communications
-   ABI_ALLOCATE(value_fft,(5,nitems,nproc))
-   ABI_ALLOCATE(index_fft,(2,2,nitems,nproc))
+   ABI_MALLOC(value_fft,(5,nitems,nproc))
+   ABI_MALLOC(index_fft,(2,2,nitems,nproc))
    value_fft(:,:,:)=zero
-   index_fft(:,:,:,:)=zero
+   index_fft(:,:,:,:)=0
    value_fft(1,:,me + 1)=value(1,1,:)
    value_fft(2,:,me + 1)=value(2,1,:)
    value_fft(3,:,me + 1)=value(1,2,:)
@@ -1523,15 +1691,15 @@ subroutine prtrhomxmn(iout,mpi_enreg,nfft,ngfft,nspden,option,rhor,optrhor,ucvol
      end do ! iisign
    end do ! iitems
 
-   ABI_DEALLOCATE(value_fft)
-   ABI_DEALLOCATE(index_fft)
+   ABI_FREE(value_fft)
+   ABI_FREE(index_fft)
 
  end if !if(reduce)
 
 !-------------------------------------------------------------------
 
 !Determines the reduced coordinates of the min and max for each item
- ABI_ALLOCATE(coord,(3,2,2,nitems))
+ ABI_MALLOC(coord,(3,2,2,nitems))
  do iitems=1,nitems
    do indsign=1,2
      do ii=1,2
@@ -1638,25 +1806,23 @@ subroutine prtrhomxmn(iout,mpi_enreg,nfft,ngfft,nspden,option,rhor,optrhor,ucvol
 !            if(iitems==5) write(message,'(a)')' Magnetization (spin up - spin down) [el/Bohr^4]'
 !            if(iitems==6) write(message,'(a)')' Relative magnetization (=zeta, between -1 and 1)   '
          end if
-
-
        end select
 
        call wrtout(iout,message,'COLL')
 
-       write(message,'(a,es13.4,a,3f10.4)') '      Maximum= ',&
+       write(message,'(a,es13.4,a,3f10.4)')   ')     Maximum= ',&
 &       value(1,1,iitems),'  at reduced coord.',coord(:,1,1,iitems)
        call wrtout(iout,message,'COLL')
        if(option==2)then
-         write(message,'(a,es13.4,a,3f10.4)')' Next maximum= ',&
+         write(message,'(a,es13.4,a,3f10.4)') ')Next maximum= ',&
 &         value(2,1,iitems),'  at reduced coord.',coord(:,2,1,iitems)
          call wrtout(iout,message,'COLL')
        end if
-       write(message,'(a,es13.4,a,3f10.4)') '      Minimum= ',&
+       write(message,'(a,es13.4,a,3f10.4)')   ')     Minimum= ',&
 &       value(1,2,iitems),'  at reduced coord.',coord(:,1,2,iitems)
        call wrtout(iout,message,'COLL')
        if(option==2)then
-         write(message,'(a,es13.4,a,3f10.4)')' Next minimum= ',&
+         write(message,'(a,es13.4,a,3f10.4)') ')Next minimum= ',&
 &         value(2,2,iitems),'  at reduced coord.',coord(:,2,2,iitems)
          call wrtout(iout,message,'COLL')
        end if
@@ -1863,10 +2029,10 @@ subroutine prtrhomxmn(iout,mpi_enreg,nfft,ngfft,nspden,option,rhor,optrhor,ucvol
    end if
  end if
 
- ABI_DEALLOCATE(coord)
- ABI_DEALLOCATE(value)
- ABI_DEALLOCATE(iindex)
- ABI_DEALLOCATE(integrated)
+ ABI_FREE(coord)
+ ABI_FREE(value)
+ ABI_FREE(iindex)
+ ABI_FREE(integrated)
 
 end subroutine prtrhomxmn
 !!***
@@ -1876,12 +2042,6 @@ end subroutine prtrhomxmn
 !! read_atomden
 !!
 !! FUNCTION
-!!
-!! COPYRIGHT
-!! Copyright (C) 2005-2019 ABINIT group (SM,VR,FJ,MT)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~ABINIT/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! INPUTS
 !! natom : number of atoms in cell
@@ -1894,22 +2054,10 @@ end subroutine prtrhomxmn
 !! OUTPUT
 !! rhor_atm(nfft,nspden) : full electron density on the (fine) grid
 !!
-!! SIDE EFFECTS
-!!
-!! NOTES
-!!
-!! PARENTS
-!!      outscfcv
-!!
-!! CHILDREN
-!!      atomden
-!!
 !! SOURCE
 
 subroutine read_atomden(MPI_enreg,natom,nfft,ngfft,nspden,ntypat, &
 &                       rhor_atm,typat,rprimd,xred,prtvol,file_prefix)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1943,16 +2091,16 @@ subroutine read_atomden(MPI_enreg,natom,nfft,ngfft,nspden,ntypat, &
  a(:) = rprimd(:,1)
  b(:) = rprimd(:,2)
  c(:) = rprimd(:,3)
- ABI_ALLOCATE(rho,(ngrid))
+ ABI_MALLOC(rho,(ngrid))
  if (nspden/=1) then
-   MSG_ERROR('read_atomden: Only nspden=1 allowed.')
+   ABI_ERROR('read_atomden: Only nspden=1 allowed.')
  end if
  rho = rhor_atm(:,1)
  gmet=zero;gprimd=zero;rmet=zero;ucvol=zero
 
 
 !Calculate the r vector (reduced coord.) of the fine gridpoints
- ABI_ALLOCATE(r_vec_grid,(3,ngrid))
+ ABI_MALLOC(r_vec_grid,(3,ngrid))
  igrid = 0
  n1 = ngfft(1)
  n2 = ngfft(2)
@@ -1971,23 +2119,21 @@ subroutine read_atomden(MPI_enreg,natom,nfft,ngfft,nspden,ntypat, &
    end do
  end do
  if (igrid/=ngrid) then
-   MSG_ERROR('read_atomden: igrid not equal to ngrid')
+   ABI_ERROR('read_atomden: igrid not equal to ngrid')
  end if
 
 !Read in atomic density data for each atom type
 !first check how many datapoints are in each file
  do itypat=1,ntypat
    filename='';io_err=0;
-   if (itypat>0)  write(filename,'(a,a,i1,a)') trim(file_prefix), &
-&   '_density_atom_type',itypat,'.dat'
-   if (itypat>10) write(filename,'(a,a,i2,a)') trim(file_prefix), &
-&   '_density_atom_type',itypat,'.dat'
+   if (itypat>0)  write(filename,'(a,a,i1,a)') trim(file_prefix), '_density_atom_type',itypat,'.dat'
+   if (itypat>10) write(filename,'(a,a,i2,a)') trim(file_prefix), '_density_atom_type',itypat,'.dat'
    if (open_file(filename, message, newunit=unt, status='old',action='read') /= 0) then
      write(std_out,*) 'ERROR in read_atomden: Could not open file: ',filename
      write(std_out,*) ' Current implementation requires this file to be present'
      write(std_out,*) ' for each type of atom.'
      write(std_out,*)trim(message)
-     MSG_ERROR("Cannot continue")
+     ABI_ERROR("Cannot continue")
    end if
 !  Check number of lines in file
    nlines = 1;io_err=0;
@@ -2001,17 +2147,15 @@ subroutine read_atomden(MPI_enreg,natom,nfft,ngfft,nspden,ntypat, &
  end do ! Atom type
 !Allocate arrays and read in data
  natomgrmax = maxval(natomgr)
- ABI_ALLOCATE(atomrgrid,(natomgrmax,ntypat))
- ABI_ALLOCATE(density,(natomgrmax,ntypat))
+ ABI_MALLOC(atomrgrid,(natomgrmax,ntypat))
+ ABI_MALLOC(density,(natomgrmax,ntypat))
  atomrgrid = zero ; density = zero
  do itypat=1,ntypat
    filename='';io_err=0;
-   if (itypat>0)  write(filename,'(a,a,i1,a)') trim(file_prefix), &
-&   '_density_atom_type',itypat,'.dat'
-   if (itypat>10) write(filename,'(a,a,i2,a)') trim(file_prefix), &
-&   '_density_atom_type',itypat,'.dat'
+   if (itypat>0)  write(filename,'(a,a,i1,a)') trim(file_prefix), '_density_atom_type',itypat,'.dat'
+   if (itypat>10) write(filename,'(a,a,i2,a)') trim(file_prefix), '_density_atom_type',itypat,'.dat'
    if (open_file(filename,message,newunit=unt,status='old',action='read') /= 0) then
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
    read(unt,*) ! Skip comment line
    do i=1,natomgr(itypat)
@@ -2021,7 +2165,7 @@ subroutine read_atomden(MPI_enreg,natom,nfft,ngfft,nspden,ntypat, &
    if (atomrgrid(1,itypat)/=zero) then
      write(std_out,*) 'ERROR in read_atomden, in file: ',filename
      write(std_out,*) ' First gridpoint has to be the origin.'
-     MSG_ERROR("Cannot continue")
+     ABI_ERROR("Cannot continue")
    end if
  end do ! Atom type
 
@@ -2053,20 +2197,10 @@ subroutine read_atomden(MPI_enreg,natom,nfft,ngfft,nspden,ntypat, &
 
  rhor_atm(:,1) = rho
 
- if (allocated(atomrgrid))  then
-   ABI_DEALLOCATE(atomrgrid)
- end if
- if (allocated(density))  then
-   ABI_DEALLOCATE(density)
- end if
- if (allocated(r_vec_grid))  then
-   ABI_DEALLOCATE(r_vec_grid)
- end if
- if (allocated(rho))  then
-   ABI_DEALLOCATE(rho)
- end if
-
- return
+ ABI_SFREE(atomrgrid)
+ ABI_SFREE(density)
+ ABI_SFREE(r_vec_grid)
+ ABI_SFREE(rho)
 
 end subroutine read_atomden
 !!***
@@ -2089,12 +2223,6 @@ end subroutine read_atomden
 !! rho^{atm}_{\alpha}(r-R_{\alpha}) on a grid.
 !!
 !! Units are atomic.
-!!
-!! COPYRIGHT
-!! Copyright (C) 2005-2019 ABINIT group (SM,VR,FJ,MT)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~ABINIT/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! INPUTS
 !! calctype : type of calculation
@@ -2136,18 +2264,10 @@ end subroutine read_atomden
 !! external field (and it's simpler)
 !!
 !!
-!! PARENTS
-!!      read_atomden
-!!
-!! CHILDREN
-!!      sort_dp,spline,splint,wrtout,xmpi_barrier,xmpi_sum_master
-!!
 !! SOURCE
 
 subroutine atomden(MPI_enreg,natom,ntypat,typat,ngrid,r_vec_grid,rho,a,b,c,atom_pos, &
 &                  natomgr,natomgrmax,atomrgrid,density,prtvol,calctype)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2205,7 +2325,7 @@ subroutine atomden(MPI_enreg,natom,ntypat,typat,ngrid,r_vec_grid,rho,a,b,c,atom_
  dp_dummy = dot_product(c,(a+b))/(dot_product((a+b),(a+b)))
  dp_vec_dummy = dp_dummy*(a+b)
  delta_c = c - dp_vec_dummy
- ABI_ALLOCATE(rho_temp,(ngrid,ntypat))
+ ABI_MALLOC(rho_temp,(ngrid,ntypat))
  rho_temp = zero
 
 !write(std_out,*) '*** --- In atomden --- ***'
@@ -2253,8 +2373,8 @@ subroutine atomden(MPI_enreg,natom,ntypat,typat,ngrid,r_vec_grid,rho,a,b,c,atom_
 
 !allocate arrays
  n = maxval(n_equiv_atoms)
- ABI_ALLOCATE(equiv_atom_pos,(3,n,ntypat))
- ABI_ALLOCATE(equiv_atom_dist,(n,ntypat))
+ ABI_MALLOC(equiv_atom_pos,(3,n,ntypat))
+ ABI_MALLOC(equiv_atom_dist,(n,ntypat))
  equiv_atom_pos = zero
  equiv_atom_dist = zero
 
@@ -2267,7 +2387,7 @@ subroutine atomden(MPI_enreg,natom,ntypat,typat,ngrid,r_vec_grid,rho,a,b,c,atom_
          do iatom=1,natom
            if (typat(iatom)==itypat) then
              if (i>n_equiv_atoms(itypat)) then
-               MSG_ERROR('atomden: i>n_equiv_atoms')
+               ABI_ERROR('atomden: i>n_equiv_atoms')
              end if
              equiv_atom_pos(:,i,itypat) = (atom_pos(1,iatom)+dble(l))*a &
 &             + (atom_pos(2,iatom)+dble(m))*b &
@@ -2292,9 +2412,9 @@ subroutine atomden(MPI_enreg,natom,ntypat,typat,ngrid,r_vec_grid,rho,a,b,c,atom_
 !furthest away can be added first. This is to prevent truncation error.
  do itypat=1,ntypat
    n = n_equiv_atoms(itypat)
-   ABI_ALLOCATE(dp_1d_dummy,(n))
-   ABI_ALLOCATE(new_index,(n))
-   ABI_ALLOCATE(dp_2d_dummy,(3,n))
+   ABI_MALLOC(dp_1d_dummy,(n))
+   ABI_MALLOC(new_index,(n))
+   ABI_MALLOC(dp_2d_dummy,(3,n))
    dp_1d_dummy = equiv_atom_dist(1:n,itypat)
    dp_2d_dummy = equiv_atom_pos(1:3,1:n,itypat)
    do i=1,n
@@ -2302,13 +2422,13 @@ subroutine atomden(MPI_enreg,natom,ntypat,typat,ngrid,r_vec_grid,rho,a,b,c,atom_
    end do
    call sort_dp(n,dp_1d_dummy,new_index,tol14)
    do i=1,n
-!    write(std_out,*) i,' -> ',new_index(i)
+     !write(std_out,*) i,' -> ',new_index(i)
      equiv_atom_pos(1:3,n+1-i,itypat) = dp_2d_dummy(1:3,new_index(i))
      equiv_atom_dist(1:n,itypat) = dp_1d_dummy
    end do
-   ABI_DEALLOCATE(dp_1d_dummy)
-   ABI_DEALLOCATE(new_index)
-   ABI_DEALLOCATE(dp_2d_dummy)
+   ABI_FREE(dp_1d_dummy)
+   ABI_FREE(new_index)
+   ABI_FREE(dp_2d_dummy)
 !  write(std_out,*) '*** --- In atomden ---  sorting atoms ***'
 !  write(std_out,*) ' itypat:',itypat
 !  write(std_out,*) ' equiv_atom_pos:'
@@ -2414,9 +2534,9 @@ subroutine atomden(MPI_enreg,natom,ntypat,typat,ngrid,r_vec_grid,rho,a,b,c,atom_
 !    to be interpolated
 
 !    Sort points to be interpolated in ascending order
-     ABI_ALLOCATE(dp_1d_dummy,(n_grid_p))
-     ABI_ALLOCATE(new_index,(n_grid_p))
-     ABI_ALLOCATE(i_1d_dummy,(n_grid_p))
+     ABI_MALLOC(dp_1d_dummy,(n_grid_p))
+     ABI_MALLOC(new_index,(n_grid_p))
+     ABI_MALLOC(i_1d_dummy,(n_grid_p))
      dp_1d_dummy = grid_distances(1:n_grid_p)
      do i=1,n_grid_p
        new_index(i) = i
@@ -2425,17 +2545,17 @@ subroutine atomden(MPI_enreg,natom,ntypat,typat,ngrid,r_vec_grid,rho,a,b,c,atom_
      grid_distances(1:n_grid_p) = dp_1d_dummy
      i_1d_dummy = grid_index(1:n_grid_p)
      do i=1,n_grid_p
-!      write(std_out,*) i_1d_dummy(i),' -> ',i_1d_dummy(new_index(i))
+       !write(std_out,*) i_1d_dummy(i),' -> ',i_1d_dummy(new_index(i))
        grid_index(i) = i_1d_dummy(new_index(i))
      end do
-     ABI_DEALLOCATE(dp_1d_dummy)
-     ABI_DEALLOCATE(new_index)
-     ABI_DEALLOCATE(i_1d_dummy)
+     ABI_FREE(dp_1d_dummy)
+     ABI_FREE(new_index)
+     ABI_FREE(i_1d_dummy)
 
 !    Interpolate density onto all grid points
-     ABI_ALLOCATE(ypp,(natomgr(itypat)))
-     ABI_ALLOCATE(x_fit,(n_grid_p))
-     ABI_ALLOCATE(y_fit,(n_grid_p))
+     ABI_MALLOC(ypp,(natomgr(itypat)))
+     ABI_MALLOC(x_fit,(n_grid_p))
+     ABI_MALLOC(y_fit,(n_grid_p))
      ypp = zero; y_fit = zero
      ybcbeg = zero; ybcend = zero
      x_fit = grid_distances(1:n_grid_p)
@@ -2450,15 +2570,14 @@ subroutine atomden(MPI_enreg,natom,ntypat,typat,ngrid,r_vec_grid,rho,a,b,c,atom_
      do i=1,n_grid_p
        rho_temp(grid_index(i),itypat) = rho_temp(grid_index(i),itypat) + y_fit(i)
      end do
-     ABI_DEALLOCATE(ypp)
-     ABI_DEALLOCATE(x_fit)
-     ABI_DEALLOCATE(y_fit)
+     ABI_FREE(ypp)
+     ABI_FREE(x_fit)
+     ABI_FREE(y_fit)
 
    end do ! n equiv atoms
  end do ! type of atom
 
-!Collect all contributions to rho_temp if
-!we are running in parallel
+ ! Collect all contributions to rho_temp if we are running in parallel
  if (nprocs>1) then
    call xmpi_barrier(spaceComm)
    call xmpi_sum_master(rho_temp,master,spaceComm,ierr)
@@ -2477,19 +2596,10 @@ subroutine atomden(MPI_enreg,natom,ntypat,typat,ngrid,r_vec_grid,rho,a,b,c,atom_
    rho(:) = rho(:) + rho_temp(:,itypat)
  end do
 
-!deallocations
- if (allocated(rho_temp))  then
-   ABI_DEALLOCATE(rho_temp)
- end if
- if (allocated(equiv_atom_pos))  then
-   ABI_DEALLOCATE(equiv_atom_pos)
- end if
- if (allocated(equiv_atom_dist))  then
-   ABI_DEALLOCATE(equiv_atom_dist)
- end if
-!if (allocated()) deallocate()
-
- return
+ ! deallocations
+ ABI_SFREE(rho_temp)
+ ABI_SFREE(equiv_atom_pos)
+ ABI_SFREE(equiv_atom_dist)
 
  end subroutine atomden
 !!***

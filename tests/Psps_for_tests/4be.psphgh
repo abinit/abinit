@@ -1,7 +1,0 @@
-Hartwigsen-Goedecker-Hutter psp for Beryllium,  from PRB58, 3641 (1998) paper
-4  2    980509                     zatom,zion,pspdat
-3   1   1    0    2001    0        pspcod,pspxc,lmax,lloc,mmax,r2well
-0.739009 -2.592951 0.354839  0        0   rloc, c1, c2, c3, c4
-0.528797  3.061666 0         0     rs, h11s, h22s, h33s
-0.658153  0.092462 0         0            rp, h11p, h22p, h33p
-          0.000129 0         0                k11p, k22p, k33p

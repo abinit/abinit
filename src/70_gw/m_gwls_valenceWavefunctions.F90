@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_gwls_valenceWavefunctions
 !! NAME
 !! m_gwls_valenceWavefunctions
@@ -7,14 +6,10 @@
 !!  .
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2019 ABINIT group (JLJ, BR, MC)
+!! Copyright (C) 2009-2024 ABINIT group (JLJ, BR, MC)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -62,11 +57,6 @@ contains
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      gwls_sternheimer
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine prepareValenceWavefunctions()
@@ -97,9 +87,9 @@ implicit none
 
 
 ! old code, broken because fftpac isn't invertible !
-! ABI_ALLOCATE(valence_wfr_fftpac,(2,nfft,nbandv)) ! nfft is a public variable from the gwls_hamiltonian module
+! ABI_MALLOC(valence_wfr_fftpac,(2,nfft,nbandv)) ! nfft is a public variable from the gwls_hamiltonian module
 
-! ABI_ALLOCATE(psir,(2,n4,n5,n6))
+! ABI_MALLOC(psir,(2,n4,n5,n6))
 ! psir = zero
 ! do v=1,nbandv
 !        kmin = 1+(v-1)*npw_k
@@ -111,10 +101,10 @@ implicit none
 !       ! pack the real-space wavefunction in the purpose-made array
 !       call sg_to_dg(valence_wfr_fftpac(:,:,v), psir)
 ! end do
-! ABI_DEALLOCATE(psir)
+! ABI_FREE(psir)
 
 ! old code!
-!ABI_ALLOCATE(valence_wfr,(2,n4,n5,n6,nbandv))
+!ABI_MALLOC(valence_wfr,(2,n4,n5,n6,nbandv))
 !valence_wfr = zero
 
 !do v=1,nbandv
@@ -137,11 +127,6 @@ end subroutine prepareValenceWavefunctions
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      gwls_sternheimer
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine cleanupValenceWavefunctions()
@@ -154,8 +139,8 @@ implicit none
 
 ! *************************************************************************
 
-!if (allocated(valence_wfr)) ABI_DEALLOCATE(valence_wfr)
-!if (allocated(valence_wfr_fftpac)) ABI_DEALLOCATE(valence_wfr_fftpac)
+!if (allocated(valence_wfr)) ABI_FREE(valence_wfr)
+!if (allocated(valence_wfr_fftpac)) ABI_FREE(valence_wfr_fftpac)
 
 end subroutine cleanupValenceWavefunctions
 !!***
@@ -170,11 +155,6 @@ end subroutine cleanupValenceWavefunctions
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      gwls_sternheimer
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

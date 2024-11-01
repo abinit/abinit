@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_wvl_rho
 !! NAME
 !!  m_wvl_rho
@@ -7,14 +6,10 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2012-2019 ABINIT group (TRangel, DC)
+!!  Copyright (C) 2012-2024 ABINIT group (TRangel, DC)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -32,10 +27,11 @@ module m_wvl_rho
  use m_errors
  use defs_wvltypes
  use m_sort
- use defs_abitypes
  use m_abi2big
  use m_xmpi
+ use m_dtset
 
+ use defs_abitypes,  only : MPI_type
  use m_geometry, only : xred2xcart, metric
  use m_pawrad,   only : pawrad_type, pawrad_init, pawrad_free
  use m_pawtab,   only : pawtab_type
@@ -72,13 +68,6 @@ contains
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      gstate
-!!
-!! CHILDREN
-!!      ext_buffers,ind_positions,metric,mkdenpos,pawrad_free,pawrad_init
-!!      sort_dp,splint,wrtout,xred2xcart
-!!
 !! SOURCE
 
 subroutine wvl_initro(&
@@ -91,7 +80,6 @@ subroutine wvl_initro(&
 #if defined HAVE_BIGDFT
   use BigDFT_API, only : ELECTRONIC_DENSITY, ext_buffers, ind_positions
 #endif
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: me,natom,ntypat,nfft,nspden
@@ -233,12 +221,12 @@ subroutine wvl_initro(&
      ncmax=1
    end if
 !
-   ABI_ALLOCATE(ifftsph_tmp,(ncmax))
-   ABI_ALLOCATE(iindex,(ncmax))
-   ABI_ALLOCATE(rr,(ncmax))
-   ABI_ALLOCATE(raux,(ncmax))
+   ABI_MALLOC(ifftsph_tmp,(ncmax))
+   ABI_MALLOC(iindex,(ncmax))
+   ABI_MALLOC(rr,(ncmax))
+   ABI_MALLOC(raux,(ncmax))
    if(nspden==2) then
-     ABI_ALLOCATE(raux2,(ncmax))
+     ABI_MALLOC(raux2,(ncmax))
    end if
 
 !  Big loop on atoms
@@ -349,12 +337,12 @@ subroutine wvl_initro(&
 
 !  Deallocate
    call pawrad_free(vale_mesh)
-   ABI_DEALLOCATE(ifftsph_tmp)
-   ABI_DEALLOCATE(iindex)
-   ABI_DEALLOCATE(rr)
-   ABI_DEALLOCATE(raux)
+   ABI_FREE(ifftsph_tmp)
+   ABI_FREE(iindex)
+   ABI_FREE(rr)
+   ABI_FREE(raux)
    if(nspden==2) then
-     ABI_DEALLOCATE(raux2)
+     ABI_FREE(raux2)
    end if
 
  end do !itypat
@@ -401,23 +389,17 @@ end subroutine wvl_initro
 !!
 !! INPUTS
 !!  dtset <type(dataset_type)>=input variables.
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  occ(dtset%mband)=occupation numbers.
 !!  psps <type(pseudopotential_type)>=variables related to pseudopotentials
-!!  wvl_wfs <type(wvl_projector_type)>=wavefunctions informations for wavelets.
+!!  wvl_wfs <type(wvl_projector_type)>=wavefunctions information for wavelets.
 !!
 !! OUTPUT
 !!  rhor(dtset%nfft)=electron density in r space
 !!
 !! SIDE EFFECTS
-!!  proj <type(wvl_projector_type)>=projectors informations for wavelets.
+!!  proj <type(wvl_projector_type)>=projectors information for wavelets.
 !!   | proj(OUT)=computed projectors.
-!!
-!! PARENTS
-!!      afterscfloop,gstate,mkrho,mover,vtorho
-!!
-!! CHILDREN
-!!      communicate_density,sumrho,wrtout,wvl_rho_abi2big
 !!
 !! SOURCE
 
@@ -426,7 +408,6 @@ subroutine wvl_mkrho(dtset, irrzon, mpi_enreg, phnons, rhor, wvl_wfs, wvl_den)
 #if defined HAVE_BIGDFT
   use BigDFT_API, only : sumrho, symmetry_data, ELECTRONIC_DENSITY, communicate_density
 #endif
- implicit none
 
 !Arguments -------------------------------
 !scalars
@@ -505,17 +486,10 @@ end subroutine wvl_mkrho
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      newrho,newvtr
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine wvl_prcref(dielar,iprcel,my_natom,nfftprc,npawmix,nspden,pawrhoij,&
 & rhoijrespc,usepaw,vresid,vrespc)
-
- implicit none
 
 !Arguments ------------------------------------
  integer , intent(in)  :: iprcel,nfftprc,my_natom,npawmix,nspden,usepaw
@@ -548,7 +522,7 @@ subroutine wvl_prcref(dielar,iprcel,my_natom,nfftprc,npawmix,nspden,pawrhoij,&
 &   '  From the calling routine, iprcel=',iprcel,ch10,&
 &   '  For wavelets, the only allowed value is 0.',ch10,&
 &   '  Action : correct your input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 !call wvl_moddiel  !PENDING

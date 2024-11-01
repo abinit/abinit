@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_pred_diisrelax
 !! NAME
 !!  m_pred_diisrelax
@@ -7,14 +6,10 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2019 ABINIT group (DCA, XG, GMR, JCC, SE)
+!!  Copyright (C) 1998-2024 ABINIT group (DCA, XG, GMR, JCC, SE)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -65,8 +60,7 @@ contains
 !! for instance.
 !!
 !! INPUTS
-!! ab_mover <type(abimover)> : Datatype with all the information
-!!                                needed by the preditor
+!! ab_mover <type(abimover)> : Datatype with all the information needed by the preditor
 !! itime  : Index of the present iteration
 !! ntime  : Maximal number of iterations
 !! zDEBUG : if true print some debugging information
@@ -74,21 +68,11 @@ contains
 !! OUTPUT
 !!
 !! SIDE EFFECTS
-!! hist <type(abihist)> : History of positions,forces
-!!                               acell, rprimd, stresses
-!!
-!! PARENTS
-!!      mover
-!!
-!! CHILDREN
-!!      dcopy,dgemv,dsysv,hessinit,hessupdt,hist2var,var2hist,xcart2xred
-!!      xred2xcart
+!! hist <type(abihist)> : History of positions,forces,acell, rprimd, stresses
 !!
 !! SOURCE
 
 subroutine pred_diisrelax(ab_mover,hist,itime,ntime,zDEBUG,iexit)
-
-implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -108,7 +92,6 @@ implicit none
 !arrays
  real(dp) :: acell(3)
  real(dp) :: rprimd(3,3)
-!real(dp) :: fred_corrected(3,ab_mover%natom)
  real(dp) :: xred(3,ab_mover%natom)
  real(dp) :: xcart(3,ab_mover%natom)
  real(dp) :: strten(6)
@@ -139,27 +122,13 @@ implicit none
 !***************************************************************************
 
  if(iexit/=0)then
-   if (allocated(ipiv))         then
-     ABI_DEALLOCATE(ipiv)
-   end if
-   if (allocated(error))        then
-     ABI_DEALLOCATE(error)
-   end if
-   if (allocated(diisMatrix))   then
-     ABI_DEALLOCATE(diisMatrix)
-   end if
-   if (allocated(diisCoeff))    then
-     ABI_DEALLOCATE(diisCoeff)
-   end if
-   if (allocated(workArray))    then
-     ABI_DEALLOCATE(workArray)
-   end if
-   if (allocated(workMatrix))   then
-     ABI_DEALLOCATE(workMatrix)
-   end if
-   if (allocated(hessin))       then
-     ABI_DEALLOCATE(hessin)
-   end if
+   ABI_SFREE(ipiv)
+   ABI_SFREE(error)
+   ABI_SFREE(diisMatrix)
+   ABI_SFREE(diisCoeff)
+   ABI_SFREE(workArray)
+   ABI_SFREE(workMatrix)
+   ABI_SFREE(hessin)
    return
  end if
 
@@ -190,15 +159,11 @@ implicit none
 !Notice that the arrays could be allocated
 !From a previous dataset with a different ndim
  if(itime==1)then
-   if (allocated(error))  then
-     ABI_DEALLOCATE(error)
-   end if
-   if (allocated(hessin))  then
-     ABI_DEALLOCATE(hessin)
-   end if
+   ABI_SFREE(error)
+   ABI_SFREE(hessin)
 
-   ABI_ALLOCATE(error,(3, ab_mover%natom, nhist))
-   ABI_ALLOCATE(hessin,(ndim,ndim))
+   ABI_MALLOC(error,(3, ab_mover%natom, nhist))
+   ABI_MALLOC(hessin,(ndim,ndim))
 
    ident(:, :) = zero
    ident(1, 1) = -one
@@ -252,23 +217,11 @@ implicit none
  end if
 
 !Need also history in cartesian coordinates
- ABI_ALLOCATE(xcart_hist,(3,ab_mover%natom,diisSize))
+ ABI_MALLOC(xcart_hist,(3,ab_mover%natom,diisSize))
  do ii=1,diisSize
    call xred2xcart(ab_mover%natom,rprimd,xcart_hist(:,:,ii),hist%xred(:,:,ii+shift))
  end do
  fcart_hist => hist%fcart(:,:,1+shift:diisSize+shift)
-
-!Get rid of mean force on whole unit cell, but only if no
-!generalized constraints are in effect
-!  call fcart2fred(hist%fcart(:,:,hist%ihist),fred_corrected,rprimd,ab_mover%natom)
-!  if(ab_mover%nconeq==0)then
-!    do ii=1,3
-!      if (ii/=3.or.ab_mover%jellslab==0) then
-!        favg=sum(fred_corrected(ii,:))/dble(ab_mover%natom)
-!        fred_corrected(ii,:)=fred_corrected(ii,:)-favg
-!      end if
-!    end do
-!  end if
 
 !write(std_out,*) 'diisrelax 06'
 !##########################################################
@@ -351,7 +304,7 @@ implicit none
 !##########################################################
 !### 07. Create the DIIS Matrix
 
- ABI_ALLOCATE(diisMatrix,(diisSize + 1, diisSize + 1))
+ ABI_MALLOC(diisMatrix,(diisSize + 1, diisSize + 1))
  diisMatrix(:,:) = zero
  if(zDEBUG) write(std_out,*) "DIIS matrix", diisSize+1,'x',diisSize+1
  do ii = 1, diisSize, 1
@@ -369,13 +322,13 @@ implicit none
 !##########################################################
 !### 08. Solve the system using Lapack
 
- ABI_ALLOCATE(diisCoeff,(diisSize + 1))
+ ABI_MALLOC(diisCoeff,(diisSize + 1))
  diisCoeff(:) = zero
  diisCoeff(diisSize + 1) = -one
  if(zDEBUG) write(std_out,*) "B vector:", diisCoeff(1:diisSize + 1)
- ABI_ALLOCATE(workMatrix,(diisSize + 1, diisSize + 1))
- ABI_ALLOCATE(workArray,((diisSize + 1) ** 2))
- ABI_ALLOCATE(ipiv,(diisSize + 1))
+ ABI_MALLOC(workMatrix,(diisSize + 1, diisSize + 1))
+ ABI_MALLOC(workArray,((diisSize + 1) ** 2))
+ ABI_MALLOC(ipiv,(diisSize + 1))
 !*     DCOPY(N,DX,INCX,DY,INCY)
 !*     copies a vector, x, to a vector, y.
 !*     uses unrolled loops for increments equal to one.
@@ -506,10 +459,10 @@ implicit none
    write(std_out,*) 'Sum of coefficients=',suma
  end if
 
- ABI_DEALLOCATE(ipiv)
- ABI_DEALLOCATE(workArray)
- ABI_DEALLOCATE(workMatrix)
- ABI_DEALLOCATE(diisMatrix)
+ ABI_FREE(ipiv)
+ ABI_FREE(workArray)
+ ABI_FREE(workMatrix)
+ ABI_FREE(diisMatrix)
 
 !write(std_out,*) 'diisrelax 09'
 !##########################################################
@@ -548,7 +501,7 @@ implicit none
    end if
 
  end do
- ABI_DEALLOCATE(diisCoeff)
+ ABI_FREE(diisCoeff)
 
  error_tmp(:)=RESHAPE( error(:,:,diisSize), (/ 3*ab_mover%natom /) )
  xcart_tmp(:)=RESHAPE( xcart(:,:), (/ 3*ab_mover%natom /) )
@@ -579,7 +532,7 @@ implicit none
 &   reshape(fcart_hist(:,:,diisSize-1), (/ ndim /)))
  end if
 
- ABI_DEALLOCATE(xcart_hist)
+ ABI_FREE(xcart_hist)
 
 !write(std_out,*) 'diisrelax 11'
 !##########################################################

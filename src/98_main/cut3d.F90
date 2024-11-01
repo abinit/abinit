@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****p* ABINIT/cut3d
 !! NAME
 !! cut3d
@@ -8,7 +7,7 @@
 !! as well as other files with the ABINIT header.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2019 ABINIT group (GMR, RC, LSI, XG, NCJ, JFB, MCote, LPizzagalli)
+!! Copyright (C) 1999-2024 ABINIT group (GMR, RC, LSI, XG, NCJ, JFB, MCote, LPizzagalli)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -27,16 +26,6 @@
 !! ucvol = unit cell volume (> 0)
 !! filrho = name of the density file (binary or netcdf)
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      abi_io_redirect,abimem_init,abinit_doctor,crystal_free,crystal_from_hdr
-!!      cut3d_hirsh,cut3d_lineint,cut3d_planeint,cut3d_pointint,cut3d_rrho
-!!      cut3d_volumeint,cut3d_wffile,destroy_mpi_enreg,fftdatar_write
-!!      flush_unit,hdr_echo,hdr_free,hdr_read_from_fname,herald
-!!      init_distribfft_seq,initmpi_seq,metric,ngfft_seq,timein,wrtout,xmpi_end
-!!      xmpi_init,xred2xcart
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -48,9 +37,7 @@
 program cut3d
 
  use defs_basis
- use defs_abitypes
  use m_errors
- use m_build_info
  use m_xmpi
  use m_nctk
  use m_abicore
@@ -64,25 +51,29 @@ program cut3d
  use m_cut3d
  use m_crystal
 
+ use defs_abitypes,     only : MPI_type
+ use m_build_info,      only : abinit_version
  use m_specialmsg,      only : specialmsg_getcount, herald
  use m_fstrings,        only : endswith, sjoin, itoa
  use m_time,            only : timein
  use m_geometry,        only : xred2xcart, metric
  use m_mpinfo,          only : destroy_mpi_enreg, initmpi_seq
  use m_fftcore,         only : ngfft_seq
+ use m_fft_mesh,        only : denpot_project
  use m_distribfft,      only : init_distribfft_seq
  use m_ioarr,           only : fftdatar_write
  use m_io_tools,        only : flush_unit, file_exists, open_file, is_open, get_unit, read_string
+
  implicit none
 
 !Local variables-------------------------------
  character(len=1) :: outputchar,blank=' '
 !scalars
- integer,parameter :: paral_kgb0=0,mfiles=10,exchn2n3d0=0
+ integer,parameter :: mfiles=10,exchn2n3d0=0
  integer :: fform0,gridshift1,gridshift2,gridshift3,i1,i2,i3
  integer :: iatom,ifiles,ii,ii1,ii2,ii3,index,iprompt,ir1,ir2,ir3,ispden,cplex
  integer :: itask,jfiles,natom,nfiles,nr1,nr2,unt,comm,iomode,nprocs,my_rank
- integer :: nr3,nr1_stored,nr2_stored,nr3_stored,nrws,nspden,nspden_stored,ntypat,timrev,nfft
+ integer :: nr3,nr1_stored,nr2_stored,nr3_stored,nrws,nspden,nspden_stored,ntypat,nfft
  real(dp) :: dotdenpot,maxmz,normz,sumdenpot,ucvol,xm,xnow,xp,ym,ynow,yp,zm,znow,zp,tcpui,twalli
  character(len=24) :: codename
  character(len=fnlen) :: filnam,filrho,filrho_tmp
@@ -96,7 +87,7 @@ program cut3d
  integer :: ngfft(18)
  real(dp) :: rprimd(3,3),shift_tau(3),tsec(2)
  real(dp) :: xcart2(3),gmet(3,3),gprimd(3,3),rmet(3,3)
- real(dp),allocatable :: grid(:,:,:),grid_full(:,:,:,:),grid_full_stored(:,:,:,:,:),gridtt(:,:,:)
+ real(dp),allocatable :: grid(:,:,:),grid_full(:,:,:,:),grid_full_stored(:,:,:,:,:),gridtt(:,:,:) !, grid_rot(:,:,:,:)
  real(dp),allocatable :: tau2(:,:),xcart(:,:),xred(:,:),rhomacu(:,:),gridmz(:,:,:),gridmy(:,:,:),gridmx(:,:,:)
  character(len=fnlen),allocatable :: filrho_stored(:)
  character(len=500) :: message
@@ -140,7 +131,7 @@ program cut3d
    write(std_out,*)
    write(std_out,*) ' What is the name of the 3D function (density, potential or wavef) file ?'
    if (read_string(filrho, unit=std_in) /= 0) then
-     MSG_ERROR("Fatal error!")
+     ABI_ERROR("Fatal error!")
    end if
    filrho_tmp=adjustl(filrho)
    do ii=1,len_trim(filrho_tmp)
@@ -153,7 +144,7 @@ program cut3d
    write(std_out,*)
    ! Checking the existence of data file
    if (nctk_try_fort_or_ncfile(filrho, message) /= 0) then
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
 
 !  Treat the different cases: formatted or unformatted
@@ -172,7 +163,7 @@ program cut3d
    ABI_CHECK(abifile%fform /= 0, "Cannot detect abifile from fform")
 
 !  Echo part of the header
-   call hdr_echo(hdr, fform0, 4)
+   call hdr%echo(fform0, 4)
 
    nr1=hdr%ngfft(1); nr2=hdr%ngfft(2); nr3=hdr%ngfft(3)
    natom=hdr%natom
@@ -251,8 +242,8 @@ program cut3d
      iprompt = 0 ! this needs to be initialized, as it is used after the loop on files...
 
      call cut3d_wffile(filrho,hdr%ecut_eff,exchn2n3d0,hdr%istwfk,hdr%kptns,natom,hdr%nband,hdr%nkpt,hdr%npwarr,&
-&     nr1,nr2,nr3,hdr%nspinor,hdr%nsppol,ntypat,paral_kgb0,rprimd,xcart,hdr%typat,hdr%znucltypat)
-     call hdr_free(hdr)
+&     nr1,nr2,nr3,hdr%nspinor,hdr%nsppol,ntypat,rprimd,xcart,hdr%typat,hdr%znucltypat)
+     call hdr%free()
 
 !    -------------------------------------------------------------------------
 ! This is a DEN/POT file
@@ -276,6 +267,14 @@ program cut3d
      end if
 
      call cut3d_rrho(filrho,varname,iomode,grid_full,nr1,nr2,nr3,nspden)
+
+     !ABI_WARNING("Computing (rhor(r) + rho(-r)) / 2")
+     !ABI_MALLOC(grid_rot, (nr1,nr2,nr3,nspden))
+     !call ngfft_seq(ngfft, [nr1, nr2, nr3])
+     !ngfft(4:6) = ngfft(1:3)
+     !call denpot_project(1, ngfft, nspden, grid_full, inversion_3d, [zero, zero, zero], grid_rot)
+     !grid_full = grid_rot
+     !ABI_FREE(grid_rot)
 
 !    Do not forget that the first sub-array of a density file is the total density,
 !    while the first sub-array of a potential file is the spin-up potential
@@ -319,7 +318,7 @@ program cut3d
          else if(ispden==4)then
            write(std_out,*) ' '
          else
-           MSG_ERROR(sjoin('bad ispden value = ',itoa(ispden)))
+           ABI_ERROR(sjoin('bad ispden value = ',itoa(ispden)))
          end if
        end if
 
@@ -329,7 +328,7 @@ program cut3d
        else if(ispden==1 .or. ispden==2)then
          grid(:,:,:)=grid_full(:,:,:,ispden)
        else
-         MSG_ERROR(sjoin('bad ispden value = ',itoa(ispden)))
+         ABI_ERROR(sjoin('bad ispden value = ',itoa(ispden)))
        end if
        gridtt = grid
      end if
@@ -370,7 +369,7 @@ program cut3d
          if ((5 <= itask .and. itask <= 9) .or. any(itask == [14, 15]) )then
            write(std_out,*) ch10,'  Enter the name of an output file:'
            if (read_string(filnam, unit=std_in) /= 0) then
-             MSG_ERROR("Fatal error!")
+             ABI_ERROR("Fatal error!")
            end if
            write(std_out,*) '  The name of your file is: ',trim(filnam)
          end if
@@ -397,7 +396,7 @@ program cut3d
          case(5)
            ! Rewrite the data on a formatted file, just in one (or four) column(s)
            if (open_file(filnam,message, newunit=unt, status='unknown', action="write") /= 0) then
-             MSG_ERROR(message)
+             ABI_ERROR(message)
            end if
 
            if(nspden==1)then
@@ -423,7 +422,7 @@ program cut3d
          case(6)
 !            Rewrite the data on a formatted file, 3D index + density
            if (open_file(filnam,message, newunit=unt, status='unknown', action="write") /= 0) then
-             MSG_ERROR(message)
+             ABI_ERROR(message)
            end if
 
            if(nspden==1)then
@@ -454,7 +453,7 @@ program cut3d
 
          case(7)
            if (open_file(filnam,message, newunit=unt, form='unformatted', action="write") /= 0) then
-             MSG_ERROR(message)
+             ABI_ERROR(message)
            end if
 
            xm=0 ; xp=rprimd(1,1)*Bohr_Ang
@@ -479,7 +478,7 @@ program cut3d
 
          case (8)
            if (open_file(filnam, message, newunit=unt, form='formatted', action="write") /= 0) then
-             MSG_ERROR(message)
+             ABI_ERROR(message)
            end if
 
            write(std_out,'(/,a,/)' )' Extremas (x,y,z) of the cube in which the molecule is placed, in Angstroms'
@@ -504,7 +503,7 @@ program cut3d
 
          case (9)
            if (open_file(filnam, message, newunit=unt, form='formatted', action="write") /= 0) then
-             MSG_ERROR(message)
+             ABI_ERROR(message)
            end if
            xm=0 ; xp=rprimd(1,1)*Bohr_Ang
            ym=0 ; yp=rprimd(2,2)*Bohr_Ang
@@ -528,9 +527,9 @@ program cut3d
              read(std_in,*) gridshift1, gridshift2, gridshift3
              shift_tau(:) = gridshift1*rprimd(:,1)/(nr1+1) + gridshift2*rprimd(:,2)/(nr2+1) + gridshift3*rprimd(:,3)/(nr3+1)
            end if
-!
-!            Generate translated coordinates to match density shift
-!
+           !
+           ! Generate translated coordinates to match density shift
+           !
            ABI_MALLOC(tau2,(3,natom))
            do iatom = 1,natom
              tau2(:,iatom) = xcart(:,iatom) - shift_tau(:)
@@ -556,7 +555,7 @@ program cut3d
                end do
              end do
              if(abs(maxmz)<tol10)then
-               MSG_ERROR('At least, one of the components must differ from zero.')
+               ABI_ERROR('At least, one of the components must differ from zero.')
              end if
              do i1=1,nr1,nrws
                do i2=1,nr2,nrws
@@ -726,7 +725,7 @@ program cut3d
 !            -0.25568E-04  0.59213E-05  0.81068E-05  0.10868E-04  0.11313E-04  0.35999E-05
 
            if (open_file(filnam,message,newunit=unt, status='unknown', form='formatted', action="write") /= 0) then
-             MSG_ERROR(message)
+             ABI_ERROR(message)
            end if
 
            !%% call print_fofr_cube(nr1,nr2,n3,nr1,nr2,nr3,fofr,rprimd,natom,znucl_atom,xcart,unit=unt)
@@ -757,8 +756,7 @@ program cut3d
 
          case (15)
            ! Write netcdf file.
-           timrev = 2; if (any(hdr%kptopt == [3, 4])) timrev = 1
-           cryst = hdr_get_crystal(hdr, timrev)
+           cryst = hdr%get_crystal()
            call ngfft_seq(ngfft, [nr1, nr2, nr3])
            ngfft(4:6) = ngfft(1:3)
            nfft = product(ngfft(1:3))
@@ -774,7 +772,7 @@ program cut3d
            exit
 
          case default
-           MSG_ERROR(sjoin("Wrong task:", itoa(itask)))
+           ABI_ERROR(sjoin("Wrong task:", itoa(itask)))
          end select
        end do
 
@@ -783,7 +781,7 @@ program cut3d
        write(std_out,'(a)') ' More analysis of the 3D file ? ( 0=no ; 1=default=yes ; 2= treat another file - restricted usage)'
        read(std_in,*) iprompt
        if(iprompt/=1) then
-         call hdr_free(hdr)
+         call hdr%free()
          exit
        else
          cycle
@@ -791,7 +789,7 @@ program cut3d
      end do
 
    else
-     MSG_ERROR(sjoin("Don't know how to handle file class ", abifile%class))
+     ABI_ERROR(sjoin("Don't know how to handle file class ", abifile%class))
    end if ! WF file or DEN/POT file
 
 !  A maximum number of files had been previously specified, but set the actual number of files
@@ -809,7 +807,7 @@ program cut3d
        nr3_stored=nr3
        nspden_stored=nspden
      else if(isdenpot(ifiles)/=1 .and. iprompt==2)then
-       MSG_ERROR("in case of storage mode, the first file must be a density/potential file.")
+       ABI_ERROR("in case of storage mode, the first file must be a density/potential file.")
      end if
    end if
 

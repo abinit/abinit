@@ -1,4 +1,3 @@
-!!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_effective_potential
 !!
 !! NAME
@@ -10,7 +9,7 @@
 !! Contain also routine to evaluate the energy,forces and stresses
 !!
 !! COPYRIGHT
-!! Copyright (C) 2010-2019 ABINIT group (AM)
+!! Copyright (C) 2010-2024 ABINIT group (AM)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -27,7 +26,6 @@
 module m_effective_potential
 
  use defs_basis
- use defs_datatypes
  use defs_abitypes
  use m_errors
  use m_abicore
@@ -46,20 +44,20 @@ module m_effective_potential
 #if defined HAVE_NETCDF
  use netcdf
 #endif
+#if defined DEV_MS_SCALEUP
+ use scup_global, only : global_calculate_energy, global_calculate_forces
+#endif
 
- use m_fstrings,       only : replace, ftoa, itoa, int2char4
- use m_io_tools,       only : open_file,get_unit
+ use m_fstrings,       only : replace, ftoa, itoa
+ use m_io_tools,       only : open_file, get_unit
  use m_dtfil,          only : isfile
  use m_symtk,          only : matr3inv
  use m_effpot_mpi,     only : effpot_mpi_init,effpot_mpi_type,effpot_mpi_free
  use m_abihist,        only : abihist
- use m_special_funcs,  only : factorial
- use m_copy,           only : alloc_copy
- use m_geometry,       only : fred2fcart,fcart2fred, xcart2xred, xred2xcart, metric
- use m_crystal,        only : crystal_t, crystal_init, crystal_print
- use m_anaddb_dataset, only : anaddb_dataset_type, anaddb_dtset_free, outvars_anaddb, invars9
- use m_multibinit_dataset, only : multibinit_dtset_type
- use m_dynmat,         only : make_bigbox,q0dy3_apply, q0dy3_calc, dfpt_phfrq
+ use m_geometry,       only : gred2fcart,fcart2gred, xcart2xred, xred2xcart, metric
+ use m_crystal,        only : crystal_t, crystal_init
+ !use m_anaddb_dataset, only : anaddb_dataset_type, anaddb_dtset_free, outvars_anaddb, invars9
+
  implicit none
 
  public :: effective_potential_distributeResidualForces
@@ -71,6 +69,7 @@ module m_effective_potential
  public :: effective_potential_getDisp
  public :: effective_potential_init
  public :: effective_potential_initmpi
+ public :: effective_potential_copy
  public :: effective_potential_print
  public :: effective_potential_printSupercell
  public :: effective_potential_setCoeffs
@@ -82,6 +81,7 @@ module m_effective_potential
  public :: effective_potential_setSupercell
  public :: effective_potential_writeAbiInput
  public :: effective_potential_writeXML
+ public :: effective_potential_writeAnhHead
  !AM_EXPERIMENTAL
  public :: effective_potential_computeGradient
 ! public :: effective_potential_effpot2ddb
@@ -128,7 +128,7 @@ module m_effective_potential
 !     type with all information for anharmonics terms
 
    type(polynomial_conf_type) :: confinement
-!     type with all the informations for the confinement
+!     type with all the information for the confinement
 
    type(supercell_type) :: supercell
 !     super cell type
@@ -190,12 +190,6 @@ CONTAINS  !=====================================================================
 !! OUTPUT
 !! eff_pot<type(effective_potential_type)> = effective_potential datatype to be initialized
 !!
-!! PARENTS
-!!      m_effective_potential_file
-!!
-!! CHILDREN
-!!      ab_define_var,isfile,wrtout
-!!
 !! SOURCE
 
 subroutine effective_potential_init(crystal,eff_pot,energy,ifcs,ncoeff,nqpt,comm,&
@@ -204,8 +198,6 @@ subroutine effective_potential_init(crystal,eff_pot,energy,ifcs,ncoeff,nqpt,comm
 &                                   fcart,strain_coupling,strten,name,phonon_strain,&
 &                                   polynomial_conf,phfrq,qpoints,has_anharmonicsTerms,&
 &                                   supercell,zeff)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -224,7 +216,7 @@ subroutine effective_potential_init(crystal,eff_pot,energy,ifcs,ncoeff,nqpt,comm
  type(ifc_type),optional,intent(in) :: phonon_strain(6)
  real(dp),optional,intent(in) :: elastic3rd(6,6,6)
  real(dp),optional,intent(in) :: elastic_displacement(6,6,3,crystal%natom)
- type(polynomial_coeff_type),optional :: coeffs(ncoeff)
+ type(polynomial_coeff_type),optional,intent(in) :: coeffs(:)
  real(dp),optional,intent(in) :: strten(6)
  real(dp),optional,intent(in) :: fcart(3,crystal%natom)
  type(polynomial_conf_type),optional,intent(in) :: polynomial_conf
@@ -250,14 +242,14 @@ subroutine effective_potential_init(crystal,eff_pot,energy,ifcs,ncoeff,nqpt,comm
    write(msg, '(a,a,a,i10,a)' )&
 &   'The cell must have at least one atom.',ch10,&
 &   'The number of atom is  ',crystal%natom,'.'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
  if (crystal%ntypat < 1) then
    write(msg, '(a,a,a,i10,a)' )&
 &   'The cell must have at least one type of atom.',ch10,&
 &   'The number of type of atom is  ',crystal%ntypat,'.'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
 !3-Fill energy of the crystal (hartree)
@@ -278,7 +270,7 @@ subroutine effective_potential_init(crystal,eff_pot,energy,ifcs,ncoeff,nqpt,comm
  call anharmonics_terms_init(eff_pot%anharmonics_terms,crystal%natom,ncoeff)
 
 !5-Fill optional inputs
- ABI_ALLOCATE(eff_pot%fcart,(3,eff_pot%crystal%natom))
+ ABI_MALLOC(eff_pot%fcart,(3,eff_pot%crystal%natom))
  eff_pot%fcart = zero
  if(present(fcart))then
    eff_pot%fcart = fcart
@@ -327,6 +319,19 @@ subroutine effective_potential_init(crystal,eff_pot,energy,ifcs,ncoeff,nqpt,comm
    call anharmonics_terms_setElastic3rd(eff_pot%anharmonics_terms,elastic3rd)
  end if
 
+!TODO Comment Marcus: Uncomment and implement below if you want to use the elastic4th implementation, which is there, but
+! not used anywere
+! Below I just ensured that the has_elastic4th variable is set to FALSE as it was causing problems on some builders
+! in the test farm
+! Set the 4th order elastic tensor
+! if(present(elastic4th).and.has_anharmonicsTerms)then
+!   call anharmonics_terms_setElastic3rd(eff_pot%anharmonics_terms,elastic4th)
+! end if
+
+!MS Ensure has_elastic4th is .FALSE.
+! eff_pot%anharmonics_terms%has_elastic4th=.FALSE.
+
+
 !Allocation of 3rd order with respecto to 2 strain and 1 atomic displacement
  if(present(elastic_displacement).and.has_anharmonicsTerms)then
    call anharmonics_terms_setElasticDispCoupling(eff_pot%anharmonics_terms,crystal%natom,&
@@ -336,9 +341,7 @@ subroutine effective_potential_init(crystal,eff_pot,energy,ifcs,ncoeff,nqpt,comm
 !Allocation of the coefficients
  if(present(coeffs))then
    if(ncoeff /= size(coeffs))then
-     write(msg, '(a)' )&
-&        ' ncoeff has not the same size than coeffs array, '
-     MSG_BUG(msg)
+     ABI_BUG('ncoeff has not the same size than coeffs array')
    end if
    call effective_potential_setCoeffs(coeffs,eff_pot,ncoeff)
  end if
@@ -369,7 +372,7 @@ end subroutine effective_potential_init
 !!  effective_potential_initmpi
 !!
 !! FUNCTION
-!!  Initializes the mpi informations for parallelism over supercell.
+!!  Initializes the mpi information for parallelism over supercell.
 !!  Only the parallelisation over cell is done here.
 !!  The parallelisation over cell and coeff is disable for now (experimental)
 !!
@@ -384,17 +387,9 @@ end subroutine effective_potential_init
 !!  eff_pot%mpi_ifc%my_cells(:)  = Number of the cells in the supercell treat by this CPU
 !!  eff_pot%mpi_ifc%my_index_cells(:,:) = indexes of the cells in the supercell treat by this CPU
 !!
-!! PARENTS
-!!      m_effective_potential
-!!
-!! CHILDREN
-!!      ab_define_var,isfile,wrtout
-!!
 !! SOURCE
 
 subroutine effective_potential_initmpi(eff_pot,comm)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -408,7 +403,7 @@ subroutine effective_potential_initmpi(eff_pot,comm)
  integer :: ncell
 !array
  integer :: cell_number(3)
- character(len=500) :: msg
+ !character(len=500) :: msg
 ! ***********************************************************************
 
 !Set the number of cell in the supercell
@@ -419,8 +414,7 @@ subroutine effective_potential_initmpi(eff_pot,comm)
 
 !Do some checks
  if (any(cell_number <= 0).or.ncell<=0) then
-   write(msg,'(a,a)')' No supercell found for setting'
-   MSG_ERROR(msg)
+   ABI_ERROR('No supercell found for setting')
  end if
 
 !First mpi_ifc
@@ -438,6 +432,50 @@ subroutine effective_potential_initmpi(eff_pot,comm)
 end subroutine effective_potential_initmpi
 !!***
 
+!!****f* m_effective_potential/effective_potential_copy
+!!
+!! NAME
+!! effective_potential_copy
+!!
+!! FUNCTION
+!! Copy one effective potential to another i.e. initialize the output effective potentiale
+!! eff_pot_out with the values the input effective potential eff_pot_in
+!!
+!! INPUTS
+!!
+!! eff_pot_in<type(effective_potential_type)> = effective_potential datatype to be initialized
+!!
+!! OUTPUT
+!! eff_pot_out<type(effective_potential_type)> = effective_potential datatype to be initialized
+!!
+!! SOURCE
+
+subroutine effective_potential_copy(eff_pot_out,eff_pot_in,comm)
+
+!Arguments ------------------------------------
+!scalars
+ type(effective_potential_type),intent(out)  :: eff_pot_out
+ type(effective_potential_type),intent(in)  :: eff_pot_in
+ integer,intent(in)     :: comm
+! ***********************************************************************
+
+call effective_potential_init(eff_pot_in%crystal,eff_pot_out,eff_pot_in%energy,eff_pot_in%harmonics_terms%ifcs,&
+&                             eff_pot_in%anharmonics_terms%ncoeff,eff_pot_in%harmonics_terms%nqpt,comm,&
+&                             coeffs=eff_pot_in%anharmonics_terms%coefficients,dynmat=eff_pot_in%harmonics_terms%dynmat,&
+&                             elastic_constants=eff_pot_in%harmonics_terms%elastic_constants,&
+&                             elastic3rd=eff_pot_in%anharmonics_terms%elastic3rd,&
+&                             elastic_displacement=eff_pot_in%anharmonics_terms%elastic_displacement,&
+&                             epsilon_inf=eff_pot_in%harmonics_terms%epsilon_inf,&
+&                             fcart=eff_pot_in%fcart,strain_coupling=eff_pot_in%harmonics_terms%strain_coupling,&
+&                             strten=eff_pot_in%strten,name=eff_pot_in%name,&
+&                             phonon_strain=eff_pot_in%anharmonics_terms%phonon_strain,phfrq=eff_pot_in%harmonics_terms%phfrq,&
+&                             qpoints=eff_pot_in%harmonics_terms%qpoints,has_anharmonicsTerms=eff_pot_in%has_anharmonicsTerms,&
+&                             supercell=eff_pot_in%supercell,&
+&                             zeff=eff_pot_in%harmonics_terms%zeff)
+
+
+end subroutine effective_potential_copy
+!!***
 
 !****f* m_effective_potential/effective_potential_free
 !!
@@ -453,18 +491,9 @@ end subroutine effective_potential_initmpi
 !! OUTPUT
 !! eff_pot<type(effective_potential_type)>  = effective_potential datatype
 !!
-!! PARENTS
-!!      compute_anharmonics,m_effective_potential,m_effective_potential_file
-!!      multibinit
-!!
-!! CHILDREN
-!!      ab_define_var,isfile,wrtout
-!!
 !! SOURCE
 
 subroutine effective_potential_free(eff_pot)
-
-  implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -484,13 +513,13 @@ subroutine effective_potential_free(eff_pot)
 
    if(allocated(eff_pot%fcart)) then
      eff_pot%fcart=zero
-     ABI_DEALLOCATE(eff_pot%fcart)
+     ABI_FREE(eff_pot%fcart)
    end if
 
 ! Free others datatypes
    call anharmonics_terms_free(eff_pot%anharmonics_terms)
    call harmonics_terms_free(eff_pot%harmonics_terms)
-   call destroy_supercell(eff_pot%supercell)
+   call eff_pot%supercell%free()
    call eff_pot%crystal%free()
    call effective_potential_freempi(eff_pot)
    call polynomial_conf_free(eff_pot%confinement)
@@ -513,17 +542,9 @@ end subroutine effective_potential_free
 !! OUTPUT
 !! eff_pot<type(effective_potential_type)>  = effective_potential datatype
 !!
-!! PARENTS
-!!      m_fit_polynomial_coeff
-!!
-!! CHILDREN
-!!      ab_define_var,isfile,wrtout
-!!
 !! SOURCE
 
 subroutine effective_potential_freeCoeffs(eff_pot)
-
-  implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -553,17 +574,9 @@ end subroutine effective_potential_freeCoeffs
 !! OUTPUT
 !! eff_pot<type(effective_potential_type)>  = effective_potential datatype
 !!
-!! PARENTS
-!!      m_effective_potential
-!!
-!! CHILDREN
-!!      ab_define_var,isfile,wrtout
-!!
 !! SOURCE
 
 subroutine effective_potential_freempi(eff_pot)
-
-  implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -601,17 +614,9 @@ end subroutine effective_potential_freempi
 !! OUTPUT
 !! eff_pot<type(effective_potential_type)> = effective potential datatype
 !!
-!! PARENTS
-!!      m_effective_potential_file
-!!
-!! CHILDREN
-!!      ab_define_var,isfile,wrtout
-!!
 !! SOURCE
 
 subroutine effective_potential_generateDipDip(eff_pot,ncell,option,asr,comm)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -627,11 +632,11 @@ subroutine effective_potential_generateDipDip(eff_pot,ncell,option,asr,comm)
  integer :: ia,i1,i2,i3,ii,ierr,irpt,irpt2,irpt_ref,min1,min2,min3
  integer :: min1_cell,min2_cell,min3_cell,max1_cell,max2_cell,max3_cell
  integer :: max1,max2,max3,my_rank,natom_uc
- integer :: nproc,second_coordinate,size,sumg0
+ integer :: nproc,second_coordinate,size_tmp,sumg0
  integer :: my_nrpt,nrpt_alone
  real(dp) :: ucvol
  character(len=500) :: msg
- logical :: iam_master=.FALSE.
+ logical :: iam_master
 !array
  integer,allocatable :: my_index_rpt(:,:)
  integer,allocatable :: bufsize(:),bufdisp(:)
@@ -639,52 +644,60 @@ subroutine effective_potential_generateDipDip(eff_pot,ncell,option,asr,comm)
  real(dp) :: acell(3)
  real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3)
  real(dp),allocatable :: buff_ewald(:,:,:,:,:,:),dyew(:,:,:,:,:), dyewq0(:,:,:,:,:)
- real(dp),allocatable :: xred(:,:),xred_tmp(:,:),zeff_tmp(:,:,:)
+ real(dp),allocatable :: xred(:,:),xred_tmp(:,:),zeff_tmp(:,:,:),qdrp_cart(:,:,:,:)
  type(supercell_type) :: supercell
  type(ifc_type) :: ifc_tmp
+ integer, allocatable :: full_cell(:,:)
+ integer :: full_nrpt
+ real(dp), allocatable :: full_cell_atmfrc(:,:,:,:,:), full_cell_short_atmfrc(:,:,:,:,:), full_cell_ewald_atmfrc(:,:,:,:,:)
 
 ! *************************************************************************
 
 !0 MPI variables
  nproc = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
+ iam_master=.FALSE.
  iam_master = (my_rank == master)
  ierr=0
 
 !0 Check the size of the cell
  do ia=1,3
-   if(ncell(ia)<0.or.ncell(ia)>100)then
+   if(ncell(ia)<0.or.ncell(ia)>150)then
      write(msg, '(a,i0,a,i0,a,a,a,i0,a)' )&
-&     'ncell(',ia,') is ',ncell(ia),', which is lower than 0 of superior than 50.',&
+&     'ncell(',ia,') is ',ncell(ia),', which is lower than 0 of superior than 150.',&
 &     ch10,'Action: correct ncell(',ia,').'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
  end do
 
- call init_supercell(eff_pot%crystal%natom, &
+ call supercell%init(eff_pot%crystal%natom, &
 &   (/ncell(1),0,0,  0,ncell(2),0,  0,0,ncell(3)/),&
 &   eff_pot%crystal%rprimd,&
 &   eff_pot%crystal%typat,&
 &   eff_pot%crystal%xcart,&
-&   eff_pot%crystal%znucl,&
-&   supercell)
+&   eff_pot%crystal%znucl)
 
 !set variables
  natom_uc = eff_pot%crystal%natom
 
 !1 Store the information of the supercell of the reference structure into effective potential
- call copy_supercell(supercell,eff_pot%supercell)
+ call supercell%copy(eff_pot%supercell)
 !2 Initialisation of new mpi over supercell
  call effective_potential_initmpi(eff_pot,comm)
 
 !3 Check if the bound of new cell correspond to the effective potential
 !only for option=zero
 !set min and max
- min1 = minval(eff_pot%harmonics_terms%ifcs%cell(1,:))
+! NGQPT
+ min1 = minval(eff_pot%harmonics_terms%ifcs%cell(1,:)) !negative maximum cells in direc 1 MARCUS
  min2 = minval(eff_pot%harmonics_terms%ifcs%cell(2,:))
  min3 = minval(eff_pot%harmonics_terms%ifcs%cell(3,:))
- max1 = maxval(eff_pot%harmonics_terms%ifcs%cell(1,:))
+ max1 = maxval(eff_pot%harmonics_terms%ifcs%cell(1,:)) !maximum cells in direc 1 MARCUS
  max2 = maxval(eff_pot%harmonics_terms%ifcs%cell(2,:))
  max3 = maxval(eff_pot%harmonics_terms%ifcs%cell(3,:))
+   write(msg,'(5a,2I3,a,2I3,a,2I3,a)') ch10,' Bound for ifc SR:',&
+&    ch10,ch10, " x=[",min1,max1,"], y=[",min2,max2,"] and z=[",min3,max3,"]"
+   call wrtout(ab_out,msg,'COLL')
+   call wrtout(std_out,msg,'COLL')
 
  if(option==0) then
    if(((max1-min1+1)/=ncell(1).and.&
@@ -725,6 +738,7 @@ subroutine effective_potential_generateDipDip(eff_pot,ncell,option,asr,comm)
    min2_cell = 0; max2_cell = 0
    min3_cell = 0; max3_cell = 0
 
+   ! ncell
    call findBound_supercell(min1_cell,max1_cell,ncell(1))
    call findBound_supercell(min2_cell,max2_cell,ncell(2))
    call findBound_supercell(min3_cell,max3_cell,ncell(3))
@@ -734,48 +748,49 @@ subroutine effective_potential_generateDipDip(eff_pot,ncell,option,asr,comm)
    call wrtout(ab_out,msg,'COLL')
    call wrtout(std_out,msg,'COLL')
 
-!  Generate new bound
-   if(option==1)then
-     if ((abs(min1) > abs(min1_cell)).or.(abs(max1) > abs(max1_cell)).or.&
-&        (abs(min2) > abs(min2_cell)).or.(abs(max2) > abs(max2_cell)).or.&
-&        (abs(min3) > abs(min3_cell)).or.(abs(max3) > abs(max3_cell))) then
-       write(msg, '(6a,3I4,3a)' )ch10,&
-&        ' --- !WARNING',ch10,&
-&        '     The range of the dipole-dipole interaction is the same than the short-range.',ch10,&
-&        '     So the range of the total ifc is ',int((/(max1-min1+1),(max2-min2+1),(max3-min3+1)/),dp),' cell',ch10,&
-&        ' ---'
-       call wrtout(std_out,msg,"COLL")
-       if (abs(min1) < abs(min1_cell)) min1 = min1_cell
-       if (abs(min2) < abs(min2_cell)) min2 = min2_cell
-       if (abs(min3) < abs(min3_cell)) min3 = min3_cell
-       if (abs(max1) < abs(max1_cell)) max1 = max1_cell
-       if (abs(max2) < abs(max2_cell)) max2 = max2_cell
-       if (abs(max3) < abs(max3_cell)) max3 = max3_cell
-!      If the cell is smaller, we redifine new cell to take into acount all atoms
-       call destroy_supercell(supercell)
-       call init_supercell(natom_uc,(/(max1-min1+1),0,0,  0,(max2-min2+1),0,  0,0,(max3-min3+1)/),&
-&                          eff_pot%crystal%rprimd,eff_pot%crystal%typat,&
-&                          eff_pot%crystal%xcart,eff_pot%crystal%znucl,supercell)
-
-!      Store the information of the supercell of the reference structure into effective potential
-       call effective_potential_setSupercell(eff_pot,comm,supercell=supercell)
-     else
-       min1 = min1_cell ; min2 = min2_cell ; min3 = min3_cell
-       max1 = max1_cell ; max2 = max2_cell ; max3 = max3_cell
-     end if
-   end if
+!!  Generate new bound
+!   !if(option==1)then
+!     ! If NGQPT > NCELL "=" dipdip range
+!     !if ((abs(min1) > abs(min1_cell)).or.(abs(max1) > abs(max1_cell)).or.&
+!&    !    (abs(min2) > abs(min2_cell)).or.(abs(max2) > abs(max2_cell)).or.&
+!&    !    (abs(min3) > abs(min3_cell)).or.(abs(max3) > abs(max3_cell))) then
+!     !  write(msg, '(6a,3I4,3a)' )ch10,&
+!&    !    ' --- !WARNING',ch10,&
+!&    !    '     The range of the dipole-dipole interaction is the same than the short-range.',ch10,&
+!&    !    '     So the range of the total ifc is ',int((/(max1-min1+1),(max2-min2+1),(max3-min3+1)/),dp),' cell',ch10,&
+!&    !    ' ---'
+!     !  call wrtout(std_out,msg,"COLL")
+!     !  if (abs(min1) < abs(min1_cell)) min1 = min1_cell
+!     !  if (abs(min2) < abs(min2_cell)) min2 = min2_cell
+!     !  if (abs(min3) < abs(min3_cell)) min3 = min3_cell
+!     !  if (abs(max1) < abs(max1_cell)) max1 = max1_cell
+!     !  if (abs(max2) < abs(max2_cell)) max2 = max2_cell
+!     !  if (abs(max3) < abs(max3_cell)) max3 = max3_cell
+!!    !  If the cell is smaller, we redifine new cell to take into acount all atoms
+!     !  call supercell%free()
+!     !  call init_supercell(natom_uc,(/(max1-min1+1),0,0,  0,(max2-min2+1),0,  0,0,(max3-min3+1)/),&
+!&    !                      eff_pot%crystal%rprimd,eff_pot%crystal%typat,&
+!&    !                      eff_pot%crystal%xcart,eff_pot%crystal%znucl,supercell)
+!
+!!    !  Store the information of the supercell of the reference structure into effective potential
+!     !  call effective_potential_setSupercell(eff_pot,comm,supercell=supercell)
+!     !else
+!     !  min1 = min1_cell ; min2 = min2_cell ; min3 = min3_cell
+!     !  max1 = max1_cell ; max2 = max2_cell ; max3 = max3_cell
+!     !end if
+!   !end if
 
 !  Print the new boundary
-   write(msg,'(5a,2I3,a,2I3,a,2I3,4a)') ch10,' New bound for ifc (long+short):',&
-&    ch10,ch10, " x=[",min1,max1,"], y=[",min2,max2,"] and z=[",min3,max3,"]",ch10,ch10,&
+   write(msg,'(5a,2I3,a,2I3,a,2I3,4a)') ch10,' Bound for ifc (LR):',&
+&    ch10,ch10, " x=[",min1_cell,max1_cell,"], y=[",min2_cell,max2_cell,"] and z=[",min3_cell,max3_cell,"]",ch10,ch10,&
 &    " Computation of new dipole-dipole interaction."
    call wrtout(ab_out,msg,'COLL')
    call wrtout(std_out,msg,'COLL')
 
 !  Count the new number of ifc
-   do i1=min1,max1
-     do i2=min2,max2
-       do i3=min3,max3
+   do i1=min1_cell,max1_cell
+     do i2=min2_cell,max2_cell
+       do i3=min3_cell,max3_cell
          irpt = irpt +1
          if(i1==0.and.i2==0.and.i3==0) irpt_ref = irpt
        end do
@@ -783,14 +798,14 @@ subroutine effective_potential_generateDipDip(eff_pot,ncell,option,asr,comm)
    end do
 
    ifc_tmp%nrpt = irpt
-   ABI_ALLOCATE(ifc_tmp%cell,(3,ifc_tmp%nrpt))
+   ABI_MALLOC(ifc_tmp%cell,(3,ifc_tmp%nrpt))
    ifc_tmp%cell(:,:) = 0
 
 !  Set MPI here and not at the begining because the number of cell is adjust just before
 !  Here we store in my_irpt a list with the number of each cell to be treat by this CPU
 !  Determine the number of cell for each CPU
-   ABI_ALLOCATE(bufsize,(nproc))
-   ABI_ALLOCATE(bufdisp,(nproc))
+   ABI_MALLOC(bufsize,(nproc))
+   ABI_MALLOC(bufdisp,(nproc))
 
    nrpt_alone = mod(ifc_tmp%nrpt,nproc)
    my_nrpt = int(real(ifc_tmp%nrpt,sp)/nproc)
@@ -799,12 +814,12 @@ subroutine effective_potential_generateDipDip(eff_pot,ncell,option,asr,comm)
    end if
 
 !  Initialisation of ifc temporary
-   ABI_ALLOCATE(buff_ewald,(2,3,natom_uc,3,natom_uc,my_nrpt))
-   ABI_ALLOCATE(ifc_tmp%short_atmfrc,(3,natom_uc,3,natom_uc,ifc_tmp%nrpt))
-   ABI_ALLOCATE(ifc_tmp%ewald_atmfrc,(3,natom_uc,3,natom_uc,ifc_tmp%nrpt))
-   ABI_ALLOCATE(ifc_tmp%atmfrc,(3,natom_uc,3,natom_uc,ifc_tmp%nrpt))
-   ABI_ALLOCATE(my_irpt,(my_nrpt))
-   ABI_ALLOCATE(my_index_rpt,(3,my_nrpt))
+   ABI_MALLOC(buff_ewald,(2,3,natom_uc,3,natom_uc,my_nrpt))
+   ABI_MALLOC(ifc_tmp%short_atmfrc,(3,natom_uc,3,natom_uc,ifc_tmp%nrpt))
+   ABI_MALLOC(ifc_tmp%ewald_atmfrc,(3,natom_uc,3,natom_uc,ifc_tmp%nrpt))
+   ABI_MALLOC(ifc_tmp%atmfrc,(3,natom_uc,3,natom_uc,ifc_tmp%nrpt))
+   ABI_MALLOC(my_irpt,(my_nrpt))
+   ABI_MALLOC(my_index_rpt,(3,my_nrpt))
 
    my_irpt = 0
    my_index_rpt(:,:) = 0
@@ -825,9 +840,9 @@ subroutine effective_potential_generateDipDip(eff_pot,ncell,option,asr,comm)
 
    irpt = 0
    ii = 0
-   do i1=min1,max1
-     do i2=min2,max2
-       do i3=min3,max3
+   do i1=min1_cell,max1_cell
+     do i2=min2_cell,max2_cell
+       do i3=min3_cell,max3_cell
          ii = ii +1
          ifc_tmp%cell(1,ii) = i1; ifc_tmp%cell(2,ii) = i2; ifc_tmp%cell(3,ii) = i3;
          if(any(my_irpt==ii))then
@@ -841,17 +856,19 @@ subroutine effective_potential_generateDipDip(eff_pot,ncell,option,asr,comm)
    end do
 
 !  Allocate and initialize some array
-   ABI_ALLOCATE(xred_tmp,(3,2*natom_uc))
-   ABI_ALLOCATE(xred,(3,supercell%natom))
-   ABI_ALLOCATE(zeff_tmp,(3,3,2*natom_uc))
-   ABI_ALLOCATE(dyew,(2,3,2*natom_uc,3,2*natom_uc))
-   ABI_ALLOCATE(dyewq0,(2,3,natom_uc,3,natom_uc))
+   ABI_MALLOC(xred_tmp,(3,2*natom_uc))
+   ABI_MALLOC(xred,(3,supercell%natom))
+   ABI_MALLOC(zeff_tmp,(3,3,2*natom_uc))
+   ABI_MALLOC(qdrp_cart,(3,3,3,2*natom_uc))
+   ABI_MALLOC(dyew,(2,3,2*natom_uc,3,2*natom_uc))
+   ABI_MALLOC(dyewq0,(2,3,natom_uc,3,natom_uc))
 
    dyew            = zero
    dyewq0          = zero
    xred(:,:)       = zero
    xred_tmp(:,:)   = zero
    zeff_tmp(:,:,:) = zero
+   qdrp_cart       = zero
    sumg0           = 0
    acell           = one
 
@@ -876,7 +893,7 @@ subroutine effective_potential_generateDipDip(eff_pot,ncell,option,asr,comm)
        call ewald9(acell,eff_pot%harmonics_terms%epsilon_inf,dyewq0,&
 &                  gmet,gprimd,natom_uc,real((/0,0,0/),dp),rmet,&
 &                  supercell%rprimd,sumg0,ucvol,xred_tmp(:,1:natom_uc),&
-&                  eff_pot%harmonics_terms%zeff)
+&                  eff_pot%harmonics_terms%zeff,qdrp_cart)
        buff_ewald(:,:,:,:,:,irpt) = dyewq0
      else
        first_coordinate  = ((my_irpt(irpt)-1)*natom_uc) + 1
@@ -886,20 +903,21 @@ subroutine effective_potential_generateDipDip(eff_pot,ncell,option,asr,comm)
        call ewald9(acell,eff_pot%harmonics_terms%epsilon_inf,dyew,gmet,gprimd,&
 &                  int(2*natom_uc),real((/0,0,0/),dp),&
 &                  rmet,supercell%rprimd,&
-&                  sumg0,ucvol,xred_tmp,zeff_tmp)
+&                  sumg0,ucvol,xred_tmp,zeff_tmp,qdrp_cart)
        buff_ewald(:,:,:,:,:,irpt) = &
 &           dyew(:,:,1:natom_uc,:,natom_uc+1:2*natom_uc)
      end if
    end do
 
 !  DEALLOCATION OF ARRAYS
-   ABI_DEALLOCATE(my_index_rpt)
-   ABI_DEALLOCATE(my_irpt)
-   ABI_DEALLOCATE(xred_tmp)
-   ABI_DEALLOCATE(xred)
-   ABI_DEALLOCATE(zeff_tmp)
-   ABI_DEALLOCATE(dyew)
-   ABI_DEALLOCATE(dyewq0)
+   ABI_FREE(my_index_rpt)
+   ABI_FREE(my_irpt)
+   ABI_FREE(xred_tmp)
+   ABI_FREE(xred)
+   ABI_FREE(zeff_tmp)
+   ABI_FREE(qdrp_cart)
+   ABI_FREE(dyew)
+   ABI_FREE(dyewq0)
 
 !  Set the bufsize for mpi allgather
    do ii = 1,nproc
@@ -914,68 +932,114 @@ subroutine effective_potential_generateDipDip(eff_pot,ncell,option,asr,comm)
      bufdisp(ii) = bufdisp(ii-1) + bufsize(ii-1)
    end do
 
-   size = 3*natom_uc*3*natom_uc*my_nrpt
-   call xmpi_allgatherv(buff_ewald(1,:,:,:,:,:),size,ifc_tmp%ewald_atmfrc,bufsize,bufdisp, comm, ierr)
+   size_tmp = 3*natom_uc*3*natom_uc*my_nrpt
+   call xmpi_allgatherv(buff_ewald(1,:,:,:,:,:),size_tmp,ifc_tmp%ewald_atmfrc,bufsize,bufdisp, comm, ierr)
 
-   ABI_DEALLOCATE(bufsize)
-   ABI_DEALLOCATE(bufdisp)
-   ABI_DEALLOCATE(buff_ewald)
+   ABI_FREE(bufsize)
+   ABI_FREE(bufdisp)
+   ABI_FREE(buff_ewald)
+
+
 
 !  Fill the short range part (calculated previously) only master
-   if(iam_master)then
-     do irpt=1,ifc_tmp%nrpt
-       do irpt2=1,eff_pot%harmonics_terms%ifcs%nrpt
-         if(eff_pot%harmonics_terms%ifcs%cell(1,irpt2)==ifc_tmp%cell(1,irpt).and.&
-&           eff_pot%harmonics_terms%ifcs%cell(2,irpt2)==ifc_tmp%cell(2,irpt).and.&
-&           eff_pot%harmonics_terms%ifcs%cell(3,irpt2)==ifc_tmp%cell(3,irpt).and.&
-&           any(abs(eff_pot%harmonics_terms%ifcs%short_atmfrc(:,:,:,:,irpt2)) > tol20)) then
-           ifc_tmp%short_atmfrc(:,:,:,:,irpt) = &
-&                               eff_pot%harmonics_terms%ifcs%short_atmfrc(:,:,:,:,irpt2)
-         end if
-       end do
-     end do
-   end if
+!   if(iam_master)then
+!     do irpt=1,ifc_tmp%nrpt
+!       do irpt2=1,eff_pot%harmonics_terms%ifcs%nrpt
+!         if(eff_pot%harmonics_terms%ifcs%cell(1,irpt2)==ifc_tmp%cell(1,irpt).and.&
+!&           eff_pot%harmonics_terms%ifcs%cell(2,irpt2)==ifc_tmp%cell(2,irpt).and.&
+!&           eff_pot%harmonics_terms%ifcs%cell(3,irpt2)==ifc_tmp%cell(3,irpt).and.&
+!&           any(abs(eff_pot%harmonics_terms%ifcs%short_atmfrc(:,:,:,:,irpt2)) > tol20)) then
+!           ifc_tmp%short_atmfrc(:,:,:,:,irpt) = &
+!&                               eff_pot%harmonics_terms%ifcs%short_atmfrc(:,:,:,:,irpt2)
+!         end if
+!       end do
+!     end do
+!   end if
 
-   call xmpi_bcast(ifc_tmp%short_atmfrc, master, comm, ierr)
+
+   !call xmpi_bcast(ifc_tmp%short_atmfrc, master, comm, ierr)
+   ! Maybe useless
+   call xmpi_bcast(eff_pot%harmonics_terms%ifcs%short_atmfrc, master, comm, ierr)
 
 !  Compute total ifc
-   ifc_tmp%atmfrc = ifc_tmp%short_atmfrc + ifc_tmp%ewald_atmfrc
+   !ifc_tmp%atmfrc = ifc_tmp%short_atmfrc + ifc_tmp%ewald_atmfrc
+   ! Set the full cell according to the largest box
+   full_nrpt = max(ifc_tmp%nrpt,eff_pot%harmonics_terms%ifcs%nrpt)
+   ABI_MALLOC(full_cell,(3,full_nrpt))
+   ABI_CALLOC(full_cell_atmfrc,(3,natom_uc,3,natom_uc,full_nrpt)) ! Allocate and set to 0
+   ABI_CALLOC(full_cell_short_atmfrc,(3,natom_uc,3,natom_uc,full_nrpt)) ! Allocate and set to 0
+   ABI_CALLOC(full_cell_ewald_atmfrc,(3,natom_uc,3,natom_uc,full_nrpt)) ! Allocate and set to 0
+   if ( full_nrpt == ifc_tmp%nrpt ) then
+     full_cell = ifc_tmp%cell
+   else
+     full_cell = eff_pot%harmonics_terms%ifcs%cell
+   end if
+
+   ! Copy LR into total_atmfrc
+   do irpt=1,ifc_tmp%nrpt ! LR IRPT
+     do irpt2=1, full_nrpt
+       if(  ifc_tmp%cell(1,irpt)==full_cell(1,irpt2).and.&
+&           ifc_tmp%cell(2,irpt)==full_cell(2,irpt2).and.&
+&           ifc_tmp%cell(3,irpt)==full_cell(3,irpt2) ) then
+         full_cell_atmfrc(:,:,:,:,irpt2) = ifc_tmp%ewald_atmfrc(:,:,:,:,irpt)
+         full_cell_ewald_atmfrc(:,:,:,:,irpt2) = ifc_tmp%ewald_atmfrc(:,:,:,:,irpt)
+       end if
+     end do
+   end do
+   ! Copy SR into total_atmfrc
+   do irpt=1,eff_pot%harmonics_terms%ifcs%nrpt ! SR IRPT
+     do irpt2=1, full_nrpt
+     if(  eff_pot%harmonics_terms%ifcs%cell(1,irpt)==full_cell(1,irpt2).and.&
+&         eff_pot%harmonics_terms%ifcs%cell(2,irpt)==full_cell(2,irpt2).and.&
+&         eff_pot%harmonics_terms%ifcs%cell(3,irpt)==full_cell(3,irpt2) ) then
+         full_cell_atmfrc(:,:,:,:,irpt2) = full_cell_atmfrc(:,:,:,:,irpt2) + eff_pot%harmonics_terms%ifcs%short_atmfrc(:,:,:,:,irpt)
+         full_cell_short_atmfrc(:,:,:,:,irpt2) = eff_pot%harmonics_terms%ifcs%short_atmfrc(:,:,:,:,irpt)
+       end if
+     end do
+   end do
 
 !  Count the rpt inferior to the tolerance
    irpt2 = 0
-   do irpt=1,ifc_tmp%nrpt
-     if(any(abs(ifc_tmp%atmfrc(:,:,:,:,irpt)) > tol20))then
+   do irpt=1,full_nrpt
+     if(any(abs(full_cell_atmfrc(:,:,:,:,irpt)) > tol5))then
        irpt2 = irpt2 + 1
      end if
    end do
+   !write(std_out,*) "irpt2: how many dipdip cells: ", irpt2
 
 !  Copy ifc into effective potential
 !  !!!Warning eff_pot%harmonics_terms%ifcs only contains atmfrc,short_atmfrc,ewald_atmfrc,nrpt
 !    and cell!!  rcan,ifc%rpt,wghatm and other quantities
 !    are not needed for effective potential!!!
 !  Free ifc before copy
-   call ifc_free(eff_pot%harmonics_terms%ifcs)
+   call eff_pot%harmonics_terms%ifcs%free()
 
 !  Fill the effective potential with new atmfr
     eff_pot%harmonics_terms%ifcs%nrpt = irpt2
-    ABI_ALLOCATE(eff_pot%harmonics_terms%ifcs%atmfrc,(3,natom_uc,3,natom_uc,irpt2))
-    ABI_ALLOCATE(eff_pot%harmonics_terms%ifcs%short_atmfrc,(3,natom_uc,3,natom_uc,irpt2))
-    ABI_ALLOCATE(eff_pot%harmonics_terms%ifcs%ewald_atmfrc,(3,natom_uc,3,natom_uc,irpt2))
-    ABI_ALLOCATE(eff_pot%harmonics_terms%ifcs%cell,(3,irpt2))
+    ABI_MALLOC(eff_pot%harmonics_terms%ifcs%atmfrc,(3,natom_uc,3,natom_uc,irpt2))
+    ABI_MALLOC(eff_pot%harmonics_terms%ifcs%short_atmfrc,(3,natom_uc,3,natom_uc,irpt2))
+    ABI_MALLOC(eff_pot%harmonics_terms%ifcs%ewald_atmfrc,(3,natom_uc,3,natom_uc,irpt2))
+    ABI_MALLOC(eff_pot%harmonics_terms%ifcs%cell,(3,irpt2))
 
     irpt2 = 0
-    do irpt = 1,ifc_tmp%nrpt
-     if(any(abs(ifc_tmp%atmfrc(:,:,:,:,irpt)) > tol20))then
+    do irpt = 1,full_nrpt
+     if(any(abs(full_cell_atmfrc(:,:,:,:,irpt)) > tol5))then
        irpt2 = irpt2 + 1
-       eff_pot%harmonics_terms%ifcs%atmfrc(:,:,:,:,irpt2) = ifc_tmp%atmfrc(:,:,:,:,irpt)
-       eff_pot%harmonics_terms%ifcs%short_atmfrc(:,:,:,:,irpt2) = ifc_tmp%short_atmfrc(:,:,:,:,irpt)
-       eff_pot%harmonics_terms%ifcs%ewald_atmfrc(:,:,:,:,irpt2) = ifc_tmp%ewald_atmfrc(:,:,:,:,irpt)
-       eff_pot%harmonics_terms%ifcs%cell(:,irpt2) = ifc_tmp%cell(:,irpt)
+       eff_pot%harmonics_terms%ifcs%atmfrc(:,:,:,:,irpt2) = full_cell_atmfrc(:,:,:,:,irpt)
+       eff_pot%harmonics_terms%ifcs%short_atmfrc(:,:,:,:,irpt2) = full_cell_short_atmfrc(:,:,:,:,irpt)
+       eff_pot%harmonics_terms%ifcs%ewald_atmfrc(:,:,:,:,irpt2) = full_cell_ewald_atmfrc(:,:,:,:,irpt)
+       eff_pot%harmonics_terms%ifcs%cell(:,irpt2) = full_cell(:,irpt)
      end if
    end do
 
 !  Free temporary ifc
-   call ifc_free(ifc_tmp)
+   call ifc_tmp%free()
+   !Deallocate temporary arrays
+   ABI_FREE(full_cell)
+   ABI_FREE(full_cell_atmfrc) ! Allocate and set to 0
+   ABI_FREE(full_cell_short_atmfrc) ! Allocate and set to 0
+   ABI_FREE(full_cell_ewald_atmfrc) ! Allocate and set to 0
+
  end if
 
  if(asr >= 0) then
@@ -983,13 +1047,12 @@ subroutine effective_potential_generateDipDip(eff_pot,ncell,option,asr,comm)
    call harmonics_terms_applySumRule(asr,eff_pot%harmonics_terms%ifcs,natom_uc)
  end if
 
- write(msg, '(a,(80a),a)' ) ch10,&
-&   ('=',ii=1,80)
+ write(msg, '(a,(80a),a)' ) ch10,('=',ii=1,80)
  call wrtout(ab_out,msg,'COLL')
  call wrtout(std_out,msg,'COLL')
 
 ! Free suppercell
- call destroy_supercell(supercell)
+ call supercell%free()
 
 end subroutine effective_potential_generateDipDip
 !!***
@@ -1009,18 +1072,9 @@ end subroutine effective_potential_generateDipDip
 !! OUTPUT
 !! eff_pot<type(effective_potential_type)> = datatype for effective potential
 !!
-!! PARENTS
-!!      m_effective_potential,m_effective_potential_file,m_fit_polynomial_coeff
-!!      mover_effpot
-!!
-!! CHILDREN
-!!      ab_define_var,isfile,wrtout
-!!
 !! SOURCE
 
 subroutine effective_potential_setCoeffs(coeffs,eff_pot,ncoeff)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1031,18 +1085,17 @@ subroutine effective_potential_setCoeffs(coeffs,eff_pot,ncoeff)
 !Local variables-------------------------------
 !scalar
  integer :: ii,jj
- logical :: has_straincoupling=.FALSE.
+ logical :: has_straincoupling
  character(len=500) :: msg
 !array
 ! *************************************************************************
 
  if(ncoeff /= size(coeffs))then
-   write(msg, '(a)' )&
-&       ' ncoeff has not the same size than coeffs array, '
-   MSG_BUG(msg)
+   ABI_BUG('ncoeff has not the same size than coeffs array')
  end if
 
 ! Check if the strain coupling is present
+ has_straincoupling=.FALSE.
  do ii=1,ncoeff
    do jj=1,coeffs(ii)%nterm
      if (coeffs(ii)%terms(jj)%nstrain > 0) then
@@ -1084,17 +1137,9 @@ end subroutine effective_potential_setCoeffs
 !! eff_pot<type(effective_potential_type)> = datatype for effective potential
 !!
 !!
-!! PARENTS
-!!      compute_anharmonics
-!!
-!! CHILDREN
-!!      ab_define_var,isfile,wrtout
-!!
 !! SOURCE
 
 subroutine effective_potential_setElastic3rd(eff_pot,elastics)
-
-  implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1129,17 +1174,9 @@ end subroutine effective_potential_setElastic3rd
 !! eff_pot<type(effective_potential_type)> = datatype for effective potential
 !!
 !!
-!! PARENTS
-!!      compute_anharmonics
-!!
-!! CHILDREN
-!!      ab_define_var,isfile,wrtout
-!!
 !! SOURCE
 
 subroutine effective_potential_setElastic4th(eff_pot,elastics)
-
-  implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1175,17 +1212,9 @@ end subroutine effective_potential_setElastic4th
 !! OUTPUT
 !! eff_pot<type(effective_potential_type)> = datatype for effective potential
 !!
-!! PARENTS
-!!      compute_anharmonics
-!!
-!! CHILDREN
-!!      ab_define_var,isfile,wrtout
-!!
 !! SOURCE
 
 subroutine effective_potential_setStrainPhononCoupling(eff_pot,natom,phonon_strain)
-
-  implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1224,17 +1253,9 @@ end subroutine effective_potential_setStrainPhononCoupling
 !! OUTPUT
 !! eff_pot<type(effective_potential_type)> = datatype for effective potential
 !!
-!! PARENTS
-!!      compute_anharmonics
-!!
-!! CHILDREN
-!!      ab_define_var,isfile,wrtout
-!!
 !! SOURCE
 
 subroutine effective_potential_setElasticDispCoupling(eff_pot,natom,elastic_displacement)
-
-  implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1276,19 +1297,11 @@ end subroutine effective_potential_setElasticDispCoupling
 !! OUTPUT
 !! eff_pot<type(effective_potential_type)> = datatype for effective potential
 !!
-!! PARENTS
-!!      m_effective_potential,multibinit
-!!
-!! CHILDREN
-!!      ab_define_var,isfile,wrtout
-!!
 !! SOURCE
 
 subroutine effective_potential_setConfinement(cutoff_disp,cutoff_strain,eff_pot,factor_disp,&
 &                                             factor_strain,ndisp,power_disp,power_strain,&
 &                                             need_confinement)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1300,21 +1313,21 @@ subroutine effective_potential_setConfinement(cutoff_disp,cutoff_strain,eff_pot,
  type(effective_potential_type),intent(inout) :: eff_pot
 !Local variables-------------------------------
 !scalar
- logical  :: need_confinement_tmp = .FALSE.
+ logical  :: need_confinement_tmp
 !arrays
- character(len=500) :: msg
+ !character(len=500) :: msg
 
 ! *************************************************************************
 
 !Checks
  if (ndisp <= 0) then
-   write(msg,'(a,a)')' ndisp can not be inferior or equal to zero'
-   MSG_ERROR(msg)
+   ABI_ERROR('ndisp can not be inferior or equal to zero')
  end if
 
 !First free the type
  call  polynomial_conf_free(eff_pot%confinement)
 
+ need_confinement_tmp = .FALSE.
  if (present(need_confinement)) need_confinement_tmp = need_confinement
 
  call  polynomial_conf_init(cutoff_disp,cutoff_strain,factor_disp,factor_strain,ndisp,&
@@ -1342,17 +1355,9 @@ end subroutine effective_potential_setConfinement
 !! OUTPUT
 !! eff_pot<type(effective_potential_type)> = effective_potential datatype
 !!
-!! PARENTS
-!!      m_effective_potential,m_effective_potential_file,mover_effpot
-!!
-!! CHILDREN
-!!      ab_define_var,isfile,wrtout
-!!
 !! SOURCE
 
 subroutine effective_potential_setSupercell(eff_pot,comm,ncell,supercell)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1364,24 +1369,23 @@ subroutine effective_potential_setSupercell(eff_pot,comm,ncell,supercell)
 !Local variables-------------------------------
 !scalar
 !arrays
- character(len=500) :: msg
+ !character(len=500) :: msg
 
 ! *************************************************************************
 
 !Checks
  if (.not.present(supercell).and..not.present(ncell)) then
-   write(msg,'(a,a)')' You should at least set ncell of supercell type'
-   MSG_ERROR(msg)
+   ABI_ERROR(' You should at least set ncell of supercell type')
  end if
 
- call destroy_supercell(eff_pot%supercell)
+ call eff_pot%supercell%free()
 
  if(present(supercell))then
-   call copy_supercell(supercell,eff_pot%supercell)
+   call supercell%copy(eff_pot%supercell)
  else
-   call init_supercell(eff_pot%crystal%natom, (/ncell(1),0,0,  0,ncell(2),0,  0,0,ncell(3)/), &
-&                      eff_pot%crystal%rprimd,eff_pot%crystal%typat,eff_pot%crystal%xcart,&
-&                      eff_pot%crystal%znucl, eff_pot%supercell)
+   call eff_pot%supercell%init(eff_pot%crystal%natom, (/ncell(1),0,0,  0,ncell(2),0,  0,0,ncell(3)/), &
+                      eff_pot%crystal%rprimd,eff_pot%crystal%typat,eff_pot%crystal%xcart,&
+                      eff_pot%crystal%znucl)
  end if
 
 !Initialisation of new mpi over supercell
@@ -1406,17 +1410,9 @@ end subroutine effective_potential_setSupercell
 !! OUTPUT
 !!
 !!
-!! PARENTS
-!!      m_effective_potential_file
-!!
-!! CHILDREN
-!!      ab_define_var,isfile,wrtout
-!!
 !! SOURCE
 
 subroutine effective_potential_print(eff_pot,option,filename)
-
-  implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1528,16 +1524,9 @@ end subroutine effective_potential_print
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      ab_define_var,isfile,wrtout
-!!
 !! SOURCE
 
 subroutine effective_potential_printSupercell(eff_pot,supercell)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1564,10 +1553,10 @@ subroutine effective_potential_printSupercell(eff_pot,supercell)
    write(msg, '(3a)' )&
 &  ' There is not the same numbers of atoms in the two supercell',ch10,&
 &   'Action: modify the code'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
- ABI_ALLOCATE(xred,(3,supercell_tmp%natom))
+ ABI_MALLOC(xred,(3,supercell_tmp%natom))
 
 !**********************************************************************
 ! Write basics values
@@ -1651,7 +1640,7 @@ subroutine effective_potential_printSupercell(eff_pot,supercell)
   call wrtout(std_out,msg,'COLL')
 
 ! Deallocation array
-  ABI_DEALLOCATE(xred)
+  ABI_FREE(xred)
 
 end subroutine effective_potential_printSupercell
 !!***
@@ -1663,13 +1652,6 @@ end subroutine effective_potential_printSupercell
 !! FUNCTION
 !! This routine print the effective potential into xml format
 !! Several options are available
-!!
-!! COPYRIGHT
-!! Copyright (C) 2000-2019 ABINIT group (AM)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
 !! filename = the name of output file
@@ -1687,17 +1669,9 @@ end subroutine effective_potential_printSupercell
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      multibinit
-!!
-!! CHILDREN
-!!      ab_define_var,isfile,wrtout
-!!
 !! SOURCE
 
 subroutine effective_potential_writeXML(eff_pot,option,filename,prt_dipdip)
-
-  implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1715,7 +1689,7 @@ subroutine effective_potential_writeXML(eff_pot,option,filename,prt_dipdip)
  character(len=500) :: msg
  character(len=fnlen) :: namefile
  character(len=10) :: natom
- logical :: new_file = .FALSE.,need_prtdipdip = .FALSE.
+ logical :: new_file,need_prtdipdip
 !arrays
  real(dp) :: strain(9,6)
 
@@ -1756,7 +1730,7 @@ subroutine effective_potential_writeXML(eff_pot,option,filename,prt_dipdip)
 
    if (open_file(namefile,msg,unit=unit_xml,form="formatted",&
 &      status="new",action="write") /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
    write(msg,'(a,a,a)')ch10,&
@@ -1845,7 +1819,7 @@ subroutine effective_potential_writeXML(eff_pot,option,filename,prt_dipdip)
            write(msg, '(a,a,a,a)' )&
 &         ' There is no total range but short range in your effective potential',ch10,&
 &         'Action: contact abinit group'
-           MSG_BUG(msg)
+           ABI_BUG(msg)
          end if
        else
          WRITE(unit_xml,'("  <total_force_constant units=""hartree/bohrradius**2"">")')
@@ -1925,8 +1899,8 @@ subroutine effective_potential_writeXML(eff_pot,option,filename,prt_dipdip)
            end do
            WRITE(unit_xml,'(a)')''
          end do
+         WRITE(unit_xml,'("    </correction_strain_force>")')
        end if
-       WRITE(unit_xml,'("    </correction_strain_force>")')
        if (eff_pot%anharmonics_terms%has_strain_coupling) then
          do irpt=1,eff_pot%anharmonics_terms%phonon_strain(ii)%nrpt
            WRITE(unit_xml,'("    <correction_force_constant units=""hartree/bohrradius**2"">")')
@@ -1961,6 +1935,7 @@ subroutine effective_potential_writeXML(eff_pot,option,filename,prt_dipdip)
  end if!end option
 
 !Print the coefficients into XML file
+ new_file = .FALSE.
  if (option==1 .or. option == 2 .or. option==4) then
 !   Compute the name of the XML file
    if(present(filename)) then
@@ -2006,13 +1981,6 @@ end subroutine effective_potential_writeXML
 !! This routine print the effective potential into input of abinit
 !! We can also apply a strain to the structure
 !!
-!! COPYRIGHT
-!! Copyright (C) 2000-2019 ABINIT group (AM)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
-!!
 !! INPUTS
 !! eff_pot<type(effective_potential_type)> = effective_potential datatype
 !! filename = the name of input file
@@ -2020,17 +1988,9 @@ end subroutine effective_potential_writeXML
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      compute_anharmonics
-!!
-!! CHILDREN
-!!      ab_define_var,isfile,wrtout
-!!
 !! SOURCE
 
 subroutine effective_potential_writeAbiInput(eff_pot,filename,strain)
-
-  implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2076,7 +2036,7 @@ subroutine effective_potential_writeAbiInput(eff_pot,filename,strain)
  call isfile(namefile,'new')
 
  if (open_file(namefile,msg,unit=unit,form="formatted",status="new",action="write") /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
   write(msg,'(a,a,a,a)')ch10,&
@@ -2199,44 +2159,40 @@ end subroutine effective_potential_writeAbiInput
 !! OUTPUTS
 !! energy =  energy of the structure (Ha)
 !! fcart(3,natom) =  forces in cartesian coordinates (Ha/Bohr)
-!! fred(3,natom)  =  forces in reduced coordinates
+!! gred(3,natom)  =  gradient wrt nuclear positions in reduced coordinates
 !! strten(6) = stress tensor (Ha/Bohr^3)
-!!
-!! PARENTS
-!!      m_effective_potential,m_fit_data,m_fit_polynomial_coeff,mover
-!!
-!! CHILDREN
-!!      ab_define_var,isfile,wrtout
 !!
 !! SOURCE
 
-subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,rprimd,&
+subroutine effective_potential_evaluate(eff_pot,energy,fcart,gred,strten,natom,rprimd,&
 &                                       displacement,du_delta,strain,xred,&
-&                                       compute_anharmonic,verbose)
-
-  implicit none
+&                                       compute_anharmonic,verbose,filename,elec_eval)
 
 !Arguments ------------------------------------
 !scalars
   integer, intent(in) :: natom
+  character(len=fnlen),optional,intent(in) :: filename
 !array
   type(effective_potential_type),intent(in) :: eff_pot
   real(dp),intent(out) :: energy
   real(dp),intent(out) :: fcart(3,natom)
-  real(dp),intent(out) :: fred(3,natom)
+  real(dp),intent(out) :: gred(3,natom)
   real(dp),intent(out) :: strten(6)
   real(dp),intent(in)  :: rprimd(3,3)
   real(dp),intent(in),optional  :: xred(3,natom)
   real(dp),intent(in),optional :: strain(6)
   real(dp),intent(in),optional :: displacement(3,natom)
   real(dp),intent(in),optional :: du_delta(6,3,natom)
-  logical,intent(in),optional :: verbose,compute_anharmonic
+  logical,intent(in),optional :: verbose,compute_anharmonic,elec_eval
 !Local variables-------------------------------
 !scalar
-  integer :: alpha,ii,ia,mu,ncell,comm
+  integer :: alpha,ii,ia,mu,ncell,comm,natom_for_scup
   real(dp):: energy_part,ucvol
-  logical :: has_strain = .FALSE.,need_verbose
+  logical :: has_strain,need_verbose
   logical :: iam_master,need_anharmonic
+  logical :: err_eng, err_for
+  logical*1 :: update_dens
+  logical :: need_elec_eval
   integer, parameter:: master = 0
 !array
   type(strain_type) :: strain_t
@@ -2246,11 +2202,13 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
   real(dp) :: fcart_part(3,natom)
   real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3)
   real(dp) :: strain_tmp(6),strten_part(6)
-  real(dp) :: energy_coeff_part(eff_pot%anharmonics_terms%ncoeff) 
+  real(dp) :: energy_coeff_part(eff_pot%anharmonics_terms%ncoeff)
   real(dp),allocatable :: xcart(:,:)
   character(len=500) :: msg
-
 ! *************************************************************************
+
+  !Hide SCALE-UP Variables
+  ABI_UNUSED(update_dens)
 
   !MPI variables
   comm = eff_pot%mpi_ifc%comm
@@ -2262,6 +2220,8 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
     sc_size(ii) = eff_pot%supercell%rlatt(ii,ii)
   end do
 
+  natom_for_scup = natom
+
   need_verbose = .TRUE.
   if(present(verbose)) then
     need_verbose = verbose
@@ -2272,33 +2232,36 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
     need_anharmonic = compute_anharmonic
   end if
 
+  need_elec_eval = .FALSE.
+  if(present(elec_eval)) need_elec_eval = elec_eval
+
 ! Check some variables
   if (natom /= eff_pot%supercell%natom) then
     write(msg,'(a,I7,a,I7,a)')' The number of atoms is not correct :',natom,&
 &   ' in argument istead of ',eff_pot%supercell%natom, ' in supercell'
-    MSG_ERROR(msg)
+    ABI_ERROR(msg)
   end if
 
   if (present(displacement))then
     if(size(displacement(1,:)) /= eff_pot%supercell%natom) then
       write(msg,'(a,I7,a,I7,a)')' The number of atoms is not correct :',size(displacement(1,:)),&
 &      ' in displacement array instead of ',eff_pot%supercell%natom, ' in supercell'
-      MSG_ERROR(msg)
+      ABI_ERROR(msg)
     end if
   end if
   if (present(du_delta))then
     if(size(du_delta,3) /= eff_pot%supercell%natom) then
       write(msg,'(a,I7,a,I7,a)')' The number of atoms is not correct :',size(du_delta,3),&
 &      ' in du_delta array instead of ',eff_pot%supercell%natom, ' in supercell'
-      MSG_ERROR(msg)
+      ABI_ERROR(msg)
     end if
   end if
   do ii=1,3
-    if(eff_pot%supercell%rlatt(ii,ii)<0.or.eff_pot%supercell%rlatt(ii,ii)>50)then
+    if(eff_pot%supercell%rlatt(ii,ii)<0.or.eff_pot%supercell%rlatt(ii,ii)>150)then
       write(msg, '(a,i0,a,i2,a,a,a,i0,a)' )&
 &     'eff_pot%supercell%rlatt(',ii,') is ',int(eff_pot%supercell%rlatt(ii,ii)),&
-&     ', which is lower than 0 of superior than 10.',ch10,'Action: correct ncell(',ii,').'
-      MSG_ERROR(msg)
+&     ', which is lower than 0 or superior than 150.',ch10,'Action: correct ncell(',ii,').'
+      ABI_ERROR(msg)
     end if
   end do
 
@@ -2308,12 +2271,14 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
   end if
 
   call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
+!  write(*,*) "---- UCVOL ----"
+!  write(*,*) ucvol
 
 !--------------------------------------------
 ! 1 - Set the perturbations and intialisation
 !--------------------------------------------
-
 ! Get strain
+  has_strain = .FALSE.
   strain_tmp(:) = zero
   if (present(strain)) then
     strain_tmp(:) = strain(:)
@@ -2344,7 +2309,7 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
     end if
   end if
 ! Get displacement and the variation of the displacmeent wr to strain
-  ABI_ALLOCATE(xcart,(3,natom))
+  ABI_MALLOC(xcart,(3,natom))
   disp_tmp(:,:) = zero
   du_delta_tmp(:,:,:) = zero
   if((.not.present(displacement).or..not.present(du_delta)).and.present(xred))then
@@ -2404,7 +2369,7 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
 !   ii = ii + 1
 !   if(ii > eff_pot%crystal%natom) ii = 1
 ! end do
- 
+
 !------------------------------------
 ! 3 - Computation of the IFC part :
 !------------------------------------
@@ -2447,6 +2412,8 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
   fcart_part(:,:)= zero
   strten_part(:) = zero
 
+! write(*,*) "--- STRTEN before harmonics evaluate --- "
+! write(*,*) strten(:)
   call harmonics_terms_evaluateElastic(eff_pot%harmonics_terms%elastic_constants,disp_tmp,energy_part,&
 &                                fcart_part,eff_pot%supercell%natom,eff_pot%crystal%natom,&
 &                                ncell,eff_pot%harmonics_terms%strain_coupling,strten_part,strain_tmp)
@@ -2462,6 +2429,8 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
   energy = energy + energy_part
   fcart(:,:) = fcart(:,:)  + fcart_part(:,:)
   strten(:) = strten(:) + strten_part(:)
+! write(*,*) "--- STRTEN after harmonics evaluate --- "
+! write(*,*) strten(:)
 
 !------------------------------------
 ! 5 - Treat 3rd order strain-coupling:
@@ -2532,7 +2501,8 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
 &                                  energy_part,energy_coeff_part,fcart_part,eff_pot%supercell%natom,&
 &                                  eff_pot%crystal%natom,eff_pot%anharmonics_terms%ncoeff,&
 &                                  sc_size,strain_tmp,strten_part,eff_pot%mpi_coeff%my_ncell,&
-&                                  eff_pot%mpi_coeff%my_index_cells,eff_pot%mpi_coeff%comm)
+&                                  eff_pot%mpi_coeff%my_index_cells,eff_pot%mpi_coeff%comm,&
+&                                  filename=filename)
 
     if(need_verbose)then
       write(msg, '(a,1ES24.16,a)' ) ' Energy of the fitted coefficient          :',&
@@ -2572,11 +2542,46 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
     end if
   end if
 
+
+!-------------------------------------------
+! 8 - Compute electronic Part with SCALE-UP
+!------------------------------------------
+
+err_eng = .FALSE.
+err_for = .FALSE.
+
+energy_part = 0
+fcart_part = 0
+
+if(need_elec_eval)then
+#if defined DEV_MS_SCALEUP
+   update_dens = .TRUE.
+   write(msg,'(a)') ' wohoo i was here and call scale-up now!---STILL WOHOOO!---'
+   call wrtout(ab_out,msg,'COLL')
+   call wrtout(std_out,msg,'COLL')
+   err_eng = global_calculate_energy(energy_part,strain_tmp,disp_tmp,natom_for_scup)
+   err_for = global_calculate_forces(fcart_part,strain_tmp,disp_tmp,natom_for_scup,update_dens)
+   write(msg,'(a,1ES24.16,a)') 'The Energy of the electronic model is: ', energy_part,' unit?'
+   call wrtout(ab_out,msg,'COLL')
+   call wrtout(std_out,msg,'COLL')
+#endif
+
+energy = energy + energy_part
+fcart = fcart + fcart_part
+endif
+
+
+
 !-----------------------------------
-! 8 - Add variation of the atomic
-!     displacement due to the strain
+! 9 - Add stress due to forces on
+!     atoms and variation of disp
+!     due to strain
 !-----------------------------------
-  if (has_strain) then
+
+! multiply forces by -1
+  fcart = -1 * fcart
+
+!Calculatei
     strten_part(:) = zero
     do ia = 1,eff_pot%supercell%natom
       do mu = 1,3
@@ -2586,25 +2591,26 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
       end do
     end do
     strten(:) = strten(:) + strten_part(:)
-  end if
+
+! write(*,*) "--- STRTEN after du/deta application --- "
+! write(*,*) strten(:)
 
 !---------------------------------
-! 8 - Apply factors
+! 10 - Renormalize stress
 !---------------------------------
 
 ! divide stess tensor by ucvol
   strten = strten / ucvol
 
-! multiply forces by -1
-  fcart = -1 * fcart
-
+! write(*,*) "--- STRTEN after /ucvol  --- "
+! write(*,*) strten(:)
 ! Redistribute the residuale of the forces
   call effective_potential_distributeResidualForces(eff_pot,fcart,eff_pot%supercell%natom)
 
-  call fcart2fred(fcart,fred,rprimd,natom)
+  call fcart2gred(fcart,gred,rprimd,natom)
 
 !------------------------------------
-! 9 - Final Print:
+! 11 - Final Print:
 !------------------------------------
 
   if(need_verbose)then
@@ -2665,7 +2671,7 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
 
 
 
-  ABI_DEALLOCATE(xcart)
+  ABI_FREE(xcart)
 
 end subroutine effective_potential_evaluate
 !!***
@@ -2700,19 +2706,11 @@ end subroutine effective_potential_evaluate
 !! displacement(3,natom) = cartesian atomic displacement between two configurations (Bohr)
 !! du_delta(6,3,natom)   = variation of the displacmeent wr to strain
 !!
-!! PARENTS
-!!      m_effective_potential,m_fit_data
-!!
-!! CHILDREN
-!!      ab_define_var,isfile,wrtout
-!!
 !! SOURCE
 
 subroutine effective_potential_getDisp(displacement,du_delta,natom,rprimd_hist,rprimd_ref,comm,&
 &                                      xcart_hist,xred_hist,xred_ref,xcart_ref,compute_displacement,&
 &                                      compute_duDelta)
-
-  implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2728,26 +2726,26 @@ subroutine effective_potential_getDisp(displacement,du_delta,natom,rprimd_hist,r
   integer :: ii,ia,ib,mu
   integer :: ierr,nproc,my_rank,natom_alone,my_natom
   character(len=500) :: msg
-  logical :: has_strain = .FALSE.
+  logical :: has_strain
   logical :: need_displacement,need_duDelta
 !array
   integer,parameter :: alpha(9)=(/1,2,3,3,3,2,2,1,1/),beta(9)=(/1,2,3,2,1,1,3,3,2/)
   integer,allocatable :: my_atoms(:)
   type(strain_type) :: strain
   real(dp) :: xcart_hist_tmp(3,natom),xcart_ref_tmp(3,natom)
-  real(dp) :: xred_ref_tmp(3,natom)
+  real(dp) :: xred_ref_tmp(3,natom),strain_inv(3,3),strain_inv_u(3),strain_tmp(3,3)
 ! *************************************************************************
 
   if (.not.(present(xred_ref).or.present(xcart_ref))) then
      write(msg, '(3a)' )&
 &         'You need at least give xcart_ref or xred_ref '
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
   end if
 
   if (.not.(present(xred_hist).or.present(xcart_hist))) then
      write(msg, '(3a)' )&
 &         'You need at least give xcart_hist or xred_hist '
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
   end if
 
   need_duDelta = .TRUE.
@@ -2765,7 +2763,7 @@ subroutine effective_potential_getDisp(displacement,du_delta,natom,rprimd_hist,r
   if(my_rank >= (nproc-natom_alone)) then
     my_natom = my_natom  + 1
   end if
-  ABI_ALLOCATE(my_atoms,(my_natom))
+  ABI_MALLOC(my_atoms,(my_natom))
   my_atoms = 0
   do ii=1,my_natom
     if(my_rank >= (nproc-natom_alone))then
@@ -2779,11 +2777,30 @@ subroutine effective_potential_getDisp(displacement,du_delta,natom,rprimd_hist,r
 !--------------------------------------------
 ! 1 - Get the strain for this step
 !--------------------------------------------
-
+  has_strain = .FALSE.
   call strain_get(strain,rprim=rprimd_ref,rprim_def=rprimd_hist)
   if (strain%name /= "reference")  then
     has_strain = .TRUE.
+    strain_tmp = strain%strain
+    strain_tmp(1,1) = strain_tmp(1,1) + 1.0
+    strain_tmp(2,2) = strain_tmp(2,2) + 1.0
+    strain_tmp(3,3) = strain_tmp(3,3) + 1.0
+    ! get (1+eta)^-1
+    call matr3inv(strain_tmp,strain_inv)
+  else if (strain%name == "reference")  then
+    strain_inv(:,:) = zero
+    strain_inv(1,1) = 1.0
+    strain_inv(2,2) = 1.0
+    strain_inv(3,3) = 1.0
   end if
+!  write(*,*) "---- STRAIN ----"
+!  do ii = 1,3
+!    write(*,*) strain%strain(ii,:)
+!  enddo
+!  write(*,*) "---- 1+STRAIN inv ----"
+!  do ii = 1,3
+!    write(*,*) strain_inv(ii,:)
+!  enddo
 
 ! fill the history position
   if(present(xcart_hist)) then
@@ -2791,7 +2808,7 @@ subroutine effective_potential_getDisp(displacement,du_delta,natom,rprimd_hist,r
   else
     call xred2xcart(natom, rprimd_hist, xcart_hist_tmp, xred_hist)
   end if
-  
+
 ! Fill the reference position and change the cartesian coordinates
 ! if the rprimd is different
   if(has_strain) then
@@ -2812,35 +2829,36 @@ subroutine effective_potential_getDisp(displacement,du_delta,natom,rprimd_hist,r
 ! Compute displacement
   if(need_displacement)then
     displacement(:,:) = zero
+!    write(*,*) "-----   DISP -----"
     do ii = 1, natom
-      displacement(:,ii) = xcart_hist_tmp(:,ii) - xcart_ref_tmp(:,ii) 
+      displacement(:,ii) = xcart_hist_tmp(:,ii) - xcart_ref_tmp(:,ii)
+!      write(*,*) displacement(:,ii)
     end do
   end if
 
-! Get also the variation of the displacmeent wr to strain
-  if(has_strain.and.need_duDelta) then
-    du_delta(:,:,:)   = zero
-!   Compute displacmeent wr to strain
-!   within the metric tensor formulation
-!   \frac{\partial u_{k}}{\partial \epsilon_{\alpha\beta}}=
-!    \frac{1}{2} (\delta_{\alpha,k} u_{\beta}+ \delta_{\beta,k} u_{\alpha})
-    do ia=1,my_natom
-      ib = my_atoms(ia)
-      do ii=1,6
-        do mu=1,3
-          if(alpha(ii)==mu)then
-            du_delta(ii,mu,ib) = du_delta(ii,mu,ib) + half * displacement(beta(ii),ib)
-          end if
-          if(beta(ii)==mu)then
-            du_delta(ii,mu,ib) = du_delta(ii,mu,ib) + half * displacement(alpha(ii),ib)
-          end if
-        end do
-      end do
-    end do
-    call xmpi_sum(du_delta , comm, ierr)
-  end if
+!   Du_Delta after Equation A4 in 2017 Paper Carlos
+  du_delta=zero
+  do ia=1,my_natom
+    ib = my_atoms(ia)
+    !Calc (1+eta)^-1 * disp(ib)
+    strain_inv_u = MATMUL(strain_inv,displacement(:,ib))
+!    write(*,*) "--- strain_inv_u ---"
+!    write(*,*) strain_inv_u
+    ! fill du_delta_e
+    do ii = 1,6
+      do mu = 1,3
+        if(alpha(ii)==mu)then
+          du_delta(ii,mu,ib) = du_delta(ii,mu,ib) + half * strain_inv_u(beta(ii))
+        end if
+        if(beta(ii)==mu)then
+          du_delta(ii,mu,ib) = du_delta(ii,mu,ib) + half * strain_inv_u(alpha(ii))
+        end if
+      enddo
+    enddo
+  enddo
+  call xmpi_sum(du_delta , comm, ierr)
 
-  ABI_DEALLOCATE(my_atoms)
+  ABI_FREE(my_atoms)
 
 end subroutine effective_potential_getDisp
 !!***
@@ -2860,17 +2878,9 @@ end subroutine effective_potential_getDisp
 !! OUTPUT
 !! fcart   = forces in cartesian coordinates
 !!
-!! PARENTS
-!!      m_effective_potential
-!!
-!! CHILDREN
-!!      ab_define_var,isfile,wrtout
-!!
 !! SOURCE
 
 subroutine effective_potential_distributeResidualForces(eff_pot,fcart,natom)
-
-  implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2905,6 +2915,74 @@ subroutine effective_potential_distributeResidualForces(eff_pot,fcart,natom)
 end subroutine effective_potential_distributeResidualForces
 !!***
 
+!****f* m_effective_potential/effective_potential_writeAnhHead
+!!
+!! NAME
+!! effective_potential_writeAnhHead
+!!
+!! FUNCTION
+!! Write Header of anharmonic_energy_terms.out file
+!!
+!! INPUTS
+!! natom   = number of atoms
+!! eff_pot = effective potential structure
+!!
+!! OUTPUT
+!!
+!! SOURCE
+
+subroutine effective_potential_writeAnhHead(ncoeff,filename,anh_terms)
+
+  implicit none
+
+!Arguments ------------------------------------
+!scalars
+  integer, intent(in) :: ncoeff
+!Strings/Characters
+  character(len=fnlen) :: filename
+!array
+  type(anharmonics_terms_type ),intent(in) :: anh_terms
+!Local variables-------------------------------
+!scalar
+  integer :: icoeff,unit_out
+!Strings/Characters
+  character(len=fnlen) :: name_file
+  character(len=200):: term_name
+!array
+
+! *************************************************************************
+
+  ! Marcus: if wanted: analyze anharmonic terms of effective potential &&
+  ! and print anharmonic contribution to file anharmonic_energy_terms.out
+  ! Open File and write header
+  name_file=trim(filename)//'_anharmonic_terms_energy.dat'
+  unit_out = get_unit()
+  open(unit=unit_out,file=name_file,status='replace',form='formatted')
+  write(unit_out,*) '#---------------------------------------------#'
+  write(unit_out,*) '#    Anharmonic Terms Energy Contribution     #'
+  write(unit_out,*) '#---------------------------------------------#'
+  write(unit_out,*) ''
+  write(unit_out,'(A,I5)') 'Number of Terms: ', ncoeff
+  write(unit_out,*) ''
+  write(unit_out,'(A)') 'Terms     Names'
+  do icoeff=1,ncoeff
+    term_name = anh_terms%coefficients(icoeff)%name
+    write(unit_out,'(I5,A,A)') icoeff,'     ',trim(term_name)
+  enddo
+  write(unit_out,*) ''
+  write(unit_out,'(A)',advance='no')  'Cycle/Terms'
+  do icoeff=1,ncoeff
+    if(icoeff<ncoeff)then
+    write(unit_out,'(I5)',advance='no') icoeff
+    else
+    write(unit_out,'(I5)',advance='yes') icoeff
+    endif
+  enddo
+  !close(unit_out)
+
+end subroutine effective_potential_writeAnhHead
+
+
 !AM_EXPERIMENTAL SECTION
 !!****f* m_effective_potential/equal
 !! NAME
@@ -2922,8 +3000,6 @@ end subroutine effective_potential_distributeResidualForces
 !! SOURCE
 
 pure function effective_potential_compare(e1,e2) result (res)
-!Arguments ------------------------------------
- implicit none
 
 !Arguments ------------------------------------
   type(effective_potential_type), intent(in) :: e1,e2
@@ -2956,18 +3032,10 @@ end function effective_potential_compare
 ! !! OUTPUT
 ! !! ddb   = ddb with all information
 ! !!
-! !! PARENTS
-! !!      m_effective_potential
-! !!
-! !! CHILDREN
-! !!      ab_define_var,isfile,wrtout
-! !!
 ! !! SOURCE
 
 ! subroutine effective_potential_effpot2ddb(ddb,crystal,eff_pot,ncell,nph1l,option,qph1l)
 
-
-!   implicit none
 
 ! !Arguments ------------------------------------
 ! !scalars
@@ -3046,12 +3114,12 @@ end function effective_potential_compare
 !     ddb%acell  = one
 !     msym   = 1
 ! !  Setup crystal type
-!     ABI_ALLOCATE(xred,(3,ddb%natom))
+!     ABI_MALLOC(xred,(3,ddb%natom))
 ! !    call xcar2xred(ddb%natom,eff_pot%crystal%rprimd,eff_pot%crystal%xcart,xred)
 ! !Warning znucl is dimension with ntypat = nspsp hence alchemy is not supported here
-!     ABI_ALLOCATE(symrel,(3,3,msym))
-!     ABI_ALLOCATE(symafm,(msym))
-!     ABI_ALLOCATE(tnons,(3,msym))
+!     ABI_MALLOC(symrel,(3,3,msym))
+!     ABI_MALLOC(symafm,(msym))
+!     ABI_MALLOC(tnons,(3,msym))
 
 ! !    call crystal_init(ddb%amu,crystal,1,ddb%natom,size(eff_pot%crystal%znucl),eff_pot%crystal%ntypat,1,&
 ! !&       eff_pot%crystal%rprimd,eff_pot%crystal%typat,xred,eff_pot%crystal%znucl,&
@@ -3060,11 +3128,11 @@ end function effective_potential_compare
 ! !    call crystal_print(crystal)
 ! !    stop
 ! !TEST_AM
-!     ABI_DEALLOCATE(symrel)
-!     ABI_DEALLOCATE(symafm)
-!     ABI_DEALLOCATE(tnons)
+!     ABI_FREE(symrel)
+!     ABI_FREE(symafm)
+!     ABI_FREE(tnons)
 
-!     ABI_DEALLOCATE(xred)
+!     ABI_FREE(xred)
 
 !    else  if (option==2) then
 ! !   Compute different matrices in real and reciprocal space, also
@@ -3126,16 +3194,9 @@ end function effective_potential_compare
 ! !! OUTPUT
 ! !! eff_pot
 ! !!
-! !! PARENTS
-! !!
-! !! CHILDREN
-! !!      ab_define_var,isfile,wrtout
-! !!
 ! !! SOURCE
 
 ! subroutine effective_potential_printPDOS(eff_pot,filename,ncell,nph1l,option,qph1l)
-
-!   implicit none
 
 ! !Arguments ------------------------------------
 ! !scalars
@@ -3203,16 +3264,9 @@ end function effective_potential_compare
 !! OUTPUT
 !! dynmat   = ddb with all information
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      ab_define_var,isfile,wrtout
-!!
 !! SOURCE
 
 subroutine effective_potential_computeGradient(delta,fcart_out,eff_pot,natom,ncell,option,comm)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -3230,7 +3284,7 @@ subroutine effective_potential_computeGradient(delta,fcart_out,eff_pot,natom,nce
 !array
  real(dp):: strten(6)
  real(dp),allocatable :: disp(:,:),diff(:)
- real(dp),allocatable :: fred(:,:),fcart(:,:),xred(:,:)
+ real(dp),allocatable :: gred(:,:),fcart(:,:),xred(:,:)
 
 ! *************************************************************************
 
@@ -3264,11 +3318,11 @@ subroutine effective_potential_computeGradient(delta,fcart_out,eff_pot,natom,nce
 
 ! Allocation of forces arrays
 
- ABI_ALLOCATE(disp,(3,natom))
- ABI_ALLOCATE(diff,(npt))
- ABI_ALLOCATE(fred,(3,natom))
- ABI_ALLOCATE(fcart,(3,natom))
- ABI_ALLOCATE(xred,(3,natom))
+ ABI_MALLOC(disp,(3,natom))
+ ABI_MALLOC(diff,(npt))
+ ABI_MALLOC(gred,(3,natom))
+ ABI_MALLOC(fcart,(3,natom))
+ ABI_MALLOC(xred,(3,natom))
 
  fcart_out = zero
 
@@ -3282,12 +3336,12 @@ subroutine effective_potential_computeGradient(delta,fcart_out,eff_pot,natom,nce
        delt = (-(npt/2+1)+ii) * delta
        disp = zero
        disp(mu,ia) = delt * eff_pot%supercell%rprimd(mu,mu)
-       call effective_potential_evaluate(eff_pot,energy,fcart,fred,&
+       call effective_potential_evaluate(eff_pot,energy,fcart,gred,&
 &                                        strten,natom,eff_pot%supercell%rprimd,&
 &                                        displacement=disp,&
 &                                        compute_anharmonic=.FALSE.,verbose=.false.)
 
-       !       diff(ii,:,:) = fred(:,:)
+       !       diff(ii,:,:) = gred(:,:)
        diff(ii) = energy
      end do
 
@@ -3319,11 +3373,11 @@ subroutine effective_potential_computeGradient(delta,fcart_out,eff_pot,natom,nce
 !TEST_AM
 
 ! Deallocation of arrays
- ABI_DEALLOCATE(disp)
- ABI_DEALLOCATE(diff)
- ABI_DEALLOCATE(fred)
- ABI_DEALLOCATE(fcart)
- ABI_DEALLOCATE(xred)
+ ABI_FREE(disp)
+ ABI_FREE(diff)
+ ABI_FREE(gred)
+ ABI_FREE(fcart)
+ ABI_FREE(xred)
 
 
  end subroutine effective_potential_computeGradient
@@ -3347,16 +3401,9 @@ subroutine effective_potential_computeGradient(delta,fcart_out,eff_pot,natom,nce
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      ab_define_var,isfile,wrtout
-!!
 !! SOURCE
 
  subroutine effective_potential_checkDEV(eff_pot,hist,natom,ntime)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -3371,7 +3418,7 @@ subroutine effective_potential_computeGradient(delta,fcart_out,eff_pot,natom,nce
  real(dp):: energy,delt,delta,ucvol
  !arrays
  real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3),mat_def(3,3),identity(3,3)
- real(dp):: fcart(3,natom),fred(3,natom),strten(6),rprimd(3,3)
+ real(dp):: fcart(3,natom),gred(3,natom),strten(6),rprimd(3,3)
  real(dp):: rprimd_def(3,3),rprimd_ref(3,3),deltalist(5)
  real(dp):: disp(3,natom),disp_red(3,natom),strain(6),du_delta(6,3,natom),diff(5)
  real(dp),allocatable :: xred(:,:)
@@ -3383,16 +3430,16 @@ subroutine effective_potential_computeGradient(delta,fcart_out,eff_pot,natom,nce
  !Do some checks
  if(ntime /= hist%mxhist)then
    write(msg,'(a)')'ntime is not correct'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
  if(natom /= size(hist%xred,2)) then
    write(msg,'(a)')'natom is not correct'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
 
- ABI_ALLOCATE(xred,(3,natom))
+ ABI_MALLOC(xred,(3,natom))
  xred = zero
 
 !option 1 => set the reference for the test
@@ -3404,7 +3451,7 @@ subroutine effective_potential_computeGradient(delta,fcart_out,eff_pot,natom,nce
  istep = 4
  xred = hist%xred(:,:,istep)
  rprimd =  hist%rprimd(:,:,istep)
- 
+
  rprimd_ref =  eff_pot%supercell%rprimd
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
 
@@ -3412,25 +3459,25 @@ subroutine effective_potential_computeGradient(delta,fcart_out,eff_pot,natom,nce
  delta = 0.001
  deltalist = (/-2*delta,-delta,real(0.0,dp),delta,2*delta/)
  strain = zero
- 
+
    do ia=1,natom
      do mu=1,3
        write(std_out,*) "atm: ",ia," dir: ",mu
        do ii=1,npt
          delt = deltalist(ii)
 
-!        Get the initial displacement        
+!        Get the initial displacement
          call effective_potential_getDisp(disp,du_delta,natom,rprimd,&
 &                                         eff_pot%supercell%rprimd,1,xred_hist=xred,&
 &                                         xcart_ref=eff_pot%supercell%xcart,&
 &                                         compute_displacement = .true.,compute_duDelta = .true.)
 
-!        Add the delta         
+!        Add the delta
          call xcart2xred(natom, rprimd, disp, disp_red)
          disp_red(mu,ia) = disp_red(mu,ia) + delt
          call xred2xcart(natom, rprimd, disp, disp_red)
 
-         call effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,rprimd,&
+         call effective_potential_evaluate(eff_pot,energy,fcart,gred,strten,natom,rprimd,&
 &                                          xred=xred,du_delta=du_delta,&
 &                                          displacement=disp,compute_anharmonic=.true.,verbose=.false.)
          diff(ii) = energy
@@ -3443,13 +3490,13 @@ subroutine effective_potential_computeGradient(delta,fcart_out,eff_pot,natom,nce
 &                                   xcart_ref=eff_pot%supercell%xcart,&
 &                                   compute_displacement = .true.,compute_duDelta = .true.)
 
-   call effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,rprimd,&
+   call effective_potential_evaluate(eff_pot,energy,fcart,gred,strten,natom,rprimd,&
 &                                    xred=xred,du_delta=du_delta,&
 &                                    displacement=disp,compute_anharmonic=.true.,verbose=.false.)
 
-   write(std_out,*) "Analyti:",fred(mu,ia)
+   write(std_out,*) "Analyti:",gred(mu,ia)
    write(std_out,*) "FD     :",(-diff(5)+8*diff(4)-8*diff(2)+diff(1)) / (12*delta)
-   write(std_out,*) "Diff(%):",abs(100*(fred(mu,ia)-((-diff(5)+8*diff(4)-8*diff(2)+diff(1))&
+   write(std_out,*) "Diff(%):",abs(100*(gred(mu,ia)-((-diff(5)+8*diff(4)-8*diff(2)+diff(1))&
 &             / (12*delta) )) / ((-diff(5)+8*diff(4)-8*diff(2)+diff(1)) / (12*delta) ))
 
  end do
@@ -3484,13 +3531,13 @@ forall(ii=1:3)identity(ii,ii)=1
 ! &                                     xcart_ref=eff_pot%supercell%xcart,&
 ! &                                     compute_displacement = .true.,compute_duDelta = .true.)
 
-!      call effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,rprimd_def,&
+!      call effective_potential_evaluate(eff_pot,energy,fcart,gred,strten,natom,rprimd_def,&
 ! &                                      xred=xred,du_delta=du_delta,&
 ! &                                      displacement=disp,strain=strain,&
 ! &                                      compute_anharmonic=.true.,verbose=.false.)
 
 !   Option 2 => compute the disps within evaluate
-    call effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,rprimd_def,&
+    call effective_potential_evaluate(eff_pot,energy,fcart,gred,strten,natom,rprimd_def,&
 &                                     xred=xred,compute_anharmonic=.true.,verbose=.false.)
 
 
@@ -3506,15 +3553,15 @@ forall(ii=1:3)identity(ii,ii)=1
 ! &                                   xcart_ref=eff_pot%supercell%xcart,&
 ! &                                   compute_displacement = .true.,compute_duDelta = .true.)
 
-!    call effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,rprimd,&
+!    call effective_potential_evaluate(eff_pot,energy,fcart,gred,strten,natom,rprimd,&
 ! &                                    xred=xred,du_delta=du_delta,&
 ! &                                    displacement=disp,&
 ! &                                    compute_anharmonic=.true.,verbose=.false.)
 
 !  Option 2 => compute the disps within evaluate
-   call effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,rprimd,&
+   call effective_potential_evaluate(eff_pot,energy,fcart,gred,strten,natom,rprimd,&
 &                                    xred=xred,compute_anharmonic=.true.,verbose=.false.)
-   
+
  write(std_out,*) "Analyti:",strten(jj)
  write(std_out,*) "FD     :",(-diff(5)+8*diff(4)-8*diff(2)+diff(1)) / (12*delta) / ucvol
  write(std_out,*) "Diff(%):",abs(100*(strten(jj)-((-diff(5)+8*diff(4)-8*diff(2)+diff(1))&
@@ -3533,13 +3580,6 @@ end subroutine effective_potential_checkDEV
 !! This routine print the effective potential into netcdf format
 !! Several options are available
 !!
-!! COPYRIGHT
-!! Copyright (C) 2000-2019 ABINIT group (AM)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
-!!
 !! INPUTS
 !! filename = the name of output file
 !! eff_pot  = datatype contains the effective potential
@@ -3548,17 +3588,9 @@ end subroutine effective_potential_checkDEV
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      multibinit
-!!
-!! CHILDREN
-!!      ab_define_var,isfile,wrtout
-!!
 !! SOURCE
 
 subroutine effective_potential_writeNETCDF(eff_pot,option,filename)
-
-  implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -3627,7 +3659,7 @@ subroutine effective_potential_writeNETCDF(eff_pot,option,filename)
 
    npsp = size(eff_pot%crystal%znucl)
    if (npsp /= eff_pot%crystal%ntypat) then
-     MSG_WARNING("HIST file does not support alchemical mixing!")
+     ABI_WARNING("HIST file does not support alchemical mixing!")
    end if
    ncerr = nf90_def_dim(ncid,"npsp",npsp,npsp_id)
    NCF_CHECK_MSG(ncerr," define dimension npsp")
@@ -3644,7 +3676,7 @@ subroutine effective_potential_writeNETCDF(eff_pot,option,filename)
    ncerr = nf90_def_dim(ncid,"two",2,two_id)
    NCF_CHECK_MSG(ncerr," define dimension two")
 
-!  Dimensions for xcart,xred,fcart,fred and vel
+!  Dimensions for xcart,xred,fcart,gred and vel
    dimXids = (/ xyz_id, natom_id /)
 !  Dimensions for rprimd
    dimRids = (/ xyz_id, xyz_id /)

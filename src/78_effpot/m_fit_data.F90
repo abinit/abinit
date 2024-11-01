@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_fit_data
 !!
 !! NAME
@@ -7,7 +6,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 2010-2019 ABINIT group (AM)
+!! Copyright (C) 2010-2024 ABINIT group (AM)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -39,7 +38,7 @@ module m_fit_data
 !!
 !! FUNCTION
 !! datatype for with all the information for the fit process
-!! This structure contains all the informations of the training set:
+!! This structure contains all the information of the training set:
 !!   - ntime
 !!   - displacement
 !!   - du_delta
@@ -119,10 +118,10 @@ module m_fit_data
 !   The model constains only harmonic part
 
    type(training_set_type) :: training_set
-!    datatype with the informations of the training set
+!    datatype with the information of the training set
    
  end type fit_data_type
- 
+
 !routine for fit_data
  public :: fit_data_compute
  public :: fit_data_init
@@ -155,11 +154,6 @@ CONTAINS  !=====================================================================
 !! OUTPUT
 !! fit_data<fit_data_type> = fit_data datatype to be initialized
 !!
-!! PARENTS
-!!      m_fit_data
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine fit_data_init(fit_data,energy_diff,fcart_diff,natom,ntime,strten_diff,ts)
@@ -181,13 +175,13 @@ subroutine fit_data_init(fit_data,energy_diff,fcart_diff,natom,ntime,strten_diff
  if(natom /= ts%natom)then
    write(message, '(a)')&
 &      ' The number of atoms does not correspond to the training set'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
  if(ntime /= ts%ntime)then
    write(message, '(a)')&
 &      ' The number of time does not correspond to the training set'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
  
 !Free the output 
@@ -198,13 +192,13 @@ subroutine fit_data_init(fit_data,energy_diff,fcart_diff,natom,ntime,strten_diff
  fit_data%natom = natom
 
 !allocate arrays
- ABI_ALLOCATE(fit_data%fcart_diff,(3,natom,ntime))
+ ABI_MALLOC(fit_data%fcart_diff,(3,natom,ntime))
  fit_data%fcart_diff(:,:,:) = fcart_diff(:,:,:)
  
- ABI_ALLOCATE(fit_data%strten_diff,(6,ntime))
+ ABI_MALLOC(fit_data%strten_diff,(6,ntime))
  fit_data%strten_diff(:,:) = strten_diff(:,:)
 
- ABI_ALLOCATE(fit_data%energy_diff,(ntime))
+ ABI_MALLOC(fit_data%energy_diff,(ntime))
  fit_data%energy_diff(:) = energy_diff
  
  call training_set_init(fit_data%training_set,ts%displacement,ts%du_delta,&
@@ -224,11 +218,6 @@ end subroutine fit_data_init
 !! INPUTS
 !! fit_data<fit_data_type> = fit_data to be free
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_fit_data,m_fit_polynomial_coeff
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -251,13 +240,13 @@ subroutine fit_data_free(fit_data)
 
 ! Deallocate arrays  
   if(allocated(fit_data%energy_diff)) then
-    ABI_DEALLOCATE(fit_data%energy_diff)
+    ABI_FREE(fit_data%energy_diff)
   end if
   if(allocated(fit_data%fcart_diff)) then
-    ABI_DEALLOCATE(fit_data%fcart_diff)
+    ABI_FREE(fit_data%fcart_diff)
   end if
   if(allocated(fit_data%strten_diff)) then
-    ABI_DEALLOCATE(fit_data%strten_diff)
+    ABI_FREE(fit_data%strten_diff)
   end if
   call training_set_free(fit_data%training_set)
    
@@ -284,11 +273,6 @@ end subroutine fit_data_free
 !!
 !! OUTPUT
 !! fit_data<fit_data_type> = fit_data is now filled
-!!
-!! PARENTS
-!!      m_fit_polynomial_coeff
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -319,7 +303,7 @@ subroutine fit_data_compute(fit_data,eff_pot,hist,comm,verbose)
  real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3)
  real(dp),allocatable :: energy_diff(:)
  real(dp),allocatable :: du_delta(:,:,:,:),displacement(:,:,:),strain(:,:)
- real(dp),allocatable :: fcart_diff(:,:,:),fred_fixed(:,:,:),fcart_fixed(:,:,:)
+ real(dp),allocatable :: fcart_diff(:,:,:),gred_fixed(:,:,:),fcart_fixed(:,:,:)
  real(dp),allocatable :: strten_diff(:,:),strten_fixed(:,:),sqomega(:),ucvol(:)
  type(strain_type) :: strain_t
  type(training_set_type) :: ts
@@ -337,27 +321,27 @@ subroutine fit_data_compute(fit_data,eff_pot,hist,comm,verbose)
 &      'The number of atoms in the hist file does not correspond to the supercell.',ch10,&
 &      'You should call the routine fit_polynomial_coeff_mapHistToRef before',ch10,&
 &      'Action: Contact abinit group'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
 !Allocation of temporary arrays
- ABI_ALLOCATE(displacement,(3,natom,ntime))
- ABI_ALLOCATE(du_delta,(6,3,natom,ntime))
- ABI_ALLOCATE(energy_diff,(ntime))
- ABI_ALLOCATE(fcart_fixed,(3,natom,ntime))
- ABI_ALLOCATE(fcart_diff,(3,natom,ntime))
- ABI_ALLOCATE(fred_fixed,(3,natom,ntime))
- ABI_ALLOCATE(strain,(6,ntime))
- ABI_ALLOCATE(strten_fixed,(6,ntime))
- ABI_ALLOCATE(strten_diff,(6,ntime))
- ABI_ALLOCATE(sqomega,(ntime))
- ABI_ALLOCATE(ucvol,(ntime))
+ ABI_MALLOC(displacement,(3,natom,ntime))
+ ABI_MALLOC(du_delta,(6,3,natom,ntime))
+ ABI_MALLOC(energy_diff,(ntime))
+ ABI_MALLOC(fcart_fixed,(3,natom,ntime))
+ ABI_MALLOC(fcart_diff,(3,natom,ntime))
+ ABI_MALLOC(gred_fixed,(3,natom,ntime))
+ ABI_MALLOC(strain,(6,ntime))
+ ABI_MALLOC(strten_fixed,(6,ntime))
+ ABI_MALLOC(strten_diff,(6,ntime))
+ ABI_MALLOC(sqomega,(ntime))
+ ABI_MALLOC(ucvol,(ntime))
 
  displacement = zero 
  du_delta = zero 
  strain = zero; 
  fcart_fixed  = zero 
- fred_fixed  = zero
+ gred_fixed  = zero
  strain = zero 
  strten_fixed = zero 
  strten_diff = zero
@@ -386,7 +370,7 @@ subroutine fit_data_compute(fit_data,eff_pot,hist,comm,verbose)
 &                                   compute_displacement=.TRUE.,compute_duDelta=.TRUE.)
 
 !  Get forces and stresses from harmonic part (fixed part)     
-   call effective_potential_evaluate(eff_pot,energy,fcart_fixed(:,:,itime),fred_fixed(:,:,itime),&
+   call effective_potential_evaluate(eff_pot,energy,fcart_fixed(:,:,itime),gred_fixed(:,:,itime),&
 &                                    strten_fixed(:,itime),natom,hist%rprimd(:,:,itime),&
 &                                    displacement=displacement(:,:,itime),&
 &                                    du_delta=du_delta(:,:,:,itime),strain=strain(:,itime),&
@@ -402,7 +386,7 @@ subroutine fit_data_compute(fit_data,eff_pot,hist,comm,verbose)
    fcart_diff(:,:,itime) =  hist%fcart(:,:,itime) - fcart_fixed(:,:,itime)
    energy_diff(itime)    =  hist%etot(itime) - energy
    strten_diff(:,itime)  =  hist%strten(:,itime) - strten_fixed(:,itime)
- end do
+ end do ! End Loop itime 
    
 !Set the training set
  call training_set_init(ts,displacement,du_delta,natom,ntime,strain,sqomega,ucvol)
@@ -411,20 +395,23 @@ subroutine fit_data_compute(fit_data,eff_pot,hist,comm,verbose)
 
 !Free space
  call training_set_free(ts)
- ABI_DEALLOCATE(displacement)
- ABI_DEALLOCATE(du_delta)
- ABI_DEALLOCATE(energy_diff)
- ABI_DEALLOCATE(fcart_fixed)
- ABI_DEALLOCATE(fcart_diff)
- ABI_DEALLOCATE(fred_fixed)
- ABI_DEALLOCATE(strain)
- ABI_DEALLOCATE(strten_fixed)
- ABI_DEALLOCATE(strten_diff)
- ABI_DEALLOCATE(sqomega)
- ABI_DEALLOCATE(ucvol)
+ ABI_FREE(displacement)
+ ABI_FREE(du_delta)
+ ABI_FREE(energy_diff)
+ ABI_FREE(fcart_fixed)
+ ABI_FREE(fcart_diff)
+ ABI_FREE(gred_fixed)
+ ABI_FREE(strain)
+ ABI_FREE(strten_fixed)
+ ABI_FREE(strten_diff)
+ ABI_FREE(sqomega)
+ ABI_FREE(ucvol)
 
 end subroutine fit_data_compute
 !!***
+
+
+
 
 !!****f* m_fit_data/training_set_init
 !!
@@ -445,11 +432,6 @@ end subroutine fit_data_compute
 !!
 !! OUTPUT
 !! ts<training_set_type> = training set to be initialized
-!!
-!! PARENTS
-!!      m_fit_data
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -475,19 +457,19 @@ subroutine training_set_init(ts,displacement,du_delta,natom,ntime,strain,sqomega
  ts%natom = natom
 
 !allocate arrays
- ABI_ALLOCATE(ts%displacement,(3,natom,ntime))
+ ABI_MALLOC(ts%displacement,(3,natom,ntime))
  ts%displacement(:,:,:) = displacement(:,:,:)
  
- ABI_ALLOCATE(ts%du_delta,(6,3,natom,ntime))
+ ABI_MALLOC(ts%du_delta,(6,3,natom,ntime))
  ts%du_delta(:,:,:,:) = du_delta(:,:,:,:)
  
- ABI_ALLOCATE(ts%strain,(6,ntime))
+ ABI_MALLOC(ts%strain,(6,ntime))
  ts%strain(:,:) = strain(:,:)
  
- ABI_ALLOCATE(ts%sqomega,(ntime))
+ ABI_MALLOC(ts%sqomega,(ntime))
  ts%sqomega(:) = sqomega(:)
  
- ABI_ALLOCATE(ts%ucvol,(ntime))
+ ABI_MALLOC(ts%ucvol,(ntime))
  ts%ucvol(:) = ucvol(:)
  
 end subroutine training_set_init
@@ -504,11 +486,6 @@ end subroutine training_set_init
 !! INPUTS
 !! training_set<training_set_type> = training_set to be free
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_fit_data
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -531,19 +508,19 @@ subroutine training_set_free(ts)
 
 ! Deallocate arrays  
   if(allocated(ts%displacement)) then
-    ABI_DEALLOCATE(ts%displacement)
+    ABI_FREE(ts%displacement)
   end if
   if(allocated(ts%du_delta)) then
-    ABI_DEALLOCATE(ts%du_delta)
+    ABI_FREE(ts%du_delta)
   end if
   if(allocated(ts%strain)) then
-    ABI_DEALLOCATE(ts%strain)
+    ABI_FREE(ts%strain)
   end if
   if(allocated(ts%sqomega))then
-    ABI_DEALLOCATE(ts%sqomega)
+    ABI_FREE(ts%sqomega)
   end if
   if(allocated(ts%ucvol)) then
-    ABI_DEALLOCATE(ts%ucvol)
+    ABI_FREE(ts%ucvol)
   end if
    
 end subroutine training_set_free

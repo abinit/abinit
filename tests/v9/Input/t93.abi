@@ -1,0 +1,60 @@
+#   Test  iron BCC metallic spin-polarized ferromagnetic collinear and non-collinear
+#   Conventional cell, test forces
+
+ndtset 7
+
+nsppol1   2                 spinat1 0 0 1   0 0 1   nband1 24
+nsppol2   2                 spinat2 0 0 1   0 0 1   nband2 24    getwfk2 -1
+
+nspinor3  2   nspden3  4    spinat3 0 0 1   0 0 1   nband3 48    # getwfk3 -1
+nspinor4  2   nspden4  4    spinat4 0 0 1   0 0 1   nband4 48    getwfk4 -1
+nspinor5  2   nspden5  4    spinat5 1 0 0   1 0 0   nband5 48
+nspinor6  2   nspden6  4    spinat6 0 1 0   0 1 0   nband6 48
+nspinor7  2   nspden7  4    spinat7 sqrt(0.5) sqrt(0.5) 0   sqrt(0.5) sqrt(0.5) 0   nband7 48
+
+#
+
+kptopt 4  
+ecut 10.0
+
+pawecutdg 20.0
+pawspnorb 0    #   This is for testing purposes only : one expect the collinear results to be exactly equal to the non-collinear results, so spin-orbit coupling must be suppressed
+
+occopt 7
+
+nstep 30
+tolvrs    1.0d-10
+
+#Definition of the k-point grid
+ ngkpt 1 1 1   # Much too coarse. Only for testing purposes.
+
+#Definition of the atoms
+natom 2
+typat 2*1         # These atoms are of type 1, that is, Fe
+xred              # This keyword indicate that the location of the atoms
+   0.02  0.02  0.02  # will follow, one triplet of number for each atom
+   0.48  0.48  0.48  # will follow, one triplet of number for each atom
+ntypat 1
+znucl 26
+
+#Definition of the unit cell
+ acell   3*5.2
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "Pseudodojo_paw_pbe_standard/Fe.xml"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test =
+#%%   t93.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0e-0 , fld_options= -ridiculous;
+#%% [paral_info]
+#%% max_nprocs = 10
+#%% [extra_info]
+#%% authors = X. Gonze
+#%% keywords = PAW
+#%% description =
+#%%   BCC iron, ferromagnetic, GGA, PAW. Conventional cell, frozen phonon along 1 1 1
+#%%   Test collinear treatment as well as non-collinear, with different starting spinat
+#%% topics = PAW
+#%%<END TEST_INFO>

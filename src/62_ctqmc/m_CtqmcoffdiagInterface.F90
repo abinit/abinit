@@ -1,7 +1,7 @@
+
 #if defined HAVE_CONFIG_H
 #include "config.h"
 #endif
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_CtqmcoffdiagInterface
 !! NAME
 !!  m_CtqmcoffdiagInterface
@@ -11,24 +11,19 @@
 !!  friendly interface for the user
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2019 ABINIT group (J. Bieder, B. Amadon, J. Denier)
+!!  Copyright (C) 2013-2024 ABINIT group (J. Bieder, B. Amadon, J. Denier)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! NOTES
 !!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
-!!
 !! SOURCE
 
 #include "defs.h"
 MODULE m_CtqmcoffdiagInterface
 USE m_Ctqmcoffdiag
+use defs_basis
 
 IMPLICIT NONE
 
@@ -42,7 +37,7 @@ IMPLICIT NONE
 !!  This structured datatype contains the necessary data
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2019 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2024 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -53,6 +48,7 @@ TYPE CtqmcoffdiagInterface
   TYPE(Ctqmcoffdiag) :: Hybrid
   INTEGER :: opt_fk       = 0
   INTEGER :: opt_order    = 0
+  INTEGER :: opt_histo    = 0
   INTEGER :: opt_movie    = 0
   INTEGER :: opt_analysis = 0
   INTEGER :: opt_check    = 0
@@ -73,7 +69,7 @@ CONTAINS
 !!  Initialize with permanent parameters
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2019 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2024 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -90,6 +86,7 @@ CONTAINS
 !!  U=interaction parameter
 !!  ostream=where to write output
 !!  MPI_COMM=mpi communicator for the run
+!!  nspinor=number of spinor
 !!
 !! OUTPUT
 !!
@@ -97,16 +94,10 @@ CONTAINS
 !!
 !! NOTES
 !!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
-!!
 !! SOURCE
 
 SUBROUTINE CtqmcoffdiagInterface_init(op,iseed,sweeps,thermalization,&
-&measurements,flavors,samples,beta,U,ostream,MPI_COMM,opt_nondiag)
+&measurements,flavors,samples,beta,U,ostream,MPI_COMM,opt_nondiag,nspinor)
 
 !Arguments ------------------------------------
   TYPE(CtqmcoffdiagInterface), INTENT(INOUT) :: op
@@ -122,10 +113,11 @@ SUBROUTINE CtqmcoffdiagInterface_init(op,iseed,sweeps,thermalization,&
   INTEGER, INTENT(IN) :: opt_nondiag
   DOUBLE PRECISION, INTENT(IN) :: beta
   DOUBLE PRECISION, INTENT(IN) :: u
+  INTEGER, INTENT(IN) :: nspinor
   !DOUBLE PRECISION, INTENT(IN) :: mu
 !Local arguements -----------------------------
   INTEGER          :: ifstream
-  DOUBLE PRECISION, DIMENSION(1:10) :: buffer
+  DOUBLE PRECISION, DIMENSION(1:11) :: buffer
 
   ifstream = 42
 
@@ -139,6 +131,7 @@ SUBROUTINE CtqmcoffdiagInterface_init(op,iseed,sweeps,thermalization,&
   buffer(8)=U
   buffer(9)=GREENHYB_TAU
   buffer(10)=DBLE(opt_nondiag)
+  buffer(11)=nspinor
   !buffer(9)=0.d0!mu
   !buffer(9)=DBLE(Wmax)
 
@@ -149,6 +142,7 @@ SUBROUTINE CtqmcoffdiagInterface_init(op,iseed,sweeps,thermalization,&
   END IF
   op%opt_fk       = 0
   op%opt_order    = 0
+  op%opt_histo    = 0
   op%opt_movie    = 0
   op%opt_analysis = 0
   op%opt_check    = 0
@@ -165,7 +159,7 @@ END SUBROUTINE CtqmcoffdiagInterface_init
 !!  Set and save options for many runs
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2019 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2024 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -191,20 +185,16 @@ END SUBROUTINE CtqmcoffdiagInterface_init
 !!
 !! NOTES
 !!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
-!!
 !! SOURCE
 
-SUBROUTINE CtqmcoffdiagInterface_setOpts(op,opt_Fk,opt_order,opt_movie,opt_analysis,opt_check, opt_noise, opt_spectra, opt_gMove) 
+SUBROUTINE CtqmcoffdiagInterface_setOpts(op,opt_Fk,opt_order,opt_histo,opt_movie,&
+& opt_analysis,opt_check, opt_noise, opt_spectra, opt_gMove) 
 
 !Arguments ------------------------------------
   TYPE(CtqmcoffdiagInterface), INTENT(INOUT) :: op
   INTEGER , OPTIONAL  , INTENT(IN   ) :: opt_Fk
   INTEGER , OPTIONAL  , INTENT(IN   ) :: opt_order
+  INTEGER , OPTIONAL  , INTENT(IN   ) :: opt_histo
   INTEGER , OPTIONAL  , INTENT(IN   ) :: opt_movie
   INTEGER , OPTIONAL  , INTENT(IN   ) :: opt_analysis
   INTEGER , OPTIONAL  , INTENT(IN   ) :: opt_check
@@ -216,6 +206,8 @@ SUBROUTINE CtqmcoffdiagInterface_setOpts(op,opt_Fk,opt_order,opt_movie,opt_analy
     op%opt_Fk = opt_fk
   IF ( PRESENT(opt_order) ) &
     op%opt_order = opt_order
+  IF ( PRESENT(opt_histo) ) &
+    op%opt_histo = opt_histo
   IF ( PRESENT(opt_analysis) ) &
     op%opt_analysis = opt_analysis
   IF ( PRESENT(opt_check) ) &
@@ -240,7 +232,7 @@ END SUBROUTINE CtqmcoffdiagInterface_setOpts
 !!  run a ctqmc simu and get results
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2019 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2024 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -263,15 +255,10 @@ END SUBROUTINE CtqmcoffdiagInterface_setOpts
 !!
 !! NOTES
 !!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
-!!
 !! SOURCE
 
-SUBROUTINE CtqmcoffdiagInterface_run(op,G0omega, Gtau, Gw, D,E,Noise,matU,Docc,opt_sym,opt_levels,hybri_limit) 
+SUBROUTINE CtqmcoffdiagInterface_run(op,G0omega, Gtau, Gw, D,E,Noise,matU,Docc,opt_sym,opt_levels,hybri_limit,Magmom_orb,&
+&Magmom_spin,Magmom_tot,Iatom,fname) 
 
 !Arguments ------------------------------------
   TYPE(CtqmcoffdiagInterface), INTENT(INOUT) :: op
@@ -286,6 +273,21 @@ SUBROUTINE CtqmcoffdiagInterface_run(op,G0omega, Gtau, Gw, D,E,Noise,matU,Docc,o
   DOUBLE PRECISION, DIMENSION(:,:),OPTIONAL,  INTENT(IN ) :: opt_sym
   DOUBLE PRECISION, DIMENSION(:),OPTIONAL,  INTENT(IN ) :: opt_levels
   COMPLEX(KIND=8) , DIMENSION(:,:),OPTIONAL,  INTENT(IN ) :: hybri_limit
+  DOUBLE PRECISION, DIMENSION(:,:),OPTIONAL, INTENT(IN ) :: Magmom_orb
+  DOUBLE PRECISION, DIMENSION(:,:),OPTIONAL, INTENT(IN ) :: Magmom_spin
+  DOUBLE PRECISION, DIMENSION(:,:),OPTIONAL, INTENT(IN ) :: Magmom_tot
+  INTEGER, INTENT(IN ) :: Iatom
+  character(len=fnlen), INTENT(INOUT) :: fname
+!local variables--------------------------------
+!  INTEGER :: iflavor1,iflavor2
+
+ ! do iflavor1=1,10
+ !   do iflavor2=1,10
+ !      if(iflavor1==iflavor2) THEN
+ !        write(6,*) iflavor1, iflavor2, Magmom(iflavor1,iflavor2)
+ !      end if
+ !   end do
+ ! end do
 
   CALL Ctqmcoffdiag_reset(op%Hybrid)
 
@@ -302,23 +304,33 @@ SUBROUTINE CtqmcoffdiagInterface_run(op,G0omega, Gtau, Gw, D,E,Noise,matU,Docc,o
   IF ( PRESENT(hybri_limit)) &
     CALL Ctqmcoffdiag_sethybri_limit(op%Hybrid, hybri_limit)
 
+     !call xmpi_barrier(op%Hybrid%MY_COMM)
   CALL Ctqmcoffdiag_setG0wTab(op%Hybrid, G0omega,op%opt_fk)
+     !call xmpi_barrier(op%Hybrid%MY_COMM)
 
   IF ( PRESENT(matU) ) &
     CALL Ctqmcoffdiag_setU(op%Hybrid, matU)
+     !call xmpi_barrier(op%Hybrid%MY_COMM)
+
+  IF ( PRESENT(Magmom_orb) ) &
+    CALL Ctqmcoffdiag_setMagmom(op%Hybrid, Magmom_orb, Magmom_spin, Magmom_tot)
+     !call xmpi_barrier(op%Hybrid%MY_COMM)
+
 
   CALL Ctqmcoffdiag_run(op%Hybrid,opt_order=op%opt_order, &
+                           opt_histo=op%opt_histo, &
                            opt_movie=op%opt_movie, &
                            opt_analysis=op%opt_analysis, &
                            opt_check=op%opt_check, &
                            opt_noise=op%opt_noise, &
                            opt_spectra=op%opt_spectra, &
                            opt_gMove=op%opt_gMove)
+     !call xmpi_barrier(op%Hybrid%MY_COMM)
 
  ! write(6,*) "op%Hybrid%stats",op%Hybrid%stats
  ! write(6,*) "opt_gMove",op%opt_gMove
 
-  CALL Ctqmcoffdiag_getResult(op%Hybrid)
+  CALL Ctqmcoffdiag_getResult(op%Hybrid,Iatom,fname)
 
   IF ( PRESENT(opt_sym) ) THEN
     CALL Ctqmcoffdiag_symmetrizeGreen(op%Hybrid,opt_sym)
@@ -362,7 +374,7 @@ END SUBROUTINE CtqmcoffdiagInterface_run
 !!  change sweeps on the fly
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2019 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2024 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -376,12 +388,6 @@ END SUBROUTINE CtqmcoffdiagInterface_run
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 
@@ -403,7 +409,7 @@ END SUBROUTINE CtqmcoffdiagInterface_setSweeps
 !!  Destroy simulation
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2019 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2024 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -416,12 +422,6 @@ END SUBROUTINE CtqmcoffdiagInterface_setSweeps
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 

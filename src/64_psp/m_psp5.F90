@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_psp5
 !! NAME
 !!  m_psp5
@@ -7,14 +6,10 @@
 !! Initialize pspcod=5 ("Phoney pseudopotentials" with Hamman grid):
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2019 ABINIT group (DCA, XG, GMR, FrD, FJ, MT)
+!!  Copyright (C) 1998-2024 ABINIT group (DCA, XG, GMR, FrD, FJ, MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -98,12 +93,6 @@ contains
 !!  xcccrc=XC core correction cutoff radius (bohr) from psp file
 !!  xccc1d(n1xccc,6)=1D core charge function and five derivatives, from psp file
 !!
-!! PARENTS
-!!      pspatm
-!!
-!! CHILDREN
-!!      psp1cc,psp5lo,psp5nl,spline,wrtout
-!!
 !! SOURCE
 
 subroutine psp5in(ekb,ekb1,ekb2,epsatm,epspsp,e990,e999,ffspl,indlmn,&
@@ -173,7 +162,7 @@ subroutine psp5in(ekb,ekb1,ekb2,epsatm,epspsp,e990,e999,ffspl,indlmn,&
 &   'Problem reading the fourth line of pseudopotential file.',ch10,&
 &   'The parameter pspso should be 1 or 2, but it is pspso= ',pspso0,ch10,&
 &   'Action: check your pseudopotential input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  write(message, '(2es16.6,t47,a)' ) r1,al,'r1 and al (Hamman grid)'
@@ -191,7 +180,7 @@ subroutine psp5in(ekb,ekb1,ekb2,epsatm,epspsp,e990,e999,ffspl,indlmn,&
 &   'The treatment of spin-orbit interaction is required (pspso/=0)',ch10,&
 &   'but pseudopotential file format cannot contain spin-orbit information !',ch10,&
 &   'Action: check your pseudopotential input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  nso=1;if (pspso0/=1) nso=2
@@ -223,7 +212,7 @@ subroutine psp5in(ekb,ekb1,ekb2,epsatm,epspsp,e990,e999,ffspl,indlmn,&
 &     'and number of projector for l/=0 is not 2 !',ch10,&
 &     'It has been forced to 2.'
      call wrtout(std_out,message,'COLL')
-     MSG_WARNING(message)
+     ABI_WARNING(message)
    end if
  end if
 
@@ -273,8 +262,8 @@ subroutine psp5in(ekb,ekb1,ekb2,epsatm,epspsp,e990,e999,ffspl,indlmn,&
 !vloc(:)=Vlocal(r), lloc=0, 1, or 2 or -1 for avg.
 !rad(:)=radial grid r(i)
 !wfll(:,1),...,wfll(:,4)=reference config. wavefunctions
- ABI_ALLOCATE(vloc,(mmax))
- ABI_ALLOCATE(vpspll,(mmax,mpsang))
+ ABI_MALLOC(vloc,(mmax))
+ ABI_MALLOC(vpspll,(mmax,mpsang))
 
 !(1) Read atomic pseudopotential for each l, filling up array vpspll
 !Note: put each l into vpspll(:,l+1)
@@ -290,7 +279,7 @@ subroutine psp5in(ekb,ekb1,ekb2,epsatm,epspsp,e990,e999,ffspl,indlmn,&
  else
 
 !  --SPIN-ORBIT
-   ABI_ALLOCATE(vpspll_so,(mmax,mpsang))
+   ABI_MALLOC(vpspll_so,(mmax,mpsang))
    read (tmp_unit,*, err=10, iomsg=errmsg) ll
    read (tmp_unit,*, err=10, iomsg=errmsg) (vpspll(ii,1),ii=1,mmax)
    vpspll_so(:,1)=0.0d0
@@ -321,7 +310,7 @@ subroutine psp5in(ekb,ekb1,ekb2,epsatm,epspsp,e990,e999,ffspl,indlmn,&
 !(2) Create radial grid, and associated quantities
 
 !Now compute Hamman Grid
- ABI_ALLOCATE(rad,(mmax))
+ ABI_MALLOC(rad,(mmax))
  do ii=1,mmax
    rad (ii)=r1*exp(dble(ii-1)*al)
  end do
@@ -342,13 +331,13 @@ subroutine psp5in(ekb,ekb1,ekb2,epsatm,epspsp,e990,e999,ffspl,indlmn,&
 
 
 !Fit spline to q^2 V(q) (Numerical Recipes subroutine)
- ABI_ALLOCATE(work_space,(mqgrid))
- ABI_ALLOCATE(work_spl,(mqgrid))
+ ABI_MALLOC(work_space,(mqgrid))
+ ABI_MALLOC(work_spl,(mqgrid))
  call spline (qgrid,vlspl(:,1),mqgrid,yp1,ypn,work_spl)
  vlspl(:,2)=work_spl(:)
 
- ABI_DEALLOCATE(work_space)
- ABI_DEALLOCATE(work_spl)
+ ABI_FREE(work_space)
+ ABI_FREE(work_spl)
 
 !(4)Take care of non-local part
 
@@ -373,7 +362,7 @@ subroutine psp5in(ekb,ekb1,ekb2,epsatm,epspsp,e990,e999,ffspl,indlmn,&
 !  each l up to lmax
 
 !  Read wavefunctions for each l up to lmax
-   ABI_ALLOCATE( wfll,(mmax,mpsang))
+   ABI_MALLOC( wfll,(mmax,mpsang))
 !  -----------------------------------------------------------------
 
    if (pspso==0) then
@@ -388,7 +377,7 @@ subroutine psp5in(ekb,ekb1,ekb2,epsatm,epspsp,e990,e999,ffspl,indlmn,&
 &           'angular momenta in order expected for first projection',&
 &           'operator.',ch10,' Values are ',ipsang-1,ll,ch10,&
 &           'Action: check your pseudopotential input file.'
-           MSG_ERROR(message)
+           ABI_ERROR(message)
          end if
          read (tmp_unit,*, err=10, iomsg=errmsg) wfll(:,ipsang)
        else
@@ -398,7 +387,7 @@ subroutine psp5in(ekb,ekb1,ekb2,epsatm,epspsp,e990,e999,ffspl,indlmn,&
    else
 
 !    --SPIN-ORBIT
-     ABI_ALLOCATE(wfll_so,(mmax,mpsang))
+     ABI_MALLOC(wfll_so,(mmax,mpsang))
      if (nproj(1)/=0) then
        read (tmp_unit,*,err=10,iomsg=errmsg) ll
        read (tmp_unit,*,err=10,iomsg=errmsg) wfll(:,1)
@@ -421,26 +410,26 @@ subroutine psp5in(ekb,ekb1,ekb2,epsatm,epspsp,e990,e999,ffspl,indlmn,&
 
 !  ----------------------------------------------------------------------
 !  Compute KB form factors and fit splines
-   ABI_ALLOCATE(ekb_tmp,(mpssoang,max(nso,mproj)))
-   ABI_ALLOCATE(ffspl_tmp,(mqgrid,2,mpssoang,max(nso,mproj)))
+   ABI_MALLOC(ekb_tmp,(mpssoang,max(nso,mproj)))
+   ABI_MALLOC(ffspl_tmp,(mqgrid,2,mpssoang,max(nso,mproj)))
    ekb_tmp(:,:)=0.d0
 
-   ABI_ALLOCATE(ekb_sr,(mpsang))
-   ABI_ALLOCATE(ffspl_sr,(mqgrid,2,mpsang))
+   ABI_MALLOC(ekb_sr,(mpsang))
+   ABI_MALLOC(ffspl_sr,(mqgrid,2,mpsang))
    call psp5nl(al,ekb_sr(:),ffspl_sr(:,:,:),lmax,mmax,mpsang,mqgrid,&
 &   qgrid,rad,vloc,vpspll,wfll)
    ekb_tmp(1:mpsang,1)=ekb_sr(1:mpsang)
    ffspl_tmp(:,:,1:mpsang,1)=ffspl_sr(:,:,1:mpsang)
 
    if (pspso/=0) then
-     ABI_ALLOCATE(ekb_so,(mpsang))
-     ABI_ALLOCATE(ffspl_so,(mqgrid,2,mpsang))
+     ABI_MALLOC(ekb_so,(mpsang))
+     ABI_MALLOC(ffspl_so,(mqgrid,2,mpsang))
      call psp5nl(al,ekb_so,ffspl_so,lmax,mmax,mpsang,mqgrid,&
 &     qgrid,rad,vloc,vpspll_so,wfll_so)
      ekb_tmp(mpsang+1:mpssoang,1)=ekb_so(2:mpsang)
      do ipsang=2,lmax+1
        if((ekb_sr(ipsang)*ekb_so(ipsang))<0.0) then
-         MSG_ERROR('BIG PROBLEM WITH THE SPIN ORBIT IN PSP5NL')
+         ABI_ERROR('BIG PROBLEM WITH THE SPIN ORBIT IN PSP5NL')
        end if
      end do
 
@@ -472,10 +461,10 @@ subroutine psp5in(ekb,ekb1,ekb2,epsatm,epspsp,e990,e999,ffspl,indlmn,&
          end do
        end do
      end do
-     ABI_DEALLOCATE(ekb_so)
-     ABI_DEALLOCATE(ffspl_so)
-     ABI_DEALLOCATE(vpspll_so)
-     ABI_DEALLOCATE(wfll_so)
+     ABI_FREE(ekb_so)
+     ABI_FREE(ffspl_so)
+     ABI_FREE(vpspll_so)
+     ABI_FREE(wfll_so)
 
 !    The non local contribution is written as quadratic form of the vector
 !    V=(v_ion,v_so)
@@ -522,8 +511,8 @@ subroutine psp5in(ekb,ekb1,ekb2,epsatm,epspsp,e990,e999,ffspl,indlmn,&
 
    end if
 
-   ABI_DEALLOCATE(ekb_sr)
-   ABI_DEALLOCATE(ffspl_sr)
+   ABI_FREE(ekb_sr)
+   ABI_FREE(ffspl_sr)
 
 !  FJ WARNING : No spin orbit if nproj>1
    if (pspso==0) then
@@ -542,7 +531,7 @@ subroutine psp5in(ekb,ekb1,ekb2,epsatm,epspsp,e990,e999,ffspl,indlmn,&
 &           'angular momenta in order expected for second projection',&
 &           'operator.',ch10,' Values are ',ipsang-1,ll,ch10,&
 &           'Action: check your pseudopotential input file.'
-           MSG_ERROR(message)
+           ABI_ERROR(message)
          end if
          read (tmp_unit,*, err=10, iomsg=errmsg) wfll(:,ipsang)
 !        DEBUG
@@ -579,22 +568,22 @@ subroutine psp5in(ekb,ekb1,ekb2,epsatm,epspsp,e990,e999,ffspl,indlmn,&
      end if
    end do
 
-   ABI_DEALLOCATE(ekb_tmp)
-   ABI_DEALLOCATE(ffspl_tmp)
-   ABI_DEALLOCATE(wfll)
+   ABI_FREE(ekb_tmp)
+   ABI_FREE(ffspl_tmp)
+   ABI_FREE(wfll)
 
 !  end of if concerning lloc
  end if
 
- ABI_DEALLOCATE(vpspll)
- ABI_DEALLOCATE(rad)
- ABI_DEALLOCATE(vloc)
+ ABI_FREE(vpspll)
+ ABI_FREE(rad)
+ ABI_FREE(vloc)
 
  return
 
  ! Handle IO error
  10 continue
- MSG_ERROR(errmsg)
+ ABI_ERROR(errmsg)
 
 end subroutine psp5in
 !!***

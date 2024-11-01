@@ -1,0 +1,35 @@
+#  Basic input for Z2pack. The code will append the variables defining each line on the surface
+pp_dirpath "$ABI_PSPDIR/Pseudodojo_nc_fr_04_pbe_standard_psp8/"
+pseudos "Bi.psp8,Te.psp8,I.psp8"
+
+# Unit cell
+acell     8.3956 8.3956 13.7627
+rprim     0.86602540378 0.5 0.0 
+         -0.86602540378 0.5 0.0 
+          0.0 0.0 1.0 
+
+ntypat  3
+znucl   83 52 53 
+
+natom   3
+typat   1 2 3 
+xred    0.0000000000E+00  0.0000000000E+00  1.953E-03 # Bi
+        6.6666666667E-01 3.3333333333E-01 2.36867E-01 # Te
+        3.3333333333E-01 6.6666666667E-01 7.11179E-01 # I
+
+# Convergence parameters etc.
+ecut       15.0 # unconverged
+nspinor    2 # WFK are spinors
+nstep      30 
+tolwfr     1.0e-6 # unconverged
+diemac     12  
+
+# Information for band structure, without the kpath definition
+iscf     -2
+getden_filepath "../tz2_2o_DS11_DEN"
+nband     40
+nbdbuf    2 # Buffer to speed up convergence
+enunit    2   
+# Prepare Wannier90 calculation
+prtwant 2
+

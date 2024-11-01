@@ -1,0 +1,60 @@
+# 14Si.4.hgh
+
+# ndtset 2
+ nstep 20
+
+ acell 3*20
+ wvl_hgrid 0.45
+ wvl_crmult 5
+ wvl_frmult 10
+ tolwfr 1e-4
+ kptopt 0
+ kpt   0 0 0
+ istwfk 1
+ natom  1
+ nkpt  1
+ nsym  1
+ ntypat  1
+ rprim   1 0 0  0 1 0  0 0 1
+ symrel  1 0 0  0 1 0  0 0 1
+ typat  1
+ xred
+  0.5 0.5 0.5
+ occopt 0
+ nband 4
+ occ 2 2/3 2/3 2/3
+ znucl  14
+
+ ixc 1
+ optforces 0
+ optstress 0
+
+ usewvl 1
+ icoulomb 1
+ iscf 0
+ nwfshist 6
+ wvl_bigdft_comp 1 #to follow the BigDFT workflow
+
+# Avoid print densities, wavefunctions and eigenvalues
+ prteig 0
+ prtden 0
+ prtwf  0
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosHGH_pwteter/14si.4.hgh"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t11.abo, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = D. Caliste
+#%% keywords = 
+#%% description = 
+#%%   Si single atom with fractional occupation.
+#%% topics = Wavelets
+#%%<END TEST_INFO>

@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_cgwf
 !! NAME
 !!  m_cgwf
@@ -7,14 +6,10 @@
 !!  Conjugate-gradient eigensolver.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2019 ABINIT group (DCA, XG, GMR, MT, MVeithen, ISouza, JIniguez)
+!!  Copyright (C) 2008-2024 ABINIT group (DCA, XG, GMR, MT, MVeithen, ISouza, JIniguez)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -27,13 +22,13 @@
 module m_cgwf
 
  use defs_basis
- use defs_abitypes
  use m_errors
  use m_xmpi
  use m_abicore
  use m_cgtools
  use m_efield
 
+ use defs_abitypes,   only : MPI_type
  use m_time,          only : timab
  use m_numeric_tools, only : rhophi
  use m_pawcprj,       only : pawcprj_type, pawcprj_alloc, pawcprj_put, pawcprj_copy, &
@@ -45,6 +40,7 @@ module m_cgwf
  use m_nonlop,      only : nonlop
  use m_paw_overlap,   only : smatrix_k_paw
  use m_cgprj,         only : getcprj
+ use m_gemm_nonlop_projectors, only : gemm_nonlop_use_gemm
 
  implicit none
 
@@ -119,7 +115,7 @@ contains
 !!  dphase_k(3) = change in Zak phase for the current k-point in case berryopt = 4/14,6/16,7/17 (electric (displacement) field)
 !!  resid(nband)=wf residual for new states=|(H-e)|C>|^2 (hartree^2)
 !!  subham(nband*(nband+1))=Hamiltonian expressed in the WFs subspace
-!!  subovl(nband*(nband+1)*use_subovl)=overlap matrix expressed in sthe WFs subspace
+!!  subovl(nband*(nband+1)*use_subovl)=overlap matrix expressed in the WFs subspace
 !!  subvnlx(nband*(nband+1)*use_subvnlx))=non-local Hamiltonian (if NCPP)  plus Fock ACE operator (if usefock_ACE)
 !!   expressed in the WFs subspace
 !!
@@ -136,19 +132,9 @@ contains
 !!               where S is the overlap matrix (used only for paw)
 !!
 !! NOTES
-!!  1) cg should not be filtered and normalized : it should already be OK at input !
+!!  1) cg should not be filtered and normalized: it should already be OK at input !
 !!  2) Not sure that that the generalized eigenproblem (when gs_hamk%usepaw=1)
-!!     is compatible with wfoptalg=2 or 3 (use of shifted square  Hamiltonian) - to be verified
-!!
-!! PARENTS
-!!      vtowfk
-!!
-!! CHILDREN
-!!      cg_precon,cg_zaxpy,cg_zcopy,cg_zscal,dotprod_g,etheta,fock_set_ieigen
-!!      getcprj,getghc,linemin,make_grad_berry,mksubham,pawcprj_alloc
-!!      pawcprj_copy,pawcprj_free,pawcprj_get,pawcprj_mpi_allgather,pawcprj_put
-!!      pawcprj_symkn,projbd,smatrix,smatrix_k_paw,sqnorm_g,timab,wrtout
-!!      xmpi_allgather
+!!     is compatible with wfoptalg=2 or 3 (use of shifted square Hamiltonian) - to be verified
 !!
 !! SOURCE
 
@@ -159,8 +145,6 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
 &                nspinor,nsppol,ortalg,prtvol,pwind,&
 &                pwind_alloc,pwnsfac,pwnsfacq,quit,resid,subham,subovl,&
 &                subvnlx,tolrde,tolwfr,use_subovl,use_subvnlx,wfoptalg,zshift)
-
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: berryopt,chkexit,icg,igsc,ikpt,inonsc,isppol
@@ -184,7 +168,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
  real(dp),intent(out) :: resid(nband)
 
 !Local variables-------------------------------
- integer,parameter :: level=113,tim_getghc=1,tim_projbd=1
+ integer,parameter :: level=113,tim_getghc=1,tim_projbd=1,type_calc=0
  integer,save :: nskip=0
  integer :: choice,counter,cpopt,ddkflag,dimenlc1,dimenlr1,dimenl2,iat,iatom,itypat
  integer :: iband,ibandmin,ibandmax,me_g0
@@ -192,7 +176,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
  integer :: ikpt2,ikpt2f,ikptf,iline,iproc,ipw,ispinor,istwf_k,isubh,isubo,itrs
  integer :: job,mcg_q,me_distrb,natom,ncpgr,nblock,nproc_distrb,npw_k2
  integer :: optekin,paw_opt,signs,shiftbd,sij_opt,spaceComm_distrb
- integer :: useoverlap,wfopta10
+ integer :: useoverlap,wfopta10,gpu_option_save
  real(dp) :: chc,costh,deltae,deold,dhc,dhd,diff,dotgg,dotgp,doti,dotr
  real(dp) :: dphase_aux2,e0,e0_old,e1,e1_old,eval,gamma
  real(dp) :: lam0,lamold,root,sinth,sintn,swap,tan2th,theta,thetam
@@ -226,11 +210,11 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
 
 !Touching chkexit, cpus,filnam_ds to avoid warning for abirules. This is dirty...
  if(chkexit<0)then
-   MSG_BUG('chkexit should be positive!')
+   ABI_BUG('chkexit should be positive!')
  end if
 
  if(cpus<0 .and. filnam_ds1=='a')then
-   MSG_BUG('cpus should be positive!')
+   ABI_BUG('cpus should be positive!')
  end if
 
 !======================================================================
@@ -242,6 +226,10 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
  nproc_distrb=xmpi_comm_size(spaceComm_distrb)
  me_distrb=mpi_enreg%me_kpt
  me_g0 = mpi_enreg%me_g0
+ gpu_option_save=gs_hamk%gpu_option
+ !Using cgwf with ndat=1 in getghc calls isn't beneficial in most cases, hence we disable GPU here
+ gs_hamk%gpu_option=ABI_GPU_DISABLED
+ if(gpu_option_save==ABI_GPU_OPENMP) gemm_nonlop_use_gemm=.false.
 
 !if PAW, one has to solve a generalized eigenproblem (H|Psi>=Lambda.S|Psi>)
 !else,   one has to solve a classical eigenproblem   (H|Psi>=Lambda.|Psi>)
@@ -258,50 +246,49 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
  cpopt=-1
  kinpw => gs_hamk%kinpw_k
 
- ABI_ALLOCATE(pcon,(npw))
- ABI_ALLOCATE(ghc,(2,npw*nspinor))
- ABI_ALLOCATE(gvnlxc,(2,npw*nspinor))
- ABI_ALLOCATE(conjgr,(2,npw*nspinor))
- ABI_ALLOCATE(cwavef,(2,npw*nspinor))
- ABI_ALLOCATE(direc,(2,npw*nspinor))
- ABI_ALLOCATE(scprod,(2,nband))
+ ABI_MALLOC(pcon,(npw))
+ ABI_MALLOC(ghc,(2,npw*nspinor))
+ ABI_MALLOC(gvnlxc,(2,npw*nspinor))
+ ABI_MALLOC(conjgr,(2,npw*nspinor))
+ ABI_MALLOC(cwavef,(2,npw*nspinor))
+ ABI_MALLOC(direc,(2,npw*nspinor))
+ ABI_MALLOC(scprod,(2,nband))
 
- ABI_ALLOCATE(gh_direc,(2,npw*nspinor))
- ABI_ALLOCATE(gvnlx_direc,(2,npw*nspinor))
- ABI_ALLOCATE(vresid,(2,npw*nspinor))
+ ABI_MALLOC(gh_direc,(2,npw*nspinor))
+ ABI_MALLOC(gvnlx_direc,(2,npw*nspinor))
+ ABI_MALLOC(vresid,(2,npw*nspinor))
 
  if (gen_eigenpb)  then
-   ABI_ALLOCATE(gs_direc,(2,npw*nspinor))
+   ABI_MALLOC(gs_direc,(2,npw*nspinor))
  else
-   ABI_ALLOCATE(gs_direc,(0,0))
+   ABI_MALLOC(gs_direc,(0,0))
  end if
 
  if (gen_eigenpb) then
-   ABI_ALLOCATE(scwavef,(2,npw*nspinor))
-   ABI_ALLOCATE(direc_tmp,(2,npw*nspinor))
+   ABI_MALLOC(scwavef,(2,npw*nspinor))
+   ABI_MALLOC(direc_tmp,(2,npw*nspinor))
  end if
 
  if (gen_eigenpb.and.(inonsc==1))  then
-   ABI_STAT_ALLOCATE(ghc_all,(2,nband*npw*nspinor), ierr)
-   ABI_CHECK(ierr==0, "out-of-memory in ghg_all")
+   ABI_MALLOC_OR_DIE(ghc_all,(2,nband*npw*nspinor), ierr)
  end if
 
  if (wfopta10==2.or.wfopta10==3)  then
-   ABI_ALLOCATE(work,(2,npw*nspinor))
+   ABI_MALLOC(work,(2,npw*nspinor))
  end if
 
  if (gen_eigenpb.and.(wfopta10==2.or.wfopta10==3))  then
-   ABI_ALLOCATE(swork,(2,npw*nspinor))
+   ABI_MALLOC(swork,(2,npw*nspinor))
  else
-   ABI_ALLOCATE(swork,(0,0))
+   ABI_MALLOC(swork,(0,0))
  end if
 
  if (wfopta10==2 .or. wfopta10==3) then
-   ABI_ALLOCATE(ghcws,(2,npw*nspinor))
-   ABI_ALLOCATE(gh_direcws,(2,npw*nspinor))
-   ABI_ALLOCATE(gvnlx_dummy,(2,npw*nspinor))
+   ABI_MALLOC(ghcws,(2,npw*nspinor))
+   ABI_MALLOC(gh_direcws,(2,npw*nspinor))
+   ABI_MALLOC(gvnlx_dummy,(2,npw*nspinor))
  else
-   ABI_ALLOCATE(gvnlx_dummy,(0,0))
+   ABI_MALLOC(gvnlx_dummy,(0,0))
  end if
 
 !if "generalized eigenproblem", not sure of wfoptalg=2,3 algorithms
@@ -310,7 +297,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
 &   'Conjugate gradient algorithm not tested with',ch10,&
 &   'wfoptalg=2 or 3 and usepaw==1 !',ch10,&
 &   'Program will continue at your own risk...'
-   MSG_WARNING(message)
+   ABI_WARNING(message)
  end if
 
 !Electric field: definition of local variables:
@@ -336,20 +323,20 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
    ikptf = dtefield%i2fbz(ikpt)
    ikgf = dtefield%fkgindex(ikptf)  ! this is the shift for pwind
    mcg_q = mpw*mband*nspinor
-   ABI_ALLOCATE(detovc,(2,2,3))
-   ABI_ALLOCATE(detovd,(2,2,3))
-   ABI_ALLOCATE(grad_berry,(2,npw*nspinor))
-   ABI_ALLOCATE(cg1_k,(2,mpw))
-   ABI_ALLOCATE(cgq_k,(2,mcg_q))
-   ABI_ALLOCATE(grad_total,(2,npw*nspinor))
-   ABI_ALLOCATE(sflag_k,(mband))
-   ABI_ALLOCATE(pwind_k,(mpw))
-   ABI_ALLOCATE(pwnsfac_k,(4,mpw))
-   ABI_ALLOCATE(smat_k,(2,mband,mband))
-   ABI_ALLOCATE(smat_inv,(2,mband,mband))
+   ABI_MALLOC(detovc,(2,2,3))
+   ABI_MALLOC(detovd,(2,2,3))
+   ABI_MALLOC(grad_berry,(2,npw*nspinor))
+   ABI_MALLOC(cg1_k,(2,mpw))
+   ABI_MALLOC(cgq_k,(2,mcg_q))
+   ABI_MALLOC(grad_total,(2,npw*nspinor))
+   ABI_MALLOC(sflag_k,(mband))
+   ABI_MALLOC(pwind_k,(mpw))
+   ABI_MALLOC(pwnsfac_k,(4,mpw))
+   ABI_MALLOC(smat_k,(2,mband,mband))
+   ABI_MALLOC(smat_inv,(2,mband,mband))
 !  now the special features if using PAW
    if (gs_hamk%usepaw /= 0) then
-     ABI_ALLOCATE(smat_k_paw,(2,gs_hamk%usepaw*mband,gs_hamk%usepaw*mband))
+     ABI_MALLOC(smat_k_paw,(2,gs_hamk%usepaw*mband,gs_hamk%usepaw*mband))
      smat_k_paw(:,:,:) = zero
 !    the following are arguments to nonlop used to apply the on-site dipole to direc vector
      choice = 1 ! only apply projectors
@@ -360,12 +347,12 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
      dimenlr1 = gs_hamk%lmnmax*(gs_hamk%lmnmax+1)/2
      dimenl2 = natom
 !    cprj structures for finite_field case
-     ABI_ALLOCATE(dimlmn,(natom))
+     ABI_MALLOC(dimlmn,(natom))
      do iatom = 1, natom
        itypat = gs_hamk%typat(iatom)
        dimlmn(iatom)=dtefield%lmn_size(itypat)
      end do
-     ABI_ALLOCATE(dimlmn_srt,(natom))
+     ABI_MALLOC(dimlmn_srt,(natom))
      iatom = 0
      do itypat = 1, gs_hamk%ntypat
        do iat = 1, gs_hamk%nattyp(itypat)
@@ -373,33 +360,33 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
          dimlmn_srt(iatom) = dtefield%lmn_size(itypat)
        end do
      end do
-     ABI_ALLOCATE(ikptf_recv,(nproc_distrb))
-     ABI_DATATYPE_ALLOCATE(cprj_k,(natom,mband*nspinor))
-     ABI_DATATYPE_ALLOCATE(cprj_kb,(natom,mband*nspinor))
-     ABI_DATATYPE_ALLOCATE(cprj_direc,(natom,mband*nspinor))
-     ABI_DATATYPE_ALLOCATE(cprj_band_srt,(natom,nspinor))
-     ABI_DATATYPE_ALLOCATE(cprj_gat,(natom,mband*nspinor*nproc_distrb))
+     ABI_MALLOC(ikptf_recv,(nproc_distrb))
+     ABI_MALLOC(cprj_k,(natom,mband*nspinor))
+     ABI_MALLOC(cprj_kb,(natom,mband*nspinor))
+     ABI_MALLOC(cprj_direc,(natom,mband*nspinor))
+     ABI_MALLOC(cprj_band_srt,(natom,nspinor))
+     ABI_MALLOC(cprj_gat,(natom,mband*nspinor*nproc_distrb))
      call pawcprj_alloc(cprj_k,ncpgr,dimlmn)
      call pawcprj_alloc(cprj_kb,ncpgr,dimlmn)
      call pawcprj_alloc(cprj_direc,ncpgr,dimlmn)
      call pawcprj_alloc(cprj_band_srt,ncpgr,dimlmn_srt)
      call pawcprj_alloc(cprj_gat,ncpgr,dimlmn)
      if (nkpt /= dtefield%fnkpt) then
-       ABI_DATATYPE_ALLOCATE(cprj_fkn,(natom,mband*nspinor))
-       ABI_DATATYPE_ALLOCATE(cprj_ikn,(natom,mband*nspinor))
+       ABI_MALLOC(cprj_fkn,(natom,mband*nspinor))
+       ABI_MALLOC(cprj_ikn,(natom,mband*nspinor))
        call pawcprj_alloc(cprj_fkn,ncpgr,dimlmn)
        call pawcprj_alloc(cprj_ikn,ncpgr,dimlmn)
      end if
    else
-     ABI_ALLOCATE(smat_k_paw,(0,0,0))
-     ABI_ALLOCATE(dimlmn,(0))
-     ABI_ALLOCATE(dimlmn_srt,(0))
-     ABI_ALLOCATE(ikptf_recv,(0))
-     ABI_DATATYPE_ALLOCATE(cprj_k,(0,0))
-     ABI_DATATYPE_ALLOCATE(cprj_kb,(0,0))
-     ABI_DATATYPE_ALLOCATE(cprj_direc,(0,0))
-     ABI_DATATYPE_ALLOCATE(cprj_band_srt,(0,0))
-     ABI_DATATYPE_ALLOCATE(cprj_gat,(0,0))
+     ABI_MALLOC(smat_k_paw,(0,0,0))
+     ABI_MALLOC(dimlmn,(0))
+     ABI_MALLOC(dimlmn_srt,(0))
+     ABI_MALLOC(ikptf_recv,(0))
+     ABI_MALLOC(cprj_k,(0,0))
+     ABI_MALLOC(cprj_kb,(0,0))
+     ABI_MALLOC(cprj_direc,(0,0))
+     ABI_MALLOC(cprj_band_srt,(0,0))
+     ABI_MALLOC(cprj_gat,(0,0))
    end if
  end if ! finite_field
 
@@ -425,13 +412,13 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
        sij_opt=1
        if (finite_field .and. gs_hamk%usepaw == 1) then
          call getghc(0,cwavef,cprj_band_srt,ghc,scwavef,gs_hamk,gvnlxc,&
-&         eval,mpi_enreg,1,prtvol,sij_opt,tim_getghc,0)
+           &         eval,mpi_enreg,1,prtvol,sij_opt,tim_getghc,type_calc)
          call pawcprj_put(gs_hamk%atindx,cprj_band_srt,cprj_k,natom,iband,0,ikpt,&
 &         1,isppol,mband,1,natom,1,mband,dimlmn,nspinor,nsppol,0,&
 &         mpicomm=spaceComm_distrb,proc_distrb=mpi_enreg%proc_distrb)
        else
          call getghc(cpopt,cwavef,cprj_dum,ghc,scwavef,gs_hamk,gvnlxc,&
-&         eval,mpi_enreg,1,prtvol,sij_opt,tim_getghc,0)
+           &         eval,mpi_enreg,1,prtvol,sij_opt,tim_getghc,type_calc)
        end if
 
        call cg_zcopy(npw*nspinor,ghc,ghc_all(1,1+icg_shift-icg))
@@ -485,7 +472,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
      end if
 
      ! Normalize incoming wf (and S.wf, if generalized eigenproblem):
-     ! WARNING : It might be interesting to skip the following operation.
+     ! WARNING: It might be interesting to skip the following operation.
      ! The associated routines should be reexamined to see whether cwavef is not already normalized.
      if (gen_eigenpb) then
        call dotprod_g(dotr,doti,istwf_k,npw*nspinor,2,cwavef,scwavef,me_g0,mpi_enreg%comm_spinorfft)
@@ -517,7 +504,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
        call fock_set_ieigen(gs_hamk%fockcommon,iband)
        sij_opt=0
        call getghc(cpopt,cwavef,cprj_dum,ghc,gsc_dummy,gs_hamk,gvnlxc,&
-&       eval,mpi_enreg,1,prtvol,sij_opt,tim_getghc,0)
+         &       eval,mpi_enreg,1,prtvol,sij_opt,tim_getghc,type_calc)
      end if
 
 
@@ -532,7 +519,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
          work(:,:)=ghc(:,:)-zshift(iband)*cwavef(:,:)
        end if
        call getghc(cpopt,work,cprj_dum,ghc,swork,gs_hamk,gvnlx_dummy,&
-&       eval,mpi_enreg,1,prtvol,sij_opt,tim_getghc,0)
+         &       eval,mpi_enreg,1,prtvol,sij_opt,tim_getghc,type_calc)
        if (gen_eigenpb) then
          ghc(:,:)=ghc(:,:)-zshift(iband)*swork(:,:)
        else
@@ -561,7 +548,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
                write(message, '(a,i8,a,1p,e14.6,a1,3x,a,1p,e14.6,a1)')&
 &               'New trial energy at line ',iline,' = ',lam0,ch10,&
 &               'is higher than former =',lamold,ch10
-               MSG_WARNING(message)
+               ABI_WARNING(message)
              end if
              lamold=lam0
            end if
@@ -620,7 +607,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
          if (resid(iband)<tolwfr) then
            if (prtvol>=10) then
              write(message, '(a,i4,a,i2,a,es12.4)' ) &
-&             ' cgwf: band ',iband,' converged after ',iline,' line minimizations: resid =',resid(iband)
+              ' cgwf: band ',iband,' converged after ',iline,' line minimizations: resid =',resid(iband)
              call wrtout(std_out,message,'PERS')
            end if
            nskip=nskip+(nline-iline+1)  ! Number of two-way 3D ffts skipped
@@ -778,6 +765,10 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
            gamma=zero
            dotgp=dotgg
            call cg_zcopy(npw*nspinor,direc,conjgr)
+           if (prtvol==-level)then
+             write(message,'(a,es21.10e3)')' cgwf: dotgg = ',dotgg
+             call wrtout(std_out,message,'PERS')
+           end if
 
          else
            gamma=dotgg/dotgp
@@ -848,7 +839,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
          sij_opt=0;if (gen_eigenpb) sij_opt=1
 
          call getghc(cpopt,direc,cprj_dum,gh_direc,gs_direc,gs_hamk,gvnlx_direc,&
-&         eval,mpi_enreg,1,prtvol,sij_opt,tim_getghc,0)
+           &         eval,mpi_enreg,1,prtvol,sij_opt,tim_getghc,type_calc)
 
          if(wfopta10==2 .or. wfopta10==3)then
            ! Minimisation of the residual, so compute <G|(H-zshift)^2|D>
@@ -862,7 +853,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
            end if
 
            call getghc(cpopt,work,cprj_dum,gh_direc,swork,gs_hamk,gvnlx_dummy,&
-&           eval,mpi_enreg,1,prtvol,0,tim_getghc,0)
+             &           eval,mpi_enreg,1,prtvol,0,tim_getghc,type_calc)
 
            if (gen_eigenpb) then
              gh_direc(:,:)=gh_direc(:,:)-zshift(iband)*swork(:,:)
@@ -978,7 +969,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
                  call getcprj(1,0,direc_tmp,cprj_band_srt,&
 &                 gs_hamk%ffnl_k,0,gs_hamk%indlmn,gs_hamk%istwf_k,gs_hamk%kg_k,&
 &                 gs_hamk%kpg_k,gs_hamk%kpt_k,gs_hamk%lmnmax,gs_hamk%mgfft,&
-&                 mpi_enreg,gs_hamk%natom,gs_hamk%nattyp,gs_hamk%ngfft,gs_hamk%nloalg,&
+&                 mpi_enreg,1,gs_hamk%natom,gs_hamk%nattyp,gs_hamk%ngfft,gs_hamk%nloalg,&
 &                 gs_hamk%npw_k,gs_hamk%nspinor,gs_hamk%ntypat,gs_hamk%phkxred,gs_hamk%ph1d,&
 &                 gs_hamk%ph3d_k,gs_hamk%ucvol,gs_hamk%useylm)
 
@@ -1092,7 +1083,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
            if (finite_field) then  ! must update cprj for the new wavefunction
              call getcprj(1,0,cwavef,cprj_band_srt,&
 &             gs_hamk%ffnl_k,0,gs_hamk%indlmn,istwf_k,gs_hamk%kg_k,gs_hamk%kpg_k,gs_hamk%kpt_k,&
-&             gs_hamk%lmnmax,gs_hamk%mgfft,mpi_enreg,natom,gs_hamk%nattyp,&
+&             gs_hamk%lmnmax,gs_hamk%mgfft,mpi_enreg,1,natom,gs_hamk%nattyp,&
 &             gs_hamk%ngfft,gs_hamk%nloalg,gs_hamk%npw_k,gs_hamk%nspinor,gs_hamk%ntypat,&
 &             gs_hamk%phkxred,gs_hamk%ph1d,gs_hamk%ph3d_k,gs_hamk%ucvol,gs_hamk%useylm)
              call pawcprj_put(gs_hamk%atindx,cprj_band_srt,cprj_k,gs_hamk%natom,iband,0,ikpt,&
@@ -1138,7 +1129,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
 &             '  (electric field)',ch10,&
 &             '  New trial energy at line',iline,' = ',e0,ch10,&
 &             '  is higher than former:',e0_old,ch10
-             MSG_WARNING(message)
+             ABI_WARNING(message)
            end if
          end if         ! finite_field
 
@@ -1214,14 +1205,14 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
  end do ! iblock End loop over block of bands
 
  if (allocated(dimlmn_srt)) then
-   ABI_DEALLOCATE(dimlmn_srt)
+   ABI_FREE(dimlmn_srt)
  end if
 
  if (finite_field .and. gs_hamk%usepaw == 1) then ! store updated cprjs for this kpt
    ! switch from ikptf to ikpt
    ikptf = ikpt
    call xmpi_allgather(ikptf,ikptf_recv,spaceComm_distrb,ierr)
-   call pawcprj_mpi_allgather(cprj_k,cprj_gat,natom,nspinor*mband,dimlmn,ncpgr,nproc_distrb,&
+   call pawcprj_mpi_allgather(cprj_k,cprj_gat,natom,nspinor*mband,1,dimlmn,ncpgr,nproc_distrb,&
 &   spaceComm_distrb,ierr,rank_ordered=.true.)
    do iproc = 1, nproc_distrb
      icp2=nspinor*mband*(iproc-1)
@@ -1257,51 +1248,51 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
  ! ===================
  ! FINAL DEALLOCATIONS
  ! ===================
- ABI_DEALLOCATE(conjgr)
- ABI_DEALLOCATE(cwavef)
- ABI_DEALLOCATE(direc)
- ABI_DEALLOCATE(pcon)
- ABI_DEALLOCATE(scprod)
- ABI_DEALLOCATE(ghc)
- ABI_DEALLOCATE(gvnlxc)
- ABI_DEALLOCATE(gh_direc)
- ABI_DEALLOCATE(gvnlx_direc)
- ABI_DEALLOCATE(vresid)
- ABI_DEALLOCATE(gs_direc)
+ ABI_FREE(conjgr)
+ ABI_FREE(cwavef)
+ ABI_FREE(direc)
+ ABI_FREE(pcon)
+ ABI_FREE(scprod)
+ ABI_FREE(ghc)
+ ABI_FREE(gvnlxc)
+ ABI_FREE(gh_direc)
+ ABI_FREE(gvnlx_direc)
+ ABI_FREE(vresid)
+ ABI_FREE(gs_direc)
 
  if (gen_eigenpb)  then
-   ABI_DEALLOCATE(scwavef)
-   ABI_DEALLOCATE(direc_tmp)
+   ABI_FREE(scwavef)
+   ABI_FREE(direc_tmp)
  end if
 
  if (gen_eigenpb.and.(inonsc==1))  then
-   ABI_DEALLOCATE(ghc_all)
+   ABI_FREE(ghc_all)
  end if
 
  if(wfopta10==2.or.wfopta10==3)  then
-   ABI_DEALLOCATE(ghcws)
-   ABI_DEALLOCATE(gh_direcws)
+   ABI_FREE(ghcws)
+   ABI_FREE(gh_direcws)
  end if
- ABI_DEALLOCATE(gvnlx_dummy)
+ ABI_FREE(gvnlx_dummy)
 
  if(wfopta10==2.or.wfopta10==3)  then
-   ABI_DEALLOCATE(work)
+   ABI_FREE(work)
  end if
 
- ABI_DEALLOCATE(swork)
+ ABI_FREE(swork)
 
  if (finite_field) then
-   ABI_DEALLOCATE(cg1_k)
-   ABI_DEALLOCATE(cgq_k)
-   ABI_DEALLOCATE(detovc)
-   ABI_DEALLOCATE(detovd)
-   ABI_DEALLOCATE(grad_berry)
-   ABI_DEALLOCATE(sflag_k)
-   ABI_DEALLOCATE(smat_inv)
-   ABI_DEALLOCATE(smat_k)
-   ABI_DEALLOCATE(pwind_k)
-   ABI_DEALLOCATE(pwnsfac_k)
-   ABI_DEALLOCATE(grad_total)
+   ABI_FREE(cg1_k)
+   ABI_FREE(cgq_k)
+   ABI_FREE(detovc)
+   ABI_FREE(detovd)
+   ABI_FREE(grad_berry)
+   ABI_FREE(sflag_k)
+   ABI_FREE(smat_inv)
+   ABI_FREE(smat_k)
+   ABI_FREE(pwind_k)
+   ABI_FREE(pwnsfac_k)
+   ABI_FREE(grad_total)
    if (gs_hamk%usepaw /= 0) then
      call pawcprj_free(cprj_k)
      call pawcprj_free(cprj_kb)
@@ -1311,19 +1302,22 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
      if (nkpt /= dtefield%fnkpt) then
        call pawcprj_free(cprj_fkn)
        call pawcprj_free(cprj_ikn)
-       ABI_DATATYPE_DEALLOCATE(cprj_fkn)
-       ABI_DATATYPE_DEALLOCATE(cprj_ikn)
+       ABI_FREE(cprj_fkn)
+       ABI_FREE(cprj_ikn)
      end if
    end if
-   ABI_DEALLOCATE(smat_k_paw)
-   ABI_DEALLOCATE(dimlmn)
-   ABI_DATATYPE_DEALLOCATE(cprj_k)
-   ABI_DATATYPE_DEALLOCATE(cprj_kb)
-   ABI_DATATYPE_DEALLOCATE(cprj_direc)
-   ABI_DATATYPE_DEALLOCATE(cprj_gat)
-   ABI_DEALLOCATE(ikptf_recv)
-   ABI_DATATYPE_DEALLOCATE(cprj_band_srt)
+   ABI_FREE(smat_k_paw)
+   ABI_FREE(dimlmn)
+   ABI_FREE(cprj_k)
+   ABI_FREE(cprj_kb)
+   ABI_FREE(cprj_direc)
+   ABI_FREE(cprj_gat)
+   ABI_FREE(ikptf_recv)
+   ABI_FREE(cprj_band_srt)
  end if
+
+ gs_hamk%gpu_option=gpu_option_save
+ if(gpu_option_save==ABI_GPU_OPENMP) gemm_nonlop_use_gemm=.true.
 
 ! Do not delete this line, needed to run with open MP
  write(unit=message,fmt=*) resid(1)
@@ -1369,7 +1363,6 @@ end subroutine cgwf
 !! sinth = sin(thetam)
 !! thetam = optimal angle theta in line_minimization
 !!
-!!
 !! SIDE EFFECTS
 !! Input/Output
 !! dphase_aux1 = change in Zak phase accumulated during the loop over iline
@@ -1382,18 +1375,10 @@ end subroutine cgwf
 !! of the Hartree and exchange-correlation terms on theta; the original
 !! abinit routine does the same)
 !!
-!! PARENTS
-!!      cgwf
-!!
-!! CHILDREN
-!!      etheta,rhophi,wrtout
-!!
 !! SOURCE
 
 subroutine linemin(bcut,chc,costh,detovc,detovd,dhc,dhd,dphase_aux1,&
 &  efield_dot,iline,nkpt,nstr,hel,phase_end,phase_init,sdeg,sinth,thetam)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1587,7 +1572,7 @@ subroutine linemin(bcut,chc,costh,detovc,detovd,dhc,dhd,dphase_aux1,&
 &   '  Cannot find theta_min. No minimum exists: the field is too strong ! ',ch10,&
 &   '  Try decreasing difference between D and 4 Pi P by changing structure or D (only for fixed D calculation)'
    call wrtout(std_out,message,'COLL')
-   MSG_ERROR('linemin cannot find theta_min')
+   ABI_ERROR('linemin cannot find theta_min')
  end if
 
 !Compute the mimum of E(theta)
@@ -1698,18 +1683,10 @@ end subroutine linemin
 !! e0 = energy for the given value of theta
 !! e1 = derivative of the energy with respect to theta
 !!
-!! PARENTS
-!!      cgwf,linemin
-!!
-!! CHILDREN
-!!      rhophi
-!!
 !! SOURCE
 
 subroutine etheta(bcut,chc,detovc,detovd,dhc,dhd,efield_dot,e0,e1,&
 &    hel,nkpt,nstr,sdeg,theta)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1828,18 +1805,11 @@ end subroutine etheta
 !!  subvnlx(nband_k*(nband_k+1)*use_subvnlx)=non-local Hamiltonian (if NCPP)  plus Fock ACE operator (if usefock_ACE)
 !!   expressed in the WFs subspace
 !!
-!! PARENTS
-!!      cgwf
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine mksubham(cg,ghc,gsc,gvnlxc,iblock,icg,igsc,istwf_k,&
 &                    isubh,isubo,mcg,mgsc,nband_k,nbdblock,npw_k,&
 &                    nspinor,subham,subovl,subvnlx,use_subovl,use_subvnlx,me_g0)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2009,7 +1979,6 @@ subroutine mksubham(cg,ghc,gsc,gvnlxc,iblock,icg,igsc,istwf_k,&
 end subroutine mksubham
 !!***
 
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/make_grad_berry
 !! NAME
 !! make_grad_berry
@@ -2017,13 +1986,6 @@ end subroutine mksubham
 !! FUNCTION
 !! compute gradient contribution from berry phase in finite
 !! electric field case
-!!
-!! COPYRIGHT
-!! Copyright (C) 1998-2019 ABINIT group
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
 !!  cg(2,mcg)=input wavefunctions
@@ -2064,23 +2026,13 @@ end subroutine mksubham
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      cgwf
-!!
-!! CHILDREN
-!!      nonlop,pawcprj_alloc,pawcprj_copy,pawcprj_free,pawcprj_get
-!!      pawcprj_symkn,smatrix,smatrix_k_paw
-!!
 !! SOURCE
 
 subroutine make_grad_berry(cg,cgq,cprj_k,detovc,dimlmn,dimlmn_srt,direc,dtefield,grad_berry,&
 &                          gs_hamk,iband,icg,ikpt,isppol,mband,mcg,mcgq,mkgq,mpi_enreg,mpw,natom,nkpt,&
 &                          npw,npwarr,nspinor,nsppol,pwind,pwind_alloc,pwnsfac,pwnsfacq)
 
-  implicit none
-
   !Arguments ------------------------------------
-
   !scalars
   integer,intent(in) :: iband,icg,ikpt,isppol,mband,mcg,mcgq
   integer,intent(in) :: mkgq,mpw,natom,nkpt,npw,nspinor,nsppol,pwind_alloc
@@ -2135,35 +2087,35 @@ subroutine make_grad_berry(cg,cgq,cprj_k,detovc,dimlmn,dimlmn_srt,direc,dtefield
 
   if (gs_hamk%usepaw /= 0) then
      dimenlr1 = gs_hamk%lmnmax*(gs_hamk%lmnmax+1)/2
-     ABI_ALLOCATE(qijbkk,(dimenlr1,natom,nspinor**2,2))
-     ABI_ALLOCATE(enl_rij,(nspinor*dimenlr1,natom,nspinor**2,1))
-     ABI_ALLOCATE(smat_k_paw,(2,nbo,nbo))
-     ABI_ALLOCATE(grad_berry_ev,(2,npw*nspinor))
+     ABI_MALLOC(qijbkk,(dimenlr1,natom,nspinor**2,2))
+     ABI_MALLOC(enl_rij,(nspinor*dimenlr1,natom,nspinor**2,1))
+     ABI_MALLOC(smat_k_paw,(2,nbo,nbo))
+     ABI_MALLOC(grad_berry_ev,(2,npw*nspinor))
      enl_rij = zero
      qijbkk = zero
      smat_k_paw = zero
-     ABI_DATATYPE_ALLOCATE(cprj_kb,(natom,nbo*nspinor))
+     ABI_MALLOC(cprj_kb,(natom,nbo*nspinor))
      call pawcprj_alloc(cprj_kb,0,dimlmn)
-     ABI_DATATYPE_ALLOCATE(cprj_band_srt,(natom,nspinor))
+     ABI_MALLOC(cprj_band_srt,(natom,nspinor))
      call pawcprj_alloc(cprj_band_srt,0,dimlmn_srt)
      if (nkpt /= dtefield%fnkpt) then
-        ABI_DATATYPE_ALLOCATE(cprj_fkn,(natom,nbo*nspinor))
-        ABI_DATATYPE_ALLOCATE(cprj_ikn,(natom,nbo*nspinor))
+        ABI_MALLOC(cprj_fkn,(natom,nbo*nspinor))
+        ABI_MALLOC(cprj_ikn,(natom,nbo*nspinor))
         call pawcprj_alloc(cprj_fkn,0,dimlmn)
         call pawcprj_alloc(cprj_ikn,0,dimlmn)
      else
-        ABI_DATATYPE_ALLOCATE(cprj_fkn,(0,0))
-        ABI_DATATYPE_ALLOCATE(cprj_ikn,(0,0))
+        ABI_MALLOC(cprj_fkn,(0,0))
+        ABI_MALLOC(cprj_ikn,(0,0))
      end if
   else
-     ABI_ALLOCATE(qijbkk,(0,0,0,0))
-     ABI_ALLOCATE(enl_rij,(0,0,0,0))
-     ABI_ALLOCATE(smat_k_paw,(0,0,0))
-     ABI_ALLOCATE(grad_berry_ev,(0,0))
-     ABI_DATATYPE_ALLOCATE(cprj_kb,(0,0))
-     ABI_DATATYPE_ALLOCATE(cprj_band_srt,(0,0))
-     ABI_DATATYPE_ALLOCATE(cprj_fkn,(0,0))
-     ABI_DATATYPE_ALLOCATE(cprj_ikn,(0,0))
+     ABI_MALLOC(qijbkk,(0,0,0,0))
+     ABI_MALLOC(enl_rij,(0,0,0,0))
+     ABI_MALLOC(smat_k_paw,(0,0,0))
+     ABI_MALLOC(grad_berry_ev,(0,0))
+     ABI_MALLOC(cprj_kb,(0,0))
+     ABI_MALLOC(cprj_band_srt,(0,0))
+     ABI_MALLOC(cprj_fkn,(0,0))
+     ABI_MALLOC(cprj_ikn,(0,0))
   end if
 
   ikptf = dtefield%i2fbz(ikpt)
@@ -2185,7 +2137,7 @@ subroutine make_grad_berry(cg,cgq,cprj_k,detovc,dimlmn,dimlmn_srt,direc,dtefield
         end if
         ikpt2 = dtefield%indkk_f2ibz(ikpt2f,1)
         npw_k2 = npwarr(ikpt2)
-        ABI_ALLOCATE(cgq_k,(2,nbo*nspinor*npw_k2))
+        ABI_MALLOC(cgq_k,(2,nbo*nspinor*npw_k2))
         pwind_k(1:npw) = pwind(ikgf+1:ikgf+npw,ifor,idir)
         pwnsfac_k(1:2,1:npw) = pwnsfac(1:2,ikgf+1:ikgf+npw)
         sflag_k(:) = dtefield%sflag(:,ikpt+(isppol-1)*nkpt,ifor,idir)
@@ -2225,7 +2177,7 @@ subroutine make_grad_berry(cg,cgq,cprj_k,detovc,dimlmn,dimlmn_srt,direc,dtefield
              &     job,iband,mcg,mcg_q,mcg1_k,iband,mpw,nbo,dtefield%nband_occ(isppol),&
              &     npw,npw_k2,nspinor,pwind_k,pwnsfac_k,sflag_k,&
              &     shiftbd,smat_inv,smat_k,smat_k_paw,gs_hamk%usepaw)
-        ABI_DEALLOCATE(cgq_k)
+        ABI_FREE(cgq_k)
         detovc(:,ifor,idir) = dtm_k(:) !store the determinant of the overlap
         if (sqrt(dtm_k(1)*dtm_k(1) + dtm_k(2)*dtm_k(2)) < tol12) then
            write(message,'(3a,i5,a,i3,a,a,a)') &
@@ -2237,7 +2189,7 @@ subroutine make_grad_berry(cg,cgq,cprj_k,detovc,dimlmn,dimlmn_srt,direc,dtefield
            if(abs(dtm_k(1))<=1d-12)dtm_k(1)=1d-12
            if(abs(dtm_k(2))<=1d-12)dtm_k(2)=1d-12
            write(std_out,*)' Changing to:',dtm_k(1:2)
-           !      REC       MSG_BUG(message)
+           !      REC       ABI_BUG(message)
         end if
 
         if (gs_hamk%usepaw == 1) then
@@ -2331,14 +2283,14 @@ subroutine make_grad_berry(cg,cgq,cprj_k,detovc,dimlmn,dimlmn_srt,direc,dtefield
         call pawcprj_free(cprj_ikn)
      end if
   end if
-  ABI_DEALLOCATE(grad_berry_ev)
-  ABI_DEALLOCATE(qijbkk)
-  ABI_DEALLOCATE(enl_rij)
-  ABI_DEALLOCATE(smat_k_paw)
-  ABI_DATATYPE_DEALLOCATE(cprj_kb)
-  ABI_DATATYPE_DEALLOCATE(cprj_band_srt)
-  ABI_DATATYPE_DEALLOCATE(cprj_fkn)
-  ABI_DATATYPE_DEALLOCATE(cprj_ikn)
+  ABI_FREE(grad_berry_ev)
+  ABI_FREE(qijbkk)
+  ABI_FREE(enl_rij)
+  ABI_FREE(smat_k_paw)
+  ABI_FREE(cprj_kb)
+  ABI_FREE(cprj_band_srt)
+  ABI_FREE(cprj_fkn)
+  ABI_FREE(cprj_ikn)
 
   !DBG_EXIT("COLL")
 

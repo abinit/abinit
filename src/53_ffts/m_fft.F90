@@ -1,21 +1,16 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_fft
 !! NAME
 !!  m_fft
 !!
 !! FUNCTION
 !!  This module provides driver routines for sequential FFTs (OpenMP threads are supported).
-!!  It also defines generic interfaces for single or double precision arrays.
+!!  It also defines generic interfaces for single or double precision FFTs.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2019 ABINIT group (MG, MM, GZ, MT, MF, XG)
+!! Copyright (C) 2009-2024 ABINIT group (MG, MM, GZ, MT, MF, XG, PT, FF)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -24,6 +19,9 @@
 #endif
 
 #include "abi_common.h"
+
+! nvtx related macro definition
+#include "nvtx_macros.h"
 
 MODULE m_fft
 
@@ -38,7 +36,6 @@ MODULE m_fft
  use m_sg2002
  use m_fftw3
  use m_dfti
- use iso_c_binding
 #if defined HAVE_MPI2
  use mpi
 #endif
@@ -50,10 +47,17 @@ MODULE m_fft
  use m_fstrings,      only : sjoin, itoa
  use m_geometry,      only : metric
  use m_hide_blas,     only : xscal
- use m_fftcore,       only : get_cache_kb, kpgsph, get_kg, sphere_fft, sphere_fft1, sphere, change_istwfk,&
-&                            fftalg_info, fftalg_has_mpi, print_ngfft, getng, sphereboundary
+ use m_fftcore,       only : get_cache_kb, kpgsph, get_kg, sphere_fft, sphere_fft1, sphere, change_istwfk, &
+                             fftalg_info, fftalg_has_mpi, print_ngfft, getng, sphereboundary
  use m_mpinfo,        only : destroy_mpi_enreg, ptabs_fourdp, ptabs_fourwf, initmpi_seq
  use m_distribfft,    only : distribfft_type, init_distribfft, destroy_distribfft
+
+#if defined HAVE_GPU_CUDA
+ use m_manage_cuda
+#endif
+ use m_ompgpu_fourwf
+
+ use, intrinsic :: iso_c_binding
 
  implicit none
 
@@ -63,7 +67,6 @@ MODULE m_fft
  include 'mpif.h'
 #endif
 
- public :: fftbox_execute       ! Driver for FFTs on the full box (complex-to-complex version, operated on complex arrays)
  public :: fft_ug               ! Driver for zero-padded FFTs u(g) --> u(r)
  public :: fft_ur               ! Driver for zero-padded FFTs u(r) --> u(g)
  public :: fftpad               ! Driver for (low-level) zero-padded FFTs, note that fft_ug is the preferred interface.
@@ -80,34 +83,31 @@ MODULE m_fft
  public :: fourdp
  public :: fourwf
 
+ integer,public,save :: fourdp_counter = -1
+ integer,public,save :: fourwf_counter = -1
+ public :: fft_init_counters
+ public :: fft_stop_counters
+ public :: fft_output_counters
+
 ! Driver routines for MPI version.
  public :: fourdp_mpi           ! MPI FFT of densities/potentials on the full box.
  public :: fourwf_mpi           ! specialized MPI-FFT for wavefunctions.
  !public :: fftmpi_u
 
- interface fftbox_execute
-   module procedure fftbox_execute_ip_spc
-   module procedure fftbox_execute_ip_dpc
-   module procedure fftbox_execute_op_spc
-   module procedure fftbox_execute_op_dpc
- end interface fftbox_execute
-
  interface fft_ug
-   !module procedure fft_ug_dp   TODO
+   module procedure fft_ug_sp
+   module procedure fft_ug_dp
    module procedure fft_ug_spc
    module procedure fft_ug_dpc
  end interface fft_ug
- !public :: fft_ug_spc, fft_ug_dpc
 
  interface fft_ur
-   !module procedure fft_ur_dp      TODO
+   module procedure fft_ur_dp
    module procedure fft_ur_spc
    module procedure fft_ur_dpc
  end interface fft_ur
- !public :: fft_ur_spc, fft_ur_dpc
 
  interface fftpad
-   !module procedure fftpad_dp
    module procedure fftpad_spc
    module procedure fftpad_dpc
  end interface fftpad
@@ -120,35 +120,132 @@ MODULE m_fft
 !! fftbox_plan3_t
 !!
 !! FUNCTION
-!!  Stores the options passed to the fftbox_ routines.
+!!  Options passed to the fftbox_* routines to perform dense 3d FFTs.
 !!
 !! SOURCE
 
  type,public :: fftbox_plan3_t
-   private
-   integer :: fftalg=112      ! Flag defining the library to call.
-   integer :: fftcache=16     ! Size of the cache (kB). Only used in SG routines.
-   integer :: isign=0         ! Sign of the exponential in the FFT
-   integer :: nfft            ! Total number of points in the FFT box.
-   integer :: ldxyz=-1        ! Physical dimension of the array to transform
-   integer :: ndat=-1         ! Number of FFTs associated to the plan.
-   !integer :: nthreads=-1    ! The number of threads associated to the plan.
-   integer :: dims(3)=-1      ! The number of FFT divisions.
-   integer :: embed(3)=-1     ! Leading dimensions of the input,output arrays.
- end type fftbox_plan3_t
 
- public :: fftbox_plan3       ! Basic interface to create the plan.
- public :: fftbox_plan3_many  ! Advanced interface
- public :: fftbox_plan3_init  ! Low-level constructor
+   integer :: fftalg = 112       ! The library to call.
+   integer :: fftcache = 16      ! Cache size in kB. Only used in SG routines.
+   integer :: nfft = -1          ! Total number of points in the FFT box.
+   integer :: ldxyz = -1         ! Physical dimension of the array to transform
+   integer :: batch_size = -1    ! MAXIMUM number of FFTs associated to the plan.
+   integer :: dims(3) = -1       ! The number of FFT divisions.
+   integer :: embed(3) = -1      ! Leading dimensions of the input, output arrays.
+   integer :: gpu_option = ABI_GPU_DISABLED  ! /= 0 if FFTs should be offloaded to the GPU
+
+   type(c_ptr) :: gpu_plan_ip_spc = c_null_ptr
+   type(c_ptr) :: gpu_data_ip_spc = c_null_ptr
+   type(c_ptr) :: gpu_plan_ip_dpc = c_null_ptr
+   type(c_ptr) :: gpu_data_ip_dpc = c_null_ptr
+   type(c_ptr) :: gpu_plan_op_spc = c_null_ptr
+   type(c_ptr) :: gpu_idata_op_spc = c_null_ptr
+   type(c_ptr) :: gpu_odata_op_spc = c_null_ptr
+   type(c_ptr) :: gpu_plan_op_dpc = c_null_ptr
+   type(c_ptr) :: gpu_idata_op_dpc = c_null_ptr
+   type(c_ptr) :: gpu_odata_op_dpc = c_null_ptr
+
+ contains
+
+   procedure :: init => fftbox_plan3_init                 ! Low-level constructor
+   procedure :: from_ngfft => fftbox_plan3_from_ngfft     ! Build object from ngfft.
+   procedure :: execute_ip_spc => fftbox_execute_ip_spc
+   procedure :: execute_ip_dpc => fftbox_execute_ip_dpc
+   procedure :: execute_op_spc => fftbox_execute_op_spc
+   procedure :: execute_op_dpc => fftbox_execute_op_dpc
+
+   ! Main entry point for performing FFTs on the full box
+   ! complex-to-complex version, operating on complex arrays
+   generic :: execute => execute_ip_spc, &
+                         execute_ip_dpc, &
+                         execute_op_spc, &
+                         execute_op_dpc
+
+   procedure :: free => fftbox_plan3_free
+   ! Free dynamic memory
+
+ end type fftbox_plan3_t
+!!***
+
+#if defined HAVE_GPU_CUDA
+ interface
+   subroutine gpu_planpp_free(plan_pp) bind(C)
+     use, intrinsic :: iso_c_binding
+     type(c_ptr),intent(inout) :: plan_pp
+   end subroutine gpu_planpp_free
+   subroutine devpp_free(dev_pp) bind(C)
+     use, intrinsic :: iso_c_binding
+     type(c_ptr),intent(inout) :: dev_pp
+   end subroutine devpp_free
+   subroutine xgpu_fftbox_c2c_ip(f_dims, f_embed, ndat, isign, kind, iscale, h_ff, plan_pp, d_ff) bind(C)
+     use, intrinsic :: iso_c_binding
+     integer(c_int),intent(in) :: f_dims(3), f_embed(3)
+     integer(c_int),value, intent(in) :: ndat, isign, kind, iscale
+     type(c_ptr),intent(in) :: h_ff
+     type(c_ptr),intent(inout) :: plan_pp, d_ff
+   end subroutine xgpu_fftbox_c2c_ip
+   subroutine xgpu_fftbox_c2c_op(f_dims, f_embed, ndat, isign, kind, iscale, h_ff, h_gg, plan_pp, d_ff, d_gg) bind(C)
+     use, intrinsic :: iso_c_binding
+     integer(c_int),intent(in) :: f_dims(3), f_embed(3)
+     integer(c_int),value, intent(in) :: ndat, isign, kind, iscale
+     type(c_ptr),intent(in) :: h_ff, h_gg
+     type(c_ptr),intent(inout) :: plan_pp, d_ff, d_gg
+   end subroutine xgpu_fftbox_c2c_op
+ end interface
+#endif
+
+
+!----------------------------------------------------------------------
+
+!!****t* m_fft/uplan_t
+!! NAME
+!! uplan_t
+!!
+!! FUNCTION
+!!
+!! SOURCE
+
+ type, public :: uplan_t
+
+   integer :: npw = -1
+   integer :: nspinor = -1
+   integer :: batch_size = -1  ! MAXIMUM number of FFTs associated to the plan.
+   integer :: istwfk = -1
+   integer :: kind = -1
+   integer :: gpu_option = ABI_GPU_DISABLED  ! /= 0 if FFTs should be offloaded to the GPU.
+   integer :: nfft = -1  ! Total number of points in the FFT box.
+   integer :: mgfft = -1
+   integer :: ngfft(18)
+   integer, contiguous, pointer :: kg_k(:,:)
+   integer, allocatable :: gbound(:,:)
+
+ contains
+   procedure :: init => uplan_init    ! Build object
+   procedure :: free => uplan_free    ! Free dynamic memory
+
+   procedure :: execute_gr_spc => uplan_execute_gr_spc
+   procedure :: execute_gr_dpc => uplan_execute_gr_dpc
+   procedure :: execute_rg_spc => uplan_execute_rg_spc
+   procedure :: execute_rg_dpc => uplan_execute_rg_dpc
+
+   ! Main entry point for performing FFTs on the full box
+   ! complex-to-complex version, operating on complex arrays
+   generic :: execute_gr => execute_gr_spc, &
+                            execute_gr_dpc
+
+   generic :: execute_rg => execute_rg_spc, &
+                            execute_rg_dpc
+ end type uplan_t
 !!***
 
 !----------------------------------------------------------------------
 
-!unitary tests
+ ! unit tests
  public :: fftbox_utests          ! Unit tests for FFTs on the full box.
  public :: fftu_utests            ! Unit tests for the FFTs of wavefunctions.
- public :: fftbox_mpi_utests      ! Unit tests for the MPI-FFTs on the full box.
- public :: fftu_mpi_utests        ! Unit tests for the MPI-FFTs of the wavefunctions.
+ public :: fftbox_mpi_utests      ! Unit tests for MPI-FFT on the full box.
+ public :: fftu_mpi_utests        ! Unit tests for MPI-FFT of the wavefunctions.
 !!***
 
  ! Flag used to enable/disable the use of non-blocking IALLTOALL
@@ -171,16 +268,9 @@ CONTAINS  !===========================================================
 !!  Allow the use of non-blocking IALLOTOALL in MPI-FFTs algorithms
 !!  Mainly used for profiling purposes.
 !!
-!! PARENTS
-!!      m_argparse
-!!
-!! CHILDREN
-!!      fourwf_mpi
-!!
 !! SOURCE
 
 subroutine fft_allow_ialltoall(bool)
-
 
 !Arguments ------------------------------------
  logical,intent(in) :: bool
@@ -197,87 +287,6 @@ end subroutine fft_allow_ialltoall
 
 !----------------------------------------------------------------------
 
-!!****f* m_fft/fftbox_plan3
-!! NAME
-!!  fftbox_plan3
-!!
-!! FUNCTION
-!!  Basic interface to construct fftbox_plan3_t
-!!
-!! INPUTS
-!!
-!! PARENTS
-!!      debug_tools
-!!
-!! CHILDREN
-!!      fourwf_mpi
-!!
-!! SOURCE
-
-subroutine fftbox_plan3(plan,dims,fftalg,isign)
-
-
-!Arguments ------------------------------------
-!scalars
- integer,intent(in) :: fftalg,isign
- type(fftbox_plan3_t),intent(out) :: plan
-!arrays
- integer,intent(in) :: dims(3)
-
-!Local variables-------------------------------
-!scalars
- integer,parameter :: ndat1=1,fftcache0=0
-
-! *************************************************************************
-
- call fftbox_plan3_init(plan,ndat1,dims,dims,fftalg,fftcache0,isign)
-
-end subroutine fftbox_plan3
-!!***
-
-!----------------------------------------------------------------------
-
-!!****f* m_fft/fftbox_plan3_many
-!! NAME
-!!  fftbox_plan3_many
-!!
-!! FUNCTION
-!!  Advanced interface to construct fftbox_plan3_t
-!!
-!! INPUTS
-!!  See fftbox_plan3_t
-!!
-!! PARENTS
-!!      m_fft,m_fft_prof,m_oscillators,m_pawpwij,m_shirley
-!!
-!! CHILDREN
-!!      fourwf_mpi
-!!
-!! SOURCE
-
-subroutine fftbox_plan3_many(plan,ndat,dims,embed,fftalg,isign)
-
-
-!Arguments ------------------------------------
-!scalars
- integer,intent(in) :: fftalg,isign,ndat
- type(fftbox_plan3_t),intent(out) :: plan
-!arrays
- integer,intent(in) :: dims(3),embed(3)
-
-!Local variables-------------------------------
-!scalars
- integer,parameter :: fftcache0=0
-
-! *************************************************************************
-
- call fftbox_plan3_init(plan,ndat,dims,embed,fftalg,fftcache0,isign)
-
-end subroutine fftbox_plan3_many
-!!***
-
-!----------------------------------------------------------------------
-
 !!****f* m_fft/fftbox_plan3_init
 !! NAME
 !!  fftbox_plan3_init
@@ -289,38 +298,89 @@ end subroutine fftbox_plan3_many
 !! INPUTS
 !!  See fftbox_plan3_t for the meaning of the different arguments.
 !!
-!! PARENTS
-!!      m_fft
-!!
-!! CHILDREN
-!!      fourwf_mpi
-!!
 !! SOURCE
 
-subroutine fftbox_plan3_init(plan,ndat,dims,embed,fftalg,fftcache,isign)
-
+subroutine fftbox_plan3_init(plan, batch_size, dims, embed, fftalg, fftcache, gpu_option)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: ndat,fftalg,fftcache,isign !,nthreads
- type(fftbox_plan3_t),intent(out) :: plan
+ class(fftbox_plan3_t),intent(out) :: plan
+ integer,intent(in) :: batch_size, fftalg, fftcache, gpu_option
 !arrays
- integer,intent(in) :: dims(3),embed(3)
+ integer,intent(in) :: dims(3), embed(3)
 
 ! *************************************************************************
 
- plan%ndat     = ndat
- plan%dims     = dims                       !ngfft(1:3)
- plan%embed    = embed                      !ngfft(4:6)
- plan%fftalg   = fftalg                     !ngfft(7)
- if (fftcache > 0) plan%fftcache = fftcache !ngfft(8)
- plan%isign    = isign
- !plan%nthreads = nthreads
-
- plan%nfft     = PRODUCT(plan%dims)
- plan%ldxyz    = PRODUCT(plan%embed)
+ plan%batch_size = batch_size
+ plan%dims     = dims                       ! ngfft(1:3)
+ plan%embed    = embed                      ! ngfft(4:6)
+ plan%fftalg   = fftalg                     ! ngfft(7)
+ if (fftcache > 0) plan%fftcache = fftcache ! ngfft(8)
+ plan%gpu_option  = gpu_option
+ plan%nfft  = product(plan%dims)
+ plan%ldxyz = product(plan%embed)
 
 end subroutine fftbox_plan3_init
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_fft/fftbox_plan3_from_ngfft
+!! NAME
+!!  fftbox_plan3_from_ngfft
+!!
+!! FUNCTION
+!!  Initialize plan from ngfft.
+!!
+!! SOURCE
+
+subroutine fftbox_plan3_from_ngfft(plan, ngfft, batch_size, gpu_option)
+
+!Arguments ------------------------------------
+ class(fftbox_plan3_t),intent(out) :: plan
+ integer,intent(in) :: ngfft(18), batch_size, gpu_option
+
+! *************************************************************************
+
+ call plan%init(batch_size, ngfft(1:3), ngfft(4:6), ngfft(7), ngfft(8), gpu_option)
+
+end subroutine fftbox_plan3_from_ngfft
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_fft/fftbox_plan3_free
+!! NAME
+!!  fftbox_plan3_free
+!!
+!! FUNCTION
+!!  Free dynamic memory.
+!!
+!! SOURCE
+
+subroutine fftbox_plan3_free(plan)
+
+!Arguments ------------------------------------
+ class(fftbox_plan3_t),target,intent(inout) :: plan
+
+! *************************************************************************
+
+ ABI_UNUSED(plan%ldxyz)
+
+#if defined HAVE_GPU_CUDA
+ call gpu_planpp_free(plan%gpu_plan_ip_spc)
+ call devpp_free(plan%gpu_data_ip_spc)
+ call gpu_planpp_free(plan%gpu_plan_ip_dpc)
+ call devpp_free(plan%gpu_data_ip_dpc)
+ call gpu_planpp_free(plan%gpu_plan_op_spc)
+ call devpp_free(plan%gpu_idata_op_spc)
+ call devpp_free(plan%gpu_odata_op_spc)
+ call gpu_planpp_free(plan%gpu_plan_op_dpc)
+ call devpp_free(plan%gpu_idata_op_dpc)
+ call devpp_free(plan%gpu_odata_op_dpc)
+#endif
+
+end subroutine fftbox_plan3_free
 !!***
 
 !----------------------------------------------------------------------
@@ -331,35 +391,46 @@ end subroutine fftbox_plan3_init
 !!
 !! FUNCTION
 !!  In-place FFT transform of complex array.
-!!  Call (FFTW3|DFTI) routines if available, otherwise we fallback to SG routines
+!!  Call (FFTW3|DFTI) routines if available, otherwise fallback to SG routines
 !!  TARGET: spc arrays
 !!
 !! INPUTS
 !!  plan<fftbox_plan3_t>=Structure with the parameters defining the transform.
+!!  isign= Sign of the exponential in the FFT
+!!  [iscale]= 0 if G --> R FFT should not be scaled. Default: 1 i.e. scale
 !!
 !! SIDE EFFECTS
-!!  ff(plan%ldxyz*plan%ndat) =
+!!  ff(plan%ldxyz*plan%batch_size) =
 !!    In input: the data to transform.
 !!    Changed in output, filled with the FFT results.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      fourwf_mpi
-!!
 !! SOURCE
 
-subroutine fftbox_execute_ip_spc(plan,ff)
-
+subroutine fftbox_execute_ip_spc(plan, ff, isign, ndat, iscale)
 
 !Arguments ------------------------------------
 !scalars
- type(fftbox_plan3_t),intent(in) :: plan
+ class(fftbox_plan3_t),target,intent(inout) :: plan
+ integer,intent(in) :: isign
+ integer,optional,intent(in) :: ndat, iscale
 !arrays
- complex(spc),intent(inout) :: ff(plan%ldxyz*plan%ndat)
+ complex(spc),target,intent(inout) :: ff(*)
 
 ! *************************************************************************
 
+ integer :: ndat__, iscale__
+ ndat__ = plan%batch_size; if (present(ndat) ) ndat__ = ndat
+ ABI_DEFAULT(iscale__, iscale, 1)
+
+#if defined HAVE_GPU_CUDA
+ if (plan%gpu_option /= ABI_GPU_DISABLED) then
+   call xgpu_fftbox_c2c_ip(plan%dims, plan%embed, ndat__, isign, spc, iscale__, c_loc(ff), &
+                           plan%gpu_plan_ip_spc, plan%gpu_data_ip_spc)
+   return
+ end if
+#endif
+
+ ! CPU version
 #include "fftbox_ip_driver.finc"
 
 end subroutine fftbox_execute_ip_spc
@@ -378,30 +449,41 @@ end subroutine fftbox_execute_ip_spc
 !!
 !! INPUTS
 !!  plan<fftbox_plan3_t>=Structure with the parameters defining the transform.
+!!  isign= Sign of the exponential in the FFT
+!!  [iscale]= 0 if G --> R FFT should not be scaled. Default: 1 i.e. scale
 !!
 !! SIDE EFFECTS
-!!  ff(plan%ldxyz*plan%ndat) =
+!!  ff(plan%ldxyz*plan%batch_size) =
 !!    In input: the data to transform.
 !!    Changed in output, filled with the FFT results.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      fourwf_mpi
-!!
 !! SOURCE
 
-subroutine fftbox_execute_ip_dpc(plan,ff)
-
+subroutine fftbox_execute_ip_dpc(plan, ff, isign, ndat, iscale)
 
 !Arguments ------------------------------------
 !scalars
- type(fftbox_plan3_t),intent(in) :: plan
+ class(fftbox_plan3_t),target,intent(inout) :: plan
+ integer,intent(in) :: isign
+ integer,optional,intent(in) :: ndat, iscale
 !arrays
- complex(dpc),intent(inout) :: ff(plan%ldxyz*plan%ndat)
+ complex(dpc),target,intent(inout) :: ff(*)
 
 ! *************************************************************************
 
+ integer :: ndat__, iscale__
+ ndat__ = plan%batch_size; if (present(ndat) ) ndat__ = ndat
+ ABI_DEFAULT(iscale__, iscale, 1)
+
+#if defined HAVE_GPU_CUDA
+ if (plan%gpu_option /= ABI_GPU_DISABLED) then
+   call xgpu_fftbox_c2c_ip(plan%dims, plan%embed, ndat__, isign, dpc, iscale__, c_loc(ff), &
+                           plan%gpu_plan_ip_dpc, plan%gpu_data_ip_dpc)
+   return
+ end if
+#endif
+
+ ! CPU version
 #include "fftbox_ip_driver.finc"
 
 end subroutine fftbox_execute_ip_dpc
@@ -420,30 +502,41 @@ end subroutine fftbox_execute_ip_dpc
 !!
 !! INPUTS
 !! plan<fftbox_plan3_t>=Structure with the parameters defining the transform.
-!! ff(plan%ldxyz*plan%ndat)=The input array to be transformed.
+!! ff(plan%ldxyz*plan%batch_size)=The input array to be transformed.
+!! isign= Sign of the exponential in the FFT
+!! [iscale]= 0 if G --> R FFT should not be scaled. Default: 1 i.e. scale
 !!
 !! OUTPUT
-!!  gg(plan%ldxyz*plan%ndat)= The FFT results.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      fourwf_mpi
+!!  gg(plan%ldxyz*plan%batch_size)= The FFT results.
 !!
 !! SOURCE
 
-subroutine fftbox_execute_op_spc(plan,ff,gg)
-
+subroutine fftbox_execute_op_spc(plan, ff, gg, isign, ndat, iscale)
 
 !Arguments ------------------------------------
 !scalars
- type(fftbox_plan3_t),intent(in) :: plan
+ class(fftbox_plan3_t),intent(inout) :: plan
+ integer,intent(in) :: isign
+ integer,optional,intent(in) :: ndat, iscale
 !arrays
- complex(spc),intent(in) :: ff(plan%ldxyz*plan%ndat)
- complex(spc),intent(inout) :: gg(plan%ldxyz*plan%ndat)
+ complex(spc),target,intent(in) :: ff(*)
+ complex(spc),target,intent(inout) :: gg(*)
 
 ! *************************************************************************
 
+ integer :: ndat__, iscale__
+ ndat__ = plan%batch_size; if (present(ndat) ) ndat__ = ndat
+ ABI_DEFAULT(iscale__, iscale, 1)
+
+#if defined HAVE_GPU_CUDA
+ if (plan%gpu_option /= ABI_GPU_DISABLED) then
+   call xgpu_fftbox_c2c_op(plan%dims, plan%embed, ndat__, isign, spc, iscale__, c_loc(ff), c_loc(gg), &
+                           plan%gpu_plan_op_spc, plan%gpu_idata_op_spc, plan%gpu_odata_op_spc)
+   return
+ end if
+#endif
+
+ ! CPU version
 #include "fftbox_op_driver.finc"
 
 end subroutine fftbox_execute_op_spc
@@ -462,37 +555,83 @@ end subroutine fftbox_execute_op_spc
 !!
 !! INPUTS
 !! plan<fftbox_plan3_t>=Structure with the parameters defining the transform.
-!! ff(plan%ldxyz*plan%ndat)=The input array to be transformed.
+!! ff(plan%ldxyz*plan%batch_size)=The input array to be transformed.
+!! isign= Sign of the exponential in the FFT
+!! [iscale]= 0 if G --> R FFT should not be scaled. Default: 1 i.e. scale
 !!
 !! OUTPUT
-!!  gg(plan%ldxyz*plan%ndat)= The FFT results.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      fourwf_mpi
+!!  gg(plan%ldxyz*plan%batch_size)= The FFT results.
 !!
 !! SOURCE
 
-subroutine fftbox_execute_op_dpc(plan,ff,gg)
-
+subroutine fftbox_execute_op_dpc(plan, ff, gg, isign, ndat, iscale)
 
 !Arguments ------------------------------------
 !scalars
- type(fftbox_plan3_t),intent(in) :: plan
+ class(fftbox_plan3_t),intent(inout) :: plan
+ integer,intent(in) :: isign
+ integer,optional,intent(in) :: ndat, iscale
 !arrays
- complex(dpc),intent(in) :: ff(plan%ldxyz*plan%ndat)
- complex(dpc),intent(inout) :: gg(plan%ldxyz*plan%ndat)
+ complex(dpc),target,intent(in) :: ff(*)
+ complex(dpc),target,intent(inout) :: gg(*)
 
 ! *************************************************************************
 
+ integer :: ndat__, iscale__
+ ndat__ = plan%batch_size; if (present(ndat) ) ndat__ = ndat
+ ABI_DEFAULT(iscale__, iscale, 1)
+
+#if defined HAVE_GPU_CUDA
+ if (plan%gpu_option /= ABI_GPU_DISABLED) then
+   call xgpu_fftbox_c2c_op(plan%dims, plan%embed, ndat__, isign, dpc, iscale__, c_loc(ff), c_loc(gg), &
+                           plan%gpu_plan_op_dpc, plan%gpu_idata_op_dpc, plan%gpu_odata_op_dpc)
+   return
+ end if
+#endif
+
+ ! CPU version
 #include "fftbox_op_driver.finc"
 
 end subroutine fftbox_execute_op_dpc
 !!***
 
 !----------------------------------------------------------------------
-#if 0
+
+!!****f* m_fft/fft_ug_sp
+!! NAME
+!! fft_ug_sp
+!!
+!! FUNCTION
+!! Driver routine for G-->R transform of wavefunctions with zero-padded FFT.
+!! TARGET: single precision real arrays with Re/Im.
+!!
+!! INPUTS
+!!  See fft_ug_dpc
+!!
+!! SOURCE
+
+subroutine fft_ug_sp(npw_k, nfft, nspinor, ndat, mgfft, ngfft, istwf_k, kg_k, gbound_k, ug, ur)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: npw_k,nfft,nspinor,istwf_k,mgfft,ndat
+!arrays
+ integer,intent(in) :: ngfft(18),gbound_k(2*mgfft+8,2),kg_k(3,npw_k)
+ real(sp),target,intent(in) :: ug(2*npw_k*nspinor*ndat)
+ real(sp),target,intent(out) :: ur(2*nfft*nspinor*ndat)
+
+!Local variables-------------------------------
+ complex(sp),contiguous,pointer :: ug_cplx(:), ur_cplx(:)
+
+! *************************************************************************
+
+ call C_F_pointer(c_loc(ug), ug_cplx, shape=[npw_k*nspinor*ndat])
+ call C_F_pointer(c_loc(ur), ur_cplx, shape=[nfft*nspinor*ndat])
+
+ call fft_ug_spc(npw_k, nfft, nspinor, ndat, mgfft, ngfft, istwf_k, kg_k, gbound_k, ug_cplx, ur_cplx)
+
+end subroutine fft_ug_sp
+!!***
 
 !!****f* m_fft/fft_ug_dp
 !! NAME
@@ -500,51 +639,35 @@ end subroutine fftbox_execute_op_dpc
 !!
 !! FUNCTION
 !! Driver routine for G-->R transform of wavefunctions with zero-padded FFT.
-!! TARGET: double precision real arrays
+!! TARGET: double precision real arrays with Re/Im.
 !!
 !! INPUTS
-!! npw_k=number of plane waves for this k-point.
-!! nfft=Number of FFT points.
-!! nspinor=number of spinorial components
-!! ndat=Numer of wavefunctions to transform.
-!! mgfft=Max number of FFT divisions
-!! ngfft(18)=information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
-!! istwfk=Option describing the storage of the wavefunction. (at present must be 1)
-!! kg_k(3,npw_k)=G-vectors in reduced coordinates
-!! gbound_k_k(2*mgfft+8,2)=Table for padded-FFT. See sphereboundary.
-!! ug(npw_k*nspinor*ndat)=wavefunctions in reciprocal space
-!!
-!! OUTPUT
-!!  ur(nfft*nspinor*ndat)=wavefunctions in real space.
-!!
-!! PARENTS
-!!      m_fft
-!!
-!! CHILDREN
-!!      fourwf_mpi
+!!  See fft_ug_dpc
 !!
 !! SOURCE
 
-subroutine fft_ug_dp(npw_k,nfft,nspinor,ndat,mgfft,ngfft,istwf_k,kg_k,gbound_k,ug,ur)
-
+subroutine fft_ug_dp(npw_k, nfft, nspinor, ndat, mgfft, ngfft, istwf_k, kg_k, gbound_k, ug, ur)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: npw_k,nfft,nspinor,istwf_k,mgfft,ndat
 !arrays
  integer,intent(in) :: ngfft(18),gbound_k(2*mgfft+8,2),kg_k(3,npw_k)
- real(dp),intent(in) :: ug(2*npw_k*nspinor*ndat)
- real(dp),intent(out) :: ur(2*nfft*nspinor*ndat)
+ real(dp),target,intent(in) :: ug(*)  !2*npw_k*nspinor*ndat)
+ real(dp),target,intent(out) :: ur(*) !2*nfft*nspinor*ndat)
+
+!Local variables-------------------------------
+ complex(dp),contiguous,pointer :: ug_cplx(:), ur_cplx(:)
 
 ! *************************************************************************
 
- MSG_ERROR("This is a Stub")
-!#include "fftug_driver.finc"
+ call C_F_pointer(c_loc(ug), ug_cplx, shape=[npw_k*nspinor*ndat])
+ call C_F_pointer(c_loc(ur), ur_cplx, shape=[nfft*nspinor*ndat])
+
+ call fft_ug_dpc(npw_k, nfft, nspinor, ndat, mgfft, ngfft, istwf_k, kg_k, gbound_k, ug_cplx, ur_cplx)
 
 end subroutine fft_ug_dp
 !!***
-
-#endif
 
 !----------------------------------------------------------------------
 
@@ -571,23 +694,17 @@ end subroutine fft_ug_dp
 !! OUTPUT
 !!  ur(nfft*nspinor*ndat)=wavefunctions in real space.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      fourwf_mpi
-!!
 !! SOURCE
 
-subroutine fft_ug_spc(npw_k,nfft,nspinor,ndat,mgfft,ngfft,istwf_k,kg_k,gbound_k,ug,ur)
-
+subroutine fft_ug_spc(npw_k, nfft, nspinor, ndat, mgfft, ngfft, istwf_k, kg_k, gbound_k, ug, ur)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: npw_k,nfft,nspinor,istwf_k,mgfft,ndat
 !arrays
  integer,intent(in) :: ngfft(18),gbound_k(2*mgfft+8,2),kg_k(3,npw_k)
- complex(spc),intent(in) :: ug(npw_k*nspinor*ndat)
- complex(spc),intent(out) :: ur(nfft*nspinor*ndat)
+ complex(spc),intent(in) :: ug(*)  !npw_k*nspinor*ndat)
+ complex(spc),intent(out) :: ur(*) !nfft*nspinor*ndat)
 
 ! *************************************************************************
 
@@ -621,23 +738,17 @@ end subroutine fft_ug_spc
 !! OUTPUT
 !!  ur(nfft*nspinor*ndat)=wavefunctions in real space.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      fourwf_mpi
-!!
 !! SOURCE
 
-subroutine fft_ug_dpc(npw_k,nfft,nspinor,ndat,mgfft,ngfft,istwf_k,kg_k,gbound_k,ug,ur)
-
+subroutine fft_ug_dpc(npw_k, nfft, nspinor, ndat, mgfft, ngfft, istwf_k, kg_k, gbound_k, ug, ur)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: npw_k,nfft,nspinor,istwf_k,mgfft,ndat
 !arrays
  integer,intent(in) :: ngfft(18),gbound_k(2*mgfft+8,2),kg_k(3,npw_k)
- complex(dpc),intent(in) :: ug(npw_k*nspinor*ndat)
- complex(dpc),intent(out) :: ur(nfft*nspinor*ndat)
+ complex(dpc),intent(in) :: ug(*)  !npw_k*nspinor*ndat)
+ complex(dpc),intent(out) :: ur(*) !nfft*nspinor*ndat)
 
 ! *************************************************************************
 
@@ -646,9 +757,6 @@ subroutine fft_ug_dpc(npw_k,nfft,nspinor,ndat,mgfft,ngfft,istwf_k,kg_k,gbound_k,
 end subroutine fft_ug_dpc
 !!***
 
-!----------------------------------------------------------------------
-#if 0
-
 !!****f* m_fft/fft_ur_dp
 !! NAME
 !! fft_ur_dp
@@ -656,55 +764,34 @@ end subroutine fft_ug_dpc
 !! FUNCTION
 !! Compute ndat zero-padded FFTs from R- to G-space .
 !! Mainly used for the transform of wavefunctions.
-!! TARGET: dp real arrays
+!! TARGET: double precision real arrays with re/im
 !!
 !! INPUTS
-!! npw_k=number of plane waves for this k-point.
-!! nfft=Number of FFT points.
-!! nspinor=number of spinorial components
-!! ndat=Number of wavefunctions to transform.
-!! mgfft=Max number of FFT divisions
-!! ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
-!! istwfk=Option describing the storage of the wavefunction. (at present must be 1)
-!! kg_k(3,npw_k)=G-vectors in reduced coordinates
-!! gbound_k(2*mgfft+8,2)=Table for padded-FFT. See sphereboundary.
-!!
-!! SIDE EFFECTS
-!!  ur(nfft*nspinor*ndat)=In input: wavefunctions in real space
-!!                        Destroyed in output. Do not use ur anymore!
-!!
-!! OUTPUT
-!!  ug(npw_k*nspinor*ndat)=wavefunctions in reciprocal space given on the G-sphere.
-!!
-!! PARENTS
-!!      m_fft
-!!
-!! CHILDREN
-!!      fourwf_mpi
+!!  See fft_ur_dpc
 !!
 !! SOURCE
 
-subroutine fft_ur_dp(npw_k,nfft,nspinor,ndat,mgfft,ngfft,istwf_k,kg_k,gbound_k,ur,ug)
-
+subroutine fft_ur_dp(npw_k, nfft, nspinor, ndat, mgfft, ngfft, istwf_k, kg_k, gbound_k, ur, ug)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: npw_k,nfft,nspinor,ndat,istwf_k,mgfft
 !arrays
- integer,intent(in) :: ngfft(18),gbound_k(2*mgfft+8,2)
- integer,intent(in) :: kg_k(3,npw_k)
- real(dp),intent(inout) :: ur(2*nfft*nspinor*ndat)
- real(dp),intent(out) :: ug(2*npw_k*nspinor*ndat)
+ integer,intent(in) :: ngfft(18),gbound_k(2*mgfft+8,2), kg_k(3,npw_k)
+ real(dp),target,intent(inout) :: ur(*) !2*nfft*nspinor*ndat)
+ real(dp),target,intent(out) :: ug(*)   !2*npw_k*nspinor*ndat)
+
+!Local variables-------------------------------
+ complex(dp),contiguous,pointer :: ug_cplx(:), ur_cplx(:)
 
 ! *************************************************************************
 
- MSG_ERROR("This is a Stub")
-
-!#include "fftur_driver.finc"
+ call C_F_pointer(c_loc(ug), ug_cplx, shape=[npw_k*nspinor*ndat])
+ call C_F_pointer(c_loc(ur), ur_cplx, shape=[nfft*nspinor*ndat])
+ call fft_ur_dpc(npw_k, nfft, nspinor, ndat, mgfft, ngfft, istwf_k, kg_k, gbound_k, ur_cplx, ug_cplx)
 
 end subroutine fft_ur_dp
 !!***
-#endif
 
 !----------------------------------------------------------------------
 
@@ -735,24 +822,17 @@ end subroutine fft_ur_dp
 !! OUTPUT
 !!  ug(npw_k*nspinor*ndat)=wavefunctions in reciprocal space given on the G-sphere.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      fourwf_mpi
-!!
 !! SOURCE
 
-subroutine fft_ur_spc(npw_k,nfft,nspinor,ndat,mgfft,ngfft,istwf_k,kg_k,gbound_k,ur,ug)
-
+subroutine fft_ur_spc(npw_k, nfft, nspinor, ndat, mgfft, ngfft, istwf_k, kg_k, gbound_k, ur, ug)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: npw_k,nfft,nspinor,ndat,istwf_k,mgfft
 !arrays
- integer,intent(in) :: ngfft(18),gbound_k(2*mgfft+8,2)
- integer,intent(in) :: kg_k(3,npw_k)
- complex(spc),intent(inout) :: ur(nfft*nspinor*ndat)
- complex(spc),intent(out) :: ug(npw_k*nspinor*ndat)
+ integer,intent(in) :: ngfft(18),gbound_k(2*mgfft+8,2),kg_k(3,npw_k)
+ complex(spc),intent(inout) :: ur(*) !nfft*nspinor*ndat)
+ complex(spc),intent(out) :: ug(*)   !npw_k*nspinor*ndat)
 
 ! *************************************************************************
 
@@ -790,24 +870,17 @@ end subroutine fft_ur_spc
 !! OUTPUT
 !!  ug(npw_k*nspinor*ndat)=wavefunctions in reciprocal space given on the G-sphere.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      fourwf_mpi
-!!
 !! SOURCE
 
-subroutine fft_ur_dpc(npw_k,nfft,nspinor,ndat,mgfft,ngfft,istwf_k,kg_k,gbound_k,ur,ug)
-
+subroutine fft_ur_dpc(npw_k, nfft, nspinor, ndat, mgfft, ngfft, istwf_k, kg_k, gbound_k, ur, ug)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: npw_k,nfft,nspinor,ndat,istwf_k,mgfft
 !arrays
- integer,intent(in) :: ngfft(18),gbound_k(2*mgfft+8,2)
- integer,intent(in) :: kg_k(3,npw_k)
- complex(dpc),intent(inout) :: ur(nfft*nspinor*ndat)
- complex(dpc),intent(out) :: ug(npw_k*nspinor*ndat)
+ integer,intent(in) :: ngfft(18),gbound_k(2*mgfft+8,2),kg_k(3,npw_k)
+ complex(dpc),intent(inout) :: ur(*) ! nfft*nspinor*ndat)
+ complex(dpc),intent(out) :: ug(*)   ! npw_k*nspinor*ndat)
 
 ! *************************************************************************
 
@@ -824,7 +897,7 @@ end subroutine fft_ur_dpc
 !!
 !! FUNCTION
 !!  Driver routine used to transform COMPLEX arrays using 3D zero-padded FFTs.
-!!  TARGET: SPC arrays
+!!  TARGET: single-precision complex.
 !!
 !! INPUTS
 !!  ngfft(18)=Info on the 3D FFT.
@@ -833,22 +906,17 @@ end subroutine fft_ur_dpc
 !!  ndat=Number of FFTs
 !!  mgfft=MAX(nx,ny,nz), only used to dimension gbound
 !!  isign=The sign of the transform.
-!!  gbound(2*mgfft+8,2)= The boundaries of the basis sphere of G vectors at a given k-point. See sphereboundary for more info.
+!!  gbound(2*mgfft+8,2)= The boundaries of the basis sphere of G vectors at a given k-point.
+!!    See sphereboundary for more info.
 !!
 !! SIDE EFFECTS
 !!  ff(ldx*ldy*ldz*ndat)=
 !!    input: The array with the data to be transformed.
 !!    output: The results of the FFT.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      fourwf_mpi
-!!
 !! SOURCE
 
-subroutine fftpad_spc(ff,ngfft,nx,ny,nz,ldx,ldy,ldz,ndat,mgfft,isign,gbound)
-
+subroutine fftpad_spc(ff, ngfft, nx, ny, nz, ldx, ldy, ldz, ndat, mgfft, isign, gbound)
 
 !Arguments ------------------------------------
 !scalars
@@ -871,10 +939,10 @@ subroutine fftpad_spc(ff,ngfft,nx,ny,nz,ldx,ldy,ldz,ndat,mgfft,isign,gbound)
  select case (fftalga)
 
  case (FFT_FFTW3)
-   call fftw3_fftpad(ff,nx,ny,nz,ldx,ldy,ldz,ndat,mgfft,isign,gbound)
+   call fftw3_fftpad(ff, nx, ny, nz, ldx, ldy, ldz, ndat, mgfft, isign, gbound)
 
  case (FFT_DFTI)
-   call dfti_fftpad(ff,nx,ny,nz,ldx,ldy,ldz,ndat,mgfft,isign,gbound)
+   call dfti_fftpad(ff, nx, ny, nz, ldx, ldy, ldz, ndat, mgfft, isign, gbound)
 
  case (FFT_SG)
    ! Goedecker"s routines.
@@ -907,7 +975,7 @@ subroutine fftpad_spc(ff,ngfft,nx,ny,nz,ldx,ldy,ldz,ndat,mgfft,isign,gbound)
 
  case default
    write(msg,'(a,i0,a)')"fftalga = ", fftalga," not coded "
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end select
 
 end subroutine fftpad_spc
@@ -937,15 +1005,9 @@ end subroutine fftpad_spc
 !!    input: The array with the data to be transformed.
 !!    output: The results of the FFT.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      fourwf_mpi
-!!
 !! SOURCE
 
-subroutine fftpad_dpc(ff,ngfft,nx,ny,nz,ldx,ldy,ldz,ndat,mgfft,isign,gbound)
-
+subroutine fftpad_dpc(ff, ngfft, nx, ny, nz, ldx, ldy, ldz, ndat, mgfft, isign, gbound)
 
 !Arguments ------------------------------------
 !scalars
@@ -971,15 +1033,15 @@ subroutine fftpad_dpc(ff,ngfft,nx,ny,nz,ldx,ldy,ldz,ndat,mgfft,isign,gbound)
  select case (fftalga)
 
  case (FFT_FFTW3)
-   call fftw3_fftpad(ff,nx,ny,nz,ldx,ldy,ldz,ndat,mgfft,isign,gbound)
+   call fftw3_fftpad(ff, nx, ny, nz, ldx, ldy, ldz, ndat, mgfft, isign, gbound)
 
  case (FFT_DFTI)
-   call dfti_fftpad(ff,nx,ny,nz,ldx,ldy,ldz,ndat,mgfft,isign,gbound)
+   call dfti_fftpad(ff, nx, ny, nz, ldx, ldy, ldz, ndat, mgfft, isign, gbound)
 
  case (FFT_SG)
    ! Goedecker"s routines.
    ! TODO: sg_fftpad is not the fastest routine, here I should call sg_fftrisc but I need
-   ! kg_kin that are not available in rho_tw_g, actually one should pass G-G0 due to
+   ! kg_kin that is not available in rho_tw_g, actually one should pass G-G0 due to
    ! the shift introduced by the umklapp.
    ncount = ldx*ldy*ldz*ndat
 
@@ -987,13 +1049,13 @@ subroutine fftpad_dpc(ff,ngfft,nx,ny,nz,ldx,ldy,ldz,ndat,mgfft,isign,gbound)
 !  call ZCOPY(ncount,ff,1,fofr,1) !vz_d
 !  call DCOPY(2*ncount,ff,1,fofr,1)  ! MG
    ! alternatif of ZCOPY from vz
-   ABI_ALLOCATE(fofrvz,(2,ncount))     !vz_d
+   ABI_MALLOC(fofrvz,(2,ncount))     !vz_d
    do ivz=1,ncount                !vz_d
-      fofrvz(1,ivz)= real(ff(ivz))  !vz_d
-      fofrvz(2,ivz)=aimag(ff(ivz))  !vz_d
+     fofrvz(1,ivz)= real(ff(ivz))  !vz_d
+     fofrvz(2,ivz)=aimag(ff(ivz))  !vz_d
    end do                         !vz_d
    call DCOPY(2*ncount,fofrvz,1,fofr,1) !vz_d
-   ABI_DEALLOCATE(fofrvz)             !vz_d
+   ABI_FREE(fofrvz)             !vz_d
 
    call C_F_pointer(C_loc(ff),fpt_ftarr, shape=(/2,ldx,ldy,ldz,ndat/))
 
@@ -1013,7 +1075,7 @@ subroutine fftpad_dpc(ff,ngfft,nx,ny,nz,ldx,ldy,ldz,ndat,mgfft,isign,gbound)
 
  case default
    write(msg,'(a,i0,a)')"fftalga = ", fftalga," not coded "
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end select
 
 end subroutine fftpad_dpc
@@ -1046,15 +1108,9 @@ end subroutine fftpad_dpc
 !!   vg is given on the FFT mesh instead of the augmented mesh [ldx,ldy,ldz]
 !!   in order to simplify the interface with the other routines operating of vg
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      fourwf_mpi
-!!
 !! SOURCE
 
-subroutine fft_poisson(ngfft,cplex,nx,ny,nz,ldx,ldy,ldz,ndat,vg,nr)
-
+subroutine fft_poisson(ngfft, cplex, nx, ny, nz, ldx, ldy, ldz, ndat, vg, nr)
 
 !Arguments ------------------------------------
 !scalars
@@ -1065,8 +1121,7 @@ subroutine fft_poisson(ngfft,cplex,nx,ny,nz,ldx,ldy,ldz,ndat,vg,nr)
  real(dp),intent(in) :: vg(nx*ny*nz)
 
 !Local variables-------------------------------
-!scalars
- integer :: fftalga,fftcache
+ integer :: fftalga, fftcache
 
 ! *************************************************************************
 
@@ -1086,7 +1141,7 @@ subroutine fft_poisson(ngfft,cplex,nx,ny,nz,ldx,ldy,ldz,ndat,vg,nr)
  !  call dfti_poisson(cplex,nx,ny,nz,ldx,ldy,ldz,ndat,vg,nr)
 
  case default
-   MSG_BUG(sjoin("Wrong value for fftalga: ",itoa(fftalga)))
+   ABI_BUG(sjoin("Wrong value for fftalga: ",itoa(fftalga)))
  end select
 
 end subroutine fft_poisson
@@ -1104,16 +1159,9 @@ end subroutine fft_poisson
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      fftprof
-!!
-!! CHILDREN
-!!      fourwf_mpi
-!!
 !! SOURCE
 
 subroutine fft_use_lib_threads(logvar)
-
 
 !Arguments ------------------------------------
 !scalars
@@ -1140,35 +1188,31 @@ end subroutine fft_use_lib_threads
 !! fftalg =fftalg input variable.
 !! ndat = Number of transform to execute
 !! nthreads = Number of OpenMP threads.
+!! gpu_option=  GPU version to active (0: no GPU).
 !! [unit]=Output Unit number (DEFAULT std_out)
 !!
 !! OUTPUT
 !!  nfailed=number of failures.
 !!
-!! PARENTS
-!!      fftprof
-!!
 !! SOURCE
 
-function fftbox_utests(fftalg,ndat,nthreads,unit) result(nfailed)
-
+integer function fftbox_utests(fftalg, ndat, nthreads, gpu_option, unit) result(nfailed)
 
 !Arguments -----------------------------------
 !scalars
- integer,intent(in) :: fftalg,ndat,nthreads
+ integer,intent(in) :: fftalg, ndat, nthreads, gpu_option
  integer,optional,intent(in) :: unit
- integer :: nfailed
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: NSETS=6
+ integer,parameter :: NSETS=6, fftcache0 = 0
  integer :: ifft,ierr,ldxyz,old_nthreads,ount,cplex
  integer :: iset,nx,ny,nz,ldx,ldy,ldz,fftalga,fftalgc
  !integer :: ix,iy,iz,padat,dat
  real(dp),parameter :: ATOL_SP=tol6,ATOL_DP=tol12 ! Tolerances on the absolute error
  real(dp) :: max_abserr
  character(len=500) :: msg,info,library,cplex_mode,padding_mode
- type(fftbox_plan3_t) :: bw_plan,fw_plan
+ type(fftbox_plan3_t) :: box_plan
 !arrays
  integer :: pars(6,NSETS)
  real(dp) :: crand(2)
@@ -1179,43 +1223,40 @@ function fftbox_utests(fftalg,ndat,nthreads,unit) result(nfailed)
 ! *************************************************************************
 
  nfailed = 0
-
  ount = std_out; if (PRESENT(unit)) ount = unit
 
- if (nthreads>0) then
+ if (nthreads > 0) then
    old_nthreads = xomp_get_max_threads()
    call xomp_set_num_threads(nthreads)
  end if
 
  ! These values must be compatible with all the FFT routines.
  ! SG library is the most restrictive (only powers of 2,3,5).
- pars = RESHAPE( (/   &
-&  12,18,15,12,18,15, &
-&  12,18,15,13,19,16, &
-&  12,18,15,13,19,15, &
-&  12,18,15,12,18,16, &
-&  12,18,15,13,18,15, &
-&  12,18,15,15,21,18  &
-& /), (/6,NSETS/) )
+ pars = RESHAPE( [   &
+   12, 18, 15, 12, 18, 15, &
+   12, 18, 15, 13, 19, 16, &
+   12, 18, 15, 13, 19, 15, &
+   12, 18, 15, 12, 18, 16, &
+   12, 18, 15, 13, 18, 15, &
+   12, 18, 15, 15, 21, 18  &
+ ], [6, NSETS])
 
  fftalga=fftalg/100; fftalgc=mod(fftalg,10)
 
- call fftalg_info(fftalg,library,cplex_mode,padding_mode)
+ call fftalg_info(fftalg, library, cplex_mode, padding_mode)
 
  do iset=1,SIZE(pars,DIM=2)
    nx =pars(1,iset);  ny=pars(2,iset);  nz=pars(3,iset)
    ldx=pars(4,iset); ldy=pars(5,iset); ldz=pars(6,iset)
-   !write(std_out,*)pars(1:6,iset)
 
-   ! Create the FFT plans.
-   call fftbox_plan3_many(bw_plan,ndat,pars(1,iset),pars(4,iset),fftalg,+1)
-   call fftbox_plan3_many(fw_plan,ndat,pars(1,iset),pars(4,iset),fftalg,-1)
+   ! Create the FFT plan
+   call box_plan%init(ndat, pars(1,iset), pars(4,iset), fftalg, fftcache0, gpu_option)
 
    ldxyz = ldx*ldy*ldz
    !
-   ! ================================================================
-   ! === TEST the single precision version of dfti_c2c_* routines ===
-   ! ================================================================
+   ! ======================================
+   ! === TEST the single precision version
+   ! ======================================
    ABI_MALLOC(ff_refsp, (ldxyz*ndat))
    ABI_MALLOC(ffsp,     (ldxyz*ndat))
    ABI_MALLOC(ggsp,     (ldxyz*ndat))
@@ -1225,50 +1266,54 @@ function fftbox_utests(fftalg,ndat,nthreads,unit) result(nfailed)
      ff_refsp(ifft) = DCMPLX(crand(1), crand(2))
    end do
 
-   ! Set the augmentation region to zero, because FFTW3 wrappers
-   ! use zscal to scale the results.
+   ! Set the augmentation region to zero to avoid SIGFPE, as FFTW3 wrappers use zscal to scale the results.
    call cplx_setaug_zero_spc(nx,ny,nz,ldx,ldy,ldz,ndat,ff_refsp)
    ffsp = ff_refsp
 
    ! in-place version.
-   call fftbox_execute(bw_plan,ffsp)
-   call fftbox_execute(fw_plan,ffsp)
+   call box_plan%execute(ffsp, +1)
+   call box_plan%execute(ffsp, -1)
+
+   ! do it twice to test GPU version
+   !call box_plan%execute(ffsp, +1)
+   !call box_plan%execute(ffsp, -1)
 
    ierr = COUNT(ABS(ffsp - ff_refsp) > ATOL_SP)
    nfailed = nfailed + ierr
 
-   info = sjoin(library,"c2c_ip_spc :")
+   info = sjoin(library, "c2c_ip_spc :")
    if (ierr /= 0) then
      max_abserr = MAXVAL(ABS(ffsp - ff_refsp))
      write(msg,"(a,es9.2,a)")" FAILED (max_abserr = ",max_abserr,")"
    else
      write(msg,"(a)")" OK"
    end if
-   call wrtout(ount,sjoin(info,msg),"COLL")
+   call wrtout(ount,sjoin(info,msg))
 
+   ! out-of-place version.
    ffsp = ff_refsp
-   call fftbox_execute(bw_plan,ffsp,ggsp)
-   call fftbox_execute(fw_plan,ggsp,ffsp)
+   call box_plan%execute(ffsp, ggsp, +1)
+   call box_plan%execute(ggsp, ffsp, -1)
 
    ierr = COUNT(ABS(ffsp - ff_refsp) > ATOL_SP)
    nfailed = nfailed + ierr
 
-   info = sjoin(library,"c2c_op_spc :")
+   info = sjoin(library, "c2c_op_spc :")
    if (ierr /= 0) then
      max_abserr = MAXVAL(ABS(ffsp - ff_refsp))
      write(msg,"(a,es9.2,a)")" FAILED (max_abserr = ",max_abserr,")"
    else
      write(msg,"(a)")" OK"
    end if
-   call wrtout(ount,sjoin(info,msg),"COLL")
+   call wrtout(ount, sjoin(info, msg))
 
    ABI_FREE(ff_refsp)
    ABI_FREE(ffsp)
    ABI_FREE(ggsp)
 
-   ! ================================================================
-   ! === TEST the double precision version of dfti_c2c_* routines ===
-   ! ================================================================
+   ! =======================================
+   ! === TEST the double precision version
+   ! =======================================
    ABI_MALLOC(ff_ref, (ldxyz*ndat))
    ABI_MALLOC(ff,     (ldxyz*ndat))
    ABI_MALLOC(gg,     (ldxyz*ndat))
@@ -1278,49 +1323,53 @@ function fftbox_utests(fftalg,ndat,nthreads,unit) result(nfailed)
      ff_ref(ifft) = DCMPLX(crand(1), crand(2))
    end do
 
-   ! Set the augmentation region to zero, because FFTW3 wrappers
-   ! use zscal to scale the results.
+   ! Set the augmentation region to zero to avoid SIGFPE, as FFTW3 wrappers use zscal to scale the results.
    call cplx_setaug_zero_dpc(nx,ny,nz,ldx,ldy,ldz,ndat,ff_ref)
    ff = ff_ref
 
-   call fftbox_execute(bw_plan,ff)
-   call fftbox_execute(fw_plan,ff)
+   ! in-place version.
+   call box_plan%execute(ff, +1)
+   call box_plan%execute(ff, -1)
 
    ierr = COUNT(ABS(ff - ff_ref) > ATOL_DP)
    nfailed = nfailed + ierr
 
-   info = sjoin(library,"c2c_ip_dpc :")
+   info = sjoin(library, "c2c_ip_dpc :")
    if (ierr /= 0) then
      max_abserr = MAXVAL(ABS(ff - ff_ref))
      write(msg,"(a,es9.2,a)")" FAILED (max_abserr = ",max_abserr,")"
    else
      write(msg,"(a)")" OK"
    end if
-   call wrtout(ount,sjoin(info,msg),"COLL")
+   call wrtout(ount,sjoin(info, msg))
 
+   ! out-of-place version.
    ff = ff_ref
-   call fftbox_execute(bw_plan,ff,gg)
-   call fftbox_execute(fw_plan,gg,ff)
+   call box_plan%execute(ff, gg, +1)
+   call box_plan%execute(gg, ff, -1)
 
    ierr = COUNT(ABS(ff - ff_ref) > ATOL_DP)
    nfailed = nfailed + ierr
 
-   info = sjoin(library,"c2c_op_dpc :")
+   info = sjoin(library, "c2c_op_dpc :")
    if (ierr /= 0) then
      max_abserr = MAXVAL(ABS(ff - ff_ref))
      write(msg,"(a,es9.2,a)")" FAILED (max_abserr = ",max_abserr,")"
    else
      write(msg,"(a)")" OK"
    end if
-   call wrtout(ount,sjoin(info,msg),"COLL")
+   call wrtout(ount, sjoin(info, msg))
 
    ABI_FREE(ff_ref)
    ABI_FREE(ff)
    ABI_FREE(gg)
 
+   call box_plan%free()
+   !stop
+
    do cplex=1,2
      !if (fftalga == FFT_FFTW3 .and. ndat > 1 .and. cplex==1) then
-     !  call wrtout(ount,"Warning: fourdp with FFTW3-wrappers, cplex=2 and ndat>1, might crash if MKL is used","COLL")
+     !  call wrtout(ount,"Warning: fourdp with FFTW3-wrappers, cplex=2 and ndat>1, might crash if MKL is used")
      !  !CYCLE
      !end if
      ABI_MALLOC(fofg,     (2*ldxyz*ndat))
@@ -1331,26 +1380,26 @@ function fftbox_utests(fftalg,ndat,nthreads,unit) result(nfailed)
      !call cg_setaug_zero(cplex,nx,ny,nz,ldx,ldy,ldz,ndat,fofr_ref)
      fofr = fofr_ref
 
-     SELECT CASE (fftalga)
-     CASE (FFT_FFTW3)
+     select case (fftalga)
+     case (FFT_FFTW3)
        call fftw3_seqfourdp(cplex,nx,ny,nz,ldx,ldy,ldz,ndat,-1,fofg,fofr)
        call fftw3_seqfourdp(cplex,nx,ny,nz,ldx,ldy,ldz,ndat,+1,fofg,fofr)
 
-     CASE (FFT_DFTI)
+     case (FFT_DFTI)
        call dfti_seqfourdp(cplex,nx,ny,nz,ldx,ldy,ldz,ndat,-1,fofg,fofr)
        call dfti_seqfourdp(cplex,nx,ny,nz,ldx,ldy,ldz,ndat,+1,fofg,fofr)
 
-     CASE DEFAULT
+     case default
        ! TODO
        continue
-     END SELECT
+     end select
 
      !call cg_setaug_zero(cplex,nx,ny,nz,ldx,ldy,ldz,ndat,fofr)
 
      ierr = COUNT(ABS(fofr - fofr_ref) > ATOL_DP)
      nfailed = nfailed + ierr
 
-     write(info,"(a,i1,a)")sjoin(library,"fourdp (cplex "),cplex,") :"
+     write(info,"(a,i1,a)")sjoin(library, "fourdp (cplex "),cplex,") :"
      !write(info,"(2a,i1,a,i0,a)")trim(library), "fourdp (cplex ", cplex,"), ndata = ",ndat," :"
      if (ierr /= 0) then
        max_abserr = MAXVAL(ABS(fofr - fofr_ref))
@@ -1358,13 +1407,12 @@ function fftbox_utests(fftalg,ndat,nthreads,unit) result(nfailed)
      else
        write(msg,"(a)")" OK"
      end if
-     call wrtout(ount,sjoin(info,msg),"COLL")
+     call wrtout(ount,sjoin(info, msg))
 
      ABI_FREE(fofg)
      ABI_FREE(fofr_ref)
      ABI_FREE(fofr)
    end do
-   !
  end do
 
  if (nthreads > 0) call xomp_set_num_threads(old_nthreads)
@@ -1386,13 +1434,9 @@ end function fftbox_utests
 !! OUTPUT
 !!  nfailed=number of failed tests.
 !!
-!! PARENTS
-!!      fftprof
-!!
 !! SOURCE
 
-function fftu_utests(ecut,ngfft,rprimd,ndat,nthreads,unit) result(nfailed)
-
+function fftu_utests(ecut, ngfft, rprimd, ndat, nthreads, unit) result(nfailed)
 
 !Arguments ------------------------------------
 !scalars
@@ -1455,16 +1499,16 @@ function fftu_utests(ecut,ngfft,rprimd,ndat,nthreads,unit) result(nfailed)
  ABI_CALLOC(ugsp,     (ldxyz*ndat))
  ABI_CALLOC(ursp,     (ldxyz*ndat))
 
- kpoints = RESHAPE( (/ &
-&  0.1, 0.2, 0.3, &
-&  0.0, 0.0, 0.0, &
-&  0.5, 0.0, 0.0, &
-&  0.0, 0.0, 0.5, &
-&  0.5, 0.0, 0.5, &
-&  0.0, 0.5, 0.0, &
-&  0.5, 0.5, 0.0, &
-&  0.0, 0.5, 0.5, &
-&  0.5, 0.5, 0.5 /), (/3,9/) )
+ kpoints = RESHAPE([ &
+   0.1, 0.2, 0.3, &
+   0.0, 0.0, 0.0, &
+   0.5, 0.0, 0.0, &
+   0.0, 0.0, 0.5, &
+   0.5, 0.0, 0.5, &
+   0.0, 0.5, 0.0, &
+   0.5, 0.5, 0.0, &
+   0.0, 0.5, 0.5, &
+   0.5, 0.5, 0.5], [3, 9])
 
  call fftalg_info(fftalg,library,cplex_mode,padding_mode)
 
@@ -1472,12 +1516,11 @@ function fftu_utests(ecut,ngfft,rprimd,ndat,nthreads,unit) result(nfailed)
 
  do ikpt=1,SIZE(kpoints,DIM=2)
    kpoint = kpoints(:,ikpt)
-
    istwf_k = set_istwfk(kpoint)
 
    ! Calculate the number of G-vectors for this k-point.
    call kpgsph(ecut,exchn2n3d0,gmet,ikg0,0,istwf_k,kg_dum,kpoint,0,MPI_enreg_seq,0,npw_k)
-   !
+
    ! Allocate and calculate the set of G-vectors.
    ABI_MALLOC(kg_k,(3,npw_k))
    call kpgsph(ecut,exchn2n3d0,gmet,ikg0,0,istwf_k,kg_k,kpoint,mkmem1,MPI_enreg_seq,npw_k,npw_k_test)
@@ -1523,7 +1566,7 @@ function fftu_utests(ecut,ngfft,rprimd,ndat,nthreads,unit) result(nfailed)
    else
      write(msg,"(a)")" OK"
    end if
-   call wrtout(ount,sjoin(info,msg),"COLL")
+   call wrtout(ount,sjoin(info, msg))
 #endif
 
    ! =================================================
@@ -1555,7 +1598,7 @@ function fftu_utests(ecut,ngfft,rprimd,ndat,nthreads,unit) result(nfailed)
    else
      write(msg,"(a)")" OK"
    end if
-   call wrtout(ount,sjoin(info,msg),"COLL")
+   call wrtout(ount,sjoin(info, msg))
 
    ! =================================================
    ! === Test the double precision complex version ===
@@ -1586,7 +1629,7 @@ function fftu_utests(ecut,ngfft,rprimd,ndat,nthreads,unit) result(nfailed)
    else
      write(msg,"(a)")" OK"
    end if
-   call wrtout(ount,sjoin(info,msg),"COLL")
+   call wrtout(ount, sjoin(info, msg))
 
    ABI_FREE(kg_k)
    ABI_FREE(gbound_k)
@@ -1595,20 +1638,15 @@ function fftu_utests(ecut,ngfft,rprimd,ndat,nthreads,unit) result(nfailed)
  ABI_FREE(cg_ref)
  ABI_FREE(cg)
  ABI_FREE(cr)
-
  ABI_FREE(ug_ref)
  ABI_FREE(ug)
  ABI_FREE(ur)
-
  ABI_FREE(ug_refsp)
  ABI_FREE(ugsp)
  ABI_FREE(ursp)
-
  call destroy_mpi_enreg(MPI_enreg_seq)
 
- if (nthreads > 0) then
-   call xomp_set_num_threads(old_nthreads)
- end if
+ if (nthreads > 0) call xomp_set_num_threads(old_nthreads)
 
 end function fftu_utests
 !!***
@@ -1633,13 +1671,9 @@ end function fftu_utests
 !! OUTPUT
 !!  nfailed=number of failures.
 !!
-!! PARENTS
-!!      fftprof
-!!
 !! SOURCE
 
-function fftbox_mpi_utests(fftalg,cplex,ndat,nthreads,comm_fft,unit) result(nfailed)
-
+function fftbox_mpi_utests(fftalg, cplex, ndat, nthreads, comm_fft, unit) result(nfailed)
 
 !Arguments -----------------------------------
 !scalars
@@ -1676,13 +1710,13 @@ function fftbox_mpi_utests(fftalg,cplex,ndat,nthreads,comm_fft,unit) result(nfai
  ! These values must be compatible with all the FFT routines.
  ! SG library is the most restrictive (only powers of 2,3,5).
  pars = RESHAPE( [    &
-&  12,18,15,12,18,15, &
-&  12,18,15,13,19,16, &
-&  12,18,15,13,19,15, &
-&  12,18,15,12,18,16, &
-&  12,18,15,13,18,15, &
-&  12,18,15,15,21,18  &
-& ], [6,NSETS] )
+   12, 18, 15, 12, 18, 15, &
+   12, 18, 15, 13, 19, 16, &
+   12, 18, 15, 13, 19, 15, &
+   12, 18, 15, 12, 18, 16, &
+   12, 18, 15, 13, 18, 15, &
+   12, 18, 15, 15, 21, 18  &
+  ], [6, NSETS] )
 
  fftalga=fftalg/100; fftalgc=mod(fftalg,10)
 
@@ -1697,15 +1731,6 @@ function fftbox_mpi_utests(fftalg,cplex,ndat,nthreads,comm_fft,unit) result(nfai
    n2 = n2 * nproc_fft; n3 = n3 * nproc_fft
    !n4=pars(4,iset); n5=pars(5,iset); n6=pars(6,iset)
    n4=n1; n5=n2; n6=n3
-
-   !n4=n1+1; n5=n2; n6=n3
-   !n4=n1; n5=n2+1; n6=n3
-   !n4=n1; n5=n2; n6=n3+1
-   !write(std_out,*)pars(1:6,iset)
-   !cplex = 1
-
-   !call getng(boxcutmin,ecut,gmet,kpt,me_fft,mgfft,nfft,ngfft,nproc_fft,nsym,paral_fft,symrel,&
-   !&ngfftc,use_gpu_cuda,unit) ! optional
 
    ! Init ngfft
    ! TODO Propagate more info via ngfft, define helper functions, write routine to get fftcache
@@ -1752,8 +1777,7 @@ function fftbox_mpi_utests(fftalg,cplex,ndat,nthreads,comm_fft,unit) result(nfai
    !  call dfti_mpifourdp(cplex,nfft,ngfft,ndat,+1,fftn2_distrib,ffti2_local,fftn3_distrib,ffti3_local,fofg,fofr,comm_fft)
 
    case default
-     write(msg,'(a,i0,a)')"fftalg: ",fftalg," does not support MPI-FFT"
-     MSG_BUG(msg)
+     ABI_BUG(sjoin("fftalg: ", itoa(fftalg), " does not support MPI-FFT"))
    end select
 
    call cwtime(ctime,wtime,gflops,"stop")
@@ -1777,7 +1801,7 @@ function fftbox_mpi_utests(fftalg,cplex,ndat,nthreads,comm_fft,unit) result(nfai
    else
      write(msg,"(a)")" OK"
    end if
-   call wrtout(ount,sjoin(info,msg),"COLL")
+   call wrtout(ount,sjoin(info, msg))
 
    call destroy_distribfft(fftabs)
 
@@ -1786,9 +1810,7 @@ function fftbox_mpi_utests(fftalg,cplex,ndat,nthreads,comm_fft,unit) result(nfai
    ABI_FREE(fofr)
  end do
 
- if (nthreads > 0) then
-   call xomp_set_num_threads(old_nthreads)
- end if
+ if (nthreads > 0) call xomp_set_num_threads(old_nthreads)
 
 end function fftbox_mpi_utests
 !!***
@@ -1800,20 +1822,16 @@ end function fftbox_mpi_utests
 !! fftu_mpi_utests
 !!
 !! FUNCTION
-!! Unit tests for the FFTs of wavefunctions (MPI vesion).
+!! Unit tests for the FFTs of wavefunctions (MPI version).
 !!
 !! INPUTS
 !!
 !! OUTPUT
 !!  nfailed=number of failed tests.
 !!
-!! PARENTS
-!!      fftprof
-!!
 !! SOURCE
 
-function fftu_mpi_utests(fftalg,ecut,rprimd,ndat,nthreads,comm_fft,paral_kgb,unit) result(nfailed)
-
+function fftu_mpi_utests(fftalg, ecut, rprimd, ndat, nthreads, comm_fft, paral_kgb, unit) result(nfailed)
 
 !Arguments ------------------------------------
 !scalars
@@ -1830,11 +1848,11 @@ function fftu_mpi_utests(fftalg,ecut,rprimd,ndat,nthreads,comm_fft,paral_kgb,uni
  integer :: n1,n2,n3,idat,n4,n5,n6,ierr,npw_k,full_npw_k,istwf_npw_k,cplexwf
  integer :: mgfft,istwf_k,ikpt,old_nthreads,ount,isign,fftalga,fftalgc
  integer :: ig,i1,i2,i3,i3_glob,i3dat,nd3proc,i3_local,g0sender
- integer :: step,me_g0,me_fft,nproc_fft,mpierr,nfft,cplex
+ integer :: step,me_g0,me_fft,nproc_fft,mpierr,nfft,cplex,chksymtnons
  real(dp),parameter :: boxcutmin2=two,ATOL_DP=tol12,RTOL_DP=tol3 ! Tolerances on the absolute and relative error
  real(dp),parameter :: weight_r=one,weight_i=one
  real(dp) :: max_abserr,max_relerr,ucvol,relerr,den,refden
- real(dp) ::  ctime,wtime,gflops
+ real(dp) :: ctime,wtime,gflops
  character(len=500) :: msg,info,library,cplex_mode,padding_mode
  type(distribfft_type) :: fftabs
 !arrays
@@ -1843,7 +1861,7 @@ function fftu_mpi_utests(fftalg,ecut,rprimd,ndat,nthreads,comm_fft,paral_kgb,uni
  integer,allocatable :: gbound_k(:,:),kg_k(:,:)
  real(dp) :: dummy_fofg(0,0) !dummy_denpot(0,0,0)
  real(dp) :: kpoint(3),kpoints(3,2)
- real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3)
+ real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3),tnons(3,nsym1)
  real(dp),allocatable :: fofg(:,:),ref_fofg(:,:),fofg_out(:,:),fofr(:,:,:,:)
  real(dp),allocatable :: density(:,:,:),pot(:,:,:),invpot(:,:,:)
  real(dp),allocatable :: full_fofg(:,:),istwf_fofg(:,:)
@@ -1861,17 +1879,19 @@ function fftu_mpi_utests(fftalg,ecut,rprimd,ndat,nthreads,comm_fft,paral_kgb,uni
 
  if (.not. fftalg_has_mpi(fftalg)) then
    write(msg,'(a,i0,a)')"fftalg: ",fftalg," does not support MPI"
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  nproc_fft = xmpi_comm_size(comm_fft); me_fft = xmpi_comm_rank(comm_fft)
 
  symrel = reshape([1,0,0,0,1,0,0,0,1],[3,3,nsym1])
+ tnons=zero
+ chksymtnons=0
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
 
  kpoints = RESHAPE( [ &
-&  0.1, 0.2, 0.3, &
-&  0.0, 0.0, 0.0 ], [3,2] )
+   0.1, 0.2, 0.3, &
+   0.0, 0.0, 0.0 ], [3,2] )
 
  call fftalg_info(fftalg,library,cplex_mode,padding_mode)
 
@@ -1892,8 +1912,8 @@ function fftu_mpi_utests(fftalg,ecut,rprimd,ndat,nthreads,comm_fft,paral_kgb,uni
    ngfft(7) = fftalg
    ngfft(8) = get_cache_kb()
 
-   call getng(boxcutmin2,ecut,gmet,kpoint,me_fft,mgfft,nfft,ngfft,nproc_fft,nsym1,&
-&             paral_kgb,symrel,unit=dev_null)
+   call getng(boxcutmin2,chksymtnons,ecut,gmet,kpoint,me_fft,mgfft,nfft,ngfft,nproc_fft,nsym1,&
+              paral_kgb,symrel,tnons,unit=dev_null)
 
    n1 = ngfft(1); n2 = ngfft(2); n3 = ngfft(3)
    ! Do not use augmentation.
@@ -1935,7 +1955,7 @@ function fftu_mpi_utests(fftalg,ecut,rprimd,ndat,nthreads,comm_fft,paral_kgb,uni
        ABI_FREE(istwf_fofg)
 
      else
-       MSG_ERROR("istwf_k /= [1,2] not available in MPI-FFT mode")
+       ABI_ERROR("istwf_k /= [1,2] not available in MPI-FFT mode")
      end if
    end if
 
@@ -1997,7 +2017,7 @@ function fftu_mpi_utests(fftalg,ecut,rprimd,ndat,nthreads,comm_fft,paral_kgb,uni
 
    do isign = 1,-1,-2
      call fftmpi_u(npw_k,n4,n5,n6,ndat,mgfft,ngfft,&
-&      istwfk_one,gbound_k,kg_k,me_g0,fftabs,isign,fofg,fofr,comm_fft,cplexwf=cplexwf)
+       istwfk_one,gbound_k,kg_k,me_g0,fftabs,isign,fofg,fofr,comm_fft,cplexwf=cplexwf)
    end do
 
    ! The final interface should be:
@@ -2030,7 +2050,7 @@ function fftu_mpi_utests(fftalg,ecut,rprimd,ndat,nthreads,comm_fft,paral_kgb,uni
    else
      write(msg,"(a)")" OK"
    end if
-   call wrtout(ount,sjoin(info,msg),"COLL")
+   call wrtout(ount,sjoin(info, msg))
 
    ! -------------------------------------------
    ! Test the accumulation of density (option 1)
@@ -2040,8 +2060,8 @@ function fftu_mpi_utests(fftalg,ecut,rprimd,ndat,nthreads,comm_fft,paral_kgb,uni
 
    ! Accumulate density. Does not work if cplexwf==1
    call fourwf_mpi(cplex_one,density,fofg,dummy_fofg,fofr,&
-&    gbound_k,gbound_k,istwfk_one,kg_k,kg_k,me_g0,mgfft,ngfft,fftabs,n1,n2,n3,&
-&    npw_k,npw_k,n4,n5,n6,ndat,1,weight_r,weight_i,comm_fft,cplexwf=cplexwf)
+     gbound_k,gbound_k,istwfk_one,kg_k,kg_k,me_g0,mgfft,ngfft,fftabs,n1,n2,n3,&
+     npw_k,npw_k,n4,n5,n6,ndat,1,weight_r,weight_i,comm_fft,cplexwf=cplexwf)
 
 !   Recompute u(r)
 !   call fourwf_mpi(cplex_one,density,fofg,dummy_fofg,fofr,&
@@ -2096,7 +2116,7 @@ function fftu_mpi_utests(fftalg,ecut,rprimd,ndat,nthreads,comm_fft,paral_kgb,uni
    else
      write(msg,"(a)")" OK"
    end if
-   call wrtout(ount,sjoin(info,msg),"COLL")
+   call wrtout(ount, sjoin(info, msg))
 
    ABI_FREE(density)
 
@@ -2146,29 +2166,23 @@ function fftu_mpi_utests(fftalg,ecut,rprimd,ndat,nthreads,comm_fft,paral_kgb,uni
    else
      write(msg,"(a)")" OK"
    end if
-   call wrtout(ount,sjoin(info,msg),"COLL")
+   call wrtout(ount, sjoin(info, msg))
 
    ABI_FREE(fofg_out)
-
    ABI_FREE(pot)
    ABI_FREE(invpot)
-
    ABI_FREE(kg_k)
    ABI_FREE(gbound_k)
-
    ABI_FREE(fofg)
    ABI_FREE(ref_fofg)
    ABI_FREE(fofr)
-
    ABI_FREE(full_kg_k)
    ABI_FREE(full_fofg)
 
    call destroy_distribfft(fftabs)
  end do
 
- if (nthreads > 0) then
-   call xomp_set_num_threads(old_nthreads)
- end if
+ if (nthreads > 0) call xomp_set_num_threads(old_nthreads)
 
 end function fftu_mpi_utests
 !!***
@@ -2206,13 +2220,6 @@ end function fftu_mpi_utests
 !! Also for better speed, it uses no F90 construct, except the allocate command
 !! and for zeroing arrays.
 !!
-!! COPYRIGHT
-!! Copyright (C) 1998-2019 ABINIT group (DCA, XG, GMR, FF)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
-!!
 !! INPUTS
 !! cplex= if 1 , denpot is real, if 2 , denpot is complex
 !!    (cplex=2 only allowed for option=2, and istwf_k=1)
@@ -2235,16 +2242,22 @@ end function fftu_mpi_utests
 !!         if 1: do direct FFT, then sum the density
 !!         if 2: do direct FFT, multiply by the potential, then do reverse FFT
 !!         if 3: do reverse FFT only
-!! paral_kgb=Flag related to the kpoint-band-fft parallelism
 !! tim_fourwf=timing code of the calling routine (can be set to 0 if not attributed)
 !! weight_r=weight to be used for the accumulation of the density in real space
 !!         (needed only when option=1)
 !! weight_i=weight to be used for the accumulation of the density in real space
 !!         (needed only when option=1 and (fftalg=4 and fftalgc/=0))
-!! fofginb(2,npwin)=holds second input wavefunction in G vector basis sphere.
+!! [weight_array_r]= -- optional -- same as weight_r when ndat>1
+!!                   weight_array_r(i)=weight_r to be used for band i
+!!                   at present only used for the GPU version
+!! [weight_array_i]= -- optional -- same as weight_i when ndat>1
+!!                   weight_array_i(i)=weight_i to be used for band i
+!!                   at present only used for the GPU version
+!! [fofginb(2,npwin)]=holds second input wavefunction in G vector basis sphere.
 !!                 (intent(in) but the routine sphere can modify it for another iflag)
 !!                 (for non diagonal occupation)
-!! use_ndo = use non diagonal occupations.
+!! [use_ndo] = use non diagonal occupations.
+!! [gpu_option] = GPU implementation to use, i.e. cuda, openMP, ... (0=not using GPU)
 !!
 !! OUTPUT
 !!  (see side effects)
@@ -2272,31 +2285,20 @@ end function fftu_mpi_utests
 !!   has already too many parameters and each change in the API requires a careful
 !!   modification of the different wrappers used for specialized FFTs such as FFTW3 and MKL-DFTI
 !!
-!! PARENTS
-!!      dfpt_accrho,dfpt_mkrho,dfptnl_resp,fock_getghc,getgh1c,getghc
-!!      gwls_hamiltonian,m_cut3d,m_epjdos,m_fft_prof,m_fock,mkrho,mlwfovlp
-!!      pawmkaewf,pawsushat,posdoppler,prep_fourwf,spin_current,susk,suskmm
-!!      tddft,vtowfk
-!!
-!! CHILDREN
-!!      ccfft,cg_addtorho,cg_box2gsph,dcopy,dfti_seqfourwf,fftw3_seqfourwf
-!!      fourwf_mpi,gpu_fourwf,ptabs_fourwf,sg_fftpad,sg_fftrisc,sg_fftrisc_2
-!!      sphere,sphere_fft,timab,xmpi_sum
-!!
 !! SOURCE
 
 subroutine fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
-&  kg_kin,kg_kout,mgfft,mpi_enreg,ndat,ngfft,npwin,npwout,n4,n5,n6,option,&
-&  tim_fourwf,weight_r,weight_i, &
-&  use_gpu_cuda,use_ndo,fofginb) ! Optional arguments
-
+                  kg_kin,kg_kout,mgfft,mpi_enreg,ndat,ngfft,npwin,npwout,n4,n5,n6,option,&
+                  tim_fourwf,weight_r,weight_i, &
+                  weight_array_r,weight_array_i,gpu_option,use_ndo,fofginb) ! Optional arguments
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: cplex,istwf_k,mgfft,n4,n5,n6,ndat,npwin,npwout,option
  integer,intent(in) :: tim_fourwf
- integer,intent(in),optional :: use_gpu_cuda,use_ndo
+ integer,intent(in),optional :: gpu_option,use_ndo
  real(dp),intent(in) :: weight_r,weight_i
+ real(dp),intent(in),optional,target :: weight_array_r(ndat),weight_array_i(ndat)
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: gboundin(2*mgfft+8,2),gboundout(2*mgfft+8,2)
@@ -2310,10 +2312,10 @@ subroutine fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
 !scalars
  integer :: fftalg,fftalga,fftalgc,fftcache,i1,i2,i2_local,i3,i3_local,i3_glob,idat,ier
  integer :: iflag,ig,comm_fft,me_g0,me_fft,n1,n2,n3,nd2proc,nd3proc
- integer :: nfftot,nproc_fft,option_ccfft,paral_kgb
+ integer :: nfftot,nproc_fft,option_ccfft,paral_kgb,gpu_option_
  real(dp) :: fim,fre,xnorm
- character(len=500) :: message
- logical :: luse_gpu_cuda,luse_ndo
+ character(len=500) :: msg
+ logical :: luse_ndo
 !arrays
  integer,parameter :: shiftg0(3)=0
  integer,parameter :: symmE(3,3)=reshape([1,0,0,0,1,0,0,0,1],[3,3])
@@ -2322,11 +2324,17 @@ subroutine fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
  real(dp) :: tsec(2)
  real(dp),allocatable :: work1(:,:,:,:),work2(:,:,:,:),work3(:,:,:,:)
  real(dp),allocatable :: work4(:,:,:,:),work_sum(:,:,:,:)
+ real(dp),pointer :: weight_ptr_r(:),weight_ptr_i(:)
 
 ! *************************************************************************
 
  ! Accumulate timing
  call timab(840+tim_fourwf,1,tsec)
+
+ if (fourwf_counter>=0) then
+   fourwf_counter = fourwf_counter + ndat
+   if (option==2) fourwf_counter = fourwf_counter + ndat
+ end if
 
  n1=ngfft(1); n2=ngfft(2); n3=ngfft(3); nfftot=n1*n2*n3
  fftcache=ngfft(8)
@@ -2334,72 +2342,109 @@ subroutine fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
  me_fft=ngfft(11)
  nproc_fft=ngfft(10)
 
- comm_fft = mpi_enreg%comm_fft; me_g0 = mpi_enreg%me_g0
+ comm_fft = mpi_enreg%comm_fft; me_g0 = mpi_enreg%me_g0_fft
  paral_kgb = mpi_enreg%paral_kgb
 
  !if (ndat/=1) then
  !  write(std_out,*)fftalg
- !  MSG_ERROR("Really? I thought nobody uses ndat > 1")
+ !  ABI_ERROR("Really? I thought nobody uses ndat > 1")
  !end if
 
  !if (weight_r /= weight_i) then
  !  write(std_out,*)fftalg
- !  MSG_ERROR("Really? I thought nobody uses weight_r != weight_i")
+ !  ABI_ERROR("Really? I thought nobody uses weight_r != weight_i")
  !end if
 
  !if (option == 0 .and. fftalgc == 0) then
- !  MSG_ERROR("Option 0 is buggy when fftalgc ==0 is used!")
+ !  ABI_ERROR("Option 0 is buggy when fftalgc ==0 is used!")
  !end if
 
-!Cuda version of fourwf
- luse_gpu_cuda=PRESENT(use_gpu_cuda)
- if (luse_gpu_cuda) luse_gpu_cuda=(luse_gpu_cuda.and.(use_gpu_cuda==1))
+!GPU version of fourwf
+ gpu_option_=ABI_GPU_DISABLED
+ if (PRESENT(gpu_option)) gpu_option_=gpu_option
 
- if(luse_gpu_cuda) then
-#if defined HAVE_GPU_CUDA
-   call gpu_fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
-&   kg_kin,kg_kout,mgfft,mpi_enreg,ndat,ngfft,npwin,npwout,n4,n5,n6,option,&
-&   paral_kgb,tim_fourwf,weight_r,weight_i) !,&
-!  &  use_ndo,fofginb)
-#endif
-   call timab(840+tim_fourwf,2,tsec); return
+ !If processing gamma-point, disable GPU, except OpenMP (not supported on other variants)
+ if(me_g0==1 .and. istwf_k>1 .and. gpu_option_/=ABI_GPU_OPENMP) then
+   gpu_option_=ABI_GPU_DISABLED
  end if
 
+ if(gpu_option_/=ABI_GPU_DISABLED) then
+   if (present(weight_array_r)) then
+     weight_ptr_r => weight_array_r
+   else
+     ABI_MALLOC(weight_ptr_r,(ndat))
+     weight_ptr_r(:)=weight_r
+   end if
+   if (present(weight_array_i)) then
+     weight_ptr_i => weight_array_i
+   else
+     ABI_MALLOC(weight_ptr_i,(ndat))
+     weight_ptr_i(:)=weight_i
+   end if
+   if(gpu_option_==ABI_GPU_LEGACY) then
+#if defined HAVE_GPU_CUDA
+     call gpu_fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
+       kg_kin,kg_kout,mgfft,mpi_enreg,ndat,ngfft,npwin,npwout,n4,n5,n6,option,&
+       paral_kgb,tim_fourwf,weight_ptr_r,weight_ptr_i) !,use_ndo,fofginb)
+#endif
+   else if(gpu_option_==ABI_GPU_KOKKOS) then
+#if defined HAVE_GPU_CUDA && defined HAVE_YAKL
+     call gpu_fourwf_managed(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
+       kg_kin,kg_kout,mgfft,mpi_enreg,ndat,ngfft,npwin,npwout,n4,n5,n6,option,&
+       paral_kgb,tim_fourwf,weight_ptr_r,weight_ptr_i) !,use_ndo,fofginb)
+#endif
+   else if(gpu_option_==ABI_GPU_OPENMP) then
+#ifdef HAVE_OPENMP_OFFLOAD
+     call ompgpu_fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
+       kg_kin,kg_kout,mgfft,ndat,ngfft,npwin,npwout,n4,n5,n6,option,&
+       weight_ptr_r,weight_ptr_i) !,use_ndo,fofginb)
+#endif
+   end if
+   if (.not.present(weight_array_r)) then
+     ABI_FREE(weight_ptr_r)
+   end if
+   if (.not.present(weight_array_i)) then
+     ABI_FREE(weight_ptr_i)
+   end if
+   call timab(840+tim_fourwf,2,tsec)
+   return
+ end if ! GPU
+
  if ((fftalgc < 0 .or. fftalgc > 2)) then
-   write(message, '(a,i0,5a)' )&
-&   'The input algorithm number fftalg= ',fftalg,' is not allowed.',ch10,&
-&   'The third digit, fftalg(C), must be 0, 1, or 2',ch10,&
-&   'Action: change fftalg in your input file.'
-   MSG_ERROR(message)
+   write(msg, '(a,i0,5a)' )&
+    'The input algorithm number fftalg= ',fftalg,' is not allowed.',ch10,&
+    'The third digit, fftalg(C), must be 0, 1, or 2',ch10,&
+    'Action: change fftalg in your input file.'
+   ABI_ERROR(msg)
  end if
 
  if (fftalgc /= 0 .and. ALL(fftalga /= [1,3,4,5])) then
-   write(message, '(a,i0,5a)' )&
-&   'The input algorithm number fftalg= ',fftalg,' is not allowed.',ch10,&
-&   'The first digit must be 1,3,4 when the last digit is not 0.',ch10,&
-&   'Action: change fftalg in your input file.'
-   MSG_ERROR(message)
+   write(msg, '(a,i0,5a)' )&
+    'The input algorithm number fftalg= ',fftalg,' is not allowed.',ch10,&
+    'The first digit must be 1,3,4 when the last digit is not 0.',ch10,&
+    'Action: change fftalg in your input file.'
+   ABI_ERROR(msg)
  end if
 
  if (option < 0 .or. option > 3)then
-   write(message, '(a,i0,3a)' )&
-&   'The option number ',option,' is not allowed.',ch10,&
-&   'Only option=0, 1, 2 or 3 are allowed presently.'
-   MSG_ERROR(message)
+   write(msg, '(a,i0,3a)' )&
+    'The option number ',option,' is not allowed.',ch10,&
+    'Only option=0, 1, 2 or 3 are allowed presently.'
+   ABI_ERROR(msg)
  end if
 
  if (option == 1 .and. cplex /= 1) then
-   write(message, '(3a,i0,a)' )&
-&   'With the option number 1, cplex must be 1,',ch10,&
-&   'but it is cplex= ',cplex,'.'
-   MSG_ERROR(message)
+   write(msg, '(3a,i0,a)' )&
+    'With the option number 1, cplex must be 1,',ch10,&
+    'but it is cplex= ',cplex,'.'
+   ABI_ERROR(msg)
  end if
 
  if (option==2 .and. (cplex/=1 .and. cplex/=2)) then
-   write(message, '(3a,i0,a)' )&
-&   'With the option number 2, cplex must be 1 or 2,',ch10,&
-&   'but it is cplex= ',cplex,'.'
-   MSG_ERROR(message)
+   write(msg, '(3a,i0,a)' )&
+    'With the option number 2, cplex must be 1 or 2,',ch10,&
+    'but it is cplex= ',cplex,'.'
+   ABI_ERROR(msg)
  end if
 
  ! DMFT uses its own FFT algorithm (that should be wrapped in a different routine!)
@@ -2408,24 +2453,24 @@ subroutine fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
    if(use_ndo==1) then
      luse_ndo=.true.
      if((size(fofginb,2)==0)) then
-       write(message, '(a,a,a,i4,i5)' )&
-&       'fofginb has a dimension equal to zero and use_ndo==1',ch10,&
-&       'Action: check dimension of fofginb',size(fofginb,2),use_ndo
-       MSG_ERROR(message)
+       write(msg, '(a,a,a,i4,i5)' )&
+        'fofginb has a dimension equal to zero and use_ndo==1',ch10,&
+        'Action: check dimension of fofginb',size(fofginb,2),use_ndo
+       ABI_ERROR(msg)
      end if
    end if
  end if
 
  if (luse_ndo) then
    if (.not.(fftalgc==2 .and. option/=3)) then
-     MSG_ERROR("luse_ndo but not .not.(fftalgc==2 .and. option/=3)")
+     ABI_ERROR("luse_ndo but not .not.(fftalgc==2 .and. option/=3)")
    end if
    ABI_CHECK(nproc_fft==1, "DMFT with nproc_fft != 1")
    ABI_CHECK(ndat == 1, "use_ndo and ndat != 1 not coded")
 
    call sg_fftrisc_2(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,&
-&   istwf_k,kg_kin,kg_kout,&
-&   mgfft,ngfft,npwin,npwout,n4,n5,n6,option,weight_r,weight_2=weight_i,luse_ndo=luse_ndo,fofgin_p=fofginb)
+     istwf_k,kg_kin,kg_kout,&
+     mgfft,ngfft,npwin,npwout,n4,n5,n6,option,weight_r,weight_2=weight_i,luse_ndo=luse_ndo,fofgin_p=fofginb)
    goto 100
  end if
 
@@ -2435,31 +2480,31 @@ subroutine fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
  ! Branch immediately depending on nproc_fft
  if (nproc_fft > 1 .and. fftalg /= 412) then
    call fourwf_mpi(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,&
-&   istwf_k,kg_kin,kg_kout,me_g0,mgfft,ngfft,mpi_enreg%distribfft,n1,n2,n3,npwin,npwout,&
-&   n4,n5,n6,ndat,option,weight_r,weight_i,comm_fft)
+     istwf_k,kg_kin,kg_kout,me_g0,mgfft,ngfft,mpi_enreg%distribfft,n1,n2,n3,npwin,npwout,&
+     n4,n5,n6,ndat,option,weight_r,weight_i,comm_fft)
    goto 100
  end if
 
  select case (fftalga)
 
  case (FFT_FFTW3)
-   if (luse_ndo) MSG_ERROR("luse_ndo not supported by FFTW3")
+   if (luse_ndo) ABI_ERROR("luse_ndo not supported by FFTW3")
    if (nproc_fft == 1) then
-!      call wrtout(std_out,"FFTW3_SEQFOURWF","COLL")
+     ! call wrtout(std_out, "FFTW3_SEQFOURWF")
      call fftw3_seqfourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
-&     kg_kin,kg_kout,mgfft,ndat,ngfft,npwin,npwout,n4,n5,n6,option,weight_r,weight_i)
+       kg_kin,kg_kout,mgfft,ndat,ngfft,npwin,npwout,n4,n5,n6,option,weight_r,weight_i)
    else
-     MSG_ERROR("Not coded")
+     ABI_ERROR("Not coded")
    end if
 
  case (FFT_DFTI)
-   if (luse_ndo) MSG_ERROR("luse_ndo not supported by DFTI")
+   if (luse_ndo) ABI_ERROR("luse_ndo not supported by DFTI")
    if (nproc_fft == 1) then
-!     call wrtout(std_out,"DFTI_SEQFOURWF","COLL")
+     ! call wrtout(std_out, "DFTI_SEQFOURWF")
      call dfti_seqfourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
-&     kg_kin,kg_kout,mgfft,ndat,ngfft,npwin,npwout,n4,n5,n6,option,weight_r,weight_i)
+       kg_kin,kg_kout,mgfft,ndat,ngfft,npwin,npwout,n4,n5,n6,option,weight_r,weight_i)
    else
-     MSG_ERROR("Not coded")
+     ABI_ERROR("Not coded")
    end if
 
  case default
@@ -2468,9 +2513,9 @@ subroutine fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
    ! Here, use routines that make forwards FFT separately of backwards FFT,
    ! in particular, usual 3DFFT library routines, called in ccfft.
    if (fftalgc==0 .or. (fftalgc==1 .and. fftalga/=4) .or. &
-&   (fftalgc==2 .and. fftalga/=4 .and. option==3) )then
+      (fftalgc==2 .and. fftalga/=4 .and. option==3) )then
 
-     ABI_ALLOCATE(work1,(2,n4,n5,n6*ndat))
+     ABI_MALLOC(work1,(2,n4,n5,n6*ndat))
 
      if (option/=3)then
        ! Insert fofgin into the fft box (array fofr)
@@ -2482,35 +2527,35 @@ subroutine fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
        else if (fftalga==4 .and. fftalgc==0) then
          ! Note the switch of n5 and n6, as they are only
          ! needed to dimension work2 inside "sphere"
-         ABI_ALLOCATE(work2,(2,n4,n6,n5*ndat))
+         ABI_MALLOC(work2,(2,n4,n6,n5*ndat))
 
          iflag=2
          nd2proc=((n2-1)/nproc_fft) +1
          nd3proc=((n6-1)/nproc_fft) +1
-         ABI_ALLOCATE(work3,(2,n4,n6,nd2proc*ndat))
-         ABI_ALLOCATE(work4,(2,n4,n5,nd3proc*ndat))
+         ABI_MALLOC(work3,(2,n4,n6,nd2proc*ndat))
+         ABI_MALLOC(work4,(2,n4,n5,nd3proc*ndat))
 
          if (istwf_k == 1 .and. paral_kgb==1) then
            ! sphere dont need a big array
            work3=zero
            call sphere_fft(fofgin,ndat,npwin,work3,n1,n2,n3,n4,n6,kg_kin,&
-&           mpi_enreg%distribfft%tab_fftwf2_local,nd2proc)
+             mpi_enreg%distribfft%tab_fftwf2_local,nd2proc)
          else
            ! sphere needs a big array and communications
            if (nproc_fft == 1 .and. ndat == 1 .and. istwf_k == 1) then
              ! dimensions of tab work3 and work2 are identical no need to use work2
              work3=zero
              call sphere(fofgin,ndat,npwin,work3,n1,n2,n3,n4,n6,nd2proc,&
-&             kg_kin,istwf_k,iflag,me_g0,shiftg0,symmE,one)
+               kg_kin,istwf_k,iflag,me_g0,shiftg0,symmE,one)
            else
              work2=zero
              call sphere(fofgin,ndat,npwin,work2,n1,n2,n3,n4,n6,n5,&
-&             kg_kin,istwf_k,iflag,me_g0,shiftg0,symmE,one)
+               kg_kin,istwf_k,iflag,me_g0,shiftg0,symmE,one)
 
              if (paral_kgb==1 .and. istwf_k > 1) then
                ! Collect G-vectors on each node
                work3=zero
-               ABI_ALLOCATE(work_sum,(2,n4,n6,n5*ndat))
+               ABI_MALLOC(work_sum,(2,n4,n6,n5*ndat))
                call timab(48,1,tsec)
                call xmpi_sum(work2,work_sum,2*n4*n6*n5*ndat,comm_fft,ier)
                call timab(48,2,tsec)
@@ -2529,7 +2574,7 @@ subroutine fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
                    end if
                  end do
                end do
-               ABI_DEALLOCATE(work_sum)
+               ABI_FREE(work_sum)
              end if
 
              if (paral_kgb/=1) then
@@ -2562,8 +2607,8 @@ subroutine fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
          else
            ! SG simplest complex-to-complex routine
            call ccfft(ngfft,+1,n1,n2,n3,n4,n5,n6,ndat,option_ccfft,work3,work4,comm_fft)
-           ABI_DEALLOCATE(work2)
-           ABI_DEALLOCATE(work3)
+           ABI_FREE(work2)
+           ABI_FREE(work3)
          end if
        else
          ! Call SG routine, with zero padding
@@ -2596,8 +2641,8 @@ subroutine fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
                do i2=1,n2
                  do i1=1,n1
                    denpot(i1,i2,i3)=denpot(i1,i2,i3)+&
-&                   weight_r*work4(1,i1,i2,i3_local)**2+&
-&                   weight_i*work4(2,i1,i2,i3_local)**2
+                     weight_r*work4(1,i1,i2,i3_local)**2+&
+                     weight_i*work4(2,i1,i2,i3_local)**2
                  end do
                end do
              end if
@@ -2695,8 +2740,8 @@ subroutine fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
        if (fftalgc==0) then
          ! Call usual 3DFFT library routines or SG simplest complex-to-complex routine
          if (fftalga==FFT_SG2002) then
-           ABI_DEALLOCATE(work1)
-           ABI_ALLOCATE(work1,(2,n4,n6,n5*ndat))
+           ABI_FREE(work1)
+           ABI_MALLOC(work1,(2,n4,n6,n5*ndat))
          end if
 
          if (option==3 .or. fftalga/=4) then
@@ -2706,8 +2751,8 @@ subroutine fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
            ! nd3proc=((n5-1)/nproc_fft) +1
            nd3proc=((n6-1)/nproc_fft) +1
            nd2proc=((n2-1)/nproc_fft) +1
-           ABI_ALLOCATE(work3,(2,n4,n5,nd3proc*ndat))
-           ABI_ALLOCATE(work2,(2,n4,n6,nd2proc*ndat))
+           ABI_MALLOC(work3,(2,n4,n5,nd3proc*ndat))
+           ABI_MALLOC(work2,(2,n4,n6,nd2proc*ndat))
 
            if (paral_kgb==1) then
 
@@ -2804,7 +2849,7 @@ subroutine fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
                end do
              end if
            end if
-           ABI_DEALLOCATE(work3)
+           ABI_FREE(work3)
            if ((paral_kgb==1) .and.  ( istwf_k > 1 )) then
              call timab(48,1,tsec)
              call xmpi_sum(work1,comm_fft,ier)
@@ -2835,7 +2880,7 @@ subroutine fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
                fofgout(2,ig+npwout*(idat-1))= work2(2,i1,i3,i2_local)*xnorm
              end do
            end do
-           ABI_DEALLOCATE(work2)
+           ABI_FREE(work2)
          else
 !$OMP PARALLEL DO PRIVATE(i1,i2,i3)
            do idat=1,ndat
@@ -2851,9 +2896,7 @@ subroutine fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
        end if ! fftalga
      end if ! if option==2 or 3
 
-     if (allocated(work1))  then
-       ABI_DEALLOCATE(work1)
-     end if
+     ABI_SFREE(work1)
    end if
 
    ! Here, call more specialized 3-dimensional fft
@@ -2861,7 +2904,7 @@ subroutine fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
    ! Specially tuned for cache architectures.
    if (fftalga==FFT_SG .and. fftalgc==2 .and. option/=3) then
      call sg_fftrisc(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,&
-&     istwf_k,kg_kin,kg_kout,mgfft,ndat,ngfft,npwin,npwout,n4,n5,n6,option,weight_r,weight_i)
+       istwf_k,kg_kin,kg_kout,mgfft,ndat,ngfft,npwin,npwout,n4,n5,n6,option,weight_r,weight_i)
    end if
 
    ! Here, call new FFT from S Goedecker, also sophisticated specialized 3-dimensional fft
@@ -2869,17 +2912,26 @@ subroutine fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
    if (fftalga==FFT_SG2002 .and. fftalgc/=0) then
      ! The args are not the same as fourwf, but might be
      call fourwf_mpi(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,&
-&     istwf_k,kg_kin,kg_kout,me_g0,mgfft,ngfft,mpi_enreg%distribfft,n1,n2,n3,npwin,npwout,&
-&     n4,n5,n6,ndat,option,weight_r,weight_i,comm_fft)
+       istwf_k,kg_kin,kg_kout,me_g0,mgfft,ngfft,mpi_enreg%distribfft,n1,n2,n3,npwin,npwout,&
+       n4,n5,n6,ndat,option,weight_r,weight_i,comm_fft)
    end if
 
-   if (allocated(work4))  then
-     ABI_DEALLOCATE(work4)
-   end if
-   if (allocated(work2))  then
-     ABI_DEALLOCATE(work2)
+   if (option==0.and.(fftalga==FFT_SG.or.fftalga==FFT_SG2002)) then
+     ! In these cases, add the periodic image of the borders so all fofr components are computed
+     do i3=1,n3
+       if (n1==n4-1) then
+         do i2=1,n2
+           fofr(:,n4,i2,i3)=fofr(:,1,i2,i3)
+         end do
+       end if
+       if (n2==n5-1) then
+         fofr(:,:,n5,i3)=fofr(:,:,1,i3)
+       end if
+     end do
    end if
 
+   ABI_SFREE(work4)
+   ABI_SFREE(work2)
  end select
 
 ! Accumulate timing
@@ -2906,13 +2958,6 @@ end subroutine fourwf
 !!  fftalgb=1 means using a real-to-complex FFT or a complex-to-complex FFT, depending on the value of cplex.
 !!  The only real-to-complex FFT available is from SGoedecker library.
 !!
-!! COPYRIGHT
-!! Copyright (C) 1998-2019 ABINIT group (DCA, XG)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
-!!
 !! INPUTS
 !! cplex=1 if fofr is real, 2 if fofr is complex
 !! isign=sign of Fourier transform exponent: current convention uses
@@ -2929,30 +2974,14 @@ end subroutine fourwf
 !! fofg(2,nfft)=f(G), complex.
 !! fofr(cplex*nfft)=input function f(r) (real or complex)
 !!
-!! PARENTS
-!!      atm2fft,bethe_salpeter,calc_smeared_density,dfpt_atm2fft,dfpt_dyfro
-!!      dfpt_eltfrxc,dfpt_looppert,dfpt_newvtr,dfpt_scfcv,dfpt_vlocal
-!!      dfptnl_loop,dieltcel,energy,fock_getghc,forces,fourdp_6d,fresidrsp
-!!      green_kernel,gstate,hartre,hartrestr,initro,jellium,laplacian,m_dvdb
-!!      m_electronpositron,m_epjdos,m_fft_prof,m_hidecudarec,m_kxc,m_ppmodel
-!!      m_screening,make_efg_el,mklocl_realspace,mklocl_recipspace,moddiel
-!!      moddiel_csrb,mrgscr,newrho,newvtr,nonlinear,nres2vres,odamix,pawmknhat
-!!      pawmknhat_psipsi,pawmkrho,posdoppler,prcref,prcref_PMA,recursion
-!!      recursion_nl,redgr,respfn,rotate_rho,scfcv,screening,setup_positron
-!!      sigma,stress,symrhg,tddft,transgrid,vlocalstr,xcden,xcpot
-!!
-!! CHILDREN
-!!      ccfft,dfti_seqfourdp,fftw3_mpifourdp,fftw3_seqfourdp,fourdp_mpi
-!!      ptabs_fourdp,sg2002_back,sg2002_forw,sg2002_mpifourdp,sg_fft_rc,timab
-!!
 !! SOURCE
 
-subroutine fourdp(cplex,fofg,fofr,isign,mpi_enreg,nfft,ndat,ngfft,tim_fourdp)
-
+subroutine fourdp(cplex, fofg, fofr, isign, mpi_enreg, nfft, ndat, ngfft, tim_fourdp, gpu_option)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: cplex,isign,nfft,ndat,tim_fourdp
+ integer,intent(in),optional :: gpu_option
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: ngfft(18)
@@ -2963,9 +2992,9 @@ subroutine fourdp(cplex,fofg,fofr,isign,mpi_enreg,nfft,ndat,ngfft,tim_fourdp)
  integer :: fftalg,fftalga,fftalgb,fftcache,i1,i2,i3,base,idat
  integer :: n1,n1half1,n1halfm,n2,n2half1,n3,n4
  integer :: n4half1,n5,n5half1,n6 !nd2proc,nd3proc,i3_local,i2_local,
- integer :: comm_fft,nproc_fft,me_fft
+ integer :: comm_fft,nproc_fft,me_fft,gpu_option_
  real(dp) :: xnorm
- character(len=500) :: message
+ character(len=500) :: msg
 !arrays
  integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:),ffti2_local(:)
  integer, ABI_CONTIGUOUS pointer :: fftn3_distrib(:),ffti3_local(:)
@@ -2974,16 +3003,31 @@ subroutine fourdp(cplex,fofg,fofr,isign,mpi_enreg,nfft,ndat,ngfft,tim_fourdp)
  real(dp),allocatable :: workf(:,:,:,:,:),workr(:,:,:,:,:)
 
 ! *************************************************************************
- ABI_CHECK(ndat == 1, "ndat != 1 should be tested")
+
+ !ABI_CHECK(ndat == 1, "ndat != 1 should be tested")
 
  ! Keep track of timing
- call timab(260+tim_fourdp,1,tsec)
+ call timab(1260+tim_fourdp,1,tsec)
+
+ if (fourdp_counter>=0) then
+   fourdp_counter = fourdp_counter + ndat
+ end if
+
+ ! GPU version of fourdp
+ gpu_option_=ABI_GPU_DISABLED
+ if (PRESENT(gpu_option)) gpu_option_=gpu_option
 
  n1=ngfft(1); n2=ngfft(2); n3=ngfft(3)
  n4=ngfft(4); n5=ngfft(5); n6=ngfft(6)
  me_fft=ngfft(11); nproc_fft=ngfft(10)
  comm_fft = mpi_enreg%comm_fft
  !write(std_out,*)"fourdp, nx,ny,nz,nfft =",n1,n2,n3,nfft
+
+ ! Run fourdp with OpenMP GPU if requested, on CPU otherwise
+ if(gpu_option_==ABI_GPU_OPENMP) then
+   call ompgpu_fourdp(cplex,ngfft,n4,n5,n6,ndat,isign,fofg,fofr)
+   goto 100
+ end if
 
  fftcache=ngfft(8)
  fftalg  =ngfft(7); fftalga =fftalg/100; fftalgb =mod(fftalg,100)/10
@@ -2992,24 +3036,24 @@ subroutine fourdp(cplex,fofg,fofr,isign,mpi_enreg,nfft,ndat,ngfft,tim_fourdp)
  !write(std_out,*)' fourdp :me_fft',me_fft,'nproc_fft',nproc_fft,'nfft',nfft
 
  if (fftalgb /= 0 .and. fftalgb /= 1) then
-   write(message, '(a,i0,5a)' )&
-&   'The input algorithm number fftalg= ',fftalg,' is not allowed.',ch10,&
-&   'The second digit (fftalg(B)) must be 0 or 1.',ch10,&
-&   'Action: change fftalg in your input file.'
-   MSG_BUG(message)
+   write(msg, '(a,i0,5a)' )&
+    'The input algorithm number fftalg= ',fftalg,' is not allowed.',ch10,&
+    'The second digit (fftalg(B)) must be 0 or 1.',ch10,&
+    'Action: change fftalg in your input file.'
+   ABI_BUG(msg)
  end if
 
  if (fftalgb == 1 .and. ALL(fftalga /= [1,3,4,5])) then
-   write(message,'(a,i0,5a)')&
-&   'The input algorithm number fftalg= ',fftalg,' is not allowed.',ch10,&
-&   'When fftalg(B) is 1, the allowed values for fftalg(A) are 1 and 4.',ch10,&
-&   'Action: change fftalg in your input file.'
-   MSG_BUG(message)
+   write(msg,'(a,i0,5a)')&
+    'The input algorithm number fftalg= ',fftalg,' is not allowed.',ch10,&
+    'When fftalg(B) is 1, the allowed values for fftalg(A) are 1 and 4.',ch10,&
+    'Action: change fftalg in your input file.'
+   ABI_BUG(msg)
  end if
 
  if (n4<n1.or.n5<n2.or.n6<n3) then
-   write(message,'(a,3(i0,1x),a,3(i0,1x))')'  Each of n4,n5,n6=',n4,n5,n6,'must be >= n1, n2, n3 =',n1,n2,n3
-   MSG_BUG(message)
+   write(msg,'(a,3(i0,1x),a,3(i0,1x))')'  Each of n4,n5,n6=',n4,n5,n6,'must be >= n1, n2, n3 =',n1,n2,n3
+   ABI_BUG(msg)
  end if
 
  ! Get the distrib associated with this fft_grid => for i2 and i3 planes
@@ -3032,18 +3076,18 @@ subroutine fourdp(cplex,fofg,fofr,isign,mpi_enreg,nfft,ndat,ngfft,tim_fourdp)
       fftn2_distrib,ffti2_local,fftn3_distrib,ffti3_local,fofg,fofr,comm_fft)
    end if
    ! Accumulate timing and return
-   call timab(260+tim_fourdp,2,tsec); return
+   call timab(1260+tim_fourdp,2,tsec); return
  end if
 
- if (fftalga==FFT_DFTI) then
+ if (fftalga == FFT_DFTI) then
    ! Call sequential or MPI MKL.
    if (nproc_fft == 1) then
      call dfti_seqfourdp(cplex,n1,n2,n3,n1,n2,n3,ndat,isign,fofg,fofr)
    else
-     MSG_ERROR("MPI fourdp with MKL cluster DFT not implemented")
+     ABI_ERROR("MPI fourdp with MKL cluster DFT not implemented")
    end if
    ! Accumulate timing and return
-   call timab(260+tim_fourdp,2,tsec); return
+   call timab(1260+tim_fourdp,2,tsec); return
  end if
 
  ! Here, deal with the new SG FFT, complex-to-complex case
@@ -3062,8 +3106,8 @@ subroutine fourdp(cplex,fofg,fofr,isign,mpi_enreg,nfft,ndat,ngfft,tim_fourdp)
    ! n4half1 or n5half1 are the odd integers >= n1half1 or n2half1
    n4half1=(n1half1/2)*2+1
    n5half1=(n2half1/2)*2+1
-   ABI_ALLOCATE(workr, (2,n4half1,n5,n6,ndat))
-   ABI_ALLOCATE(workf, (2,n4,n6,n5half1,ndat))
+   ABI_MALLOC(workr, (2,n4half1,n5,n6,ndat))
+   ABI_MALLOC(workf, (2,n4,n6,n5half1,ndat))
 
    if (isign==1) then
      do idat=1,ndat
@@ -3152,16 +3196,16 @@ subroutine fourdp(cplex,fofg,fofr,isign,mpi_enreg,nfft,ndat,ngfft,tim_fourdp)
      end do
 
    end if ! isign
-   ABI_DEALLOCATE(workr)
-   ABI_DEALLOCATE(workf)
+   ABI_FREE(workr)
+   ABI_FREE(workf)
  end if
 
  ! Here, one calls the complex-to-complex FFT subroutine
  if( (fftalgb==0 .or. cplex==2) .and. fftalga/=4 )then
-   ABI_CHECK(ndat == 1, "ndat must be 1")
+   !ABI_CHECK(ndat == 1, "ndat must be 1")
 
-   ABI_ALLOCATE(work1, (2,n4,n5,n6,ndat))
-   ABI_ALLOCATE(work2, (2,n4,n5,n6,ndat))
+   ABI_MALLOC(work1, (2,n4,n5,n6,ndat))
+   ABI_MALLOC(work2, (2,n4,n5,n6,ndat))
 
    if (isign==1) then
 
@@ -3267,8 +3311,8 @@ subroutine fourdp(cplex,fofg,fofr,isign,mpi_enreg,nfft,ndat,ngfft,tim_fourdp)
 
    end if ! isign
 
-   ABI_DEALLOCATE(work1)
-   ABI_DEALLOCATE(work2)
+   ABI_FREE(work1)
+   ABI_FREE(work2)
  end if ! End simple algorithm
 
  ! Here sophisticated algorithm based on S. Goedecker routines, only for the REAL case.
@@ -3280,7 +3324,7 @@ subroutine fourdp(cplex,fofg,fofr,isign,mpi_enreg,nfft,ndat,ngfft,tim_fourdp)
    end do
  end if
 
- 100 call timab(260+tim_fourdp,2,tsec)
+ 100 call timab(1260+tim_fourdp,2,tsec)
 
 end subroutine fourdp
 !!***
@@ -3293,12 +3337,6 @@ end subroutine fourdp
 !! Carry out complex-to-complex Fourier transforms between real
 !! and reciprocal (G) space. Library of such routines.
 !! Include machine-dependent F90 routines used with fftalg=200.
-!!
-!! COPYRIGHT
-!! Copyright (C) 2000-2019 ABINIT group (PT, XG, FF)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! INPUTS
 !!  fftalga=govern the choice of the fft routine to be used
@@ -3346,12 +3384,6 @@ end subroutine fourdp
 !! For all the other platforms, or if the CPP directive nolib is
 !! activated, one uses the fft routine from S. Goedecker.
 !!
-!! PARENTS
-!!      fourdp,fourwf
-!!
-!! CHILDREN
-!!      sg2002_back,sg2002_forw,sg_fft_cc
-!!
 !! SOURCE
 
 subroutine ccfft(ngfft,isign,n1,n2,n3,n4,n5,n6,ndat,option,work1,work2,comm_fft)
@@ -3370,28 +3402,26 @@ subroutine ccfft(ngfft,isign,n1,n2,n3,n4,n5,n6,ndat,option,work1,work2,comm_fft)
  integer,parameter :: cplex2=2
  integer :: fftalg,fftalga,fftalgb,fftalgc,fftcache
  integer :: nd2proc,nd3proc,nproc_fft
- character(len=500) :: message
+ character(len=500) :: msg
 
 !*************************************************************************
 
+ !print *, "in ccfft"
  nproc_fft=ngfft(10)
-
- fftcache=ngfft(8)
- fftalg  =ngfft(7)
- fftalga =fftalg/100; fftalgb=mod(fftalg,100)/10; fftalgc=mod(fftalg,10)
+ fftcache=ngfft(8); fftalg  =ngfft(7); fftalga =fftalg/100; fftalgb=mod(fftalg,100)/10; fftalgc=mod(fftalg,10)
 
  if(fftalga==2)then
-   MSG_ERROR("Machine dependent FFTs are not supported anymore")
+   ABI_ERROR("Machine dependent FFTs are not supported anymore")
 
  else if(fftalga==3)then
-   MSG_ERROR("Old interface with FFTW2 is not supported anymore")
+   ABI_ERROR("Old interface with FFTW2 is not supported anymore")
 
  else if(fftalga<1 .or. fftalga>4)then
-   write(message, '(a,a,a,i5,a,a)' )&
-&   'The allowed values of fftalg(A) are 1, 2, 3, and 4 .',ch10,&
-&   'The actual value of fftalg(A) is',fftalga,ch10,&
-&   'Action: check the value of fftalg in your input file.'
-   MSG_ERROR(message)
+   write(msg, '(a,a,a,i5,a,a)' )&
+    'The allowed values of fftalg(A) are 1, 2, 3, and 4 .',ch10,&
+    'The actual value of fftalg(A) is',fftalga,ch10,&
+    'Action: check the value of fftalg in your input file.'
+   ABI_ERROR(msg)
  end if
 
  ! This routine will be removed ASAP.
@@ -3454,17 +3484,10 @@ end subroutine ccfft
 !! TODO
 !!  Write simplified API for sequential version.
 !!
-!! PARENTS
-!!      fourdp
-!!
-!! CHILDREN
-!!      fourwf_mpi
-!!
 !! SOURCE
 
 subroutine fourdp_mpi(cplex,nfft,ngfft,ndat,isign,&
 &  fftn2_distrib,ffti2_local,fftn3_distrib,ffti3_local,fofg,fofr,comm_fft)
-
 
 !Arguments ------------------------------------
 !scalars
@@ -3487,11 +3510,11 @@ subroutine fourdp_mpi(cplex,nfft,ngfft,ndat,isign,&
  select case (fftalga)
  case (FFT_SG2002)
    call sg2002_mpifourdp(cplex,nfft,ngfft,ndat,isign,&
-&    fftn2_distrib,ffti2_local,fftn3_distrib,ffti3_local,fofg,fofr,comm_fft)
+     fftn2_distrib,ffti2_local,fftn3_distrib,ffti3_local,fofg,fofr,comm_fft)
 
  case (FFT_FFTW3)
    call fftw3_mpifourdp(cplex,nfft,ngfft,ndat,isign,&
-&    fftn2_distrib,ffti2_local,fftn3_distrib,ffti3_local,fofg,fofr,comm_fft)
+     fftn2_distrib,ffti2_local,fftn3_distrib,ffti3_local,fofg,fofr,comm_fft)
 
  ! TODO
  !case (FFT_DFTI)
@@ -3500,7 +3523,7 @@ subroutine fourdp_mpi(cplex,nfft,ngfft,ndat,isign,&
 
  case default
    write(msg,"(a,i0)")"Wrong fftalg: ",fftalg
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end select
 
 end subroutine fourdp_mpi
@@ -3587,12 +3610,6 @@ end subroutine fourdp_mpi
 !!                fofgout(2,npwout) contains its output Fourier transform;
 !!                no use of fofgin and npwin.
 !!
-!! PARENTS
-!!      fourwf,m_fft
-!!
-!! CHILDREN
-!!      fourwf_mpi
-!!
 !! SOURCE
 
 subroutine fourwf_mpi(cplex,denpot,fofgin,fofgout,fofr,&
@@ -3647,27 +3664,27 @@ subroutine fourwf_mpi(cplex,denpot,fofgin,fofgout,fofr,&
 
  if (fftalgc<1 .or. fftalgc>2) then
    write(msg,'(a,i0,3a)')&
-&   'The input algorithm number fftalgc=',fftalgc,' is not allowed with MPI-FFT. Must be 1 or 2',ch10,&
-&   'Action: change fftalgc in your input file.'
-   MSG_ERROR(msg)
+    'The input algorithm number fftalgc=',fftalgc,' is not allowed with MPI-FFT. Must be 1 or 2',ch10,&
+    'Action: change fftalgc in your input file.'
+   ABI_ERROR(msg)
  end if
 
  if (option<0 .or. option>3) then
    write(msg,'(a,i0,3a)')&
-&   'The option number',option,' is not allowed.',ch10,&
-&   'Only option=0, 1, 2 or 3 are allowed presently.'
-   MSG_ERROR(msg)
+    'The option number',option,' is not allowed.',ch10,&
+    'Only option=0, 1, 2 or 3 are allowed presently.'
+   ABI_ERROR(msg)
  end if
 
  if (option==1 .and. cplex/=1) then
    write(msg,'(a,i0,a)')&
-&   'With the option number 1, cplex must be 1 but it is cplex=',cplex,'.'
-   MSG_ERROR(msg)
+    'With the option number 1, cplex must be 1 but it is cplex=',cplex,'.'
+   ABI_ERROR(msg)
  end if
 
  if ( ALL(cplex/=(/1,2/)) .and. ANY(option==(/1,2/)) ) then
    write(msg,'(a,i0,a)')' When option is (1,2) cplex must be 1 or 2, but it is cplex=',cplex,'.'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  !write(std_out,*)"in fourwf_mpi with fftalg: ",fftalg,fftalgc
@@ -3680,7 +3697,7 @@ subroutine fourwf_mpi(cplex,denpot,fofgin,fofgout,fofr,&
  use_ialltoall = (use_ialltoall .and. ALLOW_IALLTOALL)
  if (use_ialltoall .and. nwrites_ialltoall==0) then
    nwrites_ialltoall = 1
-   call wrtout(std_out,"- Will use non-blocking ialltoall for MPI-FFT","COLL")
+   call wrtout(std_out, "- Will use non-blocking ialltoall for MPI-FFT")
  end if
 
  md1i=0; md2i=0; md3i=0; m2i=0
@@ -3780,7 +3797,7 @@ subroutine fourwf_mpi(cplex,denpot,fofgin,fofgout,fofr,&
  !write(std_out,*)'fourwf_mpi : m1i,m2i,m3i=',m1i,m2i,m3i
 
  ! Allocate work array in G-space (note exchange 3 <--> 2)
- ABI_ALLOCATE(workf,(2,md1,md3,md2proc*ndat))
+ ABI_MALLOC(workf,(2,md1,md3,md2proc*ndat))
 
  if (option/=3) then
    ! Insert fofgin into the **small** box (array workf) :
@@ -3789,8 +3806,8 @@ subroutine fourwf_mpi(cplex,denpot,fofgin,fofgout,fofr,&
    if (nproc_fft > 1) then
      if (istwf_k/=1 )then
        write(msg,'(a,i0,a)')'The value of istwf_k: ',istwf_k,' is not allowed. Only istwf_k=1 is allowed in MPI-FFT'
-       !MSG_WARNING(msg)
-       MSG_ERROR(msg)
+       !ABI_WARNING(msg)
+       ABI_ERROR(msg)
      end if
      call sphere_fft1(fofgin,ndat,npwin,workf,m1i,m2i,m3i,md1,md3,md2proc,kg_kin,distribfft%tab_fftwf2_local)
    else
@@ -3821,23 +3838,23 @@ subroutine fourwf_mpi(cplex,denpot,fofgin,fofgout,fofr,&
 ! &        fofr(:,:,:,(idat-1)*n6eff+1:idat*n6eff),comm_fft)
 !        enddo
        call sg2002_mpiback_wf(cplexwf_,ndat,n1,n2,n3,n4,n5,(n6-1)/nproc_fft+1,&
-&        max1i,max2i,max3i,m1i,m2i,m3i,md1,md2proc,md3,workf,fofr,comm_fft)
+         max1i,max2i,max3i,m1i,m2i,m3i,md1,md2proc,md3,workf,fofr,comm_fft)
 
      case (FFT_FFTW3)
 
        if (use_ialltoall) then
          call fftw3_mpiback_manywf(cplexwf_,ndat,n1,n2,n3,n4,n5,(n6-1)/nproc_fft+1,&
-&          max1i,max2i,max3i,m1i,m2i,m3i,md1,md2proc,md3,workf,fofr,comm_fft)
+           max1i,max2i,max3i,m1i,m2i,m3i,md1,md2proc,md3,workf,fofr,comm_fft)
        else
          call fftw3_mpiback_wf(cplexwf_,ndat,n1,n2,n3,n4,n5,(n6-1)/nproc_fft+1,&
-&          max1i,max2i,max3i,m1i,m2i,m3i,md1,md2proc,md3,workf,fofr,comm_fft)
+           max1i,max2i,max3i,m1i,m2i,m3i,md1,md2proc,md3,workf,fofr,comm_fft)
        end if
 
      !case (FFT_DFTI)
      !  call dfti_mpiback_wf(cplexwf_,ndat,n1,n2,n3,n4,n5,(n6-1)/nproc_fft+1,&
      !   &        max1i,max2i,max3i,m1i,m2i,m3i,md1,md2proc,md3,workf,fofr,comm_fft)
      case default
-       MSG_ERROR("fftalga does not provide MPI back_wf")
+       ABI_ERROR("fftalga does not provide MPI back_wf")
      end select
 
    end if ! option
@@ -3853,7 +3870,7 @@ subroutine fourwf_mpi(cplex,denpot,fofgin,fofgout,fofr,&
          do i2=1,n2
            do i1=1,n1
              denpot(i1,i2,i3_glob) = denpot(i1,i2,i3_glob) &
-&              + (weight_r*fofr(1,i1,i2,i3dat)**2+ weight_i*fofr(2,i1,i2,i3dat)**2)
+               + (weight_r*fofr(1,i1,i2,i3dat)**2+ weight_i*fofr(2,i1,i2,i3dat)**2)
            end do
          end do
        end do
@@ -3904,16 +3921,16 @@ subroutine fourwf_mpi(cplex,denpot,fofgin,fofgout,fofr,&
      case (FFT_SG2002)
 
        call sg2002_mpiforw_wf(cplexwf_,ndat,n1,n2,n3,n4,n5,(n6-1)/nproc_fft+1,&
-&        max1o,max2o,max3o,m1o,m2o,m3o,md1,md2proc,md3,fofr,workf,comm_fft)
+        max1o,max2o,max3o,m1o,m2o,m3o,md1,md2proc,md3,fofr,workf,comm_fft)
 
      case (FFT_FFTW3)
 
        if (use_ialltoall) then
          call fftw3_mpiforw_manywf(cplexwf_,ndat,n1,n2,n3,n4,n5,(n6-1)/nproc_fft+1,&
-&          max1o,max2o,max3o,m1o,m2o,m3o,md1,md2proc,md3,fofr,workf,comm_fft)
+          max1o,max2o,max3o,m1o,m2o,m3o,md1,md2proc,md3,fofr,workf,comm_fft)
        else
          call fftw3_mpiforw_wf(cplexwf_,ndat,n1,n2,n3,n4,n5,(n6-1)/nproc_fft+1,&
-&          max1o,max2o,max3o,m1o,m2o,m3o,md1,md2proc,md3,fofr,workf,comm_fft)
+          max1o,max2o,max3o,m1o,m2o,m3o,md1,md2proc,md3,fofr,workf,comm_fft)
        end if
 
      !case (FFT_DFTI)
@@ -3921,7 +3938,7 @@ subroutine fourwf_mpi(cplex,denpot,fofgin,fofgout,fofr,&
      !  &max1o,max2o,max3o,m1o,m2o,m3o,md1,md2proc,md3,fofr,workf,comm_fft)
 
      case default
-       MSG_ERROR("fftalga does not provide MPI back_wf")
+       ABI_ERROR("fftalga does not provide MPI back_wf")
      end select
 
    end if
@@ -3940,16 +3957,16 @@ subroutine fourwf_mpi(cplex,denpot,fofgin,fofgout,fofr,&
        ! Note that here we don' fill fofr. Don't know if someone in
        ! abinit uses option 1 to get both fofr as well as denpot
        call sg2002_accrho(cplexwf_,ndat,n1,n2,n3,n4,n5,n6,(n6-1)/nproc_fft+1,&
-&        max1i,max2i,max3i,m1i,m2i,m3i,md1,md2proc,md3,comm_fft,nproc_fft,me_fft,&
-&        workf,denpot,weight_array_r,weight_array_i)
+         max1i,max2i,max3i,m1i,m2i,m3i,md1,md2proc,md3,comm_fft,nproc_fft,me_fft,&
+         workf,denpot,weight_array_r,weight_array_i)
 
      case (FFT_FFTW3)
        call fftw3_accrho(cplexwf_,ndat,n1,n2,n3,n4,n5,n6,(n6-1)/nproc_fft+1,&
-&        max1i,max2i,max3i,m1i,m2i,m3i,md1,md2proc,md3,comm_fft,nproc_fft,me_fft,&
-&        workf,denpot,weight_array_r, weight_array_i)
+         max1i,max2i,max3i,m1i,m2i,m3i,md1,md2proc,md3,comm_fft,nproc_fft,me_fft,&
+         workf,denpot,weight_array_r, weight_array_i)
 
      case default
-       MSG_ERROR("fftalga does not provide accrho")
+       ABI_ERROR("fftalga does not provide accrho")
      end select
 
    case (2)
@@ -3962,13 +3979,13 @@ subroutine fourwf_mpi(cplex,denpot,fofgin,fofgout,fofr,&
 
        if (use_ialltoall) then
          call sg2002_applypot_many(cplexwf_,cplex,ndat,n1,n2,n3,n4,n5,n6,(n6-1)/nproc_fft+1,&
-&          max1i,max2i,max3i,m1i,m2i,m3i,md1,md2proc,md3,&
-&          max1o,max2o,max3o,m1o,m2o,m3o,comm_fft,nproc_fft,me_fft,denpot,workf)
+           max1i,max2i,max3i,m1i,m2i,m3i,md1,md2proc,md3,&
+           max1o,max2o,max3o,m1o,m2o,m3o,comm_fft,nproc_fft,me_fft,denpot,workf)
 
        else
          call sg2002_applypot(cplexwf_,cplex,ndat,n1,n2,n3,n4,n5,n6,(n6-1)/nproc_fft+1,&
-&          max1i,max2i,max3i,m1i,m2i,m3i,md1,md2proc,md3,&
-&          max1o,max2o,max3o,m1o,m2o,m3o,comm_fft,nproc_fft,me_fft,denpot,workf)
+           max1i,max2i,max3i,m1i,m2i,m3i,md1,md2proc,md3,&
+           max1o,max2o,max3o,m1o,m2o,m3o,comm_fft,nproc_fft,me_fft,denpot,workf)
        endif
 
      case (FFT_FFTW3)
@@ -3976,22 +3993,22 @@ subroutine fourwf_mpi(cplex,denpot,fofgin,fofgout,fofr,&
        if (use_ialltoall) then
 
          call fftw3_applypot_many(cplexwf_,cplex,ndat,n1,n2,n3,n4,n5,n6,(n6-1)/nproc_fft+1,&
-&          max1i,max2i,max3i,m1i,m2i,m3i,md1,md2proc,md3,&
-&          max1o,max2o,max3o,m1o,m2o,m3o,comm_fft,nproc_fft,me_fft,denpot,workf)
+           max1i,max2i,max3i,m1i,m2i,m3i,md1,md2proc,md3,&
+           max1o,max2o,max3o,m1o,m2o,m3o,comm_fft,nproc_fft,me_fft,denpot,workf)
 
        else
          call fftw3_applypot(cplexwf_,cplex,ndat,n1,n2,n3,n4,n5,n6,(n6-1)/nproc_fft+1,&
-&          max1i,max2i,max3i,m1i,m2i,m3i,md1,md2proc,md3,&
-&          max1o,max2o,max3o,m1o,m2o,m3o,comm_fft,nproc_fft,me_fft,denpot,workf)
+           max1i,max2i,max3i,m1i,m2i,m3i,md1,md2proc,md3,&
+           max1o,max2o,max3o,m1o,m2o,m3o,comm_fft,nproc_fft,me_fft,denpot,workf)
        end if
 
      case default
-       MSG_ERROR("fftalga does not provide applypot")
+       ABI_ERROR("fftalga does not provide applypot")
      end select
 
    case default
      write(msg,"(a,i0,a)")"Option ",option," is not supported when fftalgc == 2"
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end select
 
  end if ! End of composite operations
@@ -4019,11 +4036,11 @@ subroutine fourwf_mpi(cplex,denpot,fofgin,fofgout,fofr,&
      ! Warning: This call is buggy if istwfk > 2
      iflag=-2
      call sphere(fofgout,ndat,npwout,workf,m1o,m2o,m3o,md1,md3,md2proc,kg_kout,istwf_k,iflag,&
-&      me_g0,shiftg0,symmE,xnorm)
+       me_g0,shiftg0,symmE,xnorm)
    end if
  end if ! if option==2 or 3
 
- ABI_DEALLOCATE(workf)
+ ABI_FREE(workf)
 
 !call timab(540,2,tsec)
 
@@ -4049,20 +4066,13 @@ end subroutine fourwf_mpi
 !! OUTPUT
 !!  See fourwf_mpi
 !!
-!! PARENTS
-!!      m_fft
-!!
-!! CHILDREN
-!!      fourwf_mpi
-!!
 !! SOURCE
 
 ! The final interface should be:
 !subroutine fftmpi_u(npw_k,n4,n5,n6,nspinor,ndat,mgfft,ngfft,istwf_k,kg_k,gbound_k,fftabs,isign,fofg,fofr)
 
 subroutine fftmpi_u(npw_k,n4,n5,n6,ndat,mgfft,ngfft,&
-&  istwf_k,gbound_k,kg_k,me_g0,distribfft,isign,fofg,fofr,comm_fft,cplexwf)
-
+                    istwf_k,gbound_k,kg_k,me_g0,distribfft,isign,fofg,fofr,comm_fft,cplexwf)
 
 !Arguments ------------------------------------
 !scalars
@@ -4090,13 +4100,13 @@ subroutine fftmpi_u(npw_k,n4,n5,n6,ndat,mgfft,ngfft,&
  if (isign == 1) then
    ! option 0 G --> R
    call fourwf_mpi(cplex0,dummy_denpot,fofg,dummy_fofg,fofr,&
-&    gbound_k,gbound_k,istwf_k,kg_k,dummy_kg,me_g0,mgfft,ngfft,distribfft,n1,n2,n3,&
-&    npw_k,npw0,n4,n5,n6,ndat,0,weight_r,weight_i,comm_fft,cplexwf=cplexwf)
+     gbound_k,gbound_k,istwf_k,kg_k,dummy_kg,me_g0,mgfft,ngfft,distribfft,n1,n2,n3,&
+     npw_k,npw0,n4,n5,n6,ndat,0,weight_r,weight_i,comm_fft,cplexwf=cplexwf)
  else
    ! option 3 R --> G
    call fourwf_mpi(cplex0,dummy_denpot,dummy_fofg,fofg,fofr,&
-&    gbound_k,gbound_k,istwf_k,dummy_kg,kg_k,me_g0,mgfft,ngfft,distribfft,n1,n2,n3,&
-&    npw0,npw_k,n4,n5,n6,ndat,3,weight_r,weight_i,comm_fft,cplexwf=cplexwf)
+     gbound_k,gbound_k,istwf_k,dummy_kg,kg_k,me_g0,mgfft,ngfft,distribfft,n1,n2,n3,&
+     npw0,npw_k,n4,n5,n6,ndat,3,weight_r,weight_i,comm_fft,cplexwf=cplexwf)
  end if
 
 end subroutine fftmpi_u
@@ -4123,17 +4133,10 @@ end subroutine fftmpi_u
 !! SIDE EFFECTS
 !!  array(cplex,n1*n2*n3)=complex array to be symetrized
 !!
-!! PARENTS
-!!      atm2fft,dfpt_atm2fft,dfpt_dyfro,forces,hartre,initro,m_fock,pawmknhat
-!!      pawmknhat_psipsi,prcref,prcref_PMA,stress,transgrid
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
-subroutine zerosym(array,cplex,n1,n2,n3,&
-&                  ig1,ig2,ig3,comm_fft,distribfft) ! Optional arguments
-
+subroutine zerosym(array,cplex,n1,n2,n3, &
+                   ig1,ig2,ig3,comm_fft,distribfft) ! Optional arguments
 
 !Arguments ------------------------------------
 !scalars
@@ -4152,8 +4155,6 @@ subroutine zerosym(array,cplex,n1,n2,n3,&
 
 ! **********************************************************************
 
- DBG_ENTER("COLL")
-
  me_fft=0;nproc_fft=1
  if (present(comm_fft)) then
    me_fft=xmpi_comm_rank(comm_fft)
@@ -4171,11 +4172,11 @@ subroutine zerosym(array,cplex,n1,n2,n3,&
      fftn2_distrib => distribfft%tab_fftdp2dg_distrib
      ffti2_local => distribfft%tab_fftdp2dg_local
    else
-     MSG_BUG("Unable to find an allocated distrib for this fft grid")
+     ABI_BUG("Unable to find an allocated distrib for this fft grid")
    end if
  else
-   ABI_ALLOCATE(fftn2_distrib,(n2))
-   ABI_ALLOCATE(ffti2_local,(n2))
+   ABI_MALLOC(fftn2_distrib,(n2))
+   ABI_MALLOC(ffti2_local,(n2))
    fftn2_distrib=0;ffti2_local=(/(i2,i2=1,n2)/)
  end if
 
@@ -4208,7 +4209,7 @@ subroutine zerosym(array,cplex,n1,n2,n3,&
      do i2=1,n2
        ifft=ifft+n1
        if (nproc_fft>1) then
-!        MPIWF: consider ifft only if it is treated by the current proc and compute its adress
+         ! MPIWF: consider ifft only if it is treated by the current proc and compute its adress
          j=ifft-1;j1=modulo(j,n1);j2=modulo(j/n1,n2);j3=j/(n1*n2) !;r2=modulo(j2,nd2)
          if(fftn2_distrib(j2+1)==me_fft) then ! MPIWF this ifft is to be treated by me_fft
            r2= ffti2_local(j2+1) - 1
@@ -4229,7 +4230,7 @@ subroutine zerosym(array,cplex,n1,n2,n3,&
      do i1=1,n1
        ifft=ifft+1
        if (nproc_fft>1) then
-!        MPIWF: consider ifft only if it is treated by the current proc and compute its adress
+         ! MPIWF: consider ifft only if it is treated by the current proc and compute its adress
          j=ifft-1;j1=modulo(j,n1);j2=modulo(j/n1,n2);j3=j/(n1*n2);
          if(fftn2_distrib(j2+1)==me_fft) then ! MPIWF this ifft is to be treated by me_fft
            r2= ffti2_local(j2+1) - 1
@@ -4250,7 +4251,7 @@ subroutine zerosym(array,cplex,n1,n2,n3,&
      do i1=1,n1
        ifft=ifft+1
        if (nproc_fft>1) then
-!        MPIWF: consider ifft only if it is treated by the current proc and compute its adress
+         ! MPIWF: consider ifft only if it is treated by the current proc and compute its adress
          j=ifft-1;j1=modulo(j,n1);j2=modulo(j/n1,n2);j3=j/(n1*n2)
          if(fftn2_distrib(j2+1)==me_fft) then ! MPIWF this ifft is to be treated by me_fft
            r2= ffti2_local(j2+1) - 1
@@ -4265,11 +4266,9 @@ subroutine zerosym(array,cplex,n1,n2,n3,&
  end if
 
  if (.not.present(distribfft)) then
-   ABI_DEALLOCATE(fftn2_distrib)
-   ABI_DEALLOCATE(ffti2_local)
+   ABI_FREE(fftn2_distrib)
+   ABI_FREE(ffti2_local)
  end if
-
- DBG_EXIT("COLL")
 
 end subroutine zerosym
 !!***
@@ -4304,20 +4303,13 @@ end subroutine zerosym
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      m_kxc
-!!
-!! CHILDREN
-!!      fourdp
-!!
 !! SOURCE
 
-subroutine fourdp_6d(cplex,matrix,isign,MPI_enreg,nfft,ngfft,paral_kgb,tim_fourdp)
-
+subroutine fourdp_6d(cplex,matrix,isign,MPI_enreg,nfft,ngfft,tim_fourdp)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: cplex,isign,nfft,paral_kgb,tim_fourdp
+ integer,intent(in) :: cplex,isign,nfft,tim_fourdp
  type(MPI_type),intent(in) :: MPI_enreg
 !arrays
  integer,intent(in) :: ngfft(18)
@@ -4355,7 +4347,7 @@ subroutine fourdp_6d(cplex,matrix,isign,MPI_enreg,nfft,ngfft,paral_kgb,tim_fourd
          fofr(1:nfft)       =REAL (matrix(:,ifft))
          fofr(nfft+1:2*nfft)=AIMAG(matrix(:,ifft))
        else
-         MSG_ERROR("Wrong isign")
+         ABI_ERROR("Wrong isign")
        end if
 
        call fourdp(cplex,fofg,fofr,isign,MPI_enreg,nfft,1,ngfft,tim_fourdp)
@@ -4408,8 +4400,8 @@ end subroutine fourdp_6d
 !! fftpac
 !!
 !! FUNCTION
-!! Allow for data copying to modify the stride (dimensioning) of a three-
-!! dimensional array, for more efficient three dimensional fft.
+!! Allow for data copying to modify the stride (dimensioning) of a three-dimensional array,
+!! for more efficient three dimensional fft.
 !! NOTE that the arrays are in REAL space.
 !!
 !! Note that arrays aa and bb may be the same array (start at the same address).
@@ -4434,18 +4426,9 @@ end subroutine fourdp_6d
 !!  option=10 aa(n1*n2*n3,ispden) <-- bb(nd1,nd2,nd3) complex case like option 1 real part
 !!  option=11 aa(n1*n2*n3,ispden) <-- bb(nd1,nd2,nd3) complex case like option 1 imag part
 !!
-!! PARENTS
-!!      dfpt_mkrho,dfpt_nstpaw,dfpt_rhofermi,dfpt_vtorho,dfptnl_resp,energy
-!!      fock_getghc,getgh1c,gwls_hamiltonian,ks_ddiago,m_epjdos,m_io_kss,mkrho
-!!      suscep_stat,vtorho
-!!
-!! CHILDREN
-!!      ptabs_fourdp
-!!
 !! SOURCE
 
 subroutine fftpac(ispden,mpi_enreg,nspden,n1,n2,n3,nd1,nd2,nd3,ngfft,aa,bb,option)
-
 
 !Arguments ------------------------------------
 !scalars
@@ -4458,7 +4441,7 @@ subroutine fftpac(ispden,mpi_enreg,nspden,n1,n2,n3,nd1,nd2,nd3,ngfft,aa,bb,optio
 !Local variables-------------------------------
 !scalars
  integer :: i1,i2,i3,index,me_fft,nproc_fft
- character(len=500) :: message
+ character(len=500) :: msg
  !arrays
  integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:),ffti2_local(:)
  integer, ABI_CONTIGUOUS pointer :: fftn3_distrib(:),ffti3_local(:)
@@ -4469,17 +4452,17 @@ subroutine fftpac(ispden,mpi_enreg,nspden,n1,n2,n3,nd1,nd2,nd3,ngfft,aa,bb,optio
 
  if (option==1.or.option==2) then
    if (nd1<n1.or.nd2<n2.or.nd3<n3) then
-     write(message,'(a,3i0,2a,3i0,a)')&
-&     'Each of nd1,nd2,nd3=',nd1,nd2,nd3,ch10,&
-&     'must be >= n1, n2, n3 =',n1,n2,n3,'.'
-     MSG_BUG(message)
+     write(msg,'(a,3i0,2a,3i0,a)')&
+      'Each of nd1,nd2,nd3=',nd1,nd2,nd3,ch10,&
+      'must be >= n1, n2, n3 =',n1,n2,n3,'.'
+     ABI_BUG(msg)
    end if
  else
    if (2*nd1<n1.or.nd2<n2.or.nd3<n3) then
-     write(message,'(a,3i0,2a,3i0,a)')&
-&     'Each of 2*nd1,nd2,nd3=',2*nd1,nd2,nd3,ch10,&
-&     'must be >= (n1, n2, n3) =',n1,n2,n3,'.'
-     MSG_BUG(message)
+     write(msg,'(a,3i0,2a,3i0,a)')&
+     'Each of 2*nd1,nd2,nd3=',2*nd1,nd2,nd3,ch10,&
+     'must be >= (n1, n2, n3) =',n1,n2,n3,'.'
+     ABI_BUG(msg)
    end if
  end if
 
@@ -4487,6 +4470,7 @@ subroutine fftpac(ispden,mpi_enreg,nspden,n1,n2,n3,nd1,nd2,nd3,ngfft,aa,bb,optio
  call ptabs_fourdp(mpi_enreg,n2,n3,fftn2_distrib,ffti2_local,fftn3_distrib,ffti3_local)
 
  if (option==1) then
+   ! aa(n1*n2*n3,ispden) <-- bb(nd1,nd2,nd3) real case
    do i3=1,n3
      if (me_fft==fftn3_distrib(i3)) then
        do i2=1,n2
@@ -4498,6 +4482,7 @@ subroutine fftpac(ispden,mpi_enreg,nspden,n1,n2,n3,nd1,nd2,nd3,ngfft,aa,bb,optio
    end do
 
  else if (option==2) then
+   !  option=2  aa(n1*n2*n3,ispden) --> bb(nd1,nd2,nd3) real case
    !  Here we avoid corrupting the data in a while writing to b in the
    !  case in which a and b are same array.
    !  Also: replace "trash" data with 0 s to avoid floating point
@@ -4528,6 +4513,8 @@ subroutine fftpac(ispden,mpi_enreg,nspden,n1,n2,n3,nd1,nd2,nd3,ngfft,aa,bb,optio
    end do
 !  MF
  else if (option==10 .or. option==11) then
+   ! option=10 aa(n1*n2*n3,ispden) <-- bb(nd1,nd2,nd3) complex case like option 1 real part
+   ! option=11 aa(n1*n2*n3,ispden) <-- bb(nd1,nd2,nd3) complex case like option 1 imag part
    index=1
    if(option==11) index=2
    do i3=1,n3
@@ -4540,8 +4527,8 @@ subroutine fftpac(ispden,mpi_enreg,nspden,n1,n2,n3,nd1,nd2,nd3,ngfft,aa,bb,optio
    end do
 !  MF
  else
-   write(message,'(a,i0,a)')' Bad option =',option,'.'
-   MSG_BUG(message)
+   write(msg,'(a,i0,a)')' Bad option =',option,'.'
+   ABI_BUG(msg)
  end if
 
 end subroutine fftpac
@@ -4578,16 +4565,9 @@ end subroutine fftpac
 !! NOTES
 !!  A lot of things to improve.
 !!
-!! PARENTS
-!!      prcref,prcref_PMA,transgrid
-!!
-!! CHILDREN
-!!      mpi_alltoall,ptabs_fourdp
-!!
 !! SOURCE
 
 subroutine indirect_parallel_Fourier(index,left,mpi_enreg,ngleft,ngright,nleft,nright,paral_kgb,right,sizeindex)
-
 
 !Arguments ---------------------------------------------
 !scalars
@@ -4625,7 +4605,7 @@ subroutine indirect_parallel_Fourier(index,left,mpi_enreg,ngleft,ngright,nleft,n
  call ptabs_fourdp(mpi_enreg,n2r,n3r,fftn2r_distrib,ffti2r_local,fftn3r_distrib,ffti3r_local)
 
  !Precompute local --> global corespondance
- ABI_ALLOCATE(ffti2r_global,(nd2r))
+ ABI_MALLOC(ffti2r_global,(nd2r))
  ffti2r_global(:) = -1
  do j2=1,n2r
     if( fftn2r_distrib(j2) == me_fft ) then
@@ -4634,7 +4614,7 @@ subroutine indirect_parallel_Fourier(index,left,mpi_enreg,ngleft,ngright,nleft,n
  end do
 
 
- ABI_ALLOCATE(siz_slice,(nproc_fft))
+ ABI_MALLOC(siz_slice,(nproc_fft))
  siz_slice(:)=0
  do i_global=1,sizeindex !look for the maximal size of slice of data
   j_global=index(i_global)!; write(std_out,*) j_global,i_global
@@ -4649,8 +4629,8 @@ subroutine indirect_parallel_Fourier(index,left,mpi_enreg,ngleft,ngright,nleft,n
 !and performing a allgather with a max
 !write(std_out,*) 'siz_slice,sizeindex,siz_slice',siz_slice(:),sizeindex,siz_slice_max
 !write(std_out,*) 'sizeindex,nright,nleft',sizeindex,nright,nleft
- ABI_ALLOCATE(right_send,(2,nproc_fft*siz_slice_max))
- ABI_ALLOCATE(index_send,(nproc_fft*siz_slice_max))
+ ABI_MALLOC(right_send,(2,nproc_fft*siz_slice_max))
+ ABI_MALLOC(index_send,(nproc_fft*siz_slice_max))
  siz_slice(:)=0; index_send(:)=0; right_send(:,:)=zero
  do iright=1,nright
   j=iright-1;j1=modulo(j,n1r);j2=modulo(j/n1r,nd2r);j3=j/(n1r*nd2r)
@@ -4667,8 +4647,8 @@ subroutine indirect_parallel_Fourier(index,left,mpi_enreg,ngleft,ngright,nleft,n
 !write(std_out,*) 'loop ir',jleft_local,jleft_global,iright_global,iright
   end if
  end do
- ABI_ALLOCATE(right_recv,(2,nproc_fft*siz_slice_max))
- ABI_ALLOCATE(index_recv,(nproc_fft*siz_slice_max))
+ ABI_MALLOC(right_recv,(2,nproc_fft*siz_slice_max))
+ ABI_MALLOC(index_recv,(nproc_fft*siz_slice_max))
 #if defined HAVE_MPI
   if(paral_kgb == 1) then
     call mpi_alltoall (right_send,2*siz_slice_max, &
@@ -4685,15 +4665,388 @@ subroutine indirect_parallel_Fourier(index,left,mpi_enreg,ngleft,ngright,nleft,n
 !write(std_out,*)index_recv(ileft)
  if(index_recv(ileft) /=0 ) left(:,index_recv(ileft))=right_recv(:,ileft)
  end do
- ABI_DEALLOCATE(right_recv)
- ABI_DEALLOCATE(index_recv)
- ABI_DEALLOCATE(right_send)
- ABI_DEALLOCATE(index_send)
- ABI_DEALLOCATE(siz_slice)
- ABI_DEALLOCATE(ffti2r_global)
+ ABI_FREE(right_recv)
+ ABI_FREE(index_recv)
+ ABI_FREE(right_send)
+ ABI_FREE(index_send)
+ ABI_FREE(siz_slice)
+ ABI_FREE(ffti2r_global)
 
 end subroutine indirect_parallel_Fourier
 !!***
 
-END MODULE m_fft
+!!****f* ABINIT/fft_init_counters
+!! NAME
+!! fft_init_counters
+!!
+!! FUNCTION
+!!
+!! SOURCE
+
+subroutine fft_init_counters()
+
+   fourdp_counter = 0
+   fourwf_counter = 0
+
+end subroutine fft_init_counters
+!!***
+
+!!****f* ABINIT/fft_stop_counters
+!! NAME
+!! fft_stop_counters
+!!
+!! FUNCTION
+!!
+!! SOURCE
+
+subroutine fft_stop_counters()
+
+   fourdp_counter = -1
+   fourwf_counter = -1
+
+end subroutine fft_stop_counters
+!!***
+
+!!****f* ABINIT/fft_output_counters
+!! NAME
+!! fft_output_counters
+!!
+!! FUNCTION
+!!
+!! SOURCE
+
+subroutine fft_output_counters(nbandtot, mpi_enreg)
+
+!Arguments ------------------------------------
+ integer,intent(in) :: nbandtot
+ type(MPI_type),intent(in) :: mpi_enreg
+
+!Local variables-------------------------------
+!scalars
+ character(len=500) :: msg
+ integer :: cnt,ierr
+!arrays
+
+ call wrtout([std_out,ab_out],'')
+ write(msg,'(a)')                ' --- FFT COUNTERS ------------------------------------------------------------'
+ call wrtout([std_out,ab_out], msg)
+ write(msg,'(a,i6)')             ' total Number of Bands         : NB = ',nbandtot
+ call wrtout([std_out,ab_out], msg)
+ write(msg,'(a)')                '                      | total count (TC) |            TC/NB'
+ call wrtout([std_out,ab_out], msg)
+ write(msg,'(a)')                ' -----------------------------------------------------------------------------'
+ call wrtout([std_out,ab_out], msg)
+ call xmpi_sum(fourwf_counter,mpi_enreg%comm_kpt,ierr)
+ cnt=fourdp_counter
+ if (cnt>0) then
+   write(msg,'(a,i16,a)')       ' fourdp               | ',cnt,' |'
+   call wrtout([std_out,ab_out], msg)
+ end if
+ cnt=fourwf_counter
+ if (cnt>0) then
+   write(msg,'(a,i16,a,f16.1)') ' fourwf               | ',cnt,' | ',dble(cnt)/nbandtot
+   call wrtout([std_out,ab_out], msg)
+ end if
+ write(msg,'(a)')                ' -----------------------------------------------------------------------------'
+ call wrtout([std_out,ab_out], msg)
+
+end subroutine fft_output_counters
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_fft/uplan_init
+!! NAME
+!!  uplan_init
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! SOURCE
+
+subroutine uplan_init(uplan, npw, nspinor, batch_size, ngfft, istwfk, kg_k, kind, gpu_option)
+
+!Arguments ------------------------------------
+!scalars
+ class(uplan_t),intent(out) :: uplan
+ integer,intent(in) :: npw, nspinor, batch_size, istwfk, kind, gpu_option
+!arrays
+ integer,intent(in) :: ngfft(18)
+ integer,target,intent(in) :: kg_k(3,npw)
+
+! *************************************************************************
+
+ uplan%npw = npw
+ uplan%nspinor = nspinor
+ uplan%istwfk = istwfk
+ uplan%batch_size = batch_size
+ uplan%kind  = kind
+ uplan%gpu_option  = gpu_option
+ uplan%ngfft = ngfft
+ uplan%mgfft = maxval(ngfft(1:3))
+ uplan%nfft  = product(ngfft(1:3))
+ uplan%kg_k => kg_k
+
+ ABI_MALLOC(uplan%gbound, (2 * uplan%mgfft + 8, 2))
+ call sphereboundary(uplan%gbound, uplan%istwfk, uplan%kg_k, uplan%mgfft, uplan%npw)
+
+ if (uplan%gpu_option /= ABI_GPU_DISABLED) then
+   ! Allocate memory on the device and transfer data.
+   NOT_IMPLEMENTED_ERROR()
+ end if
+
+end subroutine uplan_init
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_fft/uplan_free
+!! NAME
+!!  uplan_free
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! SOURCE
+
+subroutine uplan_free(uplan)
+
+!Arguments ------------------------------------
+ class(uplan_t),intent(inout) :: uplan
+! *************************************************************************
+
+ ABI_SFREE(uplan%gbound)
+ if (uplan%gpu_option /= ABI_GPU_DISABLED) then
+   ! Free memory on the GPU
+ end if
+
+end subroutine uplan_free
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_fft/uplan_execute_gr_spc
+!! NAME
+!!  uplan_execute_gr_spc
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! SOURCE
+
+subroutine uplan_execute_gr_spc(uplan, ndat, ug, ur, isign, iscale)
+
+!Arguments ------------------------------------
+ class(uplan_t),intent(in) :: uplan
+ integer,intent(in) :: ndat
+ complex(sp),intent(in) :: ug(uplan%npw*uplan%nspinor*ndat)
+ complex(sp),intent(out) :: ur(uplan%nfft*uplan%nspinor*ndat)
+ integer,optional,intent(in) :: isign, iscale
+
+!Local variables-------------------------------
+ integer :: isign__, iscale__, nx, ny, nz, ldx, ldy, ldz, fftalg, fftalga, fftalgc, fftcache
+
+! *************************************************************************
+
+ ABI_CHECK_ILEQ(ndat, uplan%batch_size, "ndat > batch_size!")
+ ABI_CHECK_IEQ(sp, uplan%kind, "Incosistent kind!")
+
+ isign__ = +1; if (present(isign)) isign__ = isign
+ iscale__ = 0; if (present(iscale)) iscale__ = iscale
+
+ fftalg = uplan%ngfft(7); fftcache = uplan%ngfft(8); fftalga = fftalg/100; fftalgc = mod(fftalg, 10)
+ nx = uplan%ngfft(1); ny = uplan%ngfft(2); nz = uplan%ngfft(3)
+ ldx = nx; ldy = ny; ldz = nz ! No augmentation, the caller does not support it.
+
+ if (uplan%gpu_option == ABI_GPU_DISABLED) then
+   select case (fftalga)
+   case (FFT_FFTW3)
+     call fftw3_fftug(fftalg, fftcache, uplan%npw, nx, ny, nz, ldx, ldy, ldz, uplan%nspinor*ndat, &
+                      uplan%istwfk, uplan%mgfft, uplan%kg_k, uplan%gbound, ug, ur, &
+                      isign=isign__, iscale=iscale__)
+   case (FFT_DFTI)
+     call dfti_fftug(fftalg, fftcache, uplan%npw, nx, ny, nz, ldx, ldy, ldz, uplan%nspinor*ndat, &
+                     uplan%istwfk, uplan%mgfft, uplan%kg_k, uplan%gbound, ug, ur, &
+                     isign=isign__, iscale=iscale__)
+   case default
+     ABI_ERROR(sjoin("Wrong fftalga:", itoa(fftalga)))
+   end select
+
+ else
+   NOT_IMPLEMENTED_ERROR()
+ end if
+
+end subroutine uplan_execute_gr_spc
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_fft/uplan_execute_gr_dpc
+!! NAME
+!!  uplan_execute_gr_dpc
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! SOURCE
+
+subroutine uplan_execute_gr_dpc(uplan, ndat, ug, ur, isign, iscale)
+
+!Arguments ------------------------------------
+ class(uplan_t),intent(in) :: uplan
+ integer,intent(in) :: ndat
+ complex(dp),intent(in) :: ug(uplan%npw*uplan%nspinor*ndat)
+ complex(dp),intent(out) :: ur(uplan%nfft*uplan%nspinor*ndat)
+ integer,optional,intent(in) :: isign, iscale
+
+!Local variables-------------------------------
+ integer :: isign__, iscale__, nx, ny, nz, ldx, ldy, ldz, fftalg, fftalga, fftalgc, fftcache
+
+! *************************************************************************
+
+ ABI_CHECK_ILEQ(ndat, uplan%batch_size, "ndat > batch_size!")
+ ABI_CHECK_IEQ(dp, uplan%kind, "Incosistent kind!")
+
+ isign__ = +1; if (present(isign)) isign__ = isign
+ iscale__ = 0; if (present(iscale)) iscale__ = iscale
+
+ fftalg = uplan%ngfft(7); fftcache = uplan%ngfft(8); fftalga = fftalg/100; fftalgc = mod(fftalg, 10)
+ nx = uplan%ngfft(1); ny = uplan%ngfft(2); nz = uplan%ngfft(3)
+ ldx = nx; ldy = ny; ldz = nz ! No augmentation, the caller does not support it.
+
+ if (uplan%gpu_option == ABI_GPU_DISABLED) then
+   select case (fftalga)
+   case (FFT_FFTW3)
+     call fftw3_fftug(fftalg, fftcache, uplan%npw, nx, ny, nz, ldx, ldy, ldz, uplan%nspinor*ndat, &
+                      uplan%istwfk, uplan%mgfft, uplan%kg_k, uplan%gbound, ug, ur, &
+                      isign=isign__, iscale=iscale__)
+   case (FFT_DFTI)
+     call dfti_fftug(fftalg, fftcache, uplan%npw, nx, ny, nz, ldx, ldy, ldz, uplan%nspinor*ndat, &
+                     uplan%istwfk, uplan%mgfft, uplan%kg_k, uplan%gbound, ug, ur, &
+                     isign=isign__, iscale=iscale__)
+   case default
+     ABI_ERROR(sjoin("Wrong fftalga:", itoa(fftalga)))
+   end select
+
+ else
+   NOT_IMPLEMENTED_ERROR()
+ end if
+
+end subroutine uplan_execute_gr_dpc
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_fft/uplan_execute_rg_spc
+!! NAME
+!!  uplan_execute_rg_spc
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! SOURCE
+
+subroutine uplan_execute_rg_spc(uplan, ndat, ur, ug, isign, iscale)
+
+!Arguments ------------------------------------
+ class(uplan_t),intent(in) :: uplan
+ integer,intent(in) :: ndat
+ complex(sp),intent(inout) :: ur(uplan%nfft*uplan%nspinor*ndat)
+ complex(sp),intent(out) :: ug(uplan%npw*uplan%nspinor*ndat)
+ integer,optional,intent(in) :: isign, iscale
+
+!Local variables-------------------------------
+ integer :: isign__, iscale__, nx, ny, nz, ldx, ldy, ldz, fftalg, fftalga, fftalgc, fftcache
+
+! *************************************************************************
+
+ ABI_CHECK_ILEQ(ndat, uplan%batch_size, "ndat > batch_size!")
+ ABI_CHECK_IEQ(sp, uplan%kind, "Incosistent kind!")
+
+ isign__ = -1; if (present(isign)) isign__ = isign
+ iscale__ = 1; if (present(iscale)) iscale__ = iscale
+
+ fftalg = uplan%ngfft(7); fftcache = uplan%ngfft(8); fftalga = fftalg/100; fftalgc = mod(fftalg, 10)
+ nx = uplan%ngfft(1); ny = uplan%ngfft(2); nz = uplan%ngfft(3)
+ ldx = nx; ldy = ny; ldz = nz ! No augmentation, the caller does not support it.
+
+ if (uplan%gpu_option == ABI_GPU_DISABLED) then
+   select case (fftalga)
+   case (FFT_FFTW3)
+     call fftw3_fftur(fftalg, fftcache, uplan%npw, nx, ny, nz, ldx, ldy, ldz, uplan%nspinor*ndat, uplan%istwfk, uplan%mgfft, &
+                      uplan%kg_k, uplan%gbound, ur, ug, isign=isign__, iscale=iscale__)
+   case (FFT_DFTI)
+     call dfti_fftur(fftalg, fftcache, uplan%npw, nx, ny, nz, ldx, ldy, ldz, uplan%nspinor*ndat, uplan%istwfk, uplan%mgfft, &
+                     uplan%kg_k, uplan%gbound, ur, ug, isign=isign__, iscale=iscale__)
+   case default
+     ABI_ERROR(sjoin("Wrong fftalga:", itoa(fftalga)))
+   end select
+
+ else
+   NOT_IMPLEMENTED_ERROR()
+ end if
+
+end subroutine uplan_execute_rg_spc
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_fft/uplan_execute_rg_dpc
+!! NAME
+!!  uplan_execute_rg_dpc
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! SOURCE
+
+subroutine uplan_execute_rg_dpc(uplan, ndat, ur, ug, isign, iscale)
+
+!Arguments ------------------------------------
+ class(uplan_t),intent(in) :: uplan
+ integer,intent(in) :: ndat
+ complex(dp),intent(inout) :: ur(uplan%nfft*uplan%nspinor*ndat)
+ complex(dp),intent(out) :: ug(uplan%npw*uplan%nspinor*ndat)
+ integer,optional,intent(in) :: isign, iscale
+
+!Local variables-------------------------------
+ integer :: isign__, iscale__, nx, ny, nz, ldx, ldy, ldz, fftalg, fftalga, fftalgc, fftcache
+! *************************************************************************
+
+ ABI_CHECK_ILEQ(ndat, uplan%batch_size, "ndat > batch_size!")
+ ABI_CHECK_IEQ(dp, uplan%kind, "Incosistent kind!")
+
+ isign__ = -1; if (present(isign)) isign__ = isign
+ iscale__ = 1; if (present(iscale)) iscale__ = iscale
+
+ fftalg = uplan%ngfft(7); fftcache = uplan%ngfft(8); fftalga = fftalg/100; fftalgc = mod(fftalg, 10)
+ nx = uplan%ngfft(1); ny = uplan%ngfft(2); nz = uplan%ngfft(3)
+ ldx = nx; ldy = ny; ldz = nz ! No augmentation, the caller does not support it.
+
+ if (uplan%gpu_option == ABI_GPU_DISABLED) then
+   select case (fftalga)
+   case (FFT_FFTW3)
+     call fftw3_fftur(fftalg, fftcache, uplan%npw, nx, ny, nz, ldx, ldy, ldz, uplan%nspinor*ndat, uplan%istwfk, uplan%mgfft, &
+                      uplan%kg_k, uplan%gbound, ur, ug, isign=isign__, iscale=iscale__)
+   case (FFT_DFTI)
+     call dfti_fftur(fftalg, fftcache, uplan%npw, nx, ny, nz, ldx, ldy, ldz, uplan%nspinor*ndat, uplan%istwfk, uplan%mgfft, &
+                     uplan%kg_k, uplan%gbound, ur, ug, isign=isign__, iscale=iscale__)
+   case default
+     ABI_ERROR(sjoin("Wrong fftalga:", itoa(fftalga)))
+   end select
+
+ else
+   NOT_IMPLEMENTED_ERROR()
+ end if
+
+end subroutine uplan_execute_rg_dpc
+!!***
+
+end module m_fft
 !!***

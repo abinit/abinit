@@ -1,0 +1,84 @@
+# Hydrogen diatomic molecule --broyden minimization. acell much too small.
+# Multidataset testing : different k-points, with getxcart and getwfk
+# This is to determine the optimal xred, at different nkpt : convergence study.
+# Note that mkmem==0, unlike the preceeding test.
+
+ getxcart -1
+ getwfk -1
+
+# DATASET configuration
+#----------------------
+ ndtset 2
+
+# Atomic Structure
+#-----------------
+ acell  7 5 5
+ natom  2
+ ntypat  1
+ rprim 1 0 0
+       0 1 0
+       0 0 1
+ typat  2*1
+ xcart  -0.385 0 0
+         0.385  0 0
+         Angstrom
+ znucl  1.0
+
+# Structure Optimization
+#-----------------------
+ ionmov  2
+ ntime  5
+ tolmxf 5.0d-5
+
+# Other Variables
+#----------------
+
+ nkpt1  1
+ kptnrm1  4
+ kpt1  1 1 1
+ wtk1  1
+ nkpt2  4
+ kptnrm2  8
+ kpt2  1 1 1    1 1 3    1 3 3    3 3 3
+ wtk2  1        3        3        1
+ diemac 1.0d0
+ diemix 0.5d0
+ ecut  12
+ densfor_pred 1
+ kptopt 0
+ nband 1
+ nline 3
+ nstep 10
+ nsym 8
+ occ 2
+ occopt 0
+ symrel  1  0  0   0  1  0   0  0  1
+        -1  0  0   0  1  0   0  0  1
+         1  0  0   0 -1  0   0  0  1
+        -1  0  0   0 -1  0   0  0  1
+         1  0  0   0  1  0   0  0 -1
+        -1  0  0   0  1  0   0  0 -1
+         1  0  0   0 -1  0   0  0 -1
+        -1  0  0   0 -1  0   0  0 -1
+ tnons 24*0
+ toldff 5.0d-6
+ wtk  1
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/1h.pspnc"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t65.abo, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% keywords = NC
+#%% authors = Unknown
+#%% description = 
+#%%   Test multi-dataset mode. H2 molecule with 1 and 4 k points.
+#%%   (use getxcart=-1 and getwfk=-1). Convergence study with k points.
+#%%<END TEST_INFO>

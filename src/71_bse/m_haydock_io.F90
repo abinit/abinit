@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_haydock_io
 !! NAME
 !! m_haydock_io
@@ -7,12 +6,10 @@
 !!  This module provides routines to read the Haydock file
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2019 ABINIT group (YG)
+!!  Copyright (C) 2013-2024 ABINIT group (YG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
 !!
 !! SOURCE
 
@@ -105,16 +102,9 @@ CONTAINS  !====================================================================
 !! OUTPUT
 !!  haydock_file = file descriptor for the haydock file
 !!
-!! PARENTS
-!!      bsepostproc,m_haydock
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine open_haydock(filename, haydock_file)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -129,7 +119,7 @@ subroutine open_haydock(filename, haydock_file)
 !************************************************************************
 
  if (open_file(filename,msg,newunit=haydock_file%unt,form="unformatted") /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  haydock_file%version = CUR_VERSION
@@ -150,16 +140,9 @@ end subroutine open_haydock
 !! INPUT/OUTPUT
 !!  haydock_file = haydock file descriptor
 !!
-!! PARENTS
-!!      bsepostproc,m_haydock
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine read_dim_haydock(haydock_file)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -216,16 +199,9 @@ end subroutine read_dim_haydock
 !! INPUTS
 !!  haydock_file = haydock file descriptor
 !!
-!! PARENTS
-!!      m_haydock
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine write_dim_haydock(haydock_file)
-
- implicit none
 
 !Arguments ------------------------------------
  type(haydock_type),intent(in) :: haydock_file
@@ -253,16 +229,9 @@ end subroutine write_dim_haydock
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_haydock_io
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine skip_dim_haydock(haydock_file)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -300,16 +269,9 @@ end subroutine skip_dim_haydock
 !! NOTES
 !!  niter = 0 if the q-point has not been found
 !!
-!! PARENTS
-!!      bsepostproc,m_haydock
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine read_haydock(haydock_file, q, aa, bb, phi_n, phi_nm1, niter, factor)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -354,13 +316,13 @@ subroutine read_haydock(haydock_file, q, aa, bb, phi_n, phi_nm1, niter, factor)
 
  if(found_q) then
    niter = niter_file
-   ABI_ALLOCATE(aa,(niter))
-   ABI_ALLOCATE(bb,(niter))
+   ABI_MALLOC(aa,(niter))
+   ABI_MALLOC(bb,(niter))
    do inn=1,niter
      read(haydock_file%unt)it,aa(inn),bb(inn)
      if (inn/=it) then
        write(msg,'(2(a,i0))')" Found it_file: ",it," while it should be: ",inn
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
    end do
    ABI_MALLOC(phi_nm1,(haydock_file%hsize))
@@ -394,16 +356,9 @@ end subroutine read_haydock
 !!  niter = number of iterations done
 !!  factor = pre-factor used to obtain the green function
 !!
-!! PARENTS
-!!      m_haydock
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine write_haydock(haydock_file, hsize, q, aa, bb, phi_n, phi_nm1, niter, factor)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -445,16 +400,9 @@ end subroutine write_haydock
 !! INPUTS
 !!  haydock_file = haydock file descriptor
 !!
-!! PARENTS
-!!      bsepostproc,m_haydock
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine close_haydock(haydock_file)
-
- implicit none
 
 !Arguments ------------------------------------
  type(haydock_type),intent(inout) :: haydock_file
@@ -463,13 +411,8 @@ subroutine close_haydock(haydock_file)
 
  close(haydock_file%unt)
 
- if(allocated(haydock_file%qpoints)) then
-   ABI_FREE(haydock_file%qpoints)
- end if
-
- if(allocated(haydock_file%niter)) then
-   ABI_FREE(haydock_file%niter)
- end if
+ ABI_SFREE(haydock_file%qpoints)
+ ABI_SFREE(haydock_file%niter)
 
 end subroutine close_haydock
 !!***

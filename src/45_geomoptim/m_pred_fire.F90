@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_pred_fire
 !! NAME
 !!  m_pred_fire
@@ -6,18 +5,14 @@
 !! FUNCTION
 !! Ionmov predictors (15) FIRE algorithm
 !! The fast inertial relaxation engine (FIRE) method for relaxation.
-!! The method is described in  Erik Bitzek, Pekka Koskinen, Franz G"ahler, 
+!! The method is described in  Erik Bitzek, Pekka Koskinen, Franz G"ahler,
 !! Michael Moseler, and Peter Gumbsch, Phys. Rev. Lett. 97, 170201 [[cite:Bitzek2006]]
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2019 ABINIT group (hexu)
+!!  Copyright (C) 1998-2024 ABINIT group (hexu)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -33,10 +28,13 @@ module m_pred_fire
  use m_abimover
  use m_abihist
  use m_xfpack
- use m_geometry,    only : mkrdim, fcart2fred, metric, xred2xcart
+ use m_geometry,    only : mkrdim, fcart2gred, metric, xred2xcart
+ use m_errors, only: unused_var
 
  implicit none
+
  private
+
  public :: pred_fire
 
 contains
@@ -85,21 +83,13 @@ contains
 !! hist <type(abihist)> : History of positions,forces
 !!                               acell, rprimd, stresses
 !!
-!! PARENTS
-!!      mover
-!!
-!! CHILDREN
-!!      fcart2fred,hist2var,metric,mkrdim,var2hist
-!!      xfh_recover_new,xfpack_f2vout,xfpack_vin2x,xfpack_x2vin
-!!
 !! SOURCE
 subroutine pred_fire(ab_mover, ab_xfh,forstr,hist,ionmov,itime,zDEBUG,iexit)
-
 
 !Arguments ------------------------------------
 !scalars
  type(abimover),intent(in) :: ab_mover
- type(ab_xfh_type),intent(inout)    :: ab_xfh
+ type(ab_xfh_type),intent(inout) :: ab_xfh
  type(abiforstr),intent(in) :: forstr
  type(abihist),intent(inout) :: hist
  integer, intent(in) :: ionmov
@@ -112,9 +102,9 @@ subroutine pred_fire(ab_mover, ab_xfh,forstr,hist,ionmov,itime,zDEBUG,iexit)
 !scalars
 integer  :: ihist,ihist_prev,ndim
 integer, parameter :: min_downhill=4
-integer  :: ierr,ii,jj,kk
+integer  :: ii,jj,kk
 real(dp),save :: ucvol0
-real(dp) :: ucvol,det
+real(dp) :: ucvol
 real(dp) :: etotal,etotal_prev
 real(dp) :: favg
 ! time step, damping factor initially dtion
@@ -139,11 +129,9 @@ real(dp) :: gprimd(3,3)
 real(dp) :: gmet(3,3)
 real(dp) :: rmet(3,3)
 real(dp) :: fcart(3, ab_mover%natom)
-real(dp) :: acell(3),strten(6), acell_prev(3), acell0(3)
-real(dp) :: rprim(3,3),rprimd(3,3), rprim_prev(3,3), rprimd_prev(3,3), rprimd0(3,3)
+real(dp) :: acell(3),strten(6), acell0(3)
+real(dp) :: rprim(3,3),rprimd(3,3), rprimd0(3,3)
 real(dp) :: xred(3,ab_mover%natom),xcart(3,ab_mover%natom)
-real(dp) :: xred_prev(3,ab_mover%natom),xcart_prev(3,ab_mover%natom)
-real(dp) :: vel_prev(3,ab_mover%natom)
 ! velocity are saved
 real(dp) :: vel(3,ab_mover%natom)
 real(dp) :: residual(3,ab_mover%natom),residual_corrected(3,ab_mover%natom)
@@ -152,72 +140,51 @@ real(dp), allocatable, save:: vin_prev(:)
 ! velocity but correspoing to vin&vout, for ion&cell relaxation
 real(dp),allocatable,save :: vel_ioncell(:)
 
-
+ ABI_UNUSED((/ionmov, ab_xfh%mxfh/))
 
 !***************************************************************************
 !Beginning of executable session
 !***************************************************************************
 
  if(iexit/=0)then
-   if (allocated(vin))           then
-     ABI_DEALLOCATE(vin)
-   end if
-   if (allocated(vout))          then
-     ABI_DEALLOCATE(vout)
-   end if
-   if (allocated(vin_prev))           then
-     ABI_DEALLOCATE(vin_prev)
-   end if
-   if (allocated(vel_ioncell))          then
-     ABI_DEALLOCATE(vel_ioncell)
-   end if
+   ABI_SFREE(vin)
+   ABI_SFREE(vout)
+   ABI_SFREE(vin_prev)
+   ABI_SFREE(vel_ioncell)
    return
  end if
 
- !write(std_out,*) 'FIRE 01'
+write(std_out,*) 'FIRE 01'
 !##########################################################
 !### 01. Compute the dimension of vectors (ndim)
 
  ndim=3*ab_mover%natom
- if(ab_mover%optcell==1 .or.&
-& ab_mover%optcell==4 .or.&
-& ab_mover%optcell==5 .or.&
-& ab_mover%optcell==6) ndim=ndim+1
+ if(ab_mover%optcell==1) ndim=ndim+1
  if(ab_mover%optcell==2 .or.&
 & ab_mover%optcell==3) ndim=ndim+6
- if(ab_mover%optcell==7 .or.&
-& ab_mover%optcell==8 .or.&
-& ab_mover%optcell==9) ndim=ndim+3
+ if(ab_mover%optcell>=4) ndim=ndim+3
 
-!write(std_out,*) 'FIRE: ndim=', ndim
-! write(std_out,*) 'FIRE 02'
+write(std_out,*) 'FIRE: ndim=', ndim
+write(std_out,*) 'FIRE 02'
 !##########################################################
 !### 02. Allocate the vectors vin
 
 !Notice that vin, vout, etc could be allocated
 !From a previous dataset with a different ndim
  if(itime==1)then
-   if (allocated(vin))           then
-     ABI_DEALLOCATE(vin)
-   end if
-   if (allocated(vout))          then
-     ABI_DEALLOCATE(vout)
-   end if
-   if (allocated(vin_prev))           then
-     ABI_DEALLOCATE(vin_prev)
-   end if
-   if (allocated(vel_ioncell))          then
-     ABI_DEALLOCATE(vel_ioncell)
-   end if
+   ABI_SFREE(vin)
+   ABI_SFREE(vout)
+   ABI_SFREE(vin_prev)
+   ABI_SFREE(vel_ioncell)
 
-   ABI_ALLOCATE(vin,(ndim))
-   ABI_ALLOCATE(vout,(ndim))
-   ABI_ALLOCATE(vin_prev,(ndim))
-   ABI_ALLOCATE(vel_ioncell,(ndim))
+   ABI_MALLOC(vin,(ndim))
+   ABI_MALLOC(vout,(ndim))
+   ABI_MALLOC(vin_prev,(ndim))
+   ABI_MALLOC(vel_ioncell,(ndim))
    vel_ioncell(:)=0.0
  end if
 
- !write(std_out,*) 'FIRE 03'
+ write(std_out,*) 'FIRE 03'
 !##########################################################
 !### 03. Obtain the present values from the history
 
@@ -246,9 +213,9 @@ real(dp),allocatable,save :: vel_ioncell(:)
 !Fill the residual with forces (No preconditioning)
 !Or the preconditioned forces
  if (ab_mover%goprecon==0)then
-   call fcart2fred(hist%fcart(:,:,hist%ihist),residual,rprimd,ab_mover%natom)
+   call fcart2gred(hist%fcart(:,:,hist%ihist),residual,rprimd,ab_mover%natom)
  else
-   residual(:,:)=forstr%fred(:,:)
+   residual(:,:)=forstr%gred(:,:)
  end if
 
 !Save initial values
@@ -287,19 +254,19 @@ real(dp),allocatable,save :: vel_ioncell(:)
    end do
  end if
 
- !write(std_out,*) 'FIRE 04'
+ write(std_out,*) 'FIRE 04'
 !##########################################################
 !### 04. Fill the vectors vin and vout
 
 !Initialize input vectors : first vin, then vout
 ! transfer xred, acell, and rprim to vin
-call xfpack_x2vin(acell, acell0, ab_mover%natom, ndim,&
+call xfpack_x2vin(acell, ab_mover%natom, ndim,&
 & ab_mover%nsym, ab_mover%optcell, rprim, rprimd0,&
 & ab_mover%symrel, ucvol, ucvol0, vin, xred)
 !end if
 
-!transfer fred and strten to vout. 
-!Note: fred is not f in reduced co.
+!transfer gred and strten to vout.
+!Note: gred is not f in reduced co.
 !but dE/dx
 
  call xfpack_f2vout(residual_corrected, ab_mover%natom, ndim,&
@@ -308,7 +275,7 @@ call xfpack_x2vin(acell, acell0, ab_mover%natom, ndim,&
 ! Now vout -> -dE/dx
 vout(:) = -1.0*vout(:)
 
- !write(std_out,*) 'FIRE 05'
+ write(std_out,*) 'FIRE 05'
 !##########################################################
 !### 05. iniialize FIRE
 if ( itime==1 ) then
@@ -319,7 +286,7 @@ if ( itime==1 ) then
    end if
 end if
 
- !write(std_out,*) 'FIRE 06'
+ write(std_out,*) 'FIRE 06'
 !##########################################################
 !### 06. update timestep
 ! Note that vin & vout are in reduced coordinates.
@@ -342,7 +309,7 @@ else
     dtratio = dtratio*dtdec
 endif
 
- !write(std_out,*) 'FIRE 07'
+ write(std_out,*) 'FIRE 07'
 !##########################################################
 !### 07. MD step. update vel_ioncell
 
@@ -355,7 +322,7 @@ vel_ioncell = vel_ioncell + dtratio*ab_mover%dtion* vout
 ! update x
 vin = vin + dtratio*ab_mover%dtion* vel_ioncell
 !write(std_out,*) 'FIRE vin: ', vin
-   
+
 !   write(std_out,*) 'FIRE vout: ', vout
 !   write(std_out,*) 'FIRE vf: ', vf
 !   write(std_out,*) 'FIRE etotal: ', etotal
@@ -383,7 +350,7 @@ if ( etotal - etotal_prev >0.0 ) then
     vin= vin*(1-mixold)+vin_prev*mixold
 end if
 
-! only set vin to vin_prev when energy decreased, so it's 
+! only set vin to vin_prev when energy decreased, so it's
 ! possible to go back.
 ! if (etotal - etotal_prev <0.0 ) then
  vin_prev(:)=vin(:)
@@ -401,7 +368,6 @@ end if
 & ab_mover%nsym, ab_mover%optcell, rprim, rprimd0,&
 & ab_mover%symrel, ucvol, ucvol0,&
 & vin, xred)
-
 
  if(ab_mover%optcell/=0)then
    call mkrdim(acell,rprim,rprimd)

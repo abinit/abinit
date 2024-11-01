@@ -1,0 +1,74 @@
+# Fe normal bcc structure for test of ferromagnetic metal strain perturbation
+
+ ndtset   3
+
+# Set 1 : initial self-consistency
+
+ kptopt1   1
+ prtden1   1
+ spinat1   0.0 0.0 4.0
+ tolvrs1   1.0d-10
+
+# Set 2 : wavefunction convergence
+
+ getden2   -1
+ getwfk2   -1
+   iscf2   -2
+ kptopt2   1
+ tolwfr2   1.0d-8
+
+# Set 3 : response-function strain calculation
+
+getwfk3   -1
+kptopt3   2
+  nqpt3   1
+   qpt3   0  0  0
+ rfdir3   1  0  0
+rfstrs3   2
+tolvrs3   1.0d-8
+
+# common input data
+
+  acell   3*5.42
+dilatmx   1.1
+   ecut   18.0
+ ecutsm   0.0
+    ixc   11     #PBE GGA
+  natom   1
+  nband   8
+  ngkpt   2 2 2
+nshiftk   1
+ nsppol   2
+  nstep   50
+ ntypat   1
+ occopt   3
+  rprim   -0.5  0.5  0.5
+           0.5 -0.5  0.5
+           0.5  0.5 -0.5
+ shiftk   0.5 0.5 0.5
+ tsmear   0.01
+  typat   1
+   xred   0.0  0.0  0.0
+  znucl   26
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/26fe.pspnc"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t59.abo, tolnlines = 5, tolabs = 1.001e-02, tolrel = 2.000e-03, fld_options = -easy
+#%% [paral_info]
+#%% max_nprocs = 4
+#%% [extra_info]
+#%% authors =  D. R. Hamann
+#%% keywords = NC, DFPT
+#%% description = 
+#%%   Test of the strain perturbation with GGA  and spin polarization
+#%%   This is the same as t79, bcc Fe,
+#%%   but with the PBE GGA.  This calculation is restricted to one
+#%%   unaxial strain, which adequately tests the polarization-dependent
+#%%   parts of the strain GGA code.
+#%%<END TEST_INFO>

@@ -1,0 +1,78 @@
+# Finite electric field calculation of alas at clamped atomic positions
+# (after M. Veithen, 04.5.2005)
+
+# 4 June 2014 Electric field with PAW and forces
+optforces 1
+optstress 1
+
+#Definition of the elementary cell
+#*********************************
+   acell 3*10.53
+   rprim 0.0 0.5 0.5
+         0.5 0.0 0.5
+         0.5 0.5 0.0
+
+#Definition of the atoms
+#***********************
+   natom 2
+   ntypat 2
+   znucl 13 33
+   typat 1 2
+   xred  0.00  0.00  0.00
+         0.25  0.25  0.25
+
+#Definition of the SCF procedure
+#*******************************
+   toldfe 1.0d-22 # ultratight convergence so all test
+                  # platforms show same convergence
+                  # behavior in the 10 allowed steps
+   nstep 10
+   nband 4
+   nbdbuf 0
+
+
+#Definition of the plane wave basis set
+#**************************************
+   ecut  4
+   pawecutdg 8
+   ecutsm 0.5
+   dilatmx 1.05
+
+   kptopt 1
+   symmorphi 0
+   ngkpt 2 2 2 # do not expect converged results with such
+               # coarse k point mesh!!
+               # polarization, stresses, and forces converge slowly
+               # with berryphase calculations
+   nshiftk 4
+   shiftk 0.5 0.5 0.5
+          0.5 0.0 0.0
+          0.0 0.5 0.0
+          0.0 0.0 0.5
+
+
+ndtset   2
+
+berryopt1 -1       rfdir    1 1 1
+
+berryopt2  4       efield2   0.0001  0.0000  0.0000    getwfk2  1
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "al_ps.abinit.paw, as_ps.paw"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   tsv7_70.abo, tolnlines = 7, tolabs = 2.0E-6, tolrel = 3.0E-3, fld_options = -medium
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = J. Zwanziger
+#%% keywords = PAW, DFPT
+#%% description = 
+#%%   PAW Berrys Phase calculation of forces in finite electric fields 
+#%%   (contributed by J. Zwanziger, adapted from efield tutorial.)
+#%%   Cannot be executed with more than 1 MPI node.
+#%%<END TEST_INFO>

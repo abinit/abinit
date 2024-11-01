@@ -1,0 +1,46 @@
+#test GaAs crystal
+ ndtset 2
+ tolvrs  1e-8
+ #rmm_diis 1
+
+# DATASET 1: GS run with SOC
+ nspinor1 2
+ nband1   32
+ #wfinitw1 1
+
+# DATASET 2: GS run without SOC
+ nspinor2 1
+ nband2   16
+ #getwfk2 -1   # This triggers SIGSEV, likely due to different istwfk
+ getden2 -1
+
+#Common data
+ ngkpt 2 2 2
+ nshiftk 1
+ shiftk 0 0 0
+ acell   3*10.60
+ ecut 25.00
+ natom  2
+ ntypat  2
+ rprim   0 .5 .5  .5 0 .5  .5 .5 0
+ xred 3*0.00d0 3*0.25d0
+ typat  1 2
+ znucl  31 33
+
+ pp_dirpath "$ABI_PSPDIR/Pseudodojo_nc_fr_04_pbe_standard_psp8"
+ pseudos "Ga.upf, As.upf"
+ #pseudos "Ga.psp8, As.psp8"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [paral_info]
+#%% max_nprocs = 12
+#%% [files]
+#%% files_to_test = t131.abo, tolnlines = 100, tolabs = 1.1e-01, tolrel = 1.0e-01
+#%% [extra_info]
+#%% authors =  M. Giantomassi
+#%% keywords = NC, UPF2
+#%% description =
+#%%    GaAs in zinc-blende structure
+#%%<END TEST_INFO>
