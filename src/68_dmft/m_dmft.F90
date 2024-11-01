@@ -480,6 +480,8 @@ subroutine dmft_solve(cryst_struc,istep,dft_occup,mpi_enreg,paw_dmft,pawang,pawt
 !  ---------------------------------------------------------------------
    call fermi_green(green,paw_dmft,self)
 
+   if (idmftloop == dmft_iter) opt_log = 0
+
    call compute_green(green,paw_dmft,0,self,opt_self=1,opt_nonxsum=1,opt_log=opt_log,opt_restart_moments=1)
    call integrate_green(green,paw_dmft,prtopt,opt_diff=opt_diff,opt_ksloc=3,opt_fill_occnd=opt_fill_occnd) 
 

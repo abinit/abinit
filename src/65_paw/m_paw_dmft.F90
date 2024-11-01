@@ -526,6 +526,12 @@ MODULE m_paw_dmft
   ! True for each proc wich has at least one band involved in DMFT non diagonal
   ! occupations on band parallelism
 
+  real(dp), allocatable :: edc(:)
+  ! Double counting energy for each atom (only used for dmft_dc=8)
+
+  real(dp), allocatable :: edcdc(:)
+  ! Integral of Vdc * rho for each atom (only used for dmft_dc=8)
+
   real(dp), allocatable :: eigen_dft(:,:,:)
   ! DFT eigenvalues for each correlated band, k-point, polarization
 
@@ -1267,7 +1273,7 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
        paw_dmft%phimtphi(1:siz_paw,iproj,itypat) = pawtab(itypat)%phi(1:siz_paw,indproj)- &
                                                  & pawtab(itypat)%tphi(1:siz_paw,indproj)
        call simp_gen(paw_dmft%phimtphi_int(iproj,itypat),pawtab(itypat)%proj(1:siz_proj)* &
-            & paw_dmft%phimtphi(1:siz_proj,iproj,itypat),paw_dmft%radgrid(itypat),r_for_intg=rint)
+                   & paw_dmft%phimtphi(1:siz_proj,iproj,itypat),paw_dmft%radgrid(itypat),r_for_intg=rint)
      else
        call simp_gen(paw_dmft%phi_int(iproj,itypat),pawtab(itypat)%proj(1:siz_proj)* &
                    & pawtab(itypat)%phi(1:siz_proj,indproj),paw_dmft%radgrid(itypat),r_for_intg=rint)
@@ -1434,6 +1440,11 @@ subroutine init_dmft(cryst_struc,dmatpawu,dtset,fermie_dft,fnamei,fnametmp_app,p
                        & ch10,' ============================================================'
  end if ! ucrpa
  call wrtout(std_out,message,'COLL')
+
+ if (paw_dmft%dmft_dc == 8) then
+   ABI_MALLOC(paw_dmft%edc,(paw_dmft%natom))
+   ABI_MALLOC(paw_dmft%edcdc,(paw_dmft%natom))
+ end if 
 
  nsym = paw_dmft%nsym
 
@@ -1911,6 +1922,8 @@ subroutine destroy_dmft(paw_dmft)
    ABI_FREE(paw_dmft%hybrid)
  end if
  ABI_SFREE(paw_dmft%chipsi)
+ ABI_SFREE(paw_dmft%edc)
+ ABI_SFREE(paw_dmft%edcdc)
  ABI_SFREE(paw_dmft%eigen_dft)
  ABI_SFREE(paw_dmft%symrec_cart)
  paw_dmft%eigen => null()

@@ -370,7 +370,7 @@ subroutine dc_self(charge_loc,hdc,hu,paw_dmft,pawtab,occ_matlu)
 !Arguments ------------------------------------
 !type
  !type(crystal_t),intent(in) :: cryst_struc
- type(paw_dmft_type), intent(in) :: paw_dmft
+ type(paw_dmft_type), intent(inout) :: paw_dmft
  type(matlu_type), intent(inout) :: hdc(paw_dmft%natom)
  real(dp), intent(in) :: charge_loc(paw_dmft%nsppol+1,paw_dmft%natom)
  type(hu_type), intent(in) :: hu(paw_dmft%ntypat)
@@ -428,7 +428,7 @@ subroutine dc_self(charge_loc,hdc,hu,paw_dmft,pawtab,occ_matlu)
      end do ! isppol
      if (nsppol == 1 .and. nspinor == 1) occ(:,:) = occ(:,:) * two
      call compute_exactDC(lpawu,pawtab(itypat),paw_dmft%radgrid(itypat),occ(:,:), &
-                        & vdc(:,:),pawtab(itypat)%edc,pawtab(itypat)%edcdc)           
+                        & vdc(:,:),paw_dmft%edc(iatom),paw_dmft%edcdc(iatom))
      do isppol=1,nsppol
        do ispinor=1,nspinor
          do im1=1,ndim
