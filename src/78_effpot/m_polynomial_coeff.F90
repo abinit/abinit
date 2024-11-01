@@ -1977,36 +1977,6 @@ end do
      end if
    end do
  end do
-!write(std_out,*) "DEBUG ncoeff3 after 2.5.3: ", ncoeff3
-
-!4.2 Put irreducible terms in front of list_symcoeff_tmp3
-!    Store index of irreducible terms
- ABI_ALLOCATE(list_symcoeff_tmp3,(6,ncoeff2,nsym))
- ABI_ALLOCATE(index_irred,(ncoeff3))
-icoeff_tmp = 0
-do icoeff = 1,ncoeff
-   if(.not.(all(list_symcoeff_tmp(:,icoeff,1)==0)))then
-     icoeff_tmp = icoeff_tmp+1
-     index_irred(icoeff_tmp) = icoeff
-     list_symcoeff_tmp3(:,icoeff_tmp,:) = list_symcoeff_tmp(:,icoeff,:)
-   endif
-enddo
-
-!4.3 Put symmetric equivalents behind in list_symcoeff_tmp3
-!    Attention icoeff_tmps keeps it's value of loop before
-!    TODO for check should be equal to ncoeff2
-do icoeff = 1,ncoeff
-   if(.not.(all(list_symcoeff_tmp2(:,icoeff,1)==0))&
-&     .and..not. any(index_irred == icoeff))then
-     icoeff_tmp = icoeff_tmp+1
-     list_symcoeff_tmp3(:,icoeff_tmp,:) = list_symcoeff_tmp2(:,icoeff,:)
-   endif
-enddo
-
-!4.4 A little copy round
-ABI_DEALLOCATE(list_symcoeff_tmp)
- ABI_ALLOCATE(list_symcoeff_tmp,(6,ncoeff2,nsym))
-list_symcoeff_tmp = list_symcoeff_tmp3
 
 ncoeff3 = 0
  do icoeff = 1,ncoeff
@@ -3188,7 +3158,7 @@ recursive subroutine computeCombinationFromList(cell,compatibleCoeffs,list_coeff
  logical :: need_only_odd_power,need_only_even_power,compute_sym,need_disp
 !arrays
  integer :: powers(power_disp)
- integer,allocatable :: index_coeff(:),dummylist(:),index_irred(:)
+ integer,allocatable :: index_coeff(:)
 ! *************************************************************************
 
  !Set the inputs
@@ -4067,13 +4037,6 @@ function coeffs_compare(c1,c2) result (res)
   !integer,allocatable :: blkval(:,:)
   integer :: blkval(2, max(c1%nterm,c2%nterm))
 ! *************************************************************************
-
-  if(c1%nterm >= c2%nterm)then
-    ABI_ALLOCATE(blkval,(2,c1%nterm))
-  else
-    ABI_ALLOCATE(blkval,(2,c2%nterm))
-  endif
-
   res = .false.
   blkval = 0
   do iterm1=1,c1%nterm
@@ -4087,8 +4050,6 @@ function coeffs_compare(c1,c2) result (res)
     end do
   end do
   if(.not.any(blkval(:,:)==0))res = .true.
-
-  ABI_DEALLOCATE(blkval)
 
 end function coeffs_compare
 !!***
