@@ -1129,7 +1129,7 @@ subroutine compute_green(green,paw_dmft,prtopt,self,opt_self,opt_nonxsum,opt_non
    if (green%w_type == "imag") then
      omega_current = cmplx(zero,green%omega(ifreq),kind=dp)
      fac = two * paw_dmft%wgt_wlo(ifreq) * paw_dmft%temp
-     omega_fac(1) = -fac / omega_current
+     omega_fac(1) = - fac / omega_current
      do i=2,nmoments
        omega_fac(i) = omega_fac(i-1) / omega_current
      end do ! i 
@@ -1146,8 +1146,8 @@ subroutine compute_green(green,paw_dmft,prtopt,self,opt_self,opt_nonxsum,opt_non
    
    if (green%oper(ifreq)%has_operks == 0) then
      ABI_MALLOC(green%oper(ifreq)%ks,(mbandc,mbandc,mkmem,nsppol))
-     green%oper(ifreq)%nkpt = mkmem
-     green%oper(ifreq)%paral = 1
+     green%oper(ifreq)%nkpt   = mkmem
+     green%oper(ifreq)%paral  = 1
      green%oper(ifreq)%shiftk = shift
    end if 
    
@@ -1665,7 +1665,7 @@ subroutine integrate_green(green,paw_dmft,prtopt,opt_ksloc,opt_after_solver,opt_
        if (green%distrib%procf(ifreq) /= myproc) cycle
        omega = cmplx(zero,paw_dmft%omega_lo(ifreq),kind=dp)
        fac = two * paw_dmft%temp * paw_dmft%wgt_wlo(ifreq)
-       omega_fac(1) = -fac / omega
+       omega_fac(1) = - fac / omega
        do i=2,nmoments
          omega_fac(i) = omega_fac(i-1) / omega
        end do ! i
@@ -3396,9 +3396,9 @@ subroutine newton(green,self,paw_dmft,x_input,x_precision,max_iter,&
  character(len=500) :: message
 ! *********************************************************************
 
- x_minus = -dble(10)
- x_plus  = -dble(11)
- xold    = -dble(12)
+ x_minus = - dble(10)
+ x_plus  = - dble(11)
+ xold    = - dble(12)
 
  ierr_hh = 0
  option = 1
@@ -3629,7 +3629,7 @@ subroutine function_and_deriv(green,self,paw_dmft,x_input,x_precision, &
 !  write(std_out,*) "iter,x_input,deltax",iter,x_input,deltax
      x0 = x_input
      xminus = x0 - deltax
-     xplus = x0 + deltax
+     xplus  = x0 + deltax
 
      call compute_nb_elec(green,self,paw_dmft,Fx,nb_elec_x,x0)
 
