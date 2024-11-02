@@ -1023,7 +1023,7 @@ subroutine compute_green(green,paw_dmft,prtopt,self,opt_self,opt_nonxsum,opt_non
  diag = 1 - optself
  
  if (prtopt > 0) then
-   write(message,'(2a,i3,13x,a)') ch10,'  ===  Compute green function '
+   write(message,'(2a)') ch10,'  ===  Compute green function '
    call wrtout(std_out,message,'COLL')
  end if ! prtopt>0
 
@@ -2959,7 +2959,7 @@ subroutine occup_green_tau(green)
 
  ABI_MALLOC(shift,(natom))
 
- shift(:) = -cone
+ shift(:) = - cone
 
  call copy_matlu(green%oper_tau(1)%matlu(:),green%occup_tau%matlu(:),natom)
  call shift_matlu(green%occup_tau%matlu(:),natom,shift(:))
@@ -3762,7 +3762,7 @@ subroutine compute_nb_elec(green,self,paw_dmft,Fx,nb_elec_x,fermie,Fxprime)
        if (green%distrib%proct(ifreq) /= green%distrib%me_freq) cycle
        omega = cmplx(zero,green%omega(ifreq),kind=dp)
        fac = two * paw_dmft%wgt_wlo(ifreq) * temp
-       omega_fac(1) = -fac / omega
+       omega_fac(1) = - fac / omega
        do i=2,nmoments
          omega_fac(i) = omega_fac(i-1) / omega
        end do ! i

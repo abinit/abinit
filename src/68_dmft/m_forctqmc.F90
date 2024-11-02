@@ -1756,7 +1756,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
 end if !nspinor
 ! =================================================================
 
- write(message,'(a,2x,a,f13.5)') ch10," == Rotate Green function to original basis "
+ write(message,'(a,2x,a)') ch10," == Rotate Green function to original basis "
  call wrtout(std_out,message,'COLL')
  !write(message,'(i3,4x,2e21.14)') 8,weiss%oper(1)%matlu(1)%mat(1,1,1,1,1)
  !call wrtout(std_out,message,'COLL')  ! debug
