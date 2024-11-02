@@ -307,7 +307,7 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
 
 !Test size of kinetic energy potential Vxctau
  with_vxctau = (present(vxctau))
- with_vxctau = (with_vxctau.and.size(vxctau)>0.and.dtset%usekden/=0)
+ if (with_vxctau) with_vxctau = (size(vxctau)>0.and.dtset%usekden/=0)
  if (with_vxctau) then 
    if (size(vxctau)/=nfftf*dtset%nspden*4) then
      ABI_BUG("Wrong size for vxctau!")
