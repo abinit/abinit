@@ -260,7 +260,7 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
 
 !Test size of kinetic energy potential Vxctau
  with_vxctau = (present(vxctau).and.present(taur))
- with_vxctau = (with_vxctau.and.size(vxctau)>0.and.dtset%usekden/=0)
+ if (with_vxctau) with_vxctau = (size(vxctau)>0.and.dtset%usekden/=0)
  if (with_vxctau) then 
    if (size(vxctau)/=nfft*dtset%nspden*4) then
      ABI_BUG("Wrong size for vxctau!")
