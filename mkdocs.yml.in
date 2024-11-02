@@ -299,6 +299,7 @@ markdown_extensions:
   - markdown.extensions.sane_lists
   - markdown.extensions.attr_list
   - pymdownx.arithmatex:
+        #generic: true
         #inline_syntax: ['dollar']
         #block_syntax:  ['dollar', 'begin']
   - pymdownx.betterem:
@@ -308,6 +309,11 @@ markdown_extensions:
   - pymdownx.details
   - pymdownx.inlinehilite
   - pymdownx.mark
+  #- pymdownx.highlight:
+  #    anchor_linenums: true
+  #    line_spans: __span
+  #    pygments_lang_class: true
+  #- pymdownx.snippets
   - pymdownx.smartsymbols:
         registered: false
         copyright: false
@@ -350,6 +356,8 @@ extra_css:
 
 extra_javascript:
     - extra_javascript/abidocs.js
+    #- javascripts/mathjax.js
+    #- https://unpkg.com/mathjax@3/es5/tex-mml-chtml.js
 
 copyright: Copyright &copy; 2020-2024 The Abinit Group
 

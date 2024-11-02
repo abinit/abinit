@@ -12,8 +12,8 @@ import mkdocs.__main__
 if sys.version_info < (3, 6):
     warnings.warn("Python >= 3.6 is STRONGLY recommended when building the Abinit documentation\n" * 20)
 
-if sys.version_info >= (3, 10):
-    warnings.warn("Python >= 3.10 is not yet supported. Please use py <= 3.9 to build the Abinit documentation\n" * 20)
+#if sys.version_info >= (3, 10):
+#    warnings.warn("Python >= 3.10 is not yet supported. Please use py <= 3.9 to build the Abinit documentation\n" * 20)
 
 def is_git_repo(path):
     '''
@@ -25,8 +25,6 @@ def is_git_repo(path):
     git_dir = os.path.join(path, ".git")
     return os.path.isdir(git_dir)
 
-
-#if sys.mkdocs.__version__
 
 # We don't install with setup.py hence we have to add the directory [...]/abinit/tests to $PYTHONPATH
 pack_dir = os.path.dirname(os.path.abspath(__file__))
@@ -52,8 +50,8 @@ def get_abinit_version():
             abinit_version = subprocess.run(['./config/scripts/git-version-gen', '.tarball-version'], stdout=subprocess.PIPE).stdout
     return abinit_version
 
-def generate_mkdocs_yml():
 
+def generate_mkdocs_yml():
     abinit_version = get_abinit_version()
 
     # Read yml template and replace abinit version
@@ -65,6 +63,7 @@ def generate_mkdocs_yml():
     # Write mkdocs.yml
     with open('mkdocs.yml', 'w') as mkdocs_yml:
         mkdocs_yml.write(yml_data)
+
 
 def prof_main(main):
     """
