@@ -1052,6 +1052,11 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
  if ((t2g .or. x2my2d) .and. paw_dmft%dmft_dc == 8) then
    message = "dmft_dc=8 is not implemented for the t2g and x2my2d cases"
    ABI_ERROR(message)
+ end if
+
+ if (paw_dmft%dmft_dc == 8 .and. paw_dmft%dmft_solv == -1) then
+   message = "dmft_dc=8 is not implemented for dmft_solv=-1"
+   ABI_ERROR(message)
  end if 
  
  paw_dmft%typat => dtset%typat(:)

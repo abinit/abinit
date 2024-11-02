@@ -245,6 +245,14 @@ subroutine dmft_solve(cryst_struc,istep,dft_occup,mpi_enreg,paw_dmft,pawang,pawt
  call icip_green("DFT renormalized",greendft,paw_dmft,pawprtvol,self,opt_moments=opt_moments,opt_log=opt_log)
  !call print_green('DFT_renormalized',greendft,1,paw_dmft,pawprtvol=1,opt_wt=1)
 
+!== Define Interaction from input upawu and jpawu
+!----------------------------------------------------------------------
+ ABI_MALLOC(hu,(ntypat))
+ call init_hu(hu(:),paw_dmft,pawtab(:))
+
+ call dc_self(greendft%charge_matlu(:,:),self%hdc%matlu(:),hu(:), &
+            & paw_dmft,pawtab(:),greendft%occup%matlu(:))
+
  ! Need to store idmftloop and set it to zero to avoid useless print_energy in ab_out
  idmftloop = paw_dmft%idmftloop
  paw_dmft%idmftloop = 0
@@ -264,10 +272,6 @@ subroutine dmft_solve(cryst_struc,istep,dft_occup,mpi_enreg,paw_dmft,pawang,pawt
     & ch10,' ===== Define Interaction and self-energy', &
     & ch10,' ==============================================================='
  call wrtout(std_out,message,'COLL')
-!== Define Interaction from input upawu and jpawu
-!----------------------------------------------------------------------
- ABI_MALLOC(hu,(ntypat))
- call init_hu(hu(:),paw_dmft,pawtab(:))
 
  ! Set Hu in density representation for calculation of entropy if needed...
  if (paw_dmft%dmft_entropy > 0) then
@@ -280,8 +284,6 @@ subroutine dmft_solve(cryst_struc,istep,dft_occup,mpi_enreg,paw_dmft,pawang,pawt
 !== define self from scratch or file and double counting
 !----------------------------------------------------------------------
 !-  Self allocated
- call dc_self(greendft%charge_matlu(:,:),self%hdc%matlu(:),hu(:), &
-            & paw_dmft,pawtab(:),greendft%occup%matlu(:))
 
 !-   Read self or do self=hdc
  !if(paw_dmft%dmft_solv==4) then
@@ -331,7 +333,7 @@ subroutine dmft_solve(cryst_struc,istep,dft_occup,mpi_enreg,paw_dmft,pawang,pawt
  call integrate_green(green,paw_dmft,prtopt,opt_fill_occnd=opt_fill_occnd)
 
  if (dmft_test == 0) then
-   call printocc_green(green,5,paw_dmft,3,chtype="Green_inputself")
+   call printocc_green(green,5,paw_dmft,3,chtype="Green with input self-energy")
  end if
 
 !== define weiss field only for the local quantities (opt_oper=2)

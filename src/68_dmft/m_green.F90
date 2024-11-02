@@ -1460,7 +1460,7 @@ subroutine compute_green(green,paw_dmft,prtopt,self,opt_self,opt_nonxsum,opt_non
  call gather_oper_ks(green%occup,green%distrib,paw_dmft,opt_diag=diag)
 ! write(std_out,*) 'afterxsum sym     %matlu(1)%mat(2,5,1,1,1) 1',green%oper(1)%matlu(1)%mat(2,5,1,1,1)
 
- if (prtopt /= 0 .and. prtopt > -100)  then
+ if (prtopt /= 0 .and. prtopt > -100 .and. (paw_dmft%lchipsiortho == 1 .or. optself == 1)) then
    write(message,'(2a)') ch10,&
      & '  == Local Green function has been computed and projected on local orbitals'
    call wrtout(std_out,message,'COLL')

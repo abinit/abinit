@@ -865,7 +865,7 @@ CONTAINS  !=====================================================================
        call pawrad_init(pawrad_tmp,meshsz,mesh_type,rstep,lstep)
        call simp_gen(int1,pawtab(itypat)%proj(1:meshsz)**2,pawrad_tmp)
 
-       write(message,*) "Squared norm of the DMFT orbital: ",int1
+       write(message,'(a,f9.4)') "Squared norm of the DMFT orbital: ",int1
        call wrtout(std_out,message,"COLL")
 
        int1 = sqrt(int1)  
@@ -897,11 +897,9 @@ CONTAINS  !=====================================================================
 
          write(message,*) "Yukawa parameters for atom type: ",adjustl(tag)
          call wrtout(std_out,message,"COLL")
-         write(message,*) "Lambda:",lambda
+         write(message,'(a,f9.4)') "Lambda: ",lambda
          call wrtout(std_out,message,"COLL")
-         write(message,*) "Epsilon:",eps
-         call wrtout(std_out,message,"COLL")
-         write(message,*) "Slater integrals:",fk(:)
+         write(message,'(a,f9.4)') "Epsilon:",eps
          call wrtout(std_out,message,"COLL")
 
          ! Recompute U tensor with new Slater integrals
