@@ -317,7 +317,7 @@ subroutine dmft_solve(cryst_struc,istep,dft_occup,mpi_enreg,paw_dmft,pawang,pawt
  if (dmft_test == 0) then
    call init_green(green,paw_dmft,opt_moments=opt_moments)
  else
-   call icip_green("Green with input self-energy",green,paw_dmft,pawprtvol,self,opt_self=1)
+   call icip_green("Green with input self-energy",green,paw_dmft,pawprtvol,self,opt_self=1,opt_moments=opt_moments)
    !call print_green('beforefermi_green',green,1,paw_dmft,pawprtvol=1,opt_wt=1)
 !   call abi_abort('COLL')
  end if 
@@ -695,7 +695,7 @@ subroutine impurity_solve(cryst_struc,green,hu,paw_dmft,pawang,pawtab,&
  if (abs(paw_dmft%dmft_solv) >= 5) then
 !  == Initialize  green functions for imaginary times
 !  -------------------------------------------------------------------
-   write(message,'(2a,i3,13x,a)') ch10,'   ===  Initialize Green function G(tau)'
+   write(message,'(2a)') ch10,'   ===  Initialize Green function G(tau)'
    call wrtout(std_out,message,'COLL')
    call init_green_tau(green,paw_dmft)
 
@@ -707,7 +707,7 @@ subroutine impurity_solve(cryst_struc,green,hu,paw_dmft,pawang,pawtab,&
 !=======================================================================
 !== Solve impurity model   =============================================
 !=======================================================================
- write(message,'(2a,i3,13x,a)') ch10,'  ===  Solve impurity model'
+ write(message,'(2a)') ch10,'  ===  Solve impurity model'
  call wrtout(std_out,message,'COLL')
  if (abs(paw_dmft%dmft_solv) == 1) then
 
@@ -793,7 +793,7 @@ subroutine impurity_solve(cryst_struc,green,hu,paw_dmft,pawang,pawtab,&
    if (abs(paw_dmft%dmft_solv) == 888) then
 !  == Back fourier transform of G_0(tau) for compensation (try or comment or improve FT).
 !  -------------------------------------------------------------------
-     write(message,'(2a,i3,13x,a)') ch10,'   ===  Direct Fourier transform t->w of Weiss'
+     write(message,'(2a)') ch10,'   ===  Direct Fourier transform t->w of Weiss'
      call wrtout(std_out,message,'COLL')
      call fourier_green(cryst_struc,weiss,paw_dmft,opt_ksloc=2,opt_tw=1)
 
@@ -825,7 +825,7 @@ subroutine impurity_solve(cryst_struc,green,hu,paw_dmft,pawang,pawtab,&
  if (paw_dmft%dmft_solv >= 2 .and. green%w_type == "imag") then
 !  ==  Integrate G(iw_n)
 !  ---------------------
-   write(message,'(2a,i3,13x,a)') ch10,'   ===  Integrate local part of green function'
+   write(message,'(2a)') ch10,'   ===  Integrate local part of green function'
    call wrtout(std_out,message,'COLL')
    call integrate_green(green,paw_dmft,2,opt_ksloc=2,opt_after_solver=1)
 
@@ -891,6 +891,7 @@ subroutine dyson(green,paw_dmft,self,weiss,opt_weissself)
 
  call timab(623,1,tsec(:))
  DBG_ENTER("COLL")
+
  myproc   = paw_dmft%myproc
  natom    = paw_dmft%natom
  nsppol   = paw_dmft%nsppol
@@ -898,10 +899,10 @@ subroutine dyson(green,paw_dmft,self,weiss,opt_weissself)
  weissinv = 1
  
  if (opt_weissself == 1) then
-   write(message,'(2a,i3,13x,a)') ch10,'  ===  Use Dyson Equation => weiss '
+   write(message,'(2a)') ch10,'  ===  Use Dyson Equation => weiss '
    call wrtout(std_out,message,'COLL')
  else if (opt_weissself == 2) then
-   write(message,'(2a,i3,13x,a)') ch10,'  ===  Use Dyson Equation => self'
+   write(message,'(2a)') ch10,'  ===  Use Dyson Equation => self'
    call wrtout(std_out,message,'COLL')
  end if ! opt_weisself
 

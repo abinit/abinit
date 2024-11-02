@@ -527,10 +527,10 @@ MODULE m_paw_dmft
   ! occupations on band parallelism
 
   real(dp), allocatable :: edc(:)
-  ! Double counting energy for each atom (only used for dmft_dc=8)
+  ! Double counting energy for each atom (only used as a temporary for dmft_dc=8)
 
   real(dp), allocatable :: edcdc(:)
-  ! Integral of Vdc * rho for each atom (only used for dmft_dc=8)
+  ! Integral of Vdc * rho for each atom (only used as a temporary for dmft_dc=8)
 
   real(dp), allocatable :: eigen_dft(:,:,:)
   ! DFT eigenvalues for each correlated band, k-point, polarization
@@ -569,7 +569,7 @@ MODULE m_paw_dmft
   ! 4*pi*(i**l)*jl(|k+G|r)*r/sqrt(ucvol) for each G,r,atom type and kpt
 
   complex(dpc), allocatable :: buf_psi(:)
-  ! Buffer for the computation of Wannier function
+  ! Temporary buffer for the computation of Wannier function
   
   complex(dpc), allocatable :: chipsi(:,:,:,:,:)
   ! Hermitian product <Chi|Psi> for each flavor, correlated band,

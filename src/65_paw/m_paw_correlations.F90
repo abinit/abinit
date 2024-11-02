@@ -903,8 +903,8 @@ CONTAINS  !=====================================================================
          call wrtout(std_out,message,"COLL")
 
          ! Recompute U tensor with new Slater integrals
-         f4of2 = -one
-         f6of2 = -one
+         f4of2 = - one
+         f6of2 = - one
          uh = fk(1)
 
          if (lcur == 1) then
