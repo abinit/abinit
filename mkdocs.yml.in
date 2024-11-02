@@ -18,7 +18,13 @@ use_directory_urls: True
 #pages:  # TODO Should be replaced by nav but then the search plugin does not work (bug?)
 nav:
 - User Guides:
-    #- NewUser: guide/new_user.md
+    - Installation:
+        - HowTo: installation.md
+        - MacOS: INSTALL_MacOS.md
+        - Ubuntu: INSTALL_Ubuntu.md
+        - CentOS: INSTALL_CentOS.md
+        - EasyBuild: INSTALL_EasyBuild.md
+        - GPUs: INSTALL_gpu.md
     - NewUser: index.md
     - Abinit: guide/abinit.md
     - Abitk: guide/abitk.md
@@ -33,13 +39,7 @@ nav:
     - Optic: guide/optic.md
     - Respfn: guide/respfn.md
     - Spacegroup: guide/spacegroup.md
-    - Installation:
-        - HowTo: installation.md
-        - MacOS: INSTALL_MacOS.md
-        - Ubuntu: INSTALL_Ubuntu.md
-        - CentOS: INSTALL_CentOS.md
-        - EasyBuild: INSTALL_EasyBuild.md
-        - GPUs: INSTALL_gpu.md
+
 # The topics should be declared both in this file and in abimkdocs/variables.py
 - Topics:
     - Features: topics/features.md
@@ -299,7 +299,7 @@ markdown_extensions:
   - markdown.extensions.sane_lists
   - markdown.extensions.attr_list
   - pymdownx.arithmatex:
-        #generic: true
+        generic: true
         #inline_syntax: ['dollar']
         #block_syntax:  ['dollar', 'begin']
   - pymdownx.betterem:
@@ -346,7 +346,7 @@ plugins:
     - abimkdocs
     - search:
           separator: '[\s\-\.]+'
-          min_search_length: 2
+          #min_search_length: 2
           #prebuild_index: true  # Should test whether this makes search faster.
 
 extra_css:
@@ -356,7 +356,7 @@ extra_css:
 
 extra_javascript:
     - extra_javascript/abidocs.js
-    #- javascripts/mathjax.js
+    #- extra_javascript/mathjax.js
     #- https://unpkg.com/mathjax@3/es5/tex-mml-chtml.js
 
 copyright: Copyright &copy; 2020-2024 The Abinit Group
