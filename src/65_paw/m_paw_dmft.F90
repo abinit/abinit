@@ -1429,7 +1429,7 @@ subroutine init_dmft(cryst_struc,dmatpawu,dtset,fermie_dft,fnamei,fnametmp_app,p
  type(paw_dmft_type), intent(inout) :: paw_dmft
  type(crystal_t), target, intent(in) :: cryst_struc
  character(len=fnlen), intent(in) :: fnamei,fnametmp_app
- real(dp), target, intent(in) :: dmatpawu(:,:,:,:)
+ real(dp), ABI_CONTIGUOUS target, intent(in) :: dmatpawu(:,:,:,:)
 !Local variables ------------------------------------
  integer :: iatom,irot,isym,nflavor,nsym
  character(len=500) :: message
