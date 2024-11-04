@@ -6,7 +6,7 @@
 !! Treat XC functionals closely linked with the Perdew-Wang 92 LSD and the PBE GGA.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2024 ABINIT group (XG,MF,LG,CE)
+!!  Copyright (C) 1998-2024 ABINIT group (XG,MF,LG,CE,AB)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -24,7 +24,7 @@ module m_xcpbe
  use defs_basis
  use m_abicore
  use m_errors
- use m_special_funcs,      only : tildeAx,tildeBx,tildeBc,tildeBcII
+ use m_special_funcs,      only : tildeAx,tildeBx,tildeBc
  use m_xclda,              only : fex_ksdt,fec_ksdt
  use m_numeric_tools,      only : invcb
 
@@ -5184,18 +5184,18 @@ end subroutine xcpbe
 !!    spin-down (dvxcdgr(:,2)), or total spin (dvxcdgr(:,3)) gradients of the density
 !!    divided by the norm of the gradient (the definition changed in v3.3)
 !!  exci(npts)=exchange-correlation free energy density (hartree)
-!!  sxci(npts)=exchange-correlation entropy density
+!!  tsxci(npts)=exchange-correlation entropy energy density (hartree)
 !!  vxci(npts,nspden)=input xc potential
 !!
 !! SOURCE
-subroutine xckdt16(dvxcdgr,exci,sxci,grho2_updn,ixc,npts,nspden,rhor,rspts,el_temp,vxci)
+subroutine xckdt16(dvxcdgr,exci,tsxci,grho2_updn,ixc,npts,nspden,rhor,rspts,el_temp,vxci)
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ixc,npts,nspden
 !arrays
  real(dp),intent(in) :: grho2_updn(npts,2*nspden-1)
  real(dp),intent(in) :: rhor(npts),rspts(npts),el_temp
- real(dp),intent(out) :: dvxcdgr(npts,3),exci(npts),sxci(npts),vxci(npts,nspden)
+ real(dp),intent(out) :: dvxcdgr(npts,3),exci(npts),tsxci(npts),vxci(npts,nspden)
 !Local variables-------------------------------
 !scalars
  integer :: ipt
@@ -5235,16 +5235,16 @@ subroutine xckdt16(dvxcdgr,exci,sxci,grho2_updn,ixc,npts,nspden,rhor,rspts,el_te
    vxclda=vx_lda+vc_lda
    if(ixc.eq.60) then
      call fex_kdt16(rho,grho,5,fx,v1x,v2x,einx,tsx,degauss)
-     call fec_kdt16(rho,grho,9,fc,v1c,v2c,einc,tsc,degauss)
-   elseif(ixc.eq.61) then
-     call fex_kdt16(rho,grho,6,fx,v1x,v2x,einx,tsx,degauss)
-     call fec_kdt16(rho,grho,10,fc,v1c,v2c,einc,tsc,degauss)
-   elseif(ixc.eq.62) then
-     call fex_kdt16(rho,grho,7,fx,v1x,v2x,einx,tsx,degauss)
-     call fec_kdt16(rho,grho,11,fc,v1c,v2c,einc,tsc,degauss)
+     call fec_kdt16(rho,grho,1,fc,v1c,v2c,einc,tsc,degauss)
+   !  elseif(ixc.eq.61) then
+   !    call fex_kdt16(rho,grho,6,fx,v1x,v2x,einx,tsx,degauss)
+   !    call fec_kdt16(rho,grho,2,fc,v1c,v2c,einc,tsc,degauss)
+   !  elseif(ixc.eq.62) then
+   !    call fex_kdt16(rho,grho,7,fx,v1x,v2x,einx,tsx,degauss)
+   !    call fec_kdt16(rho,grho,3,fc,v1c,v2c,einc,tsc,degauss)
    endif
    exci(ipt)=fxclda+(fx+fc)!/rho
-   sxci(ipt)=(tsxclda+(tsx+tsc))/el_temp ! total exchange-correlation entropy: S_xc[n] = kTS_xc[n]/kT
+   tsxci(ipt)=(tsxclda+(tsx+tsc)) ! total exchange-correlation entropy energy: S_xc[n] = kTS_xc[n]/kT
    vxci(ipt,1)=vxclda+v1x+v1c
    dvxcdgr(ipt,3)=v2x+v2c !d(exc*rho)/d|gradRho|*1/|gradRho|
    dvxcdgr(ipt,1)=zero !dvxcdgr(ipt,3)*4.d0 ! d(exc*rho)/d|gradRho_up|*1/|gradRho_up|
@@ -5355,7 +5355,6 @@ subroutine fex_kdt16(rho,grho,iflag,fx,v1x,v2x,einx,tsx,degauss)
  v1x = fx + dfxunif*FFx + fxunif*dFFxds2x*ds2xdn ! d/dn(n*fxunif*FFx(s2x) see above
  v2x = fxunif*dFFxds2x*ds2dg*BAx/agrho !d(n*fxunif*Fx(s2x))/d(gn)*1/(gn)=
 !                                     =fxunif*d(Fx(s2x))/d(s2x) *n*ds2/d(gn) *Bx/Ax)*1/(gn)
- if(v2x/=v2x) v2x=zero ! TEMPORARY TO AVOID NAN
 end subroutine fex_kdt16
 !!***
 
@@ -5564,7 +5563,7 @@ subroutine fec_kdt16(rho,grho,iflag,fc,v1c,v2c,einc,tsc,degauss)
 !tsc_lda = 0._DP
 !
  if(iflag.le.8)   call tildeBc(iflag,rs,t,Bc,dBcdrs,dBcdt)  !iflag=1,2,..8
- if(iflag.gt.8) call tildeBcII(iflag,rs,t,Bc,dBcdrs,dBcdt)  !iflag=9,10,..12
+!if(iflag.gt.8) call tildeBcII(iflag,rs,t,Bc,dBcdrs,dBcdt)  !iflag=9,10,..12
 
  kf = xkf/rs
  ks = xks*sqrt(kf)
@@ -5606,7 +5605,6 @@ subroutine fec_kdt16(rho,grho,iflag,fc,v1c,v2c,einc,tsc,degauss)
 !tsc = rho*(ga/s1)*ds1da*dadf*tsc_lda - t*rho*(ga/s1)*ds1dqc*dqcdt !17-APR-2016: commented in ABINIT version
  tsc =     (ga/s1)*ds1da*dadf*tsc_lda - t*    (ga/s1)*ds1dqc*dqcdt ! energy per electron, 17-APR-2016: ABINIT version
  einc = fc + tsc
- if(v2c/=v2c) v2c=zero ! TEMPORARY TO AVOID NAN
 end subroutine fec_kdt16
 !!***
 
