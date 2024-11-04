@@ -5583,8 +5583,8 @@ subroutine fec_kdt16(rho,grho,iflag,fc,v1c,v2c,einc,tsc,degauss)
  ds1dqc = be(iflag)/ga*2._DP*qc*xy + be(iflag)/ga*qc*qc*dxy * 2._DP*af*qc !d(s1)/d(qc)
  ds1da = be(iflag)/ga*qc*qc*dxy * qc*qc !d(s1)/dA
  h0 = ga*log(s1)
-!fc = rho * h0 ! energy density !17-APR-2016: commented in ABINIT version
- fc = h0 ! energy per electron, 17-APR-2016: ABINIT version
+ fc = rho * h0 ! energy density !17-APR-2016: commented in ABINIT version
+!fc = h0 ! energy per electron, 17-APR-2016: ABINIT version
 !v1c=d(n*H)/dn=H + n*(dH/ds1)*(ds1/dA)*(dA/d(fc_lda))*(d(fc_lda)/dn) + n*(dH/ds1)*(ds1/d(qc))*{(d(qc)/dn) + (d(qc)/dt)*(dt/dn)}
 !   = H + (dH/ds1)*(ds1/dA)*(dA/d(fc_lda))*(vc_lda - fc_lda) + (dH/ds1)*(ds1/d(qc))*{(n*d(qc)/dn) + (d(qc)/dt)*(n*dt/dn)}
 !
@@ -5602,9 +5602,13 @@ subroutine fec_kdt16(rho,grho,iflag,fc,v1c,v2c,einc,tsc,degauss)
 ! GGA entropy and T*s_c density (not per particle)
 ! sc = -d(n*H)/dt*(1/T_F) = -n*(dH/ds1)*(ds1/dA)*(dA/d(fc_lda))*(d(fc_lda)/dt)/T_F - n*(dH/ds1)*(ds1/d(qc))*(d(qc)/dt)/T_F
 ! T*sc=t*T_F*sc = -t*d(n*H)/dt = +n*(dH/ds1)*(ds1/dA)*(dA/d(fc_lda))*(-t*d(fc_lda)/dt) - t*n*(dH/ds1)*(ds1/d(qc))*(d(qc)/dt)
-!tsc = rho*(ga/s1)*ds1da*dadf*tsc_lda - t*rho*(ga/s1)*ds1dqc*dqcdt !17-APR-2016: commented in ABINIT version
- tsc =     (ga/s1)*ds1da*dadf*tsc_lda - t*    (ga/s1)*ds1dqc*dqcdt ! energy per electron, 17-APR-2016: ABINIT version
+ tsc = rho*(ga/s1)*ds1da*dadf*tsc_lda - t*rho*(ga/s1)*ds1dqc*dqcdt !17-APR-2016: commented in ABINIT version
+!tsc =     (ga/s1)*ds1da*dadf*tsc_lda - t*    (ga/s1)*ds1dqc*dqcdt ! energy per electron, 17-APR-2016: ABINIT version
  einc = fc + tsc
+ ! convert energy density to energy per electron
+ fc = fc / rho
+ einc = einc / rho
+ tsc = tsc / rho
 end subroutine fec_kdt16
 !!***
 
