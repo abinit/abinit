@@ -7,7 +7,7 @@ release are NOT described here...
 NOTE that problems are presently (for about three years) most often reported on the issue manager of the internal ABINIT Gitlab .
 Still, the list of platforms and corresponding failing tests is maintained in the present document.
 
-The present revision ABINITv10.2.2 is for examination of the release notes, and bug fixes
+The present revision ABINITv10.2.3 is for examination of the release notes, and bug fixes
 
 0. List of platforms
 1. Batteries of tests
@@ -16,7 +16,7 @@ The present revision ABINITv10.2.2 is for examination of the release notes, and 
 ================================================================
 0. Platforms
 
-For ABINITv10.2.2, list closed on 2024 11 03
+For ABINITv10.2.3, list closed on 2024 11 04
 after installation and successful tests for the standard set of platforms,
 as mentioned on
 https://bbportal.abinit.org/#/status
