@@ -1367,11 +1367,12 @@ end subroutine xctfw
 !!
 !! OUTPUT
 !!  exc(npt)=exchange-correlation free energy density (hartree)
+!!  tsxc(npt)=exchange-correlation entropy energy density (hartree)
 !!  vxc(npt)=xc potential (d($\rho$*exc)/d($\rho$)) (hartree)
 !!  if(order>1) dvxc(npt)=derivative d(vxc)/d($\rho$) (hartree*bohr^3)
 !!
 !! SOURCE
-subroutine xcksdt(exc,sxc,npt,order,rhor,rspts,el_temp,vxc,&
+subroutine xcksdt(exc,tsxc,npt,order,rhor,rspts,el_temp,vxc,&
 &                 dvxc) ! optional arguments
 !Arguments ------------------------------------
 !scalars
@@ -1379,13 +1380,13 @@ subroutine xcksdt(exc,sxc,npt,order,rhor,rspts,el_temp,vxc,&
  real(dp),intent(in) :: el_temp
 !arrays
  real(dp),intent(in) :: rhor(npt),rspts(npt)
- real(dp),intent(out) :: exc(npt),sxc(npt),vxc(npt)
+ real(dp),intent(out) :: exc(npt),tsxc(npt),vxc(npt)
  real(dp),intent(out),optional :: dvxc(npt)
 
 !Local variables ------------------------------
 !scalars
  integer :: ipt
- real(dp) :: tfac,rs,rho,tempf,tred,fxc,einxc,tsxc
+ real(dp) :: tfac,rs,rho,tempf,tred,fxc,einxc
 !for numerical derivative of vxc:
  real(dp) :: drho,vxctmp(5) !array to calculate dvxc/drho numerically
  integer :: i
@@ -1419,8 +1420,7 @@ subroutine xcksdt(exc,sxc,npt,order,rhor,rspts,el_temp,vxc,&
    rho=rhor(ipt) !0.75_dp/pi/(rs**3)
    tempf=tfac*rho**(2._dp/3._dp) !(3._dp*pi**2*rho)**(2._dp/3._dp)/2._dp
    tred=el_temp/tempf
-   call exc_ksdt(einxc,rs,tsxc,tred,0)
-   sxc(ipt)=tsxc/el_temp
+   call exc_ksdt(einxc,rs,tsxc(ipt),tred,0)
    call fxc_ksdt(fxc,vxc(ipt),rs,tred,0)
    exc(ipt)=fxc
    if( (exc(ipt)/=exc(ipt)).or.(vxc(ipt)/=vxc(ipt)) ) then

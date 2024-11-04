@@ -237,8 +237,8 @@ contains
 !!   rhoexc ---> means rho*exc == exchange-correlation free energy density
 !!   bigexc ---> means exchange-correlation internal energy E_xc
 !!   bigsxc ---> means exchange-correlation entropy S_xc
-!!   sxc_b ---> means exchange-correlation entropy density per particle
-!!   rhosxc --> means rho*sxc == exchange-correlation entropy density
+!!   tsxc_b ---> means exchange-correlation entropy energy density per particle
+!!   rhotsxc --> means rho*tsxc == exchange-correlation entropy energy density
 !!
 !!   g... --> means gradient of something (e.g. : grho --> means gradient of electron density)
 !!   g...2 -> means square norm of gradient of something (e.g. : grho2 -> means square norm of gradient of electron density)
@@ -294,7 +294,7 @@ subroutine rhotoxc(bigexc,bigsxc,kxc,mpi_enreg,nfft,ngfft, &
  integer :: n3xctau,order,usefxc,nproc_fft,comm_fft,usegradient,usekden,uselaplacian
  logical :: my_add_tfw
  real(dp),parameter :: mot=-one/3.0_dp
- real(dp) :: coeff,divshft,doti,dstrsxc,dvdn,dvdz,rhoexc,rhosxc,exc_str,factor,m_norm_min,s1,s2,s3
+ real(dp) :: coeff,divshft,doti,dstrsxc,dvdn,dvdz,rhoexc,rhotsxc,exc_str,factor,m_norm_min,s1,s2,s3
  real(dp) :: strdiag,strsxc1_tot,strsxc2_tot,strsxc3_tot,strsxc4_tot
  real(dp) :: strsxc5_tot,strsxc6_tot,ucvol
  real(dp) :: deltae_vdw,exc_vdw
@@ -305,7 +305,7 @@ subroutine rhotoxc(bigexc,bigsxc,kxc,mpi_enreg,nfft,ngfft, &
  real(dp) :: gm_norm(3),grho(3),gmet(3,3),gprimd(3,3),qphon(3),rmet(3,3)
  real(dp) :: tsec(2),vxcmean(4)
  real(dp),allocatable :: d2vxc_b(:,:),depsxc(:,:),depsxc_apn(:,:),dvxc_apn(:),dvxc_b(:,:)
- real(dp),allocatable :: exc_b(:),sxc_b(:),fxc_b(:),fxc_apn(:),grho2_apn(:),grho2_b_updn(:,:)
+ real(dp),allocatable :: exc_b(:),tsxc_b(:),fxc_b(:),fxc_apn(:),grho2_apn(:),grho2_b_updn(:,:)
  real(dp),allocatable :: lrhonow(:,:),lrho_b_updn(:,:)
  real(dp),allocatable :: m_norm(:),nhat_up(:),rho_b_updn(:,:),rho_b(:),rhonow_apn(:,:,:)
  real(dp),allocatable :: tau_b_updn(:,:),vxc_apn(:,:),vxcgr_apn(:),vxcgrho_b_updn(:,:),vxcrho_b_updn(:,:)
@@ -447,7 +447,7 @@ subroutine rhotoxc(bigexc,bigsxc,kxc,mpi_enreg,nfft,ngfft, &
  bigexc=zero
  bigsxc=zero
  rhoexc=zero
- rhosxc=zero
+ rhotsxc=zero
  vxc(:,:)=zero
  vxcavg=zero
  strsxc(:)=zero
@@ -734,7 +734,7 @@ subroutine rhotoxc(bigexc,bigsxc,kxc,mpi_enreg,nfft,ngfft, &
 
 !      Allocation of mandatory arguments of drivexc
        ABI_MALLOC(exc_b,(npts))
-       ABI_MALLOC(sxc_b,(npts))
+       ABI_MALLOC(tsxc_b,(npts))
        ABI_MALLOC(rho_b,(npts))
        ABI_MALLOC(rho_b_updn,(npts,nspden_updn))
        ABI_MALLOC(vxcrho_b_updn,(npts,nspden_updn))
@@ -797,7 +797,7 @@ subroutine rhotoxc(bigexc,bigsxc,kxc,mpi_enreg,nfft,ngfft, &
            call libxc_functionals_init(auxc_ixc,nspden,xc_functionals=xc_funcs_auxc)
          end if
          call drivexc(auxc_ixc,order,npts,nspden_updn,usegradient,0,0,&
-&          rho_b_updn,exc_b,sxc_b,vxcrho_b_updn,nvxcgrho,0,0,ndvxc,nd2vxc,xcdata%tphysel, &
+&          rho_b_updn,exc_b,tsxc_b,vxcrho_b_updn,nvxcgrho,0,0,ndvxc,nd2vxc,xcdata%tphysel, &
 &          grho2_updn=grho2_b_updn,vxcgrho=vxcgrho_b_updn,dvxc=dvxc_b, &
 &          fxcT=fxc_b,hyb_mixing=xcdata%hyb_mixing,xc_funcs=xc_funcs_auxc)
 !        Transfer the xc kernel
@@ -824,7 +824,7 @@ subroutine rhotoxc(bigexc,bigsxc,kxc,mpi_enreg,nfft,ngfft, &
        if (present(xc_funcs)) then
          call drivexc(ixc,order,npts,nspden_updn,&
 &          usegradient,uselaplacian,usekden,&
-&          rho_b_updn,exc_b,sxc_b,vxcrho_b_updn,&
+&          rho_b_updn,exc_b,tsxc_b,vxcrho_b_updn,&
 &          nvxcgrho,nvxclrho,nvxctau,ndvxc,nd2vxc,xcdata%tphysel, &
 &          grho2_updn=grho2_b_updn,vxcgrho=vxcgrho_b_updn,&
 &          lrho_updn=lrho_b_updn,vxclrho=vxclrho_b_updn,&
@@ -835,7 +835,7 @@ subroutine rhotoxc(bigexc,bigsxc,kxc,mpi_enreg,nfft,ngfft, &
        else
          call drivexc(ixc,order,npts,nspden_updn,&
 &          usegradient,uselaplacian,usekden,&
-&          rho_b_updn,exc_b,sxc_b,vxcrho_b_updn,&
+&          rho_b_updn,exc_b,tsxc_b,vxcrho_b_updn,&
 &          nvxcgrho,nvxclrho,nvxctau,ndvxc,nd2vxc,xcdata%tphysel, &
 &          grho2_updn=grho2_b_updn,vxcgrho=vxcgrho_b_updn,&
 &          lrho_updn=lrho_b_updn,vxclrho=vxclrho_b_updn,&
@@ -878,8 +878,8 @@ subroutine rhotoxc(bigexc,bigsxc,kxc,mpi_enreg,nfft,ngfft, &
        dstrsxc=zero
        do ipts=ifft,ifft+npts-1
          indx=ipts-ifft+1
-         rhoexc=rhoexc+rho_b(indx)*exc_b(indx) ! Will be normalized with respect to the volume later to get bigexc.
-         rhosxc=rhosxc+rho_b(indx)*sxc_b(indx) ! Will be normalized with respect to the volume later to get bigsxc.
+         rhoexc=rhoexc+rho_b(indx)*exc_b(indx)    ! Will be normalized with respect to the volume later to get bigexc.
+         rhotsxc=rhotsxc+rho_b(indx)*tsxc_b(indx) ! Will be normalized with respect to the volume later to get bigsxc.
          depsxc(ipts,1)=vxcrho_b_updn(indx,1)
          exc_str=exc_b(indx)
          if(usefxc==1) exc_str=fxc_b(indx)
@@ -1143,7 +1143,7 @@ subroutine rhotoxc(bigexc,bigsxc,kxc,mpi_enreg,nfft,ngfft, &
        end if
 
        ABI_FREE(exc_b)
-       ABI_FREE(sxc_b)
+       ABI_FREE(tsxc_b)
        ABI_FREE(rho_b)
        ABI_FREE(rho_b_updn)
        ABI_FREE(grho2_b_updn)
@@ -1261,7 +1261,7 @@ subroutine rhotoxc(bigexc,bigsxc,kxc,mpi_enreg,nfft,ngfft, &
    divshft=one/dble(xcdata%intxc+1)
    strsxc(:)=strsxc(:)/dble(nfftot)*divshft
    bigexc=rhoexc*ucvol/dble(nfftot)*divshft
-   bigsxc=rhosxc*ucvol/dble(nfftot)*divshft
+   bigsxc=rhotsxc*ucvol/dble(nfftot)*divshft/xcdata%tphysel
    vxc=vxc*divshft
    if (with_vxctau) vxctau=vxctau*divshft
    if (present(grho1_over_rho1)) grho1_over_rho1=grho1_over_rho1*ucvol/dble(nfftot)*divshft

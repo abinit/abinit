@@ -60,7 +60,6 @@ module m_special_funcs
  public :: tildeAx           ! tilde Ax Pade fit and first and second derivatives
  public :: tildeBx           ! tilde Bx Pade fit and first and second derivatives
  public :: tildeBc           ! tilde Bc Pade fit and first and second derivatives
- public :: tildeBcII         ! tilde Bc Pade fit (2nd) and first and second derivatives
 !!***
 
 !!****t* m_special_funcs/jlspline_t
@@ -2102,117 +2101,6 @@ subroutine tildeBc(iflag,rs,t,Bc,dBcdrs,dBcdt)
    !
  endif
 end subroutine tildeBc
-!!***
-
-!!****f* m_special_funcs/tildeBcII
-!! NAME
-!!  tildeBcII
-!!
-!! FUNCTION
-!!  Returns tilde Bc Pade fit (2nd) and first and second derivatives
-!!  w.r.t. reduced temperature t.
-!!
-!! NOTES
-!!  Karasiev-Dufty-Trickey (KDT16) TGGA xc-functional
-!!  V.V. Karasiev, J.W. Dufty, and S.B. Trickey, PRL 120(7), 076401 (2018) [[cite:Karasiev2018]]
-!!
-!! INPUTS
-!!  iflag=flag selector integer
-!!  rs=Wigner-Seitz radius (bohr)
-!!  t=reduced temperature, t=T/T_F
-!!
-!! OUTPUT
-!!  Bc=tilde Bc(rs,t)
-!!  dBcdrs=dBxc(rs,t)/drs
-!!  dBcdt=dBc(rs,t)/dt
-!!
-!! SOURCE
-subroutine tildeBcII(iflag,rs,t,Bc,dBcdrs,dBcdt)
-!Arguments ------------------------------------
-!scalars
- integer,intent(in) :: iflag
- real(dp),intent(in) :: rs,t
- real(dp),intent(out) :: Bc,dBcdrs,dBcdt
-!Local variables ------------------------------
-!scalars
- real(dp),parameter :: &
-   alpha_n = 0.75000000000000D+00, &
-   alpha_d = 0.10000000000000D+01, &
-   alpha_t = 0.13333333333333D+01, &
-   a1 =  0.15347929735622D+04, &
-   b1 = -0.84219627176667D+01, &
-   a2 =  0.44868805325009D+04, &
-   b2 = -0.58530532404446D+03, &
-   a3 =  0.69532418328433D+04, &
-   b3 = -0.35678194103563D+04, &
-   a4 = -0.93218590455726D+03, &
-   b4 =  0.34051871203715D+04, &
-   c1 =  0.11159913731638D+04, &
-   d1 =  0.47203417436724D+03, &
-   c2 =  0.18928455226052D-02, &
-   d2 =  0.30978353565417D-02, &
-   c3 =  0.19309591081276D+05, &
-   d3 =  0.16467574170732D-02, &
-   c4 =  0.16584881560245D+04, &
-   d4 =  0.51151114337559D+04, &
-   c5 =  0.13467962617509D+04, &
-   d5 =  0.98716996214546D+04, &
-   e1 =  0.25965951327313D+03, &
-   e2 =  0.27232110869584D+03, &
-   e3 = -0.97350129986349D+02, &
-   e4 =  0.18729855159197D+04, &
-   f1 =  0.22826224012303D+02, &
-   f2 =  0.29742599786418D+02, &
-   f3 =  0.15142142964724D-01, &
-   f4 =  0.69329585676317D+03, &
-   f5 =  0.22183609439600D+01
- real(dp), parameter :: &
-   onethird = 1.d0/3.d0,&
-   twothird = 2.d0/3.d0,&
-   threehalf = 3.d0/2.d0,&
-   fivehalf = 5.d0/2.d0,&
-   sevenhalf = 7.d0/2.d0
- real(dp) :: rsn,rsd,u,du
- real(dp) :: num,den,dnumdrs,dnumdt,ddendrs,ddendt
- real(dp) :: Ax,dAx,d2Ax
-
-! *************************************************************************
-
- if(iflag==5.or.iflag==6.or.iflag==7.or.iflag==8) then 
-   ! Bc(rs,t) = 1
-   Bc = 1._DP
-   dBcdrs = 0._DP
-   dBcdt = 0._DP
- elseif(iflag==9.or.iflag==10.or.iflag==11.or.iflag==12) then
-   !
-   ! Bc(rs,t) = Pade Fit
-   !
-   rsn = rs**alpha_n
-   rsd = rs**alpha_d
-   u = t**alpha_t
-   du = alpha_t*t**(alpha_t-1.d0)
-   !
-   num = 1.d0+(a1+b1*rsn+e1*rsn**2)*u+(a2+b2*rsn+e2*rsn**2)*u**2+(a3+b3*rsn+e3*rsn**2)*u**3+(a4+b4*rsn+e4*rsn**2)*u**4
-   dnumdrs = (b1+2.d0*e1*rsn)*u+(b2+2.d0*e2*rsn)*u**2+(b3+2.d0*e3*rsn)*u**3+(b4+2.d0*e4*rsn)*u**4
-   dnumdrs = dnumdrs * alpha_n*rs**(alpha_n-1.d0)
-   dnumdt = (a1+b1*rsn+e1*rsn**2)+2.d0*(a2+b2*rsn+e2*rsn**2)*u+3.d0*(a3+b3*rsn+e3*rsn**2)*u**2+4.d0*(a4+b4*rsn+e4*rsn**2)*u**3
-   dnumdt = dnumdt * du
-   den = 1.d0+(c1+d1*rsd+f1*rsd**2)*u+(c2+d2*rsd+f2*rsd**2)*u**2+(c3+d3*rsd+f3*rsd**2)*u**3+(c4+d4*rsd+f4*rsd**2)*u**4+(c5+d5*rsd+f5*rsd**2)*u**5
-   ddendrs = (d1+2.d0*f1*rsd)*u+(d2+2.d0*f2*rsd)*u**2+(d3+2.d0*f3*rsd)*u**3+(d4+2.d0*f4*rsd)*u**4+(d5+2.d0*f5*rsd)*u**5
-   ddendrs = ddendrs * alpha_d*rs**(alpha_d-1.d0)
-   ddendt = (c1+d1*rsd+f1*rsd**2)+2.d0*(c2+d2*rsd+f2*rsd**2)*u+3.d0*(c3+d3*rsd+f3*rsd**2)*u**2+4.d0*(c4+d4*rsd+f4*rsd**2)*u**3+5.d0*(c5+d5*rsd+f5*rsd**2)*u**4
-   ddendt = ddendt * du
-   !
-   call tildeAx(t,Ax,dAx,d2Ax)
-   Bc = num/den
-   Bc = Bc/Ax
-   dBcdrs = dnumdrs/den - num*ddendrs/den**2
-   dBcdrs = dBcdrs/Ax
-   ! d((num/den)/Ax)/dt = d(num/den)/dt *1/Ax -  (num/den)*dAx/dt * 1/Ax**2
-   dBcdt = (dnumdt/den - num*ddendt/den**2)/Ax - (num/den)*dAx/Ax**2
-   !
- endif
-end subroutine tildeBcII
 !!***
 
 !----------------------------------------------------------------------
