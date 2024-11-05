@@ -1480,12 +1480,12 @@ subroutine prtene(dtset,energies,iout,usepaw)
 !Local variables-------------------------------
 !scalars
  integer :: ipositron,optdc
- logical :: directE_avail,testdmft
+ logical :: directE_avail,testdmft,write_entropy=.false.
  real(dp) :: eent,enevalue,etotal,etotaldc,exc_semilocal
  ! Do not modify the length of these strings
  character(len=14) :: eneName
  character(len=500) :: msg
- type(yamldoc_t) :: edoc, dc_edoc
+ type(yamldoc_t) :: edoc,dc_edoc,sdoc
 !arrays
  !character(len=10) :: EPName(1:2)=(/"Positronic","Electronic"/)
 
@@ -1527,10 +1527,7 @@ subroutine prtene(dtset,energies,iout,usepaw)
      edoc = yamldoc_open('EnergyTerms', info='Components of total free energy in Hartree', &
                          width=20, real_fmt='(es21.14)')
      call edoc%add_real('kinetic', energies%e_kinetic)
-     if(abs(energies%e_extfpmd)>tiny(0.0_dp)) then
-       call edoc%add_real('kinetic_extfpmd',energies%e_extfpmd)
-       call edoc%add_real('total_kinetic',energies%e_extfpmd+energies%e_kinetic)
-     end if
+     if(abs(energies%e_extfpmd)>tiny(zero)) call edoc%add_real('extfpmd',energies%e_extfpmd)
      if (ipositron/=1) then
        exc_semilocal=energies%e_xc+energies%e_hybcomp_E0-energies%e_hybcomp_v0+energies%e_hybcomp_v
        ! XG20181025 This should NOT be a part of the semilocal XC energy, but treated separately.
@@ -1623,7 +1620,7 @@ subroutine prtene(dtset,energies,iout,usepaw)
                           width=20, real_fmt="(es21.14)")
    call dc_edoc%add_real('band_energy', energies%e_eigenvalues)
    if(abs(energies%e_extfpmd)>tiny(0.0_dp)) then
-     call dc_edoc%add_real('kinetic_extfpmd_dc',energies%edc_extfpmd)
+     call dc_edoc%add_real('extfpmd_dc',energies%edc_extfpmd)
    end if
    if (ipositron/=1) then
      !write(msg, '(2(a,es21.14,a),a,es21.14)' ) &
@@ -1725,9 +1722,23 @@ subroutine prtene(dtset,energies,iout,usepaw)
    call edoc%add_real('monopole_correction_eV', energies%e_monopole*Ha_eV)
  end if
 
+!======= In case other sources of entropies than the non-interacting entropy ==========
+!============ of the Kohn-Shame states come into play, print the details ==============
+ if(abs(energies%entropy)>tiny(zero).and.abs(energies%entropy-energies%entropy_ks)>tiny(zero)) then
+   write_entropy=.true.
+   sdoc = yamldoc_open('EntropyTerms', info='Components of total entropy', &
+   & width=20, real_fmt="(es21.14)") ! in kB units
+   call sdoc%add_real('noninteracting',energies%entropy_ks) ! Noninteracting entropy = Entropy of the Kohn-Sham states
+   if(abs(energies%entropy_xc)>tiny(zero)) call sdoc%add_real('xc',energies%entropy_xc)
+   if(usepaw==1.and.abs(energies%entropy_paw)>tiny(zero)) call sdoc%add_real('spherical_terms',energies%entropy_paw)
+   if(abs(energies%entropy_extfpmd)>tiny(zero)) call sdoc%add_real('extfpmd',energies%entropy_extfpmd)
+   call sdoc%add_real('total_entropy',energies%entropy) ! Total entropy energy
+ end if
+
  ! Write components of total energies in Yaml format.
  call edoc%write_and_free(iout)
- if (optdc >= 1) call dc_edoc%write_and_free(iout)
+ if(optdc >= 1) call dc_edoc%write_and_free(iout)
+ if(write_entropy) call sdoc%write_and_free(iout)
 
 end subroutine prtene
 !!***
