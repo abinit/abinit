@@ -25,7 +25,7 @@ module m_xcpbe
  use m_abicore
  use m_errors
  use m_special_funcs,      only : tildeAx,tildeBx,tildeBc
- use m_xclda,              only : fex_ksdt,fec_ksdt
+ use m_xclda,              only : fxc_ksdt,fec_ksdt
  use m_numeric_tools,      only : invcb
 
  implicit none
@@ -5201,54 +5201,40 @@ subroutine xckdt16(dvxcdgr,exci,tsxci,grho2_updn,ixc,npts,nspden,rhor,rspts,el_t
  integer :: ipt
  real(dp) :: tfac,rs,rho,tempf,tred
  real(dp) :: grho,degauss
- real(dp) :: fxclda,tsxclda,vxclda
- real(dp) :: fx_lda,einx_lda,tsx_lda,vx_lda
- real(dp) :: fc_lda,einc_lda,tsc_lda,vc_lda
+ real(dp) :: fxclda,tsxclda,vxclda,einxclda
  real(dp) :: fx, v1x, v2x, einx, tsx
  real(dp) :: fc, v1c, v2c, einc, tsc
 
 ! *************************************************************************
 
-!Compute tfac=(3._dp*pi**2)**(2._dp/3._dp)/2._dp, tempFermi=tfac*rho**(2/3)
  tfac=(3._dp*pi**2)**(2._dp/3._dp)/2._dp
-
- !el_temp=1.d-10
- degauss = el_temp*2._dp ! setup temperature (in Ry) in defs_basis module
-
+ degauss = el_temp*2._dp ! setup temperature (in Ry)
 !Loop over grid points
  do ipt=1,npts
    rs=rspts(ipt)
-   rho=rhor(ipt) !0.75_dp/pi/(rs**3)
+   rho=rhor(ipt)                 !0.75_dp/pi/(rs**3)
    tempf=tfac*rho**(2._dp/3._dp) !(3._dp*pi**2*rho)**(2._dp/3._dp)/2._dp
    tred=el_temp/tempf
-   grho=grho2_updn(ipt,1)*4.d0 ! this array must have grad2_rho_up even in
-                               ! the spin-unpolarized case, such that
-                               ! grad2_rho=4*grad2_rho_up=4*grad2_rho_dn
-! quantities below (fxclda, fx_lda and fc_lda) are the XC, X and C energy per particle
-! choose this one:
-! call fxc_ksdt(fxclda,vxclda,rs,tred,0)
-! or this one:
-   call fex_ksdt(rs,fx_lda,einx_lda,tsx_lda,vx_lda,degauss)
-   call fec_ksdt(rs,fc_lda,einc_lda,tsc_lda,vc_lda,degauss)
-   fxclda=fx_lda+fc_lda
-   tsxclda=tsx_lda+tsc_lda
-   vxclda=vx_lda+vc_lda
+   grho=grho2_updn(ipt,1)*4.d0   ! this array must have grad2_rho_up even in
+                                 ! the spin-unpolarized case, such that
+                                 ! grad2_rho=4*grad2_rho_up=4*grad2_rho_dn
+   call fxc_ksdt(fxclda,vxclda,einxclda,tsxclda,rs,tred,0)
    if(ixc.eq.60) then
      call fex_kdt16(rho,grho,5,fx,v1x,v2x,einx,tsx,degauss)
      call fec_kdt16(rho,grho,1,fc,v1c,v2c,einc,tsc,degauss)
-   !  elseif(ixc.eq.61) then
-   !    call fex_kdt16(rho,grho,6,fx,v1x,v2x,einx,tsx,degauss)
-   !    call fec_kdt16(rho,grho,2,fc,v1c,v2c,einc,tsc,degauss)
-   !  elseif(ixc.eq.62) then
-   !    call fex_kdt16(rho,grho,7,fx,v1x,v2x,einx,tsx,degauss)
-   !    call fec_kdt16(rho,grho,3,fc,v1c,v2c,einc,tsc,degauss)
+!  elseif(ixc.eq.61) then ! These parametrizations are not yet active.
+!    call fex_kdt16(rho,grho,6,fx,v1x,v2x,einx,tsx,degauss)
+!    call fec_kdt16(rho,grho,2,fc,v1c,v2c,einc,tsc,degauss)
+!  elseif(ixc.eq.62) then ! These parametrizations are not yet active.
+!    call fex_kdt16(rho,grho,7,fx,v1x,v2x,einx,tsx,degauss)
+!    call fec_kdt16(rho,grho,3,fc,v1c,v2c,einc,tsc,degauss)
    endif
    exci(ipt)=(fx+fc)+fxclda
    tsxci(ipt)=(tsx+tsc)+tsxclda ! total exchange-correlation entropy energy: S_xc[n] = kTS_xc[n]/kT
    vxci(ipt,1)=(v1x+v1c)+vxclda
-   dvxcdgr(ipt,3)=(v2x+v2c)      !d(exc*rho)/d|gradRho|*1/|gradRho|
-   dvxcdgr(ipt,1)=zero !dvxcdgr(ipt,3)*4.d0 ! d(exc*rho)/d|gradRho_up|*1/|gradRho_up|
-   dvxcdgr(ipt,2)=zero !dvxcdgr(ipt,1)      ! d(exc*rho)/d|gradRho_dn|*1/|gradRho_dn|
+   dvxcdgr(ipt,3)=(v2x+v2c)     !d(exc*rho)/d|gradRho|*1/|gradRho|
+   dvxcdgr(ipt,1)=zero          !dvxcdgr(ipt,3)*4.d0 ! d(exc*rho)/d|gradRho_up|*1/|gradRho_up|
+   dvxcdgr(ipt,2)=zero          !dvxcdgr(ipt,1)      ! d(exc*rho)/d|gradRho_dn|*1/|gradRho_dn|
  enddo
 end subroutine xckdt16
 !!***
@@ -5294,27 +5280,26 @@ subroutine fex_kdt16(rho,grho,iflag,fx,v1x,v2x,einx,tsx,degauss)
  real(dp) :: s2x,ds2xdt,ds2xdn
  real(dp) :: ex0,vx0,fxunif,dfxunif,sx,FFx,dFFxds2x
  real(dp) :: f_slater,alpha_slater
- real(dp), parameter :: &
-      twothird = 2._DP*third, &
-      fourthird = 4._DP*third, &
-      eightthird = 8._DP*third, &
-      c1 = 0.75_DP / pi , &
-      c2 = 3.093667726280136_DP, &
-      pi34 = 0.6203504908994d0
+ real(dp), parameter :: twothird = 2._dp*third
+ real(dp), parameter :: fourthird = 4._dp*third
+ real(dp), parameter :: eightthird = 8._dp*third
+ real(dp), parameter :: c1 = 0.75_dp / pi
+ real(dp), parameter :: c2 = 3.093667726280136_dp
+ real(dp), parameter :: pi34 = 0.6203504908994d0
 
 ! *************************************************************************
 
  rs = pi34 / rho**third
- tF = (3._DP*PI**2*rho)**twothird/2._DP !tF=Fermi temperature for spin-unpol case
- t = degauss/2.0_DP/tF !reduced temperature
+ tF = (3._dp*pi**2*rho)**twothird/2._dp !tF=Fermi temperature for spin-unpol case
+ t = degauss/2.0_dp/tF !reduced temperature
  dtdn = -twothird*t!/rho        ! n*(dt/dn)
  agrho = sqrt (grho)
  kf = c2 * rho**third           ! (3*pi^2*rho)^(1/3)
- dsg = 0.5_DP / kf              ! n*ds/d(gn)
+ dsg = 0.5_dp / kf              ! n*ds/d(gn)
  s1 = agrho * dsg / rho         ! s
  s2 = s1 * s1                   ! s^2
  ds2dn = -eightthird*s2          ! n*ds^2/dn
- ds2dg = agrho/(2._DP*rho*kf**2) ! n*ds^2/d(gn)
+ ds2dg = agrho/(2._dp*rho*kf**2) ! n*ds^2/d(gn)
 !
 ! Call t-dependent functions
 !
@@ -5324,7 +5309,7 @@ subroutine fex_kdt16(rho,grho,iflag,fx,v1x,v2x,einx,tsx,degauss)
  BAx = Bx/Ax
  dBAx = dBx/Ax - Bx*dAx/Ax**2
  d2BAx = d2Bx/Ax - dBx*dAx/Ax**2 & ! derivative of first term in above line
-       - dBx*dAx/Ax**2 - Bx*d2Ax/Ax**2 + 2._DP*Bx*dAx*dAx/Ax**3 ! derivative of second term
+       - dBx*dAx/Ax**2 - Bx*d2Ax/Ax**2 + 2._dp*Bx*dAx*dAx/Ax**3 ! derivative of second term
 !
  s2x = s2*BAx
  ds2xdt = s2*dBAx
@@ -5404,9 +5389,9 @@ subroutine enfact1_kdt16(iflag,s2x,Fx,dFxds2x)
 ! ************************************************************************* 
 
 !            PBE         PBEsol                     PBEmol      Geldart                
- data Fxmax /1.804_DP,   1.804_DP                 , 1.804_DP,   1.804_DP                 /
- data    mu /0.21951_DP, 0.12345679012345679012_DP, 0.27583_DP, 0.09876543209876543209_DP/
- data gamma /0.1_DP    , 0.05_DP                  , 0.1_DP,     0.05_DP                  /
+ data Fxmax /1.804_dp,   1.804_dp                 , 1.804_dp,   1.804_dp                 /
+ data    mu /0.21951_dp, 0.12345679012345679012_dp, 0.27583_dp, 0.09876543209876543209_dp/
+ data gamma /0.1_dp    , 0.05_dp                  , 0.1_dp,     0.05_dp                  /
  alpha = mu(iflag)**2/(Fxmax(iflag)**2-one)
  if(s2x.lt.zero) then
    expe = exp(gamma(iflag)*s2x)
@@ -5471,8 +5456,8 @@ subroutine enfact2_kdt16(iflag,s2x,Fx,dFxds2x)
 ! *************************************************************************
 
 !           PBE         PBEsol                     PBEmol      Geldart                
- data kappa /0.804_DP,   0.804_DP                 , 0.804_DP,   0.804_DP                 /
- data    mu /0.21951_DP, 0.12345679012345679012_DP, 0.27583_DP, 0.09876543209876543209_DP/
+ data kappa /0.804_dp,   0.804_dp                 , 0.804_dp,   0.804_dp                 /
+ data    mu /0.21951_dp, 0.12345679012345679012_dp, 0.27583_dp, 0.09876543209876543209_dp/
  aa1 = mu(iflag)/kappa(iflag)
  Fx = mu(iflag)*s2x/(one+aa1*abs(s2x)) !remove LDA term (subtract 1) to make it compatible with WE
  dFxds2x = mu(iflag)/(one+aa1*abs(s2x))**2
@@ -5551,8 +5536,8 @@ subroutine fec_kdt16(rho,grho,iflag,fc,v1c,v2c,einc,tsc,degauss)
  rs = pi34 / rho**third
 !drsdn = -third*rs/rho
  drsdn = -third*rs !n*d(rs)/dn
- tF = (3._DP*PI**2*rho)**twothird/2._DP !tF=Fermi temperature for spin-unpol case
- t = degauss/2.0_DP/tF
+ tF = (3._dp*pi**2*rho)**twothird/2._dp !tF=Fermi temperature for spin-unpol case
+ t = degauss/2.0_dp/tF
 !dtdn = -twothird*t/rho ! (dt/dn)
  dtdn = -twothird*t ! n*(dt/dn)
 ! LDA f_c, einternal_c and T*s_c energies per electron
@@ -5560,7 +5545,7 @@ subroutine fec_kdt16(rho,grho,iflag,fc,v1c,v2c,einc,tsc,degauss)
 ! added temporarily for tests
 !call pw (rs, 1, fc_lda, vc_lda)
 !einc_lda = fc_lda
-!tsc_lda = 0._DP
+!tsc_lda = 0._dp
 !
  if(iflag.le.8)   call tildeBc(iflag,rs,t,Bc,dBcdrs,dBcdt)  !iflag=1,2,..8
 !if(iflag.gt.8) call tildeBcII(iflag,rs,t,Bc,dBcdrs,dBcdt)  !iflag=9,10,..12
@@ -5568,19 +5553,19 @@ subroutine fec_kdt16(rho,grho,iflag,fc,v1c,v2c,einc,tsc,degauss)
  kf = xkf/rs
  ks = xks*sqrt(kf)
  qc = sqrt(grho)/(2.d0*ks*rho) * sqrt(Bc)
-!dqcdn = -(7._DP/6._DP)*qc/rho - 0.5_DP*sqrt(grho)/(2.d0*ks*rho)/sqrt(Bc) * dBcdrs*drsdn !d(qc)/dn
-!dqcdn = -(7._DP/6._DP)*qc - 0.5_DP*sqrt(grho)/(2.d0*ks*rho)/sqrt(Bc) * dBcdrs*drsdn !n*d(qc)/dn
-!dqcdt = - 0.5_DP*sqrt(grho)/(2.d0*ks*rho)/sqrt(Bc) * dBcdt ! d(qc)/dt
- dqcdn = -(7._DP/6._DP)*qc + 0.5_DP*qc/Bc * dBcdrs*drsdn !n*d(qc)/dn
- dqcdt = + 0.5_DP*qc/Bc * dBcdt ! d(qc)/dt
+!dqcdn = -(7._dp/6._dp)*qc/rho - 0.5_dp*sqrt(grho)/(2.d0*ks*rho)/sqrt(Bc) * dBcdrs*drsdn !d(qc)/dn
+!dqcdn = -(7._dp/6._dp)*qc - 0.5_dp*sqrt(grho)/(2.d0*ks*rho)/sqrt(Bc) * dBcdrs*drsdn !n*d(qc)/dn
+!dqcdt = - 0.5_dp*sqrt(grho)/(2.d0*ks*rho)/sqrt(Bc) * dBcdt ! d(qc)/dt
+ dqcdn = -(7._dp/6._dp)*qc + 0.5_dp*qc/Bc * dBcdrs*drsdn !n*d(qc)/dn
+ dqcdt = + 0.5_dp*qc/Bc * dBcdt ! d(qc)/dt
  expe = exp(-fc_lda/ga)
  af = be(iflag)/ga/(expe-1.d0) !A(fc_lda)
  dadf = expe*af**2/be(iflag) !dA(fc_lda)/d(fc_lda)
  y = af*qc*qc
  xy = (1.d0 + y) / (1.d0 + y + y * y) 
- dxy = -y*(2._DP + y)/(1._DP + y + y*y)**2 !d(xy)/dy
+ dxy = -y*(2._dp + y)/(1._dp + y + y*y)**2 !d(xy)/dy
  s1 = 1.d0 + be(iflag)/ga*qc*qc*xy
- ds1dqc = be(iflag)/ga*2._DP*qc*xy + be(iflag)/ga*qc*qc*dxy * 2._DP*af*qc !d(s1)/d(qc)
+ ds1dqc = be(iflag)/ga*2._dp*qc*xy + be(iflag)/ga*qc*qc*dxy * 2._dp*af*qc !d(s1)/d(qc)
  ds1da = be(iflag)/ga*qc*qc*dxy * qc*qc !d(s1)/dA
  h0 = ga*log(s1)
  fc = rho * h0 ! energy density !17-APR-2016: commented in ABINIT version
