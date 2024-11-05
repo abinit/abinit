@@ -5243,10 +5243,10 @@ subroutine xckdt16(dvxcdgr,exci,tsxci,grho2_updn,ixc,npts,nspden,rhor,rspts,el_t
    !    call fex_kdt16(rho,grho,7,fx,v1x,v2x,einx,tsx,degauss)
    !    call fec_kdt16(rho,grho,3,fc,v1c,v2c,einc,tsc,degauss)
    endif
-   exci(ipt)=fxclda+(fx+fc)!/rho
-   tsxci(ipt)=(tsxclda+(tsx+tsc)) ! total exchange-correlation entropy energy: S_xc[n] = kTS_xc[n]/kT
-   vxci(ipt,1)=vxclda+v1x+v1c
-   dvxcdgr(ipt,3)=v2x+v2c !d(exc*rho)/d|gradRho|*1/|gradRho|
+   exci(ipt)=(fx+fc)+fxclda
+   tsxci(ipt)=(tsx+tsc)+tsxclda ! total exchange-correlation entropy energy: S_xc[n] = kTS_xc[n]/kT
+   vxci(ipt,1)=(v1x+v1c)+vxclda
+   dvxcdgr(ipt,3)=(v2x+v2c)      !d(exc*rho)/d|gradRho|*1/|gradRho|
    dvxcdgr(ipt,1)=zero !dvxcdgr(ipt,3)*4.d0 ! d(exc*rho)/d|gradRho_up|*1/|gradRho_up|
    dvxcdgr(ipt,2)=zero !dvxcdgr(ipt,1)      ! d(exc*rho)/d|gradRho_dn|*1/|gradRho_dn|
  enddo
