@@ -1,3 +1,5 @@
+# IMPORTANT: python 3.6 is REQUIRED. Later version are not supported.  
+
 html2text
 
 # Pinned versions for website deployment
@@ -10,6 +12,9 @@ python-markdown-math
 pyyaml
 pygments
 pybtex
+numpy 
+pyyaml
+pandas
 
 #graphviz or python-graphviz if conda
 #py_w3c
