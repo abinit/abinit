@@ -388,6 +388,15 @@ contains
     end if
   end if
 
+  ! Check if provided buffers are already mapped on GPU
+  transfer_vectin=.not. xomp_target_is_present(c_loc(vectin)) &
+      .and. ((cpopt < 2 .and. choice < 2) .or. (cpopt <= 3 .and. choice >= 2) &
+      .or. (choice/=7 .and.paw_opt >=3))
+  transfer_vectout=.not. xomp_target_is_present(c_loc(vectout)) &
+      .and. (signs==2 .and. (paw_opt == 0 .or. paw_opt == 1 .or. paw_opt == 4))
+  transfer_svectout=.not. xomp_target_is_present(c_loc(svectout)) &
+      .and. (signs==2 .and. (paw_opt == 3 .or. paw_opt == 4))
+
   ikin=1; ikout=1;
   select case (select_k)
   case (K_H_K)
@@ -484,6 +493,57 @@ contains
     ph3dout_    => ph3dout
   end if
 
+  ! The number of projectors used for computation may vary among
+  ! nonlop calls, from computing on all atoms to a select one for
+  ! some perturbations.
+  ! In such cases, projs arrays must be recomputed
+  nprojs=0
+  do itypat=1,ntypat_
+    nprojs = nprojs + count(indlmn_(3,:,itypat)>0)*nattyp_(itypat)
+  end do
+
+  if(nprojs == 0) then
+    ! TODO check if this is correct
+    if (iatom_only>0) then
+      ABI_FREE(atindx1_)
+      ABI_FREE(nattyp_)
+      ABI_FREE(ph3din_)
+      ABI_FREE(ph3dout_)
+      ABI_FREE(ffnlin_)
+      ABI_FREE(ffnlout_)
+      ABI_FREE(enl_)
+      ABI_FREE(indlmn_)
+      if (size(sij) > 1) then
+        ABI_FREE(sij_)
+      end if
+    end if
+    if(signs == 1) then
+      enlout=zero
+      return
+    end if
+    if(signs == 2) then
+      if(transfer_vectout) then
+        vectout = zero
+      else
+        call gpu_set_to_zero(svectout, int(2,c_size_t) * npwout * nspinor * ndat)
+      end if
+      if(paw_opt>0) then
+        if(transfer_svectout .and. transfer_vectin) then
+          svectout = vectin
+        else if(transfer_vectin) then
+          svectout = vectin
+          !$OMP TARGET UPDATE TO(svectout)
+        else if(transfer_svectout) then
+          !$OMP TARGET UPDATE FROM(vectin)
+          svectout = vectin
+        else
+          call gpu_copy(svectout, vectin, int(2,c_size_t) * npwin * nspinor * ndat)
+        end if
+      end if
+      return
+    end if
+  end if
+
   !Eventually re-compute (k+G) vectors (and related data)
   nkpgin_=0
   if (choice==2.or.choice==54) nkpgin_=3
@@ -512,23 +572,7 @@ contains
 
   !$OMP TARGET ENTER DATA MAP(to:kpgin_,kpgout_)
 
-  ! The number of projectors used for computation may vary among
-  ! nonlop calls, from computing on all atoms to a select one for
-  ! some perturbations.
-  ! In such cases, projs arrays must be recomputed
-  nprojs=0
-  do itypat=1,ntypat_
-    nprojs = nprojs + count(indlmn_(3,:,itypat)>0)*nattyp_(itypat)
-  end do
-
   ! Allocate and copy GPU buffers if user doesn't manage them
-  transfer_vectin=.not. xomp_target_is_present(c_loc(vectin)) &
-      .and. ((cpopt < 2 .and. choice < 2) .or. (cpopt <= 3 .and. choice >= 2) &
-      .or. (choice/=7 .and.paw_opt >=3))
-  transfer_vectout=.not. xomp_target_is_present(c_loc(vectout)) &
-      .and. (signs==2 .and. (paw_opt == 0 .or. paw_opt == 1 .or. paw_opt == 4))
-  transfer_svectout=.not. xomp_target_is_present(c_loc(svectout)) &
-      .and. (signs==2 .and. (paw_opt == 3 .or. paw_opt == 4))
   !$OMP TARGET ENTER DATA MAP(to:vectin)      IF(transfer_vectin)
   !$OMP TARGET ENTER DATA MAP(alloc:vectout)  IF(transfer_vectout)
   !$OMP TARGET ENTER DATA MAP(alloc:svectout) IF(transfer_svectout)
@@ -569,19 +613,6 @@ contains
     end if
   end if
   !$OMP TARGET UPDATE TO(sij_typ)
-
-  if(nprojs == 0) then
-    ! TODO check if this is correct
-    if(signs == 1) then
-      enlout=zero
-      return
-    end if
-    if(signs == 2) then
-      vectout = zero
-      if(paw_opt>0) svectout = vectin
-      return
-    end if
-  end if
 
   ndgxdt = -1
   nd2gxdt = -1
@@ -713,19 +744,6 @@ contains
     end if
   else
     ABI_MALLOC(d2projections,(1, 1, ndat))
-  end if
-
-  if(nprojs == 0) then
-    ! TODO check if this is correct
-    if(signs == 1) then
-      enlout=zero
-      return
-    end if
-    if(signs == 2) then
-      vectout = zero
-      if(paw_opt>0) svectout = vectin
-      return
-    end if
   end if
 
   if(signs == 1 .and. choice > 0) then
