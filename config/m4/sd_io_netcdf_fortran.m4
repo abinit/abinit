@@ -429,7 +429,7 @@ AC_DEFUN([_SD_NETCDF_FORTRAN_CHECK_CONFIG], [
         ;;
       warn)
         if test "${sd_netcdf_fortran_init}" = "dir" ; then
-          AC_MSG_WARN([conflicting option settings for NETCDF Fortran: when giving a path, environment variable are ignored. Set with_netcdf="yes" to use environment variable])
+          AC_MSG_WARN([conflicting option settings for NETCDF Fortran: when giving a path, environment variables are ignored. Set with_netcdf="yes" to use environment variables])
         else
           AC_MSG_WARN([conflicting option settings for NETCDF Fortran])
           tmp_netcdf_fortran_invalid="yes"
