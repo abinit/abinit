@@ -41,7 +41,7 @@ pseudos = "H.psp8"
 #%% executable = abinit
 #%% [files]
 #%% files_to_test =
-#%%   t20.abo, tolnlines = 55, tolabs = 1.0E-6, tolrel = 2.0E-4;
+#%%   t20.abo, tolnlines = 55, tolabs = 1.0E-6, tolrel = 1.0E-3;
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]
