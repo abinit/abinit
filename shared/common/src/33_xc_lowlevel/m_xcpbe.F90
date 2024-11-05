@@ -5273,7 +5273,7 @@ subroutine fex_kdt16(rho,grho,iflag,fx,v1x,v2x,einx,tsx,degauss)
 !Local variables ------------------------------
 !scalars
  real(dp) :: rs,tF,t,dtdn
- real(dp) :: kf,agrho,s1,s2,ds2dn,ds2dg,dsg
+ real(dp) :: kf,agrho,s1,s2,ds2dn,ds2dg_agrho,dsg
  real(dp) :: Ax,dAx,d2Ax
  real(dp) :: Bx,dBx,d2Bx
  real(dp) :: BAx,dBAx,d2BAx
@@ -5299,7 +5299,8 @@ subroutine fex_kdt16(rho,grho,iflag,fx,v1x,v2x,einx,tsx,degauss)
  s1 = agrho * dsg / rho         ! s
  s2 = s1 * s1                   ! s^2
  ds2dn = -eightthird*s2          ! n*ds^2/dn
- ds2dg = agrho/(2._dp*rho*kf**2) ! n*ds^2/d(gn)
+!ds2dg = agrho/(2._dp*rho*kf**2) ! n*ds^2/d(gn)
+ ds2dg_agrho = 1._dp/(2._dp*rho*kf**2) ! n*ds^2/d(gn)
 !
 ! Call t-dependent functions
 !
@@ -5338,7 +5339,7 @@ subroutine fex_kdt16(rho,grho,iflag,fx,v1x,v2x,einx,tsx,degauss)
 ! Pay attention: "*n" factor is included in dtdn, ds2dn, ds2dg, ds2xdn terms (see above). 
  dfxunif = fxunif*third + ex0*dAx*dtdn !n*(dfxunif/dn)=fxunif*(1/3) + e_x^0*(dAx/dt)* n*(dt/dn)
  v1x = fx + dfxunif*FFx + fxunif*dFFxds2x*ds2xdn ! d/dn(n*fxunif*FFx(s2x) see above
- v2x = fxunif*dFFxds2x*ds2dg*BAx/agrho !d(n*fxunif*Fx(s2x))/d(gn)*1/(gn)=
+ v2x = fxunif*dFFxds2x*ds2dg_agrho*BAx !d(n*fxunif*Fx(s2x))/d(gn)*1/(gn)=
 !                                     =fxunif*d(Fx(s2x))/d(s2x) *n*ds2/d(gn) *Bx/Ax)*1/(gn)
 end subroutine fex_kdt16
 !!***
