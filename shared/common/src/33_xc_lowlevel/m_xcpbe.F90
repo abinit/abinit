@@ -5583,7 +5583,6 @@ subroutine fec_kdt16(rho,grho,iflag,fc,v1c,v2c,einc,tsc,degauss)
  tilde_qc = 1._dp/(2.d0*ks*rho) * sqrt(Bc) ! tilde_qc == qc /sqrt(grho)
  tilde_ds1dqc = be(iflag)/ga*2._dp*tilde_qc*xy + be(iflag)/ga*qc*qc*dxy * 2._dp*af*tilde_qc ! tilde_ds1dqc = ds1dqc/sqrt(grho)
  v2c = rho * (ga/s1) * tilde_ds1dqc * tilde_qc
- write(0,*) v2c
 ! first version:
 !tsc = rho*(ga/s1) * ds1da * dadf * tsc_lda - rho*(ga/s1) * t*dqcdt
 !
