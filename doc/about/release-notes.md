@@ -10,12 +10,12 @@ March 2024 and October 2024.
 These release notes
 are relative to modifications/improvements of ABINIT v10.2 with respect to v10.0, with also some late fixes to v10.0, after March 2024,
 that had not yet been documented.
-<!-- Initially, merge requests from MR986 up to and including MR1062 in the beta-release v10.2.1. Also, MR1064 to MR1067 and MR1069 to MR1062 are taken into account in v10.2.3, publicly released.. -->
+<!-- Initially, merge requests from MR986 up to and including MR1062 in the beta-release v10.2.1. Also, MR1034, MR1064 to MR1067, MR1069 to MR1072, MR1074 are taken into account in v10.2.3, publicly released.. -->
 
 The list of contributors includes:
 G. Antonius, M. Azizi, L. Baguet, J.-M. Beuken, O. Bistoni, A. Blanchet, F. Bottin, F. Bruneval, Siyu Chen, F. Gendron, M. Giantomassi, X. Gonze,
 P. Kestener, L. MacEnulty, M. Mignolet, C. Paillard,
-S. Ponce, M. Sarraute, M. Torrent, V. Vasilchenko, M. Verstraete, Xu He, J. Zwanziger
+S. Ponce, M. Royo, M. Sarraute, M. Torrent, V. Vasilchenko, M. Verstraete, Xu He, J. Zwanziger
 
 It is worthwhile to read carefully all the modifications that are mentioned in the present file,
 and examine the links to help files or test cases.
@@ -162,7 +162,7 @@ By M. Torrent (MR1069)
 
 * * *
 
-### **D.**  Other developments (possibly not yet finalized), other new tests, other new input variables.
+### **D.**  Other developments (possibly not yet finalized), other new tests, new input variables, new tutorial.
 
 **D.1** The work on the ground-state GPU porting of ABINIT is continuing.
 
@@ -316,6 +316,11 @@ Related input variables : varpeq_aseed, varpeq_erange, varpeq_gau_params, varpeq
 
 By V. Vasilchenko, with help from M. Giantomassi (MR 1047, MR1065).
 
+**D.21** A new tutorial, on the computation of dynamical quadrupoles, has been created.
+Also, the elph legacy tutorial has been updated.
+
+By S. Ponce, with contribution from M. Royo (MR1034).
+
 
 ### **E.**  Bug fixes, not yet mentioned in the previous sections of these release notes.
 
@@ -424,9 +429,13 @@ By M. Mignolet (MR1057)
 
 **E.16** New NVHPC version 24.9 dropped recently and was failing to compile (again). Switching loop order simply fixes the thing. 
 
+By M. Sarraute (MR1064)
 
+**E.17** Minor fixes : fix compilation with gcc8.5 regarding contiguous pointers ; Fix gpu[1], by fixing condition restricting GPU to DFPT, only with OpenMP ; Reduce implicit copies when nspinor==1 in GEMM nonlop.
 
-**E.17** Miscellaneous bug fixes and cleaning
+By M. Sarraute (MR1074)
+
+**E.18** Miscellaneous bug fixes and cleaning
 
 By He Xu (MR1009), by M. Verstraete (MR1025)
 
