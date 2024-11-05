@@ -213,8 +213,6 @@ contains
 !!   50 means IIT xc (TLDA functional)                     xciit
 !!   51 means KSDT xc (TLDA functional)                    xcksdt
 !!   60 means KDT16 xc (PBE TGGA functional)               xckdt16
-!!   61 means KDT16 xc (PBEsol TGGA functional)            xckdt16
-!!   62 means KDT16 xc (PBEmol TGGA functional)            xckdt16
 !!
 !! NOTE: please update echo_xc_name.F90 if you add new functional (apart from libxc)
 !!

@@ -1599,7 +1599,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 
 !  ixc
    call chkint(0,0,cond_string,cond_values,ierr,&
-&   'ixc',dt%ixc,38,(/0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,20,21,22,23,24,26,27,31,32,33,34,35,40,41,42,50,51,60,61,62/),-1,0,iout) ! One of the values, or negative
+&   'ixc',dt%ixc,36,(/0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,20,21,22,23,24,26,27,31,32,33,34,35,40,41,42,50,51,60/),-1,0,iout) ! One of the values, or negative
    if(dt%iscf==-1)then
      cond_string(1)='iscf' ; cond_values(1)=dt%iscf
 !    Make sure that ixc is 1, 7, 8, 20, 21 or 22  (native functionals only for TDDFT - LibXC functionals have not been tested !)
