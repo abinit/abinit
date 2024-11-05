@@ -2,9 +2,7 @@
 
 Version 10.2, released on October 10, 2024.
 List of changes with respect to version 10.0.
-<!-- Release notes updated on Oct 9, 2024. -->
-
-WARNING : THESE v10.2 RELEASE NOTES HAVE NOT YET BEEN EXAMINED CAREFULLY AND APPROVED BY THE DEVELOPERS. MOREOVER THEY ARE INCOMPLETE. THE PRESENT v10.2 RELEASE IS ONLY A BETA RELEASE.
+<!-- Release notes updated on Oct 27, 2024. -->
 
 Many thanks to the contributors to the ABINIT project between
 March 2024 and October 2024.
@@ -12,7 +10,7 @@ March 2024 and October 2024.
 These release notes
 are relative to modifications/improvements of ABINIT v10.2 with respect to v10.0, with also some late fixes to v10.0, after March 2024,
 that had not yet been documented.
-<!-- TO BE CHANGED Merge requests from MR986 up to and including MR1062. Also, MRXXX to MRYYY ... are taken into account. -->
+<!-- Initially, merge requests from MR986 up to and including MR1062 in the beta-release v10.2.1. Also, MR1064 to MR1067 and MR1069 to MR1062 are taken into account in v10.2.3, publicly released.. -->
 
 The list of contributors includes:
 G. Antonius, M. Azizi, L. Baguet, J.-M. Beuken, O. Bistoni, A. Blanchet, F. Bottin, F. Bruneval, Siyu Chen, F. Gendron, M. Giantomassi, X. Gonze,
@@ -29,7 +27,9 @@ Xavier
 
 ### **A.** Remarks and warnings.
 
-(none)
+**A.1** Change nline default to 6 for ChebFi algorithm .
+
+By M. Torrent (MR1069)
 
 
 * * *
@@ -43,12 +43,16 @@ In the previous release 10.0, two implementations (OpenMP or KOKKOS+CUDA) for gr
 had been made available.
 
 In the present release 10.2, the Density-Functional Perturbation Theory [[optdriver]]=1
-has been ported, using OpenMP.  Numerous tests are available, [[test:gpu_omp_11]] to [[test:gpu_omp_25]]
+has been ported, using OpenMP, along with the following perturbations:
+- phonons ([[rfphon]])
+- electric field ([[rfelfd]])
+- strains ([[rfstrs]])
+Numerous tests are available, [[test:gpu_omp_11]] to [[test:gpu_omp_25]]
 
 See the description of the GPU possibilities of ABINIT in the documentation, input variable [[gpu_option]]=2 for the OpenMP capabilities.
 For the description of the modifications of ABINIT, see the Merge Requests (MR) below.
 
-By M. Sarraute and M. Torrent (MR 1027, MR1055, MR1059)
+By M. Sarraute and M. Torrent (MR 1027, MR1055, MR1059, MR1071)
 
 
 **B.2** GPU porting of Fock calculations
@@ -77,29 +81,27 @@ By M. Giantomassi (MR 1006) and F. Bruneval (MR1024).
 **B.4** Speed-up of the calculation (PAW as well as norm-conserving), thanks to cprj_in_memory. 
 
 The coefficients of the wavefunctions giving the in-sphere contribution, denoted "cprj", can now be stored in memory,
-thanks to the input variable [[cprj_in_memory]]. This brings speed-up of the PAW calculations (on the order of 20%-30%).
-There are many tests of this functionality, [[test:v10_10]] to  [[test:v10_18]],  [[test:paral_35]] to [[test:paral_40]],
+thanks to the input variable [[cprj_in_memory]].
+LOBPCG ([[wfoptalg]]=114) and Chebyshev filtering ([[wfoptalg]]=111) can be accelerated using this option.
+There are many tests of this functionality, [[test:v10_10]] to [[test:v10_19]], [[test:paral_35]] to [[test:paral_40]],
  [[test:paral_48]] and  [[test:paral_49]], and  [[test:v9_71]] to  [[test:v9_74]].
 However, as usual, the users are advised to check for themselves the results from turning on this new implementation (still mentioned as being "in development").
 
+Many parts are now computed with matrix-matrix multiplications, done with BLAS routines ("gemm").
+As a consequence, the efficiency of the implementation strongly depends on the BLAS library, which has to be multi-threaded if used with OpenMP. 
+
 Available only for the ground state. See the other limitations in the documentation of [[cprj_in_memory]].
 
-More detailed explanation ...
-The routines use a new module (xg_nonlop) in which all data needed to compute non-local operations are stored, using the xg_tools library.
-Main xg_nonlop routines (equivalent of opernla/b/c/d) are based on matrix-matrix operations.
-For now xg_nonlop is used only at the ground state level, but it is used to compute forces (with [[optforces]]=1 or 2) and stress.
-It is available with :
-PAW, [[nsppol]]=1 or2, [[nspinor]]=1 or 2, [[istwfk]]=all values, MPI ([[np_spkpt]]+[[npband]]) + openMP.
+It is available for both PAW and norm-conserving (NC) pseudopotentials, but with some constraints for the latter.
+Indeed, NC can be used only with [[useylm]]=1 (set automatically if [[cprj_in_memory]]=1).
+Also [[nspinor]]=2 does not work properly (but works well for PAW). This case is forbidden at the moment (test paral_50 is not activated).
 
-It is also available for norm-conserving pseudopotentials, but with the following constraints :
-[[useylm]] must be 1 (set automatically if [[cprj_in_memory]]=1), Legendre polynomials are not implemented.
-[[nspinor]]=2 does not work properly, most probably because SOC is not implemented with [[useylm]]=1 (but works well for PAW).
-This case is forbidden at the moment (test paral_50 is not activated).
-At last : ABINIT also contains a small fix of [[tolwfr_diago]], which was not used in lobpcg ([[tolwfr]] was used instead). This has a small impact on few references.
+At last : ABINIT also contains a small fix of [[tolwfr_diago]], which was not used in lobpcg ([[tolwfr]] was used instead).
 
-SHOULD DOCUMENT xg_nonlop_option input variable, used in  [[test:paral_35]],  [[test:paral_38]] and  [[test:v10_10]].
+In the case of Chebyshev filtering, two implementations are available, controlled by [[xg_nonlop_option]] (see [[test:paral_35]], [[test:paral_38]]).
+In practice, only the default option has good performance.
 
-By L. Baguet (MR 1058)
+By L. Baguet (MR 1058, MR1067, MR1070, MR1072)
 
 **B.5** Wannier90 with spinors, and other Wannier90 improvements.
 
@@ -132,7 +134,7 @@ By A. Blanchet (MR1013).
 They cover the basic functionalities of ABINIT, and the detection of failures is modified and made more robust.
 There should not be false failures due to tight tolerances.
 So, this should be the ideal set of tests to be executed after a new installation.
-Use "runtests.py -k MINIMAL". Also, "make check-local" and "make check-am" trigger this suite. POSSIBLY GIVE MORE DETAILS ?
+Use "runtests.py -k MINIMAL". Also, "make check-local" and "make check-am" trigger this suite. 
 
 By M. Verstrate, M. Torrent and X. Gonze (MR1035, MR1041)
 
@@ -142,7 +144,7 @@ So, this has been modified in config/m4/sd_math_linalg_core.m4 .
 
 By J.-M. Beuken (MR995) and M. Verstraete (MR1007)
 
-**C.3** The build system has been modified in order to include cmake files in 'make dist'. Modifications needed to compile with cmake.
+**C.3** The build system has been modified in order to include cmake files in 'make dist'. Some modifications needed to compile with cmake have been made.
 
 By M. Torrent (MR986, MR1032)
 
@@ -153,6 +155,10 @@ By P. Kestener (MR994)
 **C.5** Manage GPU markers with compilation flag rather than input parameters.
 
 By M. Sarraute (MR989)
+
+**C.6** Improve NVPL lib support in build system
+
+By M. Torrent (MR1069)
 
 * * *
 
@@ -208,24 +214,23 @@ See [[test:v10_40]].
 The requirement for m_orbmag routine to have pawxcdev 0 has been lifted. The default 1 works fine also, and the flexibility in pawxcdev makes the m_orbmag routine compatible with more features (mgga related, hybrid functional related, etc)
 
 The fock_getghc code has been corrected to allow for cplex_dij = 2 case; necessary for use with [[nucdipmom]]. Now for example pbe0 calculations run together with nuclear dipole moments, allowing NMR shieldings to be calculated in the hybrid functional case.
-IS THERE A TEST ?
 
 By J.Zwanziger (MR993, MR1016, MR1051, MR1052)
 
 
 **D.5** Miscellaneous developments for ground state.
-This includes the rework of [[istwfk]]=2 with xg_tools (both CPU and GPU).
-and the extension of [[istwfk]]>2 to lobpcg2 and chebfi2 (but works only with DFTI - the FFT from MKL).
-Tested in [[test:v10_03]], [[test:v10_04]], [[test:paral_44]] and [[test:paral_45]] for DFTI.
+
+This includes the rework of [[istwfk]]=2 with xg_tools (both CPU and GPU) and the extension of [[istwfk]]>2 to lobpcg2 and chebfi2
+(but works only with DFTI - the FFT from MKL).
+Tested in [[test:v10_03]], [[test:v10_04]], [[test:paral_44]] and [[test:paral_45]] for DFTI. 
 Same inputs are tested without DFTI in [[test:v10_05]], [[test:v10_06]], [[test:paral_46]] and [[test:paral_47]], but they use only [[istwfk]]=1 and 2.
-The Chebicheff filtering algorithm has been generalized to PAW with Spin-Orbit Coupling
+The Chebicheff filtering algorithm has been generalized to PAW with Spin-Orbit Coupling.
 See [[test:paral_44]] to [[test:paral_47]], as well as [[test:v10_03]] to [[test:v10_06]].
 
 By L. Baguet (MR 1014,1021,1022)
 
 **D.6**
-Authorize Hartree-Fock with time-reversal symmetry when a single k-point is used
-IS THERE A TEST ?
+Authorize Hartree-Fock with time-reversal symmetry when a single k-point is used.
 
 By F. Bruneval (MR1038)
 
@@ -264,7 +269,7 @@ By M. Giantomassi (5c6ff934)
 to read the database with the first-order densities for GWPT calculations.
 There is no test available yet (except the fake one `test:gwpt_04`), as this feature is still under development.
 
-By Siyu Chen (867b11f9)
+By Siyu Chen (867b11f9) and documentation of input variable by M. Giantomassi (MR1066)
 
 
 **D.13** The post-process mode of Wannier90 with wfk_task "wannier" is now tested. Upgraded [[test:w90_7]] for that purpose.
@@ -309,7 +314,7 @@ Current commit containts intermediate developments & variables, which are used f
 Final release of the framework is expected in the next version of the code.
 Related input variables : varpeq_aseed, varpeq_erange, varpeq_gau_params, varpeq_interpolate, varpeq_orth, varpeq_nstep, varpeq_pkind, varpeq_tolgrs, varpeq_pc_nupdate, varpeq_pc_factor, getvarpeq, getvarpeq_filepath.
 
-By V. Vasilchenko, with help from M. Giantomassi (MR 1047).
+By V. Vasilchenko, with help from M. Giantomassi (MR 1047, MR1065).
 
 
 ### **E.**  Bug fixes, not yet mentioned in the previous sections of these release notes.
@@ -417,8 +422,11 @@ m_kpts:kpts_map was always assuming spatial symmetries for mapping one set of k-
 
 By M. Mignolet (MR1057)
 
+**E.16** New NVHPC version 24.9 dropped recently and was failing to compile (again). Switching loop order simply fixes the thing. 
 
-**E.16** Miscellaneous bug fixes and cleaning
+
+
+**E.17** Miscellaneous bug fixes and cleaning
 
 By He Xu (MR1009), by M. Verstraete (MR1025)
 
@@ -670,7 +678,7 @@ See [[test:mpiio_26]], [[test:mpiio_27]], [[test:mpiio_51]],
 [[test:paral_66]],[[test:paral_86]]
 [[test:psic_03]], [[test:v9_202]].
 
-By L. Baguet (MR947)
+By L. Baguet (MR947, MR1070))
 
 **D.2**
 Introduced the new [[nblock_lobpcg]] variable (default=1), and set [[bandpp]] accordingly (taking into account npband).
