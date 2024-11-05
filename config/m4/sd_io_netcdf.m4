@@ -410,7 +410,7 @@ AC_DEFUN([_SD_NETCDF_CHECK_CONFIG], [
         ;;
       warn)
         if test "${sd_netcdf_init}" = "dir" ; then
-          AC_MSG_WARN([conflicting option settings for NETCDF : when giving a path, environment variable are ignored. Set with_netcdf="yes" to use environment variable])
+          AC_MSG_WARN([conflicting option settings for NETCDF : when giving a path, environment variables are ignored. Set with_netcdf="yes" to use environment variables])
         else
           AC_MSG_WARN([conflicting option settings for NETCDF])
           tmp_netcdf_invalid="yes"

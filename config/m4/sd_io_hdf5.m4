@@ -497,7 +497,7 @@ AC_DEFUN([_SD_HDF5_CHECK_CONFIG], [
         ;;
       warn)
         if test "${sd_hdf5_init}" = "dir" ; then
-          AC_MSG_WARN([conflicting option settings for HDF5 : when giving a path, environment variable are ignored. Set with_hdf5="yes" to use environment variable])
+          AC_MSG_WARN([conflicting option settings for HDF5 : when giving a path, environment variables are ignored. Set with_hdf5="yes" to use environment variables])
         else
           AC_MSG_WARN([conflicting option settings for HDF5])
           tmp_hdf5_invalid="yes"
