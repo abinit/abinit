@@ -2068,7 +2068,7 @@ subroutine tildeBc(iflag,rs,t,Bc,dBcdrs,dBcdt)
    threehalf = 3.d0/2.d0,&
    fivehalf = 5.d0/2.d0,&
    sevenhalf = 7.d0/2.d0
- real(dp) :: rsn,rsd
+ real(dp) :: rsn,rsd,u,du
  real(dp) :: num,den,dnumdrs,dnumdt,ddendrs,ddendt
 
 ! *************************************************************************
@@ -2084,16 +2084,20 @@ subroutine tildeBc(iflag,rs,t,Bc,dBcdrs,dBcdt)
    !
    rsn = rs**alpha_n
    rsd = rs**alpha_d
+   u = t**alpha_t
+   du = alpha_t*t**(alpha_t-1.d0)
    !
-   num = 1.d0+(a1+b1*rsn+e1*rsn**2)*t+(a2+b2*rsn+e2*rsn**2)*t**2+(a3+b3*rsn+e3*rsn**2)*t**3+(a4+b4*rsn+e4*rsn**2)*t**4
-   dnumdrs = (b1+2.d0*e1*rsn)*t+(b2+2.d0*e2*rsn)*t**2+(b3+2.d0*e3*rsn)*t**3+(b4+2.d0*e4*rsn)*t**4
+   num = 1.d0+(a1+b1*rsn+e1*rsn**2)*u+(a2+b2*rsn+e2*rsn**2)*u**2+(a3+b3*rsn+e3*rsn**2)*u**3+(a4+b4*rsn+e4*rsn**2)*u**4
+   dnumdrs = (b1+2.d0*e1*rsn)*u+(b2+2.d0*e2*rsn)*u**2+(b3+2.d0*e3*rsn)*u**3+(b4+2.d0*e4*rsn)*u**4
    dnumdrs = dnumdrs * alpha_n*rs**(alpha_n-1.d0)
-   dnumdt = (a1+b1*rsn+e1*rsn**2)+2.d0*(a2+b2*rsn+e2*rsn**2)*t+3.d0*(a3+b3*rsn+e3*rsn**2)*t**2+4.d0*(a4+b4*rsn+e4*rsn**2)*t**3
+   dnumdt = (a1+b1*rsn+e1*rsn**2)+2.d0*(a2+b2*rsn+e2*rsn**2)*u+3.d0*(a3+b3*rsn+e3*rsn**2)*u**2+4.d0*(a4+b4*rsn+e4*rsn**2)*u**3
+   dnumdt = dnumdt * du
    !
-   den = 1.d0+(c1+d1*rsd+f1*rsd**2)*t+(c2+d2*rsd+f2*rsd**2)*t**2+(c3+d3*rsd+f3*rsd**2)*t**3+(c4+d4*rsd+f4*rsd**2)*t**4+(c5+d5*rsd+f5*rsd**2)*t**5
-   ddendrs = (d1+2.d0*f1*rsd)*t+(d2+2.d0*f2*rsd)*t**2+(d3+2.d0*f3*rsd)*t**3+(d4+2.d0*f4*rsd)*t**4+(d5+2.d0*f5*rsd)*t**5
+   den = 1.d0+(c1+d1*rsd+f1*rsd**2)*u+(c2+d2*rsd+f2*rsd**2)*u**2+(c3+d3*rsd+f3*rsd**2)*u**3+(c4+d4*rsd+f4*rsd**2)*u**4+(c5+d5*rsd+f5*rsd**2)*u**5
+   ddendrs = (d1+2.d0*f1*rsd)*u+(d2+2.d0*f2*rsd)*u**2+(d3+2.d0*f3*rsd)*u**3+(d4+2.d0*f4*rsd)*u**4+(d5+2.d0*f5*rsd)*u**5
    ddendrs = ddendrs * alpha_d*rs**(alpha_d-1.d0)
-   ddendt = (c1+d1*rsd+f1*rsd**2)+2.d0*(c2+d2*rsd+f2*rsd**2)*t+3.d0*(c3+d3*rsd+f3*rsd**2)*t**2+4.d0*(c4+d4*rsd+f4*rsd**2)*t**3+5.d0*(c5+d5*rsd+f5*rsd**2)*t**4
+   ddendt = (c1+d1*rsd+f1*rsd**2)+2.d0*(c2+d2*rsd+f2*rsd**2)*u+3.d0*(c3+d3*rsd+f3*rsd**2)*u**2+4.d0*(c4+d4*rsd+f4*rsd**2)*u**3+5.d0*(c5+d5*rsd+f5*rsd**2)*u**4
+   ddendt = ddendt * du
    !
    Bc = num/den
    dBcdrs = dnumdrs/den - num*ddendrs/den**2
