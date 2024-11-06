@@ -200,7 +200,11 @@ AC_DEFUN([SD_TRIQS_DETECT], [
           ;;
         2.0)
           AC_DEFINE([HAVE_TRIQS_v2_0], 1,
-            [Define to 1 if you have the TRIQS 1.4 libraries.])
+            [Define to 1 if you have the TRIQS 2.0 libraries.])
+          ;;
+        3.4)
+          AC_DEFINE([HAVE_TRIQS_v3_4], 1,
+            [Define to 1 if you have the TRIQS 3.4 libraries.])
           ;;
         *)
           AC_MSG_ERROR([TRIQS API version ${sd_triqs_api_version} not implemented in the build system])
@@ -250,23 +254,40 @@ AC_DEFUN([_SD_TRIQS_CHECK_USE], [
 
   # Check TRIQS C++ API
   AC_MSG_CHECKING([whether the TRIQS library works])
-  AC_LANG_PUSH([C++])
+  AC_LANG_PUSH([C++]) 
   AC_LINK_IFELSE([AC_LANG_PROGRAM(
     [[
-#     include <solver_core.hpp>
-#     include <triqs/h5.hpp>
-      using namespace std;
-      using namespace triqs_cthyb;
+#     include <triqs_cthyb/solver_core.hpp>
+      using triqs::hilbert_space::gf_struct_t;
     ]],
     [[
-      std::vector<std::pair<std::string, indices_type>> gf_struct;
-    ]])], [sd_triqs_ok="yes"; sd_triqs_api_version="2.0"], [sd_triqs_ok="no"])
+      gf_struct_t gf_struct;
+      triqs_cthyb::solver_core solver({1.,gf_struct,1,1,1,1,true});
+    ]])], [sd_triqs_ok="yes"; sd_triqs_api_version="3.4"], [sd_triqs_ok="no"])
   AC_LANG_POP([C++])
   AC_MSG_RESULT([${sd_triqs_ok}])
 
   # Check old TRIQS C++ API
   if test "${sd_triqs_ok}" != "yes"; then
     AC_MSG_CHECKING([whether the TRIQS library has an old API])
+    AC_LANG_PUSH([C++])
+    AC_LINK_IFELSE([AC_LANG_PROGRAM(
+      [[
+#       include <solver_core.hpp>
+#       include <triqs/h5.hpp>
+        using namespace std;
+        using namespace triqs_cthyb;
+      ]],
+      [[
+        std::vector<std::pair<std::string, indices_type>> gf_struct;
+      ]])], [sd_triqs_ok="yes"; sd_triqs_api_version="2.0"], [sd_triqs_ok="no"])
+    AC_LANG_POP([C++])
+    AC_MSG_RESULT([${sd_triqs_ok}])
+  fi 
+
+  # Check even older TRIQS C++ API
+  if test "${sd_triqs_ok}" != "yes"; then
+    AC_MSG_CHECKING([whether the TRIQS library has an even older API])
     AC_LANG_PUSH([C++])
     AC_LINK_IFELSE([AC_LANG_PROGRAM(
       [[
