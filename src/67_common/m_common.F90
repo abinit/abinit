@@ -1480,12 +1480,12 @@ subroutine prtene(dtset,energies,iout,usepaw)
 !Local variables-------------------------------
 !scalars
  integer :: ipositron,optdc
- logical :: directE_avail,testdmft,write_entropy=.false.
- real(dp) :: eent,enevalue,etotal,etotaldc,exc_semilocal
+ logical :: directE_avail,testdmft,write_entropy=.false.,write_totalxc=.false.
+ real(dp) :: eent,enevalue,etotal,etotaldc,exc_semilocal,el_temp
  ! Do not modify the length of these strings
  character(len=14) :: eneName
  character(len=500) :: msg
- type(yamldoc_t) :: edoc,dc_edoc,sdoc
+ type(yamldoc_t) :: edoc,dc_edoc,sdoc,ftxcdoc
 !arrays
  !character(len=10) :: EPName(1:2)=(/"Positronic","Electronic"/)
 
@@ -1722,8 +1722,8 @@ subroutine prtene(dtset,energies,iout,usepaw)
    call edoc%add_real('monopole_correction_eV', energies%e_monopole*Ha_eV)
  end if
 
-!======= In case other sources of entropies than the non-interacting entropy ==========
-!============ of the Kohn-Shame states come into play, print the details ==============
+!======== In case other sources of entropies than the non-interacting entropy =========
+!============= of the Kohn-Sham states come into play, print the details ==============
  if(abs(energies%entropy)>tiny(zero).and.abs(energies%entropy-energies%entropy_ks)>tiny(zero)) then
    write_entropy=.true.
    sdoc = yamldoc_open('EntropyTerms', info='Components of total entropy', &
@@ -1735,10 +1735,31 @@ subroutine prtene(dtset,energies,iout,usepaw)
    call sdoc%add_real('total_entropy',energies%entropy) ! Total entropy energy
  end if
 
+!======== In case finite-temperature exchange-correlation functionals are used =========
+!=================== write the total exchange-correlation components ===================
+ if(abs(energies%entropy_xc)>tiny(zero)) then
+   write_totalxc=.true.
+   el_temp=merge(dtset%tphysel,dtset%tsmear,dtset%tphysel>tol8.and.dtset%occopt/=3.and.dtset%occopt/=9)
+   ftxcdoc = yamldoc_open('FTXCEnergyTerms', info='Components of total xc energy in Hartree', &
+   & width=20, real_fmt="(es21.14)")
+   if(usepaw==1) then
+     ! For now, only finite-temperature xc functionals contribute to entropy_paw.
+     ! We may introduce 'energies%entropy_pawxc' in the future.
+     call ftxcdoc%add_real('internal_xc',energies%e_xc+energies%e_pawxc)
+     call ftxcdoc%add_real('-kT*entropy_xc',-el_temp*(energies%entropy_xc+energies%entropy_paw))
+     call ftxcdoc%add_real('free_xc',energies%e_xc+energies%e_pawxc-el_temp*(energies%entropy_xc+energies%entropy_paw))
+   else
+     call ftxcdoc%add_real('internal_xc',energies%e_xc)
+     call ftxcdoc%add_real('-kT*entropy_xc',-el_temp*energies%entropy_xc)
+     call ftxcdoc%add_real('free_xc',energies%e_xc-el_temp*energies%entropy_xc)
+   end if
+ end if
+
  ! Write components of total energies in Yaml format.
  call edoc%write_and_free(iout)
  if(optdc >= 1) call dc_edoc%write_and_free(iout)
  if(write_entropy) call sdoc%write_and_free(iout)
+ if(write_totalxc) call ftxcdoc%write_and_free(iout)
 
 end subroutine prtene
 !!***
