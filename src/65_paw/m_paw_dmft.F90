@@ -1669,7 +1669,7 @@ subroutine construct_nwlo_dmft(paw_dmft)
    !cubic_freq=0
    !omegamaxmin=paw_dmft%omega_li(paw_dmft%dmft_nwli)-paw_dmft%omega_li(paw_dmft%dmftqmc_l+1)
    nlin = paw_dmft%dmftqmc_l ! number of linear frequencies
-   if (paw_dmft%dmft_solv == 6 .or. paw_dmft%dmft_solv == 7) nlin = int(nwlo * half)
+   if (paw_dmft%dmft_solv == 6 .or. paw_dmft%dmft_solv == 7) nlin = int(nwlo*half)
    omegamaxmin = pi * temp * two * dble(nwli-nlin-1)
 
    !if(cubic_freq==1) then

@@ -2,6 +2,7 @@
 #include "config.h"
 #endif
 
+/*
 #include <triqs_cthyb/solver_core.hpp>
 #include <triqs/operators/many_body_operator.hpp>
 #include <triqs/hilbert_space/fundamental_operator_set.hpp>
@@ -28,6 +29,7 @@ using triqs::operators::many_body_operator_generic;
 using triqs::operators::c;
 using triqs::operators::c_dag;
 using triqs::operators::n;
+*/
 
 void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool off_diag, bool move_shift, bool move_double, 
                      bool measure_density_matrix, bool time_invariance, bool use_norm_as_weight,               

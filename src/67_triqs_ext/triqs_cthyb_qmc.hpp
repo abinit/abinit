@@ -7,12 +7,8 @@
 
 #include <iostream>
 #include <complex>
-#include <triqs/operators/many_body_operator.hpp>
-#include <triqs/utility/real_or_complex.hpp>  //ADDED for compatibility with TRIQS 1.4
 
 using namespace std;
-//using triqs::utility::many_body_operator; //COMMENTED: Not relevant with TRIQS 1.4
-using triqs::operators::many_body_operator_generic; //ADDED Instead
 
 extern "C"{
 
@@ -25,16 +21,10 @@ extern "C"{
                           double det_singular_threshold, double lam, complex<double> *ftau, complex<double> *gtau,
                           complex<double> *gl, complex<double> *udens, complex<double> *vee, complex<double> *levels,
                           complex<double> *moments_self_1, complex<double> *moments_self_2, double *Eu, double *occ ) ;
-  //double *res ) ;
-//COMMENTED: Class name changed in TRIQS 1.4
-//    many_body_operator<double> init_Hamiltonian( double *eps, int nflavor, double *U );
-//    many_body_operator<double> init_fullHamiltonian( double *eps, int nflavor, double *U );
-//    many_body_operator<double> init_fullHamiltonianUpDown( double *eps, int nflavor, double *U );
 
-//ADDED Instead
     many_body_operator_generic<triqs::utility::real_or_complex> init_Hamiltonian( complex<double> *eps, int nflavor,
                                                                                   complex<double> *U, bool off_diag,
-						                                  int nspinor,double lambda );
+						                                                          int nspinor,double lambda );
     many_body_operator_generic<triqs::utility::real_or_complex> init_fullHamiltonian( complex<double> *eps, int nflavor, 
 										      complex<double> *U, bool off_diag, 
 										      int nspinor,double lambda );

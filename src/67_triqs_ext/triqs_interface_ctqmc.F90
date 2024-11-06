@@ -34,17 +34,17 @@ MODULE TRIQS_CTQMC
      
       use iso_c_binding
 
-      LOGICAL(Kind=1), VALUE, INTENT(IN) :: rot_inv,leg_measure,off_diag,move_shift,move_double
+      LOGICAL(KIND=1), VALUE, INTENT(IN) :: rot_inv,leg_measure,off_diag,move_shift,move_double
       
-      LOGICAL(Kind=1), VALUE, INTENT(IN) :: measure_density_matrix,time_invariance,use_norm_as_weight
+      LOGICAL(KIND=1), VALUE, INTENT(IN) :: measure_density_matrix,time_invariance,use_norm_as_weight
       
       INTEGER, VALUE, INTENT(IN) :: loc_n_min,loc_n_max,seed_a,seed_b,nflavor,ntau,nl,ncycle,cycle_length,ntherm,ntherm2
 
       INTEGER, VALUE, INTENT(IN) :: det_init_size,det_n_operations_before_check,ntau_delta,nbins_histo,rank,nspinor,iatom,ilam
 
-      REAL(Kind=8), VALUE, INTENT(IN) :: beta,move_global_prob,imag_threshold,det_precision_warning,det_precision_error
+      REAL(KIND=8), VALUE, INTENT(IN) :: beta,move_global_prob,imag_threshold,det_precision_warning,det_precision_error
 
-      REAL(Kind=8), VALUE, INTENT(IN) :: det_singular_threshold,lam
+      REAL(KIND=8), VALUE, INTENT(IN) :: det_singular_threshold,lam
 
       TYPE(C_PTR), VALUE, INTENT(IN) :: ftau,gtau,gl,udens,vee,levels,moments_self_1,moments_self_2,Eu,occ
  
@@ -58,7 +58,7 @@ MODULE TRIQS_CTQMC
 
       TYPE(C_PTR), VALUE, INTENT(IN)  :: ndlr,wdlr
 
-      REAL(Kind=8), VALUE, INTENT(IN) :: lam,eps
+      REAL(KIND=8), VALUE, INTENT(IN) :: lam,eps
 
     end subroutine build_dlr
 
