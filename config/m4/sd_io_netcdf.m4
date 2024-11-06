@@ -430,12 +430,15 @@ AC_DEFUN([_SD_NETCDF_CHECK_CONFIG], [
   fi
 
   if test "${sd_netcdf_init}" = "dir" ; then
-    sd_netcdf_bin="${sd_netcdf_prefix}/bin"
-    AC_CHECK_PROG([sd_netcdf_ncconfig],[nc-config],"${sd_netcdf_bin}/nc-config",[path = $bin])
-    if test -n "${sd_netcdf_ncconfig}" ; then
+    sd_netcdf_ncconfig="${sd_netcdf_prefix}/bin/nc-config"
+    AC_MSG_CHECKING([for nc-config binary])
+    if test -x "${sd_netcdf_ncconfig}" ; then
       sd_netcdf_fcflags=$($sd_netcdf_ncconfig --cflags)
       sd_netcdf_libs=$($sd_netcdf_ncconfig --libs)
       sd_netcdf_cppflags=$($sd_netcdf_ncconfig --cflags)
+      AC_MSG_RESULT([${sd_netcdf_ncconfig}])
+    else
+      AC_MSG_ERROR([nc-config binary not found or cannot be executed : ${sd_netcdf_ncconfig}])
     fi
   fi
 

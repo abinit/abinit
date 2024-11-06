@@ -449,12 +449,15 @@ AC_DEFUN([_SD_NETCDF_FORTRAN_CHECK_CONFIG], [
   fi
 
   if test "${sd_netcdf_fortran_init}" = "dir" ; then
-    sd_netcdf_fortran_bin="${sd_netcdf_fortran_prefix}/bin"
-    AC_CHECK_PROG([sd_netcdf_fortran_nfconfig],[nf-config],"${sd_netcdf_fortran_bin}/nf-config",[path = $bin])
-    if test -n "${sd_netcdf_fortran_nfconfig}" ; then
+    sd_netcdf_fortran_nfconfig="${sd_netcdf_fortran_prefix}/bin/nf-config"
+    AC_MSG_CHECKING([for nf-config binary])
+    if test -x "${sd_netcdf_fortran_nfconfig}" ; then
       sd_netcdf_fortran_fcflags=$($sd_netcdf_fortran_nfconfig --fflags)
       sd_netcdf_fortran_libs=$($sd_netcdf_fortran_nfconfig --flibs)
       sd_netcdf_fortran_cppflags=$($sd_netcdf_fortran_nfconfig --fflags)
+      AC_MSG_RESULT([${sd_netcdf_fortran_nfconfig}])
+    else
+      AC_MSG_ERROR([nf-config binary not found or cannot be executed : ${sd_netcdf_fortran_nfconfig}])
     fi
   fi
 
