@@ -606,7 +606,7 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
      Cryst%ntypat,Dtset%nucdipmom,nzlmopt,option,KS_Paw_an,KS_Paw_an,KS_paw_ij,&
      Pawang,Dtset%pawprtvol,Pawrad,KS_Pawrhoij,Dtset%pawspnorb,&
      Pawtab,Dtset%pawxcdev,Dtset%spnorbscl,Dtset%xclevel,Dtset%xc_denpos,Dtset%xc_taupos,&
-     Cryst%ucvol,Psps%znuclpsp)
+     Cryst%ucvol,Psps%znuclpsp,epaw_xc=KS_energies%e_pawxc)
  end if !PAW
 
  if (.not.allocated(ks_nhatgr))  then

@@ -120,6 +120,7 @@ CONTAINS  !=====================================================================
 !!    epaw=contribution to total energy from the PAW "on-site" part
 !!    epawdc=contribution to total double-counting energy from the PAW "on-site" part
 !!    spaw=contribution to total entropy from the PAW "on-site" part
+!!    epaw_xc=--optional-- contribution to exchange-correlation from the PAW "on-site" part
 !!  ==== if option=0 or 2 and ipert<=0
 !!    compch_sph=compensation charge integral inside spheres computed over spherical meshes
 !!  ==== if (option=0 or 1) and paw_an(:)%has_vxc=1
@@ -149,7 +150,7 @@ subroutine pawdenpot(compch_sph,el_temp,epaw,epawdc,spaw,ipert,ixc,&
 & my_natom,natom,nspden,ntypat,nucdipmom,nzlmopt,option,paw_an,paw_an0,&
 & paw_ij,pawang,pawprtvol,pawrad,pawrhoij,pawspnorb,pawtab,pawxcdev,spnorbscl,&
 & xclevel,xc_denpos,xc_taupos,ucvol,znucl,&
-& electronpositron,mpi_atmtab,comm_atom,vpotzero,hyb_mixing,hyb_mixing_sr) ! optional arguments
+& electronpositron,mpi_atmtab,comm_atom,vpotzero,hyb_mixing,hyb_mixing_sr,epaw_xc) ! optional arguments
 
 !Arguments ---------------------------------------------
 !scalars
@@ -158,6 +159,7 @@ subroutine pawdenpot(compch_sph,el_temp,epaw,epawdc,spaw,ipert,ixc,&
  integer,optional,intent(in) :: comm_atom
  real(dp),intent(in) :: spnorbscl,xc_denpos,xc_taupos,ucvol,el_temp
  real(dp),intent(in),optional :: hyb_mixing,hyb_mixing_sr
+ real(dp),intent(out),optional :: epaw_xc
  real(dp),intent(out) :: compch_sph,epaw,epawdc,spaw
  type(electronpositron_type),pointer,optional :: electronpositron
  type(pawang_type),intent(in) :: pawang
@@ -186,7 +188,7 @@ subroutine pawdenpot(compch_sph,el_temp,epaw,epawdc,spaw,ipert,ixc,&
  real(dp) :: e1t10,e1xc,e1xcdc,efock,efockdc,eexc,ssxc,eexcdc,eexdctemp
  real(dp) :: eexc_val,ssxc_val,eexcdc_val,eexex,eexexdc,eextemp,ssxtemp,eh2
  real(dp) :: edftumdc,edftumdcdc,edftufll,enucdip,etmp,espnorb,etild1xc,etild1xcdc
- real(dp) :: s1xc,stild1xc,sxccore
+ real(dp) :: s1xc,stild1xc,sxccore,tmp_epaw_xc
  real(dp) :: exccore,exchmix,hyb_mixing_,hyb_mixing_sr_,rdum
  character(len=3) :: pertstrg
  character(len=500) :: msg
@@ -194,7 +196,7 @@ subroutine pawdenpot(compch_sph,el_temp,epaw,epawdc,spaw,ipert,ixc,&
  integer :: idum1(0),idum3(0,0,0)
  integer,pointer :: my_atmtab(:)
  logical,allocatable :: lmselect_cur(:),lmselect_cur_ep(:),lmselect_ep(:),lmselect_tmp(:)
- real(dp) :: mpiarr(8),tsec(2)
+ real(dp) :: mpiarr(9),tsec(2)
  real(dp),allocatable :: dij_ep(:),dijfock_vv(:,:),dijfock_cv(:,:)
  real(dp),allocatable :: one_over_rad2(:),kxc_tmp(:,:,:),k3xc_tmp(:,:,:)
  real(dp),allocatable :: nhat1(:,:,:),nhat1_ep(:,:,:)
@@ -1041,10 +1043,12 @@ subroutine pawdenpot(compch_sph,el_temp,epaw,epawdc,spaw,ipert,ixc,&
      epaw=e1xc+half*eh2+e1t10-exccore-etild1xc+edftumdc+edftufll+eexex+espnorb+efock+enucdip
      epawdc=e1xc-e1xcdc-half*eh2-exccore-etild1xc+etild1xcdc+edftumdcdc-eexex-efockdc
      spaw=s1xc-sxccore-stild1xc ! PAW entropy coming from finite-temperature xc functionals
+     tmp_epaw_xc=e1xc-exccore-etild1xc!+eexex
    else
      epaw=e1xc-etild1xc+eh2+two*edftumdc
      epawdc=zero
      spaw=zero ! Force PAW entropy contribution to zero when using RF.
+     tmp_epaw_xc=e1xc-etild1xc
    end if
  end if
 
@@ -1055,7 +1059,7 @@ subroutine pawdenpot(compch_sph,el_temp,epaw,epawdc,spaw,ipert,ixc,&
    if (option/=1)  then
      call timab(48,1,tsec)
      mpiarr=zero
-     mpiarr(1)=compch_sph;mpiarr(2)=epaw;mpiarr(3)=epawdc;mpiarr(4)=spaw
+     mpiarr(1)=compch_sph;mpiarr(2)=epaw;mpiarr(3)=epawdc;mpiarr(4)=spaw;
      if (ipositron/=0) then
        mpiarr(5)=electronpositron%e_paw
        mpiarr(6)=electronpositron%e_pawdc
@@ -1064,6 +1068,7 @@ subroutine pawdenpot(compch_sph,el_temp,epaw,epawdc,spaw,ipert,ixc,&
        mpiarr(7)=vpotzero(1)
        mpiarr(8)=vpotzero(2)
      end if
+     mpiarr(9)=tmp_epaw_xc
      call xmpi_sum(mpiarr,my_comm_atom,ierr)
      compch_sph=mpiarr(1);epaw=mpiarr(2);epawdc=mpiarr(3);spaw=mpiarr(4)
      if (ipositron/=0) then
@@ -1074,6 +1079,7 @@ subroutine pawdenpot(compch_sph,el_temp,epaw,epawdc,spaw,ipert,ixc,&
        vpotzero(1)=mpiarr(7)
        vpotzero(2)=mpiarr(8)
      end if
+     tmp_epaw_xc=mpiarr(9)
      call timab(48,2,tsec)
    end if
  end if
@@ -1085,7 +1091,9 @@ subroutine pawdenpot(compch_sph,el_temp,epaw,epawdc,spaw,ipert,ixc,&
  if(abs(spaw)>tiny(zero)) then
    epaw=epaw+el_temp*spaw
    epawdc=epawdc+el_temp*spaw
+   tmp_epaw_xc=tmp_epaw_xc+el_temp*spaw
  end if
+ if(present(epaw_xc)) epaw_xc=tmp_epaw_xc
 
 !Destroy atom table used for parallelism
  call free_my_atmtab(my_atmtab,my_atmtab_allocated)

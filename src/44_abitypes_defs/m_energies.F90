@@ -36,7 +36,7 @@ module m_energies
  private
 
 !public parameter
- integer, public, parameter :: n_energies=42
+ integer, public, parameter :: n_energies=43
 
 !!***
 
@@ -176,6 +176,9 @@ module m_energies
   real(dp) :: e_pawdc=zero
    ! PAW spherical part double-counting energy
 
+  real(dp) :: e_pawxc=zero
+   ! PAW spherical part exchange-correlation energy
+
   real(dp) :: e_sicdc=zero
    ! Self-interaction energy double-counting
 
@@ -272,6 +275,7 @@ subroutine energies_init(energies)
  energies%e_nucdip      = zero
  energies%e_paw         = zero
  energies%e_pawdc       = zero
+ energies%e_pawxc       = zero
  energies%e_sicdc       = zero
  energies%e_vdw_dftd    = zero
  energies%e_xc          = zero
@@ -348,6 +352,7 @@ end subroutine energies_init
  energies_out%e_nucdip             = energies_in%e_nucdip
  energies_out%e_paw                = energies_in%e_paw
  energies_out%e_pawdc              = energies_in%e_pawdc
+ energies_out%e_pawxc              = energies_in%e_pawxc
  energies_out%e_sicdc              = energies_in%e_sicdc
  energies_out%e_vdw_dftd           = energies_in%e_vdw_dftd
  energies_out%e_xc                 = energies_in%e_xc
@@ -430,14 +435,15 @@ end subroutine energies_copy
    energies_array(32)=energies%e_nlpsp_vfock
    energies_array(33)=energies%e_paw
    energies_array(34)=energies%e_pawdc
-   energies_array(35)=energies%e_sicdc
-   energies_array(36)=energies%e_vdw_dftd
-   energies_array(37)=energies%e_xc
-   energies_array(38)=energies%e_xcdc
-   energies_array(39)=energies%e_xc_vdw
-   energies_array(40)=energies%h0
-   energies_array(41)=energies%e_zeeman
-   energies_array(42)=energies%e_nucdip
+   energies_array(35)=energies%e_pawxc
+   energies_array(36)=energies%e_sicdc
+   energies_array(37)=energies%e_vdw_dftd
+   energies_array(38)=energies%e_xc
+   energies_array(39)=energies%e_xcdc
+   energies_array(40)=energies%e_xc_vdw
+   energies_array(41)=energies%h0
+   energies_array(42)=energies%e_zeeman
+   energies_array(43)=energies%e_nucdip
  end if
 
  if (option==-1) then
@@ -475,14 +481,15 @@ end subroutine energies_copy
    energies%e_nlpsp_vfock        = energies_array(32)
    energies%e_paw                = energies_array(33)
    energies%e_pawdc              = energies_array(34)
-   energies%e_sicdc              = energies_array(35)
-   energies%e_vdw_dftd           = energies_array(36)
-   energies%e_xc                 = energies_array(37)
-   energies%e_xcdc               = energies_array(38)
-   energies%e_xc_vdw             = energies_array(39)
-   energies%h0                   = energies_array(40)
-   energies%e_zeeman             = energies_array(41)
-   energies%e_nucdip             = energies_array(42)
+   energies%e_pawxc              = energies_array(35)
+   energies%e_sicdc              = energies_array(36)
+   energies%e_vdw_dftd           = energies_array(37)
+   energies%e_xc                 = energies_array(38)
+   energies%e_xcdc               = energies_array(39)
+   energies%e_xc_vdw             = energies_array(40)
+   energies%h0                   = energies_array(41)
+   energies%e_zeeman             = energies_array(42)
+   energies%e_nucdip             = energies_array(43)
  end if
 
 end subroutine energies_to_array
@@ -634,7 +641,7 @@ subroutine energies_ncwrite(enes, ncid)
   "e_ewald", "e_exactX", "e_extfpmd", "edc_extfpmd", "e_fermie", &
   "e_fock", "e_fockdc", "e_fock0", "e_hartree", "e_hybcomp_E0", "e_hybcomp_v0", "e_hybcomp_v", "e_kinetic",&
   "e_localpsp", "e_magfield", "e_monopole", "e_nlpsp_vfock", "e_nucdip", &
-  "e_paw", "e_pawdc", "e_sicdc", "e_vdw_dftd", &
+  "e_paw", "e_pawdc", "e_pawxc", "e_sicdc", "e_vdw_dftd", &
   "e_xc", "e_xcdc", "e_xc_vdw", &
   "h0", "e_zeeman", "e_fermih"], &
   [enes%e_chempot, enes%e_constrained_dft, enes%e_corepsp, enes%e_corepspdc, enes%e_eigenvalues, enes%e_elecfield, &
@@ -644,7 +651,7 @@ subroutine energies_ncwrite(enes, ncid)
    enes%e_fock, enes%e_fockdc, enes%e_fock0, enes%e_hartree, &
    enes%e_hybcomp_E0, enes%e_hybcomp_v0, enes%e_hybcomp_v, enes%e_kinetic,&
    enes%e_localpsp, enes%e_magfield, enes%e_monopole, enes%e_nlpsp_vfock, enes%e_nucdip, &
-   enes%e_paw, enes%e_pawdc, enes%e_sicdc, enes%e_vdw_dftd,&
+   enes%e_paw, enes%e_pawdc, enes%e_pawxc, enes%e_sicdc, enes%e_vdw_dftd,&
    enes%e_xc, enes%e_xcdc, enes%e_xc_vdw,&
    enes%h0,enes%e_zeeman,enes%e_fermih])
 

@@ -524,7 +524,7 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
      Cryst%ntypat,Dtset%nucdipmom,nzlmopt,option,KS_Paw_an,KS_Paw_an,KS_paw_ij,&
      Pawang,Dtset%pawprtvol,Pawrad,KS_Pawrhoij,Dtset%pawspnorb,&
      Pawtab,Dtset%pawxcdev,Dtset%spnorbscl,Dtset%xclevel,Dtset%xc_denpos,Dtset%xc_taupos,&
-     Cryst%ucvol,Psps%znuclpsp)
+     Cryst%ucvol,Psps%znuclpsp,epaw_xc=KS_energies%e_pawxc)
 
  else
    ABI_MALLOC(ks_nhatgr, (0, 0, 0))

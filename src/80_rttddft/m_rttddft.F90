@@ -305,7 +305,8 @@ subroutine rttddft_init_hamiltonian(dtset, energies, gs_hamk, istep, mpi_enreg, 
                 & tdks%pawtab,dtset%pawxcdev,dtset%spnorbscl,dtset%xclevel, &
                 & dtset%xc_denpos,dtset%xc_taupos,tdks%ucvol,psps%znuclpsp, &
                 & comm_atom=mpi_enreg%comm_atom,                            &
-                & mpi_atmtab=mpi_enreg%my_atmtab,vpotzero=vpotzero)
+                & mpi_atmtab=mpi_enreg%my_atmtab,vpotzero=vpotzero,         &
+                & epaw_xc=energies%e_pawxc)
    !Correct the average potential with the calculated constant vpotzero
    !Correct the total energies accordingly
    !vpotzero(1) = -beta/ucvol
