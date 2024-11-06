@@ -263,19 +263,19 @@ of the trunk, you should first register *git@gitlab.abinit.org:trunk/abinit.git*
 
     git remote add trunk gitlab:trunk/abinit.git
 
-At this point, one can fetch the branches in trunk with:
+At this point, one can fetch the branches (also the tags) in trunk with:
 
     git fetch --tags trunk develop
 
 then, if the develop branch is to be updated, supposing it is checked out,
-To merge *trunk/develop* in your develop branch:
+to merge *trunk/develop* in your develop branch:
 
     git checkout develop
     git merge trunk develop
 
-You can combine the last two commands in one as:
+or
 
-    git pull trunk develop
+    git pull -t trunk develop
 
 If, on the contrary, a new branch (e.g. a release branch, let's says 8.8 to fix the ideas) has to be created:
 
