@@ -1745,6 +1745,8 @@ subroutine prtene(dtset,energies,iout,usepaw)
    if(usepaw==1) then
      ! For now, only finite-temperature xc functionals contribute to entropy_paw.
      ! We may introduce 'energies%entropy_pawxc' in the future.
+     call ftxcdoc%add_real('xc',energies%e_xc)
+     call ftxcdoc%add_real('spherical_terms_xc',energies%e_pawxc)
      call ftxcdoc%add_real('internal_xc',energies%e_xc+energies%e_pawxc)
      call ftxcdoc%add_real('-kT*entropy_xc',-el_temp*(energies%entropy_xc+energies%entropy_paw))
      call ftxcdoc%add_real('free_xc',energies%e_xc+energies%e_pawxc-el_temp*(energies%entropy_xc+energies%entropy_paw))

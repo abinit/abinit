@@ -1,5 +1,5 @@
 
-.Version 10.2.2.1 of ABINIT, released Nov 2024.
+.Version 10.3.1.3 of ABINIT, released Nov 2024.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2024 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue  5 Nov 2024.
-- ( at 16h59 )
+.Starting date : Wed  6 Nov 2024.
+- ( at 20h24 )
   
 - input  file    -> t20.abi
 - output file    -> t20.abo
@@ -302,6 +302,15 @@ total_entropy       :  1.88452878923016E+00
 ...
 
 
+--- !FTXCEnergyTerms
+iteration_state     : {dtset: 1, }
+comment             : Components of total xc energy in Hartree
+internal_xc         : -3.21507615444301E-01
+'-kT*entropy_xc'    :  3.89954166525127E-02
+free_xc             : -2.82512198791789E-01
+...
+
+
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -4.45969278E-03  sigma(3 2)=  0.00000000E+00
   sigma(2 2)= -4.45969278E-03  sigma(3 1)=  0.00000000E+00
@@ -376,7 +385,7 @@ tolerances: {toldfe: 1.00E-06, }
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
  ETOT  1 -0.89812213198565    -8.981E-01 1.000E-03 1.698E-01
- ETOT  2 -0.89813833950579    -1.621E-05 1.710E-06 7.149E-04
+ ETOT  2 -0.89813833950578    -1.621E-05 1.710E-06 7.149E-04
  ETOT  3 -0.89813859166851    -2.522E-07 3.115E-06 6.990E-06
  ETOT  4 -0.89813859625619    -4.588E-09 1.521E-08 3.653E-08
 
@@ -458,18 +467,18 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 2, }
 comment             : Components of total free energy in Hartree
-kinetic             :  6.66901839550915E-01
+kinetic             :  6.66901839550914E-01
 hartree             :  1.18056706644526E-02
 xc                  : -3.28894494005887E-01
 Ewald energy        : -4.72882913246778E-01
 psp_core            :  1.34075496566468E-02
 local_psp           : -1.48053331872316E-01
-non_local_psp       : -5.20460393703443E-02
-internal            : -3.09761718623310E-01
-'-kT*entropy'       : -5.88376877632881E-01
+non_local_psp       : -5.20460393703444E-02
+internal            : -3.09761718623311E-01
+'-kT*entropy'       : -5.88376877632880E-01
 total_energy        : -8.98138596256191E-01
 total_energy_eV     : -2.44395941022088E+01
-band_energy         :  9.75605031517006E-02
+band_energy         :  9.75605031516989E-02
 ...
 
 
@@ -479,6 +488,15 @@ comment             : Components of total entropy
 noninteracting      :  2.01007245032741E+00
 xc                  : -1.52127481487649E-01
 total_entropy       :  1.85794496883976E+00
+...
+
+
+--- !FTXCEnergyTerms
+iteration_state     : {dtset: 2, }
+comment             : Components of total xc energy in Hartree
+internal_xc         : -3.28894494005887E-01
+'-kT*entropy_xc'    :  4.81759654139552E-02
+free_xc             : -2.80718528591932E-01
 ...
 
 

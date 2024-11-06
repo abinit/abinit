@@ -1,5 +1,5 @@
 
-.Version 10.2.2.1 of ABINIT, released Nov 2024.
+.Version 10.3.1.3 of ABINIT, released Nov 2024.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2024 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue  5 Nov 2024.
-- ( at 16h59 )
+.Starting date : Wed  6 Nov 2024.
+- ( at 20h25 )
   
 - input  file    -> t21.abi
 - output file    -> t21.abo
@@ -365,6 +365,17 @@ total_entropy       :  1.88430090916136E+00
 ...
 
 
+--- !FTXCEnergyTerms
+iteration_state     : {dtset: 1, }
+comment             : Components of total xc energy in Hartree
+xc                  : -3.19314331014383E-01
+spherical_terms_xc  : -2.73838734293756E-03
+internal_xc         : -3.22052718357320E-01
+'-kT*entropy_xc'    :  3.89120593724202E-02
+free_xc             : -2.83140658984900E-01
+...
+
+
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -4.49404672E-03  sigma(3 2)=  0.00000000E+00
   sigma(2 2)= -4.49404672E-03  sigma(3 1)=  0.00000000E+00
@@ -462,8 +473,8 @@ tolerances: {toldfe: 1.00E-06, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1 -0.89998398788489    -9.000E-01 7.845E+00 9.832E-02
- ETOT  2 -0.90053320937124    -5.492E-04 9.642E-05 1.167E-02
+ ETOT  1 -0.89998398788481    -9.000E-01 7.845E+00 9.832E-02
+ ETOT  2 -0.90053320937125    -5.492E-04 9.642E-05 1.167E-02
  ETOT  3 -0.90053433269855    -1.123E-06 9.011E-05 3.881E-05
  ETOT  4 -0.90053434346944    -1.077E-08 2.148E-05 4.441E-06
  ETOT  5 -0.90053434576833    -2.299E-09 1.636E-06 2.271E-08
@@ -563,16 +574,16 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 2, }
 comment             : Components of total free energy in Hartree
-kinetic             :  6.61563640199251E-01
-hartree             :  1.21862553165747E-02
-xc                  : -3.26531650908868E-01
+kinetic             :  6.61563640199256E-01
+hartree             :  1.21862553165751E-02
+xc                  : -3.26531650908870E-01
 Ewald energy        : -4.72882913246778E-01
 psp_core            :  7.15551457195548E-03
-local_psp           : -1.65351584422131E-01
-spherical_terms     : -2.84509522934968E-02
-internal            : -3.12311690783493E-01
-'-kT*entropy'       : -5.88222654984838E-01
-total_energy        : -9.00534345768331E-01
+local_psp           : -1.65351584422134E-01
+spherical_terms     : -2.84509522934971E-02
+internal            : -3.12311690783491E-01
+'-kT*entropy'       : -5.88222654984839E-01
+total_energy        : -9.00534345768330E-01
 total_energy_eV     : -2.45047857618160E+01
 ...
 
@@ -583,12 +594,12 @@ comment             : '"Double-counting" decomposition of free energy'
 band_energy         :  1.01665234698849E-01
 Ewald energy        : -4.72882913246778E-01
 psp_core            :  7.15551457195548E-03
-xc_dc               :  5.12477205708990E-02
-spherical_terms     :  5.03155301479710E-04
-internal            : -3.12311288103595E-01
-'-kT*entropy'       : -5.88222654984838E-01
-total_energy_dc     : -9.00533943088433E-01
-total_energy_dc_eV  : -2.45047748043388E+01
+xc_dc               :  5.12477205709023E-02
+spherical_terms     :  5.03155301479684E-04
+internal            : -3.12311288103591E-01
+'-kT*entropy'       : -5.88222654984839E-01
+total_energy_dc     : -9.00533943088430E-01
+total_energy_dc_eV  : -2.45047748043387E+01
 ...
 
 
@@ -596,9 +607,20 @@ total_energy_dc_eV  : -2.45047748043388E+01
 iteration_state     : {dtset: 2, }
 comment             : Components of total entropy
 noninteracting      :  2.00948407248229E+00
-xc                  : -1.51435134593738E-01
-spherical_terms     : -5.90965060872903E-04
+xc                  : -1.51435134593739E-01
+spherical_terms     : -5.90965060872896E-04
 total_entropy       :  1.85745797282768E+00
+...
+
+
+--- !FTXCEnergyTerms
+iteration_state     : {dtset: 2, }
+comment             : Components of total xc energy in Hartree
+xc                  : -3.26531650908870E-01
+spherical_terms_xc  : -3.37389106074574E-03
+internal_xc         : -3.29905541969615E-01
+'-kT*entropy_xc'    :  4.81438596587411E-02
+free_xc             : -2.81761682310874E-01
 ...
 
 
