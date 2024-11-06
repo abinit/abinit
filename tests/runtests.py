@@ -294,6 +294,9 @@ def main():
     parser.add_option("-l", "--list-tests-info", dest="list_info", default=False, action="store_true",
                       help="List the tests in test suite (echo description section in ListOfFile files) and exit")
 
+    parser.add_option("--tolerances", default=False, action="store_true",
+                      help="Print tolerances")
+
     parser.add_option("-m", "--make", dest="make", type="int", default=0,
                       help="Find the abinit build tree, and compile to code with 'make -j#NUM' before running the tests.")
 
@@ -570,6 +573,24 @@ def main():
 
         with open("ListOfTests.txt", "w") as fh:
             fh.write(test_suite.make_listoftests(width=100, html=False))
+        sys.exit(0)
+
+    if options.tolerances:
+        #from pymods.testsuite import ChainOfTests, BaseTest
+
+        def print_tols(this_test):
+            #assert not isinstance(this_test, ChainOfTests)
+            print("test:", this_test, this_test.__class__.__name__)
+            for f in this_test.files_to_test:
+                print("file_name:", f.name, ", f.tolnlines:", f.tolnlines, ", tolabs: ", f.tolabs, ", tolrel:", f.tolrel)
+
+        for test in test_suite:
+            if test.is_chain():
+                for child_test in test:
+                    print_tols(child_test)
+            else:
+                print_tols(test)
+
         sys.exit(0)
 
     if options.dry_run:
