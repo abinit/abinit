@@ -22,6 +22,7 @@ prtwf1  1 getwfk 1 getwfk1 0
 natom 2 ntypat 1 typat 2*1
 znucl  83.
 spinat 0 0 1.2   0 1.1 0
+spinat1  *0.0
 xred   3*0.231d0
        3*-0.231d0
 acell  3*9.
