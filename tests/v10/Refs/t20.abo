@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed  6 Nov 2024.
-- ( at 20h24 )
+.Starting date : Thu  7 Nov 2024.
+- ( at 08h33 )
   
 - input  file    -> t20.abi
 - output file    -> t20.abo
@@ -145,7 +145,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 ...
 
  Exchange-correlation functional for the present dataset will be:
-  TLDA: Karasiev-Sjostrom-Dufty-Trickey - ixc=51
+  TLDA: corrKSDT Karasiev-Sjostrom-Dufty-Trickey - ixc=51
  Citation for XC functional:
   V.V. Karasiev, T. Sjostrom, J. Dufty, and S.B. Trickey, PRL 112, 076403 (2014)
 
@@ -335,7 +335,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 ...
 
  Exchange-correlation functional for the present dataset will be:
-  TGGA: Karasiev, PBE-parameters - ixc=60
+  TGGA: KDT16 Karasiev-Dufty-Trickey - ixc=60
  Citation for XC functional:
   V.V. Karasiev, J.W. Dufty, and S.B. Trickey, PRL 120(7), 076401 (2018)
 
@@ -681,10 +681,10 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          0.2  wall=          0.2
+- Proc.   0 individual time (sec): cpu=          0.4  wall=          0.4
 
 ================================================================================
 
  Calculation completed.
 .Delivered   2 WARNINGs and   8 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          0.2  wall=          0.2
++Overall time at end (sec) : cpu=          0.4  wall=          0.4
