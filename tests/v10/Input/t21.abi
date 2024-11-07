@@ -27,7 +27,7 @@ pawecutdg 10.0
 chksymbreak 0
 ngkpt 2 2 2
 nstep 20
-toldfe 1.0d-6
+toldfe 1.0d-10
 tolsym 1.0d-8
 
 # Pseudopotential file
