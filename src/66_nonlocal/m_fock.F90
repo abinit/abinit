@@ -2018,9 +2018,7 @@ subroutine bare_vqg(qpoint,fockcommon,gmet,nfft,nkpt_bz,ngfft,ucvol,vqg)
  vqg = zero
 
  if (abs(fockcommon%hyb_mixing)>tol8) then
-    !FIXME FBruneval
-    rcut= (three*nkpt_bz*ucvol/four_pi)**(one/three)
-    call barevcoul(rcut,fockcommon%fock_icutcoul,qpoint,fockcommon%gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,izero,vqg)
+    call barevcoul(fockcommon%rcut,fockcommon%fock_icutcoul,qpoint,fockcommon%gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,izero,vqg)
     ! Rescale the interaction with the factor hyb_mixing
     vqg = vqg * fockcommon%hyb_mixing
  end if

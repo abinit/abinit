@@ -157,7 +157,6 @@ subroutine barevcoul(rcut,icutcoul,qpoint,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,i
  type(MPI_type)             :: mpi_enreg   !!!!
  type(crystal_t)            :: Cryst       !!!!
  !type(gsphere_t)            :: Gsph
- type(vcut_t)               :: vcut        !!!!
 !Local variables-------------------------------
 !scalars
  integer,parameter    :: empty(3,3)=zero
@@ -178,6 +177,7 @@ subroutine barevcoul(rcut,icutcoul,qpoint,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,i
  real(dp),allocatable :: gq(:,:),gpq(:),gpq2(:)
  real(dp),allocatable :: vcfit(:,:),xx(:),yy(:)
  real(dp),allocatable :: cov(:,:),par(:),qfit(:,:),sigma(:),var(:),qcart(:,:)
+ type(vcut_t)               :: vcut        !!!!
 !
  comm=mpi_enreg%comm_world
 !
@@ -357,7 +357,7 @@ subroutine barevcoul(rcut,icutcoul,qpoint,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,i
      if (abs(gpq(ig))<tol4) then
        barev(ig) = two_pi*rcut0**two
      else if (gpq(ig)<=cutoff) then
-       barev(ig) = gpq2(ig) * (one - cos( rcut*sqrt(four_pi/gpq2(ig)) ) )
+       barev(ig) = gpq2(ig) * (one - cos( rcut0*sqrt(four_pi/gpq2(ig)) ) )
      end if
    end do
 
