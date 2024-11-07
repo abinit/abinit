@@ -1387,10 +1387,11 @@ subroutine xcksdt(exc,tsxc,npt,order,rhor,rspts,el_temp,vxc,&
 !scalars
  integer :: ipt
  real(dp) :: tfac,rs,rho,tempf,tred,fxc,einxc,tsxctmp
-!for numerical derivative of vxc:
- real(dp) :: drho,vxctmp(5) !array to calculate dvxc/drho numerically
+ real(dp) :: drho
  integer :: i
  character(len=500) :: message
+!arrays
+ real(dp) :: vxctmp(5)
 
 ! *************************************************************************
 
