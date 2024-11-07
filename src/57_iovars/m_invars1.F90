@@ -2396,9 +2396,10 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%dmftctqmc_triqs_nbins_histo=100
    dtsets(idtset)%dmftctqmc_triqs_nleg=30
    dtsets(idtset)%dmftctqmc_triqs_ntau_delta=-1
-   dtsets(idtset)%dmftctqmc_triqs_off_diag=0
+   dtsets(idtset)%dmftctqmc_triqs_orb_off_diag=0
    dtsets(idtset)%dmftctqmc_triqs_seed_a=34788
    dtsets(idtset)%dmftctqmc_triqs_seed_b=928374
+   dtsets(idtset)%dmftctqmc_triqs_spin_off_diag=0
    dtsets(idtset)%dmftctqmc_triqs_therm=1000
    dtsets(idtset)%dmftctqmc_triqs_time_invariance=1
    dtsets(idtset)%dmftctqmc_triqs_use_norm_as_weight=0

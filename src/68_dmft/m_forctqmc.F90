@@ -113,18 +113,17 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
  integer :: i,iatom,icomp,ierr,if1,if2,iflavor1,iflavor2,ifreq,im1,im2,ima,imb,ispa,ispb,ispinor
  integer :: ispinor1,ispinor2,isppol,itau,itypat,lpawu,myproc,natom,natom2,ndim,nflavor,nomega,nproc
  integer :: nspinor,nsppol,nsppol_imp,ntypat,nwlo,opt_diag,opt_fk,opt_log,opt_nondiag,opt_real
- integer :: opt_rot,rot_type_vee,testcode,testrot,tndim,unt,unt2,useylm
+ integer :: opt_rot,option,rot_type_vee,testcode,testrot,tndim,unt,unt2,useylm
  integer, parameter :: optdb = 0
- logical :: nondiaglevels,triqs
+ logical :: nondiaglevels,orb_off_diag,spin_off_diag,triqs
  logical(kind=1) :: leg_measure = .true.
- real(dp) :: doccsum,EE,f4of2_sla,f6of2_sla,noise,omega
+ real(dp) :: doccsum,EE,f4of2_sla,f6of2_sla,maxoffdiag,maxoffdiag_,noise,omega
  type(green_type) :: weiss_for_rot
  type(oper_type) :: energy_level,level_diag
  type(CtqmcInterface) :: hybrid
  type(CtqmcoffdiagInterface) :: hybridoffdiag
  real(dp) :: umod(2,2)
  complex(dpc) :: integral(2,2)
- type(oper_type) :: levels_slm
  real(dp), allocatable :: docc(:,:),gtmp(:,:),gtmp_nd(:,:,:),levels_ctqmc(:),vee(:,:,:,:)
  complex(dpc), allocatable :: muorb,muspin,muzeem
  complex(dpc), allocatable :: fw1(:,:),fw1_nd(:,:,:),gw_tmp(:,:),gw_tmp_nd(:,:,:)
@@ -149,26 +148,27 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
  triqs   = (paw_dmft%dmft_solv == 6) .or. (paw_dmft%dmft_solv == 7)
  !greendft%whichgreen="DFT"
 
- call init_green(weiss_for_rot,paw_dmft,opt_oper_ksloc=2, &
-               & opt_moments=green%has_moments,opt_moments_ksloc=2,opt_occup_ksloc=2)
+ if (.not. triqs) then
+   call init_green(weiss_for_rot,paw_dmft,opt_oper_ksloc=2)
 ! call init_green(gw_loc,paw_dmft)
- call copy_green(weiss,weiss_for_rot,opt_tw=2)
+   call copy_green(weiss,weiss_for_rot,opt_tw=2)
+ end if 
 !=======================================================================
 !== Use one QMC solver   ===============================================
 !=======================================================================
  write(message,'(2a)') ch10,'  ===  CT-QMC solver === '
  call wrtout(std_out,message,'COLL')
 
-! Initialise for compiler
+! Initialize for compiler
  !omega_current=czero
 
-! Initialise nproc
+! Initialize nproc
  nproc  = paw_dmft%nproc
  myproc = paw_dmft%myproc
 
-! ======================================
+! =============================================
 ! Allocations: diagonalization and eigenvectors
-! ======================================
+! =============================================
  ABI_MALLOC(udens_atoms,(natom))
  ABI_MALLOC(eigvectmatlu,(natom))
  ABI_MALLOC(magmom_orb,(natom))
@@ -200,10 +200,9 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
 
 ! ___________________________________________________________________________________
 !
-!  FIRST PART: DIAGONALISATION AND ROTATIONS.
+!  FIRST PART: DIAGONALIZATION AND ROTATIONS.
 ! ___________________________________________________________________________________
 !
-
 ! =================================================================
 ! Choose to diagonalize and how to do it
 ! =================================================================
@@ -267,7 +266,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
  if (paw_dmft%dmftctqmc_basis == 1) then
    if (nondiaglevels .or. useylm == 1) then
      opt_diag = 1
-     write(message,'(3a)') ch10, "   == Hamiltonian in local basis is non diagonal: diagonalise it",ch10
+     write(message,'(3a)') ch10, "   == Hamiltonian in local basis is non diagonal: diagonalize it",ch10
    else
      opt_diag = 0
      write(message,'(5a)') ch10, "   == Hamiltonian in local basis is diagonal in the Slm basis ",ch10, &
@@ -276,7 +275,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
  else if (paw_dmft%dmftctqmc_basis == 2) then
    if (nondiaglevels .or. useylm == 1) then
      write(message,'(7a)') ch10, "   == Hamiltonian in local basis is non diagonal",ch10, &
-       & "   == According to dmftctqmc_basis: diagonalise density matrix",ch10, &
+       & "   == According to dmftctqmc_basis: diagonalize density matrix",ch10, &
        & "   == Warning : Check that the Hamiltonian is diagonal !",ch10
      opt_diag = 2
    else
@@ -308,37 +307,18 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
      ABI_BUG(message)
    end if 
 
-   call init_oper(paw_dmft,levels_slm,opt_ksloc=2)
-   call copy_matlu(energy_level%matlu(:),levels_slm%matlu(:),natom)
+   if (.not. triqs) then
+     message = "The case weiss%has_moments=1 and dmft_solv/=6 and dmft_solv/=7 &
+              & is not handled"
+     ABI_BUG(message)
+   end if 
 
-   ! Compute the moments of the hybridization 
    call compute_moments_loc(green,self,energy_level,weiss,0)
 
-   ! Remove the spurious 0th order moment of the hybridization
-   do ifreq=1,nwlo
-     if (weiss%distrib%procf(ifreq) /= myproc) cycle
-     do iatom=1,natom
-       lpawu = paw_dmft%lpawu(iatom)
-       if (lpawu == -1) cycle
-       ndim = nspinor * (2*lpawu+1)
-       do isppol=1,nsppol
-         call xginv(weiss%oper(ifreq)%matlu(iatom)%mat(:,:,isppol),ndim)
-         weiss%oper(ifreq)%matlu(iatom)%mat(:,:,isppol) = &
-            & weiss%oper(ifreq)%matlu(iatom)%mat(:,:,isppol) + &
-            & weiss%moments(1)%matlu(iatom)%mat(:,:,isppol)
-         call xginv(weiss%oper(ifreq)%matlu(iatom)%mat(:,:,isppol),ndim)
-       end do ! isppol
-     end do ! iatom
-   end do ! ifreq
-   call gather_oper(weiss%oper(:),weiss%distrib,paw_dmft,opt_ksloc=2)
-   call zero_matlu(weiss%moments(1)%matlu(:),natom)
-   do i=2,weiss%nmoments-1
-     call copy_matlu(weiss%moments(i)%matlu(:),weiss_for_rot%moments(i)%matlu(:),natom)
-   end do ! i
  end if ! moments 
 
 ! =================================================================
-! Now, check if diagonalisation is necessary
+! Now, check if diagonalization is necessary
 ! =================================================================
 
 ! =================================================================
@@ -421,7 +401,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
        !  write(6,*) size(hu(itypat)%udens)
        !  write(6,*) udens_atoms(iatom)%value
        !  write(6,*) hu(itypat)%udens
-       udens_atoms(iatom)%mat(:,:,1) = hu(itypat)%udens(:,:)
+       udens_atoms(iatom)%mat(:,:,1)   = hu(itypat)%udens(:,:)
        vee_rotated(iatom)%mat(:,:,:,:) = hu(itypat)%veeslm2(:,:,:,:)
      end do ! iatom
    end if ! opt_diag=0 or 1
@@ -436,7 +416,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
    ! Print density matrix before diagonalization
    ! -------------------------------------------
    if (pawprtvol >= 3) then
-     write(message,'(a,2x,a)') ch10,        " == Density Matrix before diagonalisation ="
+     write(message,'(a,2x,a)') ch10,        " == Density Matrix before diagonalization ="
      call wrtout(std_out,message,'COLL')
      !MGNAG: This call is wrong if green has intent(out), now we use intent(inout)
      call print_matlu(green%occup%matlu(:),natom,1)
@@ -587,6 +567,8 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
 
  call flush_unit(std_out)
 
+ if (triqs) goto 10
+
 ! =================================================================
 ! Rotate weiss function according to eigenvectors.
 ! =================================================================
@@ -634,7 +616,6 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
    call wrtout(std_out,message,'COLL')
      
    do ifreq=1,nwlo
-     if (weiss%distrib%procf(ifreq) /= myproc) cycle
      if (opt_rot == 1) then
        call rotate_matlu(weiss_for_rot%oper(ifreq)%matlu(:),eigvectmatlu(:),natom,1)
        call rotate_matlu(weiss%oper(ifreq)%matlu(:),eigvectmatlu(:),natom,1)
@@ -642,21 +623,12 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
 !    call checkdiag_matlu(weiss_for_rot%oper(ifreq)%matlu,natom,tol6)
    end do ! ifreq
    
-   call gather_oper(weiss_for_rot%oper(:),weiss%distrib,paw_dmft,opt_ksloc=2)
-   call gather_oper(weiss%oper(:),weiss%distrib,paw_dmft,opt_ksloc=2)
-   
-   if (weiss%has_moments == 1) then
-     do i=2,weiss%nmoments-1
-       call rotate_matlu(weiss_for_rot%moments(i)%matlu(:),eigvectmatlu(:),natom,1)
-     end do ! i
-   end if ! moments
-
-   if (myproc == mod(nproc+1,nproc) .and. paw_dmft%lpawu(1) > 0) then
+   if (myproc == mod(nproc+1,nproc)) then
      if (open_file(trim(paw_dmft%filapp)//"_atom_G0w_.dat",message,newunit=unt) /= 0) ABI_ERROR(message)
-     ndim = 2*paw_dmft%lpawu(1) + 1
+     ndim = 2*paw_dmft%lpawu(natom) + 1
      do ifreq=1,nwlo
        write(unt,'(29f21.14)') paw_dmft%omega_lo(ifreq),&
-         & (((weiss_for_rot%oper(ifreq)%matlu(1)%mat(im1+(ispinor-1)*ndim,im1+(ispinor-1)*ndim,isppol),&
+         & (((weiss_for_rot%oper(ifreq)%matlu(natom)%mat(im1+(ispinor-1)*ndim,im1+(ispinor-1)*ndim,isppol),&
          & im1=1,3),ispinor=1,nspinor),isppol=1,nsppol)
      end do ! ifreq
      close(unt)
@@ -697,42 +669,40 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
 ! =================================================================
 ! Compute analytic limit of hybridization and rotate it
 ! =================================================================
- if (.not. triqs) then
-   ABI_MALLOC(hybri_coeff,(natom))
-   call init_matlu(natom,nspinor,nsppol,paw_dmft%lpawu(:),hybri_coeff(:))
+ ABI_MALLOC(hybri_coeff,(natom))
+ call init_matlu(natom,nspinor,nsppol,paw_dmft%lpawu(:),hybri_coeff(:))
  !write(6,*)"hybri1",hybri_coeff(1)%mat(1,1,1,1,1),paw_dmft%natom,cryst_struc%natom
 
  ! Compute analytical C_ij such that F_ij -> C_ij/iw_n
  ! ---------------------------------------
-   call hybridization_asymptotic_coefficient(cryst_struc,paw_dmft,hybri_coeff(:))
-   write(message,'(a,2x,a)') ch10," == Coeff analytical C_ij such that F -> C_ij/iw_n for large frequency"
-   call wrtout(std_out,message,'COLL')
+ call hybridization_asymptotic_coefficient(cryst_struc,paw_dmft,hybri_coeff(:))
+ write(message,'(a,2x,a)') ch10," == Coeff analytical C_ij such that F -> C_ij/iw_n for large frequency"
+ call wrtout(std_out,message,'COLL')
 
  ! Print analytical C_ij (not rotated)
  ! ---------------------------------------
-   call print_matlu(hybri_coeff(:),natom,1)
+ call print_matlu(hybri_coeff(:),natom,1)
 
  ! Rotate analytical C_ij in Ylm basis
  ! ---------------------------------------
-   if (useylm == 1) then
-     call slm2ylm_matlu(hybri_coeff(:),natom,1,pawprtvol)
-   end if 
+ if (useylm == 1) then
+   call slm2ylm_matlu(hybri_coeff(:),natom,1,pawprtvol)
+ end if 
 
-   if (opt_diag /= 0)  then
+ if (opt_diag /= 0)  then
 
  ! Rotate analytical C_ij in rotated basis
  ! ---------------------------------------
-     if (opt_rot == 1 .or. opt_rot == 2) then
-       call rotate_matlu(hybri_coeff(:),eigvectmatlu(:),natom,1)
-     end if 
+   if (opt_rot == 1 .or. opt_rot == 2) then
+     call rotate_matlu(hybri_coeff(:),eigvectmatlu(:),natom,1)
+   end if 
 
  ! Print analytical C_ij (rotated)
  ! ---------------------------------------
-     write(message,'(a,2x,a)') ch10," == Coeff analytical C_ij such that F -> C_ij/iw_n after rotation"
-     call wrtout(std_out,message,'COLL')
-     call print_matlu(hybri_coeff(:),natom,1,compl=1,opt_exp=1)
-   end if 
- end if ! not triqs
+   write(message,'(a,2x,a)') ch10," == Coeff analytical C_ij such that F -> C_ij/iw_n after rotation"
+   call wrtout(std_out,message,'COLL')
+   call print_matlu(hybri_coeff(:),natom,1,compl=1,opt_exp=1)
+ end if 
 
 ! =================================================================
 ! Check if rotation is properly done.
@@ -820,17 +790,14 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
 ! Compute inverse of weiss and compute hybridization
 ! ===========================================================================================
 
-! Compute inverse of weiss  for each Frequency
+! Compute inverse of weiss for each Frequency
 ! ----------------------------------------------
   
-  ABI_MALLOC(matlu1,(natom))
-  ABI_MALLOC(matlu2,(natom))
-  call init_matlu(natom,nspinor,nsppol,paw_dmft%lpawu(:),matlu1(:))
-  call init_matlu(natom,nspinor,nsppol,paw_dmft%lpawu(:),matlu2(:)) 
-
   do ifreq=1,nwlo
-
-    if (weiss%distrib%procf(ifreq) /= myproc) cycle
+    ABI_MALLOC(matlu1,(natom))
+    ABI_MALLOC(matlu2,(natom))
+    call init_matlu(natom,nspinor,nsppol,paw_dmft%lpawu(:),matlu1(:))
+    call init_matlu(natom,nspinor,nsppol,paw_dmft%lpawu(:),matlu2(:))
 
     call copy_matlu(weiss_for_rot%oper(ifreq)%matlu(:),matlu1(:),natom)
 
@@ -861,7 +828,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
       call printplot_matlu(weiss_for_rot%oper(ifreq)%matlu(:),natom,paw_dmft%omega_lo(ifreq),"goinv",70000,imre=1)
     end if 
 
-    if (pawprtvol >= 4 .or. ifreq == 1) then
+    if (pawprtvol >= 4 .or. ifreq == nwlo) then
       if (opt_fk == 1 .or. testcode /= 0) then
       ! Check inversion : do the product
       ! ----------------------------------------------
@@ -872,12 +839,12 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
        end if
      end if 
 
+     call destroy_matlu(matlu1(:),natom)
+     call destroy_matlu(matlu2(:),natom)
+     ABI_FREE(matlu1)
+     ABI_FREE(matlu2)
+
    end do ! ifreq
-   call destroy_matlu(matlu1(:),natom)
-   call destroy_matlu(matlu2(:),natom)
-   ABI_FREE(matlu1)
-   ABI_FREE(matlu2)
-   call gather_oper(weiss_for_rot%oper(:),weiss%distrib,paw_dmft,opt_ksloc=2)
 
  ! Copy weiss_for_rot into weiss
  ! -------------------------------
@@ -941,7 +908,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
 ! Check numerical limit of F(i_wn)*iw_n (can be used also to compute F )
 ! ======================================
 
- if (opt_nondiag == 1 .and. (.not. triqs)) then
+ if (opt_nondiag == 1) then
  
    ABI_MALLOC(matlu1,(natom))
    ABI_MALLOC(matlu2,(natom))
@@ -1141,10 +1108,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
 ! Start big loop over atoms to compute hybridization and do the CTQMC
 ! =========================================================================================
 
- natom2 = natom
- if (triqs) natom2 = 0
-
- do iatom=1,natom2
+ do iatom=1,natom
  
    lpawu = paw_dmft%lpawu(iatom)
    if (lpawu == -1) cycle
@@ -1671,6 +1635,77 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
  !write(message,'(i3,4x,2e21.14)') 7,weiss%oper(1)%matlu(1)%mat(1,1,1,1,1)
  !call wrtout(std_out,message,'COLL')  ! debug
 
+10 continue
+
+ if (triqs) then
+
+   ABI_MALLOC(shift,(natom))
+   ABI_MALLOC(matlu1,(natom))
+
+   call init_matlu(natom,nspinor,nsppol,paw_dmft%lpawu(:),matlu1(:))
+
+   option = 0
+   orb_off_diag  = paw_dmft%dmftctqmc_triqs_orb_off_diag
+   spin_off_diag = paw_dmft%dmftctqmc_triqs_spin_off_diag
+
+   if ((.not. orb_off_diag) .and. (.not. spin_off_diag)) option = 1
+   if ((.not. orb_off_diag) .and. (spin_off_diag)) option = 2
+   if (orb_off_diag .and. (.not. spin_off_diag)) option = 3
+ 
+   if (opt_diag /= 0) then
+     do i=1,weiss%nmoments-1
+       call rotate_matlu(weiss%moments(i)%matlu(:),eigvectmatlu(:),natom,1)
+     end do ! i 
+   end if 
+
+   maxoffdiag = zero
+
+   do ifreq=1,nwlo
+
+     if (weiss%distrib%procf(ifreq) /= myproc) cycle
+   
+     shift(:) = cmplx(zero,paw_dmft%omega_lo(ifreq),kind=dp)
+
+     if (opt_diag /= 0) then
+       call rotate_matlu(weiss%oper(ifreq)%matlu(:),eigvectmatlu(:),natom,1)
+     end if
+  
+     call shift_matlu(weiss%oper(ifreq)%matlu(:),natom,shift(:))
+     call fac_matlu(weiss%oper(ifreq)%matlu(:),natom,-cone)
+     call add_matlu(weiss%oper(ifreq)%matlu(:),energy_level%matlu(:),matlu1(:),natom,-1)
+     call add_matlu(matlu1(:),weiss%moments(1)%matlu(:),weiss%oper(ifreq)%matlu(:),natom,-1)
+     call zero_matlu(weiss%oper(ifreq)%matlu(:),natom,onlynondiag=option,maxoffdiag=maxoffdiag_)
+     if (maxoffdiag_ > maxoffdiag) maxoffdiag = maxoffdiag_
+
+   end do ! ifreq
+
+   call gather_oper(weiss%oper(:),weiss%distrib,paw_dmft,opt_ksloc=2)
+   call xmpi_max(maxoffdiag,maxoffdiag_,paw_dmft%spacecomm,ierr)
+ 
+   call zero_matlu(energy_level%matlu(:),natom,onlynondiag=option,maxoffdiag=maxoffdiag)
+   if (maxoffdiag > maxoffdiag_) maxoffdiag_ = maxoffdiag
+
+   call zero_matlu(weiss%moments(1)%matlu(:),natom)
+   do i=2,weiss%nmoments-1
+     call zero_matlu(weiss%moments(i)%matlu(:),natom,onlynondiag=option,maxoffdiag=maxoffdiag)
+     if (maxoffdiag > maxoffdiag_) maxoffdiag_ = maxoffdiag
+   end do ! i
+
+   if (maxoffdiag > tol10) then 
+     message = "WARNING: You have neglected some off-diagonal elements in your calculation &
+              & but they are non-negligible."
+     ABI_WARNING(message)
+   end if  
+
+   call destroy_matlu(matlu1(:),natom)
+ 
+   ABI_FREE(shift)
+   ABI_FREE(matlu1)
+
+   call ctqmc_calltriqs_c(paw_dmft,green,weiss,energy_level,udens_atoms(:),vee_rotated(:))
+
+ end if ! triqs
+
 ! =================================================================
 ! Rotate back green function to original basis (non-diagonal)
 !  (and Weiss for further use: might be useful if an back Fourier
@@ -1811,8 +1846,22 @@ end if !nspinor
 
  ! Rotate Green's and Weiss functions into Ylm basis and then Slm basis
  !-------------------------------------------------------------
+
+ if (triqs) then
+   ABI_MALLOC(shift,(natom))
+   ABI_MALLOC(matlu1,(natom)) 
+   call init_matlu(natom,nspinor,nsppol,paw_dmft%lpawu(:),matlu1(:))
+ end if 
+
  do ifreq=1,nwlo
-   if (green%distrib%procf(ifreq) /= myproc) cycle
+   if (weiss%distrib%procf(ifreq) /= myproc) cycle
+   if (triqs) then
+     shift(ifreq) = cmplx(zero,paw_dmft%omega_lo(ifreq),kind=dp)
+     call add_matlu(weiss%oper(ifreq)%matlu(:),energy_level%matlu(:),matlu1(:),natom,1)
+     call copy_matlu(matlu1(:),weiss%oper(ifreq)%matlu(:),natom)
+     call shift_matlu(weiss%oper(ifreq)%matlu(:),natom,shift(:))
+     call fac_matlu(weiss%oper(ifreq)%matlu(:),natom,-cone)
+   end if 
    if (opt_diag /= 0) then
      call rotate_matlu(green%oper(ifreq)%matlu(:),eigvectmatlu(:),natom,0)
      call rotate_matlu(weiss%oper(ifreq)%matlu(:),eigvectmatlu(:),natom,0)
@@ -1822,8 +1871,15 @@ end if !nspinor
      call slm2ylm_matlu(weiss%oper(ifreq)%matlu(:),natom,2,0)
    end if 
  end do ! ifreq
- call gather_oper(green%oper(:),green%distrib,paw_dmft,opt_ksloc=2)
+
+ if (triqs) then 
+   ABI_FREE(shift)
+   call destroy_matlu(matlu1(:),natom)
+   ABI_FREE(matlu1)
+ end if 
+
  call gather_oper(weiss%oper(:),weiss%distrib,paw_dmft,opt_ksloc=2)
+ call gather_oper(green%oper(:),green%distrib,paw_dmft,opt_ksloc=2)
  
  if (green%has_moments == 1) then
    do i=1,green%nmoments
@@ -1831,11 +1887,20 @@ end if !nspinor
        call rotate_matlu(green%moments(i)%matlu(:),eigvectmatlu(:),natom,0)
      end if 
      call sym_matlu(green%moments(i)%matlu(:),paw_dmft)
+   end do ! i
+   do i=2,weiss%nmoments-1
+     if (opt_diag /= 0) then
+       call rotate_matlu(weiss%moments(i)%matlu(:),eigvectmatlu(:),natom,0)
+     end if 
+     call sym_matlu(weiss%moments(i)%matlu(:),paw_dmft)
    end do ! i 
+   if (opt_diag /= 0) then
+     call rotate_matlu(energy_level%matlu(:),eigvectmatlu(:),natom,0)
+   end if 
+   call sym_matlu(energy_level%matlu(:),paw_dmft)
    opt_log = 0
    if (paw_dmft%dmftctqmc_triqs_entropy == 1) opt_log = 1
-   call compute_moments_loc(green,self,levels_slm,weiss,1,opt_log=opt_log)
-   call destroy_oper(levels_slm)
+   call compute_moments_loc(green,self,energy_level,weiss,1,opt_log=opt_log)
  end if ! moments
  !write(message,'(i3,4x,2e21.14)') 10,weiss%oper(1)%matlu(1)%mat(1,1,1,1,1)
  !call wrtout(std_out,message,'COLL')  ! debug
@@ -1943,7 +2008,9 @@ end if !nspinor
  ABI_FREE(matlumag_orb)
  ABI_FREE(matlumag_spin)
  ABI_FREE(matlumag_tot)
- call destroy_green(weiss_for_rot)
+ if (.not. triqs) then
+   call destroy_green(weiss_for_rot)
+ end if 
 ! call destroy_green(gw_loc)
 ! call destroy_green(greendft)
 
@@ -2664,7 +2731,7 @@ end subroutine ctqmcoutput_printgreen
 
 subroutine ctqmc_calltriqs(paw_dmft,cryst_struc,hu,levels_ctqmc,gtmp_nd,gw_tmp_nd,fw1_nd,leg_measure,iatom)
 
-#if defined HAVE_TRIQS_v2_0 || defined HAVE_TRIQS_v1_4
+#if defined HAVE_TRIQS_v3_4 || defined HAVE_TRIQS_v2_0 || defined HAVE_TRIQS_v1_4
  use TRIQS_CTQMC !Triqs module
 #endif
 #if defined HAVE_PYTHON_INVOCATION
@@ -3236,21 +3303,41 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,weiss,energy_level,udens,vee)
  type(matlu_type), target, intent(in) :: udens(:)
  type(vee_type), target, intent(in) :: vee(:)
 !Local variables ------------------------------
+ integer :: i,iatom,iflavor,iflavor1,ifreq,ifreq2,iilam,ilam,ileg,im,im1,isppol
+ integer :: itau,iw,l,lpawu,myproc,natom,ncon,ndim,nflavor,ngauss,nlam,nleg
+ integer :: nmoments,nspinor,nsppol,ntau,ntau_delta,ntot,nwlo,p,tndim,wdlr_size
+ integer, target :: ndlr
+ logical :: density_matrix_measure,leg_measure,orb_off_diag,rot_inv,spin_off_diag
+ real(dp) :: besp,bespp,beta,dx,fact,fact2,xx
+ real(dp), target :: eu
+ complex(dpc) :: mself_1,mself_2,occ_tmp,u_nl
+ type(c_ptr) :: eu_ptr,ftau_ptr,gl_ptr,gtau_ptr,levels_ptr,mself_1_ptr
+ type(c_ptr) :: mself_2_ptr,ndlr_ptr,occ_ptr,udens_ptr,vee_ptr,wdlr_ptr
+ real(dp), allocatable :: Adlr(:,:),bdlr(:),gl_dlr_re(:),gl_dlr_im(:)
+ real(dp), allocatable :: jbes(:),lam_list(:),mgreen(:),t_lp(:,:)
+ real(dp), allocatable :: tpoints(:),tweights(:),wdlr(:),wdlr_beta(:)
+ real(dp), allocatable :: wdlr2(:),wdlr3(:),wdlr4(:)
+ real(dp), target, allocatable :: occ(:),wdlr_tmp(:)
+ complex(dpc), allocatable :: Adlr_iw(:,:),gl_dlr(:,:,:,:),gl_tmp(:,:,:,:),gtau_dlr(:,:,:)
+ complex(dpc), target, allocatable :: gl(:,:,:),gtau(:,:,:),levels_ctqmc(:,:)
+ complex(dpc), target, allocatable :: moments_self_1(:,:),moments_self_2(:,:)
+ type(matlu_type), target, allocatable :: ftau(:)
  character(len=4) :: tag_at
  character(len=13) :: tag,tag2
  character(len=500) :: message
 ! ************************************************************************
 
- leg_measure = paw_dmft%dmftctqmc_triqs_leg_measure
- myproc      = paw_dmft%myproc
- natom       = paw_dmft%natom
- nleg        = paw_dmft%dmftctqmc_triqs_nleg
- nspinor     = paw_dmft%nspinor
- nsppol      = paw_dmft%nsppol
- ntau        = paw_dmft%dmftqmc_l + 1
- nwlo        = paw_dmft%dmft_nwlo
- off_diag    = paw_dmft%dmftctqmc_triqs_off_diag
- 
+ leg_measure   = paw_dmft%dmftctqmc_triqs_leg_measure
+ myproc        = paw_dmft%myproc
+ natom         = paw_dmft%natom
+ nleg          = paw_dmft%dmftctqmc_triqs_nleg
+ nspinor       = paw_dmft%nspinor
+ nsppol        = paw_dmft%nsppol
+ ntau          = paw_dmft%dmftqmc_l + 1
+ nwlo          = paw_dmft%dmft_nwlo
+ orb_off_diag  = paw_dmft%dmftctqmc_triqs_orb_off_diag
+ spin_off_diag = paw_dmft%dmftctqmc_triqs_spin_off_diag 
+
  density_matrix_measure = paw_dmft%dmftctqmc_triqs_measure_density_matrix
  
  rot_inv = .false.
@@ -3266,56 +3353,9 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,weiss,energy_level,udens,vee)
  
  nmoments = weiss%nmoments - 2
 
- ! Substract the energy levels to get the hybridization 
- do ifreq=1,nwlo
-   do iatom=1,natom
-     lpawu = paw_dmft%lpawu(iatom)
-     if (lpawu == -1) cycle
-     weiss%oper(ifreq)%matlu(iatom)%mat(:,:,:) = &
-       & weiss%oper(ifreq)%matlu(iatom)%mat(:,:,:) - &
-       & energy_level%matlu(iatom)%mat(:,:,:)
-   end do ! natom 
- end do ! ifreq 
-
  ! Inverse Fourier transform of the hybridization
  call fourier_inv(paw_dmft,nmoments,ntau_delta,ftau(:),weiss%oper(:),weiss%moments(2:nmoments+1))
-
- loopat: do iatom=1,natom
-   lpawu = paw_dmft%lpawu(iatom)
-   if (lpawu == -1) cycle
-   ndim = 2*lpawu + 1
-   do itau=1,ntau_delta
-     do isppol1=1,nsppol*nspinor
-       do isppol=1,nsppol*nspinor
-         if (nspinor == 1 .and. isppol /= isppol1) cycle
-         do im1=1,ndim
-           do im=1,ndim
-             if (im /= im1 .and. abs(ftau(im+(isppol-1)*ndim,im1+(isppol1-1)*ndim,itau)) > tol10) then
-               nondiag = .true.
-               exit loopat
-             end if 
-           end do ! im
-         end do ! im1
-       end do ! isppol
-     end do ! isppol1
-   end do ! itau 
- end do loopat ! iatom
-
- if (nondiag .and. (.not. off_diag)) then
-   message = "WARNING: you have neglected the off-diagonal elements by setting &
-           & triqs_off_diag to 0, yet the off-diagonal entries of the hybridization &
-           & are not negligible"
-   ABI_WARNING(message) 
- end if
-
- if ((.not. nondiag) .and. off_diag) then
-   message = "WARNING: you have activated the calculation of the off-diagonal &
-            & elements by setting triqs_off_diag to 1, yet the off-diagonal &
-            & entries of the hybridization are negligible. You should consider &
-            & neglecting them in order to reduce the computation time."
-   ABI_WARNING(message)
- end if 
-
+ 
  call identity_oper(green%moments(1),2)
  do i=2,green%nmoments
    call zero_matlu(green%moments(i)%matlu(:),natom)
@@ -3425,14 +3465,14 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,weiss,energy_level,udens,vee)
    open(unit=505,file="Hybridization_offdiag_iatom"//tag_at//".dat",status='unknown',form='formatted')
    do itau=1,ntau_delta
      write(505,'(2x,393(e18.10e3,2x))') beta*dble(itau-1)/dble(ntau_delta-1), &
-        & ((dble(ftau(im,im1,itau)),aimag(ftau(im,im1,itau)),im=1,nflavor),im1=1,nflavor)
+        & ((dble(ftau(iatom)%mat(im,im1,itau)),aimag(ftau(iatom)%mat(im,im1,itau)),im=1,nflavor),im1=1,nflavor)
    end do ! itau 
    close(505)
 
    open(unit=505,file="Hybridization_diag_iatom"//tag_at//".dat",status='unknown',form='formatted')
    do itau=1,ntau_delta
      write(505,'(2x,393(e25.17e3,2x))') beta*dble(itau-1)/dble(ntau_delta-1), &
-        & (dble(ftau(im,im,itau)),im=1,nflavor)
+        & (dble(ftau(iatom)%mat(im,im,itau)),im=1,nflavor)
    end do ! itau 
    close(505)
   
@@ -3443,10 +3483,13 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,weiss,energy_level,udens,vee)
    end if 
    if ((.not. leg_measure) .and. density_matrix_measure) then
      ABI_MALLOC(moments_self_1,(nflavor,nflavor))
-     ABI_MALLOC(moments_self_2,(nflavor,nflavor))
+     ABI_MALLOC(moments_self_2,(nflavor,nflavor)) 
+     moments_self_1(:,:) = czero
+     moments_self_2(:,:) = czero
    end if 
    if (leg_measure) then
      ABI_MALLOC(gl,(nleg,nflavor,nflavor))
+     gl(:,:,:) = czero
    end if 
    
    levels_ctqmc(:,:) = czero
@@ -3458,6 +3501,8 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,weiss,energy_level,udens,vee)
        end do ! im
      end do ! im1
    end do ! isppol
+
+   gtau(:,:,:) = czero
    
    eu_ptr      = C_LOC(eu)
    ftau_ptr    = C_LOC(ftau(iatom)%mat(:,:,:))
@@ -3474,8 +3519,9 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,weiss,energy_level,udens,vee)
  
      iilam = ilam
      if (ilam == ntot) iilam = 0
- 
-     call Ctqmc_triqs_run(rot_inv,leg_measure,off_diag,paw_dmft%dmftctqmc_triqs_move_shift, &
+
+#if defined HAVE_TRIQS_v3_4 
+     call Ctqmc_triqs_run(rot_inv,leg_measure,orb_off_diag,spin_off_diag,paw_dmft%dmftctqmc_triqs_move_shift, &
                         & paw_dmft%dmftctqmc_triqs_move_double,density_matrix_measure, &
                         & paw_dmft%dmftctqmc_triqs_time_invariance,paw_dmft%dmftctqmc_triqs_use_norm_as_weight, &
                         & paw_dmft%dmftctqmc_triqs_loc_n_min,paw_dmft%dmftctqmc_triqs_loc_n_max, &
@@ -3488,7 +3534,8 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,weiss,energy_level,udens,vee)
                         & paw_dmft%dmftctqmc_triqs_det_precision_warning,paw_dmft%dmftctqmc_triqs_det_precision_error, &
                         & paw_dmft%dmftctqmc_triqs_det_singular_threshold,lam_list(ilam),ftau_ptr,gtau_ptr,gl_ptr,udens_ptr, &
                         & vee_ptr,levels_ptr,mself_1_ptr,mself_2_ptr,eu_ptr,occ_ptr)
-        
+#endif        
+
      if (paw_dmft%dmft_integral == 1 .and. ilam < ntot) then
        i = mod(ilam,ngauss)
        if (i == 0) i = ngauss
@@ -3525,6 +3572,21 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,weiss,energy_level,udens,vee)
    close(505)
 
    ABI_FREE(levels_ctqmc)
+
+   do isppol=1,nsppol
+     do im1=1,tndim 
+       iflavor1 = im1 + (isppol-1)*ndim
+       do im=1,tndim
+         iflavor = im + (isppol-1)*ndim
+         if (nsppol == 1 .and. nspinor == 1) then 
+           occ_tmp = (gtau(1,iflavor,iflavor1)+gtau(1,iflavor+ndim,iflavor1+ndim)) * half
+         else
+           occ_tmp = gtau(1,iflavor,iflavor1)
+         end if 
+         green%oper_tau(1)%matlu(iatom)%mat(im,im1,isppol) = occ_tmp
+       end do ! im
+     end do ! im1
+   end do ! isppol
  
    if (density_matrix_measure) then
  
@@ -3536,7 +3598,6 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,weiss,energy_level,udens,vee)
          do im1=1,tndim
            iflavor1 = im1 + (isppol-1)*ndim
            do im=1,tndim
-             if (im /= im1 .and. (.not. off_diag)) cycle
              iflavor = im + (isppol-1)*ndim            
              
              if (nsppol == 1 .and. nspinor == 1) then
@@ -3569,12 +3630,12 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,weiss,energy_level,udens,vee)
            iflavor = im + (isppol-1)*ndim
 
            if (nsppol == 1 .and. nspinor == 1) then
-             occ_tmp = (occ(iflavor)+occ(iflavor+ndim))*half
+             occ_tmp = cmplx((occ(iflavor)+occ(iflavor+ndim))*half,zero,kind=dp)
            else
-             occ_tmp = occ(iflavor)
+             occ_tmp = cmplx(occ(iflavor),zero,kind=dp)
            end if
           
-           green%oper_tau(1)%matlu(iatom)%mat(im,im,isppol) = cmplx(occ_tmp,zero,kind=dp) - cone
+           green%oper_tau(1)%matlu(iatom)%mat(im,im,isppol) = occ_tmp - cone
  
        end do ! im
      end do ! isppol
@@ -3597,7 +3658,6 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,weiss,energy_level,udens,vee)
          do im1=1,tndim
            iflavor1 = im1 + (isppol-1)*ndim
            do im=1,tndim
-             if (im /= im1 .and. (.not. off_diag)) cycle
              iflavor = im + (isppol-1)*ndim
              do ileg=1,nleg
                if (xx >= dble(99)) then
@@ -3608,7 +3668,7 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,weiss,energy_level,udens,vee)
                  gl_tmp(ileg,im,im1,isppol) = &
                    & (gl(ileg,iflavor,iflavor1)+gl(ileg,iflavor+ndim,iflavor1+ndim))*half
                else
-                 gl_tmp(ileg,im,im1,isppol) = gl(iflavor,iflavor1,ileg)
+                 gl_tmp(ileg,im,im1,isppol) = gl(ileg,iflavor,iflavor1)
                end if 
                green%oper(ifreq2)%matlu(iatom)%mat(im,im1,isppol) = &
                  & green%oper(ifreq2)%matlu(iatom)%mat(im,im1,isppol) + &
@@ -3620,46 +3680,45 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,weiss,energy_level,udens,vee)
      end do ! ifreq2
      ABI_FREE(jbes)     
 
-     ABI_MALLOC(t,(nleg,green%nmoments))
+     ABI_MALLOC(t_lp,(nleg,green%nmoments))
      
      fact = one ! this is equal to (p-1)!
 
      do p=1,green%nmoments
-       if (p > 1) fact = fact * (dble(p)-one)
+       if (p > 1) fact = fact * dble(p-1)
        fact2 = fact
        do l=0,nleg-1
          if (l > 0) fact2 = fact2 * dble(l+p-1)
          if (p > l+1) then
-           t(l+1,p) = zero
+           t_lp(l+1,p) = zero
          else
            if (l-p+1 > 0) fact2 = fact2 / dble(l-p+1)  ! fact2 is now equal to (l+p-1)...(l-p+2)
            if (mod(p+l,2) == 0) then
-             t(l+1,p) = zero
+             t_lp(l+1,p) = zero
            else
-             t(l+1,p) = (-1)**p * two * sqrt(dble(2*l+1)) * fact2 / fact
+             t_lp(l+1,p) = (-1)**p * two * sqrt(dble(2*l+1)) * fact2 / fact
            end if
          end if ! p>l+1
        end do ! l
-       green%moments(p)%matlu(iatom)%mat(:,:,:) = czero
        do isppol=1,nsppol
          do im1=1,tndim
            do im=1,tndim
-             if (im /= im1 .and. (.not. off_diag)) cycle
-             green%moments(p)%matlu(iatom)%mat(im,im1,isppol) = sum(t(:,p)*gl_tmp(:,im,im1,isppol))
+             green%moments(p)%matlu(iatom)%mat(im,im1,isppol) = sum(t_lp(:,p)*gl_tmp(:,im,im1,isppol))
            end do ! im
          end do ! im1
        end do ! isppol
      end do ! p
          
      ABI_FREE(gl_tmp)   
-     ABI_FREE(t)
+     ABI_FREE(t_lp)
 
    else
 
-     ABI_MALLOC(gl_dlr,(ndlr,ndim,ndim,nsppol))
+     ABI_MALLOC(gl_dlr,(ndlr,tndim,tndim,nsppol))
      ABI_MALLOC(gl_dlr_re,(ndlr))
      ABI_MALLOC(gl_dlr_im,(ndlr))
      ABI_MALLOC(bdlr,(ntau))
+     ABI_MALLOC(gtau_dlr,(ntau,nflavor,nflavor))
         
      ncon = 1
      if (density_matrix_measure) ncon = 4   
@@ -3670,14 +3729,21 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,weiss,energy_level,udens,vee)
        do im1=1,tndim
          iflavor1 = im1 + (isppol-1)*ndim
          do im=1,tndim
-           if (im /= im1 .and. (.not. off_diag)) cycle
            iflavor = im + (isppol-1)*ndim
+           
+           if (iflavor == iflavor1) then
+             ncon = 4
+           else
+             ncon = 3
+           end if 
+
            if (nsppol == 1 .and. nspinor == 1) gtau(:,iflavor,iflavor1) = &
              & (gtau(:,iflavor,iflavor1)+gtau(:,iflavor+ndim,iflavor1+ndim)) * half
            bdlr(:) = dble(gtau(:,iflavor,iflavor1))
            do i=1,nmoments
              mgreen(i) = dble(green%moments(i)%matlu(iatom)%mat(im,im1,isppol))
            end do ! i
+           occ_tmp = dble(green%oper_tau(1)%matlu(iatom)%mat(im,im1,isppol))
            call fit_dlr(ncon,ndlr,lsq_g,con_moments,jac_lsq_g,jac_con_moments,gl_dlr_re(:))
            bdlr(:) = aimag(gtau(:,iflavor,iflavor1))
            do i=1,nmoments
@@ -3690,10 +3756,14 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,weiss,energy_level,udens,vee)
            green%moments(3)%matlu(iatom)%mat(im,im1,isppol) = sum(gl_dlr(:,im,im1,isppol)*wdlr2(:))
            green%moments(4)%matlu(iatom)%mat(im,im1,isppol) = sum(gl_dlr(:,im,im1,isppol)*wdlr3(:))
            green%moments(5)%matlu(iatom)%mat(im,im1,isppol) = sum(gl_dlr(:,im,im1,isppol)*wdlr4(:))
+           do itau=1,ntau
+             gtau_dlr(itau,iflavor,iflavor1) = sum(gl_dlr(:,im,im1,isppol)*Adlr(:,itau))
+           end do ! itau
+           if (nsppol == 1 .and. nspinor == 1) gtau_dlr(:,iflavor+ndim,iflavor1+ndim) = gtau_dlr(:,iflavor,iflavor1)
          end do ! im
        end do ! im1
      end do ! isppol
-     
+
      do ifreq=1,nwlo
        do isppol=1,nsppol
          do im1=1,tndim
@@ -3705,7 +3775,21 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,weiss,energy_level,udens,vee)
          end do ! im1
        end do ! isppol
      end do ! ifreq
-    
+   
+     open(unit=505,file="Gtau_offdiag_DLR_iatom"//tag_at//".dat",status='unknown',form='formatted')
+     do itau=1,ntau
+       write(505,'(2x,393(e18.10e3,2x))') beta*dble(itau-1)/dble(ntau-1), &
+          & ((dble(gtau_dlr(itau,im,im1)),aimag(gtau_dlr(itau,im,im1)),im=1,nflavor),im1=1,nflavor)
+     end do ! itau 
+     close(505)
+
+     open(unit=505,file="Gtau_diag_DLR_iatom"//tag_at//".dat",status='unknown',form='formatted')
+     do itau=1,ntau
+       write(505,'(2x,393(e25.17e3,2x))') beta*dble(itau-1)/dble(ntau-1), &
+          & (dble(gtau_dlr(itau,im,im)),im=1,nflavor)
+     end do ! itau 
+     close(505)
+ 
      ABI_FREE(gl_dlr)
      ABI_FREE(gl_dlr_re)
      ABI_FREE(gl_dlr_im)
@@ -3718,6 +3802,7 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,weiss,energy_level,udens,vee)
      ABI_FREE(wdlr2)
      ABI_FREE(wdlr3)
      ABI_FREE(wdlr4)
+     ABI_FREE(gtau_dlr)
    
    end if ! leg_measure
    
@@ -3777,7 +3862,7 @@ subroutine con_moments(gl,con)
  if (ncon > 1) then 
    con(2) = sum(gl(:)*wdlr_beta(:)) - mgreen(2)
    con(3) = sum(gl(:)*wdlr2(:)) - mgreen(3)
-   con(4) = sum(gl(:)*Adlr(:,1)) - bdlr(1)  
+   if (ncon == 4) con(4) = sum(gl(:)*Adlr(:,1)) - dble(occ_tmp)
  end if ! ncon>1
 
 end subroutine con_moments
@@ -3795,7 +3880,7 @@ subroutine jac_con_moments(gl,jac_con)
  if (ncon > 1) then 
    jac_con(2,1:ndlr) = wdlr_beta(:)
    jac_con(3,1:ndlr) = wdlr2(:)
-   jac_con(4,1:ndlr) = Adlr(:,1)
+   if (ncon == 4) jac_con(4,1:ndlr) = Adlr(:,1)
  end if ! ncon>1
  jac_con(:,ndlr+1) = zero  ! not sure if this is necessary, but this is what they do in the SCIPY interface with SLSQP
  
@@ -3862,6 +3947,27 @@ function k_iw(iom,omega)
 end function k_iw
 !!***
 
+!!****f* m_forctqmc/fit_dlr
+!! NAME
+!! fit_dlr
+!!
+!! FUNCTION
+!! Optimizes a function with several variables
+!! under several constraints, using the SLSQP algorithm.
+!!
+!! INPUTS
+!! m = number of constraints
+!! n = number of variables
+!! fun = function to optimize
+!! con = constraints
+!! jac = jacobian of the function
+!! jac_con = jacobian of the constraints
+!!
+!! OUTPUT
+!! x(n) = minimizer
+!!
+!! SOURCE
+
 subroutine fit_dlr(m,n,fun,con,jac,jac_con,x)
 
  use m_slsqp, only : slsqp
@@ -3909,7 +4015,7 @@ subroutine fit_dlr(m,n,fun,con,jac,jac_con,x)
  maxiter = 10000
  meq = m   ! all constraints are equality constraints here
  la = m
- x(:) = zero
+ x(:)  = zero
  xl(:) = zero
  xu(:) = zero
  xl(:) = xl(:) / zero  ! set lower and upper bounds to NaN (very important, this is how slsqp recognizes that no bounds should be applied)
@@ -3930,25 +4036,12 @@ subroutine fit_dlr(m,n,fun,con,jac,jac_con,x)
  w = zero
  l_jw = mineq   ! as recommended
  ABI_MALLOC(jw,(l_jw))
- jw = 0
- alpha = zero
- f0  = zero
- gs  = zero
- h1  = zero
- h2  = zero
- h3  = zero
- h4  = zero
- t   = zero
- t0  = zero
- tol = zero
- iexact = 0
- incons = 0
- ireset = 0
- itermx = 0
- line = 0
- n1 = 0
- n2 = 0
- n3 = 0
+ jw = 0 ; alpha = zero ; f0 = zero
+ gs = zero ; h1 = zero ; h2 = zero
+ h3 = zero ; h4 = zero ; t = zero
+ t0 = zero ; tol = zero ; iexact = 0
+ incons = 0 ; ireset = 0 ; itermx = 0
+ line = 0 ; n1 = 0 ; n2 = 0 ; n3 = 0
 
  do i=1,maxiter
 
@@ -4012,7 +4105,7 @@ subroutine fourier_inv(paw_dmft,nmoments,ntau,matlu_tau,oper_freq,moments)
  type(matlu_type), intent(inout) :: matlu_tau(paw_dmft%natom)
 !Local variables ------------------------------
  integer :: i,iatom,ifreq,im,im1,isppol,itau,lpawu
- integer :: myproc,natom,ndim,nsppol,nwlo,tndim
+ integer :: myproc,natom,ndim,nspinor,nsppol,nwlo,tndim
  real(dp) :: beta,minusomegatau,tau 
  complex(dpc) :: omega,sumterm
  complex(dpc), allocatable :: omega_fac(:)

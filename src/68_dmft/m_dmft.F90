@@ -882,6 +882,7 @@ subroutine dyson(green,paw_dmft,self,weiss,opt_weissself)
 ! type(paw_dmft_type), intent(inout)  :: paw_dmft
 !Local variables ------------------------------
  integer :: ifreq,myproc,natom,nspinor,nsppol,weissinv
+ logical :: triqs
  real(dp) :: tsec(2)
  type(matlu_type), allocatable :: greeninv(:)
  character(len=500) :: message
@@ -896,6 +897,7 @@ subroutine dyson(green,paw_dmft,self,weiss,opt_weissself)
  natom    = paw_dmft%natom
  nsppol   = paw_dmft%nsppol
  nspinor  = paw_dmft%nspinor
+ triqs    = (paw_dmft%dmft_solv == 6) .or. (paw_dmft%dmft_solv == 7)
  weissinv = 1
  
  if (opt_weissself == 1) then
@@ -907,7 +909,7 @@ subroutine dyson(green,paw_dmft,self,weiss,opt_weissself)
  end if ! opt_weisself
 
 !call xmpi_barrier(spaceComm)
- if (paw_dmft%dmft_solv == 2) weissinv = 0
+ if (paw_dmft%dmft_solv == 2 .or. triqs) weissinv = 0
  
  ABI_MALLOC(greeninv,(natom))
  call init_matlu(natom,nspinor,nsppol,paw_dmft%lpawu(:),greeninv(:))
@@ -923,7 +925,9 @@ subroutine dyson(green,paw_dmft,self,weiss,opt_weissself)
    
 !    warning green is now inversed
      call add_matlu(greeninv(:),self%oper(ifreq)%matlu(:),weiss%oper(ifreq)%matlu(:),natom,1)
-     call inverse_oper(weiss%oper(ifreq),2)
+     if (.not. triqs) then
+       call inverse_oper(weiss%oper(ifreq),2)
+     end if 
      
    else if (opt_weissself == 2) then
 
