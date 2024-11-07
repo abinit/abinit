@@ -411,8 +411,11 @@ MODULE m_paw_dmft
   logical :: dmftctqmc_triqs_move_shift
   ! TRIQS CTQMC: Flag to activate the shift move
 
-  logical :: dmftctqmc_triqs_off_diag
-  ! TRIQS CTQMC: Flag to sample the off-diagonal elements of the Green's function
+  logical :: dmftctqmc_triqs_orb_off_diag
+  ! TRIQS CTQMC: Flag to sample the orbital off-diagonal elements of the Green's function
+ 
+  logical :: dmftctqmc_triqs_spin_off_diag
+  ! TRIQS CTQMC: Flag to sample the spin off-diagonal elements of the Green's function
 
   logical :: dmftctqmc_triqs_time_invariance
   ! TRIQS CTQMC: Flag to activate the use of time invariance for the sampling
@@ -1012,17 +1015,18 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
  paw_dmft%dmftctqmc_triqs_therm                         = dtset%dmftctqmc_triqs_therm
  paw_dmft%dmftctqmc_triqs_det_init_size                 = dtset%dmftctqmc_triqs_det_init_size
  paw_dmft%dmftctqmc_triqs_det_n_operations_before_check = dtset%dmftctqmc_triqs_det_n_operations_before_check
- paw_dmft%dmftctqmc_triqs_move_shift                    = dtset%dmftctqmc_triqs_move_shift == 1
- paw_dmft%dmftctqmc_triqs_move_double                   = dtset%dmftctqmc_triqs_move_double == 1
+ paw_dmft%dmftctqmc_triqs_move_shift                    = (dtset%dmftctqmc_triqs_move_shift == 1)
+ paw_dmft%dmftctqmc_triqs_move_double                   = (dtset%dmftctqmc_triqs_move_double == 1)
  paw_dmft%dmftctqmc_triqs_loc_n_min                     = dtset%dmftctqmc_triqs_loc_n_min
  paw_dmft%dmftctqmc_triqs_loc_n_max                     = dtset%dmftctqmc_triqs_loc_n_max
  paw_dmft%dmftctqmc_triqs_seed_a                        = dtset%dmftctqmc_triqs_seed_a
  paw_dmft%dmftctqmc_triqs_seed_b                        = dtset%dmftctqmc_triqs_seed_b
- paw_dmft%dmftctqmc_triqs_measure_density_matrix        = dtset%dmftctqmc_triqs_measure_density_matrix == 1
- paw_dmft%dmftctqmc_triqs_time_invariance               = dtset%dmftctqmc_triqs_time_invariance == 1
- paw_dmft%dmftctqmc_triqs_use_norm_as_weight            = dtset%dmftctqmc_triqs_use_norm_as_weight == 1
- paw_dmft%dmftctqmc_triqs_leg_measure                   = dtset%dmftctqmc_triqs_leg_measure == 1
- paw_dmft%dmftctqmc_triqs_off_diag                      = dtset%dmftctqmc_triqs_off_diag == 1
+ paw_dmft%dmftctqmc_triqs_measure_density_matrix        = (dtset%dmftctqmc_triqs_measure_density_matrix == 1)
+ paw_dmft%dmftctqmc_triqs_time_invariance               = (dtset%dmftctqmc_triqs_time_invariance == 1)
+ paw_dmft%dmftctqmc_triqs_use_norm_as_weight            = (dtset%dmftctqmc_triqs_use_norm_as_weight == 1)
+ paw_dmft%dmftctqmc_triqs_leg_measure                   = (dtset%dmftctqmc_triqs_leg_measure == 1)
+ paw_dmft%dmftctqmc_triqs_orb_off_diag                  = (dtset%dmftctqmc_triqs_orb_off_diag == 1)
+ paw_dmft%dmftctqmc_triqs_spin_off_diag                 = (dtset%dmftctqmc_triqs_spin_off_diag == 1)
  paw_dmft%dmftctqmc_triqs_move_global_prob              = dtset%dmftctqmc_triqs_move_global_prob
  paw_dmft%dmftctqmc_triqs_imag_threshold                = dtset%dmftctqmc_triqs_imag_threshold
  paw_dmft%dmftctqmc_triqs_det_precision_warning         = dtset%dmftctqmc_triqs_det_precision_warning
