@@ -30,7 +30,7 @@ angdeg 3*57.25
 nband 32 nband1 16
 
 # === SCF cycle options
-nstep 20  tolvrs 1.d-7
+nstep 20  tolvrs 1.d-7 tolvrs3 2.d-7
 ecut 5. pawecutdg 10.
 
 # === K-points and syms
