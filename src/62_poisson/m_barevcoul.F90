@@ -169,7 +169,7 @@ subroutine barevcoul(rcut,icutcoul,qpoint,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,i
  integer              :: qeq0,qeq05
  real(dp),parameter   :: tolfix=1.000000001e0_dp ! Same value as the one used in hartre
  real(dp)             :: check,step
- real(dp)             :: cutoff,gqg2p3,gqgm12,gqgm13,gqgm23,gs,gs2,gs3,divgq0,rcut0
+ real(dp)             :: cutoff,gqg2p3,gqgm12,gqgm13,gqgm23,gs,gs2,gs3,rcut0
  real(dp)             :: bz_plane,dx,integ,q0_vol,q0_volsph
  character(len=500)   :: msg
 !arrays
