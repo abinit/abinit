@@ -1979,7 +1979,7 @@ end subroutine fock_print
 !!  ucvol=unitcell volume
 !!
 !! OUTPUT
-!!  vqg(nfft)=4pi/(G+q)**2, G=0 component is set to divgq0/pi if q = Gamma.
+!!  vqg(nfft)=4pi/(G+q)**2, G=0 component is set to an analytic value if q = Gamma.
 !!
 !! NOTES
 !!  This routine operates on the full FFT mesh. DO NOT PASS MPI_TYPE
@@ -2044,12 +2044,8 @@ end subroutine bare_vqg
 !! Compute Fock energy contribution to stress tensor (Cartesian coordinates).
 !!
 !! INPUTS
-!!  gsqcut=cutoff value on $G^2$ for (large) sphere inside fft box.
-!!  $gsqcut=(boxcut^2)*ecut/(2._dp*(\pi^2))$
+!!  fockcommon= basic information for fock calculations
 !!  gprimd(3,3)=reciprocal space dimensional primitive translations
-!!  hyb_mixing=hybrid mixing coefficient for the Fock contribution
-!!  hyb_mixing_sr=hybrid mixing coefficient for the short-range Fock contribution
-!!  hyb_range_fock=hybrid range for separation
 !!  mpi_enreg=information about MPI parallelization
 !!  nfft=(effective) number of FFT grid points (for this processor)
 !!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
@@ -2058,7 +2054,6 @@ end subroutine bare_vqg
 !!  rhog(2,nfft)=Fourier transform of charge density (bohr^-3)
 !!  rhog2(2,nfft)= optional argument: Fourier transform of a second charge density (bohr^-3)
 !!  ucvol=unit cell volume (bohr^3)
-!!  vqg(nfft)=4pi/(G+q)**2
 !!
 !! OUTPUT
 !!  fockstr(6)=components of Fock part of stress tensor
@@ -2068,7 +2063,7 @@ end subroutine bare_vqg
 !!
 !! SOURCE
 
-subroutine strfock(gprimd,gsqcut,fockstr,hyb_mixing,hyb_mixing_sr,hyb_range_fock,mpi_enreg,nfft,ngfft,&
+subroutine strfock(fockcommon,gprimd,fockstr,mpi_enreg,nfft,ngfft,&
                    nkpt_bz,ndat,rhog,ucvol,qphon,&
                    rhog2,gpu_option) ! optional argument
 
@@ -2076,26 +2071,27 @@ subroutine strfock(gprimd,gsqcut,fockstr,hyb_mixing,hyb_mixing_sr,hyb_range_fock
 !scalars
  integer,intent(in) :: nfft,nkpt_bz,ndat
  integer,intent(in),optional :: gpu_option
- real(dp),intent(in) :: gsqcut,hyb_mixing,hyb_mixing_sr,hyb_range_fock,ucvol
+ real(dp),intent(in) :: ucvol
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: ngfft(18)
  real(dp),intent(in) :: gprimd(3,3),rhog(2,nfft,ndat),qphon(3)
  real(dp),intent(in),optional :: rhog2(2,nfft,ndat)
  real(dp),intent(out) :: fockstr(6,ndat)
+ type(fock_common_type),intent(in) :: fockcommon
 
 !Local variables-------------------------------
 !scalars
  integer,parameter :: im=2,re=1
  integer :: i1,i2,i3,id1,id2,id3,ierr,ig1,ig2,ig3,ii,irho2,idat,me_fft,n1,n2,n3,nproc_fft
- real(dp) :: arg,cutoff,gsquar,rcut,rhogsq,tolfix=1.000000001_dp,tot,tot1,divgq0
+ real(dp) :: arg,cutoff,gsquar,rcut,rhogsq,tolfix=1.000000001_dp,tot,tot1
 #ifdef HAVE_OPENMP_OFFLOAD
  ! Cray has trouble with reduction on array, so we use 6 scalars instead
  real(dp) :: fockstr1,fockstr2,fockstr3,fockstr4,fockstr5,fockstr6
 #endif
  !character(len=500) :: msg
 !arrays
- real(dp) :: gcart(3),tsec(2)
+ real(dp) :: gcart(3),tsec(2),gmet(3,3),vqg(nfft)
  real(dp), allocatable :: v_gcart(:,:,:,:)
  integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:),ffti2_local(:)
  integer, ABI_CONTIGUOUS pointer :: fftn3_distrib(:),ffti3_local(:)
@@ -2104,22 +2100,31 @@ subroutine strfock(gprimd,gsqcut,fockstr,hyb_mixing,hyb_mixing_sr,hyb_range_fock
 
  call timab(568,1,tsec)
 
- if (abs(hyb_mixing_sr)>tol8.and.abs(hyb_range_fock)<tol8) then
+ if (abs(fockcommon%hyb_mixing_sr)>tol8.and.abs(fockcommon%hyb_range_fock)<tol8) then
    ABI_BUG('strfock: SR mixing<>0 while range separation=0!')
  end if
+
+ gmet = MATMUL(TRANSPOSE(gprimd),gprimd)
+ call bare_vqg(qphon,fockcommon,gmet,nfft,nkpt_bz,ngfft,ucvol,vqg)
 
  !if(gpu_option==ABI_GPU_DISABLED) then
    fockstr(:,:)=zero
  !else(gpu_option==ABI_GPU_OPENMP) then
  !  gpu_set_to_zero(fockstr, 6*ndat)
  !end if
+ write(*,*) '- FBFB FIXME rcut is set here'
  rcut= (three*nkpt_bz*ucvol/four_pi)**(one/three)
  irho2=0;if (present(rhog2)) irho2=1
- divgq0=two_pi/three*rcut**2
 
-!Conduct looping over all fft grid points to find G vecs inside gsqcut
+ write(*,*) 'qphon',qphon(:)
+ write(*,*) 'vqg',vqg(1)
+ write(*,*) 'rcut',rcut
+ write(*,*) '================='
+
+!Conduct looping over all fft grid points to find G vecs inside fockcommon%gsqcut
 !Include G**2 on surface of cutoff sphere as well as inside:
- cutoff=gsqcut*tolfix
+ !FBruneval: cutoff is never used.
+ !cutoff=fockcommon%gsqcut*tolfix
  n1=ngfft(1) ; n2=ngfft(2) ; n3=ngfft(3)
  me_fft=ngfft(11)
  nproc_fft=ngfft(10)
@@ -2152,6 +2157,12 @@ subroutine strfock(gprimd,gsqcut,fockstr,hyb_mixing,hyb_mixing_sr,hyb_range_fock
          gcart(3)=gprimd(3,1)*(dble(ig1)+qphon(1))+gprimd(3,2)*(dble(ig2)+qphon(2))+gprimd(3,3)*(dble(ig3)+qphon(3))
 !        Compute |G+q|^2
          gsquar=gcart(1)**2+gcart(2)**2+gcart(3)**2
+
+
+         write(*,*) 'FBFB',i1,i2,i3,gsquar,4.0d0*pi/gsquar,vqg(1:10)
+         if( ii > 100 ) stop "NOUEFH is ZENOI"
+
+
 !        take |rho(G)|^2 for complex rhog
          if (irho2==0) then
            rhogsq=rhog(re,ii,idat)**2+rhog(im,ii,idat)**2
@@ -2160,26 +2171,26 @@ subroutine strfock(gprimd,gsqcut,fockstr,hyb_mixing,hyb_mixing_sr,hyb_range_fock
          end if
 !        Case G=0:
          if(gsquar<tol10) then
-           if (abs(hyb_mixing_sr)>tol8) cycle
-           if (abs(hyb_mixing)>tol8) then
-             fockstr(1,idat)=fockstr(1,idat)+hyb_mixing*divgq0*rhogsq
-             fockstr(2,idat)=fockstr(2,idat)+hyb_mixing*divgq0*rhogsq
-             fockstr(3,idat)=fockstr(3,idat)+hyb_mixing*divgq0*rhogsq
+           if (abs(fockcommon%hyb_mixing_sr)>tol8) cycle
+           if (abs(fockcommon%hyb_mixing)>tol8) then
+             fockstr(1,idat)=fockstr(1,idat)+fockcommon%hyb_mixing*vqg(1)/3.0_dp*rhogsq
+             fockstr(2,idat)=fockstr(2,idat)+fockcommon%hyb_mixing*vqg(1)/3.0_dp*rhogsq
+             fockstr(3,idat)=fockstr(3,idat)+fockcommon%hyb_mixing*vqg(1)/3.0_dp*rhogsq
              cycle
            end if
          end if
 
 !        Spencer-Alavi screening
-         if (abs(hyb_mixing)>tol8) then
+         if (abs(fockcommon%hyb_mixing)>tol8) then
            arg=two_pi*rcut*sqrt(gsquar)
-           tot=hyb_mixing*rhogsq*piinv/(gsquar**2)*(1-cos(arg)-arg*sin(arg)/two)
-           tot1=hyb_mixing*rhogsq/three*rcut*sin(arg)/sqrt(gsquar)
+           tot=fockcommon%hyb_mixing*rhogsq*piinv/(gsquar**2)*(1-cos(arg)-arg*sin(arg)/two)
+           tot1=fockcommon%hyb_mixing*rhogsq/three*rcut*sin(arg)/sqrt(gsquar)
          end if
 
 !        Erfc screening
-         if (abs(hyb_mixing_sr)>tol8) then
-           arg=-gsquar*pi**2/(hyb_range_fock**2)
-           tot=tot+hyb_mixing_sr*rhogsq*piinv/(gsquar**2)*(1.d0-exp(arg)*(1-arg))
+         if (abs(fockcommon%hyb_mixing_sr)>tol8) then
+           arg=-gsquar*pi**2/(fockcommon%hyb_range_fock**2)
+           tot=tot+fockcommon%hyb_mixing_sr*rhogsq*piinv/(gsquar**2)*(1.d0-exp(arg)*(1-arg))
          end if
          fockstr(1,idat)=fockstr(1,idat)+tot*gcart(1)*gcart(1)+tot1
          fockstr(2,idat)=fockstr(2,idat)+tot*gcart(2)*gcart(2)+tot1
@@ -2239,25 +2250,25 @@ subroutine strfock(gprimd,gsqcut,fockstr,hyb_mixing,hyb_mixing_sr,hyb_range_fock
            rhogsq=rhog(re,ii,idat)**2+rhog(im,ii,idat)**2
   !        Case G=0:
            if(gsquar<tol10) then
-             if (abs(hyb_mixing)>tol8 .and. abs(hyb_mixing_sr)<tol8) then
-               fockstr1=fockstr1+hyb_mixing*divgq0*rhogsq
-               fockstr2=fockstr2+hyb_mixing*divgq0*rhogsq
-               fockstr3=fockstr3+hyb_mixing*divgq0*rhogsq
+             if (abs(fockcommon%hyb_mixing)>tol8 .and. abs(fockcommon%hyb_mixing_sr)<tol8) then
+               fockstr1=fockstr1+fockcommon%hyb_mixing*vqg(1)/3.0_dp*rhogsq
+               fockstr2=fockstr2+fockcommon%hyb_mixing*vqg(1)/3.0_dp*rhogsq
+               fockstr3=fockstr3+fockcommon%hyb_mixing*vqg(1)/3.0_dp*rhogsq
              end if
 
            else
 
     !        Spencer-Alavi screening
-             if (abs(hyb_mixing)>tol8) then
+             if (abs(fockcommon%hyb_mixing)>tol8) then
                arg=two_pi*rcut*sqrt(gsquar)
-               tot=hyb_mixing*rhogsq*piinv/(gsquar**2)*(1-cos(arg)-arg*sin(arg)/two)
-               tot1=hyb_mixing*rhogsq/three*rcut*sin(arg)/sqrt(gsquar)
+               tot=fockcommon%hyb_mixing*rhogsq*piinv/(gsquar**2)*(1-cos(arg)-arg*sin(arg)/two)
+               tot1=fockcommon%hyb_mixing*rhogsq/three*rcut*sin(arg)/sqrt(gsquar)
              end if
 
     !        Erfc screening
-             if (abs(hyb_mixing_sr)>tol8) then
-               arg=-gsquar*pi**2/(hyb_range_fock**2)
-               tot=tot+hyb_mixing_sr*rhogsq*piinv/(gsquar**2)*(1.d0-exp(arg)*(1-arg))
+             if (abs(fockcommon%hyb_mixing_sr)>tol8) then
+               arg=-gsquar*pi**2/(fockcommon%hyb_range_fock**2)
+               tot=tot+fockcommon%hyb_mixing_sr*rhogsq*piinv/(gsquar**2)*(1.d0-exp(arg)*(1-arg))
              end if
              fockstr1=fockstr1+tot*v_gcart(1,i1,i2,i3)*v_gcart(1,i1,i2,i3)+tot1
              fockstr2=fockstr2+tot*v_gcart(2,i1,i2,i3)*v_gcart(2,i1,i2,i3)+tot1
