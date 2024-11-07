@@ -91,12 +91,13 @@ AC_DEFUN([SD_NETCDF_INIT], [
   AC_ARG_VAR([NETCDF_CFLAGS], [C flags for NetCDF.])
   AC_ARG_VAR([NETCDF_CXXFLAGS], [C++ flags for NetCDF.])
   AC_ARG_VAR([NETCDF_FCFLAGS], [Fortran flags for NetCDF.])
+  AC_ARG_VAR([NETCDF_FFFLAGS], [Fortran flags for NetCDF (better use NETCDF_FCFLAGS).])
   AC_ARG_VAR([NETCDF_LDFLAGS], [Linker flags for NetCDF.])
   AC_ARG_VAR([NETCDF_LIBS], [Library flags for NetCDF.])
 
   # Detect use of environment variables
   if test "${sd_netcdf_enable}" = "yes" -o "${sd_netcdf_enable}" = "auto"; then
-    tmp_netcdf_vars="${NETCDF_CPPFLAGS}${NETCDF_CFLAGS}${NETCDF_CXXFLAGS}${NETCDF_FCFLAGS}${NETCDF_LDFLAGS}${NETCDF_LIBS}"
+    tmp_netcdf_vars="${NETCDF_CPPFLAGS}${NETCDF_CFLAGS}${NETCDF_CXXFLAGS}${NETCDF_FFLAGS}${NETCDF_FCFLAGS}${NETCDF_LDFLAGS}${NETCDF_LIBS}"
     if test "${sd_netcdf_init}" = "def" -a \
             ! -z "${tmp_netcdf_vars}"; then
       sd_netcdf_enable="yes"
@@ -142,6 +143,7 @@ AC_DEFUN([SD_NETCDF_INIT], [
         test ! -z "${NETCDF_CPPFLAGS}" && sd_netcdf_cppflags="${NETCDF_CPPFLAGS}"
         test ! -z "${NETCDF_CFLAGS}" && sd_netcdf_cflags="${NETCDF_CFLAGS}"
         test ! -z "${NETCDF_CXXFLAGS}" && sd_netcdf_cxxflags="${NETCDF_CXXFLAGS}"
+        test ! -z "${NETCDF_FFLAGS}" && sd_netcdf_fcflags="${NETCDF_FFLAGS}"
         test ! -z "${NETCDF_FCFLAGS}" && sd_netcdf_fcflags="${NETCDF_FCFLAGS}"
         test ! -z "${NETCDF_LDFLAGS}" && sd_netcdf_ldflags="${NETCDF_LDFLAGS}"
         test ! -z "${NETCDF_LIBS}" && sd_netcdf_libs="${NETCDF_LIBS}"
@@ -390,7 +392,7 @@ AC_DEFUN([_SD_NETCDF_CHECK_CONFIG], [
   fi
 
   # Environment variables conflict with --with-* options
-  tmp_netcdf_vars="${NETCDF_CPPFLAGS}${NETCDF_CFLAGS}${NETCDF_FCFLAGS}${NETCDF_LDFLAGS}${NETCDF_LIBS}"
+  tmp_netcdf_vars="${NETCDF_CPPFLAGS}${NETCDF_CFLAGS}${NETCDF_FFLAGS}${NETCDF_FCFLAGS}${NETCDF_LDFLAGS}${NETCDF_LIBS}"
   tmp_netcdf_invalid="no"
   if test ! -z "${tmp_netcdf_vars}" -a ! -z "${sd_netcdf_prefix}"; then
     case "${sd_netcdf_policy}" in

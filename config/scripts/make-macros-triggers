@@ -102,7 +102,9 @@ AC_DEFUN([ABI_INFO_TRIGGERS_CHANGED],[
             trig_chgs += "  AC_MSG_NOTICE([  * removed feature trigger for %s])\n" % pkg
 
     if ( trig_chgs == "" ):
-        trig_chgs = "AC_MSG_NOTICE([no change in feature triggers to report])"
+        trig_chgs = """\
+  AC_MSG_NOTICE([])
+  AC_MSG_NOTICE([no change in feature triggers to report])"""
     else:
         trig_chgs = """\
   AC_MSG_NOTICE([])

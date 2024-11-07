@@ -42,7 +42,6 @@
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% exclude_builders = eos_nvhpc_23.1_elpa
 #%% [files]
 #%% [paral_info]
 #%% nprocs_to_test = 4

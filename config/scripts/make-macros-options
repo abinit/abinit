@@ -650,7 +650,9 @@ for arg in all_args:
 
 changed = chg_rem + chg_new + chg_mod + chg_ren + chg_dep
 if ( changed == "" ):
-  changed = "AC_MSG_NOTICE([no change in user interface to report])"
+  changed = """\
+  AC_MSG_NOTICE([])
+  AC_MSG_NOTICE([no change in user interface to report])"""
 else:
   changed = """\
   AC_MSG_NOTICE([])

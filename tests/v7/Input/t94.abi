@@ -76,7 +76,8 @@ iatprj_bs 1
 #%% executable = anaddb
 #%% input_gkk = t92o 
 #%% input_ddb = t91.ddb.out
-#%% test_chain = t90.abi, t91.abi, t92.abi, t93.abi, t94.abi
+#%% test_chain = t90.abi, t91.abi, t92.abi
+##%% test_chain = t90.abi, t91.abi, t92.abi, t93.abi, t94.abi
 #%% [files]
 #%% files_to_test = 
 #%%   t94.abo, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00;

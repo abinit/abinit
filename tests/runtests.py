@@ -276,6 +276,13 @@ def main():
     parser.add_option("--etsf", action="store_true", default=False,
                        help="Validate netcdf files produced by the tests. Requires netcdf4")
 
+    parser.add_option("-Y","--yaml-simplified-diff", dest="yaml_simplified_diff", default=False, action="store_true",
+                      help="Will only perform a simplified diff when comparing .abo files (based only on YAML sections)")
+
+    parser.add_option("-T","--forced-tolerance", dest="forced_tolerance", type="string", default="default",
+                      help="[string] Force the use of fldiff comparison tool with the specified tolerance. "+
+                           "Possible values are: default (from test config), high(1.e-10), medium (1.e-8), easy (1.e-5), ridiculous (1.e-2)")
+
     parser.add_option("--touch", default="",
                       help=("Used in conjunction with `-m`."
                             "Touch the source files containing the given expression(s) before recompiling the code. "
@@ -286,6 +293,9 @@ def main():
 
     parser.add_option("-l", "--list-tests-info", dest="list_info", default=False, action="store_true",
                       help="List the tests in test suite (echo description section in ListOfFile files) and exit")
+
+    parser.add_option("--tolerances", default=False, action="store_true",
+                      help="Print tolerances")
 
     parser.add_option("-m", "--make", dest="make", type="int", default=0,
                       help="Find the abinit build tree, and compile to code with 'make -j#NUM' before running the tests.")
@@ -565,6 +575,24 @@ def main():
             fh.write(test_suite.make_listoftests(width=100, html=False))
         sys.exit(0)
 
+    if options.tolerances:
+        #from pymods.testsuite import ChainOfTests, BaseTest
+
+        def print_tols(this_test):
+            #assert not isinstance(this_test, ChainOfTests)
+            print("test:", this_test, this_test.__class__.__name__)
+            for f in this_test.files_to_test:
+                print("file_name:", f.name, ", f.tolnlines:", f.tolnlines, ", tolabs: ", f.tolabs, ", tolrel:", f.tolrel)
+
+        for test in test_suite:
+            if test.is_chain():
+                for child_test in test:
+                    print_tols(child_test)
+            else:
+                print_tols(test)
+
+        sys.exit(0)
+
     if options.dry_run:
         print("Dry-run mode, print list of tests and exit(0)")
         for i, test in enumerate(test_suite):
@@ -584,7 +612,9 @@ def main():
                                    sub_timeout=options.sub_timeout,
                                    pedantic=options.pedantic,
                                    abimem_check=options.abimem,
-                                   etsf_check=options.etsf)
+                                   etsf_check=options.etsf,
+                                   simplified_diff=options.yaml_simplified_diff,
+                                   forced_tolerance=options.forced_tolerance)
     if results is None: return 99
 
     if options.looponfail:

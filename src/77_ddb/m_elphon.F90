@@ -174,6 +174,7 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam,comm)
  real(dp),allocatable :: wtk_fullbz(:),wtk_folded(:)
  real(dp),allocatable :: a2f_1d(:),dos_phon(:)
  real(dp),allocatable :: eigenGS(:,:,:),eigenGS_fine(:,:,:)
+ real(dp),allocatable :: gam_qpt(:,:,:),gam_rpt(:,:,:)
  real(dp),allocatable :: v_surf(:,:,:,:,:,:)
  real(dp),allocatable :: tmp_veloc_sq1(:,:), tmp_veloc_sq2(:,:)
  real(dp),allocatable :: coskr(:,:), sinkr(:,:)
@@ -1201,6 +1202,8 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam,comm)
    s2ofssp = (/1,-1,1,-1/)
 
 !  Get gamma
+   ABI_MALLOC(gam_qpt,(2,3*natom*3*natom,elph_ds%nqpt_full))
+   ABI_MALLOC(gam_rpt,(2,3*natom*3*natom,Ifc%nrpt))
    do ie=1,elph_ds%n_pair
      ie1 = red2pair(1,ie)
      ie2 = red2pair(2,ie)
@@ -1230,15 +1233,19 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam,comm)
        qtor = 1 ! q --> r
        do isppol=1,elph_ds%nsppol
          do idir=1,9
+           gam_qpt(:,:,:)=elph_tr_ds%gamma_qpt_tr(:,idir,:,isppol,:)
            call ftgam(Ifc%wghatm,elph_tr_ds%gamma_qpt_tr(:,idir,:,isppol,:),&
 &           elph_tr_ds%gamma_rpt_tr(:,idir,:,isppol,:,ssp,ie),natom,&
 &           elph_ds%nqpt_full,Ifc%nrpt,qtor,coskr, sinkr)
+           elph_tr_ds%gamma_rpt_tr(:,idir,:,isppol,:,ssp,ie)=gam_rpt(:,:,:)
          end do
        end do
 
      end do !ss
    end do !ie
 
+   ABI_FREE(gam_qpt)
+   ABI_FREE(gam_rpt)
    ABI_FREE(tmp_veloc_sq1)
    ABI_FREE(tmp_veloc_sq2)
  end if ! ifltransport

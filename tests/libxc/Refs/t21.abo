@@ -1,6 +1,6 @@
 
-.Version 9.8.0 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 10.1.4.5 of ABINIT, released Sep 2024.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2024 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,14 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri  4 Nov 2022.
-- ( at 13h34 )
+.Starting date : Fri 13 Sep 2024.
+- ( at 19h01 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/TestBot_MPI1/libxc_t21/t21.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/libxc_t21/t21.abi
 - output file    -> t21.abo
 - root for input  files -> t21i
 - root for output files -> t21o
-
 
  DATASET    1 : space group Pm -3 m (#221); Bravais cP (primitive cubic)
 ================================================================================
@@ -39,7 +38,6 @@ P This job should need less than                      13.054 Mbytes of memory.
 _ WF disk file :      0.094 Mbytes ; DEN or POT disk file :      0.414 Mbytes.
 ================================================================================
 
-
  DATASET    2 : space group Pm -3 m (#221); Bravais cP (primitive cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  2.
@@ -55,7 +53,6 @@ P This job should need less than                      13.054 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.094 Mbytes ; DEN or POT disk file :      0.414 Mbytes.
 ================================================================================
-
 
  DATASET    3 : space group Pm -3 m (#221); Bravais cP (primitive cubic)
 ================================================================================
@@ -73,7 +70,6 @@ P This job should need less than                      13.054 Mbytes of memory.
 _ WF disk file :      0.094 Mbytes ; DEN or POT disk file :      0.414 Mbytes.
 ================================================================================
 
-
  DATASET    4 : space group Pm -3 m (#221); Bravais cP (primitive cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  4.
@@ -89,7 +85,6 @@ P This job should need less than                      13.054 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.094 Mbytes ; DEN or POT disk file :      0.414 Mbytes.
 ================================================================================
-
 
  DATASET    5 : space group Pm -3 m (#221); Bravais cP (primitive cubic)
 ================================================================================
@@ -107,7 +102,6 @@ P This job should need less than                      13.054 Mbytes of memory.
 _ WF disk file :      0.094 Mbytes ; DEN or POT disk file :      0.414 Mbytes.
 ================================================================================
 
-
  DATASET    6 : space group Pm -3 m (#221); Bravais cP (primitive cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  6.
@@ -123,7 +117,6 @@ P This job should need less than                      13.054 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.094 Mbytes ; DEN or POT disk file :      0.414 Mbytes.
 ================================================================================
-
 
  DATASET    7 : space group Pm -3 m (#221); Bravais cP (primitive cubic)
 ================================================================================
@@ -141,7 +134,6 @@ P This job should need less than                      14.531 Mbytes of memory.
 _ WF disk file :      0.094 Mbytes ; DEN or POT disk file :      0.414 Mbytes.
 ================================================================================
 
-
  DATASET   10 : space group Pm -3 m (#221); Bravais cP (primitive cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 10.
@@ -157,7 +149,6 @@ P This job should need less than                      14.531 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.094 Mbytes ; DEN or POT disk file :      0.414 Mbytes.
 ================================================================================
-
 
  DATASET   11 : space group Pm -3 m (#221); Bravais cP (primitive cubic)
 ================================================================================
@@ -175,7 +166,6 @@ P This job should need less than                      14.531 Mbytes of memory.
 _ WF disk file :      0.094 Mbytes ; DEN or POT disk file :      0.414 Mbytes.
 ================================================================================
 
-
  DATASET   12 : space group Pm -3 m (#221); Bravais cP (primitive cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 12.
@@ -191,7 +181,6 @@ P This job should need less than                      14.531 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.094 Mbytes ; DEN or POT disk file :      0.414 Mbytes.
 ================================================================================
-
 
  DATASET   13 : space group Pm -3 m (#221); Bravais cP (primitive cubic)
 ================================================================================
@@ -209,7 +198,6 @@ P This job should need less than                      14.531 Mbytes of memory.
 _ WF disk file :      0.094 Mbytes ; DEN or POT disk file :      0.414 Mbytes.
 ================================================================================
 
-
  DATASET   14 : space group Pm -3 m (#221); Bravais cP (primitive cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 14.
@@ -225,7 +213,6 @@ P This job should need less than                      14.531 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.094 Mbytes ; DEN or POT disk file :      0.414 Mbytes.
 ================================================================================
-
 
  DATASET   15 : space group Pm -3 m (#221); Bravais cP (primitive cubic)
 ================================================================================
@@ -243,7 +230,6 @@ P This job should need less than                      14.531 Mbytes of memory.
 _ WF disk file :      0.094 Mbytes ; DEN or POT disk file :      0.414 Mbytes.
 ================================================================================
 
-
  DATASET   16 : space group Pm -3 m (#221); Bravais cP (primitive cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 16.
@@ -259,7 +245,6 @@ P This job should need less than                      14.531 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.094 Mbytes ; DEN or POT disk file :      0.414 Mbytes.
 ================================================================================
-
 
  DATASET   17 : space group Pm -3 m (#221); Bravais cP (primitive cubic)
 ================================================================================
@@ -277,7 +262,6 @@ P This job should need less than                      14.531 Mbytes of memory.
 _ WF disk file :      0.094 Mbytes ; DEN or POT disk file :      0.414 Mbytes.
 ================================================================================
 
-
  DATASET   22 : space group Pm -3 m (#221); Bravais cP (primitive cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 22.
@@ -293,7 +277,6 @@ P This job should need less than                      13.054 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.094 Mbytes ; DEN or POT disk file :      0.414 Mbytes.
 ================================================================================
-
 
  DATASET   23 : space group Pm -3 m (#221); Bravais cP (primitive cubic)
 ================================================================================
@@ -311,7 +294,6 @@ P This job should need less than                      14.531 Mbytes of memory.
 _ WF disk file :      0.094 Mbytes ; DEN or POT disk file :      0.414 Mbytes.
 ================================================================================
 
-
  DATASET   24 : space group Pm -3 m (#221); Bravais cP (primitive cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 24.
@@ -327,7 +309,6 @@ P This job should need less than                      14.531 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.094 Mbytes ; DEN or POT disk file :      0.414 Mbytes.
 ================================================================================
-
 
  DATASET   25 : space group Pm -3 m (#221); Bravais cP (primitive cubic)
 ================================================================================
@@ -345,7 +326,6 @@ P This job should need less than                      14.531 Mbytes of memory.
 _ WF disk file :      0.094 Mbytes ; DEN or POT disk file :      0.414 Mbytes.
 ================================================================================
 
-
  DATASET   26 : space group Pm -3 m (#221); Bravais cP (primitive cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 26.
@@ -361,7 +341,6 @@ P This job should need less than                      14.531 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.094 Mbytes ; DEN or POT disk file :      0.414 Mbytes.
 ================================================================================
-
 
  DATASET   28 : space group Pm -3 m (#221); Bravais cP (primitive cubic)
 ================================================================================
@@ -379,7 +358,6 @@ P This job should need less than                      14.531 Mbytes of memory.
 _ WF disk file :      0.094 Mbytes ; DEN or POT disk file :      0.414 Mbytes.
 ================================================================================
 
-
  DATASET   29 : space group Pm -3 m (#221); Bravais cP (primitive cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 29.
@@ -395,7 +373,6 @@ P This job should need less than                      14.531 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.094 Mbytes ; DEN or POT disk file :      0.414 Mbytes.
 ================================================================================
-
 
  DATASET   30 : space group Pm -3 m (#221); Bravais cP (primitive cubic)
 ================================================================================
@@ -413,7 +390,6 @@ P This job should need less than                      14.531 Mbytes of memory.
 _ WF disk file :      0.094 Mbytes ; DEN or POT disk file :      0.414 Mbytes.
 ================================================================================
 
-
  DATASET   31 : space group Pm -3 m (#221); Bravais cP (primitive cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 31.
@@ -429,7 +405,6 @@ P This job should need less than                      14.531 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.094 Mbytes ; DEN or POT disk file :      0.414 Mbytes.
 ================================================================================
-
 
  DATASET   32 : space group Pm -3 m (#221); Bravais cP (primitive cubic)
 ================================================================================
@@ -447,7 +422,6 @@ P This job should need less than                      14.531 Mbytes of memory.
 _ WF disk file :      0.094 Mbytes ; DEN or POT disk file :      0.414 Mbytes.
 ================================================================================
 
-
  DATASET   33 : space group Pm -3 m (#221); Bravais cP (primitive cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 33.
@@ -463,7 +437,6 @@ P This job should need less than                      14.531 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.094 Mbytes ; DEN or POT disk file :      0.414 Mbytes.
 ================================================================================
-
 
  DATASET   35 : space group Pm -3 m (#221); Bravais cP (primitive cubic)
 ================================================================================
@@ -481,7 +454,6 @@ P This job should need less than                      14.531 Mbytes of memory.
 _ WF disk file :      0.094 Mbytes ; DEN or POT disk file :      0.414 Mbytes.
 ================================================================================
 
-
  DATASET   36 : space group Pm -3 m (#221); Bravais cP (primitive cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 36.
@@ -497,7 +469,6 @@ P This job should need less than                      13.054 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.094 Mbytes ; DEN or POT disk file :      0.414 Mbytes.
 ================================================================================
-
 
  DATASET   37 : space group Pm -3 m (#221); Bravais cP (primitive cubic)
 ================================================================================
@@ -515,7 +486,6 @@ P This job should need less than                      14.531 Mbytes of memory.
 _ WF disk file :      0.094 Mbytes ; DEN or POT disk file :      0.414 Mbytes.
 ================================================================================
 
-
  DATASET   38 : space group Pm -3 m (#221); Bravais cP (primitive cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 38.
@@ -531,7 +501,6 @@ P This job should need less than                      14.531 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.094 Mbytes ; DEN or POT disk file :      0.414 Mbytes.
 ================================================================================
-
 
  DATASET   44 : space group Pm -3 m (#221); Bravais cP (primitive cubic)
 ================================================================================
@@ -549,7 +518,6 @@ P This job should need less than                      14.531 Mbytes of memory.
 _ WF disk file :      0.094 Mbytes ; DEN or POT disk file :      0.414 Mbytes.
 ================================================================================
 
-
  DATASET   45 : space group Pm -3 m (#221); Bravais cP (primitive cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 45.
@@ -565,7 +533,6 @@ P This job should need less than                      14.531 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.094 Mbytes ; DEN or POT disk file :      0.414 Mbytes.
 ================================================================================
-
 
  DATASET   46 : space group Pm -3 m (#221); Bravais cP (primitive cubic)
 ================================================================================
@@ -587,10 +554,10 @@ _ WF disk file :      0.094 Mbytes ; DEN or POT disk file :      0.414 Mbytes.
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
 -
-- outvars: echo of selected default values                                      
--   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+- outvars: echo of selected default values
+-   iomode0 =  0 , fftalg0 =512 , wfoptalg0 =  0
 -
-- outvars: echo of global parameters not present in the input file              
+- outvars: echo of global parameters not present in the input file
 -  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
@@ -599,7 +566,7 @@ _ WF disk file :      0.094 Mbytes ; DEN or POT disk file :      0.414 Mbytes.
            diemac      2.00000000E+00
            diemix      5.00000000E-01
              ecut      1.00000000E+01 Hartree
--          fftalg         312
+-          fftalg         512
            istwfk        2
               ixc1      -1025
               ixc2      -1027
@@ -779,8 +746,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.10744
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for Bi,  from PRB58, 3641 (1998)
 - 83.00000   5.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -901,15 +868,15 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
 kinetic             :  1.27332767116999E+00
-hartree             :  5.61492373479506E-01
+hartree             :  5.61492373479507E-01
 xc                  : -1.12692633738711E+00
 Ewald energy        : -3.54662184935089E+00
 psp_core            :  1.73973577808835E-01
 local_psp           : -2.52576002788253E+00
-non_local_psp       :  8.69574688736210E-02
+non_local_psp       :  8.69574688736212E-02
 total_energy        : -5.10355712328858E+00
 total_energy_eV     : -1.38874851933243E+02
-band_energy         : -9.42780099901162E-01
+band_energy         : -9.42780099901161E-01
 ...
 
 
@@ -947,8 +914,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.10744
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for Bi,  from PRB58, 3641 (1998)
 - 83.00000   5.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1073,10 +1040,10 @@ xc                  : -1.01078908415615E+00
 Ewald energy        : -3.54662184935089E+00
 psp_core            :  1.73973577808835E-01
 local_psp           : -2.51341326631330E+00
-non_local_psp       :  8.66718751215800E-02
+non_local_psp       :  8.66718751215801E-02
 total_energy        : -4.98673079538037E+00
 total_energy_eV     : -1.35695845879578E+02
-band_energy         : -8.19670023732963E-01
+band_energy         : -8.19670023732961E-01
 ...
 
 
@@ -1114,8 +1081,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.10744
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for Bi,  from PRB58, 3641 (1998)
 - 83.00000   5.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1240,10 +1207,10 @@ xc                  : -1.04124103465482E+00
 Ewald energy        : -3.54662184935089E+00
 psp_core            :  1.73973577808835E-01
 local_psp           : -2.51429606519792E+00
-non_local_psp       :  8.67373116496549E-02
+non_local_psp       :  8.67373116496550E-02
 total_energy        : -5.01705553703377E+00
 total_energy_eV     : -1.36521024065164E+02
-band_energy         : -8.58361780904244E-01
+band_energy         : -8.58361780904243E-01
 ...
 
 
@@ -1281,8 +1248,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.10744
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for Bi,  from PRB58, 3641 (1998)
 - 83.00000   5.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1407,8 +1374,8 @@ xc                  : -1.04313115894709E+00
 Ewald energy        : -3.54662184935089E+00
 psp_core            :  1.73973577808835E-01
 local_psp           : -2.51429606519792E+00
-non_local_psp       :  8.67373116496549E-02
-total_energy        : -5.01894566132604E+00
+non_local_psp       :  8.67373116496550E-02
+total_energy        : -5.01894566132603E+00
 total_energy_eV     : -1.36572456962824E+02
 band_energy         : -8.58361780904244E-01
 ...
@@ -1448,8 +1415,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.10744
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for Bi,  from PRB58, 3641 (1998)
 - 83.00000   5.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1574,7 +1541,7 @@ xc                  : -1.04323272496714E+00
 Ewald energy        : -3.54662184935089E+00
 psp_core            :  1.73973577808835E-01
 local_psp           : -2.51429606519792E+00
-non_local_psp       :  8.67373116496549E-02
+non_local_psp       :  8.67373116496550E-02
 total_energy        : -5.01904722734608E+00
 total_energy_eV     : -1.36575220714783E+02
 band_energy         : -8.58361780904244E-01
@@ -1615,8 +1582,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.10744
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for Bi,  from PRB58, 3641 (1998)
 - 83.00000   5.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1741,10 +1708,10 @@ xc                  : -1.04387970863683E+00
 Ewald energy        : -3.54662184935089E+00
 psp_core            :  1.73973577808835E-01
 local_psp           : -2.51429606519792E+00
-non_local_psp       :  8.67373116496549E-02
+non_local_psp       :  8.67373116496551E-02
 total_energy        : -5.01969421101577E+00
 total_energy_eV     : -1.36592826035770E+02
-band_energy         : -8.58361780904244E-01
+band_energy         : -8.58361780904243E-01
 ...
 
 
@@ -1782,8 +1749,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.10744
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for Bi,  from PRB58, 3641 (1998)
 - 83.00000   5.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1821,7 +1788,7 @@ tolerances: {tolwfr: 1.00E-14, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -4.9904121005197    -4.990E+00 1.642E-01 1.978E+02
+ ETOT  1  -4.9904121005196    -4.990E+00 1.642E-01 1.978E+02
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  2.97521990E-04  sigma(3 2)=  0.00000000E+00
@@ -1903,15 +1870,15 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 iteration_state     : {dtset: 7, }
 comment             : Components of total free energy in Hartree
 kinetic             :  1.26587292577484E+00
-hartree             :  5.45761026957289E-01
+hartree             :  5.45761026957287E-01
 xc                  : -1.01140388584955E+00
 Ewald energy        : -3.54662184935089E+00
 psp_core            :  1.73973577808835E-01
 local_psp           : -2.50372828253083E+00
-non_local_psp       :  8.57343866706660E-02
+non_local_psp       :  8.57343866706661E-02
 total_energy        : -4.99041210051965E+00
 total_energy_eV     : -1.35796019286829E+02
-band_energy         : -8.54886388953803E-01
+band_energy         : -8.54886388953802E-01
 ...
 
 
@@ -1949,8 +1916,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.10744
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for Bi,  from PRB58, 3641 (1998)
 - 83.00000   5.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2070,15 +2037,15 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 iteration_state     : {dtset: 10, }
 comment             : Components of total free energy in Hartree
 kinetic             :  1.23942815144705E+00
-hartree             :  5.11192569287821E-01
-xc                  : -9.85566582379974E-01
+hartree             :  5.11192569287819E-01
+xc                  : -9.85566582379973E-01
 Ewald energy        : -3.54662184935089E+00
 psp_core            :  1.73973577808835E-01
-local_psp           : -2.43691396473782E+00
-non_local_psp       :  8.62537715252270E-02
+local_psp           : -2.43691396473781E+00
+non_local_psp       :  8.62537715252273E-02
 total_energy        : -4.95825432639976E+00
-total_energy_eV     : -1.34920961751170E+02
-band_energy         : -8.38213993294533E-01
+total_energy_eV     : -1.34920961751169E+02
+band_energy         : -8.38213993294532E-01
 ...
 
 
@@ -2116,8 +2083,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.10744
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for Bi,  from PRB58, 3641 (1998)
 - 83.00000   5.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2237,15 +2204,15 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 iteration_state     : {dtset: 11, }
 comment             : Components of total free energy in Hartree
 kinetic             :  1.25387802791592E+00
-hartree             :  5.34623641665241E-01
-xc                  : -9.70256036392984E-01
+hartree             :  5.34623641665240E-01
+xc                  : -9.70256036392983E-01
 Ewald energy        : -3.54662184935089E+00
 psp_core            :  1.73973577808835E-01
 local_psp           : -2.47748141392071E+00
-non_local_psp       :  8.66193049568611E-02
+non_local_psp       :  8.66193049568614E-02
 total_energy        : -4.94526474731774E+00
 total_energy_eV     : -1.34567497328589E+02
-band_energy         : -7.98979068711679E-01
+band_energy         : -7.98979068711677E-01
 ...
 
 
@@ -2283,8 +2250,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.10744
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for Bi,  from PRB58, 3641 (1998)
 - 83.00000   5.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2404,15 +2371,15 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 iteration_state     : {dtset: 12, }
 comment             : Components of total free energy in Hartree
 kinetic             :  1.39271809613034E+00
-hartree             :  5.24314610739815E-01
-xc                  : -9.49136109715057E-01
+hartree             :  5.24314610739816E-01
+xc                  : -9.49136109715058E-01
 Ewald energy        : -3.54662184935089E+00
 psp_core            :  1.73973577808835E-01
 local_psp           : -2.43206222563158E+00
-non_local_psp       :  7.94835189472245E-02
+non_local_psp       :  7.94835189472242E-02
 total_energy        : -4.75733038107132E+00
 total_energy_eV     : -1.29453543148172E+02
-band_energy         : -7.71844340170113E-01
+band_energy         : -7.71844340170115E-01
 ...
 
 
@@ -2450,8 +2417,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.10744
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for Bi,  from PRB58, 3641 (1998)
 - 83.00000   5.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2571,15 +2538,15 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 iteration_state     : {dtset: 13, }
 comment             : Components of total free energy in Hartree
 kinetic             :  1.26184495253490E+00
-hartree             :  5.41178524639937E-01
-xc                  : -9.69791719433720E-01
+hartree             :  5.41178524639936E-01
+xc                  : -9.69791719433721E-01
 Ewald energy        : -3.54662184935089E+00
 psp_core            :  1.73973577808835E-01
 local_psp           : -2.49225484353402E+00
-non_local_psp       :  8.55467996904126E-02
+non_local_psp       :  8.55467996904128E-02
 total_energy        : -4.94612455764455E+00
 total_energy_eV     : -1.34590893957439E+02
-band_energy         : -7.84261705050634E-01
+band_energy         : -7.84261705050633E-01
 ...
 
 
@@ -2617,8 +2584,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.10744
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for Bi,  from PRB58, 3641 (1998)
 - 83.00000   5.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2738,15 +2705,15 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 iteration_state     : {dtset: 14, }
 comment             : Components of total free energy in Hartree
 kinetic             :  1.25443254822317E+00
-hartree             :  5.29489267236193E-01
-xc                  : -9.87238614114751E-01
+hartree             :  5.29489267236191E-01
+xc                  : -9.87238614114750E-01
 Ewald energy        : -3.54662184935089E+00
 psp_core            :  1.73973577808835E-01
 local_psp           : -2.47246014804796E+00
-non_local_psp       :  8.62615128658189E-02
-total_energy        : -4.96216370537960E+00
+non_local_psp       :  8.62615128658194E-02
+total_energy        : -4.96216370537959E+00
 total_energy_eV     : -1.35027341363244E+02
-band_energy         : -8.13251039600988E-01
+band_energy         : -8.13251039600987E-01
 ...
 
 
@@ -2784,8 +2751,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.10744
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for Bi,  from PRB58, 3641 (1998)
 - 83.00000   5.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2905,15 +2872,15 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 iteration_state     : {dtset: 15, }
 comment             : Components of total free energy in Hartree
 kinetic             :  1.26975941284614E+00
-hartree             :  5.53989887779517E-01
+hartree             :  5.53989887779516E-01
 xc                  : -9.53377278490771E-01
 Ewald energy        : -3.54662184935089E+00
 psp_core            :  1.73973577808835E-01
-local_psp           : -2.51114985694969E+00
-non_local_psp       :  8.54531020358890E-02
+local_psp           : -2.51114985694970E+00
+non_local_psp       :  8.54531020358893E-02
 total_energy        : -4.92797300432098E+00
 total_energy_eV     : -1.34096965072296E+02
-band_energy         : -7.63693499967666E-01
+band_energy         : -7.63693499967668E-01
 ...
 
 
@@ -2951,8 +2918,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.10744
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for Bi,  from PRB58, 3641 (1998)
 - 83.00000   5.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3072,7 +3039,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 iteration_state     : {dtset: 16, }
 comment             : Components of total free energy in Hartree
 kinetic             :  1.05403974166084E+00
-hartree             :  2.90224105341784E-01
+hartree             :  2.90224105341783E-01
 xc                  : -6.43293419401822E-02
 Ewald energy        : -3.54662184935089E+00
 psp_core            :  1.73973577808835E-01
@@ -3118,8 +3085,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.10744
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for Bi,  from PRB58, 3641 (1998)
 - 83.00000   5.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3157,7 +3124,7 @@ tolerances: {tolwfr: 1.00E-14, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -4.9678858616714    -4.968E+00 1.631E-01 2.183E+02
+ ETOT  1  -4.9678858616682    -4.968E+00 1.631E-01 2.183E+02
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  2.89102501E-04  sigma(3 2)=  0.00000000E+00
@@ -3238,16 +3205,16 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 17, }
 comment             : Components of total free energy in Hartree
-kinetic             :  1.25800616309122E+00
-hartree             :  5.36907179977583E-01
-xc                  : -9.91307708243744E-01
+kinetic             :  1.25800616309288E+00
+hartree             :  5.36907179977051E-01
+xc                  : -9.91307708243085E-01
 Ewald energy        : -3.54662184935089E+00
 psp_core            :  1.73973577808835E-01
-local_psp           : -2.48615762947453E+00
-non_local_psp       :  8.73144045201215E-02
-total_energy        : -4.96788586167141E+00
-total_energy_eV     : -1.35183049154608E+02
-band_energy         : -8.23450768765022E-01
+local_psp           : -2.48615762947435E+00
+non_local_psp       :  8.73144045213750E-02
+total_energy        : -4.96788586166819E+00
+total_energy_eV     : -1.35183049154520E+02
+band_energy         : -8.23450768761721E-01
 ...
 
 
@@ -3290,8 +3257,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.10744
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for Bi,  from PRB58, 3641 (1998)
 - 83.00000   5.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3416,10 +3383,10 @@ xc                  : -1.04250713166760E+00
 Ewald energy        : -3.54662184935089E+00
 psp_core            :  1.73973577808835E-01
 local_psp           : -2.51296022976421E+00
-non_local_psp       :  8.67006252529752E-02
+non_local_psp       :  8.67006252529756E-02
 total_energy        : -5.01809720741325E+00
 total_energy_eV     : -1.36549369357716E+02
-band_energy         : -8.57000710074235E-01
+band_energy         : -8.57000710074234E-01
 ...
 
 
@@ -3457,8 +3424,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.10744
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for Bi,  from PRB58, 3641 (1998)
 - 83.00000   5.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3578,15 +3545,15 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 iteration_state     : {dtset: 23, }
 comment             : Components of total free energy in Hartree
 kinetic             :  1.29368984792522E+00
-hartree             :  5.79335268622810E-01
+hartree             :  5.79335268622811E-01
 xc                  : -1.02967600465188E+00
 Ewald energy        : -3.54662184935089E+00
 psp_core            :  1.73973577808835E-01
 local_psp           : -2.56723209511368E+00
-non_local_psp       :  8.80013984225248E-02
+non_local_psp       :  8.80013984225251E-02
 total_energy        : -5.00852985633706E+00
-total_energy_eV     : -1.36289028495058E+02
-band_energy         : -8.03826624645513E-01
+total_energy_eV     : -1.36289028495059E+02
+band_energy         : -8.03826624645512E-01
 ...
 
 
@@ -3624,8 +3591,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.10744
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for Bi,  from PRB58, 3641 (1998)
 - 83.00000   5.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3745,12 +3712,12 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 iteration_state     : {dtset: 24, }
 comment             : Components of total free energy in Hartree
 kinetic             :  1.29714489620477E+00
-hartree             :  5.83935732260253E-01
+hartree             :  5.83935732260251E-01
 xc                  : -1.02173932039670E+00
 Ewald energy        : -3.54662184935089E+00
 psp_core            :  1.73973577808835E-01
 local_psp           : -2.57489645037802E+00
-non_local_psp       :  8.79165400103563E-02
+non_local_psp       :  8.79165400103564E-02
 total_energy        : -5.00028687384139E+00
 total_energy_eV     : -1.36064725534218E+02
 band_energy         : -8.13092081944442E-01
@@ -3791,8 +3758,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.10744
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for Bi,  from PRB58, 3641 (1998)
 - 83.00000   5.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3911,16 +3878,16 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 25, }
 comment             : Components of total free energy in Hartree
-kinetic             :  1.29722437541293E+00
+kinetic             :  1.29722437541292E+00
 hartree             :  5.84123825356971E-01
-xc                  : -1.02430046589557E+00
+xc                  : -1.02430046589556E+00
 Ewald energy        : -3.54662184935089E+00
 psp_core            :  1.73973577808835E-01
-local_psp           : -2.57514525889822E+00
-non_local_psp       :  8.78169291136254E-02
-total_energy        : -5.00292886645232E+00
-total_energy_eV     : -1.36136617809309E+02
-band_energy         : -8.11942563091899E-01
+local_psp           : -2.57514525889820E+00
+non_local_psp       :  8.78169291136256E-02
+total_energy        : -5.00292886645231E+00
+total_energy_eV     : -1.36136617809308E+02
+band_energy         : -8.11942563091898E-01
 ...
 
 
@@ -3958,8 +3925,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.10744
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for Bi,  from PRB58, 3641 (1998)
 - 83.00000   5.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -4084,7 +4051,7 @@ xc                  : -1.02260570628301E+00
 Ewald energy        : -3.54662184935089E+00
 psp_core            :  1.73973577808835E-01
 local_psp           : -2.57478581431373E+00
-non_local_psp       :  8.77976963681383E-02
+non_local_psp       :  8.77976963681389E-02
 total_energy        : -5.00123667116622E+00
 total_energy_eV     : -1.36090570833813E+02
 band_energy         : -8.13025705941289E-01
@@ -4125,8 +4092,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.10744
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for Bi,  from PRB58, 3641 (1998)
 - 83.00000   5.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -4250,11 +4217,11 @@ hartree             :  5.91562549706090E-01
 xc                  : -1.08104353934463E+00
 Ewald energy        : -3.54662184935089E+00
 psp_core            :  1.73973577808835E-01
-local_psp           : -2.58620829989944E+00
-non_local_psp       :  8.71127239601300E-02
+local_psp           : -2.58620829989945E+00
+non_local_psp       :  8.71127239601301E-02
 total_energy        : -5.05828193657476E+00
 total_energy_eV     : -1.37642851448240E+02
-band_energy         : -8.64558086853393E-01
+band_energy         : -8.64558086853392E-01
 ...
 
 
@@ -4292,8 +4259,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.10744
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for Bi,  from PRB58, 3641 (1998)
 - 83.00000   5.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -4418,10 +4385,10 @@ xc                  : -1.04822600602586E+00
 Ewald energy        : -3.54662184935089E+00
 psp_core            :  1.73973577808835E-01
 local_psp           : -2.58654764794121E+00
-non_local_psp       :  8.70498227727919E-02
-total_energy        : -5.02650193787436E+00
+non_local_psp       :  8.70498227727921E-02
+total_energy        : -5.02650193787435E+00
 total_energy_eV     : -1.36778073704533E+02
-band_energy         : -8.29135355290179E-01
+band_energy         : -8.29135355290177E-01
 ...
 
 
@@ -4459,8 +4426,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.10744
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for Bi,  from PRB58, 3641 (1998)
 - 83.00000   5.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -4585,10 +4552,10 @@ xc                  : -1.05328042620033E+00
 Ewald energy        : -3.54662184935089E+00
 psp_core            :  1.73973577808835E-01
 local_psp           : -2.58654764794121E+00
-non_local_psp       :  8.70498227727919E-02
+non_local_psp       :  8.70498227727920E-02
 total_energy        : -5.03155635804883E+00
 total_energy_eV     : -1.36915611472090E+02
-band_energy         : -8.29135355290179E-01
+band_energy         : -8.29135355290177E-01
 ...
 
 
@@ -4626,8 +4593,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.10744
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for Bi,  from PRB58, 3641 (1998)
 - 83.00000   5.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -4752,10 +4719,10 @@ xc                  : -1.12421173030194E+00
 Ewald energy        : -3.54662184935089E+00
 psp_core            :  1.73973577808835E-01
 local_psp           : -2.66110691582602E+00
-non_local_psp       :  8.95449962263421E-02
-total_energy        : -5.09241347990430E+00
+non_local_psp       :  8.95449962263423E-02
+total_energy        : -5.09241347990429E+00
 total_energy_eV     : -1.38571617975514E+02
-band_energy         : -8.72818595420937E-01
+band_energy         : -8.72818595420936E-01
 ...
 
 
@@ -4793,8 +4760,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.10744
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for Bi,  from PRB58, 3641 (1998)
 - 83.00000   5.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -4919,10 +4886,10 @@ xc                  : -1.09225689925408E+00
 Ewald energy        : -3.54662184935089E+00
 psp_core            :  1.73973577808835E-01
 local_psp           : -2.58829976736405E+00
-non_local_psp       :  8.69208051008050E-02
+non_local_psp       :  8.69208051008052E-02
 total_energy        : -5.06727664520034E+00
 total_energy_eV     : -1.37887609917359E+02
-band_energy         : -8.43792401732182E-01
+band_energy         : -8.43792401732181E-01
 ...
 
 
@@ -4960,8 +4927,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.10744
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for Bi,  from PRB58, 3641 (1998)
 - 83.00000   5.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -5081,7 +5048,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 iteration_state     : {dtset: 33, }
 comment             : Components of total free energy in Hartree
 kinetic             :  1.32030718054049E+00
-hartree             :  5.92651473364616E-01
+hartree             :  5.92651473364615E-01
 xc                  : -1.10338284269774E+00
 Ewald energy        : -3.54662184935089E+00
 psp_core            :  1.73973577808835E-01
@@ -5127,8 +5094,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.10744
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for Bi,  from PRB58, 3641 (1998)
 - 83.00000   5.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -5256,7 +5223,7 @@ local_psp           : -2.50003199563050E+00
 non_local_psp       :  8.39840069190626E-02
 total_energy        : -5.02435361341547E+00
 total_energy_eV     : -1.36719614823026E+02
-band_energy         : -9.22379506851871E-01
+band_energy         : -9.22379506851870E-01
 ...
 
 
@@ -5299,8 +5266,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.10744
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for Bi,  from PRB58, 3641 (1998)
 - 83.00000   5.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -5425,10 +5392,10 @@ xc                  : -1.04250713166760E+00
 Ewald energy        : -3.54662184935089E+00
 psp_core            :  1.73973577808835E-01
 local_psp           : -2.51296022976421E+00
-non_local_psp       :  8.67006252529752E-02
+non_local_psp       :  8.67006252529756E-02
 total_energy        : -5.01809720741325E+00
 total_energy_eV     : -1.36549369357716E+02
-band_energy         : -8.57000710074235E-01
+band_energy         : -8.57000710074234E-01
 ...
 
 
@@ -5466,8 +5433,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.10744
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for Bi,  from PRB58, 3641 (1998)
 - 83.00000   5.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -5587,12 +5554,12 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 iteration_state     : {dtset: 37, }
 comment             : Components of total free energy in Hartree
 kinetic             :  1.29388401306514E+00
-hartree             :  5.77021187268324E-01
+hartree             :  5.77021187268323E-01
 xc                  : -1.19702353004186E+00
 Ewald energy        : -3.54662184935089E+00
 psp_core            :  1.73973577808835E-01
 local_psp           : -2.56719165171357E+00
-non_local_psp       :  8.65471216232936E-02
+non_local_psp       :  8.65471216232935E-02
 total_energy        : -5.17941113134073E+00
 total_energy_eV     : -1.40938944463670E+02
 band_energy         : -9.96058375414469E-01
@@ -5633,8 +5600,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.10744
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for Bi,  from PRB58, 3641 (1998)
 - 83.00000   5.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -5754,15 +5721,15 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 iteration_state     : {dtset: 38, }
 comment             : Components of total free energy in Hartree
 kinetic             :  1.30539808970321E+00
-hartree             :  5.81648279827897E-01
+hartree             :  5.81648279827898E-01
 xc                  : -1.04714658217428E+00
 Ewald energy        : -3.54662184935089E+00
 psp_core            :  1.73973577808835E-01
 local_psp           : -2.58373248215221E+00
 non_local_psp       :  8.90176564827211E-02
-total_energy        : -5.02746330985473E+00
+total_energy        : -5.02746330985472E+00
 total_energy_eV     : -1.36804233966523E+02
-band_energy         : -8.81188896456539E-01
+band_energy         : -8.81188896456538E-01
 ...
 
 
@@ -5800,8 +5767,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.10744
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for Bi,  from PRB58, 3641 (1998)
 - 83.00000   5.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -5927,9 +5894,9 @@ Ewald energy        : -3.54662184935089E+00
 psp_core            :  1.73973577808835E-01
 local_psp           : -2.49953371342127E+00
 non_local_psp       :  8.40092502428475E-02
-total_energy        : -4.99529412258421E+00
+total_energy        : -4.99529412258420E+00
 total_energy_eV     : -1.35928865863241E+02
-band_energy         : -8.30646269353181E-01
+band_energy         : -8.30646269353180E-01
 ...
 
 
@@ -5967,8 +5934,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.10744
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for Bi,  from PRB58, 3641 (1998)
 - 83.00000   5.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -6088,15 +6055,15 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 iteration_state     : {dtset: 45, }
 comment             : Components of total free energy in Hartree
 kinetic             :  1.27027806704169E+00
-hartree             :  5.37213563717617E-01
+hartree             :  5.37213563717616E-01
 xc                  : -9.95566766628827E-01
 Ewald energy        : -3.54662184935089E+00
 psp_core            :  1.73973577808835E-01
 local_psp           : -2.49382615473462E+00
-non_local_psp       :  8.29730427783892E-02
+non_local_psp       :  8.29730427783894E-02
 total_energy        : -4.97157651936782E+00
 total_energy_eV     : -1.35283477057880E+02
-band_energy         : -7.90536154772266E-01
+band_energy         : -7.90536154772265E-01
 ...
 
 
@@ -6134,8 +6101,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.10744
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for Bi,  from PRB58, 3641 (1998)
 - 83.00000   5.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -6260,7 +6227,7 @@ xc                  : -1.96258148527517E+00
 Ewald energy        : -3.54662184935089E+00
 psp_core            :  1.73973577808835E-01
 local_psp           : -2.57468000198817E+00
-non_local_psp       :  8.74765609440252E-02
+non_local_psp       :  8.74765609440254E-02
 total_energy        : -5.93743758699998E+00
 total_energy_eV     : -1.61565893324649E+02
 band_energy         : -1.73297624361970E+00
@@ -6352,7 +6319,7 @@ band_energy         : -1.73297624361970E+00
             fcart44   -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
             fcart45   -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
             fcart46   -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
--          fftalg         312
+-          fftalg         512
            istwfk        2
               ixc1      -1025
               ixc2      -1027
@@ -6440,7 +6407,7 @@ P           mkmem           1
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            strten16    1.7019620265E-04  1.7019620265E-04  1.7019620265E-04
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-           strten17    2.8910250111E-04  2.8910250111E-04  2.8910250111E-04
+           strten17    2.8910250110E-04  2.8910250110E-04  2.8910250110E-04
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            strten22    2.8863785372E-04  2.8863785372E-04  2.8863785372E-04
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -6601,10 +6568,10 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          9.6  wall=         10.7
+- Proc.   0 individual time (sec): cpu=          6.0  wall=          6.2
 
 ================================================================================
 
  Calculation completed.
 .Delivered  97 WARNINGs and  71 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          9.6  wall=         10.7
++Overall time at end (sec) : cpu=          6.0  wall=          6.2

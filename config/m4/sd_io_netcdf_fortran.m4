@@ -91,12 +91,13 @@ AC_DEFUN([SD_NETCDF_FORTRAN_INIT], [
   AC_ARG_VAR([NETCDF_FORTRAN_CFLAGS], [C flags for NetCDF Fortran interface.])
   AC_ARG_VAR([NETCDF_FORTRAN_CXXFLAGS], [C++ flags for NetCDF Fortran interface.])
   AC_ARG_VAR([NETCDF_FORTRAN_FCFLAGS], [Fortran flags for NetCDF Fortran interface.])
+  AC_ARG_VAR([NETCDF_FORTRAN_FFLAGS], [Fortran flags for NetCDF Fortran interface (better use NETCDF_FORTRAN_FCFLAGS).])
   AC_ARG_VAR([NETCDF_FORTRAN_LDFLAGS], [Linker flags for NetCDF Fortran interface.])
   AC_ARG_VAR([NETCDF_FORTRAN_LIBS], [Library flags for NetCDF Fortran interface.])
 
   # Detect use of environment variables
   if test "${sd_netcdf_fortran_enable}" = "yes" -o "${sd_netcdf_fortran_enable}" = "auto"; then
-    tmp_netcdf_fortran_vars="${NETCDF_FORTRAN_CPPFLAGS}${NETCDF_FORTRAN_CFLAGS}${NETCDF_FORTRAN_CXXFLAGS}${NETCDF_FORTRAN_FCFLAGS}${NETCDF_FORTRAN_LDFLAGS}${NETCDF_FORTRAN_LIBS}"
+    tmp_netcdf_fortran_vars="${NETCDF_FORTRAN_CPPFLAGS}${NETCDF_FORTRAN_CFLAGS}${NETCDF_FORTRAN_CXXFLAGS}${NETCDF_FORTRAN_FFLAGS}${NETCDF_FORTRAN_FCFLAGS}${NETCDF_FORTRAN_LDFLAGS}${NETCDF_FORTRAN_LIBS}"
     if test "${sd_netcdf_fortran_init}" = "def" -a \
             ! -z "${tmp_netcdf_fortran_vars}"; then
       sd_netcdf_fortran_enable="yes"
@@ -143,6 +144,7 @@ AC_DEFUN([SD_NETCDF_FORTRAN_INIT], [
         test ! -z "${NETCDF_FORTRAN_CPPFLAGS}" && sd_netcdf_fortran_cppflags="${NETCDF_FORTRAN_CPPFLAGS}"
         test ! -z "${NETCDF_FORTRAN_CFLAGS}" && sd_netcdf_fortran_cflags="${NETCDF_FORTRAN_CFLAGS}"
         test ! -z "${NETCDF_FORTRAN_CXXFLAGS}" && sd_netcdf_fortran_cxxflags="${NETCDF_FORTRAN_CXXFLAGS}"
+        test ! -z "${NETCDF_FORTRAN_FFLAGS}" && sd_netcdf_fortran_fcflags="${NETCDF_FORTRAN_FFLAGS}"
         test ! -z "${NETCDF_FORTRAN_FCFLAGS}" && sd_netcdf_fortran_fcflags="${NETCDF_FORTRAN_FCFLAGS}"
         test ! -z "${NETCDF_FORTRAN_LDFLAGS}" && sd_netcdf_fortran_ldflags="${NETCDF_FORTRAN_LDFLAGS}"
         test ! -z "${NETCDF_FORTRAN_LIBS}" && sd_netcdf_fortran_libs="${NETCDF_FORTRAN_LIBS}"
@@ -412,7 +414,7 @@ AC_DEFUN([_SD_NETCDF_FORTRAN_CHECK_CONFIG], [
   fi
 
   # Environment variables conflict with --with-* options
-  tmp_netcdf_fortran_vars="${NETCDF_FORTRAN_CPPFLAGS}${NETCDF_FORTRAN_CFLAGS}${NETCDF_FORTRAN_FCFLAGS}${NETCDF_FORTRAN_LDFLAGS}${NETCDF_FORTRAN_LIBS}"
+  tmp_netcdf_fortran_vars="${NETCDF_FORTRAN_CPPFLAGS}${NETCDF_FORTRAN_CFLAGS}${NETCDF_FORTRAN_FFLAGS}${NETCDF_FORTRAN_FCFLAGS}${NETCDF_FORTRAN_LDFLAGS}${NETCDF_FORTRAN_LIBS}"
   tmp_netcdf_fortran_invalid="no"
   if test ! -z "${tmp_netcdf_fortran_vars}" -a ! -z "${sd_netcdf_fortran_prefix}"; then
     case "${sd_netcdf_fortran_policy}" in

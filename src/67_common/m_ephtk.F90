@@ -471,25 +471,33 @@ end subroutine ephtk_update_ebands
 !!
 !! SOURCE
 
-subroutine ephtk_get_mpw_gmax(nkpt, kpts, ecut, gmet, mpw, gmax, comm)
+subroutine ephtk_get_mpw_gmax(nkpt, kpts, ecut, gmet, mpw, gmax, comm, init_with_zero)
 
 !Arguments ------------------------------------
  integer,intent(in) :: nkpt
  integer,intent(out) :: mpw, gmax(3)
  real(dp),intent(in) :: ecut, kpts(3,nkpt), gmet(3,3)
  integer,intent(in) :: comm
+ logical,optional,intent(in) :: init_with_zero
 
 !Local variables ------------------------------
  integer,parameter :: istwfk1 = 1
  integer :: ik,i1,i2,i3,cnt,ipw,ii,onpw,my_mpw,my_gmax(3),ierr, my_rank, nprocs
  real(dp) :: kk(3), kq(3)
  integer,allocatable :: gtmp(:,:)
+ logical :: init_with_zero__
 
 ! *************************************************************************
 
  my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
 
- mpw = 0; gmax = 0; cnt = 0
+ init_with_zero__ = .True.; if (present(init_with_zero)) init_with_zero__ = init_with_zero
+
+ if (init_with_zero__) then
+   mpw = 0; gmax = 0
+ end if
+
+ cnt = 0
  do ik=1,nkpt
    kk = kpts(:, ik)
    do i3=-1,1
@@ -502,7 +510,7 @@ subroutine ephtk_get_mpw_gmax(nkpt, kpts, ecut, gmet, mpw, gmax, comm)
          mpw = max(mpw, onpw)
          do ipw=1,onpw
            do ii=1,3
-            gmax(ii) = max(gmax(ii), abs(gtmp(ii, ipw)))
+             gmax(ii) = max(gmax(ii), abs(gtmp(ii, ipw)))
            end do
          end do
          ABI_FREE(gtmp)

@@ -200,7 +200,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  integer :: nfft,nfftf,mgfft,mgfftf,nkpg_k,nkpg_kq,nkpg_kqmp,nkpg_kmp,imyp, cnt, nvloc, iw_nk, iw_mkq
  integer :: nbsum,my_bsum_start, my_bsum_stop, my_nbsum, ndone, nmiss ! num_mn_kq,
  !integer :: bstart_ks,ikcalc,bstart,bstop, sendcount !iatom,
- integer :: ipp_bz, ipp_ibz, isym_pp, itim_pp, comm_rpt, nqlwl, ebands_timrev ! osc_npw,
+ integer :: ipp_bz, ipp_ibz, isym_pp, itim_pp, comm_rpt, nqlwl ! osc_npw,
  integer :: ffnl_k_request, ffnl_kq_request, ffnl_kmp_request, ffnl_kqmp_request
  integer :: qptopt, my_iq, my_ik, qbuf_size, iqbuf_cnt, nb ! nelem,
  real(dp) :: cpu_all, wall_all, gflops_all, cpu_qq, wall_qq, gflops_qq, cpu_kk, wall_kk, gflops_kk
@@ -329,7 +329,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
 
  if (restart == 0) then
    ! Build new gstore object from dtset input variables.
-   call gstore%init(gstore_filepath, dtset, wfk_hdr, cryst, ebands, ifc, comm)
+   call gstore%init(gstore_filepath, dtset, dtfil, wfk_hdr, cryst, ebands, ifc, comm)
    ABI_REMALLOC(done_qbz_spin, (gstore%nqbz, nsppol))
    done_qbz_spin = 0
  else
@@ -561,14 +561,14 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
        end do
      end do ! my_ik
 
-     call xmpi_sum_master(count_bk, master, gqk%grid_comm%value, ierr)
-     call xmpi_sum_master(vk_cart_ibz, master, gqk%grid_comm%value, ierr)
+     call xmpi_sum_master(count_bk, master, gqk%comm%value, ierr)
+     call xmpi_sum_master(vk_cart_ibz, master, gqk%comm%value, ierr)
      do ii=1,3
        vk_cart_ibz(ii,:,:) = vk_cart_ibz(ii,:,:) / count_bk
      end do
 
      ! Write v_nk to disk.
-     !if (gqk%grid_comm%me == master) then
+     !if (gqk%comm%me == master) then
        NCF_CHECK(nf90_inq_ncid(root_ncid, strcat("gqk", "_spin", itoa(spin)), spin_ncid))
        NCF_CHECK(nf90_put_var(spin_ncid, spin_vid("vk_cart_ibz"), vk_cart_ibz))
      !end if
@@ -761,8 +761,6 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  call screen%init(w_info, cryst, pp_mesh, gsph_c, vcp, screen_filepath, mqmem, dtset%npweps, &
                   dtset%iomode, ngfftf, nfftf, nsppol, nspden, rhor, dtset%prtvol, comm)
  ABI_FREE(qlwl)
-
- ebands_timrev = kpts_timrev_from_kptopt(ebands%kptopt)
 
  ! Allocate g-vectors centered on k, k+q, k-p, and k+q-p
  ABI_MALLOC(kg_k, (3, mpw))
@@ -981,7 +979,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
        !
        kq = kk + qq_ibz
 
-       if (kpts_map("symrel", ebands_timrev, cryst, gstore%krank_ibz, 1, kq, mapl_kq) /= 0) then
+       if (kpts_map("symrel", ebands%kptopt, cryst, gstore%krank_ibz, 1, kq, mapl_kq) /= 0) then
          write(msg, '(4a)' )"k-mesh is not closed!",ch10, "k+q could not be generated from a symmetrical one.",trim(ltoa(kq))
          ABI_ERROR(msg)
        end if
@@ -1059,7 +1057,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
 
          ! Symmetry tables and g-sphere centered on k-p.
          kmp = kk - pp
-         if (kpts_map("symrel", ebands_timrev, cryst, gstore%krank_ibz, 1, kmp, mapl_kmp) /= 0) then
+         if (kpts_map("symrel", ebands%kptopt, cryst, gstore%krank_ibz, 1, kmp, mapl_kmp) /= 0) then
            write(msg, '(4a)' )"k-mesh is not closed!",ch10, &
              "k-p could not be generated from a symmetrical one.",trim(ltoa(kmp))
            ABI_ERROR(msg)
@@ -1081,7 +1079,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
 
          ! Symmetry tables and g-sphere centered on k+q-p.
          kqmp = kq - pp
-         if (kpts_map("symrel", ebands_timrev, cryst, gstore%krank_ibz, 1, kqmp, mapl_kqmp) /= 0) then
+         if (kpts_map("symrel", ebands%kptopt, cryst, gstore%krank_ibz, 1, kqmp, mapl_kqmp) /= 0) then
            write(msg, '(4a)' )"k-mesh is not closed!",ch10, &
              "k+q-p could not be generated from a symmetrical one.",trim(ltoa(kqmp))
            ABI_ERROR(msg)

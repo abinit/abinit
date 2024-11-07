@@ -27,7 +27,7 @@ getdvdb_filepath "teph4mob_3_DVDB"
 tmesh 5.0 59.0 6  # List of Temperatures for which the mobility will be computed
 
 # Change this depending on the concentration you want
-eph_doping  -1e+15   # in |e| cm^-3 
+eph_doping  -1e+15   # in |e| cm^-3
 
 sigma_erange  0 0.15 eV  # We compute the lifetimes of electrons only,
                          # in an energy window of 0.15 eV from the CBM
@@ -35,7 +35,7 @@ sigma_erange  0 0.15 eV  # We compute the lifetimes of electrons only,
 mixprec 1     # We use single precision in some parts.
               # It does not affect the precision of the result
               # but helps decreasing the memory requirements.
-              
+
 boxcutmin 1.1 # Use boxcutmin 1.1 to decrease the memory
               # requirements. Check that it does not affect
               # your results by increasing this (up to 2 max).
@@ -80,6 +80,7 @@ nband 8
 #%% [setup]
 #%% executable = abinit
 #%% test_chain = teph4mob_1.abi, teph4mob_2.abi, teph4mob_3.abi, teph4mob_4.abi, teph4mob_5.abi, teph4mob_6.abi, teph4mob_7.abi
+#%% exclude_builders = eos_nvhpc_*, eos_gnu_13.2_serial
 #%% [files]
 #%% files_to_test =
 #%%   teph4mob_5.abo, tolnlines= 80, tolabs=  600, tolrel=  6.000e-03

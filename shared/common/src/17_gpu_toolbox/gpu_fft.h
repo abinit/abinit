@@ -8,13 +8,13 @@
 #ifdef HAVE_GPU_CUDA
 #include <cufft.h>
 #include <cuda_api_error_check.h>
-extern cufftHandle plan_fft;
+extern cufftHandle plan_fft[2];
 #endif
 
 #ifdef HAVE_GPU_HIP
 #include <hipfft/hipfft.h>
 #include <hip_api_error_check.h>
-extern hipfftHandle plan_fft;
+extern hipfftHandle plan_fft[2];
 #endif
 
 #endif // ABINIT_SHARED_COMMON_SRC_17_GPU_FFT_H

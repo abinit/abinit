@@ -1,6 +1,6 @@
 
-.Version 9.11.2 of ANADDB 
-.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 10.1.4.5 of ANADDB, released Sep 2024.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2024 ABINIT group . 
  ANADDB comes with ABSOLUTELY NO WARRANTY.
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 15 Jul 2023.
-- ( at 12h03 )
+.Starting date : Fri 13 Sep 2024.
+- ( at 19h11 )
   
 
 ================================================================================
@@ -85,7 +85,7 @@
 
  Calculation of the interatomic forces 
 
--begin at tcpu      0.029  and twall      0.037 sec
+-begin at tcpu      0.029  and twall      0.029 sec
        Homogeneous q point set in the B.Z.
  Grid q points  :        8
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -186,16 +186,16 @@
 
  For checking purposes, write ten values in the present file.
        Index    Energy (in Ha)      DOS
-         1     -1.151422E-06      1.057855E+04
+         1     -1.151435E-06      1.057855E+04
         51      6.345553E-04      0.000000E+00
        101      1.270262E-03      0.000000E+00
        151      1.905969E-03      0.000000E+00
        201      2.541676E-03      0.000000E+00
-       251      3.177382E-03      1.573381E-06
+       251      3.177382E-03      1.573386E-06
        301      3.813089E-03      0.000000E+00
-       351      4.448796E-03      1.938505E-06
+       351      4.448796E-03      1.938508E-06
        401      5.084502E-03      0.000000E+00
-       451      5.720209E-03      9.866633E+01
+       451      5.720209E-03      9.866630E+01
  
 --------------------------------------------------------------------------------
  
@@ -256,6 +256,6 @@
 
 ================================================================================
 
-+Total cpu time      0.085  and wall time      0.101 sec
++Total cpu time      0.080  and wall time      0.080 sec
 
  anaddb : the run completed succesfully.

@@ -533,7 +533,7 @@ subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,pawrad,pawtab,psps,r
                        end if
                        psps%indlmn(1,ilmn,itypat)=ilang
                        psps%indlmn(2,ilmn,itypat)=indlmn_alch(2,ilmn0,ipspalch)
-                       psps%indlmn(3,ilmn,itypat)=iproj 
+                       psps%indlmn(3,ilmn,itypat)=iproj
                        psps%indlmn(4,ilmn,itypat)=ilmn
                        psps%indlmn(5,ilmn,itypat)=iln
                        psps%indlmn(6,ilmn,itypat)=ispin
@@ -845,8 +845,8 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
  integer :: ii,il,ilmn,iln,iln0,lloc,lmax,me,mmax
  integer :: paral_mode,pspcod,pspdat,pspxc,useupf,usexml,xmlpaw,unt
  real(dp) :: maxrad,qchrg,r2well,zion,znucl
- !logical,parameter :: nc_debug = .False.
- logical,parameter :: nc_debug = .True.
+ logical,parameter :: nc_debug = .False.
+ !logical,parameter :: nc_debug = .True.
  character(len=500) :: msg,errmsg
  character(len=fnlen) :: title, filnam
  type(pawpsp_header_type):: pawpsp_header

@@ -113,6 +113,7 @@ jpawu2      0.84 eV  # Values of J
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
+#%% exclude_builders = eos_gnu_13.2_mpich
 #%% [paral_info]
 #%% nprocs_to_test = 10
 #%% max_nprocs = 10

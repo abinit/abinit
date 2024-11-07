@@ -1,4 +1,3 @@
--Could not open HIST.nc, starting from scratch
   
 .Version    3.0 of PHONONS
 .Copyright (C) 1998-2024 ABINIT group (FB,JB).
@@ -14,7 +13,7 @@
  acknowledgments of the ABINIT effort.
  For more information, see http://www.abinit.org .
 
-.Starting date :  8 Apr 2021.
+.Starting date : 13 Sep 2024.
   
  #############################################################################
  ######################### ECHO OF INPUT FILE ################################
@@ -74,6 +73,7 @@
  use_ideal_positions     1
  order                   4    5.0000000000    5.0000000000
  USE IDEAL POSITIONS TO COMPUTE SPECTRUM
+-Number of processors    1    1
  
  All quantities are computed from nstep_min=    1
                                to nstep_max=   20
@@ -1343,7 +1343,7 @@
  
  ========================= Elastic anisotropy =================================
  Elastic anisotropy index : A_U= 5*G_V/G_R + K_V/K_R - 6 =    0.539
- Bulk anisotropy ratio : A_B= (B_V-B_R)/(B_V+B_R) =    0.000
+ Bulk anisotropy ratio : A_B= (B_V-B_R)/(B_V+B_R) =   -0.000
  Shear anisotropy ratio : A_G= (G_V-G_R)/(G_V+G_R) =    0.051
   
  #############################################################################

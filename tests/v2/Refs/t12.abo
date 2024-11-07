@@ -1,6 +1,6 @@
 
-.Version 9.11.2 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 10.1.4.5 of ABINIT, released Sep 2024.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2024 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 15 Jul 2023.
-- ( at 11h59 )
+.Starting date : Fri 13 Sep 2024.
+- ( at 19h08 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v2_t12/t12.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v2_t12/t12.abi
 - output file    -> t12.abo
 - root for input  files -> t12i
 - root for output files -> t12o
@@ -42,10 +42,10 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
 -
-- outvars: echo of selected default values                                      
--   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+- outvars: echo of selected default values
+-   iomode0 =  0 , fftalg0 =512 , wfoptalg0 =  0
 -
-- outvars: echo of global parameters not present in the input file              
+- outvars: echo of global parameters not present in the input file
 -  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
@@ -54,7 +54,7 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
            diemac      3.00000000E+00
              ecut      6.00000000E+00 Hartree
            enunit           2
--          fftalg         312
+-          fftalg         512
            jdtset        1
               kpt     -1.25000000E-01 -1.25000000E-01  3.75000000E-01
                       -3.75000000E-01 -3.75000000E-01  1.25000000E-01
@@ -143,8 +143,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/2he_ca_30t.psp
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/2he_ca_30t.psp
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/2he_ca_30t.psp
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/2he_ca_30t.psp
 - Helium, fhi98PP : TM-type, LDA, l=0 local
 -  2.00000   2.00000       211                znucl, zion, pspdat
     6    1    0    0       415   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -169,14 +169,14 @@ tolerances: {tolvrs: 1.00E-13, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -2.3815475598679    -2.382E+00 3.906E-04 5.815E-01
+ ETOT  1  -2.3815475598678    -2.382E+00 3.906E-04 5.815E-01
  ETOT  2  -2.3825010897884    -9.535E-04 1.234E-10 2.139E-04
  ETOT  3  -2.3825011008023    -1.101E-08 1.028E-09 5.407E-07
  ETOT  4  -2.3825011009798    -1.775E-10 5.444E-11 1.152E-09
- ETOT  5  -2.3825011009802    -3.548E-13 1.117E-13 5.643E-13
- ETOT  6  -2.3825011009801     3.020E-14 2.267E-17 2.993E-16
+ ETOT  5  -2.3825011009801    -2.891E-13 1.117E-13 5.644E-13
+ ETOT  6  -2.3825011009801    -1.910E-14 2.267E-17 3.002E-16
 
- At SCF step    6       vres2   =  2.99E-16 < tolvrs=  1.00E-13 =>converged.
+ At SCF step    6       vres2   =  3.00E-16 < tolvrs=  1.00E-13 =>converged.
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -1.29958651E-02  sigma(3 2)=  0.00000000E+00
@@ -194,7 +194,7 @@ lattice_vectors:
 lattice_lengths: [   3.72391,    3.72391,    3.72391, ]
 lattice_angles: [109.471, 109.471, 109.471, ] # degrees, (23, 13, 12)
 lattice_volume:   3.9753500E+01
-convergence: {deltae:  3.020E-14, res2:  2.993E-16, residm:  2.267E-17, diffor: null, }
+convergence: {deltae: -1.910E-14, res2:  3.002E-16, residm:  2.267E-17, diffor: null, }
 etotal    :  -2.38250110E+00
 entropy   :   0.00000000E+00
 fermie    :  -5.36905524E-01
@@ -218,7 +218,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   11.821E-18; max=  22.671E-18
+ Mean square residual over all n,k,spin=   11.821E-18; max=  22.670E-18
  reduced coordinates (array xred) for    1 atoms
        0.000000000000      0.000000000000      0.000000000000
  rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
@@ -253,16 +253,16 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
-kinetic             :  1.75417135334136E+00
-hartree             :  3.13751872051999E-01
-xc                  : -8.54483626541789E-01
+kinetic             :  1.75417135334097E+00
+hartree             :  3.13751872051879E-01
+xc                  : -8.54483626541714E-01
 Ewald energy        : -1.69266672070162E+00
 psp_core            :  5.60737958968036E-01
-local_psp           : -2.46401193809812E+00
+local_psp           : -2.46401193809769E+00
 non_local_psp       :  0.00000000000000E+00
 total_energy        : -2.38250110098013E+00
-total_energy_eV     : -6.48311520056428E+01
-band_energy         : -1.20038189648149E+00
+total_energy_eV     : -6.48311520056430E+01
+band_energy         : -1.20038189648039E+00
 ...
 
 
@@ -287,7 +287,7 @@ band_energy         : -1.20038189648149E+00
            enunit           2
            etotal1    -2.3825011010E+00
             fcart1    -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
--          fftalg         312
+-          fftalg         512
            jdtset        1
               kpt     -1.25000000E-01 -1.25000000E-01  3.75000000E-01
                       -3.75000000E-01 -3.75000000E-01  1.25000000E-01
@@ -433,10 +433,10 @@ P           mkmem           2
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          0.5  wall=          0.6
+- Proc.   0 individual time (sec): cpu=          0.4  wall=          0.9
 
 ================================================================================
 
  Calculation completed.
 .Delivered   0 WARNINGs and   4 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          0.5  wall=          0.6
++Overall time at end (sec) : cpu=          0.4  wall=          0.9

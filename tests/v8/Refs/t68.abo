@@ -1,6 +1,6 @@
 
-.Version 9.11.2 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 10.1.4.5 of ABINIT, released Sep 2024.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2024 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 15 Jul 2023.
-- ( at 12h09 )
+.Starting date : Wed 18 Sep 2024.
+- ( at 17h32 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v8_t67-t68-t69-t70/t68.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop/tests/TestBot_MPI1/v8_t67-t68-t69-t70/t68.abi
 - output file    -> t68.abo
 - root for input  files -> t68i
 - root for output files -> t68o
@@ -43,17 +43,17 @@ _ WF disk file :      1.232 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
 -
-- outvars: echo of selected default values                                      
--   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+- outvars: echo of selected default values
+-   iomode0 =  0 , fftalg0 =512 , wfoptalg0 =  0
 -
-- outvars: echo of global parameters not present in the input file              
+- outvars: echo of global parameters not present in the input file
 -  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
             acell      5.4200000000E+00  5.4200000000E+00  5.4200000000E+00 Bohr
               amu      5.58470000E+01
              ecut      3.00000000E+01 Hartree
--          fftalg         312
+-          fftalg         512
            irdwfk           1
            istwfk        1    1    1    1    1    1    1    1
               ixc           7
@@ -160,8 +160,8 @@ meta: {optdriver: 1, rfmagn: 1, }
          ecut(hartree)=     30.000   => boxcut(ratio)=   1.98828
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/26fe.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/26fe.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop/tests/Psps_for_tests/PseudosTM_pwteter/26fe.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop/tests/Psps_for_tests/PseudosTM_pwteter/26fe.pspnc
 -  Troullier-Martins psp for element  Fe        Thu Oct 27 17:35:05 EDT 1994
 - 26.00000   8.00000    940714                znucl, zion, pspdat
     1    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -212,35 +212,35 @@ tolerances: {toldfe: 1.00E-03, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   6.0303675267869      6.030E+00 4.111E+00 1.109E+04
- ETOT  2   40.831961721439      3.480E+01 7.132E-03 1.853E+05
- ETOT  3   6.8449480026010     -3.399E+01 9.031E+00 6.825E+03
- ETOT  4   6.5139321568693     -3.310E-01 2.207E-03 7.692E+02
- ETOT  5   8.1336966943676      1.620E+00 1.274E+01 5.982E+01
- ETOT  6   9.4642098620550      1.331E+00 1.078E-02 5.034E+00
- ETOT  7   9.5750018200843      1.108E-01 1.428E+01 3.887E+00
- ETOT  8   9.6511303022491      7.613E-02 4.496E-03 2.272E+00
- ETOT  9   9.7885314498172      1.374E-01 1.406E+01 8.948E-01
- ETOT 10   9.8624550817094      7.392E-02 4.305E-03 7.056E-01
- ETOT 11   9.8674786417239      5.024E-03 1.411E+01 3.466E+00
- ETOT 12   9.9191210303094      5.164E-02 3.633E-03 7.333E-02
- ETOT 13   9.9312534843316      1.213E-02 1.422E+01 1.071E-02
- ETOT 14   9.9326574944178      1.404E-03 1.540E-03 1.109E-03
- ETOT 15   9.9306375192803     -2.020E-03 1.422E+01 4.159E-04
- ETOT 16   9.9304727781221     -1.647E-04 6.709E-04 1.008E-04
- ETOT 17   9.9299083048990     -5.645E-04 1.422E+01 4.061E-05
+-ETOT  1   6.0303646246716      6.030E+00 4.111E+00 1.109E+04
+ ETOT  2   40.831918072828      3.480E+01 7.132E-03 1.853E+05
+ ETOT  3   6.8449435642523     -3.399E+01 9.031E+00 6.825E+03
+ ETOT  4   6.5139350017042     -3.310E-01 2.207E-03 7.692E+02
+ ETOT  5   8.1337037510399      1.620E+00 1.274E+01 5.982E+01
+ ETOT  6   9.4642148376515      1.331E+00 1.078E-02 5.034E+00
+ ETOT  7   9.5750019485509      1.108E-01 1.428E+01 3.887E+00
+ ETOT  8   9.6511319971270      7.613E-02 4.496E-03 2.272E+00
+ ETOT  9   9.7885360937409      1.374E-01 1.406E+01 8.947E-01
+ ETOT 10   9.8624563838144      7.392E-02 4.305E-03 7.056E-01
+ ETOT 11   9.8674820890514      5.026E-03 1.411E+01 3.466E+00
+ ETOT 12   9.9191237480384      5.164E-02 3.632E-03 7.331E-02
+ ETOT 13   9.9312525991166      1.213E-02 1.422E+01 1.072E-02
+ ETOT 14   9.9326566364104      1.404E-03 1.540E-03 1.109E-03
+ ETOT 15   9.9306379374138     -2.019E-03 1.422E+01 4.163E-04
+ ETOT 16   9.9304739173192     -1.640E-04 6.709E-04 1.007E-04
+ ETOT 17   9.9299096904558     -5.642E-04 1.422E+01 4.072E-05
 
  At SCF step   17, etot is converged : 
-  for the second time, diff in etot=  5.645E-04 < toldfe=  1.000E-03
+  for the second time, diff in etot=  5.642E-04 < toldfe=  1.000E-03
 
  ------------------------------------------------------------------------
  Integrals of the first order density n^(1) and magnetization m^(1):
  ------------------------------------------------------------------------
 
-  Re[n^(1)] =  -0.90606176E+00   Im[n^(1)] =  -0.13810050E-04
-  Re[mx^(1)]=   0.42445138E+01   Im[mx^(1)]=  -0.24240882E-05
-  Re[my^(1)]=  -0.82563117E+01   Im[my^(1)]=   0.18311094E-05
-  Re[mz^(1)]=   0.19858956E+02   Im[mz^(1)]=   0.22789892E-05
+  Re[n^(1)] =  -0.90606170E+00   Im[n^(1)] =  -0.13816567E-04
+  Re[mx^(1)]=   0.42445153E+01   Im[mx^(1)]=  -0.24241191E-05
+  Re[my^(1)]=  -0.82563147E+01   Im[my^(1)]=   0.18311711E-05
+  Re[mz^(1)]=   0.19858958E+02   Im[mz^(1)]=   0.22798633E-05
 
  ------------------------------------------------------------------------
 
@@ -252,14 +252,14 @@ tolerances: {toldfe: 1.00E-03, }
 
  Eight components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
-     kin0=   2.39062379E+00 eigvalue=   3.41559364E-01  local=  -4.00476749E-01
+     kin0=   2.39062412E+00 eigvalue=   3.41559404E-01  local=  -4.00476781E-01
  4,5,6: 1st-order hamiltonian combined with 1st and 0th-order wfs
- loc psp =   0.00000000E+00  Hartree=   1.01553215E+00     xc=  -9.46753770E+00
+ loc psp =   0.00000000E+00  Hartree=   1.01553226E+00     xc=  -9.46754048E+00
  note that "loc psp" includes a xc core correction that could be resolved
  7,8,9: eventually, occupation + non-local contributions
-    edocc=   1.71942666E+01     enl0=  -1.14405912E+00   enl1=   0.00000000E+00
+    edocc=   1.71942705E+01     enl0=  -1.14405933E+00   enl1=   0.00000000E+00
  1-9 gives the relaxation energy (to be shifted if some occ is /=2.0)
-   erelax=   9.92990830E+00
+   erelax=   9.92990969E+00
 ================================================================================
 
  ---- first-order wavefunction calculations are completed ----
@@ -280,9 +280,9 @@ tolerances: {toldfe: 1.00E-03, }
             acell      5.4200000000E+00  5.4200000000E+00  5.4200000000E+00 Bohr
               amu      5.58470000E+01
              ecut      3.00000000E+01 Hartree
-           etotal      9.9299083049E+00
+           etotal      9.9299096905E+00
             fcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
--          fftalg         312
+-          fftalg         512
            irdwfk           1
            istwfk        1    1    1    1    1    1    1    1
               ixc           7
@@ -451,10 +451,10 @@ P          mk1mem           8
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         53.0  wall=         53.1
+- Proc.   0 individual time (sec): cpu=         24.4  wall=         24.5
 
 ================================================================================
 
  Calculation completed.
-.Delivered  12 WARNINGs and   6 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         53.0  wall=         53.1
+.Delivered  12 WARNINGs and   5 COMMENTs to log file.
++Overall time at end (sec) : cpu=         24.4  wall=         24.5

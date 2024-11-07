@@ -919,9 +919,9 @@ subroutine slk_get_head_and_wings(mat, head, low_wing, up_wing, call_mpi)
  end do
 
  if (call_mpi) then
-   call xmpi_sum(head, mat%processor%grid%ictxt, ierr)
-   call xmpi_sum(low_wing, mat%processor%grid%ictxt, ierr)
-   call xmpi_sum(up_wing, mat%processor%grid%ictxt, ierr)
+   call xmpi_sum(head, mat%processor%comm, ierr)
+   call xmpi_sum(low_wing, mat%processor%comm, ierr)
+   call xmpi_sum(up_wing, mat%processor%comm, ierr)
  end if
 
 end subroutine slk_get_head_and_wings
@@ -5292,6 +5292,7 @@ complex(dp) function slk_get_trace(mat) result(ctrace)
 
 !Local variables-------------------------------
 #ifdef HAVE_LINALG_SCALAPACK
+ integer :: iloc, jloc, iglob, jglob, ierr
  real(dp) :: rtrace
  real(sp) :: rtrace_sp
  complex(sp) :: ctrace_sp
@@ -5307,30 +5308,71 @@ complex(dp) function slk_get_trace(mat) result(ctrace)
 
  ! prototype for complex version.
  ! COMPLEX*16 FUNCTION PZLATRA( N, A, IA, JA, DESCA )
+ !
+ ! NOTE: We don't use PZLATRA and friends as these calls can lead to SIGSEGV when
+ ! we compile with gcc and link with intel scalack (very likely there's an ABI mismatch
+ ! even when the compatibily layer is used --> we implement our own version.
+
 #ifdef HAVE_LINALG_SCALAPACK
  select type (mat)
  class is (matrix_scalapack)
    if (allocated(mat%buffer_cplx)) then
-     ctrace = PZLATRA(mat%sizeb_global(1), mat%buffer_cplx, 1, 1, mat%descript%tab)
+     !ctrace = PZLATRA(mat%sizeb_global(1), mat%buffer_cplx, 1, 1, mat%descript%tab)
+     ctrace = zero
+     do jloc=1,mat%sizeb_local(2)
+       do iloc=1,mat%sizeb_local(1)
+         call mat%loc2glob(iloc, jloc, iglob, jglob)
+         if (iglob == jglob) ctrace = ctrace + mat%buffer_cplx(iloc, jloc)
+       end do
+     end do
+
    else if (allocated(mat%buffer_real)) then
-     rtrace = PDLATRA(mat%sizeb_global(1), mat%buffer_real, 1, 1, mat%descript%tab)
+     !rtrace = PDLATRA(mat%sizeb_global(1), mat%buffer_real, 1, 1, mat%descript%tab)
+     rtrace = zero
+     do jloc=1,mat%sizeb_local(2)
+       do iloc=1,mat%sizeb_local(1)
+         call mat%loc2glob(iloc, jloc, iglob, jglob)
+         if (iglob == jglob) rtrace = rtrace + mat%buffer_real(iloc, jloc)
+       end do
+     end do
      ctrace = rtrace
+
    else
      ABI_ERROR("Neither buffer_cplx nor buffer_real are allocated!")
    end if
+
  class is (slkmat_sp_t)
     if (allocated(mat%buffer_cplx)) then
-      ctrace_sp = PCLATRA(mat%sizeb_global(1), mat%buffer_cplx, 1, 1, mat%descript%tab)
-      ctrace = ctrace_sp
+     !ctrace_sp = PCLATRA(mat%sizeb_global(1), mat%buffer_cplx, 1, 1, mat%descript%tab)
+     ctrace_sp = zero
+     do jloc=1,mat%sizeb_local(2)
+       do iloc=1,mat%sizeb_local(1)
+         call mat%loc2glob(iloc, jloc, iglob, jglob)
+         if (iglob == jglob) ctrace_sp = ctrace_sp + mat%buffer_cplx(iloc, jloc)
+       end do
+     end do
+     ctrace = ctrace_sp
+
     else if (allocated(mat%buffer_real)) then
-      rtrace_sp = PSLATRA(mat%sizeb_global(1), mat%buffer_real, 1, 1, mat%descript%tab)
+      !rtrace_sp = PSLATRA(mat%sizeb_global(1), mat%buffer_real, 1, 1, mat%descript%tab)
+      rtrace_sp = zero
+      do jloc=1,mat%sizeb_local(2)
+        do iloc=1,mat%sizeb_local(1)
+          call mat%loc2glob(iloc, jloc, iglob, jglob)
+          if (iglob == jglob) rtrace_sp = rtrace_sp + mat%buffer_real(iloc, jloc)
+        end do
+      end do
       ctrace = rtrace_sp
+
     else
       ABI_ERROR("Neither buffer_cplx nor buffer_real are allocated!")
     end if
+
  class default
    ABI_ERROR("Wrong class")
  end select
+
+ call xmpi_sum(ctrace, mat%processor%comm, ierr)
 #endif
 
 end function slk_get_trace

@@ -20,7 +20,7 @@ nstep 15
 nline  8
 
 # bands and spinors
-nband  6
+nband  8
 nbdbuf 2
 
 tolvrs 1.0D-20

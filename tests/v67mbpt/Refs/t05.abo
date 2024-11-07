@@ -1,6 +1,6 @@
 
-.Version 9.3.1 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 10.1.4.5 of ABINIT, released Sep 2024.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2024 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,14 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h30 )
+.Starting date : Fri 13 Sep 2024.
+- ( at 19h11 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v67mbpt_t04-t05/t05.in
-- output file    -> t05.out
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v67mbpt_t04-t05/t05.abi
+- output file    -> t05.abo
 - root for input  files -> t05i
 - root for output files -> t05o
-
 
  DATASET    1 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -34,11 +33,10 @@
 -    mband =          20        mffmem =           1         mkmem =           6
        mpw =          92          nfft =        3375          nkpt =           6
 ================================================================================
-P This job should need less than                       1.642 Mbytes of memory.
+P This job should need less than                       1.740 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.170 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
-
 
  DATASET    2 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -51,11 +49,10 @@ _ WF disk file :      0.170 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 -    mband =          20        mffmem =           1         mkmem =           6
        mpw =          92          nfft =        3375          nkpt =           6
 ================================================================================
-P This job should need less than                       1.642 Mbytes of memory.
+P This job should need less than                       1.740 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.170 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
-
 
  DATASET    3 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -68,7 +65,7 @@ _ WF disk file :      0.170 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 -    mband =          20        mffmem =           1         mkmem =           6
        mpw =          92          nfft =        3375          nkpt =           6
 ================================================================================
-P This job should need less than                       1.642 Mbytes of memory.
+P This job should need less than                       1.740 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.170 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
@@ -77,10 +74,10 @@ _ WF disk file :      0.170 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
 -
-- outvars: echo of selected default values                                      
--   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+- outvars: echo of selected default values
+-   iomode0 =  0 , fftalg0 =512 , wfoptalg0 =  0
 -
-- outvars: echo of global parameters not present in the input file              
+- outvars: echo of global parameters not present in the input file
 -  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
@@ -93,7 +90,7 @@ _ WF disk file :      0.170 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
          ecutsigx      4.00000000E+00 Hartree
           ecutwfn      8.00000000E+00 Hartree
            enunit           1
--          fftalg         312
+-          fftalg         512
         gwcalctyp1          0
         gwcalctyp2          0
         gwcalctyp3         28
@@ -249,8 +246,8 @@ meta: {optdriver: 4, gwcalctyp: 0, }
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -802,8 +799,8 @@ meta: {optdriver: 4, gwcalctyp: 28, }
 
   Number of electrons    =    8.0000
 
-  QP Band energy    [Ha] =  1.44468298602014E+00
-  QP Hartree energy [Ha] =  8.30446882167393E-01
+  QP Band energy    [Ha] =  1.44468298602110E+00
+  QP Hartree energy [Ha] =  8.30446882167305E-01
 
 --------------------------------------------------------------------------------
 
@@ -1007,7 +1004,7 @@ data: !SigmaeeData |
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
             fcart3     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
--          fftalg         312
+-          fftalg         512
         gwcalctyp1          0
         gwcalctyp2          0
         gwcalctyp3         28
@@ -1223,10 +1220,10 @@ P           mkmem           6
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          4.4  wall=          4.5
+- Proc.   0 individual time (sec): cpu=          2.3  wall=          2.4
 
 ================================================================================
 
  Calculation completed.
-.Delivered  13 WARNINGs and   6 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          4.4  wall=          4.5
+.Delivered  10 WARNINGs and   7 COMMENTs to log file.
++Overall time at end (sec) : cpu=          2.3  wall=          2.4

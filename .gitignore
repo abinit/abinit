@@ -81,8 +81,8 @@ tests/TestBot_MPI*/*
 /abilint.out
 /aclocal.m4
 /autom4te.cache
-/build
 /_build*
+/build
 /configure
 /config.dump
 /config.dump.in
@@ -353,3 +353,8 @@ doxygen.err
 
 # VSC
 .vscode/
+
+/home/users/lmacenul/abinit/build
+# R language
+.Rhistory
+

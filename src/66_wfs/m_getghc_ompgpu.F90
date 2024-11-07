@@ -29,6 +29,7 @@ module m_getghc_ompgpu
  use m_abicore
  use m_xmpi
  use m_xomp
+ use m_abi_linalg
  use, intrinsic :: iso_c_binding
 
  use defs_abitypes, only : mpi_type
@@ -36,6 +37,7 @@ module m_getghc_ompgpu
  use m_pawcprj,     only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_getdim, pawcprj_copy
  use m_hamiltonian, only : gs_hamiltonian_type, KPRIME_H_K, K_H_KPRIME, K_H_K, KPRIME_H_KPRIME
  use m_fock,        only : fock_common_type, fock_get_getghc_call
+ use m_fock_getghc, only : fock_getghc, fock_ACE_getghc
  use m_nonlop,      only : nonlop
  use m_fft,         only : fourwf
 
@@ -122,11 +124,13 @@ end subroutine alloc_getghc_ompgpu_buffers
 subroutine free_getghc_ompgpu_buffers
 
 #ifdef HAVE_OPENMP_OFFLOAD
- !FIXME Smater buffer management ?
+ if(allocated(work)) then
+   !FIXME Smater buffer management ?
 #ifdef HAVE_GPU_HIP
- !$OMP TARGET EXIT DATA MAP(delete:work)
+   !$OMP TARGET EXIT DATA MAP(delete:work)
 #endif
- ABI_FREE(work)
+   ABI_FREE(work)
+ end if
 
  buf_initialized = 0
 
@@ -163,8 +167,7 @@ function getghc_ompgpu_work_mem(gs_ham, ndat) result(req_mem)
  !   - the sum of getghc and fourwf work buffers memory requirements
  !   - the amount of memory required by gemm_nonlop_ompgpu work buffers
  ghc_mem = 0
- ghc_mem = 2 * dp * int(gs_ham%n4, c_size_t) * int(gs_ham%n5, c_size_t) &
- &        * int(gs_ham%n6, c_size_t) * int(ndat, c_size_t)
+ ghc_mem = int(2, c_size_t) * dp * gs_ham%n4 * gs_ham%n5 * gs_ham%n6 * ndat
  ghc_mem = ghc_mem + ompgpu_fourwf_work_mem(gs_ham%ngfft, ndat)
 
  nonlop_mem = gemm_nonlop_ompgpu_work_mem(gs_ham%istwf_k, ndat, gs_ham%npw_fft_k,&
@@ -261,9 +264,9 @@ subroutine getghc_ompgpu(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_
 !arrays
  integer,intent(in),optional,target :: kg_fft_k(:,:),kg_fft_kp(:,:)
  real(dp),intent(out),target :: gsc(:,:)
- real(dp),intent(inout) :: cwavef(:,:)
+ real(dp),intent(inout),target :: cwavef(:,:)
  real(dp),optional,intent(inout) :: cwavef_r(:,:,:,:,:)
- real(dp),intent(out) :: ghc(:,:)
+ real(dp),intent(out),target :: ghc(:,:)
  real(dp),intent(out),target :: gvnlxc(:,:)
  type(pawcprj_type),intent(inout),target :: cwaveprj(:,:)
  !MG: Passing these arrays assumed-shape has the drawback that client code is
@@ -303,7 +306,7 @@ subroutine getghc_ompgpu(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_
  real(dp),pointer :: gsc_ptr(:,:)
  type(fock_common_type),pointer :: fock
  type(pawcprj_type),pointer :: cwaveprj_fock(:,:),cwaveprj_idat(:,:),cwaveprj_nonlop(:,:)
- logical :: transfer_omp_args,fourwf_on_cpu
+ logical :: transfer_ghc,transfer_gsc,transfer_cwavef,transfer_gvnlxc,fourwf_on_cpu
  integer :: tmp2i(2)
 
 ! *********************************************************************
@@ -372,7 +375,7 @@ subroutine getghc_ompgpu(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_
    end if
  end if
  if (any(type_calc == [0, 2, 3])) then
-   local_gvnlxc = size(gvnlxc)==0
+   local_gvnlxc = size(gvnlxc)<=1
    if (local_gvnlxc) then
      ABI_MALLOC(gvnlxc_,(2,npw_k2*my_nspinor*ndat))
    else
@@ -420,13 +423,8 @@ subroutine getghc_ompgpu(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_
 
 has_fock=.false.
 !Do we add Fock exchange term ?
- if (associated(gs_ham%fockcommon)) then
-   ABI_BUG("Fock exchange term calculation not supported in GPU mode")
- end if
-
- if (gs_ham%gpu_option/=ABI_GPU_OPENMP) then
-   ABI_BUG('Unexpected value for gs_ham%gpu_option (debugging) ! ')
- end if
+ has_fock = associated(gs_ham%fockcommon)
+ if (has_fock) fock => gs_ham%fockcommon
 
 !Parallelization over spinors management
  if (mpi_enreg%paral_spinor==0) then
@@ -443,20 +441,20 @@ has_fock=.false.
  if (gs_ham%usepaw==0) gsc_ptr => nonlop_dum
  if (gs_ham%usepaw==1) gsc_ptr => gsc
 
- !$OMP TARGET ENTER DATA MAP(alloc:gvnlxc_)
 
- transfer_omp_args =  .not. ( xomp_target_is_present(c_loc(ghc)) &
-   .and. xomp_target_is_present(c_loc(gsc_ptr)) &
-   .and. xomp_target_is_present(c_loc(cwavef)) )
+ transfer_ghc =  .not. xomp_target_is_present(c_loc(ghc))
+ transfer_gsc =  .not. xomp_target_is_present(c_loc(gsc))
+ transfer_gvnlxc =  .not. xomp_target_is_present(c_loc(gvnlxc_))
+ transfer_cwavef =  .not. xomp_target_is_present(c_loc(cwavef))
 
+ !$OMP TARGET ENTER DATA MAP(alloc:ghc)     IF(transfer_ghc)
+ !$OMP TARGET ENTER DATA MAP(alloc:gsc)     IF(transfer_gsc)
+ !$OMP TARGET ENTER DATA MAP(alloc:gvnlxc_) IF(transfer_gvnlxc)
+ !$OMP TARGET ENTER DATA MAP(to:cwavef)     IF(transfer_cwavef)
  if (type_calc == 2) then
-   !$OMP TARGET ENTER DATA MAP(to:ghc) IF(transfer_omp_args)
-   !$OMP TARGET ENTER DATA MAP(to:gsc_ptr) IF(transfer_omp_args)
- else
-   !$OMP TARGET ENTER DATA MAP(alloc:ghc) IF(transfer_omp_args)
-   !$OMP TARGET ENTER DATA MAP(alloc:gsc_ptr) IF(transfer_omp_args)
+   !$OMP TARGET UPDATE TO(ghc)     IF(transfer_ghc)
+   !$OMP TARGET UPDATE TO(gsc)     IF(transfer_gsc .and. gs_ham%usepaw==1)
  end if
- !$OMP TARGET ENTER DATA MAP(to:cwavef) IF(transfer_omp_args)
 
 !============================================================
 ! Application of the local potential
@@ -755,10 +753,8 @@ has_fock=.false.
      ABI_FREE(cwavef2)
    end if
 
-   if (type_calc==1) then
-     if(transfer_omp_args) then
-       !$OMP TARGET UPDATE FROM(ghc) nowait
-     end if
+   if (type_calc==1 .and. .not. fourwf_on_cpu) then
+     !$OMP TARGET UPDATE FROM(ghc) nowait IF(transfer_ghc)
    end if
 
 #ifndef HAVE_GPU_HIP
@@ -780,19 +776,67 @@ has_fock=.false.
 !============================================================
 
    ABI_NVTX_START_RANGE(NVTX_GETGHC_NLOCPOT)
+
    if (type_calc==0 .or. type_calc==2) then
      signs=2 ; choice=1 ; nnlout=1 ; idir=0 ; tim_nonlop=1
      cpopt_here=-1;if (gs_ham%usepaw==1) cpopt_here=cpopt
-     cwaveprj_nonlop=>cwaveprj
+     if (has_fock) then
+       if (gs_ham%usepaw==1) then
+         cpopt_here=max(cpopt,0)
+         if (cpopt<2) then
+           ABI_MALLOC(cwaveprj_fock,(gs_ham%natom,my_nspinor*ndat))
+           ABI_MALLOC(dimcprj,(gs_ham%natom))
+           call pawcprj_getdim(dimcprj,gs_ham%natom,gs_ham%nattyp,gs_ham%ntypat,&
+&           gs_ham%typat,fock%pawtab,'O')
+           call pawcprj_alloc(cwaveprj_fock,0,dimcprj)
+           ABI_FREE(dimcprj)
+         else
+           cwaveprj_fock=>cwaveprj
+         end if
+         cwaveprj_nonlop=>cwaveprj_fock
+       else
+         cwaveprj_nonlop=>cwaveprj
+         cwaveprj_fock=>cwaveprj
+       end if
+     else
+       cwaveprj_nonlop=>cwaveprj
+     end if
+     paw_opt=gs_ham%usepaw ; if (sij_opt/=0) paw_opt=sij_opt+3
      lambda_ndat = lambda
 
      call nonlop(choice,cpopt_here,cwaveprj_nonlop,enlout,gs_ham,idir,lambda_ndat,mpi_enreg,ndat,&
 &     nnlout,paw_opt,signs,gsc_ptr,tim_nonlop,cwavef,gvnlxc_,select_k=select_k_)
 
+     if (gs_ham%usepaw==1 .and. has_fock)then
+       if (fock_get_getghc_call(fock)==1) then
+         ABI_MALLOC(gvnlc, (2,npw_k2*my_nspinor*ndat))
+         !$OMP TARGET UPDATE FROM(gvnlxc_)
+         gvnlc=gvnlxc_
+         !$OMP TARGET ENTER DATA MAP(to:gvnlc)
+       endif
+     endif
+
+!    Calculation of the Fock exact exchange contribution from the Fock or ACE operator
+     if (has_fock) then
+       if (fock_get_getghc_call(fock)==1) then
+         if (gs_ham%usepaw==0) cwaveprj_idat => cwaveprj
+         if (fock%use_ACE==0) then
+           !$OMP TARGET UPDATE FROM(cwavef,gvnlxc_)
+           call timab(360,1,tsec)
+           call fock_getghc(cwavef,cwaveprj_idat,gvnlxc_,gs_ham,mpi_enreg,ndat)
+           call timab(360,2,tsec)
+           !$OMP TARGET UPDATE TO(cwavef,gvnlxc_)
+         else
+           call fock_ACE_getghc(cwavef,gvnlxc_,gs_ham,mpi_enreg,ndat,gpu_option=ABI_GPU_OPENMP)
+         end if
+       end if
+     end if
+
    else if (type_calc == 3) then
      ! for kinetic and local only, nonlocal and vfock should be zero
-     gvnlxc_(:,:) = zero
+     call gpu_set_to_zero(gvnlxc_, int(2,c_size_t)*npw_k2*my_nspinor*ndat)
    end if ! if(type_calc...
+
    ABI_NVTX_END_RANGE()
 
 !============================================================
@@ -804,11 +848,12 @@ has_fock=.false.
    !  to <G|H|C(n,k)>. Take also into account build-in debugging.
    if(prtvol/=-level)then
      if (k1_eq_k2) then
-       !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(3) &
-       !$OMP& PRIVATE(idat,ispinor,ig) &
+       !$OMP TARGET TEAMS DISTRIBUTE COLLAPSE(2) &
+       !$OMP& PRIVATE(idat,ispinor) &
        !$OMP& MAP(to:ghc,kinpw_k2,gvnlxc_,gsc,cwavef) MAP(tofrom:kinpw_k2)
        do idat=1,ndat
          do ispinor=1,my_nspinor
+           !$OMP PARALLEL DO PRIVATE(ig,igspinor)
            do ig=1,npw_k2
              igspinor=ig+npw_k2*(ispinor-1)+npw_k2*my_nspinor*(idat-1)
              if(kinpw_k2(ig)<huge(zero)*1.d-11)then
@@ -826,11 +871,12 @@ has_fock=.false.
          end do ! ispinor
        end do ! idat
      else
-       !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(3) &
-       !$OMP& PRIVATE(idat,ispinor,ig) &
+       !$OMP TARGET TEAMS DISTRIBUTE COLLAPSE(2) &
+       !$OMP& PRIVATE(idat,ispinor) &
        !$OMP& MAP(to:ghc,gvnlxc_,gsc) MAP(tofrom:kinpw_k2)
        do idat=1,ndat
          do ispinor=1,my_nspinor
+           !$OMP PARALLEL DO PRIVATE(ig,igspinor)
            do ig=1,npw_k2
              igspinor=ig+npw_k2*(ispinor-1)+npw_k2*my_nspinor*(idat-1)
              if(kinpw_k2(ig)<huge(zero)*1.d-11)then
@@ -902,17 +948,18 @@ has_fock=.false.
 
 !  Special case of PAW + Fock : only return Fock operator contribution in gvnlxc_
    if (gs_ham%usepaw==1 .and. has_fock) then
+     !$OMP TARGET UPDATE FROM(gvnlxc_,gvnlc)
      gvnlxc_=gvnlxc_-gvnlc
+     !$OMP TARGET UPDATE TO(gvnlxc_) if(.not. local_gvnlxc)
+     !$OMP TARGET EXIT DATA MAP(delete:gvnlc)
      ABI_FREE(gvnlc)
    endif
 
-   if(transfer_omp_args) then
-     !$OMP TARGET UPDATE FROM(ghc) nowait
-     !$OMP TARGET UPDATE FROM(gsc_ptr) nowait
-     !$OMP TARGET UPDATE FROM(cwavef) nowait
-   end if
+   !$OMP TARGET UPDATE FROM(ghc)     nowait IF(transfer_ghc)
+   !$OMP TARGET UPDATE FROM(gsc)     nowait IF(transfer_gsc)
+   !$OMP TARGET UPDATE FROM(cwavef)  nowait IF(transfer_cwavef)
    if (.not. local_gvnlxc) then
-     !$OMP TARGET UPDATE FROM(gvnlxc_) nowait
+     !$OMP TARGET UPDATE FROM(gvnlxc_) nowait IF(transfer_gvnlxc)
    end if
    !$OMP TASKWAIT
 
@@ -924,8 +971,10 @@ has_fock=.false.
 
  end if ! type_calc
 
- !$OMP TARGET EXIT DATA MAP(delete:cwavef,gsc_ptr,ghc) IF(transfer_omp_args)
- !$OMP TARGET EXIT DATA MAP(delete:gvnlxc_)
+ !$OMP TARGET EXIT DATA MAP(delete:ghc)     IF(transfer_ghc)
+ !$OMP TARGET EXIT DATA MAP(delete:gsc)     IF(transfer_gsc)
+ !$OMP TARGET EXIT DATA MAP(delete:cwavef)  IF(transfer_cwavef)
+ !$OMP TARGET EXIT DATA MAP(delete:gvnlxc_) IF(transfer_gvnlxc)
  if (local_gvnlxc .and. any(type_calc == [0, 2, 3])) then
    ABI_FREE(gvnlxc_)
  end if

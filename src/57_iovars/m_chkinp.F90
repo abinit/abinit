@@ -95,7 +95,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
  integer :: nproc,nspden,nspinor,nsppol,optdriver,mismatch_fft_tnons,response
  integer :: fftalg,usepaw,usewvl
  integer :: ttoldfe,ttoldff,ttolrff,ttolvrs,ttolwfr
- logical :: twvl,allowed,berryflag
+ logical :: test,twvl,allowed,berryflag
  logical :: wvlbigdft=.false.
  logical :: xc_is_lda,xc_is_gga,xc_is_mgga,xc_is_hybrid,xc_is_tb09,xc_need_kden
  real(dp) :: dz,sumalch,summix,sumocc,ucvol,wvl_hgrid,zatom
@@ -291,7 +291,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 !  (that is, nonsymmorphic symmetries do not work yet
 !  Update MT 2017-05-31: nonsymmorphic symmetries seem also to be an issue for NCPP
    if (usepaw==1.and.dt%berryopt/=0.and.dt%kptopt/=3) then
-  !if (dt%berryopt/=0.and.dt%kptopt/=3) then
+  !if (clldt%berryopt/=0.and.dt%kptopt/=3) then
      cond_string(1)='usepaw'; cond_values(1)=usepaw
      cond_string(2)='berryopt'; cond_values(2)=dt%berryopt
      cond_string(3)='kptopt'; cond_values(3)=dt%kptopt
@@ -520,6 +520,47 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      endif
 
    enddo
+
+!  cprj_in_memory
+   if (dt%cprj_in_memory/=0) then
+     if (dt%optdriver/=RUNL_GSTATE) then
+       ABI_ERROR_NOSTOP('cprj_in_memory/=0 is implemented only for ground state (optdriver=0).',ierr)
+     else
+       if (dt%useylm /= 1) then
+         ABI_ERROR_NOSTOP('cprj_in_memory/=0 requires the input variable "useylm" to be 1',ierr)
+       end if
+       ABI_CHECK(dt%gpu_option==0,"cprj_in_memory/=0 is not implemented for GPUs. Change cprj_in_memory or gpu_option.")
+       write(msg,'(a)') "cprj_in_memory/=0 is not compatible with use_gemm_nonlop/=0. Change cprj_in_memory or use_gemm_nonlop."
+       ABI_CHECK(dt%use_gemm_nonlop==0,msg)
+       test = dt%wfoptalg==10 .or. dt%wfoptalg==114 .or. dt%wfoptalg==111
+       write(msg,'(a)') "With cprj_in_memory/=0, only wfoptalg==10,114 or 111 are implemented. Change cprj_in_memory or wfoptalg."
+       ABI_CHECK(test,msg)
+       ABI_CHECK(dt%rmm_diis==0, "With cprj_in_memory/=0, rmm_diis/=0 is not implemented. Change cprj_in_memory or rmm_diis.")
+       ABI_CHECK(dt%berryopt==0, "With cprj_in_memory/=0, berryopt/=0 is not implemented. Change cprj_in_memory or berryopt.")
+       ABI_CHECK(dt%usefock==0, "With cprj_in_memory/=0, usefock/=0 is not implemented. Change cprj_in_memory or usefock.")
+       test = sum(abs(dt%nucdipmom))<tol16
+       ABI_CHECK(test,"With cprj_in_memory/=0, nuclear dipolar moments are not implemented. Change cprj_in_memory or nucdipmom.")
+       !
+       test=dt%cprj_in_memory==0.or.dt%cprj_in_memory==1.or.dt%cprj_in_memory==2
+       write(msg,'(a)') "cprj_in_memory must 0 (not used), 1 (LOBPCG or Chebfi) or 2 (Conjugate Gradient). Change cprj_in_memory."
+       ABI_CHECK(test,msg)
+       test = dt%usepaw==1.or.dt%nspinor==1
+       write(msg,'(a,a)') "With cprj_in_memory/=0, nspinor=2 is not available with Norm-Concerving pseudo-potentials.",&
+        & " Use nspinor=1, or PAW pseudos, or set cprj_in_memory to 0."
+       ABI_CHECK(test,msg)
+       if (dt%cprj_in_memory==1.and.dt%wfoptalg==10) then
+         ABI_ERROR_NOSTOP('cprj_in_memory must be 2 for Conjugate Gradient (not 1).',ierr)
+       end if
+       if (dt%cprj_in_memory==2.and.(dt%wfoptalg==114.or.dt%wfoptalg==111)) then
+         dt%cprj_in_memory=1
+         ABI_ERROR_NOSTOP('cprj_in_memory must be 1 for LOBPCG or Chebfi (not 2).',ierr)
+       end if
+       if (dt%wfoptalg/=111.and.dt%xg_nonlop_option/=0) then
+         dt%xg_nonlop_option=0
+         ABI_ERROR_NOSTOP('xg_nonlop_option/=0 is usefull only for Chebfi (wfoptalg=111).',ierr)
+       end if
+     end if
+   end if
 
 !  d3e_pert1_atpol
    call chkint_ge(0,0,cond_string,cond_values,ierr,'d3e_pert1_atpol(1)',dt%d3e_pert1_atpol(1),1,iout)
@@ -837,9 +878,16 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 !  ecutsm
    call chkdpr(0,0,cond_string,cond_values,ierr,'ecutsm',dt%ecutsm,1,0.0_dp,iout)
 !  With non-zero optcell, one must use non-zero ecutsm
-   if(dt%optcell/=0 )then
-     cond_string(1)='optcell' ; cond_values(1)=dt%optcell
-     call chkdpr(1,1,cond_string,cond_values,ierr,'ecutsm',dt%ecutsm,1,tol8,iout)
+   !if(dt%optcell/=0 )then
+   !  cond_string(1)='optcell' ; cond_values(1)=dt%optcell
+   !  call chkdpr(1,1,cond_string,cond_values,ierr,'ecutsm',dt%ecutsm,1,tol8,iout)
+   !end if
+!  At present (v10.2.2), Chebyshev filtering algorithm (wfoptalg=1 or 111) cannot be used with ecutsm=0.
+!  So we allow ecutsm=0 but with a warning.
+   if(dt%optcell/=0 .and. dt%ecutsm < tol8 .and. dt%wfoptalg/=1 .and. dt%wfoptalg/=111) then
+     write(msg, "(2a)") 'For optcell > 0, it is highly recommended to set ecutsm > 0 to have better precision on stress',&
+                      & ' (available only if wfoptalg is neither 1 nor 111).'
+     ABI_WARNING(msg)
    end if
 
 !  ecutwfn <= ecut. This is also needed for the correct evaluation
@@ -917,7 +965,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    if (optdriver == RUNL_EPH) then
      cond_string(1)='optdriver'; cond_values(1)=optdriver
      call chkint_eq(1,1,cond_string,cond_values,ierr,'eph_task',dt%eph_task, &
-       22, [0, 1, 2, -2, 3, 4, -4, 5, -5, 6, 7, -7, 8, 9, 10, 11, -12, 14, 15, -15, 16, 17], iout)
+       22, [0, 1, 2, -2, 3, 4, -4, 5, -5, 6, 7, -7, 8, 9, 10, 11, -12, 13, -13, 14, 15, -15, 16, 17], iout)
 
      if (any(dt%ddb_ngqpt <= 0)) then
        ABI_ERROR_NOSTOP("ddb_ngqpt must be specified when performing EPH calculations.", ierr)
@@ -938,6 +986,13 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      if (any(dt%eph_task == [-5])) then
        ABI_CHECK(dt%ph_nqpath > 0, "ph_nqpath must be specified when eph_task in [-5]")
      end if
+     if (dt%eph_task == 13) then
+       msg = "electron, hole"
+       if (.not. string_in(dt%varpeq_pkind, msg)) then
+         ABI_ERROR_NOSTOP(sjoin("Invalid varpeq_pkind: `", dt%varpeq_pkind, "`, must be among:", msg), ierr)
+       end if
+       ABI_CHECK(dt%varpeq_pc_nupdate > 0, "varpeq_pc_nupdate must be > 0, if specified")
+     end if
      !if (dt%eph_task == -4 .and. dt%occopt /= 3) then
      !  ABI_ERROR_NOSTOP("eph_task -4 requires occopt 3 in the input file (Fermi-Dirac with physical Temperature!", ierr)
      !end if
@@ -957,7 +1012,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
          ABI_ERROR_NOSTOP("tolwfr must be specified when eph_stern /= 0", ierr)
        end if
        if (dt%getpot_filepath == ABI_NOFILE) then
-         ABI_ERROR_NOSTOP(" getpot_filepath is required when eph_stern /= 0", ierr)
+         ABI_ERROR_NOSTOP("getpot_filepath is required when eph_stern /= 0", ierr)
        end if
        if (all(dt%sigma_bsum_range /= 0)) then
          ABI_ERROR_NOSTOP("sigma_bsum_range cannot be used when eph_stern /= 0", ierr)
@@ -1072,7 +1127,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    if(dt%getxcart/=0)then
      cond_string(1)='getxcart' ; cond_values(1)=dt%getxcart
      ! Make sure that dt%getxred is 0. NB: this has already been checked elsewhere:
-     !  that only one of xred xcart xrandom getxred getxcart are set 
+     !  that only one of xred xcart xrandom getxred getxcart are set
      call chkint_eq(1,1,cond_string,cond_values,ierr,'getxred',dt%getxred,1,[0],iout)
    end if
 
@@ -1486,9 +1541,9 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    end if
 
 !  istwfk
-   if(dt%usefock==1 .and. dt%optdriver/=RUNL_SIGMA .and. mod(dt%wfoptalg,10)/=5 .and. maxval( abs(dt%istwfk(1:nkpt)-1) ) >0)then
+   if(dt%usefock==1 .and. dt%optdriver/=RUNL_SIGMA .and. mod(dt%wfoptalg,10)/=5 .and. maxval(abs(dt%istwfk(1:nkpt)-1)) > 0 .and. nkpt > 1 ) then
      write(msg,'(3a)' )&
-      'When usefock==1, unless sigma calculation, all the components of istwfk must be 1.',ch10,&
+      'When usefock==1 and several k-points, unless sigma calculation, all the components of istwfk must be 1.',ch10,&
       'Action: set istwfk to 1 for all k-points'
      ABI_ERROR_NOSTOP(msg, ierr)
    end if
@@ -1523,21 +1578,23 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      'Action: set istwfk to 1 for all k-points'
      ABI_ERROR_NOSTOP(msg, ierr)
    end if
-   if (dt%optdriver==RUNL_GSTATE) then
-     if ((dt%wfoptalg==4.or.dt%wfoptalg==14.or.dt%wfoptalg==114).and.maxval(dt%istwfk(:)-2)>0) then
-       write(msg, '(a,a,a,a,a)' )&
-       'Only the gamma point can use time-reversal and wfoptalg=4 or 14',ch10,&
-       'Action: put istwfk to 1 or remove k points with half integer coordinates ',ch10,&
-       'Also contact ABINIT group to say that you need that option.'
-       ABI_ERROR_NOSTOP(msg, ierr)
-     end if
-!     if ((dt%wfoptalg==4.or.dt%wfoptalg==14).and.any(dt%istwfk(:)==2) .and.dt%paral_kgb==1.and.fftalg/=401.and.fftalg/=312) then
-!       write(msg, '(a,i3,a,a,a)' )&
-!&       ' For istwfk=2, the value fftalg= ',fftalg, &
-!&       ' is not allowed in case of wfoptalg=4 or 14 !', ch10,&
-!&       ' Change if to fftalg=401.'
-!       ABI_ERROR_NOSTOP(msg, ierr)
-!     end if
+   if ( dt%gpu_option/=0 .and. dt%gpu_option/=2 .and. maxval( abs(dt%istwfk(1:nkpt)-1) ) > 0 ) then
+     write(msg,'(3a)' )&
+      'When gpu_option is neither 0 nor 2, all the components of istwfk must be 1.',ch10,&
+      'Action: set istwfk to 1 for all k-points or change gpu_option.'
+     ABI_ERROR_NOSTOP(msg, ierr)
+   end if
+   if ( dt%gpu_option==2 .and. any( dt%istwfk(1:nkpt) > 2 ) ) then
+     write(msg,'(3a)' )&
+      'When gpu_option is 2, all the components of istwfk must be 1 or 2.',ch10,&
+      'Action: change gpu_option or set "istwfk *1" in the input file. If there is one k-point which is "0 0 0" then set "istwfk 2".'
+     ABI_ERROR_NOSTOP(msg, ierr)
+   end if
+   if ( dt%npfft>1 .and. any( dt%istwfk(1:nkpt) > 2 ) ) then
+     write(msg,'(3a)' )&
+      'When npfft>1, all the components of istwfk must be 1 or 2.',ch10,&
+      'Action: set "npfft 1" or set "istwfk *1" in the input file. If only one k-point which is "0 0 0" then set "istwfk 2".'
+     ABI_ERROR_NOSTOP(msg, ierr)
    end if
 
 !  ixc
@@ -1877,6 +1934,17 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
        end if
      end do
    end if
+
+!  nbdbuf
+!  At this stage, nbdbuf Must be greater or equal to 0, or take the special value -101. 
+!  Note that other negative values are permitted in input, but immediately
+!  transformed to a fraction of the number of bands hence a positive number.
+   call chkint_ge(0,0,cond_string,cond_values,ierr,'nbdbuf',dt%nbdbuf,-101,iout)
+   if(dt%nbdbuf/=-101)then
+     cond_string(1)='nbdbuf' ; cond_values(1)=dt%nbdbuf
+     call chkint_ge(1,1,cond_string,cond_values,ierr,'nbdbuf',dt%nbdbuf,0,iout)
+   endif
+
 
 !  nbandkss
 !  Must be greater or equal to -1
@@ -2326,7 +2394,6 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      end if
 
 !    nucdipmom requires kptopt 0, 3, or 4 (no time reversal symmetry allowed)
-     ! if( (dt%kptopt .EQ. 1) .OR. (dt%kptopt .EQ. 2) .OR. (dt%kptopt .EQ. 4) ) then
      if( (dt%kptopt .EQ. 1) .OR. (dt%kptopt .EQ. 2) ) then
        write(msg, '(a,i4,a,a,a)' )&
        ' Nuclear dipole moments (variable nucdipmom) break time reveral symmetry but kptopt = ',dt%kptopt,&
@@ -2686,6 +2753,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      cond_string(1)='orbmag';cond_values(1)=dt%orbmag
   !  only kptopt 3 or 0 are allowed, because ddk cannot use spatial symmetries and
   !  nucdipmom breaks time reversal symmetry
+  ! TODO: generalize in the berryopt -2 case to kptopt 4 allowed
      call chkint_eq(1,1,cond_string,cond_values,ierr,'kptopt',dt%kptopt,2,(/0,3/),iout)
   !  only kpt parallelism is allowed at present
      call chkint_eq(1,1,cond_string,cond_values,ierr,'paral_atom',dt%paral_atom,1,(/0/),iout)
@@ -2693,7 +2761,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
   !  require usexcnhat 0
      call chkint_eq(1,1,cond_string,cond_values,ierr,'usexcnhat',dt%usexcnhat_orig,1,(/0/),iout)
   !  require pawxcdev 0
-     call chkint_eq(1,1,cond_string,cond_values,ierr,'pawxcdev',dt%pawxcdev,1,(/0/),iout)
+  !   call chkint_eq(1,1,cond_string,cond_values,ierr,'pawxcdev',dt%pawxcdev,1,(/0/),iout)
   !  require PAW
      call chkint_eq(1,1,cond_string,cond_values,ierr,'usepaw',dt%usepaw,1,(/1/),iout)
   end if
@@ -3885,8 +3953,8 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      if(dt%usefock > 0) then
        ABI_ERROR_NOSTOP('Fock not yet compatible with wfoptalg 1 (use Fock-level parallelism)', ierr)
      end if
-     if(maxval(abs(dt%istwfk(1:nkpt))) > 2) then
-       ABI_ERROR_NOSTOP('Istwfk > 2 not compatible with wfoptalg 1', ierr)
+     if(dt%wfoptalg==1.and.maxval(abs(dt%istwfk(1:nkpt))) > 2) then
+       ABI_ERROR_NOSTOP('Istwfk > 2 not compatible with wfoptalg 1. Use chebfi V2 instead (wfoptalg=111).', ierr)
      end if
      if(dt%ecutsm > 0) then
        ABI_ERROR_NOSTOP('Ecutsm > 0 not yet compatible with wfoptalg 1', ierr)
@@ -3992,13 +4060,6 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
        write(msg,'(a,a,a)')&
 &       'The number of bands have to remain constant in the case of band-FFT parallelization.',ch10,&
 &       'Action: set all the nbands to the same value in your input file'
-       ABI_ERROR_NOSTOP(msg,ierr)
-     end if
-     if(maxval(abs(dt%istwfk(1:nkpt)-1)) > 1)then
-       write(msg,'(5a)' )&
-&       'One of the components of istwfk is not equal to 1 or 2.',ch10,&
-&       'Time-reversal symmetry is not yet programmed in the case of band-FFT parallelization.',ch10,&
-&       'Action: set istwfk to 1 or 2 for all k-points'
        ABI_ERROR_NOSTOP(msg,ierr)
      end if
      if (dt%mkmem == 0) then

@@ -1,6 +1,6 @@
 
-.Version 9.3.3 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 10.1.4.5 of ABINIT, released Sep 2024.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2024 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,14 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Thu 31 Dec 2020.
-- ( at 11h28 )
+.Starting date : Fri 13 Sep 2024.
+- ( at 19h07 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_beauty/tests/TestBot_MPI1/tutorial_ttddft_1/ttddft_1.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/tutorial_ttddft_1/ttddft_1.abi
 - output file    -> ttddft_1.abo
 - root for input  files -> ttddft_1i
 - root for output files -> ttddft_1o
-
 
  DATASET    1 : space group P4/m m m (#123); Bravais tP (primitive tetrag.)
 ================================================================================
@@ -34,11 +33,10 @@
 -    mband =           5        mffmem =           1         mkmem =           1
        mpw =        3031          nfft =      109350          nkpt =           1
 ================================================================================
-P This job should need less than                      31.660 Mbytes of memory.
+P This job should need less than                      34.858 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.233 Mbytes ; DEN or POT disk file :      0.836 Mbytes.
 ================================================================================
-
 
  DATASET    2 : space group P4/m m m (#123); Bravais tP (primitive tetrag.)
 ================================================================================
@@ -62,10 +60,10 @@ _ WF disk file :      0.557 Mbytes ; DEN or POT disk file :      0.836 Mbytes.
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
 -
-- outvars: echo of selected default values                                      
--   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+- outvars: echo of selected default values
+-   iomode0 =  0 , fftalg0 =512 , wfoptalg0 =  0
 -
-- outvars: echo of global parameters not present in the input file              
+- outvars: echo of global parameters not present in the input file
 -  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
@@ -77,7 +75,7 @@ _ WF disk file :      0.557 Mbytes ; DEN or POT disk file :      0.836 Mbytes.
            diemac      1.00000000E+00
            diemix      5.00000000E-01
              ecut      2.50000000E+01 Hartree
--          fftalg         312
+-          fftalg         512
            getden1          0
            getden2          1
            getwfk1          0
@@ -156,8 +154,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     25.000   => boxcut(ratio)=   2.06894
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_beauty/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/N.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_beauty/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/N.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/N.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/N.psp8
 - N     ONCVPSP-3.3.0  r_core=   1.20551   1.35824
 -  7.00000   5.00000    171101                znucl, zion, pspdat
     8   -1012    1    4       600   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -194,8 +192,8 @@ tolerances: {tolwfr: 1.00E-15, }
  ETOT  8  -20.674883395646    -5.067E-09 4.287E-11 6.518E-06
  ETOT  9  -20.674883396998    -1.352E-09 4.245E-11 7.191E-08
  ETOT 10  -20.674883397012    -1.463E-11 9.174E-13 4.466E-09
- ETOT 11  -20.674883397012     7.390E-13 1.146E-14 2.677E-10
- ETOT 12  -20.674883397010     1.243E-12 9.756E-16 1.445E-11
+ ETOT 11  -20.674883397012     7.958E-13 1.146E-14 2.677E-10
+ ETOT 12  -20.674883397010     1.428E-12 9.756E-16 1.445E-11
 
  At SCF step   12   max residual=  9.76E-16 < tolwfr=  1.00E-15 =>converged.
 
@@ -215,7 +213,7 @@ lattice_vectors:
 lattice_lengths: [  11.33836,    9.44863,    9.44863, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
 lattice_volume:   1.0122502E+03
-convergence: {deltae:  1.243E-12, res2:  1.445E-11, residm:  9.756E-16, diffor: null, }
+convergence: {deltae:  1.428E-12, res2:  1.445E-11, residm:  9.756E-16, diffor: null, }
 etotal    :  -2.06748834E+01
 entropy   :   0.00000000E+00
 fermie    :  -3.46636305E-01
@@ -247,21 +245,21 @@ force_length_stats: {min:   6.07649735E-03, max:   6.07649735E-03, mean:   6.076
       -0.091458333333      0.000000000000      0.000000000000
        0.091458333333      0.000000000000      0.000000000000
  rms dE/dt=  3.9778E-02; max dE/dt=  6.8897E-02; dE/dt below (all hartree)
-    1      -0.068897495041      0.000000000000      0.000000000000
-    2       0.068897495041      0.000000000000      0.000000000000
+    1      -0.068897495042      0.000000000000      0.000000000000
+    2       0.068897495042      0.000000000000      0.000000000000
 
  cartesian coordinates (angstrom) at end:
     1     -0.54875000000000     0.00000000000000     0.00000000000000
     2      0.54875000000000     0.00000000000000     0.00000000000000
 
  cartesian forces (hartree/bohr) at end:
-    1      0.00607649735079    -0.00000000000000    -0.00000000000000
-    2     -0.00607649735079    -0.00000000000000    -0.00000000000000
+    1      0.00607649735082    -0.00000000000000    -0.00000000000000
+    2     -0.00607649735082    -0.00000000000000    -0.00000000000000
  frms,max,avg= 3.5082674E-03 6.0764974E-03   0.000E+00  0.000E+00  0.000E+00 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1      0.31246603075950    -0.00000000000000    -0.00000000000000
-    2     -0.31246603075950    -0.00000000000000    -0.00000000000000
+    1      0.31246603076126    -0.00000000000000    -0.00000000000000
+    2     -0.31246603076126    -0.00000000000000    -0.00000000000000
  frms,max,avg= 1.8040235E-01 3.1246603E-01   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales= 11.338356797314  9.448630664428  9.448630664428 bohr
               =  6.000000000000  5.000000000000  5.000000000000 angstroms
@@ -274,16 +272,16 @@ force_length_stats: {min:   6.07649735E-03, max:   6.07649735E-03, mean:   6.076
 --- !EnergyTerms
 iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
-kinetic             :  1.34821608084111E+01
-hartree             :  1.43996777287222E+01
-xc                  : -5.81608366176205E+00
+kinetic             :  1.34821608084110E+01
+hartree             :  1.43996777287221E+01
+xc                  : -5.81608366176203E+00
 Ewald energy        : -1.79564520286976E+00
 psp_core            :  1.04870851821856E-01
-local_psp           : -3.92188284527287E+01
-non_local_psp       : -1.83103546860504E+00
-total_energy        : -2.06748833970104E+01
-total_energy_eV     : -5.62592188376790E+02
-band_energy         : -5.22604318855441E+00
+local_psp           : -3.92188284527284E+01
+non_local_psp       : -1.83103546860502E+00
+total_energy        : -2.06748833970102E+01
+total_energy_eV     : -5.62592188376786E+02
+band_energy         : -5.22604318855438E+00
 ...
 
 
@@ -354,10 +352,10 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -1, paral_kgb: 0, }
    5->  6 3.06494E-01 8.34013E+00 -2.03684E+01 0.0000E+00 0.00E+00 0.00E+00 0.00E+00
    5->  7 3.06494E-01 8.34013E+00 -2.03684E+01 0.0000E+00 0.00E+00 0.00E+00 0.00E+00
    5->  8 3.50400E-01 9.53488E+00 -2.03245E+01 0.0000E+00 0.00E+00 0.00E+00 0.00E+00
-   4->  6 3.60026E-01 9.79682E+00 -2.03149E+01 5.5535E-01 1.67E+00 0.00E+00 0.00E+00
-   3->  6 3.60026E-01 9.79682E+00 -2.03149E+01 3.7773E-03 1.13E-02 0.00E+00 0.00E+00
-   4->  7 3.60026E-01 9.79682E+00 -2.03149E+01 3.7773E-03 1.13E-02 0.00E+00 0.00E+00
-   3->  7 3.60026E-01 9.79682E+00 -2.03149E+01 5.5535E-01 1.67E+00 0.00E+00 0.00E+00
+   4->  6 3.60026E-01 9.79682E+00 -2.03149E+01 5.5534E-01 1.67E+00 0.00E+00 0.00E+00
+   3->  6 3.60026E-01 9.79682E+00 -2.03149E+01 3.7821E-03 1.13E-02 0.00E+00 0.00E+00
+   4->  7 3.60026E-01 9.79682E+00 -2.03149E+01 3.7822E-03 1.13E-02 0.00E+00 0.00E+00
+   3->  7 3.60026E-01 9.79682E+00 -2.03149E+01 5.5534E-01 1.67E+00 0.00E+00 0.00E+00
    4->  8 4.03933E-01 1.09916E+01 -2.02710E+01 3.7976E-02 0.00E+00 1.14E-01 0.00E+00
    3->  8 4.03933E-01 1.09916E+01 -2.02710E+01 3.7976E-02 0.00E+00 0.00E+00 1.14E-01
    2->  6 4.16919E-01 1.13449E+01 -2.02580E+01 3.1925E-01 0.00E+00 9.51E-01 6.47E-03
@@ -579,7 +577,7 @@ force_length_stats: {min: null, max: null, mean: null, }
            etotal1    -2.0674883397E+01
             fcart1     6.0764973508E-03 -0.0000000000E+00 -0.0000000000E+00
                       -6.0764973508E-03 -0.0000000000E+00 -0.0000000000E+00
--          fftalg         312
+-          fftalg         512
            getden1          0
            getden2          1
            getwfk1          0
@@ -719,10 +717,10 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          3.1  wall=          3.1
+- Proc.   0 individual time (sec): cpu=          2.1  wall=          2.2
 
 ================================================================================
 
  Calculation completed.
-.Delivered  10 WARNINGs and   2 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          3.1  wall=          3.1
+.Delivered  17 WARNINGs and   3 COMMENTs to log file.
++Overall time at end (sec) : cpu=          2.1  wall=          2.2

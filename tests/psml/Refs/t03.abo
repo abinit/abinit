@@ -1,6 +1,6 @@
 
-.Version 9.3.1 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 10.1.4.5 of ABINIT, released Sep 2024.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2024 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,14 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h19 )
+.Starting date : Fri 13 Sep 2024.
+- ( at 19h02 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/psml_t03/t03.in
-- output file    -> t03.out
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/psml_t03/t03.abi
+- output file    -> t03.abo
 - root for input  files -> t03i
 - root for output files -> t03o
-
 
  DATASET    1 : space group Fm -3 m (#225); Bravais cF (face-center cubic)
 ================================================================================
@@ -34,11 +33,10 @@
 -    mband =          10        mffmem =           1         mkmem =         110
        mpw =         131          nfft =        3375          nkpt =         110
 ================================================================================
-P This job should need less than                       4.768 Mbytes of memory.
+P This job should need less than                       4.862 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      2.201 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
-
 
  DATASET    2 : space group Fm -3 m (#225); Bravais cF (face-center cubic)
 ================================================================================
@@ -51,11 +49,10 @@ _ WF disk file :      2.201 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 -    mband =          10        mffmem =           1         mkmem =         110
        mpw =         165          nfft =        4096          nkpt =         110
 ================================================================================
-P This job should need less than                       5.587 Mbytes of memory.
+P This job should need less than                       5.685 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      2.771 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
-
 
  DATASET    3 : space group Fm -3 m (#225); Bravais cF (face-center cubic)
 ================================================================================
@@ -68,7 +65,7 @@ _ WF disk file :      2.771 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 -    mband =          10        mffmem =           1         mkmem =         110
        mpw =         190          nfft =        4096          nkpt =         110
 ================================================================================
-P This job should need less than                       6.038 Mbytes of memory.
+P This job should need less than                       6.141 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      3.191 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
@@ -77,10 +74,10 @@ _ WF disk file :      3.191 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
 -
-- outvars: echo of selected default values                                      
--   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+- outvars: echo of selected default values
+-   iomode0 =  0 , fftalg0 =512 , wfoptalg0 =  0
 -
-- outvars: echo of global parameters not present in the input file              
+- outvars: echo of global parameters not present in the input file
 -  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
@@ -91,7 +88,7 @@ _ WF disk file :      3.191 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
              ecut2     8.00000000E+00 Hartree
              ecut3     9.00000000E+00 Hartree
            ecutsm      5.00000000E-01 Hartree
--          fftalg         312
+-          fftalg         512
            iatfix        1
              iscf           5
               ixc     -101130
@@ -339,8 +336,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 5, paral_kgb: 0, }
          ecut(hartree)=      8.470   => boxcut(ratio)=   2.02466
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/13_Al_psml.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/13_Al_psml.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/13_Al_psml.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/13_Al_psml.psp8
 - Al    ONCVPSP-3.3.0  r_core=   1.76802   1.76802   1.70587
 - 13.00000   3.00000    170801                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -451,18 +448,18 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
-kinetic             :  8.78679633145842E-01
-hartree             :  4.17566978710675E-03
-xc                  : -1.09690865125018E+00
+kinetic             :  8.78679633145859E-01
+hartree             :  4.17566978710683E-03
+xc                  : -1.09690865125019E+00
 Ewald energy        : -2.75010587246188E+00
 psp_core            :  1.15990635562571E-01
-local_psp           :  1.52090189435506E-01
-non_local_psp       :  3.84126362531015E-01
-internal            : -2.31195203325002E+00
-'-kT*entropy'       : -3.36124177596271E-03
-total_energy        : -2.31531327502598E+00
-total_energy_eV     : -6.30028782828857E+01
-band_energy         :  3.20668307176701E-01
+local_psp           :  1.52090189435507E-01
+non_local_psp       :  3.84126362531019E-01
+internal            : -2.31195203325001E+00
+'-kT*entropy'       : -3.36124177596275E-03
+total_energy        : -2.31531327502597E+00
+total_energy_eV     : -6.30028782828854E+01
+band_energy         :  3.20668307176711E-01
 ...
 
 
@@ -500,8 +497,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 5, paral_kgb: 0, }
          ecut(hartree)=      9.680   => boxcut(ratio)=   2.15349
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/13_Al_psml.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/13_Al_psml.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/13_Al_psml.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/13_Al_psml.psp8
 - Al    ONCVPSP-3.3.0  r_core=   1.76802   1.76802   1.70587
 - 13.00000   3.00000    170801                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -611,15 +608,15 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 2, }
 comment             : Components of total free energy in Hartree
-kinetic             :  8.79614078644753E-01
-hartree             :  4.13066729467965E-03
+kinetic             :  8.79614078644750E-01
+hartree             :  4.13066729467962E-03
 xc                  : -1.09701738368388E+00
 Ewald energy        : -2.75010587246188E+00
 psp_core            :  1.15990635562571E-01
 local_psp           :  1.50564674284110E-01
 non_local_psp       :  3.84296056916611E-01
-internal            : -2.31252714344303E+00
-'-kT*entropy'       : -3.37221434819445E-03
+internal            : -2.31252714344304E+00
+'-kT*entropy'       : -3.37221434819443E-03
 total_energy        : -2.31589935779123E+00
 total_energy_eV     : -6.30188264059846E+01
 band_energy         :  3.20165917498290E-01
@@ -660,8 +657,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 5, paral_kgb: 0, }
          ecut(hartree)=     10.890   => boxcut(ratio)=   2.03033
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/13_Al_psml.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/13_Al_psml.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/13_Al_psml.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/13_Al_psml.psp8
 - Al    ONCVPSP-3.3.0  r_core=   1.76802   1.76802   1.70587
 - 13.00000   3.00000    170801                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -771,18 +768,18 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 3, }
 comment             : Components of total free energy in Hartree
-kinetic             :  8.80239002396322E-01
-hartree             :  4.11928385122544E-03
+kinetic             :  8.80239002396319E-01
+hartree             :  4.11928385122540E-03
 xc                  : -1.09706025427287E+00
 Ewald energy        : -2.75010587246188E+00
 psp_core            :  1.15990635562571E-01
 local_psp           :  1.50056903574056E-01
 non_local_psp       :  3.83865089384830E-01
 internal            : -2.31289521196575E+00
-'-kT*entropy'       : -3.37275298634795E-03
+'-kT*entropy'       : -3.37275298634794E-03
 total_energy        : -2.31626796495209E+00
 total_energy_eV     : -6.30288567169325E+01
-band_energy         :  3.19823830129353E-01
+band_energy         :  3.19823830129350E-01
 ...
 
 
@@ -813,7 +810,7 @@ band_energy         :  3.19823830129353E-01
             fcart1    -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
             fcart2    -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
             fcart3    -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
--          fftalg         312
+-          fftalg         512
            iatfix        1
              iscf           5
               ixc     -101130
@@ -1322,10 +1319,10 @@ P           mkmem         110
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         22.0  wall=         22.1
+- Proc.   0 individual time (sec): cpu=         11.1  wall=         11.2
 
 ================================================================================
 
  Calculation completed.
-.Delivered   6 WARNINGs and   6 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         22.0  wall=         22.1
+.Delivered   3 WARNINGs and   7 COMMENTs to log file.
++Overall time at end (sec) : cpu=         11.1  wall=         11.2
