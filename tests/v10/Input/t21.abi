@@ -7,8 +7,6 @@ ndtset 2
 ixc1 51
 ixc2 60
 
-iscf 7 # /!\ WARNING: For now, mixing on density is unavailable.
-
 nband 30
 dipdip 0
 occopt 3
