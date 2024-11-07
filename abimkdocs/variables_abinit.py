@@ -17446,7 +17446,7 @@ On the other hand, when the Rozzi methods in 1D or 2D are expected, which is the
 [[rcut]] mut be defined.
 
 If [[rcut]] is negative, the cutoff is automatically calculated so to enclose
-the same volume inside the cutoff as the volume of the primitive cell.
+the same volume inside the cutoff as the volume of the solid, i.e primitive cell times the number of k-points.
 """,
 ),
 
