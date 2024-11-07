@@ -2610,19 +2610,22 @@ subroutine ctqmc_calltriqs(paw_dmft,cryst_struc,hu,levels_ctqmc,gtmp_nd,gw_tmp_n
  type(c_ptr) :: levels_ptr, fw1_nd_ptr, u_mat_ij_ptr, u_mat_ijkl_ptr, g_iw_ptr, gtau_ptr, gl_ptr
  real(dp), allocatable :: jbes(:)
  character(len=500) :: message
- integer :: itau, ifreq, iflavor1
+ integer :: ifreq, iflavor1
  integer :: iflavor2,iflavor,nflavor,iflavor3,itypat
  integer :: nfreq,ntau,nleg,ileg
  integer :: verbosity_solver ! min 0 -> max 3
  logical(kind=1) :: rot_inv = .false.
+#if defined HAVE_TRIQS_v2_0 || defined HAVE_TRIQS_v1_4 || defined HAVE_PYTHON_INVOCATION
  logical(kind=1) :: hist = .false.
  logical(kind=1) :: wrt_files = .true.
  logical(kind=1) :: tot_not = .true.
+#endif
  real(dp) :: beta,besp,bespp,xx
  complex(dpc) :: u_nl
 
+#if defined HAVE_PYTHON_INVOCATION
 !----------
-!Variables for writing out the NETCDF file
+!Variables for writing out the NETCDF file when calling PYTHON_INVOCATION
 !----------
  integer(kind=4) :: ncid
  integer(kind=4) :: dim_one_id, dim_nflavor_id, dim_nwlo_id, dim_nwli_id
@@ -2636,6 +2639,8 @@ subroutine ctqmc_calltriqs(paw_dmft,cryst_struc,hu,levels_ctqmc,gtmp_nd,gw_tmp_n
  integer(kind=4) :: var_levels_id, var_u_mat_ij_id, var_u_mat_ijkl_id, var_real_fw1_nd_id, var_imag_fw1_nd_id
  integer(kind=4) :: var_real_g_iw_id, var_imag_g_iw_id, var_gtau_id, var_gl_id, var_spacecomm_id
 
+ integer :: itau
+
  integer(kind=4) :: varid
  logical :: file_exists
  complex :: i
@@ -2644,6 +2649,7 @@ subroutine ctqmc_calltriqs(paw_dmft,cryst_struc,hu,levels_ctqmc,gtmp_nd,gw_tmp_n
  real(dp), allocatable, target :: new_re_g_iw(:,:,:), new_im_g_iw(:,:,:)
  real(dp), allocatable, target :: new_g_tau(:,:,:), new_gl(:,:,:)
 !----------
+#endif
 ! ************************************************************************
 
  ! fw1_nd: Hybridation

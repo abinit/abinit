@@ -387,7 +387,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 ! integer,parameter :: level=111
  integer,parameter :: tim_mkrho=2
  !integer,save :: nwarning=0
- integer :: bantot,bdtot_index,counter,cplex,cplex_rhoij,dimffnl,enunit,iband,iband1,ibdkpt
+ integer :: bdtot_index,counter,cplex,cplex_rhoij,dimffnl,enunit,iband,iband1,ibdkpt
  integer :: ibg,icg,ider,idir,ierr,ifft,ifor,ifor1,ii,ikg,ikpt
  integer :: ikpt_loc,ikpt1,my_ikpt,ikxc,ilm,imagn,index1,iorder_cprj,ipert
  integer :: iscf,ispden,isppol,istwf_k,mband_cprj,mbdkpsp,mb2dkpsp
@@ -396,13 +396,13 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  integer :: nband_k,nband_cprj_k,nbuf,neglect_pawhat,nfftot,nkpg,nkpt1,nnsclo_now
  integer :: nproc_distrb,npw_k,nspden_rhoij,option,prtvol,quit,nblk_gemm_nonlop
  integer :: spaceComm_distrb,usecprj_local,usefock_ACE,usetimerev
- logical :: berryflag,computesusmat,fixed_occ,has_vectornd,exists
+ logical :: berryflag,computesusmat,fixed_occ,has_vectornd
  logical :: locc_test,paral_atom,remove_inv,usefock,with_vxctau
  logical :: do_last_ortho,wvlbigdft=.false.,do_invS
  integer :: dmft_dftocc
  real(dp) :: edmft,ebandlda,ebanddmft,ebandldatot,ekindmft,ekindmft2,ekinlda
  real(dp) :: min_occ,vxcavg_dum,strsxc(6)
- character(len=500) :: msg, filename
+ character(len=500) :: msg
  type(bandfft_kpt_type),pointer :: my_bandfft_kpt => null()
  type(gs_hamiltonian_type) :: gs_hamk
 !arrays
@@ -413,9 +413,6 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  real(dp),allocatable :: dphasek(:,:),ek_k(:),ek_k_nd(:,:,:),eknk(:),eknk_nd(:,:,:,:,:),end_k(:)
  real(dp),allocatable :: enlx_k(:),enlxnk(:),focknk(:),fockfornk(:,:,:),ffnl(:,:,:,:),grnl_k(:,:), xcart(:,:)
  real(dp),allocatable :: grnlnk(:,:)
- class(abstract_wf), pointer :: mywfc
- integer :: exclude_bands(hdr%mband, hdr%nsppol)
- logical :: exclude_bands_ind(hdr%mband, hdr%nsppol)
 
 #if defined HAVE_GPU && defined HAVE_YAKL
  real(c_double), ABI_CONTIGUOUS pointer :: kinpw(:) => null()
@@ -453,12 +450,18 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  type(crystal_t) :: cryst_struc
  integer :: idum1(0),idum3(0,0,0)
  real(dp) :: rdum2(0,0),rdum4(0,0,0,0)
- type(ebands_t) :: ebands
 #if defined HAVE_BIGDFT
  integer :: occopt_bigdft
 #endif
 
 #if defined(HAVE_PYTHON_INVOCATION)
+ integer :: bantot
+ logical :: exists
+ character(len=500) :: filename
+ class(abstract_wf), pointer :: mywfc
+ integer :: exclude_bands(hdr%mband, hdr%nsppol)
+ logical :: exclude_bands_ind(hdr%mband, hdr%nsppol)
+ type(ebands_t) :: ebands
  real(dp), allocatable :: occnd_tmp(:)
 #endif
 
@@ -1517,6 +1520,8 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        call timab(991,2,tsec)
 
      else if (dtset%usedmft == 10) then
+        write(std_out, *) "pawrad%int_meshsz: ", pawrad%int_meshsz
+        write(std_out, *) "results_gs%energies%e_fermie: ", results_gs%energies%e_fermie
 #if defined HAVE_PYTHON_INVOCATION
         ! xcryst_struct
         remove_inv=.false.
