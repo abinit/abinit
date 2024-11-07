@@ -44,6 +44,8 @@
 #It forces the use of linear algebra on the GPU.
 gpu_option 2
 
+istwfk *1
+
 wfoptalg 114
 bandpp 1
 

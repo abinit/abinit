@@ -1,6 +1,6 @@
 
-.Version 9.11.2 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 10.1.4.5 of ABINIT, released Sep 2024.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2024 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 15 Jul 2023.
-- ( at 12h04 )
+.Starting date : Fri 13 Sep 2024.
+- ( at 19h12 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v7_t01/t01.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v7_t01/t01.abi
 - output file    -> t01.abo
 - root for input  files -> t01i
 - root for output files -> t01o
@@ -42,10 +42,10 @@ _ WF disk file :      1.952 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
 -
-- outvars: echo of selected default values                                      
--   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+- outvars: echo of selected default values
+-   iomode0 =  0 , fftalg0 =512 , wfoptalg0 =  0
 -
-- outvars: echo of global parameters not present in the input file              
+- outvars: echo of global parameters not present in the input file
 -  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
@@ -53,7 +53,7 @@ _ WF disk file :      1.952 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
               amu      2.80855000E+01  1.59994000E+01
            diemac      4.00000000E+00
              ecut      6.00000000E+00 Hartree
--          fftalg         312
+-          fftalg         512
               kpt      0.00000000E+00  0.00000000E+00  2.50000000E-01
                        3.33333333E-01  0.00000000E+00  2.50000000E-01
                       -3.33333333E-01  0.00000000E+00  2.50000000E-01
@@ -150,8 +150,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.13111
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -168,8 +168,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
              1    1.849886
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/08o_001023.pspfhi
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/08o_001023.pspfhi
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/08o_001023.pspfhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/08o_001023.pspfhi
 - O, fhi98PP: TM-type, LDA PerdewWang, l=2 local
 -  8.00000   6.00000      1023                znucl, zion, pspdat
     6    7    2    2       473   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -315,15 +315,15 @@ force_length_stats: {min:   6.78662916E-04, max:   1.06260516E-01, mean:   7.102
  frms,max,avg= 5.0046236E-02 8.8383615E-02   8.124E-08  3.314E-08 -1.740E-09 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1      0.01724655963768    -0.03182529854740    -0.02619338508415
-    2      0.01699422951351     0.03043471321304     0.00167692047076
-    3     -0.03636577830878    -0.00043623946715     0.00353119060263
-    4     -2.63996837309759     3.72949053863184    -2.99227842339849
-    5      4.54486784546367     0.42918874610369    -2.99507787416350
-    6     -2.64221900511361    -3.72239221062479     2.99298674771185
-    7     -1.91289207399338    -4.14450616315061    -2.98385306337937
-    8     -1.89182517940846     4.14930879330517     2.99680669038504
-    9      4.54416177530695    -0.43926287946377     3.00240119685524
+    1      0.01724655963777    -0.03182529854738    -0.02619338508414
+    2      0.01699422951349     0.03043471321301     0.00167692047078
+    3     -0.03636577830873    -0.00043623946712     0.00353119060264
+    4     -2.63996837309764     3.72949053863180    -2.99227842339855
+    5      4.54486784546368     0.42918874610370    -2.99507787416359
+    6     -2.64221900511366    -3.72239221062483     2.99298674771195
+    7     -1.91289207399351    -4.14450616315059    -2.98385306337935
+    8     -1.89182517940834     4.14930879330516     2.99680669038502
+    9      4.54416177530694    -0.43926287946374     3.00240119685524
  frms,max,avg= 2.5734807E+00 4.5448678E+00   4.177E-06  1.704E-06 -8.948E-08 e/A
  length scales=  9.284300079912  9.284300079912 10.213270549578 bohr
               =  4.913040000000  4.913040000000  5.404630000000 angstroms
@@ -346,9 +346,9 @@ hartree             :  2.62599598569305E+01
 xc                  : -2.40541667076358E+01
 Ewald energy        : -6.95068313549098E+01
 psp_core            :  1.25427829794248E+00
-local_psp           : -9.58253381797076E+01
+local_psp           : -9.58253381797075E+01
 non_local_psp       :  1.37364403782636E+01
-total_energy        : -9.93970293710486E+01
+total_energy        : -9.93970293710485E+01
 total_energy_eV     : -2.70473072075930E+03
 band_energy         : -1.03145467134030E+01
 ...
@@ -374,15 +374,15 @@ band_energy         : -1.03145467134030E+01
              ecut      6.00000000E+00 Hartree
            etotal     -9.9397029371E+01
             fcart      3.3539221430E-04 -6.1890357119E-04 -5.0938028267E-04
-                       3.3048517423E-04  5.9186098969E-04  3.2610913811E-05
-                      -7.0720185172E-04 -8.4835076632E-06  6.8670729710E-05
+                       3.3048517423E-04  5.9186098969E-04  3.2610913812E-05
+                      -7.0720185172E-04 -8.4835076627E-06  6.8670729711E-05
                       -5.1339215294E-02  7.2527049813E-02 -5.8190555525E-02
                        8.8383615190E-02  8.3463929578E-03 -5.8244996179E-02
                       -5.1382983122E-02 -7.2389009300E-02  5.8204330241E-02
                       -3.7199831264E-02 -8.0597819416E-02 -5.8026708346E-02
                       -3.6790145357E-02  8.0691215710E-02  5.8278616305E-02
                        8.8369884311E-02 -8.5423036766E-03  5.8387412143E-02
--          fftalg         312
+-          fftalg         512
               kpt      0.00000000E+00  0.00000000E+00  2.50000000E-01
                        3.33333333E-01  0.00000000E+00  2.50000000E-01
                       -3.33333333E-01  0.00000000E+00  2.50000000E-01
@@ -543,10 +543,10 @@ P           mkmem           9
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          7.6  wall=          7.6
+- Proc.   0 individual time (sec): cpu=          3.6  wall=          3.7
 
 ================================================================================
 
  Calculation completed.
-.Delivered   1 WARNINGs and   8 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          7.6  wall=          7.6
+.Delivered   1 WARNINGs and   6 COMMENTs to log file.
++Overall time at end (sec) : cpu=          3.6  wall=          3.7
